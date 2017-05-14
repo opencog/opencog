@@ -245,22 +245,52 @@
 ; The CNTOBJ needs to be an object implementing methods to get pair
 ; observation counts, and wild-card counts (which must hold valid
 ; values). Specifically, it must have the 'pair-count, 'left-wild-count,
-; 'right-wild-count and 'wild-wild-count methods on it.
+; 'right-wild-count and 'wild-wild-count methods on it.  Thus, if
+; caching (which is the generic case) these need to have been computed
+; and cached before using this class.
 
 (define (make-compute-freq CNTOBJ)
-	(let ((cntobj CNTOBJ))
+	(let ((cntobj CNTOBJ)
+			(tot-cnt 0))
 
-		; Compute the left-side wild-card count. This is the number
-		; N(*,y) = sum_x N(x,y) where ITEM==y and N(x,y) is the number
-		; of times that the pair (x,y) was observed.
-		; This returns the count, or zero, if the pair was never observed.
-		(define (compute-left-freq ITEM) cntobj)
+		(define (init)
+			(set! tot-cnt (cntobj `wild-wild-count)))
+
+		; Compute the left-side wild-card frequency. This is the ratio
+		; P(*,y) = N(*,y) / N(*,*) which gives the frequency at which
+		; the pair (x,y) was observed.
+		; This returns the frequency, or zero, if the pair was never
+		; observed.
+		(define (compute-left-freq ITEM)
+			(/ (cntobj 'left-wild-count ITEM) tot-cnt))
+		(define (compute-right-freq ITEM)
+			(/ (cntobj 'right-wild-count ITEM) tot-cnt))
+
+		; Compute and cache the left-side wild-card frequency.
+		; This returns the atom holding the cached count, thus
+		; making it convient to persist (store) this cache in
+		; the database. It returns nil if the count was zero.
+		(define (cache-left-freq ITEM)
+			(define freq (compute-left-freq ITEM))
+			(if (< 0 freq)
+				(cntobj 'set-left-wild-freq ITEM freq)
+				'()))
+
+		(define (cache-right-freq ITEM)
+			(define freq (compute-right-freq ITEM))
+			(if (< 0 freq)
+				(cntobj 'set-right-wild-freq ITEM freq)
+				'()))
 
 		; Methods on this class.
 		(lambda (message . args)
 			(case message
-				((compute-left-freq) (apply compute-left-freq args))
-				(else (apply cntobj (cons message args))))
+				((init)               (init))
+				((compute-left-freq)  (apply compute-left-freq args))
+				((compute-right-freq) (apply compute-right-freq args))
+				((cache-left-freq)    (apply cache-left-freq args))
+				((cache-right-freq)   (apply cache-right-freq args))
+				(else (apply cntobj   (cons message args))))
 		))
 )
 
