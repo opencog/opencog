@@ -56,6 +56,44 @@
 ;
 ; This implements a word-pair object, where the two words are connected
 ; with an LG link-type of "ANY", in an EvaluationLink.
+;
+; That is, a word pair is represented as:
+;
+;   EvaluationLink
+;      LinkGrammarRelationshipNode "ANY"
+;      ListLink
+;         WordNode "word"
+;         WordNode "bird"
+;
+; After various counts, frequencies, entropies, etc pertaining to
+; this particular pair are computed, they will be hung, as values,
+; on the above EvaluationLink.
+;
+; The 'item-pair method returns the above EvaluationLink, if it exists.
+; The 'make-pair method will create it, if it does not exist.
+;
+; Left-side counts, frequencies, etc. such as N(*,y) P(*,y) or
+; log_2 P(*,y) will be placed on the following, which is returned
+; by the 'left-wildcard methd:
+;
+;   EvaluationLink
+;      LinkGrammarRelationshipNode "ANY"
+;      ListLink
+;         AnyNode "left-word"
+;         WordNode "bird"
+;
+; The corresponding N(x,*) P(x,*) etc are hung on the atom returned
+; by the 'right-wildcard method:
+;
+;   EvaluationLink
+;      LinkGrammarRelationshipNode "ANY"
+;      ListLink
+;         WordNode "word"
+;         AnyNode "right-word"
+;
+; Finally, the 'left-type and 'right-type methods return the type
+; of the the two sides of the pair.
+
 (define (make-any-link)
 	(let ()
 		(define (get-left-type) 'WordNode)

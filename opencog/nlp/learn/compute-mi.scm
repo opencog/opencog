@@ -129,12 +129,25 @@
 ;
 ; Extend the CNTOBJ with additional methods to compute wildcard counts
 ; for pairs, and store the results in the count-object.
+; That is, compute the summations N(x,*) = sum_y N(x,y) where (x,y)
+; is a pair, and N(x,y) is the count of how often that pair has been
+; observed, and * denotes the wild-card, ranging over all items
+; supported in that slot.
 ;
-; The CNTOBJ needs to be an object implementing methods to get wild-card
-; lists, i.e. the 'left-stars and 'right-stars methods, and also
-; implementing setters, so that the wild-card counts can be cached.
-; That is, the object must also have the 'set-left-wild-count,
-; 'set-right-wild-count and 'set-wild-wild-count methods on it.
+; The CNTOBJ needs to be an object implementing methods to get the
+; support, and the supported pairs. So, the left-support is the set
+; of all x's for which 0 < N(x,y) for some y.  Dual to the left-support
+; are the right-stars, which is the set of all pairs (x,y) for any
+; given, fixed x.
+;
+; The CNTOBJ needs to implement the 'left-support and 'right-support
+; methods, to return these two sets, and also the 'left-stars and the
+; 'right-stars methods, to return those sets.
+;
+; The CNTOBJ also needs to implement the setters, so that the wild-card
+; counts can be cached. That is, the object must also have the
+; 'set-left-wild-count, 'set-right-wild-count and 'set-wild-wild-count
+; methods on it.
 ;
 (define (make-compute-count CNTOBJ)
 	(let ((cntobj CNTOBJ))
@@ -309,85 +322,6 @@
 ; ---------------------------------------------------------------------
 ; ---------------------------------------------------------------------
 ; ---------------------------------------------------------------------
-; ---------------------------------------------------------------------
-; Compute the left and right word-pair wildcard counts.
-; That is, compute the summations N(w,*) and N(*,w) where * denotes
-; a wildcard, and ranges over all words observed in that slot.
-; Store the resulting counts in a wild-card count structure, described
-; below.
-;
-; To be precise, the summation is performed relative to the given
-; LinkGrammar relationship node.  That is, the sumation only occurs
-; over word pairs connected by the given link-grammar link.
-; (Link grammar links are encoded with LinkGrammarRelationshipNode's).
-;
-; Thus, a word pair is currently represented as:
-;
-;   EvaluationLink
-;      LinkGrammarRelationshipNode "ANY"
-;      ListLink
-;         WordNode "word"
-;         WordNode "bird"
-;
-; To compute the left and right counts, we do an ad-hoc pattern
-; match to the pattern below (ad-hoc because we don't bother with the
-; pattern matcher here, the patten is too simple. In other cases, for
-; structures more complex than word-pairs, we will need the matcher...)
-; (Err, actually, we *do* use the pattern matcher, but the code would
-; be faster and more efficient if we didn't. This should be fixed...)
-;
-; The match pattern for the right-counts is:
-;
-;   EvaluationLink
-;      LinkGrammarRelationshipNode "ANY"
-;      ListLink
-;         WordNode "word"
-;         VariableNode of type WordNode   ; i.e. a wildcard here.
-;
-; while that for left-counts is:
-;
-;   EvaluationLink
-;      LinkGrammarRelationshipNode "ANY"
-;      ListLink
-;         VariableNode of type WordNode  ; i.e. a wildcard on the left.
-;         WordNode "bird"
-;
-; Sums are performed over all matching patterns (i.e. all values of the
-; VariableNode).
-;
-; The resulting sums are stored in the CountTruthValues (on the
-; EvaluationLink) of the following structures:
-;
-;   EvaluationLink
-;      LinkGrammarRelationshipNode "ANY"
-;      ListLink
-;         AnyNode "left-word"
-;         WordNode "bird"
-;
-;   EvaluationLink
-;      LinkGrammarRelationshipNode "ANY"
-;      ListLink
-;         WordNode "word"
-;         AnyNode "right-word"
-;
-; This routine assumes that all relevant atoms are already in the
-; atomspace. If they're not, incorrect counts will be obtained. Either
-; batch-fetch all word-pairs, or use the
-; `fetch-and-compute-pair-wildcard-counts` routine, below, to fetch
-; the individual word.
-;
-; Returns the two wild-card EvaluationLinks
-
-(define (compute-pair-wildcard-counts OBJ ITEM)
-
-	(define lefty (OBJ 'cache-left-count ITEM))
-	(define righty (OBJ 'cache-right-count ITEM))
-
-	(if (not (null? lefty)) (store-atom lefty))
-	(if (not (null? righty)) (store-atom righty))
-)
-
-; ---------------------------------------------------------------------
 ; Compute the log-liklihood for all wild-card wordpairs.
 ;
 ; This assumes that wild-card word-pair counts have already been
@@ -420,6 +354,7 @@
 
 (define (batch-all-pair-wildcard-logli OBJ ALL-WORDS)
 
+xxxxxxxxxxxxx
 	; Get the word-pair grand-total
 	(define pair-total (OBJ 'wild-wild-count))
 
