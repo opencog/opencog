@@ -193,10 +193,10 @@
 		;
 		; This method returns a list of all of the atoms holding
 		; those counts; handy for storing in a database.
-		(define (cache-all-lefts)
+		(define (cache-all-left-counts)
 			(par-map cache-left-count (cntobj 'right-support)))
 
-		(define (cache-all-rights)
+		(define (cache-all-right-counts)
 			(par-map cache-right-count (cntobj 'left-support)))
 
 		; Compute the total number of times that all pairs have been
@@ -248,12 +248,14 @@
 		; Methods on this class.
 		(lambda (message . args)
 			(case message
-				((compute-left-count)    (apply compute-left-count args))
-				((cache-left-count)      (apply cache-left-count args))
-				((compute-right-count)   (apply compute-right-count args))
-				((cache-right-count)     (apply cache-right-count args))
-				((compute-total-count)   (compute-total-count))
-				((cache-total-count)     (cache-total-count))
+				((compute-left-count)     (apply compute-left-count args))
+				((cache-left-count)       (apply cache-left-count args))
+				((compute-right-count)    (apply compute-right-count args))
+				((cache-right-count)      (apply cache-right-count args))
+				((cache-all-left-counts)  (cache-all-left-counts))
+				((cache-all-right-counts) (cache-all-right-counts))
+				((compute-total-count)    (compute-total-count))
+				((cache-total-count)      (cache-total-count))
 				(else (apply cntobj (cons message args))))
 			))
 )
@@ -306,76 +308,33 @@
 				(cntobj 'set-right-wild-freq ITEM freq)
 				'()))
 
+		; Compute and cache all of the left-side frequencies.
+		; This computes P(*,y) for all y, in parallel.
+		;
+		; This method returns a list of all of the atoms holding
+		; those counts; handy for storing in a database.
+		(define (cache-all-left-freqs)
+			(par-map cache-left-freq (cntobj 'right-support)))
+		(define (cache-all-right-freqs)
+			(par-map cache-right-freq (cntobj 'right-support)))
+
 		; Methods on this class.
 		(lambda (message . args)
 			(case message
-				((init)               (init))
-				((compute-left-freq)  (apply compute-left-freq args))
-				((compute-right-freq) (apply compute-right-freq args))
-				((cache-left-freq)    (apply cache-left-freq args))
-				((cache-right-freq)   (apply cache-right-freq args))
-				(else (apply cntobj   (cons message args))))
+				((init-freqs)            (init))
+				((compute-left-freq)     (apply compute-left-freq args))
+				((compute-right-freq)    (apply compute-right-freq args))
+				((cache-left-freq)       (apply cache-left-freq args))
+				((cache-right-freq)      (apply cache-right-freq args))
+				((cache-all-left-freqs)  (cache-all-left-freqs))
+				((cache-all-right-freqs) (cache-all-right-freqs))
+				(else (apply cntobj      (cons message args))))
 		))
 )
 
 ; ---------------------------------------------------------------------
 ; ---------------------------------------------------------------------
 ; ---------------------------------------------------------------------
-; ---------------------------------------------------------------------
-; Compute the log-liklihood for all wild-card wordpairs.
-;
-; This assumes that wild-card word-pair counts have already been
-; performed. This takes three functions as an argument, and a list
-; of words.
-;
-; The GET-LEFT-WILD and GET-RIGHT-WILD functions should return
-; an atom of the general form:
-;
-;   FooBarEvaluationLink
-;      FooPredicateNode "Blah"
-;      ListLink
-;         WordNode "some-word"
-;         AnyNode "right-word"
-;
-; and also for the flipped version (exchange WordNode and AnyNode)
-; For example, FooBarEvaluationLink can be EvaluationLink, and
-; FooPredicateNode can be LinkGrammarRelationshipNode "ANY".
-;
-; The wild-card counts will be fetched from the above atoms; the
-; computed log-liklihood will be stored on the aove atoms.
-;
-; The GET-WILD-WILD function should return the atom holding
-; the total wildcard count (i.e. N(R, *,*))
-;
-; The computation is performed "batch style", it loops over the list
-; of words in ALL-WORDS; it assumes that assumes that all wild-card
-; counts are up-to-date in the atomspace; no fetching from the database
-; is performed.
-
-(define (batch-all-pair-wildcard-logli OBJ ALL-WORDS)
-
-; xxxxxxxxxxxxx
-	; Get the word-pair grand-total
-	(define pair-total (OBJ 'wild-wild-count))
-
-	; For each wild-card pair associated with the word,
-	; obtain the log likelihood.
-	(for-each
-		(lambda (word)
-			(let ((lefty (OBJ 'left-wildcard word))
-					(righty (OBJ 'right-wildcard word)))
-
-				; log-likelihood for the left wildcard
-				(if (< 0 (get-count lefty))
-					(store-atom (compute-atom-logli lefty pair-total)))
-
-				; log-likelihood for the right wildcard
-				(if (< 0 (get-count righty))
-					(store-atom (compute-atom-logli righty pair-total)))))
-
-		ALL-WORDS)
-)
-
 ; ---------------------------------------------------------------------
 ;
 ; Compute word-pair mutual information, for all word-pairs with the
@@ -500,28 +459,32 @@
 			(OBJ 'left-support-size)
 			(OBJ 'right-support-size))
 
-	; First, get the left and right wildcard counts.
-	; That is, compute N(w,*) and N(*,w) for all w.
-	(for-each
-		(lambda (atom) (if (not (null? atom)) (store-atom atom)))
-		(count-obj 'cache-all-left))
-
-	(for-each
-		(lambda (atom) (if (not (null? atom)) (store-atom atom)))
-		(count-obj 'cache-all-right))
+	; First, compute the summations for the left and right wildcard counts.
+	; That is, compute N(x,*) and N(*,y) for the supports on x and y.
+	(count-obj 'cache-all-left-counts)
+	(count-obj 'cache-all-right-counts)
 
 	(trace-elapsed)
 	(trace-msg "Done with wild-card counts N(*,w) and N(w,*)\n")
 	(display "Done with wild-card count N(*,w) and N(w,*)\n")
 
 	; Now, compute the grand-total
-	(store-atom (comp-obj 'cache-total-count))
+	(store-atom (count-obj 'cache-total-count))
 	(trace-elapsed)
 	(trace-msg "Done computing N(*,*), start computing log P(*,w)\n")
 	(display "Done computing N(*,*), start computing log P(*,w)\n")
 
-	; Compute the left and right wildcard logli's
-	(batch-all-pair-wildcard-logli OBJ all-singletons)
+	; Compute the left and right wildcard frequencies and
+	; log-frequencies.
+	(freq-obj 'init-freq)
+	(for-each
+		(lambda (atom) (if (not (null? atom)) (store-atom atom)))
+		(freq-obj 'cache-all-left-freqs))
+
+	(for-each
+		(lambda (atom) (if (not (null? atom)) (store-atom atom)))
+		(freq-obj 'cache-all-right-freqs))
+
 	(trace-elapsed)
 	(trace-msg "Done computing -log N(w,*)/N(*,*) and <-->\n")
 	(display "Done computing -log N(w,*)/N(*,*) and <-->\n")
