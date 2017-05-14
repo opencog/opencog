@@ -141,8 +141,6 @@
 	(let ((llobj LLOBJ)
 			(l-supp '())
 			(r-supp '())
-			(l-stars '())
-			(r-stars '())
 		)
 
 		; Return a list of all of the atoms that might ever appear on
@@ -180,38 +178,30 @@
 		;         (LLOBJ 'left-type)
 		;         ITEM
 		;
-		; Locally caches the value, so as not to waste time
-		; recomputing it.
 		(define (get-left-stars ITEM)
 			(define want-type (LLOBJ 'left-type))
-			(if (null? l-stars)
-				(set! l-stars
-					(filter
-						(lambda (lnk)
-							(define oset (cog-outgoing-set lnk))
-							(and
-								(equal? 2 (cog-arity lnk))
-								(equal? want-type (cog-type (car oset)))
-								(equal? ITEM (cadr oset))
-							))
-						(cog-incoming-by-type ITEM 'ListLink))))
-			l-stars)
+			(filter
+				(lambda (lnk)
+					(define oset (cog-outgoing-set lnk))
+					(and
+						(equal? 2 (cog-arity lnk))
+						(equal? want-type (cog-type (car oset)))
+						(equal? ITEM (cadr oset))
+					))
+				(cog-incoming-by-type ITEM 'ListLink)))
 
 		; Same as above, but on the right.
 		(define (get-right-stars ITEM)
 			(define want-type (LLOBJ 'right-type))
-			(if (null? r-stars)
-				(set! r-stars
-					(filter
-						(lambda (lnk)
-							(define oset (cog-outgoing-set lnk))
-							(and
-								(equal? 2 (cog-arity lnk))
-								(equal? ITEM (car oset))
-								(equal? want-type (cog-type (cadr oset)))
-							))
-						(cog-incoming-by-type ITEM 'ListLink))))
-			r-stars)
+			(filter
+				(lambda (lnk)
+					(define oset (cog-outgoing-set lnk))
+					(and
+						(equal? 2 (cog-arity lnk))
+						(equal? ITEM (car oset))
+						(equal? want-type (cog-type (cadr oset)))
+					))
+				(cog-incoming-by-type ITEM 'ListLink)))
 
 
 	; Methods on this class.
