@@ -484,14 +484,13 @@
 		(lambda (atom) (if (not (null? atom)) (store-atom atom)))
 		(freq-obj 'cache-all-left-freqs))
 
-	(display "Done with P(*,w)\n")
+	(display "Done with -log P(*,w)\n")
 	(for-each
 		(lambda (atom) (if (not (null? atom)) (store-atom atom)))
 		(freq-obj 'cache-all-right-freqs))
 
 	(trace-elapsed)
-	(trace-msg "Done computing -log N(w,*)/N(*,*) and <-->\n")
-	(display "Done computing -log N(w,*)/N(*,*) and <-->\n")
+	(display "Done computing -log P(w,*) and <-->\n")
 
 	; Enfin, the word-pair mi's
 	(start-trace "Going to do individual word-pair MI\n")

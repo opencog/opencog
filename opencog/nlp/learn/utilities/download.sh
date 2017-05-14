@@ -314,3 +314,59 @@ scp relig-* ubuntu@10.0.3.208:/home/ubuntu/run/beta-guten
 mv relig-* split-books
 mv *utf-8 whole-books
 
+wget http://www.gutenberg.org/ebooks/8438.txt.utf-8
+./chapters.sh 8438.txt.utf-8 ethics-
+
+scp ethics-* ubuntu@10.0.3.208:/home/ubuntu/run/beta-guten
+mv ethics-* split-books
+mv *utf-8 whole-books
+
+wget http://www.gutenberg.org/files/2892/2892-0.txt
+./chapters.sh 2892-0.txt irish-
+
+scp irish-* ubuntu@10.0.3.208:/home/ubuntu/run/beta-guten
+mv irish-* split-books
+mv *utf-8 whole-books
+
+wget http://www.gutenberg.org/ebooks/6519.txt.utf-8
+./chapters.sh 6519.txt.utf-8 kabir-
+
+scp kabir-* ubuntu@10.0.3.208:/home/ubuntu/run/beta-guten
+mv kabir-* split-books
+mv *utf-8 whole-books
+
+wget http://www.gutenberg.org/ebooks/29558.txt.utf-8
+./chapters.sh 29558.txt.utf-8 scouts-
+
+scp scouts-* ubuntu@10.0.3.208:/home/ubuntu/run/beta-guten
+mv scouts-* split-books
+mv *utf-8 whole-books
+
+wget http://www.gutenberg.org/ebooks/5720.txt.utf-8
+./chapters.sh 5720.txt.utf-8 shrop-
+
+scp shrop-* ubuntu@10.0.3.208:/home/ubuntu/run/beta-guten
+mv shrop-* split-books
+mv *utf-8 whole-books
+
+wget http://www.gutenberg.org/ebooks/45502.txt.utf-8
+./chapters.sh 45502.txt.utf-8 other-half-
+
+scp other-half-* ubuntu@10.0.3.208:/home/ubuntu/run/beta-guten
+mv other-half-* split-books
+mv *utf-8 whole-books
+
+wget http://www.gutenberg.org/files/8147/8147-0.txt
+./chapters.sh 8147-0.txt kip-king-
+
+scp kip-king-* ubuntu@10.0.3.208:/home/ubuntu/run/beta-guten
+mv kip-king-* split-books
+mv *utf-8 whole-books
+
+wget http://www.gutenberg.org/files/54712/54712-0.txt
+./chapters.sh 54712-0.txt penny-
+
+scp penny-* ubuntu@10.0.3.208:/home/ubuntu/run/beta-guten
+mv penny-* split-books
+mv *txt whole-books
+
