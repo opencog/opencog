@@ -206,11 +206,17 @@
 ; Other classes can overload these methods; these just provide
 ; a reasonable default.
 ;
+; These methods do NOT compute the counts! They merely provide a
+; way to access these, as cached values, and they provide a way
+; to set the cached value. Thus, this class is meant to provide
+; support for some computational class, which does compute these
+; counts.
+;
 ; Here, the LLOBJ is expected to be an object, with methods for
 ; 'item-pair 'make-pair 'left-wildcard 'right-wildcard and 'wild-wild
 ; on it, in the form documented above for the "low-level API class".
 ;
-(define (make-pair-count-get-set LLOBJ)
+(define (make-pair-count-api LLOBJ)
 	(let ((llobj LLOBJ))
 
 		; Return the raw observational count on PAIR.
@@ -264,6 +270,75 @@
 				((set-right-wild-count) (apply set-right-wild-count args))
 				((wild-wild-count)      (get-wild-wild-count))
 				((set-wild-wild-count)  (apply set-wild-wild-count args))
+				(else (apply llobj (cons message args))))
+		))
+)
+
+; ---------------------------------------------------------------------
+;
+; Extend the LLOBJ with additional methods to get and set
+; the observation frequencies, entropies and mutual infomation.
+; Basically, this decorates the class with additional methods
+; that get and set these frequencies and entropies in "standardized"
+; places. Other classes can overload these methods; these just
+; provide a reasonable default.
+;
+; Here, the LLOBJ is expected to be an object, with methods for
+; 'item-pair 'make-pair 'left-wildcard and 'right-wildcard on it,
+; in the form documented above for the "low-level API class".
+;
+(define (make-pair-freq-api LLOBJ)
+	(let ((llobj LLOBJ))
+
+		; Return the observed frequency on ATOM
+		(define (get-freq ATOM)
+			(car (cog-value->list (cog-value ATOM freq-key))))
+
+		(define (set-freq ATOM FREQ)
+			; 1.4426950408889634 is 1/0.6931471805599453 is 1/log 2
+			(define ln2 (* -1.4426950408889634 (log FREQ)))
+			(cog-set-value! ATOM freq-key (FloatValue FREQ ln2)))
+
+		; Return the observational frequency on PAIR.
+		; If the PAIR does not exist (was not oberved) return 0.
+		(define (get-pair-freq PAIR)
+			(fold
+				(lambda (pr sum) (get-freq pr))
+				0
+				(llobj 'item-pairs PAIR)))
+
+		; Set the frequency and log-frequency on PAIR
+		; Return the atom that holds this count.
+		(define (set-pair-freq PAIR FREQ)
+			(set-freq (llobj 'make-pair PAIR) FREQ))
+
+		; Get the left wildcard frequency
+		(define (get-left-wild-freq ITEM)
+			(get-pair-freq (llobj 'left-wildcard ITEM)))
+
+		; Get the right wildcard frequency
+		(define (get-right-wild-freq ITEM)
+			(get-pair-freq (llobj 'right-wildcard ITEM)))
+
+		; Set the left wildcard frequency.
+		; Return the atom that holds this value.
+		(define (set-left-wild-freq ITEM FREQ)
+			(set-pair-freq (llobj 'left-wildcard ITEM) FREQ))
+
+		; Set the right wildcard frequency.
+		; Return the atom that holds this value.
+		(define (set-right-wild-freq ITEM FREQ)
+			(set-pair-freq (llobj 'right-wildcard ITEM) FREQ))
+
+		; Methods on this class.
+		(lambda (message . args)
+			(case message
+				((pair-freq)           (apply get-pair-freq args))
+				((set-pair-freq)       (apply set-pair-freq args))
+				((left-wild-freq)      (apply get-left-wild-freq args))
+				((set-left-wild-freq)  (apply set-left-wild-freq args))
+				((right-wild-freq)     (apply get-right-wild-freq args))
+				((set-right-wild-freq) (apply set-right-wild-freq args))
 				(else (apply llobj (cons message args))))
 		))
 )

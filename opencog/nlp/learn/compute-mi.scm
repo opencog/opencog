@@ -509,8 +509,10 @@
 ;
 (define (batch-all-pair-mi OBJ all-singletons)
 
-	; decorate the object with methods that can compute things.
-	(define comp-obj (make-compute-count OBJ))
+	; Decorate the object with methods that can compute things.
+	(define comp-obj
+		(make-compute-count
+			(make-pair-count-api OBJ)))
 
 	(define msg (format #f "Start counting, num words=~A\n"
 			(length all-singletons)))
