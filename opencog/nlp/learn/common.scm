@@ -85,22 +85,6 @@
 )
 
 ; ----
-; set-mi ATOM MI - set the mutual information on ATOM.
-;
-; MI is assumed to be a scheme floating-point value, holding the
-; mutual-information value appropriate for the ATOM.
-;
-; In essentially all cases, ATOM is actually an EvaluationLink that
-; is holding the structural pattern to which the mutial information
-; applied. Currently, this is almost always a word-pair.
-;
-; Returns ATOM.
-;
-(define (set-mi ATOM MI)
-	(cog-set-value! ATOM mi-key (FloatValue MI))
-)
-
-; ----
 ; get-mi ATOM - get the mutual information on ATOM.
 ;
 ; Returns a floating-point value holding the mutual information
