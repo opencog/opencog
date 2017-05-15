@@ -106,22 +106,6 @@
 ; ---------------------------------------------------------------------
 ; ---------------------------------------------------------------------
 
-; Call the function FUNC on the word-pair, but only if the
-; word-pair exists. This prevents garbaging up the atomspace
-; with bogus word-pair lists.
-(define (safety-wrap FUNC WORD-A WORD-B)
-	(define pair
-		(if
-			(and
-				(not (null? WORD-A))
-				(not (null? WORD-B)))
-			(cog-link 'ListLink WORD-A WORD-B)
-			'()))
-	(if (not (null? pair))
-		(FUNC pair)
-		#f)
-)
-
 (define (count-clique-pair PAIR)
 "
   Return count for the clique-pair PAIR
@@ -146,34 +130,7 @@
 		0
 		(filter
 			(lambda (lnk) (equal? pair-dist (gar lnk)))
-				(cog-incoming-by-type PAIR 'ExecutionLink)))
-)
-
-(define (avg-dist-pair PAIR)
-"
-  Return average distance over all counts of the distance pairs.
-  PAIR should be a ListLink of two words.
-"
-	(define (get-dist exl)
-		(string->number (cog-name (caddr (cog-outgoing-set exl))))
-	)
-	(/
-		(fold
-			(lambda (ex sum) (+ (* (get-count ex) (get-dist ex)) sum))
-			0
-			(filter
-				(lambda (lnk) (equal? pair-dist (gar lnk)))
-					(cog-incoming-by-type PAIR 'ExecutionLink)))
-
-		(count-dist-pair PAIR))
-)
-
-(define-public (avg-dist-word-pair WORD-A WORD-B)
-"
-  Return average distance over all counts of the distance pairs
-"
-	(define dist (safety-wrap avg-dist-pair WORD-A WORD-B))
-	(if dist dist 1e40)
+			(cog-incoming-by-type PAIR 'ExecutionLink)))
 )
 
 ; ---------------------------------------------------------------------

@@ -128,7 +128,7 @@
 			(make-pair (ListLink WORD any-right)))
 
 		(define (get-wild-wild)
-			(get-pair (ListLink any-left any-right)))
+			(make-pair (ListLink any-left any-right)))
 
 		; get-all-pairs - return a list holding all of the observed
 		; word-pairs.  Caution: this can be tens of millions long!
@@ -218,7 +218,7 @@
 			(make-pair (ListLink WORD any-right)))
 
 		(define (get-wild-wild)
-			(get-pair (ListLink any-left any-right)))
+			(make-pair (ListLink any-left any-right)))
 
 		; get-all-pairs - return a list holding all of the observed
 		; word-pairs.  Caution: this can be tens of millions long!
@@ -265,6 +265,109 @@
 ; ---------------------------------------------------------------------
 ; ---------------------------------------------------------------------
 ; ---------------------------------------------------------------------
+; Clique-based-counting length-limited word-pair access methods.
+; ---------------------------------------------------------------------
+
+;
+(define-public (make-distance-pair-api MAX-DIST)
+"
+  make-distance-pair-api -- Word-pair access methods from
+  clique-counting, but limited by edge-length.
+
+  Object for getting word-pair counts, obtained from clique counting.
+  The counts are considered only if the distance between the words
+  was observed to be MAX-DIST or less.
+
+  The counts are stored in the form of ExecutionLinks:
+
+    ExecutionLink
+       SchemaNode  *-Pair Distance-*
+          ListLink
+             WordNode lefty
+             WordNode righty
+          NumberNode 3
+
+"
+	(let* ((max-dist MAX-DIST)
+			(dist-name (format #f "*-Pair Max Dist ~A-*" max-dist))
+			(pair-max (PredicateNode dist-name))
+			(all-pairs '()))
+
+		(define any-left (AnyNode "left-word"))
+		(define any-right (AnyNode "right-word"))
+
+		(define (get-left-type) 'WordNode)
+		(define (get-right-type) 'WordNode)
+
+		; Return the atom holding the count, if it exists, else
+		; return nil.
+		(define (get-pair PAIR)
+			(cog-link 'EvaluationLink pair-max PAIR))
+
+		; Create an atom to hold the count (if it doesn't exist already).
+		(define (make-pair PAIR)
+			(EvaluationLink pair-max PAIR))
+
+		; Return a list of atoms that hold the count.
+		(define (get-pairs PAIR)
+			(filter!
+				(lambda (lnk) (equal? pair-dist (gar lnk)))
+				(cog-incoming-by-type PAIR 'ExecutionLink)))
+
+		(define (get-left-wildcard WORD)
+			(make-pair (ListLink any-left WORD)))
+
+		(define (get-right-wildcard WORD)
+			(make-pair (ListLink WORD any-right)))
+
+		(define (get-wild-wild)
+			(make-pair (ListLink any-left any-right)))
+
+		; get-all-pairs - return a list holding all of the observed
+		; word-pairs.  Caution: this can be tens of millions long!
+		(define (do-get-all-pairs)
+			; The list of pairs is mostly just the incoming set of the
+			; ANY node. However, this does include some junk, sooo ...
+			; hey, both left and right better be words.
+		   (filter!
+				(lambda (pair)
+					(and
+						(equal? 'WordNode (cog-type (gadr pair)))
+						(equal? 'WordNode (cog-type (gddr pair)))))
+				(cog-incoming-by-type pair-pred 'EvaluationLink)))
+
+		(define (get-all-pairs)
+			(if (null? all-pairs) (set! all-pairs (do-get-all-pairs)))
+			all-pairs)
+
+		; fetch-distance-pairs -- fetch all counts for distance-pairs
+		; from the database.
+		(define (fetch-distance-pairs)
+			(define start-time (current-time))
+			(fetch-incoming-set pair-dist)
+			(format #t "Elapsed time to load distance pairs: ~A secs\n"
+				(- (current-time) start-time)))
+
+		; Methods on the object
+		(lambda (message . args)
+			(apply (case message
+					((left-type) get-left-type)
+					((right-type) get-right-type)
+					((item-pair) get-pair)
+					((make-pair) make-pair)
+					((item-pairs) get-pairs)
+					((left-wildcard) get-left-wildcard)
+					((right-wildcard) get-right-wildcard)
+					((wild-wild) get-wild-wild)
+					((all-pairs) get-all-pairs)
+					((fetch-pairs) fetch-clique-pairs)
+					(else (error "Bad method call on clique-pair:" message)))
+				args))))
+
+
+; ---------------------------------------------------------------------
+; ---------------------------------------------------------------------
+; ---------------------------------------------------------------------
 
 (define-public (fetch-all-words)
 "
@@ -273,17 +376,6 @@
 	(define start-time (current-time))
 	(load-atoms-of-type 'WordNode)
 	(format #t "Elapsed time to load words: ~A secs\n"
-		(- (current-time) start-time))
-)
-
-(define-public (fetch-distance-pairs)
-"
-  fetch-distance-pairs -- fetch all counts for clique-pairs from the
-  database.
-"
-	(define start-time (current-time))
-	(fetch-incoming-set pair-dist)
-	(format #t "Elapsed time to load clique-pair distances: ~A secs\n"
 		(- (current-time) start-time))
 )
 

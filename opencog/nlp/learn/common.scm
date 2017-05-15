@@ -40,8 +40,6 @@
 ; ---------------------------------------------------------------------
 ; Define locations where statistics will be stored.
 
-(define freq-key (PredicateNode "*-FrequencyKey-*"))
-
 ; These are used to store/maintain counts for clique-pair counting.
 ; See `link-pipeline.scm` for usage.
 (define pair-pred (PredicateNode "*-Sentence Word Pair-*"))
