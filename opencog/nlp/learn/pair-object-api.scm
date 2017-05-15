@@ -81,6 +81,10 @@
 ;        (define (get-left-type) 'WordNode)
 ;        (define (get-right-type) 'WordNode)
 ;
+;        ; Return the observed count for PAIR, if it exists,
+;        ; else return zero.
+;        (define (get-pair-count PAIR) 42)
+;
 ;        ; Return the atom holding the count, if it exists,
 ;        ; else return nil.
 ;        (define (get-pair PAIR) "foobar")
@@ -88,20 +92,6 @@
 ;        ; Return the atom holding the count, creating it if
 ;        ; it does not yet exist.
 ;        (define (make-pair PAIR) "foobar")
-;
-; The get-pairs method should be a function that returns all atoms
-; that hold counts for a pair (ListLink left-item right-item). It
-; should return a list (possibly the empty list).  Note that in some
-; cases, the list may be longer than just one item, e.g. for schemas
-; that count link lengths.  In thise case, the total count for the
-; pair is taken to be the sum of the individual counts on all the
-; atoms in the list.
-;
-; XXX except this is a bad idea, and will be removed in some later
-; version.
-;
-;        ; Return a list of atoms hold the count.
-;        (define (get-pairs PAIR) "foobar")
 ;
 ;        ; Return the atom holding the N(*,y) count
 ;        (define (get-left-wildcard ITEM) "foobar")
@@ -119,6 +109,7 @@
 ;        (apply (case message
 ;              ((left-type) get-left-type)
 ;              ((right-type) get-right-type)
+;              ((pair-count) get-pair-count)
 ;              ((item-pair) get-pair)
 ;              ((make-pair) make-pair)
 ;              ((left-wildcard) get-left-wildcard)
@@ -255,11 +246,6 @@
 
 		(define (set-count ATOM CNT)
 			(cog-set-tv! ATOM (cog-new-ctv 0 0 CNT)))
-
-		; Set the raw observational count on PAIR
-		; Return the atom that holds this count.
-		(define (set-pair-count PAIR CNT)
-			(set-count (llobj 'make-pair PAIR) CNT))
 
 		; Get the left wildcard count
 		(define (get-left-wild-count ITEM)
