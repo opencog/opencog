@@ -351,11 +351,11 @@
 		; left-supports on the outside, and over right-stars for
 		; the inner loop. This returns a list of all atoms holding
 		; the MI, suitable for iterating for storage.
-		(define (compute-n-cache-mi)
+		(define (compute-n-cache-pair-mi)
 			(define all-atoms '())
 
 			(define (right-loop left-item)
-				; Either of the get-loglis below will throw an exception,
+				; Either of the get-loglis below may throw an exception,
 				; if the particular item-pair doesn't have any counts.
 				; This is rare, but can happen: e.g. (Any "left-word")
 				; (Word "###LEFT-WALL###") will have zero counts.  This
@@ -385,13 +385,44 @@
 			; a global lock, thus effectively single-threaded.
 			(for-each right-loop (frqobj 'left-support))
 
+			; Return the list of ALL atoms with MI on them
 			all-atoms
+		)
+
+		; Compute the total entropy for the set. This loops over all
+		; pairs, and computes the sum
+		;   H = sum_x sum_y p(x,y) log_2 p(x,y)
+		; It returns a single numerical value, for the entire set.
+		(define (compute-total-entropy)
+			(define entropy 0)
+
+			(define (right-loop left-item)
+				(for-each
+					(lambda (lipr)
+						; The get-logli below may throw an exception, if
+						; the particular item-pair doesn't have any counts.
+						; XXX does this ever actually happen?  It shouldn't,
+						;right?
+						(catch #t (lambda ()
+								(define pr-freq (frqobj 'pair-freq lipr))
+								(define pr-logli (frqobj 'pair-logli lipr))
+								(define h (* pr-freq pr-logli))
+								(set! entropy (+ entropy h))
+							)
+							(lambda (key . args) #f))) ; catch handler
+					(frqobj 'right-stars left-item)))
+
+			(for-each right-loop (frqobj 'left-support))
+
+			; Return the single number.
+			entropy
 		)
 
 		; Methods on this class.
 		(lambda (message . args)
 			(case message
-				((cache-mi)              (compute-n-cache-mi))
+				((cache-pair-mi)         (compute-n-cache-pair-mi))
+				((total-entropy)         (compute-total-entropy))
 				(else (apply frqobj      (cons message args))))
 		))
 )
@@ -502,7 +533,7 @@
 	(display "Going to do individual word-pair MI\n")
 
 	(let* ((bami (make-batch-mi freq-obj))
-			(all-atoms (bami 'cache-mi)))
+			(all-atoms (bami 'cache-pair-mi)))
 		(format #t "Done computing ~A MI's in ~A secs\n"
 			(length all-atoms) (elapsed-secs))
 		(for-each store-atom all-atoms)
