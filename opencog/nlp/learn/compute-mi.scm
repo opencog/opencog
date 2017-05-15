@@ -355,22 +355,34 @@
 			(define all-atoms '())
 
 			(define (right-loop left-item)
-				(define r-logli (frqobj 'right-wild-logli left-item))
-				(for-each
-					(lambda (lipr)
-						(define right-item (gdr lipr))
-						(define l-logli (frqobj 'left-wild-logli right-item))
-						(define pr-logli (frqobj 'pair-logli lipr))
-						(define mi (- (+ r-logli l-logli) pr-logli))
-						(define atom (frqobj 'set-pair-mi lipr mi))
-						(set! all-atoms (cons atom all-atoms))
-					)
-					(frqobj 'right-stars left-item)
-				)
+				; Either of the get-loglis below will throw an exception,
+				; if the particular item-pair doesn't have any counts.
+				; This is rare, but can happen: e.g. (Any "left-word")
+				; (Word "###LEFT-WALL###") will have zero counts.  This
+				; would have an infinite logli and an infinite MI. So we
+				; skip this, with a try-catch block.
+				(catch #t (lambda ()
+					(define r-logli (frqobj 'right-wild-logli left-item))
+					(for-each
+						(lambda (lipr)
+							(define right-item (gdr lipr))
+							(define l-logli (frqobj 'left-wild-logli right-item))
+							(define pr-logli (frqobj 'pair-logli lipr))
+							(define mi (- (+ r-logli l-logli) pr-logli))
+							(define atom (frqobj 'set-pair-mi lipr mi))
+							(set! all-atoms (cons atom all-atoms))
+						)
+						(frqobj 'right-stars left-item)
+					))
+					(lambda (key . args) #f)) ; catch handler
 			)
 
-			;; XXX FIXME this should be a par-for-each
-			; but then we need to make the all-atoms list thread-safe
+			;; XXX Maybe FIXME This could be a par-for-each, to run the
+			; calculations in parallel, but then we need to make the
+			; all-atoms list thread-safe.  Two problems: one is that
+			; current guile par-for-each implementation sucks.
+			; The other is that the atom value-fetching is done under
+			; a global lock, thus effectively single-threaded.
 			(for-each right-loop (frqobj 'left-support))
 
 			all-atoms
