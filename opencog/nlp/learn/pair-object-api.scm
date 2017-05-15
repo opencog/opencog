@@ -357,10 +357,10 @@
 
 		; Return the MI value on the pair.
 		(define (get-pair-mi PAIR MI)
-			(get-mi (llobj 'get-pair PAIR)))
+			(get-mi (llobj 'item-pair PAIR)))
 
 		(define (set-pair-mi PAIR MI)
-			(set-mi (llobj 'get-pair PAIR) MI))
+			(set-mi (llobj 'item-pair PAIR) MI))
 
 		; ----------------------------------------------------
 		; Get the left wildcard frequency

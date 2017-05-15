@@ -17,7 +17,7 @@
 ;          SomeAtom "right-hand-part"
 ;
 ; In the current usage, the SomeAtom is a WordNode, and the pairs are
-; word-pairs obtained from lingistic analysis.  However, these scripts
+; word-pairs obtained from linguistic analysis.  However, these scripts
 ; are general, and work for any kind of pairs, not just words.
 ;
 ; It is presumed that a database of counts of pairs has been already
@@ -37,13 +37,15 @@
 ;         WordNode "some-word"
 ;         WordNode "other-word"
 ;
-; In the general case, the 'WordNode is actually of ITEM-TYPE.
-; The actual atom holding the count is obtained by calling an
-; access function: i.e. given the ListLink holding a pair, the
-; GET-PAIR function returns a list of atoms holding the count.
-; It is presumed that the total count is the sum over the counts
-; all atoms in the list.
-;
+; In the general case, access to this structure is provided by methods
+; on the "low-level API". These include:
+;   'left-type and 'right-type, both of which should return 'WordNode
+;         for the above.
+;   'item-pair, which should return the EvaluationLink, given the
+;        ListLink
+;   'left-wildcard and 'right-wildcard, indicating where the partial
+;        sums, such as N(x,*) and N(*,y) should be stored.
+
 ; Let N(wl,wr) denote the number of times that the pair (wl, wr) has
 ; actually been observed; that is, N("some-word", "other-word") for the
 ; example above.  Properly speaking, this count is conditioned on the
@@ -66,12 +68,14 @@
 ;    N(*,wr) = Sum_wl N(wl,wr)
 ;    N(*,*) = Sum_wl Sum_wr N(wl,wr)
 ;
-; These sums are computed, for a given item, by compute-pair-wildcard-counts
-; below, and are computed for all items by batch-all-pair-wildcard-counts.
-; The resulting counts are stored as the 'count' value on the
-; CountTruthValue on the atoms provided by the GET-LEFT-WILD, the
-; GET-RIGHT-WILD and the GET-WILD-WILD functions. For example, for word-pair
-; counts, these will be the atoms
+; These sums are computed, for a given item, by the `make-compute-count`
+; object defined below.  It stores these counts at the locations
+; provided by the underlying object. By default, thse are given by
+; `make-pair-count-api` object, althought these are designed to be
+; overloaded, if needed.
+
+; For example, for word-pair counts, the wild-card sums are stored
+; with the atoms
 ;
 ;   EvaluationLink
 ;      LinkGrammarRelationshipNode "ANY"
@@ -94,10 +98,12 @@
 ; Here, AnyNode plays the role of *.  Thus, N(*,*) is shorthand for the
 ; last of these triples.
 ;
-; After they've been computed, the values for N(w,*) and N(*,w) can be
-; fetched with the `get-left-count-str` and `get-right-count-str`
-; routines, below.  The value for N(*,*) can be gotten by calling
-; `total-pair-observations`.
+; After they've been computed, the values for N(*,y) and N(x,*) can be
+; fetched with the 'left-wild-count and 'right-wild-count methods on
+; the object.  The value for N(*,*) can be gotten with the
+; 'wild-wild-count method.
+;
+;xxxxxxxxxxxxx
 ;
 ; In addition to computing and storing the probabilities P(wl,wr), it
 ; is convenient to also store the entropy or "log likelihood" of the
@@ -391,27 +397,31 @@
 ; ---------------------------------------------------------------------
 ; ---------------------------------------------------------------------
 ;
-;
-; Compute the mutual information between all pairs.
+; Compute the mutual information between all pairs. Counts, frequencies
+; and left, right partial sums are also performed; this is an all-in-one
+; routine, which computes all of the needed pre-requisites, and stores
+; them, as well as the MI, in the database.
 ;
 ; The mutual information between pairs is described in the overview,
 ; up top of this file. The access to the pairs is governed by the
 ; the methods on the passed object.
 ;
-; Partial sums of counts, i.e. the N(w,*) and N(*,w) explained up top,
-; are stored with the atoms that GET-LEFT-WILD and GET-RIGHT-WILD
-; provide. The GET-WILD-WILD function returns the atom where N(*,*) is
-; stored.
+; Among the things that are computed and stored are the partial sums
+; of counts, i.e. the N(x,*) and N(*,y) explained up top, the total
+; count N(*,*), the frequencies p(x,y) = N(x,y) / N(*,*), the
+; corresponding partial sums.  All of these quantities are written
+; back to the database, at the time of computation.
 ;
-; The wild-card entropies and MI values are written back to the database
-; as soon as they are computed, so as not to be lost.  The double-nested
-; sums are distributed over all CPU cores, using guile's par-for-each,
-; and can thus be very CPU intensive.
+; In order to work correctly, this function assumes that the object
+; has at least the minimal low-level API to identify where to find
+; the counts on pairs.  This script is designed to work with any kinds
+; of pairs.
 ;
-; Running this script can take hours, or longer (days?) depending on the
-; size of the dataset.  This script wasn't really designed to be
-; efficient; instead, the goal to to allow general, generic knowledge
-; representation.  You can compute MI between any kind of thing.
+; Running this script can take hours or longer, depending on the size
+; of the dataset. Progress reports are printed to stdout, including
+; timing and summary statistics. This script wasn't really designed to
+; be efficient; instead, the goal to to allow general, generic knowledge
+; representation.  You can compute MI between any kinds of things
 ; If you just need to count one thing, writing custom scripts that do
 ; NOT use the atomspace would almost surely be faster.  We put up with
 ; the performance overhead here in order to get the flexibility that
