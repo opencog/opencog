@@ -214,7 +214,7 @@
 "
 	(define start-time (current-time))
 	(fetch-incoming-set any-pair-pred)
-	(format #t "Elapsed time to ANY-link pairs: ~A secs\n"
+	(format #t "Elapsed time to load ANY-link pairs: ~A secs\n"
 		(- (current-time) start-time))
 )
 
