@@ -5150,8 +5150,8 @@ Support: num left=106696 num right=106696
 Done with wild-card count N(*,w) and N(w,*) in 222 secs
 Done computing N(*,*) total-count=34688664.0 in 13 secs
 Start computing log P(*,w)
-Done computing 106696 left-wilds in 39 secs
-Done storing 106696 left-wilds in 458 secs  << par-for
+Done computing 106696 left-wilds in 39 secs  << 120%
+Done storing 106696 left-wilds in 458 secs  << par-for 110% vs 65% !
 Done with -log P(*,w), start -log P(w,*)
 Done computing 106696 right-wilds in 45 secs
 Done storing 106696 right-wilds in 458 secs << par-for
