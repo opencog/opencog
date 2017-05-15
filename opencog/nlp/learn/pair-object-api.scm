@@ -371,7 +371,7 @@
 		; ----------------------------------------------------
 
 		; Return the MI value on the pair.
-		(define (get-pair-mi PAIR MI)
+		(define (get-pair-mi PAIR)
 			(get-mi (llobj 'item-pair PAIR)))
 
 		(define (set-pair-mi PAIR MI)
