@@ -52,49 +52,51 @@
 (use-modules (opencog persist))
 
 ; ---------------------------------------------------------------------
-; Random-tree parse word-pair count access routines.
-;
-; This implements a word-pair object, where the two words are connected
-; with an LG link-type of "ANY", in an EvaluationLink.
-;
-; That is, a word pair is represented as:
-;
-;   EvaluationLink
-;      LinkGrammarRelationshipNode "ANY"
-;      ListLink
-;         WordNode "word"
-;         WordNode "bird"
-;
-; After various counts, frequencies, entropies, etc pertaining to
-; this particular pair are computed, they will be hung, as values,
-; on the above EvaluationLink.
-;
-; The 'item-pair method returns the above EvaluationLink, if it exists.
-; The 'make-pair method will create it, if it does not exist.
-;
-; Left-side counts, frequencies, etc. such as N(*,y) P(*,y) or
-; log_2 P(*,y) will be placed on the following, which is returned
-; by the 'left-wildcard methd:
-;
-;   EvaluationLink
-;      LinkGrammarRelationshipNode "ANY"
-;      ListLink
-;         AnyNode "left-word"
-;         WordNode "bird"
-;
-; The corresponding N(x,*) P(x,*) etc are hung on the atom returned
-; by the 'right-wildcard method:
-;
-;   EvaluationLink
-;      LinkGrammarRelationshipNode "ANY"
-;      ListLink
-;         WordNode "word"
-;         AnyNode "right-word"
-;
-; Finally, the 'left-type and 'right-type methods return the type
-; of the the two sides of the pair.
 
-(define (make-any-link)
+(define-public (make-any-link-api)
+"
+  make-any-link-api -- Word-pair access methods from random parse.
+
+  This implements a word-pair object, where the two words are connected
+  with an LG link-type of \"ANY\", in an EvaluationLink.
+
+  That is, a word pair is represented as:
+
+    EvaluationLink
+       LinkGrammarRelationshipNode \"ANY\"
+       ListLink
+          WordNode \"word\"
+          WordNode \"bird\"
+
+  After various counts, frequencies, entropies, etc pertaining to
+  this particular pair are computed, they will be hung, as values,
+  on the above EvaluationLink.
+
+  The 'item-pair method returns the above EvaluationLink, if it exists.
+  The 'make-pair method will create it, if it does not exist.
+
+  Left-side counts, frequencies, etc. such as N(*,y) P(*,y) or
+  log_2 P(*,y) will be placed on the following, which is returned
+  by the 'left-wildcard methd:
+
+    EvaluationLink
+       LinkGrammarRelationshipNode \"ANY\"
+       ListLink
+          AnyNode \"left-word\"
+          WordNode \"bird\"
+
+  The corresponding N(x,*) P(x,*) etc are hung on the atom returned
+  by the 'right-wildcard method:
+
+    EvaluationLink
+       LinkGrammarRelationshipNode \"ANY\"
+       ListLink
+          WordNode \"word\"
+          AnyNode \"right-word\"
+
+  Finally, the 'left-type and 'right-type methods return the type
+  of the the two sides of the pair.
+"
 	(let ()
 		(define (get-left-type) 'WordNode)
 		(define (get-right-type) 'WordNode)
@@ -145,11 +147,15 @@
 ; Clique-based-counting word-pair access methods.
 ; ---------------------------------------------------------------------
 
-; Object for getting word-pair counts, obtained from clique counting.
-; The counts are stored on EvaluationLinks with the predicate
-; (PredicateNode "*-Sentence Word Pair-*")
 ;
-(define (make-clique-pair)
+(define-public (make-clique-pair-api)
+"
+  make-clique-pair-api -- Word-pair access methods from clique-counting.
+
+  Object for getting word-pair counts, obtained from clique counting.
+  The counts are stored on EvaluationLinks with the predicate
+  (PredicateNode \"*-Sentence Word Pair-*\")
+"
 	(let ()
 		(define (get-left-type) 'WordNode)
 		(define (get-right-type) 'WordNode)
@@ -264,7 +270,7 @@
 	(trace-msg "Finished loading any-word-pairs\n")
 	(display "Finished loading any-word-pairs\n")
 
-	(batch-all-pair-mi (add-pair-wildcards (make-any-link)))
+	(batch-all-pair-mi (add-pair-wildcards (make-any-link-api)))
 )
 
 (define-public (batch-clique-pairs)
@@ -283,7 +289,7 @@
 	(trace-msg "Finished loading clique-word-pairs\n")
 	(display "Finished loading clique-word-pairs\n")
 
-	(batch-all-pair-mi (add-pair-wildcards (make-clique-pair)))
+	(batch-all-pair-mi (add-pair-wildcards (make-clique-pair-api)))
 )
 
 ; ---------------------------------------------------------------------
