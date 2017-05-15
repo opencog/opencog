@@ -192,10 +192,10 @@
 		; This method returns a list of all of the atoms holding
 		; those counts; handy for storing in a database.
 		(define (cache-all-left-counts)
-			(par-map cache-left-count (cntobj 'right-support)))
+			(map cache-left-count (cntobj 'right-support)))
 
 		(define (cache-all-right-counts)
-			(par-map cache-right-count (cntobj 'left-support)))
+			(map cache-right-count (cntobj 'left-support)))
 
 		; Compute the total number of times that all pairs have been
 		; observed. In formulas, return
@@ -312,9 +312,9 @@
 		; This method returns a list of all of the atoms holding
 		; those counts; handy for storing in a database.
 		(define (cache-all-left-freqs)
-			(par-map cache-left-freq (cntobj 'right-support)))
+			(map cache-left-freq (cntobj 'right-support)))
 		(define (cache-all-right-freqs)
-			(par-map cache-right-freq (cntobj 'right-support)))
+			(map cache-right-freq (cntobj 'right-support)))
 
 		; Methods on this class.
 		(lambda (message . args)
