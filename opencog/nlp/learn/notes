@@ -5141,3 +5141,20 @@ pair-counts unequal: 2133920.0 1168749.0\n")'
 (define mave-1 (map (lambda (w) (cons (ob 'left-wild-count w) w)) aw))
 
 pair-counts unequal: 34692424.0 34689203.0\n")'.
+
+Elapsed time to load words: 45 secs
+Done loading words, now loading any-pairs
+Elapsed time to load ANY-link pairs: 322 secs
+Finished loading any-word-pairs
+Support: num left=106696 num right=106696
+Done with wild-card count N(*,w) and N(w,*) in 222 secs
+Done computing N(*,*) total-count=34688664.0 in 13 secs
+Start computing log P(*,w)
+Done computing 106696 left-wilds in 39 secs
+Done storing 106696 left-wilds in 458 secs  << par-for
+Done with -log P(*,w), start -log P(w,*)
+Done computing 106696 right-wilds in 45 secs
+Done storing 106696 right-wilds in 458 secs << par-for
+Done computing -log P(w,*) and <-->
+Going to do individual word-pair MI
+

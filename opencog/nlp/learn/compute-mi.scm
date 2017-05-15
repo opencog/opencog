@@ -103,24 +103,16 @@
 ; the object.  The value for N(*,*) can be gotten with the
 ; 'wild-wild-count method.
 ;
-;xxxxxxxxxxxxx
+; The mutual information for the pair (x,y) is defined as
 ;
-; In addition to computing and storing the probabilities P(wl,wr), it
-; is convenient to also store the entropy or "log likelihood" of the
-; probabilities. Thus, the quantity H(wl,*) = -log_2 P(wl,*) is computed.
-; Both the probability, and the entropy are stored, under the key of
-; (PredicateNode "*-FrequencyKey-*").
-; Note the minus sign: the entropy H(wl,*) is positive, and gets larger,
-; the smaller P is. Note that the logarithm is base-2.  In the scripts
-; below, the phrase 'logli' is used as a synonym for this entropy.
-;
-; The mutual information between a pair of items is defined as
-;
-;     MI(wl,wr) = -(H(wl,wr) - H(wl,*) - H(*,wr))
+;     MI(x,y) = - log_2 [ p(x,y) /  p(x,*) p(*,y) ]
 ;
 ; This is computed by the script batch-all-pair-mi below. The value is
-; stored under the key of (Predicate "*-Pair MI Key-*") as a single
-; float.
+; stored at the location provided by the 'set-pair-mi method on the
+; object.  It can later be retrieved with the corresponding 'pair-mi
+; method. Because everything is stored in the database, it is
+; straight-forward to perform this batch computation only once,
+; and then rely on the cached values fetched from the database.
 ;
 ; That's all there's to this.
 ;
@@ -473,7 +465,7 @@
 	(let ((lefties (freq-obj 'cache-all-left-freqs)))
 		(format #t "Done computing ~A left-wilds in ~A secs\n"
 			(length lefties) (elapsed-secs))
-		(par-for-each
+		(for-each
 			(lambda (atom) (if (not (null? atom)) (store-atom atom)))
 			lefties)
 		(format #t "Done storing ~A left-wilds in ~A secs\n"
@@ -485,7 +477,7 @@
 	(let ((righties (freq-obj 'cache-all-right-freqs)))
 		(format #t "Done computing ~A right-wilds in ~A secs\n"
 			(length righties) (elapsed-secs))
-		(par-for-each
+		(for-each
 			(lambda (atom) (if (not (null? atom)) (store-atom atom)))
 			righties)
 		(format #t "Done storing ~A right-wilds in ~A secs\n"
