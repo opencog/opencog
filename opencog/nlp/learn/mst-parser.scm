@@ -91,6 +91,35 @@
 )
 
 ; ---------------------------------------------------------------------
+
+(define (safe-pair-mi CNTOBJ left-word right-word)
+"
+  safe-pair-mi CNTOBJ LEFT-WORD RIGHT-WORD --
+         Return the mutual information for a pair of words. The
+  returned value will be in bits (i.e. using log_2 in calculations)
+
+  The source of mutual information is given by CNTOBJ, which should
+  be an object implementing a method called 'pair-mi, such that
+  when given a (ListLink (WordNode)(WordNode)), the MI for that pair.
+
+  The left and right words are presumed to be WordNodes, or nil.
+  If either word is nil, or if the word-pair cannot be found, then a
+  default value of -1e40 is returned.
+"
+	; Define a losing score.
+	(define bad-mi -1e40)
+
+	; We take care here to not actually create the atoms,
+	; if they aren't already in the atomspace. cog-link returns
+	; nil if the atoms can't be found.
+	(define wpr
+		(if (and (not (null? left-word)) (not (null? right-word)))
+			(cog-link 'ListLink left-word right-word)
+			'()))
+	(if (null? wpr) bad-mi (CNTOBJ 'pair-mi wpr))
+)
+
+; ---------------------------------------------------------------------
 ;
 ; Maximum Spanning Tree parser.
 ;
@@ -135,8 +164,8 @@
 (define-public (mst-parse-text plain-text)
 
 	; the source of where we will get MI from
-	(define mi-source get-any-pair)
-	; (define mi-source get-clique-pair)
+	(define mi-source (add-pair-freq-api (make-any-link-api)))
+	; (define mi-source (add-pair-freq-api (make-clique-pair-api)))
 
 	; Define a losing score.
 	(define bad-mi -1e30)
@@ -159,19 +188,19 @@
 	; a word from the list that has the highest-MI attachment to the left
 	; word.  Return a list containing that cost and the selected word-pair
 	; (i.e. the specified left-word, and the chosen right-word).
-	; The search is made over word pairs from the GET-PAIR mi-source.
+	; The search is made over word pairs from the CNTOBJ mi-source.
 	;
 	; The left-word is assumed to be an list, consisting of an ID, and
 	; a WordNode; thus the WordNode is the cadr of the left-word.
 	; The word-list is likewise assumed to be a list of numbered WordNodes.
 	;
 	; to-do: might be better to use values for the return value....
-	(define (pick-best-cost-left-pair GET-PAIR left-word word-list)
+	(define (pick-best-cost-left-pair CNTOBJ left-word word-list)
 		(fold
 			(lambda (right-word max-pair)
 				(define max-mi (car max-pair))
 				(define best-pair (cdr max-pair))
-				(define cur-mi (get-pair-mi GET-PAIR (cadr left-word) (cadr right-word)))
+				(define cur-mi (safe-pair-mi CNTOBJ (cadr left-word) (cadr right-word)))
 				; Use strict inequality, so that a shorter dependency
 				; length is always prefered.
 				(if (< max-mi cur-mi)
@@ -188,19 +217,19 @@
 	; a word from the list that has the highest-MI attachment to the
 	; right word.  Return a list containing that cost and the selected
 	; word-pair (i.e. the chosen left-word, and the specified right-word).
-	; The search is made over word pairs from the GET-PAIR mi-source.
+	; The search is made over word pairs from the CNTOBJ mi-source.
 	;
 	; The right-word is assumed to be an list, consisting of an ID, and
 	; a WordNode; thus the WordNode is the cadr of the right-word.
 	; The word-list is likewise assumed to be a list of numbered WordNodes.
 	;
 	; to-do: might be better to use values for the return value....
-	(define (pick-best-cost-right-pair GET-PAIR right-word word-list)
+	(define (pick-best-cost-right-pair CNTOBJ right-word word-list)
 		(fold
 			(lambda (left-word max-pair)
 				(define max-mi (car max-pair))
 				(define best-pair (cdr max-pair))
-				(define cur-mi (get-pair-mi GET-PAIR (cadr left-word) (cadr right-word)))
+				(define cur-mi (safe-pair-mi CNTOBJ (cadr left-word) (cadr right-word)))
 				; Use less-or-equal, so that a shorter dependency
 				; length is always prefered.
 				(if (<= max-mi cur-mi)
@@ -215,13 +244,13 @@
 
 	; Given a list of words, return a list containing the cost and the
 	; word-pair with the best cost (highest MI, in this case). The search
-	; is made over word pairs having the GET-PAIR mi-source.
+	; is made over word pairs having the CNTOBJ mi-source.
 	;
 	; to-do: might be better to use values for the return value....
-	(define (pick-best-cost-pair GET-PAIR word-list)
+	(define (pick-best-cost-pair CNTOBJ word-list)
 
 		; scan from left-most word to the right.
-		(define best-left (pick-best-cost-left-pair GET-PAIR
+		(define best-left (pick-best-cost-left-pair CNTOBJ
 				(car word-list) (cdr word-list)))
 		(if (eq? 2 (length word-list))
 			; If the list is two words long, we are done.
@@ -229,7 +258,7 @@
 			; else the list is longer than two words. Pick between two
 			; possibilities -- those that start with left-most word, and
 			; something else.
-			(let ((best-rest (pick-best-cost-pair GET-PAIR (cdr word-list))))
+			(let ((best-rest (pick-best-cost-pair CNTOBJ (cdr word-list))))
 				(if (< (car best-left) (car best-rest))
 					best-rest
 					best-left
@@ -287,7 +316,7 @@
 	;
 	; This only returns connections, if tehre are any. This might return
 	; the empty list, if there are no connections at all.
-	(define (connect-word GET-PAIR brk-word word-list)
+	(define (connect-word CNTOBJ brk-word word-list)
 		; The ordinal number of the break-word.
 		(define brk-num (car brk-word))
 		; The WordNode of the break-word
@@ -304,11 +333,11 @@
 				(if (< try-num brk-num)
 
 					; returned value: the MI value for the pair, then the pair.
-					(let ((mi (get-pair-mi GET-PAIR try-node brk-node)))
+					(let ((mi (safe-pair-mi CNTOBJ try-node brk-node)))
 						(if (< -1e10 mi)
 							(list mi (list word brk-word)) #f))
 
-					(let ((mi (get-pair-mi GET-PAIR brk-node try-node)))
+					(let ((mi (safe-pair-mi CNTOBJ brk-node try-node)))
 						(if (< -1e10 mi)
 							(list mi (list brk-word word)) #f))
 				)
@@ -325,9 +354,9 @@
 	; It is assumed that these two sets have no words in common.
 	;
 	; This might return an empty list, if tehre are no connections!
-	(define (connect-to-graph GET-PAIR bare-words graph-words)
+	(define (connect-to-graph CNTOBJ bare-words graph-words)
 		(append-map
-			(lambda (grph-word) (connect-word GET-PAIR grph-word bare-words))
+			(lambda (grph-word) (connect-word CNTOBJ grph-word bare-words))
 			graph-words
 		)
 	)
@@ -397,14 +426,14 @@
 	; The graph-links are assumed to be a set of MI-costed word-pairs.
 	; That is, an float-point MI value, followed by a pair of words.
 	;
-	(define (*pick-em GET-PAIR word-list graph-links nected-words)
+	(define (*pick-em CNTOBJ word-list graph-links nected-words)
 
 		;(trace-msg (list "----------------------- \nenter pick-em with wordlist="
 		;	word-list "\nand graph-links=" graph-links "\nand nected=" nected-words "\n"))
 
 		; Generate a set of possible links between unconnected words,
 		; and the connected graph. This list might be empty
-		(define trial-pairs (connect-to-graph GET-PAIR word-list nected-words))
+		(define trial-pairs (connect-to-graph CNTOBJ word-list nected-words))
 
 		; Find the best link that doesn't cross existing links.
 		(define best (pick-no-cross-best trial-pairs graph-links))
@@ -433,7 +462,7 @@
 				; If word-list is null, then we are done. Otherwise, trawl.
 				(if (null? shorter-list)
 					bigger-graph
-					(*pick-em GET-PAIR shorter-list bigger-graph more-nected)
+					(*pick-em CNTOBJ shorter-list bigger-graph more-nected)
 				)
 			)
 		)

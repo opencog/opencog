@@ -52,6 +52,12 @@
 ;
 ; There are several API's here. The lowest-level ones are listed first.
 ;
+; XXX FIXME ... the calling seuqence is exactly backeards. In order
+; for overloading to work correct, attempts must be made to call
+; methods on the base object first, and only later on the wrapper.
+; For now, we blow this off, but in the long run, this needs to be
+; fixed.
+;
 ; ---------------------------------------------------------------------
 ;
 ; Example low-level API class. It has only six methods; these
@@ -123,21 +129,24 @@
 ;
 ;
 ; ---------------------------------------------------------------------
-;
-; Extend the LLOBJ with addtional methods to get wild-card lists,
-; that is, lists of all pairs with a specific item on the left,
-; or on the right.  This generates these lists in a generic way,
-; that probably work for most kinds of pairs. However, you can
-; overload them with custom getters, if you wish.
-;
-; Here, the LLOBJ is expected to be an object, with methods for
-; 'left-type and 'right-type on it, just as described above.
-;
-; The lists of pairs will be lists of ListLink's, with the desired
-; item on the left or right, and an atom of 'left-type or 'right-type
-; on the other side.
 
-(define (make-pair-wild LLOBJ)
+(define-public (add-pair-wildcards LLOBJ)
+"
+  pair-wildcards LLOBJ - Extend LLOBJ with wildcard methods.
+
+  Extend the LLOBJ with addtional methods to get wild-card lists,
+  that is, lists of all pairs with a specific item on the left,
+  or on the right.  This generates these lists in a generic way,
+  that probably work for most kinds of pairs. However, you can
+  overload them with custom getters, if you wish.
+
+  Here, the LLOBJ is expected to be an object, with methods for
+  'left-type and 'right-type on it, just as described above.
+
+  The lists of pairs will be lists of ListLink's, with the desired
+  item on the left or right, and an atom of 'left-type or 'right-type
+  on the other side.
+"
 	(let ((llobj LLOBJ)
 			(l-supp '())
 			(r-supp '())
@@ -217,25 +226,28 @@
 		)))
 
 ; ---------------------------------------------------------------------
-;
-; Extend the LLOBJ with additional methods to get and set
-; the count values for wild-card counts, and total counts.
-; Basically, this decorates the class with additional methods
-; that get and set these counts in "standardized" places.
-; Other classes can overload these methods; these just provide
-; a reasonable default.
-;
-; These methods do NOT compute the counts! They merely provide a
-; way to access these, as cached values, and they provide a way
-; to set the cached value. Thus, this class is meant to provide
-; support for some computational class, which does compute these
-; counts.
-;
-; Here, the LLOBJ is expected to be an object, with methods for
-; 'item-pair 'make-pair 'left-wildcard 'right-wildcard and 'wild-wild
-; on it, in the form documented above for the "low-level API class".
-;
-(define (make-pair-count-api LLOBJ)
+
+(define-public (add-pair-count-api LLOBJ)
+"
+  add-pair-count-api LLOBJ - Extend LLOBJ with count-getters.
+
+  Extend the LLOBJ with additional methods to get and set
+  the count values for wild-card counts, and total counts.
+  Basically, this decorates the class with additional methods
+  that get and set these counts in \"standardized\" places.
+  Other classes can overload these methods; these just provide
+  a reasonable default.
+
+  These methods do NOT compute the counts! They merely provide a
+  way to access these, as cached values, and they provide a way
+  to set the cached value. Thus, this class is meant to provide
+  support for some computational class, which does compute these
+  counts.
+
+  Here, the LLOBJ is expected to be an object, with methods for
+  'item-pair 'make-pair 'left-wildcard 'right-wildcard and 'wild-wild
+  on it, in the form documented above for the \"low-level API class\".
+"
 	(let ((llobj LLOBJ))
 
 		(define (get-count ATOM)
@@ -243,14 +255,6 @@
 
 		(define (set-count ATOM CNT)
 			(cog-set-tv! ATOM (cog-new-ctv 0 0 CNT)))
-
-		; Return the raw observational count on PAIR.
-		; If the PAIR does not exist (was not oberved) return 0.
-		(define (get-pair-count PAIR)
-			(fold
-				(lambda (pr sum) (+ sum (get-count pr)))
-				0
-				(llobj 'item-pairs PAIR)))
 
 		; Set the raw observational count on PAIR
 		; Return the atom that holds this count.
@@ -287,8 +291,6 @@
 		; Methods on this class.
 		(lambda (message . args)
 			(case message
-				((pair-count)           (apply get-pair-count args))
-				((set-pair-count)       (apply set-pair-count args))
 				((left-wild-count)      (apply get-left-wild-count args))
 				((set-left-wild-count)  (apply set-left-wild-count args))
 				((right-wild-count)     (apply get-right-wild-count args))
@@ -300,20 +302,26 @@
 )
 
 ; ---------------------------------------------------------------------
-;
-; Extend the LLOBJ with additional methods to get and set
-; the observation frequencies, entropies and mutual infomation.
-; Basically, this decorates the class with additional methods
-; that get and set these frequencies and entropies in "standardized"
-; places. Other classes can overload these methods; these just
-; provide a reasonable default.
-;
-; Here, the LLOBJ is expected to be an object, with methods for
-; 'item-pair 'make-pair 'left-wildcard and 'right-wildcard on it,
-; in the form documented above for the "low-level API class".
-;
-(define (make-pair-freq-api LLOBJ)
+
+(define-public (add-pair-freq-api LLOBJ)
+"
+  add-pair-freq-api LLOBJ - Extend LLOBJ with frequency getters.
+
+  Extend the LLOBJ with additional methods to get and set
+  the observation frequencies, entropies and mutual infomation.
+  Basically, this decorates the class with additional methods
+  that get and set these frequencies and entropies in \"standardized\"
+  places. Other classes can overload these methods; these just
+  provide a reasonable default.
+
+  Here, the LLOBJ is expected to be an object, with methods for
+  'item-pair 'make-pair 'left-wildcard and 'right-wildcard on it,
+  in the form documented above for the \"low-level API class\".
+"
 	(let ((llobj LLOBJ))
+
+		; Key under which the frequency values are stored.
+		(define freq-key (PredicateNode "*-FrequencyKey-*"))
 
 		; Return the observed frequency on ATOM
 		(define (get-freq ATOM)
@@ -330,6 +338,13 @@
 			(define ln2 (* -1.4426950408889634 (log FREQ)))
 			(cog-set-value! ATOM freq-key (FloatValue FREQ ln2)))
 
+		; The key under which the MI is stored.
+		(define mi-key (PredicateNode "*-Mutual Info Key-*"))
+
+		; Get the (floating-point) mutual information on ATOM.
+		(define (get-mi ATOM)
+			(car (cog-value->list (cog-value ATOM mi-key))))
+
 		; Set the MI value for ATOM.
 		(define (set-mi ATOM MI)
 			(cog-set-value! ATOM mi-key (FloatValue MI)))
@@ -338,13 +353,8 @@
 		; Return the observational frequency on PAIR.
 		; If the PAIR does not exist (was not oberved) return 0.
 		(define (get-pair-freq PAIR)
-			(fold
-				(lambda (pr sum) (+ sum (get-freq pr)))
-				0
-				(llobj 'item-pairs PAIR)))
+			(get-freq (llobj 'item-pair PAIR)))
 
-		; XXX this is wrong cause it doesn't sum. The whole sum
-		; thing needs to be fixed to be single-valued.
 		(define (get-pair-logli PAIR)
 			(get-logli (llobj 'item-pair PAIR)))
 
@@ -356,7 +366,7 @@
 		; ----------------------------------------------------
 
 		; Return the MI value on the pair.
-		(define (get-pair-mi PAIR MI)
+		(define (get-pair-mi PAIR)
 			(get-mi (llobj 'item-pair PAIR)))
 
 		(define (set-pair-mi PAIR MI)

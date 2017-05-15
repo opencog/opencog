@@ -5153,8 +5153,42 @@ Start computing log P(*,w)
 Done computing 106696 left-wilds in 39 secs  << 120% vs. 15
 Done storing 106696 left-wilds in 458 secs  << par-for vs 101 secs for non-par
 Done with -log P(*,w), start -log P(w,*)
-Done computing 106696 right-wilds in 45 secs
-Done storing 106696 right-wilds in 458 secs << par-for
+Done computing 106696 right-wilds in 45 secs vs. 15 now
+Done storing 106696 right-wilds in 458 secs << par-for vs 103 now
 Done computing -log P(w,*) and <-->
 Going to do individual word-pair MI
+Done computing 2360328 pair MI's in 962 secs
+Stored 100000 of 2360328 pairs in 191 secs (523.5602094240837 pairs/sec)
+....
+Stored 2000000 of 2360328 pairs in 317 secs (315.45741324921136 pairs/sec)
+Stored 2100000 of 2360328 pairs in 251 secs (398.40637450199205 pairs/sec)
+Stored 2200000 of 2360328 pairs in 254 secs (393.7007874015748 pairs/sec)
+Stored 2300000 of 2360328 pairs in 300 secs (333.3333333333333 pairs/sec)
+Done storing 2360328 pair MI's in 6964 secs
+Finished with MI computations
+
+Sooo any-pair:
+  PID USER      PR  NI    VIRT    RES    SHR S  %CPU %MEM     TIME+ COMMAND     
+ 5180 linas     20   0 11.819g 8.935g  37080 S   0.0  3.5 117:00.53 guile       
+
+----------------
+clique pairs:
+
+Start loading words ...
+Elapsed time to load words: 45 secs
+Done loading words, now loading clique pairs
+Elapsed time to load clique pairs: 1145 secs  <<< vs 322 for any-pairs
+Finished loading clique-word-pairs
+Support: num left=106696 num right=106696
+Done with wild-card count N(*,w) and N(w,*) in 737 secs  <<< vs 215 for any
+Done computing N(*,*) total-count=31628463.0 in 14 secs  <<<!? almost the same??
+Start computing log P(*,w)
+Done computing 106696 left-wilds in 14 secs
+Done storing 106696 left-wilds in 103 secs
+Done with -log P(*,w), start -log P(w,*)
+Done computing 106696 right-wilds in 15 secs
+Done storing 106696 right-wilds in 103 secs
+Done computing -log P(w,*) and <-->
+Going to do individual word-pair MI
+
 

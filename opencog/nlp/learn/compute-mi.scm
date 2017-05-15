@@ -71,7 +71,7 @@
 ; These sums are computed, for a given item, by the `make-compute-count`
 ; object defined below.  It stores these counts at the locations
 ; provided by the underlying object. By default, thse are given by
-; `make-pair-count-api` object, althought these are designed to be
+; `add-pair-count-api` object, althought these are designed to be
 ; overloaded, if needed.
 
 ; For example, for word-pair counts, the wild-card sums are stored
@@ -332,10 +332,10 @@
 
 ; ---------------------------------------------------------------------
 ;
-; Extend the CNTOBJ with additional methods to compute the mutual
+; Extend the FRQOBJ with additional methods to compute the mutual
 ; information of pairs.
 ;
-; The CNTOBJ needs to be an object implementing methods to get pair
+; The FRQOBJ needs to be an object implementing methods to get pair
 ; observation frequencies, which must return valid values; i.e. must
 ; have been previously computed. Specifically, it must have the
 ; 'left-logli, 'right-logli and 'pair-logli methods.  For caching,
@@ -377,14 +377,8 @@
 						(set! all-atoms (cons atom all-atoms))
 					)
 
-					; Wrap the do-one-pair function with a progress-report
-					; printer.
-					(define do-one-and-report
-						(make-progress-rpt do-one-pair 10000 nlefties
-							"MI, done ~A outer loops of ~A in ~A secs (~A loops/sec)\n"))
-
 					(for-each
-						do-one-and-report
+						do-one-pair
 						(frqobj 'right-stars left-item)))
 					(lambda (key . args) #f)) ; catch handler
 			)
@@ -401,40 +395,10 @@
 			all-atoms
 		)
 
-		; Compute the total entropy for the set. This loops over all
-		; pairs, and computes the sum
-		;   H = sum_x sum_y p(x,y) log_2 p(x,y)
-		; It returns a single numerical value, for the entire set.
-		(define (compute-total-entropy)
-			(define entropy 0)
-
-			(define (right-loop left-item)
-				(for-each
-					(lambda (lipr)
-						; The get-logli below may throw an exception, if
-						; the particular item-pair doesn't have any counts.
-						; XXX does this ever actually happen?  It shouldn't,
-						;right?
-						(catch #t (lambda ()
-								(define pr-freq (frqobj 'pair-freq lipr))
-								(define pr-logli (frqobj 'pair-logli lipr))
-								(define h (* pr-freq pr-logli))
-								(set! entropy (+ entropy h))
-							)
-							(lambda (key . args) #f))) ; catch handler
-					(frqobj 'right-stars left-item)))
-
-			(for-each right-loop (frqobj 'left-support))
-
-			; Return the single number.
-			entropy
-		)
-
 		; Methods on this class.
 		(lambda (message . args)
 			(case message
 				((cache-pair-mi)         (compute-n-cache-pair-mi))
-				((total-entropy)         (compute-total-entropy))
 				(else (apply frqobj      (cons message args))))
 		))
 )
@@ -483,14 +447,14 @@
 		diff)
 
 	; Decorate the object with a counting API.
-	(define obj-get-set-api (make-pair-count-api OBJ))
+	(define obj-get-set-api (add-pair-count-api OBJ))
 
 	; Decorate the object with methods that can compute counts.
 	(define count-obj (make-compute-count obj-get-set-api))
 
 	; Decorate the object with methods that can compute frequencies.
 	(define freq-obj (make-compute-freq
-		(make-pair-freq-api obj-get-set-api)))
+		(add-pair-freq-api obj-get-set-api)))
 
 	(format #t "Support: num left=~A num right=~A\n"
 			(OBJ 'left-support-size)

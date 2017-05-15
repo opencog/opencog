@@ -48,54 +48,65 @@
 ;
 ; ---------------------------------------------------------------------
 ;
+(use-modules (srfi srfi-1))
 (use-modules (opencog))
 (use-modules (opencog persist))
 
 ; ---------------------------------------------------------------------
-; Random-tree parse word-pair count access routines.
-;
-; This implements a word-pair object, where the two words are connected
-; with an LG link-type of "ANY", in an EvaluationLink.
-;
-; That is, a word pair is represented as:
-;
-;   EvaluationLink
-;      LinkGrammarRelationshipNode "ANY"
-;      ListLink
-;         WordNode "word"
-;         WordNode "bird"
-;
-; After various counts, frequencies, entropies, etc pertaining to
-; this particular pair are computed, they will be hung, as values,
-; on the above EvaluationLink.
-;
-; The 'item-pair method returns the above EvaluationLink, if it exists.
-; The 'make-pair method will create it, if it does not exist.
-;
-; Left-side counts, frequencies, etc. such as N(*,y) P(*,y) or
-; log_2 P(*,y) will be placed on the following, which is returned
-; by the 'left-wildcard methd:
-;
-;   EvaluationLink
-;      LinkGrammarRelationshipNode "ANY"
-;      ListLink
-;         AnyNode "left-word"
-;         WordNode "bird"
-;
-; The corresponding N(x,*) P(x,*) etc are hung on the atom returned
-; by the 'right-wildcard method:
-;
-;   EvaluationLink
-;      LinkGrammarRelationshipNode "ANY"
-;      ListLink
-;         WordNode "word"
-;         AnyNode "right-word"
-;
-; Finally, the 'left-type and 'right-type methods return the type
-; of the the two sides of the pair.
 
-(define (make-any-link)
-	(let ()
+(define-public (make-any-link-api)
+"
+  make-any-link-api -- Word-pair access methods from random parse.
+
+  This implements a word-pair object, where the two words are connected
+  with an LG link-type of \"ANY\", in an EvaluationLink.
+
+  That is, a word pair is represented as:
+
+    EvaluationLink
+       LinkGrammarRelationshipNode \"ANY\"
+       ListLink
+          WordNode \"word\"
+          WordNode \"bird\"
+
+  After various counts, frequencies, entropies, etc pertaining to
+  this particular pair are computed, they will be hung, as values,
+  on the above EvaluationLink.
+
+  The 'item-pair method returns the above EvaluationLink, if it exists.
+  The 'make-pair method will create it, if it does not exist.
+
+  Left-side counts, frequencies, etc. such as N(*,y) P(*,y) or
+  log_2 P(*,y) will be placed on the following, which is returned
+  by the 'left-wildcard methd:
+
+    EvaluationLink
+       LinkGrammarRelationshipNode \"ANY\"
+       ListLink
+          AnyNode \"left-word\"
+          WordNode \"bird\"
+
+  The corresponding N(x,*) P(x,*) etc are hung on the atom returned
+  by the 'right-wildcard method:
+
+    EvaluationLink
+       LinkGrammarRelationshipNode \"ANY\"
+       ListLink
+          WordNode \"word\"
+          AnyNode \"right-word\"
+
+  Finally, the 'left-type and 'right-type methods return the type
+  of the the two sides of the pair.
+"
+	(let ((all-pairs '()))
+
+		; Get the observational count on ATOM.
+		(define (get-count ATOM) (cog-tv-count (cog-tv ATOM)))
+
+		(define any-left (AnyNode "left-word"))
+		(define any-right (AnyNode "right-word"))
+		(define any-pair-pred (LinkGrammarRelationshipNode "ANY"))
+
 		(define (get-left-type) 'WordNode)
 		(define (get-right-type) 'WordNode)
 
@@ -108,10 +119,11 @@
 		(define (make-pair PAIR)
 			(EvaluationLink any-pair-pred PAIR))
 
-		; Return a list of atoms hold the count.
-		(define (get-pairs PAIR)
+		; Return the raw observational count on PAIR.
+		; If the PAIR does not exist (was not oberved) return 0.
+		(define (get-pair-count PAIR)
 			(define pr (get-pair PAIR))
-			(if (null? pr) '() (list pr)))
+			(if (null? pr) 0 (get-count pr)))
 
 		; Caution: this unconditionally creates the wildcard pair!
 		(define (get-left-wildcard WORD)
@@ -122,21 +134,50 @@
 			(make-pair (ListLink WORD any-right)))
 
 		(define (get-wild-wild)
-			(get-pair (ListLink any-left any-right)))
+			(make-pair (ListLink any-left any-right)))
 
-	; Methods on the object
-	(lambda (message . args)
-		(apply (case message
-				((left-type) get-left-type)
-				((right-type) get-right-type)
-				((item-pair) get-pair)
-				((make-pair) make-pair)
-				((item-pairs) get-pairs)
-				((left-wildcard) get-left-wildcard)
-				((right-wildcard) get-right-wildcard)
-				((wild-wild) get-wild-wild)
-				(else (error "Bad method call on ANY-link:" message)))
-			args))))
+		; get-all-pairs - return a list holding all of the observed
+		; word-pairs.  Caution: this can be tens of millions long!
+		(define (do-get-all-pairs)
+			; The list of pairs is mostly just the incoming set of the
+			; ANY node. However, this does include some junk, sooo ...
+			; hey, both left and right better be words.
+		   (filter!
+				(lambda (pair)
+					(and
+						(equal? 'WordNode (cog-type (gadr pair)))
+						(equal? 'WordNode (cog-type (gddr pair)))))
+				(cog-incoming-by-type any-pair-pred 'EvaluationLink)))
+
+		(define (get-all-pairs)
+			(if (null? all-pairs) (set! all-pairs (do-get-all-pairs)))
+			all-pairs)
+
+		; fetch-any-pairs -- fetch all counts for link-grammar
+		; ANY links from the database.
+		(define (fetch-any-pairs)
+			(define start-time (current-time))
+			(fetch-incoming-set any-pair-pred)
+			(format #t "Elapsed time to load ANY-link pairs: ~A secs\n"
+				(- (current-time) start-time))
+		)
+
+		; Methods on the object
+		(lambda (message . args)
+			(apply (case message
+					((left-type) get-left-type)
+					((right-type) get-right-type)
+					((pair-count) get-pair-count)
+					((item-pair) get-pair)
+					((make-pair) make-pair)
+					((left-wildcard) get-left-wildcard)
+					((right-wildcard) get-right-wildcard)
+					((wild-wild) get-wild-wild)
+					((all-pairs) get-all-pairs)
+					((fetch-pairs) fetch-any-pairs)
+					(else (error "Bad method call on ANY-link:" message)))
+				args)))
+)
 
 
 ; ---------------------------------------------------------------------
@@ -145,12 +186,23 @@
 ; Clique-based-counting word-pair access methods.
 ; ---------------------------------------------------------------------
 
-; Object for getting word-pair counts, obtained from clique counting.
-; The counts are stored on EvaluationLinks with the predicate
-; (PredicateNode "*-Sentence Word Pair-*")
 ;
-(define (make-clique-pair)
-	(let ()
+(define-public (make-clique-pair-api)
+"
+  make-clique-pair-api -- Word-pair access methods from clique-counting.
+
+  Object for getting word-pair counts, obtained from clique counting.
+  The counts are stored on EvaluationLinks with the predicate
+  (PredicateNode \"*-Sentence Word Pair-*\")
+"
+	(let ((all-pairs '()))
+
+		; Get the observational count on ATOM.
+		(define (get-count ATOM) (cog-tv-count (cog-tv ATOM)))
+
+		(define any-left (AnyNode "left-word"))
+		(define any-right (AnyNode "right-word"))
+
 		(define (get-left-type) 'WordNode)
 		(define (get-right-type) 'WordNode)
 
@@ -163,10 +215,11 @@
 		(define (make-pair PAIR)
 			(EvaluationLink pair-pred PAIR))
 
-		; Return a list of atoms hold the count.
-		(define (get-pairs PAIR)
+		; Return the raw observational count on PAIR.
+		; If the PAIR does not exist (was not oberved) return 0.
+		(define (get-pair-count PAIR)
 			(define pr (get-pair PAIR))
-			(if (null? pr) '() (list pr)))
+			(if (null? pr) 0 (get-count pr)))
 
 		(define (get-left-wildcard WORD)
 			(make-pair (ListLink any-left WORD)))
@@ -175,24 +228,192 @@
 			(make-pair (ListLink WORD any-right)))
 
 		(define (get-wild-wild)
-			(get-pair (ListLink any-left any-right)))
+			(make-pair (ListLink any-left any-right)))
 
-	; Methods on the object
-	(lambda (message . args)
-		(apply (case message
-				((left-type) get-left-type)
-				((right-type) get-right-type)
-				((item-pair) get-pair)
-				((make-pair) make-pair)
-				((item-pairs) get-pairs)
-				((left-wildcard) get-left-wildcard)
-				((right-wildcard) get-right-wildcard)
-				((wild-wild) get-wild-wild)
-				(else (error "Bad method call on clique-pair:" message)))
-			args))))
+		; get-all-pairs - return a list holding all of the observed
+		; word-pairs.  Caution: this can be tens of millions long!
+		(define (do-get-all-pairs)
+			; The list of pairs is mostly just the incoming set of the
+			; ANY node. However, this does include some junk, sooo ...
+			; hey, both left and right better be words.
+		   (filter!
+				(lambda (pair)
+					(and
+						(equal? 'WordNode (cog-type (gadr pair)))
+						(equal? 'WordNode (cog-type (gddr pair)))))
+				(cog-incoming-by-type pair-pred 'EvaluationLink)))
+
+		(define (get-all-pairs)
+			(if (null? all-pairs) (set! all-pairs (do-get-all-pairs)))
+			all-pairs)
+
+		; fetch-clique-pairs -- fetch all counts for clique-pairs
+		; from the database.
+		(define (fetch-clique-pairs)
+			(define start-time (current-time))
+			(fetch-incoming-set pair-pred)
+			(format #t "Elapsed time to load clique pairs: ~A secs\n"
+				(- (current-time) start-time)))
+
+		; Methods on the object
+		(lambda (message . args)
+			(apply (case message
+					((left-type) get-left-type)
+					((right-type) get-right-type)
+					((pair-count) get-pair-count)
+					((item-pair) get-pair)
+					((make-pair) make-pair)
+					((left-wildcard) get-left-wildcard)
+					((right-wildcard) get-right-wildcard)
+					((wild-wild) get-wild-wild)
+					((all-pairs) get-all-pairs)
+					((fetch-pairs) fetch-clique-pairs)
+					(else (error "Bad method call on clique-pair:" message)))
+				args))))
 
 
+; ---------------------------------------------------------------------
+; ---------------------------------------------------------------------
+; ---------------------------------------------------------------------
+; Clique-based-counting length-limited word-pair access methods.
+; ---------------------------------------------------------------------
 
+;
+(define-public (make-distance-pair-api MAX-DIST)
+"
+  make-distance-pair-api -- Word-pair access methods from
+  clique-counting, but limited by edge-length.
+
+  Object for getting word-pair counts, obtained from clique counting.
+  The counts are considered only if the distance between the words
+  was observed to be MAX-DIST or less.
+
+  The counts are stored in the form of ExecutionLinks:
+
+    ExecutionLink
+       SchemaNode  *-Pair Distance-*
+       ListLink
+          WordNode lefty
+          WordNode righty
+       NumberNode 3
+
+"
+	(let* ((max-dist MAX-DIST)
+			(dist-name (format #f "*-Pair Max Dist ~A-*" max-dist))
+			(pair-max (PredicateNode dist-name))
+			(all-pairs '()))
+
+		; Get the observational count on ATOM.
+		(define (get-count ATOM) (cog-tv-count (cog-tv ATOM)))
+
+		; Get the numeric distance from the ExecutionLink
+		(define (get-dist ATOM)
+			(string->number (cog-name (cog-outgoing-atom ATOM 2))))
+
+		(define any-left (AnyNode "left-word"))
+		(define any-right (AnyNode "right-word"))
+
+		(define (get-left-type) 'WordNode)
+		(define (get-right-type) 'WordNode)
+
+		; Return the atom holding the count, if it exists, else
+		; return nil.
+		(define (get-pair PAIR)
+			(cog-link 'EvaluationLink pair-max PAIR))
+
+		; Create an atom to hold the count (if it doesn't exist already).
+		(define (make-pair PAIR)
+			(EvaluationLink pair-max PAIR))
+
+		; Return the raw observational count on PAIR.
+		; If the PAIR does not exist (was not oberved) return 0.
+		; Return a list of atoms that hold the count.
+		(define (get-pair-count PAIR)
+			(fold
+				(lambda (pr sum) (+ sum (get-count pr)))
+				0
+				(filter!
+					(lambda (lnk) (<= (get-dist lnk) max-dist))
+					(cog-incoming-by-type PAIR 'ExecutionLink))))
+
+		(define (get-left-wildcard WORD)
+			(make-pair (ListLink any-left WORD)))
+
+		(define (get-right-wildcard WORD)
+			(make-pair (ListLink WORD any-right)))
+
+		(define (get-wild-wild)
+			(make-pair (ListLink any-left any-right)))
+
+		; get-all-pairs - return a list holding all of the observed
+		; word-pairs.  Caution: this can be tens of millions long!
+		(define (do-get-all-pairs)
+			; The list of pairs is mostly just the incoming set of the
+			; ANY node. However, this does include some junk, sooo ...
+			; hey, both left and right better be words.
+		   (filter!
+				(lambda (pair)
+					(and
+						(equal? 'WordNode (cog-type (gadr pair)))
+						(equal? 'WordNode (cog-type (gddr pair)))))
+				(cog-incoming-by-type pair-pred 'EvaluationLink)))
+
+		(define (get-all-pairs)
+			(if (null? all-pairs) (set! all-pairs (do-get-all-pairs)))
+			all-pairs)
+
+		; fetch-distance-pairs -- fetch all counts for distance-pairs
+		; from the database.
+		(define (fetch-distance-pairs)
+			(define start-time (current-time))
+			(fetch-incoming-set pair-dist)
+			(format #t "Elapsed time to load distance pairs: ~A secs\n"
+				(- (current-time) start-time)))
+
+		; Methods on the object
+		(lambda (message . args)
+			(apply (case message
+					((left-type) get-left-type)
+					((right-type) get-right-type)
+					((pair-count) get-pair-count)
+					((item-pair) get-pair)
+					((make-pair) make-pair)
+					((left-wildcard) get-left-wildcard)
+					((right-wildcard) get-right-wildcard)
+					((wild-wild) get-wild-wild)
+					((all-pairs) get-all-pairs)
+					((fetch-pairs) fetch-distance-pairs)
+					(else (error "Bad method call on clique-pair:" message)))
+				args))))
+
+
+; ---------------------------------------------------------------------
+
+(define-public (verify-clique-pair-sums)
+"
+  This checks consistency of the the clique-pair total count, with
+  the subcounts of each pair, accodring to the distance between
+  the words. The sum of the subtotals should equal the total.
+  It should not throw.
+
+  Example usage: (verify-clique-pair-sums)
+"
+	(define cliq (add-pair-count-api (make-clique-pair-api)))
+	(define dist (add-pair-count-api (make-distance-pair-api 10000000)))
+	(define all-pairs (cliq 'all-pairs))
+
+	(define cnt 0)
+	(for-each
+		(lambda (PAIR)
+			(set! cnt (+ cnt 1))
+			(if (not (eqv? (cliq 'pair-count PAIR) (dist 'pair-count PAIR)))
+				(throw 'bad-count 'foobar PAIR)
+				(format #t "Its OK ~A\n" cnt)
+			))
+		all-pairs)
+)
+
+; ---------------------------------------------------------------------
 ; ---------------------------------------------------------------------
 ; ---------------------------------------------------------------------
 ; ---------------------------------------------------------------------
@@ -204,33 +425,6 @@
 	(define start-time (current-time))
 	(load-atoms-of-type 'WordNode)
 	(format #t "Elapsed time to load words: ~A secs\n"
-		(- (current-time) start-time))
-)
-
-(define-public (fetch-any-pairs)
-"
-  fetch-any-pairs -- fetch all counts for link-grammar ANY links
-  from the database.
-"
-	(define start-time (current-time))
-	(fetch-incoming-set any-pair-pred)
-	(format #t "Elapsed time to load ANY-link pairs: ~A secs\n"
-		(- (current-time) start-time))
-)
-
-(define-public (fetch-clique-pairs)
-"
-  fetch-clique-pairs -- fetch all counts for clique-pairs from the
-  database.
-"
-	(define start-time (current-time))
-	(fetch-incoming-set pair-pred)
-	(format #t "Elapsed time to load clique pairs: ~A secs\n"
-		(- (current-time) start-time))
-
-	(set! start-time (current-time))
-	(fetch-incoming-set pair-dist)
-	(format #t "Elapsed time to load clique-pair distances: ~A secs\n"
 		(- (current-time) start-time))
 )
 
@@ -248,42 +442,28 @@
 ; ---------------------------------------------------------------------
 ; Handy-dandy main entry points.
 
-(define-public (batch-any-pairs)
-	(init-trace "/tmp/progress")
+(define (batch-pairs LLOBJ)
+
+	(define pair-obj (add-pair-wildcards LLOBJ))
 
 	; Make sure all words are in the atomspace
-	(start-trace "Begin loading words\n")
+	(display "Start loading words ...\n")
 	(call-only-once fetch-all-words)
-	(trace-elapsed)
-	(trace-msg "Done loading words, now loading any-pairs\n")
-	(display "Done loading words, now loading any-pairs\n")
+	(display "Done loading words, now loading pairs\n")
 
 	; Make sure all word-pairs are in the atomspace.
-	(call-only-once fetch-any-pairs)
-	(trace-elapsed)
-	(trace-msg "Finished loading any-word-pairs\n")
+	(call-only-once (lambda() (pair-obj 'fetch-pairs)))
 	(display "Finished loading any-word-pairs\n")
 
-	(batch-all-pair-mi (make-pair-wild (make-any-link)))
+	(batch-all-pair-mi pair-obj)
+)
+
+(define-public (batch-any-pairs)
+	(batch-pairs (make-any-link-api))
 )
 
 (define-public (batch-clique-pairs)
-	(init-trace "/tmp/progress")
-
-	; Make sure all words are in the atomspace
-	(start-trace "Begin loading words\n")
-	(call-only-once fetch-all-words)
-	(trace-elapsed)
-	(trace-msg "Done loading words, now loading clique pairs\n")
-	(display "Done loading words, now loading clique pairs\n")
-
-	; Make sure all word-pairs are in the atomspace.
-	(call-only-once fetch-clique-pairs)
-	(trace-elapsed)
-	(trace-msg "Finished loading clique-word-pairs\n")
-	(display "Finished loading clique-word-pairs\n")
-
-	(batch-all-pair-mi (make-pair-wild (make-clique-pair)))
+	(batch-pairs (make-clique-pair-api))
 )
 
 ; ---------------------------------------------------------------------
@@ -296,11 +476,6 @@
 ; (start-cogserver "opencog2.conf")
 ; (fetch-all-words)
 ;
-; (define x (WordNode "famille"))
-; (define y (LinkGrammarRelationshipNode "ANY"))
-; (fetch-and-compute-pair-wildcard-counts x y)
-;
-; (fetch-all-words)
 ; (define wc (cog-count-atoms 'WordNode))
 ; (length (cog-get-atoms 'WordNode))
 ; (define wc (get-total-atom-count (cog-get-atoms 'WordNode)))
