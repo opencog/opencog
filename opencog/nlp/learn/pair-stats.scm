@@ -40,7 +40,7 @@
 
 		; Compute the total entropy for the set. This loops over all
 		; pairs, and computes the sum
-		;   H = sum_x sum_y p(x,y) log_2 p(x,y)
+		;   H_tot = sum_x sum_y p(x,y) log_2 p(x,y)
 		; It returns a single numerical value, for the entire set.
 		(define (compute-total-entropy)
 			(define entropy 0)
@@ -67,10 +67,38 @@
 			entropy
 		)
 
+		; Compute the left-wildcard partial entropy for the set. This
+		; loops over all left-wildcards, and computes the sum
+		;   H_left = sum_y p(*,y) log_2 p(*,y)
+		; It returns a single numerical value, for the entire set.
+		(define (compute-left-entropy)
+
+			(fold
+				(lambda (right-item sum)
+					(+ sum (frqobj 'left-wild-logli right-item)))
+				0
+				(frqobj 'right-support))
+		)
+
+		; Compute the right-wildcard partial entropy for the set. This
+		; loops over all right-wildcards, and computes the sum
+		;   H_right = sum_x p(x,*) log_2 p(x,*)
+		; It returns a single numerical value, for the entire set.
+		(define (compute-right-entropy)
+
+			(fold
+				(lambda (left-item sum)
+					(+ sum (frqobj 'right-wild-logli left-item)))
+				0
+				(frqobj 'left-support))
+		)
+
 		; Methods on this class.
 		(lambda (message . args)
 			(case message
 				((total-entropy)         (compute-total-entropy))
+				((left-entropy)          (compute-left-entropy))
+				((right-entropy)         (compute-right-entropy))
 				(else (apply frqobj      (cons message args))))
 		))
 )
