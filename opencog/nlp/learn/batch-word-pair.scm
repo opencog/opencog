@@ -98,6 +98,9 @@
   of the the two sides of the pair.
 "
 	(let ((all-pairs '()))
+		(define any-left (AnyNode "left-word"))
+		(define any-right (AnyNode "right-word"))
+
 		(define (get-left-type) 'WordNode)
 		(define (get-right-type) 'WordNode)
 
@@ -176,6 +179,10 @@
   (PredicateNode \"*-Sentence Word Pair-*\")
 "
 	(let ((all-pairs '()))
+
+		(define any-left (AnyNode "left-word"))
+		(define any-right (AnyNode "right-word"))
+
 		(define (get-left-type) 'WordNode)
 		(define (get-right-type) 'WordNode)
 
