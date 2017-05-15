@@ -22,6 +22,62 @@
 
 ; ---------------------------------------------------------------------
 
+(define-public (add-total-entropy-api FRQOBJ)
+"
+  add-total-entropy-api FRQOBJ - methods for total and partial entropy.
+
+  Extend the FRQOBJ with additional methods to compute the partial
+  and total entropies of the total set of pairrs.
+
+  The FRQOBJ needs to be an object implementing methods to get pair
+  observation frequencies, which must return valid values; i.e. must
+  have been previously computed. Specifically, it must have the
+  'left-logli, 'right-logli and 'pair-logli methods.
+
+  These methods loop over all pairs, and so can take a lot of time.
+"
+	(let ((frqobj FRQOBJ))
+
+		; Compute the total entropy for the set. This loops over all
+		; pairs, and computes the sum
+		;   H = sum_x sum_y p(x,y) log_2 p(x,y)
+		; It returns a single numerical value, for the entire set.
+		(define (compute-total-entropy)
+			(define entropy 0)
+
+			(define (right-loop left-item)
+				(for-each
+					(lambda (lipr)
+						; The get-logli below may throw an exception, if
+						; the particular item-pair doesn't have any counts.
+						; XXX does this ever actually happen?  It shouldn't,
+						;right?
+						(catch #t (lambda ()
+								(define pr-freq (frqobj 'pair-freq lipr))
+								(define pr-logli (frqobj 'pair-logli lipr))
+								(define h (* pr-freq pr-logli))
+								(set! entropy (+ entropy h))
+							)
+							(lambda (key . args) #f))) ; catch handler
+					(frqobj 'right-stars left-item)))
+
+			(for-each right-loop (frqobj 'left-support))
+
+			; Return the single number.
+			entropy
+		)
+
+		; Methods on this class.
+		(lambda (message . args)
+			(case message
+				((total-entropy)         (compute-total-entropy))
+				(else (apply frqobj      (cons message args))))
+		))
+)
+
+; ---------------------------------------------------------------------
+; ---------------------------------------------------------------------
+
 ; Call the function FUNC on the word-pair, but only if the
 ; word-pair exists. This prevents garbaging up the atomspace
 ; with bogus word-pair lists.
