@@ -140,19 +140,20 @@ protected:
 
     bool enable_filter_leaves_should_not_be_vars;
     bool enable_filter_links_should_connect_by_vars;
-    bool enable_filter_not_inheritant_from_same_var;
+    bool enable_filter_links_of_same_type_not_share_second_outgoing;
     bool enable_filter_not_same_var_from_same_predicate;
     bool enable_filter_not_all_first_outgoing_const;
     bool enable_filter_first_outgoing_evallink_should_be_var;
     bool enable_filter_node_types_should_not_be_vars;
     vector<Type> node_types_should_not_be_vars;
+    vector<Type> same_link_types_not_share_second_outgoing;
 
     unsigned int num_of_patterns_without_superpattern_cur_gram;
 
     unsigned int thresholdFrequency;
 
     std::mutex uniqueKeyLock, patternForLastGramLock, removeAtomLock, patternMatcherLock, addNewPatternLock, calculateIILock,
-        readNextLinkLock,actualProcessedLinkLock, curDFExtractedLinksLock, readNextPatternLock;
+        readNextLinkLock,actualProcessedLinkLock, curDFExtractedLinksLock, readNextPatternLock, threadExtractedLinksLock;
 
     bool use_keyword_white_list;
     bool use_keyword_black_list;
@@ -182,7 +183,10 @@ protected:
 
    // [gram], this to avoid different threads happen to work on the same links.
    // each string is composed the handles of a group of fact links in the observingAtomSpace in the default hash order using std set
-   set<string>* cur_DF_ExtractedLinks;
+    // queue<string>[thread_num][max_gram]
+   list<string>** thread_DF_ExtractedLinks;
+   // set<string>[max_gram]
+   set<string>* all_thread_ExtractedLinks_pergram;
 
     // this is to against graph isomorphism problem, make sure the patterns we found are not dupicacted
     // the input links should be a Pattern in such format:
@@ -257,10 +261,15 @@ protected:
     void extendAllPossiblePatternsForOneMoreGramBF(HandleSeq &instance, HTreeNode* curHTreeNode, unsigned int gram);
 
     //  void extendAllPossiblePatternsTillMaxGramDF(Handle &startLink, AtomSpace* _fromAtomSpace, unsigned int max_gram);
+    void addThreadExtractedLinks(unsigned int _gram, unsigned int cur_thread_index, string _extractedLinkUIDs);
+
+    bool existInAllThreadExtractedLinks(unsigned int _gram, string _extractedLinkUIDs);
+
+    bool existInOneThreadExtractedLinks(unsigned int _gram, unsigned int cur_thread_index, string _extractedLinkUIDs);
 
     void extendAPatternForOneMoreGramRecursively(const Handle &extendedLink, AtomSpace* _fromAtomSpace, const Handle &extendedNode, const HandleSeq &lastGramLinks,
                                                  HTreeNode* parentNode, const map<Handle,Handle> &lastGramValueToVarMap, const map<Handle,Handle> &lastGramPatternVarMap,
-                                                 bool isExtendedFromVar, set<string>& allNewMinedPatternsCurTask, vector<HTreeNode*> &allHTreeNodesCurTask, vector<MinedPatternInfo> &allNewMinedPatternInfo);
+                                                 bool isExtendedFromVar, set<string>& allNewMinedPatternsCurTask, vector<HTreeNode*> &allHTreeNodesCurTask, vector<MinedPatternInfo> &allNewMinedPatternInfo, unsigned int thread_index);
 
     bool containsLoopVariable(HandleSeq& inputPattern);
 
@@ -348,6 +357,10 @@ protected:
 
     void cleanUpPatternMiner();
 
+    bool loadOutgoingsIntoAtomSpaceFromString(stringstream &outgoingStream, AtomSpace *_atomSpace, HandleSeq &outgoings, string parentIndent = "");
+
+    HandleSeq loadPatternIntoAtomSpaceFromString(string patternStr, AtomSpace* _atomSpace);
+
 
 public:
     PatternMiner(AtomSpace* _originalAtomSpace);
@@ -377,9 +390,14 @@ public:
 
     void runPatternMinerDepthFirst();
 
+    void runInterestingnessEvaluation();
+
     void selectSubsetFromCorpus(vector<string> &topics, unsigned int gram = 2);
 
     vector<HTreeNode*>&  getFinalPatternsForGram(unsigned int gram){return finalPatternsForGram[gram - 1];}
+
+    // only load the frequent pattern result file
+    void loadPatternsFromResultFile(string fileName);
 
     void testPatternMatcher1();
     void testPatternMatcher2();
@@ -421,6 +439,20 @@ public:
 
     QUERY_LOGIC get_keyword_white_list_logic(){return keyword_white_list_logic;}
     void set_keyword_white_list_logic(QUERY_LOGIC logic){keyword_white_list_logic = logic;}
+
+    void set_enable_filter_links_of_same_type_not_share_second_outgoing(bool _enable){enable_filter_links_of_same_type_not_share_second_outgoing = _enable;}
+    bool get_enable_filter_links_of_same_type_not_share_second_outgoing(){return enable_filter_links_of_same_type_not_share_second_outgoing;}
+    vector<Type> get_same_link_types_not_share_second_outgoing(){return same_link_types_not_share_second_outgoing;}
+    bool add_link_type_to_same_link_types_not_share_second_outgoing(Type _type);
+    bool remove_link_type_from_same_link_types_not_share_second_outgoing(Type _type);
+    void clear_same_link_types_not_share_second_outgoing(){same_link_types_not_share_second_outgoing.clear();}
+
+    void set_enable_filter_node_types_should_not_be_vars(bool _enable){enable_filter_node_types_should_not_be_vars = _enable;}
+    bool get_enable_filter_node_types_should_not_be_vars(){return enable_filter_node_types_should_not_be_vars;}
+    vector<Type> get_node_types_should_not_be_vars(){return node_types_should_not_be_vars;}
+    bool add_node_type_to_node_types_should_not_be_vars(Type _type);
+    bool remove_node_type_from_node_types_should_not_be_vars(Type _type);
+    void clear_node_types_should_not_be_vars(){node_types_should_not_be_vars.clear();}
 
     // -------------------------------end filter settings----------------------
 

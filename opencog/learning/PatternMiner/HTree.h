@@ -55,7 +55,7 @@ namespace opencog
             vector<HandleSeq> instances; // the corresponding instances of this pattern in the original AtomSpace, only be used by breadth first mining
             set<HTreeNode*> parentLinks;
             set<HTreeNode*> childLinks;
-            set<string> instancesUidStrings;// all uid in each instance HandleSeq in all instances, in the form of 5152_815_201584. to prevent the same instance being count multiple times
+            // set<string> instancesUidStrings;// all uid in each instance HandleSeq in all instances, in the form of 5152_815_201584. to prevent the same instance being count multiple times
 
             vector<ExtendRelation> superPatternRelations; // store all the connections to its super patterns
 
@@ -72,7 +72,7 @@ namespace opencog
                 parentLinks.clear();
                 childLinks.clear();
                 instances.clear();
-                instancesUidStrings.clear();
+                // instancesUidStrings.clear();
                 superPatternRelations.clear();
                 count = 0;
                 var_num = 0;
