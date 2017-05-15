@@ -200,7 +200,7 @@
 	; to ignore the SentenceNode), then map these to word nodes, 
 	; and then tack them onto our list.
 	(for-each 
-		(lambda (x) (map-word-node add-to-word-list x))
+		(lambda (x) (add-to-word-list (word-inst-get-word x)))
 		(cog-filter 'WordInstanceNode (cog-outgoing-set sentence))
 	)
 
@@ -297,7 +297,7 @@
 	; (display mi-edge-list) (newline)
 
 	; Score each of the parses in the sentence
-	(map-parses score-one-parse sent-node)
+	(for-each score-one-parse (sentence-get-parses sent-node))
 	#f
 )
 

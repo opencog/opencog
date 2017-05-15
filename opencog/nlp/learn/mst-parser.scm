@@ -1,7 +1,7 @@
 ;
 ; mst-parser.scm
 ;
-; Minimum Spanning Tree parser.
+; Maximum Spanning Tree parser.
 ;
 ; Copyright (c) 2014 Linas Vepstas
 ;
@@ -16,8 +16,8 @@
 ; information is already avaialable from the atomspace (obtained
 ; previously).
 ;
-; The algorithm implemented is a basic minimum spanning tree algorithm.
-; Conceptually, the graph to be spanned by the tree is a clique, with 
+; The algorithm implemented is a basic maximum spanning tree algorithm.
+; Conceptually, the graph to be spanned by the tree is a clique, with
 ; with every word in the sentence being connected to every other word.
 ; The edge-lengths are given by the mutual information betweeen word-pairs
 ; (although perhaps other metrics are possible; see below).
@@ -38,7 +38,7 @@
 ; this is easy. This also makes a vague attempt to also separate commas,
 ; periods, and other punctuation.  Returned is a list of words.
 ;
-(define (tokenize-text plain-text)
+(define-public (tokenize-text plain-text)
 	; Prefix and suffix lists taken from the link-grammar ANY
 	; language 4.0.affix file
 	(define prefix "({[<«〈（〔《【［『「``„“‘'''…...¿¡$£₤€¤₳฿₡₢₠₫৳ƒ₣₲₴₭₺ℳ₥₦₧₱₰₹₨₪﷼₸₮₩¥៛호점†‡§¶©®℗№#")
@@ -60,10 +60,8 @@
 						(strip-prefix (substring word 1)) ; loop again.
 					)
 					(strip-prefli word (cdr prefli)) ; if no match, recurse.
-				)
-			)
-		)
-	)
+				))))
+
 	; Main entry point for the recursive prefix splitter
 	(define (strip-prefix word) (strip-prefli word prefix-list))
 
@@ -82,10 +80,8 @@
 						(list (string punct))
 					)
 					(strip-sufli word (cdr sufli))
-				)
-			)
-		)
-	)
+				))))
+
 	; Main entry point for the recursive splitter
 	(define (strip-affix word) (strip-sufli word suffix-list))
 
@@ -95,59 +91,16 @@
 )
 
 ; ---------------------------------------------------------------------
-; Return the mutual information for a pair of words.
 ;
-; The pair of words are presumed to be connected by the relationship
-; lg_rel.  The left and right words are presumed to be WordNodes, or nil.
-; If either word is nill, or if the word-pair cannot be found, then a
-; default value of -1000 is returned.
-
-(define (get-pair-mi lg_rel left-word right-word)
-
-	; Define a losing score.
-	(define bad-mi -1000)
-
-	; We take care here to not actually create the atoms,
-	; if they aren't already in the atomspace. cog-node returns
-	; nil if the atoms can't be found.
-	(define wpr 
-		(if (and (not (null? left-word)) (not (null? right-word)))
-			(cog-link 'ListLink left-word right-word)
-			'()))
-	(define evl
-		(if (not (null? wpr))
-			(cog-link 'EvaluationLink lg_rel wpr)
-			'()))
-	(if (not (null? evl))
-		(tv-conf (cog-tv evl))
-		bad-mi
-	)
-)
-
-; ---------------------------------------------------------------------
-; Return the mutual information for a pair of words.
+; Maximum Spanning Tree parser.
 ;
-; The pair of words are presumed to be connected by the relationship
-; lg_rel.  The left and right words are presumed to be strings.
-; If the word-pair cannot be found, then a default value of -1000 is
-; returned.
-
-(define (get-pair-mi-str lg_rel left-word-str right-word-str)
-
-	(get-pair-mi lg_rel
-		(cog-node 'WordNode left-word-str)
-		(cog-node 'WordNode right-word-str)
-	)
-)
-
-; ---------------------------------------------------------------------
-;
-; Minimum Spanning Tree parser.
 ; Given a raw-text sentence, it splits apart the sentence into distinct
 ; words, and finds an (unlabelled) dependency parse of the sentence, by
-; finding a dependency tree that minimizes minus the mutual information.
+; finding a dependency tree that maximizes the mutual information.
 ; A list of word-pairs, together with the associated mutual information,
 ; is returned.
+;
+; The M in MST normally stands for "minimum", but we want to maximize.
 ;
 ; There are many MST algorithms; the choice was made as follows:
 ; Prim is very easy; but seems too simple to give good results.
@@ -164,31 +117,40 @@
 ; the mean-dependency-distance metric needs to be re-phrased as some
 ; sort of graph entropy. Hmmm...
 ;
-; So, for now, a no-links-corss constraint is handed-coded into the algo.
+; Another idea is to apply the Dick Hudson Word Grammar landmark
+; transitivity idea, but exactly how this could work for unlabelled
+; trees has not been explored.
+;
+; So, for now, a no-links-cross constraint is handed-coded into the algo.
 ; Without it, it seems that the pair-MI scores alone give rather unruly
 ; dependencies (unclear, needs exploration).  So, in the long-run, it
-; might be better to instead pick something that combines MI scores with 
+; might be better to instead pick something that combines MI scores with
 ; mean-dependency-distance or with hubbiness. See, for example:
 ; Haitao Liu (2008) “Dependency distance as a metric of language
-; comprehension difficulty” Journal of Cognitive Science, 2008 9(2): 159-191. 
+; comprehension difficulty” Journal of Cognitive Science, 2008 9(2): 159-191.
 ; or also:
 ; Ramon Ferrer-i-Cancho (2013) “Hubiness, length, crossings and their
 ; relationships in dependency trees”, ArXiv 1304.4086
 
-(define (mst-parse-text plain-text)
-	(define lg_any (LinkGrammarRelationshipNode "ANY"))
+(define-public (mst-parse-text plain-text)
+
+	; the source of where we will get MI from
+	(define mi-source get-any-pair)
+	; (define mi-source get-clique-pair)
 
 	; Define a losing score.
-	(define bad-mi -1000)
+	(define bad-mi -1e30)
 
 	; Given a list of strings, create a numbered list of word-nodes.
 	; The numbering provides a unique ID, needed for the graph algos.
+	; i.e. if the same word appears twice in a sentence, we need to
+	; distinguish these two.  The id does this.
 	(define (str-list->numbered-word-list word-strs)
 		(define cnt 0)
 		(map
 			(lambda (str)
 				(set! cnt (+ cnt 1))
-				(list cnt (cog-node 'WordNode str))
+				(list cnt (WordNode str))
 			)
 			word-strs
 		)
@@ -197,19 +159,19 @@
 	; a word from the list that has the highest-MI attachment to the left
 	; word.  Return a list containing that cost and the selected word-pair
 	; (i.e. the specified left-word, and the chosen right-word).
-	; The search is made over word pairs united by lg_rel.
+	; The search is made over word pairs from the GET-PAIR mi-source.
 	;
 	; The left-word is assumed to be an list, consisting of an ID, and
 	; a WordNode; thus the WordNode is the cadr of the left-word.
-	; The word-list is likewise assumed to be a list of numbered WordNodes.   
+	; The word-list is likewise assumed to be a list of numbered WordNodes.
 	;
 	; to-do: might be better to use values for the return value....
-	(define (pick-best-cost-left-pair lg_rel left-word word-list)
+	(define (pick-best-cost-left-pair GET-PAIR left-word word-list)
 		(fold
 			(lambda (right-word max-pair)
 				(define max-mi (car max-pair))
 				(define best-pair (cdr max-pair))
-				(define cur-mi (get-pair-mi lg_rel (cadr left-word) (cadr right-word)))
+				(define cur-mi (get-pair-mi GET-PAIR (cadr left-word) (cadr right-word)))
 				; Use strict inequality, so that a shorter dependency
 				; length is always prefered.
 				(if (< max-mi cur-mi)
@@ -223,22 +185,22 @@
 	)
 
 	; Given a right-word, and a list of words to the left of it, pick
-	; a word from the list that has the highest-MI attachment to the 
+	; a word from the list that has the highest-MI attachment to the
 	; right word.  Return a list containing that cost and the selected
 	; word-pair (i.e. the chosen left-word, and the specified right-word).
-	; The search is made over word pairs united by lg_rel.
+	; The search is made over word pairs from the GET-PAIR mi-source.
 	;
 	; The right-word is assumed to be an list, consisting of an ID, and
 	; a WordNode; thus the WordNode is the cadr of the right-word.
-	; The word-list is likewise assumed to be a list of numbered WordNodes.   
+	; The word-list is likewise assumed to be a list of numbered WordNodes.
 	;
 	; to-do: might be better to use values for the return value....
-	(define (pick-best-cost-right-pair lg_rel right-word word-list)
+	(define (pick-best-cost-right-pair GET-PAIR right-word word-list)
 		(fold
 			(lambda (left-word max-pair)
 				(define max-mi (car max-pair))
 				(define best-pair (cdr max-pair))
-				(define cur-mi (get-pair-mi lg_rel (cadr left-word) (cadr right-word)))
+				(define cur-mi (get-pair-mi GET-PAIR (cadr left-word) (cadr right-word)))
 				; Use less-or-equal, so that a shorter dependency
 				; length is always prefered.
 				(if (<= max-mi cur-mi)
@@ -253,20 +215,21 @@
 
 	; Given a list of words, return a list containing the cost and the
 	; word-pair with the best cost (highest MI, in this case). The search
-	; is made over word pairs united by lg_rel.
+	; is made over word pairs having the GET-PAIR mi-source.
 	;
 	; to-do: might be better to use values for the return value....
-	(define (pick-best-cost-pair lg_rel word-list)
+	(define (pick-best-cost-pair GET-PAIR word-list)
 
 		; scan from left-most word to the right.
-		(define best-left (pick-best-cost-left-pair lg_rel (car word-list) (cdr word-list)))
+		(define best-left (pick-best-cost-left-pair GET-PAIR
+				(car word-list) (cdr word-list)))
 		(if (eq? 2 (length word-list))
 			; If the list is two words long, we are done.
 			best-left
 			; else the list is longer than two words. Pick between two
 			; possibilities -- those that start with left-most word, and
 			; something else.
-			(let ((best-rest (pick-best-cost-pair lg_rel (cdr word-list))))
+			(let ((best-rest (pick-best-cost-pair GET-PAIR (cdr word-list))))
 				(if (< (car best-left) (car best-rest))
 					best-rest
 					best-left
@@ -275,7 +238,7 @@
 		)
 	)
 
-	; Set-subtraction. 
+	; Set-subtraction.
 	; Given set-a and set-b, return set-a with all elts of set-b removed.
 	; It is assumed that equal? can be used to compare elements.  This
 	; should work fine for sets of ordinal-numbered words, and also for
@@ -308,13 +271,8 @@
 							; bad-pair as soon as possible.
 							(if (<= so-far-mi first-mi)
 								first-choice
-								best-so-far
-							)
-						)
-					)
-					(*pick-best (cdr choice-list) curr-best)
-				)
-			)
+								best-so-far)))
+					(*pick-best (cdr choice-list) curr-best)))
 		)
 		(*pick-best choice-list bad-pair)
 	)
@@ -326,25 +284,33 @@
 	; The returned list is a list of costed-pairs.
 	;
 	; It is presumed that the brk-word does not occur in the word-list.
-	(define (connect-word lg_rel brk-word word-list)
+	;
+	; This only returns connections, if tehre are any. This might return
+	; the empty list, if there are no connections at all.
+	(define (connect-word GET-PAIR brk-word word-list)
 		; The ordinal number of the break-word.
 		(define brk-num (car brk-word))
 		; The WordNode of the break-word
 		(define brk-node (cadr brk-word))
-		(map
+
+		(filter-map
 			(lambda (word)
 				; try-num is the ordinal number of the trial word.
 				(define try-num (car word))
 				; try-node is the actual WordNode of the trial word.
 				(define try-node (cadr word))
+
+				; ordered pairs, the left-right order matters.
 				(if (< try-num brk-num)
+
 					; returned value: the MI value for the pair, then the pair.
-					(list (get-pair-mi lg_rel try-node brk-node)
-						(list word brk-word)
-					)
-					(list (get-pair-mi lg_rel brk-node try-node)
-						(list brk-word word)
-					)
+					(let ((mi (get-pair-mi GET-PAIR try-node brk-node)))
+						(if (< -1e10 mi)
+							(list mi (list word brk-word)) #f))
+
+					(let ((mi (get-pair-mi GET-PAIR brk-node try-node)))
+						(if (< -1e10 mi)
+							(list mi (list brk-word word)) #f))
 				)
 			)
 			word-list
@@ -357,9 +323,11 @@
 	; an ordinal number denoting sentence order.  The graph-words is a
 	; set of words that are already a part of the spanning tree.
 	; It is assumed that these two sets have no words in common.
-	(define (connect-to-graph lg_rel bare-words graph-words)
+	;
+	; This might return an empty list, if tehre are no connections!
+	(define (connect-to-graph GET-PAIR bare-words graph-words)
 		(append-map
-			(lambda (grph-word) (connect-word lg_rel grph-word bare-words))
+			(lambda (grph-word) (connect-word GET-PAIR grph-word bare-words))
 			graph-words
 		)
 	)
@@ -396,7 +364,8 @@
 		(if (not (cross-any? best graph-pairs))
 			best
 			; Else, remove best from list, and try again.
-			(pick-no-cross-best (set-sub candidates (list best)) graph-pairs)
+			(pick-no-cross-best
+				(set-sub candidates (list best)) graph-pairs)
 		)
 	)
 
@@ -411,7 +380,7 @@
 		)
 	)
 		
-	; Find the maximum spanning tree. 
+	; Find the maximum spanning tree.
 	; word-list is the list of unconnected words, to be added to the tree.
 	; graph-links is a list of edges found so far, joining things together.
 	; nected-words is a list words that are part of the tree.
@@ -427,23 +396,25 @@
 	;
 	; The graph-links are assumed to be a set of MI-costed word-pairs.
 	; That is, an float-point MI value, followed by a pair of words.
-	; 
-	(define (*pick-em lg_rel word-list graph-links nected-words)
+	;
+	(define (*pick-em GET-PAIR word-list graph-links nected-words)
 
 		;(trace-msg (list "----------------------- \nenter pick-em with wordlist="
 		;	word-list "\nand graph-links=" graph-links "\nand nected=" nected-words "\n"))
 
-		; If word-list is null, then we are done. Otherwise, trawl.
-		(if (null? word-list)
+		; Generate a set of possible links between unconnected words,
+		; and the connected graph. This list might be empty
+		(define trial-pairs (connect-to-graph GET-PAIR word-list nected-words))
+
+		; Find the best link that doesn't cross existing links.
+		(define best (pick-no-cross-best trial-pairs graph-links))
+
+		; There is no such "best link" i.e. we've never obseved it
+		; and so have no MI for it, then we are done.  That is, none
+		; of the remaining words can be connected to the existing graph.
+		(if (> -1e10 (car best))
 			graph-links
 			(let* (
-					; Generate a set of possible links
-					(trial-pairs (connect-to-graph lg_rel word-list nected-words))
-					; (ja (trace-msg (list "trial pairs=" trial-pairs "\n")))
-
-					; Find the best link that doesn't cross existing links.
-					(best (pick-no-cross-best trial-pairs graph-links))
-					; (jb (trace-msg (list "best-pair=" best "\n")))
 
 					; Add the best to the list of graph-links.
 					(bigger-graph (append graph-links (list best)))
@@ -458,8 +429,12 @@
 					; Add the freshly-connected word to the cnoonected-list
 					(more-nected (append nected-words (list fresh-word)))
 				)
-				; recurse
-				(*pick-em lg_rel shorter-list bigger-graph more-nected)
+
+				; If word-list is null, then we are done. Otherwise, trawl.
+				(if (null? shorter-list)
+					bigger-graph
+					(*pick-em GET-PAIR shorter-list bigger-graph more-nected)
+				)
 			)
 		)
 	)
@@ -467,24 +442,73 @@
 	(let* (
 			; Tokenize the sentence into a list of words.
 			(word-strs (tokenize-text plain-text))
+
 			; Number the words in sentence-order.
 			(word-list (str-list->numbered-word-list word-strs))
+
 			; Find a pair of words connected with the largest MI in the sentence.
-			(start-cost-pair (pick-best-cost-pair lg_any word-list))
+			(start-cost-pair (pick-best-cost-pair mi-source word-list))
+
 			; Add both of these words to the connected-list.
 			(nected-list (cadr start-cost-pair)) ; discard the MI
+
 			; remove both of these words from the word-list
 			(smaller-list (set-sub word-list nected-list))
 		)
-		(*pick-em lg_any smaller-list (list start-cost-pair) nected-list)
+		(*pick-em mi-source smaller-list (list start-cost-pair) nected-list)
 	)
 )
 
 ; ---------------------------------------------------------------------
-; (init-trace)
-; (load-atoms-of-type item-type)
-; (define lg_any (LinkGrammarRelationshipNode "ANY"))
-; (fetch-incoming-set lg_any)
+; The MST parser returns a list of word-pair links, tagged with the
+; mutual information between that word-pair. The functions below
+; unpack each data strcture.
+;
+; Hmm. Should we be using goops for this?
+
+; Get the mutual informattion of the link.
+(define (mst-link-get-mi lnk) (car lnk))
+
+; Get the left word in the link. This returns the WordNode.
+(define (mst-link-get-left-word lnk)
+	(define (get-pr lnk) (cadr lnk))
+	(cadr (car (get-pr lnk))))
+
+; Get the right word in the link. This returns the WordNode.
+(define (mst-link-get-right-word lnk)
+	(define (get-pr lnk) (cadr lnk))
+	(cadr (cadr (get-pr lnk))))
+
+; Get the word-pair of the link. This includes misc extraneous markup,
+; including the word indexes in the sentence.
+(define (mst-link-get-wordpair lnk)
+	(ListLink (mst-link-get-left-word lnk) (mst-link-get-right-word lnk))
+)
+
+; Get the left seq-word in the link. The seq-word holds both the
+; sequence number, and the word in it.
+(define (mst-link-get-left-seq lnk)
+	(define (get-pr lnk) (cadr lnk))
+	(car (get-pr lnk)))
+
+(define (mst-link-get-right-seq lnk)
+	(define (get-pr lnk) (cadr lnk))
+	(cadr (get-pr lnk)))
+
+; Get the index number out of the sequenced word.
+(define (mst-seq-get-index seq) (car seq))
+
+; Get the word from the sequenced word.
+(define (mst-seq-get-word seq) (cadr seq))
+
+; ---------------------------------------------------------------------
+;
+; (use-modules (opencog) (opencog persist) (opencog persist-sql))
+; (use-modules (opencog nlp) (opencog nlp learn))
+; (sql-open "postgres:///en_pairs?user=linas")
+;
+; (fetch-all-words)
+; (fetch-any-pairs)
 ; (mst-parse-text "faire un test")
 ; (mst-parse-text "Elle jouit notamment du monopole de la restauration ferroviaire")
 ;

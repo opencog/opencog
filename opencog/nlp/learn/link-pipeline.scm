@@ -1,135 +1,341 @@
 ;
 ; link-pipeline.scm
 ;
-; Link-grammar processing pipeline. Currently, just counts word pairs.
+; Link-grammar word and link-counting pipeline.  Currently counts
+; words, several kinds of word-pairs (links, and order-relations),
+; and also disjuncts, parses and sentences.
 ;
-; Copyright (c) 2013 Linas Vepstas <linasvepstas@gmail.com>
+; Copyright (c) 2013, 2017 Linas Vepstas <linasvepstas@gmail.com>
 ;
-; This code is part of a language-learning effort.  The goal is to
-; observe a lot of text, and then perform clustering to min-max the
-; entropy. Right now, only the observe part is supported.
+; This code is part of the language-learning effort.  The project
+; requires that a lot of text be observed, withe the goal of deducing
+; a grammar from it, using entropy and other basic probability methods.
 ;
-; Main entry point: (observe-text plain-text)
-; Call this entry point with exactly one sentance as plain text.
-; It will be parsed by RelEx, and the resulting link-grammar link
-; usage counts will be updated in the atomspace. The counts are
+; Main entry point: `(observe-text plain-text)`
+;
+; Call this entry point with exactly one sentance as a plain text
+; string. It will be parsed by RelEx, and the resulting link-grammar
+; link usage counts will be updated in the atomspace. The counts are
 ; flushed to the SQL database so that they're not forgotten.
 ;
-; As of 10 December 2013, this seems to work fine. Deploying ...
-
+; RelEx is used for only one reason: it prints out the required
+; atomese format. The rule-engine in RelEx is NOT used!  This could
+; be redesigned and XXX FIXME, it should be.
+;
+; This tracks multiple, independent counts:
+; *) how many sentences have been observed.
+; *) how many parses were observed.
+; *) how many words have been observed (counting once-per-word-per-parse)
+; *) how many word-order pairs have been observed.
+; *) the distance between words in the above pairs.
+; *) how many link-relationship triples have been observed.
+; *) how many disjuncts have been observed.
+;
+; Sentences are counted by updating the count on `(SentenceNode "ANY")`.
+; Parses are counted by updating the count on `(ParseNode "ANY")`.
+; Words are counted by updating the count on the `WordNode` for that
+; word. It is counted with multiplicity: once for each time it occurs
+; in a parse.  That is, if a word appears twice in a parse, it is counted
+; twice.
+;
+; Word-pairs show up, and are counted in four different ways. First,
+; a count is made if two words appear, left-right ordered, in the same
+; sentence. This count is stored in the CountTV for the EvaluationLink
+; on (PredicateNode "*-Sentence Word Pair-*").  A second count is
+; maintained for this same pair, but including the distance between the
+; two words. This is on (SchemaNode "*-Pair Distance-*").  Since
+; sentences always start with LEFT-WALL, this can be used to reconstruct
+; the typical word-order in a sentence.
+;
+; Word-pairs are also designated by means of Link Grammar parses of a
+; sentence. A Link Grammar parse creates a list of typed links between
+; pairs of words in the sentence. Each such link is counted once, for
+; each time that it occurs.  These counts are maintained in the CountTV
+; on the EvaluationLink for the LinkGrammarRelationshipNode for that
+; word-pair.  In addition, a count is maintained of the length of that
+; link.
+;
+; For the initial stages of the langauge-learning project, the parses
+; are produced by the "any" langauge parser, which produces random planar
+; trees.  This creates a sampling of word-pairs that is different than
+; merely having them show up in the same sentence.  That is, a covering
+; of a sentence by random trees does not produce the same edge statistics
+; as a clique of edges drawn between all words. This is explored further
+; in the diary, in a section devoted to this topic.
+;
+; The Link Grammar parse also produces and reports the disjuncts that were
+; used for each word. These are useful in and of themselves; they indicate
+; the hubbiness (link-multiplicity) of each word. The disjunct counts are
+; maintained on the LgWordCset for a given word.
+;
 (use-modules (opencog) (opencog nlp) (opencog persist))
-;
+(use-modules (srfi srfi-1))
+
 ; ---------------------------------------------------------------------
-; map-lg-links -- loop over all link-grammar links in sentences.
+; make-word-sequence -- extract the sequence of words in a parse.
 ;
-; Each link-grammar link is of the general form:
-;   EvaluationLink
-;      LinkGrammarRelationshipNode "ANY"
-;      ListLink
-;         WordInstanceNode "word@uuid"
-;         WordInstanceNode "bird@uuid"
+; The parser proves a numbered sequence of word-instances, for example:
 ;
-; and 'proc' is invoked on each of these.
+;    (WordSequenceLink
+;         (WordInstanceNode "foo@9023e177")
+;         (NumberNode "4567"))
 ;
-; Note -- as currently written, this double-counts.
-(define (map-lg-links proc sent-list)
-	; Do each parse in it's own thread.
-	; (parallel-map-parses
-	(map-parses
-		(lambda (parse)
-			(map-word-instances
-				(lambda (word-inst)
-					(map proc (cog-get-pred word-inst 'LinkGrammarRelationshipNode))
-				)
-				parse
-			)
-		)
-		sent-list
-	)
+; This returns the corresponding structures, for words, starting with
+; the left-wall at number zero.  Thus, this would return
+;
+;    (WordSequenceLink
+;         (WordNode "foo")
+;         (NumberNode "4"))
+;
+; when the sentence was "this is some foo".
+;
+; Due to a RelEx bug in parenthesis handling, the `word-inst-get-word`
+; function used here can throw an exception. See documentation.
+;
+(define (make-word-sequence PARSE)
+
+	; Get the scheme-number of the word-sequence number
+	(define (get-number word-inst)
+		(string->number (cog-name (word-inst-get-number word-inst))))
+
+	; A comparison function, for use as kons in fold
+	(define (least word-inst lim)
+		(define no (get-number word-inst))
+		(if (< no lim) no lim))
+
+	; Get the number of the first word in the sentence (the left-wall)
+	(define wall-no (fold least 9e99 (parse-get-words PARSE)))
+
+	; Convert a word-instance sequence number into a word sequence
+	; number, starting with LEFT-WALL at zero.
+	(define (make-ordered-word word-inst)
+		(WordSequenceLink
+			(word-inst-get-word word-inst)
+			(NumberNode (- (get-number word-inst) wall-no))))
+
+	; Ahhh .. later code will be easier, if we return the list in
+	; sequential order. So, define a compare function and sort it.
+	(define (get-no seq-lnk)
+		(string->number (cog-name (gdr seq-lnk))))
+
+	(sort (map make-ordered-word (parse-get-words PARSE))
+		(lambda (wa wb)
+			(< (get-no wa) (get-no wb))))
 )
 
 ; ---------------------------------------------------------------------
-; make-lg-rel -- create a word-relation from a word-instance relation
+; update-word-counts -- update counts for sentences, parses and words,
+; for the given list of sentences.
 ;
-; Get the word relation correspoding to a word-instance relation.
-; That is, given this:
+; As explained above, the counts on `(SentenceNode "ANY")` and
+; `(ParseNode "ANY")` and on `(WordNode "foobar")` are updated.
+;
+(define (update-word-counts single-sent)
+	(define any-sent (SentenceNode "ANY"))
+	(define any-parse (ParseNode "ANY"))
+
+	; Due to a RelEx bug in parenthesis handling, the `word-inst-get-word`
+	; function can throw an exception. See documentation. Catch the
+	; exception, avoid counting if its thrown.
+	(define (try-count-one-word word-inst)
+		(catch 'wrong-type-arg
+			(lambda () (count-one-atom (word-inst-get-word word-inst)))
+			(lambda (key . args) #f)))
+
+	(count-one-atom any-sent)
+	(for-each
+		(lambda (parse)
+			(count-one-atom any-parse)
+			(for-each try-count-one-word (parse-get-words parse)))
+		(sentence-get-parses single-sent))
+)
+
+; ---------------------------------------------------------------------
+; update-pair-counts -- count occurances of word-pairs in a parse.
+;
+; Note that this might throw an exception...
+;
+; The structures that get created and incremented are of the form
+;
+;     EvaluationLink
+;         PredicateNode "*-Sentence Word Pair-*"
+;         ListLink
+;             WordNode "lefty"  -- or whatever words these are.
+;             WordNode "righty"
+;
+;     ExecutionLink
+;         SchemaNode "*-Pair Distance-*"
+;         ListLink
+;             WordNode "lefty"
+;             WordNode "righty"
+;         NumberNode 3
+;
+; Here, the NumberNode encdes the distance between the words. It is always
+; at least one -- i.e. it is the diffference between their ordinals.
+;
+(define (update-pair-counts-once PARSE)
+
+	; Get the scheme-number of the word-sequence number
+	(define (get-no seq-lnk)
+		(string->number (cog-name (gdr seq-lnk))))
+
+	; Create and count a word-pair, and the distance.
+	(define (count-one-pair left-seq right-seq)
+		(define pare (ListLink (gar left-seq) (gar right-seq)))
+		(define dist (- (get-no right-seq) (get-no left-seq)))
+
+		(count-one-atom (EvaluationLink pair-pred pare))
+		(count-one-atom (ExecutionLink pair-dist pare (NumberNode dist))))
+
+	; Create pairs from `first`, and each word in the list in `rest`,
+	; and increment counts on these pairs.
+	(define (count-pairs first rest)
+		(if (not (null? rest))
+			(begin
+				(count-one-pair first (car rest))
+				(count-pairs first (cdr rest)))))
+
+	; Iterate over all of the words in the word-list, making pairs.
+	(define (make-pairs word-list)
+		(if (not (null? word-list))
+			(begin
+				(count-pairs (car word-list) (cdr word-list))
+				(make-pairs (cdr word-list)))))
+
+	; If this function throws, then it will be here, so all counting
+	; will be skipped, if any one word fails.
+	(define word-seq (make-word-sequence PARSE))
+
+	; What the heck. Go ahead and count these, too.
+	(for-each count-one-atom word-seq)
+
+	; Count the pairs, too.
+	(make-pairs word-seq)
+)
+
+(define (update-pair-counts SENT)
+	; In most cases, all parses return the same words in the same order.
+	; Thus, counting only requires us to look at only one parse.
+	(update-pair-counts-once (car (sentence-get-parses SENT)))
+)
+
+; ---------------------------------------------------------------------
+; for-each-lg-link -- loop over all link-grammar links in a sentence.
+;
+; Each link-grammar link is of the general form:
 ;
 ;   EvaluationLink
-;      LinkGrammarRelationshipNode "ANY"
+;      LinkGrammarRelationshipNode "FOO"
 ;      ListLink
 ;         WordInstanceNode "word@uuid"
 ;         WordInstanceNode "bird@uuid"
 ;
-; create this:
+; The PROC is a function to be invoked on each of these.
+;
+(define (for-each-lg-link PROC SENT)
+	(for-each
+		(lambda (parse)
+			(for-each PROC (parse-get-links parse)))
+		(sentence-get-parses SENT))
+)
+
+; ---------------------------------------------------------------------
+; make-word-link -- create a word-link from a word-instance link
+;
+; Get the LG word-link relation corresponding to a word-instance LG link
+; relation. An LG link is simply a single link-grammar link between two
+; words (or two word-instances, when working with a single sentence).
+;
+; This function simply strips off the unique word-ids from each word.
+; For example, given this as input:
 ;
 ;   EvaluationLink
-;      LinkGrammarRelationshipNode "ANY"
+;      LinkGrammarRelationshipNode "FOO"
 ;      ListLink
-;         WordNode "word"
-;         WordNode "bird"
+;         WordInstanceNode "word@uuid"
+;         WordInstanceNode "bird@uuid"
 ;
-(define (make-lg-rel lg-rel-inst)
+; this creates and returns this:
+;
+;   EvaluationLink
+;      LinkGrammarRelationshipNode "FOO" -- gar
+;      ListLink                          -- gdr
+;         WordNode "word"                -- gadr
+;         WordNode "bird"                -- gddr
+;
+(define (make-word-link lg-rel-inst)
 	(let (
 			(rel-node (gar lg-rel-inst))
-			(w-left  (car (word-inst-get-word (gadr lg-rel-inst))))
-			(w-right (car (word-inst-get-word (gddr lg-rel-inst))))
+			(w-left  (word-inst-get-word (gadr lg-rel-inst)))
+			(w-right (word-inst-get-word (gddr lg-rel-inst)))
 		)
 		(EvaluationLink rel-node (ListLink w-left w-right))
 	)
 )
 
 ; ---------------------------------------------------------------------
-; update-link-counts -- Increment word and link counts
+; make-word-cset -- create a word-cset from a word-instance cset
 ;
-; This routine updates word counts and link counts in the database.
-; Word and link counts are needed to compute mutual information (mutual
-; entropy), which is required for maximum-entropy-style learning.  The
-; algo implemented here is trite: fetch words and relations from SQL;
-; increment the attached CountTruthValue; save back to SQL.
+; A cset is a link-grammar connector set. This takes, as input
+; a cset that is attached to a word instance, and creates the
+; corresponding cset attached to a word. Basically, it just strips
+; off the UUID from the word-instance.
+;
+; For example, given this input:
+;
+;   LgWordCset
+;      WordInstanceNode "foobar@1233456"
+;      LgAnd ...
+;
+; this creates and returns this:
+;
+;   LgWordCset
+;      WordNode "foobar"  -- gar
+;      LgAnd ...          -- gdr
+;
+(define (make-word-cset CSET-INST)
+	(LgWordCset
+		(word-inst-get-word (gar CSET-INST))
+		(gdr CSET-INST))
+)
 
-(define (update-link-counts sents)
-	(define (count-one-link link)
-		(define (incr-one atom)
-			; If the atom doesn't yet have a count TV attached to it,
-			; then its probably a freshly created atom. Go fetch it
-			; from SQL. Otherwise, assume that what we've got here,
-			; in the atomspace, is the current copy.  This works if
-			; there is only once cogserver updating the counts.
-			(if (not (cog-ctv? (cog-tv atom)))
-				(fetch-atom atom)) ; get from SQL
-			(cog-inc-count! atom 1) ; increment
-		)
-		(let ((rel (make-lg-rel link)))
-			(begin
-				; Evalu -- rel
-				;   Pred -- gar
-				;   List -- gdr
-				;     Left  -- gadr
-				;     Right -- gddr
-				(incr-one rel) ; increment relation (the evaluation link)
-				(incr-one (gar rel))  ; increment link type
-				(incr-one (gadr rel)) ; increment left word
-				(incr-one (gddr rel)) ; increment right work.
-				(store-atom rel) ; save (recursively) to SQL
-			)
-		)
-	)
+; ---------------------------------------------------------------------
+; update-link-counts -- Increment link counts
+;
+; This routine updates link counts in the database. The algo is trite:
+; fetch the LG link from SQL, increment the attached CountTruthValue,
+; and save back to SQL.
 
-	; Under weird circumstances, the above can fail. Specifically,
-	; sometimes RelEx doesn't generate the needed (ReferenceLink
-	; connecting (WordInstanceNode "(@4bf5e341-c6b") to the desired
-	; (WordNode "(") ... Either that, some paren-counter somewhere
-	; gets confused. Beats me why. We should fix this. In the meanhile,
-	; we hack around this here by catching.  What happens is that the
-	; call (word-inst-get-word ...) returns nothing, so the car in
-	; make-lg-rel throws 'wrong-type-arg and everything gets borken.
+(define (update-link-counts single-sent)
+
+	; Due to a RelEx bug, `make-word-link` can throw an exception.  See
+	; the documentation for `word-inst-get-word` for details. Look for
+	; this exception, and avoid it, if possible.
 	(define (try-count-one-link link)
 		(catch 'wrong-type-arg
-			(lambda () (count-one-link link))
-			(lambda (key . args) #f)
-		)
-	)
-	(map-lg-links try-count-one-link sents)
+			(lambda () (count-one-atom (make-word-link link)))
+			(lambda (key . args) #f)))
+
+	(for-each-lg-link try-count-one-link (list single-sent))
+)
+
+; ---------------------------------------------------------------------
+; update-disjunct-counts -- Increment disjunct counts
+;
+; Just like the above, but for the disjuncts.
+
+(define (update-disjunct-counts SENT)
+
+	(define (try-count-one-cset CSET)
+		(catch 'wrong-type-arg
+			(lambda () (count-one-atom (make-word-cset CSET)))
+			(lambda (key . args) #f)))
+
+	(for-each
+		(lambda (parse)
+			(for-each (lambda (wi) (try-count-one-cset (word-inst-get-cset wi)))
+				(parse-get-words parse)))
+		(sentence-get-parses SENT))
 )
 
 ; ---------------------------------------------------------------------
@@ -162,13 +368,26 @@
  it parsed, and then updates the counts for the observed words and word
  pairs.
 "
+	; try-catch wrapper around the counters. Due to a buggy RelEx
+	; (see documentation for `word-inst-get-word`), the function
+	; `update-pair-counts` might throw.  If it does throw, then
+	; avoid doing any counting at all for this sentence.
+	(define (update-counts sent)
+		(catch 'wrong-type-arg
+			(lambda () (begin
+				(update-pair-counts sent)
+				(update-word-counts sent)
+				(update-link-counts sent)
+				(update-disjunct-counts sent)))
+			(lambda (key . args) #f)))
+
 	; Loop -- process any that we find. This will typically race
 	; against other threads, but I think that's OK.
 	(define (process-sents)
 		(let ((sent (get-one-new-sentence)))
 			(if (null? sent) '()
 				(begin
-					(update-link-counts (list sent))
+					(update-counts sent)
 					(delete-sentence sent)
 					(monitor-rate '())
 					(process-sents)))))
@@ -180,25 +399,25 @@
 
 ; ---------------------------------------------------------------------
 ;
-; Some generic hand-testing code for this stuff:
+; Some notes for hand-testing the code up above:
+;
+; (sql-open "postgres:///en_pairs?user=linas")
+; (use-relex-server "127.0.0.1" 4445)
 ;
 ; (define (prt x) (display x))
 ;
 ; (relex-parse "this is")
 ; (get-new-parsed-sentences)
 ;
-; (map-lg-links prt (get-new-parsed-sentences))
+; (for-each-lg-link prt (get-new-parsed-sentences))
 ;
-; (map-lg-links (lambda (x) (prt (make-lg-rel x)))
-; 	(get-new-parsed-sentences)
-; )
+; (for-each-lg-link (lambda (x) (prt (make-word-link x)))
+;    (get-new-parsed-sentences))
 ;
-; (map-lg-links (lambda (x) (prt (gddr (make-lg-rel x))))
-; 	(get-new-parsed-sentences)
-; )
+; (for-each-lg-link (lambda (x) (prt (gddr (make-word-link x))))
+;    (get-new-parsed-sentences))
 ;
-; (map-lg-links (lambda (x) (cog-inc-count! (make-lg-rel x) 1))
-; 	(get-new-parsed-sentences)
-; )
+; (for-each-lg-link (lambda (x) (cog-inc-count! (make-word-link x) 1))
+;    (get-new-parsed-sentences))
 ;
 ; (observe-text "abcccccccccc  defffffffffffffffff")

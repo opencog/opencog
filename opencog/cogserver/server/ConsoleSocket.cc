@@ -218,7 +218,7 @@ void ConsoleSocket::OnLine(const std::string& line)
     {
         char msg[256];
         snprintf(msg, 256, "command \"%s\" not found\n", cmdName.c_str());
-        logger().debug(msg);
+        logger().debug("%s", msg);
         Send(msg);
 
         // Try to send "help" command response

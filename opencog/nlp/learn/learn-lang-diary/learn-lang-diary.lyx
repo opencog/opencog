@@ -81,23 +81,77 @@ Linas Vepstas
 \end_layout
 
 \begin_layout Abstract
-Collection of thoughts and notes, pursuant to language learning.
- Organized in mostly chronological order.
+The language-learning effort involves research and software development
+ to implement the ideas described in ArXiv abs/1401.3372
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Goertzel2014"
+
+\end_inset
+
+.
+ This document contains supplementary notes and a loosely-organized semi-chronol
+ogical diary of results.
 \end_layout
 
 \begin_layout Section*
-31 December 2013
+Introduction
 \end_layout
 
 \begin_layout Standard
-Easier said than done.
- Should be 'obvious' but its not.
- Goal: construct a set of linkage rules to model only the observed language,
- using Link Grammar.
- That is, using the graphical structure implied in Link Grammar.
- This, of course, implicitly assumes that Link Grammar provides an adequate
- theory for describing and constraining the syntactical parsing of a natural
- language.
+The language-learning effort involves research and software development
+ to implement the ideas described in in ArXiv abs/1401.3372
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Goertzel2014"
+
+\end_inset
+
+.
+ This document contains supplementary notes and a loosely-organized semi-chronol
+ogical diary of results.
+\end_layout
+
+\begin_layout Standard
+The initial stages of this work require the extraction of word-pair probabilitie
+s from raw text, and the use of these to induce a Link Grammar
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Sleator1991,Sleator1993"
+
+\end_inset
+
+.
+ This extends prior work on MST parsers
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Yuret1998"
+
+\end_inset
+
+, by inducing link types for word-pair relations.
+\end_layout
+
+\begin_layout Standard
+Later stages further extend beyond what is possible with Link Grammar by
+ inducing synonymous words and phrases.
+ The goal here is to unifiy into a consistent framework various techniques
+ for unsupervised semantic discovery that have already been proven in narrower
+ contexts
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Poon2009,Lin1998,Lin2001"
+
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+The first section of this document is a review of various defintions of
+ probabilites that can be obtained from natural langauge text.
+ This is followed by a roughly chronological diary of further observaions
+ and results.
 \end_layout
 
 \begin_layout Subsection*
@@ -134,7 +188,7 @@ target "http://www2.denizyuret.com/pub/yuretphd.pdf"
 \end_layout
 
 \begin_layout Standard
-Possibly the most useful formula is the one in the middle off page 40.
+Possibly the most useful formula is the one in the middle of page 40.
  By the time that we get to it, the terms 
 \begin_inset Quotes eld
 \end_inset
@@ -302,7 +356,7 @@ nal).
 \begin_inset Formula $R(w_{l},w_{r})$
 \end_inset
 
- does do is to capture that 
+ does is to capture that 
 \begin_inset Formula $w_{l}$
 \end_inset
 
@@ -321,12 +375,13 @@ In what follows, the relation
 
  refers to a generic two-word relation, and not necessarily this simplest
  one.
- To regain Yuret's formula, use the simplest relation, described above.
+ To regain Yuret's formula, use the simplest relation, the ordered word-pair
+ relation, given just above.
 \end_layout
 
 \begin_layout Standard
-We are then interested in the conditional probability 
-\begin_inset Formula $P(R(w_{l},w_{r})|w_{l},w_{r})$
+The quantity of interest is the (unconditional) probability 
+\begin_inset Formula $P(R(w_{l},w_{r}),w_{l},w_{r})$
 \end_inset
 
  of observing the two words 
@@ -341,20 +396,76 @@ We are then interested in the conditional probability
 \begin_inset Formula $R=R(w_{l},w_{r})$
 \end_inset
 
-, given that the two individual words were observed in a sentance (in no
- particular order).
- Let 
+.
+ To correctly understand and work with this quantity, some care must be
+ taken with the notation for several related probabilities.
+ First, one has 
 \begin_inset Formula $P(w)$
 \end_inset
 
- be the probability of observing word 
+, the probability of observing the word 
 \begin_inset Formula $w$
 \end_inset
 
- in a sentance (with multiplicity).
- We know from experiece this is a Zipfian distribution; however, this fact
- will not be used in what follows.
- From the definition of conditional probabilities, we get 
+ in the data sample.
+ Next, one has 
+\begin_inset Formula $P(S(w_{1},w_{2}),w_{1},w_{2})$
+\end_inset
+
+, the probability that the two words occur in the same sentence.
+ Again, 
+\begin_inset Formula $S(w_{1},w_{2})$
+\end_inset
+
+ denotes a relation between the two words; it differs from 
+\begin_inset Formula $R(w_{1},w_{2})$
+\end_inset
+
+ in that the word-order does not matter.
+ A third kind of pair relation is the unconditional probability of observing
+ two words, which can be 
+\emph on
+defined
+\emph default
+ as 
+\begin_inset Formula $P(w_{1},w_{2})=P(w_{1})P(w_{2})$
+\end_inset
+
+.
+ In this case, instead of assuming independence of two random variables,
+ we define them to be so.
+ This is possible, because we have a notation for specifying when there
+ is a correlation.
+ That is, if there was some correlation (relation) 
+\begin_inset Formula $C(w_{1},w_{2})$
+\end_inset
+
+ between them, then one should write this explicitly, as 
+\begin_inset Formula $P(C,w_{1},w_{2})=P(C(w_{1},w_{2}),w_{1},w_{2})$
+\end_inset
+
+.
+ The notation here allows the various needed probabilities to be defined
+ without ambiguity.
+ 
+\end_layout
+
+\begin_layout Standard
+Thus, assumptions of independent variables are now replaced by a notational
+ infrastrcture.
+ Note, in particular, that if one uses a frequentist definition for the
+ probabilities (as will be done in what follows), then the probabilities
+ are not independent of the data sample from which they are drawn.
+ Thus, all probabilities here have an implicit dependence on the data sample.
+ This dependency is not explicitly shown.
+ Some care must be taken to use the same data sample throughout.
+ 
+\end_layout
+
+\begin_layout Standard
+The above notation allows the definition of conditional probabilities, in
+ the conventional sense.
+ For example, one has that 
 \begin_inset Formula 
 \[
 P(R,w_{l},w_{r})=P(R|w_{l},w_{r})P(w_{l},w_{r})
@@ -370,161 +481,13 @@ P(R|w_{l},w_{r})=\frac{P(R,w_{l},w_{r})}{P(w_{l},w_{r})}
 
 \end_inset
 
-Here, the relation 
+as the conditional probability of observing the relation 
 \begin_inset Formula $R$
 \end_inset
 
- encompasses several facts: that one word is to the left of the other, and
- that they are connected by a certain link-type, as well as possibly capturing
- other 'ambient' information, perhaps such as other nearby words.
- The expression 
-\begin_inset Formula $P(R,w_{l},w_{r})$
-\end_inset
-
- is the probability of observing both the words 
-\begin_inset Formula $w_{l}$
-\end_inset
-
- and 
-\begin_inset Formula $w_{r}$
-\end_inset
-
- in a sentance, as well as observing that they are related as 
-\begin_inset Formula $R(w_{l},w_{r})$
-\end_inset
-
- in the sentence.
- Clearly, 
-\begin_inset Formula $R$
-\end_inset
-
- cannot occur if 
-\begin_inset Formula $w_{l}$
-\end_inset
-
- and 
-\begin_inset Formula $w_{r}$
-\end_inset
-
- don't, but the converse is not true: the words can appear in a sentence,
- but fail to be related by 
-\begin_inset Formula $R$
-\end_inset
-
-.
- For this reason, it is 
-\begin_inset Quotes eld
-\end_inset
-
-safe
-\begin_inset Quotes erd
-\end_inset
-
- to use the notational short-hand 
-\begin_inset Formula $P(R)=P(R(w_{l},w_{r}),w_{l},w_{r})$
-\end_inset
-
-; nothing is thrown out, because 
-\begin_inset Formula $R$
-\end_inset
-
- already depends on 
-\begin_inset Formula $w_{l}$
-\end_inset
-
- and 
-\begin_inset Formula $w_{r}$
-\end_inset
-
-.
- 
-\end_layout
-
-\begin_layout Standard
-The probability 
-\begin_inset Formula $P(w_{l},w_{r})$
-\end_inset
-
- is interesting, because it's definition is not enirely unambigous: we can
- define it as the probability of observing both words in the same sentence,
- or we can define it as the probability of observing both words, as if they
- were independent of one-another.
- Clearly, the occurances of pairs of words are correlated; suggesting the
- firt defintion is correct.
- The second one seems to be a dumb, brute-force assumption of independence,
- i.e.
- that 
-\begin_inset Formula $P(w_{l},w_{r})=P(w_{l})P(w_{r})$
-\end_inset
-
-.
-\end_layout
-
-\begin_layout Standard
-What should be done? This is a bit confusing, and is worth thinking about.
- To observe two words in the same sentence, we could say that they obey
- the relationship 
-\begin_inset Formula $S(w_{l},w_{r})$
-\end_inset
-
- that captures thier correlation to one-another.
- This leads one to ponder the probability 
-\begin_inset Formula $P(S(w_{l},w_{r}),w_{l},w_{r})$
-\end_inset
-
-.
- But this is not what we want, in the end; we are interested in 
-\begin_inset Formula $R$
-\end_inset
-
- and not 
-\begin_inset Formula $S$
-\end_inset
-
-.
- The relationship 
-\begin_inset Formula $R$
-\end_inset
-
- includes 
-\begin_inset Formula $S$
-\end_inset
-
- implicitly: two words can only be related by 
-\begin_inset Formula $R$
-\end_inset
-
- only if they are already related by 
-\begin_inset Formula $S$
-\end_inset
-
-.
- Thus, the only appropriate definition for 
-\begin_inset Formula $P(w_{l},w_{r})$
-\end_inset
-
- that we can use is that the two words really are un-related, un-correlated,
- independent.
- That is, we must define 
-\begin_inset Formula $P(w_{l},w_{r})=P(w_{l})P(w_{r})$
-\end_inset
-
-.
- This is important: we don't 
-\begin_inset Quotes eld
-\end_inset
-
-assume
-\begin_inset Quotes erd
-\end_inset
-
- independence, we define it.
- The goal is to capture the dependence as a part of the relation 
-\begin_inset Formula $R$
-\end_inset
-
-.
- Thus, we conclude with the conditional probability:
+, given that it's component parts are observed.
+ From the earlier definitions, the denominator factors, and so we conclude
+ that the correct expression for the conditional probability is:
 \begin_inset Formula 
 \begin{equation}
 P(R|w_{l},w_{r})=\frac{P(R,w_{l},w_{r})}{P(w_{l})P(w_{r})}\label{eq:cond-pair}
@@ -537,18 +500,51 @@ This is the probability of observing the relationship
 \end_inset
 
  given that the individual parts of the relationship have been observed.
-\end_layout
+ The relation 
+\begin_inset Formula $R$
+\end_inset
 
-\begin_layout Subsubsection*
-Frequentism
+ includes all correlations between the two words: thier ordering as well
+ as thier co-occurance in a sentence.
+ 
 \end_layout
 
 \begin_layout Standard
-In order for the above to be manipulable in practice, we need to provide
- a definition for the probabilities, and, for this, the definition can only
- be frequentist.
- That is, the defintion is to be obtained from empircal data; from counting
- frequencies as they occur in nature.
+Take care, however: 
+\begin_inset Formula $P(R|w_{l},w_{r})$
+\end_inset
+
+ is NOT the probability of seeing 
+\begin_inset Formula $R$
+\end_inset
+
+, given that 
+\begin_inset Formula $w_{l}$
+\end_inset
+
+ and 
+\begin_inset Formula $w_{r}$
+\end_inset
+
+ occur in the same sentence.
+ This would instead by given by 
+\begin_inset Formula $P(R,w_{l},w_{r})/P(S,w_{l},w_{r})$
+\end_inset
+
+.
+ This is an entirely different.
+\end_layout
+
+\begin_layout Subsubsection*
+Frequentism - Counting words and pairs
+\end_layout
+
+\begin_layout Standard
+In order to be usable, a computable definition for the probabilities must
+ be given.
+ For this, the definition can only be frequentist.
+ That is, the probabilities are to be obtained from empircal data; from
+ counting frequencies as they occur in data samples taken from nature.
  The frequency 
 \begin_inset Formula $P(w)$
 \end_inset
@@ -586,91 +582,572 @@ N(*)=\sum_{w}N(w)
 
 \end_inset
 
+How to count words is not entirely obvious, so even these defintions need
+ care.
+ There are several ways in which one can count words.
+ One way is to simply count how many times a word occurs in the block of
+ sample text.
+ Another way is to count how many times a word occurs in parses of the sample
+ text.
+ These are not the same! For example, if a parse connects words by edges
+ (by dependency-grammar relations), then one can count each word once, for
+ each time that it occurs at the end of an edge.
+ In this counting, the word-count is exactly double the word-pair count.
+ A word is then counted multiple times, if it participates in multiple edges.
+ If the sample text is parsed multiple times, then addtional counts can
+ result that way.
+ To maintain consistency with the defintions given in the previous section,
+ 
+\begin_inset Formula $N(w)$
+\end_inset
 
+ is defined to be the number of times that the word 
+\begin_inset Formula $w$
+\end_inset
+
+ occurs in the data sample, and independent of any other relations that
+ 
+\begin_inset Formula $w$
+\end_inset
+
+ might be engaged in.
+ For now, it is assumed that the segmentation of the text sample into words
+ is unambiguous.
+ 
 \end_layout
 
 \begin_layout Standard
-The conditional probability for two words in a relation is similarly defined:
-\begin_inset Formula 
-\[
-P(R|w_{l},w_{r})=\frac{N(R,w_{l},w_{r})}{N(w_{l})N(w_{r})}
-\]
-
+Let 
+\begin_inset Formula $F(S(w),w)$
 \end_inset
 
-This follows from the form of eqn 
-\begin_inset CommandInset ref
-LatexCommand ref
-reference "eq:cond-pair"
+ be the number of times (frequency) of observing word 
+\begin_inset Formula $w$
+\end_inset
 
+ in any sentence 
+\begin_inset Formula $S$
 \end_inset
 
 .
- It is worth unpacking the unconditional probability.
- It is given by
-\begin_inset Formula 
-\begin{align}
-P(R,w_{l},w_{r})= & P(R|w_{l},w_{r})P(w_{l})P(w_{r})\nonumber \\
-= & \frac{N(R,w_{l},w_{r})}{N(w_{l})N(w_{r})}\,\frac{N(w_{l})}{N(*)}\,\frac{N(w_{r})}{N(*)}\label{eq:uncond-pair}\\
-= & \frac{N(R,w_{l},w_{r})}{N(*)N(*)}\nonumber 
-\end{align}
-
-\end_inset
-
-That is, the probability is just the number of times the relationship was
- observed, divided by the total number of times two words are observed.
-\end_layout
-
-\begin_layout Standard
-Another interesting quantity is the probability of seeing a pair-wise relationsh
-ip, in general, independent of the actual words in the pair.
- This may seem somewhat pointless at first, but becomes interesting when
- a variety of different relations considered.
- This probability is given by 
+ This can be computed as
 \begin_inset Formula 
 \[
-P(R(*,*))=\sum_{w_{l},w_{r}}\frac{N(R,w_{l},w_{r})}{N(*)N(*)}=\frac{N(R(*,*))}{N(*)N(*)}
+F(S,w)=\frac{N(w)}{NS}
 \]
 
 \end_inset
 
-XXX Report on values of the eabove for English.
-\end_layout
+where 
+\begin_inset Formula $N(w)$
+\end_inset
 
-\begin_layout Subsubsection*
-Yuret Notation
+ is the number of times a word 
+\begin_inset Formula $w$
+\end_inset
+
+ was observed in a data sample, and 
+\begin_inset Formula $NS$
+\end_inset
+
+ is the number of sentences in that same sample.
+ This counts with 
+\begin_inset Quotes eld
+\end_inset
+
+multiplicity
+\begin_inset Quotes erd
+\end_inset
+
+, in that 
+\begin_inset Formula $w$
+\end_inset
+
+ can appear in a sentence more than once.
+ That is, 
+\begin_inset Formula $F$
+\end_inset
+
+ is not a probability, rather, it is an expectation value of the number
+ of times that a word is observed.
+ This can be made explicit, by writing
 \end_layout
 
 \begin_layout Standard
-We need to harmonize here a little bit with the Deniz Yuret concepts and
- notation.
+\begin_inset Formula 
+\[
+F(S,w)=\frac{N(w)}{N(*)}\,\frac{N(*)}{NS}=P(w)L(S)
+\]
+
+\end_inset
+
+with 
+\begin_inset Formula $L(S)=F(S,*)$
+\end_inset
+
+ being the average sentence length (the expectation value of the number
+ of words in a sentence).
+ 
+\end_layout
+
+\begin_layout Standard
+Three different word-pair relationships are interesting.
+ First, define the relation 
+\begin_inset Formula $S(w_{1},w_{2})$
+\end_inset
+
+ as being the relation that both words 
+\begin_inset Formula $w_{1}$
+\end_inset
+
+ and 
+\begin_inset Formula $w_{2}$
+\end_inset
+
+ occur in the same sentence, but in arbitrary order.
+ It is symmetric: 
+\begin_inset Formula $S(w_{1},w_{2})=S(w_{2},w_{1})$
+\end_inset
+
+.
+ Define 
+\begin_inset Formula $A(w_{l},w_{r})$
+\end_inset
+
+ as being the relation that both words 
+\begin_inset Formula $w_{l}$
+\end_inset
+
+ and 
+\begin_inset Formula $w_{r}$
+\end_inset
+
+ occur in the same sentence, and that 
+\begin_inset Formula $w_{l}$
+\end_inset
+
+ is to the left of 
+\begin_inset Formula $w_{r}.$
+\end_inset
+
+ By this definition, the counts for the two are related: one has that 
+\begin_inset Formula 
+\[
+N(S,w_{1},w_{2})=N(A,w_{1},w_{2})+N(A,w_{2},w_{1})
+\]
+
+\end_inset
+
+This is the symmetrized count.
+\end_layout
+
+\begin_layout Standard
+Neither of 
+\begin_inset Formula $S$
+\end_inset
+
+ or 
+\begin_inset Formula $A$
+\end_inset
+
+ is yet the relation 
+\begin_inset Formula $R(w_{l},w_{r})$
+\end_inset
+
+ mentioned above, which is defined as being the relation that both words
+ 
+\begin_inset Formula $w_{l}$
+\end_inset
+
+ and 
+\begin_inset Formula $w_{r}$
+\end_inset
+
+ occur in the same sentence, that 
+\begin_inset Formula $w_{l}$
+\end_inset
+
+ is to the left of 
+\begin_inset Formula $w_{r}$
+\end_inset
+
+, and, most importantly, that there is a link-grammar link (of type 
+\begin_inset Quotes eld
+\end_inset
+
+R
+\begin_inset Quotes erd
+\end_inset
+
+) connecting the two.
+ Observe that although 
+\begin_inset Formula $A$
+\end_inset
+
+ can be deduced from 
+\begin_inset Formula $S$
+\end_inset
+
+, there is no simple or obvious relation between 
+\begin_inset Formula $S$
+\end_inset
+
+ and 
+\begin_inset Formula $R$
+\end_inset
+
+; these are essentially independent relations.
+\end_layout
+
+\begin_layout Standard
+The way that the statistics are collected for 
+\begin_inset Formula $A$
+\end_inset
+
+ and for 
+\begin_inset Formula $R$
+\end_inset
+
+ are different.
+ To count the 
+\begin_inset Formula $A$
+\end_inset
+
+-type relations, one tokenizes a sentence into words, and then, counts every
+ possible word-pair in the sentence.
+ Effectively, one draws a clique of edges between the words, and then counts
+ each edge.
+ The statistics for 
+\begin_inset Formula $R$
+\end_inset
+
+ are collected by parsing the sentence into a random planar tree, and then
+ counting the edges in the tree.
+ The result for this counting is NOT the same as that for type-
+\begin_inset Formula $A$
+\end_inset
+
+ edges.
+ The reason for this is demonstrated in depth, in the section 
+\begin_inset CommandInset ref
+LatexCommand nameref
+reference "sec:Edge-counting"
+
+\end_inset
+
+ 
+\begin_inset CommandInset ref
+LatexCommand vpageref
+reference "sec:Edge-counting"
+
+\end_inset
+
+, below.
+\end_layout
+
+\begin_layout Standard
+Initially, there is only one link relation 
+\begin_inset Quotes eld
+\end_inset
+
+R
+\begin_inset Quotes erd
+\end_inset
+
+ between two words: this is the 
+\begin_inset Quotes eld
+\end_inset
+
+ANY
+\begin_inset Quotes erd
+\end_inset
+
+ link-type.
+ However, in general, 
+\begin_inset Quotes eld
+\end_inset
+
+R
+\begin_inset Quotes erd
+\end_inset
+
+ can be other kinds of link-types.
+ Note that 
+\begin_inset Quotes eld
+\end_inset
+
+R
+\begin_inset Quotes erd
+\end_inset
+
+ can also have a head-tail dependency order: either 
+\begin_inset Formula $w_{l}$
+\end_inset
+
+ or 
+\begin_inset Formula $w_{r}$
+\end_inset
+
+ can be the head-word of a directional link.
+ Thus, there are three different symmetrizations that can be obtained from
+ 
+\begin_inset Quotes eld
+\end_inset
+
+R
+\begin_inset Quotes erd
+\end_inset
+
+: by failing to make a left-right distinction, by failing to make a head-tail
+ distinction, and failing to do either.
+\end_layout
+
+\begin_layout Standard
+The definition for the probability of observing a relation can be taken
+ to be 
+\begin_inset Formula 
+\begin{equation}
+P(R,w_{l},w_{r})=\frac{N(R,w_{l},w_{r})}{N(R,*,*)}\label{eq:prob-relation}
+\end{equation}
+
+\end_inset
+
+where
+\begin_inset Formula 
+\[
+N(R,*,*)=\sum_{w_{l},w_{r}}N(R,w_{l},w_{r})
+\]
+
+\end_inset
+
+This can be roughly understood as being the conditional probability of observing
+ the relation 
+\begin_inset Formula $R(w_{l},w_{r})$
+\end_inset
+
+ between two specific words, given that the relation 
+\begin_inset Formula $R$
+\end_inset
+
+ between any two words was seen.
+\end_layout
+
+\begin_layout Standard
+Is it possible to define the unconditional probability 
+\begin_inset Formula $P(R,*,*)$
+\end_inset
+
+ of seeing the relationship? The path to the answer is not entirely straight-for
+ward.
+ First consdier the probability 
+\begin_inset Formula $P(S,w_{1},w_{2})$
+\end_inset
+
+ of seeing two words in the same sentence.
+ This probability is defined just as in eqn 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:prob-relation"
+
+\end_inset
+
+; that is, 
+\begin_inset Formula $P(S,w_{1},w_{2})=N(S,w_{1},w_{2})/N(S,*,*)$
+\end_inset
+
+.
+ From this, one can define the frequency of seeing a relation in a sentence,
+ as
+\begin_inset Formula 
+\[
+F(R|S,w_{1},w_{2})=\frac{P(R,w_{1},w_{2})}{P(S,w_{1},w_{2})}
+\]
+
+\end_inset
+
+This gives the expectation value of seeing the relation 
+\begin_inset Formula $R$
+\end_inset
+
+ in a sentence, given that the two words are already known to be in the
+ sentence.
+ That this is an expectation value should be clear, as the relation might
+ appear multiple times in one sentence (e.g.
+ if one of the words is repeated).
+  The sum
+\begin_inset Formula 
+\[
+F(R|S,*,*)=\sum_{w_{l},w_{r}}F(R|S,w_{l},w_{r})
+\]
+
+\end_inset
+
+then counts the average number of relations per sentence.
+ For the any-type ordered-pair relation, clearly one must have that there
+ are at least as many relations as there are words in the sentence, minus
+ one, since each word must appear in at least one (distinct) relation.
+ That is, 
+\begin_inset Formula $F(S,*)-1\le F(R|S,*,*)$
+\end_inset
+
+ with 
+\begin_inset Formula $F(S,*)$
+\end_inset
+
+ the expected length of a sentence.
+ 
+\end_layout
+
+\begin_layout Standard
+Similarly, one can consider the ratio
+\begin_inset Formula 
+\[
+F(S,w_{1},w_{2})=\frac{P(S,w_{1},w_{2})}{P(w_{1})P(w_{2})}
+\]
+
+\end_inset
+
+which captures the frequency at which two words are seen in the same sentence.
+ The summation 
+\begin_inset Formula $F(S,*,*)$
+\end_inset
+
+ then counts how many pairs are seen per sentence.
+ Assuming that the counting was performed with a uniform distribution, this
+ should then equal the number of edges in a clique.
+ That is, for a sentence of length 
+\begin_inset Formula $m$
+\end_inset
+
+, there should be 
+\begin_inset Formula $m(m-1)/2$
+\end_inset
+
+ word-pairs (edges) counted for that sentence.
+ This should hold approximately, on average, so that 
+\begin_inset Formula $F(S,*,*)\approx F(S,*)(F(S,*)-1)/2$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+From the development above, it should be clear that it is not really possible
+ to define a quantity 
+\begin_inset Formula $P(R,*,*)$
+\end_inset
+
+ that is the 
+\begin_inset Quotes eld
+\end_inset
+
+probability of seeing a relation
+\begin_inset Quotes erd
+\end_inset
+
+.
+ We can count the number 
+\begin_inset Formula $N(R,*,*)$
+\end_inset
+
+ of times the relation occurs in a data sample.
+ We can count the average number of times the relation is seen in a sentence.
+ However, as long as the relation occurs at least once in the data sample,
+ one would have to say that the 
+\begin_inset Quotes eld
+\end_inset
+
+probability of seeing the relation in the data sample
+\begin_inset Quotes erd
+\end_inset
+
+ is one.
+ The problem is one of normalization: there is no universe, of which 
+\begin_inset Formula $N(R,*,*)$
+\end_inset
+
+ is a fractional measure.
+\end_layout
+
+\begin_layout Standard
+That said, once can still consider an interesting ratio:
+\begin_inset Formula 
+\[
+F(R,*,*)=\sum_{w_{l},w_{r}}F(R,w_{l},w_{r})=\sum_{w_{l},w_{r}}\frac{P(R,w_{l},w_{r})}{P(w_{l})P(w_{r})}
+\]
+
+\end_inset
+
+This can be interpreted as a kind-of centrality.
+ So, for example, for the any-pair relation, every word in the data sample
+ must participate in at least one such pair-relation, and thus, we expect
+ that 
+\begin_inset Formula $F(R,*,*)\approx1$
+\end_inset
+
+.
+ The precise value is related to the tree-parse that is being used to generate
+ the any-relation.
+ If the (random) parse-tree is acyclic, then the number of edges is comparable
+ to the number of words.
+ If the parse-tree contains cycles, then there may be more relations than
+ there are words.
+\end_layout
+
+\begin_layout Subsubsection*
+Yuret's Mutual Information
+\end_layout
+
+\begin_layout Standard
+Deniz Yuret introduces the concept of 
+\begin_inset Quotes eld
+\end_inset
+
+lexical attraction
+\begin_inset Quotes erd
+\end_inset
+
+.
+ It is reviewed breifly, here.
  He defines a probability 
 \begin_inset Formula $\mathcal{P}(w_{l},w_{r})$
 \end_inset
 
- of seeing the ordered pair; that is, the relation 
-\begin_inset Formula $R$
+ of seeing an ordered pair; as compared to the above, the relation is implicit.
+ To make it explicit, one should write: 
+\begin_inset Formula 
+\begin{equation}
+\mathcal{P}(w_{l},w_{r})=P(A(w_{l},w_{r}),w_{l},w_{r})\label{eq:Yuret-prob}
+\end{equation}
+
 \end_inset
 
- is implicit.
- To make it explicit, we should write: 
-\begin_inset Formula $\mathcal{P}(w_{l},w_{r})=P(R(w_{l},w_{r})|R(*,*))$
-\end_inset
-
- to indicate the relation explicitly, and to note that the order of the
- positions in the relation matter.
- The right-hand side is the conditional probability of seeing a given word
- pair, conditioned on seeing any word pair.
+which indicates the relation explicitly, as well as noting that the order
+ of the positions in the relation matter.
  To avoid confusion, the cursive 
 \begin_inset Formula $\mathcal{P}$
 \end_inset
 
- is used instead of the roman 
+ is used for the Yuret notation, instead of the roman 
 \begin_inset Formula $P$
 \end_inset
 
-.
- Yuret also uses the notation 
+ which is reserved for the defintions above.
+\end_layout
+
+\begin_layout Standard
+The letter 
+\begin_inset Formula $A$
+\end_inset
+
+ used here reminds us that in Yuret's work, the pair-counting method used
+ is the clique-edge-counting mechanism, described above, rather than the
+ random-planar-tree relation.
+ One expects the two to be similar, but not the same.
+\end_layout
+
+\begin_layout Standard
+Yuret also uses the notation 
 \begin_inset Formula $\mathcal{P}(w_{l},*)$
 \end_inset
 
@@ -704,105 +1181,14 @@ It is tempting to conflate
 \end_inset
 
 .
- This is also not the case! This comes from the fact that the frequentist
- definitions of the two are incompatible: the denominators are not the same.
- Viz, 
-\begin_inset Formula 
-\[
-\mathcal{P}(w_{l},w_{r})=\frac{N(w_{l},w_{r})}{N(*,*)}
-\]
-
-\end_inset
-
- while 
-\begin_inset Formula 
-\[
-P(w)=\frac{N(w)}{N(*)}
-\]
-
-\end_inset
-
-so that the former is normalized by the number of times 
-\begin_inset Formula $N(*,*)$
-\end_inset
-
- the pairs have been observed, while the later is normalized by the number
- of times that singletons have been observed.
- The incompatible normalizations can be understood as conditional probabilities:
-\begin_inset Formula 
-\[
-\mathcal{P}(w_{l},w_{r})=P(R(w_{l},w_{r})|R(*,*))=\frac{P(R(w_{l},w_{r}))}{P(R(*,*))}
-\]
-
-\end_inset
-
-That is, the Yuret probability of seeing a given word pair is actually the
- conditional probability of seeing that pair, conditioned on seeing 
-\emph on
-any
-\emph default
- word pair.
- The numerator of this expression is given by eqn 
-\begin_inset CommandInset ref
-LatexCommand ref
-reference "eq:uncond-pair"
-
-\end_inset
-
-, that is, 
-\begin_inset Formula $P(R(w_{l},w_{r}))=P(R(w_{l},w_{r}),w_{l},w_{r})$
-\end_inset
-
-, while the denominator is the wild-card sum:
-\begin_inset Formula 
-\[
-P(R(*,*))=\frac{N(R(*,*))}{N(*)N(*)}
-\]
-
-\end_inset
-
-which can be viewed as a conditional probability:
-\begin_inset Formula 
-\[
-\mathcal{P}(w_{l},*)=\frac{P(R(w_{l},*))}{P(R(*,*))}=\frac{P(R(w_{l},*)|w_{l})}{P(R(*,*))}P(w_{l})\le P(w_{l})
-\]
-
-\end_inset
-
-In practice, then, for word-pairs, one has that 
-\begin_inset Formula $P(R|w_{l})/P(R)$
-\end_inset
-
- is almost equal to 1, but not quite.
- That is, 
-\begin_inset Formula $P(R|w_{l})\approx P(R)$
-\end_inset
-
-.
- This can be confirmed by actual measurements for English, and should hold
- true for most languages.
- XXX TODO Report on this (double-check) XXX.
+ This is also not the case! A word might occur more frequently as the left
+ side of a pair, than it does all by itself in the sample text.
+ This follows from the frequentist definitions; the denominators for the
+ two probabilities are not compatible; they do not range over the same universe.
 \end_layout
 
 \begin_layout Standard
-Thus, Yuret's notation can be expressed either in terms of conditional probabili
-tes, as 
-\begin_inset Formula 
-\[
-\frac{\mathcal{P}(w_{l},w_{r})}{\mathcal{P}(w_{l},*)\mathcal{P}(*,w_{r})}=\frac{P(R(w_{l},w_{r})|w_{l},w_{r})\; P(R(*,*))}{P(R(w_{l},*)|w_{l})\ P(R(*,w_{r})|w_{r})}
-\]
-
-\end_inset
-
-or in terms of the unconditional probabilities, as 
-\begin_inset Formula 
-\begin{equation}
-\frac{\mathcal{P}(w_{l},w_{r})}{\mathcal{P}(w_{l},*)\mathcal{P}(*,w_{r})}=\frac{P(R(w_{l},w_{r}),w_{l},w_{r})\; P(R(*,*))}{P(R(w_{l},*),w_{l})\ P(R(*,w_{r}),w_{r})}\label{eq:basic pair}
-\end{equation}
-
-\end_inset
-
-The left hand side above is used by Yuret to define the 
+Yuret defines the 
 \begin_inset Quotes eld
 \end_inset
 
@@ -810,7 +1196,7 @@ lexical attraction
 \begin_inset Quotes erd
 \end_inset
 
-, as 
+ as 
 \begin_inset Formula 
 \begin{equation}
 \mbox{MI}(w_{l},w_{r})=\log_{2}\,\frac{\mathcal{P}(w_{l},w_{r})}{\mathcal{P}(w_{l},*)\mathcal{P}(*,w_{r})}\label{eq:Yuret's MI}
@@ -831,7 +1217,7 @@ Northern Ireland
 \end_inset
 
  is roughly comparable to 
-\begin_inset Formula $\mathcal{P}(w,*)\approx\mathcal{P}(*,w)\approx P(w)$
+\begin_inset Formula $\mathcal{P}(w,*)\approx\mathcal{P}(*,w)$
 \end_inset
 
 .
@@ -870,143 +1256,12 @@ reference "eq:Yuret's MI"
 
 \end_inset
 
- is such that word that co-occur have a large positive value.
+ is such that words that co-occur have a large positive value.
  In practice, the distribution of the MI for word-pairs runs from about
  -15 to about +35, and, when ranked accoring to MI, the probabilites form
  a rounded mountain-peak, two-sided, each side being linear (Zipfian) with
  the peak at about MI=4 or 6.
  (See my other notes for a graph.)
-\end_layout
-
-\begin_layout Standard
-Observationally, we have that 
-\begin_inset Formula $P(R(w_{l},*)|w_{l})\approx P(R(*,w_{r})|w_{r})\approx1$
-\end_inset
-
-, and thus must conclude that 
-\begin_inset Formula $P(R(w_{l},w_{r})|w_{l},w_{r})$
-\end_inset
-
- is 'large'; much larger than (unconditional) word-pair frequencies.
- XXX double check this; the definitions have changed.XXX.
-\end_layout
-
-\begin_layout Standard
-The RHS of eqn 
-\begin_inset CommandInset ref
-LatexCommand eqref
-reference "eq:basic pair"
-
-\end_inset
-
- is 
-\begin_inset Quotes eld
-\end_inset
-
-nicer
-\begin_inset Quotes erd
-\end_inset
-
- than Yuret's definition, in that it is manifestly symmetric in 
-\begin_inset Formula $w_{l}$
-\end_inset
-
- and 
-\begin_inset Formula $w_{r}$
-\end_inset
-
-.
- This symmetry is essential for making contact with the 'standard' definitions
- of MI, which are always provided in a symmetric fashion.
- It also helps make clear the role of the left-right relationship; eqn 
-\begin_inset CommandInset ref
-LatexCommand ref
-reference "eq:Yuret's MI"
-
-\end_inset
-
- is in fact the three-point interaction information
-\begin_inset Formula 
-\[
-I(R;w_{l};w_{r})=MI(w_{l},w_{r})
-\]
-
-\end_inset
-
-that is, the interaction information of three random variables: 
-\begin_inset Formula $w_{l}$
-\end_inset
-
-, 
-\begin_inset Formula $w_{r}$
-\end_inset
-
- and 
-\begin_inset Formula $R=R(w_{l},w_{r})$
-\end_inset
-
-.
- In particular, Yuret's lexical attraction is specifically 
-\emph on
-not
-\emph default
- the mutual information of two random variables; it includes a specific,
- defined relationship between them: that one word is explicitly to the left
- of another, as well as the 
-\begin_inset Quotes eld
-\end_inset
-
-ambient
-\begin_inset Quotes erd
-\end_inset
-
- relation that they occur within the same sentence.
-\end_layout
-
-\begin_layout Subsubsection*
-Update 14 Jan 2014
-\end_layout
-
-\begin_layout Standard
-OK, The LHS of equation 
-\begin_inset CommandInset ref
-LatexCommand eqref
-reference "eq:basic pair"
-
-\end_inset
-
- then demonstrates how to obtain conditional entropies in general.
- Thus, given an 
-\begin_inset Formula $n$
-\end_inset
-
--point relation 
-\begin_inset Formula $R(x_{1},x_{2,}\cdots,x_{n})$
-\end_inset
-
- one computes first the unconditional probability 
-\begin_inset Formula $P(R(x_{1},x_{2,}\cdots,x_{n}))$
-\end_inset
-
-.
- The conditional probability is then obtained as usual:
-\begin_inset Formula 
-\[
-P(R(x_{1},x_{2,}\cdots,x_{n})\,|\, x_{1},x_{2,}\cdots,x_{n})=\frac{P(R(x_{1},x_{2,}\cdots,x_{n}))}{P(x_{1})P(x_{2})\cdots P(x_{n})}
-\]
-
-\end_inset
-
-The entropy is then built recursively by normalizing by the probability
- of wild-card relations:
-\begin_inset Formula 
-\begin{equation}
-MI(R(x_{1},x_{2,}\cdots,x_{n})\,|\, x_{1},x_{2,}\cdots,x_{n}))=\log_{2}\frac{P(R(x_{1},x_{2,}\cdots,x_{n})\,|\, x_{1},x_{2,}\cdots,x_{n}))}{P(R(*,x_{2,}\cdots,x_{n})\,|\, x_{2,}\cdots,x_{n}))\, P(R(x_{1},*,\cdots,x_{n})\,|\, x_{1},x_{3,}\cdots,x_{n}))\cdots}\label{eq:Relation MI}
-\end{equation}
-
-\end_inset
-
-(Right? We're not dividing by multiple *'s here, yes?) 
 \end_layout
 
 \begin_layout Section*
@@ -15928,6 +16183,13 @@ ers13.pdf
 
 \begin_layout Section*
 Edge-counting 27 March 2017
+\begin_inset CommandInset label
+LatexCommand label
+name "sec:Edge-counting"
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -17979,6 +18241,3205 @@ x
 \end_inset
 
 
+\end_layout
+
+\begin_layout Section*
+English Dataset Sample 28 April 2017
+\end_layout
+
+\begin_layout Subsubsection*
+Samples for English
+\end_layout
+
+\begin_layout Standard
+This section reports on data collected for a small sample of English sentences,
+ taken from Wikipedia, late April 2017.
+ 
+\begin_inset Foot
+status open
+
+\begin_layout Plain Layout
+The `en_snapshot` dataset
+\end_layout
+
+\end_inset
+
+.
+ It was collected over the course of a few days, and so should be considered
+ to be a medium-sized sample: larger ones, collected over weeks or months,
+ are possible, as well as smaller samples collected over a few hours.
+ Note that the current atomspace infrastructure does have some serious performan
+ce limitations: the atomspace is designed to be a very general-purpose hypergrap
+h tool, and not a fast statistics-collecting tool.
+\end_layout
+
+\begin_layout Standard
+There were 106696 unique words observed in the dataset
+\begin_inset Foot
+status open
+
+\begin_layout Plain Layout
+Obtained with (fetch-all-words)(length (get-all-words))
+\end_layout
+
+\end_inset
+
+.
+ This number is fairly large, as it includes not only common nouns, but
+ also surnames, geographical location names, and a variety of foreign-language
+ words, as would be observed in typical wikipedia articles.
+ These words were observed for a total of 24417409 times
+\begin_inset Foot
+status open
+
+\begin_layout Plain Layout
+(get-total-atom-count (get-all-words)) which is the same as (total-word-observat
+ions)
+\end_layout
+
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+These were observed in 80613 sentences
+\begin_inset Foot
+status open
+
+\begin_layout Plain Layout
+(get-sentence-count)
+\end_layout
+
+\end_inset
+
+ with 15.88 parses per sentence
+\begin_inset Foot
+status open
+
+\begin_layout Plain Layout
+(/ (get-parse-count) (get-sentence-count))
+\end_layout
+
+\end_inset
+
+.
+ On average, there were 19.07 words per sentence
+\begin_inset Foot
+status open
+
+\begin_layout Plain Layout
+(avg-sentence-length)
+\end_layout
+
+\end_inset
+
+.
+ 
+\end_layout
+
+\begin_layout Standard
+There were 9376710 (about 9M) unique 'clique pairs' observed
+\begin_inset Foot
+status open
+
+\begin_layout Plain Layout
+(fetch-clique-pairs) (length (get-all-clique-pairs))
+\end_layout
+
+\end_inset
+
+ for a total of XXX observations
+\begin_inset Foot
+status open
+
+\begin_layout Plain Layout
+(get-total-atom-count (get-all-clique-pairs))
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Graphs.
+ TODO.TODO graphs P(w), P(t,w), etc.
+ show zipf
+\end_layout
+
+\begin_layout Standard
+XXX
+\end_layout
+
+\begin_layout Standard
+Define the relation 
+\begin_inset Formula $E(w_{1},w_{2})$
+\end_inset
+
+ as being the relation that both words 
+\begin_inset Formula $w_{1}$
+\end_inset
+
+ and 
+\begin_inset Formula $w_{2}$
+\end_inset
+
+ occur at the ends of an edge in the same sentence, but in arbitrary order.
+ It is symmetric: 
+\begin_inset Formula $E(w_{1},w_{2})=E(w_{2},w_{1})$
+\end_inset
+
+.
+ By this definition, one has that 
+\begin_inset Formula 
+\[
+N(E,w_{1},w_{2})=N(R,w_{1},w_{2})+N(R,w_{2},w_{1})
+\]
+
+\end_inset
+
+This is the symmetrized count.
+ It is useful to mod out one of the two words, and to consider the sum
+\begin_inset Formula 
+\[
+N(E,w)\equiv N(E,w,*)=\sum_{w_{2}}N(E,w,w_{2})
+\]
+
+\end_inset
+
+This counts how often the word 
+\begin_inset Formula $w$
+\end_inset
+
+ occurs at one end or the other of a word-pair.
+ It is a distinct count from 
+\begin_inset Formula $N(w)$
+\end_inset
+
+, which, by definition, counts only once per word in a sentence.
+\end_layout
+
+\begin_layout Subsubsection*
+Left-right asymmetry
+\end_layout
+
+\begin_layout Standard
+This section explores how often a given word occurs on the left side of
+ a word pair, vs.
+ how often it occurs on the right.
+ This, of course, depends on the word.
+ If sentences and words were randomly generate, one would expect that a
+ given word would occur on the left, or on the right, exactly half the time.
+ That is, in a random world 
+\begin_inset Formula 
+\[
+N(w,*)\approx N(*,w)
+\]
+
+\end_inset
+
+Of course, this cannot hold for a given human language: the exclamation
+ point, question mark and period occur exclusively on the right hand-side
+ of any randomly-generated pair.
+ This is not limited to punctuation: for Japanese, sentences usually end
+ in a verb, and thus, for Japanse verbs 
+\begin_inset Formula $v$
+\end_inset
+
+, one expects that 
+\begin_inset Formula $N(v,*)\ll N(*,v)$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+Some typical values for English words are given in the table below.
+ Here, by defintion, 
+\begin_inset Formula $N(w)\equiv N(*,w)+N(*,w)$
+\end_inset
+
+ is the number of times the word 
+\begin_inset Formula $w$
+\end_inset
+
+ is observed in a pair relation.
+ The word-pairs were generated by creating random parse trees of the sentences
+ in the data-set, and then counting a pair, if two words are connected by
+ a parse link.
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Tabular
+<lyxtabular version="3" rows="13" columns="2">
+<features tabularvalignment="middle">
+<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top" width="0">
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $w$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $N(*,w)-N(w,*)/N(w)$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+how
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+-0.0058
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+when
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+-0.0051
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+,
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+-0.0021
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+will
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+-0.00114
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+usually
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+-0.00112
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+a
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+-0.00085
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+the
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0.0035
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+finally
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0.0043
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+word
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0.0094
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+hope
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0.0128
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+?
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0.3197
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+.
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0.8578
+\end_layout
+
+\end_inset
+</cell>
+</row>
+</lyxtabular>
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+A histogram summarizing the above table is shown below.
+ It bin-counts the asymmetry 
+\begin_inset Formula $N(*,w)-N(w,*)/N(w)$
+\end_inset
+
+.
+ About 100 bins are used, from an observation of 8.88 million distinct English-la
+nguage word pairs, where were observed for a total of 420 million times.
+ These pairs connected about 400K distinct words.
+ The number of distinct words is large, because these include surname, and
+ geographical names, as well as an assortment of foreign-language words
+ as might be encountered in a sampling of English wikipedia pages.
+ (This is the dataset collected by Rohit, summer of 2015).
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Graphics
+	filename images/lr-balance.eps
+	width 60col%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Note Note
+status collapsed
+
+\begin_layout Plain Layout
+The above got generated by lr-balance.scm and plotted with lr-balance.gplot
+\end_layout
+
+\end_inset
+
+Observe that the y-axis is drawn with a logarithmic scale.
+ The two sides to this peak are conjectured to be linear.
+ Two lines guessing at the slopes are indicated in the graph; the (natural
+ logarithm) slopes are +13 and -18.
+\end_layout
+
+\begin_layout Subsubsection*
+Total Entropy
+\end_layout
+
+\begin_layout Standard
+Of some
+\end_layout
+
+\begin_layout Subsubsection*
+Asymmetric Mutual Information
+\end_layout
+
+\begin_layout Standard
+Reviewing some old results suggests that asymmetric mutual information should
+ be attempted.
+ For the results reported below, this will be defined as 
+\begin_inset Formula 
+\[
+AMI(w_{l},w_{r})=MI(w_{l},w_{r})/\log
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section*
+Connector Sets 7 May 2017
+\end_layout
+
+\begin_layout Standard
+Some results on connector sets, preceeded by an explanation of what they
+ are.
+\end_layout
+
+\begin_layout Subsection*
+Recap
+\end_layout
+
+\begin_layout Standard
+The story so far: Starting from a large text corpus, the mutual information
+ (MI) of word-pairs are counted.
+ This MI is used to perform a maximum spanning-tree (MST) parse (of a different
+ subset of) the corpus.
+ From each parse, a pseudo-disjunct is extracted for each word.
+ The pseudo-disjunct is like a real LG disjunct, except that each connector
+ in the disjunct is the word at the far end of the link.
+\end_layout
+
+\begin_layout Standard
+So, for example, in in idealized world, the MST parse of the sentence "Ben
+ ate pizza" would prodouce the parse Ben <--> ate <--> pizza and from this,
+ we can extract the pseudo-disjunct (Ben- pizza+) on the word "ate".
+ Similarly, the sentence "Ben puked pizza" should produce the disjunct (Ben-
+ pizza+) on the word "puked".
+ Since these two disjuncts are the same, we can conclude that the two words
+ "ate" and "puked" are very similar to each other.
+ Considering all of the other disjuncts that arise in this example, we can
+ conclude that these are the only two words that are similar.
+\end_layout
+
+\begin_layout Standard
+Any given word will have many psuedo-disjuncts attached to it.
+ Each disjunct has a count of the number of times it has been observed.
+ Thus, this set of disjuncts can be imagined to be a vector in a high-dimensiona
+l vector space, which each disjunct being a single basis element.
+ The similarity of two words can be taken to be the cosine-similariy between
+ the disjunct-vectors.
+\end_layout
+
+\begin_layout Standard
+Equivalently, the set of disjuncts can be thought of as a weighted set:
+ each disjunct has a weight, corresponding to the number of times it has
+ been observed.
+ A weighted set is more or less the same thing as a vector, and are treated
+ as the same, in what follows.
+ Note that the disjunct vectors are sparse: for any given word, almost all
+ coefficients will have a count of zero.
+ For example, the dataset that will be examined next has over a quarter
+ of a million different pseudo-disjuncts in it; most words have fewer than
+ a hundred dsjuncts on them.
+\end_layout
+
+\begin_layout Standard
+The nature of the disjunct sets are characterized first, followed by an
+ examination of similarity.
+ 
+\end_layout
+
+\begin_layout Subsection*
+Terminology
+\end_layout
+
+\begin_layout Standard
+It is useful to introduce some notation for counting words, disjuncts, and
+ connectors.
+ Let 
+\begin_inset Formula $N(w)$
+\end_inset
+
+ be the number of times that the word 
+\begin_inset Formula $w$
+\end_inset
+
+ has been observed, in the dataset.
+ Let 
+\begin_inset Formula $N(d,w)$
+\end_inset
+
+ be the number of times that the disjunct 
+\begin_inset Formula $d$
+\end_inset
+
+ has been observed on word 
+\begin_inset Formula $w$
+\end_inset
+
+.
+ The pair 
+\begin_inset Formula $(d,w)$
+\end_inset
+
+ is refered to as a 
+\begin_inset Quotes eld
+\end_inset
+
+connector set
+\begin_inset Quotes erd
+\end_inset
+
+ or 
+\begin_inset Quotes eld
+\end_inset
+
+cset
+\begin_inset Quotes erd
+\end_inset
+
+ in the text below.
+ Thus, for a word 
+\begin_inset Formula $w$
+\end_inset
+
+, there is a set 
+\begin_inset Formula $(*,w)=\left\{ (d,w)|N(d,w)>0\right\} $
+\end_inset
+
+ of associated csets, called the 
+\begin_inset Quotes eld
+\end_inset
+
+support
+\begin_inset Quotes erd
+\end_inset
+
+ of the word.
+ The size of this set can be written using the standard notation for set-sizes
+ as 
+\begin_inset Formula $\left|(*,w)\right|$
+\end_inset
+
+.
+ Similarly, a disjunct 
+\begin_inset Formula $d$
+\end_inset
+
+, is supported by the set 
+\begin_inset Formula $(d,*)=\left\{ (d,w)|N(d,w)>0\right\} $
+\end_inset
+
+ of associated csets.
+ 
+\end_layout
+
+\begin_layout Standard
+The primary contents of the database are the counts 
+\begin_inset Formula $N(d,w)$
+\end_inset
+
+ and everthing else of interest in this section can be obtained from this.
+\end_layout
+
+\begin_layout Standard
+Every time a word is observed in an MST parse, a disjunct is extracted for
+ it; thus, word observations and disjunct observations are on one-to-one
+ correspondance.
+ In notation:
+\begin_inset Formula 
+\[
+\sum_{d}N(d,w)=N(*,w)=N(w)
+\]
+
+\end_inset
+
+Similarly, the total number of times that a disjunct was observed is just
+\begin_inset Formula 
+\[
+N(d,*)=\sum_{w}N(d,w)
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Frequncies can be obtained by dividing by the total number of observations,
+ so that 
+\begin_inset Formula $p(d,w)=N(d,w)/N(*)$
+\end_inset
+
+ and 
+\begin_inset Formula $p(w)=N(w)/N(*)$
+\end_inset
+
+ with 
+\begin_inset Formula $N(*)=\sum_{w}N(w)$
+\end_inset
+
+ the total number of observations of words.
+\end_layout
+
+\begin_layout Standard
+A single disjunct is always composed of a fixed number of connectors, independen
+tly of any observations; let 
+\begin_inset Formula $C(d,c)$
+\end_inset
+
+ be the number of times that connector 
+\begin_inset Formula $c$
+\end_inset
+
+ appears in disjunct 
+\begin_inset Formula $d$
+\end_inset
+
+.
+ Note that 
+\begin_inset Formula $C(d,c)$
+\end_inset
+
+ is almost always either zero or one; however, a connector can appear more
+ than once in a disjuct, so this count can rise to 2 or 3 or very rarely
+ higher.
+\end_layout
+
+\begin_layout Subsection*
+Dataset characterization
+\end_layout
+
+\begin_layout Standard
+The following charts and analyses are derived from a single dataset, a relativel
+y small dataset, taken as a snapshot during counting.
+ Its called 'en_pairs_sim'.
+ It contains 37413 words that have disjuncts attached to them.
+ These words have been observed a total of 661104 times, for an average
+ of 661104/37413 = 17.6 observations per word.
+ This dataset contains 291637 different, unique disjuncts, for an average
+ of 661104/291637 = 2.27 observations per disjunct.
+ The period appears 32536 times, suggesting that this many sentences were
+ observed.
+ Each sentnece thus has an average of 661104/32536 = 20.3 words per sentence.
+ The dataset contains 446204 unique connector-sets, for an average of 661104/446
+204 = 1.48 observations per cset.
+\end_layout
+
+\begin_layout Standard
+The total word-entropy for the dataset is defined as
+\begin_inset Formula 
+\[
+H_{word}=\sum_{w}p(w)\log p(w)
+\]
+
+\end_inset
+
+and was measured to be 
+\begin_inset Formula $H_{word}=10.28$
+\end_inset
+
+ bits.
+ The connector-set entropy is much higher.
+ It is defined as
+\begin_inset Formula 
+\[
+H_{cset}=\sum_{d,w}p(d,w)\log p(d,w)
+\]
+
+\end_inset
+
+and is measured to be 
+\begin_inset Formula $H_{cset}=18.30$
+\end_inset
+
+ bits.
+ The disjunct entropy is dual to the word entropy:
+\begin_inset Formula 
+\[
+H_{disjunct}=\sum_{d}p(d,*)\log p(d,*)
+\]
+
+\end_inset
+
+and is measured to be 
+\begin_inset Formula $H_{disjunct}=16.01$
+\end_inset
+
+ bits.
+\end_layout
+
+\begin_layout Subsection*
+Connector-set distribution
+\end_layout
+
+\begin_layout Standard
+Some connector-sets will be observed far more often than others.
+ Likewise for te two sides of the connector-set: some words will have far
+ more observations, and some disjuncts will be seen more often.
+\end_layout
+
+\begin_layout Standard
+Two graphs, dual to one-another.
+ The one on the right shows 
+\begin_inset Formula $N(*,w)$
+\end_inset
+
+, ranked by count.
+ The one on the left shows 
+\begin_inset Formula $N(d,*)$
+\end_inset
+
+, also ranked.
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+Obtained by running (print-ts-rank sorted-word-obs outport) from the disjunct-st
+ats.scm file, on the en_pairs_sim database.
+ The second one prints sorted-dj-obs.
+\end_layout
+
+\end_inset
+
+.
+ The first follows the canonical Zipf distribution.
+ The green line is an eyeballed, approximate fit, of exponent -1.1.
+ The second has an exponent of -0.85.
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Graphics
+	filename images/ranked-word-obs.eps
+	width 45text%
+
+\end_inset
+
+
+\begin_inset Graphics
+	filename images/ranked-dj-obs.eps
+	width 45text%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The first ten words in the word ranking are: "the" "," "." "of" "and" "in"
+ "to" "a" "was".
+ This is the ranking of how often these words appear, overall, in the MST-parsed
+ corpus.
+ The number of periods should be equal to the number of sentences in the
+ corpus; commas and the word 
+\begin_inset Quotes eld
+\end_inset
+
+the
+\begin_inset Quotes erd
+\end_inset
+
+ can appear more than once in a sentence.
+ The first ten pseudo-disjuncts in the disjunct-ranking are ".+ " "the- "
+ "the+ " ",+ " ",- " "of+ " "of- " "a- " "and+ " "and- ".
+ The duality between these counts shold be obvious.
+\end_layout
+
+\begin_layout Standard
+The ranking of connector sets is shown below.
+ It's a graph of the ranked counts 
+\begin_inset Formula $N(d,w)$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Graphics
+	filename images/ranked-cset-obs.eps
+	width 60text%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The top-ten connector-sets are ".: )-" "and: ,-" "in: the+" "(: )+" ",: and+"
+ "the: of-" "of: the+" "): .+" "He: was+".
+ These are hard to read, so, decoded: the first is a parenthesis followed
+ by a period.
+ The second is a comma, followed by 
+\begin_inset Quotes eld
+\end_inset
+
+and
+\begin_inset Quotes erd
+\end_inset
+
+.
+ The third is the word-pair 
+\begin_inset Quotes eld
+\end_inset
+
+in the
+\begin_inset Quotes erd
+\end_inset
+
+.
+ All the others are pairs, also.
+ Written in order: 
+\begin_inset Quotes eld
+\end_inset
+
+()
+\begin_inset Quotes erd
+\end_inset
+
+ (presumably with other text between the parens) 
+\begin_inset Quotes eld
+\end_inset
+
+, and
+\begin_inset Quotes erd
+\end_inset
+
+ 
+\begin_inset Quotes eld
+\end_inset
+
+of the
+\begin_inset Quotes erd
+\end_inset
+
+ 
+\begin_inset Quotes eld
+\end_inset
+
+of the
+\begin_inset Quotes erd
+\end_inset
+
+ 
+\begin_inset Quotes eld
+\end_inset
+
+) .
+\begin_inset Quotes erd
+\end_inset
+
+ and 
+\begin_inset Quotes eld
+\end_inset
+
+He was
+\begin_inset Quotes erd
+\end_inset
+
+.
+ Curiously the 1st and 8th give the same pair, as do 2nd and 5th, and the
+ 6th and 7th.
+ This makes sense: if one word-disjunct pair is observed a lot, the converse
+ should be also.
+ This duality might be behind the slope of slightly less than -0.6 in the
+ graph.
+\end_layout
+
+\begin_layout Subsection*
+Ranked average observations per disjunct
+\end_layout
+
+\begin_layout Standard
+A more interesting distribution arises by looking at the average number
+ of observations per disjunct (per word).
+ That is, a single word may have hundreds of disjuncts, observed thousands
+ of times; what is the average number of times that a disjunct is observed?
+ By 
+\begin_inset Quotes eld
+\end_inset
+
+average
+\begin_inset Quotes erd
+\end_inset
+
+, it is explicitly meant 
+\begin_inset Formula $N(*,w)/\left|(*,w)\right|$
+\end_inset
+
+, the number of observations divided by the support for those observations.
+\end_layout
+
+\begin_layout Standard
+This number gives a hint of how 
+\begin_inset Quotes eld
+\end_inset
+
+narrow
+\begin_inset Quotes erd
+\end_inset
+
+ the grammatical usage of a word is.
+ If the average is high, it means that the word just does not have very
+ many disjuncts on it; the few that it does have are observed a lot.
+ Recall that these disjuncts (pseudo-disjuncts) connect to individual words,
+ and not to word-classes.
+ Thus, if a disjunct is seen a lot, it probably connects to another word,
+ forming a high-MI pair.
+ This can be explicitly seen in the example further below.
+\end_layout
+
+\begin_layout Standard
+A graph of the ranked average number of observations, per disjunct, per
+ word, is shown below.
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+Computed with the sorted-avg list in disjunct-stats.scm
+\end_layout
+
+\end_inset
+
+ Words with fewer than 100 observations have been excluded, so as to minimize
+ the spurious noise.
+ Note that although the line is straight in this log-log graph, the Zipf
+ exponent is approximately -1/4.
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Graphics
+	filename images/ranked-avg.eps
+	width 60text%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The first ten on this list are "According" "Gestalt" "Cao" "Berger" "2015"
+ "It" "U.S" "United" "However" "y".
+ Unsurprisingly, most of these are all capitalized, suggesting that they
+ are either part of a proper name, or that perhaps they begin a sentence.
+ 
+\end_layout
+
+\begin_layout Standard
+For example, the appearance of 
+\begin_inset Quotes eld
+\end_inset
+
+United
+\begin_inset Quotes erd
+\end_inset
+
+ is almost surely due to the high-MI pair 
+\begin_inset Quotes eld
+\end_inset
+
+United States
+\begin_inset Quotes erd
+\end_inset
+
+, and so this probably dominates the disjunct count.
+ This is confirmed by manual inspection, per table below.
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Tabular
+<lyxtabular version="3" rows="6" columns="2">
+<features tabularvalignment="middle">
+<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top" width="0">
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+disjunct
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+number of observations
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+the- States+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+108
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+in- the- States+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+41
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+States+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+35
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+the- Kingdom+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+16
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+the- the- States+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+14
+\end_layout
+
+\end_inset
+</cell>
+</row>
+</lyxtabular>
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Only the first four disjuncts seem to be grammatically acceptable.
+ In the first, second and fourth usage, 
+\begin_inset Quotes eld
+\end_inset
+
+States
+\begin_inset Quotes erd
+\end_inset
+
+ seems to be a head word, with 
+\begin_inset Quotes eld
+\end_inset
+
+United
+\begin_inset Quotes erd
+\end_inset
+
+ being the dependent.
+ In the third case, it would appears that 
+\begin_inset Quotes eld
+\end_inset
+
+United
+\begin_inset Quotes erd
+\end_inset
+
+ is the head-word, and 
+\begin_inset Quotes eld
+\end_inset
+
+States
+\begin_inset Quotes erd
+\end_inset
+
+ the dependent.
+ 
+\end_layout
+
+\begin_layout Standard
+The fifth most frequent disjunct is grammatical garbage: noise from bad
+ MST parses.
+ There are even more disjuncts, which occur with lower frequency: there
+ are 156 in all.
+ Almost all of these are presumably junk of some kind.
+ We conclude that the signal/noise ratio here is about 
+\begin_inset Formula $10\log_{10}(108/14)$
+\end_inset
+
+ or about 9 dB.
+ These first four disjuncts really pull up the average, which is quite low,
+ given this skew: the average number of observations pero disjunct for 
+\begin_inset Quotes eld
+\end_inset
+
+United
+\begin_inset Quotes erd
+\end_inset
+
+ is 2.96.
+\end_layout
+
+\begin_layout Standard
+The corresponding table for 
+\begin_inset Quotes eld
+\end_inset
+
+It
+\begin_inset Quotes erd
+\end_inset
+
+ is
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Tabular
+<lyxtabular version="3" rows="6" columns="2">
+<features tabularvalignment="middle">
+<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top" width="0">
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+disjunct
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+number of observations
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+is+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+216
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+was+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+197
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+has+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+55
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+was+ was+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+12
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+is+ was+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+10
+\end_layout
+
+\end_inset
+</cell>
+</row>
+</lyxtabular>
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+This also is much as expected: 
+\begin_inset Quotes eld
+\end_inset
+
+It
+\begin_inset Quotes erd
+\end_inset
+
+ is a sentence opener, and the three sentence types it opens are 
+\begin_inset Quotes eld
+\end_inset
+
+It is
+\begin_inset Quotes erd
+\end_inset
+
+, 
+\begin_inset Quotes eld
+\end_inset
+
+It was
+\begin_inset Quotes erd
+\end_inset
+
+ and 
+\begin_inset Quotes eld
+\end_inset
+
+It has
+\begin_inset Quotes erd
+\end_inset
+
+.
+ The fourth and fifth disjuncts are grammatical garbage.
+ The average number of disjucnt observations is 3.03, almost identical to
+ that for 
+\begin_inset Quotes eld
+\end_inset
+
+United
+\begin_inset Quotes erd
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+The skewness appears to be very sharp.
+ This suggests that we should not waste time looking at mean-square variations
+ in the average, although we'll do this anyway.
+ But first, its worth graphing the skewness directly.
+ Again, this is done on a log-log graph, in a Zipfian way.
+\end_layout
+
+\begin_layout Subsection*
+Disjunct count distribution
+\end_layout
+
+\begin_layout Standard
+The graph below shows the distribution of the disjunct observations on the
+ two words 
+\begin_inset Quotes eld
+\end_inset
+
+United
+\begin_inset Quotes erd
+\end_inset
+
+ and 
+\begin_inset Quotes eld
+\end_inset
+
+It
+\begin_inset Quotes erd
+\end_inset
+
+.
+ Indeed, it looks Zipfian; since we know that all but the first three or
+ four disjuncts are noise, this graph illustrates 
+\begin_inset Quotes eld
+\end_inset
+
+pink noise
+\begin_inset Quotes erd
+\end_inset
+
+ or 
+\begin_inset Quotes eld
+\end_inset
+
+1/f noise
+\begin_inset Quotes erd
+\end_inset
+
+.
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+Computed with the dj-united and dj-it arrays indisjunct-stats.scm 
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Graphics
+	filename images/ranked-dj-united.eps
+	width 60text%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Can one get a smoother distribution by summing together these two graphs?
+ Sure...
+ and one can sum together not just these two words, but all words (that
+ have been observed at least 100 times).
+ That graph is shown below.
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+Computed with the accum-dj-all function in disjunct-stats.scm 
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Graphics
+	filename images/ranked-dj-counts.eps
+	width 60text%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Its kind of a strange graph.
+ Yes, the x-axis of this graph does imply that there is at least one word,
+ and probably several, that have more than ten-thousand (unique, different)
+ disjuncts on it! Are there more? That's covered in the next section.
+\end_layout
+
+\begin_layout Subsection*
+Disjunct Support Distribution
+\end_layout
+
+\begin_layout Standard
+Is it possible that some words have a large number of disjuncts on them?
+ Yes, it is.
+ For example, the period was observed to have 18200 unique, different disjuncts
+ associated with it.
+ The word 
+\begin_inset Quotes eld
+\end_inset
+
+the
+\begin_inset Quotes erd
+\end_inset
+
+ has 15420 unique, different disjuncts, the comma has 14510.
+ Rounding out this list are "of" "and" "in" "a" "to" "was".
+ Its not clear what fraction of these disjuncts are grammatically valid,
+ and what fraction are junk.
+\end_layout
+
+\begin_layout Standard
+The graph below shouls the distribution of the size of the support: the
+ ranking of 
+\begin_inset Formula $\left|(*,w)\right|$
+\end_inset
+
+.
+ Again, the graph appears to be approximately Zipfian.
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+Generated by sorted-support in disjunct-stats.scm 
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Graphics
+	filename images/ranked-support.eps
+	width 60text%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Terminology: the 
+\begin_inset Quotes eld
+\end_inset
+
+support
+\begin_inset Quotes erd
+\end_inset
+
+ of a vector is the number of basis eleements that have a non-zero coefficient.
+ This is the set 
+\begin_inset Formula $(*,w)$
+\end_inset
+
+ defined earlier.
+ Equivalently, this is the size of the set of disjuncts associated with
+ a word, when counted 
+\emph on
+without
+\emph default
+ multiplicity.
+\end_layout
+
+\begin_layout Subsection*
+Ranked Disjunct-Set RMS Size
+\end_layout
+
+\begin_layout Standard
+A different distribution arises by looking at the ranked RMS sizes of the
+ disjunct sets
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+Obtained by running (print-ts-rank sorted-lengths outport) from the disjunct-sta
+ts.scm file on the en_pairs_sim database.
+ 
+\end_layout
+
+\end_inset
+
+.
+ Here, the RMS size
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+The word 
+\begin_inset Quotes eld
+\end_inset
+
+length
+\begin_inset Quotes erd
+\end_inset
+
+ can be used to describe the root-mean-square size of the set of disjuncts
+ associated with a word.
+ That is, each element of the set is a disjunct, and that disjunct has a
+ count, the number of times it has been observed.
+ The root-mean-square of these counts can be taken as the set-size.
+ But this set can also be interpreted as a vector, and so the RMS size is
+ the same thing as the Euclidean length of the vector.
+ Thus, the word 
+\begin_inset Quotes eld
+\end_inset
+
+length
+\begin_inset Quotes erd
+\end_inset
+
+ is sometimes used for the RMS size; they're the same thing.
+\end_layout
+
+\end_inset
+
+ is computed by taking the root-mean-square of the counts on each disjunct
+ in the set, that is, by computing 
+\begin_inset Formula $\sqrt{\sum_{d}N(d,w)^{2}}$
+\end_inset
+
+ for each word 
+\begin_inset Formula $w$
+\end_inset
+
+ and then ranking.
+\end_layout
+
+\begin_layout Standard
+The RMS size of the set is thus larger not only when more disjuncts have
+ been observed, but also when most of the observations are made of only
+ a small handful of disjuncts.
+ That is, the RMS size should be relatively larger, if the word is less
+ grammatically flexible.
+ So for example, prepositions tend to be very flexible; adjectives, not
+ so much.
+ Thus, we expect adjectives to appear higher-up on this ranking list, than
+ the observation-based list.
+ And this might be true, relatively, but certainly not true absolutely.
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Graphics
+	filename images/ranked-lengths.eps
+	width 60text%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The first ten words of the RMS-size-list are: "." "and" "," "in" "the" ")"
+ "(" "of" "as" "to".
+ Not that interesting: these are all words that were observed a lot in the
+ text.
+ The RMS size is dominated by the total number of observations of a word
+ in text.
+ Some other quantity is needed.
+\end_layout
+
+\begin_layout Standard
+Note that the graph above is Zipfian, but the slope is approximately -0.65.
+ The green line is an 
+\begin_inset Quotes eld
+\end_inset
+
+eyeball
+\begin_inset Quotes erd
+\end_inset
+
+ fit.
+ Why the slope is approximately 2/3rds of the canonical slope is not clear.
+\end_layout
+
+\begin_layout Subsection*
+Mean-square to size ratio
+\end_layout
+
+\begin_layout Standard
+More intesting is the ratio of mean-square size to the total size.
+ In formulas, by ranking according to 
+\begin_inset Formula 
+\[
+\frac{\sqrt{\sum_{d}N^{2}(d,w)}}{N(*,w)}=\frac{\sqrt{\sum_{d}p^{2}(d,w)}}{p(*,w)}
+\]
+
+\end_inset
+
+This seems like the interesting ratio, because the Zipf exponent of -0.65
+ would be doubled, when working with mean-square sizes, thus making the
+ two rankings comparable.
+\end_layout
+
+\begin_layout Standard
+Words high in this score will be words that have relatively few disjuncts
+ on them, or at least, few that matter much, that rise above the level of
+ noise.
+ The first ten on this list are (after excluding all words with fewer than
+ 100 observations): "It" "According" "He" ")" "and" "(" "United" "as" "."
+ "well".
+ Note that most are capitalized: that means that these words appeared at
+ the begining of sentences; the way in which the can link to what follows
+ is fairly constrainted, and thus it is no surprise that these have only
+ a few disjuncts on them.
+ 
+\end_layout
+
+\begin_layout Standard
+Excluding the capitalized words, and punctuation, in this list what remains
+ is quite surprising.
+ It is shown in the table below.
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Tabular
+<lyxtabular version="3" rows="11" columns="3">
+<features tabularvalignment="middle">
+<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top" width="0">
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+rank
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+score
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+word
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+5 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+41.4
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+and
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+8
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+31.6
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+as
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+10
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+30.1
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+well
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+11
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+29.9
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+in
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+18
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+18.8
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+first
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+21
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+17.2
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+is
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+22
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+16.7
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+also
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+23
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+15.3
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+can
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+24
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+15.3
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+on
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+25
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+14.9
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+at
+\end_layout
+
+\end_inset
+</cell>
+</row>
+</lyxtabular>
+
+\end_inset
+
+ 
+\begin_inset space \qquad{}
+\end_inset
+
+  
+\begin_inset Tabular
+<lyxtabular version="3" rows="11" columns="3">
+<features tabularvalignment="middle">
+<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top" width="0">
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+rank
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+score
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+word
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+26
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+14.4
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+been
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+31
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+13.2
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+but
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+32
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+13.1
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+part
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+34
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+12.8
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+with
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+35
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+12.8
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+old
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+36
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+12.7
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+same
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+38
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+11.9
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+one
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+39
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+11.6
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+which
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+43
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+10.8
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+not
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+49
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+10.2
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+the
+\end_layout
+
+\end_inset
+</cell>
+</row>
+</lyxtabular>
+
+\end_inset
+
+ 
+\end_layout
+
+\begin_layout Standard
+It is surprising because, grammatically, we expect most of these words to
+ have a large number of varied disjuncts attached to them.
+ We expect them to be diffuse, not sharp: we expect that these would have
+ a large number of observations smeared over a large variety of disjuncts,
+ instead of having their weight concentrated in only one or two disjuncts,
+ the way that 
+\begin_inset Quotes eld
+\end_inset
+
+United
+\begin_inset Quotes erd
+\end_inset
+
+ was, above.
+ So what is going on, here?
+\end_layout
+
+\begin_layout Standard
+Other measures are needed.
+ One could contemplate the ratio of the mean-square size to the support
+ 
+\begin_inset Formula $\sum_{d}N(d,w)^{2}/\left|(*,w)\right|$
+\end_inset
+
+.
+ Another possbility would be this, minus the average-squared, which would
+ give the mean-square deviation from the average, specifically
+\begin_inset Formula 
+\[
+\frac{\sum_{d}N(d,w)^{2}}{\left|(*,w)\right|}-\left[\frac{N(*,w)}{\left|(*,w)\right|}\right]^{2}=\frac{1}{\left|(*,w)\right|}\sum_{d}\left[N(d,w)-\frac{N(*,w)}{\left|(*,w)\right|}\right]^{2}
+\]
+
+\end_inset
+
+Neither of these variations seem promising; they seem to offer up more of
+ the same.
+\end_layout
+
+\begin_layout Subsection*
+Mutual Information
+\end_layout
+
+\begin_layout Standard
+Another interesting item is a mutual-information ranking.
+ It is given by the (fractional) mutual information between a word, and
+ all of it's disjuncts:
+\begin_inset Formula 
+\[
+MI(w)=\frac{1}{p(w)}\sum_{d}p(d,w)\log_{2}\frac{p(d,w)}{p(d,*)p(*,w)}
+\]
+
+\end_inset
+
+This is written in the 
+\begin_inset Quotes eld
+\end_inset
+
+fractional
+\begin_inset Quotes erd
+\end_inset
+
+ style, so that the total MI of the entire dataset can be written as
+\begin_inset Formula 
+\[
+MI=\sum_{w}p(w)MI(w)
+\]
+
+\end_inset
+
+That is, 
+\begin_inset Formula $MI(w)$
+\end_inset
+
+ is the fractional contribution of the word to the total MI.
+ The total MI for the dataset is measured to be 7.985 bits.
+ The graph below shows the MI of the 630 words that have been observed more
+ than 100 times in this dataset.
+ Note that it is a semi-log plot; it is NOT Zipfian.
+ Note that the MI seems to decay logarithmically, for a good long ways,
+ and then drops off a cliff.
+ What are the disjuncts like at either end of this cliff?
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Graphics
+	filename images/ranked-word-mi-hi-p.eps
+	width 60text%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset VSpace defskip
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The first ten words in this ranking are: "Cao" "Award" "x" "y" "Prime" "we"
+ "per" "Division" "League" "Game".
+ The word 
+\begin_inset Quotes eld
+\end_inset
+
+United
+\begin_inset Quotes erd
+\end_inset
+
+, examined previously, is 86th in this rank.
+ Lets look at some of these.
+\end_layout
+
+\begin_layout Standard
+The word 
+\begin_inset Quotes eld
+\end_inset
+
+Award
+\begin_inset Quotes erd
+\end_inset
+
+ has only two disjuncts that were observed more than twice:
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Tabular
+<lyxtabular version="3" rows="3" columns="2">
+<features tabularvalignment="middle">
+<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top" width="0">
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+count
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+disjunct
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+8
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\strikeout off
+\uuline off
+\uwave off
+\noun off
+\color none
+ Grammy- for+ Best+
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+7
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Academy- for+ Best+
+\end_layout
+
+\end_inset
+</cell>
+</row>
+</lyxtabular>
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset VSpace defskip
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+It is already clear from this one example that the hi-MI words will be those
+ that take part in idioms, 
+\begin_inset Quotes eld
+\end_inset
+
+set phrases
+\begin_inset Quotes erd
+\end_inset
+
+ or 
+\begin_inset Quotes eld
+\end_inset
+
+institutional phrases
+\begin_inset Quotes erd
+\end_inset
+
+, and that the disjunct identifies the words taking part in the setting.
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Tabular
+<lyxtabular version="3" rows="5" columns="2">
+<features tabularvalignment="middle">
+<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top" width="0">
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+count
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+disjunct for 
+\begin_inset Quotes eld
+\end_inset
+
+Prime
+\begin_inset Quotes erd
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+23
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Minister+
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+5
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+the- Minister+
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+3
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+as- Minister+
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+3
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Governor-General- Minister+
+\end_layout
+
+\end_inset
+</cell>
+</row>
+</lyxtabular>
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset VSpace defskip
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Only one disjunct for 
+\begin_inset Quotes eld
+\end_inset
+
+Division
+\begin_inset Quotes erd
+\end_inset
+
+ was observed 4 times; those with 3 observations or less suggest that they
+ were extracted from tables listing WWII military battles and equipment.
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Tabular
+<lyxtabular version="3" rows="2" columns="2">
+<features tabularvalignment="middle">
+<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top" width="0">
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+count
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+disjunct for 
+\begin_inset Quotes eld
+\end_inset
+
+Division
+\begin_inset Quotes erd
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+4
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+NCAA-
+\end_layout
+
+\end_inset
+</cell>
+</row>
+</lyxtabular>
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset VSpace defskip
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The disjuncts for 
+\begin_inset Quotes eld
+\end_inset
+
+League
+\begin_inset Quotes erd
+\end_inset
+
+ correspond to word-pairs, and these will clearly be high-MI word-pairs.
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Tabular
+<lyxtabular version="3" rows="4" columns="2">
+<features tabularvalignment="middle">
+<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top" width="0">
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+count
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+disjunct for 
+\begin_inset Quotes eld
+\end_inset
+
+League
+\begin_inset Quotes erd
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+8
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Baseball+
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+5
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Premier-
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+4
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Justice-
+\end_layout
+
+\end_inset
+</cell>
+</row>
+</lyxtabular>
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+This ranking also captures a fair amount of the 
+\begin_inset Quotes eld
+\end_inset
+
+garbage
+\begin_inset Quotes erd
+\end_inset
+
+ in wikipedia (which is the source for the dataset): the disjuncts on 
+\begin_inset Quotes eld
+\end_inset
+
+x
+\begin_inset Quotes erd
+\end_inset
+
+ and 
+\begin_inset Quotes eld
+\end_inset
+
+y
+\begin_inset Quotes erd
+\end_inset
+
+ indicate that these occur almost exclusivelt in mathematical formulas of
+ some sort, involving single-letter variables, plus signs and equal signs.
+ The most frequent disjunct on 
+\begin_inset Quotes eld
+\end_inset
+
+per
+\begin_inset Quotes erd
+\end_inset
+
+ was observed 5 times, and was 
+\begin_inset Quotes eld
+\end_inset
+
+100,000+ 100,000+ 100,000+ 100,000+ 100,000+
+\begin_inset Quotes erd
+\end_inset
+
+ suggesting that it arose in some parse of a table listing.
+ None of the disjuncts on 
+\begin_inset Quotes eld
+\end_inset
+
+we
+\begin_inset Quotes erd
+\end_inset
+
+ were observed more than 4 times, and seemd to consist of some sort of grammatic
+al word-salad.
+ This is not surprising: Wikipedia has a severe shortage of pronouns; style
+ guidelines prohibit thier use.
+\end_layout
+
+\begin_layout Standard
+At the other extreme, the ten words with the lowest MI are: "The" "a" "to"
+ "in" "of" "and" "the" "," ".".
+ These are already familiar from previous rankings: they occur with very
+ high frequency; the disjunct lists on them will be lengthly variable, diffuse.
+ 
+\end_layout
+
+\begin_layout Subsection*
+Hubbiness
+\end_layout
+
+\begin_layout Standard
+Hubbiness can be defined as the average number of connectors per disjunct
+\end_layout
+
+\begin_layout Standard
+Yuck.
+ We need verbs, desperately! wikipedia sucks is the story here; we need
+ kids lit.
+\end_layout
+
+\begin_layout Subsection*
+highest ranked dependents!
+\end_layout
+
+\begin_layout Standard
+s too
+\end_layout
+
+\begin_layout Standard
+also 
+\end_layout
+
+\begin_layout Subsection*
+Similarity
+\end_layout
+
+\begin_layout Standard
+two kinds: cosine, and 3-point MI (and jaccard...?)
 \end_layout
 
 \begin_layout Section*

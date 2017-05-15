@@ -297,7 +297,7 @@ IF(OCTOMAP_FOUND AND OCTOMAP_LIBRARY)
   INCLUDE_DIRECTORIES(${OCTOMAP_INCLUDE_DIR})
   SET(OCTOMAP_DIR_MESSAGE "Octomap was found.")
 ELSE (OCTOMAP_FOUND AND OCTOMAP_LIBRARY)
-  SET(OCTOMAP_DIR_MESSAGE "Octomap not found.")
+  SET(OCTOMAP_DIR_MESSAGE "Octomap missing: needed for the SpaceTime map.")
 ENDIF(OCTOMAP_FOUND AND OCTOMAP_LIBRARY)
 
 
@@ -307,7 +307,7 @@ FIND_PACKAGE(OpenGL)
 IF (OPENGL_FOUND)
 	MESSAGE(STATUS "OpenGL was found.")
 ELSE (OPENGL_FOUND)
-	MESSAGE(STATUS "OpenGL missing: needed for Spatial tools (MapExplorer, MapTools, etc.).")
+	MESSAGE(STATUS "OpenGL missing: needed for space visualization tools (MapExplorer, MapTools, etc.).")
 ENDIF (OPENGL_FOUND)
 
 # Google Protobuf library

@@ -1,4 +1,654 @@
 
+======================================================================
+Crashes and bugs 2013, 2014
+
+
+Crash 2
+-------
+All new crash. Note:
+1) This is with the old scheme singleton-instance.
+2) This one received when defining a function with an unbound variable
+   in it.  It should have just been a standard stack trace, but wasn't.
+3) Sometimes, when doing this, and parser is running, I get
+
+[2013-12-26 22:50:57:680] [ERROR] Caught signal 11 (Segmentation fault) on thread 47486186035520
+        Stack Trace:
+        2: CogServerMain.cc:92  _Z7sighandi()
+        3: sigaction.c:0        __restore_rt()
+        4: ??:0   std::string::append(std::string const&)
+        5: basic_string.h:290     std::string::_M_data() const
+        6: SchemeEval.cc:381      opencog::SchemeEval::c_wrap_eval(void*)
+line 381 is  self->answer = self->do_eval(*(self->pexpr));
+So maybe p is null, or self->pexpr is null..
+...
+        7: continuations.c:511  c_body()
+        8: vm-i-system.c:855    vm_regular_engine()
+        9: eval.c:508   scm_call_4()
+        10: continuations.c:456 scm_i_with_continuation_barrier()
+        11: continuations.c:550 scm_c_with_continuation_barrier()
+        12: pthread_support.c:1272      GC_call_with_gc_active()
+        13: threads.c:937       with_guile_and_parent()
+        14: misc.c:1835 GC_call_with_stack_base()
+        15: threads.c:959       scm_with_guile()
+        16: SchemeEval.cc:372     opencog::SchemeEval::eval(std::string const&)
+        17: basic_string.h:536  ~basic_string()
+        18: GenericShell.cc:157   opencog::GenericShell::eval(std::string const&, opencog::ConsoleSocket*)
+        19: ConsoleSocket.cc:232          opencog::ConsoleSocket::OnLine(std::string const&)
+        20: basic_string.h:536  ~basic_string()
+        21: thread.cpp:0        thread_proxy()
+        22: pthread_create.c:0  start_thread()
+        23: ??:0        __clone()
+
+again 7 Jan 2014 but this time its different:
+
+[2014-01-07 00:58:32:234] [ERROR] Caught signal 11 (Segmentation fault) on threa
+d 47389012408640
+        Stack Trace:
+        2: CogServerMain.cc:91  _Z7sighandi()
+        3: sigaction.c:0        __restore_rt()
+        4: vm-i-system.c:887    vm_regular_engine()
+        5: eval.c:508   scm_call_4()
+        6: backtrace.c:163      scm_display_error()
+        7: inline.h:131 scm_puts()
+        8: vm-i-system.c:855    vm_regular_engine()
+        9: eval.c:508   scm_call_4()
+        10: SchemeEval.cc:433     opencog::SchemeEval::do_eval(std::string const&)
+        11: SchemeEval.cc:392     opencog::SchemeEval::c_wrap_eval(void*)
+        12: continuations.c:511 c_body()
+        13: vm-i-system.c:855   vm_regular_engine()
+        14: eval.c:508  scm_call_4()
+
+19 Jan 2014: again: same but different:
+
+[2014-01-19 06:06:32:335] [ERROR] Caught signal 11 (Segmentation fault)
+on threa
+d 47820857940288
+        Stack Trace:
+        2: CogServerMain.cc:91  _Z7sighandi()
+        3: sigaction.c:0        __restore_rt()
+        4: ??:0 strlen()
+        5: strings.c:1518       scm_from_stringn()
+        6: strports.c:517       scm_c_eval_string()
+        7: vm-i-system.c:855    vm_regular_engine()
+        8: eval.c:508   scm_call_4()
+        9: SchemeEval.cc:433    opencog::SchemeEval::do_eval(std::string const&)
+        10: SchemeEval.cc:392   opencog::SchemeEval::c_wrap_eval(void*)
+
+Got exactly above, again 21 Jan.
+
+Preceeded a few minutes earlier by below.
+
+opencog-fr> Backtrace:
+In ice-9/boot-9.scm:
+ 157: 6 [catch #t #<catch-closure 25dd04e0> ...]
+In unknown file:
+   ?: 5 [apply-smob/1 #<catch-closure 25dd04e0>]
+In ice-9/boot-9.scm:
+ 157: 4 [catch #t #<catch-closure 25d2ff20> ...]
+In unknown file:
+   ?: 3 [apply-smob/1 #<catch-closure 25d2ff20>]
+   ?: 2 [call-with-input-string "(observe-text \"Hvozdnica est un village de Slovaquie situé dans la région de \u017dilina.\")\n" ...]
+In ice-9/boot-9.scm:
+ 102: 1 [#<procedure cfebf00 at ice-9/boot-9.scm:97:6 (thrown-k . args)> encoding-error ...]
+In unknown file:
+   ?: 0 [apply-smob/1 #<catch-closure 25d2fee0> encoding-error ...]
+ERROR: In procedure apply-smob/1:
+ERROR: In procedure scm_to_stringn: Error while printing exception.
+ABORT: encoding-error
+Backtrace:
+In ice-9/boot-9.scm:
+ 157: 6 [catch #t #<catch-closure 174c8ac0> ...]
+In unknown file:
+   ?: 5 [apply-smob/1 #<catch-closure 174c8ac0>]
+In ice-9/boot-9.scm:
+ 157: 4 [catch #t #<catch-closure ac0b5e0> ...]
+In unknown file:
+   ?: 3 [apply-smob/1 #<catch-closure ac0b5e0>]
+   ?: 2 [call-with-input-string "(observe-text \"Hvozdnica est un village de Slovaquie situé dans la région de \u017dilina.\")\n" ...]
+In ice-9/boot-9.scm:
+ 102: 1 [#<procedure a82f4c0 at ice-9/boot-9.scm:97:6 (thrown-k . args)> encoding-error ...]
+In unknown file:
+   ?: 0 [apply-smob/1 #<catch-closure ac0b5a0> encoding-error ...]
+
+ERROR: In procedure apply-smob/1:
+ERROR: In procedure scm_to_stringn: Error while printing exception.
+ABORT: encoding-error
+
+
+Crash 6
+-------
+All new 21 jan 2014
+
+[2014-01-21 20:30:03:348] [ERROR] Caught signal 11 (Segmentation fault) on thread 47570270030144
+        Stack Trace:
+        2: CogServerMain.cc:91  _Z7sighandi()
+        3: sigaction.c:0        __restore_rt()
+        4: ??:0   std::back_insert_iterator<std::vector<opencog::Handle, std::allocator<opencog::Handle> > > opencog::Atom::getIncomingSet<std::back_insert_iterator<std::vector<opencog::Handle, std::allocator<opencog::Handle> > > >(std::back_insert_iterator<std::vector<opencog::Handle, std::allocator<opencog::Handle> > >)
+        5: AtomSpaceImpl.cc:402 opencog::AtomSpaceImpl::getIncoming(opencog::H
+andle)
+        6: ??:0   opencog::AtomSpace::getIncoming(opencog::Handle)
+        7: SchemeSmobNew.cc:538   opencog::SchemeSmob::ss_delete(scm_u
+
+Again, same exact trace:
+[2014-01-22 07:42:21:675] [ERROR] Caught signal 11
+* Again, same exact trace .. again, only for french. Why is french different???
+* Again, same exact trace ..  22 Jan
+* Again, same exact trace ..  23 Jan  Only in french ... wtf ...
+* Again, same exact trace ..  23 Jan  Only in french ... wtf ...
+* Again, same exact trace ..  24 Jan  Only in french ... wtf ...
+* Again, handle=480036842 ptr is null .. why?
+
+
+But this time without the weirdo message:
+terminate called after throwing an instance of 'boost::exception_detail::clone_impl<boost::exception_detail::error_info_injector<boost::lock_error> >'
+  what():  boost shared_lock has no mutex: Operation not permitted
+
+WTF ... where is the above shared_lock coming from????
+
+
+
+Crash 7
+-------
+[2014-01-22 10:18:24:103] [ERROR] Caught signal 11 (Segmentation fault)
+on thread 47155674880320
+        Stack Trace:
+        2: CogServerMain.cc:91  _Z7sighandi()
+        3: sigaction.c:0        __restore_rt()
+        4: ConsoleSocket.cc:211 opencog::ConsoleSocket::OnLine(std::string const&)
+
+
+
+
+
+Irritation 4
+------------
+Occasionally see this:
+
+In ice-9/boot-9.scm:
+ 157: 6 [catch #t #<catch-closure 294a63c0> ...]
+
+   ?: 3 [apply-smob/1 #<catch-closure 294a62a0>]
+   ?: 2 [call-with-input-string "(observe-text \"Cheopso piramid\u0117, arba Did
+\u017eioji Gizos piramid\u0117 \u2013 Egipto piramid\u0117, faraono Cheopso kapa
+s.\")\n" ...]
+In ice-9/boot-9.scm:
+ 102: 1 [#<procedure 193e5c80 at ice-9/boot-9.scm:97:6 (thrown-k . args)> encodi
+ng-error ...]
+
+-----------
+another:
+ "(observe-text \"Andrzej G\u0105siorowski i Krzysztof Steyer, Tajna Organizacja Wojskowa Gryf Pomorski, Polnord Wydawnictwo Oskar, Gda\u0144sk 2010 r.\")\n" .
+
+Andrzej Gąsiorowski i Krzysztof Steyer, Tajna Organizacja Wojskowa Gryf Pomorski, Polnord Wydawnictwo Oskar, Gdańsk 2010 r.
+
+In ice-9/boot-9.scm:
+ 102: 1 [#<procedure 3db5240 at ice-9/boot-9.scm:97:6 (thrown-k . args)> encoding-error ...]
+In unknown file:
+   ?: 0 [apply-smob/1 #<catch-closure 3be53c40> encoding-error ...]
+
+ABORT: encoding-error
+
+ERROR: In procedure scm_to_stringn: Error while printing exception.
+
+
+Crash 8
+-------
+[2015-07-17 12:37:57:428] [ERROR] Caught signal 11 (Segmentation fault) on
+thread 140537051608832
+        Stack Trace:
+        2: basic_string.h:539   ~basic_string()
+        3: CogServerMain.cc:79  _Z7sighandi()
+        4: ??:0 killpg()
+        5: ??:0 scm_make_vm()
+        6: ??:0 GC_mark_from()
+        7: ??:0 GC_mark_some()
+        8: ??:0 GC_stopped_mark()
+        9: ??:0 GC_try_to_collect_inner()
+        10: ??:0        GC_collect_or_expand()
+        11: ??:0        GC_allocobj()
+        12: ??:0        GC_generic_malloc_inner()
+        13: ??:0        GC_register_finalizer_inner()
+        14: ??:0        scm_closedir()
+        15: ??:0        scm_i_new_smob()
+        16: smob.h:91   scm_new_smob()
+        17: ??:0        scm_vm_engine()
+        18: ??:0        scm_call_1()
+        19: ??:0        scm_vm_engine()
+        20: ??:0        scm_call_3()
+        21: ??:0        scm_vm_engine()
+        22: ??:0        scm_call_1()
+        23: ??:0        scm_vm_engine()
+        24: ??:0        scm_call_3()
+        25: ??:0        scm_vm_engine()
+        26: ??:0        scm_call_4()
+        27: SchemeEval.cc:606     opencog::SchemeEval::do_eval(std::string
+const&)
+        28: SchemeEval.cc:535     opencog::SchemeEval::c_wrap_eval(void*)
+        29: ??:0        scm_at_abort()
+        30: ??:0        scm_vm_engine()
+        31: ??:0        scm_call_4()
+        32: ??:0        scm_at_abort()
+        33: ??:0        scm_c_with_continuation_barrier()
+        34: ??:0        GC_call_with_gc_active()
+        35: ??:0        scm_current_processor_count()
+        36: ??:0        GC_call_with_stack_base()
+        37: ??:0        scm_with_guile()
+        38: SchemeEval.cc:502     opencog::SchemeEval::eval_expr(std::string
+const&)
+        39: basic_string.h:293    std::string::_M_data() const
+        40: ??:0
+std::this_thread::__sleep_for(std::chrono::duration<long, std::ratio<1l, 1l>
+>, std::chrono::duration<long, std::ratio<1l, 1000000000l> >)
+        41: ??:0        start_thread()
+        42: ??:0        clone()
+
+
+Garbage 9
+---------
+submit-one: The town has an area of 88 km², population (2003) is 158,000, and is
+located 20 km north of downtown Hồ Chí Minh City, on the left bank of the Saigon River,
+upstream from Hồ Chí Minh City.
+duuude before nectcat open 27
+opencog-en> Backtrace:
+In ice-9/boot-9.scm:
+ 157: 6 [catch #t #<catch-closure 195d220> ...]
+In unknown file:
+   ?: 5 [apply-smob/1 #<catch-closure 195d220>]
+In ice-9/boot-9.scm:
+ 157: 4 [catch #t #<catch-closure 195d0e0> ...]
+   ?: 5 [apply-smob/1 #<catch-closure 1959f00>]
+In ice-9/boot-9.scm:
+ 157: 4 [catch #t #<catch-closure 1959dc0> ...]
+In unknown file:
+   ?: 3 [apply-smob/1 #<catch-closure 1959dc0>]
+   ?: 2 [call-with-input-string "(observe-text \"Although this town is an
+administratively separate town, it is considered as part of the H\u1ed3 Chí Minh City
+Metropolitan Area since this town is bordered by H\u1ed3 Chí Minh City\u2019s urban
+area.\")\n" ...]
+In ice-9/boot-9.scm:
+ 102: 1 [#<procedure 1addf40 at ice-9/boot-9.scm:97:6 (thrown-k . args)> encoding-error
+...]
+In unknown file:
+   ?: 0 [apply-smob/1 #<catch-closure 1959d80> encoding-error ...]
+
+
+/bin/bash ./ss-one.sh en beta-pages/T/Thủ Dầu Một lo
+
+
+So -- looks like netcat is sending correct text, but by the time
+observe-text gets it, it has been garbled. Why?
+Well, nlp/scm/processing-utils.scm prints it ungarbled.
+
+OK, so this fails:
+(define sss (socket PF_INET SOCK_STREAM 0))
+(connect sss AF_INET (inet-pton AF_INET "127.0.0.1") 7777)
+(display "SmålandSmåland" sss)
+
+prints garbage
+
+(set-port-encoding! sss "utf-8")
+does not fix it.
+(use-modules (rnrs bytevectors))
+(send sss (string->utf8 "Hòa Phú Tân Mỹ")) does not work
+
+
+Ahhh ... (string->utf8 "Småland") prints
+#vu8(83 109 63 108 97 110 100)
+which is what netcat receives
+
+å should be c3 a5  U+00E5
+
+guile-git is broken
+guile-2.0.9 shell works great.
+cogserver linked to guile-2.0.9 is broken
+... but is fixed by using (set-port-encoding! sss "utf-8")
+Yayyy!
+
+
+Boo ...
+submit-one: Phú Mỹ.
+(observe-text \"Phú M\u1ef9.\")
+
+ditto for Phú Thọ.
+Chánh Nghĩa.
+Hiệp Thành
+Thủ Dầu Một
+Hồ Chí Minh
+
+(relex-parse "Ćićolina\n")
+(x-sock-io "Ćićolina\n")
+(x-sock-io "Thủ Dầu Một\n")
+
+(define (x-sock-io sent-txt)
+   (let ((s (socket PF_INET SOCK_STREAM 0)))
+      (connect s AF_INET (inet-pton AF_INET "10.70.70.2") 7777)
+      (set-port-encoding! s "utf-8")
+
+      (display sent-txt s)
+      (system (string-join (list "echo \"Info: send to parser: " sent-txt "\"")))
+      (close-port s)))
+
+(setlocale LC_ALL "")
+
+(set-port-encoding! (current-input-port) "utf-8")
+(display "Ćićolina\n")
+(define x "Ćićolina\n")   breaks  on cogserver for guile-2.0.9 but
+(define x "Thủ Dầu Một\n")  as above
+(define x "Småland\n") ... works!!
+(define x "Hòa Phú Phú Tân\n")  ... works  !!!
+(define x "x\u0106i\u0107olina\\n") works
+
+Ć is U+0106  c4 86
+ć is U+0107  c4 87
+
+what is bizarre is that the above is exactly inverted for
+the guile-2.1 shell:
+sending the  "working" ones sends garbage, sending the failing ones goes through.
+(ditto for just simply printing....)
+
+both define/display seem to work fine in the guile-2.0.9 shell...
+and define/display seem to work well for the cogserver-2.1 shell. WTF.
+so is it due to a shared-library mis-match?  Caching of compiled files?
+
+(display "SmålandSmåland\n")
+(display "Ćićolina\n")
+(display "Thủ Dầu Một\n")
+(display "Hòa Phú Phú Tân\n")
+
+Avoiding preload of all scheme does not fix it.
+Clearling the guile compiler cache does not fix it.
+
+[call-with-input-string "(define x \"\u0106i\u0107olina\\n\")\n" ...]
+
+ERROR: In procedure call-with-input-string:
+ERROR: Throw to key `encoding-error' with args `("scm_to_stringn" "cannot convert wide
+string to output locale" 84 #f #f)'.
+
+(define x "\u0106i\u0107olina\n")
+
+%default-port-encoding is a fluid ....
+make fluid with default ...
+make dynamic state (with parent ....)
+
+Solution! (setlocale LC_ALL "") every time a new thread is created.
+
+======================================================================
+Jan-Feb 2014
+
+Performance
+-----------
+Performance seems to suck:
+-- two parsers, each takes maybe 4% cpu time total. Load avg of about 0.03
+-- each parser runs 4 async write threads pushing atoms to postgres.
+   each one complains about it taking too long to flush the write queues.
+-- postmaster is running 10 threads, load-avg of about 2.00  so about
+   2 cpu's at 100%
+-- vmstat shows 500 blks per second written. This is low...
+-- top shows maybe 0.2% wait state. So its not disk-bound.
+-- what is taking so long?
+
+So, take a tcpdump:
+-- a typical tcpdump packet:
+   UPDATE Atoms SET tv_type = 2, stv_mean = 0 , stv_confidence = 0, stv_count = 54036 WHERE uuid = 367785;
+   its maybe 226 bytes long.
+-- this gets one response from server, about 96 bytes long.
+-- then one more req, one more repsonse, seems to be a 'were'done' mesg
+   or something ...  which I guess is due to SQLFreeHandle(SQL_HANDLE_STMT ???
+-- time delta in seconds, of tcpdump of traffic packets, between update, and
+   response from server:
+   0.0006  0.0002 0.0002 0.0002 0.028 (yow!!) 0.001 0.0002
+
+-- so it looks like about every 8-10 packets are replied to fairly quick,
+   then there's one that takes 0.025 seconds to reply.... stair-steps in
+   response time like this all the way through the capture.
+
+Wild guess:
+-- Hmm ... this seems to be related to the commit delay in postgresql.conf
+   Change commit_delay to 1 second
+   change wal_bufers to 32MB since its mostly update traffic.
+   change checkpoint_segments to 32 (each one takes up 16MB of disk space.)
+
+-- Making these changes has no obvious effect ... bummer.
+
+I don't get it; performance sucks and I don't see why.  Or rather: postmaster
+is chewing up vast amounts of cpu time for no apparent reason...
+
+
+select * from pg_stat_user_tables;
+select * from pg_stat_all_tables;
+select * from pg_statio_user_tables;
+select * from pg_database;
+
+pg_stat_user_indexes
+pg_stat_all_indexes
+
+select * from pg_catalog.pg_stat_activity;
+select * from pg_catalog.pg_locks;
+
+
+-- WOW!!!   VACUUM ANALYZE; had a huge effect!!
+
+-- vacuum tells em to do following:
+   change max_fsm_pages to 600K
+   chage max_fsm_relations to 10K
+
+Anyway ... performance measured as of 27 Dec 2013:
+
+Takes about 105 millisecs to clear 90 eval-links from the write-back
+queues. This each eval-link is 5 atoms (eval, defind, list, word, word)
+so this works out to 5*90 atoms /0.105 seconds = 4.3KAtoms/sec
+which is still pretty pathetic...
+
+gdb:
+---
+handle SIGPWR nostop noprint
+handle SIGXCPU nostop noprint
+
+
+How about using a reader-writer lock?
+----------------------------------
+
+boost::shared_lock  for reading,
+unique_lock for writing ...
+
+upgrade_lock<shared_mutex> lock(workerAccess);
+        upgrade_to_unique_lock<shared_mutex> uniqueLock(lock);
+
+
+shared_mutex
+write uses:  unique_lock<shared_mutex>
+readers use shared_lock<shared_mutex>
+
+writer does:
+
+  // get upgradable access
+  boost::upgrade_lock<boost::shared_mutex> lock(_access);
+
+  // get exclusive access
+  boost::upgrade_to_unique_lock<boost::shared_mutex> uniqueLock(lock);
+  // now we have exclusive access
+}
+
+am using boost-1.49 on cray
+
+======================================================================
+======================================================================
+
+8 Aug 2015
+----------
+
+# select * from typecodes where typename='WordNode';
+ type | typename 
+------+----------
+   73 | WordNode
+
+select * from typecodes where typename='ListLink';
+ type | typename 
+------+----------
+    8 | ListLink
+
+select * from typecodes where typename='EvaluationLink';
+ type |    typename    
+------+----------------
+   47 | EvaluationLink
+
+en_pairs=# select * from typecodes where typename='AnyNode';
+ type | typename 
+------+----------
+   74 | AnyNode
+
+
+
+select uuid,stv_count,name from atoms where type=73 and name='Northern';
+  uuid   | stv_count |   name   
+---------+-----------+----------
+ 1018149 |      9426 | Northern
+
+select uuid,stv_count,name from atoms where type=73 and name='Ireland';
+  uuid   | stv_count |  name   
+---------+-----------+---------
+ 1018155 |     12288 | Ireland
+
+select sum(stv_count) from atoms where type=73;
+   sum    
+----------
+ 78615971
+
+that is, N(*) = 78615971
+
+
+So we conclude that -log_2 P(Northern) = -log_2 (9426 / 78615971)
+= -log_2 (1.1989930137732446e-4) = 13.025889126989188
+
+-log_2(Ireland) = -log_2(12288 / 78615971)
+= -log_2(1.563041178999112e-4) = 12.643356592283384
+
+
+
+
+select uuid, stv_count from atoms where type=8 and outgoing='{1018149, 1018155}';
+  uuid   | stv_count 
+---------+-----------
+ 1023156 |         0
+
+any==152
+select * from typecodes where type=89;
+ type |          typename           
+------+-----------------------------
+   89 | LinkGrammarRelationshipNode
+
+
+select uuid,type,stv_count from atoms where type=89;
+ uuid | type | stv_count 
+------+------+-----------
+  152 |   89 |  23830549
+
+
+select uuid,stv_confidence, stv_count from atoms where type=47 and outgoing='{152, 1023156}';
+  uuid   | stv_confidence | stv_count 
+---------+----------------+-----------
+ 1023157 |      10.743062 |      1314
+
+
+So N(Northern, Ireland) = 1314
+
+Next ...
+select uuid,name from atoms where type=74;
+   uuid    |    name    
+-----------+------------
+ 143427138 | left-word
+ 143427163 | right-word
+
+select uuid, stv_count from atoms where type=8 and outgoing='{143427138, 143427163}';
+   uuid    | stv_count 
+-----------+-----------
+ 143670792 |         0
+
+select uuid,stv_confidence,stv_count from atoms where type=47 and outgoing='{152, 143670792}';
+   uuid    | stv_confidence | stv_count 
+-----------+----------------+-----------
+ 143670793 |              0 |  39333063
+
+
+So N(*,*) = 39333063
+
+So P(Northern, Ireland) = 1314 / 39333063 = 3.340700926342807e-5
+
+-log_2 P(Northern, Ireland) = 14.869489642136607
+
+
+Get (Northern,*)
+select uuid, stv_count from atoms where type=8 and outgoing='{1018149, 143427163}';
+
+143526182 == uuid of above
+select uuid,stv_confidence,stv_count from atoms where type=47 and outgoing='{152, 143526182}';
+   uuid    | stv_confidence | stv_count 
+-----------+----------------+-----------
+ 143526183 |      12.992029 |      4828
+
+So N(Northern,*) = 4828
+
+P(Northern,*) = 4828 / 39333063 = 1.227466063347266e-4
+
+-log_2 P(Northern,*) = 12.992029241703914  agrees with above.
+
+Get (*, Ireland)
+select uuid, stv_count from atoms where type=8 and outgoing='{143427138, 1018155}';
+
+uuid=143526120
+
+select uuid,stv_confidence,stv_count from atoms where type=47 and outgoing='{152,143526120}';
+   uuid    | stv_confidence | stv_count 
+-----------+----------------+-----------
+ 143526121 |      12.620522 |      6246
+
+
+So: N(*, Ireland) = 6246
+P(*, Ireland) = 6246 / 39333063 = 1.58797701567254e-4
+
+-log_2 P(*, Ireland) = 12.620522348438364
+
+MI(Northern, Ireland) = 
+log_2 P(Northern, Ireland) - log_2 P(Northern,*) - log_2 P(*, Ireland)
+
+= - 14.869489642136607 + 12.992029241703914 + 12.620522348438364
+= 10.743061948005671 agrees with SQL
+
+Next:
+P(Northern,*) = 4828 / 39333063 = 1.227466063347266e-4
+
+P(Northern) = (9426 / 78615971) = 1.1989930137732446e-4
+
+So P(Northern,*) < P(Northern)  aiiieeeee false!
+and 
+P(R(Northern,*)|Northern) ==
+P(Northern,*) / P(Northern) = 
+
+P(*, Ireland) = 6246 / 39333063 = 1.58797701567254e-4
+
+P(Ireland) = (12288 / 78615971) = 1.563041178999112e-4
+
+
+P(R(*, Ireland) | Ireland) ==
+  P(*, Ireland) / P(Ireland)
+
+So P(R(Northern, Ireland) | Northern, Ireland) is huge!! >> 1
+
+
+
+So N(*,*) = 39333063
+
+N(*) = 78615971
+
+P(R(*,*)) = 39333063 / 78615971 = 0.5003189873467314
+
+log_2 ((R,*,*)) = 0.9990798905456042
+
+Strange ... I expect more pairs than words ... !?
+
+Is the 1/2 an accident due to the parse-damange?
+
+
 31 Dec 2016
 -----------
 
@@ -2646,9 +3296,6 @@ scheme@(guile-user)> GC Warning: Repeated allocation of very large block (appr. 
 
 
 
-
-
-
 12 Feb 2017
 -----------------
 postgres: change  shared_buffers = 64576MB         # min 128kB
@@ -2706,4 +3353,1808 @@ cp ~/src/relex/src/split-sentences/split-sentences.pl ~/run
 
 .... etc.
 
+
+===============================================================
+Again:
+sudo cgm create all linas
+sudo cgm chown all linas $(id -u) $(id -g)
+cgm movepid all linas $$
+
+14 April status:
+---------------
+ZH:
+select count(*) from atoms;  18941255
+
+14 April 2017
+-------------
+Start from scratch with English.
+
+time lxc-copy -n  opencog-learn -N learn-en
+real	6m43.362s
+wget https://dumps.wikimedia.org/enwiki/20170320/enwiki-20170320-pages-articles-multistream.xml.bz2
+2 hours 2 mins
+
+time cat enwiki-20170320-pages-articles-multistream.xml.bz2 |bunzip2
+|/home/ubuntu/src/relex/src/perl/wiki-count.pl
+Counted 955001762 lines in 17398694 pages -- 17.4M articles
+real    65m31.329s
+
+time cat enwiki-20170320-pages-articles-multistream.xml.bz2 |bunzip2 |/home/ubuntu/src/relex/src/perl/wiki-scrub.pl
+real    604m9.767s
+user    413m17.996s
+sys     13m8.680s
+
+
+find |wc gives 7495026 total articles
+real    267m1.295s
+
+find |wc gives 5423537 after cat/template removal
+
+createdb en_pairs
+cat src/atomspace/opencog/persist/sql/multi-driver/atom.sql | psql en_pairs
+
+
+----------------
+Arghh more bugs:
+* failure in LG to split punctuation
+* failure to strip regex markup.
+linkage_get_word
+UBSCRIPT_MARK
+SUBSCRIPT_DOT
+linkage_print_diagram
+DISPLAY_GUESS_MARKS
+HIDE_MORPHO  for any language.... except its set to rue for jni
+where are the square bracekts removed??????
+orig_str in java....
+feature/LinkableView.java line 286
+
+LocalLGParser.java circa line 150
+-----------------------------
+yue: 
+17006 -- 21876 submitted 27342 left
+
+
+en: java crashed:
+/home/ubuntu/run/hs_err_pid3206.log
+# C  [liblink-grammar.so.5+0x2aa00]  linkage_set_domain_names+0xe0
+
+
+-------------------------
+en_pairs from 2016:
+select count(*) from atoms;  18487291 atoms. == 18.5M
+select sum(stv_count) from atoms; 1775388151 = 1.77 B
+
+select sum(floatvalue[3]) from valuations where type=177; CountTru
+
+select count(*) from  atoms where type =73;   396255 this is words
+select count(*) from  atoms where type =47;   9045489 this is pairs
+select count(*) from  atoms where type =8;    9045489 this is list links
+
+select count(*) from valuations where type=121;  -- FloatValue
+ select * from valuations where type != 176 and type != 177 limit 50;
+select count(*) from valuations where type != 176 and type != 177;
+
+select count(*) from valuations where key =2440463582;  -- 9672428
+select count(*) from valuations where key =2440463583;  -- 8880904
+
+
+(use-modules (opencog) (opencog persist) (opencog persist-sql))
+(use-modules (opencog nlp) (opencog nlp learn))
+(sql-open "postgres:///en_pairs?user=linas")
+(batch-all-pairs)
+
+ (load "compute-mi.scm")
+(init-trace "/tmp/progress")
+702
+(load-atoms-of-type item-type)
+(sql-stats)
+; hangs... because it is walking the TLB which has 2.4GB of uuid
+    _store->print_stats();
+(length (cog-get-atoms item-type))
+
+(define lgr (LinkGrammarRelationshipNode "ANY"))
+(fetch-incoming-set lgr)
+; there aren't any yet....
+
+(define word (car (cog-get-atoms item-type)))
+(compute-pair-wildcard-counts word lgr)
+
+delete all-pair-wildcard-counts
+
+      (par-for-each
+         (lambda (word)
+            (compute-pair-wildcard-counts word lgr)
+            (trace-msg-cnt "Wildcard-count did ")) al)
+
+         (cog-get-atoms item-type)
+      )
+
+(define al (take (cog-get-atoms item-type) 1000))
+
+scheme@(guile-user) [1]> ,bt
+In ice-9/threads.scm:
+   289:22  5 (loop _)
+In ice-9/futures.scm:
+   259:13  4 (touch #<future 55c59c4adb40 queued #<partial-continuation
+55c5…>)
+   243:14  3 (work)
+In unknown file:
+           2 (wait-condition-variable #t)
+While executing meta-command:
+ERROR: In procedure cdr: Wrong type argument in position 1 (expecting
+pair): ()
+
+
+(use-modules (srfi srfi-1))
+(define al (list-tabulate 100000 values))
+(define foo 0)
+(par-for-each (lambda (x) (set! foo (+ x foo))) al)
+
+^CERROR: In procedure scm-error:
+ERROR: User interrupt
+
+Entering a new prompt.  Type `,bt' for a backtrace or `,q' to continue.
+scheme@(guile-user) [1]> ,bt
+In ice-9/threads.scm:
+   289:22  5 (loop _)
+In ice-9/futures.scm:
+   265:11  4 (touch #<future 55e1984d3400 started #<procedure 55e198659f60 a…>)
+   243:14  3 (work)
+In unknown file:
+           2 (wait-condition-variable #t)
+While executing meta-command:
+ERROR: In procedure cdr: Wrong type argument in position 1 (expecting pair): ()
+scheme@(guile-user) [1]>
+
+bug#26616: Acknowledgement (guile-2.2 par-for-each hangs for large lists)
+
+
+https://debbugs.gnu.org/cgi/bugreport.cgi?bug=26616
+
+-------
+(cog-new-value type list) string float link
+(cog-set-value! atom key value)
+(cog-value atom key)
+(cog-value?
+cog-value->list
+cog-tv-count
+
+confidence
+
+---------
+(use-modules (opencog) (opencog persist) (opencog persist-sql))
+(use-modules (opencog nlp) (opencog nlp learn))
+(sql-open "postgres:///en_pairs?user=linas")
+(load-atoms-of-type 'WordNode)
+
+(define lgr (LinkGrammarRelationshipNode "ANY"))
+(fetch-incoming-set lgr)
+(cog-incoming-set lgr)
+
+(define word (car (cog-get-atoms 'WordNode)))
+(fetch-incoming-set word)
+(cog-incoming-set word)
+(define lpr (car (cog-incoming-set word)))
+(fetch-incoming-set lpr)
+(length (cog-incoming-set lgr))
+
+scheme@(guile-user)> (length (cog-incoming-set lgr))
+Too many heap sections: Increase MAXHINCR or MAX_HEAP_SECTS
+Aborted
+
+
+(load-atoms-of-type 'LinkGrammarRelationshipNode)
+(fetch-atom lg_rel)
+
+fetch_incoming_set_cb
+SQLAtomStorage::getIncomingSet
+tlb get uuid
+getNod
+
+h = as->fetch_atom(h);
+
+   Handle h(doGetNode(t, str));
+   Handle hg(doGetLink(t, hs));
+
+getUUID  INVALID_UUID
+
+select * from atoms where type = 89;
+
+en_pairs=> select * from atoms where type = 89;
+    uuid    | space | type | height | name | outgoing 
+------------+-------+------+--------+------+----------
+        152 |     1 |   89 |      0 | ANY  | 
+ 2439209701 |     1 |   89 |      0 | ANY  | 
+ 2439209706 |     1 |   89 |      0 | ANY  | 
+ 2439209711 |     1 |   89 |      0 | ANY  | 
+ 2439209716 |     1 |   89 |      0 | ANY  | 
+(5 rows)
+
+OK, so that's a bug .. no unique constraint
+
+
+   8: SQLAtomStorage.cc:324
+opencog::SQLAtomStorage::Response::get_all_values_cb()
+"SELECT * FROM Valuations WHERE atom = 
+
+SELECT * FROM Valuations WHERE atom = 152;
+   1 |  152 |  177 | {1,0,402733330} |             | 
+
+loading_typemap
+
+(cog-new-ctv 0 0 right-total
+
+set-count   vs ctv, stv, confidence, count etc.
+AnyN
+any-left
+any-right
+
+mst-parser.scm
+
+Going to batch-logli wildcards
+Elapsed secs 53
+Going to do individual word-pair mi
+
+
+Noting for pair (When *) -- no frequency!
+no frequency's anywhere...
+(PredicateNode \"*-FrequencyKey-*\") was never stored!
+
+select * from atoms where type=53; -- the predicateNodes 
+
+wtf line 646 ... sote the keyy....
+
+Wildcard-count did 396255    compute-pair-wildcard-counts -- stores count
+Elapsed secs 11
+Done with wild-card count
+Elapsed secs 0
+Going to batch-count all-pairs
+Start all-pair-count
+Done with all-pair count -- again a count...
+Elapsed secs 130
+Going to batch-logli wildcards -- batch-all-pair-wildcard-logli
+    compute-atom-logli
+Elapsed secs 53
+Going to do individual word-pair mi
+
+(define k (PredicateNode "*-FrequencyKey-*"))
+(define w (WordNode "When"))
+(define e (EvaluationLink
+(LinkGrammarRelationshipNode "ANY")
+(ListLink  (WordNode "When") (AnyNode "right-word")))) 
+
+(cog-value e k)
+
+well ... e has no counts ... and thus no logli
+
+(length (cog-incoming-set (WordNode "When") ))
+except there are lots so wtf?
+
+(define lg_rel (LinkGrammarRelationshipNode "ANY"))
+
+(define (get-total-atom-count atom-list)
+   (fold + 0.0 (map get-count atom-list))
+
+ (compute-pair-wildcard-counts   w lg_rel
+
+... there are no counts on any e's ... wtf ??
+
+(EvaluationLink  ; uuid  2434162536
+   (LinkGrammarRelationshipNode "ANY") ; uuid 152
+   (ListLink   ; uuid 2434162535
+      (WordNode "Hear")  ; uuid 17490475
+      (WordNode "When")  ; uuiid 1537161
+   )
+)
+
+incoming set failed to load the values!!!
+also cog-value is real slowww
+
+   // Get the correct UUID; its possible that we don't know it yet.
+   UUID uuid = _tlbuf.getUUID(h);
+   if (TLB::INVALID_UUID == uuid)
+   {
+      Handle hg(doGetAtom(h));
+      uuid = _tlbuf.getUUID(hg);
+   }
+get_uuid
+_vindex
+_keyset
+std::unordered_multimap<ContentHash, Handle>
+std::unordered_map<
+#include <unordered_map>
+std::unordered_set<Handle, handle_hash>  -- kill this -- done
+HandlePair
+
+-----------------------------------------
+
+(use-modules (opencog) (opencog persist) (opencog persist-sql))
+(use-modules (opencog nlp) (opencog nlp learn))
+(sql-open "postgres:///en_pairs?user=linas")
+(use-modules (opencog cogserver))
+(start-cogserver)
+(batch-all-pairs)
+(define lg_rel  (LinkGrammarRelationshipNode "ANY"))
+      (init-trace "/tmp/progress")
+(load "common.scm")
+(load "compute-mi.scm")
+ (load-atoms-of-type item-type)
+ (length (cog-get-atoms item-type))
+ (fetch-incoming-set lg_rel)
+
+ (compute-pair-wildcard-counts w lg_rel)
+
+
+(EvaluationLink (ctv 0 0 90720) ; uuid = 143501595
+   (LinkGrammarRelationshipNode "ANY") ; uuid = 152
+   (ListLink  ; uuid = 143501594
+      (AnyNode "left-word")  ; uuid = 143427138
+      (WordNode "When")  ; uuid = 1537161
+   )
+)
+elect * from valuations where atom=143501595;
+
+(store-atom left-star) took forever...
+
+WordNode load took 36s, 38s
+
+9112060 in incoming set
+
+serial inc fetch= 28m11 ,  28m03
+serial inc fetch w/GIN idx= 28m39
+parallel inc fecth w/GIN idex = 38s, 28s, 29s
+parallel inc fetch no idx = 32s, 30s, 33s
+
+serial value fetch=  24m30
+parallel value fetch=  1m36, 1m35
+parallel resurse+value= 5m16, 6m47(!?), 6m47, 6m50, 7m6
+
+atomspace add = 8m51 = 531 secs, 9m02, 7m56, 7m55, 8m00, 8m21
+
+atsomapce add: added 9112060 atoms in 8m51 = 531 secs = 17.1K/sec
+well, each atom is actually 5 atoms so this is 5x faster = 86K/sec
+
+do a parallel type fetch...
+as->fetch_all_atoms_of_type(t);
+_backing_store->loadType(_atom_table, t);
+
+o_store_single_ato
+add_id_to_cache(uuid)
+   puts it in local_id_cache
+   erases from id_create_cach
+
+maybe_create_id(uuid)
+
+where is check for existance?????
+well, get_uuid() does checking()
+soo  iif in tlb then works
+
+rp.id_set ...!?
+get_ids get all id's  in 
+
+do_store_single_atom
+do_store_atom
+_write_q
+
+does tlbuf???
+
+I don'd see it being tlbuff....
+
+   UUID uuid = _tlbuf.getUUID(h);
+   if (TLB::INVALID_UUID != uuid) return uuid;
+
+
++CREATE INDEX ON Atoms USING GIN(outgoing);
+
+TODO:
+parallelize get_ids...
+actually get_ids is not needed.....
+
+XXX need to store the keys
+
+do_store_atom
+
+total stroes is miscounted!aactually, its right, values don't count.
+
+num_get_nodes=3 num_got_nodes=1 (33.333333 pct)
+num_get_links=0 num_got_links=0 (-nan pct)
+sql-stats: total loads = 19741116 total stores = 2 ratio=0.000000
+
+get_recursive is not counting what it got.
+values and valuations are not counting....
+
+Also: type load doesn't ...? grab the TV's!?  FIXED
+
+type load needs to be conservative with recursion! DONE
+
+do-store_atom stores values recursively. It should have a flag for that.
+Documented....
+
+Also: ato->setValue() does not work for raw atoms!  so incoming is
+broken.
+RuntimeException
+move printing exceptiioon ot guile
+
+fetch_incoming_set false
+MultiThreadUTest
+tv-conf
+cog-tv
+
+14:37
+ (use-modules (opencog) (opencog persist) (opencog persist-sql))
+ (use-modules (opencog nlp) (opencog nlp learn))
+ (sql-open "postgres:///en_pairs?user=linas")
+
+ (load-atoms-of-type 'WordNode)   ;; approx 1 minutes?
+ (define lg_any (LinkGrammarRelationshipNode "ANY"))
+ (fetch-incoming-set lg_any) ;; approx 15 minutes ?
+;
+(mst-parse-text "this is a test")
+
+ _tlbuf.addAtom(node, p->uuid); can replace!?
+line 1427
+line 378
+
+start-cost-pair is bogus!
+and subsequent crash
+
+ (define e (EvaluationLink 
+   (LinkGrammarRelationshipNode "ANY")
+   (ListLink (WordNode "this") (WordNode "test"))))
+
+ (cog-value e mi-key)
+
+select * from atoms where name='this'; -- 953769
+test -- 1712336
+select * from atoms where outgoing='{953769,1712336}'; -- 29138136
+select * from atoms where outgoing='{152,29138136}'; -- 29138137
+
+select * from valuations where atom=29138137;
+
+
+all count-tvs being stored as length 2...
+fetch-atom aint getting the tv.
+
+store-atom crashed. ... cause type=-1
+store after fetch truncates
+ctv print is fuckec
+crap. Are teh datbases corrupt???
+
+also .. reload the typemap
+type_map_was_loaded = false
+classserver().getNumberOfClasses();
+
+INSERT INTO Valuations
+   (SELECT 1 AS key,  -- 1 here is the predicate node
+      uuid AS atom,
+      176 as type,
+      ARRAY[stv_mean, stv_confidence] as floatvalue
+      FROM Atoms_Backup WHERE tv_type = 1);
+
+INSERT INTO Valuations
+   (SELECT 1 AS key, -- 1 here is the predicate node
+      uuid AS atom,
+      177 as type,
+      ARRAY[stv_mean, stv_confidence, stv_count] as floatvalue
+      FROM Atoms_Backup WHERE tv_type = 2);
+
+wait .. link pipeline!???
+
+observ-ext ... load???
+
+
+the -FrequencyKey- shows {0,Infinity} ... wtf. MI is nan!!
+
+Maybe 4 hours
+
+ (use-modules (opencog) (opencog persist) (opencog persist-sql))
+ (use-modules (opencog nlp) (opencog nlp learn))
+ (sql-open "postgres:///en_pairs?user=linas")
+
+ (load-atoms-of-type 'WordNode)   ;; approx 3 minutes?
+ (define lg_any (LinkGrammarRelationshipNode "ANY"))
+ (fetch-incoming-set lg_any) ;; approx 15 minutes ?
+;
+(mst-parse-text "this is a test") ; OK
+-----------------
+Ben,
+
+Just got out of surgery for my broken leg; this email attempts to prove
+that the general anesthesia didn't kill too many brain cells.  Its a report
+on some the langauge-learning results.
+
+Lets dive in.
+(mst-parse-text "this is a test")
+
+Raw hard-to-read result below.  Easier-to-read versions later.
+ctv holds the raw count of how many times the word was observed.
+
+((2.862118287646645 ((2 (WordNode "is" (ctv 1 0 8165736))) (3 (WordNode "a" (ctv 1 0 14691104))
+))) (2.1880378875282904 ((1 (WordNode "this" (ctv 1 0 1300681))) (2 (WordNode "is" (ctv 1 0 8165736))
+))) (2.8103625339100944 ((1 (WordNode "this" (ctv 1 0 1300681))) (4 (WordNode "test" (ctv 1 0 60328))
+))))
+
+The floating point number above and below is the Yuret MI of the word pair.
+I've ameneded
+https://github.com/opencog/opencog/tree/master/opencog/nlp/learn/learn-lang-diary/learn-lang-diary.pdf
+pages 2-5 so that its less confusing and the formulas are accurate.
+Basically, it derives Yuret's formulas in a more rigorous
+way; if I recall, his argument was scattered, and just asserted the
+result without deriving it.  So the PDF derives it.
+
+((2.862118287646645 ((2 (WordNode "is" )) (3 (WordNode "a" ))))
+ (2.1880378875282904 ((1 (WordNode "this" )) (2 (WordNode "is" ))))
+(2.8103625339100944 ((1 (WordNode "this" )) (4 (WordNode "test" )))))
+
+Simplifying further:
+
+(((2 (WordNode "is" )) (3 (WordNode "a" )))
+ ((1 (WordNode "this" )) (2 (WordNode "is" )))
+((1 (WordNode "this" )) (4 (WordNode "test" ))))
+
+The integer is the ordinal of the word.  Note that the linkage
+"is-a" was selected over "a test" -- that's because "a test" has an
+MI of 2.0935.  This is not terribly surprising; any MI of less than
+four is pretty crappy, and these four words occur so commonly that
+the correlation between them really is quite qeak -- they're alomost
+drowning in noise.  Extracting disjuncts should strongly sharpen the
+results.  Next email.
+
+Here's a "better" example:
+
+(mst-parse-text "cats eat cat food")
+$5 = ((7.329 ((2 (WordNode "eat" (ctv 20938))) (4 (WordNode "food" (ctv 73924)))))
+(4.992 ((3 (WordNode "cat" (ctv 18408))) (4 (WordNode "food" (ctv 73924)))))
+(-1000 ((1 (WordNode "cats" (ctv 5902))) (4 (WordNode "food" (ctv 73924))))))
+
+So "eat food" has a decent MI, as expected.  Also "cat food" is decent.
+The minus-1000 means that the word pair "cats food" was never observed.
+(get-pair-mi-str "cats" "eat") = -1000 means that "cats eat" was never
+observed!  Bummer! The word "cats" was observed 6000 times, and this was
+not enough to discover a sentence that has "cats eat" in it.  These
+statistics are from some relatively smallish sample of WP articles, so
+lack of such a sentence is maybe not surprising. Here, childrens &
+young-adult lit may be better.
+
+Anyway, clustering that reveals that cats, dogs, etc are similar should
+help with this, or so goes the hypothesis.
+
+The word-pair "cats cat" does occur and has an MI of 5 but is prevented
+from linking by the link-crossing constraint.  Have not attempted to
+figure out if the Dick Hudson landmark transitivity idea can be mutated
+to apply to this situation. I suppose I should think about things before
+writing about them, but not thinking is faster.
+
+Lets try again:
+
+(mst-parse-text "dogs eat dog food")
+((7.329 ((2 (WordNode "eat" (ctv 20938))) (4 (WordNode "food" (ctv 73924)))))
+(7.047 ((3 (WordNode "dog" (ctv 41896))) (4 (WordNode "food" (ctv 73924)))))
+(5.050 ((1 (WordNode "dogs" (ctv 14852))) (2 (WordNode "eat" (ctv 20938))
+))))
+
+Well, that's much better. Let's try something harder:
+(mst-parse-text "It is not uncommon to discover strange things")
+
+((7.515 ( (WordNode "not" ) (WordNode "uncommon" )))
+ (4.142 ( (WordNode "is" ) (WordNode "uncommon" )))
+ (4.412 ( (WordNode "It" ) (WordNode "is" )))
+ (2.739 ( (WordNode "uncommon" ) (WordNode "to" )))
+(3.529 ( (WordNode "to" ) (WordNode "discover" )))
+(0.822 ( (WordNode "to" ) (WordNode "things" )))
+(6.171 ( (WordNode "strange" ) (WordNode "things" ))))
+
+Almost right -- the stinker in there is "to things" and it has a
+terrible MI.  The correct link would have been "discover things"
+but again, this word-pair was never ever observed.
+
+That's it for now, more later.
+
+p.s. The above is obtained with code that uses values in full
+generality; so for example the normalized word frequency is stored as
+
+(Valuation
+    (WordNode "foo")
+    (PredicateNode "*-Frequency Key-*")
+    (FloatValue 0.1234567 3.018))
+
+Note that "Valuation" is like an EvaluationLink but different.
+The first number is the normalized frequency of observation N(foo) / N(all words)
+and the second number of log-base-2 of the first number (its easier to
+read, than counting zeros in a frequency).
+
+I had to fix a dozen bugs in brand-new SQL backend code to get this to
+work right. It all seems stable, now.
+
+==========================================
+
+   (EvaluationLink
+      (LinkGrammarRelationshipNode "ANY")
+      (ListLink
+			(AnyNode "left-word")
+			(AnyNode "right-word")))
+
+fooo  failed to store counts for lw, rw...
+
+Hmm
+total word pair counts = 4.1823518e+08
+
+(define-public (count-all-words)
+	(define total-wordcnt 0)
+   (for-each
+      (lambda (word)
+         (set! total-wordcnt (+ total-wordcnt (get-count word))))
+      (cog-get-atoms item-type))
+	total-wordcnt
+)
+836420450.0
+
+342:48 342:50
+
+(define-public (count-all-words)
+	(get-total-atom-count (cog-get-atoms item-type))
+)
+
+(get-count (WordNode "the"))
+$28 = 41658552.0
+
+(define (mkhist)
+	(define nbins 100)
+	(define lo -0.7)
+	(define hi 0.7)
+	(define inc (/ nbins (- hi lo)))
+	(define hist (make-array 0 nbins))
+	(define (rat w) (/ (- (get-left-count-str w) (get-right-count-str w)) (get-word-count-str w)))
+
+	(define x lo)
+
+	(for-each (lambda (w)
+			(define bin (round (* inc (- (rat (cog-name w)) lo))))
+
+			(if (nan? bin) (set! bin 0))
+				(set! bin (inexact->exact bin))
+			(if (>= bin nbins) (set! bin (- nbins 1)))
+			(if (< bin 0) (set! bin 0))
+			(array-set! hist (+ 1 (array-ref hist bin)) bin))
+		(cog-get-atoms 'WordNode))
+
+	(array-for-each (lambda (cnt)
+			(format #t "~A	~A\n" x cnt)
+			(set! x (+ x (/ 1.0 inc))))
+		hist)
+)
+
+=============================================
+
+(cog-incoming-by-type
+	(LinkGrammarRelationshipNode "ANY")
+	'EvaluationLink)
+
+get_left_wildcard_count word lg_rel)
+(get-total-atom-count (get-all-pairs))
+
+(define (wtf)
+	(for-each
+		(lambda (pair)
+			(if (> 0.5 (get-count (get-left-word-of-pair pair)))
+				(format #t "wtf left of pair ~A" pair))
+			(if (> 0.5 (get-count (get-right-word-of-pair pair)))
+				(format #t "wtf right of pair ~A" pair))
+		)
+		(get-all-pairs)))
+
+418235182.0
+
+(get-total-atom-count (get-all-words))
+836420450.0
+(length (get-all-pairs))
+
+(LgWordCset 
+    (WordInstanceNode "adsf@62e9c582-1984-472b-a2f5-b61b2b0707e8")
+    (LgAnd 
+        (LgConnector 
+            (LgConnectorNode "ANY")
+            (LgConnDirNode "-")
+            (LgConnMultiNode "@")
+        )
+        (LgConnector 
+            (LgConnectorNode "ANY")
+            (LgConnDirNode "+")
+            (LgConnMultiNode "@")
+        )
+    )
+)
+
+No cset for the last word!!
+
+no DISJUNCT srcNode.get("DISJUNCT"); on last word .. line 139
+no attr on the last word
+load_senses
+config.isStoreSense
+
+ERROR: Throw to key `C++-EXCEPTION' with args `("fetch-atom" "Error:
+get_uuid(): cannot find (WordNode \"abcccccccccc\" (ctv 1.000000
+0.000000 4.000000)) ; [8608664669745395561][1]\n\n
+(/home/linas/src/novamente/src/atomspace-git/opencog/persist/sql/multi-driver/SQLAtomStorage.cc:934)\nFunction
+args:\n((EvaluationLink\n   (LinkGrammarRelationshipNode \"ANY\")\n
+(ListLink\n      (WordNode \"###LEFT-WALL###\" (ctv 1 0 19431131))\n
+(WordNode \"abcccccccccc\" (ctv 1 0 4))\n   )\n)\n)")'.
+
+
+(fetch-atom (Word "asdfasdfasdf"))
+(fetch-atom (EvaluationLink (LinkGrammarRelationshipNode "ANY")
+    (ListLink (Word "###LEFT-WALL###") (Word "asdfasdfqewr"))))
+
+(fetch-atom (ListLink (Word "###LEFT-WALL###") (Word "asdfasdfqewr")))
+
+SQLAtomStorage::doGetLink
+IOException
+ fixed in commit 327fc6c0a3c8b4b62ac80a61e2fdfc6971190c30
+
+arghhh, last checkpoint: 24304265 24M distinct words
+select sum(floatvalue[3]) from valuations where type=7;
+
+gives 1914173302 == 1.9G observations
+
+single-quote -- leading
+semicolon -- leading
+foobar
+sql-stats should print name of the DB and the login user.<F4>
+/home/ubuntu/run/hs_err_pid31730.log
+but only when sock is dropped...
+bug https://github.com/opencog/atomspace/issues/1054
+
+
+Using bdwgc as of 
+0f4244e130541a591d638c98f820b6b49e915ac0
+Author: Ivan Maidanski <ivmai@mail.ru>
+Date:   Thu Jan 12 00:58:41 2017 +0300
+
+
+stack below seen twice 3 4
+#0  0x00007ffff762c350 in pthread_kill ()
+   from /lib/x86_64-linux-gnu/libpthread.so.0
+#1  0x00007ffff785f490 in GC_suspend_all () at pthread_stop_world.c:640
+#2  0x00007ffff785f564 in GC_stop_world () at pthread_stop_world.c:748
+#3  0x00007ffff784b19e in GC_stopped_mark (
+    stop_func=stop_func@entry=0x7ffff784aca0 <GC_never_stop_func>)
+    at alloc.c:650
+#4  0x00007ffff784bd19 in GC_try_to_collect_inner (
+    stop_func=0x7ffff784aca0 <GC_never_stop_func>) at alloc.c:488
+#5  0x00007ffff784bf9a in GC_try_to_collect_general (
+    stop_func=stop_func@entry=0x0, force_unmap=force_unmap@entry=0)
+    at alloc.c:1064
+#6  0x00007ffff784c06d in GC_gcollect () at alloc.c:1088
+#7  0x00007ffff7b06529 in scm_i_gc (what=<synthetic pointer>)
+    at ../../libguile/gc.c:266
+#8  scm_gc () at ../../libguile/gc.c:255
+#9  0x00005555555551f2 in Eval::~Eval() ()
+
+
+stack below seen twice.3 
+#0  0x00007ffff762c350 in pthread_kill ()
+   from /lib/x86_64-linux-gnu/libpthread.so.0
+#1  0x00007ffff785f6fb in GC_start_world () at pthread_stop_world.c:990
+#2  0x00007ffff784b2d6 in GC_stopped_mark (
+    stop_func=stop_func@entry=0x7ffff784aca0 <GC_never_stop_func>)
+    at alloc.c:728
+#3  0x00007ffff784bd19 in GC_try_to_collect_inner (
+    stop_func=0x7ffff784aca0 <GC_never_stop_func>) at alloc.c:488
+#4  0x00007ffff784bf9a in GC_try_to_collect_general (
+    stop_func=stop_func@entry=0x0, force_unmap=force_unmap@entry=0)
+    at alloc.c:1064
+#5  0x00007ffff784c06d in GC_gcollect () at alloc.c:1088
+#6  0x00007ffff7b06529 in scm_i_gc (what=<synthetic pointer>)
+    at ../../libguile/gc.c:266
+#7  scm_gc () at ../../libguile/gc.c:255
+#8  0x00005555555551f2 in Eval::~Eval() ()
+
+==============================================
+latest bdwgc does this:
+#0  GC_push_all_eager (bottom=<optimized out>, 
+    top=top@entry=0x7ffff43f7000 <error: Cannot access memory at address
+0x7ffff43f7000>) at mark.c:1599
+#1  0x00007ffff7855625 in GC_push_all_stack (bottom=<optimized out>, 
+    top=top@entry=0x7ffff43f7000 <error: Cannot access memory at address
+0x7ffff43f7000>) at mark.c:1609
+#2  0x00007ffff78568aa in GC_push_all_stack_sections (lo=<optimized
+out>, 
+    lo@entry=0x7ffff43f56c0 <error: Cannot access memory at address
+0x7ffff43f56c0>, 
+    hi=hi@entry=0x7ffff43f7000 <error: Cannot access memory at address
+0x7ffff43f7000>, traced_stack_sect=<optimized out>) at mark_rts.c:565
+#3  0x00007ffff785f2fd in GC_push_all_stacks () at
+pthread_stop_world.c:557
+#4  0x00007ffff7855bcf in GC_mark_some (
+    cold_gc_frame=0x7fffe43d5d00 "\274ǧ\367\377\177") at mark.c:343
+#5  0x00007ffff784b20d in GC_stopped_mark (
+    stop_func=stop_func@entry=0x7ffff784aca0 <GC_never_stop_func>)
+    at alloc.c:702
+#6  0x00007ffff784bd19 in GC_try_to_collect_inner (
+    stop_func=0x7ffff784aca0 <GC_never_stop_func>) at alloc.c:488
+#7  0x00007ffff784bf9a in GC_try_to_collect_general (
+    stop_func=stop_func@entry=0x0, force_unmap=force_unmap@entry=0)
+    at alloc.c:1064
+#8  0x00007ffff784c06d in GC_gcollect () at alloc.c:1088
+#9  0x00007ffff7b06529 in scm_i_gc (what=<synthetic pointer>)
+    at ../../libguile/gc.c:266
+#10 scm_gc () at ../../libguile/gc.c:255
+#11 0x00005555555551f2 in Eval::~Eval() ()
+
+
+apt-cache show libgc-dev
+libgc-dev_7.4.2-8_amd64.deb
+git tag
+gc7_4_2
+gc7_4_4
+gc7_6_0 <---  try this one -- notpe still bad.
+
+
+    txt="Error: get_uuid(): cannot find (ListLink\n  (WordNode \"Hume\"
+(ctv 1.000000 0.000000 16.000000)) ; [1287745831931189139][1]\n
+(WordNode \",\" (ctv 1.000000 0.000000 64.000000)) ;
+[7731950238383222497][1]\n"...)
+
+            result = RAISE_SIGNAL(p, GC_sig_thr_restart);
+
+
+Guess  some of the threads are exiting when gc runs...
+
+for (p = GC_threads[i]; p != 0; p = p -> next) {
+p 
+
+#define RAISE_SIGNAL(t, sig) pthread_kill(THREAD_SYSTEM_ID(t), sig)
+#define THREAD_SYSTEM_ID(t) (t)->id
+
+ohhh 7.6 sometimes deadlocks...
+
+------------------ done iteration 14
+Done creating 120 threads
+
+Thread 1917 "a.out" received signal SIGSEGV, Segmentation fault.
+[Switching to Thread 0x7fffc639b700 (LWP 27872)]
+0x00007ffff762d350 in pthread_kill ()
+   from /lib/x86_64-linux-gnu/libpthread.so.0
+(gdb) bt
+#0  0x00007ffff762d350 in pthread_kill ()
+   from /lib/x86_64-linux-gnu/libpthread.so.0
+#1  0x00007ffff785fe70 in GC_suspend_all () at pthread_stop_world.c:640
+#2  0x00007ffff785ff44 in GC_stop_world () at pthread_stop_world.c:748
+
+(igdb) up
+#1  0x00007ffff785fe70 in GC_suspend_all () at pthread_stop_world.c:640
+640	              result = RAISE_SIGNAL(p, GC_sig_suspend);
+(gdb) print p
+$1 = (GC_thread) 0x7ffff7a7d380 <first_thread>
+(gdb) print i
+$2 = 0
+(gdb) print p->id
+$3 = 140737198868224
+(gdb) print /x p->id
+$4 = 0x7fffeebec700
+
+Sooo.. p->id  is not self.
+
+(gdb) print /x p->next
+$5 = 0x0
+
+(gdb) print GC_threads[1]
+$6 = (volatile GC_thread) 0x0
+
+(gdb) print /x self
+$10 = 0x7fffc639b700   -- yes this agreees with gdb message on top.
+
+(gdb) info thr --  lists all the threads. ...  0x7fffeebec700 is not listed,
+its not a valid thread.
+
+sure looks like bdwgc is failing to keep GC_threads[0] accurate.!!
+
+(gdb) print p->flags
+$11 = 6 '\006'
+
+include/private/pthread_support.h
+#       define FINISHED 1       /* Thread has exited.
+#       define DETACHED 2       /* Thread is treated as detached.
+                                /* Thread may really be detached, or
+                                /* it may have been explicitly
+                                /* registered, in which case we can
+                                /* deallocate its GC_Thread_Rep once
+                                /* it unregisters itself, since it
+                                /* may not return a GC pointer.
+#       define MAIN_THREAD 4    /* True for the original thread only.
+
+but its not teh main thread::: .. p is neoither of the below:
+(gdb) info thr
+  Id   Target Id         Frame 
+  1    Thread 0x7ffff7fc7300 (LWP 24666) "a.out" 0x00007ffff762767d in pthread_join () from /lib/x86_64-linux-gnu/libpthread.so.0
+* 1917 Thread 0x7fffc639b700 (LWP 27872) "a.out" 0x00007ffff762d350 in pthread_kill () from /lib/x86_64-linux-gnu/libpthread.so.0
+
+(gdb) print *p
+$12 = {next = 0x0, id = 140737198868224, stop_info = {last_stop_count = 1545, 
+    stack_ptr = 0x7fffeebeb6c0 <error: Cannot access memory at address 0x7fffeebeb6c0>}, flags = 6 '\006', thread_blocked = 0 '\000', finalizer_skipped = 0, 
+  finalizer_nested = 0 '\000', stack_end = 0x0, altstack = 0x0, 
+  altstack_size = 0, stack = 0x0, stack_size = 0, traced_stack_sect = 0x0, 
+  status = 0x0, tlfs = {_freelists = {{0x1, 0xbd, 0x555555818520, 
+        0x55555591f5d0, 0x5555557ff500, 0x3d, 0x1, 0x1, 0x1, 0x65, 
+        0x1 <repeats 14 times>, 0x1a}, {0x1, 0x5555559242d0, 0x55555587d820, 
+        0x555555908540, 0x10, 0x3d, 0x5555558ff2a0, 0xb9, 0x1c, 0xb, 0x0, 0x1, 
+        0x1, 0x1, 0x1, 0x1, 0x555555927d00, 0x1, 0x14, 0x1, 0x1, 0x1, 0x1, 
+        0x1, 0x1}, {0x1 <repeats 25 times>}}, gcj_freelists = {
+      0xffffffffffffffff, 0x1 <repeats 24 times>}}}
+
+
+new thread handled at line 538
+threa delete on 572
+GC_delete_thread  line 550
+but also ... GC_delete_gc_thread line 592
+
+GC_delete_thread called from only one place:
+GC_unregister_my_thread_inner
+called from two places:
+   GC_unregister_my_thread
+   GC_thread_exit_proc  -- not called by guile
+
+pthread_start.c:    pthread_cleanup_push(GC_thread_exit_proc, me);
+
+
+scm_gc is NOT being called in guile mode.!!  Example 1
+but fixing this does not cure the bug.
+
+threads.c:    GC_unregister_my_thread ();
+
+libguile/gc.c
+
+static void on_thread_exit (void *v)
+calls GC_unregister_my_thread() but only if t->needs_unregister) is set
+called by init_thread_key 
+by scm_i_init_thread_for_guile
+by scm_init_guile()
+
+Hmm   scm_i_with_guile no longer calls scm_init_guile()
+but with_guile() does call scm_i_init_thread_for_guile
+which does call init....
+
+maybe the exit handler is still running.... when the gc is called.
+
+except the thread should remain valid until all of the exit handlers
+have returned.  So maybe a thread handler did not run? ??
+
+
+Program terminated with signal SIGSEGV, Segmentation fault.
+#0  0x00007f19e496f350 in pthread_kill ()
+   from /lib/x86_64-linux-gnu/libpthread.so.0
+[Current thread is 1 (Thread 0x7f19aa6a7700 (LWP 7486))]
+
+sconew not being called !  
+GC_register_my_thread
+print notin
+print nxt
+
+x /150xg &board
+
+[Current thread is 1 (Thread 0x7f7aa3a6d700 (LWP 25905))]
+
+ print p
+$3 = (GC_thread) 0x7f7abb142380 <first_thread>
+
+(gdb) print /x p->id
+$5 = 0x7f7ab7a95700  this is the first thread....
+
+Needs_unreg was not set!!
+scm_init_guile ()
+
+------------------ done iteration 540
+Done creating 120 threads
+
+
+argh  this is broken:
+cog-map-chase-links-chk
+cog-par-chase-links-chk
+
+thus all users of map-parses might be broken
+map-parses
+parallel-map-parses
+map-word-instances
+
+ (use-modules (opencog) (opencog persist) (opencog persist-sql))
+ (use-modules (opencog nlp) (opencog nlp learn))
+ (sql-open "postgres:///en_pairs?user=linas")
+ (use-relex-server "127.0.0.1" 4445)
+
+==========================================
+
+again: using the rohit data:
+
+select count(*) from atoms where type=73; gives 396K unique words.
+select count(8) from atoms where type=47; gives number fo evluation
+links which is 9672K  but 2*396K of these are anynodes, so really only
+9672-792=8880K unique word-pairs.
+which were observed 
+
+en_pairs=> select * from atoms where type=74;
+   uuid    | space | type | height |    name    | outgoing 
+-----------+-------+------+--------+------------+----------
+ 143427138 |     1 |   74 |      0 | left-word  | 
+ 143427163 |     1 |   74 |      0 | right-word | 
+
+en_pairs=> select * from atoms where outgoing='{143427138,143427163}';
+   uuid    | space | type | height | name |       outgoing        
+-----------+-------+------+--------+------+-----------------------
+ 143670792 |     1 |    8 |      1 |      | {143427138,143427163}
+
+en_pairs=> select * from atoms where outgoing='{152,143670792}';
+   uuid    | space | type | height | name |    outgoing     
+-----------+-------+------+--------+------+-----------------
+ 143670793 |     1 |   47 |      2 |      | {152,143670792}
+
+en_pairs=> select * from valuations where atom=143670793;
+ key |   atom    | type |   floatvalue    | stringvalue | linkvalue 
+-----+-----------+------+-----------------+-------------+-----------
+   1 | 143670793 |  177 | {0,0,418235182} |             | 
+
+So 418M observations of word-pairs.
+
+ALTER DATABASE en_pairs RENAME TO en_pairs_rohit;
+
+=========================================================
+ (use-modules (opencog) (opencog persist) (opencog persist-sql))
+ (use-modules (opencog nlp) (opencog nlp learn))
+ (sql-open "postgres:///en_pairs?user=ubuntu")
+
+(fetch-all-words)
+(length (get-all-words)) 65021 
+(total-word-observations) 7181662.0 7.2M
+(PredicateNode "*-Sentence Word Pair-*")
+(SchemaNode "*-Pair Distance-*")o
+   (define pair-pred (PredicateNode "*-Sentence Word Pair-*"))
+   (define pair-dist (SchemaNode "*-Pair Distance-*"))
+
+(length (cog-incoming-set pair-pred))
+(get-total-atom-count (cog-incoming-set pair-pred))
+
+get-any-left-wildcard-count
+get-any-right-wildcard-count
+set-any-pair-total
+
+set-any-left-wildcard-count
+set-any-right-wildcard-count
+get-any-pair-link
+batch-all-pair-wildcard-counts
+get-all-words
+
+batch-all-pair-wildcard-logli
+get-pair-total
+
+GET-LEFT-WILD
+(store-atom
+      (set-count GET-LEFT-WILD TOTAL))
+batch-all-pair-wildcard-logli
+compute-pair-mi
+get-any-pair-link-> GET-PAIR
+get-word-pairs
+
+cog-incoming-by-type
+.scm:		(par-map get-endpoint (cog-filter link-type 
+utilities.scm:
+cog-map-chase-link dead
+cog-map-chase-link-dbg   used by ppars ranker
+cog-map-chase-links-chk  used by cog-chase-link-chk
+cog-chase-link-chk   used by  nlp-utils
+
+cog-map-apply-link  dead used by cog-get-link
+cog-get-link used by 
+cog-get-pred
+
+(define bar (let ((done #f))
+	(lambda () (format #t "duude ~A\n" done) (set! done #t))))
+
+(AnyNode \"left-word\") (WordNode \"###LEFT-WALL###\"
+
+get-logli
+      (catch #t
+         (lambda () (xxxxx))
+         (lambda (key . args) #f)))
+
+
+(start-trace msg)
+
+get-any-pair  get-clique-pair
+
+wow 32 gigs to load all pairs!
+
+tlb.clear()
+reserve_upto(uuid)
+getMaxUUID
+
+(make-narrow-links (mst-parse-text "The game is played on a level playing field"))
+
+(LgWordCset 
+    (WordInstanceNode "foo@e5bfab2f-b3b1-4cf1-ae89-89aaa47bf871")
+    (LgAnd 
+        (LgConnector 
+            (LgConnectorNode "ANY")
+            (LgConnDirNode "-")
+        )
+    )
+)
+
+(unfold
+
+ (use-modules (opencog) (opencog persist) (opencog persist-sql))
+ (use-modules (opencog nlp) (opencog nlp learn))
+ (sql-open "postgres:///en_pairs_rohit?user=linas")
+ (fetch-all-words)
+ (fetch-any-pairs)
+
+
+
+=========================================================
+(sql-open "postgres:///en_snapshot?user=ubuntu")
+Start counting, num words=106696
+num words=106696
+
+select count(*) from atoms where type=123;  -- 123 is wordNode
+
+   85 | SchemaNode
+   88 | PredicateNode
+  123 | WordNode
+  142 | LinkGrammarRelationshipNode
+
+
+ uuid | space | type | height |          name          | outgoing 
+------+-------+------+--------+------------------------+----------
+   29 |     1 |   88 |      0 | *-Sentence Word Pair-* | 
+   30 |     1 |   85 |      0 | *-Pair Distance-* | 
+  141 |     1 |  142 |      0 | ANY  | 
+
+
+select count(*) from atoms where outgoing[1]='29';
+gives ... 12956699
+30 gives ... 26174210   ... wtf!?
+
+after loading clique only: 37925105 atoms = 38M/51G = 1.35KB/atom
+
+(ListLink (WordNode "playing") (WordNode "field"))
+zero
+
+(ListLink (WordNode "day") (WordNode "field"))
+1 and 1 at 30
+Lincoln
+the
+which
+
+   (ListLink (Word "the" ) (Word "field" ))
+(cog-chase-link
+(cog-get-link 'EvaluationLink PAIR (Pred
+
+
+(define cnt 0)
+(for-each
+	(lambda (PAIR)
+		(set! cnt (+ cnt 1))
+		(if (not (eqv? (count-dist-pair PAIR) (count-clique-pair PAIR)))
+			(throw 'bad-count 'foobar PAIR)
+			(format #t "Its OK ~A\n" cnt)
+		))
+	(get-all-pairs))
+
+
+
+115 | LgWordCset
+2440463600
+   1 | 2440463600 |  177 | {1,0,12}   |             | 
+2440463720   {636276,2440463719}
+2440463718   {107,2440463716}
+2440463717   {101,2440463715}
+2440463714   {1748714,2440463710}
+2440463669  {2440463611,2440463599}
+
+
+19741227 = 19.8M atoms / 30G = 1.52KB/atom
+
+echo "" | ./submit-one.pl localhost 17001 observe-mst
+
+
+(mst-parse-text "Area: total: 29,743 km² country comparison to the world: 149. land: 28,454 km² water: 1,289 km² Area comparative Australia comparative: about one third (33%) the size of Tasmania.")
+
+freshie (0 ())
+28 words
+
+74  -- 34
+108 -- 32
+140 -- 30
+170 -- 28
+198 -- 26
+224 -- 24
+248 -- 
+270
+269
+290
+
+bad-pair in max-of-pair-list
+
+
+ (use-modules (opencog) (opencog persist) (opencog persist-sql))
+ (use-modules (opencog nlp) (opencog nlp learn))
+ (sql-open "postgres:///en_pairs_mst?user=linas")
+ (fetch-all-words)
+ (length (get-all-words))
+396262
+ (fetch-pseudo-csets (get-all-words))
+ (length (filter-words-with-csets  (get-all-words)))
+30127
+
+ (cset-observations (get-all-words))
+436595.0
+
+
+425186
+(cset-vec-support (Word "the"))
+(cset-vec-len (Word "the"))
+
+(
+
+   (length (cog-incoming-by-type WORD 'LgWordCset))
+
+(define n 0)
+(for-each
+	(lambda (cset) 
+		(set! n (+ 1 n)))
+	(cog-incoming-by-type (Word "the") 'LgWordCset))
+
+Ben, Ruiting,
+
+For your enjoyment: I have some very preliminary results on word
+similarity.  They look pretty nice, even thogh based on a fairly
+small number of observations. 
+
+If you've been watching TV instead of reading email, here's the story
+so far: Starting from a large text corpus, the mutual information (MI)
+of word-pairs are counted. This MI is used to perform a maximum
+spanning-tree (MST) parse (of a different subset of) the corpus. From each
+parse, a pseudo-disjunct is extracted for each word.  The
+pseudo-disjunct is like a real LG disjunct, except that each connector
+in the disjunct is the word at the far end of the link.
+
+So, for example, in in idealized world, the MST parse of the sentence
+"Ben ate pizza" would prodouce the parse Ben <--> ate <--> pizza and
+from this, we can extract the psuedo-disjunct (Ben- pizza+) on the
+word "ate".  Similarly, the sentence "Ben puked pizza" should produce
+the disjunct (Ben- pizza+) on the word "puke".  Since these two 
+disjuncts are the same, we can conclude that the two words "ate"
+and "puke" are very similar to each other.  Considering all of the
+other disjuncts that arise in this example, we can conclude that these
+are the only two words that are similar.
+
+Note that a given word may have very many psuedo-disjuncts attached
+to it. Each disjunct has a count of the number of times it has been
+observed.  Thus, this set of disjuncts can be imagined to be a vector
+in a high-dimensional vector space, which each disjunct being a single
+basis element.  The similarity of two words can be taken to be the
+cosine-similariy between the disjunct-vectors (or pick another,
+different metric, as you please.)
+
+Below are a set of examples, for English, on a somewhat smmall dataset.
+Collected over a few days, it contains just under half-a-million 
+observations of disjuncts, distributed across about 30K words.
+Thus, most words will have only a copule of disjuncts on them, 
+which may have been seen only a couple of times. its important, at
+this stage, to limit oneself to only the most popular words.
+
+We expect the determiners "the" and "a" to be similar, and they are:
+(cset-vec-cosine (Word "the") (Word "a")) = 0.1554007744026141
+
+Even more similar:
+(cset-vec-cosine (Word "the") (Word "this")) = 0.3083725359820755
+
+Not very similar at all:
+(cset-vec-cosine (Word "the") (Word "that")) = 0.01981486048876119
+
+Oh hey this and that are similar. Notice the triangle with "the".
+(cset-vec-cosine (Word "this") (Word "that")) = 0.14342403062507977
+
+Some more results
+ (cset-vec-cosine (Word "this") (Word "these")) = 0.23100101197144984
+ (cset-vec-cosine (Word "this") (Word "those")) = 0.1099725424243773
+ (cset-vec-cosine (Word "these") (Word "those")) = 0.13577971016706158
+
+We expect that determiners, nouns and verbs to all be very differrent
+from one-another. And they are:
+ (cset-vec-cosine (Word "the") (Word "ball")) = 2.3964597196461594e-4
+ (cset-vec-cosine (Word "the") (Word "jump")) = 0.0
+ (cset-vec-cosine (Word "ball") (Word "jump")) = 0.0
+
+We expect verbs to be similar, and they sort-of are.
+ (cset-vec-cosine (Word "run") (Word "jump")) = 0.05184758473652128
+ (cset-vec-cosine (Word "run") (Word "look")) = 0.05283524652572603
+
+Since this is a sampling from wikipedia, there will be very few
+"action" verbs, unless the sample accidentally contains articles
+about sports. A "common sense" corpus, or a corpus that talks about
+what people do, could/should improve the above verbs.  These are
+very basic to human behavior, but are rare in most writing.
+
+I'm thinking that a corpus of children's lit, and young-adult-lit
+would be much better for these kinds of things.
+
+An adjective.
+ (cset-vec-cosine (Word "wide") (Word "narrow")) = 0.06262242910851494
+ (cset-vec-cosine (Word "wide") (Word "look")) = 0.0
+ (cset-vec-cosine (Word "wide") (Word "ball")) = 0.02449979787750126
+ (cset-vec-cosine (Word "wide") (Word "the")) = 0.04718158900583385
+
+ (cset-vec-cosine (Word "heavy") (Word "wide")) = 0.05752237416355278
+
+Here's a set of antonyms!
+ (cset-vec-cosine (Word "heavy") (Word "light")) = 0.16760038078849773
+
+A pronoun
+ (cset-vec-cosine (Word "ball") (Word "it")) = 0.009201177048960233
+ (cset-vec-cosine (Word "wide") (Word "it")) = 0.005522960959398417
+
+ (cset-vec-cosine (Word "the") (Word "it")) = 0.01926824360790382
+
+Wow!! In English, "it" is usually a male!
+ (cset-vec-cosine (Word "it") (Word "she")) = 0.1885493638629482
+ (cset-vec-cosine (Word "it") (Word "he")) = 0.4527656594627214
+ (cset-vec-cosine (Word "he") (Word "she")) = 0.1877589816088902
+
+I can post the database on mondy, let me know when you're ready to
+receive it.
+
+above dataset has 200183 (200K) disjuncts in it
+
+SIMILARITY_LINK
+
+ac
+
+scheme@(guile-user)> (batch-sim (Word "him") ac)
+terminate called after throwing an instance of
+'opencog::RuntimeException'
+  what():  Failed to execute!
+(/home/linas/src/novamente/src/atomspace-git/opencog/persist/sql/multi-driver/ll-pg-cxx.cc:113)
+Aborted
+
+
+[2017-05-07 17:01:27:152] [WARN] PQresult message: ERROR:  duplicate key
+value violates unique constraint "atoms_uuid_idx"
+DETAIL:  Key (uuid)=(2441253852) already exists.
+
+[2017-05-07 17:01:27:152] [WARN] PQ query was: INSERT INTO Atoms (uuid,
+space, type, height, outgoing) VALUES (2441253852, 1, 43, 1, '{1888882,
+127137759}');
+
+
+dohhh Need to reserve some uuid's!
+
+
+[2017-05-04 17:31:29:122] [ERROR] There is no value for key
+(PredicateNode "link count") ; [8812231717367445517][1]
+ on atom (AnchorNode "MST data") ; [1539316140051770629][1]
+
+createdb -T en_pairs_mst -e en_pairs_sim "forked from en_pairs_mst, holds similarity data"
+
+COMMENT ON DATABASE en_pairs_mst IS 'forked from en_pairs_rohit, holds disjunct data';
+
+COMMENT ON DATABASE en_pairs_rohit IS 'forked from en_pairs_2016, converted to modern format';
+
+COMMENT ON DATABASE en_pairs_2016 IS 'Rohits original pair data; old format; missing correct word-counts';
+
+(define ac (filter-words-with-csets (get-all-words)))
+
+(cset-vec-len
+(cset-vec-observations
+
+(define lens (map (lambda (wrd) (cons (cset-vec-len wrd) wrd)) ac))
+
+(define slens (sort lens (lambda (a b) (> (car a) (car b)))))
+
+(define obs (map (lambda (wrd) (cons (cset-vec-observations wrd) wrd)) ac))
+
+(define sobs (sort obs (lambda (a b) (> (car a) (car b)))))
+
+
+(define firm (filter (lambda (wrd) (< 8.0 (cset-vec-len wrd))) ac))
+
+*) count words during MST
+err this can be reconstructed by taking:
+   counts of disjuncts  based on counts of csets .... 
+so never mind....
+
+what are teh most comon disjuncts???
+
+(filter (lambda (cset) (< 10 (get-count cset)))
+	(cog-incoming-by-type (Word "United") 'LgWordCset))
+
+156 ... 125.888
+
+5  41.44827196747233 "and"
+8  31.658516707416464 "as"
+10  30.140583554376658 "well"
+11  29.969530201342277 "in"
+18  18.805788982259568 "first"
+21  17.254613233923575 "is"
+22  16.742203742203742 "also"
+23  15.386776859504135 "can"
+24  15.359470949456778 "on"
+25  14.910157559503853 "at"
+26  14.424603174603176 "been"
+31  13.231375985977214 "but"
+32  13.122743682310471 "part"
+34  12.835568802781918 "with"
+35  12.835051546391755 "old"
+36  12.726962457337885 "same"
+38  11.925403225806452 "one"
+39  11.611694152923539 "which"
+43  10.856905158069885 "not"
+
+(filter (lambda (cset) (< 5 (get-count cset)))
+	(cog-incoming-by-type (Word "Gestalt") 'LgWordCset))
+
+(.+) 34
+(of -)  14
+
+(is+) 216
+was+ 197
+(has+ 55
+was+ was+ 12
+is+ was+ 10
+
+get-cset-vec
+ad   cset-vec-observations
+(define disjunct-entropy
+(define total-cset-count (cset-observations all-cset-words))
+(define all-cset-words (filter-words-with-csets (get-all-words)))
+
+(define total-cset-count 0)
+(cog-map-type 
+	(lambda (cset) 
+		(set! total-cset-count (+ total-cset-count (get-count cset))) #f)
+	'LgWordCset)
+
+7.984991833299495  bits total MI bits
+
+(cset-vec-mi (Word "United"))  7.116097374166928
+is the relative(?) MI to the disjuncts in the word.
+(is how much MI this word contributes to the total MI)
+(and its slightly below average)
+
+(cset-vec-frequency (Word "United"))
+
+(/ (log (cset-vec-frequency (Word "United"))) (log 2))
+-10.48276867673862  is the entropy for that word, only.
+
+"Cao" "Award" "x" "y" "Prime" "we" "per" "Division" "League" "Game"
+
+(define cao (get-cset-vec (Word "Cao")))
+
+34 (length cao)
+
+(filter (lambda (cset) (< 10 (get-count cset))) cao)
+
+18  ,- Cao- Cao+  garbage !!
+
+8 Grammy- for+ Best+
+7 Academy- for+ Best+
+
+23 Minister+
+5 the- Minister+
+3 as- Minister+
+3 Governor-General- Minister+
+
+ "The" "a" "to" "in" "of" "and" "the" "," "."
+
+ "Bay" "Street" "Island" "of" "century" "right" "Game" "Georgian" "or" "a" ";" "near" "Party" "team" "law" "Australia" "her" "research" "Church" "east" "Government"
+
+--------------------------------------------------------------
+
+1985 words of length > 8
+all pairs of above with cosine > 0.5
+
+23993 pairs, but some are junk
+15809 good pairs.
+
+store-sim
+ (sim-pair WORD-A WORD-B) cos-key
+            (FloatValue SIM (get-angle SIM)))
+(define (sim-pair WORD-A WORD-B) (SimilarityLink WORD-A WORD-B))
+(define cos-key (PredicateNode "*-Cosine Distance Key-*"))
+
+
+(define all-sims '())
+(cog-map-type
+	(lambda (sim)  (set! all-sims (cons sim all-sims)) #f)
+	'SimilarityLink)
+
+(define (cosine-of-sim SIM)
+	(car (cog-value->list (cog-value SIM cos-key))))
+
+(define good-sims
+(filter
+	(lambda (sim)
+		(< 0.5 (car (cog-value->list (cog-value sim cos-key)))))
+	all-sims))
+
+
+(map (lambda (sim) (sim-cosine sim)) (take ranked-sims 20))
+	
+
+ 'Poir .. Perls'
+ 'Poir .. Sevan'
+ 'Sevan .. Perls'
+ 'Sevan .. Ruins'
+ 'Ruins .. Perls'
+ 'Poir .. Ruins'
+ 'Gongora .. Perls'
+  'Poir .. Gongora'
+  'Gongora .. Sevan'
+  'Gongora .. Ruins'
+  'Poir .. Gag'
+
+ (use-modules (opencog) (opencog persist) (opencog persist-sql))
+ (use-modules (opencog nlp) (opencog nlp learn))
+ (sql-open "postgres:///en_pairs_sim?user=linas")
+ (use-modules (opencog cogserver))
+ (start-cogserver "opencog2.conf")
+ (fetch-all-words)
+(fetch-pseudo-csets (get-all-words))
+
+70 74 128
+
+95  0.953598053136202  'conjunction .. accordance'
+
+504  0.868429815807705  'in .. from'
+633  0.8549756852697713  'in .. at'
+637  0.8545553489854567  'In .. By'
+643  0.8540378312493768  'in .. After'
+740  0.846034030453443  'canal .. swamp'
+
+
+754  0.843837363738534  'at .. At'
+757  0.8436223414042503  'in .. In'
+818  0.838269351079866  'in .. on'
+840  0.8366056647469058  'creation .. existence'
+878  0.8332692184393486  'e.g .. i.e'
+965  0.8265058609938521  'and .. but'
+969  0.8264399296782371  'in .. With'
+971  0.8263325988164274  'in .. inside'
+
+
+canal -- 68 dj 
+
+(define (prt-sim sim port)
+   (format port "~A  '~A .. ~A'\n" (sim-cosine sim)
+      (cog-name (gar sim)) (cog-name (gdr sim))))
+
+get-disjunct-string
+
+20.0  canal  the-
+8.0  canal  the- .+
+5.0  canal  the- ,+
+
+14.0  swamp  the-
+3.0  swamp  the- .+
+
+
+18.0  creation  the- of+
+10.0  existence  the- of+
+
+627  in  the+
+75  in  a+
+61  in  which+
+49  in  the+ the+
+36  in  used-
+33  in  his+
+32  in  order+
+31  in  United+
+27  in  gallantry-
+26  in  born-
+23  in  role-
+
+8338 -- in
+2185 from
+
+155  from  the+
+20  from  :+ :+ :+ :+ :+ :+ :+ :+ :+ :+ 0+ 0+ 0+ 0+ 0+ 0+ 0+ 0+ 0+ 0+
+18  from  a+
+9  from  derived-
+9  from  until+
+9  from  degree-
+8  from  his+
+8  from  comes-
+8  from  away-
+7.0  from  time+
+7.0  from  the+ the+
+
+get-pair-mi
+get-pair-mi-str ("
+
+MI(fast, horse) = 5.258979
+MI(fast, car) = 3.805734
+
+(get-pair-logli get-any-pair (Word "fast") (Word "horse"))
+-log P(fast, horse) = 24.054777  P = 5.7383969102974027e-8
+-log P(fast, car) = 23.832385  P = 6.694794440144226e-8
+
+
+-log P(*, horse) = 14.383531  P = 4.6787056718009e-5
+-log P(*, car) = 12.707894    P = 1.4946610743515038e-4
+-log P(fast, *) =  14.930225  P = 3.2029815202410256e-5
+
+
+MI(fast, {hosrse, car}) = linear interploation of the two. 
+  [
+  p(fast,horse) log p(fast, horse) / p(fast,*) p(*,horse)
++
+  p(fast,car) log p(fast, car) / p(fast,*) p(*,car) ] 
+   / [p(fast,horse) + p(fast,car)]
+
+= [ p(fast,horse) 5.258979 + p(fast,car) 3.805734] /
+     1.2433191350441628e-7
+= 5.565671566878678e-7 / 1.2433191350441628e-7 
+= 4.476462567015012
+
+
+
+(get-left-wild-prob GETTER WORD)
+(get-left-wild-log-prob GETTER WORD)
+(get-pair-prob GETTER WORD WORD)
+
+(get-logli ATOM)
+
+(define (get-left-wild-prob GETTER WORD)
+	(EvaluationLink any-pair-pred (ListLink any-left word))
+(define (get-any-wild-wild)
+   (EvaluationLink any-pair-pred (ListLink any-left any-right))
+)
+
+(define (get-any-wild-wild)
+   (EvaluationLink any-pair-pred (ListLink any-left any-right))
+)
+
+get-any-pair PAIR -- public OK defined in common.scm
+get-clique-pair PAIR --public OK
+
+kill get-pair-mi-str 
+make get-pair-mi public. done
+
+
+(define all-cset-words (filter-words-with-csets (get-all-words)))
+(define all-disjuncts (get-all-disjuncts))
+(define all-csets (get-all-csets))
+(define total-cset-count (get-total-cset-count))
+
+in the en_pairs sim: MI is  7.9849918332741225
+(- (+ 10.280666542033556 16.00578269190252) 18.301457400661953)
+
+in en_pairs_mst:
+(length all-cset-words) 49423
+(length all-disjuncts) 486824  + 73 more
+(length all-csets) 749337 + 118 more
+total-cset-count 1154809  + 235 more
+word-entropy-bits 10.353641069558124
+disjunct-entropy-bits 16.48346995957877
+cset-entropy-bits 18.958440018522307
+MI is 7.878671010614585
+
+all connectors ...
+(length (get-all-pseudo-connectors)) 81557
+
+
+wtf:
+(length all-disjuncts) 225396 
+wiki-mst-en.sh is running
+why is get_nodes bad? because no nodes are being created. so that OK.
+why is total stores for node =0?  just like above. its OK.
+
+postgres:///en_pairs_mst?user=linas  is the ongoing accumulation of mst stats...
+
+guile -l mst-count-en.scm
+335 secs for words
+1071 secs for pairs
+results size is 32G for 19741168 atoms
+1213 secs for csets
+
+
+fix message -- done
+add  sql-clear-stats -- done
+
+./mst-one.sh en gamma-pages/G/Gzhelian localhost 17001
+
+
+move base-stats.scm to pair-stats.scm -- DONE
+
+Cannot connect to database: FATAL:  remaining connection slots are reserved for non-replication superuser connections
+
+get-clique-pair get-any-pair
+
+(display-backtrace (fluid-ref the-last-stack))
+
+Throw to key `bad-summation' with args `(count-all-pairs "Error:
+pair-counts unequal: 5974976.0 5754410.0\n")'.
+pair-counts unequal: 5974600.0 5761584.0\n")'. afer redoing the left!
+pair-counts unequal: 5974600.0 5761584.0\n")'  afer doing left 2x
+pair-counts unequal: 5974976.0 5761682.0\n")' after redoing right.
+pair-counts unequal: 5974976.0 5761682.0\n")' after right 2x
+pair-counts unequal: 5974600.0 5761584.0\n") after redoing  left
+
+(define aw (get-all-words))
+
+(ob 'left-stars)
+
+(define save-1 (map (lambda (w) (cons (ob 'left-wild-count w) w)) aw))
+
+(length (cob 'cache-all-left-counts))
+
+(for-each (lambda (a b) (if (not (equal? a b)) (error "aiiide ~A ~A" a b)))
+	save-1 save-2)
+
+ERROR: aiiide ~A ~A (54.0 . (WordNode "d'Urville")
+) (56.0 . (WordNode "d'Urville")
+)
+
+So... recomputing the right counts changed the left-count on above....
+
+wtf.... (ob 'left-wildcard w) is empty....
+
+set-pair-count calls make-pair
+set-left-wild-count calls set-pair-count with 'left-wildcard  which is null
+
+foobar confused about which pari si which
+
+Glurg. and now its this:
+
+pair-counts unequal: 2133920.0 1168749.0\n")'
+(define w (WordNode "d'Urville"))
+(define ob (make-pair-wild (make-any-link)))
+(define ob (make-pair-count-api ob))
+(define cob (make-compute-count ob))
+
+(ob 'left-support-size)
+(length (ob 'left-stars))
+ (cob 'compute-total-count)
+(length (cob 'cache-all-left-counts))
+(cob 'compute-total-count)
+(define save-1 (map (lambda (w) (cons (ob 'left-wild-count w) w)) aw))
+
+(cob 'compute-left-count w)
+(ob 'left-wildcard w)
+(ob 'right-wildcard w)
+(ob 'left-wild-count w)
+
+(for-each (lambda (a b) (if (not (equal? a b)) (error "aiiide ~A ~A" a b)))
+	save-1 save-2)
+
+(fold (lambda (p s) (+ s (car p))) 0 save-1)   1173656.0
+
+(define rave-1 (map (lambda (w) (cons (ob 'right-wild-count w) w)) aw))
+
+(fold (lambda (p s) (+ s (car p))) 0 rave-1)   2133920.0
+
+(define (lsum w)
+	(
+
+1) fetch failed
+2) compute failed.
+3) left-stars returns junk fixed
+
+(define mave-1 (map (lambda (w) (cons (ob 'left-wild-count w) w)) aw))
+
+pair-counts unequal: 34692424.0 34689203.0\n")'.
+
+Elapsed time to load words: 45 secs
+Done loading words, now loading any-pairs
+Elapsed time to load ANY-link pairs: 322 secs
+Finished loading any-word-pairs
+Support: num left=106696 num right=106696
+Done with wild-card count N(*,w) and N(w,*) in 222 secs << par-map vs..  217
+Done computing N(*,*) total-count=34688664.0 in 13 secs
+Start computing log P(*,w)
+Done computing 106696 left-wilds in 39 secs  << 120% vs. 15
+Done storing 106696 left-wilds in 458 secs  << par-for vs 101 secs for non-par
+Done with -log P(*,w), start -log P(w,*)
+Done computing 106696 right-wilds in 45 secs
+Done storing 106696 right-wilds in 458 secs << par-for
+Done computing -log P(w,*) and <-->
+Going to do individual word-pair MI
 

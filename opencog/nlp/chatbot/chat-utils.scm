@@ -16,7 +16,8 @@
              (opencog nlp)
              (opencog nlp fuzzy)
              (opencog nlp microplanning)
-             (opencog nlp relex2logic))
+             (opencog nlp relex2logic)
+             (opencog exec))
 
 ; -----------------------------------------------------------------------
 ; TODO: Replace these time related utilities with one from TimeMap, when it is
@@ -154,7 +155,7 @@
     (define (stimulate x) (cog-stimulate x STIMULUS))
     (let* ((word-inst-list
                 (append-map parse-get-words (sentence-get-parses SENT)))
-           (word-list (append-map word-inst-get-word word-inst-list)))
+           (word-list (map word-inst-get-word word-inst-list)))
         (map stimulate word-inst-list)
         (map stimulate word-list)
     )

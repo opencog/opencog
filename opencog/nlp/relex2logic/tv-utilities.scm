@@ -139,6 +139,11 @@
 "
   r2l-count SENT -- maintain counts of R2L atoms for SENT-LIST.
 
+  XXX FIXME ... this does NOT maintain counts in the same way as
+  all the other code ... i.e. it does NOT use CountTV.
+
+  This is some experimental? code and it might be obsolete?
+
   sent-list:
   - A list of SentenceNodes
 "
@@ -149,16 +154,17 @@
             (cog-set-tv! atom (stv 1 1))
         ))
 
-    (parallel-map-parses
-        (lambda (p)
-            (let* ((r2l-outputs (parse-get-r2l-outputs p))
-                (all-nodes (delete-duplicates
-                    (append-map cog-get-all-nodes r2l-outputs))))
+    (define (count-one-parse p)
+        (let* ((r2l-outputs (parse-get-r2l-outputs p))
+            (all-nodes (delete-duplicates
+                (append-map cog-get-all-nodes r2l-outputs))))
 
-                (map update-tv all-nodes)
-                (map update-tv r2l-outputs)
-            )
+            (map update-tv all-nodes)
+            (map update-tv r2l-outputs)
         )
-        sent-list
     )
+    (for-each
+        (lambda (sent)
+            (for-each count-one-parse (sentence-get-parses sent)))
+        sent-list)
 )
