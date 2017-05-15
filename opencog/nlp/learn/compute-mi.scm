@@ -553,7 +553,7 @@
 		; stored, and this just takes a long time.
 		(define store-rpt
 			(make-progress-rpt store-atom 100000 num-prs
-				"Stored ~A of ~A pairs in ~A secs (~A pairs/sec)\n"
+				"Stored ~A of ~A pairs in ~A secs (~A pairs/sec)\n"))
 
 		; This print triggers as soon as the let* above finishes.
 		(format #t "Done computing ~A pair MI's in ~A secs\n"
