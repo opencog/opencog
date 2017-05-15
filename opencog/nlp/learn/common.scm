@@ -41,7 +41,6 @@
 ; Define locations where statistics will be stored.
 
 (define freq-key (PredicateNode "*-FrequencyKey-*"))
-(define mi-key (PredicateNode "*-Mutual Info Key-*"))
 
 ; These are used to store/maintain counts for clique-pair counting.
 ; See `link-pipeline.scm` for usage.
@@ -53,20 +52,6 @@
 
 ; set-count ATOM CNT - Set the raw observational count on ATOM.
 (define (set-count ATOM CNT) (cog-set-tv! ATOM (cog-new-ctv 0 0 CNT)))
-
-; ----
-; get-mi ATOM - get the mutual information on ATOM.
-;
-; Returns a floating-point value holding the mutual information
-; for the ATOM.
-;
-; In essentially all cases, ATOM is actually an EvaluationLink that
-; is holding the structural pattern to which the mutial information
-; applied. Currently, this is almost always a word-pair.
-;
-(define (get-mi ATOM)
-	(car (cog-value->list (cog-value ATOM mi-key)))
-)
 
 ; ---------------------------------------------------------------------
 

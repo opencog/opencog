@@ -5153,8 +5153,8 @@ Start computing log P(*,w)
 Done computing 106696 left-wilds in 39 secs  << 120% vs. 15
 Done storing 106696 left-wilds in 458 secs  << par-for vs 101 secs for non-par
 Done with -log P(*,w), start -log P(w,*)
-Done computing 106696 right-wilds in 45 secs
-Done storing 106696 right-wilds in 458 secs << par-for
+Done computing 106696 right-wilds in 45 secs vs. 15 now
+Done storing 106696 right-wilds in 458 secs << par-for vs 103 now
 Done computing -log P(w,*) and <-->
 Going to do individual word-pair MI
 Done computing 2360328 pair MI's in 962 secs

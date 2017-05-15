@@ -48,6 +48,9 @@
 ;
 ; Returns ATOM.
 ;
+
+(define freq-key (PredicateNode "*-FrequencyKey-*"))
+
 (define (set-freq ATOM FREQ)
 	; 1.4426950408889634 is 1/0.6931471805599453 is 1/log 2
 	(define ln2 (* -1.4426950408889634 (log FREQ)))

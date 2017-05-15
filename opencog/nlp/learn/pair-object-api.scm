@@ -330,6 +330,9 @@
 "
 	(let ((llobj LLOBJ))
 
+		; Key under which the frequency values are stored.
+		(define freq-key (PredicateNode "*-FrequencyKey-*"))
+
 		; Return the observed frequency on ATOM
 		(define (get-freq ATOM)
 			(car (cog-value->list (cog-value ATOM freq-key))))
@@ -344,6 +347,13 @@
 			; 1.4426950408889634 is 1/0.6931471805599453 is 1/log 2
 			(define ln2 (* -1.4426950408889634 (log FREQ)))
 			(cog-set-value! ATOM freq-key (FloatValue FREQ ln2)))
+
+		; The key under which the MI is stored.
+		(define mi-key (PredicateNode "*-Mutual Info Key-*"))
+
+		; Get the (floating-point) mutual information on ATOM.
+		(define (get-mi ATOM)
+			(car (cog-value->list (cog-value ATOM mi-key))))
 
 		; Set the MI value for ATOM.
 		(define (set-mi ATOM MI)
