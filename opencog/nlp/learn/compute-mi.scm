@@ -333,6 +333,57 @@
 )
 
 ; ---------------------------------------------------------------------
+;
+; Extend the CNTOBJ with additional methods to compute the mutual
+; information of pairs.
+;
+; The CNTOBJ needs to be an object implementing methods to get pair
+; observation frequencies, which must return valid values; i.e. must
+; have been previously computed. Specifically, it must have the
+; 'left-logli, 'right-logli and 'pair-logli methods.  For caching,
+; it must also have the 'set-pair-mi method.
+;
+; The MI computations are done as a batch, looping over all pairs.
+
+(define (make-batch-mi FRQOBJ)
+	(let ((frqobj FRQOBJ))
+
+		; Loop over all pairs, computing the MI for each. The loop
+		; is actually two nested loops, with a loop over the
+		; left-supports on the outside, and over right-stars for
+		; the inner loop. This returns a list of all atoms holding
+		; the MI, suitable for iterating for storage.
+		(define (compute-n-cache-mi)
+			(define (all-atoms '()))
+
+			(define (right-loop left-item)
+				(define r-logli (frqobj 'right-wild-logli left-item))
+				(for-each
+					(lambda (lipr)
+						(define right-item (gdr lipr))
+						(define l-logli (frqobj 'left-wild-logli right-item))
+						(define pr-logli (frqobj 'pair-logli lipr))
+						(define mi (- (+ r-logli l-logli) pr-logli))
+						(frqobj 'set-pair-mi mi)
+						(set! all-atoms (cons (frqobj 'item-pair) all-atoms))
+					)
+					(frqobj 'right-stars left-item)
+				)
+			)
+			(for-each right-loop (frqobj 'left-support))
+
+			all-atoms
+		)
+
+		; Methods on this class.
+		(lambda (message . args)
+			(case message
+				((cache-mi)              (compute-n-cache-mi))
+				(else (apply frqobj      (cons message args))))
+		))
+)
+
+; ---------------------------------------------------------------------
 ; ---------------------------------------------------------------------
 ; ---------------------------------------------------------------------
 ; ---------------------------------------------------------------------

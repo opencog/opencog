@@ -319,6 +319,10 @@
 		(define (get-freq ATOM)
 			(car (cog-value->list (cog-value ATOM freq-key))))
 
+		; Return the observed - log_2(frequency) on ATOM
+		(define (get-logli ATOM)
+			(cadr (cog-value->list (cog-value ATOM freq-key))))
+
 		(define (set-freq ATOM FREQ)
 			; 1.4426950408889634 is 1/0.6931471805599453 is 1/log 2
 			(define ln2 (* -1.4426950408889634 (log FREQ)))
@@ -332,6 +336,11 @@
 				0
 				(llobj 'item-pairs PAIR)))
 
+		; XXX this is wrong cause it doesn't sum. The whole sum
+		; thing needs to be fixed to be single-valued.
+		(define (get-pair-logli PAIR)
+			(get-logli (llobj 'item-pair PAIR)))
+
 		; Set the frequency and log-frequency on PAIR
 		; Return the atom that holds this count.
 		(define (set-pair-freq PAIR FREQ)
@@ -341,9 +350,15 @@
 		(define (get-left-wild-freq ITEM)
 			(get-freq (llobj 'left-wildcard ITEM)))
 
+		(define (get-left-wild-logli ITEM)
+			(get-logli (llobj 'left-wildcard ITEM)))
+
 		; Get the right wildcard frequency
 		(define (get-right-wild-freq ITEM)
 			(get-freq (llobj 'right-wildcard ITEM)))
+
+		(define (get-right-wild-logli ITEM)
+			(get-logli (llobj 'right-wildcard ITEM)))
 
 		; Set the left wildcard frequency.
 		; Return the atom that holds this value.
@@ -359,10 +374,13 @@
 		(lambda (message . args)
 			(case message
 				((pair-freq)           (apply get-pair-freq args))
+				((pair-logli)          (apply get-pair-logli args))
 				((set-pair-freq)       (apply set-pair-freq args))
 				((left-wild-freq)      (apply get-left-wild-freq args))
+				((left-wild-logli)     (apply get-left-wild-logli args))
 				((set-left-wild-freq)  (apply set-left-wild-freq args))
 				((right-wild-freq)     (apply get-right-wild-freq args))
+				((right-wild-logli)    (apply get-right-wild-logli args))
 				((set-right-wild-freq) (apply set-right-wild-freq args))
 				(else (apply llobj (cons message args))))
 		))
