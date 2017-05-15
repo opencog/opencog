@@ -27,7 +27,7 @@
 			(cnt 0)
 			(start-time 0))
 		(lambda (item)
-			(if (eq? 0 cnt) (set! start-time (current-time)))
+			(if (eqv? 0 cnt) (set! start-time (current-time)))
 			(func item)
 			(set! cnt (+ 1 cnt))
 			(if (eqv? 0 (modulo cnt when))
