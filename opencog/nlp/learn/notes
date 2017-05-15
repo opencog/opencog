@@ -5067,3 +5067,94 @@ move base-stats.scm to pair-stats.scm -- DONE
 Cannot connect to database: FATAL:  remaining connection slots are reserved for non-replication superuser connections
 
 get-clique-pair get-any-pair
+
+(display-backtrace (fluid-ref the-last-stack))
+
+Throw to key `bad-summation' with args `(count-all-pairs "Error:
+pair-counts unequal: 5974976.0 5754410.0\n")'.
+pair-counts unequal: 5974600.0 5761584.0\n")'. afer redoing the left!
+pair-counts unequal: 5974600.0 5761584.0\n")'  afer doing left 2x
+pair-counts unequal: 5974976.0 5761682.0\n")' after redoing right.
+pair-counts unequal: 5974976.0 5761682.0\n")' after right 2x
+pair-counts unequal: 5974600.0 5761584.0\n") after redoing  left
+
+(define aw (get-all-words))
+
+(ob 'left-stars)
+
+(define save-1 (map (lambda (w) (cons (ob 'left-wild-count w) w)) aw))
+
+(length (cob 'cache-all-left-counts))
+
+(for-each (lambda (a b) (if (not (equal? a b)) (error "aiiide ~A ~A" a b)))
+	save-1 save-2)
+
+ERROR: aiiide ~A ~A (54.0 . (WordNode "d'Urville")
+) (56.0 . (WordNode "d'Urville")
+)
+
+So... recomputing the right counts changed the left-count on above....
+
+wtf.... (ob 'left-wildcard w) is empty....
+
+set-pair-count calls make-pair
+set-left-wild-count calls set-pair-count with 'left-wildcard  which is null
+
+foobar confused about which pari si which
+
+Glurg. and now its this:
+
+pair-counts unequal: 2133920.0 1168749.0\n")'
+(define w (WordNode "d'Urville"))
+(define ob (make-pair-wild (make-any-link)))
+(define ob (make-pair-count-api ob))
+(define cob (make-compute-count ob))
+
+(ob 'left-support-size)
+(length (ob 'left-stars))
+ (cob 'compute-total-count)
+(length (cob 'cache-all-left-counts))
+(cob 'compute-total-count)
+(define save-1 (map (lambda (w) (cons (ob 'left-wild-count w) w)) aw))
+
+(cob 'compute-left-count w)
+(ob 'left-wildcard w)
+(ob 'right-wildcard w)
+(ob 'left-wild-count w)
+
+(for-each (lambda (a b) (if (not (equal? a b)) (error "aiiide ~A ~A" a b)))
+	save-1 save-2)
+
+(fold (lambda (p s) (+ s (car p))) 0 save-1)   1173656.0
+
+(define rave-1 (map (lambda (w) (cons (ob 'right-wild-count w) w)) aw))
+
+(fold (lambda (p s) (+ s (car p))) 0 rave-1)   2133920.0
+
+(define (lsum w)
+	(
+
+1) fetch failed
+2) compute failed.
+3) left-stars returns junk fixed
+
+(define mave-1 (map (lambda (w) (cons (ob 'left-wild-count w) w)) aw))
+
+pair-counts unequal: 34692424.0 34689203.0\n")'.
+
+Elapsed time to load words: 45 secs
+Done loading words, now loading any-pairs
+Elapsed time to load ANY-link pairs: 322 secs
+Finished loading any-word-pairs
+Support: num left=106696 num right=106696
+Done with wild-card count N(*,w) and N(w,*) in 222 secs << par-map vs..  217
+Done computing N(*,*) total-count=34688664.0 in 13 secs
+Start computing log P(*,w)
+Done computing 106696 left-wilds in 39 secs  << 120% vs. 15
+Done storing 106696 left-wilds in 458 secs  << par-for vs 101 secs for non-par
+Done with -log P(*,w), start -log P(w,*)
+Done computing 106696 right-wilds in 45 secs
+Done storing 106696 right-wilds in 458 secs << par-for
+Done computing -log P(w,*) and <-->
+Going to do individual word-pair MI
+

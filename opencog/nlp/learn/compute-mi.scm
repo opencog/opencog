@@ -17,7 +17,7 @@
 ;          SomeAtom "right-hand-part"
 ;
 ; In the current usage, the SomeAtom is a WordNode, and the pairs are
-; word-pairs obtained from lingistic analysis.  However, these scripts
+; word-pairs obtained from linguistic analysis.  However, these scripts
 ; are general, and work for any kind of pairs, not just words.
 ;
 ; It is presumed that a database of counts of pairs has been already
@@ -37,13 +37,15 @@
 ;         WordNode "some-word"
 ;         WordNode "other-word"
 ;
-; In the general case, the 'WordNode is actually of ITEM-TYPE.
-; The actual atom holding the count is obtained by calling an
-; access function: i.e. given the ListLink holding a pair, the
-; GET-PAIR function returns a list of atoms holding the count.
-; It is presumed that the total count is the sum over the counts
-; all atoms in the list.
-;
+; In the general case, access to this structure is provided by methods
+; on the "low-level API". These include:
+;   'left-type and 'right-type, both of which should return 'WordNode
+;         for the above.
+;   'item-pair, which should return the EvaluationLink, given the
+;        ListLink
+;   'left-wildcard and 'right-wildcard, indicating where the partial
+;        sums, such as N(x,*) and N(*,y) should be stored.
+
 ; Let N(wl,wr) denote the number of times that the pair (wl, wr) has
 ; actually been observed; that is, N("some-word", "other-word") for the
 ; example above.  Properly speaking, this count is conditioned on the
@@ -66,12 +68,14 @@
 ;    N(*,wr) = Sum_wl N(wl,wr)
 ;    N(*,*) = Sum_wl Sum_wr N(wl,wr)
 ;
-; These sums are computed, for a given item, by compute-pair-wildcard-counts
-; below, and are computed for all items by batch-all-pair-wildcard-counts.
-; The resulting counts are stored as the 'count' value on the
-; CountTruthValue on the atoms provided by the GET-LEFT-WILD, the
-; GET-RIGHT-WILD and the GET-WILD-WILD functions. For example, for word-pair
-; counts, these will be the atoms
+; These sums are computed, for a given item, by the `make-compute-count`
+; object defined below.  It stores these counts at the locations
+; provided by the underlying object. By default, thse are given by
+; `make-pair-count-api` object, althought these are designed to be
+; overloaded, if needed.
+
+; For example, for word-pair counts, the wild-card sums are stored
+; with the atoms
 ;
 ;   EvaluationLink
 ;      LinkGrammarRelationshipNode "ANY"
@@ -94,27 +98,21 @@
 ; Here, AnyNode plays the role of *.  Thus, N(*,*) is shorthand for the
 ; last of these triples.
 ;
-; After they've been computed, the values for N(w,*) and N(*,w) can be
-; fetched with the `get-left-count-str` and `get-right-count-str`
-; routines, below.  The value for N(*,*) can be gotten by calling
-; `total-pair-observations`.
+; After they've been computed, the values for N(*,y) and N(x,*) can be
+; fetched with the 'left-wild-count and 'right-wild-count methods on
+; the object.  The value for N(*,*) can be gotten with the
+; 'wild-wild-count method.
 ;
-; In addition to computing and storing the probabilities P(wl,wr), it
-; is convenient to also store the entropy or "log likelihood" of the
-; probabilities. Thus, the quantity H(wl,*) = -log_2 P(wl,*) is computed.
-; Both the probability, and the entropy are stored, under the key of
-; (PredicateNode "*-FrequencyKey-*").
-; Note the minus sign: the entropy H(wl,*) is positive, and gets larger,
-; the smaller P is. Note that the logarithm is base-2.  In the scripts
-; below, the phrase 'logli' is used as a synonym for this entropy.
+; The mutual information for the pair (x,y) is defined as
 ;
-; The mutual information between a pair of items is defined as
-;
-;     MI(wl,wr) = -(H(wl,wr) - H(wl,*) - H(*,wr))
+;     MI(x,y) = - log_2 [ p(x,y) /  p(x,*) p(*,y) ]
 ;
 ; This is computed by the script batch-all-pair-mi below. The value is
-; stored under the key of (Predicate "*-Pair MI Key-*") as a single
-; float.
+; stored at the location provided by the 'set-pair-mi method on the
+; object.  It can later be retrieved with the corresponding 'pair-mi
+; method. Because everything is stored in the database, it is
+; straight-forward to perform this batch computation only once,
+; and then rely on the cached values fetched from the database.
 ;
 ; That's all there's to this.
 ;
@@ -126,431 +124,445 @@
 (use-modules (opencog persist))
 
 ; ---------------------------------------------------------------------
-; Return all of the ListLinks of arity two in which the ITEM appears
-(define (get-item-pairs ITEM)
-	(filter
-		(lambda (lnk) (equal? 2 (cog-arity lnk)))
-		(cog-incoming-by-type ITEM 'ListLink))
-)
-
-; The left-stars have the item in the right slot and have some other
-; item (of ITEM-TYPE) in the left slot. We must check for ITEM-TYPE
-; in this spot, as some of these ListLinks may have AnyNode (or
-; something else) in that slot.
-(define (get-left-stars word list-of-pairs ITEM-TYPE)
-	(filter
-		(lambda (lnk)
-			(define oset (cog-outgoing-set lnk))
-			(and
-				(equal? ITEM-TYPE (cog-type (car oset)))
-				(equal? word (cadr oset))))
-		list-of-pairs)
-)
-
-(define (get-right-stars word list-of-pairs ITEM-TYPE)
-	(filter
-		(lambda (lnk)
-			(define oset (cog-outgoing-set lnk))
-			(and
-				(equal? word (car oset))
-				(equal? ITEM-TYPE (cog-type (cadr oset)))))
-		list-of-pairs)
-)
-
-; ---------------------------------------------------------------------
-; Count the total number of times that the atoms in the atom-list have
-; been observed.  The observation-count for a single atom is stored in
-; the 'count' value of its CountTruthValue. This routine just fetches
-; those, and adds them up.
 ;
-; The returned value is the total count.
-
-(define-public (get-total-atom-count atom-list)
-	;
-	; A proceedural loop.
-	;	(let ((cnt 0))
-	;		(define (inc atom) (set! cnt (+ cnt (get-count atom))))
-	;		(for-each inc atom-list)
-	;		cnt
-	;	)
-
-	; textbook tail-recursive solution.
-	(define (hlpr lst cnt)
-		(if (null? lst) cnt
-			(hlpr (cdr lst) (+ cnt (get-count (car lst))))))
-
-	(hlpr atom-list 0)
-)
-
-; ---------------------------------------------------------------------
-; ---------------------------------------------------------------------
-; ---------------------------------------------------------------------
-; ---------------------------------------------------------------------
-; ---------------------------------------------------------------------
-; Compute the left and right word-pair wildcard counts.
-; That is, compute the summations N(w,*) and N(*,w) where * denotes
-; a wildcard, and ranges over all words observed in that slot.
-; Store the resulting counts in a wild-card count structure, described
-; below.
+; Extend the CNTOBJ with additional methods to compute wildcard counts
+; for pairs, and store the results in the count-object.
+; That is, compute the summations N(x,*) = sum_y N(x,y) where (x,y)
+; is a pair, and N(x,y) is the count of how often that pair has been
+; observed, and * denotes the wild-card, ranging over all items
+; supported in that slot.
 ;
-; To be precise, the summation is performed relative to the given
-; LinkGrammar relationship node.  That is, the sumation only occurs
-; over word pairs connected by the given link-grammar link.
-; (Link grammar links are encoded with LinkGrammarRelationshipNode's).
+; The CNTOBJ needs to be an object implementing methods to get the
+; support, and the supported pairs. So, the left-support is the set
+; of all x's for which 0 < N(x,y) for some y.  Dual to the left-support
+; are the right-stars, which is the set of all pairs (x,y) for any
+; given, fixed x.
 ;
-; Thus, a word pair is currently represented as:
+; The CNTOBJ needs to implement the 'left-support and 'right-support
+; methods, to return these two sets, and also the 'left-stars and the
+; 'right-stars methods, to return those sets.
 ;
-;   EvaluationLink
-;      LinkGrammarRelationshipNode "ANY"
-;      ListLink
-;         WordNode "word"
-;         WordNode "bird"
+; The CNTOBJ also needs to implement the setters, so that the wild-card
+; counts can be cached. That is, the object must also have the
+; 'set-left-wild-count, 'set-right-wild-count and 'set-wild-wild-count
+; methods on it.
 ;
-; To compute the left and right counts, we do an ad-hoc pattern
-; match to the pattern below (ad-hoc because we don't bother with the
-; pattern matcher here, the patten is too simple. In other cases, for
-; structures more complex than word-pairs, we will need the matcher...)
-; (Err, actually, we *do* use the pattern matcher, but the code would
-; be faster and more efficient if we didn't. This should be fixed...)
-;
-; The match pattern for the right-counts is:
-;
-;   EvaluationLink
-;      LinkGrammarRelationshipNode "ANY"
-;      ListLink
-;         WordNode "word"
-;         VariableNode of type WordNode   ; i.e. a wildcard here.
-;
-; while that for left-counts is:
-;
-;   EvaluationLink
-;      LinkGrammarRelationshipNode "ANY"
-;      ListLink
-;         VariableNode of type WordNode  ; i.e. a wildcard on the left.
-;         WordNode "bird"
-;
-; Sums are performed over all matching patterns (i.e. all values of the
-; VariableNode).
-;
-; The resulting sums are stored in the CountTruthValues (on the
-; EvaluationLink) of the following structures:
-;
-;   EvaluationLink
-;      LinkGrammarRelationshipNode "ANY"
-;      ListLink
-;         AnyNode "left-word"
-;         WordNode "bird"
-;
-;   EvaluationLink
-;      LinkGrammarRelationshipNode "ANY"
-;      ListLink
-;         WordNode "word"
-;         AnyNode "right-word"
-;
-; This routine assumes that all relevant atoms are already in the
-; atomspace. If they're not, incorrect counts will be obtained. Either
-; batch-fetch all word-pairs, or use the
-; `fetch-and-compute-pair-wildcard-counts` routine, below, to fetch
-; the individual word.
-;
-; Returns the two wild-card EvaluationLinks
+(define (make-compute-count CNTOBJ)
+	(let ((cntobj CNTOBJ))
 
-(define (compute-pair-wildcard-counts ITEM
-	GET-PAIR GET-LEFT-WILD GET-RIGHT-WILD ITEM-TYPE)
+		; Compute the left-side wild-card count. This is the number
+		; N(*,y) = sum_x N(x,y) where ITEM==y and N(x,y) is the number
+		; of times that the pair (x,y) was observed.
+		; This returns the count, or zero, if the pair was never observed.
+		(define (compute-left-count ITEM)
+			(fold
+				(lambda (pr sum) (+ sum (cntobj 'pair-count pr)))
+				0
+				(cntobj 'left-stars ITEM)))
 
-	(let* (
-			; list-links are all the ListLinks in which the ITEM appears
-			(list-links (get-item-pairs ITEM))
+		; Compute and cache the left-side wild-card counts N(*,y).
+		; This returns the atom holding the cached count, thus
+		; making it convient to persist (store) this cache in
+		; the database. It returns nil if the count was zero.
+		(define (cache-left-count ITEM)
+			(define cnt (compute-left-count ITEM))
+			(if (< 0 cnt)
+				(cntobj 'set-left-wild-count ITEM cnt)
+				'()))
 
-			; The left-stars have the item in the right slot and
-			; have some other ITEM-TYPE in the left slot. We must
-			; check for ITEM-TYPE in this spot, as some of these
-			; ListLinks may have AnyNode in that slot.
-			(left-stars (get-left-stars ITEM list-links ITEM-TYPE))
+		; Compute the right-side wild-card count N(x,*).
+		(define (compute-right-count ITEM)
+			(fold
+				(lambda (pr sum) (+ sum (cntobj 'pair-count pr)))
+				0
+				(cntobj 'right-stars ITEM)))
 
-			; The right-stars have the item in the left slot and
-			; have some other ITEM-TYPE in the right slot.
-			(right-stars (get-right-stars ITEM list-links ITEM-TYPE))
+		; Compute and cache the right-side wild-card counts N(x,*).
+		; This returns the atom holding the cached count, or nil
+		; if the count was zero.
+		(define (cache-right-count ITEM)
+			(define cnt (compute-right-count ITEM))
+			(if (< 0 cnt)
+				(cntobj 'set-right-wild-count ITEM cnt)
+				'()))
 
-			; left-evs are the EvaluationLinks above the left-stars
-			; That is, they have the wild-card in the left-hand slot.
-			(left-evs (concatenate!
-					(map!  (lambda (lnk) (GET-PAIR lnk)) left-stars)))
+		; Compute and cache all of the left-side wild-card counts.
+		; This computes N(*,y) for all y, in parallel.
+		;
+		; This method returns a list of all of the atoms holding
+		; those counts; handy for storing in a database.
+		(define (cache-all-left-counts)
+			(map cache-left-count (cntobj 'right-support)))
 
-			(right-evs (concatenate!
-					(map!  (lambda (lnk) (GET-PAIR lnk)) right-stars)))
+		(define (cache-all-right-counts)
+			(map cache-right-count (cntobj 'left-support)))
 
-			; The total occurance counts
-			(left-total (get-total-atom-count left-evs))
-			(right-total (get-total-atom-count right-evs))
-		)
+		; Compute the total number of times that all pairs have been
+		; observed. In formulas, return
+		;     N(*,*) = sum_x N(x,*) = sum_x sum_y N(x,y)
+		;
+		; This method assumes that the partial wild-card counts have
+		; been previously computed and cached.  That is, it assumes that
+		; the 'right-wild-count returns a valid value, which really
+		; should be the same value as 'compute-right-count on this object.
+		(define (compute-total-count-from-left)
+			(fold
+				;;; (lambda (item sum) (+ sum (compute-right-count item)))
+				(lambda (item sum) (+ sum (cntobj 'right-wild-count item)))
+				0
+				(cntobj 'left-support)))
 
-		(if (< 0 left-total)
-			(store-atom (set-count (GET-LEFT-WILD ITEM) left-total)))
+		; Compute the total number of times that all pairs have been
+		; observed. That is, return N(*,*) = sum_y N(*,y). Note that
+		; this should give exactly the same result as the above; however,
+		; the order in which the sums are performed is distinct, and
+		; thus any differences indicate a bug.
+		(define (compute-total-count-from-right)
+			(fold
+				;;; (lambda (item sum) (+ sum (compute-left-count item)))
+				(lambda (item sum) (+ sum (cntobj 'left-wild-count item)))
+				0
+				(cntobj 'right-support)))
 
-		(if (< 0 right-total)
-			(store-atom (set-count (GET-RIGHT-WILD ITEM) right-total)))
-	)
-)
+		; Compute the total number of times that all pairs have been
+		; observed. That is, return N(*,*).  Throws an error if the
+		; left and right summations fail to agree.
+		(define (compute-total-count)
+			(define l-cnt (compute-total-count-from-left))
+			(define r-cnt (compute-total-count-from-right))
 
-; ---------------------------------------------------------------------
-; Compute the total number of observed word-pairs, using the left
-; and right wild-card count access methods.  The resulting total count
-; is stored on the GET-WILD-WILD atom.
-;
-; The computation is performed batch-style. This function assumes that
-; all word-pairs are already loaded in the atom table; it will get
-; incorrect counts if this is not the case.
-;
-(define (count-all-pairs
-	GET-LEFT-WILD GET-RIGHT-WILD GET-WILD-WILD ALL-WORDS)
+			; The left and right counts should be equal!
+			(if (not (eqv? l-cnt r-cnt))
+				(throw 'bad-summation 'count-all-pairs
+					(format #f "Error: pair-counts unequal: ~A ~A\n" l-cnt r-cnt)))
+			l-cnt)
 
-	(define l-cnt 0)
-	(define r-cnt 0)
+		; Compute and cache the total observation count for all pairs.
+		; This returns the atom holding the cached count.
+		(define (cache-total-count)
+			(define cnt (compute-total-count))
+			(cntobj 'set-wild-wild-count cnt))
 
-	(start-trace "Start all-pair-count\n")
-	; Now, loop over all words, totalling up the counts.
-	(for-each
-		(lambda (word)
-			(set! l-cnt (+ l-cnt (get-count (GET-LEFT-WILD word))))
-			(set! r-cnt (+ r-cnt (get-count (GET-RIGHT-WILD word))))
-		)
-		ALL-WORDS)
-
-	; The left and right counts should be equal!
-	(if (not (eqv? l-cnt r-cnt))
-		(throw 'bad-summation 'count-all-pairs
-			(format #f "Error: word-pair-counts unequal: ~A ~A\n" l-cnt r-cnt))
-	)
-
-	; Create and save the grand-total count.
-	(store-atom (set-count (GET-WILD-WILD) r-cnt))
-	(trace-msg "Done with all-pair count\n")
-)
-
-; ---------------------------------------------------------------------
-; Compute the log-liklihood for all wild-card wordpairs.
-;
-; This assumes that wild-card word-pair counts have already been
-; performed. This takes three functions as an argument, and a list
-; of words.
-;
-; The GET-LEFT-WILD and GET-RIGHT-WILD functions should return
-; an atom of the general form:
-;
-;   FooBarEvaluationLink
-;      FooPredicateNode "Blah"
-;      ListLink
-;         WordNode "some-word"
-;         AnyNode "right-word"
-;
-; and also for the flipped version (exchange WordNode and AnyNode)
-; For example, FooBarEvaluationLink can be EvaluationLink, and
-; FooPredicateNode can be LinkGrammarRelationshipNode "ANY".
-;
-; The wild-card counts will be fetched from the above atoms; the
-; computed log-liklihood will be stored on the aove atoms.
-;
-; The GET-WILD-WILD function should return the atom holding
-; the total wildcard count (i.e. N(R, *,*))
-;
-; The computation is performed "batch style", it loops over the list
-; of words in ALL-WORDS; it assumes that assumes that all wild-card
-; counts are up-to-date in the atomspace; no fetching from the database
-; is performed.
-
-(define (batch-all-pair-wildcard-logli
-	GET-LEFT-WILD GET-RIGHT-WILD GET-WILD-WILD ALL-WORDS)
-
-	; Get the word-pair grand-total
-	(define pair-total (get-count (GET-WILD-WILD)))
-
-	; For each wild-card pair associated with the word,
-	; obtain the log likelihood.
-	(for-each
-		(lambda (word)
-			(let ((lefty (GET-LEFT-WILD word))
-					(righty (GET-RIGHT-WILD word)))
-
-				; log-likelihood for the left wildcard
-				(if (< 0 (get-count lefty))
-					(store-atom (compute-atom-logli lefty pair-total)))
-
-				; log-likelihood for the right wildcard
-				(if (< 0 (get-count righty))
-					(store-atom (compute-atom-logli righty pair-total)))))
-
-		ALL-WORDS)
+		; Methods on this class.
+		(lambda (message . args)
+			(case message
+				((compute-left-count)     (apply compute-left-count args))
+				((cache-left-count)       (apply cache-left-count args))
+				((compute-right-count)    (apply compute-right-count args))
+				((cache-right-count)      (apply cache-right-count args))
+				((cache-all-left-counts)  (cache-all-left-counts))
+				((cache-all-right-counts) (cache-all-right-counts))
+				((compute-total-count)    (compute-total-count))
+				((cache-total-count)      (cache-total-count))
+				(else (apply cntobj (cons message args))))
+			))
 )
 
 ; ---------------------------------------------------------------------
 ;
-; Compute word-pair mutual information, for all word-pairs with the
-; given word being on the right.  This is a helper routine, to split
-; up the double-loop over left and right words into two. This is the
-; inner loop, looping over all left-words.
+; Extend the CNTOBJ with additional methods to compute observation
+; frequencies and entropies for pairs, including partial-sum entropies
+; (mutual information) for the left and right side of each pair.
+; This will also cache the results of these computations in a
+; standardized location.
 ;
-; The mutual information, and where its stored, is described in the
-; overview, up top.  This routine is a batch routine; it assumes that
-; all needed pairs are already in the atomspace (it does NOT fetch
-; from storage). It assumes that the wild-card entropies (logli's) have
-; already been computed.
+; The CNTOBJ needs to be an object implementing methods to get pair
+; observation counts, and wild-card counts (which must hold valid
+; values). Specifically, it must have the 'pair-count, 'left-wild-count,
+; 'right-wild-count and 'wild-wild-count methods on it.  Thus, if
+; caching (which is the generic case) these need to have been computed
+; and cached before using this class.
+
+(define (make-compute-freq CNTOBJ)
+	(let ((cntobj CNTOBJ)
+			(tot-cnt 0))
+
+		(define (init)
+			(set! tot-cnt (cntobj `wild-wild-count)))
+
+		; Compute the left-side wild-card frequency. This is the ratio
+		; P(*,y) = N(*,y) / N(*,*) which gives the frequency at which
+		; the pair (x,y) was observed.
+		; This returns the frequency, or zero, if the pair was never
+		; observed.
+		(define (compute-left-freq ITEM)
+			(/ (cntobj 'left-wild-count ITEM) tot-cnt))
+		(define (compute-right-freq ITEM)
+			(/ (cntobj 'right-wild-count ITEM) tot-cnt))
+
+		; Compute and cache the left-side wild-card frequency.
+		; This returns the atom holding the cached count, thus
+		; making it convient to persist (store) this cache in
+		; the database. It returns nil if the count was zero.
+		(define (cache-left-freq ITEM)
+			(define freq (compute-left-freq ITEM))
+			(if (< 0 freq)
+				(cntobj 'set-left-wild-freq ITEM freq)
+				'()))
+
+		(define (cache-right-freq ITEM)
+			(define freq (compute-right-freq ITEM))
+			(if (< 0 freq)
+				(cntobj 'set-right-wild-freq ITEM freq)
+				'()))
+
+		; Compute and cache all of the left-side frequencies.
+		; This computes P(*,y) for all y, in parallel.
+		;
+		; This method returns a list of all of the atoms holding
+		; those counts; handy for storing in a database.
+		(define (cache-all-left-freqs)
+			(map cache-left-freq (cntobj 'right-support)))
+		(define (cache-all-right-freqs)
+			(map cache-right-freq (cntobj 'right-support)))
+
+		; Methods on this class.
+		(lambda (message . args)
+			(case message
+				((init-freq)             (init))
+				((compute-left-freq)     (apply compute-left-freq args))
+				((compute-right-freq)    (apply compute-right-freq args))
+				((cache-left-freq)       (apply cache-left-freq args))
+				((cache-right-freq)      (apply cache-right-freq args))
+				((cache-all-left-freqs)  (cache-all-left-freqs))
+				((cache-all-right-freqs) (cache-all-right-freqs))
+				(else (apply cntobj      (cons message args))))
+		))
+)
+
+; ---------------------------------------------------------------------
 ;
+; Extend the CNTOBJ with additional methods to compute the mutual
+; information of pairs.
 ;
-(define (compute-pair-mi RIGHT-ITEM
-	GET-PAIR GET-LEFT-WILD GET-RIGHT-WILD GET-WILD-WILD ITEM-TYPE)
+; The CNTOBJ needs to be an object implementing methods to get pair
+; observation frequencies, which must return valid values; i.e. must
+; have been previously computed. Specifically, it must have the
+; 'left-logli, 'right-logli and 'pair-logli methods.  For caching,
+; it must also have the 'set-pair-mi method.
+;
+; The MI computations are done as a batch, looping over all pairs.
 
-	; Get the word-pair grand-total
-	(define pair-total (get-count (GET-WILD-WILD)))
+(define (make-batch-mi FRQOBJ)
+	(let ((frqobj FRQOBJ))
 
-	; Either of the get-loglis below will throw an exception, if
-	; the particular word-pair doesn't have any counts. This is rare,
-	; but can happen: e.g. (Any "left-word") (Word "###LEFT-WALL###")
-	; will have zero counts.  This would have an infinite logli
-	; an an infinite MI. So we skip this, with a try-catch block.
-	(catch #t (lambda ()
-	(let* (
-			; left-stars are all the ListLinks in which the RIGHT-ITEM
-			; appears on the right (and anything on the left)
-			(left-stars (get-left-stars RIGHT-ITEM
-					(get-item-pairs RIGHT-ITEM) ITEM-TYPE))
+		; Loop over all pairs, computing the MI for each. The loop
+		; is actually two nested loops, with a loop over the
+		; left-supports on the outside, and over right-stars for
+		; the inner loop. This returns a list of all atoms holding
+		; the MI, suitable for iterating for storage.
+		(define (compute-n-cache-pair-mi)
+			(define all-atoms '())
+			(define lefties (frqobj 'left-support))
+			(define nlefties (length lefties))
 
-			; left-evs are the EvaluationLinks above the left-stars
-			; That is, they have the wild-card in the left-hand slot.
-			(left-evs (concatenate!
-					(map! (lambda (lnk) (GET-PAIR lnk)) left-stars)))
+			(define (right-loop left-item)
 
-			(l-logli (get-logli (GET-LEFT-WILD RIGHT-ITEM)))
-		)
-		(for-each
-
-			; This lambda sets the mutual information for each word-pair.
-			(lambda (pair)
+				; Either of the get-loglis below may throw an exception,
+				; if the particular item-pair doesn't have any counts.
+				; This is rare, but can happen: e.g. (Any "left-word")
+				; (Word "###LEFT-WALL###") will have zero counts.  This
+				; would have an infinite logli and an infinite MI. So we
+				; skip this, with a try-catch block.
 				(catch #t (lambda ()
-					(let* (
-							; the left-word of the word-pair
-							(left-word (gadr pair))
+					(define r-logli (frqobj 'right-wild-logli left-item))
 
-							(r-logli (get-logli (GET-RIGHT-WILD left-word)))
+					; Compute the MI for exactly one pair.
+					(define (do-one-pair lipr)
+						(define right-item (gdr lipr))
+						(define l-logli (frqobj 'left-wild-logli right-item))
+						(define pr-logli (frqobj 'pair-logli lipr))
+						(define mi (- (+ r-logli l-logli) pr-logli))
+						(define atom (frqobj 'set-pair-mi lipr mi))
+						(set! all-atoms (cons atom all-atoms))
+					)
 
-							; Compute the logli log_2 P(l,r)/P(*,*)
-							(atom (compute-atom-logli pair pair-total))
+					; Wrap the do-one-pair function with a progress-report
+					; printer.
+					(define do-one-and-report
+						(make-progress-rpt do-one-pair 10000 nlefties
+							"MI, done ~A outer loops of ~A in ~A secs (~A loops/sec)\n"))
 
-							; Get the log liklihood computed immediately above.
-							(ll (get-logli atom))
-
-							; Subtract the left and right entropies to get the
-							; mutual information (at last!)
-							(mi (- (+ l-logli r-logli) ll))
-						)
-						; Save the hard-won MI to the database.
-						(store-atom (set-mi atom mi))
-					))
-				(lambda (key . args) #f)) ; catch handler
+					(for-each
+						do-one-and-report
+						(frqobj 'right-stars left-item)))
+					(lambda (key . args) #f)) ; catch handler
 			)
-			left-evs
+
+			;; XXX Maybe FIXME This could be a par-for-each, to run the
+			; calculations in parallel, but then we need to make the
+			; all-atoms list thread-safe.  Two problems: one is that
+			; current guile par-for-each implementation sucks.
+			; The other is that the atom value-fetching is done under
+			; a global lock, thus effectively single-threaded.
+			(for-each right-loop lefties)
+
+			; Return the list of ALL atoms with MI on them
+			all-atoms
 		)
-	))
-	(lambda (key . args) #f)) ; catch handler
+
+		; Compute the total entropy for the set. This loops over all
+		; pairs, and computes the sum
+		;   H = sum_x sum_y p(x,y) log_2 p(x,y)
+		; It returns a single numerical value, for the entire set.
+		(define (compute-total-entropy)
+			(define entropy 0)
+
+			(define (right-loop left-item)
+				(for-each
+					(lambda (lipr)
+						; The get-logli below may throw an exception, if
+						; the particular item-pair doesn't have any counts.
+						; XXX does this ever actually happen?  It shouldn't,
+						;right?
+						(catch #t (lambda ()
+								(define pr-freq (frqobj 'pair-freq lipr))
+								(define pr-logli (frqobj 'pair-logli lipr))
+								(define h (* pr-freq pr-logli))
+								(set! entropy (+ entropy h))
+							)
+							(lambda (key . args) #f))) ; catch handler
+					(frqobj 'right-stars left-item)))
+
+			(for-each right-loop (frqobj 'left-support))
+
+			; Return the single number.
+			entropy
+		)
+
+		; Methods on this class.
+		(lambda (message . args)
+			(case message
+				((cache-pair-mi)         (compute-n-cache-pair-mi))
+				((total-entropy)         (compute-total-entropy))
+				(else (apply frqobj      (cons message args))))
+		))
 )
 
 ; ---------------------------------------------------------------------
+; ---------------------------------------------------------------------
+; ---------------------------------------------------------------------
+; ---------------------------------------------------------------------
 ;
-; Compute the mutual information between all pairs.
+; Compute the mutual information between all pairs. Counts, frequencies
+; and left, right partial sums are also performed; this is an all-in-one
+; routine, which computes all of the needed pre-requisites, and stores
+; them, as well as the MI, in the database.
 ;
 ; The mutual information between pairs is described in the overview,
 ; up top of this file. The access to the pairs is governed by the
-; the access functions provided as arguments.
+; the methods on the passed object.
 ;
-; The `all-singletons` argument should be a list of all items over
-; which the pairs will be computed. Every item in this list should
-; be of ITEM-TYPE.
+; Among the things that are computed and stored are the partial sums
+; of counts, i.e. the N(x,*) and N(*,y) explained up top, the total
+; count N(*,*), the frequencies p(x,y) = N(x,y) / N(*,*), the
+; corresponding partial sums.  All of these quantities are written
+; back to the database, at the time of computation.
 ;
-; The GET-PAIR argument should be a function that returns all atoms
-; that hold counts for a pair (ListLink left-item right-item). It
-; should return a list (possibly the empty list).  Note that in some
-; cases, the list may be longer than just one item, e.g. for schemas
-; that count link lengths.  In thise case, the total count for the
-; pair is taken to be the sum of the individual counts on all the
-; atoms in the list.
+; In order to work correctly, this function assumes that the object
+; has at least the minimal low-level API to identify where to find
+; the counts on pairs.  This script is designed to work with any kinds
+; of pairs.
 ;
-; The algorithm uses a doubley-nested loop to walk over all pairs,
-; in a sparse-matrix fashion: The outer loop is over all all items,
-; the inner loop is over the incoming set of the items, that incoming
-; set being composed of ListLinks that hold pairs. The ITEM-TYPE
-; is used for filtering, to make sure that only valid pairs are
-; accessed.
-;
-; Partial sums of counts, i.e. the N(w,*) and N(*,w) explained up top,
-; are stored with the atoms that GET-LEFT-WILD and GET-RIGHT-WILD
-; provide. The GET-WILD-WILD function returns the atom where N(*,*) is
-; stored.
-;
-; The wild-card entropies and MI values are written back to the database
-; as soon as they are computed, so as not to be lost.  The double-nested
-; sums are distributed over all CPU cores, using guile's par-for-each,
-; and can thus be very CPU intensive.
-;
-; Running this script can take hours, or longer (days?) depending on the
-; size of the dataset.  This script wasn't really designed to be
-; efficient; instead, the goal to to allow general, generic knowledge
-; representation.  You can compute MI between any kind of thing.
+; Running this script can take hours or longer, depending on the size
+; of the dataset. Progress reports are printed to stdout, including
+; timing and summary statistics. This script wasn't really designed to
+; be efficient; instead, the goal to to allow general, generic knowledge
+; representation.  You can compute MI between any kinds of things
 ; If you just need to count one thing, writing custom scripts that do
 ; NOT use the atomspace would almost surely be faster.  We put up with
 ; the performance overhead here in order to get the flexibility that
 ; the atomspace provides.
 ;
-(define (batch-all-pair-mi GET-PAIR
-	GET-LEFT-WILD GET-RIGHT-WILD GET-WILD-WILD ITEM-TYPE all-singletons)
+(define (batch-all-pair-mi OBJ)
 
-	(define msg (format #f "Start counting, num words=~A\n"
-			(length all-singletons)))
-	(trace-msg msg)
-	(display msg)
+	(define start-time (current-time))
+	(define (elapsed-secs)
+		(define diff (- (current-time) start-time))
+		(set! start-time (current-time))
+		diff)
 
-	; First, get the left and right wildcard counts.
-	; That is, compute N(w,*) and N(*,w)
-	; for-each
-	(par-for-each
-		(lambda (word)
-			(compute-pair-wildcard-counts word
-				GET-PAIR GET-LEFT-WILD GET-RIGHT-WILD ITEM-TYPE)
-			(trace-msg-cnt "Wildcard-count did ")
-		)
-		all-singletons
+	; Decorate the object with a counting API.
+	(define obj-get-set-api (make-pair-count-api OBJ))
+
+	; Decorate the object with methods that can compute counts.
+	(define count-obj (make-compute-count obj-get-set-api))
+
+	; Decorate the object with methods that can compute frequencies.
+	(define freq-obj (make-compute-freq
+		(make-pair-freq-api obj-get-set-api)))
+
+	(format #t "Support: num left=~A num right=~A\n"
+			(OBJ 'left-support-size)
+			(OBJ 'right-support-size))
+
+	; First, compute the summations for the left and right wildcard counts.
+	; That is, compute N(x,*) and N(*,y) for the supports on x and y.
+
+	(count-obj 'cache-all-left-counts)
+	(count-obj 'cache-all-right-counts)
+
+	(format #t "Done with wild-card count N(*,w) and N(w,*) in ~A secs\n"
+		(elapsed-secs))
+
+	; Now, compute the grand-total
+	(store-atom (count-obj 'cache-total-count))
+	(format #t "Done computing N(*,*) total-count=~A in ~A secs\n"
+		(obj-get-set-api 'wild-wild-count)
+		(elapsed-secs))
+
+	(display "Start computing log P(*,w)\n")
+
+	; Compute the left and right wildcard frequencies and
+	; log-frequencies.
+	(freq-obj 'init-freq)
+
+	(let ((lefties (freq-obj 'cache-all-left-freqs)))
+		(format #t "Done computing ~A left-wilds in ~A secs\n"
+			(length lefties) (elapsed-secs))
+		(for-each
+			(lambda (atom) (if (not (null? atom)) (store-atom atom)))
+			lefties)
+		(format #t "Done storing ~A left-wilds in ~A secs\n"
+			(length lefties) (elapsed-secs))
 	)
-	(trace-elapsed)
-	(trace-msg "Done with wild-card counts N(*,w) and N(w,*)\n")
-	(display "Done with wild-card count N(*,w) and N(w,*)\n")
 
-	; Now, get the grand-total
-	(count-all-pairs
-		 GET-LEFT-WILD GET-RIGHT-WILD GET-WILD-WILD all-singletons)
-	(trace-elapsed)
-	(trace-msg "Done computing N(*,*), start computing log P(*,w)\n")
-	(display "Done computing N(*,*), start computing log P(*,w)\n")
+	(display "Done with -log P(*,w), start -log P(w,*)\n")
 
-	; Compute the left and right wildcard logli's
-	(batch-all-pair-wildcard-logli
-		GET-LEFT-WILD GET-RIGHT-WILD GET-WILD-WILD all-singletons)
-	(trace-elapsed)
-	(trace-msg "Done computing -log N(w,*)/N(*,*) and <-->\n")
-	(display "Done computing -log N(w,*)/N(*,*) and <-->\n")
+	(let ((righties (freq-obj 'cache-all-right-freqs)))
+		(format #t "Done computing ~A right-wilds in ~A secs\n"
+			(length righties) (elapsed-secs))
+		(for-each
+			(lambda (atom) (if (not (null? atom)) (store-atom atom)))
+			righties)
+		(format #t "Done storing ~A right-wilds in ~A secs\n"
+			(length righties) (elapsed-secs))
+	)
+
+	(display "Done computing -log P(w,*) and <-->\n")
 
 	; Enfin, the word-pair mi's
-	(start-trace "Going to do individual word-pair MI\n")
 	(display "Going to do individual word-pair MI\n")
-	; for-each
-	(par-for-each
-		(lambda (word)
-			(compute-pair-mi word GET-PAIR
-				GET-LEFT-WILD GET-RIGHT-WILD GET-WILD-WILD ITEM-TYPE)
-			(trace-msg-cnt "Done with pair MI cnt=")
-		)
-		all-singletons
+
+	(let* ((bami (make-batch-mi freq-obj))
+			(all-atoms (bami 'cache-pair-mi))
+			(num-prs (length all-atoms)))
+
+		; Create a wrapper around `store-atom` that prints a progress
+		; report.  The problem is that millions of pairs may need to be
+		; stored, and this just takes a long time.
+		(define store-rpt
+			(make-progress-rpt store-atom 100000 num-prs
+				"Stored ~A of ~A pairs in ~A secs (~A pairs/sec)\n"))
+
+		; This print triggers as soon as the let* above finishes.
+		(format #t "Done computing ~A pair MI's in ~A secs\n"
+			num-prs (elapsed-secs))
+		(for-each store-rpt all-atoms)
+		(format #t "Done storing ~A pair MI's in ~A secs\n"
+			num-prs (elapsed-secs))
 	)
-	(trace-elapsed)
-	(trace-msg "Finished with MI computations\n")
+
 	(display "Finished with MI computations\n")
 )
 

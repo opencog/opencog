@@ -9,6 +9,8 @@
 ; in the earlier files.
 (load "learn/common.scm")
 (load "learn/link-pipeline.scm")
+(load "learn/singletons.scm")
+(load "learn/pair-object-api.scm")
 (load "learn/compute-mi.scm")
 (load "learn/batch-word-pair.scm")
 (load "learn/pair-stats.scm") ; load after compute-mi.scm

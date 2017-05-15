@@ -653,6 +653,7 @@ It will eventually get cleaned up.
 TODO List
 =========
 * Fix crash at linkage_set_domain_names+0xe0
+* Fix (WordNode "…!ANY-PUNCT")
 * Create OO system for generic pair statistics.
 * Rework pipeline to use literary English sources.
 * Count single-word probabilities.

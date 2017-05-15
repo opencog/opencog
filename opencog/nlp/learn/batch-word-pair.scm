@@ -54,25 +54,90 @@
 ; ---------------------------------------------------------------------
 ; Random-tree parse word-pair count access routines.
 ;
-; Get the atom that holds the left wild-card count for `word`,
-; for the LG link type "ANY". (the wildcard is on the left side)
-; This *creates* the atom, if it does not already exist, and thus
-; is not intended for public use!
+; This implements a word-pair object, where the two words are connected
+; with an LG link-type of "ANY", in an EvaluationLink.
+;
+; That is, a word pair is represented as:
+;
+;   EvaluationLink
+;      LinkGrammarRelationshipNode "ANY"
+;      ListLink
+;         WordNode "word"
+;         WordNode "bird"
+;
+; After various counts, frequencies, entropies, etc pertaining to
+; this particular pair are computed, they will be hung, as values,
+; on the above EvaluationLink.
+;
+; The 'item-pair method returns the above EvaluationLink, if it exists.
+; The 'make-pair method will create it, if it does not exist.
+;
+; Left-side counts, frequencies, etc. such as N(*,y) P(*,y) or
+; log_2 P(*,y) will be placed on the following, which is returned
+; by the 'left-wildcard methd:
+;
+;   EvaluationLink
+;      LinkGrammarRelationshipNode "ANY"
+;      ListLink
+;         AnyNode "left-word"
+;         WordNode "bird"
+;
+; The corresponding N(x,*) P(x,*) etc are hung on the atom returned
+; by the 'right-wildcard method:
+;
+;   EvaluationLink
+;      LinkGrammarRelationshipNode "ANY"
+;      ListLink
+;         WordNode "word"
+;         AnyNode "right-word"
+;
+; Finally, the 'left-type and 'right-type methods return the type
+; of the the two sides of the pair.
 
-(define (get-any-left-wildcard word)
-	(EvaluationLink any-pair-pred (ListLink any-left word))
-)
+(define (make-any-link)
+	(let ()
+		(define (get-left-type) 'WordNode)
+		(define (get-right-type) 'WordNode)
 
-(define (get-any-right-wildcard word)
-	(EvaluationLink any-pair-pred (ListLink word any-right))
-)
+		; Return the atom holding the count, if it exists, else
+		; return nil.
+		(define (get-pair PAIR)
+			(cog-link 'EvaluationLink any-pair-pred PAIR))
 
-; Get the atom that holds the total word-pair count.
-; This has wild-cards on both the left and right.
+		; Create an atom to hold the count (if it doesn't exist already).
+		(define (make-pair PAIR)
+			(EvaluationLink any-pair-pred PAIR))
 
-(define (get-any-wild-wild)
-	(EvaluationLink any-pair-pred (ListLink any-left any-right))
-)
+		; Return a list of atoms hold the count.
+		(define (get-pairs PAIR)
+			(define pr (get-pair PAIR))
+			(if (null? pr) '() (list pr)))
+
+		; Caution: this unconditionally creates the wildcard pair!
+		(define (get-left-wildcard WORD)
+			(make-pair (ListLink any-left WORD)))
+
+		; Caution: this unconditionally creates the wildcard pair!
+		(define (get-right-wildcard WORD)
+			(make-pair (ListLink WORD any-right)))
+
+		(define (get-wild-wild)
+			(get-pair (ListLink any-left any-right)))
+
+	; Methods on the object
+	(lambda (message . args)
+		(apply (case message
+				((left-type) get-left-type)
+				((right-type) get-right-type)
+				((item-pair) get-pair)
+				((make-pair) make-pair)
+				((item-pairs) get-pairs)
+				((left-wildcard) get-left-wildcard)
+				((right-wildcard) get-right-wildcard)
+				((wild-wild) get-wild-wild)
+				(else (error "Bad method call on ANY-link:" message)))
+			args))))
+
 
 ; ---------------------------------------------------------------------
 ; ---------------------------------------------------------------------
@@ -80,20 +145,53 @@
 ; Clique-based-counting word-pair access methods.
 ; ---------------------------------------------------------------------
 
-; Get the atom that holds the left wild-card count for `word`,
-; for the clique-based counts. (the wildcard is on the left side)
+; Object for getting word-pair counts, obtained from clique counting.
+; The counts are stored on EvaluationLinks with the predicate
+; (PredicateNode "*-Sentence Word Pair-*")
+;
+(define (make-clique-pair)
+	(let ()
+		(define (get-left-type) 'WordNode)
+		(define (get-right-type) 'WordNode)
 
-(define (get-clique-left-wildcard word)
-	(EvaluationLink pair-pred (ListLink any-left word))
-)
+		; Return the atom holding the count, if it exists, else
+		; return nil.
+		(define (get-pair PAIR)
+			(cog-link 'EvaluationLink pair-pred PAIR))
 
-(define (get-clique-right-wildcard word)
-	(EvaluationLink pair-pred (ListLink word any-right))
-)
+		; Create an atom to hold the count (if it doesn't exist already).
+		(define (make-pair PAIR)
+			(EvaluationLink pair-pred PAIR))
 
-(define (get-clique-wild-wild)
-	(EvaluationLink pair-pred (ListLink any-left any-right))
-)
+		; Return a list of atoms hold the count.
+		(define (get-pairs PAIR)
+			(define pr (get-pair PAIR))
+			(if (null? pr) '() (list pr)))
+
+		(define (get-left-wildcard WORD)
+			(make-pair (ListLink any-left WORD)))
+
+		(define (get-right-wildcard WORD)
+			(make-pair (ListLink WORD any-right)))
+
+		(define (get-wild-wild)
+			(get-pair (ListLink any-left any-right)))
+
+	; Methods on the object
+	(lambda (message . args)
+		(apply (case message
+				((left-type) get-left-type)
+				((right-type) get-right-type)
+				((item-pair) get-pair)
+				((make-pair) make-pair)
+				((item-pairs) get-pairs)
+				((left-wildcard) get-left-wildcard)
+				((right-wildcard) get-right-wildcard)
+				((wild-wild) get-wild-wild)
+				(else (error "Bad method call on clique-pair:" message)))
+			args))))
+
+
 
 ; ---------------------------------------------------------------------
 ; ---------------------------------------------------------------------
@@ -116,7 +214,7 @@
 "
 	(define start-time (current-time))
 	(fetch-incoming-set any-pair-pred)
-	(format #t "Elapsed time to ANY-link pairs: ~A secs\n"
+	(format #t "Elapsed time to load ANY-link pairs: ~A secs\n"
 		(- (current-time) start-time))
 )
 
@@ -166,13 +264,7 @@
 	(trace-msg "Finished loading any-word-pairs\n")
 	(display "Finished loading any-word-pairs\n")
 
-	(batch-all-pair-mi
-		internal-any-pair
-		get-any-left-wildcard
-		get-any-right-wildcard
-		get-any-wild-wild
-		'WordNode
-		(get-all-words))
+	(batch-all-pair-mi (make-pair-wild (make-any-link)))
 )
 
 (define-public (batch-clique-pairs)
@@ -191,55 +283,18 @@
 	(trace-msg "Finished loading clique-word-pairs\n")
 	(display "Finished loading clique-word-pairs\n")
 
-	(batch-all-pair-mi
-		internal-clique-pair
-		get-clique-left-wildcard
-		get-clique-right-wildcard
-		get-clique-wild-wild
-		'WordNode
-		(get-all-words))
-)
-
-; ---------------------------------------------------------------------
-; Compute the occurance logliklihoods for a list of atoms.
-;
-; This sums up the occurance-count over the entire list of atoms,
-; and uses that as the normalization for the probability frequency
-; for the individual atoms in the list. It then computes the log_2
-; likelihood for each atom in the list, based on the total.
-;
-; As usual, the raw counts are obtained from the 'count' slot on a
-; CountTruthValue, and the logli is stored as a value on the atom.
-;
-; This returns the atom-list, but now with the logli's set.
-
-(define (compute-all-logli atom-list)
-	(let ((total (get-total-atom-count atom-list)))
-		(map
-			(lambda (atom) (compute-atom-logli atom total))
-			atom-list
-		)
-	)
-)
-
-; ---------------------------------------------------------------------
-; Compute the occurance logliklihoods for all words.
-;
-; Load all word-nodes into the atomspace from SQL storage, if they
-; are not already present.  This also loads the associated values.
-;
-; This returns the list of all word-nodes, with the logli's set.
-
-(define (compute-all-word-freqs)
-	(begin
-		; Make sure that all word-nodes are in the atom table.
-		(call-only-once fetch-all-words)
-		(compute-all-logli (get-all-words))
-	)
+	(batch-all-pair-mi (make-pair-wild (make-clique-pair)))
 )
 
 ; ---------------------------------------------------------------------
 ; misc unit-test-by-hand stuff
+;
+; (use-modules (opencog) (opencog persist) (opencog persist-sql))
+; (use-modules (opencog nlp) (opencog nlp learn))
+; (sql-open "postgres:///en_snapshot?user=linas
+; (use-modules (opencog cogserver))
+; (start-cogserver "opencog2.conf")
+; (fetch-all-words)
 ;
 ; (define x (WordNode "famille"))
 ; (define y (LinkGrammarRelationshipNode "ANY"))

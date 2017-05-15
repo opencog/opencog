@@ -8,7 +8,34 @@
 ; ---------------------------------------------------------------------
 ;
 (use-modules (srfi srfi-1))
-(use-modules (opencog))
+(use-modules (opencog) (opencog persist))
+
+; ---------------------------------------------------------------------
+; A progress report utility.
+; The wraps the FUNC function, and prints a progress report MSG
+; every WHEN calls to FUNC.
+; FUNC should be the function to be called, taking one argument.
+; MSG should be a string of the form
+;    "Did ~A of ~A in ~A seconds (~A items/sec)\n"
+; WHEN should be how often to print (modulo)
+; TOTAL should be the total number of items to process.
+(define (make-progress-rpt FUNC WHEN TOTAL MSG)
+	(let ((func FUNC)
+			(when WHEN)
+			(total TOTAL)
+			(msg MSG)
+			(cnt 0)
+			(start-time 0))
+		(lambda (item)
+			(if (eqv? 0 cnt) (set! start-time (current-time)))
+			(func item)
+			(set! cnt (+ 1 cnt))
+			(if (eqv? 0 (modulo cnt when))
+				(let* ((elapsed (- (current-time) start-time))
+						(rate (/ (exact->inexact when) elapsed)))
+					(format #t msg cnt total elapsed rate)
+					(set! start-time (current-time))))))
+)
 
 ; ---------------------------------------------------------------------
 ; Define locations where statistics will be stored.
@@ -55,22 +82,6 @@
 ; for this atom.
 (define (get-logli ATOM)
 	(cadr (cog-value->list (cog-value ATOM freq-key)))
-)
-
-; ----
-; set-mi ATOM MI - set the mutual information on ATOM.
-;
-; MI is assumed to be a scheme floating-point value, holding the
-; mutual-information value appropriate for the ATOM.
-;
-; In essentially all cases, ATOM is actually an EvaluationLink that
-; is holding the structural pattern to which the mutial information
-; applied. Currently, this is almost always a word-pair.
-;
-; Returns ATOM.
-;
-(define (set-mi ATOM MI)
-	(cog-set-value! ATOM mi-key (FloatValue MI))
 )
 
 ; ----
@@ -146,12 +157,6 @@
   the word-pair.
 "
 	(cog-link 'EvaluationLink any-pair-pred PAIR)
-)
-
-; Internal-use version of above, not for the public.
-(define (internal-any-pair PAIR)
-	(define pr (get-any-pair PAIR))
-	(if (null? pr) '() (list pr))
 )
 
 ; ---------------------------------------------------------------------
