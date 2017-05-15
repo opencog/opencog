@@ -135,7 +135,7 @@ public:
     {
         Type atomType = classserver().getType(_typeStr);
         if (atomType == NOTYPE)
-            return "Input type is wrong!";
+            return "Error: Input type doesn't exist!";
 
         string result = "";
 
@@ -152,7 +152,7 @@ public:
     {
         Type atomType = classserver().getType(_typeStr);
         if (atomType == NOTYPE)
-            return "Input type is wrong!";
+            return "Error: Input type doesn't exist!";
 
         string result = "";
         if (patternMiner->remove_Ignore_Link_Type(atomType))
@@ -287,6 +287,69 @@ public:
 
     void clear_keyword_black_list(){patternMiner->clear_keyword_white_list();}
     void clear_keyword_white_list(){patternMiner->clear_keyword_white_list();}
+
+
+    string set_enable_filter_links_of_same_type_not_share_second_outgoing(bool _enable)
+    {
+        patternMiner->set_enable_filter_links_of_same_type_not_share_second_outgoing(_enable);
+        return get_enable_filter_links_of_same_type_not_share_second_outgoing();
+    }
+
+    string get_enable_filter_links_of_same_type_not_share_second_outgoing()
+    {
+        bool enable = patternMiner->get_enable_filter_links_of_same_type_not_share_second_outgoing();
+
+        if (enable)
+            return "enable_filter_links_of_same_type_not_share_second_outgoing: true";
+        else
+            return "enable_filter_links_of_same_type_not_share_second_outgoing: false";
+    }
+
+    string get_same_link_types_not_share_second_outgoing()
+    {
+        string result =  "same_link_types_not_share_second_outgoing Link_Types:";
+        vector<Type> _list = patternMiner->get_same_link_types_not_share_second_outgoing();
+        for (Type type : _list)
+            result +=  " " + classserver().getTypeName(type);
+
+        return result;
+    }
+
+    string add_link_type_to_same_link_types_not_share_second_outgoing(const string& _typeStr)
+    {
+        Type atomType = classserver().getType(_typeStr);
+        if (atomType == NOTYPE)
+            return "Error: Input type doesn't exist!";
+
+        string result = "";
+
+        if (patternMiner->add_link_type_to_same_link_types_not_share_second_outgoing(atomType))
+            result += "Added!\n";
+        else
+            result += "Input type already exists in the same_link_types_not_share_second_outgoing list!\n";
+
+        return result + get_same_link_types_not_share_second_outgoing();
+
+    }
+
+    string remove_link_type_from_same_link_types_not_share_second_outgoing(const string& _typeStr)
+    {
+        Type atomType = classserver().getType(_typeStr);
+        if (atomType == NOTYPE)
+            return "Error: Input type doesn't exist!";
+
+        string result = "";
+        if (patternMiner->remove_link_type_from_same_link_types_not_share_second_outgoing(atomType))
+            result += "Removed!\n";
+        else
+            result += "Input type does not exist in the same_link_types_not_share_second_outgoing list!\n";
+
+        return result + get_same_link_types_not_share_second_outgoing();
+
+    }
+
+    void clear_same_link_types_not_share_second_outgoing(){patternMiner->clear_same_link_types_not_share_second_outgoing();}
+
 
     string get_current_settings()
     {
@@ -427,6 +490,7 @@ void PatternMinerSCM::init()
     // git pull https://github.com/opencog/atomspace.git master
     //------------------------------------
     define_scheme_primitive("pm-run-patternminer", &PatternMinerSCM::run_patternminer, this, "patternminer");
+
     define_scheme_primitive("pm-get-current-settings", &PatternMinerSCM::get_current_settings, this, "patternminer");
     define_scheme_primitive("pm-get-pattern-max-gram", &PatternMinerSCM::get_Pattern_Max_Gram, this, "patternminer");
     define_scheme_primitive("pm-set-pattern-max-gram", &PatternMinerSCM::set_Pattern_Max_Gram, this, "patternminer");
@@ -436,6 +500,20 @@ void PatternMinerSCM::init()
     define_scheme_primitive("pm-set-frequency-threshold", &PatternMinerSCM::set_Frequency_threshold, this, "patternminer");
     define_scheme_primitive("pm-get-ignore-link-types", &PatternMinerSCM::get_Ignore_Link_Types, this, "patternminer");
     define_scheme_primitive("pm-add-ignore-link-type", &PatternMinerSCM::add_Ignore_Link_Type, this, "patternminer");
+
+    define_scheme_primitive("pm-get-enable-filter-links-of-same-type-not-share-second-outgoing",
+                            &PatternMinerSCM::get_enable_filter_links_of_same_type_not_share_second_outgoing, this, "patternminer");
+    define_scheme_primitive("pm-set-enable-filter-links-of-same-type-not-share-second-outgoing",
+                            &PatternMinerSCM::set_enable_filter_links_of_same_type_not_share_second_outgoing, this, "patternminer");
+    define_scheme_primitive("pm-get-same-link-types-not-share-second-outgoing",
+                            &PatternMinerSCM::get_same_link_types_not_share_second_outgoing, this, "patternminer");
+    define_scheme_primitive("pm-add-link-type-to-same-link-types-not-share-second-outgoing",
+                            &PatternMinerSCM::add_link_type_to_same_link_types_not_share_second_outgoing, this, "patternminer");
+    define_scheme_primitive("pm-remove-link-type-from-same-link-types-not-share-second-outgoing",
+                            &PatternMinerSCM::remove_link_type_from_same_link_types_not_share_second_outgoing, this, "patternminer");
+    define_scheme_primitive("pm-clear-same-link-types-not-share-second-outgoing",
+                            &PatternMinerSCM::clear_same_link_types_not_share_second_outgoing, this, "patternminer");
+
     define_scheme_primitive("pm-remove-ignore-link-type", &PatternMinerSCM::remove_Ignore_Link_Type, this, "patternminer");
     define_scheme_primitive("pm-get-use-keyword-black-list", &PatternMinerSCM::get_use_keyword_black_list, this, "patternminer");
     define_scheme_primitive("pm-set-use-keyword-black-list", &PatternMinerSCM::set_use_keyword_black_list, this, "patternminer");
@@ -453,6 +531,7 @@ void PatternMinerSCM::init()
     define_scheme_primitive("pm-remove-keyword-from-white-list", &PatternMinerSCM::remove_keyword_from_white_list, this, "patternminer");
     define_scheme_primitive("pm-clear-keyword-black-list", &PatternMinerSCM::clear_keyword_black_list, this, "patternminer");
     define_scheme_primitive("pm-clear-keyword-white-list", &PatternMinerSCM::clear_keyword_white_list, this, "patternminer");
+
     define_scheme_primitive("pm-select-subset-from-atomspace", &PatternMinerSCM::select_subset_from_atomspace, this, "patternminer");
     define_scheme_primitive("pm-select-whitelist-subset-from-atomspace", &PatternMinerSCM::select_whitelist_subset_from_atomspace, this, "patternminer");
     define_scheme_primitive("pm-apply-whitelist-keyword-filter-after-mining", &PatternMinerSCM::apply_whitelist_keyword_filter_after_mining, this, "patternminer");

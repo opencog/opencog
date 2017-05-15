@@ -877,6 +877,34 @@ bool PatternMiner::remove_Ignore_Link_Type(Type _type)
     return false;
 }
 
+bool PatternMiner::add_link_type_to_same_link_types_not_share_second_outgoing(Type _type)
+{
+    for (Type t : same_link_types_not_share_second_outgoing)
+    {
+        if (t == _type)
+            return false; //  exist
+    }
+
+    same_link_types_not_share_second_outgoing.push_back(_type);
+    return true;
+}
+
+bool PatternMiner::remove_link_type_from_same_link_types_not_share_second_outgoing(Type _type)
+{
+    vector<Type>::iterator it;
+    for (it = same_link_types_not_share_second_outgoing.begin(); it != same_link_types_not_share_second_outgoing.end(); it ++)
+    {
+        if ((Type)(*it) == _type)
+        {
+           same_link_types_not_share_second_outgoing.erase(it);
+           return true;
+        }
+    }
+
+    return false; // not exist
+
+}
+
 bool PatternMiner::add_keyword_to_black_list(string _keyword)
 {
     if (isIgnoredContent(_keyword))
@@ -2498,7 +2526,13 @@ void PatternMiner::reSetAllSettingsFromConfig()
 
         for (string typestr : typeStrs)
         {
-            node_types_should_not_be_vars.push_back( classserver().getType(typestr) );
+            Type atomType = classserver().getType(typestr);
+            if (atomType == NOTYPE)
+            {
+                cout << "\nCannot find Node Type: " << typestr << " in config file for node_types_should_not_be_vars.\n";
+                continue;
+            }
+            node_types_should_not_be_vars.push_back(atomType);
         }
     }
 
@@ -2512,7 +2546,13 @@ void PatternMiner::reSetAllSettingsFromConfig()
 
         for (string typestr : typeStrs)
         {
-            same_link_types_not_share_second_outgoing.push_back( classserver().getType(typestr) );
+            Type atomType = classserver().getType(typestr);
+            if (atomType == NOTYPE)
+            {
+                cout << "\nCannot find Link Type: " << typestr << " in config file for same_link_types_not_share_second_outgoing.\n";
+                continue;
+            }
+            same_link_types_not_share_second_outgoing.push_back(atomType);
         }
     }
 }

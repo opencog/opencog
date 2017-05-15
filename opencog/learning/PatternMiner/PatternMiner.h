@@ -440,6 +440,14 @@ public:
     QUERY_LOGIC get_keyword_white_list_logic(){return keyword_white_list_logic;}
     void set_keyword_white_list_logic(QUERY_LOGIC logic){keyword_white_list_logic = logic;}
 
+    void set_enable_filter_links_of_same_type_not_share_second_outgoing(bool _enable){enable_filter_links_of_same_type_not_share_second_outgoing = _enable;}
+    bool get_enable_filter_links_of_same_type_not_share_second_outgoing(){return enable_filter_links_of_same_type_not_share_second_outgoing;}
+    vector<Type> get_same_link_types_not_share_second_outgoing(){return same_link_types_not_share_second_outgoing;}
+    bool add_link_type_to_same_link_types_not_share_second_outgoing(Type _type);
+    bool remove_link_type_from_same_link_types_not_share_second_outgoing(Type _type);
+    void clear_same_link_types_not_share_second_outgoing(){same_link_types_not_share_second_outgoing.clear();}
+
+
     // -------------------------------end filter settings----------------------
 
     void applyWhiteListKeywordfilterAfterMining();
