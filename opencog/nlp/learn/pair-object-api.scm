@@ -226,25 +226,28 @@
 		)))
 
 ; ---------------------------------------------------------------------
-;
-; Extend the LLOBJ with additional methods to get and set
-; the count values for wild-card counts, and total counts.
-; Basically, this decorates the class with additional methods
-; that get and set these counts in "standardized" places.
-; Other classes can overload these methods; these just provide
-; a reasonable default.
-;
-; These methods do NOT compute the counts! They merely provide a
-; way to access these, as cached values, and they provide a way
-; to set the cached value. Thus, this class is meant to provide
-; support for some computational class, which does compute these
-; counts.
-;
-; Here, the LLOBJ is expected to be an object, with methods for
-; 'item-pair 'make-pair 'left-wildcard 'right-wildcard and 'wild-wild
-; on it, in the form documented above for the "low-level API class".
-;
-(define (make-pair-count-api LLOBJ)
+
+(define-public (add-pair-count-api LLOBJ)
+"
+  add-pair-count-api LLOBJ - Extend LLOBJ with count-getters.
+
+  Extend the LLOBJ with additional methods to get and set
+  the count values for wild-card counts, and total counts.
+  Basically, this decorates the class with additional methods
+  that get and set these counts in "standardized" places.
+  Other classes can overload these methods; these just provide
+  a reasonable default.
+
+  These methods do NOT compute the counts! They merely provide a
+  way to access these, as cached values, and they provide a way
+  to set the cached value. Thus, this class is meant to provide
+  support for some computational class, which does compute these
+  counts.
+
+  Here, the LLOBJ is expected to be an object, with methods for
+  'item-pair 'make-pair 'left-wildcard 'right-wildcard and 'wild-wild
+  on it, in the form documented above for the "low-level API class".
+"
 	(let ((llobj LLOBJ))
 
 		(define (get-count ATOM)
@@ -309,19 +312,22 @@
 )
 
 ; ---------------------------------------------------------------------
-;
-; Extend the LLOBJ with additional methods to get and set
-; the observation frequencies, entropies and mutual infomation.
-; Basically, this decorates the class with additional methods
-; that get and set these frequencies and entropies in "standardized"
-; places. Other classes can overload these methods; these just
-; provide a reasonable default.
-;
-; Here, the LLOBJ is expected to be an object, with methods for
-; 'item-pair 'make-pair 'left-wildcard and 'right-wildcard on it,
-; in the form documented above for the "low-level API class".
-;
-(define (make-pair-freq-api LLOBJ)
+
+(define-public (add-pair-freq-api LLOBJ)
+"
+  add-pair-freq-api LLOBJ - Extend LLOBJ with frequency getters.
+
+  Extend the LLOBJ with additional methods to get and set
+  the observation frequencies, entropies and mutual infomation.
+  Basically, this decorates the class with additional methods
+  that get and set these frequencies and entropies in "standardized"
+  places. Other classes can overload these methods; these just
+  provide a reasonable default.
+
+  Here, the LLOBJ is expected to be an object, with methods for
+  'item-pair 'make-pair 'left-wildcard and 'right-wildcard on it,
+  in the form documented above for the "low-level API class".
+"
 	(let ((llobj LLOBJ))
 
 		; Return the observed frequency on ATOM

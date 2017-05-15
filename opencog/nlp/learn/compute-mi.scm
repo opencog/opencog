@@ -71,7 +71,7 @@
 ; These sums are computed, for a given item, by the `make-compute-count`
 ; object defined below.  It stores these counts at the locations
 ; provided by the underlying object. By default, thse are given by
-; `make-pair-count-api` object, althought these are designed to be
+; `add-pair-count-api` object, althought these are designed to be
 ; overloaded, if needed.
 
 ; For example, for word-pair counts, the wild-card sums are stored
@@ -477,14 +477,14 @@
 		diff)
 
 	; Decorate the object with a counting API.
-	(define obj-get-set-api (make-pair-count-api OBJ))
+	(define obj-get-set-api (add-pair-count-api OBJ))
 
 	; Decorate the object with methods that can compute counts.
 	(define count-obj (make-compute-count obj-get-set-api))
 
 	; Decorate the object with methods that can compute frequencies.
 	(define freq-obj (make-compute-freq
-		(make-pair-freq-api obj-get-set-api)))
+		(add-pair-freq-api obj-get-set-api)))
 
 	(format #t "Support: num left=~A num right=~A\n"
 			(OBJ 'left-support-size)
