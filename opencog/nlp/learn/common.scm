@@ -148,12 +148,6 @@
 	(cog-link 'EvaluationLink any-pair-pred PAIR)
 )
 
-; Internal-use version of above, not for the public.
-(define (internal-any-pair PAIR)
-	(define pr (get-any-pair PAIR))
-	(if (null? pr) '() (list pr))
-)
-
 ; ---------------------------------------------------------------------
 ; ---------------------------------------------------------------------
 ; ---------------------------------------------------------------------

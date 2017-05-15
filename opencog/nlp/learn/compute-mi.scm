@@ -353,7 +353,7 @@
 		; the MI, suitable for iterating for storage.
 		(define (compute-n-cache-pair-mi)
 			(define all-atoms '())
-			(define n-rpt 0)
+			(define nrpt 0)
 			(define lefties (frqobj 'left-support))
 			(define nlefties (length lefties))
 
@@ -379,7 +379,7 @@
 
 					; Print a progress report.
 					(set! nrpt (+ nrpt 1))
-					(if (eqv? 0 (mod nrpt 10000))
+					(if (eqv? 0 (modulo nrpt 10000))
 						(format #t "MI done ~A outer loops of ~A\n" nrpt nlefties))
 					)
 					(lambda (key . args) #f)) ; catch handler
@@ -552,9 +552,8 @@
 		(define (store-rpt ATOM)
 			(store-atom ATOM)
 			(set! store-cnt (+ 1 store-cnt))
-			(if (eqv? 0 (mod store-cnt 100000))
-				(begin
-					(define elapsed (- (current-time) start-time))
+			(if (eqv? 0 (modulo store-cnt 100000))
+				(let ((elapsed (- (current-time) start-time)))
 					(set! start-time (current-time))
 					(format #t "Stored ~A of ~A pairs in ~A secs\n"
 						 store-cnt num-prs elapsed))))
