@@ -334,7 +334,7 @@
 				0
 				(filter!
 					(lambda (lnk) (<= (get-dist lnk) max-dist))
-					(cog-incoming-by-type PAIR 'ExecutionLink)))
+					(cog-incoming-by-type PAIR 'ExecutionLink))))
 
 		(define (get-left-wildcard WORD)
 			(make-pair (ListLink any-left WORD)))
@@ -382,7 +382,7 @@
 					((right-wildcard) get-right-wildcard)
 					((wild-wild) get-wild-wild)
 					((all-pairs) get-all-pairs)
-					((fetch-pairs) fetch-clique-pairs)
+					((fetch-pairs) fetch-distance-pairs)
 					(else (error "Bad method call on clique-pair:" message)))
 				args))))
 
