@@ -99,6 +99,10 @@
   of the the two sides of the pair.
 "
 	(let ((all-pairs '()))
+
+		; Get the observational count on ATOM.
+		(define (get-count ATOM) (cog-tv-count (cog-tv ATOM)))
+
 		(define any-left (AnyNode "left-word"))
 		(define any-right (AnyNode "right-word"))
 		(define any-pair-pred (LinkGrammarRelationshipNode "ANY"))
@@ -115,10 +119,11 @@
 		(define (make-pair PAIR)
 			(EvaluationLink any-pair-pred PAIR))
 
-		; Return a list of atoms hold the count.
-		(define (get-pairs PAIR)
+		; Return the raw observational count on PAIR.
+		; If the PAIR does not exist (was not oberved) return 0.
+		(define (get-pair-count PAIR)
 			(define pr (get-pair PAIR))
-			(if (null? pr) '() (list pr)))
+			(if (null? pr) 0 (get-count pr)))
 
 		; Caution: this unconditionally creates the wildcard pair!
 		(define (get-left-wildcard WORD)
@@ -162,9 +167,9 @@
 			(apply (case message
 					((left-type) get-left-type)
 					((right-type) get-right-type)
+					((pair-count) get-pair-count)
 					((item-pair) get-pair)
 					((make-pair) make-pair)
-					((item-pairs) get-pairs)
 					((left-wildcard) get-left-wildcard)
 					((right-wildcard) get-right-wildcard)
 					((wild-wild) get-wild-wild)
@@ -192,6 +197,9 @@
 "
 	(let ((all-pairs '()))
 
+		; Get the observational count on ATOM.
+		(define (get-count ATOM) (cog-tv-count (cog-tv ATOM)))
+
 		(define any-left (AnyNode "left-word"))
 		(define any-right (AnyNode "right-word"))
 
@@ -207,10 +215,11 @@
 		(define (make-pair PAIR)
 			(EvaluationLink pair-pred PAIR))
 
-		; Return a list of atoms hold the count.
-		(define (get-pairs PAIR)
+		; Return the raw observational count on PAIR.
+		; If the PAIR does not exist (was not oberved) return 0.
+		(define (get-pair-count PAIR)
 			(define pr (get-pair PAIR))
-			(if (null? pr) '() (list pr)))
+			(if (null? pr) 0 (get-count pr)))
 
 		(define (get-left-wildcard WORD)
 			(make-pair (ListLink any-left WORD)))
@@ -251,9 +260,9 @@
 			(apply (case message
 					((left-type) get-left-type)
 					((right-type) get-right-type)
+					((pair-count) get-pair-count)
 					((item-pair) get-pair)
 					((make-pair) make-pair)
-					((item-pairs) get-pairs)
 					((left-wildcard) get-left-wildcard)
 					((right-wildcard) get-right-wildcard)
 					((wild-wild) get-wild-wild)
@@ -283,16 +292,23 @@
 
     ExecutionLink
        SchemaNode  *-Pair Distance-*
-          ListLink
-             WordNode lefty
-             WordNode righty
-          NumberNode 3
+       ListLink
+          WordNode lefty
+          WordNode righty
+       NumberNode 3
 
 "
 	(let* ((max-dist MAX-DIST)
 			(dist-name (format #f "*-Pair Max Dist ~A-*" max-dist))
 			(pair-max (PredicateNode dist-name))
 			(all-pairs '()))
+
+		; Get the observational count on ATOM.
+		(define (get-count ATOM) (cog-tv-count (cog-tv ATOM)))
+
+		; Get the numeric distance from the ExecutionLink
+		(define (get-dist ATOM)
+			(string->number (cog-name (cog-outgoing-atom ATOM 2))))
 
 		(define any-left (AnyNode "left-word"))
 		(define any-right (AnyNode "right-word"))
@@ -309,11 +325,16 @@
 		(define (make-pair PAIR)
 			(EvaluationLink pair-max PAIR))
 
+		; Return the raw observational count on PAIR.
+		; If the PAIR does not exist (was not oberved) return 0.
 		; Return a list of atoms that hold the count.
-		(define (get-pairs PAIR)
-			(filter!
-				(lambda (lnk) (equal? pair-dist (gar lnk)))
-				(cog-incoming-by-type PAIR 'ExecutionLink)))
+		(define (get-pair-count PAIR)
+			(fold
+				(lambda (pr sum) (+ sum (get-count pr)))
+				0
+				(filter!
+					(lambda (lnk) (<= (get-dist lnk) max-dist))
+					(cog-incoming-by-type PAIR 'ExecutionLink)))
 
 		(define (get-left-wildcard WORD)
 			(make-pair (ListLink any-left WORD)))
@@ -354,9 +375,9 @@
 			(apply (case message
 					((left-type) get-left-type)
 					((right-type) get-right-type)
+					((pair-count) get-pair-count)
 					((item-pair) get-pair)
 					((make-pair) make-pair)
-					((item-pairs) get-pairs)
 					((left-wildcard) get-left-wildcard)
 					((right-wildcard) get-right-wildcard)
 					((wild-wild) get-wild-wild)

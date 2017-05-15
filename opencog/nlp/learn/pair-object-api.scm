@@ -256,14 +256,6 @@
 		(define (set-count ATOM CNT)
 			(cog-set-tv! ATOM (cog-new-ctv 0 0 CNT)))
 
-		; Return the raw observational count on PAIR.
-		; If the PAIR does not exist (was not oberved) return 0.
-		(define (get-pair-count PAIR)
-			(fold
-				(lambda (pr sum) (+ sum (get-count pr)))
-				0
-				(llobj 'item-pairs PAIR)))
-
 		; Set the raw observational count on PAIR
 		; Return the atom that holds this count.
 		(define (set-pair-count PAIR CNT)
@@ -299,8 +291,6 @@
 		; Methods on this class.
 		(lambda (message . args)
 			(case message
-				((pair-count)           (apply get-pair-count args))
-				((set-pair-count)       (apply set-pair-count args))
 				((left-wild-count)      (apply get-left-wild-count args))
 				((set-left-wild-count)  (apply set-left-wild-count args))
 				((right-wild-count)     (apply get-right-wild-count args))
@@ -363,13 +353,8 @@
 		; Return the observational frequency on PAIR.
 		; If the PAIR does not exist (was not oberved) return 0.
 		(define (get-pair-freq PAIR)
-			(fold
-				(lambda (pr sum) (+ sum (get-freq pr)))
-				0
-				(llobj 'item-pairs PAIR)))
+			(get-freq (llobj 'item-pair PAIR)))
 
-		; XXX this is wrong cause it doesn't sum. The whole sum
-		; thing needs to be fixed to be single-valued.
 		(define (get-pair-logli PAIR)
 			(get-logli (llobj 'item-pair PAIR)))
 
