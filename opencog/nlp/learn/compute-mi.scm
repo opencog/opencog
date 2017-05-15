@@ -353,6 +353,9 @@
 		; the MI, suitable for iterating for storage.
 		(define (compute-n-cache-pair-mi)
 			(define all-atoms '())
+			(define n-rpt 0)
+			(define lefties (frqobj 'left-support))
+			(define nlefties (length lefties))
 
 			(define (right-loop left-item)
 				; Either of the get-loglis below may throw an exception,
@@ -372,8 +375,13 @@
 							(define atom (frqobj 'set-pair-mi lipr mi))
 							(set! all-atoms (cons atom all-atoms))
 						)
-						(frqobj 'right-stars left-item)
-					))
+						(frqobj 'right-stars left-item))
+
+					; Print a progress report.
+					(set! nrpt (+ nrpt 1))
+					(if (eqv? 0 (mod nrpt 10000))
+						(format #t "MI done ~A outer loops of ~A\n" nrpt nlefties))
+					)
 					(lambda (key . args) #f)) ; catch handler
 			)
 
@@ -383,7 +391,7 @@
 			; current guile par-for-each implementation sucks.
 			; The other is that the atom value-fetching is done under
 			; a global lock, thus effectively single-threaded.
-			(for-each right-loop (frqobj 'left-support))
+			(for-each right-loop lefties)
 
 			; Return the list of ALL atoms with MI on them
 			all-atoms
@@ -533,12 +541,30 @@
 	(display "Going to do individual word-pair MI\n")
 
 	(let* ((bami (make-batch-mi freq-obj))
-			(all-atoms (bami 'cache-pair-mi)))
-		(format #t "Done computing ~A MI's in ~A secs\n"
-			(length all-atoms) (elapsed-secs))
-		(for-each store-atom all-atoms)
-		(format #t "Done storing ~A MI's in ~A secs\n"
-			(length all-atoms) (elapsed-secs))
+			(all-atoms (bami 'cache-pair-mi))
+			(num-prs (length all-atoms)))
+
+		; This is a fat wrapper around `store-atom` that simply prints
+		; a progress report for the stores. The problem is that millions
+		; of pairs may need to be stored, and this just takes a long time.
+		(define store-cnt 0)
+		(define start-time (current-time))
+		(define (store-rpt ATOM)
+			(store-atom ATOM)
+			(set! store-cnt (+ 1 store-cnt))
+			(if (eqv? 0 (mod store-cnt 100000))
+				(begin
+					(define elapsed (- (current-time) start-time))
+					(set! start-time (current-time))
+					(format #t "Stored ~A of ~A pairs in ~A secs\n"
+						 store-cnt num-prs elapsed))))
+
+		; This print triggers as soon as the let* above finishes.
+		(format #t "Done computing ~A pair MI's in ~A secs\n"
+			num-prs (elapsed-secs))
+		(for-each store-rpt all-atoms)
+		(format #t "Done storing ~A pair MI's in ~A secs\n"
+			num-prs (elapsed-secs))
 	)
 
 	(display "Finished with MI computations\n")
