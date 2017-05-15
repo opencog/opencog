@@ -353,11 +353,11 @@
 		; the MI, suitable for iterating for storage.
 		(define (compute-n-cache-pair-mi)
 			(define all-atoms '())
-			(define nrpt 0)
 			(define lefties (frqobj 'left-support))
 			(define nlefties (length lefties))
 
 			(define (right-loop left-item)
+
 				; Either of the get-loglis below may throw an exception,
 				; if the particular item-pair doesn't have any counts.
 				; This is rare, but can happen: e.g. (Any "left-word")
@@ -366,22 +366,26 @@
 				; skip this, with a try-catch block.
 				(catch #t (lambda ()
 					(define r-logli (frqobj 'right-wild-logli left-item))
-					(for-each
-						(lambda (lipr)
-							(define right-item (gdr lipr))
-							(define l-logli (frqobj 'left-wild-logli right-item))
-							(define pr-logli (frqobj 'pair-logli lipr))
-							(define mi (- (+ r-logli l-logli) pr-logli))
-							(define atom (frqobj 'set-pair-mi lipr mi))
-							(set! all-atoms (cons atom all-atoms))
-						)
-						(frqobj 'right-stars left-item))
 
-					; Print a progress report.
-					(set! nrpt (+ nrpt 1))
-					(if (eqv? 0 (modulo nrpt 10000))
-						(format #t "MI done ~A outer loops of ~A\n" nrpt nlefties))
+					; Compute the MI for exactly one pair.
+					(define (do-one-pair lipr)
+						(define right-item (gdr lipr))
+						(define l-logli (frqobj 'left-wild-logli right-item))
+						(define pr-logli (frqobj 'pair-logli lipr))
+						(define mi (- (+ r-logli l-logli) pr-logli))
+						(define atom (frqobj 'set-pair-mi lipr mi))
+						(set! all-atoms (cons atom all-atoms))
 					)
+
+					; Wrap the do-one-pair function with a progress-report
+					; printer.
+					(define do-one-and-report
+						(make-progress-rpt do-one-pair 10000 nlefties
+							"MI, done ~A outer loops of ~A in ~A secs (~A loops/sec)\n"))
+
+					(for-each
+						do-one-and-report
+						(frqobj 'right-stars left-item)))
 					(lambda (key . args) #f)) ; catch handler
 			)
 
@@ -544,19 +548,12 @@
 			(all-atoms (bami 'cache-pair-mi))
 			(num-prs (length all-atoms)))
 
-		; This is a fat wrapper around `store-atom` that simply prints
-		; a progress report for the stores. The problem is that millions
-		; of pairs may need to be stored, and this just takes a long time.
-		(define store-cnt 0)
-		(define start-time (current-time))
-		(define (store-rpt ATOM)
-			(store-atom ATOM)
-			(set! store-cnt (+ 1 store-cnt))
-			(if (eqv? 0 (modulo store-cnt 100000))
-				(let ((elapsed (- (current-time) start-time)))
-					(set! start-time (current-time))
-					(format #t "Stored ~A of ~A pairs in ~A secs\n"
-						 store-cnt num-prs elapsed))))
+		; Create a wrapper around `store-atom` that prints a progress
+		; report.  The problem is that millions of pairs may need to be
+		; stored, and this just takes a long time.
+		(define store-rpt
+			(make-progress-rpt store-atom 100000 num-prs
+				"Stored ~A of ~A pairs in ~A secs (~A pairs/sec)\n"
 
 		; This print triggers as soon as the let* above finishes.
 		(format #t "Done computing ~A pair MI's in ~A secs\n"

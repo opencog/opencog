@@ -11,6 +11,33 @@
 (use-modules (opencog))
 
 ; ---------------------------------------------------------------------
+; A progress report utility.
+; The wraps the FUNC function, and prints a progress report MSG
+; every WHEN calls to FUNC.
+; FUNC should be the function to be called, taking one argument.
+; MSG should be a string of the form
+;    "Did ~A of ~A in ~A seconds (~A items/sec)\n"
+; WHEN should be how often to print (modulo)
+; TOTAL should be the total number of items to process.
+(define (make-progress-rpt FUNC WHEN TOTAL MSG)
+	(let ((func FUNC)
+			(when WHEN)
+			(total TOTAL)
+			(msg MSG)
+			(cnt 0)
+			(start-time 0))
+		(lambda (item)
+			(if (eq? 0 cnt) (set! start-time (current-time)))
+			(func item)
+			(set! cnt (+ 1 cnt))
+			(if (eqv? 0 (modulo cnt when))
+				(let* ((elapsed (- (current-time) start-time))
+						(rate (/ (exact->inexact when) elapsed)))
+					(format #t msg cnt total elapsed rate)
+					(set! start-time (current-time))))))
+)
+
+; ---------------------------------------------------------------------
 ; Define locations where statistics will be stored.
 
 (define freq-key (PredicateNode "*-FrequencyKey-*"))
