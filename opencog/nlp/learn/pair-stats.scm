@@ -106,53 +106,28 @@
 ; ---------------------------------------------------------------------
 ; ---------------------------------------------------------------------
 
-(define (count-clique-pair PAIR)
-"
-  Return count for the clique-pair PAIR
-  PAIR should be a ListLink of two words.
-"
-	(define evl (cog-link 'EvaluationLink pair-pred PAIR))
-	(if (null? evl) 0 (get-count evl))
-)
-
-(define (count-dist-pair PAIR)
-"
-  Return sum over all counts of the distance pairs.
-  This should, in all cases, return the same value as
-  `count-clique-pair`, above, since the sum over distances
-  should equal the total number of observations. This can be
-  checked with the `verify-clique-pair-sums` function below.
-
-  PAIR should be a ListLink of two words.
-"
-	(fold
-		(lambda (ex sum) (+ (get-count ex) sum))
-		0
-		(filter
-			(lambda (lnk) (equal? pair-dist (gar lnk)))
-			(cog-incoming-by-type PAIR 'ExecutionLink)))
-)
-
-; ---------------------------------------------------------------------
-
-(define-public (verify-clique-pair-sums PAIR-LIST)
+(define-public (verify-clique-pair-sums)
 "
   This checks consistency of the the clique-pair total count, with
   the subcounts of each pair, accodring to the distance between
   the words. The sum of the subtotals should equal the total.
   It should not throw.
 
-  Example usage: (verify-clique-pair-sums (get-all-clique-pairs))
+  Example usage: (verify-clique-pair-sums)
 "
+	(define cliq (add-pair-count-api (make-clique-pair-api)))
+	(define dist (add-pair-count-api (make-distance-pair-api 10000000)))
+	(define all-pairs (cliq 'all-pairs))
+
 	(define cnt 0)
 	(for-each
 		(lambda (PAIR)
 			(set! cnt (+ cnt 1))
-			(if (not (eqv? (count-dist-pair PAIR) (count-clique-pair PAIR)))
+			(if (not (eqv? (cliq 'pair-count PAIR) (dist 'pair-count PAIR)))
 				(throw 'bad-count 'foobar PAIR)
 				(format #t "Its OK ~A\n" cnt)
 			))
-		PAIR-LIST)
+		all-pairs)
 )
 
 ; ---------------------------------------------------------------------
