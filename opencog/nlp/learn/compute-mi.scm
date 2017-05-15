@@ -364,7 +364,7 @@
 						(define l-logli (frqobj 'left-wild-logli right-item))
 						(define pr-logli (frqobj 'pair-logli lipr))
 						(define mi (- (+ r-logli l-logli) pr-logli))
-						(frqobj 'set-pair-mi mi)
+						(frqobj 'set-pair-mi lipr mi)
 						(set! all-atoms (cons (frqobj 'item-pair) all-atoms))
 					)
 					(frqobj 'right-stars left-item)
@@ -419,6 +419,12 @@
 ;
 (define (batch-all-pair-mi OBJ)
 
+	(define start-time (current-time))
+	(define (elapsed-secs)
+		(define diff (- (current-time) start-time))
+		(set! start-time (current-time))
+		diff)
+
 	; Decorate the object with a counting API.
 	(define obj-get-set-api (make-pair-count-api OBJ))
 
@@ -429,27 +435,25 @@
 	(define freq-obj (make-compute-freq
 		(make-pair-freq-api obj-get-set-api)))
 
-	(format #t "Start counting\n")
-
 	(format #t "Support: num left=~A num right=~A\n"
 			(OBJ 'left-support-size)
 			(OBJ 'right-support-size))
 
 	; First, compute the summations for the left and right wildcard counts.
 	; That is, compute N(x,*) and N(*,y) for the supports on x and y.
+
 	(count-obj 'cache-all-left-counts)
 	(count-obj 'cache-all-right-counts)
 
-	(trace-elapsed)
-	(trace-msg "Done with wild-card counts N(*,w) and N(w,*)\n")
-	(display "Done with wild-card count N(*,w) and N(w,*)\n")
+	(display "Done with wild-card count N(*,w) and N(w,*) in ~A secs\n"
+		(elapsed-secs))
 
 	; Now, compute the grand-total
 	(store-atom (count-obj 'cache-total-count))
-	(trace-elapsed)
-	(trace-msg "Done computing N(*,*), start computing log P(*,w)\n")
-	(format #t "Done computing N(*,*) total-count=~A\n"
-		(obj-get-set-api 'wild-wild-count))
+	(format #t "Done computing N(*,*) total-count=~A in ~A secs\n"
+		(obj-get-set-api 'wild-wild-count)
+		(elapsed-secs))
+
 	(display "Start computing log P(*,w)\n")
 
 	; Compute the left and right wildcard frequencies and
@@ -457,36 +461,41 @@
 	(freq-obj 'init-freq)
 
 	(let ((lefties (freq-obj 'cache-all-left-freqs)))
-		(format #t "Start storing ~A left-wilds\n"
-			(length lefties))
+		(format #t "Done computing ~A left-wilds in ~A secs\n"
+			(length lefties) (elapsed-secs))
 		(par-for-each
 			(lambda (atom) (if (not (null? atom)) (store-atom atom)))
-			lefties))
+			lefties)
+		(format #t "Done storing ~A left-wilds in ~A secs\n"
+			(length lefties) (elapsed-secs))
+	)
 
 	(display "Done with -log P(*,w), start -log P(w,*)\n")
 
 	(let ((righties (freq-obj 'cache-all-right-freqs)))
-		(format #t "Start storing ~A right-wilds\n"
-			(length righties))
+		(format #t "Done computing ~A right-wilds in ~A secs\n"
+			(length righties) (elapsed-secs))
 		(par-for-each
 			(lambda (atom) (if (not (null? atom)) (store-atom atom)))
-			righties))
+			righties)
+		(format #t "Done storing ~A right-wilds in ~A secs\n"
+			(length righties) (elapsed-secs))
+	)
 
-	(trace-elapsed)
 	(display "Done computing -log P(w,*) and <-->\n")
 
 	; Enfin, the word-pair mi's
-	(start-trace "Going to do individual word-pair MI\n")
 	(display "Going to do individual word-pair MI\n")
 
 	(let* ((bami (make-batch-mi freq-obj))
-			(all-atoms (bami 'cache-mi))
-			(len (length all-atoms)))
-		(format #t "Start storing the MI's for ~A atoms\n" len)
-		(for-each store-atom all-atoms))
+			(all-atoms (bami 'cache-mi)))
+		(format #t "Done computing ~A MI's in ~A secs\n"
+			(length all-atoms) (elapsed-secs))
+		(for-each store-atom all-atoms)
+		(format #t "Done storing ~A MI's in ~A secs\n"
+			(length all-atoms) (elapsed-secs))
+	)
 
-	(trace-elapsed)
-	(trace-msg "Finished with MI computations\n")
 	(display "Finished with MI computations\n")
 )
 
