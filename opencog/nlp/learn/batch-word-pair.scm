@@ -100,6 +100,7 @@
 	(let ((all-pairs '()))
 		(define any-left (AnyNode "left-word"))
 		(define any-right (AnyNode "right-word"))
+		(define any-pair-pred (LinkGrammarRelationshipNode "ANY"))
 
 		(define (get-left-type) 'WordNode)
 		(define (get-right-type) 'WordNode)
@@ -146,6 +147,15 @@
 			(if (null? all-pairs) (set! all-pairs (do-get-all-pairs)))
 			all-pairs)
 
+		; fetch-any-pairs -- fetch all counts for link-grammar
+		; ANY links from the database.
+		(define (fetch-any-pairs)
+			(define start-time (current-time))
+			(fetch-incoming-set any-pair-pred)
+			(format #t "Elapsed time to load ANY-link pairs: ~A secs\n"
+				(- (current-time) start-time))
+		)
+
 		; Methods on the object
 		(lambda (message . args)
 			(apply (case message
@@ -158,6 +168,7 @@
 					((right-wildcard) get-right-wildcard)
 					((wild-wild) get-wild-wild)
 					((all-pairs) get-all-pairs)
+					((fetch-pairs) fetch-any-pairs)
 					(else (error "Bad method call on ANY-link:" message)))
 				args)))
 )
@@ -226,6 +237,14 @@
 			(if (null? all-pairs) (set! all-pairs (do-get-all-pairs)))
 			all-pairs)
 
+		; fetch-clique-pairs -- fetch all counts for clique-pairs
+		; from the database.
+		(define (fetch-clique-pairs)
+			(define start-time (current-time))
+			(fetch-incoming-set pair-pred)
+			(format #t "Elapsed time to load clique pairs: ~A secs\n"
+				(- (current-time) start-time)))
+
 		; Methods on the object
 		(lambda (message . args)
 			(apply (case message
@@ -238,6 +257,7 @@
 					((right-wildcard) get-right-wildcard)
 					((wild-wild) get-wild-wild)
 					((all-pairs) get-all-pairs)
+					((fetch-pairs) fetch-clique-pairs)
 					(else (error "Bad method call on clique-pair:" message)))
 				args))))
 
@@ -256,27 +276,11 @@
 		(- (current-time) start-time))
 )
 
-(define-public (fetch-any-pairs)
+(define-public (fetch-distance-pairs)
 "
-  fetch-any-pairs -- fetch all counts for link-grammar ANY links
-  from the database.
-"
-	(define start-time (current-time))
-	(fetch-incoming-set any-pair-pred)
-	(format #t "Elapsed time to load ANY-link pairs: ~A secs\n"
-		(- (current-time) start-time))
-)
-
-(define-public (fetch-clique-pairs)
-"
-  fetch-clique-pairs -- fetch all counts for clique-pairs from the
+  fetch-distance-pairs -- fetch all counts for clique-pairs from the
   database.
 "
-	(define start-time (current-time))
-	(fetch-incoming-set pair-pred)
-	(format #t "Elapsed time to load clique pairs: ~A secs\n"
-		(- (current-time) start-time))
-
 	(set! start-time (current-time))
 	(fetch-incoming-set pair-dist)
 	(format #t "Elapsed time to load clique-pair distances: ~A secs\n"
@@ -298,41 +302,33 @@
 ; Handy-dandy main entry points.
 
 (define-public (batch-any-pairs)
-	(init-trace "/tmp/progress")
+
+	(define pair-obj (add-pair-wildcards (make-any-link-api)))
 
 	; Make sure all words are in the atomspace
-	(start-trace "Begin loading words\n")
 	(call-only-once fetch-all-words)
-	(trace-elapsed)
-	(trace-msg "Done loading words, now loading any-pairs\n")
 	(display "Done loading words, now loading any-pairs\n")
 
 	; Make sure all word-pairs are in the atomspace.
-	(call-only-once fetch-any-pairs)
-	(trace-elapsed)
-	(trace-msg "Finished loading any-word-pairs\n")
+	(call-only-once (pair-obj 'fetch-pairs))
 	(display "Finished loading any-word-pairs\n")
 
-	(batch-all-pair-mi (add-pair-wildcards (make-any-link-api)))
+	(batch-all-pair-mi pair-obj)
 )
 
 (define-public (batch-clique-pairs)
-	(init-trace "/tmp/progress")
+
+	(define pair-obj (add-pair-wildcards (make-clique-pair-api)))
 
 	; Make sure all words are in the atomspace
-	(start-trace "Begin loading words\n")
 	(call-only-once fetch-all-words)
-	(trace-elapsed)
-	(trace-msg "Done loading words, now loading clique pairs\n")
 	(display "Done loading words, now loading clique pairs\n")
 
 	; Make sure all word-pairs are in the atomspace.
-	(call-only-once fetch-clique-pairs)
-	(trace-elapsed)
-	(trace-msg "Finished loading clique-word-pairs\n")
+	(call-only-once (pair-obj 'fetch-pairs))
 	(display "Finished loading clique-word-pairs\n")
 
-	(batch-all-pair-mi (add-pair-wildcards (make-clique-pair-api)))
+	(batch-all-pair-mi pair-obj)
 )
 
 ; ---------------------------------------------------------------------
@@ -345,11 +341,6 @@
 ; (start-cogserver "opencog2.conf")
 ; (fetch-all-words)
 ;
-; (define x (WordNode "famille"))
-; (define y (LinkGrammarRelationshipNode "ANY"))
-; (fetch-and-compute-pair-wildcard-counts x y)
-;
-; (fetch-all-words)
 ; (define wc (cog-count-atoms 'WordNode))
 ; (length (cog-get-atoms 'WordNode))
 ; (define wc (get-total-atom-count (cog-get-atoms 'WordNode)))
