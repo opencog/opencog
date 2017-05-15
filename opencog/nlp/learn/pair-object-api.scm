@@ -52,6 +52,12 @@
 ;
 ; There are several API's here. The lowest-level ones are listed first.
 ;
+; XXX FIXME ... the calling seuqence is exactly backeards. In order
+; for overloading to work correct, attempts must be made to call
+; methods on the base object first, and only later on the wrapper.
+; For now, we blow this off, but in the long run, this needs to be
+; fixed.
+;
 ; ---------------------------------------------------------------------
 ;
 ; Example low-level API class. It has only six methods; these
@@ -123,21 +129,24 @@
 ;
 ;
 ; ---------------------------------------------------------------------
-;
-; Extend the LLOBJ with addtional methods to get wild-card lists,
-; that is, lists of all pairs with a specific item on the left,
-; or on the right.  This generates these lists in a generic way,
-; that probably work for most kinds of pairs. However, you can
-; overload them with custom getters, if you wish.
-;
-; Here, the LLOBJ is expected to be an object, with methods for
-; 'left-type and 'right-type on it, just as described above.
-;
-; The lists of pairs will be lists of ListLink's, with the desired
-; item on the left or right, and an atom of 'left-type or 'right-type
-; on the other side.
 
-(define (make-pair-wild LLOBJ)
+(define-public (add-pair-wildcards LLOBJ)
+"
+  pair-wildcards LLOBJ - Extend LLOBJ with wildcard methods.
+
+  Extend the LLOBJ with addtional methods to get wild-card lists,
+  that is, lists of all pairs with a specific item on the left,
+  or on the right.  This generates these lists in a generic way,
+  that probably work for most kinds of pairs. However, you can
+  overload them with custom getters, if you wish.
+
+  Here, the LLOBJ is expected to be an object, with methods for
+  'left-type and 'right-type on it, just as described above.
+
+  The lists of pairs will be lists of ListLink's, with the desired
+  item on the left or right, and an atom of 'left-type or 'right-type
+  on the other side.
+"
 	(let ((llobj LLOBJ)
 			(l-supp '())
 			(r-supp '())
