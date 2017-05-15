@@ -97,7 +97,7 @@
   Finally, the 'left-type and 'right-type methods return the type
   of the the two sides of the pair.
 "
-	(let ()
+	(let ((all-pairs '()))
 		(define (get-left-type) 'WordNode)
 		(define (get-right-type) 'WordNode)
 
@@ -126,19 +126,38 @@
 		(define (get-wild-wild)
 			(get-pair (ListLink any-left any-right)))
 
-	; Methods on the object
-	(lambda (message . args)
-		(apply (case message
-				((left-type) get-left-type)
-				((right-type) get-right-type)
-				((item-pair) get-pair)
-				((make-pair) make-pair)
-				((item-pairs) get-pairs)
-				((left-wildcard) get-left-wildcard)
-				((right-wildcard) get-right-wildcard)
-				((wild-wild) get-wild-wild)
-				(else (error "Bad method call on ANY-link:" message)))
-			args))))
+		; get-all-pairs - return a list holding all of the observed
+		; word-pairs.  Caution: this can be tens of millions long!
+		(define (do-get-all-pairs)
+			; The list of pairs is mostly just the incoming set of the
+			; ANY node. However, this does include some junk, sooo ...
+			; hey, both left and right better be words.
+		   (filter!
+				(lambda (pair)
+					(and
+						(equal? 'WordNode (cog-type (gadr pair)))
+						(equal? 'WordNode (cog-type (gddr pair)))))
+				(cog-incoming-by-type any-pair-pred 'EvaluationLink)))
+
+		(define (get-all-pairs)
+			(if (null? all-pairs) (set! all-pairs (do-get-all-pairs)))
+			all-pairs)
+
+		; Methods on the object
+		(lambda (message . args)
+			(apply (case message
+					((left-type) get-left-type)
+					((right-type) get-right-type)
+					((item-pair) get-pair)
+					((make-pair) make-pair)
+					((item-pairs) get-pairs)
+					((left-wildcard) get-left-wildcard)
+					((right-wildcard) get-right-wildcard)
+					((wild-wild) get-wild-wild)
+					((all-pairs) get-all-pairs)
+					(else (error "Bad method call on ANY-link:" message)))
+				args)))
+)
 
 
 ; ---------------------------------------------------------------------
@@ -156,7 +175,7 @@
   The counts are stored on EvaluationLinks with the predicate
   (PredicateNode \"*-Sentence Word Pair-*\")
 "
-	(let ()
+	(let ((all-pairs '()))
 		(define (get-left-type) 'WordNode)
 		(define (get-right-type) 'WordNode)
 
@@ -183,20 +202,37 @@
 		(define (get-wild-wild)
 			(get-pair (ListLink any-left any-right)))
 
-	; Methods on the object
-	(lambda (message . args)
-		(apply (case message
-				((left-type) get-left-type)
-				((right-type) get-right-type)
-				((item-pair) get-pair)
-				((make-pair) make-pair)
-				((item-pairs) get-pairs)
-				((left-wildcard) get-left-wildcard)
-				((right-wildcard) get-right-wildcard)
-				((wild-wild) get-wild-wild)
-				(else (error "Bad method call on clique-pair:" message)))
-			args))))
+		; get-all-pairs - return a list holding all of the observed
+		; word-pairs.  Caution: this can be tens of millions long!
+		(define (do-get-all-pairs)
+			; The list of pairs is mostly just the incoming set of the
+			; ANY node. However, this does include some junk, sooo ...
+			; hey, both left and right better be words.
+		   (filter!
+				(lambda (pair)
+					(and
+						(equal? 'WordNode (cog-type (gadr pair)))
+						(equal? 'WordNode (cog-type (gddr pair)))))
+				(cog-incoming-by-type pair-pred 'EvaluationLink)))
 
+		(define (get-all-pairs)
+			(if (null? all-pairs) (set! all-pairs (do-get-all-pairs)))
+			all-pairs)
+
+		; Methods on the object
+		(lambda (message . args)
+			(apply (case message
+					((left-type) get-left-type)
+					((right-type) get-right-type)
+					((item-pair) get-pair)
+					((make-pair) make-pair)
+					((item-pairs) get-pairs)
+					((left-wildcard) get-left-wildcard)
+					((right-wildcard) get-right-wildcard)
+					((wild-wild) get-wild-wild)
+					((all-pairs) get-all-pairs)
+					(else (error "Bad method call on clique-pair:" message)))
+				args))))
 
 
 ; ---------------------------------------------------------------------
