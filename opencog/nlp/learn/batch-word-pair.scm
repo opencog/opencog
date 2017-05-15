@@ -48,6 +48,7 @@
 ;
 ; ---------------------------------------------------------------------
 ;
+(use-modules (srfi srfi-1))
 (use-modules (opencog))
 (use-modules (opencog persist))
 
@@ -365,6 +366,33 @@
 				args))))
 
 
+; ---------------------------------------------------------------------
+
+(define-public (verify-clique-pair-sums)
+"
+  This checks consistency of the the clique-pair total count, with
+  the subcounts of each pair, accodring to the distance between
+  the words. The sum of the subtotals should equal the total.
+  It should not throw.
+
+  Example usage: (verify-clique-pair-sums)
+"
+	(define cliq (add-pair-count-api (make-clique-pair-api)))
+	(define dist (add-pair-count-api (make-distance-pair-api 10000000)))
+	(define all-pairs (cliq 'all-pairs))
+
+	(define cnt 0)
+	(for-each
+		(lambda (PAIR)
+			(set! cnt (+ cnt 1))
+			(if (not (eqv? (cliq 'pair-count PAIR) (dist 'pair-count PAIR)))
+				(throw 'bad-count 'foobar PAIR)
+				(format #t "Its OK ~A\n" cnt)
+			))
+		all-pairs)
+)
+
+; ---------------------------------------------------------------------
 ; ---------------------------------------------------------------------
 ; ---------------------------------------------------------------------
 ; ---------------------------------------------------------------------
