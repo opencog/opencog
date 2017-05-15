@@ -354,7 +354,7 @@
 		; the inner loop. This returns a list of all atoms holding
 		; the MI, suitable for iterating for storage.
 		(define (compute-n-cache-mi)
-			(define (all-atoms '()))
+			(define all-atoms '())
 
 			(define (right-loop left-item)
 				(define r-logli (frqobj 'right-wild-logli left-item))
@@ -396,14 +396,7 @@
 ;
 ; The mutual information between pairs is described in the overview,
 ; up top of this file. The access to the pairs is governed by the
-; the methods on the assed object.
-;
-; The algorithm uses a doubley-nested loop to walk over all pairs,
-; in a sparse-matrix fashion: The outer loop is over all all items,
-; the inner loop is over the incoming set of the items, that incoming
-; set being composed of ListLinks that hold pairs. The ITEM-TYPE
-; is used for filtering, to make sure that only valid pairs are
-; accessed.
+; the methods on the passed object.
 ;
 ; Partial sums of counts, i.e. the N(w,*) and N(*,w) explained up top,
 ; are stored with the atoms that GET-LEFT-WILD and GET-RIGHT-WILD
