@@ -77,3 +77,46 @@
 )
 
 ; ---------------------------------------------------------------------
+
+(define-public (total-word-observations)
+"
+  total-word-observations -- return a total of the number of times
+  any/all words were observed.  That is, compute and return N(*),
+  as defined above, and in the diary.  This does NOT work from a
+  cached value.  Also, this does NOT fetch atoms from the database!
+"
+   (get-total-atom-count (get-all-words))
+)
+
+; ---------------------------------------------------------------------
+
+(define-public (get-sentence-count)
+"
+  get-sentence-count -- get the number of sentences observed.
+  This does fetch the count from the database.
+
+  This count is maintained by the link-pipeline code.
+"
+	(get-count (fetch-atom (SentenceNode "ANY")))
+)
+
+(define-public (get-parse-count)
+"
+  get-parse-count -- get the number of parses observed.
+  This does fetch the count from the database.
+
+  This count is maintained by the link-pipeline code.
+"
+	(get-count (fetch-atom (ParseNode "ANY")))
+)
+
+(define-public (avg-sentence-length)
+"
+  avg-sentence-length -- get expected value for the number of words
+  in the sentence.
+"
+	; Each word is counted once, in every parse.
+	(/ (total-word-observations) (get-parse-count))
+)
+
+; ---------------------------------------------------------------------
