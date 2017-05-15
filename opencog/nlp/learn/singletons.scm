@@ -39,6 +39,37 @@
 )
 
 ; ---------------------------------------------------------------------
+; set-freq ATOM FREQ - set the frequency count on ATOM.
+;
+; FREQ is assumed to be some simple ratio, interpreted as a
+; probability: i.e. 0.0 < FREQ <= 1.0.  The frequency and it's log_2
+; are stored: the log is accessed thousands of times, and so it
+; is worth caching it as a pre-computed value.
+;
+; Returns ATOM.
+;
+(define (set-freq ATOM FREQ)
+	; 1.4426950408889634 is 1/0.6931471805599453 is 1/log 2
+	(define ln2 (* -1.4426950408889634 (log FREQ)))
+	(cog-set-value! ATOM freq-key (FloatValue FREQ ln2))
+)
+
+; ---------------------------------------------------------------------
+; Compute log liklihood of having observed a given atom.
+;
+; The liklihood and its log-base-2 will be stored under the key
+; (Predicate "*-FrequencyKey-*"), with the first number being the
+; frequency, which is just the atom's count value, dividing by the
+; total number of times the atom has been observed.  The log liklihood
+; is -log_2(frequency), and is stored as a convenience.
+;
+; This returns the atom that was provided, but now with the logli set.
+
+(define (compute-atom-logli atom total)
+	(set-freq atom (/ (get-count atom) total))
+)
+
+; ---------------------------------------------------------------------
 ; Compute the occurance logliklihoods for a list of atoms.
 ;
 ; This sums up the occurance-count over the entire list of atoms,

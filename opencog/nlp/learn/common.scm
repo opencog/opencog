@@ -59,32 +59,6 @@
 (define (set-count ATOM CNT) (cog-set-tv! ATOM (cog-new-ctv 0 0 CNT)))
 
 ; ----
-; set-freq ATOM FREQ - set the frequency count on ATOM.
-;
-; FREQ is assumed to be some simple ratio, interpreted as a
-; probability: i.e. 0.0 < FREQ <= 1.0.  The frequency and it's log_2
-; are stored: the log is accessed thousands of times, and so it
-; is worth caching it as a pre-computed value.
-;
-; Returns ATOM.
-;
-(define (set-freq ATOM FREQ)
-	; 1.4426950408889634 is 1/0.6931471805599453 is 1/log 2
-	(define ln2 (* -1.4426950408889634 (log FREQ)))
-	(cog-set-value! ATOM freq-key (FloatValue FREQ ln2))
-)
-
-; ----
-; get-logli ATOM - get the -log_2(frequency) on ATOM.
-;
-; The log will be in position 2 of the value.
-; This will throw an exception if no value has been recorded
-; for this atom.
-(define (get-logli ATOM)
-	(cadr (cog-value->list (cog-value ATOM freq-key)))
-)
-
-; ----
 ; get-mi ATOM - get the mutual information on ATOM.
 ;
 ; Returns a floating-point value holding the mutual information
@@ -127,44 +101,6 @@
 	(begin
 		(incr-one ATM) ; increment the count on ATM
 		(store-atom ATM)) ; save to SQL
-)
-
-; ---------------------------------------------------------------------
-; Compute log liklihood of having observed a given atom.
-;
-; The liklihood and its log-base-2 will be stored under the key
-; (Predicate "*-FrequencyKey-*"), with the first number being the
-; frequency, which is just the atom's count value, dividing by the
-; total number of times the atom has been observed.  The log liklihood
-; is -log_2(frequency), and is stored as a convenience.
-;
-; This returns the atom that was provided, but now with the logli set.
-
-(define (compute-atom-logli atom total)
-	(set-freq atom (/ (get-count atom) total))
-)
-
-
-; ---------------------------------------------------------------------
-; ---------------------------------------------------------------------
-; ---------------------------------------------------------------------
-; Clique-based-counting word-pair access methods.
-; ---------------------------------------------------------------------
-
-(define-public (get-clique-pair PAIR)
-"
-  clique-pair PAIR -- Given a ListLink holding a word-pair, return
-  the corresponding 'clique-counting' style link that holds the count
-  for that word-pair. Return the empty list, if there is no count for
-  the word-pair.
-"
-	(cog-link 'EvaluationLink pair-pred PAIR)
-)
-
-; Internal-use version of above, not for the public.
-(define (internal-clique-pair PAIR)
-	(define pr (get-clique-pair PAIR))
-	(if (null? pr) '() (list pr))
 )
 
 ; ---------------------------------------------------------------------
