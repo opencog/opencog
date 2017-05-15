@@ -363,6 +363,8 @@ public:
         result += get_keyword_black_list() + "\n";
         result += get_keyword_white_list() + "\n";
         result += get_keyword_white_list_logic() + "\n";
+        result += get_enable_filter_links_of_same_type_not_share_second_outgoing() + "\n";
+        result += get_same_link_types_not_share_second_outgoing()  + "\n";
 
         return result;
 
