@@ -455,14 +455,22 @@
 	; Compute the left and right wildcard frequencies and
 	; log-frequencies.
 	(freq-obj 'init-freq)
-	(for-each
-		(lambda (atom) (if (not (null? atom)) (store-atom atom)))
-		(freq-obj 'cache-all-left-freqs))
 
-	(display "Done with -log P(*,w)\n")
-	(for-each
-		(lambda (atom) (if (not (null? atom)) (store-atom atom)))
-		(freq-obj 'cache-all-right-freqs))
+	(let ((lefties (freq-obj 'cache-all-left-freqs)))
+		(format #t "Start storing ~A left-wilds\n"
+			(length lefties))
+		(par-for-each
+			(lambda (atom) (if (not (null? atom)) (store-atom atom)))
+			lefties))
+
+	(display "Done with -log P(*,w), start -log P(w,*)\n")
+
+	(let ((righties (freq-obj 'cache-all-right-freqs)))
+		(format #t "Start storing ~A right-wilds\n"
+			(length righties))
+		(par-for-each
+			(lambda (atom) (if (not (null? atom)) (store-atom atom)))
+			righties))
 
 	(trace-elapsed)
 	(display "Done computing -log P(w,*) and <-->\n")
@@ -471,7 +479,7 @@
 	(start-trace "Going to do individual word-pair MI\n")
 	(display "Going to do individual word-pair MI\n")
 
-	(let ((bami (make-batch-mi freq-obj))
+	(let* ((bami (make-batch-mi freq-obj))
 			(all-atoms (bami 'cache-mi))
 			(len (length all-atoms)))
 		(format #t "Start storing the MI's for ~A atoms\n" len)
