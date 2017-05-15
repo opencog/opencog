@@ -905,6 +905,33 @@ bool PatternMiner::remove_link_type_from_same_link_types_not_share_second_outgoi
 
 }
 
+bool PatternMiner::add_node_type_to_node_types_should_not_be_vars(Type _type)
+{
+    for (Type t : node_types_should_not_be_vars)
+    {
+        if (t == _type)
+            return false; //  exist
+    }
+
+    node_types_should_not_be_vars.push_back(_type);
+    return true;
+}
+
+bool PatternMiner::remove_node_type_from_node_types_should_not_be_vars(Type _type)
+{
+    vector<Type>::iterator it;
+    for (it = node_types_should_not_be_vars.begin(); it != node_types_should_not_be_vars.end(); it ++)
+    {
+        if ((Type)(*it) == _type)
+        {
+           node_types_should_not_be_vars.erase(it);
+           return true;
+        }
+    }
+
+    return false; // not exist
+}
+
 bool PatternMiner::add_keyword_to_black_list(string _keyword)
 {
     if (isIgnoredContent(_keyword))
@@ -2516,45 +2543,44 @@ void PatternMiner::reSetAllSettingsFromConfig()
     enable_filter_not_same_var_from_same_predicate = config().get_bool("enable_filter_not_same_var_from_same_predicate");
     enable_filter_first_outgoing_evallink_should_be_var = config().get_bool("enable_filter_first_outgoing_evallink_should_be_var");
 
-    if (enable_filter_node_types_should_not_be_vars)
-    {
-        node_types_should_not_be_vars.clear();
-        string node_types_str = config().get("node_types_should_not_be_vars");
-        node_types_str.erase(std::remove(node_types_str.begin(), node_types_str.end(), ' '), node_types_str.end());
-        vector<string> typeStrs;
-        boost::split(typeStrs, node_types_str, boost::is_any_of(","));
 
-        for (string typestr : typeStrs)
+    node_types_should_not_be_vars.clear();
+    string node_types_str = config().get("node_types_should_not_be_vars");
+    node_types_str.erase(std::remove(node_types_str.begin(), node_types_str.end(), ' '), node_types_str.end());
+    vector<string> typeStrs;
+    boost::split(typeStrs, node_types_str, boost::is_any_of(","));
+
+    for (string typestr : typeStrs)
+    {
+        Type atomType = classserver().getType(typestr);
+        if (atomType == NOTYPE)
         {
-            Type atomType = classserver().getType(typestr);
-            if (atomType == NOTYPE)
-            {
-                cout << "\nCannot find Node Type: " << typestr << " in config file for node_types_should_not_be_vars.\n";
-                continue;
-            }
-            node_types_should_not_be_vars.push_back(atomType);
+            cout << "\nCannot find Node Type: " << typestr << " in config file for node_types_should_not_be_vars.\n";
+            continue;
         }
+        node_types_should_not_be_vars.push_back(atomType);
     }
 
-    if (enable_filter_links_of_same_type_not_share_second_outgoing)
-    {
-        same_link_types_not_share_second_outgoing.clear();
-        string link_types_str = config().get("same_link_types_not_share_second_outgoing");
-        link_types_str.erase(std::remove(link_types_str.begin(), link_types_str.end(), ' '), link_types_str.end());
-        vector<string> typeStrs;
-        boost::split(typeStrs, link_types_str, boost::is_any_of(","));
 
-        for (string typestr : typeStrs)
+
+    same_link_types_not_share_second_outgoing.clear();
+    string link_types_str = config().get("same_link_types_not_share_second_outgoing");
+    link_types_str.erase(std::remove(link_types_str.begin(), link_types_str.end(), ' '), link_types_str.end());
+
+    typeStrs.clear();
+    boost::split(typeStrs, link_types_str, boost::is_any_of(","));
+
+    for (string typestr : typeStrs)
+    {
+        Type atomType = classserver().getType(typestr);
+        if (atomType == NOTYPE)
         {
-            Type atomType = classserver().getType(typestr);
-            if (atomType == NOTYPE)
-            {
-                cout << "\nCannot find Link Type: " << typestr << " in config file for same_link_types_not_share_second_outgoing.\n";
-                continue;
-            }
-            same_link_types_not_share_second_outgoing.push_back(atomType);
+            cout << "\nCannot find Link Type: " << typestr << " in config file for same_link_types_not_share_second_outgoing.\n";
+            continue;
         }
+        same_link_types_not_share_second_outgoing.push_back(atomType);
     }
+
 }
 
 // release everything

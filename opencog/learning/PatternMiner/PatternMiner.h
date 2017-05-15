@@ -447,6 +447,12 @@ public:
     bool remove_link_type_from_same_link_types_not_share_second_outgoing(Type _type);
     void clear_same_link_types_not_share_second_outgoing(){same_link_types_not_share_second_outgoing.clear();}
 
+    void set_enable_filter_node_types_should_not_be_vars(bool _enable){enable_filter_node_types_should_not_be_vars = _enable;}
+    bool get_enable_filter_node_types_should_not_be_vars(){return enable_filter_node_types_should_not_be_vars;}
+    vector<Type> get_node_types_should_not_be_vars(){return node_types_should_not_be_vars;}
+    bool add_node_type_to_node_types_should_not_be_vars(Type _type);
+    bool remove_node_type_from_node_types_should_not_be_vars(Type _type);
+    void clear_node_types_should_not_be_vars(){node_types_should_not_be_vars.clear();}
 
     // -------------------------------end filter settings----------------------
 
