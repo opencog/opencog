@@ -445,7 +445,7 @@
 	(count-obj 'cache-all-left-counts)
 	(count-obj 'cache-all-right-counts)
 
-	(display "Done with wild-card count N(*,w) and N(w,*) in ~A secs\n"
+	(format #t "Done with wild-card count N(*,w) and N(w,*) in ~A secs\n"
 		(elapsed-secs))
 
 	; Now, compute the grand-total
