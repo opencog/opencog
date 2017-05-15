@@ -234,7 +234,7 @@
   Extend the LLOBJ with additional methods to get and set
   the count values for wild-card counts, and total counts.
   Basically, this decorates the class with additional methods
-  that get and set these counts in "standardized" places.
+  that get and set these counts in \"standardized\" places.
   Other classes can overload these methods; these just provide
   a reasonable default.
 
@@ -246,7 +246,7 @@
 
   Here, the LLOBJ is expected to be an object, with methods for
   'item-pair 'make-pair 'left-wildcard 'right-wildcard and 'wild-wild
-  on it, in the form documented above for the "low-level API class".
+  on it, in the form documented above for the \"low-level API class\".
 "
 	(let ((llobj LLOBJ))
 
@@ -320,13 +320,13 @@
   Extend the LLOBJ with additional methods to get and set
   the observation frequencies, entropies and mutual infomation.
   Basically, this decorates the class with additional methods
-  that get and set these frequencies and entropies in "standardized"
+  that get and set these frequencies and entropies in \"standardized\"
   places. Other classes can overload these methods; these just
   provide a reasonable default.
 
   Here, the LLOBJ is expected to be an object, with methods for
   'item-pair 'make-pair 'left-wildcard and 'right-wildcard on it,
-  in the form documented above for the "low-level API class".
+  in the form documented above for the \"low-level API class\".
 "
 	(let ((llobj LLOBJ))
 
