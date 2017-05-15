@@ -135,8 +135,12 @@
 (define-public (mst-parse-text plain-text)
 
 	; the source of where we will get MI from
-	(define mi-source get-any-pair)
-	; (define mi-source get-clique-pair)
+	(define pair-obj (make-any-link-api))
+	; (define pair-obj (make-clique-pair-api))
+
+	; Given a ListLink holding a word-pair, return the atom where the MI
+	; for that pair is stored.
+	(define (mi-source LIPR) (pair-obj 'item-pair LIPR))
 
 	; Define a losing score.
 	(define bad-mi -1e30)

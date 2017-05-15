@@ -144,20 +144,6 @@
 	(set-freq atom (/ (get-count atom) total))
 )
 
-; ---------------------------------------------------------------------
-; ---------------------------------------------------------------------
-; ---------------------------------------------------------------------
-; Random-tree parse word-pair count access routines.
-;
-(define-public (get-any-pair PAIR)
-"
-  get-any-pair PAIR -- Given a ListLink holding a word-pair, return
-  the corresponding 'ANY' link-type link that holds the count for
-  that word-pair.  Return the empty list, if there is no count for
-  the word-pair.
-"
-	(cog-link 'EvaluationLink any-pair-pred PAIR)
-)
 
 ; ---------------------------------------------------------------------
 ; ---------------------------------------------------------------------
@@ -194,45 +180,6 @@
 ; ---------------------------------------------------------------------
 ; ---------------------------------------------------------------------
 ; ---------------------------------------------------------------------
-
-(define-public (get-pair-logli GET-PAIR left-word right-word)
-"
-  get-pair-logli GET-PAIR LEFT-WORD RIGHT-WORD --
-         Return the -log_2 P(left, right) for the probability
-  P(left,right) of having observed a pair of words.
-
-  Currently, the only valid values for GET-PAIR are get-any-pair
-  and get-clique-pair.
-
-  The source of probability is given by GET-PAIR, which should
-  be a function that, when given a (ListLink (WordNode)(WordNode)),
-  returns an atom that holds the MI for that pair.  The user is
-  strongly discouraged from calling GET-PAIR directly, to avoid
-  unintended side-effects (such as the creation of bogus atoms).
-
-  The left and right words are presumed to be WordNodes, or nil.
-  If either word is nil, or if the word-pair cannot be found, then a
-  default value of -1e40 is returned.
-"
-	; Define a losing score.
-	(define bad-mi -1e40)
-
-	; We take care here to not actually create the atoms,
-	; if they aren't already in the atomspace. cog-node returns
-	; nil if the atoms can't be found.
-	(define wpr
-		(if (and (not (null? left-word)) (not (null? right-word)))
-			(cog-link 'ListLink left-word right-word)
-			'()))
-	(define evl
-		(if (not (null? wpr))
-			(GET-PAIR wpr)
-			'()))
-	(if (not (null? evl))
-		(get-logli evl)
-		bad-mi
-	)
-)
 
 (define-public (get-pair-mi GET-PAIR left-word right-word)
 "
@@ -271,60 +218,6 @@
 		(get-mi evl)
 		bad-mi
 	)
-)
-
-; ---------------------------------------------------------------------
-
-(define-public (get-pair-mi-str left-word-str right-word-str)
-"
-  get-pair-mi-str LEFT-WORD-STRING RIGHT-WORD-STRING
-  Return the mutual information for a pair of words. The MI value
-  will be given in bits (i.e. log_2 of the ratio of probabilites)
-
-  The left and right words are presumed to be strings.  If the word-
-  pair cannot be found, then a default value of -1000 is returned.
-
-  This is the most basic kind of MI for a pair, it assumes nothing
-  more than the relation that both occured in the  same sentence, and
-  that the left word is to the left of the right.
-"
-	(get-pair-mi
-		get-any-pair  ; use the random-tree MI, for now.
-		(cog-node 'WordNode left-word-str)
-		(cog-node 'WordNode right-word-str)
-	)
-)
-
-(define-public (get-left-wild-logli GET-PAIR right-word)
-"
-  get-left-wild-logli GET-PAIR RIGHT-WORD --
-         Return the -log_2 p(*,word) i.e. where the left word was
-  summed over.
-
-  Currently, the only valid values for GET-PAIR are get-any-pair
-  and get-clique-pair.
-
-  The RIGHT-WORD must be a WordNode, or nil.
-  If its nil, or if the wild-card count cannot be found, then a
-  default value of -1e40 is returned.
-"
-	(get-pair-logli GET-PAIR any-left right-word)
-)
-
-(define-public (get-right-wild-logli GET-PAIR left-word)
-"
-  get-right-wild-logli GET-PAIR LEFT-WORD --
-         Return the -log_2 p(word,*) i.e. where the right word was
-  summed over.
-
-  Currently, the only valid values for GET-PAIR are get-any-pair
-  and get-clique-pair.
-
-  The LEFT-WORD must be a WordNode, or nil.
-  If its nil, or if the wild-card count cannot be found, then a
-  default value of -1e40 is returned.
-"
-	(get-pair-logli GET-PAIR left-word any-right)
 )
 
 ; ---------------------------------------------------------------------
