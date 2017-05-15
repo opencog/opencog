@@ -5157,7 +5157,7 @@ Done computing 106696 right-wilds in 45 secs vs. 15 now
 Done storing 106696 right-wilds in 458 secs << par-for vs 103 now
 Done computing -log P(w,*) and <-->
 Going to do individual word-pair MI
-Done computing 2360328 pair MI's in 962 secs
+Done computing 2360328 pair MI's in 962 secs (1124 secs under load)
 Stored 100000 of 2360328 pairs in 191 secs (523.5602094240837 pairs/sec)
 ....
 Stored 2000000 of 2360328 pairs in 317 secs (315.45741324921136 pairs/sec)

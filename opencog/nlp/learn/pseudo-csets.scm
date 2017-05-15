@@ -63,6 +63,8 @@
 ; an actual metric only when the vectors are bit-vectors, and we don't
 ; have bit-vectors, so I am not implementing this.
 ;
+; XXX support can be taken as bit-vectors ....
+;
 ; ---------------------------------------------------------------------
 ;
 (use-modules (srfi srfi-1))
@@ -72,21 +74,40 @@
 ; ---------------------------------------------------------------------
 ; ---------------------------------------------------------------------
 
-(define-public (fetch-pseudo-csets WORD-LIST)
+(define-public (make-pseudo-cset-api)
 "
-  fetch-pseudo-csets WORD-LIST - fetch (from the database)
-  all pseudo-csets for all of the WordNodes in the WORD-LIST.
+  make-pseudo-cset-api -- connector-set access methods. Pseudo-
+  connector sets are pairs consisting of a word on the left, and
+  a pseudo-disjunct on the right. These are observed during MST parsing.
+  A more detailed scription is at the top of this fie.
 "
-	(define (fetch-one WORD)
-		(fetch-incoming-by-type WORD 'LgWordCset))
+	(let ()
+		; Get the observational count on ATOM
+		(define (get-count ATOM) (cog-tv-count (cog-tv ATOM)))
 
-	(define start-time (current-time))
-	; (for-each fetch-one WORD-LIST) ; this is wyyyyy too slow!
-	(load-atoms-of-type 'LgWordCset)
-	(format #t "Elapsed time to load csets: ~A secs\n"
-		(- (current-time) start-time))
+		(define (get-left-type) 'WordNode)
+		(define (get-right-type) 'LgAnd)
+
+		; fetch (from the database) all pseudo-csets
+		(define (fetch-pseudo-csets)
+			(define start-time (current-time))
+			(load-atoms-of-type 'LgWordCset)
+			(format #t "Elapsed time to load csets: ~A secs\n"
+				(- (current-time) start-time)))
+
+		; Methods on the object
+		(lambda (message . args)
+			(apply (case message
+				((left-type) get-left-type)
+				((right-type) get-right-type)
+				((pair-count) get-pair-count)
+				((item-pair) get-pair)
+				((fetch-pairs) fetch-pseudo-csets)
+				(else (error "Bad method call on psuedo-cset:" message)))
+			args)))
 )
 
+; ---------------------------------------------------------------------
 ; ---------------------------------------------------------------------
 
 (define-public (get-cset-vec ITEM)
