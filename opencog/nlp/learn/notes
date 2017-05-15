@@ -5171,4 +5171,24 @@ Sooo any-pair:
   PID USER      PR  NI    VIRT    RES    SHR S  %CPU %MEM     TIME+ COMMAND     
  5180 linas     20   0 11.819g 8.935g  37080 S   0.0  3.5 117:00.53 guile       
 
+----------------
+clique pairs:
+
+Start loading words ...
+Elapsed time to load words: 45 secs
+Done loading words, now loading clique pairs
+Elapsed time to load clique pairs: 1145 secs  <<< vs 322 for any-pairs
+Finished loading clique-word-pairs
+Support: num left=106696 num right=106696
+Done with wild-card count N(*,w) and N(w,*) in 737 secs  <<< vs 215 for any
+Done computing N(*,*) total-count=31628463.0 in 14 secs  <<<!? almost the same??
+Start computing log P(*,w)
+Done computing 106696 left-wilds in 14 secs
+Done storing 106696 left-wilds in 103 secs
+Done with -log P(*,w), start -log P(w,*)
+Done computing 106696 right-wilds in 15 secs
+Done storing 106696 right-wilds in 103 secs
+Done computing -log P(w,*) and <-->
+Going to do individual word-pair MI
+
 

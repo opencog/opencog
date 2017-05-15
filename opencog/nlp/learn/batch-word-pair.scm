@@ -301,14 +301,14 @@
 ; ---------------------------------------------------------------------
 ; Handy-dandy main entry points.
 
-(define-public (batch-any-pairs)
+(define (batch-pairs LLOBJ)
 
-	(define pair-obj (add-pair-wildcards (make-any-link-api)))
+	(define pair-obj (add-pair-wildcards LLOBJ))
 
 	; Make sure all words are in the atomspace
 	(display "Start loading words ...\n")
 	(call-only-once fetch-all-words)
-	(display "Done loading words, now loading any-pairs\n")
+	(display "Done loading words, now loading pairs\n")
 
 	; Make sure all word-pairs are in the atomspace.
 	(call-only-once (lambda() (pair-obj 'fetch-pairs)))
@@ -317,20 +317,12 @@
 	(batch-all-pair-mi pair-obj)
 )
 
+(define-public (batch-any-pairs)
+	(batch-pairs (make-any-link-api))
+)
+
 (define-public (batch-clique-pairs)
-
-	(define pair-obj (add-pair-wildcards (make-clique-pair-api)))
-
-	; Make sure all words are in the atomspace
-	(display "Start loading words ...\n")
-	(call-only-once fetch-all-words)
-	(display "Done loading words, now loading clique pairs\n")
-
-	; Make sure all word-pairs are in the atomspace.
-	(call-only-once (lambda() (pair-obj 'fetch-pairs)))
-	(display "Finished loading clique-word-pairs\n")
-
-	(batch-all-pair-mi pair-obj)
+	(batch-pairs (make-clique-pair-api))
 )
 
 ; ---------------------------------------------------------------------
