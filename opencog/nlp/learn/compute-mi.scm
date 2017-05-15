@@ -377,14 +377,8 @@
 						(set! all-atoms (cons atom all-atoms))
 					)
 
-					; Wrap the do-one-pair function with a progress-report
-					; printer.
-					(define do-one-and-report
-						(make-progress-rpt do-one-pair 10000 nlefties
-							"MI, done ~A outer loops of ~A in ~A secs (~A loops/sec)\n"))
-
 					(for-each
-						do-one-and-report
+						do-one-pair
 						(frqobj 'right-stars left-item)))
 					(lambda (key . args) #f)) ; catch handler
 			)
