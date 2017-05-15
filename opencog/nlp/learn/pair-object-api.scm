@@ -323,11 +323,18 @@
 		(define (get-logli ATOM)
 			(cadr (cog-value->list (cog-value ATOM freq-key))))
 
+		; Set both a frequency count, and a -log_2(frequency) on
+		; the ATOM.
 		(define (set-freq ATOM FREQ)
 			; 1.4426950408889634 is 1/0.6931471805599453 is 1/log 2
 			(define ln2 (* -1.4426950408889634 (log FREQ)))
 			(cog-set-value! ATOM freq-key (FloatValue FREQ ln2)))
 
+		; Set the MI value for ATOM.
+		(define (set-mi ATOM MI)
+			(cog-set-value! ATOM mi-key (FloatValue MI)))
+
+		; ----------------------------------------------------
 		; Return the observational frequency on PAIR.
 		; If the PAIR does not exist (was not oberved) return 0.
 		(define (get-pair-freq PAIR)
@@ -346,6 +353,16 @@
 		(define (set-pair-freq PAIR FREQ)
 			(set-freq (llobj 'make-pair PAIR) FREQ))
 
+		; ----------------------------------------------------
+
+		; Return the MI value on the pair.
+		(define (get-pair-mi PAIR MI)
+			(get-mi (llobj 'get-pair PAIR)))
+
+		(define (set-pair-mi PAIR MI)
+			(set-mi (llobj 'get-pair PAIR) MI))
+
+		; ----------------------------------------------------
 		; Get the left wildcard frequency
 		(define (get-left-wild-freq ITEM)
 			(get-freq (llobj 'left-wildcard ITEM)))
@@ -370,12 +387,16 @@
 		(define (set-right-wild-freq ITEM FREQ)
 			(set-freq (llobj 'right-wildcard ITEM) FREQ))
 
+		; ----------------------------------------------------
 		; Methods on this class.
 		(lambda (message . args)
 			(case message
 				((pair-freq)           (apply get-pair-freq args))
 				((pair-logli)          (apply get-pair-logli args))
+				((pair-mi)             (apply get-pair-mi args))
 				((set-pair-freq)       (apply set-pair-freq args))
+				((set-pair-mi)         (apply set-pair-mi args))
+
 				((left-wild-freq)      (apply get-left-wild-freq args))
 				((left-wild-logli)     (apply get-left-wild-logli args))
 				((set-left-wild-freq)  (apply set-left-wild-freq args))

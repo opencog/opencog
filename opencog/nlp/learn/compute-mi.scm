@@ -370,6 +370,9 @@
 					(frqobj 'right-stars left-item)
 				)
 			)
+
+			;; XXX FIXME this should be a par-for-each
+			; but then we need to make the all-atoms list thread-safe
 			(for-each right-loop (frqobj 'left-support))
 
 			all-atoms
@@ -388,84 +391,12 @@
 ; ---------------------------------------------------------------------
 ; ---------------------------------------------------------------------
 ;
-; Compute word-pair mutual information, for all word-pairs with the
-; given word being on the right.  This is a helper routine, to split
-; up the double-loop over left and right words into two. This is the
-; inner loop, looping over all left-words.
-;
-; The mutual information, and where its stored, is described in the
-; overview, up top.  This routine is a batch routine; it assumes that
-; all needed pairs are already in the atomspace (it does NOT fetch
-; from storage). It assumes that the wild-card entropies (logli's) have
-; already been computed.
-;
-;
-(define (compute-pair-mi OBJ RIGHT-ITEM)
-
-	; Get the word-pair grand-total
-	(define pair-total (OBJ 'wild-wild-count))
-
-	; Either of the get-loglis below will throw an exception, if
-	; the particular word-pair doesn't have any counts. This is rare,
-	; but can happen: e.g. (Any "left-word") (Word "###LEFT-WALL###")
-	; will have zero counts.  This would have an infinite logli
-	; an an infinite MI. So we skip this, with a try-catch block.
-	(catch #t (lambda ()
-	(let* (
-			; left-stars are all the ListLinks in which the RIGHT-ITEM
-			; appears on the right (and anything on the left)
-			(left-stars (OBJ 'left-stars RIGHT-ITEM))
-
-			; left-evs are the EvaluationLinks above the left-stars
-			; That is, they have the wild-card in the left-hand slot.
-			(left-evs (map! (lambda (lnk) (OBJ 'item-pair lnk)) left-stars))
-
-			(l-logli (get-logli (OBJ 'left-wildcard RIGHT-ITEM)))
-		)
-		(for-each
-
-			; This lambda sets the mutual information for each word-pair.
-			(lambda (pair)
-				(catch #t (lambda ()
-					(let* (
-							; the left-word of the word-pair
-							(left-word (gadr pair))
-
-							(r-logli (get-logli (OBJ 'right-wildcard left-word)))
-
-							; Compute the logli log_2 P(l,r)/P(*,*)
-							(atom (compute-atom-logli pair pair-total))
-
-							; Get the log liklihood computed immediately above.
-							(ll (get-logli atom))
-
-							; Subtract the left and right entropies to get the
-							; mutual information (at last!)
-							(mi (- (+ l-logli r-logli) ll))
-						)
-						; Save the hard-won MI to the database.
-						(store-atom (set-mi atom mi))
-					))
-				(lambda (key . args) #f)) ; catch handler
-			)
-			left-evs
-		)
-	))
-	(lambda (key . args) #f)) ; catch handler
-)
-
-; ---------------------------------------------------------------------
 ;
 ; Compute the mutual information between all pairs.
 ;
 ; The mutual information between pairs is described in the overview,
 ; up top of this file. The access to the pairs is governed by the
 ; the methods on the assed object.
-;
-; The `all-singletons` argument should be a list of all items over
-; which the pairs will be computed. Every item in this list should
-; be of  (OBJ 'item-type)
-; XXX FIXME .. which ones .. left or right????? XXX
 ;
 ; The algorithm uses a doubley-nested loop to walk over all pairs,
 ; in a sparse-matrix fashion: The outer loop is over all all items,
@@ -493,7 +424,7 @@
 ; the performance overhead here in order to get the flexibility that
 ; the atomspace provides.
 ;
-(define (batch-all-pair-mi OBJ all-singletons)
+(define (batch-all-pair-mi OBJ)
 
 	; Decorate the object with a counting API.
 	(define obj-get-set-api (make-pair-count-api OBJ))
@@ -546,14 +477,13 @@
 	; Enfin, the word-pair mi's
 	(start-trace "Going to do individual word-pair MI\n")
 	(display "Going to do individual word-pair MI\n")
-	; for-each
-	(par-for-each
-		(lambda (word)
-			(compute-pair-mi OBJ word)
-			(trace-msg-cnt "Done with pair MI cnt=")
-		)
-		all-singletons
-	)
+
+	(let ((bami (make-batch-mi freq-obj))
+			(all-atoms (bami 'cache-mi))
+			(len (length all-atoms)))
+		(format #t "Start storing the MI's for ~A atoms\n" len)
+		(for-each store-atom all-atoms))
+
 	(trace-elapsed)
 	(trace-msg "Finished with MI computations\n")
 	(display "Finished with MI computations\n")
