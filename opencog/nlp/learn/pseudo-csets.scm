@@ -82,8 +82,12 @@
   A more detailed scription is at the top of this fie.
 "
 	(let ()
+
 		; Get the observational count on ATOM
 		(define (get-count ATOM) (cog-tv-count (cog-tv ATOM)))
+
+		(define any-left (AnyNode "cset-word"))
+		(define any-right (AnyNode "cset-disjunct"))
 
 		(define (get-left-type) 'WordNode)
 		(define (get-right-type) 'LgAnd)
@@ -95,9 +99,20 @@
 		; Getting the count is trivial, we already got the needed pair.
 		(define (get-pair-count PAIR) (get-count PAIR))
 
+		(define (get-left-wildcard DJ)
+			(ListLink any-left DJ))
+
+		(define (get-right-wildcard WORD)
+			(ListLink WORD any-right))
+
+		(define (get-wild-wild)
+			(ListLink any-left any-right))
+
 		; fetch (from the database) all pseudo-csets
 		(define (fetch-pseudo-csets)
 			(define start-time (current-time))
+			(fetch-incoming-set any-left)
+			(fetch-incoming-set any-right)
 			(load-atoms-of-type 'LgWordCset)
 			(format #t "Elapsed time to load csets: ~A secs\n"
 				(- (current-time) start-time)))
@@ -110,6 +125,10 @@
 				((pair-type) get-pair-type)
 				((pair-count) get-pair-count)
 				((item-pair) get-pair)
+				((make-pair) get-pair)
+				((left-wildcard) get-left-wildcard)
+				((right-wildcard) get-right-wildcard)
+				((wild-wild) get-wild-wild)
 				((fetch-pairs) fetch-pseudo-csets)
 				(else (error "Bad method call on psuedo-cset:" message)))
 			args)))
@@ -723,10 +742,12 @@
 ; (use-modules (opencog) (opencog persist) (opencog persist-sql))
 ; (use-modules (opencog nlp) (opencog nlp learn))
 ; (sql-open "postgres:///en_pairs_mst?user=linas")
-; (fetch-all-words)
+; (sql-open "postgres:///en_pairs_sim?user=linas")
+; (fetch-all-words)  <<< 132 secs
 ; (length (get-all-words))
 ; 396262
-; (fetch-pseudo-csets (get-all-words))
+; (define pca (make-pseudo-cset-api))
+; (pca 'fetch-pairs)  <<< 789 secs
 ; (define ac (filter-words-with-csets (get-all-words)))
 ; (length ac)
 ; 49423  (now 37413 in en_pairs_sim)

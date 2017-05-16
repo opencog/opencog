@@ -350,8 +350,19 @@
 	(- (word-entropy-bits disjunct-entropy-bits) cset-entropy-bits)
 
 ; ---------------------------------------------------------------------
+; Rank words according to thier fractonal entropy
+(define pca (make-pseudo-cset-api))
+(define pcw (add-pair-wildcards pca))
+(define pmi (add-pair-mi-api pca))
+(define (cset-vec-word-ent WORD)
+		(pmi 'compute-right-partial WORD))
+
+(define sorted-word-ent (score-and-rank cset-vec-word-ent all-cset-wordsa))
+xxxxx
+
+; ---------------------------------------------------------------------
 ; Rank words according to the MI between them and thier disjuncts
-(define sorted-word-mi (score-and-rank cset-vec-word-mi all-cset-words)
+(define sorted-word-mi (score-and-rank cset-vec-word-mi all-cset-words))
 
 ; Like above, but high-ferequency only
 (define sorted-word-mi-hi-p (score-and-rank cset-vec-word-mi

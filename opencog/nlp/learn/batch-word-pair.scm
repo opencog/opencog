@@ -448,7 +448,7 @@
 ; ---------------------------------------------------------------------
 ; Handy-dandy main entry points.
 
-(define (batch-pairs LLOBJ)
+(define-public (batch-pairs LLOBJ)
 
 	(define pair-obj (add-pair-wildcards LLOBJ))
 

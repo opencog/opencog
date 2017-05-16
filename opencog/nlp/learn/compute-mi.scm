@@ -438,7 +438,7 @@
 ; the performance overhead here in order to get the flexibility that
 ; the atomspace provides.
 ;
-(define (batch-all-pair-mi OBJ)
+(define-public (batch-all-pair-mi OBJ)
 
 	(define start-time (current-time))
 	(define (elapsed-secs)
