@@ -349,7 +349,6 @@
   XXX FIXME this is deprecated in favor of
   ((add-pair-mi-api (make-pseudo-cset-api)) 'compute-left-entropy ITEM)
 "
-	(add-pair-mi-api ()) 'compute-right-entropy ITEM)
    ; sum of the counts
 	(define nats
 		(fold
