@@ -372,8 +372,10 @@
 						(define right-item (gdr lipr))
 						(define l-logli (frqobj 'left-wild-logli right-item))
 						(define pr-logli (frqobj 'pair-logli lipr))
-						(define mi (- (+ r-logli l-logli) pr-logli))
-						(define atom (frqobj 'set-pair-mi lipr mi))
+						(define pr-freq (frqobj 'pair-freq lipr))
+						(define fmi (- pr-logli (+ r-logli l-logli)))
+						(define mi (* pr-freq fmi))
+						(define atom (frqobj 'set-pair-mi lipr mi fmi))
 						(set! all-atoms (cons atom all-atoms))
 					)
 

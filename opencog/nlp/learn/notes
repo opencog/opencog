@@ -5201,3 +5201,23 @@ Finished with MI computations
 17274 linas     20   0 26.656g 0.024t  37676 S   0.0  9.6 406:04.03 guile
 
 
+=================================================================
+disjuncts & csets:
+
+Start loading words ...
+Elapsed time to load words: 126 secs
+Done loading words, now loading pairs
+Elapsed time to load csets: 783 secs
+Finished loading any-word-pairs
+Support: num left=396262 num right=291637
+Done with wild-card count N(*,w) and N(w,*) in 39 secs
+Done computing N(*,*) total-count=661104.0 in 34 secs
+Start computing log P(*,w)
+Done computing 291637 left-wilds in 33 secs
+Done storing 291637 left-wilds in 670 secs
+Done with -log P(*,w), start -log P(w,*)
+Done computing 291637 right-wilds in 16 secs
+Done storing 291637 right-wilds in 0 secs <<< wtf!
+Done computing -log P(w,*) and <-->
+Going to do individual word-pair MI
+

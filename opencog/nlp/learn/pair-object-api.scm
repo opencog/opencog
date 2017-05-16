@@ -335,16 +335,22 @@
 			(define ent (* FREQ ln2))
 			(cog-set-value! ATOM freq-key (FloatValue FREQ ln2 ent)))
 
+		; ------
 		; The key under which the MI is stored.
 		(define mi-key (PredicateNode "*-Mutual Info Key-*"))
 
 		; Get the (floating-point) mutual information on ATOM.
 		(define (get-mi ATOM)
-			(car (cog-value->list (cog-value ATOM mi-key))))
+			(cog-value-ref (cog-value ATOM mi-key) 0))
+
+		; Get the (floating-point) fractional mutual information on ATOM.
+		; This is the Yuret "lexical attraction" value.
+		(define (get-fmi ATOM)
+			(cog-value-ref (cog-value ATOM mi-key) 1))
 
 		; Set the MI value for ATOM.
-		(define (set-mi ATOM MI)
-			(cog-set-value! ATOM mi-key (FloatValue MI)))
+		(define (set-mi ATOM MI FMI)
+			(cog-set-value! ATOM mi-key (FloatValue MI FMI)))
 
 		; ----------------------------------------------------
 		; Return the observational frequency on PAIR.
@@ -366,11 +372,19 @@
 		; ----------------------------------------------------
 
 		; Return the MI value on the pair.
+		; The MI is defined as
+		; - P(x,y) log_2 P(x,y) / P(x,*) P(*,y)
 		(define (get-pair-mi PAIR)
 			(get-mi (llobj 'item-pair PAIR)))
 
-		(define (set-pair-mi PAIR MI)
-			(set-mi (llobj 'item-pair PAIR) MI))
+		; Return the fractional MI (lexical atraction) on the pair.
+		; - log_2 P(x,y) / P(x,*) P(*,y)
+		; It differs from the MI above only by the leading probability.
+		(define (get-pair-fmi PAIR)
+			(get-fmi (llobj 'item-pair PAIR)))
+
+		(define (set-pair-mi PAIR MI FMI)
+			(set-mi (llobj 'item-pair PAIR) MI FMI))
 
 		; ----------------------------------------------------
 		; Get the left wildcard frequency
@@ -405,12 +419,14 @@
 				((pair-logli)          (apply get-pair-logli args))
 				((pair-entropy)        (apply get-pair-entropy args))
 				((pair-mi)             (apply get-pair-mi args))
+				((pair-fmi)            (apply get-pair-fmi args))
 				((set-pair-freq)       (apply set-pair-freq args))
 				((set-pair-mi)         (apply set-pair-mi args))
 
 				((left-wild-freq)      (apply get-left-wild-freq args))
 				((left-wild-logli)     (apply get-left-wild-logli args))
 				((set-left-wild-freq)  (apply set-left-wild-freq args))
+
 				((right-wild-freq)     (apply get-right-wild-freq args))
 				((right-wild-logli)    (apply get-right-wild-logli args))
 				((set-right-wild-freq) (apply set-right-wild-freq args))

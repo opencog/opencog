@@ -58,16 +58,16 @@
 				0
 				(frqobj 'right-stars LEFT-ITEM)))
 
-		; Compute the left-partial entropy summation:
+		; Compute the left-fractional entropy summation:
 		;    H_left(y) = h_left(y) / P(*,y)
 		; Note that
 		;    h_total = sum_y P(*,y) H_left(y)
-		(define (compute-left-partial RIGHT-ITEM)
+		(define (compute-left-fractional RIGHT-ITEM)
 			(/ (compute-left-entropy RIGHT-ITEM)
 				(frqobj 'left-wild-freq RIGHT-ITEM)))
 
 		; As above, but flipped.
-		(define (compute-right-partial LEFT-ITEM)
+		(define (compute-right-fractional LEFT-ITEM)
 			(/ (compute-right-entropy LEFT-ITEM)
 				(frqobj 'right-wild-freq LEFT-ITEM)))
 
@@ -76,8 +76,8 @@
 			(case message
 				((compute-left-entropy)  (apply compute-left-entropy args))
 				((compute-right-entropy) (apply compute-right-entropy args))
-				((compute-left-partial)  (apply compute-left-partial args))
-				((compute-right-partial) (apply compute-right-partial args))
+				((compute-left-fractional)  (apply compute-left-partial args))
+				((compute-right-fractional) (apply compute-right-partial args))
 				(else (apply frqobj      (cons message args))))
 		))
 )
