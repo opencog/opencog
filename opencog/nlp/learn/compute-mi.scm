@@ -354,6 +354,10 @@
 		(define (compute-n-cache-pair-mi)
 			(define all-atoms '())
 			(define lefties (frqobj 'left-support))
+
+			; progress stats
+			(define cnt-pairs 0)
+			(define cnt-lefties 0)
 			(define nlefties (length lefties))
 
 			(define (right-loop left-item)
@@ -377,11 +381,20 @@
 						(define mi (* pr-freq fmi))
 						(define atom (frqobj 'set-pair-mi lipr mi fmi))
 						(set! all-atoms (cons atom all-atoms))
+						(set! cnt-pairs (+ cnt-pairs 1))
 					)
 
+					; Run the inner loop
 					(for-each
 						do-one-pair
 						(frqobj 'right-stars left-item)))
+
+					; Print some prgress statistics.
+					(set! cnt-lefties (+ cnt-lefties 1))
+					(if (eqv? 0 (modulo cnt-lefties 10000))
+						(format #t "Done ~A of ~A outer loops, pairs=~A\n"
+							cnt-lefties nlefties cnt-pairs))
+
 					(lambda (key . args) #f)) ; catch handler
 			)
 
