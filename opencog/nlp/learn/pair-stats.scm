@@ -22,12 +22,74 @@
 
 ; ---------------------------------------------------------------------
 
+(define-public (add-pair-mi-api FRQOBJ)
+"
+  add-pair-mi-api FRQOBJ - methods for MI and entropy of pairs.
+
+  Extend the FRQOBJ with additional methods to compute the one-sided
+  entropies and mutual information of pairs.
+
+  The FRQOBJ needs to be an object implementing methods to get pair
+  observation frequencies, which must return valid values; i.e. must
+  have been previously computed. Specifically, it must have the
+  'pair-freq and 'pair-entropy methods.
+"
+	(let ((frqobj FRQOBJ))
+
+		; Compute the left-wild entropy summation:
+		;    h_left(y) = -sum_x P(x,y) log_2 P(x,y)
+		;
+		; Note that
+		;    h_total = sum_y h_left(y)
+		(define (compute-left-entropy RIGHT-ITEM)
+			(fold
+				(lambda (PAIR sum) (+ sum (frqobj 'pair-entropy PAIR)))
+				0
+				(frqobj 'left-stars RIGHT-ITEM)))
+
+		; Compute the right-wild entropy summation:
+		;    h_right(x) = -sum_y P(x,y) log_2 P(x,y)
+		;
+		; Note that
+		;    h_total = sum_x h_right(x)
+		(define (compute-right-entropy LEFT-ITEM)
+			(fold
+				(lambda (PAIR sum) (+ sum (frqobj 'pair-entropy PAIR)))
+				0
+				(frqobj 'right-stars LEFT-ITEM)))
+
+		; Compute the left-partial entropy summation:
+		;    H_left(y) = h_left(y) / P(*,y)
+		; Note that
+		;    h_total = sum_y P(*,y) H_left(y)
+		(define (compute-left-partial RIGHT-ITEM)
+			(/ (compute-left-entropy RIGHT-ITEM)
+				(frqobj 'left-wild-freq RIGHT-ITEM)))
+
+		; As above, but flipped.
+		(define (compute-right-partial LEFT-ITEM)
+			(/ (compute-right-entropy LEFT-ITEM)
+				(frqobj 'right-wild-freq LEFT-ITEM)))
+
+		; Methods on this class.
+		(lambda (message . args)
+			(case message
+				((compute-left-entropy)  (apply compute-left-entropy args))
+				((compute-right-entropy) (apply compute-right-entropy args))
+				((compute-left-partial)  (apply compute-left-partial args))
+				((compute-right-partial) (apply compute-right-partial args))
+				(else (apply frqobj      (cons message args))))
+		))
+)
+
+; ---------------------------------------------------------------------
+
 (define-public (add-total-entropy-api FRQOBJ)
 "
   add-total-entropy-api FRQOBJ - methods for total and partial entropy.
 
   Extend the FRQOBJ with additional methods to compute the partial
-  and total entropies of the total set of pairrs.
+  and total entropies of the total set of pairs.
 
   The FRQOBJ needs to be an object implementing methods to get pair
   observation frequencies, which must return valid values; i.e. must

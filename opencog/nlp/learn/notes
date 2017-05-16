@@ -5168,7 +5168,7 @@ Done storing 2360328 pair MI's in 6964 secs  <<< 6847 under load
 Finished with MI computations
 
 Sooo any-pair:
-  PID USER      PR  NI    VIRT    RES    SHR S  %CPU %MEM     TIME+ COMMAND     
+  PID USER      PR  NI    VIRT    RES    SHR S  %CPU %MEM     TIME+ COMMAND
  5180 linas     20   0 11.819g 8.935g  37080 S   0.0  3.5 117:00.53 guile
  5525 linas     20   0 11.483g 8.931g  37616 S   0.0  3.5 129:07.73 guile
 
@@ -5192,5 +5192,12 @@ Done computing 106696 right-wilds in 15 secs
 Done storing 106696 right-wilds in 103 secs
 Done computing -log P(w,*) and <-->
 Going to do individual word-pair MI
+Done computing 4810 pair MI's in 37872 secs << 10.5 hours!!!
+Done storing 4810 pair MI's in 7 secs   << whhhat!????
+Finished with MI computations
+
+
+  PID USER      PR  NI    VIRT    RES    SHR S  %CPU %MEM     TIME+ COMMAND
+17274 linas     20   0 26.656g 0.024t  37676 S   0.0  9.6 406:04.03 guile
 
 

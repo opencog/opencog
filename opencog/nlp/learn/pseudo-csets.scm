@@ -342,8 +342,14 @@
   csets associated with that item, and the entropy for each
   cset is summed up.
 
+  sum_x p(x,y) log p(x,y) for fixed y
+
   The returned entropy is in bits, i.e. computerd with log_2.
+
+  XXX FIXME this is deprecated in favor of
+  ((add-pair-mi-api (make-pseudo-cset-api)) 'compute-left-entropy ITEM)
 "
+	(add-pair-mi-api ()) 'compute-right-entropy ITEM)
    ; sum of the counts
 	(define nats
 		(fold

@@ -123,6 +123,8 @@
 ;
 ; ---------------------------------------------------------------------
 
+(use-modules (srfi srfi-1))
+
 (define-public (add-pair-wildcards LLOBJ)
 "
   pair-wildcards LLOBJ - Extend LLOBJ with wildcard methods.
@@ -315,18 +317,23 @@
 
 		; Return the observed frequency on ATOM
 		(define (get-freq ATOM)
-			(car (cog-value->list (cog-value ATOM freq-key))))
+			(cog-value-ref (cog-value ATOM freq-key) 0)))
 
 		; Return the observed - log_2(frequency) on ATOM
 		(define (get-logli ATOM)
-			(cadr (cog-value->list (cog-value ATOM freq-key))))
+			(cog-value-ref (cog-value ATOM freq-key) 1)))
+
+		; Return the observed - frequency * log_2(frequency) on ATOM
+		(define (get-entropy ATOM)
+			(cog-value-ref (cog-value ATOM freq-key) 2)))
 
 		; Set both a frequency count, and a -log_2(frequency) on
 		; the ATOM.
 		(define (set-freq ATOM FREQ)
 			; 1.4426950408889634 is 1/0.6931471805599453 is 1/log 2
 			(define ln2 (* -1.4426950408889634 (log FREQ)))
-			(cog-set-value! ATOM freq-key (FloatValue FREQ ln2)))
+			(define ent (* FREQ ln2))
+			(cog-set-value! ATOM freq-key (FloatValue FREQ ln2 ent)))
 
 		; The key under which the MI is stored.
 		(define mi-key (PredicateNode "*-Mutual Info Key-*"))
@@ -347,6 +354,9 @@
 
 		(define (get-pair-logli PAIR)
 			(get-logli (llobj 'item-pair PAIR)))
+
+		(define (get-pair-entropy PAIR)
+			(get-entropy (llobj 'item-pair PAIR)))
 
 		; Set the frequency and log-frequency on PAIR
 		; Return the atom that holds this count.
@@ -393,6 +403,7 @@
 			(case message
 				((pair-freq)           (apply get-pair-freq args))
 				((pair-logli)          (apply get-pair-logli args))
+				((pair-entropy)        (apply get-pair-entropy args))
 				((pair-mi)             (apply get-pair-mi args))
 				((set-pair-freq)       (apply set-pair-freq args))
 				((set-pair-mi)         (apply set-pair-mi args))
