@@ -81,7 +81,7 @@
   a pseudo-disjunct on the right. These are observed during MST parsing.
   A more detailed scription is at the top of this fie.
 "
-	(let ()
+	(let ((all-csets '()))
 
 		; Get the observational count on ATOM
 		(define (get-count ATOM) (cog-tv-count (cog-tv ATOM)))
@@ -108,6 +108,19 @@
 		(define (get-wild-wild)
 			(ListLink any-left any-right))
 
+		; get-all-csets - return a list holding all of the observed
+		; csets. Caution: this can be tens of millions long!
+		(define (do-get-all-csets)
+			(define all '())
+			(cog-map-type
+				(lambda (atom) (set! (cons atom all)) #f)
+				'LgWordCset)
+			all)
+
+		(define (get-all-csets)
+			(if (null? all-csets) (set! all-csets (do-get-all-csets)))
+			all-csets)
+
 		; fetch (from the database) all pseudo-csets
 		(define (fetch-pseudo-csets)
 			(define start-time (current-time))
@@ -129,6 +142,7 @@
 				((left-wildcard) get-left-wildcard)
 				((right-wildcard) get-right-wildcard)
 				((wild-wild) get-wild-wild)
+				((all-pairs) get-all-csets)
 				((fetch-pairs) fetch-pseudo-csets)
 				(else (error "Bad method call on psuedo-cset:" message)))
 			args)))
