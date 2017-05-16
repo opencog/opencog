@@ -450,18 +450,16 @@
 
 (define-public (batch-pairs LLOBJ)
 
-	(define pair-obj (add-pair-wildcards LLOBJ))
-
 	; Make sure all words are in the atomspace
 	(display "Start loading words ...\n")
 	(call-only-once fetch-all-words)
 	(display "Done loading words, now loading pairs\n")
 
 	; Make sure all word-pairs are in the atomspace.
-	(call-only-once (lambda() (pair-obj 'fetch-pairs)))
+	(call-only-once (lambda() (LLOBJ 'fetch-pairs)))
 	(display "Finished loading any-word-pairs\n")
 
-	(batch-all-pair-mi pair-obj)
+	(batch-all-pair-mi LLOBJ)
 )
 
 (define-public (batch-any-pairs)

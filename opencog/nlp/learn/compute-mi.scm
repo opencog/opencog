@@ -125,30 +125,18 @@
 
 ; ---------------------------------------------------------------------
 ;
-; Extend the CNTOBJ with additional methods to compute wildcard counts
-; for pairs, and store the results in the count-object.
+; Extend the LLOBJ with additional methods to compute wildcard counts
+; for pairs, and store the results using the count-object API.
 ; That is, compute the summations N(x,*) = sum_y N(x,y) where (x,y)
 ; is a pair, and N(x,y) is the count of how often that pair has been
 ; observed, and * denotes the wild-card, ranging over all items
 ; supported in that slot.
 ;
-; The CNTOBJ needs to be an object implementing methods to get the
-; support, and the supported pairs. So, the left-support is the set
-; of all x's for which 0 < N(x,y) for some y.  Dual to the left-support
-; are the right-stars, which is the set of all pairs (x,y) for any
-; given, fixed x.
-;
-; The CNTOBJ needs to implement the 'left-support and 'right-support
-; methods, to return these two sets, and also the 'left-stars and the
-; 'right-stars methods, to return those sets.
-;
-; The CNTOBJ also needs to implement the setters, so that the wild-card
-; counts can be cached. That is, the object must also have the
-; 'set-left-wild-count, 'set-right-wild-count and 'set-wild-wild-count
-; methods on it.
-;
-(define (make-compute-count CNTOBJ)
-	(let ((cntobj CNTOBJ))
+(define (make-compute-count LLOBJ)
+
+	; We need 'left-supprt, provided by add-pair-wildcards
+	; We need 'set-left-wild-count, provided by add-pair-count-api
+	(let ((cntobj (add-pair-count-api (add-pair-wildcards LLOBJ))))
 
 		; Compute the left-side wild-card count. This is the number
 		; N(*,y) = sum_x N(x,y) where ITEM==y and N(x,y) is the number
@@ -466,11 +454,8 @@
 		(set! start-time (current-time))
 		diff)
 
-	; Decorate the object with a counting API.
-	(define obj-get-set-api (add-pair-count-api OBJ))
-
 	; Decorate the object with methods that can compute counts.
-	(define count-obj (make-compute-count obj-get-set-api))
+	(define count-obj (make-compute-count OBJ))
 
 	; Decorate the object with methods that can compute frequencies.
 	(define freq-obj (make-compute-freq OBJ)))
@@ -491,7 +476,7 @@
 	; Now, compute the grand-total
 	(store-atom (count-obj 'cache-total-count))
 	(format #t "Done computing N(*,*) total-count=~A in ~A secs\n"
-		(obj-get-set-api 'wild-wild-count)
+		((add-pair-count-api OBJ) 'wild-wild-count)
 		(elapsed-secs))
 
 	(display "Start computing log P(*,w)\n")
