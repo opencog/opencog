@@ -458,7 +458,7 @@
 	(define count-obj (make-compute-count OBJ))
 
 	; Decorate the object with methods that can compute frequencies.
-	(define freq-obj (make-compute-freq OBJ)))
+	(define freq-obj (make-compute-freq OBJ))
 
 	(format #t "Support: num left=~A num right=~A\n"
 			(OBJ 'left-support-size)
