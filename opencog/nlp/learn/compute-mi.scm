@@ -387,7 +387,7 @@
 					; Run the inner loop
 					(for-each
 						do-one-pair
-						(frqobj 'right-stars left-item)))
+						(frqobj 'right-stars left-item))
 
 					; Print some prgress statistics.
 					(set! cnt-lefties (+ cnt-lefties 1))
@@ -395,7 +395,7 @@
 						(format #t "Done ~A of ~A outer loops, pairs=~A\n"
 							cnt-lefties nlefties cnt-pairs))
 
-					(lambda (key . args) #f)) ; catch handler
+					) (lambda (key . args) #f)) ; catch handler
 			)
 
 			;; XXX Maybe FIXME This could be a par-for-each, to run the
