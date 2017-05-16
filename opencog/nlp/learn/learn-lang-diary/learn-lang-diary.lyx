@@ -19027,7 +19027,7 @@ It is useful to introduce some notation for counting words, disjuncts, and
 
  has been observed, in the dataset.
  Let 
-\begin_inset Formula $N(d,w)$
+\begin_inset Formula $N(w,d)$
 \end_inset
 
  be the number of times that the disjunct 
@@ -19040,7 +19040,7 @@ It is useful to introduce some notation for counting words, disjuncts, and
 
 .
  The pair 
-\begin_inset Formula $(d,w)$
+\begin_inset Formula $(w,d)$
 \end_inset
 
  is refered to as a 
@@ -19065,7 +19065,7 @@ cset
 \end_inset
 
 , there is a set 
-\begin_inset Formula $(*,w)=\left\{ (d,w)|N(d,w)>0\right\} $
+\begin_inset Formula $(w,*)=\left\{ (w,d)|N(w,d)>0\right\} $
 \end_inset
 
  of associated csets, called the 
@@ -19079,7 +19079,7 @@ support
  of the word.
  The size of this set can be written using the standard notation for set-sizes
  as 
-\begin_inset Formula $\left|(*,w)\right|$
+\begin_inset Formula $\left|(w,*)\right|$
 \end_inset
 
 .
@@ -19088,7 +19088,7 @@ support
 \end_inset
 
 , is supported by the set 
-\begin_inset Formula $(d,*)=\left\{ (d,w)|N(d,w)>0\right\} $
+\begin_inset Formula $(*,d)=\left\{ (w,d)|N(w,d)>0\right\} $
 \end_inset
 
  of associated csets.
@@ -19097,7 +19097,7 @@ support
 
 \begin_layout Standard
 The primary contents of the database are the counts 
-\begin_inset Formula $N(d,w)$
+\begin_inset Formula $N(w,d)$
 \end_inset
 
  and everthing else of interest in this section can be obtained from this.
@@ -19110,7 +19110,7 @@ Every time a word is observed in an MST parse, a disjunct is extracted for
  In notation:
 \begin_inset Formula 
 \[
-\sum_{d}N(d,w)=N(*,w)=N(w)
+\sum_{d}N(w,d)=N(w,*)=N(w)
 \]
 
 \end_inset
@@ -19118,7 +19118,7 @@ Every time a word is observed in an MST parse, a disjunct is extracted for
 Similarly, the total number of times that a disjunct was observed is just
 \begin_inset Formula 
 \[
-N(d,*)=\sum_{w}N(d,w)
+N(*,d)=\sum_{w}N(w,d)
 \]
 
 \end_inset
@@ -19129,7 +19129,7 @@ N(d,*)=\sum_{w}N(d,w)
 \begin_layout Standard
 Frequncies can be obtained by dividing by the total number of observations,
  so that 
-\begin_inset Formula $p(d,w)=N(d,w)/N(*)$
+\begin_inset Formula $p(w,d)=N(w,d)/N(*)$
 \end_inset
 
  and 
@@ -19232,7 +19232,7 @@ This and the following entropies were measured with the word-entropy-bits,
  It is defined as
 \begin_inset Formula 
 \[
-H_{cset}=\sum_{d,w}p(d,w)\log_{2}p(d,w)
+H_{cset}=\sum_{w,d}p(w,d)\log_{2}p(w,d)
 \]
 
 \end_inset
@@ -19245,7 +19245,7 @@ and is measured to be
  The disjunct entropy is dual to the word entropy:
 \begin_inset Formula 
 \[
-H_{disjunct}=\sum_{d}p(d,*)\log_{2}p(d,*)
+H_{disjunct}=\sum_{d}p(*,d)\log_{2}p(*,d)
 \]
 
 \end_inset
@@ -19258,7 +19258,7 @@ and is measured to be
  The total mutual information between the words and disjuncts is then 
 \begin_inset Formula 
 \[
-MI_{cset}=-\sum_{d,w}p(d,w)\log_{2}\frac{p(d,w)}{p(d,*)p(*,w)}=-\left(H_{cset}-H_{word}-H_{disjunct}\right)
+MI_{cset}=-\sum_{w,d}p(w,d)\log_{2}\frac{p(w,d)}{p(*,d)p(w,*)}=-\left(H_{cset}-H_{word}-H_{disjunct}\right)
 \]
 
 \end_inset
@@ -19283,12 +19283,12 @@ Some connector-sets will be observed far more often than others.
 \begin_layout Standard
 Two graphs, dual to one-another.
  The one on the right shows 
-\begin_inset Formula $N(*,w)$
+\begin_inset Formula $N(w,*)$
 \end_inset
 
 , ranked by count.
  The one on the left shows 
-\begin_inset Formula $N(d,*)$
+\begin_inset Formula $N(*,d)$
 \end_inset
 
 , also ranked.
@@ -19350,7 +19350,7 @@ the
 \begin_layout Standard
 The ranking of connector sets is shown below.
  It's a graph of the ranked counts 
-\begin_inset Formula $N(d,w)$
+\begin_inset Formula $N(w,d)$
 \end_inset
 
 .
@@ -19466,7 +19466,7 @@ average
 \end_inset
 
 , it is explicitly meant 
-\begin_inset Formula $N(*,w)/\left|(*,w)\right|$
+\begin_inset Formula $N(w,*)/\left|(w,*)\right|$
 \end_inset
 
 , the number of observations divided by the support for those observations.
@@ -20072,7 +20072,7 @@ the
 \begin_layout Standard
 The graph below shouls the distribution of the size of the support: the
  ranking of 
-\begin_inset Formula $\left|(*,w)\right|$
+\begin_inset Formula $\left|(w,*)\right|$
 \end_inset
 
 .
@@ -20111,7 +20111,7 @@ support
 
  of a vector is the number of basis eleements that have a non-zero coefficient.
  This is the set 
-\begin_inset Formula $(*,w)$
+\begin_inset Formula $(w,*)$
 \end_inset
 
  defined earlier.
@@ -20177,7 +20177,7 @@ length
 
  is computed by taking the root-mean-square of the counts on each disjunct
  in the set, that is, by computing 
-\begin_inset Formula $\sqrt{\sum_{d}N(d,w)^{2}}$
+\begin_inset Formula $\sqrt{\sum_{d}N(w,d)^{2}}$
 \end_inset
 
  for each word 
@@ -20244,7 +20244,7 @@ More intesting is the ratio of mean-square size to the total size.
  In formulas, by ranking according to 
 \begin_inset Formula 
 \[
-\frac{\sqrt{\sum_{d}N^{2}(d,w)}}{N(*,w)}=\frac{\sqrt{\sum_{d}p^{2}(d,w)}}{p(*,w)}
+\frac{\sqrt{\sum_{d}N^{2}(w,d)}}{N(w,*)}=\frac{\sqrt{\sum_{d}p^{2}(w,d)}}{p(w,*)}
 \]
 
 \end_inset
@@ -20964,7 +20964,7 @@ United
 Other measures are needed.
  One could contemplate the ratio of the mean-square size to the support
  
-\begin_inset Formula $\sum_{d}N(d,w)^{2}/\left|(*,w)\right|$
+\begin_inset Formula $\sum_{d}N(w,d)^{2}/\left|(w,*)\right|$
 \end_inset
 
 .
@@ -20973,7 +20973,7 @@ Other measures are needed.
  specifically
 \begin_inset Formula 
 \[
-\frac{\sum_{d}N(d,w)^{2}}{\left|(*,w)\right|}-\left[\frac{N(*,w)}{\left|(*,w)\right|}\right]^{2}=\frac{1}{\left|(*,w)\right|}\sum_{d}\left[N(d,w)-\frac{N(*,w)}{\left|(*,w)\right|}\right]^{2}
+\frac{\sum_{d}N(w,d)^{2}}{\left|(w,*)\right|}-\left[\frac{N(w,*)}{\left|(w,*)\right|}\right]^{2}=\frac{1}{\left|(w,*)\right|}\sum_{d}\left[N(w,d)-\frac{N(w,*)}{\left|(w,*)\right|}\right]^{2}
 \]
 
 \end_inset
@@ -20992,7 +20992,7 @@ Another interesting item is a mutual-information ranking.
  all of it's disjuncts:
 \begin_inset Formula 
 \[
-MI(w)=\frac{1}{p(w)}\sum_{d}p(d,w)\log_{2}\frac{p(d,w)}{p(d,*)p(*,w)}
+MI(w)=-\frac{1}{p(w)}\sum_{d}p(w,d)\log_{2}\frac{p(w,d)}{p(w,*)p(*,d)}
 \]
 
 \end_inset
@@ -21612,7 +21612,7 @@ Thus, its worth looking at this.
  Define the average degree as
 \begin_inset Formula 
 \[
-K(w)=\frac{\sum_{d,c}N(d,w)C(d,c)}{N(*,w)}
+K(w)=\frac{\sum_{d,c}N(w,d)C(d,c)}{N(w,*)}
 \]
 
 \end_inset
@@ -21801,7 +21801,7 @@ Similar to the above, hubiness can be defined as the second moment of the
 \begin_layout Standard
 \begin_inset Formula 
 \[
-hub(w)=\frac{\sum_{d,c}N(d,w)C^{2}(d,c)}{N(*,w)}-K^{2}(w)
+hub(w)=\frac{\sum_{d,c}N(w,d)C^{2}(d,c)}{N(w,*)}-K^{2}(w)
 \]
 
 \end_inset
@@ -21840,7 +21840,7 @@ The cosine similarity between two vectors is simply thier inner product.
 , it is given by 
 \begin_inset Formula 
 \[
-\mbox{sim}(w_{1},w_{2})=\frac{\sum_{d}N(d,w_{1})N(d,w_{2})}{\mbox{len}(w_{1})\mbox{len}(w_{2})}
+\mbox{sim}(w_{1},w_{2})=\frac{\sum_{d}N(w_{1},d)N(w_{2},d)}{\mbox{len}(w_{1})\mbox{len}(w_{2})}
 \]
 
 \end_inset
@@ -21852,7 +21852,7 @@ where
  is the root-mean-square length (Eucliden length) of the connector-set vector:
 \begin_inset Formula 
 \[
-\mbox{len}(w)=\sqrt{\sum_{d}N^{2}(d,w)}
+\mbox{len}(w)=\sqrt{\sum_{d}N^{2}(w,d)}
 \]
 
 \end_inset
