@@ -19207,7 +19207,7 @@ y small dataset, taken as a snapshot during counting.
 The total word-entropy for the dataset is defined as
 \begin_inset Formula 
 \[
-H_{word}=\sum_{w}p(w)\log_{2}p(w)
+H_{word}=-\sum_{w}p(w)\log_{2}p(w)
 \]
 
 \end_inset
@@ -19232,7 +19232,7 @@ This and the following entropies were measured with the word-entropy-bits,
  It is defined as
 \begin_inset Formula 
 \[
-H_{cset}=\sum_{w,d}p(w,d)\log_{2}p(w,d)
+H_{cset}=-\sum_{w,d}p(w,d)\log_{2}p(w,d)
 \]
 
 \end_inset
@@ -19245,7 +19245,7 @@ and is measured to be
  The disjunct entropy is dual to the word entropy:
 \begin_inset Formula 
 \[
-H_{disjunct}=\sum_{d}p(*,d)\log_{2}p(*,d)
+H_{disjunct}=-\sum_{d}p(*,d)\log_{2}p(*,d)
 \]
 
 \end_inset
@@ -19258,7 +19258,7 @@ and is measured to be
  The total mutual information between the words and disjuncts is then 
 \begin_inset Formula 
 \[
-MI_{cset}=-\sum_{w,d}p(w,d)\log_{2}\frac{p(w,d)}{p(*,d)p(w,*)}=-\left(H_{cset}-H_{word}-H_{disjunct}\right)
+MI_{cset}=-\sum_{w,d}p(w,d)\log_{2}\frac{p(w,d)}{p(*,d)p(w,*)}=H_{cset}-H_{word}-H_{disjunct}
 \]
 
 \end_inset
@@ -20992,7 +20992,7 @@ Another interesting item is a mutual-information ranking.
  all of it's disjuncts:
 \begin_inset Formula 
 \[
-MI(w)=-\frac{1}{p(w)}\sum_{d}p(w,d)\log_{2}\frac{p(w,d)}{p(w,*)p(*,d)}
+MI_{word}(w)=-\frac{1}{p(w)}\sum_{d}p(w,d)\log_{2}\frac{p(w,d)}{p(w,*)p(*,d)}
 \]
 
 \end_inset
@@ -21008,17 +21008,25 @@ fractional
  style, so that the total MI of the entire dataset can be written as
 \begin_inset Formula 
 \[
-MI=\sum_{w}p(w)MI(w)
+MI=\sum_{w}p(w)MI_{word}(w)
 \]
 
 \end_inset
 
 That is, 
-\begin_inset Formula $MI(w)$
+\begin_inset Formula $MI_{word}(w)$
 \end_inset
 
  is the fractional contribution of the word to the total MI.
- The total MI for the dataset is measured to be 7.985 bits.
+ The fractional MI is very convenient for comparing different words, since
+ it factors out the frequency of how often a word is observed: the MI of
+ two words with two very different frequencies can be directly compared.
+ As can be seen from the graph below, the fractional MI ranges between +3
+ and +13 for this dataset.
+\end_layout
+
+\begin_layout Standard
+The total MI for the dataset is measured to be 7.985 bits.
  The graph below shows the MI of the 630 words that have been observed more
  than 100 times in this dataset.
  Note that it is a semi-log plot; it is NOT Zipfian.
@@ -21575,6 +21583,110 @@ At the other extreme, the ten words with the lowest MI are: "The" "a" "to"
  These are already familiar from previous rankings: they occur with very
  high frequency; the disjunct lists on them will be lengthly variable, diffuse.
  
+\end_layout
+
+\begin_layout Subsection*
+Mutual information of disjunts
+\end_layout
+
+\begin_layout Standard
+Symmetrically, one also hasn the mutual information of a disjunct, in comparison
+ to all of the words it connects to:
+\begin_inset Formula 
+\[
+MI_{disjunct}(d)=-\frac{1}{p(*,d)}\sum_{w}p(w,d)\log_{2}\frac{p(w,d)}{p(w,*)p(*,d)}
+\]
+
+\end_inset
+
+Again, this is presented in the 
+\begin_inset Quotes eld
+\end_inset
+
+fractional
+\begin_inset Quotes erd
+\end_inset
+
+ style, so that the total MI of the entire dataset can be written as before:
+\begin_inset Formula 
+\[
+MI=\sum_{d}p(*,d)MI_{disjunct}(d)
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection*
+Fractional Entropy
+\end_layout
+
+\begin_layout Standard
+There is a simpler variant than the mutual information, that is also worth
+ understanding: the fractional contribution to the total entropy.
+ This is given by the sum 
+\begin_inset Formula 
+\[
+H_{word}(w)=-\frac{1}{p(w)}\sum_{d}p(w,d)\log_{2}p(w,d)
+\]
+
+\end_inset
+
+This is written in the 
+\begin_inset Quotes eld
+\end_inset
+
+fractional
+\begin_inset Quotes erd
+\end_inset
+
+ style, so that the total entropy of the entire dataset can be written as
+\begin_inset Formula 
+\[
+H_{cset}=\sum_{w}p(w)H_{word}(w)
+\]
+
+\end_inset
+
+ Analogously, one also has the fractional contribution of the disjuncts:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+H_{disjunct}(d)=-\frac{1}{p(*,d)}\sum_{w}p(w,d)\log_{2}p(w,d)
+\]
+
+\end_inset
+
+where, again, one has that 
+\begin_inset Formula 
+\[
+H_{cset}=\sum_{d}p(d)H_{disjunct}(d)
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection*
+More terms
+\end_layout
+
+\begin_layout Standard
+Some curious terms show up in relating the fractional mutual information
+ to the fractional entropy.
+ Expanding out the above summations, one obtains
+\begin_inset Formula 
+\[
+MI_{word}(w)=H_{word}(w)+\log_{2}p(w,*)+\frac{1}{p(w)}\sum_{d}p(w,d)\log_{2}p(*,d)
+\]
+
+\end_inset
+
+ The last term is bizarre...
 \end_layout
 
 \begin_layout Subsection*
