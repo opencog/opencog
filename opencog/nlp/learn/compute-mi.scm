@@ -314,7 +314,7 @@
 		(define (cache-all-left-freqs)
 			(map cache-left-freq (cntobj 'right-support)))
 		(define (cache-all-right-freqs)
-			(map cache-right-freq (cntobj 'right-support)))
+			(map cache-right-freq (cntobj 'left-support)))
 
 		; Methods on this class.
 		(lambda (message . args)

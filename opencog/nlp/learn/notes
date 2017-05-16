@@ -5221,3 +5221,37 @@ Done storing 291637 right-wilds in 0 secs <<< wtf!
 Done computing -log P(w,*) and <-->
 Going to do individual word-pair MI
 
+
+duuuu
+(define pca (make-pseudo-cset-api))
+(define wpca (add-pair-wildcards pca))
+(define cpca (add-pair-count-api pca))
+(define fpca (add-pair-freq-api pca))
+
+(define w (car (wpca 'left-support)))
+(define d (car  (wpca 'right-support)))
+(cpca 'left-wild-count d)
+(define d (car (drop-while 
+	(lambda (dj) (> 10 (cpca 'left-wild-count dj))) (wpca 'right-support))))
+
+(define w (car (drop-while 
+	(lambda (wrd) (> 10 (cpca 'right-wild-count wrd))) (wpca 'left-support))))
+
+(cpca 'right-wild-count w)
+
+(fpca 'left-wild-freq d)
+(/ (cpca 'left-wild-count d) (cpca 'wild-wild-count))
+
+(fpca 'right-wild-freq w)
+set-right-wild-freq
+
+(define cf (make-compute-freq (add-pair-freq-api (add-pair-wildcards cpca))))
+(cf 'init-freq)
+(cf 'compute-right-freq w)
+(cf 'cache-right-freq w)
+'compute-right-freq w
+
+(define righties (cf 'cache-all-right-freqs))
+(define okr (filter (lambda (x) (not (null? x))) righties))
+
+etierh not iint or ot being computed.

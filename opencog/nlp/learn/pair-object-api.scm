@@ -430,6 +430,7 @@
 				((right-wild-freq)     (apply get-right-wild-freq args))
 				((right-wild-logli)    (apply get-right-wild-logli args))
 				((set-right-wild-freq) (apply set-right-wild-freq args))
+
 				(else (apply llobj (cons message args))))
 		))
 )
