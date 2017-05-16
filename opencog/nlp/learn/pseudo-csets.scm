@@ -90,7 +90,7 @@
 		(define (get-pair-type) 'LgWordCset)
 
 		; Getting the pair is trivial: we already got it.
-		(define (item-pair PAIR) PAIR)
+		(define (get-pair PAIR) PAIR)
 
 		; Getting the count is trivial, we already got the needed pair.
 		(define (get-pair-count PAIR) (get-count PAIR))
