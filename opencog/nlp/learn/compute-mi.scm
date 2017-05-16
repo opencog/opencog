@@ -260,21 +260,26 @@
 
 ; ---------------------------------------------------------------------
 ;
-; Extend the CNTOBJ with additional methods to compute observation
+; Extend the LLOBJ with additional methods to compute observation
 ; frequencies and entropies for pairs, including partial-sum entropies
 ; (mutual information) for the left and right side of each pair.
 ; This will also cache the results of these computations in a
 ; standardized location.
 ;
-; The CNTOBJ needs to be an object implementing methods to get pair
-; observation counts, and wild-card counts (which must hold valid
-; values). Specifically, it must have the 'pair-count, 'left-wild-count,
-; 'right-wild-count and 'wild-wild-count methods on it.  Thus, if
-; caching (which is the generic case) these need to have been computed
-; and cached before using this class.
+; The LLOBJ must have valid left and right wild-card counts on it.
+; These need to have been previously computed, before methods on
+; this class are called.
+;
+; Before using this class, the 'init-freq method must be called,
+; and it must be called *after* a valid wild-wild count is available.
 
-(define (make-compute-freq CNTOBJ)
-	(let ((cntobj CNTOBJ)
+(define (make-compute-freq LLOBJ)
+	(let ((llobj LLOBJ)
+			; We need 'left-support, provided by add-pair-wildcards
+			; We need 'wild-wild-count, provided by add-pair-count-api
+			; We need 'set-left-wild-freq, provided by add-pair-freq-api
+			(cntobj (add-pair-freq-api (add-pair-count-api
+					(add-pair-wildcards LLOBJ))))
 			(tot-cnt 0))
 
 		(define (init)
@@ -468,8 +473,7 @@
 	(define count-obj (make-compute-count obj-get-set-api))
 
 	; Decorate the object with methods that can compute frequencies.
-	(define freq-obj (make-compute-freq
-		(add-pair-freq-api obj-get-set-api)))
+	(define freq-obj (make-compute-freq OBJ)))
 
 	(format #t "Support: num left=~A num right=~A\n"
 			(OBJ 'left-support-size)

@@ -5253,5 +5253,7 @@ set-right-wild-freq
 
 (define righties (cf 'cache-all-right-freqs))
 (define okr (filter (lambda (x) (not (null? x))) righties))
+(length okr)
+
 
 etierh not iint or ot being computed.
