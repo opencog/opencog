@@ -116,7 +116,7 @@
 		(if (and (not (null? left-word)) (not (null? right-word)))
 			(cog-link 'ListLink left-word right-word)
 			'()))
-	(if (null? wpr) bad-mi (CNTOBJ 'pair-mi wpr))
+	(if (null? wpr) bad-mi (CNTOBJ 'pair-fmi wpr))
 )
 
 ; ---------------------------------------------------------------------
