@@ -109,6 +109,7 @@
 
 		(define (get-left-type) 'WordNode)
 		(define (get-right-type) 'WordNode)
+		(define (get-pair-type) 'ListLink)
 
 		; Return the atom holding the count, if it exists, else
 		; return nil.
@@ -167,6 +168,7 @@
 			(apply (case message
 					((left-type) get-left-type)
 					((right-type) get-right-type)
+					((pair-type) get-pair-type)
 					((pair-count) get-pair-count)
 					((item-pair) get-pair)
 					((make-pair) make-pair)
@@ -205,6 +207,7 @@
 
 		(define (get-left-type) 'WordNode)
 		(define (get-right-type) 'WordNode)
+		(define (get-pair-type) 'ListLink)
 
 		; Return the atom holding the count, if it exists, else
 		; return nil.
@@ -260,6 +263,7 @@
 			(apply (case message
 					((left-type) get-left-type)
 					((right-type) get-right-type)
+					((pair-type) get-pair-type)
 					((pair-count) get-pair-count)
 					((item-pair) get-pair)
 					((make-pair) make-pair)
@@ -315,6 +319,7 @@
 
 		(define (get-left-type) 'WordNode)
 		(define (get-right-type) 'WordNode)
+		(define (get-pair-type) 'ListLink)
 
 		; Return the atom holding the count, if it exists, else
 		; return nil.
@@ -375,6 +380,7 @@
 			(apply (case message
 					((left-type) get-left-type)
 					((right-type) get-right-type)
+					((pair-type) get-pair-type)
 					((pair-count) get-pair-count)
 					((item-pair) get-pair)
 					((make-pair) make-pair)

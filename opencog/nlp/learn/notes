@@ -5164,12 +5164,14 @@ Stored 2000000 of 2360328 pairs in 317 secs (315.45741324921136 pairs/sec)
 Stored 2100000 of 2360328 pairs in 251 secs (398.40637450199205 pairs/sec)
 Stored 2200000 of 2360328 pairs in 254 secs (393.7007874015748 pairs/sec)
 Stored 2300000 of 2360328 pairs in 300 secs (333.3333333333333 pairs/sec)
-Done storing 2360328 pair MI's in 6964 secs
+Done storing 2360328 pair MI's in 6964 secs  <<< 6847 under load
 Finished with MI computations
 
 Sooo any-pair:
   PID USER      PR  NI    VIRT    RES    SHR S  %CPU %MEM     TIME+ COMMAND     
- 5180 linas     20   0 11.819g 8.935g  37080 S   0.0  3.5 117:00.53 guile       
+ 5180 linas     20   0 11.819g 8.935g  37080 S   0.0  3.5 117:00.53 guile
+ 5525 linas     20   0 11.483g 8.931g  37616 S   0.0  3.5 129:07.73 guile
+
 
 ----------------
 clique pairs:

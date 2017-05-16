@@ -87,6 +87,13 @@
 
 		(define (get-left-type) 'WordNode)
 		(define (get-right-type) 'LgAnd)
+		(define (get-pair-type) 'LgWordCset)
+
+		; Getting the pair is trivial: we already got it.
+		(define (item-pair PAIR) PAIR)
+
+		; Getting the count is trivial, we already got the needed pair.
+		(define (get-pair-count PAIR) (get-count PAIR))
 
 		; fetch (from the database) all pseudo-csets
 		(define (fetch-pseudo-csets)
@@ -100,6 +107,7 @@
 			(apply (case message
 				((left-type) get-left-type)
 				((right-type) get-right-type)
+				((pair-type) get-pair-type)
 				((pair-count) get-pair-count)
 				((item-pair) get-pair)
 				((fetch-pairs) fetch-pseudo-csets)
@@ -119,6 +127,9 @@
 "
 	; Currently, its as simple as this...
 	(cog-incoming-by-type ITEM 'LgWordCset)
+
+	; Should be this:
+	; ((add-pair-wildcards (make-pseudo-cset-api)) 'right-stars ITEM)
 )
 
 (define-public (sort-cset-vec ITEM)

@@ -80,6 +80,7 @@
 ;        ; side is a disjunct 'LgAnd
 ;        (define (get-left-type) 'WordNode)
 ;        (define (get-right-type) 'WordNode)
+;        (define (get-pair-type) 'ListLink)
 ;
 ;        ; Return the observed count for PAIR, if it exists,
 ;        ; else return zero.
@@ -109,6 +110,7 @@
 ;        (apply (case message
 ;              ((left-type) get-left-type)
 ;              ((right-type) get-right-type)
+;              ((pair-type) get-pair-type)
 ;              ((pair-count) get-pair-count)
 ;              ((item-pair) get-pair)
 ;              ((make-pair) make-pair)
@@ -134,9 +136,9 @@
   Here, the LLOBJ is expected to be an object, with methods for
   'left-type and 'right-type on it, just as described above.
 
-  The lists of pairs will be lists of ListLink's, with the desired
-  item on the left or right, and an atom of 'left-type or 'right-type
-  on the other side.
+  The lists of pairs will be lists of type 'pair-type (usually
+  ListLink's), with the desired item on the left or right, and
+  an atom of 'left-type or 'right-type on the other side.
 "
 	(let ((llobj LLOBJ)
 			(l-supp '())
@@ -180,6 +182,7 @@
 		;
 		(define (get-left-stars ITEM)
 			(define want-type (LLOBJ 'left-type))
+			(define pair-type (LLOBJ 'pair-type))
 			(filter
 				(lambda (lnk)
 					(define oset (cog-outgoing-set lnk))
@@ -188,11 +191,12 @@
 						(equal? want-type (cog-type (car oset)))
 						(equal? ITEM (cadr oset))
 					))
-				(cog-incoming-by-type ITEM 'ListLink)))
+				(cog-incoming-by-type ITEM pair-type)))
 
 		; Same as above, but on the right.
 		(define (get-right-stars ITEM)
 			(define want-type (LLOBJ 'right-type))
+			(define pair-type (LLOBJ 'pair-type))
 			(filter
 				(lambda (lnk)
 					(define oset (cog-outgoing-set lnk))
@@ -201,7 +205,7 @@
 						(equal? ITEM (car oset))
 						(equal? want-type (cog-type (cadr oset)))
 					))
-				(cog-incoming-by-type ITEM 'ListLink)))
+				(cog-incoming-by-type ITEM pair-type)))
 
 
 	; Methods on this class.
