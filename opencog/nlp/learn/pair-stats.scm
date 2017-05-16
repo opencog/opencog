@@ -76,8 +76,8 @@
 			(case message
 				((compute-left-entropy)  (apply compute-left-entropy args))
 				((compute-right-entropy) (apply compute-right-entropy args))
-				((compute-left-fractional)  (apply compute-left-partial args))
-				((compute-right-fractional) (apply compute-right-partial args))
+				((compute-left-fractional)  (apply compute-left-fractional args))
+				((compute-right-fractional) (apply compute-right-fractional args))
 				(else (apply frqobj      (cons message args))))
 		))
 )

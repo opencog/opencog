@@ -113,7 +113,7 @@
 		(define (do-get-all-csets)
 			(define all '())
 			(cog-map-type
-				(lambda (atom) (set! (cons atom all)) #f)
+				(lambda (atom) (set! all (cons atom all)) #f)
 				'LgWordCset)
 			all)
 
