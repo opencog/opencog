@@ -5273,4 +5273,223 @@ ERROR: In procedure cog-value: There is no value for key (PredicateNode
          (LgConnDirNode "+"))))
 
 
-there's no compute-pair
+there's no compute-pair    'set-pair-freq
+
+=========================================================================
+
+
+2017-05-13 01:35:49 UTC [229-2879] LOG:  checkpoints are occurring too frequently (29 seconds apart)
+2017-05-13 01:35:49 UTC [229-2880] HINT:  Consider increasing the configuration parameter "max_wal_size".
+
+pre postgres 9.5:
+ checkpoint segments. 100 or so is not out of the ordinary.
+ increase your checkpoint_timeout to 1 hour, as well as look at
+increasing your checkpoint_completion_target
+------
+
+2017-05-17 07:48:25 UTC [228-1] LOG:  database system was shut down at 2017-05-17 05:02:36 UTC
+2017-05-17 07:48:25 UTC [229-1] [unknown]@[unknown] LOG:  incomplete startup packet
+2017-05-17 07:48:25 UTC [228-2] LOG:  invalid primary checkpoint record
+2017-05-17 07:48:25 UTC [228-3] LOG:  invalid secondary checkpoint record
+2017-05-17 07:48:25 UTC [228-4] PANIC:  could not locate a valid checkpoint record
+2017-05-17 07:48:25 UTC [230-1] postgres@postgres FATAL:  the database system is starting up
+2017-05-17 07:48:25 UTC [203-1] LOG:  startup process (PID 228) was terminated by signal 6: Aborted
+2017-05-17 07:48:25 UTC [203-2] LOG:  aborting startup due to startup process failure
+2017-05-17 07:51:21 UTC [1430-1] LOG:  database system was shut down at 2017-05-17 05:02:36 UTC
+2017-05-17 07:51:21 UTC [1430-2] LOG:  invalid primary checkpoint record
+2017-05-17 07:51:21 UTC [1430-3] LOG:  invalid secondary checkpoint record
+2017-05-17 07:51:21 UTC [1430-4] PANIC:  could not locate a valid checkpoint record
+2017-05-17 07:51:21 UTC [1429-1] LOG:  startup process (PID 1430) was terminated by signal 6: Aborted
+2017-05-17 07:51:21 UTC [1429-2] LOG:  aborting startup due to startup process failure
+
+
+http://stackoverflow.com/questions/8799474/postgresql-error-panic-could-not-locate-a-valid-checkpoint-record
+
+ time cp -pr main main-fu  <<< 23 minutes
+ du -sm  <<  81638  -- 82 gigabytes!
+
+/usr/lib/postgresql/9.5/bin/pg_resetxlog  /var/lib/postgresql/9.5/main
+Transaction log reset
+
+sudo service postgresql start
+
+2017-05-17 13:17:08 UTC [15452-1] LOG:  database system was shut down at 2017-05-17 13:05:10 UTC
+2017-05-17 13:17:08 UTC [15452-2] FATAL:  could not access status of transaction 2804419190
+2017-05-17 13:17:08 UTC [15452-3] DETAIL:  Could not open file "pg_clog/0A72": No such file or directory.
+2017-05-17 13:17:08 UTC [15451-1] LOG:  startup process (PID 15452) exited with exit code 1
+2017-05-17 13:17:08 UTC [15451-2] LOG:  aborting startup due to startup process failure
+
+
+https://www.postgresql.org/message-id/AANLkTims48njGKkvkXHiTG6=19hQ31VFmFRPPLg+5w03@mail.gmail.com
+
+dd if=/dev/zero of=Transaction_missing_file_of pg_clog bs=256K count=1
+(To make the uncommitted record as they haven't been committed).
+
+dd if=/dev/zero of=0A72 bs=256K count=1
+
+
+Last entries in pg_clog are from 14 May, so 3 days of nothingness.
+2017-05-17 13:27:53 UTC [24212-1] LOG:  database system was interrupted; last known up at 2017-05-17 13:17:08 UTC
+2017-05-17 13:27:53 UTC [24212-2] LOG:  database system was not properly shut down; automatic recovery in progress
+2017-05-17 13:27:53 UTC [24212-3] LOG:  invalid record length at D62/6C000098
+2017-05-17 13:27:53 UTC [24212-4] LOG:  redo is not required
+2017-05-17 13:27:53 UTC [24212-5] FATAL:  could not access status of transaction 2124106599
+2017-05-17 13:27:53 UTC [24212-6] DETAIL:  Could not open file "pg_multixact/offsets/7E9B": No such file or directory.
+
+dd if=/dev/zero of=7E9B bs=256K count=1
+members/1FA5
+
+psql
+\l
+
+en_pairs
+en_pairs_old
+en_pairs_partial
+en_snapshot
+
+pg_dump en_pairs
+pg_dump -cC en_pairs
+pg_dumpall 
+
+time pg_dump en_pairs >en_pairs.sql 
+
+pg_dump: Dumping the contents of table "valuations" failed: PQgetResult() failed.
+pg_dump: Error message from server: ERROR:  could not access status of transaction 2786849088
+DETAIL:  Could not open file "pg_clog/0A61": No such file or directory.
+
+dd if=/dev/zero of=~/9.5/main/pg_clog/0A61 bs=256K count=1
+pg_clog/0A51
+pg_clog/0A70
+pg_clog/0A59
+pg_clog/0A5C
+pg_clog/0A50
+pg_clog/093A
+
+everything from that to 0A5E
+
+for ((i=0;i<293;i++))
+do
+        b=$(echo "ibase=16;93A" | bc)
+        j=$(echo "$b+$i" |bc)
+        k=$(echo "obase=16;$j" | bc)
+        echo dd if=/dev/zero of=~/9.5/main/pg_clog/0$k bs=256K count=1
+done
+
+pg_clog/0923
+pg_clog/08E4
+pg_clog/085E
+0524
+pg_clog/0523
+
+mv /var/lib/postgresql/9.5/main /var/lib/postgresql/9.5/main-semi-fu
+
+/usr/lib/postgresql/9.5/bin/initdb /var/lib/postgresql/9.5/main
+
+time psql en_pairs < /var/lib/postgresql/en_pairs.sql
+real    59m16.468s
+user    0m57.480s
+sys     0m12.480s
+
+psql en_pairs
+select count(*) from atoms where type=123; 123 == wordnode
+276715  << there used to be about a million, here
+
+select count(*) from atoms where type=81; 81 == evaluationlink.
+37199086  37 M. Hmmm
+
+select sum(floatvalue[3]) from valuations where type=7;
+select * from valuations limit 1;
+select * from atoms, valuations where valuations.type=7 and valuations.atom=atoms.uuid and atoms.type = 81 limit 1;
+
+Total counts on all evaluationlinks.
+(this should be doubled, clique and any.)
+select sum(floatvalue[3]) from atoms, valuations where valuations.type=7 and valuations.atom=atoms.uuid and atoms.type = 81;
+
+gives: 327030163 == 327M observations of links! wow!
+
+Nonetheless, restart from scratch.
+
+ALTER DATABASE en_pairs RENAME TO en_pairs_semi_fu;
+
+COMMENT ON DATABASE en_pairs_semi_fu IS 
+   'rohit-pairs and some gutenberg, after the crash'; 
+
+
+
+
+=======================================
+and again, on fanny:
+
+time cp -pr main main-fu
+
+real    23m29.237s
+user    0m0.464s
+sys     2m54.152s
+
+/usr/lib/postgresql/9.6/bin/pg_resetxlog  /var/lib/postgresql/9.6/main
+/usr/lib/postgresql/9.6/bin/pg_resetxlog  -f /var/lib/postgresql/9.6/main
+
+pg_clog/0351
+
+dd if=/dev/zero of=~/9.6/main/pg_clog/0351 bs=256K count=1
+pg_multixact/offsets/057A
+pg_multixact/members/0E99
+Those 3 fixed it.
+
+time pg_dumpall > everything.sql
+pg_clog/033C 
+create all from 02CE to pg_clog/0350
+
+#!/bin/bash
+
+
+# inclusive
+start=$(echo "ibase=16;2CE" | bc)
+end=$(echo "ibase=16;350" | bc)
+
+len=$(echo "$end-$start+1" | bc)
+echo $len
+
+for ((i=0;i<$len;i++))
+do
+        j=$(echo "$start+$i" |bc)
+        k=$(echo "obase=16;$j" | bc)
+        # echo $k
+        dd if=/dev/zero of=~/9.6/main/pg_clog/0$k bs=256K count=1
+done
+
+cd /home2/postgresql/data-lost-dumps
+time pg_dumpall > everything.sql
+real    13m5.740s
+user    1m13.272s
+sys     1m3.764s
+-rw-r--r--  1 postgres postgres 15190388055 May 17 15:59 everything.sql
+so 15 gigabytes.
+
+sudo service postgresql stop
+mv /var/lib/postgresql/9.6/main /var/lib/postgresql/9.6/main-semi-fu
+/usr/lib/postgresql/9.6/bin/initdb  /var/lib/postgresql/9.6/main
+
+sudo service postgresql start
+
+time psql < /home2/postgresql/data-lost-dumps/everything.sql
+real    55m43.405s
+user    1m13.960s
+sys     0m21.596s
+
+
+=======================================
+objdump -d post-process.o
+
+linkage_set_domain_names +0xe0
+
+linkage->pp_info[j].num_domains = k;
+for (d = pp->d_type_array[j]; d != NULL; d = d->next) k++;
+char buff[] = {d->type, '\0'}
+string_set_add (buff, postprocessor->string_set);
+build_type_array  not needed if not printed.
+
+linkage->pp_info[j].domain_name[k] =
+
+
+
