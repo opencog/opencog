@@ -262,26 +262,39 @@
 ; and it must be called *after* a valid wild-wild count is available.
 
 (define (make-compute-freq LLOBJ)
-	(let ((llobj LLOBJ)
-			; We need 'left-support, provided by add-pair-wildcards
-			; We need 'wild-wild-count, provided by add-pair-count-api
-			; We need 'set-left-wild-freq, provided by add-pair-freq-api
-			(cntobj (add-pair-freq-api (add-pair-count-api
+
+	; We need 'left-support, provided by add-pair-wildcards
+	; We need 'wild-wild-count, provided by add-pair-count-api
+	; We need 'set-left-wild-freq, provided by add-pair-freq-api
+	(let ((cntobj (add-pair-freq-api (add-pair-count-api
 					(add-pair-wildcards LLOBJ))))
 			(tot-cnt 0))
 
 		(define (init)
 			(set! tot-cnt (cntobj `wild-wild-count)))
 
+		; Compute the pair frequency P(x,y) = N(x,y) / N(*,*)  This is
+		; the frequency with which the pair (x,y) is observed. Return
+		; the frequency, or zero, if the pair was never observed.
+		(define (compute-pair-freq PAIR)
+			(/ (cntobj 'pair-count PAIR) tot-cnt))
+
 		; Compute the left-side wild-card frequency. This is the ratio
-		; P(*,y) = N(*,y) / N(*,*) which gives the frequency at which
-		; the pair (x,y) was observed.
-		; This returns the frequency, or zero, if the pair was never
-		; observed.
+		; P(*,y) = N(*,y) / N(*,*) = sum_x P(x,y)
 		(define (compute-left-freq ITEM)
 			(/ (cntobj 'left-wild-count ITEM) tot-cnt))
 		(define (compute-right-freq ITEM)
 			(/ (cntobj 'right-wild-count ITEM) tot-cnt))
+
+		; Compute and cache the pair frequency.
+		; This returns the atom holding the cached count, thus
+		; making it convient to persist (store) this cache in
+		; the database. It returns nil if the count was zero.
+		(define (cache-pair-freq PAIR)
+			(define freq (compute-pair-freq PAIR))
+			(if (< 0 freq)
+				(cntobj 'set-pair-freq PAIR freq)
+				'()))
 
 		; Compute and cache the left-side wild-card frequency.
 		; This returns the atom holding the cached count, thus
@@ -299,6 +312,22 @@
 				(cntobj 'set-right-wild-freq ITEM freq)
 				'()))
 
+		; Compute and cache all of the pair frequencies.
+		; This computes P(x,y) for all (x,y)
+		; This returns a count of the pairs.
+		(define (cache-all-pair-freqs)
+			(define cnt 0)
+			(define lefties (frqobj 'left-support))
+			(define (right-loop left-item)
+				(for-each
+					(lambda (pr)
+						(cache-pair-freq pr)
+						(set! cnt (+ cnt 1)))
+					(cntobj 'right-stars left-item)))
+
+			(for-each right-loop lefties)
+			cnt)
+
 		; Compute and cache all of the left-side frequencies.
 		; This computes P(*,y) for all y, in parallel.
 		;
@@ -313,12 +342,19 @@
 		(lambda (message . args)
 			(case message
 				((init-freq)             (init))
+
+				((compute-pair-freq)     (apply compute-pair-freq args))
 				((compute-left-freq)     (apply compute-left-freq args))
 				((compute-right-freq)    (apply compute-right-freq args))
+
+				((cache-pair-freq)       (apply cache-pair-freq args))
 				((cache-left-freq)       (apply cache-left-freq args))
 				((cache-right-freq)      (apply cache-right-freq args))
+
+				((cache-all-pair-freqs)  (cache-all-pair-freqs))
 				((cache-all-left-freqs)  (cache-all-left-freqs))
 				((cache-all-right-freqs) (cache-all-right-freqs))
+
 				(else (apply cntobj      (cons message args))))
 		))
 )
@@ -477,21 +513,25 @@
 	(count-obj 'cache-all-left-counts)
 	(count-obj 'cache-all-right-counts)
 
-	(format #t "Done with wild-card count N(*,w) and N(w,*) in ~A secs\n"
+	(format #t "Done with wild-card count N(x,*) and N(*,y) in ~A secs\n"
 		(elapsed-secs))
 
-	; Now, compute the grand-total
+	; Now, compute the grand-total.
 	(store-atom (count-obj 'cache-total-count))
 	(format #t "Done computing N(*,*) total-count=~A in ~A secs\n"
 		((add-pair-count-api OBJ) 'wild-wild-count)
 		(elapsed-secs))
 
-	(display "Start computing log P(*,w)\n")
-
-	; Compute the left and right wildcard frequencies and
-	; log-frequencies.
+	; Compute the pair-frequencies, and the left and right
+	; wildcard frequencies and log-frequencies.
 	(freq-obj 'init-freq)
 
+	(display "Going to do individual word-pair frequencies\n")
+	(let ((pair-cnt (freq-obj 'cache-all-pair-freqs)))
+		(format #t "Done computing ~A pairs in ~A secs\n"
+				pair-cnt (elapsed-secs)))
+
+	(display "Start computing log P(*,y)\n")
 	(let ((lefties (freq-obj 'cache-all-left-freqs)))
 		(format #t "Done computing ~A left-wilds in ~A secs\n"
 			(length lefties) (elapsed-secs))
@@ -502,7 +542,7 @@
 			(length lefties) (elapsed-secs))
 	)
 
-	(display "Done with -log P(*,w), start -log P(w,*)\n")
+	(display "Done with -log P(*,y), start -log P(x,*)\n")
 
 	(let ((righties (freq-obj 'cache-all-right-freqs)))
 		(format #t "Done computing ~A right-wilds in ~A secs\n"
@@ -514,7 +554,7 @@
 			(length righties) (elapsed-secs))
 	)
 
-	(display "Done computing -log P(w,*) and <-->\n")
+	(display "Done computing -log P(x,*) and P(*,y)\n")
 
 	; Enfin, the word-pair mi's
 	(display "Going to do individual word-pair MI\n")

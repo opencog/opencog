@@ -355,9 +355,9 @@
 (define pcw (add-pair-wildcards pca))
 (define pmi (add-pair-mi-api pca))
 (define (cset-vec-word-ent WORD)
-		(pmi 'compute-right-partial WORD))
+		(pmi 'compute-right-fractional WORD))
 
-(define sorted-word-ent (score-and-rank cset-vec-word-ent all-cset-wordsa))
+(define sorted-word-ent (score-and-rank cset-vec-word-ent all-cset-words))
 xxxxx
 
 ; ---------------------------------------------------------------------

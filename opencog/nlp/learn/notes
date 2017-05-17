@@ -5216,10 +5216,11 @@ Start computing log P(*,w)
 Done computing 291637 left-wilds in 33 secs
 Done storing 291637 left-wilds in 670 secs
 Done with -log P(*,w), start -log P(w,*)
-Done computing 291637 right-wilds in 16 secs
-Done storing 291637 right-wilds in 0 secs <<< wtf!
+Done computing 396262 right-wilds in 26 secs
+Done storing 396262 right-wilds in 549 secs
 Done computing -log P(w,*) and <-->
 Going to do individual word-pair MI
+
 
 
 duuuu
@@ -5255,5 +5256,21 @@ set-right-wild-freq
 (define okr (filter (lambda (x) (not (null? x))) righties))
 (length okr)
 
+etierh not iint or ot being computed.   FIXED
 
-etierh not iint or ot being computed.
+ERROR: In procedure cog-value: There is no value for key (PredicateNode
+"*-FrequencyKey-*") ; [6632538966455889482][1]
+ on atom (LgWordCset (ctv 1.000000 0.000000 1.000000)
+
+(LgWordCset 
+   (WordNode "dentist" 
+   (LgAnd
+      (PseudoConnector
+         (WordNode "an")
+         (LgConnDirNode "-"))
+      (PseudoConnector
+         (WordNode ",")
+         (LgConnDirNode "+"))))
+
+
+there's no compute-pair
