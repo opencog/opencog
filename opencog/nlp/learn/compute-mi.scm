@@ -325,7 +325,7 @@
 
 ; ---------------------------------------------------------------------
 ;
-; Extend the FRQOBJ with additional methods to compute the mutual
+; Extend the LLOBJ with additional methods to compute the mutual
 ; information of pairs.
 ;
 ; The FRQOBJ needs to be an object implementing methods to get pair
@@ -336,8 +336,11 @@
 ;
 ; The MI computations are done as a batch, looping over all pairs.
 
-(define (make-batch-mi FRQOBJ)
-	(let ((frqobj FRQOBJ))
+(define (make-batch-mi LLOBJ)
+	; We need 'left-supprt, provided by add-pair-wildcards
+	; We need 'pair-freq, provided by add-pair-freq-api
+	; We need 'set-pair-mi, provided by add-pair-freq-api
+	(let ((frqobj (add-pair-freq-api (add-pair-wildcards LLOBJ))))
 
 		; Loop over all pairs, computing the MI for each. The loop
 		; is actually two nested loops, with a loop over the
@@ -454,15 +457,21 @@
 		(set! start-time (current-time))
 		diff)
 
+	; Decorate the object with methods that report support.
+	(define wild-obj (add-pair-wildcards OBJ))
+
 	; Decorate the object with methods that can compute counts.
 	(define count-obj (make-compute-count OBJ))
 
 	; Decorate the object with methods that can compute frequencies.
 	(define freq-obj (make-compute-freq OBJ))
 
+	; Decorate the object with methods that can compute the pair-MI.
+	(define batch-mi-obj (make-batch-mi OBJ))
+
 	(format #t "Support: num left=~A num right=~A\n"
-			(OBJ 'left-support-size)
-			(OBJ 'right-support-size))
+			(wild-obj 'left-support-size)
+			(wild-obj 'right-support-size))
 
 	; First, compute the summations for the left and right wildcard counts.
 	; That is, compute N(x,*) and N(*,y) for the supports on x and y.
@@ -512,8 +521,7 @@
 	; Enfin, the word-pair mi's
 	(display "Going to do individual word-pair MI\n")
 
-	(let* ((bami (make-batch-mi freq-obj))
-			(all-atoms (bami 'cache-pair-mi))
+	(let* ((all-atoms (batch-mi-obj 'cache-pair-mi))
 			(num-prs (length all-atoms)))
 
 		; Create a wrapper around `store-atom` that prints a progress

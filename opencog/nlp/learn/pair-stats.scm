@@ -22,19 +22,20 @@
 
 ; ---------------------------------------------------------------------
 
-(define-public (add-pair-mi-api FRQOBJ)
+(define-public (add-pair-mi-api LLOBJ)
 "
-  add-pair-mi-api FRQOBJ - methods for MI and entropy of pairs.
+  add-pair-mi-api LLOBJ - methods for MI and entropy of pairs.
 
-  Extend the FRQOBJ with additional methods to compute the one-sided
+  Extend the LLOBJ with additional methods to compute the one-sided
   entropies and mutual information of pairs.
 
-  The FRQOBJ needs to be an object implementing methods to get pair
-  observation frequencies, which must return valid values; i.e. must
-  have been previously computed. Specifically, it must have the
-  'pair-freq and 'pair-entropy methods.
+  The object must have valid pair-frequency values on it, accessible
+  via the standard frequency-object API. These must have been
+  pre-computed, before this object can be used.
 "
-	(let ((frqobj FRQOBJ))
+	; Need the 'left-stars method, provided by add-pair-wildcards
+	; Need the 'left-wild-freq method, provided by add-pair-freq-api
+	(let ((frqobj (add-pair-freq-api (add-pair-wildcards LLOBJ))))
 
 		; Compute the left-wild entropy summation:
 		;    h_left(y) = -sum_x P(x,y) log_2 P(x,y)
