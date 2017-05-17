@@ -328,11 +328,9 @@
 ; Extend the LLOBJ with additional methods to compute the mutual
 ; information of pairs.
 ;
-; The FRQOBJ needs to be an object implementing methods to get pair
-; observation frequencies, which must return valid values; i.e. must
-; have been previously computed. Specifically, it must have the
-; 'left-logli, 'right-logli and 'pair-logli methods.  For caching,
-; it must also have the 'set-pair-mi method.
+; The LLOBJ object must have valid pair-frequencies, on it, accessible
+; by the standard API. These need to have been pre-computed, before
+; using this object.
 ;
 ; The MI computations are done as a batch, looping over all pairs.
 
