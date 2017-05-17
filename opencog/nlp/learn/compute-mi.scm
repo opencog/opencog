@@ -317,7 +317,7 @@
 		; This returns a count of the pairs.
 		(define (cache-all-pair-freqs)
 			(define cnt 0)
-			(define lefties (frqobj 'left-support))
+			(define lefties (cntobj 'left-support))
 			(define (right-loop left-item)
 				(for-each
 					(lambda (pr)
