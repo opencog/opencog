@@ -23010,6 +23010,76 @@ At any rate, the dataset seems a bit thin, but we already knew this; its
  based on a fairly small sample.
 \end_layout
 
+\begin_layout Subsection*
+Cosine Information
+\end_layout
+
+\begin_layout Standard
+The cosine similarity was defined as 
+\begin_inset Formula 
+\[
+\mbox{sim}(w_{1},w_{2})=\frac{\sum_{d}N(w_{1},d)N(w_{2},d)}{\sqrt{\sum_{d}N^{2}(w_{1},d)}\sqrt{\sum_{d}N^{2}(w_{2},d)}}
+\]
+
+\end_inset
+
+which, after dividing by 
+\begin_inset Formula $N(*,*)$
+\end_inset
+
+ so that 
+\begin_inset Formula $p(w,d)=N(w,d)/N(*,*)$
+\end_inset
+
+, gives the equivalent expression 
+\begin_inset Formula 
+\[
+\mbox{sim}(w_{1},w_{2})=\frac{\sum_{d}p(w_{1},d)p(w_{2},d)}{\sqrt{\sum_{d}p^{2}(w_{1},d)}\sqrt{\sum_{d}p^{2}(w_{2},d)}}
+\]
+
+\end_inset
+
+Comparing this to the expression for mutual information suggests that using
+ teh vector support, instead of the vector length, could be interesting.
+ In particular, these might be interesting:
+\begin_inset Formula 
+\[
+\mbox{com}(w_{1},w_{2})=-\log_{2}\frac{\sum_{d}p(w_{1},d)p(w_{2},d)}{p(w_{1},*)p(w_{2},*)}
+\]
+
+\end_inset
+
+ and 
+\begin_inset Formula 
+\[
+\mbox{mim}(w,d)=-\log_{2}\frac{p(w,d)}{\sum_{w,d}p^{2}(w,d)}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+I don't know what to call these; the first seems to be some kind of 
+\begin_inset Quotes eld
+\end_inset
+
+cosine information
+\begin_inset Quotes erd
+\end_inset
+
+, the second, some sort of 
+\begin_inset Quotes eld
+\end_inset
+
+mutual length
+\begin_inset Quotes erd
+\end_inset
+
+ device.
+\end_layout
+
 \begin_layout Section*
 TODO
 \end_layout
