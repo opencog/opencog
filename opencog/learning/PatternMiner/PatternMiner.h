@@ -166,8 +166,9 @@ protected:
     bool enable_Frequent_Pattern;
     bool enable_Interesting_Pattern;
 
-    // Only effective when Enable_Interesting_Pattern is true. The options are "Interaction_Information", "surprisingness"
-    string interestingness_Evaluation_method;
+    // Only effective when Enable_Interesting_Pattern is true.
+    bool Enable_Interaction_Information;
+    bool Enable_surprisingness;
 
     float atomspaceSizeFloat;
 

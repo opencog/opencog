@@ -562,7 +562,15 @@ void DistributedPatternMiner::centralServerEvaluateInterestingness()
     {
         for(cur_gram = 2; cur_gram <= MAX_GRAM; cur_gram ++)
         {
-            cout << "\nCalculating interestingness for " << cur_gram << " gram patterns by evaluating " << interestingness_Evaluation_method << std::endl;
+            cout << "\nCalculating";
+            if (Enable_Interaction_Information)
+                cout << " Interaction_Information ";
+
+            if (Enable_surprisingness)
+                cout << " Surprisingness ";
+
+            cout << "for " << cur_gram << " gram patterns." << std::endl;
+
             cur_index = -1;
             threads = new thread[THREAD_NUM];
             num_of_patterns_without_superpattern_cur_gram = 0;
@@ -582,13 +590,14 @@ void DistributedPatternMiner::centralServerEvaluateInterestingness()
             std::cout<<"Debug: PatternMiner:  done (gram = " + toString(cur_gram) + ") interestingness evaluation!" + toString((patternsForGram[cur_gram-1]).size()) + " patterns found! ";
             std::cout<<"Outputting to file ... ";
 
-            if (interestingness_Evaluation_method == "Interaction_Information")
+            if (Enable_Interaction_Information)
             {
                 // sort by interaction information
                 std::sort((patternsForGram[cur_gram-1]).begin(), (patternsForGram[cur_gram-1]).end(),compareHTreeNodeByInteractionInformation);
                 OutPutInterestingPatternsToFile(patternsForGram[cur_gram-1], cur_gram, 0);
             }
-            else if (interestingness_Evaluation_method == "surprisingness")
+
+            if (Enable_surprisingness)
             {
                 // sort by surprisingness_I first
                 std::sort((patternsForGram[cur_gram-1]).begin(), (patternsForGram[cur_gram-1]).end(),compareHTreeNodeBySurprisingness_I);
