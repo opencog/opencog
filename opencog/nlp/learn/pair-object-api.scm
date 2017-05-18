@@ -190,8 +190,8 @@
 					(define oset (cog-outgoing-set lnk))
 					(and
 						(equal? 2 (cog-arity lnk))
-						(equal? want-type (cog-type (car oset)))
-						(equal? ITEM (cadr oset))
+						(equal? want-type (cog-type (first oset)))
+						(equal? ITEM (second oset))
 					))
 				(cog-incoming-by-type ITEM pair-type)))
 
@@ -204,8 +204,8 @@
 					(define oset (cog-outgoing-set lnk))
 					(and
 						(equal? 2 (cog-arity lnk))
-						(equal? ITEM (car oset))
-						(equal? want-type (cog-type (cadr oset)))
+						(equal? ITEM (first oset))
+						(equal? want-type (cog-type (second oset)))
 					))
 				(cog-incoming-by-type ITEM pair-type)))
 

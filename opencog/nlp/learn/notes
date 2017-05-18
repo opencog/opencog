@@ -5205,21 +5205,32 @@ Finished with MI computations
 disjuncts & csets:
 
 Start loading words ...
-Elapsed time to load words: 126 secs
+Elapsed time to load words: 126 secs   << now 112
 Done loading words, now loading pairs
-Elapsed time to load csets: 783 secs
+Elapsed time to load csets: 783 secs    << now 367 on fresh..
 Finished loading any-word-pairs
 Support: num left=396262 num right=291637
-Done with wild-card count N(*,w) and N(w,*) in 39 secs
-Done computing N(*,*) total-count=661104.0 in 34 secs
+Done with wild-card count N(*,w) and N(w,*) in 39 secs  << now 203 !???
+Done computing N(*,*) total-count=661104.0 in 34 secs << uncahnged
+Done computing 446204 pairs in 13 secs
 Start computing log P(*,w)
 Done computing 291637 left-wilds in 33 secs
-Done storing 291637 left-wilds in 670 secs
+Done storing 291637 left-wilds in 670 secs << now  493
 Done with -log P(*,w), start -log P(w,*)
 Done computing 396262 right-wilds in 26 secs
-Done storing 396262 right-wilds in 549 secs
+Done storing 396262 right-wilds in 549 secs  <<< now  28 !! wtf ???
 Done computing -log P(w,*) and <-->
 Going to do individual word-pair MI
+
+
+(use-modules (opencog) (opencog persist) (opencog persist-sql))
+(use-modules (opencog nlp) (opencog nlp learn))
+(sql-open "postgres:///en_pairs_sim?user=linas")
+(use-modules (opencog cogserver))
+(start-cogserver "opencog2.conf")
+(define pca (make-pseudo-cset-api))
+(batch-pairs pca)
+
 
 
 
@@ -5491,5 +5502,141 @@ build_type_array  not needed if not printed.
 
 linkage->pp_info[j].domain_name[k] =
 
+=====================================================
+en_pairs_2016
+-------------
+Rohits original pair data; old format; missing correct word-counts
+
+en_pairs_2016=> \dt+
+                       List of relations
+ Schema |   Name    | Type  | Owner |    Size    | Description
+--------+-----------+-------+-------+------------+-------------
+ public | atoms     | table | linas | 2198 MB    |
+ public | global    | table | linas | 8192 bytes |
+ public | spaces    | table | linas | 8192 bytes |
+ public | typecodes | table | linas | 48 kB      |
+(4 rows)
+
+
+select count(atoms.stv_count) from atoms, typecodes where
+atoms.type=typecodes.type and typecodes.typename='EvaluationLink';
+
+gives: 9045489  i.e. 9M different evlinks
+gives 536234371 i.e. 536M observations  when sum()
+gives 396255  distinct wordnodes
+
+866733953 bytes uncompressed.
+141609207 bytes compressed
+md5sum en_pairs_2016.sql.bz2
+28577666fb51d3dc3658688a73e8bee6  en_pairs_2016.sql.bz2
+
+==================================================================
+
+en_pairs_rohit
+--------------
+forked from en_pairs_2016, converted to modern format
+This includes 8.9 word-pairs with MI on them. (But the MI is
+in the old format).
+
+en_pairs_rohit=> \dt+
+                        List of relations
+ Schema |     Name     | Type  | Owner |    Size    | Description
+--------+--------------+-------+-------+------------+-------------
+ public | atoms        | table | linas | 1735 MB    |
+ public | atoms_backup | table | linas | 2198 MB    |
+ public | global       | table | linas | 8192 bytes |
+ public | spaces       | table | linas | 8192 bytes |
+ public | typecodes    | table | linas | 48 kB      |
+ public | valuations   | table | linas | 2321 MB    |
+ public | values       | table | linas | 8192 bytes |
+(7 rows)
+
+atoms_backup is a copy of atoms from en_pairs_2016
+
+select count(atoms.uuid) from atoms,typecodes where
+atoms.type=typecodes.type and typecodes.typename='EvaluationLink';
+
+gives 9672459 i.e. 9.6M atoms. This is a 6% more than en_pairs_2016,
+(which had 9.0M) because maybe it includes the partial sums??
+
+gives 396262 WordNodes -- as before, plus 7 new test words.
+
+select sum(valuations.floatvalue[3]) from atoms,typecodes,valuations where
+valuations.atom = atoms.uuid and
+atoms.type=typecodes.type and typecodes.typename='EvaluationLink';
+
+gives 1672941118 == 1.6GB of counts so this is triple the pairs, because
+it includes: left and right sums, and the total sum. Hmm. Should be
+quadruple!?  Yes, see below.
+
+select * from atoms where outgoing='{143427138,143427163}';
+is the ListLink (Any Any)
+
+select * from atoms where outgoing='{152,143670792}';
+select * from valuations where atom=143670793;
+gives 418235277 == 418M observations of ANY,ANY
+
+ 2440463583 |   53 |  *-Mutual Info Key-* | PredicateNode
+
+select count(*) from valuations where key=2440463583;
+8880914  so 8.9M pairs with mutual info on them.
+
+2957364787 bytes uncompressed -- 2.9GB
+448704179 bytes compressed -- 448 MBytes
+
+ md5sum en_pairs_rohit.sql
+792a8830520c8cdddb5b723656ae82cc  en_pairs_rohit.sql
+
+ md5sum en_pairs_rohit.sql.bz2
+6f85e89787cbf20c54167868867cf41c  en_pairs_rohit.sql.bz2
+
+==================================================================
+
+en_pairs_mst
+------------
+forked from en_pairs_rohit, holds disjunct data
+
+                       List of relations
+ Schema |    Name    | Type  | Owner |    Size    | Description
+--------+------------+-------+-------+------------+-------------
+ public | atoms      | table | linas | 1886 MB    |
+ public | spaces     | table | linas | 8192 bytes |
+ public | typecodes  | table | linas | 48 kB      |
+ public | valuations | table | linas | 2421 MB    |
+ public | values     | table | linas | 8192 bytes |
+(5 rows)
+
+select count(atoms.uuid) from atoms,typecodes where
+atoms.type=typecodes.type and typecodes.typename='EvaluationLink';
+
+gives 9672459 so exactly the same as en_pairs_rohit, that's good.
+
+'LgWordCset' gives 941092 - almost a million connector sets.
+
+SELECT sum(valuations.floatvalue[3]) FROM atoms,typecodes,valuations
+WHERE valuations.atom = atoms.uuid AND
+atoms.type=typecodes.type AND typecodes.typename='LgWordCset';
+
+gives 1669981 -- 1.7M observations of csets or maybe 1.8 obs per cset.
+A bit didsappointing....
+
+
+==================================================================
+
+en_pairs_semi_fu
+----------------
+forked from en_pairs_rohit, plus more WP data, plus some gutenberg.
+May have data loss, due to server lockup failure.
+
+==================================================================
+
+en_pairs_merge
+--------------
+
+Plan:
+load en_pairs_mst
+load en_pairs_semi_fu
+recompute MI for word-pairs.
+fork, and restart mst counting...
 
 
