@@ -5506,6 +5506,8 @@ linkage->pp_info[j].domain_name[k] =
 en_pairs_2016
 -------------
 Rohits original pair data; old format; missing correct word-counts
+STATUS: obsolete, archived.
+REASON: converted to newer format.
 
 en_pairs_2016=> \dt+
                        List of relations
@@ -5537,6 +5539,10 @@ en_pairs_rohit
 forked from en_pairs_2016, converted to modern format
 This includes 8.9 word-pairs with MI on them. (But the MI is
 in the old format).
+
+STATUS: obsolete, archived.
+REASON: This is included in the newer en_pairs_semi_fu which contains
+all data here, plus additional word-pair counts.
 
 en_pairs_rohit=> \dt+
                         List of relations
@@ -5595,6 +5601,8 @@ select count(*) from valuations where key=2440463583;
 en_pairs_mst
 ------------
 forked from en_pairs_rohit, holds disjunct data
+STATUS: obsolete, archived.
+REASON: merged into en_pairs_wiki, so accumulated data lives on.
 
                        List of relations
  Schema |    Name    | Type  | Owner |    Size    | Description
@@ -5606,8 +5614,8 @@ forked from en_pairs_rohit, holds disjunct data
  public | values     | table | linas | 8192 bytes |
 (5 rows)
 
-select count(atoms.uuid) from atoms,typecodes where
-atoms.type=typecodes.type and typecodes.typename='EvaluationLink';
+SELECT count(atoms.uuid) FROM atoms,typecodes WHERE
+atoms.type=typecodes.type AND typecodes.typename='EvaluationLink';
 
 gives 9672459 so exactly the same as en_pairs_rohit, that's good.
 
@@ -5618,8 +5626,47 @@ WHERE valuations.atom = atoms.uuid AND
 atoms.type=typecodes.type AND typecodes.typename='LgWordCset';
 
 gives 1669981 -- 1.7M observations of csets or maybe 1.8 obs per cset.
-A bit didsappointing....
+A bit disappointing....
 
+2205218439 bytes uncompressed (2.2GB)
+325948435 bytes compressed (325 MByte)
+
+ md5sum en_pairs_mst.sql
+955b7fe0578ded9a266f0874e8a02d6f  en_pairs_mst.sql
+
+ md5sum en_pairs_mst.sql.bz2
+ee81f6b11e4629ffa30efc0950af3595  en_pairs_mst.sql.bz2
+
+==================================================================
+en_pairs_sim
+------------
+forked from earlier version of en_pairs_mst, contains less data.
+(half as many disjuncts) This is the dataset analyzed in the diary.
+
+The simil_en is a snapshot of this; the en_pairs_sim contains
+additional caches of partial sums acrosss disjuncts, etc.
+
+STATUS: working DB
+
+                       List of relations
+ Schema |    Name    | Type  | Owner |    Size    | Description
+--------+------------+-------+-------+------------+-------------
+ public | atoms      | table | linas | 1840 MB    |
+ public | spaces     | table | linas | 8192 bytes |
+ public | typecodes  | table | linas | 48 kB      |
+ public | valuations | table | linas | 2702 MB    |
+ public | values     | table | linas | 8192 bytes |
+(5 rows)
+
+SELECT count(atoms.uuid) FROM atoms,typecodes WHERE
+atoms.type=typecodes.type AND typecodes.typename='EvaluationLink';
+
+gives 9672459 so exactly the same as en_pairs_rohit, that's good.
+
+'LgWordCset' gives 446204 which is as expected, (as reported in diary)
+
+We are not creating a backup of this yet, the simil_en is good enough
+backup; this dataset marches on as a working dataset.
 
 ==================================================================
 
@@ -5628,10 +5675,13 @@ en_pairs_semi_fu
 forked from en_pairs_rohit, plus more WP data, plus some gutenberg.
 May have data loss, due to server lockup failure.
 
+STATUS: obsolete, archived.
+REASON: data merged into en_pairs_wiki
+
 ==================================================================
 
-en_pairs_merge
---------------
+en_pairs_wiki
+-------------
 
 Plan:
 load en_pairs_mst

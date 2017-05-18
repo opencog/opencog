@@ -371,10 +371,19 @@
 ; The MI computations are done as a batch, looping over all pairs.
 
 (define (make-batch-mi LLOBJ)
+
+	(define start-nsecs (get-internal-real-time))
+	(define (elapsed-millisecs)
+		(define diff (- (get-internal-real-time) start-nsecs))
+		(set! start-nsecs (get-internal-real-time))
+		(/ (* diff 1000.0) internal-time-units-per-second))
+
 	; We need 'left-supprt, provided by add-pair-wildcards
 	; We need 'pair-freq, provided by add-pair-freq-api
 	; We need 'set-pair-mi, provided by add-pair-freq-api
-	(let ((frqobj (add-pair-freq-api (add-pair-wildcards LLOBJ))))
+	; We need 'right-wild-count, provided by add-pair-count-api
+	(let ((frqobj (add-pair-freq-api
+				(add-pair-count-api (add-pair-wildcards LLOBJ)))))
 
 		; Loop over all pairs, computing the MI for each. The loop
 		; is actually two nested loops, with a loop over the
@@ -392,40 +401,40 @@
 
 			(define (right-loop left-item)
 
-				; Either of the get-loglis below may throw an exception,
-				; if the particular item-pair doesn't have any counts.
-				; This is rare, but can happen: e.g. (Any "left-word")
-				; (Word "###LEFT-WALL###") will have zero counts.  This
-				; would have an infinite logli and an infinite MI. So we
-				; skip this, with a try-catch block.
-				(catch #t (lambda ()
-					(define r-logli (frqobj 'right-wild-logli left-item))
+				; Check for non-zero counts. A zero here will cause the
+				; 'right-wild-logli to throw. For some reason, the handling
+				; of this thorw (but NOT the other throws!!) can be really
+				; slow (1/3 of a second.!!)  So we must avoid throws at all
+				; costs, here.  No matter: zero counts means undefined MI.
+				(if (< 0 (frqobj 'right-wild-count left-item))
+					(let ((r-logli (frqobj 'right-wild-logli left-item)))
 
-					; Compute the MI for exactly one pair.
-					(define (do-one-pair lipr)
-						(define right-item (gdr lipr))
-						(define l-logli (frqobj 'left-wild-logli right-item))
-						(define pr-logli (frqobj 'pair-logli lipr))
-						(define pr-freq (frqobj 'pair-freq lipr))
-						(define fmi (- pr-logli (+ r-logli l-logli)))
-						(define mi (* pr-freq fmi))
-						(define atom (frqobj 'set-pair-mi lipr mi fmi))
-						(set! all-atoms (cons atom all-atoms))
-						(set! cnt-pairs (+ cnt-pairs 1))
-					)
+						; Compute the MI for exactly one pair.
+						(define (do-one-pair lipr)
+							(define pr-freq (frqobj 'pair-freq lipr))
+							(define pr-logli (frqobj 'pair-logli lipr))
 
-					; Run the inner loop
-					(for-each
-						do-one-pair
-						(frqobj 'right-stars left-item))
+							(define right-item (gdr lipr))
+							(if (< 0 (frqobj 'left-wild-count right-item))
+								(let ((l-logli (frqobj 'left-wild-logli right-item))
+										(fmi (- pr-logli (+ r-logli l-logli)))
+										(mi (* pr-freq fmi))
+										(atom (frqobj 'set-pair-mi lipr mi fmi)))
+									(set! all-atoms (cons atom all-atoms))
+									(set! cnt-pairs (+ cnt-pairs 1)))))
 
-					; Print some prgress statistics.
-					(set! cnt-lefties (+ cnt-lefties 1))
-					(if (eqv? 0 (modulo cnt-lefties 10000))
-						(format #t "Done ~A of ~A outer loops, pairs=~A\n"
-							cnt-lefties nlefties cnt-pairs))
+						; Run the inner loop
+						(for-each
+							do-one-pair
+							(frqobj 'right-stars left-item))
 
-					) (lambda (key . args) #f)) ; catch handler
+						; Print some progress statistics.
+						(set! cnt-lefties (+ cnt-lefties 1))
+						(if (eqv? 0 (modulo cnt-lefties 10000))
+							(format #t "Done ~A of ~A outer loops, pairs=~A\n"
+								cnt-lefties nlefties cnt-pairs))
+
+					))
 			)
 
 			;; XXX Maybe FIXME This could be a par-for-each, to run the
