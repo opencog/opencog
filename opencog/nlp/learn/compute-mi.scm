@@ -416,7 +416,7 @@
 
 							(define right-item (gdr lipr))
 							(if (< 0 (frqobj 'left-wild-count right-item))
-								(let ((l-logli (frqobj 'left-wild-logli right-item))
+								(let* ((l-logli (frqobj 'left-wild-logli right-item))
 										(fmi (- pr-logli (+ r-logli l-logli)))
 										(mi (* pr-freq fmi))
 										(atom (frqobj 'set-pair-mi lipr mi fmi)))

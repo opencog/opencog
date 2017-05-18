@@ -5222,6 +5222,15 @@ Done storing 396262 right-wilds in 549 secs  <<< now  28 !! wtf ???
 Done computing -log P(w,*) and <-->
 Going to do individual word-pair MI
 
+Done computing 446204 pair MI's in 200 secs
+Stored 100000 of 446204 pairs in 268 secs (373.13432835820896 pairs/sec)
+Stored 200000 of 446204 pairs in 238 secs (420.16806722689074 pairs/sec)
+Stored 300000 of 446204 pairs in 286 secs (349.65034965034965 pairs/sec)
+Stored 400000 of 446204 pairs in 303 secs (330.03300330033005 pairs/sec)
+Done storing 446204 pair MI's in 1215 secs
+Finished with MI computations
+
+
 
 (use-modules (opencog) (opencog persist) (opencog persist-sql))
 (use-modules (opencog nlp) (opencog nlp learn))
