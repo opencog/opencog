@@ -1132,7 +1132,7 @@ void PatternMiner::OutPutInterestingPatternsToFile(vector<HTreeNode*> &patternsF
     ofstream resultFile;
     string fileName = _fileNamebasic;
 
-    if (interestingness_Evaluation_method == "Interaction_Information")
+    if (surprisingness == 0)
         fileName += "Interaction_Information_" + toString(n_gram) + "gram.scm";
     else if (surprisingness == 1)
         fileName += "SurprisingnessI_" + toString(n_gram) + "gram.scm";
@@ -1153,16 +1153,12 @@ void PatternMiner::OutPutInterestingPatternsToFile(vector<HTreeNode*> &patternsF
 
         resultFile << endl << "Pattern: Frequency = " << toString(htreeNode->count);
 
-        if (interestingness_Evaluation_method == "Interaction_Information")
+        if (surprisingness == 0)
             resultFile << " InteractionInformation = " << toString(htreeNode->interactionInformation);
-        else if (interestingness_Evaluation_method == "surprisingness")
-        {
-            if (surprisingness == 1)
-                resultFile << " SurprisingnessI = " << toString(htreeNode->nI_Surprisingness);
-            else
-                resultFile << " SurprisingnessII = " << toString(htreeNode->nII_Surprisingness);
-        }
-
+        else if (surprisingness == 1)
+            resultFile << " SurprisingnessI = " << toString(htreeNode->nI_Surprisingness);
+        else
+            resultFile << " SurprisingnessII = " << toString(htreeNode->nII_Surprisingness);
 
         resultFile << endl;
 
@@ -1175,7 +1171,6 @@ void PatternMiner::OutPutInterestingPatternsToFile(vector<HTreeNode*> &patternsF
     }
 
     resultFile.close();
-
 
 }
 
@@ -1712,7 +1707,7 @@ double PatternMiner::calculateEntropyOfASubConnectedPattern(string& connectedSub
     int count = getCountOfAConnectedPattern(connectedSubPatternKey, connectedSubPattern);
     if (count == 0)
     {
-        cout << "\nwarning: cannot find subpattern: \n" << connectedSubPatternKey << std::endl;
+        // cout << "\nwarning: cannot find subpattern: \n" << connectedSubPatternKey << std::endl;
         count = 1;
     }
 
@@ -2496,11 +2491,10 @@ void PatternMiner::reSetAllSettingsFromConfig()
 
     enable_Frequent_Pattern = config().get_bool("Enable_Frequent_Pattern");
     enable_Interesting_Pattern = config().get_bool("Enable_Interesting_Pattern");
-    interestingness_Evaluation_method = config().get("Interestingness_Evaluation_method");
+    Enable_Interaction_Information = config().get_bool("Enable_Interaction_Information");
+    Enable_surprisingness = config().get_bool("Enable_surprisingness");
 
     assert(enable_Frequent_Pattern || enable_Interesting_Pattern);
-    //The options are "Interaction_Information", "surprisingness"
-    assert( (interestingness_Evaluation_method == "Interaction_Information") || (interestingness_Evaluation_method == "surprisingness") );
 
     THREAD_NUM = config().get_int("Max_thread_num");
     unsigned int system_thread_num  = std::thread::hardware_concurrency();
@@ -2723,10 +2717,19 @@ void PatternMiner::runPatternMiner(bool exit_program_after_finish)
 
 void PatternMiner::runInterestingnessEvaluation()
 {
+
     for(cur_gram = 2; cur_gram <= MAX_GRAM; cur_gram ++)
     {
 
-        cout << "\nCalculating interestingness for " << cur_gram << " gram patterns by evaluating " << interestingness_Evaluation_method << std::endl;
+        cout << "\nCalculating";
+        if (Enable_Interaction_Information)
+            cout << " Interaction_Information ";
+
+        if (Enable_surprisingness)
+            cout << " Surprisingness ";
+
+        cout << "for " << cur_gram << " gram patterns." << std::endl;
+
         cur_index = -1;
         threads = new thread[THREAD_NUM];
         num_of_patterns_without_superpattern_cur_gram = 0;
@@ -2746,13 +2749,14 @@ void PatternMiner::runInterestingnessEvaluation()
         std::cout<<"PatternMiner:  done (gram = " + toString(cur_gram) + ") interestingness evaluation!" + toString((patternsForGram[cur_gram-1]).size()) + " patterns found! ";
         std::cout<<"Outputting to file ... ";
 
-        if (interestingness_Evaluation_method == "Interaction_Information")
+        if (Enable_Interaction_Information)
         {
             // sort by interaction information
-            // std::sort((patternsForGram[cur_gram-1]).begin(), (patternsForGram[cur_gram-1]).end(),compareHTreeNodeByInteractionInformation);
+            std::sort((patternsForGram[cur_gram-1]).begin(), (patternsForGram[cur_gram-1]).end(),compareHTreeNodeByInteractionInformation);
             OutPutInterestingPatternsToFile(patternsForGram[cur_gram-1], cur_gram, 0);
         }
-        else if (interestingness_Evaluation_method == "surprisingness")
+
+        if (Enable_surprisingness)
         {
             // sort by surprisingness_I first
             std::sort((patternsForGram[cur_gram-1]).begin(), (patternsForGram[cur_gram-1]).end(),compareHTreeNodeBySurprisingness_I);
@@ -2909,13 +2913,14 @@ void PatternMiner::applyWhiteListKeywordfilterAfterMining()
         for(cur_gram = 2; cur_gram <= MAX_GRAM; cur_gram ++)
         {
 
-            if (interestingness_Evaluation_method == "Interaction_Information")
+            if (Enable_Interaction_Information)
             {
                 // sort by interaction information
                 std::sort((patternsForGramFiltered[cur_gram-1]).begin(), (patternsForGramFiltered[cur_gram-1]).end(),compareHTreeNodeByInteractionInformation);
                 OutPutInterestingPatternsToFile(patternsForGramFiltered[cur_gram-1], cur_gram, 0, fileNameBasic);
             }
-            else if (interestingness_Evaluation_method == "surprisingness")
+
+            if (Enable_surprisingness)
             {
                 // sort by surprisingness_I first
                 std::sort((patternsForGramFiltered[cur_gram-1]).begin(), (patternsForGramFiltered[cur_gram-1]).end(),compareHTreeNodeBySurprisingness_I);
@@ -2975,11 +2980,12 @@ void PatternMiner::evaluateInterestingnessTask()
 
         // evaluate the interestingness
         // Only effective when Enable_Interesting_Pattern is true. The options are "Interaction_Information", "surprisingness"
-        if (interestingness_Evaluation_method == "Interaction_Information")
+        if (Enable_Interaction_Information)
         {
            calculateInteractionInformation(htreeNode);
         }
-        else if (interestingness_Evaluation_method == "surprisingness")
+
+        if (Enable_surprisingness)
         {
            calculateSurprisingness(htreeNode, observingAtomSpace);
         }
