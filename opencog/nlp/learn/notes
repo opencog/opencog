@@ -5221,8 +5221,7 @@ Done computing 396262 right-wilds in 26 secs
 Done storing 396262 right-wilds in 549 secs  <<< now  28 !! wtf ???
 Done computing -log P(w,*) and <-->
 Going to do individual word-pair MI
-
-Done computing 446204 pair MI's in 200 secs
+Done computing 446204 pair MI's in 88 secs
 Stored 100000 of 446204 pairs in 268 secs (373.13432835820896 pairs/sec)
 Stored 200000 of 446204 pairs in 238 secs (420.16806722689074 pairs/sec)
 Stored 300000 of 446204 pairs in 286 secs (349.65034965034965 pairs/sec)
@@ -5568,6 +5567,13 @@ en_pairs_rohit=> \dt+
 
 atoms_backup is a copy of atoms from en_pairs_2016
 
+SELECT count(*) FROM atoms;  <<< 19741280 = 19M atoms total
+
+SELECT count(*) FROM atoms WHERE height=0; <<<  396313 = 396K
+SELECT count(*) FROM atoms WHERE height=1; <<< 9672482 = 9.6M
+SELECT count(*) FROM atoms WHERE height=2; <<< 9672472 = 9.6M
+SELECT count(*) FROM atoms WHERE height=3; <<<      13
+
 select count(atoms.uuid) from atoms,typecodes where
 atoms.type=typecodes.type and typecodes.typename='EvaluationLink';
 
@@ -5596,6 +5602,7 @@ gives 418235277 == 418M observations of ANY,ANY
 select count(*) from valuations where key=2440463583;
 8880914  so 8.9M pairs with mutual info on them.
 
+
 2957364787 bytes uncompressed -- 2.9GB
 448704179 bytes compressed -- 448 MBytes
 
@@ -5610,6 +5617,8 @@ select count(*) from valuations where key=2440463583;
 en_pairs_mst
 ------------
 forked from en_pairs_rohit, holds disjunct data
+Contains only wikipedia parse data.
+
 STATUS: obsolete, archived.
 REASON: merged into en_pairs_wiki, so accumulated data lives on.
 
@@ -5623,10 +5632,21 @@ REASON: merged into en_pairs_wiki, so accumulated data lives on.
  public | values     | table | linas | 8192 bytes |
 (5 rows)
 
+SELECT count(*) FROM atoms; <<< 21381856 = 21M atoms
+
+SELECT count(*) FROM atoms WHERE height=0; <<<   396313 = 396K == rohit.
+SELECT count(*) FROM atoms WHERE height=1; <<<  9763966 = 9.8M almost rohit
+SELECT count(*) FROM atoms WHERE height=2; <<< 10280485 = 10.2M = 6% larger
+SELECT count(*) FROM atoms WHERE height=3; <<<   941092 = 941K
+
+The height-3 are exactly the pseudo-disjuncts.
+
 SELECT count(atoms.uuid) FROM atoms,typecodes WHERE
 atoms.type=typecodes.type AND typecodes.typename='EvaluationLink';
 
 gives 9672459 so exactly the same as en_pairs_rohit, that's good.
+
+'WordNode' gives 396262 -- 400K words, exactly same as before, Good.
 
 'LgWordCset' gives 941092 - almost a million connector sets.
 
@@ -5647,6 +5667,21 @@ A bit disappointing....
 ee81f6b11e4629ffa30efc0950af3595  en_pairs_mst.sql.bz2
 
 ==================================================================
+
+simil_en
+--------
+The similarity database published on the web, forked from an earlier
+version of en_pairs_mst.  Contains pairs derived only from wikipedia.
+plus some number of disjuncts from mst parses.
+
+Published on web 12 May 2017
+322343968 bytes compressed (322MBytes)
+
+ md5sum simil_en.sql.bz2
+b9bb221069867c5f4a307670a34387c8  simil_en.sql.bz2
+
+==================================================================
+
 en_pairs_sim
 ------------
 forked from earlier version of en_pairs_mst, contains less data.
@@ -5687,6 +5722,48 @@ May have data loss, due to server lockup failure.
 STATUS: obsolete, archived.
 REASON: data merged into en_pairs_wiki
 
+                       List of relations
+ Schema |    Name    | Type  | Owner |    Size    | Description 
+--------+------------+-------+-------+------------+-------------
+ public | atoms      | table | linas | 12 GB      | 
+ public | spaces     | table | linas | 8192 bytes | 
+ public | typecodes  | table | linas | 48 kB      | 
+ public | valuations | table | linas | 9633 MB    | 
+ public | values     | table | linas | 8192 bytes | 
+(5 rows)
+
+SELECT count(*) FROM atoms;   <<< 132172780 = 132M atoms total
+
+
+SELECT count(atoms.uuid) FROM atoms,typecodes WHERE
+atoms.type=typecodes.type AND typecodes.typename='EvaluationLink';
+
+gives 37199086 = 37M evlinks compared to rohits 9M
+
+'WordNode' gives 276715 which is 2/3rds of rohits 400K so where did
+   all the words go? More importantly, why aren't the foreign-key 
+   constraints violated???
+
+SELECT count(*) FROM atoms WHERE height=0;   <<<     276972  = 277K
+SELECT count(*) FROM atoms WHERE height=1;   <<<   30958666  = 30M
+SELECT count(*) FROM atoms WHERE height=2;   <<<  100135499  = 100M
+SELECT count(*) FROM atoms WHERE height=3;   <<<     801643  = 802K
+SELECT count(*) FROM atoms WHERE height=4;   <<<          0
+
+wtf is height=3? Answer: some (many?) random "ANY" disjuncts
+from the random tree parses. (!)  These have low UUID's!
+
+
+Max observed UUID is 135947882
+Loaded 276972 atoms at height 0
+
+
+7721725512 bytes uncompressed (7.7GB) 17 May 2017
+1207333639 bytes compressed (1.2GB)
+
+ md5sum en_pairs_semi_fu.sql.bz2
+06b0acfecf9f5d4b25cca903b8f3b2a7  en_pairs_semi_fu.sql.bz2
+
 ==================================================================
 
 en_pairs_wiki
@@ -5699,3 +5776,19 @@ recompute MI for word-pairs.
 fork, and restart mst counting...
 
 
+(use-modules (opencog) (opencog persist) (opencog persist-sql))
+(sql-open "postgres:///en_pairs_mst?user=linas")
+(use-modules (opencog cogserver))
+(start-cogserver "opencog3.conf")
+(sql-load)
+
+sql-load has no
+
+also missing type inheritance!  (but what if inheritance conflicts!?)
+
+SQLAtomStorage.cc:1583 thrown by makeAtom
+but who calls makeAtom?
+
+
+problem: 132M atoms, and load 10K/sec about, maybe 1M/minute,
+so at least 2-4 hours to load.
