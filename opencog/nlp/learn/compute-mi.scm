@@ -402,10 +402,11 @@
 			(define (right-loop left-item)
 
 				; Check for non-zero counts. A zero here will cause the
-				; 'right-wild-logli to throw. For some reason, the handling
-				; of this thorw (but NOT the other throws!!) can be really
-				; slow (1/3 of a second.!!)  So we must avoid throws at all
-				; costs, here.  No matter: zero counts means undefined MI.
+				; 'right-wild-logli to throw. The problem here is that
+				; every throw gets logged into the logfile (currently, they
+				; are not silent) which can sometimes be a huge performance
+				; hit. So avoid the throws.
+				; Anyway: zero counts means undefined MI.
 				(if (< 0 (frqobj 'right-wild-count left-item))
 					(let ((r-logli (frqobj 'right-wild-logli left-item)))
 

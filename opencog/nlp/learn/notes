@@ -5782,12 +5782,20 @@ fork, and restart mst counting...
 (start-cogserver "opencog3.conf")
 (sql-load)
 
-sql-load has no
+sql-load has no docs
 
 also missing type inheritance!  (but what if inheritance conflicts!?)
 
 SQLAtomStorage.cc:1583 thrown by makeAtom
 but who calls makeAtom?
+
+QLAtomStorage.cc:1360 null pointer deref.
+get_recursive_if_not_exists
+from :1377 PseudoPtr po(petAtom(idu)); returned null ptr for 132204462
+
+1673 should be omp-algo
+
+
 
 
 problem: 132M atoms, and load 10K/sec about, maybe 1M/minute,
