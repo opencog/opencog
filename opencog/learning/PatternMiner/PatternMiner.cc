@@ -2661,6 +2661,7 @@ void PatternMiner::runPatternMiner(bool exit_program_after_finish)
 
     int start_time = time(NULL);
 
+    allLinks.clear();
     originalAtomSpace->get_handles_by_type(back_inserter(allLinks), (Type) LINK, true );
 
     allLinkNumber = (int)(allLinks.size());
@@ -2827,7 +2828,7 @@ void PatternMiner::runInterestingnessEvaluation()
     }
 }
 
-bool PatternMiner::containWhiteKeywords(string& str, QUERY_LOGIC logic)
+bool PatternMiner::containWhiteKeywords(const string& str, QUERY_LOGIC logic)
 {
     if (logic == QUERY_LOGIC::OR)
     {
@@ -3352,23 +3353,52 @@ OrderedHandleSet PatternMiner::_extendOneLinkForSubsetCorpus(OrderedHandleSet& a
     return allNewConnectedLinksThisGram;
 }
 
-// must load the corpus before calling this function
-void PatternMiner::_selectSubsetFromCorpus(vector<string>& subsetKeywords, unsigned int max_connection)
+// allSubsetLinks is  output
+void PatternMiner::findAllLinksContainKeyWords(vector<string>& subsetKeywords, unsigned int max_connection, bool logic_contain, OrderedHandleSet& allSubsetLinks)
 {
-    std::cout << "\nSelecting a subset from loaded corpus in Atomspace for the following keywords within " << max_connection << " distance:" << std::endl ;
-    OrderedHandleSet allSubsetLinks;
-    string topicsStr = "";
-
-    for (string keyword : subsetKeywords)
+    if (allLinks.size() == 0)
     {
-        std::cout << keyword << std::endl;
-        Handle keywordNode = originalAtomSpace->add_node(opencog::CONCEPT_NODE,keyword);
-        OrderedHandleSet newConnectedLinks = _getAllNonIgnoredLinksForGivenNode(keywordNode, allSubsetLinks);
+        originalAtomSpace->get_handles_by_type(back_inserter(allLinks), (Type) LINK, true );
 
-        allSubsetLinks.insert(newConnectedLinks.begin(), newConnectedLinks.end());
-        topicsStr += "-";
-        topicsStr += keyword;
+        allLinkNumber = (int)(allLinks.size());
+        atomspaceSizeFloat = (float)(allLinkNumber);
+    }
 
+    if (logic_contain)
+    {
+        for (Handle link : allLinks)
+        {
+            Handle newh = link;
+
+            // if this atom is a igonred type, get its first parent that is not in the igonred types
+            if (isIgnoredType (link->getType()) )
+            {
+                newh = getFirstNonIgnoredIncomingLink(originalAtomSpace, link);
+
+                if ((newh == Handle::UNDEFINED))
+                    continue;
+                else if (use_keyword_black_list && containIgnoredContent(newh))
+                    continue;
+            }
+
+            if (allSubsetLinks.find(newh) == allSubsetLinks.end())
+            {
+                if (containWhiteKeywords(newh->toShortString(), QUERY_LOGIC::OR))
+                    allSubsetLinks.insert(newh);
+            }
+        }
+    }
+    else
+    {
+        for (string keyword : subsetKeywords)
+        {
+            std::cout << keyword << std::endl;
+            Handle keywordNode = originalAtomSpace->add_node(opencog::CONCEPT_NODE,keyword);
+            OrderedHandleSet newConnectedLinks = _getAllNonIgnoredLinksForGivenNode(keywordNode, allSubsetLinks);
+
+            allSubsetLinks.insert(newConnectedLinks.begin(), newConnectedLinks.end());
+
+        }
     }
 
     unsigned int order = 0;
@@ -3379,6 +3409,26 @@ void PatternMiner::_selectSubsetFromCorpus(vector<string>& subsetKeywords, unsig
         allNewConnectedLinksThisGram = _extendOneLinkForSubsetCorpus(allNewConnectedLinksThisGram, allSubsetLinks);
         order ++;
     }
+}
+
+// must load the corpus before calling this function
+// logic_contain = true will find all the Nodes with a label contains any of the keywords,e.g.
+// keyword = Premier , Node "32nd Premier of New South Wales" will be found if logic_contain = true;
+// only Node "Premier" will be found if logic_contain = false
+void PatternMiner::_selectSubsetFromCorpus(vector<string>& subsetKeywords, unsigned int max_connection, bool logic_contain)
+{
+    std::cout << "\nSelecting a subset from loaded corpus in Atomspace for the following keywords within " << max_connection << " distance:" << std::endl ;
+    OrderedHandleSet allSubsetLinks;
+    string topicsStr = "";
+
+    for (string keyword : subsetKeywords)
+    {
+        std::cout << keyword << std::endl;
+        topicsStr += "-";
+        topicsStr += keyword;
+    }
+
+    findAllLinksContainKeyWords(subsetKeywords, max_connection, logic_contain, allSubsetLinks);
 
     ofstream subsetFile;
 

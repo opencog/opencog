@@ -319,7 +319,9 @@ protected:
     OrderedHandleSet _extendOneLinkForSubsetCorpus(OrderedHandleSet& allNewLinksLastGram, OrderedHandleSet& allSubsetLinks);
 
     // will write the subset to a scm file
-    void _selectSubsetFromCorpus(vector<string>& subsetKeywords, unsigned int max_connection);
+    void _selectSubsetFromCorpus(vector<string>& subsetKeywords, unsigned int max_connection, bool logic_contain = true);
+
+    void findAllLinksContainKeyWords(vector<string>& subsetKeywords, unsigned int max_connection, bool logic_contain, OrderedHandleSet& foundLinks);
 
     bool isIgnoredContent(string keyword);
 
@@ -350,7 +352,7 @@ protected:
 
     bool filters(HandleSeq& inputLinks, HandleSeqSeq& oneOfEachSeqShouldBeVars, HandleSeq& leaves, HandleSeq& shouldNotBeVars, HandleSeq& shouldBeVars,AtomSpace* _atomSpace);
 
-    bool containWhiteKeywords(string& str, QUERY_LOGIC logic);
+    bool containWhiteKeywords(const string& str, QUERY_LOGIC logic);
 
     void reSetAllSettingsFromConfig();
 
