@@ -5717,10 +5717,10 @@ backup; this dataset marches on as a working dataset.
 en_pairs_semi_fu
 ----------------
 forked from en_pairs_rohit, plus more WP data, plus some gutenberg.
-May have data loss, due to server lockup failure.
+Has some data loss (many missing words), due to server lockup failure.
 
 STATUS: obsolete, archived.
-REASON: data merged into en_pairs_wiki
+REASON: data merged into en_pairs_semi_ok
 
                        List of relations
  Schema |    Name    | Type  | Owner |    Size    | Description 
@@ -5753,16 +5753,27 @@ SELECT count(*) FROM atoms WHERE height=4;   <<<          0
 wtf is height=3? Answer: some (many?) random "ANY" disjuncts
 from the random tree parses. (!)  These have low UUID's!
 
-
 Max observed UUID is 135947882
-Loaded 276972 atoms at height 0
-
+Loaded 276972 atoms at height 0 <<< so a lot of words are missing.
+also: there are 508 links with missing uuids in thier outgoing set.
 
 7721725512 bytes uncompressed (7.7GB) 17 May 2017
 1207333639 bytes compressed (1.2GB)
 
  md5sum en_pairs_semi_fu.sql.bz2
 06b0acfecf9f5d4b25cca903b8f3b2a7  en_pairs_semi_fu.sql.bz2
+
+==================================================================
+
+en_pairs_semi_ok
+----------------
+A merger of en_pairs_rohit, and en_pairs_sem_fu. So: en_pairs_rohit
+loaded first, to get all missing words and wordpairs, then
+en_pairs_semi_fu to get the latest updated counts. Then the whole
+thing saved.
+
+STATUS: in progress,
+REASON: 
 
 ==================================================================
 
@@ -5788,12 +5799,113 @@ also missing type inheritance!  (but what if inheritance conflicts!?)
 
 SQLAtomStorage.cc:1583 thrown by makeAtom
 but who calls makeAtom?
+load_all_atoms_cb
 
 QLAtomStorage.cc:1360 null pointer deref.
 get_recursive_if_not_exists
 from :1377 PseudoPtr po(petAtom(idu)); returned null ptr for 132204462
 
+132204462
+132272910
+132300252
+133895580
+133896697
+133884903
+
+27 missing uuids so far.  They're not in rohit, so wtf?
+
 1673 should be omp-algo
+
+
+#define OC_OMP 1
+setting_omp(num_threads(), 3);
+num_threads
+
+
+SELECT uuid, name FROM atoms WHERE type = 73
+  EXCEPT SELECT atoms.uuid,atoms.name FROM atoms, atoms_wtf 
+     WHERE atoms_wtf.uuid = atoms.uuid;
+
+ 2293473835 | tail-piece
+ 1621296002 | dendropark
+ 2146998680 | Fellers
+  244689200 | PVC
+ 1438975809 | Arntzenius
+  709360907 | server-based
+ 2400387025 | Kihelkonna
+  799467208 | Crispe's
+  610089230 | Byssocallis
+  325547913 | leveraging
+  179977711 | amounted
+  492116248 | Kampf
+  209124496 | Barranca
+ 1158151745 | Ilisl
+ 1005621585 | Caravans
+ 1926542305 | agonising
+ 1593374046 | Urged
+
+
+SELECT * FROM Atoms WHERE outgoing @> ARRAY[CAST(2293473835 AS BIGINT)];
+
+ 2293477332 |     1 |    8 |      1 |      | {570739,2293473835}
+ 2293477368 |     1 |    8 |      1 |      | {1537258,2293473835}
+ 2293477336 |     1 |    8 |      1 |      | {2293473835,241}
+ 2293477334 |     1 |    8 |      1 |      | {573730097,2293473835}
+ 2293477354 |     1 |    8 |      1 |      | {4369780,2293473835}
+ 2439795736 |     1 |    8 |      1 |      | {143427138,2293473835}
+ 2439795738 |     1 |    8 |      1 |      | {2293473835,143427163}
+
+
+CREATE TABLE tmp_atoms AS 
+   SELECT   uuid,  space, type, height, name, outgoing 
+   FROM atoms WHERE height=0
+     EXCEPT SELECT atoms.uuid,  atoms.space, atoms.type, atoms.height, atoms.name, atoms.outgoing
+          FROM atoms, atoms_wtf 
+          WHERE atoms_wtf.uuid = atoms.uuid;
+
+338354
+
+UPDATE tmp_atoms SET type= x WHERE NAME='joe';
+
+INSERT INTO atoms_wtf 
+   SELECT   uuid,  space, type, height, name, outgoing 
+
+fuck it. 
+load rohit first, then load semi_fu then load mst
+
+(use-modules (opencog) (opencog persist) (opencog persist-sql))
+(use-modules (opencog nlp))
+(use-modules (opencog cogserver))
+(sql-open "postgres:///en_pairs_rohit?user=linas")
+(start-cogserver "opencog2.conf")
+(sql-load)
+OK, that's loading in parallel yayyy! peaked over 17K/second
+dropped down to 11.3K per sec
+Need to load 19M for this one <<< 19741280
+
+OK, so can hit rates over 20K atoms/sec during loads, when the 
+DB is in RAM (or maybe SSD). Drops to 300 atoms/sec when DB is
+on spinning disk. Ouch!
+
+So when bulk loading....
+calls load_all_atoms_cb
+which does get values.   get_atom_values
+get_all_values_cb
+
+(sql-close)
+(sql-open "postgres:///en_pairs_semi_fu?user=linas")
+(sql-load)
+loaded 132172832 
+Atomspace holds 146629585 atoms in 171GBytes RAM. Ouch. 1159:08 CPU
+(sql-close) <<< 1163:38 CPU
+(sql-open "postgres:///en_pairs_semi_ok?user=linas")
+(sql-store)
+Store rate is 20K atoms/minute! 1.2M/hour --> 100 hours (4 days) to
+store fu.  Lets try again. parallelize too
+
+So... store queues not being used. Lots of fetches, but these
+seem pointless ?
+Max UUID is 2 !!!!??
 
 
 
