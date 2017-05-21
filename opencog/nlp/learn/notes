@@ -5403,6 +5403,10 @@ pg_clog/0523
 mv /var/lib/postgresql/9.5/main /var/lib/postgresql/9.5/main-semi-fu
 
 /usr/lib/postgresql/9.5/bin/initdb /var/lib/postgresql/9.5/main
+CREATE ROLE ubuntu WITH CREATEDB;
+ALTER ROLE ubuntu WITH LOGIN;
+createdb en_pairs
+psql en_pairs < ~/src/atomspace/opencog/persist/sql/multi-driver/atom.sql
 
 time psql en_pairs < /var/lib/postgresql/en_pairs.sql
 real    59m16.468s
@@ -5881,11 +5885,17 @@ load rohit first, then load semi_fu then load mst
 (sql-load)
 OK, that's loading in parallel yayyy! peaked over 17K/second
 dropped down to 11.3K per sec
-Need to load 19M for this one <<< 19741280
+Need to load 19M for this one <<< 19741280 
+     ... in 1691 seconds (11674 per second)
+     ... using 27GB RAM
+     ... in approx 260 cpu-minutes.
 
 OK, so can hit rates over 20K atoms/sec during loads, when the 
 DB is in RAM (or maybe SSD). Drops to 300 atoms/sec when DB is
 on spinning disk. Ouch!
+
+Hmmm .. 20K/sec if there are not values on the atom.
+10K/sec if there are values ...
 
 So when bulk loading....
 calls load_all_atoms_cb
@@ -5895,8 +5905,10 @@ get_all_values_cb
 (sql-close)
 (sql-open "postgres:///en_pairs_semi_fu?user=linas")
 (sql-load)
-loaded 132172832 
+loaded 132172832  in 9938 seconds (13299 per second)
 Atomspace holds 146629585 atoms in 171GBytes RAM. Ouch. 1159:08 CPU
+again: 953:04.24 CPU again 949:04.10
+
 (sql-close) <<< 1163:38 CPU
 (sql-open "postgres:///en_pairs_semi_ok?user=linas")
 (sql-store)
@@ -5904,11 +5916,53 @@ Store rate is 20K atoms/minute! 1.2M/hour --> 100 hours (4 days) to
 store fu.  Lets try again. parallelize too
 
 So... store queues not being used. Lots of fetches, but these
-seem pointless ?
-Max UUID is 2 !!!!??
+seem pointless ?  FIXED
+Max UUID is 2 !!!!??   FIXED
+
+OK, better: 1.3K/sec, about 100K/min - 1470 min = 24 hours
+
+num_get_links and write queues not used.  FIXED
+... and max uuid is still 2. FIXED
+should call storeAtom(h, false) FIXED
+
+OK, store queues are cranking away, 100% i/o bound.  1.1K/sec
+--> 38 hours to complete!  Ouch.
+... dropped to 603 per second after 15% complete.
+
+Plan B:
+copy en_pairs_semi_fu to en_pairs_wiki
+load en_pairs_mst
+close
+open en_pairs_wiki
+
+=================================
+/home/ubuntu/src/atomspace/opencog/persist/sql/multi-driver/ll-pg-cxx.cc:113)
+
+PQresult message: ERROR:  could not read block 479803 in file
+"base/16446/16452.3": read only 0 of 8192 bytes
+SELECT * FROM Atoms WHERE type = 82 AND outgoing = '{23, 7830585, 9}';
+SELECT * FROM Atoms WHERE type = 137 AND outgoing = '{232023, 14}';
+SELECT * FROM Atoms WHERE type = 137 AND outgoing = '{2433080, 852}';
+SELECT * FROM Atoms WHERE type = 137 AND outgoing = '{9196089, 2499}';
+SELECT * FROM Atoms WHERE type = 137 AND outgoing = '{3250528, 10}';
+SELECT * FROM Atoms WHERE type = 82 AND outgoing = '{23, 30218901, 9}';
+
+/usr/lib/postgresql/9.5/bin/pg_resetxlog  /var/lib/postgresql/9.5/main
+
+Crap.  Total data corruption.
+Restart, again
+====================================
+/etc/postgresql/9.6/main/postgresql.conf
+increase shared_buffers to 24GB
+shared_buffers = 24GB
+max_worker_processes = 24
+fsync = on  
+effective_cache_size = 128GB
+
+increse  /etc/sysctl.d/30-postgresql-shm.conf too
+
+grep ^VmPeak /proc/4170/status
+
+hugpages may be too big... but anonhugepages shoud work fine
 
 
-
-
-problem: 132M atoms, and load 10K/sec about, maybe 1M/minute,
-so at least 2-4 hours to load.
