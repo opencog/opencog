@@ -6053,5 +6053,8 @@ Stored 20000 of 291637 lefties in 45 secs (444.44444444444446 stores/sec)
 Stored 40000 of 291637 lefties in 47 secs (425.531914893617 stores/sec)
 Stored 60000 of 291637 lefties in 62 secs (322.5806451612903 stores/sec)
 
+OK, so we are back in business
+======================================================================
 
+(add-total-entropy-api pca
 

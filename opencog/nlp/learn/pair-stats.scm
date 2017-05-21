@@ -85,21 +85,22 @@
 
 ; ---------------------------------------------------------------------
 
-(define-public (add-total-entropy-api FRQOBJ)
+(define-public (add-total-entropy-api LLOBJ)
 "
-  add-total-entropy-api FRQOBJ - methods for total and partial entropy.
+  add-total-entropy-api LLOBJ - methods for total and partial entropy.
 
-  Extend the FRQOBJ with additional methods to compute the partial
+  Extend the LLOBJ with additional methods to compute the partial
   and total entropies of the total set of pairs.
 
-  The FRQOBJ needs to be an object implementing methods to get pair
-  observation frequencies, which must return valid values; i.e. must
-  have been previously computed. Specifically, it must have the
-  'left-logli, 'right-logli and 'pair-logli methods.
+  The object must have valid pair-frequency values on it, accessible
+  via the standard frequency-object API. These must have been
+  pre-computed, before this object can be used.
 
   These methods loop over all pairs, and so can take a lot of time.
 "
-	(let ((frqobj FRQOBJ))
+	; Need the 'left-support method, provided by add-pair-wildcards
+	; Need the 'pair-logli method, provided by add-pair-freq-api
+	(let ((frqobj (add-pair-freq-api (add-pair-wildcards LLOBJ))))
 
 		; Compute the total entropy for the set. This loops over all
 		; pairs, and computes the sum
