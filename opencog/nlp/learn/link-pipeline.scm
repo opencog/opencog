@@ -185,8 +185,15 @@
 ;    (on the same pair-atom) to count the different lengths, but the
 ;    hit is still huge.
 ;
-;    Thus, clique-counting is currently disabled. You can turn it on
-;    by uncommenting this routine in the main loop, below.
+; 3) On a per-sentence basis, when clique-counting is turned on, the
+;    number of databse updates increases by 3x-4x atom value updates.
+;    If your database is on spinning disks, not SSD, this means that
+;    database updates will be limited by the disk I/O subsystem, and
+;    this additional traffic can slow down statistics gathering by...
+;    3x or 4x.
+;
+; Thus, clique-counting is currently disabled. You can turn it on
+; by uncommenting this routine in the main loop, below.
 ;
 ; Note that this might throw an exception...
 ;
