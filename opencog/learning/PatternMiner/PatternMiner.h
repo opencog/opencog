@@ -170,6 +170,8 @@ protected:
     bool Enable_Interaction_Information;
     bool Enable_surprisingness;
 
+    bool only_mine_patterns_start_from_white_list;
+
     float atomspaceSizeFloat;
 
     float surprisingness_II_threshold;
@@ -180,7 +182,7 @@ protected:
 
     vector<vector<vector<unsigned int>>> components_ngram[3];
 
-
+    vector<Handle> allLinksContainWhiteKeywords;
 
    // [gram], this to avoid different threads happen to work on the same links.
    // each string is composed the handles of a group of fact links in the observingAtomSpace in the default hash order using std set
@@ -319,7 +321,9 @@ protected:
     OrderedHandleSet _extendOneLinkForSubsetCorpus(OrderedHandleSet& allNewLinksLastGram, OrderedHandleSet& allSubsetLinks);
 
     // will write the subset to a scm file
-    void _selectSubsetFromCorpus(vector<string>& subsetKeywords, unsigned int max_connection);
+    void _selectSubsetFromCorpus(vector<string>& subsetKeywords, unsigned int max_connection, bool logic_contain = true);
+
+    void findAllLinksContainKeyWords(vector<string>& subsetKeywords, unsigned int max_connection, bool logic_contain, OrderedHandleSet& foundLinks);
 
     bool isIgnoredContent(string keyword);
 
@@ -350,7 +354,7 @@ protected:
 
     bool filters(HandleSeq& inputLinks, HandleSeqSeq& oneOfEachSeqShouldBeVars, HandleSeq& leaves, HandleSeq& shouldNotBeVars, HandleSeq& shouldBeVars,AtomSpace* _atomSpace);
 
-    bool containWhiteKeywords(string& str, QUERY_LOGIC logic);
+    bool containWhiteKeywords(const string& str, QUERY_LOGIC logic);
 
     void reSetAllSettingsFromConfig();
 
