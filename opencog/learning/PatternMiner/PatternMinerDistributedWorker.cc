@@ -200,6 +200,27 @@ void DistributedPatternMiner::startMiningWork()
         allLinkNumber = (int)(allLinks.size());
         atomspaceSizeFloat = (float)(allLinkNumber);
 
+        if (only_mine_patterns_start_from_white_list)
+        {
+            allLinksContainWhiteKeywords.clear();
+
+            cout << "\nOnly mine patterns start from white list:" << std::endl;
+
+            for (string keyword : keyword_white_list)
+            {
+                std::cout << keyword << std::endl;
+            }
+
+            cout << "Finding all Links contains these keywords...\n";
+
+            set<Handle> allLinksContainWhiteKeywordsSet;
+            findAllLinksContainKeyWords(keyword_white_list, 0, true, allLinksContainWhiteKeywordsSet);
+
+            std::copy(allLinksContainWhiteKeywordsSet.begin(), allLinksContainWhiteKeywordsSet.end(), std::back_inserter(allLinksContainWhiteKeywords));
+            cout << "Found " << allLinksContainWhiteKeywords.size() << " Links contians the keywords!\n";
+
+        }
+
         runPatternMinerDepthFirst();
 
         int end_time = time(NULL);
@@ -280,10 +301,17 @@ void DistributedPatternMiner::growPatternsDepthFirstTask(unsigned int thread_ind
     // The start index in allLinks for current thread
     unsigned int start_index = linksPerThread * thread_index;
     unsigned int end_index; // the last index for current thread (excluded)
-    if (thread_index == THREAD_NUM - 1) // if this the last thread, it
-                                        // needs to finish all the
-                                        // rest of the links
-        end_index = allLinkNumber;
+
+    if (thread_index == THREAD_NUM - 1)
+    {
+        // if this the last thread, it
+        // needs to finish all the
+        // rest of the links
+        if (only_mine_patterns_start_from_white_list)
+            end_index = allLinksContainWhiteKeywords.size();
+        else
+            end_index = allLinkNumber;
+    }
     else
         end_index = linksPerThread * (thread_index + 1);
 
@@ -300,22 +328,31 @@ void DistributedPatternMiner::growPatternsDepthFirstTask(unsigned int thread_ind
         std::cout.flush();
 
         processedLinkNum ++;
-        Handle& cur_link = allLinks[t_cur_index];
+
+        Handle cur_link;
+
+        if (only_mine_patterns_start_from_white_list)
+            cur_link = allLinksContainWhiteKeywords[t_cur_index];
+        else
+            cur_link = allLinks[t_cur_index];
 
         readNextLinkLock.unlock();
 
-        // if this link is ingonre type, ignore it
-        if (isIgnoredType( cur_link->getType()))
+        if (! only_mine_patterns_start_from_white_list)
         {
-            continue;
-        }
-
-
-        if (use_keyword_black_list)
-        {
-            // if the content in this link contains content in the black list,ignore it
-            if (containIgnoredContent(cur_link))
+            // if this link is ingonre type, ignore it
+            if (isIgnoredType( cur_link->getType()))
+            {
                 continue;
+            }
+
+
+            if (use_keyword_black_list)
+            {
+                // if the content in this link contains content in the black list,ignore it
+                if (containIgnoredContent(cur_link))
+                    continue;
+            }
         }
 
         // Add this link into observingAtomSpace
