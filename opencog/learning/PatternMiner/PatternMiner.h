@@ -170,6 +170,8 @@ protected:
     bool Enable_Interaction_Information;
     bool Enable_surprisingness;
 
+    bool only_mine_patterns_start_from_white_list;
+
     float atomspaceSizeFloat;
 
     float surprisingness_II_threshold;
@@ -180,7 +182,7 @@ protected:
 
     vector<vector<vector<unsigned int>>> components_ngram[3];
 
-
+    vector<Handle> allLinksContainWhiteKeywords;
 
    // [gram], this to avoid different threads happen to work on the same links.
    // each string is composed the handles of a group of fact links in the observingAtomSpace in the default hash order using std set

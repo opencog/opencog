@@ -134,10 +134,16 @@ void PatternMiner::growPatternsDepthFirstTask(unsigned int thread_index)
 	// The start index in allLinks for current thread
     unsigned int start_index = linksPerThread * thread_index;
     unsigned int end_index; // the last index for current thread (excluded)
-    if (thread_index == THREAD_NUM - 1) // if this the last thread, it
-                                        // needs to finish all the
-                                        // rest of the links
-        end_index = allLinkNumber;
+    if (thread_index == THREAD_NUM - 1)
+    {
+        // if this the last thread, it
+        // needs to finish all the
+        // rest of the links
+        if (only_mine_patterns_start_from_white_list)
+            end_index = allLinksContainWhiteKeywords.size();
+        else
+            end_index = allLinkNumber;
+    }
     else
         end_index = linksPerThread * (thread_index + 1);
 
@@ -147,29 +153,42 @@ void PatternMiner::growPatternsDepthFirstTask(unsigned int thread_index)
 
 
     float allLinkNumberfloat = ((float)(end_index - start_index));
+
     for(unsigned int t_cur_index = start_index; t_cur_index < end_index; ++t_cur_index)
     {
-        readNextLinkLock.lock();
+        if (THREAD_NUM > 1)
+            readNextLinkLock.lock();
+
         cout<< "\r" << ((float)(t_cur_index - start_index))/allLinkNumberfloat*100.0f << "% completed in Thread " + toString(thread_index) + "."; // it's not liner
         std::cout.flush();
 
         processedLinkNum ++;
-        Handle& cur_link = allLinks[t_cur_index];
 
-        readNextLinkLock.unlock();
+        Handle cur_link;
 
-        // if this link is ingonre type, ignore it
-        if (isIgnoredType( cur_link->getType()))
+        if (only_mine_patterns_start_from_white_list)
+            cur_link = allLinksContainWhiteKeywords[t_cur_index];
+        else
+            cur_link = allLinks[t_cur_index];
+
+        if (THREAD_NUM > 1)
+            readNextLinkLock.unlock();
+
+        if (! only_mine_patterns_start_from_white_list)
         {
-            continue;
-        }
-
-
-        if (use_keyword_black_list)
-        {
-            // if the content in this link contains content in the black list,ignore it
-            if (containIgnoredContent(cur_link))
+            // if this link is ingonre type, ignore it
+            if (isIgnoredType( cur_link->getType()))
+            {
                 continue;
+            }
+
+
+            if (use_keyword_black_list)
+            {
+                // if the content in this link contains content in the black list,ignore it
+                if (containIgnoredContent(cur_link))
+                    continue;
+            }
         }
 
         // Add this link into observingAtomSpace
@@ -195,9 +214,13 @@ void PatternMiner::growPatternsDepthFirstTask(unsigned int thread_index)
         vector<MinedPatternInfo> allNewMinedPatternInfo;
 
 
-        actualProcessedLinkLock.lock();
+        if (THREAD_NUM > 1)
+            actualProcessedLinkLock.lock();
+
         actualProcessedLinkNum ++;
-        actualProcessedLinkLock.unlock();
+
+        if (THREAD_NUM > 1)
+            actualProcessedLinkLock.unlock();
 
         extendAPatternForOneMoreGramRecursively(newLink, observingAtomSpace, Handle::UNDEFINED, lastGramLinks, 0, lastGramValueToVarMap,
                                                 patternVarMap, false, allNewMinedPatternsCurTask, allHTreeNodesCurTask, allNewMinedPatternInfo, thread_index);
@@ -268,7 +291,8 @@ void PatternMiner::growPatternsDepthFirstTask(unsigned int thread_index)
 void PatternMiner::runPatternMinerDepthFirst()
 {
     // observingAtomSpace is used to copy one link everytime from the originalAtomSpace
-    observingAtomSpace = new AtomSpace();
+    if (observingAtomSpace == 0)
+        observingAtomSpace = new AtomSpace();
 
     if (THREAD_NUM > 1)
     {
@@ -279,7 +303,10 @@ void PatternMiner::runPatternMinerDepthFirst()
         all_thread_ExtractedLinks_pergram = new set<string>[MAX_GRAM];
     }
 
-    linksPerThread = allLinkNumber / THREAD_NUM;
+    if (only_mine_patterns_start_from_white_list)
+        linksPerThread = allLinksContainWhiteKeywords.size() / THREAD_NUM;
+    else
+        linksPerThread = allLinkNumber / THREAD_NUM;
 
     processedLinkNum = 0;
     actualProcessedLinkNum = 0;

@@ -2468,6 +2468,16 @@ void PatternMiner::initPatternMiner()
 
     cur_gram = 0;
 
+    htree = 0;
+
+    observingAtomSpace = 0;
+
+
+//    if (threads)
+//        delete threads;
+
+    ignoredLinkTypes.clear();
+
     ignoredLinkTypes.clear();
     ignoredLinkTypes.push_back(LIST_LINK);
 
@@ -2575,6 +2585,8 @@ void PatternMiner::reSetAllSettingsFromConfig()
         same_link_types_not_share_second_outgoing.push_back(atomType);
     }
 
+    only_mine_patterns_start_from_white_list = config().get_bool("only_mine_patterns_start_from_white_list");
+
 }
 
 // release everything
@@ -2582,16 +2594,25 @@ void PatternMiner::cleanUpPatternMiner()
 {
 
     if (htree)
+    {
         delete htree;
+        htree = 0;
+    }
 
     if (atomSpace)
+    {
         delete atomSpace;
+        atomSpace = 0;
+    }
 
 //    if (originalAtomSpace)
 //        delete originalAtomSpace;
 
     if (observingAtomSpace)
+    {
         delete observingAtomSpace;
+        observingAtomSpace = 0;
+    }
 
 //    if (threads)
 //        delete threads;
@@ -2652,7 +2673,6 @@ void PatternMiner::runPatternMiner(bool exit_program_after_finish)
         initPatternMiner();
     }
 
-
     Pattern_mining_mode = config().get("Pattern_mining_mode"); // option: Breadth_First , Depth_First
     assert( (Pattern_mining_mode == "Breadth_First") || (Pattern_mining_mode == "Depth_First"));
 
@@ -2669,6 +2689,27 @@ void PatternMiner::runPatternMiner(bool exit_program_after_finish)
 
     std::cout << "Using " << THREAD_NUM << " threads. \n";
     std::cout << "Corpus size: "<< allLinkNumber << " links in total. \n\n";
+
+    if (only_mine_patterns_start_from_white_list)
+    {
+        allLinksContainWhiteKeywords.clear();
+
+        cout << "\nOnly mine patterns start from white list:" << std::endl;
+
+        for (string keyword : keyword_white_list)
+        {
+            std::cout << keyword << std::endl;
+        }
+
+        cout << "Finding all Links contains these keywords...\n";
+
+        set<Handle> allLinksContainWhiteKeywordsSet;
+        findAllLinksContainKeyWords(keyword_white_list, 0, true, allLinksContainWhiteKeywordsSet);
+
+        std::copy(allLinksContainWhiteKeywordsSet.begin(), allLinksContainWhiteKeywordsSet.end(), std::back_inserter(allLinksContainWhiteKeywords));
+        cout << "Found " << allLinksContainWhiteKeywords.size() << " Links contians the keywords!\n";
+
+    }
 
     runPatternMinerDepthFirst();
 
@@ -3356,16 +3397,24 @@ OrderedHandleSet PatternMiner::_extendOneLinkForSubsetCorpus(OrderedHandleSet& a
 // allSubsetLinks is  output
 void PatternMiner::findAllLinksContainKeyWords(vector<string>& subsetKeywords, unsigned int max_connection, bool logic_contain, OrderedHandleSet& allSubsetLinks)
 {
+    allSubsetLinks.clear();
+
     if (allLinks.size() == 0)
     {
         originalAtomSpace->get_handles_by_type(back_inserter(allLinks), (Type) LINK, true );
+    }
 
-        allLinkNumber = (int)(allLinks.size());
-        atomspaceSizeFloat = (float)(allLinkNumber);
+    if (only_mine_patterns_start_from_white_list)
+    {
+        if (observingAtomSpace == 0)
+            observingAtomSpace = new AtomSpace();
+
     }
 
     if (logic_contain)
     {
+        unsigned int linkNumLoadedIntoObservingAtomSpace = 0;
+
         for (Handle link : allLinks)
         {
             Handle newh = link;
@@ -3381,12 +3430,39 @@ void PatternMiner::findAllLinksContainKeyWords(vector<string>& subsetKeywords, u
                     continue;
             }
 
+            if (use_keyword_black_list)
+            {
+                // if the content in this link contains content in the black list,ignore it
+                if (containIgnoredContent(newh))
+                    continue;
+            }
+
             if (allSubsetLinks.find(newh) == allSubsetLinks.end())
             {
                 if (containWhiteKeywords(newh->toShortString(), QUERY_LOGIC::OR))
                     allSubsetLinks.insert(newh);
+                else
+                {
+                    if (only_mine_patterns_start_from_white_list)
+                    {
+                        // add this Link into the observingAtomSpace
+                        HandleSeq outgoingLinks, outVariableNodes;
+
+                        swapOneLinkBetweenTwoAtomSpace(originalAtomSpace, observingAtomSpace, newh, outgoingLinks, outVariableNodes);
+                        Handle newLink = observingAtomSpace->add_link(newh->getType(), outgoingLinks);
+                        newLink->merge(newh->getTruthValue());
+                        linkNumLoadedIntoObservingAtomSpace ++;
+                    }
+                }
             }
         }
+
+        if (only_mine_patterns_start_from_white_list)
+        {
+            cout << "\n" << linkNumLoadedIntoObservingAtomSpace <<
+                    " other Links (not contains black keywords and not of ignore types) has been loaded into observingAtomSpace" << std::endl;
+        }
+
     }
     else
     {

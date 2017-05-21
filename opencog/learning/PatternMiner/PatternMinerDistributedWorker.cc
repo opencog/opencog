@@ -230,7 +230,10 @@ void DistributedPatternMiner::runPatternMinerDepthFirst()
     }
 
 
-    linksPerThread = allLinkNumber / THREAD_NUM;
+    if (only_mine_patterns_start_from_white_list)
+        linksPerThread = allLinksContainWhiteKeywords.size() / THREAD_NUM;
+    else
+        linksPerThread = allLinkNumber / THREAD_NUM;
 
     processedLinkNum = 0;
     actualProcessedLinkNum = 0;
