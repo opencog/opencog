@@ -5205,20 +5205,20 @@ Finished with MI computations
 disjuncts & csets:
 
 Start loading words ...
-Elapsed time to load words: 126 secs   << now 112
+Elapsed time to load words: 126 secs   << now 112 ...814 ... 22 .. 20
 Done loading words, now loading pairs
-Elapsed time to load csets: 783 secs    << now 367 on fresh..
+Elapsed time to load csets: 783 secs  << now 367 on fresh..553...294..309
 Finished loading any-word-pairs
 Support: num left=396262 num right=291637
-Done with wild-card count N(*,w) and N(w,*) in 39 secs  << now 203 !???
+Done with wild-card count N(*,w) and N(w,*) in 39 secs  << now 203 !???  fluke
 Done computing N(*,*) total-count=661104.0 in 34 secs << uncahnged
 Done computing 446204 pairs in 13 secs
 Start computing log P(*,w)
 Done computing 291637 left-wilds in 33 secs
-Done storing 291637 left-wilds in 670 secs << now  493
+Done storing 291637 left-wilds in 670 secs << now  493 .. 711
 Done with -log P(*,w), start -log P(w,*)
 Done computing 396262 right-wilds in 26 secs
-Done storing 396262 right-wilds in 549 secs  <<< now  28 !! wtf ???
+Done storing 396262 right-wilds in 549 secs  <<< now  28 !! wtf ??? .. 47
 Done computing -log P(w,*) and <-->
 Going to do individual word-pair MI
 Done computing 446204 pair MI's in 88 secs
@@ -5226,7 +5226,7 @@ Stored 100000 of 446204 pairs in 268 secs (373.13432835820896 pairs/sec)
 Stored 200000 of 446204 pairs in 238 secs (420.16806722689074 pairs/sec)
 Stored 300000 of 446204 pairs in 286 secs (349.65034965034965 pairs/sec)
 Stored 400000 of 446204 pairs in 303 secs (330.03300330033005 pairs/sec)
-Done storing 446204 pair MI's in 1215 secs
+Done storing 446204 pair MI's in 1215 secs ... 1345
 Finished with MI computations
 
 
@@ -6027,5 +6027,31 @@ TODO:
 -- verify that MST has all the pairs that rohit does. OK.
 -- Update the dump status above; copy it over. OK, Done.
 -- Create the missing status on en_pairs_sim from the paper.
+
+
+(use-modules (opencog) (opencog persist) (opencog persist-sql))
+(use-modules (opencog nlp) (opencog nlp learn))
+(sql-open "postgres:///en_pairs_sim?user=linas")
+(use-modules (opencog cogserver))
+(start-cogserver "opencog2.conf")
+(define pca (make-pseudo-cset-api))
+(batch-pairs pca)
+
+So now word-pair loading is out of control...
+loadeed csets in 553 seconds, same as before, but at 2400% cpu
+
+Crap.  Below is a disaster.
+commit_delay = 0
+synchronous_commit = local
+Stored 1000 of 291637 lefties in 270 secs (3.7037037037037037 stores/sec)
+Stored 2000 of 291637 lefties in 320 secs (3.125 stores/sec)
+
+Try again:
+commit_delay = 0
+synchronous_commit = off
+Stored 20000 of 291637 lefties in 45 secs (444.44444444444446 stores/sec)
+Stored 40000 of 291637 lefties in 47 secs (425.531914893617 stores/sec)
+Stored 60000 of 291637 lefties in 62 secs (322.5806451612903 stores/sec)
+
 
 

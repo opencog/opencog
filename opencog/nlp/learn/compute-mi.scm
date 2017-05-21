@@ -543,10 +543,15 @@
 
 	(display "Start computing log P(*,y)\n")
 	(let ((lefties (freq-obj 'cache-all-left-freqs)))
+
+		(define store-rpt
+			(make-progress-rpt store-atom 40000  (length lefties)
+				"Stored ~A of ~A lefties in ~A secs (~A stores/sec)\n"))
+
 		(format #t "Done computing ~A left-wilds in ~A secs\n"
 			(length lefties) (elapsed-secs))
 		(for-each
-			(lambda (atom) (if (not (null? atom)) (store-atom atom)))
+			(lambda (atom) (if (not (null? atom)) (store-rpt atom)))
 			lefties)
 		(format #t "Done storing ~A left-wilds in ~A secs\n"
 			(length lefties) (elapsed-secs))

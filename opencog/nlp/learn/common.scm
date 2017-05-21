@@ -27,7 +27,8 @@
 			(cnt 0)
 			(start-time 0))
 		(lambda (item)
-			(if (eqv? 0 cnt) (set! start-time (current-time)))
+			; back-date to avoid divide-by-zero
+			(if (eqv? 0 cnt) (set! start-time (- (current-time) 0.00001)))
 			(func item)
 			(set! cnt (+ 1 cnt))
 			(if (eqv? 0 (modulo cnt when))
