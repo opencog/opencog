@@ -5517,8 +5517,12 @@ linkage->pp_info[j].domain_name[k] =
 =====================================================
 en_pairs_2016
 -------------
-Rohits original pair data; old format; missing correct word-counts
+Rohit's original pair data; old format; missing correct word-counts.
+All data is from Wikipedia article random planar-tree parses.
+Contains word-pair counts only (and some MI calcs in obsolete format).
+
 STATUS: obsolete, archived.
+DATE: 17 May 2017
 REASON: converted to newer format.
 
 en_pairs_2016=> \dt+
@@ -5553,8 +5557,10 @@ This includes 8.9 word-pairs with MI on them. (But the MI is
 in the old format).
 
 STATUS: obsolete, archived.
-REASON: This is included in the newer en_pairs_semi_fu which contains
-all data here, plus additional word-pair counts.
+DATE: 18 May 2017
+REASON: This is included in the newer en_pairs_mst, which contains
+all data here, plus data from MST parsing. Also, since its word-pairs
+from wikipedia only, the data quality is mediocre.
 
 en_pairs_rohit=> \dt+
                         List of relations
@@ -5620,11 +5626,13 @@ select count(*) from valuations where key=2440463583;
 
 en_pairs_mst
 ------------
-forked from en_pairs_rohit, holds disjunct data
-Contains only wikipedia parse data.
+forked from en_pairs_rohit, holds disjunct data from MST parsing.
+Both word-pairs and MST  parses came from wikipedia articles;
+this appears to give only mediocre results.
 
-STATUS: obsolete, archived.
-REASON: merged into en_pairs_wiki, so accumulated data lives on.
+STATUS: archived.
+DATE: 18 May 2017
+REASON: The wikipedia-based data is mediocre.
 
                        List of relations
  Schema |    Name    | Type  | Owner |    Size    | Description
@@ -5688,13 +5696,14 @@ b9bb221069867c5f4a307670a34387c8  simil_en.sql.bz2
 
 en_pairs_sim
 ------------
-forked from earlier version of en_pairs_mst, contains less data.
+Forked from earlier version of en_pairs_mst, contains less data.
 (half as many disjuncts) This is the dataset analyzed in the diary.
 
 The simil_en is a snapshot of this; the en_pairs_sim contains
-additional caches of partial sums acrosss disjuncts, etc.
+additional caches of partial sums across disjuncts, etc.
 
 STATUS: working DB
+DATE: 21 May 2017
 
                        List of relations
  Schema |    Name    | Type  | Owner |    Size    | Description
@@ -5720,11 +5729,17 @@ backup; this dataset marches on as a working dataset.
 
 en_pairs_semi_fu
 ----------------
-forked from en_pairs_rohit, plus more WP data, plus some gutenberg.
-Has some data loss (many missing words), due to server lockup failure.
+Forked from en_pairs_rohit, plus more WP data, plus some gutenberg.
+Has some data loss (many missing words, missing LGLink-pairs), due to
+server lockup + crash failure (and fsync was off, dohhhh).
+
+Large database, bloated with ExecutationLinks, and the clique pairs,
+which just are not useful at this time. In fact, 95% of the atoms are
+these junk atoms.  This dataset is just wayyy too bloated to be useful.
 
 STATUS: obsolete, archived.
-REASON: data merged into en_pairs_semi_ok
+DATE: 18 May 2017
+REASON: abandoned. Too bloated to be useful, per above.
 
                        List of relations
  Schema |    Name    | Type  | Owner |    Size    | Description 
@@ -5744,9 +5759,21 @@ atoms.type=typecodes.type AND typecodes.typename='EvaluationLink';
 
 gives 37199086 = 37M evlinks compared to rohits 9M
 
+However, of these
+SELECT count(*) FROM Atoms WHERE outgoing @> ARRAY[CAST(29 AS BIGINT)];
+where PredicateNode "*-Sentence Word Pair-*" uuid=29;
+gives 29637409 = 29.6M clique-pairs
+
+vs LinkGrammarRelationshipNode uuid=141; <<< 7561677 7.5M
+
+So many of rohit's pairs were lost, and most of the new data are the
+cliique pairs.
+
 'WordNode' gives 276715 which is 2/3rds of rohits 400K so where did
    all the words go? More importantly, why aren't the foreign-key 
    constraints violated???
+
+'ExecutionLink' has 62936410 = 62M counted pairs
 
 SELECT count(*) FROM atoms WHERE height=0;   <<<     276972  = 277K
 SELECT count(*) FROM atoms WHERE height=1;   <<<   30958666  = 30M
@@ -5767,22 +5794,26 @@ also: there are 508 links with missing uuids in thier outgoing set.
  md5sum en_pairs_semi_fu.sql.bz2
 06b0acfecf9f5d4b25cca903b8f3b2a7  en_pairs_semi_fu.sql.bz2
 
-==================================================================
-
-en_pairs_semi_ok
-----------------
-A merger of en_pairs_rohit, and en_pairs_sem_fu. So: en_pairs_rohit
-loaded first, to get all missing words and wordpairs, then
-en_pairs_semi_fu to get the latest updated counts. Then the whole
-thing saved.
-
-STATUS: in progress,
-REASON: 
 
 ==================================================================
+en_snap
+-------
+STATUS: deleted
+DATE: 21 May 2017
+REASON: bloated junk, looks like wikipedia.
 
-en_pairs_wiki
--------------
+select count(*) from atoms;   <<< 41511869 = 41M
+
+A total of 106696 = 106K WordNodes
+
+ SELECT count(*) FROM Atoms WHERE outgoing @> ARRAY[CAST(141 AS BIGINT)]; 
+gives 2786640 == 2.7M  LG links.
+
+and 9587761 = 9.6M clique pairs, and 18M ExecutionLinks.
+
+
+
+==================================================================
 
 Plan:
 load en_pairs_mst
@@ -5964,5 +5995,37 @@ increse  /etc/sysctl.d/30-postgresql-shm.conf too
 grep ^VmPeak /proc/4170/status
 
 hugpages may be too big... but anonhugepages shoud work fine
+
+no commit delay:  300%, 70% idle 6% wait 10 loadavg 10m val/h 20a/h
+10K commit
+11:18
+
+=====================================================
+-- Restart counting. Done,  May 21 06:15 UTC
+
+As of: 2017-05-21 18:59:08 i.e. 12.7 hours later,
+284 articles 
+
+select count(*) from atoms; <<< 1832992 = 1.8M
+
+SELECT count(atoms.uuid) FROM atoms,typecodes WHERE
+atoms.type=typecodes.type AND typecodes.typename='EvaluationLink';
+gives 840285 = 840K  and equal number of ListLink
+39772 = 39K WordNode
+
+SELECT sum(floatvalue[3]) FROM valuations WHERE type=7;
+aka
+SELECT sum(valuations.floatvalue[3]) FROM valuations,typecodes
+WHERE valuations.type=typecodes.type AND typecodes.typename='CountTruthValue';
+
+gives 39459145 = 39M counts = 3.1M counted per hour = 863 pairs/second
+
+
+=====================================================
+TODO:
+-- verify integrity of the database.
+-- verify that MST has all the pairs that rohit does. OK.
+-- Update the dump status above; copy it over. OK, Done.
+-- Create the missing status on en_pairs_sim from the paper.
 
 
