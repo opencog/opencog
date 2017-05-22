@@ -39,48 +39,59 @@
 
 
 ; ---------------------------------------------------------------------
+; ---------------------------------------------------------------------
+; ---------------------------------------------------------------------
 ; Bin-counting utilities.
+;
 ; This must be the 20th time I've implemented bin-counts in my life...
-; The input is assumed to be a list of pairs, with the car of the pair
-; being the score-value to be binned, and the cdr being the item.
+;
+; ITEMS is a list of items to be binned.
+;
+; NBINS is the number of bins to use.
+;
+; item->value is a function that, given an item, returns the score for
+;      that item. This score is used to determine the bin number.
+;
+; item->count should be a function that, given an item, returns the
+;      count or strength for that item. It should return 1 for simple
+;      binning.
 
-(define (bin-count scored-items nbins)
+(define (bin-count ITEMS NBINS item->value item->count)
 	; Find the smallest in the list
 	(define min-value
 		(fold
-			(lambda (scored-item min)
-				(if (< min (car scored-item)) min (car scored-item)))
+			(lambda (item min)
+				(define value (item->value item))
+				(if (< min value) min value))
 				10000000.0
-				scored-items))
+				ITEMS))
 
 	; Find the largest in the list
 	(define max-value
 		(fold
-			(lambda (scored-item max)
-				(if (> max (car scored-item)) max (car scored-item)))
+			(lambda (item max)
+				(define value (item->value item))
+				(if (> max value) max value))
 				-10000000.0
-				scored-items))
+				ITEMS))
 
-	(define bin-width (/ (- max-value min-value) (- nbins 1)))
+	(define bin-width (/ (- max-value min-value) (- NBINS 1)))
 
 	; Given a value, find the corresponding bin number.
 	(define (value->bin val)
 		(inexact->exact (floor (/ (- val min-value) bin-width))))
 
-	; Increment the bin-count by this much.
-	(define (item->count item) 1)
-
-	(define bins (make-array 0 nbins))
-	(define centers (make-array 0 nbins))
+	(define bins (make-array 0 NBINS))
+	(define centers (make-array 0 NBINS))
 
 	; Do the actual bin-counting
 	(for-each
-		(lambda (scored-item)
-			(define bin (value->bin (car scored-item)))
+		(lambda (item)
+			(define bin (value->bin (car item)))
 			(array-set! bins
-				(+ (array-ref bins bin) (item->count (cdr scored-item)))
+				(+ (array-ref bins bin) (item->count item))
 				bin))
-		scored-items)
+		ITEMS)
 
 	; Store the centers of the bins
 	(array-index-map! centers
@@ -88,6 +99,22 @@
 
 	(list centers bins)
 )
+
+; Just use the simplest binning
+(define (bin-count-simple scored-items nbins)
+	; Get the item score
+	(define (item->value item) (car item))
+	; Increment the bin-count by this much.
+	(define (item->count item) 1)
+	(bin-count  scored-items nbins item->value item->count)
+)
+
+(define (bin-count-weighted scored-items nbins item->count)
+	; Get the item score
+	(define (item->value item) (car item))
+	(bin-count  scored-items nbins item->value item->count)
+)
+
 
 (define (print-ts-bincounts cent-bins port)
 	(define centers (first cent-bins))
@@ -99,6 +126,8 @@
 			(set! binno (+ binno 1)))
 		(array->list bins)))
 
+; ---------------------------------------------------------------------
+; ---------------------------------------------------------------------
 ; ---------------------------------------------------------------------
 ; A list of all words that have csets. (Not all of the words
 ; in the database got tagged with a cset)
@@ -427,22 +456,31 @@
 ; Rank word-disjunct pairs according to thier fractonal MI.
 
 (define pfrq (add-pair-freq-api  pca))
-(define (cset-vec-pair-mi CSET)
-	(pfrq 'pair-fmi CSET))
+(define (cset-mi CSET) (pfrq 'pair-fmi CSET))
 
-(define sorted-pair-mi (score-and-rank cset-vec-pair-mi all-csets))
+(define sorted-cset-mi (score-and-rank cset-mi all-csets))
 
 ; Print above to a file, so that it can be graphed.
-(let ((outport (open-file "/tmp/ranked-pair-mi.dat" "w")))
-	(print-ts-rank-cset sorted-pair-mi outport)
+(let ((outport (open-file "/tmp/ranked-cset-mi.dat" "w")))
+	(print-ts-rank-cset sorted-cset-mi outport)
 	(close outport))
 
-(define binned-pair-mi (bin-count sorted-pair-mi 200))
+(define binned-cset-mi (bin-count-simple sorted-cset-mi 100))
+(define binned-cset-mi (bin-count-simple sorted-cset-mi 200))
 
-(let ((outport (open-file "/tmp/binned-pair-mi.dat" "w")))
-	(print-ts-bincounts binned-pair-mi outport)
+(let ((outport (open-file "/tmp/binned-cset-mi.dat" "w")))
+	(print-ts-bincounts binned-cset-mi outport)
 	(close outport))
 
+(define (cset-freq CSET) (pfrq 'pair-freq CSET))
+
+(define weighted-cset-mi
+	(bin-count-weighted sorted-cset-mi 200 
+		(lambda (scored-item) (cset-freq (cdr scored-item)))))
+
+(let ((outport (open-file "/tmp/weighted-cset-mi.dat" "w")))
+	(print-ts-bincounts weighted-cset-mi outport)
+	(close outport))
 
 xxxxxxx
 ; ---------------------------------------------------------------------
