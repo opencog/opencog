@@ -438,8 +438,7 @@ public:
     // select a subset from the current AtomSpace with a list of keywords,splitted by ','.
     // the subset will contain max_distance connected atoms of these keywords
     // e.g.: "dog,cat,bike,swimming pool,computer"
-    // when the max_distance, Pattern_Max_Gram will be used
-    void select_subset_from_atomspace(const string& _keywordlist, int max_distance = 0)
+    void select_subset_from_atomspace(const string& _keywordlist, int max_distance, bool if_contain_logic)
     {
         vector<string> keyword_list;
         string keywordstr = _keywordlist;
@@ -458,10 +457,28 @@ public:
             cout <<"\n Becasue max_distance <= 0, Pattern_Max_Gram = " << max_distance << " will be used!" << std::endl;
         }
 
-        patternMiner->selectSubsetFromCorpus(keyword_list, max_distance);
+        patternMiner->selectSubsetFromCorpus(keyword_list, max_distance, if_contain_logic);
     }
 
-    void select_whitelist_subset_from_atomspace(int max_distance = 0)
+    // select a subset from the current AtomSpace with a list of keywords,splitted by ','.
+    // the subset will contain max_distance connected atoms which contains these keywords in their labels
+    // e.g.: "book,computer", Nodes with labels : "book", "handbook", "computer", "super computer" will all be selected.
+    void select_subset_from_atomspace_nodes_contain_keywords(const string& _keywordlist, int max_distance)
+    {
+        select_subset_from_atomspace(_keywordlist, max_distance, true);
+    }
+
+
+    // select a subset from the current AtomSpace with a list of keywords,splitted by ','.
+    // the subset will contain max_distance connected atoms which contains these keywords in their labels
+    // e.g.: "book,computer", only Nodes with labels : "book", "computer" will all be selected;
+    // "handbook", "super computer"  will not be selected
+    void select_subset_from_atomspace_nodes_equalto_keywords(const string& _keywordlist, int max_distance)
+    {
+        select_subset_from_atomspace(_keywordlist, max_distance, false);
+    }
+
+    void select_whitelist_subset_from_atomspace(int max_distance, bool if_contain_logic)
     {
         vector<string> keyword_list = patternMiner->get_keyword_white_list();
         if (keyword_list.size() == 0)
@@ -476,8 +493,26 @@ public:
             cout <<"\n Becasue max_distance <= 0, Pattern_Max_Gram = " << max_distance << " will be used!" << std::endl;
         }
 
-        patternMiner->selectSubsetFromCorpus(keyword_list, max_distance);
+        patternMiner->selectSubsetFromCorpus(keyword_list, max_distance, if_contain_logic);
     }
+
+    // select a subset from the current AtomSpace with the keywords defined in whitelist.
+    // the subset will contain max_distance connected atoms which contains these keywords in their labels
+    // e.g.: "book,computer", Nodes with labels : "book", "handbook", "computer", "super computer" will all be selected.
+    void select_whitelist_subset_from_atomspace_contain_keywords(int max_distance)
+    {
+        select_whitelist_subset_from_atomspace(max_distance, true);
+    }
+
+    // select a subset from the current AtomSpace with the keywords defined in whitelist.
+    // the subset will contain max_distance connected atoms which contains these keywords in their labels
+    // e.g.: "book,computer", only Nodes with labels : "book", "computer" will all be selected;
+    // "handbook", "super computer"  will not be selected
+    void select_whitelist_subset_from_atomspace_equalto_keywords(int max_distance)
+    {
+        select_whitelist_subset_from_atomspace(max_distance, false);
+    }
+
 
     void apply_whitelist_keyword_filter_after_mining()
     {
@@ -614,8 +649,10 @@ void PatternMinerSCM::init()
     define_scheme_primitive("pm-clear-keyword-black-list", &PatternMinerSCM::clear_keyword_black_list, this, "patternminer");
     define_scheme_primitive("pm-clear-keyword-white-list", &PatternMinerSCM::clear_keyword_white_list, this, "patternminer");
 
-    define_scheme_primitive("pm-select-subset-from-atomspace", &PatternMinerSCM::select_subset_from_atomspace, this, "patternminer");
-    define_scheme_primitive("pm-select-whitelist-subset-from-atomspace", &PatternMinerSCM::select_whitelist_subset_from_atomspace, this, "patternminer");
+    define_scheme_primitive("pm-select-subset-from-atomspace-nodes-contain-keywords", &PatternMinerSCM::select_subset_from_atomspace_nodes_contain_keywords, this, "patternminer");
+    define_scheme_primitive("pm-select-subset-from-atomspace-nodes-equalto-keywords", &PatternMinerSCM::select_subset_from_atomspace_nodes_equalto_keywords, this, "patternminer");
+    define_scheme_primitive("pm-select-whitelist-subset-from-atomspace-contain-keywords", &PatternMinerSCM::select_whitelist_subset_from_atomspace_contain_keywords, this, "patternminer");
+    define_scheme_primitive("pm-select-whitelist-subset-from-atomspace-equalto-keywords", &PatternMinerSCM::select_whitelist_subset_from_atomspace_equalto_keywords, this, "patternminer");
     define_scheme_primitive("pm-apply-whitelist-keyword-filter-after-mining", &PatternMinerSCM::apply_whitelist_keyword_filter_after_mining, this, "patternminer");
     define_scheme_primitive("pm-reset-patternminer", &PatternMinerSCM::reset_patternminer, this, "patternminer");
     define_scheme_primitive("pm-run-interestingness-evaluation", &PatternMinerSCM::run_interestingness_evaluation, this, "patternminer");

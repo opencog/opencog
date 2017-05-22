@@ -399,7 +399,7 @@ public:
 
     void runInterestingnessEvaluation();
 
-    void selectSubsetFromCorpus(vector<string> &topics, unsigned int gram = 2);
+    void selectSubsetFromCorpus(vector<string> &topics, unsigned int gram, bool if_contian_logic = true);
 
     vector<HTreeNode*>&  getFinalPatternsForGram(unsigned int gram){return finalPatternsForGram[gram - 1];}
 

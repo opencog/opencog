@@ -3060,9 +3060,9 @@ void PatternMiner::evaluateInterestingnessTask()
 }
 
 // select a subset for topics from the corpus
-void PatternMiner::selectSubsetFromCorpus(vector<string>& topics, unsigned int gram)
+void PatternMiner::selectSubsetFromCorpus(vector<string>& topics, unsigned int gram, bool if_contian_logic)
 {
-    _selectSubsetFromCorpus(topics,gram);
+    _selectSubsetFromCorpus(topics,gram, if_contian_logic);
 }
 
 std::string PatternMiner::Link2keyString(Handle& h, std::string indent, const AtomSpace *atomspace)
@@ -3492,8 +3492,14 @@ void PatternMiner::findAllLinksContainKeyWords(vector<string>& subsetKeywords, u
     {
         for (string keyword : subsetKeywords)
         {
-            std::cout << keyword << std::endl;
-            Handle keywordNode = originalAtomSpace->add_node(opencog::CONCEPT_NODE,keyword);
+            // std::cout << keyword << std::endl;
+            Handle keywordNode = originalAtomSpace->get_node(opencog::CONCEPT_NODE,keyword);
+            if (keywordNode == Handle::UNDEFINED)
+                keywordNode = originalAtomSpace->get_node(opencog::PREDICATE_NODE,keyword);
+
+            if (keywordNode == Handle::UNDEFINED)
+                continue;
+
             OrderedHandleSet newConnectedLinks = _getAllNonIgnoredLinksForGivenNode(keywordNode, allSubsetLinks);
 
             allSubsetLinks.insert(newConnectedLinks.begin(), newConnectedLinks.end());
