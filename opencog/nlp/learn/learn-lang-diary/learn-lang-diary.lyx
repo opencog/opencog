@@ -21037,6 +21037,17 @@ Fractional MI is interesting because it usually has a reasonably nice distributi
 on.
  For this particular dataset, it ranges from about -20 to +8.
  The distribution is shown in the graphs below.
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+These are graphed by binned-cset-mi and weighted-cset-mi in the disjunct-stats.sc
+m file.
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -21105,21 +21116,20 @@ where '
 \end_layout
 
 \begin_layout Subsection*
-Mutual Information
+Mutual Information of words
 \end_layout
 
 \begin_layout Standard
-Another interesting item is a mutual-information ranking.
- It is given by the (fractional) mutual information between a word, and
- all of it's disjuncts:
+The mutual information of a single word can be defined by summing the (fractiona
+l) mutual information between a word, and all of it's disjuncts:
 \begin_inset Formula 
 \[
-MI_{word}(w)=-\frac{1}{p(w)}\sum_{d}p(w,d)\log_{2}\frac{p(w,d)}{p(w,*)p(*,d)}
+MI_{word}(w)=\frac{1}{p(w)}\sum_{d}p(w,d)MI_{pair}(w,d)
 \]
 
 \end_inset
 
-This is written in the 
+This is also written in the 
 \begin_inset Quotes eld
 \end_inset
 
@@ -21127,10 +21137,11 @@ fractional
 \begin_inset Quotes erd
 \end_inset
 
- style, so that the total MI of the entire dataset can be written as
+ style, so that, again, the total MI of the entire dataset can be written
+ as
 \begin_inset Formula 
 \[
-MI=\sum_{w}p(w)MI_{word}(w)
+MI_{cset}=\sum_{w}p(w)MI_{word}(w)
 \]
 
 \end_inset
@@ -21144,24 +21155,54 @@ That is,
  it factors out the frequency of how often a word is observed: the MI of
  two words with two very different frequencies can be directly compared.
  As can be seen from the graph below, the fractional MI ranges between +3
- and +13 for this dataset.
+ and +19 for this dataset.
 \end_layout
 
 \begin_layout Standard
 The total MI for the dataset is measured to be 7.985 bits.
- The graph below shows the MI of the 630 words that have been observed more
- than 100 times in this dataset.
+ 
+\end_layout
+
+\begin_layout Standard
+The distribution can be visualized in two different ways.
+ The graph on the left, below
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+This is graphed by sorted-word-mi-hi-p in disjunct-stats.scm 
+\end_layout
+
+\end_inset
+
+ shows the ranked MI of the 630 words that have been observed more than
+ 100 times in this dataset.
  Note that it is a semi-log plot; it is NOT Zipfian.
  Note that the MI seems to decay logarithmically, for a good long ways,
  and then drops off a cliff.
- What are the disjuncts like at either end of this cliff?
+ 
+\end_layout
+
+\begin_layout Standard
+The graph on the right shows the distribution, for all 37413 words, bin-counted
+ into 100 bins.
+ Unfortunately, this sampling remains small and noisey, so the suggestion
+ of a log-linear decay to both left and right is hidden by rather noisey
+ spikes.
 \end_layout
 
 \begin_layout Standard
 \align center
 \begin_inset Graphics
 	filename images/ranked-word-mi-hi-p.eps
-	width 60text%
+	width 45text%
+
+\end_inset
+
+
+\begin_inset Graphics
+	filename images/binned-word-mi.eps
+	width 45col%
 
 \end_inset
 
@@ -21176,8 +21217,9 @@ The total MI for the dataset is measured to be 7.985 bits.
 \end_layout
 
 \begin_layout Standard
-The first ten words in this ranking are: "Cao" "Award" "x" "y" "Prime" "we"
- "per" "Division" "League" "Game".
+What re the disjuncts like at either end of this distribution? The first
+ ten words in the ranking are: "Cao" "Award" "x" "y" "Prime" "we" "per"
+ "Division" "League" "Game".
  The word 
 \begin_inset Quotes eld
 \end_inset

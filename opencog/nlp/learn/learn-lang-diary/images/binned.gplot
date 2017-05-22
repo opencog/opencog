@@ -27,3 +27,14 @@ set xlabel "Mutual information of connector-set"
 set ylabel "Count"
 plot "weighted-cset-mi.dat" using 2:3 with lines linewidth 2 title ""
 
+#################################################
+# Used to generate the binned word-MI graph
+#
+set term postscript eps color
+set out 'binned-word-mi.eps'
+set logscale y
+set title "Distribution of word fractional MI"
+set xlabel "Fractional mutual information of word"
+set ylabel "Count"
+plot "binned-word-mi.dat" using 2:3 with lines linewidth 2 title ""
+
