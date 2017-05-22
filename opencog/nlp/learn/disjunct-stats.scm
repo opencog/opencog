@@ -510,9 +510,21 @@
 	(close outport))
 
 ; ---------------------------------------------------------------------
-; Create the distribution for word-MI 
+; Create the distribution graphs for word-MI
 
 (define binned-word-mi (bin-count-simple sorted-word-mi 100))
+
+(define (new-cset-vec-word-mi WORD)
+	(define pca (make-pseudo-cset-api))
+	(define pmi (add-pair-mi-api pca))
+	(pmi 'compute-right-fmi WORD)
+)
+
+(define osorted-word-mi (score-and-rank new-cset-vec-word-mi all-cset-words))
+
+(let ((outport (open-file "/tmp/binned-word-mi.dat" "w")))
+	(print-ts-bincounts binned-word-mi outport)
+	(close outport))
 
 xxxxxx
 ; ---------------------------------------------------------------------

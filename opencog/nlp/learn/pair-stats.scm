@@ -82,14 +82,14 @@
 		;    MI_total = sum_y mi_left(y)
 		(define (compute-left-mi RIGHT-ITEM)
 			(fold
-				(lambda (PAIR sum) (+ sum (frqobj 'pair-fmi PAIR)))
+				(lambda (PAIR sum) (+ sum (frqobj 'pair-mi PAIR)))
 				0
 				(frqobj 'left-stars RIGHT-ITEM)))
 
 		; As above, but flipped.
 		(define (compute-right-mi LEFT-ITEM)
 			(fold
-				(lambda (PAIR sum) (+ sum (frqobj 'pair-fmi PAIR)))
+				(lambda (PAIR sum) (+ sum (frqobj 'pair-mi PAIR)))
 				0
 				(frqobj 'right-stars LEFT-ITEM)))
 

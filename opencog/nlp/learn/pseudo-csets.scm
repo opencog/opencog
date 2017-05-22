@@ -393,13 +393,10 @@
 	(/ nats (log 2.0))
 )
 
-; XXX FIXME, this should be replaced by the modern implementation
-;
-; (define (cset-vec-word-mi WORD)
-;    (define pca (make-pseudo-cset-api))
-;    (define pmi (add-pair-mi-api pca))
-;    (pmi 'compute-right-fmi WORD))
-;
+; Use the new, modern object API for all this stuff.
+(define pseudo-cset-api (make-pseudo-cset-api))
+(define pseudo-cset-mi-api (add-pair-mi-api pca))
+
 (define (cset-vec-word-mi WORD)
 "
 	cset-vec-word-mi - get the fractional mutual information between
@@ -411,20 +408,7 @@
 
    Note this function returns MI in units of bits. i.e. log-2
 "
-	(define n-tot (get-stashed-count))
-	(define sum 0)
-	(define n-word (cset-vec-observations WORD))
-	(for-each
-		(lambda (cset)
-			(define dj (cset-get-disjunct cset))
-			(define n-dj (cset-vec-observations dj))
-			(define n-cset (get-count cset))
-			(set! sum
-				(+ sum (* n-cset (log (/ (* n-cset n-tot) (* n-word n-dj)))))
-		))
-		(get-cset-vec WORD))
-	; (/ sum n-tot)
-	(/ sum (* n-word (log 2)))
+	(pseudo-cset-mi-api 'compute-right-fmi WORD))
 )
 
 ; ---------------------------------------------------------------------
