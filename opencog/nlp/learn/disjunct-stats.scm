@@ -442,7 +442,7 @@
 (define pcw (add-pair-wildcards pca))
 (define pmi (add-pair-mi-api pca))
 (define (cset-vec-word-ent WORD)
-		(pmi 'compute-right-fractional WORD))
+		(pmi 'compute-right-fentropy WORD))
 
 ; rank only the top-100
 (define sorted-word-ent (score-and-rank cset-vec-word-ent top-cset-words))
@@ -492,7 +492,6 @@
 	(print-ts-bincounts wlogli-cset-mi outport)
 	(close outport))
 
-xxxxxxx
 ; ---------------------------------------------------------------------
 ; Rank words according to the MI between them and thier disjuncts
 (define sorted-word-mi (score-and-rank cset-vec-word-mi all-cset-words))
@@ -510,6 +509,12 @@ xxxxxxx
 	(print-ts-rank sorted-word-mi-hi-p outport)
 	(close outport))
 
+; ---------------------------------------------------------------------
+; Create the distribution for word-MI 
+
+(define binned-word-mi (bin-count-simple sorted-word-mi 100))
+
+xxxxxx
 ; ---------------------------------------------------------------------
 ; ---------------------------------------------------------------------
 ; ---------------------------------------------------------------------

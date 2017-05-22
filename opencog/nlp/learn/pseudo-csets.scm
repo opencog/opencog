@@ -393,11 +393,18 @@
 	(/ nats (log 2.0))
 )
 
+; XXX FIXME, this should be replaced by the modern implementation
+;
+; (define (cset-vec-word-mi WORD)
+;    (define pca (make-pseudo-cset-api))
+;    (define pmi (add-pair-mi-api pca))
+;    (pmi 'compute-right-fmi WORD))
+;
 (define (cset-vec-word-mi WORD)
 "
 	cset-vec-word-mi - get the fractional mutual information between
    the word and all of it's disjuncts. This is defined as
-      MI(w) = (1/p(w)) sum_d p(d,w) log_2 p(d,w)/[p(d,*) p(*,w)]
+      MI(w) = (1/p(w)) sum_d p(w,d) log_2 p(w,d)/[p(w,*) p(*,d)]
    This is defined 'fractionally', so that the MI of the dataset
    as a whole can be written as
      MI = sum_w p(w) MI(w)

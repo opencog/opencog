@@ -72,13 +72,52 @@
 			(/ (compute-right-entropy LEFT-ITEM)
 				(frqobj 'right-wild-freq LEFT-ITEM)))
 
+		; ---------------
+		; Compute the left MI summation:
+		;    mi_left(y) = sum_x P(x,y) log_2 MI(x,y)
+		;
+		; where MI(x,y) = -log_2 P(x,y) / P(x,*) P(*,y)
+		;
+		; Note that
+		;    MI_total = sum_y mi_left(y)
+		(define (compute-left-mi RIGHT-ITEM)
+			(fold
+				(lambda (PAIR sum) (+ sum (frqobj 'pair-fmi PAIR)))
+				0
+				(frqobj 'left-stars RIGHT-ITEM)))
+
+		; As above, but flipped.
+		(define (compute-right-mi LEFT-ITEM)
+			(fold
+				(lambda (PAIR sum) (+ sum (frqobj 'pair-fmi PAIR)))
+				0
+				(frqobj 'right-stars LEFT-ITEM)))
+
+		; Compute the left-fractional MI summation:
+		;    MI_left(y) = mi_left(y) / P(*,y)
+		; Note that
+		;    MI_total = sum_y P(*,y) MI_left(y)
+		(define (compute-left-fmi RIGHT-ITEM)
+			(/ (compute-left-mi RIGHT-ITEM)
+				(frqobj 'left-wild-freq RIGHT-ITEM)))
+
+		; As above, but flipped.
+		(define (compute-right-fmi LEFT-ITEM)
+			(/ (compute-right-mi LEFT-ITEM)
+				(frqobj 'right-wild-freq LEFT-ITEM)))
+
+
 		; Methods on this class.
 		(lambda (message . args)
 			(case message
-				((compute-left-entropy)  (apply compute-left-entropy args))
-				((compute-right-entropy) (apply compute-right-entropy args))
-				((compute-left-fractional)  (apply compute-left-fractional args))
-				((compute-right-fractional) (apply compute-right-fractional args))
+				((compute-left-entropy)   (apply compute-left-entropy args))
+				((compute-right-entropy)  (apply compute-right-entropy args))
+				((compute-left-fentropy)  (apply compute-left-fractional args))
+				((compute-right-fentropy) (apply compute-right-fractional args))
+				((compute-left-mi)        (apply compute-left-mi args))
+				((compute-right-mi)       (apply compute-right-mi args))
+				((compute-left-fmi)       (apply compute-left-fmi args))
+				((compute-right-fmi)      (apply compute-right-fmi args))
 				(else (apply frqobj      (cons message args))))
 		))
 )
