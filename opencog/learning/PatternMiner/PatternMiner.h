@@ -356,6 +356,8 @@ protected:
 
     bool containWhiteKeywords(const string& str, QUERY_LOGIC logic);
 
+    bool containKeywords(const string& str, vector<string>& keywords, QUERY_LOGIC logic);
+
     void reSetAllSettingsFromConfig();
 
     void initPatternMiner();
