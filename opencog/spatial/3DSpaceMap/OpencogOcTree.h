@@ -67,15 +67,22 @@ namespace opencog
             ~OpencogOcTreeNode(){}
             OpencogOcTreeNode& operator=(const OpencogOcTreeNode& rhs);
 
-#ifdef NEED_OBSOLETE_OCTREE_API
             // children
             inline OpencogOcTreeNode* getChild(unsigned int i)
             {
+#ifdef NEED_OBSOLETE_OCTREE_API
                 return static_cast<OpencogOcTreeNode*> (OcTreeNode::getChild(i));
+#else
+                return static_cast<OpencogOcTreeNode*> (children[i]);
+#endif
             }
             inline const OpencogOcTreeNode* getChild(unsigned int i) const
             {
+#ifdef NEED_OBSOLETE_OCTREE_API
                 return static_cast<const OpencogOcTreeNode*> (OcTreeNode::getChild(i));
+#else
+                return static_cast<const OpencogOcTreeNode*> (children[i]);
+#endif
             }
 
             bool createChild(unsigned int i)
@@ -86,7 +93,6 @@ namespace opencog
                 children[i] = new OpencogOcTreeNode();
                 return true;
             }
-#endif
 
             void setBlock(const Handle& block)
             {

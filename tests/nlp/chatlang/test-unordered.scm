@@ -3,19 +3,23 @@
              (opencog nlp chatlang)
              (opencog openpsi))
 
-(define rule (chat-rule '((lemma "blah")
-                          (unordered-matching "foo" "bar")
-                          (word "bleh"))
-                        '(say "phew")))
-
-(define term-seq (cog-outgoing-set (gar (car
-    (filter (lambda (x) (equal? 'TrueLink (cog-type x)))
-            (cog-outgoing-set (gdr (car (psi-get-context rule)))))))))
+(define w (cons 'word "drink"))
+(define l (cons 'lemma "eat"))
+(define p (cons 'phrase "John Smith"))
+(define c (cons 'concept "play"))
+(define unordered (unordered-matching (list w l p c)))
 
 (define test-unordered-result
-    (and (equal? (list-ref term-seq 0)
-                 (Word "blah"))
-         (equal? (list-ref term-seq 1)
-                 (Glob "$unordered"))
-         (equal? (list-ref term-seq 2)
-                 (Word "bleh"))))
+    (equal? 5 (length
+        (filter (lambda (x)
+            (and (or (eq? (cog-type x) 'ReferenceLink)
+                     (eq? (cog-type x) 'LemmaLink)
+                     (eq? (cog-type x) 'EvaluationLink))
+                 (or (equal? (gdr x) (WordNode "drink"))
+                     (equal? (gdr x) (WordNode "eat"))
+                     (equal? (gdr x) (WordNode "John"))
+                     (equal? (gdr x) (WordNode "Smith"))
+                     (and (equal? (gar x)
+                                  (GroundedPredicateNode "scm: chatlang-concept?"))
+                          (equal? (gdr (gdr x)) (ConceptNode "play"))))))
+        (cdr unordered)))))

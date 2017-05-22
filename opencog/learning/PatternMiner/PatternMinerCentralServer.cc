@@ -44,8 +44,6 @@
 #include <opencog/embodiment/atom_types.h>
 #include <opencog/query/BindLinkAPI.h>
 #include <opencog/util/Config.h>
-#include <boost/algorithm/string.hpp>
-#include <boost/algorithm/string/regex.hpp>
 
 #include "DistributedPatternMiner.h"
 
@@ -537,178 +535,7 @@ void DistributedPatternMiner::parseAPatternTask(json::value jval)
     }
 }
 
-// a patternStr is sent from a distributed worker via json, it's the keystring of a pattern
-// the server need to load the string into links into AtomSpace
-// e.g. a patternStr =
-//  (InheritanceLink )\n
-//    (VariableNode $var_1)\n
-//    (ConceptNode human)\n\n
-//  (EvaluationLink )\n
-//    (PredicateNode like_drink)
-//    (Listlink )\n
-//      (VariableNode $var_1)\n
-//      (ConceptNode soda)\n\n
-//  (InheritanceLink )\n
-//    (VariableNode $var_1)\n
-//    (ConceptNode ugly)\n\n
 
-//(AndLink)\n
-//  (InheritanceLink )\n
-//    (VariableNode $var_1)\n
-//    (ConceptNode human)\n
-//  (EvaluationLink )\n
-//    (PredicateNode like_drink)
-//    (Listlink )\n
-//      (VariableNode $var_1)\n
-//      (ConceptNode soda)\n\n
-//(InheritanceLink )\n
-//    (VariableNode $var_1)\n
-//    (ConceptNode ugly)\n\n
-HandleSeq DistributedPatternMiner::loadPatternIntoAtomSpaceFromString(string patternStr, AtomSpace *_atomSpace)
-{
-
-    std::vector<std::string> strs;
-    boost::algorithm::split_regex( strs, patternStr, boost::regex( "\n\n" ) ) ;
-
-    HandleSeq pattern;
-
-//    // debug
-//    if (strs.size() > 2)
-//    {
-//        int i = 0;
-//        i++;
-//    }
-
-    for (string linkStr : strs) // load each link
-    {
-        if (linkStr == "")
-            continue;
-
-            HandleSeq rootOutgoings;
-
-            std::size_t firstLineEndPos = linkStr.find("\n");
-            std::string rootOutgoingStr = linkStr.substr(firstLineEndPos + 1);
-            stringstream outgoingStream(rootOutgoingStr);
-
-            if (! loadOutgoingsIntoAtomSpaceFromString(outgoingStream, _atomSpace, rootOutgoings))
-            {
-                cout << "Warning: loadPatternIntoAtomSpaceFromString: Parse pattern string error: " << linkStr << std::endl;
-                HandleSeq emptyPattern;
-                return emptyPattern;
-            }
-
-            std::size_t typeEndPos = linkStr.find(" ");
-            string atomTypeStr = linkStr.substr(1, typeEndPos - 1);
-            string linkOrNodeStr = atomTypeStr.substr(atomTypeStr.size() - 4, 4);
-
-            if (linkOrNodeStr != "Link")
-            {
-
-                cout << "Warning: loadPatternIntoAtomSpaceFromString: Not a Link: " << linkOrNodeStr << std::endl;
-                HandleSeq emptyPattern;
-                return emptyPattern;
-
-            }
-
-            Type atomType = classserver().getType(atomTypeStr);
-            if (NOTYPE == atomType)
-            {
-
-                cout << "Warning: loadPatternIntoAtomSpaceFromString: Not a valid typename: " << atomTypeStr << std::endl;
-                HandleSeq emptyPattern;
-                return emptyPattern;
-
-            }
-
-            Handle rootLink = _atomSpace->add_link(atomType, rootOutgoings);
-            pattern.push_back(rootLink);
-
-
-    }
-
-    // debug:
-    // static int pattern_num = 0;
-    // string patternToStr = "";
-
-    // for(Handle h : pattern)
-    // {
-    //    patternToStr += h->toShortString();
-    //    patternToStr += "\n";
-    // }
-
-    // cout << "\nAdded pattern: NO." << pattern_num << "\n" << patternToStr;
-    // pattern_num ++;
-
-    return pattern;
-}
-
-// recursively function
-bool DistributedPatternMiner::loadOutgoingsIntoAtomSpaceFromString(stringstream& outgoingStream, AtomSpace *_atomSpace, HandleSeq &outgoings, string parentIndent)
-{
-    string line;
-    string curIndent = parentIndent + LINE_INDENTATION;
-
-    while(getline(outgoingStream, line))
-    {
-
-        std::size_t nonIndentStartPos = line.find("(");
-        string indent = line.substr(0, nonIndentStartPos);
-        string nonIndentSubStr = line.substr(nonIndentStartPos + 1);
-        std::size_t typeEndPos = nonIndentSubStr.find(" ");
-        string atomTypeStr = nonIndentSubStr.substr(0, typeEndPos);
-        string linkOrNodeStr = atomTypeStr.substr(atomTypeStr.size() - 4, 4);
-        Type atomType = classserver().getType(atomTypeStr);
-        if (NOTYPE == atomType)
-        {
-            cout << "Warning: loadOutgoingsIntoAtomSpaceFromString: Not a valid typename: " << atomTypeStr << std::endl;
-            return false;
-
-        }
-
-        if (indent == curIndent)
-        {
-            if (linkOrNodeStr == "Node")
-            {
-                std::size_t nodeNameEndPos = nonIndentSubStr.find(")");
-                string nodeName = nonIndentSubStr.substr(typeEndPos + 1, nodeNameEndPos - typeEndPos - 1);
-                Handle node = _atomSpace->add_node(atomType, nodeName);
-                outgoings.push_back(node);
-            }
-            else if (linkOrNodeStr == "Link")
-            {
-                // call this function recursively
-                HandleSeq childOutgoings;
-                if (! loadOutgoingsIntoAtomSpaceFromString(outgoingStream, _atomSpace, childOutgoings, curIndent))
-                    return false;
-
-                Handle link = _atomSpace->add_link(atomType, childOutgoings);
-                outgoings.push_back(link);
-            }
-            else
-            {
-                cout << "Warning: loadOutgoingsIntoAtomSpaceFromString: Not a Node, neighter a Link: " << linkOrNodeStr << std::endl;
-                return false;
-
-            }
-
-        }
-        else if (indent.size() < curIndent.size())
-        {
-            return true;
-        }
-        else
-        {
-            // exception
-            cout << "Warning: loadOutgoingsIntoAtomSpaceFromString: Indent wrong: " << line << std::endl;
-            return false;
-
-
-        }
-
-    }
-
-    return true;
-}
 
 void DistributedPatternMiner::centralServerEvaluateInterestingness()
 {
@@ -735,7 +562,15 @@ void DistributedPatternMiner::centralServerEvaluateInterestingness()
     {
         for(cur_gram = 2; cur_gram <= MAX_GRAM; cur_gram ++)
         {
-            cout << "\nCalculating interestingness for " << cur_gram << " gram patterns by evaluating " << interestingness_Evaluation_method << std::endl;
+            cout << "\nCalculating";
+            if (Enable_Interaction_Information)
+                cout << " Interaction_Information ";
+
+            if (Enable_surprisingness)
+                cout << " Surprisingness ";
+
+            cout << "for " << cur_gram << " gram patterns." << std::endl;
+
             cur_index = -1;
             threads = new thread[THREAD_NUM];
             num_of_patterns_without_superpattern_cur_gram = 0;
@@ -755,13 +590,14 @@ void DistributedPatternMiner::centralServerEvaluateInterestingness()
             std::cout<<"Debug: PatternMiner:  done (gram = " + toString(cur_gram) + ") interestingness evaluation!" + toString((patternsForGram[cur_gram-1]).size()) + " patterns found! ";
             std::cout<<"Outputting to file ... ";
 
-            if (interestingness_Evaluation_method == "Interaction_Information")
+            if (Enable_Interaction_Information)
             {
                 // sort by interaction information
                 std::sort((patternsForGram[cur_gram-1]).begin(), (patternsForGram[cur_gram-1]).end(),compareHTreeNodeByInteractionInformation);
                 OutPutInterestingPatternsToFile(patternsForGram[cur_gram-1], cur_gram, 0);
             }
-            else if (interestingness_Evaluation_method == "surprisingness")
+
+            if (Enable_surprisingness)
             {
                 // sort by surprisingness_I first
                 std::sort((patternsForGram[cur_gram-1]).begin(), (patternsForGram[cur_gram-1]).end(),compareHTreeNodeBySurprisingness_I);
