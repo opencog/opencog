@@ -1,4 +1,4 @@
-;
+
 ; disjunct-stats.scm
 ;
 ; Assorted ad-hoc collection of tools for understanding the
@@ -64,13 +64,16 @@
 	(define bin-width (/ (- max-value min-value) (- nbins 1)))
 
 	; Given a value, find the corresponding bin number.
-	(define (value->bin val) (/ (- val min-value) bin-width))
+	(define (value->bin val)
+		(inexact->exact (floor (/ (- val min-value) bin-width))))
 
 	; Increment the bin-count by this much.
 	(define (item->count item) 1)
 
 	(define bins (make-array 0 nbins))
+	(define centers (make-array 0 nbins))
 
+	; Do the actual bin-counting
 	(for-each
 		(lambda (scored-item)
 			(define bin (value->bin (car scored-item)))
@@ -79,8 +82,22 @@
 				bin))
 		scored-items)
 
-	bins
+	; Store the centers of the bins
+	(array-index-map! centers
+		(lambda (i) (+ (* i bin-width) min-value)))
+
+	(list centers bins)
 )
+
+(define (print-ts-bincounts cent-bins port)
+	(define centers (first cent-bins))
+	(define bins (second cent-bins))
+	(define binno 0)
+	(for-each
+		(lambda (bin-cnt)
+			(format port "~A	~A	~A\n" binno (array-ref centers binno) bin-cnt)
+			(set! binno (+ binno 1)))
+		(array->list bins)))
 
 ; ---------------------------------------------------------------------
 ; A list of all words that have csets. (Not all of the words
@@ -419,6 +436,13 @@
 (let ((outport (open-file "/tmp/ranked-pair-mi.dat" "w")))
 	(print-ts-rank-cset sorted-pair-mi outport)
 	(close outport))
+
+(define binned-pair-mi (bin-count sorted-pair-mi 200))
+
+(let ((outport (open-file "/tmp/binned-pair-mi.dat" "w")))
+	(print-ts-bincounts binned-pair-mi outport)
+	(close outport))
+
 
 xxxxxxx
 ; ---------------------------------------------------------------------

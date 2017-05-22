@@ -6075,3 +6075,6 @@ education: 100  N=3 has 1  N=2 has 7
 lost 100  1 and 7
 days  98 2 7
 children 101 1 9
+
+(define bins (second binned-pair-mi))
+(fold + 0 (array->list bins))
