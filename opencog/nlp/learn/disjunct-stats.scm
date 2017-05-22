@@ -34,9 +34,53 @@
 	(print-ts-rank-fn scrs port cog-name))
 
 (define (print-ts-rank-cset scrs port)
-   (print-ts-rank-fn scrs port 
+   (print-ts-rank-fn scrs port
 		(lambda (x) (cog-name (gar x)))))
 
+
+; ---------------------------------------------------------------------
+; Bin-counting utilities.
+; This must be the 20th time I've implemented bin-counts in my life...
+; The input is assumed to be a list of pairs, with the car of the pair
+; being the score-value to be binned, and the cdr being the item.
+
+(define (bin-count scored-items nbins)
+	; Find the smallest in the list
+	(define min-value
+		(fold
+			(lambda (scored-item min)
+				(if (< min (car scored-item)) min (car scored-item)))
+				10000000.0
+				scored-items))
+
+	; Find the largest in the list
+	(define max-value
+		(fold
+			(lambda (scored-item max)
+				(if (> max (car scored-item)) max (car scored-item)))
+				-10000000.0
+				scored-items))
+
+	(define bin-width (/ (- max-value min-value) (- nbins 1)))
+
+	; Given a value, find the corresponding bin number.
+	(define (value->bin val) (/ (- val min-value) bin-width))
+
+	; Increment the bin-count by this much.
+	(define (item->count item) 1)
+
+	(define bins (make-array 0 nbins))
+
+	(for-each
+		(lambda (scored-item)
+			(define bin (value->bin (car scored-item)))
+			(array-set! bins
+				(+ (array-ref bins bin) (item->count (cdr scored-item)))
+				bin))
+		scored-items)
+
+	bins
+)
 
 ; ---------------------------------------------------------------------
 ; A list of all words that have csets. (Not all of the words
