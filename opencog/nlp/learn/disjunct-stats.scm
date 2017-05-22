@@ -482,6 +482,16 @@
 	(print-ts-bincounts weighted-cset-mi outport)
 	(close outport))
 
+(define (cset-logli CSET) (pfrq 'pair-logli CSET))
+
+(define wlogli-cset-mi
+	(bin-count-weighted sorted-cset-mi 200 
+		(lambda (scored-item) (cset-logli (cdr scored-item)))))
+
+(let ((outport (open-file "/tmp/wlogli-cset-mi.dat" "w")))
+	(print-ts-bincounts wlogli-cset-mi outport)
+	(close outport))
+
 xxxxxxx
 ; ---------------------------------------------------------------------
 ; Rank words according to the MI between them and thier disjuncts
