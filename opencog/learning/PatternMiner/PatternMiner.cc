@@ -3060,9 +3060,9 @@ void PatternMiner::evaluateInterestingnessTask()
 }
 
 // select a subset for topics from the corpus
-void PatternMiner::selectSubsetFromCorpus(vector<string>& topics, unsigned int gram)
+void PatternMiner::selectSubsetFromCorpus(vector<string>& topics, unsigned int gram, bool if_contian_logic)
 {
-    _selectSubsetFromCorpus(topics,gram);
+    _selectSubsetFromCorpus(topics,gram, if_contian_logic);
 }
 
 std::string PatternMiner::Link2keyString(Handle& h, std::string indent, const AtomSpace *atomspace)
