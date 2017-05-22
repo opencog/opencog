@@ -19546,7 +19546,19 @@ United States
 \end_inset
 
 , and so this probably dominates the disjunct count.
- This is confirmed by manual inspection, per table below.
+ This is confirmed by manual inspection
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+View disjuncts by saying (filter (lambda (cset) (< 10 (get-count cset)))
+ (cog-incoming-by-type (Word "foo") 'LgWordCset)) where 10 is the minimum
+ number of counts.
+\end_layout
+
+\end_inset
+
+, per table below.
 \end_layout
 
 \begin_layout Standard
@@ -21682,6 +21694,7 @@ Generated from sorted-word-ent in disjunct-stats.scm.
 
 \end_inset
 
+ It only shows those words that have been observed 100 times, or more.
  It resembles the graph for the ranked fractional MI, above.
 \end_layout
 
@@ -21697,7 +21710,7 @@ Generated from sorted-word-ent in disjunct-stats.scm.
 \end_layout
 
 \begin_layout Standard
-The top-ranked words are these:
+The top-ranked words (which have been observed 100 times or more) are these:
 \end_layout
 
 \begin_layout Standard
@@ -21956,6 +21969,406 @@ normal
 
  words: mostly nouns, some modifiers, a verb, a preposition.
  Why these? 
+\end_layout
+
+\begin_layout Standard
+The answer lies in looking at the disjunct set, shown in the table below.
+ All of these words have a large support, but were observed very infrequently.
+ For example, 
+\begin_inset Quotes eld
+\end_inset
+
+possible
+\begin_inset Quotes erd
+\end_inset
+
+ has only one disjunct that was observed 3 times, 4 that were observed twice,
+ and 101 that were observed only once.
+ A quick examination shows that many, maybe most, are grammatically reasonable,
+ for example: (investigate- routes+) (is- also- for+) (is- only- to+) (made-
+ through+) (many- as-) and so on.
+ But all of these were observed precisely once.
+ The table below illustrates this.
+ 
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Tabular
+<lyxtabular version="3" rows="6" columns="5">
+<features tabularvalignment="middle">
+<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top" width="0">
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Entropy
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Word
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $\left|(w,*)\right|_{2}$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $\left|(w,*)\right|_{1}$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $\left|(w,*)\right|_{0}$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+19.22
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+possible
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+1
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+5
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+106
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+19.18
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+education
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+1
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+7
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+100
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+19.18
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+lost
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+1
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+7
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+100
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+19.15
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+days
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+2
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+8
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+98
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+19.15
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+children
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+1
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+9
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+101
+\end_layout
+
+\end_inset
+</cell>
+</row>
+</lyxtabular>
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset VSpace defskip
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+A bit of notation.
+ Recall the defintion for the set that supports a word: 
+\begin_inset Formula 
+\[
+(w,*)=\left\{ (w,d)|N(w,d)>0\right\} 
+\]
+
+\end_inset
+
+together with the notation 
+\begin_inset Formula $\left|(w,*)\right|$
+\end_inset
+
+ to indicate the size of this set.
+ Extend this notation as
+\begin_inset Formula 
+\[
+\left|(w,*)\right|_{k}=\mbox{sizeof }\left\{ (w,d)|N(w,d)>k\right\} 
+\]
+
+\end_inset
+
+That is, 
+\begin_inset Formula $\left|(w,*)\right|_{k}$
+\end_inset
+
+ is the size of the support for when the disjucts on word 
+\begin_inset Formula $w$
+\end_inset
+
+ have been seen more than 
+\begin_inset Formula $k$
+\end_inset
+
+ times.
+\end_layout
+
+\begin_layout Standard
+From this table, it is now clear why 
+\begin_inset Quotes eld
+\end_inset
+
+large entropy
+\begin_inset Quotes erd
+\end_inset
+
+ can be intuitively understood to mean 
+\begin_inset Quotes eld
+\end_inset
+
+many possibilities
+\begin_inset Quotes erd
+\end_inset
+
+.
+ Each of these words was seen in a very broad setting of possibilities:
+ in a sense, the broadest possible.
+ Each of these words was observed with a vary large set of different disjuncts,
+ and this set was as spread-out as possible: the vast majority of disjuncts
+ were observed exactly once.
+ 
 \end_layout
 
 \begin_layout Subsection*
