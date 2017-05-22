@@ -2893,6 +2893,30 @@ bool PatternMiner::containWhiteKeywords(const string& str, QUERY_LOGIC logic)
     }
 }
 
+bool PatternMiner::containKeywords(const string& str, vector<string>& keywords, QUERY_LOGIC logic)
+{
+    if (logic == QUERY_LOGIC::OR)
+    {
+        for (string keyword : keywords)
+        {
+            if (str.find(keyword) != std::string::npos)
+                return true;
+        }
+
+        return false;
+    }
+    else // QUERY_LOGIC::AND
+    {
+        for (string keyword : keywords)
+        {
+            if (str.find(keyword) == std::string::npos)
+                return false;
+        }
+
+        return true;
+    }
+}
+
 void PatternMiner::applyWhiteListKeywordfilterAfterMining()
 {
     if (patternsForGram[0].size() < 1)
@@ -3439,7 +3463,7 @@ void PatternMiner::findAllLinksContainKeyWords(vector<string>& subsetKeywords, u
 
             if (allSubsetLinks.find(newh) == allSubsetLinks.end())
             {
-                if (containWhiteKeywords(newh->toShortString(), QUERY_LOGIC::OR))
+                if (containKeywords(newh->toShortString(), subsetKeywords, QUERY_LOGIC::OR))
                     allSubsetLinks.insert(newh);
                 else
                 {
