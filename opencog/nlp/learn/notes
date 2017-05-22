@@ -6061,3 +6061,17 @@ OK, so we are back in business
 right-wild gives dj
 
 /tmp/ranked-word-ent.dat
+
+(define cs (cog-incoming-by-type (Word "possible") 'LgWordCset))
+
+(filter (lambda (cset) (< 10 (get-count cset))) cs)
+
+possible N=3 has 1: a-
+         N=2 has 5: (is- that+) (it- to+) 
+         N=1 = 106
+
+education: 100  N=3 has 1  N=2 has 7
+
+lost 100  1 and 7
+days  98 2 7
+children 101 1 9

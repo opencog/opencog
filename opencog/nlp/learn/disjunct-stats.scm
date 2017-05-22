@@ -33,6 +33,11 @@
 (define (print-ts-rank scrs port)
 	(print-ts-rank-fn scrs port cog-name))
 
+(define (print-ts-rank-cset scrs port)
+   (print-ts-rank-fn scrs port 
+		(lambda (x) (cog-name (gar x)))))
+
+
 ; ---------------------------------------------------------------------
 ; A list of all words that have csets. (Not all of the words
 ; in the database got tagged with a cset)
@@ -352,13 +357,26 @@
 ; rank only the top-100
 (define sorted-word-ent (score-and-rank cset-vec-word-ent top-cset-words))
 
-xxxxx
-
 ; Print above to a file, so that it can be graphed.
 (let ((outport (open-file "/tmp/ranked-word-ent.dat" "w")))
 	(print-ts-rank sorted-word-ent outport)
 	(close outport))
 
+; ---------------------------------------------------------------------
+; Rank word-disjunct pairs according to thier fractonal MI.
+
+(define pfrq (add-pair-freq-api  pca))
+(define (cset-vec-pair-mi CSET)
+	(pfrq 'pair-fmi CSET))
+
+(define sorted-pair-mi (score-and-rank cset-vec-pair-mi all-csets))
+
+; Print above to a file, so that it can be graphed.
+(let ((outport (open-file "/tmp/ranked-pair-mi.dat" "w")))
+	(print-ts-rank-cset sorted-pair-mi outport)
+	(close outport))
+
+xxxxxxx
 ; ---------------------------------------------------------------------
 ; Rank words according to the MI between them and thier disjuncts
 (define sorted-word-mi (score-and-rank cset-vec-word-mi all-cset-words))
