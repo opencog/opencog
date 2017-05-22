@@ -6031,6 +6031,50 @@ select count(*) from atoms; << 2829421 = 2.8M
 67789172 = 68M counts = 2.8M/hour = 784 pairs/sec
 
 Why is it slowing?
+---------------
+1) why is valuation updates about 3.5x of sum(3)?
+2) why is get-got almost 2x bigger than delta for nodes? A: 
+3) why is get-got almost 1.5x bigger than delta for links? A: LgAnd's
+
+One sentence:
+sum valuations=245   but 461 valuation updates!?
+5 WordNodes
+7 ListLinks
+7 EvaluationLinks
+----------------- expect 19 atoms
+got 41 atoms... many are LgWordCsets, LgAnd's OK.  total stores is perfect.
+
+num_get_nodes=34 huh???
+this time, 922 updates!!!! wtf
+why are fecth and store counts same?? maybe cause not syn
+cog-logger-set-sync!
+
+There were 23 fetches logged:
+1 sent
+1 parse
+5 word
+ -- total 7 nodes
+?? where are the connectors? not fetched, cause not incr'ed so OK.
+7 eval
+9 lgwordcset
+ -- total 16 links
+ ListLinks, not fetched cause not incr'ed. so OK.
+
+245 stores. again 922 updates of values...
+
+SentenceNode got update twice...
+ParseNode twice ... 
+2x for all the words ... 
+
+Then lots of updates, even when not teh main target of the store...
+Now, only 490 updates. Still too many. should be 245 ... !?
+barrier is broken.. wewell its not forcing a flush
+
+does close have a barrier?
+
+well, busy_writers is a bad idea... because it races.
+but queue size was wrong.
+
 
 
 =====================================================
