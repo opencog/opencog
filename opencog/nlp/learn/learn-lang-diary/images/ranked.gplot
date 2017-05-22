@@ -97,7 +97,7 @@ plot "ranked-avg.dat" using 1:2 with lines linewidth 2 title "", \
 unset ytics
 
 #################################################
-# Used to generate the disjunct ranking graphs.
+# Used to generate the word-mi ranking graphs.
 #
 set term postscript eps color
 set out 'ranked-word-mi-hi-p.eps'
@@ -106,6 +106,18 @@ set title "MI of word"
 set xlabel "Rank"
 set ylabel "MI of word"
 plot "ranked-word-mi-hi-p.dat" using 1:2 with lines linewidth 2 title ""
+
+
+#################################################
+# Used to generate the word-entropy ranking graphs.
+#
+set term postscript eps color
+set out 'ranked-word-ent.eps'
+set logscale x
+set title "Ranking by fractional word entropy"
+set xlabel "Rank"
+set ylabel "Fractional Word Entropy"
+plot "ranked-word-ent.dat" using 1:2 with lines linewidth 2 title ""
 
 
 #################################################
