@@ -1,0 +1,18 @@
+# set term png small color
+set term png small
+set out 'binned.png'
+
+# set data style linespoints
+# set data style points
+
+#################################################
+# Used to generate the binned connector-set counts
+#
+set term postscript eps color
+set out 'binned-cset-mi.eps'
+set logscale y
+set title "Distribution of connector set mutual information"
+set xlabel "Mutual information of connector-set"
+set ylabel "Count"
+plot "binned-cset-mi.dat" using 2:3 with lines linewidth 2 title ""
+
