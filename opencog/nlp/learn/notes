@@ -6056,5 +6056,8 @@ Stored 60000 of 291637 lefties in 62 secs (322.5806451612903 stores/sec)
 OK, so we are back in business
 ======================================================================
 
-(add-total-entropy-api pca
+(add-pair-mi-api pca) 'compute-left-fractional
 
+right-wild gives dj
+
+/tmp/ranked-word-ent.dat

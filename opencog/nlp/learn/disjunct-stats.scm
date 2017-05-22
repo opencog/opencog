@@ -43,6 +43,11 @@
 
 (define all-csets (get-all-csets))
 
+; words with 100 or more observations.
+(define top-cset-words
+	(filter (lambda (wrd) (< 100 (cset-vec-observations wrd)))
+		all-cset-words))
+
 ; ---------------------------------------------------------------------
 ; A sorted list of score-word pairs, where the score is the count
 ; of the cset observations. Note that this score is *identical* to the
@@ -81,9 +86,7 @@
 ; Compute the average number of observations per disjunct.
 ; Discard anything with less than 100 observations.
 (define sorted-avg
-	(score-and-rank avg-obs
-		(filter (lambda (wrd) (< 100 (cset-vec-observations wrd)))
-			all-cset-words)))
+	(score-and-rank avg-obs top-cset-words))
 
 (let ((outport (open-file "/tmp/ranked-avg.dat" "w")))
 	(print-ts-rank sorted-avg outport)
@@ -120,9 +123,7 @@
 ; The length vs observation ranking; but discard everything
 ; with a small number of observations.
 (define sorted-lensq-norm
-	(score-and-rank lensq-vs-obs
-		(filter (lambda (wrd) (< 100 (cset-vec-observations wrd)))
-			all-cset-words)))
+	(score-and-rank lensq-vs-obs top-cset-words))
 
 (let ((outport (open-file "/tmp/ranked-sqlen-norm.dat" "w")))
 	(print-ts-rank sorted-lensq-norm outport)
@@ -149,9 +150,7 @@
 ; per disjunct.
 ; Discard anything with less than 100 observations.
 (define sorted-rms
-	(score-and-rank rms-deviation
-		(filter (lambda (wrd) (< 100 (cset-vec-observations wrd)))
-			all-cset-words)))
+	(score-and-rank rms-deviation top-cset-words))
 
 (let ((outport (open-file "/tmp/ranked-rms.dat" "w")))
 	(print-ts-rank sorted-rms outport)
@@ -171,9 +170,7 @@
 ; Rank by average disjunct size; but discard everything
 ; with a small number of observations.
 (define sorted-avg-connectors
-	(score-and-rank avg-con-count
-		(filter (lambda (wrd) (< 100 (cset-vec-observations wrd)))
-			all-cset-words)))
+	(score-and-rank avg-con-count top-cset-words))
 
 (define sorted-avg-connectors
 	(score-and-rank avg-con-count all-cset-words))
@@ -192,9 +189,7 @@
 	(sqrt (- meansq (* avg avg))))
 
 (define sorted-hub-connectors
-	(score-and-rank moment-con-count
-		(filter (lambda (wrd) (< 100 (cset-vec-observations wrd)))
-			all-cset-words)))
+	(score-and-rank moment-con-count top-cset-words))
 
 (let ((outport (open-file "/tmp/ranked-hub-connectors.dat" "w")))
 	(print-ts-rank sorted-hub-connectors outport)
@@ -255,10 +250,7 @@
 		WORD-LIST))
 
 ; Accumulate all, but only for those with 100 or more observations.
-(accum-dj-all
-	(filter
-		(lambda (word) (< 100 (cset-vec-observations word)))
-		all-cset-words))
+(accum-dj-all top-csets-words)
 
 (define (print-dj-acc port)
 	(define idx 0)
@@ -357,17 +349,23 @@
 (define (cset-vec-word-ent WORD)
 		(pmi 'compute-right-fractional WORD))
 
-(define sorted-word-ent (score-and-rank cset-vec-word-ent all-cset-words))
+; rank only the top-100
+(define sorted-word-ent (score-and-rank cset-vec-word-ent top-cset-words))
+
 xxxxx
+
+; Print above to a file, so that it can be graphed.
+(let ((outport (open-file "/tmp/ranked-word-ent.dat" "w")))
+	(print-ts-rank sorted-word-ent outport)
+	(close outport))
 
 ; ---------------------------------------------------------------------
 ; Rank words according to the MI between them and thier disjuncts
 (define sorted-word-mi (score-and-rank cset-vec-word-mi all-cset-words))
 
 ; Like above, but high-ferequency only
-(define sorted-word-mi-hi-p (score-and-rank cset-vec-word-mi
-		(filter (lambda (wrd) (< 100 (cset-vec-observations wrd)))
-			all-cset-words)))
+(define sorted-word-mi-hi-p
+	(score-and-rank cset-vec-word-mi top-cset-words))
 
 ; Print above to a file, so that it can be graphed.
 (let ((outport (open-file "/tmp/ranked-word-mi.dat" "w")))
