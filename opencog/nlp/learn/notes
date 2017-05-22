@@ -6020,6 +6020,18 @@ WHERE valuations.type=typecodes.type AND typecodes.typename='CountTruthValue';
 
 gives 39459145 = 39M counts = 3.1M counted per hour = 863 pairs/second
 
+----------------
+As of 2017-05-22 05:56:04 i.e. 24 hours later
+497 articles  .. really 500 a day, avg.
+
+select count(*) from atoms; << 2829421 = 2.8M
+1309922 = 1.3M EvaluationLinks
+53781 = 54K words
+
+67789172 = 68M counts = 2.8M/hour = 784 pairs/sec
+
+Why is it slowing?
+
 
 =====================================================
 TODO:
