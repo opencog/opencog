@@ -20790,8 +20790,8 @@ the
 \end_layout
 
 \begin_layout Standard
-The graph below shouls the distribution of the size of the support: the
- ranking of 
+The graph below shows the distribution of the size of the support: the ranking
+ of 
 \begin_inset Formula $\left|(w,*)\right|$
 \end_inset
 
@@ -20924,7 +20924,7 @@ The RMS size of the set is thus larger not only when more disjuncts have
 \align center
 \begin_inset Graphics
 	filename images/ranked-lengths.eps
-	width 60text%
+	width 70text%
 
 \end_inset
 
