@@ -134,9 +134,9 @@
 ;
 (define (make-compute-count LLOBJ)
 
-	; We need 'left-supprt, provided by add-pair-wildcards
+	; We need 'left-supprt, provided by add-pair-wildcards-api
 	; We need 'set-left-wild-count, provided by add-pair-count-api
-	(let ((cntobj (add-pair-count-api (add-pair-wildcards LLOBJ))))
+	(let ((cntobj (add-pair-count-api (add-pair-wildcards-api LLOBJ))))
 
 		; Compute the left-side wild-card count. This is the number
 		; N(*,y) = sum_x N(x,y) where ITEM==y and N(x,y) is the number
@@ -263,11 +263,11 @@
 
 (define (make-compute-freq LLOBJ)
 
-	; We need 'left-support, provided by add-pair-wildcards
+	; We need 'left-support, provided by add-pair-wildcards-api
 	; We need 'wild-wild-count, provided by add-pair-count-api
 	; We need 'set-left-wild-freq, provided by add-pair-freq-api
 	(let ((cntobj (add-pair-freq-api (add-pair-count-api
-					(add-pair-wildcards LLOBJ))))
+					(add-pair-wildcards-api LLOBJ))))
 			(tot-cnt 0))
 
 		(define (init)
@@ -378,12 +378,12 @@
 		(set! start-nsecs (get-internal-real-time))
 		(/ (* diff 1000.0) internal-time-units-per-second))
 
-	; We need 'left-supprt, provided by add-pair-wildcards
+	; We need 'left-supprt, provided by add-pair-wildcards-api
 	; We need 'pair-freq, provided by add-pair-freq-api
 	; We need 'set-pair-mi, provided by add-pair-freq-api
 	; We need 'right-wild-count, provided by add-pair-count-api
 	(let ((frqobj (add-pair-freq-api
-				(add-pair-count-api (add-pair-wildcards LLOBJ)))))
+				(add-pair-count-api (add-pair-wildcards-api LLOBJ)))))
 
 		; Loop over all pairs, computing the MI for each. The loop
 		; is actually two nested loops, with a loop over the
@@ -502,7 +502,7 @@
 		diff)
 
 	; Decorate the object with methods that report support.
-	(define wild-obj (add-pair-wildcards OBJ))
+	(define wild-obj (add-pair-wildcards-api OBJ))
 
 	; Decorate the object with methods that can compute counts.
 	(define count-obj (make-compute-count OBJ))

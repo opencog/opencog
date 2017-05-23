@@ -171,7 +171,7 @@
 	(cog-incoming-by-type ITEM 'LgWordCset)
 
 	; Should be this:
-	; ((add-pair-wildcards (make-pseudo-cset-api)) 'right-stars ITEM)
+	; ((add-pair-wildcards-api (make-pseudo-cset-api)) 'right-stars ITEM)
 )
 
 (define-public (sort-cset-vec ITEM)

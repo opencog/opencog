@@ -125,7 +125,7 @@
 
 (use-modules (srfi srfi-1))
 
-(define-public (add-pair-wildcards LLOBJ)
+(define-public (add-pair-wildcards-api LLOBJ)
 "
   pair-wildcards LLOBJ - Extend LLOBJ with wildcard methods.
 

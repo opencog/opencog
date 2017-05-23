@@ -33,9 +33,9 @@
   via the standard frequency-object API. These must have been
   pre-computed, before this object can be used.
 "
-	; Need the 'left-stars method, provided by add-pair-wildcards
+	; Need the 'left-stars method, provided by add-pair-wildcards-api
 	; Need the 'left-wild-freq method, provided by add-pair-freq-api
-	(let ((frqobj (add-pair-freq-api (add-pair-wildcards LLOBJ))))
+	(let ((frqobj (add-pair-freq-api (add-pair-wildcards-api LLOBJ))))
 
 		; Compute the left-wild entropy summation:
 		;    h_left(y) = -sum_x P(x,y) log_2 P(x,y)
@@ -137,9 +137,9 @@
 
   These methods loop over all pairs, and so can take a lot of time.
 "
-	; Need the 'left-support method, provided by add-pair-wildcards
+	; Need the 'left-support method, provided by add-pair-wildcards-api
 	; Need the 'pair-logli method, provided by add-pair-freq-api
-	(let ((frqobj (add-pair-freq-api (add-pair-wildcards LLOBJ))))
+	(let ((frqobj (add-pair-freq-api (add-pair-wildcards-api LLOBJ))))
 
 		; Compute the total entropy for the set. This loops over all
 		; pairs, and computes the sum

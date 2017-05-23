@@ -210,10 +210,6 @@
 	(close outport))
 
 ; ---------------------------------------------------------------------
-; Similar to above, but this time, instead of ranking, we bin-count.
-;
-xxxxxx
-; ---------------------------------------------------------------------
 ; Compute the average number of observations per disjunct.
 (define (avg-obs WORD)
 	(/ (cset-vec-word-observations WORD) (cset-vec-support WORD)))
@@ -227,6 +223,10 @@ xxxxxx
 	(print-ts-rank sorted-avg outport)
 	(close outport))
 
+; --------------------------
+; As above, but this time, instead of ranking, we bin-count.
+;
+xxxxxx
 ; ---------------------------------------------------------------------
 ; A sorted list of the support of a word.
 ; The support is simply how many basis elements of a vector are
@@ -517,7 +517,7 @@ xxxxxx
 	(close outport))
 
 ; -------
-; A simle graph of how many words were observed once, twice, etc.
+; A simple graph of how many words were observed once, twice, etc.
 ; So: first column: how many times a word was observed.
 ; Second column: the number of words that were observed tat many times.
 ;
