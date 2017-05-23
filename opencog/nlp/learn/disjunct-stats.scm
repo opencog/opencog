@@ -3,8 +3,13 @@
 ;
 ; Assorted ad-hoc collection of tools for understanding the
 ; word-simillarity obtained via pseudo-disjunct overlap.
+;
 ; These were used to create the section "Connetor Sets 7 May 2017"
-; in the diary.
+; in the diary. These can ONLY be used by hand, by cutting and pasting
+; the interesting bits from this file, into a guile prompt. This is
+; more of a kind-of work-log of what was needed to generate those
+; pictures, than anything else. Of course, this can be recycled for
+; other datasets, too.
 ;
 ; Copyright (c) 2017 Linas Vepstas
 ;
@@ -452,6 +457,14 @@
 	(print-ts-rank sorted-word-ent outport)
 	(close outport))
 
+(define sorted-word-ent (score-and-rank cset-vec-word-ent all-cset-words))
+(define binned-word-ent (bin-count-simple sorted-word-ent 100))
+
+(let ((outport (open-file "/tmp/binned-word-ent.dat" "w")))
+	(print-ts-bincounts binned-word-ent outport)
+	(close outport))
+
+xxxxxx
 ; ---------------------------------------------------------------------
 ; Rank word-disjunct pairs according to thier fractonal MI.
 
@@ -510,7 +523,7 @@
 	(close outport))
 
 ; ---------------------------------------------------------------------
-; Create the distribution graphs for word-MI
+; Create the binned distribution graphs for word-MI
 
 (define binned-word-mi (bin-count-simple sorted-word-mi 100))
 
@@ -526,7 +539,20 @@
 	(print-ts-bincounts binned-word-mi outport)
 	(close outport))
 
-xxxxxx
+; ---------------------------------------------------------------------
+; Create the binned distribution graphs for dj-MI
+
+(define (cset-vec-disjunct-mi DJ)
+	(pseudo-cset-mi-api 'compute-left-fmi DJ))
+
+(define sorted-dj-mi (score-and-rank cset-vec-disjunct-mi all-disjuncts))
+
+(define binned-dj-mi (bin-count-simple sorted-dj-mi 100))
+
+(let ((outport (open-file "/tmp/binned-dj-mi.dat" "w")))
+	(print-ts-bincounts binned-dj-mi outport)
+	(close outport))
+
 ; ---------------------------------------------------------------------
 ; ---------------------------------------------------------------------
 ; ---------------------------------------------------------------------

@@ -395,7 +395,7 @@
 
 ; Use the new, modern object API for all this stuff.
 (define pseudo-cset-api (make-pseudo-cset-api))
-(define pseudo-cset-mi-api (add-pair-mi-api pca))
+(define pseudo-cset-mi-api (add-pair-mi-api pseudo-cset-api))
 
 (define (cset-vec-word-mi WORD)
 "

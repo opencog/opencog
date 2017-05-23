@@ -6030,6 +6030,26 @@ select count(*) from atoms; << 2829421 = 2.8M
 
 67789172 = 68M counts = 2.8M/hour = 784 pairs/sec
 
+----------------
+As of 2017-05-22 23:58:10 
+888 articles
+
+select count(*) from atoms; <<< 4239364 = 4.2M 
+1980561 = 2M eval links
+71595 = 71K words
+
+116752710 = 117M counts in 42 hours = 2.8M/hour
+          or (117M-68M) / 18 hours = 2.7M/hour
+
+------------------
+Restart from scratch 2017-05-23 00:10:00
+at 01:51 have 129302108= 129M so 12M in 1.7 hours = 7M/hour
+So now its more than 2x faster. almost 3x, with rounding errors
+Yayyyy!!!
+
+
+----------------------------------------------------
+
 Why is it slowing?
 ---------------
 1) why is valuation updates about 3.5x of sum(3)?
@@ -6075,7 +6095,9 @@ does close have a barrier?
 well, busy_writers is a bad idea... because it races.
 but queue size was wrong.
 
+OK, so 105 of 245 ... 123 
 
+ why is fillfraction 55K ? Because drain is no longer being hit.
 
 =====================================================
 TODO:
