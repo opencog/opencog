@@ -1,0 +1,64 @@
+# set term png small color
+set term png small
+set out 'binned.png'
+
+# set data style linespoints
+# set data style points
+
+#################################################
+# Used to generate the binned connector-set counts
+#
+set term postscript eps color
+set out 'binned-cset-mi.eps'
+set logscale y
+set title "Distribution of connector set mutual information"
+set xlabel "Mutual information of connector-set"
+set ylabel "Count"
+plot "binned-cset-mi.dat" using 2:3 with lines linewidth 2 title ""
+
+#################################################
+# Used to generate the weighted binned connector-set counts
+#
+set term postscript eps color
+set out 'weighted-cset-mi.eps'
+set logscale y
+set title "Weighted distribution of connector set mutual information"
+set xlabel "Mutual information of connector-set"
+set ylabel "Count"
+plot "weighted-cset-mi.dat" using 2:3 with lines linewidth 2 title ""
+
+#################################################
+# Used to generate the binned word-MI graph
+#
+set term postscript eps color
+set out 'binned-word-mi.eps'
+set logscale y
+set title "Distribution of word fractional MI"
+set xlabel "Fractional mutual information of word"
+set ylabel "Count"
+plot "binned-word-mi.dat" using 2:3 with lines linewidth 2 title ""
+
+
+#################################################
+# Used to generate the binned disjunct MI counts
+#
+set term postscript eps color
+set out 'binned-dj-mi.eps'
+set logscale y
+set title "Distribution of disjunct fractional MI"
+set xlabel "Fractional mutual information of disjunct"
+set ylabel "Count"
+plot "binned-dj-mi.dat" using 2:3 with lines linewidth 2 title ""
+
+
+#################################################
+# Used to generate the binned word entropy counts
+#
+set term postscript eps color
+set out 'binned-word-ent.eps'
+set logscale y
+set title "Distribution of word fractional entropy"
+set xlabel "Fractional entropy of word"
+set ylabel "Count"
+plot "binned-word-ent.dat" using 2:3 with lines linewidth 2 title ""
+
