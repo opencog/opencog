@@ -464,7 +464,44 @@
 	(print-ts-bincounts binned-word-ent outport)
 	(close outport))
 
-xxxxxx
+;--------------
+(define (cset-vec-word-logli WORD)
+	(pmi 'right-wild-logli WORD))
+
+(define sorted-word-logli (score-and-rank cset-vec-word-logli all-cset-words))
+(define binned-word-logli (bin-count-simple sorted-word-logli 100))
+
+(let ((outport (open-file "/tmp/binned-word-logli.dat" "w")))
+	(print-ts-bincounts binned-word-logli outport)
+	(close outport))
+
+;--------------
+; cheat method, assumes we are not making errors,
+; it would be better to double-check this by running the
+; sums the other way.
+(define (cset-vec-word-crazy WORD)
+	(- (pmi 'compute-right-mi WORD) 
+		(+ (pmi 'right-wild-logli WORD)
+			(pmi 'compute-right-fentropy WORD))))
+
+(define sorted-word-crazy (score-and-rank cset-vec-word-crazy all-cset-words))
+(define binned-word-crazy (bin-count-simple sorted-word-crazy 100))
+
+(let ((outport (open-file "/tmp/binned-word-crazy.dat" "w")))
+	(print-ts-bincounts binned-word-crazy outport)
+	(close outport))
+
+(define (cset-vec-word-crazy2 WORD)
+	(- (pmi 'compute-right-mi WORD) 
+		(pmi 'compute-right-fentropy WORD)))
+
+(define sorted-word-crazy2 (score-and-rank cset-vec-word-crazy2 all-cset-words))
+(define binned-word-crazy2 (bin-count-simple sorted-word-crazy2 100))
+
+(let ((outport (open-file "/tmp/binned-word-crazy2.dat" "w")))
+	(print-ts-bincounts binned-word-crazy2 outport)
+	(close outport))
+
 ; ---------------------------------------------------------------------
 ; Rank word-disjunct pairs according to thier fractonal MI.
 
