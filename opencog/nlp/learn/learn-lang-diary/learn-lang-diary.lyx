@@ -19448,6 +19448,70 @@ He was
  graph.
 \end_layout
 
+\begin_layout Standard
+It is also interesting to turn this graph 
+\begin_inset Quotes eld
+\end_inset
+
+on it's side
+\begin_inset Quotes erd
+\end_inset
+
+.
+ So, in this dataset, there were 15270 words observed exactly once.
+ These are presumably rare typos, foreign words, IPA pronunciation guides:
+ any word that appears only oce must be unusual.
+ There are 5790 words that appear twice, 3093 that appear exactly 3 times,
+ 
+\emph on
+etc.
+
+\emph default
+ These are graphed below.
+ 
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Graphics
+	filename images/binned-word-counts.eps
+	width 70text%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Writing 
+\begin_inset Formula $N$
+\end_inset
+
+ for the number of times that some word was observed, it appears that there
+ are approximately 
+\begin_inset Formula $15270\times N^{-3/2}$
+\end_inset
+
+ words observed that many times.
+ In formulas, the size of the set of words 
+\begin_inset Formula 
+\[
+\left|\left\{ w|N(w)=N\right\} \right|\sim N^{-3/2}
+\]
+
+\end_inset
+
+where 
+\begin_inset Formula $\left\{ w|\mbox{cond}\right\} $
+\end_inset
+
+ is a set of words (subject to the condition cond) and 
+\begin_inset Formula $\left|\left\{ w|\mbox{cond}\right\} \right|$
+\end_inset
+
+ denotes the size of that set of words.
+\end_layout
+
 \begin_layout Subsection*
 Ranked average observations per disjunct
 \end_layout

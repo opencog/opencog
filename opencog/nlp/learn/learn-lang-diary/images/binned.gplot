@@ -67,3 +67,21 @@ set xlabel "Fractional entropy of word"
 set ylabel "Count"
 plot "binned-word-ent.dat" using 2:3 with lines linewidth 5 title ""
 
+
+#################################################
+# Used to generate the binned word frequency counts
+
+set term postscript eps enhanced color 28
+set out 'binned-word-counts.eps'
+set xrange [1:200]
+set yrange [1:20000]
+set logscale x
+set logscale y
+set format y "10^{%L}"
+set title "Frequency of word observations"
+set xlabel "Number of observations"
+set ylabel "Number of words"
+# plot "binned-word-counts.dat" using 2:3 with point  pointsize 2 title "obs", \
+
+plot "binned-word-counts.dat" using 2:3 with lines linewidth 5 title "", \
+     "binned-word-counts.dat" using 2:(15270 * $2**(-1.5)) with lines linewidth 5 title "N^{-1.5}"
