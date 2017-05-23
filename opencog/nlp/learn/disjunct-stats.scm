@@ -70,11 +70,16 @@
 (define (bin-count ITEMS NBINS item->value item->count
          LOWER UPPER)
 
-	(define bin-width (/ (- UPPER LOWER) (- NBINS 1)))
+	(define bin-width (/ (- UPPER LOWER) NBINS))
 
 	; Given a value, find the corresponding bin number.
+	; min and max are 0 and NBINS-1
 	(define (value->bin val)
-		(inexact->exact (floor (/ (- val LOWER) bin-width))))
+		(define bino
+			(inexact->exact (floor (/ (- val LOWER) bin-width))))
+		(if (< 0 bino)
+			(if (> NBINS bino) bino (- NBINS 1))
+			0))
 
 	(define bins (make-array 0 NBINS))
 	(define centers (make-array 0 NBINS))
@@ -90,7 +95,7 @@
 
 	; Store the centers of the bins
 	(array-index-map! centers
-		(lambda (i) (+ (* i bin-width) LOWER)))
+		(lambda (i) (+ (* (+ i 0.5) bin-width) LOWER)))
 
 	(list centers bins)
 )
@@ -117,15 +122,16 @@
 		ITEMS))
 
 ; Just use the simplest binning
-(define (bin-count-simple scored-items nbins)
+(define* (bin-count-simple scored-items nbins #:optional
+	; default left andright bounds
+	(min-val (min-value first scored-items))
+	(max-val (max-value first scored-items)))
+
 	; Get the item score
-	(define (item->value item) (car item))
+	(define (item->value item) (first item))
 
 	; Increment the bin-count by this much.
 	(define (item->count item) 1)
-
-	(define min-val (min-value item->value scored-items))
-	(define max-val (max-value item->value scored-items))
 
 	(bin-count scored-items nbins item->value item->count
 	    min-val max-val)
@@ -133,8 +139,14 @@
 
 (define (bin-count-weighted scored-items nbins item->count)
 	; Get the item score
-	(define (item->value item) (car item))
-	(bin-count  scored-items nbins item->value item->count)
+	(define (item->value item) (first item))
+
+	; Default left and right bounds
+	(define min-val (min-value item->value scored-items))
+	(define max-val (max-value item->value scored-items))
+
+	(bin-count scored-items nbins item->value item->count
+	    min-val max-val)
 )
 
 
@@ -507,12 +519,15 @@ xxxxxx
 (define (cset-vec-word-count WORD)
 	(pmi 'right-wild-count WORD))
 
-xxxxxxxxxxxx
 ; -------
 ; A simle graph of how many words were observed once, twice, etc.
+; So: first column: how many times a word was observed.
+; Second column: the number of words that were observed tat many times.
+;
 (define sorted-word-counts
 	(score-and-rank cset-vec-word-observations all-cset-words))
-(define binned-word-counts (bin-count-simple sorted-word-counts 900))
+(define binned-word-counts
+	(bin-count-simple sorted-word-counts 200 0.5 200.5))
 
 (let ((outport (open-file "/tmp/binned-word-counts.dat" "w")))
 	(print-ts-bincounts binned-word-counts outport)
