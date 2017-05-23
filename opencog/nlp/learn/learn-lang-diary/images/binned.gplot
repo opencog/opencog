@@ -85,3 +85,19 @@ set ylabel "Number of words"
 
 plot "binned-word-counts.dat" using 2:3 with lines linewidth 5 title "", \
      "binned-word-counts.dat" using 2:(15270 * $2**(-1.5)) with lines linewidth 5 title "N^{-1.5}"
+
+#################################################
+# Used to generate the binned word=-logli counts
+#
+set term postscript eps enhanced color 28
+set out 'binned-word-logli.eps'
+set yrange [1:20000]
+set logscale y
+set format y "10^{%L}"
+set title "Distribution of word Log-liklihoods"
+set xlabel "Log liklihood"
+set ylabel "Number of words"
+plot "binned-word-logli.dat" using 2:3 with lines linewidth 5 title "", \
+     "binned-word-logli.dat" using 2:(2**(1.5*($2-10))) with lines linewidth 5 title "2^{1.5(logli-10)}"
+
+#################################################
