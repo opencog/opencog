@@ -22842,7 +22842,7 @@ Given the earlier Zipfian results on the average degree
 \end_layout
 
 \begin_layout Subsection*
-Cosine Similarity
+Disjunct Cosine Similarity
 \end_layout
 
 \begin_layout Standard
@@ -23914,6 +23914,86 @@ Just as the case with nouns, the evidence for the similarity for these two
 \begin_layout Standard
 At any rate, the dataset seems a bit thin, but we already knew this; its
  based on a fairly small sample.
+\end_layout
+
+\begin_layout Subsection*
+Pair Cosine Similiarty
+\end_layout
+
+\begin_layout Standard
+To correctly gauge the disjunct-based cosine similarity, it should be contrasted
+ against the simplier pair-based cosine similarity.
+ This is given by 
+\begin_inset Formula 
+\[
+\mbox{sim}_{pair}(w_{1},w_{2})=\frac{\sum_{w}N_{pair}(w_{1},w)N_{pair}(w,w_{2})}{\mbox{len}(w_{1})\mbox{len}(w_{2})}
+\]
+
+\end_inset
+
+where 
+\begin_inset Formula $\mbox{len}(w)$
+\end_inset
+
+ is the root-mean-square length (Eucliden length) of the pair vector:
+\begin_inset Formula 
+\[
+\mbox{len}(w)=\sqrt{\sum_{v}N_{pair}(w,v)N_{pair}(v,w)}
+\]
+
+\end_inset
+
+and 
+\begin_inset Formula $N_{pair}(w,v)$
+\end_inset
+
+ is the count of having observed the ordered word-pair 
+\begin_inset Formula $(w,v)$
+\end_inset
+
+.
+ Equivalently, writing the normalized frequency of observing a word pair
+ as 
+\begin_inset Formula $p(w,v)=N(w,v)/N(*,*)$
+\end_inset
+
+, this similarity can be written in the form 
+\begin_inset Formula 
+\[
+\mbox{sim}_{pair}(w_{1},w_{2})=\frac{\sum_{w}p(w_{1},w)p(w,w_{2})}{\sqrt{\sum_{v}p(w_{1},v)p(v,w_{1})}\sqrt{\sum_{v}p(w_{2},v)p(v,w_{2})}}
+\]
+
+\end_inset
+
+Note that this similarity measure is NOT symmetric: 
+\begin_inset Formula $\mbox{sim}(w_{1},w_{2})\ne\mbox{sim}(w_{2},w_{1})$
+\end_inset
+
+.
+ This is because it's built out of a manifestly non-symmetric count: 
+\begin_inset Formula $p(w,v)\ne p(v,w)$
+\end_inset
+
+ and should really be written as 
+\begin_inset Formula $p(w,v)=p(R;w,v)$
+\end_inset
+
+ with the relation 
+\begin_inset Formula $R$
+\end_inset
+
+ encompasing all of the constraints of pair-wise word relationships (including,
+ for example, that the pair might have been extracted from a random planar
+ tree parse).
+ Of course, one could construct a symmetrized similarity measure.
+\end_layout
+
+\begin_layout Standard
+The point here is that this measure treats words as similar with they link,
+ pair-wise, to the same kinds of words, with the same kinds of frequencies.
+ This is not unlike the similarity that the disjunct-cosine is measuring,
+ except that the disjunct carries additonal grammatical information with
+ it: it captures more complex relationships between the words in a sentence.
 \end_layout
 
 \begin_layout Subsection*
