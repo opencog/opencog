@@ -6050,8 +6050,6 @@ Yayyyy!!!
 05:30 152806491 =153 -117 = 36M obs in 5.4 hours = 6.7M obs/hour
                 = 1854 obs/second
 
-
-
 ----------------------------------------------------
 
 Why is it slowing?
@@ -6160,3 +6158,10 @@ children 101 1 9
 
 (define bins (second binned-pair-mi))
 (fold + 0 (array->list bins))
+
+-----------------------------------------------------------
+1 word was observed 38977 times
+ 37502
+32517
+22632
+

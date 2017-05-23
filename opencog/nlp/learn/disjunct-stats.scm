@@ -60,31 +60,21 @@
 ; item->count should be a function that, given an item, returns the
 ;      count or strength for that item. It should return 1 for simple
 ;      binning.
+;
+; LOWER is the left boundry of the left-most bin; all values less than
+;     this will go into the left-most bin.
+;
+; UPPER is the right boundry of the right-most bin; all values greater
+;     than this will go into the right-most bin.
 
-(define (bin-count ITEMS NBINS item->value item->count)
-	; Find the smallest in the list
-	(define min-value
-		(fold
-			(lambda (item min)
-				(define value (item->value item))
-				(if (< min value) min value))
-				10000000.0
-				ITEMS))
+(define (bin-count ITEMS NBINS item->value item->count
+         LOWER UPPER)
 
-	; Find the largest in the list
-	(define max-value
-		(fold
-			(lambda (item max)
-				(define value (item->value item))
-				(if (> max value) max value))
-				-10000000.0
-				ITEMS))
-
-	(define bin-width (/ (- max-value min-value) (- NBINS 1)))
+	(define bin-width (/ (- UPPER LOWER) (- NBINS 1)))
 
 	; Given a value, find the corresponding bin number.
 	(define (value->bin val)
-		(inexact->exact (floor (/ (- val min-value) bin-width))))
+		(inexact->exact (floor (/ (- val LOWER) bin-width))))
 
 	(define bins (make-array 0 NBINS))
 	(define centers (make-array 0 NBINS))
@@ -100,18 +90,45 @@
 
 	; Store the centers of the bins
 	(array-index-map! centers
-		(lambda (i) (+ (* i bin-width) min-value)))
+		(lambda (i) (+ (* i bin-width) LOWER)))
 
 	(list centers bins)
 )
+
+; Find the smallest value in the list of ITEMS.
+; The item->value function returns the value, given the item.
+(define (min-value item->value ITEMS)
+	(fold
+		(lambda (item min)
+			(define value (item->value item))
+			(if (< min value) min value))
+		1e300
+		ITEMS))
+
+
+; Find the largest value in the list of ITEMS.
+; The item->value function returns the value, given the item.
+(define (max-value item->value ITEMS)
+	(fold
+		(lambda (item max)
+			(define value (item->value item))
+			(if (> max value) max value))
+		-1e300
+		ITEMS))
 
 ; Just use the simplest binning
 (define (bin-count-simple scored-items nbins)
 	; Get the item score
 	(define (item->value item) (car item))
+
 	; Increment the bin-count by this much.
 	(define (item->count item) 1)
-	(bin-count  scored-items nbins item->value item->count)
+
+	(define min-val (min-value item->value scored-items))
+	(define max-val (max-value item->value scored-items))
+
+	(bin-count scored-items nbins item->value item->count
+	    min-val max-val)
 )
 
 (define (bin-count-weighted scored-items nbins item->count)
@@ -473,6 +490,10 @@ xxxxxx
 	(close outport))
 
 ;--------------
+; Create a binned graph of the number of words observed with a given
+; log-liklihood.  Although this is in the binning tradition of the
+; other binned graphs, its really the same thing as the log-log
+; graph of the word-counts, but renormalized.
 (define (cset-vec-word-logli WORD)
 	(pmi 'right-wild-logli WORD))
 
@@ -487,11 +508,14 @@ xxxxxx
 	(pmi 'right-wild-count WORD))
 
 xxxxxxxxxxxx
-(define sorted-word-logli (score-and-rank cset-vec-word-logli all-cset-words))
-(define binned-word-logli (bin-count-simple sorted-word-logli 100))
+; -------
+; A simle graph of how many words were observed once, twice, etc.
+(define sorted-word-counts
+	(score-and-rank cset-vec-word-observations all-cset-words))
+(define binned-word-counts (bin-count-simple sorted-word-counts 900))
 
-(let ((outport (open-file "/tmp/binned-word-logli.dat" "w")))
-	(print-ts-bincounts binned-word-logli outport)
+(let ((outport (open-file "/tmp/binned-word-counts.dat" "w")))
+	(print-ts-bincounts binned-word-counts outport)
 	(close outport))
 
 ;--------------
