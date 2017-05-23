@@ -19283,12 +19283,12 @@ Some connector-sets will be observed far more often than others.
 
 \begin_layout Standard
 Two graphs, dual to one-another.
- The one on the right shows 
+ The one on the left shows 
 \begin_inset Formula $N(w,*)$
 \end_inset
 
 , ranked by count.
- The one on the left shows 
+ The one on the right shows 
 \begin_inset Formula $N(*,d)$
 \end_inset
 
@@ -20722,7 +20722,7 @@ Computed with the dj-united and dj-it arrays indisjunct-stats.scm
 \align center
 \begin_inset Graphics
 	filename images/ranked-dj-united.eps
-	width 60text%
+	width 70text%
 
 \end_inset
 
@@ -20751,7 +20751,7 @@ Computed with the accum-dj-all function in disjunct-stats.scm
 \align center
 \begin_inset Graphics
 	filename images/ranked-dj-counts.eps
-	width 60text%
+	width 70text%
 
 \end_inset
 
@@ -20760,9 +20760,10 @@ Computed with the accum-dj-all function in disjunct-stats.scm
 
 \begin_layout Standard
 Its kind of a strange graph.
- Yes, the x-axis of this graph does imply that there is at least one word,
- and probably several, that have more than ten-thousand (unique, different)
- disjuncts on it! Are there more? That's covered in the next section.
+ Yes, the x-axis of this graph does imply that there are dozens, if not
+ hundreds of words with more than a thousand disjuncts on them, and maybe
+ half-a-dozen that have more than ten-thousand (unique, different) disjuncts
+ on them! Exactly what does this mean? This is covered in the next section.
 \end_layout
 
 \begin_layout Subsection*
