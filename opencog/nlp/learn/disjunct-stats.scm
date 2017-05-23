@@ -510,14 +510,11 @@ xxxxxx
 	(pmi 'right-wild-logli WORD))
 
 (define sorted-word-logli (score-and-rank cset-vec-word-logli all-cset-words))
-(define binned-word-logli (bin-count-simple sorted-word-logli 100))
+(define binned-word-logli (bin-count-simple sorted-word-logli 200 10.0 20.0))
 
 (let ((outport (open-file "/tmp/binned-word-logli.dat" "w")))
 	(print-ts-bincounts binned-word-logli outport)
 	(close outport))
-
-(define (cset-vec-word-count WORD)
-	(pmi 'right-wild-count WORD))
 
 ; -------
 ; A simle graph of how many words were observed once, twice, etc.
