@@ -21779,7 +21779,49 @@ MI=\sum_{d}p(*,d)MI_{disjunct}(d)
 
 \end_inset
 
+The distribution is shown below.
+\begin_inset Foot
+status collapsed
 
+\begin_layout Plain Layout
+Use binned-dj-mi to get this.
+ 
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Graphics
+	filename images/binned-dj-mi.eps
+	width 60col%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+So, at first, this looks much like the word-MI graph, until one realizes
+ its really almost a mirror-image.
+ Also very notable is that the MI is negative, in all cases! What does this
+ mean? In this case, it means that entropy is dominating over any 
+\begin_inset Quotes eld
+\end_inset
+
+attractive
+\begin_inset Quotes erd
+\end_inset
+
+ effect: basically, that the various disjuncts are getting used for a very
+ large and widespread set of words, and that any one disjunct is not favoring
+ any particular word or word-set; indeed, any given disjunct is mostly dis-favor
+ing any word or small set of words, and is instead appearing with just about
+ all words.
+ This is exp;lored a bit more in the next section.
 \end_layout
 
 \begin_layout Subsection*

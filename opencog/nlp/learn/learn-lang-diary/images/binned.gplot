@@ -38,3 +38,15 @@ set xlabel "Fractional mutual information of word"
 set ylabel "Count"
 plot "binned-word-mi.dat" using 2:3 with lines linewidth 2 title ""
 
+
+#################################################
+# Used to generate the binned connector-set counts
+#
+set term postscript eps color
+set out 'binned-dj-mi.eps'
+set logscale y
+set title "Distribution of disjunct fractional MI"
+set xlabel "Fractional mutual information of disjunct"
+set ylabel "Count"
+plot "binned-dj-mi.dat" using 2:3 with lines linewidth 2 title ""
+
