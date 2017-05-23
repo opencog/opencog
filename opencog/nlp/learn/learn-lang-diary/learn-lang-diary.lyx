@@ -21878,7 +21878,7 @@ H_{cset}=\sum_{d}p(d)H_{disjunct}(d)
 \end_layout
 
 \begin_layout Standard
-The ranked fractional entropy is shown in the graph below.
+The ranked fractional entropy is shown in the left graph below.
 \begin_inset Foot
 status collapsed
 
@@ -21890,13 +21890,25 @@ Generated from sorted-word-ent in disjunct-stats.scm.
 
  It only shows those words that have been observed 100 times, or more.
  It resembles the graph for the ranked fractional MI, above.
+ The graph on the right shows the distribution of teh entropy, for all of
+ the words.
+ This affirms (or explains?) the sharp knee in the graph on the left: the
+ knee occurs because almost all words have a large disjunct-entropy.
+ This is expained below.
 \end_layout
 
 \begin_layout Standard
 \align center
 \begin_inset Graphics
 	filename images/ranked-word-ent.eps
-	width 60theight%
+	width 45text%
+
+\end_inset
+
+
+\begin_inset Graphics
+	filename images/binned-word-ent.eps
+	width 45text%
 
 \end_inset
 
