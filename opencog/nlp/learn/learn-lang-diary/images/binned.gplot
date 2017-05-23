@@ -8,57 +8,62 @@ set out 'binned.png'
 #################################################
 # Used to generate the binned connector-set counts
 #
-set term postscript eps color
+set term postscript eps enhanced color 28
 set out 'binned-cset-mi.eps'
 set logscale y
-set title "Distribution of connector set mutual information"
-set xlabel "Mutual information of connector-set"
+set format y "10^{%L}"
+set title "Distribution of connector set MI"
+set xlabel "Mutual information of c-set"
 set ylabel "Count"
-plot "binned-cset-mi.dat" using 2:3 with lines linewidth 2 title ""
+plot "binned-cset-mi.dat" using 2:3 with lines linewidth 5 title ""
 
 #################################################
 # Used to generate the weighted binned connector-set counts
 #
-set term postscript eps color
+set term postscript eps enhanced color 28
 set out 'weighted-cset-mi.eps'
 set logscale y
-set title "Weighted distribution of connector set mutual information"
-set xlabel "Mutual information of connector-set"
+set format y "10^{%L}"
+set title "Weighted distribution of connector set MI"
+set xlabel "Mutual information of c-set"
 set ylabel "Count"
-plot "weighted-cset-mi.dat" using 2:3 with lines linewidth 2 title ""
+plot "weighted-cset-mi.dat" using 2:3 with lines linewidth 5 title ""
 
 #################################################
 # Used to generate the binned word-MI graph
 #
-set term postscript eps color
+set term postscript eps enhanced color 28
 set out 'binned-word-mi.eps'
 set logscale y
+set format y "10^{%L}"
 set title "Distribution of word fractional MI"
-set xlabel "Fractional mutual information of word"
+set xlabel "Fractional MI of word"
 set ylabel "Count"
-plot "binned-word-mi.dat" using 2:3 with lines linewidth 2 title ""
+plot "binned-word-mi.dat" using 2:3 with lines linewidth 5 title ""
 
 
 #################################################
 # Used to generate the binned disjunct MI counts
 #
-set term postscript eps color
+set term postscript eps enhanced color 28
 set out 'binned-dj-mi.eps'
 set logscale y
-set title "Distribution of disjunct fractional MI"
-set xlabel "Fractional mutual information of disjunct"
+set format y "10^{%L}"
+set title "Distr. of disjunct fractional MI"
+set xlabel "Fractional MI of disjunct"
 set ylabel "Count"
-plot "binned-dj-mi.dat" using 2:3 with lines linewidth 2 title ""
+plot "binned-dj-mi.dat" using 2:3 with lines linewidth 5 title ""
 
 
 #################################################
 # Used to generate the binned word entropy counts
 #
-set term postscript eps color
+set term postscript eps enhanced color 28
 set out 'binned-word-ent.eps'
 set logscale y
-set title "Distribution of word fractional entropy"
+set format y "10^{%L}"
+set title "Distr. of word fractional entropy"
 set xlabel "Fractional entropy of word"
 set ylabel "Count"
-plot "binned-word-ent.dat" using 2:3 with lines linewidth 2 title ""
+plot "binned-word-ent.dat" using 2:3 with lines linewidth 5 title ""
 

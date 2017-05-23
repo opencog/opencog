@@ -21054,14 +21054,14 @@ m file.
 \align center
 \begin_inset Graphics
 	filename images/binned-cset-mi.eps
-	width 45col%
+	width 50col%
 
 \end_inset
 
 
 \begin_inset Graphics
 	filename images/weighted-cset-mi.eps
-	width 45col%
+	width 50col%
 
 \end_inset
 
@@ -21195,14 +21195,14 @@ The graph on the right shows the distribution, for all 37413 words, bin-counted
 \align center
 \begin_inset Graphics
 	filename images/ranked-word-mi-hi-p.eps
-	width 45text%
+	width 50text%
 
 \end_inset
 
 
 \begin_inset Graphics
 	filename images/binned-word-mi.eps
-	width 45col%
+	width 50col%
 
 \end_inset
 
@@ -21890,7 +21890,7 @@ Generated from sorted-word-ent in disjunct-stats.scm.
 
  It only shows those words that have been observed 100 times, or more.
  It resembles the graph for the ranked fractional MI, above.
- The graph on the right shows the distribution of teh entropy, for all of
+ The graph on the right shows the distribution of the entropy, for all of
  the words.
  This affirms (or explains?) the sharp knee in the graph on the left: the
  knee occurs because almost all words have a large disjunct-entropy.
@@ -21901,14 +21901,14 @@ Generated from sorted-word-ent in disjunct-stats.scm.
 \align center
 \begin_inset Graphics
 	filename images/ranked-word-ent.eps
-	width 45text%
+	width 50text%
 
 \end_inset
 
 
 \begin_inset Graphics
 	filename images/binned-word-ent.eps
-	width 45text%
+	width 50text%
 
 \end_inset
 
