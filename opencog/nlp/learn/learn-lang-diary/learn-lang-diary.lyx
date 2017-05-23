@@ -19313,14 +19313,14 @@ ats.scm file, on the en_pairs_sim database.
 \align center
 \begin_inset Graphics
 	filename images/ranked-word-obs.eps
-	width 45text%
+	width 50text%
 
 \end_inset
 
 
 \begin_inset Graphics
 	filename images/ranked-dj-obs.eps
-	width 45text%
+	width 50text%
 
 \end_inset
 
@@ -19458,16 +19458,29 @@ on it's side
 \end_inset
 
 .
- So, in this dataset, there were 15270 words observed exactly once.
+ So, in this dataset, there were 15270 words observed exactly once (out
+ of a total of 661104 oservations of 37413 words).
+ This is quite something: of all the words observed, almost half were seen
+ only once.
+ More than half were seen twice, or less.
  These are presumably rare typos, foreign words, IPA pronunciation guides:
- any word that appears only oce must be unusual.
- There are 5790 words that appear twice, 3093 that appear exactly 3 times,
- 
+ any word that appears only once must be unusual; and yet, there are a lot
+ of them! There are 5790 words that appear twice, 3093 that appear exactly
+ 3 times, 
 \emph on
 etc.
 
 \emph default
- These are graphed below.
+ These counts are graphed below.
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+graph of binned-word-counts.dat, generated in disjunct-stats.scm 
+\end_layout
+
+\end_inset
+
  
 \end_layout
 
@@ -19483,6 +19496,13 @@ etc.
 \end_layout
 
 \begin_layout Standard
+This graph indicates that most (almost all) words were observed less than
+ 100 times.
+ In this dataset, there were only 630 words that were observed more than
+ 100 times, and 267 words that were observed 200 or more times.
+\end_layout
+
+\begin_layout Standard
 Writing 
 \begin_inset Formula $N$
 \end_inset
@@ -19494,6 +19514,10 @@ Writing
 
  words observed that many times.
  In formulas, the size of the set of words 
+\begin_inset Formula $\left\{ w|N(w)=N\right\} $
+\end_inset
+
+is given by 
 \begin_inset Formula 
 \[
 \left|\left\{ w|N(w)=N\right\} \right|\sim N^{-3/2}
