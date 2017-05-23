@@ -156,6 +156,7 @@
 (define pseudo-cset-count-api (add-pair-count-api pseudo-cset-api))
 (define pseudo-cset-freq-api (add-pair-freq-api pseudo-cset-api))
 (define pseudo-cset-mi-api (add-pair-mi-api pseudo-cset-api))
+(define pseudo-cset-wild-api (add-pair-wildcards-api pseudo-cset-api))
 
 ; ---------------------------------------------------------------------
 ; ---------------------------------------------------------------------
@@ -170,8 +171,8 @@
 	; Currently, its as simple as this...
 	(cog-incoming-by-type ITEM 'LgWordCset)
 
-	; Should be this:
-	; ((add-pair-wildcards-api (make-pseudo-cset-api)) 'right-stars ITEM)
+	; Should be this: XXX FIXME later
+	; (pseudo-cset-wild-api 'right-stars ITEM)
 )
 
 (define-public (sort-cset-vec ITEM)
@@ -261,17 +262,18 @@
 
 ; ---------------------------------------------------------------------
 
-(define-public (cset-vec-support ITEM)
+(define-public (cset-vec-word-support WORD)
 "
-  cset-vec-support ITEM - compute the pseudo-cset vector support for ITEM
-  ITEM can be either a WordNode or a disjunct (LgAnd)
+  cset-vec-word-support WORD - return size of the support for WORD.
+  WORD must be a WordNode.
 
   The support of a sparse vector is the number of basis elements that
   are non-zero.  In this case, its simply the number of disjuncts
   attached to the word.  Equivalently, this is the l_0 norm of the
   vector (the l_p norm for p=0).
 "
-	(length (get-cset-vec ITEM))
+	; (length (pseudo-cset-wild-api 'right-stars WORD))
+	(pseudo-cset-wild-api 'right-support-size WORD)
 )
 
 ; ---------------------------------------------------------------------

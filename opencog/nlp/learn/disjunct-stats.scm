@@ -212,7 +212,7 @@
 ; ---------------------------------------------------------------------
 ; Compute the average number of observations per disjunct.
 (define (avg-obs WORD)
-	(/ (cset-vec-word-observations WORD) (cset-vec-support WORD)))
+	(/ (cset-vec-word-observations WORD) (cset-vec-word-support WORD)))
 
 ; Compute the average number of observations per disjunct.
 ; Discard anything with less than 100 observations.
@@ -233,7 +233,7 @@ xxxxxx
 ; non-zero.  Equivalently, it is the size of the set of unique
 ; disjuncts associated with a word (counted without multiplicity).
 
-(define sorted-support (score-and-rank cset-vec-support all-cset-words))
+(define sorted-support (score-and-rank cset-vec-word-support all-cset-words))
 
 (let ((outport (open-file "/tmp/ranked-support.dat" "w")))
 	(print-ts-rank sorted-support outport)
@@ -271,11 +271,11 @@ xxxxxx
 ;  sum_i (x-a)^2 = <x^2> - a^2
 ;
 (define (avg-obs WORD)
-	(/ (cset-vec-word-observations WORD) (cset-vec-support WORD)))
+	(/ (cset-vec-word-observations WORD) (cset-vec-word-support WORD)))
 
 (define (meansq-obs WORD)
 	(define len (cset-vec-len WORD))
-	(/ (* len len) (cset-vec-support WORD)))
+	(/ (* len len) (cset-vec-word-support WORD)))
 
 (define (rms-deviation WORD)
 	(define avg (avg-obs WORD))
