@@ -1,10 +1,15 @@
-;
+
 ; disjunct-stats.scm
 ;
 ; Assorted ad-hoc collection of tools for understanding the
 ; word-simillarity obtained via pseudo-disjunct overlap.
+;
 ; These were used to create the section "Connetor Sets 7 May 2017"
-; in the diary.
+; in the diary. These can ONLY be used by hand, by cutting and pasting
+; the interesting bits from this file, into a guile prompt. This is
+; more of a kind-of work-log of what was needed to generate those
+; pictures, than anything else. Of course, this can be recycled for
+; other datasets, too.
 ;
 ; Copyright (c) 2017 Linas Vepstas
 ;
@@ -33,6 +38,101 @@
 (define (print-ts-rank scrs port)
 	(print-ts-rank-fn scrs port cog-name))
 
+(define (print-ts-rank-cset scrs port)
+   (print-ts-rank-fn scrs port
+		(lambda (x) (cog-name (gar x)))))
+
+
+; ---------------------------------------------------------------------
+; ---------------------------------------------------------------------
+; ---------------------------------------------------------------------
+; Bin-counting utilities.
+;
+; This must be the 20th time I've implemented bin-counts in my life...
+;
+; ITEMS is a list of items to be binned.
+;
+; NBINS is the number of bins to use.
+;
+; item->value is a function that, given an item, returns the score for
+;      that item. This score is used to determine the bin number.
+;
+; item->count should be a function that, given an item, returns the
+;      count or strength for that item. It should return 1 for simple
+;      binning.
+
+(define (bin-count ITEMS NBINS item->value item->count)
+	; Find the smallest in the list
+	(define min-value
+		(fold
+			(lambda (item min)
+				(define value (item->value item))
+				(if (< min value) min value))
+				10000000.0
+				ITEMS))
+
+	; Find the largest in the list
+	(define max-value
+		(fold
+			(lambda (item max)
+				(define value (item->value item))
+				(if (> max value) max value))
+				-10000000.0
+				ITEMS))
+
+	(define bin-width (/ (- max-value min-value) (- NBINS 1)))
+
+	; Given a value, find the corresponding bin number.
+	(define (value->bin val)
+		(inexact->exact (floor (/ (- val min-value) bin-width))))
+
+	(define bins (make-array 0 NBINS))
+	(define centers (make-array 0 NBINS))
+
+	; Do the actual bin-counting
+	(for-each
+		(lambda (item)
+			(define bin (value->bin (car item)))
+			(array-set! bins
+				(+ (array-ref bins bin) (item->count item))
+				bin))
+		ITEMS)
+
+	; Store the centers of the bins
+	(array-index-map! centers
+		(lambda (i) (+ (* i bin-width) min-value)))
+
+	(list centers bins)
+)
+
+; Just use the simplest binning
+(define (bin-count-simple scored-items nbins)
+	; Get the item score
+	(define (item->value item) (car item))
+	; Increment the bin-count by this much.
+	(define (item->count item) 1)
+	(bin-count  scored-items nbins item->value item->count)
+)
+
+(define (bin-count-weighted scored-items nbins item->count)
+	; Get the item score
+	(define (item->value item) (car item))
+	(bin-count  scored-items nbins item->value item->count)
+)
+
+
+(define (print-ts-bincounts cent-bins port)
+	(define centers (first cent-bins))
+	(define bins (second cent-bins))
+	(define binno 0)
+	(for-each
+		(lambda (bin-cnt)
+			(format port "~A	~A	~A\n" binno (array-ref centers binno) bin-cnt)
+			(set! binno (+ binno 1)))
+		(array->list bins)))
+
+; ---------------------------------------------------------------------
+; ---------------------------------------------------------------------
 ; ---------------------------------------------------------------------
 ; A list of all words that have csets. (Not all of the words
 ; in the database got tagged with a cset)
@@ -42,6 +142,11 @@
 (define all-disjuncts (get-all-disjuncts))
 
 (define all-csets (get-all-csets))
+
+; words with 100 or more observations.
+(define top-cset-words
+	(filter (lambda (wrd) (< 100 (cset-vec-observations wrd)))
+		all-cset-words))
 
 ; ---------------------------------------------------------------------
 ; A sorted list of score-word pairs, where the score is the count
@@ -81,9 +186,7 @@
 ; Compute the average number of observations per disjunct.
 ; Discard anything with less than 100 observations.
 (define sorted-avg
-	(score-and-rank avg-obs
-		(filter (lambda (wrd) (< 100 (cset-vec-observations wrd)))
-			all-cset-words)))
+	(score-and-rank avg-obs top-cset-words))
 
 (let ((outport (open-file "/tmp/ranked-avg.dat" "w")))
 	(print-ts-rank sorted-avg outport)
@@ -120,9 +223,7 @@
 ; The length vs observation ranking; but discard everything
 ; with a small number of observations.
 (define sorted-lensq-norm
-	(score-and-rank lensq-vs-obs
-		(filter (lambda (wrd) (< 100 (cset-vec-observations wrd)))
-			all-cset-words)))
+	(score-and-rank lensq-vs-obs top-cset-words))
 
 (let ((outport (open-file "/tmp/ranked-sqlen-norm.dat" "w")))
 	(print-ts-rank sorted-lensq-norm outport)
@@ -149,9 +250,7 @@
 ; per disjunct.
 ; Discard anything with less than 100 observations.
 (define sorted-rms
-	(score-and-rank rms-deviation
-		(filter (lambda (wrd) (< 100 (cset-vec-observations wrd)))
-			all-cset-words)))
+	(score-and-rank rms-deviation top-cset-words))
 
 (let ((outport (open-file "/tmp/ranked-rms.dat" "w")))
 	(print-ts-rank sorted-rms outport)
@@ -171,9 +270,7 @@
 ; Rank by average disjunct size; but discard everything
 ; with a small number of observations.
 (define sorted-avg-connectors
-	(score-and-rank avg-con-count
-		(filter (lambda (wrd) (< 100 (cset-vec-observations wrd)))
-			all-cset-words)))
+	(score-and-rank avg-con-count top-cset-words))
 
 (define sorted-avg-connectors
 	(score-and-rank avg-con-count all-cset-words))
@@ -192,9 +289,7 @@
 	(sqrt (- meansq (* avg avg))))
 
 (define sorted-hub-connectors
-	(score-and-rank moment-con-count
-		(filter (lambda (wrd) (< 100 (cset-vec-observations wrd)))
-			all-cset-words)))
+	(score-and-rank moment-con-count top-cset-words))
 
 (let ((outport (open-file "/tmp/ranked-hub-connectors.dat" "w")))
 	(print-ts-rank sorted-hub-connectors outport)
@@ -255,10 +350,7 @@
 		WORD-LIST))
 
 ; Accumulate all, but only for those with 100 or more observations.
-(accum-dj-all
-	(filter
-		(lambda (word) (< 100 (cset-vec-observations word)))
-		all-cset-words))
+(accum-dj-all top-csets-words)
 
 (define (print-dj-acc port)
 	(define idx 0)
@@ -350,13 +442,113 @@
 	(- (word-entropy-bits disjunct-entropy-bits) cset-entropy-bits)
 
 ; ---------------------------------------------------------------------
+; Rank words according to thier fractonal entropy
+(define pca (make-pseudo-cset-api))
+(define pcw (add-pair-wildcards pca))
+(define pmi (add-pair-mi-api pca))
+(define (cset-vec-word-ent WORD)
+		(pmi 'compute-right-fentropy WORD))
+
+; rank only the top-100
+(define sorted-word-ent (score-and-rank cset-vec-word-ent top-cset-words))
+
+; Print above to a file, so that it can be graphed.
+(let ((outport (open-file "/tmp/ranked-word-ent.dat" "w")))
+	(print-ts-rank sorted-word-ent outport)
+	(close outport))
+
+(define sorted-word-ent (score-and-rank cset-vec-word-ent all-cset-words))
+(define binned-word-ent (bin-count-simple sorted-word-ent 100))
+
+(let ((outport (open-file "/tmp/binned-word-ent.dat" "w")))
+	(print-ts-bincounts binned-word-ent outport)
+	(close outport))
+
+;--------------
+(define (cset-vec-word-logli WORD)
+	(pmi 'right-wild-logli WORD))
+
+(define sorted-word-logli (score-and-rank cset-vec-word-logli all-cset-words))
+(define binned-word-logli (bin-count-simple sorted-word-logli 100))
+
+(let ((outport (open-file "/tmp/binned-word-logli.dat" "w")))
+	(print-ts-bincounts binned-word-logli outport)
+	(close outport))
+
+;--------------
+; cheat method, assumes we are not making errors,
+; it would be better to double-check this by running the
+; sums the other way.
+(define (cset-vec-word-crazy WORD)
+	(- (pmi 'compute-right-mi WORD) 
+		(+ (pmi 'right-wild-logli WORD)
+			(pmi 'compute-right-fentropy WORD))))
+
+(define sorted-word-crazy (score-and-rank cset-vec-word-crazy all-cset-words))
+(define binned-word-crazy (bin-count-simple sorted-word-crazy 100))
+
+(let ((outport (open-file "/tmp/binned-word-crazy.dat" "w")))
+	(print-ts-bincounts binned-word-crazy outport)
+	(close outport))
+
+(define (cset-vec-word-crazy2 WORD)
+	(- (pmi 'compute-right-mi WORD) 
+		(pmi 'compute-right-fentropy WORD)))
+
+(define sorted-word-crazy2 (score-and-rank cset-vec-word-crazy2 all-cset-words))
+(define binned-word-crazy2 (bin-count-simple sorted-word-crazy2 100))
+
+(let ((outport (open-file "/tmp/binned-word-crazy2.dat" "w")))
+	(print-ts-bincounts binned-word-crazy2 outport)
+	(close outport))
+
+; ---------------------------------------------------------------------
+; Rank word-disjunct pairs according to thier fractonal MI.
+
+(define pfrq (add-pair-freq-api  pca))
+(define (cset-mi CSET) (pfrq 'pair-fmi CSET))
+
+(define sorted-cset-mi (score-and-rank cset-mi all-csets))
+
+; Print above to a file, so that it can be graphed.
+(let ((outport (open-file "/tmp/ranked-cset-mi.dat" "w")))
+	(print-ts-rank-cset sorted-cset-mi outport)
+	(close outport))
+
+(define binned-cset-mi (bin-count-simple sorted-cset-mi 100))
+(define binned-cset-mi (bin-count-simple sorted-cset-mi 200))
+
+(let ((outport (open-file "/tmp/binned-cset-mi.dat" "w")))
+	(print-ts-bincounts binned-cset-mi outport)
+	(close outport))
+
+(define (cset-freq CSET) (pfrq 'pair-freq CSET))
+
+(define weighted-cset-mi
+	(bin-count-weighted sorted-cset-mi 200 
+		(lambda (scored-item) (cset-freq (cdr scored-item)))))
+
+(let ((outport (open-file "/tmp/weighted-cset-mi.dat" "w")))
+	(print-ts-bincounts weighted-cset-mi outport)
+	(close outport))
+
+(define (cset-logli CSET) (pfrq 'pair-logli CSET))
+
+(define wlogli-cset-mi
+	(bin-count-weighted sorted-cset-mi 200 
+		(lambda (scored-item) (cset-logli (cdr scored-item)))))
+
+(let ((outport (open-file "/tmp/wlogli-cset-mi.dat" "w")))
+	(print-ts-bincounts wlogli-cset-mi outport)
+	(close outport))
+
+; ---------------------------------------------------------------------
 ; Rank words according to the MI between them and thier disjuncts
-(define sorted-word-mi (score-and-rank cset-vec-word-mi all-cset-words)
+(define sorted-word-mi (score-and-rank cset-vec-word-mi all-cset-words))
 
 ; Like above, but high-ferequency only
-(define sorted-word-mi-hi-p (score-and-rank cset-vec-word-mi
-		(filter (lambda (wrd) (< 100 (cset-vec-observations wrd)))
-			all-cset-words)))
+(define sorted-word-mi-hi-p
+	(score-and-rank cset-vec-word-mi top-cset-words))
 
 ; Print above to a file, so that it can be graphed.
 (let ((outport (open-file "/tmp/ranked-word-mi.dat" "w")))
@@ -365,6 +557,37 @@
 
 (let ((outport (open-file "/tmp/ranked-word-mi-hi-p.dat" "w")))
 	(print-ts-rank sorted-word-mi-hi-p outport)
+	(close outport))
+
+; ---------------------------------------------------------------------
+; Create the binned distribution graphs for word-MI
+
+(define binned-word-mi (bin-count-simple sorted-word-mi 100))
+
+(define (new-cset-vec-word-mi WORD)
+	(define pca (make-pseudo-cset-api))
+	(define pmi (add-pair-mi-api pca))
+	(pmi 'compute-right-fmi WORD)
+)
+
+(define osorted-word-mi (score-and-rank new-cset-vec-word-mi all-cset-words))
+
+(let ((outport (open-file "/tmp/binned-word-mi.dat" "w")))
+	(print-ts-bincounts binned-word-mi outport)
+	(close outport))
+
+; ---------------------------------------------------------------------
+; Create the binned distribution graphs for dj-MI
+
+(define (cset-vec-disjunct-mi DJ)
+	(pseudo-cset-mi-api 'compute-left-fmi DJ))
+
+(define sorted-dj-mi (score-and-rank cset-vec-disjunct-mi all-disjuncts))
+
+(define binned-dj-mi (bin-count-simple sorted-dj-mi 100))
+
+(let ((outport (open-file "/tmp/binned-dj-mi.dat" "w")))
+	(print-ts-bincounts binned-dj-mi outport)
 	(close outport))
 
 ; ---------------------------------------------------------------------

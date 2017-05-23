@@ -151,7 +151,49 @@
 )
 
 ; ---------------------------------------------------------------------
-; update-pair-counts -- count occurances of word-pairs in a parse.
+; update-clique-pair-counts -- count occurances of random word-pairs.
+;
+; This generates what are termed "clique pairs" throughout: these are
+; all possible word-pair combinations, given a sequence of words.
+; No parsing is involved; this code simply generates one word-pair
+; for each and every edge in the clique of the sequence of the words.
+;
+; This code is problematic for multiple reasons:
+; 1) The kinds of pairs it generates occur with different frequencies
+;    than they would in a random planar tree parse.  In particular,
+;    it generates more pairs between distant words than the planar tree
+;    would. This could be ameliorated by simply not generating pairs
+;    for words that are more than 6 lengths apart. Or, altnernately,
+;    only the statistics for closer pairs closer together than 6 could
+;    be used.  Anyway, this is probably not a big deal, by itself.
+;
+; 2) This generates pairs tagged with the distance between the pairs.
+;    (See below for the format).  This is might be interesting to
+;    look at for academic reasons, but it currently puts a huge
+;    impact on the size of the atomspace, and the size of the
+;    database, impacting performance in a sharply neggative way.
+;    That's because, for every possible word-pair, chances are that
+;    it will appear, sooner or later, with with every possible distance
+;    from 1 to about 30. Each distance requires it's own atom to keep
+;    count: thus requiring maybe 30x more atoms for word-pairs!  Ouch!
+;    This is huge!
+;
+;    Limiting pair-counts to distances of 6 or less still blows up
+;    the database size by 6x... which is still a lot.
+;
+;    We might be able to cut down on this by using different values
+;    (on the same pair-atom) to count the different lengths, but the
+;    hit is still huge.
+;
+; 3) On a per-sentence basis, when clique-counting is turned on, the
+;    number of databse updates increases by 3x-4x atom value updates.
+;    If your database is on spinning disks, not SSD, this means that
+;    database updates will be limited by the disk I/O subsystem, and
+;    this additional traffic can slow down statistics gathering by...
+;    3x or 4x.
+;
+; Thus, clique-counting is currently disabled. You can turn it on
+; by uncommenting this routine in the main loop, below.
 ;
 ; Note that this might throw an exception...
 ;
@@ -213,7 +255,7 @@
 	(make-pairs word-seq)
 )
 
-(define (update-pair-counts SENT)
+(define (update-clique-pair-counts SENT)
 	; In most cases, all parses return the same words in the same order.
 	; Thus, counting only requires us to look at only one parse.
 	(update-pair-counts-once (car (sentence-get-parses SENT)))
@@ -300,13 +342,13 @@
 )
 
 ; ---------------------------------------------------------------------
-; update-link-counts -- Increment link counts
+; update-lg-link-counts -- Increment link counts
 ;
-; This routine updates link counts in the database. The algo is trite:
+; This routine updates LG link counts in the database. The algo is trite:
 ; fetch the LG link from SQL, increment the attached CountTruthValue,
 ; and save back to SQL.
 
-(define (update-link-counts single-sent)
+(define (update-lg-link-counts single-sent)
 
 	; Due to a RelEx bug, `make-word-link` can throw an exception.  See
 	; the documentation for `word-inst-get-word` for details. Look for
@@ -370,14 +412,14 @@
 "
 	; try-catch wrapper around the counters. Due to a buggy RelEx
 	; (see documentation for `word-inst-get-word`), the function
-	; `update-pair-counts` might throw.  If it does throw, then
-	; avoid doing any counting at all for this sentence.
+	; `update-clique-pair-counts` might throw.  If it does throw,
+	; then avoid doing any counting at all for this sentence.
 	(define (update-counts sent)
 		(catch 'wrong-type-arg
 			(lambda () (begin
-				(update-pair-counts sent)
+				; (update-clique-pair-counts sent)
 				(update-word-counts sent)
-				(update-link-counts sent)
+				(update-lg-link-counts sent)
 				(update-disjunct-counts sent)))
 			(lambda (key . args) #f)))
 

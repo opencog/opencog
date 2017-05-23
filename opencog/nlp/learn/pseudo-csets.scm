@@ -63,6 +63,8 @@
 ; an actual metric only when the vectors are bit-vectors, and we don't
 ; have bit-vectors, so I am not implementing this.
 ;
+; XXX support can be taken as bit-vectors ....
+;
 ; ---------------------------------------------------------------------
 ;
 (use-modules (srfi srfi-1))
@@ -72,21 +74,81 @@
 ; ---------------------------------------------------------------------
 ; ---------------------------------------------------------------------
 
-(define-public (fetch-pseudo-csets WORD-LIST)
+(define-public (make-pseudo-cset-api)
 "
-  fetch-pseudo-csets WORD-LIST - fetch (from the database)
-  all pseudo-csets for all of the WordNodes in the WORD-LIST.
+  make-pseudo-cset-api -- connector-set access methods. Pseudo-
+  connector sets are pairs consisting of a word on the left, and
+  a pseudo-disjunct on the right. These are observed during MST parsing.
+  A more detailed scription is at the top of this fie.
 "
-	(define (fetch-one WORD)
-		(fetch-incoming-by-type WORD 'LgWordCset))
+	(let ((all-csets '()))
 
-	(define start-time (current-time))
-	; (for-each fetch-one WORD-LIST) ; this is wyyyyy too slow!
-	(load-atoms-of-type 'LgWordCset)
-	(format #t "Elapsed time to load csets: ~A secs\n"
-		(- (current-time) start-time))
+		; Get the observational count on ATOM
+		(define (get-count ATOM) (cog-tv-count (cog-tv ATOM)))
+
+		(define any-left (AnyNode "cset-word"))
+		(define any-right (AnyNode "cset-disjunct"))
+
+		(define (get-left-type) 'WordNode)
+		(define (get-right-type) 'LgAnd)
+		(define (get-pair-type) 'LgWordCset)
+
+		; Getting the pair is trivial: we already got it.
+		(define (get-pair PAIR) PAIR)
+
+		; Getting the count is trivial, we already got the needed pair.
+		(define (get-pair-count PAIR) (get-count PAIR))
+
+		(define (get-left-wildcard DJ)
+			(ListLink any-left DJ))
+
+		(define (get-right-wildcard WORD)
+			(ListLink WORD any-right))
+
+		(define (get-wild-wild)
+			(ListLink any-left any-right))
+
+		; get-all-csets - return a list holding all of the observed
+		; csets. Caution: this can be tens of millions long!
+		(define (do-get-all-csets)
+			(define all '())
+			(cog-map-type
+				(lambda (atom) (set! all (cons atom all)) #f)
+				'LgWordCset)
+			all)
+
+		(define (get-all-csets)
+			(if (null? all-csets) (set! all-csets (do-get-all-csets)))
+			all-csets)
+
+		; fetch (from the database) all pseudo-csets
+		(define (fetch-pseudo-csets)
+			(define start-time (current-time))
+			(fetch-incoming-set any-left)
+			(fetch-incoming-set any-right)
+			(load-atoms-of-type 'LgWordCset)
+			(format #t "Elapsed time to load csets: ~A secs\n"
+				(- (current-time) start-time)))
+
+		; Methods on the object
+		(lambda (message . args)
+			(apply (case message
+				((left-type) get-left-type)
+				((right-type) get-right-type)
+				((pair-type) get-pair-type)
+				((pair-count) get-pair-count)
+				((item-pair) get-pair)
+				((make-pair) get-pair)
+				((left-wildcard) get-left-wildcard)
+				((right-wildcard) get-right-wildcard)
+				((wild-wild) get-wild-wild)
+				((all-pairs) get-all-csets)
+				((fetch-pairs) fetch-pseudo-csets)
+				(else (error "Bad method call on psuedo-cset:" message)))
+			args)))
 )
 
+; ---------------------------------------------------------------------
 ; ---------------------------------------------------------------------
 
 (define-public (get-cset-vec ITEM)
@@ -98,6 +160,9 @@
 "
 	; Currently, its as simple as this...
 	(cog-incoming-by-type ITEM 'LgWordCset)
+
+	; Should be this:
+	; ((add-pair-wildcards (make-pseudo-cset-api)) 'right-stars ITEM)
 )
 
 (define-public (sort-cset-vec ITEM)
@@ -310,7 +375,12 @@
   csets associated with that item, and the entropy for each
   cset is summed up.
 
+  sum_x p(x,y) log p(x,y) for fixed y
+
   The returned entropy is in bits, i.e. computerd with log_2.
+
+  XXX FIXME this is deprecated in favor of
+  ((add-pair-mi-api (make-pseudo-cset-api)) 'compute-left-entropy ITEM)
 "
    ; sum of the counts
 	(define nats
@@ -323,31 +393,22 @@
 	(/ nats (log 2.0))
 )
 
+; Use the new, modern object API for all this stuff.
+(define pseudo-cset-api (make-pseudo-cset-api))
+(define pseudo-cset-mi-api (add-pair-mi-api pseudo-cset-api))
+
 (define (cset-vec-word-mi WORD)
 "
 	cset-vec-word-mi - get the fractional mutual information between
    the word and all of it's disjuncts. This is defined as
-      MI(w) = (1/p(w)) sum_d p(d,w) log_2 p(d,w)/[p(d,*) p(*,w)]
+      MI(w) = (1/p(w)) sum_d p(w,d) log_2 p(w,d)/[p(w,*) p(*,d)]
    This is defined 'fractionally', so that the MI of the dataset
    as a whole can be written as
      MI = sum_w p(w) MI(w)
 
    Note this function returns MI in units of bits. i.e. log-2
 "
-	(define n-tot (get-stashed-count))
-	(define sum 0)
-	(define n-word (cset-vec-observations WORD))
-	(for-each
-		(lambda (cset)
-			(define dj (cset-get-disjunct cset))
-			(define n-dj (cset-vec-observations dj))
-			(define n-cset (get-count cset))
-			(set! sum
-				(+ sum (* n-cset (log (/ (* n-cset n-tot) (* n-word n-dj)))))
-		))
-		(get-cset-vec WORD))
-	; (/ sum n-tot)
-	(/ sum (* n-word (log 2)))
+	(pseudo-cset-mi-api 'compute-right-fmi WORD))
 )
 
 ; ---------------------------------------------------------------------
@@ -686,10 +747,12 @@
 ; (use-modules (opencog) (opencog persist) (opencog persist-sql))
 ; (use-modules (opencog nlp) (opencog nlp learn))
 ; (sql-open "postgres:///en_pairs_mst?user=linas")
-; (fetch-all-words)
+; (sql-open "postgres:///en_pairs_sim?user=linas")
+; (fetch-all-words)  <<< 132 secs
 ; (length (get-all-words))
 ; 396262
-; (fetch-pseudo-csets (get-all-words))
+; (define pca (make-pseudo-cset-api))
+; (pca 'fetch-pairs)  <<< 789 secs
 ; (define ac (filter-words-with-csets (get-all-words)))
 ; (length ac)
 ; 49423  (now 37413 in en_pairs_sim)

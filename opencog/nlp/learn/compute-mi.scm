@@ -125,30 +125,18 @@
 
 ; ---------------------------------------------------------------------
 ;
-; Extend the CNTOBJ with additional methods to compute wildcard counts
-; for pairs, and store the results in the count-object.
+; Extend the LLOBJ with additional methods to compute wildcard counts
+; for pairs, and store the results using the count-object API.
 ; That is, compute the summations N(x,*) = sum_y N(x,y) where (x,y)
 ; is a pair, and N(x,y) is the count of how often that pair has been
 ; observed, and * denotes the wild-card, ranging over all items
 ; supported in that slot.
 ;
-; The CNTOBJ needs to be an object implementing methods to get the
-; support, and the supported pairs. So, the left-support is the set
-; of all x's for which 0 < N(x,y) for some y.  Dual to the left-support
-; are the right-stars, which is the set of all pairs (x,y) for any
-; given, fixed x.
-;
-; The CNTOBJ needs to implement the 'left-support and 'right-support
-; methods, to return these two sets, and also the 'left-stars and the
-; 'right-stars methods, to return those sets.
-;
-; The CNTOBJ also needs to implement the setters, so that the wild-card
-; counts can be cached. That is, the object must also have the
-; 'set-left-wild-count, 'set-right-wild-count and 'set-wild-wild-count
-; methods on it.
-;
-(define (make-compute-count CNTOBJ)
-	(let ((cntobj CNTOBJ))
+(define (make-compute-count LLOBJ)
+
+	; We need 'left-supprt, provided by add-pair-wildcards
+	; We need 'set-left-wild-count, provided by add-pair-count-api
+	(let ((cntobj (add-pair-count-api (add-pair-wildcards LLOBJ))))
 
 		; Compute the left-side wild-card count. This is the number
 		; N(*,y) = sum_x N(x,y) where ITEM==y and N(x,y) is the number
@@ -260,35 +248,53 @@
 
 ; ---------------------------------------------------------------------
 ;
-; Extend the CNTOBJ with additional methods to compute observation
+; Extend the LLOBJ with additional methods to compute observation
 ; frequencies and entropies for pairs, including partial-sum entropies
 ; (mutual information) for the left and right side of each pair.
 ; This will also cache the results of these computations in a
 ; standardized location.
 ;
-; The CNTOBJ needs to be an object implementing methods to get pair
-; observation counts, and wild-card counts (which must hold valid
-; values). Specifically, it must have the 'pair-count, 'left-wild-count,
-; 'right-wild-count and 'wild-wild-count methods on it.  Thus, if
-; caching (which is the generic case) these need to have been computed
-; and cached before using this class.
+; The LLOBJ must have valid left and right wild-card counts on it.
+; These need to have been previously computed, before methods on
+; this class are called.
+;
+; Before using this class, the 'init-freq method must be called,
+; and it must be called *after* a valid wild-wild count is available.
 
-(define (make-compute-freq CNTOBJ)
-	(let ((cntobj CNTOBJ)
+(define (make-compute-freq LLOBJ)
+
+	; We need 'left-support, provided by add-pair-wildcards
+	; We need 'wild-wild-count, provided by add-pair-count-api
+	; We need 'set-left-wild-freq, provided by add-pair-freq-api
+	(let ((cntobj (add-pair-freq-api (add-pair-count-api
+					(add-pair-wildcards LLOBJ))))
 			(tot-cnt 0))
 
 		(define (init)
 			(set! tot-cnt (cntobj `wild-wild-count)))
 
+		; Compute the pair frequency P(x,y) = N(x,y) / N(*,*)  This is
+		; the frequency with which the pair (x,y) is observed. Return
+		; the frequency, or zero, if the pair was never observed.
+		(define (compute-pair-freq PAIR)
+			(/ (cntobj 'pair-count PAIR) tot-cnt))
+
 		; Compute the left-side wild-card frequency. This is the ratio
-		; P(*,y) = N(*,y) / N(*,*) which gives the frequency at which
-		; the pair (x,y) was observed.
-		; This returns the frequency, or zero, if the pair was never
-		; observed.
+		; P(*,y) = N(*,y) / N(*,*) = sum_x P(x,y)
 		(define (compute-left-freq ITEM)
 			(/ (cntobj 'left-wild-count ITEM) tot-cnt))
 		(define (compute-right-freq ITEM)
 			(/ (cntobj 'right-wild-count ITEM) tot-cnt))
+
+		; Compute and cache the pair frequency.
+		; This returns the atom holding the cached count, thus
+		; making it convient to persist (store) this cache in
+		; the database. It returns nil if the count was zero.
+		(define (cache-pair-freq PAIR)
+			(define freq (compute-pair-freq PAIR))
+			(if (< 0 freq)
+				(cntobj 'set-pair-freq PAIR freq)
+				'()))
 
 		; Compute and cache the left-side wild-card frequency.
 		; This returns the atom holding the cached count, thus
@@ -306,6 +312,22 @@
 				(cntobj 'set-right-wild-freq ITEM freq)
 				'()))
 
+		; Compute and cache all of the pair frequencies.
+		; This computes P(x,y) for all (x,y)
+		; This returns a count of the pairs.
+		(define (cache-all-pair-freqs)
+			(define cnt 0)
+			(define lefties (cntobj 'left-support))
+			(define (right-loop left-item)
+				(for-each
+					(lambda (pr)
+						(cache-pair-freq pr)
+						(set! cnt (+ cnt 1)))
+					(cntobj 'right-stars left-item)))
+
+			(for-each right-loop lefties)
+			cnt)
+
 		; Compute and cache all of the left-side frequencies.
 		; This computes P(*,y) for all y, in parallel.
 		;
@@ -314,37 +336,54 @@
 		(define (cache-all-left-freqs)
 			(map cache-left-freq (cntobj 'right-support)))
 		(define (cache-all-right-freqs)
-			(map cache-right-freq (cntobj 'right-support)))
+			(map cache-right-freq (cntobj 'left-support)))
 
 		; Methods on this class.
 		(lambda (message . args)
 			(case message
 				((init-freq)             (init))
+
+				((compute-pair-freq)     (apply compute-pair-freq args))
 				((compute-left-freq)     (apply compute-left-freq args))
 				((compute-right-freq)    (apply compute-right-freq args))
+
+				((cache-pair-freq)       (apply cache-pair-freq args))
 				((cache-left-freq)       (apply cache-left-freq args))
 				((cache-right-freq)      (apply cache-right-freq args))
+
+				((cache-all-pair-freqs)  (cache-all-pair-freqs))
 				((cache-all-left-freqs)  (cache-all-left-freqs))
 				((cache-all-right-freqs) (cache-all-right-freqs))
+
 				(else (apply cntobj      (cons message args))))
 		))
 )
 
 ; ---------------------------------------------------------------------
 ;
-; Extend the FRQOBJ with additional methods to compute the mutual
+; Extend the LLOBJ with additional methods to compute the mutual
 ; information of pairs.
 ;
-; The FRQOBJ needs to be an object implementing methods to get pair
-; observation frequencies, which must return valid values; i.e. must
-; have been previously computed. Specifically, it must have the
-; 'left-logli, 'right-logli and 'pair-logli methods.  For caching,
-; it must also have the 'set-pair-mi method.
+; The LLOBJ object must have valid pair-frequencies, on it, accessible
+; by the standard API. These need to have been pre-computed, before
+; using this object.
 ;
 ; The MI computations are done as a batch, looping over all pairs.
 
-(define (make-batch-mi FRQOBJ)
-	(let ((frqobj FRQOBJ))
+(define (make-batch-mi LLOBJ)
+
+	(define start-nsecs (get-internal-real-time))
+	(define (elapsed-millisecs)
+		(define diff (- (get-internal-real-time) start-nsecs))
+		(set! start-nsecs (get-internal-real-time))
+		(/ (* diff 1000.0) internal-time-units-per-second))
+
+	; We need 'left-supprt, provided by add-pair-wildcards
+	; We need 'pair-freq, provided by add-pair-freq-api
+	; We need 'set-pair-mi, provided by add-pair-freq-api
+	; We need 'right-wild-count, provided by add-pair-count-api
+	(let ((frqobj (add-pair-freq-api
+				(add-pair-count-api (add-pair-wildcards LLOBJ)))))
 
 		; Loop over all pairs, computing the MI for each. The loop
 		; is actually two nested loops, with a loop over the
@@ -354,33 +393,49 @@
 		(define (compute-n-cache-pair-mi)
 			(define all-atoms '())
 			(define lefties (frqobj 'left-support))
+
+			; progress stats
+			(define cnt-pairs 0)
+			(define cnt-lefties 0)
 			(define nlefties (length lefties))
 
 			(define (right-loop left-item)
 
-				; Either of the get-loglis below may throw an exception,
-				; if the particular item-pair doesn't have any counts.
-				; This is rare, but can happen: e.g. (Any "left-word")
-				; (Word "###LEFT-WALL###") will have zero counts.  This
-				; would have an infinite logli and an infinite MI. So we
-				; skip this, with a try-catch block.
-				(catch #t (lambda ()
-					(define r-logli (frqobj 'right-wild-logli left-item))
+				; Check for non-zero counts. A zero here will cause the
+				; 'right-wild-logli to throw. The problem here is that
+				; every throw gets logged into the logfile (currently, they
+				; are not silent) which can sometimes be a huge performance
+				; hit. So avoid the throws.
+				; Anyway: zero counts means undefined MI.
+				(if (< 0 (frqobj 'right-wild-count left-item))
+					(let ((r-logli (frqobj 'right-wild-logli left-item)))
 
-					; Compute the MI for exactly one pair.
-					(define (do-one-pair lipr)
-						(define right-item (gdr lipr))
-						(define l-logli (frqobj 'left-wild-logli right-item))
-						(define pr-logli (frqobj 'pair-logli lipr))
-						(define mi (- (+ r-logli l-logli) pr-logli))
-						(define atom (frqobj 'set-pair-mi lipr mi))
-						(set! all-atoms (cons atom all-atoms))
-					)
+						; Compute the MI for exactly one pair.
+						(define (do-one-pair lipr)
+							(define pr-freq (frqobj 'pair-freq lipr))
+							(define pr-logli (frqobj 'pair-logli lipr))
 
-					(for-each
-						do-one-pair
-						(frqobj 'right-stars left-item)))
-					(lambda (key . args) #f)) ; catch handler
+							(define right-item (gdr lipr))
+							(if (< 0 (frqobj 'left-wild-count right-item))
+								(let* ((l-logli (frqobj 'left-wild-logli right-item))
+										(fmi (- pr-logli (+ r-logli l-logli)))
+										(mi (* pr-freq fmi))
+										(atom (frqobj 'set-pair-mi lipr mi fmi)))
+									(set! all-atoms (cons atom all-atoms))
+									(set! cnt-pairs (+ cnt-pairs 1)))))
+
+						; Run the inner loop
+						(for-each
+							do-one-pair
+							(frqobj 'right-stars left-item))
+
+						; Print some progress statistics.
+						(set! cnt-lefties (+ cnt-lefties 1))
+						(if (eqv? 0 (modulo cnt-lefties 10000))
+							(format #t "Done ~A of ~A outer loops, pairs=~A\n"
+								cnt-lefties nlefties cnt-pairs))
+
+					))
 			)
 
 			;; XXX Maybe FIXME This could be a par-for-each, to run the
@@ -438,7 +493,7 @@
 ; the performance overhead here in order to get the flexibility that
 ; the atomspace provides.
 ;
-(define (batch-all-pair-mi OBJ)
+(define-public (batch-all-pair-mi OBJ)
 
 	(define start-time (current-time))
 	(define (elapsed-secs)
@@ -446,19 +501,21 @@
 		(set! start-time (current-time))
 		diff)
 
-	; Decorate the object with a counting API.
-	(define obj-get-set-api (add-pair-count-api OBJ))
+	; Decorate the object with methods that report support.
+	(define wild-obj (add-pair-wildcards OBJ))
 
 	; Decorate the object with methods that can compute counts.
-	(define count-obj (make-compute-count obj-get-set-api))
+	(define count-obj (make-compute-count OBJ))
 
 	; Decorate the object with methods that can compute frequencies.
-	(define freq-obj (make-compute-freq
-		(add-pair-freq-api obj-get-set-api)))
+	(define freq-obj (make-compute-freq OBJ))
+
+	; Decorate the object with methods that can compute the pair-MI.
+	(define batch-mi-obj (make-batch-mi OBJ))
 
 	(format #t "Support: num left=~A num right=~A\n"
-			(OBJ 'left-support-size)
-			(OBJ 'right-support-size))
+			(wild-obj 'left-support-size)
+			(wild-obj 'right-support-size))
 
 	; First, compute the summations for the left and right wildcard counts.
 	; That is, compute N(x,*) and N(*,y) for the supports on x and y.
@@ -466,32 +523,41 @@
 	(count-obj 'cache-all-left-counts)
 	(count-obj 'cache-all-right-counts)
 
-	(format #t "Done with wild-card count N(*,w) and N(w,*) in ~A secs\n"
+	(format #t "Done with wild-card count N(x,*) and N(*,y) in ~A secs\n"
 		(elapsed-secs))
 
-	; Now, compute the grand-total
+	; Now, compute the grand-total.
 	(store-atom (count-obj 'cache-total-count))
 	(format #t "Done computing N(*,*) total-count=~A in ~A secs\n"
-		(obj-get-set-api 'wild-wild-count)
+		((add-pair-count-api OBJ) 'wild-wild-count)
 		(elapsed-secs))
 
-	(display "Start computing log P(*,w)\n")
-
-	; Compute the left and right wildcard frequencies and
-	; log-frequencies.
+	; Compute the pair-frequencies, and the left and right
+	; wildcard frequencies and log-frequencies.
 	(freq-obj 'init-freq)
 
+	(display "Going to do individual word-pair frequencies\n")
+	(let ((pair-cnt (freq-obj 'cache-all-pair-freqs)))
+		(format #t "Done computing ~A pairs in ~A secs\n"
+				pair-cnt (elapsed-secs)))
+
+	(display "Start computing log P(*,y)\n")
 	(let ((lefties (freq-obj 'cache-all-left-freqs)))
+
+		(define store-rpt
+			(make-progress-rpt store-atom 40000  (length lefties)
+				"Stored ~A of ~A lefties in ~A secs (~A stores/sec)\n"))
+
 		(format #t "Done computing ~A left-wilds in ~A secs\n"
 			(length lefties) (elapsed-secs))
 		(for-each
-			(lambda (atom) (if (not (null? atom)) (store-atom atom)))
+			(lambda (atom) (if (not (null? atom)) (store-rpt atom)))
 			lefties)
 		(format #t "Done storing ~A left-wilds in ~A secs\n"
 			(length lefties) (elapsed-secs))
 	)
 
-	(display "Done with -log P(*,w), start -log P(w,*)\n")
+	(display "Done with -log P(*,y), start -log P(x,*)\n")
 
 	(let ((righties (freq-obj 'cache-all-right-freqs)))
 		(format #t "Done computing ~A right-wilds in ~A secs\n"
@@ -503,13 +569,12 @@
 			(length righties) (elapsed-secs))
 	)
 
-	(display "Done computing -log P(w,*) and <-->\n")
+	(display "Done computing -log P(x,*) and P(*,y)\n")
 
 	; Enfin, the word-pair mi's
 	(display "Going to do individual word-pair MI\n")
 
-	(let* ((bami (make-batch-mi freq-obj))
-			(all-atoms (bami 'cache-pair-mi))
+	(let* ((all-atoms (batch-mi-obj 'cache-pair-mi))
 			(num-prs (length all-atoms)))
 
 		; Create a wrapper around `store-atom` that prints a progress

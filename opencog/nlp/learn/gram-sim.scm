@@ -42,7 +42,7 @@
 
 (define-public (fetch-all-sims)
 "
-  fetch-all-simss - fetch all SimilarityLinks from the database backend.
+  fetch-all-sims - fetch all SimilarityLinks from the database backend.
 "
 	(define start-time (current-time))
 	(load-atoms-of-type 'SimilarityLink)

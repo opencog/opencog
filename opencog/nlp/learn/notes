@@ -5157,19 +5157,21 @@ Done computing 106696 right-wilds in 45 secs vs. 15 now
 Done storing 106696 right-wilds in 458 secs << par-for vs 103 now
 Done computing -log P(w,*) and <-->
 Going to do individual word-pair MI
-Done computing 2360328 pair MI's in 962 secs
+Done computing 2360328 pair MI's in 962 secs (1124 secs under load)
 Stored 100000 of 2360328 pairs in 191 secs (523.5602094240837 pairs/sec)
 ....
 Stored 2000000 of 2360328 pairs in 317 secs (315.45741324921136 pairs/sec)
 Stored 2100000 of 2360328 pairs in 251 secs (398.40637450199205 pairs/sec)
 Stored 2200000 of 2360328 pairs in 254 secs (393.7007874015748 pairs/sec)
 Stored 2300000 of 2360328 pairs in 300 secs (333.3333333333333 pairs/sec)
-Done storing 2360328 pair MI's in 6964 secs
+Done storing 2360328 pair MI's in 6964 secs  <<< 6847 under load
 Finished with MI computations
 
 Sooo any-pair:
-  PID USER      PR  NI    VIRT    RES    SHR S  %CPU %MEM     TIME+ COMMAND     
- 5180 linas     20   0 11.819g 8.935g  37080 S   0.0  3.5 117:00.53 guile       
+  PID USER      PR  NI    VIRT    RES    SHR S  %CPU %MEM     TIME+ COMMAND
+ 5180 linas     20   0 11.819g 8.935g  37080 S   0.0  3.5 117:00.53 guile
+ 5525 linas     20   0 11.483g 8.931g  37616 S   0.0  3.5 129:07.73 guile
+
 
 ----------------
 clique pairs:
@@ -5190,5 +5192,967 @@ Done computing 106696 right-wilds in 15 secs
 Done storing 106696 right-wilds in 103 secs
 Done computing -log P(w,*) and <-->
 Going to do individual word-pair MI
+Done computing 4810 pair MI's in 37872 secs << 10.5 hours!!!
+Done storing 4810 pair MI's in 7 secs   << whhhat!????
+Finished with MI computations
 
 
+  PID USER      PR  NI    VIRT    RES    SHR S  %CPU %MEM     TIME+ COMMAND
+17274 linas     20   0 26.656g 0.024t  37676 S   0.0  9.6 406:04.03 guile
+
+
+=================================================================
+disjuncts & csets:
+
+Start loading words ...
+Elapsed time to load words: 126 secs   << now 112 ...814 ... 22 .. 20
+Done loading words, now loading pairs
+Elapsed time to load csets: 783 secs  << now 367 on fresh..553...294..309
+Finished loading any-word-pairs
+Support: num left=396262 num right=291637
+Done with wild-card count N(*,w) and N(w,*) in 39 secs  << now 203 !???  fluke
+Done computing N(*,*) total-count=661104.0 in 34 secs << uncahnged
+Done computing 446204 pairs in 13 secs
+Start computing log P(*,w)
+Done computing 291637 left-wilds in 33 secs
+Done storing 291637 left-wilds in 670 secs << now  493 .. 711
+Done with -log P(*,w), start -log P(w,*)
+Done computing 396262 right-wilds in 26 secs
+Done storing 396262 right-wilds in 549 secs  <<< now  28 !! wtf ??? .. 47
+Done computing -log P(w,*) and <-->
+Going to do individual word-pair MI
+Done computing 446204 pair MI's in 88 secs
+Stored 100000 of 446204 pairs in 268 secs (373.13432835820896 pairs/sec)
+Stored 200000 of 446204 pairs in 238 secs (420.16806722689074 pairs/sec)
+Stored 300000 of 446204 pairs in 286 secs (349.65034965034965 pairs/sec)
+Stored 400000 of 446204 pairs in 303 secs (330.03300330033005 pairs/sec)
+Done storing 446204 pair MI's in 1215 secs ... 1345
+Finished with MI computations
+
+
+
+(use-modules (opencog) (opencog persist) (opencog persist-sql))
+(use-modules (opencog nlp) (opencog nlp learn))
+(sql-open "postgres:///en_pairs_sim?user=linas")
+(use-modules (opencog cogserver))
+(start-cogserver "opencog2.conf")
+(define pca (make-pseudo-cset-api))
+(batch-pairs pca)
+
+
+
+
+duuuu
+(define pca (make-pseudo-cset-api))
+(define wpca (add-pair-wildcards pca))
+(define cpca (add-pair-count-api pca))
+(define fpca (add-pair-freq-api pca))
+
+(define w (car (wpca 'left-support)))
+(define d (car  (wpca 'right-support)))
+(cpca 'left-wild-count d)
+(define d (car (drop-while 
+	(lambda (dj) (> 10 (cpca 'left-wild-count dj))) (wpca 'right-support))))
+
+(define w (car (drop-while 
+	(lambda (wrd) (> 10 (cpca 'right-wild-count wrd))) (wpca 'left-support))))
+
+(cpca 'right-wild-count w)
+
+(fpca 'left-wild-freq d)
+(/ (cpca 'left-wild-count d) (cpca 'wild-wild-count))
+
+(fpca 'right-wild-freq w)
+set-right-wild-freq
+
+(define cf (make-compute-freq (add-pair-freq-api (add-pair-wildcards cpca))))
+(cf 'init-freq)
+(cf 'compute-right-freq w)
+(cf 'cache-right-freq w)
+'compute-right-freq w
+
+(define righties (cf 'cache-all-right-freqs))
+(define okr (filter (lambda (x) (not (null? x))) righties))
+(length okr)
+
+etierh not iint or ot being computed.   FIXED
+
+ERROR: In procedure cog-value: There is no value for key (PredicateNode
+"*-FrequencyKey-*") ; [6632538966455889482][1]
+ on atom (LgWordCset (ctv 1.000000 0.000000 1.000000)
+
+(LgWordCset 
+   (WordNode "dentist" 
+   (LgAnd
+      (PseudoConnector
+         (WordNode "an")
+         (LgConnDirNode "-"))
+      (PseudoConnector
+         (WordNode ",")
+         (LgConnDirNode "+"))))
+
+
+there's no compute-pair    'set-pair-freq
+
+=========================================================================
+
+
+2017-05-13 01:35:49 UTC [229-2879] LOG:  checkpoints are occurring too frequently (29 seconds apart)
+2017-05-13 01:35:49 UTC [229-2880] HINT:  Consider increasing the configuration parameter "max_wal_size".
+
+pre postgres 9.5:
+ checkpoint segments. 100 or so is not out of the ordinary.
+ increase your checkpoint_timeout to 1 hour, as well as look at
+increasing your checkpoint_completion_target
+------
+
+2017-05-17 07:48:25 UTC [228-1] LOG:  database system was shut down at 2017-05-17 05:02:36 UTC
+2017-05-17 07:48:25 UTC [229-1] [unknown]@[unknown] LOG:  incomplete startup packet
+2017-05-17 07:48:25 UTC [228-2] LOG:  invalid primary checkpoint record
+2017-05-17 07:48:25 UTC [228-3] LOG:  invalid secondary checkpoint record
+2017-05-17 07:48:25 UTC [228-4] PANIC:  could not locate a valid checkpoint record
+2017-05-17 07:48:25 UTC [230-1] postgres@postgres FATAL:  the database system is starting up
+2017-05-17 07:48:25 UTC [203-1] LOG:  startup process (PID 228) was terminated by signal 6: Aborted
+2017-05-17 07:48:25 UTC [203-2] LOG:  aborting startup due to startup process failure
+2017-05-17 07:51:21 UTC [1430-1] LOG:  database system was shut down at 2017-05-17 05:02:36 UTC
+2017-05-17 07:51:21 UTC [1430-2] LOG:  invalid primary checkpoint record
+2017-05-17 07:51:21 UTC [1430-3] LOG:  invalid secondary checkpoint record
+2017-05-17 07:51:21 UTC [1430-4] PANIC:  could not locate a valid checkpoint record
+2017-05-17 07:51:21 UTC [1429-1] LOG:  startup process (PID 1430) was terminated by signal 6: Aborted
+2017-05-17 07:51:21 UTC [1429-2] LOG:  aborting startup due to startup process failure
+
+
+http://stackoverflow.com/questions/8799474/postgresql-error-panic-could-not-locate-a-valid-checkpoint-record
+
+ time cp -pr main main-fu  <<< 23 minutes
+ du -sm  <<  81638  -- 82 gigabytes!
+
+/usr/lib/postgresql/9.5/bin/pg_resetxlog  /var/lib/postgresql/9.5/main
+Transaction log reset
+
+sudo service postgresql start
+
+2017-05-17 13:17:08 UTC [15452-1] LOG:  database system was shut down at 2017-05-17 13:05:10 UTC
+2017-05-17 13:17:08 UTC [15452-2] FATAL:  could not access status of transaction 2804419190
+2017-05-17 13:17:08 UTC [15452-3] DETAIL:  Could not open file "pg_clog/0A72": No such file or directory.
+2017-05-17 13:17:08 UTC [15451-1] LOG:  startup process (PID 15452) exited with exit code 1
+2017-05-17 13:17:08 UTC [15451-2] LOG:  aborting startup due to startup process failure
+
+
+https://www.postgresql.org/message-id/AANLkTims48njGKkvkXHiTG6=19hQ31VFmFRPPLg+5w03@mail.gmail.com
+
+dd if=/dev/zero of=Transaction_missing_file_of pg_clog bs=256K count=1
+(To make the uncommitted record as they haven't been committed).
+
+dd if=/dev/zero of=0A72 bs=256K count=1
+
+
+Last entries in pg_clog are from 14 May, so 3 days of nothingness.
+2017-05-17 13:27:53 UTC [24212-1] LOG:  database system was interrupted; last known up at 2017-05-17 13:17:08 UTC
+2017-05-17 13:27:53 UTC [24212-2] LOG:  database system was not properly shut down; automatic recovery in progress
+2017-05-17 13:27:53 UTC [24212-3] LOG:  invalid record length at D62/6C000098
+2017-05-17 13:27:53 UTC [24212-4] LOG:  redo is not required
+2017-05-17 13:27:53 UTC [24212-5] FATAL:  could not access status of transaction 2124106599
+2017-05-17 13:27:53 UTC [24212-6] DETAIL:  Could not open file "pg_multixact/offsets/7E9B": No such file or directory.
+
+dd if=/dev/zero of=7E9B bs=256K count=1
+members/1FA5
+
+psql
+\l
+
+en_pairs
+en_pairs_old
+en_pairs_partial
+en_snapshot
+
+pg_dump en_pairs
+pg_dump -cC en_pairs
+pg_dumpall 
+
+time pg_dump en_pairs >en_pairs.sql 
+
+pg_dump: Dumping the contents of table "valuations" failed: PQgetResult() failed.
+pg_dump: Error message from server: ERROR:  could not access status of transaction 2786849088
+DETAIL:  Could not open file "pg_clog/0A61": No such file or directory.
+
+dd if=/dev/zero of=~/9.5/main/pg_clog/0A61 bs=256K count=1
+pg_clog/0A51
+pg_clog/0A70
+pg_clog/0A59
+pg_clog/0A5C
+pg_clog/0A50
+pg_clog/093A
+
+everything from that to 0A5E
+
+for ((i=0;i<293;i++))
+do
+        b=$(echo "ibase=16;93A" | bc)
+        j=$(echo "$b+$i" |bc)
+        k=$(echo "obase=16;$j" | bc)
+        echo dd if=/dev/zero of=~/9.5/main/pg_clog/0$k bs=256K count=1
+done
+
+pg_clog/0923
+pg_clog/08E4
+pg_clog/085E
+0524
+pg_clog/0523
+
+mv /var/lib/postgresql/9.5/main /var/lib/postgresql/9.5/main-semi-fu
+
+/usr/lib/postgresql/9.5/bin/initdb /var/lib/postgresql/9.5/main
+CREATE ROLE ubuntu WITH CREATEDB;
+ALTER ROLE ubuntu WITH LOGIN;
+createdb en_pairs
+psql en_pairs < ~/src/atomspace/opencog/persist/sql/multi-driver/atom.sql
+
+time psql en_pairs < /var/lib/postgresql/en_pairs.sql
+real    59m16.468s
+user    0m57.480s
+sys     0m12.480s
+
+psql en_pairs
+select count(*) from atoms where type=123; 123 == wordnode
+276715  << there used to be about a million, here
+
+select count(*) from atoms where type=81; 81 == evaluationlink.
+37199086  37 M. Hmmm
+
+select sum(floatvalue[3]) from valuations where type=7;
+select * from valuations limit 1;
+select * from atoms, valuations where valuations.type=7 and valuations.atom=atoms.uuid and atoms.type = 81 limit 1;
+
+Total counts on all evaluationlinks.
+(this should be doubled, clique and any.)
+select sum(floatvalue[3]) from atoms, valuations where valuations.type=7 and valuations.atom=atoms.uuid and atoms.type = 81;
+
+gives: 327030163 == 327M observations of links! wow!
+
+Nonetheless, restart from scratch.
+
+ALTER DATABASE en_pairs RENAME TO en_pairs_semi_fu;
+
+COMMENT ON DATABASE en_pairs_semi_fu IS 
+   'rohit-pairs and some gutenberg, after the crash'; 
+
+
+
+
+=======================================
+and again, on fanny:
+
+time cp -pr main main-fu
+
+real    23m29.237s
+user    0m0.464s
+sys     2m54.152s
+
+/usr/lib/postgresql/9.6/bin/pg_resetxlog  /var/lib/postgresql/9.6/main
+/usr/lib/postgresql/9.6/bin/pg_resetxlog  -f /var/lib/postgresql/9.6/main
+
+pg_clog/0351
+
+dd if=/dev/zero of=~/9.6/main/pg_clog/0351 bs=256K count=1
+pg_multixact/offsets/057A
+pg_multixact/members/0E99
+Those 3 fixed it.
+
+time pg_dumpall > everything.sql
+pg_clog/033C 
+create all from 02CE to pg_clog/0350
+
+#!/bin/bash
+
+
+# inclusive
+start=$(echo "ibase=16;2CE" | bc)
+end=$(echo "ibase=16;350" | bc)
+
+len=$(echo "$end-$start+1" | bc)
+echo $len
+
+for ((i=0;i<$len;i++))
+do
+        j=$(echo "$start+$i" |bc)
+        k=$(echo "obase=16;$j" | bc)
+        # echo $k
+        dd if=/dev/zero of=~/9.6/main/pg_clog/0$k bs=256K count=1
+done
+
+cd /home2/postgresql/data-lost-dumps
+time pg_dumpall > everything.sql
+real    13m5.740s
+user    1m13.272s
+sys     1m3.764s
+-rw-r--r--  1 postgres postgres 15190388055 May 17 15:59 everything.sql
+so 15 gigabytes.
+
+sudo service postgresql stop
+mv /var/lib/postgresql/9.6/main /var/lib/postgresql/9.6/main-semi-fu
+/usr/lib/postgresql/9.6/bin/initdb  /var/lib/postgresql/9.6/main
+
+sudo service postgresql start
+
+time psql < /home2/postgresql/data-lost-dumps/everything.sql
+real    55m43.405s
+user    1m13.960s
+sys     0m21.596s
+
+
+=======================================
+objdump -d post-process.o
+
+linkage_set_domain_names +0xe0
+
+linkage->pp_info[j].num_domains = k;
+for (d = pp->d_type_array[j]; d != NULL; d = d->next) k++;
+char buff[] = {d->type, '\0'}
+string_set_add (buff, postprocessor->string_set);
+build_type_array  not needed if not printed.
+
+linkage->pp_info[j].domain_name[k] =
+
+=====================================================
+en_pairs_2016
+-------------
+Rohit's original pair data; old format; missing correct word-counts.
+All data is from Wikipedia article random planar-tree parses.
+Contains word-pair counts only (and some MI calcs in obsolete format).
+
+STATUS: obsolete, archived.
+DATE: 17 May 2017
+REASON: converted to newer format.
+
+en_pairs_2016=> \dt+
+                       List of relations
+ Schema |   Name    | Type  | Owner |    Size    | Description
+--------+-----------+-------+-------+------------+-------------
+ public | atoms     | table | linas | 2198 MB    |
+ public | global    | table | linas | 8192 bytes |
+ public | spaces    | table | linas | 8192 bytes |
+ public | typecodes | table | linas | 48 kB      |
+(4 rows)
+
+
+select count(atoms.stv_count) from atoms, typecodes where
+atoms.type=typecodes.type and typecodes.typename='EvaluationLink';
+
+gives: 9045489  i.e. 9M different evlinks
+gives 536234371 i.e. 536M observations  when sum()
+gives 396255  distinct wordnodes
+
+866733953 bytes uncompressed.
+141609207 bytes compressed
+md5sum en_pairs_2016.sql.bz2
+28577666fb51d3dc3658688a73e8bee6  en_pairs_2016.sql.bz2
+
+==================================================================
+
+en_pairs_rohit
+--------------
+forked from en_pairs_2016, converted to modern format
+This includes 8.9 word-pairs with MI on them. (But the MI is
+in the old format).
+
+STATUS: obsolete, archived.
+DATE: 18 May 2017
+REASON: This is included in the newer en_pairs_mst, which contains
+all data here, plus data from MST parsing. Also, since its word-pairs
+from wikipedia only, the data quality is mediocre.
+
+en_pairs_rohit=> \dt+
+                        List of relations
+ Schema |     Name     | Type  | Owner |    Size    | Description
+--------+--------------+-------+-------+------------+-------------
+ public | atoms        | table | linas | 1735 MB    |
+ public | atoms_backup | table | linas | 2198 MB    |
+ public | global       | table | linas | 8192 bytes |
+ public | spaces       | table | linas | 8192 bytes |
+ public | typecodes    | table | linas | 48 kB      |
+ public | valuations   | table | linas | 2321 MB    |
+ public | values       | table | linas | 8192 bytes |
+(7 rows)
+
+atoms_backup is a copy of atoms from en_pairs_2016
+
+SELECT count(*) FROM atoms;  <<< 19741280 = 19M atoms total
+
+SELECT count(*) FROM atoms WHERE height=0; <<<  396313 = 396K
+SELECT count(*) FROM atoms WHERE height=1; <<< 9672482 = 9.6M
+SELECT count(*) FROM atoms WHERE height=2; <<< 9672472 = 9.6M
+SELECT count(*) FROM atoms WHERE height=3; <<<      13
+
+select count(atoms.uuid) from atoms,typecodes where
+atoms.type=typecodes.type and typecodes.typename='EvaluationLink';
+
+gives 9672459 i.e. 9.6M atoms. This is a 6% more than en_pairs_2016,
+(which had 9.0M) because maybe it includes the partial sums??
+
+gives 396262 WordNodes -- as before, plus 7 new test words.
+
+select sum(valuations.floatvalue[3]) from atoms,typecodes,valuations where
+valuations.atom = atoms.uuid and
+atoms.type=typecodes.type and typecodes.typename='EvaluationLink';
+
+gives 1672941118 == 1.6GB of counts so this is triple the pairs, because
+it includes: left and right sums, and the total sum. Hmm. Should be
+quadruple!?  Yes, see below.
+
+select * from atoms where outgoing='{143427138,143427163}';
+is the ListLink (Any Any)
+
+select * from atoms where outgoing='{152,143670792}';
+select * from valuations where atom=143670793;
+gives 418235277 == 418M observations of ANY,ANY
+
+ 2440463583 |   53 |  *-Mutual Info Key-* | PredicateNode
+
+select count(*) from valuations where key=2440463583;
+8880914  so 8.9M pairs with mutual info on them.
+
+
+2957364787 bytes uncompressed -- 2.9GB
+448704179 bytes compressed -- 448 MBytes
+
+ md5sum en_pairs_rohit.sql
+792a8830520c8cdddb5b723656ae82cc  en_pairs_rohit.sql
+
+ md5sum en_pairs_rohit.sql.bz2
+6f85e89787cbf20c54167868867cf41c  en_pairs_rohit.sql.bz2
+
+==================================================================
+
+en_pairs_mst
+------------
+forked from en_pairs_rohit, holds disjunct data from MST parsing.
+Both word-pairs and MST  parses came from wikipedia articles;
+this appears to give only mediocre results.
+
+STATUS: archived.
+DATE: 18 May 2017
+REASON: The wikipedia-based data is mediocre.
+
+                       List of relations
+ Schema |    Name    | Type  | Owner |    Size    | Description
+--------+------------+-------+-------+------------+-------------
+ public | atoms      | table | linas | 1886 MB    |
+ public | spaces     | table | linas | 8192 bytes |
+ public | typecodes  | table | linas | 48 kB      |
+ public | valuations | table | linas | 2421 MB    |
+ public | values     | table | linas | 8192 bytes |
+(5 rows)
+
+SELECT count(*) FROM atoms; <<< 21381856 = 21M atoms
+
+SELECT count(*) FROM atoms WHERE height=0; <<<   396313 = 396K == rohit.
+SELECT count(*) FROM atoms WHERE height=1; <<<  9763966 = 9.8M almost rohit
+SELECT count(*) FROM atoms WHERE height=2; <<< 10280485 = 10.2M = 6% larger
+SELECT count(*) FROM atoms WHERE height=3; <<<   941092 = 941K
+
+The height-3 are exactly the pseudo-disjuncts.
+
+SELECT count(atoms.uuid) FROM atoms,typecodes WHERE
+atoms.type=typecodes.type AND typecodes.typename='EvaluationLink';
+
+gives 9672459 so exactly the same as en_pairs_rohit, that's good.
+
+'WordNode' gives 396262 -- 400K words, exactly same as before, Good.
+
+'LgWordCset' gives 941092 - almost a million connector sets.
+
+SELECT sum(valuations.floatvalue[3]) FROM atoms,typecodes,valuations
+WHERE valuations.atom = atoms.uuid AND
+atoms.type=typecodes.type AND typecodes.typename='LgWordCset';
+
+gives 1669981 -- 1.7M observations of csets or maybe 1.8 obs per cset.
+A bit disappointing....
+
+2205218439 bytes uncompressed (2.2GB)
+325948435 bytes compressed (325 MByte)
+
+ md5sum en_pairs_mst.sql
+955b7fe0578ded9a266f0874e8a02d6f  en_pairs_mst.sql
+
+ md5sum en_pairs_mst.sql.bz2
+ee81f6b11e4629ffa30efc0950af3595  en_pairs_mst.sql.bz2
+
+==================================================================
+
+simil_en
+--------
+The similarity database published on the web, forked from an earlier
+version of en_pairs_mst.  Contains pairs derived only from wikipedia.
+plus some number of disjuncts from mst parses.
+
+Published on web 12 May 2017
+322343968 bytes compressed (322MBytes)
+
+ md5sum simil_en.sql.bz2
+b9bb221069867c5f4a307670a34387c8  simil_en.sql.bz2
+
+==================================================================
+
+en_pairs_sim
+------------
+Forked from earlier version of en_pairs_mst, contains less data.
+(half as many disjuncts) This is the dataset analyzed in the diary.
+
+The simil_en is a snapshot of this; the en_pairs_sim contains
+additional caches of partial sums across disjuncts, etc.
+
+STATUS: working DB
+DATE: 21 May 2017
+
+                       List of relations
+ Schema |    Name    | Type  | Owner |    Size    | Description
+--------+------------+-------+-------+------------+-------------
+ public | atoms      | table | linas | 1840 MB    |
+ public | spaces     | table | linas | 8192 bytes |
+ public | typecodes  | table | linas | 48 kB      |
+ public | valuations | table | linas | 2702 MB    |
+ public | values     | table | linas | 8192 bytes |
+(5 rows)
+
+SELECT count(atoms.uuid) FROM atoms,typecodes WHERE
+atoms.type=typecodes.type AND typecodes.typename='EvaluationLink';
+
+gives 9672459 so exactly the same as en_pairs_rohit, that's good.
+
+'LgWordCset' gives 446204 which is as expected, (as reported in diary)
+
+We are not creating a backup of this yet, the simil_en is good enough
+backup; this dataset marches on as a working dataset.
+
+==================================================================
+
+en_pairs_semi_fu
+----------------
+Forked from en_pairs_rohit, plus more WP data, plus some gutenberg.
+Has some data loss (many missing words, missing LGLink-pairs), due to
+server lockup + crash failure (and fsync was off, dohhhh).
+
+Large database, bloated with ExecutationLinks, and the clique pairs,
+which just are not useful at this time. In fact, 95% of the atoms are
+these junk atoms.  This dataset is just wayyy too bloated to be useful.
+
+STATUS: obsolete, archived.
+DATE: 18 May 2017
+REASON: abandoned. Too bloated to be useful, per above.
+
+                       List of relations
+ Schema |    Name    | Type  | Owner |    Size    | Description 
+--------+------------+-------+-------+------------+-------------
+ public | atoms      | table | linas | 12 GB      | 
+ public | spaces     | table | linas | 8192 bytes | 
+ public | typecodes  | table | linas | 48 kB      | 
+ public | valuations | table | linas | 9633 MB    | 
+ public | values     | table | linas | 8192 bytes | 
+(5 rows)
+
+SELECT count(*) FROM atoms;   <<< 132172780 = 132M atoms total
+
+
+SELECT count(atoms.uuid) FROM atoms,typecodes WHERE
+atoms.type=typecodes.type AND typecodes.typename='EvaluationLink';
+
+gives 37199086 = 37M evlinks compared to rohits 9M
+
+However, of these
+SELECT count(*) FROM Atoms WHERE outgoing @> ARRAY[CAST(29 AS BIGINT)];
+where PredicateNode "*-Sentence Word Pair-*" uuid=29;
+gives 29637409 = 29.6M clique-pairs
+
+vs LinkGrammarRelationshipNode uuid=141; <<< 7561677 7.5M
+
+So many of rohit's pairs were lost, and most of the new data are the
+cliique pairs.
+
+'WordNode' gives 276715 which is 2/3rds of rohits 400K so where did
+   all the words go? More importantly, why aren't the foreign-key 
+   constraints violated???
+
+'ExecutionLink' has 62936410 = 62M counted pairs
+
+SELECT count(*) FROM atoms WHERE height=0;   <<<     276972  = 277K
+SELECT count(*) FROM atoms WHERE height=1;   <<<   30958666  = 30M
+SELECT count(*) FROM atoms WHERE height=2;   <<<  100135499  = 100M
+SELECT count(*) FROM atoms WHERE height=3;   <<<     801643  = 802K
+SELECT count(*) FROM atoms WHERE height=4;   <<<          0
+
+wtf is height=3? Answer: some (many?) random "ANY" disjuncts
+from the random tree parses. (!)  These have low UUID's!
+
+Max observed UUID is 135947882
+Loaded 276972 atoms at height 0 <<< so a lot of words are missing.
+also: there are 508 links with missing uuids in thier outgoing set.
+
+7721725512 bytes uncompressed (7.7GB) 17 May 2017
+1207333639 bytes compressed (1.2GB)
+
+ md5sum en_pairs_semi_fu.sql.bz2
+06b0acfecf9f5d4b25cca903b8f3b2a7  en_pairs_semi_fu.sql.bz2
+
+
+==================================================================
+en_snap
+-------
+STATUS: deleted
+DATE: 21 May 2017
+REASON: bloated junk, looks like wikipedia.
+
+select count(*) from atoms;   <<< 41511869 = 41M
+
+A total of 106696 = 106K WordNodes
+
+ SELECT count(*) FROM Atoms WHERE outgoing @> ARRAY[CAST(141 AS BIGINT)]; 
+gives 2786640 == 2.7M  LG links.
+
+and 9587761 = 9.6M clique pairs, and 18M ExecutionLinks.
+
+
+
+==================================================================
+
+Plan:
+load en_pairs_mst
+load en_pairs_semi_fu
+recompute MI for word-pairs.
+fork, and restart mst counting...
+
+
+(use-modules (opencog) (opencog persist) (opencog persist-sql))
+(sql-open "postgres:///en_pairs_mst?user=linas")
+(use-modules (opencog cogserver))
+(start-cogserver "opencog3.conf")
+(sql-load)
+
+sql-load has no docs
+
+also missing type inheritance!  (but what if inheritance conflicts!?)
+
+SQLAtomStorage.cc:1583 thrown by makeAtom
+but who calls makeAtom?
+load_all_atoms_cb
+
+QLAtomStorage.cc:1360 null pointer deref.
+get_recursive_if_not_exists
+from :1377 PseudoPtr po(petAtom(idu)); returned null ptr for 132204462
+
+132204462
+132272910
+132300252
+133895580
+133896697
+133884903
+
+27 missing uuids so far.  They're not in rohit, so wtf?
+
+1673 should be omp-algo
+
+
+#define OC_OMP 1
+setting_omp(num_threads(), 3);
+num_threads
+
+
+SELECT uuid, name FROM atoms WHERE type = 73
+  EXCEPT SELECT atoms.uuid,atoms.name FROM atoms, atoms_wtf 
+     WHERE atoms_wtf.uuid = atoms.uuid;
+
+ 2293473835 | tail-piece
+ 1621296002 | dendropark
+ 2146998680 | Fellers
+  244689200 | PVC
+ 1438975809 | Arntzenius
+  709360907 | server-based
+ 2400387025 | Kihelkonna
+  799467208 | Crispe's
+  610089230 | Byssocallis
+  325547913 | leveraging
+  179977711 | amounted
+  492116248 | Kampf
+  209124496 | Barranca
+ 1158151745 | Ilisl
+ 1005621585 | Caravans
+ 1926542305 | agonising
+ 1593374046 | Urged
+
+
+SELECT * FROM Atoms WHERE outgoing @> ARRAY[CAST(2293473835 AS BIGINT)];
+
+ 2293477332 |     1 |    8 |      1 |      | {570739,2293473835}
+ 2293477368 |     1 |    8 |      1 |      | {1537258,2293473835}
+ 2293477336 |     1 |    8 |      1 |      | {2293473835,241}
+ 2293477334 |     1 |    8 |      1 |      | {573730097,2293473835}
+ 2293477354 |     1 |    8 |      1 |      | {4369780,2293473835}
+ 2439795736 |     1 |    8 |      1 |      | {143427138,2293473835}
+ 2439795738 |     1 |    8 |      1 |      | {2293473835,143427163}
+
+
+CREATE TABLE tmp_atoms AS 
+   SELECT   uuid,  space, type, height, name, outgoing 
+   FROM atoms WHERE height=0
+     EXCEPT SELECT atoms.uuid,  atoms.space, atoms.type, atoms.height, atoms.name, atoms.outgoing
+          FROM atoms, atoms_wtf 
+          WHERE atoms_wtf.uuid = atoms.uuid;
+
+338354
+
+UPDATE tmp_atoms SET type= x WHERE NAME='joe';
+
+INSERT INTO atoms_wtf 
+   SELECT   uuid,  space, type, height, name, outgoing 
+
+fuck it. 
+load rohit first, then load semi_fu then load mst
+
+(use-modules (opencog) (opencog persist) (opencog persist-sql))
+(use-modules (opencog nlp))
+(use-modules (opencog cogserver))
+(sql-open "postgres:///en_pairs_rohit?user=linas")
+(start-cogserver "opencog2.conf")
+(sql-load)
+OK, that's loading in parallel yayyy! peaked over 17K/second
+dropped down to 11.3K per sec
+Need to load 19M for this one <<< 19741280 
+     ... in 1691 seconds (11674 per second)
+     ... using 27GB RAM
+     ... in approx 260 cpu-minutes.
+
+OK, so can hit rates over 20K atoms/sec during loads, when the 
+DB is in RAM (or maybe SSD). Drops to 300 atoms/sec when DB is
+on spinning disk. Ouch!
+
+Hmmm .. 20K/sec if there are not values on the atom.
+10K/sec if there are values ...
+
+So when bulk loading....
+calls load_all_atoms_cb
+which does get values.   get_atom_values
+get_all_values_cb
+
+(sql-close)
+(sql-open "postgres:///en_pairs_semi_fu?user=linas")
+(sql-load)
+loaded 132172832  in 9938 seconds (13299 per second)
+Atomspace holds 146629585 atoms in 171GBytes RAM. Ouch. 1159:08 CPU
+again: 953:04.24 CPU again 949:04.10
+
+(sql-close) <<< 1163:38 CPU
+(sql-open "postgres:///en_pairs_semi_ok?user=linas")
+(sql-store)
+Store rate is 20K atoms/minute! 1.2M/hour --> 100 hours (4 days) to
+store fu.  Lets try again. parallelize too
+
+So... store queues not being used. Lots of fetches, but these
+seem pointless ?  FIXED
+Max UUID is 2 !!!!??   FIXED
+
+OK, better: 1.3K/sec, about 100K/min - 1470 min = 24 hours
+
+num_get_links and write queues not used.  FIXED
+... and max uuid is still 2. FIXED
+should call storeAtom(h, false) FIXED
+
+OK, store queues are cranking away, 100% i/o bound.  1.1K/sec
+--> 38 hours to complete!  Ouch.
+... dropped to 603 per second after 15% complete.
+
+Plan B:
+copy en_pairs_semi_fu to en_pairs_wiki
+load en_pairs_mst
+close
+open en_pairs_wiki
+
+=================================
+/home/ubuntu/src/atomspace/opencog/persist/sql/multi-driver/ll-pg-cxx.cc:113)
+
+PQresult message: ERROR:  could not read block 479803 in file
+"base/16446/16452.3": read only 0 of 8192 bytes
+SELECT * FROM Atoms WHERE type = 82 AND outgoing = '{23, 7830585, 9}';
+SELECT * FROM Atoms WHERE type = 137 AND outgoing = '{232023, 14}';
+SELECT * FROM Atoms WHERE type = 137 AND outgoing = '{2433080, 852}';
+SELECT * FROM Atoms WHERE type = 137 AND outgoing = '{9196089, 2499}';
+SELECT * FROM Atoms WHERE type = 137 AND outgoing = '{3250528, 10}';
+SELECT * FROM Atoms WHERE type = 82 AND outgoing = '{23, 30218901, 9}';
+
+/usr/lib/postgresql/9.5/bin/pg_resetxlog  /var/lib/postgresql/9.5/main
+
+Crap.  Total data corruption.
+Restart, again
+====================================
+/etc/postgresql/9.6/main/postgresql.conf
+increase shared_buffers to 24GB
+shared_buffers = 24GB
+max_worker_processes = 24
+fsync = on  
+effective_cache_size = 128GB
+
+increse  /etc/sysctl.d/30-postgresql-shm.conf too
+
+grep ^VmPeak /proc/4170/status
+
+hugpages may be too big... but anonhugepages shoud work fine
+
+no commit delay:  300%, 70% idle 6% wait 10 loadavg 10m val/h 20a/h
+10K commit
+11:18
+
+=====================================================
+-- Restart counting. Done,  May 21 06:15 UTC
+
+As of: 2017-05-21 18:59:08 i.e. 12.7 hours later,
+284 articles 
+
+select count(*) from atoms; <<< 1832992 = 1.8M
+
+SELECT count(atoms.uuid) FROM atoms,typecodes WHERE
+atoms.type=typecodes.type AND typecodes.typename='EvaluationLink';
+gives 840285 = 840K  and equal number of ListLink
+39772 = 39K WordNode
+
+SELECT sum(floatvalue[3]) FROM valuations WHERE type=7;
+aka
+SELECT sum(valuations.floatvalue[3]) FROM valuations,typecodes
+WHERE valuations.type=typecodes.type AND typecodes.typename='CountTruthValue';
+
+gives 39459145 = 39M counts = 3.1M counted per hour = 863 pairs/second
+
+----------------
+As of 2017-05-22 05:56:04 i.e. 24 hours later
+497 articles  .. really 500 a day, avg.
+
+select count(*) from atoms; << 2829421 = 2.8M
+1309922 = 1.3M EvaluationLinks
+53781 = 54K words
+
+67789172 = 68M counts = 2.8M/hour = 784 pairs/sec
+
+----------------
+As of 2017-05-22 23:58:10 
+888 articles
+
+select count(*) from atoms; <<< 4239364 = 4.2M 
+1980561 = 2M eval links
+71595 = 71K words
+
+116752710 = 117M counts in 42 hours = 2.8M/hour
+          or (117M-68M) / 18 hours = 2.7M/hour
+
+------------------
+Restart from scratch 2017-05-23 00:10:00
+at 01:51 have 129302108= 129M so 12M in 1.7 hours = 7M/hour
+So now its more than 2x faster. almost 3x, with rounding errors
+Yayyyy!!!
+
+
+----------------------------------------------------
+
+Why is it slowing?
+---------------
+1) why is valuation updates about 3.5x of sum(3)?
+2) why is get-got almost 2x bigger than delta for nodes? A: 
+3) why is get-got almost 1.5x bigger than delta for links? A: LgAnd's
+
+One sentence:
+sum valuations=245   but 461 valuation updates!?
+5 WordNodes
+7 ListLinks
+7 EvaluationLinks
+----------------- expect 19 atoms
+got 41 atoms... many are LgWordCsets, LgAnd's OK.  total stores is perfect.
+
+num_get_nodes=34 huh???
+this time, 922 updates!!!! wtf
+why are fecth and store counts same?? maybe cause not syn
+cog-logger-set-sync!
+
+There were 23 fetches logged:
+1 sent
+1 parse
+5 word
+ -- total 7 nodes
+?? where are the connectors? not fetched, cause not incr'ed so OK.
+7 eval
+9 lgwordcset
+ -- total 16 links
+ ListLinks, not fetched cause not incr'ed. so OK.
+
+245 stores. again 922 updates of values...
+
+SentenceNode got update twice...
+ParseNode twice ... 
+2x for all the words ... 
+
+Then lots of updates, even when not teh main target of the store...
+Now, only 490 updates. Still too many. should be 245 ... !?
+barrier is broken.. wewell its not forcing a flush
+
+does close have a barrier?
+
+well, busy_writers is a bad idea... because it races.
+but queue size was wrong.
+
+OK, so 105 of 245 ... 123 
+
+ why is fillfraction 55K ? Because drain is no longer being hit.
+
+=====================================================
+TODO:
+-- verify integrity of the database.
+-- verify that MST has all the pairs that rohit does. OK.
+-- Update the dump status above; copy it over. OK, Done.
+-- Create the missing status on en_pairs_sim from the paper.
+
+
+(use-modules (opencog) (opencog persist) (opencog persist-sql))
+(use-modules (opencog nlp) (opencog nlp learn))
+(sql-open "postgres:///en_pairs_sim?user=linas")
+(use-modules (opencog cogserver))
+(start-cogserver "opencog2.conf")
+(define pca (make-pseudo-cset-api))
+(batch-pairs pca)
+
+So now word-pair loading is out of control...
+loadeed csets in 553 seconds, same as before, but at 2400% cpu
+
+Crap.  Below is a disaster.
+commit_delay = 0
+synchronous_commit = local
+Stored 1000 of 291637 lefties in 270 secs (3.7037037037037037 stores/sec)
+Stored 2000 of 291637 lefties in 320 secs (3.125 stores/sec)
+
+Try again:
+commit_delay = 0
+synchronous_commit = off
+Stored 20000 of 291637 lefties in 45 secs (444.44444444444446 stores/sec)
+Stored 40000 of 291637 lefties in 47 secs (425.531914893617 stores/sec)
+Stored 60000 of 291637 lefties in 62 secs (322.5806451612903 stores/sec)
+
+OK, so we are back in business
+======================================================================
+
+(add-pair-mi-api pca) 'compute-left-fractional
+
+right-wild gives dj
+
+/tmp/ranked-word-ent.dat
+
+(define cs (cog-incoming-by-type (Word "possible") 'LgWordCset))
+
+(filter (lambda (cset) (< 10 (get-count cset))) cs)
+
+possible N=3 has 1: a-
+         N=2 has 5: (is- that+) (it- to+) 
+         N=1 = 106
+
+education: 100  N=3 has 1  N=2 has 7
+
+lost 100  1 and 7
+days  98 2 7
+children 101 1 9
+
+(define bins (second binned-pair-mi))
+(fold + 0 (array->list bins))

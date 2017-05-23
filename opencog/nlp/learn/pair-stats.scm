@@ -22,21 +22,124 @@
 
 ; ---------------------------------------------------------------------
 
-(define-public (add-total-entropy-api FRQOBJ)
+(define-public (add-pair-mi-api LLOBJ)
 "
-  add-total-entropy-api FRQOBJ - methods for total and partial entropy.
+  add-pair-mi-api LLOBJ - methods for MI and entropy of pairs.
 
-  Extend the FRQOBJ with additional methods to compute the partial
-  and total entropies of the total set of pairrs.
+  Extend the LLOBJ with additional methods to compute the one-sided
+  entropies and mutual information of pairs.
 
-  The FRQOBJ needs to be an object implementing methods to get pair
-  observation frequencies, which must return valid values; i.e. must
-  have been previously computed. Specifically, it must have the
-  'left-logli, 'right-logli and 'pair-logli methods.
+  The object must have valid pair-frequency values on it, accessible
+  via the standard frequency-object API. These must have been
+  pre-computed, before this object can be used.
+"
+	; Need the 'left-stars method, provided by add-pair-wildcards
+	; Need the 'left-wild-freq method, provided by add-pair-freq-api
+	(let ((frqobj (add-pair-freq-api (add-pair-wildcards LLOBJ))))
+
+		; Compute the left-wild entropy summation:
+		;    h_left(y) = -sum_x P(x,y) log_2 P(x,y)
+		;
+		; Note that
+		;    h_total = sum_y h_left(y)
+		(define (compute-left-entropy RIGHT-ITEM)
+			(fold
+				(lambda (PAIR sum) (+ sum (frqobj 'pair-entropy PAIR)))
+				0
+				(frqobj 'left-stars RIGHT-ITEM)))
+
+		; Compute the right-wild entropy summation:
+		;    h_right(x) = -sum_y P(x,y) log_2 P(x,y)
+		;
+		; Note that
+		;    h_total = sum_x h_right(x)
+		(define (compute-right-entropy LEFT-ITEM)
+			(fold
+				(lambda (PAIR sum) (+ sum (frqobj 'pair-entropy PAIR)))
+				0
+				(frqobj 'right-stars LEFT-ITEM)))
+
+		; Compute the left-fractional entropy summation:
+		;    H_left(y) = h_left(y) / P(*,y)
+		; Note that
+		;    h_total = sum_y P(*,y) H_left(y)
+		(define (compute-left-fractional RIGHT-ITEM)
+			(/ (compute-left-entropy RIGHT-ITEM)
+				(frqobj 'left-wild-freq RIGHT-ITEM)))
+
+		; As above, but flipped.
+		(define (compute-right-fractional LEFT-ITEM)
+			(/ (compute-right-entropy LEFT-ITEM)
+				(frqobj 'right-wild-freq LEFT-ITEM)))
+
+		; ---------------
+		; Compute the left MI summation:
+		;    mi_left(y) = sum_x P(x,y) log_2 MI(x,y)
+		;
+		; where MI(x,y) = -log_2 P(x,y) / P(x,*) P(*,y)
+		;
+		; Note that
+		;    MI_total = sum_y mi_left(y)
+		(define (compute-left-mi RIGHT-ITEM)
+			(fold
+				(lambda (PAIR sum) (+ sum (frqobj 'pair-mi PAIR)))
+				0
+				(frqobj 'left-stars RIGHT-ITEM)))
+
+		; As above, but flipped.
+		(define (compute-right-mi LEFT-ITEM)
+			(fold
+				(lambda (PAIR sum) (+ sum (frqobj 'pair-mi PAIR)))
+				0
+				(frqobj 'right-stars LEFT-ITEM)))
+
+		; Compute the left-fractional MI summation:
+		;    MI_left(y) = mi_left(y) / P(*,y)
+		; Note that
+		;    MI_total = sum_y P(*,y) MI_left(y)
+		(define (compute-left-fmi RIGHT-ITEM)
+			(/ (compute-left-mi RIGHT-ITEM)
+				(frqobj 'left-wild-freq RIGHT-ITEM)))
+
+		; As above, but flipped.
+		(define (compute-right-fmi LEFT-ITEM)
+			(/ (compute-right-mi LEFT-ITEM)
+				(frqobj 'right-wild-freq LEFT-ITEM)))
+
+
+		; Methods on this class.
+		(lambda (message . args)
+			(case message
+				((compute-left-entropy)   (apply compute-left-entropy args))
+				((compute-right-entropy)  (apply compute-right-entropy args))
+				((compute-left-fentropy)  (apply compute-left-fractional args))
+				((compute-right-fentropy) (apply compute-right-fractional args))
+				((compute-left-mi)        (apply compute-left-mi args))
+				((compute-right-mi)       (apply compute-right-mi args))
+				((compute-left-fmi)       (apply compute-left-fmi args))
+				((compute-right-fmi)      (apply compute-right-fmi args))
+				(else (apply frqobj      (cons message args))))
+		))
+)
+
+; ---------------------------------------------------------------------
+
+(define-public (add-total-entropy-api LLOBJ)
+"
+  add-total-entropy-api LLOBJ - methods for total and partial entropy.
+
+  Extend the LLOBJ with additional methods to compute the partial
+  and total entropies of the total set of pairs.
+
+  The object must have valid pair-frequency values on it, accessible
+  via the standard frequency-object API. These must have been
+  pre-computed, before this object can be used.
 
   These methods loop over all pairs, and so can take a lot of time.
 "
-	(let ((frqobj FRQOBJ))
+	; Need the 'left-support method, provided by add-pair-wildcards
+	; Need the 'pair-logli method, provided by add-pair-freq-api
+	(let ((frqobj (add-pair-freq-api (add-pair-wildcards LLOBJ))))
 
 		; Compute the total entropy for the set. This loops over all
 		; pairs, and computes the sum
