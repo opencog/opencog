@@ -150,6 +150,15 @@
 
 ; ---------------------------------------------------------------------
 ; ---------------------------------------------------------------------
+;
+; Use the new, modern object API for all this stuff.
+(define pseudo-cset-api (make-pseudo-cset-api))
+(define pseudo-cset-count-api (add-pair-count-api pseudo-cset-api))
+(define pseudo-cset-freq-api (add-pair-freq-api pseudo-cset-api))
+(define pseudo-cset-mi-api (add-pair-mi-api pseudo-cset-api))
+
+; ---------------------------------------------------------------------
+; ---------------------------------------------------------------------
 
 (define-public (get-cset-vec ITEM)
 "
@@ -267,19 +276,30 @@
 
 ; ---------------------------------------------------------------------
 
-(define-public (cset-vec-observations ITEM)
+(define-public (cset-vec-word-observations WORD)
 "
-  cset-vec-observations ITEM - compute the number of observations of
-  the disjuncts for ITEM. Equivalently, this is the l_1 norm of the
-  vector (the l_p norm for p=1).
+  cset-vec-word-observations WORD - return the number of times that
+  WORD has been observed.  This is exactly equal to to wild-card
+  summation over disjuncts N(w) = N(w,*) = sum_d N(w,d) for w being
+  the WordNode WORD.  This is exactly the same as the l_1 norm of
+  of the vector (the l_p norm for p=1).
 
-  ITEM can be either a WordNode or a disjunct (LgAnd)
+  WORD must be WordNode.
 "
-	; sum of the counts
-	(fold
-		(lambda (cset sum) (+ (get-count cset) sum))
-		0
-		(get-cset-vec ITEM))
+	(pseudo-cset-count-api 'right-wild-count WORD)
+)
+
+; ---------------------------------------------------------------------
+
+(define-public (cset-vec-dj-observations DISJUNCT)
+"
+  cset-vec-dj-observations DISJUNCT - return the number of times that
+  DISJUNCT has been observed.  This is exactly equal to to wild-card
+  summation over words N(*,d) = sum_w N(w,d) for d being the DISJUNCT.
+
+  DISJUNCT must be an LgAnd.
+"
+	(pseudo-cset-count-api 'left-wild-count DISJUNCT)
 )
 
 ; ---------------------------------------------------------------------
@@ -359,12 +379,20 @@
 	(/ (get-count CSET) (get-stashed-count))
 )
 
-(define-public (cset-vec-frequency ITEM)
+(define-public (cset-vec-word-frequency WORD)
 "
-  cset-vec-frequency -- Return the frequency (probability) with which
-  ITEM has been observed.
+  cset-vec-word-frequency -- Return the frequency (probability) with
+  which WORD has been observed. WORD must be a WordNode.
 "
-	(/ (cset-vec-observations ITEM) (get-stashed-count))
+	(pseudo-cset-freq-api 'right-wild-freq WORD)
+)
+
+(define-public (cset-vec-dj-frequency DISJUNCT)
+"
+  cset-vec-dj-frequency -- Return the frequency (probability) with
+  which DISJUNCT has been observed. DISJUNCT must be an LgAnd.
+"
+	(pseudo-cset-freq-api 'left-wild-freq DISJUNCT)
 )
 
 (define-public (cset-vec-entropy ITEM)
@@ -392,10 +420,6 @@
 			(get-cset-vec ITEM)))
 	(/ nats (log 2.0))
 )
-
-; Use the new, modern object API for all this stuff.
-(define pseudo-cset-api (make-pseudo-cset-api))
-(define pseudo-cset-mi-api (add-pair-mi-api pseudo-cset-api))
 
 (define (cset-vec-word-mi WORD)
 "
@@ -649,21 +673,6 @@
 		(lambda (cset sum) (+ (con-count cset) sum))
 		0
 		(get-cset-vec ITEM))
-)
-
-; ---------------------------------------------------------------------
-
-(define-public (cset-observations ITEM-LIST)
-"
-  cset-observations ITEM-LIST - Return the number of times that
-  all of the connector-sets in the ITEM-LIST have been observed.
-
-  The ITEM-LIST can be a mixture of WordNodes and disjuncts.
-"
-	(fold
-		(lambda (item sum) (+ (cset-vec-observations item) sum))
-		0
-		ITEM-LIST)
 )
 
 ; ---------------------------------------------------------------------

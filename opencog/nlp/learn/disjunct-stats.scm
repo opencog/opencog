@@ -145,7 +145,7 @@
 
 ; words with 100 or more observations.
 (define top-cset-words
-	(filter (lambda (wrd) (< 100 (cset-vec-observations wrd)))
+	(filter (lambda (wrd) (< 100 (cset-vec-word-observations wrd)))
 		all-cset-words))
 
 ; ---------------------------------------------------------------------
@@ -153,7 +153,8 @@
 ; of the cset observations. Note that this score is *identical* to the
 ; number of times that the word was observed during MST parsing. That is
 ; because exactly one disjunct is extracted per word, per MST parse.
-(define sorted-word-obs (score-and-rank cset-vec-observations all-cset-words)
+(define sorted-word-obs
+	(score-and-rank cset-vec-word-observations all-cset-words)
 
 ; Print above to a file, so that it can be graphed.
 (let ((outport (open-file "/tmp/ranked-word-obs.dat" "w")))
@@ -162,7 +163,8 @@
 
 ; A sorted list of score-disjunct pairs, where the score is the count
 ; of the cset observations.
-(define sorted-dj-obs (score-and-rank cset-vec-observations all-disjuncts))
+(define sorted-dj-obs
+	(score-and-rank cset-vec-dj-observations all-disjuncts))
 
 ; Print above to a file, so that it can be graphed.
 (let ((outport (open-file "/tmp/ranked-dj-obs.dat" "w")))
@@ -179,9 +181,13 @@
 	(close outport))
 
 ; ---------------------------------------------------------------------
+; Similar to above, but this time, instead of ranking, we bin-count.
+;
+xxxxxx
+; ---------------------------------------------------------------------
 ; Compute the average number of observations per disjunct.
 (define (avg-obs WORD)
-	(/ (cset-vec-observations WORD) (cset-vec-support WORD)))
+	(/ (cset-vec-word-observations WORD) (cset-vec-support WORD)))
 
 ; Compute the average number of observations per disjunct.
 ; Discard anything with less than 100 observations.
@@ -218,7 +224,7 @@
 ; of observations.
 (define (lensq-vs-obs wrd)
 	(define len (cset-vec-len wrd))
-	(/ (* len len) (cset-vec-observations wrd)))
+	(/ (* len len) (cset-vec-word-observations wrd)))
 
 ; The length vs observation ranking; but discard everything
 ; with a small number of observations.
@@ -236,7 +242,7 @@
 ;  sum_i (x-a)^2 = <x^2> - a^2
 ;
 (define (avg-obs WORD)
-	(/ (cset-vec-observations WORD) (cset-vec-support WORD)))
+	(/ (cset-vec-word-observations WORD) (cset-vec-support WORD)))
 
 (define (meansq-obs WORD)
 	(define len (cset-vec-len WORD))
@@ -265,7 +271,7 @@
 ; Hubiness is the second moment of the vertex degree.
 
 (define (avg-con-count wrd)
-	(/ (cset-vec-connectors wrd) (cset-vec-observations wrd)))
+	(/ (cset-vec-connectors wrd) (cset-vec-word-observations wrd)))
 
 ; Rank by average disjunct size; but discard everything
 ; with a small number of observations.
@@ -284,7 +290,7 @@
 ; RMS is sqrt (sum (c^2/n) - (sum c/n)^2)
 (define (moment-con-count wrd)
 	(define meansq
-		(/ (cset-vec-lp-connectors wrd 2) (cset-vec-observations wrd)))
+		(/ (cset-vec-lp-connectors wrd 2) (cset-vec-word-observations wrd)))
 	(define avg (avg-con-count wrd))
 	(sqrt (- meansq (* avg avg))))
 
@@ -372,23 +378,25 @@
 
 ; Several ways of counting the same thing. These should all
 ; give the same result.
-(define total-cset-count (cset-observations all-cset-words))
+
 (define total-cset-count (get-total-cset-count))
 
-; Get the "partial entropy".
-(define (partial-entropy LIST)
+; Get the "fractional entropy".
+(define (fractional-entropy FUNC LIST)
 	(fold
 		(lambda (item sum)
-			(define pitem (/ (cset-vec-observations item) total-cset-count))
+			(define pitem (/ (FUNC item) total-cset-count))
 			(- sum (* pitem (log pitem))))
 		0
 		LIST))
 
 ; Get the "word entropy".
-(define word-entropy (partial-entropy all-cset-words))
+(define word-entropy
+	(fractional-entropy cset-vec-word-observations all-cset-words))
 (define word-entropy-bits (/ word-entropy (log 2.0)))
 
-(define disjunct-entropy (partial-entropy all-disjuncts))
+(define disjunct-entropy
+	(fractional-entropy cset-vec-dj-observations all-disjuncts))
 (define disjunct-entropy-bits (/ disjunct-entropy (log 2.0)))
 
 (define cset-entropy-bits
@@ -475,12 +483,23 @@
 	(print-ts-bincounts binned-word-logli outport)
 	(close outport))
 
+(define (cset-vec-word-count WORD)
+	(pmi 'right-wild-count WORD))
+
+xxxxxxxxxxxx
+(define sorted-word-logli (score-and-rank cset-vec-word-logli all-cset-words))
+(define binned-word-logli (bin-count-simple sorted-word-logli 100))
+
+(let ((outport (open-file "/tmp/binned-word-logli.dat" "w")))
+	(print-ts-bincounts binned-word-logli outport)
+	(close outport))
+
 ;--------------
 ; cheat method, assumes we are not making errors,
 ; it would be better to double-check this by running the
 ; sums the other way.
 (define (cset-vec-word-crazy WORD)
-	(- (pmi 'compute-right-mi WORD) 
+	(- (pmi 'compute-right-mi WORD)
 		(+ (pmi 'right-wild-logli WORD)
 			(pmi 'compute-right-fentropy WORD))))
 
@@ -492,7 +511,7 @@
 	(close outport))
 
 (define (cset-vec-word-crazy2 WORD)
-	(- (pmi 'compute-right-mi WORD) 
+	(- (pmi 'compute-right-mi WORD)
 		(pmi 'compute-right-fentropy WORD)))
 
 (define sorted-word-crazy2 (score-and-rank cset-vec-word-crazy2 all-cset-words))
@@ -525,7 +544,7 @@
 (define (cset-freq CSET) (pfrq 'pair-freq CSET))
 
 (define weighted-cset-mi
-	(bin-count-weighted sorted-cset-mi 200 
+	(bin-count-weighted sorted-cset-mi 200
 		(lambda (scored-item) (cset-freq (cdr scored-item)))))
 
 (let ((outport (open-file "/tmp/weighted-cset-mi.dat" "w")))
@@ -535,7 +554,7 @@
 (define (cset-logli CSET) (pfrq 'pair-logli CSET))
 
 (define wlogli-cset-mi
-	(bin-count-weighted sorted-cset-mi 200 
+	(bin-count-weighted sorted-cset-mi 200
 		(lambda (scored-item) (cset-logli (cdr scored-item)))))
 
 (let ((outport (open-file "/tmp/wlogli-cset-mi.dat" "w")))

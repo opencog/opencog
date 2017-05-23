@@ -6047,6 +6047,10 @@ at 01:51 have 129302108= 129M so 12M in 1.7 hours = 7M/hour
 So now its more than 2x faster. almost 3x, with rounding errors
 Yayyyy!!!
 
+05:30 152806491 =153 -117 = 36M obs in 5.4 hours = 6.7M obs/hour
+                = 1854 obs/second
+
+
 
 ----------------------------------------------------
 
