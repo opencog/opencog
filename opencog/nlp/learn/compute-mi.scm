@@ -124,6 +124,92 @@
 (use-modules (opencog persist))
 
 ; ---------------------------------------------------------------------
+
+(definec (add-pair-stars LLOBJ)
+"
+  add-pair-stars LLOBJ - Extend LLOBJ with wildcard access methods.
+
+  Extend the LLOBJ with additional methods to get wild-card lists,
+  that is, lists of all pairs with a specific item on the left,
+  or on the right.  This generates these lists in a generic way,
+  that probably work for most kinds of pairs. However, you can
+  overload them with custom getters, if you wish.
+
+  Here, the LLOBJ is expected to be an object, with methods for
+  'left-type and 'right-type on it, just as described above.
+
+  The lists of pairs will be lists of type 'pair-type (usually
+  ListLink's), with the desired item on the left or right, and
+  an atom of 'left-type or 'right-type on the other side.
+"
+	(let ((llobj LLOBJ)
+			(l-supp '())
+			(r-supp '())
+		)
+
+		; Return a list of all of the atoms that might ever appear on
+		; the left-hand-side of a pair.  This is the set of all possible
+		; items x from the pair (x,y) for any y.
+		;
+		(define (get-left-basis)
+			(if (null? l-supp)
+				(set! l-supp (cog-get-atoms (llobj 'left-type))))
+			l-supp)
+
+		(define (get-right-basis)
+			(if (null? r-supp)
+				(set! r-supp (cog-get-atoms (llobj 'right-type))))
+			r-supp)
+
+		; Return a list of all pairs with the ITEM on the right side,
+		; and an object of type (LLOBJ 'left-type) on the left. The
+		; pairs are just ListLink's (of arity two). That is, it returns
+		; a list of atoms of the form
+		;
+		;    ListLink
+		;         (LLOBJ 'left-type)
+		;         ITEM
+		;
+		(define (get-left-stars ITEM)
+			(define want-type (LLOBJ 'left-type))
+			(define pair-type (LLOBJ 'pair-type))
+			(filter
+				(lambda (lnk)
+					(define oset (cog-outgoing-set lnk))
+					(and
+						(equal? 2 (cog-arity lnk))
+						(equal? want-type (cog-type (first oset)))
+						(equal? ITEM (second oset))
+					))
+				(cog-incoming-by-type ITEM pair-type)))
+
+		; Same as above, but on the right.
+		(define (get-right-stars ITEM)
+			(define want-type (LLOBJ 'right-type))
+			(define pair-type (LLOBJ 'pair-type))
+			(filter
+				(lambda (lnk)
+					(define oset (cog-outgoing-set lnk))
+					(and
+						(equal? 2 (cog-arity lnk))
+						(equal? ITEM (first oset))
+						(equal? want-type (cog-type (second oset)))
+					))
+				(cog-incoming-by-type ITEM pair-type)))
+
+
+	; Methods on this class.
+	(lambda (message . args)
+		(case message
+			((left-basis)      (get-left-basis))
+			((right-basis)     (get-right-basis))
+			((left-stars)      (apply get-left-stars args))
+			((right-stars)     (apply get-right-stars args))
+			(else (apply llobj (cons message args))))
+		)))
+
+; ---------------------------------------------------------------------
+; ---------------------------------------------------------------------
 ;
 ; Extend the LLOBJ with additional methods to compute wildcard counts
 ; for pairs, and store the results using the count-object API.
@@ -134,9 +220,9 @@
 ;
 (define (make-compute-count LLOBJ)
 
-	; We need 'left-supprt, provided by add-pair-wildcards-api
+	; We need 'left-supprt, provided by add-pair-stars
 	; We need 'set-left-wild-count, provided by add-pair-count-api
-	(let ((cntobj (add-pair-count-api (add-pair-wildcards-api LLOBJ))))
+	(let ((cntobj (add-pair-count-api (add-pair-stars LLOBJ))))
 
 		; Compute the left-side wild-card count. This is the number
 		; N(*,y) = sum_x N(x,y) where ITEM==y and N(x,y) is the number
@@ -180,10 +266,10 @@
 		; This method returns a list of all of the atoms holding
 		; those counts; handy for storing in a database.
 		(define (cache-all-left-counts)
-			(map cache-left-count (cntobj 'right-support)))
+			(map cache-left-count (cntobj 'right-basis)))
 
 		(define (cache-all-right-counts)
-			(map cache-right-count (cntobj 'left-support)))
+			(map cache-right-count (cntobj 'left-basis)))
 
 		; Compute the total number of times that all pairs have been
 		; observed. In formulas, return
@@ -198,7 +284,7 @@
 				;;; (lambda (item sum) (+ sum (compute-right-count item)))
 				(lambda (item sum) (+ sum (cntobj 'right-wild-count item)))
 				0
-				(cntobj 'left-support)))
+				(cntobj 'left-basis)))
 
 		; Compute the total number of times that all pairs have been
 		; observed. That is, return N(*,*) = sum_y N(*,y). Note that
@@ -210,7 +296,7 @@
 				;;; (lambda (item sum) (+ sum (compute-left-count item)))
 				(lambda (item sum) (+ sum (cntobj 'left-wild-count item)))
 				0
-				(cntobj 'right-support)))
+				(cntobj 'right-basis)))
 
 		; Compute the total number of times that all pairs have been
 		; observed. That is, return N(*,*).  Throws an error if the
@@ -263,11 +349,11 @@
 
 (define (make-compute-freq LLOBJ)
 
-	; We need 'left-support, provided by add-pair-wildcards-api
+	; We need 'left-basis, provided by add-pair-stars
 	; We need 'wild-wild-count, provided by add-pair-count-api
 	; We need 'set-left-wild-freq, provided by add-pair-freq-api
 	(let ((cntobj (add-pair-freq-api (add-pair-count-api
-					(add-pair-wildcards-api LLOBJ))))
+					(add-pair-stars LLOBJ))))
 			(tot-cnt 0))
 
 		(define (init)
@@ -317,7 +403,7 @@
 		; This returns a count of the pairs.
 		(define (cache-all-pair-freqs)
 			(define cnt 0)
-			(define lefties (cntobj 'left-support))
+			(define lefties (cntobj 'left-basis))
 			(define (right-loop left-item)
 				(for-each
 					(lambda (pr)
@@ -334,9 +420,9 @@
 		; This method returns a list of all of the atoms holding
 		; those counts; handy for storing in a database.
 		(define (cache-all-left-freqs)
-			(map cache-left-freq (cntobj 'right-support)))
+			(map cache-left-freq (cntobj 'right-basis)))
 		(define (cache-all-right-freqs)
-			(map cache-right-freq (cntobj 'left-support)))
+			(map cache-right-freq (cntobj 'left-basis)))
 
 		; Methods on this class.
 		(lambda (message . args)
@@ -378,12 +464,12 @@
 		(set! start-nsecs (get-internal-real-time))
 		(/ (* diff 1000.0) internal-time-units-per-second))
 
-	; We need 'left-supprt, provided by add-pair-wildcards-api
+	; We need 'left-supprt, provided by add-pair-stars
 	; We need 'pair-freq, provided by add-pair-freq-api
 	; We need 'set-pair-mi, provided by add-pair-freq-api
 	; We need 'right-wild-count, provided by add-pair-count-api
 	(let ((frqobj (add-pair-freq-api
-				(add-pair-count-api (add-pair-wildcards-api LLOBJ)))))
+				(add-pair-count-api (add-pair-stars LLOBJ)))))
 
 		; Loop over all pairs, computing the MI for each. The loop
 		; is actually two nested loops, with a loop over the
@@ -392,7 +478,7 @@
 		; the MI, suitable for iterating for storage.
 		(define (compute-n-cache-pair-mi)
 			(define all-atoms '())
-			(define lefties (frqobj 'left-support))
+			(define lefties (frqobj 'left-basis))
 
 			; progress stats
 			(define cnt-pairs 0)
@@ -502,7 +588,7 @@
 		diff)
 
 	; Decorate the object with methods that report support.
-	(define wild-obj (add-pair-wildcards-api OBJ))
+	(define wild-obj (add-pair-stars OBJ))
 
 	; Decorate the object with methods that can compute counts.
 	(define count-obj (make-compute-count OBJ))
@@ -514,8 +600,8 @@
 	(define batch-mi-obj (make-batch-mi OBJ))
 
 	(format #t "Support: num left=~A num right=~A\n"
-			(wild-obj 'left-support-size)
-			(wild-obj 'right-support-size))
+			(length (wild-obj 'left-basis))
+			(length (wild-obj 'right-basis)))
 
 	; First, compute the summations for the left and right wildcard counts.
 	; That is, compute N(x,*) and N(*,y) for the supports on x and y.
