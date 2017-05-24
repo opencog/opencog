@@ -23502,7 +23502,7 @@ Computed with sorted-avg-connectors in disjunct-stats.scm
 \align center
 \begin_inset Graphics
 	filename images/ranked-avg-connectors.eps
-	width 60text%
+	width 70text%
 
 \end_inset
 
@@ -23680,7 +23680,7 @@ Given the earlier Zipfian results on the average degree
 
 , it should be no surprise that a ranked listing of words by hubiness is
  very nearly identical to the listing for average degree.
- This is, after all, what the scale-free naure of the Zipfian distribution
+ This is, after all, what the scale-free nature of the Zipfian distribution
  really means.
  Not only is the ranking nearly the same, but one also has the aproximate
  equality 
