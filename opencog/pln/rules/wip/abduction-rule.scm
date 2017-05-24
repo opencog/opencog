@@ -17,6 +17,8 @@
 ;;       abduction-implication-rule
 ;;       abduction-subset-rule
 ;;
+;; TODO: make BC compatible (check if the premises could be unordered)
+;;
 ;; -----------------------------------------------------------------------------
 (load "formulas.scm")
 
