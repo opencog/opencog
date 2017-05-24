@@ -157,6 +157,7 @@
 (define pseudo-cset-freq-api (add-pair-freq-api pseudo-cset-api))
 (define pseudo-cset-mi-api (add-pair-mi-compute pseudo-cset-api))
 (define pseudo-cset-support-api (add-pair-support-compute pseudo-cset-api))
+(define pseudo-cset-cosine-api (add-pair-cosine-compute pseudo-cset-api))
 
 ; ---------------------------------------------------------------------
 ; ---------------------------------------------------------------------
@@ -481,6 +482,7 @@
 
   ITEMs can be either WordNodes or disjuncts (LgAnd of pseudo-connectors).
 "
+pseudo-cset-cosine-api 'right-product 
 	(define word-base (equal? (cog-type ITEM-A) 'WordNode))
 	(define get-base (if word-base cset-get-disjunct cset-get-word))
 
@@ -512,10 +514,10 @@
 
   WORDs must be WordNodes.
 "
-xxxxxxxx
 	(define deno (* (cset-vec-word-len WORD-A) (cset-vec-word-len WORD-B)))
+	(define prod (pseudo-cset-cosine-api 'right-product WORD-A WORD-B))
 
-	(if (eqv? 0.0 deno) 0.0 (/ (cset-vec-prod WORD-A WORD-B) deno))
+	(if (eqv? 0.0 deno) 0.0 (/ prod deno))
 )
 
 ; ---------------------------------------------------------------------

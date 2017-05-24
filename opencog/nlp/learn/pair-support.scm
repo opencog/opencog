@@ -221,7 +221,7 @@
 		; Return the low-level pair (x,y) if it exists, else
 		; return the empty list '()
 		(define (have-lopr? X Y)
-			(cog-link (llobj 'get-pair-type) X Y))
+			(cog-link (llobj 'pair-type) X Y))
 
 		; Get the "other pair", for lefty wild
 		(define (get-other-left LOPR OTHER)
@@ -229,7 +229,7 @@
 
 		; Get the "other pair", for righty wild
 		(define (get-other-right LOPR OTHER)
-			(have-lopr? (OTHER (gdr LOPR))))
+			(have-lopr? OTHER (gdr LOPR)))
 
 		(define (compute-left-product ITEM-A ITEM-B)
 			(compute-product get-other-left ITEM-B
