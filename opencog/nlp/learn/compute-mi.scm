@@ -125,15 +125,14 @@
 
 ; ---------------------------------------------------------------------
 
-(definec (add-pair-stars LLOBJ)
+(define (add-pair-stars LLOBJ)
 "
   add-pair-stars LLOBJ - Extend LLOBJ with wildcard access methods.
 
   Extend the LLOBJ with additional methods to get wild-card lists,
   that is, lists of all pairs with a specific item on the left,
   or on the right.  This generates these lists in a generic way,
-  that probably work for most kinds of pairs. However, you can
-  overload them with custom getters, if you wish.
+  that probably work for most kinds of pairs.
 
   Here, the LLOBJ is expected to be an object, with methods for
   'left-type and 'right-type on it, just as described above.
@@ -143,8 +142,8 @@
   an atom of 'left-type or 'right-type on the other side.
 "
 	(let ((llobj LLOBJ)
-			(l-supp '())
-			(r-supp '())
+			(l-basis '())
+			(r-basis '())
 		)
 
 		; Return a list of all of the atoms that might ever appear on
@@ -152,14 +151,14 @@
 		; items x from the pair (x,y) for any y.
 		;
 		(define (get-left-basis)
-			(if (null? l-supp)
-				(set! l-supp (cog-get-atoms (llobj 'left-type))))
-			l-supp)
+			(if (null? l-basis)
+				(set! l-basis (cog-get-atoms (llobj 'left-type))))
+			l-basis)
 
 		(define (get-right-basis)
-			(if (null? r-supp)
-				(set! r-supp (cog-get-atoms (llobj 'right-type))))
-			r-supp)
+			(if (null? r-basis)
+				(set! r-basis (cog-get-atoms (llobj 'right-type))))
+			r-basis)
 
 		; Return a list of all pairs with the ITEM on the right side,
 		; and an object of type (LLOBJ 'left-type) on the left. The
@@ -220,7 +219,7 @@
 ;
 (define (make-compute-count LLOBJ)
 
-	; We need 'left-supprt, provided by add-pair-stars
+	; We need 'left-basis, provided by add-pair-stars
 	; We need 'set-left-wild-count, provided by add-pair-count-api
 	(let ((cntobj (add-pair-count-api (add-pair-stars LLOBJ))))
 
@@ -464,7 +463,7 @@
 		(set! start-nsecs (get-internal-real-time))
 		(/ (* diff 1000.0) internal-time-units-per-second))
 
-	; We need 'left-supprt, provided by add-pair-stars
+	; We need 'left-basis, provided by add-pair-stars
 	; We need 'pair-freq, provided by add-pair-freq-api
 	; We need 'set-pair-mi, provided by add-pair-freq-api
 	; We need 'right-wild-count, provided by add-pair-count-api
@@ -473,7 +472,7 @@
 
 		; Loop over all pairs, computing the MI for each. The loop
 		; is actually two nested loops, with a loop over the
-		; left-supports on the outside, and over right-stars for
+		; left-basis on the outside, and over right-stars for
 		; the inner loop. This returns a list of all atoms holding
 		; the MI, suitable for iterating for storage.
 		(define (compute-n-cache-pair-mi)
