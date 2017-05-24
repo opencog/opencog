@@ -101,3 +101,16 @@ plot "binned-word-logli.dat" using 2:3 with lines linewidth 5 title "", \
      "binned-word-logli.dat" using 2:(2**(1.5*($2-10))) with lines linewidth 5 title "2^{1.5(logli-10)}"
 
 #################################################
+# Used to generate the binned average observations
+#
+set term postscript eps enhanced color 28
+set out 'binned-avg.eps'
+set yrange [1:30000]
+set logscale y
+set format y "10^{%L}"
+set title "Distribution of average observations"
+set xlabel "Average observations per disjunct"
+set ylabel "Number of words"
+plot "binned-avg.dat" using 2:3 with lines linewidth 5 title ""
+
+#################################################

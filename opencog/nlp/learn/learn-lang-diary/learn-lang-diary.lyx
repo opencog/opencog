@@ -20200,7 +20200,7 @@ narrow
 
 \begin_layout Standard
 A graph of the ranked average number of observations, per disjunct, per
- word, is shown below.
+ word, is shown on the left, below.
 \begin_inset Foot
 status collapsed
 
@@ -20214,13 +20214,27 @@ Computed with the sorted-avg list in disjunct-stats.scm
  the spurious noise.
  Note that although the line is straight in this log-log graph, the Zipf
  exponent is approximately -1/4.
+ The graph on the right expresses an alternate view of the same idea: this
+ one shows a bin-count of all of the words.
+ Raffirming the graph in the left, it indicates that almost all words have
+ an average disjunct observation count of less than three.
+ Both of these graphs emphasize just how thin and weak this dataset is:
+ to be certain of a disjunct, it sure would be nice to observe it, in actual
+ use, more than half-a-dozen times! 
 \end_layout
 
 \begin_layout Standard
 \align center
 \begin_inset Graphics
 	filename images/ranked-avg.eps
-	width 70text%
+	width 50text%
+
+\end_inset
+
+
+\begin_inset Graphics
+	filename images/binned-avg.eps
+	width 50text%
 
 \end_inset
 
@@ -20228,8 +20242,19 @@ Computed with the sorted-avg list in disjunct-stats.scm
 \end_layout
 
 \begin_layout Standard
-The first ten on this list are "According" "Gestalt" "Cao" "Berger" "2015"
- "It" "U.S" "United" "However" "y".
+The spike on the far right on the graph on the right suggests that there
+ are about 30 words that have an average number of observations of greater
+ than 6! Since they are 
+\emph on
+not
+\emph default
+ showing up in the graph on the left, this shows that the underlying word
+ have fewer than 100 observations.
+\end_layout
+
+\begin_layout Standard
+The first ten on the ranked list are "According" "Gestalt" "Cao" "Berger"
+ "2015" "It" "U.S" "United" "However" "y".
  Unsurprisingly, most of these are all capitalized, suggesting that they
  are either part of a proper name, or that perhaps they begin a sentence.
  
