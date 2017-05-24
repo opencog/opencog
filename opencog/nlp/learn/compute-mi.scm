@@ -467,8 +467,9 @@
 	; We need 'pair-freq, provided by add-pair-freq-api
 	; We need 'set-pair-mi, provided by add-pair-freq-api
 	; We need 'right-wild-count, provided by add-pair-count-api
-	(let ((frqobj (add-pair-freq-api
-				(add-pair-count-api (add-pair-stars LLOBJ)))))
+	(let ((star-obj (add-pair-stars LLOBJ))
+			(cntobj (add-pair-count-api LLOBJ))
+			(frqobj (add-pair-freq-api LLOBJ)))
 
 		; Loop over all pairs, computing the MI for each. The loop
 		; is actually two nested loops, with a loop over the
@@ -477,7 +478,7 @@
 		; the MI, suitable for iterating for storage.
 		(define (compute-n-cache-pair-mi)
 			(define all-atoms '())
-			(define lefties (frqobj 'left-basis))
+			(define lefties (star-obj 'left-basis))
 
 			; progress stats
 			(define cnt-pairs 0)
@@ -492,7 +493,7 @@
 				; are not silent) which can sometimes be a huge performance
 				; hit. So avoid the throws.
 				; Anyway: zero counts means undefined MI.
-				(if (< 0 (frqobj 'right-wild-count left-item))
+				(if (< 0 (cntobj 'right-wild-count left-item))
 					(let ((r-logli (frqobj 'right-wild-logli left-item)))
 
 						; Compute the MI for exactly one pair.
@@ -512,7 +513,7 @@
 						; Run the inner loop
 						(for-each
 							do-one-pair
-							(frqobj 'right-stars left-item))
+							(star-obj 'right-stars left-item))
 
 						; Print some progress statistics.
 						(set! cnt-lefties (+ cnt-lefties 1))
