@@ -475,38 +475,6 @@
 
 ; ---------------------------------------------------------------------
 
-(define-public (cset-vec-prod ITEM-A ITEM-B)
-"
-  cset-vec-prod ITEM-A ITEM-B - compute the pseudo-cset vector
-  dot product between ITEM-A and ITEM-B
-
-  ITEMs can be either WordNodes or disjuncts (LgAnd of pseudo-connectors).
-"
-pseudo-cset-cosine-api 'right-product 
-	(define word-base (equal? (cog-type ITEM-A) 'WordNode))
-	(define get-base (if word-base cset-get-disjunct cset-get-word))
-
-	; If the connector-set for ITEM-B exists, then get its count.
-	(define (get-other-count cset)
-		(define other-cset
-			(if word-base
-				(have-cset? ITEM-B (cset-get-disjunct cset))
-				(have-cset? (cset-get-word cset) ITEM-B)))
-		(if (null? other-cset) 0 (get-count other-cset))
-	)
-
-	; Loop over all connectors for ITEM-A
-	(fold
-		(lambda (cset sum)
-			(define a-cnt (get-count cset))
-			(define b-cnt (get-other-count cset))
-			(+ sum (* a-cnt b-cnt)))
-		0
-		(get-cset-vec ITEM-A))
-)
-
-; ---------------------------------------------------------------------
-
 (define-public (cset-vec-cosine WORD-A WORD-B)
 "
   cset-vec-cosine WORD-A WORD-B - compute the pseudo-cset vector
