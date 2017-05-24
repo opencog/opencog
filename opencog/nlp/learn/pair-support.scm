@@ -195,7 +195,32 @@
 	(let ((llobj LLOBJ)
 			(star-obj (add-pair-stars LLOBJ)))
 
+		(define (compute-product ITEM-A ITEM-B LIST)
+			; Loop over all 
+		)
+
+		; Return the low-level pair (x,y) if it exists, else
+		; return the empty list '()
+		(define (have-lopr? X Y)
+			(cog-link (llobj 'get-pair-type) X Y))
+
+		; for lefty onnly
+		(define (get-other-cnt LOPR OTHER)
+			(define other-pair (have-lopr? (gar LOPR) OTHER))
+			(if (null? other-pair) 0
+				(llobj 'pair-count other-pair)))
+
 		(define (compute-left-product ITEM-A ITEM-B)
+			; Loop over the left-wilds for ITEM-A
+			(fold
+				(lambda (lopr sum)
+					(define a-cnt
+						(llobj 'pair-count (llobj 'item-pair lopr)))
+					(define b-cnt (get-other-cnt lopr))
+					(+ sum (* a-cnt b-cnt)))
+				)
+				0
+				(star-obj 'left-stars ITEM-A))
 		)
 
 		; -------------
