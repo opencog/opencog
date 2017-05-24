@@ -62,8 +62,9 @@
 ; List the rules and their weights.
 (define rules
   (list ;; (list deduction-inheritance-rule-name 1)
-        (list conditional-full-instantiation-inheritance-meta-rule-name 1)
         (list conditional-full-instantiation-implication-scope-meta-rule-name 1)
+        (list conditional-full-instantiation-implication-meta-rule-name 1)
+        (list conditional-full-instantiation-inheritance-meta-rule-name 1)
         (list fuzzy-conjunction-introduction-3ary-rule-name 1)
   )
 )
@@ -76,7 +77,7 @@
 ;; ;;;;;;;;;;;;;;;;;;;;;;
 
 ;; Termination criteria parameters
-(ure-set-num-parameter pln-rbs "URE:maximum-iterations" 20000)
+(ure-set-num-parameter pln-rbs "URE:maximum-iterations" 50000)
 
 ;; Attention allocation (0 to disable it, 1 to enable it)
 (ure-set-fuzzy-bool-parameter pln-rbs "URE:attention-allocation" 0)

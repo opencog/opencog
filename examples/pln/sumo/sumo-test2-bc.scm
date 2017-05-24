@@ -3,29 +3,56 @@
 ;; The reasoning goes as follows
 ;;
 ;; 1. If Entity2-2 is a father, then it has the attribute of
-;; Male. Apply conditional instantiation over KB-test1-6 and KB-16658
+;; Male. Apply conditional instantiation over KB-test1-6 and KB-17197
 ;; to conclude
 ;;
-;; (MemberLink
-;;   (ConceptNode "Entity2-2")
-;;   (ConceptNode "Male"))
+;; (EvaluationLink
+;;   (PredicateNode "attribute")
+;;   (ListLink
+;;     (ConceptNode "Entity2-2")
+;;     (ConceptNode "Male")))
 ;;
 ;; 2. If Entity2-2 is a mother, then it has the attribute of
 ;; Female. Apply conditional instantiation over KB-test1-7 and
-;; KB-16741 to conclude
+;; KB-16754 to conclude
 ;;
-;; (MemberLink
-;;   (ConceptNode "Entity2-2")
-;;   (ConceptNode "Female"))
+;; (EvaluationLink
+;;   (PredicateNode "attribute")
+;;   (ListLink
+;;     (ConceptNode "Entity2-2")
+;;     (ConceptNode "Female")))
 ;;
-;; 3. Introduce the conjunction that Entity2-2 has attributes Male and
-;; Female and that these attributes are contradictory. Apply fuzzy
-;; conjunction introduction over 1., 2. and KB-17286 to obtain their
+;; 3. If Entity2-2 has attribute of Male, then it has the property of
+;; Male because attribute is a subrelation of property. Apply
+;; conditional instantiation using 1. and KB-17347 as premises
+;;
+;; (EvaluationLink
+;;   (PredicateNode "property")
+;;   (ListLink
+;;     (ConceptNode "Entity2-2")
+;;     (ConceptNode "Male")))
+;;
+;; 4. If Entity2-2 has attribute of Female, then it has the property
+;; of Female because attribute is a subrelation of property. Apply
+;; conditional instantiation using 2. and KB-17347 as premises
+;;
+;; (EvaluationLink
+;;   (PredicateNode "property")
+;;   (ListLink
+;;     (ConceptNode "Entity2-2")
+;;     (ConceptNode "Female")))
+;;
+;; 5. Introduce the conjunction that Entity2-2 has property Male and
+;; Female and that these attributes are contrary. Apply fuzzy
+;; conjunction introduction using 3., 4. and KB-17527 to obtain their
 ;; conjunction.
 ;;
-;; 4. Since Entity2-2 has 2 contradictory attributes, the KB is
-;; inconsistent. Apply conditional instantiation over 3. and
-;; KB-test1-5 to obtain the target
+;; 6. Since Entity2-2 has 2 contrary properties, the KB is
+;; inconsistent. Apply conditional instantiation using 5. and
+;; KB-test1-5 as premises to obtain the target
+;;
+;; TODO: use the suppodely fact that "contraryAttribute" is symmetric
+;; to get the right argument order.
 ;;
 ;; Note: use Merge.scm (instead of all-sumo-labeled-kb.scm) to be more
 ;; tractable.
@@ -37,7 +64,7 @@
 (cog-logger-set-level! "debug")
 
 ;; Load PLN rule base
-(load "pln-config.scm")
+(load "pln-config2.scm")
 
 ;; Add axioms pertaining to the test
 ;; KB-test1-1

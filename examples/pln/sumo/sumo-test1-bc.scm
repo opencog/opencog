@@ -24,7 +24,7 @@
 (cog-logger-set-level! "debug")
 
 ;; Load PLN rule base
-(load "pln-config.scm")
+(load "pln-config1.scm")
 
 ;; Add axioms pertaining to the test
 (MemberLink (stv 1.000000 1.000000)
