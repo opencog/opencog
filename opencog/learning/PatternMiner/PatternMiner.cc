@@ -401,7 +401,7 @@ void PatternMiner::generateALinkByChosenVariables(Handle& originalLink, map<Hand
 }
 
  // valueToVarMap:  the ground value node in the orginal Atomspace to the variable handle in pattenmining Atomspace
-// _fromAtomSpace: where is input link from
+// _fromAtomSpace: where the input link is from
 void PatternMiner::extractAllNodesInLink(Handle link, map<Handle,Handle>& valueToVarMap, AtomSpace* _fromAtomSpace)
 {
     HandleSeq outgoingLinks = link->getOutgoingSet();
@@ -985,18 +985,18 @@ Handle PatternMiner::getFirstNonIgnoredIncomingLink(AtomSpace *atomspace, Handle
     Handle cur_h = handle;
     while(true)
     {
-        HandleSeq incomings;
-        cur_h->getIncomingSet(back_inserter(incomings));
+        IncomingSet incomings = cur_h->getIncomingSet(atomspace);
         if (incomings.size() == 0)
             return Handle::UNDEFINED;
 
-        if (isIgnoredType ((incomings[0])->getType()))
+        Handle incomingHandle = (incomings[0])->getHandle();
+        if (isIgnoredType (incomingHandle->getType()))
         {
-            cur_h = incomings[0];
+            cur_h = incomingHandle;
             continue;
         }
         else
-            return incomings[0];
+            return incomingHandle;
 
     }
 
@@ -2123,11 +2123,11 @@ void PatternMiner::reNameNodesForALink(Handle& inputLink, Handle& nodeToBeRename
 void PatternMiner::getOneMoreGramExtendedLinksFromGivenLeaf(Handle& toBeExtendedLink, Handle& leaf, Handle& varNode,
                                                             HandleSeq& outPutExtendedPatternLinks, AtomSpace* _fromAtomSpace)
 {
-    HandleSeq incomings;
-    leaf->getIncomingSet(back_inserter(incomings));
+    IncomingSet incomings = leaf->getIncomingSet(_fromAtomSpace);
 
-    for (Handle incomingHandle : incomings)
+    for (LinkPtr incomingPtr : incomings)
     {
+        Handle incomingHandle  = incomingPtr->getHandle();
         Handle extendedHandle;
         // if this atom is a igonred type, get its first parent that is not in the igonred types
         if (isIgnoredType (incomingHandle->getType()) )
@@ -2586,6 +2586,7 @@ void PatternMiner::reSetAllSettingsFromConfig()
     }
 
     only_mine_patterns_start_from_white_list = config().get_bool("only_mine_patterns_start_from_white_list");
+    only_mine_patterns_start_from_white_list_contain = config().get_bool("only_mine_patterns_start_from_white_list_contain");
 
 }
 
@@ -2593,13 +2594,13 @@ void PatternMiner::reSetAllSettingsFromConfig()
 void PatternMiner::cleanUpPatternMiner()
 {
 
-    if (htree)
+    if (htree != 0)
     {
         delete htree;
         htree = 0;
     }
 
-    if (atomSpace)
+    if (atomSpace != 0)
     {
         delete atomSpace;
         atomSpace = 0;
@@ -2608,7 +2609,7 @@ void PatternMiner::cleanUpPatternMiner()
 //    if (originalAtomSpace)
 //        delete originalAtomSpace;
 
-    if (observingAtomSpace)
+    if (observingAtomSpace != 0)
     {
         delete observingAtomSpace;
         observingAtomSpace = 0;
@@ -2666,6 +2667,11 @@ void PatternMiner::resetPatternMiner(bool resetAllSettingsFromConfig)
 
 void PatternMiner::runPatternMiner(bool exit_program_after_finish)
 {
+//    Handle n1 = originalAtomSpace->add_node(CONCEPT_NODE, "AAA");
+//    Handle var1 = atomSpace->add_node(VARIABLE_NODE, "var1");
+
+//    Handle l1 = atomSpace->add_link(LIST_LINK, n1, var1);
+//    n1->geti
 
     if (keyStrToHTreeNodeMap.size() > 0)
     {
@@ -2693,8 +2699,13 @@ void PatternMiner::runPatternMiner(bool exit_program_after_finish)
     if (only_mine_patterns_start_from_white_list)
     {
         allLinksContainWhiteKeywords.clear();
+        havenotProcessedWhiteKeywordLinks.clear();
 
-        cout << "\nOnly mine patterns start from white list:" << std::endl;
+        cout << "\nOnly mine patterns start from white list: logic = ";
+        if (only_mine_patterns_start_from_white_list_contain)
+            cout << " Nodes contain keyword." << std::endl;
+        else
+            cout << " Nodes'label equal to keyword." << std::endl;
 
         for (string keyword : keyword_white_list)
         {
@@ -2703,10 +2714,10 @@ void PatternMiner::runPatternMiner(bool exit_program_after_finish)
 
         cout << "Finding all Links contains these keywords...\n";
 
-        set<Handle> allLinksContainWhiteKeywordsSet;
-        findAllLinksContainKeyWords(keyword_white_list, 0, true, allLinksContainWhiteKeywordsSet);
 
-        std::copy(allLinksContainWhiteKeywordsSet.begin(), allLinksContainWhiteKeywordsSet.end(), std::back_inserter(allLinksContainWhiteKeywords));
+        findAllLinksContainKeyWords(keyword_white_list, 0, only_mine_patterns_start_from_white_list_contain, havenotProcessedWhiteKeywordLinks);
+
+        std::copy(havenotProcessedWhiteKeywordLinks.begin(), havenotProcessedWhiteKeywordLinks.end(), std::back_inserter(allLinksContainWhiteKeywords));
         cout << "Found " << allLinksContainWhiteKeywords.size() << " Links contians the keywords!\n";
 
     }
@@ -3364,11 +3375,12 @@ void PatternMiner::testPatternMatcher2()
 OrderedHandleSet PatternMiner::_getAllNonIgnoredLinksForGivenNode(Handle keywordNode, OrderedHandleSet& allSubsetLinks)
 {
     OrderedHandleSet newHandles;
-    HandleSeq incomings;
-    keywordNode->getIncomingSet(back_inserter(incomings));
+    IncomingSet incomings = keywordNode->getIncomingSet(originalAtomSpace);
 
-    for (Handle incomingHandle : incomings)
+    cout << "\n " << incomings.size() << " incomings found for keyword: " << keywordNode->toShortString() << std::endl;
+    for (LinkPtr incomingPtr : incomings)
     {
+        Handle incomingHandle = incomingPtr->getHandle();
         Handle newh = incomingHandle;
 
         // if this atom is a igonred type, get its first parent that is not in the igonred types
@@ -3388,7 +3400,7 @@ OrderedHandleSet PatternMiner::_getAllNonIgnoredLinksForGivenNode(Handle keyword
     return newHandles;
 }
 
-OrderedHandleSet PatternMiner::_extendOneLinkForSubsetCorpus(OrderedHandleSet& allNewLinksLastGram, OrderedHandleSet& allSubsetLinks)
+OrderedHandleSet PatternMiner::_extendOneLinkForSubsetCorpus(OrderedHandleSet& allNewLinksLastGram, OrderedHandleSet& allSubsetLinks, set<Handle>& extractedNodes)
 {
     OrderedHandleSet allNewConnectedLinksThisGram;
     // only extend the links in allNewLinksLastGram. allNewLinksLastGram is a part of allSubsetLinks
@@ -3407,6 +3419,11 @@ OrderedHandleSet PatternMiner::_extendOneLinkForSubsetCorpus(OrderedHandleSet& a
             if (isIgnoredContent(content))
                 continue;
 
+            if (extractedNodes.find(neighborNode) != extractedNodes.end())
+                continue;
+            else
+                extractedNodes.insert(neighborNode);
+
             OrderedHandleSet newConnectedLinks;
             newConnectedLinks = _getAllNonIgnoredLinksForGivenNode(neighborNode, allSubsetLinks);
             allNewConnectedLinksThisGram.insert(newConnectedLinks.begin(),newConnectedLinks.end());
@@ -3422,22 +3439,16 @@ OrderedHandleSet PatternMiner::_extendOneLinkForSubsetCorpus(OrderedHandleSet& a
 void PatternMiner::findAllLinksContainKeyWords(vector<string>& subsetKeywords, unsigned int max_connection, bool logic_contain, OrderedHandleSet& allSubsetLinks)
 {
     allSubsetLinks.clear();
+    set<Handle> extractedNodes;
 
     if (allLinks.size() == 0)
     {
         originalAtomSpace->get_handles_by_type(back_inserter(allLinks), (Type) LINK, true );
     }
 
-    if (only_mine_patterns_start_from_white_list)
-    {
-        if (observingAtomSpace == 0)
-            observingAtomSpace = new AtomSpace();
-
-    }
 
     if (logic_contain)
     {
-        unsigned int linkNumLoadedIntoObservingAtomSpace = 0;
 
         for (Handle link : allLinks)
         {
@@ -3465,27 +3476,22 @@ void PatternMiner::findAllLinksContainKeyWords(vector<string>& subsetKeywords, u
             {
                 if (containKeywords(newh->toShortString(), subsetKeywords, QUERY_LOGIC::OR))
                     allSubsetLinks.insert(newh);
-                else
-                {
-                    if (only_mine_patterns_start_from_white_list)
-                    {
-                        // add this Link into the observingAtomSpace
-                        HandleSeq outgoingLinks, outVariableNodes;
+//                else
+//                {
+//                    if (only_mine_patterns_start_from_white_list)
+//                    {
+//                        // add this Link into the observingAtomSpace
+//                        HandleSeq outgoingLinks, outVariableNodes;
 
-                        swapOneLinkBetweenTwoAtomSpace(originalAtomSpace, observingAtomSpace, newh, outgoingLinks, outVariableNodes);
-                        Handle newLink = observingAtomSpace->add_link(newh->getType(), outgoingLinks);
-                        newLink->merge(newh->getTruthValue());
-                        linkNumLoadedIntoObservingAtomSpace ++;
-                    }
-                }
+//                        swapOneLinkBetweenTwoAtomSpace(originalAtomSpace, observingAtomSpace, newh, outgoingLinks, outVariableNodes);
+//                        Handle newLink = observingAtomSpace->add_link(newh->getType(), outgoingLinks);
+//                        newLink->merge(newh->getTruthValue());
+//                        linkNumLoadedIntoObservingAtomSpace ++;
+//                    }
+//                }
             }
         }
 
-        if (only_mine_patterns_start_from_white_list)
-        {
-            cout << "\n" << linkNumLoadedIntoObservingAtomSpace <<
-                    " other Links (not contains black keywords and not of ignore types) has been loaded into observingAtomSpace" << std::endl;
-        }
 
     }
     else
@@ -3500,11 +3506,17 @@ void PatternMiner::findAllLinksContainKeyWords(vector<string>& subsetKeywords, u
             if (keywordNode == Handle::UNDEFINED)
                 continue;
 
+            if (extractedNodes.find(keywordNode) == extractedNodes.end())
+                extractedNodes.insert(keywordNode);
+            else
+                continue;
+
             OrderedHandleSet newConnectedLinks = _getAllNonIgnoredLinksForGivenNode(keywordNode, allSubsetLinks);
 
             allSubsetLinks.insert(newConnectedLinks.begin(), newConnectedLinks.end());
 
         }
+
     }
 
     unsigned int order = 0;
@@ -3512,9 +3524,10 @@ void PatternMiner::findAllLinksContainKeyWords(vector<string>& subsetKeywords, u
 
     while (order < max_connection)
     {
-        allNewConnectedLinksThisGram = _extendOneLinkForSubsetCorpus(allNewConnectedLinksThisGram, allSubsetLinks);
+        allNewConnectedLinksThisGram = _extendOneLinkForSubsetCorpus(allNewConnectedLinksThisGram, allSubsetLinks, extractedNodes);
         order ++;
     }
+
 }
 
 // must load the corpus before calling this function
