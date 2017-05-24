@@ -324,27 +324,6 @@
 
 ; ---------------------------------------------------------------------
 
-(define-public (cset-vec-lp-norm P ITEM)
-"
-  cset-vec-lp-norm P ITEM - compute the Banach space l_p norm of
-  the pseudo-cset vector for ITEM.
-
-  ITEM can be either a WordNode or a disjunct (LgAnd)
-"
-	; sum of the powers of the counts
-	(define sum
-		(fold
-			(lambda (cset sum)
-				(define cnt (get-count cset))
-				(+ sum (expt cnt P)))
-			0
-			(get-cset-vec ITEM)))
-
-	(expt sum (/ 1 P))
-)
-
-; ---------------------------------------------------------------------
-
 (define-public (get-total-cset-count)
 "
   get-total-cset-count -- return the total number of observations

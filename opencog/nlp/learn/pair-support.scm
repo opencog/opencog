@@ -156,7 +156,6 @@
 		(define (sum-right-lp-norm P ITEM)
 			(sum-lp-norm P (star-obj 'right-stars ITEM)))
 
-
 	; Methods on this class.
 	(lambda (message . args)
 		(case message
@@ -170,6 +169,40 @@
 			((right-length)       (apply sum-right-length args))
 			((left-lp-norm)       (apply sum-left-lp-norm args))
 			((right-lp-norm)      (apply sum-right-lp-norm args))
+			(else (apply llobj (cons message args))))
+		)))
+
+; ---------------------------------------------------------------------
+
+(define-public (add-pair-cosine-compute LLOBJ)
+"
+  add-pair-cosine-compute LLOBJ - Extend LLOBJ with methods to compute
+  vector dot-products and cosine angles.  None of these use cached
+  values, instead, they compute these values on the fly.
+
+  Some terminology: Let N(x,y) be the observed count for the pair (x,y).
+  There are two ways of computing a dot-product: summing on the left, or
+  the right.  Thus we define the left-product as
+      left-prod(y,z) = sum_x N(x,y) N(x,z)
+  and the right-product as
+      right-prod(x,u) = sum_y N(x,y) N(u,y)
+
+  Here, the LLOBJ is expected to be an object, with valid
+  counts associated with each pair. LLOBJ is expected to have
+  working, functional methods for 'left-type and 'right-type
+  on it.
+"
+	(let ((llobj LLOBJ)
+			(star-obj (add-pair-stars LLOBJ)))
+
+		(define (compute-left-product ITEM-A ITEM-B)
+		)
+
+		; -------------
+	; Methods on this class.
+	(lambda (message . args)
+		(case message
+			((left-product)      (apply compute-left-product args))
 			(else (apply llobj (cons message args))))
 		)))
 
