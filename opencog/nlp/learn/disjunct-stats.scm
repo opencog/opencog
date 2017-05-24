@@ -11,6 +11,9 @@
 ; pictures, than anything else. Of course, this can be recycled for
 ; other datasets, too.
 ;
+; TODO: move this file to the lang-learn-diary directory. It does
+; not belong here, in the main repo
+;
 ; Copyright (c) 2017 Linas Vepstas
 ;
 
@@ -212,8 +215,6 @@
 ; ---------------------------------------------------------------------
 ; Compute the average number of observations per disjunct.
 (define (avg-obs WORD)
-(format #t "duuude wtf nobs=~A sup=~A wrd=~A\n"
-(cset-vec-word-observations WORD) (cset-vec-word-support WORD) WORD)
 	(/ (cset-vec-word-observations WORD) (cset-vec-word-support WORD)))
 
 ; Compute the average number of observations per disjunct.
@@ -231,13 +232,12 @@
 (define sorted-avg
 	(score-and-rank avg-obs all-cset-words))
 
-(define binned-avg (bin-count-simple sorted-avg 100))
+(define binned-avg (bin-count-simple sorted-avg 100 1.0 6.0))
 
 (let ((outport (open-file "/tmp/binned-avg.dat" "w")))
 	(print-ts-bincounts binned-avg outport)
 	(close outport))
 
-xxxxxx
 ; ---------------------------------------------------------------------
 ; A sorted list of the support of a word.
 ; The support is simply how many basis elements of a vector are
