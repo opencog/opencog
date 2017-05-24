@@ -114,3 +114,18 @@ set ylabel "Number of words"
 plot "binned-avg.dat" using 2:3 with lines linewidth 5 title ""
 
 #################################################
+# Used to generate the binned squared-len/norm ratio
+#
+set term postscript eps enhanced color 28
+set out 'binned-sqlen-norm.eps'
+set yrange [1:30000]
+set xrange [1:10]
+set logscale y
+set logscale x
+set format y "10^{%L}"
+set title "Mean-square/size ratio distribution"
+set xlabel "Mean-square to size ratio"
+set ylabel "Number of words"
+plot "binned-sqlen-norm.dat" using 2:3 with lines linewidth 5 title ""
+
+#################################################

@@ -20876,7 +20876,7 @@ without
 \end_layout
 
 \begin_layout Subsection*
-Ranked Disjunct-Set RMS Size
+Ranked Euclidean length (RMS Size)
 \end_layout
 
 \begin_layout Standard
@@ -20937,6 +20937,12 @@ length
 \end_inset
 
  and then ranking.
+ Interpreting 
+\begin_inset Formula $d$
+\end_inset
+
+ as a basis element of a vector space, this can be recognized as the Euclidean
+ length of the count-vector.
 \end_layout
 
 \begin_layout Standard
@@ -20970,7 +20976,16 @@ The first ten words of the RMS-size-list are: "." "and" "," "in" "the" ")"
  text.
  The RMS size is dominated by the total number of observations of a word
  in text.
- Some other quantity is needed.
+ In and of itself, its insufficient to indicate how 
+\begin_inset Quotes eld
+\end_inset
+
+concentrated
+\begin_inset Quotes erd
+\end_inset
+
+ the disjuncts are, how grammatically narrow a word is.
+ For this, some other quantity is needed.
 \end_layout
 
 \begin_layout Standard
@@ -21024,6 +21039,16 @@ Words high in this score will be words that have relatively few disjuncts
 Excluding the capitalized words, and punctuation, in this list what remains
  is quite surprising.
  It is shown in the table below.
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+Extracted from ranked-sqlen-norm.dat 
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -21713,9 +21738,25 @@ United
 \end_layout
 
 \begin_layout Standard
-Other measures are needed.
- One could contemplate the ratio of the mean-square size to the support
- 
+The distribution is unusual; it is shown below.
+ Note that the x-axis is drawn with a log-scale.
+ It appears to be linear, with an exponet of -4.
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Graphics
+	filename images/binned-sqlen-norm.eps
+	width 70text%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Are there other interesting measures? One could contemplate the ratio of
+ the mean-square size to the support 
 \begin_inset Formula $\sum_{d}N(w,d)^{2}/\left|(w,*)\right|$
 \end_inset
 
@@ -21731,7 +21772,8 @@ Other measures are needed.
 \end_inset
 
 Neither of these variations seem promising; they seem to offer up more of
- the same.
+ the same, at least on this dataset.
+ A larger and more refined dataset might reveal otherwise.
 \end_layout
 
 \begin_layout Subsection*
