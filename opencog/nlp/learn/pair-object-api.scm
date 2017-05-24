@@ -335,7 +335,7 @@
 		; on LIST.  Viz sum_k N^p(k) for counted-pairs k in the
 		; list
 		(define (sum-lp-norm P LIST)
-			(detine tot
+			(define tot
 				(fold
 					(lambda (lopr sum)
 						; 'item-pair returns the atom holding the count
@@ -345,7 +345,7 @@
 						(+ sum (expt cnt P)))
 					0
 					LIST))
-			(expt tot (/ 1.0 p)))
+			(expt tot (/ 1.0 P)))
 
 		(define (sum-left-lp-norm P ITEM)
 			(sum-lp-norm P (star-obj 'left-stars ITEM)))

@@ -439,7 +439,7 @@
 
    Note this function returns MI in units of bits. i.e. log-2
 "
-	(pseudo-cset-mi-api 'compute-right-fmi WORD))
+	(pseudo-cset-mi-api 'compute-right-fmi WORD)
 )
 
 ; ---------------------------------------------------------------------

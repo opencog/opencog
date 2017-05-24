@@ -33,9 +33,10 @@
   via the standard frequency-object API. These must have been
   pre-computed, before this object can be used.
 "
-	; Need the 'left-stars method, provided by add-pair-wildcards-api
+	; Need the 'left-stars method, provided by add-pair-stars
 	; Need the 'left-wild-freq method, provided by add-pair-freq-api
-	(let ((frqobj (add-pair-freq-api (add-pair-wildcards-api LLOBJ))))
+	(let ((star-obj (add-pair-stars LLOBJ))
+			(frqobj (add-pair-freq-api LLOBJ)))
 
 		; Compute the left-wild entropy summation:
 		;    h_left(y) = -sum_x P(x,y) log_2 P(x,y)
@@ -46,7 +47,7 @@
 			(fold
 				(lambda (PAIR sum) (+ sum (frqobj 'pair-entropy PAIR)))
 				0
-				(frqobj 'left-stars RIGHT-ITEM)))
+				(star-obj 'left-stars RIGHT-ITEM)))
 
 		; Compute the right-wild entropy summation:
 		;    h_right(x) = -sum_y P(x,y) log_2 P(x,y)
@@ -57,7 +58,7 @@
 			(fold
 				(lambda (PAIR sum) (+ sum (frqobj 'pair-entropy PAIR)))
 				0
-				(frqobj 'right-stars LEFT-ITEM)))
+				(star-obj 'right-stars LEFT-ITEM)))
 
 		; Compute the left-fractional entropy summation:
 		;    H_left(y) = h_left(y) / P(*,y)
@@ -84,14 +85,14 @@
 			(fold
 				(lambda (PAIR sum) (+ sum (frqobj 'pair-mi PAIR)))
 				0
-				(frqobj 'left-stars RIGHT-ITEM)))
+				(star-obj 'left-stars RIGHT-ITEM)))
 
 		; As above, but flipped.
 		(define (compute-right-mi LEFT-ITEM)
 			(fold
 				(lambda (PAIR sum) (+ sum (frqobj 'pair-mi PAIR)))
 				0
-				(frqobj 'right-stars LEFT-ITEM)))
+				(star-obj 'right-stars LEFT-ITEM)))
 
 		; Compute the left-fractional MI summation:
 		;    MI_left(y) = mi_left(y) / P(*,y)
@@ -137,9 +138,10 @@
 
   These methods loop over all pairs, and so can take a lot of time.
 "
-	; Need the 'left-support method, provided by add-pair-wildcards-api
+	; Need the 'left-basis method, provided by add-pair-stars
 	; Need the 'pair-logli method, provided by add-pair-freq-api
-	(let ((frqobj (add-pair-freq-api (add-pair-wildcards-api LLOBJ))))
+	(let ((star-obj (add-pair-stars LLOBJ))
+			(frqobj (add-pair-freq-api LLOBJ)))
 
 		; Compute the total entropy for the set. This loops over all
 		; pairs, and computes the sum
@@ -162,9 +164,9 @@
 								(set! entropy (+ entropy h))
 							)
 							(lambda (key . args) #f))) ; catch handler
-					(frqobj 'right-stars left-item)))
+					(star-obj 'right-stars left-item)))
 
-			(for-each right-loop (frqobj 'left-support))
+			(for-each right-loop (star-obj 'left-basis))
 
 			; Return the single number.
 			entropy
@@ -180,7 +182,7 @@
 				(lambda (right-item sum)
 					(+ sum (frqobj 'left-wild-logli right-item)))
 				0
-				(frqobj 'right-support))
+				(star-obj 'right-basis))
 		)
 
 		; Compute the right-wildcard partial entropy for the set. This
@@ -193,7 +195,7 @@
 				(lambda (left-item sum)
 					(+ sum (frqobj 'right-wild-logli left-item)))
 				0
-				(frqobj 'left-support))
+				(star-obj 'left-basis))
 		)
 
 		; Methods on this class.
