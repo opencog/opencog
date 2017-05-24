@@ -155,8 +155,8 @@
 (define pseudo-cset-api (make-pseudo-cset-api))
 (define pseudo-cset-count-api (add-pair-count-api pseudo-cset-api))
 (define pseudo-cset-freq-api (add-pair-freq-api pseudo-cset-api))
-(define pseudo-cset-mi-api (add-pair-mi-api pseudo-cset-api))
-(define pseudo-cset-support-api (add-pair-support-api pseudo-cset-api))
+(define pseudo-cset-mi-api (add-pair-mi-compute pseudo-cset-api))
+(define pseudo-cset-support-api (add-pair-support-compute pseudo-cset-api))
 
 ; ---------------------------------------------------------------------
 ; ---------------------------------------------------------------------
@@ -415,7 +415,7 @@
   The returned entropy is in bits, i.e. computerd with log_2.
 
   XXX FIXME this is deprecated in favor of
-  ((add-pair-mi-api (make-pseudo-cset-api)) 'compute-left-entropy ITEM)
+  ((add-pair-mi-compute (make-pseudo-cset-api)) 'compute-left-entropy ITEM)
 "
    ; sum of the counts
 	(define nats

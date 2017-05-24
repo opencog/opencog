@@ -493,7 +493,7 @@ xxxxxx
 ; Rank words according to thier fractonal entropy
 (define pca (make-pseudo-cset-api))
 (define pcw (add-pair-wildcards pca))
-(define pmi (add-pair-mi-api pca))
+(define pmi (add-pair-mi-compute pca))
 (define (cset-vec-word-ent WORD)
 		(pmi 'compute-right-fentropy WORD))
 
@@ -632,7 +632,7 @@ xxxxxx
 
 (define (new-cset-vec-word-mi WORD)
 	(define pca (make-pseudo-cset-api))
-	(define pmi (add-pair-mi-api pca))
+	(define pmi (add-pair-mi-compute pca))
 	(pmi 'compute-right-fmi WORD)
 )
 

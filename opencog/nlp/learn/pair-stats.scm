@@ -22,9 +22,9 @@
 
 ; ---------------------------------------------------------------------
 
-(define-public (add-pair-mi-api LLOBJ)
+(define-public (add-pair-mi-compute LLOBJ)
 "
-  add-pair-mi-api LLOBJ - methods for MI and entropy of pairs.
+  add-pair-mi-compute LLOBJ - methods for MI and entropy of pairs.
 
   Extend the LLOBJ with additional methods to compute the one-sided
   entropies and mutual information of pairs.
@@ -125,9 +125,9 @@
 
 ; ---------------------------------------------------------------------
 
-(define-public (add-total-entropy-api LLOBJ)
+(define-public (add-total-entropy-compute LLOBJ)
 "
-  add-total-entropy-api LLOBJ - methods for total and partial entropy.
+  add-total-entropy-compute LLOBJ - methods for total and partial entropy.
 
   Extend the LLOBJ with additional methods to compute the partial
   and total entropies of the total set of pairs.

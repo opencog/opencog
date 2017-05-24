@@ -16,9 +16,9 @@
 
 ; ---------------------------------------------------------------------
 
-(define-public (add-pair-support-api LLOBJ)
+(define-public (add-pair-support-compute LLOBJ)
 "
-  add-pair-support-api LLOBJ - Extend LLOBJ with methods to
+  add-pair-support-compute LLOBJ - Extend LLOBJ with methods to
   compute wild-card sums, including the support (lp-norm for p=0),
   the count (lp-norm for p=1), the Eucliden length (lp-norm for p=2)
   and the general lp-norm.  These all work with the counts for the
