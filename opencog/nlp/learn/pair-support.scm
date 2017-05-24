@@ -195,39 +195,56 @@
 	(let ((llobj LLOBJ)
 			(star-obj (add-pair-stars LLOBJ)))
 
-		(define (compute-product ITEM-A ITEM-B LIST)
-			; Loop over all 
-		)
+		; Given the low-level pair LOPR, return the numeric count for it.
+		(define (get-lo-cnt LOPR)
+			(llobj 'pair-count (llobj 'item-pair LOPR)))
+
+		; Compute the dot-product, summing over items from the
+		; LIST, (which are pairs containing ITEM-A) and using the
+		; get-other-lopr function to get the other pair to sum over
+		; (i.e. replacing ITEM-A in the list with ITEM-B)
+		; With a suitable LIST and get-other-lopr, this can do
+		; either the left or the right sums.
+		(define (compute-product get-other-lopr ITEM-B LIST)
+			; Loop over the the LIST
+			(fold
+				(lambda (lopr sum)
+					(define a-cnt (get-lo-cnt lopr))
+					(define b-pr (get-other-lopr lopr ITEM-B))
+
+					(if (null? b-pr)
+						sum
+						(+ sum (* a-cnt (get-lo-cnt b-pr)))))
+				0
+				LIST))
 
 		; Return the low-level pair (x,y) if it exists, else
 		; return the empty list '()
 		(define (have-lopr? X Y)
 			(cog-link (llobj 'get-pair-type) X Y))
 
-		; for lefty onnly
-		(define (get-other-cnt LOPR OTHER)
-			(define other-pair (have-lopr? (gar LOPR) OTHER))
-			(if (null? other-pair) 0
-				(llobj 'pair-count other-pair)))
+		; Get the "other pair", for lefty wild
+		(define (get-other-left LOPR OTHER)
+			(have-lopr? (gar LOPR) OTHER))
+
+		; Get the "other pair", for righty wild
+		(define (get-other-right LOPR OTHER)
+			(have-lopr? (OTHER (gdr LOPR))))
 
 		(define (compute-left-product ITEM-A ITEM-B)
-			; Loop over the left-wilds for ITEM-A
-			(fold
-				(lambda (lopr sum)
-					(define a-cnt
-						(llobj 'pair-count (llobj 'item-pair lopr)))
-					(define b-cnt (get-other-cnt lopr))
-					(+ sum (* a-cnt b-cnt)))
-				)
-				0
-				(star-obj 'left-stars ITEM-A))
-		)
+			(compute-product get-other-left ITEM-B
+				(star-obj 'left-stars ITEM-A)))
 
-		; -------------
+		(define (compute-right-product ITEM-A ITEM-B)
+			(compute-product get-other-right ITEM-B
+				(star-obj 'right-stars ITEM-A)))
+
+	; -------------
 	; Methods on this class.
 	(lambda (message . args)
 		(case message
-			((left-product)      (apply compute-left-product args))
+			((left-product)    (apply compute-left-product args))
+			((right-product)   (apply compute-right-product args))
 			(else (apply llobj (cons message args))))
 		)))
 
