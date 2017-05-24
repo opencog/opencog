@@ -98,14 +98,15 @@ public:
 
             if (compact and out.size() == 2 and h->getIncomingSetSize() == 0)
             {
-                ost << out[0] << " -> " << out[1] << " [label=\""
+	            ost << out[0].value() << " -> " << out[1].value() << " [label=\""
                     << classserver().getTypeName(a->getType()) << "\"];\n";
                 answer += ost.str();
                 return false;
             }
 
             for (size_t i = 0; i < out.size(); i++) {
-                ost << h << "->" << out[i] << " [label=\"" << i << "\"];\n";
+	            ost << h.value() << "->" << out[i].value()
+	                << " [label=\"" << i << "\"];\n";
             }
         }
 
@@ -114,7 +115,8 @@ public:
             h->getIncomingSet(back_inserter(hs));
             int i = 0;
             for (const Handle& h : hs) {
-                ost << h << "->" << h << " [style=\"dotted\" label=\"" << i << "\"];\n";
+	            ost << h.value() << "->" << h.value()
+	                << " [style=\"dotted\" label=\"" << i << "\"];\n";
                 i++;
             }
         }
