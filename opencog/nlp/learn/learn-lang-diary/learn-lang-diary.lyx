@@ -23742,7 +23742,7 @@ The current dataset being analyzed contains 1985 words whose length is greater
 \align center
 \begin_inset Graphics
 	filename images/ranked-sims.eps
-	width 60text%
+	width 70text%
 
 \end_inset
 
