@@ -212,20 +212,31 @@
 ; ---------------------------------------------------------------------
 ; Compute the average number of observations per disjunct.
 (define (avg-obs WORD)
+(format #t "duuude wtf nobs=~A sup=~A wrd=~A\n"
+(cset-vec-word-observations WORD) (cset-vec-word-support WORD) WORD)
 	(/ (cset-vec-word-observations WORD) (cset-vec-word-support WORD)))
 
 ; Compute the average number of observations per disjunct.
 ; Discard anything with less than 100 observations.
-(define sorted-avg
+(define top-sorted-avg
 	(score-and-rank avg-obs top-cset-words))
 
 (let ((outport (open-file "/tmp/ranked-avg.dat" "w")))
-	(print-ts-rank sorted-avg outport)
+	(print-ts-rank top-sorted-avg outport)
 	(close outport))
 
 ; --------------------------
 ; As above, but this time, instead of ranking, we bin-count.
 ;
+(define sorted-avg
+	(score-and-rank avg-obs all-cset-words))
+
+(define binned-avg (bin-count-simple sorted-avg 100))
+
+(let ((outport (open-file "/tmp/binned-avg.dat" "w")))
+	(print-ts-bincounts binned-avg outport)
+	(close outport))
+
 xxxxxx
 ; ---------------------------------------------------------------------
 ; A sorted list of the support of a word.

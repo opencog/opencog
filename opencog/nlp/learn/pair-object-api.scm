@@ -125,100 +125,81 @@
 
 (use-modules (srfi srfi-1))
 
-(define-public (add-pair-wildcards-api LLOBJ)
+(define-public (add-pair-support-api LLOBJ)
 "
-  pair-wildcards LLOBJ - Extend LLOBJ with wildcard methods.
+  add-pair-support-api LLOBJ - Extend LLOBJ with wildcard methods.
 
-  Extend the LLOBJ with addtional methods to get wild-card lists,
-  that is, lists of all pairs with a specific item on the left,
-  or on the right.  This generates these lists in a generic way,
-  that probably work for most kinds of pairs. However, you can
-  overload them with custom getters, if you wish.
+  Extend the LLOBJ with additional methods to get the support,
+  aka the wild-card lists. The support consists of all of those
+  pairs for which N(x,y) > 0 for a fixed x, or fixed y.
 
-  Here, the LLOBJ is expected to be an object, with methods for
-  'left-type and 'right-type on it, just as described above.
-
-  The lists of pairs will be lists of type 'pair-type (usually
-  ListLink's), with the desired item on the left or right, and
-  an atom of 'left-type or 'right-type on the other side.
+  Here, the LLOBJ is expected to be an object, with valid
+  counts associated with each pair. LLOBJ is expected to have
+  working, functional methods for 'left-type and 'right-type
+  on it.
 "
 	(let ((llobj LLOBJ)
-			(l-supp '())
-			(r-supp '())
-		)
+			(star-obj (add-pair-stars LLOBJ)))
 
-		; Return a list of all of the atoms that might ever appear on
-		; the left-hand-side of a pair.  This is the set of items x
-		; for which 0 < N(x,y) for some item y, and N(x,y) the count
-		; of ever having observed the pair (x,y).
-		;
-		; Actually, we cheat, for performance reasons. Instead of
-		; computing the set desribed above, we just *assume* that
-		; every atom of 'left-type is a part of the support. We may
-		; regret this cheat, someday, but for now it works. It's
-		; certainly faster than computing the correct thing.
-		;
-		; Actually, if someone needs something better, they can
-		; overload this method.
-		(define (get-left-support)
-			(if (null? l-supp)
-				(set! l-supp (cog-get-atoms (llobj 'left-type))))
-			l-supp)
+		; Given a list of low-level pairs, return list of high-level
+		; pairs for which the count is non-zero. Internal use only.
+		(define (non-zero-filter LIST)
+			(filter-map
+				(lambda (lopr)
+					; 'item-pair returns the atom hold the count
+					; 'pair-count returns the actual count.
+					(define hipr (llobj 'item-pair lopr))
+					(define cnt (llobj 'pair-count hipr))
+					(if (< 0 cnt) hipr #f))
+				LIST))
 
-		(define (get-right-support)
-			(if (null? r-supp)
-				(set! r-supp (cog-get-atoms (llobj 'right-type))))
-			r-supp)
-
-		(define (get-left-support-size) (length (get-left-support)))
-		(define (get-right-support-size) (length (get-right-support)))
-
-		; Return a list of all pairs with the ITEM on the right side,
-		; and an object of type (LLOBJ 'left-type) on the left. The
-		; pairs are just ListLink's (of arity two). That is, it returns
-		; a list of atoms of the form
-		;
-		;    ListLink
-		;         (LLOBJ 'left-type)
-		;         ITEM
-		;
-		(define (get-left-stars ITEM)
-			(define want-type (LLOBJ 'left-type))
-			(define pair-type (LLOBJ 'pair-type))
-			(filter
-				(lambda (lnk)
-					(define oset (cog-outgoing-set lnk))
-					(and
-						(equal? 2 (cog-arity lnk))
-						(equal? want-type (cog-type (first oset)))
-						(equal? ITEM (second oset))
-					))
-				(cog-incoming-by-type ITEM pair-type)))
+		; Return a list of all pairs (x, y) for y == ITEM for which
+		; N(x,y) > 0.  Specifically, this returns the pairs which
+		; are hiolding the counts (and not the low-level pairs).
+		(define (get-left-support-set ITEM)
+			(non-zero-filter (star-obj 'left-stars ITEM)))
 
 		; Same as above, but on the right.
-		(define (get-right-stars ITEM)
-			(define want-type (LLOBJ 'right-type))
-			(define pair-type (LLOBJ 'pair-type))
-			(filter
-				(lambda (lnk)
-					(define oset (cog-outgoing-set lnk))
-					(and
-						(equal? 2 (cog-arity lnk))
-						(equal? ITEM (first oset))
-						(equal? want-type (cog-type (second oset)))
-					))
-				(cog-incoming-by-type ITEM pair-type)))
+		(define (get-right-support-set ITEM)
+			(non-zero-filter (star-obj 'right-stars ITEM)))
+
+		; Return how many non-zero items are in the list.
+		(define (get-support-size LIST)
+			(fold
+				(lambda (lopr cnt)
+					; 'item-pair returns the atom holding the count
+					; 'pair-count returns the count.
+					(+ cnt
+						(if (< 0 (llobj 'pair-count (llobj 'item-pair lopr)))
+							1 0)))
+				0
+				LIST))
+
+ 		; Should return a value exactly equal to 
+		; (length (get-left-support ITEM))
+		(define (get-left-support-size ITEM)
+			(get-support-size (star-obj 'left-stars ITEM)))
+
+		(define (get-right-support-size)
+			(get-support-size (star-obj 'right-stars ITEM)))
+
+		(define (get-lp-norm LIST P)
+			(fold
+				(lambda (lopr sum)
+					; 'item-pair returns the atom holding the count
+					; 'pair-count returns the actual count.
+					(+ cnt (llobj 'pair-count (llobj 'item-pair lopr))))
+				0
+				(star-obj 'left-stars ITEM)))
 
 
 	; Methods on this class.
 	(lambda (message . args)
 		(case message
-			((left-support)       (get-left-support))
-			((right-support)      (get-right-support))
-			((left-support-size)  (get-left-support-size))
-			((right-support-size) (get-right-support-size))
-			((left-stars)         (apply get-left-stars args))
-			((right-stars)        (apply get-right-stars args))
+			((left-support-set)   (apply get-left-support-set args))
+			((right-support-set)  (apply get-right-support-set args))
+			((left-support)       (get-left-support-size))
+			((right-support)      (get-right-support-size))
 			(else (apply llobj (cons message args))))
 		)))
 
