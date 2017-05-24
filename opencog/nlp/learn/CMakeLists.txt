@@ -9,6 +9,7 @@ ADD_GUILE_MODULE (FILES
 	mst-parser.scm
 	pair-object-api.scm
 	pair-stats.scm
+	pair-support.scm
 	pseudo-csets.scm
 	singletons.scm
 	MODULE_DESTINATION "${DATADIR}/scm/opencog/nlp/learn"
