@@ -311,6 +311,20 @@
 
 ; ---------------------------------------------------------------------
 
+(define-public (cset-vec-word-len WORD)
+"
+  cset-vec-word-len WORD - compute the pseudo-cset vector length for WORD.
+  Equivalently, this is the l_2 norm of the vector (the l_p norm for p=2).
+
+  WORD must be a WordNode.
+"
+	; square-root of the sum of the square of the counts
+	(pseudo-cset-support-api 'right-length WORD)
+)
+
+; ---------------------------------------------------------------------
+
+;xxx FIXME deprecate the below
 (define-public (cset-vec-len ITEM)
 "
   cset-vec-len ITEM - compute the pseudo-cset vector length for ITEM.

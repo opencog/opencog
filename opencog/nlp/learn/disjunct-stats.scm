@@ -263,16 +263,25 @@
 ; Consider, for example, the length-squared, divided by the number
 ; of observations.
 (define (lensq-vs-obs wrd)
-	(define len (cset-vec-len wrd))
+	(define len (cset-vec-word-len wrd))
 	(/ (* len len) (cset-vec-word-observations wrd)))
 
 ; The length vs observation ranking; but discard everything
 ; with a small number of observations.
-(define sorted-lensq-norm
+(define sorted-lensq-norm-top
 	(score-and-rank lensq-vs-obs top-cset-words))
 
 (let ((outport (open-file "/tmp/ranked-sqlen-norm.dat" "w")))
-	(print-ts-rank sorted-lensq-norm outport)
+	(print-ts-rank sorted-lensq-norm-top outport)
+	(close outport))
+
+(define sorted-lensq-norm
+	(score-and-rank lensq-vs-obs all-cset-words))
+
+(define binned-sqlen-norm (bin-count-simple sorted-lensq-norm 100 0.0 10.0))
+
+(let ((outport (open-file "/tmp/binned-sqlen-norm.dat" "w")))
+	(print-ts-bincounts binned-sqlen-norm outport)
 	(close outport))
 
 ; ---------------------------------------------------------------------
