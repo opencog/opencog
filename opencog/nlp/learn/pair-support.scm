@@ -16,7 +16,8 @@
 
 ; ---------------------------------------------------------------------
 
-(define-public (add-pair-support-compute LLOBJ)
+(define*-public (add-pair-support-compute LLOBJ
+	 #optional (GET-CNT (lambda (x) (LLOBJ 'pair-count x))))
 "
   add-pair-support-compute LLOBJ - Extend LLOBJ with methods to
   compute wild-card sums, including the support (lp-norm for p=0),
@@ -41,9 +42,19 @@
   counts associated with each pair. LLOBJ is expected to have
   working, functional methods for 'left-type and 'right-type
   on it.
+
+  By default, the N(x,y) is taken to be the 'get-count method
+  on LLOBJ, i.e. it is literally the count. The optional argument
+  GET-CNT allows this to be over-ridden with any other method
+  that returns a number.  For example, to compute the lengths
+  and norms for frequencies, pass this lambda as the second
+  argument:
+     (lambda (x) ((add-pair-freq-api LLOBJ) 'pair-freq x))
+  Any function that takes a pair and returns a number is allowed.
 "
 	(let ((llobj LLOBJ)
-			(star-obj (add-pair-stars LLOBJ)))
+			(star-obj (add-pair-stars LLOBJ))
+			(get-cnt GET-CNT))
 
 		; -------------
 		; Given a list of low-level pairs, return list of high-level
@@ -52,9 +63,8 @@
 			(filter-map
 				(lambda (lopr)
 					; 'item-pair returns the atom holding the count
-					; 'pair-count returns the actual count.
 					(define hipr (llobj 'item-pair lopr))
-					(define cnt (llobj 'pair-count hipr))
+					(define cnt (get-cnt hipr))
 					(if (< 0 cnt) hipr #f))
 				LIST))
 
@@ -72,11 +82,10 @@
 		; Return how many non-zero items are in the list.
 		(define (get-support-size LIST)
 			(fold
-				(lambda (lopr cnt)
+				(lambda (lopr sum)
 					; 'item-pair returns the atom holding the count
-					; 'pair-count returns the count.
-					(+ cnt
-						(if (< 0 (llobj 'pair-count (llobj 'item-pair lopr)))
+					(+ sum
+						(if (< 0 (get-cnt (llobj 'item-pair lopr)))
 							1 0)))
 				0
 				LIST))
@@ -96,9 +105,8 @@
 			(fold
 				(lambda (lopr sum)
 					; 'item-pair returns the atom holding the count
-					; 'pair-count returns the actual count.
 					(define hipr (llobj 'item-pair lopr))
-					(define cnt (llobj 'pair-count hipr))
+					(define cnt (get-cnt hipr))
 					(+ sum cnt))
 				0
 				LIST))
@@ -118,9 +126,8 @@
 				(fold
 					(lambda (lopr sum)
 						; 'item-pair returns the atom holding the count
-						; 'pair-count returns the actual count.
 						(define hipr (llobj 'item-pair lopr))
-						(define cnt (llobj 'pair-count hipr))
+						(define cnt (get-cnt hipr))
 						(+ sum (* cnt cnt)))
 					0
 					LIST))
@@ -142,9 +149,8 @@
 				(fold
 					(lambda (lopr sum)
 						; 'item-pair returns the atom holding the count
-						; 'pair-count returns the actual count.
 						(define hipr (llobj 'item-pair lopr))
-						(define cnt (llobj 'pair-count hipr))
+						(define cnt (get-cnt hipr))
 						(+ sum (expt cnt P)))
 					0
 					LIST))
@@ -174,7 +180,8 @@
 
 ; ---------------------------------------------------------------------
 
-(define-public (add-pair-cosine-compute LLOBJ)
+(define*-public (add-pair-cosine-compute LLOBJ
+	#optional (GET-CNT (lambda (x) (LLOBJ 'pair-count x))))
 "
   add-pair-cosine-compute LLOBJ - Extend LLOBJ with methods to compute
   vector dot-products and cosine angles.  None of these use cached
@@ -191,13 +198,23 @@
   counts associated with each pair. LLOBJ is expected to have
   working, functional methods for 'left-type and 'right-type
   on it.
+
+  By default, the N(x,y) is taken to be the 'get-count method
+  on LLOBJ, i.e. it is literally the count. The optional argument
+  GET-CNT allows this to be over-ridden with any other method
+  that returns a number.  For example, to compute the lengths
+  and norms for frequencies, pass this lambda as the second
+  argument:
+     (lambda (x) ((add-pair-freq-api LLOBJ) 'pair-freq x))
+  Any function that takes a pair and returns a number is allowed.
 "
 	(let ((llobj LLOBJ)
-			(star-obj (add-pair-stars LLOBJ)))
+			(star-obj (add-pair-stars LLOBJ))
+			(get-cnt GET-CNT))
 
 		; Given the low-level pair LOPR, return the numeric count for it.
 		(define (get-lo-cnt LOPR)
-			(llobj 'pair-count (llobj 'item-pair LOPR)))
+			(get-cnt (llobj 'item-pair LOPR)))
 
 		; Compute the dot-product, summing over items from the
 		; LIST, (which are pairs containing ITEM-A) and using the
