@@ -324,28 +324,6 @@
 
 ; ---------------------------------------------------------------------
 
-;xxx FIXME deprecate the below
-(define-public (cset-vec-len ITEM)
-"
-  cset-vec-len ITEM - compute the pseudo-cset vector length for ITEM.
-  Equivalently, this is the l_2 norm of the vector (the l_p norm for p=2).
-
-  ITEM can be either a WordNode or a disjunct (LgAnd)
-"
-	; sum of the square of the counts
-	(define sumsq
-		(fold
-			(lambda (cset sum)
-				(define cnt (get-count cset))
-				(+ sum (* cnt cnt)))
-			0
-			(get-cset-vec ITEM)))
-
-	(sqrt sumsq)
-)
-
-; ---------------------------------------------------------------------
-
 (define-public (cset-vec-lp-norm P ITEM)
 "
   cset-vec-lp-norm P ITEM - compute the Banach space l_p norm of
@@ -548,16 +526,17 @@
 
 ; ---------------------------------------------------------------------
 
-(define-public (cset-vec-cosine ITEM-A ITEM-B)
+(define-public (cset-vec-cosine WORD-A WORD-B)
 "
-  cset-vec-cosine ITEM-A ITEM-B - compute the pseudo-cset vector
-  cosine similarity between ITEM-A and ITEM-B
+  cset-vec-cosine WORD-A WORD-B - compute the pseudo-cset vector
+  cosine similarity between WORD-A and WORD-B
 
-  ITEMs can be either WordNodes or disjuncts (LgAnd of pseudo-connectors).
+  WORDs must be WordNodes.
 "
-	(define deno (* (cset-vec-len ITEM-A) (cset-vec-len ITEM-B)))
+xxxxxxxx
+	(define deno (* (cset-vec-word-len WORD-A) (cset-vec-word-len WORD-B)))
 
-	(if (eqv? 0.0 deno) 0.0 (/ (cset-vec-prod ITEM-A ITEM-B) deno))
+	(if (eqv? 0.0 deno) 0.0 (/ (cset-vec-prod WORD-A WORD-B) deno))
 )
 
 ; ---------------------------------------------------------------------

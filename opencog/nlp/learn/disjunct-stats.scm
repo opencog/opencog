@@ -253,7 +253,7 @@
 ; ---------------------------------------------------------------------
 ; A sorted list of score-word pairs, where the score is the cset length
 
-(define sorted-lengths (score-and-rank cset-vec-len all-cset-words)
+(define sorted-lengths (score-and-rank cset-vec-word-len all-cset-words)
 
 (let ((outport (open-file "/tmp/ranked-lengths.dat" "w")))
 	(print-ts-rank sorted-lengths outport)
@@ -294,7 +294,7 @@
 	(/ (cset-vec-word-observations WORD) (cset-vec-word-support WORD)))
 
 (define (meansq-obs WORD)
-	(define len (cset-vec-len WORD))
+	(define len (cset-vec-word-len WORD))
 	(/ (* len len) (cset-vec-word-support WORD)))
 
 (define (rms-deviation WORD)
@@ -669,6 +669,8 @@
 ; ---------------------------------------------------------------------
 ; ---------------------------------------------------------------------
 ; Similarity.  Cosine distance.
+; Assumes that cosine similarities have been batch-computed, already,
+; using the code in gram-sim.scm
 
 (define cos-key (PredicateNode "*-Cosine Distance Key-*"))
 
@@ -681,8 +683,8 @@
 	(filter
 		(lambda (sim) (and
 				(< 0.5 (sim-cosine sim))
-				(< 8 (cset-vec-len (gar sim)))
-				(< 8 (cset-vec-len (gdr sim)))))
+				(< 8 (cset-vec-word-len (gar sim)))
+				(< 8 (cset-vec-word-len (gdr sim)))))
 		all-sims))
 
 (define ranked-sims
