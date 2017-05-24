@@ -107,14 +107,13 @@ plot "ranked-lengths.dat" using 1:2 with lines linewidth 5 title "", \
 #################################################
 # Used to generate the word-mi ranking graphs.
 #
-set term postscript eps color
+set term postscript eps enhanced color 28
 set out 'ranked-word-mi-hi-p.eps'
 set logscale x
-set title "MI of word"
+set title "Word mututa, information"
 set xlabel "Rank"
 set ylabel "MI of word"
-plot "ranked-word-mi-hi-p.dat" using 1:2 with lines linewidth 2 title ""
-
+plot "ranked-word-mi-hi-p.dat" using 1:2 with lines linewidth 5 title ""
 
 #################################################
 # Used to generate the word-entropy ranking graphs.
