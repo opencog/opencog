@@ -20121,6 +20121,13 @@ is
 \end_inset
 
 
+\begin_inset CommandInset label
+LatexCommand label
+name "logli distribution graph"
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -20854,7 +20861,7 @@ support
 \begin_inset Quotes erd
 \end_inset
 
- of a vector is the number of basis eleements that have a non-zero coefficient.
+ of a vector is the number of basis elements that have a non-zero coefficient.
  This is the set 
 \begin_inset Formula $(w,*)$
 \end_inset
@@ -21846,6 +21853,43 @@ where '
 \end_inset
 
 .
+\end_layout
+
+\begin_layout Standard
+Both of these graphs show 
+\begin_inset Quotes eld
+\end_inset
+
+combs
+\begin_inset Quotes erd
+\end_inset
+
+ in the left side.
+ Thse combs are exactly the same combs as noted in the last figure in section
+ 
+\begin_inset CommandInset ref
+LatexCommand nameref
+reference "logli distribution graph"
+
+\end_inset
+
+ 
+\begin_inset CommandInset ref
+LatexCommand vref
+reference "logli distribution graph"
+
+\end_inset
+
+.
+ The combs are due to the large number of words that have been observed
+ only a small handful of times.
+ In essence, the combs attest that the bulk of the high-MI pairs hae been
+ observed more than just a few times; 
+\emph on
+i.e.
+
+\emph default
+ the high MI values are meainingful.
 \end_layout
 
 \begin_layout Subsection*
