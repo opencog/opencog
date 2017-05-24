@@ -1,24 +1,18 @@
 ;
-; pair-stats.scm
+; pair-entropy.scm
 ;
-; Return assorted database statistics, pertaining to word-pairs.
+; Assorted objects for computing fractional entropies of pairs.
 ;
 ; Copyright (c) 2017 Linas Vepstas
 ;
 ; ---------------------------------------------------------------------
-; The statistics reported here are those collected via the code
-; in `link-pipeline.scm` and computed in `compute-mi.scm`.  Therefore
-; structure defintions there and here need to be maintained
-; consistently.
-;
-; Many or most of the stats returned here assume that the pair-counting
-; batch job has completed. They get stats based on the current contents
-; of the atomspace.
+; The objects here assume that a pair-counting batch job has completed.
+; They get cached stats for counts and frequencies taken from the
+; current contents of the atomspace.
 ; ---------------------------------------------------------------------
 ;
 (use-modules (srfi srfi-1))
 (use-modules (opencog))
-(use-modules (opencog persist))
 
 ; ---------------------------------------------------------------------
 

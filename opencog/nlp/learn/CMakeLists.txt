@@ -7,8 +7,8 @@ ADD_GUILE_MODULE (FILES
 	link-pipeline.scm
 	make-disjuncts.scm
 	mst-parser.scm
+	pair-entropy.scm
 	pair-object-api.scm
-	pair-stats.scm
 	pair-support.scm
 	pseudo-csets.scm
 	singletons.scm
