@@ -156,7 +156,7 @@
 (define pseudo-cset-count-api (add-pair-count-api pseudo-cset-api))
 (define pseudo-cset-freq-api (add-pair-freq-api pseudo-cset-api))
 (define pseudo-cset-mi-api (add-pair-mi-api pseudo-cset-api))
-(define pseudo-cset-wild-api (add-pair-wildcards-api pseudo-cset-api))
+(define pseudo-cset-support-api (add-pair-support-api pseudo-cset-api))
 
 ; ---------------------------------------------------------------------
 ; ---------------------------------------------------------------------
@@ -172,7 +172,7 @@
 	(cog-incoming-by-type ITEM 'LgWordCset)
 
 	; Should be this: XXX FIXME later
-	; (pseudo-cset-wild-api 'right-stars ITEM)
+	; (pseudo-cset-support-api 'right-stars ITEM)
 )
 
 (define-public (sort-cset-vec ITEM)
@@ -272,8 +272,9 @@
   attached to the word.  Equivalently, this is the l_0 norm of the
   vector (the l_p norm for p=0).
 "
-	; (length (pseudo-cset-wild-api 'right-stars WORD))
-	(pseudo-cset-wild-api 'right-support-size WORD)
+	; Should be same as
+	; (length (pseudo-cset-support-api 'right-support-set WORD))
+	(pseudo-cset-support-api 'right-support WORD)
 )
 
 ; ---------------------------------------------------------------------
@@ -288,6 +289,8 @@
 
   WORD must be WordNode.
 "
+	; Should be same as
+	; (pseudo-cset-support-api 'right-count WORD)
 	(pseudo-cset-count-api 'right-wild-count WORD)
 )
 
@@ -301,6 +304,8 @@
 
   DISJUNCT must be an LgAnd.
 "
+	; Should be same as
+	; (pseudo-cset-support-api 'left-count DISJUNCT)
 	(pseudo-cset-count-api 'left-wild-count DISJUNCT)
 )
 
