@@ -21865,7 +21865,7 @@ combs
 \end_inset
 
  in the left side.
- Thse combs are exactly the same combs as noted in the last figure in section
+ These combs are exactly the same combs as noted in the last figure in section
  
 \begin_inset CommandInset ref
 LatexCommand nameref
@@ -21966,6 +21966,22 @@ The graph on the right shows the distribution, for all 37413 words, bin-counted
  Unfortunately, this sampling remains small and noisey, so the suggestion
  of a log-linear decay to both left and right is hidden by rather noisey
  spikes.
+ The combs on the far right are again the same combs as noted in the last
+ figure in section 
+\begin_inset CommandInset ref
+LatexCommand nameref
+reference "logli distribution graph"
+
+\end_inset
+
+ 
+\begin_inset CommandInset ref
+LatexCommand vref
+reference "logli distribution graph"
+
+\end_inset
+
+.
 \end_layout
 
 \begin_layout Standard
@@ -22567,7 +22583,22 @@ Use binned-dj-mi to get this.
 
 \end_inset
 
+ The combs on the far left are again the same combs as noted in the last
+ figure in section 
+\begin_inset CommandInset ref
+LatexCommand nameref
+reference "logli distribution graph"
 
+\end_inset
+
+ 
+\begin_inset CommandInset ref
+LatexCommand vref
+reference "logli distribution graph"
+
+\end_inset
+
+.
 \end_layout
 
 \begin_layout Standard
