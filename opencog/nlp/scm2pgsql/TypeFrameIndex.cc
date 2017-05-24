@@ -3,6 +3,8 @@
 
 using namespace opencog;
 
+const int TypeFrameIndex::LIMIT_FOR_SYMMETRIC_LINKS_PERMUTATION = 5;
+
 const int TypeFrameIndex::OPERATOR_NOP = 0;
 const int TypeFrameIndex::OPERATOR_AND = 1;
 const int TypeFrameIndex::OPERATOR_OR = 2;
@@ -21,11 +23,90 @@ TypeFrame TypeFrameIndex::getFrameAt(int index)
     return frames.at(index);
 }
 
+void TypeFrameIndex::permutation(std::vector<std::vector<int>> &answer, int *array, int current, int size)
+{
+    if (current == size - 1) {
+        std::vector<int> v;
+        for (int i = 0; i < size; i++) {
+            v.push_back(array[i]);
+        }
+        answer.push_back(v);
+    } else {
+        for (int i = current; i < size; i++) {
+            int aux = array[current];
+            array[current] = array[i];
+            array[i] = aux;
+            permutation(answer, array, current + 1, size);
+            aux = array[current];
+            array[current] = array[i];
+            array[i] = aux;
+        }
+    }
+}
+
+void TypeFrameIndex::addPermutations(std::vector<std::vector<int>> &answer, std::vector<int> base)
+{
+    int array[base.size()];
+    for (unsigned int i = 0; i < base.size(); i++) {
+        array[i] = base.at(i);
+    }
+    permutation(answer, array, 0, base.size());
+}
+
+void TypeFrameIndex::addSymmetrucPermutations(TypeFrameSet &answer, const TypeFrame &frame, unsigned int cursor)
+{
+    unsigned int arity = frame.at(cursor).second;
+    std::vector<int> argPos = frame.getArgumentsPosition(cursor);
+    if (frame.typeAtIsSymmetricLink(cursor)) {
+        if (arity == 2) {
+            // optimization of commom case
+            answer.insert(frame.subFrameAt(cursor));
+            TypeFrame permutation;
+            for (unsigned int i = 0; i <= cursor; i++) {
+                permutation.pickAndPushBack(frame, i);
+            }
+            TypeFrame subFrame0 = frame.subFrameAt(argPos.at(0));
+            TypeFrame subFrame1 = frame.subFrameAt(argPos.at(1));
+            permutation.append(subFrame1);
+            permutation.append(subFrame0);
+            answer.insert(permutation);
+        } else {
+            if (arity <= LIMIT_FOR_SYMMETRIC_LINKS_PERMUTATION) {
+                std::vector<std::vector<int>> permutationVector;
+                addPermutations(permutationVector, argPos);
+                TypeFrame permutation;
+                for (unsigned int k = 0; k < permutationVector.size(); k++) {
+                    permutation.clear();
+                    for (unsigned int i = 0; i <= cursor; i++) {
+                        permutation.pickAndPushBack(frame, i);
+                    }
+                    TypeFrame subFrame;
+                    for (unsigned int j = 0; j < arity; j++) {
+                        subFrame.clear();
+                        subFrame = frame.subFrameAt(permutationVector.at(k).at(j));
+                        permutation.append(subFrame);
+                    }
+                    answer.insert(permutation);
+                }
+            }
+        }
+    } else {
+        answer.insert(frame.subFrameAt(cursor));
+    }
+    for (unsigned int i = 0; i < arity; i++) {
+        addSymmetrucPermutations(answer, frame, argPos.at(i));
+    }
+}
+
 bool TypeFrameIndex::addFrame(TypeFrame &frame, int offset)
 {
     bool exitStatus = true;
     if (frame.isValid()) {
-        frames.push_back(frame);
+        TypeFrameSet symmetricPermutations;
+        addSymmetrucPermutations(symmetricPermutations, frame, 0);
+        for (TypeFrameSet::iterator it = symmetricPermutations.begin(); it != symmetricPermutations.end(); it++) {
+            frames.push_back(*it);
+        }
         if (DEBUG) {
             printf("%d: ", offset);
             frame.printForDebug("", "\n", true);
@@ -50,6 +131,65 @@ bool TypeFrameIndex::addFromScheme(const std::string &txt, int offset)
     return exitStatus;
 }
 
+void TypeFrameIndex::addArity2Patterns(std::vector<TypeFrame> &answer, std::vector<TypeFrame> &recurseResult1, std::vector<TypeFrame> &recurseResult2, TypeFrame &baseFrame, int cursor)
+{
+    TypeFrame pattern;
+
+    // Link * *
+    pattern = TypeFrame::EMPTY_PATTERN;
+    pattern.pickAndPushBack(baseFrame, cursor); 
+    pattern.push_back(TypeFrame::STAR_PATTERN); 
+    pattern.push_back(TypeFrame::STAR_PATTERN); 
+
+    if (DEBUG) {
+        printf("Adding * * 2-link pattern\n");
+        pattern.printForDebug("", "\n", true);
+    }
+
+    answer.push_back(pattern);
+
+    // Link [recurse1] *
+    for (unsigned int i = 0; i < recurseResult1.size(); i++) {
+        pattern = TypeFrame::EMPTY_PATTERN;
+        pattern.pickAndPushBack(baseFrame, cursor); 
+        pattern.append(recurseResult1.at(i));
+        pattern.push_back(TypeFrame::STAR_PATTERN);
+        if (DEBUG) {
+            printf("Adding [%u] * 2-link pattern\n", i);
+            pattern.printForDebug("", "\n", true);
+        }
+        answer.push_back(pattern);
+    }
+
+    // Link * [recurse2]
+    for (unsigned int j = 0; j < recurseResult2.size(); j++) {
+        pattern = TypeFrame::EMPTY_PATTERN;
+        pattern.pickAndPushBack(baseFrame, cursor);
+        pattern.push_back(TypeFrame::STAR_PATTERN); 
+        pattern.append(recurseResult2.at(j));
+        if (DEBUG) {
+            printf("Adding * [%u] 2-link pattern\n", j);
+            pattern.printForDebug("", "\n", true);
+        }
+        answer.push_back(pattern);
+    }
+
+    // Link [recurse1] [recurse2]
+    for (unsigned int i = 0; i < recurseResult1.size(); i++) {
+        for (unsigned int j = 0; j < recurseResult2.size(); j++) {
+            pattern = TypeFrame::EMPTY_PATTERN;
+            pattern.pickAndPushBack(baseFrame, cursor);
+            pattern.append(recurseResult1.at(i));
+            pattern.append(recurseResult2.at(j));
+            if (DEBUG) {
+                printf("Adding [%u] [%u] 2-link pattern\n", i, j);
+                pattern.printForDebug("", "\n", true);
+            }
+            answer.push_back(pattern);
+        }
+    }
+}
+
 // TODO: This method should allocate answers in the heap instead of the stack to
 // avoid copying data all the away in the recursive calls
 // TODO: Break this method into smaller pieces
@@ -57,6 +197,7 @@ std::vector<TypeFrame> TypeFrameIndex::computeSubPatterns(TypeFrame &baseFrame, 
 {
     std::vector<TypeFrame> answer;
     unsigned int headArity = baseFrame.at(cursor).second;
+    bool symmetricHead = baseFrame.typeAtIsSymmetricLink(cursor);
     std::vector<int> argPos = baseFrame.getArgumentsPosition(cursor);
 
     if (headArity == 0) {
@@ -79,7 +220,7 @@ std::vector<TypeFrame> TypeFrameIndex::computeSubPatterns(TypeFrame &baseFrame, 
 
     } else if (headArity == 2) {
 
-        // Arity 2 Link, compute all possible patterns
+        // Arity 2 Link, computes all possible patterns
 
         std::vector<TypeFrame> recurseResult1, recurseResult2;
 
@@ -87,68 +228,18 @@ std::vector<TypeFrame> TypeFrameIndex::computeSubPatterns(TypeFrame &baseFrame, 
         recurseResult2 = computeSubPatterns(baseFrame, argPos.at(1), pos);
         if (DEBUG) {
             for (unsigned int i = 0; i < recurseResult1.size(); i++) {
-                recurseResult1.at(i).printForDebug(">>>>> recurseResult1: ", "\n", true);
+                recurseResult1.at(i).printForDebug("recurseResult1: ", "\n", true);
             }
             for (unsigned int i = 0; i < recurseResult2.size(); i++) {
-                recurseResult1.at(i).printForDebug(">>>>> recurseResult2: ", "\n", true);
+                recurseResult1.at(i).printForDebug("recurseResult2: ", "\n", true);
             }
         }
 
-        TypeFrame pattern;
-
-        // Link * *
-        pattern = TypeFrame::EMPTY_PATTERN;
-        pattern.pickAndPushBack(baseFrame, cursor); 
-        pattern.push_back(TypeFrame::STAR_PATTERN); 
-        pattern.push_back(TypeFrame::STAR_PATTERN); 
-
-        if (DEBUG) {
-            printf("Adding * * 2-link pattern\n");
-            pattern.printForDebug("", "\n", true);
+        addArity2Patterns(answer, recurseResult1, recurseResult2, baseFrame, cursor);
+        if (symmetricHead) {
+            addArity2Patterns(answer, recurseResult2, recurseResult1, baseFrame, cursor);
         }
 
-        answer.push_back(pattern);
-
-        // Link [recurse1] *
-        for (unsigned int i = 0; i < recurseResult1.size(); i++) {
-            pattern = TypeFrame::EMPTY_PATTERN;
-            pattern.pickAndPushBack(baseFrame, cursor); 
-            pattern.append(recurseResult1.at(i));
-            pattern.push_back(TypeFrame::STAR_PATTERN);
-            if (DEBUG) {
-                printf("Adding [%u] * 2-link pattern\n", i);
-                pattern.printForDebug("", "\n", true);
-            }
-            answer.push_back(pattern);
-        }
-
-        // Link * [recurse2]
-        for (unsigned int j = 0; j < recurseResult2.size(); j++) {
-            pattern = TypeFrame::EMPTY_PATTERN;
-            pattern.pickAndPushBack(baseFrame, cursor);
-            pattern.push_back(TypeFrame::STAR_PATTERN); 
-            pattern.append(recurseResult2.at(j));
-            if (DEBUG) {
-                printf("Adding * [%u] 2-link pattern\n", j);
-                pattern.printForDebug("", "\n", true);
-            }
-            answer.push_back(pattern);
-        }
-
-        // Link [recurse1] [recurse2]
-        for (unsigned int i = 0; i < recurseResult1.size(); i++) {
-            for (unsigned int j = 0; j < recurseResult2.size(); j++) {
-                pattern = TypeFrame::EMPTY_PATTERN;
-                pattern.pickAndPushBack(baseFrame, cursor);
-                pattern.append(recurseResult1.at(i));
-                pattern.append(recurseResult2.at(j));
-                if (DEBUG) {
-                    printf("Adding [%u] [%u] 2-link pattern\n", i, j);
-                    pattern.printForDebug("", "\n", true);
-                }
-                answer.push_back(pattern);
-            }
-        }
     } else {
 
         // Arity != 2 Link, doesn't compute all possible patterns (to avoid
@@ -248,11 +339,11 @@ void TypeFrameIndex::buildSubPatternsIndex()
     if (DEBUG) printForDebug(true);
 }
 
-void TypeFrameIndex::query(std::vector<ResultPair> &result, const std::string &queryScm)
+void TypeFrameIndex::query(std::vector<ResultPair> &result, const std::string &queryScm, bool distinct)
 {
     TypeFrame queryFrame(queryScm);
     if (DEBUG) queryFrame.printForDebug("NEW QUERY: ", "\n", true);
-    query(result, queryFrame);
+    query(result, queryFrame, distinct);
 }
 
 void TypeFrameIndex::selectCurrentElement(TypeFrame &answer, StringMap &variableOccurrences, const TypeFrame &baseFrame, int cursor)
@@ -311,19 +402,17 @@ void TypeFrameIndex::buildQueryTerm(TypeFrame &answer, StringMap &variableOccurr
     }
 }
 
-void TypeFrameIndex::query(std::vector<ResultPair> &result, const TypeFrame &queryFrame)
+void TypeFrameIndex::query(std::vector<ResultPair> &result, const TypeFrame &queryFrame, bool distinct)
 {
     TypeFrame keyExpression;
     std::vector<VarMapping> forbiddenMappings;
     int headLogicOperator;
 
-    query(result, keyExpression, forbiddenMappings, headLogicOperator, queryFrame, 0);
+    query(result, keyExpression, forbiddenMappings, headLogicOperator, queryFrame, 0, distinct);
 }
 
-bool TypeFrameIndex::compatibleVarMappings(const VarMapping &map1, const VarMapping &map2)
+bool TypeFrameIndex::compatibleVarMappings(const VarMapping &map1, const VarMapping &map2, bool distinct)
 {
-    bool answer = true;
-
     /*
     if (DEBUG) {
         printf("TypeFrameIndex::compatibleVarMappings()\n");
@@ -336,17 +425,25 @@ bool TypeFrameIndex::compatibleVarMappings(const VarMapping &map1, const VarMapp
     for (VarMapping::const_iterator it1 = map1.begin(); it1 != map1.end(); it1++) {
         VarMapping::const_iterator it2 = map2.find((*it1).first);
         if ((it2 != map2.end()) && (! (*it1).second.equals((*it2).second))) {
-            answer = false;
             /*
             if (DEBUG) {
                 printf("Failed at %s\n", (*it1).first.c_str());
             }
             */
-            break;
+            return false;
+        }
+    }
+    if (distinct) {
+        for (VarMapping::const_iterator it1 = map1.begin(); it1 != map1.end(); it1++) {
+            for (VarMapping::const_iterator it2 = map2.begin(); it2 != map2.end(); it2++) {
+                if (((*it1).first.compare((*it2).first) != 0) && ((*it1).second.equals((*it2).second))) {
+                    return false;
+                }
+            }
         }
     }
 
-    return answer;
+    return true;
 }
 
 void TypeFrameIndex::typeFrameSetUnion(TypeFrameSet &answer, const TypeFrameSet &set1, const TypeFrameSet &set2)
@@ -391,7 +488,7 @@ bool TypeFrameIndex::isForbiddenMapping(const VarMapping &mapping, const std::ve
     return answer;
 }
 
-void TypeFrameIndex::query(std::vector<ResultPair> &answer, TypeFrame &keyExpression, std::vector<VarMapping> &forbiddenMappings, int &logicOperator, const TypeFrame &queryFrame, int cursor)
+void TypeFrameIndex::query(std::vector<ResultPair> &answer, TypeFrame &keyExpression, std::vector<VarMapping> &forbiddenMappings, int &logicOperator, const TypeFrame &queryFrame, int cursor, bool distinct)
 {
     if (DEBUG) queryFrame.printForDebug("Query frame: ", "\n", true);
     if (DEBUG) printf("Cursor: %d\n", cursor);
@@ -407,13 +504,13 @@ void TypeFrameIndex::query(std::vector<ResultPair> &answer, TypeFrame &keyExpres
     bool AndFlag = queryFrame.typeAtEqualsTo(cursor, "AndLink");
     bool OrFlag = queryFrame.typeAtEqualsTo(cursor, "OrLink");
     bool NotFlag = queryFrame.typeAtEqualsTo(cursor, "NotLink");
-    if (DEBUG) printf("Head is %s\n", (AndFlag ? "AND" : (OrFlag ? "OR" : (NotFlag ? "NOT" : "LEAF EXPRESSION"))));
+    if (DEBUG) printf("Head is %s\n", (AndFlag ? "AND" : (OrFlag ? "OR" : (NotFlag ? "NOT" : "LEAF"))));
 
     if (AndFlag || OrFlag || NotFlag) {
         // Recursive call on each clause
         keyExpression.pickAndPushBack(queryFrame, cursor);
         for (unsigned int i = 0; i < arity; i++) {
-            query(recursionQueryResult.at(i), recursionKeyExpression.at(i), recursionForbiddenMappings.at(i), recursionHeadLogicOperator.at(i), queryFrame, argPos.at(i));
+            query(recursionQueryResult.at(i), recursionKeyExpression.at(i), recursionForbiddenMappings.at(i), recursionHeadLogicOperator.at(i), queryFrame, argPos.at(i), distinct);
         }
         for (unsigned int i = 0; i < arity; i++) {
             if (DEBUG) {
@@ -492,7 +589,7 @@ void TypeFrameIndex::query(std::vector<ResultPair> &answer, TypeFrame &keyExpres
                 TypeFrameSet newSet;
                 for (unsigned int b = 0; b < cleanRecursionQueryResult.at(i).size(); b++) {
                     for (unsigned int a = 0; a < aux[src].size(); a++) {
-                        if (compatibleVarMappings(aux[src].at(a).second, cleanRecursionQueryResult.at(i).at(b).second)) {
+                        if (compatibleVarMappings(aux[src].at(a).second, cleanRecursionQueryResult.at(i).at(b).second, distinct)) {
                             TypeFrameSet newSet;
                             VarMapping newMapping;
                             typeFrameSetUnion(newSet, aux[src].at(a).first, cleanRecursionQueryResult.at(i).at(b).first);

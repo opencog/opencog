@@ -40,29 +40,42 @@ bool loadFile(char *fileName)
     bool returnValue = SCMLoader::load(fileName, atomSpace, &builder);
     //bool returnValue = SCMLoader::load(fileName, atomSpace);
     index.buildSubPatternsIndex();
+    index.printForDebug(true);
+
     std::vector<TypeFrameIndex::ResultPair> result;
 
     //std::string query2[1] = {"(AndLink (InheritanceLink (VariableNode \"V2\") (VariableNode \"V3\")) (SimilarityLink (VariableNode \"V1\") (VariableNode \"V2\")))"};
     //std::string query6[1] = {"(AndLink (InheritanceLink (VariableNode \"V2\") (VariableNode \"V2\")) (SimilarityLink (VariableNode \"V1\") (VariableNode \"V2\")))"};
+    //std::string query7[10] = {
+    //    "(AndLink (SimilarityLink (VariableNode \"X\") (VariableNode \"Y\")) (InheritanceLink (VariableNode \"Y\") (VariableNode \"Z\")))",
+    //    "(AndLink (SimilarityLink (VariableNode \"X\") (VariableNode \"Y\")) (InheritanceLink (VariableNode \"Z\") (VariableNode \"Y\")))",
+    //    "(OrLink (SimilarityLink (VariableNode \"X\") (VariableNode \"Y\")) (InheritanceLink (VariableNode \"Y\") (VariableNode \"Z\")))",
+    //    "(OrLink (NotLink (NotLink (SimilarityLink (VariableNode \"X\") (VariableNode \"Y\")))) (NotLink (NotLink (InheritanceLink (VariableNode \"Y\") (VariableNode \"Z\")))))",
+    //    "(OrLink (AndLink (SimilarityLink (VariableNode \"X\") (VariableNode \"Y\")) (InheritanceLink (VariableNode \"Y\") (VariableNode \"Z\"))) (AndLink (InheritanceLink (VariableNode \"X\") (VariableNode \"Y\")) (SimilarityLink (VariableNode \"Y\") (VariableNode \"Z\"))))",
+    //    "(OrLink (NotLink (NotLink (AndLink (SimilarityLink (VariableNode \"X\") (VariableNode \"Y\")) (InheritanceLink (VariableNode \"Y\") (VariableNode \"Z\"))))) (AndLink (InheritanceLink (VariableNode \"X\") (VariableNode \"Y\")) (SimilarityLink (VariableNode \"Y\") (VariableNode \"Z\"))))",
+    //    "(AndLink (SimilarityLink (VariableNode \"X\") (VariableNode \"Y\")) (OrLink (InheritanceLink (VariableNode \"Y\") (VariableNode \"Z\")) (InheritanceLink (VariableNode \"Z\") (VariableNode \"Y\"))))",
+    //    "(AndLink (SimilarityLink (VariableNode \"X\") (VariableNode \"Y\")) (SimilarityLink (VariableNode \"Y\") (VariableNode \"Z\")))",
+    //    "(AndLink (SimilarityLink (VariableNode \"X\") (VariableNode \"Y\")) (NotLink (AndLink (SimilarityLink (VariableNode \"X\") (VariableNode \"Y\")) (SimilarityLink (VariableNode \"Y\") (VariableNode \"Z\")))))",
+    //    "(AndLink (NotLink (AndLink (SimilarityLink (VariableNode \"X\") (VariableNode \"Y\")) (SimilarityLink (VariableNode \"Y\") (VariableNode \"Z\")))) (SimilarityLink (VariableNode \"X\") (VariableNode \"Y\")))"
+    //};
 
-    std::string query7[9] = {
-        "(AndLink (SimilarityLink (VariableNode \"X\") (VariableNode \"Y\")) (InheritanceLink (VariableNode \"Y\") (VariableNode \"Z\")))",
-        "(AndLink (SimilarityLink (VariableNode \"X\") (VariableNode \"Y\")) (InheritanceLink (VariableNode \"Z\") (VariableNode \"Y\")))",
-        "(OrLink (SimilarityLink (VariableNode \"X\") (VariableNode \"Y\")) (InheritanceLink (VariableNode \"Y\") (VariableNode \"Z\")))",
-        "(OrLink (NotLink (NotLink (SimilarityLink (VariableNode \"X\") (VariableNode \"Y\")))) (NotLink (NotLink (InheritanceLink (VariableNode \"Y\") (VariableNode \"Z\")))))",
-        "(OrLink (AndLink (SimilarityLink (VariableNode \"X\") (VariableNode \"Y\")) (InheritanceLink (VariableNode \"Y\") (VariableNode \"Z\"))) (AndLink (InheritanceLink (VariableNode \"X\") (VariableNode \"Y\")) (SimilarityLink (VariableNode \"Y\") (VariableNode \"Z\"))))",
-        "(OrLink (NotLink (NotLink (AndLink (SimilarityLink (VariableNode \"X\") (VariableNode \"Y\")) (InheritanceLink (VariableNode \"Y\") (VariableNode \"Z\"))))) (AndLink (InheritanceLink (VariableNode \"X\") (VariableNode \"Y\")) (SimilarityLink (VariableNode \"Y\") (VariableNode \"Z\"))))",
-        "(AndLink (SimilarityLink (VariableNode \"X\") (VariableNode \"Y\")) (OrLink (InheritanceLink (VariableNode \"Y\") (VariableNode \"Z\")) (InheritanceLink (VariableNode \"Z\") (VariableNode \"Y\"))))",
+    std::string query9[9] = {
         "(AndLink (SimilarityLink (VariableNode \"X\") (VariableNode \"Y\")) (SimilarityLink (VariableNode \"Y\") (VariableNode \"Z\")))",
-        "(AndLink (SimilarityLink (VariableNode \"X\") (VariableNode \"Y\")) (NotLink (AndLink (SimilarityLink (VariableNode \"X\") (VariableNode \"Y\")) (SimilarityLink (VariableNode \"Y\") (VariableNode \"Z\")))))"
+        "(OrLink (AndLink (SimilarityLink (VariableNode \"X\") (VariableNode \"Y\")) (SimilarityLink (VariableNode \"Y\") (VariableNode \"Z\"))) (AndLink (InheritanceLink (VariableNode \"X\") (VariableNode \"Y\")) (InheritanceLink (VariableNode \"Y\") (VariableNode \"Z\"))))",
+        "(AndLink (InheritanceLink (VariableNode \"X\") (VariableNode \"Y\")) (InheritanceLink (VariableNode \"Y\") (VariableNode \"Z\")) (InheritanceLink (VariableNode \"Z\") (VariableNode \"W\")))",
+        "(AndLink (SimilarityLink (VariableNode \"X\") (VariableNode \"Y\")) (NotLink (AndLink (InheritanceLink (VariableNode \"X\") (VariableNode \"Z\")) (InheritanceLink (VariableNode \"Y\") (VariableNode \"Z\")))))",
+        "(AndLink (SimilarityLink (VariableNode \"X\") (VariableNode \"Y\")) (SimilarityLink (VariableNode \"Y\") (VariableNode \"Z\")) (SimilarityLink (VariableNode \"Z\") (VariableNode \"W\")))",
+        "(AndLink (InheritanceLink (VariableNode \"X\") (VariableNode \"Y\")) (InheritanceLink (VariableNode \"Y\") (VariableNode \"X\")))",
+        "(AndLink (NotLink (OrLink (InheritanceLink (VariableNode \"X\") (ConceptNode \"mammal\")) (InheritanceLink (VariableNode \"Y\") (ConceptNode \"mammal\")))) (SimilarityLink (VariableNode \"X\") (VariableNode \"Y\")))",
+        "(AndLink (SimilarityLink (VariableNode \"X\") (VariableNode \"Y\")) (SimilarityLink (VariableNode \"Y\") (VariableNode \"Z\")) (SimilarityLink (VariableNode \"Z\") (VariableNode \"X\")))",
+        "(AndLink (AndLink (InheritanceLink (VariableNode \"X\") (VariableNode \"Z\")) (InheritanceLink (VariableNode \"Y\") (VariableNode \"Z\"))) (NotLink (SimilarityLink (VariableNode \"X\") (VariableNode \"Y\"))))"
     };
 
-                
-
-    for (unsigned int i = 0; i < (sizeof(query7) / sizeof(query7[0])); i++) {
-        index.query(result, query7[i]);
+    for (unsigned int i = 0; i < (sizeof(query9) / sizeof(query9[0])); i++) {
+    //for (unsigned int i = 4; i == 4; i++) {
+        index.query(result, query9[i]);
         printf("================================================================================\n");
-        printf("Query: %s\n", query7[i].c_str());
+        printf("Query: %s\n", query9[i].c_str());
         for (unsigned int i = 0; i < result.size(); i++) {
             printf("Query solution %u\n" , i);
             for (TypeFrameIndex::TypeFrameSet::iterator it = result.at(i).first.begin(); it != result.at(i).first.end(); it++) {

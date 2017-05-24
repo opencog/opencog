@@ -130,13 +130,14 @@ public:
     bool nodeNameDefined(unsigned int pos) const;
     std::string nodeNameAt(unsigned int pos) const;
     void setNodeNameAt(unsigned int pos, std::string name);
+    bool typeAtIsSymmetricLink(unsigned int pos) const;
     bool typeAtEqualsTo(unsigned int pos, const std::string &typeName) const;
     void append(TypeFrame &other);
     void pickAndPushBack(const TypeFrame &other, unsigned int pos);
     bool match(std::vector<int> &mapping, const TypeFrame &pattern);
     bool match(std::vector<int> &mapping, const TypeFrame &pattern, const IntPairVector &constraints);
     bool subFramesEqual(unsigned int cursorA, unsigned int cursorB);
-    TypeFrame subFrameAt(int pos);
+    TypeFrame subFrameAt(int pos) const;
     void printForDebug(std::string prefix = "", std::string suffix = "", bool showNames = false) const;
 
 };

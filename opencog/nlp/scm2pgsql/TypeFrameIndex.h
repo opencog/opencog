@@ -61,19 +61,22 @@ private:
     PatternMap occurrenceSet;
     IntegerSet occurrenceUniverse;
 
-    void query(std::vector<ResultPair> &result, TypeFrame &keyExpression, std::vector<VarMapping> &forbiddenMappings, int &logicOperator, const TypeFrame &queryFrame, int cursor);
+    void query(std::vector<ResultPair> &result, TypeFrame &keyExpression, std::vector<VarMapping> &forbiddenMappings, int &logicOperator, const TypeFrame &queryFrame, int cursor, bool distinct);
     void addPatternOccurrence(TypeFrame &pattern, int pos);
+    void addArity2Patterns(std::vector<TypeFrame> &answer, std::vector<TypeFrame> &recurseResult1, std::vector<TypeFrame> &recurseResult2, TypeFrame &baseFrame, int cursor);
     std::vector<TypeFrame> computeSubPatterns(TypeFrame &baseFrame, int cursorn, int pos);
     void selectCurrentElement(TypeFrame &answer, StringMap &variableOccurrences, const TypeFrame &baseFrame, int cursor);
     void buildConstraints(IntPairVector &constraints, StringMap &variableOccurrences);
     void buildJointConstraints(IntPairPairVector &constraints, std::vector<StringMap> &variableOccurrences);
     void buildQueryTerm(TypeFrame &answer, StringMap &variableOccurrences, const TypeFrame &baseFrame, int cursor);
-    bool compatibleVarMappings(const VarMapping &map1, const VarMapping &map2);
+    bool compatibleVarMappings(const VarMapping &map1, const VarMapping &map2, bool distinct);
     bool isForbiddenMapping(const VarMapping &mapping, const std::vector<VarMapping> &forbiddenVector);
     void typeFrameSetUnion(TypeFrameSet &answer, const TypeFrameSet &set1, const TypeFrameSet &set2);
     void varMappingUnion(VarMapping &answer, const VarMapping &map1, const VarMapping &map2);
+    void permutation(std::vector<std::vector<int>> &answer, int *array, int current, int size);
+    void addPermutations(std::vector<std::vector<int>> &answer, std::vector<int> base);
+    void addSymmetrucPermutations(TypeFrameSet &answer, const TypeFrame &frame, unsigned int cursor);
 
-    void printForDebug(bool showNodeNames = false) const;
     void printRecursionResult(const std::vector<ResultPair> &v) const;
     void printVarMapping(const VarMapping &map) const;
     void printTypeFrameSet(const TypeFrameSet &set) const;
@@ -82,18 +85,22 @@ private:
 
 public:
 
+    static const int LIMIT_FOR_SYMMETRIC_LINKS_PERMUTATION;
+
     TypeFrameIndex();
 
     // TODO Implement this
     ~TypeFrameIndex();
 
     bool addFromScheme(const std::string &scm, int offset);
-    void query(std::vector<ResultPair> &result, const std::string &queryScm);
-    void query(std::vector<ResultPair> &result, const TypeFrame &queryFrame);
+    void query(std::vector<ResultPair> &result, const std::string &queryScm, bool distinct = true);
+    void query(std::vector<ResultPair> &result, const TypeFrame &queryFrame, bool distinct = true);
 
     bool addFrame(TypeFrame &frame, int offset);
     TypeFrame getFrameAt(int index);
     void buildSubPatternsIndex();
+
+    void printForDebug(bool showNodeNames = false) const;
 };
 
 }

@@ -39,6 +39,12 @@ bool TypeFrame::typeAtEqualsTo(unsigned int pos, const std::string &typeName) co
     return (classserver().getTypeName(at(pos).first).compare(typeName) == 0);
 }
 
+bool TypeFrame::typeAtIsSymmetricLink(unsigned int pos) const
+{
+    //return (classserver().isA(at(pos).first, classserver().getType("UnorderedLink")));
+    return (classserver().isA(at(pos).first, UNORDERED_LINK));
+}
+
 std::string TypeFrame::nodeNameAt(unsigned int pos) const
 {
     std::string answer = "";
@@ -236,7 +242,7 @@ bool TypeFrame::match(std::vector<int> &mapping, const TypeFrame &pattern, const
     return answer;
 }
 
-TypeFrame TypeFrame::subFrameAt(int pos)
+TypeFrame TypeFrame::subFrameAt(int pos) const
 {
     TypeFrame answer;
 
