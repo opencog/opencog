@@ -1,11 +1,11 @@
 ;; =======================================================================
 ;; Conditional Full Instantiation Meta Rule
 ;;
-;; Multiple forms are implemented
+;; Two forms are implemented
 ;;
-;; 1. ImplicationScopeLink
+;; 1. Scoped links, like ImplicationScopeLink
 ;;
-;; ImplicationScopeLink
+;; <impl-scope-link>
 ;;   V
 ;;   P
 ;;   Q
@@ -15,21 +15,24 @@
 ;;   |-
 ;;   Q[V->T]
 ;;
-;; 2. InheritanceLink
+;; 2. Unscoped links, like ImplicationLink, InheritanceLink, etc.
 ;;
-;; InheritanceLink
+;; <impl-type>
 ;;   A
 ;;   B
 ;; |-
 ;;   T
-;;   MemberLink
-;;     T
+;;   <eval-type>
 ;;     A
-;;   |-
-;;   MemberLink
 ;;     T
+;;   |-
+;;   <eval-type>
 ;;     B
+;;     T
 ;;
+;; Note that depending on <eval-type> the arguments should be
+;; swapped. For instance MemberLink and EvaluationLink have swapped
+;; arguments.
 ;; -----------------------------------------------------------------------
 
 (use-modules (srfi srfi-1))
@@ -37,134 +40,9 @@
 (use-modules (opencog exec))
 (use-modules (opencog logger))
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Conditional full instantiation rule ;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-(define conditional-full-instantiation-implication-scope-meta-rule
-  (let* ((V (Variable "$V"))
-         (VariableT (Type "VariableNode"))
-         (VariableListT (Type "VariableList"))
-         (TypedVariableT (Type "TypedVariableLink"))
-         (VardeclT (TypeChoice VariableT VariableListT TypedVariableT))
-         (P (Variable "$P"))
-         (Q (Variable "$Q"))
-
-         ;; Meta rule variable declaration
-         (meta-vardecl (VariableList
-                         (TypedVariable V VardeclT)
-                         P Q))
-         ;; Meta rule main clause
-         (implication (Quote
-                        (ImplicationScope
-                          (Unquote V)
-                          (Unquote P)
-                          (Unquote Q))))
-         ;; Meta rule precondition
-         (meta-precondition (Evaluation
-                              (GroundedPredicate "scm: gt-zero-confidence")
-                              implication))
-         ;; Meta rule pattern
-         (meta-pattern (And implication meta-precondition))
-
-         ;; Produced rule variable declaration. P and Q will now be
-         ;; content rather than variables.
-         (produced-vardecl V)
-         ;; Produced rule precondition. P must have a positive confidence
-         (produced-precondition (Evaluation
-                                  (GroundedPredicate "scm: gt-zero-confidence")
-                                  P))
-         ;; Produced rule pattern. Look for groundings of P that meet
-         ;; the precondition.
-         (produced-pattern (And P produced-precondition))
-         ;; Produced rule rewrite. Apply formula to calculate the TV
-         ;; over Q.
-         (produced-rewrite (ExecutionOutput
-                            (GroundedSchema "scm: conditional-full-instantiation-scope-formula")
-                            (Unquote
-                              (List
-                                ;; Conclusion
-                                Q
-                                ;; Premises. Both P and the
-                                ;; implication are required to
-                                ;; calculate the TV over Q.
-                                P
-                                implication))))
-         ;; Meta rule rewrite
-         (meta-rewrite (Quote (Bind
-                          (Unquote produced-vardecl)
-                          (Unquote produced-pattern)
-                          produced-rewrite ; the Unquote appears
-                                           ; inside it, to avoid
-                                           ; running the
-                                           ; ExecutionOutput
-                          ))))
-    (Bind
-      meta-vardecl
-      meta-pattern
-      meta-rewrite)))
-
-(define conditional-full-instantiation-inheritance-meta-rule
-  (let* ((X (Variable "$X"))
-         (A (Variable "$A"))
-         (B (Variable "$B"))
-         (ConceptT (Type "ConceptNode"))
-         ;; Meta rule variable declaration
-         (meta-vardecl (VariableList
-                         (TypedVariable A ConceptT)
-                         (TypedVariable B ConceptT)))
-         ;; Meta rule main clause
-         (inheritance (Inheritance A B))
-         ;; Meta rule precondition
-         (meta-precondition (Evaluation
-                              (GroundedPredicate "scm: gt-zero-confidence")
-                              inheritance))
-         ;; Meta rule pattern
-         (meta-pattern (And inheritance meta-precondition))
-
-         ;; Produced rule variable declaration. A and B will now be
-         ;; content rather than variables.
-         (produced-vardecl X)
-         (produced-clause (Member X A))
-         ;; Produced rule preconditions. A and A(X) must have a positive confidence
-         (produced-precondition-1 (Evaluation
-                                    (GroundedPredicate "scm: gt-zero-confidence")
-                                    A))
-         (produced-precondition-2 (Evaluation
-                                    (GroundedPredicate "scm: gt-zero-confidence")
-                                    (Member X A)))
-         ;; Produced rule pattern. Look for groundings of P that meet
-         ;; the precondition.
-         (produced-pattern (And
-                             produced-clause
-                             produced-precondition-1
-                             produced-precondition-2))
-         ;; Produced rule rewrite. Apply formula to calculate the TV
-         ;; over B(X).
-         (produced-rewrite (ExecutionOutput
-                            (GroundedSchema "scm: conditional-full-instantiation-formula")
-                            (Unquote
-                              (List
-                                ;; Conclusion
-                                (Member X B)
-                                ;; Premises. Both P and the
-                                ;; implication are required to
-                                ;; calculate the TV over Q.
-                                (Member X A)
-                                inheritance))))
-         ;; Meta rule rewrite
-         (meta-rewrite (Quote (Bind
-                          (Unquote produced-vardecl)
-                          (Unquote produced-pattern)
-                          produced-rewrite ; the Unquote appears
-                                           ; inside it, to avoid
-                                           ; running the
-                                           ; ExecutionOutput
-                          ))))
-    (Bind
-      meta-vardecl
-      meta-pattern
-      meta-rewrite)))
+;;;;;;;;;;;;;;;;;;;;
+;; Shared formula ;;
+;;;;;;;;;;;;;;;;;;;;
 
 ;; The TV of Q is calculated as follows
 ;;
@@ -271,21 +149,78 @@
          (Qinst-c (* Impl-c Pinst-c (- 1 P-s))))
     (stv Qinst-s Qinst-c)))
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Conditional full instantiation rules for scope links ;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;; TODO turn that into a generator
+
+(define conditional-full-instantiation-implication-scope-meta-rule
+  (let* ((V (Variable "$V"))
+         (VariableT (Type "VariableNode"))
+         (VariableListT (Type "VariableList"))
+         (TypedVariableT (Type "TypedVariableLink"))
+         (VardeclT (TypeChoice VariableT VariableListT TypedVariableT))
+         (P (Variable "$P"))
+         (Q (Variable "$Q"))
+
+         ;; Meta rule variable declaration
+         (meta-vardecl (VariableList
+                         (TypedVariable V VardeclT)
+                         P Q))
+         ;; Meta rule main clause
+         (implication (Quote
+                        (ImplicationScope
+                          (Unquote V)
+                          (Unquote P)
+                          (Unquote Q))))
+         ;; Meta rule precondition
+         (meta-precondition (Evaluation
+                              (GroundedPredicate "scm: gt-zero-confidence")
+                              implication))
+         ;; Meta rule pattern
+         (meta-pattern (And implication meta-precondition))
+
+         ;; Produced rule variable declaration. P and Q will now be
+         ;; content rather than variables.
+         (produced-vardecl V)
+         ;; Produced rule precondition. P must have a positive confidence
+         (produced-precondition (Evaluation
+                                  (GroundedPredicate "scm: gt-zero-confidence")
+                                  P))
+         ;; Produced rule pattern. Look for groundings of P that meet
+         ;; the precondition.
+         (produced-pattern (And P produced-precondition))
+         ;; Produced rule rewrite. Apply formula to calculate the TV
+         ;; over Q.
+         (produced-rewrite (ExecutionOutput
+                            (GroundedSchema "scm: conditional-full-instantiation-scope-formula")
+                            (Unquote
+                              (List
+                                ;; Conclusion
+                                Q
+                                ;; Premises. Both P and the
+                                ;; implication are required to
+                                ;; calculate the TV over Q.
+                                P
+                                implication))))
+         ;; Meta rule rewrite
+         (meta-rewrite (Quote (Bind
+                          (Unquote produced-vardecl)
+                          (Unquote produced-pattern)
+                          produced-rewrite ; the Unquote appears
+                                           ; inside it, to avoid
+                                           ; running the
+                                           ; ExecutionOutput
+                          ))))
+    (Bind
+      meta-vardecl
+      meta-pattern
+      meta-rewrite)))
+
 (define (conditional-full-instantiation-scope-formula Qinst Pinst Impl)
   (let* ((Impl-outgoings (cog-outgoing-set Impl))
          (P (cadr Impl-outgoings))
-         (Pinst-tv (cog-tv Pinst))
-         (Impl-tv (cog-tv Impl))
-         (P-tv (cog-tv P))
-         (Qinst-tv (conditional-full-instantiation-tv-formula Pinst-tv Impl-tv P-tv)))
-    (if (< 0 (tv-conf Qinst-tv)) ; avoid creating informationless knowledge
-        (cog-merge-hi-conf-tv! Qinst Qinst-tv))))
-
-;; Like conditional-full-instantiation-formula but assumes a non scope
-;; link.
-(define (conditional-full-instantiation-formula Qinst Pinst Impl)
-  (let* ((Impl-outgoings (cog-outgoing-set Impl))
-         (P (car Impl-outgoings))
          (Pinst-tv (cog-tv Pinst))
          (Impl-tv (cog-tv Impl))
          (P-tv (cog-tv P))
@@ -299,7 +234,132 @@
 (DefineLink conditional-full-instantiation-implication-scope-meta-rule-name
   conditional-full-instantiation-implication-scope-meta-rule)
 
-;; Name the inheritance meta rule
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Conditional full instantiation rules for non-scope links ;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;; Determine the eval/member type given impl-type
+(define (impl-to-eval-type impl-type)
+  (if (cog-subtype? 'ImplicationLink impl-type)
+      'EvaluationLink
+      'MemberLink))
+
+;; Determine the type of the variables of the implication given
+;; impl-type. If it inherits an implication link the variables are
+;; predicate nodes, if it inherits an inheritance link the variables
+;; are concept nodes. This could be extended to lambda and satisfying
+;; set links but it has this restriction for now.
+(define (impl-to-var-type impl-type)
+  (if (cog-subtype? 'ImplicationLink impl-type)
+      (Type "PredicateNode")
+      (Type "ConceptNode")))
+
+;; Determine whether the arguments of eval-type are swapped. The
+;; convention is that if MemberLink is used, then they are considered
+;; swapped, if EvaluationLink is used then they are considered not
+;; swapped.
+(define (eval-type-to-swap eval-type)
+  (equal? 'MemberLink eval-type))
+
+;; Rule generator given the non-scope implication link type like
+;; ImplicationLink, InheritanceLink, etc. The eval/member link (and
+;; its argument order) will be automatically detected given impl-type.
+(define (gen-conditional-full-instantiation-meta-rule impl-type)
+  (let* ((impl-arg-type-atom (impl-to-var-type impl-type))
+         (eval-type (impl-to-eval-type impl-type))
+         (swapped (eval-type-to-swap eval-type))
+         (eval (lambda (A X) (if swapped
+                                 (cog-new-link eval-type X A)
+                                 (cog-new-link eval-type A X))))
+         (X (Variable "$X"))
+         (A (Variable "$A"))
+         (B (Variable "$B"))
+         (UA (Unquote A))
+         (UB (Unquote B))
+         (UA_X (eval UA X))
+         (UB_X (eval UB X))
+
+         ;; Meta rule variable declaration
+         (meta-vardecl (VariableList
+                         (TypedVariable A impl-arg-type-atom)
+                         (TypedVariable B impl-arg-type-atom)))
+         ;; Meta rule main clause
+         (AB (cog-new-link impl-type A B))
+         ;; Meta rule precondition
+         (meta-precondition (Evaluation
+                              (GroundedPredicate "scm: gt-zero-confidence")
+                              AB))
+         ;; Meta rule pattern
+         (meta-pattern (And AB meta-precondition))
+
+         ;; Produced rule variable declaration. A and B will now be
+         ;; content rather than variables.
+         (produced-vardecl X)
+         (produced-clause UA_X)
+         ;; Produced rule preconditions. A and A(X) must have a positive confidence
+         (produced-precondition-1 (Evaluation
+                                    (GroundedPredicate "scm: gt-zero-confidence")
+                                    UA))
+         (produced-precondition-2 (Evaluation
+                                    (GroundedPredicate "scm: gt-zero-confidence")
+                                    UA_X))
+         ;; Produced rule pattern. Look for groundings of P that meet
+         ;; the precondition.
+         (produced-pattern (And
+                             produced-clause
+                             produced-precondition-1
+                             produced-precondition-2))
+         ;; Produced rewrite rule last premise
+         (UAUB (cog-new-link impl-type UA UB))
+         ;; Produced rule rewrite. Apply formula to calculate the TV
+         ;; over B(X).
+         (produced-rewrite (ExecutionOutput
+                             (GroundedSchema "scm: conditional-full-instantiation-formula")
+                             (List
+                               ;; Conclusion
+                               UB_X
+                               ;; Premises. Both P and the
+                               ;; implication are required to
+                               ;; calculate the TV over Q.
+                               UA_X
+                               UAUB)))
+         ;; Meta rule rewrite
+         (meta-rewrite (Quote
+                         (Bind
+                           ;; The Unquotes appear inside the terms
+                          produced-vardecl
+                          produced-pattern
+                          produced-rewrite))))
+    (Bind
+      meta-vardecl
+      meta-pattern
+      meta-rewrite)))
+
+;; Like conditional-full-instantiation-formula but assumes a non scope
+;; link.
+(define (conditional-full-instantiation-formula Qinst Pinst Impl)
+  (let* ((Impl-outgoings (cog-outgoing-set Impl))
+         (P (car Impl-outgoings))
+         (Pinst-tv (cog-tv Pinst))
+         (Impl-tv (cog-tv Impl))
+         (P-tv (cog-tv P))
+         (Qinst-tv (conditional-full-instantiation-tv-formula Pinst-tv Impl-tv P-tv)))
+    (if (< 0 (tv-conf Qinst-tv)) ; avoid creating informationless knowledge
+        (cog-merge-hi-conf-tv! Qinst Qinst-tv))))
+
+;; Generate and name
+;; conditional-full-instantiation-implication-meta-rule
+(define conditional-full-instantiation-implication-meta-rule
+  (gen-conditional-full-instantiation-meta-rule 'ImplicationLink))
+(define conditional-full-instantiation-implication-meta-rule-name
+  (DefinedSchemaNode "conditional-full-instantiation-implication-meta-rule"))
+(DefineLink conditional-full-instantiation-implication-meta-rule-name
+  conditional-full-instantiation-implication-meta-rule)
+
+;; Generate and name
+;; conditional-full-instantiation-inheritance-meta-rule
+(define conditional-full-instantiation-inheritance-meta-rule
+  (gen-conditional-full-instantiation-meta-rule 'InheritanceLink))
 (define conditional-full-instantiation-inheritance-meta-rule-name
   (DefinedSchemaNode "conditional-full-instantiation-inheritance-meta-rule"))
 (DefineLink conditional-full-instantiation-inheritance-meta-rule-name
