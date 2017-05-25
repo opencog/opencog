@@ -17,7 +17,7 @@
 
 ; Open the database.
 ; Edit the below, setting the database name, user and password.
-(sql-open "postgres:///en_pairs?user=ubuntu&password=asdf")
+(sql-open "postgres:///en_pairs_tone_mst?user=ubuntu&password=asdf")
 
 ; Load up the words
 (display "Fetch all words from database. This may take several minutes.\n")
@@ -25,7 +25,19 @@
 
 ; Load up the word-pairs -- this can take over half an hour!
 (display "Fetch all word-pairs. This may over half-an-hour!\n")
+
+(define (fetch-any-pairs)
+	(define any-pair-pred (LinkGrammarRelationshipNode "ANY"))
+	(define start-time (current-time))
+	(fetch-incoming-set any-pair-pred)
+	(format #t "Elapsed time to load ANY-link pairs: ~A secs\n"
+		(- (current-time) start-time))
+)
+
 (fetch-any-pairs)
+
+; Print the sql stats
+(sql-stats)
 
 ; Clear the sql cache and the stats counters
 (sql-clear-cache)

@@ -17,18 +17,20 @@
 ; ---------------------------------------------------------------------
 ;
 ; Example usage:
-; (define pma (add-pair-map pca))
+; (define (subtract TUPLE)  (- (first TUPLE) (second TUPLE)))
+; (define pma (add-tuple-math pca subtract))
 ; (define pdi (add-pair-support-compute pma))
 ; (pdi 'left-support (list (Word "the") (Word "a")))
 
-(define-public (add-pair-map LLOBJ)
+(define-public (add-tuple-math LLOBJ FUNC)
 "
-  add-pair-map LLOBJ - Extend LLOBJ with ability to take vector
-  differences.
-
+  add-tuple-math LLOBJ FUNC - Extend LLOBJ with ability to take
+  tuples of items, and then call FUNC on that tuple, whenever
+  the 'pair-count method is invoked.
 "
 	(let ((llobj LLOBJ)
-			(stars-obj (add-pair-stars LLOBJ)))
+			(stars-obj (add-pair-stars LLOBJ))
+			(sum-func FUNC))
 
 		; ---------------
 		; Return the set-union of all atoms that might be paired
@@ -37,6 +39,12 @@
 			(delete-duplicates!
 				(append-map!
 					(lambda (item) (map! gar (llobj 'left-stars item)))
+					TUPLE)))
+
+		(define (get-right-union TUPLE)
+			(delete-duplicates!
+				(append-map!
+					(lambda (item) (map! gdr (llobj 'right-stars item)))
 					TUPLE)))
 
 		; ---------------
@@ -48,6 +56,12 @@
 			(define prty (llobj 'pair-type))
 			(map
 				(lambda (rght) (cog-link prty LEFTY rght))
+				TUPLE))
+
+		(define (get-right-lopr-tuple RIGHTY TUPLE)
+			(define prty (llobj 'pair-type))
+			(map
+				(lambda (left) (cog-link prty left RIGHTY))
 				TUPLE))
 
 		; ---------------
@@ -85,14 +99,22 @@
 				(get-left-union TUPLE)))
 
 		; Same as above, but for the right
-		(define (right-star-union LIST) #f)
+		(define (right-star-union LIST)
+			(map
+				(lambda (righty) (get-right-lopr-tuple righty TUPLE))
+				(get-right-union TUPLE)))
 
 		; ---------------
-		(define (get-pair PAIR)
-		)
-		(define (map-left FN LIST)
-			(FN LIST)
-		)
+		; Given a TUPLE of low-level pairs, return a tuple of high-level
+		; pairs.
+		(define (get-pair TUPLE)
+			(map (lambda (lopr) (llobj 'item-pair lopr)) TUPLE))
+
+		(define (get-func-count TUPLE)
+			(sum-func
+				(map
+					(lambda (pr) (llobj 'pair-count pr))
+					TUPLE)))
 
 		; ---------------
 
@@ -101,6 +123,8 @@
 		(case message
 			((left-stars)      (apply left-star-union args))
 			((right-stars)     (apply right-star-union args))
+			((item-pair)       (apply get-pair args))
+			((pair-count)      (apply get-func-count args))
 			(else (apply llobj (cons message args))))
 		)))
 
