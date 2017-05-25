@@ -5835,6 +5835,8 @@ WordNodes: 139790 -- 140K
 EvaluationLink : 4886362 -- 4.9M
 ListLink: exactly the same.
 
+select count(*) from valuations; <<< 5431036 = 5.4M values
+
 SELECT sum(floatvalue[3]) FROM valuations WHERE type=7;
  gives  396713166 << 397M total obs.
 
@@ -6215,3 +6217,5 @@ The wild-card support needs to be a union
 overload 'left-stars 'right-stars 'pair-count 'item-pair
 this can be a generic map function of any kind! not just a diff!
 
+=======================================
+There is no value for key (PredicateNode "*-FrequencyKey-*")
