@@ -13,11 +13,12 @@
 ; ---------------------------------------------------------------------
 
 (use-modules (srfi srfi-1))
+(use-modules (ice-9 optargs)) ; for define*-public
 
 ; ---------------------------------------------------------------------
 
 (define*-public (add-pair-support-compute LLOBJ
-	 #optional (GET-CNT (lambda (x) (LLOBJ 'pair-count x))))
+	 #:optional (GET-CNT (lambda (x) (LLOBJ 'pair-count x))))
 "
   add-pair-support-compute LLOBJ - Extend LLOBJ with methods to
   compute wild-card sums, including the support (lp-norm for p=0),
@@ -181,7 +182,7 @@
 ; ---------------------------------------------------------------------
 
 (define*-public (add-pair-cosine-compute LLOBJ
-	#optional (GET-CNT (lambda (x) (LLOBJ 'pair-count x))))
+	#:optional (GET-CNT (lambda (x) (LLOBJ 'pair-count x))))
 "
   add-pair-cosine-compute LLOBJ - Extend LLOBJ with methods to compute
   vector dot-products and cosine angles.  None of these use cached
