@@ -363,11 +363,13 @@
 ; ---------------------------------------------------------------------
 ;
 ; Extend the LLOBJ with additional methods to compute the mutual
-; information of pairs.
+; information of all pairs; each pair is then tagged with the resulting
+; MI. (This is the "cache" -- the resulting MI is "cached" with the
+; atom).
 ;
-; The LLOBJ object must have valid pair-frequencies, on it, accessible
-; by the standard API. These need to have been pre-computed, before
-; using this object.
+; The LLOBJ object must have valid pair-frequencies on it, accessible
+; by the standard frequency API. These need to have been pre-computed,
+; before using this object.
 ;
 ; The MI computations are done as a batch, looping over all pairs.
 
