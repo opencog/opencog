@@ -5794,7 +5794,6 @@ also: there are 508 links with missing uuids in thier outgoing set.
  md5sum en_pairs_semi_fu.sql.bz2
 06b0acfecf9f5d4b25cca903b8f3b2a7  en_pairs_semi_fu.sql.bz2
 
-
 ==================================================================
 en_snap
 -------
@@ -5811,7 +5810,52 @@ gives 2786640 == 2.7M  LG links.
 
 and 9587761 = 9.6M clique pairs, and 18M ExecutionLinks.
 
+==================================================================
+en_pairs_tone
+-------------
+Random-planar-tree parsed books from "tranche-1" of mostly project
+gutenberg books. Contains counts for word-pairs, words and disjuncts.
 
+STATUS: good
+DATE: 24 May 2017
+REASON: I think it's good.
+
+                        List of relations
+ Schema |    Name    | Type  | Owner  |    Size    | Description 
+--------+------------+-------+--------+------------+-------------
+ public | atoms      | table | ubuntu | 909 MB     | 
+ public | spaces     | table | ubuntu | 40 kB      | 
+ public | typecodes  | table | ubuntu | 56 kB      | 
+ public | valuations | table | ubuntu | 591 MB     | 
+ public | values     | table | ubuntu | 8192 bytes | 
+(5 rows)
+
+select count(*) from atoms;  <<< 10317409 = 10M atoms total
+WordNodes: 139790 -- 140K
+EvaluationLink : 4886362 -- 4.9M
+ListLink: exactly the same.
+
+SELECT sum(floatvalue[3]) FROM valuations WHERE type=7;
+ gives  396713166 << 397M total obs.
+
+SELECT sum(valuations.floatvalue[3]) FROM valuations, atoms, typecodes
+WHERE valuations.atom=atoms.uuid AND atoms.type=typecodes.type AND
+typecodes.typename='EvaluationLink';
+
+gives 139806259 << 140M pair observations
+.. WordNode: 125696239 << 125M obs
+...LgWordCset: 125707119 << 126M disjuncts
+
+SentenceNode: 330376 == 330K unique sentences
+ParseNode: 5173173 == 5.1M parses
+###LEFT-WALL### seen 5173095 = ... a few missing left-walls!?
+
+464744628 bytes uncompressed == 464MB en_pairs_tone.sql 24 May 2017
+81217915 bytes compressed == 81MB en_pairs_tone.sql.bz2
+
+md5sum:
+28562003d0567039571006803b716dc0  en_pairs_tone.sql
+c4a981af336075f0121ac020887bfa47  en_pairs_tone.sql.bz2
 
 ==================================================================
 
@@ -6164,4 +6208,10 @@ children 101 1 9
  37502
 32517
 22632
+
+differences:
+there is a left and a right diff.
+The wild-card support needs to be a union
+overload 'left-stars 'right-stars 'pair-count 'item-pair
+this can be a generic map function of any kind! not just a diff!
 

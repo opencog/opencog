@@ -212,6 +212,7 @@
 			(star-obj (add-pair-stars LLOBJ))
 			(get-cnt GET-CNT))
 
+		; -------------
 		; Given the low-level pair LOPR, return the numeric count for it.
 		(define (get-lo-cnt LOPR)
 			(get-cnt (llobj 'item-pair LOPR)))
@@ -255,6 +256,8 @@
 		(define (compute-right-product ITEM-A ITEM-B)
 			(compute-product get-other-right ITEM-B
 				(star-obj 'right-stars ITEM-A)))
+
+		; -------------
 
 	; -------------
 	; Methods on this class.
