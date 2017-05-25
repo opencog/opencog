@@ -1,7 +1,7 @@
 ;
-; pair-map-api.scm
+; pair-fold-api.scm
 ;
-; Provides support for multi-vectors and maps for pairs.
+; Provides support for folding down tuples of pairs.
 ;
 ; Copyright (c) 2017 Linas Vepstas
 ;
@@ -110,6 +110,9 @@
 		(define (get-pair TUPLE)
 			(map (lambda (lopr) (llobj 'item-pair lopr)) TUPLE))
 
+		; Given a TUPLE of high-level pairs, return a single number.
+		; The sum-func is applied to reduce the counts on each pair
+		; in the tuple down to just one number.
 		(define (get-func-count TUPLE)
 			(sum-func
 				(map

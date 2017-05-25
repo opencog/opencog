@@ -8,6 +8,7 @@ ADD_GUILE_MODULE (FILES
 	make-disjuncts.scm
 	mst-parser.scm
 	pair-entropy.scm
+	pair-fold-api.scm
 	pair-object-api.scm
 	pair-support.scm
 	pseudo-csets.scm
