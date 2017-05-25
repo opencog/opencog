@@ -68,7 +68,7 @@
 ; The `make-pair-count-get-set` class, below, is a typical user
 ; of this class; it provides getters and setters for teh counts.
 ;
-; See `make-any-link` for a working example.
+; See `make-any-link-link` for a working example.
 ;
 ; When called, this will create a new instance of the class
 ; i.e. will create a new object.
@@ -88,20 +88,20 @@
 ;
 ;        ; Return the atom holding the count, if it exists,
 ;        ; else return nil.
-;        (define (get-pair PAIR) "foobar")
+;        (define (get-pair PAIR) (Node "foobar"))
 ;
 ;        ; Return the atom holding the count, creating it if
 ;        ; it does not yet exist.
-;        (define (make-pair PAIR) "foobar")
+;        (define (make-pair PAIR) (Node "foobar"))
 ;
 ;        ; Return the atom holding the N(*,y) count
-;        (define (get-left-wildcard ITEM) "foobar")
+;        (define (get-left-wildcard ITEM) (Node "foobar"))
 ;
 ;        ; Return the atom holding the N(x,*) count
-;        (define (get-right-wildcard ITEM) "foobar")
+;        (define (get-right-wildcard ITEM) (Node "foobar"))
 ;
 ;        ; Return the atom holding the N(*,*) count
-;        (define (get-wild-wild) "foobar")
+;        (define (get-wild-wild) (Node "foobar"))
 ;
 ;     ; Methods on the class. To call these, quote the method name.
 ;     ; Example: (OBJ 'left-wildcard WORD) calls the

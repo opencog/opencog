@@ -15,20 +15,20 @@
 (use-modules (srfi srfi-1))
 
 ; ---------------------------------------------------------------------
+;
+; Example usage:
+; (define pma (add-pair-map pca))
+; (define pdi (add-pair-support-compute pma))
+; (pdi 'left-support (list (Word "the") (Word "a")))
 
-(define-public (add-pair-nap LLOBJ)
+(define-public (add-pair-map LLOBJ)
 "
   add-pair-map LLOBJ - Extend LLOBJ with ability to take vector
   differences.
 
 "
 	(let ((llobj LLOBJ)
-			(stars-obj (add-pair-stars LLOBJ))
-		)
-
-		(define (map-left FN LIST)
-			(FN LIST)
-		)
+			(stars-obj (add-pair-stars LLOBJ)))
 
 		; ---------------
 		; Expects LIST to a a scheme list of items of 'right-type
@@ -45,6 +45,13 @@
 				(append-map!
 					(lambda (item) (stars-obj 'right-stars ITEM))
 					LIST)))
+
+		; ---------------
+		(define (get-pair PAIR)
+		)
+		(define (map-left FN LIST)
+			(FN LIST)
+		)
 
 		; ---------------
 
