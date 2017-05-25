@@ -117,6 +117,7 @@
 ;              ((left-wildcard) get-left-wildcard)
 ;              ((right-wildcard) get-right-wildcard)
 ;              ((wild-wild) get-wild-wild)
+;              ((provides) (lambda (symb) #f))
 ;              (else (error "Bad method call on low-level API")))
 ;           args))))
 ;
