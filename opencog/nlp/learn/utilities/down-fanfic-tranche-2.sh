@@ -1,5 +1,6 @@
 #! /bin/bash
 # Download a bunch of fanfic.
+# These make up "tranche-2" of the English-learning raw source.
 
 ./process-epub.sh http://archiveofourown.org/downloads/Fa/FayJay/91885/The%20Student%20Prince.epub prince-
 ./process-epub.sh http://archiveofourown.org/downloads/Am/Ames78/10560708/Anger%20Management.epub anger-

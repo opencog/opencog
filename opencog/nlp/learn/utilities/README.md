@@ -40,6 +40,18 @@ word. Therefore, the words are sampled according to a formula and their
 frequency is also noted. These values are again plotted to a graph.
 
 
-chapters.sh
------------
-Split Project Gutenberg files into pieces.
+chapters.sh, chapters-epub.sh
+-----------------------------
+Split Project Gutenberg files (and other text files) into pieces.
+
+
+down-guten.sh
+-------------
+Download and prep for processing a bunch of Project gutenberg
+books. These form teh bulk of the English "tranche-1" series.
+
+down-fanfic.sh
+--------------
+Download approx 150 fanfic titles from "Archive of Our Own", and
+split them up into digestible chapters.  This was used to create
+the "tranche-2" of the langauge-learning experiment for English

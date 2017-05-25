@@ -1,3 +1,7 @@
+#
+# Download and prep a bunch of texts from project gutenberg,
+# and prep them for language-learning for English.  These titles
+# comprise most of the "tranche-1" series of parsed texts.
 
 wget http://www.gutenberg.org/files/76/76-0.txt
 ./chapters.sh 76-0.txt huck-finn-
