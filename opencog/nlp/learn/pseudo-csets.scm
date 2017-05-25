@@ -144,6 +144,7 @@
 				((wild-wild) get-wild-wild)
 				((all-pairs) get-all-csets)
 				((fetch-pairs) fetch-pseudo-csets)
+				((provides) (lambda (symb) #f))
 				(else (error "Bad method call on psuedo-cset:" message)))
 			args)))
 )

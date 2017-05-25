@@ -99,7 +99,7 @@
 				(get-left-union TUPLE)))
 
 		; Same as above, but for the right
-		(define (right-star-union LIST)
+		(define (right-star-union TUPLE)
 			(map
 				(lambda (righty) (get-right-lopr-tuple righty TUPLE))
 				(get-right-union TUPLE)))
@@ -120,6 +120,16 @@
 					TUPLE)))
 
 		; ---------------
+		; Return a pointer to each method that this class overloads.
+		(define (provides meth)
+			(case meth
+				((left-stars) left-star-union)
+				((right-stars) right-star-union)
+				((item-pair) get-pair)
+				((pair-count) get-func-count)
+				(else #f)))
+
+		; ---------------
 
 	; Methods on this class.
 	(lambda (message . args)
@@ -128,6 +138,7 @@
 			((right-stars)     (apply right-star-union args))
 			((item-pair)       (apply get-pair args))
 			((pair-count)      (apply get-func-count args))
+			((provides)        (apply provides args))
 			(else (apply llobj (cons message args))))
 		)))
 

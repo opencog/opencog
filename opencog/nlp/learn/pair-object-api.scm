@@ -204,16 +204,35 @@
 					))
 				(cog-incoming-by-type ITEM pair-type)))
 
+		;-------------------------------------------
+		; Provide default methods, but only if the low-level
+		; object does not already provide them.
+		(let ((f-left-basis get-left-basis)
+				(f-right-basis get-right-basis)
+				(f-left-stars get-left-stars)
+				(f-right-stars get-right-stars))
 
-	; Methods on this class.
-	(lambda (message . args)
-		(case message
-			((left-basis)      (get-left-basis))
-			((right-basis)     (get-right-basis))
-			((left-stars)      (apply get-left-stars args))
-			((right-stars)     (apply get-right-stars args))
-			(else (apply llobj (cons message args))))
-		)))
+			; Overload a function pointer,
+			; bot only if llobj provides that symbol.
+			(define (overload func-ptr symbol)
+				(define fp (llobj 'provides symbol))
+				(if fp (set! func-ptr fp)))
+
+			; Provide defaults, only if the base class does not.
+			(overload f-left-basis 'left-basis)
+			(overload f-right-basis 'right-basis)
+			(overload f-left-stars 'left-stars)
+			(overload f-right-stars 'right-stars)
+
+			; Methods on this class.
+			(lambda (message . args)
+				(case message
+					((left-basis)      (f-left-basis))
+					((right-basis)     (f-right-basis))
+					((left-stars)      (apply f-left-stars args))
+					((right-stars)     (apply f-right-stars args))
+					(else (apply llobj (cons message args))))
+			))))
 
 ; ---------------------------------------------------------------------
 ; ---------------------------------------------------------------------
