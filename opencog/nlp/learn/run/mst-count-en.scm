@@ -26,15 +26,11 @@
 ; Load up the word-pairs -- this can take over half an hour!
 (display "Fetch all word-pairs. This may over half-an-hour!\n")
 
-(define (fetch-any-pairs)
-	(define any-pair-pred (LinkGrammarRelationshipNode "ANY"))
-	(define start-time (current-time))
-	(fetch-incoming-set any-pair-pred)
-	(format #t "Elapsed time to load ANY-link pairs: ~A secs\n"
-		(- (current-time) start-time))
-)
-
-(fetch-any-pairs)
+; The object which will be providing pair-counts for us.
+; We can also do MST parsing with other kinds of pair-count objects,
+; for example, the clique-pairs, or the distance-pairs.
+(define pair-obj (make-any-link-api))
+(pair-obj 'fetch-pairs)
 
 ; Print the sql stats
 (sql-stats)
