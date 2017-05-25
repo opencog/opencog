@@ -32,12 +32,23 @@
 
 		; ---------------
 		; Return the set-union of all atoms that might be paired
-		; with one of the atoms from LIST on the right.
-		(define (get-left-union LIST)
+		; with one of the atoms from TUPLE on the right.
+		(define (get-left-union TUPLE)
 			(delete-duplicates!
 				(append-map!
 					(lambda (item) (map! gar (llobj 'left-stars item)))
-					LIST)))
+					TUPLE)))
+
+		; ---------------
+		; Given a TUPLE of items of 'right-type, this returns
+		; a tuple of low-level pairs of LEFTY and each righty
+		; in the TUPLE.  If such a pair does not exist, the
+		; returned tuple will contain an empty list at that locus.
+		(define (get-left-lopr-tuple LEFTY TUPLE)
+			(define prty (llobj 'pair-type))
+			(map
+				(lambda (rght) (cog-link prty LEFTY rght))
+				TUPLE))
 
 		; ---------------
 		; Expects TUPLE to be a scheme list of items of 'right-type.
@@ -49,9 +60,29 @@
 		; happen is if all items in the TUPLE had exactly the same
 		; left-wilds.  But this would be a very unusual thing, in the
 		; normal case.
+		;
+		; So, for example, if TUPLE is (list (Word "the") (Word "a"))
+		; This might return a list of say, 3 tuples:
+		;   (list
+		;      (list  ; Note left atoms are identical.
+		;          (ListLink (Word "foo") (Word "the"))
+		;          (ListLink (Word "foo") (Word "a")))
+		;      (list
+		;          '()  ; Note the pair bar:the does not exist
+		;          (ListLink (Word "bar") (Word "a")))
+		;      (list
+		;          (ListLink (Word "zed") (Word "the"))
+		;          '()))  ; Note the par zed-a does not exist.
+		;
+		; In the above, the union of the left support was {foo, bar, zed}
+		; and the intersection of the left support was just {foo}.  This
+		; will be the typical case: the intersection will be typically
+		; non-empty, and hethe union will typically be strictly alrger.
 
-		(define (left-star-union LIST)
-	)
+		(define (left-star-union TUPLE)
+			(map
+				(lambda (lefty) (get-left-lopr-tuple lefty TUPLE))
+				(get-left-union TUPLE)))
 
 		; Same as above, but for the right
 		(define (right-star-union LIST) #f)
