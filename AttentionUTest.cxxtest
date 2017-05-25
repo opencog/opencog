@@ -48,7 +48,8 @@ class AttentionUTest :  public CxxTest::TestSuite
                 _ab.set_sti(h, i*10);
             } 
             
-            HandleSeq hseq = _ab.getTopSTIValuedHandles();
+            HandleSeq hseq;
+            _ab.get_handle_set_in_attentional_focus(std::back_inserter(hseq));
            
             TS_ASSERT_EQUALS(_as.get_size(), 50);
             TS_ASSERT_EQUALS(hseq.size(), 10);
