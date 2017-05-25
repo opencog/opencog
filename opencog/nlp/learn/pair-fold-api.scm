@@ -20,7 +20,7 @@
 ; (define (subtract TUPLE)  (- (first TUPLE) (second TUPLE)))
 ; (define pma (add-tuple-math pca subtract))
 ; (define pdi (add-pair-support-compute pma))
-; (pdi 'left-support (list (Word "the") (Word "a")))
+; (pdi 'right-support (list (Word "the") (Word "a")))
 
 (define-public (add-tuple-math LLOBJ FUNC)
 "
@@ -29,7 +29,7 @@
   the 'pair-count method is invoked.
 "
 	(let ((llobj LLOBJ)
-			(stars-obj (add-pair-stars LLOBJ))
+			(star-obj (add-pair-stars LLOBJ))
 			(sum-func FUNC))
 
 		; ---------------
@@ -38,13 +38,13 @@
 		(define (get-left-union TUPLE)
 			(delete-duplicates!
 				(append-map!
-					(lambda (item) (map! gar (llobj 'left-stars item)))
+					(lambda (item) (map! gar (star-obj 'left-stars item)))
 					TUPLE)))
 
 		(define (get-right-union TUPLE)
 			(delete-duplicates!
 				(append-map!
-					(lambda (item) (map! gdr (llobj 'right-stars item)))
+					(lambda (item) (map! gdr (star-obj 'right-stars item)))
 					TUPLE)))
 
 		; ---------------

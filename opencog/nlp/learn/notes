@@ -6226,3 +6226,9 @@ Done storing 4886362 pair MI's in 6903 secs
 
 =======================================
 
+OK, so:
+pca is the pseudo-cset-api
+pma adds special stars to it
+pdi will provide utilities
+   pdi takes pma and wraps it with default stars
+      default stars should see the pma under it.

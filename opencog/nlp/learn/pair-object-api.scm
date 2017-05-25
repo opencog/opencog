@@ -206,24 +206,17 @@
 				(cog-incoming-by-type ITEM pair-type)))
 
 		;-------------------------------------------
+		; Return default, only if llobj does not provide symbol
+		(define (overload symbol default)
+			(define fp (llobj 'provides symbol))
+			(if fp fp default))
+
 		; Provide default methods, but only if the low-level
 		; object does not already provide them.
-		(let ((f-left-basis get-left-basis)
-				(f-right-basis get-right-basis)
-				(f-left-stars get-left-stars)
-				(f-right-stars get-right-stars))
-
-			; Overload a function pointer,
-			; bot only if llobj provides that symbol.
-			(define (overload func-ptr symbol)
-				(define fp (llobj 'provides symbol))
-				(if fp (set! func-ptr fp)))
-
-			; Provide defaults, only if the base class does not.
-			(overload f-left-basis 'left-basis)
-			(overload f-right-basis 'right-basis)
-			(overload f-left-stars 'left-stars)
-			(overload f-right-stars 'right-stars)
+		(let ((f-left-basis (overload 'left-basis get-left-basis))
+				(f-right-basis (overload 'right-basis get-right-basis))
+				(f-left-stars (overload 'left-stars get-left-stars))
+				(f-right-stars (overload 'right-stars get-right-stars)))
 
 			; Methods on this class.
 			(lambda (message . args)
