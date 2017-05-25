@@ -164,13 +164,18 @@
 			r-basis)
 
 		; Return a list of all pairs with the ITEM on the right side,
-		; and an object of type (LLOBJ 'left-type) on the left. The
-		; pairs are just ListLink's (of arity two). That is, it returns
-		; a list of atoms of the form
+		; and an object of type (LLOBJ 'left-type) on the left.
+		; The point of this function is to find and return the complete
+		; wild-card set (*,y) = {(x,y) | there-exists pair (x,y) for some x}
+		; The pairs are Links of type 'pair-type, of arity two. That is,
+		; this returns a list of atoms of the form
 		;
-		;    ListLink
-		;         (LLOBJ 'left-type)
-		;         ITEM
+		;    (cog-link (LLOBJ 'pair-type)
+		;         (cog-atom (LLOBJ 'left-type) ...)
+		;         ITEM)
+		;
+		; ITEM should be an atom of (LLOBJ 'right-type); if it isn't,
+		; the the behavior is undefined.
 		;
 		(define (get-left-stars ITEM)
 			(define want-type (LLOBJ 'left-type))

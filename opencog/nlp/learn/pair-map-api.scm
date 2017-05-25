@@ -23,16 +23,36 @@
 
 "
 	(let ((llobj LLOBJ)
+			(stars-obj (add-pair-stars LLOBJ))
 		)
 
-		(define (foo ITEM)
-				)
+		(define (map-left FN LIST)
+			(FN LIST)
+		)
 
+		; ---------------
+		; Expects LIST to a a scheme list of items of 'right-type
+		; Returns a set-union of the left-stars of all of tehse items.
+		(define (left-star-union LIST)
+			(delete-duplicates!
+				(append-map!
+					(lambda (item) (stars-obj 'left-stars ITEM))
+					LIST)))
+
+		; Same as above, but for the right
+		(define (right-star-union LIST)
+			(delete-duplicates!
+				(append-map!
+					(lambda (item) (stars-obj 'right-stars ITEM))
+					LIST)))
+
+		; ---------------
 
 	; Methods on this class.
 	(lambda (message . args)
 		(case message
-			((foo)     (apply foo args))
+			((left-stars)      (apply left-star-union args))
+			((right-stars)     (apply right-star-union args))
 			(else (apply llobj (cons message args))))
 		)))
 
