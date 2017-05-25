@@ -178,8 +178,8 @@
 		; the the behavior is undefined.
 		;
 		(define (get-left-stars ITEM)
-			(define want-type (LLOBJ 'left-type))
-			(define pair-type (LLOBJ 'pair-type))
+			(define want-type (llobj 'left-type))
+			(define pair-type (llobj 'pair-type))
 			(filter
 				(lambda (lnk)
 					(define oset (cog-outgoing-set lnk))
@@ -192,8 +192,8 @@
 
 		; Same as above, but on the right.
 		(define (get-right-stars ITEM)
-			(define want-type (LLOBJ 'right-type))
-			(define pair-type (LLOBJ 'pair-type))
+			(define want-type (llobj 'right-type))
+			(define pair-type (llobj 'pair-type))
 			(filter
 				(lambda (lnk)
 					(define oset (cog-outgoing-set lnk))

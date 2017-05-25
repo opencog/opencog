@@ -31,20 +31,30 @@
 			(stars-obj (add-pair-stars LLOBJ)))
 
 		; ---------------
-		; Expects LIST to a a scheme list of items of 'right-type
-		; Returns a set-union of the left-stars of all of tehse items.
-		(define (left-star-union LIST)
+		; Return the set-union of all atoms that might be paired
+		; with one of the atoms from LIST on the right.
+		(define (get-left-union LIST)
 			(delete-duplicates!
 				(append-map!
-					(lambda (item) (stars-obj 'left-stars ITEM))
+					(lambda (item) (map! gar (llobj 'left-stars item)))
 					LIST)))
 
+		; ---------------
+		; Expects TUPLE to be a scheme list of items of 'right-type.
+		; Returns a list of tuples of the left-stars appropriae for
+		; that TUPLE.  The left-star tuples are "aligned", so that
+		; that within one tuple, all pairs have exactly the same
+		; left side.  If such a pair does not exist, the empty list
+		; stands in its place.  The only case where this would not
+		; happen is if all items in the TUPLE had exactly the same
+		; left-wilds.  But this would be a very unusual thing, in the
+		; normal case.
+
+		(define (left-star-union LIST)
+	)
+
 		; Same as above, but for the right
-		(define (right-star-union LIST)
-			(delete-duplicates!
-				(append-map!
-					(lambda (item) (stars-obj 'right-stars ITEM))
-					LIST)))
+		(define (right-star-union LIST) #f)
 
 		; ---------------
 		(define (get-pair PAIR)
