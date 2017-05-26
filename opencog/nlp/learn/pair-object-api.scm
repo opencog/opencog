@@ -152,11 +152,35 @@
 
 		; Return a list of all atoms of TYPE with appear in a Link
 		; of type 'pair-type
-		(define (get-basis TYPE)
+		(define (get-basis TYPE PAIR-FILT)
 			(define pair-type (llobj 'pair-type))
 			(remove!
-				(lambda (item) (null? (cog-incoming-by-type item)))
+				(lambda (item)
+					(null? (PAIR-FILT item (cog-incoming-by-type item pair-type))))
 				(cog-get-atoms TYPE)))
+
+		; Given a left-item, and a list of pairs, return only those
+		; pairs in which the left-item really is on the left, and
+		; the correct type is on the right.
+		(define (good-right-pairs left-item pair-list)
+			(define right-type (llobj 'right-type))
+			(filter!
+				(lambda (pr)
+					(and
+						(eq? 2 (cog-arity pr))
+						(eq? left-item (gar pr))
+						(eq? right-type (cog-type (gdr pr)))))
+				pair-list))
+
+		(define (good-left-pairs right-item pair-list)
+			(define left-type (llobj 'left-type))
+			(filter!
+				(lambda (pr)
+					(and
+						(eq? 2 (cog-arity pr))
+						(eq? left-type (cog-type (gar pr)))
+						(eq? right-item (gdr pr))))
+				pair-list))
 
 		; Return a list of all of the atoms that might ever appear on
 		; the left-hand-side of a pair.  This is the set of all possible
@@ -164,12 +188,12 @@
 		;
 		(define (get-left-basis)
 			(if (null? l-basis)
-				(set! l-basis (get-basis (llobj 'left-type))))
+				(set! l-basis (get-basis (llobj 'left-type) good-right-type)))
 			l-basis)
 
 		(define (get-right-basis)
 			(if (null? r-basis)
-				(set! r-basis (get-basis (llobj 'right-type))))
+				(set! r-basis (get-basis (llobj 'right-type) good-left-type)))
 			r-basis)
 
 		; Return a list of all pairs with the ITEM on the right side,
