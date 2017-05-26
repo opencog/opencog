@@ -167,11 +167,14 @@ void PatternMiner::growPatternsDepthFirstTask(unsigned int thread_index)
         Handle cur_link;
 
         if (only_mine_patterns_start_from_white_list)
+        {
             cur_link = allLinksContainWhiteKeywords[t_cur_index];
+            havenotProcessedWhiteKeywordLinks.erase(havenotProcessedWhiteKeywordLinks.find(cur_link));
+
+        }
         else
             cur_link = allLinks[t_cur_index];
 
-        havenotProcessedWhiteKeywordLinks.erase(havenotProcessedWhiteKeywordLinks.find(cur_link));
 
         if (THREAD_NUM > 1)
             readNextLinkLock.unlock();
