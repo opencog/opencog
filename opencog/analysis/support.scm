@@ -1,5 +1,5 @@
 ;
-; pair-support.scm
+; support.scm
 ;
 ; Define object-oriented class API's for computing the supporting set
 ; the the lp-norms for the left and right side of pairs.
@@ -9,7 +9,7 @@
 ; ---------------------------------------------------------------------
 ; OVERVIEW
 ; --------
-; See pair-object-api.scm for the overview.
+; See object-api.scm for the overview.  Or the README.md file.
 ; ---------------------------------------------------------------------
 
 (use-modules (srfi srfi-1))

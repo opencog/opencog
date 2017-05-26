@@ -1,5 +1,5 @@
 ;
-; pair-fold-api.scm
+; fold-api.scm
 ;
 ; Provides support for folding down tuples of pairs.
 ;
@@ -9,7 +9,7 @@
 ; OVERVIEW
 ; --------
 ; There is sometimes a need to take differences and sums of vectors,
-; or apply other kinds of transforms.  This provides eh API to do that.
+; or apply other kinds of transforms.  This provides the API to do that.
 ;
 ; So, for example, the add-pair-support-compute object adds methods
 ; to compute the length of a vector (the l_2 norm) or more generally

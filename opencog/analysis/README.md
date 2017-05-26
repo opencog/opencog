@@ -43,7 +43,7 @@ and provide various reasonable default behaviors for computing the
 various interesting things. If you don't like some particular default,
 you can always overload that particular method to do something
 customized. This OO programming style is called "parametric
-polymorphism". 
+polymorphism".
 
 https://en.wikipedia.org/wiki/Parametric_polymorphism
 https://en.wikipedia.org/wiki/Generic_programming
@@ -80,16 +80,51 @@ The `add-pair-stars` class provides methods to fetch the set
 `left-support-set`. Likewise for the right-support.
 Another method returns the wild-card pairs: that is, the set
 `(x,*) = {(x,y) | x is fixed and y is any atom in the pair}`
-This is called the `right-star` because the right-side of the
-pair is a wild-card.  These methods are useful for iterating
-over all rows and columns of the correlation matrix.
+This is called the `right-star` because the right-side of the pair is
+a wild-card.  These methods are useful for iterating over all rows and
+columns of the correlation matrix.
 
-The `add-pair-support-compute` class provides methods to compute
+The `add-pair-support-compute` class provides methods to compute the
+partial sums `N(*,y)` and `N(x,*)`. It also provides methods that
+compute how many non-zero entries there are in each row or column.
+It provides methods for the "length" of a column: that is,
+`len(y) = sqrt(sum_x N^2 (x,y))` and more generally the l_p norm.
 
+The `add-pair-mi-compute` class provides methods to compute the entropy
+and mutual information of rows and columns: for example, the column
+entropy (or `left-entropy`) `h_left(y) = -sum_x P(x,y) log_2 P(x,y)`
+It also returns the far more interesting 'fractional entropy', given
+by 'H_left(y) = h_left(y) / P(*,y)`.  Along similar lines, there is
+also the mutual information `mi_left(y) = sum_x P(x,y) log_2 MI(x,y)`
+where `MI(x,y) = -log_2 P(x,y) / P(x,*) P(*,y)` is the fractional pair
+MI.
 
-xxxxxx
-  We also need to compute entropies and
-mutual information, which can be infered from these frequencies.
-We also can compute cosine-similairy and other metrics of similarity,
-dervied solely from the observed frequency counts.
+The `add-total-entropy-compute` class provides methods to compute the
+total entropy: `H_tot = sum_x sum_y p(x,y) log_2 p(x,y)` as well as
+the left and right entropies: `H_left = sum_y p(*,y) log_2 p(*,y)`
+and v.v.
+
+The `add-pair-cosine-compute` class provides methods for taking the
+vector product of two different rows or columns, viz. the product
+`left-prod(y,z) = sum_x N(x,y) N(x,z)` and likewise for the right.
+The cosine similarity is
+```
+   left-cosine(y,z) = left-prod(y,z) / (left-length(y) * left-length(z))
+```
+where
+```
+   left-length(y) = sqrt sum_x N(x,y) N(x,y)
+                  = sqrt left-prod(y,y)
+````
+The class also provides the Jaccard similarity
+```
+   left-jacc-sim(y,z) = sum_x min (N(x,y), N(x,z)) /
+            sum_x max (N(x,y), N(x,z))
+```
+
+The `add-tuple-math` class provides methods for applying aribitrary
+functions to arebitrary sets of rows or columns. The simplest examples
+include taking the sums and differences of columns, taking the
+element-by-element min or max of a set of columns, counting the number
+of entries that are simultaneously non-zero in sets of columns, etc.
 

@@ -1,5 +1,5 @@
 ;
-; pair-entropy.scm
+; entropy.scm
 ;
 ; Assorted objects for computing fractional entropies of pairs.
 ;
