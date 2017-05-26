@@ -168,7 +168,7 @@
 				(lambda (pr)
 					(and
 						(eq? 2 (cog-arity pr))
-						(eq? left-item (gar pr))
+						(equal? left-item (gar pr))
 						(eq? right-type (cog-type (gdr pr)))))
 				pair-list))
 
@@ -178,7 +178,7 @@
 				(lambda (pr)
 					(and
 						(eq? 2 (cog-arity pr))
-						(eq? left-type (cog-type (gar pr)))
+						(equal? left-type (cog-type (gar pr)))
 						(eq? right-item (gdr pr))))
 				pair-list))
 
