@@ -433,7 +433,7 @@
 
   WORDs must be WordNodes.
 "
-	(pseudo-cset-cosine-api 'right-cosine WORD-A WORD-B))
+	(pseudo-cset-cosine-api 'right-cosine WORD-A WORD-B)
 )
 
 ; ---------------------------------------------------------------------
@@ -469,7 +469,7 @@
     sum min(a,b) = sum_d min (N(a,d), N(b,d))
   with the sum ranging over the disjuncts (i.e. on the right).
 "
-	(pseudo-cset-cosine-api 'right-jaccard WORD-A WORD-B))
+	(pseudo-cset-cosine-api 'right-jaccard WORD-A WORD-B)
 )
 
 ; ---------------------------------------------------------------------
