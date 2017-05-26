@@ -150,18 +150,26 @@
 			(r-basis '())
 		)
 
+		; Return a list of all atoms of TYPE with appear in a Link
+		; of type 'pair-type
+		(define (get-basis TYPE)
+			(define pair-type (llobj 'pair-type))
+			(remove!
+				(lambda (item) (null? (cog-incoming-by-type item)))
+				(cog-get-atoms TYPE)))
+
 		; Return a list of all of the atoms that might ever appear on
 		; the left-hand-side of a pair.  This is the set of all possible
 		; items x from the pair (x,y) for any y.
 		;
 		(define (get-left-basis)
 			(if (null? l-basis)
-				(set! l-basis (cog-get-atoms (llobj 'left-type))))
+				(set! l-basis (get-basis (llobj 'left-type))))
 			l-basis)
 
 		(define (get-right-basis)
 			(if (null? r-basis)
-				(set! r-basis (cog-get-atoms (llobj 'right-type))))
+				(set! r-basis (get-basis (llobj 'right-type))))
 			r-basis)
 
 		; Return a list of all pairs with the ITEM on the right side,

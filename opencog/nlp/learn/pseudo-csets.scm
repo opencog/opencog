@@ -588,11 +588,11 @@
 ; (use-modules (opencog nlp) (opencog nlp learn))
 ; (sql-open "postgres:///en_pairs_mst?user=linas")
 ; (sql-open "postgres:///en_pairs_sim?user=linas")
-; (fetch-all-words)  <<< 132 secs
+; (fetch-all-words)  <<< 21 secs
 ; (length (get-all-words))
 ; 396262
 ; (define pca (make-pseudo-cset-api))
-; (pca 'fetch-pairs)  <<< 789 secs
+; (pca 'fetch-pairs)  <<< 295 secs
 ; (define ac (get-all-cset-words))
 ; (length ac)
 ; 49423  (now 37413 in en_pairs_sim)

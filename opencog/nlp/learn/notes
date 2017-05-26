@@ -6240,3 +6240,11 @@ pdi will provide utilities
 total 15420+7168 -256 = 22588 - 256 = 22332  which is what union reports...
 unions 22260 < so wtf is this? oh 72 obse are identical!
 256 interested!  sum = 22260+256 = 22516
+
+Hmmm. 
+-       (filter!
+-               (lambda (wrd)
+-                       (not (null? (get-cset-vec wrd))))
+-               WORD-LIST)
+
+(cog-incoming-by-type ITEM 'LgWordCset)
