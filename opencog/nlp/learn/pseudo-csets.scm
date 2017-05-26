@@ -539,33 +539,6 @@
 
 ; ---------------------------------------------------------------------
 
-(define-public (cset-support WORD-LIST)
-"
-  cset-support WORD-LIST - Return all of the disjuncts in use
-  in the space of all cset-vectors in the WORD-LIST.  Equivalently,
-  return all of the basis vectors in the space.  One disjunct is
-  just one basis element.  The length of this list is the total
-  dimension of the space.
-
-  Caution: this can take a very long time!  Last time, this took
-  3-4 hours to return a list of length 200K for 430K observations
-  distributed across 30K words.
-
-  For practical use, use `(get-all-disjuncts)` below.
-"
-	(define all-csets
-		(append-map!
-			(lambda (wrd) (get-cset-vec wrd))
-			WORD-LIST))
-
-	(delete-duplicates!
-		(map!
-			(lambda (cset) (cset-get-disjunct cset))
-			all-csets))
-)
-
-; ---------------------------------------------------------------------
-
 ; return a list of all atoms of TYPE
 (define (get-all-type TYPE)
 	(define all-atoms '())
