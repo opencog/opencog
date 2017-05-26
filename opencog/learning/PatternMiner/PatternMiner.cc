@@ -1059,7 +1059,7 @@ void PatternMiner::OutPutFinalPatternsToFile(unsigned int n_gram)
     vector<HTreeNode*> &patternsForThisGram = finalPatternsForGram[n_gram-1];
 
 
-    resultFile << "Interesting Pattern Mining final results for " + toString(n_gram) + " gram patterns. Total pattern number: " + toString(patternsForThisGram.size()) << endl;
+    resultFile << ";Interesting Pattern Mining final results for " + toString(n_gram) + " gram patterns. Total pattern number: " + toString(patternsForThisGram.size()) << endl;
 
 
     for (HTreeNode* htreeNode : patternsForThisGram)
@@ -1067,17 +1067,21 @@ void PatternMiner::OutPutFinalPatternsToFile(unsigned int n_gram)
         if (htreeNode->count < thresholdFrequency)
             continue;
 
-        resultFile << endl << "Pattern: Frequency = " << toString(htreeNode->count);
+        resultFile << endl << ";Pattern: Frequency = " << toString(htreeNode->count);
 
         resultFile << ", SurprisingnessI = " << toString(htreeNode->nI_Surprisingness);
 
         resultFile << ", SurprisingnessII = " << toString(htreeNode->nII_Surprisingness);
 
-
         resultFile << endl;
 
-        resultFile << unifiedPatternToKeyString(htreeNode->pattern)<< endl;
+        // resultFile << unifiedPatternToKeyString(htreeNode->pattern)<< endl;
+        for (Handle link : htreeNode->pattern)
+        {
+            resultFile << link->toShortString();
+        }
 
+        resultFile << std::endl;
 
     }
 
@@ -1101,23 +1105,25 @@ void PatternMiner::OutPutFrequentPatternsToFile(unsigned int n_gram, vector < ve
     resultFile.open(fileName.c_str());
     vector<HTreeNode*> &patternsForThisGram = _patternsForGram[n_gram-1];
 
-    resultFile << "Frequent Pattern Mining results for " + toString(n_gram) + " gram patterns. Total pattern number: " + toString(patternsForThisGram.size()) << endl;
+    resultFile << ";Frequent Pattern Mining results for " + toString(n_gram) + " gram patterns. Total pattern number: " + toString(patternsForThisGram.size()) << endl;
 
     for (HTreeNode* htreeNode : patternsForThisGram)
     {
         if (htreeNode->count < thresholdFrequency)
             continue;
 
-        resultFile << endl << "Pattern: Frequency = " << toString(htreeNode->count);
+        resultFile << endl << ";Pattern: Frequency = " << toString(htreeNode->count);
 
         resultFile << endl;
 
-        resultFile << unifiedPatternToKeyString(htreeNode->pattern)<< endl;
+        // resultFile << unifiedPatternToKeyString(htreeNode->pattern)<< endl;
 
-//        for (Handle link : htreeNode->pattern)
-//        {
-//            resultFile << link->toShortString();
-//        }
+        for (Handle link : htreeNode->pattern)
+        {
+            resultFile << link->toShortString();
+        }
+
+        resultFile << std::endl;
     }
 
     resultFile.close();
@@ -1144,14 +1150,14 @@ void PatternMiner::OutPutInterestingPatternsToFile(vector<HTreeNode*> &patternsF
     resultFile.open(fileName.c_str());
 
 
-    resultFile << "Interesting Pattern Mining results for " + toString(n_gram) + " gram patterns. Total pattern number: " + toString(patternsForThisGram.size()) << endl;
+    resultFile << ";Interesting Pattern Mining results for " + toString(n_gram) + " gram patterns. Total pattern number: " + toString(patternsForThisGram.size()) << endl;
 
     for (HTreeNode* htreeNode : patternsForThisGram)
     {
         if (htreeNode->count < thresholdFrequency)
             continue;
 
-        resultFile << endl << "Pattern: Frequency = " << toString(htreeNode->count);
+        resultFile << endl << ";Pattern: Frequency = " << toString(htreeNode->count);
 
         if (surprisingness == 0)
             resultFile << " InteractionInformation = " << toString(htreeNode->interactionInformation);
@@ -1162,12 +1168,14 @@ void PatternMiner::OutPutInterestingPatternsToFile(vector<HTreeNode*> &patternsF
 
         resultFile << endl;
 
-        resultFile << unifiedPatternToKeyString(htreeNode->pattern)<< endl;
+        // resultFile << unifiedPatternToKeyString(htreeNode->pattern)<< endl;
 
-//        for (Handle link : htreeNode->pattern)
-//        {
-//            resultFile << link->toShortString();
-//        }
+        for (Handle link : htreeNode->pattern)
+        {
+            resultFile << link->toShortString();
+        }
+
+        resultFile << std::endl;
     }
 
     resultFile.close();
@@ -1234,14 +1242,14 @@ void PatternMiner::OutPutLowFrequencyHighSurprisingnessPatternsToFile(vector<HTr
 
     resultFile.open(fileName.c_str());
 
-    resultFile << "Interesting Pattern Mining results for " + toString(n_gram) + " gram patterns. Total pattern number: " + toString(resultPatterns.size()) << endl;
+    resultFile << ";Interesting Pattern Mining results for " + toString(n_gram) + " gram patterns. Total pattern number: " + toString(resultPatterns.size()) << endl;
 
-    resultFile << "This file contains the pattern with Frequency < 4, sort by Surprisingness_I"  << std::endl;
+    resultFile << ";This file contains the pattern with Frequency < 4, sort by Surprisingness_I"  << std::endl;
 
 
     for (HTreeNode* htreeNode : resultPatterns)
     {
-        resultFile << endl << "Pattern: Frequency = " << toString(htreeNode->count);
+        resultFile << endl << ";Pattern: Frequency = " << toString(htreeNode->count);
 
         resultFile << " SurprisingnessI = " << toString(htreeNode->nI_Surprisingness);
 
@@ -1249,8 +1257,14 @@ void PatternMiner::OutPutLowFrequencyHighSurprisingnessPatternsToFile(vector<HTr
 
         resultFile << endl;
 
-        resultFile << unifiedPatternToKeyString(htreeNode->pattern)<< endl;
+        // resultFile << unifiedPatternToKeyString(htreeNode->pattern)<< endl;
 
+        for (Handle link : htreeNode->pattern)
+        {
+            resultFile << link->toShortString();
+        }
+
+        resultFile << std::endl;
 
     }
 
@@ -1285,14 +1299,14 @@ void PatternMiner::OutPutHighFrequencyHighSurprisingnessPatternsToFile(vector<HT
     resultFile.open(fileName.c_str());
 
 
-    resultFile << "Interesting Pattern Mining results for " + toString(n_gram) + " gram patterns. Total pattern number: " + toString(resultPatterns.size()) << endl;
+    resultFile << ";Interesting Pattern Mining results for " + toString(n_gram) + " gram patterns. Total pattern number: " + toString(resultPatterns.size()) << endl;
 
-    resultFile << "This file contains the pattern with Frequency > " << min_frequency << ", sort by Surprisingness_I"  << std::endl;
+    resultFile << ";This file contains the pattern with Frequency > " << min_frequency << ", sort by Surprisingness_I"  << std::endl;
 
 
     for (HTreeNode* htreeNode : resultPatterns)
     {
-        resultFile << endl << "Pattern: Frequency = " << toString(htreeNode->count);
+        resultFile << endl << ";Pattern: Frequency = " << toString(htreeNode->count);
 
         resultFile << " SurprisingnessI = " << toString(htreeNode->nI_Surprisingness);
 
@@ -1300,7 +1314,14 @@ void PatternMiner::OutPutHighFrequencyHighSurprisingnessPatternsToFile(vector<HT
 
         resultFile << endl;
 
-        resultFile << unifiedPatternToKeyString(htreeNode->pattern)<< endl;
+        // resultFile << unifiedPatternToKeyString(htreeNode->pattern)<< endl;
+
+        for (Handle link : htreeNode->pattern)
+        {
+            resultFile << link->toShortString();
+        }
+
+        resultFile << std::endl;
 
 
     }
@@ -1340,9 +1361,9 @@ void PatternMiner::OutPutHighSurprisingILowSurprisingnessIIPatternsToFile(vector
     resultFile.open(fileName.c_str());
 
 
-    resultFile << "Interesting Pattern Mining results for " + toString(n_gram) + " gram patterns. Total pattern number: " + toString(resultPatterns.size()) << endl;
+    resultFile << ";Interesting Pattern Mining results for " + toString(n_gram) + " gram patterns. Total pattern number: " + toString(resultPatterns.size()) << endl;
 
-    resultFile << "This file contains the pattern with Surprising_I > " << min_surprisingness_I << ", and Surprisingness_II < "  << max_surprisingness_II << std::endl;
+    resultFile << ";This file contains the pattern with Surprising_I > " << min_surprisingness_I << ", and Surprisingness_II < "  << max_surprisingness_II << std::endl;
 
 
     // std::sort(resultPatterns.begin(), resultPatterns.end(),compareHTreeNodeBySurprisingness_I);
@@ -1357,7 +1378,14 @@ void PatternMiner::OutPutHighSurprisingILowSurprisingnessIIPatternsToFile(vector
 
         resultFile << endl;
 
-        resultFile << unifiedPatternToKeyString(htreeNode->pattern)<< endl;
+        // resultFile << unifiedPatternToKeyString(htreeNode->pattern)<< endl;
+
+        for (Handle link : htreeNode->pattern)
+        {
+            resultFile << link->toShortString();
+        }
+
+        resultFile << std::endl;
 
 
     }
@@ -3076,6 +3104,60 @@ void PatternMiner::selectSubsetFromCorpus(vector<string>& topics, unsigned int g
     _selectSubsetFromCorpus(topics,gram, if_contian_logic);
 }
 
+/*
+void PatternMiner::selectSubsetForDBpedia()
+{
+    set<Handle> subsetLinks;
+    Handle orLink;
+    HandleSeq orLinks;
+    originalAtomSpace->get_handles_by_type(back_inserter(orLinks), OR_LINK);
+    orLink = orLinks[0];
+
+    Handle newPredicate = originalAtomSpace->add_node(PREDICATE_NODE, "position");
+
+    string titles[] = {"president","chairman","vicePresident","primeMinister","vicePrimeMinister"};
+    string orgs[] = {"Institute", "University", "Congress", "College"};
+
+    HandleSeq allKeyPeople = orLink->getOutgoingSet();
+    for (Handle h : allKeyPeople)
+    {
+        HandleSeq listLinks = h->getIncomingSet();
+        for (Handle l : listLinks)
+        {
+            HandleSeq evals = l->getIncomingSet();
+
+            for (Handle eval : evals)
+            {
+
+                if (isIgnoredContent(predicateStr))
+                    continue;
+
+                Handle valueNode = l->getOutgoingAtom(1);
+
+                Handle predicate = eval->getOutgoingAtom(0);
+                string predicateStr = predicate->getName();
+                for (string title : titles)
+                {
+                    if (predicateStr == title)
+                    {
+                        if ()
+                        Handle titlelistLink = originalAtomSpace->add_link(LIST_LINK, valueNode, predicate);
+                        originalAtomSpace->add_link(EVALUATION_LINK, newPredicate, titlelistLink);
+                        originalAtomSpace->remove_atom(eval);
+                        continue;
+                    }
+                }
+
+                string valueStr = valueNode->getName();
+                if (valueStr.find_last_of())
+            }
+        }
+
+    }
+
+}
+*/
+
 std::string PatternMiner::Link2keyString(Handle& h, std::string indent, const AtomSpace *atomspace)
 {
     if (atomspace == 0)
@@ -3549,6 +3631,8 @@ void PatternMiner::_selectSubsetFromCorpus(vector<string>& subsetKeywords, unsig
 
     findAllLinksContainKeyWords(subsetKeywords, max_connection, logic_contain, allSubsetLinks);
 
+    std::cout << "\n " << allSubsetLinks.size() << " Links found! Writing to file ..."  << std::endl ;
+
     ofstream subsetFile;
 
     string fileName = "SubSet" + topicsStr + ".scm";
@@ -3568,7 +3652,7 @@ void PatternMiner::_selectSubsetFromCorpus(vector<string>& subsetKeywords, unsig
 
     subsetFile.close();
 
-    std::cout << "\nDone! Subset size: " << allSubsetLinks.size() << " Links in total. The subset has been written to file:  " << fileName << std::endl ;
+    std::cout << "\nDone! The subset has been written to file:  " << fileName << std::endl ;
 }
 
 // recursively function

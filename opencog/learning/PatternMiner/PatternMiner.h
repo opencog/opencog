@@ -403,6 +403,8 @@ public:
 
     void selectSubsetFromCorpus(vector<string> &topics, unsigned int gram, bool if_contian_logic = true);
 
+    // void selectSubsetForDBpedia();
+
     vector<HTreeNode*>&  getFinalPatternsForGram(unsigned int gram){return finalPatternsForGram[gram - 1];}
 
     // only load the frequent pattern result file
