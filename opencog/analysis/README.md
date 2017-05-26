@@ -84,6 +84,29 @@ This is called the `right-star` because the right-side of the pair is
 a wild-card.  These methods are useful for iterating over all rows and
 columns of the correlation matrix.
 
+The `make-compute-count` class provides methods to compute the partial
+sums `N(*,y)` and `N(x,*)` and cache the resulting values on atoms where
+they can be quickly retreived. The location of the cached values are
+exactly where they can be found by the `add-pair-count-api`, above.
+
+The `make-compute-freq` class provides methods to compute and cache
+the frequencies `p(x,y)`, `p(*,y)` and `p(x,*)`.  These are cached
+exactly where the `add-pair-freq-api` class, above, can find them.
+
+The `make-batch-mi` class provides methods to compute the fractional
+mutual information of all pairs, namely the value
+```
+    MI(x,y) = -log_2 P(x,y) / P(x,*) P(*,y)
+```
+
+The `batch-all-pair-mi` class is a convenience class that wraps up all
+three classes above, and unleashes them on a dataset: first computing
+the row and column partial counts, then computing the frequencies, and
+then computing and caching the mutual information.  For large datasets,
+e.g. tens of millions of atoms, this can take hours to run.  Thus, for
+this reaso, the cached values are then saved to the currrently-open
+database, so that these results become available later.
+
 The `add-pair-support-compute` class provides methods to compute the
 partial sums `N(*,y)` and `N(x,*)`. It also provides methods that
 compute how many non-zero entries there are in each row or column.
