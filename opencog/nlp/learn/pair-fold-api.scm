@@ -77,10 +77,12 @@
 ; ---------------------------------------------------------------------
 
 (use-modules (srfi srfi-1))
+(use-modules (ice-9 optargs)) ; for define*-public
 
 ; ---------------------------------------------------------------------
 ;
-(define-public (add-tuple-math LLOBJ FUNC)
+(define-public (add-tuple-math LLOBJ FUNC
+	#:optional (GET-CNT (lambda (x) (LLOBJ 'pair-count x))))
 "
   add-tuple-math LLOBJ FUNC - Extend LLOBJ with ability to take
   tuples of items, and then call FUNC on that tuple, whenever
@@ -88,7 +90,9 @@
 "
 	(let ((llobj LLOBJ)
 			(star-obj (add-pair-stars LLOBJ))
-			(sum-func FUNC))
+			(sum-func FUNC)
+			(get-cnt GET-CNT)
+		)
 
 		; ---------------
 		; Return the set-union of all atoms that might be paired
@@ -174,8 +178,7 @@
 		(define (get-func-count TUPLE)
 			(sum-func
 				(map
-					(lambda (pr)
-						(if (null? pr) 0 (llobj 'pair-count pr)))
+					(lambda (pr) (if (null? pr) 0 (get-cnt pr)))
 					TUPLE)))
 
 		; ---------------
