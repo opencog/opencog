@@ -188,12 +188,12 @@
 		;
 		(define (get-left-basis)
 			(if (null? l-basis)
-				(set! l-basis (get-basis (llobj 'left-type) good-right-type)))
+				(set! l-basis (get-basis (llobj 'left-type) good-right-pairs)))
 			l-basis)
 
 		(define (get-right-basis)
 			(if (null? r-basis)
-				(set! r-basis (get-basis (llobj 'right-type) good-left-type)))
+				(set! r-basis (get-basis (llobj 'right-type) good-left-pairs)))
 			r-basis)
 
 		; Return a list of all pairs with the ITEM on the right side,
