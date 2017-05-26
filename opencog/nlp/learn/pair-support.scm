@@ -305,10 +305,10 @@
 
 ; ---------------------------------------------------------------------
 
-(define*-public (add-pair-math LLOBJ
+(define*-public (add-pair-math MSG LLOBJ
 	#:optional (GET-CNT (lambda (x) (LLOBJ 'pair-count x))))
 "
-  add-pair-math LLOBJ - Extend LLOBJ with methods to compute common
+  add-pair-math MSG LLOBJ - Extend LLOBJ with methods to compute common
   operations, such as vector sums, differences, unions, intersections,
   and min and max functions.
 
@@ -365,11 +365,31 @@
      (lambda (x) ((add-pair-freq-api LLOBJ) 'pair-freq x))
   Any function that takes a pair and returns a number is allowed.
 "
-	(let ((llobj LLOBJ)
-			(star-obj (add-pair-stars LLOBJ))
-			(supp-obj (add-pair-support-compute LLOBJ))
-			(get-cnt GET-CNT))
+	(define (minus TUPLE)  (- (first TUPLE) (second TUPLE)))
+	(define (plus TUPLE)   (+ (first TUPLE) (second TUPLE)))
+	(define (mintu TUPLE)  (min (first TUPLE) (second TUPLE)))
+	(define (maxtu TUPLE)  (max (first TUPLE) (second TUPLE)))
+	(define (cup TUPLE)
+		(if (or (< 0 (first TUPLE)) (< 0 (second TUPLE))) 1 0))
+	(define (cap TUPLE)
+		(if (and (< 0 (first TUPLE)) (< 0 (second TUPLE))) 1 0))
 
-	))
+	(let* ((llobj LLOBJ)
+			(get-cnt GET-CNT)
+			(minus-obj (add-tuple-math LLOBJ minus GET-CNT))
+			(plus-obj  (add-tuple-math LLOBJ plus GET-CNT))
+			(min-obj   (add-tuple-math LLOBJ mintu GET-CNT))
+			(max-obj   (add-tuple-math LLOBJ maxtu GET-CNT))
+			(cup-obj   (add-tuple-math LLOBJ cup GET-CNT))
+			(cap-obj   (add-tuple-math LLOBJ cap GET-CNT))
+		)
+
+	; -------------
+	; Methods on this class.
+	(lambda (message . args)
+		(case message
+			((left-sum)    (apply compute-left-sum args))
+			(else (apply llobj (cons message args))))
+		)))
 
 ; ---------------------------------------------------------------------

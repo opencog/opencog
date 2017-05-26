@@ -46,7 +46,7 @@
 ; function:
 ;
 ;    (define (intersect TUPLE)
-;       (if (or (eqv? 0 (first TUPLE)) (eqv? 0 (second TUPLE))) 0 1))
+;       (if (and (< 0 (abs (first TUPLE))) (< 0 (abs (second TUPLE)))) 1 0))
 ;
 ; then
 ;
@@ -59,7 +59,7 @@
 ; disjuncts are used, between the two:
 ;
 ;    (define (union TUPLE)
-;        (if (and (eqv? 0 (first TUPLE)) (eqv? 0 (second TUPLE))) 0 1))
+;       (if (or (< 0 (abs (first TUPLE))) (< 0 (abs (second TUPLE)))) 1 0))
 ;
 ; then
 ;
@@ -69,9 +69,6 @@
 ;
 ; returns the number of disjuncts that appear in the word "the" or in
 ; the word "a".
-;
-; These examples are useful enough in the general case, that they are
-; implemented in standard functions in the add-pair-math class.
 ;
 ; The function provided to add-tuple-math can be any tuple. i.e. can
 ; take any arbitrary list.  The only constraint is that all elements of
