@@ -10,18 +10,76 @@
 ; --------
 ; There is sometimes a need to take differences and sums of vectors,
 ; or apply other kinds of transforms.  This provides eh API to do that.
+;
+; So, for example, the add-pair-support-compute object adds methods
+; to compute the length of a vector (the l_2 norm) or more generally
+; the l_p norm.  Suppose, instead, we wanted to take the length of
+; the difference of two vectors? That is, length(A-B)? How can we do
+; that?  This class provides a generic way of doing this.
+;
+; Suppose that some pair object is providing the vectors. Any of
+; the classes make-pseudo-cset-api, make-any-link-api,
+; make-clique-pair-api, etc. will do. To take the difference
+; of two vectors, define the function
+;
+;     (define (subtract TUPLE)  (- (first TUPLE) (second TUPLE)))
+;
+; which just takes the numeric difference of a list of two numbers.
+; For example: (subtract (list 7 2)) returns 5.  This can be used to
+; subtract vectors, like so:
+;
+;      (define vecty (make-pseudo-cset-api)
+;      (define subby (add-tuple-math vecty subtract))
+;      (define normy (add-pair-support-compute subby))
+;
+; The length of the difference of two vectors can then be computed as
+; so:
+;      (normy 'right-length (list (Word "the") (Word "a")))
+;
+; which will take the disjunct-vectors for the two words "the" and "a",
+; treating each disjunct as a basis element, take thier difference, and
+; return the length (the root-mean-square of the difference of the
+; counts).
+;
+; There are other possibilities.  To compute the number of disjuncts
+; that these two words have in common, define a set-intersection
+; function:
+;
+;    (define (intersect TUPLE)
+;       (if (or (eqv? 0 (first TUPLE)) (eqv? 0 (second TUPLE))) 0 1))
+;
+; then
+;
+;      (define isect (add-tuple-math vecty intersect))
+;      (define secty (add-pair-support-compute isect))
+;      (secty 'right-count (list (Word "the") (Word "a")))
+;
+; will return how many disjuncts there are shared, in common, with both
+; of these words.  Similarly, the set union will count how many
+; disjuncts are used, between the two:
+;
+;    (define (union TUPLE)
+;        (if (and (eqv? 0 (first TUPLE)) (eqv? 0 (second TUPLE))) 0 1))
+;
+; then
+;
+;      (define youny (add-tuple-math vecty union))
+;      (define uniny (add-pair-support-compute youny))
+;      (uniny 'right-count (list (Word "the") (Word "a")))
+;
+; returns the number of disjuncts that appear in the word "the" or in
+; the word "a".
+;
+; The function provided to add-tuple-math can be any tuple. i.e. can
+; take any arbitrary list.  The only constraint is that all elements of
+; the list must all be items associated with the same vector.
+;
 ; ---------------------------------------------------------------------
 
 (use-modules (srfi srfi-1))
 
 ; ---------------------------------------------------------------------
 ;
-; Example usage:
-; (define (subtract TUPLE)  (- (first TUPLE) (second TUPLE)))
-; (define pma (add-tuple-math pca subtract))
-; (define pdi (add-pair-support-compute pma))
-; (pdi 'right-support (list (Word "the") (Word "a")))
-
 (define-public (add-tuple-math LLOBJ FUNC)
 "
   add-tuple-math LLOBJ FUNC - Extend LLOBJ with ability to take

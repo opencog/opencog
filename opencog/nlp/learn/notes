@@ -6232,3 +6232,11 @@ pma adds special stars to it
 pdi will provide utilities
    pdi takes pma and wraps it with default stars
       default stars should see the pma under it.
+
+15265 pos only
+
+15420 the all by itself
+ 7168 for "a"
+total 15420+7168 -256 = 22588 - 256 = 22332  which is what union reports...
+unions 22260 < so wtf is this? oh 72 obse are identical!
+256 interested!  sum = 22260+256 = 22516
