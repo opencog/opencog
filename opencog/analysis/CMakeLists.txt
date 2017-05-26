@@ -5,5 +5,5 @@ ADD_GUILE_MODULE (FILES
 	fold-api.scm
 	object-api.scm
 	support.scm
-	MODULE_DESTINATION "${DATADIR}/scm/opencog/nlp/analysis"
+	MODULE_DESTINATION "${DATADIR}/scm/opencog/analysis"
 )

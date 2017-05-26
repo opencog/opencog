@@ -78,6 +78,7 @@
 
 (use-modules (srfi srfi-1))
 (use-modules (ice-9 optargs)) ; for define*-public
+(use-modules (opencog))
 
 ; ---------------------------------------------------------------------
 ;
