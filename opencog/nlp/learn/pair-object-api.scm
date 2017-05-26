@@ -178,8 +178,8 @@
 				(lambda (pr)
 					(and
 						(eq? 2 (cog-arity pr))
-						(equal? left-type (cog-type (gar pr)))
-						(eq? right-item (gdr pr))))
+						(eq? left-type (cog-type (gar pr)))
+						(equal? right-item (gdr pr))))
 				pair-list))
 
 		; Return a list of all of the atoms that might ever appear on

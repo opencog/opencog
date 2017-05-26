@@ -6248,3 +6248,8 @@ Hmmm.
 -               WORD-LIST)
 
 (cog-incoming-by-type ITEM 'LgWordCset)
+
+ Error: do_store_single_atom: Maxiumum Link size is 330.
+ (/home/ubuntu/src/atomspace/opencog/persist/sql/multi-driver/SQLAtomStorage.cc:1202)
+Aborted
+
