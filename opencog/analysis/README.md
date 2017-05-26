@@ -17,6 +17,21 @@ counts and frequencies can be viewed as a sparse correlation matrix,
 and the goal here is to do all the typical things that one might do
 with such a matrix.  That's what the code in this directory does.
 
+The prototypical example is that of word-pairs. These are stored in the
+atomspace as
+```
+    EvaluationLink   (count=6789)
+        PredicateNode "word-pair"
+        ListLink
+            WordNode "foo"
+            WordNode "bar"
+```
+which indicates that the word-pair (foo,bar) was observed 6789 times.
+In the general, generic case, we might want to observe not just these
+`PredicateNode "word-pair"` relations, but maybe some other kinds of
+predicates. We are interested, perhaps, not just in `WordNode`'s but
+in relations between, say, `ConceptNodes` and `ContextLink`s.
+
 In order to perform some sort of generic analysis of the correlation
 of atoms, we need to somehow specify which pairs of atoms are
 the ones to be analyzed. This is done with a minimalist object-oriented
@@ -56,14 +71,25 @@ is defined, by default, to be `p(x,y) = N(x,y)/N(*,*)`.  The row and
 column sums are `p(x,*) = sum_y p(x,y)`.  By default, these total to
 one, as all good probabilities should: `1 = sum_x sum_y p(x,y)`.
 
+These `add-pair-*-api` classes simply provide methods to fetch these
+values, which are presumed to have been precomputed in some way. Several
+classes are provided to compute these.
+
+The `add-pair-stars` class provides methods to fetch the set
+`{x | the atom x occurs in some pair (x,y)}`.  This is called the
+`left-support-set`. Likewise for the right-support.
+Another method returns the wild-card pairs: that is, the set
+`(x,*) = {(x,y) | x is fixed and y is any atom in the pair}`
+This is called the `right-star` because the right-side of the
+pair is a wild-card.  These methods are useful for iterating
+over all rows and columns of the correlation matrix.
+
+The `add-pair-support-compute` class provides methods to compute
+
+
+xxxxxx
   We also need to compute entropies and
 mutual information, which can be infered from these frequencies.
 We also can compute cosine-similairy and other metrics of similarity,
 dervied solely from the observed frequency counts.
-
-All of these formulas are independent of the actual objects in the
-pairs.  Thus, it is useful to separae the various algorithms from
-the data that they operate on. Towards this end, this file defines
-some object-oriented OO API's for pairs, which the algos can assume,
-and the different types of pairs can implement.
 
