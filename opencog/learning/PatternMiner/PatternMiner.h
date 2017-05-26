@@ -171,6 +171,7 @@ protected:
     bool Enable_surprisingness;
 
     bool only_mine_patterns_start_from_white_list;
+    bool only_mine_patterns_start_from_white_list_contain;
 
     float atomspaceSizeFloat;
 
@@ -183,6 +184,7 @@ protected:
     vector<vector<vector<unsigned int>>> components_ngram[3];
 
     vector<Handle> allLinksContainWhiteKeywords;
+    set<Handle> havenotProcessedWhiteKeywordLinks;
 
    // [gram], this to avoid different threads happen to work on the same links.
    // each string is composed the handles of a group of fact links in the observingAtomSpace in the default hash order using std set
@@ -318,7 +320,7 @@ protected:
 
     OrderedHandleSet _getAllNonIgnoredLinksForGivenNode(Handle keywordNode, OrderedHandleSet& allSubsetLinks);
 
-    OrderedHandleSet _extendOneLinkForSubsetCorpus(OrderedHandleSet& allNewLinksLastGram, OrderedHandleSet& allSubsetLinks);
+    OrderedHandleSet _extendOneLinkForSubsetCorpus(OrderedHandleSet& allNewLinksLastGram, OrderedHandleSet& allSubsetLinks, set<Handle>& extractedNodes);
 
     // will write the subset to a scm file
     void _selectSubsetFromCorpus(vector<string>& subsetKeywords, unsigned int max_connection, bool logic_contain = true);
@@ -400,6 +402,8 @@ public:
     void runInterestingnessEvaluation();
 
     void selectSubsetFromCorpus(vector<string> &topics, unsigned int gram, bool if_contian_logic = true);
+
+    // void selectSubsetForDBpedia();
 
     vector<HTreeNode*>&  getFinalPatternsForGram(unsigned int gram){return finalPatternsForGram[gram - 1];}
 
