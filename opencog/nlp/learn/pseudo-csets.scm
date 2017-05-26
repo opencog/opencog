@@ -452,10 +452,7 @@
 
   WORDs must be WordNodes.
 "
-	(define deno (* (cset-vec-word-len WORD-A) (cset-vec-word-len WORD-B)))
-	(define prod (pseudo-cset-cosine-api 'right-product WORD-A WORD-B))
-
-	(if (eqv? 0.0 deno) 0.0 (/ prod deno))
+	(pseudo-cset-cosine-api 'right-cosine WORD-A WORD-B))
 )
 
 ; ---------------------------------------------------------------------
@@ -468,16 +465,16 @@
 	(* 2.0 (/ (real-part (acos SIM)) pi))
 )
 
-(define-public (cset-vec-cos-dist ITEM-A ITEM-B)
+(define-public (cset-vec-cos-dist WORD-A WORD-B)
 "
-  cset-vec-cos-dist ITEM-A ITEM-B - compute the pseudo-cset vector
-  cosine distance between ITEM-A and ITEM-B. The cosine distance
+  cset-vec-cos-dist WORD-A WORD-B - compute the pseudo-cset vector
+  cosine distance between WORD-A and WORD-B. The cosine distance
   is defined as dist = 2*arccos(cossim) / pi.  The cosine distance
   obeys the triangle inequality.
 
-  ITEMs can be either WordNodes or disjuncts (LgAnd of pseudo-connectors).
+  WORDs must be WordNodes.
 "
-	(get-angle (cset-vec-cosine ITEM-A ITEM-B))
+	(get-angle (cset-vec-cosine WORD-A WORD-B))
 )
 
 ; ---------------------------------------------------------------------

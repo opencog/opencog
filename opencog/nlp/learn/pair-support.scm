@@ -195,6 +195,14 @@
   and the right-product as
       right-prod(x,u) = sum_y N(x,y) N(u,y)
 
+  Similarly, we can define the left and right cosine angles as
+      left-cosine(y,z) = left-prod(y,z) /
+             (left-length(y) * left-length(z))
+  and likewise for the right side. Recall that the left-length is
+  defined as
+      left-length(y) = sqrt sum_x N(x,y) N(x,y)
+                     = sqrt left-prod(y,y)
+
   Here, the LLOBJ is expected to be an object, with valid
   counts associated with each pair. LLOBJ is expected to have
   working, functional methods for 'left-type and 'right-type
@@ -211,6 +219,7 @@
 "
 	(let ((llobj LLOBJ)
 			(star-obj (add-pair-stars LLOBJ))
+			(supp-obj (add-pair-support-compute LLOBJ))
 			(get-cnt GET-CNT))
 
 		; -------------
@@ -259,6 +268,23 @@
 				(star-obj 'right-stars ITEM-A)))
 
 		; -------------
+		; Return the cosine of the left-angle between ITEM-A and B.
+		; The cosine as defined above.
+		(define (compute-left-cosine ITEM-A ITEM-B)
+			(define prod (compute-left-product ITEM-A ITEM-B))
+			(define deno (*
+				(supp-obj 'left-length ITEM-A)
+				(supp-obj 'left-length ITEM-B)))
+			(if (eqv? 0.0 deno) 0.0 (/ prod deno)))
+
+		; As above, but for the right.
+		(define (compute-right-cosine ITEM-A ITEM-B)
+			(define prod (compute-right-product ITEM-A ITEM-B))
+			(define deno (*
+				(supp-obj 'right-length ITEM-A)
+				(supp-obj 'right-length ITEM-B)))
+			(if (eqv? 0.0 deno) 0.0 (/ prod deno)))
+
 
 	; -------------
 	; Methods on this class.
@@ -266,6 +292,8 @@
 		(case message
 			((left-product)    (apply compute-left-product args))
 			((right-product)   (apply compute-right-product args))
+			((left-cosine)     (apply compute-left-cosine args))
+			((right-cosine)    (apply compute-right-cosine args))
 			(else (apply llobj (cons message args))))
 		)))
 
