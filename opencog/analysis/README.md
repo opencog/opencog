@@ -32,7 +32,8 @@ In the general, generic case, we might want to observe not just these
 predicates. We are interested, perhaps, not just in `WordNode`'s but
 in relations between, say, `ConceptNodes` and `ContextLink`s.
 
-== Generic Programming
+Generic Programming
+-------------------
 In order to perform some sort of generic analysis of the correlation
 of atoms, we need to somehow specify which pairs of atoms are
 the ones to be analyzed. This is done with a minimalist object-oriented
@@ -56,7 +57,8 @@ software systems (such as scipy or Gnu Octave or tensorflow) could
 be used to perform the analysis.  Now that you've got the general
 idea... you can go do this!
 
-== Basic definitions
+Basic definitions
+-----------------
 Anyway, if you are willing to use scheme, here's what we've got,
 and some notation to go with it:
 
@@ -73,7 +75,8 @@ is defined, by default, to be `p(x,y) = N(x,y)/N(*,*)`.  The row and
 column sums are `p(x,*) = sum_y p(x,y)`.  By default, these total to
 one, as all good probabilities should: `1 = sum_x sum_y p(x,y)`.
 
-== Computing basic statistics
+Computing basic statistics
+--------------------------
 These `add-pair-*-api` classes simply provide methods to fetch these
 values, which are presumed to have been precomputed in some way. Several
 classes are provided to compute these.
@@ -110,7 +113,8 @@ e.g. tens of millions of atoms, this can take hours to run.  Thus, for
 this reaso, the cached values are then saved to the currrently-open
 database, so that these results become available later.
 
-== Computing support and entropy
+Computing support and entropy
+-----------------------------
 The `add-pair-support-compute` class provides methods to compute the
 partial sums `N(*,y)` and `N(x,*)`. It also provides methods that
 compute how many non-zero entries there are in each row or column.
@@ -131,7 +135,8 @@ total entropy: `H_tot = sum_x sum_y p(x,y) log_2 p(x,y)` as well as
 the left and right entropies: `H_left = sum_y p(*,y) log_2 p(*,y)`
 and v.v.
 
-== Computing similarity measures
+Computing similarity measures
+-----------------------------
 The `add-pair-cosine-compute` class provides methods for taking the
 vector product of two different rows or columns, viz. the product
 `left-prod(y,z) = sum_x N(x,y) N(x,z)` and likewise for the right.
@@ -155,4 +160,3 @@ functions to arebitrary sets of rows or columns. The simplest examples
 include taking the sums and differences of columns, taking the
 element-by-element min or max of a set of columns, counting the number
 of entries that are simultaneously non-zero in sets of columns, etc.
-
