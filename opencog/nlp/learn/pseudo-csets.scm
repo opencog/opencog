@@ -159,6 +159,7 @@
 (define pseudo-cset-mi-api (add-pair-mi-compute pseudo-cset-api))
 (define pseudo-cset-support-api (add-pair-support-compute pseudo-cset-api))
 (define pseudo-cset-cosine-api (add-pair-cosine-compute pseudo-cset-api))
+(define pseudo-cset-stars (add-pair-stars pseudo-cset-api))
 
 ; ---------------------------------------------------------------------
 ; ---------------------------------------------------------------------
@@ -245,6 +246,20 @@
 				(cog-name (cset-get-word cset))
 				(get-disjunct-string (cset-get-disjunct cset))))
 		LIST)
+)
+
+; ---------------------------------------------------------------------
+
+(define-public (get-all-disjuncts)
+"
+  get-all-disjuncts -- Return all of the disjuncts in the atomspace.
+  Caution: this performs almost no sanity checks, and so could
+  easily return junk, if there are other LgAnd's in the atomspace.
+
+  The sanity check would be to make sure that the LgAnd has the desired
+  form, i.e. consisting entirely of PseudoDisjuncts.
+"
+	(pseudo-cset-stars 'right-basis)
 )
 
 ; ---------------------------------------------------------------------
@@ -548,20 +563,6 @@
 	all-atoms
 )
 
-
-(define-public (get-all-disjuncts)
-"
-  get-all-disjuncts -- Return all of the disjuncts in the atomspace.
-  Caution: this performs almost no sanity checks, and so could
-  easily return junk, if there are other LgAnd's in the atomspace.
-
-  The sanity check would be to make sure that the LgAnd has the desired
-  form, i.e. consisting entirely of PseudoDisjuncts.
-"
-	(get-all-type 'LgAnd)
-)
-
-; ---------------------------------------------------------------------
 
 (define-public (get-all-csets)
 "
