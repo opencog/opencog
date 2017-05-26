@@ -168,7 +168,7 @@
 ; ---------------------------------------------------------------------
 ; A list of all words that have csets. (Not all of the words
 ; in the database got tagged with a cset)
-(define all-cset-words (filter-words-with-csets (get-all-words)))
+(define all-cset-words (get-all-cset-words))
 
 ; A list of all disjucnts (appearing in all csets)
 (define all-disjuncts (get-all-disjuncts))

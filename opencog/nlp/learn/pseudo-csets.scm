@@ -264,17 +264,12 @@
 
 ; ---------------------------------------------------------------------
 
-(define-public (filter-words-with-csets WORD-LIST)
+(define-public (get-all-cset-words)
 "
-  filter-words-with-csets WORD-LIST - Return the subset of
-  the WORD-LIST that has pseudo-csets on them.  This is useful,
-  because not all words in the dataset might have csets on them,
-  so far.
+  get-all-cset-words -- Return all of the words that appear in some
+  connector set.
 "
-	(filter!
-		(lambda (wrd)
-			(not (null? (get-cset-vec wrd))))
-		WORD-LIST)
+	(pseudo-cset-stars 'left-basis)
 )
 
 ; ---------------------------------------------------------------------
@@ -598,7 +593,7 @@
 ; 396262
 ; (define pca (make-pseudo-cset-api))
 ; (pca 'fetch-pairs)  <<< 789 secs
-; (define ac (filter-words-with-csets (get-all-words)))
+; (define ac (get-all-cset-words))
 ; (length ac)
 ; 49423  (now 37413 in en_pairs_sim)
 ; (define ad (get-all-disjuncts))

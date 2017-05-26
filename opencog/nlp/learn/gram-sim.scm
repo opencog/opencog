@@ -152,7 +152,7 @@
 ; (start-cogserver "opencog2.conf")
 ; (fetch-all-words)
 ; (fetch-pseudo-csets (get-all-words))
-; (define ac (filter-words-with-csets (get-all-words)))
+; (define ac (get-all-cset-words)))
 ; (length ac)
 ; 37413
 ; (define ad (get-all-disjuncts))
