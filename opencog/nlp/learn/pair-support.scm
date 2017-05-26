@@ -223,9 +223,18 @@
      (lambda (x) ((add-pair-freq-api LLOBJ) 'pair-freq x))
   Any function that takes a pair and returns a number is allowed.
 "
+
+	; Min and max of individual elements
+	(define (mintu TUPLE)  (min (first TUPLE) (second TUPLE)))
+	(define (maxtu TUPLE)  (max (first TUPLE) (second TUPLE)))
+
 	(let ((llobj LLOBJ)
 			(star-obj (add-pair-stars LLOBJ))
 			(supp-obj (add-pair-support-compute LLOBJ))
+			(min-obj  (add-pair-support-compute
+				(add-tuple-math LLOBJ mintu GET-CNT)))
+			(max-obj  (add-pair-support-compute
+				(add-tuple-math LLOBJ maxtu GET-CNT)))
 			(get-cnt GET-CNT))
 
 		; -------------
@@ -291,6 +300,20 @@
 				(supp-obj 'right-length ITEM-B)))
 			(if (eqv? 0.0 deno) 0.0 (/ prod deno)))
 
+		; -------------
+		; Return the left-jaccard distance
+		(define (compute-left-jaccard-dist ITEM-A ITEM-B)
+			(define left-min (min-obj 'left-count (list ITEM-A ITEM-B)))
+			(define left-max (max-obj 'left-count (list ITEM-A ITEM-B)))
+			(- 1.0 (/ left-min left-max))
+		)
+
+		; Return the right-jaccard distance
+		(define (compute-right-jaccard-dist ITEM-A ITEM-B)
+			(define right-min (min-obj 'right-count (list ITEM-A ITEM-B)))
+			(define right-max (max-obj 'right-count (list ITEM-A ITEM-B)))
+			(- 1.0 (/ right-min right-max))
+		)
 
 	; -------------
 	; Methods on this class.
@@ -300,6 +323,8 @@
 			((right-product)   (apply compute-right-product args))
 			((left-cosine)     (apply compute-left-cosine args))
 			((right-cosine)    (apply compute-right-cosine args))
+			((left-jaccard)    (apply compute-left-jaccard-dist args))
+			((right-jaccard)   (apply compute-right-jaccard-dist args))
 			(else (apply llobj (cons message args))))
 		)))
 
