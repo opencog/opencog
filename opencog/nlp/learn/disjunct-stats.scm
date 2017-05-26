@@ -11,6 +11,9 @@
 ; pictures, than anything else. Of course, this can be recycled for
 ; other datasets, too.
 ;
+; TODO: move this file to the lang-learn-diary directory. It does
+; not belong here, in the main repo
+;
 ; Copyright (c) 2017 Linas Vepstas
 ;
 
@@ -60,31 +63,26 @@
 ; item->count should be a function that, given an item, returns the
 ;      count or strength for that item. It should return 1 for simple
 ;      binning.
+;
+; LOWER is the left boundry of the left-most bin; all values less than
+;     this will go into the left-most bin.
+;
+; UPPER is the right boundry of the right-most bin; all values greater
+;     than this will go into the right-most bin.
 
-(define (bin-count ITEMS NBINS item->value item->count)
-	; Find the smallest in the list
-	(define min-value
-		(fold
-			(lambda (item min)
-				(define value (item->value item))
-				(if (< min value) min value))
-				10000000.0
-				ITEMS))
+(define (bin-count ITEMS NBINS item->value item->count
+         LOWER UPPER)
 
-	; Find the largest in the list
-	(define max-value
-		(fold
-			(lambda (item max)
-				(define value (item->value item))
-				(if (> max value) max value))
-				-10000000.0
-				ITEMS))
-
-	(define bin-width (/ (- max-value min-value) (- NBINS 1)))
+	(define bin-width (/ (- UPPER LOWER) NBINS))
 
 	; Given a value, find the corresponding bin number.
+	; min and max are 0 and NBINS-1
 	(define (value->bin val)
-		(inexact->exact (floor (/ (- val min-value) bin-width))))
+		(define bino
+			(inexact->exact (floor (/ (- val LOWER) bin-width))))
+		(if (< 0 bino)
+			(if (> NBINS bino) bino (- NBINS 1))
+			0))
 
 	(define bins (make-array 0 NBINS))
 	(define centers (make-array 0 NBINS))
@@ -100,24 +98,58 @@
 
 	; Store the centers of the bins
 	(array-index-map! centers
-		(lambda (i) (+ (* i bin-width) min-value)))
+		(lambda (i) (+ (* (+ i 0.5) bin-width) LOWER)))
 
 	(list centers bins)
 )
 
+; Find the smallest value in the list of ITEMS.
+; The item->value function returns the value, given the item.
+(define (min-value item->value ITEMS)
+	(fold
+		(lambda (item min)
+			(define value (item->value item))
+			(if (< min value) min value))
+		1e300
+		ITEMS))
+
+
+; Find the largest value in the list of ITEMS.
+; The item->value function returns the value, given the item.
+(define (max-value item->value ITEMS)
+	(fold
+		(lambda (item max)
+			(define value (item->value item))
+			(if (> max value) max value))
+		-1e300
+		ITEMS))
+
 ; Just use the simplest binning
-(define (bin-count-simple scored-items nbins)
+(define* (bin-count-simple scored-items nbins #:optional
+	; default left andright bounds
+	(min-val (min-value first scored-items))
+	(max-val (max-value first scored-items)))
+
 	; Get the item score
-	(define (item->value item) (car item))
+	(define (item->value item) (first item))
+
 	; Increment the bin-count by this much.
 	(define (item->count item) 1)
-	(bin-count  scored-items nbins item->value item->count)
+
+	(bin-count scored-items nbins item->value item->count
+	    min-val max-val)
 )
 
 (define (bin-count-weighted scored-items nbins item->count)
 	; Get the item score
-	(define (item->value item) (car item))
-	(bin-count  scored-items nbins item->value item->count)
+	(define (item->value item) (first item))
+
+	; Default left and right bounds
+	(define min-val (min-value item->value scored-items))
+	(define max-val (max-value item->value scored-items))
+
+	(bin-count scored-items nbins item->value item->count
+	    min-val max-val)
 )
 
 
@@ -136,7 +168,7 @@
 ; ---------------------------------------------------------------------
 ; A list of all words that have csets. (Not all of the words
 ; in the database got tagged with a cset)
-(define all-cset-words (filter-words-with-csets (get-all-words)))
+(define all-cset-words (get-all-cset-words))
 
 ; A list of all disjucnts (appearing in all csets)
 (define all-disjuncts (get-all-disjuncts))
@@ -145,7 +177,7 @@
 
 ; words with 100 or more observations.
 (define top-cset-words
-	(filter (lambda (wrd) (< 100 (cset-vec-observations wrd)))
+	(filter (lambda (wrd) (< 100 (cset-vec-word-observations wrd)))
 		all-cset-words))
 
 ; ---------------------------------------------------------------------
@@ -153,7 +185,8 @@
 ; of the cset observations. Note that this score is *identical* to the
 ; number of times that the word was observed during MST parsing. That is
 ; because exactly one disjunct is extracted per word, per MST parse.
-(define sorted-word-obs (score-and-rank cset-vec-observations all-cset-words)
+(define sorted-word-obs
+	(score-and-rank cset-vec-word-observations all-cset-words)
 
 ; Print above to a file, so that it can be graphed.
 (let ((outport (open-file "/tmp/ranked-word-obs.dat" "w")))
@@ -162,7 +195,8 @@
 
 ; A sorted list of score-disjunct pairs, where the score is the count
 ; of the cset observations.
-(define sorted-dj-obs (score-and-rank cset-vec-observations all-disjuncts))
+(define sorted-dj-obs
+	(score-and-rank cset-vec-dj-observations all-disjuncts))
 
 ; Print above to a file, so that it can be graphed.
 (let ((outport (open-file "/tmp/ranked-dj-obs.dat" "w")))
@@ -181,15 +215,27 @@
 ; ---------------------------------------------------------------------
 ; Compute the average number of observations per disjunct.
 (define (avg-obs WORD)
-	(/ (cset-vec-observations WORD) (cset-vec-support WORD)))
+	(/ (cset-vec-word-observations WORD) (cset-vec-word-support WORD)))
 
 ; Compute the average number of observations per disjunct.
 ; Discard anything with less than 100 observations.
-(define sorted-avg
+(define top-sorted-avg
 	(score-and-rank avg-obs top-cset-words))
 
 (let ((outport (open-file "/tmp/ranked-avg.dat" "w")))
-	(print-ts-rank sorted-avg outport)
+	(print-ts-rank top-sorted-avg outport)
+	(close outport))
+
+; --------------------------
+; As above, but this time, instead of ranking, we bin-count.
+;
+(define sorted-avg
+	(score-and-rank avg-obs all-cset-words))
+
+(define binned-avg (bin-count-simple sorted-avg 100 1.0 6.0))
+
+(let ((outport (open-file "/tmp/binned-avg.dat" "w")))
+	(print-ts-bincounts binned-avg outport)
 	(close outport))
 
 ; ---------------------------------------------------------------------
@@ -198,7 +244,7 @@
 ; non-zero.  Equivalently, it is the size of the set of unique
 ; disjuncts associated with a word (counted without multiplicity).
 
-(define sorted-support (score-and-rank cset-vec-support all-cset-words))
+(define sorted-support (score-and-rank cset-vec-word-support all-cset-words))
 
 (let ((outport (open-file "/tmp/ranked-support.dat" "w")))
 	(print-ts-rank sorted-support outport)
@@ -207,7 +253,7 @@
 ; ---------------------------------------------------------------------
 ; A sorted list of score-word pairs, where the score is the cset length
 
-(define sorted-lengths (score-and-rank cset-vec-len all-cset-words)
+(define sorted-lengths (score-and-rank cset-vec-word-len all-cset-words)
 
 (let ((outport (open-file "/tmp/ranked-lengths.dat" "w")))
 	(print-ts-rank sorted-lengths outport)
@@ -217,16 +263,25 @@
 ; Consider, for example, the length-squared, divided by the number
 ; of observations.
 (define (lensq-vs-obs wrd)
-	(define len (cset-vec-len wrd))
-	(/ (* len len) (cset-vec-observations wrd)))
+	(define len (cset-vec-word-len wrd))
+	(/ (* len len) (cset-vec-word-observations wrd)))
 
 ; The length vs observation ranking; but discard everything
 ; with a small number of observations.
-(define sorted-lensq-norm
+(define sorted-lensq-norm-top
 	(score-and-rank lensq-vs-obs top-cset-words))
 
 (let ((outport (open-file "/tmp/ranked-sqlen-norm.dat" "w")))
-	(print-ts-rank sorted-lensq-norm outport)
+	(print-ts-rank sorted-lensq-norm-top outport)
+	(close outport))
+
+(define sorted-lensq-norm
+	(score-and-rank lensq-vs-obs all-cset-words))
+
+(define binned-sqlen-norm (bin-count-simple sorted-lensq-norm 100 0.0 10.0))
+
+(let ((outport (open-file "/tmp/binned-sqlen-norm.dat" "w")))
+	(print-ts-bincounts binned-sqlen-norm outport)
 	(close outport))
 
 ; ---------------------------------------------------------------------
@@ -236,11 +291,11 @@
 ;  sum_i (x-a)^2 = <x^2> - a^2
 ;
 (define (avg-obs WORD)
-	(/ (cset-vec-observations WORD) (cset-vec-support WORD)))
+	(/ (cset-vec-word-observations WORD) (cset-vec-word-support WORD)))
 
 (define (meansq-obs WORD)
-	(define len (cset-vec-len WORD))
-	(/ (* len len) (cset-vec-support WORD)))
+	(define len (cset-vec-word-len WORD))
+	(/ (* len len) (cset-vec-word-support WORD)))
 
 (define (rms-deviation WORD)
 	(define avg (avg-obs WORD))
@@ -265,7 +320,7 @@
 ; Hubiness is the second moment of the vertex degree.
 
 (define (avg-con-count wrd)
-	(/ (cset-vec-connectors wrd) (cset-vec-observations wrd)))
+	(/ (cset-vec-connectors wrd) (cset-vec-word-observations wrd)))
 
 ; Rank by average disjunct size; but discard everything
 ; with a small number of observations.
@@ -284,7 +339,7 @@
 ; RMS is sqrt (sum (c^2/n) - (sum c/n)^2)
 (define (moment-con-count wrd)
 	(define meansq
-		(/ (cset-vec-lp-connectors wrd 2) (cset-vec-observations wrd)))
+		(/ (cset-vec-lp-connectors wrd 2) (cset-vec-word-observations wrd)))
 	(define avg (avg-con-count wrd))
 	(sqrt (- meansq (* avg avg))))
 
@@ -372,28 +427,30 @@
 
 ; Several ways of counting the same thing. These should all
 ; give the same result.
-(define total-cset-count (cset-observations all-cset-words))
+
 (define total-cset-count (get-total-cset-count))
 
-; Get the "partial entropy".
-(define (partial-entropy LIST)
+; Get the "fractional entropy".
+(define (fractional-entropy FUNC LIST)
 	(fold
 		(lambda (item sum)
-			(define pitem (/ (cset-vec-observations item) total-cset-count))
+			(define pitem (/ (FUNC item) total-cset-count))
 			(- sum (* pitem (log pitem))))
 		0
 		LIST))
 
 ; Get the "word entropy".
-(define word-entropy (partial-entropy all-cset-words))
+(define word-entropy
+	(fractional-entropy cset-vec-word-observations all-cset-words))
 (define word-entropy-bits (/ word-entropy (log 2.0)))
 
-(define disjunct-entropy (partial-entropy all-disjuncts))
+(define disjunct-entropy
+	(fractional-entropy cset-vec-dj-observations all-disjuncts))
 (define disjunct-entropy-bits (/ disjunct-entropy (log 2.0)))
 
 (define cset-entropy-bits
 	(fold
-		(lambda (word sum) (+ sum  (cset-vec-entropy word)))
+		(lambda (word sum) (+ sum  (cset-vec-word-entropy word)))
 		0
 		all-cset-words))
 
@@ -445,7 +502,7 @@
 ; Rank words according to thier fractonal entropy
 (define pca (make-pseudo-cset-api))
 (define pcw (add-pair-wildcards pca))
-(define pmi (add-pair-mi-api pca))
+(define pmi (add-pair-mi-compute pca))
 (define (cset-vec-word-ent WORD)
 		(pmi 'compute-right-fentropy WORD))
 
@@ -465,14 +522,32 @@
 	(close outport))
 
 ;--------------
+; Create a binned graph of the number of words observed with a given
+; log-liklihood.  Although this is in the binning tradition of the
+; other binned graphs, its really the same thing as the log-log
+; graph of the word-counts, but renormalized.
 (define (cset-vec-word-logli WORD)
 	(pmi 'right-wild-logli WORD))
 
 (define sorted-word-logli (score-and-rank cset-vec-word-logli all-cset-words))
-(define binned-word-logli (bin-count-simple sorted-word-logli 100))
+(define binned-word-logli (bin-count-simple sorted-word-logli 200 10.0 20.0))
 
 (let ((outport (open-file "/tmp/binned-word-logli.dat" "w")))
 	(print-ts-bincounts binned-word-logli outport)
+	(close outport))
+
+; -------
+; A simple graph of how many words were observed once, twice, etc.
+; So: first column: how many times a word was observed.
+; Second column: the number of words that were observed tat many times.
+;
+(define sorted-word-counts
+	(score-and-rank cset-vec-word-observations all-cset-words))
+(define binned-word-counts
+	(bin-count-simple sorted-word-counts 200 0.5 200.5))
+
+(let ((outport (open-file "/tmp/binned-word-counts.dat" "w")))
+	(print-ts-bincounts binned-word-counts outport)
 	(close outport))
 
 ;--------------
@@ -480,7 +555,7 @@
 ; it would be better to double-check this by running the
 ; sums the other way.
 (define (cset-vec-word-crazy WORD)
-	(- (pmi 'compute-right-mi WORD) 
+	(- (pmi 'compute-right-mi WORD)
 		(+ (pmi 'right-wild-logli WORD)
 			(pmi 'compute-right-fentropy WORD))))
 
@@ -492,7 +567,7 @@
 	(close outport))
 
 (define (cset-vec-word-crazy2 WORD)
-	(- (pmi 'compute-right-mi WORD) 
+	(- (pmi 'compute-right-mi WORD)
 		(pmi 'compute-right-fentropy WORD)))
 
 (define sorted-word-crazy2 (score-and-rank cset-vec-word-crazy2 all-cset-words))
@@ -525,7 +600,7 @@
 (define (cset-freq CSET) (pfrq 'pair-freq CSET))
 
 (define weighted-cset-mi
-	(bin-count-weighted sorted-cset-mi 200 
+	(bin-count-weighted sorted-cset-mi 200
 		(lambda (scored-item) (cset-freq (cdr scored-item)))))
 
 (let ((outport (open-file "/tmp/weighted-cset-mi.dat" "w")))
@@ -535,7 +610,7 @@
 (define (cset-logli CSET) (pfrq 'pair-logli CSET))
 
 (define wlogli-cset-mi
-	(bin-count-weighted sorted-cset-mi 200 
+	(bin-count-weighted sorted-cset-mi 200
 		(lambda (scored-item) (cset-logli (cdr scored-item)))))
 
 (let ((outport (open-file "/tmp/wlogli-cset-mi.dat" "w")))
@@ -566,7 +641,7 @@
 
 (define (new-cset-vec-word-mi WORD)
 	(define pca (make-pseudo-cset-api))
-	(define pmi (add-pair-mi-api pca))
+	(define pmi (add-pair-mi-compute pca))
 	(pmi 'compute-right-fmi WORD)
 )
 
@@ -594,6 +669,8 @@
 ; ---------------------------------------------------------------------
 ; ---------------------------------------------------------------------
 ; Similarity.  Cosine distance.
+; Assumes that cosine similarities have been batch-computed, already,
+; using the code in gram-sim.scm
 
 (define cos-key (PredicateNode "*-Cosine Distance Key-*"))
 
@@ -606,8 +683,8 @@
 	(filter
 		(lambda (sim) (and
 				(< 0.5 (sim-cosine sim))
-				(< 8 (cset-vec-len (gar sim)))
-				(< 8 (cset-vec-len (gdr sim)))))
+				(< 8 (cset-vec-word-len (gar sim)))
+				(< 8 (cset-vec-word-len (gdr sim)))))
 		all-sims))
 
 (define ranked-sims

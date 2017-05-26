@@ -177,6 +177,7 @@
 					((wild-wild) get-wild-wild)
 					((all-pairs) get-all-pairs)
 					((fetch-pairs) fetch-any-pairs)
+					((provides) (lambda (symb) #f))
 					(else (error "Bad method call on ANY-link:" message)))
 				args)))
 )
@@ -272,6 +273,7 @@
 					((wild-wild) get-wild-wild)
 					((all-pairs) get-all-pairs)
 					((fetch-pairs) fetch-clique-pairs)
+					((provides) (lambda (symb) #f))
 					(else (error "Bad method call on clique-pair:" message)))
 				args))))
 
@@ -389,6 +391,7 @@
 					((wild-wild) get-wild-wild)
 					((all-pairs) get-all-pairs)
 					((fetch-pairs) fetch-distance-pairs)
+					((provides) (lambda (symb) #f))
 					(else (error "Bad method call on clique-pair:" message)))
 				args))))
 
@@ -475,7 +478,7 @@
 ;
 ; (use-modules (opencog) (opencog persist) (opencog persist-sql))
 ; (use-modules (opencog nlp) (opencog nlp learn))
-; (sql-open "postgres:///en_snapshot?user=linas
+; (sql-open "postgres:///en_pairs_tone_mst?user=linas")
 ; (use-modules (opencog cogserver))
 ; (start-cogserver "opencog2.conf")
 ; (fetch-all-words)
@@ -483,6 +486,10 @@
 ; (define wc (cog-count-atoms 'WordNode))
 ; (length (cog-get-atoms 'WordNode))
 ; (define wc (get-total-atom-count (cog-get-atoms 'WordNode)))
+; Should match 
+; SELECT sum(valuations.floatvalue[3]) FROM valuations, atoms, typecodes
+; WHERE valuations.atom=atoms.uuid AND atoms.type=typecodes.type
+; AND typecodes.typename='WordNode';
 ;
 ; (compute-word-prob x wc)
 ;

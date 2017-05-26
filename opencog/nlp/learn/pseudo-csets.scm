@@ -144,9 +144,22 @@
 				((wild-wild) get-wild-wild)
 				((all-pairs) get-all-csets)
 				((fetch-pairs) fetch-pseudo-csets)
+				((provides) (lambda (symb) #f))
 				(else (error "Bad method call on psuedo-cset:" message)))
 			args)))
 )
+
+; ---------------------------------------------------------------------
+; ---------------------------------------------------------------------
+;
+; Use the new, modern object API for all this stuff.
+(define pseudo-cset-api (make-pseudo-cset-api))
+(define pseudo-cset-count-api (add-pair-count-api pseudo-cset-api))
+(define pseudo-cset-freq-api (add-pair-freq-api pseudo-cset-api))
+(define pseudo-cset-mi-api (add-pair-mi-compute pseudo-cset-api))
+(define pseudo-cset-support-api (add-pair-support-compute pseudo-cset-api))
+(define pseudo-cset-cosine-api (add-pair-cosine-compute pseudo-cset-api))
+(define pseudo-cset-stars (add-pair-stars pseudo-cset-api))
 
 ; ---------------------------------------------------------------------
 ; ---------------------------------------------------------------------
@@ -161,8 +174,8 @@
 	; Currently, its as simple as this...
 	(cog-incoming-by-type ITEM 'LgWordCset)
 
-	; Should be this:
-	; ((add-pair-wildcards (make-pseudo-cset-api)) 'right-stars ITEM)
+	; Should be this: XXX FIXME later
+	; (pseudo-cset-support-api 'right-stars ITEM)
 )
 
 (define-public (sort-cset-vec ITEM)
@@ -237,91 +250,88 @@
 
 ; ---------------------------------------------------------------------
 
-(define-public (filter-words-with-csets WORD-LIST)
+(define-public (get-all-disjuncts)
 "
-  filter-words-with-csets WORD-LIST - Return the subset of
-  the WORD-LIST that has pseudo-csets on them.  This is useful,
-  because not all words in the dataset might have csets on them,
-  so far.
+  get-all-disjuncts -- Return all of the disjuncts in the atomspace.
+  Caution: this performs almost no sanity checks, and so could
+  easily return junk, if there are other LgAnd's in the atomspace.
+
+  The sanity check would be to make sure that the LgAnd has the desired
+  form, i.e. consisting entirely of PseudoDisjuncts.
 "
-	(filter!
-		(lambda (wrd)
-			(not (null? (get-cset-vec wrd))))
-		WORD-LIST)
+	(pseudo-cset-stars 'right-basis)
 )
 
 ; ---------------------------------------------------------------------
 
-(define-public (cset-vec-support ITEM)
+(define-public (get-all-cset-words)
 "
-  cset-vec-support ITEM - compute the pseudo-cset vector support for ITEM
-  ITEM can be either a WordNode or a disjunct (LgAnd)
+  get-all-cset-words -- Return all of the words that appear in some
+  connector set.
+"
+	(pseudo-cset-stars 'left-basis)
+)
+
+; ---------------------------------------------------------------------
+
+(define-public (cset-vec-word-support WORD)
+"
+  cset-vec-word-support WORD - return size of the support for WORD.
+  WORD must be a WordNode.
 
   The support of a sparse vector is the number of basis elements that
   are non-zero.  In this case, its simply the number of disjuncts
   attached to the word.  Equivalently, this is the l_0 norm of the
   vector (the l_p norm for p=0).
 "
-	(length (get-cset-vec ITEM))
+	; Should be same as
+	; (length (pseudo-cset-support-api 'right-support-set WORD))
+	(pseudo-cset-support-api 'right-support WORD)
 )
 
 ; ---------------------------------------------------------------------
 
-(define-public (cset-vec-observations ITEM)
+(define-public (cset-vec-word-observations WORD)
 "
-  cset-vec-observations ITEM - compute the number of observations of
-  the disjuncts for ITEM. Equivalently, this is the l_1 norm of the
-  vector (the l_p norm for p=1).
+  cset-vec-word-observations WORD - return the number of times that
+  WORD has been observed.  This is exactly equal to to wild-card
+  summation over disjuncts N(w) = N(w,*) = sum_d N(w,d) for w being
+  the WordNode WORD.  This is exactly the same as the l_1 norm of
+  of the vector (the l_p norm for p=1).
 
-  ITEM can be either a WordNode or a disjunct (LgAnd)
+  WORD must be WordNode.
 "
-	; sum of the counts
-	(fold
-		(lambda (cset sum) (+ (get-count cset) sum))
-		0
-		(get-cset-vec ITEM))
+	; Should be same as
+	; (pseudo-cset-support-api 'right-count WORD)
+	(pseudo-cset-count-api 'right-wild-count WORD)
 )
 
 ; ---------------------------------------------------------------------
 
-(define-public (cset-vec-len ITEM)
+(define-public (cset-vec-dj-observations DISJUNCT)
 "
-  cset-vec-len ITEM - compute the pseudo-cset vector length for ITEM.
+  cset-vec-dj-observations DISJUNCT - return the number of times that
+  DISJUNCT has been observed.  This is exactly equal to to wild-card
+  summation over words N(*,d) = sum_w N(w,d) for d being the DISJUNCT.
+
+  DISJUNCT must be an LgAnd.
+"
+	; Should be same as
+	; (pseudo-cset-support-api 'left-count DISJUNCT)
+	(pseudo-cset-count-api 'left-wild-count DISJUNCT)
+)
+
+; ---------------------------------------------------------------------
+
+(define-public (cset-vec-word-len WORD)
+"
+  cset-vec-word-len WORD - compute the pseudo-cset vector length for WORD.
   Equivalently, this is the l_2 norm of the vector (the l_p norm for p=2).
 
-  ITEM can be either a WordNode or a disjunct (LgAnd)
+  WORD must be a WordNode.
 "
-	; sum of the square of the counts
-	(define sumsq
-		(fold
-			(lambda (cset sum)
-				(define cnt (get-count cset))
-				(+ sum (* cnt cnt)))
-			0
-			(get-cset-vec ITEM)))
-
-	(sqrt sumsq)
-)
-
-; ---------------------------------------------------------------------
-
-(define-public (cset-vec-lp-norm P ITEM)
-"
-  cset-vec-lp-norm P ITEM - compute the Banach space l_p norm of
-  the pseudo-cset vector for ITEM.
-
-  ITEM can be either a WordNode or a disjunct (LgAnd)
-"
-	; sum of the powers of the counts
-	(define sum
-		(fold
-			(lambda (cset sum)
-				(define cnt (get-count cset))
-				(+ sum (expt cnt P)))
-			0
-			(get-cset-vec ITEM)))
-
-	(expt sum (/ 1 P))
+	; square-root of the sum of the square of the counts
+	(pseudo-cset-support-api 'right-length WORD)
 )
 
 ; ---------------------------------------------------------------------
@@ -331,71 +341,46 @@
   get-total-cset-count -- return the total number of observations
   of all connector-sets in the system.
 "
-	; XXX FIXME, this is somewhat sloppy in it's counting, it
-	; does not verify that all atoms that are 'LgWordCsets are
-	; valid word+psuedo-disjunct pairs.  Other garbage could
-	; sneak in.
-	(define tot 0)
-	(cog-map-type
-		(lambda (cset) (set! tot (+ tot (get-count cset))) #f)
-		'LgWordCset)
-	tot
-)
-
-(define total-cset-count 0)
-(define (get-stashed-count)
-	; total number of observations of csets in the system.
-	; XXX there might be a more elegant way to handle this.
-	(if (eqv? 0 total-cset-count)
-		(set! total-cset-count (get-total-cset-count)))
-	total-cset-count
+	(pseudo-cset-count-api 'wild-wild-count)
 )
 
 (define-public (get-cset-frequency CSET)
 "
   get-cset-frequency -- Return the frequency (probability) with which
-  CSET has been observed.
+  CSET has been observed. CSET must be a link of type LgWordCset.
 "
-	(/ (get-count CSET) (get-stashed-count))
+	(pseudo-cset-freq-api 'pair-freq CSET)
 )
 
-(define-public (cset-vec-frequency ITEM)
+(define-public (cset-vec-word-frequency WORD)
 "
-  cset-vec-frequency -- Return the frequency (probability) with which
-  ITEM has been observed.
+  cset-vec-word-frequency -- Return the frequency (probability) with
+  which WORD has been observed. WORD must be a WordNode.
 "
-	(/ (cset-vec-observations ITEM) (get-stashed-count))
+	(pseudo-cset-freq-api 'right-wild-freq WORD)
 )
 
-(define-public (cset-vec-entropy ITEM)
+(define-public (cset-vec-dj-frequency DISJUNCT)
+"
+  cset-vec-dj-frequency -- Return the frequency (probability) with
+  which DISJUNCT has been observed. DISJUNCT must be an LgAnd.
+"
+	(pseudo-cset-freq-api 'left-wild-freq DISJUNCT)
+)
+
+(define-public (cset-vec-word-entropy WORD)
 "
   cset-vec-entropy -- return the entropy for the subset of
-  connector-sets associated with ITEM.  ITEM can be either a
-  WordNode or a disjunct. A loop is performed over all of the
-  csets associated with that item, and the entropy for each
-  cset is summed up.
+  connector-sets associated with WORD, which must be a WordNode.
+  This is given by
+      sum_d p(w,d) log p(w,d)
+  for fixed word w, the sum ranging over all disjuncts.
 
-  sum_x p(x,y) log p(x,y) for fixed y
+  The returned entropy is in bits, i.e. computed with log_2.
 
-  The returned entropy is in bits, i.e. computerd with log_2.
-
-  XXX FIXME this is deprecated in favor of
-  ((add-pair-mi-api (make-pseudo-cset-api)) 'compute-left-entropy ITEM)
 "
-   ; sum of the counts
-	(define nats
-		(fold
-			(lambda (cset sum)
-				(define cset-freq (get-cset-frequency cset))
-				(- sum (* cset-freq (log cset-freq))))
-			0
-			(get-cset-vec ITEM)))
-	(/ nats (log 2.0))
+  (pseudo-cset-mi-api 'compute-right-entropy WORD)
 )
-
-; Use the new, modern object API for all this stuff.
-(define pseudo-cset-api (make-pseudo-cset-api))
-(define pseudo-cset-mi-api (add-pair-mi-api pseudo-cset-api))
 
 (define (cset-vec-word-mi WORD)
 "
@@ -406,25 +391,25 @@
    as a whole can be written as
      MI = sum_w p(w) MI(w)
 
-   Note this function returns MI in units of bits. i.e. log-2
+   Note this function returns MI in units of bits. i.e. log_2
 "
-	(pseudo-cset-mi-api 'compute-right-fmi WORD))
+	(pseudo-cset-mi-api 'compute-right-fmi WORD)
 )
 
 ; ---------------------------------------------------------------------
 ; ---------------------------------------------------------------------
 ; ---------------------------------------------------------------------
 
-(define-public (cset-vec-lp-dist P ITEM-A ITEM-B)
+(define-public (cset-vec-word-lp-dist P WORD-A WORD-B)
 "
-  cset-vec-lp-dist P ITEM-A ITEM-B - compute the Banache space l_p
-  distance between the pseudo-cset vector for ITEM-A and ITEM-B.
+  cset-vec-word-lp-dist P WORD-A WORD-B - compute the Banache space l_p
+  distance between the pseudo-cset vector for WORD-A and WORD-B.
 
   This is a real metric.  Recall, for p=2, this is just the
   Eucliden distance metric, and for p=1, this is the 'Mahnatten
   distance'.
 
-  ITEM can be either a WordNode or a disjunct (LgAnd of pseudo-connectors).
+  WORD-A and WORD-B must both be WordNode's.
 
   As a metric for measuring the similarity of connector-set vectors,
   this is terrible, because any word that has a lot of observations
@@ -433,86 +418,22 @@
   be near the origin, and thus close to one-another, no matter how
   different thier disjuncts are.
 "
-	(define word-base (equal? (cog-type ITEM-A) 'WordNode))
-	(define get-base (if word-base cset-get-disjunct cset-get-word))
-
-	; Get the common non-zero entries of the two vectors.
-	(define bases
-		(delete-duplicates! (append!
-			(map! get-base (get-cset-vec ITEM-A))
-			(map! get-base (get-cset-vec ITEM-B)))))
-
-	; Get the count for DISJUNCT on WORD, if it exists (is non-zero)
-	(define (get-cset-count WORD DISJUNCT)
-		(define cset (have-cset? WORD DISJUNCT))
-		(if (null? cset) 0 (get-count cset))
-	)
-
-	(define (cnt-a it)
-		(if word-base
-			(lambda (it) (get-cset-count ITEM-A it))
-			(lambda (it) (get-cset-count it ITEM-A))))
-
-	(define (cnt-b it)
-		(if word-base
-			(lambda (it) (get-cset-count ITEM-B it))
-			(lambda (it) (get-cset-count it ITEM-B))))
-
-	; sum of the powers of the counts
-	(define sum
-		(fold
-			(lambda (it sum)
-				(define adiff (abs (- (cnt-a it) (cnt-b it))))
-				(+ sum (expt adiff P)))
-			0
-			bases))
-
-	(expt sum (/ 1 P))
+	(define (subtract TUPLE)  (- (first TUPLE) (second TUPLE)))
+	(define subby (add-tuple-math pseudo-cset-api subtract))
+	(define normy (add-pair-support-compute subby))
+	(normy 'right-lp-norm P (list WORD-A WORD-B))
 )
 
 ; ---------------------------------------------------------------------
 
-(define-public (cset-vec-prod ITEM-A ITEM-B)
+(define-public (cset-vec-cosine WORD-A WORD-B)
 "
-  cset-vec-prod ITEM-A ITEM-B - compute the pseudo-cset vector
-  dot product between ITEM-A and ITEM-B
+  cset-vec-cosine WORD-A WORD-B - compute the pseudo-cset vector
+  cosine similarity between WORD-A and WORD-B
 
-  ITEMs can be either WordNodes or disjuncts (LgAnd of pseudo-connectors).
+  WORDs must be WordNodes.
 "
-	(define word-base (equal? (cog-type ITEM-A) 'WordNode))
-	(define get-base (if word-base cset-get-disjunct cset-get-word))
-
-	; If the connector-set for ITEM-B exists, then get its count.
-	(define (get-other-count cset)
-		(define other-cset
-			(if word-base
-				(have-cset? ITEM-B (cset-get-disjunct cset))
-				(have-cset? (cset-get-word cset) ITEM-B)))
-		(if (null? other-cset) 0 (get-count other-cset))
-	)
-
-	; Loop over all connectors for ITEM-A
-	(fold
-		(lambda (cset sum)
-			(define a-cnt (get-count cset))
-			(define b-cnt (get-other-count cset))
-			(+ sum (* a-cnt b-cnt)))
-		0
-		(get-cset-vec ITEM-A))
-)
-
-; ---------------------------------------------------------------------
-
-(define-public (cset-vec-cosine ITEM-A ITEM-B)
-"
-  cset-vec-cosine ITEM-A ITEM-B - compute the pseudo-cset vector
-  cosine similarity between ITEM-A and ITEM-B
-
-  ITEMs can be either WordNodes or disjuncts (LgAnd of pseudo-connectors).
-"
-	(define deno (* (cset-vec-len ITEM-A) (cset-vec-len ITEM-B)))
-
-	(if (eqv? 0.0 deno) 0.0 (/ (cset-vec-prod ITEM-A ITEM-B) deno))
+	(pseudo-cset-cosine-api 'right-cosine WORD-A WORD-B)
 )
 
 ; ---------------------------------------------------------------------
@@ -525,16 +446,16 @@
 	(* 2.0 (/ (real-part (acos SIM)) pi))
 )
 
-(define-public (cset-vec-cos-dist ITEM-A ITEM-B)
+(define-public (cset-vec-cos-dist WORD-A WORD-B)
 "
-  cset-vec-cos-dist ITEM-A ITEM-B - compute the pseudo-cset vector
-  cosine distance between ITEM-A and ITEM-B. The cosine distance
+  cset-vec-cos-dist WORD-A WORD-B - compute the pseudo-cset vector
+  cosine distance between WORD-A and WORD-B. The cosine distance
   is defined as dist = 2*arccos(cossim) / pi.  The cosine distance
   obeys the triangle inequality.
 
-  ITEMs can be either WordNodes or disjuncts (LgAnd of pseudo-connectors).
+  WORDs must be WordNodes.
 "
-	(get-angle (cset-vec-cosine ITEM-A ITEM-B))
+	(get-angle (cset-vec-cosine WORD-A WORD-B))
 )
 
 ; ---------------------------------------------------------------------
@@ -544,36 +465,11 @@
   cset-vec-jaccard WORD-A WORD-B - compute the pseudo-cset vector
   Jaccard distance between WORD-A and WORD-B. The Jaccard distance
   is defined as dist = 1 - sim where sim = sum min(a,b)/ sum max(a,b)
-
-  XXX FIXME this algo is currently written so that it works for
-  words only; but it could be made to work for disjuncts, too.
-  See the implementation for the lp-distance for the basic outline.
+  That is,
+    sum min(a,b) = sum_d min (N(a,d), N(b,d))
+  with the sum ranging over the disjuncts (i.e. on the right).
 "
-	; Get the common non-zero entries of the two vectors.
-	(define disjuncts (delete-duplicates! (append!
-		(map! cset-get-disjunct (get-cset-vec WORD-A))
-		(map! cset-get-disjunct (get-cset-vec WORD-B)))))
-
-	; Get the count for DISJUNCT on WORD, if it exists (is non-zero)
-	(define (get-cset-count WORD DISJUNCT)
-		(define cset (have-cset? WORD DISJUNCT))
-		(if (null? cset) 0 (get-count cset))
-	)
-
-	; Sum over the min of all pairs
-	(define sum-inf 0)
-	; Sum over the max of all pairs
-	(define sum-sup 0)
-
-	(for-each
-		(lambda (dj)
-			(define cnt-a (get-cset-count WORD-A dj))
-			(define cnt-b (get-cset-count WORD-B dj))
-			(set! sum-inf (+ sum-inf (min cnt-a cnt-b)))
-			(set! sum-sup (+ sum-sup (max cnt-a cnt-b))))
-		disjuncts)
-
-	(- 1.0 (/ sum-inf sum-sup))
+	(pseudo-cset-cosine-api 'right-jaccard WORD-A WORD-B)
 )
 
 ; ---------------------------------------------------------------------
@@ -597,7 +493,7 @@
   cset-vec-lp-connectors ITEM - compute the total number of
   observations of the lp-moment of the connectors on the ITEM.
   Specifically, the sum (#connectors)^p.   Note the 1/p root
-  is NOT taken!  You probably want to deivce by the number of
+  is NOT taken!  You probably want to divide by the number of
   observations first, and then take the 1/p power.
   See cset-vec-connectors for more details.
 "
@@ -653,48 +549,6 @@
 
 ; ---------------------------------------------------------------------
 
-(define-public (cset-observations ITEM-LIST)
-"
-  cset-observations ITEM-LIST - Return the number of times that
-  all of the connector-sets in the ITEM-LIST have been observed.
-
-  The ITEM-LIST can be a mixture of WordNodes and disjuncts.
-"
-	(fold
-		(lambda (item sum) (+ (cset-vec-observations item) sum))
-		0
-		ITEM-LIST)
-)
-
-; ---------------------------------------------------------------------
-
-(define-public (cset-support WORD-LIST)
-"
-  cset-support WORD-LIST - Return all of the disjuncts in use
-  in the space of all cset-vectors in the WORD-LIST.  Equivalently,
-  return all of the basis vectors in the space.  One disjunct is
-  just one basis element.  The length of this list is the total
-  dimension of the space.
-
-  Caution: this can take a very long time!  Last time, this took
-  3-4 hours to return a list of length 200K for 430K observations
-  distributed across 30K words.
-
-  For practical use, use `(get-all-disjuncts)` below.
-"
-	(define all-csets
-		(append-map!
-			(lambda (wrd) (get-cset-vec wrd))
-			WORD-LIST))
-
-	(delete-duplicates!
-		(map!
-			(lambda (cset) (cset-get-disjunct cset))
-			all-csets))
-)
-
-; ---------------------------------------------------------------------
-
 ; return a list of all atoms of TYPE
 (define (get-all-type TYPE)
 	(define all-atoms '())
@@ -704,20 +558,6 @@
 	all-atoms
 )
 
-
-(define-public (get-all-disjuncts)
-"
-  get-all-disjuncts -- Return all of the disjuncts in the atomspace.
-  Caution: this performs almost no sanity checks, and so could
-  easily return junk, if there are other LgAnd's in the atomspace.
-
-  The sanity check would be to make sure that the LgAnd has the desired
-  form, i.e. consisting entirely of PseudoDisjuncts.
-"
-	(get-all-type 'LgAnd)
-)
-
-; ---------------------------------------------------------------------
 
 (define-public (get-all-csets)
 "
@@ -748,12 +588,12 @@
 ; (use-modules (opencog nlp) (opencog nlp learn))
 ; (sql-open "postgres:///en_pairs_mst?user=linas")
 ; (sql-open "postgres:///en_pairs_sim?user=linas")
-; (fetch-all-words)  <<< 132 secs
+; (fetch-all-words)  <<< 21 secs
 ; (length (get-all-words))
 ; 396262
 ; (define pca (make-pseudo-cset-api))
-; (pca 'fetch-pairs)  <<< 789 secs
-; (define ac (filter-words-with-csets (get-all-words)))
+; (pca 'fetch-pairs)  <<< 295 secs
+; (define ac (get-all-cset-words))
 ; (length ac)
 ; 49423  (now 37413 in en_pairs_sim)
 ; (define ad (get-all-disjuncts))

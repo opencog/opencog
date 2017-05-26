@@ -5794,7 +5794,6 @@ also: there are 508 links with missing uuids in thier outgoing set.
  md5sum en_pairs_semi_fu.sql.bz2
 06b0acfecf9f5d4b25cca903b8f3b2a7  en_pairs_semi_fu.sql.bz2
 
-
 ==================================================================
 en_snap
 -------
@@ -5811,7 +5810,54 @@ gives 2786640 == 2.7M  LG links.
 
 and 9587761 = 9.6M clique pairs, and 18M ExecutionLinks.
 
+==================================================================
+en_pairs_tone
+-------------
+Random-planar-tree parsed books from "tranche-1" of mostly project
+gutenberg books. Contains counts for word-pairs, words and disjuncts.
 
+STATUS: good
+DATE: 24 May 2017
+REASON: I think it's good.
+
+                        List of relations
+ Schema |    Name    | Type  | Owner  |    Size    | Description 
+--------+------------+-------+--------+------------+-------------
+ public | atoms      | table | ubuntu | 909 MB     | 
+ public | spaces     | table | ubuntu | 40 kB      | 
+ public | typecodes  | table | ubuntu | 56 kB      | 
+ public | valuations | table | ubuntu | 591 MB     | 
+ public | values     | table | ubuntu | 8192 bytes | 
+(5 rows)
+
+select count(*) from atoms;  <<< 10317409 = 10M atoms total
+WordNodes: 139790 -- 140K
+EvaluationLink : 4886362 -- 4.9M
+ListLink: exactly the same.
+
+select count(*) from valuations; <<< 5431036 = 5.4M values
+
+SELECT sum(floatvalue[3]) FROM valuations WHERE type=7;
+ gives  396713166 << 397M total obs.
+
+SELECT sum(valuations.floatvalue[3]) FROM valuations, atoms, typecodes
+WHERE valuations.atom=atoms.uuid AND atoms.type=typecodes.type AND
+typecodes.typename='EvaluationLink';
+
+gives 139806259 << 140M pair observations
+.. WordNode: 125696239 << 125M obs
+...LgWordCset: 125707119 << 126M disjuncts
+
+SentenceNode: 330376 == 330K unique sentences
+ParseNode: 5173173 == 5.1M parses
+###LEFT-WALL### seen 5173095 = ... a few missing left-walls!?
+
+464744628 bytes uncompressed == 464MB en_pairs_tone.sql 24 May 2017
+81217915 bytes compressed == 81MB en_pairs_tone.sql.bz2
+
+md5sum:
+28562003d0567039571006803b716dc0  en_pairs_tone.sql
+c4a981af336075f0121ac020887bfa47  en_pairs_tone.sql.bz2
 
 ==================================================================
 
@@ -6047,6 +6093,8 @@ at 01:51 have 129302108= 129M so 12M in 1.7 hours = 7M/hour
 So now its more than 2x faster. almost 3x, with rounding errors
 Yayyyy!!!
 
+05:30 152806491 =153 -117 = 36M obs in 5.4 hours = 6.7M obs/hour
+                = 1854 obs/second
 
 ----------------------------------------------------
 
@@ -6156,3 +6204,52 @@ children 101 1 9
 
 (define bins (second binned-pair-mi))
 (fold + 0 (array->list bins))
+
+-----------------------------------------------------------
+1 word was observed 38977 times
+ 37502
+32517
+22632
+
+differences:
+there is a left and a right diff.
+The wild-card support needs to be a union
+overload 'left-stars 'right-stars 'pair-count 'item-pair
+this can be a generic map function of any kind! not just a diff!
+
+=======================================
+There is no value for key (PredicateNode "*-FrequencyKey-*")
+
+en_pairs_tone_mst: spinnning drives:
+Done storing 4886362 pair MI's in 6903 secs
+
+
+=======================================
+
+OK, so:
+pca is the pseudo-cset-api
+pma adds special stars to it
+pdi will provide utilities
+   pdi takes pma and wraps it with default stars
+      default stars should see the pma under it.
+
+15265 pos only
+
+15420 the all by itself
+ 7168 for "a"
+total 15420+7168 -256 = 22588 - 256 = 22332  which is what union reports...
+unions 22260 < so wtf is this? oh 72 obse are identical!
+256 interested!  sum = 22260+256 = 22516
+
+Hmmm. 
+-       (filter!
+-               (lambda (wrd)
+-                       (not (null? (get-cset-vec wrd))))
+-               WORD-LIST)
+
+(cog-incoming-by-type ITEM 'LgWordCset)
+
+ Error: do_store_single_atom: Maxiumum Link size is 330.
+ (/home/ubuntu/src/atomspace/opencog/persist/sql/multi-driver/SQLAtomStorage.cc:1202)
+Aborted
+

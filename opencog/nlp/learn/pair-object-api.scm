@@ -68,7 +68,7 @@
 ; The `make-pair-count-get-set` class, below, is a typical user
 ; of this class; it provides getters and setters for teh counts.
 ;
-; See `make-any-link` for a working example.
+; See `make-any-link-link` for a working example.
 ;
 ; When called, this will create a new instance of the class
 ; i.e. will create a new object.
@@ -88,20 +88,20 @@
 ;
 ;        ; Return the atom holding the count, if it exists,
 ;        ; else return nil.
-;        (define (get-pair PAIR) "foobar")
+;        (define (get-pair PAIR) (Node "foobar"))
 ;
 ;        ; Return the atom holding the count, creating it if
 ;        ; it does not yet exist.
-;        (define (make-pair PAIR) "foobar")
+;        (define (make-pair PAIR) (Node "foobar"))
 ;
 ;        ; Return the atom holding the N(*,y) count
-;        (define (get-left-wildcard ITEM) "foobar")
+;        (define (get-left-wildcard ITEM) (Node "foobar"))
 ;
 ;        ; Return the atom holding the N(x,*) count
-;        (define (get-right-wildcard ITEM) "foobar")
+;        (define (get-right-wildcard ITEM) (Node "foobar"))
 ;
 ;        ; Return the atom holding the N(*,*) count
-;        (define (get-wild-wild) "foobar")
+;        (define (get-wild-wild) (Node "foobar"))
 ;
 ;     ; Methods on the class. To call these, quote the method name.
 ;     ; Example: (OBJ 'left-wildcard WORD) calls the
@@ -117,6 +117,7 @@
 ;              ((left-wildcard) get-left-wildcard)
 ;              ((right-wildcard) get-right-wildcard)
 ;              ((wild-wild) get-wild-wild)
+;              ((provides) (lambda (symb) #f))
 ;              (else (error "Bad method call on low-level API")))
 ;           args))))
 ;
@@ -125,15 +126,17 @@
 
 (use-modules (srfi srfi-1))
 
-(define-public (add-pair-wildcards LLOBJ)
-"
-  pair-wildcards LLOBJ - Extend LLOBJ with wildcard methods.
+; ---------------------------------------------------------------------
 
-  Extend the LLOBJ with addtional methods to get wild-card lists,
+; Note this is NOT define-public!!
+(define (add-pair-stars LLOBJ)
+"
+  add-pair-stars LLOBJ - Extend LLOBJ with wildcard access methods.
+
+  Extend the LLOBJ with additional methods to get wild-card lists,
   that is, lists of all pairs with a specific item on the left,
   or on the right.  This generates these lists in a generic way,
-  that probably work for most kinds of pairs. However, you can
-  overload them with custom getters, if you wish.
+  that probably work for most kinds of pairs.
 
   Here, the LLOBJ is expected to be an object, with methods for
   'left-type and 'right-type on it, just as described above.
@@ -143,48 +146,73 @@
   an atom of 'left-type or 'right-type on the other side.
 "
 	(let ((llobj LLOBJ)
-			(l-supp '())
-			(r-supp '())
+			(l-basis '())
+			(r-basis '())
 		)
 
+		; Return a list of all atoms of TYPE with appear in a Link
+		; of type 'pair-type
+		(define (get-basis TYPE PAIR-FILT)
+			(define pair-type (llobj 'pair-type))
+			(remove!
+				(lambda (item)
+					(null? (PAIR-FILT item (cog-incoming-by-type item pair-type))))
+				(cog-get-atoms TYPE)))
+
+		; Given a left-item, and a list of pairs, return only those
+		; pairs in which the left-item really is on the left, and
+		; the correct type is on the right.
+		(define (good-right-pairs left-item pair-list)
+			(define right-type (llobj 'right-type))
+			(filter!
+				(lambda (pr)
+					(and
+						(eq? 2 (cog-arity pr))
+						(equal? left-item (gar pr))
+						(eq? right-type (cog-type (gdr pr)))))
+				pair-list))
+
+		(define (good-left-pairs right-item pair-list)
+			(define left-type (llobj 'left-type))
+			(filter!
+				(lambda (pr)
+					(and
+						(eq? 2 (cog-arity pr))
+						(eq? left-type (cog-type (gar pr)))
+						(equal? right-item (gdr pr))))
+				pair-list))
+
 		; Return a list of all of the atoms that might ever appear on
-		; the left-hand-side of a pair.  This is the set of items x
-		; for which 0 < N(x,y) for some item y, and N(x,y) the count
-		; of ever having observed the pair (x,y).
+		; the left-hand-side of a pair.  This is the set of all possible
+		; items x from the pair (x,y) for any y.
 		;
-		; Actually, we cheat, for performance reasons. Instead of
-		; computing the set desribed above, we just *assume* that
-		; every atom of 'left-type is a part of the support. We may
-		; regret this cheat, someday, but for now it works. It's
-		; certainly faster than computing the correct thing.
-		;
-		; Actually, if someone needs something better, they can
-		; overload this method.
-		(define (get-left-support)
-			(if (null? l-supp)
-				(set! l-supp (cog-get-atoms (llobj 'left-type))))
-			l-supp)
+		(define (get-left-basis)
+			(if (null? l-basis)
+				(set! l-basis (get-basis (llobj 'left-type) good-right-pairs)))
+			l-basis)
 
-		(define (get-right-support)
-			(if (null? r-supp)
-				(set! r-supp (cog-get-atoms (llobj 'right-type))))
-			r-supp)
-
-		(define (get-left-support-size) (length (get-left-support)))
-		(define (get-right-support-size) (length (get-right-support)))
+		(define (get-right-basis)
+			(if (null? r-basis)
+				(set! r-basis (get-basis (llobj 'right-type) good-left-pairs)))
+			r-basis)
 
 		; Return a list of all pairs with the ITEM on the right side,
-		; and an object of type (LLOBJ 'left-type) on the left. The
-		; pairs are just ListLink's (of arity two). That is, it returns
-		; a list of atoms of the form
+		; and an object of type (LLOBJ 'left-type) on the left.
+		; The point of this function is to find and return the complete
+		; wild-card set (*,y) = {(x,y) | there-exists pair (x,y) for some x}
+		; The pairs are Links of type 'pair-type, of arity two. That is,
+		; this returns a list of atoms of the form
 		;
-		;    ListLink
-		;         (LLOBJ 'left-type)
-		;         ITEM
+		;    (cog-link (LLOBJ 'pair-type)
+		;         (cog-atom (LLOBJ 'left-type) ...)
+		;         ITEM)
+		;
+		; ITEM should be an atom of (LLOBJ 'right-type); if it isn't,
+		; the the behavior is undefined.
 		;
 		(define (get-left-stars ITEM)
-			(define want-type (LLOBJ 'left-type))
-			(define pair-type (LLOBJ 'pair-type))
+			(define want-type (llobj 'left-type))
+			(define pair-type (llobj 'pair-type))
 			(filter
 				(lambda (lnk)
 					(define oset (cog-outgoing-set lnk))
@@ -197,8 +225,8 @@
 
 		; Same as above, but on the right.
 		(define (get-right-stars ITEM)
-			(define want-type (LLOBJ 'right-type))
-			(define pair-type (LLOBJ 'pair-type))
+			(define want-type (llobj 'right-type))
+			(define pair-type (llobj 'pair-type))
 			(filter
 				(lambda (lnk)
 					(define oset (cog-outgoing-set lnk))
@@ -209,19 +237,30 @@
 					))
 				(cog-incoming-by-type ITEM pair-type)))
 
+		;-------------------------------------------
+		; Return default, only if llobj does not provide symbol
+		(define (overload symbol default)
+			(define fp (llobj 'provides symbol))
+			(if fp fp default))
 
-	; Methods on this class.
-	(lambda (message . args)
-		(case message
-			((left-support)       (get-left-support))
-			((right-support)      (get-right-support))
-			((left-support-size)  (get-left-support-size))
-			((right-support-size) (get-right-support-size))
-			((left-stars)         (apply get-left-stars args))
-			((right-stars)        (apply get-right-stars args))
-			(else (apply llobj (cons message args))))
-		)))
+		; Provide default methods, but only if the low-level
+		; object does not already provide them.
+		(let ((f-left-basis (overload 'left-basis get-left-basis))
+				(f-right-basis (overload 'right-basis get-right-basis))
+				(f-left-stars (overload 'left-stars get-left-stars))
+				(f-right-stars (overload 'right-stars get-right-stars)))
 
+			; Methods on this class.
+			(lambda (message . args)
+				(case message
+					((left-basis)      (f-left-basis))
+					((right-basis)     (f-right-basis))
+					((left-stars)      (apply f-left-stars args))
+					((right-stars)     (apply f-right-stars args))
+					(else (apply llobj (cons message args))))
+			))))
+
+; ---------------------------------------------------------------------
 ; ---------------------------------------------------------------------
 
 (define-public (add-pair-count-api LLOBJ)
