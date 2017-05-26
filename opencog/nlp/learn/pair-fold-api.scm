@@ -116,7 +116,8 @@
 		(define (get-func-count TUPLE)
 			(sum-func
 				(map
-					(lambda (pr) (llobj 'pair-count pr))
+					(lambda (pr)
+						(if (null? pr) 0 (llobj 'pair-count pr)))
 					TUPLE)))
 
 		; ---------------
