@@ -419,16 +419,16 @@
 ; ---------------------------------------------------------------------
 ; ---------------------------------------------------------------------
 
-(define-public (cset-vec-lp-dist P ITEM-A ITEM-B)
+(define-public (cset-vec-word-lp-dist P WORD-A WORD-B)
 "
-  cset-vec-lp-dist P ITEM-A ITEM-B - compute the Banache space l_p
-  distance between the pseudo-cset vector for ITEM-A and ITEM-B.
+  cset-vec-word-lp-dist P WORD-A WORD-B - compute the Banache space l_p
+  distance between the pseudo-cset vector for WORD-A and WORD-B.
 
   This is a real metric.  Recall, for p=2, this is just the
   Eucliden distance metric, and for p=1, this is the 'Mahnatten
   distance'.
 
-  ITEM can be either a WordNode or a disjunct (LgAnd of pseudo-connectors).
+  WORD-A and WORD-B must both be WordNode's.
 
   As a metric for measuring the similarity of connector-set vectors,
   this is terrible, because any word that has a lot of observations
@@ -437,41 +437,10 @@
   be near the origin, and thus close to one-another, no matter how
   different thier disjuncts are.
 "
-	(define word-base (equal? (cog-type ITEM-A) 'WordNode))
-	(define get-base (if word-base cset-get-disjunct cset-get-word))
-
-	; Get the common non-zero entries of the two vectors.
-	(define bases
-		(delete-duplicates! (append!
-			(map! get-base (get-cset-vec ITEM-A))
-			(map! get-base (get-cset-vec ITEM-B)))))
-
-	; Get the count for DISJUNCT on WORD, if it exists (is non-zero)
-	(define (get-cset-count WORD DISJUNCT)
-		(define cset (have-cset? WORD DISJUNCT))
-		(if (null? cset) 0 (get-count cset))
-	)
-
-	(define (cnt-a it)
-		(if word-base
-			(lambda (it) (get-cset-count ITEM-A it))
-			(lambda (it) (get-cset-count it ITEM-A))))
-
-	(define (cnt-b it)
-		(if word-base
-			(lambda (it) (get-cset-count ITEM-B it))
-			(lambda (it) (get-cset-count it ITEM-B))))
-
-	; sum of the powers of the counts
-	(define sum
-		(fold
-			(lambda (it sum)
-				(define adiff (abs (- (cnt-a it) (cnt-b it))))
-				(+ sum (expt adiff P)))
-			0
-			bases))
-
-	(expt sum (/ 1 P))
+	(define (subtract TUPLE)  (- (first TUPLE) (second TUPLE)))
+	(define subby (add-tuple-math pseudo-cset-api subtract))
+	(define normy (add-pair-support-compute subby))
+	(normy 'right-lp-norm P (list WORD-A WORD-B))
 )
 
 ; ---------------------------------------------------------------------
