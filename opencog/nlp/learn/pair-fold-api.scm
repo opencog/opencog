@@ -81,7 +81,7 @@
 
 ; ---------------------------------------------------------------------
 ;
-(define-public (add-tuple-math LLOBJ FUNC
+(define*-public (add-tuple-math LLOBJ FUNC
 	#:optional (GET-CNT (lambda (x) (LLOBJ 'pair-count x))))
 "
   add-tuple-math LLOBJ FUNC - Extend LLOBJ with ability to take
