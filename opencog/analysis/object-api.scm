@@ -1,7 +1,7 @@
 ;
-; pair-object-api.scm
+; object-api.scm
 ;
-; Define object-oriented class API's for pairs of things.
+; Define object-oriented class API's for correlation matricies of atoms.
 ;
 ; Copyright (c) 2017 Linas Vepstas
 ;
@@ -9,16 +9,23 @@
 ; OVERVIEW
 ; --------
 ; In this project, there's a generic theme of "pairs of things" that
-; are statistically related. The can be pairs of words, they can be
+; are statistically related. These can be pairs of words, they can be
 ; connector-sets, which are a pair of (word, disjunct), or they can
 ; be other things.
+;
+; More precisely, we are generally interested in pairs (x,y) of atoms
+; (that is, where x and y are atoms), and we have some sort of count
+; N(x,y) of how often that particular pair was observed.  We typically
+; are then interested in various statistical measures: usually starting
+; with the normalized frequency (probability, likelihood) of how often
+; the pair (x,y) occured,
 ;
 ; For all of these pairs (x,y), we typically need to get the count
 ; N(x,y), the partial sums N(x,*) = sum_y N(x,y), and likewise N(*,y)
 ; and N(*,*).   We need to compute frequencies of observations, such
 ; as p(x,y) = N(x,y)/N(*,*).  We also need to compute entropies and
 ; mutual information, which can be infered from these frequencies.
-; We also can compute cosine-similairy and other matrics of similarity,
+; We also can compute cosine-similairy and other metrics of similarity,
 ; dervied solely from the observed frequency counts.
 ;
 ; All of these formulas are independent of the actual objects in the

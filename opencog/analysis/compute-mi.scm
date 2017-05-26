@@ -570,7 +570,7 @@
 	; wildcard frequencies and log-frequencies.
 	(freq-obj 'init-freq)
 
-	(display "Going to do individual word-pair frequencies\n")
+	(display "Going to do individual pair frequencies\n")
 	(let ((pair-cnt (freq-obj 'cache-all-pair-freqs)))
 		(format #t "Done computing ~A pairs in ~A secs\n"
 				pair-cnt (elapsed-secs)))
@@ -605,8 +605,8 @@
 
 	(display "Done computing -log P(x,*) and P(*,y)\n")
 
-	; Enfin, the word-pair mi's
-	(display "Going to do individual word-pair MI\n")
+	; Enfin, the pair mi's
+	(display "Going to do individual pair MI\n")
 
 	(let* ((all-atoms (batch-mi-obj 'cache-pair-mi))
 			(num-prs (length all-atoms)))
