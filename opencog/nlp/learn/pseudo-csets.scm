@@ -472,6 +472,8 @@
   cset-vec-jaccard WORD-A WORD-B - compute the pseudo-cset vector
   Jaccard distance between WORD-A and WORD-B. The Jaccard distance
   is defined as dist = 1 - sim where sim = sum min(a,b)/ sum max(a,b)
+  and
+    sum min(a,b) = sum_d min (N(a,d), N(b,d))
 
   XXX FIXME this algo is currently written so that it works for
   words only; but it could be made to work for disjuncts, too.
@@ -525,7 +527,7 @@
   cset-vec-lp-connectors ITEM - compute the total number of
   observations of the lp-moment of the connectors on the ITEM.
   Specifically, the sum (#connectors)^p.   Note the 1/p root
-  is NOT taken!  You probably want to deivce by the number of
+  is NOT taken!  You probably want to divide by the number of
   observations first, and then take the 1/p power.
   See cset-vec-connectors for more details.
 "

@@ -9,7 +9,7 @@
 ; ---------------------------------------------------------------------
 ; OVERVIEW
 ; --------
-; See pairobject-api.scm for the overview.
+; See pair-object-api.scm for the overview.
 ; ---------------------------------------------------------------------
 
 (use-modules (srfi srfi-1))
@@ -203,6 +203,12 @@
       left-length(y) = sqrt sum_x N(x,y) N(x,y)
                      = sqrt left-prod(y,y)
 
+  The Jaccard distance can be defined as one minus the Jaccard
+  similarity, which is defined as
+
+      left-jacc-sim(y,z) = sum_x min (N(x,y), N(x,z)) /
+               sum_x max (N(x,y), N(x,z))
+
   Here, the LLOBJ is expected to be an object, with valid
   counts associated with each pair. LLOBJ is expected to have
   working, functional methods for 'left-type and 'right-type
@@ -296,5 +302,74 @@
 			((right-cosine)    (apply compute-right-cosine args))
 			(else (apply llobj (cons message args))))
 		)))
+
+; ---------------------------------------------------------------------
+
+(define*-public (add-pair-math LLOBJ
+	#:optional (GET-CNT (lambda (x) (LLOBJ 'pair-count x))))
+"
+  add-pair-math LLOBJ - Extend LLOBJ with methods to compute common
+  operations, such as vector sums, differences, unions, intersections,
+  and min and max functions.
+
+  Some terminology: Let 'x' be a fixed left-item. Then the set
+      V(x) = {N(x,y) | all items 'y'}
+  is a vector, when 'y' is allowed to range over all possible items.
+  Its called a "right vector", as 'y' lies to the right.  The
+  corresponding left vector is
+      W(y) = {N(x,y) | all items 'x'}
+
+  Considering N(x,y) to be a matrix, a given right-vector is a specific
+  row in the matrix, and a given left-vector is a specific column.
+
+  As always, N(x,y) is the observed count for the pair (x,y).
+
+  This class defines the following methods:
+     'right-sum A B  is  V(A) + V(B)
+          = {N(a,y) + N(b,y) | all items 'y'}
+     'right-diff A B  is  V(A) - V(B)
+          = {N(a,y) - N(b,y) | all items 'y'}
+
+  Let the "right-cap" or "intersection" be the function
+     cap(a,b,y) = 1 if 0 < N(a, y) and 0 < N(b, y)
+                = 0 otherwise.
+  and let "right-cup" or "union" be the function
+     cup(a,b,y) = 1 if 0 < N(a, y) or 0 < N(b, y)
+                = 0 otherwise.
+  The left-cap and cup are defined likewise.
+
+  Let "right-min" be the function
+      min(a,b,y) = min (N(a,y), N(b,y))
+  and the "right-max" be
+      max(a,b,y) = max (N(a,y), N(b,y))
+
+  This class then defines the functions
+     'right-cap A B is the vector { cap(a,b,y) | all items 'y'}
+     'right-cup A B is the vector { cup(a,b,y) | all items 'y'}
+     'right-min A B is the vector { min(a,b,y) | all items 'y'}
+     'right-max A B is the vector { min(a,b,y) | all items 'y'}
+
+  The left versions are defined similarly.
+
+  Here, the LLOBJ is expected to be an object, with valid
+  counts associated with each pair. LLOBJ is expected to have
+  working, functional methods for 'left-type and 'right-type
+  on it.
+
+  By default, the N(x,y) is taken to be the 'get-count method
+  on LLOBJ, i.e. it is literally the count. The optional argument
+  GET-CNT allows this to be over-ridden with any other method
+  that returns a number.  For example, to compute the lengths
+  and norms for frequencies, pass this lambda as the second
+  argument:
+     (lambda (x) ((add-pair-freq-api LLOBJ) 'pair-freq x))
+  Any function that takes a pair and returns a number is allowed.
+"
+	(let ((llobj LLOBJ)
+			(star-obj (add-pair-stars LLOBJ))
+			(supp-obj (add-pair-support-compute LLOBJ))
+			(get-cnt GET-CNT))
+
+	))
 
 ; ---------------------------------------------------------------------

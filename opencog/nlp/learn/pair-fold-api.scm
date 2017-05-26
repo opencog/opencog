@@ -70,6 +70,9 @@
 ; returns the number of disjuncts that appear in the word "the" or in
 ; the word "a".
 ;
+; These examples are useful enough in the general case, that they are
+; implemented in standard functions in the add-pair-math class.
+;
 ; The function provided to add-tuple-math can be any tuple. i.e. can
 ; take any arbitrary list.  The only constraint is that all elements of
 ; the list must all be items associated with the same vector.
