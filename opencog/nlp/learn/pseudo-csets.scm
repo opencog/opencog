@@ -331,21 +331,13 @@
   get-total-cset-count -- return the total number of observations
   of all connector-sets in the system.
 "
-	; XXX FIXME, this is somewhat sloppy in it's counting, it
-	; does not verify that all atoms that are 'LgWordCsets are
-	; valid word+psuedo-disjunct pairs.  Other garbage could
-	; sneak in.
-	(define tot 0)
-	(cog-map-type
-		(lambda (cset) (set! tot (+ tot (get-count cset))) #f)
-		'LgWordCset)
-	tot
+	(pseudo-cset-count-api 'wild-wild-count)
 )
 
 (define-public (get-cset-frequency CSET)
 "
   get-cset-frequency -- Return the frequency (probability) with which
-  CSET has been observed. CST must be a link of type LgWordCset.
+  CSET has been observed. CSET must be a link of type LgWordCset.
 "
 	(pseudo-cset-freq-api 'pair-freq CSET)
 )
