@@ -450,7 +450,7 @@
 
 (define cset-entropy-bits
 	(fold
-		(lambda (word sum) (+ sum  (cset-vec-entropy word)))
+		(lambda (word sum) (+ sum  (cset-vec-word-entropy word)))
 		0
 		all-cset-words))
 

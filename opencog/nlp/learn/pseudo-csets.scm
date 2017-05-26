@@ -375,30 +375,18 @@
 	(pseudo-cset-freq-api 'left-wild-freq DISJUNCT)
 )
 
-(define-public (cset-vec-entropy ITEM)
+(define-public (cset-vec-word-entropy WORD)
 "
   cset-vec-entropy -- return the entropy for the subset of
-  connector-sets associated with ITEM.  ITEM can be either a
-  WordNode or a disjunct. A loop is performed over all of the
-  csets associated with that item, and the entropy for each
-  cset is summed up.
+  connector-sets associated with WORD, which must be a WordNode.
+  This is given by
+      sum_d p(w,d) log p(w,d)
+  for fixed word w, the sum ranging over all disjuncts.
 
-  sum_x p(x,y) log p(x,y) for fixed y
+  The returned entropy is in bits, i.e. computed with log_2.
 
-  The returned entropy is in bits, i.e. computerd with log_2.
-
-  XXX FIXME this is deprecated in favor of
-  ((add-pair-mi-compute (make-pseudo-cset-api)) 'compute-left-entropy ITEM)
 "
-   ; sum of the counts
-	(define nats
-		(fold
-			(lambda (cset sum)
-				(define cset-freq (get-cset-frequency cset))
-				(- sum (* cset-freq (log cset-freq))))
-			0
-			(get-cset-vec ITEM)))
-	(/ nats (log 2.0))
+  (pseudo-cset-mi-api 'compute-right-entropy WORD)
 )
 
 (define (cset-vec-word-mi WORD)
@@ -410,7 +398,7 @@
    as a whole can be written as
      MI = sum_w p(w) MI(w)
 
-   Note this function returns MI in units of bits. i.e. log-2
+   Note this function returns MI in units of bits. i.e. log_2
 "
 	(pseudo-cset-mi-api 'compute-right-fmi WORD)
 )
