@@ -342,21 +342,12 @@
 	tot
 )
 
-(define total-cset-count 0)
-(define (get-stashed-count)
-	; total number of observations of csets in the system.
-	; XXX there might be a more elegant way to handle this.
-	(if (eqv? 0 total-cset-count)
-		(set! total-cset-count (get-total-cset-count)))
-	total-cset-count
-)
-
 (define-public (get-cset-frequency CSET)
 "
   get-cset-frequency -- Return the frequency (probability) with which
-  CSET has been observed.
+  CSET has been observed. CST must be a link of type LgWordCset.
 "
-	(/ (get-count CSET) (get-stashed-count))
+	(pseudo-cset-freq-api 'pair-freq CSET)
 )
 
 (define-public (cset-vec-word-frequency WORD)
