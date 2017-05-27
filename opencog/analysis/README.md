@@ -57,6 +57,14 @@ software systems (such as scipy or Gnu Octave or tensorflow) could
 be used to perform the analysis.  Now that you've got the general
 idea... you can go do this!
 
+The basic methods that need to be implemented to make some structures
+in the atomspace available to the correlation matrix code are documented
+in `object-api.scm`. Working examples of the base classes can be found
+in
+http://github.com/opencog/opencog/opencog/nlp/learn/batch-word-pair.scm
+and in
+http://github.com/opencog/opencog/opencog/nlp/learn/pseudo-csets.scm
+
 Basic definitions
 -----------------
 Anyway, if you are willing to use scheme, here's what we've got,

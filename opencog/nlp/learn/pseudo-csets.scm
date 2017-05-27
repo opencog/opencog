@@ -70,6 +70,7 @@
 (use-modules (srfi srfi-1))
 (use-modules (opencog))
 (use-modules (opencog persist))
+(use-modules (opencog analysis))
 
 ; ---------------------------------------------------------------------
 ; ---------------------------------------------------------------------

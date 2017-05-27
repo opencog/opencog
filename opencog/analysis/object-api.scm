@@ -136,8 +136,7 @@
 
 ; ---------------------------------------------------------------------
 
-; Note this is NOT define-public!!
-(define (add-pair-stars LLOBJ)
+(define-public (add-pair-stars LLOBJ)
 "
   add-pair-stars LLOBJ - Extend LLOBJ with wildcard access methods.
 
