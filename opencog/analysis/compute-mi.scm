@@ -9,27 +9,16 @@
 ; OVERVIEW
 ; --------
 ; The scripts below compute the mutual information held in pairs
-; of "items".  The "items" can be any atoms, all of the same atom-type,
-; arranged in ordered pairs via a ListLink.  For example,
+; of "items".  The "items" can be any atoms, arranged in ordered pairs,
+; usually by a ListLink. For example,
 ;
 ;     ListLink
 ;          SomeAtom "left-side"
-;          SomeAtom "right-hand-part"
+;          OtherKinfOfAtom "right-hand-part"
 ;
-; In the current usage, the SomeAtom is a WordNode, and the pairs are
-; word-pairs obtained from linguistic analysis.  However, these scripts
-; are general, and work for any kind of pairs, not just words.
-;
-; It is presumed that a database of counts of pairs has been already
-; generated; these scripts work off of those counts.  We say "database",
-; instead of "atomspace", because the scripts will automatically store
-; the resulting counts in the (SQL) persistence backend, as they are
-; computed.  This simplifies data management a little bit.
-;
-; It is assumed that all the count of all pair observations are stored
-; as the "count" portion of the CountTruthValue on some link. For
-; example, some (not not all!) of the linguistic word-pairs are stored
-; as
+; It is presumed that the atomspace already contains such pairs, with
+; counts attached to each. The prototypical example is a word-pair,
+; connected with an "ANY" link-grammar link:
 ;
 ;   EvaluationLink
 ;      LinkGrammarRelationshipNode "ANY"
@@ -69,7 +58,7 @@
 ;    N(*,*) = Sum_wl Sum_wr N(wl,wr)
 ;
 ; These sums are computed, for a given item, by the `make-compute-count`
-; object defined below.  It stores these counts at the locations
+; object defined below.  It attached these counts at the locations
 ; provided by the underlying object. By default, thse are given by
 ; `add-pair-count-api` object, althought these are designed to be
 ; overloaded, if needed.
@@ -103,18 +92,19 @@
 ; the object.  The value for N(*,*) can be gotten with the
 ; 'wild-wild-count method.
 ;
-; The mutual information for the pair (x,y) is defined as
+; The fractional mutual information for the pair (x,y) is defined as
 ;
 ;     MI(x,y) = - log_2 [ p(x,y) /  p(x,*) p(*,y) ]
 ;
 ; This is computed by the script batch-all-pair-mi below. The value is
-; stored at the location provided by the 'set-pair-mi method on the
+; attached at the location provided by the 'set-pair-mi method on the
 ; object.  It can later be retrieved with the corresponding 'pair-mi
-; method. Because everything is stored in the database, it is
-; straight-forward to perform this batch computation only once,
-; and then rely on the cached values fetched from the database.
+; method.
 ;
-; That's all there's to this.
+; The main utility wrapper not only computes all of these, but also
+; stores them in the database, from which they can be retreived at some
+; future date.  This helps avoid repeating the calculation, which can
+; take many hours for large datasets (tens of millions of pairs).
 ;
 ; ---------------------------------------------------------------------
 ;

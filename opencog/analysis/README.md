@@ -32,6 +32,11 @@ In the general, generic case, we might want to observe not just these
 predicates. We are interested, perhaps, not just in `WordNode`'s but
 in relations between, say, `ConceptNodes` and `ContextLink`s.
 
+The count can be stored anywhere, as the `'pair-count` method is used
+to obtain it.  In most cases, it is simply stored in a CountTruthValue
+attached to the EvaluationLink.  It's doesn't have to be, it could be
+placed elsewhere.
+
 Generic Programming
 -------------------
 In order to perform some sort of generic analysis of the correlation
@@ -57,17 +62,22 @@ software systems (such as scipy or Gnu Octave or tensorflow) could
 be used to perform the analysis.  Now that you've got the general
 idea... you can go do this!
 
-The basic methods that need to be implemented to make some structures
-in the atomspace available to the correlation matrix code are documented
-in `object-api.scm`. Working examples of the base classes can be found
-in
+Anyway, if you are willing to use scheme, here's what we've got,
+
+Low-level API
+-------------
+Every user needs to implement a "low-level API" object that describes
+the pairs, and provides methods to get them, and to get the associated
+count (or other numeric value).
+
+The methods that need to be implemented are described in
+`object-api.scm`. Working examples of the base classes can be found in
 http://github.com/opencog/opencog/opencog/nlp/learn/batch-word-pair.scm
 and in
 http://github.com/opencog/opencog/opencog/nlp/learn/pseudo-csets.scm
 
 Basic definitions
 -----------------
-Anyway, if you are willing to use scheme, here's what we've got,
 and some notation to go with it:
 
 Let `N(x,y)` be the observed count on the pair of atoms `(x,y)`.
