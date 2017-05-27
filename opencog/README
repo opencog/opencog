@@ -10,16 +10,22 @@ Source code overview:
 scm             -- Scheme language bindings.
 python,cython   -- Python language bindings.
 
-nlp             -- English language processing
+nlp             -- English language processing tools.
+                   Includes various chatbots.
+
 pln             -- Probabilistic logic reasoner.
 attention       -- ECAN Attention allocation.
 
 cogserver       -- Multi-user network server.
 
-spatial, spacetime -- Space and time matrix for avatars.
+timeoctomap     -- Space and time storage matrix for avatars.
+spatial, spacetime -- Like above, but quasi-obsolete.
+
+eva             -- Code to control the Hanson Robotics Sophia robot.
+                   Includes perception (vision, sound), chat and
+                   behavior subsystems.
 
 learning        -- Misc supervised learning algorithms.
+                   Most importantly, the pattern miner.
 
 visualization   -- Visualization, graphics.
-
-cycl-import     -- Import OpenCyc datasets
