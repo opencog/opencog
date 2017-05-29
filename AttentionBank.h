@@ -63,7 +63,19 @@ class AttentionBank
     /** The attention values of all the atoms in the attention bank */
     std::mutex _idx_mtx;
     std::unordered_map<Handle, AttentionValuePtr> _atom_index;
+    std::mutex AFMutex;
+    int minAFSize;
+    struct compare_sti_less{
+        bool operator()(const std::pair<Handle, AttentionValuePtr>& h1,
+                        const std::pair<Handle, AttentionValuePtr>& h2){
+            return  (h1.second)->getSTI() < (h2.second)->getSTI();
+        }
+    };
+    std::set<std::pair<Handle, AttentionValuePtr>, compare_sti_less> attentionalFocus;
 
+    void updateAttentionalFocus(const Handle&, const AttentionValuePtr&, 
+                                const AttentionValuePtr&);
+    
     /** AV changes */
     void AVChanged(const Handle&, const AttentionValuePtr&, const AttentionValuePtr&);
 
@@ -343,15 +355,11 @@ public:
      * @note: This method utilizes the ImportanceIndex
      */
     template <typename OutputIterator> OutputIterator
-    get_handle_set_in_attentional_focus(OutputIterator result) const
+    get_handle_set_in_attentional_focus(OutputIterator result)
     {
-        return get_handles_by_AV(result, getAttentionalFocusBoundary(),
-                                 AttentionValue::AttentionValue::MAXSTI);
-    }
-
-    HandleSeq getTopSTIValuedHandles(void)
-    {
-         return _importanceIndex.getTopSTIValuedHandles();
+         std::lock_guard<std::mutex> lock(AFMutex);
+         std::transform(attentionalFocus.begin(), attentionalFocus.end(),
+                 result, [](std::pair<Handle, AttentionValuePtr> hstp){return hstp.first;});
     }
 
     /**
@@ -359,6 +367,7 @@ public:
      */
     Handle getRandomAtom(void);
 
+    bool atom_is_in_AF(const Handle&);
     /**
      * Updates the importance index for the given atom. According to the
      * new importance of the atom, it may change importance bins.
