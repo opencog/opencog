@@ -125,9 +125,7 @@
          (cog-set-tv!
             ABC
             (stv (implication-implicant-conjunction-strength sC sAC sBC)
-                 (implication-implicant-conjunction-confidence cAC cBC))))
-       ;; Inconsistent, better not build anything
-       (cog-undefined-handle))))
+                 (implication-implicant-conjunction-confidence cAC cBC)))))))
 
 (define (implication-implicant-conjunction-strength sC sAC sBC)
   (min (/ (* sAC sBC) sC) 1))

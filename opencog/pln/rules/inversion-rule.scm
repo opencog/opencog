@@ -65,8 +65,7 @@
     (if (and (< 1e-8 sBA) (< 1e-8 cBA) ; Try to avoid constructing
                                         ; informationless knowledge
              (inversion-consistency sA sB sAB))
-        (cog-merge-hi-conf-tv! BA (stv sBA cBA))
-        (cog-undefined-handle)))))
+        (cog-merge-hi-conf-tv! BA (stv sBA cBA))))))
 
 ;; Name the rules
 (define inversion-inheritance-rule-name
