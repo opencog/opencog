@@ -50,17 +50,17 @@
 (add-to-load-path "../../../opencog/pln/rules/")
 
 (define rule-filenames
-  (list "conditional-partial-instantiation-meta-rule.scm"
-        "implication-scope-to-implication-rule.scm"
-        "and-lambda-distribution-rule.scm"
-        "closed-lambda-introduction-rule.scm"
-        "implication-introduction-rule.scm"
-        "implication-implicant-distribution-rule.scm"
-        "implication-and-lambda-factorization-rule.scm"
-        "deduction-rule.scm"
-        "equivalence-to-implication-rule.scm"
-        "implication-implicant-disjunction-rule.scm"
-        "conditional-full-instantiation-meta-rule.scm"
+  (list "predicate-logic/conditional-partial-instantiation-meta-rule.scm"
+        "wip/implication-scope-to-implication-rule.scm"
+        "wip/and-lambda-distribution-rule.scm"
+        "wip/closed-lambda-introduction-rule.scm"
+        "wip/implication-introduction-rule.scm"
+        "wip/implication-implicant-distribution-rule.scm"
+        "wip/implication-and-lambda-factorization-rule.scm"
+        "term-logic/deduction-rule.scm"
+        "wip/equivalence-to-implication-rule.scm"
+        "wip/implication-implicant-disjunction-rule.scm"
+        "predicate-logic/conditional-full-instantiation-meta-rule.scm"
         )
   )
 (for-each load-from-path rule-filenames)
@@ -104,4 +104,4 @@
 (ure-set-num-parameter pln-rbs "URE:BC:complexity-penalty" 1)
 
 ;; BIT reduction parameters
-(ure-set-num-parameter pln-rbs "URE:BC:maximum-bit-size" 20000)
+(ure-set-num-parameter pln-rbs "URE:BC:maximum-bit-size" 100000)
