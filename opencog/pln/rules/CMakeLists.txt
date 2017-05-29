@@ -1,7 +1,7 @@
 # Boolean algebra rules
 ADD_GUILE_MODULE(FILES
-	boolean-logic/fuzzy-conjunction-introduction-rule.scm
-	boolean-logic/fuzzy-disjunction-introduction-rule.scm
+	propositional-logic/fuzzy-conjunction-introduction-rule.scm
+	propositional-logic/fuzzy-disjunction-introduction-rule.scm
 	MODULE_DESTINATION "${DATADIR}/scm/opencog/pln/rules"
 )
 

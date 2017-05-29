@@ -50,7 +50,7 @@
 (define rule-filenames
   (list ;; "term-logic/deduction-rule.scm"
         "predicate-logic/conditional-full-instantiation-meta-rule.scm"
-        "boolean-logic/fuzzy-conjunction-introduction-rule.scm"
+        "propositional-logic/fuzzy-conjunction-introduction-rule.scm"
   )
 )
 (for-each load-from-path rule-filenames)
