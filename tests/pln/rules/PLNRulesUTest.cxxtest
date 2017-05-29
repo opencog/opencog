@@ -824,7 +824,7 @@ void PLNRulesUTest::test_conditional_full_instantiation_meta_rule()
 	                "opencog/pln/meta-rules/predicate-logic/conditional-full-instantiation-meta-rule.scm"});
 
 	// Apply the rule
-	Handle rule = eval.eval_h("conditional-full-instantiation-meta-rule");
+	Handle rule = eval.eval_h("conditional-full-instantiation-implication-scope-meta-rule");
 	Handle results = bindlink(&as, rule);
 	Handle expected = eval.eval_h
 		("(SetLink"
@@ -847,7 +847,7 @@ void PLNRulesUTest::test_conditional_full_instantiation_meta_rule()
 		 "      )"
 		 "    )"
 		 "    (ExecutionOutputLink"
-		 "      (GroundedSchemaNode \"scm: conditional-full-instantiation-formula\")"
+		 "      (GroundedSchemaNode \"scm: conditional-full-instantiation-scope-formula\")"
 		 "      (ListLink"
 		 "        (EvaluationLink"
 		 "          (PredicateNode \"Q\")"

@@ -21,7 +21,7 @@
 
 (use-modules (opencog logger))
 
-(load-from-path "formulas.scm")
+(load "formulas.scm")
 
 ;; Generate the corresponding deduction rule given its link-type and
 ;; the type for each variable (the same for all 3).

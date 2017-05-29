@@ -87,5 +87,6 @@ ADD_GUILE_MODULE(FILES
 	wip/similarity-rule.scm
 	wip/negation-introduction-rule.scm
 	wip/temp-deduction-rule.scm
+	wip/formulas.scm
 	MODULE_DESTINATION "${DATADIR}/scm/opencog/pln/rules"
 )
