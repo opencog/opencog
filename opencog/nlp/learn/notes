@@ -5860,6 +5860,89 @@ md5sum:
 c4a981af336075f0121ac020887bfa47  en_pairs_tone.sql.bz2
 
 ==================================================================
+en_pairs_tone_mst
+-----------------
+Disjuncts from MST-parsed books from "tranche-1" of mostly project
+gutenberg books. Based off of the en_pairs_tone. Contains MI for tone,
+but not the cosine angles.
+
+STATUS: good
+DATE: 27 May 2017
+REASON: I think it's good.
+
+en_pairs_tone_mst=> \dt+
+                        List of relations
+ Schema |    Name    | Type  | Owner  |    Size    | Description 
+--------+------------+-------+--------+------------+-------------
+ public | atoms      | table | ubuntu | 1496 MB    | 
+ public | spaces     | table | ubuntu | 40 kB      | 
+ public | typecodes  | table | ubuntu | 56 kB      | 
+ public | valuations | table | ubuntu | 1871 MB    | 
+ public | values     | table | ubuntu | 8192 bytes | 
+(5 rows)
+
+select count(*) from atoms; << 16487725 = 16.5M (6M more than baseline)
+
+select count(*) from valuations; <<< 19330366 = 19.3M (14M more than base)
+
+SELECT sum(valuations.floatvalue[3]) FROM valuations, atoms, typecodes
+WHERE valuations.atom=atoms.uuid AND atoms.type=typecodes.type AND
+valuations.type=7 AND typecodes.typename='EvaluationLink';
+
+EaluationLink:  559225036 = 559M almost 4X more than baseline.
+WordNode: 125696239 = 126M = identical to baseline;
+LgWordCset: 133363005 = 134M  Hm. 9M more ob.
+
+Key 10317416  *-FrequencyKey-*
+Key 10872983  *-Mutual Info Key-*
+
+1461271903 bytes uncompressed = 1.46G
+208591406 bytes compressed = 209 MB
+
+180dff2b3d683ad5559290338b5815fa  en_pairs_tone_mst.sql
+e7dddab32c92b0fd0e88adfe6be1a87b  en_pairs_tone_mst.sql.bz2
+
+==================================================================
+en_pairs_ttwo
+-------------
+Random parses from tranche-1 and tranche-2. 
+
+                        List of relations
+ Schema |    Name    | Type  | Owner  |    Size    | Description 
+--------+------------+-------+--------+------------+-------------
+ public | atoms      | table | ubuntu | 1483 MB    | 
+ public | spaces     | table | ubuntu | 40 kB      | 
+ public | typecodes  | table | ubuntu | 56 kB      | 
+ public | valuations | table | ubuntu | 956 MB     | 
+ public | values     | table | ubuntu | 8192 bytes | 
+
+select count(*) from atoms; <<< 16817599 = 16.8M atoms (6M more than tone)
+select count(*) from valuations; <<< 8770525 = 8.8m (3.4M more)
+
+SELECT count(atoms.uuid) FROM atoms,typecodes WHERE
+atoms.type=typecodes.type AND typecodes.typename='foobar';
+
+WordNode: 186573 = 187K (47K more)
+EvaluationLink:  8047063 = 8M (3.1M more)
+
+SELECT sum(floatvalue[3]) FROM valuations WHERE type=7;
+767377888 << 767M observations = 370M more
+
+SELECT sum(valuations.floatvalue[3]) FROM valuations, atoms, typecodes
+WHERE valuations.atom=atoms.uuid AND atoms.type=typecodes.type AND
+typecodes.typename='EvaluationLink';
+
+EvaluationLink: 267913561 << 268M pair obs, more than double of tone.
+WordNode: 243085829 << 243 M -- almost double
+LgWordCset: << 243114608 -- almost double
+
+SentenceNode << 795835 = 796K more than double
+ParseNode << 12468055 = 12.5M parses more than double.
+
+==================================================================
+==================================================================
+==================================================================
+==================================================================
 
 Plan:
 load en_pairs_mst
@@ -6253,3 +6336,71 @@ Hmmm.
  (/home/ubuntu/src/atomspace/opencog/persist/sql/multi-driver/SQLAtomStorage.cc:1202)
 Aborted
 
+relex crash always on this:
+“What the hell is happening here?!”
+split-books/gneiosric-ab   three out of three crashes
+
+cat gneiosric-ab | ./split-sentences.pl > g-split
+./ss-one.sh en gneiosric-ab localhost 17005
+
+cat g-split | ./submit-one.pl localhost 17005 observe-text  breaks
+g2  breaks
+g2b breaks
+g2guess is OK
+g2bb is OK
+g2ba breaks
+g2baa is OK
+g2bab breaks
+g2baba breaks
+g2babaa is OK
+g2babab breaks
+g2bababa breaks
+g3 is OK
+
+cat g4 |nc localhost 4445   breaks!
+echo 「...」 |nc localhost 4445  breks
+link-parser works ... but eats the trailing character...!?
+
+and generates zillions of parses!!??
+
+of which most are identical...
+relex definitely crashes...
+linkage_set_domain_names+0xe0
+
+6 links,
+5th link crashes..
+dtype array holds junk
+
+dtsz supposed to be the actual size of valid entries
+ppn->dtsz
+
+chk_d_type reallocs but does not memset....
+dtsz is too small.!!
+chk_d_type
+
+chk_d_type(pp->pp_node, numli...
+ do not set the pipinfo if domains is zero.
+so do not free. either
+
+*** START OF THIS PROJECT GUTENBERG EBOOK
+***START OF THE PROJECT GUTENBERG EBOOK
+
+END OF THIS PROJECT GUTENBERG EBOOK
+
+*** START: FULL LICENSE ***
+The Full Project Gutenberg License
+
+sed -n '/PROJECT GUTENBERG EBOOK/,$p' filename
+
+schweben
+
+getp "is a"
+54756-0.txt
+
+grep -l 大
+grep -l Anmerkungen *
+
+purezza
+quella
+
+if
