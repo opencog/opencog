@@ -5,9 +5,9 @@
 ;
 ; MemberLink
 ;   B
-;   SatisfyingSetLink
+;   SatisfyingSetScopeLink
 ;       X
-;		EvaluationLink
+;       EvaluationLink
 ;           D
 ;           ListLink
 ;               X
@@ -33,7 +33,7 @@
     				(TypeNode "PredicateNode")))
 		(MemberLink
 			(VariableNode "$B")
-			(SatisfyingSetLink
+			(SatisfyingSetScopeLink
 				(VariableNode "$X-M2E")
 				(EvaluationLink
 					(VariableNode "$D")
@@ -46,7 +46,7 @@
 					(VariableNode "$B"))
 				(MemberLink
 					(VariableNode "$B")
-					(SatisfyingSetLink
+					(SatisfyingSetScopeLink
 						(VariableNode "$X-M2E")
 						(EvaluationLink
 							(VariableNode "$D")
@@ -62,7 +62,7 @@
     				(TypeNode "PredicateNode")))
 		(MemberLink
 			(VariableNode "$B")
-			(SatisfyingSetLink
+			(SatisfyingSetScopeLink
 				(VariableNode "$X-M2E")
 				(EvaluationLink
 					(VariableNode "$D")
@@ -77,7 +77,7 @@
 						(VariableNode "$B")))
 				(MemberLink
 					(VariableNode "$B")
-					(SatisfyingSetLink
+					(SatisfyingSetScopeLink
 						(VariableNode "$X-M2E")
 						(EvaluationLink
 							(VariableNode "$D")
@@ -95,7 +95,7 @@
     				(TypeNode "PredicateNode")))
 		(MemberLink
 			(VariableNode "$B")
-			(SatisfyingSetLink
+			(SatisfyingSetScopeLink
 				(VariableNode "$X-M2E")
 				(EvaluationLink
 					(VariableNode "$D")
@@ -112,7 +112,7 @@
 						(VariableNode "$C")))
 				(MemberLink
 					(VariableNode "$B")
-					(SatisfyingSetLink
+					(SatisfyingSetScopeLink
 						(VariableNode "$X-M2E")
 						(EvaluationLink
 							(VariableNode "$D")
@@ -131,7 +131,7 @@
     				(TypeNode "PredicateNode")))
 		(MemberLink
 			(VariableNode "$C")
-			(SatisfyingSetLink
+			(SatisfyingSetScopeLink
 				(VariableNode "$X-M2E")
 				(EvaluationLink
 					(VariableNode "$D")
@@ -148,7 +148,7 @@
 						(VariableNode "$C")))
 				(MemberLink
 					(VariableNode "$C")
-					(SatisfyingSetLink
+					(SatisfyingSetScopeLink
 						(VariableNode "$X-M2E")
 						(EvaluationLink
 							(VariableNode "$D")

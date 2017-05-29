@@ -11,9 +11,9 @@
 ; |-
 ; MemberLink
 ;   B 
-;   SatisfyingSetLink
+;   SatisfyingSetScopeLink
 ;       X 
-;		EvaluationLink
+;       EvaluationLink
 ;           D 
 ;           ListLink 
 ;               X 
@@ -52,7 +52,7 @@
 				(ListLink
 					(MemberLink
 						(VariableNode "$A")
-						(SatisfyingSetLink
+						(SatisfyingSetScopeLink
 							(VariableNode "$X")
 							(EvaluationLink
 								(VariableNode "$D")
@@ -93,7 +93,7 @@
 				(ListLink
 					(MemberLink
 						(VariableNode "$A")
-						(SatisfyingSetLink
+						(SatisfyingSetScopeLink
 							(VariableNode "$X")
 							(EvaluationLink
 								(VariableNode "$D")
@@ -138,7 +138,7 @@
 				(ListLink
 					(MemberLink
 						(VariableNode "$A")
-						(SatisfyingSetLink
+						(SatisfyingSetScopeLink
 							(VariableNode "$X")
 							(EvaluationLink
 								(VariableNode "$D")
@@ -147,7 +147,7 @@
 									(VariableNode "$B")))))
 					(MemberLink
 						(VariableNode "$B")
-						(SatisfyingSetLink
+						(SatisfyingSetScopeLink
 							(VariableNode "$Y")
 							(EvaluationLink
 								(VariableNode "$D")
@@ -206,7 +206,7 @@
 ;	(if (= (cog-arity (gdr DA)) 0)
 ;		(MemberLink (stv (cog-stv-strength DA) (cog-stv-confidence DA))
 ;			(gdr DA)
-;			(SatisfyingSetLink
+;			(SatisfyingSetScopeLink
 ;				(VariableNode "$X")
 ;				(EvaluationLink
 ;					(gar DA)
@@ -219,7 +219,7 @@
 ;		(cons
 ;			(MemberLink (stv (cog-stv-strength DA) (cog-stv-confidence DA))
 ;				(car trailing-nodes)
-;				(SatisfyingSetLink
+;				(SatisfyingSetScopeLink
 ;					(VariableNode "$X")
 ;					(EvaluationLink
 ;						(gar DA)
