@@ -109,8 +109,7 @@
           (cog-merge-hi-conf-tv! lamb (cog-tv and-lamb))
           (List
            (cog-set-tv! (ImplicationLink and-lamb lamb) (stv 1 1))
-           (cog-set-tv! (ImplicationLink lamb and-lamb) (stv 1 1))))
-        (cog-undefined-handle))))
+           (cog-set-tv! (ImplicationLink lamb and-lamb) (stv 1 1)))))))
 
 ;; Name the rule
 (define and-lambda-factorization-double-implication-rule-name

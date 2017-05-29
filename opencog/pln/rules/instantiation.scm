@@ -59,9 +59,9 @@
 (define (select-rnd-outgoing link)
   (let* ((outgoings (cog-outgoing-set link))
          (outgoings-len (length outgoings)))
-    (if (= outgoings-len 0)
-        (cog-undefined-handle)
-        (list-ref outgoings (random outgoings-len)))))
+    (if (< 0 outgoings-len)
+        (list-ref outgoings (random outgoings-len))
+        #f)))
 
 ;; Return a list without the indexed element
 (define (rm-list-ref l i)

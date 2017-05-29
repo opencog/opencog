@@ -179,10 +179,9 @@
          (Q (caddr Impl-outgoings))
          (terms (if (= 0 Impl-c) ; don't try to instantiate zero
                                  ; knowledge implication
-                    (cog-undefined-handle)
+                    #f
                     (select-conditioned-substitution-terms TyVs P))))
-    (if (equal? terms (cog-undefined-handle))
-        (cog-undefined-handle)
+    (if terms
         ;; Substitute the variables by the terms in P and Q. In P to
         ;; get its TV, in Q cause it's the rule output.
         (let* (
@@ -199,8 +198,7 @@
           ;; TODO: replace this by something more sensible
           ;; (extract-hypergraph Pput)
           ;; (extract-hypergraph Qput)
-          (if (= 0 Qinst-c) ; avoid creating informationless knowledge
-              (cog-undefined-handle)
+          (if (< 0 Qinst-c) ; avoid creating informationless knowledge
               (cog-merge-hi-conf-tv! Qinst (stv Qinst-s Qinst-c)))))))
 
 ;; Name the rule
@@ -272,8 +270,7 @@
          (TyVs-remain-list (rm-list-ref TyVs-outgoings rnd-index))
          (TyVs-remain-len (length TyVs-remain-list))
          (TyVs-remain (apply cog-new-link 'VariableList TyVs-remain-list)))
-    (if (equal? terms (cog-undefined-handle))
-        terms
+    (if terms
         (cog-set-tv!
          (let* (
                                         ; Take the corresponding term

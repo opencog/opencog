@@ -123,8 +123,7 @@
                                               ;; annoying in the
                                               ;; current hacky
                                               ;; situation.
-                    (cog-merge-hi-conf-tv! AC (stv sAC cAC))
-                    (cog-undefined-handle)))
+                    (cog-merge-hi-conf-tv! AC (stv sAC cAC))))
               ;; Branch if sB * cB <= 0.99
               (let* ((sAC (if (or (< 0.99 (* sAB cAB)) (< 0.99 (* sBC cBC)))
                               ;; Hack to overcome for the lack of
@@ -149,9 +148,7 @@
                                               ;; annoying in the
                                               ;; current hacky
                                               ;; situation.
-                    (cog-merge-hi-conf-tv! AC (stv sAC cAC))
-                    (cog-undefined-handle))))
-          (cog-undefined-handle)))))
+                    (cog-merge-hi-conf-tv! AC (stv sAC cAC)))))))))
 
 ;; Name the rules
 (define deduction-inheritance-rule-name

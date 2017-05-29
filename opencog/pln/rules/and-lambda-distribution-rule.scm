@@ -35,9 +35,9 @@
         (TypeNode "AndLink"))))
 
 (define and-lambda-distribution-body
-  (LambdaLink
-     (VariableNode "$TyVs")
-     (VariableNode "$And")))
+  (QuoteLink (LambdaLink
+     (UnquoteLink (VariableNode "$TyVs"))
+     (UnquoteLink (VariableNode "$And")))))
 
 (define and-lambda-distribution-rewrite
   (ExecutionOutputLink
