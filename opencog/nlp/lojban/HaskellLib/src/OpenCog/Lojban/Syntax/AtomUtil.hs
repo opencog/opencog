@@ -76,7 +76,7 @@ evalTv :: Iso (TruthVal,[Atom]) Atom
 evalTv = linkIso2 "EvaluationLink"
 
 ssl :: Iso [Atom] Atom
-ssl = linkIso "SatisfyingSetLink" noTv
+ssl = linkIso "SatisfyingSetScopeLink" noTv
 
 setTypeL  :: Iso [Atom] Atom
 setTypeL = linkIso "SetTypeLink" noTv

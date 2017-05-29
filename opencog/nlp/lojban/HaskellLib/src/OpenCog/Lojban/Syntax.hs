@@ -477,7 +477,7 @@ handleNU = Iso f g where
                     concept = 
                 in Link "MemberLink"
                     [ concept
-                    , Link "SatisfyingSetLink"
+                    , Link "SatisfyingSetScopeLink"
                         [ Link "TypedVariableLink"
                             [ Node "VariableNode" "$C"
                             , Node "TypeNode" "ConceptNode"
