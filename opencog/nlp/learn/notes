@@ -5907,6 +5907,10 @@ en_pairs_ttwo
 -------------
 Random parses from tranche-1 and tranche-2. 
 
+STATUS: good
+DATE: 29 May 2017
+REASON: I think it's good.
+
                         List of relations
  Schema |    Name    | Type  | Owner  |    Size    | Description 
 --------+------------+-------+--------+------------+-------------
@@ -5938,6 +5942,12 @@ LgWordCset: << 243114608 -- almost double
 
 SentenceNode << 795835 = 796K more than double
 ParseNode << 12468055 = 12.5M parses more than double.
+
+772033746 Bytes = 772M uncompressed.
+132694670 Bytes = 133M compressed
+
+8bbfb8f0f4956f21ec1120b550890e0f  en_pairs_ttwo.sql
+0b1908dfc232de4ea4e20d616cbbe290  en_pairs_ttwo.sql.bz2
 
 ==================================================================
 ==================================================================
@@ -6428,3 +6438,66 @@ Langauge:
 54724-0.txt
 54729-0.txt
 
+
+guile
+
+(use-modules (opencog) (opencog persist) (opencog persist-sql))
+(use-modules (opencog nlp) (opencog nlp learn))
+(use-modules (opencog cogserver))
+(start-cogserver "opencog2.conf")
+(sql-open "postgres:///en_pairs_tone_mst?user=ubuntu")
+(sql-load)
+(sql-stats)
+(sql-close)
+Finished loading 16487725 atoms in total in 2212 seconds (7453 per second)
+started at 20K/sec .. towards end, was 75% system cpu... why????
+21GB ram = 1400Bytes/atom. as usual. Need a diet plan.
+
+(sql-open "postgres:///en_pairs_ttwo?user=ubuntu")
+(sql-load)
+(sql-stats)
+(sql-close)
+Finished loading 16817599 atoms in total in 991 seconds (16970 per second)
+Much faster because most atoms are in atomspace already.
+sql-stats: Atomspace holds 22987920 atoms ... and is 26GB in size.
+
+
+(sql-open "postgres:///en_pairs_ttwo_mst?user=ubuntu")
+(sql-store)
+(sql-stats)
+(sql-close)
+
+Initial rate is (3389 per second) on SSD which is 10x the spinning-disk
+Peaked at (3546 per second) half-way throough
+Dropped to (2537 per second) overall average.
+version but is still pathetically slow.
+iotop shows 3.2 MBytes/sec  and about 770 tps
+so where is the bottleneck?
+ Bottleneck is still disk i/o, even though its SSD:
+how can I tell?
+1) guile is under 90% cpu
+2) 20+ postgres procs show 30% cpu, each
+3) sql-stats shows 8 threads busy draining.
+4) loadavg shows 6
+5) top shows > 2.0% wait,  (on 24 cpus!) 4% system 18% user 75% idle
+   viz about 0.5 cou wait, 1 cpu system, 4cpu's busy
+   and since guile is less than  1 cpu, the postgres take up the
+   remaining cpu.  Since 18 cpus are idle, we must be stalled in i/o.
+So, somehow still stuck in i/o waiting for postgres to flush to disk.
+
+6) iotop shows 60 to 100 MBytes/sec, highly variable.
+   wait sometimes spikes to 15% (and io dropts to zero)
+   sometimes rate spikes to 300MB/sec! but rarely.
+
+7) Launching any-parsing does not seem to affect iowait!
+   Nore does it change store performance at all!!!
+   but it does raise the write rates and the tps
+
+?? Is it postgres indexing? Can we suspend that while storing?
+
+--------- meanhwile
+launch tranche-3 any-parsing Tue May 30 04:39:44 UTC 2017
+
+----- anyway, recompute pair mi.
+(define ala (make-any-link-api))
+(batch-all-pair-mi ala)

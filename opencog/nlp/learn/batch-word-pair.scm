@@ -491,20 +491,8 @@
 ; WHERE valuations.atom=atoms.uuid AND atoms.type=typecodes.type
 ; AND typecodes.typename='WordNode';
 ;
-; (compute-word-prob x wc)
-;
-; select count(*) from  atoms where type = 77;
-; 16785 in fr
-; 19781 in lt
-;
-; select * from atoms where name='famille';
-; uuid is 2908473
-; select * from atoms where outgoing @> ARRAY[2908473];
-; select * from atoms where outgoing @> ARRAY[cast(2908473 as bigint)];
-;
-; 43464154
-; duuude left-star handle is
-; 43464157duuude good by
+; If it all looks good, then:
+; (batch-all-pair-mi (make-any-link-api))
 ;
 ; (define wtfl  (EvaluationLink  (LinkGrammarRelationshipNode "ANY")
 ;   (ListLink (AnyNode "left-word") (WordNode "famille"))))
@@ -512,23 +500,11 @@
 ; (define wtfr  (EvaluationLink  (LinkGrammarRelationshipNode "ANY")
 ;     (ListLink (WordNode "famille") (AnyNode "right-word"))))
 ;
-;
 ; anynode is type 105
 ;  select * from atoms where type=105;
 ; uuid is 43464152
 ;         43464155
+;
 ; select count(*) from atoms where outgoing @> ARRAY[cast(43464152 as bigint)];
 ; returns the number of word-pairs which we've wild-carded.
 ; select * from atoms where outgoing = ARRAY[cast(43464152 as bigint), cast(43464155 as bigint)];
-;
-; How many atoms?
-; 16785  words in fr
-;
-; How many pairs ??
-; LinkGrammarRelationshipNode is 87
-; ANY is uuid 199
-; select count(*) from atoms where outgoing @> ARRAY[cast(199 as bigint)];
-; There are 177960 french pairs.
-; This should require  2x atoms per pair (eval, list)
-; viz 178K x 2 = 360K atom loads.
-; OK, that's good.
