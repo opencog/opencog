@@ -91,6 +91,15 @@
 ;
 (define (batch-sim WORD WORD-LIST CUTOFF)
 
+	(define cnt 0)
+
+	(define (get-angle SIM)
+		(define pi 3.14159265358979)
+		; Stupid-ass guile return a small imaginary number when taking
+		; the arccos of 1.0. WTF.  So we need to take the real part!!
+		(* 2.0 (/ (real-part (acos SIM)) pi))
+	)
+
 	(define (set-sim WORD-A WORD-B SIM)
 		(cog-set-value!
 			(sim-pair WORD-A WORD-B) cos-key
@@ -100,8 +109,12 @@
 		(lambda (wrd)
 			(define sim (cset-vec-cosine WORD wrd))
 			(if (and (< CUTOFF sim) (not (equal? WORD wrd)))
-				(set-sim WORD wrd sim)))
+				(begin
+					(set! cnt (+ 1 cnt))
+					(store-atom (set-sim WORD wrd sim)))))
 		WORD-LIST)
+
+	cnt
 )
 
 ; ---------------------------------------------------------------------
@@ -112,15 +125,26 @@
 
 	(define len (length WORD-LIST))
 	(define done 0)
+	(define prs 0)
+	(define start (current-time))
 
 	; tail-recursive list-walker.
 	(define (make-pairs WRD-LST)
 		(if (null? WRD-LST) #t
 			(begin
+				(set! prs (+ prs (batch-sim (car WRD-LST) (cdr WRD-LST) CUTOFF)))
 				(set! done (+  done 1))
 				(if (eqv? 0 (modulo done 10))
-					(format #t "Doing ~A of ~A\n" done len))
-				(batch-sim (car WRD-LST) (cdr WRD-LST) CUTOFF)
+					(let* ((elapsed (- (current-time) start))
+							(tot (* done (- len done)))
+							(rate (* 0.001 (/ tot elapsed)))
+							)
+						(format #t
+							 "Done ~A/~A Pairs: ~A/~A pct: ~4f Elapsed: ~A rate=~5f K prs/sec\n"
+							done len prs tot
+							(* 100.0 (/ prs tot))
+							elapsed rate
+						)))
 				(make-pairs (cdr WRD-LST)))))
 
 	(make-pairs WORD-LIST)
@@ -138,10 +162,12 @@
 ; (use-modules (opencog) (opencog persist) (opencog persist-sql))
 ; (use-modules (opencog nlp) (opencog nlp learn))
 ; (sql-open "postgres:///en_pairs_sim?user=linas")
+; (sql-open "postgres:///en_pairs_supersim?user=linas")
 ; (use-modules (opencog cogserver))
 ; (start-cogserver "opencog2.conf")
 ; (fetch-all-words)
-; (fetch-pseudo-csets (get-all-words))
+; (define pca (make-pseudo-cset-api))
+; (pca 'fetch-pairs)
 ; (define ac (get-all-cset-words)))
 ; (length ac)
 ; 37413

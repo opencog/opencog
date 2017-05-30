@@ -443,7 +443,7 @@
 	(define pi 3.14159265358979)
 
 	; Stupid-ass guile return a small imaginary number when taking
-	; the arccos of 1.0. WTF.  So we need to take he real part!!
+	; the arccos of 1.0. WTF.  So we need to take the real part!!
 	(* 2.0 (/ (real-part (acos SIM)) pi))
 )
 

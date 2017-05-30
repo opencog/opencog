@@ -6499,6 +6499,9 @@ So, somehow still stuck in i/o waiting for postgres to flush to disk.
 launch tranche-3 any-parsing Tue May 30 04:39:44 UTC 2017
 
 ----- anyway, recompute pair mi and resume mst-parsing
+
+en_pairs_ttwo_mst
+
 (define ala (make-any-link-api))
 (batch-all-pair-mi ala)
 Final store: about  (1250.0 pairs/sec)
@@ -6506,6 +6509,10 @@ Done storing 8047063 pair MI's in 6905 secs
 
 sql-stats: Atomspace holds 23178644 atoms = 23M = 35GBytes
 Now can start tranche-2 MST parsing.
+
+Done. Wow. That was fast! did anything actually happen?
+
+select count(*) from atoms; <<< 27638783 = 27M
 
 ---------- meanwhile, finish stats work
 (fetch-all-sims)
@@ -6521,6 +6528,13 @@ batch-sim should NOT store!
 batch-sim-pairs 
 
 So: 1) cutoff for sim  2) cutoff for store.
+
+start 2.4G and run 0.3 sim
+again 0.1 sim...
+
+possible: 37413 * 37413 = 1399732569 = 1.4G pairs.
+estimate: 5% of these, so= 70M pairs!? Ouch. RAM eating. and insanely
+slow
 
 
 ---------- meanwhile, compute & cache similarity
