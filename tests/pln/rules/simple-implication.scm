@@ -1,10 +1,10 @@
 ;; Define simple implications to test implication instantiation rules
 
-(ImplicationLink (stv 1 1)
+(ImplicationScopeLink (stv 1 1)
    (TypedVariableLink
       (VariableNode "$X")
       (TypeNode "ConceptNode"))
-   (EvaluationLink
+   (EvaluationLink (stv 0.2 0.9)
       (PredicateNode "P")
       (VariableNode "$X"))
    (EvaluationLink
@@ -15,7 +15,7 @@
    (PredicateNode "P")
    (ConceptNode "A"))
 
-(ImplicationLink (stv 1 1)
+(ImplicationScopeLink (stv 1 1)
    (VariableList
       (TypedVariableLink
          (VariableNode "$X")
@@ -23,7 +23,7 @@
       (TypedVariableLink
          (VariableNode "$Y")
          (TypeNode "ConceptNode")))
-   (EvaluationLink
+   (EvaluationLink (stv 0.04 0.6)
       (PredicateNode "P")
       (ListLink
          (VariableNode "$X")
@@ -42,7 +42,7 @@
 
 ;; This one is to test the implication instantiation rule when the
 ;; precondition cannot be satisfied
-(ImplicationLink (stv 1 1)
+(ImplicationScopeLink (stv 1 1)
    (TypedVariableLink
       (VariableNode "$X")
       (TypeNode "ConceptNode"))
@@ -55,6 +55,6 @@
 
 ;; This one is to test implicant distribution
 
-(ImplicationLink
+(ImplicationLink (stv 1 1)
    (PredicateNode "P")
    (PredicateNode "Q"))

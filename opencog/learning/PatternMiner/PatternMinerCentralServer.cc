@@ -44,12 +44,8 @@
 #include <opencog/embodiment/atom_types.h>
 #include <opencog/query/BindLinkAPI.h>
 #include <opencog/util/Config.h>
-#include <opencog/util/StringManipulator.h>
-#include <boost/algorithm/string.hpp>
-#include <boost/algorithm/string/regex.hpp>
 
-#include "HTree.h"
-#include "PatternMiner.h"
+#include "DistributedPatternMiner.h"
 
 #include <cpprest/http_listener.h>
 #include <cpprest/http_msg.h>
@@ -73,8 +69,9 @@ bool compareHTreeNodeBySurprisingness_I(HTreeNode* node1, HTreeNode* node2);
 bool compareHTreeNodeBySurprisingness_II(HTreeNode* node1, HTreeNode* node2);
 
 
-void PatternMiner::launchCentralServer()
+void DistributedPatternMiner::launchCentralServer()
 {
+    run_as_distributed_worker = false;
     run_as_central_server = true;
 
     waitingForNewClients = false;
@@ -87,7 +84,7 @@ void PatternMiner::launchCentralServer()
 
     serverListener = new http_listener( utility::string_t("http://" + centralServerIP + ":" + centralServerPort +"/PatternMinerServer") );
 
-    serverListener->support(methods::POST, std::bind(&PatternMiner::handlePost, this,  std::placeholders::_1));
+    serverListener->support(methods::POST, std::bind(&DistributedPatternMiner::handlePost, this,  std::placeholders::_1));
 
     allWorkersStop = false;
 
@@ -154,7 +151,7 @@ void PatternMiner::launchCentralServer()
 
 }
 
-void PatternMiner::centralServerStartListening()
+void DistributedPatternMiner::centralServerStartListening()
 {
     try
     {
@@ -168,7 +165,7 @@ void PatternMiner::centralServerStartListening()
     }
 }
 
-void PatternMiner::centralServerStopListening()
+void DistributedPatternMiner::centralServerStopListening()
 {
     try
     {
@@ -182,7 +179,7 @@ void PatternMiner::centralServerStopListening()
     }
 }
 
-bool PatternMiner::checkIfAllWorkersStopWorking()
+bool DistributedPatternMiner::checkIfAllWorkersStopWorking()
 {
 
     if (allWorkers.size() == 0)
@@ -199,7 +196,7 @@ bool PatternMiner::checkIfAllWorkersStopWorking()
     return true;
 }
 
-void PatternMiner::handlePost(http_request request)
+void DistributedPatternMiner::handlePost(http_request request)
 {
     try
     {
@@ -237,7 +234,7 @@ void PatternMiner::handlePost(http_request request)
 }
 
 
-void PatternMiner::handleRegisterNewWorker(http_request request)
+void DistributedPatternMiner::handleRegisterNewWorker(http_request request)
 {
 
     try
@@ -269,7 +266,7 @@ void PatternMiner::handleRegisterNewWorker(http_request request)
 
 }
 
-void PatternMiner::handleReportWorkerStop(http_request request)
+void DistributedPatternMiner::handleReportWorkerStop(http_request request)
 {
     try
     {
@@ -308,7 +305,7 @@ void PatternMiner::handleReportWorkerStop(http_request request)
 
 //long startTime;
 //long endTime;
-void PatternMiner::handleFindNewPatterns(http_request request)
+void DistributedPatternMiner::handleFindNewPatterns(http_request request)
 {
 
 //    // check server load
@@ -365,7 +362,7 @@ void PatternMiner::handleFindNewPatterns(http_request request)
     patternQueueLock.unlock();
 }
 
-void PatternMiner::runParsePatternTaskThread()
+void DistributedPatternMiner::runParsePatternTaskThread()
 {
     static int tryToParsePatternNum = 0;
 
@@ -399,7 +396,7 @@ void PatternMiner::runParsePatternTaskThread()
     }
 }
 
-void PatternMiner::parseAPatternTask(json::value jval)
+void DistributedPatternMiner::parseAPatternTask(json::value jval)
 {
 
     try
@@ -538,180 +535,9 @@ void PatternMiner::parseAPatternTask(json::value jval)
     }
 }
 
-// a patternStr is sent from a distributed worker via json, it's the keystring of a pattern
-// the server need to load the string into links into AtomSpace
-// e.g. a patternStr =
-//  (InheritanceLink )\n
-//    (VariableNode $var_1)\n
-//    (ConceptNode human)\n\n
-//  (EvaluationLink )\n
-//    (PredicateNode like_drink)
-//    (Listlink )\n
-//      (VariableNode $var_1)\n
-//      (ConceptNode soda)\n\n
-//  (InheritanceLink )\n
-//    (VariableNode $var_1)\n
-//    (ConceptNode ugly)\n\n
-
-//(AndLink)\n
-//  (InheritanceLink )\n
-//    (VariableNode $var_1)\n
-//    (ConceptNode human)\n
-//  (EvaluationLink )\n
-//    (PredicateNode like_drink)
-//    (Listlink )\n
-//      (VariableNode $var_1)\n
-//      (ConceptNode soda)\n\n
-//(InheritanceLink )\n
-//    (VariableNode $var_1)\n
-//    (ConceptNode ugly)\n\n
-HandleSeq PatternMiner::loadPatternIntoAtomSpaceFromString(string patternStr, AtomSpace *_atomSpace)
-{
-
-    std::vector<std::string> strs;
-    boost::algorithm::split_regex( strs, patternStr, boost::regex( "\n\n" ) ) ;
-
-    HandleSeq pattern;
-
-//    // debug
-//    if (strs.size() > 2)
-//    {
-//        int i = 0;
-//        i++;
-//    }
-
-    for (string linkStr : strs) // load each link
-    {
-        if (linkStr == "")
-            continue;
-
-            HandleSeq rootOutgoings;
-
-            std::size_t firstLineEndPos = linkStr.find("\n");
-            std::string rootOutgoingStr = linkStr.substr(firstLineEndPos + 1);
-            stringstream outgoingStream(rootOutgoingStr);
-
-            if (! loadOutgoingsIntoAtomSpaceFromString(outgoingStream, _atomSpace, rootOutgoings))
-            {
-                cout << "Warning: loadPatternIntoAtomSpaceFromString: Parse pattern string error: " << linkStr << std::endl;
-                HandleSeq emptyPattern;
-                return emptyPattern;
-            }
-
-            std::size_t typeEndPos = linkStr.find(" ");
-            string atomTypeStr = linkStr.substr(1, typeEndPos - 1);
-            string linkOrNodeStr = atomTypeStr.substr(atomTypeStr.size() - 4, 4);
-
-            if (linkOrNodeStr != "Link")
-            {
-
-                cout << "Warning: loadPatternIntoAtomSpaceFromString: Not a Link: " << linkOrNodeStr << std::endl;
-                HandleSeq emptyPattern;
-                return emptyPattern;
-
-            }
-
-            Type atomType = classserver().getType(atomTypeStr);
-            if (NOTYPE == atomType)
-            {
-
-                cout << "Warning: loadPatternIntoAtomSpaceFromString: Not a valid typename: " << atomTypeStr << std::endl;
-                HandleSeq emptyPattern;
-                return emptyPattern;
-
-            }
-
-            Handle rootLink = _atomSpace->add_link(atomType, rootOutgoings);
-            pattern.push_back(rootLink);
 
 
-    }
-
-    // debug:
-    // static int pattern_num = 0;
-    // string patternToStr = "";
-
-    // for(Handle h : pattern)
-    // {
-    //    patternToStr += _atomSpace->atom_as_string(h);
-    //    patternToStr += "\n";
-    // }
-
-    // cout << "\nAdded pattern: NO." << pattern_num << "\n" << patternToStr;
-    // pattern_num ++;
-
-    return pattern;
-}
-
-// recursively function
-bool PatternMiner::loadOutgoingsIntoAtomSpaceFromString(stringstream& outgoingStream, AtomSpace *_atomSpace, HandleSeq &outgoings, string parentIndent)
-{
-    string line;
-    string curIndent = parentIndent + LINE_INDENTATION;
-
-    while(getline(outgoingStream, line))
-    {
-
-        std::size_t nonIndentStartPos = line.find("(");
-        string indent = line.substr(0, nonIndentStartPos);
-        string nonIndentSubStr = line.substr(nonIndentStartPos + 1);
-        std::size_t typeEndPos = nonIndentSubStr.find(" ");
-        string atomTypeStr = nonIndentSubStr.substr(0, typeEndPos);
-        string linkOrNodeStr = atomTypeStr.substr(atomTypeStr.size() - 4, 4);
-        Type atomType = classserver().getType(atomTypeStr);
-        if (NOTYPE == atomType)
-        {
-            cout << "Warning: loadOutgoingsIntoAtomSpaceFromString: Not a valid typename: " << atomTypeStr << std::endl;
-            return false;
-
-        }
-
-        if (indent == curIndent)
-        {
-            if (linkOrNodeStr == "Node")
-            {
-                std::size_t nodeNameEndPos = nonIndentSubStr.find(")");
-                string nodeName = nonIndentSubStr.substr(typeEndPos + 1, nodeNameEndPos - typeEndPos - 1);
-                Handle node = _atomSpace->add_node(atomType, nodeName);
-                outgoings.push_back(node);
-            }
-            else if (linkOrNodeStr == "Link")
-            {
-                // call this function recursively
-                HandleSeq childOutgoings;
-                if (! loadOutgoingsIntoAtomSpaceFromString(outgoingStream, _atomSpace, childOutgoings, curIndent))
-                    return false;
-
-                Handle link = _atomSpace->add_link(atomType, childOutgoings);
-                outgoings.push_back(link);
-            }
-            else
-            {
-                cout << "Warning: loadOutgoingsIntoAtomSpaceFromString: Not a Node, neighter a Link: " << linkOrNodeStr << std::endl;
-                return false;
-
-            }
-
-        }
-        else if (indent.size() < curIndent.size())
-        {
-            return true;
-        }
-        else
-        {
-            // exception
-            cout << "Warning: loadOutgoingsIntoAtomSpaceFromString: Indent wrong: " << line << std::endl;
-            return false;
-
-
-        }
-
-    }
-
-    return true;
-}
-
-void PatternMiner::centralServerEvaluateInterestingness()
+void DistributedPatternMiner::centralServerEvaluateInterestingness()
 {
     if (enable_Frequent_Pattern)
     {
@@ -725,7 +551,7 @@ void PatternMiner::centralServerEvaluateInterestingness()
             // Finished mining gram patterns; output to file
             std::cout<<"gram = " + toString(gram) + ": " + toString((patternsForGram[gram-1]).size()) + " patterns found! ";
 
-            OutPutFrequentPatternsToFile(gram);
+            OutPutFrequentPatternsToFile(gram, patternsForGram);
 
             std::cout<< std::endl;
         }
@@ -736,7 +562,15 @@ void PatternMiner::centralServerEvaluateInterestingness()
     {
         for(cur_gram = 2; cur_gram <= MAX_GRAM; cur_gram ++)
         {
-            cout << "\nCalculating interestingness for " << cur_gram << " gram patterns by evaluating " << interestingness_Evaluation_method << std::endl;
+            cout << "\nCalculating";
+            if (Enable_Interaction_Information)
+                cout << " Interaction_Information ";
+
+            if (Enable_surprisingness)
+                cout << " Surprisingness ";
+
+            cout << "for " << cur_gram << " gram patterns." << std::endl;
+
             cur_index = -1;
             threads = new thread[THREAD_NUM];
             num_of_patterns_without_superpattern_cur_gram = 0;
@@ -756,13 +590,14 @@ void PatternMiner::centralServerEvaluateInterestingness()
             std::cout<<"Debug: PatternMiner:  done (gram = " + toString(cur_gram) + ") interestingness evaluation!" + toString((patternsForGram[cur_gram-1]).size()) + " patterns found! ";
             std::cout<<"Outputting to file ... ";
 
-            if (interestingness_Evaluation_method == "Interaction_Information")
+            if (Enable_Interaction_Information)
             {
                 // sort by interaction information
                 std::sort((patternsForGram[cur_gram-1]).begin(), (patternsForGram[cur_gram-1]).end(),compareHTreeNodeByInteractionInformation);
-                OutPutInterestingPatternsToFile(patternsForGram[cur_gram-1], cur_gram);
+                OutPutInterestingPatternsToFile(patternsForGram[cur_gram-1], cur_gram, 0);
             }
-            else if (interestingness_Evaluation_method == "surprisingness")
+
+            if (Enable_surprisingness)
             {
                 // sort by surprisingness_I first
                 std::sort((patternsForGram[cur_gram-1]).begin(), (patternsForGram[cur_gram-1]).end(),compareHTreeNodeBySurprisingness_I);

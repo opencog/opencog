@@ -1,0 +1,15 @@
+#
+# Set up a gdb session
+#
+# Use this like so:
+#     gdb --batch --command=gdb-cmds --args guile -l btree.scm
+#
+set width 0
+set height 0
+set verbose off
+set logging on big-dump
+start
+continue
+backtrace
+info threads
+thread apply all bt

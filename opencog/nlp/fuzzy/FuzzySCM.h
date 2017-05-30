@@ -1,7 +1,8 @@
 /*
  * FuzzySCM.h
  *
- * Copyright (C) 2015 OpenCog Foundation
+ * Copyright (C) 2015, 2016 OpenCog Foundation
+ * All Rights Reserved
  *
  * Author: Leung Man Hin <https://github.com/leungmanhin>
  *
@@ -38,7 +39,8 @@ class FuzzySCM
         static void init_in_module(void*);
         void init(void);
 
-        Handle do_nlp_fuzzy_match(Handle, Type, const HandleSeq&);
+        Handle do_nlp_fuzzy_match(Handle, Type, const HandleSeq&,bool);
+        Handle do_nlp_fuzzy_compare(Handle, Handle);
 
     public:
         FuzzySCM();

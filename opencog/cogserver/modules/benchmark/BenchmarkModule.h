@@ -34,6 +34,7 @@ namespace opencog
 {
 
 class CogServer;
+class AttentionBank;
 
 /**
  *
@@ -45,6 +46,7 @@ class BenchmarkModule : public Module
 {
     private:
         AtomSpace* as;
+        AttentionBank* _bank;
 
         /*
          * Runs a performance benchmark on the AtomSpace by creating a fully

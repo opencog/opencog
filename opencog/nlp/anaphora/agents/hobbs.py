@@ -43,7 +43,7 @@ STRENGTH_FOR_ACCEPTED_ANTECEDENTS=0.98
 Truth Value for antecendents which have been filtered out by filters.
 '''
 
-TV_FOR_FILTERED_OUT_ANTECEDENTS=TruthValue(0.02, TruthValue().confidence_to_count(0.9))
+TV_FOR_FILTERED_OUT_ANTECEDENTS=TruthValue(0.02, 0.9)
 
 '''
 ========================================
@@ -273,7 +273,7 @@ class HobbsAgent(MindAgent):
             if self.DEBUG:
                     print("accepted "+node.name)
             log.fine("accepted "+node.name)
-            self.generateReferenceLink(self.currentPronoun,node,TruthValue(STRENGTH_FOR_ACCEPTED_ANTECEDENTS, TruthValue().confidence_to_count(self.confidence)))
+            self.generateReferenceLink(self.currentPronoun,node,TruthValue(STRENGTH_FOR_ACCEPTED_ANTECEDENTS, self.confidence))
             self.confidence=self.confidence*CONFIDENCE_DECREASING_RATE
         else:
             self.generateReferenceLink(self.currentPronoun,node,TV_FOR_FILTERED_OUT_ANTECEDENTS)

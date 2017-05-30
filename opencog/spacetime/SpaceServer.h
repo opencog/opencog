@@ -56,7 +56,7 @@
 #include <opencog/truthvalue/TruthValue.h>
 
 #include <opencog/spatial/3DSpaceMap/Block3DMapUtil.h>
-#include <opencog/spatial/3DSpaceMap/OctomapOcTree.h>
+#include <opencog/spatial/3DSpaceMap/OpencogOcTree.h>
 #include <opencog/spatial/3DSpaceMap/EntityRecorder.h>
 
 #include "SpaceServerContainer.h"
@@ -95,7 +95,7 @@ namespace opencog
         {
         Scene(const string& mapName, double resolution):
             spaceMap(mapName, resolution), entityRecorder(){}
-            spatial::OctomapOcTree spaceMap;
+            spatial::OpencogOcTree spaceMap;
             spatial::EntityRecorder entityRecorder;
         };
 
@@ -105,7 +105,7 @@ namespace opencog
 
         typedef spatial::EntityRecorder EntityRecorder;
         typedef spatial::BlockVector SpaceMapPoint;
-        typedef spatial::OctomapOcTree SpaceMap;
+        typedef spatial::OpencogOcTree SpaceMap;
 
         explicit SpaceServer(AtomSpace&);
         virtual ~SpaceServer();
@@ -246,8 +246,8 @@ namespace opencog
         boost::signals2::connection removedAtomConnection;
         boost::signals2::connection addedAtomConnection;
 
-        void atomRemoved(AtomPtr);
-        void atomAdded(Handle);
+        void atomRemoved(const AtomPtr&);
+        void atomAdded(const Handle&);
 
         Handle addPropertyPredicate(std::string predicateName,
                                     Handle,

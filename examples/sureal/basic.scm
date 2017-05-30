@@ -20,7 +20,8 @@
 (use-modules (opencog)
              (opencog nlp)
              (opencog nlp sureal)
-             (opencog nlp chatbot)) ; the chatbot defines nlp-parse
+             (opencog nlp chatbot) ; the chatbot defines nlp-parse
+             (opencog nlp relex2logic))
 
 ; SuReal depends on the contents of the AtomSpace, specifically the existing
 ; sentences, i.e. the sentences/utterances that were parsed via the `nlp-parse`

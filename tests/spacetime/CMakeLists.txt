@@ -1,5 +1,3 @@
-ADD_SUBDIRECTORY (TimeSpaceAtomMapsAPI)
-
 LINK_LIBRARIES(
 	spacetime-types
 	spacetime

@@ -7,8 +7,10 @@ thus, these two projects are dependent on each other.
 
 Sureal requires Link Grammar (LG), RelEx, and RelEx2Logic outputs.
 
-The main function is `sureal` which takes in a `SetLink` and returns a
-sentence.
+The main functions are `sureal` and `cached-sureal`. The former takes in a `SetLink` and returns a
+sentence while the latter takes in a SetLink and return whether it succeeded building a proper sentence or
+not (but the sentence itself is not returned). The point of `cached-sureal` is that it is optimized
+to be used inside the Microplanner while `sureal` is supposed to be used by other general-porpose applications.
 
 The words used in the input `SetLink` need to have the corresponding
 `WordNode` before calling `sureal`.

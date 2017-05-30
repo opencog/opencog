@@ -52,7 +52,7 @@ public:
     unsigned int count() { return _count; }
     virtual void run()
     {
-        logger().debug("%ld: executed %s", _cogserver.getCycleCount(), _name.c_str());
+        _log->debug("%ld: executed %s", _cogserver.getCycleCount(), _name.c_str());
         _count++;
 
         // add some nodes to test the SystemActivityTable

@@ -1,6 +1,6 @@
 # Microplanning
 
-The folder contains microplanning code for the natural langauge
+The folder contains microplanning code for the natural language
 generation (NLG) pipeline.
 
 - microplanning.scm
@@ -16,7 +16,7 @@ generation (NLG) pipeline.
 - chunks-set.scm
 
     Definition of the `<chunks-set>` class for storing one set of
-    chunking reuslt.
+    chunking result.
 
 - helpers.scm
 

@@ -21,6 +21,7 @@
 ; By default, these two will be added:
 (add-to-load-path "/opencog/tests")
 (add-to-load-path "../tests")
+(add-to-load-path "../../tests")
 
 ; Load the needed modules
 (use-modules (opencog)

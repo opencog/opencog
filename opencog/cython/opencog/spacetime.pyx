@@ -1,6 +1,6 @@
 from cython.operator cimport dereference as deref
 
-from opencog.atomspace cimport Atom, AtomSpace, TruthValue
+from opencog.atomspace cimport Atom, AtomSpace, TruthValue, void_from_candle
 from opencog.spatial import OctomapOcTree as SpaceMap
 from opencog.spatial import EntityRecorder
 
@@ -22,7 +22,7 @@ cdef class TimeServer:
                                                                      timestamp,
                                                                      c_time_domain,
                                                                      deref(tv._tvptr()))
-        return Atom(c_at_time_link.value(), atom.atomspace)
+        return Atom(void_from_candle(c_at_time_link), atom.atomspace)
 
 
 cdef class SpaceServer:
@@ -54,7 +54,7 @@ cdef class SpaceServer:
 
         cdef cHandle ch = self.c_space_server.addOrGetSpaceMap(timestamp, c_map_name,
                                                                resolution, c_time_domain)
-        cdef Atom handle = Atom(ch.value(), self.atomspace)
+        cdef Atom handle = Atom(void_from_candle(ch), self.atomspace)
         return handle
 
     def add_map_info(self, Atom object_node, Atom space_map_node,

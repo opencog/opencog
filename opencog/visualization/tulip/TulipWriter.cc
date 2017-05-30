@@ -21,7 +21,6 @@
 #include <time.h>
 #include <sstream>
 
-#define DEPRECATED_ATOMSPACE_CALLS
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/cogserver/server/CogServer.h>
 
@@ -45,10 +44,10 @@ void TulipWriter::writeNodes()
     // Output Node numbers/ids
     myfile << "(nodes ";
     for (Handle h : nodeHandles) {
-        myfile << h << " ";
+	    myfile << h.value() << " ";
     }
     for (Handle h : linkHandles) {
-        myfile << h << " ";
+	    myfile << h.value() << " ";
     }
     myfile << ")" << endl;
 
@@ -73,7 +72,7 @@ void TulipWriter::writeCluster(Handle setLink)
     a.get_handles_by_type(back_inserter(linkHandles), (Type) LINK, true );
 
     // Output setLink as a cluster
-    std::set<Handle> inSet;
+    OrderedHandleSet inSet;
     if (setLink != Handle::UNDEFINED) {
         HandleSeq setLinks = setLink->getOutgoingSet();
         for (Handle h : setLinks) {
@@ -83,7 +82,7 @@ void TulipWriter::writeCluster(Handle setLink)
     myfile << "(cluster 1 \"In Set\"" << endl;
     myfile << " (nodes ";
     for (Handle h : inSet) {
-        myfile << h << " ";
+	    myfile << h.value() << " ";
     }
     myfile << ")\n)" << endl;
 
@@ -91,8 +90,8 @@ void TulipWriter::writeCluster(Handle setLink)
     myfile << "(cluster 2 \"Not in set\"" << endl;
     myfile << " (nodes ";
     for (Handle h : nodeHandles) {
-        std::set<Handle>::iterator si = inSet.find(h);
-        if (si == inSet.end()) myfile << h << " ";
+        OrderedHandleSet::iterator si = inSet.find(h);
+        if (si == inSet.end()) myfile << h.value() << " ";
     }
     for (Handle h : linkHandles) {
         inSet.find(h);
@@ -102,7 +101,7 @@ void TulipWriter::writeCluster(Handle setLink)
     // TODO : also output the appropriate fake edges
 //    myfile << " (edges ";
 //    for (Handle h : linkHandles) {
-//        std::set<Handle>::iterator si = inSet.find(h);
+//        OrderedHandleSet::iterator si = inSet.find(h);
 //        if (si == inSet.end()) {
 //            myfile << h << " ";
 //        }
@@ -145,7 +144,7 @@ void TulipWriter::writeNodeNames()
     myfile << "(property  0 string \"viewLabel\" " << endl;
     myfile << "  (default \"\" \"\" )" << endl;
     for (Handle h : nodeHandles) {
-        myfile << "  (node " << h << " \"" << a.get_name(h) << "\")" << endl;
+        myfile << "  (node " << h << " \"" << h->getName() << "\")" << endl;
     }
     // give not nodes the name NOT
     for (Handle h : linkHandles) {

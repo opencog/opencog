@@ -1,0 +1,3994 @@
+[DEBUG] [URE] Iteration 3
+[DEBUG] [URE] Weighted and-BITs:
+1 [9784828008193082764][3]
+0.367879 [9318682074605260610][3]
+0.135335 [18313939221224606850][3]
+[DEBUG] [URE] Selected and-BIT for expansion:
+(BindLink
+  (ImplicationLink
+    (PredicateNode "take-treatment-1" (stv 0.100000 0.800000)) ; [693477798751519767][1]
+    (LambdaLink
+      (TypedVariableLink
+        (VariableNode "$X") ; [6809909406030619949][1]
+        (TypeNode "ConceptNode") ; [3788388250666256890][1]
+      ) ; [17718894144153964593][1]
+      (EvaluationLink
+        (PredicateNode "take") ; [3396821867884253757][1]
+        (ListLink
+          (VariableNode "$X") ; [6809909406030619949][1]
+          (ConceptNode "compound-A") ; [5571266438078870282][1]
+        ) ; [9339663655215837098][1]
+      ) ; [12459373116713205302][1]
+    ) ; [18413871478668594639][1]
+  ) ; [15180311865663055677][1]
+  (ImplicationLink
+    (PredicateNode "take-treatment-1" (stv 0.100000 0.800000)) ; [693477798751519767][1]
+    (LambdaLink
+      (TypedVariableLink
+        (VariableNode "$X") ; [6809909406030619949][1]
+        (TypeNode "ConceptNode") ; [3788388250666256890][1]
+      ) ; [17718894144153964593][1]
+      (EvaluationLink
+        (PredicateNode "take") ; [3396821867884253757][1]
+        (ListLink
+          (VariableNode "$X") ; [6809909406030619949][1]
+          (ConceptNode "compound-A") ; [5571266438078870282][1]
+        ) ; [9339663655215837098][1]
+      ) ; [12459373116713205302][1]
+    ) ; [18413871478668594639][1]
+  ) ; [15180311865663055677][1]
+) ; [9784828008193082764][3]
+
+[DEBUG] [URE] Selected BIT-node for expansion:
+body:
+(ImplicationLink
+  (PredicateNode "take-treatment-1" (stv 0.100000 0.800000)) ; [693477798751519767][1]
+  (LambdaLink
+    (TypedVariableLink
+      (VariableNode "$X") ; [6809909406030619949][1]
+      (TypeNode "ConceptNode") ; [3788388250666256890][1]
+    ) ; [17718894144153964593][1]
+    (EvaluationLink
+      (PredicateNode "take") ; [3396821867884253757][1]
+      (ListLink
+        (VariableNode "$X") ; [6809909406030619949][1]
+        (ConceptNode "compound-A") ; [5571266438078870282][1]
+      ) ; [9339663655215837098][1]
+    ) ; [12459373116713205302][1]
+  ) ; [18413871478668594639][1]
+) ; [15180311865663055677][1]
+exhausted: 0
+rules: size = 1
+implication-construction-rule [9318682074605260610][18446744073709551615]
+[WARN] validate_clauses: Constant clauses removed from pattern
+[WARN] validate_clauses: Constant clauses removed from pattern
+[WARN] validate_clauses: Constant clauses removed from pattern
+[WARN] validate_clauses: Constant clauses removed from pattern
+[DEBUG] [URE] The following weighted rules are valid:
+1 deduction-implication-rule
+1 equivalence-to-implication-rule
+[DEBUG] [URE] Selected rule for BIT expansion:
+name: deduction-implication-rule
+rule:
+(BindLink
+  (TypedVariableLink
+    (VariableNode "$B-a083600") ; [1075803195405159200][3]
+    (TypeChoice
+      (TypeNode "OrLink") ; [1641200931040822982][1]
+      (TypeNode "AndLink") ; [5150993344963829271][1]
+      (TypeNode "LambdaLink") ; [6352458681478507967][1]
+      (TypeNode "NotLink") ; [7029353635928836065][1]
+      (TypeNode "PredicateNode") ; [7305492803481351454][1]
+    ) ; [12553683925648135849][1]
+  ) ; [12502753568736379187][3]
+  (AndLink
+    (ImplicationLink
+      (VariableNode "$B-a083600") ; [1075803195405159200][3]
+      (LambdaLink
+        (TypedVariableLink
+          (VariableNode "$X") ; [6809909406030619949][1]
+          (TypeNode "ConceptNode") ; [3788388250666256890][1]
+        ) ; [17718894144153964593][1]
+        (EvaluationLink
+          (PredicateNode "take") ; [3396821867884253757][1]
+          (ListLink
+            (VariableNode "$X") ; [6809909406030619949][1]
+            (ConceptNode "compound-A") ; [5571266438078870282][1]
+          ) ; [9339663655215837098][1]
+        ) ; [12459373116713205302][1]
+      ) ; [18413871478668594639][1]
+    ) ; [9350305881523605350][3]
+    (NotLink
+      (IdenticalLink
+        (PredicateNode "take-treatment-1" (stv 0.100000 0.800000)) ; [693477798751519767][1]
+        (LambdaLink
+          (TypedVariableLink
+            (VariableNode "$X") ; [6809909406030619949][1]
+            (TypeNode "ConceptNode") ; [3788388250666256890][1]
+          ) ; [17718894144153964593][1]
+          (EvaluationLink
+            (PredicateNode "take") ; [3396821867884253757][1]
+            (ListLink
+              (VariableNode "$X") ; [6809909406030619949][1]
+              (ConceptNode "compound-A") ; [5571266438078870282][1]
+            ) ; [9339663655215837098][1]
+          ) ; [12459373116713205302][1]
+        ) ; [18413871478668594639][1]
+      ) ; [15601785458906142039][3]
+    ) ; [15622104433787007084][3]
+    (ImplicationLink
+      (PredicateNode "take-treatment-1" (stv 0.100000 0.800000)) ; [693477798751519767][1]
+      (VariableNode "$B-a083600") ; [1075803195405159200][3]
+    ) ; [16288987656109171854][3]
+  ) ; [17606174990569917799][3]
+  (ExecutionOutputLink
+    (GroundedSchemaNode "scm: deduction-formula") ; [201750363263560339][1]
+    (ListLink
+      (ImplicationLink
+        (PredicateNode "take-treatment-1" (stv 0.100000 0.800000)) ; [693477798751519767][1]
+        (LambdaLink
+          (TypedVariableLink
+            (VariableNode "$X") ; [6809909406030619949][1]
+            (TypeNode "ConceptNode") ; [3788388250666256890][1]
+          ) ; [17718894144153964593][1]
+          (EvaluationLink
+            (PredicateNode "take") ; [3396821867884253757][1]
+            (ListLink
+              (VariableNode "$X") ; [6809909406030619949][1]
+              (ConceptNode "compound-A") ; [5571266438078870282][1]
+            ) ; [9339663655215837098][1]
+          ) ; [12459373116713205302][1]
+        ) ; [18413871478668594639][1]
+      ) ; [15180311865663055677][1]
+      (ImplicationLink
+        (PredicateNode "take-treatment-1" (stv 0.100000 0.800000)) ; [693477798751519767][1]
+        (VariableNode "$B-a083600") ; [1075803195405159200][3]
+      ) ; [16288987656109171854][3]
+      (ImplicationLink
+        (VariableNode "$B-a083600") ; [1075803195405159200][3]
+        (LambdaLink
+          (TypedVariableLink
+            (VariableNode "$X") ; [6809909406030619949][1]
+            (TypeNode "ConceptNode") ; [3788388250666256890][1]
+          ) ; [17718894144153964593][1]
+          (EvaluationLink
+            (PredicateNode "take") ; [3396821867884253757][1]
+            (ListLink
+              (VariableNode "$X") ; [6809909406030619949][1]
+              (ConceptNode "compound-A") ; [5571266438078870282][1]
+            ) ; [9339663655215837098][1]
+          ) ; [12459373116713205302][1]
+        ) ; [18413871478668594639][1]
+      ) ; [9350305881523605350][3]
+    ) ; [9837926172306332772][3]
+  ) ; [9303052526956646077][3]
+) ; [13079345644155264039][18446744073709551615]
+
+[WARN] validate_clauses: Constant clauses removed from pattern
+[WARN] validate_clauses: Constant clauses removed from pattern
+[DEBUG] [URE] Expanded forward chainer strategy:
+(BindLink
+  (TypedVariableLink
+    (VariableNode "$B-a083600") ; [1075803195405159200][3]
+    (TypeChoice
+      (TypeNode "OrLink") ; [1641200931040822982][1]
+      (TypeNode "AndLink") ; [5150993344963829271][1]
+      (TypeNode "LambdaLink") ; [6352458681478507967][1]
+      (TypeNode "NotLink") ; [7029353635928836065][1]
+      (TypeNode "PredicateNode") ; [7305492803481351454][1]
+    ) ; [12553683925648135849][1]
+  ) ; [12502753568736379187][3]
+  (AndLink
+    (ImplicationLink
+      (VariableNode "$B-a083600") ; [1075803195405159200][3]
+      (LambdaLink
+        (TypedVariableLink
+          (VariableNode "$X") ; [6809909406030619949][1]
+          (TypeNode "ConceptNode") ; [3788388250666256890][1]
+        ) ; [17718894144153964593][1]
+        (EvaluationLink
+          (PredicateNode "take") ; [3396821867884253757][1]
+          (ListLink
+            (VariableNode "$X") ; [6809909406030619949][1]
+            (ConceptNode "compound-A") ; [5571266438078870282][1]
+          ) ; [9339663655215837098][1]
+        ) ; [12459373116713205302][1]
+      ) ; [18413871478668594639][1]
+    ) ; [9350305881523605350][3]
+    (NotLink
+      (IdenticalLink
+        (PredicateNode "take-treatment-1" (stv 0.100000 0.800000)) ; [693477798751519767][1]
+        (LambdaLink
+          (TypedVariableLink
+            (VariableNode "$X") ; [6809909406030619949][1]
+            (TypeNode "ConceptNode") ; [3788388250666256890][1]
+          ) ; [17718894144153964593][1]
+          (EvaluationLink
+            (PredicateNode "take") ; [3396821867884253757][1]
+            (ListLink
+              (VariableNode "$X") ; [6809909406030619949][1]
+              (ConceptNode "compound-A") ; [5571266438078870282][1]
+            ) ; [9339663655215837098][1]
+          ) ; [12459373116713205302][1]
+        ) ; [18413871478668594639][1]
+      ) ; [15601785458906142039][3]
+    ) ; [15622104433787007084][3]
+    (ImplicationLink
+      (PredicateNode "take-treatment-1" (stv 0.100000 0.800000)) ; [693477798751519767][1]
+      (VariableNode "$B-a083600") ; [1075803195405159200][3]
+    ) ; [16288987656109171854][3]
+  ) ; [17606174990569917799][3]
+  (ExecutionOutputLink
+    (GroundedSchemaNode "scm: deduction-formula") ; [201750363263560339][1]
+    (ListLink
+      (ImplicationLink
+        (PredicateNode "take-treatment-1" (stv 0.100000 0.800000)) ; [693477798751519767][1]
+        (LambdaLink
+          (TypedVariableLink
+            (VariableNode "$X") ; [6809909406030619949][1]
+            (TypeNode "ConceptNode") ; [3788388250666256890][1]
+          ) ; [17718894144153964593][1]
+          (EvaluationLink
+            (PredicateNode "take") ; [3396821867884253757][1]
+            (ListLink
+              (VariableNode "$X") ; [6809909406030619949][1]
+              (ConceptNode "compound-A") ; [5571266438078870282][1]
+            ) ; [9339663655215837098][1]
+          ) ; [12459373116713205302][1]
+        ) ; [18413871478668594639][1]
+      ) ; [15180311865663055677][1]
+      (ImplicationLink
+        (PredicateNode "take-treatment-1" (stv 0.100000 0.800000)) ; [693477798751519767][1]
+        (VariableNode "$B-a083600") ; [1075803195405159200][3]
+      ) ; [16288987656109171854][3]
+      (ImplicationLink
+        (VariableNode "$B-a083600") ; [1075803195405159200][3]
+        (LambdaLink
+          (TypedVariableLink
+            (VariableNode "$X") ; [6809909406030619949][1]
+            (TypeNode "ConceptNode") ; [3788388250666256890][1]
+          ) ; [17718894144153964593][1]
+          (EvaluationLink
+            (PredicateNode "take") ; [3396821867884253757][1]
+            (ListLink
+              (VariableNode "$X") ; [6809909406030619949][1]
+              (ConceptNode "compound-A") ; [5571266438078870282][1]
+            ) ; [9339663655215837098][1]
+          ) ; [12459373116713205302][1]
+        ) ; [18413871478668594639][1]
+      ) ; [9350305881523605350][3]
+    ) ; [9837926172306332772][3]
+  ) ; [9303052526956646077][3]
+) ; [13079345644155264039][3]
+
+[DEBUG] [URE] With inference tree:
+
+[16288987656109171854](11) [9350305881523605350](9)
+----------------deduction-formula------------------
+            [15180311865663055677](12)
+
+[DEBUG] [URE] Selected and-BIT for fulfillment (fcs value):
+[13079345644155264039][3]
+[DEBUG] [URE] Results:
+size = 0
+
+[DEBUG] [URE] Iteration 19
+[DEBUG] [URE] Weighted and-BITs:
+0 [9784828008193082764][3]
+0 [9318682074605260610][3]
+0.367879 [13079345644155264039][3]
+0.367879 [13100328147986777818][3]
+0.135335 [12267047379613349907][3]
+0.135335 [14393749419077526878][3]
+0.135335 [16288841085533427254][3]
+0.135335 [18313939221224606850][3]
+0.0497871 [11654299464900949455][3]
+0.0497871 [13455592559407745395][3]
+0.0497871 [13819468909123323685][3]
+0.0497871 [15476542820437867535][3]
+0.0497871 [16476955773914844770][3]
+[DEBUG] [URE] Selected and-BIT for expansion:
+(BindLink
+  (TypedVariableLink
+    (VariableNode "$B-a083600") ; [1075803195405159200][3]
+    (TypeChoice
+      (TypeNode "OrLink") ; [1641200931040822982][1]
+      (TypeNode "AndLink") ; [5150993344963829271][1]
+      (TypeNode "LambdaLink") ; [6352458681478507967][1]
+      (TypeNode "NotLink") ; [7029353635928836065][1]
+      (TypeNode "PredicateNode") ; [7305492803481351454][1]
+    ) ; [12553683925648135849][1]
+  ) ; [12502753568736379187][3]
+  (AndLink
+    (ImplicationLink
+      (VariableNode "$B-a083600") ; [1075803195405159200][3]
+      (LambdaLink
+        (TypedVariableLink
+          (VariableNode "$X") ; [6809909406030619949][1]
+          (TypeNode "ConceptNode") ; [3788388250666256890][1]
+        ) ; [17718894144153964593][1]
+        (EvaluationLink
+          (PredicateNode "take") ; [3396821867884253757][1]
+          (ListLink
+            (VariableNode "$X") ; [6809909406030619949][1]
+            (ConceptNode "compound-A") ; [5571266438078870282][1]
+          ) ; [9339663655215837098][1]
+        ) ; [12459373116713205302][1]
+      ) ; [18413871478668594639][1]
+    ) ; [9350305881523605350][3]
+    (NotLink
+      (IdenticalLink
+        (PredicateNode "take-treatment-1" (stv 0.100000 0.800000)) ; [693477798751519767][1]
+        (LambdaLink
+          (TypedVariableLink
+            (VariableNode "$X") ; [6809909406030619949][1]
+            (TypeNode "ConceptNode") ; [3788388250666256890][1]
+          ) ; [17718894144153964593][1]
+          (EvaluationLink
+            (PredicateNode "take") ; [3396821867884253757][1]
+            (ListLink
+              (VariableNode "$X") ; [6809909406030619949][1]
+              (ConceptNode "compound-A") ; [5571266438078870282][1]
+            ) ; [9339663655215837098][1]
+          ) ; [12459373116713205302][1]
+        ) ; [18413871478668594639][1]
+      ) ; [15601785458906142039][3]
+    ) ; [15622104433787007084][3]
+    (ImplicationLink
+      (PredicateNode "take-treatment-1" (stv 0.100000 0.800000)) ; [693477798751519767][1]
+      (VariableNode "$B-a083600") ; [1075803195405159200][3]
+    ) ; [16288987656109171854][3]
+  ) ; [17606174990569917799][3]
+  (ExecutionOutputLink
+    (GroundedSchemaNode "scm: deduction-formula") ; [201750363263560339][1]
+    (ListLink
+      (ImplicationLink
+        (PredicateNode "take-treatment-1" (stv 0.100000 0.800000)) ; [693477798751519767][1]
+        (LambdaLink
+          (TypedVariableLink
+            (VariableNode "$X") ; [6809909406030619949][1]
+            (TypeNode "ConceptNode") ; [3788388250666256890][1]
+          ) ; [17718894144153964593][1]
+          (EvaluationLink
+            (PredicateNode "take") ; [3396821867884253757][1]
+            (ListLink
+              (VariableNode "$X") ; [6809909406030619949][1]
+              (ConceptNode "compound-A") ; [5571266438078870282][1]
+            ) ; [9339663655215837098][1]
+          ) ; [12459373116713205302][1]
+        ) ; [18413871478668594639][1]
+      ) ; [15180311865663055677][1]
+      (ImplicationLink
+        (PredicateNode "take-treatment-1" (stv 0.100000 0.800000)) ; [693477798751519767][1]
+        (VariableNode "$B-a083600") ; [1075803195405159200][3]
+      ) ; [16288987656109171854][3]
+      (ImplicationLink
+        (VariableNode "$B-a083600") ; [1075803195405159200][3]
+        (LambdaLink
+          (TypedVariableLink
+            (VariableNode "$X") ; [6809909406030619949][1]
+            (TypeNode "ConceptNode") ; [3788388250666256890][1]
+          ) ; [17718894144153964593][1]
+          (EvaluationLink
+            (PredicateNode "take") ; [3396821867884253757][1]
+            (ListLink
+              (VariableNode "$X") ; [6809909406030619949][1]
+              (ConceptNode "compound-A") ; [5571266438078870282][1]
+            ) ; [9339663655215837098][1]
+          ) ; [12459373116713205302][1]
+        ) ; [18413871478668594639][1]
+      ) ; [9350305881523605350][3]
+    ) ; [9837926172306332772][3]
+  ) ; [9303052526956646077][3]
+) ; [13079345644155264039][3]
+
+[DEBUG] [URE] Selected BIT-node for expansion:
+body:
+(ImplicationLink
+  (PredicateNode "take-treatment-1" (stv 0.100000 0.800000)) ; [693477798751519767][1]
+  (VariableNode "$B-a083600") ; [1075803195405159200][3]
+) ; [16288987656109171854][3]
+exhausted: 0
+rules: size = 2
+implication-construction-rule [15925051753571679622][18446744073709551615]
+implication-implicant-distribution-rule [18121831040128198015][18446744073709551615]
+[WARN] validate_clauses: Constant clauses removed from pattern
+[WARN] validate_clauses: Constant clauses removed from pattern
+[DEBUG] [URE] The following weighted rules are valid:
+1 deduction-implication-rule
+1 equivalence-to-implication-rule
+[DEBUG] [URE] Selected rule for BIT expansion:
+name: equivalence-to-implication-rule
+rule:
+(BindLink
+  (TypedVariableLink
+    (VariableNode "$B-a083600") ; [1075803195405159200][3]
+    (TypeChoice
+      (TypeNode "OrLink") ; [1641200931040822982][1]
+      (TypeNode "AndLink") ; [5150993344963829271][1]
+      (TypeNode "LambdaLink") ; [6352458681478507967][1]
+      (TypeNode "NotLink") ; [7029353635928836065][1]
+      (TypeNode "PredicateNode") ; [7305492803481351454][1]
+    ) ; [12553683925648135849][1]
+  ) ; [12502753568736379187][3]
+  (AndLink
+    (EvaluationLink
+      (GroundedPredicateNode "scm: gt-zero-confidence") ; [2096565403849494700][1]
+      (EquivalenceLink
+        (PredicateNode "take-treatment-1" (stv 0.100000 0.800000)) ; [693477798751519767][1]
+        (VariableNode "$B-a083600") ; [1075803195405159200][3]
+      ) ; [16346461327915047267][3]
+    ) ; [13451195623684469822][3]
+    (EquivalenceLink
+      (PredicateNode "take-treatment-1" (stv 0.100000 0.800000)) ; [693477798751519767][1]
+      (VariableNode "$B-a083600") ; [1075803195405159200][3]
+    ) ; [16346461327915047267][3]
+  ) ; [18146269530337942152][3]
+  (ExecutionOutputLink
+    (GroundedSchemaNode "scm: equivalence-to-implication-formula") ; [657362063185547793][1]
+    (ListLink
+      (ImplicationLink
+        (PredicateNode "take-treatment-1" (stv 0.100000 0.800000)) ; [693477798751519767][1]
+        (VariableNode "$B-a083600") ; [1075803195405159200][3]
+      ) ; [16288987656109171854][3]
+      (EquivalenceLink
+        (PredicateNode "take-treatment-1" (stv 0.100000 0.800000)) ; [693477798751519767][1]
+        (VariableNode "$B-a083600") ; [1075803195405159200][3]
+      ) ; [16346461327915047267][3]
+    ) ; [10106419507727073668][3]
+  ) ; [15383359922948197147][3]
+) ; [13904101491987880747][18446744073709551615]
+
+[DEBUG] [URE] Expanded forward chainer strategy:
+(BindLink
+  (TypedVariableLink
+    (VariableNode "$B-a083600") ; [1075803195405159200][3]
+    (TypeChoice
+      (TypeNode "OrLink") ; [1641200931040822982][1]
+      (TypeNode "AndLink") ; [5150993344963829271][1]
+      (TypeNode "LambdaLink") ; [6352458681478507967][1]
+      (TypeNode "NotLink") ; [7029353635928836065][1]
+      (TypeNode "PredicateNode") ; [7305492803481351454][1]
+    ) ; [12553683925648135849][1]
+  ) ; [12502753568736379187][3]
+  (AndLink
+    (ImplicationLink
+      (VariableNode "$B-a083600") ; [1075803195405159200][3]
+      (LambdaLink
+        (TypedVariableLink
+          (VariableNode "$X") ; [6809909406030619949][1]
+          (TypeNode "ConceptNode") ; [3788388250666256890][1]
+        ) ; [17718894144153964593][1]
+        (EvaluationLink
+          (PredicateNode "take") ; [3396821867884253757][1]
+          (ListLink
+            (VariableNode "$X") ; [6809909406030619949][1]
+            (ConceptNode "compound-A") ; [5571266438078870282][1]
+          ) ; [9339663655215837098][1]
+        ) ; [12459373116713205302][1]
+      ) ; [18413871478668594639][1]
+    ) ; [9350305881523605350][3]
+    (EvaluationLink
+      (GroundedPredicateNode "scm: gt-zero-confidence") ; [2096565403849494700][1]
+      (EquivalenceLink
+        (PredicateNode "take-treatment-1" (stv 0.100000 0.800000)) ; [693477798751519767][1]
+        (VariableNode "$B-a083600") ; [1075803195405159200][3]
+      ) ; [16346461327915047267][3]
+    ) ; [13451195623684469822][3]
+    (NotLink
+      (IdenticalLink
+        (PredicateNode "take-treatment-1" (stv 0.100000 0.800000)) ; [693477798751519767][1]
+        (LambdaLink
+          (TypedVariableLink
+            (VariableNode "$X") ; [6809909406030619949][1]
+            (TypeNode "ConceptNode") ; [3788388250666256890][1]
+          ) ; [17718894144153964593][1]
+          (EvaluationLink
+            (PredicateNode "take") ; [3396821867884253757][1]
+            (ListLink
+              (VariableNode "$X") ; [6809909406030619949][1]
+              (ConceptNode "compound-A") ; [5571266438078870282][1]
+            ) ; [9339663655215837098][1]
+          ) ; [12459373116713205302][1]
+        ) ; [18413871478668594639][1]
+      ) ; [15601785458906142039][3]
+    ) ; [15622104433787007084][3]
+    (EquivalenceLink
+      (PredicateNode "take-treatment-1" (stv 0.100000 0.800000)) ; [693477798751519767][1]
+      (VariableNode "$B-a083600") ; [1075803195405159200][3]
+    ) ; [16346461327915047267][3]
+  ) ; [9780942665109101466][3]
+  (ExecutionOutputLink
+    (GroundedSchemaNode "scm: deduction-formula") ; [201750363263560339][1]
+    (ListLink
+      (ImplicationLink
+        (PredicateNode "take-treatment-1" (stv 0.100000 0.800000)) ; [693477798751519767][1]
+        (LambdaLink
+          (TypedVariableLink
+            (VariableNode "$X") ; [6809909406030619949][1]
+            (TypeNode "ConceptNode") ; [3788388250666256890][1]
+          ) ; [17718894144153964593][1]
+          (EvaluationLink
+            (PredicateNode "take") ; [3396821867884253757][1]
+            (ListLink
+              (VariableNode "$X") ; [6809909406030619949][1]
+              (ConceptNode "compound-A") ; [5571266438078870282][1]
+            ) ; [9339663655215837098][1]
+          ) ; [12459373116713205302][1]
+        ) ; [18413871478668594639][1]
+      ) ; [15180311865663055677][1]
+      (ExecutionOutputLink
+        (GroundedSchemaNode "scm: equivalence-to-implication-formula") ; [657362063185547793][1]
+        (ListLink
+          (ImplicationLink
+            (PredicateNode "take-treatment-1" (stv 0.100000 0.800000)) ; [693477798751519767][1]
+            (VariableNode "$B-a083600") ; [1075803195405159200][3]
+          ) ; [16288987656109171854][3]
+          (EquivalenceLink
+            (PredicateNode "take-treatment-1" (stv 0.100000 0.800000)) ; [693477798751519767][1]
+            (VariableNode "$B-a083600") ; [1075803195405159200][3]
+          ) ; [16346461327915047267][3]
+        ) ; [10106419507727073668][3]
+      ) ; [15383359922948197147][3]
+      (ImplicationLink
+        (VariableNode "$B-a083600") ; [1075803195405159200][3]
+        (LambdaLink
+          (TypedVariableLink
+            (VariableNode "$X") ; [6809909406030619949][1]
+            (TypeNode "ConceptNode") ; [3788388250666256890][1]
+          ) ; [17718894144153964593][1]
+          (EvaluationLink
+            (PredicateNode "take") ; [3396821867884253757][1]
+            (ListLink
+              (VariableNode "$X") ; [6809909406030619949][1]
+              (ConceptNode "compound-A") ; [5571266438078870282][1]
+            ) ; [9339663655215837098][1]
+          ) ; [12459373116713205302][1]
+        ) ; [18413871478668594639][1]
+      ) ; [9350305881523605350][3]
+    ) ; [16845699125413270673][3]
+  ) ; [16310825480063583978][3]
+) ; [14267890823949643513][3]
+
+[DEBUG] [URE] With inference tree:
+
+[16346461327915047267][3]
+-equivalence-to-implicat--
+[16288987656109171854](11) [9350305881523605350](9)
+----------------deduction-formula------------------
+            [15180311865663055677](12)
+
+[DEBUG] [URE] Selected and-BIT for fulfillment (fcs value):
+[14267890823949643513][3]
+[DEBUG] [URE] Results:
+size = 0
+
+[DEBUG] [URE] Iteration 109
+[DEBUG] [URE] Weighted and-BITs:
+0 [9784828008193082764][3]
+0 [9318682074605260610][3]
+0 [13079345644155264039][3]
+0 [13100328147986777818][3]
+0.135335 [11242362051823497534][3]
+0.135335 [11263344700677031690][3]
+0.135335 [12267047379613349907][3]
+0 [12328886805747494797][3]
+0.135335 [14246908175096157275][3]
+0.135335 [14267890823949643513][3]
+0.135335 [14393749419077526878][3]
+0.135335 [16288841085533427254][3]
+0 [18313939221224606850][3]
+0.0497871 [10430063788405651715][3]
+0.0497871 [10491903359595371260][3]
+0.0497871 [10814922785850695030][3]
+0.0497871 [11654299464900949455][3]
+0.0497871 [12430907231617908974][3]
+0.0497871 [12430907231617908974][3]
+0.0497871 [12451889880471411226][3]
+0.0497871 [13434609910554243143][3]
+0.0497871 [13455592559407745395][3]
+0.0497871 [13819468909123323685][3]
+0.0497871 [13927603486614009205][3]
+0.0497871 [14105705163371883521][3]
+0.0497871 [14127060373209657767][3]
+0.0497871 [14148042875900310142][3]
+0.0497871 [14451857493201691835][3]
+0.0497871 [14472840142055194905][3]
+0.0497871 [15152080908377376583][3]
+0.0497871 [15424678408000404244][3]
+0.0497871 [15476542820437867535][3]
+0.0497871 [15723606632177944984][3]
+0.0497871 [16476955773914844770][3]
+0.0497871 [17688266910588132955][3]
+0.0497871 [17709249559441635207][3]
+0.0497871 [17819668396505638041][3]
+0.0183156 [9817315873676505210][3]
+0.0183156 [9858880635204422535][3]
+0.0183156 [10463079177884618147][3]
+0.0183156 [11597626320487390403][3]
+0.0183156 [11618608968200047203][3]
+0.0183156 [12003467966787254218][3]
+0.0183156 [13293406898846747470][3]
+0.0183156 [14171659890782707951][3]
+0.0183156 [14639972182153532015][3]
+0.0183156 [15286959293987433328][3]
+0.0183156 [15286959295749032923][3]
+0.0183156 [15307941942840951532][3]
+0.0183156 [15315605553574475981][3]
+0.0183156 [15851283319967634628][3]
+0.0183156 [16026415816510828127][3]
+0.0183156 [16876699645632758962][3]
+0.0183156 [16891169164830106398][3]
+0.0183156 [16912151812542763198][3]
+0.0183156 [17665500953709256210][3]
+0.0183156 [17690340717853148051][3]
+0.0183156 [17806586811738614735][3]
+0.0183156 [17865309879497506026][3]
+0.00673795 [11652355102876778530][3]
+0.00673795 [12833376114956714462][3]
+0.00673795 [14531982364258394048][3]
+0.00673795 [14927725382276268860][3]
+0.00673795 [15262058010414213920][3]
+0.00673795 [16454521827830770793][3]
+0.00673795 [16878042454435286280][3]
+0.00673795 [17203704321018089408][3]
+0.00673795 [17466177387428641892][3]
+0.00247875 [12845725232462361009][3]
+0.00247875 [16112948809148444594][3]
+[DEBUG] [URE] Selected and-BIT for expansion:
+(BindLink
+  (TypedVariableLink
+    (VariableNode "$B-a083600") ; [1075803195405159200][3]
+    (TypeChoice
+      (TypeNode "OrLink") ; [1641200931040822982][1]
+      (TypeNode "AndLink") ; [5150993344963829271][1]
+      (TypeNode "LambdaLink") ; [6352458681478507967][1]
+      (TypeNode "NotLink") ; [7029353635928836065][1]
+      (TypeNode "PredicateNode") ; [7305492803481351454][1]
+    ) ; [12553683925648135849][1]
+  ) ; [12502753568736379187][3]
+  (AndLink
+    (ImplicationLink
+      (VariableNode "$B-a083600") ; [1075803195405159200][3]
+      (LambdaLink
+        (TypedVariableLink
+          (VariableNode "$X") ; [6809909406030619949][1]
+          (TypeNode "ConceptNode") ; [3788388250666256890][1]
+        ) ; [17718894144153964593][1]
+        (EvaluationLink
+          (PredicateNode "take") ; [3396821867884253757][1]
+          (ListLink
+            (VariableNode "$X") ; [6809909406030619949][1]
+            (ConceptNode "compound-A") ; [5571266438078870282][1]
+          ) ; [9339663655215837098][1]
+        ) ; [12459373116713205302][1]
+      ) ; [18413871478668594639][1]
+    ) ; [9350305881523605350][3]
+    (EvaluationLink
+      (GroundedPredicateNode "scm: gt-zero-confidence") ; [2096565403849494700][1]
+      (EquivalenceLink
+        (PredicateNode "take-treatment-1" (stv 0.100000 0.800000)) ; [693477798751519767][1]
+        (VariableNode "$B-a083600") ; [1075803195405159200][3]
+      ) ; [16346461327915047267][3]
+    ) ; [13451195623684469822][3]
+    (NotLink
+      (IdenticalLink
+        (PredicateNode "take-treatment-1" (stv 0.100000 0.800000)) ; [693477798751519767][1]
+        (LambdaLink
+          (TypedVariableLink
+            (VariableNode "$X") ; [6809909406030619949][1]
+            (TypeNode "ConceptNode") ; [3788388250666256890][1]
+          ) ; [17718894144153964593][1]
+          (EvaluationLink
+            (PredicateNode "take") ; [3396821867884253757][1]
+            (ListLink
+              (VariableNode "$X") ; [6809909406030619949][1]
+              (ConceptNode "compound-A") ; [5571266438078870282][1]
+            ) ; [9339663655215837098][1]
+          ) ; [12459373116713205302][1]
+        ) ; [18413871478668594639][1]
+      ) ; [15601785458906142039][3]
+    ) ; [15622104433787007084][3]
+    (EquivalenceLink
+      (PredicateNode "take-treatment-1" (stv 0.100000 0.800000)) ; [693477798751519767][1]
+      (VariableNode "$B-a083600") ; [1075803195405159200][3]
+    ) ; [16346461327915047267][3]
+  ) ; [9780942665109101466][3]
+  (ExecutionOutputLink
+    (GroundedSchemaNode "scm: deduction-formula") ; [201750363263560339][1]
+    (ListLink
+      (ImplicationLink (stv 0.200000 0.576000)
+        (PredicateNode "take-treatment-1" (stv 0.100000 0.800000)) ; [693477798751519767][1]
+        (LambdaLink
+          (TypedVariableLink
+            (VariableNode "$X") ; [6809909406030619949][1]
+            (TypeNode "ConceptNode") ; [3788388250666256890][1]
+          ) ; [17718894144153964593][1]
+          (EvaluationLink
+            (PredicateNode "take") ; [3396821867884253757][1]
+            (ListLink
+              (VariableNode "$X") ; [6809909406030619949][1]
+              (ConceptNode "compound-A") ; [5571266438078870282][1]
+            ) ; [9339663655215837098][1]
+          ) ; [12459373116713205302][1]
+        ) ; [18413871478668594639][1]
+      ) ; [15180311865663055677][1]
+      (ExecutionOutputLink
+        (GroundedSchemaNode "scm: equivalence-to-implication-formula") ; [657362063185547793][1]
+        (ListLink
+          (ImplicationLink
+            (PredicateNode "take-treatment-1" (stv 0.100000 0.800000)) ; [693477798751519767][1]
+            (VariableNode "$B-a083600") ; [1075803195405159200][3]
+          ) ; [16288987656109171854][3]
+          (EquivalenceLink
+            (PredicateNode "take-treatment-1" (stv 0.100000 0.800000)) ; [693477798751519767][1]
+            (VariableNode "$B-a083600") ; [1075803195405159200][3]
+          ) ; [16346461327915047267][3]
+        ) ; [10106419507727073668][3]
+      ) ; [15383359922948197147][3]
+      (ImplicationLink
+        (VariableNode "$B-a083600") ; [1075803195405159200][3]
+        (LambdaLink
+          (TypedVariableLink
+            (VariableNode "$X") ; [6809909406030619949][1]
+            (TypeNode "ConceptNode") ; [3788388250666256890][1]
+          ) ; [17718894144153964593][1]
+          (EvaluationLink
+            (PredicateNode "take") ; [3396821867884253757][1]
+            (ListLink
+              (VariableNode "$X") ; [6809909406030619949][1]
+              (ConceptNode "compound-A") ; [5571266438078870282][1]
+            ) ; [9339663655215837098][1]
+          ) ; [12459373116713205302][1]
+        ) ; [18413871478668594639][1]
+      ) ; [9350305881523605350][3]
+    ) ; [16845699125413270673][3]
+  ) ; [16310825480063583978][3]
+) ; [14267890823949643513][3]
+
+[DEBUG] [URE] Selected BIT-node for expansion:
+body:
+(ImplicationLink
+  (VariableNode "$B-a083600") ; [1075803195405159200][3]
+  (LambdaLink
+    (TypedVariableLink
+      (VariableNode "$X") ; [6809909406030619949][1]
+      (TypeNode "ConceptNode") ; [3788388250666256890][1]
+    ) ; [17718894144153964593][1]
+    (EvaluationLink
+      (PredicateNode "take") ; [3396821867884253757][1]
+      (ListLink
+        (VariableNode "$X") ; [6809909406030619949][1]
+        (ConceptNode "compound-A") ; [5571266438078870282][1]
+      ) ; [9339663655215837098][1]
+    ) ; [12459373116713205302][1]
+  ) ; [18413871478668594639][1]
+) ; [9350305881523605350][3]
+exhausted: 0
+rules: size = 3
+equivalence-to-implication-rule [17118381282297383640][18446744073709551615]
+implication-scope-to-implication-rule [17553312497009228247][18446744073709551615]
+implication-construction-rule [18122083961233702675][18446744073709551615]
+[WARN] validate_clauses: Constant clauses removed from pattern
+[WARN] validate_clauses: Constant clauses removed from pattern
+[DEBUG] [URE] The following weighted rules are valid:
+1 deduction-implication-rule
+[DEBUG] [URE] Selected rule for BIT expansion:
+name: deduction-implication-rule
+rule:
+(BindLink
+  (VariableList
+    (TypedVariableLink
+      (VariableNode "$B-a083600") ; [1075803195405159200][3]
+      (TypeChoice
+        (TypeNode "OrLink") ; [1641200931040822982][1]
+        (TypeNode "AndLink") ; [5150993344963829271][1]
+        (TypeNode "LambdaLink") ; [6352458681478507967][1]
+        (TypeNode "NotLink") ; [7029353635928836065][1]
+        (TypeNode "PredicateNode") ; [7305492803481351454][1]
+      ) ; [12553683925648135849][1]
+    ) ; [12502753568736379187][3]
+    (TypedVariableLink
+      (VariableNode "$B-1dddc59f") ; [6279313473057644823][3]
+      (TypeChoice
+        (TypeNode "OrLink") ; [1641200931040822982][1]
+        (TypeNode "AndLink") ; [5150993344963829271][1]
+        (TypeNode "LambdaLink") ; [6352458681478507967][1]
+        (TypeNode "NotLink") ; [7029353635928836065][1]
+        (TypeNode "PredicateNode") ; [7305492803481351454][1]
+      ) ; [12553683925648135849][1]
+    ) ; [18197896067882440202][3]
+  ) ; [16579969364204214737][3]
+  (AndLink
+    (NotLink
+      (IdenticalLink
+        (VariableNode "$B-a083600") ; [1075803195405159200][3]
+        (LambdaLink
+          (TypedVariableLink
+            (VariableNode "$X") ; [6809909406030619949][1]
+            (TypeNode "ConceptNode") ; [3788388250666256890][1]
+          ) ; [17718894144153964593][1]
+          (EvaluationLink
+            (PredicateNode "take") ; [3396821867884253757][1]
+            (ListLink
+              (VariableNode "$X") ; [6809909406030619949][1]
+              (ConceptNode "compound-A") ; [5571266438078870282][1]
+            ) ; [9339663655215837098][1]
+          ) ; [12459373116713205302][1]
+        ) ; [18413871478668594639][1]
+      ) ; [9771779474766691712][3]
+    ) ; [9792098449647556757][3]
+    (ImplicationLink
+      (VariableNode "$B-1dddc59f") ; [6279313473057644823][3]
+      (LambdaLink
+        (TypedVariableLink
+          (VariableNode "$X") ; [6809909406030619949][1]
+          (TypeNode "ConceptNode") ; [3788388250666256890][1]
+        ) ; [17718894144153964593][1]
+        (EvaluationLink
+          (PredicateNode "take") ; [3396821867884253757][1]
+          (ListLink
+            (VariableNode "$X") ; [6809909406030619949][1]
+            (ConceptNode "compound-A") ; [5571266438078870282][1]
+          ) ; [9339663655215837098][1]
+        ) ; [12459373116713205302][1]
+      ) ; [18413871478668594639][1]
+    ) ; [15045448380669666365][3]
+    (ImplicationLink
+      (VariableNode "$B-a083600") ; [1075803195405159200][3]
+      (VariableNode "$B-1dddc59f") ; [6279313473057644823][3]
+    ) ; [15662491949622207150][3]
+  ) ; [17893534375455001191][3]
+  (ExecutionOutputLink
+    (GroundedSchemaNode "scm: deduction-formula") ; [201750363263560339][1]
+    (ListLink
+      (ImplicationLink
+        (VariableNode "$B-a083600") ; [1075803195405159200][3]
+        (LambdaLink
+          (TypedVariableLink
+            (VariableNode "$X") ; [6809909406030619949][1]
+            (TypeNode "ConceptNode") ; [3788388250666256890][1]
+          ) ; [17718894144153964593][1]
+          (EvaluationLink
+            (PredicateNode "take") ; [3396821867884253757][1]
+            (ListLink
+              (VariableNode "$X") ; [6809909406030619949][1]
+              (ConceptNode "compound-A") ; [5571266438078870282][1]
+            ) ; [9339663655215837098][1]
+          ) ; [12459373116713205302][1]
+        ) ; [18413871478668594639][1]
+      ) ; [9350305881523605350][3]
+      (ImplicationLink
+        (VariableNode "$B-a083600") ; [1075803195405159200][3]
+        (VariableNode "$B-1dddc59f") ; [6279313473057644823][3]
+      ) ; [15662491949622207150][3]
+      (ImplicationLink
+        (VariableNode "$B-1dddc59f") ; [6279313473057644823][3]
+        (LambdaLink
+          (TypedVariableLink
+            (VariableNode "$X") ; [6809909406030619949][1]
+            (TypeNode "ConceptNode") ; [3788388250666256890][1]
+          ) ; [17718894144153964593][1]
+          (EvaluationLink
+            (PredicateNode "take") ; [3396821867884253757][1]
+            (ListLink
+              (VariableNode "$X") ; [6809909406030619949][1]
+              (ConceptNode "compound-A") ; [5571266438078870282][1]
+            ) ; [9339663655215837098][1]
+          ) ; [12459373116713205302][1]
+        ) ; [18413871478668594639][1]
+      ) ; [15045448380669666365][3]
+    ) ; [10108899059316459972][3]
+  ) ; [9574025413966773277][3]
+) ; [17097398633443881388][18446744073709551615]
+
+[DEBUG] [URE] Expanded forward chainer strategy:
+(BindLink
+  (VariableList
+    (TypedVariableLink
+      (VariableNode "$B-a083600") ; [1075803195405159200][3]
+      (TypeChoice
+        (TypeNode "OrLink") ; [1641200931040822982][1]
+        (TypeNode "AndLink") ; [5150993344963829271][1]
+        (TypeNode "LambdaLink") ; [6352458681478507967][1]
+        (TypeNode "NotLink") ; [7029353635928836065][1]
+        (TypeNode "PredicateNode") ; [7305492803481351454][1]
+      ) ; [12553683925648135849][1]
+    ) ; [12502753568736379187][3]
+    (TypedVariableLink
+      (VariableNode "$B-5560bed3") ; [954956885300767879][3]
+      (TypeChoice
+        (TypeNode "OrLink") ; [1641200931040822982][1]
+        (TypeNode "AndLink") ; [5150993344963829271][1]
+        (TypeNode "LambdaLink") ; [6352458681478507967][1]
+        (TypeNode "NotLink") ; [7029353635928836065][1]
+        (TypeNode "PredicateNode") ; [7305492803481351454][1]
+      ) ; [12553683925648135849][1]
+    ) ; [17738197372146241402][3]
+  ) ; [16120270668468015937][3]
+  (AndLink
+    (NotLink
+      (IdenticalLink
+        (VariableNode "$B-a083600") ; [1075803195405159200][3]
+        (LambdaLink
+          (TypedVariableLink
+            (VariableNode "$X") ; [6809909406030619949][1]
+            (TypeNode "ConceptNode") ; [3788388250666256890][1]
+          ) ; [17718894144153964593][1]
+          (EvaluationLink
+            (PredicateNode "take") ; [3396821867884253757][1]
+            (ListLink
+              (VariableNode "$X") ; [6809909406030619949][1]
+              (ConceptNode "compound-A") ; [5571266438078870282][1]
+            ) ; [9339663655215837098][1]
+          ) ; [12459373116713205302][1]
+        ) ; [18413871478668594639][1]
+      ) ; [9771779474766691712][3]
+    ) ; [9792098449647556757][3]
+    (ImplicationLink
+      (VariableNode "$B-a083600") ; [1075803195405159200][3]
+      (VariableNode "$B-5560bed3") ; [954956885300767879][3]
+    ) ; [10338135361865330206][3]
+    (EvaluationLink
+      (GroundedPredicateNode "scm: gt-zero-confidence") ; [2096565403849494700][1]
+      (EquivalenceLink
+        (PredicateNode "take-treatment-1" (stv 0.100000 0.800000)) ; [693477798751519767][1]
+        (VariableNode "$B-a083600") ; [1075803195405159200][3]
+      ) ; [16346461327915047267][3]
+    ) ; [13451195623684469822][3]
+    (ImplicationLink
+      (VariableNode "$B-5560bed3") ; [954956885300767879][3]
+      (LambdaLink
+        (TypedVariableLink
+          (VariableNode "$X") ; [6809909406030619949][1]
+          (TypeNode "ConceptNode") ; [3788388250666256890][1]
+        ) ; [17718894144153964593][1]
+        (EvaluationLink
+          (PredicateNode "take") ; [3396821867884253757][1]
+          (ListLink
+            (VariableNode "$X") ; [6809909406030619949][1]
+            (ConceptNode "compound-A") ; [5571266438078870282][1]
+          ) ; [9339663655215837098][1]
+        ) ; [12459373116713205302][1]
+      ) ; [18413871478668594639][1]
+    ) ; [14585749684933467565][3]
+    (NotLink
+      (IdenticalLink
+        (PredicateNode "take-treatment-1" (stv 0.100000 0.800000)) ; [693477798751519767][1]
+        (LambdaLink
+          (TypedVariableLink
+            (VariableNode "$X") ; [6809909406030619949][1]
+            (TypeNode "ConceptNode") ; [3788388250666256890][1]
+          ) ; [17718894144153964593][1]
+          (EvaluationLink
+            (PredicateNode "take") ; [3396821867884253757][1]
+            (ListLink
+              (VariableNode "$X") ; [6809909406030619949][1]
+              (ConceptNode "compound-A") ; [5571266438078870282][1]
+            ) ; [9339663655215837098][1]
+          ) ; [12459373116713205302][1]
+        ) ; [18413871478668594639][1]
+      ) ; [15601785458906142039][3]
+    ) ; [15622104433787007084][3]
+    (EquivalenceLink
+      (PredicateNode "take-treatment-1" (stv 0.100000 0.800000)) ; [693477798751519767][1]
+      (VariableNode "$B-a083600") ; [1075803195405159200][3]
+    ) ; [16346461327915047267][3]
+  ) ; [13392015689230750516][3]
+  (ExecutionOutputLink
+    (GroundedSchemaNode "scm: deduction-formula") ; [201750363263560339][1]
+    (ListLink
+      (ImplicationLink (stv 0.200000 0.576000)
+        (PredicateNode "take-treatment-1" (stv 0.100000 0.800000)) ; [693477798751519767][1]
+        (LambdaLink
+          (TypedVariableLink
+            (VariableNode "$X") ; [6809909406030619949][1]
+            (TypeNode "ConceptNode") ; [3788388250666256890][1]
+          ) ; [17718894144153964593][1]
+          (EvaluationLink
+            (PredicateNode "take") ; [3396821867884253757][1]
+            (ListLink
+              (VariableNode "$X") ; [6809909406030619949][1]
+              (ConceptNode "compound-A") ; [5571266438078870282][1]
+            ) ; [9339663655215837098][1]
+          ) ; [12459373116713205302][1]
+        ) ; [18413871478668594639][1]
+      ) ; [15180311865663055677][1]
+      (ExecutionOutputLink
+        (GroundedSchemaNode "scm: equivalence-to-implication-formula") ; [657362063185547793][1]
+        (ListLink
+          (ImplicationLink
+            (PredicateNode "take-treatment-1" (stv 0.100000 0.800000)) ; [693477798751519767][1]
+            (VariableNode "$B-a083600") ; [1075803195405159200][3]
+          ) ; [16288987656109171854][3]
+          (EquivalenceLink
+            (PredicateNode "take-treatment-1" (stv 0.100000 0.800000)) ; [693477798751519767][1]
+            (VariableNode "$B-a083600") ; [1075803195405159200][3]
+          ) ; [16346461327915047267][3]
+        ) ; [10106419507727073668][3]
+      ) ; [15383359922948197147][3]
+      (ExecutionOutputLink
+        (GroundedSchemaNode "scm: deduction-formula") ; [201750363263560339][1]
+        (ListLink
+          (ImplicationLink
+            (VariableNode "$B-a083600") ; [1075803195405159200][3]
+            (LambdaLink
+              (TypedVariableLink
+                (VariableNode "$X") ; [6809909406030619949][1]
+                (TypeNode "ConceptNode") ; [3788388250666256890][1]
+              ) ; [17718894144153964593][1]
+              (EvaluationLink
+                (PredicateNode "take") ; [3396821867884253757][1]
+                (ListLink
+                  (VariableNode "$X") ; [6809909406030619949][1]
+                  (ConceptNode "compound-A") ; [5571266438078870282][1]
+                ) ; [9339663655215837098][1]
+              ) ; [12459373116713205302][1]
+            ) ; [18413871478668594639][1]
+          ) ; [9350305881523605350][3]
+          (ImplicationLink
+            (VariableNode "$B-a083600") ; [1075803195405159200][3]
+            (VariableNode "$B-5560bed3") ; [954956885300767879][3]
+          ) ; [10338135361865330206][3]
+          (ImplicationLink
+            (VariableNode "$B-5560bed3") ; [954956885300767879][3]
+            (LambdaLink
+              (TypedVariableLink
+                (VariableNode "$X") ; [6809909406030619949][1]
+                (TypeNode "ConceptNode") ; [3788388250666256890][1]
+              ) ; [17718894144153964593][1]
+              (EvaluationLink
+                (PredicateNode "take") ; [3396821867884253757][1]
+                (ListLink
+                  (VariableNode "$X") ; [6809909406030619949][1]
+                  (ConceptNode "compound-A") ; [5571266438078870282][1]
+                ) ; [9339663655215837098][1]
+              ) ; [12459373116713205302][1]
+            ) ; [18413871478668594639][1]
+          ) ; [14585749684933467565][3]
+        ) ; [18412873704698838180][3]
+      ) ; [17878000059349151485][3]
+    ) ; [16150021266384041000][3]
+  ) ; [15615147621034354305][3]
+) ; [12430907231617908974][3]
+
+[DEBUG] [URE] With inference tree:
+
+[16346461327915047267][3] [10338135361865330206](8) [14585749684933467565](2)
+-equivalence-to-implicat- -----------------deduction-formula-----------------
+[16288987656109171854](11)              [9350305881523605350](9)
+-----------------------deduction-formula------------------------
+                   [15180311865663055677](12)
+
+[DEBUG] [URE] The following and-BIT is already in the BIT:
+(BindLink
+  (VariableList
+    (TypedVariableLink
+      (VariableNode "$B-a083600") ; [1075803195405159200][3]
+      (TypeChoice
+        (TypeNode "OrLink") ; [1641200931040822982][1]
+        (TypeNode "AndLink") ; [5150993344963829271][1]
+        (TypeNode "LambdaLink") ; [6352458681478507967][1]
+        (TypeNode "NotLink") ; [7029353635928836065][1]
+        (TypeNode "PredicateNode") ; [7305492803481351454][1]
+      ) ; [12553683925648135849][1]
+    ) ; [12502753568736379187][3]
+    (TypedVariableLink
+      (VariableNode "$B-5560bed3") ; [954956885300767879][3]
+      (TypeChoice
+        (TypeNode "OrLink") ; [1641200931040822982][1]
+        (TypeNode "AndLink") ; [5150993344963829271][1]
+        (TypeNode "LambdaLink") ; [6352458681478507967][1]
+        (TypeNode "NotLink") ; [7029353635928836065][1]
+        (TypeNode "PredicateNode") ; [7305492803481351454][1]
+      ) ; [12553683925648135849][1]
+    ) ; [17738197372146241402][3]
+  ) ; [16120270668468015937][3]
+  (AndLink
+    (NotLink
+      (IdenticalLink
+        (VariableNode "$B-a083600") ; [1075803195405159200][3]
+        (LambdaLink
+          (TypedVariableLink
+            (VariableNode "$X") ; [6809909406030619949][1]
+            (TypeNode "ConceptNode") ; [3788388250666256890][1]
+          ) ; [17718894144153964593][1]
+          (EvaluationLink
+            (PredicateNode "take") ; [3396821867884253757][1]
+            (ListLink
+              (VariableNode "$X") ; [6809909406030619949][1]
+              (ConceptNode "compound-A") ; [5571266438078870282][1]
+            ) ; [9339663655215837098][1]
+          ) ; [12459373116713205302][1]
+        ) ; [18413871478668594639][1]
+      ) ; [9771779474766691712][3]
+    ) ; [9792098449647556757][3]
+    (ImplicationLink
+      (VariableNode "$B-a083600") ; [1075803195405159200][3]
+      (VariableNode "$B-5560bed3") ; [954956885300767879][3]
+    ) ; [10338135361865330206][3]
+    (EvaluationLink
+      (GroundedPredicateNode "scm: gt-zero-confidence") ; [2096565403849494700][1]
+      (EquivalenceLink
+        (PredicateNode "take-treatment-1" (stv 0.100000 0.800000)) ; [693477798751519767][1]
+        (VariableNode "$B-a083600") ; [1075803195405159200][3]
+      ) ; [16346461327915047267][3]
+    ) ; [13451195623684469822][3]
+    (ImplicationLink
+      (VariableNode "$B-5560bed3") ; [954956885300767879][3]
+      (LambdaLink
+        (TypedVariableLink
+          (VariableNode "$X") ; [6809909406030619949][1]
+          (TypeNode "ConceptNode") ; [3788388250666256890][1]
+        ) ; [17718894144153964593][1]
+        (EvaluationLink
+          (PredicateNode "take") ; [3396821867884253757][1]
+          (ListLink
+            (VariableNode "$X") ; [6809909406030619949][1]
+            (ConceptNode "compound-A") ; [5571266438078870282][1]
+          ) ; [9339663655215837098][1]
+        ) ; [12459373116713205302][1]
+      ) ; [18413871478668594639][1]
+    ) ; [14585749684933467565][3]
+    (NotLink
+      (IdenticalLink
+        (PredicateNode "take-treatment-1" (stv 0.100000 0.800000)) ; [693477798751519767][1]
+        (LambdaLink
+          (TypedVariableLink
+            (VariableNode "$X") ; [6809909406030619949][1]
+            (TypeNode "ConceptNode") ; [3788388250666256890][1]
+          ) ; [17718894144153964593][1]
+          (EvaluationLink
+            (PredicateNode "take") ; [3396821867884253757][1]
+            (ListLink
+              (VariableNode "$X") ; [6809909406030619949][1]
+              (ConceptNode "compound-A") ; [5571266438078870282][1]
+            ) ; [9339663655215837098][1]
+          ) ; [12459373116713205302][1]
+        ) ; [18413871478668594639][1]
+      ) ; [15601785458906142039][3]
+    ) ; [15622104433787007084][3]
+    (EquivalenceLink
+      (PredicateNode "take-treatment-1" (stv 0.100000 0.800000)) ; [693477798751519767][1]
+      (VariableNode "$B-a083600") ; [1075803195405159200][3]
+    ) ; [16346461327915047267][3]
+  ) ; [13392015689230750516][3]
+  (ExecutionOutputLink
+    (GroundedSchemaNode "scm: deduction-formula") ; [201750363263560339][1]
+    (ListLink
+      (ImplicationLink (stv 0.200000 0.576000)
+        (PredicateNode "take-treatment-1" (stv 0.100000 0.800000)) ; [693477798751519767][1]
+        (LambdaLink
+          (TypedVariableLink
+            (VariableNode "$X") ; [6809909406030619949][1]
+            (TypeNode "ConceptNode") ; [3788388250666256890][1]
+          ) ; [17718894144153964593][1]
+          (EvaluationLink
+            (PredicateNode "take") ; [3396821867884253757][1]
+            (ListLink
+              (VariableNode "$X") ; [6809909406030619949][1]
+              (ConceptNode "compound-A") ; [5571266438078870282][1]
+            ) ; [9339663655215837098][1]
+          ) ; [12459373116713205302][1]
+        ) ; [18413871478668594639][1]
+      ) ; [15180311865663055677][1]
+      (ExecutionOutputLink
+        (GroundedSchemaNode "scm: equivalence-to-implication-formula") ; [657362063185547793][1]
+        (ListLink
+          (ImplicationLink
+            (PredicateNode "take-treatment-1" (stv 0.100000 0.800000)) ; [693477798751519767][1]
+            (VariableNode "$B-a083600") ; [1075803195405159200][3]
+          ) ; [16288987656109171854][3]
+          (EquivalenceLink
+            (PredicateNode "take-treatment-1" (stv 0.100000 0.800000)) ; [693477798751519767][1]
+            (VariableNode "$B-a083600") ; [1075803195405159200][3]
+          ) ; [16346461327915047267][3]
+        ) ; [10106419507727073668][3]
+      ) ; [15383359922948197147][3]
+      (ExecutionOutputLink
+        (GroundedSchemaNode "scm: deduction-formula") ; [201750363263560339][1]
+        (ListLink
+          (ImplicationLink
+            (VariableNode "$B-a083600") ; [1075803195405159200][3]
+            (LambdaLink
+              (TypedVariableLink
+                (VariableNode "$X") ; [6809909406030619949][1]
+                (TypeNode "ConceptNode") ; [3788388250666256890][1]
+              ) ; [17718894144153964593][1]
+              (EvaluationLink
+                (PredicateNode "take") ; [3396821867884253757][1]
+                (ListLink
+                  (VariableNode "$X") ; [6809909406030619949][1]
+                  (ConceptNode "compound-A") ; [5571266438078870282][1]
+                ) ; [9339663655215837098][1]
+              ) ; [12459373116713205302][1]
+            ) ; [18413871478668594639][1]
+          ) ; [9350305881523605350][3]
+          (ImplicationLink
+            (VariableNode "$B-a083600") ; [1075803195405159200][3]
+            (VariableNode "$B-5560bed3") ; [954956885300767879][3]
+          ) ; [10338135361865330206][3]
+          (ImplicationLink
+            (VariableNode "$B-5560bed3") ; [954956885300767879][3]
+            (LambdaLink
+              (TypedVariableLink
+                (VariableNode "$X") ; [6809909406030619949][1]
+                (TypeNode "ConceptNode") ; [3788388250666256890][1]
+              ) ; [17718894144153964593][1]
+              (EvaluationLink
+                (PredicateNode "take") ; [3396821867884253757][1]
+                (ListLink
+                  (VariableNode "$X") ; [6809909406030619949][1]
+                  (ConceptNode "compound-A") ; [5571266438078870282][1]
+                ) ; [9339663655215837098][1]
+              ) ; [12459373116713205302][1]
+            ) ; [18413871478668594639][1]
+          ) ; [14585749684933467565][3]
+        ) ; [18412873704698838180][3]
+      ) ; [17878000059349151485][3]
+    ) ; [16150021266384041000][3]
+  ) ; [15615147621034354305][3]
+) ; [12430907231617908974][3]
+
+[DEBUG] [URE] Cannot fulfill an empty and-BIT. Abort BIT fulfillment
+
+[DEBUG] [URE] Iteration 41
+[DEBUG] [URE] Weighted and-BITs:
+0 [9784828008193082764][3]
+0 [9318682074605260610][3]
+0.367879 [13079345644155264039][3]
+0 [13100328147986777818][3]
+0.135335 [11242362051823497534][3]
+0.135335 [12267047379613349907][3]
+0.135335 [12328886805747494797][3]
+0.135335 [14246908175096157275][3]
+0.135335 [14267890823949643513][3]
+0.135335 [14393749419077526878][3]
+0.135335 [16288841085533427254][3]
+0.135335 [18313939221224606850][3]
+0.0497871 [10430063788405651715][3]
+0.0497871 [11654299464900949455][3]
+0.0497871 [12430907231617908974][3]
+0.0497871 [13455592559407745395][3]
+0.0497871 [13819468909123323685][3]
+0.0497871 [14127060373209657767][3]
+0.0497871 [14472840142055194905][3]
+0.0497871 [15424678408000404244][3]
+0.0497871 [15476542820437867535][3]
+0.0497871 [15723606632177944984][3]
+0.0497871 [16476955773914844770][3]
+0.0497871 [17819668396505638041][3]
+0.0183156 [9817315873676505210][3]
+0.0183156 [11597626320487390403][3]
+0.0183156 [12003467966787254218][3]
+0.0183156 [14171659890782707951][3]
+0.0183156 [17806586811738614735][3]
+[DEBUG] [URE] Selected and-BIT for expansion:
+(BindLink
+  (VariableList
+    (TypedVariableLink
+      (VariableNode "$B-a083600") ; [1075803195405159200][3]
+      (TypeChoice
+        (TypeNode "OrLink") ; [1641200931040822982][1]
+        (TypeNode "AndLink") ; [5150993344963829271][1]
+        (TypeNode "LambdaLink") ; [6352458681478507967][1]
+        (TypeNode "NotLink") ; [7029353635928836065][1]
+        (TypeNode "PredicateNode") ; [7305492803481351454][1]
+      ) ; [12553683925648135849][1]
+    ) ; [12502753568736379187][3]
+    (TypedVariableLink
+      (VariableNode "$B-5560bed3") ; [954956885300767879][3]
+      (TypeChoice
+        (TypeNode "OrLink") ; [1641200931040822982][1]
+        (TypeNode "AndLink") ; [5150993344963829271][1]
+        (TypeNode "LambdaLink") ; [6352458681478507967][1]
+        (TypeNode "NotLink") ; [7029353635928836065][1]
+        (TypeNode "PredicateNode") ; [7305492803481351454][1]
+      ) ; [12553683925648135849][1]
+    ) ; [17738197372146241402][3]
+  ) ; [16120270668468015937][3]
+  (AndLink
+    (NotLink
+      (IdenticalLink
+        (VariableNode "$B-a083600") ; [1075803195405159200][3]
+        (LambdaLink
+          (TypedVariableLink
+            (VariableNode "$X") ; [6809909406030619949][1]
+            (TypeNode "ConceptNode") ; [3788388250666256890][1]
+          ) ; [17718894144153964593][1]
+          (EvaluationLink
+            (PredicateNode "take") ; [3396821867884253757][1]
+            (ListLink
+              (VariableNode "$X") ; [6809909406030619949][1]
+              (ConceptNode "compound-A") ; [5571266438078870282][1]
+            ) ; [9339663655215837098][1]
+          ) ; [12459373116713205302][1]
+        ) ; [18413871478668594639][1]
+      ) ; [9771779474766691712][3]
+    ) ; [9792098449647556757][3]
+    (ImplicationLink
+      (VariableNode "$B-a083600") ; [1075803195405159200][3]
+      (VariableNode "$B-5560bed3") ; [954956885300767879][3]
+    ) ; [10338135361865330206][3]
+    (EvaluationLink
+      (GroundedPredicateNode "scm: gt-zero-confidence") ; [2096565403849494700][1]
+      (EquivalenceLink
+        (PredicateNode "take-treatment-1" (stv 0.100000 0.800000)) ; [693477798751519767][1]
+        (VariableNode "$B-a083600") ; [1075803195405159200][3]
+      ) ; [16346461327915047267][3]
+    ) ; [13451195623684469822][3]
+    (ImplicationLink
+      (VariableNode "$B-5560bed3") ; [954956885300767879][3]
+      (LambdaLink
+        (TypedVariableLink
+          (VariableNode "$X") ; [6809909406030619949][1]
+          (TypeNode "ConceptNode") ; [3788388250666256890][1]
+        ) ; [17718894144153964593][1]
+        (EvaluationLink
+          (PredicateNode "take") ; [3396821867884253757][1]
+          (ListLink
+            (VariableNode "$X") ; [6809909406030619949][1]
+            (ConceptNode "compound-A") ; [5571266438078870282][1]
+          ) ; [9339663655215837098][1]
+        ) ; [12459373116713205302][1]
+      ) ; [18413871478668594639][1]
+    ) ; [14585749684933467565][3]
+    (NotLink
+      (IdenticalLink
+        (PredicateNode "take-treatment-1" (stv 0.100000 0.800000)) ; [693477798751519767][1]
+        (LambdaLink
+          (TypedVariableLink
+            (VariableNode "$X") ; [6809909406030619949][1]
+            (TypeNode "ConceptNode") ; [3788388250666256890][1]
+          ) ; [17718894144153964593][1]
+          (EvaluationLink
+            (PredicateNode "take") ; [3396821867884253757][1]
+            (ListLink
+              (VariableNode "$X") ; [6809909406030619949][1]
+              (ConceptNode "compound-A") ; [5571266438078870282][1]
+            ) ; [9339663655215837098][1]
+          ) ; [12459373116713205302][1]
+        ) ; [18413871478668594639][1]
+      ) ; [15601785458906142039][3]
+    ) ; [15622104433787007084][3]
+    (EquivalenceLink
+      (PredicateNode "take-treatment-1" (stv 0.100000 0.800000)) ; [693477798751519767][1]
+      (VariableNode "$B-a083600") ; [1075803195405159200][3]
+    ) ; [16346461327915047267][3]
+  ) ; [13392015689230750516][3]
+  (ExecutionOutputLink
+    (GroundedSchemaNode "scm: deduction-formula") ; [201750363263560339][1]
+    (ListLink
+      (ImplicationLink (stv 0.200000 0.576000)
+        (PredicateNode "take-treatment-1" (stv 0.100000 0.800000)) ; [693477798751519767][1]
+        (LambdaLink
+          (TypedVariableLink
+            (VariableNode "$X") ; [6809909406030619949][1]
+            (TypeNode "ConceptNode") ; [3788388250666256890][1]
+          ) ; [17718894144153964593][1]
+          (EvaluationLink
+            (PredicateNode "take") ; [3396821867884253757][1]
+            (ListLink
+              (VariableNode "$X") ; [6809909406030619949][1]
+              (ConceptNode "compound-A") ; [5571266438078870282][1]
+            ) ; [9339663655215837098][1]
+          ) ; [12459373116713205302][1]
+        ) ; [18413871478668594639][1]
+      ) ; [15180311865663055677][1]
+      (ExecutionOutputLink
+        (GroundedSchemaNode "scm: equivalence-to-implication-formula") ; [657362063185547793][1]
+        (ListLink
+          (ImplicationLink
+            (PredicateNode "take-treatment-1" (stv 0.100000 0.800000)) ; [693477798751519767][1]
+            (VariableNode "$B-a083600") ; [1075803195405159200][3]
+          ) ; [16288987656109171854][3]
+          (EquivalenceLink
+            (PredicateNode "take-treatment-1" (stv 0.100000 0.800000)) ; [693477798751519767][1]
+            (VariableNode "$B-a083600") ; [1075803195405159200][3]
+          ) ; [16346461327915047267][3]
+        ) ; [10106419507727073668][3]
+      ) ; [15383359922948197147][3]
+      (ExecutionOutputLink
+        (GroundedSchemaNode "scm: deduction-formula") ; [201750363263560339][1]
+        (ListLink
+          (ImplicationLink
+            (VariableNode "$B-a083600") ; [1075803195405159200][3]
+            (LambdaLink
+              (TypedVariableLink
+                (VariableNode "$X") ; [6809909406030619949][1]
+                (TypeNode "ConceptNode") ; [3788388250666256890][1]
+              ) ; [17718894144153964593][1]
+              (EvaluationLink
+                (PredicateNode "take") ; [3396821867884253757][1]
+                (ListLink
+                  (VariableNode "$X") ; [6809909406030619949][1]
+                  (ConceptNode "compound-A") ; [5571266438078870282][1]
+                ) ; [9339663655215837098][1]
+              ) ; [12459373116713205302][1]
+            ) ; [18413871478668594639][1]
+          ) ; [9350305881523605350][3]
+          (ImplicationLink
+            (VariableNode "$B-a083600") ; [1075803195405159200][3]
+            (VariableNode "$B-5560bed3") ; [954956885300767879][3]
+          ) ; [10338135361865330206][3]
+          (ImplicationLink
+            (VariableNode "$B-5560bed3") ; [954956885300767879][3]
+            (LambdaLink
+              (TypedVariableLink
+                (VariableNode "$X") ; [6809909406030619949][1]
+                (TypeNode "ConceptNode") ; [3788388250666256890][1]
+              ) ; [17718894144153964593][1]
+              (EvaluationLink
+                (PredicateNode "take") ; [3396821867884253757][1]
+                (ListLink
+                  (VariableNode "$X") ; [6809909406030619949][1]
+                  (ConceptNode "compound-A") ; [5571266438078870282][1]
+                ) ; [9339663655215837098][1]
+              ) ; [12459373116713205302][1]
+            ) ; [18413871478668594639][1]
+          ) ; [14585749684933467565][3]
+        ) ; [18412873704698838180][3]
+      ) ; [17878000059349151485][3]
+    ) ; [16150021266384041000][3]
+  ) ; [15615147621034354305][3]
+) ; [12430907231617908974][3]
+
+[DEBUG] [URE] Selected BIT-node for expansion:
+body:
+(ImplicationLink
+  (VariableNode "$B-a083600") ; [1075803195405159200][3]
+  (VariableNode "$B-5560bed3") ; [954956885300767879][3]
+) ; [10338135361865330206][3]
+exhausted: 0
+rules: size = 0
+[DEBUG] [URE] The following weighted rules are valid:
+1 implication-and-lambda-factorization-rule
+1 implication-implicant-distribution-rule
+1 conditional-full-instantiation-meta-rule
+1 implication-construction-rule
+1 implication-scope-to-implication-rule
+1 deduction-implication-rule
+1 equivalence-to-implication-rule
+[DEBUG] [URE] Selected rule for BIT expansion:
+name: deduction-implication-rule
+rule:
+(BindLink
+  (VariableList
+    (TypedVariableLink
+      (VariableNode "$B-a083600") ; [1075803195405159200][3]
+      (TypeChoice
+        (TypeNode "OrLink") ; [1641200931040822982][1]
+        (TypeNode "AndLink") ; [5150993344963829271][1]
+        (TypeNode "LambdaLink") ; [6352458681478507967][1]
+        (TypeNode "NotLink") ; [7029353635928836065][1]
+        (TypeNode "PredicateNode") ; [7305492803481351454][1]
+      ) ; [12553683925648135849][1]
+    ) ; [12502753568736379187][3]
+    (TypedVariableLink
+      (VariableNode "$B-5560bed3") ; [954956885300767879][3]
+      (TypeChoice
+        (TypeNode "OrLink") ; [1641200931040822982][1]
+        (TypeNode "AndLink") ; [5150993344963829271][1]
+        (TypeNode "LambdaLink") ; [6352458681478507967][1]
+        (TypeNode "NotLink") ; [7029353635928836065][1]
+        (TypeNode "PredicateNode") ; [7305492803481351454][1]
+      ) ; [12553683925648135849][1]
+    ) ; [17738197372146241402][3]
+    (TypedVariableLink
+      (VariableNode "$B-5284736b") ; [9022226326445859151][3]
+      (TypeChoice
+        (TypeNode "OrLink") ; [1641200931040822982][1]
+        (TypeNode "AndLink") ; [5150993344963829271][1]
+        (TypeNode "LambdaLink") ; [6352458681478507967][1]
+        (TypeNode "NotLink") ; [7029353635928836065][1]
+        (TypeNode "PredicateNode") ; [7305492803481351454][1]
+      ) ; [12553683925648135849][1]
+    ) ; [16480299861145754946][3]
+  ) ; [13493653783013284003][3]
+  (AndLink
+    (ImplicationLink
+      (VariableNode "$B-5284736b") ; [9022226326445859151][3]
+      (VariableNode "$B-5560bed3") ; [954956885300767879][3]
+    ) ; [14315681654274705965][3]
+    (NotLink
+      (IdenticalLink
+        (VariableNode "$B-5560bed3") ; [954956885300767879][3]
+        (VariableNode "$B-a083600") ; [1075803195405159200][3]
+      ) ; [16115899068622670104][3]
+    ) ; [16136218043503535149][3]
+    (ImplicationLink
+      (VariableNode "$B-a083600") ; [1075803195405159200][3]
+      (VariableNode "$B-5284736b") ; [9022226326445859151][3]
+    ) ; [18405404803010421478][3]
+  ) ; [11416428076602212391][3]
+  (ExecutionOutputLink
+    (GroundedSchemaNode "scm: deduction-formula") ; [201750363263560339][1]
+    (ListLink
+      (ImplicationLink
+        (VariableNode "$B-a083600") ; [1075803195405159200][3]
+        (VariableNode "$B-5560bed3") ; [954956885300767879][3]
+      ) ; [10338135361865330206][3]
+      (ImplicationLink
+        (VariableNode "$B-a083600") ; [1075803195405159200][3]
+        (VariableNode "$B-5284736b") ; [9022226326445859151][3]
+      ) ; [18405404803010421478][3]
+      (ImplicationLink
+        (VariableNode "$B-5284736b") ; [9022226326445859151][3]
+        (VariableNode "$B-5560bed3") ; [954956885300767879][3]
+      ) ; [14315681654274705965][3]
+    ) ; [13496683943169188772][3]
+  ) ; [12961810297819502077][3]
+) ; [17901171833563840478][18446744073709551615]
+
+[DEBUG] [URE] Expanded forward chainer strategy:
+(BindLink
+  (VariableList
+    (TypedVariableLink
+      (VariableNode "$B-a083600") ; [1075803195405159200][3]
+      (TypeChoice
+        (TypeNode "OrLink") ; [1641200931040822982][1]
+        (TypeNode "AndLink") ; [5150993344963829271][1]
+        (TypeNode "LambdaLink") ; [6352458681478507967][1]
+        (TypeNode "NotLink") ; [7029353635928836065][1]
+        (TypeNode "PredicateNode") ; [7305492803481351454][1]
+      ) ; [12553683925648135849][1]
+    ) ; [12502753568736379187][3]
+    (TypedVariableLink
+      (VariableNode "$B-5560bed3") ; [954956885300767879][3]
+      (TypeChoice
+        (TypeNode "OrLink") ; [1641200931040822982][1]
+        (TypeNode "AndLink") ; [5150993344963829271][1]
+        (TypeNode "LambdaLink") ; [6352458681478507967][1]
+        (TypeNode "NotLink") ; [7029353635928836065][1]
+        (TypeNode "PredicateNode") ; [7305492803481351454][1]
+      ) ; [12553683925648135849][1]
+    ) ; [17738197372146241402][3]
+    (TypedVariableLink
+      (VariableNode "$B-5284736b") ; [9022226326445859151][3]
+      (TypeChoice
+        (TypeNode "OrLink") ; [1641200931040822982][1]
+        (TypeNode "AndLink") ; [5150993344963829271][1]
+        (TypeNode "LambdaLink") ; [6352458681478507967][1]
+        (TypeNode "NotLink") ; [7029353635928836065][1]
+        (TypeNode "PredicateNode") ; [7305492803481351454][1]
+      ) ; [12553683925648135849][1]
+    ) ; [16480299861145754946][3]
+  ) ; [13493653783013284003][3]
+  (AndLink
+    (NotLink
+      (IdenticalLink
+        (VariableNode "$B-a083600") ; [1075803195405159200][3]
+        (LambdaLink
+          (TypedVariableLink
+            (VariableNode "$X") ; [6809909406030619949][1]
+            (TypeNode "ConceptNode") ; [3788388250666256890][1]
+          ) ; [17718894144153964593][1]
+          (EvaluationLink
+            (PredicateNode "take") ; [3396821867884253757][1]
+            (ListLink
+              (VariableNode "$X") ; [6809909406030619949][1]
+              (ConceptNode "compound-A") ; [5571266438078870282][1]
+            ) ; [9339663655215837098][1]
+          ) ; [12459373116713205302][1]
+        ) ; [18413871478668594639][1]
+      ) ; [9771779474766691712][3]
+    ) ; [9792098449647556757][3]
+    (EvaluationLink
+      (GroundedPredicateNode "scm: gt-zero-confidence") ; [2096565403849494700][1]
+      (EquivalenceLink
+        (PredicateNode "take-treatment-1" (stv 0.100000 0.800000)) ; [693477798751519767][1]
+        (VariableNode "$B-a083600") ; [1075803195405159200][3]
+      ) ; [16346461327915047267][3]
+    ) ; [13451195623684469822][3]
+    (ImplicationLink
+      (VariableNode "$B-5284736b") ; [9022226326445859151][3]
+      (VariableNode "$B-5560bed3") ; [954956885300767879][3]
+    ) ; [14315681654274705965][3]
+    (ImplicationLink
+      (VariableNode "$B-5560bed3") ; [954956885300767879][3]
+      (LambdaLink
+        (TypedVariableLink
+          (VariableNode "$X") ; [6809909406030619949][1]
+          (TypeNode "ConceptNode") ; [3788388250666256890][1]
+        ) ; [17718894144153964593][1]
+        (EvaluationLink
+          (PredicateNode "take") ; [3396821867884253757][1]
+          (ListLink
+            (VariableNode "$X") ; [6809909406030619949][1]
+            (ConceptNode "compound-A") ; [5571266438078870282][1]
+          ) ; [9339663655215837098][1]
+        ) ; [12459373116713205302][1]
+      ) ; [18413871478668594639][1]
+    ) ; [14585749684933467565][3]
+    (NotLink
+      (IdenticalLink
+        (PredicateNode "take-treatment-1" (stv 0.100000 0.800000)) ; [693477798751519767][1]
+        (LambdaLink
+          (TypedVariableLink
+            (VariableNode "$X") ; [6809909406030619949][1]
+            (TypeNode "ConceptNode") ; [3788388250666256890][1]
+          ) ; [17718894144153964593][1]
+          (EvaluationLink
+            (PredicateNode "take") ; [3396821867884253757][1]
+            (ListLink
+              (VariableNode "$X") ; [6809909406030619949][1]
+              (ConceptNode "compound-A") ; [5571266438078870282][1]
+            ) ; [9339663655215837098][1]
+          ) ; [12459373116713205302][1]
+        ) ; [18413871478668594639][1]
+      ) ; [15601785458906142039][3]
+    ) ; [15622104433787007084][3]
+    (NotLink
+      (IdenticalLink
+        (VariableNode "$B-5560bed3") ; [954956885300767879][3]
+        (VariableNode "$B-a083600") ; [1075803195405159200][3]
+      ) ; [16115899068622670104][3]
+    ) ; [16136218043503535149][3]
+    (EquivalenceLink
+      (PredicateNode "take-treatment-1" (stv 0.100000 0.800000)) ; [693477798751519767][1]
+      (VariableNode "$B-a083600") ; [1075803195405159200][3]
+    ) ; [16346461327915047267][3]
+    (ImplicationLink
+      (VariableNode "$B-a083600") ; [1075803195405159200][3]
+      (VariableNode "$B-5284736b") ; [9022226326445859151][3]
+    ) ; [18405404803010421478][3]
+  ) ; [16651159389420535702][3]
+  (ExecutionOutputLink
+    (GroundedSchemaNode "scm: deduction-formula") ; [201750363263560339][1]
+    (ListLink
+      (ImplicationLink (stv 0.200000 0.576000)
+        (PredicateNode "take-treatment-1" (stv 0.100000 0.800000)) ; [693477798751519767][1]
+        (LambdaLink
+          (TypedVariableLink
+            (VariableNode "$X") ; [6809909406030619949][1]
+            (TypeNode "ConceptNode") ; [3788388250666256890][1]
+          ) ; [17718894144153964593][1]
+          (EvaluationLink
+            (PredicateNode "take") ; [3396821867884253757][1]
+            (ListLink
+              (VariableNode "$X") ; [6809909406030619949][1]
+              (ConceptNode "compound-A") ; [5571266438078870282][1]
+            ) ; [9339663655215837098][1]
+          ) ; [12459373116713205302][1]
+        ) ; [18413871478668594639][1]
+      ) ; [15180311865663055677][1]
+      (ExecutionOutputLink
+        (GroundedSchemaNode "scm: equivalence-to-implication-formula") ; [657362063185547793][1]
+        (ListLink
+          (ImplicationLink
+            (PredicateNode "take-treatment-1" (stv 0.100000 0.800000)) ; [693477798751519767][1]
+            (VariableNode "$B-a083600") ; [1075803195405159200][3]
+          ) ; [16288987656109171854][3]
+          (EquivalenceLink
+            (PredicateNode "take-treatment-1" (stv 0.100000 0.800000)) ; [693477798751519767][1]
+            (VariableNode "$B-a083600") ; [1075803195405159200][3]
+          ) ; [16346461327915047267][3]
+        ) ; [10106419507727073668][3]
+      ) ; [15383359922948197147][3]
+      (ExecutionOutputLink
+        (GroundedSchemaNode "scm: deduction-formula") ; [201750363263560339][1]
+        (ListLink
+          (ImplicationLink
+            (VariableNode "$B-a083600") ; [1075803195405159200][3]
+            (LambdaLink
+              (TypedVariableLink
+                (VariableNode "$X") ; [6809909406030619949][1]
+                (TypeNode "ConceptNode") ; [3788388250666256890][1]
+              ) ; [17718894144153964593][1]
+              (EvaluationLink
+                (PredicateNode "take") ; [3396821867884253757][1]
+                (ListLink
+                  (VariableNode "$X") ; [6809909406030619949][1]
+                  (ConceptNode "compound-A") ; [5571266438078870282][1]
+                ) ; [9339663655215837098][1]
+              ) ; [12459373116713205302][1]
+            ) ; [18413871478668594639][1]
+          ) ; [9350305881523605350][3]
+          (ExecutionOutputLink
+            (GroundedSchemaNode "scm: deduction-formula") ; [201750363263560339][1]
+            (ListLink
+              (ImplicationLink
+                (VariableNode "$B-a083600") ; [1075803195405159200][3]
+                (VariableNode "$B-5560bed3") ; [954956885300767879][3]
+              ) ; [10338135361865330206][3]
+              (ImplicationLink
+                (VariableNode "$B-a083600") ; [1075803195405159200][3]
+                (VariableNode "$B-5284736b") ; [9022226326445859151][3]
+              ) ; [18405404803010421478][3]
+              (ImplicationLink
+                (VariableNode "$B-5284736b") ; [9022226326445859151][3]
+                (VariableNode "$B-5560bed3") ; [954956885300767879][3]
+              ) ; [14315681654274705965][3]
+            ) ; [13496683943169188772][3]
+          ) ; [12961810297819502077][3]
+          (ImplicationLink
+            (VariableNode "$B-5560bed3") ; [954956885300767879][3]
+            (LambdaLink
+              (TypedVariableLink
+                (VariableNode "$X") ; [6809909406030619949][1]
+                (TypeNode "ConceptNode") ; [3788388250666256890][1]
+              ) ; [17718894144153964593][1]
+              (EvaluationLink
+                (PredicateNode "take") ; [3396821867884253757][1]
+                (ListLink
+                  (VariableNode "$X") ; [6809909406030619949][1]
+                  (ConceptNode "compound-A") ; [5571266438078870282][1]
+                ) ; [9339663655215837098][1]
+              ) ; [12459373116713205302][1]
+            ) ; [18413871478668594639][1]
+          ) ; [14585749684933467565][3]
+        ) ; [12760426222638751843][3]
+      ) ; [12225552577289065148][3]
+    ) ; [10497573784323954663][3]
+  ) ; [9962700138974267968][3]
+) ; [17690340717853148051][3]
+
+[DEBUG] [URE] With inference tree:
+
+             [18405404803010421478](6) [14315681654274705965](7)
+             -----------------deduction-formula-----------------
+[16346461327915047267][3] [10338135361865330206](8) [14585749684933467565](2)
+-equivalence-to-implicat- -----------------deduction-formula-----------------
+[16288987656109171854](11)              [9350305881523605350](9)
+-----------------------deduction-formula------------------------
+                   [15180311865663055677](12)
+
+[DEBUG] [URE] Selected and-BIT for fulfillment (fcs value):
+[17690340717853148051][3]
+[DEBUG] [URE] Results:
+size = 0
+
+[DEBUG] [URE] Iteration 156
+[DEBUG] [URE] Weighted and-BITs:
+0 [9784828008193082764][3]
+0 [9318682074605260610][3]
+0 [13079345644155264039][3]
+0 [13100328147986777818][3]
+0.135335 [11242362051823497534][3]
+0.135335 [11263344700677031690][3]
+0.135335 [12267047379613349907][3]
+0 [12328886805747494797][3]
+0.135335 [14246908175096157275][3]
+0 [14267890823949643513][3]
+0.135335 [14393749419077526878][3]
+0 [16288841085533427254][3]
+0 [18313939221224606850][3]
+0.0497871 [9405378461203030293][3]
+0.0497871 [10303952272189261739][3]
+0.0497871 [10430063788405651715][3]
+0.0497871 [10491903359595371260][3]
+0.0497871 [10814922785850695030][3]
+0.0497871 [11654299464900949455][3]
+0.0497871 [12430907231617908974][3]
+0.0497871 [12430907231617908974][3]
+0 [12451889880471411226][3]
+0.0497871 [12694961375389788774][3]
+0.0497871 [13434609910554243143][3]
+0.0497871 [13455592559407745395][3]
+0.0497871 [13819468909123323685][3]
+0.0497871 [13927603486614009205][3]
+0.0497871 [14105705163371883521][3]
+0.0497871 [14127060373209657767][3]
+0.0497871 [14127060373796857632][3]
+0.0497871 [14148042875900310142][3]
+0.0497871 [14451857493201691835][3]
+0.0497871 [14472840142055194905][3]
+0.0497871 [15152080908377376583][3]
+0.0497871 [15424678408000404244][3]
+0.0497871 [15476542820437867535][3]
+0.0497871 [15723606632177944984][3]
+0.0497871 [15744589281031448054][3]
+0.0497871 [16234606091671956443][3]
+0.0497871 [16476955773914844770][3]
+0.0497871 [17688266910588132955][3]
+0.0497871 [17709249559441635207][3]
+0.0497871 [17819668396505638041][3]
+0.0183156 [9653440054668818712][3]
+0.0183156 [9794752087974605162][3]
+0.0183156 [9815734735687277914][3]
+0.0183156 [9815734735687277914][3]
+0.0183156 [9817315873676505210][3]
+0.0183156 [9858880635204422535][3]
+0.0183156 [10463079177884618147][3]
+0.0183156 [11566760515219954349][3]
+0.0183156 [11597626320487390403][3]
+0.0183156 [11618608968200047203][3]
+0.0183156 [11982485321926711048][3]
+0.0183156 [12003467966787254218][3]
+0.0183156 [12217238710730690041][3]
+0.0183156 [13293406898846747470][3]
+0.0183156 [13745311007110609673][3]
+0.0183156 [14171659890782707951][3]
+0.0183156 [14623155090919061357][3]
+0.0183156 [14639972182153532015][3]
+0.0183156 [15286959293987433328][3]
+0.0183156 [15286959295749032923][3]
+0.0183156 [15294250343166279009][3]
+0.0183156 [15294250343166279009][3]
+0.0183156 [15307941942840951532][3]
+0.0183156 [15315605553574475981][3]
+0.0183156 [15851283319967634628][3]
+0.0183156 [16026415816510828127][3]
+0.0183156 [16876699645632758962][3]
+0.0183156 [16891169164830106398][3]
+0.0183156 [16912151812542763198][3]
+0.0183156 [17336555815711921385][3]
+0.0183156 [17665500953709256210][3]
+0.0183156 [17690340717853148051][3]
+0.0183156 [17806586811738614735][3]
+0.0183156 [17865309879497506026][3]
+0.0183156 [17865309930303591147][3]
+0.00673795 [9273082700272451007][3]
+0.00673795 [11199904816393889961][3]
+0.00673795 [11652355102876778530][3]
+0.00673795 [12833376114956714462][3]
+0.00673795 [14531982364258394048][3]
+0.00673795 [14927725382276268860][3]
+0.00673795 [15262058010414213920][3]
+0.00673795 [15339222427430685097][3]
+0.00673795 [15807534714235269823][3]
+0.00673795 [16454521827830770793][3]
+0.00673795 [16475504475543443545][3]
+0.00673795 [16867103796808268587][3]
+0.00673795 [16878042454435286280][3]
+0.00673795 [17203704321018089408][3]
+0.00673795 [17414287064668562749][3]
+0.00673795 [17466177387428641892][3]
+0.00673795 [17503315292594595866][3]
+0.00673795 [18065244825997576296][3]
+0.00247875 [12699483462377312195][3]
+0.00247875 [12845725232462361009][3]
+0.00247875 [16112948809148444594][3]
+[DEBUG] [URE] Selected and-BIT for expansion:
+(BindLink
+  (VariableList
+    (TypedVariableLink
+      (VariableNode "$B-a083600") ; [1075803195405159200][3]
+      (TypeChoice
+        (TypeNode "OrLink") ; [1641200931040822982][1]
+        (TypeNode "AndLink") ; [5150993344963829271][1]
+        (TypeNode "LambdaLink") ; [6352458681478507967][1]
+        (TypeNode "NotLink") ; [7029353635928836065][1]
+        (TypeNode "PredicateNode") ; [7305492803481351454][1]
+      ) ; [12553683925648135849][1]
+    ) ; [12502753568736379187][3]
+    (TypedVariableLink
+      (VariableNode "$B-5560bed3") ; [954956885300767879][3]
+      (TypeChoice
+        (TypeNode "OrLink") ; [1641200931040822982][1]
+        (TypeNode "AndLink") ; [5150993344963829271][1]
+        (TypeNode "LambdaLink") ; [6352458681478507967][1]
+        (TypeNode "NotLink") ; [7029353635928836065][1]
+        (TypeNode "PredicateNode") ; [7305492803481351454][1]
+      ) ; [12553683925648135849][1]
+    ) ; [17738197372146241402][3]
+    (TypedVariableLink
+      (VariableNode "$B-5284736b") ; [9022226326445859151][3]
+      (TypeChoice
+        (TypeNode "OrLink") ; [1641200931040822982][1]
+        (TypeNode "AndLink") ; [5150993344963829271][1]
+        (TypeNode "LambdaLink") ; [6352458681478507967][1]
+        (TypeNode "NotLink") ; [7029353635928836065][1]
+        (TypeNode "PredicateNode") ; [7305492803481351454][1]
+      ) ; [12553683925648135849][1]
+    ) ; [16480299861145754946][3]
+  ) ; [13493653783013284003][3]
+  (AndLink
+    (NotLink
+      (IdenticalLink
+        (VariableNode "$B-a083600") ; [1075803195405159200][3]
+        (LambdaLink
+          (TypedVariableLink
+            (VariableNode "$X") ; [6809909406030619949][1]
+            (TypeNode "ConceptNode") ; [3788388250666256890][1]
+          ) ; [17718894144153964593][1]
+          (EvaluationLink
+            (PredicateNode "take") ; [3396821867884253757][1]
+            (ListLink
+              (VariableNode "$X") ; [6809909406030619949][1]
+              (ConceptNode "compound-A") ; [5571266438078870282][1]
+            ) ; [9339663655215837098][1]
+          ) ; [12459373116713205302][1]
+        ) ; [18413871478668594639][1]
+      ) ; [9771779474766691712][3]
+    ) ; [9792098449647556757][3]
+    (EvaluationLink
+      (GroundedPredicateNode "scm: gt-zero-confidence") ; [2096565403849494700][1]
+      (EquivalenceLink
+        (PredicateNode "take-treatment-1" (stv 0.100000 0.800000)) ; [693477798751519767][1]
+        (VariableNode "$B-a083600") ; [1075803195405159200][3]
+      ) ; [16346461327915047267][3]
+    ) ; [13451195623684469822][3]
+    (ImplicationLink
+      (VariableNode "$B-5284736b") ; [9022226326445859151][3]
+      (VariableNode "$B-5560bed3") ; [954956885300767879][3]
+    ) ; [14315681654274705965][3]
+    (ImplicationLink
+      (VariableNode "$B-5560bed3") ; [954956885300767879][3]
+      (LambdaLink
+        (TypedVariableLink
+          (VariableNode "$X") ; [6809909406030619949][1]
+          (TypeNode "ConceptNode") ; [3788388250666256890][1]
+        ) ; [17718894144153964593][1]
+        (EvaluationLink
+          (PredicateNode "take") ; [3396821867884253757][1]
+          (ListLink
+            (VariableNode "$X") ; [6809909406030619949][1]
+            (ConceptNode "compound-A") ; [5571266438078870282][1]
+          ) ; [9339663655215837098][1]
+        ) ; [12459373116713205302][1]
+      ) ; [18413871478668594639][1]
+    ) ; [14585749684933467565][3]
+    (NotLink
+      (IdenticalLink
+        (PredicateNode "take-treatment-1" (stv 0.100000 0.800000)) ; [693477798751519767][1]
+        (LambdaLink
+          (TypedVariableLink
+            (VariableNode "$X") ; [6809909406030619949][1]
+            (TypeNode "ConceptNode") ; [3788388250666256890][1]
+          ) ; [17718894144153964593][1]
+          (EvaluationLink
+            (PredicateNode "take") ; [3396821867884253757][1]
+            (ListLink
+              (VariableNode "$X") ; [6809909406030619949][1]
+              (ConceptNode "compound-A") ; [5571266438078870282][1]
+            ) ; [9339663655215837098][1]
+          ) ; [12459373116713205302][1]
+        ) ; [18413871478668594639][1]
+      ) ; [15601785458906142039][3]
+    ) ; [15622104433787007084][3]
+    (NotLink
+      (IdenticalLink
+        (VariableNode "$B-5560bed3") ; [954956885300767879][3]
+        (VariableNode "$B-a083600") ; [1075803195405159200][3]
+      ) ; [16115899068622670104][3]
+    ) ; [16136218043503535149][3]
+    (EquivalenceLink
+      (PredicateNode "take-treatment-1" (stv 0.100000 0.800000)) ; [693477798751519767][1]
+      (VariableNode "$B-a083600") ; [1075803195405159200][3]
+    ) ; [16346461327915047267][3]
+    (ImplicationLink
+      (VariableNode "$B-a083600") ; [1075803195405159200][3]
+      (VariableNode "$B-5284736b") ; [9022226326445859151][3]
+    ) ; [18405404803010421478][3]
+  ) ; [16651159389420535702][3]
+  (ExecutionOutputLink
+    (GroundedSchemaNode "scm: deduction-formula") ; [201750363263560339][1]
+    (ListLink
+      (ImplicationLink (stv 0.200000 0.576000)
+        (PredicateNode "take-treatment-1" (stv 0.100000 0.800000)) ; [693477798751519767][1]
+        (LambdaLink
+          (TypedVariableLink
+            (VariableNode "$X") ; [6809909406030619949][1]
+            (TypeNode "ConceptNode") ; [3788388250666256890][1]
+          ) ; [17718894144153964593][1]
+          (EvaluationLink
+            (PredicateNode "take") ; [3396821867884253757][1]
+            (ListLink
+              (VariableNode "$X") ; [6809909406030619949][1]
+              (ConceptNode "compound-A") ; [5571266438078870282][1]
+            ) ; [9339663655215837098][1]
+          ) ; [12459373116713205302][1]
+        ) ; [18413871478668594639][1]
+      ) ; [15180311865663055677][1]
+      (ExecutionOutputLink
+        (GroundedSchemaNode "scm: equivalence-to-implication-formula") ; [657362063185547793][1]
+        (ListLink
+          (ImplicationLink
+            (PredicateNode "take-treatment-1" (stv 0.100000 0.800000)) ; [693477798751519767][1]
+            (VariableNode "$B-a083600") ; [1075803195405159200][3]
+          ) ; [16288987656109171854][3]
+          (EquivalenceLink
+            (PredicateNode "take-treatment-1" (stv 0.100000 0.800000)) ; [693477798751519767][1]
+            (VariableNode "$B-a083600") ; [1075803195405159200][3]
+          ) ; [16346461327915047267][3]
+        ) ; [10106419507727073668][3]
+      ) ; [15383359922948197147][3]
+      (ExecutionOutputLink
+        (GroundedSchemaNode "scm: deduction-formula") ; [201750363263560339][1]
+        (ListLink
+          (ImplicationLink
+            (VariableNode "$B-a083600") ; [1075803195405159200][3]
+            (LambdaLink
+              (TypedVariableLink
+                (VariableNode "$X") ; [6809909406030619949][1]
+                (TypeNode "ConceptNode") ; [3788388250666256890][1]
+              ) ; [17718894144153964593][1]
+              (EvaluationLink
+                (PredicateNode "take") ; [3396821867884253757][1]
+                (ListLink
+                  (VariableNode "$X") ; [6809909406030619949][1]
+                  (ConceptNode "compound-A") ; [5571266438078870282][1]
+                ) ; [9339663655215837098][1]
+              ) ; [12459373116713205302][1]
+            ) ; [18413871478668594639][1]
+          ) ; [9350305881523605350][3]
+          (ExecutionOutputLink
+            (GroundedSchemaNode "scm: deduction-formula") ; [201750363263560339][1]
+            (ListLink
+              (ImplicationLink
+                (VariableNode "$B-a083600") ; [1075803195405159200][3]
+                (VariableNode "$B-5560bed3") ; [954956885300767879][3]
+              ) ; [10338135361865330206][3]
+              (ImplicationLink
+                (VariableNode "$B-a083600") ; [1075803195405159200][3]
+                (VariableNode "$B-5284736b") ; [9022226326445859151][3]
+              ) ; [18405404803010421478][3]
+              (ImplicationLink
+                (VariableNode "$B-5284736b") ; [9022226326445859151][3]
+                (VariableNode "$B-5560bed3") ; [954956885300767879][3]
+              ) ; [14315681654274705965][3]
+            ) ; [13496683943169188772][3]
+          ) ; [12961810297819502077][3]
+          (ImplicationLink
+            (VariableNode "$B-5560bed3") ; [954956885300767879][3]
+            (LambdaLink
+              (TypedVariableLink
+                (VariableNode "$X") ; [6809909406030619949][1]
+                (TypeNode "ConceptNode") ; [3788388250666256890][1]
+              ) ; [17718894144153964593][1]
+              (EvaluationLink
+                (PredicateNode "take") ; [3396821867884253757][1]
+                (ListLink
+                  (VariableNode "$X") ; [6809909406030619949][1]
+                  (ConceptNode "compound-A") ; [5571266438078870282][1]
+                ) ; [9339663655215837098][1]
+              ) ; [12459373116713205302][1]
+            ) ; [18413871478668594639][1]
+          ) ; [14585749684933467565][3]
+        ) ; [12760426222638751843][3]
+      ) ; [12225552577289065148][3]
+    ) ; [10497573784323954663][3]
+  ) ; [9962700138974267968][3]
+) ; [17690340717853148051][3]
+
+[DEBUG] [URE] Selected BIT-node for expansion:
+body:
+(ImplicationLink
+  (VariableNode "$B-a083600") ; [1075803195405159200][3]
+  (VariableNode "$B-5284736b") ; [9022226326445859151][3]
+) ; [18405404803010421478][3]
+exhausted: 0
+rules: size = 0
+[DEBUG] [URE] The following weighted rules are valid:
+1 implication-and-lambda-factorization-rule
+1 implication-implicant-distribution-rule
+1 conditional-full-instantiation-meta-rule
+1 implication-construction-rule
+1 implication-scope-to-implication-rule
+1 deduction-implication-rule
+1 equivalence-to-implication-rule
+[DEBUG] [URE] Selected rule for BIT expansion:
+name: implication-implicant-distribution-rule
+rule:
+(BindLink
+  (VariableList
+    (TypedVariableLink
+      (VariableNode "$B-a083600") ; [1075803195405159200][3]
+      (TypeChoice
+        (TypeNode "OrLink") ; [1641200931040822982][1]
+        (TypeNode "AndLink") ; [5150993344963829271][1]
+        (TypeNode "LambdaLink") ; [6352458681478507967][1]
+        (TypeNode "NotLink") ; [7029353635928836065][1]
+        (TypeNode "PredicateNode") ; [7305492803481351454][1]
+      ) ; [12553683925648135849][1]
+    ) ; [12502753568736379187][3]
+    (TypedVariableLink
+      (VariableNode "$Q-5fa8b92b") ; [8930023734698229664][3]
+      (TypeChoice
+        (TypeNode "LambdaLink") ; [6352458681478507967][1]
+        (TypeNode "PredicateNode") ; [7305492803481351454][1]
+      ) ; [15286865261196305675][1]
+    ) ; [16170795669022151701][3]
+  ) ; [14552868965343926236][3]
+  (AndLink
+    (EvaluationLink
+      (GroundedPredicateNode "scm: gt-zero-confidence") ; [2096565403849494700][1]
+      (ImplicationLink
+        (VariableNode "$B-a083600") ; [1075803195405159200][3]
+        (VariableNode "$Q-5fa8b92b") ; [8930023734698229664][3]
+      ) ; [18313202211262791991][3]
+    ) ; [15417936507032214546][3]
+    (ImplicationLink
+      (VariableNode "$B-a083600") ; [1075803195405159200][3]
+      (VariableNode "$Q-5fa8b92b") ; [8930023734698229664][3]
+    ) ; [18313202211262791991][3]
+  ) ; [11228483269323056304][3]
+  (ExecutionOutputLink
+    (GroundedSchemaNode "scm: implication-implicant-distribution-formula") ; [4181613870801572780][1]
+    (ListLink
+      (ImplicationLink
+        (VariableNode "$B-a083600") ; [1075803195405159200][3]
+        (AndLink
+          (VariableNode "$B-a083600") ; [1075803195405159200][3]
+          (VariableNode "$Q-5fa8b92b") ; [8930023734698229664][3]
+        ) ; [17393623462368785383][3]
+      ) ; [17553429902078571902][3]
+      (ImplicationLink
+        (VariableNode "$B-a083600") ; [1075803195405159200][3]
+        (VariableNode "$Q-5fa8b92b") ; [8930023734698229664][3]
+      ) ; [18313202211262791991][3]
+    ) ; [16906266360645916744][3]
+  ) ; [9356307911229003482][3]
+) ; [12223034193827296519][18446744073709551615]
+
+[DEBUG] [URE] Expanded forward chainer strategy:
+(BindLink
+  (VariableList
+    (TypedVariableLink
+      (VariableNode "$B-a083600") ; [1075803195405159200][3]
+      (TypeChoice
+        (TypeNode "OrLink") ; [1641200931040822982][1]
+        (TypeNode "AndLink") ; [5150993344963829271][1]
+        (TypeNode "LambdaLink") ; [6352458681478507967][1]
+        (TypeNode "NotLink") ; [7029353635928836065][1]
+        (TypeNode "PredicateNode") ; [7305492803481351454][1]
+      ) ; [12553683925648135849][1]
+    ) ; [12502753568736379187][3]
+    (TypedVariableLink
+      (VariableNode "$B-5560bed3") ; [954956885300767879][3]
+      (TypeChoice
+        (TypeNode "OrLink") ; [1641200931040822982][1]
+        (TypeNode "AndLink") ; [5150993344963829271][1]
+        (TypeNode "LambdaLink") ; [6352458681478507967][1]
+        (TypeNode "NotLink") ; [7029353635928836065][1]
+        (TypeNode "PredicateNode") ; [7305492803481351454][1]
+      ) ; [12553683925648135849][1]
+    ) ; [17738197372146241402][3]
+    (TypedVariableLink
+      (VariableNode "$Q-5fa8b92b") ; [8930023734698229664][3]
+      (TypeChoice
+        (TypeNode "LambdaLink") ; [6352458681478507967][1]
+        (TypeNode "PredicateNode") ; [7305492803481351454][1]
+      ) ; [15286865261196305675][1]
+    ) ; [16170795669022151701][3]
+  ) ; [13184149590889680758][3]
+  (AndLink
+    (NotLink
+      (IdenticalLink
+        (VariableNode "$B-a083600") ; [1075803195405159200][3]
+        (LambdaLink
+          (TypedVariableLink
+            (VariableNode "$X") ; [6809909406030619949][1]
+            (TypeNode "ConceptNode") ; [3788388250666256890][1]
+          ) ; [17718894144153964593][1]
+          (EvaluationLink
+            (PredicateNode "take") ; [3396821867884253757][1]
+            (ListLink
+              (VariableNode "$X") ; [6809909406030619949][1]
+              (ConceptNode "compound-A") ; [5571266438078870282][1]
+            ) ; [9339663655215837098][1]
+          ) ; [12459373116713205302][1]
+        ) ; [18413871478668594639][1]
+      ) ; [9771779474766691712][3]
+    ) ; [9792098449647556757][3]
+    (EvaluationLink
+      (GroundedPredicateNode "scm: gt-zero-confidence") ; [2096565403849494700][1]
+      (EquivalenceLink
+        (PredicateNode "take-treatment-1" (stv 0.100000 0.800000)) ; [693477798751519767][1]
+        (VariableNode "$B-a083600") ; [1075803195405159200][3]
+      ) ; [16346461327915047267][3]
+    ) ; [13451195623684469822][3]
+    (ImplicationLink
+      (AndLink
+        (VariableNode "$B-a083600") ; [1075803195405159200][3]
+        (VariableNode "$Q-5fa8b92b") ; [8930023734698229664][3]
+      ) ; [17393623462368785383][3]
+      (VariableNode "$B-5560bed3") ; [954956885300767879][3]
+    ) ; [13870626034087997381][3]
+    (ImplicationLink
+      (VariableNode "$B-5560bed3") ; [954956885300767879][3]
+      (LambdaLink
+        (TypedVariableLink
+          (VariableNode "$X") ; [6809909406030619949][1]
+          (TypeNode "ConceptNode") ; [3788388250666256890][1]
+        ) ; [17718894144153964593][1]
+        (EvaluationLink
+          (PredicateNode "take") ; [3396821867884253757][1]
+          (ListLink
+            (VariableNode "$X") ; [6809909406030619949][1]
+            (ConceptNode "compound-A") ; [5571266438078870282][1]
+          ) ; [9339663655215837098][1]
+        ) ; [12459373116713205302][1]
+      ) ; [18413871478668594639][1]
+    ) ; [14585749684933467565][3]
+    (EvaluationLink
+      (GroundedPredicateNode "scm: gt-zero-confidence") ; [2096565403849494700][1]
+      (ImplicationLink
+        (VariableNode "$B-a083600") ; [1075803195405159200][3]
+        (VariableNode "$Q-5fa8b92b") ; [8930023734698229664][3]
+      ) ; [18313202211262791991][3]
+    ) ; [15417936507032214546][3]
+    (NotLink
+      (IdenticalLink
+        (PredicateNode "take-treatment-1" (stv 0.100000 0.800000)) ; [693477798751519767][1]
+        (LambdaLink
+          (TypedVariableLink
+            (VariableNode "$X") ; [6809909406030619949][1]
+            (TypeNode "ConceptNode") ; [3788388250666256890][1]
+          ) ; [17718894144153964593][1]
+          (EvaluationLink
+            (PredicateNode "take") ; [3396821867884253757][1]
+            (ListLink
+              (VariableNode "$X") ; [6809909406030619949][1]
+              (ConceptNode "compound-A") ; [5571266438078870282][1]
+            ) ; [9339663655215837098][1]
+          ) ; [12459373116713205302][1]
+        ) ; [18413871478668594639][1]
+      ) ; [15601785458906142039][3]
+    ) ; [15622104433787007084][3]
+    (NotLink
+      (IdenticalLink
+        (VariableNode "$B-5560bed3") ; [954956885300767879][3]
+        (VariableNode "$B-a083600") ; [1075803195405159200][3]
+      ) ; [16115899068622670104][3]
+    ) ; [16136218043503535149][3]
+    (EquivalenceLink
+      (PredicateNode "take-treatment-1" (stv 0.100000 0.800000)) ; [693477798751519767][1]
+      (VariableNode "$B-a083600") ; [1075803195405159200][3]
+    ) ; [16346461327915047267][3]
+    (ImplicationLink
+      (VariableNode "$B-a083600") ; [1075803195405159200][3]
+      (VariableNode "$Q-5fa8b92b") ; [8930023734698229664][3]
+    ) ; [18313202211262791991][3]
+  ) ; [18003249542967835921][3]
+  (ExecutionOutputLink
+    (GroundedSchemaNode "scm: deduction-formula") ; [201750363263560339][1]
+    (ListLink
+      (ImplicationLink (stv 0.200000 0.576000)
+        (PredicateNode "take-treatment-1" (stv 0.100000 0.800000)) ; [693477798751519767][1]
+        (LambdaLink
+          (TypedVariableLink
+            (VariableNode "$X") ; [6809909406030619949][1]
+            (TypeNode "ConceptNode") ; [3788388250666256890][1]
+          ) ; [17718894144153964593][1]
+          (EvaluationLink
+            (PredicateNode "take") ; [3396821867884253757][1]
+            (ListLink
+              (VariableNode "$X") ; [6809909406030619949][1]
+              (ConceptNode "compound-A") ; [5571266438078870282][1]
+            ) ; [9339663655215837098][1]
+          ) ; [12459373116713205302][1]
+        ) ; [18413871478668594639][1]
+      ) ; [15180311865663055677][1]
+      (ExecutionOutputLink
+        (GroundedSchemaNode "scm: equivalence-to-implication-formula") ; [657362063185547793][1]
+        (ListLink
+          (ImplicationLink
+            (PredicateNode "take-treatment-1" (stv 0.100000 0.800000)) ; [693477798751519767][1]
+            (VariableNode "$B-a083600") ; [1075803195405159200][3]
+          ) ; [16288987656109171854][3]
+          (EquivalenceLink
+            (PredicateNode "take-treatment-1" (stv 0.100000 0.800000)) ; [693477798751519767][1]
+            (VariableNode "$B-a083600") ; [1075803195405159200][3]
+          ) ; [16346461327915047267][3]
+        ) ; [10106419507727073668][3]
+      ) ; [15383359922948197147][3]
+      (ExecutionOutputLink
+        (GroundedSchemaNode "scm: deduction-formula") ; [201750363263560339][1]
+        (ListLink
+          (ImplicationLink
+            (VariableNode "$B-a083600") ; [1075803195405159200][3]
+            (LambdaLink
+              (TypedVariableLink
+                (VariableNode "$X") ; [6809909406030619949][1]
+                (TypeNode "ConceptNode") ; [3788388250666256890][1]
+              ) ; [17718894144153964593][1]
+              (EvaluationLink
+                (PredicateNode "take") ; [3396821867884253757][1]
+                (ListLink
+                  (VariableNode "$X") ; [6809909406030619949][1]
+                  (ConceptNode "compound-A") ; [5571266438078870282][1]
+                ) ; [9339663655215837098][1]
+              ) ; [12459373116713205302][1]
+            ) ; [18413871478668594639][1]
+          ) ; [9350305881523605350][3]
+          (ExecutionOutputLink
+            (GroundedSchemaNode "scm: deduction-formula") ; [201750363263560339][1]
+            (ListLink
+              (ImplicationLink
+                (VariableNode "$B-a083600") ; [1075803195405159200][3]
+                (VariableNode "$B-5560bed3") ; [954956885300767879][3]
+              ) ; [10338135361865330206][3]
+              (ExecutionOutputLink
+                (GroundedSchemaNode "scm: implication-implicant-distribution-formula") ; [4181613870801572780][1]
+                (ListLink
+                  (ImplicationLink
+                    (VariableNode "$B-a083600") ; [1075803195405159200][3]
+                    (AndLink
+                      (VariableNode "$B-a083600") ; [1075803195405159200][3]
+                      (VariableNode "$Q-5fa8b92b") ; [8930023734698229664][3]
+                    ) ; [17393623462368785383][3]
+                  ) ; [17553429902078571902][3]
+                  (ImplicationLink
+                    (VariableNode "$B-a083600") ; [1075803195405159200][3]
+                    (VariableNode "$Q-5fa8b92b") ; [8930023734698229664][3]
+                  ) ; [18313202211262791991][3]
+                ) ; [16906266360645916744][3]
+              ) ; [9356307911229003482][3]
+              (ImplicationLink
+                (AndLink
+                  (VariableNode "$B-a083600") ; [1075803195405159200][3]
+                  (VariableNode "$Q-5fa8b92b") ; [8930023734698229664][3]
+                ) ; [17393623462368785383][3]
+                (VariableNode "$B-5560bed3") ; [954956885300767879][3]
+              ) ; [13870626034087997381][3]
+            ) ; [9579336073548512176][3]
+          ) ; [18267834465053601289][3]
+          (ImplicationLink
+            (VariableNode "$B-5560bed3") ; [954956885300767879][3]
+            (LambdaLink
+              (TypedVariableLink
+                (VariableNode "$X") ; [6809909406030619949][1]
+                (TypeNode "ConceptNode") ; [3788388250666256890][1]
+              ) ; [17718894144153964593][1]
+              (EvaluationLink
+                (PredicateNode "take") ; [3396821867884253757][1]
+                (ListLink
+                  (VariableNode "$X") ; [6809909406030619949][1]
+                  (ConceptNode "compound-A") ; [5571266438078870282][1]
+                ) ; [9339663655215837098][1]
+              ) ; [12459373116713205302][1]
+            ) ; [18413871478668594639][1]
+          ) ; [14585749684933467565][3]
+        ) ; [12615155041123285487][3]
+      ) ; [12080281395773598792][3]
+    ) ; [10352302602808488307][3]
+  ) ; [9817428957458801612][3]
+) ; [17271636565492908775][3]
+
+[DEBUG] [URE] With inference tree:
+
+             [18313202211262791991](5)
+             -implication-implicant-d-
+             [17553429902078571902](6) [13870626034087997381](7)
+             -----------------deduction-formula-----------------
+[16346461327915047267][3] [10338135361865330206](8) [14585749684933467565](2)
+-equivalence-to-implicat- -----------------deduction-formula-----------------
+[16288987656109171854](11)             [9350305881523605350](9)
+-----------------------deduction-formula-----------------------
+                   [15180311865663055677](12)
+
+[DEBUG] [URE] Selected and-BIT for fulfillment (fcs value):
+[17271636565492908775][3]
+[DEBUG] [URE] Results:
+size = 0
+
+[DEBUG] [URE] Iteration 1670
+[DEBUG] [URE] Weighted and-BITs:
+0 [9784828008193082764][3]
+0 [9318682074605260610][3]
+0 [13079345644155264039][3]
+0 [13100328147986777818][3]
+0 [11242362051823497534][3]
+0 [11263344700677031690][3]
+0 [12267047379613349907][3]
+0 [12328886805747494797][3]
+0 [14246908175096157275][3]
+0 [14267890823949643513][3]
+0 [14393749419077526878][3]
+0 [16288841085533427254][3]
+0 [18313939221224606850][3]
+0.0497871 [9405378461203030293][3]
+0.0497871 [9426361108915687911][3]
+0 [9690415252688870007][3]
+0.0497871 [10282969624476621015][3]
+0 [10303952272189261739][3]
+0 [10430063788405651715][3]
+0.0497871 [10491903359595371260][3]
+0 [10814922785850695030][3]
+0.0497871 [10823657898892836350][3]
+0 [11654299464900949455][3]
+0.0497871 [12409924583905236222][3]
+0.0497871 [12409924583905236222][3]
+0.0497871 [12430907231617908974][3]
+0.0497871 [12430907231617908974][3]
+0 [12451889880471411226][3]
+0 [12694961375389788774][3]
+0.0497871 [13434609910554243143][3]
+0 [13455592559407745395][3]
+0 [13819468909123323685][3]
+0.0497871 [13828204023306546625][3]
+0 [13927603486614009205][3]
+0.0497871 [14105705163371883521][3]
+0 [14127060373209657767][3]
+0.0497871 [14127060373796857632][3]
+0 [14148042875900310142][3]
+0.0497871 [14451857493201691835][3]
+0 [14472840142055194905][3]
+0.0497871 [14837870635574252987][3]
+0 [15152080908377376583][3]
+0.0497871 [15414470707748301857][3]
+0 [15424678408000404244][3]
+0.0497871 [15435453355460959475][3]
+0 [15476542820437867535][3]
+0.0497871 [15561311950588842022][3]
+0 [15723606632177944984][3]
+0 [15744589281031448054][3]
+0 [16234606091671956443][3]
+0 [16476955773914844770][3]
+0.0497871 [16501795538058736611][3]
+0.0497871 [16522778185771394229][3]
+0.0497871 [17110251286644511358][3]
+0.0497871 [17456403617598388803][3]
+0 [17688266910588132955][3]
+0.0497871 [17688266911728978407][3]
+0 [17709249559441635207][3]
+0 [17765539542615231857][3]
+0 [17819668396505638041][3]
+0.0497871 [17842416759417336396][3]
+0.0183156 [9266121417209337654][3]
+0.0183156 [9363577706871540562][3]
+0.0183156 [9491654007647363621][3]
+0.0183156 [9632457406956161912][3]
+0.0183156 [9632457408097007364][3]
+0.0183156 [9632457409808275542][3]
+0.0183156 [9653440054668818712][3]
+0.0183156 [9653440055809664164][3]
+0.0183156 [9709730037825433141][3]
+0.0183156 [9709730037842210280][3]
+0.0183156 [9786607256927292067][3]
+0.0183156 [9794752087974605162][3]
+0.0183156 [9794752087974605162][3]
+0.0183156 [9794752089132227753][3]
+0.0183156 [9807589903499104233][3]
+0.0183156 [9815734735687277914][3]
+0.0183156 [9815734735687277914][3]
+0.0183156 [9815734736844900505][3]
+0.0183156 [9817315873676505210][3]
+0 [9836717384540780984][3]
+0.0183156 [9855530359644631997][3]
+0.0183156 [9858880635204422535][3]
+0.0183156 [9864265477267389466][3]
+0.0183156 [10011359636599494473][3]
+0.0183156 [10095743237921917573][3]
+0.0183156 [10100817525736122257][3]
+0.0183156 [10121800174589609375][3]
+0.0183156 [10141766615000483007][3]
+0 [10463079177884618147][3]
+0.0183156 [10484235331925374489][3]
+0.0183156 [10508901590294812313][3]
+0.0183156 [10572940994425614433][3]
+0.0183156 [10572940994996037159][3]
+0.0183156 [10593923640997425781][3]
+0.0183156 [10593923640997425781][3]
+0.0183156 [10593923641567848507][3]
+0.0183156 [10614906288710098533][3]
+0.0183156 [10784188792780866125][3]
+0.0183156 [10793732712948541364][3]
+0.0183156 [10793732713535741229][3]
+0.0183156 [10793732714693363820][3]
+0.0183156 [10809539433547560007][3]
+0.0183156 [10814715360661198164][3]
+0.0183156 [10814715361248398029][3]
+0.0183156 [10857977788193366085][3]
+0.0183156 [10857977789336848033][3]
+0.0183156 [10857977794518347488][3]
+0.0183156 [10873932087873938851][3]
+0.0183156 [10878960434765193385][3]
+0.0183156 [10878960435908675333][3]
+0.0183156 [11096374691184708341][3]
+0.0183156 [11450532158269610987][3]
+0.0183156 [11450532158269610987][3]
+0.0183156 [11471514804841422335][3]
+0.0183156 [11471514804841422335][3]
+0.0183156 [11471514805982267787][3]
+0.0183156 [11492497452554079953][3]
+0.0183156 [11566760515219954349][3]
+0.0183156 [11597626320487390403][3]
+0.0183156 [11618608968200047203][3]
+0.0183156 [11659465891677109130][3]
+0.0183156 [11659465891693886269][3]
+0.0183156 [11674390318500937598][3]
+0.0183156 [11680448539389781882][3]
+0.0183156 [11759668081558408662][3]
+0.0183156 [11780650729271065462][3]
+0.0183156 [11828540166191457744][3]
+0.0183156 [11836684997271062535][3]
+0.0183156 [11836684998982330713][3]
+0.0183156 [11857667646124580739][3]
+0.0183156 [11882663116471249560][3]
+0.0183156 [11982485319074597418][3]
+0.0183156 [11982485319074597418][3]
+0.0183156 [11982485321926711048][3]
+0.0183156 [11982485321926711048][3]
+0.0183156 [11991220433256723144][3]
+0.0183156 [11991220434967991322][3]
+0.0183156 [11991220437266459365][3]
+0.0183156 [12003467966787254218][3]
+0 [12003467966787254218][3]
+0.0183156 [12012203078687246972][3]
+0.0183156 [12012203080969379944][3]
+0.0183156 [12068493064142976594][3]
+0 [12217238710730690041][3]
+0.0183156 [12268721574999521820][3]
+0.0183156 [12270667539911574669][3]
+0.0183156 [12289704220464073080][3]
+0.0183156 [12537856989720891193][3]
+0.0183156 [12558839636292702541][3]
+0.0183156 [12614873902581193508][3]
+0.0183156 [12635856550293882212][3]
+0.0183156 [12783844775955447271][3]
+0.0183156 [12800658596957683192][3]
+0.0183156 [12899910700817106081][3]
+0.0183156 [13000887047236794898][3]
+0.0183156 [13000887047302585206][3]
+0.0183156 [13007170646832159037][3]
+0.0183156 [13015905761013220762][3]
+0.0183156 [13021869693808607064][3]
+0.0183156 [13040801773849038656][3]
+0.0183156 [13146312737149043349][3]
+0.0183156 [13241542632018486585][3]
+0.0183156 [13293406898846747470][3]
+0.0183156 [13315097316045610078][3]
+0.0183156 [13315097316616032804][3]
+0.0183156 [13336079964899144234][3]
+0.0183156 [13492465066978851663][3]
+0.0183156 [13513447714691525357][3]
+0.0183156 [13598469764270070450][3]
+0.0183156 [13598469764270070450][3]
+0.0183156 [13619452411982726308][3]
+0.0183156 [13639559229783846016][3]
+0.0183156 [13699488595824704854][3]
+0.0183156 [13701398800973565561][3]
+0.0183156 [13724328359397952055][3]
+0.0183156 [13724328359968374781][3]
+0.0183156 [13745311007110609673][3]
+0.0183156 [13862523912037750848][3]
+0.0183156 [13872029127822284245][3]
+0.0183156 [13878478214000030594][3]
+0.0183156 [13883506558609562196][3]
+0.0183156 [14024418229479592595][3]
+0.0183156 [14025572374407141518][3]
+0.0183156 [14033153340271031593][3]
+0.0183156 [14171659890782707951][3]
+0.0183156 [14339782643835461509][3]
+0.0183156 [14397622499340189938][3]
+0.0183156 [14418605148193724094][3]
+0.0183156 [14464583438829860646][3]
+0.0183156 [14485566086542502312][3]
+0.0183156 [14602172443206403739][3]
+0.0183156 [14623155090919061357][3]
+0.0183156 [14639972182153532015][3]
+0.0183156 [14664811948579114822][3]
+0.0183156 [14664811948579114822][3]
+0.0183156 [14664811949719960274][3]
+0.0183156 [14685794595150926988][3]
+0.0183156 [14685794595150926988][3]
+0.0183156 [14685794596291772440][3]
+0.0183156 [14706777242863599740][3]
+0.0183156 [14749013686046943842][3]
+0.0183156 [14850554926307319526][3]
+0.0183156 [14949848743536504061][3]
+0.0183156 [14987031442916329733][3]
+0.0183156 [14995766555388284495][3]
+0.0183156 [15016749203100942113][3]
+0.0183156 [15032232960328027136][3]
+0.0183156 [15257460699714427311][3]
+0.0183156 [15273267696577689704][3]
+0.0183156 [15278443348567930381][3]
+0.0183156 [15286959293987433328][3]
+0.0183156 [15286959295749032923][3]
+0.0183156 [15294250343166279009][3]
+0.0183156 [15294250343166279009][3]
+0.0183156 [15294622905861818363][3]
+0.0183156 [15294622905878595502][3]
+0.0183156 [15296167424465920016][3]
+0 [15307941942840951532][3]
+0.0183156 [15315605553574475981][3]
+0.0183156 [15422307827130042311][3]
+0.0183156 [15441464148702359470][3]
+0.0183156 [15441464148719136609][3]
+0.0183156 [15542403112423127328][3]
+0.0183156 [15563385758994923542][3]
+0.0183156 [15619420026407498836][3]
+0.0183156 [15619420027531567149][3]
+0.0183156 [15640402674120171588][3]
+0.0183156 [15689497274640890792][3]
+0.0183156 [15710479922353548410][3]
+0.0183156 [15851283319967634628][3]
+0.0183156 [15851283320538057354][3]
+0.0183156 [15851283321678902806][3]
+0.0183156 [15872265967680322514][3]
+0.0183156 [15872265968250745240][3]
+0.0183156 [15904456823517993824][3]
+0.0183156 [15982684804794656765][3]
+0.0183156 [16005433169939000827][3]
+0.0183156 [16005433171079847221][3]
+0.0183156 [16005433172858223013][3]
+0.0183156 [16005433173999069407][3]
+0.0183156 [16026415816510828127][3]
+0.0183156 [16026415817651674521][3]
+0.0183156 [16045347896551242825][3]
+0.0183156 [16045347897138442690][3]
+0.0183156 [16074356273226779559][3]
+0.0183156 [16074356275509788711][3]
+0.0183156 [16077706548786554963][3]
+0.0183156 [16083091388567609956][3]
+0.0183156 [16381947736189046208][3]
+0.0183156 [16402930383901703008][3]
+0.0183156 [16501939987249730262][3]
+0.0183156 [16603015888683542797][3]
+0.0183156 [16644105353056474671][3]
+0.0183156 [16728874483811647196][3]
+0.0183156 [16728874484952492648][3]
+0.0183156 [16745369033981027857][3]
+0.0183156 [16749857131524303996][3]
+0.0183156 [16875968647170271184][3]
+0.0183156 [16875968647187048323][3]
+0.0183156 [16876575254519240658][3]
+0 [16876699645632758962][3]
+0.0183156 [16876699646219958827][3]
+0.0183156 [16891169164830106398][3]
+0.0183156 [16891169164846883537][3]
+0.0183156 [16893539307373709914][3]
+0.0183156 [16912151812542763198][3]
+0.0183156 [16912151812559540337][3]
+0.0183156 [16937808218360005863][3]
+0.0183156 [16937808219484074176][3]
+0.0183156 [17030118498250224927][3]
+0.0183156 [17037699464684741868][3]
+0.0183156 [17038010407670646625][3]
+0.0183156 [17076803702347254683][3]
+0.0183156 [17076803704677736780][3]
+0.0183156 [17097786348919066849][3]
+0.0183156 [17299393610151699112][3]
+0.0183156 [17315200604196401149][3]
+0.0183156 [17336555815175052937][3]
+0.0183156 [17336555815711921385][3]
+0.0183156 [17633625596721433544][3]
+0.0183156 [17644518304855738006][3]
+0 [17665500953709256210][3]
+0.0183156 [17669358071281320751][3]
+0.0183156 [17669358071281320751][3]
+0.0183156 [17669358071851743477][3]
+0.0183156 [17669358071851743477][3]
+0.0183156 [17690340717853148051][3]
+0.0183156 [17690340717853148051][3]
+0.0183156 [17690340717853148051][3]
+0.0183156 [17690340718423570777][3]
+0.0183156 [17711304548753761046][3]
+0.0183156 [17711323365565804851][3]
+0.0183156 [17711323365565804851][3]
+0 [17806586811738614735][3]
+0.0183156 [17816452235764029004][3]
+0.0183156 [17865309879497506026][3]
+0 [17865309930303591147][3]
+0.0183156 [17954394871374084892][3]
+0.0183156 [18047366079203181638][3]
+0.0183156 [18101489030625107010][3]
+0.0183156 [18201311233225833506][3]
+0.0183156 [18210046346855189825][3]
+0.0183156 [18231028993410461020][3]
+0.0183156 [18241664379296301720][3]
+0.0183156 [18262647028149803972][3]
+0.0183156 [18277813819296672772][3]
+0.0183156 [18277813821544809398][3]
+0.0183156 [18298796467009346466][3]
+0.00673795 [9243584105361884382][3]
+0.00673795 [9259391099993787288][3]
+0.00673795 [9273082700272451007][3]
+0.00673795 [9280373747706475174][3]
+0.00673795 [9309501910047710377][3]
+0.00673795 [9313883716349065711][3]
+0.00673795 [9326319001282181035][3]
+0.00673795 [9367312881404759028][3]
+0.00673795 [9367312884290426936][3]
+0.00673795 [9388295529117416646][3]
+0.00673795 [9395803307270815749][3]
+0.00673795 [9426194697263763463][3]
+0.00673795 [9491254396909365072][3]
+0.00673795 [9512609606210523870][3]
+0.00673795 [9533592252799112357][3]
+0.00673795 [9533592253923180670][3]
+0.00673795 [9609691448365795955][3]
+0.00673795 [9613548569360396852][3]
+0.00673795 [9634531214791377820][3]
+0.00673795 [9634531214791377820][3]
+0.00673795 [9634531214791377820][3]
+0.00673795 [9655495043980723517][3]
+0.00673795 [9655513861363189986][3]
+0.00673795 [9665019019791641308][3]
+0.00673795 [9676496509075846786][3]
+0.00673795 [9696603326876966494][3]
+0.00673795 [9735550043493678502][3]
+0.00673795 [9750759571741722000][3]
+0.00673795 [9760389810489683911][3]
+0.00673795 [9777420640405238790][3]
+0.00673795 [9843464948786060694][3]
+0.00673795 [9898585378632876570][3]
+0.00673795 [9917767463073445186][3]
+0.00673795 [9919568014313689029][3]
+0.00673795 [9935522309952290486][3]
+0.00673795 [9935522312805722364][3]
+0.00673795 [9968808209318044581][3]
+0.00673795 [9991556577381641097][3]
+0.00673795 [9999701406650564208][3]
+0.00673795 [9999701407791409660][3]
+0.00673795 [10020684054363252094][3]
+0.00673795 [10020684055504097546][3]
+0.00673795 [10045679527023656954][3]
+0.00673795 [10045679530418308819][3]
+0.00673795 [10060479677196521788][3]
+0.00673795 [10066662176990120985][3]
+0.00673795 [10069214793091028040][3]
+0.00673795 [10145501731304894473][3]
+0.00673795 [10154236845488353581][3]
+0.00673795 [10154236847216398898][3]
+0.00673795 [10166484376165437643][3]
+0.00673795 [10166484378448477881][3]
+0.00673795 [10175219489794793962][3]
+0.00673795 [10196202136350081109][3]
+0.00673795 [10242986963377154389][3]
+0.00673795 [10252492121805810731][3]
+0.00673795 [10364387383876040176][3]
+0.00673795 [10366293448116570182][3]
+0.00673795 [10389053788425090824][3]
+0.00673795 [10431737986090322757][3]
+0.00673795 [10433683949291076342][3]
+0.00673795 [10452720632662134105][3]
+0.00673795 [10454666596433341502][3]
+0.00673795 [10520310783822756208][3]
+0.00673795 [10520310785534025328][3]
+0.00673795 [10520310859175601556][3]
+0.00673795 [10611580614208041726][3]
+0.00673795 [10611580615365664317][3]
+0.00673795 [10659216540299524217][3]
+0.00673795 [10680199188012165883][3]
+0.00673795 [10697016279246652555][3]
+0.00673795 [10700873401382114856][3]
+0.00673795 [10700873403093383034][3]
+0.00673795 [10721856046242658026][3]
+0.00673795 [10721856047383503478][3]
+0.00673795 [10742838693384908052][3]
+0.00673795 [10754462250678056169][3]
+0.00673795 [10800019941890234446][3]
+0.00673795 [10810227787130780417][3]
+0.00673795 [10839037873806303095][3]
+0.00673795 [10860020521518975847][3]
+0.00673795 [10862698665792669491][3]
+0.00673795 [10862823050172954185][3]
+0.00673795 [10877292571601662050][3]
+0.00673795 [10877292572776282814][3]
+0.00673795 [10889966652388403180][3]
+0.00673795 [10894576781764483355][3]
+0.00673795 [10896825351214544397][3]
+0.00673795 [10898275218777672254][3]
+0.00673795 [10962314622338270922][3]
+0.00673795 [10962314622908693648][3]
+0.00673795 [10962314623495672479][3]
+0.00673795 [10963675010333001477][3]
+0.00673795 [10983297268339439328][3]
+0.00673795 [10983297268339439328][3]
+0.00673795 [10983297268909862054][3]
+0.00673795 [10983297268910083088][3]
+0.00673795 [10983297268910083088][3]
+0.00673795 [10983297269480505814][3]
+0.00673795 [10984878405758243080][3]
+0.00673795 [11004279916052096128][3]
+0.00673795 [11004279916622739888][3]
+0.00673795 [11005861053470900698][3]
+0.00673795 [11016241905024346275][3]
+0.00673795 [11023092898002338919][3]
+0.00673795 [11024386734440416643][3]
+0.00673795 [11026443173560810329][3]
+0.00673795 [11044075541722036637][3]
+0.00673795 [11052810657061784954][3]
+0.00673795 [11083909760192525826][3]
+0.00673795 [11086226305042920309][3]
+0.00673795 [11109155865195368072][3]
+0.00673795 [11113551322622981902][3]
+0.00673795 [11130138511179979555][3]
+0.00673795 [11170187056780804902][3]
+0.00673795 [11170187057384781906][3]
+0.00673795 [11199904816393889961][3]
+0.00673795 [11232026629681806817][3]
+0.00673795 [11263305772286664595][3]
+0.00673795 [11284288418858476761][3]
+0.00673795 [11293522149094890989][3]
+0.00673795 [11294162353116793543][3]
+0.00673795 [11309329147098998834][3]
+0.00673795 [11330311793670810182][3]
+0.00673795 [11332228877303791758][3]
+0.00673795 [11392341325242869061][3]
+0.00673795 [11563781173058792832][3]
+0.00673795 [11598498631671413036][3]
+0.00673795 [11600416486992172087][3]
+0.00673795 [11652355102876778530][3]
+0.00673795 [11652355104655155264][3]
+0.00673795 [11676464123500604304][3]
+0.00673795 [11740503529929888659][3]
+0.00673795 [11746541372874856722][3]
+0.00673795 [11782468821932682673][3]
+0.00673795 [11857275847325323004][3]
+0.00673795 [11862505004633783801][3]
+0.00673795 [11887344770488721906][3]
+0.00673795 [11887344771629788392][3]
+0.00673795 [11961295246758324551][3]
+0.00673795 [11982277893313359578][3]
+0.00673795 [11982277893313359578][3]
+0.00673795 [11982277893330136717][3]
+0.00673795 [11982277893330136717][3]
+0.00673795 [11982277894487759308][3]
+0.00673795 [12003260541026016378][3]
+0.00673795 [12016654854034727274][3]
+0.00673795 [12025540325982188745][3]
+0.00673795 [12046522969747837020][3]
+0.00673795 [12046522971413170593][3]
+0.00673795 [12046522971413170593][3]
+0.00673795 [12046522976597085510][3]
+0.00673795 [12046522980019842900][3]
+0.00673795 [12067505617984982759][3]
+0.00673795 [12087612441898566805][3]
+0.00673795 [12148888527637519970][3]
+0.00673795 [12188588786067085705][3]
+0.00673795 [12217152397933848898][3]
+0.00673795 [12248875167449287522][3]
+0.00673795 [12302164565732793575][3]
+0.00673795 [12478007653705280506][3]
+0.00673795 [12502799053198186923][3]
+0.00673795 [12540487847761499560][3]
+0.00673795 [12639077339204851927][3]
+0.00673795 [12658095199522992091][3]
+0.00673795 [12658095202928751308][3]
+0.00673795 [12679077847235664843][3]
+0.00673795 [12701149450149596091][3]
+0.00673795 [12735412918945607365][3]
+0.00673795 [12764935934903157200][3]
+0.00673795 [12764935935473800960][3]
+0.00673795 [12765188854850819177][3]
+0.00673795 [12786171501422631343][3]
+0.00673795 [12833376114956714462][3]
+0.00673795 [12833376119520096270][3]
+0.00673795 [12833376120660941722][3]
+0.00673795 [12845675707056351063][3]
+0.00673795 [12854358760387680358][3]
+0.00673795 [12854358760387680358][3]
+0.00673795 [12869793653954384725][3]
+0.00673795 [12887658051214955260][3]
+0.00673795 [12912030096550513828][3]
+0.00673795 [12928011198995403610][3]
+0.00673795 [12948213261923226876][3]
+0.00673795 [12948213261923226876][3]
+0.00673795 [12978691503992092229][3]
+0.00673795 [13004247530476868718][3]
+0.00673795 [13013571336827666651][3]
+0.00673795 [13025230178189541470][3]
+0.00673795 [13025230178206508557][3]
+0.00673795 [13026811314501022838][3]
+0.00673795 [13048620078209619829][3]
+0.00673795 [13048620079954442285][3]
+0.00673795 [13050225653119227586][3]
+0.00673795 [13064426795956508828][3]
+0.00673795 [13071208299691038934][3]
+0.00673795 [13075439090838584823][3]
+0.00673795 [13088025385302135616][3]
+0.00673795 [13094798793617349547][3]
+0.00673795 [13112865160381863613][3]
+0.00673795 [13112865169512803007][3]
+0.00673795 [13150047853438026192][3]
+0.00673795 [13150047854577553396][3]
+0.00673795 [13171030499438097384][3]
+0.00673795 [13171030501721106536][3]
+0.00673795 [13179765613051118632][3]
+0.00673795 [13205217772867350712][3]
+0.00673795 [13212973106720526147][3]
+0.00673795 [13220855077977688774][3]
+0.00673795 [13227666473014506446][3]
+0.00673795 [13233955754433183765][3]
+0.00673795 [13296889095137720843][3]
+0.00673795 [13305238681550847166][3]
+0.00673795 [13390260733426785028][3]
+0.00673795 [13390260736379561492][3]
+0.00673795 [13411243379998612328][3]
+0.00673795 [13412041519899538470][3]
+0.00673795 [13438230072563735265][3]
+0.00673795 [13457266752545780682][3]
+0.00673795 [13457266754793917308][3]
+0.00673795 [13475495546658250284][3]
+0.00673795 [13478249400258468568][3]
+0.00673795 [13524856907665807713][3]
+0.00673795 [13574385577104181647][3]
+0.00673795 [13585324235922344999][3]
+0.00673795 [13701562401948873618][3]
+0.00673795 [13705419524084319967][3]
+0.00673795 [13705513963942565134][3]
+0.00673795 [13726402168944879089][3]
+0.00673795 [13726402169515301815][3]
+0.00673795 [13726402169515301815][3]
+0.00673795 [13726402170085724541][3]
+0.00673795 [13747384815516691317][3]
+0.00673795 [13766276558157076979][3]
+0.00673795 [13803419084070111121][3]
+0.00673795 [13901709889281110819][3]
+0.00673795 [13970183235651699762][3]
+0.00673795 [14003228155450804920][3]
+0.00673795 [14088455882893429583][3]
+0.00673795 [14113701990213487968][3]
+0.00673795 [14134684637926145586][3]
+0.00673795 [14134684637942929226][3]
+0.00673795 [14168449583881916336][3]
+0.00673795 [14174733178374415601][3]
+0.00673795 [14189432228173354086][3]
+0.00673795 [14189432232233421724][3]
+0.00673795 [14210414874745181386][3]
+0.00673795 [14237372686028833540][3]
+0.00673795 [14237372688311842692][3]
+0.00673795 [14237372688882265418][3]
+0.00673795 [14240722963870314982][3]
+0.00673795 [14246107800782700240][3]
+0.00673795 [14258355332031525276][3]
+0.00673795 [14258355332031556362][3]
+0.00673795 [14258355332031556362][3]
+0.00673795 [14267090447371304679][3]
+0.00673795 [14299336672750415717][3]
+0.00673795 [14409105164100224455][3]
+0.00673795 [14430087811812882073][3]
+0.00673795 [14447955430754362967][3]
+0.00673795 [14460969430928485340][3]
+0.00673795 [14472126074884462136][3]
+0.00673795 [14481952078641142958][3]
+0.00673795 [14531982364258394048][3]
+0.00673795 [14531982365416016639][3]
+0.00673795 [14565946794438827272][3]
+0.00673795 [14604962612548046062][3]
+0.00673795 [14681010249608600536][3]
+0.00673795 [14694326422620627788][3]
+0.00673795 [14730104847881213258][3]
+0.00673795 [14807121764113721330][3]
+0.00673795 [14830021494253121621][3]
+0.00673795 [14838975341898401553][3]
+0.00673795 [14838975343089578422][3]
+0.00673795 [14838975344180092457][3]
+0.00673795 [14845828436849867794][3]
+0.00673795 [14867183641029847181][3]
+0.00673795 [14868961334196148883][3]
+0.00673795 [14891890894902448133][3]
+0.00673795 [14912873540333414029][3]
+0.00673795 [14912873541474259481][3]
+0.00673795 [14912873541474259481][3]
+0.00673795 [14927725379390600952][3]
+0.00673795 [14927725382276268860][3]
+0.00673795 [14933856188046071647][3]
+0.00673795 [14990146171773329018][3]
+0.00673795 [15029345808925122960][3]
+0.00673795 [15039591671318855615][3]
+0.00673795 [15039591684673458259][3]
+0.00673795 [15050328457778626030][3]
+0.00673795 [15054185575350689691][3]
+0.00673795 [15056555719135564383][3]
+0.00673795 [15060574311042089571][3]
+0.00673795 [15075168221368650370][3]
+0.00673795 [15075168221922516991][3]
+0.00673795 [15123698963502407509][3]
+0.00673795 [15144681608933374223][3]
+0.00673795 [15176927836544318782][3]
+0.00673795 [15191980763304874263][3]
+0.00673795 [15200715876346155479][3]
+0.00673795 [15214117555343700706][3]
+0.00673795 [15221698522347575187][3]
+0.00673795 [15260802765764426463][3]
+0.00673795 [15262058010414213920][3]
+0.00673795 [15272718640017321571][3]
+0.00673795 [15339222427430685097][3]
+0.00673795 [15339222516470724667][3]
+0.00673795 [15355176729392942266][3]
+0.00673795 [15360205074002496445][3]
+0.00673795 [15365065893950348322][3]
+0.00673795 [15432579168177818958][3]
+0.00673795 [15432579168765018823][3]
+0.00673795 [15449374323752792741][3]
+0.00673795 [15473618750199143400][3]
+0.00673795 [15478217016377716121][3]
+0.00673795 [15499199661288590708][3]
+0.00673795 [15586167680275461964][3]
+0.00673795 [15614629242515373878][3]
+0.00673795 [15623450891321877568][3]
+0.00673795 [15653128618624240182][3]
+0.00673795 [15720734969293022697][3]
+0.00673795 [15796642007879343037][3]
+0.00673795 [15807534714235269823][3]
+0.00673795 [15828517361947911489][3]
+0.00673795 [15832374484083389866][3]
+0.00673795 [15832374484083389866][3]
+0.00673795 [15853357128373510310][3]
+0.00673795 [15853357129514355762][3]
+0.00673795 [15853357129514355762][3]
+0.00673795 [15874339774945306524][3]
+0.00673795 [15874339774945337610][3]
+0.00673795 [15874339776086151976][3]
+0.00673795 [15937558866982389864][3]
+0.00673795 [15954508471945591317][3]
+0.00673795 [15954508473623305217][3]
+0.00673795 [16018117462383334664][3]
+0.00673795 [16039100107243878652][3]
+0.00673795 [16053166201482248484][3]
+0.00673795 [16074148848054059832][3]
+0.00673795 [16092571508003022479][3]
+0.00673795 [16099853548017642157][3]
+0.00673795 [16117411287029775833][3]
+0.00673795 [16136593375548302516][3]
+0.00673795 [16136593377226016416][3]
+0.00673795 [16138393935887248781][3]
+0.00673795 [16138393935887248781][3]
+0.00673795 [16155634900063590928][3]
+0.00673795 [16155634900634234688][3]
+0.00673795 [16178440427593995123][3]
+0.00673795 [16252870851187313595][3]
+0.00673795 [16263220878637528834][3]
+0.00673795 [16289966222664772023][3]
+0.00673795 [16373062759087026100][3]
+0.00673795 [16404680788105395801][3]
+0.00673795 [16425663435818068553][3]
+0.00673795 [16425663435818068553][3]
+0.00673795 [16446005880079230391][3]
+0.00673795 [16450335388832450992][3]
+0.00673795 [16451038072843004213][3]
+0.00673795 [16454521826639593924][3]
+0.00673795 [16454521827830770793][3]
+0.00673795 [16461812875818440547][3]
+0.00673795 [16472465015338979867][3]
+0.00673795 [16475504474352266676][3]
+0.00673795 [16475504475543443545][3]
+0.00673795 [16482795523531113299][3]
+0.00673795 [16571864475207113880][3]
+0.00673795 [16601363215642999038][3]
+0.00673795 [16601363216834175907][3]
+0.00673795 [16673492511156303430][3]
+0.00673795 [16709965647356963694][3]
+0.00673795 [16719470805265307755][3]
+0.00673795 [16725867032645952646][3]
+0.00673795 [16730948293928775042][3]
+0.00673795 [16739136698545733270][3]
+0.00673795 [16751930939359741756][3]
+0.00673795 [16846121149095611911][3]
+0.00673795 [16846121151998056958][3]
+0.00673795 [16857059808987543245][3]
+0.00673795 [16867103794476246266][3]
+0.00673795 [16867103796808268587][3]
+0.00673795 [16878042454435286280][3]
+0.00673795 [16878042454435286280][3]
+0.00673795 [16897402509751218647][3]
+0.00673795 [16899025102147943898][3]
+0.00673795 [16910605900938528289][3]
+0.00673795 [16925247074244019385][3]
+0.00673795 [16954806450737377109][3]
+0.00673795 [17018845854331284436][3]
+0.00673795 [17018845854901707162][3]
+0.00673795 [17039828500903096602][3]
+0.00673795 [17039828500903127688][3]
+0.00673795 [17039828501473550414][3]
+0.00673795 [17040084216647149991][3]
+0.00673795 [17060811148615784488][3]
+0.00673795 [17060811149186207214][3]
+0.00673795 [17071278719362394699][3]
+0.00673795 [17117101131218753330][3]
+0.00673795 [17171229984589052253][3]
+0.00673795 [17172995706585439695][3]
+0.00673795 [17181140535936959455][3]
+0.00673795 [17182500921226409107][3]
+0.00673795 [17193978351444679627][3]
+0.00673795 [17193978352016421543][3]
+0.00673795 [17193978356076489181][3]
+0.00673795 [17202123181921555804][3]
+0.00673795 [17202123181921586890][3]
+0.00673795 [17202123182508755669][3]
+0.00673795 [17203483568203731081][3]
+0.00673795 [17203704321018089408][3]
+0.00673795 [17214960998588233709][3]
+0.00673795 [17217079040025099264][3]
+0.00673795 [17225814154207224990][3]
+0.00673795 [17235067818036071049][3]
+0.00673795 [17239637572283584501][3]
+0.00673795 [17241918808163268373][3]
+0.00673795 [17241918811015382003][3]
+0.00673795 [17241918811015382003][3]
+0.00673795 [17241918815578763811][3]
+0.00673795 [17260620219996257253][3]
+0.00673795 [17260620220013034392][3]
+0.00673795 [17260965610888575925][3]
+0.00673795 [17262901453021175047][3]
+0.00673795 [17262901453021175047][3]
+0.00673795 [17262901457587193351][3]
+0.00673795 [17262901457587193351][3]
+0.00673795 [17262901457587193351][3]
+0.00673795 [17271636565492908775][3]
+0.00673795 [17271636568362020578][3]
+0.00673795 [17271636572925844454][3]
+0.00673795 [17289001829875198299][3]
+0.00673795 [17301543519739137960][3]
+0.00673795 [17303254599662049973][3]
+0.00673795 [17414287064668562749][3]
+0.00673795 [17414287065171876919][3]
+0.00673795 [17429366114754401780][3]
+0.00673795 [17450348763607904850][3]
+0.00673795 [17466177387428641892][3]
+0.00673795 [17466177393803954712][3]
+0.00673795 [17487160034000469192][3]
+0.00673795 [17503315292594595866][3]
+0.00673795 [17508188619112649355][3]
+0.00673795 [17508188619112649355][3]
+0.00673795 [17524471446064945434][3]
+0.00673795 [17528155061268315175][3]
+0.00673795 [17529171267966152425][3]
+0.00673795 [17541846658141220619][3]
+0.00673795 [17541846659902820214][3]
+0.00673795 [17591475563696098434][3]
+0.00673795 [17818273125950477974][3]
+0.00673795 [17843521465724674977][3]
+0.00673795 [17849467623531695230][3]
+0.00673795 [17864503967274482718][3]
+0.00673795 [17870623776448415287][3]
+0.00673795 [17891606425301917539][3]
+0.00673795 [17895290036529090203][3]
+0.00673795 [17896437020456988850][3]
+0.00673795 [17916272684241762955][3]
+0.00673795 [17917419667028801016][3]
+0.00673795 [18001294735514814283][3]
+0.00673795 [18043531180393076358][3]
+0.00673795 [18043531180409853497][3]
+0.00673795 [18044137791167203674][3]
+0.00673795 [18044262178284919496][3]
+0.00673795 [18058731699193535172][3]
+0.00673795 [18060050369936217091][3]
+0.00673795 [18064513828105749110][3]
+0.00673795 [18064513828122526249][3]
+0.00673795 [18065244825997576296][3]
+0.00673795 [18079714345765348280][3]
+0.00673795 [18079714346939969044][3]
+0.00673795 [18100696993495003253][3]
+0.00673795 [18205572940893451799][3]
+0.00673795 [18218663679186784115][3]
+0.00673795 [18226555588606108599][3]
+0.00673795 [18257967413994575162][3]
+0.00673795 [18265348885567043995][3]
+0.00673795 [18265348887894890538][3]
+0.00673795 [18267665432601270239][3]
+0.00673795 [18281303186386922931][3]
+0.00673795 [18286331532138871295][3]
+0.00673795 [18288648080313927039][3]
+0.00673795 [18288648081454772491][3]
+0.00673795 [18428390178978965125][3]
+0.00673795 [18437125294319810656][3]
+0.00247875 [9228074598243804288][3]
+0.00247875 [9257578513495293109][3]
+0.00247875 [9284386178486294401][3]
+0.00247875 [9353852860996713202][3]
+0.00247875 [9379460209891191990][3]
+0.00247875 [9401482416381681975][3]
+0.00247875 [9402085262175455064][3]
+0.00247875 [9431350533793670939][3]
+0.00247875 [9431350533793670939][3]
+0.00247875 [9431350542450674663][3]
+0.00247875 [9431350619980057597][3]
+0.00247875 [9432931758423806048][3]
+0.00247875 [9452333180365482287][3]
+0.00247875 [9471146106283428868][3]
+0.00247875 [9474291524225889847][3]
+0.00247875 [9479881390209123663][3]
+0.00247875 [9593230952744112898][3]
+0.00247875 [9593230953197095651][3]
+0.00247875 [9609574295291619797][3]
+0.00247875 [9621385685873230585][3]
+0.00247875 [9648645069480668141][3]
+0.00247875 [9718062466474240597][3]
+0.00247875 [9763432899795749398][3]
+0.00247875 [9783446268890113135][3]
+0.00247875 [9877636479246706285][3]
+0.00247875 [9956167003287887107][3]
+0.00247875 [9958304230597934060][3]
+0.00247875 [10006244690737708948][3]
+0.00247875 [10008704325631400658][3]
+0.00247875 [10044887492161500191][3]
+0.00247875 [10085976954235742170][3]
+0.00247875 [10150016358953964247][3]
+0.00247875 [10151376749163292346][3]
+0.00247875 [10170746087255828460][3]
+0.00247875 [10230522036541610551][3]
+0.00247875 [10236104158737510721][3]
+0.00247875 [10248594367860948518][3]
+0.00247875 [10297464363493330671][3]
+0.00247875 [10303151897892612991][3]
+0.00247875 [10458588420986468086][3]
+0.00247875 [10532995072894870034][3]
+0.00247875 [10543610475716035036][3]
+0.00247875 [10564593118848312797][3]
+0.00247875 [10641024065351266312][3]
+0.00247875 [10641024066508888903][3]
+0.00247875 [10693491320914121511][3]
+0.00247875 [10696089056376656852][3]
+0.00247875 [10749781302896352224][3]
+0.00247875 [10821111612291474900][3]
+0.00247875 [10822471945565145446][3]
+0.00247875 [10842466821642964297][3]
+0.00247875 [10843675394604376980][3]
+0.00247875 [10853227201331657407][3]
+0.00247875 [10927952345993958137][3]
+0.00247875 [10948934997129594179][3]
+0.00247875 [10996392529470020669][3]
+0.00247875 [11096635776632126235][3]
+0.00247875 [11102226326266620240][3]
+0.00247875 [11159119114481063536][3]
+0.00247875 [11167263942155059468][3]
+0.00247875 [11209229235298698934][3]
+0.00247875 [11212989304280510990][3]
+0.00247875 [11234224715477913696][3]
+0.00247875 [11236777328578953003][3]
+0.00247875 [11296864226604993508][3]
+0.00247875 [11360083453214704847][3]
+0.00247875 [11375283972127376795][3]
+0.00247875 [11388055659536952821][3]
+0.00247875 [11459905506797596114][3]
+0.00247875 [11459905507938662600][3]
+0.00247875 [11510594851142008163][3]
+0.00247875 [11524286450816711772][3]
+0.00247875 [11553277146228854143][3]
+0.00247875 [11579405621227358313][3]
+0.00247875 [11710172716858206112][3]
+0.00247875 [11800125795160059805][3]
+0.00247875 [11889418582317355796][3]
+0.00247875 [11894966340456267311][3]
+0.00247875 [11910401226037069466][3]
+0.00247875 [11925984389700744247][3]
+0.00247875 [12054178914617230220][3]
+0.00247875 [12075161561189041568][3]
+0.00247875 [12153472744969437113][3]
+0.00247875 [12171842449274681210][3]
+0.00247875 [12297701044973207455][3]
+0.00247875 [12358398985393424362][3]
+0.00247875 [12490583278922502649][3]
+0.00247875 [12506868084241886756][3]
+0.00247875 [12610971846408514626][3]
+0.00247875 [12688733737328992294][3]
+0.00247875 [12694161173101370740][3]
+0.00247875 [12699483462377312195][3]
+0.00247875 [12722608592028590362][3]
+0.00247875 [12745078516040494106][3]
+0.00247875 [12755532259209153241][3]
+0.00247875 [12845725232462361009][3]
+0.00247875 [12869578749367826802][3]
+0.00247875 [12905581518932561530][3]
+0.00247875 [12970995184344832664][3]
+0.00247875 [13054907307134284470][3]
+0.00247875 [13080333057452987018][3]
+0.00247875 [13214085509818351402][3]
+0.00247875 [13230039805389843361][3]
+0.00247875 [13230039806663588619][3]
+0.00247875 [13239545020032116891][3]
+0.00247875 [13251003687722953453][3]
+0.00247875 [13255174975168708059][3]
+0.00247875 [13277980266101390371][3]
+0.00247875 [13307698017725486083][3]
+0.00247875 [13354997173807157087][3]
+0.00247875 [13450528525887376757][3]
+0.00247875 [13450528528890484638][3]
+0.00247875 [13471511173600033557][3]
+0.00247875 [13471511174807987565][3]
+0.00247875 [13544321614240723135][3]
+0.00247875 [13568258760446495127][3]
+0.00247875 [13666552833484218045][3]
+0.00247875 [13678887185195776854][3]
+0.00247875 [13729806229162922893][3]
+0.00247875 [13792664353629490834][3]
+0.00247875 [13792664354216690699][3]
+0.00247875 [13798628301320150681][3]
+0.00247875 [13825657734457064625][3]
+0.00247875 [13846640379887825439][3]
+0.00247875 [13881845461684986244][3]
+0.00247875 [13906511720624815708][3]
+0.00247875 [13907242467080898118][3]
+0.00247875 [13983919951715942172][3]
+0.00247875 [13995390897455850621][3]
+0.00247875 [14021921300455338152][3]
+0.00247875 [14089636764880947586][3]
+0.00247875 [14162414848122064894][3]
+0.00247875 [14165143895562009109][3]
+0.00247875 [14173170453961931132][3]
+0.00247875 [14252971975750889182][3]
+0.00247875 [14255587921950112824][3]
+0.00247875 [14255587924277958425][3]
+0.00247875 [14405033743136238167][3]
+0.00247875 [14445638655604831502][3]
+0.00247875 [14510193807745249478][3]
+0.00247875 [14524000239309796211][3]
+0.00247875 [14525787422142317773][3]
+0.00247875 [14555942925990649824][3]
+0.00247875 [14578805855009417909][3]
+0.00247875 [14578805914363360168][3]
+0.00247875 [14578805917215694832][3]
+0.00247875 [14599788560935171516][3]
+0.00247875 [14624829286909210398][3]
+0.00247875 [14626746373379097891][3]
+0.00247875 [14643058078739988154][3]
+0.00247875 [14712754057316256168][3]
+0.00247875 [14748146706253772242][3]
+0.00247875 [14776864928311290404][3]
+0.00247875 [14845621006002591141][3]
+0.00247875 [14869124934601035032][3]
+0.00247875 [14869124934601035032][3]
+0.00247875 [14888883443736753645][3]
+0.00247875 [14893016123182019113][3]
+0.00247875 [15113551324480404328][3]
+0.00247875 [15305113023501478138][3]
+0.00247875 [15323263444695793797][3]
+0.00247875 [15334246394589308069][3]
+0.00247875 [15404935219821824454][3]
+0.00247875 [15409813209587895069][3]
+0.00247875 [15425917868676644954][3]
+0.00247875 [15425917871530076832][3]
+0.00247875 [15429268143664710470][3]
+0.00247875 [15568468380895921039][3]
+0.00247875 [15577303477940360670][3]
+0.00247875 [15629193889273386131][3]
+0.00247875 [15636500611690922155][3]
+0.00247875 [15636754668313267015][3]
+0.00247875 [15639688609868629919][3]
+0.00247875 [15654222095894061800][3]
+0.00247875 [15657737316025955719][3]
+0.00247875 [15660671256961881910][3]
+0.00247875 [15671205028492166980][3]
+0.00247875 [15711354183607075460][3]
+0.00247875 [15720527544623227334][3]
+0.00247875 [15793507795211554295][3]
+0.00247875 [15888573288630606139][3]
+0.00247875 [15956241826828809600][3]
+0.00247875 [15960306892751158467][3]
+0.00247875 [15981289535900433459][3]
+0.00247875 [16027082561807636872][3]
+0.00247875 [16027082563619567884][3]
+0.00247875 [16112948809148444594][3]
+0.00247875 [16136726060152146309][3]
+0.00247875 [16136726060152367343][3]
+0.00247875 [16157708705549558745][3]
+0.00247875 [16211079939069148512][3]
+0.00247875 [16223066778205860952][3]
+0.00247875 [16253488277728775223][3]
+0.00247875 [16263713402304113286][3]
+0.00247875 [16263713403428180657][3]
+0.00247875 [16343749584417824601][3]
+0.00247875 [16365473022046020094][3]
+0.00247875 [16418681881931617466][3]
+0.00247875 [16418681886025239382][3]
+0.00247875 [16420031264379841922][3]
+0.00247875 [16448667346363424802][3]
+0.00247875 [16459338302075047884][3]
+0.00247875 [16492315391634198490][3]
+0.00247875 [16506784963505382049][3]
+0.00247875 [16527767614170816131][3]
+0.00247875 [16568762639004910893][3]
+0.00247875 [16588281635439762083][3]
+0.00247875 [16727596424567888049][3]
+0.00247875 [16811996071116257042][3]
+0.00247875 [16814479544472140821][3]
+0.00247875 [16823214663218746449][3]
+0.00247875 [16889990900844304854][3]
+0.00247875 [16923290191671595770][3]
+0.00247875 [17070886920563136022][3]
+0.00247875 [17082991774235312697][3]
+0.00247875 [17121938490298378176][3]
+0.00247875 [17129827078608489832][3]
+0.00247875 [17220728735845677258][3]
+0.00247875 [17229646176943988300][3]
+0.00247875 [17241081718096460990][3]
+0.00247875 [17260134044651000505][3]
+0.00247875 [17305956466824186455][3]
+0.00247875 [17332521235594345339][3]
+0.00247875 [17386089854596140544][3]
+0.00247875 [17467850772856073990][3]
+0.00247875 [17476585888749467956][3]
+0.00247875 [17593447961124059198][3]
+0.00247875 [17614208616182886767][3]
+0.00247875 [17652275140940528742][3]
+0.00247875 [17670464874554786061][3]
+0.00247875 [17741477805653365488][3]
+0.00247875 [17760409656142575792][3]
+0.00247875 [17778386655965742667][3]
+0.00247875 [17850463902427521492][3]
+0.00247875 [17862193569730507925][3]
+0.00247875 [17862778353229224291][3]
+0.00247875 [17898510828862627360][3]
+0.00247875 [17906699307692887780][3]
+0.00247875 [17931220429901024601][3]
+0.00247875 [17952203077613697353][3]
+0.00247875 [18034666331792451504][3]
+0.00247875 [18055648974841065422][3]
+0.00247875 [18055648976602665017][3]
+0.00247875 [18161455384500423485][3]
+0.00247875 [18200776036018633605][3]
+0.00247875 [18207646750440156857][3]
+0.00247875 [18273004825916337606][3]
+0.00247875 [18276355104326938598][3]
+0.00247875 [18305646312137438165][3]
+0.00247875 [18348703070854254850][3]
+0.00247875 [18369685716872405477][3]
+0.00247875 [18369685717426051064][3]
+0.00247875 [18390668362857017778][3]
+0.00247875 [18393281310879052732][3]
+0.00247875 [18407200107788079761][3]
+0.00247875 [18428182754359907061][3]
+0.00247875 [18428182755534306791][3]
+0.00247875 [18433814266937354259][3]
+0.00247875 [18439199101013960958][3]
+0.000911882 [9794654399936395901][3]
+0.000911882 [9939287605716661330][3]
+0.000911882 [10078965396978034962][3]
+0.000911882 [10468887184555997070][3]
+0.000911882 [10573914808531049831][3]
+0.000911882 [10809930866808471463][3]
+0.000911882 [10939531318012832012][3]
+0.000911882 [11829569246287826442][3]
+0.000911882 [11921631504842533776][3]
+0.000911882 [12031012003148849877][3]
+0.000911882 [12357169512194966961][3]
+0.000911882 [13056981119532898200][3]
+0.000911882 [13688336532595529858][3]
+0.000911882 [13753105914778733981][3]
+0.000911882 [14638893702301736467][3]
+0.000911882 [14966190839108973341][3]
+0.000911882 [15007213715175561106][3]
+0.000911882 [15257199301006197807][3]
+0.000911882 [15403776264040573192][3]
+0.000911882 [15431792887677428379][3]
+0.000911882 [16472422801356639391][3]
+0.000911882 [16660023969513676598][3]
+0.000911882 [16881357372918985443][3]
+0.000911882 [16914371205410961730][3]
+0.000911882 [16990588851376525533][3]
+0.000911882 [17188778177767651225][3]
+0.000911882 [17190817361125810795][3]
+0.000911882 [17442033457523170649][3]
+0.000911882 [17479206993871012347][3]
+0.000911882 [17737531428013023262][3]
+0.000911882 [17918138849681026459][3]
+0.000911882 [17973545494615301459][3]
+0.000911882 [18268278336993133778][3]
+0.000335463 [12730534573961633036][3]
+0.000335463 [14190651796559678797][3]
+0.000335463 [16366848170134439337][3]
+[DEBUG] [URE] Selected and-BIT for expansion:
+(BindLink
+  (VariableList
+    (TypedVariableLink
+      (VariableNode "$B-a083600") ; [1075803195405159200][3]
+      (TypeChoice
+        (TypeNode "OrLink") ; [1641200931040822982][1]
+        (TypeNode "AndLink") ; [5150993344963829271][1]
+        (TypeNode "LambdaLink") ; [6352458681478507967][1]
+        (TypeNode "NotLink") ; [7029353635928836065][1]
+        (TypeNode "PredicateNode") ; [7305492803481351454][1]
+      ) ; [12553683925648135849][1]
+    ) ; [12502753568736379187][3]
+    (TypedVariableLink
+      (VariableNode "$B-5560bed3") ; [954956885300767879][3]
+      (TypeChoice
+        (TypeNode "OrLink") ; [1641200931040822982][1]
+        (TypeNode "AndLink") ; [5150993344963829271][1]
+        (TypeNode "LambdaLink") ; [6352458681478507967][1]
+        (TypeNode "NotLink") ; [7029353635928836065][1]
+        (TypeNode "PredicateNode") ; [7305492803481351454][1]
+      ) ; [12553683925648135849][1]
+    ) ; [17738197372146241402][3]
+    (TypedVariableLink
+      (VariableNode "$Q-5fa8b92b") ; [8930023734698229664][3]
+      (TypeChoice
+        (TypeNode "LambdaLink") ; [6352458681478507967][1]
+        (TypeNode "PredicateNode") ; [7305492803481351454][1]
+      ) ; [15286865261196305675][1]
+    ) ; [16170795669022151701][3]
+  ) ; [13184149590889680758][3]
+  (AndLink
+    (NotLink
+      (IdenticalLink
+        (VariableNode "$B-a083600") ; [1075803195405159200][3]
+        (LambdaLink
+          (TypedVariableLink
+            (VariableNode "$X") ; [6809909406030619949][1]
+            (TypeNode "ConceptNode") ; [3788388250666256890][1]
+          ) ; [17718894144153964593][1]
+          (EvaluationLink
+            (PredicateNode "take") ; [3396821867884253757][1]
+            (ListLink
+              (VariableNode "$X") ; [6809909406030619949][1]
+              (ConceptNode "compound-A") ; [5571266438078870282][1]
+            ) ; [9339663655215837098][1]
+          ) ; [12459373116713205302][1]
+        ) ; [18413871478668594639][1]
+      ) ; [9771779474766691712][3]
+    ) ; [9792098449647556757][3]
+    (EvaluationLink
+      (GroundedPredicateNode "scm: gt-zero-confidence") ; [2096565403849494700][1]
+      (EquivalenceLink
+        (PredicateNode "take-treatment-1" (stv 0.100000 0.800000)) ; [693477798751519767][1]
+        (VariableNode "$B-a083600") ; [1075803195405159200][3]
+      ) ; [16346461327915047267][3]
+    ) ; [13451195623684469822][3]
+    (ImplicationLink
+      (AndLink
+        (VariableNode "$B-a083600") ; [1075803195405159200][3]
+        (VariableNode "$Q-5fa8b92b") ; [8930023734698229664][3]
+      ) ; [17393623462368785383][3]
+      (VariableNode "$B-5560bed3") ; [954956885300767879][3]
+    ) ; [13870626034087997381][3]
+    (ImplicationLink
+      (VariableNode "$B-5560bed3") ; [954956885300767879][3]
+      (LambdaLink
+        (TypedVariableLink
+          (VariableNode "$X") ; [6809909406030619949][1]
+          (TypeNode "ConceptNode") ; [3788388250666256890][1]
+        ) ; [17718894144153964593][1]
+        (EvaluationLink
+          (PredicateNode "take") ; [3396821867884253757][1]
+          (ListLink
+            (VariableNode "$X") ; [6809909406030619949][1]
+            (ConceptNode "compound-A") ; [5571266438078870282][1]
+          ) ; [9339663655215837098][1]
+        ) ; [12459373116713205302][1]
+      ) ; [18413871478668594639][1]
+    ) ; [14585749684933467565][3]
+    (EvaluationLink
+      (GroundedPredicateNode "scm: gt-zero-confidence") ; [2096565403849494700][1]
+      (ImplicationLink
+        (VariableNode "$B-a083600") ; [1075803195405159200][3]
+        (VariableNode "$Q-5fa8b92b") ; [8930023734698229664][3]
+      ) ; [18313202211262791991][3]
+    ) ; [15417936507032214546][3]
+    (NotLink
+      (IdenticalLink
+        (PredicateNode "take-treatment-1" (stv 0.100000 0.800000)) ; [693477798751519767][1]
+        (LambdaLink
+          (TypedVariableLink
+            (VariableNode "$X") ; [6809909406030619949][1]
+            (TypeNode "ConceptNode") ; [3788388250666256890][1]
+          ) ; [17718894144153964593][1]
+          (EvaluationLink
+            (PredicateNode "take") ; [3396821867884253757][1]
+            (ListLink
+              (VariableNode "$X") ; [6809909406030619949][1]
+              (ConceptNode "compound-A") ; [5571266438078870282][1]
+            ) ; [9339663655215837098][1]
+          ) ; [12459373116713205302][1]
+        ) ; [18413871478668594639][1]
+      ) ; [15601785458906142039][3]
+    ) ; [15622104433787007084][3]
+    (NotLink
+      (IdenticalLink
+        (VariableNode "$B-5560bed3") ; [954956885300767879][3]
+        (VariableNode "$B-a083600") ; [1075803195405159200][3]
+      ) ; [16115899068622670104][3]
+    ) ; [16136218043503535149][3]
+    (EquivalenceLink
+      (PredicateNode "take-treatment-1" (stv 0.100000 0.800000)) ; [693477798751519767][1]
+      (VariableNode "$B-a083600") ; [1075803195405159200][3]
+    ) ; [16346461327915047267][3]
+    (ImplicationLink
+      (VariableNode "$B-a083600") ; [1075803195405159200][3]
+      (VariableNode "$Q-5fa8b92b") ; [8930023734698229664][3]
+    ) ; [18313202211262791991][3]
+  ) ; [18003249542967835921][3]
+  (ExecutionOutputLink
+    (GroundedSchemaNode "scm: deduction-formula") ; [201750363263560339][1]
+    (ListLink
+      (ImplicationLink (stv 0.200000 0.576000)
+        (PredicateNode "take-treatment-1" (stv 0.100000 0.800000)) ; [693477798751519767][1]
+        (LambdaLink
+          (TypedVariableLink
+            (VariableNode "$X") ; [6809909406030619949][1]
+            (TypeNode "ConceptNode") ; [3788388250666256890][1]
+          ) ; [17718894144153964593][1]
+          (EvaluationLink
+            (PredicateNode "take") ; [3396821867884253757][1]
+            (ListLink
+              (VariableNode "$X") ; [6809909406030619949][1]
+              (ConceptNode "compound-A") ; [5571266438078870282][1]
+            ) ; [9339663655215837098][1]
+          ) ; [12459373116713205302][1]
+        ) ; [18413871478668594639][1]
+      ) ; [15180311865663055677][1]
+      (ExecutionOutputLink
+        (GroundedSchemaNode "scm: equivalence-to-implication-formula") ; [657362063185547793][1]
+        (ListLink
+          (ImplicationLink
+            (PredicateNode "take-treatment-1" (stv 0.100000 0.800000)) ; [693477798751519767][1]
+            (VariableNode "$B-a083600") ; [1075803195405159200][3]
+          ) ; [16288987656109171854][3]
+          (EquivalenceLink
+            (PredicateNode "take-treatment-1" (stv 0.100000 0.800000)) ; [693477798751519767][1]
+            (VariableNode "$B-a083600") ; [1075803195405159200][3]
+          ) ; [16346461327915047267][3]
+        ) ; [10106419507727073668][3]
+      ) ; [15383359922948197147][3]
+      (ExecutionOutputLink
+        (GroundedSchemaNode "scm: deduction-formula") ; [201750363263560339][1]
+        (ListLink
+          (ImplicationLink
+            (VariableNode "$B-a083600") ; [1075803195405159200][3]
+            (LambdaLink
+              (TypedVariableLink
+                (VariableNode "$X") ; [6809909406030619949][1]
+                (TypeNode "ConceptNode") ; [3788388250666256890][1]
+              ) ; [17718894144153964593][1]
+              (EvaluationLink
+                (PredicateNode "take") ; [3396821867884253757][1]
+                (ListLink
+                  (VariableNode "$X") ; [6809909406030619949][1]
+                  (ConceptNode "compound-A") ; [5571266438078870282][1]
+                ) ; [9339663655215837098][1]
+              ) ; [12459373116713205302][1]
+            ) ; [18413871478668594639][1]
+          ) ; [9350305881523605350][3]
+          (ExecutionOutputLink
+            (GroundedSchemaNode "scm: deduction-formula") ; [201750363263560339][1]
+            (ListLink
+              (ImplicationLink
+                (VariableNode "$B-a083600") ; [1075803195405159200][3]
+                (VariableNode "$B-5560bed3") ; [954956885300767879][3]
+              ) ; [10338135361865330206][3]
+              (ExecutionOutputLink
+                (GroundedSchemaNode "scm: implication-implicant-distribution-formula") ; [4181613870801572780][1]
+                (ListLink
+                  (ImplicationLink
+                    (VariableNode "$B-a083600") ; [1075803195405159200][3]
+                    (AndLink
+                      (VariableNode "$B-a083600") ; [1075803195405159200][3]
+                      (VariableNode "$Q-5fa8b92b") ; [8930023734698229664][3]
+                    ) ; [17393623462368785383][3]
+                  ) ; [17553429902078571902][3]
+                  (ImplicationLink
+                    (VariableNode "$B-a083600") ; [1075803195405159200][3]
+                    (VariableNode "$Q-5fa8b92b") ; [8930023734698229664][3]
+                  ) ; [18313202211262791991][3]
+                ) ; [16906266360645916744][3]
+              ) ; [9356307911229003482][3]
+              (ImplicationLink
+                (AndLink
+                  (VariableNode "$B-a083600") ; [1075803195405159200][3]
+                  (VariableNode "$Q-5fa8b92b") ; [8930023734698229664][3]
+                ) ; [17393623462368785383][3]
+                (VariableNode "$B-5560bed3") ; [954956885300767879][3]
+              ) ; [13870626034087997381][3]
+            ) ; [9579336073548512176][3]
+          ) ; [18267834465053601289][3]
+          (ImplicationLink
+            (VariableNode "$B-5560bed3") ; [954956885300767879][3]
+            (LambdaLink
+              (TypedVariableLink
+                (VariableNode "$X") ; [6809909406030619949][1]
+                (TypeNode "ConceptNode") ; [3788388250666256890][1]
+              ) ; [17718894144153964593][1]
+              (EvaluationLink
+                (PredicateNode "take") ; [3396821867884253757][1]
+                (ListLink
+                  (VariableNode "$X") ; [6809909406030619949][1]
+                  (ConceptNode "compound-A") ; [5571266438078870282][1]
+                ) ; [9339663655215837098][1]
+              ) ; [12459373116713205302][1]
+            ) ; [18413871478668594639][1]
+          ) ; [14585749684933467565][3]
+        ) ; [12615155041123285487][3]
+      ) ; [12080281395773598792][3]
+    ) ; [10352302602808488307][3]
+  ) ; [9817428957458801612][3]
+) ; [17271636565492908775][3]
+
+[DEBUG] [URE] Selected BIT-node for expansion:
+body:
+(ImplicationLink
+  (VariableNode "$B-a083600") ; [1075803195405159200][3]
+  (VariableNode "$Q-5fa8b92b") ; [8930023734698229664][3]
+) ; [18313202211262791991][3]
+exhausted: 0
+rules: size = 1
+implication-and-lambda-factorization-rule [11089791539059741445][18446744073709551615]
+[DEBUG] [URE] The following weighted rules are valid:
+1 conditional-full-instantiation-meta-rule
+1 implication-construction-rule
+1 implication-scope-to-implication-rule
+1 deduction-implication-rule
+1 equivalence-to-implication-rule
+[DEBUG] [URE] Selected rule for BIT expansion:
+name: implication-construction-rule
+rule:
+(BindLink
+  (VariableList
+    (TypedVariableLink
+      (VariableNode "$B-a083600") ; [1075803195405159200][3]
+      (TypeChoice
+        (TypeNode "OrLink") ; [1641200931040822982][1]
+        (TypeNode "AndLink") ; [5150993344963829271][1]
+        (TypeNode "LambdaLink") ; [6352458681478507967][1]
+        (TypeNode "NotLink") ; [7029353635928836065][1]
+        (TypeNode "PredicateNode") ; [7305492803481351454][1]
+      ) ; [12553683925648135849][1]
+    ) ; [12502753568736379187][3]
+    (TypedVariableLink
+      (VariableNode "$Q-5fa8b92b") ; [8930023734698229664][3]
+      (TypeChoice
+        (TypeNode "LambdaLink") ; [6352458681478507967][1]
+        (TypeNode "PredicateNode") ; [7305492803481351454][1]
+      ) ; [15286865261196305675][1]
+    ) ; [16170795669022151701][3]
+  ) ; [14552868965343926236][3]
+  (AndLink
+    (VariableNode "$B-a083600") ; [1075803195405159200][3]
+    (VariableNode "$Q-5fa8b92b") ; [8930023734698229664][3]
+    (NotLink
+      (EqualLink
+        (VariableNode "$B-a083600") ; [1075803195405159200][3]
+        (VariableNode "$Q-5fa8b92b") ; [8930023734698229664][3]
+      ) ; [9530461658253061016][3]
+    ) ; [9550780633133926061][3]
+    (EvaluationLink
+      (GroundedPredicateNode "scm: implication-construction-precondition") ; [7996446579149881740][1]
+      (ListLink
+        (VariableNode "$B-a083600") ; [1075803195405159200][3]
+        (VariableNode "$Q-5fa8b92b") ; [8930023734698229664][3]
+      ) ; [17163728775145283731][3]
+    ) ; [15273729081877186638][3]
+  ) ; [13704627542132141634][3]
+  (ExecutionOutputLink
+    (GroundedSchemaNode "scm: implication-construction-formula") ; [6458395065017447120][1]
+    (ListLink
+      (ImplicationLink
+        (VariableNode "$B-a083600") ; [1075803195405159200][3]
+        (VariableNode "$Q-5fa8b92b") ; [8930023734698229664][3]
+      ) ; [18313202211262791991][3]
+      (VariableNode "$B-a083600") ; [1075803195405159200][3]
+      (VariableNode "$Q-5fa8b92b") ; [8930023734698229664][3]
+    ) ; [13737951571107005930][3]
+  ) ; [16758168272830515232][3]
+) ; [15505081400649772820][18446744073709551615]
+
+[DEBUG] [URE] Expanded forward chainer strategy:
+(BindLink
+  (VariableList
+    (TypedVariableLink
+      (VariableNode "$B-a083600") ; [1075803195405159200][3]
+      (TypeChoice
+        (TypeNode "OrLink") ; [1641200931040822982][1]
+        (TypeNode "AndLink") ; [5150993344963829271][1]
+        (TypeNode "LambdaLink") ; [6352458681478507967][1]
+        (TypeNode "NotLink") ; [7029353635928836065][1]
+        (TypeNode "PredicateNode") ; [7305492803481351454][1]
+      ) ; [12553683925648135849][1]
+    ) ; [12502753568736379187][3]
+    (TypedVariableLink
+      (VariableNode "$B-5560bed3") ; [954956885300767879][3]
+      (TypeChoice
+        (TypeNode "OrLink") ; [1641200931040822982][1]
+        (TypeNode "AndLink") ; [5150993344963829271][1]
+        (TypeNode "LambdaLink") ; [6352458681478507967][1]
+        (TypeNode "NotLink") ; [7029353635928836065][1]
+        (TypeNode "PredicateNode") ; [7305492803481351454][1]
+      ) ; [12553683925648135849][1]
+    ) ; [17738197372146241402][3]
+    (TypedVariableLink
+      (VariableNode "$Q-5fa8b92b") ; [8930023734698229664][3]
+      (TypeChoice
+        (TypeNode "LambdaLink") ; [6352458681478507967][1]
+        (TypeNode "PredicateNode") ; [7305492803481351454][1]
+      ) ; [15286865261196305675][1]
+    ) ; [16170795669022151701][3]
+  ) ; [13184149590889680758][3]
+  (AndLink
+    (VariableNode "$B-a083600") ; [1075803195405159200][3]
+    (VariableNode "$Q-5fa8b92b") ; [8930023734698229664][3]
+    (NotLink
+      (EqualLink
+        (VariableNode "$B-a083600") ; [1075803195405159200][3]
+        (VariableNode "$Q-5fa8b92b") ; [8930023734698229664][3]
+      ) ; [9530461658253061016][3]
+    ) ; [9550780633133926061][3]
+    (NotLink
+      (IdenticalLink
+        (VariableNode "$B-a083600") ; [1075803195405159200][3]
+        (LambdaLink
+          (TypedVariableLink
+            (VariableNode "$X") ; [6809909406030619949][1]
+            (TypeNode "ConceptNode") ; [3788388250666256890][1]
+          ) ; [17718894144153964593][1]
+          (EvaluationLink
+            (PredicateNode "take") ; [3396821867884253757][1]
+            (ListLink
+              (VariableNode "$X") ; [6809909406030619949][1]
+              (ConceptNode "compound-A") ; [5571266438078870282][1]
+            ) ; [9339663655215837098][1]
+          ) ; [12459373116713205302][1]
+        ) ; [18413871478668594639][1]
+      ) ; [9771779474766691712][3]
+    ) ; [9792098449647556757][3]
+    (EvaluationLink
+      (GroundedPredicateNode "scm: gt-zero-confidence") ; [2096565403849494700][1]
+      (EquivalenceLink
+        (PredicateNode "take-treatment-1" (stv 0.100000 0.800000)) ; [693477798751519767][1]
+        (VariableNode "$B-a083600") ; [1075803195405159200][3]
+      ) ; [16346461327915047267][3]
+    ) ; [13451195623684469822][3]
+    (ImplicationLink
+      (AndLink
+        (VariableNode "$B-a083600") ; [1075803195405159200][3]
+        (VariableNode "$Q-5fa8b92b") ; [8930023734698229664][3]
+      ) ; [17393623462368785383][3]
+      (VariableNode "$B-5560bed3") ; [954956885300767879][3]
+    ) ; [13870626034087997381][3]
+    (ImplicationLink
+      (VariableNode "$B-5560bed3") ; [954956885300767879][3]
+      (LambdaLink
+        (TypedVariableLink
+          (VariableNode "$X") ; [6809909406030619949][1]
+          (TypeNode "ConceptNode") ; [3788388250666256890][1]
+        ) ; [17718894144153964593][1]
+        (EvaluationLink
+          (PredicateNode "take") ; [3396821867884253757][1]
+          (ListLink
+            (VariableNode "$X") ; [6809909406030619949][1]
+            (ConceptNode "compound-A") ; [5571266438078870282][1]
+          ) ; [9339663655215837098][1]
+        ) ; [12459373116713205302][1]
+      ) ; [18413871478668594639][1]
+    ) ; [14585749684933467565][3]
+    (EvaluationLink
+      (GroundedPredicateNode "scm: implication-construction-precondition") ; [7996446579149881740][1]
+      (ListLink
+        (VariableNode "$B-a083600") ; [1075803195405159200][3]
+        (VariableNode "$Q-5fa8b92b") ; [8930023734698229664][3]
+      ) ; [17163728775145283731][3]
+    ) ; [15273729081877186638][3]
+    (NotLink
+      (IdenticalLink
+        (PredicateNode "take-treatment-1" (stv 0.100000 0.800000)) ; [693477798751519767][1]
+        (LambdaLink
+          (TypedVariableLink
+            (VariableNode "$X") ; [6809909406030619949][1]
+            (TypeNode "ConceptNode") ; [3788388250666256890][1]
+          ) ; [17718894144153964593][1]
+          (EvaluationLink
+            (PredicateNode "take") ; [3396821867884253757][1]
+            (ListLink
+              (VariableNode "$X") ; [6809909406030619949][1]
+              (ConceptNode "compound-A") ; [5571266438078870282][1]
+            ) ; [9339663655215837098][1]
+          ) ; [12459373116713205302][1]
+        ) ; [18413871478668594639][1]
+      ) ; [15601785458906142039][3]
+    ) ; [15622104433787007084][3]
+    (NotLink
+      (IdenticalLink
+        (VariableNode "$B-5560bed3") ; [954956885300767879][3]
+        (VariableNode "$B-a083600") ; [1075803195405159200][3]
+      ) ; [16115899068622670104][3]
+    ) ; [16136218043503535149][3]
+    (EquivalenceLink
+      (PredicateNode "take-treatment-1" (stv 0.100000 0.800000)) ; [693477798751519767][1]
+      (VariableNode "$B-a083600") ; [1075803195405159200][3]
+    ) ; [16346461327915047267][3]
+  ) ; [14137636326773825635][3]
+  (ExecutionOutputLink
+    (GroundedSchemaNode "scm: deduction-formula") ; [201750363263560339][1]
+    (ListLink
+      (ImplicationLink (stv 0.200000 0.576000)
+        (PredicateNode "take-treatment-1" (stv 0.100000 0.800000)) ; [693477798751519767][1]
+        (LambdaLink
+          (TypedVariableLink
+            (VariableNode "$X") ; [6809909406030619949][1]
+            (TypeNode "ConceptNode") ; [3788388250666256890][1]
+          ) ; [17718894144153964593][1]
+          (EvaluationLink
+            (PredicateNode "take") ; [3396821867884253757][1]
+            (ListLink
+              (VariableNode "$X") ; [6809909406030619949][1]
+              (ConceptNode "compound-A") ; [5571266438078870282][1]
+            ) ; [9339663655215837098][1]
+          ) ; [12459373116713205302][1]
+        ) ; [18413871478668594639][1]
+      ) ; [15180311865663055677][1]
+      (ExecutionOutputLink
+        (GroundedSchemaNode "scm: equivalence-to-implication-formula") ; [657362063185547793][1]
+        (ListLink
+          (ImplicationLink
+            (PredicateNode "take-treatment-1" (stv 0.100000 0.800000)) ; [693477798751519767][1]
+            (VariableNode "$B-a083600") ; [1075803195405159200][3]
+          ) ; [16288987656109171854][3]
+          (EquivalenceLink
+            (PredicateNode "take-treatment-1" (stv 0.100000 0.800000)) ; [693477798751519767][1]
+            (VariableNode "$B-a083600") ; [1075803195405159200][3]
+          ) ; [16346461327915047267][3]
+        ) ; [10106419507727073668][3]
+      ) ; [15383359922948197147][3]
+      (ExecutionOutputLink
+        (GroundedSchemaNode "scm: deduction-formula") ; [201750363263560339][1]
+        (ListLink
+          (ImplicationLink
+            (VariableNode "$B-a083600") ; [1075803195405159200][3]
+            (LambdaLink
+              (TypedVariableLink
+                (VariableNode "$X") ; [6809909406030619949][1]
+                (TypeNode "ConceptNode") ; [3788388250666256890][1]
+              ) ; [17718894144153964593][1]
+              (EvaluationLink
+                (PredicateNode "take") ; [3396821867884253757][1]
+                (ListLink
+                  (VariableNode "$X") ; [6809909406030619949][1]
+                  (ConceptNode "compound-A") ; [5571266438078870282][1]
+                ) ; [9339663655215837098][1]
+              ) ; [12459373116713205302][1]
+            ) ; [18413871478668594639][1]
+          ) ; [9350305881523605350][3]
+          (ExecutionOutputLink
+            (GroundedSchemaNode "scm: deduction-formula") ; [201750363263560339][1]
+            (ListLink
+              (ImplicationLink
+                (VariableNode "$B-a083600") ; [1075803195405159200][3]
+                (VariableNode "$B-5560bed3") ; [954956885300767879][3]
+              ) ; [10338135361865330206][3]
+              (ExecutionOutputLink
+                (GroundedSchemaNode "scm: implication-implicant-distribution-formula") ; [4181613870801572780][1]
+                (ListLink
+                  (ImplicationLink
+                    (VariableNode "$B-a083600") ; [1075803195405159200][3]
+                    (AndLink
+                      (VariableNode "$B-a083600") ; [1075803195405159200][3]
+                      (VariableNode "$Q-5fa8b92b") ; [8930023734698229664][3]
+                    ) ; [17393623462368785383][3]
+                  ) ; [17553429902078571902][3]
+                  (ExecutionOutputLink
+                    (GroundedSchemaNode "scm: implication-construction-formula") ; [6458395065017447120][1]
+                    (ListLink
+                      (ImplicationLink
+                        (VariableNode "$B-a083600") ; [1075803195405159200][3]
+                        (VariableNode "$Q-5fa8b92b") ; [8930023734698229664][3]
+                      ) ; [18313202211262791991][3]
+                      (VariableNode "$B-a083600") ; [1075803195405159200][3]
+                      (VariableNode "$Q-5fa8b92b") ; [8930023734698229664][3]
+                    ) ; [13737951571107005930][3]
+                  ) ; [16758168272830515232][3]
+                ) ; [15351232422213639985][3]
+              ) ; [17024646009651502531][3]
+              (ImplicationLink
+                (AndLink
+                  (VariableNode "$B-a083600") ; [1075803195405159200][3]
+                  (VariableNode "$Q-5fa8b92b") ; [8930023734698229664][3]
+                ) ; [17393623462368785383][3]
+                (VariableNode "$B-5560bed3") ; [954956885300767879][3]
+              ) ; [13870626034087997381][3]
+            ) ; [13603448326412033977][3]
+          ) ; [13068574681062347282][3]
+          (ImplicationLink
+            (VariableNode "$B-5560bed3") ; [954956885300767879][3]
+            (LambdaLink
+              (TypedVariableLink
+                (VariableNode "$X") ; [6809909406030619949][1]
+                (TypeNode "ConceptNode") ; [3788388250666256890][1]
+              ) ; [17718894144153964593][1]
+              (EvaluationLink
+                (PredicateNode "take") ; [3396821867884253757][1]
+                (ListLink
+                  (VariableNode "$X") ; [6809909406030619949][1]
+                  (ConceptNode "compound-A") ; [5571266438078870282][1]
+                ) ; [9339663655215837098][1]
+              ) ; [12459373116713205302][1]
+            ) ; [18413871478668594639][1]
+          ) ; [14585749684933467565][3]
+        ) ; [16283650869652643608][3]
+      ) ; [15748777224302956913][3]
+    ) ; [14020798431337846428][3]
+  ) ; [13485924785988159733][3]
+) ; [15511925606899762288][3]
+
+[DEBUG] [URE] With inference tree:
+
+ [1075803195405159200][3] [8930023734698229664](4)
+ --------implication-construction-formula---------
+             [18313202211262791991](5)
+             -implication-implicant-d-
+             [17553429902078571902](6) [13870626034087997381](7)
+             -----------------deduction-formula-----------------
+[16346461327915047267][3] [10338135361865330206](8) [14585749684933467565](2)
+-equivalence-to-implicat- -----------------deduction-formula-----------------
+[16288987656109171854](11)             [9350305881523605350](9)
+-----------------------deduction-formula-----------------------
+                   [15180311865663055677](12)
+
+[DEBUG] [URE] Selected and-BIT for fulfillment (fcs value):
+[15511925606899762288][3]
+[DEBUG] [URE] Results:
+size = 0

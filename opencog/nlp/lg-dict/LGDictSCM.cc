@@ -22,6 +22,8 @@
  */
 
 #include <opencog/atomspace/AtomSpace.h>
+#include <opencog/atoms/base/Link.h>
+#include <opencog/atoms/base/Node.h>
 #include <opencog/guile/SchemePrimitive.h>
 #include <opencog/nlp/types/atom_types.h>
 
@@ -118,11 +120,11 @@ Handle LGDictSCM::do_lg_get_dict_entry(Handle h)
 
 		// avoid the disjuncts building if entries exist
 		if (not qExisting.empty())
-			return Handle(createLink(SET_LINK, qExisting));
+			return Handle(createLink(qExisting, SET_LINK));
 
         LGDictReader reader(m_pDictionary, pAS);
 
-        return reader.getAtom(NodeCast(h)->getName());
+        return reader.getAtom(h->getName());
     }
 
     return Handle::UNDEFINED;

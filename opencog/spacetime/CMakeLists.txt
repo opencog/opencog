@@ -14,7 +14,6 @@ TARGET_LINK_LIBRARIES(spacetime-types
 	${ATOMSPACE_atombase_LIBRARY}
 )
 
-ADD_DEPENDENCIES(spacetime-types opencog_atom_types)
 ADD_DEPENDENCIES(spacetime-types spacetime_atom_types)
 
 INSTALL (TARGETS spacetime-types
@@ -25,7 +24,7 @@ INSTALL (FILES
 	DESTINATION "${DATADIR}/scm/spacetime"
 )
 
-# FIXME -- actually, the timeserver does not depend on ocotomap,
+# FIXME -- actually, the timeserver does not depend on octomap,
 # and could be built just fine without it. However, its not clear
 # why we need to fix this just right now.
 IF (HAVE_OCTOMAP)
@@ -68,33 +67,4 @@ IF (HAVE_OCTOMAP)
 		TimeServer.h
 		DESTINATION "include/${PROJECT_NAME}/spacetime"
 	)
-ENDIF (HAVE_OCTOMAP)
-
-
-IF (HAVE_OCTOMAP)
-	ADD_LIBRARY (time_space_atom SHARED
-		TimeSpaceAtomMapsAPI/AtomOcTree.cc
-		TimeSpaceAtomMapsAPI/AtomOcTreeNode.cc
-		TimeSpaceAtomMapsAPI/TimeSpaceAtom.cc
-	)
-
-
-	TARGET_LINK_LIBRARIES(time_space_atom
-	${OCTOMAP_LIBRARY}
-	${OCTOMAP_OCTOMATH_LIBRARY})
-	
-	TARGET_LINK_LIBRARIES(time_space_atom
-		${ATOMSPACE_LIBRARIES})
-
-	INSTALL (TARGETS time_space_atom
-		DESTINATION "lib${LIB_DIR_SUFFIX}/opencog"
-	)
-
-	INSTALL (FILES
-		TimeSpaceAtomMapsAPI/AtomOcTree.h
-		TimeSpaceAtomMapsAPI/AtomOcTreeNode.h
-		TimeSpaceAtomMapsAPI/TimeSpaceAtom.h
-		DESTINATION "include/${PROJECT_NAME}/spacetime"
-	)
-
 ENDIF (HAVE_OCTOMAP)

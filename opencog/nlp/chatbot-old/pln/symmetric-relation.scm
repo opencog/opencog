@@ -83,11 +83,11 @@
 	cnt
 )
 
-(cog-map-type (lambda (x) (cog-delete-recursive x) #f) 'FWVariableNode)
-(cog-map-type (lambda (x) (cog-delete-recursive x) #f) 'OrderedLink)
+(cog-map-type (lambda (x) (cog-extract-recursive x) #f) 'FWVariableNode)
+(cog-map-type (lambda (x) (cog-extract-recursive x) #f) 'OrderedLink)
 (cog-map-type prt-atom 'FWVariableNode)
 
-(cog-delete-recursive (ConceptNode "___PLN___"))
+(cog-extract-recursive (ConceptNode "___PLN___"))
 
 
 

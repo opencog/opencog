@@ -177,7 +177,7 @@ bool EdgeThin::make_sense_list(const Handle& sense_h, const Handle& sense_link_h
 bool EdgeThin::delete_sim(const Handle& h)
 {
 #ifdef LINK_DEBUG
-	std::vector<Handle> oset = atom_space.getOutgoing(h);
+	HandleSeq oset = atom_space.getOutgoing(h);
 	Handle first_sense_link = oset[0];
 	Handle second_sense_link = oset[1];
 

@@ -25,7 +25,6 @@
 #ifndef _OPENCOG_BUILTIN_REQUESTS_MODULE_H
 #define _OPENCOG_BUILTIN_REQUESTS_MODULE_H
 
-#include <opencog/cogserver/server/SleepRequest.h>
 #include <opencog/cogserver/server/Factory.h>
 #include <opencog/cogserver/server/ListRequest.h>
 #include <opencog/cogserver/server/LoadModuleRequest.h>
@@ -49,7 +48,6 @@ class BuiltinRequestsModule : public Module
 private:
 
     Factory<ListRequest, Request>         listFactory;
-    Factory<SleepRequest, Request>        sleepFactory;
     Factory<ShutdownRequest, Request>     shutdownFactory;
     Factory<LoadModuleRequest, Request>   loadmoduleFactory;
     Factory<UnloadModuleRequest, Request> unloadmoduleFactory;
@@ -79,6 +77,12 @@ DECLARE_CMD_REQUEST(BuiltinRequestsModule, "", do_ctrld,
        "Close the shell TCP/IP connection.\n",
        false, true)
 
+DECLARE_CMD_REQUEST(BuiltinRequestsModule, ".", do_dot,
+       "Close the shell connection",
+       "Usage: .\n\n"
+       "Close the shell TCP/IP connection.\n",
+       false, true)
+
 DECLARE_CMD_REQUEST(BuiltinRequestsModule, "help", do_help,
        "List the available commands or print the help for a specific command",
        "Usage: help [<command>]\n\n"
@@ -92,6 +96,11 @@ DECLARE_CMD_REQUEST(BuiltinRequestsModule, "h", do_h,
        "If no command is specified, then print a menu of commands.\n"
        "Otherwise, print verbose help for the indicated command.\n",
        false, true)
+
+DECLARE_CMD_REQUEST(BuiltinRequestsModule, "stats", do_stats,
+       "Print some diagnostic statistics about the server.",
+       "Usage: stats\n\n",
+       false, false)
 
 // I'm adding the agent control commands via the macro syntax
 // (it's much more convenient than adding several new .cc/.h files). -- Jared Wigmore

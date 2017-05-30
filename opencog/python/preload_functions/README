@@ -1,1 +1,0 @@
-This is the default directory for defining Python functions which could be used by the python module. One can define functions, save them with .py suffix, and later access them in a GroundedSchemaNode with 'py: <file_name>.<function_name>' or call them directly from the py shell.

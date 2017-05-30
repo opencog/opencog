@@ -2,8 +2,8 @@ ENABLE_TESTING()
 INCLUDE(AddCxxtest)
 
 IF (WIN32)
-	ADD_DEFINITIONS(-D_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES
-	                -D_CRT_SECURE_NO_WARNINGS)
+    ADD_DEFINITIONS(-D_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES
+                    -D_CRT_SECURE_NO_WARNINGS)
 ENDIF (WIN32)
 
 ADD_DEFINITIONS(-DPROJECT_SOURCE_DIR=\\"${CMAKE_SOURCE_DIR}\\"
@@ -17,41 +17,42 @@ INCLUDE_DIRECTORIES(${CMAKE_BINARY_DIR})
 # its is tested first.
 IF (CXXTEST_FOUND)
 
-	IF (HAVE_ATOMSPACE)
-		# Persistence is for saving/restoring atomspace to disk.
-		ADD_SUBDIRECTORY (persist)
+    IF (HAVE_ATOMSPACE)
+        # Persistence is for saving/restoring atomspace to disk.
+        ADD_SUBDIRECTORY (attention)
 
-		# The cogserver exposes the atomspace to outside users.
-		IF (HAVE_SERVER)
-			ADD_SUBDIRECTORY (server)
-		ENDIF (HAVE_SERVER)
+        ADD_SUBDIRECTORY (persist)
 
-		IF (HAVE_OCTOMAP)
-			ADD_SUBDIRECTORY (spacetime)
-			ADD_SUBDIRECTORY (spatial)
-		ENDIF (HAVE_OCTOMAP)
+        # The cogserver exposes the atomspace to outside users.
+        IF (HAVE_SERVER)
+            ADD_SUBDIRECTORY (server)
+        ENDIF (HAVE_SERVER)
 
-		ADD_SUBDIRECTORY (nlp)
+        IF (HAVE_OCTOMAP)
+            ADD_SUBDIRECTORY (spacetime)
+            ADD_SUBDIRECTORY (spatial)
+            ADD_SUBDIRECTORY (timeoctomap)
+        ENDIF (HAVE_OCTOMAP)
 
-		ADD_SUBDIRECTORY (pln)
+        ADD_SUBDIRECTORY (nlp)
 
-		ADD_SUBDIRECTORY (pln_old)
+        ADD_SUBDIRECTORY (pln)
 
-		ADD_SUBDIRECTORY (planning)
+        ADD_SUBDIRECTORY (pln_old)
 
-		ADD_SUBDIRECTORY (openpsi)
+        ADD_SUBDIRECTORY (openpsi)
 
-	ENDIF (HAVE_ATOMSPACE)
+    ENDIF (HAVE_ATOMSPACE)
 
-	IF (HAVE_CYTHON AND PYTHONINTERP_FOUND)
-		ADD_SUBDIRECTORY (cython)
-		ADD_SUBDIRECTORY (python)
-	ENDIF (HAVE_CYTHON AND PYTHONINTERP_FOUND)
+    IF (HAVE_CYTHON AND PYTHONINTERP_FOUND)
+        ADD_SUBDIRECTORY (cython)
+        ADD_SUBDIRECTORY (python)
+    ENDIF (HAVE_CYTHON AND PYTHONINTERP_FOUND)
 
-	IF (HAVE_ATTENTION)
-		ADD_SUBDIRECTORY (dynamics)
-	ENDIF (HAVE_ATTENTION)
+   #IF (HAVE_ATTENTION)
+   #    ADD_SUBDIRECTORY (attention)
+   #ENDIF (HAVE_ATTENTION)
 
-	ADD_SUBDIRECTORY (learning)
+    ADD_SUBDIRECTORY (learning)
 
 ENDIF (CXXTEST_FOUND)

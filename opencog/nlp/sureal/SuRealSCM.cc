@@ -31,10 +31,13 @@
 
 #include "SuRealSCM.h"
 #include "SuRealPMCB.h"
+#include "SuRealCache.h"
 
 
 using namespace opencog::nlp;
 using namespace opencog;
+
+using namespace std;
 
 
 /**
@@ -80,7 +83,9 @@ void SuRealSCM::init_in_module(void* data)
 void SuRealSCM::init()
 {
 #ifdef HAVE_GUILE
-    define_scheme_primitive("sureal-match", &SuRealSCM::do_sureal_match, this, "nlp sureal");
+    define_scheme_primitive("sureal-match", &SuRealSCM::do_non_cached_sureal_match, this, "nlp sureal");
+    define_scheme_primitive("cached-sureal-match", &SuRealSCM::do_cached_sureal_match, this, "nlp sureal");
+    define_scheme_primitive("reset-cache", &SuRealSCM::reset_cache, this, "nlp sureal");
 #endif
 }
 
@@ -94,20 +99,44 @@ void SuRealSCM::init()
 static void get_all_unique_nodes(const Handle& h,
                                  UnorderedHandleSet& node_set)
 {
-   LinkPtr lll(LinkCast(h));
-   if (nullptr == lll)
+   if (h->isNode())
    {
       node_set.insert(h);
       return;
    }
 
-   for (const Handle& o : lll->getOutgoingSet())
+   for (const Handle& o : h->getOutgoingSet())
       get_all_unique_nodes(o, node_set);
+}
+
+/**
+ * Implement the "reset-sureal-cache" scheme primitive.
+ *
+ */
+void SuRealSCM::reset_cache(void)
+{
+    SuRealCache::instance().reset();
+}
+
+/**
+ * Implement the "cached-sureal-match" scheme primitive.
+ *
+ */
+HandleSeqSeq SuRealSCM::do_cached_sureal_match(Handle h)
+{
+    return do_sureal_match(h, true);
 }
 
 /**
  * Implement the "sureal-match" scheme primitive.
  *
+ */
+HandleSeqSeq SuRealSCM::do_non_cached_sureal_match(Handle h)
+{
+    return do_sureal_match(h, false);
+}
+
+/**
  * Uses the pattern matcher to find all InterpretationNodes whoses
  * corresponding SetLink contains a structure similar to the input,
  * taking into accounting each ConceptNode/PredicateNode's corresponding
@@ -118,7 +147,7 @@ static void get_all_unique_nodes(const Handle& h,
  * @return    a list of the form returned by sureal_get_mapping, but spanning
  *            multiple InterpretationNode
  */
-HandleSeqSeq SuRealSCM::do_sureal_match(Handle h)
+HandleSeqSeq SuRealSCM::do_sureal_match(Handle h, bool use_cache)
 {
 #ifdef HAVE_GUILE
     // only accept SetLink
@@ -127,14 +156,14 @@ HandleSeqSeq SuRealSCM::do_sureal_match(Handle h)
 
     AtomSpace* pAS = SchemeSmob::ss_get_env_as("sureal-match");
 
-    std::set<Handle> sVars;
+    OrderedHandleSet sVars;
 
     // Extract the graph under the SetLink; this is done so that the content
     // of the SetLink could be matched to another SetLink with differnet arity.
     // It is possible to keep the clauses in a SetLink and override the PM's
     // link_match() callback to skip SetLink's arity check , but that would
     // be assuming R2L will never use SetLink for other purposes.
-    const HandleSeq& qClauses = LinkCast(h)->getOutgoingSet();
+    const HandleSeq& qClauses = h->getOutgoingSet();
 
     // get all the nodes to be treated as variable in the Pattern Matcher
     // XXX perhaps it's better to write a eval_q in SchemeEval to convert
@@ -163,7 +192,22 @@ HandleSeqSeq SuRealSCM::do_sureal_match(Handle h)
             n->getType() == DEFINED_LINGUISTIC_PREDICATE_NODE)
            continue;
 
-        std::string sName = NodeCast(n)->getName();
+        std::string sName = n->getName();
+
+        // if it is an instance, check if it has the LG relationships
+        if (sName.find("@") != std::string::npos)
+        {
+            Handle hWordInstNode = pAS->get_handle(WORD_INSTANCE_NODE, sName);
+
+            // no corresponding WordInstanceNode found
+            if (hWordInstNode == Handle::UNDEFINED)
+                continue;
+
+            // if no LG link generated for the instance
+            if (get_target_neighbors(hWordInstNode, LG_WORD_CSET).empty())
+                continue;
+        }
+
         std::string sWord = sName.substr(0, sName.find_first_of('@'));
         Handle hWordNode = pAS->get_handle(WORD_NODE, sWord);
 
@@ -171,16 +215,34 @@ HandleSeqSeq SuRealSCM::do_sureal_match(Handle h)
         if (hWordNode == Handle::UNDEFINED)
             continue;
 
-        // if no LG dictionary entry
-        if (get_target_neighbors(hWordNode, LG_DISJUNCT).empty())
-            continue;
-
         sVars.insert(n);
     }
 
-    SuRealPMCB pmcb(pAS, sVars);
+    SuRealPMCB pmcb(pAS, sVars, use_cache);
     PatternLinkPtr slp(createPatternLink(sVars, qClauses));
+
     slp->satisfy(pmcb);
+
+    // The cached version of SuReal is supposed to return only true or false,
+    // not the set of all acceptable answers. To keep ortogonality with the
+    // interface of the standard (non-cached) version, this shortcut is
+    // returning an empty HandleSeq meaning 'false' or a HandleSeq with a single
+    // (actually meaningless) Handle meaning 'true'.
+    //
+    // Ideally there should be two different methods with different interfaces
+    // for the cached and the non-cached versions.
+    if (use_cache) {
+        if (pmcb.m_results.empty()) {
+            return HandleSeqSeq();
+        } else {
+            HandleSeqSeq results;
+            HandleSeq item;
+            Handle h;
+            item.push_back(h);
+            results.push_back(item);
+            return results;
+        }
+    }
 
     HandleSeq keys;
 
@@ -201,7 +263,7 @@ HandleSeqSeq SuRealSCM::do_sureal_match(Handle h)
 
         // assuming each InterpretationNode is only linked to one SetLink
         // and compare using arity
-        return LinkCast(qi[0])->getArity() < LinkCast(qj[0])->getArity();
+        return qi[0]->getArity() < qj[0]->getArity();
     };
 
     std::sort(keys.begin(), keys.end(), itprComp);

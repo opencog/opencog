@@ -22,6 +22,8 @@
  */
 
 #include <opencog/atomspace/AtomSpace.h>
+#include <opencog/atoms/base/Link.h>
+#include <opencog/atoms/base/Node.h>
 #include <opencog/nlp/types/atom_types.h>
 
 #include "LGDictUtils.h"

@@ -17,6 +17,10 @@ IF (COMMAND CMAKE_POLICY)
 	CMAKE_POLICY(SET CMP0005 OLD)
 ENDIF (COMMAND CMAKE_POLICY)
 
+IF(CMAKE_VERSION VERSION_GREATER 3.0.2)
+	CMAKE_POLICY(SET CMP0037 OLD)
+ENDIF(CMAKE_VERSION VERSION_GREATER 3.0.2)
+
 PROJECT(opencog)
 
 # To supress Cygwin warning "CMake no longer defines WIN32 on Cygwin!"
@@ -207,7 +211,7 @@ IF (cpprest_FOUND AND cpprest_LIBRARY)
 	SET(HAVE_cpprest 1)
 	SET(cpprest_DIR_MESSAGE "cpprest was found.")
 ELSE (cpprest_FOUND AND cpprest_LIBRARY)
-	SET(cpprest_DIR_MESSAGE "cpprest was not found; PatternMiner will not be built.\nTo over-ride, make sure that the environment variable cpprest_LIBRARY is set.\nInstallation instructions: https://casablanca.codeplex.com/")
+        SET(cpprest_DIR_MESSAGE "cpprest was not found; Distributed version of PatternMiner will not be built.\nTo over-ride, make sure that the environment variable cpprest_LIBRARY is set.\nInstallation instructions: https://casablanca.codeplex.com/")
 ENDIF (cpprest_FOUND AND cpprest_LIBRARY)
 MESSAGE(STATUS "${cpprest_DIR_MESSAGE}")
 
@@ -263,14 +267,14 @@ ELSE (LAPACK_FOUND)
 ENDIF (LAPACK_FOUND)
 
 
-# Link-Gramar is needed for the Viterbi parser
+# Link-Gramar is needed for the Viterbi parser and more generally NLP
 # Only 4.7.12 or newer has the required read-dict API in it.
 FIND_PACKAGE(LinkGrammar 4.7.12)
 IF (LINK_GRAMMAR_FOUND)
 	SET(HAVE_LINK_GRAMMAR 1)
 	INCLUDE_DIRECTORIES(${LINK_GRAMMAR_INCLUDE_DIRS})
 ELSE (LINK_GRAMMAR_FOUND)
-	MESSAGE(STATUS "Link Grammar missing: needed for the Viterbi parser.")
+	MESSAGE(STATUS "Link Grammar missing: needed for NLP.")
 ENDIF (LINK_GRAMMAR_FOUND)
 
 
@@ -293,7 +297,7 @@ IF(OCTOMAP_FOUND AND OCTOMAP_LIBRARY)
   INCLUDE_DIRECTORIES(${OCTOMAP_INCLUDE_DIR})
   SET(OCTOMAP_DIR_MESSAGE "Octomap was found.")
 ELSE (OCTOMAP_FOUND AND OCTOMAP_LIBRARY)
-  SET(OCTOMAP_DIR_MESSAGE "Octomap not found.")
+  SET(OCTOMAP_DIR_MESSAGE "Octomap missing: needed for the SpaceTime map.")
 ENDIF(OCTOMAP_FOUND AND OCTOMAP_LIBRARY)
 
 
@@ -303,12 +307,12 @@ FIND_PACKAGE(OpenGL)
 IF (OPENGL_FOUND)
 	MESSAGE(STATUS "OpenGL was found.")
 ELSE (OPENGL_FOUND)
-	MESSAGE(STATUS "OpenGL missing: needed for Spatial tools (MapExplorer, MapTools, etc.).")
+	MESSAGE(STATUS "OpenGL missing: needed for space visualization tools (MapExplorer, MapTools, etc.).")
 ENDIF (OPENGL_FOUND)
 
 # Google Protobuf library
 # The protocol buffer compiler is a separately installable package, and
-# it is also needed for building embodiment PAI. So check for that, too.
+# it is needed for building the ZMQ messaging subsystem.
 FIND_PACKAGE(Protobuf)
 IF (PROTOBUF_FOUND
 		AND PROTOBUF_LIBRARY
@@ -329,7 +333,7 @@ ELSE (PROTOBUF_FOUND
 	IF (PROTOBUF_PROTOC_EXECUTABLE)
 		SET(PROTOBUF_DIR_MESSAGE "Protobuf was not found; the new message decoding functions would not work.\n   To over-ride, make sure PROTOBUF_LIBRARIES and PROTOBUF_INCLUDE_DIRS are set.")
 	ELSE (PROTOBUF_PROTOC_EXECUTABLE)
-		SET(PROTOBUF_DIR_MESSAGE "Protobuf compiler was not found; embodiment PAI can't be built without it.\n   To over-ride, make sure PROTOBUF_PROTOC_EXECUTABLE is set.")
+		SET(PROTOBUF_DIR_MESSAGE "Protobuf compiler was not found; ZMQ messaging can't be built without it.\n   To over-ride, make sure PROTOBUF_PROTOC_EXECUTABLE is set.")
 	ENDIF (PROTOBUF_PROTOC_EXECUTABLE)
 
 ENDIF (PROTOBUF_FOUND
@@ -339,45 +343,64 @@ ENDIF (PROTOBUF_FOUND
 
 MESSAGE(STATUS "${PROTOBUF_DIR_MESSAGE}")
 
-# Python needed for embodiment (!?) and for PLN
-FIND_PACKAGE(PythonInterp)
+# -----------------------------------------------------------------------------
+# Python and Cython
+#
+# NOTE: Python interpreter is needed for runing python unit tests, and for
+# running the FindCython and FindCxxtest cmake modules.
+
+FIND_PACKAGE(PythonInterp 2.7)
+IF (2.7.0 VERSION_LESS ${PYTHON_VERSION_STRING} AND
+	3.0.0 VERSION_GREATER ${PYTHON_VERSION_STRING})
+	SET (HAVE_PY_INTERP 1)
+	MESSAGE(STATUS "Python ${PYTHON_VERSION_STRING} interpreter found.")
+ENDIF()
+
 FIND_PACKAGE(PythonLibs 2.7)
-IF(PYTHONLIBS_FOUND)
-	MESSAGE(STATUS "Python libs found.")
-ELSE(PYTHONLIBS_FOUND)
-	MESSAGE(STATUS "Python libs NOT found.")
-ENDIF(PYTHONLIBS_FOUND)
+IF (PYTHONLIBS_FOUND AND
+	2.7.0 VERSION_LESS ${PYTHONLIBS_VERSION_STRING} AND
+	3.0.0 VERSION_GREATER ${PYTHONLIBS_VERSION_STRING})
+	SET (HAVE_PY_LIBS 1)
+	MESSAGE(STATUS "Python ${PYTHONLIBS_VERSION_STRING} libraries found.")
+ELSE()
+	MESSAGE(STATUS "Python libraries NOT found.")
+ENDIF()
 
-# Python bindings using Cython
-# Cython is used to generate bindings
-FIND_PACKAGE(Cython 0.19.0)
-IF (CYTHON_FOUND AND PYTHONLIBS_FOUND)
-	# find python destination dir for python bindings
-	ADD_DEFINITIONS(-DHAVE_CYTHON)
-	SET(HAVE_CYTHON 1)
-	EXECUTE_PROCESS(
-		COMMAND ${PYTHON_EXECUTABLE} -c "from distutils.sysconfig import *;print(get_python_lib())"
-		OUTPUT_VARIABLE PYTHON_DEST
-	)
+# Cython is used to generate python bindings.
+IF(HAVE_PY_INTERP)
+	FIND_PACKAGE(Cython 0.19.0)
 
-	# replace new line at end
-	STRING(REPLACE "\n" "" PYTHON_DEST "${PYTHON_DEST}")
-	IF ("${PYTHON_DEST}" STREQUAL "")
-		MESSAGE(FATAL_ERROR "Python destination dir not found")
-	ELSE ("${PYTHON_DEST}" STREQUAL "")
-		MESSAGE(STATUS "Python destination dir found: ${PYTHON_DEST}" )
-	ENDIF ("${PYTHON_DEST}" STREQUAL "")
-ELSE (CYTHON_FOUND AND PYTHONLIBS_FOUND)
-	IF(NOT CYTHON_FOUND)
-		MESSAGE(STATUS "Cython executable not found.")
-	ENDIF(NOT CYTHON_FOUND)
-ENDIF (CYTHON_FOUND AND PYTHONLIBS_FOUND)
+	IF (CYTHON_FOUND AND HAVE_PY_LIBS)
+		# Find python destination dir for python bindings because it may
+		# differ on each operating system.
+		ADD_DEFINITIONS(-DHAVE_CYTHON)
+		SET(HAVE_CYTHON 1)
+		EXECUTE_PROCESS(
+			COMMAND ${PYTHON_EXECUTABLE} -c "from distutils.sysconfig import *;print(get_python_lib())"
+			OUTPUT_VARIABLE PYTHON_DEST
+		)
 
-# Nosetests will find and automatically run python tests.
-FIND_PROGRAM(NOSETESTS_EXECUTABLE nosetests)
-IF (NOSETESTS_EXECUTABLE AND CYTHON_FOUND AND PYTHONLIBS_FOUND)
-	SET(HAVE_NOSETESTS 1)
-ENDIF (NOSETESTS_EXECUTABLE AND CYTHON_FOUND AND PYTHONLIBS_FOUND)
+		# Replace new line at end.
+		STRING(REPLACE "\n" "" PYTHON_DEST "${PYTHON_DEST}")
+		IF ("${PYTHON_DEST}" STREQUAL "")
+			MESSAGE(FATAL_ERROR "Python destination dir not found")
+		ELSE ("${PYTHON_DEST}" STREQUAL "")
+			MESSAGE(STATUS "Python destination dir found: ${PYTHON_DEST}" )
+		ENDIF ("${PYTHON_DEST}" STREQUAL "")
+	ELSE (CYTHON_FOUND AND HAVE_PY_LIBS)
+		IF(NOT CYTHON_FOUND)
+			MESSAGE(STATUS "Cython executable not found.")
+		ENDIF(NOT CYTHON_FOUND)
+	ENDIF (CYTHON_FOUND AND HAVE_PY_LIBS)
+
+	# Nosetests will find and automatically run python tests.
+	FIND_PROGRAM(NOSETESTS_EXECUTABLE nosetests)
+	IF (NOSETESTS_EXECUTABLE AND CYTHON_FOUND AND HAVE_PY_LIBS)
+		SET(HAVE_NOSETESTS 1)
+	ENDIF (NOSETESTS_EXECUTABLE AND CYTHON_FOUND AND HAVE_PY_LIBS)
+ENDIF(HAVE_PY_INTERP)
+
+# -----------------------------------------------------------------------------
 
 # SDL needed for the spatial tools
 FIND_PACKAGE(SDL)
@@ -405,16 +428,6 @@ ELSE (TBB_FOUND)
 ENDIF (TBB_FOUND)
 MESSAGE(STATUS "${TBB_DIR_MESSAGE}")
 
-FIND_PACKAGE(TCL)
-
-# /usr/bin/tclsh is expected for some embodiment tests, but is
-# not otherwise important for anything...
-IF (TCL_TCLSH)
-	MESSAGE(STATUS "TCL shell was found here: ${TCL_TCLSH}")
-ELSE (TCL_TCLSH)
-	MESSAGE(STATUS "TCL shell missing: needed for some embodiment tests.")
-ENDIF (TCL_TCLSH)
-
 # Optional, currently needed only to hush up DRD in util/Logger.cc
 FIND_PACKAGE(VALGRIND)
 IF (VALGRIND_FOUND)
@@ -440,6 +453,17 @@ ELSE (ZMQ_FOUND AND ZMQ_LIBRARY)
 ENDIF (ZMQ_FOUND AND ZMQ_LIBRARY)
 MESSAGE(STATUS "${ZMQ_DIR_MESSAGE}")
 
+# Glasgow Haskell compiler
+FIND_PACKAGE(Stack)
+IF (STACK_FOUND)
+	ADD_DEFINITIONS(-DHAVE_STACK)
+	SET(HAVE_STACK 1)
+	SET(STACK_FOUND_MESSAGE "The Haskell Tool Stack found.")
+ELSE (STACK_FOUND)
+	SET(STACK_FOUND_MESSAGE "The Haskell Tool Stack not found.")
+ENDIF (STACK_FOUND)
+MESSAGE(STATUS "${STACK_FOUND_MESSAGE}")
+
 # ==========================================================
 # Decide what to build, based on the packages found.
 
@@ -461,11 +485,11 @@ IF(HAVE_ATOMSPACE)
 ENDIF(HAVE_ATOMSPACE)
 
 IF(HAVE_ATOMSPACE AND HAVE_GUILE AND HAVE_LINK_GRAMMAR)
-	SET(HAVE_VITERBI 1)
+	SET(HAVE_NLP 1)
 ENDIF(HAVE_ATOMSPACE AND HAVE_GUILE AND HAVE_LINK_GRAMMAR)
 
 IF(HAVE_SERVER AND HAVE_TBB AND HAVE_ZMQ)
-	SET(HAVE_REST 1)
+	SET(HAVE_EVENT_PUBLISHING_DEPENDENCIES 1)
 ENDIF(HAVE_SERVER AND HAVE_TBB AND HAVE_ZMQ)
 
 # ===================================================================
@@ -590,6 +614,23 @@ ADD_CUSTOM_TARGET(cscope
 	COMMENT "Generating CScope database"
 )
 
+ADD_SUBDIRECTORY(experiments EXCLUDE_FROM_ALL)
+
+IF (NOT WIN32)
+	ADD_CUSTOM_TARGET (experiments
+		# using CMAKE_BUILD_TOOL results in teh cryptic error message
+		# warning: jobserver unavailable: using -j1.  Add `+' to parent make rule.
+		# This is because make doesn't know how to pass jobserver args to
+		# the submake.  So, instead, just use $(MAKE) (with round parens)
+		# -- that will do the right thing.
+		# COMMAND ${CMAKE_BUILD_TOOL}
+		COMMAND $(MAKE)
+		WORKING_DIRECTORY experiments
+		COMMENT "Building experiments"
+	)
+ENDIF (NOT WIN32)
+
+
 # packaging
 SET(CPACK_PACKAGE_DESCRIPTION_SUMMARY "The Open Cognition Framework")
 SET(CPACK_PACKAGE_NAME "opencog")
@@ -609,7 +650,7 @@ SET(CPACK_SOURCE_TBZ2 "ON")
 SET(CPACK_SOURCE_TGZ "OFF")
 SET(CPACK_SOURCE_TZ "OFF")
 SET(CPACK_PACKAGE_CONTACT "opencog@googlegroups.com")
-SET(CPACK_GENERATOR "TBZ2")
+SET(CPACK_GENERATOR "TBZ2;DEB")
 SET(CPACK_SOURCE_GENERATOR "TBZ2")
 SET(CPACK_PACKAGE_FILE_NAME "${CPACK_PACKAGE_NAME}-${CPACK_PACKAGE_VERSION}")
 SET(CPACK_SOURCE_PACKAGE_FILE_NAME "${CPACK_PACKAGE_FILE_NAME}")
@@ -689,9 +730,14 @@ SUMMARY_ADD("Dim. Embedding" "Compute dimensional embedding of the AtomSpace" HA
 SUMMARY_ADD("Doxygen" "Code documentation" DOXYGEN_FOUND)
 SUMMARY_ADD("GTK Visualizer" "GTK3-based Atomspace Visualizer" HAVE_GTK)
 SUMMARY_ADD("Python tests" "Python bindings nose tests" HAVE_NOSETESTS)
-SUMMARY_ADD("REST" "REST Atomspace Publisher module" HAVE_REST)
+SUMMARY_ADD("REST Events" "REST Atomspace Event Publisher module"
+	HAVE_EVENT_PUBLISHING_DEPENDENCIES)
 SUMMARY_ADD("Server" "The CogServer" HAVE_SERVER)
+SUMMARY_ADD("SpaceTime" "3D Space-Time object tracker" HAVE_OCTOMAP)
 SUMMARY_ADD("Spatial" "Vizualisation of the 3D spacemap" HAVE_SPATIAL_TOOLS AND HAVE_OCTOMAP)
 SUMMARY_ADD("Unit tests" "Unit tests" CXXTEST_FOUND)
-SUMMARY_ADD("Viterbi" "Viterbi Parser for Link Grammar" HAVE_VITERBI)
+SUMMARY_ADD("NLP" "Natural Language Processing" HAVE_NLP)
+SUMMARY_ADD("PatternMiner" "Pattern Miner" HAVE_ATOMSPACE)
+SUMMARY_ADD("Haskell codes" "Logic via Lojban" HAVE_STACK AND BUILD_LOJBAN)
+
 SUMMARY_SHOW()

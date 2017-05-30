@@ -25,7 +25,6 @@
 #include <opencog/util/Config.h>
 #include <opencog/util/Logger.h>
 
-#include <opencog/guile/load-file.h>
 #include <opencog/nlp/viterbi/atom_types.h>
 #include <opencog/nlp/viterbi/parser.h>
 #include <opencog/cogserver/server/CogServer.h>
@@ -50,17 +49,13 @@ class ViterbiUTest: public CxxTest::TestSuite
 			{
 				std::cerr << e.get_message() << std::endl;
 			}
-			logger().set_filename(config()["LOG_FILE"]);
-			logger().set_level(Logger::get_level_from_string(config()["LOG_LEVEL"]));
-			logger().set_print_to_stdout_flag(config().get_bool("LOG_TO_STDOUT"));
 
 			server(CogServer::createInstance);
 			as = &cogserver().getAtomSpace();
 
 			// Load the required data
 			config().set("MODULES",
-				"opencog/nlp/types/libnlp-types.so, "
-				"opencog/cogserver/modules/libQueryModule.so");
+				"opencog/nlp/types/libnlp-types.so");
 
 			cogserver().loadModules();
 
@@ -90,15 +85,17 @@ void ViterbiUTest::setUp(void)
 
 	// XXX TODO these should be loaded by the parser itself,
 	// and not by the test-case.
-	config().set("SCM_PRELOAD",
-		"opencog/scm/core_types.scm, "
-		"opencog/scm/opencog.scm, "
-		"opencog/scm/opencog/query.scm, "
-		"opencog/nlp/types/nlp_types.scm, "
-		"opencog/nlp/viterbi/viterbi_types.scm, "
-		"opencog/nlp/viterbi/parse.scm");
+   SchemeEval* eval = new SchemeEval(as);
+   eval->eval("(add-to-load-path \"..\")");
+   eval->eval("(add-to-load-path \"../../..\")");
+   eval->eval("(load-from-path \"opencog/scm/core_types.scm\")");
+   eval->eval("(load-from-path \"opencog/scm/opencog.scm\")");
+   eval->eval("(load-from-path \"opencog/scm/opencog/query.scm\")");
+   eval->eval("(load-from-path \"opencog/nlp/types/nlp_types.scm\")");
+   eval->eval("(load-from-path \"opencog/nlp/viterbi/viterbi_types.scm\")");
+   eval->eval("(load-from-path \"opencog/nlp/viterbi/parse.scm\")");
 
-	load_scm_files_from_config(*as);
+   delete eval;
 }
 
 void ViterbiUTest::test_init(void)

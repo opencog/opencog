@@ -28,9 +28,9 @@
 #include <opencog/atoms/base/Node.h>
 #include <opencog/truthvalue/SimpleTruthValue.h>
 
-#define DEPRECATED_ATOMSPACE_CALLS
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/cogserver/server/CogServer.h>
+#include <opencog/attentionbank/AttentionBank.h>
 
 #include <opencog/learning/dimensionalembedding/DimEmbedModule.h>
 
@@ -43,14 +43,14 @@ public:
               double strength, double confidence)
     {
         Handle h = as->add_link(SIMILARITY_LINK, h1, h2);
-        h->merge(SimpleTruthValue::createTV(strength, SimpleTruthValue::confidenceToCount(confidence)));
+        h->merge(SimpleTruthValue::createTV(strength, confidence));
     }
 
     void inhLink(AtomSpace* as, Handle h1, Handle h2,
                  double strength, double confidence)
     {
         Handle h = as->add_link(INHERITANCE_LINK, h1, h2);
-        h->merge(SimpleTruthValue::createTV(strength, SimpleTruthValue::confidenceToCount(confidence)));
+        h->merge(SimpleTruthValue::createTV(strength, confidence));
     }
 
     void testMisc()
@@ -163,6 +163,7 @@ public:
     {
         CogServer& cs = cogserver();
         AtomSpace* atomSpace = &cs.getAtomSpace();
+        AttentionBank* bank = &attentionbank(atomSpace);
         atomSpace->clear();
         DimEmbedModule dimEmbed = DimEmbedModule(cs);
         
@@ -199,10 +200,10 @@ public:
         Handle handles[7] = {h1, h2, h3, h4, h5, h6, h7};
         dimEmbed.embedAtomSpace(SIMILARITY_LINK, 7);
         TS_ASSERT(dimEmbed.isEmbedded(SIMILARITY_LINK));
-        //Every node is a pivot, so every node should be nondisposable
-        for(int i=0;i<7;i++) {
-            TS_ASSERT(handles[i]->getAttentionValue()->getVLTI()
-                      != AttentionValue::DISPOSABLE);
+        // Every node is a pivot, so every node should be nondisposable
+        for (int i=0;i<7;i++) {
+            TS_ASSERT(bank->get_vlti(handles[i])
+                     != AttentionValue::DISPOSABLE);
         }
         //dimEmbed.logAtomEmbedding(SIMILARITY_LINK);
         //We have no guarantee on the order that the pivots
@@ -315,8 +316,8 @@ public:
         //We cleared the embedding, so the VLTI of each pivot should be back
         //to normal
         for (int i=0; i<7; i++) {
-            TS_ASSERT(handles[i]->getAttentionValue()->getVLTI()
-                      ==AttentionValue::DISPOSABLE);
+            TS_ASSERT(bank->get_vlti(handles[i])
+                      == AttentionValue::DISPOSABLE);
         }
     }
 
@@ -484,12 +485,12 @@ public:
         h6->merge(SimpleTruthValue::createTV(0.001f, 0.00001f));
 
         inhLink(atomSpace, h1, h2, 0.5, 1.0);
-        atomSpace->add_link(INHERITANCE_LINK, h1, h3, h4, h5)->merge(SimpleTruthValue::createTV(0.5, SimpleTruthValue::confidenceToCount(0.6)));
+        atomSpace->add_link(INHERITANCE_LINK, h1, h3, h4, h5)->merge(SimpleTruthValue::createTV(0.5, 0.6));
         inhLink(atomSpace, h2, h3, 0.2, 1.0);
         inhLink(atomSpace, h2, h5, 1.0, 0.7);
         inhLink(atomSpace, h3, h2, 0.8, 1.0);
         atomSpace->add_link(INHERITANCE_LINK, h3, h4, h5)->merge(
-                           SimpleTruthValue::createTV(0.4, SimpleTruthValue::confidenceToCount(1.0)));
+                           SimpleTruthValue::createTV(0.4, 1.0));
         inhLink(atomSpace, h4, h2, 0.6, 1.0);
         inhLink(atomSpace, h4, h5, 0.2, 1.0);
         inhLink(atomSpace, h4, h2, 0.6, 1.0);

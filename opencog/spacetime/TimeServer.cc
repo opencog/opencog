@@ -27,6 +27,8 @@
 #include <opencog/util/Logger.h>
 #include <opencog/util/oc_assert.h>
 #include <opencog/spacetime/atom_types.h>
+#include <opencog/atoms/base/Link.h>
+
 #include "TimeServer.h"
 
 //#define DPRINTF printf
@@ -101,7 +103,7 @@ bool TimeServer::remove(Handle h, const Temporal& t, TemporalTable::TemporalRela
         logger().error("TimeServer::remove: timedomain %s not found\n", timeDomain.c_str());
         return false;
     }
-	
+
     std::unique_lock<std::mutex> lock(ts_mutex);
     return (temporalTableIter->second).remove(h, t, criterion);
 }
@@ -173,11 +175,11 @@ Handle TimeServer::addTimeInfo(Handle h, const std::string& timeNodeName, const 
     return atTimeLink;
 }
 
-bool TimeServer::removeTimeInfo(Handle h, 
-                                const octime_t& timestamp, 
+bool TimeServer::removeTimeInfo(Handle h,
+                                const octime_t& timestamp,
                                 TemporalTable::TemporalRelationship criterion,
                                 const TimeDomain& timeDomain,
-                                bool removeDisconnectedTimeNodes, 
+                                bool removeDisconnectedTimeNodes,
                                 bool recursive)
 {
     Temporal t(timestamp);
@@ -187,8 +189,8 @@ bool TimeServer::removeTimeInfo(Handle h,
 bool TimeServer::removeTimeInfo(Handle h,
                                 const Temporal& t,
                                 TemporalTable::TemporalRelationship criterion,
-                                const TimeDomain& timeDomain, 
-                                bool removeDisconnectedTimeNodes, 
+                                const TimeDomain& timeDomain,
+                                bool removeDisconnectedTimeNodes,
                                 bool recursive)
 {
     DPRINTF("TimeServer::removeTimeInfo(%s, %s, %s, %d, %d)\n", atomspace->atom_as_string(h).c_str(), t.toString().c_str(), TemporalTable::getTemporalRelationshipStr(criterion), removeDisconnectedTimeNodes, recursive);
@@ -197,7 +199,7 @@ bool TimeServer::removeTimeInfo(Handle h,
     get(back_inserter(existingEntries), h, t, criterion, timeDomain);
     bool result = !existingEntries.empty();
     for (std::list<HandleTemporalPair>::const_iterator itr = existingEntries.begin();
-		 itr != existingEntries.end(); ++itr) 
+		 itr != existingEntries.end(); ++itr)
     {
         Handle atTimeLink = getAtTimeLink(*itr, timeDomain);
         DPRINTF("Got atTimeLink = %lu\n", atTimeLink.value());
@@ -230,12 +232,12 @@ bool TimeServer::removeTimeInfo(Handle h,
                     DPRINTF("Trying to remove timeNode as well\n");
                     atomspace->remove_atom(timeNode);
                 }
-            } 
-	    else { 
+            }
+	    else {
                 result = false;
             }
-        } 
-	else{ 
+        }
+	else{
             result = false;
         }
     }
@@ -265,7 +267,7 @@ Handle TimeServer::getAtTimeLink(const HandleTemporalPair& htp, const TimeDomain
 }
 /*
 TimeDomain TimeServer::getTimeDomain() const
-{	
+{
     vector<string> timeDomains = getTimeDomains();
     string timeDomain;
     if (timeDomains.empty()) {
@@ -273,7 +275,7 @@ TimeDomain TimeServer::getTimeDomain() const
     }
     else if (timeDomains.size() >= 1) {
 	if (timeDomains.size() > 1) {
-	    logger().error("TimeServer::getTimeDomain: There's more than one time domain in TimeServer. we will use the first searched timeDomain name %s. If you don't want this behavior,just change the code.", timeDomains[0].c_str());			
+	    logger().error("TimeServer::getTimeDomain: There's more than one time domain in TimeServer. we will use the first searched timeDomain name %s. If you don't want this behavior,just change the code.", timeDomains[0].c_str());
 	}
 	timeDomain = timeDomains[0];
     }
@@ -289,83 +291,83 @@ vector<TimeDomain> TimeServer::getTimeDomains() const
     return result;
 }
 
-void TimeServer::atomAdded(Handle h)
+void TimeServer::atomAdded(const Handle& h)
 {
     Type type = h->getType();
-    if (type == AT_TIME_LINK) {
-        // Add corresponding TimeServer entry
-        LinkPtr lll = LinkCast(h);
-        int arityOfTimeLink = lll->getArity();
-        if (arityOfTimeLink == 2 || arityOfTimeLink == 3) {
-            Handle timeNode = lll->getOutgoingAtom(0);
-            if (timeNode->getType() == TIME_NODE) {
-                NodePtr nnn = NodeCast(timeNode);
-                const string& timeNodeName = nnn->getName();
-                Handle timed_h = lll->getOutgoingAtom(1);
-                Temporal t = Temporal::getFromTimeNodeName(timeNodeName.c_str());
-                TimeDomain timeDomain = DEFAULT_TIMEDOMAIN;
-                if (arityOfTimeLink == 3) {
-                    Handle timeDomainNode = lll->getOutgoingAtom(2);
-                    if (timeDomainNode->getType() == TIME_DOMAIN_NODE) {
-                        timeDomain = NodeCast(timeDomainNode)->getName();
-                    }
-                    else {
-                        logger().warn("TimeServer::atomAdded: Invalid atom type "
-                              "at the third element in an AtTimeLink's outgoing: "
-                              "%s\n", classserver().getTypeName(timeDomainNode->getType()).c_str());
-                        return;
-                    }
-                }
-                add(timed_h, t, timeDomain);
-            } else {
-                logger().warn("TimeServer::atomAdded: Invalid atom type "
-                              "at the first element in an AtTimeLink's outgoing: "
-                              "%s\n", classserver().getTypeName(timeNode->getType()).c_str());
-            }
-        } else {
-            logger().warn("TimeServer::atomAdded: Invalid arity for an "
-                          "AtTimeLink: %d (expected: 2 (for default time domain) or 3 (for multiple time domains))\n", arityOfTimeLink);
-        }
-    }
-}
+    if (type != AT_TIME_LINK) return;
 
-void TimeServer::atomRemoved(AtomPtr atom)
-{
-    Type type = atom->getType();
-    if (type != AT_TIME_LINK) {
+    int arityOfTimeLink = h->getArity();
+    if (arityOfTimeLink != 2 and arityOfTimeLink != 3)
+    {
+        logger().warn("TimeServer::atomAdded: Invalid arity for an "
+            "AtTimeLink: %d (expected: 2 (for default time domain) "
+            "or 3 (for multiple time domains))\n", arityOfTimeLink);
         return;
     }
 
-    LinkPtr lll(LinkCast(atom));
-    int arityOfTimeLink = lll->getArity();
+    const Handle& timeNode = h->getOutgoingAtom(0);
+    if (timeNode->getType() != TIME_NODE) {
+        logger().warn("TimeServer::atomAdded: Invalid atom type "
+             "at the first element in an AtTimeLink's outgoing: "
+             "%s\n",
+             classserver().getTypeName(timeNode->getType()).c_str());
+        return;
+    }
+
+    // Add corresponding TimeServer entry
+    const string& timeNodeName = timeNode->getName();
+    const Handle& timed_h = h->getOutgoingAtom(1);
+    Temporal t = Temporal::getFromTimeNodeName(timeNodeName.c_str());
+    TimeDomain timeDomain = DEFAULT_TIMEDOMAIN;
+    if (arityOfTimeLink == 3)
+    {
+        const Handle& timeDomainNode = h->getOutgoingAtom(2);
+        if (timeDomainNode->getType() != TIME_DOMAIN_NODE)
+        {
+            logger().warn("TimeServer::atomAdded: Invalid atom type "
+                  "at the third element in an AtTimeLink's outgoing: "
+                  "%s\n",
+                  classserver().getTypeName(timeDomainNode->getType()).c_str());
+            return;
+        }
+        timeDomain = timeDomainNode->getName();
+    }
+    add(timed_h, t, timeDomain);
+}
+
+void TimeServer::atomRemoved(const AtomPtr& atom)
+{
+    Type type = atom->getType();
+    if (type != AT_TIME_LINK) return;
+
+    int arityOfTimeLink = atom->getArity();
     OC_ASSERT(arityOfTimeLink != 3 || arityOfTimeLink != 2,
 	      "AtomSpace::atomRemoved: Got invalid arity for removed AtTimeLink = %d\n",
 	      arityOfTimeLink);
 
-    AtomPtr timeNode = lll->getOutgoingAtom(0);
+    const Handle& timeNode = atom->getOutgoingAtom(0);
     // If it's not a TimeNode, then it's a VariableNode which can stand
     // in for a TimeNode. So we can ignore it here.
-    if (timeNode->getType() != TIME_NODE) {
-        return;
-    }
-    AtomPtr timedAtom = lll->getOutgoingAtom(1);
+    if (timeNode->getType() != TIME_NODE) return;
+
+    const Handle& timedAtom = atom->getOutgoingAtom(1);
 
     TimeDomain timeDomain = DEFAULT_TIMEDOMAIN;
     if (arityOfTimeLink == 3) {
-        AtomPtr timeDomainNode = lll->getOutgoingAtom(2);
+        const Handle& timeDomainNode = atom->getOutgoingAtom(2);
         if (timeNode->getType() != TIME_DOMAIN_NODE) {
             return;
         }
-        timeDomain = NodeCast(timeDomainNode)->getName();
+        timeDomain = timeDomainNode->getName();
     }
 
 #if DOES_NOT_COMPILE_RIGHT_NOW
     // We have to do the check here instead of in the spaceServer
     // if outgoingSet[1] is a SpaceMap concept node, remove related map from SpaceServer
-    if (a->getHandle(CONCEPT_NODE, SpaceServer::SPACE_MAP_NODE_NAME) == timedAtom->getHandle())
+    if (a->getHandle(CONCEPT_NODE, SpaceServer::SPACE_MAP_NODE_NAME) == timedAtom)
         spaceServer->removeMap(atom->getHandle());
 #endif
-    NodePtr nnn(NodeCast(timeNode));
-    remove(timedAtom->getHandle(), Temporal::getFromTimeNodeName(nnn->getName().c_str()), TemporalTable::EXACT, timeDomain);
+    remove(timedAtom,
+        Temporal::getFromTimeNodeName(timeNode->getName().c_str()), TemporalTable::EXACT, timeDomain);
 
 }

@@ -34,12 +34,42 @@
 
 using namespace opencog;
 
-ConsoleSocket::ConsoleSocket(boost::asio::io_service& _io_service) : 
-    ServerSocket(_io_service),
-    RequestResult("text/plain")
+std::string ConsoleSocket::_prompt;
+
+// _max_open_sockets is the largest number of concurrently open
+// sockets we will allow in the cogserver. Currently set to 60.
+// Note that each SchemeShell (actually, SchemeEval) will open
+// another half-dozen pipes and what-not, so actually, the number
+// of open files will increase by 4 or 6 or so for each network
+// connection. With the default `ulimit -a` of 1024 open files,
+// this should work OK (including open files for the logger, the
+// databases, etc.).
+unsigned int ConsoleSocket::_max_open_sockets = 60;
+volatile unsigned int ConsoleSocket::_num_open_sockets = 0;
+std::mutex ConsoleSocket::_max_mtx;
+std::condition_variable ConsoleSocket::_max_cv;
+
+ConsoleSocket::ConsoleSocket(void)
 {
-    SetLineProtocol(true);
-    _shell = NULL;
+    _use_count = 0;
+    _shell = nullptr;
+
+    if (0 == _prompt.size()) {
+        if (nullptr == &config()) {
+            _prompt = "[0;32mopencog[1;32m> [0m";
+        } else {
+            // Prompt with ANSI color codes, if possible.
+            if (config().get_bool("ANSI_ENABLED", true))
+                _prompt = config().get("ANSI_PROMPT", "[0;32mopencog[1;32m> [0m");
+            else
+                _prompt = config().get("PROMPT", "opencog> ");
+        }
+    }
+
+    // Block here, if there are too many concurrently-open sockets.
+    std::unique_lock<std::mutex> lck(_max_mtx);
+    _num_open_sockets++;
+    while (_max_open_sockets < _num_open_sockets) _max_cv.wait(lck);
 }
 
 ConsoleSocket::~ConsoleSocket()
@@ -51,7 +81,7 @@ ConsoleSocket::~ConsoleSocket()
     // is broken. Basically, the boost::asio code calls this destructor
     // for ConsoleSocket while there are still requests outstanding
     // in another thread.  We have to stall the destructor until all
-    // the in-flight requests are complete; we use the condition 
+    // the in-flight requests are complete; we use the condition
     // variable to do this. But really, something somewhere is broken
     // or mis-designed. Not sure what/where; this code is too complicated.
     //
@@ -60,12 +90,19 @@ ConsoleSocket::~ConsoleSocket()
     // these requests have completed.  boost:asio notices that the
     // remote socket has closed, and so decides its a good day to call
     // destructors. But of course, its not ...
-    std::unique_lock<std::mutex> lck(_mtx);
-    while (_use_count) _cv.wait(lck);
+    std::unique_lock<std::mutex> lck(_in_use_mtx);
+    while (_use_count) _in_use_cv.wait(lck);
+    lck.unlock();
 
-    // If there's a shell, let them know that we are going away.
-    // This wouldn't be needed if we had garbage collection.
-    if (_shell) _shell->socketClosed();
+    // If there's a shell, kill it.
+    if (_shell) delete _shell;
+
+    std::unique_lock<std::mutex> mxlck(_max_mtx);
+    _num_open_sockets--;
+    _max_cv.notify_all();
+    mxlck.unlock();
+
+    logger().debug("[ConsoleSocket] destructor finished");
 }
 
 // Some random RFC 854 characters
@@ -83,98 +120,71 @@ ConsoleSocket::~ConsoleSocket()
 void ConsoleSocket::OnConnection()
 {
     logger().debug("[ConsoleSocket] OnConnection");
-    if (!isClosed()) {
 
 #ifdef NOT_RIGHT_NOW
-        // Crude attempt to negotiate for a utf-8 clean channel.
-        // Using RFC 2066 protocols.  Not robust.  We're just praying
-        // for non-garbled UTF-8 goodness, here.
+    // Crude attempt to negotiate for a utf-8 clean channel.
+    // Using RFC 2066 protocols.  Not robust.  We're just praying
+    // for non-garbled UTF-8 goodness, here.
 
-        // Anyway, this won't work for netcat, socat, because they'll
-        // just pass all this crap back to the user, and we don't want
-        // that.  I'm not sure how to tell if we're talking to a true
-        // RFC telnet.
-        char utf_plz[20];
-        utf_plz[0] = IAC;
-        utf_plz[1] = WILL;
-        utf_plz[2] = CHARSET;
-        utf_plz[3] = 0;
-        Send(utf_plz);
-        utf_plz[1] = DO;
-        Send(utf_plz);
+    // Anyway, this won't work for netcat, socat, because they'll
+    // just pass all this crap back to the user, and we don't want
+    // that.  I'm not sure how to tell if we're talking to a true
+    // RFC telnet.
+    char utf_plz[20];
+    utf_plz[0] = IAC;
+    utf_plz[1] = WILL;
+    utf_plz[2] = CHARSET;
+    utf_plz[3] = 0;
+    Send(utf_plz);
+    utf_plz[1] = DO;
+    Send(utf_plz);
 
-        utf_plz[0] = IAC;
-        utf_plz[1] = SB;
-        utf_plz[2] = CHARSET;
-        utf_plz[3] = '\02';
-        utf_plz[4] = 'U';
-        utf_plz[5] = 'T';
-        utf_plz[6] = 'F';
-        utf_plz[7] = '-';
-        utf_plz[8] = '8';
-        utf_plz[9] = IAC;
-        utf_plz[10] = SE;
-        utf_plz[11] = 0;
-        Send(utf_plz);
+    utf_plz[0] = IAC;
+    utf_plz[1] = SB;
+    utf_plz[2] = CHARSET;
+    utf_plz[3] = '\02';
+    utf_plz[4] = 'U';
+    utf_plz[5] = 'T';
+    utf_plz[6] = 'F';
+    utf_plz[7] = '-';
+    utf_plz[8] = '8';
+    utf_plz[9] = IAC;
+    utf_plz[10] = SE;
+    utf_plz[11] = 0;
+    Send(utf_plz);
 #endif
 
-        sendPrompt();
-    }
+    sendPrompt();
 }
 
 void ConsoleSocket::sendPrompt()
 {
-    if (config().get_bool("ANSI_ENABLED"))
-        Send(config()["ANSI_PROMPT"]);
-    else 
-        Send(config()["PROMPT"]);
-}
-
-tcp::socket& ConsoleSocket::getSocket()
-{
-    return ServerSocket::getSocket();
+    Send(_prompt);
 }
 
 void ConsoleSocket::OnLine(const std::string& line)
 {
-    // Hmm. Looks like most telnet agents respond with an
-    // IAC WONT CHARSET IAC DONT CHARSET
-    // Any case, just ignore CHARSET RFC 2066 negotiation
-    if (IAC == (line[0] & 0xff) and CHARSET == (line[2] & 0xff)) {
-        return;
-    }
     // If a shell processor has been designated, then defer all
     // processing to the shell.  In particular, avoid as much overhead
     // as possible, since the shell needs to be able to handle a
     // high-speed data feed with as little getting in the way as
     // possible.
     if (_shell) {
-        _shell->eval(line, this);
+        _shell->eval(line);
         return;
     }
 
-    logger().debug("[ConsoleSocket] OnLine [%s]", line.c_str());
-
-    // parse command line
-    std::list<std::string> params;
-    tokenize(line, std::back_inserter(params), " \t\v\f");
-    logger().debug("params.size(): %d", params.size());
-    if (params.empty()) {
-        // return on empty/blank line
-        _request = NULL;
-        OnRequestComplete();
+    // Hmm. Looks like most telnet agents respond with an
+    // IAC WONT CHARSET IAC DONT CHARSET
+    // Any case, just ignore CHARSET RFC 2066 negotiation
+    if (IAC == (line[0] & 0xff) and CHARSET == (line[2] & 0xff)) {
         return;
     }
-    std::string cmdName = params.front();
-    params.pop_front();
-
-    CogServer& cogserver = static_cast<CogServer&>(server());
-    _request = cogserver.createRequest(cmdName);
 
     // If the command starts with an open-paren, or a semi-colon, assume
     // its a scheme command. Pop into the scheme shell, and try again.
-    if (_request == NULL and 
-        (cmdName[0] == '(' or cmdName[0] == ';')) {
+    if (line[0] == '(' or line[0] == ';')
+    {
         OnLine("scm");
 
         // Re-issue the command, but only if we sucessfully got a shell.
@@ -185,95 +195,62 @@ void ConsoleSocket::OnLine(const std::string& line)
         }
     }
 
+    logger().debug("[ConsoleSocket] OnLine [%s]", line.c_str());
+
+    // Parse command line
+    std::list<std::string> params;
+    tokenize(line, std::back_inserter(params), " \t\v\f");
+    logger().debug("params.size(): %d", params.size());
+    if (params.empty()) {
+        // return on empty/blank line
+        sendPrompt();
+        return;
+    }
+
+    std::string cmdName = params.front();
+    params.pop_front();
+
+    CogServer& cogserver = static_cast<CogServer&>(server());
+    Request* request = cogserver.createRequest(cmdName);
+
     // Command not found.
-    if (_request == NULL) {
+    if (nullptr == request)
+    {
         char msg[256];
         snprintf(msg, 256, "command \"%s\" not found\n", cmdName.c_str());
-        logger().warn(msg);
+        logger().debug("%s", msg);
         Send(msg);
 
-        // try to send "help" command response
-        _request = cogserver.createRequest("help");
-        if (_request == NULL) {
+        // Try to send "help" command response
+        request = cogserver.createRequest("help");
+        if (nullptr == request)
+        {
             // no help request; just terminate the request
-            OnRequestComplete();
+            sendPrompt();
             return;
         }
     }
 
-    _request->setRequestResult(this);
-    _request->setParameters(params);
+    request->set_console(this);
+    request->setParameters(params);
+    bool is_shell = request->isShell();
 
-    if (LineProtocol()) {
-        // We only add the command to the processing queue
-        // if it hasn't disabled the line protocol
-        cogserver.pushRequest(_request);
+    // Add the command to the processing queue.
+    // Caution: after the pushRequest, the request might be executed
+    // and then deleted in a different thread. It must NOT be accessed
+    // after the push!
+    cogserver.pushRequest(request);
 
-        if (_request->isShell()) {
-            logger().debug("[ConsoleSocket] OnLine request %s is a shell", line.c_str());
+    if (is_shell)
+    {
+        logger().debug("ConsoleSocket::OnLine() request %s is a shell",
+                       line.c_str());
 
-            // Use a stupid trick to deal with poor architecture.
-#define SECRET_HANDSHAKE ((Request*) 0x1)
-            _request = SECRET_HANDSHAKE;
-            // Force a drain of this request, because we *must* enter
-            // shell mode before handling any additional input from the
-            // socket (since the next input is almost surely intended for
-            // the new shell, not for the cogserver one).
-            //
-            // NOTE: Calling this method for non-shell requests may
-            // cause cogserver to crash due to concurrency issues, since
-            // this runs in a separate thread (for socket handler) instead
-            // of the main thread (where the server loop runs).
-            cogserver.processRequests();
-        }
-    } else {
-        // reset input buffer
-        _buffer.clear();
-    }
-}
-
-/**
- * Buffer up incoming raw data until an end-of-transmission (EOT)
- * is received. After the EOT, dispatch the buffered data as a single
- * request.
- *
- * Note that there is just one ConsoleSocket per client, so the buffer
- * is not shared.
- *
- * XXX the data buffer is currently just a string buffer, so any
- * null char in the data stream will terminate the string. So
- * this method isn't really for "raw" data containing null chars.
- * This should be fixed someday, as needed.
- */
-void ConsoleSocket::OnRawData(const char *buf, size_t len)
-{
-#ifndef __APPLE__
-    char* _tmp = strndup(buf, len); 
-    logger().debug("[ConsoleSocket] OnRawData local buffer [%s]", _tmp);
-    free(_tmp);
-#endif
-
-    _buffer.append(buf, len);
-    logger().debug("[ConsoleSocket] OnRawData: global buffer:\n%s\n", _buffer.c_str());
-    size_t buffer_len = _buffer.length();
-    bool rawDataEnd = false;
-    if (buffer_len > 1 && (_buffer.at(buffer_len-1) == 0xa)) {
-        if (_buffer.at(buffer_len-2) == 0x4) {
-            rawDataEnd = true;
-        } else if (buffer_len > 2 && 
-                   (_buffer.at(buffer_len-2) == 0xd) && 
-                   (_buffer.at(buffer_len-3) == 0x4)) {
-            rawDataEnd = true;
-        } 
-    }
-    if (rawDataEnd) {
-        logger().debug("[ConsoleSocket] found EOT; dispatching");
-        // found the EOT pattern. dispatch the request and reset
-        // the socket's line protocol flag
-        _request->addParameter(_buffer);
-        CogServer& cogserver = static_cast<CogServer&>(server());
-        cogserver.pushRequest(_request);
-        SetLineProtocol(true);
+        // Force a drain of the request queue, because we *must* enter
+        // shell mode before handling any additional input from the
+        // socket (since all subsequent input will be for the new shell,
+        // not for the cogserver command processor).
+        cogserver.processRequests();
     }
 }
 
@@ -282,15 +259,7 @@ void ConsoleSocket::OnRequestComplete()
     logger().debug("[ConsoleSocket] OnRequestComplete");
 
     // Shells will send their own prompt
-    if (_request != SECRET_HANDSHAKE) {
-        sendPrompt();
-    }
-}
-
-void ConsoleSocket::SetDataRequest()
-{
-    logger().debug("[ConsoleSocket] SetDataRequest");
-    SetLineProtocol(false);
+    if (nullptr == _shell) sendPrompt();
 }
 
 void ConsoleSocket::Exit()

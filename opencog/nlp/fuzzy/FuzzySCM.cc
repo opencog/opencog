@@ -1,7 +1,8 @@
 /*
  * FuzzySCM.cc
  *
- * Copyright (C) 2015 OpenCog Foundation
+ * Copyright (C) 2015, 2016 OpenCog Foundation
+ * All Rights Reserved
  *
  * Author: Leung Man Hin <https://github.com/leungmanhin>
  *
@@ -73,6 +74,9 @@ void FuzzySCM::init()
 {
     define_scheme_primitive("nlp-fuzzy-match", &FuzzySCM::do_nlp_fuzzy_match,
                             this, "nlp fuzzy");
+
+    define_scheme_primitive("nlp-fuzzy-compare", &FuzzySCM::do_nlp_fuzzy_compare,
+                            this, "nlp fuzzy");
 }
 
 /**
@@ -86,13 +90,12 @@ void FuzzySCM::init()
  * @return           A list of solutions and their similarity scores
  */
 Handle FuzzySCM::do_nlp_fuzzy_match(Handle pat, Type rtn_type,
-                                    const HandleSeq& excl_list)
+                                    const HandleSeq& excl_list,
+                                    bool af_only)
 {
     AtomSpace* as = SchemeSmob::ss_get_env_as("nlp-fuzzy-match");
 
-bool dup_check = false;
-
-    Fuzzy fpm(rtn_type, excl_list, dup_check);
+    Fuzzy fpm(as, rtn_type, excl_list, af_only);
 
     // A vector of solutions sorted in descending order of similarity
     RankedHandleSeq solns = fpm.perform_search(pat);
@@ -110,6 +113,24 @@ bool dup_check = false;
     Handle results = as->add_link(LIST_LINK, rtn_solns);
 
     return results;
+}
+
+/**
+ * Implement the "nlp-fuzzy-compare" scheme primitive. It calls the nlp fuzzy
+ * matcher to search for estimating how similar two trees are.
+ *
+ * @param h1, h2  The trees being compared
+ * @return        A similarity score
+ */
+Handle FuzzySCM::do_nlp_fuzzy_compare(Handle h1, Handle h2)
+{
+    AtomSpace* as = SchemeSmob::ss_get_env_as("nlp-fuzzy-compare");
+
+    Fuzzy fpm(as);
+
+    double score = fpm.fuzzy_compare(h1, h2);
+
+    return as->add_node(NUMBER_NODE, std::to_string(score));
 }
 
 void opencog_nlp_fuzzy_init(void)

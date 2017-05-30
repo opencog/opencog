@@ -43,12 +43,12 @@
 #include <opencog/util/platform.h>
 
 #include <opencog/atomspace/AtomSpace.h>
+#include <opencog/attentionbank/AttentionBank.h>
 
 #ifdef HAVE_CYTHON
 #include <opencog/cython/PythonEval.h>
 #endif
 
-#include <opencog/guile/load-file.h>
 #include <opencog/guile/SchemeEval.h>
 
 #include <opencog/cogserver/server/Agent.h>
@@ -135,7 +135,7 @@ CogServer::~CogServer()
 }
 
 CogServer::CogServer(AtomSpace* as) :
-    cycleCount(1), running(false)
+    cycleCount(1), running(false), _networkServer(nullptr)
 {
     // We shouldn't get called with a non-NULL atomSpace static global as
     // that's indicative of a missing call to CogServer::~CogServer.
@@ -148,6 +148,8 @@ CogServer::CogServer(AtomSpace* as) :
         atomSpace = new AtomSpace();
     else
         atomSpace = as;
+
+    attentionbank(atomSpace);
 
 #ifdef HAVE_GUILE
     // Tell scheme which atomspace to use.
@@ -168,23 +170,16 @@ CogServer::CogServer(AtomSpace* as) :
     agentsRunning = true;
 }
 
-NetworkServer& CogServer::networkServer()
+void CogServer::enableNetworkServer(int port)
 {
-    return _networkServer;
-}
-
-void CogServer::enableNetworkServer()
-{
-    // WARN: By using boost::asio, at least one listener must be added to
-    // the NetworkServer before starting its thread. Other Listeners may
-    // be added later, though.
-    _networkServer.addListener<ConsoleSocket>(config().get_int("SERVER_PORT"));
-    _networkServer.start();
+    if (_networkServer) return;
+    _networkServer = new NetworkServer(config().get_int("SERVER_PORT", port));
 }
 
 void CogServer::disableNetworkServer()
 {
-    _networkServer.stop();
+    delete _networkServer;
+    _networkServer = nullptr;
 }
 
 SystemActivityTable& CogServer::systemActivityTable()
@@ -195,7 +190,7 @@ SystemActivityTable& CogServer::systemActivityTable()
 void CogServer::serverLoop()
 {
     struct timeval timer_start, timer_end, elapsed_time;
-    time_t cycle_duration = config().get_int("SERVER_CYCLE_DURATION") * 1000;
+    time_t cycle_duration = config().get_int("SERVER_CYCLE_DURATION", 100) * 1000;
 //    bool externalTickMode = config().get_bool("EXTERNAL_TICK_MODE");
 
     logger().info("Starting CogServer loop.");
@@ -263,7 +258,7 @@ bool CogServer::customLoopRun(void)
 
 void CogServer::processRequests(void)
 {
-    std::unique_lock<std::mutex> lock(processRequestsMutex);
+    std::lock_guard<std::mutex> lock(processRequestsMutex);
     while (0 < getRequestQueueSize()) {
         Request* request = popRequest();
         request->execute();
@@ -600,18 +595,34 @@ Module* CogServer::getModule(const std::string& moduleId)
 
 void CogServer::loadModules(std::vector<std::string> module_paths)
 {
-    if (module_paths.empty()) {
-        // Sometimes paths are given without the "opencog" part.
-        for (auto p : DEFAULT_MODULE_PATHS) {
+    if (module_paths.empty())
+    {
+        // Give priority search oorder to the build directories
+        module_paths.push_back("./opencog/cogserver/server/");
+        module_paths.push_back("./opencog/cogserver/shell/");
+
+        // If not found at above locations, search the install paths
+        for (auto p : get_module_paths())
+        {
             module_paths.push_back(p);
             module_paths.push_back(p + "/opencog");
+            module_paths.push_back(p + "/opencog/modules");
         }
     }
 
     // Load modules specified in the config file
-    bool load_failure = false;
+    std::string modlist;
+    if (config().has("MODULES"))
+        modlist = config().get("MODULES");
+    else
+        // Defaults: search the build dirs first, then the install dirs.
+        modlist =
+            "libbuiltinreqs.so, "
+            "libscheme-shell.so, "
+            "libpy-shell.so";
     std::vector<std::string> modules;
-    tokenize(config()["MODULES"], std::back_inserter(modules), ", ");
+    tokenize(modlist, std::back_inserter(modules), ", ");
+    bool load_failure = false;
     for (const std::string& module : modules) {
         bool rc = false;
         if (not module_paths.empty()) {
@@ -638,30 +649,12 @@ void CogServer::loadModules(std::vector<std::string> module_paths)
     }
 }
 
-void CogServer::loadSCMModules(std::vector<std::string> module_paths)
-{
-#ifdef HAVE_GUILE
-    if (module_paths.empty()) {
-        // Sometimes paths are given without the "opencog" part.
-        for (auto p : DEFAULT_MODULE_PATHS) {
-            module_paths.push_back(p);
-            module_paths.push_back(p + "/opencog");
-        }
-    }
-
-
-    load_scm_files_from_config(*atomSpace, module_paths);
-#else /* HAVE_GUILE */
-    logger().warn("Server compiled without SCM support");
-#endif /* HAVE_GUILE */
-}
-
 void CogServer::openDatabase(void)
 {
 #ifdef HAVE_PERSIST_SQL
     // No-op if the user has not configured a storage backend
     if (!config().has("STORAGE")) {
-        logger().warn("No database persistant storage configured! "
+        logger().info("No database persistant storage configured! "
                       "Use the STORAGE config keyword to define.");
         return;
     }

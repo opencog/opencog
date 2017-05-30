@@ -10,7 +10,9 @@
 			(var-decl "$a-parse" "ParseNode")
 			(var-decl "$tense" "DefinedLinguisticConceptNode")
 			(var-decl "$verb" "WordInstanceNode")
+			(var-decl "$verb-lemma" "WordNode")
 			(var-decl "$obj" "WordInstanceNode")
+			(var-decl "$obj-lemma" "WordNode")
 		)
 		(AndLink
 			(word-in-parse "$verb" "$a-parse")
@@ -26,21 +28,17 @@
 					(VariableNode "$tense")
 				)
 			)
+			(word-lemma "$verb" "$verb-lemma")
+			(word-lemma "$obj" "$obj-lemma")
 		)
 		(ExecutionOutputLink
-			(GroundedSchemaNode "scm: pre-passive-rule")
+			(GroundedSchemaNode "scm: passive-rule2")
 			(ListLink
+				(VariableNode "$verb-lemma")
 				(VariableNode "$verb")
+				(VariableNode "$obj-lemma")
 				(VariableNode "$obj")
 			)
 		)
-	)
-)
-
-
-(define-public (pre-passive-rule verb obj)
-	(passive-rule2
-		(cog-name (word-inst-get-lemma verb)) (cog-name verb)
-		(cog-name (word-inst-get-lemma obj)) (cog-name obj)
 	)
 )

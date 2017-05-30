@@ -1,7 +1,8 @@
 /*
  * Fuzzy.h
  *
- * Copyright (C) 2015 OpenCog Foundation
+ * Copyright (C) 2015, 2016 OpenCog Foundation
+ * All Rights Reserved
  *
  * Author: Leung Man Hin <https://github.com/leungmanhin>
  *
@@ -24,6 +25,8 @@
 #ifndef FUZZY_H
 #define FUZZY_H
 
+#include <opencog/atomspace/AtomSpace.h>
+#include <opencog/attentionbank/AttentionBank.h>
 #include <opencog/atomutils/FuzzyMatchBasic.h>
 
 namespace opencog
@@ -35,8 +38,12 @@ class Fuzzy :
     public FuzzyMatchBasic
 {
     public:
-        Fuzzy(Type, const HandleSeq&, bool);
+        Fuzzy(AtomSpace*);
+        Fuzzy(AtomSpace*, Type, const HandleSeq&, bool af_only = false);
         virtual ~Fuzzy();
+
+        // Compare two hypergraphs and return a similarity score
+        double fuzzy_compare(const Handle&, const Handle&);
 
     protected:
         virtual void start_search(const Handle&);
@@ -45,23 +52,39 @@ class Fuzzy :
         virtual RankedHandleSeq finished_search(void);
 
     private:
+        // For estimating similarity
+        double NODE_WEIGHT = 0.5;
+        double RARENESS_WEIGHT = 0.2;
+        double LINGUISTIC_RELATION_WEIGHT = 0.3;
+
+        AtomSpace* as;
+        AttentionBank* bank;
+
         // The type of atom that we want
         Type rtn_type;
+
+        // Whether matching should be only in AF or not
+        bool _af_only;
 
         // The atoms that we don't want in the solutions
         HandleSeq excl_list;
 
-        // A flag to decide whether or not to accept duplicate solutions
-        bool dup_check;
+        // The target (input)
+        HandleSeq target_word_insts;
+        HandleSeq target_simlks;
 
         // The solutions
         RankedHandleSeq solns;
+        OrderedHandleSet solns_seen;
 
-        // A vector for storing the "contents" of the accepted solutions
-        // mainly to avoid returning duplicate solutions
-        HandleSeqSeq solns_contents;
+        // Some caches
+        std::map<Handle, double> tfidf_weights;
+        std::map<Handle, double> ling_rel_weights;
+        std::map<Handle, double> scores;
 
-        std::set<Handle> solns_seen;
+        void calculate_tfidf(const HandleSeq&);
+        void get_ling_rel(const HandleSeq&);
+        double get_score(const Handle&);
 };
 
 }

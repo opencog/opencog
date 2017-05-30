@@ -23,9 +23,12 @@
  */
 
 #include <iomanip>
+#include <unistd.h>
 
-#include <opencog/cogserver/server/CogServer.h>
 #include <opencog/util/ansi.h>
+#include <opencog/util/oc_assert.h>
+#include <opencog/cogserver/server/CogServer.h>
+#include <opencog/cogserver/server/ConsoleSocket.h>
 
 #include "BuiltinRequestsModule.h"
 
@@ -36,7 +39,6 @@ DECLARE_MODULE(BuiltinRequestsModule)
 BuiltinRequestsModule::BuiltinRequestsModule(CogServer& cs) : Module(cs)
 {
     _cogserver.registerRequest(ListRequest::info().id,         &listFactory);
-    _cogserver.registerRequest(SleepRequest::info().id,        &sleepFactory);
     _cogserver.registerRequest(ShutdownRequest::info().id,     &shutdownFactory);
     _cogserver.registerRequest(LoadModuleRequest::info().id,   &loadmoduleFactory);
     _cogserver.registerRequest(UnloadModuleRequest::info().id, &unloadmoduleFactory);
@@ -47,7 +49,6 @@ BuiltinRequestsModule::BuiltinRequestsModule(CogServer& cs) : Module(cs)
 BuiltinRequestsModule::~BuiltinRequestsModule()
 {
     _cogserver.unregisterRequest(ListRequest::info().id);
-    _cogserver.unregisterRequest(SleepRequest::info().id);
     _cogserver.unregisterRequest(ShutdownRequest::info().id);
     _cogserver.unregisterRequest(LoadModuleRequest::info().id);
     _cogserver.unregisterRequest(UnloadModuleRequest::info().id);
@@ -64,6 +65,9 @@ void BuiltinRequestsModule::registerAgentRequests()
     do_quit_register();
     do_q_register();
     do_ctrld_register();
+    do_dot_register();
+
+    do_stats_register();
 
     do_startAgents_register();
     do_stopAgents_register();
@@ -83,6 +87,9 @@ void BuiltinRequestsModule::unregisterAgentRequests()
     do_quit_unregister();
     do_q_unregister();
     do_ctrld_unregister();
+    do_dot_unregister();
+
+    do_stats_unregister();
 
     do_startAgents_unregister();
     do_stopAgents_unregister();
@@ -99,13 +106,17 @@ void BuiltinRequestsModule::init()
 
 // ====================================================================
 // Various flavors of closing the connection
-std::string BuiltinRequestsModule::do_exit(Request *req, std::list<std::string> args)
+std::string BuiltinRequestsModule::do_exit(Request* req, std::list<std::string> args)
 {
-    RequestResult* rr = req->getRequestResult();
-    if (rr) {
-        rr->Exit();
-        req->setRequestResult(NULL);
-    }
+    ConsoleSocket* con = req->get_console();
+    OC_ASSERT(con, "Bad request state");
+
+    con->Exit();
+
+    // After the exit, the pointer to the console will be invalid,
+    // so zero it out now, to avoid a bad dereference.  (Note that
+    // this call may trigger the ConsoleSocket dtor to run).
+    req->set_console(nullptr);
     return "";
 }
 
@@ -120,6 +131,11 @@ std::string BuiltinRequestsModule::do_q(Request *req, std::list<std::string> arg
 }
 
 std::string BuiltinRequestsModule::do_ctrld(Request *req, std::list<std::string> args)
+{
+    return do_exit(req, args);
+}
+
+std::string BuiltinRequestsModule::do_dot(Request *req, std::list<std::string> args)
 {
     return do_exit(req, args);
 }
@@ -171,6 +187,30 @@ std::string BuiltinRequestsModule::do_help(Request *req, std::list<std::string> 
 std::string BuiltinRequestsModule::do_h(Request *req, std::list<std::string> args)
 {
     return do_help(req, args);
+}
+
+// ====================================================================
+// Print general info about server.
+std::string BuiltinRequestsModule::do_stats(Request *req, std::list<std::string> args)
+{
+    std::ostringstream oss;
+    ConsoleSocket* con = req->get_console();
+
+    oss << "Console use-count = " << con->get_use_count() << "\n";
+    oss << "Console max-open-sockets = " << con->get_max_open_sockets() << "\n";
+    oss << "Console curr-open-sockets = " << con->get_num_open_sockets() << "\n";
+
+    // count open file descs
+    int nfd = 0;
+    for (int j=0; j<4096; j++) {
+       int fd = dup(j);
+       if (fd < 0) continue;
+       close(fd);
+       nfd++;
+    }
+    oss << "Process num-open-fds = " << nfd << "\n";
+
+    return oss.str();
 }
 
 // ====================================================================

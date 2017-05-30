@@ -40,7 +40,6 @@
 #include <opencog/embodiment/atom_types.h>
 #include <opencog/query/BindLinkAPI.h>
 #include <opencog/util/Config.h>
-#include <opencog/util/StringManipulator.h>
 
 #include "HTree.h"
 #include "PatternMiner.h"
@@ -80,7 +79,7 @@ void PatternMiner::growPatternsDepthFirstTask_old()
         readNextLinkLock.unlock();
 
         // if this link is listlink, ignore it
-        if (originalAtomSpace->get_type(cur_link) == opencog::LIST_LINK)
+        if (cur_link->getType() == opencog::LIST_LINK)
         {
             continue;
         }
@@ -89,8 +88,8 @@ void PatternMiner::growPatternsDepthFirstTask_old()
         HandleSeq outgoingLinks,outVariableNodes;
 
         swapOneLinkBetweenTwoAtomSpace(originalAtomSpace, observingAtomSpace, cur_link, outgoingLinks, outVariableNodes);
-        Handle newLink = observingAtomSpace->add_link(originalAtomSpace->get_type(cur_link), outgoingLinks);
-        newLink->merge(originalAtomSpace->get_TV(cur_link));
+        Handle newLink = observingAtomSpace->add_link(cur_link->getType(), outgoingLinks);
+        newLink->merge(cur_link->getTruthValue());
 
         HandleSeq observedLinks;
         observedLinks.push_back(newLink);
@@ -113,7 +112,7 @@ void PatternMiner::growPatternsDepthFirstTask_old()
         {
             map<HandleSeq, vector<HTreeNode*> > ::iterator it = allLastGramLinksToPatterns.begin();
             map<HandleSeq, vector<HTreeNode*> > allThisGramLinksToPatterns;
-            vector<set<Handle>> newConnectedLinksFoundThisGram;
+            vector<OrderedHandleSet> newConnectedLinksFoundThisGram;
 
             for(; it != allLastGramLinksToPatterns.end(); ++ it)
             {
@@ -132,80 +131,114 @@ void PatternMiner::growPatternsDepthFirstTask_old()
 void PatternMiner::growPatternsDepthFirstTask(unsigned int thread_index)
 {
 
-    unsigned int start_index = linksPerThread * thread_index; // the start index in allLinks for current thread
-
-    unsigned int end_index; // the last index for current thread ,excluded
-    if (thread_index == THREAD_NUM - 1) // if this the last thread, it need to finish all the rest of the links
-        end_index = allLinkNumber;
+	// The start index in allLinks for current thread
+    unsigned int start_index = linksPerThread * thread_index;
+    unsigned int end_index; // the last index for current thread (excluded)
+    if (thread_index == THREAD_NUM - 1)
+    {
+        // if this the last thread, it
+        // needs to finish all the
+        // rest of the links
+        if (only_mine_patterns_start_from_white_list)
+            end_index = allLinksContainWhiteKeywords.size();
+        else
+            end_index = allLinkNumber;
+    }
     else
         end_index = linksPerThread * (thread_index + 1);
 
 
-    cout<< "Start thread " << thread_index << " from " << start_index << " to " << end_index-1 << std::endl;
+    cout << "\nStart thread " << thread_index << ": will process Link number from " << start_index
+         << " to (excluded) " << end_index << std::endl;
 
-    patternJsonArrays[thread_index] = json::value::array();
 
     float allLinkNumberfloat = ((float)(end_index - start_index));
-    for(unsigned int t_cur_index = start_index; t_cur_index < end_index; ++ t_cur_index)
+
+    for(unsigned int t_cur_index = start_index; t_cur_index < end_index; ++t_cur_index)
     {
-        readNextLinkLock.lock();
+        if (THREAD_NUM > 1)
+            readNextLinkLock.lock();
+
         cout<< "\r" << ((float)(t_cur_index - start_index))/allLinkNumberfloat*100.0f << "% completed in Thread " + toString(thread_index) + "."; // it's not liner
         std::cout.flush();
 
         processedLinkNum ++;
-        Handle& cur_link = allLinks[t_cur_index];
 
-        readNextLinkLock.unlock();
+        Handle cur_link;
 
-        // if this link is listlink, ignore it
-        if (originalAtomSpace->get_type(cur_link) == opencog::LIST_LINK)
+        if (only_mine_patterns_start_from_white_list)
         {
-            continue;
+            cur_link = allLinksContainWhiteKeywords[t_cur_index];
+            havenotProcessedWhiteKeywordLinks.erase(havenotProcessedWhiteKeywordLinks.find(cur_link));
+
         }
+        else
+            cur_link = allLinks[t_cur_index];
 
-        // Add this link into observingAtomSpace
-        HandleSeq outgoingLinks,outVariableNodes;
 
-        swapOneLinkBetweenTwoAtomSpace(originalAtomSpace, observingAtomSpace, cur_link, outgoingLinks, outVariableNodes);
-        Handle newLink = observingAtomSpace->add_link(originalAtomSpace->get_type(cur_link), outgoingLinks);
-        newLink->merge(originalAtomSpace->get_TV(cur_link));
-
+        if (THREAD_NUM > 1)
+            readNextLinkLock.unlock();
 
         // Extract all the possible patterns from this originalLink, and extend till the max_gram links, not duplicating the already existing patterns
         HandleSeq lastGramLinks;
         map<Handle,Handle> lastGramValueToVarMap;
         map<Handle,Handle> patternVarMap;
 
-        // vector<HTreeNode*> &allHTreeNodesCurTask is only used in distributed version
+        set<string> allNewMinedPatternsCurTask;
+
+        // allHTreeNodesCurTask is only used in distributed version;
         // is to store all the HTreeNode* mined in this current task, and release them after the task is finished.
         vector<HTreeNode*> allHTreeNodesCurTask;
 
+        // allNewMinedPatternInfo is only used in distributed version, to store all the new mined patterns in this task for sending to the server.
+        vector<MinedPatternInfo> allNewMinedPatternInfo;
 
-        actualProcessedLinkLock.lock();
-        actualProcessedLinkNum ++;
-        actualProcessedLinkLock.unlock();
-
-        extendAPatternForOneMoreGramRecursively(newLink, observingAtomSpace, Handle::UNDEFINED, lastGramLinks, 0, lastGramValueToVarMap,
-                                                patternVarMap, false, allHTreeNodesCurTask, patternJsonArrays[thread_index]);
-
-        // release all the HTreeNodes created in this task if it's running as a distributed worker
-        if (run_as_distributed_worker)
+        if (! only_mine_patterns_start_from_white_list)
         {
-            // clean up the pattern atomspace, do not need to keep patterns in atomspace when run as a distributed worker
-            if (THREAD_NUM == 1)
-                atomSpace->clear(); // can only clear the atomspace when only 1 thread is used
-
-            for(unsigned int hNodeNum = 0; hNodeNum < allHTreeNodesCurTask.size(); hNodeNum ++)
+            // if this link is ingonre type, ignore it
+            if (isIgnoredType( cur_link->getType()))
             {
-                delete (allHTreeNodesCurTask[hNodeNum]);
+                continue;
             }
+
+
+            if (use_keyword_black_list)
+            {
+                // if the content in this link contains content in the black list,ignore it
+                if (containIgnoredContent(cur_link))
+                    continue;
+            }
+
+
+            // Add this link into observingAtomSpace
+            HandleSeq outgoingLinks, outVariableNodes;
+
+            swapOneLinkBetweenTwoAtomSpace(originalAtomSpace, observingAtomSpace, cur_link, outgoingLinks, outVariableNodes);
+            Handle newLink = observingAtomSpace->add_link(cur_link->getType(), outgoingLinks);
+            newLink->merge(cur_link->getTruthValue());
+
+            extendAPatternForOneMoreGramRecursively(newLink, observingAtomSpace, Handle::UNDEFINED, lastGramLinks, 0, lastGramValueToVarMap,
+                                                    patternVarMap, false, allNewMinedPatternsCurTask, allHTreeNodesCurTask, allNewMinedPatternInfo, thread_index);
+
+
+        }
+        else
+        {
+            extendAPatternForOneMoreGramRecursively(cur_link, originalAtomSpace, Handle::UNDEFINED, lastGramLinks, 0, lastGramValueToVarMap,
+                                                    patternVarMap, false, allNewMinedPatternsCurTask, allHTreeNodesCurTask, allNewMinedPatternInfo, thread_index);
+
         }
 
 
-    }
 
-    if (patternJsonArrays[thread_index].size() > 0)
-        sendPatternsToCentralServer(patternJsonArrays[thread_index]);
+        if (THREAD_NUM > 1)
+            actualProcessedLinkLock.lock();
+
+        actualProcessedLinkNum ++;
+
+        if (THREAD_NUM > 1)
+            actualProcessedLinkLock.unlock();
+    }
 
     cout<< "\r100% completed in Thread " + toString(thread_index) + ".";
     std::cout.flush();
@@ -267,15 +300,25 @@ void PatternMiner::growPatternsDepthFirstTask(unsigned int thread_index)
 //}
 
 
-
 void PatternMiner::runPatternMinerDepthFirst()
 {
     // observingAtomSpace is used to copy one link everytime from the originalAtomSpace
-    observingAtomSpace = new AtomSpace();
+    if (observingAtomSpace == 0)
+        observingAtomSpace = new AtomSpace();
 
-//    cur_DF_ExtractedLinks = new set<string>[MAX_GRAM];
+    if (THREAD_NUM > 1)
+    {
+        thread_DF_ExtractedLinks = new list<string>* [THREAD_NUM];
+        for (unsigned int ti = 0; ti < THREAD_NUM; ti ++)
+            thread_DF_ExtractedLinks[ti] = new list<string>[MAX_GRAM];
 
-    linksPerThread = allLinkNumber/THREAD_NUM;
+        all_thread_ExtractedLinks_pergram = new set<string>[MAX_GRAM];
+    }
+
+    if (only_mine_patterns_start_from_white_list)
+        linksPerThread = allLinksContainWhiteKeywords.size() / THREAD_NUM;
+    else
+        linksPerThread = allLinkNumber / THREAD_NUM;
 
     processedLinkNum = 0;
     actualProcessedLinkNum = 0;
@@ -294,18 +337,23 @@ void PatternMiner::runPatternMinerDepthFirst()
 
     // release allLinks
     allLinks.clear();
-    (vector<Handle>()).swap(allLinks);
+    (HandleSeq()).swap(allLinks);
 
-//    delete [] cur_DF_ExtractedLinks;
+    if (THREAD_NUM > 1)
+    {
+        for (unsigned int ti = 0; ti < THREAD_NUM; ti ++)
+            delete [] (thread_DF_ExtractedLinks[ti]);
+
+        delete [] thread_DF_ExtractedLinks;
+
+        delete [] all_thread_ExtractedLinks_pergram;
+
+    }
+
     delete [] threads;
-    delete [] patternJsonArrays;
 
     cout << "\nFinished mining 1~" << MAX_GRAM << " gram patterns.\n";
     cout << "\nprocessedLinkNum = " << processedLinkNum << std::endl;
-
-    if (run_as_distributed_worker)
-        cout << "Totally "<< cur_worker_mined_pattern_num << " patterns found!\n";
-
 
 
 }
@@ -313,7 +361,7 @@ void PatternMiner::runPatternMinerDepthFirst()
 // extendedLinkIndex is to return the index of extendedLink's patternlink in the unified pattern so as to identify where is the extended link in this pattern
 // vector<HTreeNode*> &allHTreeNodesCurTask is only used in distributed version
 HTreeNode* PatternMiner::extractAPatternFromGivenVarCombination(HandleSeq &inputLinks, map<Handle,Handle> &patternVarMap, HandleSeqSeq &oneOfEachSeqShouldBeVars, HandleSeq &leaves,
-                                                                HandleSeq &shouldNotBeVars, HandleSeq &shouldBeVars,AtomSpace* _fromAtomSpace, unsigned int & extendedLinkIndex)
+                                                                HandleSeq &shouldNotBeVars, HandleSeq &shouldBeVars,AtomSpace* _fromAtomSpace, unsigned int & extendedLinkIndex, set<string>& allNewMinedPatternsCurTask)
 {
     HTreeNode* returnHTreeNode = 0;
     bool skip = false;
@@ -401,7 +449,7 @@ HTreeNode* PatternMiner::extractAPatternFromGivenVarCombination(HandleSeq &input
         {
             HandleSeq outgoingLinks;
             generateALinkByChosenVariables(link, patternVarMap, outgoingLinks, _fromAtomSpace);
-            Handle rebindedLink = atomSpace->add_link(atomSpace->get_type(link), outgoingLinks);
+            Handle rebindedLink = atomSpace->add_link(link->getType(), outgoingLinks);
             rebindedLink->merge(TruthValue::TRUE_TV());
 
             pattern.push_back(rebindedLink);
@@ -416,11 +464,24 @@ HTreeNode* PatternMiner::extractAPatternFromGivenVarCombination(HandleSeq &input
         // unify the pattern
         unifiedPattern = UnifyPatternOrder(pattern, extendedLinkIndex);
 
-        // next, check if this pattern already exist (need lock)
+        string keyString = unifiedPatternToKeyString(unifiedPattern);
+
+
+        // check if this pattern has been found in current Link task
+        if (allNewMinedPatternsCurTask.find(keyString) != allNewMinedPatternsCurTask.end())
+        {
+            return returnHTreeNode;
+        }
+        else
+        {
+            allNewMinedPatternsCurTask.insert(keyString);
+        }
+
+
+
         HTreeNode* newHTreeNode = 0;
 
-
-        if (run_as_distributed_worker)
+        if (is_distributed)
         {
             newHTreeNode = new HTreeNode();
             returnHTreeNode = newHTreeNode;
@@ -432,21 +493,8 @@ HTreeNode* PatternMiner::extractAPatternFromGivenVarCombination(HandleSeq &input
         }
         else
         {
-            string keyString = unifiedPatternToKeyString(unifiedPattern);
 
-            string instancekeyString = "";
-            if ( (gram > 1) && (THREAD_NUM > 1) )
-            {
-                // check if these fact links already been processed before or by other thread
-
-                set<Handle> originalLinksSet(inputLinks.begin(), inputLinks.end());
-
-                for (Handle h  : originalLinksSet)
-                {
-                    instancekeyString +=  toString(h.value());
-                    instancekeyString += "_";
-                }
-            }
+            // next, check if this pattern already exist (need lock)
 
             if (THREAD_NUM > 1)
                 uniqueKeyLock.lock();
@@ -459,41 +507,17 @@ HTreeNode* PatternMiner::extractAPatternFromGivenVarCombination(HandleSeq &input
                 returnHTreeNode = newHTreeNode;
                 newHTreeNode->count = 1;
 
-                if (gram > 1  && (THREAD_NUM > 1) )
-                {
-                    newHTreeNode->instancesUidStrings.insert(instancekeyString);
-                }
 
                 keyStrToHTreeNodeMap.insert(std::pair<string, HTreeNode*>(keyString, newHTreeNode));
 
     //            cout << "A new pattern Found:\n"<< keyString << std::endl;
-
-
 
             }
             else
             {
                 returnHTreeNode = ((HTreeNode*)(htreeNodeIter->second));
 
-                bool alreadyExtracted = false;
-                if (gram > 1  && (THREAD_NUM > 1))
-                {
-                    // check if these fact links already been processed before or by other thread
-                    if (returnHTreeNode->instancesUidStrings.find(instancekeyString) == returnHTreeNode->instancesUidStrings.end())
-                    {
-                        returnHTreeNode->instancesUidStrings.insert(instancekeyString);
-                    }
-                    else
-                    {
-                        alreadyExtracted = true;
-                        // debug
-                        // cout << "already extracted!" << std::endl;
-                    }
-
-                }
-
-                if (! alreadyExtracted)
-                    returnHTreeNode->count ++;
+                returnHTreeNode->count ++;
 
     //            cout << "Unique Key already exists:" << keyString << std::endl;
 
@@ -519,21 +543,72 @@ HTreeNode* PatternMiner::extractAPatternFromGivenVarCombination(HandleSeq &input
             }
         }
 
-
-
     }
 
     return returnHTreeNode;
 
 }
 
+// call existInOneThreadExtractedLinks and existInAllThreadExtractedLinks before this call function
+// only keep 60 per thread per gram, should be enough
+void PatternMiner::addThreadExtractedLinks(unsigned int _gram, unsigned int cur_thread_index, string _extractedLinkUIDs)
+{
+    threadExtractedLinksLock.lock();
+
+    (thread_DF_ExtractedLinks[cur_thread_index][_gram - 1]).push_back(_extractedLinkUIDs);
+
+    all_thread_ExtractedLinks_pergram[_gram - 1].insert(_extractedLinkUIDs);
+
+    if ((thread_DF_ExtractedLinks[cur_thread_index][_gram - 1]).size() > 60)
+    {
+        set<string>::iterator uidIt = all_thread_ExtractedLinks_pergram[_gram - 1].find((thread_DF_ExtractedLinks[cur_thread_index][_gram - 1]).front());
+        if (uidIt != all_thread_ExtractedLinks_pergram[_gram - 1].end())
+        {
+            all_thread_ExtractedLinks_pergram[_gram - 1].erase(uidIt);
+        }
+
+        (thread_DF_ExtractedLinks[cur_thread_index][_gram - 1]).pop_front();
+    }
+
+    threadExtractedLinksLock.unlock();
+
+}
+
+bool PatternMiner::existInAllThreadExtractedLinks(unsigned int _gram, string _extractedLinkUIDs)
+{
+    threadExtractedLinksLock.lock();
+    if (all_thread_ExtractedLinks_pergram[_gram - 1].find(_extractedLinkUIDs) == all_thread_ExtractedLinks_pergram[_gram - 1].end())
+    {
+        threadExtractedLinksLock.unlock();
+        return false;
+    }
+    else
+    {
+        threadExtractedLinksLock.unlock();
+        return true;
+    }
+
+}
+
+bool PatternMiner::existInOneThreadExtractedLinks(unsigned int _gram, unsigned int cur_thread_index, string _extractedLinkUIDs)
+{
+    for (string uids : (thread_DF_ExtractedLinks[cur_thread_index][_gram - 1]))
+    {
+        if (_extractedLinkUIDs == uids)
+            return true;
+    }
+
+    return false;
+}
+
 // when it's the first gram pattern: parentNode = 0, extendedNode = undefined, lastGramLinks is empty, lastGramValueToVarMap and lastGramPatternVarMap are empty
 // extendedNode is the value node in original AtomSpace
 // lastGramLinks is the original links the parentLink is extracted from
-// patternJsonArray is only used in distributed mode, to buffer the pattern jsons to send to server
+// allNewMinedPatternsCurTask is to store all the pattern keystrings mined in current Link task, to avoid duplicate patterns being mined
+// allNewMinedPatternInfo is only used in distributed mode, to store all the new mined pattern info to send to server
 void PatternMiner::extendAPatternForOneMoreGramRecursively(const Handle &extendedLink, AtomSpace* _fromAtomSpace, const Handle &extendedNode, const HandleSeq &lastGramLinks,
                  HTreeNode* parentNode, const map<Handle,Handle> &lastGramValueToVarMap, const map<Handle,Handle> &lastGramPatternVarMap,
-                 bool isExtendedFromVar, vector<HTreeNode*> &allHTreeNodesCurTask, json::value &patternJsonArray)
+                 bool isExtendedFromVar, set<string>& allNewMinedPatternsCurTask, vector<HTreeNode*> &allHTreeNodesCurTask, vector<MinedPatternInfo> &allNewMinedPatternInfo, unsigned int thread_index)
 {
 
     // the ground value node in the _fromAtomSpace to the variable handle in pattenmining Atomspace
@@ -610,11 +685,11 @@ void PatternMiner::extendAPatternForOneMoreGramRecursively(const Handle &extende
 /*    // debug
     string lastGramLinksStr = "";
     for (Handle h : lastGramLinks)
-        lastGramLinksStr += _fromAtomSpace->atom_as_string(h);
+        lastGramLinksStr += h->toShortString();
 
     string inputLinksStr = "";
     for (Handle h : inputLinks)
-        inputLinksStr += _fromAtomSpace->atom_as_string(h);
+        inputLinksStr += h->toShortString();
 
         if ((inputLinksStr.find("man") != inputLinksStr.npos) && (inputLinksStr.find("soda drinker") != inputLinksStr.npos))
         {
@@ -678,30 +753,37 @@ void PatternMiner::extendAPatternForOneMoreGramRecursively(const Handle &extende
                 }
             }
 
+
             unsigned int extendedLinkIndex = 999;
-            HTreeNode* thisGramHTreeNode = extractAPatternFromGivenVarCombination(inputLinks, patternVarMap, oneOfEachSeqShouldBeVars, leaves, shouldNotBeVars, shouldBeVars,_fromAtomSpace, extendedLinkIndex);
+            HTreeNode* thisGramHTreeNode = extractAPatternFromGivenVarCombination(inputLinks, patternVarMap, oneOfEachSeqShouldBeVars, leaves,
+                                                                                  shouldNotBeVars, shouldBeVars,_fromAtomSpace, extendedLinkIndex, allNewMinedPatternsCurTask);
 
             if (thisGramHTreeNode)
             {
 
-                if (run_as_distributed_worker)
+                if (is_distributed)
                 {
                     allHTreeNodesCurTask.push_back(thisGramHTreeNode);
-                    string curPatternKeyStr = unifiedPatternToKeyString(thisGramHTreeNode->pattern);
 
-                    string parentKeyStr = "";
+                    MinedPatternInfo pInfo;
+
+                    pInfo.curPatternKeyStr = unifiedPatternToKeyString(thisGramHTreeNode->pattern);
 
                     if (parentNode)
                     {
-                        parentKeyStr = unifiedPatternToKeyString(parentNode->pattern);
+                        pInfo.parentKeyString = unifiedPatternToKeyString(parentNode->pattern);
 
                     }
                     else
                     {
-                        parentKeyStr = "none";
+                        pInfo.parentKeyString = "none";
                     }
 
-                    addPatternsToJsonArrayBuf(curPatternKeyStr, parentKeyStr, extendedLinkIndex, patternJsonArray);
+                    pInfo.extendedLinkIndex = extendedLinkIndex;
+
+                    allNewMinedPatternInfo.push_back(pInfo);
+
+
                 }
                 else
                 {
@@ -743,7 +825,7 @@ void PatternMiner::extendAPatternForOneMoreGramRecursively(const Handle &extende
                     if (enable_filter_node_types_should_not_be_vars)
                     {
                         bool isIgnoredType = false;
-                        Type t = _fromAtomSpace->get_type(extendNode);
+                        Type t = extendNode->getType();
                         for (Type noType : node_types_should_not_be_vars)
                         {
                             if (t == noType)
@@ -769,17 +851,17 @@ void PatternMiner::extendAPatternForOneMoreGramRecursively(const Handle &extende
                     }
 
                     // find what are the other links in the original Atomspace contain this variable
-                    HandleSeq incomings;
-                    extendNode->getIncomingSet(back_inserter(incomings));
+                    IncomingSet incomings = extendNode->getIncomingSet(_fromAtomSpace);
 
                     // debug
                     // string curvarstr = _fromAtomSpace->atomAsString(extendNode);
 
-                    for (Handle incomingHandle : incomings)
+                    for (LinkPtr incomeingPtr : incomings)
                     {
+                        Handle incomingHandle = incomeingPtr->getHandle();
                         Handle extendedHandle;
                         // if this atom is of igonred type, get its first ancestor that is not in the igonred types
-                        if (isIgnoredType (_fromAtomSpace->get_type(incomingHandle)) )
+                        if (isIgnoredType (incomingHandle->getType()) )
                         {
                             extendedHandle = getFirstNonIgnoredIncomingLink(_fromAtomSpace, incomingHandle);
                             if (extendedHandle == Handle::UNDEFINED)
@@ -788,34 +870,66 @@ void PatternMiner::extendAPatternForOneMoreGramRecursively(const Handle &extende
                         else
                             extendedHandle = incomingHandle;
 
-
-                        string extendedHandleStr = _fromAtomSpace->atom_as_string(extendedHandle);
-
                         if (isInHandleSeq(extendedHandle, inputLinks))
                             continue;
+
+                        if (only_mine_patterns_start_from_white_list)
+                        {
+                            if (havenotProcessedWhiteKeywordLinks.find(extendedHandle) != havenotProcessedWhiteKeywordLinks.end())
+                                continue;
+                        }
+
+                        // string extendedHandleStr = extendedHandle->toShortString();
 
                         // debug
                         // cout << "Debug: Extended link :" << extendedHandleStr << std::endl;
 
-                        if (extendedHandleStr.find("$var") != std::string::npos)
+//                        if (extendedHandleStr.find("$var") != std::string::npos)
+//                        {
+//                           // cout << "Debug: error! The extended link contines variables!" << extendedHandleStr << std::endl;
+//                            continue;
+//                        }
+
+                        // check if other thread happends to process on the same links
+                        if (THREAD_NUM > 1)
                         {
-                           // cout << "Debug: error! The extended link contines variables!" << extendedHandleStr << std::endl;
-                            continue;
+                            string instancekeyString = "";
+
+                            // check if these fact links already been processed before or by other thread
+
+                            OrderedHandleSet originalLinksSet(inputLinks.begin(), inputLinks.end());
+                            originalLinksSet.insert(extendedHandle);
+
+                            for (Handle h  : originalLinksSet)
+                            {
+                                instancekeyString +=  toString(h.value());
+                                instancekeyString += "_";
+                            }
+
+                            // if this Links combination has been processed by "other" thread but not by current thread, skip it
+                            if (! existInOneThreadExtractedLinks(cur_pattern_gram + 1, thread_index, instancekeyString))
+                            {
+                                if (existInAllThreadExtractedLinks(cur_pattern_gram + 1, instancekeyString))
+                                {
+                                    // cout << "existInOneThreadExtractedLinks: \n" << instancekeyString << std::endl;
+                                    continue;
+                                }
+                                else
+                                    addThreadExtractedLinks(cur_pattern_gram + 1, thread_index, instancekeyString);
+                            }
+
                         }
 
-                        // extract patterns from these child
+                        // extract patterns from this child
                         extendAPatternForOneMoreGramRecursively(extendedHandle,  _fromAtomSpace, extendNode, inputLinks, thisGramHTreeNode,
-                                                                valueToVarMap,patternVarMap,isNewExtendedFromVar, allHTreeNodesCurTask, patternJsonArray);
+                                                                valueToVarMap,patternVarMap,isNewExtendedFromVar, allNewMinedPatternsCurTask, allHTreeNodesCurTask, allNewMinedPatternInfo, thread_index);
+
                     }
 
                     nodeIndex ++;
                 }
 
-
-
             }
-
-
 
 
             if ( (var_num == 0) || (isLastNElementsAllTrue(indexes, n_max, var_num)))
@@ -845,9 +959,10 @@ void PatternMiner::extendAPatternForOneMoreGramRecursively(const Handle &extende
 
 }
 
+// this function is old
 // allLastGramHTreeNodes is input, allFactLinksToPatterns is output - the links fact to all its pattern HTreeNodes
 void PatternMiner::extendAllPossiblePatternsForOneMoreGramDF(HandleSeq &instance, AtomSpace* _fromAtomSpace, unsigned int gram,
-     vector<HTreeNode*>& allLastGramHTreeNodes, map<HandleSeq, vector<HTreeNode*> >& allFactLinksToPatterns, vector<set<Handle>>& newConnectedLinksFoundThisGram)
+     vector<HTreeNode*>& allLastGramHTreeNodes, map<HandleSeq, vector<HTreeNode*> >& allFactLinksToPatterns, vector<OrderedHandleSet>& newConnectedLinksFoundThisGram)
 {
 
     // First, extract all the variable nodes in the instance links
@@ -869,7 +984,7 @@ void PatternMiner::extendAllPossiblePatternsForOneMoreGramDF(HandleSeq &instance
         if (enable_filter_node_types_should_not_be_vars)
         {
             bool isIgnoredType = false;
-            Type t = _fromAtomSpace->get_type(extendNode);
+            Type t = extendNode->getType();
             for (Type noType : node_types_should_not_be_vars)
             {
                 if (t == noType)
@@ -884,17 +999,17 @@ void PatternMiner::extendAllPossiblePatternsForOneMoreGramDF(HandleSeq &instance
         }
 
         // find what are the other links in the original Atomspace contain this variable
-        HandleSeq incomings;
-        extendNode->getIncomingSet(back_inserter(incomings));
+        IncomingSet incomings = extendNode->getIncomingSet(_fromAtomSpace);
 
         // debug
         // string curvarstr = _fromAtomSpace->atomAsString((Handle)(*varIt));
 
-        for (Handle incomingHandle : incomings)
+        for (LinkPtr incomingPtr : incomings)
         {
+            Handle incomingHandle = incomingPtr->getHandle();
             Handle extendedHandle;
             // if this atom is of igonred type, get its first ancestor that is not in the igonred types
-            if (isIgnoredType (_fromAtomSpace->get_type(incomingHandle)) )
+            if (isIgnoredType (incomingHandle->getType()) )
             {
                 extendedHandle = getFirstNonIgnoredIncomingLink(_fromAtomSpace, incomingHandle);
                 if (extendedHandle == Handle::UNDEFINED)
@@ -904,7 +1019,7 @@ void PatternMiner::extendAllPossiblePatternsForOneMoreGramDF(HandleSeq &instance
                 extendedHandle = incomingHandle;
 
 
-            string extendedHandleStr = _fromAtomSpace->atom_as_string(extendedHandle);
+            string extendedHandleStr = extendedHandle->toShortString();
 
             if (isInHandleSeq(extendedHandle, instance))
                 continue;
@@ -924,14 +1039,14 @@ void PatternMiner::extendAllPossiblePatternsForOneMoreGramDF(HandleSeq &instance
 
             // Extract all the possible patterns from this originalLinks, not duplicating the already existing patterns
 
-            vector<set<Handle> >::iterator newExtendIt;
-            set<Handle> originalLinksToSet(originalLinks.begin(),originalLinks.end());
+            vector<OrderedHandleSet >::iterator newExtendIt;
+            OrderedHandleSet originalLinksToSet(originalLinks.begin(),originalLinks.end());
             bool alreadyExtracted = false;
 
             // check if these links have been extracted
             for(newExtendIt = newConnectedLinksFoundThisGram.begin(); newExtendIt != newConnectedLinksFoundThisGram.end(); ++newExtendIt)
             {
-                set<Handle>& exitstingLinks = (set<Handle>&)(*newExtendIt);
+                OrderedHandleSet& exitstingLinks = (OrderedHandleSet&)(*newExtendIt);
                 if (exitstingLinks == originalLinksToSet)
                 {
                     alreadyExtracted = true;
@@ -944,7 +1059,7 @@ void PatternMiner::extendAllPossiblePatternsForOneMoreGramDF(HandleSeq &instance
             if (! alreadyExtracted)
             {
                 newConnectedLinksFoundThisGram.push_back(originalLinksToSet);
-//                set<Handle> sharedNodes; // only the current extending shared node is in sharedNodes for Depth first
+//                OrderedHandleSet sharedNodes; // only the current extending shared node is in sharedNodes for Depth first
 //                sharedNodes.insert(extendNode);
                 vector<HTreeNode*> allThisGramHTreeNodes;
                 extractAllPossiblePatternsFromInputLinksDF(originalLinks, (unsigned int)(varIt->second), _fromAtomSpace, allLastGramHTreeNodes, allThisGramHTreeNodes, gram);
@@ -981,7 +1096,7 @@ void PatternMiner::extendAllPossiblePatternsForOneMoreGramDF(HandleSeq &instance
 //       for Depth first: sharedNodes = current shared node
 // sharedNodes have to be variables , should not be const
 // sharedLinkIndex is the index in the inputLinks which contains the shared node
-void PatternMiner::extractAllPossiblePatternsFromInputLinksDF(vector<Handle>& inputLinks,unsigned int sharedLinkIndex, AtomSpace* _fromAtomSpace,
+void PatternMiner::extractAllPossiblePatternsFromInputLinksDF(HandleSeq& inputLinks,unsigned int sharedLinkIndex, AtomSpace* _fromAtomSpace,
                                                               vector<HTreeNode*>& allLastGramHTreeNodes, vector<HTreeNode*>& allHTreeNodes, unsigned int gram)
 {
     map<Handle,Handle> valueToVarMap;  // the ground value node in the _fromAtomSpace to the variable handle in pattenmining Atomspace
@@ -1137,7 +1252,7 @@ void PatternMiner::extractAllPossiblePatternsFromInputLinksDF(vector<Handle>& in
                 {
                     HandleSeq outgoingLinks;
                     generateALinkByChosenVariables(link, patternVarMap, outgoingLinks, _fromAtomSpace);
-                    Handle rebindedLink = atomSpace->add_link(atomSpace->get_type(link), outgoingLinks);
+                    Handle rebindedLink = atomSpace->add_link(link->getType(), outgoingLinks);
                     rebindedLink->merge(TruthValue::TRUE_TV());
 
                     pattern.push_back(rebindedLink);

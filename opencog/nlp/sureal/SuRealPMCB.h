@@ -25,8 +25,10 @@
 #define _OPENCOG_SUREAL_PMCB_H
 
 
+#include <unordered_map>
 #include <opencog/query/DefaultPatternMatchCB.h>
 #include <opencog/query/InitiateSearchCB.h>
+#include <opencog/atoms/base/Handle.h>
 
 
 namespace opencog
@@ -45,7 +47,7 @@ class SuRealPMCB :
     public DefaultPatternMatchCB
 {
 public:
-    SuRealPMCB(AtomSpace* as, const std::set<Handle>& vars);
+    SuRealPMCB(AtomSpace* as, const OrderedHandleSet& vars, bool use_cache);
     ~SuRealPMCB();
 
     virtual bool variable_match(const Handle& hPat, const Handle& hSoln);
@@ -67,14 +69,15 @@ private:
     bool disjunct_match(const Handle&, const Handle&);
 
     AtomSpace* m_as;
-    std::set<Handle> m_vars;   // store nodes that are variables
+    bool m_use_cache;
+    OrderedHandleSet m_vars;   // store nodes that are variables
 
     std::unordered_map<Handle, HandleSeq> m_disjuncts;   // store the disjuncts of nodes in the pattern
 
     std::unordered_map<Handle, Handle> m_words;   // store the corresponding WordNodes of the nodes in the pattern
 
-    std::set<Handle> m_interp;   // store a set of InterpretationNodes correspond to some clauses accepted in clause_match()
-    std::set<Handle> m_targets;   // store a set of target InterpretationNodes
+    OrderedHandleSet m_interp;   // store a set of InterpretationNodes correspond to some clauses accepted in clause_match()
+    OrderedHandleSet m_targets;   // store a set of target InterpretationNodes
 
     struct CandHandle
     {

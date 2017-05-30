@@ -23,8 +23,12 @@
 #ifndef _OPENCOG_GENERIC_SHELL_H
 #define _OPENCOG_GENERIC_SHELL_H
 
+#include <condition_variable>
+#include <mutex>
 #include <string>
 #include <thread>
+
+#include <opencog/util/concurrent_queue.h>
 
 /**
  * The GenericShell class implements an "escape" from the default cogserver
@@ -37,7 +41,7 @@
  *
  * If instead a module has only a small number of simple commands that
  * need to be implemented, then the DECLARE_CMD_REQUEST function, defined
- * in Request.h, provides a simpler and easier way implementing comands.
+ * in Request.h, provides a simpler and easier way implementing commands.
  */
 
 namespace opencog {
@@ -51,7 +55,14 @@ class GenericEval;
 class GenericShell
 {
 	private:
-		std::string pending_output;
+		std::mutex _pending_mtx;
+		std::string _pending_output;
+
+		ConsoleSocket* socket;
+		std::thread* evalthr;
+		std::thread* pollthr;
+		concurrent_queue<std::string> evalque;
+		volatile bool _init_done;
 
 	protected:
 		std::string abort_prompt;
@@ -59,35 +70,38 @@ class GenericShell
 		std::string pending_prompt;
 		bool show_output;
 		bool show_prompt;
-		bool self_destruct;
+		volatile bool self_destruct;
 
-		ConsoleSocket* socket;
-		GenericEval* evaluator;
-		std::thread* evalthr;
-
-		virtual void set_socket(ConsoleSocket *);
-		virtual const std::string& get_prompt(void);
-
+		virtual GenericEval* get_evaluator(void) = 0;
 		virtual void thread_init(void);
 		virtual void line_discipline(const std::string &expr);
-		virtual void do_eval(const std::string &expr);
 
-		// Async output handling.
-		bool do_async_output;
-		bool eval_done;
+		// Concurrency handling
+		void eval_loop();
+		void poll_loop();
+		bool _eval_done;
+		std::condition_variable _cv;
+		std::mutex _mtx;
+		GenericEval* _evaluator;
+		void start_eval();
+		void finish_eval();
+		void while_not_done();
+
+		// Output handling.
 		virtual void put_output(const std::string&);
+		virtual std::string get_output();
 		virtual std::string poll_output();
 
 	public:
 		GenericShell(void);
 		virtual ~GenericShell();
 
-		virtual void eval(const std::string &, ConsoleSocket *);
-		virtual void socketClosed(void);
+		virtual void set_socket(ConsoleSocket *);
+		virtual void eval(const std::string &);
 
+		virtual const std::string& get_prompt(void);
 		virtual void hush_output(bool);
 		virtual void hush_prompt(bool);
-		virtual void sync_output(bool);
 };
 
 /** @}*/

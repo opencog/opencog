@@ -38,6 +38,7 @@
 #include <opencog/truthvalue/SimpleTruthValue.h>
 #include <opencog/attention/atom_types.h>
 #include <opencog/cogserver/server/CogServer.h>
+#include <opencog/attentionbank/AttentionBank.h>
 
 #include "BenchmarkModule.h"
 
@@ -49,7 +50,8 @@ DECLARE_MODULE(BenchmarkModule)
 BenchmarkModule::BenchmarkModule(CogServer& cs) : Module(cs)
 {
     logger().info("[BenchmarkModule] constructor");
-    this->as = &cs.getAtomSpace();
+    as = &cs.getAtomSpace();
+    _bank = &attentionbank(as);
 
     do_fullyConnectedTest_register();
 }
@@ -109,10 +111,10 @@ int BenchmarkModule::updateSTITestConcurrent()
     as->get_handles_by_type(back_inserter(atoms), ATOM, true);
 
     OMP_ALGO::for_each(atoms.begin(), atoms.end(),
-        [this](Handle handle)
+        [this](const Handle& handle)
     {
         int newSTI = rand() % 1000;
-        handle->setSTI(newSTI);
+        _bank->set_sti(handle, newSTI);
     });
 
     return atoms.size();

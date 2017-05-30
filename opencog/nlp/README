@@ -3,7 +3,7 @@
                     ---------------------------
 
 This directory contains an assortment of natural language processing
-subsystems, primarily focused on the English language). This includes
+subsystems, primarily focused on the English language. This includes
 language learning code, logical reasoning on facts extracted from
 sentences, reference resolution, question answering, natural
 language output (generation of syntactically valid sentences),
@@ -66,11 +66,12 @@ A general sketch of the desired system:
 
 Subdirectories (in alphabetical order)
 ======================================
-aiml2oc
--------
-Prototype for converting AIML XML into opencog "atomese", so that a
-simple opencog script could run AIML dialogs. Under developemnt,
-incomplete.
+aiml
+----
+Mothballed code for converting AIML XML into opencog "atomese", so that
+a simple opencog script could run AIML dialogs.  There is no compelling
+AIML content that is in any way useful to the current plans for OpenCog.
+I think that we've moved past AIML in terms of what we can accomplish.
 
 anaphora
 --------
@@ -92,7 +93,7 @@ The chatbot-old directory contains some code to tie opencog NLP
 processing to chat systems, and particularly, to IRC chat.  Provides
 a high-level implementation of a simple, hard-coded question-answering
 system, resting on the foundations of "seme" and "triples".  It worked,
-but had some design difficulties.
+but had various interesting design difficulties and flaws.
 
 dialog_system
 -------------
@@ -108,7 +109,7 @@ Interfaces to IRC; provide an easy way to connect opencog to IRC.
 
 learn
 -----
-Langauge learning code. Goal is to learn any language at all, given
+Language learning code. Goal is to learn any language at all, given
 some sufficiently large corpus.  Experiment is in progress, results
 are promising but inconclusive. Starved for time.
 

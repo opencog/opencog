@@ -10,23 +10,22 @@
 			(var-decl "$a-parse" "ParseNode")
 			(var-decl "$subj" "WordInstanceNode")
 			(var-decl "$verb" "WordInstanceNode")
-			(var-decl "$subj-lemma" "WordNode")
-			(var-decl "$verb-lemma" "WordNode")
 			(var-decl "$obj" "WordInstanceNode")
 			(var-decl "$qVar" "WordInstanceNode")
+			(var-decl "$subj-lemma" "WordNode")
+			(var-decl "$verb-lemma" "WordNode")
 		)
 		(AndLink
 			(word-in-parse "$subj" "$a-parse")
 			(word-in-parse "$verb" "$a-parse")
-			(word-lemma "$subj" "$subj-lemma")
-			(word-lemma "$verb" "$verb-lemma")
 			(dependency "_subj" "$verb" "$subj")
 			(AbsentLink (dependency "_obj" "$verb" "$obj"))
 			(dependency "_det" "$subj" "$qVar")
 			(word-feat "$qVar" "which")
+			(word-lemma "$subj" "$subj-lemma")
+			(word-lemma "$verb" "$verb-lemma")
 		)
 		(ExecutionOutputLink
-; XXX this is not implemented anywhere!
 			(GroundedSchemaNode "scm: whichsubjSVQ-rule")
 			(ListLink
 				(VariableNode "$subj-lemma")

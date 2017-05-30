@@ -24,6 +24,7 @@
  */
 
 #include <opencog/nlp/types/atom_types.h>
+#include <opencog/atoms/base/Link.h>
 
 #include "LGDictReader.h"
 
@@ -95,7 +96,7 @@ Handle LGDictReader::getAtom(const std::string& word)
 
     free_lookup_list(_dictionary, dn_head);
 
-    return Handle(createLink(SET_LINK, outgoing));
+    return Handle(createLink(outgoing, SET_LINK));
 }
 
 /**

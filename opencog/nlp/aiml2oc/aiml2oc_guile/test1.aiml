@@ -1,6 +1,0 @@
-<aiml>
-<category>
-<pattern>A * IS A *</pattern>
-<template> But is a <star index="2"/> always a <star index="1"/> ?</template>
-</category>
-</aiml>

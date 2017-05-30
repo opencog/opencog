@@ -32,6 +32,7 @@
 #ifdef HAVE_CYTHON
 
 #include <opencog/util/Logger.h>
+#include <opencog/util/oc_assert.h>
 #include <opencog/util/platform.h>
 
 #include <opencog/cython/PythonEval.h>
@@ -61,13 +62,11 @@ void PythonShellModule::init(void)
 
 std::string PythonShellModule::shellout(Request *req, std::list<std::string> args)
 {
-    ConsoleSocket *s = dynamic_cast<ConsoleSocket*>(req->getRequestResult());
-    if (!s)
-        throw RuntimeException(TRACE_INFO, "Invalid RequestResult object"
-               " for PythonShellModule: a ConsoleSocket object was expected.");
+    ConsoleSocket *con = req->get_console();
+    OC_ASSERT(con, "Invalid Request object");
 
     PythonShell *sh = new PythonShell();
-    sh->set_socket(s);
+    sh->set_socket(con);
 
     bool hush = false;
     if (!args.empty())

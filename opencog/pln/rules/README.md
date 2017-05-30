@@ -1,117 +1,57 @@
-# Prototype rule definitions for rule engine based PLN implementation
+# PLN Rule definitions for the URE
 
-Implements rules in the AtomSpace using the pattern matcher for
-unification and GroundedSchemaNodes for execution of formulas written
-in Scheme.
+Implements PLN rules according to
+http://wiki.opencog.org/w/URE_Configuration_Format
 
-## Rules
+## Contents
 
-The following rules are defined for PLN:
+PLN rules are partitioned into boolean, predicate and term logic.
+These terms are used loosely since PLN is rather different than any of
+those. The folders are organized as follows
 
-    - and-rule
-    - not-rule
-    - deduction-rule
-    - modus-ponens-rule
-    - Context rules:
-        - contextualize-inheritance-rule
-        - contextualize-evaluation-rule
-        - contextualize-subset-rule
-        - decontextualize-inheritance-rule
-        - decontextualize-evaluation-rule
-        - decontextualize-subset-rule
-        - context-free-to-sensitive-rule
-        (here, the exact formula is still unclear)
+- `propositional-logic` contains rules dealing with `AndLink`, `OrLink` and
+  `NotLink` evaluation and introduction. They are fuzzy for the most
+  part, contrary to what the name folder seems to suggest.
+- `predicate-logic` contains rules for universal and conditional
+  instantiation and generalization.
+- `term-logic` contains rules dealing with deduction, abduction,
+  induction and inversion.
+- `wip` contains work-in-progress rules, incomplete or broken.
 
-## Additional instructions
+## PLN Examples
 
-After loading the rules, you should also load this Scheme file:
+Multiple examples can be found under
 
 ```
-compile-rules.scm
+<OPENCOG_REPO>/examples/pln
 ```
-
-in order to compile the rules and formulas for better performance.
-
-## PLN Example
-
-- Load the deduction rule definitions:
-
-    ```
-    reasoning/pln/rules/deduction.scm
-    ```
-
-    Example:
-
-    ```
-    (load "reasoning/pln/rules/deduction.scm")
-    ```
-
-- Load this file containing the data:
-
-    ```
-    tests/reasoning/engine/simple-assertions.scm
-    ```
-
-    Example:
-
-    ```
-    (load "tests/reasoning/engine/simple-assertions.scm")
-    ```
-
-- Run this command:
-
-    ```
-    (cog-bind find-humans)
-    ```
-
-- Observe that there is only one instance of human defined:
-
-    ```
-    (ConceptNode "man")
-    ```
-
-- Run this command:
-
-    ```
-    (cog-bind deduction-rule)
-    ```
-
-- Run this command again:
-
-    ```
-    (cog-bind find-humans)
-    ```
-
-- Observe that there are 3 additional instances of human defined:
-
-    ```
-    (ConceptNode "Socrates")
-
-    (ConceptNode "Einstein")
-
-    (ConceptNode "Peirce")
-    ```
 
 ## Relex2Logic Example
 
 The r2l subdirectory has the initial specification of the
 R2L-RuleBase for the English language.
 
+   ```
+   opencog/nlp/relex2logic/rules
+   ```
+
 To test the rules, use the following steps.
 
-- Start the cogserver
+- Start the relex server, using for instance docker
 
-- Enter the scm shell.
+   ```
+   <DOCKER_REPO>/opencog/relex/run-opencog-relex.sh
+   ```
 
-- Load the scheme files in this directory and the sub-directories using
+- Either start the cogserver and enter the scm shell, or start guile directly
+
+- Load the nlp module
 
     ```
-    (load "../path/to/scheme/files")
+    (use-modules (opencog nlp))
     ```
-
-- Start the relex server using the --relex flag (don't use the --logic flag)
 
 - In the opencog scheme shell run (relex-parse "some sentence"),
   preferably sentences on which the rules are applicable.
 
-- Run (cog-bind name-of-the-variable-which-has-BindLink-as-its-value)
+- Run (cog-bind rule-which-should-be-a-BindLink)

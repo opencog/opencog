@@ -298,7 +298,7 @@ class PrivateUseOnlyRelexRelationFinder
 			// the list link, and call the user callback with it.
 			const std::string &relname = NodeCast(a)->getName();
 
-			const std::vector<Handle> outset = listlink->getOutgoingSet();
+			const HandleSeq outset = listlink->getOutgoingSet();
 
 			// First arg must be first (avoid reporting twice with swapped order).
 			if (first_arg != outset[0]) return false;

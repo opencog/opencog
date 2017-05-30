@@ -92,6 +92,24 @@
 	; Initialize the sentence forms as needed
 	(microplanning-init)
 
+    ; Reset (clear) SuReal cache to assure it is empty before start calling sureal.
+    ; Remark that SuReal Cache is not thread-safe. So it is not supposed to be used 
+    ; if the sureal queries are split into several threads. If you plan to do 
+    ; this (split sureal requests amongst multiple threads), just comment the 
+    ; following call and change the call to sureal below to use its non-cached version.
+    ;
+    ; It is not thread safe because in this version there is only one instance of 
+    ; the cache (reached via a singleton wrapper). So if two threads with two 
+    ; different Microplanner queries add stuff to the cache, one may lead to false 
+    ; hits in the other. In addition to this, the cache is reset (clear) just before 
+    ; the Microplanner query starts so if the second query reach the reset point 
+    ; before the first query ended, the cache will be reset during the lifetime 
+    ; of the first query, which may lead to false misses.
+    ;
+    ; A suggested approach to make it thread safe is having each Microplanner 
+    ; query to have its own cache instance.
+	(reset-sureal-cache seq-link)
+
 	(set! all-sets (make-sentence-chunks
 		(cog-outgoing-set seq-link) utterance-type option))
 
@@ -502,10 +520,16 @@
 	(define temp-set-link (SetLink (get-utterance-link utterance-type atoms) atoms))
 
 	; do something with SuReal to see if all atoms can be included in a sentence
-	(define say-able (not (null? (sureal temp-set-link))))
+    ;
+    ; Remark that SuReal Cache is not thread-safe. So it is not supposed to be used 
+    ; if the sureal queries are split into several threads. If you plan to do 
+    ; this (split sureal requests amongst multiple threads), just comment the 
+    ; call to reset-sureal-cache above and change the line below to call 'sureal'
+    ; instead of 'cached-sureal'
+	(define say-able (not (null? (cached-sureal temp-set-link))))
 
 	; remove the temporary SetLink
-	(cog-purge temp-set-link)
+	(cog-extract temp-set-link)
 
 	(cond
 		; not long/complex but sayable

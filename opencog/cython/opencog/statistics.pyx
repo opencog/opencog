@@ -214,19 +214,19 @@ class PyDataProviderAtom:
         self.provider = PyDataProvider(n_gram, is_order_dependent)
 
     def add_one_metadata(self, atom):
-        return self.provider.add_one_metadata(atom.h.value())
+        return self.provider.add_one_metadata(atom.h)
 
     def add_one_rawdata_count(self, one_rawdata, count_num):
         long_vector = list()
         for atom in one_rawdata:
-            long_vector.append(atom.h.value())
+            long_vector.append(atom.h)
 
         self.provider.add_one_rawdata_count(long_vector, count_num)
 
     def make_key_from_data(self, one_rawdata, combination_array=None):
         long_vector = list()
         for atom in one_rawdata:
-            long_vector.append(atom.h.value())
+            long_vector.append(atom.h)
 
         if combination_array is None:
             return self.provider.make_key_from_data(long_vector)
@@ -255,7 +255,7 @@ class PyDataProviderAtom:
     def datamap_find(self, one_rawdata):
         long_vector = list()
         for atom in one_rawdata:
-            long_vector.append(atom.h.value())
+            long_vector.append(atom.h)
         return self.provider.datamap_find(long_vector)
 
     @property
@@ -291,7 +291,7 @@ class PyInteractionInformationAtom:
                                           provider_atom, n_max_limit=-1):
         long_vector = list()
         for atom in one_piece_of_data:
-            long_vector.append(atom.h.value())
+            long_vector.append(atom.h)
 
         return PyInteractionInformation.calculate_interaction_information(
             long_vector, provider_atom.provider, n_max_limit

@@ -1,0 +1,77 @@
+                     Simple Bot Training
+                     -------------------
+
+Experimental prototype of simple training for Hanson robots--dynamic creation of 
+new behavior rules through natural language interaction with the robot.
+
+Starting off with simple, rigid command template to learn new stimulus and
+associated response behavior. 
+
+Example:
+Human "When I say 'Are you bored' then yawn."  
+Bot: "Okay, when you say are you bored, then I will yawn."  
+Human "Are you bored?"  
+Bot: \<yawns\>  
+
+Functional Goals
+----------------
+
+* Functionality for execution of simple behavior rules in atomese with the rule
+  premise represented as "listified" phrases or sentences that are matched via
+  AIML-style string matching. This is the atom format used currently for AIML 
+  representation in OpenCog worked out by Ean and/or Linas. E.g.,
+```
+	(ListLink
+		(ConceptNode "YOU")
+		(ConceptNode "ARE")
+		(GlobNode "$glob1")
+		(ConceptNode "BEAUTIFUL"))
+```
+* Ability to train behavior responses to stimuli dynamically using a pre-defined
+  template for the command to learn a new behavior rule. Currently the command 
+  to do this is "When I say ____________ then you ___________." As a result
+  a new behavior rule is created in the atomspace and the response executed
+  when the robot hears the specified phrase.
+
+
+Files
+-----
+
+simple-training.scm - this is the main file that processes a text input string, 
+searches for a matching behavior rule, and executes the rule consequent if a 
+match is found. Enry is through the function, 
+(execute-behavior-with-stimulus input-str)
+(I put in a shortcut (say input-str) for testing.)
+
+behavior-rules.scm - predefined behavior rules with the premise specified as 
+listified word phrases as described above and the conclusion being some
+evaluable atom, e.g., EvaluationLink.
+ 
+behavior-defs.scom - the predefined behaviors that can be used in the behavior
+rules.
+
+
+End-user Usage
+--------------
+
+Current training pattern:
+
+"When I say * then *."
+
+Human: When I say \<insert stimulus phrase here\> then \<insert desired behavior
+response here\>.
+
+Concrete example:
+Human: "When I say do you want a donut then be happy."
+
+The robot should then execute the behavior (or pass a request for the behavior 
+to an action coordinator) when it hears the stimulus phrase.
+I guess technically if the robot is taking things literally it should
+only do the behavior if it is prompted by the trainer saying the stimulus 
+phrase, but for now the rule is not dependent on who says the stimulus.)
+
+The response needs to be a pre-defined behavior with a pre-scripted animation
+
+The current implemented behaviors are . . . (or can be found at . . .)
+
+

@@ -22,18 +22,23 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _OPENCOG_ATTENTION_MODULE_H
-#define _OPENCOG_ATTENTION_MODULE_H
+#ifndef _OPENCOG_EXPERIMENTAL_ATTENTION_MODULE_H
+#define _OPENCOG_EXPERIMENTAL_ATTENTION_MODULE_H
 
-#include <opencog/attention/ForgettingAgent.h>
-#include <opencog/attention/HebbianUpdatingAgent.h>
-#include <opencog/attention/SimpleHebbianUpdatingAgent.h>
-#include <opencog/attention/ImportanceSpreadingAgent.h>
-#include <opencog/attention/ImportanceDiffusionAgent.h>
-#include <opencog/attention/SimpleImportanceDiffusionAgent.h>
-#include <opencog/attention/ImportanceUpdatingAgent.h>
 #include <opencog/cogserver/server/Factory.h>
 #include <opencog/cogserver/server/Module.h>
+#include <opencog/cogserver/server/CogServer.h>
+
+#include "AFImportanceDiffusionAgent.h"
+#include "AFRentCollectionAgent.h"
+
+#include "WAImportanceDiffusionAgent.h"
+#include "WARentCollectionAgent.h"
+
+#include "ForgettingAgent.h"
+#include "FocusBoundaryUpdatingAgent.h"
+#include "HebbianUpdatingAgent.h"
+#include "HebbianCreationAgent.h"
 
 namespace opencog
 {
@@ -45,17 +50,62 @@ class AttentionModule : public Module
 {
 
 private:
-    Factory<ForgettingAgent, Agent>          forgettingFactory;
-    Factory<HebbianUpdatingAgent, Agent>     hebbianFactory;
-    Factory<SimpleHebbianUpdatingAgent, Agent>     simpleHebbianFactory;
-    Factory<ImportanceSpreadingAgent, Agent> spreadingFactory;
-#ifdef HAVE_GSL
-    Factory<ImportanceDiffusionAgent, Agent> diffusionFactory;
-#endif
-    Factory<ImportanceUpdatingAgent, Agent>  updatingFactory;
-    Factory<SimpleImportanceDiffusionAgent, Agent> simpleDiffusionFactory;
+
+    Factory<AFImportanceDiffusionAgent, Agent>  afImportanceFactory;
+    Factory<WAImportanceDiffusionAgent, Agent>  waImportanceFactory;
+
+    Factory<AFRentCollectionAgent, Agent>  afRentFactory;
+    Factory<WARentCollectionAgent, Agent>  waRentFactory;
+
+    Factory<ForgettingAgent, Agent> forgettingFactory;
+
+    Factory<FocusBoundaryUpdatingAgent, Agent>  focusUpdatingFactory;
+
+    Factory<HebbianUpdatingAgent, Agent> hebbianUpdatingFactory;
+    Factory<HebbianCreationAgent, Agent> hebbianCreationFactory;
+
+    AgentPtr _forgetting_agentptr;
+
+    AgentPtr _minmaxstiupdating_agentptr;
+
+    AgentPtr _focusupdating_agentptr;
+
+    AgentPtr _hebbianupdating_agentptr;
+    AgentPtr _hebbiancreation_agentptr;
+
+    AgentPtr _afImportanceAgentPtr;
+    AgentPtr _waImportanceAgentPtr;
+
+    AgentPtr _waRentAgentPtr;
+    AgentPtr _afRentAgentPtr;
+
+    boost::signals2::connection addAFConnection;
+
+    void addAFSignal(const Handle& h, const AttentionValuePtr& av_old,
+                     const AttentionValuePtr& av_new);
+    void addAFSignalHandler(const Handle& h, const AttentionValuePtr& av_old,
+                            const AttentionValuePtr& av_new);
 
 public:
+
+    DECLARE_CMD_REQUEST(AttentionModule, "start-ecan", do_start_ecan,
+                        "Starts  ECAN agents. use agents-active command to view a list of agents started.\n",
+                        "Usage: start-ecan\n", false, true)
+
+    DECLARE_CMD_REQUEST(AttentionModule, "stop-ecan", do_stop_ecan,
+                        "Stops all active  ECAN agents\n",
+                        "Usage: stop-ecan\n", false, true)
+
+
+    DECLARE_CMD_REQUEST(AttentionModule, "list-ecan-param", do_list_ecan_param,
+                        "Lists all ecan parameters and their values.\n",
+                        "Usage: list-ecan-params\n", false, true)
+
+    DECLARE_CMD_REQUEST(AttentionModule, "set-ecan-param", do_set_ecan_param,
+                        "Sets the value of an ecan parameter\n",
+                        "Usage: set-ecan-param <param-name> <param-value> \n", false, true)
+
+
 
     static inline const char* id();
 
@@ -68,4 +118,4 @@ public:
 /** @}*/
 }  // namespace
 
-#endif // _OPENCOG_ATTENTION_MODULE_H
+#endif // _OPENCOG_EXPERMENTAL_ATTENTION_MODULE_H

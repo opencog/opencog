@@ -137,15 +137,15 @@
 ; Retrieves a list of who has cancer:
 ;   (cog-bind people-with-cancer)
 
-(define people-with-cancer
-    (BindLink
-        (ListLink
-            (VariableNode "$person"))
-        (EvaluationLink
-            (PredicateNode "cancer")
-            (ListLink
-                (VariableNode "$person")))
-        (VariableNode "$person")))
+;(define people-with-cancer
+;    (BindLink
+;        (ListLink
+;            (VariableNode "$person"))
+;        (EvaluationLink
+;            (PredicateNode "cancer")
+;            (ListLink
+;                (VariableNode "$person")))
+;        (VariableNode "$person")))
 
 ; Retrieves a count of people who have cancer:
 ;   (count-people-with-cancer)

@@ -108,7 +108,6 @@ class AgentRunnerThread: public AgentRunnerBase
         /** If the list of scheduled agents should be cleared */
         bool clear_all;
 
-    private:
         /** The function which runs in the worker thread, and runs all agents
          * while running agents is enabled. This function terminates when
          * there are no agents to run.

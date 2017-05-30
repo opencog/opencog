@@ -41,7 +41,6 @@
 #include <opencog/embodiment/atom_types.h>
 #include <opencog/query/BindLinkAPI.h>
 #include <opencog/util/Config.h>
-#include <opencog/util/StringManipulator.h>
 
 #include <cpprest/http_client.h>
 #include <cpprest/filestream.h>
@@ -50,8 +49,7 @@
 #include <boost/uuid/uuid_generators.hpp>
 #include <boost/uuid/uuid_io.hpp>
 
-#include "HTree.h"
-#include "PatternMiner.h"
+#include "DistributedPatternMiner.h"
 
 using namespace utility;                    // Common utilities like string conversions
 using namespace web;                        // Common features like URIs.
@@ -64,8 +62,10 @@ using namespace opencog::PatternMining;
 using namespace opencog;
 
 
-void PatternMiner::launchADistributedWorker()
+void DistributedPatternMiner::launchADistributedWorker()
 {
+
+    run_as_central_server = false;
     run_as_distributed_worker = true;
 
     centralServerIP = config().get("PMCentralServerIP");
@@ -113,7 +113,7 @@ void PatternMiner::launchADistributedWorker()
 }
 
 
-void PatternMiner::notifyServerThisWorkerStop()
+void DistributedPatternMiner::notifyServerThisWorkerStop()
 {
 
 
@@ -181,7 +181,7 @@ void PatternMiner::notifyServerThisWorkerStop()
 
 }
 
-void PatternMiner::startMiningWork()
+void DistributedPatternMiner::startMiningWork()
 {
     // Note: Breadth_First mining is not maintained anymore. Only Depth_First is used in distributed mining.
     //    Pattern_mining_mode = config().get("Pattern_mining_mode"); // option: Breadth_First , Depth_First
@@ -190,7 +190,8 @@ void PatternMiner::startMiningWork()
 
         cur_worker_mined_pattern_num = 0;
 
-        std::cout<<"Start pattern mining work! Max gram = " + toString(this->MAX_GRAM) << ", mode = Depth_First" << std::endl;
+        std::cout << "Start pattern mining work! Max gram = "
+                  << this->MAX_GRAM << ", mode = Depth_First" << std::endl;
 
         int start_time = time(NULL);
 
@@ -198,6 +199,27 @@ void PatternMiner::startMiningWork()
 
         allLinkNumber = (int)(allLinks.size());
         atomspaceSizeFloat = (float)(allLinkNumber);
+
+        if (only_mine_patterns_start_from_white_list)
+        {
+            allLinksContainWhiteKeywords.clear();
+
+            cout << "\nOnly mine patterns start from white list:" << std::endl;
+
+            for (string keyword : keyword_white_list)
+            {
+                std::cout << keyword << std::endl;
+            }
+
+            cout << "Finding all Links contains these keywords...\n";
+
+            set<Handle> allLinksContainWhiteKeywordsSet;
+            findAllLinksContainKeyWords(keyword_white_list, 0, true, allLinksContainWhiteKeywordsSet);
+
+            std::copy(allLinksContainWhiteKeywordsSet.begin(), allLinksContainWhiteKeywordsSet.end(), std::back_inserter(allLinksContainWhiteKeywords));
+            cout << "Found " << allLinksContainWhiteKeywords.size() << " Links contians the keywords!\n";
+
+        }
 
         runPatternMinerDepthFirst();
 
@@ -214,8 +236,184 @@ void PatternMiner::startMiningWork()
 
 }
 
-void PatternMiner::addPatternsToJsonArrayBuf(string curPatternKeyStr, string parentKeyString,  unsigned int extendedLinkIndex, json::value &patternJsonArray)
+void DistributedPatternMiner::runPatternMinerDepthFirst()
 {
+    // observingAtomSpace is used to copy one link everytime from the originalAtomSpace
+    observingAtomSpace = new AtomSpace();
+
+    if (THREAD_NUM > 1)
+    {
+        thread_DF_ExtractedLinks = new list<string>* [THREAD_NUM];
+        for (unsigned int ti = 0; ti < THREAD_NUM; ti ++)
+            thread_DF_ExtractedLinks[ti] = new list<string>[MAX_GRAM];
+
+        all_thread_ExtractedLinks_pergram = new set<string>[MAX_GRAM];
+    }
+
+
+    if (only_mine_patterns_start_from_white_list)
+        linksPerThread = allLinksContainWhiteKeywords.size() / THREAD_NUM;
+    else
+        linksPerThread = allLinkNumber / THREAD_NUM;
+
+    processedLinkNum = 0;
+    actualProcessedLinkNum = 0;
+
+    for (unsigned int i = 0; i < THREAD_NUM; ++ i)
+    {
+
+        threads[i] = std::thread(&DistributedPatternMiner::growPatternsDepthFirstTask,this,i);
+        // threads[i] = std::thread([this]{this->growPatternsDepthFirstTask(i);}); // using C++11 lambda-expression
+    }
+
+    for (unsigned int i = 0; i < THREAD_NUM; ++ i)
+    {
+        threads[i].join();
+    }
+
+    // release allLinks
+    allLinks.clear();
+    (HandleSeq()).swap(allLinks);
+
+    if (THREAD_NUM > 1)
+    {
+        for (unsigned int ti = 0; ti < THREAD_NUM; ti ++)
+            delete [] (thread_DF_ExtractedLinks[ti]);
+
+        delete [] thread_DF_ExtractedLinks;
+
+        delete [] all_thread_ExtractedLinks_pergram;
+
+    }
+
+    delete [] threads;
+
+    cout << "\nFinished mining 1~" << MAX_GRAM << " gram patterns.\n";
+    cout << "\nprocessedLinkNum = " << processedLinkNum << std::endl;
+
+    delete [] patternJsonArrays;
+    cout << "Totally "<< cur_worker_mined_pattern_num << " patterns found!\n";
+}
+
+void DistributedPatternMiner::growPatternsDepthFirstTask(unsigned int thread_index)
+{
+
+    // The start index in allLinks for current thread
+    unsigned int start_index = linksPerThread * thread_index;
+    unsigned int end_index; // the last index for current thread (excluded)
+
+    if (thread_index == THREAD_NUM - 1)
+    {
+        // if this the last thread, it
+        // needs to finish all the
+        // rest of the links
+        if (only_mine_patterns_start_from_white_list)
+            end_index = allLinksContainWhiteKeywords.size();
+        else
+            end_index = allLinkNumber;
+    }
+    else
+        end_index = linksPerThread * (thread_index + 1);
+
+    cout << "\nStart thread " << thread_index << ": will process Link number from " << start_index
+         << " to (excluded) " << end_index << std::endl;
+
+    patternJsonArrays[thread_index] = json::value::array();
+
+    float allLinkNumberfloat = ((float)(end_index - start_index));
+    for(unsigned int t_cur_index = start_index; t_cur_index < end_index; ++t_cur_index)
+    {
+        readNextLinkLock.lock();
+        cout<< "\r" << ((float)(t_cur_index - start_index))/allLinkNumberfloat*100.0f << "% completed in Thread " + toString(thread_index) + "."; // it's not liner
+        std::cout.flush();
+
+        processedLinkNum ++;
+
+        Handle cur_link;
+
+        if (only_mine_patterns_start_from_white_list)
+            cur_link = allLinksContainWhiteKeywords[t_cur_index];
+        else
+            cur_link = allLinks[t_cur_index];
+
+        readNextLinkLock.unlock();
+
+        if (! only_mine_patterns_start_from_white_list)
+        {
+            // if this link is ingonre type, ignore it
+            if (isIgnoredType( cur_link->getType()))
+            {
+                continue;
+            }
+
+
+            if (use_keyword_black_list)
+            {
+                // if the content in this link contains content in the black list,ignore it
+                if (containIgnoredContent(cur_link))
+                    continue;
+            }
+        }
+
+        // Add this link into observingAtomSpace
+        HandleSeq outgoingLinks, outVariableNodes;
+
+        swapOneLinkBetweenTwoAtomSpace(originalAtomSpace, observingAtomSpace, cur_link, outgoingLinks, outVariableNodes);
+        Handle newLink = observingAtomSpace->add_link(cur_link->getType(), outgoingLinks);
+        newLink->merge(cur_link->getTruthValue());
+
+
+        // Extract all the possible patterns from this originalLink, and extend till the max_gram links, not duplicating the already existing patterns
+        HandleSeq lastGramLinks;
+        map<Handle,Handle> lastGramValueToVarMap;
+        map<Handle,Handle> patternVarMap;
+
+        set<string> allNewMinedPatternsCurTask;
+
+
+        // allHTreeNodesCurTask is only used in distributed version;
+        // is to store all the HTreeNode* mined in this current task, and release them after the task is finished.
+        vector<HTreeNode*> allHTreeNodesCurTask;
+
+        // allNewMinedPatternInfo is only used in distributed version, to store all the new mined patterns in this task for sending to the server.
+        vector<MinedPatternInfo> allNewMinedPatternInfo;
+
+
+        actualProcessedLinkLock.lock();
+        actualProcessedLinkNum ++;
+        actualProcessedLinkLock.unlock();
+
+        extendAPatternForOneMoreGramRecursively(newLink, observingAtomSpace, Handle::UNDEFINED, lastGramLinks, 0, lastGramValueToVarMap,
+                                                patternVarMap, false, allNewMinedPatternsCurTask, allHTreeNodesCurTask, allNewMinedPatternInfo, thread_index);
+
+
+        // send new mined patterns to the server
+        for (MinedPatternInfo& pInfo : allNewMinedPatternInfo)
+            addPatternsToJsonArrayBuf(pInfo.curPatternKeyStr, pInfo.parentKeyString, pInfo.extendedLinkIndex, patternJsonArrays[thread_index]);
+
+        // release all the HTreeNodes created in this task
+        // clean up the pattern atomspace, do not need to keep patterns in atomspace when run as a distributed worker
+        if (THREAD_NUM == 1)
+            atomSpace->clear(); // can only clear the atomspace when only 1 thread is used
+
+        for(unsigned int hNodeNum = 0; hNodeNum < allHTreeNodesCurTask.size(); hNodeNum ++)
+        {
+            delete (allHTreeNodesCurTask[hNodeNum]);
+        }
+
+
+    }
+
+    if (patternJsonArrays[thread_index].size() > 0)
+        sendPatternsToCentralServer(patternJsonArrays[thread_index]);
+
+    cout<< "\r100% completed in Thread " + toString(thread_index) + ".";
+    std::cout.flush();
+}
+
+void DistributedPatternMiner::addPatternsToJsonArrayBuf(string curPatternKeyStr, string parentKeyString,  unsigned int extendedLinkIndex, json::value &patternJsonArray)
+{
+
     try
     {
 
@@ -243,7 +441,7 @@ void PatternMiner::addPatternsToJsonArrayBuf(string curPatternKeyStr, string par
 }
 
 // this function will empty patternJsonArray after sent
-void PatternMiner::sendPatternsToCentralServer(json::value &patternJsonArray)
+void DistributedPatternMiner::sendPatternsToCentralServer(json::value &patternJsonArray)
 {
 
     uri_builder builder(U("/FindNewPatterns"));
@@ -286,7 +484,7 @@ void PatternMiner::sendPatternsToCentralServer(json::value &patternJsonArray)
 }
 
 // send request, get response back
-bool PatternMiner::sendRequest(http_request &request, http_response &response)
+bool DistributedPatternMiner::sendRequest(http_request &request, http_response &response)
 {
     pplx::task<http_response> task = httpClient->request(request);
 

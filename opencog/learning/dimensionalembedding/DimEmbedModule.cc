@@ -28,16 +28,19 @@
 #include <string>
 #include <utility>
 
-#define DEPRECATED_ATOMSPACE_CALLS
 #include <opencog/atomspaceutils/AtomSpaceUtils.h>
 #include <opencog/atoms/base/ClassServer.h>
+#include <opencog/atoms/base/Link.h>
+#include <opencog/atoms/base/Node.h>
 #include <opencog/truthvalue/SimpleTruthValue.h>
 #include <opencog/guile/SchemePrimitive.h>
 #include <opencog/util/exceptions.h>
 #include <opencog/util/Logger.h>
+
 extern "C" {
 #include <opencog/util/cluster.h>
 }
+
 #include "DimEmbedModule.h"
 
 using namespace opencog;
@@ -50,7 +53,9 @@ DECLARE_MODULE(DimEmbedModule)
 DimEmbedModule::DimEmbedModule(CogServer& cs) : Module(cs)
 {
     logger().info("[DimEmbedModule] constructor");
-    this->as = &_cogserver.getAtomSpace();
+    as = &_cogserver.getAtomSpace();
+    _bank = &attentionbank(as);
+
     addedAtomConnection = as->
         addAtomSignal(boost::bind(&DimEmbedModule::handleAddSignal, this, _1));
     removedAtomConnection = as->
@@ -62,7 +67,7 @@ DimEmbedModule::DimEmbedModule(CogServer& cs) : Module(cs)
 DimEmbedModule::~DimEmbedModule()
 {
     logger().info("[DimEmbedModule] destructor");
-    addedAtomConnection.disconnect();   
+    addedAtomConnection.disconnect();
     removedAtomConnection.disconnect();
     tvChangedConnection.disconnect();
 }
@@ -219,7 +224,7 @@ void DimEmbedModule::addPivot(Handle h, Type linkType, bool fanin)
             "DimensionalEmbedding requires link type, not %s",
             classserver().getTypeName(linkType).c_str());
     bool symmetric = classserver().isA(linkType,UNORDERED_LINK);
-    if (!fanin) h->incVLTI();//We don't want pivot atoms to be forgotten...
+    if (!fanin) _bank->inc_vlti(h); //We don't want pivot atoms to be forgotten...
     HandleSeq nodes;
     as->get_handles_by_type(std::back_inserter(nodes), NODE, true);
 
@@ -264,8 +269,8 @@ void DimEmbedModule::addPivot(Handle h, Type linkType, bool fanin)
         u->getIncomingSet(back_inserter(newLinks));
         for (HandleSeq::iterator it=newLinks.begin(); it!=newLinks.end(); ++it){
             //ignore links that aren't a subtype of linkType
-            if (!classserver().isA(as->get_type(*it),linkType)) continue;
-            TruthValuePtr linkTV = as->get_TV(*it);
+            if (!classserver().isA((*it)->getType(), linkType)) continue;
+            TruthValuePtr linkTV = (*it)->getTruthValue();
             HandleSeq newNodes = (*it)->getOutgoingSet();
             HandleSeq::iterator it2=newNodes.begin();
             //if !fanin, we're following the "outward" links, so it's only a
@@ -282,7 +287,7 @@ void DimEmbedModule::addPivot(Handle h, Type linkType, bool fanin)
                 }
             }
             for (;it2!=newNodes.end(); ++it2) {
-                if (!as->is_node(*it2)) continue;
+                if (!(*it2)->isNode()) continue;
                 double alt =
                     distMap[u] * linkTV->getMean() * linkTV->getConfidence();
                 double oldDist=distMap[*it2];
@@ -606,7 +611,7 @@ void DimEmbedModule::clearEmbedding(Type linkType)
 
     HandleSeq pivots  = pivotsMap[linkType];
     for (HandleSeq::iterator it = pivots.begin(); it!=pivots.end(); ++it) {
-        if (as->is_valid_handle(*it)) (*it)->decVLTI();
+        if (as->is_valid_handle(*it)) _bank->dec_vlti(*it);
     }
     if (symmetric) {
         atomMaps.erase(linkType);
@@ -632,7 +637,7 @@ void DimEmbedModule::logAtomEmbedding(Type linkType)
     oss << "PIVOTS:" << std::endl;
     for (HandleSeq::const_iterator it=pivots.begin(); it!=pivots.end(); ++it){
         if (as->is_valid_handle(*it)) {
-            oss << as->atom_as_string(*it,true) << std::endl;
+            oss << (*it)->toShortString() << std::endl;
         } else {
             oss << "[PIVOT'S BEEN DELETED]" << std::endl;
         }
@@ -641,7 +646,7 @@ void DimEmbedModule::logAtomEmbedding(Type linkType)
     AtomEmbedding::const_iterator it;
     for (it=atomEmbedding.begin(); it!=atomEmbedding.end(); ++it){
         if (as->is_valid_handle(it->first)) {
-            oss << as->atom_as_string(it->first,true) << " : (";
+            oss << (it->first)->toShortString() << " : (";
         } else {
             oss << "[NODE'S BEEN DELETED H=" << it->first << "] : (";
         }
@@ -668,10 +673,10 @@ void DimEmbedModule::printEmbedding()
         AtomEmbedding::const_iterator it;
         for (it=atomEmbedding.begin(); it!=atomEmbedding.end(); ++it){
             if (as->is_valid_handle(it->first)) {
-                oss << as->atom_as_string(it->first,true) << " : (";
+                oss << (it->first)->toShortString() << " : (";
             } else {
                 oss << "[NODE'S BEEN DELETED. handle=";
-                oss << it->first << "] : (";
+                oss << it->first.value() << "] : (";
             }
             const std::vector<double>& embedVector = it->second;
             for (std::vector<double>::const_iterator it2=embedVector.begin();
@@ -871,8 +876,7 @@ void DimEmbedModule::addKMeansClusters(Type l, int maxClusters,
             double dist = euclidDist(centroid,embedVec);
             //TODO: we should do some normalizing of this probably...
             double strength = sqrt(std::pow(2.0, -dist));
-            TruthValuePtr tv(SimpleTruthValue::createTV(strength,
-                                SimpleTruthValue::confidenceToCount(strength)));
+            TruthValuePtr tv(SimpleTruthValue::createTV(strength, strength));
             Handle hi = as->add_link(INHERITANCE_LINK, *it2, newNode);
             hi->merge(tv);
 
@@ -885,8 +889,7 @@ void DimEmbedModule::addKMeansClusters(Type l, int maxClusters,
             //the link between a clusterNode and an attribute (pivot) is
             //a weighted average of the cluster's members' links to the pivot
             double attrStrength = sqrt(strNumer[i]/strDenom[i]);
-            TruthValuePtr tv(SimpleTruthValue::createTV(attrStrength,
-                                SimpleTruthValue::confidenceToCount(attrStrength)));
+            TruthValuePtr tv(SimpleTruthValue::createTV(attrStrength, attrStrength));
             Handle hi = as->add_link(l, newNode, pivots[i]);
             hi->merge(tv);
         }
@@ -960,7 +963,7 @@ Handle DimEmbedModule::blendNodes(Handle n1,
         throw InvalidParamException(TRACE_INFO,
             "DimensionalEmbedding requires link type, not %s",
             classserver().getTypeName(l).c_str());
-    if (!as->is_node(n1) || !as->is_node(n2))
+    if (!n1->isNode() || !n2->isNode())
         throw InvalidParamException(TRACE_INFO,
                                     "blendNodes requires two nodes.");
     if (!isEmbedded(l)) {
@@ -990,13 +993,12 @@ Handle DimEmbedModule::blendNodes(Handle n1,
         double dist2 = p2.distance(cTree.k_nearest_neighbors(p2,1)[0]);
         if (dist1>dist2) newVec[i]=embedVec2[i];
     }
-    std::string prefix("blend_"+as->get_name(n1)+"_"+as->get_name(n2)+"_");
+    std::string prefix("blend_"+n1->toString()+"_"+n2->toString()+"_");
     Handle newNode = add_prefixed_node(*as, n1->getType(), prefix);
 
     for (unsigned int i=0; i<numDims; i++) {
         double strength = sqrt(newVec[i]);
-        TruthValuePtr tv(SimpleTruthValue::createTV(strength,
-                            SimpleTruthValue::confidenceToCount(strength)));
+        TruthValuePtr tv(SimpleTruthValue::createTV(strength, strength));
         Handle hi = as->add_link(l, newNode, pivots[i]);
         hi->merge(tv);
     }

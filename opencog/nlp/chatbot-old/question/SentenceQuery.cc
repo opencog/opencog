@@ -377,7 +377,7 @@ void SentenceQuery::solve(AtomSpace *as, Handle sentence_node)
 
 	// Find the variables, so that they can be bound.
 	bound_vars.clear();
-	std::vector<Handle>::const_iterator i;
+	HandleSeq::const_iterator i;
 	for (i = normed_predicate.begin();
 	     i != normed_predicate.end(); ++i)
 	{
@@ -401,7 +401,7 @@ void SentenceQuery::solve(AtomSpace *as, Handle sentence_node)
 	pme = new PatternMatchEngine();
 	pme->set_atomspace(atom_space);
 
-	std::vector<Handle> ign;
+	HandleSeq ign;
 	pme->match(this, bound_vars, normed_predicate, ign);
 }
 

@@ -1,8 +1,7 @@
 /*
  * opencog/attention/HebbianUpdatingAgent.h
  *
- * Copyright (C) 2008 by OpenCog Foundation
- * Written by Joel Pitt <joel@fruitionnz.com>
+ * Written by Roman Treutlein
  * All Rights Reserved
  *
  * This program is free software; you can redistribute it and/or modify
@@ -21,13 +20,15 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _OPENCOG_HEBBIAN_LEARNING_AGENT_H
-#define _OPENCOG_HEBBIAN_LEARNING_AGENT_H
+#ifndef _OPENCOG_HEBBIAN_UPDATING_AGENT_H
+#define _OPENCOG_HEBBIAN_UPDATING_AGENT_H
 
 #include <string>
-#include <opencog/util/Logger.h>
+#include <iostream>
+#include <sstream>
 
-#define DEPRECATED_ATOMSPACE_CALLS
+#include <opencog/util/RandGen.h>
+
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/truthvalue/AttentionValue.h>
 #include <opencog/cogserver/server/Agent.h>
@@ -38,61 +39,21 @@ namespace opencog
  *  @{
  */
 
-class CogServer;
-
-/** Agent that carries out simple Hebbian learning.
+class AttentionBank;
+/**
+ * This Agent randomly picks an Atom and updates all the outgoing HebbianLinks
  *
- * @note Only updates existing HebbianLinks.
- * @todo Support SymmetricInverseHebbianLinks and AsymmetricHebbianLinks
- * @todo Support Hebbian links with arity > 2
+ * This Agents is supposed to run in it's own Thread.
+ *
+ * XXX: If there are to few Links they get updated to oft -> fast
+ * TODO: The exact way to calculate the new/target TV might be improved
  */
 class HebbianUpdatingAgent : public Agent
 {
-
-protected:
-    AtomSpace* a;
-
-	/** Work out the conjunction between a series of handles.
-	 *
-	 * The returned value is the correlation between distance in/out of
-	 * the attentional focus. STI of atoms are normalised (separately
-	 * for atoms within the attentional focus and those below it) and then
-	 * multiplied. Only returns a non zero value if at least one atom
-	 * is in the attentional focus.
-	 *
-	 * @param handles A vector of handles to calculate the conjunction for.
-	 * @return conjunction between -1 and 1.
-	 * @todo create a method for working out conjunction between more than
-	 * two atoms.
-	 */
-    float targetConjunction(std::vector<Handle> handles);
-
-	/** Transform STI into a normalised STI value between -1 and 1.
-	 *
-	 * @param s STI to normalise.
-	 * @return the normalised STI between -1.0 and 1.0
-	 */
-    float getNormSTI(AttentionValue::sti_t s);
-
-	/** Rearrange the the vector so that the one with a positive normalised
-	 * STI is at the front.
-	 *
-	 * @param outgoing Vector to rearrange.
-	 * @return rearranged vector.
-	 */
-    std::vector<Handle>& moveSourceToFront(std::vector<Handle> &outgoing);
-
-    /** Set the agent's logger object
-     *
-     * Note, this will be deleted when this agent is.
-     *
-     * @param l The logger to associate with the agent.
-     */
-    void setLogger(Logger* l);
-
-    void setMean(Handle h, float tc);
-
-    Logger *log; //!< Logger object for Agent
+private:
+    AttentionBank* _bank;
+    double targetConjunction(HandleSeq handles);
+    void updateHebbianLinks(Handle source);
 
 public:
 
@@ -103,33 +64,13 @@ public:
     }
 
     HebbianUpdatingAgent(CogServer&);
-    virtual ~HebbianUpdatingAgent();
     virtual void run();
-
-    /** Return the agent's logger object
-     *
-     * @return A logger object.
-     */
-    Logger* getLogger();
-
-    //! Whether to convert links to/from InverseHebbianLinks as necessary.
-    bool convertLinks;
-
-    //! Maximum allowable LTI of a link to be converted.
-    AttentionValue::lti_t conversionThreshold;
-
-	/** Update the TruthValues of the HebbianLinks in the AtomSpace.
-     *
-     * @todo Make link strength decay parameter configurable. Currently
-     * hard-code, ugh.
-     */
-    void hebbianUpdatingUpdate();
 
 }; // class
 
 typedef std::shared_ptr<HebbianUpdatingAgent> HebbianUpdatingAgentPtr;
 
 /** @}*/
-} // namespace
+}  // namespace
 
-#endif // _OPENCOG_HEBBIAN_LEARNING_AGENT_H
+#endif // _OPENCOG_HEBBIAN_UPDATING_AGENT_H

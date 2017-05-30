@@ -24,111 +24,87 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "NetworkServer.h"
-
-#include <boost/bind.hpp>
-
 #include <opencog/util/Logger.h>
-#include <opencog/util/exceptions.h>
-#include <opencog/util/platform.h>
+#include <opencog/cogserver/server/ConsoleSocket.h>
+
+#include "NetworkServer.h"
 
 using namespace opencog;
 
-NetworkServer::NetworkServer()
-    : _started(false), _running(false), _thread(0)
+NetworkServer::NetworkServer(unsigned short port) :
+    _running(false),
+    _port(port),
+    _acceptor(_io_service,
+        boost::asio::ip::tcp::endpoint(boost::asio::ip::tcp::v4(), port))
 {
     logger().debug("[NetworkServer] constructor");
+
+    run();
 }
 
 NetworkServer::~NetworkServer()
 {
     logger().debug("[NetworkServer] enter destructor");
 
-    for (SocketPort* sp : _listeners) delete sp;
+    stop();
+
     logger().debug("[NetworkServer] all threads joined, exit destructor");
-}
-
-extern "C" {
-static void* _opencog_run_wrapper(void* arg)
-{
-    logger().debug("[NetworkServer] run wrapper");
-    NetworkServer* ns = (NetworkServer*) arg;
-    ns->run();
-    return NULL;
-}
-}
-
-void NetworkServer::start()
-{
-    if (_running) {
-        logger().warn("server has already started");
-        return;
-    }
-
-    pthread_attr_t attr;
-    pthread_attr_init(&attr);
-    pthread_attr_setscope(&attr, PTHREAD_SCOPE_PROCESS);
-    pthread_attr_setinheritsched(&attr, PTHREAD_EXPLICIT_SCHED);
-    pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
-
-    // create thread
-    int rc = pthread_create(&_thread, &attr, _opencog_run_wrapper, this);
-    if (rc != 0) {
-        logger().error("Unable to start network server thread: %d", rc);
-        _running = false;
-        _started = false;
-        return;
-    }
-    _started = true;
-    _running = true;
 }
 
 void NetworkServer::stop()
 {
-    logger().debug("[NetworkServer] stop");
+    if (not _running) return;
     _running = false;
-    io_service.stop();
-    if (_thread != 0)
-        pthread_join(_thread, NULL);
-} 
+
+    boost::system::error_code ec;
+    _acceptor.cancel(ec);
+    _io_service.stop();
+
+    // Booost::asio hangs, despite the above.  Brute-force it to
+    // get it's head out of it's butt, and do the right thing.
+    pthread_cancel(_listener_thread->native_handle());
+
+    _listener_thread->join();
+    _listener_thread = nullptr;
+}
+
+void NetworkServer::listen()
+{
+    printf("Listening on port %d\n", _port);
+    while (_running)
+    {
+        // The call to _acceptor.accept() will block this thread until
+        // a network connection is made. Thus, we defer the creation
+        // of the connection handler thread until after accept()
+        // returns.  However, the boost design violates RAII principles,
+        // so instead, what we do is to hand off the socket created here,
+        // to the ServerSocket class, which will delete it, when the
+        // connection socket closes (just before the connection handler
+        // thread exits).  That is why there is no delete of the *ss
+        // below, and that is why there is the weird self-delete at the
+        // end of ServerSocket::handle_connection().
+        boost::asio::ip::tcp::socket* sock = new boost::asio::ip::tcp::socket(_io_service);
+        _acceptor.accept(*sock);
+
+        // The total number of concurrently open sockets is managed by
+        // keeping a count in ConsoleSocket, and blocking when there are
+        // too many.
+        ConsoleSocket* ss = new ConsoleSocket();
+        ss->set_connection(sock);
+        std::thread(&ConsoleSocket::handle_connection, ss).detach();
+    }
+}
 
 void NetworkServer::run()
 {
-    logger().debug("[NetworkServer] run");
-    while (_running) {
-        try {
-            io_service.run();
-        } catch (boost::system::system_error& e) {
-            logger().error("Error in boost::asio io_service::run() => %s", e.what());
-        }
-        usleep(50000); // avoids busy wait
-    }
-    logger().debug("[NetworkServer] end of run");
-    _started = false;
-}
+    if (_running) return;
+    _running = true;
 
-namespace opencog {
-struct equal_to_port : public std::binary_function<const SocketPort*, const unsigned short &, bool>
-{
-    bool operator()(const SocketPort* sock, const unsigned short &port) {
-        SocketPort* s = const_cast<SocketPort*>(sock);
-        return ((s->getPort()) == port);
+    try {
+        _io_service.run();
+    } catch (boost::system::system_error& e) {
+        logger().error("Error in boost::asio io_service::run() => %s", e.what());
     }
-};
-}
 
-bool NetworkServer::removeListener(const unsigned short port)
-{
-    logger().debug("[NetworkServer] removing listener bound to port %d", port);
-    std::vector<SocketPort*>::iterator l = 
-        std::find_if(_listeners.begin(), _listeners.end(),
-                     boost::bind(equal_to_port(), _1, port));
-    if (l == _listeners.end()) {
-        logger().warn("unable to remove listener from port %d", port);
-        return false;
-    }
-    SocketPort* sp = *l;
-    _listeners.erase(l);
-    delete sp;
-    return true;
+    _listener_thread = new std::thread(&NetworkServer::listen, this);
 }

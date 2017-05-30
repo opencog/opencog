@@ -42,19 +42,15 @@ namespace opencog
  *  @{
  */
 
-class PythonShellModule;
-
 class PythonShell: public GenericShell
 {
-    friend class PythonShellModule; // needs to call set_socket
-protected:
-    void set_socket(ConsoleSocket *);
-
+private:
+    GenericEval* evaluator;
 public:
     PythonShell(void);
     virtual ~PythonShell();
-    virtual void eval(const std::string &, ConsoleSocket *);
-    virtual void socketClosed(void);
+    virtual GenericEval* get_evaluator(void);
+    virtual void eval(const std::string &);
 };
 
 /** @}*/

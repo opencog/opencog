@@ -6,21 +6,21 @@
 ; Linas Vepstas August 2009
 ;
 ; -----------------------------------------------------------------------
-; Make an implication link, which can, by pattern amtching, validate 
+; Make an implication link, which can, by pattern matching, validate
 ; the indicated hypothesis. The hypothesis is assumed to be a particular
 ; EvaluationLink.  This essentially creates a simple deductive
 ; inheritance chain, i.e. if we want to prove P->Q then we explore
 ; all variabvles V such that P->V->Q. In opencog, the arrows -> are
 ; labelled by PredicateNodes. For example, consider Becky the cat.
-; Then P==Becky Q==animal and the arrow -> is is-a, the hypothesis 
-; is then is-a(Becky,animal) or .. 
+; Then P==Becky Q==animal and the arrow -> is is-a, the hypothesis
+; is then is-a(Becky,animal) or ..
 ;
 ;    EvaluationLink
 ;       PredicateNode "is-a"
 ;       ListLink
 ;          ConceptNode "Becky"
 ;          ConceptNode "animal"
-; 
+;
 ; and this routine will create an ImplicationLink 
 ; involving is-a(Becky, $var) AND is-a($var, animal)
 ; which can then be fulfilled by $var==cat.

@@ -9,6 +9,7 @@
 			(var-decl "$a-parse" "ParseNode")
 			(var-decl "$verb" "WordInstanceNode")
 			(var-decl "$qVar" "WordInstanceNode")
+			(var-decl "$verb-lemma" "WordNode")
 		)
 		(AndLink
 			(word-in-parse "$verb" "$a-parse")
@@ -17,18 +18,14 @@
 			(AbsentLink
 				(Lemma (Variable "$verb") (Word "be"))
 			)
+			(word-lemma "$verb" "$verb-lemma")
 		)
 		(ExecutionOutputLink
-			(GroundedSchemaNode "scm: pre-when-q-rule")
+			(GroundedSchemaNode "scm: when-rule")
 			(ListLink
+				(VariableNode "$verb-lemma")
 				(VariableNode "$verb")
 			)
 		)
 	)
-)
-
-; This is function is not needed. It is added so as not to break the existing
-; r2l pipeline.
-(define-public (pre-when-q-rule verb)
-	(when-rule (cog-name (word-inst-get-lemma verb)) (cog-name verb))
 )

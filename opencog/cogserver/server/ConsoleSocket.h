@@ -25,10 +25,10 @@
 #ifndef _OPENCOG_CONSOLE_SOCKET_H
 #define _OPENCOG_CONSOLE_SOCKET_H
 
+#include <condition_variable>
+#include <mutex>
 #include <string>
-#include <tr1/memory>
 
-#include <opencog/cogserver/server/RequestResult.h>
 #include <opencog/cogserver/shell/GenericShell.h>
 #include <opencog/cogserver/server/ServerSocket.h>
 
@@ -38,116 +38,121 @@ namespace opencog
  *  @{
  */
 
-class Request;
-
-
 /**
  * This class implements the ServerSocket that handles the primary
- * interface of the cogserver: the plain text command line. 
+ * interface of the cogserver: the plain text command line.
  *
- * There may be multiple instances of ConsoleSocket to support multiple 
- * simultaneous clients. This is done by creating a separate thread and 
- * dispatching a client socket for each client that connects to the 
+ * There may be multiple instances of ConsoleSocket to support multiple
+ * simultaneous clients. This is done by creating a separate thread and
+ * dispatching a client socket for each client that connects to the
  * server socket.
  *
- * We provide a callback method from the IRPCSocket interface: 
- * 'OnRequestCompleted()'. This callback signals the server socket 
- * that request processing has finished (so that the we may 
- * synchronously send the command prompt to the client but process the 
- * request 'asynchronously' on the cogserver's main thread.
- *
- * As required by the Request abstract class, the ConsoleSocket class
- * also implements the IHasMimeType interface, defining its mime-type
- * as 'text/plain'.
- *
+ * We provide a callback method: 'OnRequestCompleted()'. This callback
+ * tells the server socket that request processing has finished (so that
+ * the command prompt can be sent to the client immediately, while the
+ * request itself is processed 'asynchronously'.
  */
-class ConsoleSocket : public ServerSocket,
-                      public RequestResult
+class ConsoleSocket : public ServerSocket
 {
-
 private:
-
-    Request* _request;
-    std::string _buffer;
     GenericShell *_shell;
 
-public:
+    static std::string _prompt;
 
-    /** ConsoleSocket's constructor. Defines the socket's mime-type as
-     *  'text/plain' and the enables the Socket's 'line protocol'
-     */
-    ConsoleSocket(boost::asio::io_service& _io_service);
+    // We need the use-count and the condition variables to avoid races
+    // between asynchronous socket closures and unsent replies. So, for
+    // example, the user may send a command, but then close the socket
+    // before the reply is sent.  The boost::asio code notices the
+    // closed socket, and ServerSocket::handle_connection() exits it's
+    // loop, and then tries to destruct this class and exit the thread
+    // that has been handling the socket i/o. We have to hold off this
+    // destruction, until all of the users of this class have completed
+    // thier work. We accomplish this with a use-count: each in-flight
+    // request increments the use-count, and then decrements it when done.
+    // The destructor can run only when the use-count has dropped to zero.
+    //
+    // Sockets with a shell on them will typically have a use-count of
+    // zero already; these use a different method of holding off the dtor.
+    // Basically, the shell dtor has to run first, before the
+    // ServerSocket::handle_connection() invokes this dtor.
+    volatile unsigned int _use_count;
+    std::mutex _in_use_mtx;
+    std::condition_variable _in_use_cv;
 
-    /** ConsoleSocket's destructor. */
-    ~ConsoleSocket();
+    // A count of the number of concurrent open sockets. This is used
+    // to limit the number of connections to the cogserver, so that it
+    // doesn't crash with a `accept: Too many open files` error.
+    static unsigned int _max_open_sockets;
+    static volatile unsigned int _num_open_sockets;
+    static std::mutex _max_mtx;
+    static std::condition_variable _max_cv;
 
-    /** Connection callback: called whenever a new connection arrives
+protected:
+
+    /**
+     * Connection callback: called whenever a new connection arrives
      */
     void OnConnection(void);
 
-    /** OnLine callback: called when a new command/request is revieved
-     *  from the client. It parses the command line by splitting it into
-     *  space-separated tokens.
+    /**
+     * OnLine callback: called when a new command/request is received
+     * from the client. It parses the command line by splitting it into
+     * space-separated tokens.
      *
-     *  The first token is used as the requests id/name and the
-     *  remaining tokens are used as the request's parameters. The
-     *  request name is used to retrieve the request class from the
-     *  cogserver.
+     * The first token is used as the request's id/name and the
+     * remaining tokens are used as the request's parameters. The
+     * request name is used to identify the request type.
      *
-     *  If the class is not found, we execute the 'HelpRequest' which
-     *  will return a useful message to the client.
+     * If the request type is not found, we execute the 'HelpRequest',
+     * which will return a useful message to the client.
      *
-     *  If the request class is found, we instantiate a new request,
-     *  set its parameters and push it to the cogserver's request queue
-     *  (*unless* the request instance has disabled the line protocol;
-     *  see the OnRawData() method documentation).
+     * If the request class is found, we instantiate a new request,
+     * set its parameters and push it to the cogserver's request queue.
      */
-    void OnLine            (const std::string& line);
+    void OnLine(const std::string&);
 
-    /** Some requests may require input that spans multiple lines. To
-     *  handle these cases, the request should disable the socket's
-     *  line protocol when the method 'Request.setSocket' is called.
-     *
-     *  If the line protocol is disabled, this callback will be called
-     *  whenever the client sends data to server. The current
-     *  implementation pushes the input to a buffer until a special
-     *  character sequence is sent: "^D\r\n" (or "^D\n"). Then, the
-     *  server adds the input buffer to the request's parameter list
-     *  and pushes the request to the cogserver's request queue.
-     *  Parsing the contents of input buffer is naturally, up to
-     *  the request itself.
+public:
+    /**
+     * Ctor. Defines the socket's mime-type as 'text/plain' and then
+     * configures the Socket to use line protocol.
      */
-    void OnRawData         (const char * buf, size_t len);
+    ConsoleSocket(void);
+    ~ConsoleSocket();
 
-    /** OnRequestComplete: called when a request has finished. It
-     *  just sends another command prompt (configuration parameter
-     *  "PROMPT") to the client.
+    void get() { std::unique_lock<std::mutex> lck(_in_use_mtx); _use_count++; }
+    void put() { std::unique_lock<std::mutex> lck(_in_use_mtx); _use_count--; _in_use_cv.notify_all(); }
+
+    /**
+     * OnRequestComplete: called when a request has finished. It
+     * just sends another command prompt (configuration parameter
+     * "PROMPT") to the client.
      */
-    void OnRequestComplete ();
+    void OnRequestComplete();
 
-    /** Called when this is assigned to a DataRequest
-     */ 
-    void SetDataRequest();
-
-    /** Sends a request result to the client
-      */
-    void SendResult(const std::string& res);
+    /**
+     * Sends a request result to the client,
+     */
+    void SendResult(const std::string&);
 
     void sendPrompt();
 
-    /** Called when a Request exits the connection
-     */ 
+    /**
+     * Called when a Request exits the connection
+     */
     void Exit();
 
-    /** SetShell: Declare an alternate shell, that will perform all
-     *  command line processing.
+    /**
+     * SetShell: Declare an alternate shell, that will perform all
+     * command line processing.
      */
     void SetShell(GenericShell *);
 
-    /** Gets the tcp socket 
+    /**
+     * Assorted debugging utilities.
      */
-    tcp::socket& getSocket(void);
-
+    unsigned int get_use_count() const { return _use_count; }
+    unsigned int get_max_open_sockets() const { return _max_open_sockets; }
+    unsigned int get_num_open_sockets() const { return _num_open_sockets; }
 }; // class
 
 /** @}*/

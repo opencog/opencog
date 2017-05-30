@@ -51,44 +51,28 @@ PythonShell::~PythonShell()
     //	if (evaluator) delete evaluator;
 }
 
-/**
- * Register this shell with the console.
- */
-void PythonShell::set_socket(ConsoleSocket *s)
+GenericEval* PythonShell::get_evaluator(void)
 {
-    // Let the generic shell do the basic work.
-    GenericShell::set_socket(s);
-
     // We are using a singlton instance here, because the current
     // Python evaluator isn't thread safe.  If/when it does become
     // thread-safe, we should probably go multi-threaed, instead.
     if (!evaluator) evaluator = &PythonEval::instance();
+    return evaluator;
 }
 
-void PythonShell::eval(const std::string &expr, ConsoleSocket *s)
+void PythonShell::eval(const std::string &expr)
 {
     bool selfie = self_destruct;
     self_destruct = false;
-    GenericShell::eval(expr, s);
+    GenericShell::eval(expr);
     if (selfie) {
-        self_destruct = true;
-
         // Eval an empty string as a end-of-file marker. This is needed
-        // to flush pending input in the python sehll, as otherwise,
+        // to flush pending input in the python shell, as otherwise,
         // there is no way to know that no more python input will
         // arrive!
-        GenericShell::do_eval("");
+        GenericShell::eval("");
+        self_destruct = true;
     }
-}
-
-void PythonShell::socketClosed(void)
-{
-    // Eval an empty string as a end-of-file marker. This is needed
-    // to flush pending input in the python sehll, as otherwise,
-    // there is no way to know that no more python input will
-    // arrive!
-    GenericShell::do_eval("");
-    GenericShell::socketClosed();
 }
 
 #endif

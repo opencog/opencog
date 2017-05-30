@@ -21,16 +21,21 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <opencog/guile/load-file.h>
 #include <opencog/guile/SchemeEval.h>
 #include <opencog/guile/SchemeSmob.h>
+#include <opencog/atoms/base/Handle.h>
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/util/Config.h>
+#include <opencog/rule-engine/Rule.h>
 #include <opencog/util/Logger.h>
+#include <opencog/util/algorithm.h>
 #include <opencog/query/BindLinkAPI.h>
 #include <cxxtest/TestSuite.h>
+#include <string>
+#include <vector>
 
+using namespace std;
 using namespace opencog;
+using namespace std;
 
 class PLNRulesUTest: public CxxTest::TestSuite
 {
@@ -42,6 +47,7 @@ public:
 	PLNRulesUTest() : eval(&as)
 	{
 		logger().set_level(Logger::DEBUG);
+		logger().set_timestamp_flag(false);
 		logger().set_print_to_stdout_flag(true);
 	}
 
@@ -54,23 +60,28 @@ public:
 
 	void setUp();
 	void tearDown();
+	void load_scm_files(std::vector<std::string>);
 
 	void test_deduction();
-	void test_and_construction();
-	void test_or_construction();
-	void test_not_construction();
+	void test_and_introduction();
+	void test_or_introduction();
+	void test_not_introduction();
 	void test_forall_full_instantiation();
 	void test_forall_partial_instantiation();
 	void test_forall_implication_to_higher_order();
 	void test_implication_full_instantiation();
+	void test_implication_full_instantiation_extra_variables();
 	void test_implication_partial_instantiation();
-	void test_implication_lambda_distribution();
+	void test_implication_scope_to_implication();
 	void test_and_lambda_distribution();
 	void test_implication_implicant_distribution();
-	void test_implication_construction();
-	void test_lambda_grounded_construction();
-	void test_equivalence_to_double_implication();
+	void test_implication_introduction();
+	void test_closed_lambda_introduction();
+	void test_equivalence_to_implication();
 	void test_implication_and_lambda_factorization();
+	void test_implication_implicant_conjunction();
+	void test_implication_direct_evaluation();
+	void test_conditional_full_instantiation_meta_rule();
 };
 
 void PLNRulesUTest::tearDown()
@@ -79,110 +90,122 @@ void PLNRulesUTest::tearDown()
 
 void PLNRulesUTest::setUp()
 {
-	load_scm_files_from_config(as);
-
-	eval.eval("(add-to-load-path \"/usr/local/share/opencog/scm\")");
+	string cur_ppp_dir = string(PROJECT_SOURCE_DIR),
+		cur_dir = cur_ppp_dir + "/tests/pln/rules";
+	vector<string> load_paths = {cur_ppp_dir, cur_dir};
+	for (string& p : load_paths)
+	{
+		string eval_str = string("(add-to-load-path \"") + p + string("\")");
+		eval.eval(eval_str);
+	}
 
 	eval.eval("(use-modules (opencog))");
 	eval.eval("(use-modules (opencog query))");
 	eval.eval("(use-modules (opencog logger))");
+	eval.eval("(use-modules (opencog rule-engine))");
+	eval.eval("(use-modules (srfi srfi-1))");
+}
+
+void PLNRulesUTest::load_scm_files(std::vector<std::string> files)
+{
+	std::string hd("(load-from-path \"");
+	std::string tl("\")");
+	for (auto f: files) {
+		string result = eval.eval(hd + f + tl);
+		logger().debug() << "[PLNRulesUTest] Loaded \"" << f << "\":"
+		                 << std::endl << result;
+	}
 }
 
 #define getarity(hand) LinkCast(hand)->getArity()
 
 /**
- * Tests the deduction rule (deduction-rule) defined in:
- * opencog/pln/rules/deduction-rule.scm
+ * tests the deduction rule (deduction-rule) defined in:
+ * opencog/pln/rules/term-logic/deduction-rule.scm
  */
 void PLNRulesUTest::test_deduction()
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
 	as.clear();
-    
-	config().set("SCM_PRELOAD",
-	             "tests/pln/rules/simple-assertions.scm, "
-	             "opencog/pln/rules/deduction-rule.scm");
-	load_scm_files_from_config(as);
-    
+
+	load_scm_files({"tests/pln/rules/simple-assertions.scm",
+				    "opencog/pln/rules/term-logic/deduction-rule.scm"});
+
 	Handle results;
-    
+
 	// To start with, it should only know that men are humans
 	results = eval.eval_h("(cog-bind find-humans)");
 	TS_ASSERT_EQUALS(1, getarity(results));
-    
-	// Apply the deduction rule
+
+	// Apply the rule
 	eval.eval_h("(cog-bind deduction-inheritance-rule)");
-       
+
 	// After applying the deduction rule, it should know that all 3 of the
 	// instances of men are also humans (Socrates, Einstein, and Peirce)
 	results = eval.eval_h("(cog-bind find-humans)");
+
+	logger().debug() << "results = " << results->toString();
 
 	// 4 in total, man, Peirce, Einstein, Socrates
 	TS_ASSERT_EQUALS(4, getarity(results));
 }
 
 /**
- * Tests the and rule (and-construction-rule) defined in:
- * opencog/pln/rules/and-construction-rule.scm
+ * Tests the and rule (and-introduction-rule) defined in:
+ * opencog/pln/rules/wip/and-introduction-rule.scm
  */
-void PLNRulesUTest::test_and_construction()
+void PLNRulesUTest::test_and_introduction()
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
 	as.clear();
 
-	config().set("SCM_PRELOAD",
-	             "tests/pln/rules/simple-predicates.scm, "
-	             "opencog/pln/rules/and-construction-rule.scm");
-	load_scm_files_from_config(as);
+	load_scm_files({"tests/pln/rules/simple-predicates.scm",
+	                "opencog/pln/rules/wip/and-introduction-rule.scm"});
 
-	// Apply the and rule
-	Handle results = eval.eval_h("(cog-bind-af and-construction-rule)");
+	// Apply the rule
+	Handle results = eval.eval_h("(cog-bind-af and-introduction-rule)");
 
 	// It should contain 1 groundings, and(A, B)
 	TS_ASSERT_EQUALS(1, getarity(results));
 }
 
 /**
- * Tests the and rule (or-construction-rule) defined in:
- * opencog/pln/rules/or-construction-rule.scm
+ * Tests the and rule (or-introduction-rule) defined in:
+ * opencog/pln/rules/wip/or-introduction-rule.scm
  */
-void PLNRulesUTest::test_or_construction()
+void PLNRulesUTest::test_or_introduction()
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
 	as.clear();
 
-	config().set("SCM_PRELOAD",
-	             "tests/pln/rules/simple-predicates.scm, "
-	             "opencog/pln/rules/or-construction-rule.scm");
-	load_scm_files_from_config(as);
+	load_scm_files({"tests/pln/rules/simple-predicates.scm",
+	                "opencog/pln/rules/wip/or-introduction-rule.scm"});
 
-	// Apply the and rule
-	Handle results = eval.eval_h("(cog-bind-af or-construction-rule)");
+	// Apply the rule
+	Handle results = eval.eval_h("(cog-bind-af or-introduction-rule)");
 
 	// It should contain 1 groundings, or(A, B)
 	TS_ASSERT_EQUALS(1, getarity(results));
 }
 
 /**
- * Tests the not rule (not-construction-rule) defined in:
- * opencog/pln/rules/not-construction-rule.scm
+ * Tests the not rule (not-introduction-rule) defined in:
+ * opencog/pln/rules/wip/not-introduction-rule.scm
  */
-void PLNRulesUTest::test_not_construction()
+void PLNRulesUTest::test_not_introduction()
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
 	as.clear();
 
-	config().set("SCM_PRELOAD",
-	             "tests/pln/rules/simple-predicates.scm, "
-	             "opencog/pln/rules/not-construction-rule.scm");
-	load_scm_files_from_config(as);
+	load_scm_files({"tests/pln/rules/simple-predicates.scm",
+	               "opencog/pln/rules/wip/not-introduction-rule.scm"});
 
-	// Apply the and rule
-	Handle results = eval.eval_h("(cog-bind-af not-construction-rule)");
+	// Apply the rule
+	Handle results = eval.eval_h("(cog-bind-af not-introduction-rule)");
 
 	// It should contain 2 groundings, not(A), not(B)
 	TS_ASSERT_EQUALS(2, getarity(results));
@@ -190,7 +213,7 @@ void PLNRulesUTest::test_not_construction()
 
 /**
  * Test the pln-forall-instantiation-rule defined in:
- * opencog/pln/rules/forall-instantiation-rule.scm
+ * opencog/pln/rules/wip/forall-instantiation-rule.scm
  */
 void PLNRulesUTest::test_forall_full_instantiation()
 {
@@ -198,17 +221,15 @@ void PLNRulesUTest::test_forall_full_instantiation()
 
 	as.clear();
 
-	config().set("SCM_PRELOAD",
-	             "tests/pln/rules/simple-forall.scm, "
-	             "opencog/pln/rules/forall-instantiation-rule.scm");
-	load_scm_files_from_config(as);
+	load_scm_files({"tests/pln/rules/simple-forall.scm",
+	                "opencog/pln/rules/wip/forall-instantiation-rule.scm"});
 
-	// Apply the and rule
+	// Apply the rule
 	Handle rule = eval.eval_h("forall-full-instantiation-rule");
 	Handle results = bindlink(&as, rule);
 
 	/**
-	 * It should contain 3 groundings:
+	 * It should contain 4 groundings:
 	 *
 	 * 1. EvaluationLink
 	 *       PredicateNode "is-predicate"
@@ -223,13 +244,21 @@ void PLNRulesUTest::test_forall_full_instantiation()
 	 *       ListLink
 	 *          <some-concept>
 	 *          <some-predicate>
+	 *
+	 * 4. ImplicationScopeLink
+	 *       EvaluationLink
+	 *          PredicateNode "P"
+	 *          <some-concept>
+	 *       EvaluationLink
+	 *          PredicateNode "P"
+	 *          <some-concept>
 	 */
 	TS_ASSERT_EQUALS(4, getarity(results));
 }
 
 /**
  * Test the pln-forall-instantiation-rule defined in:
- * opencog/pln/rules/forall-instantiation-rule.scm
+ * opencog/pln/rules/wip/forall-instantiation-rule.scm
  */
 void PLNRulesUTest::test_forall_partial_instantiation()
 {
@@ -237,12 +266,10 @@ void PLNRulesUTest::test_forall_partial_instantiation()
 
 	as.clear();
 
-	config().set("SCM_PRELOAD",
-	             "tests/pln/rules/simple-forall.scm, "
-	             "opencog/pln/rules/forall-instantiation-rule.scm");
-	load_scm_files_from_config(as);
+	load_scm_files({"tests/pln/rules/simple-forall.scm",
+	                "opencog/pln/rules/wip/forall-instantiation-rule.scm"});
 
-	// Apply the and rule
+	// Apply the rule
 	Handle rule = eval.eval_h("forall-partial-instantiation-rule");
 	Handle results = bindlink(&as, rule);
 
@@ -266,12 +293,10 @@ void PLNRulesUTest::test_forall_implication_to_higher_order()
 
 	as.clear();
 
-	config().set("SCM_PRELOAD",
-	             "tests/pln/rules/simple-forall.scm, "
-	             "opencog/pln/rules/forall-implication-to-higher-order-rule.scm");
-	load_scm_files_from_config(as);
+	load_scm_files({"tests/pln/rules/simple-forall.scm",
+	                "opencog/pln/rules/wip/forall-implication-to-higher-order-rule.scm"});
 
-	// Apply the and rule
+	// Apply the rule
 	Handle rule = eval.eval_h("forall-implication-to-higher-order-rule");
 	Handle results = bindlink(&as, rule);
 	Handle expected = eval.eval_h
@@ -289,7 +314,7 @@ void PLNRulesUTest::test_forall_implication_to_higher_order()
 		 "            (VariableNode \"$X\")"
 		 "            (TypeNode \"ConceptNode\"))"
 		 "         (EvaluationLink"
-		 "            (PredicateNode \"Q\")"
+		 "            (PredicateNode \"P\")"
 		 "            (VariableNode \"$X\")))))");
 
 	logger().debug() << "results = " << results->toString();
@@ -300,7 +325,7 @@ void PLNRulesUTest::test_forall_implication_to_higher_order()
 
 /**
  * Test implication-full-instantiation-rule defined in:
- * opencog/pln/rules/implication-instantiation-rule.scm
+ * opencog/pln/rules/wip/implication-instantiation-rule.scm
  */
 void PLNRulesUTest::test_implication_full_instantiation()
 {
@@ -308,12 +333,10 @@ void PLNRulesUTest::test_implication_full_instantiation()
 
 	as.clear();
 
-	config().set("SCM_PRELOAD",
-	             "tests/pln/rules/simple-implication.scm, "
-	             "opencog/pln/rules/implication-instantiation-rule.scm");
-	load_scm_files_from_config(as);
+	load_scm_files({"tests/pln/rules/simple-implication.scm",
+	                "opencog/pln/rules/wip/implication-instantiation-rule.scm"});
 
-	// Apply the and rule
+	// Apply the rule
 	Handle rule = eval.eval_h("implication-full-instantiation-rule");
 	Handle results = bindlink(&as, rule);
 	Handle expected = eval.eval_h
@@ -334,8 +357,38 @@ void PLNRulesUTest::test_implication_full_instantiation()
 }
 
 /**
+ * Test implication-full-instantiation-rule defined in:
+ * opencog/pln/rules/wip/implication-instantiation-rule.scm
+ */
+void PLNRulesUTest::test_implication_full_instantiation_extra_variables()
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	as.clear();
+
+	load_scm_files({"tests/pln/rules/implication-extra-variables.scm",
+	                "opencog/pln/rules/wip/implication-instantiation-rule.scm"});
+
+	// Apply the rule
+	Handle rule = eval.eval_h("implication-full-instantiation-rule");
+	Handle results = bindlink(&as, rule);
+	Handle expected = eval.eval_h
+		("(SetLink"
+		 "   (EvaluationLink"
+		 "      (PredicateNode \"Q\")"
+		 "      (ListLink"
+		 "         (ConceptNode \"A\")"
+		 "         (ConceptNode \"A\"))))");
+
+	logger().debug() << "results = " << results->toString();
+	logger().debug() << "expected = " << expected->toString();
+
+	TS_ASSERT_EQUALS(results, expected);
+}
+
+/**
  * Test implication-partial-instantiation-rule defined in:
- * opencog/pln/rules/implication-instantiation-rule.scm
+ * opencog/pln/rules/wip/implication-instantiation-rule.scm
  */
 void PLNRulesUTest::test_implication_partial_instantiation()
 {
@@ -343,12 +396,10 @@ void PLNRulesUTest::test_implication_partial_instantiation()
 
 	as.clear();
 
-	config().set("SCM_PRELOAD",
-	             "tests/pln/rules/simple-implication.scm, "
-	             "opencog/pln/rules/implication-instantiation-rule.scm");
-	load_scm_files_from_config(as);
+	load_scm_files({"tests/pln/rules/simple-implication.scm",
+	                "opencog/pln/rules/wip/implication-instantiation-rule.scm"});
 
-	// Apply the and rule
+	// Apply the rule
 	Handle rule = eval.eval_h("implication-partial-instantiation-rule");
 	Handle results = bindlink(&as, rule);
 
@@ -356,7 +407,7 @@ void PLNRulesUTest::test_implication_partial_instantiation()
 	// (partial instantiation occurs on $X or $Y).
 	Handle possible_results_1 = eval.eval_h
 		("(SetLink"
-		 "   (ImplicationLink"
+		 "   (ImplicationScopeLink"
 		 "      (TypedVariableLink"
 		 "         (VariableNode \"$X\")"
 		 "         (TypeNode \"ConceptNode\"))"
@@ -372,7 +423,7 @@ void PLNRulesUTest::test_implication_partial_instantiation()
 		 "            (VariableNode \"$X\")))))");
 	Handle possible_results_2 = eval.eval_h
 		("(SetLink"
-		 "   (ImplicationLink"
+		 "   (ImplicationScopeLink"
 		 "      (TypedVariableLink"
 		 "         (VariableNode \"$Y\")"
 		 "         (TypeNode \"ConceptNode\"))"
@@ -387,27 +438,29 @@ void PLNRulesUTest::test_implication_partial_instantiation()
 		 "            (VariableNode \"$Y\")"
 		 "            (ConceptNode \"A\")))))");
 
+	logger().debug() << "results = " << results->toString();
+	logger().debug() << "possible_results_1 = " << possible_results_1->toString();
+	logger().debug() << "possible_results_2 = " << possible_results_2->toString();
+
 	TS_ASSERT((results == possible_results_1)
 	          or (results == possible_results_2));
 }
 
 /**
- * Test implication-partial-instantiation-rule defined in:
- * opencog/pln/rules/implication-instantiation-rule.scm
+ * Test implication-scope-to-implication-rule defined in:
+ * opencog/pln/rules/wip/implication-scope-to-implication-rule.scm
  */
-void PLNRulesUTest::test_implication_lambda_distribution()
+void PLNRulesUTest::test_implication_scope_to_implication()
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
 	as.clear();
 
-	config().set("SCM_PRELOAD",
-	             "tests/pln/rules/simple-implication.scm, "
-	             "opencog/pln/rules/implication-lambda-distribution-rule.scm");
-	load_scm_files_from_config(as);
+	load_scm_files({"tests/pln/rules/simple-implication.scm",
+	                "opencog/pln/rules/wip/implication-scope-to-implication-rule.scm"});
 
-	// Apply the and rule
-	Handle rule = eval.eval_h("implication-lambda-distribution-rule");
+	// Apply the rule
+	Handle rule = eval.eval_h("implication-scope-to-implication-rule");
 	Handle results = bindlink(&as, rule);
 	Handle expected = eval.eval_h
 		("(SetLink"
@@ -477,7 +530,7 @@ void PLNRulesUTest::test_implication_lambda_distribution()
 
 /**
  * Test and-lambda-distribution-rule defined in:
- * opencog/pln/rules/and-lambda-distribution-rule.scm
+ * opencog/pln/rules/wip/and-lambda-distribution-rule.scm
  */
 void PLNRulesUTest::test_and_lambda_distribution()
 {
@@ -485,12 +538,10 @@ void PLNRulesUTest::test_and_lambda_distribution()
 
 	as.clear();
 
-	config().set("SCM_PRELOAD",
-	             "tests/pln/rules/simple-lambda.scm, "
-	             "opencog/pln/rules/and-lambda-distribution-rule.scm");
-	load_scm_files_from_config(as);
+	load_scm_files({"tests/pln/rules/simple-lambda.scm",
+	                "opencog/pln/rules/wip/and-lambda-distribution-rule.scm"});
 
-	// Apply the and rule
+	// Apply the rule
 	Handle rule = eval.eval_h("and-lambda-distribution-rule");
 	Handle results = bindlink(&as, rule);
 	Handle expected = eval.eval_h
@@ -515,7 +566,7 @@ void PLNRulesUTest::test_and_lambda_distribution()
 
 /**
  * Test implication-implicant-distribution-rule defined in:
- * opencog/pln/rules/implication-implicant-distribution-rule.scm
+ * opencog/pln/rules/wip/implication-implicant-distribution-rule.scm
  */
 void PLNRulesUTest::test_implication_implicant_distribution()
 {
@@ -523,12 +574,10 @@ void PLNRulesUTest::test_implication_implicant_distribution()
 
 	as.clear();
 
-	config().set("SCM_PRELOAD",
-	             "tests/pln/rules/simple-implication.scm, "
-	             "opencog/pln/rules/implication-implicant-distribution-rule.scm");
-	load_scm_files_from_config(as);
+	load_scm_files({"tests/pln/rules/simple-implication.scm",
+	                "opencog/pln/rules/wip/implication-implicant-distribution-rule.scm"});
 
-	// Apply the and rule
+	// Apply the rule
 	Handle rule = eval.eval_h("implication-implicant-distribution-rule");
 	Handle results = bindlink(&as, rule);
 	Handle expected = eval.eval_h
@@ -546,22 +595,20 @@ void PLNRulesUTest::test_implication_implicant_distribution()
 }
 
 /**
- * Test implication-construction-rule defined in:
- * opencog/pln/rules/implication-construction-rule.scm
+ * Test implication-introduction-rule defined in:
+ * opencog/pln/rules/wip/implication-introduction-rule.scm
  */
-void PLNRulesUTest::test_implication_construction()
+void PLNRulesUTest::test_implication_introduction()
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
 	as.clear();
 
-	config().set("SCM_PRELOAD",
-	             "tests/pln/rules/simple-predicates.scm, "
-	             "opencog/pln/rules/implication-construction-rule.scm");
-	load_scm_files_from_config(as);
+	load_scm_files({"tests/pln/rules/simple-predicates.scm",
+	                "opencog/pln/rules/wip/implication-introduction-rule.scm"});
 
-	// Apply the and rule
-	Handle rule = eval.eval_h("implication-construction-rule");
+	// Apply the rule
+	Handle rule = eval.eval_h("implication-introduction-rule");
 	Handle results = bindlink(&as, rule);
 	Handle expected = eval.eval_h
 		("(SetLink"
@@ -579,66 +626,67 @@ void PLNRulesUTest::test_implication_construction()
 }
 
 /**
- * Test lambda-fully-grounded-construction-rule defined in:
- * opencog/pln/rules/lambda-fully-grounded-construction-rule.scm
+ * Test closed-lambda-introduction-rule defined in:
+ * opencog/pln/rules/wip/closed-lambda-introduction-rule.scm
  */
-void PLNRulesUTest::test_lambda_grounded_construction()
+void PLNRulesUTest::test_closed_lambda_introduction()
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
 	as.clear();
 
-	config().set("SCM_PRELOAD",
-	             "tests/pln/rules/simple-lambda.scm, "
-	             "opencog/pln/rules/lambda-grounded-construction-rule.scm");
-	load_scm_files_from_config(as);
+	load_scm_files({"tests/pln/rules/simple-lambda.scm",
+	                "opencog/pln/rules/wip/closed-lambda-introduction-rule.scm"});
 
-	// Apply the and rule
-	Handle rule = eval.eval_h("lambda-grounded-construction-rule");
+	// Apply the rule
+	Handle rule = eval.eval_h("closed-lambda-introduction-rule");
 	Handle results = bindlink(&as, rule);
 	Handle expected = eval.eval_h
-		("(SetLink"
-		 "   (LambdaLink"
-		 "      (VariableNode \"$X\")"
-		 "      (EvaluationLink"
-		 "         (PredicateNode \"P\")"
-		 "         (ConceptNode \"A\"))))");
+		("(LambdaLink"
+		 "   (VariableNode \"$X\")"
+		 "   (EvaluationLink"
+		 "      (PredicateNode \"P\")"
+		 "      (ConceptNode \"A\")))");
 
 	std::cout << "results = " << results->toString();
 	std::cout << "expected = " << expected->toString();
 
-	TS_ASSERT_EQUALS(results, expected);
+	// Rather than enumerating all possible constructions we just make
+	// sure the one that matters is in there.
+	std::set<Handle> sss;
+	for (auto h : results->getOutgoingSet()) sss.insert(h);
+	TS_ASSERT(is_in(expected, sss));
 }
 
 /**
- * Test equivalence-to-double-implication-rule defined in:
- * opencog/pln/rules/equivalence-to-double-implication-rule.scm
+ * Test equivalence-to-implication-rule defined in:
+ * opencog/pln/rules/wip/equivalence-to-implication-rule.scm
  */
-void PLNRulesUTest::test_equivalence_to_double_implication()
+void PLNRulesUTest::test_equivalence_to_implication()
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
 	as.clear();
 
-	config().set("SCM_PRELOAD",
-	             "tests/pln/rules/simple-equivalence.scm, "
-	             "opencog/pln/rules/equivalence-to-double-implication-rule.scm");
-	load_scm_files_from_config(as);
+	load_scm_files({"tests/pln/rules/simple-equivalence.scm",
+	                "opencog/pln/rules/wip/equivalence-to-implication-rule.scm"});
 
-	// Apply the and rule
-	Handle rule = eval.eval_h("equivalence-to-double-implication-rule");
-	Handle results = bindlink(&as, rule);
+	// Apply the rule
+	Handle rule_alias =
+		eval.eval_h("equivalence-to-implication-rule-name"),
+		rbs = as.add_node(CONCEPT_NODE, "dummy rbs"),
+		rule_ml = as.add_link(MEMBER_LINK, rule_alias, rbs);
+	Rule rule(rule_ml);
+	Handle results = bindlink(&as, rule.get_rule());
 	Handle expected = eval.eval_h(
 		"(SetLink"
-		"  (ListLink"
-		"    (ImplicationLink"
-		"      (PredicateNode \"P\")"
-		"      (PredicateNode \"Q\")"
-		"    )"
-		"    (ImplicationLink"
-		"      (PredicateNode \"Q\")"
-		"      (PredicateNode \"P\")"
-		"    )"
+		"  (ImplicationLink"
+		"    (PredicateNode \"P\")"
+		"    (PredicateNode \"Q\")"
+		"  )"
+		"  (ImplicationLink"
+		"    (PredicateNode \"Q\")"
+		"    (PredicateNode \"P\")"
 		"  )"
 		")");
 
@@ -658,44 +706,175 @@ void PLNRulesUTest::test_implication_and_lambda_factorization()
 
 	as.clear();
 
-	config().set("SCM_PRELOAD",
-	             "tests/pln/rules/simple-lambda.scm, "
-	             "opencog/pln/rules/implication-and-lambda-factorization-rule.scm");
-	load_scm_files_from_config(as);
+	load_scm_files({"tests/pln/rules/simple-lambda.scm",
+	                "opencog/pln/rules/wip/implication-and-lambda-factorization-rule.scm"});
 
-	// Apply the and rule
+	// Apply the rule
 	Handle rule = eval.eval_h("implication-and-lambda-factorization-rule");
 	Handle results = bindlink(&as, rule);
 	Handle expected = eval.eval_h
 		("(SetLink"
-		 "   (ImplicationLink"
-		 "      (AndLink"
-		 "         (LambdaLink"
-		 "            (VariableNode \"$X\")"
-		 "            (AndLink"
-		 "               (EvaluationLink"
-		 "                  (PredicateNode \"P\")"
-		 "                  (VariableNode \"$X\"))"
-		 "               (EvaluationLink"
-		 "                  (PredicateNode \"Q\")"
-		 "                  (VariableNode \"$X\"))))"
-		 "         (LambdaLink"
-		 "            (VariableNode \"$X\")"
-		 "            (EvaluationLink"
-		 "               (PredicateNode \"P\")"
-		 "               (ConceptNode \"A\"))))"
+		 "  (ImplicationLink"
+		 "    (AndLink"
 		 "      (LambdaLink"
-		 "         (VariableNode \"$X\")"
-		 "         (AndLink"
-		 "            (EvaluationLink"
-		 "               (PredicateNode \"P\")"
-		 "               (ConceptNode \"A\"))"
-		 "            (EvaluationLink"
-		 "               (PredicateNode \"P\")"
-		 "               (VariableNode \"$X\"))"
-		 "            (EvaluationLink"
-		 "               (PredicateNode \"Q\")"
-		 "               (VariableNode \"$X\"))))))");
+		 "        (VariableNode \"$X\")"
+		 "        (EvaluationLink"
+		 "          (PredicateNode \"Q\")"
+		 "          (VariableNode \"$X\")"
+		 "        )"
+		 "      )"
+		 "      (LambdaLink"
+		 "        (VariableNode \"$X\")"
+		 "        (EvaluationLink"
+		 "          (PredicateNode \"P\")"
+		 "          (VariableNode \"$X\")"
+		 "        )"
+		 "      )"
+		 "    )"
+		 "    (LambdaLink"
+		 "      (VariableNode \"$X\")"
+		 "      (AndLink"
+		 "        (EvaluationLink"
+		 "          (PredicateNode \"P\")"
+		 "          (VariableNode \"$X\")"
+		 "        )"
+		 "        (EvaluationLink"
+		 "          (PredicateNode \"Q\")"
+		 "          (VariableNode \"$X\")"
+		 "        )"
+		 "      )"
+		 "    )"
+		 "  )"
+		 ")");
+
+	std::cout << "results = " << results->toString();
+	std::cout << "expected = " << expected->toString();
+
+	TS_ASSERT_EQUALS(results, expected);
+}
+
+void PLNRulesUTest::test_implication_implicant_conjunction()
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	as.clear();
+
+	load_scm_files({"tests/pln/rules/simple-implication-implicant-conjunction.scm",
+	                "opencog/pln/rules/wip/implication-implicant-conjunction-rule.scm"});
+
+	// Apply the rule
+	Handle rule = eval.eval_h("implication-implicant-conjunction-rule");
+	Handle results = bindlink(&as, rule);
+	Handle expected = eval.eval_h
+		("(SetLink"
+		 "   (Implication"
+		 "      (And"
+		 "         (Predicate \"P1\")"
+		 "         (Predicate \"P2\"))"
+		 "      (Predicate \"Q\")))");
+
+	std::cout << "results = " << results->toString();
+	std::cout << "expected = " << expected->toString();
+
+	TS_ASSERT_EQUALS(results, expected);
+}
+
+/**
+ * test implication-direct-evaluation-rule defined in:
+ * opencog/pln/rules/implication-direct-evaluation-rule.scm
+ */
+void PLNRulesUTest::test_implication_direct_evaluation()
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	as.clear();
+
+	load_scm_files({"tests/pln/rules/implication-direct-evaluation.scm",
+	                "opencog/pln/rules/wip/implication-direct-evaluation-rule.scm"});
+
+	// Apply the rule
+	Handle rule = eval.eval_h("implication-direct-evaluation-rule");
+	Handle results = bindlink(&as, rule);
+	Handle expected = eval.eval_h
+		("(SetLink"
+		 "   (ImplicationLink"
+		 "      (PredicateNode \"P\")"
+		 "      (PredicateNode \"Q\"))"
+		 "   (ImplicationLink"
+		 "      (PredicateNode \"Q\")"
+		 "      (PredicateNode \"P\")))");
+
+	std::cout << "results = " << results->toString();
+	std::cout << "expected = " << expected->toString();
+
+	TS_ASSERT_EQUALS(results, expected);
+}
+
+/**
+ * test implication-direct-evaluation-rule defined in:
+ * opencog/pln/meta-rules/predicate-logic/conditional-full-instantiation-meta-rule
+ */
+void PLNRulesUTest::test_conditional_full_instantiation_meta_rule()
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	as.clear();
+
+	load_scm_files({"tests/pln/rules/simple-implication-scope.scm",
+	                "opencog/pln/meta-rules/predicate-logic/conditional-full-instantiation-meta-rule.scm"});
+
+	// Apply the rule
+	Handle rule = eval.eval_h("conditional-full-instantiation-implication-scope-meta-rule");
+	Handle results = bindlink(&as, rule);
+	Handle expected = eval.eval_h
+		("(SetLink"
+		 "  (BindLink"
+		 "    (TypedVariableLink"
+		 "      (VariableNode \"$X\")"
+		 "      (TypeNode \"ConceptNode\")"
+		 "    )"
+		 "    (AndLink"
+		 "      (EvaluationLink"
+		 "        (GroundedPredicateNode \"scm: gt-zero-confidence\")"
+		 "        (EvaluationLink"
+		 "          (PredicateNode \"P\")"
+		 "          (VariableNode \"$X\")"
+		 "        )"
+		 "      )"
+		 "      (EvaluationLink"
+		 "        (PredicateNode \"P\")"
+		 "        (VariableNode \"$X\")"
+		 "      )"
+		 "    )"
+		 "    (ExecutionOutputLink"
+		 "      (GroundedSchemaNode \"scm: conditional-full-instantiation-scope-formula\")"
+		 "      (ListLink"
+		 "        (EvaluationLink"
+		 "          (PredicateNode \"Q\")"
+		 "          (VariableNode \"$X\")"
+		 "        )"
+		 "        (EvaluationLink"
+		 "          (PredicateNode \"P\")"
+		 "          (VariableNode \"$X\")"
+		 "        )"
+		 "        (ImplicationScopeLink"
+		 "          (TypedVariableLink"
+		 "            (VariableNode \"$X\")"
+		 "            (TypeNode \"ConceptNode\")"
+		 "          )"
+		 "          (EvaluationLink"
+		 "            (PredicateNode \"P\")"
+		 "            (VariableNode \"$X\")"
+		 "          )"
+		 "          (EvaluationLink"
+		 "            (PredicateNode \"Q\")"
+		 "            (VariableNode \"$X\")"
+		 "          )"
+		 "        )"
+		 "      )"
+		 "    )"
+		 "  )"
+		 ")");
 
 	std::cout << "results = " << results->toString();
 	std::cout << "expected = " << expected->toString();

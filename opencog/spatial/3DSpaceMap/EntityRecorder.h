@@ -40,13 +40,13 @@ namespace opencog
             // when calling removeNoneBlockEntity()
             BlockVector getLastAppearedLocation(const Handle& entityHandle) const;
             Handle getEntity(const BlockVector& pos) const;
-            const set<Handle>& getAllAvatarList() const{return mAllAvatarList;};
+            const OrderedHandleSet& getAllAvatarList() const{return mAllAvatarList;};
 
             template<typename Out>
                 Out findAllEntities(Out out) const
             {
                 // only calculate the non-block entities and block entities, no including the blocks
-                std::vector<Handle> EntityList;
+                HandleSeq EntityList;
 
                 for ( auto it = mAllNoneBlockEntities.begin();
                       it != mAllNoneBlockEntities.end(); ++it ) {
@@ -66,8 +66,8 @@ namespace opencog
         private:
 
             Handle mSelfAgentEntity;
-            set<Handle> mAllNoneBlockEntities;
-            set<Handle> mAllAvatarList;
+            OrderedHandleSet mAllNoneBlockEntities;
+            OrderedHandleSet mAllAvatarList;
             multimap<BlockVector, Handle> mPosToNoneBlockEntityMap;
             //Note that even the entity isn't on the map, we still record it here
             map< Handle, vector< pair<unsigned long,BlockVector> > > mNoneBlockEntitieshistoryLocations;

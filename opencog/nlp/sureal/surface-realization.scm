@@ -10,9 +10,12 @@
              (ice-9 threads) ; needed for par-map
              (ice-9 rdelim) (ice-9 regex) (ice-9 receive))
 (use-modules (opencog))
+(use-modules (opencog exec))
 (use-modules (opencog nlp)
              (opencog nlp lg-dict)
              (opencog nlp relex2logic))
+
+(use-modules (opencog logger))
 
 ; ---------------------------------------------------------------------
 ; Creates a single list  made of the elements of lists within it with
@@ -32,7 +35,39 @@
 )
 
 ; ---------------------------------------------------------------------
+(define-public (reset-sureal-cache dummy)
+    (reset-cache)
+)
+
 (define-public (sureal a-set-link)
+"
+  sureal SETLINK -- main entry point for sureface realization
+
+  Expect SETLINK to be a SetLink -- since it is assumed that the
+  output of the micro-planner is unordered.
+"
+    ;; (cog-logger-info "sureal a-set-link = ~a" a-set-link)
+    (if (equal? 'SetLink (cog-type a-set-link))
+        (let ((interpretations (cog-chase-link 'ReferenceLink 'InterpretationNode a-set-link)))
+            (if (null? interpretations)
+                (delete-duplicates (create-sentence a-set-link #f))
+                (get-sentence interpretations)
+            )
+        )
+        (display "Please input a SetLink only")
+    )
+)
+
+;; This "cached" version of sureal is used by Microplanner.
+;;
+;; The idea is to cache the results from the calls to SuRealPCMB,
+;; which is the PaternMatcher callback object (see PatternMatcher documentation).
+;;
+;; This cached version makes sense for Microplanner because it performs a lot of
+;; sureal queries with very similar inputs.
+;;
+;; The cache lifetime is a single call of a Microplanner query
+(define-public (cached-sureal a-set-link)
 "
   sureal SETLINK -- main entry point for sureface realization
 
@@ -42,7 +77,7 @@
     (if (equal? 'SetLink (cog-type a-set-link))
         (let ((interpretations (cog-chase-link 'ReferenceLink 'InterpretationNode a-set-link)))
             (if (null? interpretations)
-                (delete-duplicates (create-sentence a-set-link))
+                (create-sentence a-set-link #t)
                 (get-sentence interpretations)
             )
         )
@@ -52,7 +87,8 @@
 
 ; Returns a possible set of SuReals from an input SetLink
 ; * 'a-set-link' : A SetLink which is to be SuRealed
-(define (create-sentence a-set-link)
+; * 'use-cache' : A flag to specify that the cached version of SuReal should be used
+(define (create-sentence a-set-link use-cache)
     (define (construct-sntc mappings)
         ; get the words, skipping ###LEFT-WALL###
         (define words-seq (cdr (parse-get-words-in-order (interp-get-parse (caar mappings)))))
@@ -91,7 +127,7 @@
             (map
                 (lambda (w)
                     (if (equal? (cog-type w) 'WordInstanceNode)
-                        (word-inst-get-word-str w)
+                        (cog-name (word-inst-get-word w))
                         (cog-name w)
                     )
                 )
@@ -101,6 +137,9 @@
 
         (map construct-sntc-mapping (circular-list words-seq) (circular-list (cdar mappings)) (map cdr (cdr mappings)))
     )
+
+    ;; (cog-logger-info "create-sentence a-set-link = ~a, use-cache = ~a"
+    ;;                  a-set-link use-cache)
 
     ; add LG dictionary on each word if not already in the atomspace
     (par-map
@@ -114,10 +153,8 @@
                             (if (equal? (cog-type n) 'PredicateNode)
                                 (map
                                     (lambda (p)
-                                        (if (> (length (word-inst-get-word p)) 0)
-                                            ; TODO: There could be too many... skip if seen before?
-                                            (lg-get-dict-entry (WordNode (word-inst-get-word-str p)))
-                                        )
+                                        ; TODO: There could be too many... skip if seen before?
+                                        (lg-get-dict-entry (word-inst-get-word p))
                                     )
                                     (cog-chase-link 'LemmaLink 'WordInstanceNode (r2l-get-word n))
                                 )
@@ -125,16 +162,21 @@
                             (r2l-get-word n)
                         )
                     )
-                    (car (word-inst-get-word (r2l-get-word-inst n)))
+                    (word-inst-get-word (r2l-get-word-inst n))
                 )
             )
             (cog-get-all-nodes a-set-link)
         )
     )
 
-    (let* ((results (sureal-match a-set-link))
-           (interps (delete-duplicates (map car results))))
-        (append-map construct-sntc (map (lambda (i) (filter (lambda (r) (equal? (car r) i)) results)) interps))
+    ;; (cog-logger-info "Still there?")
+
+    (if use-cache
+        (cached-sureal-match a-set-link)
+        (let* ((results (sureal-match a-set-link))
+            (interps (delete-duplicates (map car results))))
+            (append-map construct-sntc (map (lambda (i) (filter (lambda (r) (equal? (car r) i)) results)) interps))
+        )
     )
 )
 
@@ -153,7 +195,13 @@
 ; This just takes the one of the many InterpretationNode.
 (define (get-sentence interpret-node-lst)
     (define parse (list-ref (cog-chase-link 'InterpretationLink 'ParseNode (list-ref interpret-node-lst 0)) 0))
-    (string-join (cdr (map word-inst-get-word-str (parse-get-words-in-order parse))))
+
+    ;; (cog-logger-info "create-sentence interpret-node-lst = ~a"
+    ;;                  interpret-node-lst)
+
+    (string-join (cdr (map
+        (lambda (winst) (cog-name (word-inst-get-word winst)))
+        (parse-get-words-in-order parse))))
 )
 
 
@@ -188,4 +236,52 @@
             (equal? (cog-name-clean (car out-set)) (cog-name-clean (cadr out-set)))
         )
     )
+)
+
+; ---------------------------------------------------------------------
+(define-public (filter-for-sureal a-list)
+"
+  filter-for-sureal A-LIST
+
+  Takes a list of atoms A-LIST and returns a SetLink containing atoms that
+  sureal can process.
+"
+    (define filter-in-pattern
+        (ScopeLink
+            (TypedVariable
+                (Variable "$filter-for-sureal")
+                (TypeChoice
+                    (Signature
+                        (Inheritance
+                            (Type "ConceptNode")
+                            (Type "ConceptNode")))
+                    (Signature
+                        (Implication
+                            (Type "PredicateNode")
+                            (Type "PredicateNode")))
+                    (Signature
+                        (Evaluation
+                            (Type "PredicateNode")
+                            (List
+                                (Type "ConceptNode")
+                                (Type "ConceptNode"))))
+                    (Signature
+                        (Evaluation
+                            (Type "PredicateNode")
+                            (ListLink
+                                (Type "ConceptNode"))))
+                ))
+            ; Return atoms with the given signatures
+            (Variable "$filter-for-sureal")
+        ))
+
+    (define filter-from (SetLink  a-list))
+
+    ; Do the filtering
+    (define result (cog-execute! (MapLink filter-in-pattern filter-from)))
+
+    ; Delete the filter-from SetLink and its encompasing MapLink.
+    (cog-delete-recursive filter-from)
+
+    result
 )

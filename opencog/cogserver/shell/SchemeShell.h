@@ -34,17 +34,16 @@ namespace opencog {
  *  @{
  */
 
-class SchemeShellModule;
-
 class SchemeShell : public GenericShell
 {
-	friend class SchemeShellModule; // needs to call set_socket()
 	protected:
 		void thread_init();
+		static std::string _prompt;
 
 	public:
 		SchemeShell(void);
 		virtual ~SchemeShell();
+		virtual GenericEval* get_evaluator(void);
 };
 
 /** @}*/

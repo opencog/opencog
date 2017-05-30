@@ -3,6 +3,11 @@
 ;
 ; Assorted utilties for checking R2L outputs.
 ;
+(use-modules (srfi srfi-1))
+
+(use-modules (opencog))
+(use-modules (opencog atom-types))
+(use-modules (opencog exec))
 
 ; -----------------------------------------------------------------------
 (define-public (r2l-get-root atom)
@@ -13,7 +18,7 @@
   in the case where RelEx2Logic is called with the r2l(...) function.
 "
 	(define iset (cog-incoming-set atom))
-	
+
 	; Halt when the SetLink that wraps around R2L outputs is reached.
 	; The SetLink is created by r2l(...)
 	(if (and (= (length iset) 1) (equal? 'SetLink (cog-type (car iset))))

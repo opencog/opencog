@@ -11,6 +11,9 @@
 			(var-decl "$pobj" "WordInstanceNode")
 			(var-decl "$qVar" "WordInstanceNode")
 			(var-decl "$be" "WordInstanceNode")
+			(var-decl "$subj-lemma" "WordNode")
+			(var-decl "$prep-lemma" "WordNode")
+			(var-decl "$pobj-lemma" "WordNode")
 		)
 		(AndLink
 			(word-in-parse "$subj" "$a-parse")
@@ -21,23 +24,20 @@
 			(dependency "_advmod" "$be" "$prep")
 			(dependency "_det" "$pobj" "$qVar")
 			(word-feat "$qVar" "which")
+			(word-lemma "$subj" "$subj-lemma")
+			(word-lemma "$prep" "$prep-lemma")
+			(word-lemma "$pobj" "$pobj-lemma")
 		)
 		(ExecutionOutputLink
-			(GroundedSchemaNode "scm: pre-whichpobjQ-rule")
+			(GroundedSchemaNode "scm: whichpobjQ-rule")
 			(ListLink
+				(VariableNode "$subj-lemma")
 				(VariableNode "$subj")
+				(VariableNode "$prep-lemma")
 				(VariableNode "$prep")
+				(VariableNode "$pobj-lemma")
 				(VariableNode "$pobj")
 			)
 		)
-	)
-)
-;;ToDo: XXX FIXME define whichpobjQ
-; This is function is not needed. It is added so as not to break the existing
-; r2l pipeline.
-(define-public (pre-whichpobjQ-rule subj prep pobj)
-	(whichpobjQ-rule (cog-name (word-inst-get-lemma  pobj)) (cog-name pobj)
-			  (cog-name (word-inst-get-lemma prep)) (cog-name prep)
-			  (cog-name (word-inst-get-lemma  subj)) (cog-name subj)
 	)
 )

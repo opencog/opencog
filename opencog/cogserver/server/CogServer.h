@@ -167,7 +167,7 @@ protected:
     std::mutex processRequestsMutex;
     concurrent_queue<Request*> requestQueue;
 
-    NetworkServer _networkServer;
+    NetworkServer* _networkServer;
 
     SystemActivityTable _systemActivityTable;
 
@@ -220,13 +220,10 @@ public:
     /** Starts the network server and adds the default command line
      *  server socket on the port specified by the configuration
      *  parameter SERVER_PORT */
-    virtual void enableNetworkServer(void);
+    virtual void enableNetworkServer(int port=17001);
 
     /** Stops the network server and closes all the open server sockets. */
     virtual void disableNetworkServer(void);
-
-    /** Returns a reference to the network server instance */
-    virtual NetworkServer& networkServer(void);
 
     /** Returns a reference to the system activity table instance */
     virtual SystemActivityTable& systemActivityTable(void);
@@ -260,13 +257,6 @@ public:
         ref. */
     virtual void loadModules(std::vector<std::string> module_paths =
                              std::vector<std::string>());
-
-    /** Load all Scheme modules specified in configuration file. If
-        module_paths is empty then DEFAULT_MODULE_PATHS is used
-        instead, which is why it is passed as copy instead of const
-        ref. */
-    virtual void loadSCMModules(std::vector<std::string> module_paths =
-                                std::vector<std::string>());
 
     /** Open database specified in configuration file */
     virtual void openDatabase();
@@ -332,7 +322,11 @@ public:
     /** Returns the class metadata from request class 'id'. */
     virtual const RequestClassInfo& requestInfo(const std::string& id) const;
 
-    /** Adds request to the end of the requests queue. */
+    /**
+     * Adds request to the end of the requests queue.
+     * Caution: after this push, the request might be executed and deleted
+     * in a different thread, and so it must NOT be referenced after the push!
+     */
     void pushRequest(Request* request) { requestQueue.push(request); }
 
     /** Removes and returns the first request from the requests queue. */

@@ -1,0 +1,1661 @@
+
+Misc development notes, in random order.
+---------------------------------------
+
+Would like to use continuations for the chat pipe ...
+However, it seems that scm_with_guile() has a continuation barrier
+in it. It appears that the barrier is overly pessimistic.
+
+(defiemaNode "x+y*10")
+      (ListLink
+         (NumberNode "2")
+         (NumberNode "4"))))
+e *myk* #f)
+
+(call/cc (lambda (k) (set! *myk* k)))
+
+(*myk* 42)
+
+
+scm_c_call_with_current_module
+scm_c_with_fluid
+
+ scm_dynwind_begin (SCM_F_DYNWIND_REWINDABLE);
+  scm_dynwind_fluid (fluid, value);
+  ans = cproc (cdata);
+  scm_dynwind_end ();
+
+
+=========================================================
+
+(define (declarative-rule interpretation_index)
+   (list (InheritanceLink interpretation_index
+      (DefinedLinguisticConceptNode "DeclarativeSpeechAct"))
+   )
+)
+
+(define (pre-decl-rule int-index)
+    (ListLink
+        (declarative-rule int-index)
+    )
+
+(DefinedLinguisticConceptNode "TruthQuerySpeechAct"))
+(InheritanceLink
+ (DefinedLinguisticConceptNode "InterrogativeSpeechAct"))
+(DefinedLinguisticConceptNode "ImperativeSpeechAct"))
+
+
+(use-modules (opencog exec))
+(nlp-parse "Who ate an apple?")
+(load "../opencog/nlp/relex2logic/rules/interrogative.scm")
+(load "../opencog/nlp/relex2logic/rules/in.scm")
+(load "../opencog/nlp/chatbot/processing-utils.scm")
+
+(InterpretationLink
+   (InterpretationNode
+"sentence@d38e2bc5-5c9d-447d-bbff-3c0b15b32d91_parse_0_interpretation_$X")
+   (ParseNode "sentence@d38e2bc5-5c9d-447d-bbff-3c0b15b32d91_parse_0"
+(stv 1 0.98210001))
+)
+
+why is there only one??  why is it not for the question?
+who creates the InterpretationLink ?
+who creates
+sentence@d38e2bc5-5c9d-447d-bbff-3c0b15b32d91_parse_0_interpretation_$X"
+??
+r2l-parse does ... how? in processing_utils...
+
+OK, but only the first one ever gets used ... fixed!
+
+====================================================
+
+* "Where is ...?" not identified as a question ..
+  "When is ..." identified as conjunction by relex!
+
+
+  Who works ...  What works ...
+  Who sets interrogative-FLAG (_$qVar, T)
+  "How is..."
+  "Why is ..? also broken.
+
+
+Where is the ball -- Q and Wq links
+
+(InheritanceLink (stv 1.0 1.0)
+   (WordInstanceNode "where@010c5f19-41d6-4b74-a4be-88a26f53d324")
+   (DefinedLinguisticConceptNode "where")
+)
+
+(ReferenceLink (stv 1.0 1.0)
+   (WordInstanceNode "where@010c5f19-41d6-4b74-a4be-88a26f53d324")
+   (WordNode "where")
+)
+
+
+scm/sentence-matching.scm:
+
+fixed! Relex was mis-behaving and R2L was using a fragile mechanism.
+
+Relex failed to mark 4 of the 6 WH-words as interrogatives!
+
+====================================================
+* (grounded-talk 'luser "Look to the left!") crashes
+   C++-EXCEPTION' with args `("cog-fc"
+
+  bug was the pre-SV-rule and definite-rule were running
+    word-inst-get-lemma on LEFT-WALL, got nil, and then crashed.
+  Fix to not run these rules when there is no lemma.
+
+====================================================
+
+(use-modules (opencog) (opencog nlp chatbot))
+(grounded-talk 'luser "Linas ate a cookie.")
+(grounded-talk 'luser "Who ate a cookie?")
+
+(grounded-talk 'luser "Linas ate an apple.")
+(grounded-talk 'luser "Who ate an apple?")
+
+(cog-get-atoms 'InheritanceLink)
+
+(cog-incoming-set (DefinedLinguisticConceptNode "DeclarativeSpeechAct"))
+
+
+
+(use-modules (opencog) (opencog nlp) (opencog nlp microplanning))
+(init-trace "/tmp/wtf")
+
+(define lap
+(SequentialAndLink
+   (InheritanceLink
+      (ConceptNode "Linas@862d2b73-dc84-4fc1-bc87-896476ba6541")
+      (ConceptNode "Linas"))
+   (EvaluationLink
+      (DefinedLinguisticPredicateNode "definite")
+      (ListLink
+         (ConceptNode "Linas@862d2b73-dc84-4fc1-bc87-896476ba6541")))
+   (ImplicationLink
+      (PredicateNode "ate@37537945-4593-4136-bc70-236f4c86c43c")
+      (PredicateNode "eat"))
+   (InheritanceLink
+      (ConceptNode "apple@5409a01f-f0d1-4665-af02-5811c9806b0e")
+      (ConceptNode "apple"))
+   (EvaluationLink
+      (PredicateNode "ate@37537945-4593-4136-bc70-236f4c86c43c")
+      (ListLink
+         (ConceptNode "Linas@862d2b73-dc84-4fc1-bc87-896476ba6541")
+         (ConceptNode "apple@5409a01f-f0d1-4665-af02-5811c9806b0e")))
+   (InheritanceLink
+      (SpecificEntityNode "Linas@862d2b73-dc84-4fc1-bc87-896476ba6541")
+      (DefinedLinguisticConceptNode "male"))
+   (InheritanceLink
+      (SpecificEntityNode "Linas@862d2b73-dc84-4fc1-bc87-896476ba6541")
+      (ConceptNode "Linas"))
+))
+
+(microplanning lap "declarative" *default_chunks_option* #f)
+
+758c2970bd59a215f361b32f72a9f986966882c7 is the first bad commit
+commit 758c2970bd59a215f361b32f72a9f986966882c7
+Author: Linas Vepstas <linasvepstas@gmail.com>
+Date:   Sun Nov 29 14:24:00 2015 -0600
+
+    Wrap long lines
+
+53f6cd548e24f2274878065bde7a0a0e8dc665f3 is good
+
+iline 101 all-sets
+wtf
+
+(cog-get-atoms 'InterpretationNode)
+(cog-incoming-set (car (cog-get-atoms 'InterpretationNode)))
+
+
+(cog-incoming-set (DefinedLinguisticConceptNode "DeclarativeSpeechAct"))
+(cog-incoming-set (car (cog-incoming-set (car (cog-get-atoms 'AnchorNode)))))
+
+parse-get-r2l-outputs
+r2l-parse
+
+ahhh its focus-set!!!
+parse-get-relex-outputs
+
+(parse-get-relex-outputs parse-node)
+
+ah haha!!!
+
+====================================================
+
+WTF:
+fopencog has explocit error in scmutest -- can't find cog-atomspace
+during module load
+
+fopencog doesn't print this at guuile shell, but still doesn't define
+it... oh right.
+
+
+(use-modules (opencog)) from evaluator fails to actually
+load the module scm code ...
+probably because guile already thinks the module is loaded...
+
+
+====================================================
+bugs:
+
+* 1916, #1922
+
+* typoes fool the fuzzy matcher... e.g.
+  "Linas eats banannas. "Who eats bannanas?"  note variable nn
+
+====================================================
+
+(use-modules (opencog) (opencog nlp chatbot))
+(use-modules (opencog) (opencog nlp) (opencog nlp microplanning))
+
+(nlp-parse "Ronald ate the apple.")
+(nlp-parse "Ronald ate some fruit.")
+(microplanning lap "declarative" *default_chunks_option* #f)
+
+(grounded-talk 'luser "Joe ate a pie.")
+(grounded-talk 'luser "Joe is eating a pie.")
+(grounded-talk 'luser "Who ate a cookie?")
+(grounded-talk "luser" "Joe ate a pear.")
+(grounded-talk "luser" "Who ate a pear?")
+
+(grounded-talk "luser" "Linas ate an apple.")
+(grounded-talk "luser" "Who ate an apple?")
+
+(grounded-talk "luser" "John Kennedy died.")
+(grounded-talk "luser" "Who died?")
+
+(grounded-talk "luser" "What is the color of the ball? ")
+(grounded-talk "luser" "What is the color of the book? ")
+(grounded-talk "luser" "Who died?")
+
+(nlp-parse "My name is Raymond Reddington.")
+(grounded-talk "luser" "What is your name?")
+
+(grounded-talk "luser" "I sent the money to your boss.")
+(grounded-talk "luser" "Who sent money to your boss?")
+(grounded-talk "luser" "Who did you send the money to?")
+
+(grounded-talk "luser" "I sang a song to her")
+
+
+(grounded-talk "luser" "I sang a beautiful song to Mary")
+(grounded-talk "luser" "Who did I sing to?")
+(grounded-talk "luser" "I sang to Joan")
+(grounded-talk "luser" "Who did I sing to?")
+(grounded-talk "luser" "Who did I sing a beautiful song to?")
+
+(grounded-talk "luser" "Who did I sing to?")
+(grounded-talk "luser" "The ball is red")
+(grounded-talk "luser" "The book is blue")
+
+(grounded-talk "luser" "The ball is under the couch")
+
+(grounded-talk "luser" "John threw a green ball.")
+(grounded-talk "luser" "Mike threw a red ball.")
+
+(grounded-talk "luser" "Who threw a red ball?")
+(grounded-talk "luser" "Who threw a green ball?")
+(grounded-talk "luser" "Where is the ball?")
+
+(grounded-talk "luser" "I had two chocolates")
+(grounded-talk "luser" "how many chocolates do I have")
+
+(grounded-talk "luser" "what's your name")
+(grounded-talk "luser" "who is Raymond?")
+
+(EvaluationLink (stv 1.0 1.0)
+   (LinkGrammarRelationshipNode "Wq")
+   (ListLink
+      (WordInstanceNode
+"LEFT-WALL@sentence@b7598d65-e2c7-4f4a-b873-02d548140b40_parse_0")
+      (WordInstanceNode "how@a3499630-bbe8-4802-acbe-8a8f1213c714")
+   )
+)
+
+(ReferenceLink (stv 1.0 1.0)
+   (WordInstanceNode
+"LEFT-WALL@sentence@b7598d65-e2c7-4f4a-b873-02d548140b40_parse_0")
+   (WordNode "###LEFT-WALL###")
+)
+(WordInstanceLink (stv 1.0 1.0)
+   (WordInstanceNode
+"LEFT-WALL@sentence@b7598d65-e2c7-4f4a-b873-02d548140b40_parse_0")
+   (ParseNode "sentence@b7598d65-e2c7-4f4a-b873-02d548140b40_parse_0")
+)
+
+
+====================================================
+(grounded-talk "luser" "Look left")
+
+truthquery.scm
+passive.scm
+imperative.scm
+how-q.scm
+
+declarative borked!
+interrogative
+
+
+PrepositionalRelationshipNode
+PartOfSpeechLink
+InheritanceLink
+LemmaLink
+
+LinkGrammarRelationshipNode
+InterpretationLink
+ReferenceLink
+
+
+who are you
+Who are you?
+Who is cobita-bot?
+I am 33 years old
+how old am I?
+I am french
+What nationality am I?
+ nationality is the country a person is from
+I am a person
+France is a country
+ I am from France
+Where am I from?
+
+(grounded-talk 'luser "What nationality am I?")
+
+cog-atom? says #t for deleted handle...
+
+(define (show-arg node) (display node) node)
+
+
+(define look-rule-1
+   (BindLink
+      (VariableList
+         (var-decl "$sent" "SentenceNode")
+         (var-decl "$parse" "ParseNode")
+         (var-decl "$interp" "InterpretationNode")
+         (var-decl "$verb-inst" "WordInstanceNode")
+         (var-decl "$direct-inst" "WordInstanceNode")
+         (var-decl "$direction" "WordNode")
+      )
+      (AndLink
+         (parse-of-sent   "$parse" "$sent")
+         (interp-of-parse "$interp" "$parse")
+         (word-in-parse   "$verb-inst" "$parse")
+         (LemmaLink (VariableNode "$verb-inst") (WordNode "look"))
+         (word-pos "$verb-inst" "verb")
+         (dependency "_advmod" "$verb-inst" "$direct-inst")
+         (word-lemma "$direct-inst" "$direction")
+      )
+      (ExecutionOutput
+         (GroundedSchema "scm: show-arg")
+         (ListLink (Variable "$direction"))
+      )
+   )
+)
+
+(define look-rule-c
+   (BindLink
+      (VariableList
+         (var-decl "$sent" "SentenceNode")
+         (var-decl "$parse" "ParseNode")
+         (var-decl "$interp" "InterpretationNode")
+         (var-decl "$verb-inst" "WordInstanceNode")
+         (var-decl "$direct-inst" "WordInstanceNode")
+         (var-decl "$direction" "WordNode")
+      )
+      (AndLink
+         (parse-of-sent   "$parse" "$sent")
+         (interp-of-parse "$interp" "$parse")
+         (word-in-parse   "$verb-inst" "$parse")
+         (LemmaLink (VariableNode "$verb-inst") (WordNode "look"))
+         (word-pos "$verb-inst" "verb")
+         ; (dependency "_to-be" "$verb-inst" "$direct-inst")
+         ; (dependency "_advmod" "$verb-inst" "$direct-inst")
+         (lg-link "Pa" "$verb-inst" "$direct-inst")
+         ; (lg-link "MVa" "$verb-inst" "$direct-inst")
+         (word-lemma "$direct-inst" "$direction")
+      )
+      (ExecutionOutput
+         (GroundedSchema "scm: show-arg")
+         (ListLink (Variable "$direction")))))
+
+(cog-bind look-rule-1)
+
+(grounded-talk 'luser "look up")
+(grounded-talk 'luser "look right")
+de
+
+   (DefinedLinguisticRelationshipNode "_to-be")
+   (ListLink
+      (WordInstanceNode "look@9a098e05-0afa-46e6-bd07-c6d83d58ee77")
+      (WordInstanceNode "right@b2a9d004-4057-4613-a10b-0be7aea6c33e")
+   )
+
+WTF!!
+
+MVa
+Pa
+
+scheme@(guile-user)> (cog-handle look-rule-x)
+$7 = 3239
+scheme@(guile-user)> (cog-handle look-rule-1)
+$8 = 799
+
+scheme@(guile-user)> (cog-as look-rule-1)
+$9 = #<atomspace 0x140ede0>
+scheme@(guile-user)> (cog-as look-rule-x)
+$10 = #<atomspace 0x25fa3a0>
+
+
+WTF.
+scheme@(guile-user)> (cog-atomspace-uuid (cog-as look-rule-1))
+$11 = 1
+scheme@(guile-user)> (cog-atomspace-uuid (cog-as look-rule-x))
+$12 = 800
+
+
+Need to -- list all atomspaces ....
+print atomspace inheritance
+
+Argh starting the cogserver changes the atomspace. Fuck.
+
+c-start-cogserver
+
+&CogServerSCM::start_server
+
+srvr = &cogserver();
+
+// Handy dandy utility
+inline CogServer& cogserver(void)
+{
+    return dynamic_cast<CogServer&>(server(CogServer::createInstance));
+}
+
+
+(define la
+   (BindLink
+      (VariableList
+         (var-decl "$action" "ListLink")
+      )
+      (AndLink
+         (StateLink current-action (Variable "$action"))
+      )
+      (Evaluation (GroundedPredicate "py:look_at_point")
+         (Variable "$action"))
+))
+
+(use-modules (opencog nlp fuzzy))
+(define s (nlp-parse "I don't know how to do that"))
+(define r2l-set (get-r2l-set-of-sent (car s)))
+(define reply (gen-sentences (cog-outgoing-set r2l-set)))
+(delete-duplicates reply)
+
+
+(nlp-parse "I don't know how to do that")
+(define known-directives
+	(list
+	(nlp-parse "look left")
+	(nlp-parse "Look right")
+	(nlp-parse "Look up")
+	(nlp-parse "Look down")
+
+(define s (car (nlp-parse "look to the right")))
+(define r2l-set (get-r2l-set-of-sent s))
+(define fzset (cog-fuzzy-match r2l-set 'SetLink '()))
+(define interp (car (get-interp-of-r2l fzset)))
+
+
+(define (
+
+
+(define reply (gen-sentences (cog-outgoing-set fzset)))
+(delete-duplicates reply)
+
+========================================================
+(use-modules (opencog) (opencog nlp chatbot) (opencog nlp fuzzy))
+(use-modules (opencog) (opencog nlp) (opencog nlp microplanning))
+
+
+(get-r2l-set-of-sent (car (nlp-parse "look right")))
+
+Yay it works
+
+========================================================
+
+(use-modules (opencog) (opencog query) (opencog exec))
+(Inheritance (Concept "foo") (Concept "baz"))
+(Inheritance (Concept "bar") (Concept "baz"))
+
+(define x
+	(GetLink
+		(Variable "$x")
+		(AndLink
+			(PresentLink
+				(Inheritance (Concept "foo") (Variable "$x")))
+			(FuzzyLink
+				(Inheritance (Concept "bar") (Variable "$x")))
+		)))
+
+(cog-execute! x)
+
+(define y
+		(Inheritance (Concept "foo") (Concept "baz"))
+	)
+
+(cog-fuzzy-match y)
+
+
+(use-modules (opencog) (opencog query) (opencog exec))
+(Inheritance (Concept "foo") (Concept "baz"))
+(Inheritance (Concept "bar") (Concept "baz"))
+
+(define x
+	(GetLink
+		(TypedVariable
+			(Variable "$x")
+			(Signature (Inheritance (Concept "foo") (Type "ConceptNode"))))
+
+		(AndLink (Variable "$x"))))
+
+(define b
+	(GetLink
+		(TypedVariable
+			(Variable "$x")
+			(TypeChoice
+				(Signature (Inheritance (Concept "foo") (Type "ConceptNode")))
+				(Signature (Inheritance (Concept "bar") (Type "ConceptNode")))))
+
+		(AndLink (Variable "$x"))))
+
+(cog-execute! x)
+
+_type_restrictions = &vars._simple_typemap
+
+(EvaluationLink
+	(PredicateNode "foo")
+	(ListLink (ConceptNode "bingo") (ConceptNode "yes!")))
+
+(EvaluationLink
+	(AnchorNode "bar")
+	(ListLink (ConceptNode "hurrah") (ConceptNode "yay!")))
+
+(EvaluationLink
+	(ConceptNode "baz")
+	(ListLink (ConceptNode "oops") (ConceptNode "Oh no, Mr. Bill!")))
+
+(define pred
+	(GetLink
+		(TypedVariable
+			(Variable "$x")
+			(Signature
+				(EvaluationLink
+					(TypeChoice
+						(TypeNode "PredicateNode")
+						(TypeNode "AnchorNode"))
+					(ListLink
+						(Type "ConceptNode") (Type "ConceptNode")))))
+		(Variable "$x")))
+
+;--------------------------
+
+(define b
+   (BindLink
+		(VariableList (Variable "$x") (Variable "$y"))
+		(And
+			(Inheritance (Concept "foo") (Variable "$x"))
+			(Equal (Variable "$x") (Variable "$y"))
+		)
+		(Variable "$y")))
+
+ERROR: Throw to key `C++-EXCEPTION' with args `("cog-new-link" "Variable
+not groundable: (VariableNode \"$y\") ; [782][1]\n\n
+(/home/linas/src/novamente/src/atomspace-git/opencog/atoms/pattern/PatternLink.cc:776)")'.
+
+
+;--------------------------
+
+Given four parsed sent with sent node,  and link from that to grounded action.
+Given new sent, return most similar one(s)
+
+(use-modules (opencog) (opencog query) (opencog exec))
+
+(Member (InterpretationNode "1") (Anchor "look-actions"))
+(Member (InterpretationNode "2") (Anchor "look-actions"))
+(Member (InterpretationNode "3") (Anchor "look-actions"))
+
+(State (Anchor "curr-interp") (InterpretationNode "55"))
+
+run set-to-member conversion such that
+(Member foo (SetLink ... foo ...))
+is-member-link
+
+
+(define x
+	(GetLink
+		(VariableList
+			(TypedVariable (Variable "$likely-interp") (Type "InterpretationNode"))
+			(TypedVariable (Variable "$curr-interp") (Type "InterpretationNode"))
+			(TypedVariable (Variable "$curr-set") (Type "SetLink"))
+			(TypedVariable (Variable "$likely-set") (Type "SetLink"))
+		)
+		(AndLink
+			(Member (Variable "$likely-interp") (Anchor "look-actions"))
+			(State (Anchor "curr-interp") (Variable "$curr-interp"))
+			; (Evaluation (Predicate "scm: is-member")
+			;	(List (Variable "$curr-interp") (Variable "$curr-set")))
+			(Member (Variable "$curr-interp") (Variable "$curr-set"))
+			(Member (Variable "$likely-interp") (Variable "$likely-set"))
+			; (FuzzyLink (Variable "$curr-set"))
+			(EvaluationLink
+				(Predicate "scm is-similar")
+				(List (Variable "$curr-set") (Variable "$likely-set")))
+
+		)))
+
+(cog-execute! x)
+
+
+===========================================
+Implication
+	And
+		Evaluation Preceeds $x $y
+		Evaluation During  $x $z
+	And
+		Evaluation Overlaps $x $z    ; wtf??
+		CompositionRule ...
+
+
+; Utility defintion.
+(define (less a b) (GreaterThanLink b a))
+
+(Implication
+	; Type declarations, to constrain how the rule is applied.
+   (VariableList
+		(TypedVariable (Variable "$a-") (Type "TimeNode"))
+		(TypedVariable (Variable "$a+") (Type "TimeNode"))
+		(TypedVariable (Variable "$b-") (Type "TimeNode"))
+		(TypedVariable (Variable "$b+") (Type "TimeNode"))
+	)
+	; If the numerical relations below hold true...
+   (And
+		(less (Variable "$a-") (Variable "$a+"))
+		(less (Variable "$b-") (Variable "$b+"))
+		(less (Variable "$a-") (Variable "$b-"))
+		(less (Variable "$b-") (Variable "$a-"))
+		(less (Variable "$a+") (Variable "$b+"))
+	)
+	; Then create the following predicate...
+	(Evaluation
+		(PredicateNode "Overlaps")
+		(ListLink
+			(ListLink (Variable "$a-") (Variable "$a+"))
+			(ListLink (Variable "$b-") (Variable "$b+"))))
+)
+
+
+(Implication
+	; Type declarations, to constrain how the rule is applied.
+   (VariableList
+		(TypedVariable (Variable "$x") (Type "TimeNode"))
+		(TypedVariable (Variable "$y") (Type "TimeNode"))
+	)
+	; If the following holds
+	(AndLink
+		(GreaterThan (TimeNode 60)
+			(MinusLink (Variable "$x") (Variable "$y")))
+		(GreaterThan (TimeNode 60)
+			(MinusLink (Variable "$y") (Variable "$x")))
+	)
+	; Then create the following predicate:
+	(Evaluation
+		(PredicateNode "happened in the same minute")
+		(ListLink (Variable "$y") (Variable "$x")))
+)
+
+
+(define (Meets a- a+ b- b+)
+ (EqualLink a+ b-))
+
+(Implication
+	; Type declarations, to constrain how the rule is applied.
+   (VariableList
+		(TypedVariable (Variable "$a-") (Type "TimeNode"))
+		(TypedVariable (Variable "$a+") (Type "TimeNode"))
+		(TypedVariable (Variable "$b-") (Type "TimeNode"))
+		(TypedVariable (Variable "$b+") (Type "TimeNode"))
+	)
+	; If the numerical relations below hold true...
+   (And
+		(less (Variable "$a-") (Variable "$a+"))
+		(less (Variable "$b-") (Variable "$b+"))
+		(Evaluation
+			(PredicateNode "happened in the same minute")
+			(ListLink (Variable "$a+") (Variable "$b-")))
+	)
+	; Then create the following predicate...
+	(Evaluation
+		(PredicateNode "Meets")
+		(ListLink
+			(ListLink (Variable "$a-") (Variable "$a+"))
+			(ListLink (Variable "$b-") (Variable "$b+"))))
+)
+
+(use-modules (opencog) (opencog atom-types) (opencog query))
+
+(TimeNode 3000)    ;set atom for getter2 to find
+
+(define getter2 (BindLink
+            (VariableList
+                (TypedVariable (Variable "$x") (Type "TimeNode"))
+            )
+            (EqualLink (Time 3000) (Variable "$x"))
+            (Variable "$x")))
+
+(cog-bind getter2)
+
+
+(define getter3 (BindLink
+                (TypedVariable (Variable "$x") (Type "TimeNode"))
+            (GreaterThan (Time 3000) (Variable "$x"))
+           (Variable "$x")))
+
+(TimeNode 2000) ;set atom for getter3 to find
+(cog-bind getter3)
+
+
+(use-modules (opencog logger))
+(cog-logger-set-stdout #t)
+(cog-logger-set-level "fine")
+
+There were no type restrictions! That must be wrong!
+
+
+after ... unbundle_virtual
+
+
+   (PutLink
+     (TypedVariable (Variable $x)
+      (SignatureLink
+
+      (EvaluationLink  (Variable $x))
+      (MemberLink (Concept "foo") (Concept "bar")))
+
+vertex
+
+str_to_vertex
+
+=========================================================
+
+
+Fuzzy:
+
+* its a type.  Is it a kind of SignatueLink?
+
+* A VariableNodes can have it as a type. aget set to it.
+
+* Or is it ore like PresentLink?  How do we indicate which parts are
+  crisp, and which parts are not?  How do I specify matching affinity?
+
+
+WARNING: (opencog nlp chatbot-eva): `r2l-rules' imported from both
+(opencog rule-engine) and (opencog nlp relex2logic)
+opencog/nlp/chatbot/chat-utils.scm:61:39: In procedure
+(InterpretationNode
+"sentence@987adef9-1782-4ab7-b422-703a214ee0d5_parse_0_interpretation_$X")
+:
+opencog/nlp/chatbot/chat-utils.scm:61:39: Unbound variable: r2l-rules
+
+Entering a new prompt.  Type `,bt' for a backtrace or `,q' to continue.
+scheme@(opencog nlp chatbot-eva) [1]>
+
+======================================
+
+(use-modules (opencog) (opencog cogserver))
+(use-modules (opencog nlp))
+(use-modules (opencog nlp chatbot))
+(use-modules (opencog nlp relex2logic))
+
+; (load "relex2logic/rule-utils.scm")
+(load "chatbot/chat-utils.scm")
+
+(nlp-parse "look left")
+ERROR: Unbound variable: pre-advmod-rule
+bug #2021
+
+(StateLink current-sentence
+
+(cog-incoming-set current-sentence)
+(SentenceNode "sentence@bede40d8-aadc-4165-b2bb-c38bf1d28093")
+
+(define (get-parse sent)
+
+(ParseNode "sentence@bede40d8-aadc-4165-b2bb-c38bf1d28093_parse_0"
+(InterpretationNode
+"sentence@bede40d8-aadc-4165-b2bb-c38bf1d28093_parse_0_interpretation_$X")
+
+(WordInstanceNode "look@a08e7907-0098-498c-be5e-10df22714eb3")
+
+Its MVa not Pa and so look-rule-1 fails.
+
+general structure:
+  o
+(InheritanceLink
+   (InterpretationNode
+"sentence@f2bcdc40-e510-4462-a537-84c0323c5afd_parse_0_interpretation_$X")
+   (DefinedLinguisticConceptNode "ImperativeSpeechAct")
+)
+ (ReferenceLink
+   (InterpretationNode
+"sentence@f2bcdc40-e510-4462-a537-84c0323c5afd_parse_0_interpretation_$X")
+   (SetLink
+
+====================================================
+
+(load "chatbot-eva/run-chatbot.scm")
+
+cog-evaluate! when it runs python, does not pature the stdout
+and forward back to here.
+
+(define (bar)
+	(cog-evaluate! (Evaluation (GroundedPredicate "py:look_at_point")
+		(ListLink (NumberNode 1) (NumberNode 0.5) (NumberNode 0)))))
+
+(with-output-to-file "/tmp/foo" bar)
+
+poll_result
+_result a string that apply_tv doesn't set...
+but f it did, we could get it via poll_result and .. then what?
+
+alt: guile shell couldgrab copy of stdout ...
+
+4 must be a pipe
+tee(STDOUT_FILENO, 4, INT_MAX, SPLICE_F_NONBLOCK);
+
+PyObject *pyOutput = NULL;
+
+====================================================
+
+    +---Wi---+-MVa-+
+    |        |     |
+LEFT-WALL look.v up.e
+
+    +---Wi---+--Pa-+
+    |        |     |
+LEFT-WALL look.v up.a
+
+                   +----Ju----+
+    +---Wi---+-MVp-+   +--Dmu-+
+    |        |     |   |      |
+LEFT-WALL look.v to.r the right.n-u
+
+                   +----Js---+
+    +---Wi---+-MVp-+   +Ds**c+
+    |        |     |   |     |
+LEFT-WALL look.v to.r the left.n
+
+
+fuzzy vs. concrete:
+
+verb is concrete, verb must be specific and must link by Wi
+direction is any of four words
+direction must link by Js or Ju or Pa or MVa
+everything else is variable ....
+everything else is not precise
+
+
+meaning in relation to the current context.  ... apply rules in relation
+to the current context.
+
+current-imperative  stores look-at direction.
+look-semantics examins it.
+
+(1) determine if its a sentence I know.
+(2) if its a look or turn sentence, then extract direction.
+(3) create a simplified rendition, verb and direction.
+
+(ExecutionLink
+    (SchemaNode "turn")
+    (ListLink
+        (ConceptNode "left")
+    ))
+
+except we use WordNode, for now, to keep it simpler.
+
+current-action
+
+look engaged
+look happy  MVa
+look sad   Pa
+look bored Pa
+
+show happiness Ou
+express happiness
+Make a happy expression <---
+
+be happy!
+
+happiness sadness boredom
+
+synonymous words ....
+
+recent history for scripting
+---------------------------------------------------
+
+sureal -- assemble  from R2L
+
+   (sureal (SetLink
+      (Evaluation (Predicate "look") (ListLink (Concept "ahead"))) ))
+
+(use-modules  (opencog nlp sureal))
+(nlp-parse "Mike eats pizza")
+(nlp-parse "He went on a walk")
+(sureal (Set (Evaluation (Predicate "eats") (ListLink (Concept "he")))))
+(sureal (Set (Evaluation (Predicate "eat") (ListLink (Concept "he")))))
+
+(nlp-parse "I am going to eat")
+
+(gen-sentences  for R2L
+
+(get-r2l-set-of-sent y
+
+Where are you looking?
+
+    +---------------Xp--------------+
+    +----->WV---->+----Pg*b---+     |
+    +---Wq--+--Qw-+SIpx+      |     |
+    |       |     |    |      |     |
+LEFT-WALL where are.v you looking.v ?
+
+(sureal (Set
+   (Evaluation (Predicate "looking") (ListLink (Concept "up")))))
+
+(sureal (Set
+   (Evaluation (Predicate "looking") (ListLink (Concept "I")))
+   (InheritanceLink
+      (SatisfyingSet (Predicate "looking")) (Concept "up"))
+
+))
+
+(use-modules (opencog nlp fuzzy))
+
+(get-r2l-set-of-sent (car (nlp-parse "I am looking up")))
+(get-r2l-set-of-sent (car (nlp-parse "I am looking rightward")))
+
+:adv
+
+(use-modules (opencog exec))
+(cog-execute!
+   (StateLink (AnchorNode "*-gaze-direction-*"))
+
+==============================================================
+
+std::pair<std::__detail::_Node_iterator<opencog::Atom*,
+pencog::FixedIntegerIndex::size() const [20]
+
+tomTable.cc:    if (typeIndex.size() != 0) return false;
+mTable.cc:    if (importanceIndex.size() != 0) return false;
+
+getNumAtomsOfType
+_as->get_num_atoms_of_type
+
+_size_by_type
+oresize should take an arg
+
+classserver().getNumberOfClasses() in the resize() method
+Also in the ctor too.
+
+Fix the stupid subtype miterator
+getSize()
+
+Simplify the TypeIndex iterator
+
+is currtype even used ????
+
+ maintain counts for num nodes, links
+
+isize++
+_size_by_type[atom->_type] ++
+size_t new_size = classserver().getNumberOfClasses();
++    _size_by_type.resize(new_size);
+
+Also: do NOT use NodeIndex::size() anywhere
+
+getNumNodes
+
+MultiSpaceUTest
+
+(python-eval "print 'ooooooooooooooooooolas'\nprint 'bar'")
+(python-eval "try:\n    do_wake_up()\nexcept NameError:\n    print 'ooooooooooooooooooolas'\n")
+
+==============================================================
+
+(use-modules (opencog exec))
+(cog-evaluate! (DefinedPredicate "chatbot is happy"))
+(cog-evaluate! (Put (DefinedPredicate "Show expression")
+   (ListLink (Concept "happy") (Number 6) (Number 0.3))))
+
+(grounded-talk 'luser "Look left!")
+(grounded-talk 'luser "Smile!")
+
+(cog-incoming-set   (DefinedPredicate "Show expression"))
+
+
+LambdaLink does not have subst but its easy ...
+
+global_python_initialize(
+
+static std::mutex pythr;
+std::lock_guard<std::mutex> lock(pythr);
+
+xecute_strin
+
+apply_script
+
+CogServerUTest
+
+PythonModuleUTest
+
+PyObject * atomspace_py_object(AtomSpace *);
+---
+PyObject* pyAtomSpace = this->atomspace_py_object(_atomspace);
+
+call_user_function
+
+pyModule = this->module_for_function(moduleFunction, functionName);
+
+pyDict = PyModule_GetDict(pyModule);
+PyObject* pyUserFunc = PyDict_GetItemString(pyDict, functionName.c_str());
+Py_INCREF(pyUserFunc); // ???
+
+// Make sure the function is callable.
+    if (!PyCallable_Check(pyUserFunc)) {
+}
+
+
+pyReturnValue = PyObject_CallObject(pyUserFunc, pyAtomspace);
+
+pyError = PyErr_Occurred();
+    if (pyError) {
+
+
+Py_DECREF(pyAtomSpace);
+Py_DECREF(pyUserFunc);
+
+
+(python-eval "import os\ndef foo():\n    os.listdir('.')\n")
+(python-eval "foo()\n")
+(python-eval "def foo(aspace):\n    return aspace\n\n")
+(python-eval "dbg('asdfasdf')\n")
+
+(use-modules (opencog) (opencog python))
+(python-eval "
+def dbg(sv):
+    fu=open('/tmp/fff', 'a+')
+    print >>fu, sv
+    fu.close()
+")
+
+(python-eval "
+from opencog.atomspace import AtomSpace, TruthValue
+from opencog.type_constructors import *
+from opencog.atomspace import types
+
+def foo(asp):
+    dbg(str(asp))
+    # set_type_ctor_atomspace(asp)
+    TV = TruthValue(0.42, 0.69)
+    dbg(str(TV))
+    A = asp.add_node(types.ConceptNode, 'Apple', TV)
+    dbg(str(A))
+    # ConceptNode('Apple', TV)
+")
+(python-call-with-as "foo" (cog-atomspace))
+(cog-node 'ConceptNode "Apple")
+
+
+
+__pyx_pf_7opencog_9atomspace_9AtomSpace_10add_node (
+    __pyx_v_tv=0x7fffe2879110, __pyx_v_atom_name=<optimized out>,
+__pyx_v_t=7,
+    __pyx_v_self=0x7fffe28790f0)
+at
+/home/linas/src/novamente/src/atomspace-git/build/opencog/cython/opencog/atomspace.cpp:4445
+
+is correct but
+
+  0x00007fffedf25807 in opencog::AtomSpace::add_node (this=0x0,
+t=t@entry=7,
+    name=..., async=async@entry=false)
+    at
+/home/linas/src/novamente/src/atomspace-git/opencog/atomspace/AtomSpace.cc:167
+
+is wrong
+
+oh, its using the pointer as self ...
+__pyx_v_self->atomspace->add_node
+
+AtomSpace_factory
+cython/opencog/atomspace_details.pyx":331
+
+
+eval_scheme_h
+opencog/PyScheme.h
+
+(use-modules (opencog) (opencog python))
+(python-eval "
+def dbg(sv):
+    fu=open('/tmp/fff', 'a+')
+    print >>fu, sv
+    fu.close()
+")
+
+(python-eval "
+from opencog.scheme_wrapper import scheme_eval_as
+from opencog.atomspace import AtomSpace, TruthValue
+from opencog.atomspace import types
+
+asp = scheme_eval_as('(cog-atomspace)')
+dbg(str(asp))
+# set_type_ctor_atomspace(asp)
+TV = TruthValue(0.554, 0.2269)
+dbg(str(TV))
+A = asp.add_node(types.ConceptNode, 'Apple', TV)
+dbg(str(A))
+# ConceptNode('Apple', TV)
+")
+(cog-node 'ConceptNode "Apple")
+
+
+
+==============================================================
+
+(load "run-chatbot.scm")
+(grounded-talk 'luser "Look left!")
+(grounded-talk 'luser "where are you looking?")
+
+wh_query_process
+
+self-wh-query
+where-look-rule
+
+orchestrate first, then model.
+(DefinedPredicate "Gaze at point")
+
+afraid amused recoil worry
+
+How about Yawn
+
+
+Yawn blink nod shake
+
+Yawn, shake nod
+blink thoughtful
+
+ go to sleep
+
+be -- tense is missing ...
+   (TenseLink (VariableNode verb-inst)
+      (DefinedLinguisticConceptNode tense)))
+
+Relex TENSE_COPULA was broken. Now fixed
+
+================================================
+
+(use-modules (opencog exec))
+(cog-evaluate! (Evaluation (DefinedPredicate "Do show gesture")
+	(ListLink (Concept "imperative") (Concept "nod-1"))))
+
+
+pretend you are happy
+pretend to be happy
+blink three times.
+
+purge-hypergraph
+
+
+chatbot got motd nick=wolfe.freenode.net ident= host= target=
+
+bork
+ird->nick, ird->ident, ird->host, ird->target
+irc_reply_data
+
+todo: AO to get source of the command.
+todo: random expresion context is really part of self-model.
+
+================================================
+
+(psi-rule-nocheck
+	;; context
+	(list (AndLink
+		(Predicate "input thing")
+		(List args)
+	))
+	;; action
+	(List
+		(ExecutionOutput
+			(DefinedSchema "thing to do")
+			(List args)))
+	(Concept "demo goal")
+	(stv 1 0.8181)
+	(psi-demand "want a demo" 0.97)
+)
+
+============================================
+Look to the left doesn't work
+
+                   +----Ju----+
+    +---Wi---+-MVp-+   +--Dmu-+
+    |        |     |   |      |
+LEFT-WALL look.v to.r the right.n-u
+
+(use-modules (opencog query))
+(relex-parse "look to the right")
+
+(define imp (car (get-new-parsed-sentences)))
+; (imperative-process imp)
+
+(define current-sentence (AnchorNode "*-eva-current-sent-*"))
+
+(StateLink current-sentence imp)
+(load "imperative-rules.scm")
+
+   (cog-bind show-rule-1)
+clobbers it
+
+(load "imperative-rules.scm")
+
+================================================
+
+(psi-rule-nocheck
+	;; context
+	(list (AndLink
+		(Predicate "input thing")
+		(List args)
+	))
+	;; action
+	(List
+		(ExecutionOutput
+			(DefinedSchema "thing to do")
+			(List args)))
+	(Concept "demo goal")
+	(stv 1 0.8181)  ; placed o  the impl
+	(psi-demand "want a demo" 0.97)
+)
+
+
+
+Either incorrect or not implemented yet. Cannot evaluate (
+
+psi-action ConceptNode OpenPsi: action
+MemberLink
+
+Implication stv
+   And
+      context
+      action
+   goal
+
+one rule is selected per demand
+
+psi-controller-update-weights
+
+each rule has a weight.
+
+controled rules get a weight that is the tv-mean of the rule.
+
+demands are ConceptNodes, mean is a value-weight.
+
+this crashes:
+ (define a (Concept "A" (stv 1 1)))
+ (define b (Concept "B" (stv 0.9 0.9)))
+ (define c (Concept "C" (stv 0.8 0.8)))
+ (most-weighted-atoms (list a b c))
+
+
+psi-select-rules is not used anywhere.
+psi-select-rules-per-demand is used instead;
+
+psi-add-action-selector is not used anywhere
+psi-select-rules not used anywhere
+psi-default-action-selector is not used anywhere
+
+
+most-weighted-atoms really does return a list.
+but the action seldctor only looks at the TV for the top one.
+
+Ben -- PLN & Sequential=And
+
+valid demands?
+psi-reset-valid-demand-cache
+
+
+The random choice of these are bogus-like.a DONE
+----------------------------------------------------
+
+OK, so redo the fetch of weights, and the sorting, in util*scm - DONE
+
+most-important-weighted-atoms in action
+
+---------
+psi-get-weighted-satisfiable-rules
+-------------
+
+wtf
+
+psi-satisfiable? gets the context, runs satsifactionlink to get the
+grounded pattern.
+
+satisfaction-level -- who calls this its bogus.  rename.  DONE
+
+rename satisfaction-level psi-rule-satisfiability DONE
+--------------
+
+wtf
+
+cog-satisfiable is not being called
+
+psi-satisfiable? should return #t not a TV
+
+
+rename psi-get-all-valid-demands psi-get-all-enabled-demands DONE
+
+rename, hide psi-reset-valid-demand-cache   DONE
+
+psi-demand-skip?  FIXED
+
+(MemberLink
+   DEM   ; aso a conceptn
+   psi-label-skip ; (ConceptNode "OpenPsi: skip")
+)
+
+-------------------------------------------------------------
+* demand value -- which direction is up, down? what does it mean?
+* percentage???
+* why two different functions, one for up, one for down?
+  why not just use negative numbers?
+* demand-changes per step, instead of per unit time?
+
+------------------------------------------------------
+
+
+there is a settable action selector per demand
+
+the default action selector finds all rules associated with
+a demand, picks the one with the highest weight, and returns that.
+The weight is based on tv-mean right now.
+
+split:
+rules.scm is core
+action-selector is core
+
+
+TODO:
+* wtf is in control.scm ???
+* updater.scm what is this, how does it work.
+
+* sec.scm is actual psi code
+* event.scm is ... psi code for now.
+* interaction-rule.scm is psi code of some kind.
+* modulators.scm is part of psi.
+* modulators need to be documented
+* mock-interaction-rules.scm needs to move
+
+===========================================================
+
+Surreal meta-issues:
+-- which of several word-choices get used?
+
+   Where are you looking?   XXX this got broken, and the fix is hard.
+The fix requires that the space server track this info, and
+as well as time-stamp
+
+Space-time server meta-issues:
+self-model: what direction am I looking at? (left, right up down)
+(vs. what direction are other things pointing at?)
+
+
+   Look at me
+--> use the sound server
+
+ROS topic: /manyears/source_pose
+in ros-behavior-scripting the ros_bridge node subscribes to the ROS
+  topic in sound_track.py
+sends message (map-sound  x y z) to cogserver
+(map-sound is defined in time-map.scm in ros-behavior-scripting
+It sets this in the cogserver:
+(StateLink (ConceptNode "last person who spoke") (NumberNode fid))
+The location of the face can be gotten by querying:
+(get-last-locs-ato "faces"  (NumberNode fid) 8000)
+
+-----
+
+How to fake it:
+
+; Add face to the atomspace
+(EvaluationLink (PredicateNode "visible face") (ListLink (NumberNode 42)))
+aka 
+(use-modules (opencog eva-model))
+(make-new-face 42)
+(make-new-face 69)
+
+(use-modules (opencog ato pointmem))
+; Record facial coordinates in an octomap, at 15hz (66 mmillisecs per
+; frame), a 150 frame circular buuffer (about 10 seconds) and a 1cm
+; spatial resolution.
+(create-map "faces" 0.01 66 150)
+
+; Put it somewhere:   x y z x=forward y=left z=up; position in meters.
+(map-ato "faces" (NumberNode 42 (av 5 0 0)) 2  1 0)
+(map-ato "faces" (NumberNode 69 (av 5 0 0)) 1.5  -1 0.1)
+
+(get-last-locs-ato "faces"  (NumberNode 42) 8000)
+
+(get-face (NumberNode 42) 8000)
+(face-nearest-sound  2.01  1.01 0.01)
+(face-nearest-sound  2.01  -1.01 -0.01)
+
+; Pretend that the sound is coming from there, too.
+(map-sound  2.01  1.01 0.01)
+(map-sound  2.01  -1.01 0.01)
+
+; The above will materialize the below in the atomsapce:
+; in time-map.scm
+(define last-speaker (Concept "last person who spoke"))
+(State last-speaker (Number 42))
+
+(cog-execute! (Get (State last-speaker (Variable "$x"))))
+(cog-execute! (DefinedSchema "current-speaker"))
+
+(grounded-talk 'luser "Look at me")
+
+
+Look at me   -- done
+turn towards me -- done
+face me     Wi Ox -- done
+look at him
+look at her
+don't look at me
+turn away
+
+me
+her
+him
+
+--> No
+--> You're not the boss of me.
+--> OK, you're ugly anyway
+--> Darling, I never looked away
+--> Sure, whatever.
+
+
+    what are you looking at
+--> I am looking at you
+--> I am looking at a person
+--> I am looking at a man/woman (assume gender rec works)
+--> I am looking at an old man
+--> (closes eyes) I am not looking at anything
+
+
+   Where are you looking?   XXX this got broken, and the fix is hard.
+--> I am looking to the left
+--> I am looking to the right
+--> I am looking at you
+
+   What direction are you looking?
+--> I am looking to the left
+--> I am looking to the right
+
+   Turn your head.
+
+   Look away.
+
+   Look at me.
+
+   Where are you looking?
+
+
+   What happened just now?
+    (requires recency in time-server)
+--> I just turned my head
+--> I just heard a loud sound.
+--> There was a loud sound.
+--> Nothing.
+--> Someone just entered the room.
+--> You waved your hand in front of me.
+
+
+   What are you doing?
+--> I am smiling
+--> I am looking at you
+--> I just smiled at you
+--> I am listening to you
+--> I am talking to you.
+--> I am talking to you (but only if talking for a while)
+--> I am entertaining a room-full of people (if >1 person)
+
+   How many people can you see?
+
+   How do you feel?
+--> I feel happy
+--> I'm happy
+--> I feel sad.
+
+   How are you feeling?
+--> I feel good.
+--> I feel OK.
+--> I'm
+
+  What was the last thing that made you sad?
+  What was the last thing that frightened you?
+  Who is the nicest person you met last?
+
+  What is my name?  (multi-person)
+
+  Where is Ben?
+--> Ben is on my left.
+--> Ben is on my right.
+
+  Where am I?
+--> You are in front of me.
+--> you are in the same room as I am
+--> You are in Hong Kong.
+
+  Where are you?
+--> I am in Hong Kong
+
+  What is the weather like today?
+--> (Internet search of weather based on location)
+
+
+=============================================================
+%s/,\(\S\)/, \1/g
+
+(map-ato "faces" (NumberNode 42 (av 5 0 0)) 2  1 0)
+(map-sound  2.01  -1.01 0.01)
+(grounded-talk 'luser "Look at me")
+
+(use-modules (opencog query))
+ (load "imperative-rules.scm")
+
+(define sent-node (car (nlp-parse "Look at me")))
+ (imperative-process sent-node)
+
+look-rule-2 triggers, sets
+((StateLink
+   (AnchorNode "*-imperative-*")
+   (ActionLink
+      (WordNode "look" (stv 0.0043478259 0.0012484394))
+      (ListLink
+         (WordNode "me" (stv 0.0043290043 0.0012484394))
+      )
+   )
+)
+
+obj-semantics-rule-1-ao triggers, and binds:
+$verb -> (WordNode "look"
+"$object" ->  (WordNode "me"
+"$verb-ground" -> (DefinedPredicate "Look-at-thing cmd"
+ "$obj-ground" -> (DefinedSchema "current-speaker")
+
+(cog-evaluate!    (EvaluationLink
+      (DefinedPredicateNode "Look-at-thing cmd")
+      (ListLink (NumberNode "0.000000"))))
+
+(cog-evaluate!    (EvaluationLink
+      (DefinedPredicateNode "Look-at-thing cmd")
+      (SetLink (NumberNode "0.000000"))))
+
+... look-at-person is running off of eye-contact-state
+
+
+
+
+obj-semantic-model-rule-1
+obj-semantic-model-rule-2
+
+(load "semantics.scm")
+(cog-bind obj-semantics-rule-1-ao)
+
+(Define (DefinedPredicate "Look-at-thing cmd")
+ (DefinedPredicate "look at person"))
+
+(Define (DefinedSchema "current-speaker") 
+	(Get (State (Concept "last person who spoke") (Variable "$x"))))
+
+well, (Concept "last person who spoke") isn't being set.
+(map-sound should be setting it.
+
+(cog-incoming-set (Concept "last person who spoke"))
+
+
+where-look-rule
+
+action-rule-ao
+... ends up calling
+(DefinedPredicate "Look command")
+
+Look command does it ... but no memory of it
+
+XXX correct version of "looking" requires using the space server.
+
+(DefinedPredicate "Look at point")
+(DefinedPredicate "Gaze at point") calls
+py:gaze_at_point
+prints "(Eva looks to the left)"
+
+ (cog-bind show-rule-1)
+(define current-action (AnchorNode "*-action-*"))
+(StateLink current-action (WordNode "foobar"))
+
+(use-modules (opencog exec))
+(cog-evaluate! (Evaluation
+      (DefinedPredicate "Show class expression")
+      (List (Concept "imperative") (Concept "happy"))))
+
+
+What are you looking at?
+
+    +----------------Xp---------------+
+    |       +----------Bsw----------+ |
+    |       |    +----Pg*b---+      | |
+    +---Wq--+-Rw-+SIpx+      +--MVp-+ |
+    |       |    |    |      |      | |
+LEFT-WALL what are.v you looking.v at ?
+
+    +------------Xp-----------+
+    +--------->WV-------->+   |
+    |       +-----Bsw-----+   |
+    |       |    +---I*d--+   |
+    +---Wq--+-Rw-+SIp+    |   |
+    |       |    |   |    |   |
+LEFT-WALL what do.v you see.v ?
+
+
+    +---------------Xp--------------+
+    +----->WV---->+----Pg*b---+     |
+    +---Wq--+--Qw-+SIpx+      |     |
+    |       |     |    |      |     |
+LEFT-WALL where are.v you looking.v ?
+
+--> where-look-rule
+
+what-doing-rule ->
+
+current-reply
+self-wh-query
+
+what are you doing?
+-- I
+
+(define current-reply (AnchorNode "*-reply-*"))
+
+(define (wtf x) (format #t "wtf ~a\n" x))
+
+(cog-grounded? (Variable "x"))
+(cog-grounded? (Concept "x"))
+(cog-grounded? (List (Variable "x")))
+(cog-grounded? (List (Concept "x")))
+(cog-grounded? (List (Concept "x") (List (Variable "x"))))
+

@@ -3,8 +3,6 @@ ADD_LIBRARY (dimensionalembedding SHARED
 	CoverTreePoint
 )
 
-ADD_DEPENDENCIES(dimensionalembedding opencog_atom_types)
-
 INCLUDE_DIRECTORIES (
 	${CMAKE_BINARY_DIR}
 	${ODBC_INCLUDE_DIRS}

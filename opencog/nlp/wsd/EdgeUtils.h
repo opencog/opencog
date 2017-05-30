@@ -18,7 +18,7 @@ namespace opencog {
 class EdgeUtils
 {
 	public:
-		std::set<Handle> words;
+		OrderedHandleSet words;
 		bool look_at_relation(const std::string &, const Handle&, const Handle&);
 		bool look_at_word(const Handle&);
 };

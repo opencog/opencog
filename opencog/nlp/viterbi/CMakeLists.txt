@@ -18,7 +18,6 @@ ADD_LIBRARY (viterbi SHARED
 	parser.cc
 )
 
-ADD_DEPENDENCIES(viterbi opencog_atom_types)
 ADD_DEPENDENCIES(viterbi viterbi_atom_types)
 
 TARGET_LINK_LIBRARIES(viterbi

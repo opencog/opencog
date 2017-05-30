@@ -16,137 +16,155 @@
              (opencog nlp)
              (opencog nlp fuzzy)
              (opencog nlp microplanning)
-             (opencog nlp relex2logic))
+             (opencog nlp relex2logic)
+             (opencog exec))
 
 ; -----------------------------------------------------------------------
-(define (r2l-parse sent)
+; TODO: Replace these time related utilities with one from TimeMap, when it is
+; ready.
+(define time-domain (TimeDomainNode "Dialogue-System"))
+
+(define (sent-set-time sent)
 "
-  r2l-parse SENT -- perform relex2logic processing on sentence SENT.
-
-  Runs the rules found in R2L-en-RuleBase over the RelEx output
-  creating the logical representation of sentence in the atomspace.
-  Returns a list containing SetLinks that are the r2l-interpretations
-  for individual parses.
-
-  This can't handle  mutliple thread execution (Why???). Thus, mapping
-  this function over a list of sentences, even though possible, is not
-  advised.
-
-  SENT must be a SentenceNode.
+  Associate time to the last sentence
 "
-    (define (cog-delete-parent a-link is-from-fc)
-        ; Many rules return a ListLink of results that they
-        ; generated. Some rules return singletons. And the
-        ; Forward Chainer uses a SetLink to wrap all these
-        ; results. So if A-LINK is a ListLink or is directly
-        ; from the FC, then delete it and return a list of
-        ; its contents, else return a list holding A-LINK.
-        ;
-        ; XXX maybe this should be part of the ure module??
-        (if (or (equal? 'ListLink (cog-type a-link)) is-from-fc)
-            (let ((returned-list (cog-outgoing-set a-link)))
-                    (cog-delete a-link)
-                    returned-list)
-            (list a-link))
-    )
+	(AtTimeLink
+		; FIXME: maybe opencog's internal time octime should
+		; be used. Will do for now, assuming a single instance
+		; deals with a single conversation.
+		(TimeNode (number->string (current-time)))
+		sent
+		time-domain)
+)
 
-    (define (run-fc parse-node interp-link)
-        ; This runs all the rules of R2L-en-RuleBase over relex parse
-        ; outputs, and returns a cleaned and de-duplicated list. The
-        ; relex outputs associated with 'parse-node' make the focus-set.
-        ; This is done so that, IF there are multiple parses, then
-        ; each is handled independently by passing it seperately, as
-        ; each is likely to exist in a seperate semantic-universe.
-        (define focus-set
-            (SetLink (parse-get-relex-outputs parse-node) interp-link))
-        (define outputs
-            (cog-delete-parent (cog-fc (SetLink) r2l-rules focus-set) #t))
-
-        (append-map (lambda (o) (cog-delete-parent o #f)) outputs)
-    )
-
-    (define (interpret parse-node)
-        ; FIXME: Presently only a single interpretation is created for
-        ; each parse. Multiple interpreation should be handled, when
-        ; word-sense-disambiguation, anaphora-resolution and other
-        ; post-processing are added to the pipeline.
-        (let* ((interp-name (string-append(cog-name parse-node) "_interpretation_$X"))
-               (interp-node (InterpretationNode interp-name))
-               ; Associate the interpretation with a parse, as there
-               ; could be multiplie interpretations for the same parse.
-               (interp-link (InterpretationLink interp-node parse-node))
-               (pre-result
-                   (remove
-                       (lambda (a) (equal? (cog-type a) 'ReferenceLink))
-                       (delete-duplicates (run-fc parse-node interp-link))))
-               (result (SetLink pre-result)))
-
-            ; Construct a ReferenceLink to the output
-            (ReferenceLink interp-node result)
-
-            ; Time stamp the parse
+(define-public (get-last-said-sent)
+"
+  Returns the SentenceNode of the last said sentence or returns an empty list.
+"
+    (define query
+        (Get
+            (VariableList
+                (TypedVariableLink
+                    (Variable "tn")
+                    (TypeNode "TimeNode"))
+                (TypedVariableLink
+                    (Variable "s")
+                    (TypeNode "SentenceNode")))
             (AtTimeLink
-                ; FIXME: maybe opencog's internal time octime should
-                ; be used. Will do for now, assuming a single instance
-                ; deals with a single conversation.
-                (TimeNode (number->string (current-time)))
-                interp-node
-                (TimeDomainNode "Dialogue-System"))
+                (Variable "tn")
+                (Variable "s")
+                time-domain)))
 
-            result
-        )
+    (define last-time 0)
+    (define result '())
+    (define (last-sent sent)
+        (let ((sent-time (string->number (cog-name (gar sent)))))
+            (if (>= sent-time last-time)
+                (begin
+                    (set! last-time sent-time)
+                    (set! result (gdr sent)))
+            )
+        ))
+
+    (let ((sents (cog-execute! query)))
+        (for-each last-sent (cog-outgoing-set sents))
+        (cog-delete sents)
+        result
     )
-
-    (map interpret (sentence-get-parses sent))
 )
 
 ; -----------------------------------------------------------------------
-(define (r2l-count sent-list)
+(define-public (get-previous-said-sents from-time)
 "
-  r2l-count SENT -- maintain counts of R2L statistics for SENT-LIST.
+  Returns a list of SentenceNodes that are inputed after the given time.
+
+  from-time:
+  - The time in seconds since 1970-01-01 00:00:00 UTC. (current-time) gives
+    such time.
 "
-	; Increment the R2L's node count value
-	(parallel-map-parses
-		(lambda (p)
-			; The preferred algorithm is
-			; (1) get all non-abstract nodes
-			; (2) delete duplicates
-			; (3) get the corresponding abstract nodes
-			; (4) update count
-			(let* ((all-nodes (append-map cog-get-all-nodes (parse-get-r2l-outputs p)))
-			       ; XXX FIXME this is undercounting since each abstract node can have
-			       ; multiple instances in a sentence.  Since there is no clean way
-			       ; to get to the abstracted node from an instanced node yet, such
-			       ; repeatition are ignored for now
-			       (abst-nodes (delete-duplicates (filter is-r2l-abstract? all-nodes))))
-				(par-map
-					(lambda (n)
-						(let* ((atv (cog-tv->alist (cog-tv n)))
-								(mean (assoc-ref atv 'mean))
-								(conf (assoc-ref atv 'confidence))
-								(count (assoc-ref atv 'count))
-								; STV will have count value as well, so checking type
-								; to see whether we want that count value
-								(ntv
-									(if (cog-ptv? (cog-tv n))
-										(cog-new-ptv mean conf (+ count 1))
-										(cog-new-ptv mean conf 1))
-								))
-							(cog-set-tv! n ntv)
-						)
-					)
-					abst-nodes
-				)
-			)
-		)
-		sent-list
-	)
+; TODO use the timeserver when it is ready.
+    (define query
+        (Get
+            (VariableList
+                (TypedVariableLink
+                    (Variable "tn")
+                    (TypeNode "TimeNode"))
+                (TypedVariableLink
+                    (Variable "s")
+                    (TypeNode "SentenceNode")))
+            (AtTimeLink
+                (Variable "tn")
+                (Variable "s")
+                time-domain)))
+
+    (define result '())
+    (define (last-sent sent)
+        (let ((sent-time (string->number (cog-name (gar sent)))))
+            (if (>= sent-time from-time)
+                (set! result (append result (list (gdr sent))))
+            )
+        ))
+
+    (let ((sents (cog-execute! query)))
+        (for-each last-sent (cog-outgoing-set sents))
+        (cog-delete sents)
+        result
+    )
+)
+
+; -----------------------------------------------------------------------
+; Control variable used to switch stimulation of WordNodes and
+; WordInstanceNodes on parsing. This shouldn't be public.
+(define nlp-stimulate-parses #f)
+
+; The sti value that WordNodes and WordInstanceNodes are stimulated with.
+(define nlp-stimulation-value 0)
+
+; -----------------------------------------------------------------------
+(define-public (nlp-start-stimulation STIMULUS)
+"
+  Switchs on the stimulation of WordNodes and WordInstanceNodes during parse
+  by STI amount.
+"
+    (set! nlp-stimulation-value STIMULUS)
+    (set! nlp-stimulate-parses #t)
+)
+
+; -----------------------------------------------------------------------
+(define-public (nlp-stimuating?)
+"
+  Returns #t if nlp-stimuation of parse is taking place and #f if not.
+"
+    nlp-stimulate-parses
+)
+
+; -----------------------------------------------------------------------
+(define-public (nlp-stop-stimulation)
+"
+  Switchs off the stimulation of WordNodes and WordInstanceNodes during parse.
+"
+    (set! nlp-stimulate-parses #f)
+)
+
+; -----------------------------------------------------------------------
+(define (nlp-stimulate SENT STIMULUS)
+"
+  Stimulate the WordNodes and WordInstanceNodes associated with the SentenceNode
+  SENT by STI amount.
+"
+    (define (stimulate x) (cog-stimulate x STIMULUS))
+    (let* ((word-inst-list
+                (append-map parse-get-words (sentence-get-parses SENT)))
+           (word-list (map word-inst-get-word word-inst-list)))
+        (map stimulate word-inst-list)
+        (map stimulate word-list)
+    )
 )
 
 ; -----------------------------------------------------------------------
 (define-public (nlp-parse plain-text)
 "
-  nlp-parse -- Wrap most of the NLP pipeline in one function.
+  nlp-parse PLAIN-TEXT -- Wrap most of the NLP pipeline in one function.
 
   Call the necessary functions for the full NLP pipeline.
 "
@@ -155,19 +173,42 @@
 
 	; Check input to ensure that not-empty string isn't passed.
 	(if (string=? plain-text "")
-		(error "Please enter a valid sentence, not empty string"))
+		(error "Please enter a valid sentence, not an empty string"))
 
 	; Call the RelEx server
-	(relex-parse plain-text)
+	(catch #t (lambda () (relex-parse plain-text))
+		(lambda (key . rest)
+			(display "Error: Cannot connect to RelEx server: ")
+			(display key) (newline) (display rest) (newline)))
 
-	(let ((sent-list (get-new-parsed-sentences)))
+	(if (null? (get-new-parsed-sentences))
+		(error "The RelEx server seems to have crashed!"))
+
+	(let* ((sent-list (get-new-parsed-sentences))
+			(sent-node (car sent-list)))
+
 		; Unhook the anchor. MUST do this before r2l-parse, as
 		; otherwise, parse-get-relex-outputs will wrap it in a
 		; SetLink! Ouch!!
 		(release-new-parsed-sents)
 
+		; Tag the sentence with the wall-clock time.
+		(sent-set-time sent-node)
+
+		; Attach the original text (relex doesn't do this for us.)
+		(EvaluationLink
+			(PredicateNode "sentence-rawtext")
+			(ListLink sent-node (Node plain-text)))
+
 		; Perform the R2L processing.
-		(r2l-parse (car sent-list))
+		(r2l-parse sent-node)
+
+		; Stimulate WordNodes and WordInstanceNodes
+		(if nlp-stimulate-parses
+			(nlp-stimulate sent-node nlp-stimulation-value))
+
+		; XXX FIXME -- sentiment analysis should not be done here.
+		; (perform-sentiment-analysis sent-node)
 
 		; Track some counts needed by R2L.
 		(r2l-count sent-list)

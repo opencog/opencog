@@ -39,8 +39,8 @@ private:
     static void init_in_module(void*);
     void init(void);
 
-    const std::string& start_server(AtomSpace*, const std::string&);
-    const std::string& stop_server(void);
+    std::string start_server(AtomSpace*, const std::string&);
+    std::string stop_server(void);
 
     CogServer* srvr = NULL;
     std::thread * main_loop = NULL;
@@ -115,8 +115,8 @@ void opencog_cogserver_init(void)
 
 // --------------------------------------------------------------
 
-const std::string& CogServerSCM::start_server(AtomSpace* as,
-                                              const std::string& cfg)
+std::string CogServerSCM::start_server(AtomSpace* as,
+                                       const std::string& cfg)
 {
     static std::string rc;
     // Singleton instance. Maybe we should throw, here?
@@ -124,7 +124,7 @@ const std::string& CogServerSCM::start_server(AtomSpace* as,
 
     // The default config file is installed from
     // $SRCDIR/lib/cogserver.conf and is copied to
-    // /usr/local/etc/cogservedr.conf
+    // /usr/local/etc/cogserver.conf
     // by default. Use it if we can; it has sane file paths in it.
     if (0 < cfg.size())
         config().load(cfg.c_str(), true);
@@ -133,14 +133,11 @@ const std::string& CogServerSCM::start_server(AtomSpace* as,
 
     srvr = &cogserver(as);
 
-    // Open database *before* loading modules, since the modules
-    // might create atoms, and we can't have that happen until
-    // storage is open, as otherwise, there will be handle conflicts.
+    // Open database, if any was specified.
     srvr->openDatabase();
 
     // Load modules specified in config
     srvr->loadModules();
-    srvr->loadSCMModules();
 
     // Enable the network server and run the server's main loop
     srvr->enableNetworkServer();
@@ -149,7 +146,7 @@ const std::string& CogServerSCM::start_server(AtomSpace* as,
     return rc;
 }
 
-const std::string& CogServerSCM::stop_server(void)
+std::string CogServerSCM::stop_server(void)
 {
     static std::string rc;
     // delete singleton instance

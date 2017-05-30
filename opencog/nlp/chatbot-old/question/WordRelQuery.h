@@ -62,8 +62,8 @@ class WordRelQuery :
 		void add_to_vars(Handle);
 
 		// normalized predicates
-		std::vector<Handle> normed_predicate;
-		std::vector<Handle> bound_vars;
+		HandleSeq normed_predicate;
+		HandleSeq bound_vars;
 
 		// solver
 		PatternMatchEngine *pme;

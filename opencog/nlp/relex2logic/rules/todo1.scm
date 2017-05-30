@@ -1,7 +1,8 @@
-; This rule is for "She wants to help John."  I hate these rules, which were here when I got here.
-; There are five of them. There could be fifty.  There would need to be, to cover all cases.  Somebody
-; randomly chose five sentence-types to enshrine in these rules.  See my comment in the old relex2logic
-; rule-file for more of an explanation of the problem.
+; This rule is for "She wants to help John."  I hate these rules, which
+; were here when I got here. There are five of them. There could be fifty.
+; There would need to be, to cover all cases.  Somebody randomly chose
+; five sentence-types to enshrine in these rules.  See my comment in the
+; old relex2logic rule-file for more of an explanation of the problem.
 ; (AN June 2015)
 
 (define todo1

@@ -31,8 +31,6 @@
 #include <unordered_map>
 
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/truthvalue/AttentionValue.h>
-
 #include <opencog/cogserver/server/Factory.h>
 
 #if __GNUC__ >= 5
@@ -46,7 +44,7 @@ namespace opencog
  */
 
 typedef short stim_t;
-typedef std::unordered_map<Handle, stim_t, handle_hash> AtomStimHashMap;
+typedef std::unordered_map<Handle, stim_t> AtomStimHashMap;
 
 class CogServer;
 
@@ -111,51 +109,58 @@ class CogServer;
 class Agent
 {
 
-private:
-    boost::signals2::connection conn;
-
 protected:
+    /**
+     * Set the agent's logger object.
+     * NOTE: this will be deleted when this agent is.
+     * XXX FIXME This is a terrible API design! One must never use
+     * setters like this!  Let the agent own the logger, and if need be,
+     * it could be queried (e.g. to alter the debug level).
+     *
+     * @param l The logger to associate with the agent.
+     */
+    void setLogger(Logger*);
+    Logger* _log;
+
     CogServer& _cogserver;
+    AtomSpace* _as;
 
-    /** Note: AttentionValue itself is read-only, so no need to protect, but
-     * the pointer needs and is protected */
-    AttentionValuePtr _attentionValue;
-
-#if !defined SHARED_PTR_ATOMIC_OPS
-    mutable std::mutex _attentionValueMutex;
-#endif
-
-    /** The agent's frequency. Determines how often the opencog server should
-     *  schedule this agent. A value of 1 (the default) means that the agent
-     *  will be executed every server cycle; a value of 2 means that the agent
-     *  will be executed every 2 cycles; and so on. */
+    /**
+     * The agent's frequency. Determines how often the opencog server should
+     * schedule this agent. A value of 1 (the default) means that the agent
+     * will be executed every server cycle; a value of 2 means that the agent
+     * will be executed every 2 cycles; and so on.
+     */
     int _frequency;
 
-    /** Sets the list of parameters for this agent and their default values.
+    /**
+     * Sets the list of parameters for this agent and their default values.
      * If any parameter values are unspecified in the Config singleton, sets
      * them to the default values.
      * Note: it is assumed to be called only during initialization, so it is not
-     * thread safe and shouldn't be called from multiple threads */
-    void setParameters(const std::string* params);
+     * thread safe and shouldn't be called from multiple threads
+     */
+    void setParameters(const std::vector<std::string>&);
+    std::vector<std::string> _parameters;
 
-    const std::string* PARAMETERS;
-
-    /** The atoms utilized by the Agent in a single cycle, to be used by the
-     *  System Activity Table to assign credit to this agent. */
+    /**
+     * The atoms utilized by the Agent in a single cycle, to be used by the
+     * System Activity Table to assign credit to this agent.
+     */
     std::vector<UnorderedHandleSet> _utilizedHandleSets;
     mutable std::mutex _handleSetMutex;
 
-    /** Total stimulus given out to atoms */
-    std::atomic<stim_t> totalStimulus;
-
-    /** Hash table of atoms given stimulus since reset */
-    AtomStimHashMap* stimulatedAtoms;
-    mutable std::mutex stimulatedAtomsMutex;
-
     /** called by AtomTable via a boost::signals2::signal when an atom is removed. */
-    void atomRemoved(AtomPtr);
+    void atomRemoved(const AtomPtr&);
 
 public:
+
+    /**
+     * Return the agent's logger object
+     *
+     * @return A logger object.
+     */
+    Logger* getLogger();
 
     /** Agent's constructor. By default, initializes the frequency to 1. */
     Agent(CogServer&, const unsigned int f = 1);
@@ -163,29 +168,34 @@ public:
     /** Agent's destructor */
     virtual ~Agent();
 
-    /** Abstract run method. Should be overridden by a derived agent with the
-     *  actual agent's behavior. */
+    /**
+     * Abstract run method. Should be overridden by a derived agent with the
+     * actual agent's behavior.
+     */
     virtual void run() = 0;
 
-    /** Agent stop() method, called when the agent is stopped
-     */
+    /** Agent stop() method, called when the agent is stopped */
     virtual void stop() {}
 
     /** Returns the agent's frequency. */
     virtual int frequency(void) const { return _frequency; }
 
     /** Sets the agent's frequency. */
-    virtual void setFrequency(int frequency) { _frequency=frequency; }
+    virtual void setFrequency(int freq) { _frequency = freq; }
 
     /** Returns the agent's class info. */
     virtual const ClassInfo& classinfo() const = 0;
 
-    /** Dumps the agent's name and all its configuration parameters
-     * to a string. */
+    /**
+     * Dumps the agent's name and all its configuration parameters
+     * to a string.
+     */
     std::string to_string() const;
 
-    /** Returns the sequence of handle sets for this cycle that the agent
-     *  would like to claim credit for in the System Activity Table. */
+    /**
+     * Returns the sequence of handle sets for this cycle that the agent
+     * would like to claim credit for in the System Activity Table.
+     */
     virtual std::vector<UnorderedHandleSet> getUtilizedHandleSets() const
     {
         std::lock_guard<std::mutex> lock(_handleSetMutex);
@@ -195,72 +205,6 @@ public:
     /** Resets the utilized handle sets */
     void resetUtilizedHandleSets();
 
-    /**
-     * Stimulate a Handle's atom.
-     *
-     * @param h atom handle
-     * @param amount of stimulus to give.
-     * @return total stimulus given since last reset.
-     */
-    stim_t stimulateAtom(Handle h, stim_t amount);
-
-    /**
-     * Stimulate all atoms in HandleSeq evenly with a given amount of stimulus.
-     *
-     * @param hs set of atoms to spread stimulus across.
-     * @param amount amount of stimulus to share.
-     * @return remainder stimulus after equal spread between atoms.
-     */
-    stim_t stimulateAtom(HandleSeq hs, stim_t amount);
-
-    /**
-     * Remove stimulus from a Handle's atom.
-     *
-     * @param atom handle
-     */
-    void removeAtomStimulus(Handle h);
-
-    /**
-     * Reset stimulus.
-     *
-     * @return new stimulus since reset, usually zero unless another
-     * thread adds more.
-     */
-    stim_t resetStimulus();
-
-    /**
-     * Get total stimulus.
-     *
-     * @return total stimulus since last reset.
-     */
-    stim_t getTotalStimulus() const;
-
-    /**
-     * Get stimulus for Atom.
-     *
-     * @param h handle of atom to get stimulus for.
-     * @return total stimulus since last reset.
-     */
-    stim_t getAtomStimulus(Handle h) const;
-
-    AttentionValuePtr getAV()
-    {
-#ifdef SHARED_PTR_ATOMIC_OPS
-        return std::atomic_load(&_attentionValue);
-#else
-        std::lock_guard<std::mutex> lock(_attentionValueMutex);
-        return _attentionValue;
-#endif
-    }
-    void setAV(AttentionValuePtr new_av)
-    {
-#ifdef SHARED_PTR_ATOMIC_OPS
-        std::atomic_store(&_attentionValue, new_av);
-#else
-        std::lock_guard<std::mutex> lock(_attentionValueMutex);
-        _attentionValue = new_av;
-#endif
-    }
 }; // class
 
 typedef std::shared_ptr<Agent> AgentPtr;

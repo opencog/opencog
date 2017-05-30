@@ -64,7 +64,7 @@ void PatternMiner::extendAllPossiblePatternsForOneMoreGramBF(HandleSeq &instance
 
     // First, extract all the variable nodes in the instance links
     // we only extend one more link on the nodes that are considered as varaibles for this pattern
-    set<Handle> allVarNodes;
+    OrderedHandleSet allVarNodes;
 
     HandleSeq::iterator patternLinkIt = curHTreeNode->pattern.begin();
     for (Handle link : instance)
@@ -73,7 +73,7 @@ void PatternMiner::extendAllPossiblePatternsForOneMoreGramBF(HandleSeq &instance
         patternLinkIt ++;
     }
 
-    set<Handle>::iterator varIt;
+    OrderedHandleSet::iterator varIt;
 
     for(varIt = allVarNodes.begin(); varIt != allVarNodes.end(); ++ varIt)
     {
@@ -82,13 +82,13 @@ void PatternMiner::extendAllPossiblePatternsForOneMoreGramBF(HandleSeq &instance
         ((Handle)(*varIt))->getIncomingSet(back_inserter(incomings));
 
         // debug
-        string curvarstr = originalAtomSpace->atom_as_string((Handle)(*varIt));
+        string curvarstr = ((Handle)(*varIt))->toShortString();
 
         for (Handle incomingHandle : incomings)
         {
             Handle extendedHandle;
             // if this atom is a igonred type, get its first parent that is not in the igonred types
-            if (isIgnoredType (originalAtomSpace->get_type(incomingHandle)) )
+            if (isIgnoredType (incomingHandle->getType()) )
             {
                 extendedHandle = getFirstNonIgnoredIncomingLink(originalAtomSpace, incomingHandle);
                 if (extendedHandle == Handle::UNDEFINED)
@@ -98,7 +98,7 @@ void PatternMiner::extendAllPossiblePatternsForOneMoreGramBF(HandleSeq &instance
                 extendedHandle = incomingHandle;
 
             // debug
-            string extendedHandleStr = originalAtomSpace->atom_as_string(extendedHandle);
+            string extendedHandleStr = extendedHandle->toShortString();
 
             if (isInHandleSeq(extendedHandle, instance))
                 continue;
@@ -120,8 +120,8 @@ void PatternMiner::extendAllPossiblePatternsForOneMoreGramBF(HandleSeq &instance
     }
 }
 
-void PatternMiner::extractAllPossiblePatternsFromInputLinksBF(vector<Handle>& inputLinks,  HTreeNode* parentNode,
-                                                                          set<Handle>& sharedNodes, unsigned int gram)
+void PatternMiner::extractAllPossiblePatternsFromInputLinksBF(HandleSeq& inputLinks,  HTreeNode* parentNode,
+                                                                          OrderedHandleSet& sharedNodes, unsigned int gram)
 {
     map<Handle,Handle> valueToVarMap;  // the ground value node in the orginal Atomspace to the variable handle in pattenmining Atomspace
 
@@ -234,7 +234,7 @@ void PatternMiner::extractAllPossiblePatternsFromInputLinksBF(vector<Handle>& in
                 {
                     HandleSeq outgoingLinks;
                     generateALinkByChosenVariables(link, patternVarMap, outgoingLinks, originalAtomSpace);
-                    Handle rebindedLink = atomSpace->add_link(atomSpace->get_type(link), outgoingLinks);
+                    Handle rebindedLink = atomSpace->add_link(link->getType(), outgoingLinks);
                     rebindedLink->merge(TruthValue::TRUE_TV());
                     if (onlyContainVariableNodes(rebindedLink, atomSpace))
                     {
@@ -385,7 +385,7 @@ void PatternMiner::growTheFirstGramPatternsTaskBF()
         Handle cur_link = allLinks[cur_index];
 
         // if this link is listlink, ignore it
-        if (originalAtomSpace->get_type(cur_link) == opencog::LIST_LINK)
+        if (cur_link->getType() == opencog::LIST_LINK)
         {
             continue;
         }
@@ -394,7 +394,7 @@ void PatternMiner::growTheFirstGramPatternsTaskBF()
         originalLinks.push_back(cur_link);
 
         // Extract all the possible patterns from this originalLinks, not duplicating the already existing patterns
-        set<Handle> sharedNodes;
+        OrderedHandleSet sharedNodes;
         extractAllPossiblePatternsFromInputLinksBF(originalLinks, 0, sharedNodes, 1);
 
     }
@@ -432,18 +432,18 @@ void PatternMiner::ConstructTheFirstGramPatternsBF()
 
     // release allLinks
     allLinks.clear();
-    (vector<Handle>()).swap(allLinks);
+    (HandleSeq()).swap(allLinks);
 
     // sort the patterns by frequency
     std::sort((patternsForGram[0]).begin(), (patternsForGram[0]).end(),compareHTreeNodeByFrequency );
 
     int end_time = time(NULL);
-    OutPutFrequentPatternsToFile(1);
+    OutPutFrequentPatternsToFile(1, patternsForGram);
 
     std::cout<<"Debug: PatternMiner: done (gram = 1) pattern mining! " + toString((patternsForGram[0]).size()) + " patterns found! " << std::endl;
     printf(" Total time: %d seconds. \n", end_time - start_time);
 
-    OutPutFrequentPatternsToFile(cur_gram);
+    OutPutFrequentPatternsToFile(cur_gram, patternsForGram);
 
     HandleSeq allDumpNodes, allDumpLinks;
     atomSpace->get_handles_by_type(back_inserter(allDumpNodes), (Type) NODE, true );
@@ -456,14 +456,14 @@ void PatternMiner::ConstructTheFirstGramPatternsBF()
 
     for (Handle h : allDumpNodes)
     {
-        dumpFile << atomSpace->atom_as_string(h);
+        dumpFile << h->toShortString();
     }
 
     atomSpace->get_handles_by_type(back_inserter(allDumpLinks), (Type) LINK, true );
 
     for (Handle h : allDumpLinks)
     {
-        dumpFile << atomSpace->atom_as_string(h);
+        dumpFile << h->toShortString();
     }
 
     dumpFile.close();
@@ -499,7 +499,7 @@ void PatternMiner::GrowAllPatternsBF()
             // Finished mining cur_gram patterns; output to file
             std::cout<<"Debug: PatternMiner:  done (gram = " + toString(cur_gram) + ") frequent pattern mining!" + toString((patternsForGram[cur_gram-1]).size()) + " patterns found! " << std::endl;
 
-            OutPutFrequentPatternsToFile(cur_gram);
+            OutPutFrequentPatternsToFile(cur_gram, patternsForGram);
         }
 
 
@@ -508,7 +508,7 @@ void PatternMiner::GrowAllPatternsBF()
             cout << "\nCalculating interestingness for " << cur_gram << "gram patterns";
             // evaluate the interestingness
             // Only effective when Enable_Interesting_Pattern is true. The options are "Interaction_Information", "surprisingness"
-            if (interestingness_Evaluation_method == "Interaction_Information")
+            if (Enable_Interaction_Information)
             {
                 cout << "by evaluating Interaction_Information ...\n";
                // calculate interaction information
@@ -520,7 +520,8 @@ void PatternMiner::GrowAllPatternsBF()
                // sort by interaction information
                std::sort((patternsForGram[cur_gram-1]).begin(), (patternsForGram[cur_gram-1]).end(),compareHTreeNodeByInteractionInformation);
             }
-            else if (interestingness_Evaluation_method == "surprisingness")
+
+            if (Enable_surprisingness)
             {
                 cout << "by evaluating surprisingness ...\n";
                 // calculate surprisingness
@@ -552,14 +553,14 @@ void PatternMiner::GrowAllPatternsBF()
 
         for (Handle h : allDumpNodes)
         {
-            dumpFile << atomSpace->atom_as_string(h);
+            dumpFile << h->toShortString();
         }
 
         atomSpace->get_handles_by_type(back_inserter(allDumpLinks), (Type) LINK, true );
 
         for (Handle h : allDumpLinks)
         {
-            dumpFile << atomSpace->atom_as_string(h);
+            dumpFile << h->toShortString();
         }
 
         dumpFile.close();
@@ -574,12 +575,12 @@ void PatternMiner::swapOneLinkBetweenTwoAtomSpaceBF(AtomSpace* fromAtomSpace, At
 
     for (Handle h : outgoingLinks)
     {
-        if (fromAtomSpace->is_node(h))
+        if (h->isNode())
         {
-           Handle new_node = toAtomSpace->add_node(fromAtomSpace->get_type(h), fromAtomSpace->get_name(h));
-           new_node->merge(fromAtomSpace->get_TV(h));
+           Handle new_node = toAtomSpace->add_node(h->getType(), h->getName());
+           new_node->merge(h->getTruthValue());
            outgoings.push_back(new_node);
-           if (fromAtomSpace->get_type(h) == VARIABLE_NODE)
+           if (h->getType() == VARIABLE_NODE)
            {
                containVar = true;
                if ( ! isInHandleSeq(new_node, outVariableNodes) ) // should not have duplicated variable nodes
@@ -591,8 +592,8 @@ void PatternMiner::swapOneLinkBetweenTwoAtomSpaceBF(AtomSpace* fromAtomSpace, At
              HandleSeq _OutgoingLinks;
              bool _containVar;
              swapOneLinkBetweenTwoAtomSpaceBF(fromAtomSpace, toAtomSpace, h, _OutgoingLinks, outVariableNodes,linksWillBeDel,  _containVar);
-             Handle _link = toAtomSpace->add_link(fromAtomSpace->get_type(h), _OutgoingLinks);
-             _link->merge(fromAtomSpace->get_TV(h));
+             Handle _link = toAtomSpace->add_link(h->getType(), _OutgoingLinks);
+             _link->merge(h->getTruthValue());
              if (_containVar)
              {
                  linksWillBeDel.push_back(_link);
@@ -613,8 +614,8 @@ HandleSeq PatternMiner::swapLinksBetweenTwoAtomSpaceBF(AtomSpace* fromAtomSpace,
         HandleSeq outgoingLinks;
         bool containVar;
         swapOneLinkBetweenTwoAtomSpaceBF(fromAtomSpace, toAtomSpace, link, outgoingLinks, outVariableNodes, linksWillBeDel,containVar);
-        Handle toLink = toAtomSpace->add_link(fromAtomSpace->get_type(link), outgoingLinks);
-        toLink->merge(fromAtomSpace->get_TV(link));
+        Handle toLink = toAtomSpace->add_link(link->getType(), outgoingLinks);
+        toLink->merge(link->getTruthValue());
         if (containVar)
             linksWillBeDel.push_back(toLink);
         outPutLinks.push_back(toLink);
@@ -647,7 +648,7 @@ void PatternMiner::findAllInstancesForGivenPatternBF(HTreeNode* HNode)
 
    HandleSeq patternToMatch = swapLinksBetweenTwoAtomSpaceBF(atomSpace, originalAtomSpace, HNode->pattern, variableNodes, linksWillBeDel);
 
-//   set<Handle> allNodesInPattern;
+//   OrderedHandleSet allNodesInPattern;
 //   for (unsigned int i = 0; i < HNode->pattern.size(); ++i)
 //   {
 //       extractAllVariableNodesInLink(HNode->pattern[i],allNodesInPattern, atomSpace);
@@ -683,7 +684,7 @@ void PatternMiner::findAllInstancesForGivenPatternBF(HTreeNode* HNode)
    hBindLink->merge(TruthValue::TRUE_TV());
 
 
-   string s = originalAtomSpace->atom_as_string(hBindLink);
+   string s = hBindLink->toShortString();
    // Run pattern matcher
    Handle hResultListLink = bindlink(originalAtomSpace, hBindLink);
 

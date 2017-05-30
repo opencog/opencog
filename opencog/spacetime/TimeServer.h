@@ -421,8 +421,8 @@ private:
     boost::signals2::connection removedAtomConnection;
     boost::signals2::connection addedAtomConnection;
 
-    void atomAdded(Handle);
-    void atomRemoved(AtomPtr);
+    void atomAdded(const Handle&);
+    void atomRemoved(const AtomPtr&);
 
     /**
      * The temporal table used by this TimeServer

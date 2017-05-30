@@ -274,13 +274,12 @@ static int show_index(char * index_entry)
 	p = strchr(p, ' ') + 1;
 	int sense_num = atoi(p); 
 
+	// calling read_synset function with ipos=5 causes segfault.
+	if (5 == ipos) 
+		return -2;
+
 	// Read the synset corresponding to this line.
 	synp = read_synset(ipos, offset, NULL);
-
-	if (5 == ipos)
-	{
-		return -2;
-	}
 
 	if (!synp)
 	{

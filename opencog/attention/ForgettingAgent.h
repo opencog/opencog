@@ -1,8 +1,7 @@
 /*
  * opencog/attention/ForgettingAgent.h
  *
- * Copyright (C) 2008 by OpenCog Foundation
- * Written by Joel Pitt <joel@fruitionnz.com>
+ * Written by Roman Treutlein
  * All Rights Reserved
  *
  * This program is free software; you can redistribute it and/or modify
@@ -29,17 +28,15 @@
 #include <math.h>
 
 #include <opencog/atomspace/AtomSpace.h>
+#include <opencog/attentionbank/AttentionBank.h>
 #include <opencog/truthvalue/AttentionValue.h>
 #include <opencog/cogserver/server/Agent.h>
-#include <opencog/util/Logger.h>
 
 namespace opencog
 {
 /** \addtogroup grp_attention
  *  @{
  */
-
-class CogServer;
 
 /** The ForgettingAgent, carries out the forgetting process in OpenCog Prime. 
  * 
@@ -59,28 +56,16 @@ class CogServer;
  *
  * Forgetting can be tuned via two parameters:
  *
- * 1. the maximum LTI value that can be forgotten, and
- * 2. the percentage of the AtomSpace to forget (typically this would be very low!) 
+ * 1. The ammount of Atoms the AtomSpace should contain.
+ * 2. A range value of what is an accepteable deviation from that. (Allows the agent to run less often and delete more atoms in one go)
  *
- * These work in concert to limit how much and what atoms are forgotten. If only
- * one parameter is set, then the other has free reign. I.e. a certain percentage
- * of the AtomSpace will always be forgotten regardless of their LTI, or, any atom
- * that drops below the maximum forgetting LTI will be forgotten. 
+ * These work in concert to limit how much and what atoms are forgotten.
+ * TODO: Improve Recursive Remove to work with links outher then HebbianLinks
  */
 class ForgettingAgent : public Agent
 {
-
 private:
-    AtomSpace* a;
-    Logger *log; //!< Logger object for Agent
-
-    /** Set the agent's logger object
-     *
-     * Note, this will be deleted when this agent is.
-     *
-     * @param l The logger to associate with the agent.
-     */
-    void setLogger(Logger* l);
+    AttentionBank* _bank;
 
 public:
 
@@ -92,20 +77,17 @@ public:
 
     //! Maximum LTI of an atom that can be forgot.
     AttentionValue::lti_t forgetThreshold;
-    //! Percentage of AtomSpace to forget.
-    float forgetPercentage;
+
+    //!targetSize of AtomSpace
+    int maxSize;
+    //!acceptable diviation from maxSize;
+    int accDivSize;
 
     ForgettingAgent(CogServer&);
     virtual ~ForgettingAgent();
     virtual void run();
 
-    void forget(float p);
-
-    /** Return the agent's logger object
-     *
-     * @return A logger object.
-     */
-    Logger* getLogger();
+    void forget();
 
 }; // class
 
@@ -118,17 +100,19 @@ typedef std::shared_ptr<ForgettingAgent> ForgettingAgentPtr;
  */
 struct ForgettingLTIThenTVAscendingSort
 {
-    ForgettingLTIThenTVAscendingSort(AtomSpace* _a) {};
+    AttentionBank* _bank;
+    ForgettingLTIThenTVAscendingSort(AtomSpace* a) :
+        _bank(&attentionbank(a)) {};
 
     bool operator()(const Handle& h1, const Handle& h2)
     {
         AttentionValue::lti_t lti1, lti2;
 
-        lti1 = h1->getAttentionValue()->getLTI();
-        lti2 = h2->getAttentionValue()->getLTI();
+        lti1 = _bank->get_lti(h1);
+        lti2 = _bank->get_lti(h2);
         if (lti1 != lti2) return lti1 < lti2;
         else {
-            float tv1, tv2;
+            double tv1, tv2;
             tv1 = fabs(h1->getTruthValue()->getMean());
             tv2 = fabs(h2->getTruthValue()->getMean());
             return tv1 < tv2;

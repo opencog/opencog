@@ -3,10 +3,13 @@ __author__ = 'Cosmo Harrigan'
 from flask import abort, json, current_app, jsonify
 from flask.ext.restful import Resource, reqparse, marshal
 import opencog.cogserver
-from opencog.atomspace import Handle, Atom
+from opencog.atomspace import Atom
 from mappers import *
 from flask.ext.restful.utils import cors
 from flask_restful_swagger import swagger
+
+# Temporary hack
+from web.api.utilities import get_atoms_by_name
 
 # If the system doesn't have these dependencies installed, display a warning
 # but allow the API to load
@@ -26,9 +29,10 @@ class AtomCollectionAPI(Resource):
         return cls
 
     def __init__(self):
+        self.atom_map = global_atom_map
         self.reqparse = reqparse.RequestParser()
-        self.reqparse.add_argument(
-            'type', type=str, location='args', choices=types.__dict__.keys())
+        self.reqparse.add_argument('type', type=str, action='append',
+                     location='args', choices=types.__dict__.keys())
         self.reqparse.add_argument('name', type=str, location='args')
         self.reqparse.add_argument('callback', type=str, location='args')
         self.reqparse.add_argument('filterby', type=str, location='args',
@@ -262,6 +266,7 @@ class AtomCollectionAPI(Resource):
 	    {'code': 400, 'message': 'Invalid request: stirange filter requires stimin parameter'}
 	]
     )
+
     def get(self, id=""):
         retval = jsonify({'error':'Internal error'})
         try:
@@ -269,6 +274,7 @@ class AtomCollectionAPI(Resource):
         except Exception,e:
            retval = jsonify({'error':str(e)})
         return retval
+
     def _get(self, id=""):
         """
         Returns a list of atoms matching the specified criteria
@@ -296,11 +302,11 @@ class AtomCollectionAPI(Resource):
 
         if id != "":
             try:
-                atom = self.atomspace[Handle(id)]
+                atom = self.atom_map.get_atom(int(id))
                 atoms = [atom]
             except IndexError:
                 atoms = []
-                # abort(404, 'Handle not found')
+                # abort(404, 'Atom not found')
         else:
             # First, check if there is a valid filter type, and give it
             # precedence if it exists
@@ -323,11 +329,16 @@ class AtomCollectionAPI(Resource):
                 if type is None and name is None:
                     atoms = self.atomspace.get_atoms_by_type(types.Atom)
                 elif name is None:
-                    atoms = self.atomspace.get_atoms_by_type(
-                        types.__dict__.get(type))
+                    atoms = []
+                    for t in type:
+                         atoms = atoms + self.atomspace.get_atoms_by_type(
+                                           types.__dict__.get(t))
                 else:
-                    abort(400, 'Invalid request: get atoms by name no longer'
-                    		   ' supported')
+                    if type is None:
+                        type = ['Node']
+                    for t in type:
+                        atoms = get_atoms_by_name(types.__dict__.get(t),
+                                    name, self.atomspace)
 
             # Optionally, filter by TruthValue
             if tv_strength_min is not None:
@@ -359,6 +370,7 @@ class AtomCollectionAPI(Resource):
         # DOT return format is also supported
         if dot_format not in ['True', 'true', '1']:
             atom_list = AtomListResponse(atoms)
+            # xxxxxxxxxxxx here add atoms
             json_data = {'result': atom_list.format()}
 
             # if callback function supplied, pad the JSON data (i.e. JSONP):
@@ -521,8 +533,10 @@ the atom. Example:
 
         # Outgoing set
         if 'outgoing' in data:
+            print data
             if len(data['outgoing']) > 0:
-                outgoing = [Handle(h) for h in data['outgoing']]
+                outgoing = [self.atom_map.get_atom(uid)
+                                for uid in data['outgoing']]
         else:
             outgoing = None
 
@@ -542,11 +556,14 @@ the atom. Example:
 
         try:
             atom = self.atomspace.add(t=type, name=name, tv=tv, out=outgoing)
+            uid = self.atom_map.get_uid(atom)
         except TypeError:
             abort(500, 'Error while processing your request. Check your '
                        'parameters.')
 
-        return {'atoms': marshal(atom, atom_fields)}
+        dictoid = marshal(atom, atom_fields)
+        dictoid['handle'] = uid
+        return {'atoms': dictoid}
 
     @swagger.operation(
 	notes='''
@@ -615,7 +632,7 @@ containing the atom.
 	parameters=[
 	    {
 		'name': 'id',
-		'description': '<a href="http://wiki.opencog.org/w/Handle">Atom handle</a>',
+		'description': '<a href="http://wiki.opencog.org/w/Atom">Atom handle</a>',
 		'required': True,
 		'allowMultiple': False,
 		'dataType': 'int',
@@ -661,7 +678,7 @@ containing the atom.
 	responseMessages=[
 	    {'code': 200, 'message': 'Atom truth and/or attention value updated'},
 	    {'code': 400, 'message': 'Invalid type or required parameter type missing'},
-	    {'code': 404, 'message': 'Handle not found'}
+	    {'code': 404, 'message': 'Atom not found'}
 	]
     )
     def put(self, id):
@@ -669,8 +686,10 @@ containing the atom.
         Updates the AttentionValue (STI, LTI, VLTI) or TruthValue of an atom
         """
 
-        if Handle(id) not in self.atomspace:
-            abort(404, 'Handle not found')
+        # If the atom is not found in the atomspace.
+        the_atom = self.atom_map.get_atom(id)
+        if the_atom == None:
+            abort(404, 'Atom not found')
 
         # Prepare the atom data
         data = reqparse.request.get_json()
@@ -681,14 +700,15 @@ containing the atom.
 
         if 'truthvalue' in data:
             tv = ParseTruthValue.parse(data)
-            self.atomspace.set_tv(h=Handle(id), tv=tv)
+            the_atom.tv = tv
 
         if 'attentionvalue' in data:
             (sti, lti, vlti) = ParseAttentionValue.parse(data)
-            self.atomspace.set_av(h=Handle(id), sti=sti, lti=lti, vlti=vlti)
+            the_atom.av = {'sti': sti, 'lti': lti, 'vlti': vlti}
 
-        atom = self.atomspace[Handle(id)]
-        return {'atoms': marshal(atom, atom_fields)}
+        dicty = marshal(the_atom, atom_fields)
+        dicty['handle'] = self.atom_map.get_uid(the_atom)
+        return {'atoms': dicty}
 
     @swagger.operation(
 	notes='''
@@ -710,7 +730,7 @@ Returns a JSON representation of the result, indicating success or failure.
 	parameters=[
 	    {
 		'name': 'id',
-		'description': '<a href="http://wiki.opencog.org/w/Handle">Atom handle</a>',
+		'description': '<a href="http://wiki.opencog.org/w/Atom">Atom handle</a>',
 		'required': True,
 		'allowMultiple': False,
 		'dataType': 'int',
@@ -719,7 +739,7 @@ Returns a JSON representation of the result, indicating success or failure.
 	],
 	responseMessages=[
 	    {'code': 200, 'message': 'Deleted the atom'},
-	    {'code': 404, 'message': 'Handle not found'},
+	    {'code': 404, 'message': 'Atom not found'},
 	]
     )
     def delete(self, id):
@@ -727,11 +747,11 @@ Returns a JSON representation of the result, indicating success or failure.
         Removes an atom from the AtomSpace
         """
 
-        if Handle(id) not in self.atomspace:
-            abort(404, 'Handle not found')
-        else:
-            atom = self.atomspace[Handle(id)]
+        atom = self.atom_map.get_atom(id)
+        if atom == None:
+            abort(404, 'Atom not found')
 
         status = self.atomspace.remove(atom)
+        self.atom_map.remove(atom, id)
         response = DeleteAtomResponse(id, status)
         return {'result': response.format()}

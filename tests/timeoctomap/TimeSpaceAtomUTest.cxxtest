@@ -1,0 +1,165 @@
+/*
+ * Copyright (c) 2016, Mandeep Singh Bhatia, OpenCog Foundation
+ * All rights reserved.
+ * License: AGPL
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *
+ *     * Redistributions of source code must retain the above copyright
+ *       notice, this list of conditions and the following disclaimer.
+ *     * Redistributions in binary form must reproduce the above copyright
+ *       notice, this list of conditions and the following disclaimer in the
+ *       documentation and/or other materials provided with the distribution.
+ *     * Neither the name of the University of Freiburg nor the names of its
+ *       contributors may be used to endorse or promote products derived from
+ *       this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ */
+
+//TestAtomOcTree.cpp
+#include <cxxtest/TestSuite.h>
+#include <opencog/atomspace/AtomSpace.h>
+#include "opencog/timeoctomap/TimeOctomap.h"
+
+using namespace std;
+using namespace opencog;
+using namespace octomap;
+
+class SpaceServerUTest : public CxxTest::TestSuite
+{
+public:
+    AtomSpace testatomspace;
+    Handle testHandle;
+    void setUp()
+    {
+        testHandle=testatomspace.add_node(NUMBER_NODE,"21");
+    }
+
+    void tearDown()
+    {
+    }
+
+    void print_query_info(point3d query, opencog::Handle ato)
+    {
+        if (ato != UndefinedHandle) {
+            cout << "occupancy at " << query << ":\t " << ato<< endl;
+        }
+        else
+            cout << "occupancy at " << query << ":\t is unknown" << endl;
+    }
+
+    void test_TSA()
+    {
+        cout << endl;
+        cout << "generating example map" << endl;
+
+        double res = 0.1;
+        TimeOctomap tsa(3, res, std::chrono::seconds(10));
+        time_pt t1 = tsa.get_current_time();
+
+        // Insert some measurements of occupied cells
+        for (double x=-1; x<1; x += 0.05) {
+            for (double y=-1; y<1; y += 0.05) {
+                for (double z=-1; z<1; z += 0.05) {
+                    point3d endpoint (x,  y,  z);
+                    tsa.insert_atom(endpoint, testHandle);
+                }
+            }
+        }
+
+        /*//removal is probabilistic (huh???)
+          for (int x=-20; x<20; x++) {
+            for (int y=-20; y<20; y++) {
+              for (int z=-20; z<20; z++) {
+                point3d endpoint ((float) x*0.05f, (float) y*0.05f, (float) z*0.05f);
+                TS_ASSERT(tsa.RemoveAtomAtTime(t1,1,endpoint));
+              }
+            }
+          }
+        */
+
+        // insert some measurements of free cells
+        // Need to put something to delete atom
+        for (double x = -1.6; x < -0.4; x += 0.02) {
+            for (double y = -1.6; y < -0.4; y += 0.02) {
+                for (double z = -1.6; z < -0.4; z += 0.02) {
+                    point3d endpoint (x, y, z);
+                    tsa.remove_atoms_at_location(endpoint);
+                }
+            }
+        }
+
+        cout << endl;
+        cout << "performing some queries:" << endl;
+        point3d query (0.0, 0.0, 0.0);
+        opencog::Handle result = tsa.get_atom_at_location(query);
+        print_query_info(query, result);
+        TS_ASSERT_EQUALS(result, testHandle);
+
+        query = point3d(-1.0, -1.0, -1.0);
+        result = tsa.get_atom_at_location(query);
+        print_query_info(query, result);
+        TS_ASSERT_EQUALS(result, UndefinedHandle);
+
+        query = point3d(100.0, 1.0, 1.0);
+        result = tsa.get_atom_at_location(query);
+        print_query_info(query, result);
+        TS_ASSERT_EQUALS(result, UndefinedHandle);
+
+        cout << "at time:";
+        query = point3d(0.0, 0.0, 0.0);
+        result = tsa.get_atom_at_time_by_location(t1, query);
+        print_query_info(query, result);
+        TS_ASSERT_EQUALS(result, testHandle);
+
+        cout << "get times at location:";
+        time_list tl = tsa.get_times_of_atom_occurence_at_location(query, testHandle);
+        cout << tl.size() << endl;
+        TS_ASSERT_EQUALS(tl.size(),1);
+
+        cout << "get times in Map:";
+        tl = tsa.get_timeline(testHandle);
+        cout << tl.size() << endl;
+        TS_ASSERT_EQUALS(tl.size(), 1);
+
+        cout << "get locations at current time:";
+        point3d_list pl = tsa.get_locations_of_atom(testHandle);
+        cout << pl.size() << endl;
+        TS_ASSERT(pl.size() > 6000);
+
+        cout << "removing atom=21" << endl;
+        tsa.remove_atom(testHandle);
+        query = point3d(0.0, 0.0, 0.0);
+        result = tsa.get_atom_at_location(query);
+        print_query_info(query, result);
+        TS_ASSERT_EQUALS(result, UndefinedHandle);
+
+        cout << "get locations at time:";
+        pl = tsa.get_locations_of_atom_at_time(t1, testHandle);
+        cout<<pl.size() << endl;
+        TS_ASSERT_EQUALS(pl.size(), 0);
+
+        cout << "adding time-slices..." << endl;
+        tsa.step_time_unit();
+        tsa.step_time_unit();
+        tsa.step_time_unit();
+
+        cout << "get locations at time:";
+        pl = tsa.get_locations_of_atom_at_time(t1, testHandle);
+        cout << pl.size() << endl;
+        TS_ASSERT_EQUALS(pl.size(), 0);
+        cout << endl;
+    }
+};

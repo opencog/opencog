@@ -6,36 +6,10 @@ IF (HAVE_SERVER)
 	ENDIF (HAVE_CYTHON)
 ENDIF (HAVE_SERVER)
 
-IF (HAVE_REST)
+IF (HAVE_EVENT_PUBLISHING_DEPENDENCIES)
 	ADD_SUBDIRECTORY(events)
-ENDIF (HAVE_REST)
+ENDIF (HAVE_EVENT_PUBLISHING_DEPENDENCIES)
 
-# ----------------------------------------
-# Link-grammar cogserver module
-
-IF (HAVE_GUILE AND HAVE_LINK_GRAMMAR)
-	ADD_LIBRARY (LGDictModule SHARED
-		LGDictModule
-	)
-
-	TARGET_LINK_LIBRARIES (LGDictModule lg-dict server)
-
-	INSTALL (TARGETS LGDictModule
-		LIBRARY DESTINATION "lib${LIB_DIR_SUFFIX}/opencog/modules"
-	)
-ENDIF (HAVE_GUILE AND HAVE_LINK_GRAMMAR)
-
-# Build the query (pattern-matching) cogserver module
-ADD_LIBRARY(QueryModule SHARED
-	QueryModule.cc
-)
-TARGET_LINK_LIBRARIES(QueryModule
-	${ATOMSPACE_LIBRARIES}
-)
-
-INSTALL (TARGETS QueryModule
-	LIBRARY DESTINATION "lib${LIB_DIR_SUFFIX}/opencog/modules"
-)
 # ----------------------------------------
 # The SQL persistence module
 
@@ -74,36 +48,3 @@ IF (HAVE_ZMQ AND HAVE_PROTOBUF)
 ENDIF (HAVE_ZMQ AND HAVE_PROTOBUF)
 
 # ----------------------------------------
-# Build the RuleEngine cogserver module
-
-ADD_LIBRARY(RuleEngineModule SHARED
-	RuleEngineModule.cc
-)
-
-TARGET_LINK_LIBRARIES(RuleEngineModule
-	${ATOMSPACE_LIBRARIES}
-)
-
-INSTALL (TARGETS RuleEngineModule
-	LIBRARY DESTINATION "lib${LIB_DIR_SUFFIX}/opencog/modules"
-)
-# ----------------------------------------
-# Surface realization cogserver module
-
-IF (HAVE_GUILE AND HAVE_LINK_GRAMMAR)
-	ADD_LIBRARY (SuRealModule SHARED
-		SuRealModule
-	)
-
-	ADD_DEPENDENCIES (SuRealModule
-		nlp_atom_types
-	)
-
-	TARGET_LINK_LIBRARIES(SuRealModule
-		sureal
-	)
-
-	INSTALL (TARGETS SuRealModule
-		LIBRARY DESTINATION "lib${LIB_DIR_SUFFIX}/opencog/modules"
-	)
-ENDIF (HAVE_GUILE AND HAVE_LINK_GRAMMAR)

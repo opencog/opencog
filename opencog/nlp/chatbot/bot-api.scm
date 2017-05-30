@@ -20,8 +20,7 @@
     (cond
         ((equal? '() temp) "Sorry, I don't know the answer.")
         ; Return all of them, for now
-        (else (map string-join temp))
-        ; (else (string-join (car temp)))
+        (else temp)
 
 ))
 ;--------------------------------------------------------------------
@@ -34,47 +33,56 @@
   the user-name (currently, the user's IRC nick). The QUERY is the
   string holding what the user said.
 "
-    ; nlp-parse returns (SentenceNode "sentence@45c470a6-29...")
-    (define sent-node (car (nlp-parse query)))
+    (with-throw-handler #t
+        (lambda ()
+            ; nlp-parse returns (SentenceNode "sentence@45c470a6-29...")
+            (define sent-node (car (nlp-parse query)))
 
-    ;; XXX FIXME -- remove the IRC debug response below.
-    (display "Hello ")
-    (display user)
-    (display ", you said: \"")
-    (display query)
-    (display "\"")
-    (newline)
-    ; Call the `get-utterance-type` function to get the speech act type
-    ; of the utterance.  The response processing will be based on the
-    ; type of the speech act.
-    (let* ((gutr (sentence-get-utterance-type sent-node))
-           (utr (if (equal? '() gutr) '() (car gutr)))
+            ;; XXX FIXME -- remove the IRC debug response below.
+            (display "Hello ")
+            (display user)
+            (display ", you said: \"")
+            (display query)
+            (display "\"")
+            (newline)
+            ; Call the `get-utterance-type` function to get the speech act type
+            ; of the utterance.  The response processing will be based on the
+            ; type of the speech act.
+            (let* ((gutr (sentence-get-utterance-type sent-node))
+                   (utr (if (equal? '() gutr) '() (car gutr)))
+                )
+                (cond
+                    ((equal? utr (DefinedLinguisticConceptNode "TruthQuerySpeechAct"))
+                        (display "You asked a Truth Query\n")
+                        ; (truth_query_process sent-node)
+                        (display "I can't process truth query for now\n")
+                    )
+                    ((equal? utr (DefinedLinguisticConceptNode "InterrogativeSpeechAct"))
+                        (display "You made an Interrogative SpeechAct\n")
+                        (wh_query_process sent-node)
+                    )
+                    ((equal? utr (DefinedLinguisticConceptNode "DeclarativeSpeechAct"))
+                        (display "You made a Declarative SpeechAct\n")
+                        ; XXX Use AIML here to say something snarky.
+                    )
+                    ((equal? utr (DefinedLinguisticConceptNode "ImperativeSpeechAct"))
+                        (display "You made a Imperative SpeechAct\n")
+                        ; Make the robot do whatever ...
+		                    ; (imperative_process sent-node)
+                        ; XXX Use AIML here to say something snarky.
+                    )
+                    (else
+                        (display "Sorry, I can't identify the speech act type\n")
+                        ; XXX Use AIML here to say something snarky.
+                    )
+                )
+            )
         )
-    (cond
-        ((equal? utr (DefinedLinguisticConceptNode "TruthQuerySpeechAct"))
-            (display "You asked a Truth Query\n")
-            ; (truth_query_process sent-node)
-            (display "I can't process truth query for now\n")
-        )
-        ((equal? utr (DefinedLinguisticConceptNode "InterrogativeSpeechAct"))
-            (display "You made an Interrogative SpeechAct\n")
-            (wh_query_process sent-node)
-        )
-        ((equal? utr (DefinedLinguisticConceptNode "DeclarativeSpeechAct"))
-            (display "You made a Declarative SpeechAct\n")
-            ; XXX Use AIML here to say something snarky.
-        )
-        ((equal? utr (DefinedLinguisticConceptNode "ImperativeSpeechAct"))
-            (display "You made a Imperative SpeechAct\n")
-            ; Make the robot do whatever ...
-				; (imperative_process sent-node)
-            ; XXX Use AIML here to say something snarky.
-        )
-        (else
-            (display "Sorry, I can't identify the speech act type\n")
-            ; XXX Use AIML here to say something snarky.
-        )
-    )))
+        ; Catch the exception, if any, and display what it is.
+        (lambda args
+            (backtrace)
+            (display "Sorry, I caught an exception\n"))
+    ))
 
 ;--------------------------------------------------------------------
 ; not working for now ...
@@ -83,16 +91,16 @@
 ;
 ; should also put the sentence's output atom into the focus set
 ;
-; It Use backward chaning to process Truth query
-; Depending on the backward chaning generate the answer (using SuRel)
+; Use backward chaining to process Truth query
+; Depending on the backward chaining, generate the answer (using SuReal)
 ;--------------------------------------------------------------------
 (define (truth_query_process query)
     (define tmp)
     (define bc)
     (define rule-base)
     (set! tmp (fAtom query))
-    (set! bc (cog-bc
-        (cog-new-link 'InheritanceLink (VariableNode "$x") (gdr tmp)) rule-base (SetLink)))
+    (set! bc (cog-bc rule-base 
+        (cog-new-link 'InheritanceLink (VariableNode "$x") (gdr tmp)) (List) (Set)))
 )
 ;-------------------------------------------------------------------
 ; Used by 'truth_query_process' to find the input for the backward

@@ -1,10 +1,7 @@
-ADD_GUILE_MODULE (
+ADD_GUILE_MODULE (FILES
 	nlp.scm
-	config.scm
-	disjunct-list.scm
-	file-utils.scm
 	nlp-utils.scm
-	parse-rank.scm
+	relex-utils.scm
 	processing-utils.scm
-	type-definitions.scm
+	MODULE_DESTINATION "${DATADIR}/scm/opencog/nlp"
 )

@@ -1,0 +1,1912 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Amusing Friend PLN Demo</title>
+	<meta charset="utf-8" />
+
+	<meta content="width=device-width, initial-scale=1" name="viewport" />
+	<link href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" rel="stylesheet" /><script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.2/jquery.min.js"></script><script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+	<style type="text/css">/* cellpadding */
+    th, td { padding: 25px; }
+    th {text-align: center}
+    div.panel-body td { width: 50%; }
+    .panel-default > div.inference {background-color: #e6f5ff;}
+    h2 { text-align: center; }
+	</style>
+</head>
+<body>
+<div class="container">&nbsp;
+<h2>Amusing Friend PLN Demo</h2>
+&nbsp; 
+<div class="panel-group">
+<!--------------------------------------------------------------------------------------------------------->
+<div class="panel panel-default">
+<div class="panel-heading">
+
+	<p>PLN demo involving deductive and abductive reasoning. Self is looking for an amusing
+	 and honest friend and infers that Bob would be one based on his actions and the fact that friends tend to be honest.<p>
+</div></div>
+<br>
+<!--------------------------------------------------------------------------------------------------------->
+<div class="panel panel-default">
+<div class="panel-heading inference">
+<h4 class="panel-title"><a data-toggle="collapse" href="#collapse0">Background Knowledge</a></h4>
+
+<p>&nbsp;<br />
+Bob is a human.<br />
+I am a human.<br />
+I am honest.<br />
+I know Bob.<br />
+Friends tend to be honest.<br />
+People who told the truth about something are honest.<br />
+People who told a joke to someone, somewhere, are funny.<br />
+Being funny is loosely equivalent to being amusing.<br />
+Bob told Jill the truth about the party.<br />
+Bob told Jim a joke at the party.<br />
+Probability of two humans being acquaintances: .0002<br />
+Probability of a&nbsp;person being honest: .8<br />
+Probability of being funny: .69<br />
+The probability of random things (typically humans) being friends: .0001<br />
+The probablity of turning acquaintance into friendship between humans: .01<br />
+<br />
+<a data-toggle="collapse" href="#collapse0">show more</a></p>
+</div>
+
+<div class="panel-collapse collapse" id="collapse0">
+<div class="panel-body">
+<table border="5">
+	<tbody>
+		<tr>
+			<th>Atomese</th>
+		</tr>
+		<tr>
+			<td style="vertical-align: top">
+			<p>;; Kownledge base for the amusing friend demo.</p>
+
+			<p>;;;;;;;;;;;;;<br />
+			;; Honesty ;;<br />
+			;;;;;;;;;;;;;</p>
+
+			<p>;; Probability of being honest<br />
+			(Predicate &quot;is-honest&quot; (stv 0.8 0.9))</p>
+
+			<p>;; Probability that two things are honest<br />
+			;;<br />
+			;; This should be inferred since we don&#39;t have the rules to infer that<br />
+			;; we put it in the kb for now.<br />
+			(Lambda (stv 0.64 0.9)<br />
+			&nbsp;&nbsp; (VariableList<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (TypedVariable<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (Variable &quot;$X&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (Type &quot;ConceptNode&quot;))<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (TypedVariable<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (Variable &quot;$Y&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (Type &quot;ConceptNode&quot;)))<br />
+			&nbsp;&nbsp; (And<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (Evaluation<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (Predicate &quot;is-honest&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (Variable &quot;$X&quot;))<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (Evaluation<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (Predicate &quot;is-honest&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (Variable &quot;$Y&quot;))))</p>
+
+			<p>;; Probability of telling the truth to someone. The probability if<br />
+			;; very low cause the probability of telling something to someone is<br />
+			;; already very low.<br />
+			(Predicate &quot;told-the-truth&quot; (stv 0.00001 0.7))</p>
+
+			<p>;; We need also the following. It should normally be wrapped in a<br />
+			;; Lambda, but because instantiation. And ultimately this should be<br />
+			;; inferred.<br />
+			(Evaluation (stv 0.00001 0.7)<br />
+			&nbsp;&nbsp; (Predicate &quot;told-the-truth-about&quot;)<br />
+			&nbsp;&nbsp; (List<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (Variable &quot;$X&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (Variable &quot;$Y&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (Variable &quot;$Z&quot;)))</p>
+
+			<p>;; People who told the truth about something are honest<br />
+			(define people-telling-the-truth-are-honest<br />
+			(ImplicationScope (stv 0.95 0.9)<br />
+			&nbsp;&nbsp; (VariableList<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (TypedVariable<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (Variable &quot;$X&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (Type &quot;ConceptNode&quot;))<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (TypedVariable<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (Variable &quot;$Y&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (Type &quot;ConceptNode&quot;))<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (TypedVariable<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (Variable &quot;$Z&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (Type &quot;ConceptNode&quot;)))<br />
+			&nbsp;&nbsp; (Evaluation<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (Predicate &quot;told-the-truth-about&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (List<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (Variable &quot;$X&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (Variable &quot;$Y&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (Variable &quot;$Z&quot;)))<br />
+			&nbsp;&nbsp; (Evaluation<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (Predicate &quot;is-honest&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (Variable &quot;$X&quot;))))</p>
+
+			<p>;;;;;;;;;;;;;;<br />
+			;; Humanity ;;<br />
+			;;;;;;;;;;;;;;</p>
+
+			<p>;; Probability of two human acquaintances<br />
+			(Lambda (stv 0.0002 0.9)<br />
+			&nbsp;&nbsp; (VariableList<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (TypedVariable<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (Variable &quot;$X&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (Type &quot;ConceptNode&quot;))<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (TypedVariable<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (Variable &quot;$Y&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (Type &quot;ConceptNode&quot;)))<br />
+			&nbsp;&nbsp; (And<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (Inheritance<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (Variable &quot;$X&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (Concept &quot;human&quot;))<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (Inheritance<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (Variable &quot;$Y&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (Concept &quot;human&quot;))<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (Evaluation<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (Predicate &quot;acquainted&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (List<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (Variable &quot;$X&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (Variable &quot;$Y&quot;)))))</p>
+
+			<p>;;;;;;;;;<br />
+			;; Bob ;;<br />
+			;;;;;;;;;</p>
+
+			<p>;; Bob is a human<br />
+			(Inheritance (stv 1 1)<br />
+			&nbsp;&nbsp; (Concept &quot;Bob&quot;)<br />
+			&nbsp;&nbsp; (Concept &quot;human&quot;))</p>
+
+			<p>;;;;;;;;;;<br />
+			;; Self ;;<br />
+			;;;;;;;;;;</p>
+
+			<p>;; I am a human<br />
+			(Inheritance (stv 1 1)<br />
+			&nbsp;&nbsp; (Concept &quot;Self&quot;)<br />
+			&nbsp;&nbsp; (Concept &quot;human&quot;))</p>
+
+			<p>;; I am honest<br />
+			(Evaluation (stv 0.9 0.9)<br />
+			&nbsp;&nbsp; (Predicate &quot;is-honest&quot;)<br />
+			&nbsp;&nbsp; (Concept &quot;Self&quot;))</p>
+
+			<p>;; I know Bob<br />
+			(Evaluation (stv 1 1)<br />
+			&nbsp;&nbsp; (Predicate &quot;acquainted&quot;)<br />
+			&nbsp;&nbsp; (List<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (Concept &quot;Self&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (Concept &quot;Bob&quot;)))</p>
+
+			<p>;;;;;;;;;;;;;;;;<br />
+			;; Friendship ;;<br />
+			;;;;;;;;;;;;;;;;</p>
+
+			<p>;; The probability of random things (typically humans) being friends<br />
+			(Predicate &quot;will-be-friends&quot; (stv 0.0001 0.9))</p>
+
+			<p>;; Friendship is symmetric<br />
+			(ImplicationScope (stv 1 1)<br />
+			&nbsp;&nbsp; (VariableList<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (TypedVariable<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (Variable &quot;$X&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (Type &quot;ConceptNode&quot;))<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (TypedVariable<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (Variable &quot;$Y&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (Type &quot;ConceptNode&quot;)))<br />
+			&nbsp;&nbsp; (Evaluation<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (Predicate &quot;will-be-friends&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (List<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (Variable &quot;$X&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (Variable &quot;$Y&quot;)))<br />
+			&nbsp;&nbsp; (Evaluation<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (Predicate &quot;will-be-friends&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (List<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (Variable &quot;$Y&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (Variable &quot;$X&quot;))))</p>
+
+			<p>;; I&#39;m disabling that to simplify the inference. Ultimately the only<br />
+			;; reason we use will-be-friends rather than are-friends is so the<br />
+			;; first person perspective makes a bit of sense (cause someone is<br />
+			;; supposed to know who are her friends). With a third person<br />
+			;; perspective, such as &quot;Find Sylvia&#39;s friends&quot;, then we can just use<br />
+			;; &quot;are-friends&quot;, cause we&#39;re not supposed to know all of Sylvia&#39;s<br />
+			;; friends.<br />
+			;;<br />
+			;; ;; Friends will remain friends.<br />
+			;; ;;<br />
+			;; ;; This could simply be expressed as<br />
+			;; ;;<br />
+			;; ;; (Implication (stv 0.9 0.9)<br />
+			;; ;;&nbsp;&nbsp;&nbsp; (Predicate &quot;are-friends&quot;)<br />
+			;; ;;&nbsp;&nbsp;&nbsp; (Predicate &quot;will-be-friends&quot;))<br />
+			;; ;;<br />
+			;; ;; but due to some current limitation in the type system, specifically<br />
+			;; ;; that a Predicate cannot be declared with a certain type, we need to<br />
+			;; ;; express that in a more convoluted way.<br />
+			;; (ImplicationScope (stv 0.9 0.9)<br />
+			;;&nbsp;&nbsp;&nbsp; (VariableList<br />
+			;;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (TypedVariable<br />
+			;;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (Variable &quot;$X&quot;)<br />
+			;;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (Type &quot;ConceptNode&quot;))<br />
+			;;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (TypedVariable<br />
+			;;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (Variable &quot;$Y&quot;)<br />
+			;;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (Type &quot;ConceptNode&quot;)))<br />
+			;;&nbsp;&nbsp;&nbsp; (Evaluation<br />
+			;;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (Predicate &quot;are-friends&quot;)<br />
+			;;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (List<br />
+			;;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (Variable &quot;$X&quot;)<br />
+			;;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (Variable &quot;$Y&quot;)))<br />
+			;;&nbsp;&nbsp;&nbsp; (Evaluation<br />
+			;;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (Predicate &quot;will-be-friends&quot;)<br />
+			;;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (List<br />
+			;;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (Variable &quot;$X&quot;)<br />
+			;;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (Variable &quot;$Y&quot;))))</p>
+
+			<p>;; The probablity of turning acquaintance into friendship between<br />
+			;; humans is 0.1.<br />
+			(define human-acquainted-tend-to-become-friends<br />
+			(ImplicationScope (stv 0.1 0.5)<br />
+			&nbsp;&nbsp; (VariableList<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (TypedVariable<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (Variable &quot;$X&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (Type &quot;ConceptNode&quot;))<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (TypedVariable<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (Variable &quot;$Y&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (Type &quot;ConceptNode&quot;)))<br />
+			&nbsp;&nbsp; (And<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (Inheritance<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (Variable &quot;$X&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (Concept &quot;human&quot;))<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (Inheritance<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (Variable &quot;$Y&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (Concept &quot;human&quot;))<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (Evaluation<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (Predicate &quot;acquainted&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (List<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (Variable &quot;$X&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (Variable &quot;$Y&quot;))))<br />
+			&nbsp;&nbsp; (Evaluation<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (Predicate &quot;will-be-friends&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (List<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (Variable &quot;$X&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (Variable &quot;$Y&quot;)))))</p>
+
+			<p>;; Friends tend to be honest<br />
+			(define friends-tend-to-be-honest<br />
+			(ImplicationScope (stv 0.85 0.5)<br />
+			&nbsp;&nbsp; (VariableList<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (TypedVariable<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (Variable &quot;$X&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (Type &quot;ConceptNode&quot;))<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (TypedVariable<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (Variable &quot;$Y&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (Type &quot;ConceptNode&quot;)))<br />
+			&nbsp;&nbsp; (Evaluation<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (Predicate &quot;will-be-friends&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (List<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (Variable &quot;$X&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (Variable &quot;$Y&quot;)))<br />
+			&nbsp;&nbsp; (And<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (Evaluation<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (Predicate &quot;is-honest&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (Variable &quot;$X&quot;))<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (Evaluation<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (Predicate &quot;is-honest&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (Variable &quot;$Y&quot;)))))</p>
+
+			<p>;;;;;;;;;;;;;;;;;<br />
+			;; Being Funny ;;<br />
+			;;;;;;;;;;;;;;;;;</p>
+
+			<p>;; Probability of telling a joke to someone. The probability is<br />
+			;; extremely low because the probability of telling anything to<br />
+			;; someone is already very low.<br />
+			(Predicate &quot;told-a-joke-at&quot; (stv 0.000001 0.6))</p>
+
+			<p>;; The following should be wrapped in a Lambda and ultimately<br />
+			;; inferred.<br />
+			(Evaluation (stv 0.000001 0.6)<br />
+			&nbsp;&nbsp; (Predicate &quot;told-a-joke-at&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (List<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (Variable &quot;$X&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (Variable &quot;$Y&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (Variable &quot;$Z&quot;)))</p>
+
+			<p>;; Probability of being funny<br />
+			(Predicate &quot;is-funny&quot; (stv 0.69 0.7))</p>
+
+			<p>;; Same remark as for Predicate &quot;told-a-joke-at&quot;<br />
+			(Evaluation (stv 0.69 0.7)<br />
+			&nbsp;&nbsp; (Predicate &quot;is-funny&quot;)<br />
+			&nbsp;&nbsp; (Variable &quot;$X&quot;))</p>
+
+			<p>;; People who told a joke to someone, somewhere, are funny&nbsp;&nbsp;<br />
+			(define people-telling-jokes-are-funny<br />
+			(ImplicationScope (stv 0.8 0.9)<br />
+			&nbsp;&nbsp; (VariableList<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (TypedVariable<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (Variable &quot;$X&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (Type &quot;ConceptNode&quot;))<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (TypedVariable<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (Variable &quot;$Y&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (Type &quot;ConceptNode&quot;))<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (TypedVariable<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (Variable &quot;$Z&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (Type &quot;ConceptNode&quot;)))<br />
+			&nbsp;&nbsp; (Evaluation<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (Predicate &quot;told-a-joke-at&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (List<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (Variable &quot;$X&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (Variable &quot;$Y&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (Variable &quot;$Z&quot;)))<br />
+			&nbsp;&nbsp; (Evaluation<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (Predicate &quot;is-funny&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (Variable &quot;$X&quot;))))</p>
+
+			<p>;; Being funny is loosely equivalent to being amusing<br />
+			;;<br />
+			;; This could simply be expressed as<br />
+			;;<br />
+			;; (Equivalence (stv 0.7 0.9)<br />
+			;;&nbsp;&nbsp;&nbsp; (Predicate &quot;is-funny&quot;)<br />
+			;;&nbsp;&nbsp;&nbsp; (Predicate &quot;is-amusing&quot;))<br />
+			;;<br />
+			;; but due to some current limitation in the type system, specifically<br />
+			;; that a Predicate cannot be declared with a certain type, we need to<br />
+			;; express that in a more convoluted way.<br />
+			(define funny-is-loosely-equivalent-to-amusing<br />
+			(Equivalence (stv 0.7 0.9)<br />
+			&nbsp;&nbsp; (TypedVariable<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (Variable &quot;$X&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (Type &quot;ConceptNode&quot;))<br />
+			&nbsp;&nbsp; (Evaluation<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (Predicate &quot;is-funny&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (Variable &quot;$X&quot;))<br />
+			&nbsp;&nbsp; (Evaluation<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (Predicate &quot;is-amusing&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (Variable &quot;$X&quot;))))</p>
+
+			<p>;;;;;;;;;;;;;;;<br />
+			;; The Party ;;<br />
+			;;;;;;;;;;;;;;;</p>
+
+			<p>;; Bob told Jill the truth about the party<br />
+			(Evaluation (stv 1 1)<br />
+			&nbsp;&nbsp; (Predicate &quot;told-the-truth-about&quot;)<br />
+			&nbsp;&nbsp; (List<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (Concept &quot;Bob&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (Concept &quot;Jill&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (Concept &quot;Party&quot;)))</p>
+
+			<p><br />
+			;; Bob told Jim a joke at the party.<br />
+			(Evaluation (stv 1 1)<br />
+			&nbsp;&nbsp; (Predicate &quot;told-a-joke-at&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (List<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (Concept &quot;Bob&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (Concept &quot;Jim&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (Concept &quot;Party&quot;)))</p>
+
+			<p>;;;;;;;;;;<br />
+			;; Hack ;;<br />
+			;;;;;;;;;;</p>
+
+			<p>;; Due to the fact the evaluator does not support fuzzy TV semantic we<br />
+			;; put the evaluation of a to-be-used instantiated precondition<br />
+			;; here. Alternatively we could add PLN rules to evaluate.<br />
+			(define hack (And (stv 1 0.9)<br />
+			&nbsp;&nbsp; (Evaluation<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (Predicate &quot;is-honest&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (Concept &quot;Self&quot;)<br />
+			&nbsp;&nbsp; )<br />
+			&nbsp;&nbsp; (Evaluation<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (Predicate &quot;is-honest&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (Concept &quot;Bob&quot;)<br />
+			&nbsp;&nbsp; )<br />
+			&nbsp;&nbsp; (Inheritance<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (Concept &quot;Self&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (Concept &quot;human&quot;)<br />
+			&nbsp;&nbsp; )<br />
+			&nbsp;&nbsp; (Inheritance<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (Concept &quot;Bob&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (Concept &quot;human&quot;)<br />
+			&nbsp;&nbsp; )<br />
+			&nbsp;&nbsp; (Evaluation<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (Predicate &quot;acquainted&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (ListLink<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (Concept &quot;Self&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (Concept &quot;Bob&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; )<br />
+			&nbsp;&nbsp; )<br />
+			)<br />
+			)</p>
+
+			<p>;; Because implication-instantiation occurs on the sugar syntax, the<br />
+			;; predicate (which should be wrapped in a Lambda) is not given. Also<br />
+			;; of course that predicate should still be evaluated. Here we provide<br />
+			;; the adequate TV value of that predicate on the free scope form.<br />
+			(AndLink (stv 0.000128 0.89999998)<br />
+			&nbsp;&nbsp; (EvaluationLink<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (PredicateNode &quot;is-honest&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (VariableNode &quot;$X&quot;)<br />
+			&nbsp;&nbsp; )<br />
+			&nbsp;&nbsp; (EvaluationLink<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (PredicateNode &quot;is-honest&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (VariableNode &quot;$Y&quot;)<br />
+			&nbsp;&nbsp; )<br />
+			&nbsp;&nbsp; (InheritanceLink<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (VariableNode &quot;$X&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (ConceptNode &quot;human&quot;)<br />
+			&nbsp;&nbsp; )<br />
+			&nbsp;&nbsp; (InheritanceLink<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (VariableNode &quot;$Y&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (ConceptNode &quot;human&quot;)<br />
+			&nbsp;&nbsp; )<br />
+			&nbsp;&nbsp; (EvaluationLink<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (PredicateNode &quot;acquainted&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (ListLink<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (VariableNode &quot;$X&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (VariableNode &quot;$Y&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; )<br />
+			&nbsp;&nbsp; )<br />
+			)</p>
+			</td>
+		</tr>
+	</tbody>
+</table>
+</div>
+
+<div class="panel-footer"><a data-toggle="collapse" href="#collapse0">show less</a></div>
+</div>
+</div>
+<!-- end class="panel-collapse collapse" -->
+<br><br><h4 align="center">Steps leading up to the conclusion: Bob will be an amusing and honest friend.</h4><br>
+<!--------------------------------------------------------------------------------------------------------->
+<div class="panel panel-default">
+<div class="panel-heading inference">
+<h4 class="panel-title"><a data-toggle="collapse" href="#collapse1">Step 1</a></h4>
+<br />
+Infer that Bob is honest.<br />
+<br />
+Apply the implication-full-instantiation-rule on the implication in the knowledge base that people telling the truth are honest.<br />
+<br />
+People who told the truth about something are honest.<br />
+Bob told Jill the truth about the party.<br />
+|-<br />
+Bob is honest.<br />
+<br />
+<a data-toggle="collapse" href="#collapse1">show more</a></div>
+
+<div class="panel-collapse collapse" id="collapse1">
+<div class="panel-body">
+<table border="5">
+	<tbody>
+		<tr>
+			<th>PLN Rule</th>
+			<th>Atomese</th>
+		</tr>
+		<tr>
+			<td style="vertical-align: top">implication-full-instantiation-rule:<br />
+			<br />
+			&nbsp;ImplicationScopeLink<br />
+			&nbsp;&nbsp;&nbsp;&nbsp; V<br />
+			&nbsp;&nbsp;&nbsp;&nbsp; P<br />
+			&nbsp;&nbsp;&nbsp;&nbsp; Q<br />
+			&nbsp;&nbsp;T<br />
+			&nbsp;&nbsp;|-<br />
+			&nbsp;Q[V-&gt;T]<br />
+			<br />
+			where V is a variable or a list of variables, P is a condition, Q<br />
+			is the implicand, T is an atom (or a list of atoms) to substitute<br />
+			and Q[V-&gt;T] is Q where V has been substituted by T.</td>
+			<td style="vertical-align: top">
+			<p>Antecedents:</p>
+
+			<p>;; People who told the truth about something are honest<br />
+			(ImplicationScope (stv 0.95 0.9)<br />
+			&nbsp; (VariableList<br />
+			&nbsp;&nbsp;&nbsp;&nbsp; (TypedVariable<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (Variable &quot;$X&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (Type &quot;ConceptNode&quot;))<br />
+			&nbsp;&nbsp;&nbsp;&nbsp; (TypedVariable<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (Variable &quot;$Y&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (Type &quot;ConceptNode&quot;))<br />
+			&nbsp;&nbsp;&nbsp;&nbsp; (TypedVariable<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (Variable &quot;$Z&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (Type &quot;ConceptNode&quot;)))<br />
+			&nbsp; (Evaluation<br />
+			&nbsp;&nbsp;&nbsp;&nbsp; (Predicate &quot;told-the-truth-about&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp; (List<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (Variable &quot;$X&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (Variable &quot;$Y&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (Variable &quot;$Z&quot;)))<br />
+			&nbsp; (Evaluation<br />
+			&nbsp;&nbsp;&nbsp;&nbsp; (Predicate &quot;is-honest&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp; (Variable &quot;$X&quot;))))<br />
+			<br />
+			;; Bob told Jill the truth about the party<br />
+			(Evaluation (stv 1 1)<br />
+			&nbsp; (Predicate &quot;told-the-truth-about&quot;)<br />
+			&nbsp; (List<br />
+			&nbsp;&nbsp;&nbsp;&nbsp; (Concept &quot;Bob&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp; (Concept &quot;Jill&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp; (Concept &quot;Party&quot;)))<br />
+			<br />
+			Conclusion (1):<br />
+			<br />
+			(cog-bind implication-full-instantiation-rule)<br />
+			;; Bob is honest<br />
+			&nbsp;&nbsp; (EvaluationLink (stv 0.94999999 0.89999098)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (PredicateNode &quot;is-honest&quot; (stv 0.80000001 0.89999998))<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (ConceptNode &quot;Bob&quot;)</p>
+			</td>
+		</tr>
+	</tbody>
+</table>
+</div>
+
+<div class="panel-footer"><a data-toggle="collapse" href="#collapse1">show less</a></div>
+</div>
+</div>
+&nbsp; <!--------------------------------------------------------------------------------------------------------->
+
+<div class="panel panel-default">
+<div class="panel-heading">
+<h4 class="panel-title"><a data-toggle="collapse" href="#collapse2">Step 2</a></h4>
+
+<p>&nbsp;</p>
+
+<p>Atomspace representation transformation<br />
+<br />
+Distribute the scope of the implication that friends tend to be honest in the KB, applying implication-scope-to-implication-rule.</p>
+
+<p><br />
+<a data-toggle="collapse" href="#collapse2">show more</a></p>
+</div>
+
+<div class="panel-collapse collapse" id="collapse2">
+<div class="panel-body">
+<table border="5">
+	<tbody>
+		<tr>
+			<th>PLN Rule</th>
+			<th>Atomese</th>
+		</tr>
+		<tr>
+			<td style="vertical-align: top">implication-scope-to-implication-rule:<br />
+			<br />
+			&nbsp; ImplicationScopeLink<br />
+			&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; V<br />
+			&nbsp; &nbsp;&nbsp;&nbsp;&nbsp; P<br />
+			&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; Q<br />
+			&nbsp; |-<br />
+			&nbsp; ImplicationLink<br />
+			&nbsp; &nbsp;&nbsp; LambdaLink<br />
+			&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; V<br />
+			&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; P<br />
+			&nbsp;&nbsp;&nbsp;&nbsp; LambdaLink<br />
+			&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; V<br />
+			&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Q
+			<p>&nbsp;</p>
+			where V is a variable or a list of variables, P and Q are the implicant<br />
+			and implicand bodies.</td>
+			<td style="vertical-align: top">
+			<p>Antecedent:<br />
+			<br />
+			;; Friends tend to be honest<br />
+			(define friends-tend-to-be-honest<br />
+			(ImplicationScope (stv 0.85 0.5)<br />
+			&nbsp; (VariableList<br />
+			&nbsp;&nbsp;&nbsp;&nbsp; (TypedVariable<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (Variable &quot;$X&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (Type &quot;ConceptNode&quot;))<br />
+			&nbsp;&nbsp;&nbsp;&nbsp; (TypedVariable<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (Variable &quot;$Y&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (Type &quot;ConceptNode&quot;)))<br />
+			&nbsp; (Evaluation<br />
+			&nbsp;&nbsp;&nbsp;&nbsp; (Predicate &quot;will-be-friends&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp; (List<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (Variable &quot;$X&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (Variable &quot;$Y&quot;)))<br />
+			&nbsp; (And<br />
+			&nbsp;&nbsp;&nbsp;&nbsp; (Evaluation<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (Predicate &quot;is-honest&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (Variable &quot;$X&quot;))<br />
+			&nbsp;&nbsp;&nbsp;&nbsp; (Evaluation<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (Predicate &quot;is-honest&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (Variable &quot;$Y&quot;)))))</p>
+			<br />
+			Conclusion (2):<br />
+			<br />
+			&nbsp;&nbsp; (ImplicationLink (stv 0.85000002 0.5)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (LambdaLink<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (VariableList<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (TypedVariableLink<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (VariableNode &quot;$X&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (TypeNode &quot;ConceptNode&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; )<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (TypedVariableLink<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (VariableNode &quot;$Y&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (TypeNode &quot;ConceptNode&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; )<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; )<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (EvaluationLink<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (PredicateNode &quot;will-be-friends&quot; (stv 9.9999997e-05 0.89999998))<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (ListLink<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (VariableNode &quot;$X&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (VariableNode &quot;$Y&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; )<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; )<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; )<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (LambdaLink (stv 0.63999999 0.89999998)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (VariableList<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (TypedVariableLink<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (VariableNode &quot;$X&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (TypeNode &quot;ConceptNode&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; )<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (TypedVariableLink<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (VariableNode &quot;$Y&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (TypeNode &quot;ConceptNode&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; )<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; )<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (AndLink<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (EvaluationLink<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (PredicateNode &quot;is-honest&quot; (stv 0.80000001 0.89999998))<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (VariableNode &quot;$X&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; )<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (EvaluationLink<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (PredicateNode &quot;is-honest&quot; (stv 0.80000001 0.89999998))<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (VariableNode &quot;$Y&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; )<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; )<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; )<br />
+			&nbsp;&nbsp; )
+			<p>&nbsp;</p>
+			</td>
+		</tr>
+	</tbody>
+</table>
+</div>
+
+<div class="panel-footer"><a data-toggle="collapse" href="#collapse2">show less</a></div>
+</div>
+</div>
+<!-- end class="panel-collapse collapse" -->&nbsp; <!--------------------------------------------------------------------------------------------------------->
+
+<div class="panel panel-default">
+<div class="panel-heading">
+<h4 class="panel-title"><a data-toggle="collapse" href="#collapse3">Step 3</a></h4>
+
+<p>&nbsp;</p>
+
+<p>Atomspace representation transformation<br />
+<br />
+Infer the TV of the implicant of conclusion (2) using predicate-lambda-introduction-rule.</p>
+
+<p><br />
+<a data-toggle="collapse" href="#collapse3">show more</a></p>
+</div>
+
+<div class="panel-collapse collapse" id="collapse3">
+<div class="panel-body">
+<table border="5">
+	<tbody>
+		<tr>
+			<th>PLN Rule</th>
+			<th>Atomese</th>
+		</tr>
+		<tr>
+			<td style="vertical-align: top">
+			<p>predicate-lambda-introduction-rule:<br />
+			<br />
+			&nbsp; Predicate &lt;TV&gt;<br />
+			&nbsp; |-<br />
+			&nbsp; Lambda &lt;TV&gt;<br />
+			&nbsp;&nbsp;&nbsp;&nbsp; &lt;variables&gt;<br />
+			&nbsp;&nbsp;&nbsp;&nbsp; Evaluation<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Predicate &lt;TV&gt;<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; List<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;variables&gt;<br />
+			<br />
+			Wrap a Lambda around an evaluation of predicate and assign to the<br />
+			lambda the TV of the predicate.<br />
+			</p>
+			</td>
+			<td style="vertical-align: top">
+			<p>Antecedent:<br />
+			<br />
+			&nbsp;&nbsp; (LambdaLink<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (VariableList<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (TypedVariableLink<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (VariableNode &quot;$X&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (TypeNode &quot;ConceptNode&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; )<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (TypedVariableLink<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (VariableNode &quot;$Y&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (TypeNode &quot;ConceptNode&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; )<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; )<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (EvaluationLink<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (PredicateNode &quot;will-be-friends&quot; (stv 9.9999997e-05 0.89999998))<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (ListLink<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (VariableNode &quot;$X&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (VariableNode &quot;$Y&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; )<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; )<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; )<br />
+			<br />
+			<br />
+			Conclusion (3):<br />
+			<br />
+			&nbsp;&nbsp; (LambdaLink (stv 9.9999997e-05 0.89999998)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (VariableList<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (TypedVariableLink<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (VariableNode &quot;$X&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (TypeNode &quot;ConceptNode&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; )<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (TypedVariableLink<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (VariableNode &quot;$Y&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (TypeNode &quot;ConceptNode&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; )<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; )<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (EvaluationLink<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (PredicateNode &quot;will-be-friends&quot; (stv 9.9999997e-05 0.89999998))<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (ListLink<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (VariableNode &quot;$Y&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (VariableNode &quot;$X&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; )<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; )<br />
+			&nbsp;&nbsp; )</p>
+			</td>
+		</tr>
+	</tbody>
+</table>
+</div>
+
+<div class="panel-footer"><a data-toggle="collapse" href="#collapse3">show less</a></div>
+</div>
+</div>
+<!-- end class="panel-collapse collapse" -->&nbsp; <!--------------------------------------------------------------------------------------------------------->
+
+<div class="panel panel-default">
+<div class="panel-heading">
+<h4 class="panel-title"><a data-toggle="collapse" href="#collapse4">Step 4</a></h4>
+
+<p>&nbsp;</p>
+
+<p>Atomspace representation transformation<br />
+<br />
+Infer the TV of the implicand of conclusion (2) using predicate-lambda-introduction-rule.</p>
+
+<p><br />
+<a data-toggle="collapse" href="#collapse4">show more</a></p>
+</div>
+
+<div class="panel-collapse collapse" id="collapse4">
+<div class="panel-body">
+<table border="5">
+	<tbody>
+		<tr>
+			<th>PLN Rule</th>
+			<th>Atomese</th>
+		</tr>
+		<tr>
+			<td style="vertical-align: top">
+			<p>predicate-lambda-introduction-rule:<br />
+			<br />
+			&nbsp; Predicate &lt;TV&gt;<br />
+			&nbsp; |-<br />
+			&nbsp; Lambda &lt;TV&gt;<br />
+			&nbsp;&nbsp;&nbsp;&nbsp; &lt;variables&gt;<br />
+			&nbsp;&nbsp;&nbsp;&nbsp; Evaluation<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Predicate &lt;TV&gt;<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; List<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;variables&gt;<br />
+			<br />
+			Wrap a Lambda around an evaluation of predicate and assign to the<br />
+			lambda the TV of the predicate.<br />
+			&nbsp;</p>
+			</td>
+			<td style="vertical-align: top">
+			<p>Conclusion (4):<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (LambdaLink (stv 0.63999999 0.89999998)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (VariableList<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (TypedVariableLink<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (VariableNode &quot;$X&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (TypeNode &quot;ConceptNode&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; )<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (TypedVariableLink<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (VariableNode &quot;$Y&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (TypeNode &quot;ConceptNode&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; )<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; )<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (AndLink<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (EvaluationLink<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (PredicateNode &quot;is-honest&quot; (stv 0.80000001 0.89999998))<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (VariableNode &quot;$X&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; )<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (EvaluationLink<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (PredicateNode &quot;is-honest&quot; (stv 0.80000001 0.89999998))<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (VariableNode &quot;$Y&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; )<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; )<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; )</p>
+			</td>
+		</tr>
+	</tbody>
+</table>
+</div>
+
+<div class="panel-footer"><a data-toggle="collapse" href="#collapse4">show less</a></div>
+</div>
+</div>
+<!-- end class="panel-collapse collapse" -->&nbsp; <!--------------------------------------------------------------------------------------------------------->
+
+<div class="panel panel-default">
+<div class="panel-heading inference">
+<h4 class="panel-title"><a data-toggle="collapse" href="#collapse5">Step 5</a></h4>
+
+<p>&nbsp;</p>
+Infer that honest people are more likely to become friends.<br />
+<br />
+Apply the inversion rule over conclusion (2).<br />
+<br />
+People who become friends are more likely to be honest.<br />
+|-<br />
+People who are honest are more likely to become friends.
+<p>&nbsp;<br />
+<a data-toggle="collapse" href="#collapse5">show more</a></p>
+</div>
+
+<div class="panel-collapse collapse" id="collapse5">
+<div class="panel-body">
+<table border="5">
+	<tbody>
+		<tr>
+			<th>PLN Rule</th>
+			<th>Atomese</th>
+		</tr>
+		<tr>
+			<td style="vertical-align: top">InversionRule:<br />
+			<br />
+			&nbsp;ImplicationLink<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; A<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; B<br />
+			&nbsp;|-<br />
+			&nbsp;ImplicationLink<br />
+			&nbsp;&nbsp;&nbsp; &nbsp; B<br />
+			&nbsp;&nbsp; &nbsp;&nbsp; A<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+			<td style="vertical-align: top">
+			<p>Antecedent:<br />
+			<br />
+			&nbsp;;; people who are friends are more likely to be honest<br />
+			&nbsp; (ImplicationLink (stv 0.85000002 0.5)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (LambdaLink (stv 9.9999997e-05 0.89999998)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (VariableList<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (TypedVariableLink<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (VariableNode &quot;$X&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (TypeNode &quot;ConceptNode&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; )<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (TypedVariableLink<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (VariableNode &quot;$Y&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (TypeNode &quot;ConceptNode&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; )<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; )<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (EvaluationLink<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (PredicateNode &quot;will-be-friends&quot; (stv 9.9999997e-05 0.89999998))<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (ListLink<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (VariableNode &quot;$X&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (VariableNode &quot;$Y&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; )<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; )<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; )<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (LambdaLink (stv 0.63999999 0.89999998)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (VariableList<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (TypedVariableLink<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (VariableNode &quot;$X&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (TypeNode &quot;ConceptNode&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; )<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (TypedVariableLink<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (VariableNode &quot;$Y&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (TypeNode &quot;ConceptNode&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; )<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; )<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (AndLink<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (EvaluationLink<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (PredicateNode &quot;is-honest&quot; (stv 0.80000001 0.89999998))<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (VariableNode &quot;$X&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; )<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (EvaluationLink<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (PredicateNode &quot;is-honest&quot; (stv 0.80000001 0.89999998))<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (VariableNode &quot;$Y&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; )<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; )<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; )<br />
+			&nbsp;&nbsp; )<br />
+			<br />
+			<br />
+			<br />
+			<br />
+			Conclusion (5):<br />
+			<br />
+			;; People who are honest are more likely to be friends<br />
+			&nbsp;&nbsp; (ImplicationLink (stv 0.00013281251 0.44999999)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (LambdaLink (stv 0.63999999 0.89999998)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (VariableList<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (TypedVariableLink<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (VariableNode &quot;$X&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (TypeNode &quot;ConceptNode&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; )<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (TypedVariableLink<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (VariableNode &quot;$Y&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (TypeNode &quot;ConceptNode&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; )<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; )<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (AndLink<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (EvaluationLink<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (PredicateNode &quot;is-honest&quot; (stv 0.80000001 0.89999998))<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (VariableNode &quot;$X&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; )<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (EvaluationLink<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (PredicateNode &quot;is-honest&quot; (stv 0.80000001 0.89999998))<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (VariableNode &quot;$Y&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; )<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; )<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; )<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (LambdaLink (stv 9.9999997e-05 0.89999998)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (VariableList<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (TypedVariableLink<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (VariableNode &quot;$X&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (TypeNode &quot;ConceptNode&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; )<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (TypedVariableLink<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (VariableNode &quot;$Y&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (TypeNode &quot;ConceptNode&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; )<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; )<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (EvaluationLink<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (PredicateNode &quot;will-be-friends&quot; (stv 9.9999997e-05 0.89999998))<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (ListLink<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (VariableNode &quot;$X&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (VariableNode &quot;$Y&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; )<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; )<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; )<br />
+			&nbsp;&nbsp; )</p>
+			</td>
+		</tr>
+	</tbody>
+</table>
+</div>
+
+<div class="panel-footer"><a data-toggle="collapse" href="#collapse5">show less</a></div>
+</div>
+</div>
+<!-- end class="panel-collapse collapse" -->&nbsp; <!--------------------------------------------------------------------------------------------------------->
+
+<div class="panel panel-default">
+<div class="panel-heading">
+<h4 class="panel-title"><a data-toggle="collapse" href="#collapse6">Step 6</a></h4>
+
+<p>&nbsp;</p>
+Atomspace representation transformation<br />
+<br />
+Distribute the scope of the implication that human acquaintances tend to become friends in the kb, applying implication-scope-to-implication-rule.<br />
+<br />
+(This transformation already occurred as a result of step 2.)
+<p><br />
+<a data-toggle="collapse" href="#collapse6">show more</a></p>
+</div>
+
+<div class="panel-collapse collapse" id="collapse6">
+<div class="panel-body">
+<table border="5">
+	<tbody>
+		<tr>
+			<th>PLN Rule</th>
+			<th>Atomese</th>
+		</tr>
+		<tr>
+			<td style="vertical-align: top">implication-scope-to-implication-rule:<br />
+			<br />
+			&nbsp; ImplicationScopeLink<br />
+			&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; V<br />
+			&nbsp; &nbsp;&nbsp;&nbsp;&nbsp; P<br />
+			&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; Q<br />
+			&nbsp; |-<br />
+			&nbsp; ImplicationLink<br />
+			&nbsp; &nbsp;&nbsp; LambdaLink<br />
+			&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; V<br />
+			&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; P<br />
+			&nbsp;&nbsp;&nbsp;&nbsp; LambdaLink<br />
+			&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; V<br />
+			&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Q
+			<p>&nbsp;</p>
+			where V is a variable or a list of variables, P and Q are the implicant<br />
+			and implicand bodies.</td>
+			<td style="vertical-align: top">Conclusion (6):<br />
+			<br />
+			&nbsp;&nbsp; (ImplicationLink (stv 0.1 0.5)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (LambdaLink (stv 0.00019999999 0.89999998)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (VariableList<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (TypedVariableLink<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (VariableNode &quot;$X&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (TypeNode &quot;ConceptNode&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; )<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (TypedVariableLink<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (VariableNode &quot;$Y&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (TypeNode &quot;ConceptNode&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; )<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; )<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (AndLink<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (InheritanceLink<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (VariableNode &quot;$X&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (ConceptNode &quot;human&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; )<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (InheritanceLink<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (VariableNode &quot;$Y&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (ConceptNode &quot;human&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; )<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (EvaluationLink<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (PredicateNode &quot;acquainted&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (ListLink<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (VariableNode &quot;$X&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (VariableNode &quot;$Y&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; )<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; )<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; )<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; )<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (LambdaLink (stv 9.9999997e-05 0.89999998)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (VariableList<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (TypedVariableLink<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (VariableNode &quot;$X&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (TypeNode &quot;ConceptNode&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; )<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (TypedVariableLink<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (VariableNode &quot;$Y&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (TypeNode &quot;ConceptNode&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; )<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; )<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (EvaluationLink<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (PredicateNode &quot;will-be-friends&quot; (stv 9.9999997e-05 0.89999998))<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (ListLink<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (VariableNode &quot;$X&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (VariableNode &quot;$Y&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; )<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; )<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; )<br />
+			&nbsp;&nbsp; )</td>
+		</tr>
+	</tbody>
+</table>
+</div>
+
+<div class="panel-footer"><a data-toggle="collapse" href="#collapse6">show less</a></div>
+</div>
+</div>
+<!-- end class="panel-collapse collapse" -->&nbsp; <!--------------------------------------------------------------------------------------------------------->
+
+<div class="panel panel-default">
+<div class="panel-heading inference">
+<h4 class="panel-title"><a data-toggle="collapse" href="#collapse7">Step 7</a></h4>
+
+<p>&nbsp;</p>
+Infer that honest human acquaintances tend to become friends (more so than just human acquaintances).<br />
+<br />
+Apply rule implication-implicant-conjunction-rule on (5) and (6).<br />
+<br />
+(5) Honest people are more likely to become friends<br />
+(6) Human acquaintances tend to become friends<br />
+|-<br />
+(7) Honest human acquaintances tend to become friends.
+<p><br />
+<a data-toggle="collapse" href="#collapse7">show more</a></p>
+</div>
+
+<div class="panel-collapse collapse" id="collapse7">
+<div class="panel-body">
+<table border="5">
+	<tbody>
+		<tr>
+			<th>PLN Rule</th>
+			<th>Atomese</th>
+		</tr>
+		<tr>
+			<td style="vertical-align: top">implication-implicant-conjunction-rule:<br />
+			<br />
+			&nbsp; ImplicationLink &lt;TV1&gt;<br />
+			&nbsp;&nbsp;&nbsp;&nbsp; A<br />
+			&nbsp;&nbsp;&nbsp;&nbsp; C<br />
+			&nbsp; ImplicationLink &lt;TV2&gt;<br />
+			&nbsp;&nbsp;&nbsp;&nbsp; B<br />
+			&nbsp;&nbsp;&nbsp;&nbsp; C<br />
+			&nbsp; |-<br />
+			&nbsp; ImplicationLink &lt;TV&gt;<br />
+			&nbsp;&nbsp;&nbsp;&nbsp; AndLink<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; A<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; B<br />
+			&nbsp;&nbsp;&nbsp;&nbsp; C</td>
+			<td style="vertical-align: top">Conclusion (7):<br />
+			<br />
+			&nbsp;&nbsp; (ImplicationLink (stv 0.13281251 0.44999999)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (AndLink (stv 0.000128 0.89999998)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (LambdaLink (stv 0.63999999 0.89999998)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (VariableList<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (TypedVariableLink<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (VariableNode &quot;$X&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (TypeNode &quot;ConceptNode&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; )<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (TypedVariableLink<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (VariableNode &quot;$Y&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (TypeNode &quot;ConceptNode&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; )<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; )<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (AndLink<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (EvaluationLink<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (PredicateNode &quot;is-honest&quot; (stv 0.80000001 0.89999998))<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (VariableNode &quot;$X&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; )<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (EvaluationLink<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (PredicateNode &quot;is-honest&quot; (stv 0.80000001 0.89999998))<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (VariableNode &quot;$Y&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; )<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; )<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; )<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (LambdaLink (stv 0.00019999999 0.89999998)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (VariableList<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (TypedVariableLink<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (VariableNode &quot;$X&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (TypeNode &quot;ConceptNode&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; )<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (TypedVariableLink<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (VariableNode &quot;$Y&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (TypeNode &quot;ConceptNode&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; )<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; )<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (AndLink<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (InheritanceLink<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (VariableNode &quot;$X&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (ConceptNode &quot;human&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; )<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (InheritanceLink<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (VariableNode &quot;$Y&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (ConceptNode &quot;human&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; )<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (EvaluationLink<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (PredicateNode &quot;acquainted&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (ListLink<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (VariableNode &quot;$X&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (VariableNode &quot;$Y&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; )<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; )<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; )<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; )<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; )<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (LambdaLink (stv 9.9999997e-05 0.89999998)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (VariableList<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (TypedVariableLink<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (VariableNode &quot;$X&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (TypeNode &quot;ConceptNode&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; )<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (TypedVariableLink<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (VariableNode &quot;$Y&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (TypeNode &quot;ConceptNode&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; )<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; )<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (EvaluationLink<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (PredicateNode &quot;will-be-friends&quot; (stv 9.9999997e-05 0.89999998))<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (ListLink<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (VariableNode &quot;$X&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (VariableNode &quot;$Y&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; )<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; )<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; )<br />
+			&nbsp;&nbsp; )</td>
+		</tr>
+	</tbody>
+</table>
+</div>
+
+<div class="panel-footer"><a data-toggle="collapse" href="#collapse7">show less</a></div>
+</div>
+</div>
+<!-- end class="panel-collapse collapse" -->&nbsp; <!--------------------------------------------------------------------------------------------------------->
+
+<div class="panel panel-default">
+<div class="panel-heading">
+<h4 class="panel-title"><a data-toggle="collapse" href="#collapse8">Step 8</a></h4>
+
+<p>&nbsp;</p>
+Atomspace representation transformation<br />
+<br />
+Factorize lambda in implicant of (7). Apply rule and-lambda-factorization-double-implication-rule to the implicant of (7).
+<p><br />
+<a data-toggle="collapse" href="#collapse8">show more</a></p>
+</div>
+
+<div class="panel-collapse collapse" id="collapse8">
+<div class="panel-body">
+<table border="5">
+	<tbody>
+		<tr>
+			<th>PLN Rule</th>
+			<th>Atomese</th>
+		</tr>
+		<tr>
+			<td style="vertical-align: top">and-lambda-factorization-double-implication-rule:<br />
+			<br />
+			&nbsp; AndLink<br />
+			&nbsp;&nbsp;&nbsp;&nbsp; LambdaLink<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; V<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; A1<br />
+			&nbsp;&nbsp;&nbsp;&nbsp; ...<br />
+			&nbsp;&nbsp;&nbsp;&nbsp; LambdaLink<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; V<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; An<br />
+			&nbsp; |-<br />
+			&nbsp; LambdaLink<br />
+			&nbsp;&nbsp;&nbsp;&nbsp; V<br />
+			&nbsp;&nbsp;&nbsp;&nbsp; AndLink<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; A1<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ...<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; An</td>
+			<td style="vertical-align: top">Conclusion (8):<br />
+			<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (ImplicationLink (stv 1 1)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (LambdaLink (stv 0.000128 0.89999998)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (VariableList<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (TypedVariableLink<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (VariableNode &quot;$X&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (TypeNode &quot;ConceptNode&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; )<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (TypedVariableLink<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (VariableNode &quot;$Y&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (TypeNode &quot;ConceptNode&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; )<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; )<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (AndLink (stv 0.000128 0.89999998)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (EvaluationLink<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (PredicateNode &quot;is-honest&quot; (stv 0.80000001 0.89999998))<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (VariableNode &quot;$X&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; )<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (EvaluationLink<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (PredicateNode &quot;is-honest&quot; (stv 0.80000001 0.89999998))<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (VariableNode &quot;$Y&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; )<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (InheritanceLink<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (VariableNode &quot;$X&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (ConceptNode &quot;human&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; )<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (InheritanceLink<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (VariableNode &quot;$Y&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (ConceptNode &quot;human&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; )<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (EvaluationLink<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (PredicateNode &quot;acquainted&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (ListLink<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (VariableNode &quot;$X&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (VariableNode &quot;$Y&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; )<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; )<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; )<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; )<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (AndLink (stv 0.000128 0.89999998)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (LambdaLink (stv 0.63999999 0.89999998)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (VariableList<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (TypedVariableLink<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (VariableNode &quot;$X&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (TypeNode &quot;ConceptNode&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; )<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (TypedVariableLink<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (VariableNode &quot;$Y&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (TypeNode &quot;ConceptNode&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; )<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; )<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (AndLink<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (EvaluationLink<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (PredicateNode &quot;is-honest&quot; (stv 0.80000001 0.89999998))<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (VariableNode &quot;$X&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; )<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (EvaluationLink<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (PredicateNode &quot;is-honest&quot; (stv 0.80000001 0.89999998))<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (VariableNode &quot;$Y&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; )<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; )<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; )<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (LambdaLink (stv 0.00019999999 0.89999998)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (VariableList<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (TypedVariableLink<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (VariableNode &quot;$X&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (TypeNode &quot;ConceptNode&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; )<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (TypedVariableLink<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (VariableNode &quot;$Y&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (TypeNode &quot;ConceptNode&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; )<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; )<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (AndLink<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (InheritanceLink<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (VariableNode &quot;$X&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (ConceptNode &quot;human&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; )<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (InheritanceLink<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (VariableNode &quot;$Y&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (ConceptNode &quot;human&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; )<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (EvaluationLink<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (PredicateNode &quot;acquainted&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (ListLink<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (VariableNode &quot;$X&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (VariableNode &quot;$Y&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; )<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; )<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; )<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; )<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; )<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; )</td>
+		</tr>
+	</tbody>
+</table>
+</div>
+
+<div class="panel-footer"><a data-toggle="collapse" href="#collapse8">show less</a></div>
+</div>
+</div>
+<!-- end class="panel-collapse collapse" -->&nbsp; <!--------------------------------------------------------------------------------------------------------->
+
+<div class="panel panel-default">
+<div class="panel-heading">
+<h4 class="panel-title"><a data-toggle="collapse" href="#collapse9">Step 9</a></h4>
+
+<p>&nbsp;</p>
+Atomspace representation transformation<br />
+<br />
+Deduce with all lambda factorized that honest human acquaintance tend to become friend.<br />
+<br />
+Apply deduction-implication-rule on (7) and (8).
+<p><br />
+<a data-toggle="collapse" href="#collapse9">show more</a></p>
+</div>
+
+<div class="panel-collapse collapse" id="collapse9">
+<div class="panel-body">
+<table border="5">
+	<tbody>
+		<tr>
+			<th>PLN Rule</th>
+			<th>Atomese</th>
+		</tr>
+		<tr>
+			<td style="vertical-align: top">deduction-implication-rule:<br />
+			<br />
+			&nbsp;ImplicationLink<br />
+			&nbsp;&nbsp;&nbsp; A<br />
+			&nbsp;&nbsp;&nbsp; B<br />
+			&nbsp;ImplicationLink<br />
+			&nbsp;&nbsp;&nbsp; B<br />
+			&nbsp;&nbsp;&nbsp; C<br />
+			&nbsp; |-<br />
+			&nbsp;ImplicationLink<br />
+			&nbsp;&nbsp;&nbsp; A<br />
+			&nbsp;&nbsp;&nbsp; C</td>
+			<td style="vertical-align: top">Conclusion (9):<br />
+			<br />
+			&nbsp;&nbsp; (ImplicationLink (stv 0.13281251 0.405)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (LambdaLink (stv 0.000128 0.89999998)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (VariableList<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (TypedVariableLink<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (VariableNode &quot;$X&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (TypeNode &quot;ConceptNode&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; )<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (TypedVariableLink<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (VariableNode &quot;$Y&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (TypeNode &quot;ConceptNode&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; )<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; )<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (AndLink (stv 0.000128 0.89999998)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (EvaluationLink<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (PredicateNode &quot;is-honest&quot; (stv 0.80000001 0.89999998))<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (VariableNode &quot;$X&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; )<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (EvaluationLink<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (PredicateNode &quot;is-honest&quot; (stv 0.80000001 0.89999998))<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (VariableNode &quot;$Y&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; )<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (InheritanceLink<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (VariableNode &quot;$X&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (ConceptNode &quot;human&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; )<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (InheritanceLink<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (VariableNode &quot;$Y&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (ConceptNode &quot;human&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; )<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (EvaluationLink<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (PredicateNode &quot;acquainted&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (ListLink<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (VariableNode &quot;$X&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (VariableNode &quot;$Y&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; )<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; )<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; )<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; )<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (LambdaLink (stv 9.9999997e-05 0.89999998)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (VariableList<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (TypedVariableLink<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (VariableNode &quot;$X&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (TypeNode &quot;ConceptNode&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; )<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (TypedVariableLink<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (VariableNode &quot;$Y&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (TypeNode &quot;ConceptNode&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; )<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; )<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (EvaluationLink<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (PredicateNode &quot;will-be-friends&quot; (stv 9.9999997e-05 0.89999998))<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (ListLink<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (VariableNode &quot;$X&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (VariableNode &quot;$Y&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; )<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; )<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; )<br />
+			&nbsp;&nbsp; )</td>
+		</tr>
+	</tbody>
+</table>
+</div>
+
+<div class="panel-footer"><a data-toggle="collapse" href="#collapse9">show less</a></div>
+</div>
+</div>
+<!-- end class="panel-collapse collapse" -->&nbsp; <!--------------------------------------------------------------------------------------------------------->
+
+<div class="panel panel-default">
+<div class="panel-heading">
+<h4 class="panel-title"><a data-toggle="collapse" href="#collapse10">Step 10</a></h4>
+
+<p>&nbsp;</p>
+Infer that Bob may become a friend.<br />
+<br />
+Apply the implication-full-instantiation-rule on (9).<br />
+<br />
+Humans who are honest and acquainted tend to become friends.<br />
+Bob is human. I am human.<br />
+Bob is honest. I am honest.<br />
+Bob and I are acquainted.<br />
+|-<br />
+Bob and I will become friends.
+<p><br />
+<a data-toggle="collapse" href="#collapse10">show more</a></p>
+</div>
+
+<div class="panel-collapse collapse" id="collapse10">
+<div class="panel-body">
+<table border="5">
+	<tbody>
+		<tr>
+			<th>PLN Rule</th>
+			<th>Atomese</th>
+		</tr>
+		<tr>
+			<td style="vertical-align: top">implication-full-instantiation-rule:<br />
+			<br />
+			&nbsp;ImplicationScopeLink<br />
+			&nbsp;&nbsp;&nbsp;&nbsp; V<br />
+			&nbsp;&nbsp;&nbsp;&nbsp; P<br />
+			&nbsp;&nbsp;&nbsp;&nbsp; Q<br />
+			&nbsp;&nbsp;T<br />
+			&nbsp;|-<br />
+			&nbsp;Q[V-&gt;T]<br />
+			<br />
+			where V is a variable or a list of variables, P is a condition, Q<br />
+			is the implicand, T is an atom (or a list of atoms) to substitute<br />
+			and Q[V-&gt;T] is Q where V has been substituted by T.</td>
+			<td style="vertical-align: top">Conclusion (10):<br />
+			<br />
+			;; Bob and I will become friends.<br />
+			&nbsp;&nbsp; (EvaluationLink (stv 0.13281251 0.36445335)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (PredicateNode &quot;will-be-friends&quot; (stv 9.9999997e-05 0.89999998))<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (ListLink<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (ConceptNode &quot;Self&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (ConceptNode &quot;Bob&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; )<br />
+			&nbsp;&nbsp; )</td>
+		</tr>
+	</tbody>
+</table>
+</div>
+
+<div class="panel-footer"><a data-toggle="collapse" href="#collapse10">show less</a></div>
+</div>
+</div>
+<!-- end class="panel-collapse collapse" -->&nbsp; <!--------------------------------------------------------------------------------------------------------->
+
+<div class="panel panel-default">
+<div class="panel-heading inference">
+<h4 class="panel-title"><a data-toggle="collapse" href="#collapse11">Step 11</a></h4>
+
+<p>&nbsp;</p>
+Infer that Bob is funny.<br />
+<br />
+Apply the implication-full-instantiation-rule on the implication stating that people telling jokes are funny in the kb.<br />
+<br />
+People who tell jokes are funny.<br />
+Bob told Jim a joke at the party.<br />
+|-<br />
+Bob is funny.
+<p><br />
+<a data-toggle="collapse" href="#collapse11">show more</a></p>
+</div>
+
+<div class="panel-collapse collapse" id="collapse11">
+<div class="panel-body">
+<table border="5">
+	<tbody>
+		<tr>
+			<th>PLN Rule</th>
+			<th>Atomese</th>
+		</tr>
+		<tr>
+			<td style="vertical-align: top">implication-full-instantiation-rule:<br />
+			<br />
+			&nbsp;ImplicationScopeLink<br />
+			&nbsp;&nbsp;&nbsp;&nbsp; V<br />
+			&nbsp;&nbsp;&nbsp;&nbsp; P<br />
+			&nbsp;&nbsp;&nbsp;&nbsp; Q<br />
+			&nbsp;&nbsp;T<br />
+			&nbsp;|-<br />
+			&nbsp;Q[V-&gt;T]<br />
+			<br />
+			where V is a variable or a list of variables, P is a condition, Q<br />
+			is the implicand, T is an atom (or a list of atoms) to substitute<br />
+			and Q[V-&gt;T] is Q where V has been substituted by T.</td>
+			<td style="vertical-align: top">Antecedents:<br />
+			<br />
+			;; people who tell jokes are funny<br />
+			&nbsp;&nbsp; (ImplicationScopeLink (stv 0.80000001 0.89999998)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (VariableList<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (TypedVariableLink<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (VariableNode &quot;$X&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (TypeNode &quot;ConceptNode&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; )<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (TypedVariableLink<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (VariableNode &quot;$Y&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (TypeNode &quot;ConceptNode&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; )<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (TypedVariableLink<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (VariableNode &quot;$Z&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (TypeNode &quot;ConceptNode&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; )<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; )<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (EvaluationLink (stv 1e-06 0.60000002)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (PredicateNode &quot;told-a-joke-at&quot; (stv 1e-06 0.60000002))<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (ListLink<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (VariableNode &quot;$X&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (VariableNode &quot;$Y&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (VariableNode &quot;$Z&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; )<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; )<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (EvaluationLink (stv 0.69 0.69999999)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (PredicateNode &quot;is-funny&quot; (stv 0.69 0.69999999))<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (VariableNode &quot;$X&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; )<br />
+			&nbsp;&nbsp; )<br />
+			<br />
+			;; Bob told jim a joke at the party.<br />
+			&nbsp;(EvaluationLink (stv 1 1)<br />
+			&nbsp;&nbsp; (PredicateNode &quot;told-a-joke-at&quot; (stv 1e-06 0.60000002))<br />
+			&nbsp;&nbsp; (ListLink<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (ConceptNode &quot;Bob&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (ConceptNode &quot;Jim&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (ConceptNode &quot;Party&quot;)<br />
+			&nbsp;&nbsp; )<br />
+			<br />
+			Conclusion (11):<br />
+			<br>
+			;; Bob is funny.<br />
+			&nbsp;(EvaluationLink (stv 0.80000001 0.89999908)<br />
+			&nbsp;&nbsp; (PredicateNode &quot;is-funny&quot; (stv 0.69 0.69999999))<br />
+			&nbsp;&nbsp; (ConceptNode &quot;Bob&quot;)<br />
+			)</td>
+		</tr>
+	</tbody>
+</table>
+</div>
+
+<div class="panel-footer"><a data-toggle="collapse" href="#collapse11">show less</a></div>
+</div>
+</div>
+<!-- end class="panel-collapse collapse" -->&nbsp; <!--------------------------------------------------------------------------------------------------------->
+
+<div class="panel panel-default">
+<div class="panel-heading">
+<h4 class="panel-title"><a data-toggle="collapse" href="#collapse12">Step 12</a></h4>
+
+<p>&nbsp;</p>
+Atomspace representation transformation<br />
+<br />
+Distribute the scope of the amusing funny equivalence from the KB.<br />
+<br />
+Apply equivalence-scope-distribution-rule.
+<p><br />
+<a data-toggle="collapse" href="#collapse12">show more</a></p>
+</div>
+
+<div class="panel-collapse collapse" id="collapse12">
+<div class="panel-body">
+<table border="5">
+	<tbody>
+		<tr>
+			<th>PLN Rule</th>
+			<th>Atomese</th>
+		</tr>
+		<tr>
+			<td style="vertical-align: top">equivalence-scope-distribution-rule:<br />
+			<br />
+			&nbsp; EquivalenceLink<br />
+			&nbsp;&nbsp;&nbsp;&nbsp; V<br />
+			&nbsp;&nbsp;&nbsp;&nbsp; P<br />
+			&nbsp;&nbsp;&nbsp;&nbsp; Q<br />
+			&nbsp; |-<br />
+			&nbsp; EquivalenceLink<br />
+			&nbsp;&nbsp;&nbsp;&nbsp; LambdaLink<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; V<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; P<br />
+			&nbsp;&nbsp;&nbsp;&nbsp; LambdaLink<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; V<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Q<br />
+			<br />
+			where V is a variable or a list of variables, P and Q are the<br />
+			implicant and implicand bodies.</td>
+			<td style="vertical-align: top">Conclusion (12):<br />
+			<br />
+			&nbsp;&nbsp; (EquivalenceLink (stv 0.69999999 0.89999998)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (LambdaLink<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (TypedVariableLink<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (VariableNode &quot;$X&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (TypeNode &quot;ConceptNode&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; )<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (EvaluationLink (stv 0.69 0.69999999)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (PredicateNode &quot;is-funny&quot; (stv 0.69 0.69999999))<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (VariableNode &quot;$X&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; )<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; )<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (LambdaLink<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (TypedVariableLink<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (VariableNode &quot;$X&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (TypeNode &quot;ConceptNode&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; )<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (EvaluationLink<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (PredicateNode &quot;is-amusing&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (VariableNode &quot;$X&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; )<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; )<br />
+			&nbsp;&nbsp; )</td>
+		</tr>
+	</tbody>
+</table>
+</div>
+
+<div class="panel-footer"><a data-toggle="collapse" href="#collapse12">show less</a></div>
+</div>
+</div>
+<!-- end class="panel-collapse collapse" -->&nbsp; <!--------------------------------------------------------------------------------------------------------->
+
+<div class="panel panel-default">
+<div class="panel-heading inference">
+<h4 class="panel-title"><a data-toggle="collapse" href="#collapse13">Step 13</a></h4>
+
+<p>&nbsp;</p>
+
+<p>Infer that if X is funny, then X is amusing.<br />
+<br />
+Apply the equivalence-to-implication-rule on (12).<br />
+<br />
+Being funny is similar to being amusing.<br />
+|-<br />
+If X is funny, then X is amusing.</p>
+
+<p><br />
+<a data-toggle="collapse" href="#collapse13">show more</a></p>
+</div>
+
+<div class="panel-collapse collapse" id="collapse13">
+<div class="panel-body">
+<table border="5">
+	<tbody>
+		<tr>
+			<th>PLN Rule</th>
+			<th>Atomese</th>
+		</tr>
+		<tr>
+			<td style="vertical-align: top">
+			<p>&nbsp;equivalence-to-implication-rule:</p>
+
+			<p>&nbsp; Equivalence<br />
+			&nbsp;&nbsp;&nbsp;&nbsp; A<br />
+			&nbsp;&nbsp;&nbsp;&nbsp; B<br />
+			&nbsp; |-<br />
+			&nbsp; Implication<br />
+			&nbsp;&nbsp;&nbsp;&nbsp; A<br />
+			&nbsp;&nbsp;&nbsp;&nbsp; B<br />
+			&nbsp; Implication<br />
+			&nbsp;&nbsp;&nbsp;&nbsp; B<br />
+			&nbsp;&nbsp;&nbsp;&nbsp; A</p>
+			</td>
+			<td style="vertical-align: top">
+			<p>Conclusion (13):</p>
+
+			<p>;; If X is funny, then X is amusing.<br />
+			(ImplicationLink (stv 0.82352942 0.89999998)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (LambdaLink<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (TypedVariableLink<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (VariableNode &quot;$X&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (TypeNode &quot;ConceptNode&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; )<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (EvaluationLink (stv 0.69 0.69999999)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (PredicateNode &quot;is-funny&quot; (stv 0.69 0.69999999))<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (VariableNode &quot;$X&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; )<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; )<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (LambdaLink<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (TypedVariableLink<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (VariableNode &quot;$X&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (TypeNode &quot;ConceptNode&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; )<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (EvaluationLink<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (PredicateNode &quot;is-amusing&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (VariableNode &quot;$X&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; )<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ))</p>
+
+			<p>&nbsp;</p>
+			</td>
+		</tr>
+	</tbody>
+</table>
+</div>
+
+<div class="panel-footer"><a data-toggle="collapse" href="#collapse13">show less</a></div>
+</div>
+</div>
+<!-- end class="panel-collapse collapse" -->&nbsp; <!--------------------------------------------------------------------------------------------------------->
+
+<div class="panel panel-default">
+<div class="panel-heading">
+<h4 class="panel-title"><a data-toggle="collapse" href="#collapse14">Step 14</a></h4>
+
+<p>&nbsp;</p>
+
+<p>Infer that Bob is amusing.</p>
+
+<p>Apply implication-full-instantiation on the result of (13).</p>
+
+<p>(13) If X is funny, then X is amusing.<br />
+(11) Bob is funny.<br />
+|-<br />
+(14) Bob is amusing.</p>
+
+<p><br />
+<a data-toggle="collapse" href="#collapse14">show more</a></p>
+</div>
+
+<div class="panel-collapse collapse" id="collapse14">
+<div class="panel-body">
+<table border="5">
+	<tbody>
+		<tr>
+			<th>PLN Rule</th>
+			<th>Atomese</th>
+		</tr>
+		<tr>
+			<td style="vertical-align: top">
+			<p>implication-full-instantiation-rule:<br />
+			<br />
+			&nbsp;ImplicationScopeLink<br />
+			&nbsp;&nbsp;&nbsp;&nbsp; V<br />
+			&nbsp;&nbsp;&nbsp;&nbsp; P<br />
+			&nbsp;&nbsp;&nbsp;&nbsp; Q<br />
+			&nbsp;&nbsp;T<br />
+			&nbsp;|-<br />
+			&nbsp;Q[V-&gt;T]<br />
+			<br />
+			where V is a variable or a list of variables, P is a condition, Q<br />
+			is the implicand, T is an atom (or a list of atoms) to substitute<br />
+			and Q[V-&gt;T] is Q where V has been substituted by T.</p>
+			</td>
+			<td style="vertical-align: top">
+			<p>Conclusion (14):</p>
+
+			<p>;;Bob is amusing<br />
+			(EvaluationLink (stv 0.65882355 0.25109974)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (PredicateNode &quot;is-amusing&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (ConceptNode &quot;Bob&quot;)<br />
+			&nbsp;&nbsp; )</p>
+			</td>
+		</tr>
+	</tbody>
+</table>
+</div>
+
+<div class="panel-footer"><a data-toggle="collapse" href="#collapse14">show less</a></div>
+</div>
+</div>
+<!-- end class="panel-collapse collapse" -->&nbsp; <!--------------------------------------------------------------------------------------------------------->
+
+<div class="panel panel-default">
+<div class="panel-heading inference">
+<h4 class="panel-title"><a data-toggle="collapse" href="#collapse15">Step 15</a></h4>
+
+<p>&nbsp;</p>
+
+<p>Infer that Bob will be an amusing and honest friend.</p>
+
+<p>Apply the and-introduction-rule over the results of (10), (11) and (14)</p>
+
+<p>(10) Bob and I will become friends.<br />
+&nbsp;(1) Bob is honest.<br />
+(14) Bob is amusing<br />
+|-<br />
+(15) Bob will be an amusing and honest friend.</p>
+
+<p><br />
+<a data-toggle="collapse" href="#collapse15">show more</a></p>
+</div>
+
+<div class="panel-collapse collapse" id="collapse15">
+<div class="panel-body">
+<table border="5">
+	<tbody>
+		<tr>
+			<th>PLN Rule</th>
+			<th>Atomese</th>
+		</tr>
+		<tr>
+			<td style="vertical-align: top">
+			<p>and-introduction-rule:</p>
+
+			<p>&nbsp; A&lt;TV1&gt;<br />
+			&nbsp; B&lt;TV2&gt;<br />
+			&nbsp; |-<br />
+			&nbsp; AndLink &lt;TV&gt;<br />
+			&nbsp;&nbsp;&nbsp;&nbsp; A<br />
+			&nbsp;&nbsp;&nbsp;&nbsp; B</p>
+			</td>
+			<td style="vertical-align: top">
+			<p>Conclusion (15):</p>
+
+			<p>;; Bob will be an amusing and honest friend.<br />
+			&nbsp;(And (stv 0.13281251 0.25109974)<br />
+			&nbsp;&nbsp;&nbsp; (Evaluation<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (Predicate &quot;will-be-friends&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (List<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (Concept &quot;Self&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (Concept &quot;Bob&quot;)))<br />
+			&nbsp;&nbsp;&nbsp; (Evaluation<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (Predicate &quot;is-amusing&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (Concept &quot;Bob&quot;))<br />
+			&nbsp;&nbsp;&nbsp; (Evaluation<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (Predicate &quot;is-honest&quot;)<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (Concept &quot;Bob&quot;)))</p>
+			</td>
+		</tr>
+	</tbody>
+</table>
+</div>
+
+<div class="panel-footer"><a data-toggle="collapse" href="#collapse15">show less</a></div>
+</div>
+</div>
+<!-- end class="panel-collapse collapse" -->&nbsp; <!---------------------------------------------------------------------------------------------------------></div>
+<!-- html panel group (i think) --></div>
+
+<p>&nbsp;&nbsp;<!--------------------------------------------------------------------------------------------------------->&nbsp;<!-- end class="panel-collapse collapse" --><!---------------------------------------------------------------------------------------------------------><!-- html panel group (i think) --></p>
+</body>
+</html>

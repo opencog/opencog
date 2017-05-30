@@ -11,7 +11,6 @@ import dot
 __author__ = 'Cosmo Harrigan'
 
 atomspace = AtomSpace()
-__init__(atomspace)
 
 data = ["opencog/scm/core_types.scm",
         "opencog/scm/utilities.scm",

@@ -1,5 +1,6 @@
 __author__ = 'Cosmo Harrigan'
 
+import socket
 import opencog.cogserver
 from web.api.apimain import RESTAPI
 from threading import Thread
@@ -15,19 +16,7 @@ class Start(opencog.cogserver.Request):
     Implements a CogServer Module to load upon startup that will load the REST
     API defined in apimain.py
 
-    Prerequisites:
-        1) Requires installation of the Python dependencies by running:
-            sudo ./install_dependencies.sh
-
-        2) Requires the configuration file (opencog.conf) to contain the
-           following parameters:
-            - PYTHON_EXTENSION_DIRS must specify the relative location of the
-              API scripts
-                Example: PYTHON_EXTENSION_DIRS = ../opencog/python/web/api
-            - PYTHON_PRELOAD must specify the restapi module
-                Example: PYTHON_PRELOAD = restapi
-
-    To start the REST API, type restapi.Start at the CogServer shell
+    See examples @ github.com/opencog/opencog/tree/master/examples/restapi
     """
 
     summary = "Start the OpenCog REST API"
@@ -42,7 +31,7 @@ class Start(opencog.cogserver.Request):
     def __init__(self):
         self.atomspace = None  # Will be passed as argument in run method
 
-    def run(self, args, atomspace):        
+    def run(self, args, atomspace):
         self.atomspace = atomspace
         '''
         make a daemon thread so that it can be interrupted
@@ -50,8 +39,18 @@ class Start(opencog.cogserver.Request):
         thread = Thread(target=self.invoke)
         thread.setDaemon(True)
         thread.start()
-        print "REST API is now running in a separate daemon thread."        
+        print "REST API is now running in a separate daemon thread."
 
     def invoke(self):
         self.api = RESTAPI(self.atomspace)
-        self.api.run(host=IP_ADDRESS, port=PORT)
+
+        # OK, so if the remote end closes the pipe, we get a SIGPIPE
+        # error, and the server dies.  So just restart the server in
+        # that situation. See bug opencog/ros-behavior-scripting/issues/108
+        try_again = True
+        while try_again:
+            try_again = False
+            try:
+                self.api.run(host=IP_ADDRESS, port=PORT)
+            except socket.error, e:
+                try_again = True
