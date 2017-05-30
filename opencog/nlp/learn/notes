@@ -6507,22 +6507,32 @@ Done storing 8047063 pair MI's in 6905 secs
 sql-stats: Atomspace holds 23178644 atoms = 23M = 35GBytes
 Now can start tranche-2 MST parsing.
 
----------- meanwhile, compute & cache similarity
-(use-modules (opencog) (opencog persist) (opencog persist-sql))
-(use-modules (opencog nlp) (opencog nlp learn))
-(sql-open "postgres:///en_pairs_tone_sim?user=linas")
-(fetch-all-words)
-(length (get-all-words))
-(define pca (make-pseudo-cset-api))
-(pca 'fetch-pairs)
-(define ac (get-all-cset-words))
-(length ac)
-(define ad (get-all-disjuncts))
-(length ad)
+---------- meanwhile, finish stats work
+(fetch-all-sims)
 
+general idea: how many pairs are there out of N^2?
+what is the distribution of pair memebership?
+
+sims should be LLOBJ
+
+Umm batch-all-pair-mi is where?
+
+batch-sim should NOT store!
+batch-sim-pairs 
+
+So: 1) cutoff for sim  2) cutoff for store.
+
+
+---------- meanwhile, compute & cache similarity
+; (sql-open "postgres:///en_pairs_tone_sim?user=ubuntu")
+
+Wait, where? 
+Oh, gram-sim.
 
 -----------
 todo items:
+* sep out bin-counting
+
 * trim low observation counts ....
 * implement sql delete function.
 ---------- debug hang:

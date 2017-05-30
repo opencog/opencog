@@ -20,6 +20,28 @@
 (use-modules (srfi srfi-1))
 
 ; ---------------------------------------------------------------------
+; Load the dataset that is analyzed throughout.
+(use-modules (opencog) (opencog persist) (opencog persist-sql))
+(use-modules (opencog nlp) (opencog nlp learn))
+(sql-open "postgres:///en_pairs_sim?user=linas")
+
+(fetch-all-words)         ; 581 seconds from cold spinning media.
+                          ; 22 seconds from hot buffer cache
+(length (get-all-words))  ; 396262 words as always.
+
+(define pca (make-pseudo-cset-api))
+(pca 'fetch-pairs)        ; 456 secs after above
+
+(define ac (get-all-cset-words))
+(length ac)               ; 37413 s always
+
+(define ad (get-all-disjuncts))
+(length ad)               ; 291637 as always
+
+(fetch-all-sims)          ; 17 seconds
+
+
+; ---------------------------------------------------------------------
 ; Ranking and printing utilities
 ;
 ; Assign each word a score, using SCORE-FN, and then rank them by
@@ -679,6 +701,8 @@
 	(lambda (sim)  (set! all-sims (cons sim all-sims)) #f)
 	'SimilarityLink)
 
+(length all-sims)    ; 23993
+
 (define good-sims
 	(filter
 		(lambda (sim) (and
@@ -686,6 +710,8 @@
 				(< 8 (cset-vec-word-len (gar sim)))
 				(< 8 (cset-vec-word-len (gdr sim)))))
 		all-sims))
+
+(length good-sims)   ;  15808
 
 (define ranked-sims
 	(sort good-sims
@@ -702,6 +728,16 @@
 			(format outport "~A	" cnt)
 			(prt-sim sim outport))
 		ranked-sims)
+	(close outport))
+
+; ------ again, but binned.
+
+(define sorted-sims (score-and-rank sim-cosine all-sims))
+
+(define binned-sims (bin-count-simple sorted-sims 100))
+
+(let ((outport (open-file "/tmp/binned-sims.dat" "w")))
+	(print-ts-bincounts binned-sims outport)
 	(close outport))
 
 ; ---------------------------------------------------------------------
