@@ -836,6 +836,26 @@ bool PatternMiner::isIgnoredContent(string keyword)
     return false;
 }
 
+bool PatternMiner::doesLinkContainNodesInKeyWordNodes(const Handle& link, const set<Handle>& keywordNodes)
+{
+    HandleSeq outgoingLinks = link->getOutgoingSet();
+
+    for (Handle h : outgoingLinks)
+    {
+        if (h->isNode())
+        {
+            if (keywordNodes.find(h) != keywordNodes.end())
+                return true;
+        }
+        else
+        {
+            if (doesLinkContainNodesInKeyWordNodes(h, keywordNodes))
+                return true;
+        }
+    }
+
+    return false;
+}
 
 
 bool PatternMiner::containIgnoredContent(Handle link )
@@ -1515,8 +1535,6 @@ bool PatternMiner::containsLoopVariable(HandleSeq& inputPattern)
 // some will be filter out in this phrase, return true to filter out
 bool PatternMiner::filters(HandleSeq& inputLinks, HandleSeqSeq& oneOfEachSeqShouldBeVars, HandleSeq& leaves, HandleSeq& shouldNotBeVars, HandleSeq& shouldBeVars, AtomSpace* _atomSpace)
 {
-    if(inputLinks.size() < 2)
-        return false;
 
     OrderedHandleSet allNodesInEachLink[inputLinks.size()];
 
@@ -1531,6 +1549,9 @@ bool PatternMiner::filters(HandleSeq& inputLinks, HandleSeqSeq& oneOfEachSeqShou
     for (unsigned int i = 0; i < inputLinks.size(); ++i)
     {
         extractAllNodesInLink(inputLinks[i],allNodesInEachLink[i], _atomSpace);
+
+        if (inputLinks.size() == 1)
+            break;
 
         if (enable_filter_links_of_same_type_not_share_second_outgoing)
         {
@@ -1598,7 +1619,7 @@ bool PatternMiner::filters(HandleSeq& inputLinks, HandleSeqSeq& oneOfEachSeqShou
         // this filter: all the first outgoing nodes of all evaluation links should be variables
         if (enable_filter_first_outgoing_evallink_should_be_var)
             std::copy(all1stOutgoingsOfEvalLinks.begin(), all1stOutgoingsOfEvalLinks.end(), std::back_inserter(shouldBeVars));
-        else if ((enable_filter_not_all_first_outgoing_const) )
+        else if (enable_filter_not_all_first_outgoing_const)
         {
             // if enable_filter_first_outgoing_evallink_should_be_var is true, there is no need to enable this filter below
             HandleSeq all1stOutgoingsOfEvalLinksSeq(all1stOutgoingsOfEvalLinks.begin(), all1stOutgoingsOfEvalLinks.end());
@@ -1607,7 +1628,7 @@ bool PatternMiner::filters(HandleSeq& inputLinks, HandleSeqSeq& oneOfEachSeqShou
     }
 
 
-    if (enable_filter_links_should_connect_by_vars)
+    if ((inputLinks.size() > 1) && enable_filter_links_should_connect_by_vars)
     {
         // find the common nodes which are shared among inputLinks
         for (unsigned i = 0; i < inputLinks.size() - 1; i ++)
@@ -1629,8 +1650,8 @@ bool PatternMiner::filters(HandleSeq& inputLinks, HandleSeqSeq& oneOfEachSeqShou
     }
 
 
-
-    if ( (enable_filter_leaves_should_not_be_vars) || (enable_filter_node_types_should_not_be_vars) )
+    // only check node_types_should_not_be_vars for 1 gram patterns
+    if (enable_filter_leaves_should_not_be_vars || enable_filter_node_types_should_not_be_vars)
     {
 
         for (unsigned i = 0; i < inputLinks.size(); i ++)
@@ -1639,7 +1660,7 @@ bool PatternMiner::filters(HandleSeq& inputLinks, HandleSeqSeq& oneOfEachSeqShou
             {
 
                 // find leaves
-                if (enable_filter_leaves_should_not_be_vars)
+                if ((inputLinks.size() > 1) && enable_filter_leaves_should_not_be_vars)
                 {
                     bool is_leaf = true;
 
@@ -2549,7 +2570,9 @@ void PatternMiner::reSetAllSettingsFromConfig()
     use_keyword_black_list = config().get_bool("use_keyword_black_list");
     use_keyword_white_list = config().get_bool("use_keyword_white_list");
 
-    assert( ! (use_keyword_black_list & use_keyword_white_list) );
+    keyword_black_logic_is_contain = config().get_bool("keyword_black_logic_is_contain");
+
+    // assert( ! (use_keyword_black_list & use_keyword_white_list) );
 
     string keyword_black_list_str  = config().get("keyword_black_list");
     keyword_black_list_str .erase(std::remove(keyword_black_list_str .begin(), keyword_black_list_str .end(), ' '), keyword_black_list_str .end());
@@ -2721,6 +2744,30 @@ void PatternMiner::runPatternMiner(bool exit_program_after_finish)
     allLinkNumber = (int)(allLinks.size());
     atomspaceSizeFloat = (float)(allLinkNumber);
 
+    black_keyword_Handles.clear();
+    if (use_keyword_black_list && (! keyword_black_logic_is_contain))
+    {
+        for (string keyword : keyword_black_list)
+        {
+            // std::cout << keyword << std::endl;
+            Handle keywordNode = originalAtomSpace->get_node(opencog::CONCEPT_NODE,keyword);
+            if (keywordNode != Handle::UNDEFINED)
+            {
+                if (black_keyword_Handles.find(keywordNode) == black_keyword_Handles.end())
+                    black_keyword_Handles.insert(keywordNode);
+            }
+
+            keywordNode = originalAtomSpace->get_node(opencog::PREDICATE_NODE,keyword);
+
+            if (keywordNode != Handle::UNDEFINED)
+            {
+                if (black_keyword_Handles.find(keywordNode) == black_keyword_Handles.end())
+                    black_keyword_Handles.insert(keywordNode);
+            }
+
+        }
+    }
+
     std::cout << "Using " << THREAD_NUM << " threads. \n";
     std::cout << "Corpus size: "<< allLinkNumber << " links in total. \n\n";
 
@@ -2740,7 +2787,21 @@ void PatternMiner::runPatternMiner(bool exit_program_after_finish)
             std::cout << keyword << std::endl;
         }
 
-        cout << "Finding all Links contains these keywords...\n";
+        if (use_keyword_black_list)
+        {
+            cout << "\nuse_keyword_black_list is also enable, so avoid links that contain any nodes that ";
+            if (keyword_black_logic_is_contain)
+                cout << "contain";
+            else
+                cout << "equal to";
+            cout << " any of the following black keywords:\n";
+            for (string bkeyword : keyword_black_list)
+            {
+                std::cout << bkeyword << std::endl;
+            }
+        }
+
+        cout << "\nFinding all Links contains these keywords...\n";
 
 
         findAllLinksContainKeyWords(keyword_white_list, 0, only_mine_patterns_start_from_white_list_contain, havenotProcessedWhiteKeywordLinks);
@@ -3007,7 +3068,7 @@ void PatternMiner::applyWhiteListKeywordfilterAfterMining()
 
         // Finished mining gram patterns; output to file
         std::cout<<"gram = " + toString(gram) + ": " + toString((patternsForGramFiltered[gram-1]).size()) + " patterns found after filtering! ";
-
+        std::sort((patternsForGramFiltered[gram-1]).begin(), (patternsForGramFiltered[gram-1]).end(),compareHTreeNodeByFrequency);
         OutPutFrequentPatternsToFile(gram, patternsForGramFiltered, fileNameBasic);
 
         std::cout<< std::endl;
@@ -3104,59 +3165,163 @@ void PatternMiner::selectSubsetFromCorpus(vector<string>& topics, unsigned int g
     _selectSubsetFromCorpus(topics,gram, if_contian_logic);
 }
 
-/*
+bool checkIfObjectIsAPerson(Handle& obj, HandleSeq& listLinks)
+{
+    for (Handle l : listLinks)
+    {
+        // only check ListLinks with h as the first outgoing
+        if ( l->getOutgoingAtom(0) != obj)
+            continue;
+
+        HandleSeq evals;
+        l->getIncomingSet(back_inserter(evals));
+
+        for (Handle eval : evals)
+        {
+            Handle predicate = eval->getOutgoingAtom(0);
+            string predicateStr = predicate->getName();
+            if ((predicateStr ==  "nationality") || (predicateStr == "predecessor") || (predicateStr == "successor") || (predicateStr == "religion") ||
+                    (predicateStr == "occupation") || (predicateStr == "birthPlace") || (predicateStr == "party") || (predicateStr == "almaMater")  ||
+                    (predicateStr == "relation") || (predicateStr == "child") || (predicateStr == "parent") )
+                return true;
+        }
+    }
+
+    return false;
+}
+
+// Note: the following steps are used to select a subset related to "president","chairman","vicePresident","primeMinister","vicePrimeMinister"
+// 1. (use-modules (opencog patternminer))
+// 2. (clear)
+// 3. (load "allkeyObjects.scm")
+// 4. (pm-load-all-DBpediaKeyNodes)
+// 5. (load "DBPedia.scm")
+// 6. (pm-select-subset-for-DBpedia)
+void PatternMiner::loandAllDBpediaKeyNodes()
+{
+    originalAtomSpace->get_handles_by_type(back_inserter(allDBpediaKeyNodes), CONCEPT_NODE);
+    cout << allDBpediaKeyNodes.size() << " nodes loaded!" << std::endl;
+}
+
 void PatternMiner::selectSubsetForDBpedia()
 {
     set<Handle> subsetLinks;
-    Handle orLink;
-    HandleSeq orLinks;
-    originalAtomSpace->get_handles_by_type(back_inserter(orLinks), OR_LINK);
-    orLink = orLinks[0];
 
-    Handle newPredicate = originalAtomSpace->add_node(PREDICATE_NODE, "position");
+    // Handle newPredicate = originalAtomSpace->add_node(PREDICATE_NODE, "position");
 
     string titles[] = {"president","chairman","vicePresident","primeMinister","vicePrimeMinister"};
-    string orgs[] = {"Institute", "University", "Congress", "College"};
 
-    HandleSeq allKeyPeople = orLink->getOutgoingSet();
-    for (Handle h : allKeyPeople)
+    cout << "\nselecting president related links from DBpedia ... " << std::endl;
+    // int x = 0;
+    for (Handle h : allDBpediaKeyNodes)
     {
-        HandleSeq listLinks = h->getIncomingSet();
+//        string objname = h->getName();
+//        if (objname == "Stanley_Crooks")
+//        {
+//            x ++;
+//            cout << x << std::endl;
+//        }
+
+
+        bool is_person = false;
+        bool already_check_is_person = false;
+
+        HandleSeq listLinks;
+        h->getIncomingSet(back_inserter(listLinks));
+
         for (Handle l : listLinks)
         {
-            HandleSeq evals = l->getIncomingSet();
+            // only process ListLinks with h as the first outgoing
+            if ( l->getOutgoingAtom(0) != h)
+                continue;
+
+            HandleSeq evals;
+            l->getIncomingSet(back_inserter(evals));
+
 
             for (Handle eval : evals)
             {
 
-                if (isIgnoredContent(predicateStr))
-                    continue;
-
-                Handle valueNode = l->getOutgoingAtom(1);
+//                // if the valueNode only has one connection, do not keep it
+//                Handle valueNode = l->getOutgoingAtom(1);
+//                if (valueNode->getIncomingSetSize() < 2)
+//                {
+//                    cout << valueNode->getName() << " only has one connection, skip it!" << std::endl;
+//
+//                    continue;
+//                }
 
                 Handle predicate = eval->getOutgoingAtom(0);
                 string predicateStr = predicate->getName();
+
+                if (use_keyword_black_list && isIgnoredContent(predicateStr))
+                {
+                    continue;
+                }
+
+                bool skip = false;
                 for (string title : titles)
                 {
                     if (predicateStr == title)
                     {
-                        if ()
-                        Handle titlelistLink = originalAtomSpace->add_link(LIST_LINK, valueNode, predicate);
-                        originalAtomSpace->add_link(EVALUATION_LINK, newPredicate, titlelistLink);
-                        originalAtomSpace->remove_atom(eval);
-                        continue;
+                        // if the object has a birthplace, it means that it is a person, do not keep it; only keep the orgs
+                        if (! already_check_is_person)
+                        {
+
+                            is_person = checkIfObjectIsAPerson(h, listLinks);
+                            already_check_is_person = true;
+                        }
+
+
+                        if (is_person)
+                            skip = true;
+                        else
+                        {
+                            cout << h->getName() << " is a not a person, keep it!\n";
+                        }
+
+                        break;
+
+
+//                        Handle titlelistLink = originalAtomSpace->add_link(LIST_LINK, valueNode, predicate);
+//                        originalAtomSpace->add_link(EVALUATION_LINK, newPredicate, titlelistLink);
+//                        originalAtomSpace->remove_atom(eval);
+
                     }
                 }
 
-                string valueStr = valueNode->getName();
-                if (valueStr.find_last_of())
+                if ( (! skip) && (subsetLinks.find(eval) == subsetLinks.end()))
+                    subsetLinks.insert(eval);
+
             }
         }
 
+
+
     }
 
+    cout << "\nDone!" << subsetLinks.size() << " links selected! Writing to file ..." << std::endl;
+
+    ofstream subsetFile;
+
+    string fileName = "DBPediaSubSet.scm";
+
+    subsetFile.open(fileName.c_str());
+
+    // write the first line to enable unicode
+    subsetFile <<  "(setlocale LC_CTYPE \"\")" << std::endl ;
+
+    for (Handle h : subsetLinks)
+    {
+        subsetFile << h->toShortString();
+    }
+
+    subsetFile.close();
+
+    std::cout << "\nDone! The subset has been written to file:  " << fileName << std::endl ;
+
 }
-*/
+
 
 std::string PatternMiner::Link2keyString(Handle& h, std::string indent, const AtomSpace *atomspace)
 {
@@ -3543,15 +3708,21 @@ void PatternMiner::findAllLinksContainKeyWords(vector<string>& subsetKeywords, u
 
                 if ((newh == Handle::UNDEFINED))
                     continue;
-                else if (use_keyword_black_list && containIgnoredContent(newh))
-                    continue;
             }
 
             if (use_keyword_black_list)
             {
                 // if the content in this link contains content in the black list,ignore it
-                if (containIgnoredContent(newh))
-                    continue;
+                if (keyword_black_logic_is_contain)
+                {
+                    if (containIgnoredContent(newh))
+                        continue;
+                }
+                else
+                {
+                    if (doesLinkContainNodesInKeyWordNodes(newh, black_keyword_Handles))
+                        continue;
+                }
             }
 
             if (allSubsetLinks.find(newh) == allSubsetLinks.end())

@@ -158,8 +158,11 @@ protected:
     bool use_keyword_white_list;
     bool use_keyword_black_list;
 
-    QUERY_LOGIC keyword_white_list_logic;
+    // = true will filter out atoms with labels contain keyword, = fasle will only filter out atoms with labels equal to any keyword
+    bool keyword_black_logic_is_contain;
+    set<Handle> black_keyword_Handles; // only use when keyword_black_logic_is_contain = false
 
+    QUERY_LOGIC keyword_white_list_logic;
 
     vector<Type> ignoredLinkTypes;
 
@@ -192,6 +195,8 @@ protected:
    list<string>** thread_DF_ExtractedLinks;
    // set<string>[max_gram]
    set<string>* all_thread_ExtractedLinks_pergram;
+
+   HandleSeq allDBpediaKeyNodes;
 
     // this is to against graph isomorphism problem, make sure the patterns we found are not dupicacted
     // the input links should be a Pattern in such format:
@@ -331,6 +336,8 @@ protected:
 
     bool containIgnoredContent(Handle link );
 
+    bool doesLinkContainNodesInKeyWordNodes(const Handle& link, const set<Handle>& keywordNodes);
+
     vector<string> keyword_black_list;
     vector<string> keyword_white_list;
 
@@ -403,7 +410,9 @@ public:
 
     void selectSubsetFromCorpus(vector<string> &topics, unsigned int gram, bool if_contian_logic = true);
 
-    // void selectSubsetForDBpedia();
+    void loandAllDBpediaKeyNodes();
+
+    void selectSubsetForDBpedia();
 
     vector<HTreeNode*>&  getFinalPatternsForGram(unsigned int gram){return finalPatternsForGram[gram - 1];}
 

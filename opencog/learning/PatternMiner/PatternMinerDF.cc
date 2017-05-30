@@ -649,22 +649,26 @@ void PatternMiner::extendAPatternForOneMoreGramRecursively(const Handle &extende
     }
 
     unsigned int n_max = newValueToVarMap.size();
-    unsigned int n_limit= valueToVarMap.size()/2.0f - lastGramTotalVarNum;
-    n_limit ++;
+    unsigned int n_limit;
 
-    // sometimes there is only one variable in a link, lik:
-//    (DuringLink
-//      (ConceptNode "dead")
-//      (ConceptNode "dead")
-//    ) ; [44694]
+    if (cur_pattern_gram == 1) // do not have litmit for 1 gram patterns
+        n_limit = valueToVarMap.size();
+    else
+    {
+        n_limit = valueToVarMap.size()/2.0f - lastGramTotalVarNum;
+        n_limit ++;
 
-    if (n_limit > n_max)
-        n_limit = n_max;
+        // sometimes there is only one variable in a link, lik:
+    //    (DuringLink
+    //      (ConceptNode "dead")
+    //      (ConceptNode "dead")
+    //    ) ; [44694]
+        if (n_limit > n_max)
+            n_limit = n_max;
 
-    if (n_limit == 1)
-        n_limit = 2;
-
-
+        if (n_limit == 1)
+            n_limit = 2;
+    }
 
     // Get all the shared nodes and leaves
     HandleSeqSeq oneOfEachSeqShouldBeVars;
@@ -869,6 +873,17 @@ void PatternMiner::extendAPatternForOneMoreGramRecursively(const Handle &extende
                         }
                         else
                             extendedHandle = incomingHandle;
+
+                        if (keyword_black_logic_is_contain)
+                        {
+                            if (containIgnoredContent(extendedHandle))
+                                continue;
+                        }
+                        else
+                        {
+                            if (doesLinkContainNodesInKeyWordNodes(extendedHandle, black_keyword_Handles))
+                                continue;
+                        }
 
                         if (isInHandleSeq(extendedHandle, inputLinks))
                             continue;

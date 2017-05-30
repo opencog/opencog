@@ -535,6 +535,16 @@ public:
     {
         patternMiner->loadPatternsFromResultFile(fileName);
     }
+
+    void select_subset_for_DBpedia()
+    {
+        patternMiner->selectSubsetForDBpedia();
+    }
+
+    void load_all_DBpediaKeyNodes()
+    {
+        patternMiner->loandAllDBpediaKeyNodes();
+    }
 };
 
 
@@ -657,6 +667,9 @@ void PatternMinerSCM::init()
     define_scheme_primitive("pm-reset-patternminer", &PatternMinerSCM::reset_patternminer, this, "patternminer");
     define_scheme_primitive("pm-run-interestingness-evaluation", &PatternMinerSCM::run_interestingness_evaluation, this, "patternminer");
     define_scheme_primitive("pm-load-patterns-from-result-file", &PatternMinerSCM::load_patterns_from_result_file, this, "patternminer");
+
+    define_scheme_primitive("pm-select-subset-for-DBpedia", &PatternMinerSCM::select_subset_for_DBpedia, this, "patternminer");
+    define_scheme_primitive("pm-load-all-DBpediaKeyNodes", &PatternMinerSCM::load_all_DBpediaKeyNodes, this, "patternminer");
 
 
 }
