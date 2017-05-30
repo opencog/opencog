@@ -543,12 +543,14 @@ you can start exploring.
 ```
   (use-modules (opencog) (opencog persist) (opencog persist-sql))
   (use-modules (opencog nlp) (opencog nlp learn))
-  (sql-open "postgres:///en_pairs_mst?user=linas")
+  (sql-open "postgres:///en_pairs_sim?user=linas")
   (fetch-all-words)
   (length (get-all-words))
   ; This reports 396262 for one my DB's has.
-  (fetch-pseudo-csets (get-all-words))
-  (define all-cset-words (filter-words-with-csets (get-all-words)))
+
+  (define pca (make-pseudo-cset-api))
+  (pca 'fetch-pairs)
+  (define all-cset-words (get-all-cset-words))
   (length all-cset-words)
   ; This reports 37413 in for my `en_pairs_sim`.
   (define all-disjuncts (get-all-disjuncts))
@@ -652,13 +654,16 @@ It will eventually get cleaned up.
 
 TODO List
 =========
-* Fix crash at linkage_set_domain_names+0xe0
 * Fix (WordNode "…!ANY-PUNCT")
-* Create OO system for generic pair statistics.
-* Rework pipeline to use literary English sources.
+* Rework pipeline to use literary English sources. STARTED-ish.
+  New scripts in the utilities directory. Incomplete. Also,
+  need to document here in readme.
 * Count single-word probabilities.
 * Resume work on morphology.
-* Create an LXC container for public use.
+* Create an LXC container for public use. DONE.
+  But not updated....
+* Prune low observation counts.
+* Implement sql-delete.
 
 DONE
 ----
@@ -686,6 +691,8 @@ DONE
   was pure virtual (circa line 920 of AtomStorage.cc) There's some
   kind of smart-pointer race. See "Crash" section below.
   Done. Ran for a month without issues.
+* Fix crash at linkage_set_domain_names+0xe0  Done. Need LG 5.4.0
+* Create OO system for generic pair statistics. Done.
 
 
 Misc Notes about batch processing

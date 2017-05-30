@@ -6495,7 +6495,10 @@ So, somehow still stuck in i/o waiting for postgres to flush to disk.
 
 ?? Is it postgres indexing? Can we suspend that while storing?
 
------ anyway, recompute pair mi.
+--------- meanhwile continue pair-parsing
+launch tranche-3 any-parsing Tue May 30 04:39:44 UTC 2017
+
+----- anyway, recompute pair mi and resume mst-parsing
 (define ala (make-any-link-api))
 (batch-all-pair-mi ala)
 Final store: about  (1250.0 pairs/sec)
@@ -6504,7 +6507,24 @@ Done storing 8047063 pair MI's in 6905 secs
 sql-stats: Atomspace holds 23178644 atoms = 23M = 35GBytes
 Now can start tranche-2 MST parsing.
 
+---------- meanwhile, compute & cache similarity
+(use-modules (opencog) (opencog persist) (opencog persist-sql))
+(use-modules (opencog nlp) (opencog nlp learn))
+(sql-open "postgres:///en_pairs_tone_sim?user=linas")
+(fetch-all-words)
+(length (get-all-words))
+(define pca (make-pseudo-cset-api))
+(pca 'fetch-pairs)
+(define ac (get-all-cset-words))
+(length ac)
+(define ad (get-all-disjuncts))
+(length ad)
 
---------- meanhwile
-launch tranche-3 any-parsing Tue May 30 04:39:44 UTC 2017
 
+-----------
+todo items:
+* trim low observation counts ....
+* implement sql delete function.
+---------- debug hang:
+latest bdgw from git does not solve it.
+latest stable-2.2 guile does not solve it.
