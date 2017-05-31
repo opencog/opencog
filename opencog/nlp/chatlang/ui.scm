@@ -209,3 +209,13 @@
    \"binge and purge\", and the concept \"swallow\" as its members."
   (append-map (lambda (m) (list (Reference (member-words m) (Concept NAME))))
               MEMBERS))
+
+; ----------
+; Topic
+; ----------
+; TODO:
+; Should this be a skipped demand, so as to separate the dialogue loop be
+; independent of the psi-loop? Or, is it better to resturcture openpsi to allow
+; as many loops as possilbe as that might be required for the DMT
+; implementation?
+(define-public create-topic psi-demand)

@@ -115,7 +115,7 @@
   (cond ((equal? 'say (car ACTION))
          (say (cdr ACTION)))))
 
-(define yakking (psi-demand "Yakking" 0.9))
+(define yakking (create-topic "Yakking" 0.9))
 
 (define* (chat-rule PATTERN ACTION #:optional (TOPIC yakking) NAME)
   "Top level translation function. Pattern is a quoted list of terms,
