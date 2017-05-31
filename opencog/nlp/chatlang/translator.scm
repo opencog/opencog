@@ -117,7 +117,7 @@
 
 (define yakking (psi-demand "Yakking" 0.9))
 
-(define* (chat-rule PATTERN ACTION #:optional NAME)
+(define* (chat-rule PATTERN ACTION #:optional (TOPIC yakking) #:optional NAME)
   "Top level translation function. Pattern is a quoted list of terms,
    and action is a quoted list of actions or a single action."
   (let* ((template (cons atomese-variable-template atomese-condition-template))
@@ -134,7 +134,7 @@
       action
       (True)
       (stv .9 .9)
-      yakking
+      TOPIC
       NAME)))
 
 (define (sent-get-lemmas-in-order SENT)
