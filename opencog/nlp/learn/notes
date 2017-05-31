@@ -6556,8 +6556,6 @@ Oh, gram-sim.
 
 -----------
 todo items:
-* sep out bin-counting code into own file
-
 * trim low observation counts ....
 * implement sql delete function.
 
@@ -6565,8 +6563,93 @@ todo items:
 latest bdgw from git does not solve it.
 latest stable-2.2 guile does not solve it.
 
+revert to distro bdwgc
+#0  0x00007f362151c826 in __GI___sigsuspend (
+    set=set@entry=0x7f36214b1740 <suspend_handler_mask>)
+    at ../sysdeps/unix/sysv/linux/sigsuspend.c:30
+#1  0x00007f3621293602 in GC_suspend_handler_inner
+(dummy=dummy@entry=0x0, 
+    context=context@entry=0x7fff6c807540) at pthread_stop_world.c:324
+#2  0x00007f36212936cf in GC_suspend_handler (sig=30, info=<optimized
+out>, 
+    context=0x7fff6c807540) at pthread_stop_world.c:237
+
+thr 2: find_slot_map (
+    cache=0x7f361fe85ab0, ip=0x1) at ../../libguile/vm.c:936
+#1  scm_i_vm_mark_stack (vp=0xbdca3120, mark_stack_ptr=0x7f361fe85ef0, 
+    mark_stack_limit=0x7f361fe95eb0) at ../../libguile/vm.c:1011
+#2  0x00007f36212883be in GC_mark_from (mark_stack_top=0x7f361fe85ea0, 
+    mark_stack_top@entry=0x7f361fe85f00, 
+    mark_stack=mark_stack@entry=0x7f361fe85eb0, 
+    mark_stack_limit=mark_stack_limit@entry=0x7f361fe95eb0) at
+mark.c:784
+#3  0x00007f36212889de in GC_do_local_mark
+(local_mark_stack=0x7f361fe85eb0, 
+    local_top=0x7f361fe85f00) at mark.c:1048
+#4  0x00007f3621288bf8 in GC_mark_local (
+    local_mark_stack=local_mark_stack@entry=0x7f361fe85eb0,
+id=id@entry=1)
+    at mark.c:1181
+#5  0x00007f3621288f0a in GC_help_marker
+(my_mark_no=my_mark_no@entry=195743)
+    at mark.c:1249
+#6  0x00007f3621292edc in GC_mark_thread (id=<optimized out>)
+    at pthread_support.c:380
+
+
+single-stepping:
+
+scm_i_vm_mark_stack (vp=0xbdca3120, mark_stack_ptr=0x7f361fe85ef0, 
+    mark_stack_limit=0x7f361fe95eb0) at ../../libguile/vm.c:975
+975            fp = SCM_FRAME_DYNAMIC_LINK (fp))
+(gdb) print fp
+$1 = (union scm_vm_stack_element *) 0x7f36183d5e38
+(gdb) step
+973       for (fp = vp->fp, sp = vp->sp;
+(gdb) 
+979           for (slot = nlocals - 1; sp < fp; sp++, slot--)
+(gdb) 
+1011          slot_map = find_slot_map (SCM_FRAME_RETURN_ADDRESS (fp),
+&cache);
+(gdb) 
+1006          sp = SCM_FRAME_PREVIOUS_SP (fp);
+(gdb) print fp
+$2 = (union scm_vm_stack_element *) 0x7f36183d5e38
+(gdb) print sp
+$3 = (union scm_vm_stack_element *) 0x7f36183d5e48
+(gdb) step
+1011          slot_map = find_slot_map (SCM_FRAME_RETURN_ADDRESS (fp),
+&cache);
+(gdb) 
+find_slot_map (cache=0x7f361fe85ab0, ip=0x1) at ../../libguile/vm.c:932
+932       size_t slot = (((scm_t_uintptr) ip) >> 2) %
+SLOT_MAP_CACHE_SIZE;
+(gdb) 
+935       if (cache->entries[slot].ip == ip)
+(gdb) 
+scm_i_vm_mark_stack (vp=0xbdca3120, mark_stack_ptr=0x7f361fe85ef0, 
+    mark_stack_limit=0x7f361fe95eb0) at ../../libguile/vm.c:1011
+1011          slot_map = find_slot_map (SCM_FRAME_RETURN_ADDRESS (fp),
+&cache);
+(gdb) 
+find_slot_map (cache=0x7f361fe85ab0, ip=0x1) at ../../libguile/vm.c:936
+936         map = cache->entries[slot].map;
+(gdb) 
+scm_i_vm_mark_stack (vp=0xbdca3120, mark_stack_ptr=0x7f361fe85ef0, 
+    mark_stack_limit=0x7f361fe95eb0) at ../../libguile/vm.c:975
+975            fp = SCM_FRAME_DYNAMIC_LINK (fp))
+(gdb) print fp
+$4 = (union scm_vm_stack_element *) 0x7f36183d5e38
+
+
+
+
 =======================
 total unique pairs
 1) no way to get all pairs...
-2) support not computed or stored..
-3) stored support not fetchable
+2) support not computed or stored.. DONE
+3) stored support not fetchable FIXED with report-API
+4) store left and right sizes DONE
+cache-all-pair-freqs returs totla
+
+* sep out bin-counting code into own file DONE

@@ -23,6 +23,7 @@
 ; Load the dataset that is analyzed throughout.
 (use-modules (opencog) (opencog persist) (opencog persist-sql))
 (use-modules (opencog nlp) (opencog nlp learn))
+(use-modules (opencog analysis))
 (sql-open "postgres:///en_pairs_sim?user=linas")
 
 (fetch-all-words)         ; 581 seconds from cold spinning media.
@@ -66,124 +67,6 @@
 (define (print-ts-rank-cset scrs port)
    (print-ts-rank-fn scrs port
 		(lambda (x) (cog-name (gar x)))))
-
-
-; ---------------------------------------------------------------------
-; ---------------------------------------------------------------------
-; ---------------------------------------------------------------------
-; Bin-counting utilities.
-;
-; This must be the 20th time I've implemented bin-counts in my life...
-;
-; ITEMS is a list of items to be binned.
-;
-; NBINS is the number of bins to use.
-;
-; item->value is a function that, given an item, returns the score for
-;      that item. This score is used to determine the bin number.
-;
-; item->count should be a function that, given an item, returns the
-;      count or strength for that item. It should return 1 for simple
-;      binning.
-;
-; LOWER is the left boundry of the left-most bin; all values less than
-;     this will go into the left-most bin.
-;
-; UPPER is the right boundry of the right-most bin; all values greater
-;     than this will go into the right-most bin.
-
-(define (bin-count ITEMS NBINS item->value item->count
-         LOWER UPPER)
-
-	(define bin-width (/ (- UPPER LOWER) NBINS))
-
-	; Given a value, find the corresponding bin number.
-	; min and max are 0 and NBINS-1
-	(define (value->bin val)
-		(define bino
-			(inexact->exact (floor (/ (- val LOWER) bin-width))))
-		(if (< 0 bino)
-			(if (> NBINS bino) bino (- NBINS 1))
-			0))
-
-	(define bins (make-array 0 NBINS))
-	(define centers (make-array 0 NBINS))
-
-	; Do the actual bin-counting
-	(for-each
-		(lambda (item)
-			(define bin (value->bin (car item)))
-			(array-set! bins
-				(+ (array-ref bins bin) (item->count item))
-				bin))
-		ITEMS)
-
-	; Store the centers of the bins
-	(array-index-map! centers
-		(lambda (i) (+ (* (+ i 0.5) bin-width) LOWER)))
-
-	(list centers bins)
-)
-
-; Find the smallest value in the list of ITEMS.
-; The item->value function returns the value, given the item.
-(define (min-value item->value ITEMS)
-	(fold
-		(lambda (item min)
-			(define value (item->value item))
-			(if (< min value) min value))
-		1e300
-		ITEMS))
-
-
-; Find the largest value in the list of ITEMS.
-; The item->value function returns the value, given the item.
-(define (max-value item->value ITEMS)
-	(fold
-		(lambda (item max)
-			(define value (item->value item))
-			(if (> max value) max value))
-		-1e300
-		ITEMS))
-
-; Just use the simplest binning
-(define* (bin-count-simple scored-items nbins #:optional
-	; default left andright bounds
-	(min-val (min-value first scored-items))
-	(max-val (max-value first scored-items)))
-
-	; Get the item score
-	(define (item->value item) (first item))
-
-	; Increment the bin-count by this much.
-	(define (item->count item) 1)
-
-	(bin-count scored-items nbins item->value item->count
-	    min-val max-val)
-)
-
-(define (bin-count-weighted scored-items nbins item->count)
-	; Get the item score
-	(define (item->value item) (first item))
-
-	; Default left and right bounds
-	(define min-val (min-value item->value scored-items))
-	(define max-val (max-value item->value scored-items))
-
-	(bin-count scored-items nbins item->value item->count
-	    min-val max-val)
-)
-
-
-(define (print-ts-bincounts cent-bins port)
-	(define centers (first cent-bins))
-	(define bins (second cent-bins))
-	(define binno 0)
-	(for-each
-		(lambda (bin-cnt)
-			(format port "~A	~A	~A\n" binno (array-ref centers binno) bin-cnt)
-			(set! binno (+ binno 1)))
-		(array->list bins)))
 
 ; ---------------------------------------------------------------------
 ; ---------------------------------------------------------------------
@@ -257,7 +140,7 @@
 (define binned-avg (bin-count-simple sorted-avg 100 1.0 6.0))
 
 (let ((outport (open-file "/tmp/binned-avg.dat" "w")))
-	(print-ts-bincounts binned-avg outport)
+	(print-bincounts-tsv binned-avg outport)
 	(close outport))
 
 ; ---------------------------------------------------------------------
@@ -303,7 +186,7 @@
 (define binned-sqlen-norm (bin-count-simple sorted-lensq-norm 100 0.0 10.0))
 
 (let ((outport (open-file "/tmp/binned-sqlen-norm.dat" "w")))
-	(print-ts-bincounts binned-sqlen-norm outport)
+	(print-bincounts-tsv binned-sqlen-norm outport)
 	(close outport))
 
 ; ---------------------------------------------------------------------
@@ -540,7 +423,7 @@
 (define binned-word-ent (bin-count-simple sorted-word-ent 100))
 
 (let ((outport (open-file "/tmp/binned-word-ent.dat" "w")))
-	(print-ts-bincounts binned-word-ent outport)
+	(print-bincounts-tsv binned-word-ent outport)
 	(close outport))
 
 ;--------------
@@ -555,7 +438,7 @@
 (define binned-word-logli (bin-count-simple sorted-word-logli 200 10.0 20.0))
 
 (let ((outport (open-file "/tmp/binned-word-logli.dat" "w")))
-	(print-ts-bincounts binned-word-logli outport)
+	(print-bincounts-tsv binned-word-logli outport)
 	(close outport))
 
 ; -------
@@ -569,7 +452,7 @@
 	(bin-count-simple sorted-word-counts 200 0.5 200.5))
 
 (let ((outport (open-file "/tmp/binned-word-counts.dat" "w")))
-	(print-ts-bincounts binned-word-counts outport)
+	(print-bincounts-tsv binned-word-counts outport)
 	(close outport))
 
 ;--------------
@@ -585,7 +468,7 @@
 (define binned-word-crazy (bin-count-simple sorted-word-crazy 100))
 
 (let ((outport (open-file "/tmp/binned-word-crazy.dat" "w")))
-	(print-ts-bincounts binned-word-crazy outport)
+	(print-bincounts-tsv binned-word-crazy outport)
 	(close outport))
 
 (define (cset-vec-word-crazy2 WORD)
@@ -596,7 +479,7 @@
 (define binned-word-crazy2 (bin-count-simple sorted-word-crazy2 100))
 
 (let ((outport (open-file "/tmp/binned-word-crazy2.dat" "w")))
-	(print-ts-bincounts binned-word-crazy2 outport)
+	(print-bincounts-tsv binned-word-crazy2 outport)
 	(close outport))
 
 ; ---------------------------------------------------------------------
@@ -616,7 +499,7 @@
 (define binned-cset-mi (bin-count-simple sorted-cset-mi 200))
 
 (let ((outport (open-file "/tmp/binned-cset-mi.dat" "w")))
-	(print-ts-bincounts binned-cset-mi outport)
+	(print-bincounts-tsv binned-cset-mi outport)
 	(close outport))
 
 (define (cset-freq CSET) (pfrq 'pair-freq CSET))
@@ -626,7 +509,7 @@
 		(lambda (scored-item) (cset-freq (cdr scored-item)))))
 
 (let ((outport (open-file "/tmp/weighted-cset-mi.dat" "w")))
-	(print-ts-bincounts weighted-cset-mi outport)
+	(print-bincounts-tsv weighted-cset-mi outport)
 	(close outport))
 
 (define (cset-logli CSET) (pfrq 'pair-logli CSET))
@@ -636,7 +519,7 @@
 		(lambda (scored-item) (cset-logli (cdr scored-item)))))
 
 (let ((outport (open-file "/tmp/wlogli-cset-mi.dat" "w")))
-	(print-ts-bincounts wlogli-cset-mi outport)
+	(print-bincounts-tsv wlogli-cset-mi outport)
 	(close outport))
 
 ; ---------------------------------------------------------------------
@@ -670,7 +553,7 @@
 (define osorted-word-mi (score-and-rank new-cset-vec-word-mi all-cset-words))
 
 (let ((outport (open-file "/tmp/binned-word-mi.dat" "w")))
-	(print-ts-bincounts binned-word-mi outport)
+	(print-bincounts-tsv binned-word-mi outport)
 	(close outport))
 
 ; ---------------------------------------------------------------------
@@ -684,7 +567,7 @@
 (define binned-dj-mi (bin-count-simple sorted-dj-mi 100))
 
 (let ((outport (open-file "/tmp/binned-dj-mi.dat" "w")))
-	(print-ts-bincounts binned-dj-mi outport)
+	(print-bincounts-tsv binned-dj-mi outport)
 	(close outport))
 
 ; ---------------------------------------------------------------------
@@ -737,7 +620,7 @@
 (define binned-sims (bin-count-simple sorted-sims 100))
 
 (let ((outport (open-file "/tmp/binned-sims.dat" "w")))
-	(print-ts-bincounts binned-sims outport)
+	(print-bincounts-tsv binned-sims outport)
 	(close outport))
 
 ; ---------------------------------------------------------------------
