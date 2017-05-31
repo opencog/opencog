@@ -124,6 +124,7 @@
 (define (batch-sim-pairs WORD-LIST CUTOFF)
 
 	(define len (length WORD-LIST))
+	(define tot (* 0.5 len len))
 	(define done 0)
 	(define prs 0)
 	(define start (current-time))
@@ -136,14 +137,16 @@
 				(set! done (+  done 1))
 				(if (eqv? 0 (modulo done 10))
 					(let* ((elapsed (- (current-time) start))
-							(tot (* done (- len done)))
-							(rate (* 0.001 (/ tot elapsed)))
+							(frt (* done (- len done)))
+							(rate (* 0.001 (/ frt elapsed)))
 							)
 						(format #t
-							 "Done ~A/~A Pairs: ~A/~A pct: ~4f Elapsed: ~A rate=~5f K prs/sec\n"
-							done len prs tot
-							(* 100.0 (/ prs tot))
-							elapsed rate
+							 "Done ~A/~A frac=~5f% Time: ~A Done: ~4f% rate=~5f K prs/sec\n"
+							done len
+							(* 100.0 (/ prs frt))
+							elapsed
+							(* 100.0 (/ frt tot))
+							rate
 						)))
 				(make-pairs (cdr WRD-LST)))))
 
@@ -168,7 +171,7 @@
 ; (fetch-all-words)
 ; (define pca (make-pseudo-cset-api))
 ; (pca 'fetch-pairs)
-; (define ac (get-all-cset-words)))
+; (define ac (get-all-cset-words))
 ; (length ac)
 ; 37413
 ; (define ad (get-all-disjuncts))

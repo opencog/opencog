@@ -22,12 +22,48 @@
 	(define n-sent (get-sentence-count))
 	(define n-parse (get-parse-count))
 
-	(if (eqv? 0 n-sent)
+	(if (eqv? 0.0 n-sent)
 		(throw 'no-sentences 'print-sentence-report
 			"Atomspace does not contain any SentenceNodes\n"))
 
 	(format #t "Sentences: ~A     Parses per sentence: ~6f\n"
 		n-sent (/ n-parse n-sent))
+
+	(format #t "Unique words: ~A\n" (length (get-all-words)))
+)
+
+; ---------------------------------------------------------------------
+
+(define-public (print-word-pair-report)
+"
+  print-word-pair-report - Summarize properties about wor-pairs.
+"
+	(define any-pairs-obj (make-any-link-api))
+	(define pca (add-pair-count-api any-pairs-obj))
+
+	(define nww (pca 'wild-wild-count))
+
+	; Fetch them, if needed.
+	(if (eqv? 0.0 nww)
+		(begin
+			; XXX FIXME work on the singletons API so that we don't
+			; need to fetch the words.
+			(display "Start loading words ...\n")
+			(call-only-once fetch-all-words)
+			(display "Done loading words\n")
+
+			(fetch-atom (any-pairs-obj 'wild-wild))
+			(set! nww (pca 'wild-wild-count))))
+
+	(if (eqv? 0.0 nww)
+		(throw 'no-word-pairs 'print-word-pair-report
+			"Atomspace does not contain any word pairs\n"))
+
+	(format #t "Word pair observations: ~A\n" nww)
+; todo:
+; num unique word pairs
+; total entropy
+; total MI
 )
 
 ; ---------------------------------------------------------------------

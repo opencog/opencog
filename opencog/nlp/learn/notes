@@ -6514,6 +6514,16 @@ Done. Wow. That was fast! did anything actually happen?
 
 select count(*) from atoms; <<< 27638783 = 27M
 
+get-all-words -- 188793  vs. tone: 139790
+all-cset-words -- 83131  vs tone 139790 ??
+disjuncts -- 1670883 vs tone 1860796
+
+wtf somethng broke....
+
+(define (filter-words-with-csets WORD-LIST)
+   (filter!  (lambda (wrd) (not (null? (get-cset-vec wrd)))) WORD-LIST))
+
+
 ---------- meanwhile, finish stats work
 (fetch-all-sims)
 
@@ -6532,9 +6542,10 @@ So: 1) cutoff for sim  2) cutoff for store.
 start 2.4G and run 0.3 sim
 again 0.1 sim...
 
-possible: 37413 * 37413 = 1399732569 = 1.4G pairs.
-estimate: 5% of these, so= 70M pairs!? Ouch. RAM eating. and insanely
-slow
+possible: (37413 * 37412)/2 = 699847578 = 700M pairs
+estimate: 6% of these, so= 42M pairs!? Ouch.  .. 50-60 GB RAM 
+    and insanely slow .. 700K secs = 200 hrs = 8 days
+running at 1K pairs/sec ouch.
 
 
 ---------- meanwhile, compute & cache similarity
@@ -6545,10 +6556,17 @@ Oh, gram-sim.
 
 -----------
 todo items:
-* sep out bin-counting
+* sep out bin-counting code into own file
 
 * trim low observation counts ....
 * implement sql delete function.
+
 ---------- debug hang:
 latest bdgw from git does not solve it.
 latest stable-2.2 guile does not solve it.
+
+=======================
+total unique pairs
+1) no way to get all pairs...
+2) support not computed or stored..
+3) stored support not fetchable
