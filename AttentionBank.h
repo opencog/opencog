@@ -159,6 +159,13 @@ public:
         return get_av(h)->getVLTI();
     }
 
+    AttentionValue::sti_t get_af_max_sti(void) const {
+        if(attentionalFocus.rbegin() != attentionalFocus.rend())
+            return (attentionalFocus.rbegin()->second)->getSTI();
+        else
+            return 0;
+    }
+
     /**
      * Change the attention value of an atom.
      */
@@ -311,7 +318,6 @@ public:
      * @see getNormalisedSTI()
      */
     double getNormalisedSTI(AttentionValuePtr) const;
-
     /**
      * Retrieve the linearly normalised Short-Term Importance between 0..1
      * for a given AttentionValue.
