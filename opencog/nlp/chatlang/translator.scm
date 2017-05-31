@@ -128,7 +128,7 @@
          (cond-list (cdar proc-terms))
          (term-seq (term-sequence-check (cdr proc-terms)))
          (action (process-action ACTION)))
-    (psi-rule
+    (psi-rule-nocheck
       (list (Satisfaction (VariableList var-list)
                           (And (append cond-list (list term-seq)))))
       action
