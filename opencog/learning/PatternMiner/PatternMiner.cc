@@ -885,6 +885,30 @@ bool PatternMiner::containIgnoredContent(Handle link )
 }
 
 
+bool PatternMiner::add_linktype_to_white_list(Type _type)
+{
+    if (isTypeInList(_type, linktype_white_list))
+        return false; // already in the ignore link list
+
+    linktype_white_list.push_back(_type);
+    return true;
+}
+
+bool PatternMiner::remove_linktype_from_white_list(Type _type)
+{
+    vector<Type>::iterator it;
+    for (it = linktype_white_list.begin(); it != linktype_white_list.end(); it ++)
+    {
+        if ((Type)(*it) == _type)
+        {
+           linktype_white_list.erase(it);
+           return true;
+        }
+    }
+
+    return false;
+}
+
 bool PatternMiner::add_Ignore_Link_Type(Type _type)
 {
     if (isIgnoredType(_type))

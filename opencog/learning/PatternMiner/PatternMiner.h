@@ -450,6 +450,16 @@ public:
     bool get_use_keyword_white_list(){return use_keyword_white_list;}
     void set_use_keyword_white_list(bool _use){use_keyword_white_list = _use;}
 
+    bool get_use_linktype_black_list(){return use_linktype_black_list;}
+    void set_use_linktype_black_list(bool _use){use_linktype_black_list = _use;}
+
+    bool get_use_linktype_white_list(){return use_linktype_white_list;}
+    void set_use_linktype_white_list(bool _use){use_linktype_white_list = _use;}
+
+    vector<Type> get_linktype_white_list(){return linktype_white_list;}
+    bool add_linktype_to_white_list(Type _type);
+    bool remove_linktype_from_white_list(Type _type);
+
     vector<Type> get_Ignore_Link_Types(){return linktype_black_list;}
     bool add_Ignore_Link_Type(Type _type);
     bool remove_Ignore_Link_Type(Type _type);
