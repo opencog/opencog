@@ -164,7 +164,11 @@ protected:
 
     QUERY_LOGIC keyword_white_list_logic;
 
-    vector<Type> ignoredLinkTypes;
+    bool use_linktype_black_list;
+    bool use_linktype_white_list;
+
+    vector<Type> linktype_black_list;
+    vector<Type> linktype_white_list;
 
     bool enable_Frequent_Pattern;
     bool enable_Interesting_Pattern;
@@ -222,6 +226,7 @@ protected:
     // Return unified ordered Handle vector
     HandleSeq UnifyPatternOrder(HandleSeq& inputPattern, unsigned int &unifiedLastLinkIndex);
 
+    void addAtomTypesFromString(string node_types_str, vector<Type> &typeListToAddTo);
 
     // this function is called by RebindVariableNames
     void findAndRenameVariablesForOneLink(Handle link, map<Handle,Handle>& varNameMap, HandleSeq& renameOutgoingLinks);
@@ -317,6 +322,8 @@ protected:
     Handle getFirstNonIgnoredIncomingLink(AtomSpace *atomspace, Handle &handle);
 
     bool isIgnoredType(Type type);
+
+    bool isTypeInList(Type type, vector<Type> &typeList);
 
     // if atomspace = 0, it will use the pattern mining Atomspace
     std::string Link2keyString(Handle& link, string indent = "", const AtomSpace *atomspace = 0);
@@ -443,7 +450,7 @@ public:
     bool get_use_keyword_white_list(){return use_keyword_white_list;}
     void set_use_keyword_white_list(bool _use){use_keyword_white_list = _use;}
 
-    vector<Type> get_Ignore_Link_Types(){return ignoredLinkTypes;}
+    vector<Type> get_Ignore_Link_Types(){return linktype_black_list;}
     bool add_Ignore_Link_Type(Type _type);
     bool remove_Ignore_Link_Type(Type _type);
 

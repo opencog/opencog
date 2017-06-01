@@ -816,7 +816,7 @@ bool PatternMiner::isInHandleSeqSeq(Handle handle, HandleSeqSeq &handleSeqs)
 
 bool PatternMiner::isIgnoredType(Type type)
 {
-    for (Type t : ignoredLinkTypes)
+    for (Type t : linktype_black_list)
     {
         if (t == type)
             return true;
@@ -824,6 +824,18 @@ bool PatternMiner::isIgnoredType(Type type)
 
     return false;
 }
+
+bool PatternMiner::isTypeInList(Type type, vector<Type> &typeList)
+{
+    for (Type t : typeList)
+    {
+        if (t == type)
+            return true;
+    }
+
+    return false;
+}
+
 
 bool PatternMiner::isIgnoredContent(string keyword)
 {
@@ -878,18 +890,18 @@ bool PatternMiner::add_Ignore_Link_Type(Type _type)
     if (isIgnoredType(_type))
         return false; // already in the ignore link list
 
-    ignoredLinkTypes.push_back(_type);
+    linktype_black_list.push_back(_type);
     return true;
 }
 
 bool PatternMiner::remove_Ignore_Link_Type(Type _type)
 {
     vector<Type>::iterator it;
-    for (it = ignoredLinkTypes.begin(); it != ignoredLinkTypes.end(); it ++)
+    for (it = linktype_black_list.begin(); it != linktype_black_list.end(); it ++)
     {
         if ((Type)(*it) == _type)
         {
-           ignoredLinkTypes.erase(it);
+           linktype_black_list.erase(it);
            return true;
         }
     }
@@ -2505,6 +2517,25 @@ PatternMiner::~PatternMiner()
     cleanUpPatternMiner();
 }
 
+void PatternMiner::addAtomTypesFromString(string node_types_str, vector<Type>& typeListToAddTo)
+{
+
+    node_types_str.erase(std::remove(node_types_str.begin(), node_types_str.end(), ' '), node_types_str.end());
+    vector<string> typeStrs;
+    boost::split(typeStrs, node_types_str, boost::is_any_of(","));
+
+    for (string typestr : typeStrs)
+    {
+        Type atomType = classserver().getType(typestr);
+        if (atomType == NOTYPE)
+        {
+            cout << "\nCannot find Node Type: " << typestr << " in config file.\n";
+            continue;
+        }
+        typeListToAddTo.push_back(atomType);
+    }
+}
+
 // make sure it is called after reSetAllSettingsFromConfig
 void PatternMiner::initPatternMiner()
 {
@@ -2525,10 +2556,6 @@ void PatternMiner::initPatternMiner()
 //    if (threads)
 //        delete threads;
 
-    ignoredLinkTypes.clear();
-
-    ignoredLinkTypes.clear();
-    ignoredLinkTypes.push_back(LIST_LINK);
 
     // vector < vector<HTreeNode*> > patternsForGram
     for (unsigned int i = 0; i < MAX_GRAM; ++i)
@@ -2572,8 +2599,6 @@ void PatternMiner::reSetAllSettingsFromConfig()
 
     keyword_black_logic_is_contain = config().get_bool("keyword_black_logic_is_contain");
 
-    // assert( ! (use_keyword_black_list & use_keyword_white_list) );
-
     string keyword_black_list_str  = config().get("keyword_black_list");
     keyword_black_list_str .erase(std::remove(keyword_black_list_str .begin(), keyword_black_list_str .end(), ' '), keyword_black_list_str .end());
     boost::split(keyword_black_list, keyword_black_list_str , boost::is_any_of(","));
@@ -2590,6 +2615,21 @@ void PatternMiner::reSetAllSettingsFromConfig()
     else
         keyword_white_list_logic = QUERY_LOGIC::OR;
 
+
+    use_linktype_black_list = config().get_bool("use_linktype_black_list");
+    use_linktype_white_list = config().get_bool("use_linktype_white_list");
+
+    // use_linktype_black_list and use_linktype_white_list should not both be true
+    assert((! use_linktype_black_list) || (! use_linktype_white_list));
+
+    linktype_black_list.clear();
+    string linktype_black_list_str = config().get("linktype_black_list");
+    addAtomTypesFromString(linktype_black_list_str, linktype_black_list);
+
+    linktype_white_list.clear();
+    string linktype_white_list_str = config().get("linktype_white_list");
+    addAtomTypesFromString(linktype_white_list_str, linktype_white_list);
+
     enable_filter_leaves_should_not_be_vars = config().get_bool("enable_filter_leaves_should_not_be_vars");
     enable_filter_links_should_connect_by_vars = config().get_bool("enable_filter_links_should_connect_by_vars");
     enable_filter_node_types_should_not_be_vars =  config().get_bool("enable_filter_node_types_should_not_be_vars");
@@ -2601,40 +2641,12 @@ void PatternMiner::reSetAllSettingsFromConfig()
 
     node_types_should_not_be_vars.clear();
     string node_types_str = config().get("node_types_should_not_be_vars");
-    node_types_str.erase(std::remove(node_types_str.begin(), node_types_str.end(), ' '), node_types_str.end());
-    vector<string> typeStrs;
-    boost::split(typeStrs, node_types_str, boost::is_any_of(","));
-
-    for (string typestr : typeStrs)
-    {
-        Type atomType = classserver().getType(typestr);
-        if (atomType == NOTYPE)
-        {
-            cout << "\nCannot find Node Type: " << typestr << " in config file for node_types_should_not_be_vars.\n";
-            continue;
-        }
-        node_types_should_not_be_vars.push_back(atomType);
-    }
-
+    addAtomTypesFromString(node_types_str, node_types_should_not_be_vars);
 
 
     same_link_types_not_share_second_outgoing.clear();
     string link_types_str = config().get("same_link_types_not_share_second_outgoing");
-    link_types_str.erase(std::remove(link_types_str.begin(), link_types_str.end(), ' '), link_types_str.end());
-
-    typeStrs.clear();
-    boost::split(typeStrs, link_types_str, boost::is_any_of(","));
-
-    for (string typestr : typeStrs)
-    {
-        Type atomType = classserver().getType(typestr);
-        if (atomType == NOTYPE)
-        {
-            cout << "\nCannot find Link Type: " << typestr << " in config file for same_link_types_not_share_second_outgoing.\n";
-            continue;
-        }
-        same_link_types_not_share_second_outgoing.push_back(atomType);
-    }
+    addAtomTypesFromString(link_types_str, same_link_types_not_share_second_outgoing);
 
     only_mine_patterns_start_from_white_list = config().get_bool("only_mine_patterns_start_from_white_list");
     only_mine_patterns_start_from_white_list_contain = config().get_bool("only_mine_patterns_start_from_white_list_contain");
@@ -2669,7 +2681,7 @@ void PatternMiner::cleanUpPatternMiner()
 //    if (threads)
 //        delete threads;
 
-    ignoredLinkTypes.clear();
+    linktype_black_list.clear();
 
     for( std::pair<string, HTreeNode*> OnePattern : keyStrToHTreeNodeMap)
     {
@@ -2801,7 +2813,26 @@ void PatternMiner::runPatternMiner(bool exit_program_after_finish)
             }
         }
 
-        cout << "\nFinding all Links contains these keywords...\n";
+        if (use_linktype_black_list)
+        {
+            cout << "\nuse_linktype_black_list is also enable, so avoid links of these types:\n ";
+
+            for (Type linkTpe : linktype_black_list)
+            {
+                std::cout << classserver().getTypeName(linkTpe) << std::endl;
+            }
+        }
+        else if (use_linktype_white_list)
+        {
+            cout << "\nuse_linktype_white_list is also enable, so only find links of these types:\n ";
+
+            for (Type linkTpe : linktype_white_list)
+            {
+                std::cout << classserver().getTypeName(linkTpe) << std::endl;
+            }
+        }
+
+        cout << "\n\nFinding Links...\n";
 
 
         findAllLinksContainKeyWords(keyword_white_list, 0, only_mine_patterns_start_from_white_list_contain, havenotProcessedWhiteKeywordLinks);
@@ -3631,12 +3662,31 @@ OrderedHandleSet PatternMiner::_getAllNonIgnoredLinksForGivenNode(Handle keyword
         Handle newh = incomingHandle;
 
         // if this atom is a igonred type, get its first parent that is not in the igonred types
-        if (isIgnoredType (incomingHandle->getType()) )
+        if (use_linktype_black_list && isIgnoredType (newh->getType()) )
         {
-            newh = getFirstNonIgnoredIncomingLink(originalAtomSpace, incomingHandle);
+            newh = getFirstNonIgnoredIncomingLink(originalAtomSpace, newh);
 
-            if ((newh == Handle::UNDEFINED) || containIgnoredContent(newh ))
+            if ((newh == Handle::UNDEFINED))
                 continue;
+        }
+        else if (use_linktype_white_list && (! isTypeInList(newh->getType(), linktype_white_list)))
+        {
+            continue;
+        }
+
+        if (use_keyword_black_list)
+        {
+            // if the content in this link contains content in the black list,ignore it
+            if (keyword_black_logic_is_contain)
+            {
+                if (containIgnoredContent(newh))
+                    continue;
+            }
+            else
+            {
+                if (doesLinkContainNodesInKeyWordNodes(newh, black_keyword_Handles))
+                    continue;
+            }
         }
 
         if (allSubsetLinks.find(newh) == allSubsetLinks.end())
@@ -3702,13 +3752,18 @@ void PatternMiner::findAllLinksContainKeyWords(vector<string>& subsetKeywords, u
             Handle newh = link;
 
             // if this atom is a igonred type, get its first parent that is not in the igonred types
-            if (isIgnoredType (link->getType()) )
+            if (use_linktype_black_list && isIgnoredType (link->getType()) )
             {
                 newh = getFirstNonIgnoredIncomingLink(originalAtomSpace, link);
 
                 if ((newh == Handle::UNDEFINED))
                     continue;
             }
+            else if (use_linktype_white_list && (! isTypeInList(link->getType(), linktype_white_list)))
+            {
+                continue;
+            }
+
 
             if (use_keyword_black_list)
             {

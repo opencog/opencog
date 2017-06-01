@@ -195,12 +195,14 @@ void PatternMiner::growPatternsDepthFirstTask(unsigned int thread_index)
 
         if (! only_mine_patterns_start_from_white_list)
         {
-            // if this link is ingonre type, ignore it
-            if (isIgnoredType( cur_link->getType()))
+            if (use_linktype_black_list && isIgnoredType (cur_link->getType()) )
             {
                 continue;
             }
-
+            else if (use_linktype_white_list && (! isTypeInList(cur_link->getType(), linktype_white_list)))
+            {
+                continue;
+            }
 
             if (use_keyword_black_list)
             {
@@ -864,15 +866,19 @@ void PatternMiner::extendAPatternForOneMoreGramRecursively(const Handle &extende
                     {
                         Handle incomingHandle = incomeingPtr->getHandle();
                         Handle extendedHandle;
-                        // if this atom is of igonred type, get its first ancestor that is not in the igonred types
-                        if (isIgnoredType (incomingHandle->getType()) )
+
+                        if (use_linktype_black_list && isIgnoredType (incomingHandle->getType()) )
                         {
-                            extendedHandle = getFirstNonIgnoredIncomingLink(_fromAtomSpace, incomingHandle);
-                            if (extendedHandle == Handle::UNDEFINED)
+                            // if this atom is of igonred type, get its first ancestor that is not in the igonred types
+                            extendedHandle = getFirstNonIgnoredIncomingLink(originalAtomSpace, extendedHandle);
+
+                            if ((extendedHandle == Handle::UNDEFINED))
                                 continue;
                         }
-                        else
-                            extendedHandle = incomingHandle;
+                        else if (use_linktype_white_list && (! isTypeInList(incomingHandle->getType(), linktype_white_list)))
+                        {
+                            continue;
+                        }
 
                         if (keyword_black_logic_is_contain)
                         {
