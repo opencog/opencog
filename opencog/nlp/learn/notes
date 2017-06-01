@@ -5225,12 +5225,19 @@ Done computing 396262 right-wilds in 26 secs  now 4 secs
 Done storing 396262 right-wilds in 549 secs  <<< now  28 !! wtf ??? .. 47
 Done computing -log P(w,*) and <-->
 Going to do individual word-pair MI
-Done computing 446204 pair MI's in 88 secs
+Done computing 446204 pair MI's in 88 secs << 70 secs
 Stored 100000 of 446204 pairs in 268 secs (373.13432835820896 pairs/sec)
 Stored 200000 of 446204 pairs in 238 secs (420.16806722689074 pairs/sec)
 Stored 300000 of 446204 pairs in 286 secs (349.65034965034965 pairs/sec)
 Stored 400000 of 446204 pairs in 303 secs (330.03300330033005 pairs/sec)
-Done storing 446204 pair MI's in 1215 secs ... 1345
+Done storing 446204 pair MI's in 1215 secs ... 1345 (spin media)
+    << 201 secs SSD
+Going to do column and row subtotals
+Finished left entropy subtotals in 46 secs
+Finished right entropy subtotals in 20 secs
+Finished left MI subtotals in 40 secs
+Finished right MI subtotals in 12 secs
+
 Finished with MI computations
 
 
@@ -6650,6 +6657,9 @@ Try guile-2.2  v2.2.0 Wed Mar 15 09:02:52 2017
 Try guile-2.1.8  v2.1.8 Fri Mar 10 11:01:04 2017 tried it - spins. its broke
    (breaks after about 300 cpu-min)
 
+OK guile-2.0.11 on xenial crashes almost immediately with
+guile: hashtab.c:137: vacuum_weak_hash_table: Assertion `removed <= len' failed.
+
 
 
 =======================
@@ -6708,6 +6718,7 @@ because not computeed ... why?
 Going to do MI column and row subtotals
 should be 'cache-all-subtotals
 Going to compute the left, right and total entropy
+
 
 
 

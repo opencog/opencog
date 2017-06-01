@@ -167,6 +167,7 @@
 		; Methods on the object
 		(lambda (message . args)
 			(apply (case message
+					((name) "Link Grammar ANY link Word Pairs")
 					((left-type) get-left-type)
 					((right-type) get-right-type)
 					((pair-type) get-pair-type)
@@ -263,6 +264,7 @@
 		; Methods on the object
 		(lambda (message . args)
 			(apply (case message
+					((name) "Sentence Clique Word Pairs")
 					((left-type) get-left-type)
 					((right-type) get-right-type)
 					((pair-type) get-pair-type)
@@ -381,6 +383,7 @@
 		; Methods on the object
 		(lambda (message . args)
 			(apply (case message
+					((name) "Sentence Clique Distance-Limited Word Pairs")
 					((left-type) get-left-type)
 					((right-type) get-right-type)
 					((pair-type) get-pair-type)

@@ -134,6 +134,7 @@
 		; Methods on the object
 		(lambda (message . args)
 			(apply (case message
+				((name) "Word-Disjunct Pairs (aka Connector Sets)")
 				((left-type) get-left-type)
 				((right-type) get-right-type)
 				((pair-type) get-pair-type)
