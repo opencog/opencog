@@ -157,7 +157,6 @@
 (define pseudo-cset-api (make-pseudo-cset-api))
 (define pseudo-cset-count-api (add-pair-count-api pseudo-cset-api))
 (define pseudo-cset-freq-api (add-pair-freq-api pseudo-cset-api))
-(define pseudo-cset-mi-api (add-pair-mi-compute pseudo-cset-api))
 (define pseudo-cset-support-api (add-pair-support-compute pseudo-cset-api))
 (define pseudo-cset-cosine-api (add-pair-cosine-compute pseudo-cset-api))
 (define pseudo-cset-stars (add-pair-stars pseudo-cset-api))
@@ -380,7 +379,7 @@
   The returned entropy is in bits, i.e. computed with log_2.
 
 "
-  (pseudo-cset-mi-api 'compute-right-entropy WORD)
+  (pseudo-cset-freq-api 'right-wild-entropy WORD)
 )
 
 (define (cset-vec-word-mi WORD)
@@ -394,7 +393,7 @@
 
    Note this function returns MI in units of bits. i.e. log_2
 "
-	(pseudo-cset-mi-api 'compute-right-fmi WORD)
+	(pseudo-cset-freq-api 'right-wild-fmi WORD)
 )
 
 ; ---------------------------------------------------------------------

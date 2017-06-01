@@ -6543,9 +6543,9 @@ start 2.4G and run 0.3 sim
 again 0.1 sim...
 
 possible: (37413 * 37412)/2 = 699847578 = 700M pairs
-estimate: 6% of these, so= 42M pairs!? Ouch.  .. 50-60 GB RAM 
-    and insanely slow .. 700K secs = 200 hrs = 8 days
-running at 1K pairs/sec ouch.
+estimate: 6.5% of these, so= 45M pairs!? Ouch.  .. 50-60 GB RAM 
+    and insanely slow .. 466K secs = 130 hrs = 5.4 days
+running at 1.5K pairs/sec ouch.
 
 
 ---------- meanwhile, compute & cache similarity
@@ -6641,6 +6641,9 @@ scm_i_vm_mark_stack (vp=0xbdca3120, mark_stack_ptr=0x7f361fe85ef0,
 (gdb) print fp
 $4 = (union scm_vm_stack_element *) 0x7f36183d5e38
 
+git tag -l
+Try guile-2.2  v2.2.0 Wed Mar 15 09:02:52 2017
+Try guile-2.1.8  v2.1.8 Fri Mar 10 11:01:04 2017 
 
 
 
@@ -6650,6 +6653,17 @@ total unique pairs
 2) support not computed or stored.. DONE
 3) stored support not fetchable FIXED with report-API
 4) store left and right sizes DONE
-cache-all-pair-freqs returs totla
+cache-all-pair-freqs returs total 
 
 * sep out bin-counting code into own file DONE
+add-subtotal-mi-compute DONE
+
+call-only-once in sing
+fetch-all-words in sing
+add-pair-freq-api in mst
+
+(use-modules (opencog) (opencog persist) (opencog persist-sql))
+(use-modules (opencog nlp) (opencog nlp learn))
+(sql-open "postgres:///en_pairs_sim?user=linas")
+(sql-load)
+(sql-stats)
