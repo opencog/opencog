@@ -131,6 +131,82 @@ public:
         return result;
     }
 
+    string get_linktype_white_list()
+    {
+        string result =  "linktype_white_list:";
+        vector<Type> white_list = patternMiner->get_linktype_white_list();
+        for (Type type : white_list)
+            result +=  " " + classserver().getTypeName(type);
+
+        return result;
+    }
+
+
+    string get_use_linktype_white_list()
+    {
+        bool enable = patternMiner->get_use_linktype_white_list();
+
+        if (enable)
+            return "use_linktype_white_list: true";
+        else
+            return "use_linktype_white_list: false";
+    }
+
+    string set_use_linktype_white_list(bool _use)
+    {
+        patternMiner->set_use_linktype_white_list(_use);
+        return get_use_linktype_white_list();
+    }
+
+    string get_use_linktype_black_list()
+    {
+        bool enable = patternMiner->get_use_linktype_black_list();
+
+        if (enable)
+            return "use_linktype_black_list: true";
+        else
+            return "use_linktype_black_list: false";
+    }
+
+    string set_use_linktype_black_list(bool _use)
+    {
+        patternMiner->set_use_linktype_black_list(_use);
+        return get_use_linktype_black_list();
+    }
+
+    string add_Link_Type_to_white_list(const string& _typeStr)
+    {
+        Type atomType = classserver().getType(_typeStr);
+        if (atomType == NOTYPE)
+            return "Error: Input type doesn't exist!";
+
+        string result = "";
+
+        if (patternMiner->add_linktype_to_white_list(atomType))
+            result += "Added!\n";
+        else
+            result += "Input type already exists in the linktype white list!\n";
+
+        return result + get_linktype_white_list();
+
+    }
+
+    string remove_Link_Type_from_white_list(const string& _typeStr)
+    {
+        Type atomType = classserver().getType(_typeStr);
+        if (atomType == NOTYPE)
+            return "Error: Input type doesn't exist!";
+
+        string result = "";
+        if (patternMiner->remove_linktype_from_white_list(atomType))
+            result += "Removed!\n";
+        else
+            result += "Input type does not exist in the linktype white list!\n";
+
+        return result + get_linktype_white_list();
+
+    }
+
     string add_Ignore_Link_Type(const string& _typeStr)
     {
         Type atomType = classserver().getType(_typeStr);
@@ -420,6 +496,9 @@ public:
         result += get_Pattern_Max_Gram() + "\n";
         result += get_Enable_Interesting_Pattern() + "\n";
         result += get_Frequency_threshold() + "\n";
+        result += get_use_linktype_black_list() + "\n";
+        result += get_use_linktype_white_list() + "\n";
+        result += get_linktype_white_list() + "\n";
         result += get_Ignore_Link_Types() + "\n";
         result += get_use_keyword_black_list() + "\n";
         result += get_use_keyword_white_list() + "\n";
@@ -610,8 +689,17 @@ void PatternMinerSCM::init()
     define_scheme_primitive("pm-set-enable-interesting-pattern", &PatternMinerSCM::set_Enable_Interesting_Pattern, this, "patternminer");
     define_scheme_primitive("pm-get-frequency-threshold", &PatternMinerSCM::get_Frequency_threshold, this, "patternminer");
     define_scheme_primitive("pm-set-frequency-threshold", &PatternMinerSCM::set_Frequency_threshold, this, "patternminer");
+
+    define_scheme_primitive("pm-get-use-linktype-black-list", &PatternMinerSCM::get_use_linktype_black_list, this, "patternminer");
+    define_scheme_primitive("pm-set-use-linktype-black-list", &PatternMinerSCM::get_use_linktype_black_list, this, "patternminer");
     define_scheme_primitive("pm-get-ignore-link-types", &PatternMinerSCM::get_Ignore_Link_Types, this, "patternminer");
     define_scheme_primitive("pm-add-ignore-link-type", &PatternMinerSCM::add_Ignore_Link_Type, this, "patternminer");
+
+
+    define_scheme_primitive("pm-get-use-linktype-white-list", &PatternMinerSCM::get_use_linktype_white_list, this, "patternminer");
+    define_scheme_primitive("pm-set-use-linktype-white-list", &PatternMinerSCM::get_use_linktype_white_list, this, "patternminer");
+    define_scheme_primitive("pm-get-linktype-white-list", &PatternMinerSCM::get_linktype_white_list, this, "patternminer");
+    define_scheme_primitive("pm-add-Link-Type-to-white-list", &PatternMinerSCM::add_Link_Type_to_white_list, this, "patternminer");
 
 
     define_scheme_primitive("pm-get-enable-filter-node-types-should-not-be-vars",
