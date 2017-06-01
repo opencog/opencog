@@ -39,7 +39,6 @@ DECLARE_MODULE(BuiltinRequestsModule)
 BuiltinRequestsModule::BuiltinRequestsModule(CogServer& cs) : Module(cs)
 {
     _cogserver.registerRequest(ListRequest::info().id,         &listFactory);
-    _cogserver.registerRequest(SleepRequest::info().id,        &sleepFactory);
     _cogserver.registerRequest(ShutdownRequest::info().id,     &shutdownFactory);
     _cogserver.registerRequest(LoadModuleRequest::info().id,   &loadmoduleFactory);
     _cogserver.registerRequest(UnloadModuleRequest::info().id, &unloadmoduleFactory);
@@ -50,7 +49,6 @@ BuiltinRequestsModule::BuiltinRequestsModule(CogServer& cs) : Module(cs)
 BuiltinRequestsModule::~BuiltinRequestsModule()
 {
     _cogserver.unregisterRequest(ListRequest::info().id);
-    _cogserver.unregisterRequest(SleepRequest::info().id);
     _cogserver.unregisterRequest(ShutdownRequest::info().id);
     _cogserver.unregisterRequest(LoadModuleRequest::info().id);
     _cogserver.unregisterRequest(UnloadModuleRequest::info().id);

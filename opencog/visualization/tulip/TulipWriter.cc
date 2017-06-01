@@ -44,10 +44,10 @@ void TulipWriter::writeNodes()
     // Output Node numbers/ids
     myfile << "(nodes ";
     for (Handle h : nodeHandles) {
-        myfile << h << " ";
+	    myfile << h.value() << " ";
     }
     for (Handle h : linkHandles) {
-        myfile << h << " ";
+	    myfile << h.value() << " ";
     }
     myfile << ")" << endl;
 
@@ -82,7 +82,7 @@ void TulipWriter::writeCluster(Handle setLink)
     myfile << "(cluster 1 \"In Set\"" << endl;
     myfile << " (nodes ";
     for (Handle h : inSet) {
-        myfile << h << " ";
+	    myfile << h.value() << " ";
     }
     myfile << ")\n)" << endl;
 
@@ -91,7 +91,7 @@ void TulipWriter::writeCluster(Handle setLink)
     myfile << " (nodes ";
     for (Handle h : nodeHandles) {
         OrderedHandleSet::iterator si = inSet.find(h);
-        if (si == inSet.end()) myfile << h << " ";
+        if (si == inSet.end()) myfile << h.value() << " ";
     }
     for (Handle h : linkHandles) {
         inSet.find(h);

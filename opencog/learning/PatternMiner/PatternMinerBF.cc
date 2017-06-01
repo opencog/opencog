@@ -438,12 +438,12 @@ void PatternMiner::ConstructTheFirstGramPatternsBF()
     std::sort((patternsForGram[0]).begin(), (patternsForGram[0]).end(),compareHTreeNodeByFrequency );
 
     int end_time = time(NULL);
-    OutPutFrequentPatternsToFile(1);
+    OutPutFrequentPatternsToFile(1, patternsForGram);
 
     std::cout<<"Debug: PatternMiner: done (gram = 1) pattern mining! " + toString((patternsForGram[0]).size()) + " patterns found! " << std::endl;
     printf(" Total time: %d seconds. \n", end_time - start_time);
 
-    OutPutFrequentPatternsToFile(cur_gram);
+    OutPutFrequentPatternsToFile(cur_gram, patternsForGram);
 
     HandleSeq allDumpNodes, allDumpLinks;
     atomSpace->get_handles_by_type(back_inserter(allDumpNodes), (Type) NODE, true );
@@ -499,7 +499,7 @@ void PatternMiner::GrowAllPatternsBF()
             // Finished mining cur_gram patterns; output to file
             std::cout<<"Debug: PatternMiner:  done (gram = " + toString(cur_gram) + ") frequent pattern mining!" + toString((patternsForGram[cur_gram-1]).size()) + " patterns found! " << std::endl;
 
-            OutPutFrequentPatternsToFile(cur_gram);
+            OutPutFrequentPatternsToFile(cur_gram, patternsForGram);
         }
 
 
@@ -508,7 +508,7 @@ void PatternMiner::GrowAllPatternsBF()
             cout << "\nCalculating interestingness for " << cur_gram << "gram patterns";
             // evaluate the interestingness
             // Only effective when Enable_Interesting_Pattern is true. The options are "Interaction_Information", "surprisingness"
-            if (interestingness_Evaluation_method == "Interaction_Information")
+            if (Enable_Interaction_Information)
             {
                 cout << "by evaluating Interaction_Information ...\n";
                // calculate interaction information
@@ -520,7 +520,8 @@ void PatternMiner::GrowAllPatternsBF()
                // sort by interaction information
                std::sort((patternsForGram[cur_gram-1]).begin(), (patternsForGram[cur_gram-1]).end(),compareHTreeNodeByInteractionInformation);
             }
-            else if (interestingness_Evaluation_method == "surprisingness")
+
+            if (Enable_surprisingness)
             {
                 cout << "by evaluating surprisingness ...\n";
                 // calculate surprisingness

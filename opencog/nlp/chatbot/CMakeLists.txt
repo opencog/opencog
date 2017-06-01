@@ -1,17 +1,6 @@
-ADD_GUILE_MODULE (chatbot.scm
+ADD_GUILE_MODULE (FILES
+	chatbot.scm
 	chat-utils.scm
 	bot-api.scm
+	MODULE_DESTINATION "${DATADIR}/scm/opencog/nlp/chatbot"
 )
-
-INSTALL (FILES
-    basic_sentiment_analysis.py
-    DESTINATION "${DATADIR}/python/")
-
-INSTALL (FILES
-    dicts/positive.yml
-    dicts/negative.yml
-    dicts/inc.yml
-    dicts/dec.yml
-    dicts/inv.yml
-    dicts/sentiWordNet.txt
-    DESTINATION "/usr/local/etc/opencog/dicts")

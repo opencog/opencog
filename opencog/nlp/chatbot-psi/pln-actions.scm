@@ -147,4 +147,7 @@
         (cog-logger-info "[PLN-Action] Finishing (do-pln-qa)")
         (State pln-qa process-finished)
     )
+
+    ; Return for the GroundedSchemaNode
+    (Set)
 )

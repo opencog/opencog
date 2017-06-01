@@ -127,7 +127,7 @@
             (map
                 (lambda (w)
                     (if (equal? (cog-type w) 'WordInstanceNode)
-                        (word-inst-get-word-str w)
+                        (cog-name (word-inst-get-word w))
                         (cog-name w)
                     )
                 )
@@ -153,10 +153,8 @@
                             (if (equal? (cog-type n) 'PredicateNode)
                                 (map
                                     (lambda (p)
-                                        (if (> (length (word-inst-get-word p)) 0)
-                                            ; TODO: There could be too many... skip if seen before?
-                                            (lg-get-dict-entry (WordNode (word-inst-get-word-str p)))
-                                        )
+                                        ; TODO: There could be too many... skip if seen before?
+                                        (lg-get-dict-entry (word-inst-get-word p))
                                     )
                                     (cog-chase-link 'LemmaLink 'WordInstanceNode (r2l-get-word n))
                                 )
@@ -164,7 +162,7 @@
                             (r2l-get-word n)
                         )
                     )
-                    (car (word-inst-get-word (r2l-get-word-inst n)))
+                    (word-inst-get-word (r2l-get-word-inst n))
                 )
             )
             (cog-get-all-nodes a-set-link)
@@ -201,7 +199,9 @@
     ;; (cog-logger-info "create-sentence interpret-node-lst = ~a"
     ;;                  interpret-node-lst)
 
-    (string-join (cdr (map word-inst-get-word-str (parse-get-words-in-order parse))))
+    (string-join (cdr (map
+        (lambda (winst) (cog-name (word-inst-get-word winst)))
+        (parse-get-words-in-order parse))))
 )
 
 

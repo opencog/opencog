@@ -1,0 +1,25 @@
+(use-modules (opencog)
+             (opencog nlp)
+             (opencog nlp chatlang)
+             (opencog openpsi))
+
+(define w (cons 'word "drink"))
+(define l (cons 'lemma "eat"))
+(define p (cons 'phrase "John Smith"))
+(define c (cons 'concept "play"))
+(define unordered (unordered-matching (list w l p c)))
+
+(define test-unordered-result
+    (equal? 5 (length
+        (filter (lambda (x)
+            (and (or (eq? (cog-type x) 'ReferenceLink)
+                     (eq? (cog-type x) 'LemmaLink)
+                     (eq? (cog-type x) 'EvaluationLink))
+                 (or (equal? (gdr x) (WordNode "drink"))
+                     (equal? (gdr x) (WordNode "eat"))
+                     (equal? (gdr x) (WordNode "John"))
+                     (equal? (gdr x) (WordNode "Smith"))
+                     (and (equal? (gar x)
+                                  (GroundedPredicateNode "scm: chatlang-concept?"))
+                          (equal? (gdr (gdr x)) (ConceptNode "play"))))))
+        (cdr unordered)))))

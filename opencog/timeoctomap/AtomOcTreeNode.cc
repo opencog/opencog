@@ -19,6 +19,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <bitset>
+
 #include "AtomOcTreeNode.h"
 #include "opencog/util/oc_assert.h"
 
@@ -73,7 +75,9 @@ bool
 AtomOcTreeNode::pruneNode()
 {
     // checks for equal occupancy only, dat ignored
+#ifdef NEED_OBSOLETE_OCTREE_API
     if (!this->collapsible()) return false;
+#endif
     // set occupancy value
     setLogOdds(getChild(0)->getLogOdds());
     // set dat to average dat
@@ -94,7 +98,9 @@ AtomOcTreeNode::expandNode()
     OC_ASSERT(!this->hasChildren());
     for (unsigned int k = 0; k < 8; k++) {
         this->createChild(k);
+#ifdef NEED_OBSOLETE_OCTREE_API
         this->children[k]->setValue(value);
+#endif
         this->getChild(k)->setData(dat);
     }
 }

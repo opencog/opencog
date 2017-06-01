@@ -36,8 +36,8 @@
 )
 
 ;; Define pln-fc and pln-bc for convenience 
-(define (pln-fc source) (cog-fc source pln-rbs (SetLink)))
-(define (pln-bc target) (cog-bc target pln-rbs (SetLink)))
+(define (pln-fc source) (cog-fc pln-rbs source (List) (Set)))
+(define (pln-bc target) (cog-bc pln-rbs target (List) (Set)))
 
 ;;;;;;;;;;;;;;;;
 ;; Load rules ;;
@@ -49,16 +49,16 @@
 (add-to-load-path "../../../opencog/pln/rules/")
 
 (define rule-filenames
-  (list "implication-instantiation-rule.scm"
-        "implication-scope-to-implication-rule.scm"
-        "and-lambda-distribution-rule.scm"
-        "lambda-closed-evaluation-rule.scm"
-        "implication-construction-rule.scm"
-        "implication-implicant-distribution-rule.scm"
-        "implication-and-lambda-factorization-rule.scm"
-        "deduction-rule.scm"
-        "equivalence-to-implication-rule.scm"
-        "implication-implicant-disjunction-rule.scm"
+  (list "wip/implication-instantiation-rule.scm"
+        "wip/implication-scope-to-implication-rule.scm"
+        "wip/and-lambda-distribution-rule.scm"
+        "wip/closed-lambda-evaluation-rule.scm"
+        "wip/implication-introduction-rule.scm"
+        "wip/implication-implicant-distribution-rule.scm"
+        "wip/implication-and-lambda-factorization-rule.scm"
+        "term-logic/deduction-rule.scm"
+        "wip/equivalence-to-implication-rule.scm"
+        "wip/implication-implicant-disjunction-rule.scm"
         )
   )
 (for-each load-from-path rule-filenames)
@@ -72,8 +72,8 @@
   (list (list implication-partial-instantiation-rule-name 1)
         (list implication-scope-to-implication-rule-name 1)
         (list and-lambda-distribution-rule-name 1)
-        (list lambda-closed-evaluation-rule-name 1)
-        (list implication-construction-rule-name 1)
+        (list closed-lambda-evaluation-rule-name 1)
+        (list implication-introduction-rule-name 1)
         (list implication-implicant-distribution-rule-name 1)
         (list implication-and-lambda-factorization-rule-name 1)
         (list deduction-implication-rule-name 1)

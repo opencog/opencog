@@ -160,7 +160,7 @@ Start the MindAgent with ```agents-start socrates_agent.SocratesAgent```.
 ```
 (MemberLink (stv 1.000000 1.000000)
   (ConceptNode "men@a2905bdd-9214-4717-82c6-dfe21c1263bc") ; [353]
-  (SatisfyingSetLink (stv 1.000000 1.000000)
+  (SatisfyingSetScopeLink (stv 1.000000 1.000000)
     (VariableNode "$X0") ; [441]
     (EvaluationLink (stv 1.000000 0.000000)
       (PredicateNode "breathe@7f5b37e8-e4b3-4335-a06b-68af470cf354") ; [350]
@@ -181,7 +181,7 @@ Start the MindAgent with ```agents-start socrates_agent.SocratesAgent```.
 ```
 (InheritanceLink (stv 1.000000 1.000000)
   (ConceptNode "men@a2905bdd-9214-4717-82c6-dfe21c1263bc") ; [353]
-  (SatisfyingSetLink (stv 1.000000 1.000000)
+  (SatisfyingSetScopeLink (stv 1.000000 1.000000)
     (VariableNode "$X0") ; [441]
     (EvaluationLink (stv 1.000000 0.000000)
       (PredicateNode "breathe@7f5b37e8-e4b3-4335-a06b-68af470cf354") ; [350]
@@ -243,7 +243,7 @@ Start the MindAgent with ```agents-start socrates_agent.SocratesAgent```.
 ```
 (InheritanceLink (stv 1.000000 0.986333)
   (ConceptNode "Socrates@46ec3d0f-4535-4d01-87b7-84ef65c25a23") ; [280]
-  (SatisfyingSetLink (stv 1.000000 0.000000)
+  (SatisfyingSetScopeLink (stv 1.000000 0.000000)
     (VariableNode "$X1") ; [442]
     (EvaluationLink (stv 1.000000 1.000000)
       (PredicateNode "breathe@7f5b37e8-e4b3-4335-a06b-68af470cf354") ; [350]
@@ -264,7 +264,7 @@ Start the MindAgent with ```agents-start socrates_agent.SocratesAgent```.
 ```
 (MemberLink (stv 1.000000 0.989841)
   (ConceptNode "Socrates@46ec3d0f-4535-4d01-87b7-84ef65c25a23") ; [217]
-  (SatisfyingSetLink (stv 1.000000 1.000000)
+  (SatisfyingSetScopeLink (stv 1.000000 1.000000)
     (VariableNode "$X0") ; [385]
     (EvaluationLink (stv 1.000000 0.000000)
       (PredicateNode "breathe@7f5b37e8-e4b3-4335-a06b-68af470cf354") ; [350]

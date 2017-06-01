@@ -36,7 +36,6 @@
 #include <opencog/atoms/base/Node.h>
 #include <opencog/atomspace/AtomSpace.h>
 
-#include "Pattern.h"
 #include "HTree.h"
 #include "PatternMiner.h"
 
@@ -116,8 +115,8 @@ protected:
 
     void addPatternsToJsonArrayBuf(string curPatternKeyStr, string parentKeyString,  unsigned int extendedLinkIndex, json::value &patternJsonArray);
     void sendPatternsToCentralServer(json::value &patternJsonArray);
-    HandleSeq loadPatternIntoAtomSpaceFromString(string patternStr, AtomSpace* _atomSpace);
-    bool loadOutgoingsIntoAtomSpaceFromString(stringstream &outgoingStream, AtomSpace *_atomSpace, HandleSeq &outgoings, string parentIndent = "");
+
+
 
 
 public:

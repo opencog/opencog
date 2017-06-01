@@ -39,7 +39,7 @@ TODO:
 (1) Spatial relation Calculation: See SpaceMapUtil
 
 (2) Add more cython binding: The cython binding of inherited interface
-of OctomapOcTree is not finished.
+of OpencogOcTree is not finished.
 
 (3) Add more tests: since the use case of SpaceMap is complicated. It's
 better to test it with more complicated use case.

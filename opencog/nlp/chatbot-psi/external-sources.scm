@@ -58,6 +58,9 @@
 
         (State duckduckgo process-finished)
     )
+
+    ; Return for the GroundedSchemaNode
+    (Set)
 )
 
 (define (ask-wolframalpha)
@@ -107,6 +110,9 @@
             )
         )
     )
+
+    ; Return for the GroundedSchemaNode
+    (Set)
 )
 
 (define (ask-weather)
@@ -145,4 +151,7 @@
             )
         )
     )
+
+    ; Return for the GroundedSchemaNode
+    (Set)
 )

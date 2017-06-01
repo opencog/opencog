@@ -20,6 +20,8 @@ TARGET_LINK_LIBRARIES(sureal
 
 INSTALL (TARGETS sureal DESTINATION "lib${LIB_DIR_SUFFIX}/opencog")
 
-ADD_GUILE_MODULE (sureal.scm
+ADD_GUILE_MODULE (FILES
+	sureal.scm
 	surface-realization.scm
+	MODULE_DESTINATION "${DATADIR}/scm/opencog/nlp/sureal"
 )

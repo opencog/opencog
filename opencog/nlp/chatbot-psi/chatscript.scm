@@ -4,7 +4,7 @@
 (define cs-server "127.0.0.1")
 (define cs-port 1024)
 (define cs-username "opencog")
-(define cs-bot-name "rose")
+(define cs-bot-name "")
 
 ; Send a message to the ChatScript server
 (define (send-to-chatscript msg)
@@ -43,6 +43,9 @@
 
         (shutdown s 2)
     )
+
+    ; Return for the GroundedSchemaNode
+    (Set)
 )
 
 ; Initial setup for the ChatScript server, to load different set of rules for

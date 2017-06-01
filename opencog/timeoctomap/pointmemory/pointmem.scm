@@ -1,5 +1,5 @@
-(define-module (opencog ato pointmem))
+(define-module (opencog pointmem))
 
-(use-modules (srfi srfi-1) (opencog) (opencog atom-types) (opencog exec))
+(use-modules (opencog))
 
 (load-extension "libpoint_memory" "opencog_ato_pointmem_init")

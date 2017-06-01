@@ -851,6 +851,10 @@ bool SuRealPMCB::initiate_search(PatternMatchEngine* pPME)
         if (not _search_fail) return found;
     }
 
+    // Not sure quite what triggers this, but there are patterns
+    // with no mandatory clauses.
+    if (0 ==  _pattern->mandatory.size()) return false;
+
     // Reaching here means no constants, so do some search space
     // reduction here
     Handle bestClause = _pattern->mandatory[0];

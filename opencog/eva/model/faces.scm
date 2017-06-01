@@ -8,7 +8,6 @@
 (add-to-load-path "/usr/local/share/opencog/scm")
 
 (use-modules (opencog))
-(use-modules (opencog ato pointmem))
 (use-modules (opencog exec))
 (use-modules (opencog query))
 

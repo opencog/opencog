@@ -111,19 +111,20 @@ void HebbianCreationAgent::run()
     }
 
     std::default_random_engine generator;
-    std::uniform_int_distribution<int> distribution(0,notAttentionalFocus.size()-1);
+    if(notAttentionalFocus.size() > 0 ){
+        std::uniform_int_distribution<int> distribution(0,(int)notAttentionalFocus.size()-1);
 
-    //How many links outside the AF should be created
-    int farLinks = round(count / localToFarLinks);
+        //How many links outside the AF should be created
+        int farLinks = round(count / localToFarLinks);
 
-    //Pick a random target and create the link if it doesn't exist already
-    for (int i = 0; i < farLinks; i++) {
-        Handle target = notAttentionalFocus[distribution(generator)];
-        Handle link = _as->get_handle(ASYMMETRIC_HEBBIAN_LINK, source, target);
-        if (link == Handle::UNDEFINED)
-            addHebbian(source,target);
+        //Pick a random target and create the link if it doesn't exist already
+        for (int i = 0; i < farLinks; i++) {
+            Handle target = notAttentionalFocus[distribution(generator)];
+            Handle link = _as->get_handle(ASYMMETRIC_HEBBIAN_LINK, source, target);
+            if (link == Handle::UNDEFINED)
+                addHebbian(source,target);
+        }
     }
-
     //Check the ammount of HebbianLinks the Atom has
     IncomingSet iset = source->getIncomingSetByType(HEBBIAN_LINK,true);
 
