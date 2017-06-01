@@ -5202,6 +5202,7 @@ Finished with MI computations
 
 
 =================================================================
+=================================================================
 disjuncts & csets:
 
 Start loading words ...
@@ -5209,15 +5210,18 @@ Elapsed time to load words: 126 secs   << now 112 ...814 ... 22 .. 20
 Done loading words, now loading pairs
 Elapsed time to load csets: 783 secs  << now 367 on fresh..553...294..309
 Finished loading any-word-pairs
-Support: num left=396262 num right=291637
-Done with wild-card count N(*,w) and N(w,*) in 39 secs  << now 203 !???  fluke
+Support: num left=396262 num right=291637  << in 18 13
+Done with wild-card count N(*,w) and N(w,*) in 39 secs  `<< now 203 !???  fluke
+    << 85 after redesign ,, 72
 Done computing N(*,*) total-count=661104.0 in 34 secs << uncahnged
-Done computing 446204 pairs in 13 secs
+    << 14 after redesign 15
+Done computing 446204 pairs in 13 secs << 23 after red 24
 Start computing log P(*,w)
-Done computing 291637 left-wilds in 33 secs
-Done storing 291637 left-wilds in 670 secs << now  493 .. 711
+Done computing 291637 left-wilds in 33 secs << 27
+Done storing 291637 left-wilds in 670 secs << now  493 .. 711 (spin media)
+    << dropped to 87 secs on SSD
 Done with -log P(*,w), start -log P(w,*)
-Done computing 396262 right-wilds in 26 secs
+Done computing 396262 right-wilds in 26 secs  now 4 secs
 Done storing 396262 right-wilds in 549 secs  <<< now  28 !! wtf ??? .. 47
 Done computing -log P(w,*) and <-->
 Going to do individual word-pair MI
@@ -6643,7 +6647,8 @@ $4 = (union scm_vm_stack_element *) 0x7f36183d5e38
 
 git tag -l
 Try guile-2.2  v2.2.0 Wed Mar 15 09:02:52 2017
-Try guile-2.1.8  v2.1.8 Fri Mar 10 11:01:04 2017 
+Try guile-2.1.8  v2.1.8 Fri Mar 10 11:01:04 2017 tried it - spins. its broke
+   (breaks after about 300 cpu-min)
 
 
 
@@ -6664,6 +6669,49 @@ add-pair-freq-api in mst
 
 (use-modules (opencog) (opencog persist) (opencog persist-sql))
 (use-modules (opencog nlp) (opencog nlp learn))
+(use-modules (opencog analysis))
 (sql-open "postgres:///en_pairs_sim?user=linas")
-(sql-load)
-(sql-stats)
+(fetch-all-words)
+
+(define ala (make-any-link-api))
+(ala 'fetch-pairs)  << 1099 secs
+(batch-short ala)
+Support: num left=395274 num right=396260  that's about right.
+
+Argh. Sim has the old style. pair-entropy
+
+(define fla (add-pair-freq-api ala))
+(define rla (add-report-api ala))
+(rla 'left-dim)
+(rla 'right-dim)
+(rla 'num_pairs)
+(rla 'left-entropy)
+(rla 'right-entropy)
+(rla 'total-entropy)
+(rla 'total-mi)
+
+(define pca (make-pseudo-cset-api))
+(pca 'fetch-pairs)
+(batch-all-pair-mi pca)  
+(define fca (add-pair-freq-api pca))
+(define ac (get-all-cset-words))
+
+5205
+
+(fca 'pair-mi  xxxx)
+So:
+(EvaluationLink  ; 388
+ (LinkGrammarRelationshipNode "ANY")
+  (ListLink (AnyNode "left-word") (WordNode "one-point")))
+has no "*-Entropy Key-* why?
+because not computeed ... why?
+Going to do MI column and row subtotals
+should be 'cache-all-subtotals
+Going to compute the left, right and total entropy
+
+
+
+todo: print times
+todo: create a report.
+todo: investigate exception
+
