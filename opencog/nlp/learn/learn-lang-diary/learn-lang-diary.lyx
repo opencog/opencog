@@ -19102,6 +19102,18 @@ The primary contents of the database are the counts
 \end_inset
 
  and everthing else of interest in this section can be obtained from this.
+ Note that 
+\begin_inset Formula $N(w,d)$
+\end_inset
+
+ can be understood as a matrix, where the disjuncts identify columns, and
+ the words identify rows.
+ In general, this is a very sparse matrix: the number of non-zero entries
+ 
+\begin_inset Formula $\left|(*,*)\right|$
+\end_inset
+
+ is far less than the number of rows times the number of columns.
 \end_layout
 
 \begin_layout Standard
@@ -19205,6 +19217,27 @@ y small dataset, taken as a snapshot during counting.
 \end_layout
 
 \begin_layout Standard
+The dataset is sparse in a completely different sense: viewing 
+\begin_inset Formula $N(w,d)$
+\end_inset
+
+ as a matrix whose size is 
+\begin_inset Formula $37413\times291637$
+\end_inset
+
+, but only a very small number of these is non-zero: this is 
+\begin_inset Formula $446204/(37413\times291637)=4.089\times10^{-5}$
+\end_inset
+
+.
+ The sparsity of this matrix can be defined as 
+\begin_inset Formula $-\log_{2}$
+\end_inset
+
+ of this number, which is 14.58.
+\end_layout
+
+\begin_layout Standard
 The total word-entropy for the dataset is defined as
 \begin_inset Formula 
 \[
@@ -19223,7 +19256,7 @@ status collapsed
 
 \begin_layout Plain Layout
 This and the following entropies were measured with the word-entropy-bits,
- disjunctentropy-bits, etc.
+ disjunct-entropy-bits, etc.
  functions in disjunct-stats.scm 
 \end_layout
 
@@ -19265,7 +19298,7 @@ MI_{cset}=-\sum_{w,d}p(w,d)\log_{2}\frac{p(w,d)}{p(*,d)p(w,*)}=H_{cset}-H_{word}
 \end_inset
 
 and is measured to be 
-\begin_inset Formula $MI_{cset}=7.985$
+\begin_inset Formula $MI_{cset}=-7.985$
 \end_inset
 
  bits.
@@ -23733,8 +23766,17 @@ The current dataset being analyzed contains 1985 words whose length is greater
  than 8; the ranking-by-length was already shown up above, in a previous
  graph.
  The similarity between all pairs of these was computed; this resulted in
- 15809 pairs with a cosine similarity of greater than 0.5.
+ 15808 pairs with a cosine similarity of greater than 0.5.
  These can be sorted and ranked.
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+See the good-sims and ranked-sims in disjunct-stats.scm file.
+\end_layout
+
+\end_inset
+
  They are shown below.
 \end_layout
 
