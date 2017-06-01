@@ -90,7 +90,7 @@ evalTv :: SynIso (TruthVal,[Atom]) Atom
 evalTv = linkIso2 "EvaluationLink"
 
 ssl :: SynIso [Atom] Atom
-ssl = linkIso "SatisfyingSetLink" noTv
+ssl = linkIso "SatisfyingSetScopeLink" noTv
 
 exl :: SynIso [Atom] Atom
 exl = linkIso "ExistsLink"  noTv
