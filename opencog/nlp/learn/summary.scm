@@ -39,7 +39,7 @@
   print-word-pair-report - Summarize properties about wor-pairs.
 "
 	(define any-pairs-obj (make-any-link-api))
-	(define wild-obj (add-pair-stars (any-pairs-obj))
+	(define wild-obj (add-pair-stars (any-pairs-obj)))
 	(define pca (add-pair-count-api wild-obj))
 
 	(define nww (pca 'wild-wild-count))
