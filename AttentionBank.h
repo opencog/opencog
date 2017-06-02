@@ -82,13 +82,6 @@ class AttentionBank
     boost::signals2::connection _removeAtomConnection;
 
     /**
-     * Boundary at which an atom is considered within the attentional
-     * focus of opencog. Atom's with STI less than this value are
-     * not charged STI rent.
-     */
-    AttentionValue::sti_t _attentionalFocusBoundary;
-
-    /**
      * Signal emitted when an atom crosses in or out of the
      * AttentionalFocus.
      */
@@ -224,31 +217,6 @@ public:
 
     long updateLTIFunds(AttentionValue::lti_t diff) {
         return fundsLTI += diff;
-    }
-
-    /**
-     * Get attentional focus boundary, generally atoms below
-     * this threshold won't be accessed unless search methods
-     * are unsuccessful on those that are above this value.
-     *
-     * @return Short Term Importance threshold value
-     */
-    AttentionValue::sti_t getAttentionalFocusBoundary() const {
-        return _attentionalFocusBoundary;
-    }
-
-    /**
-     * Change the attentional focus boundary. Some situations
-     * may benefit from less focussed searches.
-     *
-     * @param s New threshold
-     * @return Short Term Importance threshold value
-     */
-    AttentionValue::sti_t setAttentionalFocusBoundary(
-        AttentionValue::sti_t s)
-    {
-        _attentionalFocusBoundary = s;
-        return s;
     }
 
     /**

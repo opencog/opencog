@@ -44,8 +44,6 @@ AttentionBank::AttentionBank(AtomSpace* asp) :
     LTIAtomWage = config().get_int("ECAN_STARTING_ATOM_LTI_WAGE", 10);
     minAFSize = config().get_int("ECAN_MIN_AF_SIZE", 100);
 
-    _attentionalFocusBoundary = 1;
-
     _removeAtomConnection =
         asp->removeAtomSignal(
             boost::bind(&AttentionBank::remove_atom_from_index, this, _1));
@@ -271,14 +269,14 @@ double AttentionBank::getNormalisedSTI(AttentionValuePtr av,
     double val;
     // get normalizer (maxSTI - attention boundary)
     AttentionValue::sti_t s = av->getSTI();
-    if (s > getAttentionalFocusBoundary()) {
-        int normaliser = (int) getMaxSTI(average) - getAttentionalFocusBoundary();
+    if (s > get_af_max_sti()) {
+        int normaliser = (int) getMaxSTI(average) - get_af_max_sti();
         if (normaliser == 0) return 0.0;
-        val = (s - getAttentionalFocusBoundary()) / (double) normaliser;
+        val = (s - get_af_max_sti()) / (double) normaliser;
     } else {
-        int normaliser = -((int) getMinSTI(average) + getAttentionalFocusBoundary());
+        int normaliser = -((int) getMinSTI(average) + get_af_max_sti());
         if (normaliser == 0) return 0.0;
-        val = (s + getAttentionalFocusBoundary()) / (double) normaliser;
+        val = (s + get_af_max_sti()) / (double) normaliser;
     }
 
     if (clip) return std::max(-1.0, std::min(val, 1.0));
@@ -289,7 +287,7 @@ double AttentionBank::getNormalisedSTI(AttentionValuePtr av) const
 {
     AttentionValue::sti_t s = av->getSTI();
     auto normaliser =
-            s > getAttentionalFocusBoundary() ? getMaxSTI() : getMinSTI();
+            s > get_af_max_sti() ? getMaxSTI() : getMinSTI();
 
     return (s / normaliser);
 }
