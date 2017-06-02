@@ -76,23 +76,42 @@
    DualLink to find the rules, see 'find-chat-rules' for details."
   (let* ((no-start-anchor? (equal? #f (member "<" SEQ)))
          (no-end-anchor? (equal? #f (member ">" SEQ)))
-         (start-with (if no-start-anchor? '() (cdr (member "<" SEQ))))
-         (end-with (if no-end-anchor?
-                       '()
-                       (take-while (lambda (t) (not (equal? ">" t))) SEQ)))
-         (new-seq (cond ((and (not (null? start-with)) (not (null? end-with)))
-                         (append start-with end-with))
-                        ; TODO: Append a zero-to-many-GlobNode at the end
-                        ((not (null? start-with))
+         (start-with
+           (if no-start-anchor?
+               (wildcard 0 -1)
+               (cdr (member "<" SEQ))))
+         (end-with
+           (if no-end-anchor?
+               (wildcard 0 -1)
+               (take-while (lambda (t) (not (equal? ">" t))) SEQ)))
+         (mid-glob (if (and no-start-anchor? no-end-anchor?) '() (wildcard 0 -1)))
+         (glob-decl (append (if no-start-anchor? (car start-with) '())
+                            (if no-end-anchor? (car end-with) '())
+                            (if (null? mid-glob) '() (car mid-glob))))
+         (new-seq (cond ; If there are both start-anchor and end-anchor
+                        ; they are the whole seq, but still need to put
+                        ; a glob in between them
+                        ((and (not no-start-anchor?) (not no-end-anchor?))
+                         (append start-with (cdr mid-glob) end-with))
+                        ; If there is only a start-anchor, append it with
+                        ; the main seq, follow by a glob at the end
+                        ((not no-start-anchor?)
                          (append start-with
-                                 (take-while (lambda (t) (not (equal? "<" t))) SEQ)))
-                        ; TODO: Append a zero-to-many-GlobNode at the beginning
-                        ((not (null? end-with))
-                         (append (cdr (member ">" SEQ)) end-with))
-                        ; TODO: Append zero-to-many-GlobNodes
-                        (else SEQ))))
+                                 (cdr mid-glob)
+                                 (take-while (lambda (t) (not (equal? "<" t))) SEQ)
+                                 (cdr end-with)))
+                        ; If there is only an end-anchor, append a glob in
+                        ; front of the main seq, follow by the end-seq
+                        ((not no-end-anchor?)
+                         (append (cdr start-with)
+                                 (cdr (member ">" SEQ))
+                                 (cdr mid-glob)
+                                 end-with))
+                        ; If there is no anchor, append two globs, one in
+                        ; the beginning and one at the end of the seq
+                        (else (append (cdr start-with) SEQ (cdr end-with))))))
   ; DualLink couldn't match patterns with no constant terms in it
-  ; Mark the rules with no constant terms so that ot cam be found
+  ; Mark the rules with no constant terms so that they can be found
   ; easily during the matching process
   (if (equal? (length new-seq)
               (length (filter (lambda (x) (equal? 'GlobNode (cog-type x)))
@@ -101,7 +120,7 @@
   ; To locate it easily
   (Inheritance (List new-seq) chatlang-term-seq)
   ; TODO: Wrap it using an TrueLink for now, use something better instead?
-  (True (List new-seq))))
+  (cons glob-decl (list (True (List new-seq))))))
 
 (define-public (say TXT)
   "Say the text and clear the state."
@@ -122,13 +141,12 @@
          (proc-terms (fold process-pattern-term
                            (cons template '())
                            PATTERN))
-         (var-list (caar proc-terms))
-         (cond-list (cdar proc-terms))
          (term-seq (term-sequence-check (cdr proc-terms)))
+         (var-list (append (caar proc-terms) (car term-seq)))
+         (cond-list (append (cdar proc-terms) (cdr term-seq)))
          (action (process-action ACTION)))
     (psi-rule-nocheck
-      (list (Satisfaction (VariableList var-list)
-                          (And (append cond-list (list term-seq)))))
+      (list (Satisfaction (VariableList var-list) (And cond-list)))
       action
       (True)
       (stv .9 .9)
