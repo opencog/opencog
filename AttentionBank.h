@@ -159,6 +159,14 @@ public:
             return 0;
     }
 
+    void set_af_size(int size) {
+        minAFSize = size;
+    }
+
+    int get_af_size(void) {
+        return minAFSize;
+    }
+
     /**
      * Change the attention value of an atom.
      */
