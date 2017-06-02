@@ -6684,21 +6684,21 @@ add-pair-freq-api in mst
 (fetch-all-words)
 
 (define ala (make-any-link-api))
-(ala 'fetch-pairs)  << 1099 secs 1074
+(ala 'fetch-pairs)  << 1099 secs 1074 1028
 (batch-short ala)
 (batch-all-pair-mi ala)
 
-Support: found num left=395274 num right=396260 in 426 secs << 395
-Done with wild-card count N(x,*) and N(*,y) in 1259 secs
-Done computing N(*,*) total-count=418235277.0 in 51 secs
+Support: found num left=395274 num right=396260 in 426 secs << 395, ph:527
+Done with wild-card count N(x,*) and N(*,y) in 1259 secs << ph:1300
+Done computing N(*,*) total-count=418235277.0 in 51 secs << ph:46
 Going to do individual pair frequencies
-Done computing 8880914 pairs in 1074 secs  << 1007
+Done computing 8880914 pairs in 1074 secs  << 1007 ph:872
 Start computing log P(*,y)
-Done computing 396260 left-wilds in 61 secs
-Done storing 396260 left-wilds in 121 secs
-Done computing 395274 right-wilds in 55 secs
+Done computing 396260 left-wilds in 61 secs << ph:51
+Done storing 396260 left-wilds in 121 secs << ph:115
+Done computing 395274 right-wilds in 55 secs << ph:51
 Done with -log P(*,y), start -log P(x,*)
-Done storing 395274 right-wilds in 121 secs
+Done storing 395274 right-wilds in 121 secs << ph:127
 Done computing -log P(x,*) and P(*,y)
 Going to do individual pair MI
 Too many heap sections: Increase MAXHINCR or MAX_HEAP_SECTS
@@ -6715,12 +6715,50 @@ include/private/gc_priv.h:#
 --enable-large-config
 --enable-parallel-mark didn't do this.
 
+Done computing 8880914 pair MI's in 3590 secs
+Done storing 8880914 pairs in 4190 secs
+Going to do column and row subtotals
+Finished left entropy subtotals in 580 secs
+Finished right entropy subtotals in 517 secs
+Finished left MI subtotals in 353 secs
+Finished right MI subtotals in 330 secs
+Going to compute the left, right and total entropy
+Done computing totals in 2360 secs
+Start saving left-wildcards
+Done storing 396260 left-wilds in 224 secs
+Done storing 395274 right-wilds in 230 secs
+Finished with MI computations
+
+
+========================================================
+support stats
 
 |(*,y)| = number of non-zero entries for column y
 
 sum_y |(*,y)| = right-support
 
 sqrt [ sum_x N^2 (x,*) / num-rows ]
+
+left-length(y) = sqrt(sum_x N^2(x,y)) = col-length
+so sum over rights
+divide by num-rights == num cols
+so this is right-legnth
+
+<xun> = sum_y N(*,y) / num-cols
+      = N(*,*) / num-cols
+
+<0w> = sum_y p(*,y) |(*,y)|
+
+<xw> = s x p
+    = sum_y p(*,y) N(*,y)
+
+but p(*,y) = N(*,y) / N(*,*)
+
+(s (x- <x>)^2) / n =
+(s x^2)/n -2<x><x> + <x>^2
+= <x^2> - <x>^2
+
+but len = [s sqrt(x^2)] / n
 
 
 Argh. Sim has the old style. pair-entropy
