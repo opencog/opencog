@@ -74,38 +74,40 @@
 (define (term-sequence-check SEQ)
   "Checks terms occur in the desired order. This is done when we're using
    DualLink to find the rules, see 'find-chat-rules' for details."
-  (let* ((no-start-anchor? (equal? #f (member "<" SEQ)))
-         (no-end-anchor? (equal? #f (member ">" SEQ)))
+  (let* ((start-anchor? (not (equal? #f (member "<" SEQ))))
+         (end-anchor? (not (equal? #f (member ">" SEQ))))
          (start-with
-           (if no-start-anchor?
-               (wildcard 0 -1)
-               (cdr (member "<" SEQ))))
+           (if start-anchor?
+               (cdr (member "<" SEQ))
+               (wildcard 0 -1)))
          (end-with
-           (if no-end-anchor?
-               (wildcard 0 -1)
-               (take-while (lambda (t) (not (equal? ">" t))) SEQ)))
-         (mid-glob (if (and no-start-anchor? no-end-anchor?) '() (wildcard 0 -1)))
-         (glob-decl (append (if no-start-anchor? (car start-with) '())
-                            (if no-end-anchor? (car end-with) '())
-                            (if (null? mid-glob) '() (car mid-glob))))
+           (if end-anchor?
+               (take-while (lambda (t) (not (equal? ">" t))) SEQ)
+               (wildcard 0 -1)))
+         (mid-wc (if (or start-anchor? end-anchor?) (wildcard 0 -1) '()))
+         (glob-decl (append (if start-anchor? '() (car start-with))
+                            (if end-anchor? '() (car end-with))
+                            (if (null? mid-wc) '() (car mid-wc))))
          (new-seq (cond ; If there are both start-anchor and end-anchor
                         ; they are the whole seq, but still need to put
                         ; a glob in between them
-                        ((and (not no-start-anchor?) (not no-end-anchor?))
-                         (append start-with (cdr mid-glob) end-with))
-                        ; If there is only a start-anchor, append it with
-                        ; the main seq, follow by a glob at the end
-                        ((not no-start-anchor?)
+                        ((and start-anchor? end-anchor?)
+                         (append start-with (cdr mid-wc) end-with))
+                        ; If there is only a start-anchor, append it and
+                        ; a wildcard with the main seq, follow by a glob
+                        ; at the end
+                        (start-anchor?
                          (append start-with
-                                 (cdr mid-glob)
+                                 (cdr mid-wc)
                                  (take-while (lambda (t) (not (equal? "<" t))) SEQ)
                                  (cdr end-with)))
                         ; If there is only an end-anchor, append a glob in
-                        ; front of the main seq, follow by the end-seq
-                        ((not no-end-anchor?)
+                        ; front of the main seq, follow by a wildcard and
+                        ; the end-seq
+                        (end-anchor?
                          (append (cdr start-with)
                                  (cdr (member ">" SEQ))
-                                 (cdr mid-glob)
+                                 (cdr mid-wc)
                                  end-with))
                         ; If there is no anchor, append two globs, one in
                         ; the beginning and one at the end of the seq
