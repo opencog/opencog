@@ -31,11 +31,11 @@
         (cons '() '())
         (map word (string-split STR #\ ))))
 
-(define* (concept STR #:optional (var (choose-var-name)))
+(define* (concept STR #:optional (VAR (choose-var-name)))
   "Occurrence of a concept."
   (cons '()  ; No variable declaration
         (list (Evaluation (GroundedPredicate "scm: chatlang-concept?")
-                          (List (Glob var)
+                          (List (Glob VAR)
                                 (Concept STR))))))
 
 (define (terms-to-atomese TERMS)
@@ -51,13 +51,13 @@
                           (Concept (cdr t)))))
        TERMS))
 
-(define* (choices TERMS #:optional (var (choose-var-name)))
+(define* (choices TERMS #:optional (VAR (choose-var-name)))
   "Occurrence of a list of choices. Existence of either one of
    the words/lemmas/phrases/concepts in the list will be considered
    as a match."
   (cons '()  ; No variable declaration
         (list (Evaluation (GroundedPredicate "scm: chatlang-choices?")
-                          (List (Glob var)
+                          (List (Glob VAR)
                                 (List (terms-to-atomese TERMS)))))))
 
 (define (unordered-matching TERMS)
@@ -83,3 +83,11 @@
   (cons '()  ; No variable declaration
         (list (Evaluation (GroundedPredicate "scm: chatlang-negation?")
                           (List (terms-to-atomese TERMS))))))
+
+(define (wildcard LOWER UPPER)
+  "Occurrence of a wildcard that the number of atoms to be matched
+   can be restricted. -1 in the upper bound means infinity."
+  (let ((name (choose-var-name)))
+    (cons (list (TypedVariable (Glob name)
+                               (Interval (Number LOWER) (Number UPPER))))
+          (list (Glob name)))))
