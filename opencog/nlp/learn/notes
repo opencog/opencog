@@ -5233,10 +5233,10 @@ Stored 400000 of 446204 pairs in 303 secs (330.03300330033005 pairs/sec)
 Done storing 446204 pair MI's in 1215 secs ... 1345 (spin media)
     << 201 secs SSD
 Going to do column and row subtotals
-Finished left entropy subtotals in 46 secs
-Finished right entropy subtotals in 20 secs
-Finished left MI subtotals in 40 secs
-Finished right MI subtotals in 12 secs
+Finished left entropy subtotals in 46 secs << 43
+Finished right entropy subtotals in 20 secs << 16
+Finished left MI subtotals in 40 secs << 35
+Finished right MI subtotals in 12 secs << 8
 
 Finished with MI computations
 
@@ -6684,9 +6684,44 @@ add-pair-freq-api in mst
 (fetch-all-words)
 
 (define ala (make-any-link-api))
-(ala 'fetch-pairs)  << 1099 secs
+(ala 'fetch-pairs)  << 1099 secs 1074
 (batch-short ala)
-Support: num left=395274 num right=396260  that's about right.
+(batch-all-pair-mi ala)
+
+Support: found num left=395274 num right=396260 in 426 secs << 395
+Done with wild-card count N(x,*) and N(*,y) in 1259 secs
+Done computing N(*,*) total-count=418235277.0 in 51 secs
+Going to do individual pair frequencies
+Done computing 8880914 pairs in 1074 secs  << 1007
+Start computing log P(*,y)
+Done computing 396260 left-wilds in 61 secs
+Done storing 396260 left-wilds in 121 secs
+Done computing 395274 right-wilds in 55 secs
+Done with -log P(*,y), start -log P(x,*)
+Done storing 395274 right-wilds in 121 secs
+Done computing -log P(x,*) and P(*,y)
+Going to do individual pair MI
+Too many heap sections: Increase MAXHINCR or MAX_HEAP_SECTS
+Fuck.
+
+alloc.c:        ABORT("Too many heap sections: Increase MAXHINCR or
+MAX_HEAP_SECTS");
+MAX_HEAP_SECTS
+include/private/gc_priv.h:#   define MAXHINCR 4096
+
+define HBLKSIZE 4096
+include/private/gc_priv.h:#
+ define MAX_HEAP_SECTS 8192  if -DLARGE_CONFIG
+--enable-large-config
+--enable-parallel-mark didn't do this.
+
+
+|(*,y)| = number of non-zero entries for column y
+
+sum_y |(*,y)| = right-support
+
+sqrt [ sum_x N^2 (x,*) / num-rows ]
+
 
 Argh. Sim has the old style. pair-entropy
 
@@ -6719,10 +6754,53 @@ Going to do MI column and row subtotals
 should be 'cache-all-subtotals
 Going to compute the left, right and total entropy
 
+(define wca (add-pair-stars pca))
+(define fca (add-pair-freq-api wca))
+(define rb (wca 'right-basis))
+(define dj (car rb))
+(define lwd (pca 'left-wildcard dj))
+ (fca 'left-wild-entropy dj)
+
+      (define (left-sum FN)
+         (fold
+            (lambda (right-item sum)
+               (+ sum (FN right-item)))
+            0 rb))
+
+      (define (right-sum FN)
+         (fold
+            (lambda (left-item sum)
+               (+ sum (FN left-item)))
+            0 (wca 'left-basis)))
+
+argh. compute-left-entropy is wrong... FIXED
+(define rca (add-report-api wca))
+(rca 'set-entropy le re tent)
+wild-wild-counta DONE
+time for totlaa DONE
+
+(define (an llobj) 
+	(lambda (message . args)
+		(case message ((name) "the big old name")
+		(else (apply llobj (cons message args))))))
 
 
+atom->getKeys()
+    std::set<Handle> getKeys() const;
 
-todo: print times
-todo: create a report.
-todo: investigate exception
+todo: print times  DONE
+todo: create a report. DONE
+todo: investigate exception DONE
 
+todo: how many words, on average, go into a pair?
+what about hubiness? in the graph con sense?
+i.e avg incomiing avg outgoing (i.e. left, right support sizes)
+
+avg left-support: non-zero / num-lefts(rows) 
+left-size: tot count /num-lefts<F8>x
+
+avg length
+( err... left-length 'rigt-basis
+
+Crazy idea: iterate; the places we end up at should be the dependents
+since everything points at them, and they never point away.

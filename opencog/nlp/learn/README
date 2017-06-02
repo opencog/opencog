@@ -77,16 +77,31 @@ statistics.  Most of this revolves around setting up postgres.
    LXC, then do it. If not, or this is your first time, then don't
    bother.
 
-0) The atomspace MUST be built with guile version 2.2.2.1 or newer,
+0.1) Probably mandatory.  Chances are good that you'll work with large
+   datasets; in this case, you also need to do the below. Skipping this
+   step will lead to the error `Too many heap sections: Increase
+   MAXHINCR or MAX_HEAP_SECTS`. So:
+```
+   git clone https://github.com/ivmai/bdwgc
+   cd bdwgc
+   git checkout gc7_6_0
+   ./configure --enable-large-config
+   make; sudo make install
+```
+
+0.2) The atomspace MUST be built with guile version 2.2.2.1 or newer,
    which can only be obtained from git: that is, by
-   `git clone git://git.sv.gnu.org/guile.git`
+```
+   git clone git://git.sv.gnu.org/guile.git
+   git checkout stable-2.2
+```
    Earlier versions have problems of various sorts. Version 2.0.11
-   will quickly crash with the error message:
-   guile: hashtab.c:137: vacuum_weak_hash_table: Assertion `removed <= len' failed.
+   will quickly crash with the error message: `guile: hashtab.c:137:
+   vacuum_weak_hash_table: Assertion 'removed <= len' failed.`
 
    Also par-for-each hangs:
    https://debbugs.gnu.org/cgi/bugreport.cgi?bug=26616
-   (in guile-2.2, it doesn't hang, but still behave very badly)
+   (in guile-2.2, it doesn't hang, but still behaves very badly)
 
 1) Set up and configure postgres, as described in
    `opencog/persist/sql/README.md`
