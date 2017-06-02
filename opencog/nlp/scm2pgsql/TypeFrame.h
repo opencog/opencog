@@ -50,12 +50,15 @@ private:
     bool validInstance;
     NodeNameMap nodeNameMap;
 
-    bool isStarPattern(const TypePair &pair);
+    bool isStarPattern(const TypePair &pair) const;
     bool subFrameEqual(unsigned int cursor, const TypeFrame &other, unsigned int otherCursor);
-    unsigned int getNextAtomPos(unsigned int cursor);
+    unsigned int getNextAtomPos(unsigned int cursor) const;
     bool buildFrameRepresentation(const std::string &schemeRepresentation);
     int countTargets(const std::string &txt, unsigned int begin);
     int recursiveParse(const std::string &txt, unsigned int begin);
+    bool isEquivalent(const TypeFrame &other, int cursorThis, int cursorOther) const;
+    bool isFeasible(const std::vector<std::vector<bool>> &matrix, int n) const;
+
     void error(std::string message);
     void check();
 
@@ -116,29 +119,29 @@ public:
         }
     };
 
-    /*
-    bool operator<(TypeFrame &other)
-    {
-    }
-    */
-
-    bool lessThan(TypeFrame &other) const;
     bool isValid() const;
+    void clear();
     std::vector<int> getArgumentsPosition(unsigned int cursor) const;
+    void buildNodesSet(std::set<TypeFrame, TypeFrame::LessThan> &answer, bool happensTwiceOrMoreOnly = false, bool excludeVariableNodes = false) const;
     TypeFrame buildSignature(unsigned int cursor);
     bool equals(const TypeFrame &other) const;
+    bool isEquivalent(const TypeFrame &other) const;
+    bool contains(const TypeFrame &other, unsigned int cursor = 0) const;
     bool nodeNameDefined(unsigned int pos) const;
     std::string nodeNameAt(unsigned int pos) const;
     void setNodeNameAt(unsigned int pos, std::string name);
     bool typeAtIsSymmetricLink(unsigned int pos) const;
     bool typeAtEqualsTo(unsigned int pos, const std::string &typeName) const;
-    void append(TypeFrame &other);
+    void append(const TypeFrame &other);
     void pickAndPushBack(const TypeFrame &other, unsigned int pos);
-    bool match(std::vector<int> &mapping, const TypeFrame &pattern);
-    bool match(std::vector<int> &mapping, const TypeFrame &pattern, const IntPairVector &constraints);
-    bool subFramesEqual(unsigned int cursorA, unsigned int cursorB);
+    bool match(std::vector<int> &mapping, const TypeFrame &pattern) const;
+    bool match(std::vector<int> &mapping, const TypeFrame &pattern, const IntPairVector &constraints) const;
+    bool subFramesEqual(unsigned int cursorA, unsigned int cursorB) const;
     TypeFrame subFrameAt(int pos) const;
-    void printForDebug(std::string prefix = "", std::string suffix = "", bool showNames = false) const;
+    bool topLevelIsLink() const;
+    TypeFrame copyReplacingFrame(const TypeFrame &key, const TypeFrame &frame) const;
+    bool nonEmptyNodeIntersection(const TypeFrame &other) const;
+    void printForDebug(std::string prefix = "", std::string suffix = "", bool showNames = true) const;
 
 };
 }

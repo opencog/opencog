@@ -3,6 +3,9 @@ ADD_LIBRARY (scmloader SHARED
 	PGStorageDelegate
 	TypeFrameIndexBuilder
 	TypeFrameIndex
+    CombinationGenerator
+    PartitionGenerator
+    CartesianProductGenerator
 	TypeFrame
 )
 
@@ -34,6 +37,9 @@ INSTALL (FILES
 	SCMLoader.h
 	PGStorageDelegate.h
 	SCMLoaderCallback.h
+    CombinationGenerator
+    PartitionGenerator
+    CartesianProductGenerator
 	TypeFrame.h
 	TypeFrameIndex.h
 	TypeFrameIndexBuilder.h

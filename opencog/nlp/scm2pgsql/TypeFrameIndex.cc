@@ -1,26 +1,652 @@
+#include <limits>
+
 #include "TypeFrameIndex.h"
 #include "TypeFrame.h"
+#include "CombinationGenerator.h"
+#include "PartitionGenerator.h"
+#include "CartesianProductGenerator.h"
 
 using namespace opencog;
 
-const int TypeFrameIndex::LIMIT_FOR_SYMMETRIC_LINKS_PERMUTATION = 5;
+unsigned int TypeFrameIndex::LIMIT_FOR_SYMMETRIC_LINKS_PERMUTATION = 5;
+bool TypeFrameIndex::PATTERN_COUNT_CACHE_ENABLED = true;
+bool TypeFrameIndex::INDEPENDENT_SUBPATTERN_PROB_CACHE_ENABLED = false;
+bool TypeFrameIndex::PATTERN_QUALITTY_CACHE_ENABLED = true;
+unsigned int TypeFrameIndex::MINIMAL_FREQUENCY_TO_COMPUTE_SURPRISINGNESS = 5;
 
 const int TypeFrameIndex::OPERATOR_NOP = 0;
 const int TypeFrameIndex::OPERATOR_AND = 1;
 const int TypeFrameIndex::OPERATOR_OR = 2;
 const int TypeFrameIndex::OPERATOR_NOT = 3;
+TypeFrameIndex::CoherenceFunction TypeFrameIndex::coherenceFunction = CONST_1;
+TypeFrameIndex::CoherenceModulatorG TypeFrameIndex::coherenceModulatorG = ONE_OVER_COHERENCE;
+TypeFrameIndex::CoherenceModulatorH TypeFrameIndex::coherenceModulatorH = COHERENCE;
 
 TypeFrameIndex::TypeFrameIndex() 
 {
+    auxVar1.push_back(TypePair(classserver().getType("VariableNode"), 0));
+    auxVar1.setNodeNameAt(0, "V1");
 }
 
 TypeFrameIndex::~TypeFrameIndex() 
 {
 }
 
+float TypeFrameIndex::computeCoherence(const TypeFrame &frame) const
+{
+    switch (coherenceFunction) {
+        case CONST_1: return 1;
+        default: throw std::runtime_error("Unknown coherence function\n");
+    }
+}
+
+float TypeFrameIndex::one_over_x(float x) const
+{
+    if (x < std::numeric_limits<float>::epsilon()) {
+        return std::numeric_limits<float>::max();
+    } else {
+        return 1 / x;
+    }
+}
+
+float TypeFrameIndex::gFunction(float x) const
+{
+    switch (coherenceModulatorG) {
+        case ONE_OVER_COHERENCE: return one_over_x(x);
+        default: throw std::runtime_error("Unknown coherence modulator G function\n");
+    }
+}
+
+float TypeFrameIndex::hFunction(float x) const
+{
+    switch (coherenceModulatorH) {
+        case COHERENCE: return x;
+        default: throw std::runtime_error("Unknown coherence modulator H function\n");
+    }
+}
+
 TypeFrame TypeFrameIndex::getFrameAt(int index)
 {
     return frames.at(index);
+}
+
+bool TypeFrameIndex::containsEquivalentFrame(const std::vector<TypeFrame> &v, const TypeFrame &f) const
+{
+    bool answer = false;
+    for (unsigned int i = 0; i < v.size(); i++) {
+        if (v.at(i).isEquivalent(f)) {
+            answer = true;
+            break;
+        }
+    }
+    return answer;
+}
+
+void TypeFrameIndex::buildCompoundFrames(std::vector<TypeFrame> &answer, int components) const
+{
+    answer.clear();
+    std::vector<TypeFrame> base;
+    std::vector<TypeFrame> accum[2];
+    int src = 0;
+    int tgt = 1;
+
+    for (unsigned int i = 0; i < frames.size(); i++) {
+        if (frames.at(i).topLevelIsLink()) {
+            if (! containsEquivalentFrame(accum[tgt], frames.at(i))) {
+                accum[tgt].push_back(frames.at(i));
+                base.push_back(frames.at(i));
+                if (DEBUG) { printf("Initial push tgt = %d : ", tgt); frames.at(i).printForDebug("", "\n", true); }
+            }
+        }
+    }
+
+    TypeFrame compoundFrame;
+    std::vector<int> argPos;
+    for (int i = 1; i < components; i++) {
+        src = i % 2;
+        tgt = 1 - src;
+        accum[tgt].clear();
+        if (DEBUG) printf("clear tgt = %d\n", tgt);
+        for (unsigned int m = 0; m < accum[src].size(); m++) {
+            for (unsigned int n = 0; n < base.size(); n++) {
+                if (accum[src].at(m).nonEmptyNodeIntersection(base.at(n))) {
+                    compoundFrame.clear();
+                    if (i == 1) {
+                        if (! accum[src].at(m).isEquivalent(base.at(n))) {
+                            compoundFrame.push_back(TypePair(classserver().getType("AndLink"), 2));
+                            compoundFrame.append(accum[src].at(m));
+                            compoundFrame.append(base.at(n));
+                            if (! containsEquivalentFrame(accum[tgt], compoundFrame)) {
+                                accum[tgt].push_back(compoundFrame);
+                                if (DEBUG) { printf("1 push tgt = %d : ", tgt); compoundFrame.printForDebug("", "\n", true); }
+                            }
+                        }
+                    } else {
+                        if (! accum[src].at(m).contains(base.at(n))) {
+                            argPos.clear();
+                            argPos = accum[src].at(m).getArgumentsPosition(0);
+                            compoundFrame.push_back(TypePair(classserver().getType("AndLink"), i + 1));
+                            TypeFrame subFrame;
+                            for (int j = 0; j < i; j++) {
+                                subFrame.clear();
+                                subFrame = accum[src].at(m).subFrameAt(argPos.at(j));
+                                compoundFrame.append(subFrame);
+                            }
+                            compoundFrame.append(base.at(n));
+                            if (! containsEquivalentFrame(accum[tgt], compoundFrame)) {
+                                accum[tgt].push_back(compoundFrame);
+                                if (DEBUG) { printf("2 push tgt = %d : ", tgt); compoundFrame.printForDebug("", "\n", true); }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    if (DEBUG) printf("finished tgt = %d size = %lu\n", tgt, accum[tgt].size());
+    if (components > 0) {
+        for (unsigned int k = 0; k < accum[tgt].size(); k++) {
+            answer.push_back(accum[tgt].at(k));
+        }
+    }
+}
+
+void TypeFrameIndex::addPatterns(std::vector<TypeFrame> &answer, const TypeFrame &base) const
+{
+    //answer.push_back(base);
+    TypeFrameSet nodes;
+    base.buildNodesSet(nodes, true, true);
+    CombinationGenerator selected(nodes.size(), true, false);
+
+    if (DEBUG) {
+        base.printForDebug("Compound frame: ", "\n", true);
+        printf("Nodes: ");
+        for (TypeFrameSet::iterator it = nodes.begin(); it != nodes.end(); it++) {
+            (*it).printForDebug("", " ", true);
+        }
+        printf("\n");
+    }
+
+    TypeFrame pattern;
+    while (! selected.depleted()) {
+        if (DEBUG) selected.printForDebug("Selection: ", "\n");
+        pattern.clear();
+        pattern.append(base);
+        int count = 0;
+        for (TypeFrameSet::iterator it = nodes.begin(); it != nodes.end(); it++) {
+            if (selected.at(count)) {
+                std::string varName = "V" + std::to_string(count);
+                for (unsigned int k = 0; k < pattern.size(); k++) {
+                    if (pattern.subFrameAt(k).equals((*it))) {
+                        pattern[k].first = classserver().getType("VariableNode");
+                        pattern.setNodeNameAt(k, varName);
+                    }
+                }
+            }
+            count++;
+        }
+        answer.push_back(pattern);
+        if (DEBUG) pattern.printForDebug("Pattern: ", "\n", true);
+        selected.generateNext();
+    }
+}
+
+float TypeFrameIndex::computeQuality(const TypeFrame &pattern, RankingMetric metric)
+{
+    if (PATTERN_QUALITTY_CACHE_ENABLED) {
+        PatternFloatMap::const_iterator it = patternQualityCache.find(pattern);
+        if (it != patternQualityCache.end()) {
+            return (*it).second;
+        }
+    }
+
+    float answer = 0;
+    switch (metric) {
+        case I_SURPRISINGNESS: answer = computeISurprinsingness(pattern, false); break;
+        case N_I_SURPRISINGNESS: answer = computeISurprinsingness(pattern, true); break;
+        case II_SURPRISINGNESS: answer = computeIISurprinsingness(pattern, false); break;
+        case N_II_SURPRISINGNESS: answer = computeIISurprinsingness(pattern, true); break;
+        default: throw std::runtime_error("Unknown pattern ranking metric\n");
+    }
+
+    if (PATTERN_QUALITTY_CACHE_ENABLED) {
+        patternQualityCache.insert(PatternFloatMap::value_type(pattern, answer));
+    }
+
+    return answer;
+}
+
+unsigned int TypeFrameIndex::countPattern(const TypeFrame &pattern)
+{
+    if (PATTERN_COUNT_CACHE_ENABLED) {
+        PatternCountMap::const_iterator it = patternCountCache.find(pattern);
+        if (it != patternCountCache.end()) {
+            return (*it).second;
+        }
+    }
+
+    std::vector<TypeFrameIndex::ResultPair> queryAnswer;
+    query(queryAnswer, pattern, true, false);
+    unsigned int answer = queryAnswer.size();
+
+    if (PATTERN_COUNT_CACHE_ENABLED) {
+        patternCountCache.insert(PatternCountMap::value_type(pattern, answer));
+    }
+
+    return answer;
+}
+
+void TypeFrameIndex::addSupersetFrames(std::vector<TypeFrame> &answer, const TypeFrame &frame) const
+{
+    std::vector<TypeFrame> notUsed;
+    addInferredSetFrames(answer, notUsed, frame, false);
+}
+
+void TypeFrameIndex::addSubsetFrames(std::vector<TypeFrame> &subset, std::vector<TypeFrame> &star, const TypeFrame &frame) const
+{
+    addInferredSetFrames(subset, star, frame, true);
+}
+
+void TypeFrameIndex::addInferredSetFrames(std::vector<TypeFrame> &subset, std::vector<TypeFrame> &star, const TypeFrame &frame, bool subSetFlag) const
+{
+    subset.clear();
+    TypeFrameSet nodes;
+    frame.buildNodesSet(nodes, false, true);
+    if (DEBUG) printTypeFrameSet(nodes);
+    CombinationGenerator selected(nodes.size(), true, false);
+
+    TypeFrame starFrame, compoundFrame;
+    TypeFrame aux1, aux2;
+    TypeFrame auxInternalVar1, auxInternalVar2;
+    auxInternalVar1.push_back(TypePair(classserver().getType("VariableNode"), 0));
+    auxInternalVar1.setNodeNameAt(0, "IV1");
+    auxInternalVar2.push_back(TypePair(classserver().getType("VariableNode"), 0));
+    auxInternalVar2.setNodeNameAt(0, "IV2");
+
+    while (! selected.depleted()) {
+        if (DEBUG) selected.printForDebug("selected: ", "\n");
+        int count = 0;
+        for (TypeFrameSet::iterator it = nodes.begin(); it != nodes.end(); it++) {
+            if (selected.at(count++)) {
+                aux1.clear();
+                aux2.clear();
+                if (DEBUG) frame.printForDebug("base: ", "\n");
+                if (DEBUG) (*it).printForDebug("key: ", "\n");
+                if (DEBUG) auxInternalVar1.printForDebug("subst for: ", "\n");
+                aux1 = frame.copyReplacingFrame((*it), auxInternalVar1);
+                if (DEBUG) aux1.printForDebug("result: ", "\n");
+                aux2.push_back(TypePair(classserver().getType("OrLink"), 2));
+                aux2.append(frame);
+                aux2.append(aux1);
+                compoundFrame.clear();
+                compoundFrame.push_back(TypePair(classserver().getType("AndLink"), 2));
+                compoundFrame.append(aux2);
+                compoundFrame.push_back(TypePair(classserver().getType("AndLink"), 2));
+                if (subSetFlag) {
+                    compoundFrame.push_back(TypePair(classserver().getType("InheritanceLink"), 2));
+                    compoundFrame.append(auxInternalVar2);
+                    compoundFrame.append(*it);
+                    compoundFrame.push_back(TypePair(classserver().getType("InheritanceLink"), 2));
+                    compoundFrame.append(auxInternalVar2);
+                    compoundFrame.append(auxInternalVar1);
+                    starFrame.clear();
+                    starFrame.push_back(TypePair(classserver().getType("AndLink"), 2));
+                    starFrame.append(frame);
+                    starFrame.push_back(TypePair(classserver().getType("NotLink"), 1));
+                    starFrame.append(compoundFrame);
+                    star.push_back(starFrame);
+                } else {
+                    compoundFrame.push_back(TypePair(classserver().getType("InheritanceLink"), 2));
+                    compoundFrame.append(*it);
+                    compoundFrame.append(auxInternalVar2);
+                    compoundFrame.push_back(TypePair(classserver().getType("InheritanceLink"), 2));
+                    compoundFrame.append(auxInternalVar1);
+                    compoundFrame.append(auxInternalVar2);
+                }
+                subset.push_back(compoundFrame);
+            }
+        }
+        selected.generateNext();
+    }
+}
+
+std::pair<float,float> TypeFrameIndex::minMaxIndependentProb(const TypeFrame &pattern)
+{
+    if (INDEPENDENT_SUBPATTERN_PROB_CACHE_ENABLED) {
+        SubPatternProbMap::const_iterator it = subPatternProbCache.find(pattern);
+        if (it != subPatternProbCache.end()) {
+            return (*it).second;
+        }
+    }
+
+    float minP = 0;
+    float maxP = 0;
+
+    if (pattern.typeAtEqualsTo(0, "AndLink")) {
+        if (DEBUG) printf("pattern is AndLink\n");
+        minP = std::numeric_limits<float>::max();
+        unsigned int n = pattern.at(0).second;
+        std::vector<int> argPos = pattern.getArgumentsPosition(0);
+        PartitionGenerator partitionGenerator(n);
+        TypeFrame subPattern;
+        TypeFrame aux;
+        while (! partitionGenerator.depleted()) {
+            if (DEBUG) partitionGenerator.printForDebug("Partition: ", "\n");
+            PartitionGenerator::IntegerSetSet partition = partitionGenerator.getPartition();
+            float prod = 1;
+            for (PartitionGenerator::IntegerSetSet::const_iterator it1 = partition.begin(); it1 != partition.end(); it1++) {
+                subPattern.clear();
+                if ((*it1).size() > 1) {
+                    subPattern.push_back(TypePair(classserver().getType("AndLink"), (*it1).size()));
+                }
+                for (PartitionGenerator::IntegerSet::const_iterator it2 = (*it1).begin(); it2 != (*it1).end(); it2++) {
+                    aux = pattern.subFrameAt(argPos.at(*it2));
+                    subPattern.append(aux);
+                }
+                if (DEBUG) subPattern.printForDebug("subPattern: ", "\n", true);
+                int count = countPattern(subPattern);
+                if (DEBUG) printf("count = %u\n", count);
+                float p = ((float) count) / floatUniverseCount;
+                prod *= p;
+            }
+            if (prod > maxP) maxP = prod;
+            if (prod < minP) minP = prod;
+            partitionGenerator.generateNext();
+        }
+    }
+
+    std::pair<float, float> answer = std::make_pair(minP, maxP);
+    if (INDEPENDENT_SUBPATTERN_PROB_CACHE_ENABLED) {
+        subPatternProbCache.insert(SubPatternProbMap::value_type(pattern, answer));
+    }
+    
+    return answer;
+}
+
+std::pair<float,float> TypeFrameIndex::minMaxSupersetProb(const TypeFrame &pattern)
+{
+    float minP = 0;
+    float maxP = 0;
+
+    if (pattern.typeAtEqualsTo(0, "AndLink")) {
+        if (DEBUG) printf("pattern is AndLink\n");
+        unsigned int n = pattern.at(0).second;
+        std::vector<int> argPos = pattern.getArgumentsPosition(0);
+        TypeFrame aux;
+        TypeFrame spotFrame;
+        TypeFrame compoundFrame;
+        for (unsigned int i = 0; i < n; i++) {
+            spotFrame.clear();
+            spotFrame = pattern.subFrameAt(argPos.at(i));
+            std::vector<TypeFrame> supersetFrames;
+            if (DEBUG) spotFrame.printForDebug("spotFrame: ", "\n");
+            addSupersetFrames(supersetFrames, spotFrame);
+            if (DEBUG) printFrameVector(supersetFrames);
+            if (supersetFrames.size() > 0) {
+                minP = std::numeric_limits<float>::max();
+            }
+            for (unsigned int k = 0; k < supersetFrames.size(); k++) {
+                compoundFrame.clear();
+                compoundFrame.push_back(TypePair(classserver().getType("AndLink"), n));
+                for (unsigned int j = 0; j < n; j++) {
+                    if (j == i) {
+                        compoundFrame.append(supersetFrames.at(k));
+                    } else {
+                        aux.clear();
+                        aux = pattern.subFrameAt(argPos.at(j));
+                        compoundFrame.append(aux);
+                    }
+                }
+                unsigned int countCompound = countPattern(compoundFrame);
+                if (DEBUG) printf("compound (count = %u): ", countCompound);
+                if (DEBUG) compoundFrame.printForDebug("", "\n");
+                unsigned int countSpot = countPattern(spotFrame);
+                if (DEBUG) printf("spot (count = %u): ", countSpot);
+                if (DEBUG) spotFrame.printForDebug("", "\n");
+                unsigned int countSuperset = countPattern(supersetFrames.at(k));
+                if (DEBUG) printf("supersetFrames.at(%u) (count = %u): ", k, countSuperset);
+                if (DEBUG) supersetFrames.at(k).printForDebug("", "\n");
+                float pCompound = ((float) countCompound) / floatUniverseCount;
+                float pSpot = ((float) countSpot) / floatUniverseCount;
+                float pSuperset = ((float) countSuperset) / floatUniverseCount;
+                float coherence = computeCoherence(supersetFrames.at(k));
+                float yMax = (countSuperset == 0 ? 0 : gFunction(coherence) * pCompound * (pSpot / pSuperset));
+                float yMin = (countSuperset == 0 ? 0 : hFunction(coherence) * pCompound * (pSpot / pSuperset));
+                if (DEBUG) printf("yMax = %f\n", yMax);
+                if (DEBUG) printf("yMin = %f\n", yMin);
+                if (yMax > maxP) maxP = yMax;
+                if (yMin < minP) minP = yMin;
+            }
+        }
+    }
+
+    return std::make_pair(minP, maxP);
+}
+
+std::pair<float,float> TypeFrameIndex::minMaxSubsetProb(const TypeFrame &pattern)
+{
+    float minP = 0;
+    float maxP = 0;
+    if (DEBUG) printf("frames.size() = %lu\n", frames.size());
+    if (DEBUG) printf("floatUniverseCount = %f\n", floatUniverseCount);
+
+    if (DEBUG) printf("minMaxSubsetProb()\n");
+    if (pattern.typeAtEqualsTo(0, "AndLink")) {
+        if (DEBUG) printf("pattern is AndLink\n");
+        unsigned int n = pattern.at(0).second;
+        std::vector<int> argPos = pattern.getArgumentsPosition(0);
+        std::vector<std::vector<TypeFrame>> subsetVector;
+        std::vector<std::vector<TypeFrame>> starVector;
+        std::vector<TypeFrame> subsetFrames;
+        std::vector<TypeFrame> starFrames;
+        std::vector<unsigned int> sizes;
+        TypeFrame aux;
+        TypeFrame compoundFrame;
+        TypeFrame compoundStar;
+        for (unsigned int i = 0; i < n; i++) {
+            aux.clear();
+            aux = pattern.subFrameAt(argPos.at(i));
+            if (DEBUG) aux.printForDebug("subFrame: ", "\n");
+            addSubsetFrames(subsetFrames, starFrames, aux);
+            if (DEBUG) printFrameVector(subsetFrames);
+            if (DEBUG) printFrameVector(starFrames);
+            subsetVector.push_back(subsetFrames);
+            starVector.push_back(starFrames);
+            // subsetFrames and starFrames have same size
+            sizes.push_back(subsetFrames.size());
+        }
+        CartesianProductGenerator cartesianGenerator(sizes);
+        if (! cartesianGenerator.depleted()) {
+            minP = std::numeric_limits<float>::max();
+        }
+        while (! cartesianGenerator.depleted()) {
+            if (DEBUG) cartesianGenerator.printForDebug("Cartesian selection: ", "\n");
+            compoundFrame.clear();
+            compoundStar.clear();
+            compoundFrame.push_back(TypePair(classserver().getType("AndLink"), n));
+            compoundStar.push_back(TypePair(classserver().getType("AndLink"), n));
+            float productMin = 1;
+            float productMax = 1;
+            for (unsigned int i = 0; i < n; i++) {
+                compoundFrame.append(subsetVector.at(i).at(cartesianGenerator.at(i)));
+                compoundStar.append(starVector.at(i).at(cartesianGenerator.at(i)));
+                float coherence = computeCoherence(subsetVector.at(i).at(cartesianGenerator.at(i)));
+                productMin *= hFunction(coherence);
+                productMax *= gFunction(coherence);
+            }
+            if (DEBUG) compoundStar.printForDebug("compoundStar: ", "\n");
+            std::pair<float,float> ind = minMaxIndependentProb(compoundStar);
+            if (DEBUG) printf("ind = <%f,%f>\n", ind.first, ind.second);
+            unsigned int countCompound = countPattern(compoundFrame);
+            if (DEBUG) printf("%u: ", countCompound);
+            if (DEBUG) compoundFrame.printForDebug("", "\n");
+            float pCompound = ((float) countCompound) / floatUniverseCount;
+            float yMin = productMin * (pCompound + ind.first);
+            float yMax = productMax * pCompound;
+            if (yMax > maxP) maxP = yMax;
+            if (yMin < minP) minP = yMin;
+            cartesianGenerator.generateNext();
+        }
+    }
+
+    return std::make_pair(minP, maxP);
+}
+
+float TypeFrameIndex::computeISurprinsingness(const TypeFrame &pattern, bool normalized)
+{
+    if (DEBUG) printf("computeISurprinsingness()\n");
+    if (DEBUG) pattern.printForDebug("", "\n");
+
+    float answer = 0;
+    unsigned int count = countPattern(pattern);
+    float pFull = ((float) count) / frames.size();
+
+    if (DEBUG) printf("count (pFull) = %u\n", count);
+    if (DEBUG) printf("pFull = %f\n", pFull);
+
+    if (count < MINIMAL_FREQUENCY_TO_COMPUTE_SURPRISINGNESS) {
+        return 0;
+    }
+
+    std::pair<float,float> pair = minMaxIndependentProb(pattern);
+
+    float c1 = pFull - pair.second;
+    float c2 = pair.first - pFull;
+    answer = (c1 > c2 ? c1 : c2);
+
+    if (normalized) {
+        answer = answer / pFull;
+    }
+
+    return answer;
+}
+
+float TypeFrameIndex::computeIISurprinsingness(const TypeFrame &pattern, bool normalized)
+{
+    if (DEBUG) printf("computeIISurprinsingness()\n");
+    if (DEBUG) pattern.printForDebug("", "\n");
+
+    float answer = 0;
+    unsigned int count = countPattern(pattern);
+    float pFull = ((float) count) / frames.size();
+
+    if (DEBUG) printf("count (pFull) = %u\n", count);
+    if (DEBUG) printf("pFull = %f\n", pFull);
+
+    if (count < MINIMAL_FREQUENCY_TO_COMPUTE_SURPRISINGNESS) {
+        return 0;
+    }
+
+    std::pair<float,float> minMaxInd = minMaxIndependentProb(pattern);
+    if (DEBUG) printf("minMaxInd = <%f,%f>\n", minMaxInd.first, minMaxInd.second);
+
+    std::pair<float,float> minMaxSuper = minMaxSupersetProb(pattern);
+    if (DEBUG) printf("minMaxSuper = <%f,%f>\n", minMaxSuper.first, minMaxSuper.second);
+
+    std::pair<float,float> minMaxSub = minMaxSubsetProb(pattern);
+    if (DEBUG) printf("minMaxSub = <%f,%f>\n", minMaxSub.first, minMaxSub.second);
+
+    float imaxP = minMaxInd.second;
+    if (minMaxSuper.second > imaxP) imaxP = minMaxSuper.second;
+    if (minMaxSub.second > imaxP) imaxP = minMaxSub.second;
+
+    float iminP = minMaxInd.first;
+    if (minMaxSuper.first > iminP) iminP = minMaxSuper.first;
+    if (minMaxSub.first > iminP) iminP = minMaxSub.first;
+
+    if (DEBUG) printf("iminP, imaxP = <%f,%f>\n", iminP, imaxP);
+
+    float c1 = pFull - imaxP;
+    float c2 = iminP - pFull;
+    answer = (c1 > c2 ? c1 : c2);
+
+    if (DEBUG) printf("(%f, %f) %f\n", c1, c2, answer);
+
+    if (normalized) {
+        answer = answer / pFull;
+    }
+
+    if (DEBUG) printf("Quality: %f\n", answer);
+
+    return answer;
+}
+
+void TypeFrameIndex::minePatterns(std::vector<std::pair<float,TypeFrame>> &answer, unsigned int components, unsigned int maxAnswers, RankingMetric metric)
+{
+    answer.clear();
+    std::vector<TypeFrame> compoundFrames;
+    if (LOCAL_DEBUG) printf("Building compound frames\n");
+    buildCompoundFrames(compoundFrames, components);
+    if (DEBUG) {
+        printf("COMPOUND FRAMES (%lu):\n", compoundFrames.size());
+        for (unsigned int i = 0; i < compoundFrames.size(); i++) {
+            compoundFrames.at(i).printForDebug("", "\n", true);
+        }
+    }
+
+    floatUniverseCount = 1;
+    unsigned int n = frames.size();
+    for (unsigned int i = 0; i < components; i++) {
+        floatUniverseCount = floatUniverseCount * ((float) (n - i));
+        floatUniverseCount = floatUniverseCount / ((float) (i + 1));
+    }
+    floatUniverseCount = 180;
+
+    /*
+    TypeFrame testFrame("(AndLink (SimilarityLink (VariableNode \"$var_1\") (ConceptNode \"chimp\")) (SimilarityLink (VariableNode \"$var_1\") (ConceptNode \"ent\")) (SimilarityLink (VariableNode \"$var_1\") (ConceptNode \"monkey\")))");
+    testFrame.printForDebug("testFrame: ", "\n");
+    float testQuality = computeQuality(testFrame, metric);
+    printf("Quality: %f\n", testQuality);
+    if (metric < 1000) return;
+    */
+      
+    /*
+    TypeFrame testFrame2( "(AndLink (InheritanceLink (VariableNode \"V0\") (ConceptNode \"human\")) (InheritanceLink (ConceptNode \"Abe\") (ConceptNode \"human\")) (InheritanceLink (VariableNode \"V0\") (ConceptNode \"soda drinker\")))");
+    testFrame2.printForDebug("testFrame2: ", "\n");
+    float testQuality2 = computeQuality(testFrame2, metric);
+    printf("Quality2: %f\n", testQuality2);
+    if (metric < 1000) return;
+    */
+
+    std::vector<TypeFrame> patterns;
+    this->patternCountCache.clear();
+    PatternHeap heap;
+    if (LOCAL_DEBUG) printf("Processing patterns\n");
+    for (unsigned int i = 0; i < compoundFrames.size(); i++) {
+    //for (unsigned int i = 17; i < 19; i++) {
+        if (LOCAL_DEBUG) printf("%u / %lu\n", i, compoundFrames.size());
+        patterns.clear();
+        if (DEBUG) compoundFrames.at(i).printForDebug("compoundFrame: ", "\n");
+        addPatterns(patterns, compoundFrames.at(i));
+        if (DEBUG) printf("%lu PATTERNS\n", patterns.size());
+        if (DEBUG) printFrameVector(patterns);
+        for (unsigned int i = 0; i < patterns.size(); i++) {
+            if (DEBUG) patterns.at(i).printForDebug("COMPUTE QUALITY FOR: ", "\n");
+            float quality = computeQuality(patterns.at(i), metric);
+            if (DEBUG) printf("%f: ", quality);
+            if (DEBUG) patterns.at(i).printForDebug("", "\n");
+            if ((heap.size() < maxAnswers) || (heap.top().first < quality)) {
+                if (DEBUG) printf("Pushing to heap. Quality = %f ", quality);
+                if (DEBUG) patterns.at(i).printForDebug("", "\n");
+                heap.push(std::make_pair(quality, patterns.at(i)));
+                if (heap.size() > maxAnswers) {
+                    if (DEBUG) printf("Removing pattern Quality = %f ", heap.top().first);
+                    if (DEBUG) heap.top().second.printForDebug("", "\n");
+                    heap.pop();
+                }
+            }
+        }
+    }
+
+    if (DEBUG) printf("Finished mining. heap size = %lu\n", heap.size());
+
+    while (heap.size() > 0) {
+        if (DEBUG) printf("%f: ", heap.top().first);
+        if (DEBUG) heap.top().second.printForDebug("", "\n");
+        answer.push_back(heap.top());
+        heap.pop();
+    }
 }
 
 void TypeFrameIndex::permutation(std::vector<std::vector<int>> &answer, int *array, int current, int size)
@@ -339,14 +965,14 @@ void TypeFrameIndex::buildSubPatternsIndex()
     if (DEBUG) printForDebug(true);
 }
 
-void TypeFrameIndex::query(std::vector<ResultPair> &result, const std::string &queryScm, bool distinct)
+void TypeFrameIndex::query(std::vector<ResultPair> &result, const std::string &queryScm, bool distinct, bool noPermutations) const
 {
     TypeFrame queryFrame(queryScm);
     if (DEBUG) queryFrame.printForDebug("NEW QUERY: ", "\n", true);
-    query(result, queryFrame, distinct);
+    query(result, queryFrame, distinct, noPermutations);
 }
 
-void TypeFrameIndex::selectCurrentElement(TypeFrame &answer, StringMap &variableOccurrences, const TypeFrame &baseFrame, int cursor)
+void TypeFrameIndex::selectCurrentElement(TypeFrame &answer, StringMap &variableOccurrences, const TypeFrame &baseFrame, int cursor) const
 {
     if (baseFrame.typeAtEqualsTo(cursor, "VariableNode")) {
         answer.push_back(TypeFrame::STAR_PATTERN);
@@ -367,7 +993,7 @@ void TypeFrameIndex::selectCurrentElement(TypeFrame &answer, StringMap &variable
 }
 
 
-void TypeFrameIndex::buildConstraints(IntPairVector &constraints, StringMap &variableOccurrences)
+void TypeFrameIndex::buildConstraints(IntPairVector &constraints, StringMap &variableOccurrences) const
 {
     constraints.clear();
     StringMap::iterator it = variableOccurrences.begin();
@@ -382,7 +1008,7 @@ void TypeFrameIndex::buildConstraints(IntPairVector &constraints, StringMap &var
     }
 }
 
-void TypeFrameIndex::buildQueryTerm(TypeFrame &answer, StringMap &variableOccurrences, const TypeFrame &baseFrame, int cursor)
+void TypeFrameIndex::buildQueryTerm(TypeFrame &answer, StringMap &variableOccurrences, const TypeFrame &baseFrame, int cursor) const
 {
     selectCurrentElement(answer, variableOccurrences, baseFrame, cursor);
     int nargs = baseFrame.at(cursor).second;
@@ -402,16 +1028,16 @@ void TypeFrameIndex::buildQueryTerm(TypeFrame &answer, StringMap &variableOccurr
     }
 }
 
-void TypeFrameIndex::query(std::vector<ResultPair> &result, const TypeFrame &queryFrame, bool distinct)
+void TypeFrameIndex::query(std::vector<ResultPair> &result, const TypeFrame &queryFrame, bool distinct, bool noPermutations) const
 {
     TypeFrame keyExpression;
     std::vector<VarMapping> forbiddenMappings;
     int headLogicOperator;
 
-    query(result, keyExpression, forbiddenMappings, headLogicOperator, queryFrame, 0, distinct);
+    query(result, keyExpression, forbiddenMappings, headLogicOperator, queryFrame, 0, distinct, noPermutations);
 }
 
-bool TypeFrameIndex::compatibleVarMappings(const VarMapping &map1, const VarMapping &map2, bool distinct)
+bool TypeFrameIndex::compatibleVarMappings(const VarMapping &map1, const VarMapping &map2, bool distinct) const
 {
     /*
     if (DEBUG) {
@@ -446,7 +1072,7 @@ bool TypeFrameIndex::compatibleVarMappings(const VarMapping &map1, const VarMapp
     return true;
 }
 
-void TypeFrameIndex::typeFrameSetUnion(TypeFrameSet &answer, const TypeFrameSet &set1, const TypeFrameSet &set2)
+void TypeFrameIndex::typeFrameSetUnion(TypeFrameSet &answer, const TypeFrameSet &set1, const TypeFrameSet &set2) const
 {
     answer.clear();
     for (TypeFrameSet::const_iterator it1 = set1.begin(); it1 != set1.end(); it1++) {
@@ -457,7 +1083,7 @@ void TypeFrameIndex::typeFrameSetUnion(TypeFrameSet &answer, const TypeFrameSet 
     }
 }
 
-void TypeFrameIndex::varMappingUnion(VarMapping &answer, const VarMapping &map1, const VarMapping &map2)
+void TypeFrameIndex::varMappingUnion(VarMapping &answer, const VarMapping &map1, const VarMapping &map2) const
 {
     for (VarMapping::const_iterator it = map1.begin(); it != map1.end(); it++) {
         answer.insert(*it);
@@ -467,7 +1093,7 @@ void TypeFrameIndex::varMappingUnion(VarMapping &answer, const VarMapping &map1,
     }
 }
 
-bool TypeFrameIndex::isForbiddenMapping(const VarMapping &mapping, const std::vector<VarMapping> &forbiddenVector)
+bool TypeFrameIndex::isForbiddenMapping(const VarMapping &mapping, const std::vector<VarMapping> &forbiddenVector) const
 {
     bool answer = false;
     for (unsigned int i = 0; i < forbiddenVector.size(); i++) {
@@ -488,10 +1114,11 @@ bool TypeFrameIndex::isForbiddenMapping(const VarMapping &mapping, const std::ve
     return answer;
 }
 
-void TypeFrameIndex::query(std::vector<ResultPair> &answer, TypeFrame &keyExpression, std::vector<VarMapping> &forbiddenMappings, int &logicOperator, const TypeFrame &queryFrame, int cursor, bool distinct)
+void TypeFrameIndex::query(std::vector<ResultPair> &answer, TypeFrame &keyExpression, std::vector<VarMapping> &forbiddenMappings, int &logicOperator, const TypeFrame &queryFrame, int cursor, bool distinct, bool noPermutations) const
 {
     if (DEBUG) queryFrame.printForDebug("Query frame: ", "\n", true);
     if (DEBUG) printf("Cursor: %d\n", cursor);
+    std::vector<ResultPair> unfilteredAnswer;
     answer.clear();
     keyExpression.clear();
     forbiddenMappings.clear();
@@ -510,7 +1137,7 @@ void TypeFrameIndex::query(std::vector<ResultPair> &answer, TypeFrame &keyExpres
         // Recursive call on each clause
         keyExpression.pickAndPushBack(queryFrame, cursor);
         for (unsigned int i = 0; i < arity; i++) {
-            query(recursionQueryResult.at(i), recursionKeyExpression.at(i), recursionForbiddenMappings.at(i), recursionHeadLogicOperator.at(i), queryFrame, argPos.at(i), distinct);
+            query(recursionQueryResult.at(i), recursionKeyExpression.at(i), recursionForbiddenMappings.at(i), recursionHeadLogicOperator.at(i), queryFrame, argPos.at(i), distinct, noPermutations);
         }
         for (unsigned int i = 0; i < arity; i++) {
             if (DEBUG) {
@@ -620,7 +1247,11 @@ void TypeFrameIndex::query(std::vector<ResultPair> &answer, TypeFrame &keyExpres
             }
         }
         for (unsigned int j = 0; j < aux[tgt].size(); j++) {
-            answer.push_back(aux[tgt].at(j));
+            if (noPermutations) {
+                unfilteredAnswer.push_back(aux[tgt].at(j));
+            } else {
+                answer.push_back(aux[tgt].at(j));
+            }
         }
     } else if (OrFlag) {
         if (DEBUG) printf("Start processing OR\n");
@@ -633,7 +1264,11 @@ void TypeFrameIndex::query(std::vector<ResultPair> &answer, TypeFrame &keyExpres
                         printTypeFrameSet(recursionQueryResult.at(i).at(j).first);
                         printVarMapping(recursionQueryResult.at(i).at(j).second);
                     }
-                    answer.push_back(recursionQueryResult.at(i).at(j));
+                    if (noPermutations) {
+                        unfilteredAnswer.push_back(recursionQueryResult.at(i).at(j));
+                    } else {
+                        answer.push_back(recursionQueryResult.at(i).at(j));
+                    }
                 } else {
                     if (DEBUG) {
                         printf("(OR) Rejecting solution:\n");
@@ -653,7 +1288,11 @@ void TypeFrameIndex::query(std::vector<ResultPair> &answer, TypeFrame &keyExpres
                 printTypeFrameSet(recursionQueryResult.at(0).at(j).first);
                 printVarMapping(recursionQueryResult.at(0).at(j).second);
             }
-            answer.push_back(recursionQueryResult.at(0).at(j));
+            if (noPermutations) {
+                unfilteredAnswer.push_back(recursionQueryResult.at(0).at(j));
+            } else {
+                answer.push_back(recursionQueryResult.at(0).at(j));
+            }
             if (! isForbiddenMapping(recursionQueryResult.at(0).at(j).second, recursionForbiddenMappings.at(0))) {
                 if (DEBUG) {
                     printf("(NOT) Adding forbidden mapping:\n");
@@ -681,7 +1320,7 @@ void TypeFrameIndex::query(std::vector<ResultPair> &answer, TypeFrame &keyExpres
                 printf("%d %d\n", constraints.at(i).first, constraints.at(i).second);
             }
         }
-        PatternMap::iterator it1 = occurrenceSet.find(keyExpression);
+        PatternMap::const_iterator it1 = occurrenceSet.find(keyExpression);
         if (it1 != occurrenceSet.end()) {
             for (IntegerSet::iterator it2 = (*it1).second.begin(); it2 != (*it1).second.end(); it2++) {
                 std::vector<int> mapping;
@@ -697,14 +1336,64 @@ void TypeFrameIndex::query(std::vector<ResultPair> &answer, TypeFrame &keyExpres
                         printTypeFrameSet(frameSet);
                         printVarMapping(varMap);
                     }
-                    answer.push_back(std::make_pair(frameSet, varMap));
+                    if (noPermutations) {
+                        unfilteredAnswer.push_back(std::make_pair(frameSet, varMap));
+                    } else {
+                        answer.push_back(std::make_pair(frameSet, varMap));
+                    }
                 }
             }
         }
     }
+
+    if (noPermutations) {
+        for (unsigned int i = 0; i < unfilteredAnswer.size(); i++) {
+            bool flag = true;
+            for (unsigned int j = 0; j < answer.size(); j++) {
+                if (equivalentVarMappings(unfilteredAnswer.at(i).second, answer.at(j).second, distinct)) {
+                    flag = false;
+                    break;
+                }
+            }
+            if (flag) {
+                answer.push_back(unfilteredAnswer.at(i));
+            }
+        }
+    }
+
     if (DEBUG) {
         printf("Answer:\n");
         printRecursionResult(answer);
+    }
+}
+
+bool TypeFrameIndex::mapCover(const VarMapping &map1, const VarMapping &map2) const
+{
+    TypeFrameSet set;
+    for (VarMapping::const_iterator it = map1.begin(); it != map1.end(); it++) {
+        set.insert((*it).second);
+    }
+    bool answer = true;
+    for (VarMapping::const_iterator it = map2.begin(); it != map2.end(); it++) {
+        if (set.find((*it).second) == set.end()) {
+            answer = false;
+            break;
+        }
+    }
+
+    return answer;
+}
+
+bool TypeFrameIndex::equivalentVarMappings(const VarMapping &map1, const VarMapping &map2, bool distinct) const
+{
+    return (distinct ? mapCover(map1, map2) : (mapCover(map1, map2) && mapCover(map2, map1)));
+}
+
+void TypeFrameIndex::printFrameVector(const std::vector<TypeFrame> &v) const
+{
+    for (unsigned int i = 0; i < v.size(); i++) {
+        printf("v[%u] = ", i);
+        v.at(i).printForDebug("", "\n");
     }
 }
 

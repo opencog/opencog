@@ -59,10 +59,15 @@ std::string TypeFrame::nodeNameAt(unsigned int pos) const
 
 void TypeFrame::setNodeNameAt(unsigned int pos, std::string name)
 {
-    nodeNameMap.insert(NodeNameMap::value_type(pos, name));
+    NodeNameMap::iterator it = nodeNameMap.find(pos);
+    if (it == nodeNameMap.end()) {
+        nodeNameMap.insert(NodeNameMap::value_type(pos, name));
+    } else {
+        (*it).second = name;
+    }
 }
 
-void TypeFrame::append(TypeFrame &other)
+void TypeFrame::append(const TypeFrame &other)
 {
     for (unsigned int i = 0; i < other.size(); i++) {
         push_back(other.at(i));
@@ -117,7 +122,7 @@ TypeFrame TypeFrame::buildSignature(unsigned int cursor)
     return answer;
 }
 
-bool TypeFrame::isStarPattern(const TypePair &pair)
+bool TypeFrame::isStarPattern(const TypePair &pair) const
 {
     return ((pair.first == STAR_PATTERN.first) && (pair.second == STAR_PATTERN.second));
 }
@@ -145,7 +150,7 @@ bool TypeFrame::subFrameEqual(unsigned int cursor, const TypeFrame &other, unsig
     return answer;
 }
 
-bool TypeFrame::subFramesEqual(unsigned int cursorA, unsigned int cursorB)
+bool TypeFrame::subFramesEqual(unsigned int cursorA, unsigned int cursorB) const
 {
     bool answer = true;
 
@@ -171,7 +176,7 @@ bool TypeFrame::subFramesEqual(unsigned int cursorA, unsigned int cursorB)
     return answer;
 }
 
-unsigned int TypeFrame::getNextAtomPos(unsigned int cursor)
+unsigned int TypeFrame::getNextAtomPos(unsigned int cursor) const
 {
     int nargs = 1;
     while (nargs > 0) {
@@ -187,7 +192,7 @@ unsigned int TypeFrame::getNextAtomPos(unsigned int cursor)
     return cursor;
 }
 
-bool TypeFrame::match(std::vector<int> &mapping, const TypeFrame &pattern)
+bool TypeFrame::match(std::vector<int> &mapping, const TypeFrame &pattern) const
 {
     bool answer = true;
     unsigned int patternCursor = 0;
@@ -224,7 +229,7 @@ bool TypeFrame::match(std::vector<int> &mapping, const TypeFrame &pattern)
     return answer;
 }
 
-bool TypeFrame::match(std::vector<int> &mapping, const TypeFrame &pattern, const IntPairVector &constraints)
+bool TypeFrame::match(std::vector<int> &mapping, const TypeFrame &pattern, const IntPairVector &constraints) const
 {
     bool answer = true;
 
@@ -276,6 +281,209 @@ bool TypeFrame::equals(const TypeFrame &other) const
         }
     } else {
         answer = false;
+    }
+
+    return answer;
+}
+
+bool TypeFrame::isFeasible(const std::vector<std::vector<bool>> &matrix, int n) const
+{
+    int mapping[n];
+    int lineCursor[n];
+
+    for (int i = 0; i < n; i++) {
+        lineCursor[i] = 0;
+    }
+
+    int mappingCursor = 0;
+    while (mappingCursor < n) {
+        int candidate = lineCursor[mappingCursor];
+
+        if (candidate == n) {
+            return false;
+        }
+        if (matrix.at(mappingCursor).at(candidate)) {
+            bool flag = true;
+            for (int i = mappingCursor - 1; i >= 0; i--) {
+                if (mapping[i] == candidate) {
+                    flag = false;
+                    break;
+                }
+            }
+            if (flag) {
+                mapping[mappingCursor] = candidate;
+                mappingCursor++;
+            } else {
+                lineCursor[mappingCursor]++;
+            }
+        } else {
+            lineCursor[mappingCursor]++;
+        }
+        while (lineCursor[mappingCursor] == n) {
+            lineCursor[mappingCursor] = 0;
+            mappingCursor--;
+            if (mappingCursor < 0) {
+                return false;
+            }
+            lineCursor[mappingCursor]++;
+        }
+    }
+
+    return true;
+}
+
+bool TypeFrame::isEquivalent(const TypeFrame &other, int cursorThis, int cursorOther) const
+{
+    bool answer = true;
+
+    if (DEBUG) {
+        printf("isEquivalent() %d %d\n", cursorThis, cursorOther);
+        printForDebug("this: ", "\n", true);
+        other.printForDebug("other:", "\n", true);
+    }
+
+    if ((at(cursorThis).first != other.at(cursorOther).first) || (at(cursorThis).second != other.at(cursorOther).second)) {
+        answer = false;
+    } else {
+        if (at(cursorThis).second == 0) {
+            if (nodeNameAt(cursorThis).compare(other.nodeNameAt(cursorOther)) != 0) {
+                answer = false;
+            }
+        } else {
+            std::vector<int> argPosThis = getArgumentsPosition(cursorThis);
+            std::vector<int> argPosOther = other.getArgumentsPosition(cursorOther);
+            if (typeAtIsSymmetricLink(cursorThis)) {
+                int n = argPosThis.size();
+                std::vector<std::vector<bool>> equivalent;
+                std::vector<bool> aux;
+                for (int i = 0; i < n; i++) {
+                    aux.clear();
+                    equivalent.push_back(aux);
+                    for (int j = 0; j < n; j++) {
+                        bool f = isEquivalent(other, argPosThis.at(i), argPosOther.at(j));
+                        equivalent.at(i).push_back(f);
+                    }
+                }
+                // TODO XXX
+                //printf(" \n");
+                answer = isFeasible(equivalent, n);
+            } else {
+                for (unsigned int i = 0; i < argPosThis.size(); i++) {
+                    if (! isEquivalent(other, argPosThis.at(i), argPosOther.at(i))) {
+                        answer = false;
+                        break;
+                    }
+                }
+            }
+        }
+    }
+
+    if (DEBUG) printf("EQUIVALENT: %s\n", (answer ? "TRUE" : "FALSE"));
+
+    return answer;
+}
+
+bool TypeFrame::isEquivalent(const TypeFrame &other) const
+{
+    return isEquivalent(other, 0, 0);
+}
+
+bool TypeFrame::contains(const TypeFrame &other, unsigned int cursor) const
+{
+    bool answer = false;
+
+    if (DEBUG) {
+        printf("contains()\n");
+        printForDebug("this: ", "\n", true);
+        other.printForDebug("other:", "\n", true);
+    }
+
+    if (isEquivalent(other, cursor, 0)) {
+        answer = true;
+    } else {
+        std::vector<int> argPos = getArgumentsPosition(cursor);
+        for (unsigned int i = 0; i < argPos.size(); i++) {
+            if (contains(other, argPos.at(i))) {
+                answer = true;
+                break;
+            }
+        }
+    }
+
+    if (DEBUG) printf("CONTAINS: %s\n", (answer ? "TRUE" : "FALSE"));
+
+    return answer;
+}
+
+bool TypeFrame::topLevelIsLink() const
+{
+    return (at(0).second > 0);
+}
+
+bool TypeFrame::nonEmptyNodeIntersection(const TypeFrame &other) const
+{
+    for (unsigned int i = 0; i < size(); i++) {
+        if (at(i).second == 0) {
+            for (unsigned int j = 0; j < other.size(); j++) {
+                if ((at(i).first == other.at(j).first) && (nodeNameAt(i).compare(other.nodeNameAt(j)) == 0)) {
+                    return true;
+                }
+            }
+        }
+    }
+    return false;
+}
+
+void TypeFrame::buildNodesSet(std::set<TypeFrame, TypeFrame::LessThan> &answer, bool happensTwiceOrMoreOnly, bool excludeVariableNodes) const
+{
+    answer.clear();
+    std::set<TypeFrame, TypeFrame::LessThan> aux;
+
+    TypeFrame frame;
+    for (unsigned int i = 0; i < size(); i++) {
+        if (at(i).second == 0) {
+            if ((! excludeVariableNodes) || (at(i).first != classserver().getType("VariableNode"))) {
+                frame.clear();
+                frame.pickAndPushBack(*this, i);
+                if (happensTwiceOrMoreOnly) {
+                    if (aux.find(frame) == aux.end()) {
+                        aux.insert(frame);
+                    } else {
+                        answer.insert(frame);
+                    }
+                } else {
+                    answer.insert(frame);
+                }
+            }
+        }
+    }
+}
+
+TypeFrame TypeFrame::copyReplacingFrame(const TypeFrame &key, const TypeFrame &frame) const
+{
+    TypeFrame answer;
+    TypeFrame aux;
+
+    if (at(0).second == 0) {
+        if (equals(key)) {
+            answer.append(frame);
+        } else {
+            answer.append(*this);
+        }
+    } else {
+        std::vector<int> argPos = getArgumentsPosition(0);
+        answer.push_back(at(0));
+        for (unsigned int i = 0; i < argPos.size(); i++) {
+            aux.clear();
+            aux = subFrameAt(argPos.at(i));
+            // TODO XXX
+            // perhaps using isEquivalent() instead of equals(0 makes more sense
+            if (aux.equals(key)) {
+                answer.append(frame);
+            } else {
+                answer.append(aux.copyReplacingFrame(key, frame));
+            }
+        }
     }
 
     return answer;
@@ -444,6 +652,12 @@ void TypeFrame::check()
         }
     }
     validInstance = ((i == (size() - 1)) && (pending == 0));
+}
+
+void TypeFrame::clear()
+{
+    nodeNameMap.clear();
+    std::vector<TypePair>::clear();
 }
 
 void TypeFrame::error(string message)
