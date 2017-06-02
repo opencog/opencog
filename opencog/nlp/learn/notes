@@ -6661,6 +6661,10 @@ OK guile-2.0.11 on xenial crashes almost immediately with
 guile: hashtab.c:137: vacuum_weak_hash_table: Assertion `removed <= len' failed.
 
 
+=======================
+other guile bugs:
+ (acos 1.0)  can return small imaginaey number
+ (fold of reals can return small imaginary parts
 
 =======================
 total unique pairs
@@ -6722,7 +6726,11 @@ Finished left entropy subtotals in 580 secs
 Finished right entropy subtotals in 517 secs
 Finished left MI subtotals in 353 secs
 Finished right MI subtotals in 330 secs
+Finished left support subtotals in 1021 secs << 772 after star fix
+Finished right support subtotals in 961 secs << 745
 Going to compute the left, right and total entropy
+Finished left norm totals in 210 secs << 232
+Finished right norm totals in 210 secs << 237
 Done computing totals in 2360 secs
 Start saving left-wildcards
 Done storing 396260 left-wilds in 224 secs
@@ -6754,11 +6762,23 @@ so this is right-legnth
 
 but p(*,y) = N(*,y) / N(*,*)
 
-(s (x- <x>)^2) / n =
-(s x^2)/n -2<x><x> + <x>^2
-= <x^2> - <x>^2
+<x^2w> = s x^2 p 
+       = sum_y p(*,y) N^2(*,y)
 
-but len = [s sqrt(x^2)] / n
+s (x- <xw>)^2  p =
+
+<x^2w> - 2<xw> s x p + <xw>^2
+= <x^2w> - <xw>^2
+
+anyway, its not clear that's what we want, anyway.  Do we want count
+variation? or length variation?  length variation is trite if we've got
+totals. But count-variation requires....
+
+2d 2 obj, each = 1, avg=1
+
+<x^2w> = 1/2 + 1/2 = 1 ... 
+so for lensq, needed to divide by support.
+and for avg, need to divide by support too.
 
 
 Argh. Sim has the old style. pair-entropy
@@ -6839,6 +6859,8 @@ left-size: tot count /num-lefts<F8>x
 
 avg length
 ( err... left-length 'rigt-basis
+
+
 
 Crazy idea: iterate; the places we end up at should be the dependents
 since everything points at them, and they never point away.

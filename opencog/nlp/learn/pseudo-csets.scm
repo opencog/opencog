@@ -122,7 +122,7 @@
 			(if (null? all-csets) (set! all-csets (do-get-all-csets)))
 			all-csets)
 
-		; fetch (from the database) all pseudo-csets
+		; Fetch (from the database) all pseudo-csets
 		(define (fetch-pseudo-csets)
 			(define start-time (current-time))
 			(fetch-incoming-set any-left)
@@ -158,7 +158,7 @@
 (define pseudo-cset-api (make-pseudo-cset-api))
 (define pseudo-cset-count-api (add-pair-count-api pseudo-cset-api))
 (define pseudo-cset-freq-api (add-pair-freq-api pseudo-cset-api))
-(define pseudo-cset-support-api (add-pair-support-compute pseudo-cset-api))
+(define pseudo-cset-support-api (add-support-api pseudo-cset-api))
 (define pseudo-cset-cosine-api (add-pair-cosine-compute pseudo-cset-api))
 (define pseudo-cset-stars (add-pair-stars pseudo-cset-api))
 
@@ -421,7 +421,7 @@
 "
 	(define (subtract TUPLE)  (- (first TUPLE) (second TUPLE)))
 	(define subby (add-tuple-math pseudo-cset-api subtract))
-	(define normy (add-pair-support-compute subby))
+	(define normy (add-support-compute subby))
 	(normy 'right-lp-norm P (list WORD-A WORD-B))
 )
 

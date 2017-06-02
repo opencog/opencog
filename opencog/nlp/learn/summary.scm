@@ -39,7 +39,8 @@
   print-word-pair-report - Summarize properties about wor-pairs.
 "
 	(define any-pairs-obj (make-any-link-api))
-	(define pca (add-pair-count-api any-pairs-obj))
+	(define wild-obj (add-pair-stars (any-pairs-obj))
+	(define pca (add-pair-count-api wild-obj))
 
 	(define nww (pca 'wild-wild-count))
 
@@ -60,10 +61,8 @@
 			"Atomspace does not contain any word pairs\n"))
 
 	(format #t "Word pair observations: ~A\n" nww)
-; todo:
-; num unique word pairs
-; total entropy
-; total MI
+
+	(print-matrix-summary-report any-pairs-obj #t)
 )
 
 ; ---------------------------------------------------------------------
