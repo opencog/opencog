@@ -6589,6 +6589,20 @@ estimate: 6.5% of these, so= 45M pairs!? Ouch.  .. 50-60 GB RAM
     and insanely slow .. 466K secs = 130 hrs = 5.4 days
 running at 1.5K pairs/sec ouch.
 
+Try again:
+(use-modules (opencog) (opencog persist) (opencog persist-sql))
+(use-modules (opencog nlp) (opencog nlp learn))
+(sql-open "postgres:///en_pairs_ultrasim?user=linas")
+(fetch-all-words)
+
+(define pca (make-pseudo-cset-api))
+(pca 'fetch-pairs)
+
+(sql-clear-stats)
+(define ac (get-all-cset-words)) 
+(length ac)
+(load "gram-sim.scm")
+(batch-sim-pairs ac 0.1)
 
 ---------- meanwhile, compute & cache similarity
 ; (sql-open "postgres:///en_pairs_tone_sim?user=ubuntu")
