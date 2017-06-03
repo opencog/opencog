@@ -6572,7 +6572,7 @@ Recompute the matrices again.
 (fetch-all-words)
 (define ala (make-any-link-api))
 (define asa (add-pair-stars ala))
-(asa 'fetch-pairs) << 1077
+(asa 'fetch-pairs) << 1077 1154
 (batch-all-pair-mi asa)
 
 Support: found num left=183290 num right=186523 in 389 secs
@@ -6582,6 +6582,17 @@ Done computing 8047063 pairs in 480 secs
 Done computing 183290 left-wilds in 25 secs
 Done storing 186523 left-wilds in 86 secs
 Done storing 183290 right-wilds in 95 secs
+....
+Going to compute the left, right and total entropy
+Finished left norm totals in 100 secs
+Finished right norm totals in 106 secs
+Done computing totals; start saving wildcards
+terminate called after throwing an instance of
+'opencog::RuntimeException'
+  what():  Failed to execute!
+(/home/ubuntu/src/atomspace/opencog/persist/sql/multi-driver/ll-pg-cxx.cc:113)
+arghhh. The valuation table was missing a lock.
+Fixed in 32d8ae4be6164a9c3594eab05f2d5af5e2c9fec6
 
 
 
@@ -6652,7 +6663,29 @@ Elapsed time to load csets: 1484 secs
 
 (define psa (add-pair-stars pca))
 (batch-all-pair-mi psa)
+Finished with MI computations; this took 3.19 hours
+
 (print-matrix-summary-report psa)
+
+Summary Report for Correlation Matrix Word-Disjunct Pairs (aka Connector Sets)
+Left type: WordNode    Right Type: LgAnd    Pair Type: LgWordCset
+Wildcard: (ListLink (ctv 0 0 1.33363e+08)
+   (AnyNode "cset-word")
+   (AnyNode "cset-disjunct")
+)
+Rows: 139790 Columns: 1860796
+Size: 3975919 non-zero entries of 260120672840 possible
+Fraction non-zero: 1.5285E-5 Sparsity (-log_2): 15.998
+Total observations: 133363005.0  Avg obs per pair: 33.543
+Entropy Total: 11.921   Left: 2.4678   Right: 9.8636
+Total MI: -0.410
+
+                 Left         Right     Avg-left     Avg-right
+                 ----         -----     --------     ---------
+Support (l_0)  3.3665E+4    1.2870E+5
+Count   (l_1)  1.6849E+6    5.1241E+7     50.05        398.2    
+Length  (l_2)  1.2139E+6    6.4911E+6     36.06        50.44    
+RMS Count      1.0132E+6    6.4895E+6     30.10        50.42    
 
 
 
@@ -6694,10 +6727,55 @@ Try again:
 (load "gram-sim.scm")
 (batch-sim-pairs ac 0.1)
 
+-------------------
+FWIW, the crappy results from back-when: en_pairs_sim:
+                     
+Summary Report for Correlation Matrix Word-Disjunct Pairs (aka Connector Sets)
+Left type: WordNode    Right Type: LgAnd    Pair Type: LgWordCset
+Wildcard: (ListLink (ctv 0 0 661104)
+   (AnyNode "cset-word")
+   (AnyNode "cset-disjunct")
+)
+Rows: 37413 Columns: 291637
+Size: 446204 non-zero entries of 10911015081 possible
+Fraction non-zero: 4.0895E-5 Sparsity (-log_2): 14.578
+Total observations: 661104.0  Avg obs per pair: 1.4816
+Entropy Total: 18.301   Left: 16.006   Right: 10.281
+Total MI: -7.985
+
+                 Left         Right     Avg-left     Avg-right
+                 ----         -----     --------     ---------
+Support (l_0)  4122.        370.0
+Count   (l_1)  8763.        680.7         2.126        1.839
+Length  (l_2)  236.8        51.39         5.7452E-2    .1389
+RMS Count      216.6        46.40         5.2550E-2    .1254
+
+Notice that tone has maybe 200x mor observations!!!! 133M instead of
+660K ... wow. en_pairs_sim also has:
+
+Left type: WordNode    Right Type: WordNode    Pair Type: ListLink
+Wildcard: (EvaluationLink (ctv 0 0 4.1823528e+08)
+   (LinkGrammarRelationshipNode "ANY")
+)
+Rows: 395274 Columns: 396260
+Size: 8880914 non-zero entries of 156631275240 possible
+Fraction non-zero: 5.6699E-5 Sparsity (-log_2): 14.106
+Total observations: 418235277.0  Avg obs per pair: 47.094
+Entropy Total: 19.280   Left: 11.088   Right: 11.215
+Total MI: -3.023
+
+                 Left         Right     Avg-left     Avg-right
+                 ----         -----     --------     ---------
+Support (l_0)  2.9904E+4    3.4828E+4                       
+Count   (l_1)  4.4813E+6    5.2946E+6    149.9        152.0
+Length  (l_2)  4.9537E+5    4.9524E+5    16.57        14.22
+RMS Count      4.9502E+5    4.9482E+5    16.55        14.21
+
+
 ---------- meanwhile, compute & cache similarity
 ; (sql-open "postgres:///en_pairs_tone_sim?user=ubuntu")
 
-Wait, where? 
+Wait, where?
 Oh, gram-sim.
 
 -----------
