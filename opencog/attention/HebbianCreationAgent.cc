@@ -67,8 +67,8 @@ void HebbianCreationAgent::run()
         return;
 
     HandleSeq notAttentionalFocus;
-    int afb = _bank->getAttentionalFocusBoundary();
-    _bank->get_handles_by_AV(back_inserter(notAttentionalFocus), 0, afb);
+    // int afb = _bank->getAttentionalFocusBoundary();
+    //_bank->get_handles_by_AV(back_inserter(notAttentionalFocus), 0, afb);
 
     // Retrieve the atoms in the AttentionalFocus
     OrderedHandleSet attentionalFocus;
