@@ -115,9 +115,7 @@
   (cond ((equal? 'say (car ACTION))
          (say (cdr ACTION)))))
 
-(define yakking (psi-demand "Yakking" 0.9))
-
-(define* (chat-rule PATTERN ACTION #:optional NAME)
+(define* (chat-rule PATTERN ACTION #:optional (TOPIC default-topic) NAME)
   "Top level translation function. Pattern is a quoted list of terms,
    and action is a quoted list of actions or a single action."
   (let* ((template (cons atomese-variable-template atomese-condition-template))
@@ -128,13 +126,13 @@
          (cond-list (cdar proc-terms))
          (term-seq (term-sequence-check (cdr proc-terms)))
          (action (process-action ACTION)))
-    (psi-rule
+    (psi-rule-nocheck
       (list (Satisfaction (VariableList var-list)
                           (And (append cond-list (list term-seq)))))
       action
       (True)
       (stv .9 .9)
-      yakking
+      TOPIC
       NAME)))
 
 (define (sent-get-lemmas-in-order SENT)

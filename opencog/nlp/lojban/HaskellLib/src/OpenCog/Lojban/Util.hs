@@ -38,7 +38,7 @@ pattern NL l <- Link "NotLink" l _
 pattern ImpL l tv <- Link "ImplicationLink" l tv
 pattern InhL l tv <- Link "InheritanceLink" l tv
 pattern SL l <- Link "SetLink" l _
-pattern SSL l <- Link "SatisfyingSetLink" [l] _
+pattern SSL l <- Link "SatisfyingSetScopeLink" [l] _
 pattern EvalL tv p a <- Link "EvaluationLink" [p,a] tv
 pattern ExL tv p a <- Link "ExistsLink" [p,a] tv
 pattern CtxL c a <- Link "ContextLink" [c,a] _
@@ -61,7 +61,7 @@ cInhL tv a b    = Link "InheritanceLink"                  [a,b]     tv
 cImpL tv a b    = Link "ImplicationLink"                  [a,b]     tv
 cIFaoIFL tv a b = Link "AndLink"          [cImpL tv a b,cImpL tv b a] tv
 cEvalL tv a b   = Link "EvaluationLink"                   [a,b]     tv
-cSSL tv a       = Link "SatisfyingSetLink"                  [a]     tv
+cSSL tv a       = Link "SatisfyingSetScopeLink"             [a]     tv
 cExL tv a b     = Link "ExistsLink"                       [a,b]     tv
 cFAL tv a b     = Link "ForAllLink"                       [a,b]     tv
 cPL     a b     = Link "PutLink"                          [a,b]     noTv

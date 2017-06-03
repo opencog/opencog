@@ -341,8 +341,8 @@
 (define (configure-pln-rbs-1)
     (define rb (ConceptNode "r2l-pln-2"))
 
-    (pln-load-rules "deduction")
-    (pln-load-rules "abduction")
+    (pln-load-rules "term-logic/deduction")
+    (pln-load-rules "wip/abduction")
 
     ; NOTE: The number has no relevance in r2l-mode
     (ure-define-rbs rb 0)

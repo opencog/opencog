@@ -9,7 +9,7 @@
 
 (InheritanceLink (stv 1.0 1.0)
     (ConceptNode "scientist")
-    (SatisfyingSetLink
+    (SatisfyingSetScopeLink
         (VariableNode "$x")
         (AndLink
             (InheritanceLink
@@ -81,7 +81,7 @@
             (PredicateNode "understand")
             (ListLink
                 (ConceptNode "scientist")
-                (SatisfyingSetLink
+                (SatisfyingSetScopeLink
                     (VariableNode "$x")
                     (EvaluationLink
                         (PredicateNode "how")
@@ -402,7 +402,7 @@
 ; Desired output:
 
 (InheritanceLink (stv 1.0 1.0)
-    (SatisfyingSetLink
+    (SatisfyingSetScopeLink
         (VariableNode "$x")
         (AndLink
             (InheritanceLink

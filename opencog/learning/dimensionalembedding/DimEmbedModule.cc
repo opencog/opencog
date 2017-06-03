@@ -676,7 +676,7 @@ void DimEmbedModule::printEmbedding()
                 oss << (it->first)->toShortString() << " : (";
             } else {
                 oss << "[NODE'S BEEN DELETED. handle=";
-                oss << it->first << "] : (";
+                oss << it->first.value() << "] : (";
             }
             const std::vector<double>& embedVector = it->second;
             for (std::vector<double>::const_iterator it2=embedVector.begin();

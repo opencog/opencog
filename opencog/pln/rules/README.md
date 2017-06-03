@@ -5,83 +5,26 @@ http://wiki.opencog.org/w/URE_Configuration_Format
 
 ## Contents
 
-This folder contains PLN rules such as
+PLN rules are partitioned into boolean, predicate and term logic.
+These terms are used loosely since PLN is rather different than any of
+those. The folders are organized as follows
 
-- fuzzy conjunction
-- deduction
-- inversion
-- abduction
-- modus ponens
-- contextual
-etc
+- `propositional-logic` contains rules dealing with `AndLink`, `OrLink` and
+  `NotLink` evaluation and introduction. They are fuzzy for the most
+  part, contrary to what the name folder seems to suggest.
+- `predicate-logic` contains rules for universal and conditional
+  instantiation and generalization.
+- `term-logic` contains rules dealing with deduction, abduction,
+  induction and inversion.
+- `wip` contains work-in-progress rules, incomplete or broken.
 
-the `wip` subfolder contains rules that are to be completed or removed.
+## PLN Examples
 
-## PLN Example
+Multiple examples can be found under
 
-- Load the deduction rule definitions:
-
-    ```
-    opencog/pln/rules/deduction.scm
-    ```
-
-    Example:
-
-    ```
-    (load "opencog/pln/rules/deduction.scm")
-    ```
-
-- Load this file containing the data:
-
-    ```
-    tests/pln/rules/simple-assertions.scm
-    ```
-
-    Example:
-
-    ```
-    (load "tests/pln/rules/simple-assertions.scm")
-    ```
-
-- Run this command:
-
-    ```
-    (cog-bind find-humans)
-    ```
-
-- Observe that there is only one instance of human defined:
-
-    ```
-    (ConceptNode "man")
-    ```
-
-- Run this command:
-
-    ```
-    (cog-bind deduction-rule)
-    ```
-
-- Run this command again:
-
-    ```
-    (cog-bind find-humans)
-    ```
-
-- Observe that there are 3 additional instances of human defined:
-
-    ```
-    (ConceptNode "Socrates")
-
-    (ConceptNode "Einstein")
-
-    (ConceptNode "Peirce")
-    ```
-
-There are more examples under the folder
-
-   ```
-   examples/pln
-   ```
+```
+<OPENCOG_REPO>/examples/pln
+```
 
 ## Relex2Logic Example
 
