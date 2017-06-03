@@ -315,7 +315,7 @@ bool Fuzzy::accept_starter(const Handle& hp)
  */
 bool Fuzzy::try_match(const Handle& soln)
 {
-    if (_af_only and bank->get_sti(soln) < bank->getAttentionalFocusBoundary())
+    if (_af_only and !bank->atom_is_in_AF(soln))
         return false;
 
     if (target == soln)

@@ -77,13 +77,31 @@ statistics.  Most of this revolves around setting up postgres.
    LXC, then do it. If not, or this is your first time, then don't
    bother.
 
-0) The atomspace MUST be built with guile version 2.2.2.1 or newer,
+0.1) Probably mandatory.  Chances are good that you'll work with large
+   datasets; in this case, you also need to do the below. Skipping this
+   step will lead to the error `Too many heap sections: Increase
+   MAXHINCR or MAX_HEAP_SECTS`. So:
+```
+   git clone https://github.com/ivmai/bdwgc
+   cd bdwgc
+   git checkout gc7_6_0
+   ./configure --enable-large-config
+   make; sudo make install
+```
+
+0.2) The atomspace MUST be built with guile version 2.2.2.1 or newer,
    which can only be obtained from git: that is, by
-   `git clone git://git.sv.gnu.org/guile.git`
-   Earlier versions, including guile-2.0.11 contain a bug in the
-   parallel for-each loop `par-for-each` that causes it to hang,
-   when computing mutual information.
+```
+   git clone git://git.sv.gnu.org/guile.git
+   git checkout stable-2.2
+```
+   Earlier versions have problems of various sorts. Version 2.0.11
+   will quickly crash with the error message: `guile: hashtab.c:137:
+   vacuum_weak_hash_table: Assertion 'removed <= len' failed.`
+
+   Also par-for-each hangs:
    https://debbugs.gnu.org/cgi/bugreport.cgi?bug=26616
+   (in guile-2.2, it doesn't hang, but still behaves very badly)
 
 1) Set up and configure postgres, as described in
    `opencog/persist/sql/README.md`
@@ -543,12 +561,14 @@ you can start exploring.
 ```
   (use-modules (opencog) (opencog persist) (opencog persist-sql))
   (use-modules (opencog nlp) (opencog nlp learn))
-  (sql-open "postgres:///en_pairs_mst?user=linas")
+  (sql-open "postgres:///en_pairs_sim?user=linas")
   (fetch-all-words)
   (length (get-all-words))
   ; This reports 396262 for one my DB's has.
-  (fetch-pseudo-csets (get-all-words))
-  (define all-cset-words (filter-words-with-csets (get-all-words)))
+
+  (define pca (make-pseudo-cset-api))
+  (pca 'fetch-pairs)
+  (define all-cset-words (get-all-cset-words))
   (length all-cset-words)
   ; This reports 37413 in for my `en_pairs_sim`.
   (define all-disjuncts (get-all-disjuncts))
@@ -652,13 +672,16 @@ It will eventually get cleaned up.
 
 TODO List
 =========
-* Fix crash at linkage_set_domain_names+0xe0
 * Fix (WordNode "…!ANY-PUNCT")
-* Create OO system for generic pair statistics.
-* Rework pipeline to use literary English sources.
+* Rework pipeline to use literary English sources. STARTED-ish.
+  New scripts in the utilities directory. Incomplete. Also,
+  need to document here in readme.
 * Count single-word probabilities.
 * Resume work on morphology.
-* Create an LXC container for public use.
+* Create an LXC container for public use. DONE.
+  But not updated....
+* Prune low observation counts.
+* Implement sql-delete.
 
 DONE
 ----
@@ -686,6 +709,8 @@ DONE
   was pure virtual (circa line 920 of AtomStorage.cc) There's some
   kind of smart-pointer race. See "Crash" section below.
   Done. Ran for a month without issues.
+* Fix crash at linkage_set_domain_names+0xe0  Done. Need LG 5.4.0
+* Create OO system for generic pair statistics. Done.
 
 
 Misc Notes about batch processing
