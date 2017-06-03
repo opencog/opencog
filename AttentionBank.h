@@ -342,6 +342,8 @@ public:
          std::lock_guard<std::mutex> lock(AFMutex);
          std::transform(attentionalFocus.begin(), attentionalFocus.end(),
                  result, [](std::pair<Handle, AttentionValuePtr> hstp){return hstp.first;});
+
+         return result;
     }
 
     /**
