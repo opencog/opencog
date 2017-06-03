@@ -5250,6 +5250,37 @@ Finished with MI computations
 (define pca (make-pseudo-cset-api))
 (batch-pairs pca)
 
+(pca 'fetch-pairs)
+(print-matrix-summary-report pca #t)
+(define psa (add-pair-stars pca))(define psa (add-pair-stars pca))
+(define sup (add-support-compute psa))
+(sup 'cache-all)
+(define cca (make-central-compute psa))
+(cca 'cache-all)
+(define sto (make-store psa))
+(sto 'store-wildcards)
+
+(print-matrix-summary-report pca #t)
+Summary Report for Correlation Matrix Word-Disjunct Pairs (aka Connector
+Sets)
+Left type: WordNode    Right Type: LgAnd    Pair Type: LgWordCset
+Wildcard: (ListLink (ctv 0 0 661104)
+   (AnyNode "cset-word")
+   (AnyNode "cset-disjunct")
+)
+Rows: 37413 Columns: 291637
+Size: 446204 non-zero entries of 10911015081 possible
+Fraction non-zero: 4.0895E-5 Sparsity (-log_2): 14.578
+Total observations: 661104.0  Avg obs per pair: 1.4816
+Entropy Total: 18.301   Left: 16.006   Right: 10.281
+Total MI: -7.985
+
+                 Left         Right     Avg-left     Avg-right
+                 ----         -----     --------     ---------
+Support (l_0)  4122.        370.0
+Count   (l_1)  8763.        680.7         2.126        1.839
+Length  (l_2)  236.8        51.39         5.7452E-2    .1389
+RMS Count      216.6        46.40         5.2550E-2    .1254
 
 
 
