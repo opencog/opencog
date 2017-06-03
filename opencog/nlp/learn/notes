@@ -6556,14 +6556,104 @@ Done. Wow. That was fast! did anything actually happen?
 
 select count(*) from atoms; <<< 27638783 = 27M
 
-get-all-words -- 188793  vs. tone: 139790
-all-cset-words -- 83131  vs tone 139790 ??
+get-all-words -- 188793  vs. tone: 139790 Seems  OK.
+all-cset-words -- 83131  vs tone 139790 ??  Crazy talk WTF? did we not
+                                          load correctly?
 disjuncts -- 1670883 vs tone 1860796
 
 wtf somethng broke....
 
 (define (filter-words-with-csets WORD-LIST)
    (filter!  (lambda (wrd) (not (null? (get-cset-vec wrd)))) WORD-LIST))
+
+Recompute the matrices again.
+
+(sql-open "postgres:///en_pairs_ttwo_mst?user=ubuntu")
+(fetch-all-words)
+(define ala (make-any-link-api))
+(define asa (add-pair-stars ala))
+(asa 'fetch-pairs) << 1077
+(batch-all-pair-mi asa)
+
+Support: found num left=183290 num right=186523 in 389 secs
+Done with wild-card count N(x,*) and N(*,y) in 733 secs
+Done computing N(*,*) total-count=267913561.0 in 23 secs
+Done computing 8047063 pairs in 480 secs
+Done computing 183290 left-wilds in 25 secs
+Done storing 186523 left-wilds in 86 secs
+Done storing 183290 right-wilds in 95 secs
+
+
+
+
+---------- Try again. Here's what tone_mst says:
+(use-modules (opencog) (opencog persist) (opencog persist-sql))
+(use-modules (opencog nlp) (opencog nlp learn))
+(use-modules (opencog analysis))
+(sql-open "postgres:///en_pairs_tone_mst?user=ubuntu")
+(fetch-all-words)
+
+(define ala (make-any-link-api))
+(define asa (add-pair-stars ala))
+(asa 'fetch-pairs)  << 672 secs
+
+(print-matrix-summary-report asa)  ; crash, of course. So rebuild .
+(batch-all-pair-mi asa)
+
+Start computing the basis
+Support: found num left=138014 num right=139770 in 247 secs
+Done with wild-card count N(x,*) and N(*,y) in 419 secs
+Done computing N(*,*) total-count=139806259.0 in 17 secs
+Going to do individual pair frequencies
+Done computing 4886362 pairs in 268 secs
+Start computing log P(*,y)
+Done computing 138014 left-wilds in 18 secs  
+Done computing 139770 right-wilds in 17 secs
+Done storing 139770 left-wilds in 67 secs
+Done storing 138014 right-wilds in 64 secs
+Done computing 4886362 pair MI's in 2051 secs
+Done storing 4886362 pairs in 3378 secs
+Finished left entropy subtotals in 191 secs
+Finished right entropy subtotals in 184 secs
+Finished left MI subtotals in 193 secs
+Finished right MI subtotals in 181 secs
+Finished left support subtotals in 479 secs
+Finished right support subtotals in 456 secs
+Finished left norm totals in 86 secs
+Finished right norm totals in 85 secs
+Done storing 139770 left-wilds in 126 secs
+Done storing 138014 right-wilds in 132 secs
+Finished with MI computations; this took 2.388 hours
+
+(print-matrix-summary-report asa)
+Summary Report for Correlation Matrix Link Grammar ANY link Word Pairs
+Left type: WordNode    Right Type: WordNode    Pair Type: ListLink
+Rows: 138014 Columns: 139770
+Size: 4886362 non-zero entries of 19290216780 possible
+Fraction non-zero: 2.5331E-4 Sparsity (-log_2): 11.947
+Total observations: 139806259.0  Avg obs per pair: 28.612
+Entropy Total: 17.725   Left: 9.9308   Right: 9.8248
+Total MI: -2.030
+
+                 Left         Right     Avg-left     Avg-right
+                 ----         -----     --------     ---------
+Support (l_0)  1.6405E+4    1.6483E+4
+Count   (l_1)  1.9950E+6    1.8453E+6     121.6        112.0    
+Length  (l_2)  2.2904E+5    1.9881E+5     13.96        12.06    
+RMS Count      2.2878E+5    1.9854E+5     13.95        12.05    
+
+
+Now do it again, for the disjuncts!
+
+(sql-clear-stats)
+(define pca (make-pseudo-cset-api))
+(pca 'fetch-pairs)
+Elapsed time to load csets: 1484 secs
+
+(define psa (add-pair-stars pca))
+(batch-all-pair-mi psa)
+(print-matrix-summary-report psa)
+
 
 
 ---------- meanwhile, finish stats work
