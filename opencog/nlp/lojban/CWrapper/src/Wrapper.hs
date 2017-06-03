@@ -1,11 +1,15 @@
 module Wrapper where
 
+import qualified Lojban as L
 import OpenCog.Lojban
 import OpenCog.AtomSpace
+import System.Random
 
 import Foreign.C
 import Foreign.Ptr
 import Foreign.StablePtr
+
+type WordList = L.WordList State
 
 foreign export ccall "lojban_parse" c_parse :: Ptr AtomSpaceRef
                                      -> StablePtr WordList
@@ -35,10 +39,11 @@ c_parse :: Ptr AtomSpaceRef -> StablePtr WordList -> CString -> IO Handle
 c_parse asRef swl ctext = do
     as <- refToObj asRef
     wl <- deRefStablePtr swl
+    seed <- randomIO
     text <- peekCString ctext
     print "Parsing: "
     print text
-    case lojbanToAtomese wl text of
+    case lojbanToAtomese wl seed text of
         Left m  -> pure nullPtr
         Right r -> do
             print r
@@ -54,8 +59,9 @@ c_print asRef swl h = do
     ma <- as <: getByHandle h
     case ma of
         Nothing -> pure nullPtr
-        Just a ->
-            case atomeseToLojban wl a of
+        Just a -> do
+            seed <- randomIO
+            case atomeseToLojban wl seed a of
                 Left m  -> pure nullPtr
                 Right r -> newCString r
 

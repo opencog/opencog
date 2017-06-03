@@ -39,19 +39,11 @@ DECLARE_MODULE(LojbanModule);
  *
  * @param cs   the OpenCog server
  */
-LojbanModule::LojbanModule(CogServer& cs,bool test) :
+LojbanModule::LojbanModule(CogServer& cs) :
         Module(cs) , _cs(cs) , _as(&cs.getAtomSpace()) , scmeval(_as)
 {
-    std::string cmavosrc;
-    std::string gismusrc;
-    if (test) {
-        cmavosrc = "cmavo_tiny.csv";
-        gismusrc = "gismu_tiny.csv";
-    }
-    else {
-        cmavosrc = "cmavo.csv";
-        gismusrc = "gismu.csv";
-    }
+    std::string cmavosrc = "cmavo.csv";
+    std::string gismusrc = "gismu.csv";
     std::string url = "https://raw.githubusercontent.com/rTreutlein"
                       "/lojban-data/master/";
     struct stat buffer;

@@ -4,6 +4,7 @@ module OpenCog.Lojban
 , lojbanToAtomese
 , atomeseToLojban
 , loadWordLists
+, State
 ) where
 
 import Lojban
