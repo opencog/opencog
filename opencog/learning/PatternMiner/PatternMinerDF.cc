@@ -880,15 +880,18 @@ void PatternMiner::extendAPatternForOneMoreGramRecursively(const Handle &extende
                             continue;
                         }
 
-                        if (keyword_black_logic_is_contain)
+                        if (use_keyword_black_list)
                         {
-                            if (containIgnoredContent(extendedHandle))
-                                continue;
-                        }
-                        else
-                        {
-                            if (doesLinkContainNodesInKeyWordNodes(extendedHandle, black_keyword_Handles))
-                                continue;
+                            if (keyword_black_logic_is_contain)
+                            {
+                                if (containIgnoredContent(extendedHandle))
+                                    continue;
+                            }
+                            else
+                            {
+                                if (doesLinkContainNodesInKeyWordNodes(extendedHandle, black_keyword_Handles))
+                                    continue;
+                            }
                         }
 
                         if (isInHandleSeq(extendedHandle, inputLinks))

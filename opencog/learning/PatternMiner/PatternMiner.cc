@@ -1141,6 +1141,7 @@ void PatternMiner::OutPutFinalPatternsToFile(unsigned int n_gram)
 
     }
 
+    resultFile << std::endl;
     resultFile.close();
 
 
@@ -1182,6 +1183,7 @@ void PatternMiner::OutPutFrequentPatternsToFile(unsigned int n_gram, vector < ve
         resultFile << std::endl;
     }
 
+    resultFile << std::endl;
     resultFile.close();
 
 
@@ -1234,6 +1236,7 @@ void PatternMiner::OutPutInterestingPatternsToFile(vector<HTreeNode*> &patternsF
         resultFile << std::endl;
     }
 
+    resultFile << std::endl;
     resultFile.close();
 
 }
@@ -1324,6 +1327,7 @@ void PatternMiner::OutPutLowFrequencyHighSurprisingnessPatternsToFile(vector<HTr
 
     }
 
+    resultFile << std::endl;
     resultFile.close();
 
 
@@ -1382,6 +1386,7 @@ void PatternMiner::OutPutHighFrequencyHighSurprisingnessPatternsToFile(vector<HT
 
     }
 
+    resultFile << std::endl;
     resultFile.close();
 
 
@@ -1446,6 +1451,7 @@ void PatternMiner::OutPutHighSurprisingILowSurprisingnessIIPatternsToFile(vector
 
     }
 
+    resultFile << std::endl;
     resultFile.close();
 
 
@@ -3116,6 +3122,10 @@ void PatternMiner::applyWhiteListKeywordfilterAfterMining()
                 break;
 
             string patternStr = unifiedPatternToKeyString(htreeNode->pattern);
+
+            if (use_keyword_black_list && containKeywords(patternStr, keyword_black_list, QUERY_LOGIC::OR))
+                continue;
+
             if (containWhiteKeywords(patternStr, keyword_white_list_logic))
                 patternsForGramFiltered[gram-1].push_back(htreeNode);
 
@@ -4080,6 +4090,177 @@ HandleSeq PatternMiner::loadPatternIntoAtomSpaceFromString(string patternStr, At
 }
 
 
+// recursively function , normal atom format
+//  (PredicateNode "country") ; [4408301568758128182][1]
+//  (ListLink (stv 1.000000 1.000000)
+//    (VariableNode "$var_1") ; [541152609547258039][2]
+//    (ConceptNode "United_States") ; [6203771557970593342][1]
+//  ) ; [15240751338816460712][2]
+//) ; [14692539656916913941][2]
+bool PatternMiner::loadOutgoingsIntoAtomSpaceFromAtomString(stringstream& outgoingStream, AtomSpace *_atomSpace, HandleSeq &outgoings, string parentIndent)
+{
+    string line;
+    string curIndent = parentIndent + LINE_INDENTATION;
+
+    while(getline(outgoingStream, line))
+    {
+
+        std::size_t nonIndentStartPos = line.find("(");
+        if (nonIndentStartPos == string::npos)
+            return true;
+        string indent = line.substr(0, nonIndentStartPos);
+        string nonIndentSubStr = line.substr(nonIndentStartPos + 1);
+        std::size_t typeEndPos = nonIndentSubStr.find(" ");
+        string atomTypeStr = nonIndentSubStr.substr(0, typeEndPos);
+        string linkOrNodeStr = atomTypeStr.substr(atomTypeStr.size() - 4, 4);
+        Type atomType = classserver().getType(atomTypeStr);
+        if (NOTYPE == atomType)
+        {
+            cout << "Warning: loadOutgoingsIntoAtomSpaceFromAtomString: Not a valid typename: " << atomTypeStr << std::endl;
+            return false;
+
+        }
+
+        if (indent == curIndent)
+        {
+            if (linkOrNodeStr == "Node")
+            {
+                std::size_t nodeNameEndPos = nonIndentSubStr.find_last_of("\"");
+                string nodeName = nonIndentSubStr.substr(typeEndPos + 2, nodeNameEndPos - typeEndPos - 2);
+                Handle node = _atomSpace->add_node(atomType, nodeName);
+                outgoings.push_back(node);
+            }
+            else if (linkOrNodeStr == "Link")
+            {
+                // call this function recursively
+                HandleSeq childOutgoings;
+                if (! loadOutgoingsIntoAtomSpaceFromAtomString(outgoingStream, _atomSpace, childOutgoings, curIndent))
+                    return false;
+
+                Handle link = _atomSpace->add_link(atomType, childOutgoings);
+                outgoings.push_back(link);
+            }
+            else
+            {
+                cout << "Warning: loadOutgoingsIntoAtomSpaceFromAtomString: Not a Node, neighter a Link: " << linkOrNodeStr << std::endl;
+                return false;
+
+            }
+
+        }
+        else if (indent.size() < curIndent.size())
+        {
+            return true;
+        }
+        else
+        {
+            // exception
+            cout << "Warning: loadOutgoingsIntoAtomSpaceFromAtomString: Indent wrong: " << line << std::endl;
+            return false;
+
+
+        }
+
+    }
+
+    return true;
+}
+
+// the input patternStr is in the format of normal Atom format, e.g.:
+//(EvaluationLink (stv 1.000000 1.000000)
+//  (PredicateNode "country") ; [4408301568758128182][1]
+//  (ListLink (stv 1.000000 1.000000)
+//    (VariableNode "$var_1") ; [541152609547258039][2]
+//    (ConceptNode "United_States") ; [6203771557970593342][1]
+//  ) ; [15240751338816460712][2]
+//) ; [14692539656916913941][2]
+//(EvaluationLink (stv 1.000000 1.000000)
+//  (PredicateNode "governmentType") ; [7065069092094160337][1]
+//  (ListLink (stv 1.000000 1.000000)
+//    (VariableNode "$var_2") ; [1433406047102624628][2]
+//    (ConceptNode "Mayor-council_government") ; [6067926743140439366][1]
+//  ) ; [16879153852749076749][2]
+//) ; [11770550072390833013][2]
+//(EvaluationLink (stv 1.000000 1.000000)
+//  (PredicateNode "isPartOf") ; [2521175578444903070][1]
+//  (ListLink (stv 1.000000 1.000000)
+//    (VariableNode "$var_2") ; [1433406047102624628][2]
+//    (VariableNode "$var_1") ; [541152609547258039][2]
+//  ) ; [11352379719155895422][2]
+//) ; [13092614614903350611][2]
+HandleSeq PatternMiner::loadPatternIntoAtomSpaceFromFileString(string patternStr, AtomSpace *_atomSpace)
+{
+
+    std::vector<std::string> strs;
+    boost::algorithm::split_regex( strs, patternStr, boost::regex( "\n\\)\n" ) ) ;
+
+    HandleSeq pattern;
+
+    for (string linkStr : strs) // load each link
+    {
+        if (linkStr == "")
+            continue;
+
+            HandleSeq rootOutgoings;
+
+            std::size_t firstLineEndPos = linkStr.find("\n"); //(EvaluationLink (stv 1.000000 1.000000)\n
+            std::string rootOutgoingStr = linkStr.substr(firstLineEndPos + 1);
+            stringstream outgoingStream(rootOutgoingStr);
+
+            if (! loadOutgoingsIntoAtomSpaceFromAtomString(outgoingStream, _atomSpace, rootOutgoings))
+            {
+                cout << "Warning: loadPatternIntoAtomSpaceFromFileString: Parse pattern string error: " << linkStr << std::endl;
+                HandleSeq emptyPattern;
+                return emptyPattern;
+            }
+
+            std::size_t typeEndPos = linkStr.find(" ");
+            string atomTypeStr = linkStr.substr(1, typeEndPos - 2);
+            string linkOrNodeStr = atomTypeStr.substr(atomTypeStr.size() - 4, 4);
+
+            if (linkOrNodeStr != "Link")
+            {
+
+                cout << "Warning: loadPatternIntoAtomSpaceFromFileString: Not a Link: " << linkOrNodeStr << std::endl;
+                HandleSeq emptyPattern;
+                return emptyPattern;
+
+            }
+
+            Type atomType = classserver().getType(atomTypeStr);
+            if (NOTYPE == atomType)
+            {
+
+                cout << "Warning: loadPatternIntoAtomSpaceFromFileString: Not a valid typename: " << atomTypeStr << std::endl;
+                HandleSeq emptyPattern;
+                return emptyPattern;
+
+            }
+
+            Handle rootLink = _atomSpace->add_link(atomType, rootOutgoings);
+            pattern.push_back(rootLink);
+
+
+    }
+
+    // debug:
+//     static int pattern_num = 0;
+//     string patternToStr = "";
+
+//     for(Handle h : pattern)
+//     {
+//        patternToStr += h->toShortString();
+//        patternToStr += "\n";
+//     }
+
+//     cout << "\nAdded pattern: NO." << pattern_num << "\n" << patternToStr;
+//     pattern_num ++;
+
+    return pattern;
+}
+
+
+
 void PatternMiner::loadPatternsFromResultFile(string fileName)
 {
     ifstream resultFile;
@@ -4102,18 +4283,6 @@ void PatternMiner::loadPatternsFromResultFile(string fileName)
     std::cout << "Expected pattern number = " << expectedPatternNumber << std::endl ;
 
     // loop to load every pattern
-//    Pattern: Frequency = 5
-//    (InheritanceLink )
-//      (VariableNode $var_1)
-//      (ConceptNode human)
-
-//    (InheritanceLink )
-//      (VariableNode $var_1)
-//      (ConceptNode man)
-
-//    (InheritanceLink )
-//      (VariableNode $var_1)
-//      (ConceptNode ugly)
 
     string patternStr = "";
     int frequency = 0;
@@ -4123,10 +4292,12 @@ void PatternMiner::loadPatternsFromResultFile(string fileName)
 
     for (std::string line; std::getline(resultFile, line); )
     {
+        //cout <<"\nline: " << line << std::endl;
         if (patternStart && (line == "") && (lastLine == "")) // one pattern end, load it
         {
+
             // add this new found pattern into the Atomspace
-            HandleSeq patternHandleSeq = loadPatternIntoAtomSpaceFromString(patternStr, atomSpace);
+            HandleSeq patternHandleSeq = loadPatternIntoAtomSpaceFromFileString(patternStr, atomSpace);
 
             if (patternHandleSeq.size() == 0)
             {
@@ -4157,10 +4328,24 @@ void PatternMiner::loadPatternsFromResultFile(string fileName)
         }
         else if (patternStart)// in the middle of one pattern
         {
-            if (line == "")
-                patternStr += "\n";
-            else
-                patternStr += (line + "\n");
+            if (line != "")
+            {
+
+                if (line.find(";") != string::npos)
+                {
+                    string subline = line.substr(0, line.find_last_of(";") - 1);
+                    patternStr += (subline + "\n");
+
+                }
+                else if (line.find("(stv") != string::npos)
+                {
+                    string subline = line.substr(0, line.find("(stv ") - 1);
+                    patternStr += (subline + "\n");
+                }
+                else
+                    patternStr += (line + "\n");
+
+            }
         }
 
         lastLine = line;

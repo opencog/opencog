@@ -381,8 +381,9 @@ protected:
     void cleanUpPatternMiner();
 
     bool loadOutgoingsIntoAtomSpaceFromString(stringstream &outgoingStream, AtomSpace *_atomSpace, HandleSeq &outgoings, string parentIndent = "");
-
-    HandleSeq loadPatternIntoAtomSpaceFromString(string patternStr, AtomSpace* _atomSpace);
+    bool loadOutgoingsIntoAtomSpaceFromAtomString(stringstream& outgoingStream, AtomSpace *_atomSpace, HandleSeq &outgoings, string parentIndent = "");
+    HandleSeq loadPatternIntoAtomSpaceFromString(string patternStr, AtomSpace* _atomSpace);// input string is pattern keystring
+    HandleSeq loadPatternIntoAtomSpaceFromFileString(string patternStr, AtomSpace *_atomSpace); // input string is normal atom string
 
 
 public:
