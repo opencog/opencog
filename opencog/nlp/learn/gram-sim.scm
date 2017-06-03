@@ -28,12 +28,6 @@
 
 (define cos-key (PredicateNode "*-Cosine Distance Key-*"))
 
-; If the similarity is less than this, it is not saved.
-; The current value is chosen by gut-feel, based on the current
-; dataset, which is small/crappy.  The appropriate value is
-; likely to be strongly dataset-dependent.
-(define cutoff 0.5)
-
 ; Define the atom at which the cosine similarity value will be stored.
 (define (sim-pair WORD-A WORD-B) (SimilarityLink WORD-A WORD-B))
 
@@ -91,56 +85,79 @@
 
 ; ---------------------------------------------------------------------
 ; Compute and store the similarity between the WORD, and the other
-; words in the word-list
-(define (batch-sim WORD WORD-LIST)
+; words in the WORD-LIST.  Do NOT actually cache the similarity
+; value, if it is less than CUTOFF.  This is used to avoid having
+; N-squared pairs cluttering the atomspace.
+;
+(define (batch-sim WORD WORD-LIST CUTOFF)
 
-	(define num-checked 0)
-	(define num-stored 0)
+	(define cnt 0)
 
-	(define (store-sim WORD-A WORD-B SIM)
-		(set! num-stored (+ num-stored 1))
-		(format #t "~A ~A Similarity ~A <--> ~A = ~A\n"
-			num-checked num-stored (cog-name WORD-A) (cog-name WORD-B) SIM)
-		(store-atom
-			(cog-set-value!
-				(sim-pair WORD-A WORD-B) cos-key
-				(FloatValue SIM (get-angle SIM)))))
+	(define (get-angle SIM)
+		(define pi 3.14159265358979)
+		; Stupid-ass guile return a small imaginary number when taking
+		; the arccos of 1.0. WTF.  So we need to take the real part!!
+		(* 2.0 (/ (real-part (acos SIM)) pi))
+	)
+
+	(define (set-sim WORD-A WORD-B SIM)
+		(cog-set-value!
+			(sim-pair WORD-A WORD-B) cos-key
+			(FloatValue SIM (get-angle SIM))))
 
 	(for-each
 		(lambda (wrd)
 			(define sim (cset-vec-cosine WORD wrd))
-			(set! num-checked (+ num-checked 1))
-			(if (and (< cutoff sim) (not (equal? WORD wrd)))
-				(store-sim WORD wrd sim)))
+			(if (and (< CUTOFF sim) (not (equal? WORD wrd)))
+				(begin
+					(set! cnt (+ 1 cnt))
+					(store-atom (set-sim WORD wrd sim)))))
 		WORD-LIST)
 
-	; print some progress info.
-	(if (not (null? WORD-LIST))
-		(format #t "Word ~A had ~A sims on ~A (~A pct)\n"
-			(cog-name WORD) num-stored (length WORD-LIST)
-			(/ (* 100.0 num-stored) (length WORD-LIST))))
+	cnt
 )
 
 ; ---------------------------------------------------------------------
 
 ; Loop over the entire list of words, and compute similarity scores
 ; for them.  This might take a very long time!
-(define (batch-sim-pairs WORD-LIST)
+(define (batch-sim-pairs WORD-LIST CUTOFF)
 
 	(define len (length WORD-LIST))
+	(define tot (* 0.5 len len))
 	(define done 0)
+	(define prs 0)
+	(define start (current-time))
 
 	; tail-recursive list-walker.
 	(define (make-pairs WRD-LST)
 		(if (null? WRD-LST) #t
 			(begin
+				(set! prs (+ prs (batch-sim (car WRD-LST) (cdr WRD-LST) CUTOFF)))
 				(set! done (+  done 1))
-				(format #t "Doing ~A of ~A\n" done len)
-				(batch-sim (car WRD-LST) (cdr WRD-LST))
+				(if (eqv? 0 (modulo done 10))
+					(let* ((elapsed (- (current-time) start))
+							(frt (* done (- len done)))
+							(rate (* 0.001 (/ frt elapsed)))
+							)
+						(format #t
+							 "Done ~A/~A frac=~5f% Time: ~A Done: ~4f% rate=~5f K prs/sec\n"
+							done len
+							(* 100.0 (/ prs frt))
+							elapsed
+							(* 100.0 (/ frt tot))
+							rate
+						)))
 				(make-pairs (cdr WRD-LST)))))
 
 	(make-pairs WORD-LIST)
 )
+
+; If the similarity is less than this, it is not saved.
+; The current value is chosen by gut-feel, based on the current
+; dataset, which is small/crappy.  The appropriate value is
+; likely to be strongly dataset-dependent.
+(define cutoff 0.5)
 
 ; ---------------------------------------------------------------------
 ; Example usage:
@@ -148,11 +165,13 @@
 ; (use-modules (opencog) (opencog persist) (opencog persist-sql))
 ; (use-modules (opencog nlp) (opencog nlp learn))
 ; (sql-open "postgres:///en_pairs_sim?user=linas")
+; (sql-open "postgres:///en_pairs_supersim?user=linas")
 ; (use-modules (opencog cogserver))
 ; (start-cogserver "opencog2.conf")
 ; (fetch-all-words)
-; (fetch-pseudo-csets (get-all-words))
-; (define ac (get-all-cset-words)))
+; (define pca (make-pseudo-cset-api))
+; (pca 'fetch-pairs)
+; (define ac (get-all-cset-words))
 ; (length ac)
 ; 37413
 ; (define ad (get-all-disjuncts))

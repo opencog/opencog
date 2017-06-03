@@ -122,7 +122,7 @@
 			(if (null? all-csets) (set! all-csets (do-get-all-csets)))
 			all-csets)
 
-		; fetch (from the database) all pseudo-csets
+		; Fetch (from the database) all pseudo-csets
 		(define (fetch-pseudo-csets)
 			(define start-time (current-time))
 			(fetch-incoming-set any-left)
@@ -134,6 +134,7 @@
 		; Methods on the object
 		(lambda (message . args)
 			(apply (case message
+				((name) (lambda () "Word-Disjunct Pairs (aka Connector Sets)"))
 				((left-type) get-left-type)
 				((right-type) get-right-type)
 				((pair-type) get-pair-type)
@@ -157,8 +158,7 @@
 (define pseudo-cset-api (make-pseudo-cset-api))
 (define pseudo-cset-count-api (add-pair-count-api pseudo-cset-api))
 (define pseudo-cset-freq-api (add-pair-freq-api pseudo-cset-api))
-(define pseudo-cset-mi-api (add-pair-mi-compute pseudo-cset-api))
-(define pseudo-cset-support-api (add-pair-support-compute pseudo-cset-api))
+(define pseudo-cset-support-api (add-support-api pseudo-cset-api))
 (define pseudo-cset-cosine-api (add-pair-cosine-compute pseudo-cset-api))
 (define pseudo-cset-stars (add-pair-stars pseudo-cset-api))
 
@@ -380,7 +380,7 @@
   The returned entropy is in bits, i.e. computed with log_2.
 
 "
-  (pseudo-cset-mi-api 'compute-right-entropy WORD)
+  (pseudo-cset-freq-api 'right-wild-entropy WORD)
 )
 
 (define (cset-vec-word-mi WORD)
@@ -394,7 +394,7 @@
 
    Note this function returns MI in units of bits. i.e. log_2
 "
-	(pseudo-cset-mi-api 'compute-right-fmi WORD)
+	(pseudo-cset-freq-api 'right-wild-fmi WORD)
 )
 
 ; ---------------------------------------------------------------------
@@ -421,7 +421,7 @@
 "
 	(define (subtract TUPLE)  (- (first TUPLE) (second TUPLE)))
 	(define subby (add-tuple-math pseudo-cset-api subtract))
-	(define normy (add-pair-support-compute subby))
+	(define normy (add-support-compute subby))
 	(normy 'right-lp-norm P (list WORD-A WORD-B))
 )
 
@@ -443,7 +443,7 @@
 	(define pi 3.14159265358979)
 
 	; Stupid-ass guile return a small imaginary number when taking
-	; the arccos of 1.0. WTF.  So we need to take he real part!!
+	; the arccos of 1.0. WTF.  So we need to take the real part!!
 	(* 2.0 (/ (real-part (acos SIM)) pi))
 )
 

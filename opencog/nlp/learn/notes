@@ -5202,6 +5202,7 @@ Finished with MI computations
 
 
 =================================================================
+=================================================================
 disjuncts & csets:
 
 Start loading words ...
@@ -5209,24 +5210,34 @@ Elapsed time to load words: 126 secs   << now 112 ...814 ... 22 .. 20
 Done loading words, now loading pairs
 Elapsed time to load csets: 783 secs  << now 367 on fresh..553...294..309
 Finished loading any-word-pairs
-Support: num left=396262 num right=291637
-Done with wild-card count N(*,w) and N(w,*) in 39 secs  << now 203 !???  fluke
+Support: num left=396262 num right=291637  << in 18 13
+Done with wild-card count N(*,w) and N(w,*) in 39 secs  `<< now 203 !???  fluke
+    << 85 after redesign ,, 72
 Done computing N(*,*) total-count=661104.0 in 34 secs << uncahnged
-Done computing 446204 pairs in 13 secs
+    << 14 after redesign 15
+Done computing 446204 pairs in 13 secs << 23 after red 24
 Start computing log P(*,w)
-Done computing 291637 left-wilds in 33 secs
-Done storing 291637 left-wilds in 670 secs << now  493 .. 711
+Done computing 291637 left-wilds in 33 secs << 27
+Done storing 291637 left-wilds in 670 secs << now  493 .. 711 (spin media)
+    << dropped to 87 secs on SSD
 Done with -log P(*,w), start -log P(w,*)
-Done computing 396262 right-wilds in 26 secs
+Done computing 396262 right-wilds in 26 secs  now 4 secs
 Done storing 396262 right-wilds in 549 secs  <<< now  28 !! wtf ??? .. 47
 Done computing -log P(w,*) and <-->
 Going to do individual word-pair MI
-Done computing 446204 pair MI's in 88 secs
+Done computing 446204 pair MI's in 88 secs << 70 secs
 Stored 100000 of 446204 pairs in 268 secs (373.13432835820896 pairs/sec)
 Stored 200000 of 446204 pairs in 238 secs (420.16806722689074 pairs/sec)
 Stored 300000 of 446204 pairs in 286 secs (349.65034965034965 pairs/sec)
 Stored 400000 of 446204 pairs in 303 secs (330.03300330033005 pairs/sec)
-Done storing 446204 pair MI's in 1215 secs ... 1345
+Done storing 446204 pair MI's in 1215 secs ... 1345 (spin media)
+    << 201 secs SSD
+Going to do column and row subtotals
+Finished left entropy subtotals in 46 secs << 43
+Finished right entropy subtotals in 20 secs << 16
+Finished left MI subtotals in 40 secs << 35
+Finished right MI subtotals in 12 secs << 8
+
 Finished with MI computations
 
 
@@ -5239,6 +5250,37 @@ Finished with MI computations
 (define pca (make-pseudo-cset-api))
 (batch-pairs pca)
 
+(pca 'fetch-pairs)
+(print-matrix-summary-report pca #t)
+(define psa (add-pair-stars pca))(define psa (add-pair-stars pca))
+(define sup (add-support-compute psa))
+(sup 'cache-all)
+(define cca (make-central-compute psa))
+(cca 'cache-all)
+(define sto (make-store psa))
+(sto 'store-wildcards)
+
+(print-matrix-summary-report pca #t)
+Summary Report for Correlation Matrix Word-Disjunct Pairs (aka Connector
+Sets)
+Left type: WordNode    Right Type: LgAnd    Pair Type: LgWordCset
+Wildcard: (ListLink (ctv 0 0 661104)
+   (AnyNode "cset-word")
+   (AnyNode "cset-disjunct")
+)
+Rows: 37413 Columns: 291637
+Size: 446204 non-zero entries of 10911015081 possible
+Fraction non-zero: 4.0895E-5 Sparsity (-log_2): 14.578
+Total observations: 661104.0  Avg obs per pair: 1.4816
+Entropy Total: 18.301   Left: 16.006   Right: 10.281
+Total MI: -7.985
+
+                 Left         Right     Avg-left     Avg-right
+                 ----         -----     --------     ---------
+Support (l_0)  4122.        370.0
+Count   (l_1)  8763.        680.7         2.126        1.839
+Length  (l_2)  236.8        51.39         5.7452E-2    .1389
+RMS Count      216.6        46.40         5.2550E-2    .1254
 
 
 
@@ -5860,6 +5902,99 @@ md5sum:
 c4a981af336075f0121ac020887bfa47  en_pairs_tone.sql.bz2
 
 ==================================================================
+en_pairs_tone_mst
+-----------------
+Disjuncts from MST-parsed books from "tranche-1" of mostly project
+gutenberg books. Based off of the en_pairs_tone. Contains MI for tone,
+but not the cosine angles.
+
+STATUS: good
+DATE: 27 May 2017
+REASON: I think it's good.
+
+en_pairs_tone_mst=> \dt+
+                        List of relations
+ Schema |    Name    | Type  | Owner  |    Size    | Description 
+--------+------------+-------+--------+------------+-------------
+ public | atoms      | table | ubuntu | 1496 MB    | 
+ public | spaces     | table | ubuntu | 40 kB      | 
+ public | typecodes  | table | ubuntu | 56 kB      | 
+ public | valuations | table | ubuntu | 1871 MB    | 
+ public | values     | table | ubuntu | 8192 bytes | 
+(5 rows)
+
+select count(*) from atoms; << 16487725 = 16.5M (6M more than baseline)
+
+select count(*) from valuations; <<< 19330366 = 19.3M (14M more than base)
+
+SELECT sum(valuations.floatvalue[3]) FROM valuations, atoms, typecodes
+WHERE valuations.atom=atoms.uuid AND atoms.type=typecodes.type AND
+valuations.type=7 AND typecodes.typename='EvaluationLink';
+
+EaluationLink:  559225036 = 559M almost 4X more than baseline.
+WordNode: 125696239 = 126M = identical to baseline;
+LgWordCset: 133363005 = 134M  Hm. 9M more ob.
+
+Key 10317416  *-FrequencyKey-*
+Key 10872983  *-Mutual Info Key-*
+
+1461271903 bytes uncompressed = 1.46G
+208591406 bytes compressed = 209 MB
+
+180dff2b3d683ad5559290338b5815fa  en_pairs_tone_mst.sql
+e7dddab32c92b0fd0e88adfe6be1a87b  en_pairs_tone_mst.sql.bz2
+
+==================================================================
+en_pairs_ttwo
+-------------
+Random parses from tranche-1 and tranche-2. 
+
+STATUS: good
+DATE: 29 May 2017
+REASON: I think it's good.
+
+                        List of relations
+ Schema |    Name    | Type  | Owner  |    Size    | Description 
+--------+------------+-------+--------+------------+-------------
+ public | atoms      | table | ubuntu | 1483 MB    | 
+ public | spaces     | table | ubuntu | 40 kB      | 
+ public | typecodes  | table | ubuntu | 56 kB      | 
+ public | valuations | table | ubuntu | 956 MB     | 
+ public | values     | table | ubuntu | 8192 bytes | 
+
+select count(*) from atoms; <<< 16817599 = 16.8M atoms (6M more than tone)
+select count(*) from valuations; <<< 8770525 = 8.8m (3.4M more)
+
+SELECT count(atoms.uuid) FROM atoms,typecodes WHERE
+atoms.type=typecodes.type AND typecodes.typename='foobar';
+
+WordNode: 186573 = 187K (47K more)
+EvaluationLink:  8047063 = 8M (3.1M more)
+
+SELECT sum(floatvalue[3]) FROM valuations WHERE type=7;
+767377888 << 767M observations = 370M more
+
+SELECT sum(valuations.floatvalue[3]) FROM valuations, atoms, typecodes
+WHERE valuations.atom=atoms.uuid AND atoms.type=typecodes.type AND
+typecodes.typename='EvaluationLink';
+
+EvaluationLink: 267913561 << 268M pair obs, more than double of tone.
+WordNode: 243085829 << 243 M -- almost double
+LgWordCset: << 243114608 -- almost double
+
+SentenceNode << 795835 = 796K more than double
+ParseNode << 12468055 = 12.5M parses more than double.
+
+772033746 Bytes = 772M uncompressed.
+132694670 Bytes = 133M compressed
+
+8bbfb8f0f4956f21ec1120b550890e0f  en_pairs_ttwo.sql
+0b1908dfc232de4ea4e20d616cbbe290  en_pairs_ttwo.sql.bz2
+
+==================================================================
+==================================================================
+==================================================================
+==================================================================
 
 Plan:
 load en_pairs_mst
@@ -6253,3 +6388,524 @@ Hmmm.
  (/home/ubuntu/src/atomspace/opencog/persist/sql/multi-driver/SQLAtomStorage.cc:1202)
 Aborted
 
+relex crash always on this:
+“What the hell is happening here?!”
+split-books/gneiosric-ab   three out of three crashes
+
+cat gneiosric-ab | ./split-sentences.pl > g-split
+./ss-one.sh en gneiosric-ab localhost 17005
+
+cat g-split | ./submit-one.pl localhost 17005 observe-text  breaks
+g2  breaks
+g2b breaks
+g2guess is OK
+g2bb is OK
+g2ba breaks
+g2baa is OK
+g2bab breaks
+g2baba breaks
+g2babaa is OK
+g2babab breaks
+g2bababa breaks
+g3 is OK
+
+cat g4 |nc localhost 4445   breaks!
+echo 「...」 |nc localhost 4445  breks
+link-parser works ... but eats the trailing character...!?
+
+and generates zillions of parses!!??
+
+of which most are identical...
+relex definitely crashes...
+linkage_set_domain_names+0xe0
+
+6 links,
+5th link crashes..
+dtype array holds junk
+
+dtsz supposed to be the actual size of valid entries
+ppn->dtsz
+
+chk_d_type reallocs but does not memset....
+dtsz is too small.!!
+chk_d_type
+
+chk_d_type(pp->pp_node, numli...
+ do not set the pipinfo if domains is zero.
+so do not free. either
+
+*** START OF THIS PROJECT GUTENBERG EBOOK
+***START OF THE PROJECT GUTENBERG EBOOK
+
+END OF THIS PROJECT GUTENBERG EBOOK
+
+*** START: FULL LICENSE ***
+The Full Project Gutenberg License
+
+sed -n '/PROJECT GUTENBERG EBOOK/,$p' filename
+
+schweben
+
+getp "is a"
+54756-0.txt
+
+grep -l 大
+grep -l Anmerkungen *
+
+purezza
+quella
+
+if
+
+Langauge:
+
+54637-0.txt
+54640-0.txt
+54652-0.txt
+54655-0.txt
+54660-0.txt
+54665-0.txt
+54667-0.txt
+54668-0.txt
+54672-0.txt
+54675-0.txt
+54676-0.txt
+54679-0.txt
+54681-0.txt
+54706-0.txt
+54711-0.txt
+54714-0.txt
+54719-0.txt
+54721-0.txt
+54724-0.txt
+54729-0.txt
+
+
+guile
+
+(use-modules (opencog) (opencog persist) (opencog persist-sql))
+(use-modules (opencog nlp) (opencog nlp learn))
+(use-modules (opencog cogserver))
+(start-cogserver "opencog2.conf")
+(sql-open "postgres:///en_pairs_tone_mst?user=ubuntu")
+(sql-load)
+(sql-stats)
+(sql-close)
+Finished loading 16487725 atoms in total in 2212 seconds (7453 per second)
+started at 20K/sec .. towards end, was 75% system cpu... why????
+21GB ram = 1400Bytes/atom. as usual. Need a diet plan.
+
+(sql-open "postgres:///en_pairs_ttwo?user=ubuntu")
+(sql-load)
+(sql-stats)
+(sql-close)
+Finished loading 16817599 atoms in total in 991 seconds (16970 per second)
+Much faster because most atoms are in atomspace already.
+sql-stats: Atomspace holds 22987920 atoms ... and is 26GB in size.
+
+
+(sql-open "postgres:///en_pairs_ttwo_mst?user=ubuntu")
+(sql-store)
+(sql-stats)
+(sql-close)
+
+Initial rate is (3389 per second) on SSD which is 10x the spinning-disk
+Peaked at (3546 per second) half-way throough
+Dropped to (2537 per second) overall average.
+version but is still pathetically slow.
+iotop shows 3.2 MBytes/sec  and about 770 tps
+so where is the bottleneck?
+ Bottleneck is still disk i/o, even though its SSD:
+how can I tell?
+1) guile is under 90% cpu
+2) 20+ postgres procs show 30% cpu, each
+3) sql-stats shows 8 threads busy draining.
+4) loadavg shows 6
+5) top shows > 2.0% wait,  (on 24 cpus!) 4% system 18% user 75% idle
+   viz about 0.5 cou wait, 1 cpu system, 4cpu's busy
+   and since guile is less than  1 cpu, the postgres take up the
+   remaining cpu.  Since 18 cpus are idle, we must be stalled in i/o.
+So, somehow still stuck in i/o waiting for postgres to flush to disk.
+
+6) iotop shows 60 to 100 MBytes/sec, highly variable.
+   wait sometimes spikes to 15% (and io dropts to zero)
+   sometimes rate spikes to 300MB/sec! but rarely.
+
+7) Launching any-parsing does not seem to affect iowait!
+   Nore does it change store performance at all!!!
+   but it does raise the write rates and the tps
+
+?? Is it postgres indexing? Can we suspend that while storing?
+
+--------- meanhwile continue pair-parsing
+launch tranche-3 any-parsing Tue May 30 04:39:44 UTC 2017
+
+----- anyway, recompute pair mi and resume mst-parsing
+
+en_pairs_ttwo_mst
+
+(define ala (make-any-link-api))
+(batch-all-pair-mi ala)
+Final store: about  (1250.0 pairs/sec)
+Done storing 8047063 pair MI's in 6905 secs
+
+sql-stats: Atomspace holds 23178644 atoms = 23M = 35GBytes
+Now can start tranche-2 MST parsing.
+
+Done. Wow. That was fast! did anything actually happen?
+
+select count(*) from atoms; <<< 27638783 = 27M
+
+get-all-words -- 188793  vs. tone: 139790
+all-cset-words -- 83131  vs tone 139790 ??
+disjuncts -- 1670883 vs tone 1860796
+
+wtf somethng broke....
+
+(define (filter-words-with-csets WORD-LIST)
+   (filter!  (lambda (wrd) (not (null? (get-cset-vec wrd)))) WORD-LIST))
+
+
+---------- meanwhile, finish stats work
+(fetch-all-sims)
+
+general idea: how many pairs are there out of N^2?
+what is the distribution of pair memebership?
+
+sims should be LLOBJ
+
+Umm batch-all-pair-mi is where?
+
+batch-sim should NOT store!
+batch-sim-pairs 
+
+So: 1) cutoff for sim  2) cutoff for store.
+
+start 2.4G and run 0.3 sim
+again 0.1 sim...
+
+possible: (37413 * 37412)/2 = 699847578 = 700M pairs
+estimate: 6.5% of these, so= 45M pairs!? Ouch.  .. 50-60 GB RAM 
+    and insanely slow .. 466K secs = 130 hrs = 5.4 days
+running at 1.5K pairs/sec ouch.
+
+Try again:
+(use-modules (opencog) (opencog persist) (opencog persist-sql))
+(use-modules (opencog nlp) (opencog nlp learn))
+(sql-open "postgres:///en_pairs_ultrasim?user=linas")
+(fetch-all-words)
+
+(define pca (make-pseudo-cset-api))
+(pca 'fetch-pairs)
+
+(sql-clear-stats)
+(define ac (get-all-cset-words)) 
+(length ac)
+(load "gram-sim.scm")
+(batch-sim-pairs ac 0.1)
+
+---------- meanwhile, compute & cache similarity
+; (sql-open "postgres:///en_pairs_tone_sim?user=ubuntu")
+
+Wait, where? 
+Oh, gram-sim.
+
+-----------
+todo items:
+* trim low observation counts ....
+* implement sql delete function.
+
+---------- debug hang:
+latest bdgw from git does not solve it.
+latest stable-2.2 guile does not solve it.
+
+revert to distro bdwgc
+#0  0x00007f362151c826 in __GI___sigsuspend (
+    set=set@entry=0x7f36214b1740 <suspend_handler_mask>)
+    at ../sysdeps/unix/sysv/linux/sigsuspend.c:30
+#1  0x00007f3621293602 in GC_suspend_handler_inner
+(dummy=dummy@entry=0x0, 
+    context=context@entry=0x7fff6c807540) at pthread_stop_world.c:324
+#2  0x00007f36212936cf in GC_suspend_handler (sig=30, info=<optimized
+out>, 
+    context=0x7fff6c807540) at pthread_stop_world.c:237
+
+thr 2: find_slot_map (
+    cache=0x7f361fe85ab0, ip=0x1) at ../../libguile/vm.c:936
+#1  scm_i_vm_mark_stack (vp=0xbdca3120, mark_stack_ptr=0x7f361fe85ef0, 
+    mark_stack_limit=0x7f361fe95eb0) at ../../libguile/vm.c:1011
+#2  0x00007f36212883be in GC_mark_from (mark_stack_top=0x7f361fe85ea0, 
+    mark_stack_top@entry=0x7f361fe85f00, 
+    mark_stack=mark_stack@entry=0x7f361fe85eb0, 
+    mark_stack_limit=mark_stack_limit@entry=0x7f361fe95eb0) at
+mark.c:784
+#3  0x00007f36212889de in GC_do_local_mark
+(local_mark_stack=0x7f361fe85eb0, 
+    local_top=0x7f361fe85f00) at mark.c:1048
+#4  0x00007f3621288bf8 in GC_mark_local (
+    local_mark_stack=local_mark_stack@entry=0x7f361fe85eb0,
+id=id@entry=1)
+    at mark.c:1181
+#5  0x00007f3621288f0a in GC_help_marker
+(my_mark_no=my_mark_no@entry=195743)
+    at mark.c:1249
+#6  0x00007f3621292edc in GC_mark_thread (id=<optimized out>)
+    at pthread_support.c:380
+
+
+single-stepping:
+
+scm_i_vm_mark_stack (vp=0xbdca3120, mark_stack_ptr=0x7f361fe85ef0, 
+    mark_stack_limit=0x7f361fe95eb0) at ../../libguile/vm.c:975
+975            fp = SCM_FRAME_DYNAMIC_LINK (fp))
+(gdb) print fp
+$1 = (union scm_vm_stack_element *) 0x7f36183d5e38
+(gdb) step
+973       for (fp = vp->fp, sp = vp->sp;
+(gdb) 
+979           for (slot = nlocals - 1; sp < fp; sp++, slot--)
+(gdb) 
+1011          slot_map = find_slot_map (SCM_FRAME_RETURN_ADDRESS (fp),
+&cache);
+(gdb) 
+1006          sp = SCM_FRAME_PREVIOUS_SP (fp);
+(gdb) print fp
+$2 = (union scm_vm_stack_element *) 0x7f36183d5e38
+(gdb) print sp
+$3 = (union scm_vm_stack_element *) 0x7f36183d5e48
+(gdb) step
+1011          slot_map = find_slot_map (SCM_FRAME_RETURN_ADDRESS (fp),
+&cache);
+(gdb) 
+find_slot_map (cache=0x7f361fe85ab0, ip=0x1) at ../../libguile/vm.c:932
+932       size_t slot = (((scm_t_uintptr) ip) >> 2) %
+SLOT_MAP_CACHE_SIZE;
+(gdb) 
+935       if (cache->entries[slot].ip == ip)
+(gdb) 
+scm_i_vm_mark_stack (vp=0xbdca3120, mark_stack_ptr=0x7f361fe85ef0, 
+    mark_stack_limit=0x7f361fe95eb0) at ../../libguile/vm.c:1011
+1011          slot_map = find_slot_map (SCM_FRAME_RETURN_ADDRESS (fp),
+&cache);
+(gdb) 
+find_slot_map (cache=0x7f361fe85ab0, ip=0x1) at ../../libguile/vm.c:936
+936         map = cache->entries[slot].map;
+(gdb) 
+scm_i_vm_mark_stack (vp=0xbdca3120, mark_stack_ptr=0x7f361fe85ef0, 
+    mark_stack_limit=0x7f361fe95eb0) at ../../libguile/vm.c:975
+975            fp = SCM_FRAME_DYNAMIC_LINK (fp))
+(gdb) print fp
+$4 = (union scm_vm_stack_element *) 0x7f36183d5e38
+
+git tag -l
+Try guile-2.2  v2.2.0 Wed Mar 15 09:02:52 2017
+Try guile-2.1.8  v2.1.8 Fri Mar 10 11:01:04 2017 tried it - spins. its broke
+   (breaks after about 300 cpu-min)
+
+OK guile-2.0.11 on xenial crashes almost immediately with
+guile: hashtab.c:137: vacuum_weak_hash_table: Assertion `removed <= len' failed.
+
+
+=======================
+other guile bugs:
+ (acos 1.0)  can return small imaginaey number
+ (fold of reals can return small imaginary parts
+
+=======================
+total unique pairs
+1) no way to get all pairs...
+2) support not computed or stored.. DONE
+3) stored support not fetchable FIXED with report-API
+4) store left and right sizes DONE
+cache-all-pair-freqs returs total 
+
+* sep out bin-counting code into own file DONE
+add-subtotal-mi-compute DONE
+
+call-only-once in sing
+fetch-all-words in sing
+add-pair-freq-api in mst
+
+(use-modules (opencog) (opencog persist) (opencog persist-sql))
+(use-modules (opencog nlp) (opencog nlp learn))
+(use-modules (opencog analysis))
+(sql-open "postgres:///en_pairs_sim?user=linas")
+(fetch-all-words)
+
+(define ala (make-any-link-api))
+(ala 'fetch-pairs)  << 1099 secs 1074 1028
+(batch-short ala)
+(batch-all-pair-mi ala)
+
+Support: found num left=395274 num right=396260 in 426 secs << 395, ph:527
+Done with wild-card count N(x,*) and N(*,y) in 1259 secs << ph:1300
+Done computing N(*,*) total-count=418235277.0 in 51 secs << ph:46
+Going to do individual pair frequencies
+Done computing 8880914 pairs in 1074 secs  << 1007 ph:872
+Start computing log P(*,y)
+Done computing 396260 left-wilds in 61 secs << ph:51
+Done storing 396260 left-wilds in 121 secs << ph:115
+Done computing 395274 right-wilds in 55 secs << ph:51
+Done with -log P(*,y), start -log P(x,*)
+Done storing 395274 right-wilds in 121 secs << ph:127
+Done computing -log P(x,*) and P(*,y)
+Going to do individual pair MI
+Too many heap sections: Increase MAXHINCR or MAX_HEAP_SECTS
+Fuck.
+
+alloc.c:        ABORT("Too many heap sections: Increase MAXHINCR or
+MAX_HEAP_SECTS");
+MAX_HEAP_SECTS
+include/private/gc_priv.h:#   define MAXHINCR 4096
+
+define HBLKSIZE 4096
+include/private/gc_priv.h:#
+ define MAX_HEAP_SECTS 8192  if -DLARGE_CONFIG
+--enable-large-config
+--enable-parallel-mark didn't do this.
+
+Done computing 8880914 pair MI's in 3590 secs
+Done storing 8880914 pairs in 4190 secs
+Going to do column and row subtotals
+Finished left entropy subtotals in 580 secs
+Finished right entropy subtotals in 517 secs
+Finished left MI subtotals in 353 secs
+Finished right MI subtotals in 330 secs
+Finished left support subtotals in 1021 secs << 772 after star fix
+Finished right support subtotals in 961 secs << 745
+Going to compute the left, right and total entropy
+Finished left norm totals in 210 secs << 232
+Finished right norm totals in 210 secs << 237
+Done computing totals in 2360 secs
+Start saving left-wildcards
+Done storing 396260 left-wilds in 224 secs
+Done storing 395274 right-wilds in 230 secs
+Finished with MI computations
+
+
+========================================================
+support stats
+
+|(*,y)| = number of non-zero entries for column y
+
+sum_y |(*,y)| = right-support
+
+sqrt [ sum_x N^2 (x,*) / num-rows ]
+
+left-length(y) = sqrt(sum_x N^2(x,y)) = col-length
+so sum over rights
+divide by num-rights == num cols
+so this is right-legnth
+
+<xun> = sum_y N(*,y) / num-cols
+      = N(*,*) / num-cols
+
+<0w> = sum_y p(*,y) |(*,y)|
+
+<xw> = s x p
+    = sum_y p(*,y) N(*,y)
+
+but p(*,y) = N(*,y) / N(*,*)
+
+<x^2w> = s x^2 p 
+       = sum_y p(*,y) N^2(*,y)
+
+s (x- <xw>)^2  p =
+
+<x^2w> - 2<xw> s x p + <xw>^2
+= <x^2w> - <xw>^2
+
+anyway, its not clear that's what we want, anyway.  Do we want count
+variation? or length variation?  length variation is trite if we've got
+totals. But count-variation requires....
+
+2d 2 obj, each = 1, avg=1
+
+<x^2w> = 1/2 + 1/2 = 1 ... 
+so for lensq, needed to divide by support.
+and for avg, need to divide by support too.
+
+
+Argh. Sim has the old style. pair-entropy
+
+(define fla (add-pair-freq-api ala))
+(define rla (add-report-api ala))
+(rla 'left-dim)
+(rla 'right-dim)
+(rla 'num_pairs)
+(rla 'left-entropy)
+(rla 'right-entropy)
+(rla 'total-entropy)
+(rla 'total-mi)
+
+(define pca (make-pseudo-cset-api))
+(pca 'fetch-pairs)
+(batch-all-pair-mi pca)  
+(define fca (add-pair-freq-api pca))
+(define ac (get-all-cset-words))
+
+5205
+
+(fca 'pair-mi  xxxx)
+So:
+(EvaluationLink  ; 388
+ (LinkGrammarRelationshipNode "ANY")
+  (ListLink (AnyNode "left-word") (WordNode "one-point")))
+has no "*-Entropy Key-* why?
+because not computeed ... why?
+Going to do MI column and row subtotals
+should be 'cache-all-subtotals
+Going to compute the left, right and total entropy
+
+(define wca (add-pair-stars pca))
+(define fca (add-pair-freq-api wca))
+(define rb (wca 'right-basis))
+(define dj (car rb))
+(define lwd (pca 'left-wildcard dj))
+ (fca 'left-wild-entropy dj)
+
+      (define (left-sum FN)
+         (fold
+            (lambda (right-item sum)
+               (+ sum (FN right-item)))
+            0 rb))
+
+      (define (right-sum FN)
+         (fold
+            (lambda (left-item sum)
+               (+ sum (FN left-item)))
+            0 (wca 'left-basis)))
+
+argh. compute-left-entropy is wrong... FIXED
+(define rca (add-report-api wca))
+(rca 'set-entropy le re tent)
+wild-wild-counta DONE
+time for totlaa DONE
+
+(define (an llobj) 
+	(lambda (message . args)
+		(case message ((name) "the big old name")
+		(else (apply llobj (cons message args))))))
+
+
+atom->getKeys()
+    std::set<Handle> getKeys() const;
+
+todo: print times  DONE
+todo: create a report. DONE
+todo: investigate exception DONE
+
+todo: how many words, on average, go into a pair?
+what about hubiness? in the graph con sense?
+i.e avg incomiing avg outgoing (i.e. left, right support sizes)
+
+avg left-support: non-zero / num-lefts(rows) 
+left-size: tot count /num-lefts<F8>x
+
+avg length
+( err... left-length 'rigt-basis
+
+
+
+Crazy idea: iterate; the places we end up at should be the dependents
+since everything points at them, and they never point away.
