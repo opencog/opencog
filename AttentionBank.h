@@ -64,7 +64,7 @@ class AttentionBank
     std::mutex _idx_mtx;
     std::unordered_map<Handle, AttentionValuePtr> _atom_index;
     std::mutex AFMutex;
-    int minAFSize;
+    unsigned int minAFSize;
     struct compare_sti_less{
         bool operator()(const std::pair<Handle, AttentionValuePtr>& h1,
                         const std::pair<Handle, AttentionValuePtr>& h2){
