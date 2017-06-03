@@ -1,4 +1,5 @@
 # Pattern miner build file.
+ADD_SUBDIRECTORY (types)
 
 IF (HAVE_cpprest)
     ADD_LIBRARY (PatternMiner SHARED
