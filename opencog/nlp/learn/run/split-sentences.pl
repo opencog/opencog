@@ -176,5 +176,8 @@ sub preprocess
 	# Add trailing break.
 	$text .= "\n" unless $text =~ /\n$/;
 
+	# Escape double-quotes.
+	$text =~ s/\"/\\\"/g;
+
 	return $text;
 }
