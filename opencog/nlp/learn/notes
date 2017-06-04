@@ -6620,6 +6620,29 @@ RMS Count      4.2741E+5    3.4915E+5     18.52        15.55
 (define psa (add-pair-stars pca))
 (psa 'fetch-pairs)
 Elapsed time to load csets: 2454 secs
+Finished with MI computations; this took 4.55 hours
+
+(print-matrix-summary-report psa)
+Summary Report for Correlation Matrix Word-Disjunct Pairs (aka Connector Sets)
+Left type: WordNode    Right Type: LgAnd    Pair Type: LgWordCset
+Wildcard: (ListLink (ctv 0 0 2.5749688e+08)
+   (AnyNode "cset-word")
+   (AnyNode "cset-disjunct")
+)
+Rows: 186573 Columns: 3401465
+Size: 6975371 non-zero entries of 634621529445 possible
+Fraction non-zero: 1.0991E-5 Sparsity (-log_2): 16.473
+Total observations: 257496884.0  Avg obs per pair: 36.915
+Entropy Total: 11.868   Left: 2.4858   Right: 9.8057
+Total MI: -0.423
+
+                 Left         Right     Avg-left     Avg-right
+                 ----         -----     --------     ---------
+Support (l_0)  5.8326E+4    1.7086E+5
+Count   (l_1)  3.2094E+6    9.5093E+7     55.03        556.6    
+Length  (l_2)  2.4075E+6    1.2274E+7     41.28        71.84    
+RMS Count      1.8036E+6    1.2272E+7     30.92        71.83    
+
 
 
 
@@ -7030,6 +7053,29 @@ So we are instanly in trouble! once through the loop, and we've got the broken f
 
 So how did we get here?
 
+(gdb) print vp
+$32 = (struct scm_vm *) 0x755c1bd0
+(gdb) print *vp
+$33 = {ip = 0x7f3e9e5a6378 <subr_stub_code+56>, sp = 0x7f3e94cdee00, 
+  fp = 0x7f3e94cdee18, stack_limit = 0x7f3e94cde000, trace_level = 0, 
+  sp_min_since_gc = 0x7f3e94cdee00, stack_size = 512, 
+  stack_bottom = 0x7f3e94cde000, stack_top = 0x7f3e94cdf000, 
+  overflow_handler_stack = 0x304, hooks = {0x4, 0x4, 0x4, 0x4, 0x4}, 
+  resumable_prompt_cookie = 0x7f3d397f9440, engine = 1}
+
+Looks plausible, not corrupted. Why is engine=1 ?? 
+#define SCM_VM_REGULAR_ENGINE 0
+#define SCM_VM_DEBUG_ENGINE 1
+#define SCM_VM_NUM_ENGINES 2
+#  define SCM_I_CURRENT_THREAD (scm_i_current_thread)
+
+(gdb) print scm_i_current_thread
+$34 = (scm_i_thread *) 0x0
+
+OK, that's not excellent.
+(gdb) print thread_count
+$35 = 161
+
 (gdb) bt
 #0  scm_i_vm_mark_stack (vp=0x755c1bd0, mark_stack_ptr=0x7f3e9b783f40, 
     mark_stack_limit=0x7f3e9b793eb0) at ../../libguile/vm.c:1011
@@ -7062,6 +7108,195 @@ define GET_HDR(p, hhdr)  ... ((hhdr) = HDR_INNER(p)
                 ((bi)->index[((word)(p) >> LOG_HBLKSIZE) & (BOTTOM_SZ - 1)])
 
 This seems all wrong.. wtf ....
+
+is it called by thread_mark ??
+in libguile/thread.c:
+  thread_gc_kind =
+    GC_new_kind (GC_new_free_list (),
+       GC_MAKE_PROC (GC_new_proc (thread_mark), 0),
+       0, 1)
+in bdwgc/misc.c  GC_new_proc
+    GC_mark_procs[result] = proc
+#define GC_mark_procs GC_arrays._mark_procs
+#define PROC(descr) \
+      (GC_mark_procs[((descr) >> GC_DS_TAG_BITS) & (GC_MAX_MARK_PROCS-1)])
+
+      GC_obj_kinds[result].ok_descriptor = descr;  <<< this is where MAKE_PROC goes.
+
+anyway ... in mark.c line 733
+        case GC_DS_PROC:
+          mark_stack_top--;
+          credit -= GC_PROC_BYTES;
+          mark_stack_top = (*PROC(descr))((word *)current_p, mark_stack_top,
+                                          mark_stack_limit, ENV(descr));
+          continue;
+But that's the wrong line number.  line 772 is in 
+        case GC_DS_PER_OBJECT:
+          if ((signed_word)descr >= 0) {
+            /* Descriptor is in the object.     */
+            descr = *(word *)(current_p + descr - GC_DS_PER_OBJECT);
+
+Oh, it goes to retry, which loops around and calls PROC which is thread_mark
+which is called with args 
+          mark_stack_top = (*PROC(descr))((word *)current_p, mark_stack_top,
+                                          mark_stack_limit, ENV(descr));
+
+(gdb) print current_p
+$39 = (ptr_t) 0x7225d380 "@\325%r"
+
+so back in libguile/threads.c line 84:
+  const struct scm_i_thread *t = (struct scm_i_thread *) addr;
+
+(gdb) print *(struct scm_i_thread *) current_p
+$40 = {next_thread = 0x7225d540, handle = 0x5763f3b0, pthread = 139900934399744, 
+  result = 0x4, exited = 0, guile_mode = 1, needs_unregister = 1, wake = 0x0, 
+  sleep_cond = {__data = {__lock = 0, __futex = 0, __total_seq = 0, 
+      __wakeup_seq = 0, __woken_seq = 0, __mutex = 0x0, __nwaiters = 0, 
+      __broadcast_seq = 0}, __size = '\000' <repeats 47 times>, __align = 0}, 
+  sleep_pipe = {151, 197}, freelists = 0x71cfe800, 
+  pointerless_freelists = 0x71cfe780, dynamic_state = 0x71de7900, dynstack = {
+    base = 0x698c3800, top = 0x698c3940, limit = 0x698c3a00}, 
+  pending_asyncs = 0x304, block_asyncs = 0, continuation_root = 0x5763f340, 
+  continuation_base = 0x7f3d397f9c90, vp = 0x755c1bd0, base = 0x7f3d397f9da0, 
+  regs = {{__jmpbuf = {139905204221696, 139906923931021, 1, 139894281647232, 
+        139906913276512, 0, 139906918327551, 8388608}, 
+      __mask_was_saved = 964664752, __saved_mask = {__val = {0, 139900934399744, 
+          139900934399744, 139900934397344, 139906923929400, 139893936840720, 
+          1804170656, 139906913276512, 139900934399744, 139900934397344, 
+          139900934397504, 139893936840720, 139906910859134, 139906913276484, 
+          139906910857112, 27401856}}}}}
+
+(gdb) print ((struct scm_i_thread *) current_p)->vp
+$41 = (struct scm_vm *) 0x755c1bd0
+
+which is exactly the vp we had before, so this is the correct thread.
+
+So  ... all the values in *(struct scm_i_thread *) current_p look more or less OK;
+its not corrupted. And all the values in *vp look more or less OK, its not corrrupted
+except that engine=1 looks wrong.  So what's up with the weird stack looping?
+Again: 
+From before, we had:
+
+(gdb) print *vp
+$42 = {ip = 0x7f3e9e5a6378 <subr_stub_code+56>, sp = 0x7f3e94cdee00, 
+  fp = 0x7f3e94cdee18, stack_limit = 0x7f3e94cde000, trace_level = 0, 
+  sp_min_since_gc = 0x7f3e94cdee00, stack_size = 512, 
+  stack_bottom = 0x7f3e94cde000, stack_top = 0x7f3e94cdf000, 
+  overflow_handler_stack = 0x304, hooks = {0x4, 0x4, 0x4, 0x4, 0x4}, 
+  resumable_prompt_cookie = 0x7f3d397f9440, engine = 1}
+
+so fp, sp, stack_bottom, stack_top all are self-consistent with each other.
+The problem is that
+    fp = SCM_FRAME_DYNAMIC_LINK (fp)
+goes nowhere, after the first iteration.
+
+Is the frame corrupted? How? what does the rest of the stack look like?
+
+(gdb) x/32x 0x7f3e94cdee00
+0x7f3e94cdee00: 0x0000000000000904      0x000000000000200c
+0x7f3e94cdee10: 0x0000000001a1b7e0      0x0000000001a1b5e0
+0x7f3e94cdee20: 0x0000000000000004      0x000000000000200c  <<< theres the 4
+0x7f3e94cdee30: 0x0000000000169bd6      0x0000000000000001 <<< there's the new fp
+0x7f3e94cdee40: 0x0000000000000000      0x000000000192acd0 <<< there's the zero.
+0x7f3e94cdee50: 0x0000000001fa4bc0      0x0000000001a1c6d0
+0x7f3e94cdee60: 0x0000000044507950      0x0000000000000002
+0x7f3e94cdee70: 0x000000000005a6f5      0x00000000018febd0
+0x7f3e94cdee80: 0x000000006d490d00      0x00007f3e9e97241c
+0x7f3e94cdee90: 0x0000000000000002      0x00007f3e9e97241c
+0x7f3e94cdeea0: 0x0000000000000002      0x00007f3e8d797630
+0x7f3e94cdeeb0: 0x0000000000000002      0x00007f3e86effacc
+0x7f3e94cdeec0: 0x0000000000000003      0x000000006d490d00
+0x7f3e94cdeed0: 0x00007f3e86eb8698      0x0000000000000002
+0x7f3e94cdeee0: 0x00007f3e8e51f450      0x0000000000000008
+0x7f3e94cdeef0: 0x0000000001a37c10      0x000000000192acd0
+
+
+So... who sets up thread->vp ? 
+/* #define VM_ENABLE_ASSERTIONS */
+However, defining this breaks the build.
+
+diff --git a/libguile/vm-engine.c b/libguile/vm-engine.c
+index 6c88ebf..f0f8164 100644
+--- a/libguile/vm-engine.c
++++ b/libguile/vm-engine.c
+@@ -2050,11 +2050,11 @@ VM_NAME (scm_i_thread *thread, struct scm_vm *vp,
+ 
+           if (!scm_module_system_booted_p)
+             {
+-              ASSERT (scm_is_true
++              ASSERT (scm_is_true(
+                       scm_equal_p (modname,
+                                    scm_list_2
+                                    (SCM_BOOL_T,
+-                                    scm_from_utf8_symbol ("guile"))));
++                                    scm_from_utf8_symbol ("guile")))));
+               var = scm_lookup (sym);
+             }
+           else if (scm_is_true (SCM_CAR (modname)))
+diff --git a/libguile/vm.c b/libguile/vm.c
+index 18f2192..c26066e 100644
+--- a/libguile/vm.c
++++ b/libguile/vm.c
+@@ -63,7 +63,7 @@ static size_t page_size;
+ 
+ /* The VM has a number of internal assertions that shouldn't normally be
+    necessary, but might be if you think you found a bug in the VM. */
+-/* #define VM_ENABLE_ASSERTIONS */
++#define VM_ENABLE_ASSERTIONS
+ 
+ static void vm_expand_stack (struct scm_vm *vp,
+                              union scm_vm_stack_element *new_sp) SCM_NOINLINE;
+
+
+ GEN      guile-procedures.texi
+/bin/bash: line 1: 24078 Broken pipe 
+
+ ./meta/guile
+Aborted
+./libguile/guile
+Aborted
+gdb libguile/.libs/lt-guile
+
+#0  0x00007ffff74f7428 in __GI_raise (sig=sig@entry=6)
+    at ../sysdeps/unix/sysv/linux/raise.c:54
+#1  0x00007ffff74f902a in __GI_abort () at abort.c:89
+#2  0x00007ffff7b707c4 in vm_regular_engine (thread=0x7282, vp=0x806f30, 
+    registers=0x6, resume=-145787864) at ../../libguile/vm-engine.c:2053
+#3  0x00007ffff7b711d2 in scm_call_n (proc=0x832b30, argv=argv@entry=0x0, 
+    nargs=nargs@entry=0) at ../../libguile/vm.c:1257
+#4  0x00007ffff7af14e9 in scm_call_0 (proc=<optimized out>)
+    at ../../libguile/eval.c:481
+#5  0x00007ffff7b10568 in scm_primitive_load_path (args=<optimized out>)
+    at ../../libguile/load.c:1248
+#6  0x00007ffff7b6e976 in vm_regular_engine (thread=0x7282, vp=0x806f30, 
+    registers=0x6, resume=-145787864) at ../../libguile/vm-engine.c:784
+
+Oh. wtf. 
+
+(define last-gc (gc-stats))
+(define start-time (get-internal-real-time))
+(define run-time (get-internal-run-time))
+(define (avg-time-taken) 
+	(define now (get-internal-real-time))
+	(define run (get-internal-run-time))
+	(define cur (gc-stats))
+	(define gc-time-taken (* 1.0e-9 (- (cdar cur) (cdar last-gc))))
+	(define elapsed-time (* 1.0e-9 (- now start-time)))
+	(define cpu-time (* 1.0e-9 (- run run-time)))
+	(format #t "Elapsed time: ~5f secs. GC-time-taken: ~5f s or ~5f%   cpu-usage: ~5f%\n"
+		elapsed-time gc-time-taken  (* 100 (/ gc-time-taken elapsed-time))
+		(* 100 (/ cpu-time elapsed-time))
+	)
+	(set! last-gc cur)
+	(set! start-time now)
+	(set! run-time run)
+)
+
+
+
+
+
+
 
 
 
