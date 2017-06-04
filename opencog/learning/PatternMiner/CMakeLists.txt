@@ -14,6 +14,7 @@ IF (HAVE_cpprest)
     TARGET_LINK_LIBRARIES (PatternMiner
         ${COGUTIL_LIBRARY}
         ${ATOMSPACE_LIBRARIES}
+        patternminer-types
         ${cpprest_LIBRARY}
         ${Boost_SYSTEM_LIBRARY}
     )
@@ -28,6 +29,7 @@ ELSE (HAVE_cpprest)
     TARGET_LINK_LIBRARIES (PatternMiner
         ${COGUTIL_LIBRARY}
         ${ATOMSPACE_LIBRARIES}
+        patternminer-types
         ${Boost_SYSTEM_LIBRARY}
     )
 ENDIF (HAVE_cpprest)
