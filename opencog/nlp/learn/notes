@@ -6930,6 +6930,34 @@ guile: hashtab.c:137: vacuum_weak_hash_table: Assertion `removed <= len' failed.
 Arguments with Curtis:
 GC_register_my_thread
 -------------------------------------------------------------------------
+
+Bewlow has gone to
+https://debbugs.gnu.org/cgi/bugreport.cgi?bug=27234
+
+bug-guile@gnu.org.
+
+Subject: Hang in GC, inf loop while walking frame pointers
+
+what: guile-2.2-stable, from git.
+
+I've got a large, complex, heavily multi-threaded guile program that
+hangs during garbage collection; usually after running for half a day.
+It hangs in a tight loop in scm_i_vm_mark_stack, spinning at 100% of CPU.
+
+This is due to the for-loop line fp = SCM_FRAME_DYNAMIC_LINK (fp)) 
+at libguile/vm.c line 975 failing to advance the frame pointer.
+There's no "obvious" corruption in the stack; it simply looks like
+the frame was incompletely set up, and so incrementing to the next
+fp does not go anywhere.
+
+I have recompiled guile with VM_ENABLE_ASSERTIONS and am trying to
+reproduce the bug now.  The rest of this email is a record of a long
+debug session isolating the problem, and showing that, overall, the
+thread and stack data look more-or-less correct and uncorrupoted,
+except for the inability to walk forward in the frame.
+
+-- linas
+
 Try again.
 same as above: thread 4: find_slot_map
 187 threads total.
@@ -7273,6 +7301,7 @@ gdb libguile/.libs/lt-guile
 
 Oh. wtf. 
 
+
 (define last-gc (gc-stats))
 (define start-time (get-internal-real-time))
 (define run-time (get-internal-run-time))
@@ -7293,10 +7322,320 @@ Oh. wtf.
 )
 
 
+Anyway: it hangs without ever hitting any of the VM DEBUG asserts.
+This time:
+
+(gdb) print *vp
+$1 = {ip = 0x7ffff7b87358 <subr_stub_code+56>, sp = 0x7fffdc617e00, 
+  fp = 0x7fffdc617e18, stack_limit = 0x7fffdc617000, trace_level = 0, 
+  sp_min_since_gc = 0x7fffdc617b58, stack_size = 512, 
+  stack_bottom = 0x7fffdc617000, stack_top = 0x7fffdc618000, 
+  overflow_handler_stack = 0x304, hooks = {0x4, 0x4, 0x4, 0x4, 0x4}, 
+  resumable_prompt_cookie = 0x7fff857f9440, engine = 1}
+
+(gdb) x/32x 0x7fffdc617e00
+0x7fffdc617e00: 0x0000000000000904      0x000000000000630c
+0x7fffdc617e10: 0x000000000089f7e0      0x000000000089f5e0
+0x7fffdc617e20: 0x0000000000000004      0x000000000000630c
+0x7fffdc617e30: 0x00000000000377d6      0x0000000000000001
+0x7fffdc617e40: 0x0000000000000000      0x00000000007aecd0
+0x7fffdc617e50: 0x00000000010de660      0x00000000008a06d0
+0x7fffdc617e60: 0x000000003f543a40      0x0000000000000002
+0x7fffdc617e70: 0x000000000000ddf5      0x0000000000782bd0
+0x7fffdc617e80: 0x00000000130cbe20      0x00007ffff7f4d41c
+0x7fffdc617e90: 0x0000000000000002      0x00007ffff7f4d41c
+0x7fffdc617ea0: 0x0000000000000002      0x00007fffe7099630
+0x7fffdc617eb0: 0x0000000000000002      0x00007fffe08f3acc
+0x7fffdc617ec0: 0x0000000000000003      0x00000000130cbe20
+0x7fffdc617ed0: 0x00007fffe08be698      0x0000000000000002
+0x7fffdc617ee0: 0x00007fffe7c8e450      0x0000000000000008
+0x7fffdc617ef0: 0x00000000008bbbe0      0x00000000007aecd0
+
+Wow. More or less IDENTICAL to last time!!
+
+what is vp->ip pointing at??
+
+(gdb) x/16 0x7ffff7b87320
+0x7ffff7b87320 <subr_stub_code>:        0x0000000a00000115      0x00000009000000b7
+0x7ffff7b87330 <subr_stub_code+16>:     0x0000000000000000      0x0000000a00000215
+0x7ffff7b87340 <subr_stub_code+32>:     0x00000009000000b7      0x0000000000000000
+0x7ffff7b87350 <subr_stub_code+48>:     0x0000021800000217      0x000000b70000000a
+0x7ffff7b87360 <subr_stub_code+64>:     0x0000000000000009      0x0000000a00000120
+0x7ffff7b87370 <subr_stub_code+80>:     0x00000009000000b7      0x0000000000000000
+0x7ffff7b87380 <subr_stub_code+96>:     0x0000000a00000315      0x00000009000000b7
+0x7ffff7b87390 <subr_stub_code+112>:    0x0000000000000000      0x0000031700000216
+
+WHo sets t->vp ???
+thread_vm (scm_i_thread *t)
+   t->vp = make_vm ();
+
+So clearly, above is NOT a fresh stack, but is well-used.
+
+(gdb) print vm_default_engine
+$3 = 1
+
+But ... #define SCM_VM_REGULAR_ENGINE 0
+#define SCM_VM_DEBUG_ENGINE 1
+ So who set it to 1??
+
+#define FP_SLOT(i)           SCM_FRAME_SLOT (vp->fp, i)
+#define SCM_FRAME_SLOT(fp,i)            ((fp) - (i) - 1)
+
+      vp->fp = SCM_FRAME_SLOT (old_fp, proc - 1);
+      SCM_FRAME_SET_DYNAMIC_LINK (vp->fp, old_fp);
+
+frames.h:#define SCM_FRAME_DYNAMIC_LINK(fp)      ((fp) + (fp)[1].as_uint)
+frames.h:#define SCM_FRAME_SET_DYNAMIC_LINK(fp, dl) ((fp)[1].as_uint = ((dl) - (fp)))
+
+So I'm getting dl == fp ?? 
+guile -l pair-count-en.scm
+
+libguile/frames.h
+@@ -104,7 +104,8 @@ union scm_vm_stack_element
+ #define SCM_FRAME_RETURN_ADDRESS(fp)    ((fp)[0].as_ip)
+ #define SCM_FRAME_SET_RETURN_ADDRESS(fp, ra) ((fp)[0].as_ip = (ra))
+ #define SCM_FRAME_DYNAMIC_LINK(fp)      ((fp) + (fp)[1].as_uint)
+-#define SCM_FRAME_SET_DYNAMIC_LINK(fp, dl) ((fp)[1].as_uint = ((dl) - (fp)))
++#define SCM_FRAME_SET_DYNAMIC_LINK(fp, dl)  { \
++((fp)[1].as_uint = ((dl) - (fp))) ; if ((dl) == (fp)) abort(); }
+ #define SCM_FRAME_SLOT(fp,i)            ((fp) - (i) - 1)
+ #define SCM_FRAME_LOCAL(fp,i)           (SCM_FRAME_SLOT (fp, i)->as_scm)
+ #define SCM_FRAME_NUM_LOCALS(fp, sp)    ((fp) - (sp))
+
+--- a/libguile/gsubr.c
++++ b/libguile/gsubr.c
+@@ -169,7 +169,8 @@
+        (generate-bytecode i)
+        (setq i (1+ i)))))
+ */
+-static const scm_t_uint32 subr_stub_code[] = {
++// static const scm_t_uint32 subr_stub_code[] = {
++const scm_t_uint32 subr_stub_code[] = {
+   /* C-u 1 0 M-x generate-bytecodes RET */
+   /* 0 arguments */
+   A(0),
+--- a/libguile/vm.c
++++ b/libguile/vm.c
+@@ -63,7 +63,7 @@ static size_t page_size;
+ 
+ /* The VM has a number of internal assertions that shouldn't normally be
+    necessary, but might be if you think you found a bug in the VM. */
+-/* #define VM_ENABLE_ASSERTIONS */
++#define VM_ENABLE_ASSERTIONS
+ 
+ static void vm_expand_stack (struct scm_vm *vp,
+                              union scm_vm_stack_element *new_sp) SCM_NOINLINE;
+@@ -952,6 +952,9 @@ enum slot_desc
+     SLOT_DESC_UNUSED = 3
+   };
+ 
++extern const scm_t_uint32 subr_stub_code[];
++scm_t_uint32 * pstub = (void*) &subr_stub_code;
++
+ /* Mark the active VM stack region.  */
+ struct GC_ms_entry *
+ scm_i_vm_mark_stack (struct scm_vm *vp, struct GC_ms_entry *mark_stack_ptr,
+@@ -967,6 +970,7 @@ scm_i_vm_mark_stack (struct scm_vm *vp, struct GC_ms_entry
+*mark_stack_ptr,
+   void *upper = (void *) GC_greatest_plausible_heap_addr;
+   void *lower = (void *) GC_least_plausible_heap_addr;
+   struct slot_map_cache cache;
++  union scm_vm_stack_element *fprev = NULL;
+ 
+   memset (&cache, 0, sizeof (cache));
+ 
+@@ -974,6 +978,14 @@ scm_i_vm_mark_stack (struct scm_vm *vp, struct GC_ms_entry
+*mark_stack_ptr,
+        fp < vp->stack_top;
+        fp = SCM_FRAME_DYNAMIC_LINK (fp))
+     {
++      if (fprev == fp)
++        {
++           printf("Oh no Mr Bill!! stack_size=%lu fp-bot = %lu ip-subr_stub_code=%lu engine=%d\n",
++           vp->stack_size, fp - vp->stack_bottom, vp->ip - pstub, vp->engine);
++           break;
++        }
++      fprev = fp;
++
+       scm_t_ptrdiff nlocals = SCM_FRAME_NUM_LOCALS (fp, sp);
+       size_t slot = nlocals - 1;
+       for (slot = nlocals - 1; sp < fp; sp++, slot--)
+
+
+Oh no Mr Bill!! stack_size=512 fp-bot = 455 ip-subr_stub_code=14  engine=1
+Oh no Mr Bill!! stack_size=512 fp-bot = 455 ip-subr_stub_code=14  engine=1
+
+after a wall-clock hour of runtime, it crashes:
+#0  0x00007ffff7affb2a in scm_frame_instruction_pointer (frame=0x5bcae580)
+    at ../../libguile/frames.c:346
+frames.h:#define SCM_VM_FRAME_IP(f)	SCM_VM_FRAME_DATA (f)->ip
+frames.h:#define SCM_VM_FRAME_DATA(x)	((struct scm_frame *)SCM_CELL_WORD_1 (x))
+#define SCM_CELL_WORD_1(x) SCM_CELL_WORD ((x), 1)
+#define SCM_CELL_WORD(x, n) SCM_GC_CELL_WORD ((x), (n))
+gc.h:#define SCM_GC_CELL_WORD(x, n)   (SCM_UNPACK (SCM_GC_CELL_OBJECT ((x), (n))))
+gc.h:#define SCM_GC_CELL_OBJECT(x, n) (((SCM *)SCM2PTR (x)) [n])
+gc.h:#define SCM2PTR(x) ((scm_t_cell *) (SCM_UNPACK_POINTER (x)))
+etc.
+
+(gdb) x/8x  0x5bcae580
+0x5bcae580:     0xffffffffa49232af      0x0000000000000000
+0x5bcae590:     0xffffffffa396e59f      0x0000000000000000
+0x5bcae5a0:     0xffffffffa4924287      0x0000000000000000
+0x5bcae5b0:     0xffffffffa39d15df      0x0000000000000000
+
+All of these look bad, and will clearly crash if derefernced.
+(gdb) x 0xa49232af
+0xa49232af:     Cannot access memory at address 0xa49232af
+(gdb) x 0xffffffffa396e59f
+0xffffffffa396e59f:     Cannot access memory at address 0xffffffffa396e59f
 
 
 
+#1  0x00007ffff7b67331 in vm_debug_engine (thread=0x5bcae580, vp=0x5b62c480, 
+    registers=0x7ffff7b04330 <scm_apply_subr+176>, resume=-536784)
+    at ../../libguile/vm-engine.c:784
+#2  0x00007ffff7b7128a in scm_call_n (proc=0x7fffede811e8, 
+    argv=argv@entry=0x7ffe53ffddd8, nargs=nargs@entry=1)
+    at ../../libguile/vm.c:1269
+#3  0x00007ffff7af1568 in scm_call_1 (proc=<optimized out>, arg1=0x5bcae580)
+    at ../../libguile/eval.c:487
+#4  0x00007ffff7affd08 in scm_i_frame_print (frame=0x5bcae580, port=0x16f10160, 
+    pstate=<optimized out>) at ../../libguile/frames.c:48
+why are we printing???
 
+#5  0x00007ffff7b33c4b in scm_prin1 (exp=exp@entry=0x5bcae580, 
+    port=port@entry=0x16f10160, writingp=writingp@entry=1)
+    at ../../libguile/print.c:817
+#6  0x00007ffff7b34b11 in scm_write (obj=0x5bcae580, port=0x16f10160)
+    at ../../libguile/print.c:1076
+
+why are we writing?
+
+#7  0x00007ffff7b67331 in vm_debug_engine (thread=0x5bcae580, vp=0x5b62c480, 
+    registers=0x7ffff7b04330 <scm_apply_subr+176>, resume=-536784)
+    at ../../libguile/vm-engine.c:784
+#8  0x00007ffff7b7128a in scm_call_n (proc=0x7fffeddbed70, 
+    argv=argv@entry=0x7ffe53ffe080, nargs=nargs@entry=4)
+    at ../../libguile/vm.c:1269
+#9  0x00007ffff7af1644 in scm_call_4 (proc=<optimized out>, 
+    arg1=arg1@entry=0x59d5fee0, arg2=arg2@entry=0x59d5cf20, 
+    arg3=arg3@entry=0x983520, arg4=arg4@entry=0x52) at ../../libguile/eval.c:508
+#10 0x00007ffff7ae29a5 in display_backtrace_body (a=<optimized out>)
+    at ../../libguile/backtrace.c:244
+
+Ohh, why is this being done?
+
+#11 0x00007ffff7b67331 in vm_debug_engine (thread=0x5bcae580, vp=0x5b62c480, 
+    registers=0x7ffff7b04330 <scm_apply_subr+176>, resume=-536784)
+    at ../../libguile/vm-engine.c:784
+#12 0x00007ffff7b7128a in scm_call_n (proc=proc@entry=0x59d5cf00, 
+    argv=argv@entry=0x0, nargs=nargs@entry=0) at ../../libguile/vm.c:1269
+#13 0x00007ffff7af1549 in scm_call_0 (proc=proc@entry=0x59d5cf00)
+    at ../../libguile/eval.c:481
+#14 0x00007ffff7b600f9 in catch (tag=tag@entry=0x404, thunk=0x59d5cf00, 
+    handler=0x59d5cee0, pre_unwind_handler=0x4) at ../../libguile/throw.c:137
+#15 0x00007ffff7b60465 in scm_catch_with_pre_unwind_handler (key=key@entry=0x404, 
+    thunk=<optimized out>, handler=<optimized out>, 
+    pre_unwind_handler=<optimized out>) at ../../libguile/throw.c:254
+#16 0x00007ffff7b6061f in scm_c_catch (tag=tag@entry=0x404, 
+    body=body@entry=0x7ffff7ae2880 <display_backtrace_body>, 
+    body_data=body_data@entry=0x7ffe53ffe460, 
+    handler=handler@entry=0x7ffff7ae2c70 <error_during_backtrace>, 
+    handler_data=<optimized out>, 
+    pre_unwind_handler=pre_unwind_handler@entry=0x0, pre_unwind_handler_data=0x0)
+    at ../../libguile/throw.c:377
+#17 0x00007ffff7b6062e in scm_internal_catch (tag=tag@entry=0x404, 
+    body=body@entry=0x7ffff7ae2880 <display_backtrace_body>, 
+    body_data=body_data@entry=0x7ffe53ffe460, 
+    handler=handler@entry=0x7ffff7ae2c70 <error_during_backtrace>, 
+    handler_data=<optimized out>) at ../../libguile/throw.c:386
+#18 0x00007ffff7ae2855 in scm_display_backtrace_with_highlights (
+    stack=<optimized out>, port=<optimized out>, first=<optimized out>, 
+    depth=<optimized out>, highlights=<optimized out>)
+    at ../../libguile/backtrace.c:282
+
+Yuck.
+#19 0x00007fffecb62654 in opencog::SchemeEval::catch_handler(scm_unused_struct*,
+scm_unused_struct*) (this=0x7ffe8c000980, tag=0x7a86e0, throw_args=0x5bcda980)
+    at /home/ubuntu/src/atomspace/opencog/guile/SchemeEval.cc:420
+
+Oh. Ewww. Something that got sent caused an exception.  But what?
+Lets print to the log file.
+
+#20 0x00007ffff7b67331 in vm_debug_engine (thread=0x5bcae580, vp=0x5b62c480, 
+    registers=0x7ffff7b04330 <scm_apply_subr+176>, resume=-536784)
+    at ../../libguile/vm-engine.c:784
+#21 0x00007ffff7b7128a in scm_call_n (proc=proc@entry=0x5bcae600, 
+    argv=<optimized out>, nargs=5) at ../../libguile/vm.c:1269
+#22 0x00007ffff7af1a3b in scm_apply_0 (proc=proc@entry=0x5bcae600, args=0x304)
+    at ../../libguile/eval.c:594
+#23 0x00007ffff7b60177 in catch (tag=<optimized out>, thunk=0x5bcae620, 
+    handler=0x5bcae600, pre_unwind_handler=0x5bcae5e0)
+    at ../../libguile/throw.c:134
+#24 0x00007fffecb62d29 in opencog::SchemeEval::do_eval(std::__cxx11::basic_string<char,
+std::char_traits<char>, std::allocator<char> > const&) (this=0x7ffe8c000980, 
+    expr=...) at /home/ubuntu/src/atomspace/opencog/guile/SchemeEval.cc:572
+#25 0x00007fffecb62dda in opencog::SchemeEval::c_wrap_eval(void*) (
+    p=0x7ffe8c000980)
+    at /home/ubuntu/src/atomspace/opencog/guile/SchemeEval.cc:501
+#26 0x00007ffff7aeb70a in c_body (d=0x7ffe53ffece0)
+    at ../../libguile/continuations.c:422
+#27 0x00007ffff7b67331 in vm_debug_engine (thread=0x5bcae580, vp=0x5b62c480, 
+    registers=0x7ffff7b04330 <scm_apply_subr+176>, resume=-536784)
+    at ../../libguile/vm-engine.c:784
+<<<<<<<<<< first one is here.
+
+#28 0x00007ffff7b7128a in scm_call_n (proc=proc@entry=0x5c6d3580, 
+    argv=argv@entry=0x0, nargs=nargs@entry=0) at ../../libguile/vm.c:1269
+#29 0x00007ffff7af1549 in scm_call_0 (proc=proc@entry=0x5c6d3580)
+    at ../../libguile/eval.c:481
+#30 0x00007ffff7b600f9 in catch (tag=tag@entry=0x404, thunk=0x5c6d3580, 
+    handler=0x5c6d3560, pre_unwind_handler=0x5c6d3540)
+    at ../../libguile/throw.c:137
+#31 0x00007ffff7b60465 in scm_catch_with_pre_unwind_handler (key=key@entry=0x404, 
+    thunk=<optimized out>, handler=<optimized out>, 
+    pre_unwind_handler=<optimized out>) at ../../libguile/throw.c:254
+#32 0x00007ffff7b6061f in scm_c_catch (tag=tag@entry=0x404, 
+    body=body@entry=0x7ffff7aeb700 <c_body>, 
+    body_data=body_data@entry=0x7ffe53ffece0, 
+    handler=handler@entry=0x7ffff7aeb9a0 <c_handler>, 
+    handler_data=handler_data@entry=0x7ffe53ffece0, 
+    pre_unwind_handler=pre_unwind_handler@entry=0x7ffff7aeb800 <pre_unwind_handler>, pre_unwind_handler_data=0x7ff020) at ../../libguile/throw.c:377
+#33 0x00007ffff7aebd10 in scm_i_with_continuation_barrier (
+    body=body@entry=0x7ffff7aeb700 <c_body>, 
+    body_data=body_data@entry=0x7ffe53ffece0, 
+    handler=handler@entry=0x7ffff7aeb9a0 <c_handler>, 
+    handler_data=handler_data@entry=0x7ffe53ffece0, 
+    pre_unwind_handler=pre_unwind_handler@entry=0x7ffff7aeb800 <pre_unwind_handler>, pre_unwind_handler_data=0x7ff020) at ../../libguile/continuations.c:360
+#34 0x00007ffff7aebdf5 in scm_c_with_continuation_barrier (func=<optimized out>, 
+    data=<optimized out>) at ../../libguile/continuations.c:456
+#35 0x00007ffff717f127 in GC_call_with_gc_active (
+    fn=fn@entry=0x7ffff7b5e200 <with_guile_trampoline>, 
+    client_data=client_data@entry=0x7ffe53ffedc0) at ../pthread_support.c:1343
+#36 0x00007ffff7b5ec11 in with_guile (base=base@entry=0x7ffe53ffed90, 
+    data=data@entry=0x7ffe53ffedc0) at ../../libguile/threads.c:688
+#37 0x00007ffff7179132 in GC_call_with_stack_base (
+    fn=fn@entry=0x7ffff7b5eb80 <with_guile>, arg=arg@entry=0x7ffe53ffedc0)
+    at ../misc.c:1941
+#38 0x00007ffff7b5efb8 in scm_i_with_guile (dynamic_state=<optimized out>, 
+    data=<optimized out>, func=<optimized out>) at ../../libguile/threads.c:703
+#39 scm_with_guile (func=<optimized out>, data=<optimized out>)
+    at ../../libguile/threads.c:709
+#40 0x00007fffecb62e5e in opencog::SchemeEval::eval_expr(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&) (
+    this=0x7ffe8c000980, expr=...)
+    at /home/ubuntu/src/atomspace/opencog/guile/SchemeEval.cc:473
+#41 0x00007fffdef6eb6c in opencog::GenericShell::eval_loop (this=0x7fff69581ac0)
+    at /home/ubuntu/src/opencog/opencog/cogserver/shell/GenericShell.cc:450
+
+
+Interesting. Unescaped quotes!
+also - unescaped carriage returns
+also sentence spliter fails when there are footnotes:
+.[571]
+also
+at any time."[572]
+but also...
+ERROR: In procedure fport_read: Connection reset by peer
 
 
 
