@@ -24982,8 +24982,9 @@ ANY
 
 \begin_layout Standard
 \begin_inset Tabular
-<lyxtabular version="3" rows="5" columns="6">
+<lyxtabular version="3" rows="5" columns="7">
 <features tabularvalignment="middle">
+<column alignment="center" valignment="top" width="0">
 <column alignment="center" valignment="top" width="0">
 <column alignment="center" valignment="top" width="0">
 <column alignment="center" valignment="top" width="0">
@@ -24996,6 +24997,15 @@ ANY
 
 \begin_layout Plain Layout
 Size
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Pairs
 \end_layout
 
 \end_inset
@@ -25060,6 +25070,15 @@ Dataset
 \begin_inset Text
 
 \begin_layout Plain Layout
+8.88M
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
 418M
 \end_layout
 
@@ -25116,6 +25135,15 @@ en_pairs_sim
 \begin_inset Text
 
 \begin_layout Plain Layout
+4.89M
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
 140M
 \end_layout
 
@@ -25163,7 +25191,7 @@ en_pairs_tone_mst
 \begin_inset Text
 
 \begin_layout Plain Layout
-
+183K x 187K
 \end_layout
 
 \end_inset
@@ -25172,7 +25200,7 @@ en_pairs_tone_mst
 \begin_inset Text
 
 \begin_layout Plain Layout
-
+8.05M
 \end_layout
 
 \end_inset
@@ -25181,7 +25209,7 @@ en_pairs_tone_mst
 \begin_inset Text
 
 \begin_layout Plain Layout
-
+268M
 \end_layout
 
 \end_inset
@@ -25190,7 +25218,7 @@ en_pairs_tone_mst
 \begin_inset Text
 
 \begin_layout Plain Layout
-
+33.3
 \end_layout
 
 \end_inset
@@ -25199,7 +25227,16 @@ en_pairs_tone_mst
 \begin_inset Text
 
 \begin_layout Plain Layout
+17.83
+\end_layout
 
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+-1.84
 \end_layout
 
 \end_inset
@@ -25215,6 +25252,15 @@ en_pairs_ttwo_mst
 </cell>
 </row>
 <row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
 <cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
 \begin_inset Text
 
@@ -25332,8 +25378,9 @@ Next, datasets that hold disjuncts.
 
 \begin_layout Standard
 \begin_inset Tabular
-<lyxtabular version="3" rows="5" columns="8">
+<lyxtabular version="3" rows="5" columns="9">
 <features tabularvalignment="middle">
+<column alignment="center" valignment="top" width="0">
 <column alignment="center" valignment="top" width="0">
 <column alignment="center" valignment="top" width="0">
 <column alignment="center" valignment="top" width="0">
@@ -25348,6 +25395,15 @@ Next, datasets that hold disjuncts.
 
 \begin_layout Plain Layout
 Size
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Pairs
 \end_layout
 
 \end_inset
@@ -25436,6 +25492,15 @@ Notes
 \begin_inset Text
 
 \begin_layout Plain Layout
+446K
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
 661K
 \end_layout
 
@@ -25502,6 +25567,15 @@ en_pairs_sim
 
 \begin_layout Plain Layout
 140K x 1.86M
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+3.98M
 \end_layout
 
 \end_inset
@@ -25634,6 +25708,15 @@ en_pairs_tone_mst
 
 \end_inset
 </cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
 <cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
 \begin_inset Text
 
@@ -25645,6 +25728,15 @@ en_pairs_tone_mst
 </cell>
 </row>
 <row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
 <cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
 \begin_inset Text
 
