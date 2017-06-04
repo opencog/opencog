@@ -90,11 +90,13 @@ sub do_it_for {
 	#chop($text);
 }
 
-sub preprocess {
-	#this is one paragraph
+sub preprocess
+{
+	# This is one paragraph.
 	my($text) = @_;
 
-	# clean up spaces at head and tail of each line as well as any double-spacing
+	# Clean up spaces at head and tail of each line as well as any
+	# double-spacing.
 	$text =~ s/ +/ /g;
 	$text =~ s/\n /\n/g;
 	$text =~ s/ \n/\n/g;
@@ -103,19 +105,19 @@ sub preprocess {
 
 	#####add sentence breaks as needed#####
 
-	#non-period end of sentence markers (?!) followed by sentence starters.
+	# Non-period end of sentence markers (?!) followed by sentence starters.
 	$text =~ s/([?!]) +([\'\"\(\[\¿\¡\p{IsPi}]*[\p{IsUpper}])/$1\n$2/g;
 
-	#multi-dots followed by sentence starters
+	# Multi-dots followed by sentence starters.
 	$text =~ s/(\.[\.]+) +([\'\"\(\[\¿\¡\p{IsPi}]*[\p{IsUpper}])/$1\n$2/g;
 
-	# add breaks for sentences that end with some sort of punctuation inside a quote or
-	# parenthetical and are followed by a possible sentence starter punctuation and upper
-	# case
+	# Add breaks for sentences that end with some sort of punctuation
+	# inside a quote or parenthetical and are followed by a possible
+	# sentence starter punctuation and upper case.
 	$text =~ s/([?!\.][\ ]*[\'\"\)\]\p{IsPf}]+) +([\'\"\(\[\¿\¡\p{IsPi}]*[\ ]*[\p{IsUpper}])/$1\n$2/g;
 
-	# add breaks for sentences that end with some sort of punctuation are followed by a
-	# sentence starter punctuation and upper case
+	# Add breaks for sentences that end with some sort of punctuation
+	# are followed by a sentence starter punctuation and upper case.
 	$text =~ s/([?!\.]) +([\'\"\(\[\¿\¡\p{IsPi}]+[\ ]*[\p{IsUpper}])/$1\n$2/g;
 
 	$text =~ s/([。．？！♪])/$1\n/g;
@@ -128,16 +130,25 @@ sub preprocess {
 	my $i;
 	my @words = split(/ /,$text);
 	$text = "";
-	for ($i=0;$i<(scalar(@words)-1);$i++) {
-		if ($words[$i] =~ /([\p{IsAlnum}\.\-]*)([\'\"\)\]\%\p{IsPf}]*)(\.+)$/) {
-			#check if $1 is a known honorific and $2 is empty, never break
+	for ($i=0; $i<(scalar(@words)-1); $i++)
+	{
+		if ($words[$i] =~ /([\p{IsAlnum}\.\-]*)([\'\"\)\]\%\p{IsPf}]*)(\.+)$/)
+		{
+			# Check if $1 is a known honorific and $2 is empty, never break.
 			my $prefix = $1;
 			my $starting_punct = $2;
-			if($prefix && $NONBREAKING_PREFIX{$prefix} && $NONBREAKING_PREFIX{$prefix} == 1 && !$starting_punct) {
+			if ($prefix && $NONBREAKING_PREFIX{$prefix} &&
+			    $NONBREAKING_PREFIX{$prefix} == 1 &&
+			    !$starting_punct)
+			{
 				#not breaking;
-			} elsif ($words[$i] =~ /(\.)[\p{IsUpper}\-]+(\.+)$/) {
+			}
+			elsif ($words[$i] =~ /(\.)[\p{IsUpper}\-]+(\.+)$/)
+			{
 				#not breaking - upper case acronym
-			} elsif($words[$i+1] =~ /^([ ]*[\'\"\(\[\¿\¡\p{IsPi}]*[ ]*[\p{IsUpper}0-9])/) {
+			}
+			elsif($words[$i+1] =~ /^([ ]*[\'\"\(\[\¿\¡\p{IsPi}]*[ ]*[\p{IsUpper}0-9])/)
+			{
 				# The next word has a bunch of initial quotes, maybe a
 				# space, then either upper case or a number
 				$words[$i] = $words[$i]."\n" unless ($prefix && $NONBREAKING_PREFIX{$prefix} && $NONBREAKING_PREFIX{$prefix} == 2 && !$starting_punct && ($words[$i+1] =~ /^[0-9]+/));
@@ -157,7 +168,7 @@ sub preprocess {
 	$text =~ s/^ //g;
 	$text =~ s/ $//g;
 
-	#add trailing break
+	# Add trailing break.
 	$text .= "\n" unless $text =~ /\n$/;
 
 	return $text;
