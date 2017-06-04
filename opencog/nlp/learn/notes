@@ -6594,6 +6594,34 @@ terminate called after throwing an instance of
 arghhh. The valuation table was missing a lock.
 Fixed in 32d8ae4be6164a9c3594eab05f2d5af5e2c9fec6
 
+Finished with MI computations; this took 6.25 hours
+
+Summary Report for Correlation Matrix Link Grammar ANY link Word Pairs
+Left type: WordNode    Right Type: WordNode    Pair Type: ListLink
+Wildcard: (EvaluationLink (ctv 0 0 2.6791356e+08)
+   (LinkGrammarRelationshipNode "ANY")
+)
+Rows: 183290 Columns: 186523
+Size: 8047063 non-zero entries of 34187800670 possible
+Fraction non-zero: 2.3538E-4 Sparsity (-log_2): 12.053
+Total observations: 267913561.0  Avg obs per pair: 33.293
+Entropy Total: 17.827   Left: 9.9014   Right: 9.7626
+Total MI: -1.837
+
+                 Left         Right     Avg-left     Avg-right
+                 ----         -----     --------     ---------
+Support (l_0)  2.3078E+4    2.2456E+4
+Count   (l_1)  4.0365E+6    3.4647E+6     174.9        154.3    
+Length  (l_2)  4.2779E+5    3.4953E+5     18.54        15.56    
+RMS Count      4.2741E+5    3.4915E+5     18.52        15.55    
+
+
+(define pca (make-pseudo-cset-api))
+(define psa (add-pair-stars pca))
+(psa 'fetch-pairs)
+Elapsed time to load csets: 2454 secs
+
+
 
 
 
@@ -6658,10 +6686,10 @@ Now do it again, for the disjuncts!
 
 (sql-clear-stats)
 (define pca (make-pseudo-cset-api))
-(pca 'fetch-pairs)
+(define psa (add-pair-stars pca))
+(psa 'fetch-pairs)
 Elapsed time to load csets: 1484 secs
 
-(define psa (add-pair-stars pca))
 (batch-all-pair-mi psa)
 Finished with MI computations; this took 3.19 hours
 
@@ -6797,6 +6825,8 @@ revert to distro bdwgc
 #2  0x00007f36212936cf in GC_suspend_handler (sig=30, info=<optimized
 out>, 
     context=0x7fff6c807540) at pthread_stop_world.c:237
+#3  <signal handler called>
+
 
 thr 2: find_slot_map (
     cache=0x7f361fe85ab0, ip=0x1) at ../../libguile/vm.c:936
@@ -6872,6 +6902,179 @@ Try guile-2.1.8  v2.1.8 Fri Mar 10 11:01:04 2017 tried it - spins. its broke
 
 OK guile-2.0.11 on xenial crashes almost immediately with
 guile: hashtab.c:137: vacuum_weak_hash_table: Assertion `removed <= len' failed.
+
+
+Arguments with Curtis:
+GC_register_my_thread
+-------------------------------------------------------------------------
+Try again.
+same as above: thread 4: find_slot_map
+187 threads total.
+
+#0  find_slot_map (cache=0x7f3e9b783ab0, ip=0x1) at
+../../libguile/vm.c:935
+935       if (cache->entries[slot].ip == ip)
+(gdb) print slot
+$1 = 0
+(gdb) print cache->entries[slot].ip
+$2 = (scm_t_uint32 *) 0x1
+(gdb) print cache->entries[slot].map
+$4 = (const scm_t_uint8 *) 0x0
+(gdb) step
+scm_i_vm_mark_stack (vp=0x755c1bd0, mark_stack_ptr=0x7f3e9b783f40, 
+    mark_stack_limit=0x7f3e9b793eb0) at ../../libguile/vm.c:1011
+1011        slot_map = find_slot_map (SCM_FRAME_RETURN_ADDRESS (fp), &cache);
+(gdb) print fp
+$5 = (union scm_vm_stack_element *) 0x7f3e94cdee38
+
+#define SCM_FRAME_RETURN_ADDRESS(fp)    ((fp)[0].as_ip)
+(gdb) print (fp)[0].as_ip
+$6 = (scm_t_uint32 *) 0x1
+
+OK that looks weird ... is this corrupted ?? but whatever,
+because the returned slot_map is never used ... because ...
+
+(gdb) step
+scm_i_vm_mark_stack (vp=0x755c1bd0, mark_stack_ptr=0x7f3e9b783f40, 
+    mark_stack_limit=0x7f3e9b793eb0) at ../../libguile/vm.c:975
+975            fp = SCM_FRAME_DYNAMIC_LINK (fp))
+(gdb) print fp
+$7 = (union scm_vm_stack_element *) 0x7f3e94cdee38
+
+frames.h:#define SCM_FRAME_DYNAMIC_LINK(fp)      ((fp) + (fp)[1].as_uint)
+(gdb) print (fp)[1].as_uint
+$8 = 0
+
+OK, that seems bad, because now fp never advances, it just repeats
+over and over with this same value.
+
+(gdb) 
+979           for (slot = nlocals - 1; sp < fp; sp++, slot--)
+(gdb) print nlocals
+$10 = -2
+(gdb) print sp
+$11 = (union scm_vm_stack_element *) 0x7f3e94cdee48
+#define SCM_FRAME_NUM_LOCALS(fp, sp)    ((fp) - (sp))
+(gdb) print fp
+$12 = (union scm_vm_stack_element *) 0x7f3e94cdee38
+(gdb) print  ((fp) - (sp))
+$13 = -2
+Ohh .. its not -16 because its -2 * sizeof (union scm_vm_stack_element *)
+so that's OK.
+So for loops is skipped, it should go to.
+      sp = SCM_FRAME_PREVIOUS_SP (fp);
+frames.h:#define SCM_FRAME_PREVIOUS_SP(fp)	((fp) + 2)
+
+and so now it loops around and repeats.
+(gdb) print cache
+$19 = {entries = {{ip = 0x1, map = 0x0}, {ip = 0x0, 
+      map = 0x0} <repeats 23 times>, {ip = 0x1a1b5e0, map = 0x0}, {ip = 0x0, 
+      map = 0x0}, {ip = 0x0, map = 0x0}, {ip = 0x0, map = 0x0}, {ip = 0x0, 
+      map = 0x0}, {ip = 0x0, map = 0x0}, {ip = 0x0, map = 0x0}, {ip = 0x0, 
+      map = 0x0}}}
+(gdb) print &cache
+$20 = (struct slot_map_cache *) 0x7f3e9b783ab0
+
+and so the loop repeates forever, because 
+fp = SCM_FRAME_DYNAMIC_LINK (fp) never advances fp, because
+(fp)[1].as_uint  is zero.
+
+So where is fp pointing to?  recall fp == 0x7f3e94cdee38
+
+(gdb) x/20x 0x7f3e94cdee00
+0x7f3e94cdee00: 0x0000000000000904      0x000000000000200c
+0x7f3e94cdee10: 0x0000000001a1b7e0      0x0000000001a1b5e0
+0x7f3e94cdee20: 0x0000000000000004      0x000000000000200c
+0x7f3e94cdee30: 0x0000000000169bd6      0x0000000000000001
+0x7f3e94cdee40: 0x0000000000000000      0x000000000192acd0
+0x7f3e94cdee50: 0x0000000001fa4bc0      0x0000000001a1c6d0
+0x7f3e94cdee60: 0x0000000044507950      0x0000000000000002
+0x7f3e94cdee70: 0x000000000005a6f5      0x00000000018febd0
+0x7f3e94cdee80: 0x000000006d490d00      0x00007f3e9e97241c
+0x7f3e94cdee90: 0x0000000000000002      0x00007f3e9e97241c
+
+
+(gdb) x/s 0x7f3e94cdee60
+0x7f3e94cdee60: "PyPD"      <<< ?? is this a meaningul string?
+(gdb) x/s 0x7f3e94cdee81
+0x7f3e94cdee81: "\rIm"      << how about this ???
+
+So this does not look healthy.  How did we get here?
+
+(gdb) print vp
+$21 = (struct scm_vm *) 0x755c1bd0
+(gdb) print mark_stack_ptr
+$22 = (struct GC_ms_entry *) 0x7f3e9b783f40
+(gdb) print mark_stack_limit
+$23 = (struct GC_ms_entry *) 0x7f3e9b793eb0
+(gdb) print upper
+$24 = (void *) 0x7ffdd986
+(gdb) print GC_greatest_plausible_heap_addr
+$25 = (void *) 0x7ffdd986
+(gdb) print lower
+$26 = (void *) 0x17a1ff8
+
+(gdb) print vp->fp
+$27 = (union scm_vm_stack_element *) 0x7f3e94cdee18
+(gdb) print vp->sp
+$28 = (union scm_vm_stack_element *) 0x7f3e94cdee00
+(gdb) print  vp->stack_top
+$29 = (union scm_vm_stack_element *) 0x7f3e94cdf000
+
+So lets walk manually. 
+frames.h:#define SCM_FRAME_DYNAMIC_LINK(fp)      ((fp) + (fp)[1].as_uint)
+
+(gdb) print (vp->fp) + (vp->fp)[1].as_uint
+$31 = (union scm_vm_stack_element *) 0x7f3e94cdee38
+So we are instanly in trouble! once through the loop, and we've got the broken fp
+
+So how did we get here?
+
+(gdb) bt
+#0  scm_i_vm_mark_stack (vp=0x755c1bd0, mark_stack_ptr=0x7f3e9b783f40, 
+    mark_stack_limit=0x7f3e9b793eb0) at ../../libguile/vm.c:1011
+#1  0x00007f3e9db8835e in GC_mark_from (mark_stack_top=0x7f3e9b783ee0, 
+    mark_stack_top@entry=0x7f3e9b783f00, 
+    mark_stack=mark_stack@entry=0x7f3e9b783eb0, 
+    mark_stack_limit=mark_stack_limit@entry=0x7f3e9b793eb0) at ../mark.c:772
+#2  0x00007f3e9db8897e in GC_do_local_mark (local_mark_stack=0x7f3e9b783eb0, 
+    local_top=0x7f3e9b783f00) at ../mark.c:1037
+#3  0x00007f3e9db88b98 in GC_mark_local (
+    local_mark_stack=local_mark_stack@entry=0x7f3e9b783eb0, id=id@entry=4)
+    at ../mark.c:1170
+#4  0x00007f3e9db88eaa in GC_help_marker (my_mark_no=my_mark_no@entry=80003)
+    at ../mark.c:1238
+#5  0x00007f3e9db92e3c in GC_mark_thread (id=<optimized out>)
+    at ../pthread_support.c:380
+#6  0x00007f3e9e2ae6ba in start_thread (arg=0x7f3e9b794700)
+    at pthread_create.c:333
+#7  0x00007f3e9dfdd82d in clone ()
+    at ../sysdeps/unix/sysv/linux/x86_64/clone.S:109
+
+so bdwgc is version gc7_6_0
+
+So ../mark.c:772 is GET_HDR and GET_HDR is in
+include/private/gc_hdrs.h
+
+define GET_HDR(p, hhdr)  ... ((hhdr) = HDR_INNER(p) 
+# define HDR_INNER(p) HDR_FROM_BI(BI(p),p)
+#define HDR_FROM_BI(bi, p) \
+                ((bi)->index[((word)(p) >> LOG_HBLKSIZE) & (BOTTOM_SZ - 1)])
+
+This seems all wrong.. wtf ....
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 =======================
