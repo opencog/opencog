@@ -7631,9 +7631,8 @@ std::char_traits<char>, std::allocator<char> > const&) (this=0x7ffe8c000980,
 Interesting. Unescaped quotes!
 also - unescaped carriage returns
 also sentence spliter fails when there are footnotes:
-.[571]
-also
-at any time."[572]
+.[571]   FIXED
+also at any time."[572]   FIXED
 but also...
 ERROR: In procedure fport_read: Connection reset by peer
 

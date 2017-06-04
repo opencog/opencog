@@ -113,7 +113,7 @@ sub preprocess
 
 	# A period, followed by a footnote.[42] followed by sentence starters.
 	# Can be [HarvardStyle42] also.
-	$text =~ s/([\.?!]\[.*]) +([\'\"\(\[\¿\¡\p{IsPi}]*[\p{IsUpper}])/$1\n$2/g;
+	$text =~ s/([\.?!][\'\"\)]?\[.*?]) +([\'\"\(\[\¿\¡\p{IsPi}]*[\p{IsUpper}])/$1\n$2/g;
 
 	# Add breaks for sentences that end with some sort of punctuation
 	# inside a quote or parenthetical and are followed by a possible
