@@ -96,7 +96,8 @@ sub preprocess
 	my($text) = @_;
 
 	# Clean up spaces at head and tail of each line as well as any
-	# double-spacing.
+	# double-spacing. Get rid of carriage returns.
+	$text =~ s/\r//g;
 	$text =~ s/ +/ /g;
 	$text =~ s/\n /\n/g;
 	$text =~ s/ \n/\n/g;
