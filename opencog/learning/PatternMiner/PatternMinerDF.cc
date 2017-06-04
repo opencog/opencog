@@ -865,7 +865,7 @@ void PatternMiner::extendAPatternForOneMoreGramRecursively(const Handle &extende
                     for (LinkPtr incomeingPtr : incomings)
                     {
                         Handle incomingHandle = incomeingPtr->getHandle();
-                        Handle extendedHandle;
+                        Handle extendedHandle = incomingHandle;
 
                         if (use_linktype_black_list && isIgnoredType (incomingHandle->getType()) )
                         {
@@ -884,12 +884,12 @@ void PatternMiner::extendAPatternForOneMoreGramRecursively(const Handle &extende
                         {
                             if (keyword_black_logic_is_contain)
                             {
-                                if (containIgnoredContent(extendedHandle))
+                                if ((keyword_black_list.size() > 0) && containIgnoredContent(extendedHandle))
                                     continue;
                             }
                             else
                             {
-                                if (doesLinkContainNodesInKeyWordNodes(extendedHandle, black_keyword_Handles))
+                                if ((black_keyword_Handles.size() > 0) && doesLinkContainNodesInKeyWordNodes(extendedHandle, black_keyword_Handles))
                                     continue;
                             }
                         }
@@ -908,7 +908,7 @@ void PatternMiner::extendAPatternForOneMoreGramRecursively(const Handle &extende
                         // debug
                         // cout << "Debug: Extended link :" << extendedHandleStr << std::endl;
 
-//                        if (extendedHandleStr.find("$var") != std::string::npos)
+//                        if (extendedHandleStr.find("PatternVariableNode") != std::string::npos)
 //                        {
 //                           // cout << "Debug: error! The extended link contines variables!" << extendedHandleStr << std::endl;
 //                            continue;
@@ -1051,7 +1051,7 @@ void PatternMiner::extendAllPossiblePatternsForOneMoreGramDF(HandleSeq &instance
             // debug
             // cout << "Debug: Extended link :" << extendedHandleStr << std::endl;
 
-            if (extendedHandleStr.find("$var") != std::string::npos)
+            if (extendedHandleStr.find("PatternVariableNode") != std::string::npos)
             {
                // cout << "Debug: error! The extended link contines variables!" << extendedHandleStr << std::endl;
                 continue;
