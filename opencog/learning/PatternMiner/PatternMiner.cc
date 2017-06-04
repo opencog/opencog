@@ -38,6 +38,7 @@
 #include <opencog/atoms/base/atom_types.h>
 #include <opencog/spacetime/atom_types.h>
 #include <opencog/embodiment/atom_types.h>
+#include <opencog/learning/PatternMiner/types/atom_types.h>
 //#include <opencog/atoms/bind/BindLink.h>
 #include <opencog/query/BindLinkAPI.h>
 #include <opencog/util/Config.h>
@@ -68,7 +69,7 @@ void PatternMiner::generateIndexesOfSharedVars(Handle& link, HandleSeq& orderedH
     {
         if (h->isNode())
         {
-            if (h->getType() == opencog::VARIABLE_NODE)
+            if (h->getType() == opencog::PATTERN_VARIABLE_NODE)
             {
                 string var_name = h->getName();
 
@@ -104,7 +105,7 @@ void PatternMiner::findAndRenameVariablesForOneLink(Handle link, map<Handle,Hand
 
         if (h->isNode())
         {
-           if (h->getType() == opencog::VARIABLE_NODE)
+           if (h->getType() == opencog::PATTERN_VARIABLE_NODE)
            {
                // it's a variable node, rename it
                if (varNameMap.find(h) != varNameMap.end())
@@ -114,7 +115,7 @@ void PatternMiner::findAndRenameVariablesForOneLink(Handle link, map<Handle,Hand
                else
                {
                    string var_name = "$var_"  + toString(varNameMap.size() + 1);
-                   Handle var_node = atomSpace->add_node(opencog::VARIABLE_NODE, var_name);
+                   Handle var_node = atomSpace->add_node(opencog::PATTERN_VARIABLE_NODE, var_name);
                    // XXX why do we need to set the TV ???
                    var_node->merge(TruthValue::TRUE_TV());
                    varNameMap.insert(std::pair<Handle,Handle>(h,var_node));
@@ -413,11 +414,11 @@ void PatternMiner::extractAllNodesInLink(Handle link, map<Handle,Handle>& valueT
             if (valueToVarMap.find(h) == valueToVarMap.end())
             {
                 // add a variable node in Pattern miner Atomspace
-                Handle varHandle = atomSpace->add_node(opencog::VARIABLE_NODE,"$var~" + toString(valueToVarMap.size()) );
+                Handle varHandle = atomSpace->add_node(opencog::PATTERN_VARIABLE_NODE,"$var~" + toString(valueToVarMap.size()) );
                 valueToVarMap.insert(std::pair<Handle,Handle>(h,varHandle));
             }
 
-            if ((h->getType() == opencog::VARIABLE_NODE))
+            if ((h->getType() == opencog::PATTERN_VARIABLE_NODE))
                 cout<<"Error: instance link contains variables: \n" << h->toShortString() <<std::endl;
 
         }
@@ -440,7 +441,7 @@ void PatternMiner::extractAllVariableNodesInAnInstanceLink(Handle& instanceLink,
     {
         if (h->isNode())
         {
-            if (((*pit)->getType() == opencog::VARIABLE_NODE))
+            if (((*pit)->getType() == opencog::PATTERN_VARIABLE_NODE))
             {
                 if (allVarNodes.find(h) == allVarNodes.end())
                 {
@@ -471,7 +472,7 @@ void PatternMiner::extractAllVariableNodesInAnInstanceLink(Handle& instanceLink,
     {
         if (h->isNode())
         {
-            if (((*pit)->getType() == opencog::VARIABLE_NODE))
+            if (((*pit)->getType() == opencog::PATTERN_VARIABLE_NODE))
             {
                 if (allVarNodes.find(h) == allVarNodes.end())
                 {
@@ -538,7 +539,7 @@ void PatternMiner::extractAllVariableNodesInLink(Handle link, OrderedHandleSet& 
     {
         if (h->isNode())
         {
-            if ((h->getType() == opencog::VARIABLE_NODE) && (allNodes.find(h) == allNodes.end()))
+            if ((h->getType() == opencog::PATTERN_VARIABLE_NODE) && (allNodes.find(h) == allNodes.end()))
             {
                 allNodes.insert(h);
             }
@@ -558,7 +559,7 @@ bool PatternMiner::onlyContainVariableNodes(Handle link, AtomSpace* _atomSpace)
     {
         if (h->isNode())
         {
-            if (h->getType() != opencog::VARIABLE_NODE)
+            if (h->getType() != opencog::PATTERN_VARIABLE_NODE)
             {
                 return false;
             }
@@ -588,7 +589,7 @@ void PatternMiner::swapOneLinkBetweenTwoAtomSpace(AtomSpace* fromAtomSpace, Atom
            Handle new_node = toAtomSpace->add_node(h->getType(), h->getName());
            new_node->merge(h->getTruthValue());
            outgoings.push_back(new_node);
-           if (h->getType() == VARIABLE_NODE)
+           if (h->getType() == PATTERN_VARIABLE_NODE)
            {
                if ( ! isInHandleSeq(new_node, outVariableNodes) ) // should not have duplicated variable nodes
                 outVariableNodes.push_back(new_node);
@@ -688,7 +689,7 @@ void PatternMiner::findAllInstancesForGivenPatternInNestedAtomSpace(HTreeNode* H
     HandleSeq variableNodes;
     for (Handle varh : allVariableNodesInPattern)
     {
-        Handle v = _atomSpace->add_node(VARIABLE_NODE, varh->getName());
+        Handle v = _atomSpace->add_node(PATTERN_VARIABLE_NODE, varh->getName());
         variableNodes.push_back(v);
     }
 
@@ -2155,7 +2156,7 @@ bool PatternMiner::isALinkOneInstanceOfGivenPattern(Handle &instanceLink, Handle
             // they are both nodes
 
             // If this node is a variable, skip it
-            if ((outComingsOfPattern[i])->getType() == VARIABLE_NODE)
+            if ((outComingsOfPattern[i])->getType() == PATTERN_VARIABLE_NODE)
                 continue;
             else
             {
@@ -2761,7 +2762,7 @@ void PatternMiner::resetPatternMiner(bool resetAllSettingsFromConfig)
 void PatternMiner::runPatternMiner(bool exit_program_after_finish)
 {
 //    Handle n1 = originalAtomSpace->add_node(CONCEPT_NODE, "AAA");
-//    Handle var1 = atomSpace->add_node(VARIABLE_NODE, "var1");
+//    Handle var1 = atomSpace->add_node(PATTERN_VARIABLE_NODE, "var1");
 
 //    Handle l1 = atomSpace->add_link(LIST_LINK, n1, var1);
 //    n1->geti
@@ -3452,10 +3453,10 @@ void PatternMiner::testPatternMatcher1()
 //    ...
     HandleSeq variableNodes, implicationLinkOutgoings, bindLinkOutgoings, patternToMatch;
 
-    Handle varHandle1 = originalAtomSpace->add_node(opencog::VARIABLE_NODE,"$var_1" );
-    Handle varHandle2 = originalAtomSpace->add_node(opencog::VARIABLE_NODE,"$var_2" );
-    Handle varHandle3 = originalAtomSpace->add_node(opencog::VARIABLE_NODE,"$var_3" );
-    Handle varHandle4 = originalAtomSpace->add_node(opencog::VARIABLE_NODE,"$var_4" );
+    Handle varHandle1 = originalAtomSpace->add_node(opencog::PATTERN_VARIABLE_NODE,"$var_1" );
+    Handle varHandle2 = originalAtomSpace->add_node(opencog::PATTERN_VARIABLE_NODE,"$var_2" );
+    Handle varHandle3 = originalAtomSpace->add_node(opencog::PATTERN_VARIABLE_NODE,"$var_3" );
+    Handle varHandle4 = originalAtomSpace->add_node(opencog::PATTERN_VARIABLE_NODE,"$var_4" );
 
 
     variableNodes.push_back(varHandle1);
@@ -3583,9 +3584,9 @@ void PatternMiner::testPatternMatcher2()
 
     HandleSeq variableNodes, implicationLinkOutgoings, bindLinkOutgoings, patternToMatch, resultOutgoings;
 
-    Handle varHandle1 = originalAtomSpace->add_node(opencog::VARIABLE_NODE,"$var_1" );
-    Handle varHandle2 = originalAtomSpace->add_node(opencog::VARIABLE_NODE,"$var_2" );
-    Handle varHandle3 = originalAtomSpace->add_node(opencog::VARIABLE_NODE,"$var_3" );
+    Handle varHandle1 = originalAtomSpace->add_node(opencog::PATTERN_VARIABLE_NODE,"$var_1" );
+    Handle varHandle2 = originalAtomSpace->add_node(opencog::PATTERN_VARIABLE_NODE,"$var_2" );
+    Handle varHandle3 = originalAtomSpace->add_node(opencog::PATTERN_VARIABLE_NODE,"$var_3" );
 
     variableNodes.push_back(varHandle1);
     variableNodes.push_back(varHandle2);
