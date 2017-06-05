@@ -1,0 +1,806 @@
+Ant is a small insect that lives under the ground in large organized groups called colonies.
+Aphid is a very small insect that lives on plants and destroys them.
+Bedbug is an insect with a round body and no wings that sucks people’s blood, especially when they are in bed.
+bee is a flying insect that has black and yellow bands and can sting you.
+Bees make honey, and bees that are not wild live in hives.
+The sound a bee makes is written as buzz.
+Beetle is an insect with a smooth hard back.
+Black widow is a very poisonous spider that lives in parts of North America and Asia.
+Bloodsucker is an insect that feeds on the blood of animals or people.
+Blowfly is a fly that lays its eggs on meat or dead animals.
+Bluebottle is a large fly with a shiny blue body.
+Boll weevil is an insect that lives in North America and damages cotton plants.
+Bumblebee is a large bee.
+Butterfly is a flying insect with large colourful wings.
+Caterpillar is a small long thin insect with many legs that eats plants and develops into a butterfly or moth.
+Centipede is a very small insect with a long narrow body and many pairs of legs.
+Chigger is a small insect larva, common in warm parts of the US, whose bite causes painful lumps on your skin.
+Cicada is an insect that lives in trees and tall grass in hot countries and makes a loud high noise.
+Cockroach is an insect similar to a large beetle that lives in places where food is kept.
+Crane fly is a flying insect with very long legs.
+Cricket is a small brown insect that moves by jumping and makes a loud noise by rubbing its front wings together.
+Daddy long legs is a fly with a thin body and very long thin legs.
+Dragonfly is an insect with a long narrow brightly coloured body and two pairs of transparent wings.
+Dust mite is a type of very small insect that lives in houses and causes allergies in some people.
+Earthworm is a type of worm that lives in soil.
+Earwig is a brown insect with a pair of curved parts at the back end of its body.
+Firefly is an insect that produces a flashing light when it flies at night.
+Flea is a small jumping insect that lives on animals and bites them.
+Fly is a common small insect with wings.
+Flies eat food, are often found near rubbish, and are responsible for spreading many diseases.
+fruit fly is a very small fly that eats decaying fruit.
+Gadfly is a fly that bites cows and horses.
+Glow-worm is a small insect without wings that produces light from its body at night.
+Gnat is a very small flying insect that bites people but is not dangerous.
+Grasshopper is a large insect with long back legs that moves by jumping and makes short high sounds.
+Greenfly is a very small green insect that damages plants.
+Honeybee is a flying insect with black and yellow stripes that makes honey and can sting.
+A honeybee is often simply called a bee.
+Hornet is a black and yellow flying insect that can sting you.
+It is a type of large wasp.
+Horsefly is a large flying insect that bites horses, cows, and other large animals.
+Housefly is a very common flying insect that often lives in houses and is attracted by food.
+Ladybird is a small insect that has a round red or yellow body with small black spots on it.
+Leech is a small soft creature that sticks to the skin of other animals in order to feed on their blood.
+Leeches were often used in the past as a type of medical treatment.
+Lice is a small insects that live on people’s skin and in their hair.
+Lice is the plural of louse.
+Locust is a type of grasshopper that flies over wide areas in very large groups called swarms, often destroying crops.
+Louse is a small insect that lives on the bodies of animals and people.
+Maggot is a small soft creature with no arms or legs that later changes into a fly.
+Maggots are found in old meat and dead bodies.
+Mantis is a praying mantis.
+Mayfly is a flying insect that lives near water and has a very short life.
+Midge is a small fly that bites people and often lives near water.
+Millepede is another spelling of millipede.
+Millipede an insect with a long thin body and many pairs of small legs.
+Mite is a very small insect that lives in foods, on plants, or on animals.
+Mosquito is a small flying insect that bites the skin of people and animals in order to feed on their blood.
+Some types of mosquito can spread a serious disease called malaria.
+Moth is a flying insect like a butterfly that flies mostly at night.
+The young form of some types of moth eat cloth.
+Praying mantis is a large insect with long front legs.
+Roach is americaninformal a cockroach.
+Sand fly is a small fly that lives in warm regions of Asia, Africa, and southern Europe.
+It can spread disease when it bites.
+Scarab is a large black beetle that ancient Egyptians believed was holy.
+Silkworm is a type of caterpillar that produces silk when it is young.
+Silverfish is an insect with a grey or silver body that often causes damage to paper products or clothing.
+Slug is a small creature with a soft body and no legs that moves very slowly.
+Slugs are similar to snails but they have no shell.
+Snail is a small animal that has a soft body, no legs, and a hard shell on its back.
+Snails move very slowly.
+Songololo is an insect with a thin body and many legs.
+Spider is a small creature with eight legs that usually weaves a web to catch insects.
+Stick is a long thin insect that looks like a small stick.
+Tarantula is a large poisonous spider that lives in Central and South America.
+Termite is a small insect that eats wood and can damage buildings.
+Tick is an insect that sucks your blood.
+Tortoiseshell is a type of butterfly that is brown and orange.
+Tsetse fly is a flying insect in Africa that bites people and animals in order to drink their blood.
+It can spread a serious disease called sleeping sickness.
+Varroa mite is a very small insect that is a parasite of honey bees and gives them a disease called varroatosis that kills them.
+Wasp is a black and yellow flying insect that can sting you.
+Weevil is an insect that eats plants and can destroy crops.
+Woodlouse is a small grey insect that lives in places that are slightly wet.
+Woodworm is a small insect that makes holes in wood.
+Worms is a creature with a long soft body and no bones or legs.
+Insects are the dominant life-form on earth.
+Millions may exist in a single acre of land.
+About one million species have been described, and there may be as many as ten times that many yet to be identified.
+Of all creatures on earth, insects are the main consumers of plants.
+They also play a major role in the breakdown of plant and animal material and constitute a major food source for many other animals.
+Insects are extraordinarily adaptable creatures, having evolved to live successfully in most environments on earth, including deserts and the Antarctic.
+The only place where insects are not commonly found is the oceans.
+If they are not physically equipped to live in a stressful environment, insects have adopted behaviors to avoid such stresses.
+Insects possess an amazing diversity in size, form, and behavior.
+It is believed that insects are so successful because they have a protective shell or exoskeleton, they are small, and they can fly.
+Their small size and ability to fly permits escape from enemies and dispersal to new environments.
+Because they are small they require only small amounts of food and can exist in very small niches or spaces.
+In addition, insects can produce large numbers of offspring relatively quickly.
+Insect populations also possess considerable genetic diversity and a great potential for adaptation to different or changing environments.
+This makes them an especially formidable pest of crops, able to adapt to new plant varieties as they are developed or rapidly becoming resistant to insecticides.
+Insects are directly beneficial to humans by producing honey, silk, wax, and other products.
+Indirectly, they are important as pollinators of crops, natural enemies of pests, scavengers, and food for other creatures.
+At the same time, insects are major pests of humans and domesticated animals because they destroy crops and vector diseases.
+In reality, less than one percent of insect species are pests, and only a few hundred of these are consistently a problem.
+In the context of agriculture, an insect is a pest if its presence or damage results in an economically important loss.
+Insects and closely related organisms have a lightweight, but strong exterior skeleton (exoskeleton) or integument.
+Their muscles and organs are on the inside.
+This multi-layered exoskeleton protects the insect from the environment and natural enemies.
+The exoskeleton also has many sense organs for detecting light, pressure, sound, temperature, wind, and odor.
+Sense organs may be located almost anywhere on the insect body, not just on the head.
+Insects have three body regions: head, thorax, and abdomen.
+The head functions mainly for food and sensory intake and information processing.
+Insect mouthparts have evolved for chewing (beetles, caterpillars), piercing-sucking (aphids, bugs), sponging (flies), siphoning (moths), rasping-sucking (thrips), cutting-sponging (biting flies), and chewing-lapping (wasps).
+The thorax provides structural support for the legs (three pairs) and, if present, for one or two pairs of wings.
+The legs may be adapted for running, grasping, digging, or swimming.
+The abdomen functions in digestion and reproduction.
+The internal anatomy of insects is characterized by an open circulatory system, a multitude of breathing tubes, and a three-chambered digestive system.
+With the exception of a heart and an aorta, there are few blood vessels; insect blood simply flows around inside the body cavity.
+Air enters the insect through a few openings (spiracles) in the exoskeleton, and makes its way to all areas of need by way of branching tubes, which permeate the body.
+The insect digestive system is long and tube-like, often divided into three sections, each with a different function.
+The insect nervous system transports and processes information received from the sense organs (sight, smell, taste, hearing, and touch).
+The brain, located in the head, processes information, but some information is also processed at nerve centers elsewhere in the body.
+Knowledge about the structure and function of the insect exoskeleton has proven critical in developing insecticide formulations that are able to penetrate this multi-layered protective covering.
+Studies of insect communication have led to the discovery of chemical compounds used by insects to locate each other or host plants, and many of these have now been identified and produced synthetically.
+For example, pheromones are very specific compounds released by insects to attract others of the same species, such as for mating.
+Synthetic pheromones are now widely used to bait insect traps for detecting the presence of a pest, to determine its abundance, or for control.
+Control may involve the use of many traps to trap out the pest or the pheromones can be dispersed throughout the crop to confuse insects, making it more difficult for them to find a mate.
+As simple as it may seem, knowing what type of mouthparts an insect has can be very important in deciding on a management tactic.
+For example, insects with chewing mouthparts can be selectively controlled by some insecticides that are applied directly to plant surfaces and are only effective if ingested; contact alone will not result in death of the insect.
+Consequently, natural enemies that feed on other insects, but not the crop plant, will not be harmed.
+Since insects obtain oxygen through their spiracles, plugging these openings causes death.
+That is how insecticidal oils control insects.
+Components of the microbial insecticide Bacillus thuringiensis enter the digestive system and break down the gut lining.
+Knowledge of the nervous system of insects has led to the development of several types of insecticides designed to disrupt normal nerve function.
+Some of these are effective simply by contacting the insect.
+The adage know your enemy is especially appropriate when it comes to insect pests.
+The more we know about their biology and behavior, including their natural enemies, the more likely we will be able to manage them effectively.
+Most species of insects have males and females that mate and reproduce sexually.
+In some cases, males are rare or present only at certain times of the year.
+In the absence of males, females of some species may still reproduce.
+This is common, particularly among aphids.
+In many species of wasps, unfertilized eggs become males while fertilized eggs become females.
+In a few species, females produce only females.
+A single embryo typically develops within each egg, except in the case of polyembryony, where hundreds of embryos may develop per egg.
+Insects may reproduce by laying eggs or, in some species, the eggs may hatch within the female which shortly thereafter deposits young.
+In another strategy common to aphids, the eggs hatch within the female and the immatures remain within the female for some time before birth.
+Insects typically pass through four distinct life stages: egg, larva or nymph, pupa, and adult.
+Eggs are laid singly or in masses, in or on plant tissue or another insect.
+The embryo within the egg develops, and eventually a larva or nymph emerges from the egg.
+There are generally several larval or nymphal stages (instars), each progressively larger and requiring a molt, or shed of the outer skin, between each stage.
+Most weight gain (sometimes > 90%) occurs during the last one or two instars.
+In general, neither eggs, pupae, nor adults grow in size; all growth occurs during the larval or nymphal stages.
+The two types of metamorphosis typical of insect pests and natural enemies are gradual and complete.
+In gradual metamorphosis, the nymphal stages resemble the adult except that they lack wings and the nymphs may be colored differently than the adults.
+Nymphs and adults usually occupy similar habitats and have similar hosts.
+Gradual metamorphosis is typical of true bugs and grasshoppers; complete metamorphosis is typical of beetles, flies, moths, and wasps.
+The immatures of these latter species do not resemble the adults, may occupy different habitats, and feed on different hosts.
+Some moth and wasp larvae weave a silken shell to protect the pupal stage; in flies, the last larval skin becomes a puparium that protects the pupal stage.
+Insects are cold-blooded, so that the rate at which they develop is mostly dependent on the temperature of their environment.
+Cooler temperatures result in slowed growth; higher temperatures speed up the growth process.
+If a season is hot, more generations may occur than during a cool season.
+A better understanding of how insects grow and develop has contributed greatly to their management.
+For example, knowledge of the hormonal control of insect metamorphosis led to the development of a new class of insecticides called insect growth regulators (IGR).
+The insect growth regulators are very selective in the insects they affect.
+Based on information about insect growth rates relative to temperature, computer models can be used to predict when insects will be most abundant during the growing season and, consequently, when crops are most at risk.
+Ecology is the study of the interrelationships between organisms and their environment.
+An insect's environment may be described by physical factors such as temperature, wind, humidity, light, and biological factors such as other members of the species, food sources, natural enemies, and competitors (organisms using the same space or food source).
+An understanding or at least an appreciation of these physical and biological (ecological) factors and how they relate to insect diversity, activity (timing of insect appearance or phenology), and abundance is critical for successful pest management.
+Some insect species have a single generation per season (univoltine), while others may have several (multivoltine).
+The striped cucumber beetle, for example, overwinters as an adult, emerges in the spring, and lays eggs near the roots of young cucurbit plants.
+The eggs hatch, producing larvae that emerge as adults later in the summer.
+These adults overwinter to start the cycle again the next year.
+In contrast, egg parasitoids like Trichogramma overwinter as immatures within the egg of their host.
+During the summer they may have several generations.
+Insects adapt to many types of environmental conditions during their seasonal cycle.
+To survive the harsh winters, cucumber beetles enter a dormant state.
+While in this dormant state, metabolic activity is minimal and no reproduction or growth occurs.
+Dormancy can also occur at other times of the year when conditions may be stressful for the insect.
+It is often better to consider insects as populations rather than individuals, especially within the context of an agroecosystem.
+Populations have attributes such as density (number per unit area), age distribution (proportion in each life stage), and birth and death rates.
+Understanding the attributes of a pest population is important for good management.
+Knowing the age distribution of a pest population may indicate the potential for crop damage.
+For example, if most of the striped cucumber beetles are immatures, direct damage to the above ground portions of the plant is unlikely.
+Similarly, if the density of a pest is known and can be related to the potential for damage, an action may be required to protect the crop.
+Information about death rates due to natural enemies can be very important.
+Natural enemies do nothing but reduce pest populations and understanding and quantifying their impact is important to effective pest management.
+This is all the more reason to conserve their numbers.
+The weevils form a large family of beetles.
+There are 35,000-40,000 species in the family.
+In all species, the front part of the head is extended to form a beak or rostrum with a pair of biting jaws at the end.
+The main function of the rostrum is to bore holes in plants.
+In these holes, the female lays her eggs.
+The eggs hatch into larvae, which eat the plant material surrounding them.
+If this material is a crop plant or seeds used for human food, the weevils may cause serious damage.
+The bean stem weevil (Alcidodes leucogrammus), bores into the base of the stem of French bean (Phaseolus) or cowpea (Vigna) plants and lays a small number of eggs.
+These hatch in about 6 days to larvae.
+The larvae feed on the stem tissue and damage the plant, sometimes causing the stem to break off or fall over.
+They pupate in the stem and emerge as adults in about 50 days, though this period is very variable.
+This weevil may attack and damage several rows of garden beans but it is not usually a serious agricultural pest.
+Burning infected plants at once, and all plants at the end of the growing season, will help to control the weevil.
+Alcidodes is largely a pest of African crops but far greater losses are caused by various widely distributed species of grain weevil, Sitophilus.
+These are smaller and less conspicuous than Alcidodes but they do more damage because they lay their eggs in the fruits or seeds of beans, maize or rice as the crops are growing in the field.
+While the seeds or grains are in store, the larvae eat the inside of the seed.
+In the seed they pupate and emerge as adults in as little as 10 days.
+The adults then bore into the stored grain all around them and lay their eggs.
+Thus, in a month or two a large proportion of the grain can be damaged or destroyed.
+This is one reason why old seed and new seed should not be mixed; any weevils hatching from the old grains will attack the new seed.
+It is usually the larvae which do most damage to the plant, but in some species the adults feed on and damage the plant, as well as being the means by which the eggs are introduced to new plants or seeds.
+In some weevils the rostrum is so narrow that it is thought that the adults do not feed at all or that they take only liquids.
+The adult palm weevil, Rhyncophorus, is about 4-5 cm long and normally breeds in the stumps of palm trees, but will also lay its eggs in young leaves of palm trees at points where these have been damaged by human activity or by pests such as the rhinoceros beetle.
+The larvae tunnel into the crown of the palm and sometimes kill the whole tree by destroying the growing point.
+The arthropods are a large group of invertebrate animals which include insects, spiders, millipedes, centipedes and crustacea such as lobsters and crabs.
+All arthropods have a hard exoskeleton or cuticle, segmented bodies and jointed legs.
+The crustacea and insects also have antennae, compound eyes and, often, three distinct regions to their bodies: head, thorax and abdomen.
+The insects differ from the rest of the arthropods in having only three pairs of jointed legs on the thorax and, typically, two pairs of wings.
+There are a great many different species of insects and some, during evolution, have lost one pair of wings, as in the houseflies, crane flies and mosquitoes.
+Other parasitic species like the fleas have lost both pairs of wings.
+In beetles, grasshoppers and cockroaches, the first pair of wings has become modified to form a hard outer covering over the second pair.
+Cuticle and ecdysis.
+The value of the external cuticle is thought to lie mainly in reducing the loss from the body of water vapour through evaporation, but it also protects the animal from damage and bacterial invasion, maintains its shape and allows rapid locomotion.
+The cuticle imposes certain limitations in size, however, for if arthropods were to exceed the size of some of the larger crabs, the cuticle would become too heavy for the muscles to move the limbs.
+Between the segments of the body and at the joints of the limbs and other appendages, the cuticle is flexible and allows movement.
+For the most part, however, the cuticle is rigid and prevents any increase in the size of the insect except during certain periods of its development when the insect sheds its cuticle (ecdysis) and increases its volume before the new cuticle has time to harden.
+Only the outermost layer of the cuticle is shed, the inner layers are digested by enzymes secreted from the epidermis and the fluid so produced is absorbed back into the body.
+Muscular contractions force the blood into the thorax, causing it to swell and so split the old cuticle along a predetermined line of weakness.
+The swallowing of air often accompanies ecdysis; assisting the splitting of the cuticle and keeping the body expanded while the new cuticle hardens.
+In insects, this moulting, or ecdysis, takes place only in the larval and pupal form and not in adults.
+In other words, mature insects do not grow.
+Breathing.
+Running through the bodies of all insects is a branching system of tubes, tracheae which contain air.
+They open to the outside by pores called spiracles and they conduct air from the atmosphere to all living regions of the body The tracheae are lined with cuticle which is thickened in spiral bands This thickening keeps the tracheae open against the internal pressure of body fluids.
+The spiracles, typically, open on the flanks of each segment of the body, but in some insects there are only one or two openings.
+The entrance to the spiracle is usually supplied with muscles which control its opening or closure.
+Since the spiracles are one of the few areas of the body from which evaporation of water can occur, the closure of the spiracles when the insect is not active and therefore needs less oxygen, helps to conserve moisture.
+The tracheae branch repeatedly until they terminate in very fine tracheoles which invest or penetrate the tissues and organs inside the body.
+The walls of tracheae and tracheoles are permeable to gases, and oxygen is able to diffuse through them to reach the living cells.
+As might be expected the supply of tracheoles is most dense in the region of very active muscle, e.
+g.
+the flight muscles in the thorax.
+The movement of oxygen from the atmosphere, through the spiracles, up the tracheae and tracheoles to the tissues, and the passage of carbon dioxide in the opposite direction, can be accounted for by simple diffusion but in active adult insects there is often a ventilation process which exchanges up to 60 per cent of the air in the tracheal system.
+In many beetles, locusts, grasshoppers and cockroaches, the abdomen is slightly compressed vertically (dorso-ventrally) by contraction of internal muscles.
+In bees and wasps the abdomen is compressed rhythmically along its length, slightly telescoping the segments.
+In both cases, the consequent rise of blood pressure in the body cavity compresses the tracheae along their length (like a concertina) and expels air from them.
+When the muscles relax, the abdomen springs back into shape, the tracheae expand and draw in air.
+Thus, unlike mammals, the positive muscular action in breathing is that which results in expiration.
+This tracheal respiratory system is very different from the respiratory systems of the vertebrates, in which oxygen is absorbed by gills or lungs and conveyed in the blood stream to the tissues.
+In the insects, the oxygen diffuses through the trachea and tracheoles directly to the organ concerned.
+The carbon dioxide escapes through the same path although a proportion may diffuse from the body surface.
+Blood system.
+The tracheal supply carrying oxygen to the organs gives the circulatory system a rather different role in insects from that in vertebrates.
+Except where the tracheoles terminate at some distance from a cell, the blood has little need to carry dissolved oxygen and, with a few exceptions, it contains no haemoglobin or cells corresponding to red blood cells.
+There is a single dorsal vessel which propels blood forward and releases it into the body cavity, thus maintaining a sluggish circulation.
+Apart from this vessel, the blood is not confined in blood vessels but occupies the free space between the cuticle and the organs in the body cavity.
+The blood therefore serves mainly to distribute digested food, collect excretory products and, in addition, has important hydraulic functions in expanding certain regions of the body to split the old cuticle and in pumping up the crumpled wings of the newly emerged adult insect.
+Touch.
+From the body surface of the insect there arises a profusion of fine bristles most of which have a sensory function, responding principally to touch, vibration, or chemicals.
+The tactile (touch-sensitive) bristles are jointed at their bases and when a bristle is displaced to one side, it stimulates a sensory cell which fires impulses to the central nervous system.
+The tactile bristles are numerous on the tarsal segments, the head, wing margins, or antennae according to the species and as well as informing the insect about contact stimuli, they probably respond to air currents and vibrations in the ground or in the air.
+Proprioceptors.
+Small oval or circular areas of cuticle are differentially thickened and supplied with sensory fibres.
+They probably respond to distortions in the cuticle resulting from pressure, and so feed back information to the central nervous system about the position of the limbs.
+Organs of this kind respond to deflections of the antennae during flight and are thought to measure the air speed and help to adjust the wing movements accordingly.
+In some insects there are stretch receptors associated with muscle fibres, apparently similar to those in vertebrates.
+Sound.
+The tactile bristles on the cuticle and on the antennae respond to low-frequency vibrations but many insects have more specialized sound detectors in the form of a thin area of cuticle overlying a distended trachea or air sac and invested with sensory fibres.
+Such tympanal organs appear on the thorax or abdomen or tibia according to species and are sensitive to sounds of high frequency.
+They can be used to locate the source of sounds as in the case of the male cricket homing on the sound of the female's chirp, and in some cases can distinguish between sounds of different frequency.
+Smell and taste.
+Experiments show that different insects can distinguish between chemicals which we describe as sweet, sour, salt and bitter, and in some cases more specific substances.
+The organs of taste are most abundant on the mouthparts, in the mouth, and on the tarsal segments but the nature of the sense organs concerned is not always clear.
+Smell is principally the function of the antennae.
+Here there are bristles, pegs or plates with a very thin cuticle and fine perforations through which project nerve endings sensitive to chemicals.
+Sometimes these sense organs are grouped together and sunk into olfactory pits.
+In certain moths the sense of smell is very highly developed.
+The male Emperor moth will fly to an unmated female from a distance of a mile, attracted by the scent which she exudes.
+A male moth's antennae may carry many thousand chemo-receptors.
+Sight.
+The compound eyes of insects consist of thousands of identical units called ommatidia packed closely together on each side of the head.
+Each ommatidium consists of a lens system formed partly from a thickening of the transparent cuticle and partly from a special crystalline cone.
+This lens system concentrates light from within a cone of 20°, on to a transparent rod, the rhabdom.
+The light, passing down this rhabdom, stimulates the eight or so retinal cells grouped round it to fire nervous impulses to the brain.
+Each ommatidium can therefore record the presence or absence of light, its intensity, in some cases its colour and, according to the position of the ommatidium in the compound eye, its direction.
+Although there may be from 2000 to 10,000 or more ommatidia in the compound eye of an actively flying insect, this number cannot reconstruct a very accurate picture of the outside world.
+Nevertheless, the mosaic image so formed, probably produces a crude impression of the form of well-defined objects enabling bees, for example, to seek out flowers and to use landmarks for finding their way to and from the hive.
+It is likely that the construction of compound eyes makes them particularly sensitive to moving objects, e.
+g.
+bees are more readily attracted to flowers which are being blown by the wind.
+Flower-visiting insects, at least, can distinguish certain colours from shades of grey of equal brightness.
+Bees are particularly sensitive to blue, violet and ultra-violet but cannot distinguish red and green from black and grey unless the flower petals are reflecting ultra-violet light as well.
+Some butterflies can distinguish yellow, green and red.
+The simple eyes of, for example, caterpillars, consist of a cuticular lens with a group of light-sensitive cells beneath, rather like a single ommatidium.
+They show some colour sensitivity and, when grouped together, some ability to discriminate form.
+The ocelli which occur in the heads of many flying insects probably respond only to changes in light intensity.
+Movement in insects depends, as it does in vertebrates, on muscles contracting and pulling on jointed limbs or other appendages.
+The muscles are within the body and limbs, however, and are attached to the inside of the cuticle.
+A pair of antagonistic muscles is attached across a joint in a way which could bend and straighten the limb.
+Many of the joints in the -insect are of the peg and socket type.
+They permit movement in one plane only, like a hinge joint, but since there are several such joints in a limb, each operating in a different direction, the limb as a whole can describe fairly free directional movement.
+Walking.
+The characteristic walking pattern of an insect involves moving three legs at a time.
+The body is supported by a tripod of three legs while the other three are swinging forward to a new position.
+On the last tarsal joint are claws and, depending on the species, adhesive pads which enable the insect to climb very smooth surfaces.
+The precise mechanism of adhesion is uncertain.
+Modification of the limbs and their musculature enables insects to leap, e.
+g.
+grasshopper, or swim, e.
+g.
+water beetles.
+Flying.
+In insects with relatively light bodies and large wings such as butterflies and dragonflies, the wing muscles in the thorax pull directly on the wing where it is articulated to the thorax, levering it up and down.
+Insects such as bees, wasps and flies, with compact bodies and a smaller wing area have indirect flight muscles which elevate and depress the wings very rapidly by pulling on the walls of the thorax and changing its shape.
+In both cases there are direct flight muscles which, by acting on the wing insertion, can alter its angle in the air.
+During the downstroke the wing is held horizontally, so thrusting downwards on the air and producing a lifting force.
+During the upstroke the wing is rotated vertically and offers little resistance during its upward movement through the air.
+It is not possible to make very useful generalizations about the feeding methods of insects because they are so varied.
+However, insects do have in common three pairs of appendages called mouth parts, hinged to the head below the mouth and these extract or manipulate food in one way or another.
+The basic pattern of these mouth parts is the same in most insects but in the course of evolution they have become modified and adapted to exploit different kinds of food source.
+The least modified are probably those of insects such as caterpillars, grasshoppers, locusts and cockroaches in which the first pair of appendages, mandibles, form sturdy jaws, working sideways across the mouth and cutting off pieces of vegetation which are manipulated into the mouth by the other mouth parts, the maxillae and labium.
+Aphids are small insects (e.
+g.
+greenfly) which feed on plant juices that they suck from leaves and stems.
+Their mouthparts are greatly elongated to form a piercing and sucking proboscis.
+The maxillae fit together to form a tube which can be pushed into plant tissues to reach the food-conducting vessels of the phloem and so extract nutrients.
+The mosquito has mandibles and maxillae in the form of slender, sharp stylets which can cut through the skin of a mammal as well as penetrating plant tissues.
+To obtain a blood meal the mosquito inserts its mouth parts through the skin to reach a capillary and then sucks blood through a tube formed from the labrum or front lip which precedes the mouth parts.
+Another tubular structure, the hypopharynx, serves to inject into the wound a substance which prevents the blood from clotting and so blocking the tubular labrum.
+In both aphid and mosquito the labium is rolled round the other mouth parts, enclosing them in a sheath when they are not being used.
+In the butterfly, only the maxillae contribute to the feeding apparatus.
+The maxillae are greatly elongated and in the form of half tubes, i.
+e.
+like a drinking straw split down its length.
+They can be fitted together to form a tube through which nectar is sucked from the flowers.
+The housefly also sucks liquid but its mouthparts cannot penetrate tissue.
+Instead the labium is enlarged to form a proboscis which terminates in two pads whose surface is channelled by grooves called pseudotracheae.
+The fly applies its proboscis to the food and pumps saliva along the channels and over the food.
+The saliva dissolves soluble parts of the food and may contain enzymes which digest some of the insoluble matter.
+The nutrient liquid is then drawn back along the pseudotracheae and pumped into the alimentary canal.
+The aphids are probably best known as greenfly on roses or blackfly on broad beans.
+They belong to a group of insects known as bugs or Hemiptera, the mouth parts of which are modified to form piercing and sucking tubes, the insects obtaining their food by sucking plant juices or the blood of other animals.
+Water boatmen, for example, are Hemipterans which prey on other pond creatures; the frog-hoppers and cuckoo-spit insects draw fluids from plants.
+This group of insects has an incomplete metamorphosis, there being no pupal stage but a series of moults in which the nymph gradually becomes a mature adult.
+There are over 400 species and varieties of aphids but the account given below applies in general to those commonly encountered as garden and orchard pests.
+Life history.
+In October the females lay eggs usually on the stems of trees or shrubs.
+The eggs are black, with thick shells and can withstand extremes of temperature.
+It is in the egg form only that aphids pass the winter.
+In March the eggs hatch out into wingless female nymphs which are similar to the adults, with three pairs of legs, compound eyes, antennae, etc.
+There is no larval or pupal stage comparable to those of the butterfly, but with successive moults and continuous growth the nymphs become mature females.
+No males are hatched at all.
+The female nymphs feed on the shoots and leaves of the tree on which they hatch, at the time when the buds are sprouting.
+After a series of ecdyses (moults) they become mature and give birth to daughter aphids without any fertilization.
+This kind of reproduction is called parthenogenesis.
+The daughters, moreover, are not produced from eggs but are born alive as nymphs though they are surrounded at first by a transparent capsule like an egg membrane.
+The daughters grow quickly and themselves have offspring by parthenogenesis.
+Some of these develop wings which grow larger at each ecdysis.
+These winged daughters fly off to an herbaceous plant such as a rose tree or bean plant.
+The winged forms have two pairs of wings of which the hind pair are quite small.
+Both pairs are transparent with few veins.
+The aphids are not strong fliers but tend to be carried by chance air currents rather than make direct flights.
+Spruce aphids were once found in Spitsbergen, and are thought to have been carried in the upper air some 800 miles across the sea from Russia where the nearest spruce trees grow.
+When the winged generation reach the new food plant they give birth to wingless daughters parthenogenetically.
+In warm weather these may mature in 8 to 10 days and begin to reproduce in the same way by bearing winged daughters which fly off and infest new plants.
+This process of parthenogenesis goes on all through the summer months, winged and wingless generations more or less alternating.
+Enormous numbers of aphids are produced in this way, though a great many are killed by birds, ladybirds and their larvae, lace-wing larvae, and cold weather.
+In October the first males appear.
+They have wings, and fly to a tree.
+Winged females fly to the same tree and there give birth to wingless daughters.
+The males mate with these when mature, and the wingless females subsequently lay eggs on the twigs of the tree.
+The eggs remain dormant until the following spring when the tree buds begin to sprout.
+Feeding habits.
+Nymphs and adults feed in the same way.
+Their mouth parts consist of a slender tube with two sharp stylets running down each side.
+All these are enclosed in the sheath-like labium and are held horizontally below the thorax when not in use.
+During feeding the labium is bent and shortened as the stylets and central tube are pushed through the epidermis of the leaf or stem until they reach the sieve tubes of the phloem in a vascular bundle.
+Saliva is injected through the puncture to begin the digestion of the sap and cytoplasm, and the fluids are then pumped up by muscular movements of the gullet into the alimentary canal.
+The fluid pressure existing in most plant cells probably assists the flow of liquid through the aphid's mouth parts.
+Most aphids seem to take in from the plant sap more sugar than they can assimilate, so that their faeces consist of a sweet syrup, honey dew, that is passed out of the anus.
+Some species of ant like to feed on this exudation and may be seen clambering over the colonies of aphids on nettles and other plants to collect it.
+Other species of ants ‘farm’ aphids by keeping them in the nest below ground where they suck fluids from roots, the ants then collecting the honey dew as it is egested.
+Damage and control.
+A large number of aphids on the growing shoots of a plant can cause damage, partly by the excessive removal of food that would otherwise pass to the growing leaves, partly by the digestive action of the saliva injected and also by introducing virus diseases from one plant to another, particularly in the potato, sugar beet and sugar cane.
+Young leaves attacked by aphids usually curl up and wither and the growth of the entire shoot may be arrested.
+Aphids can be destroyed by spraying them with solutions or suspensions containing insecticides which kill them on contact.
+Covering the leaves with poisons is useless because the aphid draws its food from below the surface.
+For this reason systemic insecticides are often used.
+These are absorbed into the plant tissues so that the aphids are poisoned when they ingest the plant juices.
+Once the leaves have curled up under a heavy aphid attack it is difficult to reach the insects with sprays.
+A less direct method of control in winter is to spray the trees in the garden or orchard where the autumn eggs have been laid.
+Poisons dissolved in water run off the thick shell, so solvents such as paraffin, and liquids such as tar oil, are used, these penetrating the shell and destroying the egg.
+This must be done before the foliage develops, otherwise the sprays will damage the leaves.
+Larval and adult ladybirds eat a great many aphids, and an ichneumon parasite causes many deaths by laying its eggs in the bodies of the aphids.
+These predators, parasites and spells of cold weather help keep down the numbers of aphids.
+Ants, bees and wasps are social insects.
+This means that they tend to live in colonies where all the individuals are of the same family, often the offspring of one mother.
+In the more highly organized societies there is a division of labour in which individuals carry out particular duties.
+Structure.
+The bodies of bees are divided into head, thorax and abdomen, with three pairs of legs and two pairs of wings on the thorax.
+The fore and hind wings on each side are linked by hooks and grooves so that they move together in flight.
+The mouth parts consist of a tongue or labium, which can be enclosed near the head by the labial palps and maxillae.
+Nectar, from the nectaries of flowers, can be drawn up the grooved surface of the labium, partly by capillary attraction and partly by the pumping action of muscles in the head.
+When not in use, these elongated mouth parts are folded back under the head, leaving the shorter, stouter mandibles free in front to chew pollen, manipulate wax, attack intruders etc.
+The ovipositor through which the queen lays her eggs in the wax cell, is modified in the workers to form a sting.
+Organization of the colony.
+There are four species of Apis, the honey-bee, one of which is Apis mellifera, the Western honey-bee, which is the commonest hive-bee in this country.
+There are three kinds of bee in a colony: in the summer, a few hundred drones or males, one egg-laying female, or queen, and from 20 to 80 thousand sterile females or workers.
+The mature queen is usually easily recognized by her large abdomen.
+The Queen.
+A queen bee may live from two to five years and, except for a short period at the end of her life when one of her daughters takes over the colony, she is the only egg-laying female.
+All the members of the colony, whether drones or workers, are her offspring.
+She spends all her time laying eggs, perhaps up to 1500 a day, each one being placed in a wax cell made by the workers.
+The queen can feed herself but in the hive the nearest workers turn towards her, lick her body and feed her by regurgitating a special secretion of their salivary glands, called royal jelly, on to their probosces from which the queen can absorb it.
+The queen usually mates only once in her life (though second and third matings are known to happen) and stores the sperms received from the drone in a sperm sac in her abdomen.
+This store of sperms lasts her for the two or more years of egg-laying, a small quantity being released with each fertilized egg laid.
+When the store of sperms is used up she may continue to lay eggs but they are all unfertilized and will become drones.
+By this time one of her daughters has been reared as a queen and is ready to take over the egg-laying.
+Life history.
+Each egg is laid in one of the hexagonal wax cells and hatches into a tiny, white, legless larva.
+The larva feeds on substances deposited in the cell by the workers; it grows, pupates in the cell, hatches as an adult bee and finally emerges from the cell into the hive.
+The eggs hatch after three to four days and by nine days are fully grown and ready to pupate.
+The workers put a capping over the cells at this time.
+Ten or eleven days later the capping is bitten away and the adult emerges.
+The times given above vary with changes of temperature and according to whether the bee is becoming a drone, worker or queen.
+Drones.
+The drones, who live for about four to five weeks and do not work inside the hive, are fed by the workers or help themselves from the store of pollen and nectar in the combs.
+Their function is to fertilize a new queen.
+In the autumn, or when conditions are poor, they are turned out of the hive where, unable to find food for themselves, they soon die.
+Workers.
+The workers are female bees whose reproductive organs do not function.
+Among many other tasks they collect food from outside the hive and store it, make the wax cells and 
+feed the developing larvae.
+Origin of the three types of bee.
+The wax combs are built hanging vertically with a gap of about half an inch separating each one.
+The cells in each comb thus lie horizontally.
+The workers prepare three kinds of cell: worker cells about 5 mm across, drone cells about 6 mm across, and queen cells quite different from the others.
+The queen cells are larger and made individually, pointing downwards like small acorns from the surface or bottom of the comb.
+The relative numbers of these three kinds of cell seem to depend on the time of the year, the temperature, the abundance of food and condition of the colony.
+Normally, the worker cells predominate.
+Eggs are laid by the queen in the brood area.
+This is where the temperature is about 32° C, kept so by the heat given out by the bees' bodies.
+The area varies, diminishing in the winter and expanding in the summer.
+The queen moves over the brood area, laying eggs indiscriminately in any of the three types of cell she encounters, by placing her abdomen in the cell and depositing a single egg.
+The eggs placed in the larger, drone cells, are not fertilized, and this results in the eggs developing into a male bee or drone.
+In the queen and worker cells, fertilized eggs are laid.
+For the first three days after hatching, all the larvae are fed on a protein-rich, milky secretion, called royal jelly, which comes from the salivary glands of workers of a certain age.
+The grubs in queen cells continue to be fed on royal jelly for the rest of their lives, but those in drone or worker cells are weaned onto a mixture of dilute nectar and pollen.
+If a one-to-three-day old larva is transferred from a worker to a queen cell, it will receive the diet of royal jelly and develop into a queen.
+Thus, though there is no difference between the eggs and young larvae in queen and worker cells, their different treatment by the workers results in their becoming quite distinct types of bee.
+Exactly what aspects of their feeding cause this is not known for certain.
+It may be the absence of pollen from the queen's diet, the cessation of royal jelly in the worker's diet, the super-abundance of food placed in the queen cells or a vitamin-like chemical fed to the queen larvae in the early stages.
+After three days, worker grubs cannot be reared as queens, even if they are placed in queen cells and fed on royal jelly.
+Drones, then, develop from unfertilized eggs in wide cells, queens and workers from fertilized eggs which are fed differently as larvae.
+Life of a queen.
+When a new queen emerges she is fed by the workers.
+She bites a hole in any other occupied queen cells that she finds and some observers believe she stings the occupants.
+In any event, the workers usually tear down the other queen cells that have been bitten into and destroy the occupants.
+For a few days the queen leaves the hive for short flights lasting, at first, only a minute but gradually lengthening to about 15 minutes.
+During these flights she learns the geography of the district around the hive.
+On one of these flights she is pursued by drones, but not necessarily from her own hive; in fact, they do not follow her from the hive but are already waiting outside.
+One of them catches the queen and mates with her, depositing in her vagina sperms which eventually find their way into her sperm sac.
+She now returns to the hive, and soon after begins to lay eggs.
+From glands in her head, the queen produces a mixture of chemicals called pheromones (‘queen substance’).
+When the workers ‘lick’ her body, the pheromones suppress their fertility.
+When, at the end of her life, the queen ceases to produce these pheromones, some workers start to lay eggs which, being unfertilised, produce only drones.
+They do, however, start building new queen cells.
+Division of labour.
+The tasks undertaken by a worker bee depend partly on its age and partly on the immediate needs of the colony.
+Generally speaking, the worker’s life follows the course described below, although the times given are very approximate and in many cases may not apply.
+After hatching, she is fed by other workers and spends a good deal of time standing still on the comb.
+She does, however, clean out cells from which bees have recently hatched by removing the cast larval cuticles.
+On the fourth day she feeds on honey from the store cells and eats a good deal of pollen.
+Between the third and fifth day she feeds older larvae by placing nectar, water and pollen in their cells.
+The pollen that she eats is rich in protein and helps her salivary, brood food glands to become active, so that by the fifth day they can secrete the brood food or royal jelly which is fed to the younger larvae.
+After ten or twelve days these glands cease to function effectively but wax glands on the underside of her abdomen begin to secrete wax which the worker uses for comb-building and repair.
+By this time she is also beginning to leave the hive for short flights during which she learns the position of the hive and the topography of the surroundings.
+Between the twelfth and twenty-first days these reconnaissance flights continue; while in the hive, the worker collects pollen and nectar from the incoming field bees and stores it in the cells.
+She also processes the nectar and begins its conversion to honey, and cleans the hive by removing the dead bees and detritus from its floor.
+After three weeks of hive duties the worker becomes a forager and spends the daylight hours collecting water, nectar, pollen and propolis (see below) and carrying it back to the hive.
+This work she may continue for about three weeks before she dies.
+The schedule given above is by no means rigid, and observers have recorded bees doing several of the duties mentioned at the same time, as well as old bees performing nurse duties, and young bees foraging.
+Some of the duties may be missed out altogether.
+For example, only a few of the young foragers do duty as guard bees, protecting the hive from invasion by robber bees.
+Food.
+The foraging workers collect nectar from the nectaries of flowers.
+The nectar is drawn off from the nectaries by the long labium.
+It is pumped up and swallowed into the honey sac, a region of the gut from which it can be regurgitated on reaching the hive.
+Nectar is a watery sugar solution when collected, but it is processed by the house bees to whom it is passed.
+These workers repeatedly swallow it, mix it with enzymes and regurgitate it.
+The enzyme action and the evaporation of water result finally in its conversion to honey.
+Nectar contains very little protein, and the pollen collected by the foragers makes up this deficiency.
+Pollen is collected by combing off with the legs the grains which adhere to the bee's body after it has visited a flower.
+The pollen collected on the head, and removed by the front legs, is mixed with a little nectar and passed to the back legs which have combed pollen from the abdomen.
+The rows of bristles on the legs assist this combing action.
+The pollen press, in the joint between the tibia and tarsus of the hind legs, squeezes the pollen which is passed to it from the pollen comb of the opposite hind leg.
+The pollen and nectar paste is thus pushed by the press into the pollen basket on the tibia, where it is retained by the fringe of setae.
+All this may be done while the bee hovers in the air or while hanging from the flower.
+The forager returns to the hive with the two packs of pollen and pushes them off into an empty cell or into one with some pollen already in it.
+The younger house bees then break up the pollen masses and pack them down into the cell.
+When the cell is full it may be covered with a little nectar and sealed over.
+Both pollen and honey sealed in the store cells are eaten by the bees in the winter months when no other food is available.
+Water is collected and used to dilute the nectar with which the larvae are fed, but there is no evidence of water being stored.
+Propolis is a resinous substance that the bees collect from trees and sticky buds.
+They use it for sealing small cracks and gaps in the hive.
+Swarming.
+When the size of the colony reaches a certain stage, usually in Spring or Summer when the nectar flow is at its greatest, the queen and a great many workers, leave the hive in a swarm.
+The swarm comes to rest in a great cluster on a tree branch or similar situation.
+Scout bees, who may have left the hive some days before, seek out a suitable situation for a new nest and return to the swarm and communicate this information, whereupon the whole swarm moves off to the new site.
+In the old hive, one of the new queens hatches out, mates, and takes over the colony that is left.
+Senses and communication.
+The senses of touch and smell, particularly through the antennae, are very important to bees in finding sources of food, in identifying members of their own colony, and sometimes in finding their way home.
+Their compound eyes are sensitive to certain groups of colours though colour-blind to red.
+In the darkness of the hive they must depend on touch and smell to carry out their activities.
+They find their way to and from the hive by learning the landmarks in the vicinity and steering by the position of the sun.
+A bee which has found a rich source of food will return to the hive and execute a dance on the surface of the comb.
+It takes the form of a figure eight with a straight section in the middle.
+The length of the straight section is proportional to the distance of the flowers from the hive, and the angle it makes with the vertical represents the angle between the position of the sun, the hive and the source of food.
+In addition.
+the dancer may make waggling movements of her body on the straight section, which indicates distance.
+Some of the foraging bees in the hive follow the dance, touching the dancer with their antennae.
+From time to time the dancer stops and, regurgitating a little of the nectar she has collected from the flowers, she feeds the attentive workers.
+The dance pattern, the taste of the nectar and sometimes the scent of the flowers on the dancer's body enable the workers to find the feeding ground from which the dancer ,has just returned.
+Bee-keeping.
+Although humans cannot tame the honey bee they can exploit its activities.
+A hive is provided which can be opened and examined without unduly disturbing the colony.
+It is fitted with vertical wooden frames in which the bees can build their combs.
+The frames have, wired into their centre, a sheet of wax which is indented with a hexagonal pattern so that the workers build their combs within the confines of the frame, and each comb can then be removed separately.
+By means of a grid, through which the workers but not the queen can pass, the queen is kept in the lower section of the hive.
+As a result, the combs in the upper sections will contain no grubs but only pollen and nectar.
+It is from these supers that the honey is eventually removed by the bee-keeper.
+In the autumn and spring the bees are given sugar solution to compensate them for the honey taken from their winter store.
+In addition to their value as honey producers, the part played by bees in pollination is very important.
+In apple orchards and clover fields, for example, the yields have been greatly increased by keeping a hive of bees in the locality.
+Efficient pollination leads to complete fertilization of all the ovules in an ovary, which subsequently develops into a perfect fruit.
+There are firms which hire out hives of bees to farmers and fruit growers during the flowering period of their crops.
+Since the sixteenth century, and probably long before that, houseflies have been thought to transmit diseases.
+In the nineteenth century experimental proof of this was put forward, and the list of diseases which can be carried by house-flies has been growing ever since.
+For this reason, and, the fact that the housefly is an efficient and successful insect, it is important for the biologist to make a close study of its life history and habits.
+Eggs.
+The mature female housefly lays many batches of eggs with 100 to 150 eggs in each batch.
+Decaying organic matter such as manure heaps, faeces, or almost any exposed food material, are selected as breeding grounds.
+The last four segments of the abdomen of the female housefly, normally retracted and withdrawn into the body, are extended to make an ovipositor, by which means, the eggs are placed a few millimetres below the surface, and danger of drying out is avoided.
+The eggs are white, elongate ovals, about one millimetre long and with two rib-like thickenings down each side.
+They hatch after eight to twenty-four hours according to the temperature.
+The bacteriological fermentation that goes on within a manure heap usually keeps the temperature high and fairly independent of external changes so that development proceeds rapidly.
+Emerging from the split egg-case, the larva is a semi-transparent maggot, later becoming white.
+Twelve segments are visible, becoming larger at the posterior end.
+The tiny head is usually pulled back into the anterior segments and is not visible.
+Two black, hook-like teeth projecting from above the mouth are used for movement through the breeding place and for tearing up potential food.
+The larva has no legs, but on the lower sides of segments six to twelve are crescent-shaped pads bearing short spines which assist its movement.
+Spiracles open on the second and last segments only.
+The larva feeds on the organic matter in which it finds itself, taking in only fluids and tiny particles.
+It has no simple or compound eyes but must be able to distinguish light and darkness since it moves away from light.
+This negative response to light tends to keep it in the warmer, moister regions of its breeding ground.
+It grows to about one cm long in five days, shedding its cuticle twice.
+Before its final ecdysis its reactions to light and moisture change, and it migrates to a drier position just below the surface of its breeding ground where it pupates.
+The last larval cuticle is not cast but retained as a pupal case or puparium.
+The latter darkens and hardens, becoming a brown, cigar-shaped object.
+In the next three days the pupa metamorphoses to the perfect insect in a similar way to that described for the butterfly.
+A sac-like structure, the ptilinum, in the head, can be blown out by blood pressure and by this means the top of the puparium is burst open, after which the ptilinum is withdrawn into the head.
+Imago.
+The imago crawls out of the puparium on to the surface of the breeding ground where its wings expand and harden in the next few hours, and then it flies away.
+In ten to fourteen days it may become sexually mature and lay eggs four days after mating.
+In suitable conditions of temperature, humidity and food, the entire life cycle may be complete in three or four weeks.
+There are distinct divisions into head, thorax and abdomen.
+The houseflies, like the mosquitoes, are Diptera and have only one pair of wings, the second pair being reduced to halteres.
+The leading edges of the wings are thickened, and unlike the aphids which depend on chance air currents, house-flies are powerful fliers.
+Spiracles open on the first and third thoracic segments and on each of the abdominal segments.
+The three pairs of legs, like most of the rest of the body, are covered with sensory setae, and the last tarsus on each leg bears a pair of claws and two glandular pads which secrete a sticky substance enabling the fly to walk on smooth vertical surfaces.
+The pair of compound eyes on the head each have about 4000 facets, and there are three simple eyes or ocelli on the top of the head.
+Only the last segments of the short antennae are visible between the eyes.
+The mouth parts comprise a proboscis, carried bent up under the head when not in use, but extended by means of blood pressure and muscles when feeding.
+The base of the proboscis is expanded into two lobes, the lower surface of which is traversed by parallel channels called pseudotracheae.
+Only liquids can be taken in by the housefly.
+When it settles on food the proboscis is extended so that the oral lobes are placed on the surface of the food.
+Saliva is secreted from salivary glands and runs down a channel into the pseudotracheae and on to the food which it begins to digest and liquefy.
+Muscles in the proboscis enable the oesophagus to pump up the semi-digested liquid from the pseudotracheae which converge into the oesophagus, and pass it to the crop and ‘stomach’ or mid-gut.
+Sometimes the fly regurgitates the partly digested fluid, which hangs as a large drop from the lobes of the proboscis and may be left on the surface where the fly has settled, and seen as a 'vomit spot’ on windows, etc.
+This procedure possibly enables the fly to mix more saliva with the food, since the salivary duct opens into the oesophagus only just above the lobes of the proboscis.
+The saliva probably contains a mixture of enzymes, since the fly can be seen feeding on a great variety of substances though it may have a preference for sweet and soluble carbohydrates.
+Flies have been marked by putting a drop of paint on their abdomens when they emerge from their breeding ground.
+If later they are recaptured, some idea of their range of flight can be obtained.
+These experiments suggest that flies can normally travel up to 2 km from their breeding ground.
+Disease.
+It is largely as a result of their indiscriminate feeding habits that houseflies spread disease.
+They may settle and feed on decaying organic matter which contains many bacteria.
+If later the flies alight on food for human consumption, harmful bacteria are deposited on it.
+There are many ways in which the bacteria may be carried.
+They may adhere to the hairs on the fly's legs or body; they may remain in the pseudotracheae or oesophagus, to be flushed out on to food with the next salivary flow.
+They may be deposited in vomit spots of semi-digested food which has come from a source of infection, or the bacteria may enter the digestive system and pass through it, unharmed, and fall on food with the faeces of the fly.
+Experiments in which flies have been allowed to walk over culture media in sterile dishes have resulted in the growth of over 100 bacterial and fungal colonies from bacteria and fungal spores which the fly deposited.
+Many of these bacteria are harmless to humans but others may cause serious disease.
+The greatest danger arises when flies are allowed to alight and feed on the faeces of a person suffering from intestinal disease such as typhoid, cholera or polio.
+Germs or spores of these diseases may thus be carried by the flies to human food.
+When this is eaten the bacteria can multiply inside the body and so infect the consumer with the disease.
+Flies are thought to be responsible for the spread of such diseases as those already mentioned above, also diarrhoea, anthrax, eye inflammation and possibly tuberculosis.
+The principal methods of control are obvious once the ways in which flies can spread disease are known.
+Human faeces, particularly if known to be infected, must be disposed of in such a way that flies cannot possibly reach them.
+Other sources of infection such as manure heaps must not be allowed to accumulate for long periods near houses.
+Where this cannot be avoided the material should be stored in fly-proof containers.
+Food for human consumption must not be stored or displayed in such a way as to allow flies to settle on it.
+The numbers of houseflies should be kept as low as possible by removing decaying organic detritus in which they breed.
+The male locust mounts the back of the female, applies the tip of his abdomen to hers and passes sperms into her reproductive tract.
+The sperms are stored in a sperm sac in the female's abdomen, and as the eggs pass down the oviduct during laying, the sperms are released and so fertilize the eggs.
+Eggs.
+After mating, the female lays her eggs in warm, moist sand following a rainy spell.
+She pushes her abdomen down into the sand, extending the membranes between the segments, and burrowing to a depth of 50 or 60 mm.
+In this burrow, 50 to 100 eggs are laid and mixed with a frothy fluid, which hardens slightly and may help to maintain an air supply round the eggs.
+In 10 to 20 days depending on temperature and moisture, the eggs hatch and the nymphs make their way to the surface and emerge as ‘hoppers’ (like miniature adults but wingless at this stage).
+If food is in adequate supply and the hoppers are not forced to crowd together when they emerge from the eggs, the locusts live their lives separately as do other grasshoppers.
+If, however, the hoppers are crowded together for one reason or another, they enter a gregarious phase of activity.
+The hoppers tend to keep together in a band and move forward together.
+The crowding effect also results in a change of colour from the normal green, buff or brown to a striking black and yellow (or orange) coloration.
+There are also structural differences from the solitary form.
+The bands of hoppers vary in size from hundreds to millions, covering a few square metres or several square kilometres, depending partly on the age of the hoppers and how many bands have combined.
+As hoppers, they migrate only a few kilometres each day, basking in the early morning sun until their body temperature rises to a level which allows them to move off and eat all the vegetation in their path.
+When the temperature drops at night they climb bushes and plant stems and remain immobile.
+After the final ecdysis, the adult locusts take to the wing and after a few days of short flights set off on extensive migrations, settling at night and in the middle of the day when it is hottest.
+A medium-sized swarm may contain a thousand million locusts and cover an area of 20 square kilometres.
+Such a swarm will consume some 3000 tonnes of vegetation per day; and so if a swarm lands on agricultural crops, the locusts will strip them of every vestige of leaf and edible stem.
+The swarms may travel many hundreds of kilometres from their place of origin, e.
+g.
+from Africa to India, and the females will lay eggs during their journey, so leaving the nucleus of successive swarms within a few weeks.
+The range of the adult locusts is so great that international cooperation is essential for effective control.
+A swarm may originate in India but cause devastating damage to crops in Africa.
+Sixty countries in Asia and Africa are threatened by swarms of the desert locust.
+The main method of control is by spreading poisoned bait, for example bran containing insecticide, in the path of the migrating bands of hoppers.
+The insecticide kills them by being eaten and by its contact with their bodies.
+Poisoned bait can be used only when the locality of the hoppers is known, and a careful watch must be kept over wide areas so that swarms are discovered as soon as possible after they emerge.
+The information is then sent to anti-locust centres, e.
+g.
+in Nairobi or London, and trucks and personnel are mobilized to take the bait to the appropriate location.
+Other methods employed are to spray insecticides over swarms of hoppers or settled adults using aircraft or motor vehicles, or to spray the vegetation in the path of the hoppers.
+If the region of egg-laying is known, the vegetation in the area can be sprayed with an insecticide which kills the hoppers at their first meal.
+The danger with all spraying techniques is that the chemicals used may be poisonous to humans and other animals, particularly if used on food crops.
+Two other species, the red locust and the migratory locust, have been held in check for many years by effective control measures, but the desert locust still constitutes a major threat.
+Constant vigilance and international cooperation are needed if crops are to be protected against this insect.
+Currently it is being discussed whether the hazardous nature of the insecticides and the expense of spreading them is a cost effective way of controlling the desert locust.
+However, new and safer insecticides are being produced all the time and there is little doubt that farmers whose crops are threatened by locust plagues will want control measures to continue.
+Mosquitoes, midges, tsetse-flies and house-flies are familiar insects included in a group called Diptera.
+They have only one pair of wings, the second pair being reduced to tiny stumps called halteres.
+One of the commonest kinds of mosquito is the Culex mosquito.
+Other genera of mosquitoes are Anopheles and Aedes.
+The females of many species of these mosquitoes pierce the skin of humans and suck blood from the capillaries, often leaving a painful swelling in the region of the puncture.
+In tropical countries many species of mosquito carry the organisms which cause malaria, yellow fever and elephantiasis (filariasis).
+A study of the life cycles of the mosquitoes is thus very important.
+Eggs.
+The female Culex lays her eggs in stagnant water such as in drains, marshy swamps, ditches and shallow ponds.
+About 200 eggs are laid at a time.
+As they are laid they are pushed into position by the hind legs and stick together to make a floating raft.
+Bubbles of air trapped between the eggs keep the raft buoyant even if the water is disturbed.
+After one or two days the eggs hatch, the larvae push the bottoms out of the eggs and enter the water.
+Larvae.
+The larvae which hatch out are without legs but can propel themselves through the water by a vigorous flicking-wriggling movement.
+They have a distinct head, thorax and abdomen, and from the eighth segment of the abdomen a breathing tube projects.
+When undisturbed, the larva swims to the surface and remains motionless.
+The breathing tube breaks through the surface film and opens to the air so that the larva is suspended head downwards from the water surface.
+The breathing tube leads to the two main tracheae of the body and these carry air from the atmosphere to all parts of the insect.
+There are five little flaps at the entrance to the breathing tube, and these close and prevent the entry of water when the larva leaves the surface.
+The cuticle in this region is particularly water-repellent so that when the larva is breathing at the surface, water cannot enter and block the tracheae.
+While it hangs at the surface, the mosquito larva feeds by continuous whisking movements of its mouthparts.
+These bear a dense fringe of bristles and set up a current of water which brings microscopic plants to the mouth of the larva.
+These micro-organisms are filtered out and eaten.
+If disturbed, the larva flicks its abdomen from side to side and swims to the bottom of the pond.
+Similar wriggling, swimming movements serve to bring it to the surface again.
+The many long bristles on its body are thought to give some protection against being eaten by fish that thus find them distasteful.
+Nevertheless, some fish such as guppies eat mosquito larvae in great numbers.
+The tufts of bristles on the last abdominal segment may help the larva to steer when swimming.
+After three or four ecdyses, the larva changes to a pupa.
+The last larval moult reveals a grotesque, comma-shaped pupa which, unlike the butterfly chrysalis, does not remain motionless but is able to swim vigorously by flicking its abdomen.
+When at rest it is buoyant and floats passively to the water surface where it hangs, head uppermost, from the surface film.
+The pupa breathes air through a pair of breathing tubes which pass through the pupal case above the thorax.
+During the pupal stage, the insect does not feed.
+Just before the last larval moult, and during pupation, larval organs are digested away and special cells that have so far remained dormant multiply and form the organs of the adult insect.
+In the pupa, some of the structures of head and thorax can be seen through the pupal skin; the compound eyes, the antennae, legs and wings for example.
+The abdomen shows little change except for the appearance of a pair of plate-like flaps on the last segment, which probably assist the swimming movements.
+After a few days the pupal case splits above the head and thorax.
+The margins of the broken cuticle spread out into a raft-like float on the surface.
+The mosquito pushes its head and thorax out of the pupal case and then withdraws the legs and mouth parts.
+Balanced on the floating pupal case or surface film the imago rests while the wings enlarge and harden, after which it flies away.
+The adult mosquito has one pair of wings.
+The second pair is reduced to tiny protrusions called halteres.
+These vibrate rapidly while the insect is in flight and constantly stimulate the wing muscles, so maintaining their muscular tone.
+The antennae in the female are thread-like.
+Those of the male have many filaments branching from them and look bushy.
+Both sexes have elongate mouth parts through which only fluids can be sucked.
+Whereas those of the females are able to pierce the skin, those of the males cannot do so and are used only to suck up plant juices such as nectar.
+The fine, sharp mouth parts of the female are enclosed in a grooved labium.
+When she takes a blood meal the two lobes at the end of the labium are placed on the skin of the victim and the tubes and stylets are pushed through the skin until they reach a blood vessel.
+Exactly how such fine structures can penetrate the tissues without buckling is not yet fully understood.
+Unless a skin sensory cell is touched the victim is usually quite unaware of the penetration.
+Saliva is passed down the salivary duct in the hypopharynx; it contains a chemical that prevents the blood from clotting.
+Some biologists think that the saliva also produces a response in the punctured tissues, resulting in swelling and local irritation.
+Blood is pumped up through the food channel in the labrum by the action of muscles in the gullet.
+The labium does not penetrate the skin but acts as a kind of guide and support for the sharper mouth parts.
+It becomes doubled back as the mouth parts penetrate deeper into the tissues.
+It seems that a blood meal is taken by a female before fertile eggs are laid.
+This, however, is not always necessary, for the first batch of eggs at least, and the females, like the males, may also feed on nectar and fruit juices.
+In tropical countries, the Middle East and Southern Asia, certain species of the mosquito transmit the disease malaria.
+Malaria is a disease of the red blood cells.
+A microscopic, single-celled animal invades the cells and in feeding on their cytoplasm destroys them, producing regular fevers and other symptoms.
+If a mosquito sucks up blood from a person suffering from malaria, red cells containing the malarial parasite are taken in.
+These parasites are released from the blood cell by the insect's digestive juices and burrow into the insect's stomach wall, where they grow and multiply.
+The offspring eventually move to the salivary glands.
+Later, when this mosquito feeds on another person, it injects saliva containing the parasite into his or her blood stream and the person so bitten develops malaria.
+The disease is responsible for many deaths and prolonged suffering.
+In Africa alone, up to three million people die every year from malaria, and it is estimated that a quarter of the population is seriously ill with it for two months in each year.
+Drugs such as chloroquine are used to kill the parasites in the blood stream but the parasite quickly develops resistance to it.
+Much money, time and research have also been applied to exterminating the mosquito which spreads the disease.
+Methods of control include the draining of swamps and marshes where the larvae live; turning sluggish waterways into swiftly flowing streams; spraying lakes and ponds with oil films and insecticides which poison the larvae; spraying dwelling-places with insecticides to kill the adult mosquitoes.
+Papilio demodocus is a butterfly, common in southern Africa.
+It is most abundant during the rains when its larvae (caterpillars) may cause damage to citrus trees.
+After mating, the adult female lays her eggs singly, cementing them in exposed positions on the upper surface of young citrus leaves.
+The egg is spherical, whitish in colour and with an almost smooth outer shell.
+Darker pigment may occur around the equator of the egg and at a point on the upper surface of the egg where a pore or micropyle is located.
+The micropyle admitted a sperm when the egg was fertilized inside the female.
+The egg contains yolk which nourishes the larva, and gaseous exchange is allowed through the micropyle.
+After a few days the larva can be seen through the shell, subsequently escaping from it by biting a hole.
+The 3 mm larva eats the shell as its first meal, this apparently being essential for its successful development.
+After that, the caterpillar eats the leaves of the citrus tree, using its strong mandibles to chew the leaf margins.
+The body is cylindrical, distinctly segmented, and in young larvae pigmented black and white.
+Older larvae are predominantly green above and whitish below.
+Young larvae resemble bird droppings while older larvae appear to have no shadow and blend with the citrus leaves.
+The larva has thirteen visible body segments of which the first three bear jointed true legs and represent the three future thoracic segments of the adult.
+The remaining ten segments constitute the abdomen, segments 3, 4, 5, 6 and 10 bearing pairs of larval legs or prolegs which are absent in the adult.
+The prolegs bear a double row of tiny hooks enabling the insect to hold firmly to the food plant.
+Pairs of respiratory valves or spiracles occur on the sides of the first thoracic segment and on abdominal segments 1 to 8.
+The head is equipped with biting mandibles which move transversely.
+Behind these is a spinneret, a press device through which secretion is ejected from a pair of modified salivary glands within the larva.
+The liquid secretion, hardens on contact with air to form a thread of silk.
+A larva on a strange surface can be seen moving its head from side to side, extruding on to the substrate a silk safety line which can be gripped by its feet.
+The eyes are two groups of simple ocelli on either side of the head, each ocellus consisting of a lens with light-sensitive cells beneath.
+With the aid of these ocelli a larva aligns itself along the leaf margin or can detect.
+changes in light intensity, but it is doubtful whether it sees a detailed image of its surroundings.
+As the larva grows, its old cuticle is shed and replaced from below by a new cuticle whose folds allow for renewed growth.
+The splitting of the old cuticle is called ecdysis.
+The caterpillar therefore develops through four stages or instars, each ending in ecdysis.
+It eats the shed cuticle before resuming normal feeding.
+Mature larvae move to sites on the trunk or stems of the food plant.
+Here they settle, head uppermost, and spin a pad of silk.
+The caterpillar then moves upwards and clasps the pad with the last pair of prolegs while a girdle is spun to support the upper end of the larva when it releases its hold on the stem.
+The body shortens and swells in the thoracic region as blood is pumped forward and air swallowed until the last larval cuticle bursts suddenly behind the head.
+This process takes about 24 hours.
+Rhythmic contractions of the body and a lubricating moulting fluid allow the split cuticle to pass towards the tail where it is discarded, the pupa attaching itself by the modified last pair of prolegs, the cremaster.
+At first pale and soft, the pupal cuticle hardens and may be pigmented brown or green to match the background.
+The pupa does not feed.
+Reorganization of larval tissue into adult organs, already started in the larva, is completed.
+The eyes, antennae, legs, tongue and forewings of the imago are visible in the pupal cuticle.
+The silken girdle and pad are probably the remains of a reduced cocoon structure.
+Well developed cocoons are a characteristic of moths rather than butterflies.
+During the rains, the adult hatches after about a week.
+Like ecdysis into the pupa, ecdysis into the adult takes place very quickly and must be watched for very carefully.
+If the pupa is formed at the end of the rains, it may not hatch at once but remain in a dormant state called diapause during which little oxygen is used and normal chemical reactions in the body are replaced by special anaerobic ones, that is, chemical processes not requiring oxygen.
+Whether pupation lasts for one week or longer, the adult emerges with small, sac-like wings, which are expanded by pumping blood into them.
+After this they flatten and become chemically hardened.
+The wings are supported by branching veins, each being hollow and containing a trachea, blood-space and nerve.
+The body of the imago consists of a distinct head, thorax and abdomen, with three pairs of walking legs and two pairs of wings attached to the thorax.
+The head bears a pair of compound eyes, each with about six thousand separate lenses.
+Beneath each lens is a regular group of light-sensitive cells.
+The compound eyes are chiefly detectors of movement and pattern, also acting as direction finders.
+There is little evidence that the insect eye sees a distinct image of the kind seen by a mammalian eye.
+They are therefore useful in helping the insect to recognize shapes of flowers, or wing patterns of the same species of butterfly, and for detecting the wing movements or sudden approach of predators.
+On the head there is also a pair of long antennae which bear organs of smell.
+In moths this sense is very acute but in butterflies it is often reduced, probably because their day-flying habits enable visual navigation.
+The proboscis consists of two long, hollow processes grooved along their inner surfaces, so that when they are placed together they form a sucking tube.
+When not in use the proboscis is coiled beneath the head.
+The head, body and legs are clothed with hairs, which are flattened and modified on the wings to form overlapping, pigmented scales, giving the wings their characteristic pattern.
+The scale colour may be produced by a bending of light rays through the scales so that they act like tiny prisms, or by the inclusion in the scales of pigment derived from nitrogenous waste materials.
+The forewings overlap the hind wings so that in flight both pairs move together.
+The legs consist of nine sections, the coxa is attached to the body while the short trochanter hinges the long femur and tibia to it.
+There are five segments in the foot or tarsus.
+The last tarsal segments may bear taste organs.
+If they contact sugar or fruit juice, the proboscis is uncoiled.
+Many of the hairs on the legs and body are equipped with sensory nerve endings which make them sensitive to touch and vibration.
+In structure, they are quite unlike the hairs of mammals, being outgrowths of the cuticle and having no root.
+The newly emerged female butterfly is attracted to the nectar of flowers, to urine and faeces, rotten fruit and other food sources, while the mature mated female is attracted to citrus oils on the leaves on which she lays her eggs.
+The early larvae are black and white in colour and do not attempt to hide, while the mature larva with its different colouring withdraws to parts of the plant where its light under parts cancel its natural shadow and allow it to blend with the leaves.
+Bright light and high temperature cause the larva to leave its resting position and actively seek shade.
+As a defence against predators, the caterpillar expands the third thoracic segment which bears eye-spots.
+At the same time, a forked, tongue-like osmaterium, normally withdrawn into the first thoracic segment, is extruded and vibrated.
+These changes give the larva a snake-like appearance and together with a pungent, aromatic secretion from the mouth, frighten off animals that might eat it.
+Adult butterflies can distinguish between certain colours only and are most sensitive to the red end of the spectrum.
+Males are attracted to the female by her scent, her flight behaviour and colour pattern.
+Male butterflies may also produce a sex scent from special distributing scales on the wings.
+Mating takes place with the male holding the tip of the female's abdomen with his abdominal claspers, sperms passing into the female in a special sperm-package or spermatophore, so fertilizing the eggs internally.
+There may be two or more broods during the rainy season.
+Occasionally larvae of Papilio butterflies may be seen dried and dead, their shrunken bodies attached firmly to a leaf.
+If the barrel-shaped cuticle is broken open, a cocoon will be found inside the larval skin.
+In this cocoon is a pupa of a parasitic ichneumonid wasp.
+This insect lays an egg in the body of a young swallowtail caterpillar and the wasp larva is nourished from the body juices of its host.
+The account of structure and life history given above is generally applicable to most butterflies and moths.
+However, some major differences do occur.
+Many butterflies drop their eggs among herbage and do not seek a food plant on which to stick their eggs.
+In many butterflies and moths the eggs are laid in batches; the eggar moths often lay their eggs in masses on walls after they have been flying round lamps at night.
+In this case the eggs are covered with a layer of scales detached from the abdomen of the female.
+These scales are irritating to predators.
+Some butterfly and moth larvae are very particular about their species of food plant, while others eat many different species of plant.
+The citrus swallowtail larvae are leaf-eaters but in the tropics many of the most destructive moth larvae are stem-borers, burrowing in the succulent stems of plants like sugar cane and maize.
+Many butterfly pupae hang head downwards by the cremaster and lack a girdle.
+The group of insects which includes the citrus swallowtail is often popularly divided into moths and butterflies.
+In the tropics this division becomes difficult using the simple characteristics which apply to these insects in cool, temperate regions of the world.
+Thus although most moths tend to fly at night and are dull in colour, many tropical moths tend to be brightly coloured like butterflies and fly during the daytime.
+Butterflies tend to fold their wings vertically above the body at rest, while moths hold their wings flat or in a roof-like manner over the body.
+In the skipper butterflies, however, the wings may be held in a moth-like position.
+In most butterflies the antennae are clubbed at the tips, but in some groups of moths, admittedly a minority, the antennae may also be clubbed.
+Zoologists usually separate moths and butterflies using complex differences in the wing venation and sexual organs rather than the characteristics discussed above.
