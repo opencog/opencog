@@ -286,8 +286,48 @@ bool TypeFrame::equals(const TypeFrame &other) const
     return answer;
 }
 
-bool TypeFrame::isFeasible(const std::vector<std::vector<bool>> &matrix, int n) const
+int TypeFrame::lineComparisson(const std::vector<std::vector<int>> &matrix) const
 {
+    int n = (int) matrix.size();
+    int answer = 0;
+
+    bool outterFlag = true;
+    for (int i = 0; i < n; i++) {
+        bool flag = true;
+        for (int j = 0; j < n; j++) {
+            if (matrix[i][j] > 0) {
+                flag = false;
+                break;
+            }
+        }
+        if (flag) {
+            answer = -1;
+            outterFlag = false;
+            break;
+        }
+    }
+    if (outterFlag) {
+        for (int j = 0; j < n; j++) {
+            bool flag = true;
+            for (int i = 0; i < n; i++) {
+                if (matrix[i][j] < 0) {
+                    flag = false;
+                    break;
+                }
+            }
+            if (flag) {
+                answer = 1;
+                break;
+            }
+        }
+    }
+
+    return answer;
+}
+
+bool TypeFrame::isFeasible(const std::vector<std::vector<bool>> &matrix) const
+{
+    int n = (int) matrix.size();
     int mapping[n];
     int lineCursor[n];
 
@@ -366,7 +406,7 @@ bool TypeFrame::isEquivalent(const TypeFrame &other, int cursorThis, int cursorO
                 }
                 // TODO XXX
                 //printf(" \n");
-                answer = isFeasible(equivalent, n);
+                answer = isFeasible(equivalent);
             } else {
                 for (unsigned int i = 0; i < argPosThis.size(); i++) {
                     if (! isEquivalent(other, argPosThis.at(i), argPosOther.at(i))) {
@@ -379,6 +419,85 @@ bool TypeFrame::isEquivalent(const TypeFrame &other, int cursorThis, int cursorO
     }
 
     if (DEBUG) printf("EQUIVALENT: %s\n", (answer ? "TRUE" : "FALSE"));
+
+    return answer;
+}
+
+int TypeFrame::compareUsingEquivalence(const TypeFrame &other, int cursorThis, int cursorOther) const
+{
+    int answer = 0;
+
+    if (DEBUG) {
+        printf("lessThanUsingEquivalence() %d %d\n", cursorThis, cursorOther);
+        printForDebug("this: ", "\n", true);
+        other.printForDebug("other:", "\n", true);
+    }
+
+    if (at(cursorThis).first < other.at(cursorOther).first) {
+        answer = -1;
+    } else if (at(cursorThis).first > other.at(cursorOther).first) {
+        answer = 1;
+    } else if (at(cursorThis).second < other.at(cursorOther).second) {
+        answer = -1;
+    } else if (at(cursorThis).second > other.at(cursorOther).second) {
+        answer = 1;
+    } else {
+        if (at(cursorThis).second == 0) {
+            answer = nodeNameAt(cursorThis).compare(other.nodeNameAt(cursorOther));
+        } else {
+            std::vector<int> argPosThis = getArgumentsPosition(cursorThis);
+            std::vector<int> argPosOther = other.getArgumentsPosition(cursorOther);
+            if (typeAtIsSymmetricLink(cursorThis)) {
+                int n = argPosThis.size();
+                std::vector<std::vector<bool>> equivalent;
+                std::vector<bool> aux1;
+                std::vector<std::vector<int>> comparisson;
+                std::vector<int> aux2;
+                std::vector<int> zeroLine;
+                std::vector<int> zeroColumn;
+                for (int i = 0; i < n; i++) {
+                    aux1.clear();
+                    equivalent.push_back(aux1);
+                    comparisson.push_back(aux2);
+                    for (int j = 0; j < n; j++) {
+                        int comp = compareUsingEquivalence(other, argPosThis.at(i), argPosOther.at(j));
+                        //bool f = isEquivalent(other, argPosThis.at(i), argPosOther.at(j));
+                        equivalent.at(i).push_back(comp == 0);
+                        comparisson.at(i).push_back(comp);
+                        if (comp == 0) {
+                            zeroLine.push_back(i);
+                            zeroColumn.push_back(j);
+                        }
+                    }
+                }
+                // TODO XXX
+                //printf(" \n");
+                if (! isFeasible(equivalent)) {
+                    for (std::vector<int>::iterator it = zeroLine.begin(); it != zeroLine.end(); it++) {
+                        for (int j = 0; j < n; j++) {
+                            comparisson[*it][j] = 0;
+                        }
+                    }
+                    for (std::vector<int>::iterator it = zeroColumn.begin(); it != zeroColumn.end(); it++) {
+                        for (int i = 0; i < n; i++) {
+                            comparisson[i][*it] = 0;
+                        }
+                    }
+                    answer = lineComparisson(comparisson);
+                }
+            } else {
+                for (unsigned int i = 0; i < argPosThis.size(); i++) {
+                    int comp = compareUsingEquivalence(other, argPosThis.at(i), argPosOther.at(i));
+                    if (comp != 0) {
+                        answer = comp;
+                        break;
+                    }
+                }
+            }
+        }
+    }
+
+    if (DEBUG) printf("Compare: %d\n", answer);
 
     return answer;
 }
@@ -477,7 +596,7 @@ TypeFrame TypeFrame::copyReplacingFrame(const TypeFrame &key, const TypeFrame &f
             aux.clear();
             aux = subFrameAt(argPos.at(i));
             // TODO XXX
-            // perhaps using isEquivalent() instead of equals(0 makes more sense
+            // perhaps using isEquivalent() instead of equals() makes more sense
             if (aux.equals(key)) {
                 answer.append(frame);
             } else {
