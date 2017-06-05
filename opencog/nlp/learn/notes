@@ -7649,8 +7649,7 @@ Oh no Mr Bill!! stack_size=512 fp-bot = 455 ip-subr_stub_code=14 engine=1 Mon Ju
 Oh no Mr Bill!! stack_size=512 fp-bot = 455 ip-subr_stub_code=14 engine=1 Mon Jun  5 05:53:08 2017
 
 
-
-
+(observe-text "In the calmness of the evening, when the winds had sunk to rest, When no earthquake heaved its fury, burned no fire within my breast, Came a still small voice so tender, it the heart of Christ confessed: \"Unto thy God be true!\"")
 
 Interesting. Unescaped quotes!  FIXED
 also - unescaped carriage returns FIXED.

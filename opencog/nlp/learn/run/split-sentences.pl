@@ -96,6 +96,10 @@ sub preprocess
 	# This is one paragraph.
 	my($text) = @_;
 
+	# Double-dashes, without spaces! sometimes get used to concatenate
+	# sentences. I see this in Project Gutenberg books a lot.
+	$text =~ s/--/ -- /g;
+
 	# Clean up spaces at head and tail of each line as well as any
 	# double-spacing. Get rid of carriage returns.
 	$text =~ s/\r//g;
