@@ -21825,9 +21825,9 @@ fractional mutual information
  for a pair is interesting to explore.
  Define this as
 \begin_inset Formula 
-\[
-MI_{pair}(w,d)=-\log_{2}\frac{p(w,d)}{p(w,*)p(*,d)}
-\]
+\begin{equation}
+MI_{pair}(w,d)=-\log_{2}\frac{p(w,d)}{p(w,*)p(*,d)}\label{eq:mi-word-disjunct}
+\end{equation}
 
 \end_inset
 
@@ -24918,7 +24918,7 @@ which, after dividing by
 \end_inset
 
 Comparing this to the expression for mutual information suggests that using
- teh vector support, instead of the vector length, could be interesting.
+ the vector support, instead of the vector length, could be interesting.
  In particular, these might be interesting:
 \begin_inset Formula 
 \[
@@ -24956,6 +24956,80 @@ mutual length
 \end_inset
 
  device.
+\end_layout
+
+\begin_layout Subsection*
+Quality Cosine
+\end_layout
+
+\begin_layout Standard
+More possibilities exist.
+ The motivation for using cosine similarity is to find pairs of words that
+ act in a grammaticall similar fashion: they are used in the same way, with
+ the same kinds of disjuncts.
+ However, observational counts are subject to the vicissitudes of the input
+ text: perhaps, instead of using vectors where the components are given
+ by the frequency, once could instead use components based on, say, the
+ 
+\begin_inset Quotes eld
+\end_inset
+
+quality
+\begin_inset Quotes erd
+\end_inset
+
+ of the disjunct itself.
+ A disjunct could be judged as being 
+\begin_inset Quotes eld
+\end_inset
+
+high quality
+\begin_inset Quotes erd
+\end_inset
+
+ if 
+\begin_inset Formula $mi(w,d)=MI_{pair}(w,d)$
+\end_inset
+
+ as defined in equation 
+\begin_inset CommandInset ref
+LatexCommand vref
+reference "eq:mi-word-disjunct"
+
+\end_inset
+
+ is high.
+ This motivates a 
+\begin_inset Quotes eld
+\end_inset
+
+quality cosine
+\begin_inset Quotes erd
+\end_inset
+
+: 
+\begin_inset Formula 
+\[
+\mbox{qim}(w_{1},w_{2})=\frac{\sum_{d}mi(w_{1},d)mi(w_{2},d)}{\sqrt{\sum_{d}mi^{2}(w_{1},d)}\sqrt{\sum_{d}mi^{2}(w_{2},d)}}
+\]
+
+\end_inset
+
+But what if the high quality is based on a pathetically small number of
+ observations? Perhaps there should be some observational weighting.
+ One can contemplate defining 
+\begin_inset Formula $pi(w,d)=p(w,d)mi(w,d)$
+\end_inset
+
+ and so the cosine 
+\begin_inset Formula 
+\[
+\mbox{pim}(w_{1},w_{2})=\frac{\sum_{d}pi(w_{1},d)pi(w_{2},d)}{\sqrt{\sum_{d}pi^{2}(w_{1},d)}\sqrt{\sum_{d}pi^{2}(w_{2},d)}}
+\]
+
+\end_inset
+
+ The suitability of these different means of judging similarity is not clear.
 \end_layout
 
 \begin_layout Section*
@@ -25649,7 +25723,7 @@ en_pairs_tone_mst
 \begin_inset Text
 
 \begin_layout Plain Layout
-
+187K x 3.4M
 \end_layout
 
 \end_inset
@@ -25658,7 +25732,7 @@ en_pairs_tone_mst
 \begin_inset Text
 
 \begin_layout Plain Layout
-
+6.98M
 \end_layout
 
 \end_inset
@@ -25667,7 +25741,7 @@ en_pairs_tone_mst
 \begin_inset Text
 
 \begin_layout Plain Layout
-
+257M
 \end_layout
 
 \end_inset
@@ -25676,7 +25750,7 @@ en_pairs_tone_mst
 \begin_inset Text
 
 \begin_layout Plain Layout
-
+36.91
 \end_layout
 
 \end_inset
@@ -25685,7 +25759,7 @@ en_pairs_tone_mst
 \begin_inset Text
 
 \begin_layout Plain Layout
-
+11.87
 \end_layout
 
 \end_inset
@@ -25694,7 +25768,7 @@ en_pairs_tone_mst
 \begin_inset Text
 
 \begin_layout Plain Layout
-
+2.49
 \end_layout
 
 \end_inset
@@ -25703,7 +25777,7 @@ en_pairs_tone_mst
 \begin_inset Text
 
 \begin_layout Plain Layout
-
+9.81
 \end_layout
 
 \end_inset
@@ -25712,7 +25786,7 @@ en_pairs_tone_mst
 \begin_inset Text
 
 \begin_layout Plain Layout
-
+-0.42
 \end_layout
 
 \end_inset
@@ -25721,7 +25795,7 @@ en_pairs_tone_mst
 \begin_inset Text
 
 \begin_layout Plain Layout
-
+en_pairs_ttwo_mst
 \end_layout
 
 \end_inset
