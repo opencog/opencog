@@ -92,7 +92,7 @@ Supt
 Surg
 
 # Abbreviations
-# Historical Society
+# Historical Society  MSS - manuscipt
 Arch
 Hist
 Inst
@@ -107,10 +107,8 @@ i.e
 rev
 e.g
 p.s
-
-# Book types: octavo, quarto
-8vo
-4to
+op
+cit
 
 # Numbers only. These should only induce breaks when followed by a numeric
 # sequence.  Add NUMERIC_ONLY after the word for this function. This case
@@ -126,6 +124,7 @@ FIG
 Fig
 # lower case i: illustration
 i
+ii
 # lower-case p: page
 p
 seq
