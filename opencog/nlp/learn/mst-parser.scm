@@ -42,8 +42,8 @@
 (define-public (tokenize-text plain-text)
 	; Prefix and suffix lists taken from the link-grammar ANY
 	; language 4.0.affix file
-	(define prefix "({[<«〈（〔《【［『「``„“‘'''…...¿¡$£₤€¤₳฿₡₢₠₫৳ƒ₣₲₴₭₺ℳ₥₦₧₱₰₹₨₪﷼₸₮₩¥៛호점†‡§¶©®℗№#")
-	(define suffix ")}]>»〉）〕》】］』」’'%,.。:;?!‽؟？！…”–‐、～¢₵™℠")
+	(define prefix "({[<«〈（〔《【［『「``„“‘'''\"…...¿¡$£₤€¤₳฿₡₢₠₫৳ƒ₣₲₴₭₺ℳ₥₦₧₱₰₹₨₪﷼₸₮₩¥៛호점†‡§¶©®℗№#")
+	(define suffix ")}]>»〉）〕》】］』」’'\"%,.。:;?!‽؟？！…”–‐、～¢₵™℠")
 	(define prefix-list (string->list prefix))
 	(define suffix-list (string->list suffix))
 
