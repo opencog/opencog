@@ -21,6 +21,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <chrono>
+
 #include "SCMLoader.h"
 #include "TypeFrameIndex.h"
 #include "TypeFrameIndexBuilder.h"
@@ -158,11 +160,17 @@ bool loadFile(char *fileName)
     */
 
     std::vector<std::pair<float,TypeFrame>> patterns;
+
+    std::chrono::high_resolution_clock::time_point t1 = std::chrono::high_resolution_clock::now();
     index.minePatterns(patterns, 3, 10, TypeFrameIndex::N_II_SURPRISINGNESS);
+    std::chrono::high_resolution_clock::time_point t2 = std::chrono::high_resolution_clock::now();
+    unsigned int duration = std::chrono::duration_cast<std::chrono::seconds>(t2 - t1).count();
+
     for (unsigned int i = 0; i < patterns.size(); i++) {
         printf("%f: ", patterns.at(i).first);
         patterns.at(i).second.printForDebug("", "\n");
     }
+    printf("Total mining time: %u\n", duration);
 
     /*
     std::vector<TypeFrameIndex::ResultPair> result;

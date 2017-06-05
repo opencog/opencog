@@ -1,3 +1,4 @@
+#include <chrono>
 #include <limits>
 
 #include "TypeFrameIndex.h"
@@ -257,12 +258,10 @@ void TypeFrameIndex::addInferredSetFrames(std::vector<TypeFrame> &subset, std::v
     CombinationGenerator selected(nodes.size(), true, false);
 
     TypeFrame starFrame, compoundFrame;
-    TypeFrame aux1, aux2;
-    TypeFrame auxInternalVar1, auxInternalVar2;
+    TypeFrame aux1;
+    TypeFrame auxInternalVar1;
     auxInternalVar1.push_back(TypePair(classserver().getType("VariableNode"), 0));
     auxInternalVar1.setNodeNameAt(0, "IV1");
-    auxInternalVar2.push_back(TypePair(classserver().getType("VariableNode"), 0));
-    auxInternalVar2.setNodeNameAt(0, "IV2");
 
     while (! selected.depleted()) {
         if (DEBUG) selected.printForDebug("selected: ", "\n");
@@ -270,26 +269,18 @@ void TypeFrameIndex::addInferredSetFrames(std::vector<TypeFrame> &subset, std::v
         for (TypeFrameSet::iterator it = nodes.begin(); it != nodes.end(); it++) {
             if (selected.at(count++)) {
                 aux1.clear();
-                aux2.clear();
                 if (DEBUG) frame.printForDebug("base: ", "\n");
                 if (DEBUG) (*it).printForDebug("key: ", "\n");
                 if (DEBUG) auxInternalVar1.printForDebug("subst for: ", "\n");
                 aux1 = frame.copyReplacingFrame((*it), auxInternalVar1);
                 if (DEBUG) aux1.printForDebug("result: ", "\n");
-                aux2.push_back(TypePair(classserver().getType("OrLink"), 2));
-                aux2.append(frame);
-                aux2.append(aux1);
                 compoundFrame.clear();
                 compoundFrame.push_back(TypePair(classserver().getType("AndLink"), 2));
-                compoundFrame.append(aux2);
-                compoundFrame.push_back(TypePair(classserver().getType("AndLink"), 2));
+                compoundFrame.append(aux1);
                 if (subSetFlag) {
                     compoundFrame.push_back(TypePair(classserver().getType("InheritanceLink"), 2));
-                    compoundFrame.append(auxInternalVar2);
-                    compoundFrame.append(*it);
-                    compoundFrame.push_back(TypePair(classserver().getType("InheritanceLink"), 2));
-                    compoundFrame.append(auxInternalVar2);
                     compoundFrame.append(auxInternalVar1);
+                    compoundFrame.append(*it);
                     starFrame.clear();
                     starFrame.push_back(TypePair(classserver().getType("AndLink"), 2));
                     starFrame.append(frame);
@@ -299,10 +290,7 @@ void TypeFrameIndex::addInferredSetFrames(std::vector<TypeFrame> &subset, std::v
                 } else {
                     compoundFrame.push_back(TypePair(classserver().getType("InheritanceLink"), 2));
                     compoundFrame.append(*it);
-                    compoundFrame.append(auxInternalVar2);
-                    compoundFrame.push_back(TypePair(classserver().getType("InheritanceLink"), 2));
                     compoundFrame.append(auxInternalVar1);
-                    compoundFrame.append(auxInternalVar2);
                 }
                 subset.push_back(compoundFrame);
             }
@@ -588,7 +576,12 @@ void TypeFrameIndex::minePatterns(std::vector<std::pair<float,TypeFrame>> &answe
     answer.clear();
     std::vector<TypeFrame> compoundFrames;
     if (LOCAL_DEBUG) printf("Building compound frames\n");
+
+    std::chrono::high_resolution_clock::time_point t1 = std::chrono::high_resolution_clock::now();
     buildCompoundFrames(compoundFrames, components);
+    std::chrono::high_resolution_clock::time_point t2 = std::chrono::high_resolution_clock::now();
+    if (LOCAL_DEBUG) printf("Time to build compound frames: %ld\n", std::chrono::duration_cast<std::chrono::seconds>(t2 - t1).count());
+
     if (DEBUG) {
         printf("COMPOUND FRAMES (%lu):\n", compoundFrames.size());
         for (unsigned int i = 0; i < compoundFrames.size(); i++) {
@@ -610,10 +603,8 @@ void TypeFrameIndex::minePatterns(std::vector<std::pair<float,TypeFrame>> &answe
     float testQuality = computeQuality(testFrame, metric);
     printf("Quality: %f\n", testQuality);
     if (metric < 1000) return;
-    */
       
-    /*
-    TypeFrame testFrame2( "(AndLink (InheritanceLink (VariableNode \"V0\") (ConceptNode \"human\")) (InheritanceLink (ConceptNode \"Abe\") (ConceptNode \"human\")) (InheritanceLink (VariableNode \"V0\") (ConceptNode \"soda drinker\")))");
+    TypeFrame testFrame2( "(AndLink (InheritanceLink (VariableNode \"V0\") (ConceptNode \"human\")) (InheritanceLink (VariableNode \"V0\") (ConceptNode \"ugly\")) (InheritanceLink (VariableNode \"V0\") (ConceptNode \"soda drinker\")) )");
     testFrame2.printForDebug("testFrame2: ", "\n");
     float testQuality2 = computeQuality(testFrame2, metric);
     printf("Quality2: %f\n", testQuality2);
@@ -624,6 +615,7 @@ void TypeFrameIndex::minePatterns(std::vector<std::pair<float,TypeFrame>> &answe
     this->patternCountCache.clear();
     PatternHeap heap;
     if (LOCAL_DEBUG) printf("Processing patterns\n");
+    std::chrono::high_resolution_clock::time_point t3 = std::chrono::high_resolution_clock::now();
     for (unsigned int i = 0; i < compoundFrames.size(); i++) {
     //for (unsigned int i = 17; i < 19; i++) {
         if (LOCAL_DEBUG) printf("%u / %lu\n", i, compoundFrames.size());
@@ -649,6 +641,9 @@ void TypeFrameIndex::minePatterns(std::vector<std::pair<float,TypeFrame>> &answe
             }
         }
     }
+    std::chrono::high_resolution_clock::time_point t4 = std::chrono::high_resolution_clock::now();
+
+    if (LOCAL_DEBUG) printf("Time to process patterns: %ld\n", std::chrono::duration_cast<std::chrono::seconds>(t4 - t3).count());
 
     if (DEBUG) printf("Finished mining. heap size = %lu\n", heap.size());
 
