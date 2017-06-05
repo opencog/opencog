@@ -28,3 +28,7 @@ A quick overview:
 * opencog-*.conf: cogserver config file
 
 * config-*.scm: another cogserver config file
+
+* split-sentences.pl: split text into sentences. Looks for likely end-of
+  sentence locations, and divides free-form text, so taht there is one
+  sentence per line.

@@ -84,7 +84,8 @@ statistics.  Most of this revolves around setting up postgres.
 ```
    git clone https://github.com/ivmai/bdwgc
    cd bdwgc
-   git checkout gc7_6_0
+   git checkout release-7_6
+   ./autogen.sh
    ./configure --enable-large-config
    make; sudo make install
 ```
