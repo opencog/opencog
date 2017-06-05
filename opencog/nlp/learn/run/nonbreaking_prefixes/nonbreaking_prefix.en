@@ -33,11 +33,13 @@ Z
 # List of titles. These are often followed by upper-case names,
 # but do not indicate sentence breaks
 #
+Abp
 Adj
 Adm
 Adv
 Asst
 Bart
+Bp
 Bldg
 Brig
 Bros
@@ -93,24 +95,94 @@ Surg
 
 # Abbreviations
 # Arabic Architectural Congregation Historical Society  MSS - manuscipt
+Abstr
+Acad
+Acct
+Accts
+Admin
+Agric
 Ar
 Arch
+Assn
+Assoc
 Cong
+Dept
+Econ
+Ed
+Ess
+Evang
+Fr
+Gaz
+Glac
+Gr
 Hist
+Hosp
 Inst
+Jas
+Let
+Lett
+lett
+Libr
 MSS
+mss
+Mt
+Org
+org
+Phys
+Princ
+Proc
+Prod
+Prol
+Prov
+Pt
+pt
+Publ
+publ
+Quot
+quot
+Quots
+quots
+Ref
+ref
+Reg
+reg
+Rep
+Rept
+Rev
+rev
+Roy
+Russ
 Soc
+Tel
+tel
+Ths
+Trad
+trad
+Transl
+transl
+Univ
+Will
+Wk
+wk
+Wkly
+wlky
+Wks
+Yr
+Zool
+
 
 # misc - odd period-ending items that NEVER indicate breaks (p.m. does NOT
 # fall into this category - it sometimes ends a sentence)
+# mostly Latin abbreviations.
 v
 vs
 i.e
-rev
 e.g
-p.s
 op
 cit
+p.s
+q.v
+viz
 
 # Numbers only. These should only induce breaks when followed by a numeric
 # sequence.  Add NUMERIC_ONLY after the word for this function. This case
@@ -131,6 +203,9 @@ ii
 p
 seq
 Seq
+sp
+spec
+specif
 # Volumes
 Vol
 vol
@@ -150,3 +225,11 @@ Sep
 Oct
 Nov
 Dec
+
+Mon
+Tue
+Wed
+Thu
+Fri
+Sat
+Sun
