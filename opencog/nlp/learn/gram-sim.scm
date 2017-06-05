@@ -156,7 +156,7 @@
 
 ; Loop over the entire list of words, and compute similarity scores
 ; for them.  Hacked parallel version.
-(define (batch-sim-pairs WORD-LIST CUTOFF)
+(define (para-batch-sim-pairs WORD-LIST CUTOFF)
 
 	(define len (length WORD-LIST))
 	(define tot (* 0.5 len len))
@@ -164,23 +164,42 @@
 	(define prs 0)
 	(define start (current-time))
 
-	(define nthreads 10)
+	(define nthreads 20)
+
+	(define (do-one-and-rpt WRD-LST)
+		; These sets are not thread-safe but I don't care.
+		(set! prs (+ prs (batch-sim (car WRD-LST) (cdr WRD-LST) CUTOFF)))
+		(set! done (+  done 1))
+		(if (eqv? 0 (modulo done 100))
+			(let* ((elapsed (- (current-time) start))
+					(frt (* done (- len done)))
+					(rate (* 0.001 (/ frt elapsed)))
+					)
+				(format #t
+					 "Done ~A/~A frac=~5f% Time: ~A Done: ~4f% rate=~5f K prs/sec\n"
+					done len
+					(* 100.0 (/ prs frt))
+					elapsed
+					(* 100.0 (/ frt tot))
+					rate
+				))))
 
 	; tail-recursive list-walker.
 	(define (make-pairs WRD-LST)
 		(if (null? WRD-LST) #t
 			(begin
-				(batch-sim (car WRD-LST) (cdr WRD-LST) CUTOFF)
+				(do-one-and-rpt WRD-LST)
 				(if (< nthreads (length WRD-LST))
 					(make-pairs (drop nthreads WRD-LST))))))
 
+	; thread launcher
 	(define (launch WRD-LST CNT)
 		(if (< 0 CNT)
 			(begin
 				(call-with-new-thread (lambda () (make-pairs WRD-LST)))
 				(launch (cdr WRD-LST) (- CNT 1)))))
 
-	(launch nthreads)
+	(launch WORD-LIST nthreads)
 )
 
 ; If the similarity is less than this, it is not saved.
