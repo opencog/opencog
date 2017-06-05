@@ -128,6 +128,8 @@ sub preprocess
 
 	# Add breaks for sentences that end with some sort of punctuation
 	# are followed by a sentence starter punctuation and upper case.
+	# This differs from above in that starter punctuation is mandatory,
+	# and thus we can take the period, here, too.
 	$text =~ s/([?!\.]) +([\'\"\(\[\¿\¡\p{IsPi}]+[\ ]*[\p{IsUpper}])/$1\n$2/g;
 
 	$text =~ s/([。．？！♪])/$1\n/g;
