@@ -152,6 +152,36 @@
 
 	(make-pairs WORD-LIST)
 )
+; ---------------------------------------------------------------------
+
+; Loop over the entire list of words, and compute similarity scores
+; for them.  Hacked parallel version.
+(define (batch-sim-pairs WORD-LIST CUTOFF)
+
+	(define len (length WORD-LIST))
+	(define tot (* 0.5 len len))
+	(define done 0)
+	(define prs 0)
+	(define start (current-time))
+
+	(define nthreads 10)
+
+	; tail-recursive list-walker.
+	(define (make-pairs WRD-LST)
+		(if (null? WRD-LST) #t
+			(begin
+				(batch-sim (car WRD-LST) (cdr WRD-LST) CUTOFF)
+				(if (< nthreads (length WRD-LST))
+					(make-pairs (drop nthreads WRD-LST))))))
+
+	(define (launch WRD-LST CNT)
+		(if (< 0 CNT)
+			(begin
+				(call-with-new-thread (lambda () (make-pairs WRD-LST)))
+				(launch (cdr WRD-LST) (- CNT 1)))))
+
+	(launch nthreads)
+)
 
 ; If the similarity is less than this, it is not saved.
 ; The current value is chosen by gut-feel, based on the current

@@ -6766,11 +6766,17 @@ running at 1.5K pairs/sec ouch.
 Try again:
 (use-modules (opencog) (opencog persist) (opencog persist-sql))
 (use-modules (opencog nlp) (opencog nlp learn))
+; (sql-open "postgres:///en_pairs_supersim?user=linas")
 (sql-open "postgres:///en_pairs_ultrasim?user=linas")
+(use-modules (opencog cogserver))
+(start-cogserver "opencog2.conf")
+(use-modules (opencog analysis))
 (fetch-all-words)
 
 (define pca (make-pseudo-cset-api))
-(pca 'fetch-pairs)
+(define psa (add-pair-stars pca))
+(psa 'fetch-pairs)
+(print-matrix-summary-report psa)
 
 (sql-clear-stats)
 (define ac (get-all-cset-words)) 
@@ -7302,24 +7308,24 @@ gdb libguile/.libs/lt-guile
 Oh. wtf. 
 
 
-(define last-gc (gc-stats))
-(define start-time (get-internal-real-time))
-(define run-time (get-internal-run-time))
-(define (avg-time-taken) 
-	(define now (get-internal-real-time))
-	(define run (get-internal-run-time))
-	(define cur (gc-stats))
-	(define gc-time-taken (* 1.0e-9 (- (cdar cur) (cdar last-gc))))
-	(define elapsed-time (* 1.0e-9 (- now start-time)))
-	(define cpu-time (* 1.0e-9 (- run run-time)))
-	(format #t "Elapsed time: ~5f secs. GC-time-taken: ~5f s or ~5f%   cpu-usage: ~5f%\n"
-		elapsed-time gc-time-taken  (* 100 (/ gc-time-taken elapsed-time))
-		(* 100 (/ cpu-time elapsed-time))
-	)
-	(set! last-gc cur)
-	(set! start-time now)
-	(set! run-time run)
-)
+(define avg-time-taken
+	(let ((last-gc (gc-stats))
+			(start-time (get-internal-real-time))
+			(run-time (get-internal-run-time)))
+		(lambda () 
+			(define now (get-internal-real-time))
+			(define run (get-internal-run-time))
+			(define cur (gc-stats))
+			(define gc-time-taken (* 1.0e-9 (- (cdar cur) (cdar last-gc))))
+			(define elapsed-time (* 1.0e-9 (- now start-time)))
+			(define cpu-time (* 1.0e-9 (- run run-time)))
+			(format #t "Elapsed time: ~5f secs. GC-time-taken: ~5f s or ~5f%	cpu-usage: ~5f%\n"
+				elapsed-time gc-time-taken  (* 100 (/ gc-time-taken elapsed-time))
+				(* 100 (/ cpu-time elapsed-time))
+			)
+			(set! last-gc cur)
+			(set! start-time now)
+			(set! run-time run))))
 
 
 Anyway: it hangs without ever hitting any of the VM DEBUG asserts.
@@ -7628,6 +7634,12 @@ std::char_traits<char>, std::allocator<char> > const&) (this=0x7ffe8c000980,
     at /home/ubuntu/src/opencog/opencog/cogserver/shell/GenericShell.cc:450
 
 
+
+Oh no Mr Bill!! stack_size=512 fp-bot = 455 ip-subr_stub_code=14 engine=1 Mon Jun  5 03:43:12 2017
+
+
+
+
 Interesting. Unescaped quotes!  FIXED
 also - unescaped carriage returns FIXED.
 also sentence spliter fails when there are footnotes:
@@ -7649,6 +7661,15 @@ FeatureNode fn = _parse.getLeft();
 while (fn != null)
 fn = fn.get("NEXT");
 
+
+(use-modules (ice-9 textual-ports))
+(define (fubar sent-txt)
+   (let ((s (socket PF_INET SOCK_STREAM 0)))
+      (connect s AF_INET (inet-pton AF_INET "127.0.0.1") 4445)
+      (set-port-encoding! s "utf-8")
+      (display sent-txt s) (display "\n" s)
+      (format #t "Its ~A\n" (get-string-all s))
+     (close-port s)))
 
 
 
