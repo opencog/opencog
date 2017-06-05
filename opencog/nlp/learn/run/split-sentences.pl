@@ -132,6 +132,9 @@ sub preprocess
 	# and thus we can take the period, here, too.
 	$text =~ s/([?!\.]) +([\'\"\(\[\¿\¡\p{IsPi}]+[\ ]*[\p{IsUpper}])/$1\n$2/g;
 
+	# Sentences that end in punctuation, followed by a double-dash.
+	$text =~ s/([?!\.]) +(--[ \'\"\(\[\¿\¡\p{IsPi}]*[\p{IsUpper}])/$1\n$2/g;
+
 	$text =~ s/([。．？！♪])/$1\n/g;
 	$text =~ s/([\.?!]) *(\p{InCJK})/$1\n$2/g;
 	$text =~ s/(\p{InCJK})/ $1 /g;
