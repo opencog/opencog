@@ -169,7 +169,7 @@
 	(define (do-one-and-rpt WRD-LST)
 		; These sets are not thread-safe but I don't care.
 		(set! prs (+ prs (batch-sim (car WRD-LST) (cdr WRD-LST) CUTOFF)))
-		(set! done (+  done 1))
+		(set! done (+ done 1))
 		(if (eqv? 0 (modulo done 100))
 			(let* ((elapsed (- (current-time) start))
 					(frt (* done (- len done)))
@@ -190,7 +190,7 @@
 			(begin
 				(do-one-and-rpt WRD-LST)
 				(if (< nthreads (length WRD-LST))
-					(make-pairs (drop nthreads WRD-LST))))))
+					(make-pairs (drop WRD-LST nthreads))))))
 
 	; thread launcher
 	(define (launch WRD-LST CNT)
