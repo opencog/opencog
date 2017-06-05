@@ -7628,13 +7628,27 @@ std::char_traits<char>, std::allocator<char> > const&) (this=0x7ffe8c000980,
     at /home/ubuntu/src/opencog/opencog/cogserver/shell/GenericShell.cc:450
 
 
-Interesting. Unescaped quotes!
+Interesting. Unescaped quotes!  FIXED
 also - unescaped carriage returns FIXED.
 also sentence spliter fails when there are footnotes:
 .[571]   FIXED
 also at any time."[572]   FIXED
 but also...
 ERROR: In procedure fport_read: Connection reset by peer
+
+Java eats .\n as a string.... but does not eat \n by itself.  FIXED
+also it un-escapes the quotes.  FIXED
+ Ohhh: right.\n[?].n   FIXED
+
+skip setWordAndPos or rather use simplified form of it.
+setWordAndPos
+Remove from Linkable...
+add loop for englsih when? in the algs... in Morphy? No, too late
+in RelationExtractor.java: in 
+FeatureNode fn = _parse.getLeft();
+while (fn != null)
+fn = fn.get("NEXT");
+
 
 
 
