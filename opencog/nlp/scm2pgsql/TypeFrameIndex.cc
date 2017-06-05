@@ -347,8 +347,13 @@ std::pair<float,float> TypeFrameIndex::minMaxIndependentProb(const TypeFrame &pa
                 if (DEBUG) subPattern.printForDebug("subPattern: ", "\n", true);
                 int count = countPattern(subPattern);
                 if (DEBUG) printf("count = %u\n", count);
-                float p = ((float) count) / floatUniverseCount;
-                prod *= p;
+                if (count == 0) {
+                    prod = 0;
+                    break;
+                } else {
+                    float p = ((float) count) / floatUniverseCount;
+                    prod *= p;
+                }
             }
             if (prod > maxP) maxP = prod;
             if (prod < minP) minP = prod;
@@ -387,29 +392,34 @@ std::pair<float,float> TypeFrameIndex::minMaxSupersetProb(const TypeFrame &patte
                 minP = std::numeric_limits<float>::max();
             }
             for (unsigned int k = 0; k < supersetFrames.size(); k++) {
-                compoundFrame.clear();
-                compoundFrame.push_back(TypePair(classserver().getType("AndLink"), n));
-                for (unsigned int j = 0; j < n; j++) {
-                    if (j == i) {
-                        compoundFrame.append(supersetFrames.at(k));
-                    } else {
-                        aux.clear();
-                        aux = pattern.subFrameAt(argPos.at(j));
-                        compoundFrame.append(aux);
-                    }
-                }
-                unsigned int countCompound = countPattern(compoundFrame);
-                if (DEBUG) printf("compound (count = %u): ", countCompound);
-                if (DEBUG) compoundFrame.printForDebug("", "\n");
                 unsigned int countSpot = countPattern(spotFrame);
                 if (DEBUG) printf("spot (count = %u): ", countSpot);
                 if (DEBUG) spotFrame.printForDebug("", "\n");
                 unsigned int countSuperset = countPattern(supersetFrames.at(k));
                 if (DEBUG) printf("supersetFrames.at(%u) (count = %u): ", k, countSuperset);
                 if (DEBUG) supersetFrames.at(k).printForDebug("", "\n");
-                float pCompound = ((float) countCompound) / floatUniverseCount;
-                float pSpot = ((float) countSpot) / floatUniverseCount;
-                float pSuperset = ((float) countSuperset) / floatUniverseCount;
+                float pSpot = 0;
+                float pSuperset = 0;
+                float pCompound = 0;
+                if ((countSpot > 0) && (countSuperset > 0)) {
+                    pSpot = ((float) countSpot) / floatUniverseCount;
+                    pSuperset = ((float) countSuperset) / floatUniverseCount;
+                    compoundFrame.clear();
+                    compoundFrame.push_back(TypePair(classserver().getType("AndLink"), n));
+                    for (unsigned int j = 0; j < n; j++) {
+                        if (j == i) {
+                            compoundFrame.append(supersetFrames.at(k));
+                        } else {
+                            aux.clear();
+                            aux = pattern.subFrameAt(argPos.at(j));
+                            compoundFrame.append(aux);
+                        }
+                    }
+                    unsigned int countCompound = countPattern(compoundFrame);
+                    if (DEBUG) printf("compound (count = %u): ", countCompound);
+                    if (DEBUG) compoundFrame.printForDebug("", "\n");
+                    pCompound = ((float) countCompound) / floatUniverseCount;
+                }
                 float coherence = computeCoherence(supersetFrames.at(k));
                 float yMax = (countSuperset == 0 ? 0 : gFunction(coherence) * pCompound * (pSpot / pSuperset));
                 float yMin = (countSuperset == 0 ? 0 : hFunction(coherence) * pCompound * (pSpot / pSuperset));
@@ -500,7 +510,8 @@ float TypeFrameIndex::computeISurprinsingness(const TypeFrame &pattern, bool nor
 
     float answer = 0;
     unsigned int count = countPattern(pattern);
-    float pFull = ((float) count) / frames.size();
+    //float pFull = ((float) count) / frames.size();
+    float pFull = ((float) count) / floatUniverseCount;
 
     if (DEBUG) printf("count (pFull) = %u\n", count);
     if (DEBUG) printf("pFull = %f\n", pFull);
@@ -529,7 +540,7 @@ float TypeFrameIndex::computeIISurprinsingness(const TypeFrame &pattern, bool no
 
     float answer = 0;
     unsigned int count = countPattern(pattern);
-    float pFull = ((float) count) / frames.size();
+    float pFull = ((float) count) / floatUniverseCount;
 
     if (DEBUG) printf("count (pFull) = %u\n", count);
     if (DEBUG) printf("pFull = %f\n", pFull);
@@ -591,7 +602,7 @@ void TypeFrameIndex::minePatterns(std::vector<std::pair<float,TypeFrame>> &answe
         floatUniverseCount = floatUniverseCount * ((float) (n - i));
         floatUniverseCount = floatUniverseCount / ((float) (i + 1));
     }
-    floatUniverseCount = 180;
+    //floatUniverseCount = (float) frames.size();
 
     /*
     TypeFrame testFrame("(AndLink (SimilarityLink (VariableNode \"$var_1\") (ConceptNode \"chimp\")) (SimilarityLink (VariableNode \"$var_1\") (ConceptNode \"ent\")) (SimilarityLink (VariableNode \"$var_1\") (ConceptNode \"monkey\")))");

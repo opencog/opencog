@@ -73,9 +73,6 @@ public:
     static TypeFrame EMPTY_PATTERN;
     struct LessThan {
         bool operator()(const TypeFrame &a, const TypeFrame &b) const {
-            //printf("OPERATOR LESSTHAN\n");
-            //a.printForDebug("", "", true);
-            //b.printForDebug("", "", true);
             TypeFrame::const_iterator it1 = a.begin();    
             TypeFrame::const_iterator it2 = b.begin();    
             int cursor = 0;
@@ -93,10 +90,6 @@ public:
                     } else {
                         bool check1 = a.nodeNameDefined(cursor);
                         bool check2 = b.nodeNameDefined(cursor);
-                        //printf("INNER CHECK\n");
-                        //printf("cursor: %d\n", cursor);
-                        //printf("check1: %s\n", (check1 ? "true" : "false"));
-                        //printf("check2: %s\n", (check2 ? "true" : "false"));
                         if (!check1 && check2) {
                             return true;
                         } else if (check1 && !check2) {
