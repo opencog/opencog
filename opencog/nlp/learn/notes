@@ -6759,9 +6759,9 @@ start 2.4G and run 0.3 sim
 again 0.1 sim...
 
 possible: (37413 * 37412)/2 = 699847578 = 700M pairs
-estimate: 6.5% of these, so= 45M pairs!? Ouch.  .. 50-60 GB RAM 
-    and insanely slow .. 466K secs = 130 hrs = 5.4 days
-running at 1.5K pairs/sec ouch.
+estimate: 7.5% of these, so = 52M pairs!? Ouch.  .. 70-80 GB RAM
+    and insanely slow ..  secs = 102 hrs = 4.2 days
+running at 1.9K pairs/sec ouch.
 
 Try again:
 (use-modules (opencog) (opencog persist) (opencog persist-sql))
@@ -6779,14 +6779,21 @@ Try again:
 (print-matrix-summary-report psa)
 
 (sql-clear-stats)
+; 1524572 atoms in AS
 (define ac (get-all-cset-words)) 
 (length ac)
 (load "gram-sim.scm")
-(batch-sim-pairs ac 0.1)
+(para-batch-sim-pairs ac 0.1)
+
+oh fu... its running 3x because:
+1) not_yet_stored
+2) do_store_single_atom
+FIXED.  num_get_links - num_got_links == total stores
+   and  num_get_links == valuation update  Yayyy!!
 
 -------------------
 FWIW, the crappy results from back-when: en_pairs_sim:
-                     
+
 Summary Report for Correlation Matrix Word-Disjunct Pairs (aka Connector Sets)
 Left type: WordNode    Right Type: LgAnd    Pair Type: LgWordCset
 Wildcard: (ListLink (ctv 0 0 661104)
@@ -7636,6 +7643,11 @@ std::char_traits<char>, std::allocator<char> > const&) (this=0x7ffe8c000980,
 
 
 Oh no Mr Bill!! stack_size=512 fp-bot = 455 ip-subr_stub_code=14 engine=1 Mon Jun  5 03:43:12 2017
+
+Oh no Mr Bill!! stack_size=512 fp-bot = 455 ip-subr_stub_code=14 engine=1 Mon Jun  5 05:53:08 2017
+
+Oh no Mr Bill!! stack_size=512 fp-bot = 455 ip-subr_stub_code=14 engine=1 Mon Jun  5 05:53:08 2017
+
 
 
 

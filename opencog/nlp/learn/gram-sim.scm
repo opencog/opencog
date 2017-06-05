@@ -164,13 +164,13 @@
 	(define prs 0)
 	(define start (current-time))
 
-	(define nthreads 20)
+	(define nthreads 6)
 
 	(define (do-one-and-rpt WRD-LST)
 		; These sets are not thread-safe but I don't care.
 		(set! prs (+ prs (batch-sim (car WRD-LST) (cdr WRD-LST) CUTOFF)))
 		(set! done (+ done 1))
-		(if (eqv? 0 (modulo done 100))
+		(if (eqv? 0 (modulo done 20))
 			(let* ((elapsed (- (current-time) start))
 					(frt (* done (- len done)))
 					(rate (* 0.001 (/ frt elapsed)))
