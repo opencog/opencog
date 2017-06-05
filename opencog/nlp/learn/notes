@@ -7629,7 +7629,7 @@ std::char_traits<char>, std::allocator<char> > const&) (this=0x7ffe8c000980,
 
 
 Interesting. Unescaped quotes!
-also - unescaped carriage returns
+also - unescaped carriage returns FIXED.
 also sentence spliter fails when there are footnotes:
 .[571]   FIXED
 also at any time."[572]   FIXED

@@ -105,3 +105,17 @@ Nos
 Art #NUMERIC_ONLY#
 Nr
 pp #NUMERIC_ONLY#
+
+#month abbreviations
+Jan
+Feb
+Mar
+Apr
+#May is a full word
+Jun
+Jul
+Aug
+Sep
+Oct
+Nov
+Dec
