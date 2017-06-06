@@ -19,8 +19,8 @@
          ; Check if the conditions below are generated in the rule
          ; This is needed for DualLink to find the rule
          (equal? #t (any (lambda (c)
-           (if (equal? 'ListLink (cog-type (gar c)))
-               (let ((oset (cog-outgoing-set (gar c))))
+           (if (equal? 'ListLink (cog-type c))
+               (let ((oset (cog-outgoing-set c)))
                     (and (equal? 'GlobNode (cog-type (first oset)))
                          (equal? 'GlobNode (cog-type (last oset)))
                          (equal? (list (Word "James")
