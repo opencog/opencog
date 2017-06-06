@@ -121,8 +121,7 @@
     (Inheritance (List new-seq) chatlang-no-constant))
   ; To locate it easily
   (Inheritance (List new-seq) chatlang-term-seq)
-  ; TODO: Wrap it using an TrueLink for now, use something better instead?
-  (cons glob-decl (list (True (List new-seq))))))
+  (cons glob-decl (list (List new-seq)))))
 
 (define-public (say TXT)
   "Say the text and clear the state."
