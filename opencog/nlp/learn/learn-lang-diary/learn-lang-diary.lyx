@@ -19140,7 +19140,7 @@ N(*,d)=\sum_{w}N(w,d)
 \end_layout
 
 \begin_layout Standard
-Frequncies can be obtained by dividing by the total number of observations,
+Frequencies can be obtained by dividing by the total number of observations,
  so that 
 \begin_inset Formula $p(w,d)=N(w,d)/N(*)$
 \end_inset
@@ -25889,6 +25889,187 @@ en_pairs_ttwo_mst
 \end_inset
 
 
+\end_layout
+
+\begin_layout Section*
+PCA Classifier
+\end_layout
+
+\begin_layout Standard
+The next step is what I've called 
+\begin_inset Quotes eld
+\end_inset
+
+clustering
+\begin_inset Quotes erd
+\end_inset
+
+ in the past, but it really needs to be something more like facto analysis,
+ or better yet, sparse PCA, or better yet, 
+\begin_inset Quotes eld
+\end_inset
+
+Semidefinite Programming
+\begin_inset Quotes erd
+\end_inset
+
+, according to the wikipedia article on sparse PCA.
+ And according to the article on semidefinite programming, the most scalable
+ algos are those for conic optimization, i.e.
+ avoiding the need to store the full covariance matrix.
+ Another possibility is NIPALS -- Non-linear iterative partial least squares,
+ Except all this is overkill.
+\end_layout
+
+\begin_layout Standard
+What I really need, at this point is a recognizer, like so: let 
+\begin_inset Formula $\overrightarrow{b}=\sum_{n}b_{n}w_{n}$
+\end_inset
+
+ be a vector, with the 
+\begin_inset Formula $w_{n}$
+\end_inset
+
+ being individual words, and the 
+\begin_inset Formula $b_{n}$
+\end_inset
+
+ being weights.
+ Now normal PCA computes real-valued weights 
+\begin_inset Formula $b_{n}$
+\end_inset
+
+.
+ Sparse PCA computes real-valued weights 
+\begin_inset Formula $b_{n}$
+\end_inset
+
+ such that only some small number of them are non-zero.
+ But what I need are 
+\begin_inset Formula $b_{n}$
+\end_inset
+
+ that are either zero or one, indicating the membership of a word 
+\begin_inset Formula $w_{n}$
+\end_inset
+
+ in some class of words.
+ (Note, by the way, that a word might belong to multiple classes, for example,
+ according to its part-of-speech, or it's meaning.) This suggests thw following
+ neural-netish variant on iterative PCA:
+\end_layout
+
+\begin_layout Enumerate
+Start with 
+\begin_inset Formula $b_{n}=1/\sqrt{\left|w\right|}$
+\end_inset
+
+ where 
+\begin_inset Formula $\left|w\right|$
+\end_inset
+
+ is the number of unique words.
+ This starting point is a unit-length vector, i.e.
+ 
+\begin_inset Formula $\left|\overrightarrow{b}\right|=1$
+\end_inset
+
+.
+ Its convenient to change notation, here, and write 
+\begin_inset Formula $b(w)$
+\end_inset
+
+ for the value of 
+\begin_inset Formula $\overrightarrow{b}$
+\end_inset
+
+ at word 
+\begin_inset Formula $w$
+\end_inset
+
+.
+ That is, 
+\begin_inset Formula $b(w_{n})=b_{n}$
+\end_inset
+
+ is the same thing.
+ 
+\end_layout
+
+\begin_layout Enumerate
+Let 
+\begin_inset Formula $p(w,d)$
+\end_inset
+
+ be the frequency matrix, as defined before: 
+\begin_inset Formula $p(w,d)=N(w,d)/N(*,*)$
+\end_inset
+
+.
+ Compute the double-sum 
+\begin_inset Formula 
+\[
+s(v)=\left[PP^{T}b\right](v)=\sum_{d}p(v,d)\sum_{w}p(w,d)b(w)
+\]
+
+\end_inset
+
+which is basically a pair of dot products.
+ 
+\end_layout
+
+\begin_layout Enumerate
+Normalize: set 
+\begin_inset Formula $\overrightarrow{b}\leftarrow\overrightarrow{s}/\left|\overrightarrow{s}\right|$
+\end_inset
+
+ so that 
+\begin_inset Formula $\overrightarrow{b}$
+\end_inset
+
+ is of unit length.
+\end_layout
+
+\begin_layout Enumerate
+Repeat this 
+\begin_inset Formula $k$
+\end_inset
+
+ times: go to step 2 and run the summation again.
+ The repetition here is the power-iteration or the von Mises ieration method
+ for computing the largest eigenvalue of 
+\begin_inset Formula $\left[PP^{T}\right]$
+\end_inset
+
+.
+ It is not guaranteed to converge, and if it does, it might not do so quickly.
+ But we deal with this in the next step, so its sufficient to keep 
+\begin_inset Formula $k$
+\end_inset
+
+ small, just enough to get a trend going.
+\end_layout
+
+\begin_layout Enumerate
+Apply some standard neural-net sigma function to 
+\begin_inset Formula $\overrightarrow{b}$
+\end_inset
+
+, that is, set 
+\begin_inset Formula $b(w)\leftarrow\sigma(b(w))$
+\end_inset
+
+.
+ This has the effect of driving some of the elements to zero, and others
+ to one.
+\end_layout
+
+\begin_layout Enumerate
+Repeat this 
+\begin_inset Formula $m$
+\end_inset
+
+ times: go to step 2
 \end_layout
 
 \begin_layout Section*
