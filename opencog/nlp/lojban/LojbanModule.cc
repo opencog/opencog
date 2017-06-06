@@ -39,26 +39,24 @@ DECLARE_MODULE(LojbanModule);
  *
  * @param cs   the OpenCog server
  */
-LojbanModule::LojbanModule(CogServer& cs,bool test) :
+LojbanModule::LojbanModule(CogServer& cs) :
         Module(cs) , _cs(cs) , _as(&cs.getAtomSpace()) , scmeval(_as)
 {
-    std::string name;
-    if (test) {
-    name = "lojban_tiny.xml";
-    }
-    else {
-    name = "lojban.xml";
-    }
+    std::string cmavosrc = "cmavo.csv";
+    std::string gismusrc = "gismu.csv";
     std::string url = "https://raw.githubusercontent.com/rTreutlein"
-                      "/lojban-data/master/" + name;
+                      "/lojban-data/master/";
     struct stat buffer;
-    if (stat (name.c_str(),&buffer) != 0) {
-        int i = system(("wget " + url).c_str());
+    if (stat (cmavosrc.c_str(),&buffer) != 0) {
+        int i = system(("wget " + url + cmavosrc).c_str());
+        std::cout << i << "\n";
+    }
+    if (stat (gismusrc.c_str(),&buffer) != 0) {
+        int i = system(("wget " + url + gismusrc).c_str());
         std::cout << i << "\n";
     }
 
-    _wordlist = lojban_init(name.c_str());
-
+    _wordlist = lojban_init(cmavosrc.c_str(),gismusrc.c_str());
 }
 
 /**
