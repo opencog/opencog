@@ -26048,6 +26048,20 @@ Repeat this
 \end_inset
 
  small, just enough to get a trend going.
+ Another way to think of this is as a Markov process (specifically, a Markov
+ chain).
+ That is, the matrix 
+\begin_inset Formula $\left[PP^{T}\right]$
+\end_inset
+
+ is essentially a Markov matrix, and iteration on it just identifies the
+ primary Perron-Frobenius stable state (step 3 makes it Markovian).
+ That is, 
+\begin_inset Formula $\left[PP^{T}\right]$
+\end_inset
+
+ defines a graph, and iteration creates a measure-preserving process on
+ this graph.
 \end_layout
 
 \begin_layout Enumerate
@@ -26069,7 +26083,196 @@ Repeat this
 \begin_inset Formula $m$
 \end_inset
 
- times: go to step 2
+ times: go to step 2, and repeat steps 2-5.
+ Viewing this as a dynamical system, the effect of the sigma function is
+ to force the system into a block-diagonal form, with the vector 
+\begin_inset Formula $\overrightarrow{b}$
+\end_inset
+
+ identifying a highly-connected block.
+ Another way to look at this is as a graph factorization algorithm: the
+ vector 
+\begin_inset Formula $\overrightarrow{b}$
+\end_inset
+
+ is identifiying a well-connected subgraph, in which the vector (viewed
+ as a measure-preserving dynamical system) is spending most of its time.
+ Here, 
+\begin_inset Formula $\left[PP^{T}\right]$
+\end_inset
+
+ can be thought of as a surrogate for a graph adjacency matrix.
+ A third way of thinking of this is as an 
+\begin_inset Formula $m$
+\end_inset
+
+-layer neural net, with the link weights being given by the iterated 
+\begin_inset Formula $\left[PP^{T}\right]$
+\end_inset
+
+.
+ All three ways of looking at this are essentially equivalent: a measure-preserv
+ing dynamical system, a chatoic and mixing process on the graph, or as a
+ neural net.
+ Pick your favorite.
+\end_layout
+
+\begin_layout Enumerate
+Classify.
+ Pass the vector 
+\begin_inset Formula $\overrightarrow{b}$
+\end_inset
+
+ through the step function, i.e.
+ 
+\begin_inset Formula $\Theta(x)=0$
+\end_inset
+
+ if 
+\begin_inset Formula $x<1/2$
+\end_inset
+
+ and 
+\begin_inset Formula $\Theta(x)=1$
+\end_inset
+
+ if 
+\begin_inset Formula $x>1/2$
+\end_inset
+
+.
+ This identifies membership in an active, well-connected subgraph of 
+\begin_inset Formula $\left[PP^{T}\right]$
+\end_inset
+
+.
+ The non-zero elements of this final 
+\begin_inset Formula $\overrightarrow{b}$
+\end_inset
+
+ identify a class of words that can be considered to be grammatically similar
+ or identical.
+\end_layout
+
+\begin_layout Enumerate
+Associated with this class of words is a disjunct set, the 
+\begin_inset Quotes eld
+\end_inset
+
+average disjunct
+\begin_inset Quotes erd
+\end_inset
+
+ for the class.
+ It can be taken to be the set 
+\begin_inset Formula $\left\{ d|0<\sum_{w}b(w)N(w,d)\right\} $
+\end_inset
+
+.
+ The observed counts associated with this set can be taken to be 
+\begin_inset Formula $N(b,d)=\sum_{w}b(w)N(w,d)$
+\end_inset
+
+ and the frequencies similarly: 
+\begin_inset Formula $p(b,d)=\sum_{w}b(w)p(w,d)$
+\end_inset
+
+.
+ From here-on, 
+\begin_inset Formula $b\equiv\{w|0\ne b(w)\}$
+\end_inset
+
+ can be treated as if it was a an ordinary word, with the indicated disjuncts,
+ counts and frequencies.
+\end_layout
+
+\begin_layout Enumerate
+Since words can have have multiple meanings, or rather, multiple different
+ kinds of grammatical behaviors based on thier part of speech, the identified
+ words need to be subtracted, en block, from the matrix 
+\begin_inset Formula $p(w,d)$
+\end_inset
+
+, and then the process repeated, to identify another class of words.
+ Put another way, if 
+\begin_inset Formula $b$
+\end_inset
+
+ is to be added to the set of words, as 
+\begin_inset Quotes eld
+\end_inset
+
+just another word
+\begin_inset Quotes erd
+\end_inset
+
+, then the frequencies 
+\begin_inset Formula $p(b,d)$
+\end_inset
+
+ have to be subtracted from the matrix 
+\begin_inset Formula $P$
+\end_inset
+
+, and shunted to this new 
+\begin_inset Quotes eld
+\end_inset
+
+word
+\begin_inset Quotes erd
+\end_inset
+
+, so as not to loose the overall normalization.
+ That is, one must preserve the identity 
+\begin_inset Formula $\sum_{w,d}p(w,d)=1$
+\end_inset
+
+.
+ So define, in the next iteration 
+\begin_inset Formula 
+\[
+p(w,d)\leftarrow\begin{cases}
+p(b,d) & \mbox{ if }w=b\\
+p(w,d)-b(w)p(b,d) & \mbox{ otherwise}
+\end{cases}
+\]
+
+\end_inset
+
+(Hmmm.
+ This may not be right, its late and I'm tired).
+ This still sums to the identity except that now some of the values might
+ go negative, and we don't want that.
+ 
+\end_layout
+
+\begin_layout Enumerate
+This should be called step zero: We want to truncate, and discard the negative
+ entries.
+ This should have been carried out as an actual step 0: a pre-conditioning
+ of the matrix: some noise filtering, e.g.
+ discarding all words that were observed less than a handful of times.
+ Pre-conditioning in this way will have the effect of removing some (possibly
+ many) of the words from the matrix: the size of the matrix shrinks.
+ This is the step where the actual dimensional reduction takes place: the
+ size of the set of words is shrinking, as they get classified into sets.
+ 
+\end_layout
+
+\begin_layout Enumerate
+Go to step 0 and repeat, until the preconditionaing and noise-removal has
+ left behind an empty matrix (or alternately, a matrix where all words have
+ been classified into some group).
+ So, for example, words which have only one part-of-speech or meaning would
+ (hopefully should) get classified after just one step; words that are more
+ complex, and have two parts of speech, would require at least two iterations.
+ This is perhaps optimistic; I expect dozens of iterations to get anything
+ vaguely accurate.
+\end_layout
+
+\begin_layout Standard
+That's it.
+ I think this should work fairly well.
 \end_layout
 
 \begin_layout Section*
