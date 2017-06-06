@@ -25892,7 +25892,15 @@ en_pairs_ttwo_mst
 \end_layout
 
 \begin_layout Section*
-PCA Classifier
+PCA 
+\begin_inset Quotes eld
+\end_inset
+
+Neural
+\begin_inset Quotes erd
+\end_inset
+
+ Classifier
 \end_layout
 
 \begin_layout Standard
@@ -25904,25 +25912,14 @@ clustering
 \begin_inset Quotes erd
 \end_inset
 
- in the past, but it really needs to be something more like facto analysis,
- or better yet, sparse PCA, or better yet, 
-\begin_inset Quotes eld
-\end_inset
-
-Semidefinite Programming
-\begin_inset Quotes erd
-\end_inset
-
-, according to the wikipedia article on sparse PCA.
- And according to the article on semidefinite programming, the most scalable
- algos are those for conic optimization, i.e.
- avoiding the need to store the full covariance matrix.
- Another possibility is NIPALS -- Non-linear iterative partial least squares,
- Except all this is overkill.
+ in the past, but it really needs to be something more like factor analysis,
+ or better yet, sparse PCA.
+ Except that's not right, either.
 \end_layout
 
 \begin_layout Standard
-What I really need, at this point is a recognizer, like so: let 
+What is needed is a recognizer,as follows.
+ Consider 
 \begin_inset Formula $\overrightarrow{b}=\sum_{n}b_{n}w_{n}$
 \end_inset
 
@@ -25935,17 +25932,21 @@ What I really need, at this point is a recognizer, like so: let
 \end_inset
 
  being weights.
- Now normal PCA computes real-valued weights 
+ Plain-old Principal Component Analysis (PCA) computes real-valued weights
+ 
 \begin_inset Formula $b_{n}$
 \end_inset
 
 .
+ It's problematic, because potentially all of the weights are non-ero for
+ all of the words.
  Sparse PCA computes real-valued weights 
 \begin_inset Formula $b_{n}$
 \end_inset
 
  such that only some small number of them are non-zero.
- But what I need are 
+ This is much better.
+ But what is really needed is a classifier: a set of 
 \begin_inset Formula $b_{n}$
 \end_inset
 
@@ -25955,8 +25956,13 @@ What I really need, at this point is a recognizer, like so: let
 
  in some class of words.
  (Note, by the way, that a word might belong to multiple classes, for example,
- according to its part-of-speech, or it's meaning.) This suggests thw following
- neural-netish variant on iterative PCA:
+ according to its part-of-speech, or it's meaning.) 
+\end_layout
+
+\begin_layout Standard
+This suggests the following neural-netish variant on iterative PCA (entirely
+ of my own design, cribbed from nowhere at all, just popped into my head
+ as I sit still immobilized.)
 \end_layout
 
 \begin_layout Enumerate
@@ -26005,7 +26011,49 @@ Let
 \begin_inset Formula $p(w,d)=N(w,d)/N(*,*)$
 \end_inset
 
+, and where 
+\begin_inset Formula $N(w,d)$
+\end_inset
+
+ is the number of times word 
+\begin_inset Formula $w$
+\end_inset
+
+ has been observed with disjunct 
+\begin_inset Formula $d$
+\end_inset
+
 .
+ As noted earlier, 
+\begin_inset Formula $N(w,d)$
+\end_inset
+
+ is very large and very sparse: typically 
+\begin_inset Formula $200K\times4M$
+\end_inset
+
+ in recent datasets, with only 1 entry out of 
+\begin_inset Formula $2^{15}$
+\end_inset
+
+ being non-zero.
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+I plan to send out the revised, expanded statistical analysis 
+\begin_inset Quotes eld
+\end_inset
+
+real soon now
+\begin_inset Quotes erd
+\end_inset
+
+.
+\end_layout
+
+\end_inset
+
  Compute the double-sum 
 \begin_inset Formula 
 \[
@@ -26015,7 +26063,7 @@ s(v)=\left[PP^{T}b\right](v)=\sum_{d}p(v,d)\sum_{w}p(w,d)b(w)
 \end_inset
 
 which is basically a pair of dot products.
- 
+ Its still a large, time-consuming computation, even for sparse vectors.
 \end_layout
 
 \begin_layout Enumerate
@@ -26031,13 +26079,13 @@ Normalize: set
 \end_layout
 
 \begin_layout Enumerate
-Repeat this 
+Repeat these steps 
 \begin_inset Formula $k$
 \end_inset
 
  times: go to step 2 and run the summation again.
- The repetition here is the power-iteration or the von Mises ieration method
- for computing the largest eigenvalue of 
+ The repetition here is the 'power iteration' or the 'von Mises iteration'
+ method for computing the largest eigenvalue of 
 \begin_inset Formula $\left[PP^{T}\right]$
 \end_inset
 
@@ -26054,26 +26102,29 @@ Repeat this
 \begin_inset Formula $\left[PP^{T}\right]$
 \end_inset
 
- is essentially a Markov matrix, and iteration on it just identifies the
- primary Perron-Frobenius stable state (step 3 makes it Markovian).
+ will behave essentially as a Markov chain, and iteration on it just identifies
+ the primary Perron-Frobenius stable state (step 3 makes it Markovian, by
+ preserving to total probability measure).
  That is, 
 \begin_inset Formula $\left[PP^{T}\right]$
 \end_inset
 
- defines a graph, and iteration creates a measure-preserving process on
- this graph.
+ defines a weighted adjeaceny matrix for a graph, and iteration creates
+ a measure-preserving process (walk) on this graph.
 \end_layout
 
 \begin_layout Enumerate
-Apply some standard neural-net sigma function to 
+After the above repetitions, apply some standard neural-net sigmoid function
+ to 
 \begin_inset Formula $\overrightarrow{b}$
 \end_inset
 
-, that is, set 
+.
+ That is, set 
 \begin_inset Formula $b(w)\leftarrow\sigma(b(w))$
 \end_inset
 
-.
+ for some sigmoid.
  This has the effect of driving some of the elements to zero, and others
  to one.
 \end_layout
@@ -26084,8 +26135,8 @@ Repeat this
 \end_inset
 
  times: go to step 2, and repeat steps 2-5.
- Viewing this as a dynamical system, the effect of the sigma function is
- to force the system into a block-diagonal form, with the vector 
+ Viewing this as a dynamical system, the effect of the sigmoid function
+ is to force the system into a block-diagonal form, with the vector 
 \begin_inset Formula $\overrightarrow{b}$
 \end_inset
 
@@ -26095,25 +26146,37 @@ Repeat this
 \begin_inset Formula $\overrightarrow{b}$
 \end_inset
 
- is identifiying a well-connected subgraph, in which the vector (viewed
- as a measure-preserving dynamical system) is spending most of its time.
- Here, 
-\begin_inset Formula $\left[PP^{T}\right]$
+ is identifiying a well-connected subgraph, which is only weakly connected
+ to the rest of the graph.
+ The vector (viewed as a measure-preserving dynamical system) is spending
+ most of its time in one particular block.
+ Again, 
+\begin_inset Formula $\left[PP^{T}\right]^{k}$
 \end_inset
 
- can be thought of as a surrogate for a graph adjacency matrix.
+, the 
+\begin_inset Formula $k$
+\end_inset
+
+-th power iterated matrix from step 4, can be thought of as a surrogate
+ for a weighted graph adjacency matrix.
  A third way of thinking of this is as an 
 \begin_inset Formula $m$
 \end_inset
 
--layer neural net, with the link weights being given by the iterated 
-\begin_inset Formula $\left[PP^{T}\right]$
+-layer neural net, with the link weights between one layer and the next
+ being given by 
+\begin_inset Formula $\left[PP^{T}\right]^{k}$
 \end_inset
 
 .
  All three ways of looking at this are essentially equivalent: a measure-preserv
-ing dynamical system, a chatoic and mixing process on the graph, or as a
- neural net.
+ing dynamical system, a chatoic and mixing process on a graph, or as an
+ 
+\begin_inset Formula $m$
+\end_inset
+
+-layer neural net.
  Pick your favorite.
 \end_layout
 
@@ -26125,6 +26188,10 @@ Classify.
 
  through the step function, i.e.
  
+\begin_inset Formula $b(w)\leftarrow\Theta(b(w))$
+\end_inset
+
+ where 
 \begin_inset Formula $\Theta(x)=0$
 \end_inset
 
@@ -26141,17 +26208,49 @@ Classify.
 \end_inset
 
 .
- This identifies membership in an active, well-connected subgraph of 
+ The step function is a super-sharep sigmoid.
+ This step identifies and isolates an active, well-connected subgraph of
+ 
 \begin_inset Formula $\left[PP^{T}\right]$
 \end_inset
 
 .
- The non-zero elements of this final 
+ It identifes a square block, of dimension 
+\begin_inset Formula $\left|b\right|\times\left|b\right|$
+\end_inset
+
+ where 
+\begin_inset Formula $\left|b\right|$
+\end_inset
+
+ is the total number of non-zero entries in this final 
+\begin_inset Formula $\overrightarrow{b}$
+\end_inset
+
+.
+ To belabor the point: the block-matrix is explicitly 
+\begin_inset Formula 
+\[
+B(v,w)=b(v)b(w)\sum_{d}p(v,d)p(w,d)
+\]
+
+\end_inset
+
+The non-zero elements of this final 
 \begin_inset Formula $\overrightarrow{b}$
 \end_inset
 
  identify a class of words that can be considered to be grammatically similar
  or identical.
+ This is the 
+\begin_inset Quotes eld
+\end_inset
+
+clustering
+\begin_inset Quotes erd
+\end_inset
+
+ step.
 \end_layout
 
 \begin_layout Enumerate
@@ -26178,12 +26277,12 @@ average disjunct
 \end_inset
 
 .
- From here-on, 
+ From here-on, the set of words 
 \begin_inset Formula $b\equiv\{w|0\ne b(w)\}$
 \end_inset
 
- can be treated as if it was a an ordinary word, with the indicated disjuncts,
- counts and frequencies.
+ can be treated as if it was an ordinary word, behaving like any other,
+ with the indicated disjuncts, counts and frequencies.
 \end_layout
 
 \begin_layout Enumerate
@@ -26247,11 +26346,12 @@ p(w,d)-b(w)p(b,d) & \mbox{ otherwise}
 \end_layout
 
 \begin_layout Enumerate
-This should be called step zero: We want to truncate, and discard the negative
- entries.
+And so we get to what should be called step zero: We want to truncate, and
+ discard the negative entries.
  This should have been carried out as an actual step 0: a pre-conditioning
  of the matrix: some noise filtering, e.g.
- discarding all words that were observed less than a handful of times.
+ discarding all words that were observed less than a handful of times, discading
+ rare or preposterious disjuncts.
  Pre-conditioning in this way will have the effect of removing some (possibly
  many) of the words from the matrix: the size of the matrix shrinks.
  This is the step where the actual dimensional reduction takes place: the
@@ -26270,9 +26370,99 @@ Go to step 0 and repeat, until the preconditionaing and noise-removal has
  vaguely accurate.
 \end_layout
 
+\begin_layout Enumerate
+There's one more step.
+ After the formation of the class 
+\begin_inset Formula $b$
+\end_inset
+
+, we arrive at a situation where no (pseudo-)connectors connect to 
+\begin_inset Formula $b$
+\end_inset
+
+ directly.
+ Instead, all disjuncts connect to words inside of 
+\begin_inset Formula $b$
+\end_inset
+
+.
+ But this is a problem: we don't know if any given connector actually connects
+ to some 
+\begin_inset Formula $w\in b$
+\end_inset
+
+ or if it connects to the same 
+\begin_inset Formula $w$
+\end_inset
+
+, but outside of 
+\begin_inset Formula $b$
+\end_inset
+
+.
+ (e.g.
+ if 
+\begin_inset Formula $b$
+\end_inset
+
+ are nouns, then does 
+\begin_inset Quotes eld
+\end_inset
+
+saw+
+\begin_inset Quotes erd
+\end_inset
+
+ connect to 
+\begin_inset Quotes eld
+\end_inset
+
+saw
+\begin_inset Quotes erd
+\end_inset
+
+ the noun, or 
+\begin_inset Quotes eld
+\end_inset
+
+saw
+\begin_inset Quotes erd
+\end_inset
+
+ the verb?) Thus, after some small number of iterations of step 11, there
+ needs to be a re-parse of the entire text, using these newly discovered
+ classes of words.
+ 
+\end_layout
+
 \begin_layout Standard
 That's it.
  I think this should work fairly well.
+ Clearly, there are many nested loops, and so this is potentially a very
+ time-consuming computation.
+ The number of iterations 
+\begin_inset Formula $k$
+\end_inset
+
+ and 
+\begin_inset Formula $m$
+\end_inset
+
+ need to be kept small, and the classification in step 11 needs to be kept
+ greedy, because step 12 is expensive.
+ An alternate strategy is to brutally precondition 
+\begin_inset Formula $p(w,d)$
+\end_inset
+
+ to make it as small as possible; but this risks throwing out the baby with
+ the bathwater: early on, we want to cluster together the rare, obscure,
+ unused words as best as possible into arge bins, and then devote large
+ CPU resources to correctly classifying the remaining much smaller set of
+ verbs and prepositions, which we know, 
+\emph on
+a priori,
+\emph default
+ to be complex and difficult, due to thier grammatical variability.
 \end_layout
 
 \begin_layout Section*
