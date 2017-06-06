@@ -15,7 +15,7 @@ import Syntax hiding (SynIso,Syntax)
 import qualified Data.Map as M
 import qualified Data.Foldable as F
 import Data.Maybe (fromJust,isJust)
-import Data.List (isSuffixOf,nub)
+import Data.List (isSuffixOf,nub,isInfixOf)
 import Data.Hashable
 import Data.Char (chr)
 
@@ -346,21 +346,28 @@ _frame = _evalTv . (id *** (_framePred *** tolist2)) . reorder
           f ((tv,s),(a,t))     = (tv,((s,t),(s,a)))
           g (tv,((_,t),(s,a))) = ((tv,s),(a,t))
 
+specialTag :: SynIso Tag Atom
+specialTag = Iso f g where
+    f s = if "_sumti" `isInfixOf` s
+             then pure (cPN s noTv)
+             else lift $ Left "Not a special Tag."
+    g (PN s) = pure "fix_reverse_specialTag_handeling"
+
 node :: SynIso (String,(String,TruthVal)) Atom
 node = mkIso f g where
     f (t,(n,tv))    = Node t n tv
     g (Node t n tv) = (t,(n,tv))
 
 _framePred :: SynIso (Atom,Tag) Atom
-_framePred = handleVar $ node . second (first (isoIntercalate "_sumti". tolist2 .< isoDrop 23)) . reorder .< inverse node
+_framePred = handleVar <+> (specialTag . rmfstAny (cPN "dummy" noTv)) <+> (node . second (first (isoIntercalate "_sumti". tolist2 .< isoDrop 23)) . reorder .< inverse node)
     where reorder = mkIso f g where
                 f ((t,(n,tv)),tag) = (t,((n,tag),tv))
                 g (t,((n,tag),tv)) = ((t,(n,tv)),tag)
-          handleVar iso = Iso f g where
+          handleVar = Iso f g where
               f (n,"?") = pure $ cVN (nodeName n)
-              f a = apply iso a
+              f a = lift $ Left "Not a VariableTag"
               g (VN name) = pure (cPN name noTv,"$var")
-              g a = unapply iso a
+              g a = lift $ Left "Not a VariableNode"
 
 
 randName :: SynMonad t State => String -> (t ME) String

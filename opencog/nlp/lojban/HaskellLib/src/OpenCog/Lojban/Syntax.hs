@@ -444,7 +444,7 @@ modalSumti = handleFIhO <<< (fihoP <+> baiP) &&& sumtiT
 
           fi'otag :: SynIso (Selbri,(Atom,Tag)) Sumti
           fi'otag = mkIso f g where
-              f ((_,PN name),(s,tag)) = (s,Just $ name++tag)
+              f ((_,PN name),(s,tag)) = (s,Just $ (drop 23 name)++"_sumti"++tag)
               g (s,Just nametag) =
                   let [name,tag,tv] = S.split (S.oneOf "12345") nametag
                   in ((read tv,cPN name lowTv),(s,tag))
