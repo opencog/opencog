@@ -202,19 +202,17 @@
 (define-public (chatlang-concept? GLOB CONCEPT)
   "Check if the value grounded for the GlobNode is actually a member
    of the concept."
-  (let ((grd (assoc-ref globs (cog-name GLOB)))
-        (membs (get-members CONCEPT)))
-       (if (not (equal? #f (member grd membs)))
+  (let ((membs (get-members CONCEPT)))
+       (if (not (equal? #f (member GLOB membs)))
            (stv 1 1)
            (stv 0 1))))
 
 (define-public (chatlang-choices? GLOB CHOICES)
   "Check if the value grounded for the GlobNode is actually a member
    of the list of choices."
-  (let* ((grd (assoc-ref globs (cog-name GLOB)))
-         (chs (cog-outgoing-set CHOICES))
+  (let* ((chs (cog-outgoing-set CHOICES))
          (cpts (append-map get-members (cog-filter 'ConceptNode chs))))
-        (if (not (equal? #f (member grd (append chs cpts))))
+        (if (not (equal? #f (member GLOB (append chs cpts))))
             (stv 1 1)
             (stv 0 1))))
 
