@@ -15,7 +15,7 @@
 (define-public (chatlang-prefix STR) (string-append "Chatlang: " STR))
 (define chatlang-anchor (Anchor (chatlang-prefix "Currently Processing")))
 (define chatlang-no-constant (Node (chatlang-prefix "No constant terms")))
-(define chatlang-term-seq (Node (chatlang-prefix "term seq")))
+(define chatlang-term-seq (Predicate (chatlang-prefix "term seq")))
 
 ;; Shared variables for all terms
 (define atomese-variable-template (list (TypedVariable (Variable "$S")
@@ -119,9 +119,9 @@
               (length (filter (lambda (x) (equal? 'GlobNode (cog-type x)))
                               new-seq)))
     (Inheritance (List new-seq) chatlang-no-constant))
-  ; To locate it easily
-  (Inheritance (List new-seq) chatlang-term-seq)
-  (cons glob-decl (list (List new-seq)))))
+  (cons glob-decl
+        (list (Evaluation chatlang-term-seq
+                          (List (Variable "$S") (List new-seq)))))))
 
 (define-public (say TXT)
   "Say the text and clear the state."
@@ -155,25 +155,30 @@
       NAME)))
 
 (define (sent-get-lemmas-in-order SENT)
-  "Get the lemma of the words associate with sent-node."
-  (List (append-map
-    (lambda (w)
-      ; Ignore LEFT-WALL and punctuations
-      (if (or (string-prefix? "LEFT-WALL" (cog-name w))
-              (word-inst-match-pos? w "punctuation")
-              (null? (cog-chase-link 'LemmaLink 'WordNode w)))
-          '()
-          ; For proper names, e.g. Jessica Henwick,
-          ; RelEx converts them into a single WordNode, e.g.
-          ; (WordNode "Jessica_Henwick"). Codes below try to
-          ; split it into two WordNodes, "Jessica" and "Henwick",
-          ; so that the matcher will be able to find the rules
-          (let* ((wn (car (cog-chase-link 'LemmaLink 'WordNode w)))
-                 (name (cog-name wn)))
-            (if (integer? (string-index name #\_))
-              (map Word (string-split name  #\_))
-              (list wn)))))
-    (car (sent-get-words-in-order SENT)))))
+  "Get the lemma of the words associate with sent-node.
+   It also creates an EvaluationLink "
+  (define term-seq
+    (List (append-map
+      (lambda (w)
+        ; Ignore LEFT-WALL and punctuations
+        (if (or (string-prefix? "LEFT-WALL" (cog-name w))
+                (word-inst-match-pos? w "punctuation")
+                (null? (cog-chase-link 'LemmaLink 'WordNode w)))
+            '()
+            ; For proper names, e.g. Jessica Henwick,
+            ; RelEx converts them into a single WordNode, e.g.
+            ; (WordNode "Jessica_Henwick"). Codes below try to
+            ; split it into two WordNodes, "Jessica" and "Henwick",
+            ; so that the matcher will be able to find the rules
+            (let* ((wn (car (cog-chase-link 'LemmaLink 'WordNode w)))
+                   (name (cog-name wn)))
+              (if (integer? (string-index name #\_))
+                  (map Word (string-split name  #\_))
+                  (list wn)))))
+      (car (sent-get-words-in-order SENT)))))
+  ; This EvaluationLink will be used in the matching process
+  (Evaluation chatlang-term-seq (List SENT term-seq))
+  term-seq)
 
 (define (get-lemma WORD)
   "A hacky way to quickly find the lemma of a word using WordNet."
