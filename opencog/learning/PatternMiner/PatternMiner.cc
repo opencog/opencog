@@ -3096,9 +3096,13 @@ void PatternMiner::queryPatternsWithFrequencySurprisingnessIRanges(unsigned int 
     {
         resultFile << endl << ";Pattern: Frequency = " << toString(htreeNode->count);
 
-        resultFile << " SurprisingnessI = " << toString(htreeNode->nI_Surprisingness);
+        string SurprisingnessI = toString(htreeNode->nI_Surprisingness);
+        if (SurprisingnessI != "0")
+            resultFile << " SurprisingnessI = " << SurprisingnessI;
 
-        resultFile << " SurprisingnessII = " << toString(htreeNode->nII_Surprisingness);
+        string SurprisingnessII = toString(htreeNode->nII_Surprisingness);
+        if (SurprisingnessII != "0")
+        resultFile << " SurprisingnessII = " << SurprisingnessII;
 
         resultFile << endl;
 
@@ -3115,6 +3119,8 @@ void PatternMiner::queryPatternsWithFrequencySurprisingnessIRanges(unsigned int 
 
     resultFile << std::endl;
     resultFile.close();
+
+    cout <<"\nDone!" << std::endl;
 }
 
 bool PatternMiner::containWhiteKeywords(const string& str, QUERY_LOGIC logic)
