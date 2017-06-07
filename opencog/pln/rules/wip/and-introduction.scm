@@ -1,4 +1,4 @@
-;; To be replaced by conjunction-introduction-rule.scm
+;; To be replaced by conjunction-introduction.scm
 
 ; =====================================================================
 ; And introduction rule

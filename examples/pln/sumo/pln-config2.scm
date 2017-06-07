@@ -48,9 +48,9 @@
 (add-to-load-path "../../../opencog/pln/meta-rules")
 
 (define rule-filenames
-  (list ;; "term-logic/deduction-rule.scm"
-        "predicate-logic/conditional-full-instantiation-meta-rule.scm"
-        "propositional-logic/fuzzy-conjunction-introduction-rule.scm"
+  (list ;; "term/deduction.scm"
+        "predicate/conditional-full-instantiation.scm"
+        "propositional/fuzzy-conjunction-introduction.scm"
   )
 )
 (for-each load-from-path rule-filenames)

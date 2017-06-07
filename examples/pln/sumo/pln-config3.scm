@@ -51,6 +51,7 @@
   (list ;; "term/deduction.scm"
         "predicate/conditional-full-instantiation.scm"
         "propositional/fuzzy-conjunction-introduction.scm"
+        "propositional/contraposition.scm"
   )
 )
 (for-each load-from-path rule-filenames)
@@ -66,6 +67,7 @@
         (list conditional-full-instantiation-implication-meta-rule-name 1)
         (list conditional-full-instantiation-inheritance-meta-rule-name 1)
         (list fuzzy-conjunction-introduction-3ary-rule-name 1)
+        (list crisp-contraposition-implication-scope-rule-name 1)
   )
 )
 
@@ -77,7 +79,7 @@
 ;; ;;;;;;;;;;;;;;;;;;;;;;
 
 ;; Termination criteria parameters
-(ure-set-num-parameter pln-rbs "URE:maximum-iterations" 50000)
+(ure-set-num-parameter pln-rbs "URE:maximum-iterations" 500)
 
 ;; Attention allocation (0 to disable it, 1 to enable it)
 (ure-set-fuzzy-bool-parameter pln-rbs "URE:attention-allocation" 0)

@@ -50,17 +50,17 @@
 (add-to-load-path "../../../opencog/pln/rules/")
 
 (define rule-filenames
-  (list "predicate-logic/conditional-partial-instantiation-meta-rule.scm"
-        "wip/implication-scope-to-implication-rule.scm"
-        "wip/and-lambda-distribution-rule.scm"
-        "wip/closed-lambda-introduction-rule.scm"
-        "wip/implication-introduction-rule.scm"
-        "wip/implication-implicant-distribution-rule.scm"
-        "wip/implication-and-lambda-factorization-rule.scm"
-        "term-logic/deduction-rule.scm"
-        "wip/equivalence-to-implication-rule.scm"
-        "wip/implication-implicant-disjunction-rule.scm"
-        "predicate-logic/conditional-full-instantiation-meta-rule.scm"
+  (list "predicate/conditional-partial-instantiation.scm"
+        "wip/implication-scope-to-implication.scm"
+        "wip/and-lambda-distribution.scm"
+        "wip/closed-lambda-introduction.scm"
+        "wip/implication-introduction.scm"
+        "wip/implication-implicant-distribution.scm"
+        "wip/implication-and-lambda-factorization.scm"
+        "term/deduction.scm"
+        "wip/equivalence-to-implication.scm"
+        "wip/implication-implicant-disjunction.scm"
+        "predicate/conditional-full-instantiation.scm"
         )
   )
 (for-each load-from-path rule-filenames)
