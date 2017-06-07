@@ -37,8 +37,8 @@
                              (TypeSet (Type "WordNode")
                                       (Interval (Number 1) (Number -1)))))
         (list (Evaluation (GroundedPredicate "scm: chatlang-concept?")
-                          (List (Glob VAR)
-                                (Concept STR))))))
+                          (List (Concept STR)
+                                (Glob VAR))))))
 
 (define (terms-to-atomese TERMS)
   "Helper function to convert a list of terms into atomese.
@@ -61,8 +61,8 @@
                              (TypeSet (Type "WordNode")
                                       (Interval (Number 1) (Number -1)))))
         (list (Evaluation (GroundedPredicate "scm: chatlang-choices?")
-                          (List (Glob VAR)
-                                (List (terms-to-atomese TERMS)))))))
+                          (List (List (terms-to-atomese TERMS))
+                                (Glob VAR))))))
 
 (define (unordered-matching TERMS)
   "Occurrence of a list of terms (words/lemmas/phrases/concepts)

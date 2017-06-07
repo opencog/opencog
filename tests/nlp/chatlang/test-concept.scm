@@ -9,4 +9,4 @@
     (let ((c (car (cdr concept))))
         (and (eq? (cog-type c) 'EvaluationLink)
              (equal? (gar c) (GroundedPredicateNode "scm: chatlang-concept?"))
-             (equal? (gdr (gdr c)) (ConceptNode "drink")))))
+             (equal? (gadr c) (ConceptNode "drink")))))

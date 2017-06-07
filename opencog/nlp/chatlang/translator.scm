@@ -204,20 +204,24 @@
     (cog-outgoing-set
       (cog-execute! (Get (Reference (Variable "$x") CONCEPT))))))
 
-(define-public (chatlang-concept? GLOB CONCEPT)
+(define-public (chatlang-concept? CONCEPT . GLOB)
   "Check if the value grounded for the GlobNode is actually a member
    of the concept."
-  (let ((membs (get-members CONCEPT)))
-       (if (not (equal? #f (member GLOB membs)))
+  (cog-logger-debug "In chatlang-concept? GLOB: ~a" GLOB)
+  (let ((grd (if (equal? 1 (length GLOB)) (car GLOB) (List GLOB)))
+        (membs (get-members CONCEPT)))
+       (if (not (equal? #f (member grd membs)))
            (stv 1 1)
            (stv 0 1))))
 
-(define-public (chatlang-choices? GLOB CHOICES)
+(define-public (chatlang-choices? CHOICES . GLOB)
   "Check if the value grounded for the GlobNode is actually a member
    of the list of choices."
-  (let* ((chs (cog-outgoing-set CHOICES))
+  (cog-logger-debug "In chatlang-choices? GLOB: ~a" GLOB)
+  (let* ((grd (if (equal? 1 (length GLOB)) (car GLOB) (List GLOB)))
+         (chs (cog-outgoing-set CHOICES))
          (cpts (append-map get-members (cog-filter 'ConceptNode chs))))
-        (if (not (equal? #f (member GLOB (append chs cpts))))
+        (if (not (equal? #f (member grd (append chs cpts))))
             (stv 1 1)
             (stv 0 1))))
 
