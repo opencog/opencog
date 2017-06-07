@@ -20,7 +20,7 @@
                                    node))
                          #t
                          #f)))
-    (map gar (cog-filter 'TrueLink (cog-outgoing-set (gdr (gaaar RULE))))))))
+    (cog-filter 'ListLink (cog-outgoing-set (gdr (gaaar RULE)))))))
 
 (define globs '())
 (define-public (show-globs)
