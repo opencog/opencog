@@ -33,7 +33,9 @@
 
 (define* (concept STR #:optional (VAR (choose-var-name)))
   "Occurrence of a concept."
-  (cons '()  ; No variable declaration
+  (cons (list (TypedVariable (Glob VAR)
+                             (TypeSet (Type "WordNode")
+                                      (Interval (Number 1) (Number -1)))))
         (list (Evaluation (GroundedPredicate "scm: chatlang-concept?")
                           (List (Glob VAR)
                                 (Concept STR))))))
@@ -55,7 +57,9 @@
   "Occurrence of a list of choices. Existence of either one of
    the words/lemmas/phrases/concepts in the list will be considered
    as a match."
-  (cons '()  ; No variable declaration
+  (cons (list (TypedVariable (Glob VAR)
+                             (TypeSet (Type "WordNode")
+                                      (Interval (Number 1) (Number -1)))))
         (list (Evaluation (GroundedPredicate "scm: chatlang-choices?")
                           (List (Glob VAR)
                                 (List (terms-to-atomese TERMS)))))))
@@ -89,5 +93,6 @@
    can be restricted. -1 in the upper bound means infinity."
   (let ((name (choose-var-name)))
     (cons (list (TypedVariable (Glob name)
-                               (Interval (Number LOWER) (Number UPPER))))
+                               (TypeSet (Type "WordNode")
+                                        (Interval (Number LOWER) (Number UPPER)))))
           (list (Glob name)))))
