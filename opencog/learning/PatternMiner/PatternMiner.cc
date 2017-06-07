@@ -2597,6 +2597,9 @@ void PatternMiner::initPatternMiner()
         vector<HTreeNode*> finalPatternVector;
         finalPatternsForGram.push_back(finalPatternVector);
 
+        vector<HTreeNode*> tmpPatternVector;
+        tmpPatternsForGram.push_back(tmpPatternVector);
+
     }
 
 }
@@ -2682,6 +2685,8 @@ void PatternMiner::reSetAllSettingsFromConfig()
     only_mine_patterns_start_from_white_list = config().get_bool("only_mine_patterns_start_from_white_list");
     only_mine_patterns_start_from_white_list_contain = config().get_bool("only_mine_patterns_start_from_white_list_contain");
 
+    only_output_patterns_contains_white_keywords = config().get_bool("only_output_patterns_contains_white_keywords");
+
 }
 
 // release everything
@@ -2722,6 +2727,7 @@ void PatternMiner::cleanUpPatternMiner()
     std::map <string, HTreeNode*> emptykeyStrToHTreeNodeMap;
     keyStrToHTreeNodeMap.swap(emptykeyStrToHTreeNodeMap);
 
+    // clear patternsForGram
     unsigned int patternsForGramSize = patternsForGram.size();
     for (unsigned int i = 0; i < patternsForGramSize; ++i)
     {
@@ -2732,6 +2738,8 @@ void PatternMiner::cleanUpPatternMiner()
     vector < vector<HTreeNode*> > emptypatternsForGram;
     patternsForGram.swap(emptypatternsForGram);
 
+
+    // clear finalPatternsForGram
     unsigned int finalPatternsForGramSize = finalPatternsForGram.size();
     for (unsigned int i = 0; i < finalPatternsForGramSize; ++i)
     {
@@ -2739,8 +2747,20 @@ void PatternMiner::cleanUpPatternMiner()
         (finalPatternsForGram[i]).swap(emptyVector);
     }
 
-    vector < vector<HTreeNode*> > emptyfinalPatternsForGram;
-    finalPatternsForGram.swap(emptyfinalPatternsForGram);
+    vector < vector<HTreeNode*> > emptyFinalPatternsForGram;
+    finalPatternsForGram.swap(emptyFinalPatternsForGram);
+
+
+    // clear tmpPatternsForGram
+    unsigned int tmpPatternsForGramSize = tmpPatternsForGram.size();
+    for (unsigned int i = 0; i < tmpPatternsForGramSize; ++i)
+    {
+        std::vector<HTreeNode*> emptyVector;
+        (tmpPatternsForGram[i]).swap(emptyVector);
+    }
+
+    vector < vector<HTreeNode*> > emptytmpPatternsForGram;
+    tmpPatternsForGram.swap(emptytmpPatternsForGram);
 
 
 }
@@ -2761,11 +2781,6 @@ void PatternMiner::resetPatternMiner(bool resetAllSettingsFromConfig)
 
 void PatternMiner::runPatternMiner(bool exit_program_after_finish)
 {
-//    Handle n1 = originalAtomSpace->add_node(CONCEPT_NODE, "AAA");
-//    Handle var1 = atomSpace->add_node(PATTERN_VARIABLE_NODE, "var1");
-
-//    Handle l1 = atomSpace->add_link(LIST_LINK, n1, var1);
-//    n1->geti
 
     if (keyStrToHTreeNodeMap.size() > 0)
     {
@@ -2814,16 +2829,19 @@ void PatternMiner::runPatternMiner(bool exit_program_after_finish)
     std::cout << "Using " << THREAD_NUM << " threads. \n";
     std::cout << "Corpus size: "<< allLinkNumber << " links in total. \n\n";
 
-    if (only_mine_patterns_start_from_white_list)
+    if (only_mine_patterns_start_from_white_list || only_output_patterns_contains_white_keywords)
     {
         allLinksContainWhiteKeywords.clear();
         havenotProcessedWhiteKeywordLinks.clear();
 
-        cout << "\nOnly mine patterns start from white list: logic = ";
-        if (only_mine_patterns_start_from_white_list_contain)
-            cout << " Nodes contain keyword." << std::endl;
-        else
-            cout << " Nodes'label equal to keyword." << std::endl;
+        if (only_mine_patterns_start_from_white_list)
+        {
+            cout << "\nOnly mine patterns start from white list: logic = ";
+            if (only_mine_patterns_start_from_white_list_contain)
+                cout << " Nodes contain keyword." << std::endl;
+            else
+                cout << " Nodes'label equal to keyword." << std::endl;
+        }
 
         for (string keyword : keyword_white_list)
         {
@@ -2891,6 +2909,12 @@ void PatternMiner::runPatternMiner(bool exit_program_after_finish)
             std::cout<<"gram = " + toString(gram) + ": " + toString((patternsForGram[gram-1]).size()) + " patterns found! ";
 
             OutPutFrequentPatternsToFile(gram, patternsForGram);
+
+            if (tmpPatternsForGram[gram-1].size() > 0)
+            {
+                std::sort((tmpPatternsForGram[gram-1]).begin(), (tmpPatternsForGram[gram-1]).end(),compareHTreeNodeByFrequency );
+                OutPutFrequentPatternsToFile(gram, tmpPatternsForGram, "tmpPatterns");
+            }
 
             std::cout<< std::endl;
         }
@@ -2981,6 +3005,8 @@ void PatternMiner::runInterestingnessEvaluation()
             // Get the min threshold of surprisingness_II
             int threshold_index_II;
             threshold_index_II = SURPRISINGNESS_II_TOP_THRESHOLD * (float)(curGramPatterns.size() - num_of_patterns_without_superpattern_cur_gram);
+
+
             int looptimes = 0;
             while (true)
             {
@@ -3014,9 +3040,11 @@ void PatternMiner::runInterestingnessEvaluation()
                     finalPatternsForGram[cur_gram-1].push_back(pNode);
             }
 
-            // OutPutLowFrequencyHighSurprisingnessPatternsToFile(patternsForGram[cur_gram-1], cur_gram);
+            int frequency_threshold_index = FREQUENCY_TOP_THRESHOLD * ((float)(curGramPatterns.size()));
 
-            // OutPutHighFrequencyHighSurprisingnessPatternsToFile(patternsForGram[cur_gram-1], cur_gram,  15);
+            OutPutLowFrequencyHighSurprisingnessPatternsToFile(patternsForGram[cur_gram-1], cur_gram);
+
+            OutPutHighFrequencyHighSurprisingnessPatternsToFile(patternsForGram[cur_gram-1], cur_gram,  frequency_threshold_index);
 
             // OutPutHighSurprisingILowSurprisingnessIIPatternsToFile(patternsForGram[cur_gram-1], cur_gram, 100.0f, 0.51f);
 
@@ -3029,6 +3057,64 @@ void PatternMiner::runInterestingnessEvaluation()
 
         std::cout<< std::endl;
     }
+}
+
+
+void PatternMiner::queryPatternsWithFrequencySurprisingnessIRanges(unsigned int min_frequency, unsigned int max_frequency,
+                                                                  float min_surprisingness_I, float max_surprisingness_I, int gram)
+{
+    // out put the gram patterns to a file
+    ofstream resultFile;
+    string fileName;
+
+    fileName = "GivenFrequencySurprisingnessI_" + toString(gram) + "gram.scm";
+
+    std::cout<<"\nDebug: PatternMiner: writing (gram = " + toString(gram) + ") patterns to file " + fileName << std::endl;
+    std::cout<<"Frequency range = (" << min_frequency << ", " << max_frequency << ") "  << std::endl;
+    std::cout<<"Surprisingness_I range = (" << toString(min_surprisingness_I) << ", " << toString(max_surprisingness_I) << ")"  << std::endl;
+
+
+    vector<HTreeNode*> resultPatterns;
+
+    for (HTreeNode* htreeNode : patternsForGram[gram - 1])
+    {
+        if ((htreeNode->count > min_frequency) && (htreeNode->count < max_frequency) && (htreeNode->count > min_surprisingness_I) && (htreeNode->count < max_surprisingness_I))
+            resultPatterns.push_back(htreeNode);
+    }
+
+    std::sort(resultPatterns.begin(), resultPatterns.end(),compareHTreeNodeByFrequency);
+
+    resultFile.open(fileName.c_str());
+
+    resultFile << ";Interesting Pattern Mining results for " + toString(gram) + " gram patterns. Total pattern number: " + toString(resultPatterns.size()) << endl;
+
+    resultFile << ";This file contains the pattern with Frequency range = (" << min_frequency << ", " << max_frequency << ") ,"
+               << "Surprisingness_I range = (" << toString(min_surprisingness_I) << ", " << toString(max_surprisingness_I) << ")" << std::endl;
+
+
+    for (HTreeNode* htreeNode : resultPatterns)
+    {
+        resultFile << endl << ";Pattern: Frequency = " << toString(htreeNode->count);
+
+        resultFile << " SurprisingnessI = " << toString(htreeNode->nI_Surprisingness);
+
+        resultFile << " SurprisingnessII = " << toString(htreeNode->nII_Surprisingness);
+
+        resultFile << endl;
+
+        // resultFile << unifiedPatternToKeyString(htreeNode->pattern)<< endl;
+
+        for (Handle link : htreeNode->pattern)
+        {
+            resultFile << link->toShortString();
+        }
+
+        resultFile << std::endl;
+
+    }
+
+    resultFile << std::endl;
+    resultFile.close();
 }
 
 bool PatternMiner::containWhiteKeywords(const string& str, QUERY_LOGIC logic)
@@ -3690,7 +3776,7 @@ OrderedHandleSet PatternMiner::_getAllNonIgnoredLinksForGivenNode(Handle keyword
     OrderedHandleSet newHandles;
     IncomingSet incomings = keywordNode->getIncomingSet(originalAtomSpace);
 
-    cout << "\n " << incomings.size() << " incomings found for keyword: " << keywordNode->toShortString() << std::endl;
+    // cout << "\n " << incomings.size() << " incomings found for keyword: " << keywordNode->toShortString() << std::endl;
     for (LinkPtr incomingPtr : incomings)
     {
         Handle incomingHandle = incomingPtr->getHandle();
@@ -3871,6 +3957,76 @@ void PatternMiner::findAllLinksContainKeyWords(vector<string>& subsetKeywords, u
         order ++;
     }
 
+}
+
+void PatternMiner::selectSubsetAllEntityLinksContainsKeywords(vector<string>& subsetKeywords)
+{
+    std::cout << "\nSelecting a subset from loaded corpus in Atomspace for the Entities contain following value keywords." << std::endl ;
+    OrderedHandleSet allSubsetLinks;
+    string topicsStr = "";
+
+    for (string keyword : subsetKeywords)
+    {
+        std::cout << keyword << std::endl;
+        topicsStr += "-";
+        topicsStr += keyword;
+    }
+
+    findAllLinksContainKeyWords(subsetKeywords, 0, false, allSubsetLinks);
+
+    OrderedHandleSet allEntityNodes;
+    for (Handle link : allSubsetLinks)
+    {  
+        Handle firstOutgoing = link->getOutgoingAtom(1);
+        Handle entityNode;
+        if (firstOutgoing->isLink())
+            entityNode = firstOutgoing->getOutgoingAtom(0);
+        else
+            entityNode = firstOutgoing;
+
+        if (allEntityNodes.find(entityNode) == allEntityNodes.end())
+            allEntityNodes.insert(entityNode);
+    }
+
+
+    int allEntityNum = allEntityNodes.size();
+    std::cout << allEntityNum <<" entities has the predicate value found! Now find all the other Links contain these entities ..." << std::endl;
+
+    int processEntityNum = 0;
+    for (Handle entityNode : allEntityNodes)
+    {
+        OrderedHandleSet allLinks = _getAllNonIgnoredLinksForGivenNode(entityNode, allSubsetLinks);
+
+        allSubsetLinks.insert(allLinks.begin(), allLinks.end());
+        processEntityNum ++;
+
+        cout<< "\r" << ((float)(processEntityNum ))/((float)allEntityNum)*100.0f << "% completed."; // it's not liner
+        std::cout.flush();
+
+    }
+
+    std::cout << "\n " << allSubsetLinks.size() << " Links found! Writing to file ..."  << std::endl ;
+
+    ofstream subsetFile;
+
+    string fileName = "SubSetEntityLinks" + topicsStr + ".scm";
+
+    subsetFile.open(fileName.c_str());
+
+    // write the first line to enable unicode
+    subsetFile <<  "(setlocale LC_CTYPE \"\")" << std::endl ;
+
+    for (Handle h : allSubsetLinks)
+    {
+        if (containIgnoredContent(h))
+            continue;
+
+        subsetFile << h->toShortString();
+    }
+
+    subsetFile.close();
+
+    std::cout << "\nDone! The subset has been written to file:  " << fileName << std::endl ;
 }
 
 // must load the corpus before calling this function
@@ -4272,7 +4428,6 @@ void PatternMiner::loadPatternsFromResultFile(string fileName)
     else
         std::cout << "\nCannot find file " << fileName << "!" << std::endl ;
 
-
     // read the first line
     string firstLine;
     std::getline(resultFile, firstLine);
@@ -4287,6 +4442,11 @@ void PatternMiner::loadPatternsFromResultFile(string fileName)
 
     string patternStr = "";
     int frequency = 0;
+    float surprisingnessI = -9999999.99f;
+    float surprisingnessII = -9999999.99f;
+    bool hasSurprisingnessI = false;
+    bool hasSurprisingnessII = false;
+
     string lastLine = "";
     unsigned int loadedPatternNum = 0;
     bool patternStart = false;
@@ -4313,6 +4473,12 @@ void PatternMiner::loadPatternsFromResultFile(string fileName)
             newHTreeNode->pattern = patternHandleSeq;
             newHTreeNode->count = frequency;
 
+            if (hasSurprisingnessI)
+                newHTreeNode->nI_Surprisingness = surprisingnessI;
+
+            if (hasSurprisingnessII)
+                newHTreeNode->nII_Surprisingness = surprisingnessII;
+
             keyStrToHTreeNodeMap.insert(std::pair<string, HTreeNode*>(patternStr, newHTreeNode));
             (patternsForGram[patternHandleSeq.size()-1]).push_back(newHTreeNode);
             loadedPatternNum ++;
@@ -4321,10 +4487,32 @@ void PatternMiner::loadPatternsFromResultFile(string fileName)
         }
         else if (line.find("Pattern:") != string::npos) // one pattern start
         {
-            int numberStart = line.find("Frequency = ") + 12;
+            frequency = 0;
 
-            string numStr = line.substr(numberStart, line.size() - numberStart);
-            frequency = atoi(numStr.c_str());
+            int frequencyStart = line.find("Frequency = ") + 12;
+            string frequencyStr = line.substr(frequencyStart, line.size() - frequencyStart);
+            frequency = atoi(frequencyStr.c_str());
+
+            if (line.find("SurprisingnessI = ") != string::npos)
+            {
+                int surprisingnessIStart = line.find("SurprisingnessI = ") + 18;
+                string surprisingnessIStr = line.substr(surprisingnessIStart, line.size() - surprisingnessIStart);
+                surprisingnessI = atof(surprisingnessIStr.c_str());
+                hasSurprisingnessI = true;
+            }
+            else
+                hasSurprisingnessI = false;
+
+            if (line.find("SurprisingnessII = ") != string::npos)
+            {
+                int surprisingnessIIStart = line.find("SurprisingnessII = ") + 19;
+                string surprisingnessIIStr = line.substr(surprisingnessIIStart, line.size() - surprisingnessIIStart);
+                surprisingnessII = atof(surprisingnessIIStr.c_str());
+                hasSurprisingnessII = true;
+            }
+            else
+                hasSurprisingnessII = false;
+
             patternStart = true;
         }
         else if (patternStart)// in the middle of one pattern

@@ -113,7 +113,7 @@ protected:
     void startMiningWork();
     void centralServerEvaluateInterestingness();
 
-    void addPatternsToJsonArrayBuf(string curPatternKeyStr, string parentKeyString,  unsigned int extendedLinkIndex, json::value &patternJsonArray);
+    void addPatternsToJsonArrayBuf(string curPatternKeyStr, string parentKeyString,  unsigned int extendedLinkIndex, bool notOutPutPattern, json::value &patternJsonArray);
     void sendPatternsToCentralServer(json::value &patternJsonArray);
 
 

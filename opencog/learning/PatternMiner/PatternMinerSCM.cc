@@ -598,6 +598,12 @@ public:
         patternMiner->applyWhiteListKeywordfilterAfterMining();
     }
 
+    void select_whitelist_entity_links_subset_equalto_keywords()
+    {
+        vector<string> whiteKeywords = patternMiner->get_keyword_white_list();
+        patternMiner->selectSubsetAllEntityLinksContainsKeywords(whiteKeywords);
+    }
+
 
     // Note: this will release all the previous pattern mining results
     void reset_patternminer(bool resetAllSettingsFromConfig)
@@ -614,6 +620,21 @@ public:
     {
         patternMiner->loadPatternsFromResultFile(fileName);
     }
+
+    void query_patterns_with_frequency_surprisingnessI_ranges(const string& ranges, int gram)
+    {
+        vector<string> range_vector;
+        string rangesStr = ranges;
+        rangesStr.erase(std::remove(rangesStr.begin(), rangesStr.end(), ' '), rangesStr.end());
+        boost::split(range_vector, rangesStr , boost::is_any_of(","));
+        unsigned int min_frequency = std::stoi(range_vector[0]);
+        unsigned int max_frequency = std::stoi(range_vector[1]);
+        float min_surprisingness_I = std::stof(range_vector[2]);
+        float max_surprisingness_I = std::stof(range_vector[3]);
+        patternMiner->queryPatternsWithFrequencySurprisingnessIRanges(min_frequency,  max_frequency, min_surprisingness_I, max_surprisingness_I, gram);
+    }
+
+
 
     void select_subset_for_DBpedia()
     {
@@ -752,9 +773,13 @@ void PatternMinerSCM::init()
     define_scheme_primitive("pm-select-whitelist-subset-from-atomspace-contain-keywords", &PatternMinerSCM::select_whitelist_subset_from_atomspace_contain_keywords, this, "patternminer");
     define_scheme_primitive("pm-select-whitelist-subset-from-atomspace-equalto-keywords", &PatternMinerSCM::select_whitelist_subset_from_atomspace_equalto_keywords, this, "patternminer");
     define_scheme_primitive("pm-apply-whitelist-keyword-filter-after-mining", &PatternMinerSCM::apply_whitelist_keyword_filter_after_mining, this, "patternminer");
+    define_scheme_primitive("pm-query-patterns-with-frequency-surprisingnessI-ranges", &PatternMinerSCM::query_patterns_with_frequency_surprisingnessI_ranges, this, "patternminer");
     define_scheme_primitive("pm-reset-patternminer", &PatternMinerSCM::reset_patternminer, this, "patternminer");
     define_scheme_primitive("pm-run-interestingness-evaluation", &PatternMinerSCM::run_interestingness_evaluation, this, "patternminer");
     define_scheme_primitive("pm-load-patterns-from-result-file", &PatternMinerSCM::load_patterns_from_result_file, this, "patternminer");
+
+
+    define_scheme_primitive("pm-select-whitelist-entity-links-subset-equalto-keywords", &PatternMinerSCM::select_whitelist_entity_links_subset_equalto_keywords, this, "patternminer");
 
     define_scheme_primitive("pm-select-subset-for-DBpedia", &PatternMinerSCM::select_subset_for_DBpedia, this, "patternminer");
     define_scheme_primitive("pm-load-all-DBpediaKeyNodes", &PatternMinerSCM::load_all_DBpediaKeyNodes, this, "patternminer");

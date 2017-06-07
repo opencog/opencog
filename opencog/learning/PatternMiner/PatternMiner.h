@@ -44,6 +44,7 @@ namespace opencog
 namespace PatternMining
 {
 #define FLOAT_MIN_DIFF 0.00001
+#define FREQUENCY_TOP_THRESHOLD 0.10
 #define SURPRISINGNESS_I_TOP_THRESHOLD 0.20
 #define SURPRISINGNESS_II_TOP_THRESHOLD 0.40
 
@@ -93,6 +94,7 @@ struct MinedPatternInfo
     string curPatternKeyStr;
     string parentKeyString;
     unsigned int extendedLinkIndex;
+    bool notOutPutPattern;
 };
 
 enum QUERY_LOGIC
@@ -117,6 +119,9 @@ protected:
 
     vector < vector<HTreeNode*> > patternsForGram;
     vector < vector<HTreeNode*> > finalPatternsForGram;
+
+    // temp patterns generated only for calcuate the interestingness of its superpatterns, e.g. patterns with too many variables
+   vector < vector<HTreeNode*> > tmpPatternsForGram;
 
     std::thread *threads;
 
@@ -179,6 +184,8 @@ protected:
 
     bool only_mine_patterns_start_from_white_list;
     bool only_mine_patterns_start_from_white_list_contain;
+
+    bool only_output_patterns_contains_white_keywords;
 
     float atomspaceSizeFloat;
 
@@ -250,9 +257,9 @@ protected:
 
     void extractAllPossiblePatternsFromInputLinksBF(HandleSeq& inputLinks,  HTreeNode* parentNode,OrderedHandleSet& sharedNodes, unsigned int gram);
 
-    // vector<HTreeNode *> &allHTreeNodes is output all the HTreeNodes found
-    void extractAllPossiblePatternsFromInputLinksDF(HandleSeq& inputLinks,unsigned int sharedLinkIndex, AtomSpace* _fromAtomSpace,
-                                                    vector<HTreeNode*>& allLastGramHTreeNodes, vector<HTreeNode*>& allHTreeNodes, unsigned int gram = 1);
+//    // vector<HTreeNode *> &allHTreeNodes is output all the HTreeNodes found
+//    void extractAllPossiblePatternsFromInputLinksDF(HandleSeq& inputLinks,unsigned int sharedLinkIndex, AtomSpace* _fromAtomSpace,
+//                                                    vector<HTreeNode*>& allLastGramHTreeNodes, vector<HTreeNode*>& allHTreeNodes, unsigned int gram = 1);
 
     void swapOneLinkBetweenTwoAtomSpace(AtomSpace* fromAtomSpace, AtomSpace* toAtomSpace, Handle& fromLink, HandleSeq& outgoings, HandleSeq &outVariableNodes);
 
@@ -284,12 +291,15 @@ protected:
 
     void extendAPatternForOneMoreGramRecursively(const Handle &extendedLink, AtomSpace* _fromAtomSpace, const Handle &extendedNode, const HandleSeq &lastGramLinks,
                                                  HTreeNode* parentNode, const map<Handle,Handle> &lastGramValueToVarMap, const map<Handle,Handle> &lastGramPatternVarMap,
-                                                 bool isExtendedFromVar, set<string>& allNewMinedPatternsCurTask, vector<HTreeNode*> &allHTreeNodesCurTask, vector<MinedPatternInfo> &allNewMinedPatternInfo, unsigned int thread_index);
+                                                 bool isExtendedFromVar, set<string>& allNewMinedPatternsCurTask, vector<HTreeNode*> &allHTreeNodesCurTask,
+                                                 vector<MinedPatternInfo> &allNewMinedPatternInfo, unsigned int thread_index, bool startFromLinkContainWhiteKeyword);
 
     bool containsLoopVariable(HandleSeq& inputPattern);
 
-    HTreeNode* extractAPatternFromGivenVarCombination(HandleSeq &inputLinks, map<Handle,Handle> &patternVarMap, HandleSeqSeq &oneOfEachSeqShouldBeVars, HandleSeq &leaves,
-                                                      HandleSeq &shouldNotBeVars, HandleSeq &shouldBeVars, AtomSpace *_fromAtomSpace, unsigned int &extendedLinkIndex, set<string>& allNewMinedPatternsCurTask);
+    HTreeNode* extractAPatternFromGivenVarCombination(HandleSeq &inputLinks, map<Handle,Handle> &patternVarMap, HandleSeqSeq &oneOfEachSeqShouldBeVars, HandleSeq &leaves,HandleSeq &shouldNotBeVars, HandleSeq &shouldBeVars,
+                                                      AtomSpace *_fromAtomSpace, unsigned int &extendedLinkIndex, set<string>& allNewMinedPatternsCurTask, bool &notOutPutPattern, bool startFromLinkContainWhiteKeyword);
+
+
 
     void findAllInstancesForGivenPatternInNestedAtomSpace(HTreeNode* HNode);
 
@@ -303,7 +313,7 @@ protected:
 
     void GrowAllPatternsBF();
 
-    void growPatternsDepthFirstTask_old();
+    // void growPatternsDepthFirstTask_old();
 
     void growPatternsDepthFirstTask(unsigned int thread_index);
 
@@ -408,6 +418,8 @@ public:
 
     void OutPutFinalPatternsToFile(unsigned int n_gram);
 
+    void queryPatternsWithFrequencySurprisingnessIRanges(unsigned int min_frequency, unsigned int max_frequency, float min_surprisingness_I, float max_surprisingness_I, int gram);
+
     void runPatternMiner(bool exit_program_after_finish = true);
 
     void runPatternMinerBreadthFirst();
@@ -418,13 +430,14 @@ public:
 
     void selectSubsetFromCorpus(vector<string> &topics, unsigned int gram, bool if_contian_logic = true);
 
+    void selectSubsetAllEntityLinksContainsKeywords(vector<string>& subsetKeywords);
+
     void loandAllDBpediaKeyNodes();
 
     void selectSubsetForDBpedia();
 
     vector<HTreeNode*>&  getFinalPatternsForGram(unsigned int gram){return finalPatternsForGram[gram - 1];}
 
-    // only load the frequent pattern result file
     void loadPatternsFromResultFile(string fileName);
 
     void testPatternMatcher1();
