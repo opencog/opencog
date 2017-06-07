@@ -19,7 +19,7 @@
 ;; instances that satisfy a precondition, if you have an
 ;; ImplicationLink inside your ForAllLink you probably want to use
 ;; Implication Instantiation on your ImplicationLink directly
-;; (see implication-instantiation-rule.scm).
+;; (see implication-instantiation.scm).
 ;; -----------------------------------------------------------------------
 
 (use-modules (srfi srfi-1))

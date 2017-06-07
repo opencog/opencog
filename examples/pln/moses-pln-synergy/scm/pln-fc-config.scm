@@ -49,16 +49,16 @@
 (add-to-load-path "../../../opencog/pln/rules/")
 
 (define rule-filenames
-  (list "wip/implication-instantiation-rule.scm"
-        "wip/implication-scope-to-implication-rule.scm"
-        "wip/and-lambda-distribution-rule.scm"
-        "wip/closed-lambda-evaluation-rule.scm"
-        "wip/implication-introduction-rule.scm"
-        "wip/implication-implicant-distribution-rule.scm"
-        "wip/implication-and-lambda-factorization-rule.scm"
-        "term-logic/deduction-rule.scm"
-        "wip/equivalence-to-implication-rule.scm"
-        "wip/implication-implicant-disjunction-rule.scm"
+  (list "wip/implication-instantiation.scm"
+        "wip/implication-scope-to-implication.scm"
+        "wip/and-lambda-distribution.scm"
+        "wip/closed-lambda-evaluation.scm"
+        "wip/implication-introduction.scm"
+        "wip/implication-implicant-distribution.scm"
+        "wip/implication-and-lambda-factorization.scm"
+        "term/deduction.scm"
+        "wip/equivalence-to-implication.scm"
+        "wip/implication-implicant-disjunction.scm"
         )
   )
 (for-each load-from-path rule-filenames)

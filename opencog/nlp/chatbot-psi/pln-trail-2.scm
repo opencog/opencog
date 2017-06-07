@@ -48,7 +48,7 @@
 (define (configure-pln-rbs-2)
     (define rb (ConceptNode "r2l-pln-1"))
 
-    (pln-load-rules "term-logic/deduction")
+    (pln-load-rules "term/deduction")
     (pln-load-rules "wip/abduction")
 
     ; NOTE: The number has no relevance in r2l-mode
