@@ -142,8 +142,15 @@ void HebbianCreationAgent::run()
                 addHebbian(source,target);
         }
     }
+
     //Check the ammount of HebbianLinks the Atom has
-    IncomingSet iset = source->getIncomingSetByType(HEBBIAN_LINK,true);
+    IncomingSet iset;
+    classserver().foreachRecursive(
+        [&] (Type type)->void {
+            IncomingSet ts = source->getIncomingSetByType(type);
+            iset.insert(iset.end(), ts.begin(), ts.end());
+        },
+        HEBBIAN_LINK);
 
     //If it is more then the allowed max delete some randomly.
     //TODO: find a simple rule to decide which atoms to forget
