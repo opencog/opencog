@@ -6763,6 +6763,8 @@ estimate: 7.5% of these, so = 52M pairs!? Ouch.  .. 70-80 GB RAM
     and insanely slow ..  secs = 102 hrs = 4.2 days
 running at 1.9K pairs/sec ouch.
 
+4000 secs for 20x36K = 180/sec total collapse.
+
 Try again:
 (use-modules (opencog) (opencog persist) (opencog persist-sql))
 (use-modules (opencog nlp) (opencog nlp learn))
@@ -6790,6 +6792,9 @@ oh fu... its running 3x because:
 2) do_store_single_atom
 FIXED.  num_get_links - num_got_links == total stores
    and  num_get_links == valuation update  Yayyy!!
+
+OK, so: 1.5M atoms, 37413 words, now: 13M new atoms
+so 13M / 37K = 343 atoms per incoming set.
 
 -------------------
 FWIW, the crappy results from back-when: en_pairs_sim:
@@ -7642,12 +7647,6 @@ std::char_traits<char>, std::allocator<char> > const&) (this=0x7ffe8c000980,
 
 
 
-Oh no Mr Bill!! stack_size=512 fp-bot = 455 ip-subr_stub_code=14 engine=1 Mon Jun  5 03:43:12 2017
-
-Oh no Mr Bill!! stack_size=512 fp-bot = 455 ip-subr_stub_code=14 engine=1 Mon Jun  5 05:53:08 2017
-
-Oh no Mr Bill!! stack_size=512 fp-bot = 455 ip-subr_stub_code=14 engine=1 Mon Jun  5 05:53:08 2017
-
 
 (observe-text "In the calmness of the evening, when the winds had sunk to rest, When no earthquake heaved its fury, burned no fire within my breast, Came a still small voice so tender, it the heart of Christ confessed: \"Unto thy God be true!\"")
 
@@ -7683,6 +7682,359 @@ fn = fn.get("NEXT");
      (close-port s)))
 
 
+Oh no Mr Bill!! stack_size=512 fp-bot = 455 ip-subr_stub_code=14 engine=1 Mon Jun  5 03:43:12 2017
+
+Oh no Mr Bill!! stack_size=512 fp-bot = 455 ip-subr_stub_code=14 engine=1 Mon Jun  5 05:53:08 2017
+
+Oh no Mr Bill!! stack_size=512 fp-bot = 455 ip-subr_stub_code=14 engine=1 Mon Jun  5 05:53:08 2017
+
+Oh no Mr Bill!! stack_size=512 fp-bot = 455 ip-subr_stub_code=14 engine=1 Mon Jun  5 23:06:13 2017
+
+This one has an exception half-an-hour earlier:
+[2017-06-05 22:37:22:726] [INFO] Aiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiieee it
+was this
+: Backtrace: ...
+In opencog/base/file-utils.scm:
+    79:27  5 (exec-scm-from-port _)
+In ice-9/boot-9.scm:
+    849:4  4 (with-throw-handler _ _ _)
+    849:4  3 (with-throw-handler _ _ _)
+In unknown file:
+           2 (string-concatenate-reverse (" (WordInstanceNode \"of@d7a23…" …) …)
+In ice-9/boot-9.scm:
+   759:25  1 (dispatch-exception 2 wrong-type-arg ("string-append" "Wrong…" …))
+In unknown file:
+           0 (apply-smob/1 #<catch-closure 2425880> wrong-type-arg "string-…" …)
+ERROR: In procedure apply-smob/1:
+ERROR: In procedure string-append: Wrong type (expecting string): (filename . #f)
+ABORT: wrong-type-arg
+
+But there are no files anywhere in this code...
+
+[2017-06-05 23:06:14:154] [INFO] Aiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiieee it
+was this: Backtrace:
+In opencog/base/file-utils.scm:
+    79:27  5 (exec-scm-from-port _)
+In ice-9/boot-9.scm:
+    849:4  4 (with-throw-handler _ _ _)
+    849:4  3 (with-throw-handler _ _ _)
+In unknown file:
+           2 (string-concatenate-reverse ((#<tree-il (const "ANY")>)) "\n …" …)
+In ice-9/boot-9.scm:
+   759:25  1 (dispatch-exception 2 wrong-type-arg ("string-append" "Wrong…" …))
+In unknown file:
+           0 (apply-smob/1 #<catch-closure 276ce00> wrong-type-arg "string-…" …)
+
+ERROR: In procedure apply-smob/1:
+ERROR: In procedure string-append: Wrong type (expecting string):
+(#<tree-il (const "ANY")>)
+ABORT: wrong-type-arg
+
+
+Oh no Mr Bill!! stack_size=512 fp-bot = 455 ip-subr_stub_code=14
+engine=1 Tue Jun  6 02:39:21 2017
+
+Oh no Mr Bill!! stack_size=512 fp-bot = 455 ip-subr_stub_code=14
+engine=1 Tue Jun  6 02:39:21 2017
+
+.... and then a crash:
+the crash is related to a backtrace, again.
+
+
+Thread 24232 "guile" received signal SIGSEGV, Segmentation fault.
+[Switching to Thread 0x7ffee57fa700 (LWP 10775)]
+0x00007ffff7b0d809 in scm_is_pair (x=0x0) at ../../libguile/pairs.h:159
+159       return SCM_I_CONSP (x);
+(gdb) bt
+#0  0x00007ffff7b0d809 in scm_is_pair (x=0x0) at
+../../libguile/pairs.h:159
+#1  scm_ilength (sx=<optimized out>) at ../../libguile/list.c:190
+#2  0x00007ffff7b0d859 in scm_list_p (x=<optimized out>)
+    at ../../libguile/list.c:168
+#3  0x00007ffff7b66381 in vm_debug_engine (thread=0x54569480,
+vp=0x1644e990, 
+    registers=0x0, resume=-536832) at ../../libguile/vm-engine.c:784
+#4  0x00007ffff7b702fa in scm_call_n (proc=0x7fffeddbdd70, 
+    argv=argv@entry=0x7ffee57f9070, nargs=nargs@entry=4)
+    at ../../libguile/vm.c:1271
+#5  0x00007ffff7af0694 in scm_call_4 (proc=<optimized out>, 
+    arg1=arg1@entry=0x54c8fd90, arg2=arg2@entry=0x547a18c0, 
+    arg3=arg3@entry=0x984520, arg4=arg4@entry=0x52)
+    at ../../libguile/eval.c:508
+#6  0x00007ffff7ae19f5 in display_backtrace_body (a=<optimized out>)
+    at ../../libguile/backtrace.c:244
+#7  0x00007ffff7b66381 in vm_debug_engine (thread=0x54569480,
+vp=0x1644e990, 
+    registers=0x0, resume=-536832) at ../../libguile/vm-engine.c:784
+#8  0x00007ffff7b702fa in scm_call_n (proc=proc@entry=0x547a1700, 
+    argv=argv@entry=0x0, nargs=nargs@entry=0) at ../../libguile/vm.c:1271
+#9  0x00007ffff7af0599 in scm_call_0 (proc=proc@entry=0x547a1700)
+    at ../../libguile/eval.c:481
+#10 0x00007ffff7b5f149 in catch (tag=tag@entry=0x404, thunk=0x547a1700, 
+---Type <return> to continue, or q <return> to quit---
+    handler=0x547a16e0, pre_unwind_handler=0x4) at
+../../libguile/throw.c:137
+#11 0x00007ffff7b5f4b5 in scm_catch_with_pre_unwind_handler (
+    key=key@entry=0x404, thunk=<optimized out>, handler=<optimized out>, 
+    pre_unwind_handler=<optimized out>) at ../../libguile/throw.c:254
+#12 0x00007ffff7b5f66f in scm_c_catch (tag=tag@entry=0x404, 
+    body=body@entry=0x7ffff7ae18d0 <display_backtrace_body>, 
+    body_data=body_data@entry=0x7ffee57f9450, 
+    handler=handler@entry=0x7ffff7ae1cc0 <error_during_backtrace>, 
+    handler_data=<optimized out>, 
+    pre_unwind_handler=pre_unwind_handler@entry=0x0, 
+    pre_unwind_handler_data=0x0) at ../../libguile/throw.c:377
+#13 0x00007ffff7b5f67e in scm_internal_catch (tag=tag@entry=0x404, 
+    body=body@entry=0x7ffff7ae18d0 <display_backtrace_body>, 
+    body_data=body_data@entry=0x7ffee57f9450, 
+    handler=handler@entry=0x7ffff7ae1cc0 <error_during_backtrace>, 
+    handler_data=<optimized out>) at ../../libguile/throw.c:386
+#14 0x00007ffff7ae18a5 in scm_display_backtrace_with_highlights (
+    stack=<optimized out>, port=<optimized out>, first=<optimized out>, 
+    depth=<optimized out>, highlights=<optimized out>)
+    at ../../libguile/backtrace.c:282
+#15 0x00007fffecb61684 in
+opencog::SchemeEval::catch_handler(scm_unused_struct*,
+scm_unused_struct*) (this=0x7fff98000980, tag=0x7a86e0,
+throw_args=0x5148e850)
+---Type <return> to continue, or q <return> to quit---
+    at /home/ubuntu/src/atomspace/opencog/guile/SchemeEval.cc:422
+#16 0x00007ffff7b66381 in vm_debug_engine (thread=0x54569480,
+vp=0x1644e990, 
+    registers=0x0, resume=-536832) at ../../libguile/vm-engine.c:784
+#17 0x00007ffff7b702fa in scm_call_n (proc=proc@entry=0x54569500, 
+    argv=<optimized out>, nargs=5) at ../../libguile/vm.c:1271
+#18 0x00007ffff7af0a8b in scm_apply_0 (proc=proc@entry=0x54569500,
+args=0x304)
+    at ../../libguile/eval.c:594
+#19 0x00007ffff7b5f1c7 in catch (tag=<optimized out>, thunk=0x54569520, 
+    handler=0x54569500, pre_unwind_handler=0x545694e0)
+    at ../../libguile/throw.c:134
+#20 0x00007fffecb61d89 in
+opencog::SchemeEval::do_eval(std::__cxx11::basic_string<char,
+std::char_traits<char>, std::allocator<char> > const&) (
+    this=0x7fff98000980, expr=...)
+    at /home/ubuntu/src/atomspace/opencog/guile/SchemeEval.cc:576
+#21 0x00007fffecb61e3a in opencog::SchemeEval::c_wrap_eval(void*) (
+    p=0x7fff98000980)
+    at /home/ubuntu/src/atomspace/opencog/guile/SchemeEval.cc:505
+#22 0x00007ffff7aea75a in c_body (d=0x7ffee57f9ce0)
+    at ../../libguile/continuations.c:422
+#23 0x00007ffff7b66381 in vm_debug_engine (thread=0x54569480,
+vp=0x1644e990, 
+    registers=0x0, resume=-536832) at ../../libguile/vm-engine.c:784
+#24 0x00007ffff7b702fa in scm_call_n (proc=proc@entry=0x545695c0, 
+---Type <return> to continue, or q <return> to quit---
+    argv=argv@entry=0x0, nargs=nargs@entry=0) at ../../libguile/vm.c:1271
+#25 0x00007ffff7af0599 in scm_call_0 (proc=proc@entry=0x545695c0)
+    at ../../libguile/eval.c:481
+#26 0x00007ffff7b5f149 in catch (tag=tag@entry=0x404, thunk=0x545695c0, 
+    handler=0x545695a0, pre_unwind_handler=0x54569580)
+    at ../../libguile/throw.c:137
+#27 0x00007ffff7b5f4b5 in scm_catch_with_pre_unwind_handler (
+    key=key@entry=0x404, thunk=<optimized out>, handler=<optimized out>, 
+    pre_unwind_handler=<optimized out>) at ../../libguile/throw.c:254
+#28 0x00007ffff7b5f66f in scm_c_catch (tag=tag@entry=0x404, 
+    body=body@entry=0x7ffff7aea750 <c_body>, 
+    body_data=body_data@entry=0x7ffee57f9ce0, 
+    handler=handler@entry=0x7ffff7aea9f0 <c_handler>, 
+    handler_data=handler_data@entry=0x7ffee57f9ce0, 
+    pre_unwind_handler=pre_unwind_handler@entry=0x7ffff7aea850
+<pre_unwind_handler>, pre_unwind_handler_data=0x7ff020) at
+../../libguile/throw.c:377
+#29 0x00007ffff7aead60 in scm_i_with_continuation_barrier (
+    body=body@entry=0x7ffff7aea750 <c_body>, 
+    body_data=body_data@entry=0x7ffee57f9ce0, 
+    handler=handler@entry=0x7ffff7aea9f0 <c_handler>, 
+    handler_data=handler_data@entry=0x7ffee57f9ce0, 
+    pre_unwind_handler=pre_unwind_handler@entry=0x7ffff7aea850
+<pre_unwind_handl---Type <return> to continue, or q <return> to quit---
+er>, pre_unwind_handler_data=0x7ff020) at
+../../libguile/continuations.c:360
+#30 0x00007ffff7aeae45 in scm_c_with_continuation_barrier (
+    func=<optimized out>, data=<optimized out>)
+    at ../../libguile/continuations.c:456
+#31 0x00007ffff717e127 in GC_call_with_gc_active (
+    fn=fn@entry=0x7ffff7b5d250 <with_guile_trampoline>, 
+    client_data=client_data@entry=0x7ffee57f9dc0) at
+../pthread_support.c:1343
+#32 0x00007ffff7b5dc61 in with_guile (base=base@entry=0x7ffee57f9d90, 
+    data=data@entry=0x7ffee57f9dc0) at ../../libguile/threads.c:688
+#33 0x00007ffff7178132 in GC_call_with_stack_base (
+    fn=fn@entry=0x7ffff7b5dbd0 <with_guile>,
+arg=arg@entry=0x7ffee57f9dc0)
+    at ../misc.c:1941
+#34 0x00007ffff7b5e008 in scm_i_with_guile (dynamic_state=<optimized
+out>, 
+    data=<optimized out>, func=<optimized out>) at
+../../libguile/threads.c:703
+#35 scm_with_guile (func=<optimized out>, data=<optimized out>)
+    at ../../libguile/threads.c:709
+#36 0x00007fffecb61ebe in
+opencog::SchemeEval::eval_expr(std::__cxx11::basic_string<char,
+std::char_traits<char>, std::allocator<char> > const&) (
+    this=0x7fff98000980, expr=...)
+    at /home/ubuntu/src/atomspace/opencog/guile/SchemeEval.cc:477
+#37 0x00007fffdef6def4 in opencog::GenericShell::eval_loop (
+    this=0x7ffee8253d50)
+---Type <return> to continue, or q <return> to quit---
+    at
+/home/ubuntu/src/opencog/opencog/cogserver/shell/GenericShell.cc:497
+#38 0x00007fffeb71dc80 in ?? () from
+/usr/lib/x86_64-linux-gnu/libstdc++.so.6
+#39 0x00007ffff78916ba in start_thread (arg=0x7ffee57fa700)
+    at pthread_create.c:333
+#40 0x00007ffff75c782d in clone ()
+    at ../sysdeps/unix/sysv/linux/x86_64/clone.S:109
+(gdb) 
+
+
+Oh no Mr Bill!! stack_size=512 fp-bot = 455 ip-subr_stub_code=14 engine=1 Tue Jun  6 10:16:44 2017
+
+Oh no Mr Bill!! stack_size=512 fp-bot = 455 ip-subr_stub_code=14 engine=1 Tue Jun  6 10:16:44 2017
+
+Oh no Mr Bill!! stack_size=512 fp-bot = 455 ip-subr_stub_code=14 engine=1 Tue Jun  6 18:27:01 2017
+
+Oh no Mr Bill!! stack_size=512 fp-bot = 455 ip-subr_stub_code=14 engine=1 Tue Jun  6 18:27:01 2017
+
+
+----
+This time, no prints at all!! just hit abort:
+scheme@(guile-user)> 
+Thread 451 "guile" received signal SIGABRT, Aborted.
+[Switching to Thread 0x7ffd25ffb700 (LWP 5037)]
+(gdb) bt
+#0  0x00007ffff74f6428 in __GI_raise (sig=sig@entry=6)
+    at ../sysdeps/unix/sysv/linux/raise.c:54
+#1  0x00007ffff74f802a in __GI_abort () at abort.c:89
+#2  0x00007ffff7af22f4 in compute_assigned (exp=<optimized out>, 
+    assigned=assigned@entry=0x24ba1c0) at ../../libguile/expand.c:1268
+#3  0x00007ffff7af2309 in compute_assigned (exp=<optimized out>, 
+    assigned=assigned@entry=0x24ba1c0) at ../../libguile/expand.c:1185
+#4  0x00007ffff7af2388 in compute_assigned (exp=<optimized out>, 
+    assigned=assigned@entry=0x24ba1c0) at ../../libguile/expand.c:1227
+#5  0x00007ffff7af2309 in compute_assigned (exp=<optimized out>, 
+    assigned=assigned@entry=0x24ba1c0) at ../../libguile/expand.c:1185
+#6  0x00007ffff7af2309 in compute_assigned (exp=exp@entry=0xd0366c0, 
+    assigned=assigned@entry=0x24ba1c0) at ../../libguile/expand.c:1185
+#7  0x00007ffff7af3e1e in scm_convert_assignment (exp=0xd0366c0)
+    at ../../libguile/expand.c:1570
+#8  0x00007ffff7b12a45 in scm_memoize_expression (exp=<optimized out>)
+    at ../../libguile/memoize.c:641
+#9  0x00007ffff7b66381 in vm_debug_engine (thread=0xabe, vp=0xc65240, 
+    registers=0x6, resume=-145791960) at ../../libguile/vm-engine.c:784
+#10 0x00007ffff7b702fa in scm_call_n (proc=0x7fffe7c9d4a8, 
+    argv=argv@entry=0x7ffd25ffa300, nargs=nargs@entry=3)
+    at ../../libguile/vm.c:1271
+#11 0x00007ffff7af063f in scm_call_3 (proc=<optimized out>, 
+    arg1=<optimized out>, arg2=<optimized out>, arg3=<optimized out>)
+    at ../../libguile/eval.c:501
+
+well, that's unexpected....
+(gdb) print exp
+$1 = <optimized out>
+
+wtf....
+
+another crazy:
+
+Thread 11590 "guile" received signal SIGSEGV, Segmentation fault.
+[Switching to Thread 0x7fff437fe700 (LWP 1316)]
+0x00007ffff7b2b067 in encode_escape_sequence (ch=-134642584, 
+    buf=buf@entry=0x7fff437fcd70 "\\x00e3c0") at
+../../libguile/ports.c:3053
+3053              buf[i++] = hex[ch / 16];
+(gdb) bt
+#0  0x00007ffff7b2b067 in encode_escape_sequence (ch=-134642584, 
+    buf=buf@entry=0x7fff437fcd70 "\\x00e3c0") at
+../../libguile/ports.c:3053
+
+
+ch is -134642584
+
+(gdb) print/x ch
+$9 = 0xf7f98468
+So clearly ports.c fails to check for positive.
+
+
+Oh no Mr Bill!! stack_size=512 fp-bot = 455 ip-subr_stub_code=14  engine=1
+Tue Jun  6 20:27:36 2017
+
+Oh no Mr Bill!! stack_size=512 fp-bot = 455 ip-subr_stub_code=14  engine=1
+Wed Jun  7 02:06:40 2017
+
+Oh no Mr Bill!! stack_size=512 fp-bot = 455 ip-subr_stub_code=14  engine=1
+Wed Jun  7 02:06:40 2017
+
+Oh no Mr Bill!! stack_size=512 fp-bot = 455 ip-subr_stub_code=14  engine=1
+Wed Jun  7 06:04:23 2017
+
+Oh no Mr Bill!! stack_size=512 fp-bot = 455 ip-subr_stub_code=14  engine=1
+Wed Jun  7 06:04:23 2017
+
+Thread 326311 "guile" received signal SIGSEGV, Segmentation fault.
+[Switching to Thread 0x7ffe457fa700 (LWP 13958)]
+iprin1 (exp=0x0, port=0x85864500, pstate=0x71165c50)
+    at ../../libguile/print.c:611
+611           switch (SCM_TYP7 (exp))
+
+#0  iprin1 (exp=0x0, port=0x85864500, pstate=0x71165c50)
+    at ../../libguile/print.c:611
+#1  0x00007ffff7b32ad0 in scm_iprin1 (exp=<optimized out>, 
+    port=<optimized out>, pstate=<optimized out>) at
+../../libguile/print.c:544
+#2  0x00007ffff7b60787 in scm_i_variable_print (exp=0x86b77de0, 
+    port=0x85864500, pstate=0x71165c50) at ../../libguile/variable.c:41
+#3  0x00007ffff7b32c9b in scm_prin1 (exp=exp@entry=0x86b77de0, 
+    port=port@entry=0x85864500, writingp=writingp@entry=1)
+    at ../../libguile/print.c:817
+#4  0x00007ffff7b33b61 in scm_write (obj=0x86b77de0, port=0x85864500)
+    at ../../libguile/print.c:1076
+#5  0x00007ffff7b66381 in vm_debug_engine (thread=0x0, vp=0x19a7c60, 
+    registers=0xfffffffffffa7a74, resume=16) at
+../../libguile/vm-engine.c:784
+#6  0x00007ffff7b702fa in scm_call_n (proc=0x7fffeddbdd70, 
+    argv=argv@entry=0x7ffe457f9070, nargs=nargs@entry=4)
+    at ../../libguile/vm.c:1271
+#7  0x00007ffff7af0694 in scm_call_4 (proc=<optimized out>, 
+    arg1=arg1@entry=0x8759cc40, arg2=arg2@entry=0x86101be0, 
+    arg3=arg3@entry=0x983520, arg4=arg4@entry=0x52)
+    at ../../libguile/eval.c:508
+#8  0x00007ffff7ae19f5 in display_backtrace_body (a=<optimized out>)
+    at ../../libguile/backtrace.c:244
+
+
+----------------
+anotehr:
+Thread 213118 "guile" received signal SIGSEGV, Segmentation fault.
+[Switching to Thread 0x7fff61ffb700 (LWP 11550)]
+scm_ipruk (hdr=0x7ffff7b87ec8 "immediate", ptr=0xffffffff81480f9f, 
+    port=0x7ed4f6a0) at ../../libguile/print.c:946
+946           scm_uintprint (SCM_CELL_WORD_0 (ptr), 16, port);
+(gdb) bt
+#0  scm_ipruk (hdr=0x7ffff7b87ec8 "immediate", ptr=0xffffffff81480f9f, 
+    port=0x7ed4f6a0) at ../../libguile/print.c:946
+#1  0x00007ffff7b32b73 in print_vector_or_weak_vector (v=0x7feff9e0, 
+    len=<optimized out>, ref=0x7ffff7b73ac0 <scm_c_weak_vector_ref>, 
+    port=0x7ed4f6a0, pstate=0x847400) at ../../libguile/print.c:561
+#2  0x00007ffff7b33245 in iprin1 (exp=0x7feff9e0, port=0x7ed4f6a0, 
+    pstate=0x847400) at ../../libguile/print.c:743
+#3  0x00007ffff7b32c9b in scm_prin1 (exp=exp@entry=0x7feff9e0, 
+    port=port@entry=0x7ed4f6a0, writingp=writingp@entry=1)
+    at ../../libguile/print.c:817
+#4  0x00007ffff7b33b61 in scm_write (obj=0x7feff9e0, port=0x7ed4f6a0)
+    at ../../libguile/print.c:1076
+#5  0x00007ffff7b66381 in vm_debug_engine (thread=0x7e25ea80,
+vp=0x160d2360, 
+    registers=0x4d, resume=8) at ../../libguile/vm-engine.c:784
+#6  0x00007ffff7b702fa in scm_call_n (proc=0x7fffeddbdd70, 
+    argv=argv@entry=0x7fff61ffa070, nargs=nargs@entry=4)
+    at ../../libguile/vm.c:1271
+#7  0x00007ffff7af0694 in scm_call_4 (proc=<optimized out>, 
+    arg1=arg1@entry=0x7eabfee0, arg2=arg2@entry=0x7eabefa0, 
+    arg3=arg3@entry=0x983520, arg4=arg4@entry=0x52)
+    at ../../libguile/eval.c:508
+#8  0x00007ffff7ae19f5 in display_backtrace_body (a=<optimized out>)
 
 
 
@@ -7696,6 +8048,10 @@ fn = fn.get("NEXT");
 
 
 
+
+GC_MALLOC_ATOMIC GC_malloc_atomic
+scm_gc_malloc_pointerless
+scm_gc_strndup
 =======================
 other guile bugs:
  (acos 1.0)  can return small imaginaey number
