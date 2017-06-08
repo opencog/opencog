@@ -40,7 +40,8 @@
 ; Sentence anchor
 (define rule-7 (cr '("they like it < I think") '("good to know")))
 
-; TODO: Negation
+; Negation
+(define rule-8 (cr '("!apples I eat") '("me too")))
 
 ; The test
 ; --------
@@ -61,3 +62,5 @@
 (define test-result-11 (equal? (gar (chat "it says swallow")) rule-5))
 (define test-result-12 (equal? (gar (chat "oranges love apples no?")) rule-6))
 (define test-result-13 (equal? (gar (chat "I think they like it")) rule-7))
+(define test-result-14 (equal? (gar (chat "I eat apples")) '()))
+(define test-result-15 (equal? (gar (chat "I eat oranges")) rule-8))
