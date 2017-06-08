@@ -220,6 +220,13 @@ So, set up the text-ingestion pipeline:
                 You almost surely do not need this.  This is for my
                 own personal curiosity.
 
+10c) Optionally tune the forced garbage collection paramters. Currently
+  garbage collection is forced every 20 sentences; this helps keep RAM
+  usage down on small-RAM achines.  However, it does cost CPU time.
+  Adjust the `how-often` parameter in `observe-text` in
+  `link-pipeline.scm` to suit your whims in RAM usage and time spent
+  in GC.
+
 11) Get ready to feed it text. It would be best to get text that
   consists of narrative literature, adventure and young-adult novels,
   newspaper stories. These contain a good mix of common nouns and verbs,

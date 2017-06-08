@@ -440,6 +440,9 @@
 					(process-sents)))))
 
 	; Manually run the garbage collector, every now and then.
+	; This helps keep RAM usage down, which is handy on small-RAM
+	; machines. However, it does cost CPU time, in exchange.
+	; Adjust `how-often` up or down to suit your whims.
 	(define maybe-gc
 		(let ((cnt 0)
 				(how-often 20)) ; every 20 times.
