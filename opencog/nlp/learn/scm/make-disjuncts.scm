@@ -140,9 +140,9 @@
      (mst-parse-text 'The game is played on a level playing field')
   the word 'playing' might get this connector set:
 
-    (LgWordCset
+    (PseudoWordCset
        (WordNode \"playing\")
-       (LgAnd
+       (PseudoAnd
           (PseudoConnector
              (WordNode \"level\")
              (LgConnDirNode \"-\"))
@@ -218,9 +218,9 @@
 			rights))
 
 		; return the connector-set
-		(LgWordCset
+		(PseudoWordCset
 			(mst-seq-get-word seq)
-			(LgAnd (append left-cnc right-cnc)))
+			(PseudoAnd (append left-cnc right-cnc)))
 	)
 
 	(map

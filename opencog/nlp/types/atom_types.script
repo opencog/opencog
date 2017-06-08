@@ -162,13 +162,18 @@ LG_LINK_INSTANCE_LINK <- LIST_LINK
 // have MST as part of thier name.
 //
 MST_CONNECTOR <- LINK "MSTConnector"  // analogous to LG_CONNECTOR
-PSEUDO_CONNECTOR <- LINK  // with words, in place of connector letters.
-PSEUDO_WORD_CSET <- LIST_LINK  // Like LG_WORD_CSET, but with pseudo-connectors.
 
 // Analogous to LG_LINK_NODE and LG_DISJUNCT_NODE
 // The LINK_NODE is a pair of connected connectors (i.e. what is called
 // "the intersection" in the LG code-base/documentation)
 MST_LINK_NODE <- PREDICATE_NODE "MSTLinkNode"
+
+// Pseudo-connectors get their own distinct types.   This makes it
+// easier to perform data analysis; it also avoids confusion when
+// loading from the database.
+PSEUDO_WORD_CSET <- LIST_LINK // Like LG_WORD_CSET, but with pseudo-connectors.
+PSEUDO_AND <- LIST_LINK       // Like LG_AND, but with pseudo-connectors.
+PSEUDO_CONNECTOR <- LINK      // with words, in place of connector letters.
 
 // ---------------------------------------------------------------
 // Types used in the Lojban Parser
