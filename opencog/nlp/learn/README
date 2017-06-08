@@ -223,12 +223,9 @@ So, set up the text-ingestion pipeline:
   deductions of grammar.  Thus, it turns out Wikipedia is a bad choice
   for learning text.
 
-  That said, there are a bunch of scripts for dealing with wikipedia.
-  Thus, the steps are these:
-   a) Download lang-wiki-pages-articles for some lanugage lang.
-   b) See 'Wikipedia processing' section below. Do the stuff there.
-   c) See the section 'Sentence Splitting'. Set that up.
-   d) See Wikipedia 'Processing, part II' below.
+  There are various scripts in the `download` directory for downloading
+  and pre-processing texts from Project Gutenberg, Wikipedia, and the
+  "Archive of Our Own" fan-fiction website.
 
 12) After doing at least several days worth of parsing  (i.e. at least
    hundreds of articles, tens of thousands of sentences) the word-pair
@@ -249,101 +246,8 @@ So, set up the text-ingestion pipeline:
 That's all for now, folks!
 
 
-Wikipedia processing
---------------------
-Notes below are for four languages: French, Lithuanian, Polish, and
-"Simple English".  Adjust as desired.
-
-Download wikipedia database dumps:
-https://dumps.wikimedia.org/enwiki/
-https://dumps.wikimedia.org/ltwiki/
-https://dumps.wikimedia.org/frwiki/
-https://dumps.wikimedia.org/zhwiki/ (Mandarin)
-https://dumps.wikimedia.org/zh_yuewiki/ (Cantonese)
-
-The wikipedia articles need to be scrubbed of stray wiki markup, so
-that we send (mostly) plain text into the system.  There's a set of
-cleanup files in the RelEx source distribution, in the src/perl
-directory.  Use these as follows:
-```
-    cd /storage/wikipedia
-
-    mkdir wiki-stripped
-    time cat blahwiki.xml.bz2 |bunzip2 | /home/linas/src/relex/src/perl/wiki-scrub.pl
-    cd wiki-stripped
-    find |wc
-    /home/ubuntu/src/relex/src/perl/wiki-clean.sh
-    find |wc
-    cd ..
-    mkdir alpha-pages
-    cd alpha-pages
-    /home/ubuntu/src/relex/src/perl/wiki-alpha.sh
-```
-
-simple:
-find |wc     gives 131434 total files
-find |wc     gives 98825 files after cat/template removal.
-
-lt:
-7 mins to unpack
-find |wc gives 190364 total files
-find |wc gives 161463 after cat/template removal
-
-pl:
-1 hour to unpack (15 minutes each part)
-find | wc gives 1097612 articles
-52K are categories
-35K are templates
-find |wc gives 1007670 files after cat/template removal
-
-fr:
-3 hours to unpack (25-60 minutes per glob)
-find |wc gives 1764813 articles
-214K are categories
-55K are templates
-find |wc gives 1452739 files after cat/template removal
-
-en:
-10 hours to unpack
-find|wc gives 7495026 articles
-936K are categories
-866K are Files
-259K are Templates
-find| wc gives 5423537 files after cat/template removal
-
-
-Wikipedia processing continues in Part II below.  But first, an interruption.
-
-
-Sentence Splitting
-------------------
-Raw text needs to be split up into sentences.  Some distant future day,
-opencog will do this automatically. For now, we hack it.
-
-Currently, splitting is done with the `split-sentences.pl` perl script
-in the `run` directory.  It was stolen from the `moses-smt` package.
-https://github.com/moses-smt/mosesdecoder/tree/master/scripts/share/nonbreaking_prefixes
-It splits french, polish, latvian, and more.  Its LGPL.
-
-You can verify that it works, like so:
-```
-   cat text-file | run/split-sentences.pl -l en > x
-```
-Replace `en` by the language of your choice.
-
-Some typical sentence-splitting concerns that the above script seems
-to mostly handle correctly:
-
-A question mark or exclamation mark always ends a sentence.  A period
-followed by an upper-case letter generally ends a sentence, but there
-are a number of exceptions.  For example, if the period is part of an
-abbreviated title ("Mr.", "Gen.", ...), it does not end a sentence.
-A period following a single capitalized letter is assumed to be a
-person's initial, and is not considered the end of a sentence.
-
-
-Wikipedia Parsing, part II
---------------------------
+Bulk Text Parsing
+-----------------
 Set up distinct databases, one for each language:
 ```
     createdb fr_pairs lt_pairs pl_pairs simple_pairs
@@ -456,10 +360,6 @@ this is NOT counting indexes, etc.)
 For dataset (fr_pairs) with 225K words, 5M pairs:
 Current rate is 150 words/sec or 9K words/min.
 
-XXX !??? After wild-card count finshes, there is a 5563 second
-pause before batch counting starts. cogserver runs at 100%.
-WTF is this? Garbage collection? Flushing of SQL queues?
-
 After the single-word counts complete, and all-pair count is done.
 This is fast, takes a couple of minutes.
 
@@ -469,20 +369,14 @@ Finally, an MI compute stage.
 Current rate is 60 words/sec = 3.6K per minute.
 This rate is per-word, not per word-pair.
 
-... at first. Then there are long pauses, which seem to be related to
-SQL queue flushing.  The rate then drops to about half at 30 words/sec
-or 1.8K/min. And worse, dropping another 2x or 3x for a while.
-
-
 Update Feb 2014: fr_pairs now contains 10.3M atoms
 SELECT count(uuid) FROM Atoms;  gives  10324863 (10.3M atoms)
 select count(uuid) from atoms where type = 77; gives  226030 (226K words)
 select count(uuid) from atoms where type = 8;  gives 5050835 (5M pairs ListLink)
 select count(uuid) from atoms where type = 27; gives 5050847 (5M pairs EvaluationLink)
 
-The core code for batch-counting is in `compute-mi.scm` and the
-specific code for word-pairs is in `batch-word-pair.scm`.  Both
-of these files need to be ported to an OO system.
+The code for computing word-pair MI is in `batch-word-pair.scm`. It uses
+the `(opencog analysis)` subsystem to perform the core work.
 
 
 Minimum Spanning Tree parsing
@@ -597,6 +491,7 @@ you can start exploring.
   just cut-n-paste from that file, to the guile prompt, to get it to
   do things.
 
+
 Precomputed LXC containers
 --------------------------
 For your computing pleasure, there are some LXC containers that you
@@ -675,7 +570,7 @@ TODO List
 =========
 * Fix (WordNode "…!ANY-PUNCT")
 * Rework pipeline to use literary English sources. STARTED-ish.
-  New scripts in the utilities directory. Incomplete. Also,
+  New scripts in the `download` directory. Incomplete. Also,
   need to document here in readme.
 * Count single-word probabilities.
 * Resume work on morphology.
@@ -712,24 +607,7 @@ DONE
   Done. Ran for a month without issues.
 * Fix crash at linkage_set_domain_names+0xe0  Done. Need LG 5.4.0
 * Create OO system for generic pair statistics. Done.
-
-
-Misc Notes about batch processing
-----------------------------------
-The relex parse is extreely fast, the cogserver part is extremely slow ...
-Non-linear, even.
-4-word sentence: 53 parses, 3-4 seconds elapsed
-
-5-word sentence, 373 parses,
-32 second elapsed,
-postgres runs at 36% cpu
-cogserver runs at 56% cpu for a while then drops to 26% cpu
-
-8-word sentence, max of 999 parses,
-2 minutes elapsed.  Same CPU usage as above...
-
-Solution: 999 parses are not needed.  Asorted tuning was done since
-the above was written.
+* Reduce num samples for 999 to 16. Done.
 
 
 Some typical entropies for word-pairs
@@ -897,18 +775,6 @@ To recap: Delta(vieille+nouveaux) = -4.7734297e-5
 i.e. entropy increses if the word-pairs are merged, the words are separated.
 
 
----------------
-
-Total entropy:
-(fold + 0 (map (lambda (atom)
-	(let ((ent (tv-conf (cog-tv atom))))
-	(* ent (exp (* (- ent) (log 2))))))
-	(cog-get-atoms 'WordNode)))
-
-gives: 7.2199274514956
-
-
-
 ======================================================================
 Minimal morphology output
 
@@ -959,35 +825,6 @@ Tagalog status:
 31 july 2014
 4519631 = 4.5M morpehem pairs
 204K morpehemes
-
-   62 | LinkGrammarRelationshipNode
-select * from atoms where type=62;
-
-select * from atoms order by stv_confidence;
-
-{60,5592759}
-{60,4941961}
-{60,1710609}
-17720161
-7337858
-2586082
-16810147
-9548076
-3844852
-
-select * from atoms where stv_count > 100 order by stv_confidence;
-
-1217445
-
-1043142
-
-
-select * from atoms where uuid=5592759;
-
-{223,223}
-236
-541
-
 
 ======================================================================
 
