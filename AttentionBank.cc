@@ -338,11 +338,13 @@ Handle AttentionBank::getRandomAtom()
 
 bool AttentionBank::atom_is_in_AF(const Handle& h)
 {
-    HandleSeq afset;
-    get_handle_set_in_attentional_focus(std::back_inserter(afset));
-    auto it = std::find(afset.begin(), afset.end(), h);
-    if( it != afset.end()) return true;
-    return false;
+    auto it = std::find_if(attentionalFocus.begin(), attentionalFocus.end(),
+            [h](std::pair<Handle, AttentionValuePtr> p)
+            { if(p.first == h )
+                      return true;
+               return false;
+            });
+    return  (it != attentionalFocus.end());
 }
 
 /**
@@ -355,19 +357,27 @@ void AttentionBank::updateAttentionalFocus(const Handle& h,
     std::lock_guard<std::mutex> lock(AFMutex);
     AttentionValue::sti_t sti = new_av->getSTI();
     auto least = attentionalFocus.begin();
-    bool inserted = false;
-    if(attentionalFocus.size() < minAFSize){
+    bool insertable = false;
+    auto it = std::find_if(attentionalFocus.begin(), attentionalFocus.end(),
+            [h](std::pair<Handle, AttentionValuePtr> p)
+            { if(p.first == h ) return true; return false;});
+
+    // Update the STI value if atoms was already in AF
+    if(it != attentionalFocus.end()){
+        attentionalFocus.erase(it);
         attentionalFocus.insert(std::make_pair(h, new_av));
-        inserted = true;
+        return;
+    } else if(attentionalFocus.size() < minAFSize){
+        insertable = true;
     } else if( sti > (least->second)->getSTI()){
         attentionalFocus.erase(least);
         AFCHSigl& afch = RemoveAFSignal();
-        afch(h, least->second, get_av(least->first));
-        attentionalFocus.insert(std::make_pair(h, new_av));
-        inserted = true;
+        afch(least->first, least->second, get_av(least->first));
+        insertable = true;
     }
- 
-    if(inserted){   
+
+    if(insertable){
+        attentionalFocus.insert(std::make_pair(h, new_av));
         AFCHSigl& afch = AddAFSignal();
         afch(h, old_av, new_av);
     }

@@ -340,8 +340,9 @@ public:
     get_handle_set_in_attentional_focus(OutputIterator result)
     {
          std::lock_guard<std::mutex> lock(AFMutex);
-         std::transform(attentionalFocus.begin(), attentionalFocus.end(),
-                 result, [](std::pair<Handle, AttentionValuePtr> hstp){return hstp.first;});
+         for(const auto p : attentionalFocus){
+             *result++ = p.first;
+         }
 
          return result;
     }
