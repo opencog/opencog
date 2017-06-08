@@ -213,9 +213,15 @@
 ;         NumberNode 3
 ;
 ; Here, the NumberNode encdes the distance between the words. It is always
-; at least one -- i.e. it is the diffference between their ordinals.
+; at least one -- i.e. it is the difference between their ordinals.
 ;
-(define (update-pair-counts-once PARSE)
+; Paramters:
+; MAX-LEN -- integer: don't count a pair, if the words are farther apart
+;            than this.
+; RECORD-LEN -- boolean #t of #f: enable or disable recording of lengths.
+;            If enabled, see warning about the quantity of data, above.
+;
+(define (update-pair-counts-once PARSE MAX-LEN RECORD-LEN)
 
 	; Get the scheme-number of the word-sequence number
 	(define (get-no seq-lnk)
@@ -226,8 +232,13 @@
 		(define pare (ListLink (gar left-seq) (gar right-seq)))
 		(define dist (- (get-no right-seq) (get-no left-seq)))
 
-		(count-one-atom (EvaluationLink pair-pred pare))
-		(count-one-atom (ExecutionLink pair-dist pare (NumberNode dist))))
+		; Only count if the distance is less than the cap.
+		(if (<= dist MAX-LEN)
+			(begin
+				(count-one-atom (EvaluationLink pair-pred pare))
+				(if RECORD-LEN
+					(count-one-atom
+						(ExecutionLink pair-dist pare (NumberNode dist)))))))
 
 	; Create pairs from `first`, and each word in the list in `rest`,
 	; and increment counts on these pairs.
@@ -255,10 +266,13 @@
 	(make-pairs word-seq)
 )
 
-(define (update-clique-pair-counts SENT)
+; See above for explanation.
+(define (update-clique-pair-counts SENT MAX-LEN RECORD-LEN)
 	; In most cases, all parses return the same words in the same order.
 	; Thus, counting only requires us to look at only one parse.
-	(update-pair-counts-once (car (sentence-get-parses SENT)))
+	(update-pair-counts-once
+		(car (sentence-get-parses SENT))
+		MAX-LEN RECORD-LEN)
 )
 
 ; ---------------------------------------------------------------------
@@ -414,13 +428,21 @@
 	; (see documentation for `word-inst-get-word`), the function
 	; `update-clique-pair-counts` might throw.  If it does throw,
 	; then avoid doing any counting at all for this sentence.
+	;
+	; Note: update-clique-pair-counts commented out. If you want this,
+	; then uncommment it, and adjust the length.
+	; Note: update-disjunct-counts commented out. It generates some
+	; data, but none of it will be interesting to most people.
 	(define (update-counts sent)
 		(catch 'wrong-type-arg
 			(lambda () (begin
-				; (update-clique-pair-counts sent)
+				; 6 == max distance between words to count.
+				; See docs above for explanation.
+				; (update-clique-pair-counts sent 6 #f)
 				(update-word-counts sent)
 				(update-lg-link-counts sent)
-				(update-disjunct-counts sent)))
+				; (update-disjunct-counts sent)
+			))
 			(lambda (key . args) #f)))
 
 	; Loop -- process any that we find. This will typically race
@@ -434,9 +456,20 @@
 					(monitor-rate '())
 					(process-sents)))))
 
+	; Manually run the garbage collector, every now and then.
+	; This helps keep RAM usage down, which is handy on small-RAM
+	; machines. However, it does cost CPU time, in exchange.
+	; Adjust `how-often` up or down to suit your whims.
+	(define maybe-gc
+		(let ((cnt 0)
+				(how-often 20)) ; every 20 times.
+			(lambda ()
+				(set! cnt (+ cnt 1))
+				(if (eqv? 0 (modulo cnt how-often)) (gc)))))
+
 	(relex-parse plain-text) ;; send plain-text to server
 	(process-sents)
-	(gc) ;; need agressive gc to keep RAM under control.
+	(maybe-gc) ;; need agressive gc to keep RAM under control.
 )
 
 ; ---------------------------------------------------------------------

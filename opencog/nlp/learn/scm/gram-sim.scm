@@ -177,7 +177,7 @@
 		(if (eqv? 0 (modulo done 20))
 			(let* ((elapsed (- (current-time) start))
 					(frt (* done (- len done)))
-					(rate (* 0.001 (/ (- frt prev-f) (- elapsed prevt))))
+					(rate (* 0.001 (/ (- frt prevf) (- elapsed prevt))))
 					)
 				(format #t
 					 "Done ~A/~A frac=~5f% Time: ~A Done: ~4f% rate=~5f K prs/sec\n"
@@ -188,7 +188,7 @@
 					rate
 				)
 				(set! prevt elapsed)
-				(set! prev-f frt)
+				(set! prevf frt)
 			)))
 
 	; tail-recursive list-walker.
@@ -208,14 +208,8 @@
 
 	(launch WORD-LIST nthreads)
 
-	(format #t "Started ~d threads\n", nthreads)
+	(format #t "Started ~d threads\n" nthreads)
 )
-
-; If the similarity is less than this, it is not saved.
-; The current value is chosen by gut-feel, based on the current
-; dataset, which is small/crappy.  The appropriate value is
-; likely to be strongly dataset-dependent.
-(define cutoff 0.5)
 
 ; ---------------------------------------------------------------------
 ; Example usage:

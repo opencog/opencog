@@ -206,6 +206,32 @@ So, set up the text-ingestion pipeline:
    pair-wise linkages for the above sentences. If the above are empty,
    something is wrong. Go to step zero.
 
+10b) Optionally reduce the amount of data that is collected. Currently,
+  the `observe-text` function in 'link-pipeline.scm` collects counts
+  on four different kinds of structures:
+
+  * Word counts -- how often a word is seen.
+  * Clique pairs, and pair-lengths -- This counts pairs using the "clique
+                  pair" counting method.  The max length between words
+                  can be specified. Optionally, the lengths of the pairs
+                  can be recorded. Caution: enabling length recording
+                  will result in 6x or 20x more data to be collected,
+                  if you've set the length to 6 or 20.  That's because
+                  any given word pair will be observed at almost any
+                  length apart, each of these is an atom with a count.
+                  Watch out!
+  * Lg "ANY" word pairs -- how often a word-pair is observed.
+  * Disjunct counts -- how often the random ANY disjuncts are used.
+                You almost surely do not need this.  This is for my
+                own personal curiosity.
+
+10c) Optionally tune the forced garbage collection paramters. Currently
+  garbage collection is forced every 20 sentences; this helps keep RAM
+  usage down on small-RAM achines.  However, it does cost CPU time.
+  Adjust the `how-often` parameter in `observe-text` in
+  `link-pipeline.scm` to suit your whims in RAM usage and time spent
+  in GC.
+
 11) Get ready to feed it text. It would be best to get text that
   consists of narrative literature, adventure and young-adult novels,
   newspaper stories. These contain a good mix of common nouns and verbs,

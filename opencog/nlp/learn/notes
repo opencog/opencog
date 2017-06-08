@@ -5882,6 +5882,7 @@ select count(*) from atoms;  <<< 10317409 = 10M atoms total
 WordNodes: 139790 -- 140K
 EvaluationLink : 4886362 -- 4.9M
 ListLink: exactly the same.
+LgWordCset: 404882 = 405K   Hmm Curious.
 
 select count(*) from valuations; <<< 5431036 = 5.4M values
 
@@ -5914,9 +5915,10 @@ Disjuncts from MST-parsed books from "tranche-1" of mostly project
 gutenberg books. Based off of the en_pairs_tone. Contains MI for tone,
 but not the cosine angles.
 
-STATUS: good
+STATUS: bad
 DATE: 27 May 2017
-REASON: I think it's good.
+REASON: Uses LgWordCset for for connectors and pseudo-connectors.
+   Which screws up statistics.
 
 en_pairs_tone_mst=> \dt+
                         List of relations
@@ -5940,6 +5942,8 @@ valuations.type=7 AND typecodes.typename='EvaluationLink';
 EaluationLink:  559225036 = 559M almost 4X more than baseline.
 WordNode: 125696239 = 126M = identical to baseline;
 LgWordCset: 133363005 = 134M  Hm. 9M more ob.
+XXX Wait. Since 134M were ANY links, that means only 9M are MST links.
+Oh wow. We need to fix this.
 
 Key 10317416  *-FrequencyKey-*
 Key 10872983  *-Mutual Info Key-*
@@ -5998,8 +6002,71 @@ ParseNode << 12468055 = 12.5M parses more than double.
 0b1908dfc232de4ea4e20d616cbbe290  en_pairs_ttwo.sql.bz2
 
 ==================================================================
+en_pairs_ttwo_mst
+-----------------
+Random parses from tranche-1 and tranche-2, together with MST parses from
+both tranches.
+
+STATUS: good
+DATE: 8 Jun 2017
+REASON: I think it's good.
+
+3993988657 Bytes = 3.99 GB uncompressed
+
+32d2396c4751311dd0a8cd8698465f3d  en_pairs_ttwo_mst.sql
+
+==================================================================
+en_pairs_tthree
+---------------
+Random parses from tranche-1, tranche-2 and tranche_3.
+
+STATUS: good
+DATE: 8 Jun 2017
+REASON: I think it's good.
+
+                        List of relations
+ Schema |    Name    | Type  | Owner  |    Size    | Description 
+--------+------------+-------+--------+------------+-------------
+ public | atoms      | table | ubuntu | 2831 MB    | 
+ public | spaces     | table | ubuntu | 40 kB      | 
+ public | typecodes  | table | ubuntu | 56 kB      | 
+ public | valuations | table | ubuntu | 2099 MB    | 
+ public | values     | table | ubuntu | 8192 bytes | 
+(5 rows)
+
+select count(*) from atoms;  <<< 32125825 = 32M atoms (15M more than before)
+select count(*) from valuations; <<< 16901543 = 16.9M (8.1M more)
+
+SELECT count(atoms.uuid) FROM atoms,typecodes WHERE
+atoms.type=typecodes.type AND typecodes.typename='foobar';
+
+WordNode: 431609 = 432K (245K more) !!! that's a lot. More than double.
+EvaluationLink: 15224271 = 15.2 M (7.2M more, almost double) 
+
+SELECT sum(floatvalue[3]) FROM valuations WHERE type=7;
+1588822019 << 1.59 G observations (832M more, more than double)
+
+SELECT sum(valuations.floatvalue[3]) FROM valuations, atoms, typecodes
+WHERE valuations.atom=atoms.uuid AND atoms.type=typecodes.type AND
+typecodes.typename='EvaluationLink';
+
+EvaluationLink: 557197874 = 557M pair obs, nearly double of before.
+WordNode: 503467934 = 503M -- more than double.
+LgWordCset: 503537347 = 503M -- double
+
+SentenceNode: 1487169 = 1.5M -- double
+ParseNode: 23131695 = 23M -- double
+
+1506102265 Bytes = 1.51 GB uncompressed
+256913537 Bytes = 257 GB compressed
+
+1cb778a18a51244c7a5c919337a38557  en_pairs_tthree.sql
+df1109d706bc5d088097713d7f85188e  en_pairs_tthree.sql.bz2
+
 ==================================================================
 ==================================================================
+
+
 ==================================================================
 
 Plan:
@@ -6744,6 +6811,50 @@ Count   (l_1)  1.6849E+6    5.1241E+7     50.05        398.2
 Length  (l_2)  1.2139E+6    6.4911E+6     36.06        50.44    
 RMS Count      1.0132E+6    6.4895E+6     30.10        50.42    
 
+
+===============
+Arghhhh Sanity check:
+the LgWordCset's in these files are:
+
+(LgWordCset 
+    (WordNode "this")
+    (LgAnd 
+        (LgConnector 
+            (LgConnectorNode "ANY")
+            (LgConnDirNode "-")
+            (LgConnMultiNode "@")
+        )
+
+vs.
+    (LgWordCset
+       (WordNode "playing")
+       (LgAnd
+          (PseudoConnector
+
+Ugh.  The load is polluted!
+
+Double check tone_mst...
+dd(use-modules (opencog) (opencog persist) (opencog persist-sql))
+(use-modules (opencog nlp) (opencog nlp learn) (opencog analysis))
+(sql-open "postgres:///en_pairs_tone_mst?user=ubuntu")
+(fetch-all-words)
+
+(define pca (make-pseudo-cset-api))
+(define psa (add-pair-stars pca))
+(psa 'fetch-pairs)
+
+So, tone, by itself, in sql, has:
+LgWordCset: 404882 = 405K  unique csets and
+LgWordCset: 125707119 << 126M disjunct observations.
+
+tone_mst has via SQL:
+   3975919 = 3.9M csets
+
+xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx here
+
+(cog-count-atoms 'LgWordCset)
+
+(cog-delete-recursive (LgConnMultiNode "@"))
 
 
 ---------- meanwhile, finish stats work
@@ -8042,6 +8153,44 @@ vp=0x160d2360,
     at ../../libguile/eval.c:508
 #8  0x00007ffff7ae19f5 in display_backtrace_body (a=<optimized out>)
 
+-----------------
+Another one:
+
+Thread 230572 "guile" received signal SIGSEGV, Segmentation fault.
+[Switching to Thread 0x7ffec77fe700 (LWP 3880)]
+scm_reverse (lst=lst@entry=0x80003e30) at ../../libguile/list.c:346
+#0  scm_reverse (lst=lst@entry=0x80003e30) at ../../libguile/list.c:346
+#1  0x00007ffff7b4d1ea in scm_string_concatenate_reverse (ls=0x80003e30, 
+    final_string=0x7fc19520, end=<optimized out>)
+    at ../../libguile/srfi-13.c:2465
+#2  0x00007ffff7b66381 in vm_debug_engine (
+    thread=0x7ffff73cd260 <GC_allocate_ml>, vp=0x7c1fd3f0, 
+    registers=0x7ffff73cd260 <GC_allocate_ml>, resume=1)
+    at ../../libguile/vm-engine.c:784
+#3  0x00007ffff7b702fa in scm_call_n (proc=0x7fffe7c9d4a8, 
+    argv=argv@entry=0x7ffec77fd540, nargs=nargs@entry=3)
+    at ../../libguile/vm.c:1271
+#4  0x00007ffff7af063f in scm_call_3 (proc=<optimized out>, 
+    arg1=<optimized out>, arg2=<optimized out>, arg3=<optimized out>)
+    at ../../libguile/eval.c:501
+#5  0x00007ffff7b66381 in vm_debug_engine (
+    thread=0x7ffff73cd260 <GC_allocate_ml>, vp=0x7c1fd3f0, 
+    registers=0x7ffff73cd260 <GC_allocate_ml>, resume=1)
+    at ../../libguile/vm-engine.c:784
+#6  0x00007ffff7b702fa in scm_call_n (proc=proc@entry=0x7cc865a0, 
+    argv=argv@entry=0x0, nargs=nargs@entry=0) at ../../libguile/vm.c:1271
+#7  0x00007ffff7af0599 in scm_call_0 (proc=proc@entry=0x7cc865a0)
+    at ../../libguile/eval.c:481
+#8  0x00007ffff7b5f149 in catch (tag=<optimized out>, thunk=0x7cc865a0, 
+    handler=0x7cc86580, pre_unwind_handler=0x7cc86560)
+    at ../../libguile/throw.c:137
+#9  0x00007fffecb61d89 in opencog::SchemeEval::do_eval(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&) (
+    this=0x7fff3c000980, expr=...)
+    at /home/ubuntu/src/atomspace/opencog/guile/SchemeEval.cc:576
+
+Well, that's different: for the first time ever, it is NOT in an
+exception context!!!
+
 
 
 
@@ -8256,6 +8405,28 @@ left-size: tot count /num-lefts<F8>x
 
 avg length
 ( err... left-length 'rigt-basis
+
+===============================================================
+
+(define pca (make-pseudo-cset-api))
+(define psa (add-pair-stars pca))
+(define pfa (add-pair-freq-api psa))
+(define pta (make-thresh-pca pfa))
+(define aw (get-all-cset-words))
+(define w (car aw))
+(define cset (cog-incoming-by-type w 'LgWordCset))
+(define dj (gdr (car cset)))
+
+(define feig (pta 'left-initial))
+(define lm (pta 'left-mult feig))
+(lm dj)
+
+(define lit (pta 'left-iterate feig))
+(lit w)
+
+(pta 'left-norm feig)
+
+
 
 
 
