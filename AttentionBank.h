@@ -71,7 +71,7 @@ class AttentionBank
             return  (h1.second)->getSTI() < (h2.second)->getSTI();
         }
     };
-    std::set<std::pair<Handle, AttentionValuePtr>, compare_sti_less> attentionalFocus;
+    std::multiset<std::pair<Handle, AttentionValuePtr>, compare_sti_less> attentionalFocus;
 
     void updateAttentionalFocus(const Handle&, const AttentionValuePtr&, 
                                 const AttentionValuePtr&);
