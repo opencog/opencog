@@ -414,13 +414,18 @@
 	; (see documentation for `word-inst-get-word`), the function
 	; `update-clique-pair-counts` might throw.  If it does throw,
 	; then avoid doing any counting at all for this sentence.
+	;
+	; Note: update-clique-pair-counts commented out, it generates
+	; HUGE amounts of data!
+	; Note: update-disjunct-counts commented out. It generates some
+	; data, but none of it will be interesting to most people.
 	(define (update-counts sent)
 		(catch 'wrong-type-arg
 			(lambda () (begin
 				; (update-clique-pair-counts sent)
 				(update-word-counts sent)
 				(update-lg-link-counts sent)
-				(update-disjunct-counts sent)))
+				; (update-disjunct-counts sent)))
 			(lambda (key . args) #f)))
 
 	; Loop -- process any that we find. This will typically race

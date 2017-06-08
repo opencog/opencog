@@ -206,6 +206,20 @@ So, set up the text-ingestion pipeline:
    pair-wise linkages for the above sentences. If the above are empty,
    something is wrong. Go to step zero.
 
+10b) Optionally reduce the amount of data that is collected. Currently,
+  the `observe-text` function in 'link-pipeline.scm` collects counts
+  on four different kinds of structures:
+
+  * Word counts -- how often a word is seen.
+  * Clique pairs, and pair-lengths -- This generates a HUGE amount of
+                  data! For every word pair, there might be 20 or 30
+                  different lengths at which it is observed, so the
+                  database will be 20x or 30x larger!  Watch out!
+  * Lg "ANY" word pairs -- how often a word-pair is observed.
+  * Disjunct counts -- how often the random ANY disjuncts are used.
+                You almost surely do not need this.  This is for my
+                own personal curiosity.
+
 11) Get ready to feed it text. It would be best to get text that
   consists of narrative literature, adventure and young-adult novels,
   newspaper stories. These contain a good mix of common nouns and verbs,
