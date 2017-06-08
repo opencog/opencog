@@ -14,7 +14,15 @@
 
 (use-modules (opencog) (opencog analysis))
 
-
 (define (do-it)
+	(let ((pca (make-pseudo-cset-api))
+			(psa (add-pair-stars pca))
+			(pfa (add-pair-freq-api psa))
+		)
+
+	(define pta (make-thresh-pca pfa))
+	(define all-words (get-all-cset-words))
+
+
 
 )
