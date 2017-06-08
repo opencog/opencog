@@ -211,10 +211,15 @@ So, set up the text-ingestion pipeline:
   on four different kinds of structures:
 
   * Word counts -- how often a word is seen.
-  * Clique pairs, and pair-lengths -- This generates a HUGE amount of
-                  data! For every word pair, there might be 20 or 30
-                  different lengths at which it is observed, so the
-                  database will be 20x or 30x larger!  Watch out!
+  * Clique pairs, and pair-lengths -- This counts pairs using the "clique
+                  pair" counting method.  The max length between words
+                  can be specified. Optionally, the lengths of the pairs
+                  can be recorded. Caution: enabling length recording
+                  will result in 6x or 20x more data to be collected,
+                  if you've set the length to 6 or 20.  That's because
+                  any given word pair will be observed at almost any
+                  length apart, each of these is an atom with a count.
+                  Watch out!
   * Lg "ANY" word pairs -- how often a word-pair is observed.
   * Disjunct counts -- how often the random ANY disjuncts are used.
                 You almost surely do not need this.  This is for my
