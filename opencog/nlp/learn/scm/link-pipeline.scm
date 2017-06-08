@@ -441,7 +441,8 @@
 				; (update-clique-pair-counts sent 6 #f)
 				(update-word-counts sent)
 				(update-lg-link-counts sent)
-				; (update-disjunct-counts sent)))
+				; (update-disjunct-counts sent)
+			))
 			(lambda (key . args) #f)))
 
 	; Loop -- process any that we find. This will typically race
