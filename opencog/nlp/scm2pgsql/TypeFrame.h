@@ -57,6 +57,8 @@ private:
     int countTargets(const std::string &txt, unsigned int begin);
     int recursiveParse(const std::string &txt, unsigned int begin);
     bool isEquivalent(const TypeFrame &other, int cursorThis, int cursorOther) const;
+    int compareUsingEquivalence(const TypeFrame &other, int cursorThis, int cursorOther) const;
+    int lineComparisson(const std::vector<std::vector<int>> &matrix) const;
     bool isFeasible(const std::vector<std::vector<bool>> &matrix) const;
 
     void error(std::string message);
@@ -111,6 +113,11 @@ public:
             return (it2 != b.end());
         }
     };
+    struct LessThanUsingEquivalence {
+        bool operator()(const TypeFrame &a, const TypeFrame &b) const {
+            return a.compareUsingEquivalence(b, 0, 0);
+        }
+    };
 
     bool isValid() const;
     void clear();
@@ -119,8 +126,7 @@ public:
     TypeFrame buildSignature(unsigned int cursor);
     bool equals(const TypeFrame &other) const;
     bool isEquivalent(const TypeFrame &other) const;
-    int lineComparisson(const std::vector<std::vector<int>> &matrix) const;
-    int compareUsingEquivalence(const TypeFrame &other, int cursorThis, int cursorOther) const;
+    int compareUsingEquivalence(const TypeFrame &other) const;
     bool contains(const TypeFrame &other, unsigned int cursor = 0) const;
     bool nodeNameDefined(unsigned int pos) const;
     std::string nodeNameAt(unsigned int pos) const;

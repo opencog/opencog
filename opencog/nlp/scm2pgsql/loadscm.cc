@@ -159,13 +159,42 @@ bool loadFile(char *fileName)
     }
     */
 
-    std::vector<std::pair<float,TypeFrame>> patterns;
+    /*
+    std::vector<unsigned int> base;
+    base.push_back(5);
+    base.push_back(5);
+    base.push_back(5);
+    CartesianProductGenerator cart(base);
+    while (! cart.depleted()) {
+        if ((cart.at(2) == 0) || (cart.at(2) == 4)) {
+            cart.drop(2);
+            //cart.printForDebug("", "\n");
+        } else {
+            cart.printForDebug("", "\n");
+        }
+        cart.generateNext();
+    }
+    */
 
+    /*
+    CartesianProductGenerator cart(3, 4, true, true);
+    while (! cart.depleted()) {
+        if ((cart.at(1) == 1) || (cart.at(1) == 1)) {
+            cart.drop(1);
+            cart.printForDebug("DROP: ", "\n");
+            //cart.printForDebug("", "\n");
+        } else {
+            cart.printForDebug("", "\n");
+        }
+        cart.generateNext();
+    }
+    */
+
+    std::vector<std::pair<float,TypeFrame>> patterns;
     std::chrono::high_resolution_clock::time_point t1 = std::chrono::high_resolution_clock::now();
-    index.minePatterns(patterns, 3, 10, TypeFrameIndex::N_II_SURPRISINGNESS);
+    index.minePatterns(patterns, 3, 10, TypeFrameIndex::N_I_SURPRISINGNESS);
     std::chrono::high_resolution_clock::time_point t2 = std::chrono::high_resolution_clock::now();
     unsigned int duration = std::chrono::duration_cast<std::chrono::seconds>(t2 - t1).count();
-
     for (unsigned int i = 0; i < patterns.size(); i++) {
         printf("%f: ", patterns.at(i).first);
         patterns.at(i).second.printForDebug("", "\n");

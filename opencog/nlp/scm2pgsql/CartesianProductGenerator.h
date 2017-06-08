@@ -38,11 +38,13 @@ class CartesianProductGenerator
 
 public:
 
-    CartesianProductGenerator(const std::vector<unsigned int> &v);
+    CartesianProductGenerator(unsigned int n, unsigned int m, bool avoidEqual = false, bool triangularFlag = false);
+    CartesianProductGenerator(const std::vector<unsigned int> &v, bool avoidEqual = false, bool triangularFlag = false);
     ~CartesianProductGenerator();
     bool depleted() const;
     unsigned int at(unsigned int pos) const;
     void generateNext();
+    void drop(unsigned int pos);
     void printForDebug(std::string prefix, std::string suffix) const;
 
 private:
@@ -50,6 +52,12 @@ private:
     std::vector<unsigned int> cursorVector;
     std::vector<unsigned int> base;
     bool depletedFlag;
+    bool avoidEqualFlag;
+    bool triangularFlag;
+
+    void init(const std::vector<unsigned int> &v);
+    void checkForRepetition();
+    void printBaseForDebug(std::string prefix, std::string suffix) const;
 
 };
 

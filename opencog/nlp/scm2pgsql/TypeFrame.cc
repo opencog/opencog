@@ -423,6 +423,11 @@ bool TypeFrame::isEquivalent(const TypeFrame &other, int cursorThis, int cursorO
     return answer;
 }
 
+int TypeFrame::compareUsingEquivalence(const TypeFrame &other) const
+{
+    return compareUsingEquivalence(other, 0, 0);
+}
+
 int TypeFrame::compareUsingEquivalence(const TypeFrame &other, int cursorThis, int cursorOther) const
 {
     int answer = 0;

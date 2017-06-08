@@ -42,6 +42,7 @@ public:
     typedef std::set<int> IntegerSet;
     typedef std::map<std::string, TypeFrame> VarMapping;
     typedef std::set<TypeFrame, TypeFrame::LessThan> TypeFrameSet;
+    typedef std::set<TypeFrame, TypeFrame::LessThanUsingEquivalence> EquivalentTypeFrameSet;
     typedef std::pair<TypeFrameSet, VarMapping> ResultPair;
     typedef enum RankingMetric {I_SURPRISINGNESS, N_I_SURPRISINGNESS, II_SURPRISINGNESS, N_II_SURPRISINGNESS} RankingMetric;
     typedef enum CoherenceFunction {CONST_1} CoherenceFunction;
@@ -105,7 +106,6 @@ private:
     void addPermutations(std::vector<std::vector<int>> &answer, std::vector<int> base);
     void addSymmetrucPermutations(TypeFrameSet &answer, const TypeFrame &frame, unsigned int cursor);
     void buildCompoundFrames(std::vector<TypeFrame> &answer, int components) const;
-    bool containsEquivalentFrame(const std::vector<TypeFrame> &v, const TypeFrame &f) const;
     void addPatterns(std::vector<TypeFrame> &answer, const TypeFrame &base) const;
     float computeQuality(const TypeFrame &pattern, RankingMetric metric);
     float computeISurprinsingness(const TypeFrame &pattern, bool normalized);
@@ -117,6 +117,7 @@ private:
     std::pair<float,float> minMaxIndependentProb(const TypeFrame &pattern);
     std::pair<float,float> minMaxSubsetProb(const TypeFrame &pattern);
     std::pair<float,float> minMaxSupersetProb(const TypeFrame &pattern);
+    bool heapContainsEquivalent(const PatternHeap &heap, const TypeFrame &pattern) const;
     float computeCoherence(const TypeFrame &frame) const;
     float gFunction(float x) const;
     float hFunction(float x) const;
