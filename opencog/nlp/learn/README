@@ -597,6 +597,7 @@ you can start exploring.
   just cut-n-paste from that file, to the guile prompt, to get it to
   do things.
 
+
 Precomputed LXC containers
 --------------------------
 For your computing pleasure, there are some LXC containers that you
@@ -675,7 +676,7 @@ TODO List
 =========
 * Fix (WordNode "…!ANY-PUNCT")
 * Rework pipeline to use literary English sources. STARTED-ish.
-  New scripts in the utilities directory. Incomplete. Also,
+  New scripts in the `download` directory. Incomplete. Also,
   need to document here in readme.
 * Count single-word probabilities.
 * Resume work on morphology.
@@ -712,24 +713,7 @@ DONE
   Done. Ran for a month without issues.
 * Fix crash at linkage_set_domain_names+0xe0  Done. Need LG 5.4.0
 * Create OO system for generic pair statistics. Done.
-
-
-Misc Notes about batch processing
-----------------------------------
-The relex parse is extreely fast, the cogserver part is extremely slow ...
-Non-linear, even.
-4-word sentence: 53 parses, 3-4 seconds elapsed
-
-5-word sentence, 373 parses,
-32 second elapsed,
-postgres runs at 36% cpu
-cogserver runs at 56% cpu for a while then drops to 26% cpu
-
-8-word sentence, max of 999 parses,
-2 minutes elapsed.  Same CPU usage as above...
-
-Solution: 999 parses are not needed.  Asorted tuning was done since
-the above was written.
+* Reduce num samples for 999 to 16. Done.
 
 
 Some typical entropies for word-pairs
@@ -897,18 +881,6 @@ To recap: Delta(vieille+nouveaux) = -4.7734297e-5
 i.e. entropy increses if the word-pairs are merged, the words are separated.
 
 
----------------
-
-Total entropy:
-(fold + 0 (map (lambda (atom)
-	(let ((ent (tv-conf (cog-tv atom))))
-	(* ent (exp (* (- ent) (log 2))))))
-	(cog-get-atoms 'WordNode)))
-
-gives: 7.2199274514956
-
-
-
 ======================================================================
 Minimal morphology output
 
@@ -959,35 +931,6 @@ Tagalog status:
 31 july 2014
 4519631 = 4.5M morpehem pairs
 204K morpehemes
-
-   62 | LinkGrammarRelationshipNode
-select * from atoms where type=62;
-
-select * from atoms order by stv_confidence;
-
-{60,5592759}
-{60,4941961}
-{60,1710609}
-17720161
-7337858
-2586082
-16810147
-9548076
-3844852
-
-select * from atoms where stv_count > 100 order by stv_confidence;
-
-1217445
-
-1043142
-
-
-select * from atoms where uuid=5592759;
-
-{223,223}
-236
-541
-
 
 ======================================================================
 
