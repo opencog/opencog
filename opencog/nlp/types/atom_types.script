@@ -163,6 +163,7 @@ LG_LINK_INSTANCE_LINK <- LIST_LINK
 //
 MST_CONNECTOR <- LINK "MSTConnector"  // analogous to LG_CONNECTOR
 PSEUDO_CONNECTOR <- LINK  // with words, in place of connector letters.
+PSEUDO_WORD_CSET <- LIST_LINK  // Like LG_WORD_CSET, but with pseudo-connectors.
 
 // Analogous to LG_LINK_NODE and LG_DISJUNCT_NODE
 // The LINK_NODE is a pair of connected connectors (i.e. what is called
