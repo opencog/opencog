@@ -17,6 +17,8 @@ library
   hs-source-dirs:      src
   exposed-modules:     Wrapper
   build-depends:       base >= 4.7 && < 5
+                       , lojban
+                       , random
                        , opencog-lojban
                        , opencog-atomspace
   default-language:    Haskell2010

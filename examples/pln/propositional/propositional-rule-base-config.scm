@@ -32,9 +32,9 @@
 (define pln-rules-dir "../../../opencog/pln/rules/")
 (define (append-rule-dir basename) (string-append pln-rules-dir basename))
 (define rule-basenames
-  (list "fuzzy-conjunction-introduction-rule.scm"
-        "fuzzy-disjunction-introduction-rule.scm"
-        "negation-introduction-rule.scm"
+  (list "fuzzy-conjunction-introduction.scm"
+        "fuzzy-disjunction-introduction.scm"
+        "negation-introduction.scm"
         )
   )
 (define rule-files (map append-rule-dir rule-basenames))
