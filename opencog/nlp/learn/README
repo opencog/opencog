@@ -223,16 +223,9 @@ So, set up the text-ingestion pipeline:
   deductions of grammar.  Thus, it turns out Wikipedia is a bad choice
   for learning text.
 
-  That said, there are a bunch of scripts in the `download` directory
-  for dealing with wikipedia.  Thus, the steps are these:
-   a) Download lang-wiki-pages-articles for some lanugage lang.
-   b) See 'Wikipedia processing' section below. Do the stuff there.
-   c) See the section 'Sentence Splitting'. Set that up.
-   d) See Wikipedia 'Processing, part II' below.
-
-  There are also scripts in the `download` directory for downloading
-  and pre-processing texts from Project Gutenberg and from a fan-fiction
-  site.
+  There are various scripts in the `download` directory for downloading
+  and pre-processing texts from Project Gutenberg, Wikipedia, and the
+  "Archive of Our Own" fan-fiction website.
 
 12) After doing at least several days worth of parsing  (i.e. at least
    hundreds of articles, tens of thousands of sentences) the word-pair
@@ -253,8 +246,8 @@ So, set up the text-ingestion pipeline:
 That's all for now, folks!
 
 
-Wikipedia Parsing, part II
---------------------------
+Bulk Text Parsing
+-----------------
 Set up distinct databases, one for each language:
 ```
     createdb fr_pairs lt_pairs pl_pairs simple_pairs
@@ -367,10 +360,6 @@ this is NOT counting indexes, etc.)
 For dataset (fr_pairs) with 225K words, 5M pairs:
 Current rate is 150 words/sec or 9K words/min.
 
-XXX !??? After wild-card count finshes, there is a 5563 second
-pause before batch counting starts. cogserver runs at 100%.
-WTF is this? Garbage collection? Flushing of SQL queues?
-
 After the single-word counts complete, and all-pair count is done.
 This is fast, takes a couple of minutes.
 
@@ -380,20 +369,14 @@ Finally, an MI compute stage.
 Current rate is 60 words/sec = 3.6K per minute.
 This rate is per-word, not per word-pair.
 
-... at first. Then there are long pauses, which seem to be related to
-SQL queue flushing.  The rate then drops to about half at 30 words/sec
-or 1.8K/min. And worse, dropping another 2x or 3x for a while.
-
-
 Update Feb 2014: fr_pairs now contains 10.3M atoms
 SELECT count(uuid) FROM Atoms;  gives  10324863 (10.3M atoms)
 select count(uuid) from atoms where type = 77; gives  226030 (226K words)
 select count(uuid) from atoms where type = 8;  gives 5050835 (5M pairs ListLink)
 select count(uuid) from atoms where type = 27; gives 5050847 (5M pairs EvaluationLink)
 
-The core code for batch-counting is in `compute-mi.scm` and the
-specific code for word-pairs is in `batch-word-pair.scm`.  Both
-of these files need to be ported to an OO system.
+The code for computing word-pair MI is in `batch-word-pair.scm`. It uses
+the `(opencog analysis)` subsystem to perform the core work.
 
 
 Minimum Spanning Tree parsing
