@@ -1,9 +1,14 @@
 
-Wikipedia parse management scripts
-----------------------------------
+Parse management scripts
+========================
 
-The scripts here are used to automate the ingestion of wikipedia
-articles.  These should be tailored to fit your needs.
+The scripts here are used to automate the ingestion of plain-text
+UTF-8 files into the language learning pipleine.  These can be applied
+to any flat text files from any origin of your choice.  Soe tools
+for downloading Wikipedia and Project Gutenberg texts can be found
+in the ../download directory.
+
+You may want to tailor some of these scripts to fit your needs.
 
 A quick overview:
 
@@ -30,5 +35,5 @@ A quick overview:
 * config-*.scm: another cogserver config file
 
 * split-sentences.pl: split text into sentences. Looks for likely end-of
-  sentence locations, and divides free-form text, so taht there is one
+  sentence locations, and divides free-form text, so that there is one
   sentence per line.
