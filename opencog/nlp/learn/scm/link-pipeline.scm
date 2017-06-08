@@ -439,9 +439,17 @@
 					(monitor-rate '())
 					(process-sents)))))
 
+	; Manually run the garbage collector, every now and then.
+	(define maybe-gc
+		(let ((cnt 0)
+				(how-often 20)) ; every 20 times.
+			(lambda ()
+				(set! cnt (+ cnt 1))
+				(if (eqv? 0 (modulo cnt how-often)) (gc)))))
+
 	(relex-parse plain-text) ;; send plain-text to server
 	(process-sents)
-	(gc) ;; need agressive gc to keep RAM under control.
+	(maybe-gc) ;; need agressive gc to keep RAM under control.
 )
 
 ; ---------------------------------------------------------------------
