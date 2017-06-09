@@ -25477,7 +25477,7 @@ Size
 \begin_inset Text
 
 \begin_layout Plain Layout
-Pairs
+Csets
 \end_layout
 
 \end_inset
@@ -25495,7 +25495,7 @@ Obs'ns
 \begin_inset Text
 
 \begin_layout Plain Layout
-Obs/pr
+Ob/cs
 \end_layout
 
 \end_inset
@@ -25640,7 +25640,7 @@ en_pairs_sim
 \begin_inset Text
 
 \begin_layout Plain Layout
-140K x 1.86M
+133K x 1.86M
 \end_layout
 
 \end_inset
@@ -25649,7 +25649,7 @@ en_pairs_sim
 \begin_inset Text
 
 \begin_layout Plain Layout
-3.98M
+3.57M
 \end_layout
 
 \end_inset
@@ -25658,7 +25658,7 @@ en_pairs_sim
 \begin_inset Text
 
 \begin_layout Plain Layout
-133M
+7.66M
 \end_layout
 
 \end_inset
@@ -25667,7 +25667,7 @@ en_pairs_sim
 \begin_inset Text
 
 \begin_layout Plain Layout
-33.54
+2.14
 \end_layout
 
 \end_inset
@@ -25676,7 +25676,7 @@ en_pairs_sim
 \begin_inset Text
 
 \begin_layout Plain Layout
-11.92
+20.55
 \end_layout
 
 \end_inset
@@ -25685,7 +25685,7 @@ en_pairs_sim
 \begin_inset Text
 
 \begin_layout Plain Layout
-2.47
+14.71
 \end_layout
 
 \end_inset
@@ -25694,7 +25694,7 @@ en_pairs_sim
 \begin_inset Text
 
 \begin_layout Plain Layout
-9.86
+10.00
 \end_layout
 
 \end_inset
@@ -25703,7 +25703,7 @@ en_pairs_sim
 \begin_inset Text
 
 \begin_layout Plain Layout
--0.41
+-4.16
 \end_layout
 
 \end_inset
@@ -25892,15 +25892,7 @@ en_pairs_ttwo_mst
 \end_layout
 
 \begin_layout Section*
-PCA 
-\begin_inset Quotes eld
-\end_inset
-
-Neural
-\begin_inset Quotes erd
-\end_inset
-
- Classifier
+Thresholding PCA Classifier
 \end_layout
 
 \begin_layout Standard
@@ -26076,6 +26068,13 @@ Normalize: set
 \end_inset
 
  is of unit length.
+ In theory, this is not needed; in practice, each iteration can sharply
+ shrink the value of 
+\begin_inset Formula $\overrightarrow{b}$
+\end_inset
+
+, makeing it very small, eventually leading to exponent underflow.
+ 
 \end_layout
 
 \begin_layout Enumerate
