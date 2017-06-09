@@ -5917,10 +5917,13 @@ Disjuncts from MST-parsed books from "tranche-1" of mostly project
 gutenberg books. Based off of the en_pairs_tone. Contains MI for tone,
 but not the cosine angles.
 
-STATUS: poor
-DATE: 27 May 2017
-REASON: Uses LgWordCset for for connectors and pseudo-connectors.
-   Which screws up statistics.
+STATUS: poor, obsolete.  Replaced by en_pairs_tone_mst_rev
+DATE: 27 May 2017  obsoleted on 9 June
+REASON: Three issues:
+ a) fails to separate quoation marks (inherited from tone)
+ b) contains junk lg-any disjuncts
+ c) Uses LgWordCset for for connectors and pseudo-connectors.
+    Which screws up statistics. 
 
 en_pairs_tone_mst=> \dt+
                         List of relations
@@ -5957,13 +5960,53 @@ Key 10872983  *-Mutual Info Key-*
 e7dddab32c92b0fd0e88adfe6be1a87b  en_pairs_tone_mst.sql.bz2
 
 ==================================================================
+en_pairs_tone_mst_rev
+---------------------
+Disjuncts from MST-parsed books from "tranche-1" of mostly project
+gutenberg books. Based off of the en_pairs_tone. Contains MI for tone,
+but not the cosine angles.
+
+Uses the new PseudoAnd and PseudoWordCset types.
+Kills the bogus lg-any disjuncts.
+Contains table summaries for pairs and csets.
+
+STATUS: fair
+DATE:  9 June 2017
+REASON: One issue:
+ a) fails to separate quoation marks (inherited from tone)
+
+en_pairs_tone_mst=> \dt+
+                        List of relations
+ Schema |    Name    | Type  | Owner  |    Size    | Description 
+--------+------------+-------+--------+------------+-------------
+ public | atoms      | table | ubuntu | 1998 MB    | 
+ public | spaces     | table | ubuntu | 40 kB      | 
+ public | typecodes  | table | ubuntu | 56 kB      | 
+ public | valuations | table | ubuntu | 5153 MB    | 
+ public | values     | table | ubuntu | 8192 bytes | 
+
+select count(*) from atoms; --- 18083439 = 18M
+
+select count(*) from valuations; -- 36903851 = 36M
+
+2652501065 Bytes = 2.65 GB uncompressed
+295210074 Bytes = 295M compressed
+
+70494c6108a2fb952003f86264e5fd35  en_pairs_tone_mst_rev.sql
+4176f8600d56867301e51462da2b8b6e  en_pairs_tone_mst_rev.sql.bz2
+
+
+==================================================================
 en_pairs_ttwo
 -------------
 Random parses from tranche-1 and tranche-2. 
 
-STATUS: good
+STATUS: fair
 DATE: 29 May 2017
-REASON: I think it's good.
+REASON: Two issues:
+ a) fails to separate quoation marks (inherited from tone)
+ b) contains junk lg-any disjuncts
+
 
                         List of relations
  Schema |    Name    | Type  | Owner  |    Size    | Description 
@@ -6699,6 +6742,7 @@ RMS Count      4.2741E+5    3.4915E+5     18.52        15.55
 (define psa (add-pair-stars pca))
 (psa 'fetch-pairs)
 Elapsed time to load csets: 2454 secs
+(batch-all-pair-mi psa)
 Finished with MI computations; this took 4.55 hours
 
 (print-matrix-summary-report psa)
@@ -6722,8 +6766,73 @@ Count   (l_1)  3.2094E+6    9.5093E+7     55.03        556.6
 Length  (l_2)  2.4075E+6    1.2274E+7     41.28        71.84    
 RMS Count      1.8036E+6    1.2272E+7     30.92        71.83    
 
-OK, but this is wrong, we have to redoit. xxxxxxxxxxxx
+OK, but this is wrong, we have to redoit.
 
+------
+Hand-repair
+
+INSERT INTO typecodes VALUES (229, 'PseudoAnd');
+INSERT INTO typecodes VALUES (230, 'PseudoWordCset');
+
+
+select count(*) from atoms where type = 174;  -- 174==PseudoConnector
+gives 241601
+
+CREATE TEMP TABLE con AS SELECT uuid FROM atoms WHERE type=174;
+
+select count(*) from atoms, con where atoms.outgoing[1]=con.uuid;
+gives 3401462
+
+-- 167 is LgAnd ....
+select count(*) from atoms, con where atoms.outgoing[1]=con.uuid AND atoms.type=167;
+give same result
+
+-- change all of them to PseudoAnd
+update atoms set type=229 FROM con where outgoing[1]=con.uuid and type=167;
+
+How many LgAnds are left?
+select count(*) from atoms where type=167; -- gives 3
+select count(*) from atoms where type = 165;  -- 165==LgConnector
+gives 2
+
+CREATE TEMP TABLE lgs AS SELECT uuid FROM atoms WHERE type=167;
+select count(*) from atoms, lgs where atoms.outgoing[2]=lgs.uuid;
+536890 -- which is what we well need to delete
+
+-- now the rest.
+
+CREATE TEMP TABLE pan AS SELECT uuid FROM atoms WHERE type=229;
+-- 229 is the new PseudoAnd
+select count(*) from pan;  3401462
+
+select count(*) from atoms, pan where atoms.outgoing[2]=pan.uuid;
+gives 9839946
+
+-- 169 is LgWordCset
+select count(*) from atoms, pan where atoms.outgoing[2]=pan.uuid AND atoms.type=169;
+gives 6438484
+
+select count(*) from atoms, pan where atoms.outgoing[2]=pan.uuid AND atoms.type=21;
+gives 3401462  which is as before. == (- 9839946 6438484)
+
+so that makes sense too.
+
+update atoms set type=230 FROM pan where outgoing[2]=pan.uuid and type=169;
+
+------
+May as well drop the bogus connectors, too??  Yes, we should.
+select count(*) from atoms where type=169;
+ 536887 -- exactly as expected.
+
+CREATE TEMP TABLE lws AS SELECT uuid FROM atoms WHERE type=169;
+select count(*) from valuations, lws where valuations.atom=lws.uuid;
+
+delete from valuations using lws where atom =lws.uuid;
+delete from atoms where type=169;
+
+DONE. Now redo the summaries.
+
+xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxhere
 
 
 
@@ -6957,9 +7066,19 @@ so that makes sense too.
 
 update atoms set type=230 FROM pan where outgoing[2]=pan.uuid and type=169;
 
-May as well drop the bogus connectors, too??
+------
+May as well drop the bogus connectors, too??  Yes, we should.
+select count(*) from atoms where type=169;
+404882 -- exactly as expected.
 
-xxxxxxxxxxxxxxxx here
+CREATE TEMP TABLE lws AS SELECT uuid FROM atoms WHERE type=169;
+select count(*) from valuations, lws where valuations.atom=lws.uuid;
+
+delete from valuations using lws where atom =lws.uuid;
+delete from atoms where type=169;
+
+DONE.
+
 ---------------------------------------------------------------------
 ---------- meanwhile, finish stats work
 (fetch-all-sims)
