@@ -1,5 +1,6 @@
 #include <chrono>
 #include <limits>
+#include <unistd.h>
 
 #include "TypeFrameIndex.h"
 #include "TypeFrame.h"
@@ -10,10 +11,12 @@
 using namespace opencog;
 
 unsigned int TypeFrameIndex::LIMIT_FOR_SYMMETRIC_LINKS_PERMUTATION = 5;
-bool TypeFrameIndex::PATTERN_COUNT_CACHE_ENABLED = true;
+bool TypeFrameIndex::PATTERN_COUNT_CACHE_ENABLED = false;
 bool TypeFrameIndex::INDEPENDENT_SUBPATTERN_PROB_CACHE_ENABLED = false;
 bool TypeFrameIndex::PATTERN_QUALITTY_CACHE_ENABLED = false;
 unsigned int TypeFrameIndex::MINIMAL_FREQUENCY_TO_COMPUTE_SURPRISINGNESS = 5;
+unsigned int TypeFrameIndex::NUMBER_OF_EVALUATION_THREADS = 4;
+unsigned int TypeFrameIndex::MAX_SIZE_OF_COMPOUND_FRAMES_QUEUE = 5000000;
 
 const int TypeFrameIndex::OPERATOR_NOP = 0;
 const int TypeFrameIndex::OPERATOR_AND = 1;
@@ -69,75 +72,6 @@ float TypeFrameIndex::hFunction(float x) const
 TypeFrame TypeFrameIndex::getFrameAt(int index)
 {
     return frames.at(index);
-}
-
-void TypeFrameIndex::buildCompoundFrames(std::vector<TypeFrame> &answer, int components) const
-{
-    if (LOCAL_DEBUG) printf("TypeFrameIndex::buildCompoundFrames()\n");
-    answer.clear();
-    EquivalentTypeFrameSet base;
-    EquivalentTypeFrameSet accum[2];
-    int src = 0;
-    int tgt = 1;
-
-    if (LOCAL_DEBUG) printf("frames.size(): %lu\n", frames.size());
-    for (unsigned int i = 0; i < frames.size(); i++) {
-        if (frames.at(i).topLevelIsLink()) {
-            accum[tgt].insert(frames.at(i));
-            base.insert(frames.at(i));
-            if (DEBUG) { printf("Initial push tgt = %d : ", tgt); frames.at(i).printForDebug("", "\n", true); }
-        }
-    }
-    if (LOCAL_DEBUG) printf("base.size(): %lu\n", base.size());
-
-    TypeFrame compoundFrame;
-    std::vector<int> argPos;
-    for (int i = 1; i < components; i++) {
-        src = i % 2;
-        tgt = 1 - src;
-        accum[tgt].clear();
-        if (DEBUG) printf("clear tgt = %d\n", tgt);
-        int m = 0;
-        for (EquivalentTypeFrameSet::const_iterator itAcc = accum[src].begin(); itAcc != accum[src].end(); itAcc++) {
-            if (DEBUG) printf("Adding component %d/%d %u/%lu\n", i + 1, components, ++m, accum[src].size());
-            for (EquivalentTypeFrameSet::const_iterator itBase = base.begin(); itBase != base.end(); itBase++) {    
-                if ((*itAcc).nonEmptyNodeIntersection(*itBase)) {
-                    compoundFrame.clear();
-                    if (i == 1) {
-                        if (! (*itAcc).isEquivalent(*itBase)) {
-                            compoundFrame.push_back(TypePair(classserver().getType("AndLink"), 2));
-                            compoundFrame.append(*itAcc);
-                            compoundFrame.append(*itBase);
-                            accum[tgt].insert(compoundFrame);
-                            if (DEBUG) { printf("1 push tgt = %d : ", tgt); compoundFrame.printForDebug("", "\n", true); }
-                        }
-                    } else {
-                        if (! (*itAcc).contains(*itBase)) {
-                            argPos.clear();
-                            argPos = (*itAcc).getArgumentsPosition(0);
-                            compoundFrame.push_back(TypePair(classserver().getType("AndLink"), i + 1));
-                            TypeFrame subFrame;
-                            for (int j = 0; j < i; j++) {
-                                subFrame.clear();
-                                subFrame = (*itAcc).subFrameAt(argPos.at(j));
-                                compoundFrame.append(subFrame);
-                            }
-                            compoundFrame.append(*itBase);
-                            accum[tgt].insert(compoundFrame);
-                            if (DEBUG) { printf("2 push tgt = %d : ", tgt); compoundFrame.printForDebug("", "\n", true); }
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    if (DEBUG) printf("finished tgt = %d size = %lu\n", tgt, accum[tgt].size());
-    if (components > 0) {
-        for (EquivalentTypeFrameSet::const_iterator itAcc = accum[tgt].begin(); itAcc != accum[tgt].end(); itAcc++) {
-            answer.push_back(*itAcc);
-        }
-    }
 }
 
 void TypeFrameIndex::addPatterns(std::vector<TypeFrame> &answer, const TypeFrame &base) const
@@ -571,44 +505,74 @@ void TypeFrameIndex::minePatterns(std::vector<std::pair<float,TypeFrame>> &answe
     }
     //floatUniverseCount = (float) frames.size();
 
-    std::vector<TypeFrame> compoundFrames;
+    EquivalentTypeFrameSet baseSet;
+
+    if (LOCAL_DEBUG) printf("frames.size(): %lu\n", frames.size());
+    for (unsigned int i = 0; i < frames.size(); i++) {
+        if (frames.at(i).topLevelIsLink() && (! frames.at(i).typeAtEqualsTo(0, "ListLink"))) {
+            baseSet.insert(frames.at(i));
+        }
+    }
+
+    std::vector<TypeFrame> base;
+    for (EquivalentTypeFrameSet::const_iterator it = baseSet.begin(); it != baseSet.end(); it++) {
+        base.push_back(*it);
+    }
+    if (LOCAL_DEBUG) printf("base.size(): %lu\n", base.size());
+
+    CartesianProductGenerator cartesianGenerator(components, base.size(), true, true);
+    TypeFrame compoundFrame;
     std::vector<TypeFrame> patterns;
     this->patternCountCache.clear();
     PatternHeap heap;
-    if (LOCAL_DEBUG) printf("Building compound frames\n");
-    std::chrono::high_resolution_clock::time_point t1 = std::chrono::high_resolution_clock::now();
-    buildCompoundFrames(compoundFrames, components);
-    std::chrono::high_resolution_clock::time_point t2 = std::chrono::high_resolution_clock::now();
-    if (LOCAL_DEBUG) printf("Time to build compound frames: %ld\n", std::chrono::duration_cast<std::chrono::seconds>(t2 - t1).count());
-    if (LOCAL_DEBUG) printf("COMPOUND FRAMES: %lu\n", compoundFrames.size());
-    if (LOCAL_DEBUG) printf("Processing patterns\n");
-    std::chrono::high_resolution_clock::time_point t3 = std::chrono::high_resolution_clock::now();
-    for (unsigned int i = 0; i < compoundFrames.size(); i++) {
-        if (DEBUG) printf("%u / %lu\n", i, compoundFrames.size());
-        patterns.clear();
-        if (DEBUG) compoundFrames.at(i).printForDebug("compoundFrame: ", "\n");
-        addPatterns(patterns, compoundFrames.at(i));
-        if (DEBUG) printf("%lu PATTERNS\n", patterns.size());
-        if (DEBUG) printFrameVector(patterns);
-        for (unsigned int i = 0; i < patterns.size(); i++) {
-            if (DEBUG) patterns.at(i).printForDebug("COMPUTE QUALITY FOR: ", "\n");
-            float quality = computeQuality(patterns.at(i), metric);
-            if (DEBUG) printf("%f: ", quality);
-            if (DEBUG) patterns.at(i).printForDebug("", "\n");
-            if ((heap.size() < maxAnswers) || (heap.top().first < quality)) {
-                if (DEBUG) printf("Pushing to heap. Quality = %f ", quality);
+    unsigned int debugCount = 0;
+    while (! cartesianGenerator.depleted()) {
+        if (DEBUG) cartesianGenerator.printForDebug("compound selection: ", "\n");
+        compoundFrame.clear();
+        compoundFrame.push_back(TypePair(classserver().getType("AndLink"), 1));
+        compoundFrame.append(base.at(cartesianGenerator.at(components - 1)));
+        bool flag = true;
+        for (int c = ((int) components) - 2; c >= 0; c--) {
+            //if ((compoundFrame.nonEmptyNodeIntersection(base.at(cartesianGenerator.at(c)))) &&
+                //(! compoundFrame.contains(base.at(cartesianGenerator.at(c))))) {
+            if (compoundFrame.nonEmptyNodeIntersection(base.at(cartesianGenerator.at(c)))) {
+                compoundFrame.at(0).second++;
+                compoundFrame.append(base.at(cartesianGenerator.at(c)));
+            } else {
+                cartesianGenerator.drop(c);
+                flag = false;
+                break;
+            }
+        }
+        // AQUI Criar uma classe para servir como thread pool e processador de
+        // compoundFrames. Passar o heap. Passar cada compound para ela
+        // enfileirar. As threads vao consumir dessa fila de compounds
+        if (flag) {
+            if (LOCAL_DEBUG && (!(debugCount++ % 10000))) cartesianGenerator.printForDebug("Evaluating: ", "\n");
+            patterns.clear();
+            if (DEBUG) compoundFrame.printForDebug("compoundFrame: ", "\n");
+            addPatterns(patterns, compoundFrame);
+            if (DEBUG) printf("%lu PATTERNS\n", patterns.size());
+            if (DEBUG) printFrameVector(patterns);
+            for (unsigned int i = 0; i < patterns.size(); i++) {
+                if (DEBUG) patterns.at(i).printForDebug("COMPUTE QUALITY FOR: ", "\n");
+                float quality = computeQuality(patterns.at(i), metric);
+                if (DEBUG) printf("%f: ", quality);
                 if (DEBUG) patterns.at(i).printForDebug("", "\n");
-                heap.push(std::make_pair(quality, patterns.at(i)));
-                if (heap.size() > maxAnswers) {
-                    if (DEBUG) printf("Removing pattern Quality = %f ", heap.top().first);
-                    if (DEBUG) heap.top().second.printForDebug("", "\n");
-                    heap.pop();
+                if (((heap.size() < maxAnswers) || (heap.top().first < quality)) && (! heapContainsEquivalent(heap, patterns.at(i))))  {
+                    if (DEBUG) printf("Pushing to heap. Quality = %f ", quality);
+                    if (DEBUG) patterns.at(i).printForDebug("", "\n");
+                    heap.push(std::make_pair(quality, patterns.at(i)));
+                    if (heap.size() > maxAnswers) {
+                        if (DEBUG) printf("Removing pattern Quality = %f ", heap.top().first);
+                        if (DEBUG) heap.top().second.printForDebug("", "\n");
+                        heap.pop();
+                    }
                 }
             }
         }
+        cartesianGenerator.generateNext();
     }
-    std::chrono::high_resolution_clock::time_point t4 = std::chrono::high_resolution_clock::now();
-    if (LOCAL_DEBUG) printf("Time to process patterns: %ld\n", std::chrono::duration_cast<std::chrono::seconds>(t4 - t3).count());
 
     if (DEBUG) printf("Finished mining. heap size = %lu\n", heap.size());
 
@@ -621,20 +585,86 @@ void TypeFrameIndex::minePatterns(std::vector<std::pair<float,TypeFrame>> &answe
 }
 */
 
-bool TypeFrameIndex::heapContainsEquivalent(const PatternHeap &heap, const TypeFrame &pattern) const
+bool TypeFrameIndex::enqueueCompoundFrame(const TypeFrame &compoundFrame)
 {
-    bool answer = false;
+    std::lock_guard<std::mutex> lock(compoundFrameMutex);
+    static unsigned int queueDebugCount = 0;
+    if (DEBUG) printf("enqueueCompoundFrame() BEGIN\n");
+    compoundFrameQueue.push(compoundFrame);
+    if (LOCAL_DEBUG && (!(queueDebugCount++ % 100000))) printf("Queue size: %ld\n",  compoundFrameQueue.size());
+    if (DEBUG) printf("enqueueCompoundFrame() END\n");
+    return (compoundFrameQueue.size() > MAX_SIZE_OF_COMPOUND_FRAMES_QUEUE);
+}
 
-    /*
-    for (PatternHeap::iterator it = heap.begin; it != heap.end(); it++) {
-        if ((*it).second.isEquivalent(pattern)) {
-            answer = true;
-            break;
+bool TypeFrameIndex::dequeueCompoundFrame(TypeFrame &compoundFrame)
+{
+    std::lock_guard<std::mutex> lock(compoundFrameMutex);
+    if (DEBUG) printf("dequeueCompoundFrame() BEGIN\n");
+    bool answer = false;
+    if (compoundFrameQueue.size() > 0) {
+        compoundFrame.clear();
+        compoundFrame.append(compoundFrameQueue.front());
+        compoundFrameQueue.pop();
+        answer = true;
+    }
+    if (DEBUG) printf("dequeueCompoundFrame() END\n");
+    return answer;
+}
+
+void TypeFrameIndex::setCompoundFramesEnded()
+{
+    std::lock_guard<std::mutex> lock(compoundFrameMutex);
+    if (DEBUG) printf("setCompoundFramesEnded() BEGIN\n");
+    compoundFramesEnded = true;
+    if (DEBUG) printf("setCompoundFramesEnded() END\n");
+}
+
+bool TypeFrameIndex::checkCompoundPatternsEnded()
+{
+    std::lock_guard<std::mutex> lock(compoundFrameMutex);
+    if (DEBUG) printf("checkCompoundPatternsEnded() BEGIN\n");
+    if (DEBUG) printf("checkCompoundPatternsEnded() END\n");
+    return compoundFramesEnded;
+}
+
+void TypeFrameIndex::addMiningResult(float quality, const TypeFrame &frame)
+{
+    std::lock_guard<std::mutex> lock(miningResultsMutex);
+    if (((miningResultsHeap.size() < maxResultsHeapSize) || (miningResultsHeap.top().first < quality)))  {
+        miningResultsHeap.push(std::make_pair(quality, frame));
+        if (miningResultsHeap.size() > maxResultsHeapSize) {
+            miningResultsHeap.pop();
         }
     }
-    */
+}
 
-    return answer;
+void TypeFrameIndex::evaluatePatterns()
+{
+    if (DEBUG) printf("evaluatePatterns() BEGIN\n");
+    bool finished = false;
+    TypeFrame compoundFrame;
+    std::vector<TypeFrame> patterns;
+    unsigned int myId = getThreadId();
+
+    printf("myId = %u\n", myId);
+    while (! finished) {
+        if (dequeueCompoundFrame(compoundFrame)) {
+            patterns.clear();
+            addPatterns(patterns, compoundFrame);
+            for (unsigned int i = 0; i < patterns.size(); i++) {
+                float quality = computeQuality(patterns.at(i), miningRankingMetric);
+                addMiningResult(quality, patterns.at(i));
+            }
+        } else {
+            if (checkCompoundPatternsEnded()) {
+                finished = true;
+            } else {
+                if (LOCAL_DEBUG) printf("Evaluation thread sleeping\n");
+                usleep(100000); // 100 miliseconds
+            }
+        }
+    }
+    if (DEBUG) printf("evaluatePatterns() END\n");
 }
 
 void TypeFrameIndex::minePatterns(std::vector<std::pair<float,TypeFrame>> &answer, unsigned int components, unsigned int maxAnswers, RankingMetric metric)
@@ -680,11 +710,16 @@ void TypeFrameIndex::minePatterns(std::vector<std::pair<float,TypeFrame>> &answe
 
     CartesianProductGenerator cartesianGenerator(components, base.size(), true, true);
     TypeFrame compoundFrame;
-    std::vector<TypeFrame> patterns;
     this->patternCountCache.clear();
-    PatternHeap heap;
+    //miningResultsHeap.clear();
+    maxResultsHeapSize = maxAnswers;
+    miningRankingMetric = metric;
+    compoundFramesEnded = false;
+    evaluationThreads.clear();
+    for (unsigned int i = 0; i < (NUMBER_OF_EVALUATION_THREADS - 1); i++) {
+        evaluationThreads.push_back(new std::thread(&TypeFrameIndex::evaluatePatterns, this));
+    }
     unsigned int debugCount = 0;
-    //EquivalentTypeFrameSet evaluatedCompounds;
     while (! cartesianGenerator.depleted()) {
         if (DEBUG) cartesianGenerator.printForDebug("compound selection: ", "\n");
         compoundFrame.clear();
@@ -692,8 +727,6 @@ void TypeFrameIndex::minePatterns(std::vector<std::pair<float,TypeFrame>> &answe
         compoundFrame.append(base.at(cartesianGenerator.at(components - 1)));
         bool flag = true;
         for (int c = ((int) components) - 2; c >= 0; c--) {
-            //if ((compoundFrame.nonEmptyNodeIntersection(base.at(cartesianGenerator.at(c)))) &&
-                //(! compoundFrame.contains(base.at(cartesianGenerator.at(c))))) {
             if (compoundFrame.nonEmptyNodeIntersection(base.at(cartesianGenerator.at(c)))) {
                 compoundFrame.at(0).second++;
                 compoundFrame.append(base.at(cartesianGenerator.at(c)));
@@ -703,42 +736,29 @@ void TypeFrameIndex::minePatterns(std::vector<std::pair<float,TypeFrame>> &answe
                 break;
             }
         }
-        //if (flag && (evaluatedCompounds.find(compoundFrame) == evaluatedCompounds.end())) {
         if (flag) {
-            if (LOCAL_DEBUG && (!(debugCount++ % 10000))) cartesianGenerator.printForDebug("Evaluating: ", "\n");
-            //evaluatedCompounds.insert(compoundFrame);
-            patterns.clear();
-            if (DEBUG) compoundFrame.printForDebug("compoundFrame: ", "\n");
-            addPatterns(patterns, compoundFrame);
-            if (DEBUG) printf("%lu PATTERNS\n", patterns.size());
-            if (DEBUG) printFrameVector(patterns);
-            for (unsigned int i = 0; i < patterns.size(); i++) {
-                if (DEBUG) patterns.at(i).printForDebug("COMPUTE QUALITY FOR: ", "\n");
-                float quality = computeQuality(patterns.at(i), metric);
-                if (DEBUG) printf("%f: ", quality);
-                if (DEBUG) patterns.at(i).printForDebug("", "\n");
-                if (((heap.size() < maxAnswers) || (heap.top().first < quality)) && (! heapContainsEquivalent(heap, patterns.at(i))))  {
-                    if (DEBUG) printf("Pushing to heap. Quality = %f ", quality);
-                    if (DEBUG) patterns.at(i).printForDebug("", "\n");
-                    heap.push(std::make_pair(quality, patterns.at(i)));
-                    if (heap.size() > maxAnswers) {
-                        if (DEBUG) printf("Removing pattern Quality = %f ", heap.top().first);
-                        if (DEBUG) heap.top().second.printForDebug("", "\n");
-                        heap.pop();
-                    }
-                }
-            }
+             if (LOCAL_DEBUG && (!(debugCount++ % 100000))) cartesianGenerator.printForDebug("Evaluating: ", "\n");
+             if (enqueueCompoundFrame(compoundFrame)) {
+                 usleep(1000000); // 1 second
+             }
         }
         cartesianGenerator.generateNext();
     }
+    setCompoundFramesEnded();
+    if (LOCAL_DEBUG) printf("Finished creating compound patterns. Waiting for threads to clear evaluation queue.\n");
+    evaluationThreads.push_back(new std::thread(&TypeFrameIndex::evaluatePatterns, this));
 
-    if (DEBUG) printf("Finished mining. heap size = %lu\n", heap.size());
+    for (unsigned int i = 0; i < evaluationThreads.size(); i++) {
+        evaluationThreads.at(i)->join();
+    }
 
-    while (heap.size() > 0) {
-        if (DEBUG) printf("%f: ", heap.top().first);
-        if (DEBUG) heap.top().second.printForDebug("", "\n");
-        answer.push_back(heap.top());
-        heap.pop();
+    if (DEBUG) printf("Finished mining. heap size = %lu\n", miningResultsHeap.size());
+
+    while (miningResultsHeap.size() > 0) {
+        if (DEBUG) printf("%f: ", miningResultsHeap.top().first);
+        if (DEBUG) miningResultsHeap.top().second.printForDebug("", "\n");
+        answer.push_back(miningResultsHeap.top());
+        miningResultsHeap.pop();
     }
 }
 

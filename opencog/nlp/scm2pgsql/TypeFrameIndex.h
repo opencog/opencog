@@ -26,6 +26,8 @@
 
 #include <string>
 #include <queue>
+#include <thread>
+#include <mutex>
 #include "TypeFrame.h"
 
 namespace opencog
@@ -78,8 +80,16 @@ private:
     bool DEBUG = false;
     bool LOCAL_DEBUG = true;
 
+    std::mutex miningResultsMutex;
+    std::mutex compoundFrameMutex;
+    std::queue<TypeFrame> compoundFrameQueue;
+    std::vector<std::thread *> evaluationThreads;
+    std::vector<bool> threadEnabled;
+    bool compoundFramesEnded;
+    PatternHeap miningResultsHeap;
+    unsigned int maxResultsHeapSize;
+    RankingMetric miningRankingMetric;
     TypeFrame auxVar1;
-
     bool TOPLEVEL_ONLY = true;
     std::vector<TypeFrame> frames;
     PatternMap occurrenceSet;
@@ -105,7 +115,6 @@ private:
     void permutation(std::vector<std::vector<int>> &answer, int *array, int current, int size);
     void addPermutations(std::vector<std::vector<int>> &answer, std::vector<int> base);
     void addSymmetrucPermutations(TypeFrameSet &answer, const TypeFrame &frame, unsigned int cursor);
-    void buildCompoundFrames(std::vector<TypeFrame> &answer, int components) const;
     void addPatterns(std::vector<TypeFrame> &answer, const TypeFrame &base) const;
     float computeQuality(const TypeFrame &pattern, RankingMetric metric);
     float computeISurprinsingness(const TypeFrame &pattern, bool normalized);
@@ -117,7 +126,11 @@ private:
     std::pair<float,float> minMaxIndependentProb(const TypeFrame &pattern);
     std::pair<float,float> minMaxSubsetProb(const TypeFrame &pattern);
     std::pair<float,float> minMaxSupersetProb(const TypeFrame &pattern);
-    bool heapContainsEquivalent(const PatternHeap &heap, const TypeFrame &pattern) const;
+    bool enqueueCompoundFrame(const TypeFrame &compoundFrame);
+    bool dequeueCompoundFrame(TypeFrame &compoundFrame);
+    void setCompoundFramesEnded();
+    bool checkCompoundPatternsEnded();
+    void addMiningResult(float quality, const TypeFrame &frame);
     float computeCoherence(const TypeFrame &frame) const;
     float gFunction(float x) const;
     float hFunction(float x) const;
@@ -132,6 +145,8 @@ public:
 
     static unsigned int MINIMAL_FREQUENCY_TO_COMPUTE_SURPRISINGNESS;
     static unsigned int LIMIT_FOR_SYMMETRIC_LINKS_PERMUTATION;
+    static unsigned int NUMBER_OF_EVALUATION_THREADS;
+    static unsigned int MAX_SIZE_OF_COMPOUND_FRAMES_QUEUE;
     static bool PATTERN_COUNT_CACHE_ENABLED;
     static bool INDEPENDENT_SUBPATTERN_PROB_CACHE_ENABLED;
     static bool PATTERN_QUALITTY_CACHE_ENABLED;
@@ -150,6 +165,7 @@ public:
     bool addFrame(TypeFrame &frame, int offset);
     TypeFrame getFrameAt(int index);
     void buildSubPatternsIndex();
+    void evaluatePatterns();
     void minePatterns(std::vector<std::pair<float,TypeFrame>> &answer, unsigned int components, unsigned int maxAnswers, RankingMetric metric);
 
     void printForDebug(bool showNodeNames = true) const;
