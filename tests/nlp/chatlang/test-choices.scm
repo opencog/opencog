@@ -14,7 +14,7 @@
         (and (eq? (cog-type c) 'EvaluationLink)
              (equal? (gar c) (GroundedPredicateNode "scm: chatlang-choices?"))
              (equal? (gadr c) (ListLink (WordNode "drink")
-                                        (WordNode "eat")
+                                        (LemmaNode "eat")
                                         (ListLink (WordNode "John")
                                                   (WordNode "Smith"))
                                         (ConceptNode "play"))))))
