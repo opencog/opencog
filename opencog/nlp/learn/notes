@@ -5864,9 +5864,11 @@ en_pairs_tone
 Random-planar-tree parsed books from "tranche-1" of mostly project
 gutenberg books. Contains counts for word-pairs, words and disjuncts.
 
-STATUS: good
+STATUS: fair
 DATE: 24 May 2017
-REASON: I think it's good.
+REASON: Multiple issues:
+a) it fails to separate quotation marks.
+b) The any-disjuncts are junk.
 
                         List of relations
  Schema |    Name    | Type  | Owner  |    Size    | Description 
@@ -5915,7 +5917,7 @@ Disjuncts from MST-parsed books from "tranche-1" of mostly project
 gutenberg books. Based off of the en_pairs_tone. Contains MI for tone,
 but not the cosine angles.
 
-STATUS: bad
+STATUS: poor
 DATE: 27 May 2017
 REASON: Uses LgWordCset for for connectors and pseudo-connectors.
    Which screws up statistics.
@@ -6612,13 +6614,17 @@ So, somehow still stuck in i/o waiting for postgres to flush to disk.
 
 --------- meanhwile continue pair-parsing
 launch tranche-3 any-parsing Tue May 30 04:39:44 UTC 2017
+Done
 
 ----- anyway, recompute pair mi and resume mst-parsing
 
 en_pairs_ttwo_mst
 
 (define ala (make-any-link-api))
-(batch-all-pair-mi ala)
+(define asa (add-pair-stars ala))
+(asa 'fetch-pairs)
+
+(batch-all-pair-mi asa)
 Final store: about  (1250.0 pairs/sec)
 Done storing 8047063 pair MI's in 6905 secs
 
@@ -6716,7 +6722,7 @@ Count   (l_1)  3.2094E+6    9.5093E+7     55.03        556.6
 Length  (l_2)  2.4075E+6    1.2274E+7     41.28        71.84    
 RMS Count      1.8036E+6    1.2272E+7     30.92        71.83    
 
-
+OK, but this is wrong, we have to redoit. xxxxxxxxxxxx
 
 
 
@@ -6850,13 +6856,111 @@ LgWordCset: 125707119 << 126M disjunct observations.
 tone_mst has via SQL:
    3975919 = 3.9M csets
 
-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx here
+(cog-count-atoms 'LgWordCset) <<< 3975919  exactly same as above
 
-(cog-count-atoms 'LgWordCset)
-
+(sql-close)
 (cog-delete-recursive (LgConnMultiNode "@"))
 
+(cog-count-atoms 'LgWordCset) <<< 3571037 == 3.57M atoms Hmmm!
+difference =  (- 3975919 3571037) = 404882 which is exactly tone by
+itself.  Excellent.  Now recompute the cset stats....
 
+(sql-open "postgres:///en_pairs_tone_mst?user=ubuntu")
+
+(batch-all-pair-mi psa)
+Finished with MI computations; this took 4.15 hours
+
+(print-matrix-summary-report psa)
+
+So this is very different than before. Fuck.
+
+(print-matrix-summary-report psa)
+Summary Report for Correlation Matrix Word-Disjunct Pairs (aka Connector
+Sets)
+Left type: WordNode    Right Type: LgAnd    Pair Type: LgWordCset
+Wildcard: (ListLink (ctv 0 0 7655886)
+   (AnyNode "cset-word")
+   (AnyNode "cset-disjunct")
+)
+Rows: 133022 Columns: 1860793
+Size: 3571037 non-zero entries of 247526406446 possible
+Fraction non-zero: 1.4427E-5 Sparsity (-log_2): 16.081
+Total observations: 7655886.0  Avg obs per pair: 2.1439
+Entropy Total: 20.558   Left: 14.711   Right: 10.004
+Total MI: -4.156
+
+                 Left         Right     Avg-left     Avg-right
+                 ----         -----     --------     ---------
+Support (l_0)  3.4890E+4    6946.    
+Count   (l_1)  9.1434E+4    3.4736E+4     2.621        5.001    
+Length  (l_2)  2143.        1397.         6.1427E-2    .2011    
+RMS Count      2107.        1368.         6.0395E-2    .1970    
+
+
+---------- repair:
+INSERT INTO typecodes VALUES (229, 'PseudoAnd');
+INSERT INTO typecodes VALUES (230, 'PseudoWordCset');
+
+
+select count(*) from atoms where type = 174;  -- 174==PseudoConnector
+gives 182912
+
+CREATE TEMP TABLE con AS SELECT uuid FROM atoms WHERE type=174;
+
+select count(*) from atoms, con where atoms.outgoing[1]=con.uuid;
+gives 1860793
+
+-- 167 is LgAnd ....
+select count(*) from atoms, con where atoms.outgoing[1]=con.uuid AND atoms.type=167;
+give same result
+
+-- change all of them to PseudoAnd
+update atoms set type=229 FROM con where outgoing[1]=con.uuid and type=167;
+
+How many LgAnds are left?
+select count(*) from atoms where type=167; -- gives 3
+wtf??? but this is exactly what is in tone, also!!!!!!! 
+   XXX so any disjunct counting is borken!  fuuck.
+
+select count(*) from atoms where type = 165;  -- 165==LgConnector
+gives 2
+wtf.  Also same as tone.
+
+CREATE TEMP TABLE lgs AS SELECT uuid FROM atoms WHERE type=167;
+select count(*) from atoms, lgs where atoms.outgoing[2]=lgs.uuid;
+404882 -- which is exactly what got deleted. Very good.
+
+-- now the rest.
+
+CREATE TEMP TABLE pan AS SELECT uuid FROM atoms WHERE type=229;
+-- 229 is the new PseudoAnd
+select count(*) from pan;
+so its 1860793 which is same as before.
+
+select count(*) from atoms, pan where atoms.outgoing[2]=pan.uuid;
+gives 5431830 
+
+-- 169 is LgWordCset
+select count(*) from atoms, pan where atoms.outgoing[2]=pan.uuid AND atoms.type=169;
+gives 3571037
+
+so what the heck has pseudoAnd as second, but is not an LgWordCset ????
+
+its type=21 ... ListLink. 
+(ListLink ; 17184167    --- I guess we stored the counts here. Hmmm. why?
+   (AnyNode "cset-word")
+   (PseudoAnd ...)
+
+select count(*) from atoms, pan where atoms.outgoing[2]=pan.uuid AND atoms.type=21;
+gives 1860793 which is as before. == (- 5431830 3571037)
+so that makes sense too.
+
+update atoms set type=230 FROM pan where outgoing[2]=pan.uuid and type=169;
+
+May as well drop the bogus connectors, too??
+
+xxxxxxxxxxxxxxxx here
+---------------------------------------------------------------------
 ---------- meanwhile, finish stats work
 (fetch-all-sims)
 
@@ -8432,3 +8536,8 @@ avg length
 
 Crazy idea: iterate; the places we end up at should be the dependents
 since everything points at them, and they never point away.
+
+Bugs: relex is returning incorrect disjuncts because LG is reporting the 
+multi-connectors only ... with the incorrect mutiplicities.
+
+Bugs: using ListLink for the partial sums on csets... why???

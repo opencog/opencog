@@ -125,7 +125,7 @@
 (define (batch-sim-pairs WORD-LIST CUTOFF)
 
 	(define len (length WORD-LIST))
-	(define tot (* 0.5 len len))
+	(define tot (* 0.5 len (- len 1)))
 	(define done 0)
 	(define prs 0)
 	(define start (current-time))
@@ -138,7 +138,8 @@
 				(set! done (+  done 1))
 				(if (eqv? 0 (modulo done 10))
 					(let* ((elapsed (- (current-time) start))
-							(frt (* done (- len done)))
+							(togo (* 0.5 (- len done) (- len (+ done 1))))
+							(frt (- tot togo))
 							(rate (* 0.001 (/ frt elapsed)))
 							)
 						(format #t
