@@ -155,8 +155,9 @@
       NAME)))
 
 (define (sent-get-lemmas-in-order SENT)
-  "Get the lemma of the words associate with sent-node.
-   It also creates an EvaluationLink "
+  "Get the lemma of the words associate with SENT.
+   It also creates an EvaluationLink linking the
+   SENT with the lemma-list."
   (define term-seq
     (List (append-map
       (lambda (w)
