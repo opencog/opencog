@@ -14,10 +14,7 @@
               (WordNode "ingests")
               (ConceptNode "eat"))
           (ReferenceLink
-              (ListLink
-                  (WordNode "binge")
-                  (WordNode "and")
-                  (WordNode "purge"))
+              (PhraseNode "binge and purge")
               (ConceptNode "eat"))
           (ReferenceLink
               (ConceptNode "foo")

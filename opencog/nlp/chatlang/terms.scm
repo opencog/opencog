@@ -48,7 +48,7 @@
                          ((equal? 'lemma (car t))
                           (LemmaNode (get-lemma (cdr t))))
                          ((equal? 'phrase (car t))
-                          (List (map Word (string-split (cdr t) #\ ))))
+                          (PhraseNode (cdr t)))
                          ((equal? 'concept (car t))
                           (Concept (cdr t)))))
        TERMS))

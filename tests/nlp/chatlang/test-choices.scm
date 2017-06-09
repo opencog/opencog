@@ -15,6 +15,5 @@
              (equal? (gar c) (GroundedPredicateNode "scm: chatlang-choices?"))
              (equal? (gadr c) (ListLink (WordNode "drink")
                                         (LemmaNode "eat")
-                                        (ListLink (WordNode "John")
-                                                  (WordNode "Smith"))
+                                        (PhraseNode "John Smith")
                                         (ConceptNode "play"))))))

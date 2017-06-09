@@ -190,14 +190,14 @@
 
 (define (member-words STR)
   "Convert the member in the form of a string into an atom, which can
-   either be a WordNode, LemmaNode, ConceptNode, or a ListLink of WordNodes."
+   either be a WordNode, LemmaNode, ConceptNode, or a PhraseNode."
   (let ((words (string-split STR #\sp)))
     (if (= 1 (length words))
         (let ((w (car words)))
              (cond ((string-prefix? "~" w) (Concept (substring w 1)))
                    ((is-lemma? w) (LemmaNode w))
                    (else (WordNode w))))
-        (List (map-in-order Word words)))))
+        (PhraseNode STR))))
 
 (define-public (create-concept NAME . MEMBERS)
   "Create named concepts with explicit membership lists.
