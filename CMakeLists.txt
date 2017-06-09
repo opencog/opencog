@@ -464,6 +464,19 @@ ELSE (STACK_FOUND)
 ENDIF (STACK_FOUND)
 MESSAGE(STATUS "${STACK_FOUND_MESSAGE}")
 
+
+# Check for the ICU - International Components for Unicode library.
+FIND_PACKAGE(ICU)
+IF (ICU_FOUND)
+	MESSAGE(STATUS "ICU found.")
+	ADD_DEFINITIONS(-DHAVE_ICU)
+	SET(HAVE_ICU 1)
+	SET(ICU_FOUND_MESSAGE "The ICU library was found.")
+ELSE (ICU_FOUND)
+	SET(ICU_FOUND_MESSAGE "The ICU library was not found.")
+ENDIF (ICU_FOUND)
+
+
 # ==========================================================
 # Decide what to build, based on the packages found.
 

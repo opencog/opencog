@@ -26,6 +26,7 @@
 #define _OPENCOG_BUILTIN_REQUESTS_MODULE_H
 
 #include <opencog/cogserver/server/Factory.h>
+#include <opencog/cogserver/server/LearnSentenceRequest.h>
 #include <opencog/cogserver/server/ListRequest.h>
 #include <opencog/cogserver/server/LoadModuleRequest.h>
 #include <opencog/cogserver/server/Module.h>
@@ -47,11 +48,12 @@ class BuiltinRequestsModule : public Module
 
 private:
 
-    Factory<ListRequest, Request>         listFactory;
-    Factory<ShutdownRequest, Request>     shutdownFactory;
-    Factory<LoadModuleRequest, Request>   loadmoduleFactory;
-    Factory<UnloadModuleRequest, Request> unloadmoduleFactory;
-    Factory<ListModulesRequest, Request>  listmodulesFactory;
+    Factory<LearnSentenceRequest, Request>  learnFactory;
+    Factory<ListRequest, Request>           listFactory;
+    Factory<ShutdownRequest, Request>       shutdownFactory;
+    Factory<LoadModuleRequest, Request>     loadmoduleFactory;
+    Factory<UnloadModuleRequest, Request>   unloadmoduleFactory;
+    Factory<ListModulesRequest, Request>    listmodulesFactory;
 
 DECLARE_CMD_REQUEST(BuiltinRequestsModule, "exit", do_exit,
        "Close the shell connection",
