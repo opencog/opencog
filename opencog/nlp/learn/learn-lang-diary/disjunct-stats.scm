@@ -45,6 +45,10 @@
 ; ---------------------------------------------------------------------
 ; Ranking and printing utilities
 ;
+; Assign each word a score, using SCORE-FN,
+(define (score SCORE-FN WORD-LIST)
+	(map (lambda (wrd) (cons (SCORE-FN wrd) wrd)) WORD-LIST))
+
 ; Assign each word a score, using SCORE-FN, and then rank them by
 ; score: i.e. sort them, with highest score first.
 (define (score-and-rank SCORE-FN WORD-LIST)
@@ -585,6 +589,7 @@
 	'SimilarityLink)
 
 (length all-sims)    ; 23993
+; or 44139852 = 44M with the 0.1 cutoff.
 
 (define good-sims
 	(filter
@@ -615,9 +620,9 @@
 
 ; ------ again, but binned.
 
-(define sorted-sims (score-and-rank sim-cosine all-sims))
+(define scored-sims (score sim-cosine all-sims))
 
-(define binned-sims (bin-count-simple sorted-sims 100))
+(define binned-sims (bin-count-simple scored-sims 100))
 
 (let ((outport (open-file "/tmp/binned-sims.dat" "w")))
 	(print-bincounts-tsv binned-sims outport)

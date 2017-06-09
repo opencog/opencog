@@ -6050,15 +6050,33 @@ ParseNode << 12468055 = 12.5M parses more than double.
 en_pairs_ttwo_mst
 -----------------
 Random parses from tranche-1 and tranche-2, together with MST parses from
-both tranches.
+both tranches. The bogus ANY-disjuncs got removed, and the correct 
+PseudoWordCsets are used.  Contains the summary stats for csets, too.
 
 STATUS: good
-DATE: 8 Jun 2017
+DATE: 9 Jun 2017
 REASON: I think it's good.
 
-3993988657 Bytes = 3.99 GB uncompressed
+                        List of relations
+ Schema |    Name    | Type  | Owner  |    Size    | Description 
+--------+------------+-------+--------+------------+-------------
+ public | atoms      | table | ubuntu | 3616 MB    | 
+ public | spaces     | table | ubuntu | 40 kB      | 
+ public | typecodes  | table | ubuntu | 56 kB      | 
+ public | valuations | table | ubuntu | 9220 MB    | 
+ public | values     | table | ubuntu | 8192 bytes | 
 
-32d2396c4751311dd0a8cd8698465f3d  en_pairs_ttwo_mst.sql
+select count(*) from atoms; --- 30689942 = 30.6M 
+select count(*) from valuations; --- 63432483 = 63M 
+
+counts, dimensions, MI as reported elsewhere.
+
+4316209411 Bytes = 4.31 GB uncompressed
+517697226 Bytes = 518 MB compressed
+
+5103471bb355c863d8082dd4fcd99955  en_pairs_ttwo_mst.sql
+8cfd247413d2429273657974a42a24be  en_pairs_ttwo_mst.sql.bz2
+
 
 ==================================================================
 en_pairs_tthree
@@ -6067,7 +6085,8 @@ Random parses from tranche-1, tranche-2 and tranche_3.
 
 STATUS: good
 DATE: 8 Jun 2017
-REASON: I think it's good.
+REASON: I think it's good.  Has some extra cruft: has the bogus disjuncts
+that were collected.
 
                         List of relations
  Schema |    Name    | Type  | Owner  |    Size    | Description 
@@ -6107,6 +6126,65 @@ ParseNode: 23131695 = 23M -- double
 
 1cb778a18a51244c7a5c919337a38557  en_pairs_tthree.sql
 df1109d706bc5d088097713d7f85188e  en_pairs_tthree.sql.bz2
+
+==================================================================
+en_pairs_tthree_mi
+------------------
+Random parses from tranche-1, tranche-2 and tranche_3, and pair MI.
+Removed the junk disjuncts from ANY parsing.
+
+STATUS: good
+DATE: 9 Jun 2017
+REASON: I think it's good.
+
+                        List of relations
+ Schema |    Name    | Type  | Owner  |    Size    | Description 
+--------+------------+-------+--------+------------+-------------
+ public | atoms      | table | ubuntu | 2983 MB    | 
+ public | spaces     | table | ubuntu | 40 kB      | 
+ public | typecodes  | table | ubuntu | 56 kB      | 
+ public | valuations | table | ubuntu | 5852 MB    | 
+ public | values     | table | ubuntu | 8192 bytes | 
+
+select count(*) from atoms;  -- 32593133 = 32M atoms
+select count(*) from valuations; -- 50386820 = 50M valuations
+
+3411596887 = 3.4GB uncompressed 
+470255603 = 470 MB compressed
+
+209da5230c7ac24c6ae0b8182ddb2412  en_pairs_tthree_mi.sql
+ea257e5ab807b70555d182caa6d712df  en_pairs_tthree_mi.sql.bz2
+
+==================================================================
+en_pairs_rone
+-------------
+Random-planar-tree parsed books from "tranche-1" of mostly project
+gutenberg books. Contains counts for word-pairs, words and disjuncts.
+This is a "clean" reparse, with correct quotation mark handling,
+and no record of the broken ANY-disjuncts.  This fixes the issues
+in en_pairs_tone.
+
+STATUS: good
+DATE: 9 June 2017
+REASON: Best so far, I think.
+
+                        List of relations
+ Schema |    Name    | Type  | Owner  |    Size    | Description 
+--------+------------+-------+--------+------------+-------------
+ public | atoms      | table | ubuntu | 1024 MB    | 
+ public | spaces     | table | ubuntu | 40 kB      | 
+ public | typecodes  | table | ubuntu | 56 kB      | 
+ public | valuations | table | ubuntu | 1390 MB    | 
+ public | values     | table | ubuntu | 8192 bytes | 
+
+select count(*) from atoms; -- 11224348 = 11M
+select count(*) from valuations; -- 5679764 = 5.7M
+
+502761623 Bytes = 503MB uncompressed
+86534772 Bytes = 86MBytes compressed
+
+29c23c43826e8aeb5037b99acdda02a3  en_pairs_rone.sql
+37f9a6ef2415ba708ffbf42f9c5948de  en_pairs_rone.sql.bz2
 
 ==================================================================
 ==================================================================
@@ -6709,6 +6787,7 @@ sql-stats: Atomspace holds 23178644 atoms = 23M = 35GBytes
 Now can start tranche-2 MST parsing.
 
 Done. Wow. That was fast! did anything actually happen?
+Well, after a series of issues, yes, it looks like this run was good.
 
 select count(*) from atoms; <<< 27638783 = 27M
 
@@ -7138,6 +7217,34 @@ delete from atoms where type=169;
 
 DONE.
 
+---------- meanwhile, construct en_pairs_tthree_mst
+but first, in en_pairs_tthree, kill the bogus disjuncts.
+select count(*) from atoms where type=169;  --- 1245661
+
+Deleted. And take a new DB dump, while we are at it. DONE.
+
+Computed the pair MI's they are in en_pairs_tthree now, see above. DONE.
+Now merge in en_pairs_ttwo_mst
+strategy:
+-- load words and disjuncts from ttwo_mst
+-- close db
+-- load everything from en_pairs_tthree
+-- save to en_pairs_tthree_mst
+
+169 LgWordCset
+ 167 | LgAnd
+
+(use-modules (opencog) (opencog persist) (opencog persist-sql))
+(use-modules (opencog nlp) (opencog nlp learn))
+(use-modules (opencog analysis))
+(sql-open "postgres:///en_pairs_ttwo_mst?user=ubuntu")
+(fetch-all-words)
+
+(define pca (make-pseudo-cset-api))
+(define psa (add-pair-stars pca))
+(psa 'fetch-pairs)
+xxxxxxxxxxxxxxxxxxxxxxxxx
+
 ---------------------------------------------------------------------
 ---------- meanwhile, finish stats work
 (fetch-all-sims)
@@ -7194,6 +7301,10 @@ FIXED.  num_get_links - num_got_links == total stores
 
 OK, so: 1.5M atoms, 37413 words, now: 13M new atoms
 so 13M / 37K = 343 atoms per incoming set.
+
+OK. DONE. Now what?
+
+binned-sims.dat
 
 -------------------
 FWIW, the crappy results from back-when: en_pairs_sim:
