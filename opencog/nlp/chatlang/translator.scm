@@ -228,20 +228,17 @@
   "Check if the value grounded for the GlobNode is actually a member
    of the concept."
   (cog-logger-debug "In chatlang-concept? GLOB: ~a" GLOB)
-  (let ((grd (if (equal? 1 (length GLOB)) (car GLOB) (List GLOB)))
-        (membs (get-members CONCEPT)))
-       (if (not (equal? #f (member grd membs)))
-           (stv 1 1)
-           (stv 0 1))))
+  (if (is-member? GLOB (get-members CONCEPT))
+      (stv 1 1)
+      (stv 0 1)))
 
 (define-public (chatlang-choices? CHOICES . GLOB)
   "Check if the value grounded for the GlobNode is actually a member
    of the list of choices."
   (cog-logger-debug "In chatlang-choices? GLOB: ~a" GLOB)
-  (let* ((grd (if (equal? 1 (length GLOB)) (car GLOB) (List GLOB)))
-         (chs (cog-outgoing-set CHOICES))
+  (let* ((chs (cog-outgoing-set CHOICES))
          (cpts (append-map get-members (cog-filter 'ConceptNode chs))))
-        (if (not (equal? #f (member grd (append chs cpts))))
+        (if (is-member? GLOB (append chs cpts))
             (stv 1 1)
             (stv 0 1))))
 
