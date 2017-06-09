@@ -48,8 +48,8 @@ FocusBoundaryUpdatingAgent::FocusBoundaryUpdatingAgent(CogServer& cs) :
     // Provide a logger
     setLogger(new opencog::Logger("FocusBoundaryUpdatingAgent.log", Logger::FINE, true));
 
-    _bank = &attentionbank(_as);
-    _bank->setAttentionalFocusBoundary(bottomBoundary);
+    // _bank = &attentionbank(_as);
+    // _bank->setAttentionalFocusBoundary(bottomBoundary);
 }
 
 void FocusBoundaryUpdatingAgent::run()
@@ -60,6 +60,7 @@ void FocusBoundaryUpdatingAgent::run()
         minAFSize = std::stoi(_atq.get_param_value(AttentionParamQuery::af_min_size));
         maxAFSize = std::stoi(_atq.get_param_value(AttentionParamQuery::af_max_size));
 
+#if 0
         AttentionValue::sti_t afboundary = _bank->getAttentionalFocusBoundary();
         // Let there always be K top STI valued atoms in the AF.
         HandleSeq hseq = _bank->getTopSTIValuedHandles();
@@ -69,6 +70,7 @@ void FocusBoundaryUpdatingAgent::run()
              afboundary = _bank->get_sti(hseq[0]);
              _bank->setAttentionalFocusBoundary(afboundary);
         }
+#endif
        /*
         AttentionValue::sti_t maxsti = _bank->get_max_STI();
         AttentionValue::sti_t minsti = _bank->get_min_STI();
@@ -85,6 +87,7 @@ void FocusBoundaryUpdatingAgent::run()
         //printf("NewAfb: %d OldAfb: %d Afb: %d \n",newafb,oldafb,afboundary);
         */
       
+#if 0
         // Make sure not too many atoms are in the AF.
         HandleSeq afset;
         _bank->get_handle_set_in_attentional_focus(std::back_inserter(afset));
@@ -92,6 +95,7 @@ void FocusBoundaryUpdatingAgent::run()
             afboundary = get_cutoff(afset);
             _bank->setAttentionalFocusBoundary(afboundary);
         }
+#endif
 }
 
 /**

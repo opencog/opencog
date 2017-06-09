@@ -1,4 +1,10 @@
 
+Working Notes
+-------------
+This file contains a diary of random working notes, which I use to keep
+track of what the heck it is that I'm doing.  It is almost surely totally
+useless to you, except maybe for some weird voyeuristic reasons.
+
 ======================================================================
 Crashes and bugs 2013, 2014
 
@@ -5202,6 +5208,7 @@ Finished with MI computations
 
 
 =================================================================
+=================================================================
 disjuncts & csets:
 
 Start loading words ...
@@ -5209,24 +5216,34 @@ Elapsed time to load words: 126 secs   << now 112 ...814 ... 22 .. 20
 Done loading words, now loading pairs
 Elapsed time to load csets: 783 secs  << now 367 on fresh..553...294..309
 Finished loading any-word-pairs
-Support: num left=396262 num right=291637
-Done with wild-card count N(*,w) and N(w,*) in 39 secs  << now 203 !???  fluke
+Support: num left=396262 num right=291637  << in 18 13
+Done with wild-card count N(*,w) and N(w,*) in 39 secs  `<< now 203 !???  fluke
+    << 85 after redesign ,, 72
 Done computing N(*,*) total-count=661104.0 in 34 secs << uncahnged
-Done computing 446204 pairs in 13 secs
+    << 14 after redesign 15
+Done computing 446204 pairs in 13 secs << 23 after red 24
 Start computing log P(*,w)
-Done computing 291637 left-wilds in 33 secs
-Done storing 291637 left-wilds in 670 secs << now  493 .. 711
+Done computing 291637 left-wilds in 33 secs << 27
+Done storing 291637 left-wilds in 670 secs << now  493 .. 711 (spin media)
+    << dropped to 87 secs on SSD
 Done with -log P(*,w), start -log P(w,*)
-Done computing 396262 right-wilds in 26 secs
+Done computing 396262 right-wilds in 26 secs  now 4 secs
 Done storing 396262 right-wilds in 549 secs  <<< now  28 !! wtf ??? .. 47
 Done computing -log P(w,*) and <-->
 Going to do individual word-pair MI
-Done computing 446204 pair MI's in 88 secs
+Done computing 446204 pair MI's in 88 secs << 70 secs
 Stored 100000 of 446204 pairs in 268 secs (373.13432835820896 pairs/sec)
 Stored 200000 of 446204 pairs in 238 secs (420.16806722689074 pairs/sec)
 Stored 300000 of 446204 pairs in 286 secs (349.65034965034965 pairs/sec)
 Stored 400000 of 446204 pairs in 303 secs (330.03300330033005 pairs/sec)
-Done storing 446204 pair MI's in 1215 secs ... 1345
+Done storing 446204 pair MI's in 1215 secs ... 1345 (spin media)
+    << 201 secs SSD
+Going to do column and row subtotals
+Finished left entropy subtotals in 46 secs << 43
+Finished right entropy subtotals in 20 secs << 16
+Finished left MI subtotals in 40 secs << 35
+Finished right MI subtotals in 12 secs << 8
+
 Finished with MI computations
 
 
@@ -5239,6 +5256,37 @@ Finished with MI computations
 (define pca (make-pseudo-cset-api))
 (batch-pairs pca)
 
+(pca 'fetch-pairs)
+(print-matrix-summary-report pca #t)
+(define psa (add-pair-stars pca))(define psa (add-pair-stars pca))
+(define sup (add-support-compute psa))
+(sup 'cache-all)
+(define cca (make-central-compute psa))
+(cca 'cache-all)
+(define sto (make-store psa))
+(sto 'store-wildcards)
+
+(print-matrix-summary-report pca #t)
+Summary Report for Correlation Matrix Word-Disjunct Pairs (aka Connector
+Sets)
+Left type: WordNode    Right Type: LgAnd    Pair Type: LgWordCset
+Wildcard: (ListLink (ctv 0 0 661104)
+   (AnyNode "cset-word")
+   (AnyNode "cset-disjunct")
+)
+Rows: 37413 Columns: 291637
+Size: 446204 non-zero entries of 10911015081 possible
+Fraction non-zero: 4.0895E-5 Sparsity (-log_2): 14.578
+Total observations: 661104.0  Avg obs per pair: 1.4816
+Entropy Total: 18.301   Left: 16.006   Right: 10.281
+Total MI: -7.985
+
+                 Left         Right     Avg-left     Avg-right
+                 ----         -----     --------     ---------
+Support (l_0)  4122.        370.0
+Count   (l_1)  8763.        680.7         2.126        1.839
+Length  (l_2)  236.8        51.39         5.7452E-2    .1389
+RMS Count      216.6        46.40         5.2550E-2    .1254
 
 
 
@@ -5834,6 +5882,7 @@ select count(*) from atoms;  <<< 10317409 = 10M atoms total
 WordNodes: 139790 -- 140K
 EvaluationLink : 4886362 -- 4.9M
 ListLink: exactly the same.
+LgWordCset: 404882 = 405K   Hmm Curious.
 
 select count(*) from valuations; <<< 5431036 = 5.4M values
 
@@ -5858,6 +5907,165 @@ ParseNode: 5173173 == 5.1M parses
 md5sum:
 28562003d0567039571006803b716dc0  en_pairs_tone.sql
 c4a981af336075f0121ac020887bfa47  en_pairs_tone.sql.bz2
+
+==================================================================
+en_pairs_tone_mst
+-----------------
+Disjuncts from MST-parsed books from "tranche-1" of mostly project
+gutenberg books. Based off of the en_pairs_tone. Contains MI for tone,
+but not the cosine angles.
+
+STATUS: bad
+DATE: 27 May 2017
+REASON: Uses LgWordCset for for connectors and pseudo-connectors.
+   Which screws up statistics.
+
+en_pairs_tone_mst=> \dt+
+                        List of relations
+ Schema |    Name    | Type  | Owner  |    Size    | Description 
+--------+------------+-------+--------+------------+-------------
+ public | atoms      | table | ubuntu | 1496 MB    | 
+ public | spaces     | table | ubuntu | 40 kB      | 
+ public | typecodes  | table | ubuntu | 56 kB      | 
+ public | valuations | table | ubuntu | 1871 MB    | 
+ public | values     | table | ubuntu | 8192 bytes | 
+(5 rows)
+
+select count(*) from atoms; << 16487725 = 16.5M (6M more than baseline)
+
+select count(*) from valuations; <<< 19330366 = 19.3M (14M more than base)
+
+SELECT sum(valuations.floatvalue[3]) FROM valuations, atoms, typecodes
+WHERE valuations.atom=atoms.uuid AND atoms.type=typecodes.type AND
+valuations.type=7 AND typecodes.typename='EvaluationLink';
+
+EaluationLink:  559225036 = 559M almost 4X more than baseline.
+WordNode: 125696239 = 126M = identical to baseline;
+LgWordCset: 133363005 = 134M  Hm. 9M more ob.
+XXX Wait. Since 134M were ANY links, that means only 9M are MST links.
+Oh wow. We need to fix this.
+
+Key 10317416  *-FrequencyKey-*
+Key 10872983  *-Mutual Info Key-*
+
+1461271903 bytes uncompressed = 1.46G
+208591406 bytes compressed = 209 MB
+
+180dff2b3d683ad5559290338b5815fa  en_pairs_tone_mst.sql
+e7dddab32c92b0fd0e88adfe6be1a87b  en_pairs_tone_mst.sql.bz2
+
+==================================================================
+en_pairs_ttwo
+-------------
+Random parses from tranche-1 and tranche-2. 
+
+STATUS: good
+DATE: 29 May 2017
+REASON: I think it's good.
+
+                        List of relations
+ Schema |    Name    | Type  | Owner  |    Size    | Description 
+--------+------------+-------+--------+------------+-------------
+ public | atoms      | table | ubuntu | 1483 MB    | 
+ public | spaces     | table | ubuntu | 40 kB      | 
+ public | typecodes  | table | ubuntu | 56 kB      | 
+ public | valuations | table | ubuntu | 956 MB     | 
+ public | values     | table | ubuntu | 8192 bytes | 
+
+select count(*) from atoms; <<< 16817599 = 16.8M atoms (6M more than tone)
+select count(*) from valuations; <<< 8770525 = 8.8m (3.4M more)
+
+SELECT count(atoms.uuid) FROM atoms,typecodes WHERE
+atoms.type=typecodes.type AND typecodes.typename='foobar';
+
+WordNode: 186573 = 187K (47K more)
+EvaluationLink:  8047063 = 8M (3.1M more)
+
+SELECT sum(floatvalue[3]) FROM valuations WHERE type=7;
+767377888 << 767M observations = 370M more
+
+SELECT sum(valuations.floatvalue[3]) FROM valuations, atoms, typecodes
+WHERE valuations.atom=atoms.uuid AND atoms.type=typecodes.type AND
+typecodes.typename='EvaluationLink';
+
+EvaluationLink: 267913561 << 268M pair obs, more than double of tone.
+WordNode: 243085829 << 243 M -- almost double
+LgWordCset: << 243114608 -- almost double
+
+SentenceNode << 795835 = 796K more than double
+ParseNode << 12468055 = 12.5M parses more than double.
+
+772033746 Bytes = 772M uncompressed.
+132694670 Bytes = 133M compressed
+
+8bbfb8f0f4956f21ec1120b550890e0f  en_pairs_ttwo.sql
+0b1908dfc232de4ea4e20d616cbbe290  en_pairs_ttwo.sql.bz2
+
+==================================================================
+en_pairs_ttwo_mst
+-----------------
+Random parses from tranche-1 and tranche-2, together with MST parses from
+both tranches.
+
+STATUS: good
+DATE: 8 Jun 2017
+REASON: I think it's good.
+
+3993988657 Bytes = 3.99 GB uncompressed
+
+32d2396c4751311dd0a8cd8698465f3d  en_pairs_ttwo_mst.sql
+
+==================================================================
+en_pairs_tthree
+---------------
+Random parses from tranche-1, tranche-2 and tranche_3.
+
+STATUS: good
+DATE: 8 Jun 2017
+REASON: I think it's good.
+
+                        List of relations
+ Schema |    Name    | Type  | Owner  |    Size    | Description 
+--------+------------+-------+--------+------------+-------------
+ public | atoms      | table | ubuntu | 2831 MB    | 
+ public | spaces     | table | ubuntu | 40 kB      | 
+ public | typecodes  | table | ubuntu | 56 kB      | 
+ public | valuations | table | ubuntu | 2099 MB    | 
+ public | values     | table | ubuntu | 8192 bytes | 
+(5 rows)
+
+select count(*) from atoms;  <<< 32125825 = 32M atoms (15M more than before)
+select count(*) from valuations; <<< 16901543 = 16.9M (8.1M more)
+
+SELECT count(atoms.uuid) FROM atoms,typecodes WHERE
+atoms.type=typecodes.type AND typecodes.typename='foobar';
+
+WordNode: 431609 = 432K (245K more) !!! that's a lot. More than double.
+EvaluationLink: 15224271 = 15.2 M (7.2M more, almost double) 
+
+SELECT sum(floatvalue[3]) FROM valuations WHERE type=7;
+1588822019 << 1.59 G observations (832M more, more than double)
+
+SELECT sum(valuations.floatvalue[3]) FROM valuations, atoms, typecodes
+WHERE valuations.atom=atoms.uuid AND atoms.type=typecodes.type AND
+typecodes.typename='EvaluationLink';
+
+EvaluationLink: 557197874 = 557M pair obs, nearly double of before.
+WordNode: 503467934 = 503M -- more than double.
+LgWordCset: 503537347 = 503M -- double
+
+SentenceNode: 1487169 = 1.5M -- double
+ParseNode: 23131695 = 23M -- double
+
+1506102265 Bytes = 1.51 GB uncompressed
+256913537 Bytes = 257 GB compressed
+
+1cb778a18a51244c7a5c919337a38557  en_pairs_tthree.sql
+df1109d706bc5d088097713d7f85188e  en_pairs_tthree.sql.bz2
+
+==================================================================
+==================================================================
+
 
 ==================================================================
 
@@ -6253,3 +6461,1974 @@ Hmmm.
  (/home/ubuntu/src/atomspace/opencog/persist/sql/multi-driver/SQLAtomStorage.cc:1202)
 Aborted
 
+relex crash always on this:
+“What the hell is happening here?!”
+split-books/gneiosric-ab   three out of three crashes
+
+cat gneiosric-ab | ./split-sentences.pl > g-split
+./ss-one.sh en gneiosric-ab localhost 17005
+
+cat g-split | ./submit-one.pl localhost 17005 observe-text  breaks
+g2  breaks
+g2b breaks
+g2guess is OK
+g2bb is OK
+g2ba breaks
+g2baa is OK
+g2bab breaks
+g2baba breaks
+g2babaa is OK
+g2babab breaks
+g2bababa breaks
+g3 is OK
+
+cat g4 |nc localhost 4445   breaks!
+echo 「...」 |nc localhost 4445  breks
+link-parser works ... but eats the trailing character...!?
+
+and generates zillions of parses!!??
+
+of which most are identical...
+relex definitely crashes...
+linkage_set_domain_names+0xe0
+
+6 links,
+5th link crashes..
+dtype array holds junk
+
+dtsz supposed to be the actual size of valid entries
+ppn->dtsz
+
+chk_d_type reallocs but does not memset....
+dtsz is too small.!!
+chk_d_type
+
+chk_d_type(pp->pp_node, numli...
+ do not set the pipinfo if domains is zero.
+so do not free. either
+
+*** START OF THIS PROJECT GUTENBERG EBOOK
+***START OF THE PROJECT GUTENBERG EBOOK
+
+END OF THIS PROJECT GUTENBERG EBOOK
+
+*** START: FULL LICENSE ***
+The Full Project Gutenberg License
+
+sed -n '/PROJECT GUTENBERG EBOOK/,$p' filename
+
+schweben
+
+getp "is a"
+54756-0.txt
+
+grep -l 大
+grep -l Anmerkungen *
+
+purezza
+quella
+
+if
+
+Langauge:
+
+54637-0.txt
+54640-0.txt
+54652-0.txt
+54655-0.txt
+54660-0.txt
+54665-0.txt
+54667-0.txt
+54668-0.txt
+54672-0.txt
+54675-0.txt
+54676-0.txt
+54679-0.txt
+54681-0.txt
+54706-0.txt
+54711-0.txt
+54714-0.txt
+54719-0.txt
+54721-0.txt
+54724-0.txt
+54729-0.txt
+
+
+guile
+
+(use-modules (opencog) (opencog persist) (opencog persist-sql))
+(use-modules (opencog nlp) (opencog nlp learn))
+(use-modules (opencog cogserver))
+(start-cogserver "opencog2.conf")
+(sql-open "postgres:///en_pairs_tone_mst?user=ubuntu")
+(sql-load)
+(sql-stats)
+(sql-close)
+Finished loading 16487725 atoms in total in 2212 seconds (7453 per second)
+started at 20K/sec .. towards end, was 75% system cpu... why????
+21GB ram = 1400Bytes/atom. as usual. Need a diet plan.
+
+(sql-open "postgres:///en_pairs_ttwo?user=ubuntu")
+(sql-load)
+(sql-stats)
+(sql-close)
+Finished loading 16817599 atoms in total in 991 seconds (16970 per second)
+Much faster because most atoms are in atomspace already.
+sql-stats: Atomspace holds 22987920 atoms ... and is 26GB in size.
+
+
+(sql-open "postgres:///en_pairs_ttwo_mst?user=ubuntu")
+(sql-store)
+(sql-stats)
+(sql-close)
+
+Initial rate is (3389 per second) on SSD which is 10x the spinning-disk
+Peaked at (3546 per second) half-way throough
+Dropped to (2537 per second) overall average.
+version but is still pathetically slow.
+iotop shows 3.2 MBytes/sec  and about 770 tps
+so where is the bottleneck?
+ Bottleneck is still disk i/o, even though its SSD:
+how can I tell?
+1) guile is under 90% cpu
+2) 20+ postgres procs show 30% cpu, each
+3) sql-stats shows 8 threads busy draining.
+4) loadavg shows 6
+5) top shows > 2.0% wait,  (on 24 cpus!) 4% system 18% user 75% idle
+   viz about 0.5 cou wait, 1 cpu system, 4cpu's busy
+   and since guile is less than  1 cpu, the postgres take up the
+   remaining cpu.  Since 18 cpus are idle, we must be stalled in i/o.
+So, somehow still stuck in i/o waiting for postgres to flush to disk.
+
+6) iotop shows 60 to 100 MBytes/sec, highly variable.
+   wait sometimes spikes to 15% (and io dropts to zero)
+   sometimes rate spikes to 300MB/sec! but rarely.
+
+7) Launching any-parsing does not seem to affect iowait!
+   Nore does it change store performance at all!!!
+   but it does raise the write rates and the tps
+
+?? Is it postgres indexing? Can we suspend that while storing?
+
+--------- meanhwile continue pair-parsing
+launch tranche-3 any-parsing Tue May 30 04:39:44 UTC 2017
+
+----- anyway, recompute pair mi and resume mst-parsing
+
+en_pairs_ttwo_mst
+
+(define ala (make-any-link-api))
+(batch-all-pair-mi ala)
+Final store: about  (1250.0 pairs/sec)
+Done storing 8047063 pair MI's in 6905 secs
+
+sql-stats: Atomspace holds 23178644 atoms = 23M = 35GBytes
+Now can start tranche-2 MST parsing.
+
+Done. Wow. That was fast! did anything actually happen?
+
+select count(*) from atoms; <<< 27638783 = 27M
+
+get-all-words -- 188793  vs. tone: 139790 Seems  OK.
+all-cset-words -- 83131  vs tone 139790 ??  Crazy talk WTF? did we not
+                                          load correctly?
+disjuncts -- 1670883 vs tone 1860796
+
+wtf somethng broke....
+
+(define (filter-words-with-csets WORD-LIST)
+   (filter!  (lambda (wrd) (not (null? (get-cset-vec wrd)))) WORD-LIST))
+
+Recompute the matrices again.
+
+(sql-open "postgres:///en_pairs_ttwo_mst?user=ubuntu")
+(fetch-all-words)
+(define ala (make-any-link-api))
+(define asa (add-pair-stars ala))
+(asa 'fetch-pairs) << 1077 1154
+(batch-all-pair-mi asa)
+
+Support: found num left=183290 num right=186523 in 389 secs
+Done with wild-card count N(x,*) and N(*,y) in 733 secs
+Done computing N(*,*) total-count=267913561.0 in 23 secs
+Done computing 8047063 pairs in 480 secs
+Done computing 183290 left-wilds in 25 secs
+Done storing 186523 left-wilds in 86 secs
+Done storing 183290 right-wilds in 95 secs
+....
+Going to compute the left, right and total entropy
+Finished left norm totals in 100 secs
+Finished right norm totals in 106 secs
+Done computing totals; start saving wildcards
+terminate called after throwing an instance of
+'opencog::RuntimeException'
+  what():  Failed to execute!
+(/home/ubuntu/src/atomspace/opencog/persist/sql/multi-driver/ll-pg-cxx.cc:113)
+arghhh. The valuation table was missing a lock.
+Fixed in 32d8ae4be6164a9c3594eab05f2d5af5e2c9fec6
+
+Finished with MI computations; this took 6.25 hours
+
+Summary Report for Correlation Matrix Link Grammar ANY link Word Pairs
+Left type: WordNode    Right Type: WordNode    Pair Type: ListLink
+Wildcard: (EvaluationLink (ctv 0 0 2.6791356e+08)
+   (LinkGrammarRelationshipNode "ANY")
+)
+Rows: 183290 Columns: 186523
+Size: 8047063 non-zero entries of 34187800670 possible
+Fraction non-zero: 2.3538E-4 Sparsity (-log_2): 12.053
+Total observations: 267913561.0  Avg obs per pair: 33.293
+Entropy Total: 17.827   Left: 9.9014   Right: 9.7626
+Total MI: -1.837
+
+                 Left         Right     Avg-left     Avg-right
+                 ----         -----     --------     ---------
+Support (l_0)  2.3078E+4    2.2456E+4
+Count   (l_1)  4.0365E+6    3.4647E+6     174.9        154.3    
+Length  (l_2)  4.2779E+5    3.4953E+5     18.54        15.56    
+RMS Count      4.2741E+5    3.4915E+5     18.52        15.55    
+
+
+(define pca (make-pseudo-cset-api))
+(define psa (add-pair-stars pca))
+(psa 'fetch-pairs)
+Elapsed time to load csets: 2454 secs
+Finished with MI computations; this took 4.55 hours
+
+(print-matrix-summary-report psa)
+Summary Report for Correlation Matrix Word-Disjunct Pairs (aka Connector Sets)
+Left type: WordNode    Right Type: LgAnd    Pair Type: LgWordCset
+Wildcard: (ListLink (ctv 0 0 2.5749688e+08)
+   (AnyNode "cset-word")
+   (AnyNode "cset-disjunct")
+)
+Rows: 186573 Columns: 3401465
+Size: 6975371 non-zero entries of 634621529445 possible
+Fraction non-zero: 1.0991E-5 Sparsity (-log_2): 16.473
+Total observations: 257496884.0  Avg obs per pair: 36.915
+Entropy Total: 11.868   Left: 2.4858   Right: 9.8057
+Total MI: -0.423
+
+                 Left         Right     Avg-left     Avg-right
+                 ----         -----     --------     ---------
+Support (l_0)  5.8326E+4    1.7086E+5
+Count   (l_1)  3.2094E+6    9.5093E+7     55.03        556.6    
+Length  (l_2)  2.4075E+6    1.2274E+7     41.28        71.84    
+RMS Count      1.8036E+6    1.2272E+7     30.92        71.83    
+
+
+
+
+
+
+---------- Try again. Here's what tone_mst says:
+(use-modules (opencog) (opencog persist) (opencog persist-sql))
+(use-modules (opencog nlp) (opencog nlp learn))
+(use-modules (opencog analysis))
+(sql-open "postgres:///en_pairs_tone_mst?user=ubuntu")
+(fetch-all-words)
+
+(define ala (make-any-link-api))
+(define asa (add-pair-stars ala))
+(asa 'fetch-pairs)  << 672 secs
+
+(print-matrix-summary-report asa)  ; crash, of course. So rebuild .
+(batch-all-pair-mi asa)
+
+Start computing the basis
+Support: found num left=138014 num right=139770 in 247 secs
+Done with wild-card count N(x,*) and N(*,y) in 419 secs
+Done computing N(*,*) total-count=139806259.0 in 17 secs
+Going to do individual pair frequencies
+Done computing 4886362 pairs in 268 secs
+Start computing log P(*,y)
+Done computing 138014 left-wilds in 18 secs  
+Done computing 139770 right-wilds in 17 secs
+Done storing 139770 left-wilds in 67 secs
+Done storing 138014 right-wilds in 64 secs
+Done computing 4886362 pair MI's in 2051 secs
+Done storing 4886362 pairs in 3378 secs
+Finished left entropy subtotals in 191 secs
+Finished right entropy subtotals in 184 secs
+Finished left MI subtotals in 193 secs
+Finished right MI subtotals in 181 secs
+Finished left support subtotals in 479 secs
+Finished right support subtotals in 456 secs
+Finished left norm totals in 86 secs
+Finished right norm totals in 85 secs
+Done storing 139770 left-wilds in 126 secs
+Done storing 138014 right-wilds in 132 secs
+Finished with MI computations; this took 2.388 hours
+
+(print-matrix-summary-report asa)
+Summary Report for Correlation Matrix Link Grammar ANY link Word Pairs
+Left type: WordNode    Right Type: WordNode    Pair Type: ListLink
+Rows: 138014 Columns: 139770
+Size: 4886362 non-zero entries of 19290216780 possible
+Fraction non-zero: 2.5331E-4 Sparsity (-log_2): 11.947
+Total observations: 139806259.0  Avg obs per pair: 28.612
+Entropy Total: 17.725   Left: 9.9308   Right: 9.8248
+Total MI: -2.030
+
+                 Left         Right     Avg-left     Avg-right
+                 ----         -----     --------     ---------
+Support (l_0)  1.6405E+4    1.6483E+4
+Count   (l_1)  1.9950E+6    1.8453E+6     121.6        112.0    
+Length  (l_2)  2.2904E+5    1.9881E+5     13.96        12.06    
+RMS Count      2.2878E+5    1.9854E+5     13.95        12.05    
+
+
+Now do it again, for the disjuncts!
+
+(sql-clear-stats)
+(define pca (make-pseudo-cset-api))
+(define psa (add-pair-stars pca))
+(psa 'fetch-pairs)
+Elapsed time to load csets: 1484 secs
+
+(batch-all-pair-mi psa)
+Finished with MI computations; this took 3.19 hours
+
+(print-matrix-summary-report psa)
+
+Summary Report for Correlation Matrix Word-Disjunct Pairs (aka Connector Sets)
+Left type: WordNode    Right Type: LgAnd    Pair Type: LgWordCset
+Wildcard: (ListLink (ctv 0 0 1.33363e+08)
+   (AnyNode "cset-word")
+   (AnyNode "cset-disjunct")
+)
+Rows: 139790 Columns: 1860796
+Size: 3975919 non-zero entries of 260120672840 possible
+Fraction non-zero: 1.5285E-5 Sparsity (-log_2): 15.998
+Total observations: 133363005.0  Avg obs per pair: 33.543
+Entropy Total: 11.921   Left: 2.4678   Right: 9.8636
+Total MI: -0.410
+
+                 Left         Right     Avg-left     Avg-right
+                 ----         -----     --------     ---------
+Support (l_0)  3.3665E+4    1.2870E+5
+Count   (l_1)  1.6849E+6    5.1241E+7     50.05        398.2    
+Length  (l_2)  1.2139E+6    6.4911E+6     36.06        50.44    
+RMS Count      1.0132E+6    6.4895E+6     30.10        50.42    
+
+
+===============
+Arghhhh Sanity check:
+the LgWordCset's in these files are:
+
+(LgWordCset 
+    (WordNode "this")
+    (LgAnd 
+        (LgConnector 
+            (LgConnectorNode "ANY")
+            (LgConnDirNode "-")
+            (LgConnMultiNode "@")
+        )
+
+vs.
+    (LgWordCset
+       (WordNode "playing")
+       (LgAnd
+          (PseudoConnector
+
+Ugh.  The load is polluted!
+
+Double check tone_mst...
+dd(use-modules (opencog) (opencog persist) (opencog persist-sql))
+(use-modules (opencog nlp) (opencog nlp learn) (opencog analysis))
+(sql-open "postgres:///en_pairs_tone_mst?user=ubuntu")
+(fetch-all-words)
+
+(define pca (make-pseudo-cset-api))
+(define psa (add-pair-stars pca))
+(psa 'fetch-pairs)
+
+So, tone, by itself, in sql, has:
+LgWordCset: 404882 = 405K  unique csets and
+LgWordCset: 125707119 << 126M disjunct observations.
+
+tone_mst has via SQL:
+   3975919 = 3.9M csets
+
+xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx here
+
+(cog-count-atoms 'LgWordCset)
+
+(cog-delete-recursive (LgConnMultiNode "@"))
+
+
+---------- meanwhile, finish stats work
+(fetch-all-sims)
+
+general idea: how many pairs are there out of N^2?
+what is the distribution of pair memebership?
+
+sims should be LLOBJ
+
+Umm batch-all-pair-mi is where?
+
+batch-sim should NOT store!
+batch-sim-pairs 
+
+So: 1) cutoff for sim  2) cutoff for store.
+
+start 2.4G and run 0.3 sim
+again 0.1 sim...
+
+possible: (37413 * 37412)/2 = 699847578 = 700M pairs
+estimate: 7.5% of these, so = 52M pairs!? Ouch.  .. 70-80 GB RAM
+    and insanely slow ..  secs = 102 hrs = 4.2 days
+running at 1.9K pairs/sec ouch.
+
+4000 secs for 20x36K = 180/sec total collapse.
+
+Try again:
+(use-modules (opencog) (opencog persist) (opencog persist-sql))
+(use-modules (opencog nlp) (opencog nlp learn))
+; (sql-open "postgres:///en_pairs_supersim?user=linas")
+(sql-open "postgres:///en_pairs_ultrasim?user=linas")
+(use-modules (opencog cogserver))
+(start-cogserver "opencog2.conf")
+(use-modules (opencog analysis))
+(fetch-all-words)
+
+(define pca (make-pseudo-cset-api))
+(define psa (add-pair-stars pca))
+(psa 'fetch-pairs)
+(print-matrix-summary-report psa)
+
+(sql-clear-stats)
+; 1524572 atoms in AS
+(define ac (get-all-cset-words)) 
+(length ac)
+(load "gram-sim.scm")
+(para-batch-sim-pairs ac 0.1)
+
+oh fu... its running 3x because:
+1) not_yet_stored
+2) do_store_single_atom
+FIXED.  num_get_links - num_got_links == total stores
+   and  num_get_links == valuation update  Yayyy!!
+
+OK, so: 1.5M atoms, 37413 words, now: 13M new atoms
+so 13M / 37K = 343 atoms per incoming set.
+
+-------------------
+FWIW, the crappy results from back-when: en_pairs_sim:
+
+Summary Report for Correlation Matrix Word-Disjunct Pairs (aka Connector Sets)
+Left type: WordNode    Right Type: LgAnd    Pair Type: LgWordCset
+Wildcard: (ListLink (ctv 0 0 661104)
+   (AnyNode "cset-word")
+   (AnyNode "cset-disjunct")
+)
+Rows: 37413 Columns: 291637
+Size: 446204 non-zero entries of 10911015081 possible
+Fraction non-zero: 4.0895E-5 Sparsity (-log_2): 14.578
+Total observations: 661104.0  Avg obs per pair: 1.4816
+Entropy Total: 18.301   Left: 16.006   Right: 10.281
+Total MI: -7.985
+
+                 Left         Right     Avg-left     Avg-right
+                 ----         -----     --------     ---------
+Support (l_0)  4122.        370.0
+Count   (l_1)  8763.        680.7         2.126        1.839
+Length  (l_2)  236.8        51.39         5.7452E-2    .1389
+RMS Count      216.6        46.40         5.2550E-2    .1254
+
+Notice that tone has maybe 200x mor observations!!!! 133M instead of
+660K ... wow. en_pairs_sim also has:
+
+Left type: WordNode    Right Type: WordNode    Pair Type: ListLink
+Wildcard: (EvaluationLink (ctv 0 0 4.1823528e+08)
+   (LinkGrammarRelationshipNode "ANY")
+)
+Rows: 395274 Columns: 396260
+Size: 8880914 non-zero entries of 156631275240 possible
+Fraction non-zero: 5.6699E-5 Sparsity (-log_2): 14.106
+Total observations: 418235277.0  Avg obs per pair: 47.094
+Entropy Total: 19.280   Left: 11.088   Right: 11.215
+Total MI: -3.023
+
+                 Left         Right     Avg-left     Avg-right
+                 ----         -----     --------     ---------
+Support (l_0)  2.9904E+4    3.4828E+4                       
+Count   (l_1)  4.4813E+6    5.2946E+6    149.9        152.0
+Length  (l_2)  4.9537E+5    4.9524E+5    16.57        14.22
+RMS Count      4.9502E+5    4.9482E+5    16.55        14.21
+
+
+---------- meanwhile, compute & cache similarity
+; (sql-open "postgres:///en_pairs_tone_sim?user=ubuntu")
+
+Wait, where?
+Oh, gram-sim.
+
+-----------
+todo items:
+* trim low observation counts ....
+* implement sql delete function.
+
+---------- debug hang:
+latest bdgw from git does not solve it.
+latest stable-2.2 guile does not solve it.
+
+revert to distro bdwgc
+#0  0x00007f362151c826 in __GI___sigsuspend (
+    set=set@entry=0x7f36214b1740 <suspend_handler_mask>)
+    at ../sysdeps/unix/sysv/linux/sigsuspend.c:30
+#1  0x00007f3621293602 in GC_suspend_handler_inner
+(dummy=dummy@entry=0x0, 
+    context=context@entry=0x7fff6c807540) at pthread_stop_world.c:324
+#2  0x00007f36212936cf in GC_suspend_handler (sig=30, info=<optimized
+out>, 
+    context=0x7fff6c807540) at pthread_stop_world.c:237
+#3  <signal handler called>
+
+
+thr 2: find_slot_map (
+    cache=0x7f361fe85ab0, ip=0x1) at ../../libguile/vm.c:936
+#1  scm_i_vm_mark_stack (vp=0xbdca3120, mark_stack_ptr=0x7f361fe85ef0, 
+    mark_stack_limit=0x7f361fe95eb0) at ../../libguile/vm.c:1011
+#2  0x00007f36212883be in GC_mark_from (mark_stack_top=0x7f361fe85ea0, 
+    mark_stack_top@entry=0x7f361fe85f00, 
+    mark_stack=mark_stack@entry=0x7f361fe85eb0, 
+    mark_stack_limit=mark_stack_limit@entry=0x7f361fe95eb0) at
+mark.c:784
+#3  0x00007f36212889de in GC_do_local_mark
+(local_mark_stack=0x7f361fe85eb0, 
+    local_top=0x7f361fe85f00) at mark.c:1048
+#4  0x00007f3621288bf8 in GC_mark_local (
+    local_mark_stack=local_mark_stack@entry=0x7f361fe85eb0,
+id=id@entry=1)
+    at mark.c:1181
+#5  0x00007f3621288f0a in GC_help_marker
+(my_mark_no=my_mark_no@entry=195743)
+    at mark.c:1249
+#6  0x00007f3621292edc in GC_mark_thread (id=<optimized out>)
+    at pthread_support.c:380
+
+
+single-stepping:
+
+scm_i_vm_mark_stack (vp=0xbdca3120, mark_stack_ptr=0x7f361fe85ef0, 
+    mark_stack_limit=0x7f361fe95eb0) at ../../libguile/vm.c:975
+975            fp = SCM_FRAME_DYNAMIC_LINK (fp))
+(gdb) print fp
+$1 = (union scm_vm_stack_element *) 0x7f36183d5e38
+(gdb) step
+973       for (fp = vp->fp, sp = vp->sp;
+(gdb) 
+979           for (slot = nlocals - 1; sp < fp; sp++, slot--)
+(gdb) 
+1011          slot_map = find_slot_map (SCM_FRAME_RETURN_ADDRESS (fp),
+&cache);
+(gdb) 
+1006          sp = SCM_FRAME_PREVIOUS_SP (fp);
+(gdb) print fp
+$2 = (union scm_vm_stack_element *) 0x7f36183d5e38
+(gdb) print sp
+$3 = (union scm_vm_stack_element *) 0x7f36183d5e48
+(gdb) step
+1011          slot_map = find_slot_map (SCM_FRAME_RETURN_ADDRESS (fp),
+&cache);
+(gdb) 
+find_slot_map (cache=0x7f361fe85ab0, ip=0x1) at ../../libguile/vm.c:932
+932       size_t slot = (((scm_t_uintptr) ip) >> 2) %
+SLOT_MAP_CACHE_SIZE;
+(gdb) 
+935       if (cache->entries[slot].ip == ip)
+(gdb) 
+scm_i_vm_mark_stack (vp=0xbdca3120, mark_stack_ptr=0x7f361fe85ef0, 
+    mark_stack_limit=0x7f361fe95eb0) at ../../libguile/vm.c:1011
+1011          slot_map = find_slot_map (SCM_FRAME_RETURN_ADDRESS (fp),
+&cache);
+(gdb) 
+find_slot_map (cache=0x7f361fe85ab0, ip=0x1) at ../../libguile/vm.c:936
+936         map = cache->entries[slot].map;
+(gdb) 
+scm_i_vm_mark_stack (vp=0xbdca3120, mark_stack_ptr=0x7f361fe85ef0, 
+    mark_stack_limit=0x7f361fe95eb0) at ../../libguile/vm.c:975
+975            fp = SCM_FRAME_DYNAMIC_LINK (fp))
+(gdb) print fp
+$4 = (union scm_vm_stack_element *) 0x7f36183d5e38
+
+git tag -l
+Try guile-2.2  v2.2.0 Wed Mar 15 09:02:52 2017
+Try guile-2.1.8  v2.1.8 Fri Mar 10 11:01:04 2017 tried it - spins. its broke
+   (breaks after about 300 cpu-min)
+
+OK guile-2.0.11 on xenial crashes almost immediately with
+guile: hashtab.c:137: vacuum_weak_hash_table: Assertion `removed <= len' failed.
+
+
+Arguments with Curtis:
+GC_register_my_thread
+-------------------------------------------------------------------------
+
+Bewlow has gone to
+https://debbugs.gnu.org/cgi/bugreport.cgi?bug=27234
+
+bug-guile@gnu.org.
+
+Subject: Hang in GC, inf loop while walking frame pointers
+
+what: guile-2.2-stable, from git.
+
+I've got a large, complex, heavily multi-threaded guile program that
+hangs during garbage collection; usually after running for half a day.
+It hangs in a tight loop in scm_i_vm_mark_stack, spinning at 100% of CPU.
+
+This is due to the for-loop line fp = SCM_FRAME_DYNAMIC_LINK (fp)) 
+at libguile/vm.c line 975 failing to advance the frame pointer.
+There's no "obvious" corruption in the stack; it simply looks like
+the frame was incompletely set up, and so incrementing to the next
+fp does not go anywhere.
+
+I have recompiled guile with VM_ENABLE_ASSERTIONS and am trying to
+reproduce the bug now.  The rest of this email is a record of a long
+debug session isolating the problem, and showing that, overall, the
+thread and stack data look more-or-less correct and uncorrupoted,
+except for the inability to walk forward in the frame.
+
+-- linas
+
+Try again.
+same as above: thread 4: find_slot_map
+187 threads total.
+
+#0  find_slot_map (cache=0x7f3e9b783ab0, ip=0x1) at
+../../libguile/vm.c:935
+935       if (cache->entries[slot].ip == ip)
+(gdb) print slot
+$1 = 0
+(gdb) print cache->entries[slot].ip
+$2 = (scm_t_uint32 *) 0x1
+(gdb) print cache->entries[slot].map
+$4 = (const scm_t_uint8 *) 0x0
+(gdb) step
+scm_i_vm_mark_stack (vp=0x755c1bd0, mark_stack_ptr=0x7f3e9b783f40, 
+    mark_stack_limit=0x7f3e9b793eb0) at ../../libguile/vm.c:1011
+1011        slot_map = find_slot_map (SCM_FRAME_RETURN_ADDRESS (fp), &cache);
+(gdb) print fp
+$5 = (union scm_vm_stack_element *) 0x7f3e94cdee38
+
+#define SCM_FRAME_RETURN_ADDRESS(fp)    ((fp)[0].as_ip)
+(gdb) print (fp)[0].as_ip
+$6 = (scm_t_uint32 *) 0x1
+
+OK that looks weird ... is this corrupted ?? but whatever,
+because the returned slot_map is never used ... because ...
+
+(gdb) step
+scm_i_vm_mark_stack (vp=0x755c1bd0, mark_stack_ptr=0x7f3e9b783f40, 
+    mark_stack_limit=0x7f3e9b793eb0) at ../../libguile/vm.c:975
+975            fp = SCM_FRAME_DYNAMIC_LINK (fp))
+(gdb) print fp
+$7 = (union scm_vm_stack_element *) 0x7f3e94cdee38
+
+frames.h:#define SCM_FRAME_DYNAMIC_LINK(fp)      ((fp) + (fp)[1].as_uint)
+(gdb) print (fp)[1].as_uint
+$8 = 0
+
+OK, that seems bad, because now fp never advances, it just repeats
+over and over with this same value.
+
+(gdb) 
+979           for (slot = nlocals - 1; sp < fp; sp++, slot--)
+(gdb) print nlocals
+$10 = -2
+(gdb) print sp
+$11 = (union scm_vm_stack_element *) 0x7f3e94cdee48
+#define SCM_FRAME_NUM_LOCALS(fp, sp)    ((fp) - (sp))
+(gdb) print fp
+$12 = (union scm_vm_stack_element *) 0x7f3e94cdee38
+(gdb) print  ((fp) - (sp))
+$13 = -2
+Ohh .. its not -16 because its -2 * sizeof (union scm_vm_stack_element *)
+so that's OK.
+So for loops is skipped, it should go to.
+      sp = SCM_FRAME_PREVIOUS_SP (fp);
+frames.h:#define SCM_FRAME_PREVIOUS_SP(fp)	((fp) + 2)
+
+and so now it loops around and repeats.
+(gdb) print cache
+$19 = {entries = {{ip = 0x1, map = 0x0}, {ip = 0x0, 
+      map = 0x0} <repeats 23 times>, {ip = 0x1a1b5e0, map = 0x0}, {ip = 0x0, 
+      map = 0x0}, {ip = 0x0, map = 0x0}, {ip = 0x0, map = 0x0}, {ip = 0x0, 
+      map = 0x0}, {ip = 0x0, map = 0x0}, {ip = 0x0, map = 0x0}, {ip = 0x0, 
+      map = 0x0}}}
+(gdb) print &cache
+$20 = (struct slot_map_cache *) 0x7f3e9b783ab0
+
+and so the loop repeates forever, because 
+fp = SCM_FRAME_DYNAMIC_LINK (fp) never advances fp, because
+(fp)[1].as_uint  is zero.
+
+So where is fp pointing to?  recall fp == 0x7f3e94cdee38
+
+(gdb) x/20x 0x7f3e94cdee00
+0x7f3e94cdee00: 0x0000000000000904      0x000000000000200c
+0x7f3e94cdee10: 0x0000000001a1b7e0      0x0000000001a1b5e0
+0x7f3e94cdee20: 0x0000000000000004      0x000000000000200c
+0x7f3e94cdee30: 0x0000000000169bd6      0x0000000000000001
+0x7f3e94cdee40: 0x0000000000000000      0x000000000192acd0
+0x7f3e94cdee50: 0x0000000001fa4bc0      0x0000000001a1c6d0
+0x7f3e94cdee60: 0x0000000044507950      0x0000000000000002
+0x7f3e94cdee70: 0x000000000005a6f5      0x00000000018febd0
+0x7f3e94cdee80: 0x000000006d490d00      0x00007f3e9e97241c
+0x7f3e94cdee90: 0x0000000000000002      0x00007f3e9e97241c
+
+
+(gdb) x/s 0x7f3e94cdee60
+0x7f3e94cdee60: "PyPD"      <<< ?? is this a meaningul string?
+(gdb) x/s 0x7f3e94cdee81
+0x7f3e94cdee81: "\rIm"      << how about this ???
+
+So this does not look healthy.  How did we get here?
+
+(gdb) print vp
+$21 = (struct scm_vm *) 0x755c1bd0
+(gdb) print mark_stack_ptr
+$22 = (struct GC_ms_entry *) 0x7f3e9b783f40
+(gdb) print mark_stack_limit
+$23 = (struct GC_ms_entry *) 0x7f3e9b793eb0
+(gdb) print upper
+$24 = (void *) 0x7ffdd986
+(gdb) print GC_greatest_plausible_heap_addr
+$25 = (void *) 0x7ffdd986
+(gdb) print lower
+$26 = (void *) 0x17a1ff8
+
+(gdb) print vp->fp
+$27 = (union scm_vm_stack_element *) 0x7f3e94cdee18
+(gdb) print vp->sp
+$28 = (union scm_vm_stack_element *) 0x7f3e94cdee00
+(gdb) print  vp->stack_top
+$29 = (union scm_vm_stack_element *) 0x7f3e94cdf000
+
+So lets walk manually. 
+frames.h:#define SCM_FRAME_DYNAMIC_LINK(fp)      ((fp) + (fp)[1].as_uint)
+
+(gdb) print (vp->fp) + (vp->fp)[1].as_uint
+$31 = (union scm_vm_stack_element *) 0x7f3e94cdee38
+So we are instanly in trouble! once through the loop, and we've got the broken fp
+
+So how did we get here?
+
+(gdb) print vp
+$32 = (struct scm_vm *) 0x755c1bd0
+(gdb) print *vp
+$33 = {ip = 0x7f3e9e5a6378 <subr_stub_code+56>, sp = 0x7f3e94cdee00, 
+  fp = 0x7f3e94cdee18, stack_limit = 0x7f3e94cde000, trace_level = 0, 
+  sp_min_since_gc = 0x7f3e94cdee00, stack_size = 512, 
+  stack_bottom = 0x7f3e94cde000, stack_top = 0x7f3e94cdf000, 
+  overflow_handler_stack = 0x304, hooks = {0x4, 0x4, 0x4, 0x4, 0x4}, 
+  resumable_prompt_cookie = 0x7f3d397f9440, engine = 1}
+
+Looks plausible, not corrupted. Why is engine=1 ?? 
+#define SCM_VM_REGULAR_ENGINE 0
+#define SCM_VM_DEBUG_ENGINE 1
+#define SCM_VM_NUM_ENGINES 2
+#  define SCM_I_CURRENT_THREAD (scm_i_current_thread)
+
+(gdb) print scm_i_current_thread
+$34 = (scm_i_thread *) 0x0
+
+OK, that's not excellent.
+(gdb) print thread_count
+$35 = 161
+
+(gdb) bt
+#0  scm_i_vm_mark_stack (vp=0x755c1bd0, mark_stack_ptr=0x7f3e9b783f40, 
+    mark_stack_limit=0x7f3e9b793eb0) at ../../libguile/vm.c:1011
+#1  0x00007f3e9db8835e in GC_mark_from (mark_stack_top=0x7f3e9b783ee0, 
+    mark_stack_top@entry=0x7f3e9b783f00, 
+    mark_stack=mark_stack@entry=0x7f3e9b783eb0, 
+    mark_stack_limit=mark_stack_limit@entry=0x7f3e9b793eb0) at ../mark.c:772
+#2  0x00007f3e9db8897e in GC_do_local_mark (local_mark_stack=0x7f3e9b783eb0, 
+    local_top=0x7f3e9b783f00) at ../mark.c:1037
+#3  0x00007f3e9db88b98 in GC_mark_local (
+    local_mark_stack=local_mark_stack@entry=0x7f3e9b783eb0, id=id@entry=4)
+    at ../mark.c:1170
+#4  0x00007f3e9db88eaa in GC_help_marker (my_mark_no=my_mark_no@entry=80003)
+    at ../mark.c:1238
+#5  0x00007f3e9db92e3c in GC_mark_thread (id=<optimized out>)
+    at ../pthread_support.c:380
+#6  0x00007f3e9e2ae6ba in start_thread (arg=0x7f3e9b794700)
+    at pthread_create.c:333
+#7  0x00007f3e9dfdd82d in clone ()
+    at ../sysdeps/unix/sysv/linux/x86_64/clone.S:109
+
+so bdwgc is version gc7_6_0
+
+So ../mark.c:772 is GET_HDR and GET_HDR is in
+include/private/gc_hdrs.h
+
+define GET_HDR(p, hhdr)  ... ((hhdr) = HDR_INNER(p) 
+# define HDR_INNER(p) HDR_FROM_BI(BI(p),p)
+#define HDR_FROM_BI(bi, p) \
+                ((bi)->index[((word)(p) >> LOG_HBLKSIZE) & (BOTTOM_SZ - 1)])
+
+This seems all wrong.. wtf ....
+
+is it called by thread_mark ??
+in libguile/thread.c:
+  thread_gc_kind =
+    GC_new_kind (GC_new_free_list (),
+       GC_MAKE_PROC (GC_new_proc (thread_mark), 0),
+       0, 1)
+in bdwgc/misc.c  GC_new_proc
+    GC_mark_procs[result] = proc
+#define GC_mark_procs GC_arrays._mark_procs
+#define PROC(descr) \
+      (GC_mark_procs[((descr) >> GC_DS_TAG_BITS) & (GC_MAX_MARK_PROCS-1)])
+
+      GC_obj_kinds[result].ok_descriptor = descr;  <<< this is where MAKE_PROC goes.
+
+anyway ... in mark.c line 733
+        case GC_DS_PROC:
+          mark_stack_top--;
+          credit -= GC_PROC_BYTES;
+          mark_stack_top = (*PROC(descr))((word *)current_p, mark_stack_top,
+                                          mark_stack_limit, ENV(descr));
+          continue;
+But that's the wrong line number.  line 772 is in 
+        case GC_DS_PER_OBJECT:
+          if ((signed_word)descr >= 0) {
+            /* Descriptor is in the object.     */
+            descr = *(word *)(current_p + descr - GC_DS_PER_OBJECT);
+
+Oh, it goes to retry, which loops around and calls PROC which is thread_mark
+which is called with args 
+          mark_stack_top = (*PROC(descr))((word *)current_p, mark_stack_top,
+                                          mark_stack_limit, ENV(descr));
+
+(gdb) print current_p
+$39 = (ptr_t) 0x7225d380 "@\325%r"
+
+so back in libguile/threads.c line 84:
+  const struct scm_i_thread *t = (struct scm_i_thread *) addr;
+
+(gdb) print *(struct scm_i_thread *) current_p
+$40 = {next_thread = 0x7225d540, handle = 0x5763f3b0, pthread = 139900934399744, 
+  result = 0x4, exited = 0, guile_mode = 1, needs_unregister = 1, wake = 0x0, 
+  sleep_cond = {__data = {__lock = 0, __futex = 0, __total_seq = 0, 
+      __wakeup_seq = 0, __woken_seq = 0, __mutex = 0x0, __nwaiters = 0, 
+      __broadcast_seq = 0}, __size = '\000' <repeats 47 times>, __align = 0}, 
+  sleep_pipe = {151, 197}, freelists = 0x71cfe800, 
+  pointerless_freelists = 0x71cfe780, dynamic_state = 0x71de7900, dynstack = {
+    base = 0x698c3800, top = 0x698c3940, limit = 0x698c3a00}, 
+  pending_asyncs = 0x304, block_asyncs = 0, continuation_root = 0x5763f340, 
+  continuation_base = 0x7f3d397f9c90, vp = 0x755c1bd0, base = 0x7f3d397f9da0, 
+  regs = {{__jmpbuf = {139905204221696, 139906923931021, 1, 139894281647232, 
+        139906913276512, 0, 139906918327551, 8388608}, 
+      __mask_was_saved = 964664752, __saved_mask = {__val = {0, 139900934399744, 
+          139900934399744, 139900934397344, 139906923929400, 139893936840720, 
+          1804170656, 139906913276512, 139900934399744, 139900934397344, 
+          139900934397504, 139893936840720, 139906910859134, 139906913276484, 
+          139906910857112, 27401856}}}}}
+
+(gdb) print ((struct scm_i_thread *) current_p)->vp
+$41 = (struct scm_vm *) 0x755c1bd0
+
+which is exactly the vp we had before, so this is the correct thread.
+
+So  ... all the values in *(struct scm_i_thread *) current_p look more or less OK;
+its not corrupted. And all the values in *vp look more or less OK, its not corrrupted
+except that engine=1 looks wrong.  So what's up with the weird stack looping?
+Again: 
+From before, we had:
+
+(gdb) print *vp
+$42 = {ip = 0x7f3e9e5a6378 <subr_stub_code+56>, sp = 0x7f3e94cdee00, 
+  fp = 0x7f3e94cdee18, stack_limit = 0x7f3e94cde000, trace_level = 0, 
+  sp_min_since_gc = 0x7f3e94cdee00, stack_size = 512, 
+  stack_bottom = 0x7f3e94cde000, stack_top = 0x7f3e94cdf000, 
+  overflow_handler_stack = 0x304, hooks = {0x4, 0x4, 0x4, 0x4, 0x4}, 
+  resumable_prompt_cookie = 0x7f3d397f9440, engine = 1}
+
+so fp, sp, stack_bottom, stack_top all are self-consistent with each other.
+The problem is that
+    fp = SCM_FRAME_DYNAMIC_LINK (fp)
+goes nowhere, after the first iteration.
+
+Is the frame corrupted? How? what does the rest of the stack look like?
+
+(gdb) x/32x 0x7f3e94cdee00
+0x7f3e94cdee00: 0x0000000000000904      0x000000000000200c
+0x7f3e94cdee10: 0x0000000001a1b7e0      0x0000000001a1b5e0
+0x7f3e94cdee20: 0x0000000000000004      0x000000000000200c  <<< theres the 4
+0x7f3e94cdee30: 0x0000000000169bd6      0x0000000000000001 <<< there's the new fp
+0x7f3e94cdee40: 0x0000000000000000      0x000000000192acd0 <<< there's the zero.
+0x7f3e94cdee50: 0x0000000001fa4bc0      0x0000000001a1c6d0
+0x7f3e94cdee60: 0x0000000044507950      0x0000000000000002
+0x7f3e94cdee70: 0x000000000005a6f5      0x00000000018febd0
+0x7f3e94cdee80: 0x000000006d490d00      0x00007f3e9e97241c
+0x7f3e94cdee90: 0x0000000000000002      0x00007f3e9e97241c
+0x7f3e94cdeea0: 0x0000000000000002      0x00007f3e8d797630
+0x7f3e94cdeeb0: 0x0000000000000002      0x00007f3e86effacc
+0x7f3e94cdeec0: 0x0000000000000003      0x000000006d490d00
+0x7f3e94cdeed0: 0x00007f3e86eb8698      0x0000000000000002
+0x7f3e94cdeee0: 0x00007f3e8e51f450      0x0000000000000008
+0x7f3e94cdeef0: 0x0000000001a37c10      0x000000000192acd0
+
+
+So... who sets up thread->vp ? 
+/* #define VM_ENABLE_ASSERTIONS */
+However, defining this breaks the build.
+
+diff --git a/libguile/vm-engine.c b/libguile/vm-engine.c
+index 6c88ebf..f0f8164 100644
+--- a/libguile/vm-engine.c
++++ b/libguile/vm-engine.c
+@@ -2050,11 +2050,11 @@ VM_NAME (scm_i_thread *thread, struct scm_vm *vp,
+ 
+           if (!scm_module_system_booted_p)
+             {
+-              ASSERT (scm_is_true
++              ASSERT (scm_is_true(
+                       scm_equal_p (modname,
+                                    scm_list_2
+                                    (SCM_BOOL_T,
+-                                    scm_from_utf8_symbol ("guile"))));
++                                    scm_from_utf8_symbol ("guile")))));
+               var = scm_lookup (sym);
+             }
+           else if (scm_is_true (SCM_CAR (modname)))
+diff --git a/libguile/vm.c b/libguile/vm.c
+index 18f2192..c26066e 100644
+--- a/libguile/vm.c
++++ b/libguile/vm.c
+@@ -63,7 +63,7 @@ static size_t page_size;
+ 
+ /* The VM has a number of internal assertions that shouldn't normally be
+    necessary, but might be if you think you found a bug in the VM. */
+-/* #define VM_ENABLE_ASSERTIONS */
++#define VM_ENABLE_ASSERTIONS
+ 
+ static void vm_expand_stack (struct scm_vm *vp,
+                              union scm_vm_stack_element *new_sp) SCM_NOINLINE;
+
+
+ GEN      guile-procedures.texi
+/bin/bash: line 1: 24078 Broken pipe 
+
+ ./meta/guile
+Aborted
+./libguile/guile
+Aborted
+gdb libguile/.libs/lt-guile
+
+#0  0x00007ffff74f7428 in __GI_raise (sig=sig@entry=6)
+    at ../sysdeps/unix/sysv/linux/raise.c:54
+#1  0x00007ffff74f902a in __GI_abort () at abort.c:89
+#2  0x00007ffff7b707c4 in vm_regular_engine (thread=0x7282, vp=0x806f30, 
+    registers=0x6, resume=-145787864) at ../../libguile/vm-engine.c:2053
+#3  0x00007ffff7b711d2 in scm_call_n (proc=0x832b30, argv=argv@entry=0x0, 
+    nargs=nargs@entry=0) at ../../libguile/vm.c:1257
+#4  0x00007ffff7af14e9 in scm_call_0 (proc=<optimized out>)
+    at ../../libguile/eval.c:481
+#5  0x00007ffff7b10568 in scm_primitive_load_path (args=<optimized out>)
+    at ../../libguile/load.c:1248
+#6  0x00007ffff7b6e976 in vm_regular_engine (thread=0x7282, vp=0x806f30, 
+    registers=0x6, resume=-145787864) at ../../libguile/vm-engine.c:784
+
+Oh. wtf. 
+
+
+(define avg-time-taken
+	(let ((last-gc (gc-stats))
+			(start-time (get-internal-real-time))
+			(run-time (get-internal-run-time)))
+		(lambda () 
+			(define now (get-internal-real-time))
+			(define run (get-internal-run-time))
+			(define cur (gc-stats))
+			(define gc-time-taken (* 1.0e-9 (- (cdar cur) (cdar last-gc))))
+			(define elapsed-time (* 1.0e-9 (- now start-time)))
+			(define cpu-time (* 1.0e-9 (- run run-time)))
+			(format #t "Elapsed time: ~5f secs. GC-time-taken: ~5f s or ~5f%	cpu-usage: ~5f%\n"
+				elapsed-time gc-time-taken  (* 100 (/ gc-time-taken elapsed-time))
+				(* 100 (/ cpu-time elapsed-time))
+			)
+			(set! last-gc cur)
+			(set! start-time now)
+			(set! run-time run))))
+
+
+Anyway: it hangs without ever hitting any of the VM DEBUG asserts.
+This time:
+
+(gdb) print *vp
+$1 = {ip = 0x7ffff7b87358 <subr_stub_code+56>, sp = 0x7fffdc617e00, 
+  fp = 0x7fffdc617e18, stack_limit = 0x7fffdc617000, trace_level = 0, 
+  sp_min_since_gc = 0x7fffdc617b58, stack_size = 512, 
+  stack_bottom = 0x7fffdc617000, stack_top = 0x7fffdc618000, 
+  overflow_handler_stack = 0x304, hooks = {0x4, 0x4, 0x4, 0x4, 0x4}, 
+  resumable_prompt_cookie = 0x7fff857f9440, engine = 1}
+
+(gdb) x/32x 0x7fffdc617e00
+0x7fffdc617e00: 0x0000000000000904      0x000000000000630c
+0x7fffdc617e10: 0x000000000089f7e0      0x000000000089f5e0
+0x7fffdc617e20: 0x0000000000000004      0x000000000000630c
+0x7fffdc617e30: 0x00000000000377d6      0x0000000000000001
+0x7fffdc617e40: 0x0000000000000000      0x00000000007aecd0
+0x7fffdc617e50: 0x00000000010de660      0x00000000008a06d0
+0x7fffdc617e60: 0x000000003f543a40      0x0000000000000002
+0x7fffdc617e70: 0x000000000000ddf5      0x0000000000782bd0
+0x7fffdc617e80: 0x00000000130cbe20      0x00007ffff7f4d41c
+0x7fffdc617e90: 0x0000000000000002      0x00007ffff7f4d41c
+0x7fffdc617ea0: 0x0000000000000002      0x00007fffe7099630
+0x7fffdc617eb0: 0x0000000000000002      0x00007fffe08f3acc
+0x7fffdc617ec0: 0x0000000000000003      0x00000000130cbe20
+0x7fffdc617ed0: 0x00007fffe08be698      0x0000000000000002
+0x7fffdc617ee0: 0x00007fffe7c8e450      0x0000000000000008
+0x7fffdc617ef0: 0x00000000008bbbe0      0x00000000007aecd0
+
+Wow. More or less IDENTICAL to last time!!
+
+what is vp->ip pointing at??
+
+(gdb) x/16 0x7ffff7b87320
+0x7ffff7b87320 <subr_stub_code>:        0x0000000a00000115      0x00000009000000b7
+0x7ffff7b87330 <subr_stub_code+16>:     0x0000000000000000      0x0000000a00000215
+0x7ffff7b87340 <subr_stub_code+32>:     0x00000009000000b7      0x0000000000000000
+0x7ffff7b87350 <subr_stub_code+48>:     0x0000021800000217      0x000000b70000000a
+0x7ffff7b87360 <subr_stub_code+64>:     0x0000000000000009      0x0000000a00000120
+0x7ffff7b87370 <subr_stub_code+80>:     0x00000009000000b7      0x0000000000000000
+0x7ffff7b87380 <subr_stub_code+96>:     0x0000000a00000315      0x00000009000000b7
+0x7ffff7b87390 <subr_stub_code+112>:    0x0000000000000000      0x0000031700000216
+
+WHo sets t->vp ???
+thread_vm (scm_i_thread *t)
+   t->vp = make_vm ();
+
+So clearly, above is NOT a fresh stack, but is well-used.
+
+(gdb) print vm_default_engine
+$3 = 1
+
+But ... #define SCM_VM_REGULAR_ENGINE 0
+#define SCM_VM_DEBUG_ENGINE 1
+ So who set it to 1??
+
+#define FP_SLOT(i)           SCM_FRAME_SLOT (vp->fp, i)
+#define SCM_FRAME_SLOT(fp,i)            ((fp) - (i) - 1)
+
+      vp->fp = SCM_FRAME_SLOT (old_fp, proc - 1);
+      SCM_FRAME_SET_DYNAMIC_LINK (vp->fp, old_fp);
+
+frames.h:#define SCM_FRAME_DYNAMIC_LINK(fp)      ((fp) + (fp)[1].as_uint)
+frames.h:#define SCM_FRAME_SET_DYNAMIC_LINK(fp, dl) ((fp)[1].as_uint = ((dl) - (fp)))
+
+So I'm getting dl == fp ?? 
+guile -l pair-count-en.scm
+
+libguile/frames.h
+@@ -104,7 +104,8 @@ union scm_vm_stack_element
+ #define SCM_FRAME_RETURN_ADDRESS(fp)    ((fp)[0].as_ip)
+ #define SCM_FRAME_SET_RETURN_ADDRESS(fp, ra) ((fp)[0].as_ip = (ra))
+ #define SCM_FRAME_DYNAMIC_LINK(fp)      ((fp) + (fp)[1].as_uint)
+-#define SCM_FRAME_SET_DYNAMIC_LINK(fp, dl) ((fp)[1].as_uint = ((dl) - (fp)))
++#define SCM_FRAME_SET_DYNAMIC_LINK(fp, dl)  { \
++((fp)[1].as_uint = ((dl) - (fp))) ; if ((dl) == (fp)) abort(); }
+ #define SCM_FRAME_SLOT(fp,i)            ((fp) - (i) - 1)
+ #define SCM_FRAME_LOCAL(fp,i)           (SCM_FRAME_SLOT (fp, i)->as_scm)
+ #define SCM_FRAME_NUM_LOCALS(fp, sp)    ((fp) - (sp))
+
+--- a/libguile/gsubr.c
++++ b/libguile/gsubr.c
+@@ -169,7 +169,8 @@
+        (generate-bytecode i)
+        (setq i (1+ i)))))
+ */
+-static const scm_t_uint32 subr_stub_code[] = {
++// static const scm_t_uint32 subr_stub_code[] = {
++const scm_t_uint32 subr_stub_code[] = {
+   /* C-u 1 0 M-x generate-bytecodes RET */
+   /* 0 arguments */
+   A(0),
+--- a/libguile/vm.c
++++ b/libguile/vm.c
+@@ -63,7 +63,7 @@ static size_t page_size;
+ 
+ /* The VM has a number of internal assertions that shouldn't normally be
+    necessary, but might be if you think you found a bug in the VM. */
+-/* #define VM_ENABLE_ASSERTIONS */
++#define VM_ENABLE_ASSERTIONS
+ 
+ static void vm_expand_stack (struct scm_vm *vp,
+                              union scm_vm_stack_element *new_sp) SCM_NOINLINE;
+@@ -952,6 +952,9 @@ enum slot_desc
+     SLOT_DESC_UNUSED = 3
+   };
+ 
++extern const scm_t_uint32 subr_stub_code[];
++scm_t_uint32 * pstub = (void*) &subr_stub_code;
++
+ /* Mark the active VM stack region.  */
+ struct GC_ms_entry *
+ scm_i_vm_mark_stack (struct scm_vm *vp, struct GC_ms_entry *mark_stack_ptr,
+@@ -967,6 +970,7 @@ scm_i_vm_mark_stack (struct scm_vm *vp, struct GC_ms_entry
+*mark_stack_ptr,
+   void *upper = (void *) GC_greatest_plausible_heap_addr;
+   void *lower = (void *) GC_least_plausible_heap_addr;
+   struct slot_map_cache cache;
++  union scm_vm_stack_element *fprev = NULL;
+ 
+   memset (&cache, 0, sizeof (cache));
+ 
+@@ -974,6 +978,14 @@ scm_i_vm_mark_stack (struct scm_vm *vp, struct GC_ms_entry
+*mark_stack_ptr,
+        fp < vp->stack_top;
+        fp = SCM_FRAME_DYNAMIC_LINK (fp))
+     {
++      if (fprev == fp)
++        {
++           printf("Oh no Mr Bill!! stack_size=%lu fp-bot = %lu ip-subr_stub_code=%lu engine=%d\n",
++           vp->stack_size, fp - vp->stack_bottom, vp->ip - pstub, vp->engine);
++           break;
++        }
++      fprev = fp;
++
+       scm_t_ptrdiff nlocals = SCM_FRAME_NUM_LOCALS (fp, sp);
+       size_t slot = nlocals - 1;
+       for (slot = nlocals - 1; sp < fp; sp++, slot--)
+
+
+Oh no Mr Bill!! stack_size=512 fp-bot = 455 ip-subr_stub_code=14  engine=1
+Oh no Mr Bill!! stack_size=512 fp-bot = 455 ip-subr_stub_code=14  engine=1
+
+after a wall-clock hour of runtime, it crashes:
+#0  0x00007ffff7affb2a in scm_frame_instruction_pointer (frame=0x5bcae580)
+    at ../../libguile/frames.c:346
+frames.h:#define SCM_VM_FRAME_IP(f)	SCM_VM_FRAME_DATA (f)->ip
+frames.h:#define SCM_VM_FRAME_DATA(x)	((struct scm_frame *)SCM_CELL_WORD_1 (x))
+#define SCM_CELL_WORD_1(x) SCM_CELL_WORD ((x), 1)
+#define SCM_CELL_WORD(x, n) SCM_GC_CELL_WORD ((x), (n))
+gc.h:#define SCM_GC_CELL_WORD(x, n)   (SCM_UNPACK (SCM_GC_CELL_OBJECT ((x), (n))))
+gc.h:#define SCM_GC_CELL_OBJECT(x, n) (((SCM *)SCM2PTR (x)) [n])
+gc.h:#define SCM2PTR(x) ((scm_t_cell *) (SCM_UNPACK_POINTER (x)))
+etc.
+
+(gdb) x/8x  0x5bcae580
+0x5bcae580:     0xffffffffa49232af      0x0000000000000000
+0x5bcae590:     0xffffffffa396e59f      0x0000000000000000
+0x5bcae5a0:     0xffffffffa4924287      0x0000000000000000
+0x5bcae5b0:     0xffffffffa39d15df      0x0000000000000000
+
+All of these look bad, and will clearly crash if derefernced.
+(gdb) x 0xa49232af
+0xa49232af:     Cannot access memory at address 0xa49232af
+(gdb) x 0xffffffffa396e59f
+0xffffffffa396e59f:     Cannot access memory at address 0xffffffffa396e59f
+
+
+
+#1  0x00007ffff7b67331 in vm_debug_engine (thread=0x5bcae580, vp=0x5b62c480, 
+    registers=0x7ffff7b04330 <scm_apply_subr+176>, resume=-536784)
+    at ../../libguile/vm-engine.c:784
+#2  0x00007ffff7b7128a in scm_call_n (proc=0x7fffede811e8, 
+    argv=argv@entry=0x7ffe53ffddd8, nargs=nargs@entry=1)
+    at ../../libguile/vm.c:1269
+#3  0x00007ffff7af1568 in scm_call_1 (proc=<optimized out>, arg1=0x5bcae580)
+    at ../../libguile/eval.c:487
+#4  0x00007ffff7affd08 in scm_i_frame_print (frame=0x5bcae580, port=0x16f10160, 
+    pstate=<optimized out>) at ../../libguile/frames.c:48
+why are we printing???
+
+#5  0x00007ffff7b33c4b in scm_prin1 (exp=exp@entry=0x5bcae580, 
+    port=port@entry=0x16f10160, writingp=writingp@entry=1)
+    at ../../libguile/print.c:817
+#6  0x00007ffff7b34b11 in scm_write (obj=0x5bcae580, port=0x16f10160)
+    at ../../libguile/print.c:1076
+
+why are we writing?
+
+#7  0x00007ffff7b67331 in vm_debug_engine (thread=0x5bcae580, vp=0x5b62c480, 
+    registers=0x7ffff7b04330 <scm_apply_subr+176>, resume=-536784)
+    at ../../libguile/vm-engine.c:784
+#8  0x00007ffff7b7128a in scm_call_n (proc=0x7fffeddbed70, 
+    argv=argv@entry=0x7ffe53ffe080, nargs=nargs@entry=4)
+    at ../../libguile/vm.c:1269
+#9  0x00007ffff7af1644 in scm_call_4 (proc=<optimized out>, 
+    arg1=arg1@entry=0x59d5fee0, arg2=arg2@entry=0x59d5cf20, 
+    arg3=arg3@entry=0x983520, arg4=arg4@entry=0x52) at ../../libguile/eval.c:508
+#10 0x00007ffff7ae29a5 in display_backtrace_body (a=<optimized out>)
+    at ../../libguile/backtrace.c:244
+
+Ohh, why is this being done?
+
+#11 0x00007ffff7b67331 in vm_debug_engine (thread=0x5bcae580, vp=0x5b62c480, 
+    registers=0x7ffff7b04330 <scm_apply_subr+176>, resume=-536784)
+    at ../../libguile/vm-engine.c:784
+#12 0x00007ffff7b7128a in scm_call_n (proc=proc@entry=0x59d5cf00, 
+    argv=argv@entry=0x0, nargs=nargs@entry=0) at ../../libguile/vm.c:1269
+#13 0x00007ffff7af1549 in scm_call_0 (proc=proc@entry=0x59d5cf00)
+    at ../../libguile/eval.c:481
+#14 0x00007ffff7b600f9 in catch (tag=tag@entry=0x404, thunk=0x59d5cf00, 
+    handler=0x59d5cee0, pre_unwind_handler=0x4) at ../../libguile/throw.c:137
+#15 0x00007ffff7b60465 in scm_catch_with_pre_unwind_handler (key=key@entry=0x404, 
+    thunk=<optimized out>, handler=<optimized out>, 
+    pre_unwind_handler=<optimized out>) at ../../libguile/throw.c:254
+#16 0x00007ffff7b6061f in scm_c_catch (tag=tag@entry=0x404, 
+    body=body@entry=0x7ffff7ae2880 <display_backtrace_body>, 
+    body_data=body_data@entry=0x7ffe53ffe460, 
+    handler=handler@entry=0x7ffff7ae2c70 <error_during_backtrace>, 
+    handler_data=<optimized out>, 
+    pre_unwind_handler=pre_unwind_handler@entry=0x0, pre_unwind_handler_data=0x0)
+    at ../../libguile/throw.c:377
+#17 0x00007ffff7b6062e in scm_internal_catch (tag=tag@entry=0x404, 
+    body=body@entry=0x7ffff7ae2880 <display_backtrace_body>, 
+    body_data=body_data@entry=0x7ffe53ffe460, 
+    handler=handler@entry=0x7ffff7ae2c70 <error_during_backtrace>, 
+    handler_data=<optimized out>) at ../../libguile/throw.c:386
+#18 0x00007ffff7ae2855 in scm_display_backtrace_with_highlights (
+    stack=<optimized out>, port=<optimized out>, first=<optimized out>, 
+    depth=<optimized out>, highlights=<optimized out>)
+    at ../../libguile/backtrace.c:282
+
+Yuck.
+#19 0x00007fffecb62654 in opencog::SchemeEval::catch_handler(scm_unused_struct*,
+scm_unused_struct*) (this=0x7ffe8c000980, tag=0x7a86e0, throw_args=0x5bcda980)
+    at /home/ubuntu/src/atomspace/opencog/guile/SchemeEval.cc:420
+
+Oh. Ewww. Something that got sent caused an exception.  But what?
+Lets print to the log file.
+
+#20 0x00007ffff7b67331 in vm_debug_engine (thread=0x5bcae580, vp=0x5b62c480, 
+    registers=0x7ffff7b04330 <scm_apply_subr+176>, resume=-536784)
+    at ../../libguile/vm-engine.c:784
+#21 0x00007ffff7b7128a in scm_call_n (proc=proc@entry=0x5bcae600, 
+    argv=<optimized out>, nargs=5) at ../../libguile/vm.c:1269
+#22 0x00007ffff7af1a3b in scm_apply_0 (proc=proc@entry=0x5bcae600, args=0x304)
+    at ../../libguile/eval.c:594
+#23 0x00007ffff7b60177 in catch (tag=<optimized out>, thunk=0x5bcae620, 
+    handler=0x5bcae600, pre_unwind_handler=0x5bcae5e0)
+    at ../../libguile/throw.c:134
+#24 0x00007fffecb62d29 in opencog::SchemeEval::do_eval(std::__cxx11::basic_string<char,
+std::char_traits<char>, std::allocator<char> > const&) (this=0x7ffe8c000980, 
+    expr=...) at /home/ubuntu/src/atomspace/opencog/guile/SchemeEval.cc:572
+#25 0x00007fffecb62dda in opencog::SchemeEval::c_wrap_eval(void*) (
+    p=0x7ffe8c000980)
+    at /home/ubuntu/src/atomspace/opencog/guile/SchemeEval.cc:501
+#26 0x00007ffff7aeb70a in c_body (d=0x7ffe53ffece0)
+    at ../../libguile/continuations.c:422
+#27 0x00007ffff7b67331 in vm_debug_engine (thread=0x5bcae580, vp=0x5b62c480, 
+    registers=0x7ffff7b04330 <scm_apply_subr+176>, resume=-536784)
+    at ../../libguile/vm-engine.c:784
+<<<<<<<<<< first one is here.
+
+#28 0x00007ffff7b7128a in scm_call_n (proc=proc@entry=0x5c6d3580, 
+    argv=argv@entry=0x0, nargs=nargs@entry=0) at ../../libguile/vm.c:1269
+#29 0x00007ffff7af1549 in scm_call_0 (proc=proc@entry=0x5c6d3580)
+    at ../../libguile/eval.c:481
+#30 0x00007ffff7b600f9 in catch (tag=tag@entry=0x404, thunk=0x5c6d3580, 
+    handler=0x5c6d3560, pre_unwind_handler=0x5c6d3540)
+    at ../../libguile/throw.c:137
+#31 0x00007ffff7b60465 in scm_catch_with_pre_unwind_handler (key=key@entry=0x404, 
+    thunk=<optimized out>, handler=<optimized out>, 
+    pre_unwind_handler=<optimized out>) at ../../libguile/throw.c:254
+#32 0x00007ffff7b6061f in scm_c_catch (tag=tag@entry=0x404, 
+    body=body@entry=0x7ffff7aeb700 <c_body>, 
+    body_data=body_data@entry=0x7ffe53ffece0, 
+    handler=handler@entry=0x7ffff7aeb9a0 <c_handler>, 
+    handler_data=handler_data@entry=0x7ffe53ffece0, 
+    pre_unwind_handler=pre_unwind_handler@entry=0x7ffff7aeb800 <pre_unwind_handler>, pre_unwind_handler_data=0x7ff020) at ../../libguile/throw.c:377
+#33 0x00007ffff7aebd10 in scm_i_with_continuation_barrier (
+    body=body@entry=0x7ffff7aeb700 <c_body>, 
+    body_data=body_data@entry=0x7ffe53ffece0, 
+    handler=handler@entry=0x7ffff7aeb9a0 <c_handler>, 
+    handler_data=handler_data@entry=0x7ffe53ffece0, 
+    pre_unwind_handler=pre_unwind_handler@entry=0x7ffff7aeb800 <pre_unwind_handler>, pre_unwind_handler_data=0x7ff020) at ../../libguile/continuations.c:360
+#34 0x00007ffff7aebdf5 in scm_c_with_continuation_barrier (func=<optimized out>, 
+    data=<optimized out>) at ../../libguile/continuations.c:456
+#35 0x00007ffff717f127 in GC_call_with_gc_active (
+    fn=fn@entry=0x7ffff7b5e200 <with_guile_trampoline>, 
+    client_data=client_data@entry=0x7ffe53ffedc0) at ../pthread_support.c:1343
+#36 0x00007ffff7b5ec11 in with_guile (base=base@entry=0x7ffe53ffed90, 
+    data=data@entry=0x7ffe53ffedc0) at ../../libguile/threads.c:688
+#37 0x00007ffff7179132 in GC_call_with_stack_base (
+    fn=fn@entry=0x7ffff7b5eb80 <with_guile>, arg=arg@entry=0x7ffe53ffedc0)
+    at ../misc.c:1941
+#38 0x00007ffff7b5efb8 in scm_i_with_guile (dynamic_state=<optimized out>, 
+    data=<optimized out>, func=<optimized out>) at ../../libguile/threads.c:703
+#39 scm_with_guile (func=<optimized out>, data=<optimized out>)
+    at ../../libguile/threads.c:709
+#40 0x00007fffecb62e5e in opencog::SchemeEval::eval_expr(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&) (
+    this=0x7ffe8c000980, expr=...)
+    at /home/ubuntu/src/atomspace/opencog/guile/SchemeEval.cc:473
+#41 0x00007fffdef6eb6c in opencog::GenericShell::eval_loop (this=0x7fff69581ac0)
+    at /home/ubuntu/src/opencog/opencog/cogserver/shell/GenericShell.cc:450
+
+
+
+
+(observe-text "In the calmness of the evening, when the winds had sunk to rest, When no earthquake heaved its fury, burned no fire within my breast, Came a still small voice so tender, it the heart of Christ confessed: \"Unto thy God be true!\"")
+
+Interesting. Unescaped quotes!  FIXED
+also - unescaped carriage returns FIXED.
+also sentence spliter fails when there are footnotes:
+.[571]   FIXED
+also at any time."[572]   FIXED
+but also...
+ERROR: In procedure fport_read: Connection reset by peer
+
+Java eats .\n as a string.... but does not eat \n by itself.  FIXED
+also it un-escapes the quotes.  FIXED
+ Ohhh: right.\n[?].n   FIXED
+
+skip setWordAndPos or rather use simplified form of it.
+setWordAndPos
+Remove from Linkable...
+add loop for englsih when? in the algs... in Morphy? No, too late
+in RelationExtractor.java: in 
+FeatureNode fn = _parse.getLeft();
+while (fn != null)
+fn = fn.get("NEXT");
+
+
+(use-modules (ice-9 textual-ports))
+(define (fubar sent-txt)
+   (let ((s (socket PF_INET SOCK_STREAM 0)))
+      (connect s AF_INET (inet-pton AF_INET "127.0.0.1") 4445)
+      (set-port-encoding! s "utf-8")
+      (display sent-txt s) (display "\n" s)
+      (format #t "Its ~A\n" (get-string-all s))
+     (close-port s)))
+
+
+Oh no Mr Bill!! stack_size=512 fp-bot = 455 ip-subr_stub_code=14 engine=1 Mon Jun  5 03:43:12 2017
+
+Oh no Mr Bill!! stack_size=512 fp-bot = 455 ip-subr_stub_code=14 engine=1 Mon Jun  5 05:53:08 2017
+
+Oh no Mr Bill!! stack_size=512 fp-bot = 455 ip-subr_stub_code=14 engine=1 Mon Jun  5 05:53:08 2017
+
+Oh no Mr Bill!! stack_size=512 fp-bot = 455 ip-subr_stub_code=14 engine=1 Mon Jun  5 23:06:13 2017
+
+This one has an exception half-an-hour earlier:
+[2017-06-05 22:37:22:726] [INFO] Aiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiieee it
+was this
+: Backtrace: ...
+In opencog/base/file-utils.scm:
+    79:27  5 (exec-scm-from-port _)
+In ice-9/boot-9.scm:
+    849:4  4 (with-throw-handler _ _ _)
+    849:4  3 (with-throw-handler _ _ _)
+In unknown file:
+           2 (string-concatenate-reverse (" (WordInstanceNode \"of@d7a23…" …) …)
+In ice-9/boot-9.scm:
+   759:25  1 (dispatch-exception 2 wrong-type-arg ("string-append" "Wrong…" …))
+In unknown file:
+           0 (apply-smob/1 #<catch-closure 2425880> wrong-type-arg "string-…" …)
+ERROR: In procedure apply-smob/1:
+ERROR: In procedure string-append: Wrong type (expecting string): (filename . #f)
+ABORT: wrong-type-arg
+
+But there are no files anywhere in this code...
+
+[2017-06-05 23:06:14:154] [INFO] Aiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiieee it
+was this: Backtrace:
+In opencog/base/file-utils.scm:
+    79:27  5 (exec-scm-from-port _)
+In ice-9/boot-9.scm:
+    849:4  4 (with-throw-handler _ _ _)
+    849:4  3 (with-throw-handler _ _ _)
+In unknown file:
+           2 (string-concatenate-reverse ((#<tree-il (const "ANY")>)) "\n …" …)
+In ice-9/boot-9.scm:
+   759:25  1 (dispatch-exception 2 wrong-type-arg ("string-append" "Wrong…" …))
+In unknown file:
+           0 (apply-smob/1 #<catch-closure 276ce00> wrong-type-arg "string-…" …)
+
+ERROR: In procedure apply-smob/1:
+ERROR: In procedure string-append: Wrong type (expecting string):
+(#<tree-il (const "ANY")>)
+ABORT: wrong-type-arg
+
+
+Oh no Mr Bill!! stack_size=512 fp-bot = 455 ip-subr_stub_code=14
+engine=1 Tue Jun  6 02:39:21 2017
+
+Oh no Mr Bill!! stack_size=512 fp-bot = 455 ip-subr_stub_code=14
+engine=1 Tue Jun  6 02:39:21 2017
+
+.... and then a crash:
+the crash is related to a backtrace, again.
+
+
+Thread 24232 "guile" received signal SIGSEGV, Segmentation fault.
+[Switching to Thread 0x7ffee57fa700 (LWP 10775)]
+0x00007ffff7b0d809 in scm_is_pair (x=0x0) at ../../libguile/pairs.h:159
+159       return SCM_I_CONSP (x);
+(gdb) bt
+#0  0x00007ffff7b0d809 in scm_is_pair (x=0x0) at
+../../libguile/pairs.h:159
+#1  scm_ilength (sx=<optimized out>) at ../../libguile/list.c:190
+#2  0x00007ffff7b0d859 in scm_list_p (x=<optimized out>)
+    at ../../libguile/list.c:168
+#3  0x00007ffff7b66381 in vm_debug_engine (thread=0x54569480,
+vp=0x1644e990, 
+    registers=0x0, resume=-536832) at ../../libguile/vm-engine.c:784
+#4  0x00007ffff7b702fa in scm_call_n (proc=0x7fffeddbdd70, 
+    argv=argv@entry=0x7ffee57f9070, nargs=nargs@entry=4)
+    at ../../libguile/vm.c:1271
+#5  0x00007ffff7af0694 in scm_call_4 (proc=<optimized out>, 
+    arg1=arg1@entry=0x54c8fd90, arg2=arg2@entry=0x547a18c0, 
+    arg3=arg3@entry=0x984520, arg4=arg4@entry=0x52)
+    at ../../libguile/eval.c:508
+#6  0x00007ffff7ae19f5 in display_backtrace_body (a=<optimized out>)
+    at ../../libguile/backtrace.c:244
+#7  0x00007ffff7b66381 in vm_debug_engine (thread=0x54569480,
+vp=0x1644e990, 
+    registers=0x0, resume=-536832) at ../../libguile/vm-engine.c:784
+#8  0x00007ffff7b702fa in scm_call_n (proc=proc@entry=0x547a1700, 
+    argv=argv@entry=0x0, nargs=nargs@entry=0) at ../../libguile/vm.c:1271
+#9  0x00007ffff7af0599 in scm_call_0 (proc=proc@entry=0x547a1700)
+    at ../../libguile/eval.c:481
+#10 0x00007ffff7b5f149 in catch (tag=tag@entry=0x404, thunk=0x547a1700, 
+---Type <return> to continue, or q <return> to quit---
+    handler=0x547a16e0, pre_unwind_handler=0x4) at
+../../libguile/throw.c:137
+#11 0x00007ffff7b5f4b5 in scm_catch_with_pre_unwind_handler (
+    key=key@entry=0x404, thunk=<optimized out>, handler=<optimized out>, 
+    pre_unwind_handler=<optimized out>) at ../../libguile/throw.c:254
+#12 0x00007ffff7b5f66f in scm_c_catch (tag=tag@entry=0x404, 
+    body=body@entry=0x7ffff7ae18d0 <display_backtrace_body>, 
+    body_data=body_data@entry=0x7ffee57f9450, 
+    handler=handler@entry=0x7ffff7ae1cc0 <error_during_backtrace>, 
+    handler_data=<optimized out>, 
+    pre_unwind_handler=pre_unwind_handler@entry=0x0, 
+    pre_unwind_handler_data=0x0) at ../../libguile/throw.c:377
+#13 0x00007ffff7b5f67e in scm_internal_catch (tag=tag@entry=0x404, 
+    body=body@entry=0x7ffff7ae18d0 <display_backtrace_body>, 
+    body_data=body_data@entry=0x7ffee57f9450, 
+    handler=handler@entry=0x7ffff7ae1cc0 <error_during_backtrace>, 
+    handler_data=<optimized out>) at ../../libguile/throw.c:386
+#14 0x00007ffff7ae18a5 in scm_display_backtrace_with_highlights (
+    stack=<optimized out>, port=<optimized out>, first=<optimized out>, 
+    depth=<optimized out>, highlights=<optimized out>)
+    at ../../libguile/backtrace.c:282
+#15 0x00007fffecb61684 in
+opencog::SchemeEval::catch_handler(scm_unused_struct*,
+scm_unused_struct*) (this=0x7fff98000980, tag=0x7a86e0,
+throw_args=0x5148e850)
+---Type <return> to continue, or q <return> to quit---
+    at /home/ubuntu/src/atomspace/opencog/guile/SchemeEval.cc:422
+#16 0x00007ffff7b66381 in vm_debug_engine (thread=0x54569480,
+vp=0x1644e990, 
+    registers=0x0, resume=-536832) at ../../libguile/vm-engine.c:784
+#17 0x00007ffff7b702fa in scm_call_n (proc=proc@entry=0x54569500, 
+    argv=<optimized out>, nargs=5) at ../../libguile/vm.c:1271
+#18 0x00007ffff7af0a8b in scm_apply_0 (proc=proc@entry=0x54569500,
+args=0x304)
+    at ../../libguile/eval.c:594
+#19 0x00007ffff7b5f1c7 in catch (tag=<optimized out>, thunk=0x54569520, 
+    handler=0x54569500, pre_unwind_handler=0x545694e0)
+    at ../../libguile/throw.c:134
+#20 0x00007fffecb61d89 in
+opencog::SchemeEval::do_eval(std::__cxx11::basic_string<char,
+std::char_traits<char>, std::allocator<char> > const&) (
+    this=0x7fff98000980, expr=...)
+    at /home/ubuntu/src/atomspace/opencog/guile/SchemeEval.cc:576
+#21 0x00007fffecb61e3a in opencog::SchemeEval::c_wrap_eval(void*) (
+    p=0x7fff98000980)
+    at /home/ubuntu/src/atomspace/opencog/guile/SchemeEval.cc:505
+#22 0x00007ffff7aea75a in c_body (d=0x7ffee57f9ce0)
+    at ../../libguile/continuations.c:422
+#23 0x00007ffff7b66381 in vm_debug_engine (thread=0x54569480,
+vp=0x1644e990, 
+    registers=0x0, resume=-536832) at ../../libguile/vm-engine.c:784
+#24 0x00007ffff7b702fa in scm_call_n (proc=proc@entry=0x545695c0, 
+---Type <return> to continue, or q <return> to quit---
+    argv=argv@entry=0x0, nargs=nargs@entry=0) at ../../libguile/vm.c:1271
+#25 0x00007ffff7af0599 in scm_call_0 (proc=proc@entry=0x545695c0)
+    at ../../libguile/eval.c:481
+#26 0x00007ffff7b5f149 in catch (tag=tag@entry=0x404, thunk=0x545695c0, 
+    handler=0x545695a0, pre_unwind_handler=0x54569580)
+    at ../../libguile/throw.c:137
+#27 0x00007ffff7b5f4b5 in scm_catch_with_pre_unwind_handler (
+    key=key@entry=0x404, thunk=<optimized out>, handler=<optimized out>, 
+    pre_unwind_handler=<optimized out>) at ../../libguile/throw.c:254
+#28 0x00007ffff7b5f66f in scm_c_catch (tag=tag@entry=0x404, 
+    body=body@entry=0x7ffff7aea750 <c_body>, 
+    body_data=body_data@entry=0x7ffee57f9ce0, 
+    handler=handler@entry=0x7ffff7aea9f0 <c_handler>, 
+    handler_data=handler_data@entry=0x7ffee57f9ce0, 
+    pre_unwind_handler=pre_unwind_handler@entry=0x7ffff7aea850
+<pre_unwind_handler>, pre_unwind_handler_data=0x7ff020) at
+../../libguile/throw.c:377
+#29 0x00007ffff7aead60 in scm_i_with_continuation_barrier (
+    body=body@entry=0x7ffff7aea750 <c_body>, 
+    body_data=body_data@entry=0x7ffee57f9ce0, 
+    handler=handler@entry=0x7ffff7aea9f0 <c_handler>, 
+    handler_data=handler_data@entry=0x7ffee57f9ce0, 
+    pre_unwind_handler=pre_unwind_handler@entry=0x7ffff7aea850
+<pre_unwind_handl---Type <return> to continue, or q <return> to quit---
+er>, pre_unwind_handler_data=0x7ff020) at
+../../libguile/continuations.c:360
+#30 0x00007ffff7aeae45 in scm_c_with_continuation_barrier (
+    func=<optimized out>, data=<optimized out>)
+    at ../../libguile/continuations.c:456
+#31 0x00007ffff717e127 in GC_call_with_gc_active (
+    fn=fn@entry=0x7ffff7b5d250 <with_guile_trampoline>, 
+    client_data=client_data@entry=0x7ffee57f9dc0) at
+../pthread_support.c:1343
+#32 0x00007ffff7b5dc61 in with_guile (base=base@entry=0x7ffee57f9d90, 
+    data=data@entry=0x7ffee57f9dc0) at ../../libguile/threads.c:688
+#33 0x00007ffff7178132 in GC_call_with_stack_base (
+    fn=fn@entry=0x7ffff7b5dbd0 <with_guile>,
+arg=arg@entry=0x7ffee57f9dc0)
+    at ../misc.c:1941
+#34 0x00007ffff7b5e008 in scm_i_with_guile (dynamic_state=<optimized
+out>, 
+    data=<optimized out>, func=<optimized out>) at
+../../libguile/threads.c:703
+#35 scm_with_guile (func=<optimized out>, data=<optimized out>)
+    at ../../libguile/threads.c:709
+#36 0x00007fffecb61ebe in
+opencog::SchemeEval::eval_expr(std::__cxx11::basic_string<char,
+std::char_traits<char>, std::allocator<char> > const&) (
+    this=0x7fff98000980, expr=...)
+    at /home/ubuntu/src/atomspace/opencog/guile/SchemeEval.cc:477
+#37 0x00007fffdef6def4 in opencog::GenericShell::eval_loop (
+    this=0x7ffee8253d50)
+---Type <return> to continue, or q <return> to quit---
+    at
+/home/ubuntu/src/opencog/opencog/cogserver/shell/GenericShell.cc:497
+#38 0x00007fffeb71dc80 in ?? () from
+/usr/lib/x86_64-linux-gnu/libstdc++.so.6
+#39 0x00007ffff78916ba in start_thread (arg=0x7ffee57fa700)
+    at pthread_create.c:333
+#40 0x00007ffff75c782d in clone ()
+    at ../sysdeps/unix/sysv/linux/x86_64/clone.S:109
+(gdb) 
+
+
+Oh no Mr Bill!! stack_size=512 fp-bot = 455 ip-subr_stub_code=14 engine=1 Tue Jun  6 10:16:44 2017
+
+Oh no Mr Bill!! stack_size=512 fp-bot = 455 ip-subr_stub_code=14 engine=1 Tue Jun  6 10:16:44 2017
+
+Oh no Mr Bill!! stack_size=512 fp-bot = 455 ip-subr_stub_code=14 engine=1 Tue Jun  6 18:27:01 2017
+
+Oh no Mr Bill!! stack_size=512 fp-bot = 455 ip-subr_stub_code=14 engine=1 Tue Jun  6 18:27:01 2017
+
+
+----
+This time, no prints at all!! just hit abort:
+scheme@(guile-user)> 
+Thread 451 "guile" received signal SIGABRT, Aborted.
+[Switching to Thread 0x7ffd25ffb700 (LWP 5037)]
+(gdb) bt
+#0  0x00007ffff74f6428 in __GI_raise (sig=sig@entry=6)
+    at ../sysdeps/unix/sysv/linux/raise.c:54
+#1  0x00007ffff74f802a in __GI_abort () at abort.c:89
+#2  0x00007ffff7af22f4 in compute_assigned (exp=<optimized out>, 
+    assigned=assigned@entry=0x24ba1c0) at ../../libguile/expand.c:1268
+#3  0x00007ffff7af2309 in compute_assigned (exp=<optimized out>, 
+    assigned=assigned@entry=0x24ba1c0) at ../../libguile/expand.c:1185
+#4  0x00007ffff7af2388 in compute_assigned (exp=<optimized out>, 
+    assigned=assigned@entry=0x24ba1c0) at ../../libguile/expand.c:1227
+#5  0x00007ffff7af2309 in compute_assigned (exp=<optimized out>, 
+    assigned=assigned@entry=0x24ba1c0) at ../../libguile/expand.c:1185
+#6  0x00007ffff7af2309 in compute_assigned (exp=exp@entry=0xd0366c0, 
+    assigned=assigned@entry=0x24ba1c0) at ../../libguile/expand.c:1185
+#7  0x00007ffff7af3e1e in scm_convert_assignment (exp=0xd0366c0)
+    at ../../libguile/expand.c:1570
+#8  0x00007ffff7b12a45 in scm_memoize_expression (exp=<optimized out>)
+    at ../../libguile/memoize.c:641
+#9  0x00007ffff7b66381 in vm_debug_engine (thread=0xabe, vp=0xc65240, 
+    registers=0x6, resume=-145791960) at ../../libguile/vm-engine.c:784
+#10 0x00007ffff7b702fa in scm_call_n (proc=0x7fffe7c9d4a8, 
+    argv=argv@entry=0x7ffd25ffa300, nargs=nargs@entry=3)
+    at ../../libguile/vm.c:1271
+#11 0x00007ffff7af063f in scm_call_3 (proc=<optimized out>, 
+    arg1=<optimized out>, arg2=<optimized out>, arg3=<optimized out>)
+    at ../../libguile/eval.c:501
+
+well, that's unexpected....
+(gdb) print exp
+$1 = <optimized out>
+
+wtf....
+
+another crazy:
+
+Thread 11590 "guile" received signal SIGSEGV, Segmentation fault.
+[Switching to Thread 0x7fff437fe700 (LWP 1316)]
+0x00007ffff7b2b067 in encode_escape_sequence (ch=-134642584, 
+    buf=buf@entry=0x7fff437fcd70 "\\x00e3c0") at
+../../libguile/ports.c:3053
+3053              buf[i++] = hex[ch / 16];
+(gdb) bt
+#0  0x00007ffff7b2b067 in encode_escape_sequence (ch=-134642584, 
+    buf=buf@entry=0x7fff437fcd70 "\\x00e3c0") at
+../../libguile/ports.c:3053
+
+
+ch is -134642584
+
+(gdb) print/x ch
+$9 = 0xf7f98468
+So clearly ports.c fails to check for positive.
+
+
+Oh no Mr Bill!! stack_size=512 fp-bot = 455 ip-subr_stub_code=14  engine=1
+Tue Jun  6 20:27:36 2017
+
+Oh no Mr Bill!! stack_size=512 fp-bot = 455 ip-subr_stub_code=14  engine=1
+Wed Jun  7 02:06:40 2017
+
+Oh no Mr Bill!! stack_size=512 fp-bot = 455 ip-subr_stub_code=14  engine=1
+Wed Jun  7 02:06:40 2017
+
+Oh no Mr Bill!! stack_size=512 fp-bot = 455 ip-subr_stub_code=14  engine=1
+Wed Jun  7 06:04:23 2017
+
+Oh no Mr Bill!! stack_size=512 fp-bot = 455 ip-subr_stub_code=14  engine=1
+Wed Jun  7 06:04:23 2017
+
+Thread 326311 "guile" received signal SIGSEGV, Segmentation fault.
+[Switching to Thread 0x7ffe457fa700 (LWP 13958)]
+iprin1 (exp=0x0, port=0x85864500, pstate=0x71165c50)
+    at ../../libguile/print.c:611
+611           switch (SCM_TYP7 (exp))
+
+#0  iprin1 (exp=0x0, port=0x85864500, pstate=0x71165c50)
+    at ../../libguile/print.c:611
+#1  0x00007ffff7b32ad0 in scm_iprin1 (exp=<optimized out>, 
+    port=<optimized out>, pstate=<optimized out>) at
+../../libguile/print.c:544
+#2  0x00007ffff7b60787 in scm_i_variable_print (exp=0x86b77de0, 
+    port=0x85864500, pstate=0x71165c50) at ../../libguile/variable.c:41
+#3  0x00007ffff7b32c9b in scm_prin1 (exp=exp@entry=0x86b77de0, 
+    port=port@entry=0x85864500, writingp=writingp@entry=1)
+    at ../../libguile/print.c:817
+#4  0x00007ffff7b33b61 in scm_write (obj=0x86b77de0, port=0x85864500)
+    at ../../libguile/print.c:1076
+#5  0x00007ffff7b66381 in vm_debug_engine (thread=0x0, vp=0x19a7c60, 
+    registers=0xfffffffffffa7a74, resume=16) at
+../../libguile/vm-engine.c:784
+#6  0x00007ffff7b702fa in scm_call_n (proc=0x7fffeddbdd70, 
+    argv=argv@entry=0x7ffe457f9070, nargs=nargs@entry=4)
+    at ../../libguile/vm.c:1271
+#7  0x00007ffff7af0694 in scm_call_4 (proc=<optimized out>, 
+    arg1=arg1@entry=0x8759cc40, arg2=arg2@entry=0x86101be0, 
+    arg3=arg3@entry=0x983520, arg4=arg4@entry=0x52)
+    at ../../libguile/eval.c:508
+#8  0x00007ffff7ae19f5 in display_backtrace_body (a=<optimized out>)
+    at ../../libguile/backtrace.c:244
+
+
+----------------
+anotehr:
+Thread 213118 "guile" received signal SIGSEGV, Segmentation fault.
+[Switching to Thread 0x7fff61ffb700 (LWP 11550)]
+scm_ipruk (hdr=0x7ffff7b87ec8 "immediate", ptr=0xffffffff81480f9f, 
+    port=0x7ed4f6a0) at ../../libguile/print.c:946
+946           scm_uintprint (SCM_CELL_WORD_0 (ptr), 16, port);
+(gdb) bt
+#0  scm_ipruk (hdr=0x7ffff7b87ec8 "immediate", ptr=0xffffffff81480f9f, 
+    port=0x7ed4f6a0) at ../../libguile/print.c:946
+#1  0x00007ffff7b32b73 in print_vector_or_weak_vector (v=0x7feff9e0, 
+    len=<optimized out>, ref=0x7ffff7b73ac0 <scm_c_weak_vector_ref>, 
+    port=0x7ed4f6a0, pstate=0x847400) at ../../libguile/print.c:561
+#2  0x00007ffff7b33245 in iprin1 (exp=0x7feff9e0, port=0x7ed4f6a0, 
+    pstate=0x847400) at ../../libguile/print.c:743
+#3  0x00007ffff7b32c9b in scm_prin1 (exp=exp@entry=0x7feff9e0, 
+    port=port@entry=0x7ed4f6a0, writingp=writingp@entry=1)
+    at ../../libguile/print.c:817
+#4  0x00007ffff7b33b61 in scm_write (obj=0x7feff9e0, port=0x7ed4f6a0)
+    at ../../libguile/print.c:1076
+#5  0x00007ffff7b66381 in vm_debug_engine (thread=0x7e25ea80,
+vp=0x160d2360, 
+    registers=0x4d, resume=8) at ../../libguile/vm-engine.c:784
+#6  0x00007ffff7b702fa in scm_call_n (proc=0x7fffeddbdd70, 
+    argv=argv@entry=0x7fff61ffa070, nargs=nargs@entry=4)
+    at ../../libguile/vm.c:1271
+#7  0x00007ffff7af0694 in scm_call_4 (proc=<optimized out>, 
+    arg1=arg1@entry=0x7eabfee0, arg2=arg2@entry=0x7eabefa0, 
+    arg3=arg3@entry=0x983520, arg4=arg4@entry=0x52)
+    at ../../libguile/eval.c:508
+#8  0x00007ffff7ae19f5 in display_backtrace_body (a=<optimized out>)
+
+-----------------
+Another one:
+
+Thread 230572 "guile" received signal SIGSEGV, Segmentation fault.
+[Switching to Thread 0x7ffec77fe700 (LWP 3880)]
+scm_reverse (lst=lst@entry=0x80003e30) at ../../libguile/list.c:346
+#0  scm_reverse (lst=lst@entry=0x80003e30) at ../../libguile/list.c:346
+#1  0x00007ffff7b4d1ea in scm_string_concatenate_reverse (ls=0x80003e30, 
+    final_string=0x7fc19520, end=<optimized out>)
+    at ../../libguile/srfi-13.c:2465
+#2  0x00007ffff7b66381 in vm_debug_engine (
+    thread=0x7ffff73cd260 <GC_allocate_ml>, vp=0x7c1fd3f0, 
+    registers=0x7ffff73cd260 <GC_allocate_ml>, resume=1)
+    at ../../libguile/vm-engine.c:784
+#3  0x00007ffff7b702fa in scm_call_n (proc=0x7fffe7c9d4a8, 
+    argv=argv@entry=0x7ffec77fd540, nargs=nargs@entry=3)
+    at ../../libguile/vm.c:1271
+#4  0x00007ffff7af063f in scm_call_3 (proc=<optimized out>, 
+    arg1=<optimized out>, arg2=<optimized out>, arg3=<optimized out>)
+    at ../../libguile/eval.c:501
+#5  0x00007ffff7b66381 in vm_debug_engine (
+    thread=0x7ffff73cd260 <GC_allocate_ml>, vp=0x7c1fd3f0, 
+    registers=0x7ffff73cd260 <GC_allocate_ml>, resume=1)
+    at ../../libguile/vm-engine.c:784
+#6  0x00007ffff7b702fa in scm_call_n (proc=proc@entry=0x7cc865a0, 
+    argv=argv@entry=0x0, nargs=nargs@entry=0) at ../../libguile/vm.c:1271
+#7  0x00007ffff7af0599 in scm_call_0 (proc=proc@entry=0x7cc865a0)
+    at ../../libguile/eval.c:481
+#8  0x00007ffff7b5f149 in catch (tag=<optimized out>, thunk=0x7cc865a0, 
+    handler=0x7cc86580, pre_unwind_handler=0x7cc86560)
+    at ../../libguile/throw.c:137
+#9  0x00007fffecb61d89 in opencog::SchemeEval::do_eval(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&) (
+    this=0x7fff3c000980, expr=...)
+    at /home/ubuntu/src/atomspace/opencog/guile/SchemeEval.cc:576
+
+Well, that's different: for the first time ever, it is NOT in an
+exception context!!!
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+GC_MALLOC_ATOMIC GC_malloc_atomic
+scm_gc_malloc_pointerless
+scm_gc_strndup
+=======================
+other guile bugs:
+ (acos 1.0)  can return small imaginaey number
+ (fold of reals can return small imaginary parts
+
+=======================
+total unique pairs
+1) no way to get all pairs...
+2) support not computed or stored.. DONE
+3) stored support not fetchable FIXED with report-API
+4) store left and right sizes DONE
+cache-all-pair-freqs returs total 
+
+* sep out bin-counting code into own file DONE
+add-subtotal-mi-compute DONE
+
+call-only-once in sing
+fetch-all-words in sing
+add-pair-freq-api in mst
+
+(use-modules (opencog) (opencog persist) (opencog persist-sql))
+(use-modules (opencog nlp) (opencog nlp learn))
+(use-modules (opencog analysis))
+(sql-open "postgres:///en_pairs_sim?user=linas")
+(fetch-all-words)
+
+(define ala (make-any-link-api))
+(ala 'fetch-pairs)  << 1099 secs 1074 1028
+(batch-short ala)
+(batch-all-pair-mi ala)
+
+Support: found num left=395274 num right=396260 in 426 secs << 395, ph:527
+Done with wild-card count N(x,*) and N(*,y) in 1259 secs << ph:1300
+Done computing N(*,*) total-count=418235277.0 in 51 secs << ph:46
+Going to do individual pair frequencies
+Done computing 8880914 pairs in 1074 secs  << 1007 ph:872
+Start computing log P(*,y)
+Done computing 396260 left-wilds in 61 secs << ph:51
+Done storing 396260 left-wilds in 121 secs << ph:115
+Done computing 395274 right-wilds in 55 secs << ph:51
+Done with -log P(*,y), start -log P(x,*)
+Done storing 395274 right-wilds in 121 secs << ph:127
+Done computing -log P(x,*) and P(*,y)
+Going to do individual pair MI
+Too many heap sections: Increase MAXHINCR or MAX_HEAP_SECTS
+Fuck.
+
+alloc.c:        ABORT("Too many heap sections: Increase MAXHINCR or
+MAX_HEAP_SECTS");
+MAX_HEAP_SECTS
+include/private/gc_priv.h:#   define MAXHINCR 4096
+
+define HBLKSIZE 4096
+include/private/gc_priv.h:#
+ define MAX_HEAP_SECTS 8192  if -DLARGE_CONFIG
+--enable-large-config
+--enable-parallel-mark didn't do this.
+
+Done computing 8880914 pair MI's in 3590 secs
+Done storing 8880914 pairs in 4190 secs
+Going to do column and row subtotals
+Finished left entropy subtotals in 580 secs
+Finished right entropy subtotals in 517 secs
+Finished left MI subtotals in 353 secs
+Finished right MI subtotals in 330 secs
+Finished left support subtotals in 1021 secs << 772 after star fix
+Finished right support subtotals in 961 secs << 745
+Going to compute the left, right and total entropy
+Finished left norm totals in 210 secs << 232
+Finished right norm totals in 210 secs << 237
+Done computing totals in 2360 secs
+Start saving left-wildcards
+Done storing 396260 left-wilds in 224 secs
+Done storing 395274 right-wilds in 230 secs
+Finished with MI computations
+
+
+========================================================
+support stats
+
+|(*,y)| = number of non-zero entries for column y
+
+sum_y |(*,y)| = right-support
+
+sqrt [ sum_x N^2 (x,*) / num-rows ]
+
+left-length(y) = sqrt(sum_x N^2(x,y)) = col-length
+so sum over rights
+divide by num-rights == num cols
+so this is right-legnth
+
+<xun> = sum_y N(*,y) / num-cols
+      = N(*,*) / num-cols
+
+<0w> = sum_y p(*,y) |(*,y)|
+
+<xw> = s x p
+    = sum_y p(*,y) N(*,y)
+
+but p(*,y) = N(*,y) / N(*,*)
+
+<x^2w> = s x^2 p 
+       = sum_y p(*,y) N^2(*,y)
+
+s (x- <xw>)^2  p =
+
+<x^2w> - 2<xw> s x p + <xw>^2
+= <x^2w> - <xw>^2
+
+anyway, its not clear that's what we want, anyway.  Do we want count
+variation? or length variation?  length variation is trite if we've got
+totals. But count-variation requires....
+
+2d 2 obj, each = 1, avg=1
+
+<x^2w> = 1/2 + 1/2 = 1 ... 
+so for lensq, needed to divide by support.
+and for avg, need to divide by support too.
+
+
+Argh. Sim has the old style. pair-entropy
+
+(define fla (add-pair-freq-api ala))
+(define rla (add-report-api ala))
+(rla 'left-dim)
+(rla 'right-dim)
+(rla 'num_pairs)
+(rla 'left-entropy)
+(rla 'right-entropy)
+(rla 'total-entropy)
+(rla 'total-mi)
+
+(define pca (make-pseudo-cset-api))
+(pca 'fetch-pairs)
+(batch-all-pair-mi pca)  
+(define fca (add-pair-freq-api pca))
+(define ac (get-all-cset-words))
+
+5205
+
+(fca 'pair-mi  xxxx)
+So:
+(EvaluationLink  ; 388
+ (LinkGrammarRelationshipNode "ANY")
+  (ListLink (AnyNode "left-word") (WordNode "one-point")))
+has no "*-Entropy Key-* why?
+because not computeed ... why?
+Going to do MI column and row subtotals
+should be 'cache-all-subtotals
+Going to compute the left, right and total entropy
+
+(define wca (add-pair-stars pca))
+(define fca (add-pair-freq-api wca))
+(define rb (wca 'right-basis))
+(define dj (car rb))
+(define lwd (pca 'left-wildcard dj))
+ (fca 'left-wild-entropy dj)
+
+      (define (left-sum FN)
+         (fold
+            (lambda (right-item sum)
+               (+ sum (FN right-item)))
+            0 rb))
+
+      (define (right-sum FN)
+         (fold
+            (lambda (left-item sum)
+               (+ sum (FN left-item)))
+            0 (wca 'left-basis)))
+
+argh. compute-left-entropy is wrong... FIXED
+(define rca (add-report-api wca))
+(rca 'set-entropy le re tent)
+wild-wild-counta DONE
+time for totlaa DONE
+
+(define (an llobj) 
+	(lambda (message . args)
+		(case message ((name) "the big old name")
+		(else (apply llobj (cons message args))))))
+
+
+atom->getKeys()
+    std::set<Handle> getKeys() const;
+
+todo: print times  DONE
+todo: create a report. DONE
+todo: investigate exception DONE
+
+todo: how many words, on average, go into a pair?
+what about hubiness? in the graph con sense?
+i.e avg incomiing avg outgoing (i.e. left, right support sizes)
+
+avg left-support: non-zero / num-lefts(rows) 
+left-size: tot count /num-lefts<F8>x
+
+avg length
+( err... left-length 'rigt-basis
+
+===============================================================
+
+(define pca (make-pseudo-cset-api))
+(define psa (add-pair-stars pca))
+(define pfa (add-pair-freq-api psa))
+(define pta (make-thresh-pca pfa))
+(define aw (get-all-cset-words))
+(define w (car aw))
+(define cset (cog-incoming-by-type w 'LgWordCset))
+(define dj (gdr (car cset)))
+
+(define feig (pta 'left-initial))
+(define lm (pta 'left-mult feig))
+(lm dj)
+
+(define lit (pta 'left-iterate feig))
+(lit w)
+
+(pta 'left-norm feig)
+
+
+
+
+
+Crazy idea: iterate; the places we end up at should be the dependents
+since everything points at them, and they never point away.

@@ -1,4 +1,5 @@
 
+<<<<<<< HEAD
 INCLUDE_DIRECTORIES (
 	${CMAKE_BINARY_DIR}       # for the NLP atom types
 )
@@ -31,3 +32,6 @@ ADD_GUILE_MODULE (FILES
 	singletons.scm
 	MODULE_DESTINATION "${DATADIR}/scm/opencog/nlp/learn"
 )
+=======
+ADD_SUBDIRECTORY (scm)
+>>>>>>> opencog/master
