@@ -209,6 +209,21 @@
     (cog-outgoing-set
       (cog-execute! (Get (Reference (Variable "$x") CONCEPT))))))
 
+(define (is-member? GLOB LST)
+  "Check if GLOB is a member of LST, where LST may contain
+   WordNodes, LemmaNodes, and PhraseNodes."
+  (let* ((glob-txt-lst (map cog-name GLOB))
+         (raw-txt (string-join glob-txt-lst))
+         (lemma-txt (string-join (map get-lemma glob-txt-lst))))
+    (any (lambda (t)
+           (or (and (eq? 'WordNode (cog-type t))
+                    (equal? raw-txt (cog-name t)))
+               (and (eq? 'LemmaNode (cog-type t))
+                    (equal? lemma-txt (cog-name t)))
+               (and (eq? 'PhraseNode (cog-type t))
+                    (equal? raw-txt (cog-name t)))))
+         LST)))
+
 (define-public (chatlang-concept? CONCEPT . GLOB)
   "Check if the value grounded for the GlobNode is actually a member
    of the concept."
