@@ -644,9 +644,7 @@ void TypeFrameIndex::evaluatePatterns()
     bool finished = false;
     TypeFrame compoundFrame;
     std::vector<TypeFrame> patterns;
-    unsigned int myId = getThreadId();
 
-    printf("myId = %u\n", myId);
     while (! finished) {
         if (dequeueCompoundFrame(compoundFrame)) {
             patterns.clear();
@@ -792,7 +790,7 @@ void TypeFrameIndex::addPermutations(std::vector<std::vector<int>> &answer, std:
     permutation(answer, array, 0, base.size());
 }
 
-void TypeFrameIndex::addSymmetrucPermutations(TypeFrameSet &answer, const TypeFrame &frame, unsigned int cursor)
+void TypeFrameIndex::addSymmetricPermutations(TypeFrameSet &answer, const TypeFrame &frame, unsigned int cursor)
 {
     unsigned int arity = frame.at(cursor).second;
     std::vector<int> argPos = frame.getArgumentsPosition(cursor);

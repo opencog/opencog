@@ -114,7 +114,7 @@ private:
     void varMappingUnion(VarMapping &answer, const VarMapping &map1, const VarMapping &map2) const;
     void permutation(std::vector<std::vector<int>> &answer, int *array, int current, int size);
     void addPermutations(std::vector<std::vector<int>> &answer, std::vector<int> base);
-    void addSymmetrucPermutations(TypeFrameSet &answer, const TypeFrame &frame, unsigned int cursor);
+    void addSymmetricPermutations(TypeFrameSet &answer, const TypeFrame &frame, unsigned int cursor);
     void addPatterns(std::vector<TypeFrame> &answer, const TypeFrame &base) const;
     float computeQuality(const TypeFrame &pattern, RankingMetric metric);
     float computeISurprinsingness(const TypeFrame &pattern, bool normalized);
