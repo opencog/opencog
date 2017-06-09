@@ -8,4 +8,4 @@ learning.
 
 This demo exists in 2 binding languages
 1. Scheme, under the scm sub-directory,
-2. Haskell, under the haskell sub-directory.
+2. Haskell, under the haskell sub-directory (unmaintained).
