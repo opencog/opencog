@@ -162,6 +162,136 @@ void ConsoleSocket::sendPrompt()
     Send(_prompt);
 }
 
+
+// #define DEBUG_TOKENIZER(output) std::cout << output  << std::endl
+#define DEBUG_TOKENIZER(output)
+
+template <typename _OutputIterator>
+void tokenizeCommandLine( const std::string& command_line,
+                          _OutputIterator tokens,
+                          const std::string& delimiters = " ")
+{
+    bool in_quote = false;
+    bool in_single_quote = false;
+    bool have_token = false;
+    std::string::size_type length = command_line.length();
+    std::string::size_type token_length;
+    std::string::value_type current_char;
+    std::string partial_token;
+    
+    DEBUG_TOKENIZER("Processing command line->" << command_line);
+
+    // Loop over the command line characters
+    std::string::size_type char_index = 0;
+    while ( char_index < length) {
+
+        // Get the current character.
+        current_char = command_line[char_index];
+
+        // Handle double "quote"...
+        if (current_char == '\"' && !in_single_quote) {
+
+            have_token = true;
+            in_quote = !in_quote;
+
+            if (in_quote)
+                DEBUG_TOKENIZER(" > entering double quote");
+            else
+                DEBUG_TOKENIZER(" < exiting double quote");
+        }
+
+        // Handle single 'quote'...
+        else if(current_char == '\'' && !in_quote) {
+
+            have_token = true;
+            in_single_quote = !in_single_quote;
+
+            if (in_single_quote)
+                DEBUG_TOKENIZER(" > entering single quote");
+            else
+                DEBUG_TOKENIZER(" < exiting single quote");
+        }
+
+        // Handle escape sequences...
+        else if (current_char == '\\')
+            {
+            // Check the following character.
+            char_index++;
+            if (char_index < length) {
+
+                // Handle the escaped character.
+                current_char = command_line[char_index];
+                switch ( current_char ) {
+                    case '\"':
+                    case '\'':
+                    case '\\':
+                        partial_token += current_char;
+                        break;
+
+                    case 'n':
+                        partial_token += '\n';
+                        break;
+
+                    case 'f':
+                        partial_token += '\f';
+                        break;
+
+                    case 'r':
+                        partial_token += '\r';
+                        break;
+
+                    case 't':
+                        partial_token += '\t';
+                        break;
+
+                    default:
+                        partial_token += "<BAD ESCAPE CHAR>";
+                        break; 
+
+                    }
+
+                DEBUG_TOKENIZER(" handling \\" << current_char);
+                }
+            }
+
+        // Handle unquoted delimiters...
+        else if (   !in_quote && !in_single_quote &&
+                    delimiters.find(current_char) != std::string::npos) {
+            
+            // Process any pending token.
+            have_token = true;
+
+            DEBUG_TOKENIZER(" handling delimiter " << current_char);
+        }
+
+        // Handle normal characters...
+        else {
+
+            // Just append this character.
+            partial_token += current_char;
+
+            DEBUG_TOKENIZER(" handling normal " << current_char);
+        }
+
+        // The last character is automatically a token.
+        if (char_index == length - 1)
+            have_token = true;
+
+        // If we have a token append it to the token list.
+        if (have_token && partial_token.length()) {
+             *(tokens++) = partial_token;
+            DEBUG_TOKENIZER("Token add->" << partial_token);
+            partial_token.clear();
+        }
+
+        // Clear the token flag.
+        have_token = false;
+
+        // Get the next character.
+        char_index++;
+    }
+}
+
 void ConsoleSocket::OnLine(const std::string& line)
 {
     // If a shell processor has been designated, then defer all
@@ -199,7 +329,7 @@ void ConsoleSocket::OnLine(const std::string& line)
 
     // Parse command line
     std::list<std::string> params;
-    tokenize(line, std::back_inserter(params), " \t\v\f");
+    tokenizeCommandLine(line, std::back_inserter(params), " \t\v\f");
     logger().debug("params.size(): %d", params.size());
     if (params.empty()) {
         // return on empty/blank line
