@@ -6658,6 +6658,40 @@ So, somehow still stuck in i/o waiting for postgres to flush to disk.
 --------- meanhwile continue pair-parsing
 launch tranche-3 any-parsing Tue May 30 04:39:44 UTC 2017
 Done
+en_pairs_tthree
+(sql-open "postgres:///en_pairs_tthree?user=ubuntu")
+(fetch-all-words)
+(define ala (make-any-link-api))
+(define asa (add-pair-stars ala))
+(asa 'fetch-pairs)
+(batch-all-pair-mi asa)
+Finished with MI computations; this took 11.9 hours
+(print-matrix-summary-report asa)
+
+Summary Report for Correlation Matrix Link Grammar ANY link Word Pairs
+Left type: WordNode    Right Type: WordNode    Pair Type: ListLink
+Wildcard: (EvaluationLink (ctv 0 0 5.5719787e+08)
+   (LinkGrammarRelationshipNode "ANY")
+   (ListLink
+      (AnyNode "left-word")
+      (AnyNode "right-word")
+   )
+)
+Rows: 424940 Columns: 431538
+Size: 15224271 non-zero entries of 183377757720 possible
+Fraction non-zero: 8.3021E-5 Sparsity (-log_2): 13.556
+Total observations: 557197874.0  Avg obs per pair: 36.599
+Entropy Total: 18.317   Left: 10.191   Right: 10.061
+Total MI: -1.935
+
+                 Left         Right     Avg-left     Avg-right
+                 ----         -----     --------     ---------
+Support (l_0)  4.4098E+4    4.3839E+4
+Count   (l_1)  8.3106E+6    7.4675E+6     188.5        170.3    
+Length  (l_2)  9.1631E+5    7.7754E+5     20.78        17.74    
+RMS Count      9.1591E+5    7.7713E+5     20.77        17.73    
+
+OK, So I think we are done with en_pairs_tthree.
 
 ----- anyway, recompute pair mi and resume mst-parsing
 
@@ -6832,8 +6866,33 @@ delete from atoms where type=169;
 
 DONE. Now redo the summaries.
 
-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxhere
+redoing cset MI took
+Finished with MI computations; this took 8.28 hours
 
+(print-matrix-summary-report psa)
+Summary Report for Correlation Matrix Word-Disjunct Pairs (aka Connector Sets)
+Left type: WordNode    Right Type: PseudoAnd    Pair Type: PseudoWordCset
+Wildcard: (ListLink (ctv 0 0 14382276)
+   (AnyNode "cset-word")
+   (AnyNode "cset-disjunct")
+)
+Rows: 175559 Columns: 3401462
+Size: 6438484 non-zero entries of 597157267258 possible
+Fraction non-zero: 1.0782E-5 Sparsity (-log_2): 16.501
+Total observations: 14382276.0  Avg obs per pair: 2.2338
+Entropy Total: 21.006   Left: 14.906   Right: 10.007
+Total MI: -3.906
+
+                 Left         Right     Avg-left     Avg-right
+                 ----         -----     --------     ---------
+Support (l_0)  6.1010E+4    9176.    
+Count   (l_1)  1.5853E+5    6.4221E+4     2.598        6.999    
+Length  (l_2)  5694.        3476.         9.3332E-2    .3788    
+RMS Count      5666.        3444.         9.2870E-2    .3753    
+
+OK, 
+so en_pairs_ttwo_mst seems to contain valid data.
+So we are done, here, and its time to construct the next tranche.
 
 
 ---------- Try again. Here's what tone_mst says:
@@ -7191,6 +7250,7 @@ Oh, gram-sim.
 todo items:
 * trim low observation counts ....
 * implement sql delete function.
+* see todo at bottom
 
 ---------- debug hang:
 latest bdgw from git does not solve it.
@@ -8648,6 +8708,21 @@ avg length
 (lit w)
 
 (pta 'left-norm feig)
+without caching:
+scheme@(guile-user)> (pta 'left-norm feig)
+left-norm took 0 seconds
+$22 = 1.0000000000001292   OK still good.  This is sum over 37413 items
+
+(pta 'left-norm (make-fvec-cache feig)) <<  461 seconds - 81 atoms/sec
+ouch! this hashing sucks!
+
+scheme@(guile-user)> (pta 'right-norm lm)
+right-norm took 16 seconds  << Ugh, caching of feig sucked.
+$23 = 1.8948456865590222e-4
+scheme@(guile-user)> (pta 'left-norm lit)
+left-norm took 2699 seconds
+$24 = 1.8266495662334775e-7
+
 
 
 
