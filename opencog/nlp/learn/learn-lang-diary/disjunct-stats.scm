@@ -620,9 +620,9 @@
 
 ; ------ again, but binned.
 
-(define scored-sims (score sim-cosine all-sims))
+(define scored-sims (score sim-cosine all-sims))  ; 44139852 = 44M  wow
 
-(define binned-sims (bin-count-simple scored-sims 100))
+(define binned-sims (bin-count-simple scored-sims 300))
 
 (let ((outport (open-file "/tmp/binned-sims.dat" "w")))
 	(print-bincounts-tsv binned-sims outport)

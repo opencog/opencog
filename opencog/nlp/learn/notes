@@ -6187,6 +6187,32 @@ select count(*) from valuations; -- 5679764 = 5.7M
 37f9a6ef2415ba708ffbf42f9c5948de  en_pairs_rone.sql.bz2
 
 ==================================================================
+en_pairs_rone_mst
+-----------------
+
+(print-matrix-summary-report asa)
+Summary Report for Correlation Matrix Link Grammar ANY link Word Pairs
+Left type: WordNode    Right Type: WordNode    Pair Type: ListLink
+Wildcard: (EvaluationLink (ctv 0 0 1.7409991e+08)
+   (LinkGrammarRelationshipNode "ANY")
+   (ListLink
+      (AnyNode "left-word")
+      (AnyNode "right-word")
+   )
+)
+Rows: 133792 Columns: 135156
+Size: 5544578 non-zero entries of 18082791552 possible
+Fraction non-zero: 3.0662E-4 Sparsity (-log_2): 11.671
+Total observations: 174099906.0  Avg obs per pair: 31.400
+Entropy Total: 17.667   Left: 9.8592   Right: 9.7506
+Total MI: -1.943
+                 Left         Right     Avg-left     Avg-right
+                 ----         -----     --------     ---------
+Support (l_0)  1.7398E+4    1.7417E+4
+Count   (l_1)  2.4875E+6    2.2524E+6     143.0        129.3    
+Length  (l_2)  2.8788E+5    2.4347E+5     16.55        13.98    
+RMS Count      2.8758E+5    2.4316E+5     16.53        13.96    
+
 ==================================================================
 
 
@@ -7242,7 +7268,15 @@ strategy:
 
 (define pca (make-pseudo-cset-api))
 (define psa (add-pair-stars pca))
-(psa 'fetch-pairs)
+(psa 'fetch-pairs)   <<< took 3449 secs
+(sql-close)
+(sql-open "postgres:///en_pairs_tthree?user=ubuntu")
+(sql-load)
+(sql-close)
+(sql-open "postgres:///en_pairs_tthree_mst?user=ubuntu")
+(sql-store)
+
+
 xxxxxxxxxxxxxxxxxxxxxxxxx
 
 ---------------------------------------------------------------------
@@ -7305,6 +7339,14 @@ so 13M / 37K = 343 atoms per incoming set.
 OK. DONE. Now what?
 
 binned-sims.dat
+(define all-sims '())
+(cog-map-type
+   (lambda (sim)  (set! all-sims (cons sim all-sims)) #f)
+   'SimilarityLink)
+(length all-sims) -- 44139852 = 44M  wow
+(define scored-sims (score sim-cosine all-sims))  ;; many hours
+(define binned-sims (bin-count-simple scored-sims 300))
+
 
 -------------------
 FWIW, the crappy results from back-when: en_pairs_sim:
@@ -7350,12 +7392,23 @@ Count   (l_1)  4.4813E+6    5.2946E+6    149.9        152.0
 Length  (l_2)  4.9537E+5    4.9524E+5    16.57        14.22
 RMS Count      4.9502E+5    4.9482E+5    16.55        14.21
 
+---------- meanwhile do the rone_mst
+Started  gamma-guten-r 3028  port 19505  feeder-term-7 / guile-term-6
+9 June 10PM
+
+---------- meanwhile do the tthree_mst
+
+---------- meanwhile do rtwo pairs
+Started. beta-guten-r 4500 articles.  feeder-4 guile-3 port 17015
+9 June 10PM
 
 ---------- meanwhile, compute & cache similarity
 ; (sql-open "postgres:///en_pairs_tone_sim?user=ubuntu")
 
 Wait, where?
 Oh, gram-sim.
+DONE.
+then binned-sims
 
 -----------
 todo items:
@@ -8823,16 +8876,56 @@ without caching:
 scheme@(guile-user)> (pta 'left-norm feig)
 left-norm took 0 seconds
 $22 = 1.0000000000001292   OK still good.  This is sum over 37413 items
+(define cfg (pta 'make-cache feig))
+(pta 'left-norm cfg)
+left-norm took 1 seconds  <<< OK makes sense
 
-(pta 'left-norm (make-fvec-cache feig)) <<  461 seconds - 81 atoms/sec
-ouch! this hashing sucks!
 
-scheme@(guile-user)> (pta 'right-norm lm)
-right-norm took 16 seconds  << Ugh, caching of feig sucked.
+(pta 'left-norm (pta 'make-cache feig)) <<  461 seconds - 81 atoms/sec
+ouch! this hashing sucks!  
+OK, problem: all atoms hashing to same value.  OK fixed.
+
+(define lm (pta 'left-mult feig))
+(pta 'right-norm lm)
+right-norm took 16 seconds  <<  
+right-norm took 9 seconds  << baseline, no caching
+
+(define clm (pta 'left-mult cfg))
+(pta 'right-norm clm)
+right-norm took 11 seconds << with caching. Mkaes sense, since the
+                            cache is a lot slower than feig.
 $23 = 1.8948456865590222e-4
-scheme@(guile-user)> (pta 'left-norm lit)
-left-norm took 2699 seconds
+
+-----
+(define cclm (pta 'make-cache clm))
+(pta 'right-norm cclm)
+right-norm took 14 seconds  <<< first time  makes sense
+(pta 'right-norm cclm)
+right-norm took 1 seconds  << makes sense
+
+------
+(define lit (pta 'left-iterate feig))
+(pta 'left-norm lit)
+left-norm took 2699 seconds  << yow
 $24 = 1.8266495662334775e-7
+
+(define clit (pta 'right-mult cclm))
+(pta 'left-norm clit)
+left-norm took 18 seconds  << huh. weird. 
+left-norm took 10 seconds
+left-norm took 10 seconds
+left-norm took 10 seconds
+
+------
+So this is excellent. Lets try it front to back.
+
+(define alit (pta 'right-mult (pta 'make-cache (pta 'left-mult feig))))
+(pta 'left-norm alit)
+left-norm took 22 seconds << excellent
+left-norm took 11 seconds
+left-norm took 12 seconds
+
+OK, we are golden I think
 
 
 
