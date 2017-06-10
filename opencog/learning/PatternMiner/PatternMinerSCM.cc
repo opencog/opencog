@@ -645,6 +645,11 @@ public:
     {
         patternMiner->loandAllDBpediaKeyNodes();
     }
+
+    void test_pattern_matcher()
+    {
+        patternMiner->testPatternMatcher();
+    }
 };
 
 
@@ -783,6 +788,9 @@ void PatternMinerSCM::init()
 
     define_scheme_primitive("pm-select-subset-for-DBpedia", &PatternMinerSCM::select_subset_for_DBpedia, this, "patternminer");
     define_scheme_primitive("pm-load-all-DBpediaKeyNodes", &PatternMinerSCM::load_all_DBpediaKeyNodes, this, "patternminer");
+
+
+    define_scheme_primitive("pm-test-pattern-matcher", &PatternMinerSCM::test_pattern_matcher, this, "patternminer");
 
 
 }
