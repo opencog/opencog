@@ -9,7 +9,7 @@ ADD_LIBRARY (builtinreqs SHARED
 	BuiltinRequestsModule
 	Request
 	LoadModuleRequest
-	LearnSentenceRequest
+	ObserveSentenceRequest
 	ListRequest
 	ShutdownRequest
 	UnloadModuleRequest
@@ -116,7 +116,7 @@ INSTALL (FILES
 	CogServer.h
 	ConsoleSocket.h
 	Factory.h
-	LearnSentenceRequest.h
+	ObserveSentenceRequest.h
 	ListRequest.h
 	LoadModuleRequest.h
 	Module.h
