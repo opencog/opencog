@@ -129,3 +129,18 @@ set ylabel "Number of words"
 plot "binned-sqlen-norm.dat" using 2:3 with lines linewidth 5 title ""
 
 #################################################
+# Used to generate the binned average observations
+#
+set term postscript eps enhanced color 28
+set out 'binned-sims.eps'
+set logscale y
+set format y "10^{%L}"
+set title "Cosine similarity distribution"
+set xlabel "Cosine Similarity"
+set ylabel "Number of pairs of words"
+plot "binned-good-sims.dat" using 2:3 with lines linewidth 5 title "", \
+     "binned-good-sims.dat" using 2:(3.0e5*exp(-8*$2)) with lines linewidth 5 \
+      title "exp(-8 cos)"
+
+# plot "binned-good-sims.dat" using (1-(2*acos($2)/3.14159)):3 with lines linewidth 2 title "acos"
+#################################################

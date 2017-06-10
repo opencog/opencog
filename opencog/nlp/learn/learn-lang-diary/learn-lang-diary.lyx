@@ -23769,7 +23769,7 @@ The current dataset being analyzed contains 1985 words whose length is greater
  15808 pairs with a cosine similarity of greater than 0.5.
  These can be sorted and ranked.
 \begin_inset Foot
-status open
+status collapsed
 
 \begin_layout Plain Layout
 See the good-sims and ranked-sims in disjunct-stats.scm file.
@@ -23799,6 +23799,48 @@ Well, that's new! The similarity ranking is very well fit by a cubic! In
 
  and it fits the tailing end of the distribution so well, that the red data
  line is almost completely hidden under the green line!
+\end_layout
+
+\begin_layout Standard
+The graph below shows the distribution of cosine similarity.
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+Produced by binned-good-sims.
+ 
+\end_layout
+
+\end_inset
+
+ There are 5544 words for which 
+\begin_inset Formula $4<\mbox{len}(w)$
+\end_inset
+
+.
+ This shows the distribution of the 2.17 million word-pairs formed from these
+ words, and for which 
+\begin_inset Formula $0.1\le\mbox{sim}(w_{1},w_{2})$
+\end_inset
+
+.
+ The eyeballed fit is for 
+\begin_inset Formula $\exp(-8\mbox{sim})$
+\end_inset
+
+.
+ 
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Graphics
+	filename images/binned-sims.eps
+	width 70text%
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
