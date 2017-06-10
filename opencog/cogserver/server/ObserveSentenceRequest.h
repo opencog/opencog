@@ -1,5 +1,5 @@
 /*
- * opencog/cogserver/server/LearnSentenceRequest.h
+ * opencog/cogserver/server/ObserveSentenceRequest.h
  *
  * Copyright (C) 2008 by OpenCog Foundation
  * All Rights Reserved
@@ -22,8 +22,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _OPENCOG_LEARN_SENTENCE_REQUEST_H
-#define _OPENCOG_LEARN_SENTENCE_REQUEST_H
+#ifndef _OPENCOG_OBSERVE_SENTENCE_REQUEST_H
+#define _OPENCOG_OBSERVE_SENTENCE_REQUEST_H
 
 #include <sstream>
 #include <string>
@@ -39,7 +39,7 @@ namespace opencog
  *  @{
  */
 
-class LearnSentenceRequest : public Request
+class ObserveSentenceRequest : public Request
 {
 
 protected:
@@ -55,17 +55,19 @@ public:
 
     static inline const RequestClassInfo& info() {
         static const RequestClassInfo _cci(
-            "learn",
-            "Learn the sentence by creating appropriate language learning atoms",
-            "Usage: learn [[-h <handle>]\n\n"
+            "observe",
+            "Observe the sentence and create corresponding language learning atoms",
+            "Usage: learn [-pair_distance <limit>] \"<sentence-in-quotes>\"\n\n"
             "Create language learning atoms for the sentence. Optional flags are:\n"
-            "   -quiet: process without returning text confirmation\n"
+            "    -pair_distance <limit>    Create pairs up to <limit> distance apart.\n"
+            "    -quiet                    Do not return status over telnet.\n"
+            "    -noop                     Perform no op-erations (useful for timing).\n"
         );
         return _cci;
     }
 
-    LearnSentenceRequest(CogServer&);
-    virtual ~LearnSentenceRequest();
+    ObserveSentenceRequest(CogServer&);
+    virtual ~ObserveSentenceRequest();
     virtual bool execute(void);
     virtual bool isShell(void) {return info().is_shell;}
 };
@@ -73,4 +75,4 @@ public:
 /** @}*/
 } // namespace 
 
-#endif // _OPENCOG_LEARN_SENTENCE_REQUEST_H
+#endif // _OPENCOG_OBSERVE_SENTENCE_REQUEST_H

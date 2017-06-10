@@ -1,5 +1,5 @@
 /*
- * opencog/nlp/learn/LearnSentence.h
+ * opencog/nlp/learn/ObserveSentence.h
  *
  * Copyright (C) 2017 by OpenCog Foundation
  * All Rights Reserved
@@ -22,15 +22,18 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _LEARN_SENTENCE_H
-#define _LEARN_SENTENCE_H
+#ifndef _OBSERVE_SENTENCE_H
+#define _OBSERVE_SENTENCE_H
 
+#define NO_PAIR_DISTANCE_LIMIT 0
 
 namespace opencog
 {
-	class AtomSpace;
+    class AtomSpace;
 
-	void learn_sentence(AtomSpace* atomspace, std::string& sentence);
+    void observe_sentence(AtomSpace*      atomspace,
+                          std::string&    sentence,
+                          int             pair_distance_limit = NO_PAIR_DISTANCE_LIMIT );
 }
 
-#endif // _LEARN_SENTENCE_H
+#endif // _OBSERVE_SENTENCE_H

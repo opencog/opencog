@@ -3,7 +3,7 @@ INCLUDE_DIRECTORIES (
 )
 
 ADD_LIBRARY (learn SHARED
-	LearnSentence
+	ObserveSentence
 )
 
 ADD_DEPENDENCIES (learn
