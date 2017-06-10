@@ -242,24 +242,27 @@
             (stv 1 1)
             (stv 0 1))))
 
-(define (text-contains? TXT TERM)
+(define (text-contains? RTXT LTXT TERM)
   "Check if TXT contains TERM."
   (define (contains? txt term)
     (not (equal? #f (regexp-exec
       (make-regexp (string-append "\\b" term "\\b") regexp/icase) txt))))
   (cond ((equal? 'WordNode (cog-type TERM))
-         (contains? TXT (cog-name TERM)))
-        ((equal? 'ListLink (cog-type TERM))
-         (contains? TXT (string-join (map cog-name (cog-outgoing-set TERM)) " ")))
+         (contains? RTXT (cog-name TERM)))
+        ((equal? 'LemmaNode (cog-type TERM))
+         (contains? LTXT (cog-name TERM)))
+        ((equal? 'PhraseNode (cog-type TERM))
+         (contains? RTXT (cog-name TERM)))
         ((equal? 'ConceptNode (cog-type TERM))
-         (any (lambda (t) (text-contains? TXT t))
+         (any (lambda (t) (text-contains? RTXT LTXT t))
               (get-members TERM)))))
 
 (define-public (chatlang-negation? . TERMS)
   "Check if the input sentence has none of the terms specified."
   (let* ; Get the raw text input
         ((sent (car (cog-chase-link 'StateLink 'SentenceNode chatlang-anchor)))
-         (itxt (cog-name (car (cog-chase-link 'ListLink 'Node sent)))))
-        (if (any (lambda (t) (text-contains? itxt t)) TERMS)
+         (rtxt (cog-name (car (cog-chase-link 'ListLink 'Node sent))))
+         (ltxt (string-join (map get-lemma (string-split rtxt #\sp)))))
+        (if (any (lambda (t) (text-contains? rtxt ltxt t)) TERMS)
             (stv 0 1)
             (stv 1 1))))
