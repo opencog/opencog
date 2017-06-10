@@ -26039,7 +26039,7 @@ en_pairs_ttwo_mst
 \begin_inset Text
 
 \begin_layout Plain Layout
-
+en_pairs_tthree_mst
 \end_layout
 
 \end_inset
@@ -26116,6 +26116,22 @@ What is needed is a recognizer,as follows.
 This suggests the following neural-netish variant on iterative PCA (entirely
  of my own design, cribbed from nowhere at all, just popped into my head
  as I sit still immobilized.)
+\end_layout
+
+\begin_layout Standard
+\paragraph_spacing double
+\noindent
+\begin_inset space \hspace{}
+\length 1.3em
+\end_inset
+
+0.
+ 
+\begin_inset space \space{}
+\end_inset
+
+Pre-condition, filter the data.
+ See step 10, below, for what to filter, and why.
 \end_layout
 
 \begin_layout Enumerate
@@ -26623,6 +26639,55 @@ That's it.
 a priori,
 \emph default
  to be complex and difficult, due to thier grammatical variability.
+\end_layout
+
+\begin_layout Subsection*
+Filtering, Step 0
+\end_layout
+
+\begin_layout Standard
+The filtering performed in step 0 (described in step 10, above) removes
+ some of the noise in the dataset.
+ Basic filtering is implemented in the 
+\noun on
+(opencog analysis)
+\noun default
+ scheme module, and specifically in the 
+\noun on
+filter.scm
+\noun default
+ file.
+ One can remove rows and columns that have subtotal counts less than a cutoff,
+ and also remove individual entries that have fewer than some number of
+ counts.
+ By removing very infrequently observed connector sets, some of drivers
+ of accidental similarity or dis-similarity between words should be ameliorated.
+\end_layout
+
+\begin_layout Standard
+How much data does filtering actually discard? To answer that question,
+ the row and column probability distributions need to be examined.
+ These are shown in the figures below.
+\end_layout
+
+\begin_layout Subsection*
+Behavior, Steps 1-4
+\end_layout
+
+\begin_layout Standard
+Step 1-4 are implemented in the 
+\noun on
+(opencog analysis)
+\noun default
+ scheme module, and specifically in the 
+\noun on
+thresh-pca.scm
+\noun default
+ file.
+ The implementation uses lazy evaluation to avoid un-needed computation,
+ and caching of evaluation results to avoid repeated evaluations.
+ This seems like the best wat of working with the extremely sparse matricies
+ involved.
 \end_layout
 
 \begin_layout Section*
