@@ -1,0 +1,32 @@
+
+2017-06-10
+----------
+
+Preliminary performance testing of new C++ observe command.
+
+MacBook Air 1.7 GHz Intel Core i7, 8 GB 1600 MHz DDR3
+Ubuntu 14.04 LTS 
+VirtualBox non-Docker VM under Mac OS X 10.12.3
+
+Test corpus was pride_split.txt which includes all the sentences in Jane Austen's
+Pride and Prejudice, 5,933 sentences with an average of 25 words each so they have
+a large fanout for the n(n-2)/2 pairing algorithm when run with no pair distance
+limit. Note below: 
+
+Pair Distance           Atoms                         Total    Observe   Ops per
+Limit                   Added             RAM          Time       Time    Second
+-------------           -----           -----         -----    -------   -------
+1                     164,574          0.167G           13s.        4s     1,483
+2                     334,716          0.297G           16s.        7s       848
+3                     493,364          0.410G           20s.       11s       539
+6                     896,482          0.715G           35s        26s       228
+12                  1,473,987          1.084G           47s        38s       156
+All pairs           2,690,934          1.949G           87s        78s        76
+
+Noop - just send text.      0         0.044G             9s.        0s.      N/A
+
+NOTE:
+Observe Time = Total Time - Noop Time
+
+All RAM usage was with a clean CogServer restart and zero atoms in the AtomSpace
+at the test start.
