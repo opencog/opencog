@@ -69,7 +69,7 @@ void PatternMiner::generateIndexesOfSharedVars(Handle& link, HandleSeq& orderedH
     {
         if (h->isNode())
         {
-            if (h->getType() == opencog::PATTERN_VARIABLE_NODE)
+            if (h->getType() == opencog::PATTERN_VARIABLENODE_TYPE)
             {
                 string var_name = h->getName();
 
@@ -105,7 +105,7 @@ void PatternMiner::findAndRenameVariablesForOneLink(Handle link, map<Handle,Hand
 
         if (h->isNode())
         {
-           if (h->getType() == opencog::PATTERN_VARIABLE_NODE)
+           if (h->getType() == opencog::PATTERN_VARIABLENODE_TYPE)
            {
                // it's a variable node, rename it
                if (varNameMap.find(h) != varNameMap.end())
@@ -115,7 +115,7 @@ void PatternMiner::findAndRenameVariablesForOneLink(Handle link, map<Handle,Hand
                else
                {
                    string var_name = "$var_"  + toString(varNameMap.size() + 1);
-                   Handle var_node = atomSpace->add_node(opencog::PATTERN_VARIABLE_NODE, var_name);
+                   Handle var_node = atomSpace->add_node(opencog::PATTERN_VARIABLENODE_TYPE, var_name);
                    // XXX why do we need to set the TV ???
                    var_node->merge(TruthValue::TRUE_TV());
                    varNameMap.insert(std::pair<Handle,Handle>(h,var_node));
@@ -414,11 +414,11 @@ void PatternMiner::extractAllNodesInLink(Handle link, map<Handle,Handle>& valueT
             if (valueToVarMap.find(h) == valueToVarMap.end())
             {
                 // add a variable node in Pattern miner Atomspace
-                Handle varHandle = atomSpace->add_node(opencog::PATTERN_VARIABLE_NODE,"$var~" + toString(valueToVarMap.size()) );
+                Handle varHandle = atomSpace->add_node(opencog::PATTERN_VARIABLENODE_TYPE,"$var~" + toString(valueToVarMap.size()) );
                 valueToVarMap.insert(std::pair<Handle,Handle>(h,varHandle));
             }
 
-            if ((h->getType() == opencog::PATTERN_VARIABLE_NODE))
+            if ((h->getType() == opencog::PATTERN_VARIABLENODE_TYPE))
                 cout<<"Error: instance link contains variables: \n" << h->toShortString() <<std::endl;
 
         }
@@ -441,7 +441,7 @@ void PatternMiner::extractAllVariableNodesInAnInstanceLink(Handle& instanceLink,
     {
         if (h->isNode())
         {
-            if (((*pit)->getType() == opencog::PATTERN_VARIABLE_NODE))
+            if (((*pit)->getType() == opencog::PATTERN_VARIABLENODE_TYPE))
             {
                 if (allVarNodes.find(h) == allVarNodes.end())
                 {
@@ -472,7 +472,7 @@ void PatternMiner::extractAllVariableNodesInAnInstanceLink(Handle& instanceLink,
     {
         if (h->isNode())
         {
-            if (((*pit)->getType() == opencog::PATTERN_VARIABLE_NODE))
+            if (((*pit)->getType() == opencog::PATTERN_VARIABLENODE_TYPE))
             {
                 if (allVarNodes.find(h) == allVarNodes.end())
                 {
@@ -539,7 +539,7 @@ void PatternMiner::extractAllVariableNodesInLink(Handle link, OrderedHandleSet& 
     {
         if (h->isNode())
         {
-            if ((h->getType() == opencog::PATTERN_VARIABLE_NODE) && (allNodes.find(h) == allNodes.end()))
+            if ((h->getType() == opencog::PATTERN_VARIABLENODE_TYPE) && (allNodes.find(h) == allNodes.end()))
             {
                 allNodes.insert(h);
             }
@@ -559,7 +559,7 @@ bool PatternMiner::onlyContainVariableNodes(Handle link, AtomSpace* _atomSpace)
     {
         if (h->isNode())
         {
-            if (h->getType() != opencog::PATTERN_VARIABLE_NODE)
+            if (h->getType() != opencog::PATTERN_VARIABLENODE_TYPE)
             {
                 return false;
             }
@@ -589,7 +589,7 @@ void PatternMiner::swapOneLinkBetweenTwoAtomSpace(AtomSpace* fromAtomSpace, Atom
            Handle new_node = toAtomSpace->add_node(h->getType(), h->getName());
            new_node->merge(h->getTruthValue());
            outgoings.push_back(new_node);
-           if (h->getType() == PATTERN_VARIABLE_NODE)
+           if (h->getType() == PATTERN_VARIABLENODE_TYPE)
            {
                if ( ! isInHandleSeq(new_node, outVariableNodes) ) // should not have duplicated variable nodes
                 outVariableNodes.push_back(new_node);
@@ -634,50 +634,31 @@ void PatternMiner::findAllInstancesForGivenPatternInNestedAtomSpace(HTreeNode* H
 //     First, generate the Bindlink for using PatternMatcher to find all the instances for this pattern in the original Atomspace
 //    (BindLink
 //        ;; The variables to be bound
-//        (Listlink)
+//        (VariableList)
 //          (VariableNode "$var_1")
 //          (VariableNode "$var_2")
 //          ...
-//        (ImplicationLink
+//        (AndLink
 //          ;; The pattern to be searched for
 //          (pattern)
 //          (Listlink)
 //              ;; The instance to be returned.
-//              (result)
-//              (variable Listlink)
+//        (result)
 //        )
 //     )
 
-    HandleSeq  implicationLinkOutgoings, bindLinkOutgoings;
+    HandleSeq allAtomSpaceLinks;
+    originalAtomSpace->get_handles_by_type(back_inserter(allAtomSpaceLinks), (Type) LINK, true );
+    std::cout <<"Debug: PatternMiner total link number = "
+              << allAtomSpaceLinks.size() << std::endl;
+
+    HandleSeq  bindLinkOutgoings;
 
     // HandleSeq patternToMatch = swapLinksBetweenTwoAtomSpace(atomSpace, originalAtomSpace, HNode->pattern, variableNodes, linksWillBeDel);
 
-//    if (HNode->pattern.size() == 1) // this pattern only contains one link
-//    {
-//        implicationLinkOutgoings.push_back(patternToMatch[0]); // the pattern to match
-//        implicationLinkOutgoings.push_back(patternToMatch[0]); // the results to return
-
-//        std::cout<<"Debug: PatternMiner::findAllInstancesForGivenPattern for pattern:" << std::endl
-//                << (patternToMatch[0])->toShortString().c_str() << std::endl;
-//    }
-
-    AtomSpace* _atomSpace = originalAtomSpace;
+    AtomSpace* _atomSpace = atomSpace;
 
     Handle hAndLink = _atomSpace->add_link(AND_LINK, HNode->pattern);
-    // XXX why do we need to set the TV ???
-    // hAndLink->merge(TruthValue::TRUE_TV());
-    // Handle hOutPutListLink = _atomSpace->add_link(AND_LINK, HNode->pattern);
-    // XXX why do we need to set the TV ???
-    // hOutPutListLink->merge(TruthValue::TRUE_TV());
-    implicationLinkOutgoings.push_back(hAndLink); // the pattern to match
-    implicationLinkOutgoings.push_back(hAndLink); // the results to return
-
-    std::cout <<"Debug: PatternMiner::findAllInstancesForGivenPattern for pattern:" << std::endl
-            << hAndLink->toShortString().c_str() << std::endl;
-
-
-    Handle hImplicationLink = _atomSpace->add_link(IMPLICATION_LINK, implicationLinkOutgoings);
-   // hImplicationLink->merge(TruthValue::TRUE_TV());
 
     // add variable atoms
     OrderedHandleSet allVariableNodesInPattern;
@@ -689,22 +670,22 @@ void PatternMiner::findAllInstancesForGivenPatternInNestedAtomSpace(HTreeNode* H
     HandleSeq variableNodes;
     for (Handle varh : allVariableNodesInPattern)
     {
-        Handle v = _atomSpace->add_node(PATTERN_VARIABLE_NODE, varh->getName());
+        Handle v = _atomSpace->add_node(PATTERN_VARIABLENODE_TYPE, varh->getName());
         variableNodes.push_back(v);
     }
 
-    Handle hVariablesListLink = _atomSpace->add_link(LIST_LINK, variableNodes);
-    // XXX why do we need to set the TV ???
-    // hVariablesListLink->merge(TruthValue::TRUE_TV());
+    Handle hVariablesListLink = _atomSpace->add_link(VARIABLE_LIST, variableNodes);
+
 
     bindLinkOutgoings.push_back(hVariablesListLink);
-    bindLinkOutgoings.push_back(hImplicationLink);
+    bindLinkOutgoings.push_back(hAndLink); // the pattern to match
+    bindLinkOutgoings.push_back(hAndLink); // the results to return
+
     Handle hBindLink = _atomSpace->add_link(BIND_LINK, bindLinkOutgoings);
-    // XXX why do we need to set the TV ???
-    // hBindLink->merge(TruthValue::TRUE_TV());
 
 
-    string s = hBindLink->toShortString();
+
+    std::cout << std::endl << hBindLink->toShortString() << std::endl;
 
     // Run pattern matcher
     Handle hResultListLink = opencog::bindlink(_atomSpace, hBindLink);
@@ -719,7 +700,7 @@ void PatternMiner::findAllInstancesForGivenPatternInNestedAtomSpace(HTreeNode* H
      HNode->count = resultSet.size();
 
     //    //debug
-//    std::cout << hResultListLink->toShortString() << std::endl  << std::endl;
+    std::cout << hResultListLink->toShortString() << std::endl  << std::endl;
 
     _atomSpace->remove_atom(hResultListLink);
 
@@ -745,14 +726,26 @@ void PatternMiner::findAllInstancesForGivenPatternInNestedAtomSpace(HTreeNode* H
         _atomSpace->remove_atom(listH);
     }
 
+//    originalAtomSpace->remove_atom(hBindLink);
+//    // originalAtomSpace->remove_atom(resultList);
+//    originalAtomSpace->remove_atom(hVariablesListLink);
+//    originalAtomSpace->remove_atom(hAndLink);
+//    originalAtomSpace->remove_atom(evalLink1);
+//    originalAtomSpace->remove_atom(evalLink2);
+//    originalAtomSpace->remove_atom(listlink1);
+//    originalAtomSpace->remove_atom(listlink2);
 
     _atomSpace->remove_atom(hBindLink);
-    _atomSpace->remove_atom(hImplicationLink);
+
     _atomSpace->remove_atom(hAndLink);
     //_atomSpace->remove_atom(hOutPutListLink);
 
-    _atomSpace->remove_atom(hVariablesListLink);
+    // _atomSpace->remove_atom(hVariablesListLink);
 
+    allAtomSpaceLinks.clear();
+    originalAtomSpace->get_handles_by_type(back_inserter(allAtomSpaceLinks), (Type) LINK, true );
+    std::cout <<"After: PatternMiner total link number = "
+              << allAtomSpaceLinks.size() << std::endl;
 
 }
 
@@ -991,6 +984,9 @@ bool PatternMiner::remove_node_type_from_node_types_should_not_be_vars(Type _typ
 
 bool PatternMiner::add_keyword_to_black_list(string _keyword)
 {
+    if (_keyword == "")
+            return false;
+
     if (isIgnoredContent(_keyword))
         return false; // already in the ignore keyword list
 
@@ -2132,31 +2128,31 @@ unsigned int PatternMiner::getCountOfAConnectedPattern(string& connectedPatternK
     {
 
         uniqueKeyLock.unlock();
-        return 0; // just skip it
-//        // can't find its HtreeNode, have to calculate its frequency again by calling pattern matcher
-//        // Todo: need to decide if add this missing HtreeNode into H-Tree or not
+        // return 0; // just skip it
+        // can't find its HtreeNode, have to calculate its frequency again by calling pattern matcher
+        // Todo: need to decide if add this missing HtreeNode into H-Tree or not
 
-//        // cout << "Exception: can't find a subpattern: \n" << connectedPatternKey << std::endl;
-//        if (is_distributed)
-//        {
-//            uniqueKeyLock.unlock();
+        // cout << "Exception: can't find a subpattern: \n" << connectedPatternKey << std::endl;
+        if (is_distributed)
+        {
+            uniqueKeyLock.unlock();
 
-//            return 0;
-//        }
-//        else
-//        {
+            return 0;
+        }
+        else
+        {
 
-//            HTreeNode* newHTreeNode = new HTreeNode();
-//            keyStrToHTreeNodeMap.insert(std::pair<string, HTreeNode*>(connectedPatternKey, newHTreeNode));
-//            uniqueKeyLock.unlock();
+            HTreeNode* newHTreeNode = new HTreeNode();
+            keyStrToHTreeNodeMap.insert(std::pair<string, HTreeNode*>(connectedPatternKey, newHTreeNode));
+            uniqueKeyLock.unlock();
 
-//            newHTreeNode->pattern = connectedPattern;
+            newHTreeNode->pattern = connectedPattern;
 
-//            // Find All Instances in the original AtomSpace For this Pattern
-//            findAllInstancesForGivenPatternInNestedAtomSpace(newHTreeNode);
-//    //        cout << "Not found in H-tree! call pattern matcher again! count = " << newHTreeNode->count << std::endl;
-//            return newHTreeNode->count;
-//        }
+            // Find All Instances in the original AtomSpace For this Pattern
+            findAllInstancesForGivenPatternInNestedAtomSpace(newHTreeNode);
+    //        cout << "Not found in H-tree! call pattern matcher again! count = " << newHTreeNode->count << std::endl;
+            return newHTreeNode->count;
+        }
 
     }
 
@@ -2191,7 +2187,7 @@ bool PatternMiner::isALinkOneInstanceOfGivenPattern(Handle &instanceLink, Handle
             // they are both nodes
 
             // If this node is a variable, skip it
-            if ((outComingsOfPattern[i])->getType() == PATTERN_VARIABLE_NODE)
+            if ((outComingsOfPattern[i])->getType() == PATTERN_VARIABLENODE_TYPE)
                 continue;
             else
             {
@@ -2599,7 +2595,6 @@ PatternMiner::PatternMiner(AtomSpace* _originalAtomSpace): originalAtomSpace(_or
 
     initPatternMiner();
 
-
     // define (hard coding) all the possible subcomponent combinations for 2~4 gram patterns
     string gramNcomponents[3];
     // for 2 gram patterns [01], the only possible combination is [0][1]
@@ -2622,7 +2617,7 @@ PatternMiner::PatternMiner(AtomSpace* _originalAtomSpace): originalAtomSpace(_or
         ngram ++;
     }
 
-    // std::cout<<"Debug: PatternMiner init finished! " + toString(THREAD_NUM) + " threads used!" << std::endl;
+    std::cout<<"Debug: PatternMiner init finished! " << std::endl;
 
 }
 
@@ -3020,9 +3015,7 @@ void PatternMiner::runPatternMiner(bool exit_program_after_finish)
         std::exit(EXIT_SUCCESS);
     }
 
-//   testPatternMatcher2();
 
-//   selectSubsetFromCorpus();
 
 }
 
@@ -3596,256 +3589,96 @@ std::string PatternMiner::Link2keyString(Handle& h, std::string indent, const At
     return answer.str();
 }
 
-void PatternMiner::testPatternMatcher1()
+void PatternMiner::testPatternMatcher()
 {
-    originalAtomSpace->get_handles_by_type(back_inserter(allLinks), (Type) LINK, true );
+    HandleSeq allAtomSpaceLinks;
+    originalAtomSpace->get_handles_by_type(back_inserter(allAtomSpaceLinks), (Type) LINK, true );
     std::cout <<"Debug: PatternMiner total link number = "
-              << allLinks.size() << std::endl;
+              << allAtomSpaceLinks.size() << std::endl;
 
-//(BindLink (stv 1.000000 1.000000)
-//  (ListLink (stv 1.000000 1.000000)
-//    (VariableNode "$var_1") ; [66]
-//    (VariableNode "$var_2") ; [265]
-//    (VariableNode "$var_3") ; [673]
-//    (VariableNode "$var_4") ; [729]
-//  ) ; [734]
-//  (ImplicationLink (stv 1.000000 1.000000)
-//    (AndLink (stv 1.000000 1.000000)
-//      (EvaluationLink (stv 1.000000 1.000000)
-//        (VariableNode "$var_1") ; [66]
-//        (ListLink (stv 1.000000 1.000000)
-//          (ObjectNode "Bob") ; [13]
-//          (VariableNode "$var_2") ; [265]
-//        ) ; [331]
-//      ) ; [332]
-//      (EvaluationLink (stv 1.000000 1.000000)
-//        (VariableNode "$var_1") ; [66]
-//        (ListLink (stv 1.000000 1.000000)
-//          (VariableNode "$var_3") ; [673]
-//          (VariableNode "$var_2") ; [265]
-//        ) ; [930]
-//      ) ; [931]
-//      (InheritanceLink (stv 1.000000 1.000000)
-//        (VariableNode "$var_3") ; [673]
-//        (VariableNode "$var_4") ; [729]
-//      ) ; [3482]
-//    ) ; [5611]
-//    ...
-    HandleSeq variableNodes, implicationLinkOutgoings, bindLinkOutgoings, patternToMatch;
+    HandleSeq variableNodes, bindLinkOutgoings, patternToMatch;
 
-    Handle varHandle1 = originalAtomSpace->add_node(opencog::PATTERN_VARIABLE_NODE,"$var_1" );
-    Handle varHandle2 = originalAtomSpace->add_node(opencog::PATTERN_VARIABLE_NODE,"$var_2" );
-    Handle varHandle3 = originalAtomSpace->add_node(opencog::PATTERN_VARIABLE_NODE,"$var_3" );
-    Handle varHandle4 = originalAtomSpace->add_node(opencog::PATTERN_VARIABLE_NODE,"$var_4" );
-
+    Handle varHandle1 = originalAtomSpace->add_node(opencog::VARIABLE_NODE,"$var_1" );
+//    Handle varHandle2 = originalAtomSpace->add_node(opencog::PATTERN_VARIABLENODE_TYPE,"$var_2" );
+//    Handle varHandle3 = originalAtomSpace->add_node(opencog::PATTERN_VARIABLENODE_TYPE,"$var_3" );
+//    Handle varHandle4 = originalAtomSpace->add_node(opencog::PATTERN_VARIABLENODE_TYPE,"$var_4" );
 
     variableNodes.push_back(varHandle1);
-    variableNodes.push_back(varHandle2);
-    variableNodes.push_back(varHandle3);
-    variableNodes.push_back(varHandle4);
 
-    // The first EvaluationLink
-    HandleSeq listlinkOutgoings1, evalLinkOutgoings1;
-    Handle bobNode = originalAtomSpace->add_node(opencog::NODE, "Bob" );
-    listlinkOutgoings1.push_back(bobNode);
-    listlinkOutgoings1.push_back(varHandle2);
-    Handle listlink1 = originalAtomSpace->add_link(LIST_LINK, listlinkOutgoings1);
-    // XXX why do we need to set the TV ???
-    listlink1->merge(TruthValue::TRUE_TV());
-    evalLinkOutgoings1.push_back(varHandle1);
-    evalLinkOutgoings1.push_back(listlink1);
-    Handle evalLink1 = originalAtomSpace->add_link(EVALUATION_LINK, evalLinkOutgoings1);
-    // XXX why do we need to set the TV ???
-    evalLink1->merge(TruthValue::TRUE_TV());
+//    variableNodes.push_back(varHandle2);
+//    variableNodes.push_back(varHandle3);
+//    variableNodes.push_back(varHandle4);
 
-    // The second EvaluationLink
-    HandleSeq listlinkOutgoings2, evalLinkOutgoings2;
-    listlinkOutgoings2.push_back(varHandle3);
-    listlinkOutgoings2.push_back(varHandle2);
-    Handle listlink2 = originalAtomSpace->add_link(LIST_LINK, listlinkOutgoings2);
-    // XXX why do we need to set the TV ???
-    listlink2->merge(TruthValue::TRUE_TV());
-    evalLinkOutgoings2.push_back(varHandle1);
-    evalLinkOutgoings2.push_back(listlink2);
-    Handle evalLink2 = originalAtomSpace->add_link(EVALUATION_LINK, evalLinkOutgoings2);
-    // XXX why do we need to set the TV ???
-    evalLink2->merge(TruthValue::TRUE_TV());
-
-    // The InheritanceLink
-    HandleSeq inherOutgoings;
-    inherOutgoings.push_back(varHandle3);
-    inherOutgoings.push_back(varHandle4);
-    Handle inherLink = originalAtomSpace->add_link(INHERITANCE_LINK, inherOutgoings);
-    // XXX why do we need to set the TV ???
-    inherLink->merge(TruthValue::TRUE_TV());
-
-    patternToMatch.push_back(evalLink1);
-    patternToMatch.push_back(evalLink2);
-    patternToMatch.push_back(inherLink);
-
-    Handle hAndLink = originalAtomSpace->add_link(AND_LINK, patternToMatch);
-    // XXX why do we need to set the TV ???
-    hAndLink->merge(TruthValue::TRUE_TV());
-
-    implicationLinkOutgoings.push_back(hAndLink); // the pattern to match
-    implicationLinkOutgoings.push_back(hAndLink); // the results to return
-
-    Handle hImplicationLink = originalAtomSpace->add_link(IMPLICATION_LINK, implicationLinkOutgoings);
-    // XXX why do we need to set the TV ???
-    hImplicationLink->merge(TruthValue::TRUE_TV());
-
-    // add variable atoms
-    Handle hVariablesListLink = originalAtomSpace->add_link(LIST_LINK, variableNodes);
-    // XXX why do we need to set the TV ???
-    hVariablesListLink->merge(TruthValue::TRUE_TV());
-
-    bindLinkOutgoings.push_back(hVariablesListLink);
-    bindLinkOutgoings.push_back(hImplicationLink);
-    Handle hBindLink = originalAtomSpace->add_link(BIND_LINK, bindLinkOutgoings);
-    // XXX why do we need to set the TV ???
-    hBindLink->merge(TruthValue::TRUE_TV());
-
-    std::cout <<"Debug: PatternMiner::testPatternMatcher for pattern:" << std::endl
-              << hBindLink->toShortString().c_str() << std::endl;
-
-
-    // Run pattern matcher
-    Handle hResultListLink = bindlink(originalAtomSpace, hBindLink);
-
-    // Get result
-    // Note: Don't forget to remove the hResultListLink and BindLink
-    HandleSeq resultSet = hResultListLink->getOutgoingSet();
-
-    std::cout << toString(resultSet.size())  << " instances found:" << std::endl ;
-
-    //debug
-    std::cout << hResultListLink->toShortString() << std::endl  << std::endl;
-
-    originalAtomSpace->remove_atom(hResultListLink);
-    originalAtomSpace->remove_atom(hBindLink);
-
-
-}
-
-void PatternMiner::testPatternMatcher2()
-{
-
-//    (BindLink (stv 1.000000 1.000000)
-//      (ListLink (stv 1.000000 1.000000)
-//        (VariableNode "$var_1") ; [63]
-//        (VariableNode "$var_2") ; [545]
-//        (VariableNode "$var_3") ; [2003]
-//      ) ; [4575]
-//      (ImplicationLink (stv 1.000000 1.000000)
-//        (AndLink (stv 1.000000 1.000000)
-//          (EvaluationLink (stv 1.000000 1.000000)
-//            (VariableNode "$var_1") ; [63]
-//            (ListLink (stv 1.000000 1.000000)
-//              (ObjectNode "LiMing") ; [15]
-//              (ConceptNode "tea") ; [20]
-//            ) ; [44]
-//          ) ; [4569]
-//          (EvaluationLink (stv 1.000000 1.000000)
-//            (VariableNode "$var_1") ; [63]
-//            (ListLink (stv 1.000000 1.000000)
-//              (VariableNode "$var_2") ; [545]
-//              (VariableNode "$var_3") ; [2003]
-//            ) ; [4570]
-//          ) ; [4571]
+//    (BindLink
+//      (VariableList
+//          (VariableNode "$var_1")
+//      )
+//        (AndLink
 //          (InheritanceLink (stv 1.000000 1.000000)
-//            (VariableNode "$var_2") ; [545]
-//            (ConceptNode "human") ; [3]
-//          ) ; [4572]
-//        ) ; [4573]
-//        (AndLink (stv 1.000000 1.000000)
-//        .....the same as the pattern
-//      ) ; [4574]
-//    ) ; [4576]
+//            (VariableNode "$var_1") ; [542779886756298254][1]
+//            (ConceptNode "is_NOTFC4_0906_IsHandicapped") ; [1081512319175429390][1]
+//          ) ; [10229665919725499268][1]
+//          (EvaluationLink (stv 1.000000 1.000000)
+//            (PredicateNode "has_FC4_0906_SicknessDayOfWeek") ; [4132443157726361136][1]
+//            (ListLink (stv 1.000000 1.000000)
+//              (VariableNode "$var_1") ; [542779886756298254][1]
+//              (ConceptNode "Monday") ; [5669163256683509528][1]
+//            ) ; [14759843185427703993][1]
+//          ) ; [14331675976334620512][1]
+//        ) ; [11278096353514021003][1]
+//      (ListLink
+//          (VariableNode "$var_1")
+//      )
+//    )
 
-    HandleSeq variableNodes, implicationLinkOutgoings, bindLinkOutgoings, patternToMatch, resultOutgoings;
-
-    Handle varHandle1 = originalAtomSpace->add_node(opencog::PATTERN_VARIABLE_NODE,"$var_1" );
-    Handle varHandle2 = originalAtomSpace->add_node(opencog::PATTERN_VARIABLE_NODE,"$var_2" );
-    Handle varHandle3 = originalAtomSpace->add_node(opencog::PATTERN_VARIABLE_NODE,"$var_3" );
-
-    variableNodes.push_back(varHandle1);
-    variableNodes.push_back(varHandle2);
-    variableNodes.push_back(varHandle3);
-
-    // The first EvaluationLink
+    // The  EvaluationLink
     HandleSeq listlinkOutgoings1, evalLinkOutgoings1;
-    Handle LiMingNode = originalAtomSpace->add_node(opencog::NODE, "LiMing" );
-    listlinkOutgoings1.push_back(LiMingNode);
-    Handle teaNode = originalAtomSpace->add_node(opencog::CONCEPT_NODE, "tea" );
-    listlinkOutgoings1.push_back(teaNode);
+    Handle conceptNode = originalAtomSpace->add_node(opencog::CONCEPT_NODE, "Male" );
+    listlinkOutgoings1.push_back(varHandle1);
+    listlinkOutgoings1.push_back(conceptNode);
+
     Handle listlink1 = originalAtomSpace->add_link(LIST_LINK, listlinkOutgoings1);
-    // XXX why do we need to set the TV ???
-    listlink1->merge(TruthValue::TRUE_TV());
-    evalLinkOutgoings1.push_back(varHandle1);
+    Handle PredicateNode = originalAtomSpace->add_node(opencog::PREDICATE_NODE, "has_FC4_0906_Gender" );
+    evalLinkOutgoings1.push_back(PredicateNode);
     evalLinkOutgoings1.push_back(listlink1);
     Handle evalLink1 = originalAtomSpace->add_link(EVALUATION_LINK, evalLinkOutgoings1);
-    // XXX why do we need to set the TV ???
-    evalLink1->merge(TruthValue::TRUE_TV());
 
-    // The second EvaluationLink
     HandleSeq listlinkOutgoings2, evalLinkOutgoings2;
-    listlinkOutgoings2.push_back(varHandle2);
-    listlinkOutgoings2.push_back(varHandle3);
+    Handle conceptNode2 = originalAtomSpace->add_node(opencog::CONCEPT_NODE, "Larex Personeelsbemiddeling" );
+    listlinkOutgoings2.push_back(varHandle1);
+    listlinkOutgoings2.push_back(conceptNode2);
+
     Handle listlink2 = originalAtomSpace->add_link(LIST_LINK, listlinkOutgoings2);
-    // XXX why do we need to set the TV ???
-    listlink2->merge(TruthValue::TRUE_TV());
-    evalLinkOutgoings2.push_back(varHandle1);
+    Handle PredicateNode2 = originalAtomSpace->add_node(opencog::PREDICATE_NODE, "has_FC4_0906_EmployerName" );
+    evalLinkOutgoings2.push_back(PredicateNode2);
     evalLinkOutgoings2.push_back(listlink2);
     Handle evalLink2 = originalAtomSpace->add_link(EVALUATION_LINK, evalLinkOutgoings2);
-    // XXX why do we need to set the TV ???
-    evalLink2->merge(TruthValue::TRUE_TV());
 
-    // The InheritanceLink
-    HandleSeq inherOutgoings;
-    Handle humanNode = originalAtomSpace->add_node(opencog::CONCEPT_NODE, "human" );
-    inherOutgoings.push_back(varHandle2);
-    inherOutgoings.push_back(humanNode);
-    Handle inherLink = originalAtomSpace->add_link(INHERITANCE_LINK, inherOutgoings);
-    // XXX why do we need to set the TV ???
-    inherLink->merge(TruthValue::TRUE_TV());
+
+//    // The InheritanceLink
+//    HandleSeq inherOutgoings;
+//    Handle NotHandicappedNode = originalAtomSpace->add_node(opencog::CONCEPT_NODE, "soda drinker" );
+//    inherOutgoings.push_back(varHandle1);
+//    inherOutgoings.push_back(NotHandicappedNode);
+//    Handle inherLink = originalAtomSpace->add_link(INHERITANCE_LINK, inherOutgoings);
 
     patternToMatch.push_back(evalLink1);
     patternToMatch.push_back(evalLink2);
-    patternToMatch.push_back(inherLink);
 
     Handle hAndLink = originalAtomSpace->add_link(AND_LINK, patternToMatch);
-    // XXX why do we need to set the TV ???
-    hAndLink->merge(TruthValue::TRUE_TV());
+
+    //Handle resultList = originalAtomSpace->add_link(LIST_LINK, variableNodes);
 
     // add variable atoms
-    Handle hVariablesListLink = originalAtomSpace->add_link(LIST_LINK, variableNodes);
-    // XXX why do we need to set the TV ???
-    hVariablesListLink->merge(TruthValue::TRUE_TV());
-
-    resultOutgoings.push_back(hVariablesListLink);
-    resultOutgoings.push_back(hAndLink);
-
-    Handle hListLinkResult = originalAtomSpace->add_link(LIST_LINK, resultOutgoings);
-    // XXX why do we need to set the TV ???
-    hListLinkResult->merge(TruthValue::TRUE_TV());
-
-    implicationLinkOutgoings.push_back(hAndLink); // the pattern to match
-    implicationLinkOutgoings.push_back(hListLinkResult); // the results to return
-
-    Handle hImplicationLink = originalAtomSpace->add_link(IMPLICATION_LINK, implicationLinkOutgoings);
-    // XXX why do we need to set the TV ???
-    hImplicationLink->merge(TruthValue::TRUE_TV());
-
+    Handle hVariablesListLink = originalAtomSpace->add_link(VARIABLE_LIST, variableNodes);
 
     bindLinkOutgoings.push_back(hVariablesListLink);
-    bindLinkOutgoings.push_back(hImplicationLink);
+    bindLinkOutgoings.push_back(hAndLink);
+    bindLinkOutgoings.push_back(hAndLink);
     Handle hBindLink = originalAtomSpace->add_link(BIND_LINK, bindLinkOutgoings);
-    // XXX why do we need to set the TV ???
-    hBindLink->merge(TruthValue::TRUE_TV());
 
     std::cout <<"Debug: PatternMiner::testPatternMatcher for pattern:" << std::endl
               << hBindLink->toShortString().c_str() << std::endl;
-
 
     // Run pattern matcher
     Handle hResultListLink = bindlink(originalAtomSpace, hBindLink);
@@ -3856,14 +3689,30 @@ void PatternMiner::testPatternMatcher2()
 
     std::cout << toString(resultSet.size())  << " instances found:" << std::endl ;
 
+    originalAtomSpace->remove_atom(hResultListLink);
+
+    for (Handle resultLink : resultSet)
+        originalAtomSpace->remove_atom(resultLink);
+
     //debug
     std::cout << hResultListLink->toShortString() << std::endl  << std::endl;
 
-    originalAtomSpace->remove_atom(hResultListLink);
     originalAtomSpace->remove_atom(hBindLink);
+    // originalAtomSpace->remove_atom(resultList);
+    originalAtomSpace->remove_atom(hVariablesListLink);
+    originalAtomSpace->remove_atom(hAndLink);
+    originalAtomSpace->remove_atom(evalLink1);
+    originalAtomSpace->remove_atom(evalLink2);
+    originalAtomSpace->remove_atom(listlink1);
+    originalAtomSpace->remove_atom(listlink2);
 
 
+    allAtomSpaceLinks.clear();
+    originalAtomSpace->get_handles_by_type(back_inserter(allAtomSpaceLinks), (Type) LINK, true );
+    std::cout <<"After Pattern Matcher: PatternMiner total link number = "
+              << allAtomSpaceLinks.size() << std::endl;
 }
+
 
 OrderedHandleSet PatternMiner::_getAllNonIgnoredLinksForGivenNode(Handle keywordNode, OrderedHandleSet& allSubsetLinks)
 {

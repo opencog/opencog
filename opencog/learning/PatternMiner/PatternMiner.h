@@ -51,6 +51,7 @@ namespace PatternMining
 #define USE_ABS_SURPRISINGNESS 0
 #define LINE_INDENTATION "  "
 
+#define PATTERN_VARIABLENODE_TYPE VARIABLE_NODE
 
 struct _non_ordered_pattern
 {
@@ -443,8 +444,8 @@ public:
 
     void loadPatternsFromResultFile(string fileName);
 
-    void testPatternMatcher1();
-    void testPatternMatcher2();
+    void testPatternMatcher();
+
 
 public:
     // -------------------------------basic settings----------------------
