@@ -7274,10 +7274,9 @@ strategy:
 (sql-load)
 (sql-close)
 (sql-open "postgres:///en_pairs_tthree_mst?user=ubuntu")
-(sql-store)
+(sql-store) ; -- 46262710 = 46M atoms total
+(sql-close)
 
-
-xxxxxxxxxxxxxxxxxxxxxxxxx
 
 ---------------------------------------------------------------------
 ---------- meanwhile, finish stats work
@@ -7394,9 +7393,13 @@ RMS Count      4.9502E+5    4.9482E+5    16.55        14.21
 
 ---------- meanwhile do the rone_mst
 Started  gamma-guten-r 3028  port 19505  feeder-term-7 / guile-term-6
+guile -l mst-count-en-r.scm on term-6
 9 June 10PM
 
 ---------- meanwhile do the tthree_mst
+gamma-guten feeder-8 port 19005 ./guten-mst-en.sh
+cog-term-1 guile -l mst-count-en.scm on term 1
+
 
 ---------- meanwhile do rtwo pairs
 Started. beta-guten-r 4500 articles.  feeder-4 guile-3 port 17015
@@ -7409,6 +7412,7 @@ Wait, where?
 Oh, gram-sim.
 DONE.
 then binned-sims
+
 
 -----------
 todo items:
@@ -8928,7 +8932,12 @@ left-norm took 12 seconds
 OK, we are golden I think
 
 
+(define pta (make-thresh-pca pfa))
+(define lit (pta 'left-iterate feig 1))
+(define lit2 (pta 'left-iterate lit 1))
+(pta 'left-print lit 20)
 
+Wow. Like 4 iterations and its converged already!
 
 
 

@@ -628,4 +628,20 @@
 	(print-bincounts-tsv binned-sims outport)
 	(close outport))
 
+(define all-good-sims
+	(filter
+		(lambda (sim) (and
+				(< 4 (cset-vec-word-len (gar sim)))
+				(< 4 (cset-vec-word-len (gdr sim)))))
+		all-sims))
+
+(length all-good-sims) ; 2172114 = 2M
+
+(define scored-good-sims (score sim-cosine all-good-sims))
+(define binned-good-sims (bin-count-simple scored-good-sims 100))
+
+(let ((outport (open-file "/tmp/binned-good-sims.dat" "w")))
+	(print-bincounts-tsv binned-good-sims outport)
+	(close outport))
+
 ; ---------------------------------------------------------------------
