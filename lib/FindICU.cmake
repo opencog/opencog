@@ -18,7 +18,6 @@ find_path(
     NAMES unicode/utypes.h
     HINTS ${PC_ICU_INCLUDE_DIRS}
           ${PC_ICU_INCLUDEDIR}
-          ${WEBKIT_LIBRARIES_INCLUDE_DIR}
     DOC "Include directory for the ICU library")
 mark_as_advanced(ICU_INCLUDE_DIR)
 
@@ -28,7 +27,6 @@ find_library(
     NAMES libicuuc cygicuuc cygicuuc32 icuuc
     HINTS ${PC_ICU_LIBRARY_DIRS}
           ${PC_ICU_LIBDIR}
-          ${WEBKIT_LIBRARIES_LINK_DIR}
     DOC "Libraries to link against for the common parts of ICU")
 mark_as_advanced(ICU_LIBRARY)
 
@@ -54,7 +52,6 @@ if (ICU_INCLUDE_DIR AND ICU_LIBRARY)
         NAMES icui18n libicui18n libicuin cygicuin cygicuin32 icuin
         HINTS ${PC_ICU_I18N_LIBRARY_DIRS}
               ${PC_ICU_I18N_LIBDIR}
-              ${WEBKIT_LIBRARIES_LINK_DIR}
         DOC "Libraries to link against for ICU internationalization")
     mark_as_advanced(ICU_I18N_LIBRARY)
     if (ICU_I18N_LIBRARY)
@@ -71,7 +68,6 @@ if (ICU_INCLUDE_DIR AND ICU_LIBRARY)
         NAMES icudata libicudata cygicudata cygicudata32
         HINTS ${PC_ICU_I18N_LIBRARY_DIRS}
               ${PC_ICU_I18N_LIBDIR}
-              ${WEBKIT_LIBRARIES_LINK_DIR}
         DOC "Libraries to link against for ICU data")
     mark_as_advanced(ICU_DATA_LIBRARY)
     if (ICU_DATA_LIBRARY)
