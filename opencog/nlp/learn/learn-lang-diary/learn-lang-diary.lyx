@@ -23769,7 +23769,7 @@ The current dataset being analyzed contains 1985 words whose length is greater
  15808 pairs with a cosine similarity of greater than 0.5.
  These can be sorted and ranked.
 \begin_inset Foot
-status collapsed
+status open
 
 \begin_layout Plain Layout
 See the good-sims and ranked-sims in disjunct-stats.scm file.
@@ -25056,7 +25056,7 @@ ANY
 
 \begin_layout Standard
 \begin_inset Tabular
-<lyxtabular version="3" rows="5" columns="7">
+<lyxtabular version="3" rows="6" columns="7">
 <features tabularvalignment="middle">
 <column alignment="center" valignment="top" width="0">
 <column alignment="center" valignment="top" width="0">
@@ -25326,7 +25326,7 @@ en_pairs_ttwo_mst
 </cell>
 </row>
 <row>
-<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
 \begin_inset Text
 
 \begin_layout Plain Layout
@@ -25335,7 +25335,7 @@ en_pairs_ttwo_mst
 
 \end_inset
 </cell>
-<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
 \begin_inset Text
 
 \begin_layout Plain Layout
@@ -25344,7 +25344,7 @@ en_pairs_ttwo_mst
 
 \end_inset
 </cell>
-<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
 \begin_inset Text
 
 \begin_layout Plain Layout
@@ -25353,7 +25353,7 @@ en_pairs_ttwo_mst
 
 \end_inset
 </cell>
-<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
 \begin_inset Text
 
 \begin_layout Plain Layout
@@ -25362,7 +25362,7 @@ en_pairs_ttwo_mst
 
 \end_inset
 </cell>
-<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
 \begin_inset Text
 
 \begin_layout Plain Layout
@@ -25371,7 +25371,7 @@ en_pairs_ttwo_mst
 
 \end_inset
 </cell>
-<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
 \begin_inset Text
 
 \begin_layout Plain Layout
@@ -25380,11 +25380,76 @@ en_pairs_ttwo_mst
 
 \end_inset
 </cell>
-<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
 \begin_inset Text
 
 \begin_layout Plain Layout
 en_pairs_tthree
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+134K x 135K
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+5.54M
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+174M
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+31.4
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+17.67
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+-1.94
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+en_pairs_rone_mst
 \end_layout
 
 \end_inset
@@ -25398,6 +25463,56 @@ en_pairs_tthree
 \begin_inset Newline newline
 \end_inset
 
+The legend is as follows:
+\end_layout
+
+\begin_layout Description
+Size The dimensions of the array.
+ For word-pairs, this would be the number of unique, distinct words observed
+ occurring on the left-side of a word pair, times the number of words occuring
+ on the right.
+ We expect the dimensions to be approximately equal, as most words will
+ typically occur on both the left and right side of a pair.
+ For word-disjunct pairs, the left dimension counts words, the right dimension
+ counts unique, distinct pseudo-disjuncts.
+\end_layout
+
+\begin_layout Description
+Pairs The total number of distinct pairs observed.
+\end_layout
+
+\begin_layout Description
+Obsn's The total number of observations of these pairs.
+ Most pairs will be observed more than once.
+ Distributions are typically Zipfian, as previous sections point out.
+\end_layout
+
+\begin_layout Description
+Obs/pr The average number of times each pair was observed.
+\end_layout
+
+\begin_layout Description
+Entropy The total entropy of these pairs in this dataset, as defined previously.
+\end_layout
+
+\begin_layout Description
+MI The total mutual information for these paris in this dataset, as defined
+ previously.
+\end_layout
+
+\begin_layout Description
+Left-Right The left and right entropies, as defined previously.
+ Note that 
+\begin_inset Formula $MI=H-H_{left}-H_{right}$
+\end_inset
+
+ holds, by definition.
+ Not given for the word-pairs table, because these two are neary equal,
+ and are half the difference between the entropy and the MI.
+ 
+\end_layout
+
+\begin_layout Standard
 The datasets are as below.
 \end_layout
 
@@ -25440,6 +25555,10 @@ en_pairs_tthree Tranche three - Everything in tranche two, plus several
  hundred of the most recently created Project Gutenberg texts, whatever
  they may be.
  See the 'download.sh' file for the precise texts.
+\end_layout
+
+\begin_layout Description
+en_pairs_rone_mst Same as en_pairs_tone_mst, but with minor issues fixed.
 \end_layout
 
 \begin_layout Standard
