@@ -47,7 +47,8 @@ void eat_me(...) {}
 namespace opencog {
 
 void break_sentence_into_words( const std::string& sentence,
-                                std::vector<std::string>& words) {
+                                std::vector<std::string>& words)
+{
     const icu::UnicodeString unicode_sentence(sentence.c_str(), sentence.length());
     icu::UnicodeString unicode_word;
     std::string word;
@@ -61,10 +62,12 @@ void break_sentence_into_words( const std::string& sentence,
     // Loop over the sentence extracting words.
     int count = 0;
     int32_t last_break = 0;
-    while (current_break != icu::BreakIterator::DONE) {
+    while (current_break != icu::BreakIterator::DONE)
+    {
  
         int breakType = bi->getRuleStatus();
-        if (breakType != UBRK_WORD_NONE) {
+        if (breakType != UBRK_WORD_NONE)
+        {
             // Exclude spaces, punctuation, and the like.
 
             // Extract the word as a std::string.
@@ -79,9 +82,9 @@ void break_sentence_into_words( const std::string& sentence,
             DEBUG_PRINT("word break: %d\n", current_break);
             DEBUG_PRINT(".         : %s\n", word.c_str());
             ++count;
-
-        } else {
-
+        }
+        else
+        {
             // UBRK_WORD_NONE indicates that the boundary does not start
             // a word or number.
             DEBUG_PRINT("   non-word break: %d\n", current_break);

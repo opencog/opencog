@@ -53,7 +53,8 @@ bool ObserveSentenceRequest::execute()
 {
     std::list<std::string>::const_iterator it;
 
-    if (_parameters.empty()) {
+    if (_parameters.empty())
+    {
         _error << "Error: learn - a sentence is required" << std::endl;
         sendError();
         return false;
@@ -66,26 +67,30 @@ bool ObserveSentenceRequest::execute()
     int pair_distance = 0;
     bool noop = false;
     bool verbose = false;
-    for (it = _parameters.begin(); it != _parameters.end(); ++it) {
+    for (it = _parameters.begin(); it != _parameters.end(); ++it)
+    {
         parameter_count++;
 
         // -pair_distance <limit> - limit distance of word pairs
-        if (*it == "-pair_distance")  {
+        if (*it == "-pair_distance")
+        {
             ++it;
             if (it == _parameters.end()) return syntaxError();
-            pair_distance = atoi(it->c_str());
- 
+            pair_distance = atoi(it->c_str());       
+        }
         // -noop - do not perform any operations
-        } else if (*it == "-noop")  { 
+        else if (*it == "-noop")
+        { 
             noop = true;
- 
+        }
         // -verbose - send return confirmation of sentence processed
-        } else if (*it == "-verbose")  { 
+        else if (*it == "-verbose")
+        { 
             verbose = true;
- 
-       } else {
-
-            // This should be a sentence.
+        }
+        // This should be a sentence.
+        else
+        {
             _sentence = *it;
         }
     }
@@ -109,13 +114,11 @@ void ObserveSentenceRequest::sendOutput()
 
 void ObserveSentenceRequest::sendError()
 {
-    _error << "Format: observe \"Some sentence.\"" << std::endl;
-    if (false) {
-        _error << "Supported options:" << std::endl;
-        _error << "-pair_distance <limit>   Create pairs up to <limit> distance apart." << std::endl;
-//        _error << "-a <algorithm>   Learn with the specific algorithm." << std::endl;
-        _error << "Options may be combined" << std::endl;
-    }
-
+    _error << "Format: observe [-pair_distance <limit>] \"<sentence-in-quotes>\"" << std::endl;
+    _error << "Supported options:" << std::endl;
+    _error << "    -pair_distance <limit>   Create pairs up to <limit> distance apart." << std::endl;
+    _error << "    -quiet                   Do not return status over telnet." << std::endl;
+    _error << "    -noop                    Perform no op-erations (useful for timing)." << std::endl;
+    _error << "Options may be combined" << std::endl << std::endl;
     send(_error.str());
 }
