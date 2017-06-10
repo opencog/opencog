@@ -1082,10 +1082,20 @@ bool compareHTreeNodeBySurprisingness(HTreeNode* node1, HTreeNode* node2)
 
 bool compareHTreeNodeBySurprisingness_I(HTreeNode* node1, HTreeNode* node2)
 {
-    if ( node1->nI_Surprisingness - node2->nI_Surprisingness  > FLOAT_MIN_DIFF)
-        return true;
-    else if (node2->nI_Surprisingness - node1->nI_Surprisingness > FLOAT_MIN_DIFF)
-        return false;
+    if (USE_ABS_SURPRISINGNESS)
+    {
+        if ( node1->nI_Surprisingness - node2->nI_Surprisingness  > FLOAT_MIN_DIFF)
+            return true;
+        else if (node2->nI_Surprisingness - node1->nI_Surprisingness > FLOAT_MIN_DIFF)
+            return false;
+    }
+    else
+    {
+        if ( std::abs(node1->nI_Surprisingness) - std::abs(node2->nI_Surprisingness)  > FLOAT_MIN_DIFF)
+            return true;
+        else if (std::abs(node2->nI_Surprisingness) - std::abs(node1->nI_Surprisingness) > FLOAT_MIN_DIFF)
+            return false;
+    }
 
     return (node1->var_num < node2->var_num);
 }
@@ -2278,6 +2288,7 @@ void PatternMiner::calculateSurprisingness( HTreeNode* HNode, AtomSpace *_fromAt
     // int comcount = 0;
 
     float p = ((float)HNode->count)/atomspaceSizeFloat;
+    float abs_min_diff = 999999999.9f;
     float min_diff = 999999999.9f;
     // cout << "For this pattern itself: p = " <<  HNode->count << " / " <<  (int)atomspaceSizeFloat << " = " << p << std::endl;
 
@@ -2343,23 +2354,30 @@ void PatternMiner::calculateSurprisingness( HTreeNode* HNode, AtomSpace *_fromAt
         // cout << "\n ---- total_p = " << total_p << " ----\n" ;
 
         float diff = total_p - p;
-        if (diff < 0)
-            diff = - diff;
+        diff = diff / total_p;
+
+        float abs_diff = diff;
+
+        if (abs_diff < 0)
+            abs_diff = - abs_diff;
 
         // cout << "diff  = total_p - p " << diff << " \n" ;
 
-        diff = diff / total_p;
-
-        if (diff < min_diff)
+        if (abs_diff < abs_min_diff)
+        {
+            abs_min_diff = abs_diff;
             min_diff = diff;
-
+        }
 
         // cout << "diff / total_p = " << diff << " \n" ;
 
     }
 
 
-    HNode->nI_Surprisingness = min_diff;
+    if (USE_ABS_SURPRISINGNESS)
+        HNode->nI_Surprisingness = abs_min_diff;
+    else
+        HNode->nI_Surprisingness = min_diff;
 
     // debug:
 //    cout << "nI_Surprisingness = " << HNode->nI_Surprisingness  << std::endl;
