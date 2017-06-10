@@ -47,7 +47,7 @@ namespace PatternMining
 #define FREQUENCY_TOP_THRESHOLD 0.10
 #define SURPRISINGNESS_I_TOP_THRESHOLD 0.20
 #define SURPRISINGNESS_II_TOP_THRESHOLD 0.40
-#define OUTPUT_SURPRISINGNESS_CALCULATION 1
+#define OUTPUT_SURPRISINGNESS_CALCULATION_TO_FILE 1
 #define USE_ABS_SURPRISINGNESS 0
 #define LINE_INDENTATION "  "
 
@@ -197,6 +197,8 @@ protected:
     unsigned int actualProcessedLinkNum;
 
     vector<vector<vector<unsigned int>>> components_ngram[3];
+
+    map<HTreeNode*, string> surprisingnessCalcuationInfo;
 
     vector<Handle> allLinksContainWhiteKeywords;
     set<Handle> havenotProcessedWhiteKeywordLinks;

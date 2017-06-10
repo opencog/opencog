@@ -1134,6 +1134,11 @@ void PatternMiner::OutPutFinalPatternsToFile(unsigned int n_gram)
         if (htreeNode->count < thresholdFrequency)
             continue;
 
+        if (OUTPUT_SURPRISINGNESS_CALCULATION_TO_FILE)
+        {
+            resultFile << endl << htreeNode->surprisingnessInfo  << endl;
+        }
+
         resultFile << endl << ";Pattern: Frequency = " << toString(htreeNode->count);
 
         resultFile << ", SurprisingnessI = " << toString(htreeNode->nI_Surprisingness);
@@ -1225,6 +1230,11 @@ void PatternMiner::OutPutInterestingPatternsToFile(vector<HTreeNode*> &patternsF
     {
         if (htreeNode->count < thresholdFrequency)
             continue;
+
+        if (OUTPUT_SURPRISINGNESS_CALCULATION_TO_FILE)
+        {
+            resultFile << endl << htreeNode->surprisingnessInfo  << endl;
+        }
 
         resultFile << endl << ";Pattern: Frequency = " << toString(htreeNode->count);
 
@@ -1319,6 +1329,11 @@ void PatternMiner::OutPutLowFrequencyHighSurprisingnessPatternsToFile(vector<HTr
 
     for (HTreeNode* htreeNode : resultPatterns)
     {
+        if (OUTPUT_SURPRISINGNESS_CALCULATION_TO_FILE)
+        {
+            resultFile << endl << htreeNode->surprisingnessInfo  << endl;
+        }
+
         resultFile << endl << ";Pattern: Frequency = " << toString(htreeNode->count);
 
         resultFile << " SurprisingnessI = " << toString(htreeNode->nI_Surprisingness);
@@ -1377,6 +1392,11 @@ void PatternMiner::OutPutHighFrequencyHighSurprisingnessPatternsToFile(vector<HT
 
     for (HTreeNode* htreeNode : resultPatterns)
     {
+        if (OUTPUT_SURPRISINGNESS_CALCULATION_TO_FILE)
+        {
+            resultFile << endl << htreeNode->surprisingnessInfo  << endl;
+        }
+
         resultFile << endl << ";Pattern: Frequency = " << toString(htreeNode->count);
 
         resultFile << " SurprisingnessI = " << toString(htreeNode->nI_Surprisingness);
@@ -1442,6 +1462,11 @@ void PatternMiner::OutPutHighSurprisingILowSurprisingnessIIPatternsToFile(vector
 
     for (HTreeNode* htreeNode : resultPatterns)
     {
+        if (OUTPUT_SURPRISINGNESS_CALCULATION_TO_FILE)
+        {
+            resultFile << endl << htreeNode->surprisingnessInfo  << endl;
+        }
+
         resultFile << endl << "Pattern: Frequency = " << toString(htreeNode->count);
 
         resultFile << " SurprisingnessI = " << toString(htreeNode->nI_Surprisingness);
@@ -2263,10 +2288,13 @@ void PatternMiner::calculateSurprisingness( HTreeNode* HNode, AtomSpace *_fromAt
 //    if (HNode->nI_Surprisingness != 0 || HNode->nII_Surprisingness != 0)
 //        std::cout << "Exception: This pattern has been calculateSurprisingness before!\n";
 
+    if (OUTPUT_SURPRISINGNESS_CALCULATION_TO_FILE)
+        surprisingnessCalcuationInfo.clear();
+
     if (HNode->count == 0)
         HNode->count = 1;
 
-    if (HNode->count < 2)
+    if (HNode->count < thresholdFrequency)
     {
 
         HNode->nII_Surprisingness = 0.0f;
@@ -2292,21 +2320,42 @@ void PatternMiner::calculateSurprisingness( HTreeNode* HNode, AtomSpace *_fromAt
     float min_diff = 999999999.9f;
     // cout << "For this pattern itself: p = " <<  HNode->count << " / " <<  (int)atomspaceSizeFloat << " = " << p << std::endl;
 
+    HNode->surprisingnessInfo = "";
+
     for (vector<vector<unsigned int>>&  oneCombin : components_ngram[gram-2])
     {
         int com_i = 0;
         // std::cout <<" -----Combination " << comcount++ << "-----" << std::endl;
         float total_p = 1.0f;
 
+        if (OUTPUT_SURPRISINGNESS_CALCULATION_TO_FILE)
+        {
+            HNode->surprisingnessInfo += "{";
+        }
+
         bool containsComponentDisconnected = false;
         bool subComponentNotFound = false;
 
         for (vector<unsigned int>& oneComponent : oneCombin)
         {
+            if (OUTPUT_SURPRISINGNESS_CALCULATION_TO_FILE)
+            {
+                HNode->surprisingnessInfo += "[";
+            }
+
             HandleSeq subPattern;
             for (unsigned int index : oneComponent)
             {
                 subPattern.push_back(HNode->pattern[index]);
+
+                if (OUTPUT_SURPRISINGNESS_CALCULATION_TO_FILE)
+                {
+                    HNode->surprisingnessInfo += toString(index);
+                }
+            }
+            if (OUTPUT_SURPRISINGNESS_CALCULATION_TO_FILE)
+            {
+                HNode->surprisingnessInfo += "]=";
             }
 
             unsigned int unifiedLastLinkIndex;
@@ -2321,12 +2370,23 @@ void PatternMiner::calculateSurprisingness( HTreeNode* HNode, AtomSpace *_fromAt
             {
                 // std::cout<< " is disconnected! skip it \n" ;
                 containsComponentDisconnected = true;
+
+                if (OUTPUT_SURPRISINGNESS_CALCULATION_TO_FILE)
+                {
+                    HNode->surprisingnessInfo += "D";
+                }
+
                 break;
             }
             else
             {
                 // std::cout<< " is connected!" ;
                 unsigned int component_count = getCountOfAConnectedPattern(subPatternKey, unifiedSubPattern);
+
+                if (OUTPUT_SURPRISINGNESS_CALCULATION_TO_FILE)
+                {
+                    HNode->surprisingnessInfo += toString(component_count);
+                }
 
                 if (component_count == 0)
                 {
@@ -2345,6 +2405,11 @@ void PatternMiner::calculateSurprisingness( HTreeNode* HNode, AtomSpace *_fromAt
 
             com_i ++;
 
+        }
+
+        if (OUTPUT_SURPRISINGNESS_CALCULATION_TO_FILE)
+        {
+            HNode->surprisingnessInfo += "} ";
         }
 
         if (containsComponentDisconnected || subComponentNotFound)
@@ -3112,6 +3177,11 @@ void PatternMiner::queryPatternsWithFrequencySurprisingnessIRanges(unsigned int 
 
     for (HTreeNode* htreeNode : resultPatterns)
     {
+        if (OUTPUT_SURPRISINGNESS_CALCULATION_TO_FILE)
+        {
+            resultFile << endl << htreeNode->surprisingnessInfo  << endl;
+        }
+
         resultFile << endl << ";Pattern: Frequency = " << toString(htreeNode->count);
 
         string SurprisingnessI = toString(htreeNode->nI_Surprisingness);
