@@ -8875,6 +8875,7 @@ avg length
 (psa 'fetch-pairs)
 
 (define fsa (add-subtotal-filter psa 2 2 4))
+(define fsi (add-subtotal-filter psa 50 30 10))
 (define pna (add-pair-count-api psa))
 (define pfa (add-pair-freq-api psa))
 (define pta (make-thresh-pca pfa))
@@ -8976,6 +8977,38 @@ so filter should cut this entirely, but it doesn't...
                   (< 30 (pna 'left-wild-count (gdr PAIR)))) for each OK
             (psa 'right-stars cm)))  loop over all djs
 
+-------------
+OK, so the cut to use is the last one:
+
+(define fsi (add-subtotal-filter psa 50 30 10))
+(define pfi (add-pair-freq-api fsi))
+(define pti (make-thresh-pca pfi))
+
+(define feig (pti 'left-initial))
+(pti 'left-norm feig)
+
+(define lm (pti 'left-mult feig))
+
+(length (pti 'right-basis))  ;  14377
+(define dj (car (pti 'right-basis)))
+
+(lm dj)  ; 8.730046003535126e-9
+
+(define lit (pti 'left-iterate feig 1))
+(define w (car (pti 'left-basis)))
+(lit w)  ; 5.29078468146764e-4  left-norm took 133 seconds
+
+(pti 'right-norm lm) ; 4.12871026183e-4  right-norm took 39 seconds
+
+(pti 'left-print lit 20)
+(define lit2 (pti 'left-iterate lit 1))
+(pti 'left-print lit2 20)
+(define lit3 (pti 'left-iterate lit2 1))
+(pti 'left-print lit3 20)
+(define lit4 (pti 'left-iterate lit3 1))
+(pti 'left-print lit4 20)
+
+Wow. Like 4 iterations and its converged already!
 
 =========================================================================
 

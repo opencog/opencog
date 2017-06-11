@@ -685,7 +685,7 @@
 (define col-dist (cnt-obs-cols 100 '()))
 
 ; ---------------------------------------------------------------------
-; Support
+; Support  This is for the table about filters.
 
 (define fsa (add-subtotal-filter psa 1 1 0))
 (define fsb (add-subtotal-filter psa 4 4 0))
@@ -731,4 +731,26 @@
 (ssi 'total-support)  ; 100542
 (ssi 'total-count)    ; 4363640.0
 
+; ---------------------------------------------------------------------
+
+(define sorted-eigen
+	(sort
+		(pti 'left-vec lit6) 
+		(lambda (a b) (> (cdr a) (cdr b)))))
+
+(define (print-tsv-pca port)
+	(define cnt 0)
+	(for-each
+		(lambda (pr)
+			(define w (car pr))
+			(set! cnt (+ cnt 1))
+			(format port "~d	\"~A\"	~A	~A	~A	~A	~A	~A\n" cnt (cog-name w)
+				(lit w) (lit2 w) (lit3 w) (lit4 w) (lit5 w) (lit6 w)))
+		(take sorted-eigen 40)))
+
+(let ((outport (open-file "/tmp/power-iter.dat" "w")))
+	(print-tsv-pca outport)
+	(close outport))
+
+; ---------------------------------------------------------------------
 ; ---------------------------------------------------------------------
