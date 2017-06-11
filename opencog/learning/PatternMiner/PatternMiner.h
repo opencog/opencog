@@ -259,6 +259,8 @@ protected:
     // if a link contains only variableNodes , no const nodes
     bool onlyContainVariableNodes(Handle link, AtomSpace* _atomSpace);
 
+    bool containVariableNodes(Handle link, AtomSpace* _atomSpace);
+
     void extractAllPossiblePatternsFromInputLinksBF(HandleSeq& inputLinks,  HTreeNode* parentNode,OrderedHandleSet& sharedNodes, unsigned int gram);
 
 //    // vector<HTreeNode *> &allHTreeNodes is output all the HTreeNodes found

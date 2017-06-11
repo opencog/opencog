@@ -574,7 +574,28 @@ bool PatternMiner::onlyContainVariableNodes(Handle link, AtomSpace* _atomSpace)
     return true;
 }
 
+bool PatternMiner::containVariableNodes(Handle link, AtomSpace* _atomSpace)
+{
+    HandleSeq outgoingLinks = link->getOutgoingSet();
 
+    for (Handle h : outgoingLinks)
+    {
+        if (h->isNode())
+        {
+            if (h->getType() == opencog::PATTERN_VARIABLENODE_TYPE)
+            {
+                return true;
+            }
+        }
+        else
+        {
+            if (containVariableNodes(h, _atomSpace))
+                return true;
+        }
+    }
+
+    return false;
+}
 
 
 void PatternMiner::swapOneLinkBetweenTwoAtomSpace(AtomSpace* fromAtomSpace, AtomSpace* toAtomSpace, Handle& fromLink, HandleSeq& outgoings,
@@ -647,10 +668,10 @@ void PatternMiner::findAllInstancesForGivenPatternInNestedAtomSpace(HTreeNode* H
 //        )
 //     )
 
-    HandleSeq allAtomSpaceLinks;
-    originalAtomSpace->get_handles_by_type(back_inserter(allAtomSpaceLinks), (Type) LINK, true );
-    std::cout <<"Debug: PatternMiner total link number = "
-              << allAtomSpaceLinks.size() << std::endl;
+//    HandleSeq allAtomSpaceLinks;
+//    originalAtomSpace->get_handles_by_type(back_inserter(allAtomSpaceLinks), (Type) LINK, true );
+//    std::cout <<"Debug: PatternMiner total link number = "
+//              << allAtomSpaceLinks.size() << std::endl;
 
     HandleSeq  bindLinkOutgoings;
 
@@ -676,16 +697,13 @@ void PatternMiner::findAllInstancesForGivenPatternInNestedAtomSpace(HTreeNode* H
 
     Handle hVariablesListLink = _atomSpace->add_link(VARIABLE_LIST, variableNodes);
 
-
     bindLinkOutgoings.push_back(hVariablesListLink);
     bindLinkOutgoings.push_back(hAndLink); // the pattern to match
     bindLinkOutgoings.push_back(hAndLink); // the results to return
 
     Handle hBindLink = _atomSpace->add_link(BIND_LINK, bindLinkOutgoings);
 
-
-
-    std::cout << std::endl << hBindLink->toShortString() << std::endl;
+    // std::cout << std::endl << hBindLink->toShortString() << std::endl;
 
     // Run pattern matcher
     Handle hResultListLink = opencog::bindlink(_atomSpace, hBindLink);
@@ -695,57 +713,47 @@ void PatternMiner::findAllInstancesForGivenPatternInNestedAtomSpace(HTreeNode* H
     // Note: Don't forget to remove the hResultListLink and BindLink
     HandleSeq resultSet = hResultListLink->getOutgoingSet();
 
-     std::cout << toString(resultSet.size())  << " instances found!" << std::endl ;
-
-     HNode->count = resultSet.size();
-
     //    //debug
-    std::cout << hResultListLink->toShortString() << std::endl  << std::endl;
+    // std::cout << hResultListLink->toShortString() << std::endl  << std::endl;
 
     _atomSpace->remove_atom(hResultListLink);
 
-
+    int count = 0;
     for (Handle listH  : resultSet)
     {
 
-        if  (Pattern_mining_mode == "Breadth_First")
-        {
-            HandleSeq instanceLinks = listH->getOutgoingSet();
-            if (cur_gram == 1)
-            {
-                HNode->instances.push_back(instanceLinks);
-            }
-            else
-            {
-                // instance that contains duplicate links will not be added
-                if (! containsDuplicateHandle(instanceLinks))
-                    HNode->instances.push_back(instanceLinks);
-            }
-        }
+//        if  (Pattern_mining_mode == "Breadth_First")
+//        {
+//            HandleSeq instanceLinks = listH->getOutgoingSet();
+//            if (cur_gram == 1)
+//            {
+//                HNode->instances.push_back(instanceLinks);
+//            }
+//            else
+//            {
+//                // instance that contains duplicate links will not be added
+//                if (! containsDuplicateHandle(instanceLinks))
+//                    HNode->instances.push_back(instanceLinks);
+//            }
+//        }
+
+        if (! containVariableNodes(listH, _atomSpace))
+            count ++;
 
         _atomSpace->remove_atom(listH);
     }
 
-//    originalAtomSpace->remove_atom(hBindLink);
-//    // originalAtomSpace->remove_atom(resultList);
-//    originalAtomSpace->remove_atom(hVariablesListLink);
-//    originalAtomSpace->remove_atom(hAndLink);
-//    originalAtomSpace->remove_atom(evalLink1);
-//    originalAtomSpace->remove_atom(evalLink2);
-//    originalAtomSpace->remove_atom(listlink1);
-//    originalAtomSpace->remove_atom(listlink2);
+    HNode->count = count;
+
+    // std::cout << count << " instances found!" << std::endl ;
 
     _atomSpace->remove_atom(hBindLink);
-
     _atomSpace->remove_atom(hAndLink);
-    //_atomSpace->remove_atom(hOutPutListLink);
 
-    // _atomSpace->remove_atom(hVariablesListLink);
-
-    allAtomSpaceLinks.clear();
-    originalAtomSpace->get_handles_by_type(back_inserter(allAtomSpaceLinks), (Type) LINK, true );
-    std::cout <<"After: PatternMiner total link number = "
-              << allAtomSpaceLinks.size() << std::endl;
+//    allAtomSpaceLinks.clear();
+//    originalAtomSpace->get_handles_by_type(back_inserter(allAtomSpaceLinks), (Type) LINK, true );
+//    std::cout <<"After: PatternMiner total link number = "
+//              << allAtomSpaceLinks.size() << std::endl;
 
 }
 
@@ -2136,22 +2144,29 @@ unsigned int PatternMiner::getCountOfAConnectedPattern(string& connectedPatternK
         if (is_distributed)
         {
             uniqueKeyLock.unlock();
-
             return 0;
         }
         else
         {
 
-            HTreeNode* newHTreeNode = new HTreeNode();
-            keyStrToHTreeNodeMap.insert(std::pair<string, HTreeNode*>(connectedPatternKey, newHTreeNode));
-            uniqueKeyLock.unlock();
+            if (PATTERN_VARIABLENODE_TYPE == PATTERN_VARIABLE_NODE)
+            {
+                uniqueKeyLock.unlock();
+                return 0;
+            }
+            else
+            {
+                HTreeNode* newHTreeNode = new HTreeNode();
+                keyStrToHTreeNodeMap.insert(std::pair<string, HTreeNode*>(connectedPatternKey, newHTreeNode));
+                uniqueKeyLock.unlock();
 
-            newHTreeNode->pattern = connectedPattern;
+                newHTreeNode->pattern = connectedPattern;
 
-            // Find All Instances in the original AtomSpace For this Pattern
-            findAllInstancesForGivenPatternInNestedAtomSpace(newHTreeNode);
-    //        cout << "Not found in H-tree! call pattern matcher again! count = " << newHTreeNode->count << std::endl;
-            return newHTreeNode->count;
+                // Find All Instances in the original AtomSpace For this Pattern
+                findAllInstancesForGivenPatternInNestedAtomSpace(newHTreeNode);
+        //        cout << "Not found in H-tree! call pattern matcher again! count = " << newHTreeNode->count << std::endl;
+                return newHTreeNode->count;
+            }
         }
 
     }
@@ -2316,7 +2331,7 @@ void PatternMiner::calculateSurprisingness( HTreeNode* HNode, AtomSpace *_fromAt
     float min_diff = 999999999.9f;
     // cout << "For this pattern itself: p = " <<  HNode->count << " / " <<  (int)atomspaceSizeFloat << " = " << p << std::endl;
 
-    HNode->surprisingnessInfo = "";
+    HNode->surprisingnessInfo = "; ";
 
     for (vector<vector<unsigned int>>&  oneCombin : components_ngram[gram-2])
     {
@@ -2369,7 +2384,7 @@ void PatternMiner::calculateSurprisingness( HTreeNode* HNode, AtomSpace *_fromAt
 
                 if (OUTPUT_SURPRISINGNESS_CALCULATION_TO_FILE)
                 {
-                    HNode->surprisingnessInfo += "D";
+                    HNode->surprisingnessInfo += "D ";
                 }
 
                 break;
@@ -2381,7 +2396,7 @@ void PatternMiner::calculateSurprisingness( HTreeNode* HNode, AtomSpace *_fromAt
 
                 if (OUTPUT_SURPRISINGNESS_CALCULATION_TO_FILE)
                 {
-                    HNode->surprisingnessInfo += toString(component_count);
+                    HNode->surprisingnessInfo += toString(component_count) + " ";
                 }
 
                 if (component_count == 0)
@@ -2414,7 +2429,7 @@ void PatternMiner::calculateSurprisingness( HTreeNode* HNode, AtomSpace *_fromAt
 
         // cout << "\n ---- total_p = " << total_p << " ----\n" ;
 
-        float diff = total_p - p;
+        float diff = p - total_p;
         diff = diff / total_p;
 
         float abs_diff = diff;
@@ -2422,7 +2437,7 @@ void PatternMiner::calculateSurprisingness( HTreeNode* HNode, AtomSpace *_fromAt
         if (abs_diff < 0)
             abs_diff = - abs_diff;
 
-        // cout << "diff  = total_p - p " << diff << " \n" ;
+        // cout << "diff  = p - total_p" << diff << " \n" ;
 
         if (abs_diff < abs_min_diff)
         {
