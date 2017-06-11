@@ -644,4 +644,91 @@
 	(print-bincounts-tsv binned-good-sims outport)
 	(close outport))
 
+(define all-good-words (filter (lambda (w) (< 4 (cset-vec-word-len w))) ac))
+
+(length all-good-words)   ;  5544 of length 4 or more
+
+; ---------------------------------------------------------------------
+; what fraction of the rows have more than N observations?
+; (subtotaled for that entire row?)
+
+(define (cnt-obs-rows n lst)
+	(if (<= 0 n) 
+		(let* ((fsa (add-subtotal-filter psa 0 n 0))
+				(bs (fsa 'left-basis-size)))
+			(format #t "N=~d  sz=~d\n" n bs)
+			(cnt-obs-rows (- n 2) (cons (cons n bs) lst)))
+		lst))
+
+(define row-dist (cnt-obs-rows 100 '()))
+
+(define (print-tsv-count scrs port max)
+	(define cnt 0)
+	(for-each
+		(lambda (pr)
+			(set! cnt (+ cnt 1))
+			(format port "~A	~A	~A	~A\n" cnt (car pr) (cdr pr) (/ (cdr pr max)))
+		scrs))
+
+(let ((outport (open-file "/tmp/count-rows.dat" "w")))
+	(print-tsv-count row-dist outport)
+	(close outport))
+
+(define (cnt-obs-cols n lst)
+	(if (<= 0 n) 
+		(let* ((fsa (add-subtotal-filter psa n 0 0))
+				(bs (fsa 'right-basis-size)))
+			(format #t "N=~d  sz=~d\n" n bs)
+			(cnt-obs-cols (- n 5) (cons (cons n bs) lst)))
+		lst))
+
+(define col-dist (cnt-obs-cols 100 '()))
+
+; ---------------------------------------------------------------------
+; Support
+
+(define fsa (add-subtotal-filter psa 1 1 0))
+(define fsb (add-subtotal-filter psa 4 4 0))
+(define fsc (add-subtotal-filter psa 10 10 0))
+(define fsd (add-subtotal-filter psa 30 30 0))
+
+(define ssa (add-support-compute fsa))
+(define ssb (add-support-compute fsb))
+(define ssc (add-support-compute fsc))
+(define ssd (add-support-compute fsd))
+
+(ssa 'total-support)  ; 4096008
+(ssa 'total-count)    ; 12039800.0
+(ssb 'total-support)  ; 2807987
+(ssb 'total-count)    ; 9508010.0
+(ssc 'total-support)  ; 2423739
+(ssc 'total-count)    ; 8733613.0
+(ssd 'total-support)  ; 1976731
+(ssd 'total-count)    ; 8046133
+
+
+(define fse (add-subtotal-filter psa 30 10 0))
+(define fsf (add-subtotal-filter psa 30 10 4))
+
+(define fsg (add-subtotal-filter psa 50 30 0))
+(define fsh (add-subtotal-filter psa 50 30 4))
+(define fsi (add-subtotal-filter psa 50 30 10))
+
+(define sse (add-support-compute fse))
+(define ssf (add-support-compute fsf))
+(define ssg (add-support-compute fsg))
+(define ssh (add-support-compute fsh))
+(define ssi (add-support-compute fsi))
+
+(sse 'total-support)  ; 2138194
+(sse 'total-count)    ; 8299952.0
+(ssf 'total-support)  ; 266924
+(ssf 'total-count)    ; 5482910.0
+(ssg 'total-support)  ; 1848737
+(ssg 'total-count)    ; 7842336.0
+(ssh 'total-support)  ; 258303
+(ssh 'total-count)    ; 5408109.0
+(ssi 'total-support)  ; 100170
+(ssi 'total-count)    ; 4348376.0
+
 ; ---------------------------------------------------------------------

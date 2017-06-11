@@ -7400,6 +7400,7 @@ guile -l mst-count-en-r.scm on term-6
 gamma-guten feeder-8 port 19005 ./guten-mst-en.sh
 cog-term-1 guile -l mst-count-en.scm on term 1
 
+Started 10 June 8AM -- 5712 articles
 
 ---------- meanwhile do rtwo pairs
 Started. beta-guten-r 4500 articles.  feeder-4 guile-3 port 17015
@@ -7413,12 +7414,16 @@ Oh, gram-sim.
 DONE.
 then binned-sims
 
-
 -----------
 todo items:
 * trim low observation counts ....
 * implement sql delete function.
 * see todo at bottom
+* XXX r versions still fail to separate single-quotes
+  Except I am having trouble reproducing this... lg any seems to work OK
+* Also ." is not split .. which I also cannot reproduce.
+* Hyphenated words should be split, by default. These can be
+  reconstructed later.
 
 ---------- debug hang:
 latest bdgw from git does not solve it.
@@ -8858,9 +8863,19 @@ avg length
 ( err... left-length 'rigt-basis
 
 ===============================================================
+(use-modules (opencog) (opencog persist) (opencog persist-sql))
+(use-modules (opencog nlp) (opencog nlp learn))
+(use-modules (opencog analysis))
+(sql-open "postgres:///en_pairs_sim?user=linas")
+(sql-open "postgres:///en_pairs_ttwo_mst?user=linas")
+(fetch-all-words)
 
 (define pca (make-pseudo-cset-api))
 (define psa (add-pair-stars pca))
+(psa 'fetch-pairs)
+
+(define fsa (add-subtotal-filter psa 2 2 4))
+(define pna (add-pair-count-api psa))
 (define pfa (add-pair-freq-api psa))
 (define pta (make-thresh-pca pfa))
 (define aw (get-all-cset-words))
@@ -8940,6 +8955,29 @@ OK, we are golden I think
 Wow. Like 4 iterations and its converged already!
 
 
+(define fsa (add-subtotal-filter psa 2 2 4))
+(fsa 'right-stars w)
+(fsa 'left-basis-size)
+(fsa 'right-basis-size)
+
+(WordNode ",")
+(define  dj (car (psa 'right-basis)))  ; crazy
+(define pna (add-pair-count-api psa))  
+(pna 'left-wild-count dj)    ; gives 4.0
+(length (psa 'left-stars dj)) gives 1
+so its entirely in just one: (WordNode ",") which has 4 obs.
+so filter should cut this entirely, but it doesn't...
+
+(define cm (Word ","))
+(length (psa 'right-stars cm)) ; 281776
+
+         (length (filter
+            (lambda (PAIR)
+                  (< 30 (pna 'left-wild-count (gdr PAIR)))) for each OK
+            (psa 'right-stars cm)))  loop over all djs
+
+
+=========================================================================
 
 Crazy idea: iterate; the places we end up at should be the dependents
 since everything points at them, and they never point away.
