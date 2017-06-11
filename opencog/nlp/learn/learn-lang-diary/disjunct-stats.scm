@@ -720,15 +720,15 @@
 (define ssh (add-support-compute fsh))
 (define ssi (add-support-compute fsi))
 
-(sse 'total-support)  ; 2138194
-(sse 'total-count)    ; 8299952.0
-(ssf 'total-support)  ; 266924
-(ssf 'total-count)    ; 5482910.0
-(ssg 'total-support)  ; 1848737
-(ssg 'total-count)    ; 7842336.0
-(ssh 'total-support)  ; 258303
-(ssh 'total-count)    ; 5408109.0
-(ssi 'total-support)  ; 100170
-(ssi 'total-count)    ; 4348376.0
+(sse 'total-support)  ; 2261327
+(sse 'total-count)    ; 8478382.0
+(ssf 'total-support)  ; 269459
+(ssf 'total-count)    ; 5524982.0
+(ssg 'total-support)  ; 1875670
+(ssg 'total-count)    ; 7863145.0
+(ssh 'total-support)  ; 255698
+(ssh 'total-count)    ; 5405406.0
+(ssi 'total-support)  ; 100542
+(ssi 'total-count)    ; 4363640.0
 
 ; ---------------------------------------------------------------------
