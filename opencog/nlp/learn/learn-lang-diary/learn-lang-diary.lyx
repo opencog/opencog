@@ -26942,9 +26942,14 @@ The fraction of rows with more than
  or fewer times.
  These three cuts are given in the first three columns; the resulting dataset
  is given in the remaining columns.
+\begin_inset VSpace defskip
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
+\align center
 \begin_inset Tabular
 <lyxtabular version="3" rows="11" columns="7">
 <features tabularvalignment="middle">
@@ -27678,8 +27683,22 @@ Ob/cs
 \end_layout
 
 \begin_layout Standard
-Note that the previous sections carefully described entropy and mutual informati
-on distributions.
+\begin_inset VSpace defskip
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The last cut seems plausible for further work: it suggests that each disjunct
+ is observed a fairly strong number of times; and that given the word/disjunct
+ ratio, a lot of words are using disjuncts in similar fashion; thus, there
+ should be a lot of similarity.
+\end_layout
+
+\begin_layout Standard
+Note, byt the way, that the previous sections carefully described entropy
+ and mutual information distributions no longer hold for the cut dataset.
  Filtering changes these!
 \end_layout
 
@@ -27699,8 +27718,202 @@ thresh-pca.scm
  file.
  The implementation uses lazy evaluation to avoid un-needed computation,
  and caching of evaluation results to avoid repeated evaluations.
- This seems like the best wat of working with the extremely sparse matricies
+ This seems like the best way of working with the extremely sparse matricies
  involved.
+\end_layout
+
+\begin_layout Standard
+Iteration appears to converge very rapidly.
+ After three iterations, the ranking, by weight in the vector, appears to
+ be established.
+ This is shown in the figures below.
+ Siz iterations are performed, and the words 
+\begin_inset Formula $w$
+\end_inset
+
+ are then ranked according to the strength 
+\begin_inset Formula $b(w)$
+\end_inset
+
+ in the sixth iteration.
+ Then the values of 
+\begin_inset Formula $b(w)$
+\end_inset
+
+ are plotted for the first five iterations, using this rank.
+ After the third iteration, there is no discernable change in the weights.
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Graphics
+	filename images/power-iter-all.eps
+	width 45col%
+
+\end_inset
+
+
+\begin_inset Graphics
+	filename images/power-iter-close.eps
+	width 45page%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+In this case, the principle component is revealed to be
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Tabular
+<lyxtabular version="3" rows="6" columns="2">
+<features tabularvalignment="middle">
+<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top" width="0">
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+word
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+weight
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+.
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0.9358
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+the
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0.1212
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+and
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0.1098
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+to
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0.1035
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+”
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0.0920
+\end_layout
+
+\end_inset
+</cell>
+</row>
+</lyxtabular>
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Its a rather motley collection.
+ The fact that there is only one high-weight item in this vector suggests
+ that the top-ranked 
+\begin_inset Quotes eld
+\end_inset
+
+word
+\begin_inset Quotes erd
+\end_inset
+
+, the period, is radically different than the rest.
+ And this makes sense: we expect the grammatical behavior of teh period
+ to indeed be different.
 \end_layout
 
 \begin_layout Section*
