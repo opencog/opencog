@@ -155,8 +155,9 @@
       NAME)))
 
 (define (sent-get-lemmas-in-order SENT)
-  "Get the lemma of the words associate with sent-node.
-   It also creates an EvaluationLink "
+  "Get the lemma of the words associate with SENT.
+   It also creates an EvaluationLink linking the
+   SENT with the lemma-list."
   (define term-seq
     (List (append-map
       (lambda (w)
@@ -208,45 +209,62 @@
     (cog-outgoing-set
       (cog-execute! (Get (Reference (Variable "$x") CONCEPT))))))
 
+(define (is-member? GLOB LST)
+  "Check if GLOB is a member of LST, where LST may contain
+   WordNodes, LemmaNodes, and PhraseNodes."
+  ; TODO: GLOB is grounded to lemmas but not the original
+  ; words in the input, this somehow needs to be fixed...
+  (let* ((glob-txt-lst (map cog-name GLOB))
+         (raw-txt (string-join glob-txt-lst))
+         (lemma-txt (string-join (map get-lemma glob-txt-lst))))
+    (any (lambda (t)
+           (or (and (eq? 'WordNode (cog-type t))
+                    (equal? raw-txt (cog-name t)))
+               (and (eq? 'LemmaNode (cog-type t))
+                    (equal? lemma-txt (cog-name t)))
+               (and (eq? 'PhraseNode (cog-type t))
+                    (equal? raw-txt (cog-name t)))))
+         LST)))
+
 (define-public (chatlang-concept? CONCEPT . GLOB)
   "Check if the value grounded for the GlobNode is actually a member
    of the concept."
   (cog-logger-debug "In chatlang-concept? GLOB: ~a" GLOB)
-  (let ((grd (if (equal? 1 (length GLOB)) (car GLOB) (List GLOB)))
-        (membs (get-members CONCEPT)))
-       (if (not (equal? #f (member grd membs)))
-           (stv 1 1)
-           (stv 0 1))))
+  (if (is-member? GLOB (get-members CONCEPT))
+      (stv 1 1)
+      (stv 0 1)))
 
 (define-public (chatlang-choices? CHOICES . GLOB)
   "Check if the value grounded for the GlobNode is actually a member
    of the list of choices."
   (cog-logger-debug "In chatlang-choices? GLOB: ~a" GLOB)
-  (let* ((grd (if (equal? 1 (length GLOB)) (car GLOB) (List GLOB)))
-         (chs (cog-outgoing-set CHOICES))
+  (let* ((chs (cog-outgoing-set CHOICES))
          (cpts (append-map get-members (cog-filter 'ConceptNode chs))))
-        (if (not (equal? #f (member grd (append chs cpts))))
+        (if (is-member? GLOB (append chs cpts))
             (stv 1 1)
             (stv 0 1))))
 
-(define (text-contains? TXT TERM)
-  "Check if TXT contains TERM."
+(define (text-contains? RTXT LTXT TERM)
+  "Check if either RTXT (raw) or LTXT (lemma) contains TERM."
   (define (contains? txt term)
     (not (equal? #f (regexp-exec
       (make-regexp (string-append "\\b" term "\\b") regexp/icase) txt))))
   (cond ((equal? 'WordNode (cog-type TERM))
-         (contains? TXT (cog-name TERM)))
-        ((equal? 'ListLink (cog-type TERM))
-         (contains? TXT (string-join (map cog-name (cog-outgoing-set TERM)) " ")))
+         (contains? RTXT (cog-name TERM)))
+        ((equal? 'LemmaNode (cog-type TERM))
+         (contains? LTXT (cog-name TERM)))
+        ((equal? 'PhraseNode (cog-type TERM))
+         (contains? RTXT (cog-name TERM)))
         ((equal? 'ConceptNode (cog-type TERM))
-         (any (lambda (t) (text-contains? TXT t))
+         (any (lambda (t) (text-contains? RTXT LTXT t))
               (get-members TERM)))))
 
 (define-public (chatlang-negation? . TERMS)
   "Check if the input sentence has none of the terms specified."
   (let* ; Get the raw text input
         ((sent (car (cog-chase-link 'StateLink 'SentenceNode chatlang-anchor)))
-         (itxt (cog-name (car (cog-chase-link 'ListLink 'Node sent)))))
-        (if (any (lambda (t) (text-contains? itxt t)) TERMS)
+         (rtxt (cog-name (car (cog-chase-link 'ListLink 'Node sent))))
+         (ltxt (string-join (map get-lemma (string-split rtxt #\sp)))))
+        (if (any (lambda (t) (text-contains? rtxt ltxt t)) TERMS)
             (stv 0 1)
             (stv 1 1))))

@@ -44,11 +44,11 @@
   "Helper function to convert a list of terms into atomese.
    For use of choices and negation."
   (map (lambda (t) (cond ((equal? 'word (car t))
-                          (Word (cdr t)))
+                          (WordNode (cdr t)))
                          ((equal? 'lemma (car t))
-                          (Word (get-lemma (cdr t))))
+                          (LemmaNode (get-lemma (cdr t))))
                          ((equal? 'phrase (car t))
-                          (List (map Word (string-split (cdr t) #\ ))))
+                          (PhraseNode (cdr t)))
                          ((equal? 'concept (car t))
                           (Concept (cdr t)))))
        TERMS))

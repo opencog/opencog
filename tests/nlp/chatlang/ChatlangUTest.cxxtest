@@ -256,10 +256,13 @@ void ChatlangUTest::test_chat_find_rules()
     TSM_ASSERT_EQUALS("Fail to find rule 7!", "#t\n", result_13);
 
     auto result_14 = scm->eval("test-result-14");
-    TSM_ASSERT_EQUALS("Fail on test 14!", "#t\n", result_13);
+    TSM_ASSERT_EQUALS("Fail to find rule 8!", "#t\n", result_14);
 
     auto result_15 = scm->eval("test-result-15");
-    TSM_ASSERT_EQUALS("Fail to find rule 8!", "#t\n", result_13);
+    TSM_ASSERT_EQUALS("Test 15 failed!", "#t\n", result_15);
+
+    auto result_16 = scm->eval("test-result-16");
+    TSM_ASSERT_EQUALS("Test 16 failed!", "#t\n", result_16);
 
     logger().info("END TEST: %s", __FUNCTION__);
 }
