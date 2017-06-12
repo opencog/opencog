@@ -212,6 +212,8 @@
 (define (is-member? GLOB LST)
   "Check if GLOB is a member of LST, where LST may contain
    WordNodes, LemmaNodes, and PhraseNodes."
+  ; TODO: GLOB is grounded to lemmas but not the original
+  ; words in the input, this somehow needs to be fixed...
   (let* ((glob-txt-lst (map cog-name GLOB))
          (raw-txt (string-join glob-txt-lst))
          (lemma-txt (string-join (map get-lemma glob-txt-lst))))
@@ -243,7 +245,7 @@
             (stv 0 1))))
 
 (define (text-contains? RTXT LTXT TERM)
-  "Check if TXT contains TERM."
+  "Check if either RTXT (raw) or LTXT (lemma) contains TERM."
   (define (contains? txt term)
     (not (equal? #f (regexp-exec
       (make-regexp (string-append "\\b" term "\\b") regexp/icase) txt))))
