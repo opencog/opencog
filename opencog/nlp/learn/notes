@@ -6166,7 +6166,9 @@ in en_pairs_tone.
 
 STATUS: good
 DATE: 9 June 2017
-REASON: Best so far, I think.
+REASON: Best so far, I think.  One issue:
+  infix-marks: dashes, ellipsis, long-dashes are not split.
+  It now seems that this would have been the right thing to do.
 
                         List of relations
  Schema |    Name    | Type  | Owner  |    Size    | Description 
@@ -6214,7 +6216,35 @@ Length  (l_2)  2.8788E+5    2.4347E+5     16.55        13.98
 RMS Count      2.8758E+5    2.4316E+5     16.53        13.96    
 
 ==================================================================
+en_pairs_rtwo
+-------------
+Random-planar-tree parsed books from "tranche-1" and "tranche-2".
+A continutation of en_pairs_rone.
 
+STATUS: good
+DATE: 12 June 2017
+REASON: Best so far, I think.
+
+                        List of relations
+ Schema |    Name    | Type  | Owner  |    Size    | Description 
+--------+------------+-------+--------+------------+-------------
+ public | atoms      | table | ubuntu | 1596 MB    | 
+ public | spaces     | table | ubuntu | 40 kB      | 
+ public | typecodes  | table | ubuntu | 56 kB      | 
+ public | valuations | table | ubuntu | 1390 MB    | 
+ public | values     | table | ubuntu | 8192 bytes | 
+
+Strange: the above looks wrong. \l+ says total is 6608 MB so wtf?
+Maybe the rest is indexes....
+
+select count(*) from atoms; -- 18082606 = 18M (7M more than rone)
+select count(*) from valuations; -- 9135195 = 9M (3.4M more)
+
+825319194 Bytes = 825MB uncompressed
+140784957 Bytes = 141MB compressed.
+
+bzfc3a573593f60c6e2b546da22ce915f6  en_pairs_rtwo.sql
+f86114cf3f342dcd574406890a3a7168  en_pairs_rtwo.sql.bz2
 
 ==================================================================
 
@@ -7402,9 +7432,20 @@ cog-term-1 guile -l mst-count-en.scm on term 1
 
 Started 10 June 8AM -- 5712 articles
 
----------- meanwhile do rtwo pairs
+---------- meanwhile do rtwo pairs   DONE
 Started. beta-guten-r 4500 articles.  feeder-4 guile-3 port 17015
-9 June 10PM
+9 June 10PM done  12 June 1PM
+now:
+createdb -T en_pairs_r en_pairs_rtwo
+COMMENT ON DATABASE en_pairs_rtwo IS 'Clean ANY-parse of tranche-1 and tranch-2';
+pg_dump en_pairs_rtwo > en_pairs_rtwo.sql
+DONE.
+
+---------- meanwhile do rthree pairs
+guile-3 port 17015 feeder-4  5713 articles
+Started 12 June 2017 2PM
+
+
 
 ---------- meanwhile, compute & cache similarity
 ; (sql-open "postgres:///en_pairs_tone_sim?user=ubuntu")
@@ -7423,7 +7464,7 @@ todo items:
   Except I am having trouble reproducing this... lg any seems to work OK
 * Also ." is not split .. which I also cannot reproduce.
 * Hyphenated words should be split, by default. These can be
-  reconstructed later.
+  reconstructed later. Split - dashes, long dashes, elipsis.
 
 ---------- debug hang:
 latest bdgw from git does not solve it.
@@ -9081,6 +9122,18 @@ $178 = 0.8863119467021999
 (poi 'right-cosine WORD-A WORD-B)
 
 (para-batch-sim-pairs top-cset-words 0.5)
+
+--------------------------
+Whoa, is this working as expected?  Lets check.
+(define pci (make-cosine-matrix pfi))
+(define pti (make-power-iter-pca pci 'right-unit))
+(define wv (pti 'make-left-unit (list (WordNode "the"))))
+(define wm (pti 'left-iterate wv 1))
+(wm (WordNode "the"))   ;; ---- wtf
+
+(psi 'right-support (Word "the"))  ; 1403
+(psi 'right-length (Word "the") ; 9761.855971074354
+
 
 
 =========================================================================
