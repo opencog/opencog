@@ -9048,6 +9048,28 @@ Need a left and right unit. DONE.
 (define lit (pti 'left-iterate feig 4))
 (pti 'left-print lit 20)
 
+OK, that didn't work out very much. Why?
+(WordNode "." . 0.9342344830920888)
+(WordNode "," . 0.24827492849839902)
+(WordNode "the" . 0.14147241205706643)
+(WordNode "to" . 0.11305294927260087)
+(WordNode "and" . 0.10935602770196484)
+(WordNode "a" . 0.06263713832111492)
+((WordNode "of" . 0.05345591470333568)
+((WordNode "was"  . 0.04159803271278564)
+
+
+(cset-vec-cosine  (WordNode ".") (WordNode ","))
+$174 = 0.5411980781755208
+(cset-vec-cosine  (WordNode "the") (WordNode ","))
+$175 = 0.6949870533623743
+(cset-vec-cosine  (WordNode "the") (WordNode "."))
+$176 = 0.7239559271562869
+(cset-vec-cosine  (WordNode "the") (WordNode "to"))
+$177 = 0.7812122780640004
+(cset-vec-cosine  (WordNode "the") (WordNode "a"))
+$178 = 0.8863119467021999
+
 
 =========================================================================
 

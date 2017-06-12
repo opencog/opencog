@@ -128,28 +128,36 @@
 	(define tot (* 0.5 len (- len 1)))
 	(define done 0)
 	(define prs 0)
+	(define prevf 0)
 	(define start (current-time))
+	(define prevt start)
+
+	(define (do-one-and-rpt WRD-LST)
+		(set! prs (+ prs (batch-sim (car WRD-LST) (cdr WRD-LST) CUTOFF)))
+		(set! done (+  done 1))
+		(if (eqv? 0 (modulo done 10))
+			(let* ((elapsed (- (current-time) start))
+					(togo (* 0.5 (- len done) (- len (+ done 1))))
+					(frt (- tot togo))
+					(rate (* 0.001 (/ (- frt prevf) (- elapsed prevt))))
+					)
+				(format #t
+					 "Done ~A/~A frac=~5f% Time: ~A Done: ~4f% rate=~5f K prs/sec\n"
+					done len
+					(* 100.0 (/ prs frt))
+					elapsed
+					(* 100.0 (/ frt tot))
+					rate
+				)
+				(set! prevt elapsed)
+				(set! prevf frt)
+		)))
 
 	; tail-recursive list-walker.
 	(define (make-pairs WRD-LST)
-		(if (null? WRD-LST) #t
+		(if (not (null? WRD-LST))
 			(begin
-				(set! prs (+ prs (batch-sim (car WRD-LST) (cdr WRD-LST) CUTOFF)))
-				(set! done (+  done 1))
-				(if (eqv? 0 (modulo done 10))
-					(let* ((elapsed (- (current-time) start))
-							(togo (* 0.5 (- len done) (- len (+ done 1))))
-							(frt (- tot togo))
-							(rate (* 0.001 (/ frt elapsed)))
-							)
-						(format #t
-							 "Done ~A/~A frac=~5f% Time: ~A Done: ~4f% rate=~5f K prs/sec\n"
-							done len
-							(* 100.0 (/ prs frt))
-							elapsed
-							(* 100.0 (/ frt tot))
-							rate
-						)))
+				(do-one-and-rpt WRD-LST)
 				(make-pairs (cdr WRD-LST)))))
 
 	(make-pairs WORD-LIST)
@@ -162,7 +170,7 @@
 (define (para-batch-sim-pairs WORD-LIST CUTOFF)
 
 	(define len (length WORD-LIST))
-	(define tot (* 0.5 len len))
+	(define tot (* 0.5 len (- len 1)))
 	(define done 0)
 	(define prs 0)
 	(define prevf 0)
@@ -177,7 +185,8 @@
 		(set! done (+ done 1))
 		(if (eqv? 0 (modulo done 20))
 			(let* ((elapsed (- (current-time) start))
-					(frt (* done (- len done)))
+					(togo (* 0.5 (- len done) (- len (+ done 1))))
+					(frt (- tot togo))
 					(rate (* 0.001 (/ (- frt prevf) (- elapsed prevt))))
 					)
 				(format #t
