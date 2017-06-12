@@ -3,8 +3,8 @@
 ;
 ; gifty.scm
 ;
-; Demo code, for the 12 July diary entry.
-; Create a zipfian corpus, and see how the entropies work out.
+; Demo code, for the 12 July 2014 diary entry.
+; Create an artificial zipfian corpus, and see how the entropies work out.
 ; This avoids hand-calculation.
 
 (use-modules (srfi srfi-1))

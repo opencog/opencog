@@ -27849,7 +27849,7 @@ How much data does filtering actually discard? This dataset has 175559 rows.
  the words were seen 32 times or more.
  The distribution is shown in the graph below.
 \begin_inset Foot
-status open
+status collapsed
 
 \begin_layout Plain Layout
 From the cnt-obs-rows function.
@@ -28663,7 +28663,7 @@ Note, by the way, that the previous sections carefully described entropy
 \end_layout
 
 \begin_layout Subsection*
-Behavior, Steps 1-4
+Power iteration, Steps 1-4
 \end_layout
 
 \begin_layout Standard
