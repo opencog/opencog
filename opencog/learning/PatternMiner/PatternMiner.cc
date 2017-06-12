@@ -1281,7 +1281,7 @@ void PatternMiner::OutPutStaticsToCsvFile(unsigned int n_gram)
     csvFile.open(csvfileName.c_str());
 
 
-    csvFile << "Frequency,Surprisingness_I,Surprisingness_II" << std::endl;
+    csvFile << "Pattern,Frequency,Surprisingness_I,Surprisingness_II, " << std::endl;
 
     for (HTreeNode* htreeNode : patternsForThisGram)
     {
@@ -1300,6 +1300,7 @@ void PatternMiner::OutPutStaticsToCsvFile(unsigned int n_gram)
 
     csvFile.close();
 }
+
 
 void PatternMiner::OutPutLowFrequencyHighSurprisingnessPatternsToFile(vector<HTreeNode*> &patternsForThisGram, unsigned int n_gram)
 {
@@ -2291,6 +2292,164 @@ void PatternMiner::getOneMoreGramExtendedLinksFromGivenLeaf(Handle& toBeExtended
 
 }
 
+unsigned int PatternMiner::getAllEntityCountWithSamePredicatesForAPattern(HandleSeq& pattern)
+{
+
+    if (pattern.size() == 1)
+    {
+        if (pattern[0]->getType() == EVALUATION_LINK)
+        {
+            Handle predicate = pattern[0]->getOutgoingAtom(0);
+
+            string predicateName = predicate->getName();
+
+            cout << "/npredicate: " << predicateName << std::endl;
+
+            map<string,unsigned int>::iterator eit = allEntityNumMap.find(predicateName);
+            if (eit != allEntityNumMap.end())
+            {
+                cout << "alredy exists: " << eit->second << std::endl;
+                return eit->second;
+            }
+            else
+            {
+                IncomingSet allEvals = predicate->getIncomingSet(originalAtomSpace);
+                allEntityNumMap.insert(std::pair<string,int>(predicateName,allEvals.size()));
+                cout << "Found: " << allEvals.size() << " entities." << std::endl;
+                return allEvals.size();
+            }
+        }
+        else
+        {
+            cout << "warning: this pattern contains " << classserver().getTypeName(pattern[0]->getType())
+                 << "\nUSE_QUERY_ENTITY_COUNT is for the corpus that only contains EvalutionLinks." << std::endl;
+            return 0;
+        }
+    }
+    else
+    {
+
+        HandleSeq allPredicateNodes;
+
+        for (Handle l : pattern)
+        {
+            if (l->getType() == EVALUATION_LINK)
+            {
+                Handle predicate = l->getOutgoingAtom(0);
+                allPredicateNodes.push_back(predicate);
+            }
+            else
+            {
+                cout << "warning: this pattern contains " << classserver().getTypeName(l->getType())
+                     << "\nUSE_QUERY_ENTITY_COUNT is for the corpus that only contains EvalutionLinks." << std::endl;
+                return 0;
+            }
+        }
+
+        std::sort(allPredicateNodes.begin(), allPredicateNodes.end());
+        string predicateWords = "";
+        for (Handle predicate : allPredicateNodes)
+        {
+            predicateWords += predicate->getName();
+            predicateWords += " ";
+        }
+
+        cout << "/npredicates: " << predicateWords << std::endl;
+
+        map<string,unsigned int>::iterator eit = allEntityNumMap.find(predicateWords);
+        if (eit != allEntityNumMap.end())
+        {
+            cout << "alredy exists: " << eit->second << std::endl;
+            return eit->second;
+        }
+
+        vector<set<Handle>> allEntitiesForEachPredicate;
+
+        for (Handle predicate : allPredicateNodes)
+        {
+            set<Handle> allEntitiesForThisPredicate;
+
+            IncomingSet allEvals = predicate->getIncomingSet(originalAtomSpace);
+            for (LinkPtr incomeingPtr : allEvals)
+            {
+                Handle evalLink = incomeingPtr->getHandle();
+                Handle listLink = evalLink->getOutgoingAtom(1);
+                Handle entityNode = listLink->getOutgoingAtom(0);
+                allEntitiesForThisPredicate.insert(entityNode);
+            }
+
+            allEntitiesForEachPredicate.push_back(allEntitiesForThisPredicate);
+
+        }
+
+        HandleSeq commonLinks;
+        // get the common Links in allEntitiesForEachPredicate
+        std::set_intersection(allEntitiesForEachPredicate[0].begin(), allEntitiesForEachPredicate[0].end(),
+                              allEntitiesForEachPredicate[1].begin(), allEntitiesForEachPredicate[1].end(),
+                              std::back_inserter(commonLinks));
+
+        if (commonLinks.size() == 0)
+            return 0;
+
+        for (unsigned int i = 2; i < pattern.size(); ++ i)
+        {
+            HandleSeq newCommonLinks;
+            // get the common Links in allEntitiesForEachPredicate
+            std::set_intersection(allEntitiesForEachPredicate[i].begin(), allEntitiesForEachPredicate[i].end(),
+                                  commonLinks.begin(), commonLinks.end(),
+                                  std::back_inserter(newCommonLinks));
+
+            if (newCommonLinks.size() == 0)
+                return 0;
+
+            commonLinks.swap(newCommonLinks);
+        }
+
+        allEntityNumMap.insert(std::pair<string,int>(predicateWords,commonLinks.size()));
+        cout << "Found: " << commonLinks.size() << " entities." << std::endl;
+        return commonLinks.size();
+    }
+
+//    HandleSeq allEntityPattern;
+//    int var_index_num = 1;
+//    Handle entityVar = atomSpace->add_node(VARIABLE_NODE, "$var_1");
+
+//    for (Handle l : pattern)
+//    {
+//        var_index_num ++;
+
+//        if (l->getType() == EVALUATION_LINK)
+//        {
+//            Handle conceptNode = l->getOutgoingAtom(0);
+
+//            Handle valueNode = atomSpace->add_node(VARIABLE_NODE, "$var_" + toString(var_index_num));
+//            Handle newListLink = atomSpace->add_link(LIST_LINK, entityVar, valueNode);
+
+//            Handle newEvalLink = atomSpace->add_link(EVALUATION_LINK, conceptNode, newListLink);
+
+//            allEntityPattern.push_back(newEvalLink);
+//        }
+//        else
+//        {
+//            cout << "warning: this pattern contains " << classserver().getTypeName(l->getType())
+//                 << "\USE_QUERY_ENTITY_COUNT is for the corpus that only contains EvalutionLinks." << std::endl;
+//            return;
+//        }
+//    }
+
+//    unsigned int unifiedLastLinkIndex;
+//    HandleSeq unifiedPattern = UnifyPatternOrder(subPattern, unifiedLastLinkIndex);
+//    string unifiedPatternKey = unifiedPatternToKeyString(unifiedPattern);
+//    cout << "\allEntityPattern: \n" << unifiedPatternKey << std::endl;
+
+//    uniqueKeyLock.lock();
+//    // try to find if it has a correponding HtreeNode
+//    map<string, HTreeNode*>::iterator patternNodeIter = keyStrToHTreeNodeMap.find(connectedPatternKey);
+
+
+
+}
+
 // make sure only input 2~4 gram patterns, calculate nSurprisingness_I and nSurprisingness_II
 void PatternMiner::calculateSurprisingness( HTreeNode* HNode, AtomSpace *_fromAtomSpace)
 {
@@ -2298,9 +2457,6 @@ void PatternMiner::calculateSurprisingness( HTreeNode* HNode, AtomSpace *_fromAt
 //    // debug
 //    if (HNode->nI_Surprisingness != 0 || HNode->nII_Surprisingness != 0)
 //        std::cout << "Exception: This pattern has been calculateSurprisingness before!\n";
-
-    if (OUTPUT_SURPRISINGNESS_CALCULATION_TO_FILE)
-        surprisingnessCalcuationInfo.clear();
 
     if (HNode->count == 0)
         HNode->count = 1;
@@ -2313,20 +2469,54 @@ void PatternMiner::calculateSurprisingness( HTreeNode* HNode, AtomSpace *_fromAt
         return;
     }
 
-//    std::cout << "=================Debug: calculate I_Surprisingness for pattern: ====================\n";
-//    for (Handle link : HNode->pattern)
-//    {
-//        std::cout << link->toShortString();
-//    }
-//     std::cout << "count of this pattern = " << HNode->count << std::endl;
-//     std::cout << std::endl;
+    std::cout << "=================Debug: calculate I_Surprisingness for pattern: ====================\n";
+    for (Handle link : HNode->pattern)
+    {
+        std::cout << link->toShortString();
+    }
+     std::cout << "count of this pattern = " << HNode->count << std::endl;
+     std::cout << std::endl;
 
     unsigned int gram = HNode->pattern.size();
     // get the predefined combination:
     // vector<vector<vector<unsigned int>>>
     // int comcount = 0;
 
-    float p = ((float)HNode->count)/atomspaceSizeFloat;
+    float p;
+
+    if (USE_QUERY_ENTITY_COUNT) // this setting only for the corpus that only contains EvalutionLinks
+    {
+        // generate the allPattern for this pattern, e.g.:
+//        (EvaluationLink (stv 1.000000 1.000000)
+//          (PredicateNode "BirthYearCat")
+//          (ListLink (stv 1.000000 1.000000)
+//            (VariableNode "$var_1")
+//            (ConceptNode "1975-1980")
+//          )
+//        )
+//        the allPattern: it is to get all the entities that have the same predicate
+//        (EvaluationLink (stv 1.000000 1.000000)
+//          (PredicateNode "BirthYearCat")
+//          (ListLink (stv 1.000000 1.000000)
+//            (VariableNode "$var_1")
+//            (VariableNode "$var_2")
+//          )
+//        )
+        unsigned int allEntityCount = getAllEntityCountWithSamePredicatesForAPattern(HNode->pattern);
+        if (allEntityCount == 0)
+        {
+            cout << "error: cannot find instances for this allEntityCount." << std::endl;
+            return;
+        }
+        else
+        {
+            p = ((float)HNode->count) / ((float)allEntityCount);
+            cout << "allEntityCount = " << allEntityCount << std::endl;
+        }
+    }
+    else
+        p = ((float)HNode->count)/atomspaceSizeFloat;
+
     float abs_min_diff = 999999999.9f;
     float min_diff = 999999999.9f;
     // cout << "For this pattern itself: p = " <<  HNode->count << " / " <<  (int)atomspaceSizeFloat << " = " << p << std::endl;
@@ -3036,6 +3226,8 @@ void PatternMiner::runPatternMiner(bool exit_program_after_finish)
 
 void PatternMiner::runInterestingnessEvaluation()
 {
+    if (USE_QUERY_ENTITY_COUNT)
+        allEntityNumMap.clear();
 
     for(cur_gram = 2; cur_gram <= MAX_GRAM; cur_gram ++)
     {

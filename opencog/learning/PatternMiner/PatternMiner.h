@@ -48,6 +48,7 @@ namespace PatternMining
 #define SURPRISINGNESS_I_TOP_THRESHOLD 0.20
 #define SURPRISINGNESS_II_TOP_THRESHOLD 0.40
 #define OUTPUT_SURPRISINGNESS_CALCULATION_TO_FILE 1
+#define USE_QUERY_ENTITY_COUNT 1
 #define USE_ABS_SURPRISINGNESS 0
 #define LINE_INDENTATION "  "
 
@@ -123,7 +124,9 @@ protected:
     vector < vector<HTreeNode*> > finalPatternsForGram;
 
     // temp patterns generated only for calcuate the interestingness of its superpatterns, e.g. patterns with too many variables
-   vector < vector<HTreeNode*> > tmpPatternsForGram;
+    vector < vector<HTreeNode*> > tmpPatternsForGram;
+
+    map<string, unsigned int> allEntityNumMap;
 
     std::thread *threads;
 
@@ -198,8 +201,6 @@ protected:
     unsigned int actualProcessedLinkNum;
 
     vector<vector<vector<unsigned int>>> components_ngram[3];
-
-    map<HTreeNode*, string> surprisingnessCalcuationInfo;
 
     vector<Handle> allLinksContainWhiteKeywords;
     set<Handle> havenotProcessedWhiteKeywordLinks;
@@ -373,6 +374,8 @@ protected:
     void generateComponentCombinations(string componentsStr, vector<vector<vector<unsigned int>>> &componentCombinations);
 
     unsigned int getCountOfAConnectedPattern(string& connectedPatternKey, HandleSeq& connectedPattern);
+
+    unsigned int getAllEntityCountWithSamePredicatesForAPattern(HandleSeq& pattern);
 
     void calculateSurprisingness( HTreeNode* HNode, AtomSpace *_fromAtomSpace);
 
