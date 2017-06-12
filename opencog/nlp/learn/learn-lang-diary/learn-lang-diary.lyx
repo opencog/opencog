@@ -26222,7 +26222,37 @@ real soon now
 
 \end_inset
 
+ The exreme sparsity indicates that a power-itertion aglorithm will be the
+ most efficient for implementing a PCA algorithm.
+\end_layout
 
+\begin_layout Standard
+What we will examine will be the results on several different kinds of matrices
+ 
+\begin_inset Formula $M$
+\end_inset
+
+ derived from (constructed from) the base data matrix 
+\begin_inset Formula $P$
+\end_inset
+
+.
+ In all cases, the features are words, and so in all cases, it is appropriate
+ to write 
+\begin_inset Formula $X=M^{T}$
+\end_inset
+
+; that is, we work mostly with the transpose of the matrix 
+\begin_inset Formula $X$
+\end_inset
+
+ as usually given in standard texts.
+ This follows from the standard Link Grammar dictionary: the word is followed
+ by the disjuncts it can employ.
+\end_layout
+
+\begin_layout Subsection*
+PCA of the frequency matrix
 \end_layout
 
 \begin_layout Standard
@@ -26231,19 +26261,15 @@ Should we identify
 \end_inset
 
  and 
-\begin_inset Formula $X$
+\begin_inset Formula $X^{T}$
 \end_inset
 
-? We can, but then we don't get what we want.
- Since we want words as features, we can try setting 
-\begin_inset Formula $X=P^{T}$
-\end_inset
-
- so that 
+, so that 
 \begin_inset Formula $X^{T}X=PP^{T}$
 \end_inset
 
 .
+ ? We can, but then we don't get what we want.
  Computing the principal component of this matrix for a recent dataset (see
  later section below), we get the following vector shown below.
  The 
@@ -26978,6 +27004,97 @@ If these numbers seem small, it is because they were taken from a sharply
 \end_layout
 
 \begin_layout Subsection*
+PCA of the cosine similarity
+\end_layout
+
+\begin_layout Standard
+We had previously defined the cosine similarity of two words as
+\begin_inset Formula 
+\[
+\mbox{sim}(w_{1},w_{2})=\frac{\sum_{d}p(w_{1},d)p(w_{2},d)}{\sqrt{\sum_{d}p^{2}(w_{1},d)}\sqrt{\sum_{d}p^{2}(w_{2},d)}}
+\]
+
+\end_inset
+
+and so, perhaps we should use this as the basis for judging the similarity
+ of words.
+ This suggests defining a matrix 
+\begin_inset Formula $S$
+\end_inset
+
+ with matrix components 
+\begin_inset Formula 
+\[
+S(w,d)=\frac{p(w,d)}{\sqrt{\sum_{d}p^{2}(w,d)}}
+\]
+
+\end_inset
+
+and then setting setting 
+\begin_inset Formula $X=S^{T}$
+\end_inset
+
+ so that 
+\begin_inset Formula $X^{T}X=SS^{T}$
+\end_inset
+
+.
+ The idea here is that PCA allows a whole-set analysis of similarity, rather
+ than point-wise similarity.
+ That is, for normal clustering algorithms, one computes a large number
+ of values for 
+\begin_inset Formula $\mbox{sim}(w_{1},w_{2})$
+\end_inset
+
+ and then employs a clustering algorithm to categorize these, word by word.
+ Here, instead, perhaps PCA can reveal entire clusters in one gulp, by simultane
+ously evaluating the similarity between all words in a cluster.
+\end_layout
+
+\begin_layout Subsection*
+Other similarity measures
+\end_layout
+
+\begin_layout Standard
+Its worth noting that one of teh other similarity measures, such as qim
+ and pim, discussed previously, can also be treated in this way.
+ Note also that a matrix can be constructed so that 
+\begin_inset Formula $X^{T}X$
+\end_inset
+
+ becomes explicitly Markovian.
+ This is given by 
+\begin_inset Formula 
+\[
+A(w,d)=\frac{p(w,d)}{p(*,d)}\quad\mbox{ and }\quad B(w,d)=\frac{p(w,d)}{p(w,*)}
+\]
+
+\end_inset
+
+and then setting 
+\begin_inset Formula $X^{T}X=AB$
+\end_inset
+
+.
+ This has the property that 
+\begin_inset Formula 
+\[
+\sum_{w_{1}}\left[AB\right](w_{1},w_{2})=1
+\]
+
+\end_inset
+
+That is, the matrix 
+\begin_inset Formula $AB$
+\end_inset
+
+ is a Markov matrix.
+ It is straight-forward to compute using the standard power-iteration aglorithm
+ employed throughout this section.
+ 
+\end_layout
+
+\begin_layout Subsection*
 A modified PCA algorithm
 \end_layout
 
@@ -27043,30 +27160,33 @@ Start with
 
 \begin_layout Enumerate
 Let 
-\begin_inset Formula $p(w,d)$
+\begin_inset Formula $M$
 \end_inset
 
- be the frequency matrix, as defined before: 
-\begin_inset Formula $p(w,d)=N(w,d)/N(*,*)$
+ be the matrix for which the PCA is to be computed, with matrix components
+ 
+\begin_inset Formula $M(w,d)$
 \end_inset
 
-, and where 
-\begin_inset Formula $N(w,d)$
-\end_inset
-
- is the number of times word 
+ for word 
 \begin_inset Formula $w$
 \end_inset
 
- has been observed with disjunct 
+ and disjunct 
 \begin_inset Formula $d$
 \end_inset
 
 .
+ This matrix is derived from (defined in terms of) the frequency matrix
+ 
+\begin_inset Formula $p(w,d)$
+\end_inset
+
+ describing the base dataset.
  Compute the double-sum 
 \begin_inset Formula 
 \[
-s(v)=\left[PP^{T}b\right](v)=\sum_{d}p(v,d)\sum_{w}p(w,d)b(w)
+s(v)=\left[MM^{T}b\right](v)=\sum_{d}M(v,d)\sum_{w}M(w,d)b(w)
 \]
 
 \end_inset
@@ -27102,7 +27222,7 @@ Repeat these steps
  times: go to step 2 and run the summation again.
  The repetition here is the 'power iteration' or the 'von Mises iteration'
  method for computing the largest eigenvalue of 
-\begin_inset Formula $\left[PP^{T}\right]$
+\begin_inset Formula $\left[MM^{T}\right]$
 \end_inset
 
 .
@@ -27115,14 +27235,14 @@ Repeat these steps
  Another way to think of this is as a Markov process (specifically, a Markov
  chain).
  That is, the matrix 
-\begin_inset Formula $\left[PP^{T}\right]$
+\begin_inset Formula $\left[MM^{T}\right]$
 \end_inset
 
  will behave essentially as a Markov chain, and iteration on it just identifies
  the primary Peron-Frobenius stable state (step 3 makes it Markovian, by
  preserving to total probability measure).
  That is, 
-\begin_inset Formula $\left[PP^{T}\right]$
+\begin_inset Formula $\left[MM^{T}\right]$
 \end_inset
 
  defines a weighted adjacency matrix for a graph, and iteration creates
@@ -27167,7 +27287,7 @@ Repeat this
  The vector (viewed as a measure-preserving dynamical system) is spending
  most of its time in one particular block.
  Again, 
-\begin_inset Formula $\left[PP^{T}\right]^{k}$
+\begin_inset Formula $\left[MM^{T}\right]^{k}$
 \end_inset
 
 , the 
@@ -27182,7 +27302,7 @@ Repeat this
 
 -layer neural net, with the link weights between one layer and the next
  being given by 
-\begin_inset Formula $\left[PP^{T}\right]^{k}$
+\begin_inset Formula $\left[MM^{T}\right]^{k}$
 \end_inset
 
 .
@@ -27227,7 +27347,7 @@ Classify.
  The step function is a super-sharp sigmoid.
  This step identifies and isolates an active, well-connected subgraph of
  
-\begin_inset Formula $\left[PP^{T}\right]$
+\begin_inset Formula $\left[MM^{T}\right]$
 \end_inset
 
 .
@@ -27247,7 +27367,7 @@ Classify.
  To belabor the point: the block-matrix is explicitly 
 \begin_inset Formula 
 \[
-B(v,w)=b(v)b(w)\sum_{d}p(v,d)p(w,d)
+B(v,w)=b(v)b(w)\sum_{d}M(v,d)M(w,d)
 \]
 
 \end_inset
@@ -28741,19 +28861,8 @@ to
 \end_layout
 
 \begin_layout Standard
-Its a rather motley collection.
- The fact that there is only one high-weight item in this vector suggests
- that the top-ranked 
-\begin_inset Quotes eld
-\end_inset
-
-word
-\begin_inset Quotes erd
-\end_inset
-
-, the period, is radically different than the rest.
- And this makes sense: we expect the grammatical behavior of the period
- to indeed be different.
+The significance and interpretation of this vector was already discussed
+ in a previous section.
 \end_layout
 
 \begin_layout Section*
