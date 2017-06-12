@@ -7392,9 +7392,9 @@ Length  (l_2)  4.9537E+5    4.9524E+5    16.57        14.22
 RMS Count      4.9502E+5    4.9482E+5    16.55        14.21
 
 ---------- meanwhile do the rone_mst
-Started  gamma-guten-r 3028  port 19505  feeder-term-7 / guile-term-6
+Started  gamma-guten-r port 19505  feeder-term-7 / guile-term-6
 guile -l mst-count-en-r.scm on term-6
-9 June 10PM
+9 June 10PM  3028 articles
 
 ---------- meanwhile do the tthree_mst
 gamma-guten feeder-8 port 19005 ./guten-mst-en.sh
@@ -9009,6 +9009,45 @@ OK, so the cut to use is the last one:
 (pti 'left-print lit4 20)
 
 Wow. Like 4 iterations and its converged already!
+
+--------------------
+OK, knockout time.  Kill the period.
+(define fsj (add-knockout-filter fsi (list (Word ".")) '()))
+(define pfj (add-pair-freq-api fsj))
+(define ptj (make-thresh-pca pfj))
+(define lit (ptj 'left-iterate feig 4))
+
+Hmm. 
+(length (pti 'right-stars (Word "."))) ;  2031
+
+the 1403  106378.0
+and  1225  96276.0
+to 1276  96308.0
+” 506  45809.0
+,  1703  111982.0
+a  958  73760.0
+in 750  56751.0
+of 890  64753.0
+his 691  48728.0
+it  606 44211.0
+with 480 33681.0
+him 425 30345.0
+that 729 49714.0
+for 479 33092.0
+
+(define psi (add-support-compute pti))
+(psi 'right-count (Word "."))  341112.0
+--------------------
+
+OK, cosine time.  Overload the pair-freq method.
+
+Need a left and right unit. DONE.
+
+(define pci (make-cosine-matrix pfi))
+(define pti (make-thresh-pca pci 'left-unit))
+(define lit (pti 'left-iterate feig 4))
+(pti 'left-print lit 20)
+
 
 =========================================================================
 
