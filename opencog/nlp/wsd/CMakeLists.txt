@@ -24,7 +24,8 @@ ADD_LIBRARY (wsd SHARED
 	SenseSimilarityLCH.cc
 	SenseSimilaritySQL.cc
 	Sweep.cc
-	WordSenseProcessor.cc
+# Do not build this any longer!
+#	WordSenseProcessor.cc
 )
 
 ADD_DEPENDENCIES(wsd nlp_atom_types)
