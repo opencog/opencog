@@ -57,10 +57,6 @@
 #include <opencog/cogserver/server/SystemActivityTable.h>
 #include <opencog/cogserver/server/Request.h>
 
-#ifdef HAVE_PERSIST_SQL
-#include <opencog/cogserver/modules/PersistModule.h>
-#endif
-
 #include "CogServer.h"
 #include "BaseServer.h"
 
@@ -647,45 +643,6 @@ void CogServer::loadModules(std::vector<std::string> module_paths)
         for (auto p : module_paths)
             logger().warn("Searched for module at %s", p.c_str());
     }
-}
-
-void CogServer::openDatabase(void)
-{
-#ifdef HAVE_PERSIST_SQL
-    // No-op if the user has not configured a storage backend
-    if (!config().has("STORAGE")) {
-        logger().info("No database persistant storage configured! "
-                      "Use the STORAGE config keyword to define.");
-        return;
-    }
-
-    const std::string &dbname = config()["STORAGE"];
-    const std::string &username = config()["STORAGE_USERNAME"];
-    const std::string &passwd = config()["STORAGE_PASSWD"];
-
-    std::list<std::string> args;
-    args.push_back(dbname);
-    args.push_back(username);
-    args.push_back(passwd);
-
-    // Do this all very politely, by loading the required module,
-    // and then calling methods on it, as needed.
-    loadModule("libPersistModule.so");
-
-    Module *mod = getModule("opencog::PersistModule");
-    if (NULL == mod)
-    {
-        logger().warn("Failed to pre-load database, because persist module not found!\n");
-        return;
-    }
-    PersistModule *pm = dynamic_cast<PersistModule *>(mod);
-    const std::string &resp = pm->do_open(NULL, args);
-
-    logger().info("Preload %s as user %s msg: %s",
-        dbname.c_str(), username.c_str(), resp.c_str());
-#else
-    logger().warn("Cogserver compiled without database support");
-#endif
 }
 
 Logger &CogServer::logger()
