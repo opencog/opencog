@@ -223,7 +223,7 @@ took
  There seem to be few or no verbs in the dataset, as already noted.
  It seems that even small datasets are sufficient to get started with grammatica
 l similarity clustering, but much larger samples are needed for discovering
- more sophisticaed grammar.
+ more sophisticated grammar.
 \end_layout
 
 \begin_layout Subsection*
@@ -242,7 +242,7 @@ The story so far: Starting from a large text corpus, the mutual information
 
 \begin_layout Standard
 So, for example, in in idealized world, the MST parse of the sentence "Ben
- ate pizza" would prodouce the parse Ben <--> ate <--> pizza and from this,
+ ate pizza" would produce the parse Ben <--> ate <--> pizza and from this,
  we can extract the pseudo-disjunct (Ben- pizza+) on the word "ate".
  Similarly, the sentence "Ben puked pizza" should produce the disjunct (Ben-
  pizza+) on the word "puked".
@@ -253,11 +253,11 @@ So, for example, in in idealized world, the MST parse of the sentence "Ben
 \end_layout
 
 \begin_layout Standard
-Any given word will have many psuedo-disjuncts attached to it.
+Any given word will have many pseudo-disjuncts attached to it.
  Each disjunct has a count of the number of times it has been observed.
  Thus, this set of disjuncts can be imagined to be a vector in a high-dimensiona
 l vector space, which each disjunct being a single basis element.
- The similarity of two words can be taken to be the cosine-similariy between
+ The similarity of two words can be taken to be the cosine-similarity between
  the disjunct-vectors.
 \end_layout
 
@@ -271,7 +271,7 @@ Equivalently, the set of disjuncts can be thought of as a weighted set:
  coefficients will have a count of zero.
  For example, the dataset that will be examined next has over a quarter
  of a million different pseudo-disjuncts in it; most words have fewer than
- a hundred dsjuncts on them.
+ a hundred disjuncts on them.
 \end_layout
 
 \begin_layout Standard
@@ -314,7 +314,7 @@ It is useful to introduce some notation for counting words, disjuncts, and
 \begin_inset Formula $(w,d)$
 \end_inset
 
- is refered to as a 
+ is referred to as a 
 \begin_inset Quotes eld
 \end_inset
 
@@ -371,7 +371,7 @@ The primary contents of the database are the counts
 \begin_inset Formula $N(w,d)$
 \end_inset
 
- and everthing else of interest in this section can be obtained from this.
+ and everything else of interest in this section can be obtained from this.
  Note that 
 \begin_inset Formula $N(w,d)$
 \end_inset
@@ -389,7 +389,7 @@ The primary contents of the database are the counts
 \begin_layout Standard
 Every time a word is observed in an MST parse, a disjunct is extracted for
  it; thus, word observations and disjunct observations are on one-to-one
- correspondance.
+ correspondence.
  In notation:
 \begin_inset Formula 
 \[
@@ -446,9 +446,9 @@ tly of any observations; let
 \end_inset
 
  is almost always either zero or one; however, a connector can appear more
- than once in a disjuct, so this count can rise to 2 or 3 or very rarely
+ than once in a disjunct, so this count can rise to 2 or 3 or very rarely
  higher.
- The wildcard sum 
+ The wild-card sum 
 \begin_inset Formula $C(d,*)=\sum_{c}C(d,c)$
 \end_inset
 
@@ -480,7 +480,7 @@ y small dataset, taken as a snapshot during counting.
  of 661104/291637 = 2.27 observations per disjunct.
  The period appears 32536 times, suggesting that this many sentences were
  observed.
- Each sentnece thus has an average of 661104/32536 = 20.3 words per sentence.
+ Each sentence thus has an average of 661104/32536 = 20.3 words per sentence.
  The dataset contains 446204 unique connector-sets, for an average of 661104/446
 204 = 1.48 observations per cset.
  It is this last number that makes this dataset feel thin and sparse.
@@ -580,7 +580,7 @@ Connector-set distribution
 
 \begin_layout Standard
 Some connector-sets will be observed far more often than others.
- Likewise for te two sides of the connector-set: some words will have far
+ Likewise for the two sides of the connector-set: some words will have far
  more observations, and some disjuncts will be seen more often.
 \end_layout
 
@@ -647,7 +647,7 @@ the
 
  can appear more than once in a sentence.
  This list is repeated in the table below.
- The frequency is just the count deivded by 661104.
+ The frequency is just the count divided by 661104.
 \end_layout
 
 \begin_layout Standard
@@ -1050,11 +1050,11 @@ was
 \end_layout
 
 \begin_layout Standard
-The main point of this table is to demonstrate the log-liklihood column.
+The main point of this table is to demonstrate the log-likelihood column.
  At this point, these numbers won't seem to have much meaning; however,
  they provide an overall scale that will be seen, repeatedly, in the analysis
  below.
- The range of magnitudes -- 4 to 7 -- is no acccident, and similar ranges
+ The range of magnitudes -- 4 to 7 -- is no accident, and similar ranges
  will be seen later.
  
 \end_layout
@@ -1090,7 +1090,7 @@ the
 \end_inset
 
  on the left.
- This is grammaitcally correct: 
+ This is grammatically correct: 
 \begin_inset Quotes eld
 \end_inset
 
@@ -1117,9 +1117,9 @@ the
 \end_inset
 
  on the right.
- This is never correct for English; determiners always preceed the noun
+ This is never correct for English; determiners always precede the noun
  that they modify.
- The rest of the dusjunct look reasonable: it's legitimate to link to commas
+ The rest of the disjunct look reasonable: it's legitimate to link to commas
  on both the left and right, and likewise to the preposition 
 \begin_inset Quotes eld
 \end_inset
@@ -1153,7 +1153,7 @@ a+
 \begin_inset Quotes erd
 \end_inset
 
- doesnt appear until the 14th slot.
+ doesn't appear until the 14th slot.
 \end_layout
 
 \begin_layout Standard
@@ -1292,7 +1292,7 @@ on it's side
 
 .
  So, in this dataset, there were 15270 words observed exactly once (out
- of a total of 661104 oservations of 37413 words).
+ of a total of 661104 observations of 37413 words).
  This is quite something: of all the words observed, almost half were seen
  only once.
  More than half were seen twice, or less.
@@ -1446,8 +1446,8 @@ above
  The difference can be understood as follows (and is important to keep in
  mind).
  This graph was generated by bin-counting.
- The x-axis was divided into 200 equal-sized bins, and whenever the log-liklihoo
-d of a word landed within a particular bin, the count was accumulated into
+ The x-axis was divided into 200 equal-sized bins, and whenever the log-likeliho
+od of a word landed within a particular bin, the count was accumulated into
  that bin.
  Both this and the previous graph are distributions, but they use different
  measures.
@@ -1526,7 +1526,7 @@ Computed with the sorted-avg list in disjunct-stats.scm
  exponent is approximately -1/4.
  The graph on the right expresses an alternate view of the same idea: this
  one shows a bin-count of all of the words.
- Raffirming the graph in the left, it indicates that almost all words have
+ Reaffirming the graph on the left, it indicates that almost all words have
  an average disjunct observation count of less than three.
  Both of these graphs emphasize just how thin and weak this dataset is:
  to be certain of a disjunct, it sure would be nice to observe it, in actual
@@ -1788,7 +1788,7 @@ The fifth most frequent disjunct is grammatical garbage: noise from bad
 
  or about 9 dB.
  These first four disjuncts really pull up the average, which is quite low,
- given this skew: the average number of observations pero disjunct for 
+ given this skew: the average number of observations per disjunct for 
 \begin_inset Quotes eld
 \end_inset
 
@@ -2310,7 +2310,7 @@ Mean-square to size ratio
 \end_layout
 
 \begin_layout Standard
-More intesting is the ratio of mean-square size to the total size.
+More interesting is the ratio of mean-square size to the total size.
  In formulas, by ranking according to 
 \begin_inset Formula 
 \[
@@ -2332,8 +2332,8 @@ Words high in this score will be words that have relatively few disjuncts
  100 observations): "It" "According" "He" ")" "and" "(" "United" "as" "."
  "well".
  Note that most are capitalized: that means that these words appeared at
- the begining of sentences; the way in which the can link to what follows
- is fairly constrainted, and thus it is no surprise that these have only
+ the beginning of sentences; the way in which the can link to what follows
+ is fairly constrained, and thus it is no surprise that these have only
  a few disjuncts on them.
  
 \end_layout
@@ -3043,7 +3043,7 @@ United
 \begin_layout Standard
 The distribution is unusual; it is shown below.
  Note that the x-axis is drawn with a log-scale.
- It appears to be linear, with an exponet of -4.
+ It appears to be linear, with an exponent of -4.
 \end_layout
 
 \begin_layout Standard
@@ -3064,7 +3064,7 @@ Are there other interesting measures? One could contemplate the ratio of
 \end_inset
 
 .
- Another possbility would be this, minus the average-squared, which would
+ Another possibility would be this, minus the average-squared, which would
  give the second moment, aka, the mean-square deviation from the average,
  specifically
 \begin_inset Formula 
@@ -3228,13 +3228,13 @@ reference "logli distribution graph"
 .
  The combs are due to the large number of words that have been observed
  only a small handful of times.
- In essence, the combs attest that the bulk of the high-MI pairs hae been
+ In essence, the combs attest that the bulk of the high-MI pairs have been
  observed more than just a few times; 
 \emph on
 i.e.
 
 \emph default
- the high MI values are meainingful.
+ the high MI values are meaningful.
 \end_layout
 
 \begin_layout Subsection*
@@ -3308,8 +3308,8 @@ This is graphed by sorted-word-mi-hi-p in disjunct-stats.scm
 \begin_layout Standard
 The graph on the right shows the distribution, for all 37413 words, bin-counted
  into 100 bins.
- Unfortunately, this sampling remains small and noisey, so the suggestion
- of a log-linear decay to both left and right is hidden by rather noisey
+ Unfortunately, this sampling remains small and noisy, so the suggestion
+ of a log-linear decay to both left and right is hidden by rather noisy
  spikes.
  The combs on the far right are again the same combs as noted in the last
  figure in section 
@@ -3830,7 +3830,7 @@ garbage
 \begin_inset Quotes erd
 \end_inset
 
- in wikipedia (which is the source for the dataset): the disjuncts on 
+ in Wikipedia (which is the source for the dataset): the disjuncts on 
 \begin_inset Quotes eld
 \end_inset
 
@@ -3846,7 +3846,7 @@ y
 \begin_inset Quotes erd
 \end_inset
 
- indicate that these occur almost exclusivelt in mathematical formulas of
+ indicate that these occur almost exclusively in mathematical formulas of
  some sort, involving single-letter variables, plus signs and equal signs.
  The most frequent disjunct on 
 \begin_inset Quotes eld
@@ -3873,10 +3873,10 @@ we
 \begin_inset Quotes erd
 \end_inset
 
- were observed more than 4 times, and seemd to consist of some sort of grammatic
-al word-salad.
+ were observed more than 4 times, and seemed to consist of some sort of
+ grammatical word-salad.
  This is not surprising: Wikipedia has a severe shortage of pronouns; style
- guidelines prohibit thier use.
+ guidelines prohibit their use.
 \end_layout
 
 \begin_layout Standard
@@ -3888,7 +3888,7 @@ At the other extreme, the ten words with the lowest MI are: "The" "a" "to"
 \end_layout
 
 \begin_layout Subsection*
-Mutual information of disjunts
+Mutual information of disjuncts
 \end_layout
 
 \begin_layout Standard
@@ -3974,7 +3974,7 @@ attractive
  any particular word or word-set; indeed, any given disjunct is mostly dis-favor
 ing any word or small set of words, and is instead appearing with just about
  all words.
- This is exp;lored a bit more in the next section.
+ This is explored a bit more in the next section.
 \end_layout
 
 \begin_layout Subsection*
@@ -4047,7 +4047,7 @@ Generated from sorted-word-ent in disjunct-stats.scm.
  the words.
  This affirms (or explains?) the sharp knee in the graph on the left: the
  knee occurs because almost all words have a large disjunct-entropy.
- This is expained below.
+ This is explained below.
 \end_layout
 
 \begin_layout Standard
@@ -4668,7 +4668,7 @@ children
 
 \begin_layout Standard
 A bit of notation.
- Recall the defintion for the set that supports a word: 
+ Recall the definition for the set that supports a word: 
 \begin_inset Formula 
 \[
 (w,*)=\left\{ (w,d)|N(w,d)>0\right\} 
@@ -4693,7 +4693,7 @@ That is,
 \begin_inset Formula $\left|(w,*)\right|_{k}$
 \end_inset
 
- is the size of the support for when the disjucts on word 
+ is the size of the support for when the disjuncts on word 
 \begin_inset Formula $w$
 \end_inset
 
@@ -4813,7 +4813,7 @@ Computed with sorted-avg-connectors in disjunct-stats.scm
 \end_layout
 
 \begin_layout Standard
-This graph is unexpected; in part, having an average number of conectors
+This graph is unexpected; in part, having an average number of connectors
  that exceed 5 or 6 is intuitively surprising.
  What's happening here? The first ten items in the ranking are: "-" "de"
  "y" ":" "(" ")" "General" "Department" "x" "Act".
@@ -4867,8 +4867,8 @@ Figueroa+ (+ (+ y+
 
  suggesting that there were possibly 51 really bad parses of a very long
  table of Spanish kings, which was mistaken for being a single sentence.
- Clearly, its junk; its frequently-occuring junk, which suggests that the
- table was repeatedly included in maybe 51 different wikiepdia pages.
+ Clearly, its junk; its frequently-occurring junk, which suggests that the
+ table was repeatedly included in maybe 51 different Wikipedia pages.
  
 \end_layout
 
@@ -4881,7 +4881,7 @@ Department
 \begin_inset Quotes erd
 \end_inset
 
- has 18 observations of a disjunct with 41 connnectors on it.
+ has 18 observations of a disjunct with 41 connectors on it.
  It starts with 
 \begin_inset Quotes eld
 \end_inset
@@ -4898,8 +4898,8 @@ Veterans+ of+ Treasury+ Treasury+
 \begin_inset Quotes erd
 \end_inset
 
-, again suggesting a bad parse of a table mistken for a sentence, and included
- in 18 different wikipedia pages.
+, again suggesting a bad parse of a table mistaken for a sentence, and included
+ in 18 different Wikipedia pages.
  
 \end_layout
 
@@ -4947,7 +4947,7 @@ Another conclusion is that perhaps the number of observations of pairs are
  Junk links get used because there were not enough appropriate word-pairs
  seen to give a good-quality MST parse.
  A related conclusion is that the connector-set dataset is also too thin:
- The grammatially reasonable connectors are observed not even a few dozen
+ The grammatically reasonable connectors are observed not even a few dozen
  times, barely pushing them out of the noise-floor of onesie-twosie observations
  of junk.
  
@@ -4985,7 +4985,7 @@ Given the earlier Zipfian results on the average degree
  very nearly identical to the listing for average degree.
  This is, after all, what the scale-free nature of the Zipfian distribution
  really means.
- Not only is the ranking nearly the same, but one also has the aproximate
+ Not only is the ranking nearly the same, but one also has the approximate
  equality 
 \begin_inset Formula $hub(w)\approx2K(w)$
 \end_inset
@@ -4999,7 +4999,7 @@ Disjunct Cosine Similarity
 \end_layout
 
 \begin_layout Standard
-The cosine similarity between two vectors is simply thier inner product.
+The cosine similarity between two vectors is simply their inner product.
  In this case, given two words 
 \begin_inset Formula $w_{1}$
 \end_inset
@@ -5020,7 +5020,8 @@ where
 \begin_inset Formula $\mbox{len}(w)$
 \end_inset
 
- is the root-mean-square length (Eucliden length) of the connector-set vector:
+ is the root-mean-square length (Euclidean length) of the connector-set
+ vector:
 \begin_inset Formula 
 \[
 \mbox{len}(w)=\sqrt{\sum_{d}N^{2}(w,d)}
@@ -5114,7 +5115,7 @@ Produced by binned-good-sims.
 \end_layout
 
 \begin_layout Standard
-The top-ten simialrity pairs are: 'Poir ..
+The top-ten similarity pairs are: 'Poir ..
  Perls' 'Poir ..
  Sevan' 'Sevan ..
  Perls' 'Sevan ..
@@ -5681,7 +5682,7 @@ Likewise, 'creation' gets the disjunct (the- of+) 18 times, and no other
  almost all having counts of 1 or 2.
  Again, the evidence is thin, with one notable point: 'creation' is not
  at all like 'canal', in that 'canal' has zero counts of (the- of+) while
- 'creation has only one count of (the-).
+ 'creation' has only one count of (the-).
  As nouns, they are actually quite different, even based on the thin evidence
  available.
  
@@ -5692,8 +5693,8 @@ The equivalence of 'in ..
  from' is much more interesting.
  The preposition 'in' has a total of 8338 different unique disjuncts --
  this is huge, compared to the nouns above.
- Likewsise, 'from' has 2185 different disjuncts observed.
- The top-ranked disuncts for each are shown in the tables below.
+ Likewise, 'from' has 2185 different disjuncts observed.
+ The top-ranked disjuncts for each are shown in the tables below.
 \end_layout
 
 \begin_layout Standard
@@ -6121,12 +6122,12 @@ At any rate, the dataset seems a bit thin, but we already knew this; its
 \end_layout
 
 \begin_layout Subsection*
-Pair Cosine Similiarty
+Pair Cosine Similarity
 \end_layout
 
 \begin_layout Standard
 To correctly gauge the disjunct-based cosine similarity, it should be contrasted
- against the simplier pair-based cosine similarity.
+ against the simpler pair-based cosine similarity.
  This is given by 
 \begin_inset Formula 
 \[
@@ -6139,7 +6140,7 @@ where
 \begin_inset Formula $\mbox{len}(w)$
 \end_inset
 
- is the root-mean-square length (Eucliden length) of the pair vector:
+ is the root-mean-square length (Euclidean length) of the pair vector:
 \begin_inset Formula 
 \[
 \mbox{len}(w)=\sqrt{\sum_{v}N_{pair}(w,v)N_{pair}(v,w)}
@@ -6186,7 +6187,7 @@ Note that this similarity measure is NOT symmetric:
 \begin_inset Formula $R$
 \end_inset
 
- encompasing all of the constraints of pair-wise word relationships (including,
+ encompassing all of the constraints of pair-wise word relationships (including,
  for example, that the pair might have been extracted from a random planar
  tree parse).
  Of course, one could construct a symmetrized similarity measure.
@@ -6196,7 +6197,7 @@ Note that this similarity measure is NOT symmetric:
 The point here is that this measure treats words as similar with they link,
  pair-wise, to the same kinds of words, with the same kinds of frequencies.
  This is not unlike the similarity that the disjunct-cosine is measuring,
- except that the disjunct carries additonal grammatical information with
+ except that the disjunct carries additional grammatical information with
  it: it captures more complex relationships between the words in a sentence.
 \end_layout
 
@@ -6277,8 +6278,8 @@ Quality Cosine
 \begin_layout Standard
 More possibilities exist.
  The motivation for using cosine similarity is to find pairs of words that
- act in a grammaticall similar fashion: they are used in the same way, with
- the same kinds of disjuncts.
+ act in a grammatically similar fashion: they are used in the same way,
+ with the same kinds of disjuncts.
  However, observational counts are subject to the vicissitudes of the input
  text: perhaps, instead of using vectors where the components are given
  by the frequency, once could instead use components based on, say, the
@@ -6343,7 +6344,6 @@ But what if the high quality is based on a pathetically small number of
 
  The suitability of these different means of judging similarity is not clear.
 \end_layout
-
 \begin_layout Section*
 The End
 \end_layout
