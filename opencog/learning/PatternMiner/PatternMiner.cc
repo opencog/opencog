@@ -1168,6 +1168,28 @@ void PatternMiner::OutPutFinalPatternsToFile(unsigned int n_gram)
 }
 
 
+void PatternMiner::OutPutAllEntityNumsToFile()
+{
+    // out put to csv file
+    ofstream csvFile;
+    string csvfileName = "AllEntityNums.csv";
+
+    std::cout<<"\nDebug: PatternMiner: writing AllEntityNums to csv file " + csvfileName << std::endl;
+
+    csvFile.open(csvfileName.c_str());
+
+    csvFile << "predicates,AllEntityNum" << std::endl;
+
+    map<string, unsigned int>::const_iterator numit;
+    for (numit = allEntityNumMap.begin(); numit != allEntityNumMap.end(); numit ++)
+    {
+        csvFile << numit->first << "," << numit->second << std::endl;
+    }
+
+    csvFile.close();
+}
+
+
 
 void PatternMiner::OutPutFrequentPatternsToFile(unsigned int n_gram, vector < vector<HTreeNode*> >& _patternsForGram, string _fileNamebasic)
 {
@@ -2303,19 +2325,19 @@ unsigned int PatternMiner::getAllEntityCountWithSamePredicatesForAPattern(Handle
 
             string predicateName = predicate->getName();
 
-            cout << "/npredicate: " << predicateName << std::endl;
+//            cout << "/npredicate: " << predicateName << std::endl;
 
             map<string,unsigned int>::iterator eit = allEntityNumMap.find(predicateName);
             if (eit != allEntityNumMap.end())
             {
-                cout << "alredy exists: " << eit->second << std::endl;
+//                cout << "alredy exists: " << eit->second << std::endl;
                 return eit->second;
             }
             else
             {
                 IncomingSet allEvals = predicate->getIncomingSet(originalAtomSpace);
                 allEntityNumMap.insert(std::pair<string,int>(predicateName,allEvals.size()));
-                cout << "Found: " << allEvals.size() << " entities." << std::endl;
+//                cout << "Found: " << allEvals.size() << " entities." << std::endl;
                 return allEvals.size();
             }
         }
@@ -2354,12 +2376,12 @@ unsigned int PatternMiner::getAllEntityCountWithSamePredicatesForAPattern(Handle
             predicateWords += " ";
         }
 
-        cout << "/npredicates: " << predicateWords << std::endl;
+//        cout << "/npredicates: " << predicateWords << std::endl;
 
         map<string,unsigned int>::iterator eit = allEntityNumMap.find(predicateWords);
         if (eit != allEntityNumMap.end())
         {
-            cout << "alredy exists: " << eit->second << std::endl;
+//            cout << "alredy exists: " << eit->second << std::endl;
             return eit->second;
         }
 
@@ -2406,7 +2428,7 @@ unsigned int PatternMiner::getAllEntityCountWithSamePredicatesForAPattern(Handle
         }
 
         allEntityNumMap.insert(std::pair<string,int>(predicateWords,commonLinks.size()));
-        cout << "Found: " << commonLinks.size() << " entities." << std::endl;
+//        cout << "Found: " << commonLinks.size() << " entities." << std::endl;
         return commonLinks.size();
     }
 
@@ -2469,18 +2491,20 @@ void PatternMiner::calculateSurprisingness( HTreeNode* HNode, AtomSpace *_fromAt
         return;
     }
 
-    std::cout << "=================Debug: calculate I_Surprisingness for pattern: ====================\n";
-    for (Handle link : HNode->pattern)
-    {
-        std::cout << link->toShortString();
-    }
-     std::cout << "count of this pattern = " << HNode->count << std::endl;
-     std::cout << std::endl;
+    HNode->surprisingnessInfo = "";
+
+//    std::cout << "=================Debug: calculate I_Surprisingness for pattern: ====================\n";
+//    for (Handle link : HNode->pattern)
+//    {
+//        std::cout << link->toShortString();
+//    }
+//     std::cout << "count of this pattern = " << HNode->count << std::endl;
+//     std::cout << std::endl;
 
     unsigned int gram = HNode->pattern.size();
     // get the predefined combination:
     // vector<vector<vector<unsigned int>>>
-    // int comcount = 0;
+//    int comcount = 0;
 
     float p;
 
@@ -2511,17 +2535,22 @@ void PatternMiner::calculateSurprisingness( HTreeNode* HNode, AtomSpace *_fromAt
         else
         {
             p = ((float)HNode->count) / ((float)allEntityCount);
-            cout << "allEntityCount = " << allEntityCount << std::endl;
+            // cout << "allEntityCount = " << allEntityCount << std::endl;
+
+            if (OUTPUT_SURPRISINGNESS_CALCULATION_TO_FILE)
+            {
+                HNode->surprisingnessInfo += ";p = " + toString(HNode->count) + "/" + toString(allEntityCount) + " = " + toString(p) + "\n";
+            }
         }
     }
     else
         p = ((float)HNode->count)/atomspaceSizeFloat;
 
+
+
     float abs_min_diff = 999999999.9f;
     float min_diff = 999999999.9f;
     // cout << "For this pattern itself: p = " <<  HNode->count << " / " <<  (int)atomspaceSizeFloat << " = " << p << std::endl;
-
-    HNode->surprisingnessInfo = "; ";
 
     for (vector<vector<unsigned int>>&  oneCombin : components_ngram[gram-2])
     {
@@ -2531,7 +2560,7 @@ void PatternMiner::calculateSurprisingness( HTreeNode* HNode, AtomSpace *_fromAt
 
         if (OUTPUT_SURPRISINGNESS_CALCULATION_TO_FILE)
         {
-            HNode->surprisingnessInfo += "{";
+            HNode->surprisingnessInfo += "\n; {";
         }
 
         bool containsComponentDisconnected = false;
@@ -2541,7 +2570,7 @@ void PatternMiner::calculateSurprisingness( HTreeNode* HNode, AtomSpace *_fromAt
         {
             if (OUTPUT_SURPRISINGNESS_CALCULATION_TO_FILE)
             {
-                HNode->surprisingnessInfo += "[";
+                HNode->surprisingnessInfo += " [";
             }
 
             HandleSeq subPattern;
@@ -2563,13 +2592,13 @@ void PatternMiner::calculateSurprisingness( HTreeNode* HNode, AtomSpace *_fromAt
             HandleSeq unifiedSubPattern = UnifyPatternOrder(subPattern, unifiedLastLinkIndex);
             string subPatternKey = unifiedPatternToKeyString(unifiedSubPattern);
 
-            // std::cout<< "Subpattern: " << subPatternKey;
+//            std::cout<< "Subpattern: " << subPatternKey;
 
             // First check if this subpattern is disconnected. If it is disconnected, it won't exist in the H-Tree anyway.
             HandleSeqSeq splittedSubPattern;
             if (splitDisconnectedLinksIntoConnectedGroups(unifiedSubPattern, splittedSubPattern))
             {
-                // std::cout<< " is disconnected! skip it \n" ;
+//                std::cout<< " is disconnected! skip it \n" ;
                 containsComponentDisconnected = true;
 
                 if (OUTPUT_SURPRISINGNESS_CALCULATION_TO_FILE)
@@ -2581,13 +2610,8 @@ void PatternMiner::calculateSurprisingness( HTreeNode* HNode, AtomSpace *_fromAt
             }
             else
             {
-                // std::cout<< " is connected!" ;
+//                std::cout<< " is connected!" ;
                 unsigned int component_count = getCountOfAConnectedPattern(subPatternKey, unifiedSubPattern);
-
-                if (OUTPUT_SURPRISINGNESS_CALCULATION_TO_FILE)
-                {
-                    HNode->surprisingnessInfo += toString(component_count) + " ";
-                }
 
                 if (component_count == 0)
                 {
@@ -2596,28 +2620,47 @@ void PatternMiner::calculateSurprisingness( HTreeNode* HNode, AtomSpace *_fromAt
                     break;
                 }
 
-                // cout << ", count = " << component_count;
-                float p_i = ((float)(component_count)) / atomspaceSizeFloat;
+                float p_i;
+//                cout << ", count = " << component_count;
+                if (USE_QUERY_ENTITY_COUNT) // this setting only for the corpus that only contains EvalutionLinks
+                {
+                    unsigned int allEntityCount = getAllEntityCountWithSamePredicatesForAPattern(unifiedSubPattern);
+                    if (allEntityCount == 0)
+                    {
+                        cout << "error: cannot find instances for this allEntityCount." << std::endl;
+                        return;
+                    }
+                    else
+                    {
+                        p_i = ((float)(component_count)) / ((float)allEntityCount);
+//                        cout << "allEntityCount = " << allEntityCount;
+//                        cout << ", p = " << component_count  << " / " << allEntityCount << " = " << p_i << std::endl;
+
+                        if (OUTPUT_SURPRISINGNESS_CALCULATION_TO_FILE)
+                        {
+                            HNode->surprisingnessInfo += toString(component_count) + "/" + toString(allEntityCount) + "=" + toString(p_i);
+                        }
+                    }
+                }
+                else
+                    p_i = ((float)(component_count)) / atomspaceSizeFloat;
 
                 // cout << ", p = " << component_count  << " / " << (int)atomspaceSizeFloat << " = " << p_i << std::endl;
                 total_p *= p_i;
-                // std::cout << std::endl;
+//                std::cout << std::endl;
+
+
             }
 
             com_i ++;
 
         }
 
-        if (OUTPUT_SURPRISINGNESS_CALCULATION_TO_FILE)
-        {
-            HNode->surprisingnessInfo += "} ";
-        }
-
         if (containsComponentDisconnected || subComponentNotFound)
             continue;
 
 
-        // cout << "\n ---- total_p = " << total_p << " ----\n" ;
+//        cout << "\n ---- total_p = " << total_p << " ----\n" ;
 
         float diff = p - total_p;
         diff = diff / total_p;
@@ -2627,7 +2670,7 @@ void PatternMiner::calculateSurprisingness( HTreeNode* HNode, AtomSpace *_fromAt
         if (abs_diff < 0)
             abs_diff = - abs_diff;
 
-        // cout << "diff  = p - total_p" << diff << " \n" ;
+//        cout << "diff  = p - total_p" << diff << " \n" ;
 
         if (abs_diff < abs_min_diff)
         {
@@ -2635,7 +2678,12 @@ void PatternMiner::calculateSurprisingness( HTreeNode* HNode, AtomSpace *_fromAt
             min_diff = diff;
         }
 
-        // cout << "diff / total_p = " << diff << " \n" ;
+//        cout << "diff / total_p = " << diff << " \n" ;
+
+        if (OUTPUT_SURPRISINGNESS_CALCULATION_TO_FILE)
+        {
+            HNode->surprisingnessInfo += ", expect = " + toString(total_p) + ", nDiff = " + toString(diff) + "}";
+        }
 
     }
 
@@ -3335,6 +3383,9 @@ void PatternMiner::runInterestingnessEvaluation()
             std::sort((finalPatternsForGram[cur_gram-1]).begin(), (finalPatternsForGram[cur_gram-1]).end(),compareHTreeNodeByFrequency );
 
             OutPutFinalPatternsToFile(cur_gram);
+
+            if (OUTPUT_SURPRISINGNESS_CALCULATION_TO_FILE)
+                OutPutAllEntityNumsToFile();
 
         }
 

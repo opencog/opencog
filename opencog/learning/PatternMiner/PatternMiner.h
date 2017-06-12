@@ -427,6 +427,8 @@ public:
 
     void OutPutFinalPatternsToFile(unsigned int n_gram);
 
+    void OutPutAllEntityNumsToFile();
+
     void queryPatternsWithFrequencySurprisingnessIRanges(unsigned int min_frequency, unsigned int max_frequency, float min_surprisingness_I, float max_surprisingness_I, int gram);
 
     void runPatternMiner(bool exit_program_after_finish = true);
