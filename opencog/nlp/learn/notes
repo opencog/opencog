@@ -9070,6 +9070,18 @@ $177 = 0.7812122780640004
 (cset-vec-cosine  (WordNode "the") (WordNode "a"))
 $178 = 0.8863119467021999
 
+(define ac (pti 'left-basis))
+(define top-cset-words
+   (filter (lambda (wrd) (< 200 (cset-vec-word-observations wrd))) ac))
+(length top-cset-words)
+4918
+(sql-open "postgres:///en_pairs_ttwo_sim?user=linas")
+
+(define poi (add-pair-cosine-compute pti))
+(poi 'right-cosine WORD-A WORD-B)
+
+(para-batch-sim-pairs top-cset-words 0.5)
+
 
 =========================================================================
 

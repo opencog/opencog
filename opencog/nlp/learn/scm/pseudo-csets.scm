@@ -158,6 +158,10 @@
 ; ---------------------------------------------------------------------
 ;
 ; Use the new, modern object API for all this stuff.
+; XXX Everything below here should be removed/destroyed.
+; The problem is that we don't get a chance to specify the dataset
+; filters, before making use of the API below.
+;
 (define pseudo-cset-api (make-pseudo-cset-api))
 (define pseudo-cset-count-api (add-pair-count-api pseudo-cset-api))
 (define pseudo-cset-freq-api (add-pair-freq-api pseudo-cset-api))

@@ -2,6 +2,7 @@
 ; gram-sim.scm
 ;
 ; Batch-compute the grammatical similarity between all word-pairs.
+; XXX Semi-obsolete/broken.
 ;
 ; Copyright (c) 2017 Linas Vepstas
 ;
@@ -12,6 +13,11 @@
 ; grammatical similarities between "all possible" pairs of words.
 ; It assumes that a large number of observations of pseudo-connector
 ; sets have already been made, and are currently stored in the database.
+;
+; XXX This code is semi-broken/obsolete, in that it does not enable
+; or allow generating datasets with different cutoff and filtering.
+; Worse, since all values are stored under the same key, we get
+; no clue on how the similarity varies with respect to the cutoff.
 ;
 ; Note that similarity scores are symmetric, so exchanging left and
 ; right give the same answer.  Thus, an UnorderedLink is best for
