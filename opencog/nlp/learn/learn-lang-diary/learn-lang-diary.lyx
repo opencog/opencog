@@ -26091,7 +26091,7 @@ What is needed is a recognizer,as follows.
 \end_inset
 
 .
- It's problematic, because potentially all of the weights are non-ero for
+ It's problematic, because potentially all of the weights are non-zero for
  all of the words.
  Sparse PCA computes real-valued weights 
 \begin_inset Formula $b_{n}$
@@ -26109,13 +26109,882 @@ What is needed is a recognizer,as follows.
 
  in some class of words.
  (Note, by the way, that a word might belong to multiple classes, for example,
- according to its part-of-speech, or it's meaning.) 
+ according to its part-of-speech, or it's meaning.) This suggests a neural-netish
+ variant on iterative PCA, described below.
+ But, before giving this, some general remarks.
+\end_layout
+
+\begin_layout Subsection*
+Preliminary comments
 \end_layout
 
 \begin_layout Standard
-This suggests the following neural-netish variant on iterative PCA (entirely
- of my own design, cribbed from nowhere at all, just popped into my head
- as I sit still immobilized.)
+The definition of PCA requires a matrix 
+\begin_inset Formula $X$
+\end_inset
+
+ that connects columns and rows in some way.
+ In the conventional defintion, it is a matrix connecting variables and
+ measurements.
+ The variables (the features being measured) are organized in the columns;
+ the measurements in rows.
+ The PCA algorithm effectively computes the eigenvectors of the matrix 
+\begin_inset Formula $X^{T}X$
+\end_inset
+
+, with 
+\begin_inset Formula $X^{T}$
+\end_inset
+
+ denoting the transpose of 
+\begin_inset Formula $X$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+The matrix 
+\begin_inset Formula $X^{T}X$
+\end_inset
+
+ is proportional to the covariance matrix between the different features
+ being observed.
+ The principal component is the the direction of the greatest variation
+ in this matrix.
+ 
+\end_layout
+
+\begin_layout Standard
+What plays the role of 
+\begin_inset Formula $X$
+\end_inset
+
+ in the current situation, and how should the principal component be understood
+ and interpreted? 
+\end_layout
+
+\begin_layout Standard
+What we have on hand, foundationally, is the frequency matrix 
+\begin_inset Formula $P$
+\end_inset
+
+ with components 
+\begin_inset Formula $p(w,d)$
+\end_inset
+
+ connecting words with disjuncts.
+ It was defined previusly as 
+\begin_inset Formula $p(w,d)=N(w,d)/N(*,*)$
+\end_inset
+
+, and where 
+\begin_inset Formula $N(w,d)$
+\end_inset
+
+ is the number of times word 
+\begin_inset Formula $w$
+\end_inset
+
+ has been observed with disjunct 
+\begin_inset Formula $d$
+\end_inset
+
+.
+ As noted earlier, 
+\begin_inset Formula $N(w,d)$
+\end_inset
+
+ is very large and very sparse: typically 
+\begin_inset Formula $200K\times4M$
+\end_inset
+
+ in recent datasets, with only 1 entry out of 
+\begin_inset Formula $2^{15}$
+\end_inset
+
+ being non-zero.
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+I plan to send out the revised, expanded statistical analysis 
+\begin_inset Quotes eld
+\end_inset
+
+real soon now
+\begin_inset Quotes erd
+\end_inset
+
+.
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Should we identify 
+\begin_inset Formula $P$
+\end_inset
+
+ and 
+\begin_inset Formula $X$
+\end_inset
+
+? We can, but then we don't get what we want.
+ Since we want words as features, we can try setting 
+\begin_inset Formula $X=P^{T}$
+\end_inset
+
+ so that 
+\begin_inset Formula $X^{T}X=PP^{T}$
+\end_inset
+
+.
+ Computing the principal component of this matrix for a recent dataset (see
+ later section below), we get the following vector shown below.
+ The 
+\begin_inset Quotes eld
+\end_inset
+
+weight
+\begin_inset Quotes erd
+\end_inset
+
+ gives the magnitufe of the vector component.
+ The other two columns are the support for the word, and the number of observati
+ons, and are shown for comparison.
+ 
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Tabular
+<lyxtabular version="3" rows="16" columns="4">
+<features tabularvalignment="middle">
+<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top" width="0">
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+word
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+weight
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $\left|(w,*)\right|$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $N(w,*)$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+.
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0.9358
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+2031
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+341112
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+the
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0.1212
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+1403
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+106378
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+and
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0.1098
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+1225
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+96276
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+to
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0.1035
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+1276
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+96308
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+”
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0.0920
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+506
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+45809
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+,
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0.0904
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+1703
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+111982
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+a
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0.0842
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+958
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+73760
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+in
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0.0808
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+750
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+56751
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+of
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0.0783
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+890
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+64753
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+his
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0.0666
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+691
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+48728
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+it
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0.0567
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+606
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+44211
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+with
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0.0531
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+480
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+33681
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+him
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0.0482
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+425
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+30345
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+that
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0.0464
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+729
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+49714
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+for
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0.0450
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+479
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+33092
+\end_layout
+
+\end_inset
+</cell>
+</row>
+</lyxtabular>
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+What does this mean? What can we do with this? Why is the weight of the
+ period so high? In essence, this vector is stating that the greatest variety
+ of disjuncts are associated with the period.
+ Since periods are sentence enders, and every sentence has one, a link to
+ the end of the sentence will attach to just about any word.
+ That is, the period almost single-handedly acounts for almost all of the
+ variance of the disjuncts in the dataset.
+ The rest of the list is filled out with words that also attach freely and
+ easily to just about anything: 
+\begin_inset Quotes eld
+\end_inset
+
+the
+\begin_inset Quotes erd
+\end_inset
+
+ should attach only to nouns, but common nouns wildly outnumber all of the
+ other parts of speech put together.
+ Similar remarks for 
+\begin_inset Quotes eld
+\end_inset
+
+and
+\begin_inset Quotes erd
+\end_inset
+
+ and 
+\begin_inset Quotes eld
+\end_inset
+
+to
+\begin_inset Quotes erd
+\end_inset
+
+.
+ The comma can connect in a large variety of situations, and the closing
+ quotation mark ” behaves much like a sentence-ender (This particular dataset
+ contains a lot of dialog).
+ The two columns labelled as 
+\begin_inset Formula $\left|(w,*)\right|$
+\end_inset
+
+ and 
+\begin_inset Formula $N(w,*)$
+\end_inset
+
+ confirms this interpretation: so, 
+\begin_inset Formula $\left|(w,*)\right|$
+\end_inset
+
+ is the total number of unique, different disjuncts that were observed with
+ 
+\begin_inset Formula $w$
+\end_inset
+
+, and 
+\begin_inset Formula $N(w,*)$
+\end_inset
+
+ is the summation over all of the counts with which these dsjuncts were
+ seen.
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+If these numbers seem small, it is because they were taken from a sharply
+ filtered dataset, the en_pairs_ttwo_mst dataset with the (50,30,10) cut
+ applied.
+ This cut is discussed later, below.
+\end_layout
+
+\end_inset
+
+ The top words, in terms of the variety and number of disjuncts, are more
+ or less the makeup of the principal component of 
+\begin_inset Formula $PP^{T}$
+\end_inset
+
+.
+ This should not be a surprise.
+ Anyway, this is not what we wanted: we want to classify sets of similar
+ words; discovering which words account for the greatest varation in disjuncts
+ is of secondary interest.
+ 
+\end_layout
+
+\begin_layout Subsection*
+A modified PCA algorithm
+\end_layout
+
+\begin_layout Standard
+This suggests a feed-foreward-neural-netish variant on iterative PCA, described
+ below.
+ I is entirely of my own design, cribbed from nowhere at all, just popped
+ into my head as I sit still immobilized.
 \end_layout
 
 \begin_layout Standard
@@ -26193,36 +27062,6 @@ Let
 \end_inset
 
 .
- As noted earlier, 
-\begin_inset Formula $N(w,d)$
-\end_inset
-
- is very large and very sparse: typically 
-\begin_inset Formula $200K\times4M$
-\end_inset
-
- in recent datasets, with only 1 entry out of 
-\begin_inset Formula $2^{15}$
-\end_inset
-
- being non-zero.
-\begin_inset Foot
-status collapsed
-
-\begin_layout Plain Layout
-I plan to send out the revised, expanded statistical analysis 
-\begin_inset Quotes eld
-\end_inset
-
-real soon now
-\begin_inset Quotes erd
-\end_inset
-
-.
-\end_layout
-
-\end_inset
-
  Compute the double-sum 
 \begin_inset Formula 
 \[
@@ -26285,8 +27124,8 @@ Repeat these steps
 \begin_inset Formula $\left[PP^{T}\right]$
 \end_inset
 
- defines a weighted adjeaceny matrix for a graph, and iteration creates
- a measure-preserving process (walk) on this graph.
+ defines a weighted adjaceny matrix for a graph, and iteration creates a
+ measure-preserving process (walk) on this graph.
 \end_layout
 
 \begin_layout Enumerate
