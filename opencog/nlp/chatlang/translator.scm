@@ -17,6 +17,8 @@
 (define chatlang-no-constant (Node (chatlang-prefix "No constant terms")))
 (define chatlang-word-seq (Predicate (chatlang-prefix "Word Sequence")))
 (define chatlang-lemma-seq (Predicate (chatlang-prefix "Lemma Sequence")))
+(define chatlang-grd-words (Anchor (chatlang-prefix "Grounded Words")))
+(define chatlang-grd-lemmas (Anchor (chatlang-prefix "Grounded Lemmas")))
 
 ;; Shared variables for all terms
 (define atomese-variable-template (list (TypedVariable (Variable "$S")
@@ -136,6 +138,32 @@
   (cond ((equal? 'say (car ACTION))
          (say (cdr ACTION)))))
 
+(define-public (store-groundings SENT GRD)
+  "Store the groundings, both original words and lemmas,
+   for each of the GlobNode in the pattern, by using StateLinks.
+   They will be referenced in the stage of evaluating the context
+   of the psi-rules, or executing the action of the psi-rules."
+  (let ((sent-word-seq (cog-outgoing-set (car (sent-get-word-seqs SENT))))
+        (cnt 0))
+       (for-each (lambda (g)
+         (if (equal? 'ListLink (cog-type g))
+             (if (equal? (gar g) (gadr g))
+                 ; If the grounded value is the GlobNode itself,
+                 ; that means the GlobNode is grounded to nothing
+                 (begin
+                   (State (Set (gar g) chatlang-grd-words) (List))
+                   (State (Set (gar g) chatlang-grd-lemmas) (List)))
+                 ; Store the GlobNode and the groundings
+                 (begin
+                   (State (Set (gar g) chatlang-grd-words)
+                          (List (take (drop sent-word-seq cnt)
+                                      (length (cog-outgoing-set (gdr g))))))
+                   (State (Set (gar g) chatlang-grd-lemmas) (gdr g))
+                   (set! cnt (+ cnt (length (cog-outgoing-set (gdr g)))))))
+             ; Move on if it's not a GlobNode
+             (set! cnt (+ cnt 1))))
+         (cog-outgoing-set GRD))))
+
 (define (generate-bind TERM-SEQ)
   "Generate a BindLink that contains the term-seq and the
    restrictions on the GlobNode in the term-seq, if any."
@@ -144,12 +172,13 @@
                                      (Type "SentenceNode")))
         (And (cdr TERM-SEQ)
              (State chatlang-anchor (Variable "$S")))
-        (ExecutionOutput (GroundedSchema "scm: record-groundings")
-                         (List (map (lambda (x)
-                           (if (equal? 'GlobNode (cog-type x))
-                               (List (Quote x) x)
-                               x))
-                           (cog-outgoing-set (gddr (cadr TERM-SEQ))))))))
+        (ExecutionOutput (GroundedSchema "scm: store-groundings")
+                         (List (Variable "$S")
+                               (List (map (lambda (x)
+                                 (if (equal? 'GlobNode (cog-type x))
+                                     (List (Quote x) (List x))
+                                     x))
+                                 (cog-outgoing-set (gddr (cadr TERM-SEQ)))))))))
 
 (define* (chat-rule PATTERN ACTION #:optional (TOPIC default-topic) NAME)
   "Top level translation function. Pattern is a quoted list of terms,
@@ -162,25 +191,27 @@
          (var-list (caar proc-terms))
          (cond-list (cdar proc-terms))
          (action (process-action ACTION)))
-    (psi-rule-nocheck
-      (list (Satisfaction (VariableList var-list) (And cond-list)))
-      action
-      (True)
-      (stv .9 .9)
-      TOPIC
-      NAME)))
+        ; XXX TODO: term-seq does not have all the glob decl
+        (List (generate-bind term-seq)
+              (psi-rule-nocheck
+                (list (Satisfaction (VariableList var-list) (And cond-list)))
+                action
+                (True)
+                (stv .9 .9)
+                TOPIC
+                NAME))))
 
 (define (sent-get-word-seqs SENT)
-  "Get the lemma of the words associate with SENT.
+  "Get the words (original and lemma) associate with SENT.
    It also creates an EvaluationLink linking the
-   SENT with the lemma-list."
+   SENT with the word-list and lemma-list."
   (define (get-seq TYPE)
     (List (append-map
       (lambda (w)
         ; Ignore LEFT-WALL and punctuations
         (if (or (string-prefix? "LEFT-WALL" (cog-name w))
                 (word-inst-match-pos? w "punctuation")
-                (null? (cog-chase-link 'LemmaLink 'WordNode w)))
+                (null? (cog-chase-link TYPE 'WordNode w)))
             '()
             ; For proper names, e.g. Jessica Henwick,
             ; RelEx converts them into a single WordNode, e.g.
