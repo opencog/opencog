@@ -5986,8 +5986,45 @@ en_pairs_tone_mst=> \dt+
  public | values     | table | ubuntu | 8192 bytes | 
 
 select count(*) from atoms; --- 18083439 = 18M
-
 select count(*) from valuations; -- 36903851 = 36M
+
+(print-matrix-summary-report asa)
+Summary Report for Correlation Matrix Link Grammar ANY link Word Pairs
+Left type: WordNode    Right Type: WordNode    Pair Type: ListLink
+Rows: 138014 Columns: 139770
+Size: 4886362 non-zero entries of 19290216780 possible
+Fraction non-zero: 2.5331E-4 Sparsity (-log_2): 11.947
+Total observations: 139806259.0  Avg obs per pair: 28.612
+Entropy Total: 17.725   Left: 9.9308   Right: 9.8248
+Total MI: -2.030
+
+                 Left         Right     Avg-left     Avg-right
+                 ----         -----     --------     ---------
+Support (l_0)  1.6405E+4    1.6483E+4
+Count   (l_1)  1.9950E+6    1.8453E+6     121.6        112.0    
+Length  (l_2)  2.2904E+5    1.9881E+5     13.96        12.06    
+RMS Count      2.2878E+5    1.9854E+5     13.95        12.05    
+
+(print-matrix-summary-report psa)
+Summary Report for Correlation Matrix Word-Disjunct Pairs (aka Connector Sets)
+Left type: WordNode    Right Type: LgAnd    Pair Type: LgWordCset
+Wildcard: (ListLink (ctv 0 0 7655886)
+   (AnyNode "cset-word")
+   (AnyNode "cset-disjunct")
+)
+Rows: 133022 Columns: 1860793
+Size: 3571037 non-zero entries of 247526406446 possible
+Fraction non-zero: 1.4427E-5 Sparsity (-log_2): 16.081
+Total observations: 7655886.0  Avg obs per pair: 2.1439
+Entropy Total: 20.558   Left: 14.711   Right: 10.004
+Total MI: -4.156
+
+                 Left         Right     Avg-left     Avg-right
+                 ----         -----     --------     ---------
+Support (l_0)  3.4890E+4    6946.    
+Count   (l_1)  9.1434E+4    3.4736E+4     2.621        5.001    
+Length  (l_2)  2143.        1397.         6.1427E-2    .2011    
+RMS Count      2107.        1368.         6.0395E-2    .1970    
 
 2652501065 Bytes = 2.65 GB uncompressed
 295210074 Bytes = 295M compressed
@@ -6069,7 +6106,45 @@ REASON: I think it's good.
 select count(*) from atoms; --- 30689942 = 30.6M 
 select count(*) from valuations; --- 63432483 = 63M 
 
-counts, dimensions, MI as reported elsewhere.
+Summary Report for Correlation Matrix Link Grammar ANY link Word Pairs
+Left type: WordNode    Right Type: WordNode    Pair Type: ListLink
+Wildcard: (EvaluationLink (ctv 0 0 2.6791356e+08)
+   (LinkGrammarRelationshipNode "ANY")
+)
+Rows: 183290 Columns: 186523
+Size: 8047063 non-zero entries of 34187800670 possible
+Fraction non-zero: 2.3538E-4 Sparsity (-log_2): 12.053
+Total observations: 267913561.0  Avg obs per pair: 33.293
+Entropy Total: 17.827   Left: 9.9014   Right: 9.7626
+Total MI: -1.837
+
+                 Left         Right     Avg-left     Avg-right
+                 ----         -----     --------     ---------
+Support (l_0)  2.3078E+4    2.2456E+4
+Count   (l_1)  4.0365E+6    3.4647E+6     174.9        154.3    
+Length  (l_2)  4.2779E+5    3.4953E+5     18.54        15.56    
+RMS Count      4.2741E+5    3.4915E+5     18.52        15.55    
+
+
+Summary Report for Correlation Matrix Word-Disjunct Pairs (aka Connector Sets)
+Left type: WordNode    Right Type: PseudoAnd    Pair Type: PseudoWordCset
+Wildcard: (ListLink (ctv 0 0 14382276)
+   (AnyNode "cset-word")
+   (AnyNode "cset-disjunct")
+)
+Rows: 175559 Columns: 3401462
+Size: 6438484 non-zero entries of 597157267258 possible
+Fraction non-zero: 1.0782E-5 Sparsity (-log_2): 16.501
+Total observations: 14382276.0  Avg obs per pair: 2.2338
+Entropy Total: 21.006   Left: 14.906   Right: 10.007
+Total MI: -3.906
+
+                 Left         Right     Avg-left     Avg-right
+                 ----         -----     --------     ---------
+Support (l_0)  6.1010E+4    9176.    
+Count   (l_1)  1.5853E+5    6.4221E+4     2.598        6.999    
+Length  (l_2)  5694.        3476.         9.3332E-2    .3788    
+RMS Count      5666.        3444.         9.2870E-2    .3753    
 
 4316209411 Bytes = 4.31 GB uncompressed
 517697226 Bytes = 518 MB compressed
@@ -6149,6 +6224,29 @@ REASON: I think it's good.
 select count(*) from atoms;  -- 32593133 = 32M atoms
 select count(*) from valuations; -- 50386820 = 50M valuations
 
+Summary Report for Correlation Matrix Link Grammar ANY link Word Pairs
+Left type: WordNode    Right Type: WordNode    Pair Type: ListLink
+Wildcard: (EvaluationLink (ctv 0 0 5.5719787e+08)
+   (LinkGrammarRelationshipNode "ANY")
+   (ListLink
+      (AnyNode "left-word")
+      (AnyNode "right-word")
+   )
+)
+Rows: 424940 Columns: 431538
+Size: 15224271 non-zero entries of 183377757720 possible
+Fraction non-zero: 8.3021E-5 Sparsity (-log_2): 13.556
+Total observations: 557197874.0  Avg obs per pair: 36.599
+Entropy Total: 18.317   Left: 10.191   Right: 10.061
+Total MI: -1.935
+
+                 Left         Right     Avg-left     Avg-right
+                 ----         -----     --------     ---------
+Support (l_0)  4.4098E+4    4.3839E+4
+Count   (l_1)  8.3106E+6    7.4675E+6     188.5        170.3    
+Length  (l_2)  9.1631E+5    7.7754E+5     20.78        17.74    
+RMS Count      9.1591E+5    7.7713E+5     20.77        17.73    
+
 3411596887 = 3.4GB uncompressed 
 470255603 = 470 MB compressed
 
@@ -6191,6 +6289,25 @@ select count(*) from valuations; -- 5679764 = 5.7M
 ==================================================================
 en_pairs_rone_mst
 -----------------
+The en_pairs_rone dataset used to perform MST parses of tranche-1
+books.  Contains both pair-MI and cset-MI data and summaries.
+
+STATUS: good
+DATE: 13 June 2017
+REASON: Best so far, I think.
+
+en_pairs_rone_mst=> \dt+
+                        List of relations
+ Schema |    Name    | Type  | Owner  |    Size    | Description 
+--------+------------+-------+--------+------------+-------------
+ public | atoms      | table | ubuntu | 1890 MB    | 
+ public | spaces     | table | ubuntu | 40 kB      | 
+ public | typecodes  | table | ubuntu | 56 kB      | 
+ public | valuations | table | ubuntu | 4601 MB    | 
+ public | values     | table | ubuntu | 8192 bytes | 
+
+select count(*) from atoms;  20840690 == 20.8 M atoms
+select count(*) from valuations; 42809795 == 42.8M values
 
 (print-matrix-summary-report asa)
 Summary Report for Correlation Matrix Link Grammar ANY link Word Pairs
@@ -6215,12 +6332,37 @@ Count   (l_1)  2.4875E+6    2.2524E+6     143.0        129.3
 Length  (l_2)  2.8788E+5    2.4347E+5     16.55        13.98    
 RMS Count      2.8758E+5    2.4316E+5     16.53        13.96    
 
+
+(print-matrix-summary-report pca)
+Summary Report for Correlation Matrix Word-Disjunct Pairs (aka Connector Sets)
+Left type: WordNode    Right Type: PseudoAnd    Pair Type:
+PseudoWordCset
+Wildcard: (ListLink (ctv 0 0 9326663)
+   (AnyNode "cset-word")
+   (AnyNode "cset-disjunct")
+)
+Rows: 131247 Columns: 2242794
+Size: 4275308 non-zero entries of 294359984118 possible
+Fraction non-zero: 1.4524E-5 Sparsity (-log_2): 16.071
+Total observations: 9326663.0  Avg obs per pair: 2.1815
+Entropy Total: 20.715   Left: 14.926   Right: 9.9403
+Total MI: -4.151
+
+                 Left         Right     Avg-left     Avg-right
+                 ----         -----     --------     ---------
+Support (l_0)  4.1304E+4    7307.    
+Count   (l_1)  1.1025E+5    3.9464E+4     2.669        5.401    
+Length  (l_2)  3011.        1778.         7.2909E-2    .2433    
+RMS Count      2975.        1748.         7.2030E-2    .2392    
+
+3059640344 Bytes = 3.1GB uncompressed
+332027863 Bytes = 332 MB compressed
+
+4ad62e404a1473f44173800c456a1934  en_pairs_rone_mst.sql
+f90db044b2fae8baeffd1e7decbc3f45  en_pairs_rone_mst.sql.bz2
+
 ==================================================================
 en_pairs_rtwo
--------------
-Random-planar-tree parsed books from "tranche-1" and "tranche-2".
-A continutation of en_pairs_rone.
-
 STATUS: good
 DATE: 12 June 2017
 REASON: Best so far, I think.
@@ -7178,8 +7320,7 @@ Finished with MI computations; this took 4.15 hours
 So this is very different than before. Fuck.
 
 (print-matrix-summary-report psa)
-Summary Report for Correlation Matrix Word-Disjunct Pairs (aka Connector
-Sets)
+Summary Report for Correlation Matrix Word-Disjunct Pairs (aka Connector Sets)
 Left type: WordNode    Right Type: LgAnd    Pair Type: LgWordCset
 Wildcard: (ListLink (ctv 0 0 7655886)
    (AnyNode "cset-word")
@@ -7421,10 +7562,16 @@ Count   (l_1)  4.4813E+6    5.2946E+6    149.9        152.0
 Length  (l_2)  4.9537E+5    4.9524E+5    16.57        14.22
 RMS Count      4.9502E+5    4.9482E+5    16.55        14.21
 
----------- meanwhile do the rone_mst
+---------- meanwhile do the rone_mst DONE
 Started  gamma-guten-r port 19505  feeder-term-7 / guile-term-6
 guile -l mst-count-en-r.scm on term-6
 9 June 10PM  3028 articles
+12 June 2017 8PM DONE
+Now compute the summaries.
+
+(define pca (make-pseudo-cset-api))
+(batch-pairs pca)  
+COMMENT ON DATABASE en_pairs_rone_mstIS 'Clean MST-parse of tranche-1 and summary';
 
 ---------- meanwhile do the tthree_mst
 gamma-guten feeder-8 port 19005 ./guten-mst-en.sh
@@ -7441,13 +7588,15 @@ COMMENT ON DATABASE en_pairs_rtwo IS 'Clean ANY-parse of tranche-1 and tranch-2'
 pg_dump en_pairs_rtwo > en_pairs_rtwo.sql
 DONE.
 
+---------- meanwhile do rtwo_mst
+not started
+
 ---------- meanwhile do rthree pairs
 guile-3 port 17015 feeder-4  5713 articles
 Started 12 June 2017 2PM
 
 
-
----------- meanwhile, compute & cache similarity
+---------- meanwhile, compute & cache similarity  DONE
 ; (sql-open "postgres:///en_pairs_tone_sim?user=ubuntu")
 
 Wait, where?
@@ -9125,14 +9274,49 @@ $178 = 0.8863119467021999
 
 --------------------------
 Whoa, is this working as expected?  Lets check.
+(define fsi (add-subtotal-filter psa 50 30 10))
+(define pfi (add-pair-freq-api fsi))
+well, that's a problem: pfi is returning bogus values
+for this filtered thing.  Well, as long as no one uses them?
+Crap.  Wait, what?
 (define pci (make-cosine-matrix pfi))
 (define pti (make-power-iter-pca pci 'right-unit))
+
 (define wv (pti 'make-left-unit (list (WordNode "the"))))
+(wv (WordNode "the"))  ; 1 OK
 (define wm (pti 'left-iterate wv 1))
 (wm (WordNode "the"))   ;; ---- wtf
 
 (psi 'right-support (Word "the"))  ; 1403
-(psi 'right-length (Word "the") ; 9761.855971074354
+(psi 'right-length (Word "the") ; 9761.855971074354 OK correct for
+counts...
+
+(define asi (add-support-compute pci 'right-unit))
+(asi 'right-support (Word "the"))  ; 1403 OK
+
+; OK, so here, asi should when asked for a pair, return
+; the normalized vector component. So the length should be 1.0
+(asi 'right-length (Word "the"))  wtf!? count si crazy too. OK FIXED
+; OK, so frq is too low. where is it from?  its from pfi, which is giving
+; us freq. so actually looks OK, and length is wrong, since its a count
+; len, not a freq len.
+
+(define cset (car (pci 'right-stars (Word "the"))))
+
+(define acc (add-pair-cosine-compute pfi))
+(acc 'right-cosine (Word "the") (Word "the"))
+; 0.9807641990591952 because the partials are deficient.  FIXED
+;  Can we fix this?  FIXED
+-- it uses support, to get lengths, which uses freq to get freq, which
+   is wrong but still ends up using add-support-api which is wrong.  FIXED
+-- it uses star-obj to get stars. which should be filtered stars.
+
+So: 
+ (acc 'right-cosine (Word "the") (Word "a")) ; 0.8971244127293886
+
+(sqrt (acc 'right-product (Word "the") (Word "the"))) ;
+9761.855971074354  OK so that agrees with support, now.
+
 
 
 

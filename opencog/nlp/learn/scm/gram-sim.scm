@@ -155,7 +155,7 @@
 					(* 100.0 (/ frt tot))
 					rate
 				)
-				(set! prevt elapsed)
+				(set! prevt (- elapsed 1.0e-6))
 				(set! prevf frt)
 		)))
 
@@ -203,7 +203,7 @@
 					(* 100.0 (/ frt tot))
 					rate
 				)
-				(set! prevt elapsed)
+				(set! prevt (- elapsed 1.0e-6))
 				(set! prevf frt)
 			)))
 
