@@ -135,6 +135,21 @@
   (cond ((equal? 'say (car ACTION))
          (say (cdr ACTION)))))
 
+(define (generate-bind TERM-SEQ)
+  "Generate a BindLink that contains the term-seq and the
+   restrictions on the GlobNode in the term-seq, if any."
+  (Bind (VariableList (car TERM-SEQ)
+                      (TypedVariable (Variable "$S")
+                                     (Type "SentenceNode")))
+        (And (cdr TERM-SEQ)
+             (State chatlang-anchor (Variable "$S")))
+        (ExecutionOutput (GroundedSchema "scm: record-groundings")
+                         (List (map (lambda (x)
+                           (if (equal? 'GlobNode (cog-type x))
+                               (List (Quote x) x)
+                               x))
+                           (cog-outgoing-set (gddr (cadr TERM-SEQ))))))))
+
 (define* (chat-rule PATTERN ACTION #:optional (TOPIC default-topic) NAME)
   "Top level translation function. Pattern is a quoted list of terms,
    and action is a quoted list of actions or a single action."
@@ -143,8 +158,8 @@
                            (cons template '())
                            PATTERN))
          (term-seq (term-sequence-check (cdr proc-terms)))
-         (var-list (append (caar proc-terms) (car term-seq)))
-         (cond-list (append (cdar proc-terms) (cdr term-seq)))
+         (var-list (caar proc-terms))
+         (cond-list (cdar proc-terms))
          (action (process-action ACTION)))
     (psi-rule-nocheck
       (list (Satisfaction (VariableList var-list) (And cond-list)))
