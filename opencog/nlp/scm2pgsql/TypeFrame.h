@@ -142,6 +142,7 @@ public:
     bool topLevelIsLink() const;
     TypeFrame copyReplacingFrame(const TypeFrame &key, const TypeFrame &frame) const;
     bool nonEmptyNodeIntersection(const TypeFrame &other) const;
+    std::string toSCMString(unsigned int cursor = 0) const;
     void printForDebug(std::string prefix = "", std::string suffix = "", bool showNames = true) const;
 
 };

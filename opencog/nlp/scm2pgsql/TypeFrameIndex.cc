@@ -10,24 +10,24 @@
 
 using namespace opencog;
 
-unsigned int TypeFrameIndex::LIMIT_FOR_SYMMETRIC_LINKS_PERMUTATION = 5;
-bool TypeFrameIndex::PATTERN_COUNT_CACHE_ENABLED = false;
-bool TypeFrameIndex::INDEPENDENT_SUBPATTERN_PROB_CACHE_ENABLED = false;
-bool TypeFrameIndex::PATTERN_QUALITTY_CACHE_ENABLED = false;
-unsigned int TypeFrameIndex::MINIMAL_FREQUENCY_TO_COMPUTE_SURPRISINGNESS = 5;
-unsigned int TypeFrameIndex::NUMBER_OF_EVALUATION_THREADS = 4;
-unsigned int TypeFrameIndex::MAX_SIZE_OF_COMPOUND_FRAMES_QUEUE = 5000000;
 
 const int TypeFrameIndex::OPERATOR_NOP = 0;
 const int TypeFrameIndex::OPERATOR_AND = 1;
 const int TypeFrameIndex::OPERATOR_OR = 2;
 const int TypeFrameIndex::OPERATOR_NOT = 3;
-TypeFrameIndex::CoherenceFunction TypeFrameIndex::coherenceFunction = CONST_1;
-TypeFrameIndex::CoherenceModulatorG TypeFrameIndex::coherenceModulatorG = ONE_OVER_COHERENCE;
-TypeFrameIndex::CoherenceModulatorH TypeFrameIndex::coherenceModulatorH = COHERENCE;
 
 TypeFrameIndex::TypeFrameIndex() 
 {
+    // parameters
+    PATTERN_COUNT_CACHE_ENABLED = false;
+    LIMIT_FOR_UNORDERED_LINKS_PERMUTATION = 5;
+    NUMBER_OF_EVALUATION_THREADS = 4;
+    MINIMAL_FREQUENCY_TO_COMPUTE_QUALITY_METRIC = 12;
+    MAX_SIZE_OF_COMPOUND_FRAMES_QUEUE = 5000000;
+    COHERENCE_FUNCTION = CONST_1;
+    COHERENCE_MODULATOR_G = ONE_OVER_COHERENCE;
+    COHERENCE_MODULATOR_H = COHERENCE;
+
     auxVar1.push_back(TypePair(classserver().getType("VariableNode"), 0));
     auxVar1.setNodeNameAt(0, "V1");
 }
@@ -38,7 +38,7 @@ TypeFrameIndex::~TypeFrameIndex()
 
 float TypeFrameIndex::computeCoherence(const TypeFrame &frame) const
 {
-    switch (coherenceFunction) {
+    switch (COHERENCE_FUNCTION) {
         case CONST_1: return 1;
         default: throw std::runtime_error("Unknown coherence function\n");
     }
@@ -55,7 +55,7 @@ float TypeFrameIndex::one_over_x(float x) const
 
 float TypeFrameIndex::gFunction(float x) const
 {
-    switch (coherenceModulatorG) {
+    switch (COHERENCE_MODULATOR_G) {
         case ONE_OVER_COHERENCE: return one_over_x(x);
         default: throw std::runtime_error("Unknown coherence modulator G function\n");
     }
@@ -63,7 +63,7 @@ float TypeFrameIndex::gFunction(float x) const
 
 float TypeFrameIndex::hFunction(float x) const
 {
-    switch (coherenceModulatorH) {
+    switch (COHERENCE_MODULATOR_H) {
         case COHERENCE: return x;
         default: throw std::runtime_error("Unknown coherence modulator H function\n");
     }
@@ -116,24 +116,14 @@ void TypeFrameIndex::addPatterns(std::vector<TypeFrame> &answer, const TypeFrame
 
 float TypeFrameIndex::computeQuality(const TypeFrame &pattern, RankingMetric metric)
 {
-    if (PATTERN_QUALITTY_CACHE_ENABLED) {
-        PatternFloatMap::const_iterator it = patternQualityCache.find(pattern);
-        if (it != patternQualityCache.end()) {
-            return (*it).second;
-        }
-    }
-
     float answer = 0;
+
     switch (metric) {
         case I_SURPRISINGNESS: answer = computeISurprinsingness(pattern, false); break;
         case N_I_SURPRISINGNESS: answer = computeISurprinsingness(pattern, true); break;
         case II_SURPRISINGNESS: answer = computeIISurprinsingness(pattern, false); break;
         case N_II_SURPRISINGNESS: answer = computeIISurprinsingness(pattern, true); break;
         default: throw std::runtime_error("Unknown pattern ranking metric\n");
-    }
-
-    if (PATTERN_QUALITTY_CACHE_ENABLED) {
-        patternQualityCache.insert(PatternFloatMap::value_type(pattern, answer));
     }
 
     return answer;
@@ -222,13 +212,6 @@ void TypeFrameIndex::addInferredSetFrames(std::vector<TypeFrame> &subset, std::v
 
 std::pair<float,float> TypeFrameIndex::minMaxIndependentProb(const TypeFrame &pattern)
 {
-    if (INDEPENDENT_SUBPATTERN_PROB_CACHE_ENABLED) {
-        SubPatternProbMap::const_iterator it = subPatternProbCache.find(pattern);
-        if (it != subPatternProbCache.end()) {
-            return (*it).second;
-        }
-    }
-
     float minP = 0;
     float maxP = 0;
 
@@ -271,9 +254,6 @@ std::pair<float,float> TypeFrameIndex::minMaxIndependentProb(const TypeFrame &pa
     }
 
     std::pair<float, float> answer = std::make_pair(minP, maxP);
-    if (INDEPENDENT_SUBPATTERN_PROB_CACHE_ENABLED) {
-        subPatternProbCache.insert(SubPatternProbMap::value_type(pattern, answer));
-    }
     
     return answer;
 }
@@ -425,7 +405,7 @@ float TypeFrameIndex::computeISurprinsingness(const TypeFrame &pattern, bool nor
     if (DEBUG) printf("count (pFull) = %u\n", count);
     if (DEBUG) printf("pFull = %f\n", pFull);
 
-    if (count < MINIMAL_FREQUENCY_TO_COMPUTE_SURPRISINGNESS) {
+    if (count < MINIMAL_FREQUENCY_TO_COMPUTE_QUALITY_METRIC) {
         return 0;
     }
 
@@ -454,7 +434,7 @@ float TypeFrameIndex::computeIISurprinsingness(const TypeFrame &pattern, bool no
     if (DEBUG) printf("count (pFull) = %u\n", count);
     if (DEBUG) printf("pFull = %f\n", pFull);
 
-    if (count < MINIMAL_FREQUENCY_TO_COMPUTE_SURPRISINGNESS) {
+    if (count < MINIMAL_FREQUENCY_TO_COMPUTE_QUALITY_METRIC) {
         return 0;
     }
 
@@ -491,99 +471,6 @@ float TypeFrameIndex::computeIISurprinsingness(const TypeFrame &pattern, bool no
 
     return answer;
 }
-
-/*
-void TypeFrameIndex::minePatterns(std::vector<std::pair<float,TypeFrame>> &answer, unsigned int components, unsigned int maxAnswers, RankingMetric metric)
-{
-    answer.clear();
-
-    floatUniverseCount = 1;
-    unsigned int n = frames.size();
-    for (unsigned int i = 0; i < components; i++) {
-        floatUniverseCount = floatUniverseCount * ((float) (n - i));
-        floatUniverseCount = floatUniverseCount / ((float) (i + 1));
-    }
-    //floatUniverseCount = (float) frames.size();
-
-    EquivalentTypeFrameSet baseSet;
-
-    if (LOCAL_DEBUG) printf("frames.size(): %lu\n", frames.size());
-    for (unsigned int i = 0; i < frames.size(); i++) {
-        if (frames.at(i).topLevelIsLink() && (! frames.at(i).typeAtEqualsTo(0, "ListLink"))) {
-            baseSet.insert(frames.at(i));
-        }
-    }
-
-    std::vector<TypeFrame> base;
-    for (EquivalentTypeFrameSet::const_iterator it = baseSet.begin(); it != baseSet.end(); it++) {
-        base.push_back(*it);
-    }
-    if (LOCAL_DEBUG) printf("base.size(): %lu\n", base.size());
-
-    CartesianProductGenerator cartesianGenerator(components, base.size(), true, true);
-    TypeFrame compoundFrame;
-    std::vector<TypeFrame> patterns;
-    this->patternCountCache.clear();
-    PatternHeap heap;
-    unsigned int debugCount = 0;
-    while (! cartesianGenerator.depleted()) {
-        if (DEBUG) cartesianGenerator.printForDebug("compound selection: ", "\n");
-        compoundFrame.clear();
-        compoundFrame.push_back(TypePair(classserver().getType("AndLink"), 1));
-        compoundFrame.append(base.at(cartesianGenerator.at(components - 1)));
-        bool flag = true;
-        for (int c = ((int) components) - 2; c >= 0; c--) {
-            //if ((compoundFrame.nonEmptyNodeIntersection(base.at(cartesianGenerator.at(c)))) &&
-                //(! compoundFrame.contains(base.at(cartesianGenerator.at(c))))) {
-            if (compoundFrame.nonEmptyNodeIntersection(base.at(cartesianGenerator.at(c)))) {
-                compoundFrame.at(0).second++;
-                compoundFrame.append(base.at(cartesianGenerator.at(c)));
-            } else {
-                cartesianGenerator.drop(c);
-                flag = false;
-                break;
-            }
-        }
-        // AQUI Criar uma classe para servir como thread pool e processador de
-        // compoundFrames. Passar o heap. Passar cada compound para ela
-        // enfileirar. As threads vao consumir dessa fila de compounds
-        if (flag) {
-            if (LOCAL_DEBUG && (!(debugCount++ % 10000))) cartesianGenerator.printForDebug("Evaluating: ", "\n");
-            patterns.clear();
-            if (DEBUG) compoundFrame.printForDebug("compoundFrame: ", "\n");
-            addPatterns(patterns, compoundFrame);
-            if (DEBUG) printf("%lu PATTERNS\n", patterns.size());
-            if (DEBUG) printFrameVector(patterns);
-            for (unsigned int i = 0; i < patterns.size(); i++) {
-                if (DEBUG) patterns.at(i).printForDebug("COMPUTE QUALITY FOR: ", "\n");
-                float quality = computeQuality(patterns.at(i), metric);
-                if (DEBUG) printf("%f: ", quality);
-                if (DEBUG) patterns.at(i).printForDebug("", "\n");
-                if (((heap.size() < maxAnswers) || (heap.top().first < quality)) && (! heapContainsEquivalent(heap, patterns.at(i))))  {
-                    if (DEBUG) printf("Pushing to heap. Quality = %f ", quality);
-                    if (DEBUG) patterns.at(i).printForDebug("", "\n");
-                    heap.push(std::make_pair(quality, patterns.at(i)));
-                    if (heap.size() > maxAnswers) {
-                        if (DEBUG) printf("Removing pattern Quality = %f ", heap.top().first);
-                        if (DEBUG) heap.top().second.printForDebug("", "\n");
-                        heap.pop();
-                    }
-                }
-            }
-        }
-        cartesianGenerator.generateNext();
-    }
-
-    if (DEBUG) printf("Finished mining. heap size = %lu\n", heap.size());
-
-    while (heap.size() > 0) {
-        if (DEBUG) printf("%f: ", heap.top().first);
-        if (DEBUG) heap.top().second.printForDebug("", "\n");
-        answer.push_back(heap.top());
-        heap.pop();
-    }
-}
-*/
 
 bool TypeFrameIndex::enqueueCompoundFrame(const TypeFrame &compoundFrame)
 {
@@ -630,12 +517,7 @@ bool TypeFrameIndex::checkCompoundPatternsEnded()
 void TypeFrameIndex::addMiningResult(float quality, const TypeFrame &frame)
 {
     std::lock_guard<std::mutex> lock(miningResultsMutex);
-    if (((miningResultsHeap.size() < maxResultsHeapSize) || (miningResultsHeap.top().first < quality)))  {
-        miningResultsHeap.push(std::make_pair(quality, frame));
-        if (miningResultsHeap.size() > maxResultsHeapSize) {
-            miningResultsHeap.pop();
-        }
-    }
+    miningResultsHeap.push(quality, frame);
 }
 
 void TypeFrameIndex::evaluatePatterns()
@@ -657,7 +539,7 @@ void TypeFrameIndex::evaluatePatterns()
             if (checkCompoundPatternsEnded()) {
                 finished = true;
             } else {
-                if (LOCAL_DEBUG) printf("Evaluation thread sleeping\n");
+                if (DEBUG) printf("Evaluation thread sleeping\n");
                 usleep(100000); // 100 miliseconds
             }
         }
@@ -709,12 +591,13 @@ void TypeFrameIndex::minePatterns(std::vector<std::pair<float,TypeFrame>> &answe
     CartesianProductGenerator cartesianGenerator(components, base.size(), true, true);
     TypeFrame compoundFrame;
     this->patternCountCache.clear();
-    //miningResultsHeap.clear();
+    miningResultsHeap.clear();
+    miningResultsHeap.maxSize = maxAnswers;
     maxResultsHeapSize = maxAnswers;
     miningRankingMetric = metric;
     compoundFramesEnded = false;
     evaluationThreads.clear();
-    for (unsigned int i = 0; i < (NUMBER_OF_EVALUATION_THREADS - 1); i++) {
+    for (int i = 0; i < (((int) NUMBER_OF_EVALUATION_THREADS) - 1); i++) {
         evaluationThreads.push_back(new std::thread(&TypeFrameIndex::evaluatePatterns, this));
     }
     unsigned int debugCount = 0;
@@ -752,11 +635,8 @@ void TypeFrameIndex::minePatterns(std::vector<std::pair<float,TypeFrame>> &answe
 
     if (DEBUG) printf("Finished mining. heap size = %lu\n", miningResultsHeap.size());
 
-    while (miningResultsHeap.size() > 0) {
-        if (DEBUG) printf("%f: ", miningResultsHeap.top().first);
-        if (DEBUG) miningResultsHeap.top().second.printForDebug("", "\n");
-        answer.push_back(miningResultsHeap.top());
-        miningResultsHeap.pop();
+    for (unsigned int i = 0; i < miningResultsHeap.size(); i++) {
+        answer.push_back(miningResultsHeap.at(i));
     }
 }
 
@@ -808,7 +688,7 @@ void TypeFrameIndex::addSymmetricPermutations(TypeFrameSet &answer, const TypeFr
             permutation.append(subFrame0);
             answer.insert(permutation);
         } else {
-            if (arity <= LIMIT_FOR_SYMMETRIC_LINKS_PERMUTATION) {
+            if (arity <= LIMIT_FOR_UNORDERED_LINKS_PERMUTATION) {
                 std::vector<std::vector<int>> permutationVector;
                 addPermutations(permutationVector, argPos);
                 TypeFrame permutation;
@@ -831,7 +711,7 @@ void TypeFrameIndex::addSymmetricPermutations(TypeFrameSet &answer, const TypeFr
         answer.insert(frame.subFrameAt(cursor));
     }
     for (unsigned int i = 0; i < arity; i++) {
-        addSymmetrucPermutations(answer, frame, argPos.at(i));
+        addSymmetricPermutations(answer, frame, argPos.at(i));
     }
 }
 
@@ -840,7 +720,7 @@ bool TypeFrameIndex::addFrame(TypeFrame &frame, int offset)
     bool exitStatus = true;
     if (frame.isValid()) {
         TypeFrameSet symmetricPermutations;
-        addSymmetrucPermutations(symmetricPermutations, frame, 0);
+        addSymmetricPermutations(symmetricPermutations, frame, 0);
         for (TypeFrameSet::iterator it = symmetricPermutations.begin(); it != symmetricPermutations.end(); it++) {
             frames.push_back(*it);
         }
@@ -941,18 +821,19 @@ std::vector<TypeFrame> TypeFrameIndex::computeSubPatterns(TypeFrame &baseFrame, 
 
         // Node
 
-        TypeFrame pattern1, pattern2;
-        pattern1.push_back(baseFrame.at(cursor));    // discards node name
+        //TypeFrame pattern1;
+        TypeFrame pattern2;
+        //pattern1.push_back(baseFrame.at(cursor));    // discards node name
         pattern2.pickAndPushBack(baseFrame, cursor); // uses node name
 
         if (DEBUG) {
             printf("Adding node pattern\n");
             printf("Name: %s\n", baseFrame.nodeNameAt(cursor).c_str());
-            pattern1.printForDebug("pattern1: ", "\n", true);
+            //pattern1.printForDebug("pattern1: ", "\n", true);
             pattern2.printForDebug("pattern2: ", "\n", true);
         }
 
-        answer.push_back(pattern1); 
+        //answer.push_back(pattern1); 
         answer.push_back(pattern2);
 
     } else if (headArity == 2) {

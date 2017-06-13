@@ -29,6 +29,7 @@
 #include <thread>
 #include <mutex>
 #include "TypeFrame.h"
+#include "PatternHeap.h"
 
 namespace opencog
 {
@@ -57,13 +58,6 @@ private:
     typedef std::vector<std::pair<int, int>> IntPairVector;
     typedef std::vector<std::pair<std::pair<int, int>, std::pair<int, int>>> IntPairPairVector;
     typedef std::map<TypeFrame, IntegerSet, TypeFrame::LessThan> PatternMap;
-    typedef std::pair<float, TypeFrame> WeightedFrame;
-    struct WeightedFrameGreaterThan {
-        bool operator()(const WeightedFrame &a, const WeightedFrame &b) const {
-            return (a.first > b.first);
-        }
-    };
-    typedef std::priority_queue<WeightedFrame, std::vector<WeightedFrame>, TypeFrameIndex::WeightedFrameGreaterThan> PatternHeap;
     typedef std::map<TypeFrame, int, TypeFrame::LessThan> PatternCountMap;
     typedef std::map<TypeFrame, std::pair<float, float>, TypeFrame::LessThan> SubPatternProbMap;
     typedef std::map<TypeFrame, float, TypeFrame::LessThan> PatternFloatMap;
@@ -72,10 +66,6 @@ private:
     static const int OPERATOR_AND;
     static const int OPERATOR_OR;
     static const int OPERATOR_NOT;
-
-    static CoherenceFunction coherenceFunction;
-    static CoherenceModulatorG coherenceModulatorG;
-    static CoherenceModulatorH coherenceModulatorH;
 
     bool DEBUG = false;
     bool LOCAL_DEBUG = true;
@@ -95,12 +85,12 @@ private:
     PatternMap occurrenceSet;
     IntegerSet occurrenceUniverse;
     PatternCountMap patternCountCache;
-    SubPatternProbMap subPatternProbCache;
-    PatternFloatMap patternQualityCache;
     float floatUniverseCount;
 
     void query(std::vector<ResultPair> &result, TypeFrame &keyExpression, std::vector<VarMapping> &forbiddenMappings, int &logicOperator, const TypeFrame &queryFrame, int cursor, bool distinct, bool noPermutations) const;
     void addPatternOccurrence(TypeFrame &pattern, int pos);
+    void addPermutations(std::vector<std::vector<int>> &answer, std::vector<int> base);
+    void addSymmetricPermutations(TypeFrameSet &answer, const TypeFrame &frame, unsigned int cursor);
     void addArity2Patterns(std::vector<TypeFrame> &answer, std::vector<TypeFrame> &recurseResult1, std::vector<TypeFrame> &recurseResult2, TypeFrame &baseFrame, int cursor);
     std::vector<TypeFrame> computeSubPatterns(TypeFrame &baseFrame, int cursorn, int pos);
     void selectCurrentElement(TypeFrame &answer, StringMap &variableOccurrences, const TypeFrame &baseFrame, int cursor) const;
@@ -113,8 +103,6 @@ private:
     void typeFrameSetUnion(TypeFrameSet &answer, const TypeFrameSet &set1, const TypeFrameSet &set2) const;
     void varMappingUnion(VarMapping &answer, const VarMapping &map1, const VarMapping &map2) const;
     void permutation(std::vector<std::vector<int>> &answer, int *array, int current, int size);
-    void addPermutations(std::vector<std::vector<int>> &answer, std::vector<int> base);
-    void addSymmetricPermutations(TypeFrameSet &answer, const TypeFrame &frame, unsigned int cursor);
     void addPatterns(std::vector<TypeFrame> &answer, const TypeFrame &base) const;
     float computeQuality(const TypeFrame &pattern, RankingMetric metric);
     float computeISurprinsingness(const TypeFrame &pattern, bool normalized);
@@ -143,17 +131,16 @@ private:
 
 public:
 
-    static unsigned int MINIMAL_FREQUENCY_TO_COMPUTE_SURPRISINGNESS;
-    static unsigned int LIMIT_FOR_SYMMETRIC_LINKS_PERMUTATION;
-    static unsigned int NUMBER_OF_EVALUATION_THREADS;
-    static unsigned int MAX_SIZE_OF_COMPOUND_FRAMES_QUEUE;
-    static bool PATTERN_COUNT_CACHE_ENABLED;
-    static bool INDEPENDENT_SUBPATTERN_PROB_CACHE_ENABLED;
-    static bool PATTERN_QUALITTY_CACHE_ENABLED;
+    unsigned int LIMIT_FOR_UNORDERED_LINKS_PERMUTATION;
+    unsigned int MINIMAL_FREQUENCY_TO_COMPUTE_QUALITY_METRIC;
+    unsigned int MAX_SIZE_OF_COMPOUND_FRAMES_QUEUE;
+    unsigned int NUMBER_OF_EVALUATION_THREADS;
+    bool PATTERN_COUNT_CACHE_ENABLED;
+    CoherenceFunction COHERENCE_FUNCTION;
+    CoherenceModulatorG COHERENCE_MODULATOR_G;
+    CoherenceModulatorH COHERENCE_MODULATOR_H;
 
     TypeFrameIndex();
-
-    // TODO Implement this
     ~TypeFrameIndex();
 
     bool addFromScheme(const std::string &scm, int offset);

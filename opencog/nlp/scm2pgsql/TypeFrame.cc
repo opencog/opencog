@@ -613,6 +613,23 @@ TypeFrame TypeFrame::copyReplacingFrame(const TypeFrame &key, const TypeFrame &f
     return answer;
 }
 
+std::string TypeFrame::toSCMString(unsigned int cursor) const
+{
+    std::string answer = "(";
+    answer += classserver().getTypeName(at(cursor).first) + " ";
+    if (at(cursor).second == 0) {
+        answer += "\"" + nodeNameAt(cursor) + "\"";
+    } else {
+        std::vector<int> argPos = getArgumentsPosition(cursor);
+        for (unsigned int i = 0; i < argPos.size(); i++) {
+            answer += toSCMString(argPos.at(i));
+        }
+    }
+    answer += ") ";
+
+    return answer;
+}
+
 void TypeFrame::printForDebug(std::string prefix, std::string suffix, bool showNames) const
 {
     printf("%s", prefix.c_str());
