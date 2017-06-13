@@ -13,7 +13,7 @@
   "The action selector. It first searches for the rules using DualLink,
    and then does the filtering by evaluating the context of the rules.
    Eventually returns a list of weighted rules that can satisfy the demand"
-  (let* ((input-lemmas (sent-get-lemmas-in-order SENT))
+  (let* ((input-lemmas (cdr (sent-get-word-seqs SENT)))
          (no-constant (append-map psi-get-exact-match
            (cog-chase-link 'InheritanceLink 'ListLink chatlang-no-constant)))
          (dual-match (psi-get-dual-match input-lemmas))

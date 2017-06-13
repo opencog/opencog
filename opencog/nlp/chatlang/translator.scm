@@ -15,7 +15,8 @@
 (define-public (chatlang-prefix STR) (string-append "Chatlang: " STR))
 (define chatlang-anchor (Anchor (chatlang-prefix "Currently Processing")))
 (define chatlang-no-constant (Node (chatlang-prefix "No constant terms")))
-(define chatlang-term-seq (Predicate (chatlang-prefix "term seq")))
+(define chatlang-word-seq (Predicate (chatlang-prefix "Word Sequence")))
+(define chatlang-lemma-seq (Predicate (chatlang-prefix "Lemma Sequence")))
 
 ;; Shared variables for all terms
 (define atomese-variable-template (list (TypedVariable (Variable "$S")
@@ -120,7 +121,7 @@
                               new-seq)))
     (Inheritance (List new-seq) chatlang-no-constant))
   (cons glob-decl
-        (list (Evaluation chatlang-term-seq
+        (list (Evaluation chatlang-lemma-seq
                           (List (Variable "$S") (List new-seq)))))))
 
 (define-public (say TXT)
@@ -169,11 +170,11 @@
       TOPIC
       NAME)))
 
-(define (sent-get-lemmas-in-order SENT)
+(define (sent-get-word-seqs SENT)
   "Get the lemma of the words associate with SENT.
    It also creates an EvaluationLink linking the
    SENT with the lemma-list."
-  (define term-seq
+  (define (get-seq TYPE)
     (List (append-map
       (lambda (w)
         ; Ignore LEFT-WALL and punctuations
@@ -186,15 +187,18 @@
             ; (WordNode "Jessica_Henwick"). Codes below try to
             ; split it into two WordNodes, "Jessica" and "Henwick",
             ; so that the matcher will be able to find the rules
-            (let* ((wn (car (cog-chase-link 'LemmaLink 'WordNode w)))
+            (let* ((wn (car (cog-chase-link TYPE 'WordNode w)))
                    (name (cog-name wn)))
               (if (integer? (string-index name #\_))
                   (map Word (string-split name  #\_))
                   (list wn)))))
       (car (sent-get-words-in-order SENT)))))
-  ; This EvaluationLink will be used in the matching process
-  (Evaluation chatlang-term-seq (List SENT term-seq))
-  term-seq)
+  (let ((word-seq (get-seq 'ReferenceLink))
+        (lemma-seq (get-seq 'LemmaLink)))
+       ; These EvaluationLinks will be used in the matching process
+       (Evaluation chatlang-word-seq (List SENT word-seq))
+       (Evaluation chatlang-lemma-seq (List SENT lemma-seq))
+       (cons word-seq lemma-seq)))
 
 (define (get-lemma WORD)
   "A hacky way to quickly find the lemma of a word using WordNet."
