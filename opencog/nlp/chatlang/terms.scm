@@ -64,7 +64,7 @@
                           (List (List (terms-to-atomese TERMS))
                                 (Glob VAR))))))
 
-(define (unordered-matching TERMS)
+(define* (unordered-matching TERMS #:optional (VAR (choose-var-name)))
   "Occurrence of a list of terms (words/lemmas/phrases/concepts)
    that can be matched in any orders."
   (fold (lambda (t lst)
