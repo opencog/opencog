@@ -6397,6 +6397,22 @@ en_pairs_rtwo_mst
 -----------------
 en_pairs_rtwo, with tranche-1 and tranche-2 MST parses.
 
+STATUS: good
+DATE: 14 June 2017
+REASON: Best so far, I think.
+
+                        List of relations
+ Schema |    Name    | Type  | Owner  |    Size    | Description 
+--------+------------+-------+--------+------------+-------------
+ public | atoms      | table | ubuntu | 3150 MB    | 
+ public | spaces     | table | ubuntu | 40 kB      | 
+ public | typecodes  | table | ubuntu | 56 kB      | 
+ public | valuations | table | ubuntu | 7081 MB    | 
+ public | values     | table | ubuntu | 8192 bytes | 
+
+select count(*) from atoms;  -- 34720695 = 34.7M
+select count(*) from valuations; -- 72196748 = 72.2M
+
 > (print-matrix-summary-report ala)
 Summary Report for Correlation Matrix Link Grammar ANY link Word Pairs
 Left type: WordNode    Right Type: WordNode    Pair Type: ListLink
@@ -6420,6 +6436,33 @@ Support (l_0)  2.4698E+4    2.3820E+4
 Count   (l_1)  4.9158E+6    4.1130E+6     199.0        172.7    
 Length  (l_2)  5.3153E+5    4.2463E+5     21.52        17.83    
 RMS Count      5.3111E+5    4.2421E+5     21.50        17.81    
+
+Summary Report for Correlation Matrix Word-Disjunct Pairs (aka Connector Sets)
+Left type: WordNode    Right Type: PseudoAnd    Pair Type:
+PseudoWordCset
+Wildcard: (ListLink (ctv 0 0 17048845)
+   (AnyNode "cset-word")
+   (AnyNode "cset-disjunct")
+)
+Rows: 179487 Columns: 3979599
+Size: 7503114 non-zero entries of 714286285713 possible
+Fraction non-zero: 1.0504E-5 Sparsity (-log_2): 16.539
+Total observations: 17048845.0  Avg obs per pair: 2.2722
+Entropy Total: 21.146   Left: 15.105   Right: 9.9507
+Total MI: -3.910
+
+                 Left         Right     Avg-left     Avg-right
+                 ----         -----     --------     ---------
+Support (l_0)  7.0869E+4    9633.    
+Count   (l_1)  1.9041E+5    7.1256E+4     2.687        7.397    
+Length  (l_2)  7130.        4017.         .1006        .4171    
+RMS Count      7100.        3985.         .1002        .4137    
+
+5034299859 Bytes = 5.0 GB uncompressed.
+560626052 Bytes = 561MB compressed
+
+688143b9152f920f52d5cc4df317d9d3  en_pairs_rtwo_mst.sql
+4f36561722a0689bf213c304b61334d4  en_pairs_rtwo_mst.sql.bz2
 
 ==================================================================
 
@@ -7622,7 +7665,7 @@ COMMENT ON DATABASE en_pairs_rtwo IS 'Clean ANY-parse of tranche-1 and tranch-2'
 pg_dump en_pairs_rtwo > en_pairs_rtwo.sql
 DONE.
 
----------- meanwhile do rtwo_mst
+---------- meanwhile do rtwo_mst  DONE
 started
 copy rtwo to rtwo_mst this gets pairs
 open rone_mst, load cset pairs
@@ -7655,7 +7698,9 @@ guile -l mst-count-en-r.scm on term-6
 Started 13 June 2017 6:30PM  Done 6 hours later! wtf! last time, it was
 too fast, also. ???  WTF. why? Bug?
 
-(batch-pairs psa)
+(batch-pairs psa)  DONE
+
+Well, there's a huge pile of errors in the MST log file.
 
 ---------- meanwhile do rthree pairs
 guile-3 port 17015 feeder-4  5713 articles
@@ -9386,10 +9431,10 @@ So:
 9761.855971074354  OK so that agrees with support, now.
 
 Hmm But its off. 
-(acc 'right-cosine (Word "the") (Word "yes"))  ;0.48396212182787846
-(acc 'right-cosine (Word "yes") (Word "the")) ; 0.38874316832684397  XXX
+(acc 'right-cosine (Word "the") (Word "yes"))  ;0.48396212182787846 XXX
+(acc 'right-cosine (Word "yes") (Word "the")) ; 0.38874316832684397  OK
 (wm (WordNode "yes")) ; 0.38488729600833205
-wm symm:              ; 0.38488729600833205  so symmetrical but wrong!?
+wm symm:              ; 0.38488729600833205  so symmetrical and little OFF!!
 
 OK, wtf!
 (define acn (add-pair-cosine-compute fsi))
@@ -9398,15 +9443,33 @@ OK, wtf!
 (psi 'right-length (Word "the")) ; 9761.855971074354 OK correct for
 (psi 'right-length (Word "yes")) ; 187.6432785899884
 
-(acn 'right-product (Word "the") (Word "yes"))  ; 886496.0
-(acn 'right-product (Word "yes") (Word "the")) ; 712079.0 wtf wrong.  FIXED
+(acn 'right-product (Word "the") (Word "yes"))  ; 886496.0 was wrong, FIXED.
+(acn 'right-product (Word "yes") (Word "the")) ; 712079.0 this was OK.
 
 (/ 886496.0 (* 9761.855971074354 187.6432785899884)) = 0.48396212182787846
 
-ohh. The stars .. but then the cuttter is not preventing seeing bad
+ohh. The stars .. but then the cutter is not preventing seeing bad
 counts because it does not overload the get-count.
 
-overload ... item-pair and pair-count
+overload ... item-pair and pair-count  Done, but this doesn' change pti
+
+(define acc (add-pair-cosine-compute pfi))
+(acc 'right-product (Word "the") (Word "yes")) ; 712079.0 wtf! actuall OK
+(acc 'right-product (Word "yes") (Word "the")) ; 712079.0 also
+
+(/ 712079.0 (* 9761.855971074354 187.6432785899884)) = 0.38874316832684397
+
+Arghhh. wm is a little off from cosine!!  why?
+
+(define acf (add-pair-cosine-compute pfi 'pair-freq))
+(acf 'right-cosine (Word "yes") (Word "the")) ; 0.384887296008332
+ --- which is wrong, cause it bypassed the cutoff
+
+sooo ... pfi gives different results than the count API...
+because maybe count not filtered correctly, still????
+
+cosine creates fold, says "use pair-freq"
+fold uses pair-freq and bypasses filtering!
 
 
 ---------
@@ -9424,6 +9487,21 @@ so how do wildcards works?
 
 (set! (cdr flim) '(g h ))
 
+=========================================================================
+
+Bug:
+ (observe-mst "17 Book IV., § 23.")
+tokenize-text 
+strip-prefli "§"
+string-ref: Value out of range: 0
+
+(observe-mst "PLATE X.—_Bedroom, by De Vries “Cubiculum.”_ ]")
+strip-sufli Value out of range: -1
+
+ (observe-mst "*****")
+pick-best-cost-pair  line 255
+In procedure car: Wrong type argument in position 1 (expecting pair): ()
+ABORT: wrong-type-arg
 
 =========================================================================
 
