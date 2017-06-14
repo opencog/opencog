@@ -32,6 +32,39 @@
                                          (State chatlang-anchor
                                                 (Variable "$S"))))
 
+(define (order-terms TERMS)
+(display "before ordering: ") (display TERMS) (newline)
+  "Order the terms in the intended order."
+  (let* ((as (cons 'anchor-start "<"))
+         (ae (cons 'anchor-end ">"))
+         (wc (cons 'wildcard (cons 0 -1)))
+         (start-anchor? (any (lambda (t) (equal? as t)) TERMS))
+         (end-anchor? (any (lambda (t) (equal? ae t)) TERMS))
+         (start (if start-anchor? (cdr (member as TERMS)) (list wc)))
+         (end (if end-anchor?
+                  (take-while (lambda (t) (not (equal? ae t))) TERMS)
+                  (list wc))))
+        (cond ; If there are both start-anchor and end-anchor
+              ; they are the whole sequence, just need to put a
+              ; wildcard in between them
+              ((and start-anchor? end-anchor?)
+               (append start (list wc) end))
+               ; If there is only a start-anchor, append it and
+               ; a wildcard with the main-seq, follow by another
+               ; wildcard at the end
+              (start-anchor?
+               (append start (list wc)
+                       (take-while (lambda (t) (not (equal? as t))) TERMS)
+                       end))
+              ; If there is only an end-anchor, the main-seq should start
+              ; with a wildcard, follow by another wildcard and finally
+              ; the end-seq
+              (end-anchor?
+               (append start (cdr (member ae TERMS)) (list wc) end))
+              ; If there is no anchor, the main-seq should start and
+              ; end with a wildcard
+              (else (append (list wc) TERMS (list wc))))))
+
 (define (process-pattern-term TERM ATOMESE)
   "Process a single term -- calls the term function and appends the new
    variables and conditions to the existing pair.
@@ -184,6 +217,7 @@
   "Top level translation function. Pattern is a quoted list of terms,
    and action is a quoted list of actions or a single action."
   (let* ((template (cons atomese-variable-template atomese-condition-template))
+         (ordered-terms (order-terms PATTERN))
          (proc-terms (fold process-pattern-term
                            (cons template '())
                            PATTERN))
@@ -191,6 +225,8 @@
          (var-list (caar proc-terms))
          (cond-list (cdar proc-terms))
          (action (process-action ACTION)))
+; JJJ
+(display "ordered-terms:\n") (display ordered-terms) (newline)
         ; XXX TODO: term-seq does not have all the glob decl
         (List (generate-bind term-seq)
               (psi-rule-nocheck
