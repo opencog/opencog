@@ -44,11 +44,15 @@
          (end (if end-anchor?
                   (take-while (lambda (t) (not (equal? ae t))) TERMS)
                   (list wc))))
-        (cond ; If there are both start-anchor and end-anchor
-              ; they are the whole sequence, just need to put a
-              ; wildcard in between them
-              ((and start-anchor? end-anchor?)
-               (append start (list wc) end))
+        (cond ((and start-anchor? end-anchor?)
+               (if (equal? start-anchor? end-anchor?)
+                   ; If they are equal, we are not expecting
+                   ; anything else, either one of them is
+                   ; the whole sequence
+                   (drop-right start 1)
+                   ; If they are not equal, put a wildcard
+                   ; in between them
+                   (append start (list wc) end)))
                ; If there is only a start-anchor, append it and
                ; a wildcard with the main-seq, follow by another
                ; wildcard at the end
@@ -133,7 +137,7 @@
   (if (equal? (length term-seq)
               (length (filter (lambda (x) (equal? 'GlobNode (cog-type x)))
                               term-seq)))
-    (Inheritance (List term-seq) chatlang-no-constant))
+    (MemberLink (List term-seq) chatlang-no-constant))
   (list vars globs conds term-seq))
 
 (define-public (say TXT)
@@ -172,7 +176,8 @@
                    (set! cnt (+ cnt (length (cog-outgoing-set (gdr g)))))))
              ; Move on if it's not a GlobNode
              (set! cnt (+ cnt 1))))
-         (cog-outgoing-set GRD))))
+         (cog-outgoing-set GRD)))
+  (True))
 
 (define (generate-bind GLOB-DECL TERM-SEQ)
   "Generate a BindLink that contains the TERM-SEQ and the
@@ -193,26 +198,27 @@
 (define* (chat-rule PATTERN ACTION #:optional (TOPIC default-topic) NAME)
   "Top level translation function. Pattern is a quoted list of terms,
    and action is a quoted list of actions or a single action."
-  (let* ((template (cons atomese-variable-template atomese-condition-template))
-         (ordered-terms (order-terms PATTERN))
+  (let* ((ordered-terms (order-terms PATTERN))
          (proc-terms (process-pattern-terms ordered-terms))
-         (vars (list-ref proc-terms 0))
+         (vars (append atomese-variable-template (list-ref proc-terms 0)))
          (globs (list-ref proc-terms 1))
-         (conds (list-ref proc-terms 2))
+         (conds (append atomese-condition-template (list-ref proc-terms 2)))
          (term-seq (Evaluation chatlang-lemma-seq
                      (List (Variable "$S") (List (list-ref proc-terms 3)))))
-         (action (process-action ACTION)))
+         (action (process-action ACTION))
+         (bindlink (generate-bind globs term-seq))
+         (psi-rule (psi-rule-nocheck
+                     (list (Satisfaction (VariableList vars) (And conds)))
+                     action
+                     (True)
+                     (stv .9 .9)
+                     TOPIC
+                     NAME)))
         (cog-logger-debug "ordered-terms: ~a" ordered-terms)
-        ; Generate the BindLink and psi-rule, with a ListLink linking
-        ; both of them
-        (List (generate-bind globs term-seq)
-              (psi-rule-nocheck
-                (list (Satisfaction (VariableList vars) (And conds)))
-                action
-                (True)
-                (stv .9 .9)
-                TOPIC
-                NAME))))
+        (cog-logger-debug "BindLink: ~a" bindlink)
+        (cog-logger-debug "psi-rule: ~a" psi-rule)
+        ; Link both the newly generated BindLink and psi-rule together
+        (Reference bindlink psi-rule)))
 
 (define (sent-get-word-seqs SENT)
   "Get the words (original and lemma) associate with SENT.
