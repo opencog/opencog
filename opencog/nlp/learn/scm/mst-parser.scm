@@ -355,18 +355,20 @@
 		)
 	)
 
-	; For each connected word, find connections between that and the
-	; unconnected words.  Return a list of MI-costed connections.
-	; The 'bare-words' is a set of the unconnected words, labelled by
-	; an ordinal number denoting sentence order.  The graph-words is a
-	; set of words that are already a part of the spanning tree.
-	; It is assumed that these two sets have no words in common.
+	; For each connected numbered-atom (numa), find connections between
+	; that and the unconnected numas.  Return a list of MI-costed
+	; connections.
 	;
-	; This might return an empty list, if tehre are no connections!
-	(define (connect-to-graph CNTOBJ bare-words graph-words)
+	; The 'bare-numas' is a set of the unconnected atoms, labelled by
+	; an ordinal number denoting sequence order.  The graph-numas is a
+	; set of numas that are already a part of the spanning tree.
+	; It is assumed that these two sets have no numas in common.
+	;
+	; This might return an empty list, if there are no connections!
+	(define (connect-to-graph CNTOBJ bare-numas graph-numas)
 		(append-map
-			(lambda (grph-word) (connect-word CNTOBJ grph-word bare-words))
-			graph-words
+			(lambda (grph-numa) (connect-numa CNTOBJ grph-numa bare-numas))
+			graph-numas
 		)
 	)
 
@@ -374,11 +376,11 @@
 	(define (cross? cost-pair-a cost-pair-b)
 		(define pair-a (cadr cost-pair-a)) ; throw away MI
 		(define pair-b (cadr cost-pair-b)) ; throw away MI
-		(define lwa (car pair-a))  ; left word of word-pair
-		(define rwa (cadr pair-a)) ; right word of word-pair
+		(define lwa (car pair-a))  ; left numa of numa-pair
+		(define rwa (cadr pair-a)) ; right numa of numa-pair
 		(define lwb (car pair-b))
 		(define rwb (cadr pair-b))
-		(define ila (car lwa))     ; ordinal number of the word
+		(define ila (car lwa))     ; ordinal number of the atom
 		(define ira (car rwa))
 		(define ilb (car lwb))
 		(define irb (car rwb))
@@ -407,49 +409,51 @@
 		)
 	)
 
-	; Which word of the pair is in the word-list?
-	(define (get-fresh cost-pair word-list)
-		(define word-pair (cadr cost-pair)) ; throw away MI
-		(define left-word (car word-pair))
-		(define right-word (cadr word-pair))
-		(if (any (lambda (word) (equal? word left-word)) word-list)
-			left-word
-			right-word
+	; Which numa of the pair is in the numa-list?
+	(define (get-fresh cost-pair numa-list)
+		(define numa-pair (cadr cost-pair)) ; throw away MI
+		(define left-numa (car numa-pair))
+		(define right-numa (cadr numa-pair))
+		(if (any (lambda (numa) (equal? numa left-numa)) numa-list)
+			left-numa
+			right-numa
 		)
 	)
 		
 	; Find the maximum spanning tree.
-	; word-list is the list of unconnected words, to be added to the tree.
+	; numa-list is the list of unconnected numas, to be added to the tree.
 	; graph-links is a list of edges found so far, joining things together.
-	; nected-words is a list words that are part of the tree.
+	; nected-numas is a list numas that are part of the tree.
 	;
-	; When the word-list become empty, the pair-list is returned.
+	; When the numa-list becomes empty, the pair-list is returned.
 	;
-	; The word-list is assumed to be a set of ordinal-numbered WordNodes;
-	; i.e. an ordinal number denoting word-order in sentence, and then
-	; the word-node.
+	; The numa-list is assumed to be a set of ordinal-numbered atoms;
+	; i.e. scheme-pair of an ordinal number denoting atom-order in
+	; sequwnce, and then the atom.
 	;
-	; The nected-words are likewise.  It is assumed that the word-list and
-	; the nected-words are disjoint sets.
+	; The nected-numas are likewise.  It is assumed that the numa-list and
+	; the nected-numas are disjoint sets.
 	;
-	; The graph-links are assumed to be a set of MI-costed word-pairs.
-	; That is, an float-point MI value, followed by a pair of words.
+	; The graph-links are assumed to be a set of MI-costed numa-pairs.
+	; That is, an float-point MI value, followed by a pair of numas.
 	;
-	(define (*pick-em CNTOBJ word-list graph-links nected-words)
+	(define (*pick-em CNTOBJ numa-list graph-links nected-numas)
 
-		;(trace-msg (list "----------------------- \nenter pick-em with wordlist="
-		;	word-list "\nand graph-links=" graph-links "\nand nected=" nected-words "\n"))
+		; (format #t "----------------------- \n")
+		; (format #t "enter pick-em with numalist=~A\n" numa-list)
+		; (format #t "and graph-links=~A\n" graph-links)
+		; (format #t "and nected=~A\n" nected-words)
 
-		; Generate a set of possible links between unconnected words,
+		; Generate a set of possible links between unconnected numas,
 		; and the connected graph. This list might be empty
-		(define trial-pairs (connect-to-graph CNTOBJ word-list nected-words))
+		(define trial-pairs (connect-to-graph CNTOBJ numa-list nected-numas))
 
 		; Find the best link that doesn't cross existing links.
 		(define best (pick-no-cross-best trial-pairs graph-links))
 
 		; There is no such "best link" i.e. we've never obseved it
 		; and so have no MI for it, then we are done.  That is, none
-		; of the remaining words can be connected to the existing graph.
+		; of the remaining numas can be connected to the existing graph.
 		(if (> -1e10 (car best))
 			graph-links
 			(let* (
@@ -457,18 +461,18 @@
 					; Add the best to the list of graph-links.
 					(bigger-graph (append graph-links (list best)))
 
-					; Find the freshly-connected word.
-					(fresh-word (get-fresh best word-list))
-					; (jd (trace-msg (list "fresh word=" fresh-word "\n")))
+					; Find the freshly-connected numa.
+					(fresh-numa (get-fresh best numa-list))
+					; (jd (format #t "fresh atom=~A\n" fresh-numa))
 
-					; Remove the freshly-connected word from the word-list.
-					(shorter-list (set-sub word-list (list fresh-word)))
+					; Remove the freshly-connected numa from the numa-list.
+					(shorter-list (set-sub numa-list (list fresh-numa)))
 
-					; Add the freshly-connected word to the cnoonected-list
-					(more-nected (append nected-words (list fresh-word)))
+					; Add the freshly-connected numa to the connected-list
+					(more-nected (append nected-numas (list fresh-numa)))
 				)
 
-				; If word-list is null, then we are done. Otherwise, trawl.
+				; If numa-list is null, then we are done. Otherwise, trawl.
 				(if (null? shorter-list)
 					bigger-graph
 					(*pick-em CNTOBJ shorter-list bigger-graph more-nected)
