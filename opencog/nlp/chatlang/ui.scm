@@ -65,6 +65,12 @@
                 (extract TXT)
                 ; Return the negation of a phrase
                 (match:substring sm))))
+        ; For handling wildcards
+        ((not (equal? #f (string-match "^\\*~[0-9]+" TXT)))
+         (match:substring (string-match "^\\*~[0-9]+" TXT)))
+        ((not (equal? #f (string-match "^\\*[0-9]+" TXT)))
+         (match:substring (string-match "^\\*[0-9]+" TXT)))
+        ((string-prefix? "*" TXT) "*")
         ; For the rest -- concept and lemma,
         ; just return the whole term
         (else (extract TXT))))
@@ -128,6 +134,17 @@
           ; Concept
           ((string-prefix? "~" t)
            (cons 'concept (substring t 1)))
+          ; Wildcard -- "up to"
+          ((not (equal? #f (string-match "^\\*~[0-9]+" t)))
+           (cons 'wildcard (cons 0
+             (substring (match:substring (string-match "^\\*~[0-9]+" t)) 2))))
+         ; Wildcard -- "exactly"
+          ((not (equal? #f (string-match "^\\*[0-9]+" t)))
+           (let ((n (substring (match:substring (string-match "^\\*[0-9]+" t)) 1)))
+                (cons 'wildcard (cons n n))))
+          ; Wildcard -- "zero or more"
+          ((string-prefix? "*" t)
+           (cons 'wildcard (cons 0 -1)))
           ; TODO
           ; ----
           ; Variable

@@ -33,8 +33,8 @@
                                                 (Variable "$S"))))
 
 (define (order-terms TERMS)
-(display "before ordering: ") (display TERMS) (newline)
-  "Order the terms in the intended order."
+  "Order the terms in the intended order, and insert wildcards into
+   appropriate positions of the sequence."
   (let* ((as (cons 'anchor-start "<"))
          (ae (cons 'anchor-end ">"))
          (wc (cons 'wildcard (cons 0 -1)))
@@ -225,8 +225,7 @@
          (var-list (caar proc-terms))
          (cond-list (cdar proc-terms))
          (action (process-action ACTION)))
-; JJJ
-(display "ordered-terms:\n") (display ordered-terms) (newline)
+        (cog-logger-debug "ordered-terms: ~a" ordered-terms)
         ; XXX TODO: term-seq does not have all the glob decl
         (List (generate-bind term-seq)
               (psi-rule-nocheck
