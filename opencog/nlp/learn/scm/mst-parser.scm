@@ -194,68 +194,68 @@
 	; A "numa" is a numbered atom, viz a scheme-pair (number . atom)
 	;
 	; Given a left-numa, and a list of numas to the right of it, pick
-	; an atom from the list that has the highest-MI attachment to the left
-	; atom.  Return a list containing that cost and the selected numa-pair
-	; (i.e. the specified left-numa, and the chosen right-numa).
+	; an atom from the list that has the highest-MI attachment to the
+	; left atom.  Return a scheme-pair containing selected numa-pair
+	; and it's cost.  Specifically, the given left-numa, and the
+	; discovered right-numa, in the form ((left-numa . right-num) . mi).
 	; The search is made over atom pairs from the CNTOBJ mi-source.
 	;
 	; The left-numa is assumed to be an scheme-pair, consisting of an ID,
 	; and an atom; thus the atom is the cdr of the left-numa.
 	; The numa-list is likewise assumed to be a list of numbered atoms.
 	;
-	; to-do: might be better to use values for the return value....
 	(define (pick-best-cost-left-pair CNTOBJ left-numa numa-list)
 		(fold
 			(lambda (right-numa max-pair)
-				(define max-mi (car max-pair))
-				(define best-pair (cdr max-pair))
+				(define best-pair (first max-pair))
+				(define max-mi (second max-pair))
 				(define cur-mi (safe-pair-mi CNTOBJ (cdr left-numa) (cdr right-numa)))
 				; Use strict inequality, so that a shorter dependency
 				; length is always prefered.
 				(if (< max-mi cur-mi)
-					(list cur-mi (list left-numa right-numa))
+					(cons (cons left-numa right-numa) cur-mi)
 					max-pair
 				)
 			)
-			(list bad-mi '())
+			(cons '() bad-mi)
 			numa-list
 		)
 	)
 
 	; Given a right-numa, and a list of numas to the left of it, pick
 	; an atom from the list that has the highest-MI attachment to the
-	; right atom.  Return a list containing that cost and the selected
-	; numa-pair (i.e. the chosen left-numa, and the specified right-numa).
+	; right atom.  Return a scheme-pair containing selected numa-pair
+	; and it's cost.  Specifically, the given right-numa, and the
+	; discovered left-numa, in the form ((left-numa . right-num) . mi).
 	; The search is made over atom pairs from the CNTOBJ mi-source.
 	;
 	; The right-numa is assumed to be an scheme-pair, consisting of an ID,
 	; and an atom; thus the atom is the cdr of the right-numa. The
 	; numa-list is likewise assumed to be a list of numbered atoms.
 	;
-	; to-do: might be better to use values for the return value....
 	(define (pick-best-cost-right-pair CNTOBJ right-numa numa-list)
 		(fold
 			(lambda (left-numa max-pair)
-				(define max-mi (car max-pair))
-				(define best-pair (cdr max-pair))
+				(define best-pair (first max-pair))
+				(define max-mi (second max-pair))
 				(define cur-mi (safe-pair-mi CNTOBJ (cdr left-numa) (cdr right-numa)))
 				; Use less-or-equal, so that a shorter dependency
 				; length is always prefered.
 				(if (<= max-mi cur-mi)
-					(list cur-mi (list left-numa right-numa))
+					(cons (cons left-numa right-numa) cur-mi)
 					max-pair
 				)
 			)
-			(list bad-mi '())
+			(cons '() bad-mi)
 			numa-list
 		)
 	)
 
-	; Given a list of numas, return a list of two items: first, the cost
-	; and second, the numa-pair with that best cost (highest MI, in this
-	; case). The search is made over atom pairs having the CNTOBJ mi-source.
+	; Given a list of numas, return a costed numa-pair, in the form
+	; ((left-numa . right-num) . mi).
 	;
-	; to-do: Should we use scheme values for the return value?
+	; The search is made over atom pairs having the CNTOBJ mi-source.
+	;
 	(define (pick-best-cost-pair CNTOBJ numa-list)
 
 		; scan from left-most numa to the right.
@@ -268,7 +268,7 @@
 			; possibilities -- those that start with left-most numa, and
 			; something else.
 			(let ((best-rest (pick-best-cost-pair CNTOBJ (cdr numa-list))))
-				(if (< (car best-left) (car best-rest))
+				(if (< (second best-left) (second best-rest))
 					best-rest
 					best-left
 				)
@@ -292,18 +292,18 @@
 
 	; Of multiple possibilities, pick the one with the highest MI
 	; The choice-list is assumed to be a list of costed numa-pairs,
-	; as usual: cost first, then the pair.
+	; each costed pair of the form ((left-numa . right-num) . mi).
 	(define (max-of-pair-list choice-list)
 		; An awful numa-pair
-		(define bad-pair (list bad-mi (list (cons 0 '()) (cons 0 '()))))
+		(define bad-pair (cons (cons (cons 0 '()) (cons 0 '())) bad-mi))
 
 		; The tail-recursive helper that does all the work.
 		(define (*pick-best choice-list best-so-far)
-			(define so-far-mi (car best-so-far))
+			(define so-far-mi (second best-so-far))
 			(if (null? choice-list)
 				best-so-far  ; we are done!
 				(let* ((first-choice (car choice-list))
-						(first-mi (car first-choice))
+						(first-mi (second first-choice))
 						(curr-best
 							; use greater-than-or-equal; want to reject
 							; bad-pair as soon as possible.
@@ -321,9 +321,10 @@
 	; The numa-list is assumed to be a list of numas. It is presumed
 	; that the brk-numa does NOT occur in the numa-list.
 	;
-	; The returned list is a list of costed-pairs.
+	; The returned list is a list of costed-pairs. Each costed pair is
+	; of the form ((left-numa . right-num) . mi).
 	;
-	; This only returns connections, if tehre are any. This might return
+	; This only returns connections, if there are any. This might return
 	; the empty list, if there are no connections at all.
 	(define (connect-numa CNTOBJ brk-numa numa-list)
 		; The ordinal number of the break-numa.
@@ -344,11 +345,11 @@
 					; Returned value: the MI value for the pair, then the pair.
 					(let ((mi (safe-pair-mi CNTOBJ try-node brk-node)))
 						(if (< -1e10 mi)
-							(list mi (list numa brk-numa)) #f))
+							(cons (cons numa brk-numa) mi) #f))
 
 					(let ((mi (safe-pair-mi CNTOBJ brk-node try-node)))
 						(if (< -1e10 mi)
-							(list mi (list brk-numa numa)) #f))
+							(cons (cons brk-numa numa) mi) #f))
 				)
 			)
 			numa-list
@@ -357,7 +358,8 @@
 
 	; For each connected numbered-atom (numa), find connections between
 	; that and the unconnected numas.  Return a list of MI-costed
-	; connections.
+	; connections. Each costed-connection is of the form
+	; ((left-numa . right-num) . mi).
 	;
 	; The 'bare-numas' is a set of the unconnected atoms, labelled by
 	; an ordinal number denoting sequence order.  The graph-numas is a
@@ -374,12 +376,12 @@
 
 	; Return true if a pair of links cross, else return false.
 	(define (cross? cost-pair-a cost-pair-b)
-		(define pair-a (cadr cost-pair-a)) ; throw away MI
-		(define pair-b (cadr cost-pair-b)) ; throw away MI
-		(define lwa (car pair-a))  ; left numa of numa-pair
-		(define rwa (cadr pair-a)) ; right numa of numa-pair
-		(define lwb (car pair-b))
-		(define rwb (cadr pair-b))
+		(define pair-a (first cost-pair-a)) ; throw away MI
+		(define pair-b (first cost-pair-b)) ; throw away MI
+		(define lwa (first pair-a))  ; left numa of numa-pair
+		(define rwa (second pair-a)) ; right numa of numa-pair
+		(define lwb (first pair-b))
+		(define rwb (second pair-b))
 		(define ila (car lwa))     ; ordinal number of the atom
 		(define ira (car rwa))
 		(define ilb (car lwb))
@@ -411,15 +413,15 @@
 
 	; Which numa of the pair is in the numa-list?
 	(define (get-fresh cost-pair numa-list)
-		(define numa-pair (cadr cost-pair)) ; throw away MI
-		(define left-numa (car numa-pair))
-		(define right-numa (cadr numa-pair))
+		(define numa-pair (first cost-pair)) ; throw away MI
+		(define left-numa (first numa-pair))
+		(define right-numa (second numa-pair))
 		(if (any (lambda (numa) (equal? numa left-numa)) numa-list)
 			left-numa
 			right-numa
 		)
 	)
-		
+
 	; Find the maximum spanning tree.
 	; numa-list is the list of unconnected numas, to be added to the tree.
 	; graph-links is a list of edges found so far, joining things together.
@@ -454,7 +456,7 @@
 		; There is no such "best link" i.e. we've never obseved it
 		; and so have no MI for it, then we are done.  That is, none
 		; of the remaining numas can be connected to the existing graph.
-		(if (> -1e10 (car best))
+		(if (> -1e10 (second best))
 			graph-links
 			(let* (
 
@@ -489,8 +491,11 @@
 			; in the sequence.
 			(start-cost-pair (pick-best-cost-pair mi-source numa-list))
 
+			; Discard the MI.
+			(start-pair (first start-cost-pair))
+
 			; Add both of these atoms to the connected-list.
-			(nected-list (cadr start-cost-pair)) ; discard the MI
+			(nected-list (list (first start-pair) (second start-pair)))
 
 			; Remove both of these atoms from the atom-list
 			(smaller-list (set-sub numa-list nected-list))
