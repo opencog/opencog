@@ -93,7 +93,7 @@
 	(let* ((word-list (string-split plain-text #\ ))
 			(strip-list (map strip-affix word-list))
 		)
-		(concatenate (list (list left-wall) strip-list))
+		(concatenate (cons (list left-wall) strip-list))
 	)
 )
 
