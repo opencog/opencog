@@ -86,8 +86,14 @@
 	; Main entry point for the recursive splitter
 	(define (strip-affix word) (strip-sufli word suffix-list))
 
-	(let* ((word-list (string-split plain-text #\ )))
-		(concatenate (map strip-affix word-list))
+	; The left-wall indicates the start of the sentence, and
+	; is used to link to the head-verb, head-noun of the sentence.
+	(define left-wall "###LEFT-WALL###")
+
+	(let* ((word-list (string-split plain-text #\ ))
+			(strip-list (map strip-affix word-list))
+		)
+		(concatenate (list (list left-wall) strip-list))
 	)
 )
 
@@ -243,17 +249,17 @@
 		)
 	)
 
-	; Given a list of words, return a list containing the cost and the
-	; word-pair with the best cost (highest MI, in this case). The search
-	; is made over word pairs having the CNTOBJ mi-source.
+	; Given a list of words, return a list of two items: first, the cost
+	; and second, the word-pair with that best cost (highest MI, in this
+	; case). The search is made over word pairs having the CNTOBJ mi-source.
 	;
-	; to-do: might be better to use values for the return value....
+	; to-do: Should we use scheme values for the return value?
 	(define (pick-best-cost-pair CNTOBJ word-list)
 
 		; scan from left-most word to the right.
 		(define best-left (pick-best-cost-left-pair CNTOBJ
 				(car word-list) (cdr word-list)))
-		(if (eq? 2 (length word-list))
+		(if (>= 2 (length word-list))
 			; If the list is two words long, we are done.
 			best-left
 			; else the list is longer than two words. Pick between two

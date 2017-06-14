@@ -9488,6 +9488,11 @@ so how do wildcards works?
 (set! (cdr flim) '(g h ))
 
 =========================================================================
+Multiple MST bugs:
+1) left-wall is not being inserted, so do not get those links.
+
+(Word "###LEFT-WALL###")
+
 
 Bug:
  (observe-mst "17 Book IV., § 23.")
@@ -9502,6 +9507,8 @@ strip-sufli Value out of range: -1
 pick-best-cost-pair  line 255
 In procedure car: Wrong type argument in position 1 (expecting pair): ()
 ABORT: wrong-type-arg
+
+(mst-parse-text "***** fff")
 
 =========================================================================
 
