@@ -6363,6 +6363,10 @@ f90db044b2fae8baeffd1e7decbc3f45  en_pairs_rone_mst.sql.bz2
 
 ==================================================================
 en_pairs_rtwo
+-------------
+Random-planar-tree parsed books from "tranche-1" and "tranche-2".
+A continutation of en_pairs_rone.
+
 STATUS: good
 DATE: 12 June 2017
 REASON: Best so far, I think.
@@ -6387,6 +6391,35 @@ select count(*) from valuations; -- 9135195 = 9M (3.4M more)
 
 bzfc3a573593f60c6e2b546da22ce915f6  en_pairs_rtwo.sql
 f86114cf3f342dcd574406890a3a7168  en_pairs_rtwo.sql.bz2
+
+==================================================================
+en_pairs_rtwo_mst
+-----------------
+en_pairs_rtwo, with tranche-1 and tranche-2 MST parses.
+
+> (print-matrix-summary-report ala)
+Summary Report for Correlation Matrix Link Grammar ANY link Word Pairs
+Left type: WordNode    Right Type: WordNode    Pair Type: ListLink
+Wildcard: (EvaluationLink (ctv 0 0 3.2123033e+08)
+   (LinkGrammarRelationshipNode "ANY")
+   (ListLink
+      (AnyNode "left-word")
+      (AnyNode "right-word")
+   )
+)
+Rows: 184681 Columns: 187712
+Size: 8947405 non-zero entries of 34666839872 possible
+Fraction non-zero: 2.5810E-4 Sparsity (-log_2): 11.920
+Total observations: 321230333.0  Avg obs per pair: 35.902
+Entropy Total: 17.770   Left: 9.8499   Right: 9.7062
+Total MI: -1.786
+
+                 Left         Right     Avg-left     Avg-right
+                 ----         -----     --------     ---------
+Support (l_0)  2.4698E+4    2.3820E+4
+Count   (l_1)  4.9158E+6    4.1130E+6     199.0        172.7    
+Length  (l_2)  5.3153E+5    4.2463E+5     21.52        17.83    
+RMS Count      5.3111E+5    4.2421E+5     21.50        17.81    
 
 ==================================================================
 
@@ -7578,6 +7611,7 @@ gamma-guten feeder-8 port 19005 ./guten-mst-en.sh
 cog-term-1 guile -l mst-count-en.scm on term 1
 
 Started 10 June 8AM -- 5712 articles
+running at about 900 articles/day
 
 ---------- meanwhile do rtwo pairs   DONE
 Started. beta-guten-r 4500 articles.  feeder-4 guile-3 port 17015
@@ -7589,11 +7623,44 @@ pg_dump en_pairs_rtwo > en_pairs_rtwo.sql
 DONE.
 
 ---------- meanwhile do rtwo_mst
-not started
+started
+copy rtwo to rtwo_mst this gets pairs
+open rone_mst, load cset pairs
+close rone_mst
+open rtwo_mst
+write cset pairs only (not the words)
+close rtwo_mst
+
+$ createdb -T en_pairs_rtwo en_pairs_rtwo_mst
+(use-modules (opencog analysis))
+(sql-open "postgres:///en_pairs_rone_mst?user=ubuntu")
+(fetch-all-words)
+(define pca (make-pseudo-cset-api))
+(define psa (add-pair-stars pca))
+(psa 'fetch-pairs)
+(print-matrix-summary-report psa)
+(sql-close)
+
+(sql-open "postgres:///en_pairs_rtwo_mst?user=ubuntu")
+(cog-map-type (lambda (cset) (store-atom cset) #f) 'PseudoWordCset)
+(sql-close)
+
+Oh, wait; we also have to compute the pairMI's!. Ooops, almost forgot.
+(define ala (make-any-link-api))
+(batch-pairs ala)   DONE
+
+Started  gamma-guten-r port 19505  feeder-term-7 / guile-term-6
+guile -l mst-count-en-r.scm on term-6
+4500 articles
+Started 13 June 2017 6:30PM  Done 6 hours later! wtf! last time, it was
+too fast, also. ???  WTF. why? Bug?
+
+(batch-pairs psa)
 
 ---------- meanwhile do rthree pairs
 guile-3 port 17015 feeder-4  5713 articles
 Started 12 June 2017 2PM
+Paused 24 hours later, == 800 articles/24 hours
 
 
 ---------- meanwhile, compute & cache similarity  DONE
@@ -9285,10 +9352,11 @@ Crap.  Wait, what?
 (define wv (pti 'make-left-unit (list (WordNode "the"))))
 (wv (WordNode "the"))  ; 1 OK
 (define wm (pti 'left-iterate wv 1))
-(wm (WordNode "the"))   ;; ---- wtf
+(wm (WordNode "the"))   ;; ---- wtf  Oh; renormalization does this.
 
+(define psi (add-support-compute pti))
 (psi 'right-support (Word "the"))  ; 1403
-(psi 'right-length (Word "the") ; 9761.855971074354 OK correct for
+(psi 'right-length (Word "the")) ; 9761.855971074354 OK correct for
 counts...
 
 (define asi (add-support-compute pci 'right-unit))
@@ -9317,7 +9385,44 @@ So:
 (sqrt (acc 'right-product (Word "the") (Word "the"))) ;
 9761.855971074354  OK so that agrees with support, now.
 
+Hmm But its off. 
+(acc 'right-cosine (Word "the") (Word "yes"))  ;0.48396212182787846
+(acc 'right-cosine (Word "yes") (Word "the")) ; 0.38874316832684397  XXX
+(wm (WordNode "yes")) ; 0.38488729600833205
+wm symm:              ; 0.38488729600833205  so symmetrical but wrong!?
 
+OK, wtf!
+(define acn (add-pair-cosine-compute fsi))
+(define acc (add-pair-cosine-compute pfi))
+
+(psi 'right-length (Word "the")) ; 9761.855971074354 OK correct for
+(psi 'right-length (Word "yes")) ; 187.6432785899884
+
+(acn 'right-product (Word "the") (Word "yes"))  ; 886496.0
+(acn 'right-product (Word "yes") (Word "the")) ; 712079.0 wtf wrong.  FIXED
+
+(/ 886496.0 (* 9761.855971074354 187.6432785899884)) = 0.48396212182787846
+
+ohh. The stars .. but then the cuttter is not preventing seeing bad
+counts because it does not overload the get-count.
+
+overload ... item-pair and pair-count
+
+
+---------
+wtf. get-pair-count takes a LL pair, but wild-card return hi-level.
+so how do wildcards works?
+
+(define flim '(a b c))
+
+(define (mkit ARG)
+	(let ((arg ARG))
+		(lambda () (format #t "duude its ~A and ~A\n" ARG arg))))
+
+(define f (mkit flim))
+(set! flim  '(d e f))
+
+(set! (cdr flim) '(g h ))
 
 
 =========================================================================
