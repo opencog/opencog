@@ -92,11 +92,10 @@
         (list (Evaluation (GroundedPredicate "scm: chatlang-negation?")
                           (List (terms-to-atomese TERMS))))))
 
-(define (wildcard LOWER UPPER)
+(define* (wildcard LOWER UPPER #:optional (VAR (choose-var-name)))
   "Occurrence of a wildcard that the number of atoms to be matched
    can be restricted. -1 in the upper bound means infinity."
-  (let ((name (choose-var-name)))
-    (cons (list (TypedVariable (Glob name)
-                               (TypeSet (Type "WordNode")
-                                        (Interval (Number LOWER) (Number UPPER)))))
-          (list (Glob name)))))
+ (cons (list (TypedVariable (Glob VAR)
+                             (TypeSet (Type "WordNode")
+                                      (Interval (Number LOWER) (Number UPPER)))))
+        (list (Glob VAR))))
