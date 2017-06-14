@@ -131,6 +131,82 @@ public:
         return result;
     }
 
+    string get_linktype_white_list()
+    {
+        string result =  "linktype_white_list:";
+        vector<Type> white_list = patternMiner->get_linktype_white_list();
+        for (Type type : white_list)
+            result +=  " " + classserver().getTypeName(type);
+
+        return result;
+    }
+
+
+    string get_use_linktype_white_list()
+    {
+        bool enable = patternMiner->get_use_linktype_white_list();
+
+        if (enable)
+            return "use_linktype_white_list: true";
+        else
+            return "use_linktype_white_list: false";
+    }
+
+    string set_use_linktype_white_list(bool _use)
+    {
+        patternMiner->set_use_linktype_white_list(_use);
+        return get_use_linktype_white_list();
+    }
+
+    string get_use_linktype_black_list()
+    {
+        bool enable = patternMiner->get_use_linktype_black_list();
+
+        if (enable)
+            return "use_linktype_black_list: true";
+        else
+            return "use_linktype_black_list: false";
+    }
+
+    string set_use_linktype_black_list(bool _use)
+    {
+        patternMiner->set_use_linktype_black_list(_use);
+        return get_use_linktype_black_list();
+    }
+
+    string add_Link_Type_to_white_list(const string& _typeStr)
+    {
+        Type atomType = classserver().getType(_typeStr);
+        if (atomType == NOTYPE)
+            return "Error: Input type doesn't exist!";
+
+        string result = "";
+
+        if (patternMiner->add_linktype_to_white_list(atomType))
+            result += "Added!\n";
+        else
+            result += "Input type already exists in the linktype white list!\n";
+
+        return result + get_linktype_white_list();
+
+    }
+
+    string remove_Link_Type_from_white_list(const string& _typeStr)
+    {
+        Type atomType = classserver().getType(_typeStr);
+        if (atomType == NOTYPE)
+            return "Error: Input type doesn't exist!";
+
+        string result = "";
+        if (patternMiner->remove_linktype_from_white_list(atomType))
+            result += "Removed!\n";
+        else
+            result += "Input type does not exist in the linktype white list!\n";
+
+        return result + get_linktype_white_list();
+
+    }
+
     string add_Ignore_Link_Type(const string& _typeStr)
     {
         Type atomType = classserver().getType(_typeStr);
@@ -420,6 +496,9 @@ public:
         result += get_Pattern_Max_Gram() + "\n";
         result += get_Enable_Interesting_Pattern() + "\n";
         result += get_Frequency_threshold() + "\n";
+        result += get_use_linktype_black_list() + "\n";
+        result += get_use_linktype_white_list() + "\n";
+        result += get_linktype_white_list() + "\n";
         result += get_Ignore_Link_Types() + "\n";
         result += get_use_keyword_black_list() + "\n";
         result += get_use_keyword_white_list() + "\n";
@@ -519,6 +598,12 @@ public:
         patternMiner->applyWhiteListKeywordfilterAfterMining();
     }
 
+    void select_whitelist_entity_links_subset_equalto_keywords()
+    {
+        vector<string> whiteKeywords = patternMiner->get_keyword_white_list();
+        patternMiner->selectSubsetAllEntityLinksContainsKeywords(whiteKeywords);
+    }
+
 
     // Note: this will release all the previous pattern mining results
     void reset_patternminer(bool resetAllSettingsFromConfig)
@@ -534,6 +619,36 @@ public:
     void load_patterns_from_result_file(const string& fileName)
     {
         patternMiner->loadPatternsFromResultFile(fileName);
+    }
+
+    void query_patterns_with_frequency_surprisingnessI_ranges(const string& ranges, int gram)
+    {
+        vector<string> range_vector;
+        string rangesStr = ranges;
+        rangesStr.erase(std::remove(rangesStr.begin(), rangesStr.end(), ' '), rangesStr.end());
+        boost::split(range_vector, rangesStr , boost::is_any_of(","));
+        unsigned int min_frequency = std::stoi(range_vector[0]);
+        unsigned int max_frequency = std::stoi(range_vector[1]);
+        float min_surprisingness_I = std::stof(range_vector[2]);
+        float max_surprisingness_I = std::stof(range_vector[3]);
+        patternMiner->queryPatternsWithFrequencySurprisingnessIRanges(min_frequency,  max_frequency, min_surprisingness_I, max_surprisingness_I, gram);
+    }
+
+
+
+    void select_subset_for_DBpedia()
+    {
+        patternMiner->selectSubsetForDBpedia();
+    }
+
+    void load_all_DBpediaKeyNodes()
+    {
+        patternMiner->loandAllDBpediaKeyNodes();
+    }
+
+    void test_pattern_matcher()
+    {
+        patternMiner->testPatternMatcher();
     }
 };
 
@@ -600,8 +715,17 @@ void PatternMinerSCM::init()
     define_scheme_primitive("pm-set-enable-interesting-pattern", &PatternMinerSCM::set_Enable_Interesting_Pattern, this, "patternminer");
     define_scheme_primitive("pm-get-frequency-threshold", &PatternMinerSCM::get_Frequency_threshold, this, "patternminer");
     define_scheme_primitive("pm-set-frequency-threshold", &PatternMinerSCM::set_Frequency_threshold, this, "patternminer");
+
+    define_scheme_primitive("pm-get-use-linktype-black-list", &PatternMinerSCM::get_use_linktype_black_list, this, "patternminer");
+    define_scheme_primitive("pm-set-use-linktype-black-list", &PatternMinerSCM::get_use_linktype_black_list, this, "patternminer");
     define_scheme_primitive("pm-get-ignore-link-types", &PatternMinerSCM::get_Ignore_Link_Types, this, "patternminer");
     define_scheme_primitive("pm-add-ignore-link-type", &PatternMinerSCM::add_Ignore_Link_Type, this, "patternminer");
+
+
+    define_scheme_primitive("pm-get-use-linktype-white-list", &PatternMinerSCM::get_use_linktype_white_list, this, "patternminer");
+    define_scheme_primitive("pm-set-use-linktype-white-list", &PatternMinerSCM::get_use_linktype_white_list, this, "patternminer");
+    define_scheme_primitive("pm-get-linktype-white-list", &PatternMinerSCM::get_linktype_white_list, this, "patternminer");
+    define_scheme_primitive("pm-add-Link-Type-to-white-list", &PatternMinerSCM::add_Link_Type_to_white_list, this, "patternminer");
 
 
     define_scheme_primitive("pm-get-enable-filter-node-types-should-not-be-vars",
@@ -654,9 +778,19 @@ void PatternMinerSCM::init()
     define_scheme_primitive("pm-select-whitelist-subset-from-atomspace-contain-keywords", &PatternMinerSCM::select_whitelist_subset_from_atomspace_contain_keywords, this, "patternminer");
     define_scheme_primitive("pm-select-whitelist-subset-from-atomspace-equalto-keywords", &PatternMinerSCM::select_whitelist_subset_from_atomspace_equalto_keywords, this, "patternminer");
     define_scheme_primitive("pm-apply-whitelist-keyword-filter-after-mining", &PatternMinerSCM::apply_whitelist_keyword_filter_after_mining, this, "patternminer");
+    define_scheme_primitive("pm-query-patterns-with-frequency-surprisingnessI-ranges", &PatternMinerSCM::query_patterns_with_frequency_surprisingnessI_ranges, this, "patternminer");
     define_scheme_primitive("pm-reset-patternminer", &PatternMinerSCM::reset_patternminer, this, "patternminer");
     define_scheme_primitive("pm-run-interestingness-evaluation", &PatternMinerSCM::run_interestingness_evaluation, this, "patternminer");
     define_scheme_primitive("pm-load-patterns-from-result-file", &PatternMinerSCM::load_patterns_from_result_file, this, "patternminer");
+
+
+    define_scheme_primitive("pm-select-whitelist-entity-links-subset-equalto-keywords", &PatternMinerSCM::select_whitelist_entity_links_subset_equalto_keywords, this, "patternminer");
+
+    define_scheme_primitive("pm-select-subset-for-DBpedia", &PatternMinerSCM::select_subset_for_DBpedia, this, "patternminer");
+    define_scheme_primitive("pm-load-all-DBpediaKeyNodes", &PatternMinerSCM::load_all_DBpediaKeyNodes, this, "patternminer");
+
+
+    define_scheme_primitive("pm-test-pattern-matcher", &PatternMinerSCM::test_pattern_matcher, this, "patternminer");
 
 
 }

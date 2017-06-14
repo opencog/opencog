@@ -64,6 +64,7 @@ namespace opencog
             double interactionInformation;
             float nI_Surprisingness;
             float nII_Surprisingness;
+            string surprisingnessInfo; // the middle info record the surpringness calculating process for this pattern
 
             HandleSeq sharedVarNodeList; // all the shared nodes in these links in the original AtomSpace, each handle is a shared node
 
