@@ -279,8 +279,8 @@
 	; Set-subtraction.
 	; Given set-a and set-b, return set-a with all elts of set-b removed.
 	; It is assumed that equal? can be used to compare elements.  This
-	; should work fine for sets of ordinal-numbered words, and also for
-	; MI-costed word-pairs.
+	; should work fine for sets of ordinal-numbered atoms, and also for
+	; MI-costed atom-pairs.
 	(define (set-sub set rm-set)
 		(filter
 			(lambda (item)
@@ -291,11 +291,11 @@
 	)
 
 	; Of multiple possibilities, pick the one with the highest MI
-	; The choice-list is assumed to be a list of costed word-pairs,
+	; The choice-list is assumed to be a list of costed numa-pairs,
 	; as usual: cost first, then the pair.
 	(define (max-of-pair-list choice-list)
-		; An awful word-pair
-		(define bad-pair (list bad-mi (list (list 0 '()) (list 0 '()))))
+		; An awful numa-pair
+		(define bad-pair (list bad-mi (list (cons 0 '()) (cons 0 '()))))
 
 		; The tail-recursive helper that does all the work.
 		(define (*pick-best choice-list best-so-far)
@@ -315,43 +315,43 @@
 		(*pick-best choice-list bad-pair)
 	)
 
-	; Given a single break-word, return a list of connections to each
-	; of the other words in the sentence.  The break-word is assumed
-	; to be ordinal-numered, i.e. an integer, followed by a WordNode.
-	; The word-list is assumed to be ordinal-numbered as well.
-	; The returned list is a list of costed-pairs.
+	; Given a single break-numa, return a list of connections to each
+	; of the other numas in the sequence  The break-numa is assumed
+	; to be ordinal-numbered, i.e. an integer, followed by an atom.
+	; The numa-list is assumed to be a list of numas. It is presumed
+	; that the brk-numa does NOT occur in the numa-list.
 	;
-	; It is presumed that the brk-word does not occur in the word-list.
+	; The returned list is a list of costed-pairs.
 	;
 	; This only returns connections, if tehre are any. This might return
 	; the empty list, if there are no connections at all.
-	(define (connect-word CNTOBJ brk-word word-list)
-		; The ordinal number of the break-word.
-		(define brk-num (car brk-word))
-		; The WordNode of the break-word
-		(define brk-node (cdr brk-word))
+	(define (connect-numa CNTOBJ brk-numa numa-list)
+		; The ordinal number of the break-numa.
+		(define brk-num (car brk-numa))
+		; The atom of the break-numa
+		(define brk-node (cdr brk-numa))
 
 		(filter-map
-			(lambda (word)
-				; try-num is the ordinal number of the trial word.
-				(define try-num (car word))
-				; try-node is the actual WordNode of the trial word.
-				(define try-node (cdr word))
+			(lambda (numa)
+				; try-num is the ordinal number of the trial numa.
+				(define try-num (car numa))
+				; try-node is the actual atom of the trial numa.
+				(define try-node (cdr numa))
 
-				; ordered pairs, the left-right order matters.
+				; Ordered pairs, the left-right order matters.
 				(if (< try-num brk-num)
 
-					; returned value: the MI value for the pair, then the pair.
+					; Returned value: the MI value for the pair, then the pair.
 					(let ((mi (safe-pair-mi CNTOBJ try-node brk-node)))
 						(if (< -1e10 mi)
-							(list mi (list word brk-word)) #f))
+							(list mi (list numa brk-numa)) #f))
 
 					(let ((mi (safe-pair-mi CNTOBJ brk-node try-node)))
 						(if (< -1e10 mi)
-							(list mi (list brk-word word)) #f))
+							(list mi (list brk-numa numa)) #f))
 				)
 			)
-			word-list
+			numa-list
 		)
 	)
 
