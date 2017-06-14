@@ -168,7 +168,7 @@
 ; Ramon Ferrer-i-Cancho (2013) “Hubiness, length, crossings and their
 ; relationships in dependency trees”, ArXiv 1304.4086
 
-(define-public (mst-parse-text plain-text)
+(define-public (mst-parse-list STR-LIST)
 
 	; the source of where we will get MI from
 	(define mi-source (add-pair-freq-api (make-any-link-api)))
@@ -259,7 +259,7 @@
 		; scan from left-most word to the right.
 		(define best-left (pick-best-cost-left-pair CNTOBJ
 				(car word-list) (cdr word-list)))
-		(if (>= 2 (length word-list))
+		(if (eq? 2 (length word-list))
 			; If the list is two words long, we are done.
 			best-left
 			; else the list is longer than two words. Pick between two
@@ -476,11 +476,8 @@
 	)
 
 	(let* (
-			; Tokenize the sentence into a list of words.
-			(word-strs (tokenize-text plain-text))
-
 			; Number the words in sentence-order.
-			(word-list (str-list->numbered-word-list word-strs))
+			(word-list (str-list->numbered-word-list STR-LIST))
 
 			; Find a pair of words connected with the largest MI in the sentence.
 			(start-cost-pair (pick-best-cost-pair mi-source word-list))
@@ -493,6 +490,15 @@
 		)
 		(*pick-em mi-source smaller-list (list start-cost-pair) nected-list)
 	)
+)
+
+(define-public (mst-parse-text plain-text)
+
+	; Tokenize the sentence into a list of words.
+	(define word-strs (tokenize-text plain-text))
+
+	; Process the list of words.
+	(mst-parse-list word-strs)
 )
 
 ; ---------------------------------------------------------------------
