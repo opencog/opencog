@@ -60,108 +60,81 @@
               ; with a wildcard, follow by another wildcard and finally
               ; the end-seq
               (end-anchor?
-               (append start (cdr (member ae TERMS)) (list wc) end))
+               (let ((after-anchor-end (cdr (member ae TERMS))))
+                    (if (null? after-anchor-end)
+                        (append start end)
+                        ; In case there are still terms after anchor-end,
+                        ; get it and add an extra wildcard
+                        (append start after-anchor-end (list wc) end))))
               ; If there is no anchor, the main-seq should start and
               ; end with a wildcard
               (else (append (list wc) TERMS (list wc))))))
 
-(define (process-pattern-term TERM ATOMESE)
-  "Process a single term -- calls the term function and appends the new
-   variables and conditions to the existing pair.
-   The atomese are in the form of: ((A B) C)
-   where A is the variable declaration, B is the condition, C is the
-   term sequence."
-  (let* ((no-var-cond (cons '() '()))
-         (atomese-for-term
-           (cond ((equal? 'lemma (car TERM))
-                  (cons (lemma (cdr TERM))
-                        ; Use the lemma of a word for the term-seq
-                        (list (Word (get-lemma (cdr TERM))))))
-                 ((equal? 'word (car TERM))
-                  (cons (word (cdr TERM))
-                        ; Use the lemma of a word for the term-seq
-                        (list (Word (get-lemma (cdr TERM))))))
-                 ((equal? 'phrase (car TERM))
-                  (cons (phrase (cdr TERM))
-                        (map Word (string-split (cdr TERM) #\ ))))
-                 ((equal? 'concept (car TERM))
-                  (let ((var (choose-var-name)))
-                       (cons (concept (cdr TERM) var)
-                             (list (Glob var)))))
-                 ((equal? 'choices (car TERM))
-                  (let ((var (choose-var-name)))
-                       (cons (choices (cdr TERM) var)
-                             (list (Glob var)))))
-                 ((equal? 'unordered-matching (car TERM))
-                  (let ((var (choose-var-name)))
-                       (cons (unordered-matching (cdr TERM) var)
-                             (list (Glob var)))))
-                 ((equal? 'negation (car TERM))
-                  (cons (negation (cdr TERM)) '()))
-                 ((equal? 'wildcard (car TERM))
-                  (let ((var (choose-var-name)))
-                        (cons (wildcard (cadr TERM) (cddr TERM) var)
-                              (list (Glob var)))))
-                 ((equal? 'anchor-start (car TERM))
-                  (cons no-var-cond (list "<")))
-                 ((equal? 'anchor-end (car TERM))
-                  (cons no-var-cond (list ">")))))
-         (vars (append (caar ATOMESE) (caar atomese-for-term)))
-         (conds (append (cdar ATOMESE) (cdar atomese-for-term)))
-         (seq (append (cdr ATOMESE) (cdr atomese-for-term))))
-  (cons (cons vars conds) seq)))
-
-(define (term-sequence-check SEQ)
-  "Checks terms occur in the desired order. This is done when we're using
-   DualLink to find the rules, see 'find-chat-rules' for details."
-  (let* ((start-anchor? (not (equal? #f (member "<" SEQ))))
-         (end-anchor? (not (equal? #f (member ">" SEQ))))
-         (start-with
-           (if start-anchor?
-               (cdr (member "<" SEQ))
-               (wildcard 0 -1)))
-         (end-with
-           (if end-anchor?
-               (take-while (lambda (t) (not (equal? ">" t))) SEQ)
-               (wildcard 0 -1)))
-         (mid-wc (if (or start-anchor? end-anchor?) (wildcard 0 -1) '()))
-         (glob-decl (append (if start-anchor? '() (car start-with))
-                            (if end-anchor? '() (car end-with))
-                            (if (null? mid-wc) '() (car mid-wc))))
-         (new-seq (cond ; If there are both start-anchor and end-anchor
-                        ; they are the whole seq, but still need to put
-                        ; a glob in between them
-                        ((and start-anchor? end-anchor?)
-                         (append start-with (cdr mid-wc) end-with))
-                        ; If there is only a start-anchor, append it and
-                        ; a wildcard with the main seq, follow by a glob
-                        ; at the end
-                        (start-anchor?
-                         (append start-with
-                                 (cdr mid-wc)
-                                 (take-while (lambda (t) (not (equal? "<" t))) SEQ)
-                                 (cdr end-with)))
-                        ; If there is only an end-anchor, append a glob in
-                        ; front of the main seq, follow by a wildcard and
-                        ; the end-seq
-                        (end-anchor?
-                         (append (cdr start-with)
-                                 (cdr (member ">" SEQ))
-                                 (cdr mid-wc)
-                                 end-with))
-                        ; If there is no anchor, append two globs, one in
-                        ; the beginning and one at the end of the seq
-                        (else (append (cdr start-with) SEQ (cdr end-with))))))
+(define (process-pattern-terms TERMS)
+  "Generate the atomese (i.e. the variable declaration and the pattern)
+   for each of the TERMS."
+  (define vars '())
+  (define globs '())
+  (define conds '())
+  (define term-seq '())
+  (for-each (lambda (t)
+    (cond ((equal? 'lemma (car t))
+           (let ((l (lemma (cdr t))))
+                (set! vars (append vars (car l)))
+                (set! conds (append conds (cdr l)))
+                (set! term-seq
+                  (append term-seq (list (Word (get-lemma (cdr t))))))))
+          ((equal? 'word (car t))
+           (let ((w (word (cdr t))))
+                (set! vars (append vars (car w)))
+                (set! conds (append conds (cdr w)))
+                (set! term-seq
+                  (append term-seq (list (Word (get-lemma (cdr t))))))))
+          ((equal? 'phrase (car t))
+           (let ((p (phrase (cdr t))))
+                (set! vars (append vars (car p)))
+                (set! conds (append conds (cdr p)))
+                (set! term-seq (append term-seq
+                  (map Word (map get-lemma (string-split (cdr t) #\sp)))))))
+          ((equal? 'concept (car t))
+           (let* ((v (choose-var-name))
+                  (c (concept (cdr t) v)))
+                 (set! globs (append globs (car c)))
+                 (set! conds (append conds (cdr c)))
+                 (set! term-seq (append term-seq (list (Glob v))))))
+          ((equal? 'choices (car t))
+           (let* ((v (choose-var-name))
+                  (c (choices (cdr t) v)))
+                 (set! globs (append globs (car c)))
+                 (set! conds (append conds (cdr c)))
+                 (set! term-seq (append term-seq (list (Glob v))))))
+          ((equal? 'unordered-matching (car t))
+           (let* ((v (choose-var-name))
+                  (u (unordered-matching (cdr t) v)))
+                 (set! vars (append vars
+                   (filter (lambda (x) (equal? 'VariableNode (cog-type (gar x))))
+                           (car u))))
+                 (set! globs (append globs
+                   (filter (lambda (x) (equal? 'GlobNode (cog-type (gar x))))
+                           (car u))))
+                 (set! conds (append conds (cdr u)))
+                 (set! term-seq (append term-seq (list (Glob v))))))
+          ((equal? 'negation (car t))
+           (set! conds (append conds (cdr (negation (cdr t))))))
+          ((equal? 'wildcard (car t))
+           (let* ((v (choose-var-name))
+                  (w (wildcard (cadr t) (cddr t) v)))
+                 (set! globs (append globs (car w)))
+                 (set! term-seq (append term-seq (list (Glob v))))))))
+    TERMS)
   ; DualLink couldn't match patterns with no constant terms in it
   ; Mark the rules with no constant terms so that they can be found
   ; easily during the matching process
-  (if (equal? (length new-seq)
+  (if (equal? (length term-seq)
               (length (filter (lambda (x) (equal? 'GlobNode (cog-type x)))
-                              new-seq)))
-    (Inheritance (List new-seq) chatlang-no-constant))
-  (cons glob-decl
-        (list (Evaluation chatlang-lemma-seq
-                          (List (Variable "$S") (List new-seq)))))))
+                              term-seq)))
+    (Inheritance (List term-seq) chatlang-no-constant))
+  (list vars globs conds term-seq))
 
 (define-public (say TXT)
   "Say the text and clear the state."
@@ -201,13 +174,13 @@
              (set! cnt (+ cnt 1))))
          (cog-outgoing-set GRD))))
 
-(define (generate-bind TERM-SEQ)
-  "Generate a BindLink that contains the term-seq and the
-   restrictions on the GlobNode in the term-seq, if any."
-  (Bind (VariableList (car TERM-SEQ)
+(define (generate-bind GLOB-DECL TERM-SEQ)
+  "Generate a BindLink that contains the TERM-SEQ and the
+   restrictions on the GlobNode in the TERM-SEQ, if any."
+  (Bind (VariableList GLOB-DECL
                       (TypedVariable (Variable "$S")
                                      (Type "SentenceNode")))
-        (And (cdr TERM-SEQ)
+        (And TERM-SEQ
              (State chatlang-anchor (Variable "$S")))
         (ExecutionOutput (GroundedSchema "scm: store-groundings")
                          (List (Variable "$S")
@@ -215,25 +188,26 @@
                                  (if (equal? 'GlobNode (cog-type x))
                                      (List (Quote x) (List x))
                                      x))
-                                 (cog-outgoing-set (gddr (cadr TERM-SEQ)))))))))
+                                 (cog-outgoing-set (gddr TERM-SEQ))))))))
 
 (define* (chat-rule PATTERN ACTION #:optional (TOPIC default-topic) NAME)
   "Top level translation function. Pattern is a quoted list of terms,
    and action is a quoted list of actions or a single action."
   (let* ((template (cons atomese-variable-template atomese-condition-template))
          (ordered-terms (order-terms PATTERN))
-         (proc-terms (fold process-pattern-term
-                           (cons template '())
-                           PATTERN))
-         (term-seq (term-sequence-check (cdr proc-terms)))
-         (var-list (caar proc-terms))
-         (cond-list (cdar proc-terms))
+         (proc-terms (process-pattern-terms ordered-terms))
+         (vars (list-ref proc-terms 0))
+         (globs (list-ref proc-terms 1))
+         (conds (list-ref proc-terms 2))
+         (term-seq (Evaluation chatlang-lemma-seq
+                     (List (Variable "$S") (List (list-ref proc-terms 3)))))
          (action (process-action ACTION)))
         (cog-logger-debug "ordered-terms: ~a" ordered-terms)
-        ; XXX TODO: term-seq does not have all the glob decl
-        (List (generate-bind term-seq)
+        ; Generate the BindLink and psi-rule, with a ListLink linking
+        ; both of them
+        (List (generate-bind globs term-seq)
               (psi-rule-nocheck
-                (list (Satisfaction (VariableList var-list) (And cond-list)))
+                (list (Satisfaction (VariableList vars) (And conds)))
                 action
                 (True)
                 (stv .9 .9)

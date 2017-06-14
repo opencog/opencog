@@ -95,7 +95,7 @@
 (define* (wildcard LOWER UPPER #:optional (VAR (choose-var-name)))
   "Occurrence of a wildcard that the number of atoms to be matched
    can be restricted. -1 in the upper bound means infinity."
- (cons (list (TypedVariable (Glob VAR)
+  (cons (list (TypedVariable (Glob VAR)
                              (TypeSet (Type "WordNode")
                                       (Interval (Number LOWER) (Number UPPER)))))
-        (list (Glob VAR))))
+        '()))
