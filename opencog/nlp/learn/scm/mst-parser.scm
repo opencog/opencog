@@ -185,20 +185,20 @@
 		(map
 			(lambda (ato)
 				(set! cnt (+ cnt 1))
-				(list cnt ato)
+				(cons cnt ato)
 			)
 			ATOMS
 		)
 	)
-	; Given a left-word, and a list of words to the right of it, pick
-	; a word from the list that has the highest-MI attachment to the left
-	; word.  Return a list containing that cost and the selected word-pair
-	; (i.e. the specified left-word, and the chosen right-word).
-	; The search is made over word pairs from the CNTOBJ mi-source.
+	; Given a left-atom, and a list of atoms to the right of it, pick
+	; an atom from the list that has the highest-MI attachment to the left
+	; atom.  Return a list containing that cost and the selected atom-pair
+	; (i.e. the specified left-atom, and the chosen right-atom).
+	; The search is made over atom pairs from the CNTOBJ mi-source.
 	;
-	; The left-word is assumed to be an list, consisting of an ID, and
-	; a WordNode; thus the WordNode is the cadr of the left-word.
-	; The word-list is likewise assumed to be a list of numbered WordNodes.
+	; The left-atom is assumed to be an scheme-pair, consisting of an ID,
+	; and an atom; thus the atom is the cdr of the left-atom.
+	; The atom-list is likewise assumed to be a list of numbered atoms.
 	;
 	; to-do: might be better to use values for the return value....
 	(define (pick-best-cost-left-pair CNTOBJ left-word word-list)
@@ -206,7 +206,7 @@
 			(lambda (right-word max-pair)
 				(define max-mi (car max-pair))
 				(define best-pair (cdr max-pair))
-				(define cur-mi (safe-pair-mi CNTOBJ (cadr left-word) (cadr right-word)))
+				(define cur-mi (safe-pair-mi CNTOBJ (cdr left-word) (cdr right-word)))
 				; Use strict inequality, so that a shorter dependency
 				; length is always prefered.
 				(if (< max-mi cur-mi)
@@ -225,8 +225,8 @@
 	; word-pair (i.e. the chosen left-word, and the specified right-word).
 	; The search is made over word pairs from the CNTOBJ mi-source.
 	;
-	; The right-word is assumed to be an list, consisting of an ID, and
-	; a WordNode; thus the WordNode is the cadr of the right-word.
+	; The right-word is assumed to be an scheme-pairl, consisting of an ID, and
+	; a WordNode; thus the WordNode is the cdr of the right-word.
 	; The word-list is likewise assumed to be a list of numbered WordNodes.
 	;
 	; to-do: might be better to use values for the return value....
@@ -235,7 +235,7 @@
 			(lambda (left-word max-pair)
 				(define max-mi (car max-pair))
 				(define best-pair (cdr max-pair))
-				(define cur-mi (safe-pair-mi CNTOBJ (cadr left-word) (cadr right-word)))
+				(define cur-mi (safe-pair-mi CNTOBJ (cdr left-word) (cdr right-word)))
 				; Use less-or-equal, so that a shorter dependency
 				; length is always prefered.
 				(if (<= max-mi cur-mi)
@@ -326,14 +326,14 @@
 		; The ordinal number of the break-word.
 		(define brk-num (car brk-word))
 		; The WordNode of the break-word
-		(define brk-node (cadr brk-word))
+		(define brk-node (cdr brk-word))
 
 		(filter-map
 			(lambda (word)
 				; try-num is the ordinal number of the trial word.
 				(define try-num (car word))
 				; try-node is the actual WordNode of the trial word.
-				(define try-node (cadr word))
+				(define try-node (cdr word))
 
 				; ordered pairs, the left-right order matters.
 				(if (< try-num brk-num)
