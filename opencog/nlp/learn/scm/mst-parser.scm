@@ -180,7 +180,7 @@
 	; The numbering provides a unique ID, needed for the graph algos.
 	; i.e. if the same atom appears twice in a sequence, we need to
 	; distinguish these multiple occurances.  The id does this.
-	(define (atom-list->numbered-list ATOMS)
+	(define (atom-list->numa-list ATOMS)
 		(define cnt 0)
 		(map
 			(lambda (ato)
@@ -190,32 +190,35 @@
 			ATOMS
 		)
 	)
-	; Given a left-atom, and a list of atoms to the right of it, pick
-	; an atom from the list that has the highest-MI attachment to the left
-	; atom.  Return a list containing that cost and the selected atom-pair
-	; (i.e. the specified left-atom, and the chosen right-atom).
+
+	; A "numa" is a numbered atom, viz a scheme-pair (number . atom)
+	;
+	; Given a left-numa, and a list of numas to the right of it, pick
+	; an numa from the list that has the highest-MI attachment to the left
+	; numa.  Return a list containing that cost and the selected numa-pair
+	; (i.e. the specified left-numa, and the chosen right-numa).
 	; The search is made over atom pairs from the CNTOBJ mi-source.
 	;
-	; The left-atom is assumed to be an scheme-pair, consisting of an ID,
-	; and an atom; thus the atom is the cdr of the left-atom.
-	; The atom-list is likewise assumed to be a list of numbered atoms.
+	; The left-numa is assumed to be an scheme-pair, consisting of an ID,
+	; and an atom; thus the atom is the cdr of the left-numa.
+	; The numa-list is likewise assumed to be a list of numbered atoms.
 	;
 	; to-do: might be better to use values for the return value....
-	(define (pick-best-cost-left-pair CNTOBJ left-word word-list)
+	(define (pick-best-cost-left-pair CNTOBJ left-numa numa-list)
 		(fold
-			(lambda (right-word max-pair)
+			(lambda (right-numa max-pair)
 				(define max-mi (car max-pair))
 				(define best-pair (cdr max-pair))
-				(define cur-mi (safe-pair-mi CNTOBJ (cdr left-word) (cdr right-word)))
+				(define cur-mi (safe-pair-mi CNTOBJ (cdr left-numa) (cdr right-numa)))
 				; Use strict inequality, so that a shorter dependency
 				; length is always prefered.
 				(if (< max-mi cur-mi)
-					(list cur-mi (list left-word right-word))
+					(list cur-mi (list left-numa right-numa))
 					max-pair
 				)
 			)
 			(list bad-mi '())
-			word-list
+			numa-list
 		)
 	)
 
@@ -476,17 +479,17 @@
 
 	(let* (
 			; Number the atoms in sequence-order.
-			(numbered-list (atom-list->numbered-list ATOM-LIST))
+			(numa-list (atom-list->numa-list ATOM-LIST))
 
 			; Find a pair of atoms connected with the largest MI
 			; in the sequence.
-			(start-cost-pair (pick-best-cost-pair mi-source numbered-list))
+			(start-cost-pair (pick-best-cost-pair mi-source numa-list))
 
 			; Add both of these atoms to the connected-list.
 			(nected-list (cadr start-cost-pair)) ; discard the MI
 
 			; Remove both of these atoms from the atom-list
-			(smaller-list (set-sub numbered-list nected-list))
+			(smaller-list (set-sub numa-list nected-list))
 		)
 		(*pick-em mi-source smaller-list (list start-cost-pair) nected-list)
 	)
@@ -561,7 +564,7 @@
 ; (mst-parse-text "faire un test")
 ; (mst-parse-text "Elle jouit notamment du monopole de la restauration ferroviaire")
 ;
-; (define my-word-list (atom-list->numbered-list
+; (define my-word-list (atom-list->numa-list
 ;      (tokenize-text "Elle jouit notamment du monopole de la restauration ferroviaire")))
 ; answer: du monopole 5.786411762237549
 ;      (tokenize-text "faire un test entre quelques mots")))
