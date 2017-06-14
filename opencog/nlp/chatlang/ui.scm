@@ -93,7 +93,7 @@
           ((and (string-prefix? "'" t)
                 (not (equal? #f (string-match "^'[a-zA-Z0-9 ]+\\b'" t))))
            (cons 'phrase (subterm t 1)))
-          ; Literal word
+          ; Literal word -- an apostrophe in front of a word
           ((string-prefix? "'" t)
            (cons 'word (substring t 1)))
           ; Unordered-matching
@@ -137,6 +137,9 @@
           ; ((not (equal? #f (string-match "[_a-zA-Z]+~" t)))
           ;  (let ((ss (string-split t #\~)))
           ;    (string-append "(" (cadr ss) " " (car ss) ")")))
+          ; Literal word -- the word itself is not in canonical form
+          ((not (is-lemma? t))
+           (cons 'word t))
           ; Lemma, the default case
           (else (cons 'lemma t))))
     TERMS))
