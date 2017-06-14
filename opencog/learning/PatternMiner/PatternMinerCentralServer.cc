@@ -406,6 +406,7 @@ void DistributedPatternMiner::parseAPatternTask(json::value jval)
         string ParentPatternStr = jval[U("ParentPattern")].as_string();
         // cout << "ParentPatternStr = " << ParentPatternStr << std::endl;
         int ExtendedLinkIndex = jval[U("ExtendedLinkIndex")].as_integer();
+        bool notOutPutPattern = jval[U("notOutPutPattern")].as_bool();
         // cout << "ExtendedLinkIndex = " << ExtendedLinkIndex << std::endl;
         string clientIDStr = jval[U("ClientUID")].as_string();
         unsigned int processedFactsNum = (unsigned int)(jval[U("ProcessedFactsNum")].as_integer());
@@ -454,11 +455,18 @@ void DistributedPatternMiner::parseAPatternTask(json::value jval)
             keyStrToHTreeNodeMap.insert(std::pair<string, HTreeNode*>(PatternStr, newHTreeNode));
             uniqueKeyLock.unlock();
 
+        }
 
+        if (newHTreeNode->count == 1)
+        {
             addNewPatternLock.lock();
-            (patternsForGram[patternHandleSeq.size()-1]).push_back(newHTreeNode);
-            addNewPatternLock.unlock();
 
+            if (notOutPutPattern)
+                (tmpPatternsForGram[newHTreeNode->pattern.size()-1]).push_back(newHTreeNode);
+            else
+                (patternsForGram[newHTreeNode->pattern.size()-1]).push_back(newHTreeNode);
+
+            addNewPatternLock.unlock();
         }
 
         if (newHTreeNode->pattern.size() > 1) // this pattern is more than 1 gram, it should have a parent pattern
@@ -504,10 +512,9 @@ void DistributedPatternMiner::parseAPatternTask(json::value jval)
                     keyStrToHTreeNodeMap.insert(std::pair<string, HTreeNode*>(ParentPatternStr, parentNode));
                     uniqueKeyLock.unlock();
 
-                    addNewPatternLock.lock();
-                    (patternsForGram[parentPatternHandleSeq.size()-1]).push_back(parentNode);
-                    addNewPatternLock.unlock();
-
+//                    addNewPatternLock.lock();
+//                    (patternsForGram[parentPatternHandleSeq.size()-1]).push_back(parentNode);
+//                    addNewPatternLock.unlock();
 
                 }
                 else

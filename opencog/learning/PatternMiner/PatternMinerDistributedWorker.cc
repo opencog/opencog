@@ -377,19 +377,26 @@ void DistributedPatternMiner::growPatternsDepthFirstTask(unsigned int thread_ind
 
         // allNewMinedPatternInfo is only used in distributed version, to store all the new mined patterns in this task for sending to the server.
         vector<MinedPatternInfo> allNewMinedPatternInfo;
+        bool startFromLinkContainWhiteKeyword = false;
 
 
         actualProcessedLinkLock.lock();
         actualProcessedLinkNum ++;
         actualProcessedLinkLock.unlock();
 
+        if (only_output_patterns_contains_white_keywords)
+        {
+            if (havenotProcessedWhiteKeywordLinks.find(cur_link) != havenotProcessedWhiteKeywordLinks.end())
+                startFromLinkContainWhiteKeyword = true;
+        }
+
         extendAPatternForOneMoreGramRecursively(newLink, observingAtomSpace, Handle::UNDEFINED, lastGramLinks, 0, lastGramValueToVarMap,
-                                                patternVarMap, false, allNewMinedPatternsCurTask, allHTreeNodesCurTask, allNewMinedPatternInfo, thread_index);
+                                                patternVarMap, false, allNewMinedPatternsCurTask, allHTreeNodesCurTask, allNewMinedPatternInfo, thread_index,startFromLinkContainWhiteKeyword);
 
 
         // send new mined patterns to the server
         for (MinedPatternInfo& pInfo : allNewMinedPatternInfo)
-            addPatternsToJsonArrayBuf(pInfo.curPatternKeyStr, pInfo.parentKeyString, pInfo.extendedLinkIndex, patternJsonArrays[thread_index]);
+            addPatternsToJsonArrayBuf(pInfo.curPatternKeyStr, pInfo.parentKeyString, pInfo.extendedLinkIndex, pInfo.notOutPutPattern, patternJsonArrays[thread_index]);
 
         // release all the HTreeNodes created in this task
         // clean up the pattern atomspace, do not need to keep patterns in atomspace when run as a distributed worker
@@ -411,7 +418,7 @@ void DistributedPatternMiner::growPatternsDepthFirstTask(unsigned int thread_ind
     std::cout.flush();
 }
 
-void DistributedPatternMiner::addPatternsToJsonArrayBuf(string curPatternKeyStr, string parentKeyString,  unsigned int extendedLinkIndex, json::value &patternJsonArray)
+void DistributedPatternMiner::addPatternsToJsonArrayBuf(string curPatternKeyStr, string parentKeyString, unsigned int extendedLinkIndex, bool notOutPutPattern, json::value &patternJsonArray)
 {
 
     try
@@ -421,8 +428,10 @@ void DistributedPatternMiner::addPatternsToJsonArrayBuf(string curPatternKeyStr,
         patternInfo[U("Pattern")] = json::value(U(curPatternKeyStr));
         patternInfo[U("ParentPattern")] = json::value(U(parentKeyString));
         patternInfo[U("ExtendedLinkIndex")] = json::value(U(extendedLinkIndex));
+        patternInfo[U("notOutPutPattern")] = json::value(U(notOutPutPattern));
         patternInfo[U("ClientUID")] = json::value(U(clientWorkerUID));
         patternInfo[U("ProcessedFactsNum")] = json::value(U(actualProcessedLinkNum));
+
 
         patternJsonArray[patternJsonArray.size()] = patternInfo;
 
