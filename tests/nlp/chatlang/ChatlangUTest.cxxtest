@@ -236,23 +236,33 @@ void ChatlangUTest::test_chat_find_rules()
     auto result_7 = scm->eval("test-result-7");
     TSM_ASSERT_EQUALS("Fail on test 7!", "#t\n", result_7);
 
-    auto result_8 = scm->eval("test-result-8");
-    TSM_ASSERT_EQUALS("Fail to find rule 4!", "#t\n", result_8);
+// TODO: There may be a better way to handle choices and unordered
+//    auto result_8 = scm->eval("test-result-8");
+//    TSM_ASSERT_EQUALS("Fail to find rule 4!", "#t\n", result_8);
 
-    auto result_9 = scm->eval("test-result-9");
-    TSM_ASSERT_EQUALS("Fail to find rule 4!", "#t\n", result_9);
+//    auto result_9 = scm->eval("test-result-9");
+//    TSM_ASSERT_EQUALS("Fail to find rule 4!", "#t\n", result_9);
 
-    auto result_10 = scm->eval("test-result-10");
-    TSM_ASSERT_EQUALS("Fail to find rule 5!", "#t\n", result_10);
+//    auto result_10 = scm->eval("test-result-10");
+//    TSM_ASSERT_EQUALS("Fail to find rule 5!", "#t\n", result_10);
 
-    auto result_11 = scm->eval("test-result-11");
-    TSM_ASSERT_EQUALS("Fail to find rule 5!", "#t\n", result_11);
+//    auto result_11 = scm->eval("test-result-11");
+//    TSM_ASSERT_EQUALS("Fail to find rule 5!", "#t\n", result_11);
 
-    auto result_12 = scm->eval("test-result-1");
-    TSM_ASSERT_EQUALS("Fail to find rule 6!", "#t\n", result_12);
+//    auto result_12 = scm->eval("test-result-12");
+//    TSM_ASSERT_EQUALS("Fail to find rule 6!", "#t\n", result_12);
 
-    auto result_13 = scm->eval("test-result-1");
+    auto result_13 = scm->eval("test-result-13");
     TSM_ASSERT_EQUALS("Fail to find rule 7!", "#t\n", result_13);
+
+    auto result_14 = scm->eval("test-result-14");
+    TSM_ASSERT_EQUALS("Fail to find rule 8!", "#t\n", result_14);
+
+    auto result_15 = scm->eval("test-result-15");
+    TSM_ASSERT_EQUALS("Test 15 failed!", "#t\n", result_15);
+
+    auto result_16 = scm->eval("test-result-16");
+    TSM_ASSERT_EQUALS("Test 16 failed!", "#t\n", result_16);
 
     logger().info("END TEST: %s", __FUNCTION__);
 }

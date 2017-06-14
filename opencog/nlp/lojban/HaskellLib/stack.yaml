@@ -6,20 +6,18 @@ resolver: lts-8.5
 # Local packages, usually specified by relative directory name
 packages:
 - '.'
-- location: #/home/roman/OpenCog/Lojban/invertible-syntax/
-   git: https://github.com/rTreutlein/invertible-syntax
-   commit: 5185ee11763ffcef6fe121da53db2e0da773b56e
+- location:
+   git: https://github.com/rTreutlein/LojbanValidator
+   commit: cf4ba1fb96ea4555d90dac75390bf5c95b5a47b5
   extra-dep: true
 - location:
-   git: https://github.com/rTreutlein/partial-isomorphisms
-   commit: a8d1b86de0a1e1a85c20a25937f50a173b0a990d
+   git: https://github.com/rTreutlein/IsoSyntax
+   commit: 98a7ed254b3670f2869ee35cfae4a491a7376e99
   extra-dep: true
 
 # Packages to be pulled from upstream that are not in the resolver (e.g., acme-missiles-0.3)
 extra-deps: [opencog-atomspace-0.1.0.8
             ,list-tries-0.6.3]
-           #,invertible-syntax-0.2.2
-           #,partial-isomorphisms-0.2.2]
 
 # Override default flag values for local packages and extra-deps
 flags: {}

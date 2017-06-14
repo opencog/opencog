@@ -1,81 +1,92 @@
+# Boolean algebra rules
 ADD_GUILE_MODULE(FILES
-	implication-direct-evaluation-rule.scm
-	instantiation.scm
-	implication-instantiation-rule.scm
-	and-introduction-rule.scm
-	and-lambda-factorization-double-implication-rule.scm
-	and-simplification-rule.scm
-	deduction-rule.scm
-	equivalence-scope-distribution-rule.scm
-	equivalence-to-implication-rule.scm
-	formulas.scm
-	implication-and-lambda-factorization-rule.scm
-	implication-implicant-conjunction-rule.scm
-	implication-implicant-disjunction-rule.scm
-	implication-implicant-distribution-rule.scm
-	implication-scope-to-implication-rule.scm
-	implication-to-implication-scope-rule.scm
-	inversion-rule.scm
-	closed-lambda-introduction-rule.scm
-	predicate-lambda-evaluation-rule.scm
-	and-lambda-distribution-rule.scm
-	and-to-context.scm
-	contextualize.scm
-	extensional-similarity-evaluation-rule.scm
-	intensional-inheritance-evaluation-rule.scm
-	member-to-evaluation-rule.scm
-	or-simplification-rule.scm
-	abduction-rule.scm
-	and-as-1st-arg-inside-inheritance-link-rule.scm
-	and-as-2nd-arg-inside-inheritance-link-rule.scm
-	and-breakdown-rule.scm
-	and-elimination-rule.scm
-	compile-rules.scm
-	decontextualize.scm
-	evaluation-to-member-rule.scm
-	forall-implication-to-higher-order-rule.scm
-	forall-instantiation-rule.scm
-	implication-and-rule.scm
-	induction-rule.scm
-	inheritance-to-member-rule.scm
-	intensional-similarity-evaluation-rule.scm
-	member-to-inheritance-rule.scm
-	modus-ponens-rule.scm
-	not-introduction-rule.scm
-	not-elimination-rule.scm
-	not-simplification-rule.scm
-	ontological-inheritance-rule.scm
-	or-breakdown-rule.scm
-	or-introduction-rule.scm
-	or-elimination-rule.scm
-	or-evaluation-rule.scm
-	precise-modus-ponens-rule.scm
-	README.md
-	subset-evaluation-rule.scm
-	symmetric-modus-ponens-rule.scm
-	term-probability-rule.scm
-	transitive-similarity-rule.scm
-	and-evaluation-rule.scm
-	and-to-subset-rule1.scm
-	and-to-subset-rulen.scm
-	and-transformation-rule.scm
-	attraction-rule.scm
-	context-free-to-sensitive.scm
-	evaluation-implication-rule.scm
-	implication-introduction-rule.scm
-	inheritance-rule.scm
-	negated-subset-evaluation-rule.scm
-	or-transformation-rule.scm
-	similarity-rule.scm
-	fuzzy-conjunction-introduction-rule.scm
-	fuzzy-disjunction-introduction-rule.scm
-	negation-introduction-rule.scm
+	propositional/fuzzy-conjunction-introduction.scm
+	propositional/fuzzy-disjunction-introduction.scm
 	MODULE_DESTINATION "${DATADIR}/scm/opencog/pln/rules"
 )
 
-# TODO: The following rules are temporary hacks; remove them as the bugs are
-# fixed.
-ADD_GUILE_MODULE (FILES
-	temp-deduction-rule.scm
+# # Predicate logic rules
+# ADD_GUILE_MODULE(FILES
+# 	MODULE_DESTINATION "${DATADIR}/scm/opencog/pln/rules/predicate"
+# )
+
+# Term logic rules
+ADD_GUILE_MODULE(FILES
+	term/deduction.scm
+	term/formulas.scm
+	MODULE_DESTINATION "${DATADIR}/scm/opencog/pln/rules"
+)
+
+# Work in progress rules
+ADD_GUILE_MODULE(FILES
+	wip/implication-direct-evaluation.scm
+	wip/instantiation.scm
+	wip/implication-instantiation.scm
+	wip/and-introduction.scm
+	wip/and-lambda-factorization-double-implication.scm
+	wip/and-simplification.scm
+	wip/equivalence-scope-distribution.scm
+	wip/equivalence-to-implication.scm
+	wip/implication-and-lambda-factorization.scm
+	wip/implication-implicant-conjunction.scm
+	wip/implication-implicant-disjunction.scm
+	wip/implication-implicant-distribution.scm
+	wip/implication-scope-to-implication.scm
+	wip/implication-to-implication-scope.scm
+	wip/inversion.scm
+	wip/closed-lambda-introduction.scm
+	wip/predicate-lambda-evaluation.scm
+	wip/and-lambda-distribution.scm
+	wip/and-to-context.scm
+	wip/contextualize.scm
+	wip/extensional-similarity-evaluation.scm
+	wip/intensional-inheritance-evaluation.scm
+	wip/member-to-evaluation.scm
+	wip/or-simplification.scm
+	wip/abduction.scm
+	wip/and-as-1st-arg-inside-inheritance-link.scm
+	wip/and-as-2nd-arg-inside-inheritance-link.scm
+	wip/and-breakdown.scm
+	wip/and-elimination.scm
+	wip/compile-rules.scm
+	wip/decontextualize.scm
+	wip/evaluation-to-member.scm
+	wip/forall-implication-to-higher-order.scm
+	wip/forall-instantiation.scm
+	wip/implication-and.scm
+	wip/induction.scm
+	wip/inheritance-to-member.scm
+	wip/intensional-similarity-evaluation.scm
+	wip/member-to-inheritance.scm
+	wip/modus-ponens.scm
+	wip/not-introduction.scm
+	wip/not-elimination.scm
+	wip/not-simplification.scm
+	wip/ontological-inheritance.scm
+	wip/or-breakdown.scm
+	wip/or-introduction.scm
+	wip/or-elimination.scm
+	wip/or-evaluation.scm
+	wip/precise-modus-ponens.scm
+	README.md
+	wip/subset-evaluation.scm
+	wip/symmetric-modus-ponens.scm
+	wip/term-probability.scm
+	wip/transitive-similarity.scm
+	wip/and-evaluation.scm
+	wip/and-to-subset-rule1.scm
+	wip/and-to-subset-rulen.scm
+	wip/and-transformation.scm
+	wip/attraction.scm
+	wip/context-free-to-sensitive.scm
+	wip/evaluation-implication.scm
+	wip/implication-introduction.scm
+	wip/inheritance.scm
+	wip/negated-subset-evaluation.scm
+	wip/or-transformation.scm
+	wip/similarity.scm
+	wip/negation-introduction.scm
+	wip/temp-deduction.scm
+	wip/formulas.scm
 	MODULE_DESTINATION "${DATADIR}/scm/opencog/pln/rules"
 )

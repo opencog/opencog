@@ -31,42 +31,50 @@
         (cons '() '())
         (map word (string-split STR #\ ))))
 
-(define* (concept STR #:optional (var (choose-var-name)))
+(define* (concept STR #:optional (VAR (choose-var-name)))
   "Occurrence of a concept."
-  (cons '()  ; No variable declaration
+  (cons (list (TypedVariable (Glob VAR)
+                             (TypeSet (Type "WordNode")
+                                      (Interval (Number 1) (Number -1)))))
         (list (Evaluation (GroundedPredicate "scm: chatlang-concept?")
-                          (List (Glob var)
-                                (Concept STR))))))
+                          (List (Concept STR)
+                                (Glob VAR))))))
 
 (define (terms-to-atomese TERMS)
   "Helper function to convert a list of terms into atomese.
    For use of choices and negation."
   (map (lambda (t) (cond ((equal? 'word (car t))
-                          (Word (cdr t)))
+                          (WordNode (cdr t)))
                          ((equal? 'lemma (car t))
-                          (Word (get-lemma (cdr t))))
+                          (LemmaNode (get-lemma (cdr t))))
                          ((equal? 'phrase (car t))
-                          (List (map Word (string-split (cdr t) #\ ))))
+                          (PhraseNode (cdr t)))
                          ((equal? 'concept (car t))
                           (Concept (cdr t)))))
        TERMS))
 
-(define* (choices TERMS #:optional (var (choose-var-name)))
+(define* (choices TERMS #:optional (VAR (choose-var-name)))
   "Occurrence of a list of choices. Existence of either one of
    the words/lemmas/phrases/concepts in the list will be considered
    as a match."
-  (cons '()  ; No variable declaration
+  (cons (list (TypedVariable (Glob VAR)
+                             (TypeSet (Type "WordNode")
+                                      (Interval (Number 1) (Number -1)))))
         (list (Evaluation (GroundedPredicate "scm: chatlang-choices?")
-                          (List (Glob var)
-                                (List (terms-to-atomese TERMS)))))))
+                          (List (List (terms-to-atomese TERMS))
+                                (Glob VAR))))))
 
-(define (unordered-matching TERMS)
+(define* (unordered-matching TERMS #:optional (VAR (choose-var-name)))
   "Occurrence of a list of terms (words/lemmas/phrases/concepts)
    that can be matched in any orders."
   (fold (lambda (t lst)
                 (cons (append (car lst) (car t))
                       (append (cdr lst) (cdr t))))
-        (cons '() '())
+        (cons (list (TypedVariable (Glob VAR)
+                        (TypeSet (Type "WordNode")
+                                 (Interval (Number (length TERMS))
+                                           (Number (length TERMS))))))
+              '())
         (map (lambda (t)
           (cond ((equal? 'word (car t))
                  (word (cdr t)))
@@ -83,3 +91,12 @@
   (cons '()  ; No variable declaration
         (list (Evaluation (GroundedPredicate "scm: chatlang-negation?")
                           (List (terms-to-atomese TERMS))))))
+
+(define (wildcard LOWER UPPER)
+  "Occurrence of a wildcard that the number of atoms to be matched
+   can be restricted. -1 in the upper bound means infinity."
+  (let ((name (choose-var-name)))
+    (cons (list (TypedVariable (Glob name)
+                               (TypeSet (Type "WordNode")
+                                        (Interval (Number LOWER) (Number UPPER)))))
+          (list (Glob name)))))

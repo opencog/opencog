@@ -1,0 +1,685 @@
+#LyX 2.0 created this file. For more info see http://www.lyx.org/
+\lyxformat 413
+\begin_document
+\begin_header
+\textclass article
+\begin_preamble
+\usepackage{url} 
+\end_preamble
+\use_default_options false
+\maintain_unincluded_children false
+\language english
+\language_package default
+\inputencoding utf8
+\fontencoding global
+\font_roman times
+\font_sans helvet
+\font_typewriter courier
+\font_default_family default
+\use_non_tex_fonts false
+\font_sc false
+\font_osf false
+\font_sf_scale 100
+\font_tt_scale 100
+
+\graphics default
+\default_output_format default
+\output_sync 0
+\bibtex_command default
+\index_command default
+\paperfontsize default
+\spacing single
+\use_hyperref true
+\pdf_bookmarks true
+\pdf_bookmarksnumbered false
+\pdf_bookmarksopen false
+\pdf_bookmarksopenlevel 1
+\pdf_breaklinks true
+\pdf_pdfborder true
+\pdf_colorlinks true
+\pdf_backref false
+\pdf_pdfusetitle true
+\papersize default
+\use_geometry false
+\use_amsmath 2
+\use_esint 0
+\use_mhchem 0
+\use_mathdots 1
+\cite_engine basic
+\use_bibtopic false
+\use_indices false
+\paperorientation portrait
+\suppress_date false
+\use_refstyle 0
+\index Index
+\shortcut idx
+\color #008000
+\end_index
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation indent
+\paragraph_indentation default
+\quotes_language english
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+\tracking_changes false
+\output_changes false
+\html_math_output 0
+\html_css_as_file 0
+\html_be_strict false
+\end_header
+
+\begin_body
+
+\begin_layout Title
+PCA 
+\begin_inset Quotes eld
+\end_inset
+
+Neural
+\begin_inset Quotes erd
+\end_inset
+
+ Classifier
+\end_layout
+
+\begin_layout Author
+Linas Vepstas
+\end_layout
+
+\begin_layout Abstract
+This describes the classifier algorithm I plan to implement, to plce words
+ into grammatical categories.
+ Its simple, stright-forward, and a real CPU-cycle burner.
+ This is an algo I invented out of thin air, it resembles PCA/Markov in
+ the early stages, a neural net in the middle stages, and true dimensional
+ reduction in the last few steps.
+ This sounds fancy, but really, its really very simple.
+\end_layout
+
+\begin_layout Section*
+Introduction
+\end_layout
+
+\begin_layout Standard
+The next step in the language-learning process is what I've been calling
+ 
+\begin_inset Quotes eld
+\end_inset
+
+clustering
+\begin_inset Quotes erd
+\end_inset
+
+.
+ It really needs to be something more like factor analysis, or better yet,
+ sparse PCA.
+ Except that's not right, either.
+\end_layout
+
+\begin_layout Standard
+What is needed is a recognizer,as follows.
+ Consider 
+\begin_inset Formula $\overrightarrow{b}=\sum_{n}b_{n}w_{n}$
+\end_inset
+
+ be a vector, with the 
+\begin_inset Formula $w_{n}$
+\end_inset
+
+ being individual words, and the 
+\begin_inset Formula $b_{n}$
+\end_inset
+
+ being weights.
+ Plain-old Principal Component Analysis (PCA) computes real-valued weights
+ 
+\begin_inset Formula $b_{n}$
+\end_inset
+
+.
+ It's problematic, because potentially all of the weights are non-ero for
+ all of the words.
+ Sparse PCA computes real-valued weights 
+\begin_inset Formula $b_{n}$
+\end_inset
+
+ such that only some small number of them are non-zero.
+ This is much better.
+ But what is really needed is a classifier: a set of 
+\begin_inset Formula $b_{n}$
+\end_inset
+
+ that are either zero or one, indicating the membership of a word 
+\begin_inset Formula $w_{n}$
+\end_inset
+
+ in some class of words.
+ (Note, by the way, that a word might belong to multiple classes, for example,
+ according to its part-of-speech, or it's meaning.) 
+\end_layout
+
+\begin_layout Standard
+This suggests the following neural-netish variant on iterative PCA (entirely
+ of my own design, cribbed from nowhere at all, just popped into my head
+ as I sit still immobilized.)
+\end_layout
+
+\begin_layout Enumerate
+Start with 
+\begin_inset Formula $b_{n}=1/\sqrt{\left|w\right|}$
+\end_inset
+
+ where 
+\begin_inset Formula $\left|w\right|$
+\end_inset
+
+ is the number of unique words.
+ This starting point is a unit-length vector, i.e.
+ 
+\begin_inset Formula $\left|\overrightarrow{b}\right|=1$
+\end_inset
+
+.
+ Its convenient to change notation, here, and write 
+\begin_inset Formula $b(w)$
+\end_inset
+
+ for the value of 
+\begin_inset Formula $\overrightarrow{b}$
+\end_inset
+
+ at word 
+\begin_inset Formula $w$
+\end_inset
+
+.
+ That is, 
+\begin_inset Formula $b(w_{n})=b_{n}$
+\end_inset
+
+ is the same thing.
+ 
+\end_layout
+
+\begin_layout Enumerate
+Let 
+\begin_inset Formula $p(w,d)$
+\end_inset
+
+ be the frequency matrix, as defined before: 
+\begin_inset Formula $p(w,d)=N(w,d)/N(*,*)$
+\end_inset
+
+, and where 
+\begin_inset Formula $N(w,d)$
+\end_inset
+
+ is the number of times word 
+\begin_inset Formula $w$
+\end_inset
+
+ has been observed with disjunct 
+\begin_inset Formula $d$
+\end_inset
+
+.
+ As noted earlier, 
+\begin_inset Formula $N(w,d)$
+\end_inset
+
+ is very large and very sparse: typically 
+\begin_inset Formula $200K\times4M$
+\end_inset
+
+ in recent datasets, with only 1 entry out of 
+\begin_inset Formula $2^{15}$
+\end_inset
+
+ being non-zero.
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+I plan to send out the revised, expanded statistical analysis 
+\begin_inset Quotes eld
+\end_inset
+
+real soon now
+\begin_inset Quotes erd
+\end_inset
+
+.
+\end_layout
+
+\end_inset
+
+ Compute the double-sum 
+\begin_inset Formula 
+\[
+s(v)=\left[PP^{T}b\right](v)=\sum_{d}p(v,d)\sum_{w}p(w,d)b(w)
+\]
+
+\end_inset
+
+which is basically a pair of dot products.
+ Its still a large, time-consuming computation, even for sparse vectors.
+\end_layout
+
+\begin_layout Enumerate
+Normalize: set 
+\begin_inset Formula $\overrightarrow{b}\leftarrow\overrightarrow{s}/\left|\overrightarrow{s}\right|$
+\end_inset
+
+ so that 
+\begin_inset Formula $\overrightarrow{b}$
+\end_inset
+
+ is of unit length.
+\end_layout
+
+\begin_layout Enumerate
+Repeat these steps 
+\begin_inset Formula $k$
+\end_inset
+
+ times: go to step 2 and run the summation again.
+ The repetition here is the 'power iteration' or the 'von Mises iteration'
+ method for computing the largest eigenvalue of 
+\begin_inset Formula $\left[PP^{T}\right]$
+\end_inset
+
+.
+ It is not guaranteed to converge, and if it does, it might not do so quickly.
+ But we deal with this in the next step, so its sufficient to keep 
+\begin_inset Formula $k$
+\end_inset
+
+ small, just enough to get a trend going.
+ Another way to think of this is as a Markov process (specifically, a Markov
+ chain).
+ That is, the matrix 
+\begin_inset Formula $\left[PP^{T}\right]$
+\end_inset
+
+ will behave essentially as a Markov chain, and iteration on it just identifies
+ the primary Perron-Frobenius stable state (step 3 makes it Markovian, by
+ preserving to total probability measure).
+ That is, 
+\begin_inset Formula $\left[PP^{T}\right]$
+\end_inset
+
+ defines a weighted adjeaceny matrix for a graph, and iteration creates
+ a measure-preserving process (walk) on this graph.
+\end_layout
+
+\begin_layout Enumerate
+After the above repetitions, apply some standard neural-net sigmoid function
+ to 
+\begin_inset Formula $\overrightarrow{b}$
+\end_inset
+
+.
+ That is, set 
+\begin_inset Formula $b(w)\leftarrow\sigma(b(w))$
+\end_inset
+
+ for some sigmoid.
+ This has the effect of driving some of the elements to zero, and others
+ to one.
+\end_layout
+
+\begin_layout Enumerate
+Repeat this 
+\begin_inset Formula $m$
+\end_inset
+
+ times: go to step 2, and repeat steps 2-5.
+ Viewing this as a dynamical system, the effect of the sigmoid function
+ is to force the system into a block-diagonal form, with the vector 
+\begin_inset Formula $\overrightarrow{b}$
+\end_inset
+
+ identifying a highly-connected block.
+ Another way to look at this is as a graph factorization algorithm: the
+ vector 
+\begin_inset Formula $\overrightarrow{b}$
+\end_inset
+
+ is identifiying a well-connected subgraph, which is only weakly connected
+ to the rest of the graph.
+ The vector (viewed as a measure-preserving dynamical system) is spending
+ most of its time in one particular block.
+ Again, 
+\begin_inset Formula $\left[PP^{T}\right]^{k}$
+\end_inset
+
+, the 
+\begin_inset Formula $k$
+\end_inset
+
+-th power iterated matrix from step 4, can be thought of as a surrogate
+ for a weighted graph adjacency matrix.
+ A third way of thinking of this is as an 
+\begin_inset Formula $m$
+\end_inset
+
+-layer neural net, with the link weights between one layer and the next
+ being given by 
+\begin_inset Formula $\left[PP^{T}\right]^{k}$
+\end_inset
+
+.
+ All three ways of looking at this are essentially equivalent: a measure-preserv
+ing dynamical system, a chatoic and mixing process on a graph, or as an
+ 
+\begin_inset Formula $m$
+\end_inset
+
+-layer neural net.
+ Pick your favorite.
+\end_layout
+
+\begin_layout Enumerate
+Classify.
+ Pass the vector 
+\begin_inset Formula $\overrightarrow{b}$
+\end_inset
+
+ through the step function, i.e.
+ 
+\begin_inset Formula $b(w)\leftarrow\Theta(b(w))$
+\end_inset
+
+ where 
+\begin_inset Formula $\Theta(x)=0$
+\end_inset
+
+ if 
+\begin_inset Formula $x<1/2$
+\end_inset
+
+ and 
+\begin_inset Formula $\Theta(x)=1$
+\end_inset
+
+ if 
+\begin_inset Formula $x>1/2$
+\end_inset
+
+.
+ The step function is a super-sharep sigmoid.
+ This step identifies and isolates an active, well-connected subgraph of
+ 
+\begin_inset Formula $\left[PP^{T}\right]$
+\end_inset
+
+.
+ It identifes a square block, of dimension 
+\begin_inset Formula $\left|b\right|\times\left|b\right|$
+\end_inset
+
+ where 
+\begin_inset Formula $\left|b\right|$
+\end_inset
+
+ is the total number of non-zero entries in this final 
+\begin_inset Formula $\overrightarrow{b}$
+\end_inset
+
+.
+ To belabor the point: the block-matrix is explicitly 
+\begin_inset Formula 
+\[
+B(v,w)=b(v)b(w)\sum_{d}p(v,d)p(w,d)
+\]
+
+\end_inset
+
+The non-zero elements of this final 
+\begin_inset Formula $\overrightarrow{b}$
+\end_inset
+
+ identify a class of words that can be considered to be grammatically similar
+ or identical.
+ This is the 
+\begin_inset Quotes eld
+\end_inset
+
+clustering
+\begin_inset Quotes erd
+\end_inset
+
+ step.
+\end_layout
+
+\begin_layout Enumerate
+Associated with this class of words is a disjunct set, the 
+\begin_inset Quotes eld
+\end_inset
+
+average disjunct
+\begin_inset Quotes erd
+\end_inset
+
+ for the class.
+ It can be taken to be the set 
+\begin_inset Formula $\left\{ d|0<\sum_{w}b(w)N(w,d)\right\} $
+\end_inset
+
+.
+ The observed counts associated with this set can be taken to be 
+\begin_inset Formula $N(b,d)=\sum_{w}b(w)N(w,d)$
+\end_inset
+
+ and the frequencies similarly: 
+\begin_inset Formula $p(b,d)=\sum_{w}b(w)p(w,d)$
+\end_inset
+
+.
+ From here-on, the set of words 
+\begin_inset Formula $b\equiv\{w|0\ne b(w)\}$
+\end_inset
+
+ can be treated as if it was an ordinary word, behaving like any other,
+ with the indicated disjuncts, counts and frequencies.
+\end_layout
+
+\begin_layout Enumerate
+Since words can have have multiple meanings, or rather, multiple different
+ kinds of grammatical behaviors based on thier part of speech, the identified
+ words need to be subtracted, en block, from the matrix 
+\begin_inset Formula $p(w,d)$
+\end_inset
+
+, and then the process repeated, to identify another class of words.
+ Put another way, if 
+\begin_inset Formula $b$
+\end_inset
+
+ is to be added to the set of words, as 
+\begin_inset Quotes eld
+\end_inset
+
+just another word
+\begin_inset Quotes erd
+\end_inset
+
+, then the frequencies 
+\begin_inset Formula $p(b,d)$
+\end_inset
+
+ have to be subtracted from the matrix 
+\begin_inset Formula $P$
+\end_inset
+
+, and shunted to this new 
+\begin_inset Quotes eld
+\end_inset
+
+word
+\begin_inset Quotes erd
+\end_inset
+
+, so as not to loose the overall normalization.
+ That is, one must preserve the identity 
+\begin_inset Formula $\sum_{w,d}p(w,d)=1$
+\end_inset
+
+.
+ So define, in the next iteration 
+\begin_inset Formula 
+\[
+p(w,d)\leftarrow\begin{cases}
+p(b,d) & \mbox{ if }w=b\\
+p(w,d)-b(w)p(b,d) & \mbox{ otherwise}
+\end{cases}
+\]
+
+\end_inset
+
+(Hmmm.
+ This may not be right, its late and I'm tired).
+ This still sums to the identity except that now some of the values might
+ go negative, and we don't want that.
+ 
+\end_layout
+
+\begin_layout Enumerate
+And so we get to what should be called step zero: We want to truncate, and
+ discard the negative entries.
+ This should have been carried out as an actual step 0: a pre-conditioning
+ of the matrix: some noise filtering, e.g.
+ discarding all words that were observed less than a handful of times, discading
+ rare or preposterious disjuncts.
+ Pre-conditioning in this way will have the effect of removing some (possibly
+ many) of the words from the matrix: the size of the matrix shrinks.
+ This is the step where the actual dimensional reduction takes place: the
+ size of the set of words is shrinking, as they get classified into sets.
+ 
+\end_layout
+
+\begin_layout Enumerate
+Go to step 0 and repeat, until the preconditionaing and noise-removal has
+ left behind an empty matrix (or alternately, a matrix where all words have
+ been classified into some group).
+ So, for example, words which have only one part-of-speech or meaning would
+ (hopefully should) get classified after just one step; words that are more
+ complex, and have two parts of speech, would require at least two iterations.
+ This is perhaps optimistic; I expect dozens of iterations to get anything
+ vaguely accurate.
+\end_layout
+
+\begin_layout Enumerate
+There's one more step.
+ After the formation of the class 
+\begin_inset Formula $b$
+\end_inset
+
+, we arrive at a situation where no (pseudo-)connectors connect to 
+\begin_inset Formula $b$
+\end_inset
+
+ directly.
+ Instead, all disjuncts connect to words inside of 
+\begin_inset Formula $b$
+\end_inset
+
+.
+ But this is a problem: we don't know if any given connector actually connects
+ to some 
+\begin_inset Formula $w\in b$
+\end_inset
+
+ or if it connects to the same 
+\begin_inset Formula $w$
+\end_inset
+
+, but outside of 
+\begin_inset Formula $b$
+\end_inset
+
+.
+ (e.g.
+ if 
+\begin_inset Formula $b$
+\end_inset
+
+ are nouns, then does 
+\begin_inset Quotes eld
+\end_inset
+
+saw+
+\begin_inset Quotes erd
+\end_inset
+
+ connect to 
+\begin_inset Quotes eld
+\end_inset
+
+saw
+\begin_inset Quotes erd
+\end_inset
+
+ the noun, or 
+\begin_inset Quotes eld
+\end_inset
+
+saw
+\begin_inset Quotes erd
+\end_inset
+
+ the verb?) Thus, after some small number of iterations of step 11, there
+ needs to be a re-parse of the entire text, using these newly discovered
+ classes of words.
+ 
+\end_layout
+
+\begin_layout Standard
+That's it.
+ I think this should work fairly well.
+ Clearly, there are many nested loops, and so this is potentially a very
+ time-consuming computation.
+ The number of iterations 
+\begin_inset Formula $k$
+\end_inset
+
+ and 
+\begin_inset Formula $m$
+\end_inset
+
+ need to be kept small, and the classification in step 11 needs to be kept
+ greedy, because step 12 is expensive.
+ An alternate strategy is to brutally precondition 
+\begin_inset Formula $p(w,d)$
+\end_inset
+
+ to make it as small as possible; but this risks throwing out the baby with
+ the bathwater: early on, we want to cluster together the rare, obscure,
+ unused words as best as possible into arge bins, and then devote large
+ CPU resources to correctly classifying the remaining much smaller set of
+ verbs and prepositions, which we know, 
+\emph on
+a priori,
+\emph default
+ to be complex and difficult, due to thier grammatical variability.
+\end_layout
+
+\begin_layout Section*
+The End
+\end_layout
+
+\begin_layout Standard
+\begin_inset CommandInset bibtex
+LatexCommand bibtex
+bibfiles "lang"
+options "alpha"
+
+\end_inset
+
+
+\end_layout
+
+\end_body
+\end_document

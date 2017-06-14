@@ -1,4 +1,6 @@
-(define-module (opencog nlp chatlang))
+(define-module (opencog nlp chatlang)
+  #:use-module (opencog)
+  #:use-module (opencog openpsi))
 
 (use-modules (opencog))
 

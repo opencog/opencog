@@ -5,7 +5,7 @@
 (use-modules (opencog pln))
 (use-modules (opencog rule-engine))
 ; FIXME: Doesn't return anything when confidence is low, don't use for now
-;(load-from-path "opencog/pln/rules/implication-direct-evaluation-rule.scm")
+;(load-from-path "opencog/pln/rules/implication-direct-evaluation.scm")
 
 ;;;;;;;;;;;;;;;;;;;;;
 ;; Extra knowledge ;;
@@ -341,8 +341,8 @@
 (define (configure-pln-rbs-1)
     (define rb (ConceptNode "r2l-pln-2"))
 
-    (pln-load-rules "deduction")
-    (pln-load-rules "abduction")
+    (pln-load-rules "term/deduction")
+    (pln-load-rules "wip/abduction")
 
     ; NOTE: The number has no relevance in r2l-mode
     (ure-define-rbs rb 0)

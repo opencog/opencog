@@ -13,11 +13,11 @@
 ; Edit the below, setting it to the desired langauge.
 ; This has almost no effect, other than to set the cogserver
 ; port-number and the prompt-style.
-(start-cogserver "opencog-en.conf")
+(start-cogserver "opencog-mst-en.conf")
 
 ; Open the database.
 ; Edit the below, setting the database name, user and password.
-(sql-open "postgres:///en_pairs?user=ubuntu&password=asdf")
+(sql-open "postgres:///en_pairs_ttwo_mst?user=ubuntu&password=asdf")
 
 ; Load up the words
 (display "Fetch all words from database. This may take several minutes.\n")
@@ -25,7 +25,15 @@
 
 ; Load up the word-pairs -- this can take over half an hour!
 (display "Fetch all word-pairs. This may over half-an-hour!\n")
-(fetch-any-pairs)
+
+; The object which will be providing pair-counts for us.
+; We can also do MST parsing with other kinds of pair-count objects,
+; for example, the clique-pairs, or the distance-pairs.
+(define pair-obj (make-any-link-api))
+(pair-obj 'fetch-pairs)
+
+; Print the sql stats
+(sql-stats)
 
 ; Clear the sql cache and the stats counters
 (sql-clear-cache)

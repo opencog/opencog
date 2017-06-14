@@ -28,8 +28,8 @@
 
 ;; Load PLN rules
 (add-to-load-path "../../../opencog/pln/rules")
-(pln-load-rules "deduction")
-(pln-load-rules "abduction")
+(pln-load-rules "term/deduction")
+(pln-load-rules "wip/abduction")
 
 ;; Add knowledge to deal with SOG Predicates (Simple Observational
 ;; Grounded Predicates). Here we are gonna assume that all predicates
