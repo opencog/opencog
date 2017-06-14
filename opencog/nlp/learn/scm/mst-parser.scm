@@ -251,23 +251,23 @@
 		)
 	)
 
-	; Given a list of words, return a list of two items: first, the cost
-	; and second, the word-pair with that best cost (highest MI, in this
-	; case). The search is made over word pairs having the CNTOBJ mi-source.
+	; Given a list of numas, return a list of two items: first, the cost
+	; and second, the numa-pair with that best cost (highest MI, in this
+	; case). The search is made over atom pairs having the CNTOBJ mi-source.
 	;
 	; to-do: Should we use scheme values for the return value?
-	(define (pick-best-cost-pair CNTOBJ word-list)
+	(define (pick-best-cost-pair CNTOBJ numa-list)
 
-		; scan from left-most word to the right.
+		; scan from left-most numa to the right.
 		(define best-left (pick-best-cost-left-pair CNTOBJ
-				(car word-list) (cdr word-list)))
-		(if (eq? 2 (length word-list))
-			; If the list is two words long, we are done.
+				(car numa-list) (cdr numa-list)))
+		(if (eq? 2 (length numa-list))
+			; If the list is two numas long, we are done.
 			best-left
-			; else the list is longer than two words. Pick between two
-			; possibilities -- those that start with left-most word, and
+			; else the list is longer than two numas. Pick between two
+			; possibilities -- those that start with left-most numa, and
 			; something else.
-			(let ((best-rest (pick-best-cost-pair CNTOBJ (cdr word-list))))
+			(let ((best-rest (pick-best-cost-pair CNTOBJ (cdr numa-list))))
 				(if (< (car best-left) (car best-rest))
 					best-rest
 					best-left
