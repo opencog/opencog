@@ -45,14 +45,15 @@ namespace PatternMining
 {
 #define FLOAT_MIN_DIFF 0.00001
 #define FREQUENCY_TOP_THRESHOLD 0.10
+#define FREQUENCY_BOTTOM_THRESHOLD 0.90
 #define SURPRISINGNESS_I_TOP_THRESHOLD 0.20
 #define SURPRISINGNESS_II_TOP_THRESHOLD 0.40
-#define OUTPUT_SURPRISINGNESS_CALCULATION_TO_FILE 1
-#define USE_QUERY_ENTITY_COUNT 1
+#define OUTPUT_SURPRISINGNESS_CALCULATION_TO_FILE 0
+#define USE_QUERY_ENTITY_COUNT 0
 #define USE_ABS_SURPRISINGNESS 0
 #define LINE_INDENTATION "  "
 
-#define PATTERN_VARIABLENODE_TYPE VARIABLE_NODE
+#define PATTERN_VARIABLENODE_TYPE PATTERN_VARIABLE_NODE
 
 struct _non_ordered_pattern
 {
@@ -417,9 +418,9 @@ public:
 
     void OutPutStaticsToCsvFile(unsigned int n_gram);
 
-    void OutPutLowFrequencyHighSurprisingnessPatternsToFile(vector<HTreeNode*> &patternsForThisGram, unsigned int n_gram);
+    void OutPutLowFrequencyHighSurprisingnessPatternsToFile(vector<HTreeNode*> &patternsForThisGram, unsigned int n_gram, unsigned int max_frequency_index);
 
-    void OutPutHighFrequencyHighSurprisingnessPatternsToFile(vector<HTreeNode*> &patternsForThisGram, unsigned int n_gram, unsigned int min_frequency);
+    void OutPutHighFrequencyHighSurprisingnessPatternsToFile(vector<HTreeNode*> &patternsForThisGram, unsigned int n_gram, unsigned int min_frequency_index);
 
     void OutPutHighSurprisingILowSurprisingnessIIPatternsToFile(vector<HTreeNode*> &patternsForThisGram, unsigned int n_gram, float min_surprisingness_I, float max_surprisingness_II);
 
