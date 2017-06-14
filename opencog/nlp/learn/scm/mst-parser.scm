@@ -194,8 +194,8 @@
 	; A "numa" is a numbered atom, viz a scheme-pair (number . atom)
 	;
 	; Given a left-numa, and a list of numas to the right of it, pick
-	; an numa from the list that has the highest-MI attachment to the left
-	; numa.  Return a list containing that cost and the selected numa-pair
+	; an atom from the list that has the highest-MI attachment to the left
+	; atom.  Return a list containing that cost and the selected numa-pair
 	; (i.e. the specified left-numa, and the chosen right-numa).
 	; The search is made over atom pairs from the CNTOBJ mi-source.
 	;
@@ -222,32 +222,32 @@
 		)
 	)
 
-	; Given a right-word, and a list of words to the left of it, pick
-	; a word from the list that has the highest-MI attachment to the
-	; right word.  Return a list containing that cost and the selected
-	; word-pair (i.e. the chosen left-word, and the specified right-word).
-	; The search is made over word pairs from the CNTOBJ mi-source.
+	; Given a right-numa, and a list of numas to the left of it, pick
+	; an atom from the list that has the highest-MI attachment to the
+	; right atom.  Return a list containing that cost and the selected
+	; numa-pair (i.e. the chosen left-numa, and the specified right-numa).
+	; The search is made over atom pairs from the CNTOBJ mi-source.
 	;
-	; The right-word is assumed to be an scheme-pairl, consisting of an ID, and
-	; a WordNode; thus the WordNode is the cdr of the right-word.
-	; The word-list is likewise assumed to be a list of numbered WordNodes.
+	; The right-numa is assumed to be an scheme-pair, consisting of an ID,
+	; and an atom; thus the atom is the cdr of the right-numa. The
+	; numa-list is likewise assumed to be a list of numbered atoms.
 	;
 	; to-do: might be better to use values for the return value....
-	(define (pick-best-cost-right-pair CNTOBJ right-word word-list)
+	(define (pick-best-cost-right-pair CNTOBJ right-numa numa-list)
 		(fold
-			(lambda (left-word max-pair)
+			(lambda (left-numa max-pair)
 				(define max-mi (car max-pair))
 				(define best-pair (cdr max-pair))
-				(define cur-mi (safe-pair-mi CNTOBJ (cdr left-word) (cdr right-word)))
+				(define cur-mi (safe-pair-mi CNTOBJ (cdr left-numa) (cdr right-numa)))
 				; Use less-or-equal, so that a shorter dependency
 				; length is always prefered.
 				(if (<= max-mi cur-mi)
-					(list cur-mi (list left-word right-word))
+					(list cur-mi (list left-numa right-numa))
 					max-pair
 				)
 			)
 			(list bad-mi '())
-			word-list
+			numa-list
 		)
 	)
 
