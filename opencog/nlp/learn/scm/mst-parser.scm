@@ -168,7 +168,7 @@
 ; Ramon Ferrer-i-Cancho (2013) “Hubiness, length, crossings and their
 ; relationships in dependency trees”, ArXiv 1304.4086
 
-(define-public (mst-parse-list LLOBJ STR-LIST)
+(define-public (mst-parse-atom-seq LLOBJ ATOM-LIST)
 
 	; In case LLOBJ does not provide a cost-source directly.
 	(define mi-source (add-pair-freq-api LLOBJ))
@@ -176,18 +176,18 @@
 	; Define a losing score.
 	(define bad-mi -1e30)
 
-	; Given a list of strings, create a numbered list of word-nodes.
+	; Given a list of atoms, create a numbered list of atoms.
 	; The numbering provides a unique ID, needed for the graph algos.
-	; i.e. if the same word appears twice in a sentence, we need to
-	; distinguish these two.  The id does this.
-	(define (str-list->numbered-word-list word-strs)
+	; i.e. if the same atom appears twice in a sequence, we need to
+	; distinguish these multiple occurances.  The id does this.
+	(define (atom-list->numbered-list ATOMS)
 		(define cnt 0)
 		(map
-			(lambda (str)
+			(lambda (ato)
 				(set! cnt (+ cnt 1))
-				(list cnt (WordNode str))
+				(list cnt ato)
 			)
-			word-strs
+			ATOMS
 		)
 	)
 	; Given a left-word, and a list of words to the right of it, pick
@@ -475,17 +475,18 @@
 	)
 
 	(let* (
-			; Number the words in sentence-order.
-			(word-list (str-list->numbered-word-list STR-LIST))
+			; Number the atoms in sequence-order.
+			(numbered-list (atom-list->numbered-list ATOM-LIST))
 
-			; Find a pair of words connected with the largest MI in the sentence.
-			(start-cost-pair (pick-best-cost-pair mi-source word-list))
+			; Find a pair of atoms connected with the largest MI
+			; in the sequence.
+			(start-cost-pair (pick-best-cost-pair mi-source numbered-list))
 
-			; Add both of these words to the connected-list.
+			; Add both of these atoms to the connected-list.
 			(nected-list (cadr start-cost-pair)) ; discard the MI
 
-			; remove both of these words from the word-list
-			(smaller-list (set-sub word-list nected-list))
+			; Remove both of these atoms from the atom-list
+			(smaller-list (set-sub numbered-list nected-list))
 		)
 		(*pick-em mi-source smaller-list (list start-cost-pair) nected-list)
 	)
@@ -496,12 +497,15 @@
 	; Tokenize the sentence into a list of words.
 	(define word-strs (tokenize-text plain-text))
 
+	; Create a sequence of atoms from the sequence of strings.
+	(define word-list (map (lambda (str) (WordNode str)) word-strs))
+
 	; Define where the costs are coming from.
 	(define mi-source (make-any-link-api))
 	; (define mi-source (make-clique-pair-api))
 
 	; Process the list of words.
-	(mst-parse-list mi-source word-strs)
+	(mst-parse-atom-seq mi-source word-list)
 )
 
 ; ---------------------------------------------------------------------
@@ -557,7 +561,7 @@
 ; (mst-parse-text "faire un test")
 ; (mst-parse-text "Elle jouit notamment du monopole de la restauration ferroviaire")
 ;
-; (define my-word-list (str-list->numbered-word-list
+; (define my-word-list (atom-list->numbered-list
 ;      (tokenize-text "Elle jouit notamment du monopole de la restauration ferroviaire")))
 ; answer: du monopole 5.786411762237549
 ;      (tokenize-text "faire un test entre quelques mots")))
