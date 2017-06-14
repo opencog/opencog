@@ -168,11 +168,10 @@
 ; Ramon Ferrer-i-Cancho (2013) “Hubiness, length, crossings and their
 ; relationships in dependency trees”, ArXiv 1304.4086
 
-(define-public (mst-parse-list STR-LIST)
+(define-public (mst-parse-list LLOBJ STR-LIST)
 
-	; the source of where we will get MI from
-	(define mi-source (add-pair-freq-api (make-any-link-api)))
-	; (define mi-source (add-pair-freq-api (make-clique-pair-api)))
+	; In case LLOBJ does not provide a cost-source directly.
+	(define mi-source (add-pair-freq-api LLOBJ))
 
 	; Define a losing score.
 	(define bad-mi -1e30)
@@ -497,8 +496,12 @@
 	; Tokenize the sentence into a list of words.
 	(define word-strs (tokenize-text plain-text))
 
+	; Define where the costs are coming from.
+	(define mi-source (make-any-link-api))
+	; (define mi-source (make-clique-pair-api))
+
 	; Process the list of words.
-	(mst-parse-list word-strs)
+	(mst-parse-list mi-source word-strs)
 )
 
 ; ---------------------------------------------------------------------
