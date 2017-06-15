@@ -88,7 +88,10 @@
 				))))
 
 	; Main entry point for the recursive splitter
-	(define (strip-affix word) (strip-sufli word suffix-list))
+	(define (strip-affix word)
+		(if (< 0 (string-length word))
+			(strip-sufli word suffix-list)
+			'()))
 
 	; The left-wall indicates the start of the sentence, and
 	; is used to link to the head-verb, head-noun of the sentence.
