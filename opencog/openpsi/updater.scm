@@ -556,6 +556,8 @@
 				new-value))
 
 		(psi-set-value! target new-value)
+		; return atom for ExOutLink requirement
+		(TrueLink)
 	)
 )
 
@@ -586,6 +588,8 @@
 			(psi-set-value! var val)))
 
 	;(format #t "~a: ~a\n" var val)
+	; return atom for ExOutLink requirement
+	(TrueLink)
 )
 
 ; Adjust openpsi variable by adding noise
@@ -604,6 +608,8 @@
 	(set! val (min (max 0 val) 1))
 	(psi-set-value! var val)
 	;(format #t "post-noise ~a: ~a\n" var val)
+	; return atom for ExOutLink requirement
+	(TrueLink)
 )
 
 ; Return random offset based on cycle frequence
