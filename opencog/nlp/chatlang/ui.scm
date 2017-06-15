@@ -71,6 +71,12 @@
         ((not (equal? #f (string-match "^\\*[0-9]+" TXT)))
          (match:substring (string-match "^\\*[0-9]+" TXT)))
         ((string-prefix? "*" TXT) "*")
+        ; For handling variables
+        ((string-prefix? "_~" TXT)
+         (match:substring (string-match "^_~[a-zA-Z0-9]+" TXT)))
+        ((not (equal? #f (string-match "^_ *\\[" TXT)))
+         (match:substring (string-match "^_ *\\[.+\\]" TXT)))
+        ((string-prefix? "_*" TXT) "_*")
         ; For the rest -- concept and lemma,
         ; just return the whole term
         (else (extract TXT))))
@@ -138,18 +144,22 @@
           ((not (equal? #f (string-match "^\\*~[0-9]+" t)))
            (cons 'wildcard (cons 0
              (substring (match:substring (string-match "^\\*~[0-9]+" t)) 2))))
-         ; Wildcard -- "exactly"
+          ; Wildcard -- "exactly"
           ((not (equal? #f (string-match "^\\*[0-9]+" t)))
            (let ((n (substring (match:substring (string-match "^\\*[0-9]+" t)) 1)))
                 (cons 'wildcard (cons n n))))
           ; Wildcard -- "zero or more"
           ((string-prefix? "*" t)
            (cons 'wildcard (cons 0 -1)))
-          ; TODO
-          ; ----
-          ; Variable
-          ; ((equal? "_" t)
-          ;  (string-append "(variable _)"))
+          ; Variable -- concept
+          ((string-prefix? "_~" t)
+           (cons 'variable (interpret-terms (list (substring t 1)))))
+          ; Variable -- choices
+          ((not (equal? #f (string-match "^_ *\\[" t)))
+           (cons 'variable (interpret-terms (list (string-trim (substring t 1))))))
+          ; Variable -- wildcard
+          ((string-prefix? "_*" t)
+           (cons 'variable (interpret-terms (list (substring t 1)))))
           ; Part of speech (POS)
           ; ((not (equal? #f (string-match "[_a-zA-Z]+~" t)))
           ;  (let ((ss (string-split t #\~)))
