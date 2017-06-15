@@ -31,7 +31,7 @@
 ;
 (use-modules (srfi srfi-1))
 (use-modules (srfi srfi-11))
-(use-modules (opencog analysis))
+(use-modules (opencog network))
 
 ; ---------------------------------------------------------------------
 ;
@@ -128,6 +128,7 @@
 			(word-list (string-split pad-text #\ ))
 			(strip-list (map strip-affix word-list))
 		)
+		; (format #t "strp-list is ~A\n" strip-list)
 		(concatenate (cons (list left-wall) strip-list))
 	)
 )

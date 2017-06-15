@@ -8,11 +8,11 @@
 ; OVERVIEW
 ; --------
 ; The overall algo is described in the language diary.  The bulk of the
-; computation is performed in the (opencog analysis) toolkit.
+; computation is performed in the (opencog matrix) toolkit.
 ;
 ; ---------------------------------------------------------------------
 
-(use-modules (opencog) (opencog analysis))
+(use-modules (opencog) (opencog matrix))
 
 (define (do-it)
 	(let ((pca (make-pseudo-cset-api))
