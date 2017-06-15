@@ -193,6 +193,10 @@
     (close-pipe port)
     (if (string-null? lemma) WORD lemma)))
 
+(define (is-lemma? WORD)
+  "Check if WORD is a lemma."
+  (equal? WORD (get-lemma WORD)))
+
 (define (get-members CONCEPT)
   "Get the members of a concept. VariableNodes will be ignored, and
    recursive calls will be made in case there are nested concepts."
