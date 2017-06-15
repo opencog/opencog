@@ -99,15 +99,12 @@
 
 ; ---------------------------------------------------------------------
 
-(define (safe-pair-mi CNTOBJ left-atom right-atom)
+(define-public (make-score-fn LLOBJ METHOD)
 "
-  safe-pair-mi CNTOBJ LEFT-ATOM RIGHT-ATOM --
-         Return the mutual information for a pair of atoms. The
-  returned value will be in bits (i.e. using log_2 in calculations)
-
-  The source of mutual information is given by CNTOBJ, which should
-  be an object implementing a method called 'pair-fmi, such that
-  it returns the MI for that pair.
+  make-score-fn LLOBJ METHOD -- Create a function that returns a
+  score for a pair of atoms, the score being given by invoking
+  METHOD on LLOBJ.  The LLOBJ must provide the METHOD, of course,
+  and also the 'pair-type method, so that pairs can be assembled.
 
   If either atom is nil, or if the atom-pair cannot be found, then a
   default value of -1e40 is returned.
@@ -115,14 +112,17 @@
 	; Define a losing score.
 	(define bad-mi -1e40)
 
-	; We take care here to not actually create the atoms,
-	; if they aren't already in the atomspace. cog-link returns
-	; nil if the atoms can't be found.
-	(define wpr
-		(if (and (not (null? left-atom)) (not (null? right-atom)))
-			(cog-link (CNTOBJ 'pair-type) left-atom right-atom)
-			'()))
-	(if (null? wpr) bad-mi (CNTOBJ 'pair-fmi wpr))
+	(lambda (left-atom right-atom)
+
+		; We take care here to not actually create the atoms,
+		; if they aren't already in the atomspace. cog-link returns
+		; nil if the atoms can't be found.
+		(define wpr
+			(if (and (not (null? left-atom)) (not (null? right-atom)))
+				(cog-link (LLOBJ 'pair-type) left-atom right-atom)
+				#f))
+		(if wpr (LLOBJ METHOD wpr) bad-mi)
+	)
 )
 
 ; ---------------------------------------------------------------------
@@ -514,8 +514,10 @@
 
 	(define mi-source (add-pair-freq-api pair-obj))
 
+	(define scorer (make-score-fn mi-source 'pair-fmi))
+
 	; Process the list of words.
-	(mst-parse-atom-seq mi-source word-list)
+	(mst-parse-atom-seq scorer word-list)
 )
 
 ; ---------------------------------------------------------------------
