@@ -99,18 +99,17 @@
 
 ; ---------------------------------------------------------------------
 
-(define (safe-pair-mi CNTOBJ left-word right-word)
+(define (safe-pair-mi CNTOBJ left-atom right-atom)
 "
-  safe-pair-mi CNTOBJ LEFT-WORD RIGHT-WORD --
-         Return the mutual information for a pair of words. The
+  safe-pair-mi CNTOBJ LEFT-ATOM RIGHT-ATOM --
+         Return the mutual information for a pair of atoms. The
   returned value will be in bits (i.e. using log_2 in calculations)
 
   The source of mutual information is given by CNTOBJ, which should
-  be an object implementing a method called 'pair-mi, such that
-  when given a (ListLink (WordNode)(WordNode)), the MI for that pair.
+  be an object implementing a method called 'pair-fmi, such that
+  it returns the MI for that pair.
 
-  The left and right words are presumed to be WordNodes, or nil.
-  If either word is nil, or if the word-pair cannot be found, then a
+  If either atom is nil, or if the atom-pair cannot be found, then a
   default value of -1e40 is returned.
 "
 	; Define a losing score.
@@ -120,8 +119,8 @@
 	; if they aren't already in the atomspace. cog-link returns
 	; nil if the atoms can't be found.
 	(define wpr
-		(if (and (not (null? left-word)) (not (null? right-word)))
-			(cog-link 'ListLink left-word right-word)
+		(if (and (not (null? left-atom)) (not (null? right-atom)))
+			(cog-link (CNTOBJ 'pair-type) left-atom right-atom)
 			'()))
 	(if (null? wpr) bad-mi (CNTOBJ 'pair-fmi wpr))
 )
@@ -168,10 +167,7 @@
 ; Ramon Ferrer-i-Cancho (2013) “Hubiness, length, crossings and their
 ; relationships in dependency trees”, ArXiv 1304.4086
 
-(define-public (mst-parse-atom-seq LLOBJ ATOM-LIST)
-
-	; In case LLOBJ does not provide a cost-source directly.
-	(define mi-source (add-pair-freq-api LLOBJ))
+(define-public (mst-parse-atom-seq SCORE-FN ATOM-LIST)
 
 	; Define a losing score.
 	(define bad-mi -1e30)
@@ -198,18 +194,18 @@
 	; left atom.  Return a scheme-pair containing selected numa-pair
 	; and it's cost.  Specifically, the given left-numa, and the
 	; discovered right-numa, in the form ((left-numa . right-num) . mi).
-	; The search is made over atom pairs from the CNTOBJ mi-source.
+	; The search is made over atom pairs scored by the SCORE-FN.
 	;
 	; The left-numa is assumed to be an scheme-pair, consisting of an ID,
 	; and an atom; thus the atom is the cdr of the left-numa.
 	; The numa-list is likewise assumed to be a list of numbered atoms.
 	;
-	(define (pick-best-cost-left-pair CNTOBJ left-numa numa-list)
+	(define (pick-best-cost-left-pair left-numa numa-list)
 		(fold
 			(lambda (right-numa max-pair)
 				(define best-pair (first max-pair))
 				(define max-mi (second max-pair))
-				(define cur-mi (safe-pair-mi CNTOBJ (cdr left-numa) (cdr right-numa)))
+				(define cur-mi (SCORE-FN (cdr left-numa) (cdr right-numa)))
 				; Use strict inequality, so that a shorter dependency
 				; length is always prefered.
 				(if (< max-mi cur-mi)
@@ -227,18 +223,18 @@
 	; right atom.  Return a scheme-pair containing selected numa-pair
 	; and it's cost.  Specifically, the given right-numa, and the
 	; discovered left-numa, in the form ((left-numa . right-num) . mi).
-	; The search is made over atom pairs from the CNTOBJ mi-source.
+	; The search is made over atom pairs scored by the SCORE-FN.
 	;
 	; The right-numa is assumed to be an scheme-pair, consisting of an ID,
 	; and an atom; thus the atom is the cdr of the right-numa. The
 	; numa-list is likewise assumed to be a list of numbered atoms.
 	;
-	(define (pick-best-cost-right-pair CNTOBJ right-numa numa-list)
+	(define (pick-best-cost-right-pair right-numa numa-list)
 		(fold
 			(lambda (left-numa max-pair)
 				(define best-pair (first max-pair))
 				(define max-mi (second max-pair))
-				(define cur-mi (safe-pair-mi CNTOBJ (cdr left-numa) (cdr right-numa)))
+				(define cur-mi (SCORE-FN (cdr left-numa) (cdr right-numa)))
 				; Use less-or-equal, so that a shorter dependency
 				; length is always prefered.
 				(if (<= max-mi cur-mi)
@@ -254,12 +250,12 @@
 	; Given a list of numas, return a costed numa-pair, in the form
 	; ((left-numa . right-num) . mi).
 	;
-	; The search is made over atom pairs having the CNTOBJ mi-source.
+	; The search is made over atom pairs scored by the SCORE-FN.
 	;
-	(define (pick-best-cost-pair CNTOBJ numa-list)
+	(define (pick-best-cost-pair numa-list)
 
 		; scan from left-most numa to the right.
-		(define best-left (pick-best-cost-left-pair CNTOBJ
+		(define best-left (pick-best-cost-left-pair
 				(car numa-list) (cdr numa-list)))
 		(if (eq? 2 (length numa-list))
 			; If the list is two numas long, we are done.
@@ -267,7 +263,7 @@
 			; else the list is longer than two numas. Pick between two
 			; possibilities -- those that start with left-most numa, and
 			; something else.
-			(let ((best-rest (pick-best-cost-pair CNTOBJ (cdr numa-list))))
+			(let ((best-rest (pick-best-cost-pair (cdr numa-list))))
 				(if (< (second best-left) (second best-rest))
 					best-rest
 					best-left
@@ -326,7 +322,7 @@
 	;
 	; This only returns connections, if there are any. This might return
 	; the empty list, if there are no connections at all.
-	(define (connect-numa CNTOBJ brk-numa numa-list)
+	(define (connect-numa brk-numa numa-list)
 		; The ordinal number of the break-numa.
 		(define brk-num (car brk-numa))
 		; The atom of the break-numa
@@ -343,11 +339,11 @@
 				(if (< try-num brk-num)
 
 					; Returned value: the MI value for the pair, then the pair.
-					(let ((mi (safe-pair-mi CNTOBJ try-node brk-node)))
+					(let ((mi (SCORE-FN try-node brk-node)))
 						(if (< -1e10 mi)
 							(cons (cons numa brk-numa) mi) #f))
 
-					(let ((mi (safe-pair-mi CNTOBJ brk-node try-node)))
+					(let ((mi (SCORE-FN brk-node try-node)))
 						(if (< -1e10 mi)
 							(cons (cons brk-numa numa) mi) #f))
 				)
@@ -367,9 +363,9 @@
 	; It is assumed that these two sets have no numas in common.
 	;
 	; This might return an empty list, if there are no connections!
-	(define (connect-to-graph CNTOBJ bare-numas graph-numas)
+	(define (connect-to-graph bare-numas graph-numas)
 		(append-map
-			(lambda (grph-numa) (connect-numa CNTOBJ grph-numa bare-numas))
+			(lambda (grph-numa) (connect-numa grph-numa bare-numas))
 			graph-numas
 		)
 	)
@@ -439,7 +435,7 @@
 	; The graph-links are assumed to be a set of MI-costed numa-pairs.
 	; That is, an float-point MI value, followed by a pair of numas.
 	;
-	(define (*pick-em CNTOBJ numa-list graph-links nected-numas)
+	(define (*pick-em numa-list graph-links nected-numas)
 
 		; (format #t "----------------------- \n")
 		; (format #t "enter pick-em with numalist=~A\n" numa-list)
@@ -448,7 +444,7 @@
 
 		; Generate a set of possible links between unconnected numas,
 		; and the connected graph. This list might be empty
-		(define trial-pairs (connect-to-graph CNTOBJ numa-list nected-numas))
+		(define trial-pairs (connect-to-graph numa-list nected-numas))
 
 		; Find the best link that doesn't cross existing links.
 		(define best (pick-no-cross-best trial-pairs graph-links))
@@ -477,7 +473,7 @@
 				; If numa-list is null, then we are done. Otherwise, trawl.
 				(if (null? shorter-list)
 					bigger-graph
-					(*pick-em CNTOBJ shorter-list bigger-graph more-nected)
+					(*pick-em shorter-list bigger-graph more-nected)
 				)
 			)
 		)
@@ -489,7 +485,7 @@
 
 			; Find a pair of atoms connected with the largest MI
 			; in the sequence.
-			(start-cost-pair (pick-best-cost-pair mi-source numa-list))
+			(start-cost-pair (pick-best-cost-pair numa-list))
 
 			; Discard the MI.
 			(start-pair (first start-cost-pair))
@@ -500,7 +496,7 @@
 			; Remove both of these atoms from the atom-list
 			(smaller-list (set-sub numa-list nected-list))
 		)
-		(*pick-em mi-source smaller-list (list start-cost-pair) nected-list)
+		(*pick-em smaller-list (list start-cost-pair) nected-list)
 	)
 )
 
@@ -513,8 +509,10 @@
 	(define word-list (map (lambda (str) (WordNode str)) word-strs))
 
 	; Define where the costs are coming from.
-	(define mi-source (make-any-link-api))
-	; (define mi-source (make-clique-pair-api))
+	(define pair-obj (make-any-link-api))
+	; (define pair-obj (make-clique-pair-api))
+
+	(define mi-source (add-pair-freq-api pair-obj))
 
 	; Process the list of words.
 	(mst-parse-atom-seq mi-source word-list)
