@@ -36,20 +36,33 @@
 ; ---------------------------------------------------------------------
 ;
 ; Tokenize the text: take the input sentence, and return a list of the
-; words in the sentence.  Words are always separated by white-space, so
-; this is easy. This also makes a vague attempt to also separate commas,
-; periods, and other punctuation.  Returned is a list of words.
+; words in the sentence.  It is assumed that words are always separated
+; by white-space, so this is easy. This also makes a vague attempt to
+; also separate commas, periods, and other punctuation.  Returned is a
+; list of words.
 ;
-; XXX FIXME: right now, three periods in a row are split into three
-; "words"; this should not be, it should be only one word... likewise
-; for two dashes.
+; This is not terribly rigorous; it treats a somewhat arbitrary
+; selection of oddball unicode punctuation marks as prefixes and
+; suffixes. This list is not complete nor terribly organized; rather,
+; it is built up from experience of parsing assorted texts and noting
+; the kinds of stuff that actually gets used. Its slanted towards
+; European langauges, and may be inadequate for other langauges.
+;
+; I did not want to get too fancy here; I want just enough to parse
+; most "ordinary" text, for now.  A fancier treatment must await
+; generalized handling of morphology, at which point, we can treat
+; any kind of affixes, and not just punctuation.  So its kind of
+; pointless to try to replace the code below by something "better",
+; unless the better thing is full morphology support.
 ;
 (define-public (tokenize-text plain-text)
 	; Prefix and suffix lists taken from the link-grammar ANY
 	; language 4.0.affix file
-	(define prefix "({[<«〈（〔《【［『「``„“‘'''\"…..._–-—¿¡$£₤€¤₳฿₡₢₠₫৳ƒ₣₲₴₭₺ℳ₥₦₧₱₰₹₨₪﷼₸₮₩¥៛호점†‡§¶©®℗№#")
-	(define suffix ")}]>»〉）〕》】］』」’'\"%,.。:;?!‽؟？！…”_–‐—、～¢₵™℠")
-	(define infix "–‐—…()[]{}") ; yeah those two long-dashes are different!
+	(define prefix "({[<«〈（〔《【［『「``„“‘'''\"…..._-‐‑‒–—―¿¡$£₤€¤₳฿₡₢₠₫৳ƒ₣₲₴₭₺ℳ₥₦₧₱₰₹₨₪﷼₸₮₩¥៛호점†‡§¶©®℗№#")
+	(define suffix ")}]>»〉）〕》】］』」’'\"%,.。:;?!‽؟？！…”_-‐‑‒–—―、～¢₵™℠")
+	; Hey, the long-dashes below are different. So are the short dashes.
+	; The first dash is the ascii-dash 0x2d.
+	(define infix "-‐‑‒–—―…()[]{}")
 	(define prefix-list (string->list prefix))
 	(define suffix-list (string->list suffix))
 	(define infix-list (string->list infix))
@@ -120,6 +133,21 @@
 		(if (null? ifx-list) str
 			(pad-dash (pad-a-dash str (car ifx-list) 0) (cdr ifx-list))))
 
+	; Merge certain types of punctuation back into one.
+	; e.g. three dots, or two dashes.
+	(define (remerge tkl buff punct rslt)
+		(if (null? tkl) rslt
+			(if (string=? (car tkl) punct)
+				(remerge (cdr tkl) (string-append buff punct) punct rslt)
+				(if (< 0 (string-length buff))
+					(remerge tkl "" punct (cons buff rslt))
+					(remerge (cdr tkl) "" punct (cons (car tkl) rslt))))))
+
+	; Merge a sequence of dots back into one word.
+	; Merge a sequence of ascii dashes back into one word.
+	(define (remerge-dot-dash tkl)
+		(remerge (remerge tkl "" "." '()) "" "-" '()))
+
 	; The left-wall indicates the start of the sentence, and
 	; is used to link to the head-verb, head-noun of the sentence.
 	(define left-wall "###LEFT-WALL###")
@@ -127,9 +155,13 @@
 	(let* ((pad-text (pad-dash plain-text infix-list))
 			(word-list (string-split pad-text #\ ))
 			(strip-list (map strip-affix word-list))
+			(tok-list (concatenate (cons (list left-wall) strip-list)))
+			(merge-list (remerge-dot-dash tok-list))
 		)
-		; (format #t "strp-list is ~A\n" strip-list)
-		(concatenate (cons (list left-wall) strip-list))
+		; (format #t "strip-list is ~A\n" strip-list)
+		; (format #t "tok-list is ~A\n" tok-list)
+		; (format #t "merge-list is ~A\n" merge-list)
+		merge-list
 	)
 )
 
