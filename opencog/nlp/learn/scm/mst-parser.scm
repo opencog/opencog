@@ -8,8 +8,9 @@
 ; ---------------------------------------------------------------------
 ; OVERVIEW
 ; --------
-; The scripts below implement a simple spanning-tree parser. The goal
-; of this parser is to learn a base set of link-grammar disjuncts.
+; The scripts below use a simple spanning-tree (MST) parser to create
+; MST parse of a sentence. The goal of this parse is to create a base
+; set of link-grammar disjuncts.
 ;
 ; Input to this should be a single sentence. It is presumed, as
 ; background, that a large number of word-pairs with associated mutual
@@ -129,18 +130,17 @@
 ;
 ; Maximum Spanning Tree parser.
 ;
-; Given a raw-text sentence, it splits apart the sentence into distinct
-; words, and finds an (unlabelled) dependency parse of the sentence, by
-; finding a dependency tree that maximizes the mutual information.
-; A list of word-pairs, together with the associated mutual information,
-; is returned.
+; Given a sequence of atoms, find an (unlabelled) dependency parse
+; of the sequence, by finding a dependency tree that maximizes the
+; pair-wise scoring function. This returns a list of atom-pairs,
+; together with associated score.
 ;
-; The M in MST normally stands for "minimum", but we want to maximize.
+; The M in MST normally stands for "minimum", but this code maximizes.
 ;
 ; There are many MST algorithms; the choice was made as follows:
 ; Prim is very easy; but seems too simple to give good results.
 ; Kruskal is good, but seems hard to control a no-link-cross constraint. (?)
-; Settle on a variant of Borůvka's algo, which seems to be robust,
+; This implements a variant of Borůvka's algo, which seems to be robust,
 ; and fast enough for the current needs.
 ;
 ; The no-links-cross constraint might not be required, see
@@ -500,6 +500,51 @@
 	)
 )
 
+; ---------------------------------------------------------------------
+; The MST parser returns a list of word-pair links, tagged with the
+; mutual information between that word-pair. The functions below
+; unpack each data strcture.
+;
+; Get the score of the link.
+(define-public (mst-link-get-mi lnk) (second lnk))
+
+; Get the left numbered-atom (numa) in the link. The num is a scheme
+; pair of the form (number . atom)
+(define-public (mst-link-get-left-numa lnk)
+	(first (first lnk)))
+
+(define-public (mst-link-get-right-numa lnk)
+	(second (first lnk)))
+
+; Get the index number out of the numa.
+(define-public (mst-numa-get-index numa) (first numa))
+
+; Get the atom from the numa.
+(define-public (mst-numa-get-atom numa) (second numa))
+
+; Get the left atom in the scored link.
+(define-public (mst-link-get-left-atom lnk)
+	(mst-numa-get-atom (mst-link-get-left-numa lnk)))
+
+; Get the right word in the link. This returns the WordNode.
+(define-public (mst-link-get-right-atom lnk)
+	(mst-numa-get-atom (mst-link-get-right-numa lnk)))
+
+; Return the word-pair of the mst-link, as a listLink of WorNodes.
+(define (mst-link-get-wordpair lnk)
+	(ListLink (mst-link-get-left-atom lnk) (mst-link-get-right-atom lnk))
+)
+
+; ---------------------------------------------------------------------
+;
+; Maximum Spanning Tree parser.
+;
+; Given a raw-text sentence, it splits apart the sentence into distinct
+; words, and finds an (unlabelled) dependency parse of the sentence, by
+; finding a dependency tree that maximizes the mutual information.
+; A list of word-pairs, together with the associated mutual information,
+; is returned.
+;
 (define-public (mst-parse-text plain-text)
 
 	; Tokenize the sentence into a list of words.
@@ -519,48 +564,6 @@
 	; Process the list of words.
 	(mst-parse-atom-seq scorer word-list)
 )
-
-; ---------------------------------------------------------------------
-; The MST parser returns a list of word-pair links, tagged with the
-; mutual information between that word-pair. The functions below
-; unpack each data strcture.
-;
-; Hmm. Should we be using goops for this?
-
-; Get the mutual informattion of the link.
-(define (mst-link-get-mi lnk) (car lnk))
-
-; Get the left word in the link. This returns the WordNode.
-(define (mst-link-get-left-word lnk)
-	(define (get-pr lnk) (cadr lnk))
-	(cadr (car (get-pr lnk))))
-
-; Get the right word in the link. This returns the WordNode.
-(define (mst-link-get-right-word lnk)
-	(define (get-pr lnk) (cadr lnk))
-	(cadr (cadr (get-pr lnk))))
-
-; Get the word-pair of the link. This includes misc extraneous markup,
-; including the word indexes in the sentence.
-(define (mst-link-get-wordpair lnk)
-	(ListLink (mst-link-get-left-word lnk) (mst-link-get-right-word lnk))
-)
-
-; Get the left seq-word in the link. The seq-word holds both the
-; sequence number, and the word in it.
-(define (mst-link-get-left-seq lnk)
-	(define (get-pr lnk) (cadr lnk))
-	(car (get-pr lnk)))
-
-(define (mst-link-get-right-seq lnk)
-	(define (get-pr lnk) (cadr lnk))
-	(cadr (get-pr lnk)))
-
-; Get the index number out of the sequenced word.
-(define (mst-seq-get-index seq) (car seq))
-
-; Get the word from the sequenced word.
-(define (mst-seq-get-word seq) (cadr seq))
 
 ; ---------------------------------------------------------------------
 ;
