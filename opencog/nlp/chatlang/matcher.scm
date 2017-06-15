@@ -9,6 +9,15 @@
 (use-modules (opencog logger)
              (opencog exec))
 
+; For storing the groundings
+(define globs-word '())
+(define globs-lemma '())
+
+(define-public (show-globs)
+  "For debugging only."
+  (display "globs-word: ") (display globs-word) (newline)
+  (display "globs-lemma: ") (display globs-lemma) (newline))
+
 (define (get-bindlinks SEQ)
   "Get the BindLink that contains SEQ."
   ; TODO: Delete the Dual-sets
@@ -17,7 +26,9 @@
 (define-public (chat-find-rules SENT)
   "The action selector. It first searches for the rules using DualLink,
    and then does the filtering by evaluating the context of the rules.
-   Eventually returns a list of weighted rules that can satisfy the demand"
+   Eventually returns a list of weighted rules that can satisfy the demand."
+  ; Clear any previous groundings
+  (set! globs-word '()) (set! globs-lemma '())
   (let* ((input-lemmas (cdr (sent-get-word-seqs SENT)))
          ; The ones that contains no variables/globs
          (exact-match (get-bindlinks (list input-lemmas)))

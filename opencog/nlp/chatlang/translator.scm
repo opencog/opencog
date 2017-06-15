@@ -14,11 +14,9 @@
 
 (define-public (chatlang-prefix STR) (string-append "Chatlang: " STR))
 (define chatlang-anchor (Anchor (chatlang-prefix "Currently Processing")))
-(define chatlang-no-constant (Node (chatlang-prefix "No constant terms")))
+(define chatlang-no-constant (Anchor (chatlang-prefix "No constant terms")))
 (define chatlang-word-seq (Predicate (chatlang-prefix "Word Sequence")))
 (define chatlang-lemma-seq (Predicate (chatlang-prefix "Lemma Sequence")))
-(define chatlang-grd-words (Anchor (chatlang-prefix "Grounded Words")))
-(define chatlang-grd-lemmas (Anchor (chatlang-prefix "Grounded Lemmas")))
 
 ;; Shared variables for all terms
 (define atomese-variable-template (list (TypedVariable (Variable "$S")
@@ -154,8 +152,8 @@
 
 (define-public (store-groundings SENT GRD)
   "Store the groundings, both original words and lemmas,
-   for each of the GlobNode in the pattern, by using StateLinks.
-   They will be referenced in the stage of evaluating the context
+   for each of the GlobNode in the pattern.
+   They will be referenced at the stage of evaluating the context
    of the psi-rules, or executing the action of the psi-rules."
   (let ((sent-word-seq (cog-outgoing-set (car (sent-get-word-seqs SENT))))
         (cnt 0))
@@ -165,14 +163,14 @@
                  ; If the grounded value is the GlobNode itself,
                  ; that means the GlobNode is grounded to nothing
                  (begin
-                   (State (Set (gar g) chatlang-grd-words) (List))
-                   (State (Set (gar g) chatlang-grd-lemmas) (List)))
+                   (set! globs-word (assoc-set! globs-word (gar g) (List)))
+                   (set! globs-lemma (assoc-set! globs-lemma (gar g) (List))))
                  ; Store the GlobNode and the groundings
                  (begin
-                   (State (Set (gar g) chatlang-grd-words)
-                          (List (take (drop sent-word-seq cnt)
-                                      (length (cog-outgoing-set (gdr g))))))
-                   (State (Set (gar g) chatlang-grd-lemmas) (gdr g))
+                   (set! globs-word (assoc-set! globs-word (gar g)
+                     (List (take (drop sent-word-seq cnt)
+                                 (length (cog-outgoing-set (gdr g)))))))
+                   (set! globs-lemma (assoc-set! globs-lemma (gar g) (gdr g)))
                    (set! cnt (+ cnt (length (cog-outgoing-set (gdr g)))))))
              ; Move on if it's not a GlobNode
              (set! cnt (+ cnt 1))))
@@ -281,11 +279,10 @@
 (define (is-member? GLOB LST)
   "Check if GLOB is a member of LST, where LST may contain
    WordNodes, LemmaNodes, and PhraseNodes."
-  ; TODO: GLOB is grounded to lemmas but not the original
-  ; words in the input, this somehow needs to be fixed...
-  (let* ((glob-txt-lst (map cog-name GLOB))
-         (raw-txt (string-join glob-txt-lst))
-         (lemma-txt (string-join (map get-lemma glob-txt-lst))))
+  (let* ((raw-txt (string-join (map cog-name
+           (cog-outgoing-set (assoc-ref globs-word (car GLOB))))))
+         (lemma-txt (string-join (map cog-name
+           (cog-outgoing-set (assoc-ref globs-lemma (car GLOB)))))))
     (any (lambda (t)
            (or (and (eq? 'WordNode (cog-type t))
                     (equal? raw-txt (cog-name t)))
