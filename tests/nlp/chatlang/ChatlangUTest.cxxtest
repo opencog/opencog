@@ -97,7 +97,6 @@ public:
     void test_create_choices();
     void test_unordered_matching();
     void test_negation();
-    void test_create_chat_rule();
     void test_chat_find_rules();
 };
 
@@ -193,18 +192,6 @@ void ChatlangUTest::test_negation()
 
     auto result = scm->eval("test-negation-result");
     TSM_ASSERT_EQUALS("Fail to create negations!", "#t\n", result);
-
-    logger().info("END TEST: %s", __FUNCTION__);
-}
-
-void ChatlangUTest::test_create_chat_rule()
-{
-    logger().info("BEGIN TEST: %s", __FUNCTION__);
-
-    scm->eval("(load-from-path \"test-chat-rule.scm\")");
-
-    auto result = scm->eval("test-chat-rule-result");
-    TSM_ASSERT_EQUALS("Fail to create chat rules!", "#t\n", result);
 
     logger().info("END TEST: %s", __FUNCTION__);
 }
