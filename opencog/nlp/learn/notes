@@ -7725,7 +7725,7 @@ todo items:
   Except I am having trouble reproducing this... lg any seems to work OK
 * Also ." is not split .. which I also cannot reproduce.
 * Hyphenated words should be split, by default. These can be
-  reconstructed later. Split - dashes, long dashes, elipsis.
+  reconstructed later. Split - dashes, long dashes, elipsis. DONE.
 
 ---------- debug hang:
 latest bdgw from git does not solve it.

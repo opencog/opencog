@@ -40,12 +40,16 @@
 ; this is easy. This also makes a vague attempt to also separate commas,
 ; periods, and other punctuation.  Returned is a list of words.
 ;
+; XXX FIXME: right now, three periods in a row are split into three
+; "words"; this should not be, it should be only one word... likewise
+; for two dashes.
+;
 (define-public (tokenize-text plain-text)
 	; Prefix and suffix lists taken from the link-grammar ANY
 	; language 4.0.affix file
 	(define prefix "({[<«〈（〔《【［『「``„“‘'''\"…..._–-—¿¡$£₤€¤₳฿₡₢₠₫৳ƒ₣₲₴₭₺ℳ₥₦₧₱₰₹₨₪﷼₸₮₩¥៛호점†‡§¶©®℗№#")
 	(define suffix ")}]>»〉）〕》】］』」’'\"%,.。:;?!‽؟？！…”_–‐—、～¢₵™℠")
-	(define infix "–‐—") ; yeah those two long-dashes are different!
+	(define infix "–‐—…()[]{}") ; yeah those two long-dashes are different!
 	(define prefix-list (string->list prefix))
 	(define suffix-list (string->list suffix))
 	(define infix-list (string->list infix))
