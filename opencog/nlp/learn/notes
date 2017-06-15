@@ -9488,11 +9488,10 @@ so how do wildcards works?
 (set! (cdr flim) '(g h ))
 
 =========================================================================
-Multiple MST bugs:
+Multiple MST bugs:  OK all of these are fixed, I think. DONE
 1) left-wall is not being inserted, so do not get those links.
 
 (Word "###LEFT-WALL###")
-
 
 Bug:
  (observe-mst "17 Book IV., § 23.")
