@@ -65,7 +65,10 @@
 				))))
 
 	; Main entry point for the recursive prefix splitter
-	(define (strip-prefix word) (strip-prefli word prefix-list))
+	(define (strip-prefix word)
+		(if (< 0 (string-length word))
+			(strip-prefli word prefix-list)
+			'()))
 
 	; Tail-recursive helper function. Strip off any suffixes appearing
 	; in the list sufli, and return a list of the stripped prefixes,
