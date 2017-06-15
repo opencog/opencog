@@ -43,10 +43,12 @@
 (define-public (tokenize-text plain-text)
 	; Prefix and suffix lists taken from the link-grammar ANY
 	; language 4.0.affix file
-	(define prefix "({[<«〈（〔《【［『「``„“‘'''\"…..._a¿¡$£₤€¤₳฿₡₢₠₫৳ƒ₣₲₴₭₺ℳ₥₦₧₱₰₹₨₪﷼₸₮₩¥៛호점†‡§¶©®℗№#")
-	(define suffix ")}]>»〉）〕》】］』」’'\"%,.。:;?!‽؟？！_…”–‐、～¢₵™℠")
+	(define prefix "({[<«〈（〔《【［『「``„“‘'''\"…..._–-¿¡$£₤€¤₳฿₡₢₠₫৳ƒ₣₲₴₭₺ℳ₥₦₧₱₰₹₨₪﷼₸₮₩¥៛호점†‡§¶©®℗№#")
+	(define suffix ")}]>»〉）〕》】］』」’'\"%,.。:;?!‽؟？！…”_–‐、～¢₵™℠")
+	(define infix "–‐")
 	(define prefix-list (string->list prefix))
 	(define suffix-list (string->list suffix))
+	(define infix-list (string->list infix))
 
 	; Tail-recursive helper function. Strip off any prefixes appearing
 	; in the list prefli, and return a list of the stripped prefixes,
