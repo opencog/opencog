@@ -99,3 +99,13 @@
                              (TypeSet (Type "WordNode")
                                       (Interval (Number LOWER) (Number UPPER)))))
         '()))
+
+(define* (variable TERM #:optional (VAR (choose-var-name)))
+  "Occurrence of a variable, where TERM can be a concept, a list of choices,
+   or a wildcard."
+  (cond ((equal? 'concept (car TERM))
+         (concept (cdr TERM) VAR))
+        ((equal? 'choices (car TERM))
+         (choices (cdr TERM) VAR))
+        ((equal? 'wildcard (car TERM))
+         (wildcard (cadr TERM) (cddr TERM) VAR))))

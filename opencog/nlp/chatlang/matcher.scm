@@ -12,11 +12,19 @@
 ; For storing the groundings
 (define globs-word '())
 (define globs-lemma '())
+(define vars-grd '())
 
 (define-public (show-globs)
   "For debugging only."
   (display "globs-word: ") (display globs-word) (newline)
-  (display "globs-lemma: ") (display globs-lemma) (newline))
+  (display "globs-lemma: ") (display globs-lemma) (newline)
+  (display "vars-grd: ") (display vars-grd) (newline))
+
+(define (clear-globs)
+  "For clearing any previous groundings."
+  (set! globs-word '())
+  (set! globs-lemma '())
+  (set! vars-grd '()))
 
 (define (get-bindlinks SEQ)
   "Get the BindLink that contains SEQ."
@@ -28,7 +36,7 @@
    and then does the filtering by evaluating the context of the rules.
    Eventually returns a list of weighted rules that can satisfy the demand."
   ; Clear any previous groundings
-  (set! globs-word '()) (set! globs-lemma '())
+  (clear-globs)
   (let* ((input-lemmas (cdr (sent-get-word-seqs SENT)))
          ; The ones that contains no variables/globs
          (exact-match (get-bindlinks (list input-lemmas)))
