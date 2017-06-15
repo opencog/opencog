@@ -35,8 +35,6 @@
   "The action selector. It first searches for the rules using DualLink,
    and then does the filtering by evaluating the context of the rules.
    Eventually returns a list of weighted rules that can satisfy the demand."
-  ; Clear any previous groundings
-  (clear-globs)
   (let* ((input-lemmas (cdr (sent-get-word-seqs SENT)))
          ; The ones that contains no variables/globs
          (exact-match (get-bindlinks (list input-lemmas)))

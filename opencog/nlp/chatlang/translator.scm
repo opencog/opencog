@@ -147,12 +147,46 @@
     (MemberLink (List term-seq) chatlang-no-constant))
   (list vars globs conds term-seq))
 
+(define-public (ground-word GLOB)
+  "Get the original words grounded for GLOB."
+  (assoc-ref globs-word GLOB))
+
+(define-public (ground-lemma GLOB)
+  "Get the lemmas grounded for GLOB."
+  (assoc-ref globs-lemma GLOB))
+
+(define-public (chatlang-say WORDS)
+  "Say the text and update the internal state."
+  (define txt (string-join (append-map (lambda (n)
+    (if (equal? 'ListLink (cog-type n))
+        (map cog-name (cog-outgoing-set n))
+        (list (cog-name n))))
+    (cog-outgoing-set WORDS))))
+  (display "----- ") (display txt) (newline)
+  (cog-execute! (Put (DefinedPredicate "Say") (Node txt)))
+  (State chatlang-anchor (Concept "Default State"))
+  (True))
+
+(Define
+  (DefinedPredicate (chatlang-prefix "Say"))
+  (Lambda (Variable "$x")
+          (Evaluation (GroundedPredicate "scm: chatlang-say")
+                      (List (Variable "$x")))))
+
 (define-public (say TXT)
   "Say the text and clear the state."
-  ; TODO: Something simplier?
-  (And (True (Put (DefinedPredicate "Say") (Node TXT)))
-       (True (Put (State chatlang-anchor (Variable "$x"))
-                  (Concept "Default State")))))
+  ; Replace the variables, if any, with the corresponding GlobNode
+  (define txt-lst
+    (map (lambda (n)
+      (cond ((not (equal? #f (string-match "'_[0-9]+" n)))
+             (ExecutionOutput (GroundedSchema "scm: ground-word")
+               (List (list-ref vars-grd (string->number (substring n 2))))))
+            ((not (equal? #f (string-match "_[0-9]+" n)))
+             (ExecutionOutput (GroundedSchema "scm: ground-lemma")
+               (List (list-ref vars-grd (string->number (substring n 1))))))
+            (else (Word n))))
+      (string-split TXT #\sp)))
+  (True (Put (DefinedPredicate (chatlang-prefix "Say")) (List txt-lst))))
 
 (define (process-action ACTION)
   "Process a single action -- converting it into atomese."
