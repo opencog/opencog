@@ -117,7 +117,7 @@
 		(filter
 			; discard links with bad MI values; anything less than
 			; -50 is bad. Heck, anything under minus ten...
-			(lambda (mlink) (< -50 (mst-link-get-mi mlink)))
+			(lambda (mlink) (< -50 (mst-link-get-score mlink)))
 			mst-parse))
 )
 
@@ -157,36 +157,36 @@
 	; Discard links with bad MI values; anything less than
 	; -50 is bad. Heck, anything under minus ten...
 	(define good-links (filter
-		(lambda (mlink) (< -50 (mst-link-get-mi mlink)))
+		(lambda (mlink) (< -50 (mst-link-get-score mlink)))
 		MST-PARSE))
 
 	; Create a list of all of the words in the sentence.
 	(define seq-list (delete-duplicates!
 		(fold
 			(lambda (mlnk lst)
-				(cons (mst-link-get-left-seq mlnk)
-					(cons (mst-link-get-right-seq mlnk) lst)))
+				(cons (mst-link-get-left-numa mlnk)
+					(cons (mst-link-get-right-numa mlnk) lst)))
 			'()
 			good-links)))
 
 	; Return #t if word appears on the left side of mst-lnk
 	(define (is-on-left-side? wrd mlnk)
-		(equal? wrd (mst-link-get-left-word mlnk)))
+		(equal? wrd (mst-link-get-left-atom mlnk)))
 	(define (is-on-right-side? wrd mlnk)
-		(equal? wrd (mst-link-get-right-word mlnk)))
+		(equal? wrd (mst-link-get-right-atom mlnk)))
 
 	; Given a word, and the mst-parse linkset, create a shorter
 	; seq-list which holds only the words linked to the right.
 	(define (mk-right-seqlist seq mparse)
-		(define wrd (mst-seq-get-word seq))
-		(map mst-link-get-right-seq
+		(define wrd (mst-numa-get-atom seq))
+		(map mst-link-get-right-numa
 			(filter
 				(lambda (mlnk) (is-on-left-side? wrd mlnk))
 				mparse)))
 
 	(define (mk-left-seqlist seq mparse)
-		(define wrd (mst-seq-get-word seq))
-		(map mst-link-get-left-seq
+		(define wrd (mst-numa-get-atom seq))
+		(map mst-link-get-left-numa
 			(filter
 				(lambda (mlnk) (is-on-right-side? wrd mlnk))
 				mparse)))
@@ -195,7 +195,7 @@
 	(define (sort-seqlist seq-list)
 		(sort seq-list
 			(lambda (sa sb)
-				(< (mst-seq-get-index sa) (mst-seq-get-index sb)))))
+				(< (mst-numa-get-index sa) (mst-numa-get-index sb)))))
 
 	; Given a word, the the links, create a pseudo-disjunct
 	(define (mk-pseudo seq mlist)
@@ -206,20 +206,20 @@
 		(define left-cnc
 			(map (lambda (sw)
 					(PseudoConnector
-						(mst-seq-get-word sw)
+						(mst-numa-get-atom sw)
 						(LgConnDirNode "-")))
 			lefts))
 
 		(define right-cnc
 			(map (lambda (sw)
 					(PseudoConnector
-						(mst-seq-get-word sw)
+						(mst-numa-get-atom sw)
 						(LgConnDirNode "+")))
 			rights))
 
 		; return the connector-set
 		(PseudoWordCset
-			(mst-seq-get-word seq)
+			(mst-numa-get-atom seq)
 			(PseudoAnd (append left-cnc right-cnc)))
 	)
 
