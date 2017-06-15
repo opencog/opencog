@@ -43,9 +43,9 @@
 (define-public (tokenize-text plain-text)
 	; Prefix and suffix lists taken from the link-grammar ANY
 	; language 4.0.affix file
-	(define prefix "({[<«〈（〔《【［『「``„“‘'''\"…..._–-¿¡$£₤€¤₳฿₡₢₠₫৳ƒ₣₲₴₭₺ℳ₥₦₧₱₰₹₨₪﷼₸₮₩¥៛호점†‡§¶©®℗№#")
-	(define suffix ")}]>»〉）〕》】］』」’'\"%,.。:;?!‽؟？！…”_–‐、～¢₵™℠")
-	(define infix "–‐")
+	(define prefix "({[<«〈（〔《【［『「``„“‘'''\"…..._–-—¿¡$£₤€¤₳฿₡₢₠₫৳ƒ₣₲₴₭₺ℳ₥₦₧₱₰₹₨₪﷼₸₮₩¥៛호점†‡§¶©®℗№#")
+	(define suffix ")}]>»〉）〕》】］』」’'\"%,.。:;?!‽؟？！…”_–‐—、～¢₵™℠")
+	(define infix "–‐—") ; yeah those two long-dashes are different!
 	(define prefix-list (string->list prefix))
 	(define suffix-list (string->list suffix))
 	(define infix-list (string->list infix))
@@ -95,11 +95,33 @@
 			(strip-sufli word suffix-list)
 			'()))
 
+	; Pad dashes with whitespace.
+	; Taking string str, starting at the start-index, if it
+	; contains the infx character, then pad it with a space.
+	(define (pad-a-dash str infx start)
+		(define idx (string-index str infx start))
+		(if idx
+			(let ((idp1 (+ idx 1)))
+				(pad-a-dash
+					(string-replace str " " idx idx)
+					infx
+					(+ idx 2)))
+			str))
+
+	; Pad dashes with whitespace.  Go over every character in the
+	; infix-list and if it occurs in the string, put a blank space
+	; in front of it.  The string splitter will then split at the
+	; blank space, and the prefix stripper will do the rest.
+	(define (pad-dash str ifx-list)
+		(if (null? ifx-list) str
+			(pad-dash (pad-a-dash str (car ifx-list) 0) (cdr ifx-list))))
+
 	; The left-wall indicates the start of the sentence, and
 	; is used to link to the head-verb, head-noun of the sentence.
 	(define left-wall "###LEFT-WALL###")
 
-	(let* ((word-list (string-split plain-text #\ ))
+	(let* ((pad-text (pad-dash plain-text infix-list))
+			(word-list (string-split pad-text #\ ))
 			(strip-list (map strip-affix word-list))
 		)
 		(concatenate (cons (list left-wall) strip-list))
