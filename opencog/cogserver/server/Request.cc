@@ -22,18 +22,20 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <thread>
 #include <opencog/util/exceptions.h>
 #include <opencog/util/Logger.h>
 #include <opencog/util/oc_assert.h>
 
 #include <opencog/cogserver/server/ConsoleSocket.h>
+#include <opencog/cogserver/server/CogServer.h>
 
 #include "Request.h"
 
 using namespace opencog;
 
 Request::Request(CogServer& cs) :
-    _console(nullptr), _cogserver(cs)
+    _console(nullptr), _cogserver(cs), _thread(nullptr)
 {
 }
 
@@ -45,6 +47,33 @@ Request::~Request()
         _console->OnRequestComplete();
         _console->put();  // dec use count we are done with it.
     }
+
+    // Normally the thread object will be cleared when it is done.
+    if (_thread)
+    {
+        if (_thread->joinable())
+            _thread->join();
+        delete _thread;
+    }
+}
+
+void Request::executeAsynch(void)
+{
+    // Execute in a new thread.
+    auto execute_wrapper = [&](void) 
+    {
+        try{
+            execute();
+        } catch (...) {
+            logger().debug("Request::executeAsynch caught exception!");
+        }        
+        
+        // Always tell the CogServer so this request is deleted
+        // even in the event of an exception.
+        _cogserver.asynchRequestDone(this);
+    };
+    
+    _thread = new std::thread(execute_wrapper);
 }
 
 void Request::set_console(ConsoleSocket* con)
@@ -52,7 +81,7 @@ void Request::set_console(ConsoleSocket* con)
     // The "exit" request causes the console to be destroyed,
     // rendering the _console pointer invalid. However, generic
     // code will try to call Request::send() afterwards. So
-    // prevent the invalid reference by zeroing he pointer.
+    // prevent the invalid reference by zeroing the pointer.
     if (nullptr == con)
     {
         _console->put();  // dec use count -- we are done with socket.

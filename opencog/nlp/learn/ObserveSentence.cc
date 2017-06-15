@@ -98,6 +98,9 @@ void break_sentence_into_words( const std::string& sentence,
 
 void increment_count(AtomSpace* as, Handle atom, int increment = 1)
 {
+    static std::mutex count_mutex;
+    std::lock_guard<std::mutex> lock(count_mutex);
+
     int new_count;
 
     // Get the new count
@@ -112,7 +115,6 @@ void increment_count(AtomSpace* as, Handle atom, int increment = 1)
         new_count);
     atom->setTruthValue(tv);
 }
-
 
 
 /*
@@ -167,45 +169,60 @@ will create structures of the form:
 
 */
 void create_atoms_for_words(AtomSpace*                  as,
-                            std::vector<std::string>&   words,
-                            int                         pair_distance_limit)
+                            std::vector<std::string>&   word_strings,
+                            size_t                      pair_distance_limit)
 {
+    size_t total_words = word_strings.size();
+    if (total_words < 1)
+        return;
+
     // Create the predicate and schema nodes only once.
     Handle predicate = as->add_node(PREDICATE_NODE, "*-Sentence Word Pair-*");
     Handle schema = as->add_node(SCHEMA_NODE, "*-Pair Distance-*");
 
-    DEBUG_PRINT("adding atoms for %d words\n", (int) words.size());
+    DEBUG_PRINT("adding atoms for %d words\n", (int) word_strings.size());
 
-    // Loop over all the word pairs.
-    size_t total_words = words.size();
+    // Create atoms for each word.
+    std::vector<Handle> words;
+    words.reserve(total_words);
+    for (size_t index = 0; index < total_words; index++)
+        words.emplace_back(as->add_node(WORD_NODE, word_strings[index]));
+
+    // Create atoms for our pair distances.
+    size_t max_pair_distance = total_words - 1;
+    if (pair_distance_limit && pair_distance_limit < total_words)
+        max_pair_distance = pair_distance_limit;
+    std::vector<Handle> distances;
+    distances.reserve(max_pair_distance);
+    for (size_t index = 1; index <= max_pair_distance; index++)
+        distances.emplace_back(as->add_node(NUMBER_NODE, std::to_string(index)));
+
+    // Loop over all the word pairs...
     for (size_t first = 0; first < total_words; first++)
     {
-        // Get the node for the first word and count it.
-        Handle first_word = as->add_node(WORD_NODE, words[first]);
-        increment_count(as, first_word);
+        // Increment the count for the word.
+        increment_count(as, words[first]);
         
         // Determine the last pair word for this first word.
         size_t last_pair_word = total_words;
-        if (pair_distance_limit && (first + pair_distance_limit + 1) < total_words)
+        if (pair_distance_limit &&
+            (first + pair_distance_limit + 1) < total_words)
             last_pair_word = first + pair_distance_limit + 1;
 
         // Create the pair count atoms...
         for (size_t second = first + 1; second < last_pair_word; second++)
         {
-            DEBUG_PRINT("pair <%s,%s>\n", words[first].c_str(), words[second].c_str());
+            DEBUG_PRINT("pair <%s,%s>\n", word_strings[first].c_str(), word_strings[second].c_str());
 
-            // Record the <first,second> word pair.
-            Handle second_word = as->add_node(WORD_NODE, words[second]);
-            Handle pair = as->add_link(LIST_LINK, first_word, second_word);
+            // Record the <first, second> word pair.
+            Handle pair = as->add_link(LIST_LINK, words[first], words[second]);
             Handle evaluation = as->add_link(EVALUATION_LINK, predicate, pair);
+            increment_count(as, evaluation);
 
             // Record the distance.
-            std::string distance = std::to_string(second - first);
-            Handle number = as->add_node(NUMBER_NODE, distance);
-            Handle execution = as->add_link(EXECUTION_LINK, schema, pair, number);
-
-            // Increment the counts.
-            increment_count(as, evaluation);
+            size_t distance_index = second - first - 1;
+            Handle execution = as->add_link(EXECUTION_LINK, schema, pair, 
+                    distances[distance_index]);
             increment_count(as, execution);
         }
     }
@@ -213,7 +230,7 @@ void create_atoms_for_words(AtomSpace*                  as,
 
 void observe_sentence(  AtomSpace*      atomspace,
                         std::string&    sentence,
-                        int             pair_distance_limit)
+                        size_t          pair_distance_limit)
 {
     std::vector<std::string> words;
 

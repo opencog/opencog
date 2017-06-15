@@ -29,6 +29,7 @@
 
 #include <list>
 #include <string>
+#include <thread>
 
 #include <opencog/cogserver/server/Factory.h>
 
@@ -252,6 +253,8 @@ protected:
     CogServer&             _cogserver;
     std::list<std::string> _parameters;
 
+    std::thread*           _thread;
+
 public:
     /** Request's constructor */
     Request(CogServer&);
@@ -264,8 +267,15 @@ public:
      *  successfully and 'false' otherwise. */
     virtual bool execute(void) = 0;
 
-    /** Abstract method for telling if the Request if for entering a shell*/
+    /** Abstract method for telling if the Request is for entering a shell*/
     virtual bool isShell(void) = 0;
+
+    /** Abstract method - synchronous requests, return false to execute in new thread*/
+    virtual bool isSynchronous(void)
+        { return true; }
+
+    /** Calls execute in a new thread*/
+    virtual void executeAsynch(void);
 
     /** Send the command output back to the client. */
     void send(const std::string& msg) const;
@@ -275,10 +285,10 @@ public:
     ConsoleSocket *get_console(void) const { return _console; }
 
     /** sets the command's parameter list. */
-    virtual void setParameters(const std::list<std::string>&);
+    void setParameters(const std::list<std::string>&);
 
     /** adds a parameter to the commands parameter list. */
-    virtual void addParameter(const std::string&);
+    void addParameter(const std::string&);
 };
 
 /** @}*/

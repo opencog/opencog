@@ -33,7 +33,7 @@ namespace opencog
 
     void observe_sentence(AtomSpace*      atomspace,
                           std::string&    sentence,
-                          int             pair_distance_limit = NO_PAIR_DISTANCE_LIMIT );
+                          size_t          pair_distance_limit = NO_PAIR_DISTANCE_LIMIT );
 }
 
 #endif // _OBSERVE_SENTENCE_H

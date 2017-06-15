@@ -30,3 +30,314 @@ Observe Time = Total Time - Noop Time
 
 All RAM usage was with a clean CogServer restart and zero atoms in the AtomSpace
 at the test start.
+
+
+Computing Mutual Information
+----------------------------
+
+1) Run the observe_one.pl script on your input files to get sentences created.
+
+2) In scheme run:
+
+(use-modules (opencog) (opencog persist) (opencog persist-sql))
+(use-modules (opencog nlp) (opencog nlp learn))
+
+(sql-store)
+
+to save the atoms to the database.
+
+
+The C++ observe text uses clique-counting for pairs.
+
+3) After creating and storing a database created with the above you need to run:
+
+If not already loaded and open:
+(use-modules (opencog) (opencog persist) (opencog persist-sql))
+(use-modules (opencog nlp) (opencog nlp learn))
+(sql-open "postgres:///nlp")
+
+Compute the MI for the pairs:
+(batch-clique-pairs)
+
+This loads the pairs from the 
+
+guile-en> (mst-parse-text "This was invitation enough.")
+(
+	(0.510168 
+		(
+		(2 (WordNode "was" (ctv 1 0 1840))) 
+		(3 (WordNode "invitation" (ctv 1 0 34)))
+		)
+	)
+
+	(-0.882961
+		(
+		(2 (WordNode "was" (ctv 1 0 1840)))
+		(4 (WordNode "enough" (ctv 1 0 106)))
+		)
+	)
+
+	(-0.952148
+		(
+		(1 (WordNode "This" (ctv 1 0 67)))
+		(2 (WordNode "was" (ctv 1 0 1840)))
+		)
+	)
+)
+
+
+(for-each
+		(lambda (dj) (count-one-atom dj))
+		(make-pseudo-disjuncts (mst-parse-text "Mr. Bennet made no answer."))
+	)
+
+(make-pseudo-disjuncts (mst-parse-text "How can it affect them?"))
+
+"How", L, "them"
+"it", L, "them"
+"can", L, "them"
+"affect", L, "them"
+"them", R, "How"
+"them", R, "can"
+"them", R, "it"
+"them", R, "affect"
+
+
+((PseudoWordCset
+   (WordNode "affect" (ctv 1 0 3))
+   (PseudoAnd
+      (PseudoConnector
+         (WordNode "them" (ctv 1 0 429))
+         (LgConnDirNode "+")
+      )
+   )
+)
+ (PseudoWordCset
+   (WordNode "them" (ctv 1 0 429))
+   (PseudoAnd
+      (PseudoConnector
+         (WordNode "How" (ctv 1 0 66))
+         (LgConnDirNode "-")
+      )
+      (PseudoConnector
+         (WordNode "can" (ctv 1 0 199))
+         (LgConnDirNode "-")
+      )
+      (PseudoConnector
+         (WordNode "it" (ctv 1 0 1288))
+         (LgConnDirNode "-")
+      )
+      (PseudoConnector
+         (WordNode "affect" (ctv 1 0 3))
+         (LgConnDirNode "-")
+      )
+   )
+)
+ (PseudoWordCset
+   (WordNode "How" (ctv 1 0 66))
+   (PseudoAnd
+      (PseudoConnector
+         (WordNode "them" (ctv 1 0 429))
+         (LgConnDirNode "+")
+      )
+   )
+)
+ (PseudoWordCset
+   (WordNode "it" (ctv 1 0 1288))
+   (PseudoAnd
+      (PseudoConnector
+         (WordNode "them" (ctv 1 0 429))
+         (LgConnDirNode "+")
+      )
+   )
+)
+ (PseudoWordCset
+   (WordNode "can" (ctv 1 0 199))
+   (PseudoAnd
+      (PseudoConnector
+         (WordNode "them" (ctv 1 0 429))
+         (LgConnDirNode "+")
+      )
+   )
+)
+)
+
+
+((PseudoWordCset
+   (WordNode "is" (ctv 1 0 833))
+   (PseudoAnd
+      (PseudoConnector
+         (WordNode "more" (ctv 1 0 321))
+         (LgConnDirNode "+")
+      )
+      (PseudoConnector
+         (WordNode "beautiful" (ctv 1 0 15))
+         (LgConnDirNode "+")
+      )
+      (PseudoConnector
+         (WordNode "than" (ctv 1 0 282))
+         (LgConnDirNode "+")
+      )
+   )
+)
+ (PseudoWordCset
+   (WordNode "beautiful" (ctv 1 0 15))
+   (PseudoAnd
+      (PseudoConnector
+         (WordNode "is" (ctv 1 0 833))
+         (LgConnDirNode "-")
+      )
+   )
+)
+ (PseudoWordCset
+   (WordNode "more" (ctv 1 0 321))
+   (PseudoAnd
+      (PseudoConnector
+         (WordNode "is" (ctv 1 0 833))
+         (LgConnDirNode "-")
+      )
+   )
+)
+ (PseudoWordCset
+   (WordNode "than" (ctv 1 0 282))
+   (PseudoAnd
+      (PseudoConnector
+         (WordNode "Your" (ctv 1 0 44))
+         (LgConnDirNode "-")
+      )
+      (PseudoConnector
+         (WordNode "daughter" (ctv 1 0 77))
+         (LgConnDirNode "-")
+      )
+      (PseudoConnector
+         (WordNode "is" (ctv 1 0 833))
+         (LgConnDirNode "-")
+      )
+      (PseudoConnector
+         (WordNode "my" (ctv 1 0 587))
+         (LgConnDirNode "+")
+      )
+      (PseudoConnector
+         (WordNode "daughter" (ctv 1 0 77))
+         (LgConnDirNode "+")
+      )
+   )
+)
+ (PseudoWordCset
+   (WordNode "daughter" (ctv 1 0 77))
+   (PseudoAnd
+      (PseudoConnector
+         (WordNode "than" (ctv 1 0 282))
+         (LgConnDirNode "-")
+      )
+      (PseudoConnector
+         (WordNode "than" (ctv 1 0 282))
+         (LgConnDirNode "+")
+      )
+   )
+)
+ (PseudoWordCset
+   (WordNode "daughter" (ctv 1 0 77))
+   (PseudoAnd
+      (PseudoConnector
+         (WordNode "than" (ctv 1 0 282))
+         (LgConnDirNode "-")
+      )
+      (PseudoConnector
+         (WordNode "than" (ctv 1 0 282))
+         (LgConnDirNode "+")
+      )
+   )
+)
+ (PseudoWordCset
+   (WordNode "my" (ctv 1 0 587))
+   (PseudoAnd
+      (PseudoConnector
+         (WordNode "than" (ctv 1 0 282))
+         (LgConnDirNode "-")
+      )
+   )
+)
+ (PseudoWordCset
+   (WordNode "Your" (ctv 1 0 44))
+   (PseudoAnd
+      (PseudoConnector
+         (WordNode "than" (ctv 1 0 282))
+         (LgConnDirNode "+")
+      )
+   )
+)
+)
+
+(mst-parse-text "Your daughter is more beautiful than my daughter.")
+(
+	(1.075189 (
+		(1 (WordNode "Your" (ctv 1 0 44)))
+		(6 (WordNode "than" (ctv 1 0 282))) ))
+	(0.595769 (
+		(6 (WordNode "than" (ctv 1 0 282)))
+		(7 (WordNode "my" (ctv 1 0 587))) ))
+	(0.325334 (
+		(6 (WordNode "than" (ctv 1 0 282)))
+		(8 (WordNode "daughter" (ctv 1 0 77))) ))
+	(0.180899 (
+		(2 (WordNode "daughter" (ctv 1 0 77)))
+		(6 (WordNode "than" (ctv 1 0 282))) ))
+	(-0.099737 (
+		(3 (WordNode "is" (ctv 1 0 833)))
+		(6 (WordNode "than" (ctv 1 0 282))) ))
+	(0.312989 (
+		(3 (WordNode "is" (ctv 1 0 833))) 
+		(4 (WordNode "more" (ctv 1 0 321))) ))
+	(-1.219433 (
+		(3 (WordNode "is" (ctv 1 0 833))) 
+		(5 (WordNode "beautiful" (ctv 1 0 15))) ))
+)
+
+
+(define-public (output-mst plain-text)
+"
+  observe-mst -- update pseduo-disjunct counts by observing raw text.
+
+  This is the second part of the learning algo: simply count how
+  often pseudo-disjuncts show up.
+"
+	; The count-one-atom function fetches from the SQL database,
+	; increments the count by one, and stores the result back
+	(for-each
+		(lambda (dj) (count-one-atom dj))
+		(make-pseudo-disjuncts (mst-parse-text plain-text))
+	)
+)
+
+(newline)
+(for-each
+	(lambda (line)
+		(display (caar (cadr line)))
+		(display ", ")
+		(display (cog-name (cadar (cadr line))))
+		(display ", ")
+		(display (caadr (cadr line)))
+		(display ", ")
+		(display  (cog-name (cadadr (cadr line))))
+		(newline)
+	)
+	(mst-parse-text "She is very beautiful.")
+)
+
+
+(newline)
+(for-each
+	(lambda (line)
+		(display (caar (cadr line)))
+		(display ", ")
+		(display (cog-name (cadar (cadr line))))
+		(display ", ")
+		(display (caadr (cadr line)))
+		(display ", ")
+		(display  (cog-name (cadadr (cadr line))))
+		(newline)
+	)
+	(mst-parse-text "I shall be back by dinner.")
+)
+

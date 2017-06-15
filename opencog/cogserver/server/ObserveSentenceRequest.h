@@ -28,6 +28,7 @@
 #include <sstream>
 #include <string>
 #include <vector>
+#include <thread>
 
 #include <opencog/atoms/base/Handle.h>
 #include <opencog/cogserver/server/Request.h>
@@ -68,6 +69,7 @@ public:
 
     ObserveSentenceRequest(CogServer&);
     virtual ~ObserveSentenceRequest();
+    virtual bool isSynchronous(void) { return true; }
     virtual bool execute(void);
     virtual bool isShell(void) {return info().is_shell;}
 };

@@ -7,7 +7,6 @@ ENDIF (HAVE_CYTHON)
 
 ADD_LIBRARY (builtinreqs SHARED
 	BuiltinRequestsModule
-	Request
 	LoadModuleRequest
 	ObserveSentenceRequest
 	ListRequest

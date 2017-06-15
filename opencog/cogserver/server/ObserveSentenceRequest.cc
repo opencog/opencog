@@ -55,7 +55,7 @@ bool ObserveSentenceRequest::execute()
 
     if (_parameters.empty())
     {
-        _error << "Error: learn - a sentence is required" << std::endl;
+        _error << "Error: observe - a sentence is required" << std::endl;
         sendError();
         return false;
     }

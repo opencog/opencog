@@ -49,6 +49,7 @@ BuiltinRequestsModule::BuiltinRequestsModule(CogServer& cs) : Module(cs)
 
 BuiltinRequestsModule::~BuiltinRequestsModule()
 {
+    _cogserver.unregisterRequest(ObserveSentenceRequest::info().id);
     _cogserver.unregisterRequest(ListRequest::info().id);
     _cogserver.unregisterRequest(ShutdownRequest::info().id);
     _cogserver.unregisterRequest(LoadModuleRequest::info().id);
@@ -197,9 +198,9 @@ std::string BuiltinRequestsModule::do_stats(Request *req, std::list<std::string>
     std::ostringstream oss;
     ConsoleSocket* con = req->get_console();
 
-    oss << "Console use-count = " << con->get_use_count() << "\n";
-    oss << "Console max-open-sockets = " << con->get_max_open_sockets() << "\n";
-    oss << "Console curr-open-sockets = " << con->get_num_open_sockets() << "\n";
+    oss << "Console use-count = " << con->use_count() << "\n";
+    oss << "Console max-open-sockets = " << ConsoleSocket::max_open_sockets() << "\n";
+    oss << "Console curr-open-sockets = " << ConsoleSocket::num_open_sockets() << "\n";
 
     // count open file descs
     int nfd = 0;

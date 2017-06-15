@@ -159,14 +159,13 @@
 ; Haitao Liu (2008) “Dependency distance as a metric of language
 ; comprehension difficulty” Journal of Cognitive Science, 2008 9(2): 159-191.
 ; or also:
-; Ramon Ferrer-i-Cancho (2013) “Hubiness, length, crossings and their
-; relationships in dependency trees”, ArXiv 1304.4086
+; Ramon Ferrer-i-Cancho (2013) “”, ArXiv 1304.4086
 
 (define-public (mst-parse-text plain-text)
 
 	; the source of where we will get MI from
-	(define mi-source (add-pair-freq-api (make-any-link-api)))
-	; (define mi-source (add-pair-freq-api (make-clique-pair-api)))
+	; (define mi-source (add-pair-freq-api (make-any-link-api)))
+	(define mi-source (add-pair-freq-api (make-clique-pair-api)))
 
 	; Define a losing score.
 	(define bad-mi -1e30)

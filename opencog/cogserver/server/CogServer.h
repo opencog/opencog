@@ -34,6 +34,7 @@
 #include <thread>
 
 #include <opencog/util/concurrent_queue.h>
+#include <opencog/util/concurrent_set.h>
 #include <opencog/cogserver/server/Agent.h>
 #include <opencog/cogserver/server/AgentRunnerBase.h>
 #include <opencog/cogserver/server/AgentRunnerThread.h>
@@ -164,8 +165,13 @@ protected:
     std::vector<AgentRunnerThreadPtr> agentThreads;
     std::map<std::string, AgentRunnerThread*> threadNameMap;
 
-    std::mutex processRequestsMutex;
     concurrent_queue<Request*> requestQueue;
+    concurrent_queue<Request*> asynchRequestQueue;
+
+    concurrent_set<Request*> runningRequests;
+
+    mutable std::mutex cleanupMutex;
+    concurrent_queue<Request*> cleanupRequests;
 
     NetworkServer* _networkServer;
 
@@ -335,8 +341,29 @@ public:
     /** Returns the requests queue size. */
     int getRequestQueueSize(void) { return requestQueue.size(); }
 
-    /** Force drain of all outstanding requests */
+    /** Force drain of all outstanding synchronous requests. */
     void processRequests(void);
+
+    /**
+     * Adds asynch requests to the end of the queue.
+     */
+    void pushAsynchRequest(Request* request) { asynchRequestQueue.push(request); }
+
+    /** Removes and returns the first request from the asynch queue. */
+    Request* popAsynchRequest(void) { return asynchRequestQueue.pop(); }
+
+    /** Returns the requests queue size. */
+    unsigned int getAsynchRequestQueueSize(void) { return asynchRequestQueue.size(); }
+
+    /** Remove the request from the running list and delete it. */
+    void asynchRequestDone(Request* request);
+
+    /** Returns the number of requests running in separate threads. */
+    unsigned int runningRequestCount(void) { return runningRequests.size(); }
+
+
+    /** Process asynchronous requests if there are open threads. */
+    void processAsynchRequests(void);
 
     /** Return the logger */
     Logger &logger(void);

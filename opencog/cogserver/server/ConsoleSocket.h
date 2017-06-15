@@ -150,9 +150,10 @@ public:
     /**
      * Assorted debugging utilities.
      */
-    unsigned int get_use_count() const { return _use_count; }
-    unsigned int get_max_open_sockets() const { return _max_open_sockets; }
-    unsigned int get_num_open_sockets() const { return _num_open_sockets; }
+    unsigned int use_count() const { return _use_count; }
+
+    static unsigned int max_open_sockets() { return _max_open_sockets; }
+    static unsigned int num_open_sockets() { return _num_open_sockets; }
 }; // class
 
 /** @}*/
