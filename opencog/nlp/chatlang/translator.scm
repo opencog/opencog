@@ -52,12 +52,15 @@
                    ; in between them
                    (append start (list wc) end)))
                ; If there is only a start-anchor, append it and
-               ; a wildcard with the main-seq, follow by another
-               ; wildcard at the end
+               ; a wildcard with the main-seq
               (start-anchor?
-               (append start (list wc)
-                       (take-while (lambda (t) (not (equal? as t))) TERMS)
-                       end))
+               (let ((before-anchor-start
+                       (take-while (lambda (t) (not (equal? as t))) TERMS)))
+                    (if (null? before-anchor-start)
+                        (append start end)
+                        ; In case there are terms before anchor-start,
+                        ; get it and add an extra wildcard
+                        (append start (list wc) before-anchor-start end))))
               ; If there is only an end-anchor, the main-seq should start
               ; with a wildcard, follow by another wildcard and finally
               ; the end-seq
