@@ -26015,7 +26015,7 @@ en_pairs_tone_mst
 \begin_inset Text
 
 \begin_layout Plain Layout
-176K x 3.4M
+176K x 3.40M
 \end_layout
 
 \end_inset
@@ -26264,7 +26264,7 @@ en_pairs_rone_mst
 \begin_inset Text
 
 \begin_layout Plain Layout
-
+179K x 3.98M
 \end_layout
 
 \end_inset
@@ -26273,7 +26273,7 @@ en_pairs_rone_mst
 \begin_inset Text
 
 \begin_layout Plain Layout
-
+7.50M
 \end_layout
 
 \end_inset
@@ -26282,7 +26282,7 @@ en_pairs_rone_mst
 \begin_inset Text
 
 \begin_layout Plain Layout
-
+17.0M
 \end_layout
 
 \end_inset
@@ -26291,7 +26291,7 @@ en_pairs_rone_mst
 \begin_inset Text
 
 \begin_layout Plain Layout
-
+2.27
 \end_layout
 
 \end_inset
@@ -26300,7 +26300,7 @@ en_pairs_rone_mst
 \begin_inset Text
 
 \begin_layout Plain Layout
-
+21.15
 \end_layout
 
 \end_inset
@@ -26309,7 +26309,7 @@ en_pairs_rone_mst
 \begin_inset Text
 
 \begin_layout Plain Layout
-
+15.11
 \end_layout
 
 \end_inset
@@ -26318,7 +26318,7 @@ en_pairs_rone_mst
 \begin_inset Text
 
 \begin_layout Plain Layout
-
+9.95
 \end_layout
 
 \end_inset
@@ -26327,7 +26327,7 @@ en_pairs_rone_mst
 \begin_inset Text
 
 \begin_layout Plain Layout
-
+-3.91
 \end_layout
 
 \end_inset
@@ -28817,6 +28817,19 @@ The fraction of rows with more than
  or fewer times.
  These three cuts are given in the first three columns; the resulting dataset
  is given in the remaining columns.
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+Stats can be gotten by creating the add-support-compute object on the filter
+ object, and then invoking 'left-basis-size, 'right-basis-size, 'total-support
+ and 'total-count.
+ 
+\end_layout
+
+\end_inset
+
+
 \begin_inset VSpace defskip
 \end_inset
 
@@ -29573,7 +29586,7 @@ The last cut seems plausible for further work: it suggests that each disjunct
 
 \begin_layout Standard
 Note, by the way, that the previous sections carefully described entropy
- and mutual information distributions no longer hold for the cut dataset.
+ and mutual information distributions that no longer hold for the cut dataset.
  Filtering changes these!
 \end_layout
 
