@@ -51,7 +51,7 @@
 (use-modules (srfi srfi-1))
 (use-modules (opencog))
 (use-modules (opencog persist))
-(use-modules (opencog analysis))
+(use-modules (opencog matrix))
 
 ; ---------------------------------------------------------------------
 
@@ -121,8 +121,8 @@
 		(define (make-pair PAIR)
 			(EvaluationLink any-pair-pred PAIR))
 
-		; Return the raw observational count on PAIR.
-		; If the PAIR does not exist (was not oberved) return 0.
+		; Return the raw observational count on PAIR. If the counter for
+		; PAIR does not exist (was not oberved), then return 0.
 		(define (get-pair-count PAIR)
 			(define pr (get-pair PAIR))
 			(if (null? pr) 0 (get-count pr)))

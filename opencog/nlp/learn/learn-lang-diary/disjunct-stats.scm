@@ -45,6 +45,10 @@
 ; ---------------------------------------------------------------------
 ; Ranking and printing utilities
 ;
+; Assign each word a score, using SCORE-FN,
+(define (score SCORE-FN WORD-LIST)
+	(map (lambda (wrd) (cons (SCORE-FN wrd) wrd)) WORD-LIST))
+
 ; Assign each word a score, using SCORE-FN, and then rank them by
 ; score: i.e. sort them, with highest score first.
 (define (score-and-rank SCORE-FN WORD-LIST)
@@ -585,6 +589,7 @@
 	'SimilarityLink)
 
 (length all-sims)    ; 23993
+; or 44139852 = 44M with the 0.1 cutoff.
 
 (define good-sims
 	(filter
@@ -615,12 +620,137 @@
 
 ; ------ again, but binned.
 
-(define sorted-sims (score-and-rank sim-cosine all-sims))
+(define scored-sims (score sim-cosine all-sims))  ; 44139852 = 44M  wow
 
-(define binned-sims (bin-count-simple sorted-sims 100))
+(define binned-sims (bin-count-simple scored-sims 300))
 
 (let ((outport (open-file "/tmp/binned-sims.dat" "w")))
 	(print-bincounts-tsv binned-sims outport)
 	(close outport))
 
+(define all-good-sims
+	(filter
+		(lambda (sim) (and
+				(< 4 (cset-vec-word-len (gar sim)))
+				(< 4 (cset-vec-word-len (gdr sim)))))
+		all-sims))
+
+(length all-good-sims) ; 2172114 = 2M
+
+(define scored-good-sims (score sim-cosine all-good-sims))
+(define binned-good-sims (bin-count-simple scored-good-sims 100))
+
+(let ((outport (open-file "/tmp/binned-good-sims.dat" "w")))
+	(print-bincounts-tsv binned-good-sims outport)
+	(close outport))
+
+(define all-good-words (filter (lambda (w) (< 4 (cset-vec-word-len w))) ac))
+
+(length all-good-words)   ;  5544 of length 4 or more
+
+; ---------------------------------------------------------------------
+; what fraction of the rows have more than N observations?
+; (subtotaled for that entire row?)
+
+(define (cnt-obs-rows n lst)
+	(if (<= 0 n) 
+		(let* ((fsa (add-subtotal-filter psa 0 n 0))
+				(bs (fsa 'left-basis-size)))
+			(format #t "N=~d  sz=~d\n" n bs)
+			(cnt-obs-rows (- n 2) (cons (cons n bs) lst)))
+		lst))
+
+(define row-dist (cnt-obs-rows 100 '()))
+
+(define (print-tsv-count scrs port max)
+	(define cnt 0)
+	(for-each
+		(lambda (pr)
+			(set! cnt (+ cnt 1))
+			(format port "~A	~A	~A	~A\n" cnt (car pr) (cdr pr) (/ (cdr pr max)))
+		scrs))
+
+(let ((outport (open-file "/tmp/count-rows.dat" "w")))
+	(print-tsv-count row-dist outport)
+	(close outport))
+
+(define (cnt-obs-cols n lst)
+	(if (<= 0 n) 
+		(let* ((fsa (add-subtotal-filter psa n 0 0))
+				(bs (fsa 'right-basis-size)))
+			(format #t "N=~d  sz=~d\n" n bs)
+			(cnt-obs-cols (- n 5) (cons (cons n bs) lst)))
+		lst))
+
+(define col-dist (cnt-obs-cols 100 '()))
+
+; ---------------------------------------------------------------------
+; Support  This is for the table about filters.
+
+(define fsa (add-subtotal-filter psa 1 1 0))
+(define fsb (add-subtotal-filter psa 4 4 0))
+(define fsc (add-subtotal-filter psa 10 10 0))
+(define fsd (add-subtotal-filter psa 30 30 0))
+
+(define ssa (add-support-compute fsa))
+(define ssb (add-support-compute fsb))
+(define ssc (add-support-compute fsc))
+(define ssd (add-support-compute fsd))
+
+(ssa 'total-support)  ; 4096008
+(ssa 'total-count)    ; 12039800.0
+(ssb 'total-support)  ; 2807987
+(ssb 'total-count)    ; 9508010.0
+(ssc 'total-support)  ; 2423739
+(ssc 'total-count)    ; 8733613.0
+(ssd 'total-support)  ; 1976731
+(ssd 'total-count)    ; 8046133
+
+
+(define fse (add-subtotal-filter psa 30 10 0))
+(define fsf (add-subtotal-filter psa 30 10 4))
+
+(define fsg (add-subtotal-filter psa 50 30 0))
+(define fsh (add-subtotal-filter psa 50 30 4))
+(define fsi (add-subtotal-filter psa 50 30 10))
+
+(define sse (add-support-compute fse))
+(define ssf (add-support-compute fsf))
+(define ssg (add-support-compute fsg))
+(define ssh (add-support-compute fsh))
+(define ssi (add-support-compute fsi))
+
+(sse 'total-support)  ; 2261327
+(sse 'total-count)    ; 8478382.0
+(ssf 'total-support)  ; 269459
+(ssf 'total-count)    ; 5524982.0
+(ssg 'total-support)  ; 1875670
+(ssg 'total-count)    ; 7863145.0
+(ssh 'total-support)  ; 255698
+(ssh 'total-count)    ; 5405406.0
+(ssi 'total-support)  ; 100542
+(ssi 'total-count)    ; 4363640.0
+
+; ---------------------------------------------------------------------
+
+(define sorted-eigen
+	(sort
+		(pti 'left-vec lit6) 
+		(lambda (a b) (> (cdr a) (cdr b)))))
+
+(define (print-tsv-pca port)
+	(define cnt 0)
+	(for-each
+		(lambda (pr)
+			(define w (car pr))
+			(set! cnt (+ cnt 1))
+			(format port "~d	\"~A\"	~A	~A	~A	~A	~A	~A\n" cnt (cog-name w)
+				(lit w) (lit2 w) (lit3 w) (lit4 w) (lit5 w) (lit6 w)))
+		(take sorted-eigen 40)))
+
+(let ((outport (open-file "/tmp/power-iter.dat" "w")))
+	(print-tsv-pca outport)
+	(close outport))
+
+; ---------------------------------------------------------------------
 ; ---------------------------------------------------------------------
