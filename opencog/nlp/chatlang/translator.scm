@@ -76,18 +76,26 @@
               (else (append (list wc) TERMS (list wc))))))
 
 (define (merge-globs TERMS)
-  "Make sure there is no meaningless wildcards/variables in TERMS,
-   which may causes problems in rule matching or variable grounding."
+  "Make sure there is no meaningless wildcard/variable in TERMS,
+   which may cause problems in rule matching or variable grounding."
   ; A typical wildcard
   (define wc (cons 'wildcard (cons 0 -1)))
 
   (fold-right (lambda (term prev)
-;(display term) (newline) (display prev) (newline) (newline)
+(display term) (newline) (display prev) (newline) (newline)
     (cond ; If there are two consecutive typical wildcards
           ; ignore one of them
-          ((and (equal? term wc)
-                (equal? (first prev) wc))
+          ((and (equal? (first prev) wc)
+                (equal? term wc))
            prev)
+          ; If we have:
+          ; previous == a typical wildcard
+          ; current == variable, which is also a typical wildcard per se
+          ; take the variable but with the previous wildcard removed
+          ((and (equal? (first prev) wc)
+                (equal? 'variable (car term))
+                (equal? (cadr term) wc))
+           (cons term (cdr prev)))
           (else (cons term prev))))
     (list (last TERMS))
     (list-head TERMS (- (length TERMS) 1))))
