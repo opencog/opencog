@@ -19,6 +19,7 @@
     (load-from-path "opencog/openpsi/modulator.scm")
     (load-from-path "opencog/openpsi/sec.scm")
     (load-from-path "opencog/openpsi/interaction-rule.scm")
+    (load-from-path "opencog/openpsi/emotion.scm")
     (load-from-path "opencog/openpsi/updater.scm")
 )
 
