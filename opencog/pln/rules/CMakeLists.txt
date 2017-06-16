@@ -1,8 +1,8 @@
-# Boolean algebra rules
+# Propositional logic rules
 ADD_GUILE_MODULE(FILES
 	propositional/fuzzy-conjunction-introduction.scm
 	propositional/fuzzy-disjunction-introduction.scm
-	MODULE_DESTINATION "${DATADIR}/scm/opencog/pln/rules"
+	MODULE_DESTINATION "${DATADIR}/scm/opencog/pln/rules/propositional"
 )
 
 # # Predicate logic rules
@@ -14,7 +14,7 @@ ADD_GUILE_MODULE(FILES
 ADD_GUILE_MODULE(FILES
 	term/deduction.scm
 	term/formulas.scm
-	MODULE_DESTINATION "${DATADIR}/scm/opencog/pln/rules"
+	MODULE_DESTINATION "${DATADIR}/scm/opencog/pln/rules/term"
 )
 
 # Work in progress rules
@@ -68,7 +68,6 @@ ADD_GUILE_MODULE(FILES
 	wip/or-elimination.scm
 	wip/or-evaluation.scm
 	wip/precise-modus-ponens.scm
-	README.md
 	wip/subset-evaluation.scm
 	wip/symmetric-modus-ponens.scm
 	wip/term-probability.scm
@@ -88,5 +87,11 @@ ADD_GUILE_MODULE(FILES
 	wip/negation-introduction.scm
 	wip/temp-deduction.scm
 	wip/formulas.scm
+	MODULE_DESTINATION "${DATADIR}/scm/opencog/pln/rules/wip"
+)
+
+# Other files
+ADD_GUILE_MODULE(FILES
+	README.md
 	MODULE_DESTINATION "${DATADIR}/scm/opencog/pln/rules"
 )
