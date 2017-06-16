@@ -9170,6 +9170,7 @@ avg length
 (use-modules (opencog matrix))
 (sql-open "postgres:///en_pairs_sim?user=linas")
 (sql-open "postgres:///en_pairs_ttwo_mst?user=linas")
+(sql-open "postgres:///en_pairs_ttwo_sim?user=linas")
 (fetch-all-words)
 
 (define pca (make-pseudo-cset-api))

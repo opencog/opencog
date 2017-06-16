@@ -17,13 +17,13 @@
 ; a bad example, because English should not connect this way. But
 ; it is an example...
 ;
-;    (PseudoWordCset
+;    (Section
 ;       (WordNode "playing")
-;       (PseudoAnd
-;          (PseudoConnector
+;       (ConnectorSeq
+;          (Connector
 ;             (WordNode "level")
 ;             (LgConnDirNode "-"))
-;          (PseudoConnector
+;          (Connector
 ;             (WordNode "field")
 ;             (LgConnDirNode "+"))))
 ;
@@ -34,7 +34,7 @@
 ; Any given word may have dozens or hundreds or thousands of these
 ; connector sets. The totality of these sets, for a given, fixed word
 ; form a vector.  The disjunct is a basis element, and the raw
-; observational count on the `PseudoWordCset` is the magnitude of the
+; observational count on the `Section` is the magnitude of the
 ; of the vector in that basis direction.
 ;
 ; Note that these vectors are sparse: if a particular disjunct is
@@ -91,8 +91,8 @@
 		(define any-right (AnyNode "cset-disjunct"))
 
 		(define (get-left-type) 'WordNode)
-		(define (get-right-type) 'PseudoAnd)
-		(define (get-pair-type) 'PseudoWordCset)
+		(define (get-right-type) 'ConnectorSeq)
+		(define (get-pair-type) 'Section)
 
 		; Getting the pair is trivial: we already got it.
 		(define (get-pair PAIR) PAIR)
@@ -115,7 +115,7 @@
 			(define all '())
 			(cog-map-type
 				(lambda (atom) (set! all (cons atom all)) #f)
-				'PseudoWordCset)
+				'Section)
 			all)
 
 		(define (get-all-csets)
@@ -130,7 +130,7 @@
 			(define start-time (current-time))
 			(fetch-incoming-set any-left)
 			(fetch-incoming-set any-right)
-			(load-atoms-of-type 'PseudoWordCset)
+			(load-atoms-of-type 'Section)
 			(format #t "Elapsed time to load csets: ~A secs\n"
 				(- (current-time) start-time)))
 
@@ -180,7 +180,7 @@
   in which case all the csets for that disjunct are returned.
 "
 	; Currently, its as simple as this...
-	(cog-incoming-by-type ITEM 'PseudoWordCset)
+	(cog-incoming-by-type ITEM 'Section)
 
 	; Should be this: XXX FIXME later
 	; (pseudo-cset-support-api 'right-stars ITEM)
@@ -238,7 +238,7 @@
 ; Return the cset, if it exists.  If it does not exist, return the
 ; empty list '()
 (define (have-cset? WORD DISJUNCT)
-	(cog-link 'PseudoWordCset WORD DISJUNCT))
+	(cog-link 'Section WORD DISJUNCT))
 
 (define-public (print-cset-list PORT LIST)
 "
@@ -317,7 +317,7 @@
   DISJUNCT has been observed.  This is exactly equal to to wild-card
   summation over words N(*,d) = sum_w N(w,d) for d being the DISJUNCT.
 
-  DISJUNCT must be an PseudoAnd.
+  DISJUNCT must be an ConnectorSeq.
 "
 	; Should be same as
 	; (pseudo-cset-support-api 'left-count DISJUNCT)
@@ -350,7 +350,7 @@
 (define-public (get-cset-frequency CSET)
 "
   get-cset-frequency -- Return the frequency (probability) with which
-  CSET has been observed. CSET must be a link of type PseudoWordCset.
+  CSET has been observed. CSET must be a link of type Section.
 "
 	(pseudo-cset-freq-api 'pair-freq CSET)
 )
@@ -366,7 +366,7 @@
 (define-public (cset-vec-dj-frequency DISJUNCT)
 "
   cset-vec-dj-frequency -- Return the frequency (probability) with
-  which DISJUNCT has been observed. DISJUNCT must be an PseudoAnd.
+  which DISJUNCT has been observed. DISJUNCT must be an ConnectorSeq.
 "
 	(pseudo-cset-freq-api 'left-wild-freq DISJUNCT)
 )
@@ -477,7 +477,7 @@
 
 ; ---------------------------------------------------------------------
 ; Count the number of connectors in the disjunct.
-; But the disjunct is just an PseudoAnd of a bunch of connectors,
+; But the disjunct is just an ConnectorSeq of a bunch of connectors,
 ; so this is easy.
 (define (dj-connectors DISJUNCT) (length (cog-outgoing-set DISJUNCT)))
 
@@ -539,7 +539,7 @@
   connector goes in direction DIR.  The DIR should be either
   (LgConnDirNode \"+\") or (LgConnDirNode \"-\").
 
-  ITEM can be either a WordNode, or a disjunct (PseudoAnd).
+  ITEM can be either a WordNode, or a disjunct (ConnectorSeq).
 "
 	(define (con-count cset)
 		(* (get-count cset) (dj-connectors-dir (cset-get-disjunct cset) DIR)))
@@ -566,7 +566,7 @@
 "
   get-all-csets -- Return all of the connector-sets in the atomspace.
 "
-	(get-all-type 'PseudoWordCset)
+	(get-all-type 'Section)
 )
 
 ; ---------------------------------------------------------------------
@@ -576,7 +576,7 @@
   get-all-pseudo-connectors -- Return all of the pseudo-connectors
   in the atomspace.
 "
-	(get-all-type 'PseudoConnector)
+	(get-all-type 'Connector)
 )
 
 ; ---------------------------------------------------------------------
