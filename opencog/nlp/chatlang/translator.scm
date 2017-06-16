@@ -83,19 +83,26 @@
 
   (fold-right (lambda (term prev)
 (display term) (newline) (display prev) (newline) (newline)
-    (cond ; If there are two consecutive typical wildcards
+    (cond ; If there are two consecutive typical wildcards,
+          ; i.e. (wildcard 0 . -1) (wildcard 0 . -1),
           ; ignore one of them
           ((and (equal? (first prev) wc)
                 (equal? term wc))
            prev)
           ; If we have:
-          ; previous == a typical wildcard
-          ; current == variable, which is also a typical wildcard per se
+          ; (wildcard 0 . -1) (variable (wildcard 0 . -1))
           ; take the variable but with the previous wildcard removed
           ((and (equal? (first prev) wc)
                 (equal? 'variable (car term))
                 (equal? (cadr term) wc))
            (cons term (cdr prev)))
+          ; If we have:
+          ; (variable (wildcard 0 . -1)) (wildcard 0 . -1)
+          ; Ignore the current one
+          ((and (equal? term wc)
+                (equal? 'variable (car (first prev)))
+                (equal? (cadr (first prev)) wc))
+           prev)
           (else (cons term prev))))
     (list (last TERMS))
     (list-head TERMS (- (length TERMS) 1))))
