@@ -75,6 +75,23 @@
               ; end with a wildcard
               (else (append (list wc) TERMS (list wc))))))
 
+(define (merge-globs TERMS)
+  "Make sure there is no meaningless wildcards/variables in TERMS,
+   which may causes problems in rule matching or variable grounding."
+  ; A typical wildcard
+  (define wc (cons 'wildcard (cons 0 -1)))
+
+  (fold-right (lambda (term prev)
+;(display term) (newline) (display prev) (newline) (newline)
+    (cond ; If there are two consecutive typical wildcards
+          ; ignore one of them
+          ((and (equal? term wc)
+                (equal? (first prev) wc))
+           prev)
+          (else (cons term prev))))
+    (list (last TERMS))
+    (list-head TERMS (- (length TERMS) 1))))
+
 (define (process-pattern-terms TERMS)
   "Generate the atomese (i.e. the variable declaration and the pattern)
    for each of the TERMS."
@@ -243,7 +260,8 @@
   "Top level translation function. Pattern is a quoted list of terms,
    and action is a quoted list of actions or a single action."
   (let* ((ordered-terms (order-terms PATTERN))
-         (proc-terms (process-pattern-terms ordered-terms))
+         (merged-terms (merge-globs ordered-terms))
+         (proc-terms (process-pattern-terms merged-terms))
          (vars (append atomese-variable-template (list-ref proc-terms 0)))
          (globs (list-ref proc-terms 1))
          (conds (append atomese-condition-template (list-ref proc-terms 2)))
@@ -259,6 +277,7 @@
                      TOPIC
                      NAME)))
         (cog-logger-debug "ordered-terms: ~a" ordered-terms)
+        (cog-logger-debug "merged-terms: ~a" merged-terms)
         (cog-logger-debug "BindLink: ~a" bindlink)
         (cog-logger-debug "psi-rule: ~a" psi-rule)
         ; Link both the newly generated BindLink and psi-rule together
