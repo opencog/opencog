@@ -38,16 +38,18 @@ DECLARE_MODULE(BuiltinRequestsModule)
 
 BuiltinRequestsModule::BuiltinRequestsModule(CogServer& cs) : Module(cs)
 {
-    _cogserver.registerRequest(ListRequest::info().id,         &listFactory);
-    _cogserver.registerRequest(ShutdownRequest::info().id,     &shutdownFactory);
-    _cogserver.registerRequest(LoadModuleRequest::info().id,   &loadmoduleFactory);
-    _cogserver.registerRequest(UnloadModuleRequest::info().id, &unloadmoduleFactory);
-    _cogserver.registerRequest(ListModulesRequest::info().id,  &listmodulesFactory);
+    _cogserver.registerRequest(ObserveSentenceRequest::info().id,   &observeFactory);
+    _cogserver.registerRequest(ListRequest::info().id,              &listFactory);
+    _cogserver.registerRequest(ShutdownRequest::info().id,          &shutdownFactory);
+    _cogserver.registerRequest(LoadModuleRequest::info().id,        &loadmoduleFactory);
+    _cogserver.registerRequest(UnloadModuleRequest::info().id,      &unloadmoduleFactory);
+    _cogserver.registerRequest(ListModulesRequest::info().id,       &listmodulesFactory);
     registerAgentRequests();
 }
 
 BuiltinRequestsModule::~BuiltinRequestsModule()
 {
+    _cogserver.unregisterRequest(ObserveSentenceRequest::info().id);
     _cogserver.unregisterRequest(ListRequest::info().id);
     _cogserver.unregisterRequest(ShutdownRequest::info().id);
     _cogserver.unregisterRequest(LoadModuleRequest::info().id);
@@ -196,9 +198,9 @@ std::string BuiltinRequestsModule::do_stats(Request *req, std::list<std::string>
     std::ostringstream oss;
     ConsoleSocket* con = req->get_console();
 
-    oss << "Console use-count = " << con->get_use_count() << "\n";
-    oss << "Console max-open-sockets = " << con->get_max_open_sockets() << "\n";
-    oss << "Console curr-open-sockets = " << con->get_num_open_sockets() << "\n";
+    oss << "Console use-count = " << con->use_count() << "\n";
+    oss << "Console max-open-sockets = " << ConsoleSocket::max_open_sockets() << "\n";
+    oss << "Console curr-open-sockets = " << ConsoleSocket::num_open_sockets() << "\n";
 
     // count open file descs
     int nfd = 0;

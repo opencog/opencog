@@ -64,6 +64,10 @@
 #include "CogServer.h"
 #include "BaseServer.h"
 
+void eat_me(...) {}
+//#define DEBUG_PRINT fprintf
+#define DEBUG_PRINT if (false) eat_me
+
 using namespace opencog;
 
 namespace opencog {
@@ -75,6 +79,32 @@ struct equal_to_id :
     }
 };
 }
+
+
+size_t slow_hardware_cpus()
+{
+    std::ifstream cpuinfo("/proc/cpuinfo");
+
+    return std::count(std::istream_iterator<std::string>(cpuinfo),
+                      std::istream_iterator<std::string>(),
+                      std::string("processor"));
+}
+
+unsigned int hardware_cpus()
+{
+    unsigned int cores = std::thread::hardware_concurrency();
+    return cores ? cores : slow_hardware_cpus();
+}
+
+
+unsigned int max_runnable_threads()
+{
+    unsigned int max_threads = hardware_cpus();
+    if (max_threads < ConsoleSocket::max_open_sockets())
+        max_threads = ConsoleSocket::max_open_sockets();
+    return max_threads;
+}
+
 
 BaseServer* CogServer::createInstance(AtomSpace* as)
 {
@@ -234,6 +264,10 @@ void CogServer::runLoopStep(void)
                   );
     }
 
+
+    // Process asynch requests
+    processAsynchRequests();
+
     // Process mind agents
     if (customLoopRun() and agentsRunning and 0 < agentScheduler.get_agents().size())
     {
@@ -258,12 +292,77 @@ bool CogServer::customLoopRun(void)
 
 void CogServer::processRequests(void)
 {
-    std::lock_guard<std::mutex> lock(processRequestsMutex);
     while (0 < getRequestQueueSize()) {
+
         Request* request = popRequest();
-        request->execute();
+
+        // If this is a synchronous request just execute it...
+        if (request->isSynchronous())
+        {
+            request->execute();
+            delete request;
+        }
+
+        // Otherwise, queue it...
+        else
+        {
+//            std::lock_guard<std::mutex> lock(cleanupMutex);
+
+            DEBUG_PRINT(stderr, "Pushing asynch request.\n");
+            pushAsynchRequest(request);
+        }
+
+    }
+}
+
+
+void CogServer::processAsynchRequests(void)
+{
+//    std::lock_guard<std::mutex> lock(cleanupMutex);
+    static unsigned int max_threads = max_runnable_threads();
+
+    // Move requests from the waiting queue to running...
+    while ( 0 < getAsynchRequestQueueSize() &&
+            runningRequestCount() < max_threads)
+    {
+
+        // Run the request in its own thread.
+        DEBUG_PRINT(stderr, "executing asynch request.\n");
+
+        // Get the request from the waiting queue.
+        Request* request = popAsynchRequest();
+
+        // Place it in the running queue.
+        runningRequests.insert(request);
+
+        // Run the request in its own thread. Do this after 
+        // placing it in the running queue to handle the rare
+        // case where the asynch execution will finish before this
+        // call exits.
+        request->executeAsynch();
+     }
+
+    // Cleanup any completed requests. These need to be deleted
+    // in the main CogServer thread as they must stay around while they
+    // are running.
+    while (0 < cleanupRequests.size())
+    {
+        // Get the thread and delete it.
+        DEBUG_PRINT(stderr, "popping request from cleanup.\n");
+        Request* request = cleanupRequests.pop();
         delete request;
     }
+}
+
+void CogServer::asynchRequestDone(Request* request)
+{
+//    std::lock_guard<std::mutex> lock(cleanupMutex);
+
+    // Remove the request from the running list.
+    cleanupRequests.push(request);
+    runningRequests.erase(request);
+    DEBUG_PRINT(stderr, "  total running requests %d.\n", runningRequests.size());
+    DEBUG_PRINT(stderr, "  total requests to cleanup %d.\n", cleanupRequests.size());
 }
 
 bool CogServer::registerAgent(const std::string& id, AbstractFactory<Agent> const* factory)

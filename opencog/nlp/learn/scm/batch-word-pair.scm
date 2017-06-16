@@ -471,7 +471,7 @@
 
 (define-public (batch-any-pairs)
 	(batch-pairs (make-any-link-api))
-)
+) 
 
 (define-public (batch-clique-pairs)
 	(batch-pairs (make-clique-pair-api))

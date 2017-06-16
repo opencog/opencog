@@ -97,7 +97,8 @@ public:
                demangle(typeid(_BaseType).name()).c_str(), id.c_str());
             return NULL;
         }
-        // invoke the creation function
+
+         // invoke the creation function
         logger().debug("Creating %s instance with \"%s\"", 
              demangle(typeid(_BaseType).name()).c_str(), id.c_str());
         return it->second->create(cs);
