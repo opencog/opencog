@@ -9167,7 +9167,7 @@ avg length
 ===============================================================
 (use-modules (opencog) (opencog persist) (opencog persist-sql))
 (use-modules (opencog nlp) (opencog nlp learn))
-(use-modules (opencog analysis))
+(use-modules (opencog matrix))
 (sql-open "postgres:///en_pairs_sim?user=linas")
 (sql-open "postgres:///en_pairs_ttwo_mst?user=linas")
 (fetch-all-words)
@@ -9508,6 +9508,12 @@ In procedure car: Wrong type argument in position 1 (expecting pair): ()
 ABORT: wrong-type-arg
 
 (mst-parse-text "***** fff")
+
+=========================================================================
+update typecodes set typename='ConnectorSeq' where type=229; -- PseudoAnd
+update typecodes set typename='Section' where type=230;  -- PseudoWordCSet
+update typecodes set typename='ConnectorDir' where type=164;  -- LgConnDirNode
+update typecodes set typename='Connector' where type=174;  -- PseudoConnector
 
 =========================================================================
 
