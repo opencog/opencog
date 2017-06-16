@@ -356,7 +356,7 @@ void AttentionBank::updateAttentionalFocus(const Handle& h,
 {
     std::lock_guard<std::mutex> lock(AFMutex);
     AttentionValue::sti_t sti = new_av->getSTI();
-    auto least = attentionalFocus.begin();
+    auto least = attentionalFocus.begin(); // Atom to be removed from the AF
     bool insertable = false;
     auto it = std::find_if(attentionalFocus.begin(), attentionalFocus.end(),
             [h](std::pair<Handle, AttentionValuePtr> p)
@@ -367,15 +367,24 @@ void AttentionBank::updateAttentionalFocus(const Handle& h,
         attentionalFocus.erase(it);
         attentionalFocus.insert(std::make_pair(h, new_av));
         return;
+    // Simply insert the new Atom if AF is not full yet.
     } else if(attentionalFocus.size() < minAFSize){
         insertable = true;
+    // Remove the least sti valued atom in the AF and repace
+    // it with the new atom holding higher STI value.
     } else if( sti > (least->second)->getSTI()){
+        Handle hrm = least->first;
+        AttentionValuePtr hrm_new_av = get_av(hrm);
+        // Value recorded when this atom entered into AF
+        AttentionValuePtr hrm_old_av = least->second;
+
         attentionalFocus.erase(least);
         AFCHSigl& afch = RemoveAFSignal();
-        afch(least->first, least->second, get_av(least->first));
+        afch(hrm, hrm_old_av, hrm_new_av);
         insertable = true;
     }
 
+    // Insert the new atom in to AF and emit the AddAFSignal.
     if(insertable){
         attentionalFocus.insert(std::make_pair(h, new_av));
         AFCHSigl& afch = AddAFSignal();
