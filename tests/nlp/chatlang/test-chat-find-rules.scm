@@ -39,10 +39,20 @@
 
 ; Sentence anchor
 (define rule-7 (cr '("they like it < I think") '("good to know")))
+(define rule-9 (cr '("he plays >") '("play what")))
 
 ; Negation
 (create-concept "berry" "strawberry" "raspberry")
 (define rule-8 (cr '("!['apple orange ~berry] I eat") '("me too")))
+
+; Wildcard
+(define rule-10 (cr '("I know *~3 nearby") '("let's go there")))
+(define rule-11 (cr '("can *2 up") '("sure")))
+
+; Variable
+; (define rule-12 (cr '("his name is _*") '("hello _0")))
+; (define rule-13 (cr '("who _~eat this") '("Bob '_0")))
+; (define rule-14 (cr '("why did you _[jump run]") '("I like to _0")))
 
 ; The test
 ; --------
@@ -66,3 +76,9 @@
 (define test-result-14 (equal? (gar (chat "I eat apples")) (gdr rule-8)))
 (define test-result-15 (equal? (gar (chat "I eat oranges")) '()))
 (define test-result-16 (equal? (gar (chat "I eat raspberry")) '()))
+(define test-result-17 (equal? (gar (chat "he plays")) (gdr rule-9)))
+(define test-result-18 (equal? (gar (chat "he plays tennis")) '()))
+(define test-result-19 (equal? (gar (chat "I know a good place nearby")) (gdr rule-10)))
+(define test-result-20 (equal? (gar (chat "I know a really good restaurant nearby")) '()))
+(define test-result-21 (equal? (gar (chat "can do sit up")) (gdr rule-11)))
+(define test-result-22 (equal? (gar (chat "can you please speak up")) '()))
