@@ -490,18 +490,19 @@
 				(set! run-time run))))
 
 	; Perform GC whenever it gets larger than a fixed limit.
-	; Really, less than one GB should be enough, but the huge strings
-	; from relex cause problems.
+	; Less than one GB should be enough, but the huge strings
+	; from relex seem to cause bad memory fragmentation.
 	(define maybe-gc
 		(let ((cnt 0)
-				(max-size (* 2 1000 1000 1000)))  ; 2 GB
+				(max-size (* 750 1000 1000)))  ; 750 MB
 			(lambda ()
 				(if (< max-size (- (assoc-ref (gc-stats) 'heap-size)
 							(assoc-ref (gc-stats) 'heap-free-size)))
 					(begin
 						(gc)
 						(set! cnt (+ cnt 1))
-						(avg-gc-cpu-time))))))
+						;(avg-gc-cpu-time)
+					)))))
 
 	(relex-parse plain-text) ;; send plain-text to server
 	(process-sents)

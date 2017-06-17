@@ -9445,7 +9445,9 @@ counts...
 -- it uses star-obj to get stars. which should be filtered stars.
 
 So: 
- (acc 'right-cosine (Word "the") (Word "a")) ; 0.8971244127293886
+ (acc 'right-cosine (Word "the") (Word "a")) ; 0.8971244127293886 XXX
+
+Should be 0.8964505696268208
 
 (sqrt (acc 'right-product (Word "the") (Word "the"))) ;
 9761.855971074354  OK so that agrees with support, now.
@@ -9496,8 +9498,10 @@ solutions:
 2) filter should provide pair-freq.
 3) avoid cached freq, since its inaccurate in general.
 4) freq-api should check for filter, and respond differently.  How?
+5) api's refuse to work with filters; filter blocks API.
 
 
+(apply LLOBJ (cons message args)
 -----------------------------------------------------------------
 ---------
 wtf. get-pair-count takes a LL pair, but wild-card return hi-level.
