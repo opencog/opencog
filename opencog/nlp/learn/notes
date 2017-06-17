@@ -5681,6 +5681,10 @@ this appears to give only mediocre results.
 STATUS: archived.
 DATE: 18 May 2017
 REASON: The wikipedia-based data is mediocre.
+Also:
+a) it fails to separate quotation marks.
+b) The any-disjuncts are junk.
+c) The LgWordCset typename needs to be changed to Section
 
                        List of relations
  Schema |    Name    | Type  | Owner |    Size    | Description
@@ -5970,10 +5974,13 @@ Uses the new PseudoAnd and PseudoWordCset types.
 Kills the bogus lg-any disjuncts.
 Contains table summaries for pairs and csets.
 
-STATUS: fair
+STATUS: fair/poor
 DATE:  9 June 2017
-REASON: One issue:
- a) fails to separate quoation marks (inherited from tone)
+REASON: Several issues:
+ a) Missing links to LEFT-WALL
+ b) fails to separate quotation marks (inherited from tone)
+ c) fails to separete various other punctuation.
+ d) The PseudoWordCset typename needs to be changed to Section, etc.
 
 en_pairs_tone_mst=> \dt+
                         List of relations
@@ -6090,9 +6097,13 @@ Random parses from tranche-1 and tranche-2, together with MST parses from
 both tranches. The bogus ANY-disjuncs got removed, and the correct 
 PseudoWordCsets are used.  Contains the summary stats for csets, too.
 
-STATUS: good
+STATUS: fair/poor
 DATE: 9 Jun 2017
-REASON: I think it's good.
+REASON: Multiple issues:
+ a) Missing links to LEFT-WALL
+ b) fails to separete various punctuation
+ c) The PseudoWordCset typename needs to be changed to Section, etc.
+
 
                         List of relations
  Schema |    Name    | Type  | Owner  |    Size    | Description 
@@ -6292,9 +6303,13 @@ en_pairs_rone_mst
 The en_pairs_rone dataset used to perform MST parses of tranche-1
 books.  Contains both pair-MI and cset-MI data and summaries.
 
-STATUS: good
+STATUS: fair/poor
 DATE: 13 June 2017
-REASON: Best so far, I think.
+REASON: Multiple issues:
+ a) Missing links to LEFT-WALL
+ b) fails to separete various punctuation
+ c) The PseudoWordCset typename needs to be changed to Section, etc.
+
 
 en_pairs_rone_mst=> \dt+
                         List of relations
@@ -6369,7 +6384,7 @@ A continutation of en_pairs_rone.
 
 STATUS: good
 DATE: 12 June 2017
-REASON: Best so far, I think.
+REASON: One issue, see en_pairs_rone for description.
 
                         List of relations
  Schema |    Name    | Type  | Owner  |    Size    | Description 
@@ -6397,9 +6412,13 @@ en_pairs_rtwo_mst
 -----------------
 en_pairs_rtwo, with tranche-1 and tranche-2 MST parses.
 
-STATUS: good
+STATUS: fair/poor
 DATE: 14 June 2017
-REASON: Best so far, I think.
+REASON: Multiple issues:
+ a) Missing links to LEFT-WALL
+ b) fails to separete various punctuation
+ c) The PseudoWordCset typename needs to be changed to Section, etc.
+
 
                         List of relations
  Schema |    Name    | Type  | Owner  |    Size    | Description 
@@ -9511,10 +9530,10 @@ ABORT: wrong-type-arg
 (mst-parse-text "***** fff")
 
 =========================================================================
-update typecodes set typename='ConnectorSeq' where type=229; -- PseudoAnd
-update typecodes set typename='Section' where type=230;  -- PseudoWordCSet
-update typecodes set typename='ConnectorDir' where type=164;  -- LgConnDirNode
-update typecodes set typename='Connector' where type=174;  -- PseudoConnector
+update typecodes set typename='ConnectorSeq' where typename='PseudoAnd';
+update typecodes set typename='Section' where typename='PseudoWordCset';
+update typecodes set typename='ConnectorDir' where typename='LgConnDirNode';
+update typecodes set typename='Connector' where typename='PseudoConnector';
 
 =========================================================================
 
