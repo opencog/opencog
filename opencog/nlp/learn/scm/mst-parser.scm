@@ -136,7 +136,8 @@
 	; Merge certain types of punctuation back into one.
 	; e.g. three dots, or two dashes.
 	(define (remerge tkl buff punct rslt)
-		(if (null? tkl) rslt
+		(if (null? tkl)
+			(if (< 0 (string-length buff)) (cons buff rslt) rslt)
 			(if (string=? (car tkl) punct)
 				(remerge (cdr tkl) (string-append buff punct) punct rslt)
 				(if (< 0 (string-length buff))
