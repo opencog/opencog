@@ -494,7 +494,7 @@
 	; from relex cause problems.
 	(define maybe-gc
 		(let ((cnt 0)
-				(max-size (* 9 1000 1000 1000)))  ; 9 GB
+				(max-size (* 2 1000 1000 1000)))  ; 2 GB
 			(lambda ()
 				(if (< max-size (- (assoc-ref (gc-stats) 'heap-size)
 							(assoc-ref (gc-stats) 'heap-free-size)))
