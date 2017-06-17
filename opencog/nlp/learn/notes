@@ -9491,7 +9491,14 @@ because maybe count not filtered correctly, still????
 cosine creates fold, says "use pair-freq"
 fold uses pair-freq and bypasses filtering!
 
+solutions:
+1) pair-freq should check w/ filter. All of freq-api should.
+2) filter should provide pair-freq.
+3) avoid cached freq, since its inaccurate in general.
+4) freq-api should check for filter, and respond differently.  How?
 
+
+-----------------------------------------------------------------
 ---------
 wtf. get-pair-count takes a LL pair, but wild-card return hi-level.
 so how do wildcards works?
