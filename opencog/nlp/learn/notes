@@ -9500,8 +9500,101 @@ solutions:
 4) freq-api should check for filter, and respond differently.  How?
 5) api's refuse to work with filters; filter blocks API.
 
+OK, I think that's running reliably now. DONE.
 
 (apply LLOBJ (cons message args)
+-----------------------------------------------------------------
+(define grate
+	(let ((lg 0.00001) (ls 0.00001) (tm (current-time)))
+		(lambda() 
+			(define now (current-time))
+			(define fra (/ (- sent-cnt ls) (- gc-cnt lg) ))
+			(define dt (- now tm))
+			(format #t "delta-t=~A frac=~f gc-rate=~f\n"
+				dt fra (/ dt (- gc-cnt lg)))
+			(set! tm (- now 00001))
+			(set! lg gc-cnt)
+			(set! ls sent-cnt))))
+-----------------------------------------------------------------
+So again: stats.
+
+Redo earlier work: but with fixed filtering.  line 9305 above
+
+(define fsi (add-subtotal-filter psa 50 30 10))
+(define pti (make-power-iter-pca fsi))
+
+(define feig (pti 'make-left-unit (fsi 'left-basis)))
+(length (fsi 'left-basis))  ; 13122
+(feig (Word "the")) ; = 1/sqrt (13122)
+(length (pti 'right-basis)) ; 
+
+(define lit (pti 'left-iterate feig 1))
+(define w (car (pti 'left-basis)))
+(WordNode "cloud")
+(lit w)  ;  7.963841319884063e-4
+left-norm took 582 seconds
+
+(define lit2 (pti 'left-iterate lit 1))
+(pti 'left-print lit2 20)
+
+(define lit4 (pti 'left-iterate lit3 1))
+(pti 'left-print lit4 20)
+
+OK, this needs a few more steps to converge, but gives same results as
+before. Yayy!
+------------------------------------------
+OK, cosine time.  adapt from line 9364
+
+(define pci (make-cosine-matrix fsi))
+(define pti (make-power-iter-pca pci 'left-unit))
+(define lit (pti 'left-iterate feig 4))
+(define lit2 (pti 'left-iterate lit 4))
+
+Substantially similar but not identical results:
+the lit1 results are closer.
+(pti 'left-print lit2 20)
+((WordNode "." . 0.9762388252965614)
+((WordNode "," . 0.14180449500019524)
+((WordNode "the" . 0.08346874712036408)
+((WordNode "to" . 0.07062641675278085)
+((WordNode "and" . 0.07032844639726361)
+((WordNode "a" . 0.04157464373827347)
+((WordNode "of" . 0.03604121229169698)
+((WordNode "”" . 0.029226311035184596)
+((WordNode "in" . 0.028139776676391105)
+((WordNode "that" . 0.026246992008664854)
+((WordNode "was" . 0.02540012588054255)
+((WordNode "his" . 0.024322426008004088)
+((WordNode "he" . 0.023323167571591752)
+
+cosines? 
+(define poi (add-pair-cosine-compute pti))
+(poi 'right-cosine WORD-A WORD-B)
+
+(poi 'right-cosine  (Word ".") (Word ",")) ; 0.548721899627726
+(poi 'right-cosine  (Word ".") (Word ".")) = 0.9999999999999999
+(poi 'right-cosine  (Word ".") (Word "the")) = 0.7306741325101412
+(poi 'right-cosine  (Word ".") (Word "to")) = 0.6453504435435683
+(poi 'right-cosine  (Word ".") (Word "and")) = 0.6683619269954274
+(poi 'right-cosine  (Word ".") (Word "a")) = 0.6271733855216901
+
+(poi 'right-cosine  (Word ",") (Word "the")) = 0.7105031050865372
+(poi 'right-cosine  (Word ",") (Word "to")) = 0.8240420194068381
+(poi 'right-cosine  (Word ",") (Word "and")) = 0.8877149213148245
+(poi 'right-cosine  (Word ",") (Word "a")) = 0.7645779363007278
+(poi 'right-cosine  (Word "the") (Word "the")) = 0.9999999999999999
+(poi 'right-cosine  (Word "the") (Word "to")) = 0.7904174107721877
+(poi 'right-cosine  (Word "the") (Word "and")) = 0.7436842107977618
+(poi 'right-cosine  (Word "the") (Word "a")) = 0.8964505696268208
+(poi 'right-cosine  (Word "to") (Word "and")) = 0.9061808294998355
+(poi 'right-cosine  (Word "to") (Word "a")) = 0.8567320046759815
+(poi 'right-cosine  (Word "and") (Word "a")) = 0.7545793156905689
+
+
+OK, substaintially similar to before, about 8% larger.
+ So we double-checked our data, fixed the bugs, and its good. 
+Now what?
+
 -----------------------------------------------------------------
 ---------
 wtf. get-pair-count takes a LL pair, but wild-card return hi-level.
