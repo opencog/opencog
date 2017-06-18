@@ -26601,8 +26601,8 @@ real soon now
 
 \end_inset
 
- The exreme sparsity indicates that a power-itertion aglorithm will be the
- most efficient for implementing a PCA algorithm.
+ The extreme sparsity indicates that a power-iteration aglorithm will be
+ the most efficient for implementing a PCA algorithm.
 \end_layout
 
 \begin_layout Standard
@@ -26647,8 +26647,7 @@ Should we identify
 \begin_inset Formula $X^{T}X=PP^{T}$
 \end_inset
 
-.
- ? We can, but then we don't get what we want.
+? We can, but then we don't get what we want.
  Computing the principal component of this matrix for a recent dataset (see
  later section below), we get the following vector shown below.
  The 
@@ -27485,7 +27484,54 @@ a
  + ...
  and so on, the remaining entries filled out in roughly the same order,
  by the same words, as in the frequency PCA.
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+Created as follows:
+\end_layout
+
+\begin_layout Plain Layout
+(define fsi (add-subtotal-filter psa 50 30 10)) 
+\end_layout
+
+\begin_layout Plain Layout
+(define pci (make-cosine-matrix fsi))
+\end_layout
+
+\begin_layout Plain Layout
+(define pti (make-power-iter-pca pci 'left-unit))
+\end_layout
+
+\begin_layout Plain Layout
+(define lit (pti 'left-iterate feig 8)) 
+\end_layout
+
+\begin_layout Plain Layout
+(pti 'left-print lit 20) 
+\end_layout
+
+\end_inset
+
  Why is this? It's worth taking a look at the matrix:
+\begin_inset Foot
+status open
+
+\begin_layout Plain Layout
+Created with 
+\end_layout
+
+\begin_layout Plain Layout
+(define poi (add-pair-cosine-compute pti)) 
+\end_layout
+
+\begin_layout Plain Layout
+(poi 'right-cosine WORD-A WORD-B) 
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -27588,7 +27634,7 @@ a
 \begin_inset Text
 
 \begin_layout Plain Layout
-0.541
+0.549
 \end_layout
 
 \end_inset
@@ -27597,7 +27643,7 @@ a
 \begin_inset Text
 
 \begin_layout Plain Layout
-0.724
+0.731
 \end_layout
 
 \end_inset
@@ -27606,7 +27652,7 @@ a
 \begin_inset Text
 
 \begin_layout Plain Layout
-0.643
+0.6435
 \end_layout
 
 \end_inset
@@ -27615,7 +27661,7 @@ a
 \begin_inset Text
 
 \begin_layout Plain Layout
-0.666
+0.668
 \end_layout
 
 \end_inset
@@ -27624,7 +27670,7 @@ a
 \begin_inset Text
 
 \begin_layout Plain Layout
-0.625
+0.627
 \end_layout
 
 \end_inset
@@ -27662,7 +27708,7 @@ a
 \begin_inset Text
 
 \begin_layout Plain Layout
-0.695
+0.711
 \end_layout
 
 \end_inset
@@ -27671,7 +27717,7 @@ a
 \begin_inset Text
 
 \begin_layout Plain Layout
-0.811
+0.824
 \end_layout
 
 \end_inset
@@ -27680,7 +27726,7 @@ a
 \begin_inset Text
 
 \begin_layout Plain Layout
-0.873
+0.888
 \end_layout
 
 \end_inset
@@ -27689,7 +27735,7 @@ a
 \begin_inset Text
 
 \begin_layout Plain Layout
-0.753
+0.765
 \end_layout
 
 \end_inset
@@ -27736,7 +27782,7 @@ the
 \begin_inset Text
 
 \begin_layout Plain Layout
-0.781
+0.790
 \end_layout
 
 \end_inset
@@ -27745,7 +27791,7 @@ the
 \begin_inset Text
 
 \begin_layout Plain Layout
-0.734
+0.744
 \end_layout
 
 \end_inset
@@ -27754,7 +27800,7 @@ the
 \begin_inset Text
 
 \begin_layout Plain Layout
-0.886
+0.896
 \end_layout
 
 \end_inset
@@ -27810,7 +27856,7 @@ to
 \begin_inset Text
 
 \begin_layout Plain Layout
-0.900
+0.906
 \end_layout
 
 \end_inset
@@ -27819,7 +27865,7 @@ to
 \begin_inset Text
 
 \begin_layout Plain Layout
-0.852
+0.857
 \end_layout
 
 \end_inset
@@ -27884,7 +27930,7 @@ and
 \begin_inset Text
 
 \begin_layout Plain Layout
-0.750
+0.755
 \end_layout
 
 \end_inset
@@ -29652,6 +29698,45 @@ Iteration appears to converge very rapidly.
 
 \begin_layout Standard
 In this case, the principle component is revealed to be
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+Computed as follows (simplified, various checks were done to verify correctness)
+: 
+\end_layout
+
+\begin_layout Plain Layout
+(define psa (make-pseudo-cset-api))
+\end_layout
+
+\begin_layout Plain Layout
+(psa 'fetch-pairs)
+\end_layout
+
+\begin_layout Plain Layout
+(define fsi (add-subtotal-filter psa 50 30 10))
+\end_layout
+
+\begin_layout Plain Layout
+(define pti (make-power-iter-pca fsi))
+\end_layout
+
+\begin_layout Plain Layout
+(define feig (pti 'make-left-unit (fsi 'left-basis))) 
+\end_layout
+
+\begin_layout Plain Layout
+(define lit (pti 'left-iterate feig 4)) 
+\end_layout
+
+\begin_layout Plain Layout
+(pti 'left-print lit 20) 
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
