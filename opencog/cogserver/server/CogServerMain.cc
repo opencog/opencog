@@ -219,11 +219,6 @@ int main(int argc, char *argv[])
     
     CogServer& cogserve = cogserver();
 
-    // Open database *before* loading modules, since the modules
-    // might create atoms, and we can't have that happen until 
-    // storage is open, as otherwise, there will be handle conflicts.
-    cogserve.openDatabase(); 
-
     // Load modules specified in config
     cogserve.loadModules();
 
