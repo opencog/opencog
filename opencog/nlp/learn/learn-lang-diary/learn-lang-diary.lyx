@@ -29344,6 +29344,155 @@ day
 \end_layout
 
 \begin_layout Subsection*
+A bit of sheaf theory
+\end_layout
+
+\begin_layout Standard
+I recently realized tht much of what is being discussed here can be anchored
+ in the vocablary of a generic mathematical theory, namely, sheaf theory.
+ Sheaves allow topological structure to be discussed in a local way: sheaves
+ describe how the local neightborhoods of a point glue together, to form
+ a manifold as a whole.
+ Link Grammar disjuncts and connector sets are really just the stalks and
+ germs of sheaf theory, in mild disguise.
+ This can be seen as follows.
+\end_layout
+
+\begin_layout Standard
+A standard way of expressing a graph is to list all of the vertexes in the
+ graph, and to list all of the edges.
+ Knowing these, one knows the graph.
+ However, this is a global description: One does not know the local structure
+ until one looks at specific vertexes, and what they attach to.
+\end_layout
+
+\begin_layout Standard
+A different way of describing a graph is to make a list of pairs: a vertex
+ 
+\begin_inset Formula $v$
+\end_inset
+
+ and all the edges that attach to it.
+ More generally, one can consider pairs where a vertex 
+\begin_inset Formula $v$
+\end_inset
+
+ is attached to a vertex 
+\begin_inset Formula $w$
+\end_inset
+
+ by means of a path of length 
+\begin_inset Formula $N$
+\end_inset
+
+ or less.
+\begin_inset Formula 
+\[
+\left(\mbox{vertex }v,\left\{ w\mbox{ s.t. vertex }w\mbox{ is attached to }v\right\} \right)
+\]
+
+\end_inset
+
+This describes the graph, as a whole, just as well as the simpler vertex+edge
+ list does.
+ However, the language is different: these pairs are presheaves, obeying
+ all the axioms of a presheaf, e.g.
+ the compostion of restriction morphisms.
+ They become a sheaf because they also obey the glueing or collation axiom
+ as well: they can be glued together to form the original graph from which
+ they were taken.
+\end_layout
+
+\begin_layout Standard
+Thus, we can see that the set
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\left(\mbox{vertex }v,\left\{ \mbox{ edges attached to }v\right\} \right)
+\]
+
+\end_inset
+
+is the same thing as a Link Grammar dictionary entry.
+\end_layout
+
+\begin_layout Standard
+To be more precise, we need to distinguish the graph-sheaf that arises for
+ a single sentence (from the dependency parse of the sentence) from the
+ sheaf that arises from the entire language.
+ If we take the language to consist of the set of all possible sentences,
+ then the sheafification is to parse each of the sentences in the language,
+ to get a dependency graph for each sentence, create the individual (word,
+ connector-set) lists, and then take the quotient, identifying together
+ all words that have the same spelling.
+ This gives the sheaf of the entire language.
+\end_layout
+
+\begin_layout Standard
+From what I can tell, this realization that language can be sheafified is
+ not new; when the language is not a natural language, but is instead first-orde
+r logic, then it's sheafification gives the Kripke–Joyal semantics.
+ According to wikipedia, this was noted in 1965 for existential quantification.
+ I don't know if this was ever noted for natural langauge before, but, as
+ I've blathered on the mailing list before, this provides the 
+\begin_inset Quotes eld
+\end_inset
+
+answer
+\begin_inset Quotes erd
+\end_inset
+
+ to why the logic of Link Grammar appears to be modal logic: Link Grammar
+ dictionary entries are sheaves, and the disjuncts are the different 
+\begin_inset Quotes eld
+\end_inset
+
+possible worlds
+\begin_inset Quotes erd
+\end_inset
+
+ that a given word can inhabit.
+ For a natural-language sentence, 
+\begin_inset Quotes eld
+\end_inset
+
+there exists
+\begin_inset Quotes erd
+\end_inset
+
+ (existential quantification) a collection of disjuncts that can parse the
+ sentence.
+ Bingo.
+\end_layout
+
+\begin_layout Standard
+I used to say that LG disjuncts had something to do with linear logic, because
+ linear logic also has the general whiff of 
+\begin_inset Quotes eld
+\end_inset
+
+possible worlds
+\begin_inset Quotes erd
+\end_inset
+
+ around it.
+ I now see that in fact its actually modal logic, and it is the language
+ of sheaves that provides the direct route from Link Grammar, to modal logic.
+ It would be very interesting to see all the details worked out.
+\end_layout
+
+\begin_layout Standard
+Most interesting is perhaps this: the sentences of a language are observed
+ with some a priori frequency or probability.
+ What's the correct way of converting this to a probability distribution
+ on the sheaf? Next, given a probability distribution on the sheaf, what
+ is the corresponding probability distribution on the corresponding modal
+ logic? 
+\end_layout
+
+\begin_layout Subsection*
 Conclusions
 \end_layout
 
@@ -29376,6 +29525,13 @@ First principles suggest something Bayesian, based on the Gibbs measure,
  Hidden, because we don't know the grammatical categories in any a priori
  sense; we must deduce them.
  
+\end_layout
+
+\begin_layout Itemize
+It would be great if someone worked out the precise details in going from
+ sheaves to modal logic.
+ This was already done, in 1965, for topos theory; no one has done this
+ for natural language, though.
 \end_layout
 
 \begin_layout Subsection*
