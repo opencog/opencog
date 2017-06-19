@@ -75,33 +75,30 @@
               ; end with a wildcard
               (else (append (list wc) TERMS (list wc))))))
 
-(define (merge-globs TERMS)
+(define (preprocess-terms TERMS)
   "Make sure there is no meaningless wildcard/variable in TERMS,
    which may cause problems in rule matching or variable grounding."
-  ; A typical wildcard
-  (define wc (cons 'wildcard (cons 0 -1)))
-
   (fold-right (lambda (term prev)
 (display term) (newline) (display prev) (newline) (newline)
-    (cond ; If there are two consecutive typical wildcards,
-          ; i.e. (wildcard 0 . -1) (wildcard 0 . -1),
+    (cond ; If there are two consecutive wildcards that are identical,
+          ; e.g. (wildcard 0 . -1) (wildcard 0 . -1),
           ; ignore one of them
-          ((and (equal? (first prev) wc)
-                (equal? term wc))
+          ((and (equal? term (first prev))
+                (equal? 'wildcard (car term)))
            prev)
-          ; If we have:
+          ; If we have e.g.
           ; (wildcard 0 . -1) (variable (wildcard 0 . -1))
           ; take the variable but with the previous wildcard removed
-          ((and (equal? (first prev) wc)
-                (equal? 'variable (car term))
-                (equal? (cadr term) wc))
+          ((and (equal? 'variable (car term))
+                (equal? 'wildcard (caadr term))
+                (equal? (first prev) (cadr term)))
            (cons term (cdr prev)))
-          ; If we have:
+          ; If we have e.g.
           ; (variable (wildcard 0 . -1)) (wildcard 0 . -1)
-          ; Ignore the current one
-          ((and (equal? term wc)
+          ; ignore the latter one
+          ((and (equal? 'wildcard (car term))
                 (equal? 'variable (car (first prev)))
-                (equal? (cadr (first prev)) wc))
+                (equal? (cadr (first prev)) term))
            prev)
           (else (cons term prev))))
     (list (last TERMS))
@@ -275,8 +272,8 @@
   "Top level translation function. Pattern is a quoted list of terms,
    and action is a quoted list of actions or a single action."
   (let* ((ordered-terms (order-terms PATTERN))
-         (merged-terms (merge-globs ordered-terms))
-         (proc-terms (process-pattern-terms merged-terms))
+         (preproc-terms (preprocess-terms ordered-terms))
+         (proc-terms (process-pattern-terms preproc-terms))
          (vars (append atomese-variable-template (list-ref proc-terms 0)))
          (globs (list-ref proc-terms 1))
          (conds (append atomese-condition-template (list-ref proc-terms 2)))
@@ -292,7 +289,7 @@
                      TOPIC
                      NAME)))
         (cog-logger-debug "ordered-terms: ~a" ordered-terms)
-        (cog-logger-debug "merged-terms: ~a" merged-terms)
+        (cog-logger-debug "preproc-terms: ~a" preproc-terms)
         (cog-logger-debug "BindLink: ~a" bindlink)
         (cog-logger-debug "psi-rule: ~a" psi-rule)
         ; Link both the newly generated BindLink and psi-rule together
