@@ -25633,9 +25633,16 @@ en_pairs_rthree_mst
 \end_inset
 
 
-\begin_inset Newline newline
+\end_layout
+
+\begin_layout Standard
+\begin_inset VSpace defskip
 \end_inset
 
+
+\end_layout
+
+\begin_layout Standard
 The legend is as follows:
 \end_layout
 
@@ -26108,7 +26115,7 @@ en_pairs_ttwo_mst
 \begin_inset Text
 
 \begin_layout Plain Layout
-
+13.2M
 \end_layout
 
 \end_inset
@@ -26117,7 +26124,7 @@ en_pairs_ttwo_mst
 \begin_inset Text
 
 \begin_layout Plain Layout
-
+31.5M
 \end_layout
 
 \end_inset
@@ -26126,7 +26133,7 @@ en_pairs_ttwo_mst
 \begin_inset Text
 
 \begin_layout Plain Layout
-
+2.39
 \end_layout
 
 \end_inset
@@ -27523,7 +27530,7 @@ Created with
 \end_layout
 
 \begin_layout Plain Layout
-(define poi (add-pair-cosine-compute pti)) 
+(define poi (add-pair-cosine-compute fsi)) 
 \end_layout
 
 \begin_layout Plain Layout
@@ -28212,8 +28219,44 @@ sim
 So why aren't some of these in the PCA vector?
 \end_layout
 
+\begin_layout Subsubsection*
+IMPORTANT: 
+\end_layout
+
 \begin_layout Standard
-Computing similarity for all pairs is not manageable.
+Some readers have misunderstood this section.
+ We are NOT doing PCA to obtain similarity! We are examining it as an algo
+ for CLUSTERING! That is, instead of doing k-means clustering, or agglomerative
+ clustering, or something like that, the idea is/was to use a thresholded
+ PCA for CLUSTERING! and NOT for similarity, because we've already got reasonabl
+e adequate similarity.
+ Higher-quality similarity might be nice, but that is of seccondary importance,
+ right now.
+\end_layout
+
+\begin_layout Subsection*
+Cosine similarity
+\end_layout
+
+\begin_layout Standard
+This section reviews cosine similarity for the disjunct-tagged words.
+ However, before you look at this, realize that there are TWO classes of
+ words in the corpus: those that are capitalized, and those that are not.
+ Assuming that sentences are 20 words long, this means that the effective
+ size of the capitalized-word corpus is 20x smaller than the uncapitalized
+ corpus.
+ Because it is so much smaller, it should be no surprise that the accuracy
+ will be lower.
+\end_layout
+
+\begin_layout Standard
+In short, you will see quirks in the cosine similarity of the CAPITALIZED
+ words! This is an important point, so please, do not misunderstand it!
+ Don't be like some of the readers who already have missed this.
+\end_layout
+
+\begin_layout Standard
+Computing cosine similarity for all pairs is not manageable.
  However, if we limit ourselves, then there are 803 words that were observed
  1500 times, or more.
  There are 322003 = 803 * 802 / 2 pairs of these.
@@ -28912,7 +28955,7 @@ sim
 This listing skips four pairs (smiled, laughed) (nodded, laughed) (asked,
  sighed) (nodded, asked) that would appear in it.
  Curiously, surprisingly, with the exception of the first pair, these are
- all pairs of propositions! The top pairs to break out of this pattern are:
+ all pairs of prepositions! The top pairs to break out of this pattern are:
  
 \end_layout
 
