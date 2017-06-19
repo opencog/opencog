@@ -5681,6 +5681,10 @@ this appears to give only mediocre results.
 STATUS: archived.
 DATE: 18 May 2017
 REASON: The wikipedia-based data is mediocre.
+Also:
+a) it fails to separate quotation marks.
+b) The any-disjuncts are junk.
+c) The LgWordCset typename needs to be changed to Section
 
                        List of relations
  Schema |    Name    | Type  | Owner |    Size    | Description
@@ -5970,10 +5974,13 @@ Uses the new PseudoAnd and PseudoWordCset types.
 Kills the bogus lg-any disjuncts.
 Contains table summaries for pairs and csets.
 
-STATUS: fair
+STATUS: fair/poor
 DATE:  9 June 2017
-REASON: One issue:
- a) fails to separate quoation marks (inherited from tone)
+REASON: Several issues:
+ a) Missing links to LEFT-WALL
+ b) fails to separate quotation marks (inherited from tone)
+ c) fails to separete various other punctuation.
+ d) The PseudoWordCset typename needs to be changed to Section, etc.
 
 en_pairs_tone_mst=> \dt+
                         List of relations
@@ -6090,9 +6097,13 @@ Random parses from tranche-1 and tranche-2, together with MST parses from
 both tranches. The bogus ANY-disjuncs got removed, and the correct 
 PseudoWordCsets are used.  Contains the summary stats for csets, too.
 
-STATUS: good
+STATUS: fair/poor
 DATE: 9 Jun 2017
-REASON: I think it's good.
+REASON: Multiple issues:
+ a) Missing links to LEFT-WALL
+ b) fails to separete various punctuation
+ c) The PseudoWordCset typename needs to be changed to Section, etc.
+
 
                         List of relations
  Schema |    Name    | Type  | Owner  |    Size    | Description 
@@ -6292,9 +6303,13 @@ en_pairs_rone_mst
 The en_pairs_rone dataset used to perform MST parses of tranche-1
 books.  Contains both pair-MI and cset-MI data and summaries.
 
-STATUS: good
+STATUS: fair/poor
 DATE: 13 June 2017
-REASON: Best so far, I think.
+REASON: Multiple issues:
+ a) Missing links to LEFT-WALL
+ b) fails to separete various punctuation
+ c) The PseudoWordCset typename needs to be changed to Section, etc.
+
 
 en_pairs_rone_mst=> \dt+
                         List of relations
@@ -6369,7 +6384,7 @@ A continutation of en_pairs_rone.
 
 STATUS: good
 DATE: 12 June 2017
-REASON: Best so far, I think.
+REASON: One issue, see en_pairs_rone for description.
 
                         List of relations
  Schema |    Name    | Type  | Owner  |    Size    | Description 
@@ -6397,9 +6412,13 @@ en_pairs_rtwo_mst
 -----------------
 en_pairs_rtwo, with tranche-1 and tranche-2 MST parses.
 
-STATUS: good
+STATUS: fair/poor
 DATE: 14 June 2017
-REASON: Best so far, I think.
+REASON: Multiple issues:
+ a) Missing links to LEFT-WALL
+ b) fails to separete various punctuation
+ c) The PseudoWordCset typename needs to be changed to Section, etc.
+
 
                         List of relations
  Schema |    Name    | Type  | Owner  |    Size    | Description 
@@ -9362,16 +9381,11 @@ OK, that didn't work out very much. Why?
 ((WordNode "was"  . 0.04159803271278564)
 
 
-(cset-vec-cosine  (WordNode ".") (WordNode ","))
-$174 = 0.5411980781755208
-(cset-vec-cosine  (WordNode "the") (WordNode ","))
-$175 = 0.6949870533623743
-(cset-vec-cosine  (WordNode "the") (WordNode "."))
-$176 = 0.7239559271562869
-(cset-vec-cosine  (WordNode "the") (WordNode "to"))
-$177 = 0.7812122780640004
-(cset-vec-cosine  (WordNode "the") (WordNode "a"))
-$178 = 0.8863119467021999
+(cset-vec-cosine  (WordNode ".") (WordNode ",")) = 0.5411980781755208
+(cset-vec-cosine  (WordNode "the") (WordNode ",")) = 0.6949870533623743
+(cset-vec-cosine  (WordNode "the") (WordNode ".")) = 0.7239559271562869
+(cset-vec-cosine  (WordNode "the") (WordNode "to")) = 0.7812122780640004
+(cset-vec-cosine  (WordNode "the") (WordNode "a")) = 0.8863119467021999
 
 (define ac (pti 'left-basis))
 (define top-cset-words
@@ -9426,7 +9440,9 @@ counts...
 -- it uses star-obj to get stars. which should be filtered stars.
 
 So: 
- (acc 'right-cosine (Word "the") (Word "a")) ; 0.8971244127293886
+ (acc 'right-cosine (Word "the") (Word "a")) ; 0.8971244127293886 XXX
+
+Should be 0.8964505696268208
 
 (sqrt (acc 'right-product (Word "the") (Word "the"))) ;
 9761.855971074354  OK so that agrees with support, now.
@@ -9472,7 +9488,403 @@ because maybe count not filtered correctly, still????
 cosine creates fold, says "use pair-freq"
 fold uses pair-freq and bypasses filtering!
 
+solutions:
+1) pair-freq should check w/ filter. All of freq-api should.
+2) filter should provide pair-freq.
+3) avoid cached freq, since its inaccurate in general.
+4) freq-api should check for filter, and respond differently.  How?
+5) api's refuse to work with filters; filter blocks API.
 
+OK, I think that's running reliably now. DONE.
+
+(apply LLOBJ (cons message args)
+-----------------------------------------------------------------
+(define grate
+	(let ((lg 0.00001) (ls 0.00001) (tm (current-time)))
+		(lambda() 
+			(define now (current-time))
+			(define fra (/ (- sent-cnt ls) (- gc-cnt lg) ))
+			(define dt (- now tm))
+			(format #t "delta-t=~A frac=~f gc-rate=~f\n"
+				dt fra (/ dt (- gc-cnt lg)))
+			(set! tm (- now 00001))
+			(set! lg gc-cnt)
+			(set! ls sent-cnt))))
+-----------------------------------------------------------------
+So again: stats.
+
+Redo earlier work: but with fixed filtering.  line 9305 above
+
+(define fsi (add-subtotal-filter psa 50 30 10))
+(define pti (make-power-iter-pca fsi))
+
+(define feig (pti 'make-left-unit (fsi 'left-basis)))
+(length (fsi 'left-basis))  ; 13122
+(feig (Word "the")) ; = 1/sqrt (13122)
+(length (pti 'right-basis)) ; 
+
+(define lit (pti 'left-iterate feig 1))
+(define w (car (pti 'left-basis)))
+(WordNode "cloud")
+(lit w)  ;  7.963841319884063e-4
+left-norm took 582 seconds
+
+(define lit2 (pti 'left-iterate lit 1))
+(pti 'left-print lit2 20)
+
+(define lit4 (pti 'left-iterate lit3 1))
+(pti 'left-print lit4 20)
+
+OK, this needs a few more steps to converge, but gives same results as
+before. Yayy!
+------------------------------------------
+OK, cosine time.  adapt from line 9364
+
+(define pci (make-cosine-matrix fsi))
+(define pti (make-power-iter-pca pci 'left-unit))
+(define lit (pti 'left-iterate feig 4))
+(define lit2 (pti 'left-iterate lit 4))
+
+Substantially similar but not identical results:
+the lit1 results are closer.
+(pti 'left-print lit2 20)
+((WordNode "." . 0.9762388252965614)
+((WordNode "," . 0.14180449500019524)
+((WordNode "the" . 0.08346874712036408)
+((WordNode "to" . 0.07062641675278085)
+((WordNode "and" . 0.07032844639726361)
+((WordNode "a" . 0.04157464373827347)
+((WordNode "of" . 0.03604121229169698)
+((WordNode "”" . 0.029226311035184596)
+((WordNode "in" . 0.028139776676391105)
+((WordNode "that" . 0.026246992008664854)
+((WordNode "was" . 0.02540012588054255)
+((WordNode "his" . 0.024322426008004088)
+((WordNode "he" . 0.023323167571591752)
+
+cosines? 
+(define poi (add-pair-cosine-compute pti))
+(poi 'right-cosine WORD-A WORD-B)
+
+(poi 'right-cosine  (Word ".") (Word ",")) ; 0.548721899627726
+(poi 'right-cosine  (Word ".") (Word ".")) = 0.9999999999999999
+(poi 'right-cosine  (Word ".") (Word "the")) = 0.7306741325101412
+(poi 'right-cosine  (Word ".") (Word "to")) = 0.6453504435435683
+(poi 'right-cosine  (Word ".") (Word "and")) = 0.6683619269954274
+(poi 'right-cosine  (Word ".") (Word "a")) = 0.6271733855216901
+
+(poi 'right-cosine  (Word ",") (Word "the")) = 0.7105031050865372
+(poi 'right-cosine  (Word ",") (Word "to")) = 0.8240420194068381
+(poi 'right-cosine  (Word ",") (Word "and")) = 0.8877149213148245
+(poi 'right-cosine  (Word ",") (Word "a")) = 0.7645779363007278
+(poi 'right-cosine  (Word "the") (Word "the")) = 0.9999999999999999
+(poi 'right-cosine  (Word "the") (Word "to")) = 0.7904174107721877
+(poi 'right-cosine  (Word "the") (Word "and")) = 0.7436842107977618
+(poi 'right-cosine  (Word "the") (Word "a")) = 0.8964505696268208
+(poi 'right-cosine  (Word "to") (Word "and")) = 0.9061808294998355
+(poi 'right-cosine  (Word "to") (Word "a")) = 0.8567320046759815
+(poi 'right-cosine  (Word "and") (Word "a")) = 0.7545793156905689
+
+
+OK, substaintially similar to before, about 8% larger.
+ So we double-checked our data, fixed the bugs, and its good. 
+Now what?
+-----------------------------------------------------------------
+(define ac (pti 'left-basis))
+(define top-cset-words
+   (filter (lambda (wrd) (< 1500 (cset-vec-word-observations wrd))) ac))
+(length top-cset-words)
+(length top-cset-words) = 803
+
+(define (mkcos wa wb) (cons (cons wa wb) (poi 'right-cosine wa wb)))
+
+(define (coprs wrd wrds)
+	(map (lambda (wb) (mkcos wrd wb)) wrds))
+
+(define (allprs wrds lst)
+	(if (null? wrds) lst
+		(allprs (cdr wrds) (append (coprs (car wrds) (cdr wrds)) lst))))
+
+(define asprs (allprs top-cset-words '()))
+(length asprs) = 322003
+
+(define also (sort asprs (lambda (a b) (> (cdr a) (cdr b)))))
+(take also 200) ;; see below
+
+(define lcprs
+(filter
+ (lambda (scp)
+	(and (char-lower-case? (car (string->list (cog-name (caar scp)))))
+       (char-lower-case? (car (string->list (cog-name (cdar scp)))))))
+  also))
+
+(length lcprs) = 239778
+
+
+
+
+(use-modules (system repl server))
+(spawn-server)
+rlwrap telnet localhost 37146
+
+The top 200 of the above:
+(He, She) . 0.997345758
+(Her, His) . 0.996268828
+(nodded, sighed) . 0.99601656
+(There, It) . 0.995809996
+(He, It) . 0.995435813
+(Dallas, Two-Bit) . 0.995062883
+(Dallas, Jim) . 0.994875764
+(But, When) . 0.994776669
+(Two-Bit, Mai) . 0.994641695
+(Aster, Mai) . 0.994363834
+(He, There) . 0.994337552
+(After, With) . 0.994303242
+(Sandy, Bunny) . 0.994181214
+(One, All) . 0.99409611
+(Then, But) . 0.99408755
+(She, It) . 0.994054139
+(And, But) . 0.99404553
+(Gene, Mai) . 0.99381092
+(Then, When) . 0.993778539
+(Jim, Mai) . 0.993727250
+(For, With) . 0.993687969
+(There, She) . 0.993678998
+(It, They) . 0.993620758
+(Two-Bit, Jim) . 0.993559994
+(That, It) . 0.99348913
+(His, All) . 0.993405770
+(Ross, Jim) . 0.993276220
+(Two-Bit, Gene) . 0.993190381
+(It, This) . 0.993141274
+(One, His) . 0.993081512
+(He, His) . 0.993057520
+(Now, Here) . 0.993019266
+(For, But) . 0.992958261
+(There, His) . 0.992797376
+(At, With) . 0.992753993
+(There, They) . 0.992725314
+(Dallas, Mai) . 0.992627449
+(But, That) . 0.992603728
+(Richard, Anna) . 0.992601407
+(There, This) . 0.992485293
+(Gene, Jim) . 0.992427189
+(For, After) . 0.992407193
+(They, The) . 0.992382512
+(She, His) . 0.991863215
+(When, With) . 0.991836780
+(Dallas, Gene) . 0.991791358
+(smiled, sighed) . 0.991786864
+(After, At) . 0.991678895
+(For, At) . 0.991640239
+(He, Her) . 0.991640030
+(Now, But) . 0.99161025
+(smiled, nodded) . 0.991579848
+(After, When) . 0.991579720
+(His, It) . 0.99155633
+(That, This) . 0.991516495
+(She, They) . 0.991503829
+(laughed, asked) . 0.991476047
+(One, There) . 0.991343749
+(For, Then) . 0.991257404
+(One, It) . 0.991256062
+(His, The) . 0.991234256
+(Now, So) . 0.991134393
+(For, All) . 0.991128043
+(There, All) . 0.99111722
+(It, All) . 0.991093382
+(Hiccup, Mai) . 0.991088746
+(It, The) . 0.991087621
+(For, When) . 0.991060842
+(Then, After) . 0.99103343
+(That, There) . 0.99100824
+(He, They) . 0.990965962
+(And, So) . 0.990895373
+(But, All) . 0.990827920
+(Jack, Demelza) . 0.990804758
+(Her, She) . 0.990769217
+(That, All) . 0.990720297
+(Bunny, Anna) . 0.990713341
+(Her, There) . 0.990708057
+(He, This) . 0.990600114
+(After, Even) . 0.990597163
+(As, When) . 0.990560365
+(Aster, Anna) . 0.990540130
+(Margaret, Jim) . 0.990520388
+(He, That) . 0.990497589
+(Aster, Gene) . 0.99039301
+(Sandy, Aster) . 0.990387947
+(Then, With) . 0.990387390
+(As, With) . 0.990361068
+(Then, As) . 0.99034848
+(She, This) . 0.990270109
+(This, They) . 0.990171297
+(Richard, John) . 0.990166796
+(He, The) . 0.990001224
+(There, The) . 0.989960300
+(Aster, Hiccup) . 0.989888481
+(His, They) . 0.989796499
+(Then, That) . 0.989791187
+(Her, The) . 0.989757803
+(Ross, Margaret) . 0.98975517
+(Bunny, Tooth) . 0.989753554
+(Demelza, Anna) . 0.989723864
+(But, With) . 0.989686041
+(But, It) . 0.989666595
+(That, His) . 0.989488364
+(She, The) . 0.989417566
+(He, But) . 0.989407999
+(Richard, Ross) . 0.989276354
+(He, Then) . 0.989261202
+(At, Even) . 0.989197444
+(Pitch, Demelza) . 0.989162716
+(He, All) . 0.98912848
+(For, That) . 0.989083210
+(Margaret, Mai) . 0.988996494
+(That, She) . 0.988974985
+(Pitch, Ross) . 0.98891348
+(Pitch, John) . 0.988908738
+(All, This) . 0.988904006
+(Sandy, Anna) . 0.988798684
+(Ross, Mai) . 0.988786842
+(Her, It) . 0.988778883
+(Then, All) . 0.988676101
+(Bunny, Hiccup) . 0.988607248
+(Her, They) . 0.988558601
+(And, That) . 0.988510273
+(Sandy, Hiccup) . 0.988502544
+(For, Here) . 0.988465756
+(His, This) . 0.988433038
+(That, When) . 0.988401578
+(Then, At) . 0.988371519
+(Then, It) . 0.988369524
+(At, There) . 0.988350034
+(So, But) . 0.988346421
+(For, There) . 0.988324599
+(Aster, Two-Bit) . 0.988296335
+(Ross, Anna) . 0.988264218
+(All, The) . 0.988254573
+(This, The) . 0.988248820
+(Ross, Demelza) . 0.988230903
+(Richard, Demelza) . 0.988228650
+(Anna, Mai) . 0.988222252
+(One, Her) . 0.988219868
+(He, One) . 0.98818965
+(There, With) . 0.9881787
+(Gene, Margaret) . 0.988139740
+(But, After) . 0.988126
+(But, This) . 0.988098723
+(But, His) . 0.988057331
+(Richard, Bunny) . 0.988050499
+(Her, All) . 0.988048392
+(Then, There) . 0.98801170
+(Ross, John) . 0.988011020
+(Bunny, Demelza) . 0.987989404
+(And, Now) . 0.987989085
+(One, The) . 0.987973231
+(But, There) . 0.987836677
+(One, That) . 0.987799175
+(When, All) . 0.987739822
+(Sandy, Demelza) . 0.987734391
+(But, As) . 0.987733581
+(nodded, Mai) . 0.987722642
+(For, Now) . 0.987711666
+(Richard, Margaret) . 0.987683845
+(Richard, Sandy) . 0.987624417
+(Then, And) . 0.987609330
+(Then, His) . 0.987578038
+(Richard, Pitch) . 0.987549191
+(It, With) . 0.987521448
+(Aster, Jim) . 0.987507205
+(Even, With) . 0.987479957
+(For, It) . 0.987479776
+(Dallas, Ross) . 0.987453815
+(laughed, sighed) . 0.987427226
+(Aster, Bunny) . 0.987377192
+(Richard, Francis) . 0.98734084
+(But, Here) . 0.987333229
+(All, With) . 0.98731580
+(One, This) . 0.987267291
+(For, This) . 0.987236319
+(Aster, Ross) . 0.987205054
+(John, Anna) . 0.987190883
+(For, His) . 0.987144501
+(That, They) . 0.987130294
+(For, As) . 0.987098321
+(Ross, Two-Bit) . 0.987032831
+(And, When) . 0.987003352
+(Then, She) . 0.986940328
+(But, She) . 0.986857973
+(Aster, Demelza) . 0.986831710
+(Hiccup, Demelza) . 0.986821933
+(When, It) . 0.986787674
+(Yes, Oh) . 0.9867814
+(Richard, Aster) . 0.986772251
+(She, All) . 0.986771596
+(Margaret, Anna) . 0.986743199
+(For, And) . 0.986722258
+(After, As) . 0.986701581
+(Now, That) . 0.986653929
+(Ross, Gene) . 0.98659473
+(As, There) . 0.986564698
+(Then, Now) . 0.986558599
+
+----------
+
+(nodded, sighed) . 0.99601656
+(smiled, nodded) . 0.991579848
+(laughed, asked) . 0.991476047
+(laughed, sighed) . 0.987427226
+
+The top 20 non-capitalized:
+
+(((WordNode "nodded" . (WordNode "sighed" ) . 0.996016567043952)
+(smiled, sighed) . 0.9917868640114925) 
+(smiled, nodded) . 0.9915798481917005) 
+(laughed, asked) . 0.9914760479256299) 
+(laughed, sighed) . 0.9874272267287744) 
+(smiled, laughed) . 0.9858859081908571) 
+(nodded, laughed) . 0.9826039675475831) 
+(she, he) . 0.981876892746973) 
+(on, with) . 0.9816995328349034) 
+(with, in) . 0.9792626952550025) 
+(around, over) . 0.9770136201691976) 
+(asked, sighed) . 0.9769922567018301) 
+(into, from) . 0.9769095700320374) 
+(off, down) . 0.9753902427048208) 
+(on, from) . 0.9747012785336783) 
+(on, in) . 0.9746021337920453) 
+(smiled, asked) . 0.97447306776569) 
+(into, through) . 0.972188886981962) 
+(nodded, asked) . 0.9721627408838814) 
+(on, for) . 0.9719692162741662))
+
+The first non-preps, non-verbs
+
+(would, could) . 0.9718788037224313) 
+(an, a) . 0.9716791745530755) 
+(night, day) . 0.9707165794699689) 
+(evening, morning) . 0.9702929323741435)
+(water, fire) . 0.9670737755352151) 
+(black, white) . 0.9666152160018894) 
+(head, hands) . 0.9665686866713692) 
+(an, some) . 0.965654580040422) 
+(throat, chest) . 0.9647259995951039) 
+(floor, table) . 0.9643904394443693) 
+(did, really) . 0.9643071841661717) 
+(bed, window) . 0.9642793931193115) 
+(upon, through) . 0.9640223642503675) 
+(shoulders, chest) . 0.9636889297135423)
+(child, question) . 0.9631387627819359)
+(didn’t, didn't) . 0.9628278593174421)
+(mind, life) . 0.9619200398737651)
+(three, two) . 0.9618460862079484) 
+(truth, evening) . 0.9614428353471973) 
+(window, table) . 0.9613977436755163) 
+(night, morning) . 0.9612113069050774) 
+(quite, almost) . 0.9609898949120979) 
+
+-----------------------------------------------------------------
 ---------
 wtf. get-pair-count takes a LL pair, but wild-card return hi-level.
 so how do wildcards works?
@@ -9511,10 +9923,10 @@ ABORT: wrong-type-arg
 (mst-parse-text "***** fff")
 
 =========================================================================
-update typecodes set typename='ConnectorSeq' where type=229; -- PseudoAnd
-update typecodes set typename='Section' where type=230;  -- PseudoWordCSet
-update typecodes set typename='ConnectorDir' where type=164;  -- LgConnDirNode
-update typecodes set typename='Connector' where type=174;  -- PseudoConnector
+update typecodes set typename='ConnectorSeq' where typename='PseudoAnd';
+update typecodes set typename='Section' where typename='PseudoWordCset';
+update typecodes set typename='ConnectorDir' where typename='LgConnDirNode';
+update typecodes set typename='Connector' where typename='PseudoConnector';
 
 =========================================================================
 

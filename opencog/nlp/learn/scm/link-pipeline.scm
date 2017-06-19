@@ -456,16 +456,53 @@
 					(monitor-rate '())
 					(process-sents)))))
 
+	; -------------------------------------------------------
 	; Manually run the garbage collector, every now and then.
 	; This helps keep RAM usage down, which is handy on small-RAM
 	; machines. However, it does cost CPU time, in exchange.
 	; Adjust `how-often` up or down to suit your whims.
-	(define maybe-gc
+	(define sometimes-gc
 		(let ((cnt 0)
-				(how-often 20)) ; every 20 times.
+				(how-often 10)) ; every 10 times.
 			(lambda ()
 				(set! cnt (+ cnt 1))
 				(if (eqv? 0 (modulo cnt how-often)) (gc)))))
+
+	; Report the average amount of time spent in GC
+	(define avg-gc-cpu-time
+		(let ((last-gc (gc-stats))
+				(start-time (get-internal-real-time))
+				(run-time (get-internal-run-time)))
+			(lambda ()
+				(define now (get-internal-real-time))
+				(define run (get-internal-run-time))
+				(define cur (gc-stats))
+				(define gc-time-taken (* 1.0e-9 (- (cdar cur) (cdar last-gc))))
+				(define elapsed-time (* 1.0e-9 (- now start-time)))
+				(define cpu-time (* 1.0e-9 (- run run-time)))
+				(format #t "Elapsed time: ~5f secs. GC: ~5f%  cpu-usage: ~5f%\n"
+					elapsed-time
+					(* 100 (/ gc-time-taken elapsed-time))
+					(* 100 (/ cpu-time elapsed-time))
+				)
+				(set! last-gc cur)
+				(set! start-time now)
+				(set! run-time run))))
+
+	; Perform GC whenever it gets larger than a fixed limit.
+	; Less than one GB should be enough, but the huge strings
+	; from relex seem to cause bad memory fragmentation.
+	(define maybe-gc
+		(let ((cnt 0)
+				(max-size (* 750 1000 1000)))  ; 750 MB
+			(lambda ()
+				(if (< max-size (- (assoc-ref (gc-stats) 'heap-size)
+							(assoc-ref (gc-stats) 'heap-free-size)))
+					(begin
+						(gc)
+						(set! cnt (+ cnt 1))
+						;(avg-gc-cpu-time)
+					)))))
 
 	(relex-parse plain-text) ;; send plain-text to server
 	(process-sents)

@@ -180,6 +180,7 @@
 					((all-pairs) get-all-pairs)
 					((fetch-pairs) fetch-any-pairs)
 					((provides) (lambda (symb) #f))
+					((filters?) (lambda () #f))
 					(else (error "Bad method call on ANY-link:" message)))
 				args)))
 )
@@ -277,6 +278,7 @@
 					((all-pairs) get-all-pairs)
 					((fetch-pairs) fetch-clique-pairs)
 					((provides) (lambda (symb) #f))
+					((filters?) (lambda () #f))
 					(else (error "Bad method call on clique-pair:" message)))
 				args))))
 
@@ -396,6 +398,7 @@
 					((all-pairs) get-all-pairs)
 					((fetch-pairs) fetch-distance-pairs)
 					((provides) (lambda (symb) #f))
+					((filters?) (lambda () #f))
 					(else (error "Bad method call on clique-pair:" message)))
 				args))))
 

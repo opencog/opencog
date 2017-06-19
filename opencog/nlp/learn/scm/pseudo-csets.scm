@@ -137,7 +137,7 @@
 		; Methods on the object
 		(lambda (message . args)
 			(apply (case message
-				((name) (lambda () "Word-Disjunct Pairs (aka Connector Sets)"))
+				((name) (lambda () "Word-Disjunct Pairs (Connector Sets)"))
 				((left-type) get-left-type)
 				((right-type) get-right-type)
 				((pair-type) get-pair-type)
@@ -150,6 +150,7 @@
 				((all-pairs) get-all-csets)
 				((fetch-pairs) fetch-pseudo-csets)
 				((provides) (lambda (symb) #f))
+				((filters?) (lambda () #f))
 				(else (error "Bad method call on psuedo-cset:" message)))
 			args)))
 )
