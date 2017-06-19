@@ -9609,12 +9609,25 @@ Now what?
 (length asprs) = 322003
 
 (define also (sort asprs (lambda (a b) (> (cdr a) (cdr b)))))
-(take also 200)
+(take also 200) ;; see below
+
+(define lcprs
+(filter
+ (lambda (scp)
+	(and (char-lower-case? (car (string->list (cog-name (caar scp)))))
+       (char-lower-case? (car (string->list (cog-name (cdar scp)))))))
+  also))
+
+(length lcprs) = 239778
+
+
+
 
 (use-modules (system repl server))
 (spawn-server)
 rlwrap telnet localhost 37146
 
+The top 200 of the above:
 (He, She) . 0.997345758
 (Her, His) . 0.996268828
 (nodded, sighed) . 0.99601656
@@ -9822,6 +9835,54 @@ rlwrap telnet localhost 37146
 (smiled, nodded) . 0.991579848
 (laughed, asked) . 0.991476047
 (laughed, sighed) . 0.987427226
+
+The top 20 non-capitalized:
+
+(((WordNode "nodded" . (WordNode "sighed" ) . 0.996016567043952)
+(smiled, sighed) . 0.9917868640114925) 
+(smiled, nodded) . 0.9915798481917005) 
+(laughed, asked) . 0.9914760479256299) 
+(laughed, sighed) . 0.9874272267287744) 
+(smiled, laughed) . 0.9858859081908571) 
+(nodded, laughed) . 0.9826039675475831) 
+(she, he) . 0.981876892746973) 
+(on, with) . 0.9816995328349034) 
+(with, in) . 0.9792626952550025) 
+(around, over) . 0.9770136201691976) 
+(asked, sighed) . 0.9769922567018301) 
+(into, from) . 0.9769095700320374) 
+(off, down) . 0.9753902427048208) 
+(on, from) . 0.9747012785336783) 
+(on, in) . 0.9746021337920453) 
+(smiled, asked) . 0.97447306776569) 
+(into, through) . 0.972188886981962) 
+(nodded, asked) . 0.9721627408838814) 
+(on, for) . 0.9719692162741662))
+
+The first non-preps, non-verbs
+
+(would, could) . 0.9718788037224313) 
+(an, a) . 0.9716791745530755) 
+(night, day) . 0.9707165794699689) 
+(evening, morning) . 0.9702929323741435)
+(water, fire) . 0.9670737755352151) 
+(black, white) . 0.9666152160018894) 
+(head, hands) . 0.9665686866713692) 
+(an, some) . 0.965654580040422) 
+(throat, chest) . 0.9647259995951039) 
+(floor, table) . 0.9643904394443693) 
+(did, really) . 0.9643071841661717) 
+(bed, window) . 0.9642793931193115) 
+(upon, through) . 0.9640223642503675) 
+(shoulders, chest) . 0.9636889297135423)
+(child, question) . 0.9631387627819359)
+(didn’t, didn't) . 0.9628278593174421)
+(mind, life) . 0.9619200398737651)
+(three, two) . 0.9618460862079484) 
+(truth, evening) . 0.9614428353471973) 
+(window, table) . 0.9613977436755163) 
+(night, morning) . 0.9612113069050774) 
+(quite, almost) . 0.9609898949120979) 
 
 -----------------------------------------------------------------
 ---------
