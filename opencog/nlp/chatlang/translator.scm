@@ -78,14 +78,24 @@
 (define (preprocess-terms TERMS)
   "Make sure there is no meaningless wildcard/variable in TERMS,
    which may cause problems in rule matching or variable grounding."
+  (define (merge-wildcard i1 i2)
+    (cons (max (car i1) (car i2))
+          (cond ((or (negative? (cdr i1)) (negative? (cdr i2))) -1)
+                (else (max (cdr i1) (cdr i2))))))
   (fold-right (lambda (term prev)
-(display term) (newline) (display prev) (newline) (newline)
     (cond ; If there are two consecutive wildcards that are identical,
           ; e.g. (wildcard 0 . -1) (wildcard 0 . -1),
           ; ignore one of them
           ((and (equal? term (first prev))
                 (equal? 'wildcard (car term)))
            prev)
+          ; Else if we have two different wildcards e.g.
+          ; (wildcard 0 . -1) (wildcard 1 . 4)
+          ; merge them
+          ((and (equal? 'wildcard (car term))
+                (equal? 'wildcard (car (first prev))))
+           (cons (cons 'wildcard (merge-wildcard (cdr term) (cdr (first prev))))
+                 (cdr prev)))
           ; If we have e.g.
           ; (wildcard 0 . -1) (variable (wildcard 0 . -1))
           ; take the variable but with the previous wildcard removed

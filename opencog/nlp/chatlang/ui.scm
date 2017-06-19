@@ -143,10 +143,12 @@
           ; Wildcard -- "up to"
           ((not (equal? #f (string-match "^\\*~[0-9]+" t)))
            (cons 'wildcard (cons 0
-             (substring (match:substring (string-match "^\\*~[0-9]+" t)) 2))))
+             (string->number (substring
+               (match:substring (string-match "^\\*~[0-9]+" t)) 2)))))
           ; Wildcard -- "exactly"
           ((not (equal? #f (string-match "^\\*[0-9]+" t)))
-           (let ((n (substring (match:substring (string-match "^\\*[0-9]+" t)) 1)))
+           (let ((n (string->number (substring
+                      (match:substring (string-match "^\\*[0-9]+" t)) 1))))
                 (cons 'wildcard (cons n n))))
           ; Wildcard -- "zero or more"
           ((string-prefix? "*" t)
