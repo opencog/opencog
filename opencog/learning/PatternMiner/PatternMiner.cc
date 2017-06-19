@@ -1106,10 +1106,14 @@ bool compareHTreeNodeBySurprisingness_I(HTreeNode* node1, HTreeNode* node2)
 
 bool compareHTreeNodeBySurprisingness_II(HTreeNode* node1, HTreeNode* node2)
 {
-    if ( node1->nII_Surprisingness - node2->nII_Surprisingness > FLOAT_MIN_DIFF)
-        return true;
-    else if ( node2->nII_Surprisingness - node1->nII_Surprisingness > FLOAT_MIN_DIFF)
-        return false;
+
+    if ((node1->superPatternRelations.size() != 0) && (node2->superPatternRelations.size() != 0))
+    {
+        if ( node1->nII_Surprisingness - node2->nII_Surprisingness > FLOAT_MIN_DIFF)
+            return true;
+        else if ( node2->nII_Surprisingness - node1->nII_Surprisingness > FLOAT_MIN_DIFF)
+            return false;
+    }
 
     return (node1->var_num < node2->var_num);
 }
@@ -1136,6 +1140,9 @@ void PatternMiner::OutPutFinalPatternsToFile(unsigned int n_gram)
     for (HTreeNode* htreeNode : patternsForThisGram)
     {
         if (htreeNode->count < thresholdFrequency)
+            continue;
+
+        if ((htreeNode->superPatternRelations.size() == 0))
             continue;
 
         if (OUTPUT_SURPRISINGNESS_CALCULATION_TO_FILE)
@@ -1269,7 +1276,9 @@ void PatternMiner::OutPutInterestingPatternsToFile(vector<HTreeNode*> &patternsF
         else if (surprisingness == 1)
             resultFile << " SurprisingnessI = " << toString(htreeNode->nI_Surprisingness);
         else
-            resultFile << " SurprisingnessII = " << toString(htreeNode->nII_Surprisingness);
+        {
+            resultFile << ", SurprisingnessII = " << toString(htreeNode->nII_Surprisingness);
+        }
 
         resultFile << endl;
 
@@ -1365,7 +1374,8 @@ void PatternMiner::OutPutLowFrequencyHighSurprisingnessPatternsToFile(vector<HTr
 
         resultFile << " SurprisingnessI = " << toString(htreeNode->nI_Surprisingness);
 
-        resultFile << " SurprisingnessII = " << toString(htreeNode->nII_Surprisingness);
+
+        resultFile << ", SurprisingnessII = " << toString(htreeNode->nII_Surprisingness);
 
         resultFile << endl;
 
@@ -1427,7 +1437,8 @@ void PatternMiner::OutPutHighFrequencyHighSurprisingnessPatternsToFile(vector<HT
 
         resultFile << " SurprisingnessI = " << toString(htreeNode->nI_Surprisingness);
 
-        resultFile << " SurprisingnessII = " << toString(htreeNode->nII_Surprisingness);
+
+        resultFile << ", SurprisingnessII = " << toString(htreeNode->nII_Surprisingness);
 
         resultFile << endl;
 
@@ -1468,7 +1479,10 @@ void PatternMiner::OutPutHighSurprisingILowSurprisingnessIIPatternsToFile(vector
         if (htreeNode->superPatternRelations.size() == 0)
             continue;
 
-        if (htreeNode->count < 10)
+        if (htreeNode->count < thresholdFrequency)
+            continue;
+
+        if (htreeNode->nII_Surprisingness < 0)
             continue;
 
         if ( (htreeNode->nI_Surprisingness > min_surprisingness_I) && (htreeNode->nII_Surprisingness < max_surprisingness_II) )
@@ -2343,7 +2357,7 @@ unsigned int PatternMiner::getAllEntityCountWithSamePredicatesForAPattern(Handle
         else
         {
             cout << "warning: this pattern contains " << classserver().getTypeName(pattern[0]->getType())
-                 << "\nUSE_QUERY_ENTITY_COUNT is for the corpus that only contains EvalutionLinks." << std::endl;
+                 << "\nUSE_QUERY_ENTITY_COUNT_FOR_EACH_PREDICATE is for the corpus that only contains EvalutionLinks." << std::endl;
             return 0;
         }
     }
@@ -2367,7 +2381,7 @@ unsigned int PatternMiner::getAllEntityCountWithSamePredicatesForAPattern(Handle
             else
             {
                 cout << "warning: this pattern contains " << classserver().getTypeName(l->getType())
-                     << "\nUSE_QUERY_ENTITY_COUNT is for the corpus that only contains EvalutionLinks." << std::endl;
+                     << "\nUSE_QUERY_ENTITY_COUNT_FOR_EACH_PREDICATE is for the corpus that only contains EvalutionLinks." << std::endl;
                 return 0;
             }
         }
@@ -2458,7 +2472,7 @@ unsigned int PatternMiner::getAllEntityCountWithSamePredicatesForAPattern(Handle
 //        else
 //        {
 //            cout << "warning: this pattern contains " << classserver().getTypeName(l->getType())
-//                 << "\USE_QUERY_ENTITY_COUNT is for the corpus that only contains EvalutionLinks." << std::endl;
+//                 << "\USE_QUERY_ENTITY_COUNT_FOR_EACH_PREDICATE is for the corpus that only contains EvalutionLinks." << std::endl;
 //            return;
 //        }
 //    }
@@ -2513,7 +2527,7 @@ void PatternMiner::calculateSurprisingness( HTreeNode* HNode, AtomSpace *_fromAt
     float p;
     unsigned int allNum;
 
-    if (USE_QUERY_ENTITY_COUNT) // this setting only for the corpus that only contains EvalutionLinks
+    if (USE_QUERY_ENTITY_COUNT_FOR_EACH_PREDICATE) // this setting only for the corpus that only contains EvalutionLinks
     {
         // generate the allPattern for this pattern, e.g.:
 //        (EvaluationLink (stv 1.000000 1.000000)
@@ -2630,7 +2644,7 @@ void PatternMiner::calculateSurprisingness( HTreeNode* HNode, AtomSpace *_fromAt
 
                 float p_i;
 //                cout << ", count = " << component_count;
-                if (USE_QUERY_ENTITY_COUNT) // this setting only for the corpus that only contains EvalutionLinks
+                if (USE_QUERY_ENTITY_COUNT_FOR_EACH_PREDICATE) // this setting only for the corpus that only contains EvalutionLinks
                 {
                     unsigned int allEntityCount = getAllEntityCountWithSamePredicatesForAPattern(unifiedSubPattern);
                     if (allEntityCount == 0)
@@ -2651,7 +2665,14 @@ void PatternMiner::calculateSurprisingness( HTreeNode* HNode, AtomSpace *_fromAt
                     }
                 }
                 else
+                {
                     p_i = ((float)(component_count)) / atomspaceSizeFloat;
+
+                    if (OUTPUT_SURPRISINGNESS_CALCULATION_TO_FILE)
+                    {
+                        HNode->surprisingnessInfo += toString(component_count) + "/" + toString(atomspaceSizeFloat) + "=" + toString(p_i);
+                    }
+                }
 
                 // cout << ", p = " << component_count  << " / " << (int)atomspaceSizeFloat << " = " << p_i << std::endl;
                 total_p *= p_i;
@@ -2708,19 +2729,31 @@ void PatternMiner::calculateSurprisingness( HTreeNode* HNode, AtomSpace *_fromAt
     if (gram == MAX_GRAM ) // can't calculate II_Surprisingness for MAX_GRAM patterns, becasue it required gram +1 patterns
         return;
 
-//    std::cout << "=================Debug: calculate II_Surprisingness for pattern: ====================\n";
+
+    if (OUTPUT_SURPRISINGNESS_CALCULATION_TO_FILE)
+    {
+        surpringnessIICalfile << "=================Debug: calculate II_Surprisingness for pattern: ====================\n";
+        surpringnessIICalfile << "Frequency = " << HNode->count << " p = " << HNode->count << "/" << allNum << " = " << p << std::endl;
+        for (Handle link : HNode->pattern)
+        {
+            surpringnessIICalfile << link->toShortString();
+        }
+
+        surpringnessIICalfile << std::endl;
+    }
 
     // II_Surprisingness is to evaluate how easily the frequency of this pattern can be infered from any of  its superpatterns
     // for all its super patterns
     if (HNode->superPatternRelations.size() == 0)
     {
-        HNode->nII_Surprisingness  = 0.000000000f;
+        HNode->nII_Surprisingness  = -1.000000000f;
         // debug:
-//        cout << "This node has no super patterns, give it Surprisingness_II value: 0.0 \n";
+//        cout << "This node has no super patterns, give it Surprisingness_II value: -1.0 \n";
     }
     else
     {
 
+        HNode->nII_Surprisingness  = -1.000000000f;
         float minSurprisingness_II = 999999999.9f;
         vector<ExtendRelation>::iterator oneSuperRelationIt;
         for(oneSuperRelationIt = HNode->superPatternRelations.begin();  oneSuperRelationIt != HNode->superPatternRelations.end(); ++ oneSuperRelationIt)
@@ -2728,7 +2761,6 @@ void PatternMiner::calculateSurprisingness( HTreeNode* HNode, AtomSpace *_fromAt
             ExtendRelation& curSuperRelation = *oneSuperRelationIt;
 
             // There are two types of super patterns: one is extended from a variable, one is extended from a const (turnt into a variable)
-            // Only type two is the super pattern we are considering:
 
             // type one : extended from a variable,  the extended node itself is considered as a variable in the pattern A
             //            {
@@ -2757,7 +2789,10 @@ void PatternMiner::calculateSurprisingness( HTreeNode* HNode, AtomSpace *_fromAt
             // Note that becasue of unifying patern, the varible order in A, Ap, E can be different
             // HandleSeq& patternAp = curSuperRelation.extendedHTreeNode->pattern;
 
-            float p_Ap = ((float )(curSuperRelation.extendedHTreeNode->count))/atomspaceSizeFloat;
+            if (curSuperRelation.isExtendedFromVar)
+                continue;
+
+            float p_Ap = ((float )(curSuperRelation.extendedHTreeNode->count))/((float)allNum);
 
             HandleSeq patternE;
             patternE.push_back(curSuperRelation.newExtendedLink);
@@ -2782,22 +2817,33 @@ void PatternMiner::calculateSurprisingness( HTreeNode* HNode, AtomSpace *_fromAt
             if (Surprisingness_II < minSurprisingness_II)
                 minSurprisingness_II = Surprisingness_II;
 
-            // debug
-//                cout << "For Super pattern: -------extended from a const----------------- " << std::endl;
-//                cout << unifiedPatternToKeyString(curSuperRelation.extendedHTreeNode->pattern, atomSpace);
-//                cout << "P(Ap) = " << p_Ap << std::endl;
-//                cout << "The extended link pattern:  " << std::endl;
-//                cout << patternEKey;
-//                cout << "Count(E) = " << patternE_count << std::endl;
-//                cout << "Surprisingness_II = |P(A) -P(Ap)/Count(E)| = " << Surprisingness_II << std::endl;
+             if (OUTPUT_SURPRISINGNESS_CALCULATION_TO_FILE)
+             {
+                if (curSuperRelation.isExtendedFromVar)
+                    surpringnessIICalfile << "For Super pattern: -------extended from a variable----------------- " << std::endl;
+                else
+                    surpringnessIICalfile << "For Super pattern: -------extended from a const----------------- " << std::endl;
 
-
+                for (Handle link : curSuperRelation.extendedHTreeNode->pattern)
+                {
+                    surpringnessIICalfile << link->toShortString();
+                }
+                //surpringnessIICalfile << unifiedPatternToKeyString(curSuperRelation.extendedHTreeNode->pattern, atomSpace);
+                surpringnessIICalfile << "P(Ap) = " << curSuperRelation.extendedHTreeNode->count << "/" << allNum << " = " << p_Ap << std::endl;
+                surpringnessIICalfile << "The extended link pattern:  " << std::endl;
+                surpringnessIICalfile << patternEKey;
+                surpringnessIICalfile << "Count(E) = " << patternE_count << std::endl;
+                surpringnessIICalfile << "Surprisingness_II = |P(A) -P(Ap)/Count(E)| = " << Surprisingness_II << std::endl;
+             }
 
 
         }
 
 //        // debug
-//        cout << "Min Surprisingness_II  = " << minSurprisingness_II;
+        if (OUTPUT_SURPRISINGNESS_CALCULATION_TO_FILE)
+        {
+            surpringnessIICalfile << "Min Surprisingness_II  = " << minSurprisingness_II;
+        }
 
         if (HNode->superPatternRelations.size() > 0)
             HNode->nII_Surprisingness = minSurprisingness_II/p;
@@ -2809,11 +2855,12 @@ void PatternMiner::calculateSurprisingness( HTreeNode* HNode, AtomSpace *_fromAt
     }
 
 
-
 //    // debug:
-//    cout << " nII_Surprisingness = Min Surprisingness_II / p = " << HNode->nII_Surprisingness  << std::endl;
-
-//    std::cout << "=================Debug: end calculate II_Surprisingness ====================\n";
+    if (OUTPUT_SURPRISINGNESS_CALCULATION_TO_FILE)
+    {
+        surpringnessIICalfile << " nII_Surprisingness = Min Surprisingness_II / p = " << HNode->nII_Surprisingness  << std::endl;
+        surpringnessIICalfile << "=================Debug: end calculate II_Surprisingness ====================\n\n";
+    }
 
 }
 
@@ -3283,8 +3330,32 @@ void PatternMiner::runPatternMiner(bool exit_program_after_finish)
 
 void PatternMiner::runInterestingnessEvaluation()
 {
-    if (USE_QUERY_ENTITY_COUNT)
+    if (USE_QUERY_ENTITY_COUNT_FOR_EACH_PREDICATE)
         allEntityNumMap.clear();
+    else if (USE_QUERY_ALL_ENTITY_COUNT)
+    {
+        cout << "USE_QUERY_ALL_ENTITY_COUNT is enable. Querying all entity number ...\n";
+        HandleSeq allEvalLinks;
+        originalAtomSpace->get_handles_by_type(back_inserter(allEvalLinks), (Type) EVALUATION_LINK, false);
+        set<Handle> allEntityHandles;
+        for (Handle evalLink : allEvalLinks)
+        {
+            Handle listLink = evalLink->getOutgoingAtom(1);
+            Handle entityHandle = listLink->getOutgoingAtom(0);
+            if (allEntityHandles.find(entityHandle) == allEntityHandles.end())
+            {
+                allEntityHandles.insert(entityHandle);
+            }
+        }
+
+        cout << "All entity number = " << allEntityHandles.size() << std::endl;
+        atomspaceSizeFloat = (float)(allEntityHandles.size());
+    }
+
+    if (OUTPUT_SURPRISINGNESS_CALCULATION_TO_FILE)
+    {
+        surpringnessIICalfile.open("surpringnessII_calcualtion_info.scm");
+    }
 
     for(cur_gram = 2; cur_gram <= MAX_GRAM; cur_gram ++)
     {
@@ -3301,6 +3372,9 @@ void PatternMiner::runInterestingnessEvaluation()
         cur_index = -1;
         threads = new thread[THREAD_NUM];
         num_of_patterns_without_superpattern_cur_gram = 0;
+
+        if (OUTPUT_SURPRISINGNESS_CALCULATION_TO_FILE)
+            surpringnessIICalfile << ";*************** surpringnessII calculation process info for " + toString(cur_gram) + " gram patterns.***************" << endl;
 
         for (unsigned int i = 0; i < THREAD_NUM; ++ i)
         {
@@ -3343,7 +3417,6 @@ void PatternMiner::runInterestingnessEvaluation()
                 break;
 
             vector<HTreeNode*> curGramPatterns = patternsForGram[cur_gram-1];
-
 
             // and then sort by surprisingness_II
             std::sort(curGramPatterns.begin(), curGramPatterns.end(),compareHTreeNodeBySurprisingness_II);
@@ -3389,7 +3462,7 @@ void PatternMiner::runInterestingnessEvaluation()
                     finalPatternsForGram[cur_gram-1].push_back(pNode);
             }
 
-            // OutPutHighSurprisingILowSurprisingnessIIPatternsToFile(patternsForGram[cur_gram-1], cur_gram, 100.0f, 0.51f);
+            OutPutHighSurprisingILowSurprisingnessIIPatternsToFile(patternsForGram[cur_gram-1], cur_gram, 100.0f, 0.51f);
 
             // sort by frequency
             std::sort((finalPatternsForGram[cur_gram-1]).begin(), (finalPatternsForGram[cur_gram-1]).end(),compareHTreeNodeByFrequency );
@@ -3401,8 +3474,11 @@ void PatternMiner::runInterestingnessEvaluation()
         std::cout<< std::endl;
     }
 
-    if (OUTPUT_SURPRISINGNESS_CALCULATION_TO_FILE)
+    if (OUTPUT_SURPRISINGNESS_CALCULATION_TO_FILE && USE_QUERY_ENTITY_COUNT_FOR_EACH_PREDICATE)
         OutPutAllEntityNumsToFile();
+
+    if (OUTPUT_SURPRISINGNESS_CALCULATION_TO_FILE)
+        surpringnessIICalfile.close();
 }
 
 
@@ -3424,7 +3500,7 @@ void PatternMiner::queryPatternsWithFrequencySurprisingnessIRanges(unsigned int 
 
     for (HTreeNode* htreeNode : patternsForGram[gram - 1])
     {
-        if ((htreeNode->count > min_frequency) && (htreeNode->count < max_frequency) && (htreeNode->count > min_surprisingness_I) && (htreeNode->count < max_surprisingness_I))
+        if ((htreeNode->count > min_frequency) && (htreeNode->count < max_frequency) && (htreeNode->nI_Surprisingness > min_surprisingness_I) && (htreeNode->nI_Surprisingness < max_surprisingness_I))
             resultPatterns.push_back(htreeNode);
     }
 
@@ -3473,6 +3549,84 @@ void PatternMiner::queryPatternsWithFrequencySurprisingnessIRanges(unsigned int 
 
     cout <<"\nDone!" << std::endl;
 }
+
+
+void PatternMiner::queryPatternsWithSurprisingnessIAndIIRanges(unsigned int min_frequency, unsigned int max_frequency,
+                                                               float min_surprisingness_I, float max_surprisingness_I,
+                                                               float min_surprisingness_II, float max_surprisingness_II,int gram)
+{
+    // out put the gram patterns to a file
+    ofstream resultFile;
+    string fileName;
+
+    fileName = "GivenFrequencySurprisingnessIAndII_" + toString(gram) + "gram.scm";
+
+    std::cout<<"\nDebug: PatternMiner: writing (gram = " + toString(gram) + ") patterns to file " + fileName << std::endl;
+    std::cout<<"Frequency range = (" << min_frequency << ", " << max_frequency << ") "  << std::endl;
+    std::cout<<"Surprisingness_I range = (" << toString(min_surprisingness_I) << ", " << toString(max_surprisingness_I) << ")"  << std::endl;
+    std::cout<<"Surprisingness_II range = (" << toString(min_surprisingness_II) << ", " << toString(max_surprisingness_II) << ")"  << std::endl;
+
+
+
+    vector<HTreeNode*> resultPatterns;
+
+    for (HTreeNode* htreeNode : patternsForGram[gram - 1])
+    {
+        if ((htreeNode->count > min_frequency) && (htreeNode->count < max_frequency) &&
+            (htreeNode->nI_Surprisingness > min_surprisingness_I) && (htreeNode->nI_Surprisingness < max_surprisingness_I) &&
+            (htreeNode->nII_Surprisingness > min_surprisingness_II) && (htreeNode->nII_Surprisingness < max_surprisingness_II)
+           )
+            resultPatterns.push_back(htreeNode);
+    }
+
+    std::sort(resultPatterns.begin(), resultPatterns.end(),compareHTreeNodeByFrequency);
+
+    resultFile.open(fileName.c_str());
+
+    resultFile << ";Interesting Pattern Mining results for " + toString(gram) + " gram patterns. Total pattern number: " + toString(resultPatterns.size()) << endl;
+
+    resultFile << ";This file contains the pattern with Frequency range = (" << min_frequency << ", " << max_frequency << ") ,"
+               << "Surprisingness_I range = (" << toString(min_surprisingness_I) << ", " << toString(max_surprisingness_I) << ")"
+               << "Surprisingness_II range = (" << toString(min_surprisingness_II) << ", " << toString(max_surprisingness_II) << ")" << std::endl;
+
+
+
+    for (HTreeNode* htreeNode : resultPatterns)
+    {
+        if (OUTPUT_SURPRISINGNESS_CALCULATION_TO_FILE)
+        {
+            resultFile << endl << htreeNode->surprisingnessInfo  << endl;
+        }
+
+        resultFile << endl << ";Pattern: Frequency = " << toString(htreeNode->count);
+
+        string SurprisingnessI = toString(htreeNode->nI_Surprisingness);
+        if (SurprisingnessI != "0")
+            resultFile << " SurprisingnessI = " << SurprisingnessI;
+
+        string SurprisingnessII = toString(htreeNode->nII_Surprisingness);
+        if (SurprisingnessII != "0")
+        resultFile << " SurprisingnessII = " << SurprisingnessII;
+
+        resultFile << endl;
+
+        // resultFile << unifiedPatternToKeyString(htreeNode->pattern)<< endl;
+
+        for (Handle link : htreeNode->pattern)
+        {
+            resultFile << link->toShortString();
+        }
+
+        resultFile << std::endl;
+
+    }
+
+    resultFile << std::endl;
+    resultFile.close();
+
+    cout <<"\nDone!" << std::endl;
+}
+
 
 bool PatternMiner::containWhiteKeywords(const string& str, QUERY_LOGIC logic)
 {
