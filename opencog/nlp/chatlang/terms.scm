@@ -50,8 +50,9 @@
 (define* (concept STR #:optional (VAR (choose-var-name)))
   "Occurrence of a concept."
   (cons (list (TypedVariable (Glob VAR)
-                             (TypeSet (Type "WordNode")
-                                      (Interval (Number 1) (Number -1)))))
+                (TypeSet (Type "WordNode")
+                         (Interval (Number 1)
+                                   (Number (get-concept-length (Concept STR)))))))
         (list (Evaluation (GroundedPredicate "scm: chatlang-concept?")
                           (List (Concept STR)
                                 (Glob VAR))))))
@@ -89,7 +90,8 @@
    as a match."
   (cons (list (TypedVariable (Glob VAR)
                              (TypeSet (Type "WordNode")
-                                      (Interval (Number 1) (Number -1)))))
+                                      (Interval (Number 1)
+                                                (Number (get-term-length TERMS))))))
         (list (Evaluation (GroundedPredicate "scm: chatlang-choices?")
                           (List (List (terms-to-atomese TERMS))
                                 (Glob VAR))))))
