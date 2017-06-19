@@ -26546,7 +26546,7 @@ What plays the role of
 \end_layout
 
 \begin_layout Standard
-What we have on hand, foundationally, is the frequency matrix 
+What we have on hand, foundationaly, is the frequency matrix 
 \begin_inset Formula $P$
 \end_inset
 
@@ -26602,7 +26602,7 @@ real soon now
 
 \end_inset
 
- The extreme sparsity indicates that a power-iteration aglorithm will be
+ The extreme sparsity indicates that a power-iteration algorithm will be
  the most efficient for implementing a PCA algorithm.
 \end_layout
 
@@ -28527,7 +28527,7 @@ The top of the list is dominated by capitalized words primarily because
 
 \begin_layout Standard
 We conclude: cosine similarity penalizes words for being observed more frequentl
-y; for thier grammatical usage being scrutinized more carefully.
+y; for their grammatical usage being scrutinized more carefully.
  That's bad.
  We don't want more similarity just because there is more uncertainty.
 \end_layout
@@ -28912,7 +28912,7 @@ sim
 This listing skips four pairs (smiled, laughed) (nodded, laughed) (asked,
  sighed) (nodded, asked) that would appear in it.
  Curiously, surprisingly, with the exception of the first pair, these are
- all pairs of propostions! The top pairs to break out of this pattern are:
+ all pairs of propositions! The top pairs to break out of this pattern are:
  
 \end_layout
 
@@ -29295,7 +29295,7 @@ The list seems excellent to me, and almost too good to be true.
  Looking a second time, though, it has a distinctly 19th century feel to
  it: the corpus is heavily weighted by project Gutenberg titles, which will
  certainly be more plain-spoken than what we are used to.
- The only oddbal pair in the bunch is (child, question).
+ The only oddball pair in the bunch is (child, question).
  Note that the pair (didn’t, didn't) differs only in punctuation: vertical
  apostrophe, versus right-apostrophe.
 \end_layout
@@ -29304,12 +29304,12 @@ The list seems excellent to me, and almost too good to be true.
 The other very curious result here is that, although we are looking for
  grammatical similarity, we are finding something stronger: semantic similarity.
  So, for example, (night, day) (evening, morning) (water, fire) (black,
- white) are not just antonyms, they are almost primal in thier opposition:
+ white) are not just antonyms, they are almost primal in their opposition:
  they're pre-historic, pre-civilizational antonyms.
  The next few: (head, hands) (throat, chest) (shoulders, chest) are not
  just body parts, but are primal to human perception.
  Then there's indoor living: (floor, table) (bed, window) (window, table)
- which recalls the Porject Gutenberg sources.
+ which recalls the Project Gutenberg sources.
  The pair (three, two) is primal, the pair (mind, life) is surprising and
  interesting.
  The pair (child, question) is is bizarre.
@@ -29348,10 +29348,10 @@ A bit of sheaf theory
 \end_layout
 
 \begin_layout Standard
-I recently realized tht much of what is being discussed here can be anchored
- in the vocablary of a generic mathematical theory, namely, sheaf theory.
+I recently realized that much of what is being discussed here can be anchored
+ in the vocabulary of a generic mathematical theory, namely, sheaf theory.
  Sheaves allow topological structure to be discussed in a local way: sheaves
- describe how the local neightborhoods of a point glue together, to form
+ describe how the local neighborhoods of a point glue together, to form
  a manifold as a whole.
  Link Grammar disjuncts and connector sets are really just the stalks and
  germs of sheaf theory, in mild disguise.
@@ -29397,8 +29397,8 @@ This describes the graph, as a whole, just as well as the simpler vertex+edge
  list does.
  However, the language is different: these pairs are presheaves, obeying
  all the axioms of a presheaf, e.g.
- the compostion of restriction morphisms.
- They become a sheaf because they also obey the glueing or collation axiom
+ the composition of restriction morphisms.
+ They become a sheaf because they also obey the gluing or collation axiom
  as well: they can be glued together to form the original graph from which
  they were taken.
 \end_layout
@@ -29434,8 +29434,8 @@ To be more precise, we need to distinguish the graph-sheaf that arises for
 From what I can tell, this realization that language can be sheafified is
  not new; when the language is not a natural language, but is instead first-orde
 r logic, then it's sheafification gives the Kripke–Joyal semantics.
- According to wikipedia, this was noted in 1965 for existential quantification.
- I don't know if this was ever noted for natural langauge before, but, as
+ According to Wikipedia, this was noted in 1965 for existential quantification.
+ I don't know if this was ever noted for natural language before, but, as
  I've blathered on the mailing list before, this provides the 
 \begin_inset Quotes eld
 \end_inset
@@ -29513,7 +29513,7 @@ The cosine similarity measure penalizes better, more accurate measurements,
 \begin_layout Itemize
 PCA and sparse PCA, in the naive sense, applied to frequencies, or to cosine
  similarities, are inappropriate for classification.
- Its still possible that perhaps PCA applied to some sigmoid of the cosinne
+ Its still possible that perhaps PCA applied to some sigmoid of the cosine
  similarity (e.g.
  cosine to the fourth power) might work better, but the selection of this
  sigmoid seems ad-hoc, and not anchored in any principles.
@@ -29539,7 +29539,7 @@ Other similarity measures
 \end_layout
 
 \begin_layout Standard
-Its worth noting that one of teh other similarity measures, such as qim
+Its worth noting that one of the other similarity measures, such as qim
  and pim, discussed previously, can also be treated in this way.
  Note also that a matrix can be constructed so that 
 \begin_inset Formula $X^{T}X$
@@ -29572,7 +29572,7 @@ That is, the matrix
 \end_inset
 
  is a Markov matrix.
- It is straight-forward to compute using the standard power-iteration aglorithm
+ It is straight-forward to compute using the standard power-iteration algorithm
  employed throughout this section.
  
 \end_layout
