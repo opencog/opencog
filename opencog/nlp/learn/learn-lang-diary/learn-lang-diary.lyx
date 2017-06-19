@@ -29492,6 +29492,39 @@ Most interesting is perhaps this: the sentences of a language are observed
  logic? 
 \end_layout
 
+\begin_layout Standard
+It seems to me that one could make this very generic: every language, and
+ not just first-order logic, but any language, as considered in model theory,
+ has a set of sentences.
+ This sentences are composed of the terms in thier term algebra, and these
+ terms and how they connect, define a graph.
+ That graph can be viewed in terms of sheaves, germs, stalks, etale spaces.
+ This implies that every model, of model theory, has a corresponding cohomology.
+ Writing this out could be interesting.
+ Perhaps this has already been done; perhaps this is what topos theory is.
+ But I suspect that it's not been sufficiently popularized: certainly, the
+ standard computer-science textbooks that tell you what a language is do
+ not tell you that it has a cohomology associated with it.
+ And yet, this seems blantly obvious, in retrospect, and naggingly it might
+ actually be important for some reason or another.
+\end_layout
+
+\begin_layout Standard
+Anyway: this is not just all-talk, no-action.
+ I've written some code that implements some sheaf-based parsing on the
+ atomspace.
+ It is in the 
+\begin_inset CommandInset href
+LatexCommand href
+name "github atomspace repo"
+target "https://github.com/opencog/atomspace/tree/master/opencog/sheaf"
+
+\end_inset
+
+.
+ The README file there explains more.
+\end_layout
+
 \begin_layout Subsection*
 Conclusions
 \end_layout
