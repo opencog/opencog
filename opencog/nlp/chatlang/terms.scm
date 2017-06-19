@@ -31,6 +31,22 @@
         (cons '() '())
         (map word (string-split STR #\ ))))
 
+(define (get-concept-length CONCEPT)
+  "Helper function to find the maximum number of words CONCEPT has."
+  (define c (cog-outgoing-set (cog-execute!
+              (Get (Reference (Variable "$x") CONCEPT)))))
+  (if (null? c)
+      0
+      (fold (lambda (term len)
+        (let ((tl (cond ((equal? 'PhraseNode (cog-type term))
+                         (length (string-split (cog-name term) #\sp)))
+                        ((equal? 'ConceptNode (cog-type term))
+                         (get-concept-length term))
+                        (else 1))))
+             (max tl len)))
+        0
+        c)))
+
 (define* (concept STR #:optional (VAR (choose-var-name)))
   "Occurrence of a concept."
   (cons (list (TypedVariable (Glob VAR)
@@ -52,6 +68,20 @@
                          ((equal? 'concept (car t))
                           (Concept (cdr t)))))
        TERMS))
+
+(define (get-term-length TERMS)
+  "Helper function to find the maximum number of words one of
+   the TERMS has."
+  (fold
+    (lambda (term len)
+      (let ((tl (cond ((equal? 'phrase (car term))
+                       (length (string-split (cdr term) #\sp)))
+                      ((equal? 'concept (car term))
+                       (get-concept-length (Concept (cdr term))))
+                      (else 1))))
+           (max len tl)))
+    0
+    TERMS))
 
 (define* (choices TERMS #:optional (VAR (choose-var-name)))
   "Occurrence of a list of choices. Existence of either one of

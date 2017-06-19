@@ -113,7 +113,7 @@
                                    (merge-wildcard (cdadr term)
                                                    (cdr (first prev))))))
                  (cdr prev)))
-          ; Otherwise accept and  append it to the list
+          ; Otherwise accept and append it to the list
           (else (cons term prev))))
     (list (last TERMS))
     (list-head TERMS (- (length TERMS) 1))))
