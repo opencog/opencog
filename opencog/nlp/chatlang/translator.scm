@@ -78,38 +78,42 @@
 (define (preprocess-terms TERMS)
   "Make sure there is no meaningless wildcard/variable in TERMS,
    which may cause problems in rule matching or variable grounding."
-  (define (merge-wildcard i1 i2)
-    (cons (max (car i1) (car i2))
-          (cond ((or (negative? (cdr i1)) (negative? (cdr i2))) -1)
-                (else (max (cdr i1) (cdr i2))))))
+  (define (merge-wildcard INT1 INT2)
+    (cons (max (car INT1) (car INT2))
+          (cond ((or (negative? (cdr INT1)) (negative? (cdr INT2))) -1)
+                (else (max (cdr INT1) (cdr INT2))))))
   (fold-right (lambda (term prev)
-    (cond ; If there are two consecutive wildcards that are identical,
-          ; e.g. (wildcard 0 . -1) (wildcard 0 . -1),
-          ; ignore one of them
-          ((and (equal? term (first prev))
-                (equal? 'wildcard (car term)))
-           prev)
-          ; Else if we have two different wildcards e.g.
-          ; (wildcard 0 . -1) (wildcard 1 . 4)
+    (cond ; If there are two consecutive wildcards, e.g.
+          ; (wildcard 0 . -1) (wildcard 3. 5)
           ; merge them
           ((and (equal? 'wildcard (car term))
                 (equal? 'wildcard (car (first prev))))
-           (cons (cons 'wildcard (merge-wildcard (cdr term) (cdr (first prev))))
+           (cons (cons 'wildcard
+                       (merge-wildcard (cdr term) (cdr (first prev))))
                  (cdr prev)))
-          ; If we have e.g.
-          ; (wildcard 0 . -1) (variable (wildcard 0 . -1))
-          ; take the variable but with the previous wildcard removed
-          ((and (equal? 'variable (car term))
-                (equal? 'wildcard (caadr term))
-                (equal? (first prev) (cadr term)))
-           (cons term (cdr prev)))
-          ; If we have e.g.
-          ; (variable (wildcard 0 . -1)) (wildcard 0 . -1)
-          ; ignore the latter one
+          ; If we have:
+          ; (wildcard 2 . 5) (variable (wildcard 0 . -1))
+          ; merge them and return a variable
           ((and (equal? 'wildcard (car term))
                 (equal? 'variable (car (first prev)))
-                (equal? (cadr (first prev)) term))
-           prev)
+                (equal? 'wildcard (caadr (first prev))))
+           (cons (cons 'variable
+                       (list (cons 'wildcard
+                                   (merge-wildcard (cdr term)
+                                                   (cdadr (first prev))))))
+                 (cdr prev)))
+          ; Similarly if we have:
+          ; (variable (wildcard 0 . -1)) (wildcard 3 . 6)
+          ; merge them and return a variable
+          ((and (equal? 'variable (car term))
+                (equal? 'wildcard (caadr term))
+                (equal? 'wildcard (car (first prev))))
+           (cons (cons 'variable
+                       (list (cons 'wildcard
+                                   (merge-wildcard (cdadr term)
+                                                   (cdr (first prev))))))
+                 (cdr prev)))
+          ; Otherwise accept and  append it to the list
           (else (cons term prev))))
     (list (last TERMS))
     (list-head TERMS (- (length TERMS) 1))))
