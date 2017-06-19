@@ -9381,16 +9381,11 @@ OK, that didn't work out very much. Why?
 ((WordNode "was"  . 0.04159803271278564)
 
 
-(cset-vec-cosine  (WordNode ".") (WordNode ","))
-$174 = 0.5411980781755208
-(cset-vec-cosine  (WordNode "the") (WordNode ","))
-$175 = 0.6949870533623743
-(cset-vec-cosine  (WordNode "the") (WordNode "."))
-$176 = 0.7239559271562869
-(cset-vec-cosine  (WordNode "the") (WordNode "to"))
-$177 = 0.7812122780640004
-(cset-vec-cosine  (WordNode "the") (WordNode "a"))
-$178 = 0.8863119467021999
+(cset-vec-cosine  (WordNode ".") (WordNode ",")) = 0.5411980781755208
+(cset-vec-cosine  (WordNode "the") (WordNode ",")) = 0.6949870533623743
+(cset-vec-cosine  (WordNode "the") (WordNode ".")) = 0.7239559271562869
+(cset-vec-cosine  (WordNode "the") (WordNode "to")) = 0.7812122780640004
+(cset-vec-cosine  (WordNode "the") (WordNode "a")) = 0.8863119467021999
 
 (define ac (pti 'left-basis))
 (define top-cset-words
@@ -9594,6 +9589,239 @@ cosines?
 OK, substaintially similar to before, about 8% larger.
  So we double-checked our data, fixed the bugs, and its good. 
 Now what?
+-----------------------------------------------------------------
+(define ac (pti 'left-basis))
+(define top-cset-words
+   (filter (lambda (wrd) (< 1500 (cset-vec-word-observations wrd))) ac))
+(length top-cset-words)
+(length top-cset-words) = 803
+
+(define (mkcos wa wb) (cons (cons wa wb) (poi 'right-cosine wa wb)))
+
+(define (coprs wrd wrds)
+	(map (lambda (wb) (mkcos wrd wb)) wrds))
+
+(define (allprs wrds lst)
+	(if (null? wrds) lst
+		(allprs (cdr wrds) (append (coprs (car wrds) (cdr wrds)) lst))))
+
+(define asprs (allprs top-cset-words '()))
+(length asprs) = 322003
+
+(define also (sort asprs (lambda (a b) (> (cdr a) (cdr b)))))
+(take also 200)
+
+(use-modules (system repl server))
+(spawn-server)
+rlwrap telnet localhost 37146
+
+(He, She) . 0.997345758
+(Her, His) . 0.996268828
+(nodded, sighed) . 0.99601656
+(There, It) . 0.995809996
+(He, It) . 0.995435813
+(Dallas, Two-Bit) . 0.995062883
+(Dallas, Jim) . 0.994875764
+(But, When) . 0.994776669
+(Two-Bit, Mai) . 0.994641695
+(Aster, Mai) . 0.994363834
+(He, There) . 0.994337552
+(After, With) . 0.994303242
+(Sandy, Bunny) . 0.994181214
+(One, All) . 0.99409611
+(Then, But) . 0.99408755
+(She, It) . 0.994054139
+(And, But) . 0.99404553
+(Gene, Mai) . 0.99381092
+(Then, When) . 0.993778539
+(Jim, Mai) . 0.993727250
+(For, With) . 0.993687969
+(There, She) . 0.993678998
+(It, They) . 0.993620758
+(Two-Bit, Jim) . 0.993559994
+(That, It) . 0.99348913
+(His, All) . 0.993405770
+(Ross, Jim) . 0.993276220
+(Two-Bit, Gene) . 0.993190381
+(It, This) . 0.993141274
+(One, His) . 0.993081512
+(He, His) . 0.993057520
+(Now, Here) . 0.993019266
+(For, But) . 0.992958261
+(There, His) . 0.992797376
+(At, With) . 0.992753993
+(There, They) . 0.992725314
+(Dallas, Mai) . 0.992627449
+(But, That) . 0.992603728
+(Richard, Anna) . 0.992601407
+(There, This) . 0.992485293
+(Gene, Jim) . 0.992427189
+(For, After) . 0.992407193
+(They, The) . 0.992382512
+(She, His) . 0.991863215
+(When, With) . 0.991836780
+(Dallas, Gene) . 0.991791358
+(smiled, sighed) . 0.991786864
+(After, At) . 0.991678895
+(For, At) . 0.991640239
+(He, Her) . 0.991640030
+(Now, But) . 0.99161025
+(smiled, nodded) . 0.991579848
+(After, When) . 0.991579720
+(His, It) . 0.99155633
+(That, This) . 0.991516495
+(She, They) . 0.991503829
+(laughed, asked) . 0.991476047
+(One, There) . 0.991343749
+(For, Then) . 0.991257404
+(One, It) . 0.991256062
+(His, The) . 0.991234256
+(Now, So) . 0.991134393
+(For, All) . 0.991128043
+(There, All) . 0.99111722
+(It, All) . 0.991093382
+(Hiccup, Mai) . 0.991088746
+(It, The) . 0.991087621
+(For, When) . 0.991060842
+(Then, After) . 0.99103343
+(That, There) . 0.99100824
+(He, They) . 0.990965962
+(And, So) . 0.990895373
+(But, All) . 0.990827920
+(Jack, Demelza) . 0.990804758
+(Her, She) . 0.990769217
+(That, All) . 0.990720297
+(Bunny, Anna) . 0.990713341
+(Her, There) . 0.990708057
+(He, This) . 0.990600114
+(After, Even) . 0.990597163
+(As, When) . 0.990560365
+(Aster, Anna) . 0.990540130
+(Margaret, Jim) . 0.990520388
+(He, That) . 0.990497589
+(Aster, Gene) . 0.99039301
+(Sandy, Aster) . 0.990387947
+(Then, With) . 0.990387390
+(As, With) . 0.990361068
+(Then, As) . 0.99034848
+(She, This) . 0.990270109
+(This, They) . 0.990171297
+(Richard, John) . 0.990166796
+(He, The) . 0.990001224
+(There, The) . 0.989960300
+(Aster, Hiccup) . 0.989888481
+(His, They) . 0.989796499
+(Then, That) . 0.989791187
+(Her, The) . 0.989757803
+(Ross, Margaret) . 0.98975517
+(Bunny, Tooth) . 0.989753554
+(Demelza, Anna) . 0.989723864
+(But, With) . 0.989686041
+(But, It) . 0.989666595
+(That, His) . 0.989488364
+(She, The) . 0.989417566
+(He, But) . 0.989407999
+(Richard, Ross) . 0.989276354
+(He, Then) . 0.989261202
+(At, Even) . 0.989197444
+(Pitch, Demelza) . 0.989162716
+(He, All) . 0.98912848
+(For, That) . 0.989083210
+(Margaret, Mai) . 0.988996494
+(That, She) . 0.988974985
+(Pitch, Ross) . 0.98891348
+(Pitch, John) . 0.988908738
+(All, This) . 0.988904006
+(Sandy, Anna) . 0.988798684
+(Ross, Mai) . 0.988786842
+(Her, It) . 0.988778883
+(Then, All) . 0.988676101
+(Bunny, Hiccup) . 0.988607248
+(Her, They) . 0.988558601
+(And, That) . 0.988510273
+(Sandy, Hiccup) . 0.988502544
+(For, Here) . 0.988465756
+(His, This) . 0.988433038
+(That, When) . 0.988401578
+(Then, At) . 0.988371519
+(Then, It) . 0.988369524
+(At, There) . 0.988350034
+(So, But) . 0.988346421
+(For, There) . 0.988324599
+(Aster, Two-Bit) . 0.988296335
+(Ross, Anna) . 0.988264218
+(All, The) . 0.988254573
+(This, The) . 0.988248820
+(Ross, Demelza) . 0.988230903
+(Richard, Demelza) . 0.988228650
+(Anna, Mai) . 0.988222252
+(One, Her) . 0.988219868
+(He, One) . 0.98818965
+(There, With) . 0.9881787
+(Gene, Margaret) . 0.988139740
+(But, After) . 0.988126
+(But, This) . 0.988098723
+(But, His) . 0.988057331
+(Richard, Bunny) . 0.988050499
+(Her, All) . 0.988048392
+(Then, There) . 0.98801170
+(Ross, John) . 0.988011020
+(Bunny, Demelza) . 0.987989404
+(And, Now) . 0.987989085
+(One, The) . 0.987973231
+(But, There) . 0.987836677
+(One, That) . 0.987799175
+(When, All) . 0.987739822
+(Sandy, Demelza) . 0.987734391
+(But, As) . 0.987733581
+(nodded, Mai) . 0.987722642
+(For, Now) . 0.987711666
+(Richard, Margaret) . 0.987683845
+(Richard, Sandy) . 0.987624417
+(Then, And) . 0.987609330
+(Then, His) . 0.987578038
+(Richard, Pitch) . 0.987549191
+(It, With) . 0.987521448
+(Aster, Jim) . 0.987507205
+(Even, With) . 0.987479957
+(For, It) . 0.987479776
+(Dallas, Ross) . 0.987453815
+(laughed, sighed) . 0.987427226
+(Aster, Bunny) . 0.987377192
+(Richard, Francis) . 0.98734084
+(But, Here) . 0.987333229
+(All, With) . 0.98731580
+(One, This) . 0.987267291
+(For, This) . 0.987236319
+(Aster, Ross) . 0.987205054
+(John, Anna) . 0.987190883
+(For, His) . 0.987144501
+(That, They) . 0.987130294
+(For, As) . 0.987098321
+(Ross, Two-Bit) . 0.987032831
+(And, When) . 0.987003352
+(Then, She) . 0.986940328
+(But, She) . 0.986857973
+(Aster, Demelza) . 0.986831710
+(Hiccup, Demelza) . 0.986821933
+(When, It) . 0.986787674
+(Yes, Oh) . 0.9867814
+(Richard, Aster) . 0.986772251
+(She, All) . 0.986771596
+(Margaret, Anna) . 0.986743199
+(For, And) . 0.986722258
+(After, As) . 0.986701581
+(Now, That) . 0.986653929
+(Ross, Gene) . 0.98659473
+(As, There) . 0.986564698
+(Then, Now) . 0.986558599
+
+----------
+
+(nodded, sighed) . 0.99601656
+(smiled, nodded) . 0.991579848
+(laughed, asked) . 0.991476047
+(laughed, sighed) . 0.987427226
 
 -----------------------------------------------------------------
 ---------
