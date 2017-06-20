@@ -208,7 +208,6 @@
         (map cog-name (cog-outgoing-set n))
         (list (cog-name n))))
     (cog-outgoing-set WORDS))))
-  (display "----- ") (display txt) (newline)
   (cog-execute! (Put (DefinedPredicate "Say") (Node txt)))
   (State chatlang-anchor (Concept "Default State"))
   (True))
