@@ -21,7 +21,7 @@ INSTALL (TARGETS spacetime-types
 
 INSTALL (FILES
 	${CMAKE_CURRENT_BINARY_DIR}/spacetime_types.scm
-	DESTINATION "${DATADIR}/scm/spacetime"
+	DESTINATION "${DATADIR}/scm/opencog/spacetime"
 )
 
 # FIXME -- actually, the timeserver does not depend on octomap,

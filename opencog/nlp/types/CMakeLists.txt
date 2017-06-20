@@ -38,5 +38,5 @@ INSTALL (FILES
 )
 INSTALL (FILES
 	${CMAKE_CURRENT_BINARY_DIR}/nlp_types.scm
-	DESTINATION "${DATADIR}/scm/nlp/types"
+	DESTINATION "${DATADIR}/scm/opencog/nlp/types"
 )

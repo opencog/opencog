@@ -21,6 +21,6 @@
 
 (add-to-load-path "/usr/local/share/opencog/scm")
 (use-modules (opencog))  ; needed for cog-type->int
-(load-from-path "attention/attention_types.scm")
-(load-from-path "nlp/types/nlp_types.scm")
-(load-from-path "spacetime/spacetime_types.scm")
+(load-from-path "opencog/attention/attention_types.scm")
+(load-from-path "opencog/nlp/types/nlp_types.scm")
+(load-from-path "opencog/spacetime/spacetime_types.scm")
