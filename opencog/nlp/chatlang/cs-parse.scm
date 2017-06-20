@@ -34,34 +34,42 @@
 )
 
 (define (tokeniz str location)
+  (define current-match '())
+  (define (has-match? pattern str)
+    (let ((match (string-match pattern str)))
+      (if match
+        (begin (set! current-match match) #t)
+        #f
+      )))
+
   (cond
-    ; Declarations
-    ((string-prefix? "concept:" str)
+    ; Chatscript declarations
+    ((has-match? "concept:" str)
         (format #t ">>lexer concept @ ~a\n" (show-location location))
         (make-lexical-token 'CONCEPT location "a concept"))
-    ((string-prefix? "topic:" str)
+    ((has-match? "topic:" str)
         (format #t  ">>lexer topic @ ~a\n" (show-location location))
         (make-lexical-token 'TOPIC location "a topic"))
-    ((string-match "^\r" str)
+    ((has-match? "^\r" str)
         (format #t  ">>lexer cr @ ~a\n" (show-location location))
         (make-lexical-token 'CR location #f))
     ((string=? "" str)
         (format #t  ">>lexer newline @ ~a\n" (show-location location))
         (make-lexical-token 'NEWLINE location #f))
-    ((string-match "^#!" str) ; This should be checked always before #
+    ((has-match? "^#!" str) ; This should be checked always before #
         (format #t  ">>lexer sample input @ ~a\n" (show-location location))
         (make-lexical-token 'SAMPLE_INPUT location #f))
-    ((string-match "^#" str)
+    ((has-match? "^#" str)
         (format #t  ">>lexer comment @ ~a\n" (show-location location))
         (make-lexical-token 'COMMENT location #f))
-    ; Rules
-    ((string-match "^[s?u]:" str)
+    ; Chatscript rules
+    ((has-match? "^[s?u]:" str)
         (format #t ">>lexer responders @ ~a\n" (show-location location))
         (make-lexical-token 'RESPONDERS location "a responders"))
-    ((string-match "^[c-j]:" str)
+    ((has-match? "^[c-j]:" str)
         (format #t ">>lexer rejoinder @ ~a\n" (show-location location))
         (make-lexical-token 'REJOINDERS location "a rejoinders"))
-    ((string-prefix? "^[rt]:" str)
+    ((has-match? "^[rt]:" str)
         (format #t ">>lexer gambit @ ~a\n" (show-location location))
         (make-lexical-token 'GAMBIT location "a gambit"))
     (else
