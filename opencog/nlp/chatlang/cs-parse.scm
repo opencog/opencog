@@ -16,6 +16,7 @@
   )
 )
 
+
 (define (get-source-location port)
   (make-source-location
     (port-filename port)
@@ -33,6 +34,14 @@
   )
 )
 
+(define (get-concept-name str)
+  (define match (string-match "^~[a-zA-Z]+" str))
+  (if match
+    (match:substring match)
+    (error "Issue calling get-concept-name on " str)
+  )
+)
+
 (define (tokeniz str location)
   (define current-match '())
   (define (has-match? pattern str)
@@ -46,7 +55,8 @@
     ; Chatscript declarations
     ((has-match? "concept:" str)
         (format #t ">>lexer concept @ ~a\n" (show-location location))
-        (make-lexical-token 'CONCEPT location "a concept"))
+        (make-lexical-token 'CONCEPT location
+          (get-concept-name (string-trim (match:suffix current-match)))))
     ((has-match? "topic:" str)
         (format #t  ">>lexer topic @ ~a\n" (show-location location))
         (make-lexical-token 'TOPIC location "a topic"))
