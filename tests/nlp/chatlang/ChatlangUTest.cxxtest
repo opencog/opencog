@@ -59,10 +59,7 @@ public:
         scm->eval("(add-to-load-path \"" PROJECT_SOURCE_DIR "/tests/nlp/chatlang/\")");
 
         scm->eval("(setenv \"LTDL_LIBRARY_PATH\" "
-                  "\"/usr/local/lib/opencog:/usr/local/lib/opencog/modules:"
-                  PROJECT_BINARY_DIR "/opencog/spacetime:"
-                  PROJECT_BINARY_DIR "/opencog/attention:"
-                  PROJECT_BINARY_DIR "/opencog/embodiment:"
+                  "\"/usr/local/lib/opencog:"
                   PROJECT_BINARY_DIR "/opencog/nlp/types"
          "\")");
 
