@@ -50,6 +50,7 @@ namespace PatternMining
 #define SURPRISINGNESS_I_TOP_THRESHOLD 0.20
 #define SURPRISINGNESS_II_TOP_THRESHOLD 0.40
 #define OUTPUT_SURPRISINGNESS_CALCULATION_TO_FILE 1
+#define GENERATE_TMP_PATTERNS 1
 #define USE_QUERY_ENTITY_COUNT_FOR_EACH_PREDICATE 0
 #define USE_QUERY_ALL_ENTITY_COUNT 0
 #define USE_ABS_SURPRISINGNESS 0
@@ -60,7 +61,7 @@ namespace PatternMining
 struct _non_ordered_pattern
 {
     Handle link;
-    vector< vector<int> > indexesOfSharedVars;
+    vector< vector <std::pair<int,std::size_t> > > indexesOfSharedVars;
 
     bool operator <(const _non_ordered_pattern& other) const
     {
@@ -73,9 +74,14 @@ struct _non_ordered_pattern
 
             for (unsigned int j = 0; j < indexesOfSharedVars[i].size(); ++ j)
             {
-                if (indexesOfSharedVars[i][j]< other.indexesOfSharedVars[i][j])
+                if ((indexesOfSharedVars[i][j]).first< (other.indexesOfSharedVars[i][j]).first)
                     return true;
-                else if (indexesOfSharedVars[i][j] > other.indexesOfSharedVars[i][j])
+                else if ((indexesOfSharedVars[i][j]).first > (other.indexesOfSharedVars[i][j]).first)
+                    return false;
+
+                if ((indexesOfSharedVars[i][j]).second < (other.indexesOfSharedVars[i][j]).second)
+                    return true;
+                else if ((indexesOfSharedVars[i][j]).second > (other.indexesOfSharedVars[i][j]).second)
                     return false;
             }
         }
@@ -251,7 +257,7 @@ protected:
     // rename the variable names in a ordered pattern according to the orders of the variables appear in the orderedPattern
     HandleSeq RebindVariableNames(HandleSeq& orderedPattern, map<Handle,Handle>& orderedVarNameMap);
 
-    void generateIndexesOfSharedVars(Handle& link, HandleSeq& orderedHandles, vector< vector<int> > &indexes);
+    void generateIndexesOfSharedVars(Handle& link, HandleSeq& orderedHandles, vector<vector<std::pair<int, size_t> > > &indexes);
 
     // generate the outgoings for a link in a pattern in the Pattern mining Atomspace, according to the given group of variables
     void generateALinkByChosenVariables(Handle &originalLink, map<Handle,Handle>& valueToVarMap, HandleSeq &outputOutgoings, AtomSpace *_fromAtomSpace);

@@ -62,7 +62,7 @@ bool isInStringVector(string _item, vector<string> _vector)
     return false;
 }
 
-void PatternMiner::generateIndexesOfSharedVars(Handle& link, HandleSeq& orderedHandles, vector < vector<int> >& indexes)
+void PatternMiner::generateIndexesOfSharedVars(Handle& link, HandleSeq& orderedHandles, vector < vector< std::pair<int,std::size_t> > >& indexes)
 {
     HandleSeq outgoingLinks = link->getOutgoingSet();
     for (Handle h : outgoingLinks)
@@ -73,15 +73,16 @@ void PatternMiner::generateIndexesOfSharedVars(Handle& link, HandleSeq& orderedH
             {
                 string var_name = h->getName();
 
-                vector<int> indexesForCurVar;
+                vector< std::pair<int,std::size_t> > indexesForCurVar; // vector <handleindex,varposintthehandle>
                 int index = 0;
 
                 for (Handle oh : orderedHandles)
                 {
                     string ohStr = oh->toShortString();
-                    if (ohStr.find(var_name) != std::string::npos)
+                    std::size_t pos = ohStr.find(var_name) ;
+                    if (pos != std::string::npos)
                     {
-                        indexesForCurVar.push_back(index);
+                        indexesForCurVar.push_back(std::pair<int,std::size_t>(index,pos));
                     }
 
                     index ++;
@@ -1215,8 +1216,8 @@ void PatternMiner::OutPutFrequentPatternsToFile(unsigned int n_gram, vector < ve
 
     for (HTreeNode* htreeNode : patternsForThisGram)
     {
-        if (htreeNode->count < thresholdFrequency)
-            continue;
+//        if (htreeNode->count < thresholdFrequency)
+//            continue;
 
         resultFile << endl << ";Pattern: Frequency = " << toString(htreeNode->count);
 
@@ -3297,7 +3298,7 @@ void PatternMiner::runPatternMiner(bool exit_program_after_finish)
 
             OutPutFrequentPatternsToFile(gram, patternsForGram);
 
-            if (tmpPatternsForGram[gram-1].size() > 0)
+            if (GENERATE_TMP_PATTERNS && (tmpPatternsForGram[gram-1].size() > 0))
             {
                 std::sort((tmpPatternsForGram[gram-1]).begin(), (tmpPatternsForGram[gram-1]).end(),compareHTreeNodeByFrequency );
                 OutPutFrequentPatternsToFile(gram, tmpPatternsForGram, "tmpPatterns");
@@ -3809,14 +3810,22 @@ void PatternMiner::evaluateInterestingnessTask()
 
         // evaluate the interestingness
         // Only effective when Enable_Interesting_Pattern is true. The options are "Interaction_Information", "surprisingness"
-        if (Enable_Interaction_Information)
-        {
-           calculateInteractionInformation(htreeNode);
-        }
 
         if (Enable_surprisingness)
         {
            calculateSurprisingness(htreeNode, observingAtomSpace);
+        }
+
+
+        if (Enable_Interaction_Information)
+        {
+
+           if (cur_gram == 3)
+           {
+               int x = 0;
+               x ++;
+           }
+           calculateInteractionInformation(htreeNode);
         }
 
     }

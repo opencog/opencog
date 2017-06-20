@@ -443,10 +443,15 @@ HTreeNode* PatternMiner::extractAPatternFromGivenVarCombination(HandleSeq &input
 
             if (patternVarMap.find(leaf) != patternVarMap.end())
             {
-                if (gram == MAX_GRAM) // only skip for the max gram patterns
+                if (GENERATE_TMP_PATTERNS)
+                {
+                    if (gram == MAX_GRAM) // only skip for the max gram patterns
+                        skip = true;
+                    else // for smaller patterns, still need to generate, just put in keyStrToHTreeNodeMap, not put in patternsForGram
+                        notOutPutPattern = true;
+                }
+                else
                     skip = true;
-                else // for smaller patterns, still need to generate, just put in keyStrToHTreeNodeMap, not put in patternsForGram
-                    notOutPutPattern = true;
 
                 break;
             }
@@ -545,6 +550,9 @@ HTreeNode* PatternMiner::extractAPatternFromGivenVarCombination(HandleSeq &input
 
             if (newHTreeNode)
             {
+                if (! GENERATE_TMP_PATTERNS)
+                    notOutPutPattern = false;
+
                 newHTreeNode->pattern = unifiedPattern;
                 newHTreeNode->var_num = patternVarMap.size();
 
@@ -563,8 +571,11 @@ HTreeNode* PatternMiner::extractAPatternFromGivenVarCombination(HandleSeq &input
                             }
                         }
 
-                        if (! is_contain)
-                            notOutPutPattern = true;
+                        if (GENERATE_TMP_PATTERNS)
+                        {
+                            if (! is_contain)
+                                notOutPutPattern = true;
+                        }
                     }
                 }
 
@@ -572,7 +583,10 @@ HTreeNode* PatternMiner::extractAPatternFromGivenVarCombination(HandleSeq &input
                     addNewPatternLock.lock();
 
                 if (notOutPutPattern)
-                    (tmpPatternsForGram[gram-1]).push_back(newHTreeNode);
+                {
+                    if (GENERATE_TMP_PATTERNS)
+                        (tmpPatternsForGram[gram-1]).push_back(newHTreeNode);
+                }
                 else
                     (patternsForGram[gram-1]).push_back(newHTreeNode);
 
@@ -699,28 +713,46 @@ void PatternMiner::extendAPatternForOneMoreGramRecursively(const Handle &extende
     }
     else
     {
-        n_limit = valueToVarMap.size()/2.0f - lastGramTotalVarNum;
-        n_limit_putin_result = n_limit + 1;
-        n_limit += 2;
-
         // sometimes there is only one variable in a link, like:
     //    (DuringLink
     //      (ConceptNode "dead")
     //      (ConceptNode "dead")
     //    ) ; [44694]
+
+        n_limit = valueToVarMap.size()/2.0f - lastGramTotalVarNum;
+
+        if (GENERATE_TMP_PATTERNS)
+        {
+            n_limit_putin_result = n_limit + 1;
+            n_limit += 2;
+        }
+        else
+            n_limit ++;
+
         if (n_limit > n_max)
             n_limit = n_max;       
 
-        if (n_limit_putin_result > n_max)
-            n_limit_putin_result = n_max;
+        if (GENERATE_TMP_PATTERNS)
+        {
+            if (n_limit_putin_result > n_max)
+                n_limit_putin_result = n_max;
 
-        if (n_limit_putin_result == 1)
-            n_limit_putin_result = 2;
+            if (n_limit_putin_result == 1)
+                n_limit_putin_result = 2;
 
-        if (n_limit_putin_result > n_limit)
-            n_limit_putin_result = n_limit;
+            if (n_limit_putin_result > n_limit)
+                n_limit_putin_result = n_limit;
+        }
+        else
+        {
+
+            if (n_limit == 1)
+                n_limit = 2;
+        }
 
     }
+
+
 
     // Get all the shared nodes and leaves
     HandleSeqSeq oneOfEachSeqShouldBeVars;
@@ -804,8 +836,11 @@ void PatternMiner::extendAPatternForOneMoreGramRecursively(const Handle &extende
                 }
             }
 
-            if ((cur_pattern_gram > 1) &&(var_num >= n_limit_putin_result))
-                notOutPutPattern = true;
+            if (GENERATE_TMP_PATTERNS)
+            {
+                if ((cur_pattern_gram > 1) &&(var_num >= n_limit_putin_result))
+                    notOutPutPattern = true;
+            }
 
             unsigned int extendedLinkIndex = 999;
             bool patternAlreadyExtractedInCurTask;
@@ -835,7 +870,11 @@ void PatternMiner::extendAPatternForOneMoreGramRecursively(const Handle &extende
                     }
 
                     pInfo.extendedLinkIndex = extendedLinkIndex;
-                    pInfo.notOutPutPattern = notOutPutPattern;
+
+                    if (GENERATE_TMP_PATTERNS)
+                        pInfo.notOutPutPattern = notOutPutPattern;
+                    else
+                        pInfo.notOutPutPattern = false;
 
                     allNewMinedPatternInfo.push_back(pInfo);
 
@@ -947,7 +986,7 @@ void PatternMiner::extendAPatternForOneMoreGramRecursively(const Handle &extende
                         IncomingSet incomings = extendNode->getIncomingSet(_fromAtomSpace);
 
                         // debug
-                        string curvarstr = extendNode->toShortString();
+//                        string curvarstr = extendNode->toShortString();
 //                        cout << "\n---------------start curvarstr = " << curvarstr << "---------------" <<std::endl;
 
                         for (LinkPtr incomeingPtr : incomings)
