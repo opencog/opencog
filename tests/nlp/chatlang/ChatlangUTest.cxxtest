@@ -63,21 +63,6 @@ public:
         scm->eval("(add-to-load-path \"" PROJECT_SOURCE_DIR "/tests/nlp/chatlang/\")");
 
         scm->eval("(setenv \"LTDL_LIBRARY_PATH\" \"/usr/local/lib/opencog\")");
-
-
-        // This is really really strange... we should not need to actually load
-        // any of the codes like this as they are part of the chatlang module?
-        // But for some reason two of the chatlang tests were failing on my
-        // computer because somehow the definitions of the functions were not found??
-        // How did the rest pass with the exact same setup? Makes no sense to me...
-        scm->eval("(load \"" PROJECT_SOURCE_DIR
-                   "/opencog/nlp/chatlang/ui.scm\")");
-        scm->eval("(load \"" PROJECT_SOURCE_DIR
-                   "/opencog/nlp/chatlang/terms.scm\")");
-        scm->eval("(load \"" PROJECT_SOURCE_DIR
-                   "/opencog/nlp/chatlang/translator.scm\")");
-        scm->eval("(load \"" PROJECT_SOURCE_DIR
-                   "/opencog/nlp/chatlang/matcher.scm\")");
     }
 
     void tearDown()
