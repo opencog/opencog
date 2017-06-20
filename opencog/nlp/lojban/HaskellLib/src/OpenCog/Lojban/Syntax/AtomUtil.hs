@@ -101,11 +101,11 @@ meml = linkIso "MemberLink" noTv
 equivl :: SynIso [Atom] Atom
 equivl = linkIso "EquivalenceLink" noTv
 
-setTypeL  :: SynIso [Atom] Atom
-setTypeL = linkIso "SetTypeLink" noTv
-
 subsetL :: SynIso (Atom,Atom) Atom
 subsetL = linkIso "SubsetLink" noTv . tolist2
+
+setTypeL  :: SynIso [Atom] Atom
+setTypeL = linkIso "SetTypeLink" noTv
 
 sizeL  :: SynIso [Atom] Atom
 sizeL = linkIso "SetSizeLink" noTv
@@ -274,7 +274,7 @@ number :: SynIso String Atom
 number = nodeIso "VariableNode" noTv
 
 
-_frames :: SynIso (Tagged Selbri,[Sumti]) Atom
+_frames :: SynIso (Selbri,[Sumti]) Atom
 _frames = (id ||| andl) . isSingle . mapIso (handleDA . _frame) . isoDistribute . handleTAG
     where isSingle = mkIso f g
           f [a] = Left a
@@ -297,9 +297,10 @@ handleDA = Iso f g where
           in pure $ cEvalL tv ps (cLL [p1,da])
     g a = pure a
 
-handleTAG :: SynIso (Tagged Selbri,[Sumti]) (Selbri,[(Atom,Tag)])
-handleTAG = handleTAGupdater . second tagger
-    where handleTAGupdater = mkIso f g
+handleTAG :: SynIso (Selbri,[Sumti]) (Selbri,[(Atom,Tag)])
+handleTAG = second tagger
+
+{-    where handleTAGupdater = mkIso f g
           f ((s,Nothing),args) = (s,args)
           f ((s,Just u) ,args) = (s,map (mapf u) args)
           g (s,args)           = ((s,Nothing),args) --TODO: Should we really just ingore that?
@@ -307,11 +308,12 @@ handleTAG = handleTAGupdater . second tagger
 
 tagUpdater :: String -> (Tag -> Tag)
 tagUpdater t = case t of
-                    "se" -> f [("1","2"),("2","1")]
+    "se" -> f [("1","2"),("2","1")]
                     "te" -> f [("1","3"),("3","1")]
                     "ve" -> f [("1","4"),("4","1")]
                     "xe" -> f [("1","5"),("5","1")]
     where f ls e = maybe e snd $ F.find (\(a,b) -> a == e) ls
+-}
 
 --Get the argumetn location of all Sumties
 tagger :: SynIso [(Atom,Maybe String)] [(Atom,String)]
@@ -416,12 +418,12 @@ genInstance typeL = Iso f g where
     ff n (Link "InheritanceLink" [b,_] _) = n == b
     ff n a = False
 
-filterState :: SynIso Sumti Sumti
+filterState :: SynIso Atom Atom
 filterState = Iso f g where
-    f       = pure
-    g (a,t) = do
+    f   = pure
+    g a = do
         modify (\s -> s {sAtoms = getDefinitions [a] (sAtoms s)})
-        pure (a,t)
+        pure a
 
 
 getDefinitions :: [Atom] -> [Atom] -> [Atom]

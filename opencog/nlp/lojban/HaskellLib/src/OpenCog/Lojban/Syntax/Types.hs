@@ -39,14 +39,14 @@ type Tagged a = (a,Maybe Tag)
 type LCON = (Maybe String,(String,Maybe String))
 
 --Con possible contains a Logical Connective and one based on a predicate
-type Con = (Maybe LCON,Maybe (Tagged Selbri))
+type Con = (Maybe LCON,Maybe Selbri)
 
 --A Bridi consits of a some sumti/arguments in the front
 --Then Maybe a Tense
 --Then Maybe a Negation
 --Then the Selbri/Predicate
 --finally some more sumti/arguments
-type Bridi = ([Sumti],((Maybe Atom,(Maybe String,Tagged Selbri)),[Sumti]))
+type Bridi = ([Sumti],((Maybe String, Selbri),[Sumti]))
 
 --The State
 --sFlags : A list of flags then can be used to pass information along
@@ -55,8 +55,9 @@ type Bridi = ([Sumti],((Maybe Atom,(Maybe String,Tagged Selbri)),[Sumti]))
 type Flag = String
 data State = State { sFlags :: [Flag]
                    , sAtoms :: [Atom]
-                   , sText :: String
-                   , sSeed   :: Int
+                   , sText  :: String
+                   , sSeed  :: Int
+                   , sCtx   :: Atom
                    } deriving Show
 
 --They Iso we are using

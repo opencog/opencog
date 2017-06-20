@@ -94,6 +94,9 @@ ifJustB = mkIso f g where
 --State Helpers
 -------------------------------------------------------------------------------
 
+setCtx :: SynMonad t State => Atom -> (t ME) ()
+setCtx a = modify (\s -> s {sCtx = a})
+
 setAtoms :: SynMonad t State => [Atom] -> (t ME) ()
 setAtoms a = modify (\s -> s {sAtoms = a})
 
@@ -160,6 +163,8 @@ setFlagIso :: Flag -> SynIso a a
 setFlagIso flag = Iso f g
     where f a = setFlag flag >> pure a
           g a = rmFlag flag >> pure a
+
+rmFlagIso flag = inverse $ setFlagIso flag
 
 withFlag :: Flag -> SynIso a b -> SynIso a b
 withFlag flag syn = inverse (setFlagIso flag) . syn . setFlagIso flag

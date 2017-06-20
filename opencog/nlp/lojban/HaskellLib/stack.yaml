@@ -12,7 +12,7 @@ packages:
   extra-dep: true
 - location:
    git: https://github.com/rTreutlein/IsoSyntax
-   commit: 98a7ed254b3670f2869ee35cfae4a491a7376e99
+   commit: 56e8f767811b9d1051e1e2c413c622504bf908bc
   extra-dep: true
 
 # Packages to be pulled from upstream that are not in the resolver (e.g., acme-missiles-0.3)
