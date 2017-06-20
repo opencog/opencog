@@ -10,6 +10,7 @@ ADD_GUILE_MODULE (FILES
 	modulator.scm
 	rule.scm
 	sec.scm
+	emotion.scm
 	updater.scm
 	utilities.scm
 	MODULE_DESTINATION "${DATADIR}/scm/opencog/openpsi"

@@ -167,9 +167,9 @@
 	; Set event detected loop count to 0
 	(psi-set-value! psi-event-at-loop-num-node 0)
 
-	(if logging
-		(let ((output-port (open-file "psilog.txt" "a")))
-			(format output-port "\n\n\n--- New Session ---\n\n")))
+	;(if logging
+	;	(let ((output-port (open-file "psilog.txt" "a")))
+	;		(format output-port "\n\n\n--- New Session ---\n\n")))
 
 	;(format #t "psi-evals-with-change-pred: ~a\n" evals-with-change-pred)
 )
@@ -335,10 +335,13 @@
 			monitored-pau)
 			;(format #t "Changed PAU's: ~a\n" changed-pau)
 
+	;(format #t "~a " psi-updater-loop-count)
+
 	(if logging
 		(if (or (not (null? changed-params))
 				(not (null? detected-events))
-				(not (null? changed-pau)))
+				(not (null? changed-pau))
+				(= psi-updater-loop-count 1))
 			(let ((output-port (open-file "psilog.txt" "a")))
 				(format output-port
 					(string-append "-------------------------------------------"
@@ -347,17 +350,17 @@
 
 				(format output-port
 					(string-append
-						"speech: ~a  new-face: ~a  "
-						"pos-dialog: ~a  neg-dialog: ~a  "
+						;"speech: ~a  new-face: ~a  "
+						;"pos-dialog: ~a  neg-dialog: ~a  "
 						"\n\n"
 						"arousal: ~a  pos-valence: ~a  neg-valence: ~a  "
 						"agent power: ~a  "
 						;"voice: ~a  "
 						"\n\n")
-					(highlight-display speech-giving-starts)
-					(highlight-display new-face)
-					(highlight-display positive-sentiment-dialog)
-					(highlight-display negative-sentiment-dialog)
+					;(highlight-display speech-giving-starts)
+					;(highlight-display new-face)
+					;(highlight-display positive-sentiment-dialog)
+					;(highlight-display negative-sentiment-dialog)
 					(highlight-display arousal)
 					(highlight-display pos-valence)
 					(highlight-display neg-valence)
@@ -556,6 +559,8 @@
 				new-value))
 
 		(psi-set-value! target new-value)
+		; return atom for ExOutLink requirement
+		(TrueLink)
 	)
 )
 
@@ -586,6 +591,8 @@
 			(psi-set-value! var val)))
 
 	;(format #t "~a: ~a\n" var val)
+	; return atom for ExOutLink requirement
+	(TrueLink)
 )
 
 ; Adjust openpsi variable by adding noise
@@ -604,6 +611,8 @@
 	(set! val (min (max 0 val) 1))
 	(psi-set-value! var val)
 	;(format #t "post-noise ~a: ~a\n" var val)
+	; return atom for ExOutLink requirement
+	(TrueLink)
 )
 
 ; Return random offset based on cycle frequence
@@ -738,7 +747,7 @@
 ; we may want them running at different frequencies.
 
 (define psi-updater-is-running #f)
-(define psi-updater-loop-count 1)
+(define psi-updater-loop-count 0)
 (define continue-psi-updater-loop (stv 1 1))
 
 (define-public (psi-updater-running?)

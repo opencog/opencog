@@ -75,6 +75,49 @@
               ; end with a wildcard
               (else (append (list wc) TERMS (list wc))))))
 
+(define (preprocess-terms TERMS)
+  "Make sure there is no meaningless wildcard/variable in TERMS,
+   which may cause problems in rule matching or variable grounding."
+  (define (merge-wildcard INT1 INT2)
+    (cons (max (car INT1) (car INT2))
+          (cond ((or (negative? (cdr INT1)) (negative? (cdr INT2))) -1)
+                (else (max (cdr INT1) (cdr INT2))))))
+  (fold-right (lambda (term prev)
+    (cond ; If there are two consecutive wildcards, e.g.
+          ; (wildcard 0 . -1) (wildcard 3. 5)
+          ; merge them
+          ((and (equal? 'wildcard (car term))
+                (equal? 'wildcard (car (first prev))))
+           (cons (cons 'wildcard
+                       (merge-wildcard (cdr term) (cdr (first prev))))
+                 (cdr prev)))
+          ; If we have:
+          ; (wildcard 2 . 5) (variable (wildcard 0 . -1))
+          ; merge them and return a variable
+          ((and (equal? 'wildcard (car term))
+                (equal? 'variable (car (first prev)))
+                (equal? 'wildcard (caadr (first prev))))
+           (cons (cons 'variable
+                       (list (cons 'wildcard
+                                   (merge-wildcard (cdr term)
+                                                   (cdadr (first prev))))))
+                 (cdr prev)))
+          ; Similarly if we have:
+          ; (variable (wildcard 0 . -1)) (wildcard 3 . 6)
+          ; merge them and return a variable
+          ((and (equal? 'variable (car term))
+                (equal? 'wildcard (caadr term))
+                (equal? 'wildcard (car (first prev))))
+           (cons (cons 'variable
+                       (list (cons 'wildcard
+                                   (merge-wildcard (cdadr term)
+                                                   (cdr (first prev))))))
+                 (cdr prev)))
+          ; Otherwise accept and append it to the list
+          (else (cons term prev))))
+    (list (last TERMS))
+    (list-head TERMS (- (length TERMS) 1))))
+
 (define (process-pattern-terms TERMS)
   "Generate the atomese (i.e. the variable declaration and the pattern)
    for each of the TERMS."
@@ -243,7 +286,8 @@
   "Top level translation function. Pattern is a quoted list of terms,
    and action is a quoted list of actions or a single action."
   (let* ((ordered-terms (order-terms PATTERN))
-         (proc-terms (process-pattern-terms ordered-terms))
+         (preproc-terms (preprocess-terms ordered-terms))
+         (proc-terms (process-pattern-terms preproc-terms))
          (vars (append atomese-variable-template (list-ref proc-terms 0)))
          (globs (list-ref proc-terms 1))
          (conds (append atomese-condition-template (list-ref proc-terms 2)))
@@ -259,6 +303,7 @@
                      TOPIC
                      NAME)))
         (cog-logger-debug "ordered-terms: ~a" ordered-terms)
+        (cog-logger-debug "preproc-terms: ~a" preproc-terms)
         (cog-logger-debug "BindLink: ~a" bindlink)
         (cog-logger-debug "psi-rule: ~a" psi-rule)
         ; Link both the newly generated BindLink and psi-rule together
