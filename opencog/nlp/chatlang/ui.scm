@@ -2,7 +2,7 @@
 
 (use-modules (opencog)
              (opencog nlp)
-             (opencog nlp chatlang)
+             (opencog openpsi)
              (opencog logger)
              (ice-9 regex)
              (srfi srfi-1))
