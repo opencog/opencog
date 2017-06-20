@@ -14,7 +14,6 @@
 // and are being replaced by newer RelEx forms.
 // Some of these may be revived. See below.
 //
-// PHRASE_NODE <- NODE
 // COLLOCATION_NODE <- WORD_NODE
 // SEQUENCE_LINK <- ORDERED_LINK
 //
@@ -29,6 +28,8 @@
 //
 // QUERY_VARIABLE_LINK <- ORDERED_LINK
 //
+
+PHRASE_NODE <- NODE  // chatlang needs this.
 
 WORD_NODE <- NODE
 ANY_NODE <- NODE    // Explicit wildcard node, used for counting.

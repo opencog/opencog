@@ -9,11 +9,6 @@
 (use-modules (opencog logger)
              (opencog exec))
 
-; For storing the groundings
-(define globs-word '())
-(define globs-lemma '())
-(define vars-grd '())
-
 (define-public (show-globs)
   "For debugging only."
   (display "globs-word: ") (display globs-word) (newline)
