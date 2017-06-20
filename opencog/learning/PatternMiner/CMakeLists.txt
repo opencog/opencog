@@ -34,12 +34,10 @@ ELSE (HAVE_cpprest)
     )
 ENDIF (HAVE_cpprest)
 
-ADD_DEPENDENCIES(PatternMiner embodiment_atom_types)
 ADD_DEPENDENCIES(PatternMiner spacetime_atom_types)
 
-
 ADD_LIBRARY(PatternMinerAgent SHARED
-        PatternMinerAgent
+	PatternMinerAgent
 )
 
 
@@ -48,9 +46,9 @@ TARGET_LINK_LIBRARIES (PatternMinerAgent
 )
 
 INSTALL (FILES
-        HTree.h
-        PatternMiner.h
-        DESTINATION "include/${PROJECT_NAME}/learning/PatternMiner"
+	HTree.h
+	PatternMiner.h
+	DESTINATION "include/${PROJECT_NAME}/learning/PatternMiner"
 )
 
 INSTALL (TARGETS PatternMiner DESTINATION "lib${LIB_DIR_SUFFIX}/opencog")
