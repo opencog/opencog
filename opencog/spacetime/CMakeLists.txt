@@ -17,7 +17,13 @@ TARGET_LINK_LIBRARIES(spacetime-types
 ADD_DEPENDENCIES(spacetime-types spacetime_atom_types)
 
 INSTALL (TARGETS spacetime-types
-	LIBRARY DESTINATION "lib${LIB_DIR_SUFFIX}/opencog")
+	LIBRARY DESTINATION "lib${LIB_DIR_SUFFIX}/opencog"
+)
+
+INSTALL (FILES
+	spacetime.scm
+	DESTINATION "${DATADIR}/scm/opencog"
+)
 
 INSTALL (FILES
 	${CMAKE_CURRENT_BINARY_DIR}/spacetime_types.scm

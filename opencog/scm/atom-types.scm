@@ -2,11 +2,10 @@
 ; Opencog atom-types module
 ;
 
-(use-modules (opencog) (opencog nlp) (opencog attention))
+(use-modules (opencog) (opencog nlp) (opencog attention) (opencog spacetime))
 
 (define-module (opencog atom-types))
+; NOTHING is done here.
 
-; Load the C library that calls the classserver to load the types.
-(load-extension "libspacetime-types" "spacetime_types_init")
-
-(load "spacetime/spacetime_types.scm")
+; This is an OBSOLETE MODULE. It exists only to load the above.
+; Figure out which ones you need, and just load those directly.

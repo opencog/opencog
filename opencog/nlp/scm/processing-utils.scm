@@ -14,8 +14,7 @@
              (ice-9 threads)  ; needed for with-mutex
              (rnrs io ports)  ; needed for get-line
              (srfi srfi-1)
-             (opencog)
-             (opencog atom-types))
+             (opencog))
 
 ; -----------------------------------------------------------------------
 ; See below for the docs.
