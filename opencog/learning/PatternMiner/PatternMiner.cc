@@ -2169,7 +2169,8 @@ unsigned int PatternMiner::getCountOfAConnectedPattern(string& connectedPatternK
         else
         {
 
-            if (PATTERN_VARIABLENODE_TYPE == PATTERN_VARIABLE_NODE)
+            // if (PATTERN_VARIABLENODE_TYPE == PATTERN_VARIABLE_NODE)
+            if (true)
             {
                 uniqueKeyLock.unlock();
                 return 0;
@@ -4396,8 +4397,7 @@ HandleSeq PatternMiner::loadPatternIntoAtomSpaceFromString(string patternStr, At
 
     for (string linkStr : strs) // load each link
     {
-        if (linkStr == "")
-            continue;
+            if (linkStr == "") continue;
 
             HandleSeq rootOutgoings;
 
@@ -4566,8 +4566,7 @@ HandleSeq PatternMiner::loadPatternIntoAtomSpaceFromFileString(string patternStr
 
     for (string linkStr : strs) // load each link
     {
-        if (linkStr == "")
-            continue;
+            if (linkStr == "") continue;
 
             HandleSeq rootOutgoings;
 
