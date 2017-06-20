@@ -16,7 +16,7 @@ bool PatternHeap::contains(float v, const TypeFrame &frame) const
         // equivalent frames will result in exactly equals quality measure
         if (v == at(i).first) {
             if (at(i).second.isEquivalent(frame)) {
-                answer = false;
+                answer = true;
                 break;
             }
         }

@@ -27,6 +27,11 @@ TypeFrameIndex::TypeFrameIndex()
     COHERENCE_FUNCTION = CONST_1;
     COHERENCE_MODULATOR_G = ONE_OVER_COHERENCE;
     COHERENCE_MODULATOR_H = COHERENCE;
+    DIFFERENT_ASSIGNMENT_FOR_DIFFERENT_VARS = true;
+    PERMUTATIONS_OF_VARS_CONSIDERED_EQUIVALENT = true;
+    PATTERNS_GRAM = 3;
+    MAXIMUM_NUMBER_OF_MINING_RESULTS = 10;
+    PATTERN_RANKING_METRIC = N_I_SURPRISINGNESS;
 
     auxVar1.push_back(TypePair(classserver().getType("VariableNode"), 0));
     auxVar1.setNodeNameAt(0, "V1");
@@ -114,11 +119,11 @@ void TypeFrameIndex::addPatterns(std::vector<TypeFrame> &answer, const TypeFrame
     }
 }
 
-float TypeFrameIndex::computeQuality(const TypeFrame &pattern, RankingMetric metric)
+float TypeFrameIndex::computeQuality(const TypeFrame &pattern)
 {
     float answer = 0;
 
-    switch (metric) {
+    switch (PATTERN_RANKING_METRIC) {
         case I_SURPRISINGNESS: answer = computeISurprinsingness(pattern, false); break;
         case N_I_SURPRISINGNESS: answer = computeISurprinsingness(pattern, true); break;
         case II_SURPRISINGNESS: answer = computeIISurprinsingness(pattern, false); break;
@@ -532,7 +537,7 @@ void TypeFrameIndex::evaluatePatterns()
             patterns.clear();
             addPatterns(patterns, compoundFrame);
             for (unsigned int i = 0; i < patterns.size(); i++) {
-                float quality = computeQuality(patterns.at(i), miningRankingMetric);
+                float quality = computeQuality(patterns.at(i));
                 addMiningResult(quality, patterns.at(i));
             }
         } else {
@@ -547,31 +552,16 @@ void TypeFrameIndex::evaluatePatterns()
     if (DEBUG) printf("evaluatePatterns() END\n");
 }
 
-void TypeFrameIndex::minePatterns(std::vector<std::pair<float,TypeFrame>> &answer, unsigned int components, unsigned int maxAnswers, RankingMetric metric)
+void TypeFrameIndex::minePatterns(std::vector<std::pair<float,TypeFrame>> &answer)
 {
     answer.clear();
 
     floatUniverseCount = 1;
     unsigned int n = frames.size();
-    for (unsigned int i = 0; i < components; i++) {
+    for (unsigned int i = 0; i < PATTERNS_GRAM; i++) {
         floatUniverseCount = floatUniverseCount * ((float) (n - i));
         floatUniverseCount = floatUniverseCount / ((float) (i + 1));
     }
-    //floatUniverseCount = (float) frames.size();
-
-    /*
-    TypeFrame testFrame("(AndLink (SimilarityLink (VariableNode \"$var_1\") (ConceptNode \"chimp\")) (SimilarityLink (VariableNode \"$var_1\") (ConceptNode \"ent\")) (SimilarityLink (VariableNode \"$var_1\") (ConceptNode \"monkey\")))");
-    testFrame.printForDebug("testFrame: ", "\n");
-    float testQuality = computeQuality(testFrame, metric);
-    printf("Quality: %f\n", testQuality);
-    if (metric < 1000) return;
-      
-    TypeFrame testFrame2( "(AndLink (InheritanceLink (VariableNode \"V0\") (ConceptNode \"human\")) (InheritanceLink (VariableNode \"V0\") (ConceptNode \"ugly\")) (InheritanceLink (VariableNode \"V0\") (ConceptNode \"soda drinker\")) )");
-    testFrame2.printForDebug("testFrame2: ", "\n");
-    float testQuality2 = computeQuality(testFrame2, metric);
-    printf("Quality2: %f\n", testQuality2);
-    if (metric < 1000) return;
-    */
 
     EquivalentTypeFrameSet baseSet;
 
@@ -588,13 +578,11 @@ void TypeFrameIndex::minePatterns(std::vector<std::pair<float,TypeFrame>> &answe
     }
     if (LOCAL_DEBUG) printf("base.size(): %lu\n", base.size());
 
-    CartesianProductGenerator cartesianGenerator(components, base.size(), true, true);
+    CartesianProductGenerator cartesianGenerator(PATTERNS_GRAM, base.size(), true, true);
     TypeFrame compoundFrame;
     this->patternCountCache.clear();
     miningResultsHeap.clear();
-    miningResultsHeap.maxSize = maxAnswers;
-    maxResultsHeapSize = maxAnswers;
-    miningRankingMetric = metric;
+    miningResultsHeap.maxSize = MAXIMUM_NUMBER_OF_MINING_RESULTS;
     compoundFramesEnded = false;
     evaluationThreads.clear();
     for (int i = 0; i < (((int) NUMBER_OF_EVALUATION_THREADS) - 1); i++) {
@@ -605,9 +593,9 @@ void TypeFrameIndex::minePatterns(std::vector<std::pair<float,TypeFrame>> &answe
         if (DEBUG) cartesianGenerator.printForDebug("compound selection: ", "\n");
         compoundFrame.clear();
         compoundFrame.push_back(TypePair(classserver().getType("AndLink"), 1));
-        compoundFrame.append(base.at(cartesianGenerator.at(components - 1)));
+        compoundFrame.append(base.at(cartesianGenerator.at(PATTERNS_GRAM - 1)));
         bool flag = true;
-        for (int c = ((int) components) - 2; c >= 0; c--) {
+        for (int c = ((int) PATTERNS_GRAM) - 2; c >= 0; c--) {
             if (compoundFrame.nonEmptyNodeIntersection(base.at(cartesianGenerator.at(c)))) {
                 compoundFrame.at(0).second++;
                 compoundFrame.append(base.at(cartesianGenerator.at(c)));
@@ -957,13 +945,6 @@ void TypeFrameIndex::buildSubPatternsIndex()
     if (DEBUG) printForDebug(true);
 }
 
-void TypeFrameIndex::query(std::vector<ResultPair> &result, const std::string &queryScm, bool distinct, bool noPermutations) const
-{
-    TypeFrame queryFrame(queryScm);
-    if (DEBUG) queryFrame.printForDebug("NEW QUERY: ", "\n", true);
-    query(result, queryFrame, distinct, noPermutations);
-}
-
 void TypeFrameIndex::selectCurrentElement(TypeFrame &answer, StringMap &variableOccurrences, const TypeFrame &baseFrame, int cursor) const
 {
     if (baseFrame.typeAtEqualsTo(cursor, "VariableNode")) {
@@ -1020,6 +1001,17 @@ void TypeFrameIndex::buildQueryTerm(TypeFrame &answer, StringMap &variableOccurr
     }
 }
 
+void TypeFrameIndex::query(std::vector<ResultPair> &result, const std::string &queryScm) const
+{
+    TypeFrame queryFrame(queryScm);
+    query(result, queryFrame, DIFFERENT_ASSIGNMENT_FOR_DIFFERENT_VARS, PERMUTATIONS_OF_VARS_CONSIDERED_EQUIVALENT);
+}
+
+void TypeFrameIndex::query(std::vector<ResultPair> &result, const TypeFrame &queryFrame) const
+{
+    query(result, queryFrame, DIFFERENT_ASSIGNMENT_FOR_DIFFERENT_VARS, PERMUTATIONS_OF_VARS_CONSIDERED_EQUIVALENT);
+}
+
 void TypeFrameIndex::query(std::vector<ResultPair> &result, const TypeFrame &queryFrame, bool distinct, bool noPermutations) const
 {
     TypeFrame keyExpression;
@@ -1031,23 +1023,19 @@ void TypeFrameIndex::query(std::vector<ResultPair> &result, const TypeFrame &que
 
 bool TypeFrameIndex::compatibleVarMappings(const VarMapping &map1, const VarMapping &map2, bool distinct) const
 {
-    /*
     if (DEBUG) {
         printf("TypeFrameIndex::compatibleVarMappings()\n");
         printVarMapping(map1);
         printf("\n");
         printVarMapping(map2);
     }
-    */
 
     for (VarMapping::const_iterator it1 = map1.begin(); it1 != map1.end(); it1++) {
         VarMapping::const_iterator it2 = map2.find((*it1).first);
         if ((it2 != map2.end()) && (! (*it1).second.equals((*it2).second))) {
-            /*
             if (DEBUG) {
                 printf("Failed at %s\n", (*it1).first.c_str());
             }
-            */
             return false;
         }
     }
@@ -1055,6 +1043,9 @@ bool TypeFrameIndex::compatibleVarMappings(const VarMapping &map1, const VarMapp
         for (VarMapping::const_iterator it1 = map1.begin(); it1 != map1.end(); it1++) {
             for (VarMapping::const_iterator it2 = map2.begin(); it2 != map2.end(); it2++) {
                 if (((*it1).first.compare((*it2).first) != 0) && ((*it1).second.equals((*it2).second))) {
+                    if (DEBUG) {
+                        printf("* Failed at %s\n", (*it1).first.c_str());
+                    }
                     return false;
                 }
             }
@@ -1129,7 +1120,7 @@ void TypeFrameIndex::query(std::vector<ResultPair> &answer, TypeFrame &keyExpres
         // Recursive call on each clause
         keyExpression.pickAndPushBack(queryFrame, cursor);
         for (unsigned int i = 0; i < arity; i++) {
-            query(recursionQueryResult.at(i), recursionKeyExpression.at(i), recursionForbiddenMappings.at(i), recursionHeadLogicOperator.at(i), queryFrame, argPos.at(i), distinct, noPermutations);
+            query(recursionQueryResult.at(i), recursionKeyExpression.at(i), recursionForbiddenMappings.at(i), recursionHeadLogicOperator.at(i), queryFrame, argPos.at(i), distinct, false);
         }
         for (unsigned int i = 0; i < arity; i++) {
             if (DEBUG) {
@@ -1229,9 +1220,9 @@ void TypeFrameIndex::query(std::vector<ResultPair> &answer, TypeFrame &keyExpres
                         } else {
                             if (DEBUG) {
                                 printf("(AND) rejecting non-compatible var maps:\n");
-                                printVarMapping(aux[src].at(a).second);
-                                printf("-\n");
-                                printVarMapping(cleanRecursionQueryResult.at(i).at(b).second);
+                                //printVarMapping(aux[src].at(a).second);
+                                //printf("-\n");
+                                //printVarMapping(cleanRecursionQueryResult.at(i).at(b).second);
                             }
                         }
                     }

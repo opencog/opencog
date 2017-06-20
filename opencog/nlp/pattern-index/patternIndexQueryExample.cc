@@ -45,27 +45,31 @@ int main(int argc, char *argv[]) {
         AtomSpace atomSpace;
         SchemeEval::init_scheme();
         SchemeEval::set_scheme_as(&atomSpace);
+        SchemeEval *schemeEval = new SchemeEval(&atomSpace);
 
         // Create a new index given a SCM file
-        int indexKey = PatternIndexAPI::getInstance().createNewIndex(argv[1]);
-        if (indexKey == -1) {
-            throw std::runtime_error("Error creating PatternIndex\n");
-        }
+        //int indexKey = PatternIndexAPI::getInstance().createNewIndex(argv[1]);
+        Handle indexKey = PatternIndexAPI::getInstance().createNewIndex_h(argv[1]);
 
         // Optional setup of parameters which are relevant to PatternIndexAPI::query()
         //
         // Sensible defaults are provided in PatternIndexAPI::setDefaultProperties() but
-        // some tuning may be required to adjust memory usage X time
+        // some tuning may be required to adjust quality X memory usage X time
         // performance.
         //
         // All parameters are described in PatternIndexAPI::setDefaultProperties(). 
         PatternIndexAPI::getInstance().setProperty(indexKey, "PatternCountCacheEnabled", "true");
+        PatternIndexAPI::getInstance().setProperty(indexKey, "DifferentAssignmentForDifferentVars", "true");
+        PatternIndexAPI::getInstance().setProperty(indexKey, "PermutationsOfVarsConsideredEquivalent", "true");
         
         // Query
         std::string queryStr = "(AndLink (SimilarityLink (VariableNode \"X\") (VariableNode \"Y\")) (SimilarityLink (VariableNode \"Y\") (VariableNode \"Z\")))";
+        Handle queryHandle = schemeEval->eval_h(queryStr);
         std::vector<PatternIndexAPI::QueryResult> queryResult;
-        PatternIndexAPI::getInstance().query(queryResult, indexKey, queryStr, true, true);
+        //PatternIndexAPI::getInstance().query(queryResult, indexKey, queryStr);
+        Handle resultHandle = PatternIndexAPI::getInstance().query(indexKey, queryHandle);
 
+        /*
         printf("Query: %s\n", queryStr.c_str());
         printf("%lu results\n", queryResult.size());
         for (unsigned int i = 0; i < queryResult.size(); i++) {
@@ -78,6 +82,9 @@ int main(int argc, char *argv[]) {
                 printf("%s%s\n", queryResult.at(i).second.at(j).first->toString().c_str(), queryResult.at(i).second.at(j).second->toString().c_str());
             }
         }
+        */
+        printf("Result: %s", resultHandle->toString().c_str());
+
     }
 
     return exitValue;

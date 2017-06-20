@@ -77,8 +77,6 @@ private:
     std::vector<bool> threadEnabled;
     bool compoundFramesEnded;
     PatternHeap miningResultsHeap;
-    unsigned int maxResultsHeapSize;
-    RankingMetric miningRankingMetric;
     TypeFrame auxVar1;
     bool TOPLEVEL_ONLY = true;
     std::vector<TypeFrame> frames;
@@ -87,6 +85,7 @@ private:
     PatternCountMap patternCountCache;
     float floatUniverseCount;
 
+    void query(std::vector<ResultPair> &result, const TypeFrame &queryFrame, bool distinct, bool noPermutations) const;
     void query(std::vector<ResultPair> &result, TypeFrame &keyExpression, std::vector<VarMapping> &forbiddenMappings, int &logicOperator, const TypeFrame &queryFrame, int cursor, bool distinct, bool noPermutations) const;
     void addPatternOccurrence(TypeFrame &pattern, int pos);
     void addPermutations(std::vector<std::vector<int>> &answer, std::vector<int> base);
@@ -104,7 +103,7 @@ private:
     void varMappingUnion(VarMapping &answer, const VarMapping &map1, const VarMapping &map2) const;
     void permutation(std::vector<std::vector<int>> &answer, int *array, int current, int size);
     void addPatterns(std::vector<TypeFrame> &answer, const TypeFrame &base) const;
-    float computeQuality(const TypeFrame &pattern, RankingMetric metric);
+    float computeQuality(const TypeFrame &pattern);
     float computeISurprinsingness(const TypeFrame &pattern, bool normalized);
     float computeIISurprinsingness(const TypeFrame &pattern, bool normalized);
     unsigned int countPattern(const TypeFrame &pattern);
@@ -135,25 +134,28 @@ public:
     unsigned int MINIMAL_FREQUENCY_TO_COMPUTE_QUALITY_METRIC;
     unsigned int MAX_SIZE_OF_COMPOUND_FRAMES_QUEUE;
     unsigned int NUMBER_OF_EVALUATION_THREADS;
+    unsigned int PATTERNS_GRAM;
+    unsigned int MAXIMUM_NUMBER_OF_MINING_RESULTS;
     bool PATTERN_COUNT_CACHE_ENABLED;
+    bool DIFFERENT_ASSIGNMENT_FOR_DIFFERENT_VARS;
+    bool PERMUTATIONS_OF_VARS_CONSIDERED_EQUIVALENT;
     CoherenceFunction COHERENCE_FUNCTION;
     CoherenceModulatorG COHERENCE_MODULATOR_G;
     CoherenceModulatorH COHERENCE_MODULATOR_H;
+    RankingMetric PATTERN_RANKING_METRIC;
 
     TypeFrameIndex();
     ~TypeFrameIndex();
 
     bool addFromScheme(const std::string &scm, int offset);
-    // distinct enforces that to different variables are assigned different
-    // TypeFrames
-    void query(std::vector<ResultPair> &result, const std::string &queryScm, bool distinct = true, bool noPermutations = false) const;
-    void query(std::vector<ResultPair> &result, const TypeFrame &queryFrame, bool distinct = true, bool noPermutations = false) const;
+    void query(std::vector<ResultPair> &result, const std::string &queryScm) const;
+    void query(std::vector<ResultPair> &result, const TypeFrame &queryFrame) const;
 
     bool addFrame(TypeFrame &frame, int offset);
     TypeFrame getFrameAt(int index);
     void buildSubPatternsIndex();
     void evaluatePatterns();
-    void minePatterns(std::vector<std::pair<float,TypeFrame>> &answer, unsigned int components, unsigned int maxAnswers, RankingMetric metric);
+    void minePatterns(std::vector<std::pair<float,TypeFrame>> &answer);
 
     void printForDebug(bool showNodeNames = true) const;
 };

@@ -48,8 +48,6 @@ class PatternIndexAPI
         typedef std::vector<std::pair<Handle, Handle>> VariableMapping;
         typedef std::pair<HandleSeq, VariableMapping> QueryResult;
         typedef std::pair<float, Handle> MiningResult;
-        typedef enum MinedPatternsRankingMetric {I_SURPRISINGNESS, N_I_SURPRISINGNESS, II_SURPRISINGNESS, N_II_SURPRISINGNESS} MinedPatternsRankingMetric;
-
 
         static PatternIndexAPI& getInstance()
         {
@@ -58,14 +56,18 @@ class PatternIndexAPI
         }
 
         ~PatternIndexAPI();
-        // Public to allow better error messages
-        PatternIndexAPI(PatternIndexAPI const&) = delete;
-        void operator=(PatternIndexAPI const&) = delete;
+        PatternIndexAPI(PatternIndexAPI const&) = delete; // Public to provide better error messages
+        void operator=(PatternIndexAPI const&) = delete; // Public to provide better error messages
 
         int createNewIndex(const std::string &scmPath);
+        Handle createNewIndex_h(const std::string &scmPath);
         void setProperty(int key, const std::string &propertyName, const std::string &propertyValue);
-        void query(std::vector<QueryResult> &result, int key, const std::string &queryStr, bool distinct, bool noPermutations);
-        void minePatterns(std::vector<MiningResult> &answer, int key, unsigned int components, unsigned int maxResults, MinedPatternsRankingMetric metric);
+        void setProperty(Handle key, const std::string &propertyName, const std::string &propertyValue);
+        void query(std::vector<QueryResult> &result, int key, const std::string &queryStr);
+        Handle query(Handle keyNode, Handle queryLink);
+        void minePatterns(std::vector<MiningResult> &answer, int key);
+        Handle minePatterns(Handle keyNode);
+
 
     private:
 
@@ -80,12 +82,8 @@ class PatternIndexAPI
         void setDefaultProperties(PropertyMap &properties);
         void checkKey(int key);
         void applyProperties(int key);
-        TypeFrameIndex::RankingMetric selectMetric(MinedPatternsRankingMetric src);
-
-
-
+        void query(std::vector<QueryResult> &answer, int key, const TypeFrame &query);
 };
 
 }
-
 #endif // _OPENCOG_PATTERNINDEXAPI_H

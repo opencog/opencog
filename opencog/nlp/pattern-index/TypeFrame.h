@@ -54,6 +54,7 @@ private:
     bool subFrameEqual(unsigned int cursor, const TypeFrame &other, unsigned int otherCursor);
     unsigned int getNextAtomPos(unsigned int cursor) const;
     bool buildFrameRepresentation(const std::string &schemeRepresentation);
+    void recursiveHandleTraverse(Handle handle);
     int countTargets(const std::string &txt, unsigned int begin);
     int recursiveParse(const std::string &txt, unsigned int begin);
     bool isEquivalent(const TypeFrame &other, int cursorThis, int cursorOther) const;
@@ -67,6 +68,7 @@ private:
 public:
 
     TypeFrame(const std::string &schemeRepresentation);
+    TypeFrame(Handle handle);
     TypeFrame();
     ~TypeFrame();
 

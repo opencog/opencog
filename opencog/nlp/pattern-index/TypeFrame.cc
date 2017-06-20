@@ -15,6 +15,12 @@ TypeFrame::TypeFrame(const string &schemeRepresentation)
     validInstance = ! buildFrameRepresentation(schemeRepresentation);
 }
 
+TypeFrame::TypeFrame(Handle handle)
+{
+    validInstance = true;
+    recursiveHandleTraverse(handle);
+}
+
 TypeFrame::TypeFrame() 
 {
     validInstance = true;
@@ -666,6 +672,20 @@ bool TypeFrame::buildFrameRepresentation(const string &schemeTxt)
         //printForDebug();
     }
     return false;
+}
+
+void TypeFrame::recursiveHandleTraverse(Handle handle)
+{
+    bool isLink = handle->isLink();
+    unsigned int n = (isLink ? handle->getArity() : 0);
+    push_back(std::make_pair(handle->getType(), n));
+    if (isLink) {
+        for (unsigned int i = 0; i < n; i++) {
+            recursiveHandleTraverse(handle->getOutgoingAtom(i));
+        }
+    } else {
+        setNodeNameAt(size() - 1, handle->getName());
+    }
 }
 
 int TypeFrame::countTargets(const string &txt, unsigned int begin)

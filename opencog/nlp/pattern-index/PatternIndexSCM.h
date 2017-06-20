@@ -1,5 +1,5 @@
 /*
- * scm2pgsql.cc
+ * PatternIndexSCM.h
  *
  * Copyright (C) 2016 OpenCog Foundation
  *
@@ -21,21 +21,47 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "PGStorageDelegate.h"
+#ifndef _OPENCOG_PATTERNINDEXSCM_H
+#define _OPENCOG_PATTERNINDEXSCM_H
 
-using namespace opencog;
+#include <opencog/atoms/base/Handle.h>
 
-int main(int argc, char *argv[]) {
+#include <string>
 
-    int exitValue = 0;
+namespace opencog
+{
 
-    if (argc != 5) {
-        fprintf(stderr, "Usage: %s <SCM file> <DB name> <User name> <Passord>\n", argv[0]);
-        exitValue = 1;
-    } else {
-        PGStorageDelegate storageDelegate(argv[2], argv[3], argv[4]);
-        exitValue = storageDelegate.loadSCMFile(argv[1]);
-    }
+/**
+ *
+ */
+class PatternIndexSCM 
+{
 
-    return exitValue;
+public:
+
+    PatternIndexSCM();
+    ~PatternIndexSCM();
+
+private:
+
+
+    // Scheme API
+    Handle create_new_index(Handle scmPath);
+    Handle query(Handle indexKey, Handle queryLink);
+    Handle minePatterns(Handle indexKey);
+
+    // Integration magic
+    void init();
+    static void init_in_module(void* data);
+    static void* init_in_guile(void* self);
+    void opencog_patternindex_init(void);
+
+};
+
 }
+
+extern "C" {
+    void opencog_patternindex_init(void);
+};
+
+#endif // _OPENCOG_PATTERNINDEXSCM_H

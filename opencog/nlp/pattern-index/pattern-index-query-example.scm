@@ -1,0 +1,32 @@
+(use-modules (opencog))
+(use-modules (opencog nlp pattern-index))
+
+(let (
+    (index-key  (create-new-index (ConceptNode "../opencog/nlp/pattern-index/toy-example-query.scm")))
+    (query1 
+        (AndLink 
+            (SimilarityLink (VariableNode "X") (VariableNode "Y")) 
+            (SimilarityLink (VariableNode "Y") (VariableNode "Z"))
+        )
+    )
+    (query2 
+        (AndLink 
+            (SimilarityLink (VariableNode "X") (VariableNode "Y")) 
+            (NotLink 
+                (AndLink 
+                    (InheritanceLink (VariableNode "X") (VariableNode "Z")) 
+                    (InheritanceLink (VariableNode "Y") (VariableNode "Z"))
+                )
+            )
+        )
+    )
+) (begin
+    (display "query1: ")
+    (display query1)
+    (display "Result: ")
+    (display (query index-key query1))
+    (display "query2: ")
+    (display query2)
+    (display "Result: ")
+    (display (query index-key query2))
+))

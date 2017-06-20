@@ -68,14 +68,14 @@ int main(int argc, char *argv[]) {
         PatternIndexAPI::getInstance().setProperty(indexKey, "CoherenceFunction", "const1");
         PatternIndexAPI::getInstance().setProperty(indexKey, "CoherenceModulatorG", "oneOverCoherence");
         PatternIndexAPI::getInstance().setProperty(indexKey, "CoherenceModulatorH", "coherence");
+        PatternIndexAPI::getInstance().setProperty(indexKey, "PatternsGram", "3");
+        PatternIndexAPI::getInstance().setProperty(indexKey, "MaximumNumberOfMiningResults", "10");
+        PatternIndexAPI::getInstance().setProperty(indexKey, "PatternRankingMetric", "nisurprisingness");
         
         // Pattern mining
-        unsigned int patternGram = 3; // only patterns of GRAM 3 will be evaluated (see the PatternMiner documentation in Wiki to understand the meaning of a pattern's GRAM)
-        unsigned int topN = 10; // Only the topN patterns will be returned;
-        PatternIndexAPI::MinedPatternsRankingMetric metric = PatternIndexAPI::N_I_SURPRISINGNESS; // Patterns are evaluated according to this metric
         std::vector<PatternIndexAPI::MiningResult> resultPatterns;
         std::chrono::high_resolution_clock::time_point t3 = std::chrono::high_resolution_clock::now();
-        PatternIndexAPI::getInstance().minePatterns(resultPatterns, indexKey, patternGram, topN, metric);
+        PatternIndexAPI::getInstance().minePatterns(resultPatterns, indexKey);
         std::chrono::high_resolution_clock::time_point t4 = std::chrono::high_resolution_clock::now();
 
         printf("Top %lu results\n", resultPatterns.size());
