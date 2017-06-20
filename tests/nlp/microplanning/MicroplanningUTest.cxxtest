@@ -75,8 +75,9 @@ void MicroplanningUTest::setUp(void)
 
     _evaluator->eval("(use-modules (opencog))");
 
+    _evaluator->eval("(add-to-load-path \"/usr/local/share\")");
 /*
- These extra paths cause the unit tests to fail
+ These extra paths cause the unit tests to fail ... I don't understand why.
     _evaluator->eval("(add-to-load-path \"" PROJECT_BINARY_DIR "/opencog/\")");
     _evaluator->eval("(add-to-load-path \"" PROJECT_BINARY_DIR "/opencog/scm/\")");
 */
