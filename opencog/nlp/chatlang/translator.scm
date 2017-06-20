@@ -3,6 +3,7 @@
 ;; A partial implementation of the top level translator that produces
 ;; PSI rules.
 (use-modules (opencog)
+             (opencog logger)
              (opencog nlp)
              (opencog exec)
              (opencog openpsi)
@@ -11,6 +12,11 @@
              (rnrs io ports)
              (ice-9 popen)
              (ice-9 optargs))
+
+; For storing the groundings
+(define globs-word '())
+(define globs-lemma '())
+(define vars-grd '())
 
 (define-public (chatlang-prefix STR) (string-append "Chatlang: " STR))
 (define chatlang-anchor (Anchor (chatlang-prefix "Currently Processing")))

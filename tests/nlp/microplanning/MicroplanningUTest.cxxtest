@@ -75,21 +75,18 @@ void MicroplanningUTest::setUp(void)
 
     _evaluator->eval("(use-modules (opencog))");
 
-    // Bunch of fucked up library path because circle-jenkins-fucking-ci
-    // is too brain-de-fucking-dead to be able to run unit tests
-    // correctly.  Its a piece of bro-fucking-ken technology.
+    _evaluator->eval("(add-to-load-path \"/usr/local/share\")");
+/*
+ These extra paths cause the unit tests to fail ... I don't understand why.
     _evaluator->eval("(add-to-load-path \"" PROJECT_BINARY_DIR "/opencog/\")");
     _evaluator->eval("(add-to-load-path \"" PROJECT_BINARY_DIR "/opencog/scm/\")");
+*/
     _evaluator->eval("(setenv \"LTDL_LIBRARY_PATH\" "
-         "\"/usr/local/lib/opencog:/usr/local/lib/opencog/modules:"
-         PROJECT_BINARY_DIR "/opencog/spacetime:"
-         PROJECT_BINARY_DIR "/opencog/attention:"
-         PROJECT_BINARY_DIR "/opencog/embodiment:"
+         "\"/usr/local/lib/opencog:"
          PROJECT_BINARY_DIR "/opencog/nlp/sureal:"
          PROJECT_BINARY_DIR "/opencog/nlp/lg-dict"
          "\")");
 
-    _evaluator->eval("(use-modules (opencog atom-types))");
     _evaluator->eval("(use-modules (opencog nlp))");
     _evaluator->eval("(use-modules (opencog nlp lg-dict))");
     _evaluator->eval("(use-modules (opencog nlp microplanning))");
