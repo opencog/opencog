@@ -6265,6 +6265,57 @@ RMS Count      9.1591E+5    7.7713E+5     20.77        17.73
 ea257e5ab807b70555d182caa6d712df  en_pairs_tthree_mi.sql.bz2
 
 ==================================================================
+en_pairs_tthree_mst
+------------------
+MST parses from tranche-1, tranche-2 and tranche_3, and summary stats.
+
+STATUS: OK.
+DATE: 19 Jun 2017
+REASON: Several issues:
+ a) Missing many links to LEFT-WALL (on tranche-1,2, and some of 3)
+ b) fails to separete some of the punctuation
+
+                        List of relations
+ Schema |    Name    | Type  | Owner  |    Size    | Description 
+--------+------------+-------+--------+------------+-------------
+ public | atoms      | table | ubuntu | 5557 MB    | 
+ public | spaces     | table | ubuntu | 40 kB      | 
+ public | typecodes  | table | ubuntu | 56 kB      | 
+ public | valuations | table | ubuntu | 14 GB      | 
+ public | values     | table | ubuntu | 8192 bytes | 
+
+
+select count(*) from atoms; -- 61026822 = 61M
+select count(*) from valuations; --  127753161 = 128M
+
+Summary Report for Correlation Matrix Word-Disjunct Pairs (aka Connector
+Sets)
+Left type: WordNode    Right Type: ConnectorSeq    Pair Type: Section
+Wildcard: (ListLink (ctv 0 0 31507285)
+   (AnyNode "cset-word")
+   (AnyNode "cset-disjunct")
+)
+Rows: 378412 Columns: 7179578
+Size: 13176250 non-zero entries of 2716838470136 possible
+Fraction non-zero: 4.8498E-6 Sparsity (-log_2): 17.654
+Total observations: 31507285.0  Avg obs per pair: 2.3912
+Entropy Total: 21.941   Left: 15.630   Right: 10.282
+Total MI: -3.971
+
+                 Left         Right     Avg-left     Avg-right
+                 ----         -----     --------     ---------
+Support (l_0)  1.2948E+5    1.7353E+4
+Count   (l_1)  3.6454E+5    1.3127E+5     2.815        7.565    
+Length  (l_2)  9336.        5603.         7.2108E-2    .3229    
+RMS Count      9298.        5557.         7.1812E-2    .3203    
+
+8158333695 Bytes = 8.16 GBytes uncompressed
+1018619547 Bytes = 1.02 GBytes compressed
+
+487fbe4f636fb40e75a802dcda315d05  en_pairs_tthree_mst.sql
+086f9fdae0f27a2d0e6b857d1adc901b  en_pairs_tthree_mst.sql.bz2
+
+==================================================================
 en_pairs_rone
 -------------
 Random-planar-tree parsed books from "tranche-1" of mostly project
@@ -6769,6 +6820,7 @@ but queue size was wrong.
 
 OK, so 105 of 245 ... 123 
 
+o
  why is fillfraction 55K ? Because drain is no longer being hit.
 
 =====================================================
@@ -7666,7 +7718,7 @@ Now compute the summaries.
 
 (define pca (make-pseudo-cset-api))
 (batch-pairs pca)  
-COMMENT ON DATABASE en_pairs_rone_mstIS 'Clean MST-parse of tranche-1 and summary';
+COMMENT ON DATABASE en_pairs_rone_mst IS 'Clean MST-parse of tranche-1 and summary';
 
 ---------- meanwhile do the tthree_mst
 gamma-guten feeder-8 port 19005 ./guten-mst-en.sh
@@ -9927,6 +9979,30 @@ update typecodes set typename='ConnectorSeq' where typename='PseudoAnd';
 update typecodes set typename='Section' where typename='PseudoWordCset';
 update typecodes set typename='ConnectorDir' where typename='LgConnDirNode';
 update typecodes set typename='Connector' where typename='PseudoConnector';
+
+=========================================================================
+
+ (batch-all-pair-mi psa)
+Start computing the basis
+Support: found num left=378412 num right=7179408 in 10185 secs
+Done with wild-card count N(x,*) and N(*,y) in 27072 secs
+fuuuu
+opencog/matrix/compute-mi.scm:251:32:
+opencog/matrix/compute-mi.scm:251:32: Throw to key `bad-summation' with
+args `(count-all-pairs "Error: pair-counts unequal: 31507286.0
+31506142.0\n")'.
+
+Hmm. Try again.
+ (use-modules (opencog) (opencog cogserver))
+ (use-modules (opencog persist) (opencog persist-sql))
+ (use-modules (opencog nlp) (opencog nlp learn))
+ (use-modules (opencog matrix))
+ (start-cogserver "opencog-mst-en.conf")
+ (sql-open "postgres:///en_pairs_tthree_mst?user=ubuntu&password=asdf")
+ (define pca (make-pseudo-cset-api))
+ (define psa (add-pair-stars pca))
+ (batch-pairs psa)
+
 
 =========================================================================
 
