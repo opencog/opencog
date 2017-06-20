@@ -48,6 +48,12 @@
     ((string=? "" str)
         (format #t  ">>lexer newline @ ~a\n" (show-location location))
         (make-lexical-token 'NEWLINE location #f))
+    ((string-match "^#!" str) ; This should be checked always before #
+        (format #t  ">>lexer sample input @ ~a\n" (show-location location))
+        (make-lexical-token 'SAMPLE_INPUT location #f))
+    ((string-match "^#" str)
+        (format #t  ">>lexer comment @ ~a\n" (show-location location))
+        (make-lexical-token 'COMMENT location #f))
     ; Rules
     ((string-match "^[s?u]:" str)
         (format #t ">>lexer responders @ ~a\n" (show-location location))
@@ -80,7 +86,7 @@
   (lalr-parser
     ; Token (aka terminal symbol) definition
     (LPAREN RPAREN NEWLINE CR CONCEPT TOPIC RESPONDERS REJOINDERS GAMBIT
-      NotDefined
+      NotDefined COMMENT SAMPLE_INPUT
     )
 
     ; Parsing rules (aka nonterminal symbol)
@@ -95,6 +101,8 @@
       (CR) : #f
       (NotDefined) : (display-token $1)
       (NEWLINE) : #f
+      (COMMENT) : #f
+      (SAMPLE_INPUT) : #f ; TODO replace with a tester function
     )
 
     (declarations
