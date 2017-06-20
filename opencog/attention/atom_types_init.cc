@@ -20,15 +20,9 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <opencog/cogserver/server/Module.h>
-
 #include "opencog/attention/atom_types.definitions"
 
 #define INHERITANCE_FILE "opencog/attention/atom_types.inheritance"
 #define INITNAME attention_types_init
 
 #include <opencog/atoms/base/atom_types.cc>
-
-using namespace opencog;
-TRIVIAL_MODULE(AttentionTypesModule)
-DECLARE_MODULE(AttentionTypesModule)
