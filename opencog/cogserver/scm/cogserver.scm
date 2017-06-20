@@ -2,21 +2,13 @@
 ; Opencog cogserver module
 ;
 
-; Old CentOS-based systems use lib64
-(define path "/usr/local/lib/opencog:/usr/local/lib64/opencog")
-
-(setenv "LTDL_LIBRARY_PATH"
-    (if (getenv "LTDL_LIBRARY_PATH")
-        (string-append (getenv "LTDL_LIBRARY_PATH") ":" path)
-        path))
-
 (define-module (opencog cogserver))
-
-; libguile-cogserver.so is located in /usr/local/lib/opencog
-(load-extension "libguile-cogserver" "opencog_cogserver_init")
 
 ;; Server falls over if the atom types are not loaded.
 (use-modules (opencog) (opencog atom-types))
+
+; Path to libguile-cogserver.so is set up in the opencog module.
+(load-extension "libguile-cogserver" "opencog_cogserver_init")
 
 ; config path name is optional.
 (define* (start-cogserver #:optional (config-path ""))
