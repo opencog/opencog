@@ -28,4 +28,4 @@ INSTALL (FILES
 )
 
 INSTALL (TARGETS embodiment-types
-	LIBRARY DESTINATION "lib${LIB_DIR_SUFFIX}/opencog/modules")
+	LIBRARY DESTINATION "lib${LIB_DIR_SUFFIX}/opencog")

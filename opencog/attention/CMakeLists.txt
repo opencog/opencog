@@ -48,6 +48,11 @@ ADD_DEPENDENCIES(attention attention-types)
 
 TARGET_LINK_LIBRARIES(attention server ${ATOMSPACE_LIBRARIES})
 
+
+INSTALL (TARGETS attention-types
+	LIBRARY DESTINATION "lib${LIB_DIR_SUFFIX}/opencog"
+)
+
 INSTALL (TARGETS attention
 	LIBRARY DESTINATION "lib${LIB_DIR_SUFFIX}/opencog"
 )
@@ -69,6 +74,3 @@ INSTALL (FILES
 	HebbianUpdatingAgent.h
 	DESTINATION "include/${PROJECT_NAME}/attention"
 )
-
-INSTALL (TARGETS attention-types
-	LIBRARY DESTINATION "lib${LIB_DIR_SUFFIX}/opencog/modules")
