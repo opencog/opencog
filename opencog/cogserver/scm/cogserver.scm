@@ -4,8 +4,7 @@
 
 (define-module (opencog cogserver))
 
-;; Server falls over if the atom types are not loaded.
-(use-modules (opencog) (opencog atom-types))
+(use-modules (opencog))
 
 ; Path to libguile-cogserver.so is set up in the opencog module.
 (load-extension "libguile-cogserver" "opencog_cogserver_init")
