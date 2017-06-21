@@ -37,13 +37,18 @@
 (define (get-concept-name str)
   (define match (string-match "^~[a-zA-Z]+" str))
   (if match
-    (match:substring match)
+    (cons (match:substring match) (match:suffix match))
     (error "Issue calling get-concept-name on " str)
   )
 )
 
 (define (tokeniz str location)
   (define current-match '())
+  (define (tokenization-result token location a-pair)
+    (cons
+      (make-lexical-token token location (car a-pair))
+      (cdr a-pair)))
+
   (define (has-match? pattern str)
     (let ((match (string-match pattern str)))
       (if match
@@ -55,7 +60,7 @@
     ; Chatscript declarations
     ((has-match? "concept:" str)
         (format #t ">>lexer concept @ ~a\n" (show-location location))
-        (make-lexical-token 'CONCEPT location
+        (tokenization-result 'CONCEPT location
           (get-concept-name (string-trim (match:suffix current-match)))))
     ((has-match? "topic:" str)
         (format #t  ">>lexer topic @ ~a\n" (show-location location))
@@ -90,13 +95,17 @@
 
 (define (cs-lexer port)
   (lambda ()
-    (let* ((line (read-line port))
+    (let ((cs-line (read-line port))
           (port-location (get-source-location port)))
-      (if (eof-object? line)
+      (if (eof-object? cs-line)
         '*eoi*
-        (tokeniz (string-trim-both line) port-location)
-      )
-    )
+        (let ((result (tokeniz (string-trim-both cs-line) port-location)))
+          (if (pair? result)
+            (begin
+              (unread-string (cdr result) port)
+              (car result))
+            result
+          ))))
   )
 )
 
