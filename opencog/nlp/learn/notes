@@ -6535,7 +6535,19 @@ RMS Count      7100.        3985.         .1002        .4137
 4f36561722a0689bf213c304b61334d4  en_pairs_rtwo_mst.sql.bz2
 
 ==================================================================
+en_pairs_rthree
+---------------
+Random-planar-tree parsed books from tranche-1, 2 and 3. Includes
+the pair-MI computations.  A continutation of en_pairs_rtwo.
 
+STATUS: good
+DATE: 21 June 2017
+REASON: Best so far, I think.  One issue:
+  infix-marks: dashes, ellipsis, long-dashes are not split.
+  It now seems that this would have been the right thing to do.
+
+
+==================================================================
 Plan:
 load en_pairs_mst
 load en_pairs_semi_fu
@@ -6820,7 +6832,6 @@ but queue size was wrong.
 
 OK, so 105 of 245 ... 123 
 
-o
  why is fillfraction 55K ? Because drain is no longer being hit.
 
 =====================================================
@@ -7078,7 +7089,7 @@ So, somehow still stuck in i/o waiting for postgres to flush to disk.
 
 ?? Is it postgres indexing? Can we suspend that while storing?
 
---------- meanhwile continue pair-parsing
+--------- meanwhile continue pair-parsing
 launch tranche-3 any-parsing Tue May 30 04:39:44 UTC 2017
 Done
 en_pairs_tthree
@@ -7561,7 +7572,7 @@ delete from atoms where type=169;
 
 DONE.
 
----------- meanwhile, construct en_pairs_tthree_mst
+---------- meanwhile, construct en_pairs_tthree_mst DONE
 but first, in en_pairs_tthree, kill the bogus disjuncts.
 select count(*) from atoms where type=169;  --- 1245661
 
@@ -7720,7 +7731,7 @@ Now compute the summaries.
 (batch-pairs pca)  
 COMMENT ON DATABASE en_pairs_rone_mst IS 'Clean MST-parse of tranche-1 and summary';
 
----------- meanwhile do the tthree_mst
+---------- meanwhile do the tthree_mst DONE
 gamma-guten feeder-8 port 19005 ./guten-mst-en.sh
 cog-term-1 guile -l mst-count-en.scm on term 1
 
@@ -10003,6 +10014,48 @@ Hmm. Try again.
  (define psa (add-pair-stars pca))
  (batch-pairs psa)
 
+=========================================================================
+
+now what.
+oncurrent_stack<LLConnection*>::pop(LLConnection*&)
+
+current conn_pool free=30 of 54
+current conn_pool free=13 of 54
+current conn_pool free=7 of 54
+current conn_pool free=7 of 54
+current conn_pool free=6 of 54   <<<< 22 seconds!!  set (24,8)
+
+current conn_pool free=40 of 54
+current conn_pool free=40 of 54
+current conn_pool free=42 of 54
+current conn_pool free=40 of 54
+current conn_pool free=44 of 54   <<< 23 secs!! (set 8,8)
+
+current conn_pool free=18 of 32
+current conn_pool free=9 of 32
+current conn_pool free=0 of 32
+current conn_pool free=2 of 32
+current conn_pool free=0 of 32
+current conn_pool free=0 of 32  <<< 25 secs (24, 8)
+
+fetch-pairs doesn't seem to multi-thread oh wait it does
+
+omp 8 8  runs with ... 
+222% on guile  or lesss
+38%  x 8 on postgres   = 3.04
+(free = 13 of 18 12 of 18, 10 of 18 ...)
+total cpu: 66:08
+Elapsed time to load ANY-link pairs: 1802 secs
+
+12 12 runs with
+240%  
+28% x 12 = 3.36
+total cpu: 73:05
+Elapsed time to load ANY-link pairs: 1847 secs
+(free = 14 of 18 10 of 18 8 of 18 .... 13 of 18
+
+again: 72:23
+load ANY-link pairs: 1819 secs
 
 =========================================================================
 
