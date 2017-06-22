@@ -25,14 +25,14 @@
 
 ; Open the database.
 ; Edit the below, setting the database name, user and password.
-(sql-open "postgres:///en_pairs_rthree_mst?user=ubuntu&password=asdf")
+(sql-open "postgres:///en_pairs_rthree_mall?user=ubuntu&password=asdf")
 
 ; Load up the words
 (display "Fetch all words from database. This may take several minutes.\n")
 (fetch-all-words)
 
 ; Load up the word-pairs -- this can take over half an hour!
-(display "Fetch all word-pairs. This may over half-an-hour!\n")
+(display "Fetch all word-pairs. This may take well over half-an-hour!\n")
 
 ; The object which will be providing pair-counts for us.
 ; We can also do MST parsing with other kinds of pair-count objects,
