@@ -187,11 +187,13 @@
 
 (define-public (ground-word GLOB)
   "Get the original words grounded for GLOB."
-  (assoc-ref globs-word GLOB))
+  (let ((gw (assoc-ref globs-word GLOB)))
+       (if (equal? #f gw) (List) gw)))
 
 (define-public (ground-lemma GLOB)
   "Get the lemmas grounded for GLOB."
-  (assoc-ref globs-lemma GLOB))
+  (let ((gl (assoc-ref globs-lemma GLOB)))
+       (if (equal? #f gl) (List) gl)))
 
 (define-public (chatlang-say WORDS)
   "Say the text and update the internal state."
