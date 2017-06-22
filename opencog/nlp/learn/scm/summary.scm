@@ -11,7 +11,7 @@
 ; Print a summary report for a dataset.
 
 (use-modules (opencog))
-(use-modules (opencog analysis))
+(use-modules (opencog matrix))
 
 ; ---------------------------------------------------------------------
 

@@ -37,7 +37,5 @@ IF (HAVE_CYTHON)
 	ADD_SUBDIRECTORY (python)
 ENDIF (HAVE_CYTHON)
 
-ADD_SUBDIRECTORY (embodiment)
-
 # Graphics and visualization subsystems
 ADD_SUBDIRECTORY (visualization)

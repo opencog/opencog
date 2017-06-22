@@ -2,7 +2,7 @@
 
 (use-modules (opencog)
              (opencog nlp)
-             (opencog nlp chatlang)
+             (opencog openpsi)
              (opencog logger)
              (ice-9 regex)
              (srfi srfi-1))
@@ -65,6 +65,22 @@
                 (extract TXT)
                 ; Return the negation of a phrase
                 (match:substring sm))))
+        ; For handling wildcards
+        ((not (equal? #f (string-match "^\\*~[0-9]+" TXT)))
+         (match:substring (string-match "^\\*~[0-9]+" TXT)))
+        ((not (equal? #f (string-match "^\\*[0-9]+" TXT)))
+         (match:substring (string-match "^\\*[0-9]+" TXT)))
+        ((string-prefix? "*" TXT) "*")
+        ; For handling variables
+        ((string-prefix? "_~" TXT)
+         (match:substring (string-match "^_~[a-zA-Z0-9]+" TXT)))
+        ((not (equal? #f (string-match "^_ *\\[" TXT)))
+         (match:substring (string-match "^_ *\\[.+\\]" TXT)))
+        ((not (equal? #f (string-match "^_\\*~[0-9]+" TXT)))
+         (match:substring (string-match "^_\\*~[0-9]+" TXT)))
+        ((not (equal? #f (string-match "^_\\*[0-9]+" TXT)))
+         (match:substring (string-match "^_\\*[0-9]+" TXT)))
+        ((string-prefix? "_*" TXT) "_*")
         ; For the rest -- concept and lemma,
         ; just return the whole term
         (else (extract TXT))))
@@ -128,11 +144,34 @@
           ; Concept
           ((string-prefix? "~" t)
            (cons 'concept (substring t 1)))
-          ; TODO
-          ; ----
-          ; Variable
-          ; ((equal? "_" t)
-          ;  (string-append "(variable _)"))
+          ; Wildcard -- "up to"
+          ((not (equal? #f (string-match "^\\*~[0-9]+" t)))
+           (cons 'wildcard (cons 0
+             (string->number (substring
+               (match:substring (string-match "^\\*~[0-9]+" t)) 2)))))
+          ; Wildcard -- "exactly"
+          ((not (equal? #f (string-match "^\\*[0-9]+" t)))
+           (let ((n (string->number (substring
+                      (match:substring (string-match "^\\*[0-9]+" t)) 1))))
+                (cons 'wildcard (cons n n))))
+          ; Wildcard -- "zero or more"
+          ((string-prefix? "*" t)
+           (cons 'wildcard (cons 0 -1)))
+          ; Variable -- concept
+          ((string-prefix? "_~" t)
+           (cons 'variable (interpret-terms (list (substring t 1)))))
+          ; Variable -- choices
+          ((not (equal? #f (string-match "^_ *\\[" t)))
+           (cons 'variable (interpret-terms (list (string-trim (substring t 1))))))
+          ; Variable -- "up to"
+          ((not (equal? #f (string-match "^_\\*~[0-9]+" t)))
+           (cons 'variable (interpret-terms (list (substring t 1)))))
+          ; Variable -- "exactly"
+          ((not (equal? #f (string-match "^_\\*[0-9]+" t)))
+           (cons 'variable (interpret-terms (list (substring t 1)))))
+          ; Variable -- "zero or more"
+          ((string-prefix? "_*" t)
+           (cons 'variable (interpret-terms (list (substring t 1)))))
           ; Part of speech (POS)
           ; ((not (equal? #f (string-match "[_a-zA-Z]+~" t)))
           ;  (let ((ss (string-split t #\~)))

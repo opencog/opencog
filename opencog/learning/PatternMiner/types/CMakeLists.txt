@@ -26,10 +26,10 @@ ADD_DEPENDENCIES(patternminer-types patternminer_atom_types)
 
 IF (WIN32)
     INSTALL (TARGETS patternminer-types
-		DESTINATION "lib${LIB_DIR_SUFFIX}/opencog/modules")
+		DESTINATION "lib${LIB_DIR_SUFFIX}/opencog")
 ELSE (WIN32)
     INSTALL (TARGETS patternminer-types
-		LIBRARY DESTINATION "lib${LIB_DIR_SUFFIX}/opencog/modules")
+		LIBRARY DESTINATION "lib${LIB_DIR_SUFFIX}/opencog")
 ENDIF (WIN32)
 
 INSTALL (FILES
