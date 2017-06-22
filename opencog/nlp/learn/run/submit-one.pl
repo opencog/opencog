@@ -30,7 +30,7 @@ while (<STDIN>)
 
 	# open(NC, "|nc localhost 17002") || die "nc failed: $!\n";
 	open NC, $netcat || die "nc failed: $!\n";
-	print NC "scm hush\n($ARGV[2] \"$_\")\n";
+	print NC "($ARGV[2] \"$_\")\n";
 	my $elapsed = time() - $start_time;
 	print "submit-one (elapsed $elapsed): $_\n";
 }
