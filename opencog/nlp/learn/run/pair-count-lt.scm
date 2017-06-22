@@ -1,5 +1,5 @@
 ;
-; pair-count-fr.scm
+; pair-count-lt.scm
 ;
 ; Set up everything needed for the language-learning word-pair
 ; counting pipeline. Starts the REPL server, opens the database.
@@ -11,22 +11,21 @@
 (use-modules (opencog nlp) (opencog nlp learn))
 
 ; Write a log-file, just in case...
-(cog-logger-set-filename! "/tmp/pair-count-fr.log")
-(cog-logger-info "Commencez word-pair counting pour Francaise.")
+(cog-logger-set-filename! "/tmp/pair-count-lt.log")
+(cog-logger-info "Start word-pair counting for Lithuanian.")
 
 ; Tell opencog where the relex server is located.
 ; The port should match that in `relex-server-ady.sh`
 ; Note: this is the morphology split-into-two server.
 (use-relex-server "127.0.0.1" 4446)
 
-; Start the network REPL server on port 17003
+; Start the network REPL server on port 17002
 (call-with-new-thread (lambda ()
-	(repl-default-option-set! 'prompt "scheme@(fr-pairs)> ")
+	(repl-default-option-set! 'prompt "scheme@(lt-pairs)> ")
 	(set-current-error-port (%make-void-port "w"))
-	(run-server (make-tcp-server-socket #:port 17003)))
+	(run-server (make-tcp-server-socket #:port 17002)))
 )
 
 ; Open the database.
 ; Edit the below, setting the database name, user and password.
-(sql-open "odbc://linas:asdf/fr-ady")
-; (sql-open "postgres:///fr_pairs?user=ubuntu&password=asdf")
+(sql-open "postgres:///lt_pairs?user=ubuntu&password=asdf")
