@@ -97,28 +97,14 @@
            (cons (cons 'wildcard
                        (merge-wildcard (cdr term) (cdr (first prev))))
                  (cdr prev)))
-          ; If we have:
-          ; (wildcard 2 . 5) (variable (wildcard 0 . -1))
-          ; merge them and return a variable
-          ((and (equal? 'wildcard (car term))
-                (equal? 'variable (car (first prev)))
-                (equal? 'wildcard (caadr (first prev))))
-           (cons (cons 'variable
-                       (list (cons 'wildcard
-                                   (merge-wildcard (cdr term)
-                                                   (cdadr (first prev))))))
-                 (cdr prev)))
-          ; Similarly if we have:
+          ; If we have a variable that matches to "zero or more"
+          ; follow by a wildcard, e.g.
           ; (variable (wildcard 0 . -1)) (wildcard 3 . 6)
-          ; merge them and return a variable
+          ; return the variable
           ((and (equal? 'variable (car term))
-                (equal? 'wildcard (caadr term))
+                (equal? (cadr term) (cons 'wildcard (cons 0 -1)))
                 (equal? 'wildcard (car (first prev))))
-           (cons (cons 'variable
-                       (list (cons 'wildcard
-                                   (merge-wildcard (cdadr term)
-                                                   (cdr (first prev))))))
-                 (cdr prev)))
+           (cons term (cdr prev)))
           ; Otherwise accept and append it to the list
           (else (cons term prev))))
     (list (last TERMS))
