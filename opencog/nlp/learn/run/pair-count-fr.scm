@@ -9,22 +9,31 @@
 (use-modules (opencog) (opencog logger))
 (use-modules (opencog persist) (opencog persist-sql))
 (use-modules (opencog nlp) (opencog nlp learn))
+(use-modules (opencog cogserver))
 
-; Write a log-file, just in case...
-(cog-logger-set-filename! "/tmp/pair-count-fr.log")
-(cog-logger-info "Commencez word-pair counting pour Francaise.")
+(repl-default-option-set! 'prompt "scheme@(fr-pairs)> ")
 
 ; Tell opencog where the relex server is located.
 ; The port should match that in `relex-server-ady.sh`
 ; Note: this is the morphology split-into-two server.
 (use-relex-server "127.0.0.1" 4446)
 
-; Start the network REPL server on port 17003
-(call-with-new-thread (lambda ()
-	(repl-default-option-set! 'prompt "scheme@(fr-pairs)> ")
-	(set-current-error-port (%make-void-port "w"))
-	(run-server (make-tcp-server-socket #:port 17003)))
-)
+;;; Start the network REPL server on port 17003
+;;; Unfortunately, this runs about 3x slower than the cogserver,
+;;; when establishing new connections, and that's bad.
+;;;
+;;; Write a log-file, just in case...
+;;;(cog-logger-set-filename! "/tmp/pair-count-fr.log")
+;;;(cog-logger-info "Commencez word-pair counting pour Francaise.")
+;;;
+;;;; Start the network REPL server on port 17003
+;;;(call-with-new-thread (lambda ()
+;;;	(set-current-error-port (%make-void-port "w"))
+;;;	(run-server (make-tcp-server-socket #:port 17003)))
+;;;)
+
+; Start the cogserver on port 17003
+(start-cogserver "opencog-fr.conf")
 
 ; Open the database.
 ; Edit the below, setting the database name, user and password.

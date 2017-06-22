@@ -10100,6 +10100,25 @@ again: 72:23
 load ANY-link pairs: 1819 secs
 
 =========================================================================
+system repl common)
+repl-default-option-set! prompt "foo"
+
+approx 12:30 PM
+oww. clean start, approx 320K atom and 1.6M ob in 2 hours elapsed.
+--> approx 800K obs/hour
+
+Again: start exactly: 15:12 
+15:32:  297K values -> 900K obs/hour.
+16:15:  941K values 
+16:42: 1320K values -> 1M obs/hour ... using the REPL shell
+
+Or ... using the cogserver: start 21:43:47
+at 17:04: 975K -> almost 3M obs/hour wow. Big diff...
+at 18:20: 4M -> 2.5M/hour
+
+
+=========================================================================
+
 
 Crazy idea: iterate; the places we end up at should be the dependents
 since everything points at them, and they never point away.
