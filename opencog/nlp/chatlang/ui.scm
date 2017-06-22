@@ -76,6 +76,10 @@
          (match:substring (string-match "^_~[a-zA-Z0-9]+" TXT)))
         ((not (equal? #f (string-match "^_ *\\[" TXT)))
          (match:substring (string-match "^_ *\\[.+\\]" TXT)))
+        ((not (equal? #f (string-match "^_\\*~[0-9]+" TXT)))
+         (match:substring (string-match "^_\\*~[0-9]+" TXT)))
+        ((not (equal? #f (string-match "^_\\*[0-9]+" TXT)))
+         (match:substring (string-match "^_\\*[0-9]+" TXT)))
         ((string-prefix? "_*" TXT) "_*")
         ; For the rest -- concept and lemma,
         ; just return the whole term
@@ -159,7 +163,13 @@
           ; Variable -- choices
           ((not (equal? #f (string-match "^_ *\\[" t)))
            (cons 'variable (interpret-terms (list (string-trim (substring t 1))))))
-          ; Variable -- wildcard
+          ; Variable -- "up to"
+          ((not (equal? #f (string-match "^_\\*~[0-9]+" t)))
+           (cons 'variable (interpret-terms (list (substring t 1)))))
+          ; Variable -- "exactly"
+          ((not (equal? #f (string-match "^_\\*[0-9]+" t)))
+           (cons 'variable (interpret-terms (list (substring t 1)))))
+          ; Variable -- "zero or more"
           ((string-prefix? "_*" t)
            (cons 'variable (interpret-terms (list (substring t 1)))))
           ; Part of speech (POS)
