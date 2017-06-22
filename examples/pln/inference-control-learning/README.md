@@ -57,7 +57,135 @@ The inference control rules should be that double, triple, etc,
 deductions are the most effective way to prove that 2 letters are
 ordered.
 
-The useful to the Backward Chainer format should be that of a context
-free Cognitive Schematic.
+The useful representation for the Backward Chainer should be a
+Cognitive Schematic, context free for starter.
+
+Implication
+  ExecutionOutput
+  
 
 TODO: give inference control rule examples
+
+  Context:
+    running the backward chainer to prove T
+    about to choose what rule to expand L of and-BIT A
+  Action:
+    expand with rule R
+  Result:
+    produce a proof-suffix of T
+
+TODO: A proof-suffix is a inference tree prefix of an inference tree proving T
+
+;; Top inference control rule. This is the most abstract inference control rule
+;; expressing the probability of that expanding and-BIT will produce an and-BIT
+;; that is a proof-suffix of any target. This is good for instance to evaluate
+;; the performance of a BC policy. All other inference control rule are
+;; specializations of this rule.
+
+ImplicationScope
+  VariableList
+    Variable "$T"  ;; Theorem/target to prove
+    TypedVariable  ;; and-BIT to expand
+      Variable "$A"
+      Type "BindLink"
+    Variable "$L"  ;; Leaf from A to expand
+    Variable "$R"  ;; Rule to expand A from L
+    TypedVariable  ;; Resulting and-BIT from the expansion of L from A with rule R
+      Variable "$B"
+      Type "BindLink"
+  And
+    Execution
+      GroundedSchema "expand-and-BIT"
+      List
+        "$A"
+        "$L"
+        "$R"
+      "$B"
+  
+
+  (ExecutionOutputLink
+    (GroundedSchemaNode "scm: bc-deduction-formula") ; [5481509939359570705][1]
+    (ListLink
+      (InheritanceLink
+        (ConceptNode "A") ; [6977206836600634430][1]
+        (ConceptNode "D") ; [246112806454457922][1]
+      ) ; [9592798904207778024][1]
+      (ExecutionOutputLink
+        (GroundedSchemaNode "scm: bc-deduction-formula") ; [5481509939359570705][1]
+        (ListLink
+          (InheritanceLink
+            (ConceptNode "A") ; [6977206836600634430][1]
+            (VariableNode "$B-6266d6f2") ; [4097372290580364298][15]
+          ) ; [13444058388333684400][15]
+          (InheritanceLink
+            (ConceptNode "A") ; [6977206836600634430][1]
+            (VariableNode "$B-6229393a") ; [6185394777777469381][15]
+          ) ; [15532080875530789483][15]
+          (InheritanceLink
+            (VariableNode "$B-6229393a") ; [6185394777777469381][15]
+            (VariableNode "$B-6266d6f2") ; [4097372290580364298][15]
+          ) ; [14984376557733565207][15]
+        ) ; [18175419943537721797][15]
+      ) ; [16724333062125429183][15]
+      (InheritanceLink
+        (VariableNode "$B-6266d6f2") ; [4097372290580364298][15]
+        (ConceptNode "D") ; [246112806454457922][1]
+      ) ; [16015351290941397556][15]
+    ) ; [15046555205905734382][15]
+  ) ; [13595468324493441768][15]
+
+[15532080875530789483][15] [14984376557733565207][15]
+----------------bc-deduction-formula-----------------
+             [13444058388333684400][15] [16015351290941397556][15]
+             ----------------bc-deduction-formula-----------------
+                           [9592798904207778024][1]
+
+
+[DEBUG] [URE] Expanded forward chainer strategy:
+(BindLink
+  (VariableList
+    (TypedVariableLink
+      (VariableNode "$B-6266d6f2") ; [4097372290580364298][15]
+      (TypeNode "ConceptNode") ; [3788634541270868382][1]
+    ) ; [11809658565253834475][15]
+    (TypedVariableLink
+      (VariableNode "$B-6229393a") ; [6185394777777469381][15]
+      (TypeNode "ConceptNode") ; [3788634541270868382][1]
+    ) ; [16150796384774871558][15]
+  ) ; [10107478639882222213][15]
+  (AndLink
+  ) ; [17473895290224991152][15]
+  (ExecutionOutputLink
+    (GroundedSchemaNode "scm: bc-deduction-formula") ; [5481509939359570705][1]
+    (ListLink
+      (InheritanceLink
+        (ConceptNode "A") ; [6977206836600634430][1]
+        (ConceptNode "D") ; [246112806454457922][1]
+      ) ; [9592798904207778024][1]
+      (ExecutionOutputLink
+        (GroundedSchemaNode "scm: bc-deduction-formula") ; [5481509939359570705][1]
+        (ListLink
+          (InheritanceLink
+            (ConceptNode "A") ; [6977206836600634430][1]
+            (VariableNode "$B-6266d6f2") ; [4097372290580364298][15]
+          ) ; [13444058388333684400][15]
+          (InheritanceLink
+            (ConceptNode "A") ; [6977206836600634430][1]
+            (VariableNode "$B-6229393a") ; [6185394777777469381][15]
+          ) ; [15532080875530789483][15]
+          (InheritanceLink
+            (VariableNode "$B-6229393a") ; [6185394777777469381][15]
+            (VariableNode "$B-6266d6f2") ; [4097372290580364298][15]
+          ) ; [14984376557733565207][15]
+        ) ; [18175419943537721797][15]
+      ) ; [16724333062125429183][15]
+      (InheritanceLink
+        (VariableNode "$B-6266d6f2") ; [4097372290580364298][15]
+        (ConceptNode "D") ; [246112806454457922][1]
+      ) ; [16015351290941397556][15]
+    ) ; [15046555205905734382][15]
+  ) ; [13595468324493441768][15]
+) ; [17301981865595416016][15]
+
+[DEBUG] [URE] With inference tree:
+
