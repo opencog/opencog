@@ -58,11 +58,11 @@
 
   (cond
     ; Chatscript declarations
-    ((has-match? "concept:" str)
+    ((has-match? "^concept:" str)
         (format #t ">>lexer concept @ ~a\n" (show-location location))
         (tokenization-result 'CONCEPT location
           (get-concept-name (string-trim (match:suffix current-match)))))
-    ((has-match? "topic:" str)
+    ((has-match? "^topic:" str)
         (format #t  ">>lexer topic @ ~a\n" (show-location location))
         (make-lexical-token 'TOPIC location "a topic"))
     ((has-match? "^\r" str)
@@ -89,23 +89,27 @@
         (make-lexical-token 'GAMBIT location "a gambit"))
     (else
       (format #t ">>lexer non @ ~a\n" (show-location location))
-      (make-lexical-token 'NotDefined location "a not-defined"))
+      (make-lexical-token 'NotDefined location str))
   )
 )
 
 (define (cs-lexer port)
-  (lambda ()
-    (let ((cs-line (read-line port))
-          (port-location (get-source-location port)))
-      (if (eof-object? cs-line)
-        '*eoi*
-        (let ((result (tokeniz (string-trim-both cs-line) port-location)))
-          (if (pair? result)
-            (begin
-              (unread-string (cdr result) port)
-              (car result))
-            result
-          ))))
+  (let ((cs-line ""))
+    (if (string=? "" cs-line) (set! cs-line (read-line port)))
+    (lambda ()
+      (let ((port-location (get-source-location port)))
+        (if (eof-object? cs-line)
+          '*eoi*
+          (let ((result (tokeniz (string-trim-both cs-line) port-location)))
+            (if (pair? result)
+              (begin
+                (set! cs-line (cdr result))
+                (car result))
+              (error
+                  (format #f "Tokenizer issue => STRING = ~a, LOCATION = ~a"
+                      (lexical-token-value result)
+                      (lexical-token-source result)))
+            )))))
   )
 )
 
