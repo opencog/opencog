@@ -11,8 +11,8 @@ Experiment with inference control learning. The plan is to
    the backward chainer for speeding it up.
 
 For now it is a toy experiment with a small taylored series over a
-small knowledge-base. No ECAN is even necessary. The learned inference
-control rule should be that double deduction is useful.
+small, constant knowledge-base. No ECAN is even necessary. The learned
+inference control rule should be that double deduction is useful.
 
 Knowledge-base
 --------------
@@ -58,31 +58,127 @@ deductions are the most effective way to prove that 2 letters are
 ordered.
 
 The useful representation for the Backward Chainer should be a
-Cognitive Schematic, context free for starter.
+Cognitive Schematic, where
 
-Implication
-  ExecutionOutput
-  
+* Context:
+  + Running the backward chainer to prove T
+  + About to choose what rule to expand and-BIT A from leaf L
+  + Fulfill some pattern
+* Action:
+  + Expand with rule R
+* Result:
+  + Produce a proof-suffix of T
 
-TODO: give inference control rule examples
+TODO: A proof-suffix is an inference subtree (in the graph theory
+sense) of an inference tree proving T.
 
-  Context:
-    running the backward chainer to prove T
-    about to choose what rule to expand L of and-BIT A
-  Action:
-    expand with rule R
-  Result:
-    produce a proof-suffix of T
+Typically the context that we are running the backward chainer to
+prove T and about to decide what rule to expand with will be assumed,
+because that will be the universal context of our experiment anyway.
 
-TODO: A proof-suffix is a inference tree prefix of an inference tree proving T
+The simplest possible inference control rule that we can learn, let's
+call it level-0 meta-learning, expresses the probability of expanding
+an and-BIT producing a proof-suffix, or "subproof", of any target. All
+other inference control rules are specializations of this rule.
 
-;; Top inference control rule. This is the most abstract inference control rule
-;; expressing the probability of that expanding and-BIT will produce an and-BIT
-;; that is a proof-suffix of any target. This is good for instance to evaluate
-;; the performance of a BC policy. All other inference control rule are
-;; specializations of this rule.
+ImplicationScope <TV>
+  VariableList
+    Variable "$T"  ;; Theorem/target to prove
+    TypedVariable  ;; and-BIT to expand
+      Variable "$A"
+      Type "BindLink"
+    Variable "$L"  ;; Leaf from A to expand
+    Variable "$R"  ;; Rule to expand A from L
+    TypedVariable  ;; Resulting and-BIT from the expansion of L from A with rule R
+      Variable "$B"
+      Type "BindLink"
+  Execution
+    GroundedSchema "expand-and-BIT"
+    List
+      "$A"
+      "$L"
+      "$R"
+    "$B"
+  Evaluation
+    Predicate "subproof"
+    List
+      Variable "$B"
+      Variable "$T"
 
-ImplicationScope
+Such an inference control rule may already help a bit the Backward
+Chainer. Indeed partial instantiation over R will calculate the
+probability of a given rule to produce a subproof of any T. To obtain
+a partial instantiation over R, R is subtituted by a certain rule,
+called <rule>, and the TV over the ImplicationScope, called <rule-TV>,
+is obtained by direct evaluation over the subset of observations of
+the corpus of proofs involving <rule>.
+
+ImplicationScope <rule-TV>
+  VariableList
+    Variable "$T"
+    TypedVariable
+      Variable "$A"
+      Type "BindLink"
+    Variable "$L"
+    TypedVariable
+      Variable "$B"
+      Type "BindLink"
+  Execution
+    GroundedSchema "expand-and-BIT"
+    List
+      "$A"
+      "$L"
+      <rule>
+    "$B"
+  Evaluation
+    Predicate "subproof"
+    List
+      Variable "$B"
+      Variable "$T"
+
+This is a good way to assign the weights of the rules for the next
+round of reasoning, but it might not go much further. Indeed partial
+instantiation will likely fail for unknown instances of T, A, L or R
+because direct evaluation won't be possible. If at least some
+instances have been encountered, for instance T and A are known but L
+isn't, then we can still come up with some possibly useful partial
+instantiation of that rule, such as
+
+ImplicationScope <target-andbit-rule-TV>
+  VariableList
+    Variable "$L"
+    TypedVariable
+      Variable "$B"
+      Type "BindLink"
+  Execution
+    GroundedSchema "expand-and-BIT"
+    List
+      <andbit>
+      "$L"
+      <rule>
+    "$B"
+  Evaluation
+    Predicate "subproof"
+    List
+      Variable "$B"
+      <target>
+
+where <target-andbit-rule-TV> is calculated based on the subset of
+observations in the corpus where <target>, <andbit> and <rule> occurs
+simultanously. In most cases though such subset will be small and
+<target-andbit-rule-TV> will have a low confidence. Moreover the
+complexity of such a predictor will be high because the complexity of
+the instances of T, A, etc, will be counted as well, which will give
+it a low prior and in turn will lower the confidence of the produced
+term by conditional instantiation.
+
+To go beyond this level-0 meta-learning type we need to introduce more
+expressive specializations in order to generalize well when new
+instances of T, A, L, etc, are encountered.
+
+Let's give the general form of such specialization
+
+ImplicationScope <TV>
   VariableList
     Variable "$T"  ;; Theorem/target to prove
     TypedVariable  ;; and-BIT to expand
@@ -101,7 +197,17 @@ ImplicationScope
         "$L"
         "$R"
       "$B"
-  
+    <pattern>
+  Evaluation
+    Predicate "subproof"
+    List
+      Variable "$B"
+      Variable "$T"
+
+where <pattern> is a predicate body involving all or some of the
+variables T, A, L and R.
+
+TODO: give an example with double deduction.
 
   (ExecutionOutputLink
     (GroundedSchemaNode "scm: bc-deduction-formula") ; [5481509939359570705][1]
