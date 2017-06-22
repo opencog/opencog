@@ -16,7 +16,6 @@
   )
 )
 
-
 (define (get-source-location port)
   (make-source-location
     (port-filename port)
@@ -57,6 +56,16 @@
       )))
 
   (cond
+    ((has-match? "^\\(" str)
+        (format #t ">>lexer left parenthesis @ ~a\n" (show-location location))
+        (cons
+          (make-lexical-token 'LPAREN location #f)
+          (match:suffix current-match)))
+    ((has-match? "^\\)" str)
+        (format #t ">>lexer right parenthesis @ ~a\n" (show-location location))
+        (cons
+          (make-lexical-token 'RPAREN location #f)
+          (match:suffix current-match)))
     ; Chatscript declarations
     ((has-match? "^concept:" str)
         (format #t ">>lexer concept @ ~a\n" (show-location location))
@@ -70,7 +79,7 @@
         (make-lexical-token 'CR location #f))
     ((string=? "" str)
         (format #t  ">>lexer newline @ ~a\n" (show-location location))
-        (make-lexical-token 'NEWLINE location #f))
+        (cons (make-lexical-token 'NEWLINE location #f) ""))
     ((has-match? "^#!" str) ; This should be checked always before #
         (format #t  ">>lexer sample input @ ~a\n" (show-location location))
         (make-lexical-token 'SAMPLE_INPUT location #f))
@@ -87,6 +96,12 @@
     ((has-match? "^[rt]:" str)
         (format #t ">>lexer gambit @ ~a\n" (show-location location))
         (make-lexical-token 'GAMBIT location "a gambit"))
+    ((has-match? "^[a-zA-Z]+" str) ; This should always be at the end.
+        (format #t ">>lexer literal @ ~a\n" (show-location location))
+        (cons
+          (make-lexical-token 'LITERAL location
+            (match:substring current-match))
+          (match:suffix current-match)))
     (else
       (format #t ">>lexer non @ ~a\n" (show-location location))
       (make-lexical-token 'NotDefined location str))
@@ -94,9 +109,9 @@
 )
 
 (define (cs-lexer port)
-  (let ((cs-line ""))
-    (if (string=? "" cs-line) (set! cs-line (read-line port)))
+  (let ((cs-line "") (count 0))
     (lambda ()
+      (if (string=? "" cs-line) (set! cs-line (read-line port)))
       (let ((port-location (get-source-location port)))
         (if (eof-object? cs-line)
           '*eoi*
@@ -104,6 +119,7 @@
             (if (pair? result)
               (begin
                 (set! cs-line (cdr result))
+                (format #t "88888888=~a\n" cs-line)
                 (car result))
               (error
                   (format #f "Tokenizer issue => STRING = ~a, LOCATION = ~a"
@@ -117,10 +133,10 @@
   (lalr-parser
     ; Token (aka terminal symbol) definition
     (LPAREN RPAREN NEWLINE CR CONCEPT TOPIC RESPONDERS REJOINDERS GAMBIT
-      NotDefined COMMENT SAMPLE_INPUT
+      NotDefined COMMENT SAMPLE_INPUT LITERAL
     )
 
-    ; Parsing rules (aka nonterminal symbol)
+    ; Parsing rules (aka nonterminal symbols)
     (lines
       (lines line) : (format #t "lines is ~a\n" $2)
       (line) : (format #t "line is ~a\n" $1)
@@ -137,8 +153,13 @@
     )
 
     (declarations
-      (CONCEPT) : (display-token $1)
+      (CONCEPT LPAREN literals RPAREN) : (display-token (string-append $1 " = " $3))
       (TOPIC) : (display-token $1)
+    )
+
+    (literals
+      (literals LITERAL) :  (display-token (string-append $1 " " $2))
+      (LITERAL) : (display-token $1)
     )
 
     (rules
