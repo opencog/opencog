@@ -24852,12 +24852,109 @@ At any rate, the dataset seems a bit thin, but we already knew this; its
 \end_layout
 
 \begin_layout Subsection*
-Pair Cosine Similarity
+Overlap Similarity
 \end_layout
 
 \begin_layout Standard
-To correctly gauge the disjunct-based cosine similarity, it should be contrasted
- against the simpler pair-based cosine similarity.
+Cosine similarity is perhaps too strict: it judges that two words are similar
+ when they share not only the same collection of disjuncts, but have these
+ occur with the same frequencies.
+ Perhaps its enough to say that two words are grammatically similar, if
+ they simply share the same set of disjuncts.
+ This suggests ignoring the relative counts, or at least, sharply filtering
+ them.
+ Thus, the overlap similarity can be defined as 
+\begin_inset Formula 
+\[
+\mbox{ovl}(w_{1,}w_{2})=\frac{\sum_{d}\sigma(N(w_{1},d))\sigma(N(w_{2},d))}{\sum_{d}\sigma(N(w_{1},d)+N(w_{2},d))}
+\]
+
+\end_inset
+
+where 
+\begin_inset Formula $\sigma(x)$
+\end_inset
+
+ is some sigmoid function.
+ In the most basic case, its a step function: 
+\begin_inset Formula $\sigma(x)=1$
+\end_inset
+
+ if 
+\begin_inset Formula $x>C$
+\end_inset
+
+ for some constant 
+\begin_inset Formula $C$
+\end_inset
+
+ and zero otherwise.
+ Each term in the numerator sum is one only when both disjuncts are present.
+ Each term in the denominotor is one when either disjunct is present.
+ 
+\end_layout
+
+\begin_layout Standard
+This similarity measure essentially boils down to a normalized cylinder-set
+ measure.
+ That is, instead of interpreting the disjuncts as a basis for a vector
+ space, they can be taken as independent observations in a Cartesian product
+ space.
+ This makes more sense than pretening that these form a vector space.
+ Why is that? What makes the cosine angle, and vector dot products so appealing,
+ is that they are presereved by rotations; yet there really is no reason
+ to expect or desire rotational symmetry.
+ In short, the idea that we are dealing with vector spaces give the wrong
+ idea of what's going on: its more appropriate to view the set of disjuncts
+ as elements of a product space.
+ Product spaces have a natural measure: the cylinder-set measure.
+ The overlap similarity is essentially 
+\begin_inset Formula $\mu(A\cap B)/\mu(A\cup B)$
+\end_inset
+
+ with 
+\begin_inset Formula $\mu$
+\end_inset
+
+ the measure, and the intersection/union being taken over the associated
+ disjunct sets.
+\end_layout
+
+\begin_layout Subsection*
+Disjunct Subsets
+\end_layout
+
+\begin_layout Standard
+The above line of thinking suggests that another interesting comparison
+ can be made by looking for a subset relationship between the disjuncts
+ on different words.
+ For example, transitive verbs should have all the connectors that intransitive
+ verbs do, plus some more.
+\end_layout
+
+\begin_layout Standard
+The overlay similarity can be adapted for this purpose: two sets obey a
+ subset relation 
+\begin_inset Formula $A\subset B$
+\end_inset
+
+ if 
+\begin_inset Formula $A\cap(1-B)=\varnothing$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Subsection*
+Word-Pair Cosine Similarity
+\end_layout
+
+\begin_layout Standard
+To correctly gauge the advantage of disjunct-based techniques, one could
+ compare them to the same kinds of measures, but applied to word-pairs,
+ instead of word-disjunct pairs.
+ For exmaple, the disjunct-based cosine similarity, can be contrasted against
+ the simpler word-pair-based cosine similarity.
  This is given by 
 \begin_inset Formula 
 \[
@@ -25568,7 +25665,7 @@ en_pairs_rtwo_mst
 \begin_inset Text
 
 \begin_layout Plain Layout
-
+428K x 434K
 \end_layout
 
 \end_inset
@@ -25577,7 +25674,7 @@ en_pairs_rtwo_mst
 \begin_inset Text
 
 \begin_layout Plain Layout
-
+16.4M
 \end_layout
 
 \end_inset
@@ -25586,7 +25683,7 @@ en_pairs_rtwo_mst
 \begin_inset Text
 
 \begin_layout Plain Layout
-
+639M
 \end_layout
 
 \end_inset
@@ -25595,7 +25692,7 @@ en_pairs_rtwo_mst
 \begin_inset Text
 
 \begin_layout Plain Layout
-
+38.9
 \end_layout
 
 \end_inset
@@ -25622,7 +25719,7 @@ en_pairs_rtwo_mst
 \begin_inset Text
 
 \begin_layout Plain Layout
-en_pairs_rthree_mst
+en_pairs_rthree
 \end_layout
 
 \end_inset
@@ -25728,6 +25825,8 @@ en_pairs_ttwo_mst Tranche two - Everything from tranche one, plus fan-fiction
  from http://archiveofourown.org.
  Most of the selected texts were 10K words or longer.
  See the 'download.sh' file for the precise texts.
+ Issues: tone_mst and ttwo_mst are missing connectors the LEFT-WALL.
+ Certain taypes of punctuation is mis-handled.
 \end_layout
 
 \begin_layout Description
@@ -25735,11 +25834,15 @@ en_pairs_tthree Tranche three - Everything in tranche two, plus several
  hundred of the most recently created Project Gutenberg texts, whatever
  they may be.
  See the 'download.sh' file for the precise texts.
+ The _mst version has the same issues that ttwo_mst has, although some connector
+s to LEFT-WALL do get added.
+ The _mst version is probably not useful for similarity measurements.
 \end_layout
 
 \begin_layout Description
 en_pairs_rone_mst Same as en_pairs_tone_mst, but with minor issues fixed.
- Ditto rtwo, rthree.
+ Ditto rtwo.
+ However, links to LEFT-WALL still missing.
 \end_layout
 
 \begin_layout Standard
@@ -26142,7 +26245,7 @@ en_pairs_ttwo_mst
 \begin_inset Text
 
 \begin_layout Plain Layout
-
+21.94
 \end_layout
 
 \end_inset
@@ -26151,7 +26254,7 @@ en_pairs_ttwo_mst
 \begin_inset Text
 
 \begin_layout Plain Layout
-
+15.63
 \end_layout
 
 \end_inset
@@ -26160,7 +26263,7 @@ en_pairs_ttwo_mst
 \begin_inset Text
 
 \begin_layout Plain Layout
-
+10.28
 \end_layout
 
 \end_inset
@@ -26169,7 +26272,7 @@ en_pairs_ttwo_mst
 \begin_inset Text
 
 \begin_layout Plain Layout
-
+-3.97
 \end_layout
 
 \end_inset
@@ -26468,7 +26571,7 @@ What is needed is a recognizer,as follows.
 \begin_inset Formula $w_{n}$
 \end_inset
 
- being individual words, and the 
+T being individual words, and the 
 \begin_inset Formula $b_{n}$
 \end_inset
 
