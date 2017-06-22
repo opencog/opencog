@@ -47,6 +47,18 @@ if [ $? -eq 0 ]; then
 	exit
 fi
 
+grep -l "Language: Dutch" $filename
+if [ $? -eq 0 ]; then
+   mv $filename ../novels-nl
+	exit
+fi
+
+grep -l "Language: Swedish" $filename
+if [ $? -eq 0 ]; then
+   mv $filename ../novels-sv
+	exit
+fi
+
 grep -l "Language: English" $filename
 if [ $? -ne 0 ]; then
    echo Suspected non-English, bailing

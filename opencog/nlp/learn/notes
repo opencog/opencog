@@ -6546,6 +6546,48 @@ REASON: Best so far, I think.  One issue:
   infix-marks: dashes, ellipsis, long-dashes are not split.
   It now seems that this would have been the right thing to do.
 
+                        List of relations
+ Schema |    Name    | Type  | Owner  |    Size    | Description 
+--------+------------+-------+--------+------------+-------------
+ public | atoms      | table | ubuntu | 3090 MB    | 
+ public | spaces     | table | ubuntu | 40 kB      | 
+ public | typecodes  | table | ubuntu | 56 kB      | 
+ public | valuations | table | ubuntu | 6024 MB    | 
+ public | values     | table | ubuntu | 8192 bytes | 
+
+select count(*) from atoms;      -- 35044156 = 35M atoms
+select count(*) from valuations; -- 54073127 = 54M values
+
+(print-matrix-summary-report asa)
+Summary Report for Correlation Matrix Link Grammar ANY link Word Pairs
+Left type: WordNode    Right Type: WordNode    Pair Type: ListLink
+Wildcard: (EvaluationLink (ctv 0 0 6.3884586e+08)
+   (LinkGrammarRelationshipNode "ANY")
+   (ListLink
+      (AnyNode "left-word")
+      (AnyNode "right-word")
+   )
+)
+Rows: 428185 Columns: 433810
+Size: 16442999 non-zero entries of 185750934850 possible
+Fraction non-zero: 8.8522E-5 Sparsity (-log_2): 13.464
+Total observations: 638845863.0  Avg obs per pair: 38.852
+Entropy Total: 18.270   Left: 10.149   Right: 10.017
+Total MI: -1.896
+
+                 Left         Right     Avg-left     Avg-right
+                 ----         -----     --------     ---------
+Support (l_0)  4.5589E+4    4.5082E+4
+Count   (l_1)  9.4861E+6    8.4112E+6     208.1        186.6    
+Length  (l_2)  1.0437E+6    8.7608E+5     22.89        19.43    
+RMS Count      1.0433E+6    8.7564E+5     22.88        19.42    
+
+3633274138 Bytes = 3.6GBytes uncompressed = 41 bytes per atom or valuation.
+509100498 Bytes = 509MBytes compressed = 5.7 Bytes/atom
+
+286f8b84338af370465d2face539b5a7  en_pairs_rthree.sql
+4cd74f0093a99e1855d61ef896738fd3  en_pairs_rthree.sql.bz2
+
 
 ==================================================================
 Plan:
