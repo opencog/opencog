@@ -16,6 +16,7 @@ ADD_GUILE_MODULE(FILES
 	implication-to-implication-scope.scm
 	inversion.scm
 	closed-lambda-introduction.scm
+	closed-lambda-evaluation.scm
 	predicate-lambda-evaluation.scm
 	and-lambda-distribution.scm
 	and-to-context.scm
