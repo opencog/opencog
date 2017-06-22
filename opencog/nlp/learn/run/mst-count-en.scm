@@ -1,23 +1,31 @@
 ;
 ; mst-count-en.scm
 ;
-; Run the cogserver, needed for the language-learning disjunct
-; counting pipeline. Starts the cogserver, opens the database,
-; loads the database (whcih can take an hour or more!)
+; Run everyting needed for the language-learning disjunct-counting
+; pipeline. Starts the REPL server, opens the database, loads the
+; database (which can take an hour or more!).
 ;
-(use-modules (opencog) (opencog cogserver))
+(use-modules (system repl common))
+(use-modules (system repl server))
+(use-modules (opencog) (opencog logger))
 (use-modules (opencog persist) (opencog persist-sql))
 (use-modules (opencog nlp) (opencog nlp learn))
+(use-modules (opencog matrix))
 
-; Start the cogserver.
-; Edit the below, setting it to the desired langauge.
-; This has almost no effect, other than to set the cogserver
-; port-number and the prompt-style.
-(start-cogserver "opencog-mst-en.conf")
+; Write a log-file, just in case...
+(cog-logger-set-filename! "/tmp/mst-en.log")
+(cog-logger-info "Start MST parsing for English.")
+
+; Start the network REPL server on port 19005
+(call-with-new-thread (lambda ()
+   (repl-default-option-set! 'prompt "scheme@(en-mst)> ")
+   (set-current-error-port (%make-void-port "w"))
+   (run-server (make-tcp-server-socket #:port 19005)))
+)
 
 ; Open the database.
 ; Edit the below, setting the database name, user and password.
-(sql-open "postgres:///en_pairs_ttwo_mst?user=ubuntu&password=asdf")
+(sql-open "postgres:///en_pairs_rthree_mst?user=ubuntu&password=asdf")
 
 ; Load up the words
 (display "Fetch all words from database. This may take several minutes.\n")
