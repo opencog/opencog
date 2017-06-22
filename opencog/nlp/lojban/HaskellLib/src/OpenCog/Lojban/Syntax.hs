@@ -75,10 +75,7 @@ mytrace2 s a = trace (s ++(' ':show a)) a
 ---------
 
 _BO :: Syntax Selbri
-_BO = toSelbri <<< anytense <&& sepSelmaho "BO"
-    where toSelbri = mkIso f g where
-              f (CN name) = (highTv,cPN name lowTv)
-              g (_,PN n)  = cCN n lowTv
+_BO = addfst highTv . space_time <&& sepSelmaho "BO"
 
 -------------------------------------------------------------------------------
 --Sumti
@@ -428,7 +425,7 @@ sumtiT = (handleFA <<< optional _FA &&& sumtiC) <+> placeholder
 --Handle fi'o creates an Eval link that applies the sumti
 --to the fi'o/bai Predicate
 modalSumti :: Syntax Sumti
-modalSumti = handleFIhO <<< (fihoP <+> baiP) &&& sumtiT
+modalSumti = handleFIhO <<< (simple_tense_modal <+> fihoP) &&& sumtiT
     where handleFIhO :: SynIso (Selbri,Sumti) Sumti
           handleFIhO = sndToState 1 . (fi'otag &&& tolist1 . _frame)
                      . second (inverse tolist1) . handleTAG . second tolist1
@@ -445,6 +442,9 @@ modalSumti = handleFIhO <<< (fihoP <+> baiP) &&& sumtiT
 
           fihoP :: Syntax Selbri
           fihoP = sepSelmaho "FIhO" &&> selbriUI <&& optSelmaho "FEhU"
+
+simple_tense_modal :: Syntax Selbri
+simple_tense_modal = baiP <+> addfst noTv . space_time
 
 --bai are shorthands for fi'o selbri
 --in case we find one we transfrom it to the full version
@@ -480,21 +480,6 @@ simple_tense_modal = adtSyntax "simple_tense_modal" <<<
     <+> adtSelmaho "KI"
     <+> adtSelmaho "CUhE"-}
 
---Another kind of new place for a Predicate
---This time based on a tense
-tenseSumti :: Syntax Sumti
-tenseSumti = reorder <<< anytense &&& sumtiC <&& optSelmaho "KU"
-    where reorder = mkIso f g
-          f (t,s) = (s,Just $ nodeName t)
-          g (s,Just n) = (cCN n noTv,s)
-
---Somtimes the tense is not followed by a sumti
---in this case we can just assume a ti
---but only if the tense is not followed by a predicate
---as that would just set the sentence tense
-tenseSumtiP :: Syntax Sumti
-tenseSumtiP = tenseSumti <+> ptp (anytense <&& notsyn selbriAll) addti tenseSumti
-
 --Fails when the Syntax Succeds and the other way arround
 --Either the syn succeds then we fail with the zeroArrow
 --Or the right . insertc succeds because syn failed then we do nothing
@@ -502,7 +487,7 @@ notsyn :: Syntax a -> Syntax ()
 notsyn x = (zeroArrow ||| id) . ((left <<< lookahead x) <+> (right . insert ()))
 
 sumtiAll :: Syntax Sumti
-sumtiAll = first filterState <<< modalSumti <+> sumtiT <+> tenseSumtiP
+sumtiAll = first filterState <<< modalSumti <+> sumtiT
 
 sumtiAllUI :: Syntax Sumti
 sumtiAllUI = withAttitude sumtiAll
@@ -719,72 +704,42 @@ selbriUI = (second handleSOS ||| id) . reorder
                     g (Left  (tv,(ui,p))) = ((tv,p),Just ui)
                     g (Right p)           = (p,Nothing)
 
-_VA :: Syntax String
-_VA = selmaho "VA"
-
-_VIhA :: Syntax String
-_VIhA = selmaho "VIhA"
-
-_FAhA :: Syntax String
-_FAhA = selmaho "FAhA"
-
-_ZAhO :: Syntax String
-_ZAhO = selmaho "ZAhO"
-
-_ZEhA :: Syntax String
-_ZEhA = selmaho "ZEhA"
-
 _CAhA :: Syntax String
 _CAhA = selmaho "CAhA"
 
---time :: Syntax Atom
---time =
+-------------------------------------------------------------------------------
+--Space Time Utils
+-------------------------------------------------------------------------------
 
 oooob :: (Eq a,Show a,Eq b,Show b) => Syntax a -> a -> Syntax b -> b -> Syntax (a,b)
 oooob syna defa synb defb =
     rmFlagIso "SynA" <<< (setFlagIso "SynA" . syna <+> insert defa)
                      &&& (synb <+> insert defb . ifFlag "SynA")
 
-space_time :: Syntax ()
---space_time = iunit . oooob space () time ()
-space_time = handleSpaceTime <<< time_offset
-    where handleSpaceTime = Iso f g
-          f pred = do
-              (ctx,nctx) <- newCtx
-              pushAtom (cEvalL noTv
-                            pred
-                            (cLL [ctx,nctx])
-                       )
-          g _ = error "Not Implemented g handleSpaceTime"
+oooobm :: (Eq a,Show a,Eq b,Show b) => Syntax a -> Syntax b -> Syntax (Maybe a,Maybe b)
+oooobm syna synb =
+    rmFlagIso "SynA" <<< (setFlagIso "SynA" . just . syna <+> insert Nothing)
+                     &&& (just . synb <+> insert Nothing . ifFlag "SynA")
 
+mergeMaybe :: SynIso (Maybe Atom,Maybe Atom) Atom
+mergeMaybe = Iso f g
+    where f (Just a,Just b) = apply mergePredicates (a,b)
+          f (Just a,Nothing) = pure a
+          f (Nothing,Just b) = pure b
+          f (Nothing,Nothing) = lift $ Left "no interval"
+          g _ = error "Not Implemented g time_interval"
 
-{-time :: Syntax () --The ingore default values need fixing
-time = ignoreAny ([],Nothing) <<< (some time_offset <+> undef)
-                              &&& optional time_interval
-
-    where undef = Iso f g
-          f () = do
-              (ctx,nctx) <- newCtx
-              pushAtom (cExL noTv (cVN "$1")
-                           (cEvalL noTv
-                                 (cVN "$1")
-                                 (cLL [ctx,nctx])
-                           )
-                       )
-              pure []
-          g _ = error $ "Not Implemented udef"-}
-
-time_offset :: Syntax Atom
-time_offset = isoFoldl mergePredicates . inverse cons . mapIso handle_offset
-            <<< some (oooob (just . _PU) Nothing (just . _ZI) Nothing) <+> insert [(Nothing,Nothing)]
 
 mergePredicates :: SynIso (Atom,Atom) Atom
 mergePredicates = Iso f g where
     f (p1,p2) = do
         let p1name = nodeName p1
             p2name = nodeName p2
-        name <- randName (p1name ++('_':p2name))
-        let pred = cPN name noTv
+            p1pred = drop 20 p1name
+            p2pred = drop 20 p2name
+        name <- randName (p1name ++ p2name)
+        name2 <- randName (p1pred ++ p2pred)
+        let pred = cPN (name ++ "___" ++ name2) noTv
         pushAtom $ cEquivL noTv (cEvalL noTv pred (cLL [cVN "$1",cVN "$3"]))
                                 (cAL noTv [ cEvalL noTv p1 (cLL [cVN "$1",cVN "$2"])
                                           , cEvalL noTv p2 (cLL [cVN "$2",cVN "$3"])
@@ -792,174 +747,136 @@ mergePredicates = Iso f g where
         pure pred
     g pred = error $ "Not Implemented g mergePredicates"
 
-_PU :: Syntax Atom
-_PU = implicationOf . predicate . selmaho "PU"
+imply :: String -> SynIso Atom Atom
+imply string = Iso f g where
+     f a = pushAtom (cImpL noTv a (cPN string noTv)) >> pure a
+     g a = popAtom >> pure a
 
-_ZI :: Syntax Atom
-_ZI = implicationOf . predicate . selmaho "ZI"
 
-handle_offset :: SynIso (Maybe Atom,Maybe Atom) Atom
-handle_offset = Iso f g
+selmahoPred :: String -> Syntax Atom
+selmahoPred s = implicationOf . imply s . predicate . selmaho s
+
+-------------------------------------------------------------------------------
+--SpaceTime
+-------------------------------------------------------------------------------
+
+space_time :: Syntax Atom
+space_time = mergeMaybe . oooobm time space --FIXME fliped order?
+
+time :: Syntax Atom
+time = mergeMaybe <<< oooobm time_offset time_interval
+
+time_offset :: Syntax Atom
+time_offset = general_offset "PU" "ZI"
+
+time_interval :: Syntax Atom
+time_interval = mergeMaybe . oooobm time_interval' interval_property
+
+time_interval' :: Syntax Atom
+time_interval' = handle_interval <<< selmahoPred "ZEhA" &&& optional (selmahoPred "PU")
+    where handle_interval = Iso f g where
+          f (zeha,pu) = do
+              let zehaname = nodeName zeha
+                  puname = maybe "" nodeName pu
+              name <- randName (zehaname ++('_':puname))
+              let pred = cPN (name ++ "interval") noTv
+              pushAtom $ cImpL noTv pred zeha
+              case pu of
+                  Just pu -> pushAtom $ cImpL noTv pred pu
+                  Nothing -> pushAtom $ cImpL noTv pred (cPN "PU" noTv)
+              pure pred
+          g _ = error "Not implemented g time_interval'"
+
+
+space :: Syntax Atom
+space = mergeMaybe . oooobm space_offset space_interval
+
+space_offset :: Syntax Atom
+space_offset = general_offset "FAhA" "VA"
+
+general_offset :: String -> String -> Syntax Atom
+general_offset dir mag = isoFoldl mergePredicates . inverse cons . mapIso (handle_offset dir mag)
+            <<< some (oooobm (selmahoPred dir) (selmahoPred mag))
+            <+> (insert [(Nothing,Nothing)] . ifFlag "WithDefaultTenses")
+
+handle_offset :: String -> String -> SynIso (Maybe Atom,Maybe Atom) Atom
+handle_offset dirC magC = Iso f g
     where f (mdir,mmag) = do
               let dirname = maybe "" nodeName mdir
                   magname = maybe "" nodeName mmag
               name <- randName (dirname ++('_':magname))
-              let pred = cPN name noTv
+              let pred = cPN (name ++ "___offset") noTv
               case mdir of
                   Just dir -> pushAtom $ cImpL noTv pred dir
-                  _ -> pure ()
+                  _ -> pushAtom $ cImpL noTv pred (cPN dirC noTv)
               case mmag of
                   Just mag -> pushAtom $ cImpL noTv pred mag
-                  _ -> pure ()
+                  _ -> pushAtom $ cImpL noTv pred (cPN magC noTv)
               pure pred
           g pred = error $ "Not Implemented g handle_offset"
 
---time_interval :: Syntax ()
---time_interval = iunit . oooob time_interval' () interval_property ()
 
-{-time_interval' :: Syntax ()
-time_interval' = handle_interval <<< _ZEhA &&& optional _PU
+space_interval :: Syntax Atom
+space_interval = mergeMaybe . oooobm space_interval' space_int_prop
+
+space_interval' :: Syntax Atom
+space_interval' = handle_interval
+              <<< mergeMaybe . oooobm (selmahoPred "VEhA") (selmahoPred "VIhA")
+              &&& optional (selmahoPred "FAhA")
     where handle_interval = Iso f g where
-          f (zeha,pu) = do
-              (ctx,nctx) <- newCtx
-                if zeha /= ""
-                   then pushAtom (cEvalL noTv (cPN zeha noTv) (cLL [nctx]))
-                   else pure ()
-                case pu of
-                    Just pu -> pushAtom (cEvalL noTv (cPN pu noTv) (cLL [ctx,nctx]))
-                    --Specify that the VN is a pred and a time relation
-                    Nothing -> pushAtom (cExL noTv (cVN "$1")
-                                                   (cEvalL noTv
-                                                         (cVN "$1")
-                                                         (cLL [ctx,nctx])
-                                                   )
-                                        )
-            g _ = error "Not implemented"-}
-
-
---space :: Syntax ()
---space = ignoreAny ([],Nothing) <<< many space_offset &&& optional space_interval
-
---space_offset :: Syntax ()
---space_offset = handle_offset <<< oooob _FAhA "" _VA ""
-
-space_interval :: Syntax ()
-space_interval = iunit . oooob space_interval' () space_int_prop ()
-
-space_interval' :: Syntax ()
-space_interval' = toState 1 . tolist1 . _frames . handle_interval <<< oooob (selmaho "VEhA") "" (selmaho "VIhA") "" &&& (_FAhA <+> insert "undefined")
-    where handle_interval = Iso f g where
-            f ((veha,viha),faha) = do
-                (ctx,nctx) <- newCtx
-                if faha /= "undefined"
-                   then pushAtom $ cEvalL noTv (cPN faha noTv) (cLL [ctx,nctx])
-                   else pushAtom $ cExL noTv (cVN "$1")
-                                             (cEvalL noTv (cVN "$1" )
-                                                          (cLL [ctx,nctx]))
-                let pred = cPN "SpaceInterval" noTv
-                    arg1 = (nctx,Just "1")
-                    arg2 = if veha == ""
-                              then []
-                              else [(cCN veha noTv,Just "2")]
-                    arg3 = if viha == ""
-                              then []
-                              else [(cCN viha noTv,Just "3")]
-                predinst <- apply implicationOf pred
-                pure ((noTv,predinst),(arg1:arg2++arg3))
+            f (pred,mfaha) = do
+                case mfaha of
+                    Just faha -> pushAtom $ cImpL noTv pred faha
+                    Nothing -> pushAtom $ cImpL noTv pred (cPN "FAhA" noTv)
+                pure pred
             g _ = error "Not Implemented"
 
- -- ((adtSelmaho "VEhA" <&> adtSelmaho "VIhA")
- --     &+& listoptional (adtSelmaho "FAhA" &+& listoptional (adtSelmaho "NAI")))
- -- <&> space_int_props
-
-space_int_prop :: Syntax ()
+space_int_prop :: Syntax Atom
 space_int_prop = (setFlagIso "FEhE" . sepSelmaho "FEhE") &&> interval_property
 
-newCtx = do
-    ctx <- gets sCtx
-    nctx <- (\x -> cCN x noTv) <$> randName (show ctx)
-    setCtx nctx
-    return (ctx,nctx)
-
-interval_property :: Syntax ()
-interval_property = handleROI . (pa &&& selmaho "ROI")
-                <+> handle . (selmaho "TAhE" <+> selmaho "ZAhO")
+interval_property :: Syntax Atom
+interval_property = handle <<< handleROI . (pa &&& selmahoPred "ROI")
+                           <+> selmahoPred "TAhE"
+                           <+> selmahoPred "ZAhO"
     where handle = Iso f g where
-              f tahe = do
-                  (ctx,nctx) <- newCtx
+            f pred = do
                   flags <- gets sFlags
-                  let name = if "FEhE" `elem` flags
-                                then "FEhE"++tahe
-                                else tahe
-                  pushAtom $ Link "SubsetLink" [nctx,ctx] noTv
-                  pushAtom $ cEvalL noTv (cPN name noTv)
-                                         (cLL [ctx,nctx])
-              g _ = error "Reverse Interval Property Not implemented."
+                  if "FEhE" `elem` flags
+                     then pushAtom $ cImpL noTv pred (cPN "Spatial" noTv)
+                     else pushAtom $ cImpL noTv pred (cPN "Temporal" noTv)
+                  pushAtom $ cImpL noTv
+                                    (cEvalL noTv pred
+                                                 (cLL [cVN "$1",cVN "$2"]))
+                                    (cSubL noTv (cVN "$1") (cVN "$2"))
+                  pure pred
+            g _ = error "Reverse Interval Property Not implemented."
           handleROI = Iso f g where
-              f (pa,"roi") = do
-                  (ctx,nctx) <- newCtx
-                  pushAtom $ Link "SetSizeLink" [nctx,pa] noTv
-                  pushAtom $ Link "SubsetLink" [nctx,ctx] noTv
-                  flags <- gets sFlags
-                  let name = if "FEhE" `elem` flags
-                                then "FEhEroi"
-                                else "roi"
-                  pushAtom $ cEvalL noTv (cPN name noTv)
-                                         (cLL [ctx,nctx])
-              f (pa,"re'u") = do
-                  (ctx,nctx) <- newCtx
-                  pushAtom $ Link "SetSizeLink" [nctx,pa] noTv
-                  pushAtom $ Link "SubsetLink" [nctx,ctx] noTv
-                  flags <- gets sFlags
-                  let name = if "FEhE" `elem` flags
-                                then "FEhEre'u"
-                                else "re'u"
-                  pushAtom $ cEvalL noTv (cPN name noTv)
-                                         (cLL [ctx,nctx])
-              g _ = error "Reverse Interval Property Not implemented."
-
-{-handle_offset :: SynIso (String,String) ()
-handle_offset = Iso f g
-    where f (dir,mag) = do
-          ctx  <- gets sCtx
-              nctx <- (\x -> cCN x noTv) <$> randName (show ctx)
-              setCtx nctx
-              if dir /= ""
-                 then pushAtom (cEvalL noTv (cPN dir noTv) (cLL [ctx,nctx]))
-                 else pure ()
-              if mag /= ""
-                 then pushAtom (cEvalL noTv (cPN mag noTv) (cLL [ctx,nctx]))
-                 else pure ()
-          g _ = error "Not implemented"-}
-
-
-
-{-time :: SyntaxState s => Syntax s [ADT]
-time = adtSyntax "time" <<< adtSelmaho "ZI" <&> concatSome time_offset <&> adtSelmaho "ZEhA" &+& listoptional (adtSelmaho "PU" &+& listoptional (adtSelmaho "NAI")) <&> concatSome interval_property
-
-time_offset :: SyntaxState s => Syntax s [ADT]
-time_offset = adtSyntax "time_offset" <<< adtSelmaho "PU" &+& listoptional (adtSelmaho "NAI") &+& listoptional (adtSelmaho "ZI")
-
-interval_property :: SyntaxState s => Syntax s [ADT]
-interval_property = adtSyntax "interval_property" <<<
-    number &+& adtSelmaho "ROI"
-           &+& listoptional (adtSelmaho "NAI")
-    <+> adtSelmaho "TAhE" &+& listoptional (adtSelmaho "NAI")
-    <+> adtSelmaho "ZAhO" &+& listoptional (adtSelmaho "NAI")
-
--}
-
-anytense :: Syntax Atom
-anytense = concept <<< (selmaho "PU" <+> selmaho "ZI"  <+> _VA <+> _FAhA <+> _ZAhO <+>
-                        _ZEhA <+> _VIhA <+> _CAhA)
+            f (pa,roi) = do
+                  pushAtom $ cImpL noTv
+                                    (cEvalL noTv roi
+                                                 (cLL [cVN "$1",cVN "$2"]))
+                                    (Link "SetSizeLink"  [cVN "$1",pa] noTv)
+                  pure roi
+            g roi = error "Handle Roi g not implemented"
 
 _NA :: Syntax String
 _NA = selmaho "NA"
 
 selbriAll :: Syntax (Maybe String, Selbri)
-selbriAll = space_time
+selbriAll = handleSpaceTime . withFlag "WithDefaultTenses" space_time
          &&> optional _NA
          &&& selbriUI
+    where handleSpaceTime = Iso f g
+          f pred = do
+              ctx <- gets sCtx
+              nctx <- (\x -> cCN x noTv) <$> randName (show ctx)
+              setCtx nctx
+              return (ctx,nctx)
+              pushAtom (cEvalL noTv
+                            pred
+                            (cLL [ctx,nctx])
+                       )
+          g _ = error "Not Implemented g handleSpaceTime"
 
 -------------------------------------------------------------------------------
 --bacru

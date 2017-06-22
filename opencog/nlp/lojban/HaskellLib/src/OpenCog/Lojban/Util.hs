@@ -97,6 +97,7 @@ cCtxL tv a b    = Link "ContextLink"                      [a,b]     tv
 cLamdaL tv a b  = Link "LambdaLink"                       [a,b]     tv
 cMemL tv a b    = Link "MemberLink"                       [a,b]     tv
 cEquivL tv a b  = Link "EquivalenceLink"                  [a,b]     tv
+cSubL tv a b    = Link "SubsetLink"                       [a,b]     tv
 
 isInteger s = case reads s :: [(Integer, String)] of
   [(_, "")] -> True
