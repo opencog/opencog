@@ -10459,6 +10459,14 @@ what's faster: looking it up, or on-the-fly recompute?
    ))
 
 
+(write-flo "/tmp/scat-foo.flo" (take ranked-csw 20)
+   (lambda (wa wb)
+		(define val (poi 'right-overlap wa wb))
+(format #t " ~A ~A ~A\n" val wa wb)
+		val
+   ))
+
+
 -----------------------------------------------------------------
 ---------
 wtf. get-pair-count takes a LL pair, but wild-card return hi-level.
