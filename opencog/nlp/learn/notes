@@ -9990,6 +9990,444 @@ The first non-preps, non-verbs
 (quite, almost) . 0.9609898949120979) 
 
 -----------------------------------------------------------------
+Repeat the above, but for the overlap
+
+(define (mk-ovl wa wb) (cons (cons wa wb) (poi 'right-overlap wa wb)))
+
+(define (ovl-prs wrd wrds)
+	(map (lambda (wb) (mk-ovl wrd wb)) wrds))
+
+(define (all-ovl wrds lst)
+	(if (null? wrds) lst
+		(all-ovl (cdr wrds) (append (ovl-prs (car wrds) (cdr wrds)) lst))))
+
+(define top-cset-words
+   (filter (lambda (wrd) (< 1500 (cset-vec-word-observations wrd))) ac))
+(define ultra-cset-words
+   (filter (lambda (wrd) (< 3500 (cset-vec-word-observations wrd))) ac))
+
+(length ultra-cset-words) = 383
+
+(define ovprs (all-ovl top-cset-words '()))
+(define ovuprs (all-ovl ultra-cset-words '()))
+(length ovprs) ; = 322003
+(length ovuprs) ; = 73153
+
+(define ovso (sort ovprs (lambda (a b) (> (cdr a) (cdr b)))))
+(define ovuso (sort ovuprs (lambda (a b) (> (cdr a) (cdr b)))))
+(take ovso 200) ;; see below
+(take ovuso 200) ;; see below
+
+The below are  ovso -- the 1500 cutoff.
+Some look great, some look like stinkers.
+(act . foot) . 0.875
+(laid . pushed) . 0.846153846
+(Sandy . Bunny) . 0.842105263
+(start . act) . 0.84
+(soft . control) . 0.838709677
+(thoughts . heavy) . 0.833333333
+(Mary . Sandy) . 0.833333333
+(teeth . throat) . 0.826086956
+(Sandy . it's) . 0.823529411
+(wide . shoulder) . 0.821428571
+(shut . King) . 0.818181818
+(entered . drew) . 0.809523809
+(act . walk) . 0.807692307
+(wide . foot) . 0.807692307
+(teeth . shoulder) . 0.807692307
+(town . darkness) . 0.807692307
+(became . pretty) . 0.806451612
+(soft . touch) . 0.806451612
+(wide . blue) . 0.8
+(wide . evening) . 0.8
+(warm . step) . 0.8
+(warm . letter) . 0.8
+(ran . across) . 0.8
+(Mary . wait) . 0.8
+(Jack’s . Pitch’s) . 0.8
+(soft . closed) . 0.794117647
+(wide . further) . 0.793103448
+(shut . town) . 0.791666666
+(Sandy . Anna) . 0.789473684
+(move . control) . 0.787878787
+(deep . heavy) . 0.787878787
+(except . heavy) . 0.785714285
+(legs . itself) . 0.785714285
+(he’s . you’re) . 0.78260869
+(teeth . hot) . 0.78260869
+(sister . shut) . 0.78260869
+(strong . pretty) . 0.78125
+(thoughts . control) . 0.78125
+(glass . chest) . 0.777777777
+(wide . act) . 0.777777777
+(wide . slightly) . 0.777777777
+(Aster . Anna) . 0.777777777
+(kiss . chest) . 0.777777777
+(conversation . view) . 0.777777777
+(Mary . it's) . 0.777777777
+(control . further) . 0.774193548
+(thoughts . shoulder) . 0.774193548
+(evening . shoulder) . 0.774193548
+(soft . leaving) . 0.774193548
+(book . window) . 0.774193548
+(Prince . usual) . 0.772727272
+(step . five) . 0.769230769
+(wide . throat) . 0.769230769
+(warm . act) . 0.769230769
+(teeth . wide) . 0.769230769
+(teeth . chest) . 0.769230769
+(wide . control) . 0.766666666
+(wide . low) . 0.766666666
+(loved . touch) . 0.766666666
+(expression . breath) . 0.764705882
+(Aster . Hiccup) . 0.764705882
+(Sandy . Aster) . 0.764705882
+(pain . fear) . 0.763157894
+(Bunny . Anna) . 0.761904761
+(friend . family) . 0.761904761
+(space . food) . 0.76
+(warm . presence) . 0.76
+(town . presence) . 0.76
+(spirit . group) . 0.76
+(sister . view) . 0.76
+(everyone . straight) . 0.758620689
+(four . five) . 0.758620689
+(talking . completely) . 0.758620689
+(wide . outside) . 0.758620689
+(wide . heavy) . 0.758620689
+(town . control) . 0.758620689
+(heavy . red) . 0.757575757
+(control . seeing) . 0.757575757
+(blue . evening) . 0.757575757
+(raised . pretty) . 0.757575757
+(wife . heavy) . 0.757575757
+(talking . wife) . 0.757575757
+(soft . thoughts) . 0.757575757
+(blue . high) . 0.756756756
+(quiet . fear) . 0.756756756
+(away . off) . 0.755555555
+(true . tears) . 0.75
+(top . corner) . 0.75
+(strong . heavy) . 0.75
+(thoughts . further) . 0.75
+(usual . Tooth) . 0.75
+(closed . near) . 0.75
+(foot . corner) . 0.75
+(blue . further) . 0.75
+(George . Francis) . 0.75
+(George . North) . 0.75
+(act . cried) . 0.75
+(act . lady) . 0.75
+(show . turn) . 0.75
+(wide . except) . 0.75
+(wide . watch) . 0.75
+(he’s . it's) . 0.75
+(dropped . placed) . 0.75
+(soft . further) . 0.75
+(position . act) . 0.75
+(position . glass) . 0.75
+(town . usual) . 0.75
+(wait . Sandy) . 0.75
+(Tom . Aster) . 0.75
+(deep . strong) . 0.75
+(shut . foot) . 0.75
+(shut . step) . 0.75
+(late . thoughts) . 0.75
+(spirit . wide) . 0.75
+(sister . presence) . 0.75
+(year . move) . 0.742857142
+(heavy . low) . 0.741935483
+(control . heavy) . 0.741935483
+(leaving . control) . 0.741935483
+(shoulder . control) . 0.741935483
+(shoulder . low) . 0.741935483
+(outside . low) . 0.741935483
+(holding . bring) . 0.741935483
+(wide . thoughts) . 0.741935483
+(soft . wide) . 0.741935483
+(quiet . except) . 0.741935483
+(spirit . strong) . 0.741935483
+(slightly . walk) . 0.740740740
+(moving . throat) . 0.740740740
+(shoulder . throat) . 0.740740740
+(except . shoulders) . 0.740740740
+(fight . walk) . 0.740740740
+(George . giving) . 0.740740740
+(outside . throat) . 0.740740740
+(talking . presence) . 0.740740740
+(sit . walk) . 0.740740740
+(surprise . kiss) . 0.740740740
+(start . surprise) . 0.740740740
+(conversation . letter) . 0.740740740
+(spirit . town) . 0.740740740
+(spirit . slightly) . 0.740740740
+(spirit . shoulders) . 0.740740740
+(sister . talking) . 0.740740740
+(sister . lady) . 0.740740740
+(living . shut) . 0.740740740
+(inside . past) . 0.74
+(replied . cried) . 0.739130434
+(alone . round) . 0.739130434
+(shut . hot) . 0.739130434
+(shut . easy) . 0.739130434
+(shut . corner) . 0.739130434
+(yourself . shut) . 0.739130434
+(yourself . King) . 0.739130434
+(ran . near) . 0.738095238
+(several . cut) . 0.736842105
+(Aster . Bunny) . 0.736842105
+(during . control) . 0.735294117
+(live . stay) . 0.735294117
+(Jack’s . thoughts) . 0.735294117
+(above . inside) . 0.734693877
+(Francis . North) . 0.733333333
+(shoulder . heavy) . 0.733333333
+(thoughts . space) . 0.733333333
+(force . glass) . 0.733333333
+(outside . shoulder) . 0.733333333
+(outside . moving) . 0.733333333
+(talking . heavy) . 0.733333333
+(laid . bring) . 0.733333333
+(laid . touch) . 0.733333333
+(wide . touch) . 0.733333333
+(warm . tears) . 0.733333333
+(town . thoughts) . 0.733333333
+(quiet . step) . 0.733333333
+(loved . makes) . 0.733333333
+(living . wide) . 0.733333333
+(high . fear) . 0.731707317
+(pulled . met) . 0.731707317
+(five . food) . 0.730769230
+(figure . war) . 0.730769230
+(black . white) . 0.730769230
+(foot . shoulders) . 0.730769230
+(act . step) . 0.730769230
+(act . letter) . 0.730769230
+(certainly . carried) . 0.730769230
+(warm . foot) . 0.730769230
+(start . foot) . 0.730769230
+(start . step) . 0.730769230
+(town . foot) . 0.730769230
+(town . war) . 0.730769230
+(shut . wide) . 0.730769230
+(shut . straight) . 0.730769230
+(spirit . teeth) . 0.730769230
+(spirit . staff) . 0.730769230
+(expression . eye) . 0.729729729
+(thoughts . blood) . 0.729729729
+(thoughts . arm) . 0.729729729
+(evening . fear) . 0.729729729
+(blue . fear) . 0.729729729
+(wife . person) . 0.729729729
+(wife . red) . 0.729729729729
+
+
+====================================================================
+How about the 3500 cutoff?
+Meh.
+
+(away . off) . 0.755555555
+(black . white) . 0.730769230
+(off . over) . 0.71856287
+(whole . end) . 0.701754385
+(herself . myself) . 0.701754385
+(both . three) . 0.696629213
+(quite . almost) . 0.695121951
+(each . every) . 0.694736842
+(night . place) . 0.693181818
+(held . stood) . 0.692307692
+(used . hard) . 0.692307692
+(water . end) . 0.689655172
+(off . through) . 0.687943262
+(turned . went) . 0.686868686
+(air . end) . 0.685185185
+(side . behind) . 0.68493150
+(called . end) . 0.684210526
+(stood . started) . 0.683333333
+(didn’t . didn't) . 0.682926829
+(off . around) . 0.681159420
+(mother . father) . 0.680851063
+(away . through) . 0.676691729
+(people . last) . 0.675675675
+(these . both) . 0.673076923
+(end . reason) . 0.672413793
+(off . very) . 0.670886075
+(away . around) . 0.669230769
+(down . over) . 0.666666666
+(whole . feeling) . 0.666666666
+(woman . boy) . 0.666666666
+(doing . point) . 0.666666666
+(night . day) . 0.666666666
+(into . over) . 0.665116279
+(around . through) . 0.664122137
+(away . things) . 0.663934426
+(before . over) . 0.661691542
+(face . around) . 0.661417322
+(own . its) . 0.661290322
+(end . along) . 0.661016949
+(given . reason) . 0.661016949
+(days . end) . 0.660714285
+(held . started) . 0.660714285
+(mother . course) . 0.66037735
+(arms . half) . 0.66037735
+(much . good) . 0.660130718
+(mother . woman) . 0.66
+(never . has) . 0.659574468
+(come . go) . 0.659420289
+(upon . through) . 0.659090909
+(away . own) . 0.658914728
+(off . too) . 0.658064516
+(between . behind) . 0.657894736
+(must . should) . 0.657657657
+(side . along) . 0.656716417
+(anything . nothing) . 0.656565656
+(feeling . hard) . 0.65625
+(held . began) . 0.65625
+(days . years) . 0.655737704
+(called . taken) . 0.655737704
+(room . face) . 0.655462184
+(hair . reason) . 0.655172413
+(its . every) . 0.654867256
+(against . behind) . 0.654761904
+(house . place) . 0.65432098
+(behind . towards) . 0.652173913
+(stood . began) . 0.652173913
+(than . over) . 0.652173913
+(very . over) . 0.651933701
+(old . young) . 0.65168539
+(each . its) . 0.651376146
+(these . people) . 0.651376146
+(next . until) . 0.651162790
+(upon . around) . 0.651162790
+(rest . feeling) . 0.650793650
+(both . well) . 0.650485436
+(end . feeling) . 0.65
+(behind . under) . 0.65
+(whole . along) . 0.65
+(course . end) . 0.65
+(who . off) . 0.65
+(great . place) . 0.65
+(night . best) . 0.649350649
+(point . smile) . 0.649122807
+(whole . black) . 0.649122807
+(whole . point) . 0.649122807
+(whole . white) . 0.649122807
+(others . white) . 0.649122807
+(days . whole) . 0.649122807
+(off . well) . 0.64885496
+(around . against) . 0.648648648
+(things . men) . 0.648148148
+(things . nothing) . 0.648148148
+(alone . whole) . 0.648148148
+(half . point) . 0.648148148
+(though . while) . 0.648148148
+(off . down) . 0.647727272
+(night . same) . 0.647727272
+(away . well) . 0.647540983
+(behind . along) . 0.647058823
+(last . first) . 0.647058823
+(went . stood) . 0.647058823
+(must . might) . 0.647058823
+(taken . words) . 0.647058823
+(then . now) . 0.646511627
+(side . door) . 0.646341463
+(feeling . years) . 0.646153846
+(course . years) . 0.646153846
+(good . very) . 0.645569620
+(along . towards) . 0.645161290
+(taken . reason) . 0.645161290
+(little . over) . 0.645
+(must . may) . 0.644444444
+(end . smile) . 0.644067796
+(really . also) . 0.643678160
+(both . men) . 0.643564356
+(most . great) . 0.643478260
+(most . men) . 0.643478260
+(point . kept) . 0.642857142
+(hair . black) . 0.642857142
+(hair . white) . 0.642857142
+(arms . close) . 0.642857142
+(case . end) . 0.642857142
+(get . make) . 0.642384105
+(place . mind) . 0.642105263
+(night . people) . 0.642105263
+(until . why) . 0.641975308
+(side . whole) . 0.641791044
+(water . body) . 0.641791044
+(large . half) . 0.641509433
+(upon . off) . 0.640845070
+(day . place) . 0.640776699
+(used . along) . 0.640625
+(got . felt) . 0.640350877
+(never . can) . 0.64
+(mother . point) . 0.64
+(both . every) . 0.64
+(always . also) . 0.639534883
+(between . against) . 0.639534883
+(off . being) . 0.639455782
+(than . some) . 0.63934426
+(held . moved) . 0.63934426
+(away . upon) . 0.639097744
+(another . every) . 0.638888888
+(those . these) . 0.638888888
+(other . over) . 0.638613861
+(behind . door) . 0.638554216
+(saw . heard) . 0.638554216
+(away . over) . 0.638554216
+(once . well) . 0.63809523
+(something . even) . 0.638036809
+(along . white) . 0.637931034
+(called . kept) . 0.637931034
+(case . course) . 0.637931034
+(around . very) . 0.637583892
+(small . young) . 0.6375
+(would . could) . 0.637323943
+(old . own) . 0.637168141
+(off . two) . 0.636942675
+(against . without) . 0.636363636
+(black . point) . 0.636363636
+(body . end) . 0.636363636
+(hair . new) . 0.636363636
+(days . point) . 0.636363636
+(little . very) . 0.636363636
+(room . around) . 0.636363636
+(will . never) . 0.635802469
+(off . never) . 0.635761589
+(himself . off) . 0.635761589
+(most . off) . 0.635714285
+(people . life) . 0.635514018
+(men . three) . 0.635416666
+(each . both) . 0.635416666
+(gave . behind) . 0.635135135
+(used . wanted) . 0.635135135
+(used . tried) . 0.634920634
+(through . over) . 0.634730538
+(two . first) . 0.634615384
+(each . another) . 0.634615384
+(alone . point) . 0.634615384
+(large . father) . 0.634615384
+(mouth . point) . 0.634615384
+(both . almost) . 0.634408602
+(once . ever) . 0.634408602
+(taken . keep) . 0.633802816
+(between . towards) . 0.633802816
+(both . without) . 0.633663366
+(away . most) . 0.633587786
+(away . its) . 0.633587786
+(against . under) . 0.633333333
+(water . feet) . 0.633333333
+(water . ground) . 0.633333333
+(held . kept) . 0.633333333
+(much . off) . 0.632911392
+(other . little) . 0.632850241
+(ever . well) . 0.632653061
+(large . mother) . 0.632653061
+(those . each) . 0.632653061
+(upon . every) . 0.632478632
+(whole . behind) . 0.632352941
+(called . keep) . 0.632352941
+
+-----------------------------------------------------------------
 ---------
 wtf. get-pair-count takes a LL pair, but wild-card return hi-level.
 so how do wildcards works?
@@ -10116,6 +10554,17 @@ Or ... using the cogserver: start 21:43:47
 at 17:04: 975K -> almost 3M obs/hour wow. Big diff...
 at 18:20: 4M -> 2.5M/hour
 
+-----
+how about MST?
+start 18:45 -- ouch 12K in 10 mins -- 72K/hour
+                    17K in 15 mins -- 68K/hour
+
+again: baseline 17500 at 19:08  and then it crashes. Ouch.
+
+NonREPL:  fed by four threads
+103K MST updates in 20 mins = 300K/hour
+245K MST after 1 hour
+1.91M MST after 11 hours = 170K/hour
 
 =========================================================================
 
