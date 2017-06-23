@@ -21,15 +21,15 @@ The knowledge-base is the upper case latin alphabet order. The order
 relationship is represented with Inheritance between 2 consecutive
 letters:
 
+```
 Inheritance (stv 1 1)
   Concept "A" (stv 1/26 1)
   Concept "B" (stv 2/26 1)
-
 ...
-
 Inheritance (stv 1 1)
   Concept "Y" (stv 25/26 1)
   Concept "Z" (stv 26/26 1)
+```
 
 The concept strengths, 1/26 to 26/26, are defined to be consistent
 with PLN semantics.
@@ -44,9 +44,11 @@ Targets
 
 The targets to prove are of the form
 
+```
 Inheritance
   X
   Y
+```
 
 where X is a letter preceding Y.
 
@@ -111,6 +113,7 @@ call it level-0 meta-learning, expresses the probability of expanding
 an and-BIT producing a proof-suffix, or "subproof", of any target. All
 other inference control rules are specializations of this rule.
 
+```
 ImplicationScope <TV>
   VariableList
     Variable "$T"  ;; Theorem/target to prove
@@ -134,6 +137,7 @@ ImplicationScope <TV>
     List
       Variable "$B"
       Variable "$T"
+```
 
 Such an inference control rule may already help a bit the Backward
 Chainer. Indeed partial instantiation over R will calculate the
@@ -143,6 +147,7 @@ called <rule>, and the TV over the ImplicationScope, called <rule-TV>,
 is obtained by direct evaluation over the subset of observations of
 the corpus of proofs involving <rule>.
 
+```
 ImplicationScope <rule-TV>
   VariableList
     Variable "$T"
@@ -165,6 +170,7 @@ ImplicationScope <rule-TV>
     List
       Variable "$B"
       Variable "$T"
+```
 
 This is a good way to assign the weights of the rules for the next
 round of reasoning, but it might not go much further. Indeed partial
@@ -174,6 +180,7 @@ instances have been encountered, for instance T and A are known but L
 isn't, then we can still come up with some possibly useful partial
 instantiation of that rule, such as
 
+```
 ImplicationScope <target-andbit-rule-TV>
   VariableList
     Variable "$L"
@@ -192,6 +199,7 @@ ImplicationScope <target-andbit-rule-TV>
     List
       Variable "$B"
       <target>
+```
 
 where <target-andbit-rule-TV> is calculated based on the subset of
 observations in the corpus where <target>, <andbit> and <rule> occurs
@@ -209,6 +217,7 @@ instances of T, A, L, etc, are encountered.
 
 Let's give the general form of such specialization
 
+```
 ImplicationScope <TV>
   VariableList
     Variable "$T"  ;; Theorem/target to prove
@@ -234,6 +243,7 @@ ImplicationScope <TV>
     List
       Variable "$B"
       Variable "$T"
+```
 
 where <pattern> is a predicate body involving all or some of the
 variables T, A, L and R.
@@ -330,9 +340,11 @@ TODO: give an example with double deduction.
 Inference Rule Probability Estimate
 -----------------------------------
 
-TODO: look into universal operator induction
+TODO: universal operator induction
 
+```
 P(D') = sum_M P(D'|M) * P(M|D) * P(D)
+```
 
 Using Inference Control Rules
 -----------------------------
@@ -342,9 +354,11 @@ probabilities of producing a subproof of T for all available inference
 rules, as explained in Section Inference Rule Probability
 Estimate. Once we have a distribution over inference rules
 
+```
 R1 <TV1>
 ...
 Rn <TV1>
+```
 
 we want to choose the right one. The reasonable choice is to pick the
 one with the highest probability of success. However, because these
