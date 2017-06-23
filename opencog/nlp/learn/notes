@@ -10427,6 +10427,38 @@ Meh.
 (whole . behind) . 0.632352941
 (called . keep) . 0.632352941
 
+
+----------------
+How about scatter-plots?
+We've got from before:
+(define top-cset-words
+   (filter (lambda (wrd) (< 1500 (cset-vec-word-observations wrd))) ac))
+(define ovprs (all-ovl top-cset-words '()))
+(length ovprs) ; = 322003
+
+so: 
+1) rank the top-cset-words
+2) create a pixel array.
+
+
+(define ranked-csw (sort top-cset-words
+	(lambda (a b) (> (cset-vec-word-observations a) (cset-vec-word-observations b)))))
+
+(take ranked-csw 20) OK, that worked.
+
+But ovprs is not stored in atomspace ....
+what's faster: looking it up, or on-the-fly recompute?
+
+
+(define short-csw (take ranked-csw 20))
+
+
+(write-flo "/tmp/scat-ov.flo" (take ranked-csw 100)
+   (lambda (wa wb)
+      (poi 'right-overlap wa wb)
+   ))
+
+
 -----------------------------------------------------------------
 ---------
 wtf. get-pair-count takes a LL pair, but wild-card return hi-level.
@@ -10553,6 +10585,9 @@ Again: start exactly: 15:12
 Or ... using the cogserver: start 21:43:47
 at 17:04: 975K -> almost 3M obs/hour wow. Big diff...
 at 18:20: 4M -> 2.5M/hour
+
+43009543 values in 73425 secs = 586/sec = 2.10M/hour
+... and its stable.
 
 -----
 how about MST?
