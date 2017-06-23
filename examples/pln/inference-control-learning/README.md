@@ -97,21 +97,23 @@ where
 * Action:
   + Expand with rule R
 * Result:
-  + Produce a proof-suffix of T
+  + Produce a subproof of T
 
-TODO: A proof-suffix is an inference subtree (in the graph theory
-sense, perhaps?) of an inference tree proving T.
+A subproof is a back-inference-tree prefix (or suffix if you start
+from the axioms) of a complete proof of T. In other words it is a
+subtree with root T (thus as in graph theory, not computer data
+structure) of an inference tree proving T.
 
 Typically the context that we are running the backward chainer to
 prove T and about to decide what rule to expand with will be assumed,
-because that will be the universal context of our experiment
-anyway. Choosing the next inference rule is only *one* decision amonst
+because that it is the universal context of our experiment anyway.
+Also, choosing the next inference rule is only *one* decision amonst
 many others the BC has to make, but for now we'll ignore them.
 
-The simplest possible inference control rule that we can learn, let's
-call it level-0 meta-learning, expresses the probability of expanding
-an and-BIT producing a proof-suffix, or "subproof", of any target. All
-other inference control rules are specializations of this rule.
+The simplest, most generic inference control rule that we can learn
+expresses the probability of expanding an and-BIT producing a subproof
+of any target. All other inference control rules are specializations
+of this rule.
 
 ```
 ImplicationScope <TV>
