@@ -170,7 +170,8 @@ simultanously. In most cases though such subset will be small and
 complexity of such a predictor will be high because the complexity of
 the instances of T, A, etc, will be counted as well, which will give
 it a low prior and in turn will lower the confidence of the produced
-term by conditional instantiation.
+term by conditional instantiation (see Section Conditional
+Instantiation Confidence).
 
 To go beyond this level-0 meta-learning type we need to introduce more
 expressive specializations in order to generalize well when new
@@ -246,7 +247,6 @@ TODO: give an example with double deduction.
              ----------------bc-deduction-formula-----------------
                            [9592798904207778024][1]
 
-
 [DEBUG] [URE] Expanded forward chainer strategy:
 (BindLink
   (VariableList
@@ -295,3 +295,9 @@ TODO: give an example with double deduction.
 
 [DEBUG] [URE] With inference tree:
 
+Conditional Instantiation Confidence
+------------------------------------
+
+TODO: look into universal operator induction
+
+P(D') = sum_M P(D'|M) * P(M|D) * P(D)
