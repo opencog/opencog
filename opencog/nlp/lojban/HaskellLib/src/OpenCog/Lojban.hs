@@ -56,4 +56,4 @@ atomeseToLojban rstate seed a@(LL [_an,s]) = sText . fst <$> execRWST (unapply l
                         ,sSeed = seed
                         ,sCtx = now_here}
 
-now_here = cCN "NowAndHere" noTv
+now_here = [cCN "NowAndHere" noTv]

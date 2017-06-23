@@ -419,16 +419,20 @@ sumtiT = (handleFA <<< optional _FA &&& sumtiC) <+> placeholder
                                    ,("fu","5")
                                    ,("fi'a","?")]
 
+
+modalSumti :: Syntax Sumti
+modalSumti = modalSumti' <+> tenseModalSumti
+
 --New Places Can be added from other Predicates
 --fihoP <+> baiP figures out the name
 --SumitT the actually sumti that will be put in this place
 --Handle fi'o creates an Eval link that applies the sumti
 --to the fi'o/bai Predicate
-modalSumti :: Syntax Sumti
-modalSumti = handleFIhO <<< (simple_tense_modal <+> fihoP) &&& sumtiT
-    where handleFIhO :: SynIso (Selbri,Sumti) Sumti
+modalSumti' :: Syntax Sumti
+modalSumti' = handleFIhO <<< (baiP <+> fihoP) &&& sumtiC
+    where handleFIhO :: SynIso (Selbri,Atom) Sumti
           handleFIhO = sndToState 1 . (fi'otag &&& tolist1 . _frame)
-                     . second (inverse tolist1) . handleTAG . second tolist1
+                     . second (addsnd "1")
 
           fi'otag :: SynIso (Selbri,(Atom,Tag)) Sumti
           fi'otag = Iso f g where
@@ -443,9 +447,6 @@ modalSumti = handleFIhO <<< (simple_tense_modal <+> fihoP) &&& sumtiT
           fihoP :: Syntax Selbri
           fihoP = sepSelmaho "FIhO" &&> selbriUI <&& optSelmaho "FEhU"
 
-simple_tense_modal :: Syntax Selbri
-simple_tense_modal = baiP <+> addfst noTv . space_time
-
 --bai are shorthands for fi'o selbri
 --in case we find one we transfrom it to the full version
 baiP :: Syntax Selbri
@@ -459,6 +460,19 @@ baiP = ptp _bai iso selbriUI
                 unapply btf b
           _bai = optional (selmaho "SE") &&& selmaho "BAI"
 
+--simple_tense_modal :: Syntax Selbri
+--simple_tense_modal = baiP <+> addfst noTv . space_time
+
+tenseModalSumti :: Syntax Sumti
+tenseModalSumti = handleTenseModal <<< space_time &&& sumtiC
+    where handleTenseModal = Iso f g
+          f (st,s) = do
+              ctx <- gets (head.sCtx)
+              nctx <- (\x -> cCN x noTv) <$> randName (show ctx)
+              addCtx nctx
+              pushAtom $ cEvalL noTv st (cLL [nctx,s])
+              pure (s,Just "SKIP")
+          g _ = error $ "Not Implemented g handleTenseModal"
 
 {-tense_modal :: SyntaxState s => Syntax s [ADT]
 tense_modal = adtSyntax "tense_modal" <<<
@@ -868,13 +882,12 @@ selbriAll = handleSpaceTime . withFlag "WithDefaultTenses" space_time
          &&& selbriUI
     where handleSpaceTime = Iso f g
           f pred = do
-              ctx <- gets sCtx
+              ctx <- gets (head.sCtx)
               nctx <- (\x -> cCN x noTv) <$> randName (show ctx)
-              setCtx nctx
-              return (ctx,nctx)
+              setPrimaryCtx nctx
               pushAtom (cEvalL noTv
                             pred
-                            (cLL [ctx,nctx])
+                            (cLL [nctx,ctx])
                        )
           g _ = error "Not Implemented g handleSpaceTime"
 
@@ -958,8 +971,28 @@ handleBRIDI = handleNA
             -- (MNA,(Tagged Selbri,sumti))
             . inverse associate
             -- ((MNA,Tagged Selbri),sumti)
+            . second filterTenseSumti
+            -- ((MNA,Tagged Selbri),sumti)
             . mergeSumti
             -- (sumit1,((MNA,Tagged Selbri),sumti2))
+
+filterTenseSumti :: SynIso [Sumti] [Sumti]
+filterTenseSumti = Iso (pure . f) g where
+    f [] = []
+    f ((a,Just "SKIP"):ls) = f ls
+    f (l:ls) = l : f ls
+    g _ = error $ "Not implemented"
+      {-  g ls = do
+          ctxs <- gets sCtx
+
+    g' [] = []
+    g' (ctx:ctxs) = do
+        atoms <- gets sAtoms
+        let pattern = Link "GetLink" [cEvalL noTv (cVN "pred") (cLL [ctx,cVN "concept"])] noTv
+        SL [res] <- runOnNewAtomSpace (insert (cLL atoms) >> execute (pattern))
+        pure (res: g' ctxs)
+-}
+
 
 handleNA :: SynIso (Maybe String,Atom) Atom
 handleNA = Iso f g where
@@ -1000,10 +1033,10 @@ statment = handleCtx . (handleSOS ||| id) . ifJustA
   <<< optSelmaho "I" &&> optional _SOS &&& statment2
     where handleCtx = Iso f g
           f a = do
-              ctx <- gets sCtx
-              pure $ cCtxL noTv ctx a
-          g (CtxL ctx a) = do
-              setCtx ctx
+              ctxs <- gets sCtx
+              pure $ cCtxL noTv (cSL ctxs) a
+          g (CtxL (SL ctxs) a) = do
+              setCtx ctxs
               pure a
 
 statment2 :: Syntax Atom

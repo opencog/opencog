@@ -94,8 +94,14 @@ ifJustB = mkIso f g where
 --State Helpers
 -------------------------------------------------------------------------------
 
-setCtx :: SynMonad t State => Atom -> (t ME) ()
+setCtx :: SynMonad t State => [Atom] -> (t ME) ()
 setCtx a = modify (\s -> s {sCtx = a})
+
+setPrimaryCtx :: SynMonad t State => Atom -> (t ME) ()
+setPrimaryCtx a = modify (\s -> s {sCtx = a : tail (sCtx s)})
+
+addCtx :: SynMonad t State => Atom -> (t ME) ()
+addCtx a = modify (\s -> s {sCtx = (sCtx s) ++ [a]})
 
 setAtoms :: SynMonad t State => [Atom] -> (t ME) ()
 setAtoms a = modify (\s -> s {sAtoms = a})
