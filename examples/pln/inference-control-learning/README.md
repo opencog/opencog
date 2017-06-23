@@ -240,6 +240,7 @@ variables T, A, L and R.
 
 TODO: give an example with double deduction.
 
+```
   (ExecutionOutputLink
     (GroundedSchemaNode "scm: bc-deduction-formula") ; [5481509939359570705][1]
     (ListLink
@@ -324,6 +325,7 @@ TODO: give an example with double deduction.
 ) ; [17301981865595416016][15]
 
 [DEBUG] [URE] With inference tree:
+```
 
 Inference Rule Probability Estimate
 -----------------------------------
