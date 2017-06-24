@@ -2,21 +2,22 @@
              (opencog nlp)
              (opencog nlp chatlang))
 
+(define exist-concept (create-concept "foo" "swallow"))
 (define concept
-    (chat-concept "eat" (list "eat" "ingest" "binge and purge")))
+    (create-concept "eat" "eat" "ingests" "binge and purge" "~foo"))
 
 (define expected-result
     (list (ReferenceLink
-              (WordNode "eat")
+              (LemmaNode "eat")
               (ConceptNode "eat"))
           (ReferenceLink
-              (WordNode "ingest")
+              (WordNode "ingests")
               (ConceptNode "eat"))
           (ReferenceLink
-              (ListLink
-                  (WordNode "binge")
-                  (WordNode "and")
-                  (WordNode "purge"))
+              (PhraseNode "binge and purge")
+              (ConceptNode "eat"))
+          (ReferenceLink
+              (ConceptNode "foo")
               (ConceptNode "eat"))))
 
 (define test-ui-concept-result

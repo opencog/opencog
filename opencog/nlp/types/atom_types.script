@@ -14,7 +14,6 @@
 // and are being replaced by newer RelEx forms.
 // Some of these may be revived. See below.
 //
-// PHRASE_NODE <- NODE
 // COLLOCATION_NODE <- WORD_NODE
 // SEQUENCE_LINK <- ORDERED_LINK
 //
@@ -29,6 +28,8 @@
 //
 // QUERY_VARIABLE_LINK <- ORDERED_LINK
 //
+
+PHRASE_NODE <- NODE  // chatlang needs this.
 
 WORD_NODE <- NODE
 ANY_NODE <- NODE    // Explicit wildcard node, used for counting.
@@ -73,9 +74,6 @@ FEATURE_LINK <- ORDERED_LINK
 // XXX TODO -- below should be replaced by LG_LINK_NODE
 // This is NOT a connector, its a pair of connected connectors.
 LINK_GRAMMAR_RELATIONSHIP_NODE <- PREDICATE_NODE   // e.g. "MX"
-
-// XXX TODO -- name should be shortened to LG_DISJUNCT_NODE
-LINK_GRAMMAR_DISJUNCT_NODE <- PREDICATE_NODE       // e.g. "S- O+ "
 
 // ---------------------------------------------------------------
 // Used to represent RelEx dependency relations
@@ -160,20 +158,6 @@ LG_LINK_INSTANCE_NODE <- PREDICATE_NODE
 LG_LINK_INSTANCE_LINK <- LIST_LINK
 
 // ---------------------------------------------------------------
-// Language-learning atoms. The langauge-learning code uses MST
-// (minimum spanning tree) parsing in the initial stages; thus, these
-// have MST as part of thier name.
-//
-MST_CONNECTOR <- LINK "MSTConnector"  // analogous to LG_CONNECTOR
-DECODED_CONNECTOR <- LINK  // with words, in place of connector letters.
-
-// Analogous to LG_LINK_NODE and LG_DISJUNCT_NODE
-// The LINK_NODE is a pair of connected connectors (i.e. what is called
-// "the intersection" in the LG code-base/documentation)
-MST_LINK_NODE <- PREDICATE_NODE "MSTLinkNode"
-MST_DISJUNCT_NODE <- PREDICATE_NODE "MSTDisjunctNode"
-
-//New Types used in the Lojban Parser
-//Might have to be moved at some point
+// Types used in the Lojban Parser
 SET_TYPE_LINK <- ORDERED_LINK
 SET_SIZE_LINK <- ORDERED_LINK

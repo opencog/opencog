@@ -1,4 +1,5 @@
 # Pattern miner build file.
+ADD_SUBDIRECTORY (types)
 
 IF (HAVE_cpprest)
     ADD_LIBRARY (PatternMiner SHARED
@@ -13,6 +14,7 @@ IF (HAVE_cpprest)
     TARGET_LINK_LIBRARIES (PatternMiner
         ${COGUTIL_LIBRARY}
         ${ATOMSPACE_LIBRARIES}
+        patternminer-types
         ${cpprest_LIBRARY}
         ${Boost_SYSTEM_LIBRARY}
     )
@@ -27,16 +29,15 @@ ELSE (HAVE_cpprest)
     TARGET_LINK_LIBRARIES (PatternMiner
         ${COGUTIL_LIBRARY}
         ${ATOMSPACE_LIBRARIES}
+        patternminer-types
         ${Boost_SYSTEM_LIBRARY}
     )
 ENDIF (HAVE_cpprest)
 
-ADD_DEPENDENCIES(PatternMiner embodiment_atom_types)
 ADD_DEPENDENCIES(PatternMiner spacetime_atom_types)
 
-
 ADD_LIBRARY(PatternMinerAgent SHARED
-        PatternMinerAgent
+	PatternMinerAgent
 )
 
 
@@ -45,9 +46,9 @@ TARGET_LINK_LIBRARIES (PatternMinerAgent
 )
 
 INSTALL (FILES
-        HTree.h
-        PatternMiner.h
-        DESTINATION "include/${PROJECT_NAME}/learning/PatternMiner"
+	HTree.h
+	PatternMiner.h
+	DESTINATION "include/${PROJECT_NAME}/learning/PatternMiner"
 )
 
 INSTALL (TARGETS PatternMiner DESTINATION "lib${LIB_DIR_SUFFIX}/opencog")

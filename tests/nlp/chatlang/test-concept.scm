@@ -2,12 +2,14 @@
              (opencog nlp)
              (opencog nlp chatlang))
 
+; concept is not define-public, so we have to load terms.scm to test it.
+(load "../../../opencog/nlp/chatlang/terms.scm")
+
 (define concept (concept "drink"))
 
-; Just want to see if the ReferenceLink connecting
-; the variable and the concept is there...
+; Check the EvaluationLink created
 (define test-concept-result
-    (not (null? (filter (lambda (x)
-        (and (eq? (cog-type x) 'ReferenceLink)
-             (equal? (gdr x) (ConceptNode "drink"))))
-        (cdr concept)))))
+    (let ((c (car (cdr concept))))
+        (and (eq? (cog-type c) 'EvaluationLink)
+             (equal? (gar c) (GroundedPredicateNode "scm: chatlang-concept?"))
+             (equal? (gadr c) (ConceptNode "drink")))))

@@ -1,31 +1,31 @@
 from cython.operator cimport dereference as deref, preincrement as inc
 from opencog.atomspace cimport Atom, AtomSpace, void_from_candle
 
-cdef class OctomapOcTreeNode:
-    cdef cOctomapOcTreeNode* c_node
+cdef class OpencogOcTreeNode:
+    cdef cOpencogOcTreeNode* c_node
 
     def __cinit__(self):
         pass
 
     def __init__(self, long addr):
-        self.c_node = <cOctomapOcTreeNode*> PyLong_AsVoidPtr(addr)
+        self.c_node = <cOpencogOcTreeNode*> PyLong_AsVoidPtr(addr)
 
     def __dealloc__(self):
-        #OctomapOcTree will handle this
+        #OpencogOcTree will handle this
         pass
 
     def get_log_odds(self):
         return self.c_node.getLogOdds()
 
-cdef class OctomapOcTree:
-    cdef cOctomapOcTree* c_octree_map
+cdef class OpencogOcTree:
+    cdef cOpencogOcTree* c_octree_map
     cdef AtomSpace atomspace
 
     def __cinit__(self):
         pass
 
     def __init__(self, long addr, AtomSpace atomspace):
-        self.c_octree_map = <cOctomapOcTree*> PyLong_AsVoidPtr(addr)
+        self.c_octree_map = <cOpencogOcTree*> PyLong_AsVoidPtr(addr)
         self.atomspace = atomspace
 
     def __dealloc__(self):
@@ -34,7 +34,7 @@ cdef class OctomapOcTree:
 
     @classmethod
     def init_new_map(cls, atomspace, map_name, resolution):
-        cdef cOctomapOcTree* cspmap = new cOctomapOcTree(map_name, resolution)
+        cdef cOpencogOcTree* cspmap = new cOpencogOcTree(map_name, resolution)
         newmap = cls(PyLong_FromVoidPtr(cspmap), atomspace)
         return newmap
 
@@ -45,8 +45,8 @@ cdef class OctomapOcTree:
         self.c_octree_map.setOccupancyThres(prob)
 
     def search(self, pos):
-        cdef cOctomapOcTreeNode* c_node = self.c_octree_map.search(pos[0], pos[1], pos[2])
-        return OctomapOcTreeNode(PyLong_FromVoidPtr(c_node))
+        cdef cOpencogOcTreeNode* c_node = self.c_octree_map.search(pos[0], pos[1], pos[2])
+        return OpencogOcTreeNode(PyLong_FromVoidPtr(c_node))
 
     def get_map_name(self):
         cdef string c_map_name = self.c_octree_map.getMapName()
@@ -151,17 +151,17 @@ cdef class EntityRecorder:
         else:
             return Atom(void_from_candle(c_handle), self.atomspace)
 
-def check_standable(AtomSpace atomspace, OctomapOcTree space_map, pos, log_odds_occupancy = None):
+def check_standable(AtomSpace atomspace, OpencogOcTree space_map, pos, log_odds_occupancy = None):
     assert len(pos) == 3
     cdef cBlockVector c_pos = cBlockVector(pos[0], pos[1], pos[2])
     if log_odds_occupancy is None:
         log_odds_occupancy = space_map.c_octree_map.getOccupancyThresLog()
     return checkStandableWithProb(deref(atomspace.atomspace), deref(space_map.c_octree_map), c_pos, log_odds_occupancy)
 
-def get_near_free_point(AtomSpace atomspace, OctomapOcTree octree_map, dest,
+def get_near_free_point(AtomSpace atomspace, OpencogOcTree octree_map, dest,
                         dist, first_direction, bool to_be_stand):
     cdef cAtomSpace* c_atomspace = atomspace.atomspace
-    cdef cOctomapOcTree* c_octree_map = octree_map.c_octree_map
+    cdef cOpencogOcTree* c_octree_map = octree_map.c_octree_map
     assert len(dest) == 3
     cdef cBlockVector c_dest = cBlockVector(dest[0], dest[1], dest[2])
     assert len(first_direction) == 3

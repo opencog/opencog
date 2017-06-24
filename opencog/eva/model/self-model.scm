@@ -1105,7 +1105,6 @@ proper atomese.
 "
 	(enable-all-demos)
 	(State current-demo-mode default-mode)
-	(stv 1 1)
 )
 
 (Define

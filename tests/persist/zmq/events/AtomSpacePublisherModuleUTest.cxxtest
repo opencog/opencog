@@ -121,7 +121,7 @@ public:
         double precision = 0.001;
 
         // Set the AttentionalFocusBoundary
-        attentionbank(as).setAttentionalFocusBoundary(1000);
+        attentionbank(as).set_af_size(1);
 
         // Add an atom
         TruthValuePtr tv = SimpleTruthValue::createTV(2.1, 3.1);
@@ -228,7 +228,7 @@ public:
 
         // Add the atom to the AttentionalFocus
         attentionbank(as).change_av(h, createAV(1100, 0, 0));
-
+        
         address = s_recv (subscriberAddAF);
         contents = s_recv (subscriberAddAF);
         ss << contents;
@@ -250,20 +250,21 @@ public:
                         ("truthvalue.details.strength", 0), 5.1, precision);
         TS_ASSERT_DELTA(ptAtom.get<confidence_t>
                         ("truthvalue.details.confidence", 0), 7.1, precision);
-        TS_ASSERT(ptAtom.get<std::string>("attentionvalue.sti", "") == "1100");
-        TS_ASSERT(ptAtom.get<std::string>("attentionvalue.lti", "") == "0");
-        TS_ASSERT(ptAtom.get<std::string>("attentionvalue.vlti", "") == "false");
+        TS_ASSERT_EQUALS(ptAtom.get<std::string>("attentionvalue.sti", ""), "30");
+        TS_ASSERT_EQUALS(ptAtom.get<std::string>("attentionvalue.lti", ""), "50");
+        TS_ASSERT_EQUALS(ptAtom.get<std::string>("attentionvalue.vlti", ""), "false");
 
-        TS_ASSERT(ptAVOld.get<std::string>("sti", "") == "30");
-        TS_ASSERT(ptAVOld.get<std::string>("lti", "") == "50");
-        TS_ASSERT(ptAVOld.get<std::string>("vlti", "") == "false");
+        TS_ASSERT_EQUALS(ptAVOld.get<std::string>("sti", ""), "0");
+        TS_ASSERT_EQUALS(ptAVOld.get<std::string>("lti", ""), "0");
+        TS_ASSERT_EQUALS(ptAVOld.get<std::string>("vlti", ""), "false");
 
-        TS_ASSERT(ptAVNew.get<std::string>("sti", "") == "1100");
-        TS_ASSERT(ptAVNew.get<std::string>("lti", "") == "0");
-        TS_ASSERT(ptAVNew.get<std::string>("vlti", "") == "false");
+        TS_ASSERT_EQUALS(ptAVNew.get<std::string>("sti", ""), "30");
+        TS_ASSERT_EQUALS(ptAVNew.get<std::string>("lti", ""), "50");
+        TS_ASSERT_EQUALS(ptAVNew.get<std::string>("vlti", ""), "false");
 
-        // Remove the atom from the AttentionalFocus
-        attentionbank(as).change_av(h, createAV(900, 0, 0));
+        // Remove the atom(i.e ExampleNode) from the AttentionalFocus
+        Handle h2 = as->add_node(CONCEPT_NODE, "AFTakeOverAtom");
+        attentionbank(as).change_av(h2, createAV(1200, 0, 0));
 
         address = s_recv (subscriberRemoveAF);
         contents = s_recv (subscriberRemoveAF);
@@ -286,7 +287,7 @@ public:
                         ("truthvalue.details.strength", 0), 5.1, precision);
         TS_ASSERT_DELTA(ptAtom.get<confidence_t>
                         ("truthvalue.details.confidence", 0), 7.1, precision);
-        TS_ASSERT(ptAtom.get<std::string>("attentionvalue.sti", "") == "900");
+        TS_ASSERT(ptAtom.get<std::string>("attentionvalue.sti", "") == "1100");
         TS_ASSERT(ptAtom.get<std::string>("attentionvalue.lti", "") == "0");
         TS_ASSERT(ptAtom.get<std::string>
                   ("attentionvalue.vlti", "") == "false");
@@ -295,7 +296,7 @@ public:
         TS_ASSERT(ptAVOld.get<std::string>("lti", "") == "0");
         TS_ASSERT(ptAVOld.get<std::string>("vlti", "") == "false");
 
-        TS_ASSERT(ptAVNew.get<std::string>("sti", "") == "900");
+        TS_ASSERT(ptAVNew.get<std::string>("sti", "") == "1100");
         TS_ASSERT(ptAVNew.get<std::string>("lti", "") == "0");
         TS_ASSERT(ptAVNew.get<std::string>("vlti", "") == "false");
 
@@ -315,7 +316,7 @@ public:
                         ("truthvalue.details.strength", 0), 5.1, precision);
         TS_ASSERT_DELTA(ptAtom.get<confidence_t>
                         ("truthvalue.details.confidence", 0), 7.1, precision);
-        TS_ASSERT(ptAtom.get<std::string>("attentionvalue.sti", "") == "900");
+        TS_ASSERT(ptAtom.get<std::string>("attentionvalue.sti", "") == "1100");
         TS_ASSERT(ptAtom.get<std::string>("attentionvalue.lti", "") == "0");
 
         // Shutdown ZeroMQ

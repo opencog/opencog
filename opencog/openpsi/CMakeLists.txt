@@ -1,4 +1,5 @@
-ADD_GUILE_MODULE (openpsi.scm
+ADD_GUILE_MODULE (FILES
+	openpsi.scm
 	action-selector.scm
 	control.scm
 	demand.scm
@@ -9,6 +10,8 @@ ADD_GUILE_MODULE (openpsi.scm
 	modulator.scm
 	rule.scm
 	sec.scm
+	emotion.scm
 	updater.scm
 	utilities.scm
+	MODULE_DESTINATION "${DATADIR}/scm/opencog/openpsi"
 )

@@ -129,12 +129,12 @@ Currently these files are not included in the .conf file.  In order to
 use the microplanner, you need to run the following in OpenCog Scheme
 shell:
 ```
+(use-modules (opencog nlp))
 (use-modules (opencog nlp microplanning))
 ```
 
 If you want to use the testing atomspace, you also need
 ```
-(use-modules (opencog atom-types))
 (load "../tests/nlp/microplanning/test-atomspace.scm")
 (load "../tests/nlp/microplanning/r2l-atomspace.scm")
 ```

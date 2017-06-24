@@ -70,9 +70,8 @@ public:
         // Configure scheme load-paths that are common for all tests.
         _scm->eval("(add-to-load-path \"/usr/local/share/opencog/scm\")");
         CHKERR
-        _scm->eval("(add-to-load-path \"" PROJECT_BINARY_DIR  "\")");
-        CHKERR
 
+        _scm->eval("(setenv \"LTDL_LIBRARY_PATH\" \"/usr/local/lib/opencog\")");
         // Load require modules to be tested and populate the atomspace
         _scm->eval("(use-modules (opencog))");
         CHKERR

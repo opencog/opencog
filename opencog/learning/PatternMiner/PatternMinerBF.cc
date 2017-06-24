@@ -36,11 +36,10 @@
 #include <opencog/atoms/base/ClassServer.h>
 #include <opencog/atoms/base/Handle.h>
 #include <opencog/atoms/base/atom_types.h>
-#include <opencog/spacetime/atom_types.h>
-#include <opencog/embodiment/atom_types.h>
 #include <opencog/query/BindLinkAPI.h>
 #include <opencog/util/Config.h>
 #include <opencog/util/StringManipulator.h>
+#include <opencog/learning/PatternMiner/types/atom_types.h>
 
 #include "HTree.h"
 #include "PatternMiner.h"
@@ -56,7 +55,7 @@ void PatternMiner::extendAllPossiblePatternsForOneMoreGramBF(HandleSeq &instance
 {
     // debug:
     string instanceInst = unifiedPatternToKeyString(instance, originalAtomSpace);
-    if (instanceInst.find("$var") != std::string::npos)
+    if (instanceInst.find("PatternVariableNode") != std::string::npos)
     {
         cout << "Debug: error! The instance contines variables!" << instanceInst <<  "Skip it!" << std::endl;
         return;
@@ -103,7 +102,7 @@ void PatternMiner::extendAllPossiblePatternsForOneMoreGramBF(HandleSeq &instance
             if (isInHandleSeq(extendedHandle, instance))
                 continue;
 
-            if (extendedHandleStr.find("$var") != std::string::npos)
+            if (extendedHandleStr.find("PatternVariableNode") != std::string::npos)
             {
                // cout << "Debug: error! The extended link contines variables!" << extendedHandleStr << std::endl;
                 continue;
@@ -438,12 +437,12 @@ void PatternMiner::ConstructTheFirstGramPatternsBF()
     std::sort((patternsForGram[0]).begin(), (patternsForGram[0]).end(),compareHTreeNodeByFrequency );
 
     int end_time = time(NULL);
-    OutPutFrequentPatternsToFile(1);
+    OutPutFrequentPatternsToFile(1, patternsForGram);
 
     std::cout<<"Debug: PatternMiner: done (gram = 1) pattern mining! " + toString((patternsForGram[0]).size()) + " patterns found! " << std::endl;
     printf(" Total time: %d seconds. \n", end_time - start_time);
 
-    OutPutFrequentPatternsToFile(cur_gram);
+    OutPutFrequentPatternsToFile(cur_gram, patternsForGram);
 
     HandleSeq allDumpNodes, allDumpLinks;
     atomSpace->get_handles_by_type(back_inserter(allDumpNodes), (Type) NODE, true );
@@ -499,7 +498,7 @@ void PatternMiner::GrowAllPatternsBF()
             // Finished mining cur_gram patterns; output to file
             std::cout<<"Debug: PatternMiner:  done (gram = " + toString(cur_gram) + ") frequent pattern mining!" + toString((patternsForGram[cur_gram-1]).size()) + " patterns found! " << std::endl;
 
-            OutPutFrequentPatternsToFile(cur_gram);
+            OutPutFrequentPatternsToFile(cur_gram, patternsForGram);
         }
 
 
@@ -508,7 +507,7 @@ void PatternMiner::GrowAllPatternsBF()
             cout << "\nCalculating interestingness for " << cur_gram << "gram patterns";
             // evaluate the interestingness
             // Only effective when Enable_Interesting_Pattern is true. The options are "Interaction_Information", "surprisingness"
-            if (interestingness_Evaluation_method == "Interaction_Information")
+            if (Enable_Interaction_Information)
             {
                 cout << "by evaluating Interaction_Information ...\n";
                // calculate interaction information
@@ -520,7 +519,8 @@ void PatternMiner::GrowAllPatternsBF()
                // sort by interaction information
                std::sort((patternsForGram[cur_gram-1]).begin(), (patternsForGram[cur_gram-1]).end(),compareHTreeNodeByInteractionInformation);
             }
-            else if (interestingness_Evaluation_method == "surprisingness")
+
+            if (Enable_surprisingness)
             {
                 cout << "by evaluating surprisingness ...\n";
                 // calculate surprisingness
@@ -579,7 +579,7 @@ void PatternMiner::swapOneLinkBetweenTwoAtomSpaceBF(AtomSpace* fromAtomSpace, At
            Handle new_node = toAtomSpace->add_node(h->getType(), h->getName());
            new_node->merge(h->getTruthValue());
            outgoings.push_back(new_node);
-           if (h->getType() == VARIABLE_NODE)
+           if (h->getType() == PATTERN_VARIABLENODE_TYPE)
            {
                containVar = true;
                if ( ! isInHandleSeq(new_node, outVariableNodes) ) // should not have duplicated variable nodes

@@ -30,7 +30,7 @@
 
 ;; Load the fuzzy conjunction rule
 (add-to-load-path "../../../opencog/pln/rules/")
-(load-from-path "fuzzy-conjunction-introduction-rule.scm")
+(load-from-path "fuzzy-conjunction-introduction.scm")
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Associate rules to the conjunction rule base ;;

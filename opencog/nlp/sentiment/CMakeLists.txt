@@ -1,4 +1,7 @@
-ADD_GUILE_MODULE (sentiment.scm)
+ADD_GUILE_MODULE (FILES
+	sentiment.scm
+	MODULE_DESTINATION "${DATADIR}/scm/opencog/nlp/sentiment"
+)
 
 INSTALL (FILES
 	basic_sentiment_analysis.py

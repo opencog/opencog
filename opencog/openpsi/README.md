@@ -288,6 +288,7 @@ Files:
 * sec.scm - internal openpsi Stimulus Evaluation Check variables
 * events.scm - defines perceived events that are monitored and that
   trigger changes in openpsi variables.
+* emotion.scm - code for creating emotions
 
 Instructions:
 

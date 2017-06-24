@@ -398,39 +398,6 @@ class TestRESTApi():
         new_size = self.atomspace.size()
         assert new_size + 1 == old_size
 
-    def test_i_get_atoms_by_av(self):
-        # Assign some STI values
-        self.bird.sti = 9
-        self.swan.sti = 20
-        self.bird_animal.sti = 15
-        self.animal.sti = 0
-
-        jswan = self.mkswan()
-        jbird = self.mkbird()
-        jbird_animal = self.mkbird_animal()
-        get_response = \
-            self.client.get(self.uri + 'atoms?filterby=attentionalfocus')
-        get_result = json.loads(get_response.data)['result']['atoms']
-        assert len(get_result) == 3
-        assert set([atom['handle'] for atom in get_result]) \
-            == {jbird['handle'],
-                jswan['handle'],
-                jbird_animal['handle']}
-
-        get_response = \
-            self.client.get(self.uri + 'atoms?filterby=stirange&stimin=15')
-        get_result = json.loads(get_response.data)['result']['atoms']
-        assert len(get_result) == 2
-        assert set([atom['handle'] for atom in get_result]) \
-            == {jswan['handle'], jbird_animal['handle']}
-
-        get_response = self.client.get(
-            self.uri + 'atoms?filterby=stirange&stimin=15&stimax=18')
-        get_result = json.loads(get_response.data)['result']['atoms']
-        assert len(get_result) == 1
-        assert set([atom['handle'] for atom in get_result]) \
-            == {jbird_animal['handle']}
-
     def test_j_get_types(self):
         # Verify that a list of valid atom types was returned
         get_response = self.client.get(self.uri + 'types')
@@ -479,32 +446,8 @@ class TestRESTApi():
     def test_m_scheme_command(self):
         # Test an arbitrary Scheme command to ensure the binding is working
         # properly
-
-        # Set the AttentionalFocus Boundary
-        command = {'command': '(cog-set-af-boundary! 5)'}
-
-        post_response = self.client.post(
-            self.uri + 'scheme',
-            data=json.dumps(command),
-            headers=self.headers)
-        post_result = json.loads(post_response.data)['response']
-
-        # Verify that the value returned by the POST request is the new
-        # value of the AttentionalFocus Boundary
-        assert post_result == "5\n"
-
-        # Get the AttentionalFocus Boundary
-        command = {'command': '(cog-af-boundary)'}
-
-        post_response = self.client.post(
-            self.uri + 'scheme',
-            data=json.dumps(command),
-            headers=self.headers)
-        post_result = json.loads(post_response.data)['response']
-
-        # Verify that it matches the previous response
-        assert post_result == "5\n"
-
+        # XXX Emptied because the scheme command (i.e cog-af-boundary) has been removed.
+        pass 
     def test_n_dot_export(self):
         # Export the atomspace to DOT format and ensure that there is a
         # properly defined DOT header created and the correct atoms are

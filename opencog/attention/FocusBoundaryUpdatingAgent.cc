@@ -48,8 +48,8 @@ FocusBoundaryUpdatingAgent::FocusBoundaryUpdatingAgent(CogServer& cs) :
     // Provide a logger
     setLogger(new opencog::Logger("FocusBoundaryUpdatingAgent.log", Logger::FINE, true));
 
-    _bank = &attentionbank(_as);
-    _bank->setAttentionalFocusBoundary(bottomBoundary);
+    // _bank = &attentionbank(_as);
+    // _bank->setAttentionalFocusBoundary(bottomBoundary);
 }
 
 void FocusBoundaryUpdatingAgent::run()
@@ -60,6 +60,7 @@ void FocusBoundaryUpdatingAgent::run()
         minAFSize = std::stoi(_atq.get_param_value(AttentionParamQuery::af_min_size));
         maxAFSize = std::stoi(_atq.get_param_value(AttentionParamQuery::af_max_size));
 
+#if 0
         AttentionValue::sti_t afboundary = _bank->getAttentionalFocusBoundary();
         // Let there always be K top STI valued atoms in the AF.
         HandleSeq hseq = _bank->getTopSTIValuedHandles();
@@ -69,6 +70,7 @@ void FocusBoundaryUpdatingAgent::run()
              afboundary = _bank->get_sti(hseq[0]);
              _bank->setAttentionalFocusBoundary(afboundary);
         }
+#endif
        /*
         AttentionValue::sti_t maxsti = _bank->get_max_STI();
         AttentionValue::sti_t minsti = _bank->get_min_STI();
@@ -85,6 +87,7 @@ void FocusBoundaryUpdatingAgent::run()
         //printf("NewAfb: %d OldAfb: %d Afb: %d \n",newafb,oldafb,afboundary);
         */
       
+#if 0
         // Make sure not too many atoms are in the AF.
         HandleSeq afset;
         _bank->get_handle_set_in_attentional_focus(std::back_inserter(afset));
@@ -92,6 +95,7 @@ void FocusBoundaryUpdatingAgent::run()
             afboundary = get_cutoff(afset);
             _bank->setAttentionalFocusBoundary(afboundary);
         }
+#endif
 }
 
 /**
@@ -113,31 +117,31 @@ AttentionValue::sti_t FocusBoundaryUpdatingAgent::get_cutoff(HandleSeq& afset)
     std::vector<AttentionValue::sti_t> af_sti;
     for(const Handle& h: afset)
         af_sti.push_back(_bank->get_sti(h));
-
-    auto afAtoms = std::vector<AttentionValue::sti_t>(af_sti.begin() + minAFSize, 
-            ((int)af_sti.size() > maxAFSize ? af_sti.begin() + maxAFSize : af_sti.end()));
-   /**
-    std::sort(afset.begin(), afset.end(),
-            [&](const Handle& h1, const Handle& h2)->bool {
-                return _bank->get_sti(h1) > _bank->get_sti(h2);
+    
+    std::sort(af_sti.begin(), af_sti.end(),
+            [&](const AttentionValue::sti_t& sti1,
+                const AttentionValue::sti_t& sti2)->bool {
+            return sti1 > sti2;
             });
 
-    HandleSeq afAtoms = HandleSeq(afset.begin() + minAFSize, 
-                        ((int)afset.size() > maxAFSize ? afset.begin() + maxAFSize : afset.end()));
-    */
+    auto afSTIValues = std::vector<AttentionValue::sti_t>(af_sti.begin() + minAFSize, 
+            ((int)af_sti.size() > maxAFSize ? af_sti.begin() + maxAFSize : af_sti.end()));
+
+    // If there is no natural boundary, find it amongst the minAFSize atoms.
+    if(afSTIValues[0] == afSTIValues[afSTIValues.size()]){
+        afSTIValues = std::vector<AttentionValue::sti_t>(af_sti.begin(), af_sti.begin() + minAFSize);
+    }
+
 
     int cut_off_index = 0;
-    int biggest_diff = -1 ; // diffs are always +ve. so, its okay to initialize it with -ve number.
-    constexpr int DIFF_MAGNITUDE = 0.5; // make this a parameter
-    for( int i = 0 ; i < (int)afAtoms.size()-1; i++ ){
-        //int diff = _bank->get_sti(afAtoms[i]) - _bank->get_sti(afAtoms[i+1]);
-        int diff = afAtoms[i] - afAtoms[i+1];
+    AttentionValue::sti_t biggest_diff = -1.0f ; // diffs are always +ve. so, its okay to initialize it with -ve number.
+    constexpr AttentionValue::sti_t DIFF_MAGNITUDE = 0.5f; // make this a parameter
+    for( int i = 0 ; i < (int)afSTIValues.size()-1; i++ ){
+        AttentionValue::sti_t diff = afSTIValues[i] - afSTIValues[i+1]; // 5 4 3 1
         if(diff > biggest_diff*(1 + DIFF_MAGNITUDE )) {  
             biggest_diff = diff;
             cut_off_index = i;
         }
     }
-
-    //return _bank->get_sti(afAtoms[cut_off_index]);
-    return afAtoms[cut_off_index];
+    return afSTIValues[cut_off_index];
 } 

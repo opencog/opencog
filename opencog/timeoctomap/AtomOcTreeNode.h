@@ -47,11 +47,19 @@ public:
     // children
     inline AtomOcTreeNode* getChild(unsigned int i)
     {
+#ifdef NEED_OBSOLETE_OCTREE_API
         return static_cast<AtomOcTreeNode*> (OcTreeNode::getChild(i));
+#else
+        return static_cast<AtomOcTreeNode*> (children[i]);
+#endif
     }
     inline const AtomOcTreeNode* getChild(unsigned int i) const
     {
+#ifdef NEED_OBSOLETE_OCTREE_API
         return static_cast<const AtomOcTreeNode*> (OcTreeNode::getChild(i));
+#else
+        return static_cast<const AtomOcTreeNode*> (children[i]);
+#endif
     }
 
     bool createChild(unsigned int i)

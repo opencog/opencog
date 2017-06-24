@@ -48,17 +48,17 @@
 (define pln-rules-dir "../../../opencog/pln/rules/")
 (define (append-rule-dir basename) (string-append pln-rules-dir basename))
 (define rule-basenames
-  (list "implication-instantiation-rule.scm"
-        "implication-scope-to-implication-rule.scm"
-        "equivalence-to-implication-rule.scm"
-        "predicate-lambda-evaluation-rule.scm"
-        "inversion-rule.scm"
-        "implication-implicant-conjunction-rule.scm"
-        "and-lambda-factorization-double-implication-rule.scm"
-        "deduction-rule.scm"
-        "implication-to-implication-scope-rule.scm"
-        "equivalence-scope-distribution-rule.scm"
-        "and-introduction-rule.scm"
+  (list "wip/implication-instantiation.scm"
+        "wip/implication-scope-to-implication.scm"
+        "wip/equivalence-to-implication.scm"
+        "wip/predicate-lambda-evaluation.scm"
+        "wip/inversion.scm"
+        "wip/implication-implicant-conjunction.scm"
+        "wip/and-lambda-factorization-double-implication.scm"
+        "term/deduction.scm"
+        "wip/implication-to-implication-scope.scm"
+        "wip/equivalence-scope-distribution.scm"
+        "wip/and-introduction.scm"
         )
   )
 (define rule-files (map append-rule-dir rule-basenames))

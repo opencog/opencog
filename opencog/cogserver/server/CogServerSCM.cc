@@ -133,11 +133,6 @@ std::string CogServerSCM::start_server(AtomSpace* as,
 
     srvr = &cogserver(as);
 
-    // Open database *before* loading modules, since the modules
-    // might create atoms, and we can't have that happen until
-    // storage is open, as otherwise, there will be handle conflicts.
-    srvr->openDatabase();
-
     // Load modules specified in config
     srvr->loadModules();
 

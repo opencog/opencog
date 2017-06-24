@@ -31,7 +31,7 @@
 using namespace opencog;
 using namespace opencog::spatial;
 
-bool Pathfinder3D::AStar3DPathFinder(AtomSpace* atomSpace, OctomapOcTree *mapManager,  const BlockVector& begin, const BlockVector& target, vector<BlockVector>& path,
+bool Pathfinder3D::AStar3DPathFinder(AtomSpace* atomSpace, OpencogOcTree *mapManager,  const BlockVector& begin, const BlockVector& target, vector<BlockVector>& path,
                                      BlockVector& nearestPos, BlockVector& bestPos, bool getNearestPos, bool getBestPos, bool tryOptimal)
 {
     BlockVector end = target;
@@ -204,7 +204,7 @@ double Pathfinder3D::calculateCostByDistance(const BlockVector& begin, const Blo
 
 
 // before call this funciton, please make sure the pos want to access is standable first
-bool Pathfinder3D::checkNeighbourAccessable(OctomapOcTree *mapManager, BlockVector& lastPos, int i, int j, int k)
+bool Pathfinder3D::checkNeighbourAccessable(OpencogOcTree *mapManager, BlockVector& lastPos, int i, int j, int k)
 {
     // if want to access the pos 1 unit lower than last pos
     if (k == -1)
