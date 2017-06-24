@@ -29558,6 +29558,7 @@ high-confidence
 \align center
 \begin_inset Graphics
 	filename scat/scat-cosine-big.png
+	width 100col%
 
 \end_inset
 
@@ -29583,12 +29584,15 @@ It would be nice to re-arrange (permute) the rows and columns to bring the
  similarity to the last.
  This continues on dowm the list, so that word-pairs with the highest similarity
  are next to each-other, in the list.
+ Effectively, we get the two-highest similarities for each word: the highest
+ being to the word right before, and second-highest to the word right after.
  The list is organized so that the highest similarity pair occurs in the
  lower-right.
  The pairs least-similar to anything else end up on the upper-left.
 \end_layout
 
 \begin_layout Standard
+\align center
 \begin_inset Graphics
 	filename scat/scat-fcos.png
 
@@ -29603,7 +29607,62 @@ This ranking does expose a bit of block-diagonal structure, but not that
  The overwhelming color tone of these pictures demonstrate that the vast
  majority of word-pairs have an alarmingly large amount of cosine-similarity;
  again, green and yellow representing a similarity of 0.5 and above.
- 
+ The large orange block in the middle is clearly a cluster in a very obvious
+ sense.
+ Looking more closely it consists of two blocks: a big one and a much smaller
+ on to the lower-right.
+ The smaller block consists of these words: Jack Picth Ross Jim John.
+ Clearly, these are all capitalized proper names.
+ The bigger block are these words: I You And But When Then For At There
+ It He She His The They This As In We If So A No.
+ Observe that all of these are capitalized, and none are proper names, indicatin
+g that they are all sentence openers.
+ They are listed in order.
+ Thus, the cosine distance between 
+\begin_inset Quotes eld
+\end_inset
+
+I
+\begin_inset Quotes erd
+\end_inset
+
+ and 
+\begin_inset Quotes eld
+\end_inset
+
+You
+\begin_inset Quotes erd
+\end_inset
+
+ is high, although it is less than that between 
+\begin_inset Quotes eld
+\end_inset
+
+I
+\begin_inset Quotes erd
+\end_inset
+
+ and 
+\begin_inset Quotes eld
+\end_inset
+
+John
+\begin_inset Quotes erd
+\end_inset
+
+, and so on down the line.
+ The similarity between most of these is not surprising, and can certainly
+ be rationalized post-facto.
+\end_layout
+
+\begin_layout Standard
+The bands suggests that perhaps a good way of closutering might be to look
+ at not only how similar several words are, but also how different they
+ are from everything else.
+ Cosine similarity does NOT adequately take into account differences.
+ However, mutual information does.
+ So perhaps a mutual-information-inspired similarity would provide better
+ results.
 \end_layout
 
 \begin_layout Subsection*
@@ -29611,8 +29670,8 @@ Overlap Similarity
 \end_layout
 
 \begin_layout Standard
-Perhaps asking for cosine similarity os too strong -- cosine similarity
- asks not only for teh same disjuncts on a word, but also the same relative
+Perhaps asking for cosine similarity is too strong -- cosine similarity
+ asks not only for the same disjuncts on a word, but also the same relative
  ratios of usage.
  Supose that this is loosened: instead of asking for for the same relative
  ratios, we merely ask that two words use mostly the same sets of disjuncts,
