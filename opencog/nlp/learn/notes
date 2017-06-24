@@ -10453,18 +10453,80 @@ what's faster: looking it up, or on-the-fly recompute?
 (define short-csw (take ranked-csw 20))
 
 
-(write-flo "/tmp/scat-ov.flo" (take ranked-csw 100)
-   (lambda (wa wb)
-      (poi 'right-overlap wa wb)
-   ))
+(write-flo "/tmp/scat-overlap.flo" (take ranked-csw 100)
+   (lambda (wa wb) (poi 'right-overlap wa wb)))
 
 
-(write-flo "/tmp/scat-foo.flo" (take ranked-csw 20)
-   (lambda (wa wb)
-		(define val (poi 'right-overlap wa wb))
-(format #t " ~A ~A ~A\n" val wa wb)
-		val
-   ))
+(write-flo "/tmp/scat-cosine.flo" (take ranked-csw 100)
+   (lambda (wa wb) (poi 'right-cosine wa wb)))
+
+(define (get-cos wa wb)
+	(define cos-fkey (PredicateNode "*-Cosine Filtered Key-*")) 
+	(define (get-val PR)
+		(cog-value-ref (cog-value PR cos-fkey) 0))
+	(define (set-val PR VAL)
+		(cog-set-value! PR cos-fkey (FloatValue VAL)))
+	(define wpr (ListLink wa wb))
+	(define got
+		(catch #t
+			(lambda () (get-val wpr))
+			(lambda (key . args) #f)))
+	(if got got
+		(let ((val (poi 'right-cosine wa wb)))
+			(set-val wpr val)
+			val)))
+		
+
+(define rankw (Word "the"))
+(define cranked-csw (sort top-cset-words
+	(lambda (a b) (> (get-cos rankw a) (get-cos rankw b)))))
+
+(write-flo "/tmp/scat-pcos.flo" (take cranked-csw 20)
+   (lambda (wa wb) (get-cos wa wb)))
+
+; Create a sorted list of words, such that the next word in the list has
+; the highest cosine of all to the previous word in the list.
+(define (drank-helper wlist drl)
+	(define rest (cdr wlist))
+	(format #t "duude enter wlsi=~A\n   and drl=~A\n" (length wlist) drl)
+	; If the list is one item long, we are done.
+	(if (null? rest) (cons (car wlist) drl)
+		; Otherwise, find the word with the highest cosine to the previous
+		; word that was picked.  rankw is the previous one picked.
+		; next-rankw will be th next one.
+		(let ((rankw (car drl))
+				(next-rankw '()))
+			(fold
+				(lambda (item biggest)
+					(define cosi (get-cos rankw item))
+					(if (and (> cosi biggest) (not (equal? item rankw)))
+						(begin (set! next-rankw item) cosi) biggest))
+				-1e20
+				wlist)
+			(drank-helper 
+				(remove (lambda (w) (equal? w next-rankw)) wlist)
+				(cons next-rankw drl)))))
+
+(define (drank wlist)
+	(drank-helper (cdr wlist) (cons (car wlist) '())))
+
+(define dranked-csw (drank (take ranked-csw 40)))
+(define eranked-csw (drank (take ranked-csw 100)))
+(define franked-csw (drank (take ranked-csw 300)))
+
+(write-flo "/tmp/scat-dcos.flo" dranked-csw
+   (lambda (wa wb) (get-cos wa wb)))
+
+(write-flo "/tmp/scat-fcos.flo" franked-csw (lambda (wa wb) (get-cos wa wb)))
+
+
+(define (p4 wa wb)
+	(define co (get-cos wa wb))
+	(* co co co co))
+
+
+(write-flo "/tmp/scat-xxx.flo" (take ranked-csw 100)
+   (lambda (wa wb) (get-cos wa wb)))
 
 
 -----------------------------------------------------------------
@@ -10596,6 +10658,7 @@ at 18:20: 4M -> 2.5M/hour
 
 43009543 values in 73425 secs = 586/sec = 2.10M/hour
 ... and its stable.
+91M after 43 hours = 2.086M/hour
 
 -----
 how about MST?
@@ -10608,6 +10671,7 @@ NonREPL:  fed by four threads
 103K MST updates in 20 mins = 300K/hour
 245K MST after 1 hour
 1.91M MST after 11 hours = 170K/hour
+
 
 =========================================================================
 
