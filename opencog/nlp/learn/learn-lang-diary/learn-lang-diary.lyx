@@ -2225,7 +2225,8 @@ The Boltzmann distribution is the so-called canonical distribution, meaning
 \end_inset
 
  (viz, this is the MaxEnt principle.
- except for MaxEnt, the constraint is not on energy, but a set of features.)
+ Except for MaxEnt, the constraint is not on energy, but rather a set of
+ constraints obtained on some other theoretical grounds.)
 \end_layout
 
 \begin_layout Itemize
@@ -2259,7 +2260,7 @@ Boltzmann Entropy
 
  is the shanon entropy of the microcanonical ensemble: it maximizes the
  entropy (MaxEnt) for a fixed value of the energy.
- (MaxEnt: not the energy, but for a fixed set of features).
+ (MaxEnt: not the energy, but for a fixed set of constraints).
  (viz, 
 \begin_inset Formula $S_{B}=k_{B}\log\left(\epsilon\frac{d\Omega}{dE}\right)$
 \end_inset
@@ -2272,7 +2273,10 @@ Boltzmann Entropy
 \begin_inset Formula $\epsilon$
 \end_inset
 
- a constant of dimension energy to make arg of the log dimensionless.)
+ a constant of dimension energy to make arg of the log dimensionless.) (MaxEnt:
+ replace E by the individual constaints.
+ This suggests that there are many Boltzmann entropies: one for each constraint
+ that is applied!)
 \end_layout
 
 \begin_layout Itemize
@@ -2300,7 +2304,7 @@ Gibbs Entropy
 
  states.
  For a non-sharp cutoff, the Shannon entropy is primal.).
- 
+ (MaxEnt: one gets a different Gibbs entropy for each applied constraint.)
 \end_layout
 
 \begin_layout Itemize
@@ -2967,7 +2971,7 @@ n_co_clustering_and.pdf A Generalized Maximum Entropy Approach to Bregman
 \end_layout
 
 \begin_layout Standard
-The below was going to be a breif note, but I'm turning it into a rough
+The below was going to be a brief note, but I'm turning it into a rough
  draft blog post.
  But after sleeping on it, it seems silly.
  
@@ -24946,6 +24950,31 @@ The overlay similarity can be adapted for this purpose: two sets obey a
 \end_layout
 
 \begin_layout Subsection*
+Connector Similarity
+\end_layout
+
+\begin_layout Standard
+There is another, dual kind of similarity that is very different from the
+ above proposals.
+ A single disjunct is an ordered list of (pseudo-)connectors: 
+\begin_inset Formula 
+\[
+d=\left(c_{1},c_{2},\cdots,c_{k}\right)
+\]
+
+\end_inset
+
+where each pseudo-connector is a word, and a direction indicator.
+ We can judge two connectors to be similar, and thus, two words to be similar,
+ if they appear in a large number of disjuncts that would be identical,
+ but for that one connector.
+\end_layout
+
+\begin_layout Standard
+There are some practical difficulties of writing code to discern this.
+\end_layout
+
+\begin_layout Subsection*
 Word-Pair Cosine Similarity
 \end_layout
 
@@ -29490,6 +29519,14 @@ day
 \end_layout
 
 \begin_layout Subsection*
+Cosine Similarity scatterplots
+\end_layout
+
+\begin_layout Standard
+The following
+\end_layout
+
+\begin_layout Subsection*
 Overlap Similarity
 \end_layout
 
@@ -30101,6 +30138,10 @@ sim
 These are not particularly better-matched.
  Based on the actual scores, they are indeed worse-matched; the large-observatio
 n-count cut is not helping.
+\end_layout
+
+\begin_layout Subsection*
+Connector similarity
 \end_layout
 
 \begin_layout Subsection*
@@ -32235,7 +32276,219 @@ s phrases.
 \end_layout
 
 \begin_layout Itemize
-Idioms
+Reference resolution: By developing a coherent framework for working with
+ graph sections, we hope to discover reference resolution (of pronouns and
+ of given names) across multiple sentences.
+\end_layout
+
+\begin_layout Standard
+These seem like they should be acheivable.
+ Preliminary results looking promising, but not yet great.
+ What's the grand scheme of things?
+\end_layout
+
+\begin_layout Itemize
+Discover that certain nouns refer to objects in the physical world.
+\end_layout
+
+\begin_layout Itemize
+Discover that certain verbs refer to actions in the physical world.
+\end_layout
+
+\begin_layout Itemize
+Discover that certain nouns refer to abstract, non-physical concepts.
+\end_layout
+
+\begin_layout Itemize
+Discover the meaning of the verb-phrases 
+\begin_inset Quotes eld
+\end_inset
+
+is-a
+\begin_inset Quotes erd
+\end_inset
+
+, 
+\begin_inset Quotes eld
+\end_inset
+
+has-a
+\begin_inset Quotes erd
+\end_inset
+
+, 
+\begin_inset Quotes eld
+\end_inset
+
+is-a-part-of
+\begin_inset Quotes erd
+\end_inset
+
+, 
+\begin_inset Quotes eld
+\end_inset
+
+belongs-to
+\begin_inset Quotes erd
+\end_inset
+
+ ...
+ or, generally, discover the meanings of prepositional phrases.
+ 
+\end_layout
+
+\begin_layout Itemize
+Perform reasoning on relationships; specifically, on 
+\begin_inset Quotes eld
+\end_inset
+
+is-a
+\begin_inset Quotes erd
+\end_inset
+
+, 
+\begin_inset Quotes eld
+\end_inset
+
+has-a
+\begin_inset Quotes erd
+\end_inset
+
+, ...
+ relationships.
+\end_layout
+
+\begin_layout Itemize
+Develop a database of common-sense knowledge.
+\end_layout
+
+\begin_layout Itemize
+Translate between multiple languages, by employing common-sense knowledge
+ and reasoning.
+\end_layout
+
+\begin_layout Standard
+The first two seem impossible without embodiment.
+ The third bullet holds out hope that progress might be possible for textual-onl
+y analysis.
+ The fourth bullet asks for an algebraic structure to be discerned: 
+\begin_inset Quotes eld
+\end_inset
+
+is-a
+\begin_inset Quotes erd
+\end_inset
+
+ relations are symmetric: 
+\begin_inset Quotes eld
+\end_inset
+
+A is-a B
+\begin_inset Quotes erd
+\end_inset
+
+ if 
+\begin_inset Quotes eld
+\end_inset
+
+B is-a A
+\begin_inset Quotes erd
+\end_inset
+
+, and it should be possible to data-mine such symmetric relations.
+ Likewise for 
+\begin_inset Quotes eld
+\end_inset
+
+next-to
+\begin_inset Quotes erd
+\end_inset
+
+ and 
+\begin_inset Quotes eld
+\end_inset
+
+near
+\begin_inset Quotes erd
+\end_inset
+
+ relationships.
+ It is at least plausible that such relations could be data-mined, with
+ no 
+\emph on
+a priori
+\emph default
+ knowledge of the words.
+ Anyway, this provides the setting for the intial grammatical tasks.
+ So, back to the initial grammatical tasks.
+\end_layout
+
+\begin_layout Standard
+Idioms: based on preliminary evidence, we could make lists of idiomatic
+ phrases, now, based only on high-MI word-disjunct relations.
+ But these are useless, until we can build a list of synonymous words.
+\end_layout
+
+\begin_layout Standard
+Discerning synonymous words based on grammatical usage is tricky.
+ First, it is often antonyms that get observed: e.g.
+ the (black,white) pairs reported above.
+ To discern anonymy, we would also need to discern is-a relationships, apply
+ common-sense reasonsing, and notice that antonyms never describe the same
+ objects, never describe the properties of the same objects.
+ So, antonym detection appears to be an advanced topic.
+\end_layout
+
+\begin_layout Subsection*
+Error correction
+\end_layout
+
+\begin_layout Standard
+We could go full-speed ahead on grying to discern grammatical categories,
+ but for one issue: if a classification error is made early on, can it be
+ spotted, and later corrected? What is the mechanism, and how might it work?
+\end_layout
+
+\begin_layout Subsection*
+Worked example
+\end_layout
+
+\begin_layout Standard
+Bothe the cosine similarity and the overlap similarity suggested that the
+ words 
+\begin_inset Quotes eld
+\end_inset
+
+black
+\begin_inset Quotes erd
+\end_inset
+
+ and 
+\begin_inset Quotes eld
+\end_inset
+
+white
+\begin_inset Quotes erd
+\end_inset
+
+ are similar.
+ What happens when these are grouped together? We not only consider throwing
+ both words into the same bag, but we then may want to consider what happens
+ to other disjuncts, that connected to other words.
+\end_layout
+
+\begin_layout Standard
+Also, when clustering, should we create a single common category 
+\begin_inset Quotes eld
+\end_inset
+
+bw
+\begin_inset Quotes erd
+\end_inset
+
+ holding both words, or should we create three categories: bw, white-prime
+ and black-prime, where bw just has the common disjuncts, and white-prime
+ and black-prime is what's left after taking differences?
 \end_layout
 
 \begin_layout Section*
