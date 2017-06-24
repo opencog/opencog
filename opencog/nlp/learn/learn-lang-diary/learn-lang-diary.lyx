@@ -29523,7 +29523,87 @@ Cosine Similarity scatterplots
 \end_layout
 
 \begin_layout Standard
-The following
+The following scatterplot visualizes the cosine similarity between 803 word-pair
+s.
+ The rows and columns are ranked by frequency of word occurance, so that
+ the single-most-frequently occuring word is at the upper-left, with less
+ and less frequently occuring words proceeding to the right, and downwards.
+ The color scale is such that red represents 1.0, yellow represents 0.75 (so
+ orange is in between), green is exactly 0.5, and blue is 0.25 or less, fading
+ to black.
+ This is the 
+\noun on
+en_pairs_ttwo
+\noun default
+ dataset, described below.
+ It has several cuts applied here: in this case, all disjuncts with 30 observati
+ons or less are excluded from the cosing calculations, as are any word-disjunct
+ pairs with 10 observations or less.
+ This has the effect of trimming away the noise in the dataset, leaving
+ only 
+\begin_inset Quotes eld
+\end_inset
+
+high-confidence
+\begin_inset Quotes erd
+\end_inset
+
+ word-disjunct pairs contributing to the cosine.
+ Note that cosine similarity is symmetric; this figure is necessarily symmetric
+ about the diagonal.
+ The diagonal can be seen (with difficulty) as a line of red squares.
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Graphics
+	filename scat/scat-cosine-big.png
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The tartan pattern indicates that some words are very unlike others.
+ Closer examination reveals the usual culprits, already described: the period,
+ and other punctuation marks, tend to be very different than other words.
+ Thus, punctuation acconuts for many of the blue lines.
+\end_layout
+
+\begin_layout Standard
+It would be nice to re-arrange (permute) the rows and columns to bring the
+ matrix into quasi-diagonal form.
+ This is easier said than done.
+ The graph below shows the same data, this time for 300 words, with a different
+ ranking.
+ This time, the first word is the period, and the next word is the one word,
+ out of 299, that has the highest cosine similarity to the period.
+ Next comes the word, out of the remaining 298, that has the highest cosine
+ similarity to the last.
+ This continues on dowm the list, so that word-pairs with the highest similarity
+ are next to each-other, in the list.
+ The list is organized so that the highest similarity pair occurs in the
+ lower-right.
+ The pairs least-similar to anything else end up on the upper-left.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Graphics
+	filename scat/scat-fcos.png
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+This ranking does expose a bit of block-diagonal structure, but not that
+ much, and not that strong.
+ The overwhelming color tone of these pictures demonstrate that the vast
+ majority of word-pairs have an alarmingly large amount of cosine-similarity;
+ again, green and yellow representing a similarity of 0.5 and above.
+ 
 \end_layout
 
 \begin_layout Subsection*
