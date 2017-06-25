@@ -4,10 +4,17 @@
 (use-modules (rnrs bytevectors))
 (use-modules (rnrs io ports))
 
-(define (write-flo filename lst fn)
-
-	(define xsz (length lst))
-	(define ysz (length lst))
+(define-public (write-flo filename LST FN)
+"
+ write-flo - write a single-color-channel floating-point image of a
+ matrix. This assumes that FN is a function, taking two arguments,
+ returning a float. The LST is assumed to be a list of basis eleemnts
+ to be passed to FN.  The resulting image consists of the x and y
+ dimensions (in ASCII) followed by the floats.  The result is saved to
+ `filename`.
+"
+	(define xsz (length LST))
+	(define ysz (length LST))
 	(define nrow 0)
 	(define flo (open-file filename "w"))
 	; Write 23 bytes, not counting the null-terminator
@@ -16,23 +23,23 @@
 	(for-each
 		(lambda (row)
 			(define ncol 0)
-			; Make room for IEE floats
+			; Make room for IEEE floats
 			(define bvrow (make-bytevector (* 4 xsz)))
 			(for-each
 				(lambda (col)
-					(define number (fn row col))
+					(define number (FN row col))
 					; (bytevector-ieee-single-set! bvrow ncol number 'little)
 					(bytevector-ieee-single-native-set! bvrow ncol number)
 					(set! ncol (+ ncol 4))
 				)
-				lst)
+				LST)
 			; Now write out the row.
 			(put-bytevector flo bvrow)
 			(force-output flo)
 			(set! nrow (+ nrow 1))
 			(format #t "Done with row ~d of ~d\n" nrow ysz)
 		)
-		lst)
+		LST)
 	(close-port flo)
 )
 
