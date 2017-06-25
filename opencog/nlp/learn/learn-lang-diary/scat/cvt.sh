@@ -31,4 +31,4 @@ BINDIR=/home/linas/src/fractal/generate/
 # $BINDIR/renorm scat-overlap-big ren 1.5
 # cat ren.flo | $FLODIR/flo2mtv |mtvtoppm | pnmtopng > scat-overlap-big.png
 
-cat /tmp/scat-xxy.flo | $FLODIR/flo2mtv |mtvtoppm | pnmtopng > scat-pcos.png
+cat /tmp/scat-cosmi.flo | $FLODIR/flo2mtv |mtvtoppm | pnmtopng > scat-pcos.png
