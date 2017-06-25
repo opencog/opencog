@@ -148,45 +148,39 @@ So, set up the text-ingestion pipeline:
    (add-to-load-path ".")
 ```
 
-7) Copy one of the `opencog-??.conf` files from the `run`
-   directory to your working directory. A choice of default files
-   for different languages are provided, or you can create your
-   own.  This file specifies the cogserver port number, and the
-   prompt to use; the defaults are set up so that there are no
-   conflicts, so that you can run multiple languages at the same
-   time.
+7) Select a language, and copy one of the `pair-count-??.scm` files
+   from the `run` directory to your working directory. Review and edit
+   the configuration as necessary. It contains the REPL port number,
+   and a default prompt: These are set up by default to avoid conflicts
+   and confusion, and to allow multiple languages to be processed at
+   the same time.  It also contains the database credentials -- that's
+   probably the only thing you need to change.
 
-8) Chose the corresponding `pair-count-??.scm` file, copy it from
-   the `run` directory to your working directory. Review and edit
-   the configuration as necessary. It contains the database
-   credentials -- that's probably the only thing you need to change.
-
-9) Start the various servers. Eventually, you can use the
+8) Start the various servers. Eventually, you can use the
    `run-all-servers.sh` file in the `run` directory to do this;
-   it creates a byobu session with different servers in different
+   it creates a `byobu` session with different servers in different
    terminals, where you can keep an eye on them. However, the
    first time through, it is better to do all this by hand. So:
 
-9a) Start `run/relex-server-any.sh` in a terminal.
+8a) Start `run/relex-server-any.sh` in a terminal.
 
-9b) Start the cogserver, in another terminal, as follows:
+8b) Start the REPL server, in another terminal, as follows:
 ```
    guile -l pair-count-??.scm
 ```
-   There are other ways of starting the cogserver; the above is handy.
 
-10) Verify that the language processing pipeline works. In a third
+9) Verify that the language processing pipeline works. In a third
    terminal, try this:
 ```
-   telnet localhost 17002  # or wherever your cogserver is configured.
-   guile> (observe-text "this is a test")
+   rlwrap telnet localhost 17005  # or wherever your REPL server is configured.
+   scheme@(en-pairs)> (observe-text "this is a test")
 ```
 
    Better yet:
 ```
-   echo -e "scm\n (observe-text \"this is a another test\")" |nc localhost 17001
-   echo -e "scm\n (observe-text \"Bernstein () (1876\")" |nc localhost 17001
-   echo -e "scm\n (observe-text \"Lietuvos žydų kilmės žurnalistas\")" |nc localhost 17001
+   echo -e "(observe-text \"this is a another test\")" |nc localhost 17005
+   echo -e "(observe-text \"Bernstein () (1876\")" |nc localhost 17005
+   echo -e "(observe-text \"Lietuvos žydų kilmės žurnalistas\")" |nc localhost 17005
 ```
 
    This should result in activity on the RelEx server, on the cogserver,
@@ -194,7 +188,7 @@ So, set up the text-ingestion pipeline:
    RelEx for parsing, counts the returned word-pairs, and stores them in
    the database.
 
-10a) Verify that the above resulted in data sent to the SQL database.
+9a) Verify that the above resulted in data sent to the SQL database.
    Log into the database, and check:
 ```
    psql learn-pairs
@@ -206,7 +200,7 @@ So, set up the text-ingestion pipeline:
    pair-wise linkages for the above sentences. If the above are empty,
    something is wrong. Go to step zero.
 
-10b) Optionally reduce the amount of data that is collected. Currently,
+9b) Optionally reduce the amount of data that is collected. Currently,
   the `observe-text` function in 'link-pipeline.scm` collects counts
   on four different kinds of structures:
 
@@ -225,14 +219,14 @@ So, set up the text-ingestion pipeline:
                 You almost surely do not need this.  This is for my
                 own personal curiosity.
 
-10c) Optionally tune the forced garbage collection paramters. Currently
-  garbage collection is forced every 20 sentences; this helps keep RAM
-  usage down on small-RAM achines.  However, it does cost CPU time.
-  Adjust the `how-often` parameter in `observe-text` in
-  `link-pipeline.scm` to suit your whims in RAM usage and time spent
-  in GC.
+9c) Optionally tune the forced garbage collection paramters. Currently
+  garbage collection is forced whenever the guile heap exceeds 750
+  MBytes; this helps keep RAM usage down on small-RAM achines.  However,
+  it does cost CPU time.  Adjust the `max-size` parameter in
+  `observe-text` in the `link-pipeline.scm` file to suit your whims in
+  RAM usage and time spent in GC.
 
-11) Get ready to feed it text. It would be best to get text that
+10) Get ready to feed it text. It would be best to get text that
   consists of narrative literature, adventure and young-adult novels,
   newspaper stories. These contain a good mix of common nouns and verbs,
   which is needed for conversational natural language.
@@ -253,7 +247,7 @@ So, set up the text-ingestion pipeline:
   and pre-processing texts from Project Gutenberg, Wikipedia, and the
   "Archive of Our Own" fan-fiction website.
 
-12) After doing at least several days worth of parsing  (i.e. at least
+11) After doing at least several days worth of parsing  (i.e. at least
    hundreds of articles, tens of thousands of sentences) the word-pair
    mutual information can be extracted. Do the stuff in section "Mutual
    Information" section below.
@@ -261,13 +255,13 @@ So, set up the text-ingestion pipeline:
    If the parsing is interrupted, you can restart the various scripts;
    they will automatically pick up where they left off.
 
-13) Using the extracted mutual information for word-pairs, the MST
+12) Using the extracted mutual information for word-pairs, the MST
    parsing step can be started. See below. Run this for several days.
    At the end of this, you will have a bunch of statistics on
    "pseudo-connector sets": pairs which associate a word to a
    disjunct of pseudo-connectors.
 
-14) Perform clustering research.  You're on your own, now.
+13) Perform clustering research.  You're on your own, now.
 
 That's all for now, folks!
 
@@ -288,35 +282,28 @@ alpha-pages after all that work)
 * Review the file `opencog/nlp/learn/run/README`, and then copy the
   scripts into your working dir.
 * Modify as needed for chosen language. None of these need modification,
-  unless you wish to run multiple langauges at once, on the same
-  machine, in which case you need to assign non-conflicting port numbers
-  for the cogserver, and possibly the relex server.
+  by default, unless you want to do something unusual.
 
   -- `run-all-servers.sh` runs (almost) all of the needed servers, for
-     one langauge, all at once, in a multi-paneled byobu window. Edit
-     this, and manually configure the relex port-number to use. After
-     starting, the batch script `./wiki-ss-<lang>.sh` needs to be
-     started by hand (for the <lang> that you want to process).
+     one langauge, all at once, in a multi-paneled `byobu` window. What
+     it doesn't do is start the final batch script `./wiki-ss-<lang>.sh`,
+     which needs to be started by hand (for the <lang> that you want to
+     process). Use F4 to move to the 4th tab and start it there.
 
   -- `relex-server-any.sh` performs random-syntax parsing for languages
-     that do not need morphological analysis. Edit this, and verify that
-     the relex server is running on the desired port number.
+     that do not need morphological analysis.
 
-  -- `wiki-ss-en.sh` performs batch processing of wikipedia articles.
-     Edit this, and set the correct language and cogserver port number.
-     This calls `ss-one.sh` to process one wikipedia article.
+  -- `wiki-ss-en.sh` performs batch processing of input text files.
+     This calls `ss-one.sh` to process one text file.
 
-  -- `ss-one.sh` calls `split-sentences.pl` to split the article into
+  -- `ss-one.sh` calls `split-sentences.pl` to split the text file into
      sentences, and then calls `submit-one.pl` to send the sentences
      to relex for parsing. None of these should need any modification.
 
-* Make sure the scripts point at the RelEx parse server.
-  (The RelEx location is given in config-*.scm Make sure that its right,
-  and that its loaded... i.e. is listed in opencog-*.conf)
-* Copy `opencog-lang.conf` and `pair-count-lang.scm` to your working
-  directory.  Start the cogserver: `guile -l pair-count-lang.scm `
-* Go back to the wikipedia dir (the dir that contains `beta-pages`), and
-  run `./wiki-ss-lang.sh`
+* Copy `pair-count-lang.scm` to your working directory.  Start the REPL
+  server: `guile -l pair-count-<lang>.scm `
+* Go back to the input text dir (the dir that contains `beta-pages`), and
+  run `./wiki-ss-<lang>.sh`
 * Wait a few days.
 * This requires postgres 8.4 or newer, for multiple reasons. One reason
   is that older postgres don't automatically VACUUM (see "performance"
@@ -329,7 +316,7 @@ alpha-pages after all that work)
 Some handy SQL commands:
 ```
 SELECT count(uuid) FROM Atoms;
-select count(uuid) from  atoms where type =123;
+select count(uuid) from atoms where type =123;
 ```
 
 type 123 is `WordNode` for me; verify with
@@ -402,7 +389,7 @@ select count(uuid) from atoms where type = 8;  gives 5050835 (5M pairs ListLink)
 select count(uuid) from atoms where type = 27; gives 5050847 (5M pairs EvaluationLink)
 
 The code for computing word-pair MI is in `batch-word-pair.scm`. It uses
-the `(opencog analysis)` subsystem to perform the core work.
+the `(opencog matrix)` subsystem to perform the core work.
 
 
 Minimum Spanning Tree parsing
@@ -417,32 +404,29 @@ Minimum spanning tree code is in `mst-parser.scm`. The current version
 works well.
 
 To perform MST parsing in bulk:
-* Copy `run/mst-count-en.scm`, `run/opencog-en.conf`. `run/mst-one.sh`
-  and `run/wiki-mst-en.sh` to yor working directory.
+* Copy `run/mst-count-en.scm`, `run/mst-one.sh` and `run/wiki-mst-en.sh`
+  to yor working directory.
 
-* Edit `opencog-en.conf` and select a port number that does not
-  conflict with your other servers.  Make the same change to
-  `wiki-mst-en.sh`
-
-* (Optional) Make a copy of your word-pair database, "just in case".
-  You can copy databases by saying:
+* (Optional but suggested) Make a copy of your word-pair database, "just
+  in case".  You can copy databases by saying:
 ````
-  createdb -T old_dbname  new_dbname
+  createdb -T existing_dbname  new_dbname
 ```
 
 * Edit `mst-count-en.scm` and set the correct database login
   credentials. (Maybe to the new_dbname you crate above.)
 
 * Edit `wiki-mst-en.sh` and change the directory `gamma-pages` to
-  whatever directory holds your source text (or move your text to
-  the `gamma-pages` directory).
+  whatever directory holds your source text (or copy your text to
+  the `gamma-pages` directory). Be aware that, during processing,
+  text files are removed from this directory.
 
-* Start the cogserver by saying
+* Start the REPL server by saying
 ```
   guile -l mst-count-en.scm
 ```
-  Wait 10 to 30+ minutes for the guile prompt to appear.  This script
-  opens a connection to the databases, and then loads all word-pairs
+  Wait 10 to 60+ minutes for the guile prompt to appear.  This script
+  opens a connection to the database, and then loads all word-pairs
   into the atomspace.  This can take a long time, depending on the
   size of the database. The word-pairs are needed to get the pair-costs
   needed to perform the MST parse.
@@ -467,7 +451,7 @@ you can start exploring.
 * Do not run the connector-set code at the same time (on the same
   database) as the MST parser. For one, if you are actively updating
   the counts, then the connector-set counting will get confused.
-  Also, if you have two cogservers writing to the same database
+  Also, if you have two servers writing to the same database
   at the same time, the issueing of UUID's will get confused, and
   one or both the servers will crash, and possible database corruption
   may occur.  It is possible to have multiple writers (and I've done
@@ -512,10 +496,9 @@ you can start exploring.
   that is `define-public` can be invoked at the guile prompt. Most are
   safe.  If its not `define-public`, you should not call it by hand.
 
-  The `disjunct-stats.scm` file contains ad-hoc code used to prepare
-  the summary report. It is NOT loaded automatically: in this case,
-  just cut-n-paste from that file, to the guile prompt, to get it to
-  do things.
+  The `lang-learn-diary/disjunct-stats.scm` file contains ad-hoc code
+  used to prepare the summary report.  To use it, just cut-n-paste to
+  the guile prompt, to get it to do things.
 
 
 Precomputed LXC containers
@@ -594,10 +577,6 @@ It will eventually get cleaned up.
 
 TODO List
 =========
-* Fix (WordNode "…!ANY-PUNCT")
-* Rework pipeline to use literary English sources. STARTED-ish.
-  New scripts in the `download` directory. Incomplete. Also,
-  need to document here in readme.
 * Count single-word probabilities.
 * Resume work on morphology.
 * Create an LXC container for public use. DONE.
@@ -634,6 +613,9 @@ DONE
 * Fix crash at linkage_set_domain_names+0xe0  Done. Need LG 5.4.0
 * Create OO system for generic pair statistics. Done.
 * Reduce num samples for 999 to 16. Done.
+* Fix (WordNode "…!ANY-PUNCT") Done.
+* Rework pipeline to use literary English sources. DONE.
+  New scripts in the `download` directory.
 
 
 Some typical entropies for word-pairs

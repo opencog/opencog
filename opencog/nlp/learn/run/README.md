@@ -4,38 +4,33 @@ Parse management scripts
 
 The scripts here are used to automate the ingestion of plain-text
 UTF-8 files into the language learning pipleine.  These can be applied
-to any flat text files from any origin of your choice.  Soe tools
+to any flat text files from any origin of your choice.  Some tools
 for downloading Wikipedia and Project Gutenberg texts can be found
-in the ../download directory.
+in the `../download` directory.
 
 You may want to tailor some of these scripts to fit your needs.
 
 A quick overview:
 
-* run-all-servers.sh: the top-level shell script; opens multiple
+* `run-all-servers.sh`: the top-level shell script; opens multiple
   terminal sessions with tmux/byobu, and starts both opencog and
   the relex servers. Use F3 and F4 to switch to different terminals.
 
-* wiki-ss-*.sh: the top-level parser script. It pulls wikipedia
-  articles, one by one, from the data directory, and submits them
-  for parsing and counting.  This script should be manually lanuched
-  in the 'parse' byobu window.  Be sure to open the database in the
-  cogserver, first. The data directory needs to be manually adjusted
-  here, and also in the ss-one.sh script.
+* `wiki-ss-*.sh`: the top-level parser script. It pulls text files, one
+  by one, from the data directory, and submits them for parsing and
+  counting.  This script should be manually lanuched in the 'parse'
+  byobu window.  Be sure to open the database, first. The data directory
+  needs to be manually adjusted here, and also in the ss-one.sh script.
 
-* ss-one.sh: the actual sentence-splitting workhorse. It handles
-  each wikipedia article, moving the article to a different directory
-  when finished with it.  Note that there are hard-coded paths in
-  here, pointing to the sentence splitter.
+* `ss-one.sh`: the actual sentence-splitting workhorse. It handles each
+  text file, moving the file to a different directory when finished
+  with it.  Note that there are hard-coded paths in here, pointing to
+  the sentence splitter.
 
-* submit-one.pl: script to actually send sentences to the cogserver.
+* `submit-one.pl`: script to actually send sentences to the REPL server.
 
-* opencog-*.conf: cogserver config file
-
-* config-*.scm: another cogserver config file
-
-* split-sentences.pl: split text into sentences. Looks for likely end-of
-  sentence locations, and divides free-form text, so that there is one
+* `split-sentences.pl`: split text into sentences. Accepts free-form text,
+  and looks for likely end-of sentence locations, so that there is one
   sentence per line.
 
 
@@ -47,7 +42,7 @@ opencog will do this automatically. For now, we hack it.
 Currently, splitting is done with the `split-sentences.pl` perl script
 in the this directory.  It was stolen from the `moses-smt` package.
 https://github.com/moses-smt/mosesdecoder/tree/master/scripts/share/nonbreaking_prefixes
-It splits french, polish, latvian, and more.  Its LGPL.
+It splits French, Polish, Lithuanian, and more.  Its LGPL.
 
 You can verify that it works, like so:
 ```
