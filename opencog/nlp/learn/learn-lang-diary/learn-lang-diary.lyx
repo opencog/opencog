@@ -32694,13 +32694,140 @@ Discerning synonymous words based on grammatical usage is tricky.
 \end_layout
 
 \begin_layout Subsection*
+Clustering
+\end_layout
+
+\begin_layout Standard
+We could go full-speed ahead on trying to discern grammatical categories,
+ but for several issues: 
+\end_layout
+
+\begin_layout Itemize
+Merging two items into one necessarily entails a loss of information.
+ That is, one necessarily has that 
+\begin_inset Formula $-(p_{a}+p_{b})\log_{2}(p_{a}+p_{b})\le-p_{a}\log_{2}p_{a}-p_{b}\log_{2}p_{b}$
+\end_inset
+
+.
+ That is, information is necessarily lost.
+ How can we minimize information loss? 
+\end_layout
+
+\begin_layout Itemize
+If a classification error is made early on, can it be spotted, and later
+ corrected? What is the mechanism, and how might it work?
+\end_layout
+
+\begin_layout Standard
+We can use the 
+\begin_inset Quotes eld
+\end_inset
+
+information loss
+\begin_inset Quotes erd
+\end_inset
+
+ to our advantage if the 
+\begin_inset Quotes eld
+\end_inset
+
+lost information
+\begin_inset Quotes erd
+\end_inset
+
+ is in fact just noise in the data.
+ That is, the data is necessarily noisy, and the naive calculation of the
+ entropy and mutual information encodes both that noise and the signal we
+ are searching for.
+ Clustering together items, and the associated information loss, is desirable
+ if the loss results in the filtering out of noise.
+ How can we characterize the noise in the observations?
+\end_layout
+
+\begin_layout Subsection*
+Noise
+\end_layout
+
+\begin_layout Standard
+If an event is normally distributed, then we can characterize the uncertainty
+ as being 
+\begin_inset Formula $1/\sqrt{N}$
+\end_inset
+
+ after 
+\begin_inset Formula $N$
+\end_inset
+
+ observations.
+ We don't actually know if our observations are normally distributed.
+ Its not even clear quite how to even obtain the distribution.
+ But's lets assume they are.
+ Then, given that 
+\begin_inset Formula $p(x,y)=N(x,y)/N(*,*)$
+\end_inset
+
+ and estimating the noise to go as 
+\begin_inset Formula $\sqrt{N(x,y)}$
+\end_inset
+
+ we get that the error in the frequentist probability estimate is given
+ by
+\begin_inset Formula 
+\[
+\frac{N(x,y)\pm\sqrt{N(x,y)}}{N(*,*)}=p(x,y)\pm\sqrt{\frac{p(x,y)}{N(*,*)}}
+\]
+
+\end_inset
+
+where only the pair observations 
+\begin_inset Formula $N(x,y)$
+\end_inset
+
+ are considered to be noisey and the value of 
+\begin_inset Formula $N(*,*)$
+\end_inset
+
+ is held fixed (the natural variation in it is ignored).
+\end_layout
+
+\begin_layout Standard
+The error in the frequentist estimate of the entropy to be
+\begin_inset Formula 
+\[
+-\log_{2}\left[p(x,y)\pm\sqrt{\frac{p(x,y)}{N(*,*)}}\right]=-\left[\log_{2}p(x,y)\right]\pm\sqrt{\frac{1}{p(x,y)N(*,*)}}
+\]
+
+\end_inset
+
+Summing to estimate the totl entropy, one gets
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+H\pm\Delta H=-\sum_{x,y}\left[p(x,y)\pm\sqrt{\frac{p(x,y)}{N(*,*)}}\right]\log_{2}\left[p(x,y)\pm\sqrt{\frac{p(x,y)}{N(*,*)}}\right]
+\]
+
+\end_inset
+
+which exapnds out to
+\begin_inset Formula 
+\[
+\Delta H=\frac{-1}{\sqrt{N(*,*)}}\sum_{x,y}\sqrt{p(x,y)}\left(1+\log_{2}p(x,y)\right)
+\]
+
+\end_inset
+
+What might these values be, in practice?
+\end_layout
+
+\begin_layout Subsection*
 Error correction
 \end_layout
 
 \begin_layout Standard
-We could go full-speed ahead on grying to discern grammatical categories,
- but for one issue: if a classification error is made early on, can it be
- spotted, and later corrected? What is the mechanism, and how might it work?
+If a classification error is made early on, can it be spotted, and later
+ corrected? What is the mechanism, and how might it work?
 \end_layout
 
 \begin_layout Subsection*
