@@ -25096,7 +25096,64 @@ Comparing this to the expression for mutual information suggests that using
 
 \end_inset
 
- and 
+Perhaps the following is closer to the 
+\begin_inset Quotes eld
+\end_inset
+
+original intent
+\begin_inset Quotes erd
+\end_inset
+
+ of mutual information: let 
+\begin_inset Formula $\mbox{dot}(w_{1},w_{2})=\sum_{d}p(w_{1},d)p(w_{2},d)$
+\end_inset
+
+ 
+\begin_inset Formula 
+\[
+\mbox{dmi}(w_{1},w_{2})=-\log_{2}\frac{\mbox{dot}(w_{1},w_{2})\mbox{dot}(*,*)}{\mbox{dot}(w_{1},*)\mbox{dot}(*,w_{2})}
+\]
+
+\end_inset
+
+Or even
+\begin_inset Formula 
+\[
+\mbox{cmi}(w_{1},w_{2})=-\log_{2}\frac{\mbox{sim}(w_{1},w_{2})\mbox{sim}(*,*)}{\mbox{sim}(w_{1},*)\mbox{sim}(*,w_{2})}
+\]
+
+\end_inset
+
+The 
+\begin_inset Formula $\mbox{sim}(*,*)$
+\end_inset
+
+ serves to normalize the entire calculation, so that one is effectively
+ computing with 
+\begin_inset Formula $\mbox{norm-sim}(w_{1},w_{2})=\mbox{sim}(w_{1},w_{2})/\mbox{sim}(*,*)$
+\end_inset
+
+.
+ The only problem here is that cmi kind-of does 
+\begin_inset Quotes eld
+\end_inset
+
+the wrong thing
+\begin_inset Quotes erd
+\end_inset
+
+: it singles out pairs that have a lot to do with each other, but little
+ to do with anything else.
+ Which discriminates 
+\emph on
+against
+\emph default
+ the clusters of similar words, which is not really what we want.
+ We don't want strange, unusual pairings; we want common, likely pairings.
+\end_layout
+
+\begin_layout Standard
+One can be inspired to write some crazy concoctions: 
 \begin_inset Formula 
 \[
 \mbox{mim}(w,d)=-\log_{2}\frac{p(w,d)}{\sum_{w,d}p^{2}(w,d)}
@@ -29531,7 +29588,11 @@ s.
  The color scale is such that red represents 1.0, yellow represents 0.75 (so
  orange is in between), green is exactly 0.5, and blue is 0.25 or less, fading
  to black.
- This is the 
+ 
+\end_layout
+
+\begin_layout Standard
+This is for the 
 \noun on
 en_pairs_ttwo
 \noun default
@@ -29539,6 +29600,8 @@ en_pairs_ttwo
  It has several cuts applied here: in this case, all disjuncts with 30 observati
 ons or less are excluded from the cosing calculations, as are any word-disjunct
  pairs with 10 observations or less.
+ All words with 3500 or fewer observations are discarded; this leaves behind
+ just the 803 words shown.
  This has the effect of trimming away the noise in the dataset, leaving
  only 
 \begin_inset Quotes eld
@@ -29653,6 +29716,21 @@ John
 , and so on down the line.
  The similarity between most of these is not surprising, and can certainly
  be rationalized post-facto.
+\end_layout
+
+\begin_layout Standard
+For comparison, the start of the list (lower-right) are the words: 
+\begin_inset Quotes eld
+\end_inset
+
+,
+\begin_inset Quotes erd
+\end_inset
+
+ and but when if they there he she her it back up.
+ Note that these are all lower-case, which means that they are observed
+ only in the middle of sentences.
+ That these are all pair-wise similar is not all that surprising.
 \end_layout
 
 \begin_layout Standard
@@ -30279,8 +30357,45 @@ These are not particularly better-matched.
 n-count cut is not helping.
 \end_layout
 
+\begin_layout Standard
+The scatter matrix is shown below.
+ Just like the prvious matrix, it shows the 803 words in the dataset that
+ have 3500 or more observations.
+ The rows and columns are in observation-ranking order, so that the most
+ frequent words are to the upper-left.
+ As before, the pattern is necessarily symmetric about the diagonal.
+ As before, there is a Tartan pattern that is clearly visibile, and its
+ there for the same reasons.
+ 
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Graphics
+	filename scat/scat-overlap-big.png
+	width 100text%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Unlike before, there is an arrow-shape to the thing.
+ This is easy to explain: The most frequently observed words also have a
+ large number of disjuncts observed with them.
+ The least frequently observed words have far fewer disjuncts attached to
+ them.
+ Thus, all in all, the denominator for the overlap is necessarily large,
+ when comparing high-observation and low-observation words.
+\end_layout
+
 \begin_layout Subsection*
 Connector similarity
+\end_layout
+
+\begin_layout Standard
+Several remarks about the similarity of connectors.
 \end_layout
 
 \begin_layout Subsection*
