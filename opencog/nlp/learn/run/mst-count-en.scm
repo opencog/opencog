@@ -11,17 +11,24 @@
 (use-modules (opencog persist) (opencog persist-sql))
 (use-modules (opencog nlp) (opencog nlp learn))
 (use-modules (opencog matrix))
+(use-modules (opencog cogserver))
 
-; Write a log-file, just in case...
-(cog-logger-set-filename! "/tmp/mst-en.log")
-(cog-logger-info "Start MST parsing for English.")
+;;; Hmm. We would like to use the native guile repl server in place
+;;; of the cogserver, but it is not sufficiently stable for that
+;;; purpose.  Therefore, we have to launch the cogserver.
+;;;
+;;;; Write a log-file, just in case...
+;;;(cog-logger-set-filename! "/tmp/mst-en.log")
+;;;(cog-logger-info "Start MST parsing for English.")
+;;;
+;;;; Start the network REPL server on port 19005
+;;;(call-with-new-thread (lambda ()
+;;;   (repl-default-option-set! 'prompt "scheme@(en-mst)> ")
+;;;   (set-current-error-port (%make-void-port "w"))
+;;;   (run-server (make-tcp-server-socket #:port 19005)))
+;;;)
 
-; Start the network REPL server on port 19005
-(call-with-new-thread (lambda ()
-   (repl-default-option-set! 'prompt "scheme@(en-mst)> ")
-   (set-current-error-port (%make-void-port "w"))
-   (run-server (make-tcp-server-socket #:port 19005)))
-)
+(start-cogserver "opencog-mst-en-r.conf")
 
 ; Open the database.
 ; Edit the below, setting the database name, user and password.
