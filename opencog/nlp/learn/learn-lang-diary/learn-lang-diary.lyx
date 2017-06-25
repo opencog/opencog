@@ -32794,12 +32794,21 @@ where only the pair observations
 The error in the frequentist estimate of the entropy to be
 \begin_inset Formula 
 \[
--\log_{2}\left[p(x,y)\pm\sqrt{\frac{p(x,y)}{N(*,*)}}\right]=-\left[\log_{2}p(x,y)\right]\pm\sqrt{\frac{1}{p(x,y)N(*,*)}}
+-\log_{2}\left[p(x,y)\pm\sqrt{\frac{p(x,y)}{N(*,*)}}\right]=-\left[\log_{2}p(x,y)\right]\pm\frac{1}{\log2}\sqrt{\frac{1}{p(x,y)N(*,*)}}
 \]
 
 \end_inset
 
-Summing to estimate the totl entropy, one gets
+where the estimate 
+\begin_inset Formula $\log(1+\epsilon)\approx\epsilon$
+\end_inset
+
+ is used for small 
+\begin_inset Formula $\epsilon$
+\end_inset
+
+.
+ Summing to estimate the total entropy, one gets
 \end_layout
 
 \begin_layout Standard
@@ -32810,10 +32819,10 @@ H\pm\Delta H=-\sum_{x,y}\left[p(x,y)\pm\sqrt{\frac{p(x,y)}{N(*,*)}}\right]\log_{
 
 \end_inset
 
-which exapnds out to
+which expands out to
 \begin_inset Formula 
 \[
-\Delta H=\frac{-1}{\sqrt{N(*,*)}}\sum_{x,y}\sqrt{p(x,y)}\left(1+\log_{2}p(x,y)\right)
+\Delta H=\frac{-1}{\sqrt{N(*,*)}}\sum_{x,y}\sqrt{p(x,y)}\left(\frac{1}{\log2}+\log_{2}p(x,y)\right)
 \]
 
 \end_inset
