@@ -1,7 +1,7 @@
 /*
  * TypeFrameIndex.h
  *
- * Copyright (C) 2016 OpenCog Foundation
+ * Copyright (C) 2017 OpenCog Foundation
  *
  * Author: Andre Senna <https://github.com/andre-senna>
  *
