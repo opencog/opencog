@@ -83,17 +83,14 @@
         (cons (make-lexical-token 'NEWLINE location #f) ""))
     ((has-match? "^#!" str) ; This should be checked always before #
         ; TODO Add tester function for this
-        (format #t  ">>lexer sample input @ ~a\n" (show-location location))
         (cons (make-lexical-token 'SAMPLE_INPUT location #f) ""))
     ((has-match? "^#" str)
-        (format #t  ">>lexer comment @ ~a\n" (show-location location))
-        (make-lexical-token 'COMMENT location #f))
+        (cons (make-lexical-token 'COMMENT location #f) ""))
     ; Chatscript rules
     ((has-match? "^[s?u]:" str)
         (format #t ">>lexer responders @ ~a\n" (show-location location))
         (make-lexical-token 'RESPONDERS location "a responders"))
     ((has-match? "^[a-q]:" str)
-        (format #t ">>lexer rejoinder @ ~a\n" (show-location location))
         (cons
           (make-lexical-token 'REJOINDERS location #f)
           (match:suffix current-match)))
