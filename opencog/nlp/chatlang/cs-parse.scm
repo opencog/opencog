@@ -124,6 +124,15 @@
         (cons
           (make-lexical-token 'RSBRACKET location #f)
           (match:suffix current-match)))
+    ((has-match? "^\\*" str)
+        (cons
+          (make-lexical-token '* location #f)
+          (match:suffix current-match)))
+    ((has-match? "^[0-9]+" str)
+        (cons
+          (make-lexical-token 'NUM location
+            (match:substring current-match))
+          (match:suffix current-match)))
     ((has-match? "^['!?.a-zA-Z-]+" str) ; This should always be at the end.
         (cons
           (make-lexical-token 'LITERAL location
@@ -165,7 +174,8 @@
   (lalr-parser
     ; Token (aka terminal symbol) definition
     (LPAREN RPAREN NEWLINE CR CONCEPT TOPIC RESPONDERS REJOINDERS GAMBIT
-      NotDefined COMMENT SAMPLE_INPUT LITERAL _ WHITESPACE COMMA
+      NotDefined COMMENT SAMPLE_INPUT LITERAL WHITESPACE COMMA NUM
+      _ *
       ~n ; Range-restricted Wildcards
       ~ ; Concepts
        LSBRACKET RSBRACKET ; Square Brackets []
@@ -214,6 +224,7 @@
       (LITERAL) : (display-token $1)
       (_ LITERAL) : (display-token (string-append "underscore_fn->" $2))
       (~ LITERAL) : (display-token (string-append "get_concept_fn->" $2))
+      (* ~ NUM) : (display-token (string-append "range-restricted-*->~" $3))
       (LITERAL ~n) : (display-token (string-append $1 "<-range_wildecard"))
       (LITERAL COMMA) : (display-token (string-append $1 " " $2))
     )
