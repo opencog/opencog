@@ -58,6 +58,8 @@
         #f
       )))
 
+  ;NOTE The matching must be done starting from the most specific to the
+  ; the broadest regex patterns.
   (cond
     ((has-match? "^\\(" str)
         (cons
@@ -90,9 +92,11 @@
     ((has-match? "^[s?u]:" str)
         (format #t ">>lexer responders @ ~a\n" (show-location location))
         (make-lexical-token 'RESPONDERS location "a responders"))
-    ((has-match? "^[c-j]:" str)
+    ((has-match? "^[a-q]:" str)
         (format #t ">>lexer rejoinder @ ~a\n" (show-location location))
-        (make-lexical-token 'REJOINDERS location "a rejoinders"))
+        (cons
+          (make-lexical-token 'REJOINDERS location #f)
+          (match:suffix current-match)))
     ((has-match? "^[rt]:" str)
         (cons
           (make-lexical-token 'GAMBIT location "a gambit")
@@ -104,6 +108,10 @@
     ((has-match? "^~n" str)
         (cons
           (make-lexical-token '~n location #f)
+          (match:suffix current-match)))
+    ((has-match? "^~" str); Must be after other '~
+        (cons
+          (make-lexical-token '~ location #f)
           (match:suffix current-match)))
     ((has-match? "^," str)
         (cons
@@ -117,13 +125,13 @@
         (cons
           (make-lexical-token 'RSBRACKET location #f)
           (match:suffix current-match)))
-    ((has-match? "^[a-zA-Z-]+\\?*" str) ; This should always be at the end.
+    ((has-match? "^[a-zA-Z-]+\\?*\\.*[']*" str) ; This should always be at the end.
         (cons
           (make-lexical-token 'LITERAL location
             (match:substring current-match))
           (match:suffix current-match)))
     (else
-      (format #t ">>lexer non @ ~a\n" (show-location location))
+      (format #t ">>Tokenizer non @ ~a\n" (show-location location))
       (make-lexical-token 'NotDefined location str))
   )
 )
@@ -136,7 +144,7 @@
           (set! cs-line (read-line port))
           (set! initial-line cs-line)
         ))
-        (format #t ">>>>>>>>>>> line being processed ~a\n" (string->list cs-line))
+        (format #t ">>>>>>>>>>> line being processed ~a\n" cs-line)
       (let ((port-location (get-source-location port
                               (string-contains initial-line cs-line))))
         (if (eof-object? cs-line)
@@ -159,7 +167,8 @@
     ; Token (aka terminal symbol) definition
     (LPAREN RPAREN NEWLINE CR CONCEPT TOPIC RESPONDERS REJOINDERS GAMBIT
       NotDefined COMMENT SAMPLE_INPUT LITERAL _ WHITESPACE COMMA
-      ~n ;Range-restricted Wildcards
+      ~n ; Range-restricted Wildcards
+      ~ ; Concepts
        LSBRACKET RSBRACKET ; Square Brackets []
     )
 
@@ -186,7 +195,8 @@
 
     (rules
       (RESPONDERS) : (display-token $1)
-      (REJOINDERS) : (display-token $1)
+      (REJOINDERS LPAREN patterns RPAREN patterns) :
+        (display-token (format #f "rejoiner(~a -> ~a)" $3 $5))
       (GAMBIT patterns) : (display-token (string-append "gambit = " $2))
     )
 
@@ -203,6 +213,7 @@
     (a-literal
       (LITERAL) : (display-token $1)
       (_ LITERAL) : (display-token (string-append "underscore_fn->" $2))
+      (~ LITERAL) : (display-token (string-append "get_concept_fn->" $2))
       (LITERAL ~n) : (display-token (string-append $1 "<-range_wildecard"))
       (LITERAL COMMA) : (display-token (string-append $1 " " $2))
     )
