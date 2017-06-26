@@ -89,7 +89,9 @@
     ; Chatscript rules
     ((has-match? "^[s?u]:" str)
         (format #t ">>lexer responders @ ~a\n" (show-location location))
-        (make-lexical-token 'RESPONDERS location "a responders"))
+        (cons
+          (make-lexical-token 'RESPONDERS location #f)
+          (match:suffix current-match)))
     ((has-match? "^[a-q]:" str)
         (cons
           (make-lexical-token 'REJOINDERS location #f)
@@ -191,7 +193,8 @@
     )
 
     (rules
-      (RESPONDERS) : (display-token $1)
+      (RESPONDERS a-literal LPAREN patterns RPAREN patterns) :
+        (display-token (format #f "rejoiner(~a -> ~a)" $3 $5))
       (REJOINDERS LPAREN patterns RPAREN patterns) :
         (display-token (format #f "rejoiner(~a -> ~a)" $3 $5))
       (GAMBIT patterns) : (display-token (string-append "gambit = " $2))
