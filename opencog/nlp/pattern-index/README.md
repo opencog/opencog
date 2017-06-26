@@ -74,15 +74,15 @@ Reading the example programs mentioned above are the best way to understand how 
 
 #### C++
 
-`
+```
     Handle indexKey = patternindex().createIndex("toy-example-query.scm");
-`
+```
 
 #### Scheme
 
-`
+```
     (define indexKey (pi-create-index (ConceptNode "toy-example-query.scm")))
-`
+```
 
 indexKey will be used in further calls to query or mine the newly created
 index. You can create many indexes using different sets of atoms and query them
@@ -92,7 +92,7 @@ separetely.
 
 We'll use "toy-example-query.scm" to illustrate queries examples.
 
-`
+```
     (SimilarityLink (ConceptNode "human") (ConceptNode "monkey"))
     (SimilarityLink (ConceptNode "human") (ConceptNode "chimp"))
     (SimilarityLink (ConceptNode "chimp") (ConceptNode "monkey"))
@@ -112,24 +112,24 @@ We'll use "toy-example-query.scm" to illustrate queries examples.
     (InheritanceLink (ConceptNode "rhino") (ConceptNode "mammal"))
     (InheritanceLink (ConceptNode "vine") (ConceptNode "plant"))
     (InheritanceLink (ConceptNode "ent") (ConceptNode "plant"))
-`
+```
 
 #### C++
 
 In C++ one can query an index either passing a Handle or a std::string representing the query.
 
-`
+```
     std::string queryStr = "(AndLink (SimilarityLink (VariableNode \"X\") (VariableNode \"Y\")) (SimilarityLink (VariableNode \"Y\") (VariableNode \"Z\")))";
     Handle queryHandle = schemeEval->eval_h(queryStr);
     Handle resultHandle = patternindex().query(indexKey, queryHandle);
-`
+```
 
 resultHandle will point to a ListLink with the query result. This link is a
 list with all the satisfying subgraphs (each represented by a ListLink) and the
 respective variable assignments (also represented by ListLinks to pairs
-`<variable, assigned atom>`).
+```<variable, assigned atom>```).
 
-`
+```
     (ListLink
         (ListLink
             (ListLink
@@ -176,21 +176,21 @@ respective variable assignments (also represented by ListLinks to pairs
             )
         )
     )
-`
+```
 
 Optionally one can pass the query in a std::string.  Using this syntax,
-`query()` will populate a vector of QueryResult with all the subgraphs (and
+```query()``` will populate a vector of QueryResult with all the subgraphs (and
 respective variable assigments) that satisfies the passed pattern.
 
-`
+```
     std::string queryStr = "(AndLink (SimilarityLink (VariableNode \"X\") (VariableNode \"Y\")) (NotLink (AndLink (InheritanceLink (VariableNode \"X\") (VariableNode \"Z\")) (InheritanceLin
     std::vector<PatternIndexAPI::QueryResult> queryResult;
     patternindex().query(queryResult, indexKey, queryStr);
-`
+```
 
 In our example, this query would return:
 
-`
+```
     Result #1:
     
     (SimilarityLink
@@ -250,15 +250,15 @@ In our example, this query would return:
     
     (VariableNode "Y")
     (ConceptNode "human")
-`
+```
 
 #### Scheme
 
 In scheme we use only one syntax:
 
-`
+```
     (pi-query index-key (AndLink (SimilarityLink (VariableNode "X") (VariableNode "Y")) (SimilarityLink (VariableNode "Y") (VariableNode "Z"))))
-`
+```
 
 Which return the same answer as the first syntax described above for C++.
 
@@ -266,17 +266,17 @@ Which return the same answer as the first syntax described above for C++.
 
 To illustrate the pattern mining using Pattern Index, we'll use
 "toy-example-mining.scm" which is exactly the same dataset
-`ugly_male_soda-drinker_corpus.scm` used as example in OpenCog's PatternMiner.
+```ugly_male_soda-drinker_corpus.scm``` used as example in OpenCog's PatternMiner.
 
 #### C++
 
-`
+```
     patternindex().minePatterns(resultPatterns, indexKey);
-`
+```
 
-resultPatterns is populated with the best found patterns. Actually with pairs `<quality measure, pattern toplevel atom>`. In our example, the best pattern is:
+resultPatterns is populated with the best found patterns. Actually with pairs ```<quality measure, pattern toplevel atom>```. In our example, the best pattern is:
 
-`
+```
     (AndLink
         (InheritanceLink
             (VariableNode "V0")
@@ -291,38 +291,38 @@ resultPatterns is populated with the best found patterns. Actually with pairs `<
             (ConceptNode "soda drinker")
         )
     ) 
-`
+```
 
 
 #### Scheme
 
-`
+```
     (pi-mine-patterns index-key)
-`
+```
 
 Results are basically the same as the above but returned as a nested ListLink instead of a structured type.
 
 ## Running the example programs
 
-To run the examples just execute one of these command lines (from `build/`):
+To run the examples just execute one of these command lines (from ```build/```):
 
-`
+```
 ./opencog/nlp/pattern-index/patternIndexQueryExample ../opencog/nlp/pattern-index/toy-example-query.scm ../opencog/nlp/pattern-index/ExampleConfig.conf
-`
+```
 
-`
+```
 ./opencog/nlp/pattern-index/patternIndexMiningExample ../opencog/nlp/pattern-index/toy-example-mining.scm ../opencog/nlp/pattern-index/ExampleConfig.conf
-`
+```
 
-`
+```
 guile -l ../opencog/nlp/pattern-index/pattern-index-query-example.scm
-`
+```
 
-`
+```
 guile -l ../opencog/nlp/pattern-index/pattern-index-mining-example.scm
-`
+```
 
-_*NOTE*: The Scheme API read the configuration file in `lib/opencog.conf`._
+_*NOTE*: The Scheme API read the configuration file in ```lib/opencog.conf```._
 
 ## TODO
 
