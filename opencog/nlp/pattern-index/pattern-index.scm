@@ -7,6 +7,10 @@
     (scm-api-create-index path) ; Defined in PatternIndexSCM.cc
 )
 
+(define-public (pi-create-index-scm path)
+    (scm-api-create-index-scm path) ; Defined in PatternIndexSCM.cc
+)
+
 (define-public (pi-query index-key query-link)
     (scm-api-query index-key query-link) ; Defined in PatternIndexSCM.cc
 )

@@ -820,6 +820,19 @@ bool TypeFrameIndex::addFrame(TypeFrame &frame, int offset)
     return exitStatus;
 }
 
+bool TypeFrameIndex::add(Handle handle, int offset)
+{
+    bool exitStatus = true;
+    TypeFrame frame(handle);
+    if (frame.isValid()) {
+        exitStatus = addFrame(frame, offset);
+    } else {
+        printf("INVALID FRAME <%s>\n", handle->toString().c_str());
+    }
+    return exitStatus;
+
+}
+
 bool TypeFrameIndex::addFromScheme(const std::string &txt, int offset)
 {
     bool exitStatus = true;

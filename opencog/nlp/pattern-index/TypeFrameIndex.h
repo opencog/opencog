@@ -234,6 +234,7 @@ public:
     ~TypeFrameIndex();
 
     bool addFromScheme(const std::string &scm, int offset);
+    bool add(Handle handle, int offset);
     void query(std::vector<ResultPair> &result, const std::string &queryScm) const;
     void query(std::vector<ResultPair> &result, const TypeFrame &queryFrame) const;
 

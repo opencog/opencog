@@ -284,6 +284,26 @@ Handle PatternIndexAPI::createIndex(const std::string &scmPath)
     return atomSpace->add_node(ANCHOR_NODE, std::to_string(ticket));
 }
 
+Handle PatternIndexAPI::createIndex(const HandleSeq &handles)
+{
+
+    int ticket = -1;
+
+    TypeFrameIndex *index = new TypeFrameIndex();
+
+    for (HandleSeq::const_iterator it = handles.begin(); it != handles.end(); it++) {
+        index->add(*it, 0);
+    }
+
+    index->buildSubPatternsIndex();
+    ticket = ++lastUsedTicket;
+    StringMap properties;
+    setDefaultProperties(properties);
+    indexes.insert(IndexMap::value_type(ticket, std::make_pair(index, properties)));
+
+    return atomSpace->add_node(ANCHOR_NODE, std::to_string(ticket));
+}
+
 void PatternIndexAPI::deleteIndex(Handle key)
 {
     IndexMap::iterator it = indexes.find(std::stoi(key->getName()));

@@ -90,6 +90,13 @@ class PatternIndexAPI
         Handle createIndex(const std::string &scmPath);
 
         /*
+         * Create a new index using the atoms passed in the HandleSeq
+         * Returns the Handle of an AnchorNode wich must be used as a key to
+         * access this index in further calls to the other methods of this API.
+         */
+        Handle createIndex(const HandleSeq &handles);
+
+        /*
          * Delete a previously created index. Raises an exception if the passed
          * key does not denote an index or if the index have been previously
          * deleted.

@@ -4,7 +4,7 @@ This module provides two interfaces (C++ and Guile) for a data abstraction that
 alows the user to create indexes for subsets of Atoms from the AtomSpace and
 then submit queries to retrieve subgraphs that matches a given pattern.
 
-_NOTE: this is not a wrapper around OpenCog's PatternMatcher._
+_*NOTE*: this is not a wrapper around OpenCog's PatternMatcher._
 
 ## Why having a Pattern Index?
 
@@ -33,7 +33,7 @@ documents:
 * http://wiki.opencog.org/w/Pattern\_miner#Tutorial\_of\_running\_Pattern\_Miner\_in\_Opencog
 * http://wiki.opencog.org/w/Measuring\_Surprisingness
 
-_NOTE: this functionality is not a wrapper around OpenCog's PatternMiner_
+_*NOTE*: this functionality is not a wrapper around OpenCog's PatternMiner_
 
 ## Additional motivation for the Pattern Index
 
@@ -130,113 +130,57 @@ respective variable assignments (also represented by ListLinks to pairs
 `<variable, assigned atom>`).
 
 `
-(ListLink
-  (ListLink
     (ListLink
-      (SimilarityLink
-        (ConceptNode "monkey")
-        (ConceptNode "chimp")
-      )
-      (SimilarityLink
-        (ConceptNode "monkey")
-        (ConceptNode "human")
-      )
+        (ListLink
+            (ListLink
+                (SimilarityLink (ConceptNode "monkey") (ConceptNode "chimp"))
+                (SimilarityLink (ConceptNode "monkey") (ConceptNode "human"))
+            )
+            (ListLink
+                (ListLink (VariableNode "X") (ConceptNode "chimp"))
+                (ListLink (VariableNode "Y") (ConceptNode "monkey"))
+                (ListLink (VariableNode "Z") (ConceptNode "human"))
+            )
+        )
+        (ListLink
+            (ListLink
+                (SimilarityLink (ConceptNode "ent") (ConceptNode "human"))
+                (SimilarityLink (ConceptNode "monkey") (ConceptNode "human"))
+            )
+            (ListLink
+                (ListLink (VariableNode "X") (ConceptNode "ent"))
+                (ListLink (VariableNode "Y") (ConceptNode "human"))
+                (ListLink (VariableNode "Z") (ConceptNode "monkey"))
+            )
+        )
+        (ListLink
+            (ListLink
+                (SimilarityLink (ConceptNode "human") (ConceptNode "chimp"))
+                (SimilarityLink (ConceptNode "ent") (ConceptNode "human"))
+            )
+            (ListLink
+                (ListLink (VariableNode "X") (ConceptNode "ent"))
+                (ListLink (VariableNode "Y") (ConceptNode "human"))
+                (ListLink (VariableNode "Z") (ConceptNode "chimp"))
+            )
+        )
+        (ListLink
+            (ListLink
+                (SimilarityLink (ConceptNode "earthworm") (ConceptNode "snake"))
+                (SimilarityLink (ConceptNode "vine") (ConceptNode "snake"))
+            )
+            (ListLink
+                (ListLink (VariableNode "X") (ConceptNode "vine"))
+                (ListLink (VariableNode "Y") (ConceptNode "snake"))
+                (ListLink (VariableNode "Z") (ConceptNode "earthworm"))
+            )
+        )
     )
-    (ListLink
-      (ListLink
-        (VariableNode "X")
-        (ConceptNode "chimp")
-      )
-      (ListLink
-        (VariableNode "Y")
-        (ConceptNode "monkey")
-      )
-      (ListLink
-        (VariableNode "Z")
-        (ConceptNode "human")
-      )
-    )
-  )
-  (ListLink
-    (ListLink
-      (SimilarityLink
-        (ConceptNode "ent")
-        (ConceptNode "human")
-      )
-      (SimilarityLink
-        (ConceptNode "monkey")
-        (ConceptNode "human")
-      )
-    )
-    (ListLink
-      (ListLink
-        (VariableNode "X")
-        (ConceptNode "ent")
-      )
-      (ListLink
-        (VariableNode "Y")
-        (ConceptNode "human")
-      )
-      (ListLink
-        (VariableNode "Z")
-        (ConceptNode "monkey")
-      )
-    )
-  )
-  (ListLink
-    (ListLink
-      (SimilarityLink
-        (ConceptNode "human")
-        (ConceptNode "chimp")
-      )
-      (SimilarityLink
-        (ConceptNode "ent")
-        (ConceptNode "human")
-      )
-    )
-    (ListLink
-      (ListLink
-        (VariableNode "X")
-        (ConceptNode "ent")
-      )
-      (ListLink
-        (VariableNode "Y")
-        (ConceptNode "human")
-      )
-      (ListLink
-        (VariableNode "Z")
-        (ConceptNode "chimp")
-      )
-    )
-  )
-  (ListLink
-    (ListLink
-      (SimilarityLink
-        (ConceptNode "earthworm")
-        (ConceptNode "snake")
-      )
-      (SimilarityLink
-        (ConceptNode "vine")
-        (ConceptNode "snake")
-      )
-    )
-    (ListLink
-      (ListLink
-        (VariableNode "X")
-        (ConceptNode "vine")
-      )
-      (ListLink
-        (VariableNode "Y")
-        (ConceptNode "snake")
-      )
-      (ListLink
-        (VariableNode "Z")
-        (ConceptNode "earthworm")
-      )
-    )
-  )
-)
 `
+
+Optionally one can pass the query in a std::string.  Using this syntax,
+`query()` will populate a vector of QueryResult with all the subgraphs (and
+respective variable assigments) that satisfies the passed pattern.
 
 `
     std::string queryStr = "(AndLink (SimilarityLink (VariableNode \"X\") (VariableNode \"Y\")) (NotLink (AndLink (InheritanceLink (VariableNode \"X\") (VariableNode \"Z\")) (InheritanceLin
@@ -244,71 +188,68 @@ respective variable assignments (also represented by ListLinks to pairs
     patternindex().query(queryResult, indexKey, queryStr);
 `
 
-Optionally one can pass the query in a std::string.  Using this syntax,
-`query()` will populate a vector of QueryResult with all the subgraphs (and
-respective variable assigments) that satisfies the passed pattern.  In our
-example, this query would return:
+In our example, this query would return:
 
 `
-Result #1:
-
-(SimilarityLink
-  (ConceptNode "earthworm")
-  (ConceptNode "snake")
-)
-
-Mapping:
-
-(VariableNode "X")
-(ConceptNode "earthworm")
-
-(VariableNode "Y")
-(ConceptNode "snake")
-
-Result #2:
-
-(SimilarityLink
-  (ConceptNode "triceratops")
-  (ConceptNode "rhino")
-)
-
-Mapping:
-
-(VariableNode "X")
-(ConceptNode "rhino")
-
-(VariableNode "Y")
-(ConceptNode "triceratops")
-
-Result #3:
-
-(SimilarityLink
-  (ConceptNode "vine")
-  (ConceptNode "snake")
-)
-
-Mapping:
-
-(VariableNode "X")
-(ConceptNode "snake")
-
-(VariableNode "Y")
-(ConceptNode "vine")
-
-Result #4:
-
-(SimilarityLink
-  (ConceptNode "ent")
-  (ConceptNode "human")
-)
-
-Mapping:
-
-(VariableNode "X")
-(ConceptNode "ent")
-
-(VariableNode "Y")
-(ConceptNode "human")
+    Result #1:
+    
+    (SimilarityLink
+        (ConceptNode "earthworm")
+        (ConceptNode "snake")
+    )
+    
+    Mapping:
+    
+    (VariableNode "X")
+    (ConceptNode "earthworm")
+    
+    (VariableNode "Y")
+    (ConceptNode "snake")
+    
+    Result #2:
+    
+    (SimilarityLink
+        (ConceptNode "triceratops")
+        (ConceptNode "rhino")
+    )
+    
+    Mapping:
+    
+    (VariableNode "X")
+    (ConceptNode "rhino")
+    
+    (VariableNode "Y")
+    (ConceptNode "triceratops")
+    
+    Result #3:
+    
+    (SimilarityLink
+        (ConceptNode "vine")
+        (ConceptNode "snake")
+    )
+    
+    Mapping:
+    
+    (VariableNode "X")
+    (ConceptNode "snake")
+    
+    (VariableNode "Y")
+    (ConceptNode "vine")
+    
+    Result #4:
+    
+    (SimilarityLink
+        (ConceptNode "ent")
+        (ConceptNode "human")
+    )
+    
+    Mapping:
+    
+    (VariableNode "X")
+    (ConceptNode "ent")
+    
+    (VariableNode "Y")
+    (ConceptNode "human")
 `
 
 #### Scheme
@@ -336,20 +277,20 @@ To illustrate the pattern mining using Pattern Index, we'll use
 resultPatterns is populated with the best found patterns. Actually with pairs `<quality measure, pattern toplevel atom>`. In our example, the best pattern is:
 
 `
-(AndLink
-  (InheritanceLink
-    (VariableNode "V0")
-    (ConceptNode "ugly")
-  )
-  (InheritanceLink
-    (VariableNode "V0")
-    (ConceptNode "man")
-  )
-  (InheritanceLink
-    (VariableNode "V0")
-    (ConceptNode "soda drinker")
-  )
-) 
+    (AndLink
+        (InheritanceLink
+            (VariableNode "V0")
+            (ConceptNode "ugly")
+        )
+        (InheritanceLink
+            (VariableNode "V0")
+            (ConceptNode "man")
+        )
+        (InheritanceLink
+            (VariableNode "V0")
+            (ConceptNode "soda drinker")
+        )
+    ) 
 `
 
 
@@ -381,7 +322,14 @@ guile -l ../opencog/nlp/pattern-index/pattern-index-query-example.scm
 guile -l ../opencog/nlp/pattern-index/pattern-index-mining-example.scm
 `
 
-*NOTE:* The Scheme API read the configuration file in `lib/opencog.conf`
+_*NOTE*: The Scheme API read the configuration file in `lib/opencog.conf`._
 
+## TODO
 
+1. Implement C++ and Scheme API to allow creation of empty index followed by addition of atoms and finally actual creation of the index.
+1. Implement multi-thread version of TypeframeIndex::query()
+1. Implement optional creation of TypeFrameIndex pointing to elements in disk
+1. Implement optional creation of TypeFrameIndex storing the index itself in disk
+1. Implement distributed version of the mining algorithm
+1. Implement distributed version of TypeFrameIndex
 
