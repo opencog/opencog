@@ -96,7 +96,7 @@
           (match:suffix current-match)))
     ((has-match? "^[rt]:" str)
         (cons
-          (make-lexical-token 'GAMBIT location "a gambit")
+          (make-lexical-token 'GAMBIT location #f)
           (match:suffix current-match)))
     ((has-match? "^_" str)
         (cons
@@ -122,7 +122,7 @@
         (cons
           (make-lexical-token 'RSBRACKET location #f)
           (match:suffix current-match)))
-    ((has-match? "^[a-zA-Z-]+\\?*\\.*[']*" str) ; This should always be at the end.
+    ((has-match? "^['!?.a-zA-Z-]+" str) ; This should always be at the end.
         (cons
           (make-lexical-token 'LITERAL location
             (match:substring current-match))
