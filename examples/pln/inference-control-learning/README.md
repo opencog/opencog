@@ -65,7 +65,7 @@ Experiment Algorithm
 1. Run the BC over each problem pj in PS, j is the problem index.
    Save the logs of each problem in opencog-i-j.log.
 2. Store in Si the number of solved problems for this iteration.
-3. Given opencog-i-j.log for j in [0, N), build a collection of
+3. Given opencog-i-j.log for j in |0, N), build a collection of
    inference control rules, called ICRi (see Setion Inference Control
    Rule).
 4. If meta-termination hasn't occured repeat step 1 with passing ICRi
@@ -413,12 +413,17 @@ of generality we can assume that this variable is p1, we get
 P1 = I1_0^1 I2_0_^p1 ... In_0_^p1 pdf1(p1)*...*pdfn(pn) dp1 ... dpn
 ```
 
-Second, we can factorize the terms out of the integrals which they do
-not depend on
+Second, we can factorize each intergral out of the rest as they are
+independent of each others, starting by the pdf terms
 
 ```
 P1 = I1_0^1 pdf1(p1) I2_0_^p1 pdf2(p2) ... In_0_^p1 pdfn(pn) dpn ... dp1
+   = I1_0^1 pdf1(p1) dp1 * I2_0_^p1 pdf2(p2) dp2 * ... * In_0_^p1 pdfn(pn) dpn
 ```
 
-TODO: calculate the complexity, likely small, even smaller if
-intermediary results are memoized.
+If we store the values of
+```
+Ii_0^j pdfi(pi) dpi
+```
+in a `n*m` table, for i in [0, n) and j in (0/m, m/m] then the
+complexity should be around `O(n*M)`, all rules considered.
