@@ -50,7 +50,7 @@ namespace PatternMining
 #define SURPRISINGNESS_I_TOP_THRESHOLD 0.20
 #define SURPRISINGNESS_II_TOP_THRESHOLD 0.40
 #define OUTPUT_SURPRISINGNESS_CALCULATION_TO_FILE 1
-#define GENERATE_TMP_PATTERNS 1
+#define GENERATE_TMP_PATTERNS 0
 #define USE_QUERY_ENTITY_COUNT_FOR_EACH_PREDICATE 0
 #define USE_QUERY_ALL_ENTITY_COUNT 0
 #define USE_ABS_SURPRISINGNESS 0
@@ -286,10 +286,10 @@ protected:
     HandleSeq swapLinksBetweenTwoAtomSpace(AtomSpace* fromAtomSpace, AtomSpace* toAtomSpace, HandleSeq& fromLinks, HandleSeq &outVariableNodes);
 
 
-    void swapOneLinkBetweenTwoAtomSpaceBF(AtomSpace* fromAtomSpace, AtomSpace* toAtomSpace, Handle& fromLink, HandleSeq& outgoings,
+    void swapOneLinkBetweenTwoAtomSpaceForBindLink(AtomSpace* fromAtomSpace, AtomSpace* toAtomSpace, Handle& fromLink, HandleSeq& outgoings,
                                           HandleSeq &outVariableNodes, HandleSeq& linksWillBeDel, bool& containVar );
 
-    HandleSeq swapLinksBetweenTwoAtomSpaceBF(AtomSpace* fromAtomSpace, AtomSpace* toAtomSpace, HandleSeq& fromLinks, HandleSeq& outVariableNodes, HandleSeq& linksWillBeDel);
+    HandleSeq swapLinksBetweenTwoAtomSpaceForBindLink(AtomSpace* fromAtomSpace, AtomSpace* toAtomSpace, HandleSeq& fromLinks, HandleSeq& outVariableNodes, HandleSeq& linksWillBeDel);
 
     void extractAllVariableNodesInAnInstanceLink(Handle& instanceLink, Handle& patternLink, OrderedHandleSet& allVarNodes);
 

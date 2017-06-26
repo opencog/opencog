@@ -262,6 +262,7 @@ HandleSeq PatternMiner::UnifyPatternOrder(HandleSeq& inputPattern, unsigned int&
         }
     }
 
+
     // find out where the last link in the input pattern is now in the ordered pattern
     Handle lastLink = inputPattern[inputPattern.size()-1];
     unsigned int lastLinkIndex = 0;
@@ -630,7 +631,6 @@ void PatternMiner::swapOneLinkBetweenTwoAtomSpace(AtomSpace* fromAtomSpace, Atom
     }
 }
 
-// linksWillBeDel are all the links contain varaibles. Those links need to be deleted after run BindLink
 HandleSeq PatternMiner::swapLinksBetweenTwoAtomSpace(AtomSpace* fromAtomSpace, AtomSpace* toAtomSpace, HandleSeq& fromLinks, HandleSeq& outVariableNodes)
 {
     HandleSeq outPutLinks;
@@ -674,27 +674,28 @@ void PatternMiner::findAllInstancesForGivenPatternInNestedAtomSpace(HTreeNode* H
 //    std::cout <<"Debug: PatternMiner total link number = "
 //              << allAtomSpaceLinks.size() << std::endl;
 
-    HandleSeq  bindLinkOutgoings;
+    AtomSpace* _atomSpace = originalAtomSpace;
 
-    // HandleSeq patternToMatch = swapLinksBetweenTwoAtomSpace(atomSpace, originalAtomSpace, HNode->pattern, variableNodes, linksWillBeDel);
+    HandleSeq  bindLinkOutgoings, variableNodes;
 
-    AtomSpace* _atomSpace = atomSpace;
+//  HandleSeq patternToMatch = swapLinksBetweenTwoAtomSpaceForBindLink(atomSpace, _atomSpace, HNode->pattern, variableNodes, linksWillBeDel);
+    HandleSeq patternToMatch = swapLinksBetweenTwoAtomSpace(atomSpace, _atomSpace, HNode->pattern, variableNodes);
 
-    Handle hAndLink = _atomSpace->add_link(AND_LINK, HNode->pattern);
+    Handle hAndLink = _atomSpace->add_link(AND_LINK, patternToMatch);
 
-    // add variable atoms
-    OrderedHandleSet allVariableNodesInPattern;
-    for (unsigned int i = 0; i < HNode->pattern.size(); ++i)
-    {
-        extractAllVariableNodesInLink(HNode->pattern[i],allVariableNodesInPattern, _atomSpace);
-    }
+//    // add variable atoms
+//    OrderedHandleSet allVariableNodesInPattern;
+//    for (unsigned int i = 0; i < patternToMatch.size(); ++i)
+//    {
+//        extractAllVariableNodesInLink(patternToMatch[i],allVariableNodesInPattern, _atomSpace);
+//    }
 
-    HandleSeq variableNodes;
-    for (Handle varh : allVariableNodesInPattern)
-    {
-        Handle v = _atomSpace->add_node(PATTERN_VARIABLENODE_TYPE, varh->getName());
-        variableNodes.push_back(v);
-    }
+
+//    for (Handle varh : allVariableNodesInPattern)
+//    {
+//        Handle v = _atomSpace->add_node(VARIABLE_NODE, varh->getName());
+//        variableNodes.push_back(v);
+//    }
 
     Handle hVariablesListLink = _atomSpace->add_link(VARIABLE_LIST, variableNodes);
 
@@ -704,7 +705,7 @@ void PatternMiner::findAllInstancesForGivenPatternInNestedAtomSpace(HTreeNode* H
 
     Handle hBindLink = _atomSpace->add_link(BIND_LINK, bindLinkOutgoings);
 
-    // std::cout << std::endl << hBindLink->toShortString() << std::endl;
+//    std::cout << std::endl << hBindLink->toShortString() << std::endl;
 
     // Run pattern matcher
     Handle hResultListLink = opencog::bindlink(_atomSpace, hBindLink);
@@ -714,12 +715,16 @@ void PatternMiner::findAllInstancesForGivenPatternInNestedAtomSpace(HTreeNode* H
     // Note: Don't forget to remove the hResultListLink and BindLink
     HandleSeq resultSet = hResultListLink->getOutgoingSet();
 
-    //    //debug
-    // std::cout << hResultListLink->toShortString() << std::endl  << std::endl;
+    HNode->count = resultSet.size();
 
+    //    //debug
+//    std::cout << hResultListLink->toShortString() << std::endl  << std::endl;
+
+//    if (HNode->pattern.size() == 2)
+//    cout << "\nRemoving hResultListLink\n" << hResultListLink->toShortString() << std::endl;
     _atomSpace->remove_atom(hResultListLink);
 
-    int count = 0;
+//    int count = 0;
     for (Handle listH  : resultSet)
     {
 
@@ -738,18 +743,35 @@ void PatternMiner::findAllInstancesForGivenPatternInNestedAtomSpace(HTreeNode* H
 //            }
 //        }
 
-        if (! containVariableNodes(listH, _atomSpace))
-            count ++;
+//        if (! containVariableNodes(listH, _atomSpace))
+//            count ++;
 
+//        if (HNode->pattern.size() == 2)
+//        cout << "\nRemoving listH \n" << listH->toShortString() << std::endl;
         _atomSpace->remove_atom(listH);
     }
 
-    HNode->count = count;
+//    HNode->count = count;
 
-    // std::cout << count << " instances found!" << std::endl ;
+//     std::cout << HNode->count << " instances found!" << std::endl ;
 
+//    if (HNode->pattern.size() == 2)
+//    cout << "\nRemoving hBindLink\n" << hBindLink->toShortString() << std::endl;
     _atomSpace->remove_atom(hBindLink);
+
+//    if (HNode->pattern.size() == 2)
+//    cout << "\nRemoving hAndLink" << hAndLink->toShortString() << std::endl;
     _atomSpace->remove_atom(hAndLink);
+
+//    for (Handle patternLink : linksWillBeDel) // delete the patterns links contains variables
+//    {
+//        _atomSpace->remove_atom(patternLink);
+//    }
+
+    for (Handle varh : variableNodes)
+    {
+        _atomSpace->remove_atom(varh,true);
+    }
 
 //    allAtomSpaceLinks.clear();
 //    originalAtomSpace->get_handles_by_type(back_inserter(allAtomSpaceLinks), (Type) LINK, true );
@@ -2757,6 +2779,7 @@ void PatternMiner::calculateSurprisingness( HTreeNode* HNode, AtomSpace *_fromAt
         HNode->nII_Surprisingness  = -1.000000000f;
         float minSurprisingness_II = 999999999.9f;
         vector<ExtendRelation>::iterator oneSuperRelationIt;
+        unsigned int actualProcessedRelationNum = 0;
         for(oneSuperRelationIt = HNode->superPatternRelations.begin();  oneSuperRelationIt != HNode->superPatternRelations.end(); ++ oneSuperRelationIt)
         {
             ExtendRelation& curSuperRelation = *oneSuperRelationIt;
@@ -2767,9 +2790,9 @@ void PatternMiner::calculateSurprisingness( HTreeNode* HNode, AtomSpace *_fromAt
             //            {
             //                // Ap is A's one supper pattern, E is the link pattern that extended
             //                // e.g.: M is the size of corpus
-            //                // A:  ( var_1 is from CAR ) && ( var_1 is horror ) , P(A) = 100/M
-            //                // A1: ( var_1 is from CAR ), A2: ( var_1 is horror )
-            //                // Ap: ( var_1 is from CAR ) && ( var_1 is horror ) && ( var_1 is male ) , P(Ap) = 99/M
+            //                // A:  ( var_1 is alien ) && ( var_1 is horror ) , P(A) = 100/M
+            //                // A1: ( var_1 is alien ), A2: ( var_1 is horror )
+            //                // Ap: ( var_1 is alien ) && ( var_1 is horror ) && ( var_1 is male ) , P(Ap) = 99/M
             //                // E:  ( var_1 is male )
             //                // Different from the super pattern type two bellow, E adds one more condition to var_1, so P(Ap) should be < or = P(A).
             //                // Surprisingness_II (A from Ap) =  min{|P(A) - P(Ap)*(P(Ai)/P(Ai&E))|} / P(A)
@@ -2837,17 +2860,24 @@ void PatternMiner::calculateSurprisingness( HTreeNode* HNode, AtomSpace *_fromAt
                 surpringnessIICalfile << "Surprisingness_II = |P(A) -P(Ap)/Count(E)| = " << Surprisingness_II << std::endl;
              }
 
+             actualProcessedRelationNum ++;
+
 
         }
 
 //        // debug
         if (OUTPUT_SURPRISINGNESS_CALCULATION_TO_FILE)
         {
-            surpringnessIICalfile << "Min Surprisingness_II  = " << minSurprisingness_II;
+            if (actualProcessedRelationNum > 0)
+                surpringnessIICalfile << "Min Surprisingness_II  = " << minSurprisingness_II;
+            else
+                surpringnessIICalfile << "actualProcessedRelationNum = 0. Min Surprisingness_II  = -1.0";
         }
 
-        if (HNode->superPatternRelations.size() > 0)
+        if ((HNode->superPatternRelations.size() > 0) && actualProcessedRelationNum)
+        {
             HNode->nII_Surprisingness = minSurprisingness_II/p;
+        }
         else
         {
             HNode->nII_Surprisingness = -1.0f;
@@ -3529,7 +3559,7 @@ void PatternMiner::queryPatternsWithFrequencySurprisingnessIRanges(unsigned int 
             resultFile << " SurprisingnessI = " << SurprisingnessI;
 
         string SurprisingnessII = toString(htreeNode->nII_Surprisingness);
-        if (SurprisingnessII != "0")
+//        if (SurprisingnessII != "0")
         resultFile << " SurprisingnessII = " << SurprisingnessII;
 
         resultFile << endl;
@@ -3606,7 +3636,7 @@ void PatternMiner::queryPatternsWithSurprisingnessIAndIIRanges(unsigned int min_
             resultFile << " SurprisingnessI = " << SurprisingnessI;
 
         string SurprisingnessII = toString(htreeNode->nII_Surprisingness);
-        if (SurprisingnessII != "0")
+//        if (SurprisingnessII != "0")
         resultFile << " SurprisingnessII = " << SurprisingnessII;
 
         resultFile << endl;
