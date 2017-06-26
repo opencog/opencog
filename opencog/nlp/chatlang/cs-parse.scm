@@ -57,18 +57,15 @@
 
   (cond
     ((has-match? "^\\(" str)
-        (format #t ">>lexer left parenthesis @ ~a\n" (show-location location))
         (cons
           (make-lexical-token 'LPAREN location #f)
           (match:suffix current-match)))
     ((has-match? "^\\)" str)
-        (format #t ">>lexer right parenthesis @ ~a\n" (show-location location))
         (cons
           (make-lexical-token 'RPAREN location #f)
           (match:suffix current-match)))
     ; Chatscript declarations
     ((has-match? "^concept:" str)
-        (format #t ">>lexer concept @ ~a\n" (show-location location))
         (tokenization-result 'CONCEPT location
           (get-concept-name (string-trim (match:suffix current-match)))))
     ((has-match? "^topic:" str)
@@ -109,7 +106,7 @@
 )
 
 (define (cs-lexer port)
-  (let ((cs-line "") (count 0))
+  (let ((cs-line ""))
     (lambda ()
       (if (string=? "" cs-line) (set! cs-line (read-line port)))
       (let ((port-location (get-source-location port)))
@@ -119,7 +116,6 @@
             (if (pair? result)
               (begin
                 (set! cs-line (cdr result))
-                (format #t "88888888=~a\n" cs-line)
                 (car result))
               (error
                   (format #f "Tokenizer issue => STRING = ~a, LOCATION = ~a"
