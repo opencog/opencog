@@ -32827,7 +32827,60 @@ which expands out to
 
 \end_inset
 
-What might these values be, in practice?
+
+\end_layout
+
+\begin_layout Standard
+What might these values be, in practice? As a worked example, consider the
+ word-pair (big, deal) in the 
+\noun on
+en_pairs_rthree
+\noun default
+ dataset.
+ It is observed 1039 times, out of 638845863 pair observations (639M) total.
+ Plugging and chugging, one gets 
+\begin_inset Formula $H=-\log_{2}p(\mbox{big},\mbox{deal})=19.23$
+\end_inset
+
+ and 
+\begin_inset Formula $\Delta H=0.552$
+\end_inset
+
+ which seems to be eminently reasonable.
+ The value of 
+\begin_inset Formula $\Delta H$
+\end_inset
+
+ depends only on 
+\begin_inset Formula $N(x,y)$
+\end_inset
+
+ and 
+\begin_inset Formula $N(*,*)$
+\end_inset
+
+ and is graphed below, for fixed 
+\begin_inset Formula $N(*,*)=639M$
+\end_inset
+
+.
+ It does not take very many observations to drive the uncertainty to a fairly
+ small value.
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Graphics
+	filename images/error.eps
+	width 60col%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+foo
 \end_layout
 
 \begin_layout Subsection*
