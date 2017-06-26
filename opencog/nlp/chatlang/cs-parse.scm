@@ -69,8 +69,8 @@
         (tokenization-result 'CONCEPT location
           (get-concept-name (string-trim (match:suffix current-match)))))
     ((has-match? "^topic:" str)
-        (format #t  ">>lexer topic @ ~a\n" (show-location location))
-        (make-lexical-token 'TOPIC location "a topic"))
+        (tokenization-result 'CONCEPT location
+          (get-concept-name (string-trim (match:suffix current-match)))))
     ((has-match? "^\r" str)
         (format #t  ">>lexer cr @ ~a\n" (show-location location))
         (make-lexical-token 'CR location #f))
@@ -93,7 +93,15 @@
     ((has-match? "^[rt]:" str)
         (format #t ">>lexer gambit @ ~a\n" (show-location location))
         (make-lexical-token 'GAMBIT location "a gambit"))
-    ((has-match? "^[a-zA-Z]+" str) ; This should always be at the end.
+    ((has-match? "^_" str)
+        (cons
+          (make-lexical-token '_ location #f)
+          (match:suffix current-match)))
+    ((has-match? "^~n" str)
+        (cons
+          (make-lexical-token '~n location #f)
+          (match:suffix current-match)))
+    ((has-match? "^[a-zA-Z-]+" str) ; This should always be at the end.
         (format #t ">>lexer literal @ ~a\n" (show-location location))
         (cons
           (make-lexical-token 'LITERAL location
@@ -134,7 +142,8 @@
   (lalr-parser
     ; Token (aka terminal symbol) definition
     (LPAREN RPAREN NEWLINE CR CONCEPT TOPIC RESPONDERS REJOINDERS GAMBIT
-      NotDefined COMMENT SAMPLE_INPUT LITERAL
+      NotDefined COMMENT SAMPLE_INPUT LITERAL _ WHITESPACE
+      ~n ;Range-restricted Wildcards
     )
 
     ; Parsing rules (aka nonterminal symbols)
@@ -155,12 +164,18 @@
 
     (declarations
       (CONCEPT LPAREN literals RPAREN) : (display-token (string-append $1 " = " $3))
-      (TOPIC) : (display-token $1)
+      (TOPIC LPAREN literals RPAREN) : (display-token (string-append $1 " = " $3))
     )
 
     (literals
-      (literals LITERAL) :  (display-token (string-append $1 " " $2))
+      (literals a-literal) :  (display-token (string-append $1 " " $2))
+      (a-literal) :  (display-token $1)
+    )
+
+    (a-literal
       (LITERAL) : (display-token $1)
+      (_ LITERAL) : (display-token (string-append "underscore_fn->" $2))
+      (LITERAL ~n) : (display-token (string-append $1 "<-range_wildecard"))
     )
 
     (rules
