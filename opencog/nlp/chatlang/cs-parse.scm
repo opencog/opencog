@@ -184,6 +184,12 @@
       (TOPIC LPAREN patterns RPAREN) : (display-token (string-append $1 " = " $3))
     )
 
+    (rules
+      (RESPONDERS) : (display-token $1)
+      (REJOINDERS) : (display-token $1)
+      (GAMBIT patterns) : (display-token (string-append "gambit = " $2))
+    )
+
     (patterns ; TODO: Give this a better name.
       (literals) : (display-token $1)
       (choices) : (display-token $1)
@@ -194,15 +200,6 @@
       (a-literal) :  (display-token $1)
     )
 
-    (choices
-      (choices choice) : (display-token (string-append $1 " " $2))
-      (choice) : (display-token $1)
-    )
-
-    (choice
-      (LSBRACKET literals RSBRACKET) : (display-token (string-append "choices_fn->" $2))
-    )
-
     (a-literal
       (LITERAL) : (display-token $1)
       (_ LITERAL) : (display-token (string-append "underscore_fn->" $2))
@@ -210,10 +207,13 @@
       (LITERAL COMMA) : (display-token (string-append $1 " " $2))
     )
 
-    (rules
-      (RESPONDERS) : (display-token $1)
-      (REJOINDERS) : (display-token $1)
-      (GAMBIT patterns) : (display-token (string-append "gambit = " $2))
+    (choices
+      (choices choice) : (display-token (string-append $1 " " $2))
+      (choice) : (display-token $1)
+    )
+
+    (choice
+      (LSBRACKET literals RSBRACKET) : (display-token (string-append "choices_fn->" $2))
     )
   )
 )
