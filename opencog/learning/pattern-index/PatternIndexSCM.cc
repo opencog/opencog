@@ -7,9 +7,9 @@ using namespace opencog;
 
 PatternIndexSCM::PatternIndexSCM() 
 {
-    static bool opencog_nlp_patternindex_init_done = false;
-    if (opencog_nlp_patternindex_init_done) return;
-    opencog_nlp_patternindex_init_done = true;
+    static bool opencog_learning_patternindex_init_done = false;
+    if (opencog_learning_patternindex_init_done) return;
+    opencog_learning_patternindex_init_done = true;
     scm_with_guile(init_in_guile, this);
     config().load("lib/opencog.conf");
 }
@@ -26,9 +26,8 @@ void PatternIndexSCM::init_in_module(void* data)
 
 void* PatternIndexSCM::init_in_guile(void* self)
 {
-    // XXX TODO CHange module name
-    scm_c_define_module("opencog nlp pattern-index", init_in_module, self);
-    scm_c_use_module("opencog nlp pattern-index");
+    scm_c_define_module("opencog learning pattern-index", init_in_module, self);
+    scm_c_use_module("opencog learning pattern-index");
     return NULL;
 }
 

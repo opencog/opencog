@@ -1,4 +1,4 @@
-(define-module (opencog nlp pattern-index))
+(define-module (opencog learning pattern-index))
 (load-extension "libpatternindex" "opencog_patternindex_init")
 
 (use-modules (opencog))

@@ -10,13 +10,13 @@ _*NOTE*: this is not a wrapper around OpenCog's PatternMatcher._
 
 The motivation behind this implementation are the applications that use
 Opencog's AtomSpace as data container. Such applications usually load a
-(potentially huge) bunch of pre-processed information to the AtomSpace and then
+(potentially huge) bunch of pre-processed information into the AtomSpace and then
 perform some sort of computation using this information (eventually generating
 more information which is stored back in the AtomSpace)
 
 Using AtomSpace information may be time-expensive specially if the number of
 atoms involved is huge. So having an index to perform faster lookup of patterns
-may be essential to allow the algorithms to run in an acceptable time.
+may be essential to allow the algorithms to run in acceptable time.
 
 So this module allows the user to do something like:
 
@@ -26,12 +26,11 @@ So this module allows the user to do something like:
 1. Optionally discard the index when it is no longer necessary (this will have no effect in the AtomSpace)
 
 Although it's not the main purpose of this module, Pattern Index have
-additional algorithms to perform pattern mining in the index patterns. Those
-algorithms have been written according to the methodology described in these
-documents:
+additional algorithms to perform pattern mining in the indexed patterns. Those
+algorithms follow the methodology described in the documents:
 
-* http://wiki.opencog.org/w/Pattern\_miner#Tutorial\_of\_running\_Pattern\_Miner\_in\_Opencog
-* http://wiki.opencog.org/w/Measuring\_Surprisingness
+* http://wiki.opencog.org/w/Pattern_miner#Tutorial_of_running_Pattern_Miner_in_Opencog
+* http://wiki.opencog.org/w/Measuring_Surprisingness
 
 _*NOTE*: this functionality is not a wrapper around OpenCog's PatternMiner_
 
@@ -307,22 +306,22 @@ Results are basically the same as the above but returned as a nested ListLink in
 To run the examples just execute one of these command lines (from ```build/```):
 
 ```
-./opencog/nlp/pattern-index/patternIndexQueryExample ../opencog/nlp/pattern-index/toy-example-query.scm ../opencog/nlp/pattern-index/ExampleConfig.conf
+./opencog/learning/pattern-index/patternIndexQueryExample ../opencog/learning/pattern-index/toy-example-query.scm ../opencog/learning/pattern-index/ExampleConfig.conf
 ```
 
 ```
-./opencog/nlp/pattern-index/patternIndexMiningExample ../opencog/nlp/pattern-index/toy-example-mining.scm ../opencog/nlp/pattern-index/ExampleConfig.conf
+./opencog/learning/pattern-index/patternIndexMiningExample ../opencog/learning/pattern-index/toy-example-mining.scm ../opencog/learning/pattern-index/ExampleConfig.conf
 ```
 
 ```
-guile -l ../opencog/nlp/pattern-index/pattern-index-query-example.scm
+guile -l ../opencog/learning/pattern-index/pattern-index-query-example.scm
 ```
 
 ```
-guile -l ../opencog/nlp/pattern-index/pattern-index-mining-example.scm
+guile -l ../opencog/learning/pattern-index/pattern-index-mining-example.scm
 ```
 
-_*NOTE*: The Scheme API read the configuration file in ```lib/opencog.conf```._
+_*NOTE*: The Scheme API read the configuration file in ```lib/opencog.conf``` so you need to add Pattern Index parameters to it. ```cat ../opencog/learning/pattern-index/ExampleConfig.conf >> ./lib/opencog.conf```_
 
 ## TODO
 

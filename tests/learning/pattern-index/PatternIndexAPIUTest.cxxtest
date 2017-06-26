@@ -1,0 +1,179 @@
+/*
+ * Copyright (C) 2017 by OpenCog Foundation
+ * All Rights Reserved
+ *
+ * Author: Andre Senna <https://github.com/andre-senna>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+#include <cxxtest/TestSuite.h>
+
+#include <opencog/util/Config.h>
+#include <opencog/atomspace/AtomSpace.h>
+#include <opencog/learning/pattern-index/PatternIndexAPI.h>
+#include <opencog/guile/SchemeEval.h>
+
+#include <vector>
+#include <stdio.h>
+
+using namespace opencog;
+
+class PatternIndexAPIUTest : public CxxTest::TestSuite
+{
+private:
+    const char *queringFile = "/tmp/__pi_test_query.scm";
+    std::string fname = queringFile;
+	AtomSpace atomSpace;
+    SchemeEval *schemeEval;
+
+public:
+	PatternIndexAPIUTest();
+	~PatternIndexAPIUTest();
+
+	void setUp();
+	void tearDown();
+
+    void test_createAndDelete();
+    void test_query();
+};
+
+// PatternIndexAPIUTest::PatternIndexAPIUTest() : _scm(&atomSpace) {}
+PatternIndexAPIUTest::PatternIndexAPIUTest() {}
+PatternIndexAPIUTest::~PatternIndexAPIUTest() {}
+
+void PatternIndexAPIUTest::setUp()
+{
+    SchemeEval::init_scheme();
+    SchemeEval::set_scheme_as(&atomSpace);
+    schemeEval = new SchemeEval(&atomSpace);
+
+	// Configure Pattern Miner parameters
+	config().set("Pattern_Max_Gram", "4");
+    config().set("PatternIndex::PatternCountCacheEnabled", "TRUE");
+    config().set("PatternIndex::DifferentAssignmentForDifferentVars", "TRUE");
+    config().set("PatternIndex::PermutationsOfVarsConsideredEquivalent", "TRUE");
+    config().set("PatternIndex::NumberOfEvaluationThreads", "4");
+    config().set("PatternIndex::MinimalFrequencyToComputeQualityMetric", "5");
+    config().set("PatternIndex::MaximumSizeOfCompoundFramesQueue", "5000000");
+    config().set("PatternIndex::PatternsGram", "3");
+    config().set("PatternIndex::MaximumNumberOfMiningResults", "10");
+    config().set("PatternIndex::PatternRankingMetric", "nisurprisingness");
+    config().set("PatternIndex::CoherenceFunction", "const1");
+    config().set("PatternIndex::CoherenceModulatorG", "oneOverCoherence");
+    config().set("PatternIndex::CoherenceModulatorH", "coherence");
+
+    FILE *f = fopen(queringFile, "w");
+    fputs("(SimilarityLink (ConceptNode \"human\") (ConceptNode \"monkey\"))\n", f);
+    fputs("(SimilarityLink (ConceptNode \"human\") (ConceptNode \"chimp\"))\n", f);
+    fputs("(SimilarityLink (ConceptNode \"chimp\") (ConceptNode \"monkey\"))\n", f);
+    fputs("(SimilarityLink (ConceptNode \"snake\") (ConceptNode \"earthworm\"))\n", f);
+    fputs("(SimilarityLink (ConceptNode \"rhino\") (ConceptNode \"triceratops\"))\n", f);
+    fputs("(SimilarityLink (ConceptNode \"snake\") (ConceptNode \"vine\"))\n", f);
+    fputs("(SimilarityLink (ConceptNode \"human\") (ConceptNode \"ent\"))\n", f);
+    fputs("(InheritanceLink (ConceptNode \"human\") (ConceptNode \"mammal\"))\n", f);
+    fputs("(InheritanceLink (ConceptNode \"monkey\") (ConceptNode \"mammal\"))\n", f);
+    fputs("(InheritanceLink (ConceptNode \"chimp\") (ConceptNode \"mammal\"))\n", f);
+    fputs("(InheritanceLink (ConceptNode \"mammal\") (ConceptNode \"animal\"))\n", f);
+    fputs("(InheritanceLink (ConceptNode \"reptile\") (ConceptNode \"animal\"))\n", f);
+    fputs("(InheritanceLink (ConceptNode \"snake\") (ConceptNode \"reptile\"))\n", f);
+    fputs("(InheritanceLink (ConceptNode \"dinosaur\") (ConceptNode \"reptile\"))\n", f);
+    fputs("(InheritanceLink (ConceptNode \"triceratops\") (ConceptNode \"dinosaur\"))\n", f);
+    fputs("(InheritanceLink (ConceptNode \"earthworm\") (ConceptNode \"animal\"))\n", f);
+    fputs("(InheritanceLink (ConceptNode \"rhino\") (ConceptNode \"mammal\"))\n", f);
+    fputs("(InheritanceLink (ConceptNode \"vine\") (ConceptNode \"plant\"))\n", f);
+    fputs("(InheritanceLink (ConceptNode \"ent\") (ConceptNode \"plant\"))\n", f);
+    fclose(f);
+
+}
+
+void PatternIndexAPIUTest::tearDown() 
+{  
+
+}
+
+void PatternIndexAPIUTest::test_createAndDelete()
+{
+    Handle key1 = PatternIndexAPI::getInstance().createIndex(fname);
+    Handle key2 = PatternIndexAPI::getInstance().createIndex(fname);
+    Handle key3 = PatternIndexAPI::getInstance().createIndex(fname);
+    TS_ASSERT_EQUALS(key1->getType(), ANCHOR_NODE);
+    TS_ASSERT_EQUALS(key2->getType(), ANCHOR_NODE);
+    TS_ASSERT_EQUALS(key3->getType(), ANCHOR_NODE);
+    PatternIndexAPI::getInstance().deleteIndex(key2);
+    TS_ASSERT_THROWS_NOTHING(PatternIndexAPI::getInstance().setProperty(key1, "PatternCountCacheEnabled", "true"));
+    TS_ASSERT_THROWS_ANYTHING(PatternIndexAPI::getInstance().setProperty(key2, "PatternCountCacheEnabled", "true"));
+    TS_ASSERT_THROWS_NOTHING(PatternIndexAPI::getInstance().setProperty(key3, "PatternCountCacheEnabled", "true"));
+    PatternIndexAPI::getInstance().deleteIndex(key1);
+    TS_ASSERT_THROWS_ANYTHING(PatternIndexAPI::getInstance().setProperty(key1, "PatternCountCacheEnabled", "true"));
+    TS_ASSERT_THROWS_ANYTHING(PatternIndexAPI::getInstance().setProperty(key2, "PatternCountCacheEnabled", "true"));
+    TS_ASSERT_THROWS_NOTHING(PatternIndexAPI::getInstance().setProperty(key3, "PatternCountCacheEnabled", "true"));
+    PatternIndexAPI::getInstance().deleteIndex(key3);
+    TS_ASSERT_THROWS_ANYTHING(PatternIndexAPI::getInstance().setProperty(key1, "PatternCountCacheEnabled", "true"));
+    TS_ASSERT_THROWS_ANYTHING(PatternIndexAPI::getInstance().setProperty(key2, "PatternCountCacheEnabled", "true"));
+    TS_ASSERT_THROWS_ANYTHING(PatternIndexAPI::getInstance().setProperty(key3, "PatternCountCacheEnabled", "true"));
+}
+
+void PatternIndexAPIUTest::test_query()
+{
+    Handle indexKey = PatternIndexAPI::getInstance().createIndex(fname);
+    bool flag1 = false;
+    bool flag2 = false;
+    bool flag3 = false;
+    bool flag4 = false;
+    
+    std::string queryStr = "(AndLink (SimilarityLink (VariableNode \"X\") (VariableNode \"Y\")) (NotLink (AndLink (InheritanceLink (VariableNode \"X\") (VariableNode \"Z\")) (InheritanceLink (VariableNode \"Y\") (VariableNode \"Z\")))))";
+    std::vector<PatternIndexAPI::QueryResult> queryResult;
+    patternindex().query(queryResult, indexKey, queryStr);
+    TS_ASSERT_EQUALS(queryResult.size(), 4);
+    for (unsigned int i = 0; i < queryResult.size(); i++) {
+        TS_ASSERT_EQUALS(queryResult.at(i).first.size(), 1);
+        Handle link = queryResult.at(i).first.at(0);
+        TS_ASSERT_EQUALS(link->getType(), SIMILARITY_LINK);
+        HandleSeq outgoing = link->getOutgoingSet();
+        TS_ASSERT_EQUALS(outgoing.size(), 2);
+        TS_ASSERT_EQUALS(outgoing.at(0)->getType(), CONCEPT_NODE)
+        TS_ASSERT_EQUALS(outgoing.at(1)->getType(), CONCEPT_NODE)
+        if (outgoing.at(0)->getName().compare("earthworm") == 0) {
+            flag1 = true;
+            TS_ASSERT(outgoing.at(1)->getName().compare("snake") == 0);
+        } else if (outgoing.at(0)->getName().compare("snake") == 0) {
+            flag1 = true;
+            TS_ASSERT(outgoing.at(1)->getName().compare("earthworm") == 0);
+        } else if (outgoing.at(0)->getName().compare("triceratops") == 0) {
+            flag2 = true;
+            TS_ASSERT(outgoing.at(1)->getName().compare("rhino") == 0);
+        } else if (outgoing.at(0)->getName().compare("rhino") == 0) {
+            flag2 = true;
+            TS_ASSERT(outgoing.at(1)->getName().compare("triceratops") == 0);
+        } else if (outgoing.at(0)->getName().compare("vine") == 0) {
+            flag3 = true;
+            TS_ASSERT(outgoing.at(1)->getName().compare("snake") == 0);
+        } else if (outgoing.at(0)->getName().compare("snake") == 0) {
+            flag3 = true;
+            TS_ASSERT(outgoing.at(1)->getName().compare("vine") == 0);
+        } else if (outgoing.at(0)->getName().compare("human") == 0) {
+            flag4 = true;
+            TS_ASSERT(outgoing.at(1)->getName().compare("ent") == 0);
+        } else if (outgoing.at(0)->getName().compare("ent") == 0) {
+            flag4 = true;
+            TS_ASSERT(outgoing.at(1)->getName().compare("human") == 0);
+        } else {
+            TS_FAIL("Wrong query() answer");
+        }
+    }
+    TS_ASSERT(flag1 && flag2 && flag3 && flag4)
+}

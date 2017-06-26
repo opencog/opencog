@@ -154,7 +154,7 @@ private:
     static const int OPERATOR_NOT;
 
     bool DEBUG = false;
-    bool LOCAL_DEBUG = true;
+    bool LOCAL_DEBUG = false;
 
     std::mutex miningResultsMutex;
     std::mutex compoundFrameMutex;

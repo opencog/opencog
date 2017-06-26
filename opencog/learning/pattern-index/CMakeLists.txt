@@ -45,7 +45,7 @@ INSTALL (FILES
 	TypeFrame.h
 	TypeFrameIndex.h
 	TypeFrameIndexBuilder.h
-	DESTINATION "include/${PROJECT_NAME}/nlp/scm2pgsql"
+	DESTINATION "include/${PROJECT_NAME}/learning/pattern-index"
 )
 
 ADD_GUILE_MODULE (pattern-index.scm)

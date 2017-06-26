@@ -87,11 +87,6 @@ int main(int argc, char *argv[]) {
         unsigned int delta2 = std::chrono::duration_cast<std::chrono::seconds>(t4 - t3).count();
         printf("Time to build index: %u seconds\n", delta1);
         printf("Time to mine patterns: %u seconds\n", delta2);
-        PartitionGenerator part(4, true);
-        while (! part.depleted()) {
-            part.printForDebug("", "\n");
-            part.generateNext();
-        }
     }
 
     return exitValue;
