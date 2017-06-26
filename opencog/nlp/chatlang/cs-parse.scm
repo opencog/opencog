@@ -4,6 +4,9 @@
 (use-modules (ice-9 regex))
 
 (define (display-token token)
+"
+  This is used as a place holder.
+"
   (if (lexical-token? token)
     (format #t
       "lexical-category = ~a, lexical-source = ~a, lexical-value = ~a\n"  (lexical-token-category token)
@@ -11,7 +14,7 @@
       (lexical-token-value token)
     )
     (begin
-      (display "passing on \n")
+      ;(display "passing on \n")
       token)
   )
 )
@@ -75,11 +78,11 @@
         (format #t  ">>lexer cr @ ~a\n" (show-location location))
         (make-lexical-token 'CR location #f))
     ((string=? "" str)
-        (format #t  ">>lexer newline @ ~a\n" (show-location location))
         (cons (make-lexical-token 'NEWLINE location #f) ""))
     ((has-match? "^#!" str) ; This should be checked always before #
+        ; TODO Add tester function for this
         (format #t  ">>lexer sample input @ ~a\n" (show-location location))
-        (make-lexical-token 'SAMPLE_INPUT location #f))
+        (cons (make-lexical-token 'SAMPLE_INPUT location #f) ""))
     ((has-match? "^#" str)
         (format #t  ">>lexer comment @ ~a\n" (show-location location))
         (make-lexical-token 'COMMENT location #f))
@@ -91,8 +94,9 @@
         (format #t ">>lexer rejoinder @ ~a\n" (show-location location))
         (make-lexical-token 'REJOINDERS location "a rejoinders"))
     ((has-match? "^[rt]:" str)
-        (format #t ">>lexer gambit @ ~a\n" (show-location location))
-        (make-lexical-token 'GAMBIT location "a gambit"))
+        (cons
+          (make-lexical-token 'GAMBIT location "a gambit")
+          (match:suffix current-match)))
     ((has-match? "^_" str)
         (cons
           (make-lexical-token '_ location #f)
@@ -101,8 +105,19 @@
         (cons
           (make-lexical-token '~n location #f)
           (match:suffix current-match)))
-    ((has-match? "^[a-zA-Z-]+" str) ; This should always be at the end.
-        (format #t ">>lexer literal @ ~a\n" (show-location location))
+    ((has-match? "^," str)
+        (cons
+          (make-lexical-token 'COMMA location ",")
+          (match:suffix current-match)))
+    ((has-match? "^\\[" str)
+        (cons
+          (make-lexical-token 'LSBRACKET location #f)
+          (match:suffix current-match)))
+    ((has-match? "^]" str)
+        (cons
+          (make-lexical-token 'RSBRACKET location #f)
+          (match:suffix current-match)))
+    ((has-match? "^[a-zA-Z-]+\\?*" str) ; This should always be at the end.
         (cons
           (make-lexical-token 'LITERAL location
             (match:substring current-match))
@@ -121,6 +136,7 @@
           (set! cs-line (read-line port))
           (set! initial-line cs-line)
         ))
+        (format #t ">>>>>>>>>>> line being processed ~a\n" (string->list cs-line))
       (let ((port-location (get-source-location port
                               (string-contains initial-line cs-line))))
         (if (eof-object? cs-line)
@@ -142,13 +158,14 @@
   (lalr-parser
     ; Token (aka terminal symbol) definition
     (LPAREN RPAREN NEWLINE CR CONCEPT TOPIC RESPONDERS REJOINDERS GAMBIT
-      NotDefined COMMENT SAMPLE_INPUT LITERAL _ WHITESPACE
+      NotDefined COMMENT SAMPLE_INPUT LITERAL _ WHITESPACE COMMA
       ~n ;Range-restricted Wildcards
+       LSBRACKET RSBRACKET ; Square Brackets []
     )
 
     ; Parsing rules (aka nonterminal symbols)
     (lines
-      (lines line) : (format #t "lines is ~a\n" $2)
+      (lines line) : (format #t "lines is ~a -- ~a\n" $1 $2)
       (line) : (format #t "line is ~a\n" $1)
     )
 
@@ -163,8 +180,13 @@
     )
 
     (declarations
-      (CONCEPT LPAREN literals RPAREN) : (display-token (string-append $1 " = " $3))
-      (TOPIC LPAREN literals RPAREN) : (display-token (string-append $1 " = " $3))
+      (CONCEPT LPAREN patterns RPAREN) : (display-token (string-append $1 " = " $3))
+      (TOPIC LPAREN patterns RPAREN) : (display-token (string-append $1 " = " $3))
+    )
+
+    (patterns ; TODO: Give this a better name.
+      (literals) : (display-token $1)
+      (choices) : (display-token $1)
     )
 
     (literals
@@ -172,16 +194,26 @@
       (a-literal) :  (display-token $1)
     )
 
+    (choices
+      (choices choice) : (display-token (string-append $1 " " $2))
+      (choice) : (display-token $1)
+    )
+
+    (choice
+      (LSBRACKET literals RSBRACKET) : (display-token (string-append "choices_fn->" $2))
+    )
+
     (a-literal
       (LITERAL) : (display-token $1)
       (_ LITERAL) : (display-token (string-append "underscore_fn->" $2))
       (LITERAL ~n) : (display-token (string-append $1 "<-range_wildecard"))
+      (LITERAL COMMA) : (display-token (string-append $1 " " $2))
     )
 
     (rules
       (RESPONDERS) : (display-token $1)
       (REJOINDERS) : (display-token $1)
-      (GAMBIT) : (display-token $1)
+      (GAMBIT patterns) : (display-token (string-append "gambit = " $2))
     )
   )
 )
