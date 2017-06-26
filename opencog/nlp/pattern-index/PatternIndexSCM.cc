@@ -1,6 +1,7 @@
 #include "PatternIndexSCM.h"
 #include "PatternIndexAPI.h"
 #include <opencog/guile/SchemePrimitive.h>
+#include <opencog/util/Config.h>
 
 using namespace opencog;
 
@@ -10,6 +11,7 @@ PatternIndexSCM::PatternIndexSCM()
     if (opencog_nlp_patternindex_init_done) return;
     opencog_nlp_patternindex_init_done = true;
     scm_with_guile(init_in_guile, this);
+    config().load("lib/opencog.conf");
 }
 
 PatternIndexSCM::~PatternIndexSCM() 

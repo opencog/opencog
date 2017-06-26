@@ -46,7 +46,7 @@ disk) given a huge SCM file which would never fit in RAM.  This functionality
 IS NOT IMPLEMENTED YET but it is an fairly-easy-to-implement new feature.
 
 Once we have this feature we would be able to do fairly fast lookup for
-patterns in huge datasets.
+patterns in huge datasets in disk.
 
 ## Relevant files for potential users (examples and API)
 
@@ -81,7 +81,7 @@ Reading the example programs mentioned above are the best way to understand how 
 #### Scheme
 
 `
-    (define indexKey (create-index (ConceptNode "toy-example-query.scm")))
+    (define indexKey (pi-create-index (ConceptNode "toy-example-query.scm")))
 `
 
 indexKey will be used in further calls to query or mine the newly created
@@ -316,7 +316,7 @@ Mapping:
 In scheme we use only one syntax:
 
 `
-    (query index-key (AndLink (SimilarityLink (VariableNode "X") (VariableNode "Y")) (SimilarityLink (VariableNode "Y") (VariableNode "Z"))))
+    (pi-query index-key (AndLink (SimilarityLink (VariableNode "X") (VariableNode "Y")) (SimilarityLink (VariableNode "Y") (VariableNode "Z"))))
 `
 
 Which return the same answer as the first syntax described above for C++.
@@ -356,8 +356,32 @@ resultPatterns is populated with the best found patterns. Actually with pairs `<
 #### Scheme
 
 `
-    (mine-patterns index-key)
+    (pi-mine-patterns index-key)
 `
 
 Results are basically the same as the above but returned as a nested ListLink instead of a structured type.
+
+## Running the example programs
+
+To run the examples just execute one of these command lines (from `build/`):
+
+`
+./opencog/nlp/pattern-index/patternIndexQueryExample ../opencog/nlp/pattern-index/toy-example-query.scm ../opencog/nlp/pattern-index/ExampleConfig.conf
+`
+
+`
+./opencog/nlp/pattern-index/patternIndexMiningExample ../opencog/nlp/pattern-index/toy-example-mining.scm ../opencog/nlp/pattern-index/ExampleConfig.conf
+`
+
+`
+guile -l ../opencog/nlp/pattern-index/pattern-index-query-example.scm
+`
+
+`
+guile -l ../opencog/nlp/pattern-index/pattern-index-mining-example.scm
+`
+
+*NOTE:* The Scheme API read the configuration file in `lib/opencog.conf`
+
+
 
