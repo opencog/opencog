@@ -16,11 +16,11 @@
   )
 )
 
-(define (get-source-location port)
+(define (get-source-location port column)
   (make-source-location
     (port-filename port)
     (port-line port)
-    (port-column port)
+    column
     (false-if-exception (ftell port))
     #f
   )
@@ -106,10 +106,15 @@
 )
 
 (define (cs-lexer port)
-  (let ((cs-line ""))
+  (let ((cs-line "") (initial-line ""))
     (lambda ()
-      (if (string=? "" cs-line) (set! cs-line (read-line port)))
-      (let ((port-location (get-source-location port)))
+      (if (string=? "" cs-line)
+        (begin
+          (set! cs-line (read-line port))
+          (set! initial-line cs-line)
+        ))
+      (let ((port-location (get-source-location port
+                              (string-contains initial-line cs-line))))
         (if (eof-object? cs-line)
           '*eoi*
           (let ((result (tokeniz (string-trim-both cs-line) port-location)))
