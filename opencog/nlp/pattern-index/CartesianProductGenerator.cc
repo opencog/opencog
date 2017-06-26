@@ -2,21 +2,10 @@
 
 using namespace opencog;
 
-//AQUI
-//
-//Adicionar simetria
-//Nao precisa gerar todas as combinacoes se for simetrico
-//i = 0
-//j = i + 1
-//k = j + 1
-//
-//verificar nos outros usos da classe se pode ser simetrico e se o avoidEqual
-//flag deve mesmo ser falso
-//
 CartesianProductGenerator::CartesianProductGenerator(unsigned int n, unsigned int m, bool avoidEqual, bool triangular)
 {
     if (triangular && !avoidEqual) {
-        throw std::runtime_error("Invalid setup. \"triangular\" flag overwrites \"avoidEqual\"\n");
+        throw std::runtime_error("Invalid setup. \"triangular\" flag overides \"avoidEqual\"\n");
     }
 
     avoidEqualFlag = avoidEqual;
@@ -86,7 +75,6 @@ unsigned int CartesianProductGenerator::at(unsigned int pos) const
 
 void CartesianProductGenerator::drop(unsigned int pos)
 {
-    //printf("Drop at %u\n", pos);
     if (pos >= cursorVector.size()) {
         throw std::runtime_error("Invalid position\n");
     } 
@@ -103,19 +91,21 @@ void CartesianProductGenerator::drop(unsigned int pos)
 void CartesianProductGenerator::checkForRepetition()
 {
     bool eqFlag = false;
-    for (unsigned int i = 0; i < cursorVector.size(); i++) {
-        for (unsigned int j = i + 1; j < cursorVector.size(); j++) {
-            if (cursorVector.at(i) == cursorVector.at(j)) {
-                eqFlag = true;
+    if (! depletedFlag) {
+        for (unsigned int i = 0; i < cursorVector.size(); i++) {
+            for (unsigned int j = i + 1; j < cursorVector.size(); j++) {
+                if (cursorVector.at(i) == cursorVector.at(j)) {
+                    eqFlag = true;
+                    break;
+                }
+            }
+            if (eqFlag) {
                 break;
             }
         }
         if (eqFlag) {
-            break;
+            generateNext();
         }
-    }
-    if (eqFlag) {
-        generateNext();
     }
 }
 

@@ -26,9 +26,9 @@
 #include <opencog/guile/SchemeEval.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atoms/base/Handle.h>
+#include <opencog/util/Config.h>
 
 #include "PatternIndexAPI.h"
-#include <opencog/guile/SchemeEval.h>
 
 using namespace opencog;
 
@@ -36,10 +36,13 @@ int main(int argc, char *argv[]) {
 
     int exitValue = 0;
 
-    if (argc != 2) {
-        fprintf(stderr, "Usage: %s <SCM file>\n", argv[0]);
+    if (argc != 3) {
+        fprintf(stderr, "Usage: %s <SCM file> <config file>\n", argv[0]);
         exitValue = 1;
     } else {
+
+        // Load configuration file
+        config().load(argv[2]);
 
         // AtomSpace setup
         AtomSpace atomSpace;
@@ -48,8 +51,7 @@ int main(int argc, char *argv[]) {
         SchemeEval *schemeEval = new SchemeEval(&atomSpace);
 
         // Create a new index given a SCM file
-        //int indexKey = PatternIndexAPI::getInstance().createNewIndex(argv[1]);
-        Handle indexKey = PatternIndexAPI::getInstance().createNewIndex_h(argv[1]);
+        Handle indexKey = patternindex().createIndex(argv[1]);
 
         // Optional setup of parameters which are relevant to PatternIndexAPI::query()
         //
@@ -58,19 +60,25 @@ int main(int argc, char *argv[]) {
         // performance.
         //
         // All parameters are described in PatternIndexAPI::setDefaultProperties(). 
-        PatternIndexAPI::getInstance().setProperty(indexKey, "PatternCountCacheEnabled", "true");
-        PatternIndexAPI::getInstance().setProperty(indexKey, "DifferentAssignmentForDifferentVars", "true");
-        PatternIndexAPI::getInstance().setProperty(indexKey, "PermutationsOfVarsConsideredEquivalent", "true");
+        patternindex().setProperty(indexKey, "PatternCountCacheEnabled", "true");
+        patternindex().setProperty(indexKey, "DifferentAssignmentForDifferentVars", "true");
+        patternindex().setProperty(indexKey, "PermutationsOfVarsConsideredEquivalent", "true");
         
         // Query
-        std::string queryStr = "(AndLink (SimilarityLink (VariableNode \"X\") (VariableNode \"Y\")) (SimilarityLink (VariableNode \"Y\") (VariableNode \"Z\")))";
-        Handle queryHandle = schemeEval->eval_h(queryStr);
-        std::vector<PatternIndexAPI::QueryResult> queryResult;
-        //PatternIndexAPI::getInstance().query(queryResult, indexKey, queryStr);
-        Handle resultHandle = PatternIndexAPI::getInstance().query(indexKey, queryHandle);
+        std::string queryStr1 = "(AndLink (SimilarityLink (VariableNode \"X\") (VariableNode \"Y\")) (SimilarityLink (VariableNode \"Y\") (VariableNode \"Z\")))";
+        Handle queryHandle = schemeEval->eval_h(queryStr1);
+        Handle resultHandle = patternindex().query(indexKey, queryHandle);
+        printf("Query1: %s\n", queryStr1.c_str());
+        printf("Result: %s", resultHandle->toString().c_str());
 
-        /*
-        printf("Query: %s\n", queryStr.c_str());
+        //
+        // optionally, query() may be called passing the SCM string
+        //
+
+        std::string queryStr2 = "(AndLink (SimilarityLink (VariableNode \"X\") (VariableNode \"Y\")) (NotLink (AndLink (InheritanceLink (VariableNode \"X\") (VariableNode \"Z\")) (InheritanceLink (VariableNode \"Y\") (VariableNode \"Z\")))))";
+        std::vector<PatternIndexAPI::QueryResult> queryResult;
+        patternindex().query(queryResult, indexKey, queryStr2);
+        printf("\n\nQuery2: %s\n", queryStr2.c_str());
         printf("%lu results\n", queryResult.size());
         for (unsigned int i = 0; i < queryResult.size(); i++) {
             printf("Result #%u:\n\n", i + 1);
@@ -82,9 +90,6 @@ int main(int argc, char *argv[]) {
                 printf("%s%s\n", queryResult.at(i).second.at(j).first->toString().c_str(), queryResult.at(i).second.at(j).second->toString().c_str());
             }
         }
-        */
-        printf("Result: %s", resultHandle->toString().c_str());
-
     }
 
     return exitValue;

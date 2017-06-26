@@ -30,8 +30,12 @@
 namespace opencog
 {
 
-/**
+/*
+ * A custom implementation of a mining result heap.
  *
+ * This is here because standard heap implementations (using priority_queue)
+ * have a couple of annoyances like the lack of an iterator and an elegant way
+ * to avoid equivalent answers to be kept.
  */
 class PatternHeap: public std::vector<std::pair<float, TypeFrame>>
 {

@@ -30,7 +30,38 @@
 namespace opencog
 {
 
-/**
+/*
+ * Implements a way to iterate thru all possible points of a cartesian product.
+ *
+ * For example, given N sets M elements each.
+ *
+ *   CartesianProductGenerator cart(N, M);
+ *   while (! cart.depleted()) {
+ *       cart.printForDebug("", "\n");
+ *       cart.generateNext();
+ *   }
+ *
+ * this piece of code would give us:
+ *
+ * (0 0 ... 0 0)
+ * (0 0 ... 0 1)
+ * (0 0 ... 0 2)
+ * ...
+ * (0 0 ... 0 M)
+ * (0 0 ... 1 0)
+ * (0 0 ... 1 1)
+ * ...
+ * ...
+ * (M M ... M M)
+ *
+ * At each point one may call at(pos) to get the selected element at a given
+ * position. In the above example, in the second iteration we would have:
+ *
+ * at(0) ==> 0
+ * at(1) ==> 0
+ * ...
+ * at(N - 2) ==> 0
+ * at(N - 1) ==> 1
  *
  */
 class CartesianProductGenerator 
@@ -38,8 +69,17 @@ class CartesianProductGenerator
 
 public:
 
+    /*
+     * The first constructor is the one from the example above, all the sets
+     * have the same cardinality. The second one is more generic as one can 
+     * pass a vector with the cardinality of each set.
+     *
+     * avoidEqual = true makes at(i) != at(j) for all i != j (any iteration)
+     * triangularFlag = true makes at(i) < at(j) for all i < j (any iteration)
+     */
     CartesianProductGenerator(unsigned int n, unsigned int m, bool avoidEqual = false, bool triangularFlag = false);
     CartesianProductGenerator(const std::vector<unsigned int> &v, bool avoidEqual = false, bool triangularFlag = false);
+
     ~CartesianProductGenerator();
     bool depleted() const;
     unsigned int at(unsigned int pos) const;

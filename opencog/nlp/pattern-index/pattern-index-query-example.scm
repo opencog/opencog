@@ -2,7 +2,7 @@
 (use-modules (opencog nlp pattern-index))
 
 (let (
-    (index-key  (create-new-index (ConceptNode "../opencog/nlp/pattern-index/toy-example-query.scm")))
+    (index-key  (create-index (ConceptNode "../opencog/nlp/pattern-index/toy-example-query.scm")))
     (query1 
         (AndLink 
             (SimilarityLink (VariableNode "X") (VariableNode "Y")) 

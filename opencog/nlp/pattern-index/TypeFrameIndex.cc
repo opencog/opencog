@@ -1,6 +1,7 @@
-#include <chrono>
 #include <limits>
 #include <unistd.h>
+
+#include <opencog/util/Logger.h>
 
 #include "TypeFrameIndex.h"
 #include "TypeFrame.h"
@@ -10,7 +11,6 @@
 
 using namespace opencog;
 
-
 const int TypeFrameIndex::OPERATOR_NOP = 0;
 const int TypeFrameIndex::OPERATOR_AND = 1;
 const int TypeFrameIndex::OPERATOR_OR = 2;
@@ -18,7 +18,10 @@ const int TypeFrameIndex::OPERATOR_NOT = 3;
 
 TypeFrameIndex::TypeFrameIndex() 
 {
-    // parameters
+    // Parameters
+    //
+    // These raw defaults are overwritten when TypeFrameIndex is used thru
+    // PatternIndexAPI.
     PATTERN_COUNT_CACHE_ENABLED = false;
     LIMIT_FOR_UNORDERED_LINKS_PERMUTATION = 5;
     NUMBER_OF_EVALUATION_THREADS = 4;
@@ -81,7 +84,6 @@ TypeFrame TypeFrameIndex::getFrameAt(int index)
 
 void TypeFrameIndex::addPatterns(std::vector<TypeFrame> &answer, const TypeFrame &base) const
 {
-    //answer.push_back(base);
     TypeFrameSet nodes;
     base.buildNodesSet(nodes, true, true);
     CombinationGenerator selected(nodes.size(), true, false);
@@ -357,7 +359,7 @@ std::pair<float,float> TypeFrameIndex::minMaxSubsetProb(const TypeFrame &pattern
             if (DEBUG) printFrameVector(starFrames);
             subsetVector.push_back(subsetFrames);
             starVector.push_back(starFrames);
-            // subsetFrames and starFrames have same size
+            // subsetFrames and starFrames have the same size
             sizes.push_back(subsetFrames.size());
         }
         CartesianProductGenerator cartesianGenerator(sizes);
@@ -483,7 +485,7 @@ bool TypeFrameIndex::enqueueCompoundFrame(const TypeFrame &compoundFrame)
     static unsigned int queueDebugCount = 0;
     if (DEBUG) printf("enqueueCompoundFrame() BEGIN\n");
     compoundFrameQueue.push(compoundFrame);
-    if (LOCAL_DEBUG && (!(queueDebugCount++ % 100000))) printf("Queue size: %ld\n",  compoundFrameQueue.size());
+    if (DEBUG && (!(queueDebugCount++ % 100000))) printf("Queue size: %ld\n",  compoundFrameQueue.size());
     if (DEBUG) printf("enqueueCompoundFrame() END\n");
     return (compoundFrameQueue.size() > MAX_SIZE_OF_COMPOUND_FRAMES_QUEUE);
 }
@@ -525,6 +527,7 @@ void TypeFrameIndex::addMiningResult(float quality, const TypeFrame &frame)
     miningResultsHeap.push(quality, frame);
 }
 
+// Executed by mining's working threads.
 void TypeFrameIndex::evaluatePatterns()
 {
     if (DEBUG) printf("evaluatePatterns() BEGIN\n");
@@ -554,67 +557,159 @@ void TypeFrameIndex::evaluatePatterns()
 
 void TypeFrameIndex::minePatterns(std::vector<std::pair<float,TypeFrame>> &answer)
 {
+    logger().info("[PatternIndex] Start mining");
     answer.clear();
 
-    floatUniverseCount = 1;
-    unsigned int n = frames.size();
-    for (unsigned int i = 0; i < PATTERNS_GRAM; i++) {
-        floatUniverseCount = floatUniverseCount * ((float) (n - i));
-        floatUniverseCount = floatUniverseCount / ((float) (i + 1));
-    }
-
-    EquivalentTypeFrameSet baseSet;
-
-    if (LOCAL_DEBUG) printf("frames.size(): %lu\n", frames.size());
-    for (unsigned int i = 0; i < frames.size(); i++) {
-        if (frames.at(i).topLevelIsLink() && (! frames.at(i).typeAtEqualsTo(0, "ListLink"))) {
-            baseSet.insert(frames.at(i));
-        }
-    }
-
-    std::vector<TypeFrame> base;
-    for (EquivalentTypeFrameSet::const_iterator it = baseSet.begin(); it != baseSet.end(); it++) {
-        base.push_back(*it);
-    }
-    if (LOCAL_DEBUG) printf("base.size(): %lu\n", base.size());
-
-    CartesianProductGenerator cartesianGenerator(PATTERNS_GRAM, base.size(), true, true);
-    TypeFrame compoundFrame;
+    // Setup
     this->patternCountCache.clear();
     miningResultsHeap.clear();
     miningResultsHeap.maxSize = MAXIMUM_NUMBER_OF_MINING_RESULTS;
     compoundFramesEnded = false;
     evaluationThreads.clear();
     for (int i = 0; i < (((int) NUMBER_OF_EVALUATION_THREADS) - 1); i++) {
+        // Working threads that will actually evaluate patterns.
+        // Threads will wait for compoundframes are ready to be evaluated.
+        //
+        // The -1 is because the main thread will work building the
+        // compoundFrames so it will take one of the processors.
+        // When main thread finish its job, the last working thread is
+        // created.
         evaluationThreads.push_back(new std::thread(&TypeFrameIndex::evaluatePatterns, this));
     }
-    unsigned int debugCount = 0;
-    while (! cartesianGenerator.depleted()) {
-        if (DEBUG) cartesianGenerator.printForDebug("compound selection: ", "\n");
-        compoundFrame.clear();
-        compoundFrame.push_back(TypePair(classserver().getType("AndLink"), 1));
-        compoundFrame.append(base.at(cartesianGenerator.at(PATTERNS_GRAM - 1)));
-        bool flag = true;
-        for (int c = ((int) PATTERNS_GRAM) - 2; c >= 0; c--) {
-            if (compoundFrame.nonEmptyNodeIntersection(base.at(cartesianGenerator.at(c)))) {
-                compoundFrame.at(0).second++;
-                compoundFrame.append(base.at(cartesianGenerator.at(c)));
-            } else {
-                cartesianGenerator.drop(c);
-                flag = false;
-                break;
+    EquivalentTypeFrameSet baseSet;
+
+    if (DEBUG) printf("frames.size(): %lu\n", frames.size());
+    // Build a set of subcomponents that will be used to build candidate
+    // compoundFrames. subcomponents are tipically links that will be glued
+    // together with an AndLink to build a compoundFrame. compoundFrames have
+    // their Nodes replaced by variables to build patterns.
+    //
+    // A set is used here because a subcomponent could be more complex
+    // subgraphs so we need to assure that two equivalent subcomponents are not
+    // inserted in "base". The size of "base" is crux to determine the
+    // processing time of the mining algorithm. Grown is NxNxNx...
+    // (PATTERNS_GRAM times)
+    for (unsigned int i = 0; i < frames.size(); i++) {
+        if (frames.at(i).topLevelIsLink() && (! frames.at(i).typeAtEqualsTo(0, "ListLink"))) {
+            baseSet.insert(frames.at(i));
+        }
+    }
+
+    // Comb(n, p) 
+    // n: number of possible components used to assemble a compoundFrame
+    // p: compoundFrame gram
+    floatUniverseCount = 1;
+    unsigned int n = baseSet.size();
+    for (unsigned int i = 0; i < PATTERNS_GRAM; i++) {
+        floatUniverseCount = floatUniverseCount * ((float) (n - i));
+        floatUniverseCount = floatUniverseCount / ((float) (i + 1));
+    }
+
+    // Copy the baseSet to a vector to ease further manipulation
+    // (memory waste is irrelevant)
+    std::vector<TypeFrame> base(baseSet.begin(), baseSet.end());
+    if (DEBUG) printf("base.size(): %lu\n", base.size());
+
+    // Only non-empty-intersection subcompounds are glued together to build a
+    // compoundFrame (intersection == sharing of at least 1 Node). Building (a
+    // priori) a list of non-empty-intersection elements for each element of 
+    // "base" will ease the buiding of compoundFrames
+    std::vector<std::vector<unsigned int>> neighbors;
+    std::vector<unsigned int> aux;
+    unsigned int progressIndicatorMax = 0;
+    unsigned int progressIndicatorCount = 0;
+    for (unsigned int i = 0; i < base.size(); i++) {
+        if (DEBUG) printf("setting neighbors for: %u\n", i);
+        if ((base.size() > 100) && (! (i % (base.size() / 100)))) logger().info("[PatternIndex] Step 1/2 %.0f%% done", ((float) i / base.size()) * 100);
+        aux.clear();
+        for (unsigned int j = i + 1; j < base.size(); j++) {
+            if (base.at(i).nonEmptyNodeIntersection(base.at(j))) {
+                aux.push_back(j);
             }
         }
-        if (flag) {
-             if (LOCAL_DEBUG && (!(debugCount++ % 100000))) cartesianGenerator.printForDebug("Evaluating: ", "\n");
-             if (enqueueCompoundFrame(compoundFrame)) {
-                 usleep(1000000); // 1 second
-             }
-        }
-        cartesianGenerator.generateNext();
+        neighbors.push_back(aux);
+        progressIndicatorMax += aux.size();
     }
+    logger().info("[PatternIndex] Step 1/2 100%% done");
+
+    // Populates the queue of compundFrames.
+    // This queue is processed by the working threads
+    std::vector<std::set<unsigned int>> selection;
+    std::vector<std::vector<unsigned int>> selectionVector;
+    std::vector<unsigned int> sizeVector;
+    std::vector<unsigned int> v;
+    std::set<unsigned int> s;
+    TypeFrame compoundFrame;
+    CartesianProductGenerator *cartesianGenerator;
+    for (unsigned int i = 0; i < base.size(); i++) {
+        // select a seed element from base
+        if ((progressIndicatorMax > 10000) && (! (progressIndicatorCount % (progressIndicatorMax / 10000)))) logger().info("[PatternIndex] Step 2/2 %.2f%% done", ((float) progressIndicatorCount / progressIndicatorMax) * 100);
+        progressIndicatorCount += neighbors.at(i).size();
+        if (DEBUG) printf("base[%u] : %lu\n", i, neighbors.at(i).size());
+        selection.clear();
+        selectionVector.clear();
+        sizeVector.clear();
+        s.clear();
+        s.insert(i);
+        selection.push_back(s);
+        for (unsigned int g = 1; g < PATTERNS_GRAM; g++) {
+            s.clear();
+            selection.push_back(s);
+            for (std::set<unsigned int>::const_iterator it = selection.at(g - 1).begin(); it != selection.at(g - 1).end(); it++) {
+                selection.at(g).insert(neighbors.at(*it).begin(), neighbors.at(*it).end());
+            }
+        }
+        for (unsigned int g = 0; g < PATTERNS_GRAM; g++) {
+            v.clear();
+            v.insert(v.end(), selection.at(g).begin(), selection.at(g).end());
+            selectionVector.push_back(v);
+            sizeVector.push_back(v.size());
+        }
+        // build every possible combination of PATTERNS_GRAM subcomponents that
+        // have non-empty-intersection amongst themselves.
+        cartesianGenerator = new CartesianProductGenerator(sizeVector, true, false);
+        while (! cartesianGenerator->depleted()) {
+            compoundFrame.clear();
+            compoundFrame.push_back(TypePair(classserver().getType("AndLink"), 0));
+            bool flag = true;
+            for (unsigned int g = 0; g < PATTERNS_GRAM; g++) {
+                if ((g > 0) && compoundFrame.containsEquivalent(base.at(selectionVector.at(g).at(cartesianGenerator->at(g))), 0)) {
+                    // Avoids repeated subcomponents
+                    flag = false;
+                    break;
+                } else {
+                    compoundFrame.at(0).second++;
+                    compoundFrame.append(base.at(selectionVector.at(g).at(cartesianGenerator->at(g))));
+                }
+            }
+            if (flag) {
+                if (DEBUG) {
+                    printf("compound frame: (");
+                    for (unsigned int g = 0; g < PATTERNS_GRAM; g++) {
+                        printf("%u", selectionVector.at(g).at(cartesianGenerator->at(g)));
+                        if (g < (PATTERNS_GRAM - 1)) {
+                            printf(" ");
+                        }
+                    }
+                    printf(")\n");
+                    compoundFrame.printForDebug("", "\n");
+                }
+                if (enqueueCompoundFrame(compoundFrame)) {
+                    usleep(1000000); // 1 second
+                }
+            }
+            cartesianGenerator->generateNext();
+        }
+        delete cartesianGenerator;
+    }
+    logger().info("[PatternIndex] Step 2/2 100%% done");
+
     setCompoundFramesEnded();
-    if (LOCAL_DEBUG) printf("Finished creating compound patterns. Waiting for threads to clear evaluation queue.\n");
+    if (DEBUG) printf("Finished creating compound patterns. Waiting for threads to clear evaluation queue.\n");
+    // The main thread finished its job of creating the compoundFrames so it
+    // will sit down and wait for the working threads to finish their jobs.
+    // So we start another working thread to avoid (potentially) letting an idle 
+    // processor.
     evaluationThreads.push_back(new std::thread(&TypeFrameIndex::evaluatePatterns, this));
 
     for (unsigned int i = 0; i < evaluationThreads.size(); i++) {
@@ -626,6 +721,7 @@ void TypeFrameIndex::minePatterns(std::vector<std::pair<float,TypeFrame>> &answe
     for (unsigned int i = 0; i < miningResultsHeap.size(); i++) {
         answer.push_back(miningResultsHeap.at(i));
     }
+    logger().info("[PatternIndex] Finished mining");
 }
 
 void TypeFrameIndex::permutation(std::vector<std::vector<int>> &answer, int *array, int current, int size)
@@ -1138,6 +1234,8 @@ void TypeFrameIndex::query(std::vector<ResultPair> &answer, TypeFrame &keyExpres
         }
     }
 
+    // Process the returned (recursive) answers according to the type of logical
+    // operation at this level.
     if (AndFlag) {
         if (DEBUG) printf("Start processing AND\n");
         logicOperator = OPERATOR_AND;
@@ -1220,9 +1318,6 @@ void TypeFrameIndex::query(std::vector<ResultPair> &answer, TypeFrame &keyExpres
                         } else {
                             if (DEBUG) {
                                 printf("(AND) rejecting non-compatible var maps:\n");
-                                //printVarMapping(aux[src].at(a).second);
-                                //printf("-\n");
-                                //printVarMapping(cleanRecursionQueryResult.at(i).at(b).second);
                             }
                         }
                     }

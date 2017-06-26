@@ -18,9 +18,10 @@ bool SCMLoader::load(const std::string &fileName,
         // Just to provide log message with % done
         int fileSize = fcount.tellg();
         fcount.close();
-        logger().info("Loading file: \"%s\"", fileName.c_str());
+        logger().info("[PatternIndex] Loading file: \"%s\"", fileName.c_str());
         parseFile(fin, atomSpace, fileSize, listener);
-        logger().info("Loading finished.");
+        logger().info("[PatternIndex] Loading file 100%% done");
+        logger().info("[PatternIndex] Loading finished");
         fin.close();
     } else {
         logger().error("Could not open file: \"%s\"", fileName.c_str());
@@ -29,58 +30,6 @@ bool SCMLoader::load(const std::string &fileName,
 
     return exitValue;
 }
-
-
-/*
-void SCMLoader::parseFile(std::fstream &fin, 
-                          AtomSpace &atomSpace, 
-                          int inputFileSize, 
-                          SCMLoaderCallback *listener)
-{
-    SchemeEval *schemeEval = SchemeEval::get_evaluator(&atomSpace);
-    int percentDone = 0;
-    int inputFileCharCount = 0;
-    bool firstCharInLine = false;
-    char c;
-    std::string line = "";
-    while (fin >> std::noskipws >> c) {
-        inputFileCharCount++;
-        if (c == '\n') {
-            firstCharInLine = true;
-            if (inputFileSize > 0) {
-                // Logs current % done
-                int n = (((float) inputFileCharCount) / inputFileSize) * 100;
-                if ((n > percentDone) && (n < 100)) {
-                    percentDone = n;
-                    logger().info("Loading file. %d%% done.", percentDone);
-                }
-            }
-        } else {
-            if (firstCharInLine) {
-                if (c == ')') {
-                    line += c;
-                    if (listener != NULL) listener->beforeInserting(line);
-                    schemeEval->eval(line);
-                    line = "";
-                } else if (c == '(') {
-                    if (listener != NULL) listener->beforeInserting(line);
-                    schemeEval->eval(line);
-                    line = c;
-                }
-                firstCharInLine = false;
-            } else {
-                line += c;
-            }
-        }
-    }
-    if (line != "") {
-        if (listener != NULL) listener->beforeInserting(line);
-        schemeEval->eval(line);
-    }
-    std::string output = schemeEval->eval("(count-all)");
-    logger().info("Atom count after loading: %s", output.c_str());
-}
-*/
 
 void SCMLoader::parseFile(std::fstream &fin, 
                           AtomSpace &atomSpace, 
@@ -96,7 +45,7 @@ void SCMLoader::parseFile(std::fstream &fin,
     char c;
     std::string line = "";
     std::string output1 = schemeEval->eval("(count-all)");
-    logger().info("Atom count before loading: %s", output1.c_str());
+    logger().info("[PatternIndex] Atom count before loading: %s", output1.c_str());
     while (fin >> std::noskipws >> c) {
         inputFileCharCount++;
         if (c == '\n') {
@@ -105,7 +54,7 @@ void SCMLoader::parseFile(std::fstream &fin,
                 int n = (((float) inputFileCharCount) / inputFileSize) * 100;
                 if ((n > percentDone) && (n < 100)) {
                     percentDone = n;
-                    logger().info("Loading file. %d%% done.", percentDone);
+                    logger().info("[PatternIndex] Loading file %d%% done", percentDone);
                 }
             }
             inComment = false;
@@ -133,5 +82,5 @@ void SCMLoader::parseFile(std::fstream &fin,
         }
     }
     std::string output2 = schemeEval->eval("(count-all)");
-    logger().info("Atom count after loading: %s", output2.c_str());
+    logger().info("[PatternIndex] Atom count after loading: %s", output2.c_str());
 }

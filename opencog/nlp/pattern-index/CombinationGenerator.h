@@ -31,6 +31,47 @@ namespace opencog
 {
 
 /**
+ * Implements an iterator to all the combinations of N elements of a set taken K
+ * by K.
+ *
+ * For example:
+ *
+ *   CombinationGenerator comb(3);
+ *   while (! comb.depleted()) {
+ *       comb.printForDebug("", "\n");
+ *       comb.generateNext();
+ *   }
+ *
+ * Whould give us:
+ *
+ *   (0 0 0)
+ *   (1 0 0)
+ *   (0 1 0)
+ *   (1 1 0)
+ *   (0 0 1)
+ *   (1 0 1)
+ *   (0 1 1)
+ *   (1 1 1)
+ *
+ *   CombinationGenerator comb(5, (unsigned int) 3);
+ *   while (! comb.depleted()) {
+ *       comb.printForDebug("", "\n");
+ *       comb.generateNext();
+ *   }
+ *
+ * Whould give us:
+ *
+ *   (1 1 1 0 0)
+ *   (1 1 0 1 0)
+ *   (1 0 1 1 0)
+ *   (0 1 1 1 0)
+ *   (1 1 0 0 1)
+ *   ...
+ *   ...
+ *   (0 0 1 1 1)
+ *
+ * At any iteration on may use at(pos) to check whether a given element is selected
+ * for that iteration or not.
  *
  */
 class CombinationGenerator 
@@ -38,6 +79,10 @@ class CombinationGenerator
 
 public:
 
+    /*
+     * avoidAllZero = true excludes the element (0 0 ... 0) 
+     * avoidAllOne = true excludes the element (1 1 ... 1) 
+     */
     CombinationGenerator(unsigned int n, bool avoidAllZero = false, bool avoidAllOne = false);
     CombinationGenerator(unsigned int n, unsigned int k);
 

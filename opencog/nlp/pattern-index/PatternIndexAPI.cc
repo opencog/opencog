@@ -1,6 +1,9 @@
 #include "PatternIndexAPI.h"
 
+#include <algorithm> 
+
 #include <opencog/guile/SchemePrimitive.h>
+#include <opencog/util/Config.h>
 #include "SCMLoader.h"
 #include "TypeFrameIndexBuilder.h"
 
@@ -10,16 +13,73 @@ PatternIndexAPI::PatternIndexAPI()
 {
     atomSpace = SchemeSmob::ss_get_env_as("PatternIndex");
     schemeEval = new SchemeEval(atomSpace);
+    lastUsedTicket = 0;
 }
 
 PatternIndexAPI::~PatternIndexAPI()
 {
-    for (unsigned int i = 0; i < indexVector.size(); i++) {
-        delete indexVector.at(i);
+    for (IndexMap::iterator it = indexes.begin(); it != indexes.end(); it++) {
+        delete (*it).second.first;
     }
 }
 
-void PatternIndexAPI::setDefaultProperties(PropertyMap &properties)
+std::string PatternIndexAPI::getStringProperty(StringMap &map, const std::string key)
+{
+    StringMap::iterator it = map.find(key);
+    if (it == map.end()) {
+        throw std::runtime_error("Invalid property key: " + key);
+    } else {
+        return (*it).second;
+    }
+}
+
+int PatternIndexAPI::getIntProperty(StringMap &map, const std::string key, int min, int max)
+{
+    int answer;
+
+    StringMap::iterator it = map.find(key);
+    if (it == map.end()) {
+        throw std::runtime_error("Invalid property key: " + key);
+    } else {
+        answer = std::stoi((*it).second);
+        if ((answer < min) || (answer > max)) {
+            throw std::runtime_error("Invalid value for " + key + ": " + std::to_string(answer));
+        }
+    }
+
+    return answer;
+}
+
+bool PatternIndexAPI::getBoolProperty(StringMap &map, const std::string key)
+{
+    bool answer;
+
+    StringMap::iterator it = map.find(key);
+    if (it == map.end()) {
+        throw std::runtime_error("Invalid property key: " + key);
+    } else {
+        std::string value = (*it).second;
+        std::transform(value.begin(), value.end(), value.begin(), ::tolower);
+        if (value.compare("true") == 0) {
+            answer = true;
+        } else if (value.compare("false") == 0) {
+            answer = false;
+        } else {
+            throw std::runtime_error("Invalid value for " + key + ": " + (*it).second);
+        }
+    }
+
+    return answer;
+}
+
+// Default properties are set using the config file
+void PatternIndexAPI::setDefaultProperty(StringMap &map, const std::string key)
+{
+    std::string value = config().get("PatternIndex::" + key);
+    map.insert(StringMap::value_type(key, value));
+}
+
+void PatternIndexAPI::setDefaultProperties(StringMap &properties)
 {
     // -----------------------------------------------------------------------
     // Relevant for querying and mining
@@ -34,7 +94,7 @@ void PatternIndexAPI::setDefaultProperties(PropertyMap &properties)
     // 
     // If the number of evaluation threads (see below) is set to n > 1
     // then this parameter is bypassed and the cache is automatically disabled.
-    properties.insert(PropertyMap::value_type("PatternCountCacheEnabled", "true"));
+    setDefaultProperty(properties, "PatternCountCacheEnabled");
 
     // -----------------------------------------------------------------------
     // Relevant for querying
@@ -67,7 +127,7 @@ void PatternIndexAPI::setDefaultProperties(PropertyMap &properties)
     // otherwise, the above result may be returned (depending on the other
     // settings).
     //
-    properties.insert(PropertyMap::value_type("DifferentAssignmentForDifferentVars", "true"));
+    setDefaultProperty(properties, "DifferentAssignmentForDifferentVars");
 
     // In queries with more than one VariableNode, if this parameter is set
     // "true" then permutation of variable assignments are considered
@@ -107,7 +167,7 @@ void PatternIndexAPI::setDefaultProperties(PropertyMap &properties)
     //
     // setting this parameter "true" will avoid this permutation in query result.
     //
-    properties.insert(PropertyMap::value_type("PermutationsOfVarsConsideredEquivalent", "true"));
+    setDefaultProperty(properties, "PermutationsOfVarsConsideredEquivalent");
 
     // -----------------------------------------------------------------------
     // Relevant for mining
@@ -116,7 +176,7 @@ void PatternIndexAPI::setDefaultProperties(PropertyMap &properties)
     // Need to be >= 1.
     // Usually this is set to the number of availables processors. There is no
     // point in using a larger value.
-    properties.insert(PropertyMap::value_type("NumberOfEvaluationThreads", "4"));
+    setDefaultProperty(properties, "NumberOfEvaluationThreads");
 
     // Used to mine patterns. Patterns that have a total count below this
     // threashold are discarded without being evaluated.
@@ -130,20 +190,17 @@ void PatternIndexAPI::setDefaultProperties(PropertyMap &properties)
     // before evaluation of the quality metric (surprinsingness, etc) so the
     // algorithm executes faster (the drawback is the possibility of discarding
     // a good - i.e high quality measure - pattern).
-    properties.insert(PropertyMap::value_type("MinimalFrequencyToComputeQualityMetric", "5"));
+    setDefaultProperty(properties, "MinimalFrequencyToComputeQualityMetric");
 
     // The size of an auxiliary queue used in the mining algorithm.
     // This parameter is here because it will determine the amount of memory
     // used by the mining algorithm.
     //
-    // Again, there is no default that makes sense for every application. In my
-    // tests, setting this to 5000000 will cause the mining algorithm to use
-    // +- 8G of RAM. But this will change for different datasets so you may need
-    // to adjust it to fit in your use case.
+    // Again, there is no default that makes sense for every application.
     //
     // In general, the mining algorithm will run slightly faster with larger
     // values. 
-    properties.insert(PropertyMap::value_type("MaximumSizeOfCompoundFramesQueue", "5000000"));
+    setDefaultProperty(properties, "MaximumSizeOfCompoundFramesQueue");
 
     // Only patterns of specified GRAM will be evaluated.
     // (see the PatternMiner documentation in Wiki to understand the meaning of a pattern's GRAM)
@@ -151,7 +208,7 @@ void PatternIndexAPI::setDefaultProperties(PropertyMap &properties)
     // This parameter have a HUGE effect in time performance and pattern overall
     // "quality". Usually "PatternsGram" < 3 will lead to useless patterns.
     // For large knowledge bases, searching for > 3 gram patterns is not viable.
-    properties.insert(PropertyMap::value_type("PatternsGram", "3"));
+    setDefaultProperty(properties, "PatternsGram");
 
     // The pattern searching algorithm will always keep the best
     // "MaximumNumberOfMiningResults" patterns found so far. When the search
@@ -161,7 +218,7 @@ void PatternIndexAPI::setDefaultProperties(PropertyMap &properties)
     // Internally, the algorithm keeps a heap of results. Thus although using
     // large (> 1000000) values here are possible, this may slow down the
     // search.
-    properties.insert(PropertyMap::value_type("MaximumNumberOfMiningResults", "10"));
+    setDefaultProperty(properties, "MaximumNumberOfMiningResults");
 
     // Patterns are evaluated according to this metric.
     // (see the PatternMiner documentation in Wiki to understand the metric
@@ -180,14 +237,14 @@ void PatternIndexAPI::setDefaultProperties(PropertyMap &properties)
     //
     // Normalized versions have the same (time) cost of the non-normalized
     // counterpart.
-    properties.insert(PropertyMap::value_type("PatternRankingMetric", "nisurprisingness"));
+    setDefaultProperty(properties, "PatternRankingMetric");
 
     // The function used to compute coherence(x: atom). It is used by the mining
     // algorithm to compute surprinsigness (a metric for a pattern's quality).
     //
     // Actually (currently) there's no alternative to the default "const1" which is
     // coherence(x) = 1 for all x.
-    properties.insert(PropertyMap::value_type("CoherenceFunction", "const1"));
+    setDefaultProperty(properties, "CoherenceFunction");
 
     // This is the function g(x) mentioned in the document that describes how to
     // compute surprisingness of a pattern. It is used by the mining
@@ -195,7 +252,7 @@ void PatternIndexAPI::setDefaultProperties(PropertyMap &properties)
     //
     // Actually (currently) there's no alternative to the default
     // "oneOverCoherence" which is g(x) = 1 / coherence(x).
-    properties.insert(PropertyMap::value_type("CoherenceModulatorG", "oneOverCoherence"));
+    setDefaultProperty(properties, "CoherenceModulatorG");
 
     // This is the function h(x) mentioned in the document that describes how to
     // compute surprisingness of a pattern. It is used by the mining
@@ -203,10 +260,10 @@ void PatternIndexAPI::setDefaultProperties(PropertyMap &properties)
     //
     // Actually (currently) there's no alternative to the default
     // "coherence" which is h(x) = coherence(x).
-    properties.insert(PropertyMap::value_type("CoherenceModulatorH", "coherence"));
+    setDefaultProperty(properties, "CoherenceModulatorH");
 }
 
-int PatternIndexAPI::createNewIndex(const std::string &scmPath)
+Handle PatternIndexAPI::createIndex(const std::string &scmPath)
 {
 
     int ticket = -1;
@@ -218,163 +275,103 @@ int PatternIndexAPI::createNewIndex(const std::string &scmPath)
         throw std::runtime_error("Error creating PatternIndex. SCM file is invalid.\n");
     } else {
         index->buildSubPatternsIndex();
-        ticket = indexVector.size();
-        indexVector.push_back(index);
-        PropertyMap prop;
-        setDefaultProperties(prop);
-        properties.push_back(prop);
+        ticket = ++lastUsedTicket;
+        StringMap properties;
+        setDefaultProperties(properties);
+        indexes.insert(IndexMap::value_type(ticket, std::make_pair(index, properties)));
     }
 
-    return ticket;
+    return atomSpace->add_node(ANCHOR_NODE, std::to_string(ticket));
 }
 
-Handle PatternIndexAPI::createNewIndex_h(const std::string &scmPath)
+void PatternIndexAPI::deleteIndex(Handle key)
 {
-    return atomSpace->add_node(ANCHOR_NODE, std::to_string(createNewIndex(scmPath)));
+    IndexMap::iterator it = indexes.find(std::stoi(key->getName()));
+    if (it == indexes.end()) {
+        throw std::runtime_error("Invalid index key: " + key->toString());
+    }
+
+    delete (*it).second.first;
+    indexes.erase(it);
 }
 
-void PatternIndexAPI::checkKey(int key)
+void PatternIndexAPI::applyProperties(Handle key)
 {
-    if ((key < 0) || (key >= (int) indexVector.size())) {
-        throw std::runtime_error("Invalid index key");
-    }
-}
-
-void PatternIndexAPI::applyProperties(int key)
-{
-    checkKey(key);
-    PropertyMap::iterator it;
-
-    it = properties.at(key).find("PatternCountCacheEnabled");
-    if ((*it).second.compare("true") == 0) {
-        indexVector.at(key)->PATTERN_COUNT_CACHE_ENABLED = true;
-    } else if ((*it).second.compare("false") == 0) {
-        indexVector.at(key)->PATTERN_COUNT_CACHE_ENABLED = false;
-    } else {
-        throw std::runtime_error("Invalid value for PatternCountCacheEnabled");
+    IndexMap::iterator it = indexes.find(std::stoi(key->getName()));
+    if (it == indexes.end()) {
+        throw std::runtime_error("Invalid index key: " + key->toString());
     }
 
-    it = properties.at(key).find("NumberOfEvaluationThreads");
-    int n = std::stoi((*it).second);
-    if (n > 0) {
-        indexVector.at(key)->NUMBER_OF_EVALUATION_THREADS = n;
-        if (n > 1) {
-            indexVector.at(key)->PATTERN_COUNT_CACHE_ENABLED = false;
-        }
+    TypeFrameIndex *index = (*it).second.first;
+
+    index->PATTERN_COUNT_CACHE_ENABLED = getBoolProperty((*it).second.second, "PatternCountCacheEnabled");
+    int n = getIntProperty((*it).second.second, "NumberOfEvaluationThreads", 1);
+    index->NUMBER_OF_EVALUATION_THREADS = n;
+    if (n > 1) {
+        index->PATTERN_COUNT_CACHE_ENABLED = false;
+    }
+    index->MINIMAL_FREQUENCY_TO_COMPUTE_QUALITY_METRIC = getIntProperty((*it).second.second, "MinimalFrequencyToComputeQualityMetric", 1);
+    index->MAX_SIZE_OF_COMPOUND_FRAMES_QUEUE = getIntProperty((*it).second.second, "MaximumSizeOfCompoundFramesQueue", 1);
+
+    std::string s = getStringProperty((*it).second.second, "CoherenceFunction");
+    if (s.compare("const1") == 0) {
+        index->COHERENCE_FUNCTION = TypeFrameIndex::CONST_1;
     } else {
-        throw std::runtime_error("Invalid value for NumberOfEvaluationThreads");
+        throw std::runtime_error("Invalid value for CoherenceFunction: " + s);
     }
 
-    it = properties.at(key).find("MinimalFrequencyToComputeQualityMetric");
-    n = std::stoi((*it).second);
-    if (n > 0) {
-        indexVector.at(key)->MINIMAL_FREQUENCY_TO_COMPUTE_QUALITY_METRIC = n;
+    s = getStringProperty((*it).second.second, "CoherenceModulatorG");
+    if (s.compare("oneOverCoherence") == 0) {
+        index->COHERENCE_MODULATOR_G = TypeFrameIndex::ONE_OVER_COHERENCE;
     } else {
-        throw std::runtime_error("Invalid value for MinimalFrequencyToComputeQualityMetric");
+        throw std::runtime_error("Invalid value for CoherenceModulatorG: " + s);
     }
 
-    it = properties.at(key).find("MaximumSizeOfCompoundFramesQueue");
-    n = std::stoi((*it).second);
-    if (n > 0) {
-        indexVector.at(key)->MAX_SIZE_OF_COMPOUND_FRAMES_QUEUE = n;
+    s = getStringProperty((*it).second.second, "CoherenceModulatorH");
+    if (s.compare("coherence") == 0) {
+        index->COHERENCE_MODULATOR_H = TypeFrameIndex::COHERENCE;
     } else {
-        throw std::runtime_error("Invalid value for MaximumSizeOfCompoundFramesQueue");
+        throw std::runtime_error("Invalid value for CoherenceModulatorH: " + s);
     }
 
-    //TODO: Change the way these functions are set
-    /*
-    it = properties.at(key).find("CoherenceFunction");
-    if ((*it).second.compare("const1") == 0) {
-        indexVector.at(key)->COHERENCE_FUNCTION = TypeFrameIndex::CONST1;
-    } else {
-        throw std::runtime_error("Invalid value for CoherenceFunction");
-    }
+    index->DIFFERENT_ASSIGNMENT_FOR_DIFFERENT_VARS = getBoolProperty((*it).second.second, "DifferentAssignmentForDifferentVars");
+    index->PERMUTATIONS_OF_VARS_CONSIDERED_EQUIVALENT = getBoolProperty((*it).second.second, "PermutationsOfVarsConsideredEquivalent");
+    index->PATTERNS_GRAM = getIntProperty((*it).second.second, "PatternsGram", 1);
+    index->MAXIMUM_NUMBER_OF_MINING_RESULTS = getIntProperty((*it).second.second, "MaximumNumberOfMiningResults", 1);
 
-    it = properties.at(key).find("CoherenceModulatorG");
-    if ((*it).second.compare("oneOverCoherence") == 0) {
-        indexVector.at(key)->COHERENCE_FUNCTION = TypeFrameIndex::ONE_OVER_COHERENCE;
+    s = getStringProperty((*it).second.second, "PatternRankingMetric");
+    if (s.compare("isurprisingness") == 0) {
+        index->PATTERN_RANKING_METRIC = TypeFrameIndex::I_SURPRISINGNESS;
+    } else if (s.compare("nisurprisingness") == 0) {
+        index->PATTERN_RANKING_METRIC = TypeFrameIndex::N_I_SURPRISINGNESS;
+    } else if (s.compare("iisurprisingness") == 0) {
+        index->PATTERN_RANKING_METRIC = TypeFrameIndex::II_SURPRISINGNESS;
+    } else if (s.compare("niisurprisingness") == 0) {
+        index->PATTERN_RANKING_METRIC = TypeFrameIndex::N_II_SURPRISINGNESS;
     } else {
-        throw std::runtime_error("Invalid value for CoherenceModulatorG");
-    }
-
-    it = properties.at(key).find("CoherenceModulatorH");
-    if ((*it).second.compare("coherence") == 0) {
-        indexVector.at(key)->COHERENCE_FUNCTION = TypeFrameIndex::COHERENCE;
-    } else {
-        throw std::runtime_error("Invalid value for CoherenceModulatorH");
-    }
-    */
-
-    it = properties.at(key).find("DifferentAssignmentForDifferentVars");
-    if ((*it).second.compare("true") == 0) {
-        indexVector.at(key)->DIFFERENT_ASSIGNMENT_FOR_DIFFERENT_VARS = true;
-    } else if ((*it).second.compare("false") == 0) {
-        indexVector.at(key)->DIFFERENT_ASSIGNMENT_FOR_DIFFERENT_VARS = false;
-    } else {
-        throw std::runtime_error("Invalid value for DifferentAssignmentForDifferentVars");
-    }
-
-    it = properties.at(key).find("PermutationsOfVarsConsideredEquivalent");
-    if ((*it).second.compare("true") == 0) {
-        indexVector.at(key)->PERMUTATIONS_OF_VARS_CONSIDERED_EQUIVALENT = true;
-    } else if ((*it).second.compare("false") == 0) {
-        indexVector.at(key)->PERMUTATIONS_OF_VARS_CONSIDERED_EQUIVALENT = false;
-    } else {
-        throw std::runtime_error("Invalid value for PermutationsOfVarsConsideredEquivalent");
-    }
-
-    it = properties.at(key).find("PatternsGram");
-    n = std::stoi((*it).second);
-    if (n > 0) {
-        indexVector.at(key)->PATTERNS_GRAM = n;
-    } else {
-        throw std::runtime_error("Invalid value for PatternsGram");
-    }
-
-    it = properties.at(key).find("MaximumNumberOfMiningResults");
-    n = std::stoi((*it).second);
-    if (n > 0) {
-        indexVector.at(key)->MAXIMUM_NUMBER_OF_MINING_RESULTS = n;
-    } else {
-        throw std::runtime_error("Invalid value for MaximumNumberOfMiningResults");
-    }
-
-    it = properties.at(key).find("PatternRankingMetric");
-    if ((*it).second.compare("isurprisingness") == 0) {
-        indexVector.at(key)->PATTERN_RANKING_METRIC = TypeFrameIndex::I_SURPRISINGNESS;
-    } else if ((*it).second.compare("nisurprisingness") == 0) {
-        indexVector.at(key)->PATTERN_RANKING_METRIC = TypeFrameIndex::N_I_SURPRISINGNESS;
-    } else if ((*it).second.compare("iisurprisingness") == 0) {
-        indexVector.at(key)->PATTERN_RANKING_METRIC = TypeFrameIndex::II_SURPRISINGNESS;
-    } else if ((*it).second.compare("niisurprisingness") == 0) {
-        indexVector.at(key)->PATTERN_RANKING_METRIC = TypeFrameIndex::N_II_SURPRISINGNESS;
-    } else {
-        throw std::runtime_error("Invalid value for PatternRankingMetric");
+        throw std::runtime_error("Invalid value for PatternRankingMetric: " + s);
     }
 }
 
 void PatternIndexAPI::setProperty(Handle key, const std::string &propertyName, const std::string &propertyValue)
 {
-    setProperty(std::stoi(key->getName()), propertyName, propertyValue);
-}
-
-void PatternIndexAPI::setProperty(int key, const std::string &propertyName, const std::string &propertyValue)
-{
-    checkKey(key);
-    PropertyMap::iterator it = properties.at(key).find(propertyName);
-    if (it == properties.at(key).end()) {
-        throw std::runtime_error("Invalid property name");
+    IndexMap::iterator it1 = indexes.find(std::stoi(key->getName()));
+    if (it1 == indexes.end()) {
+        throw std::runtime_error("Invalid index key: " + key->toString());
+    }
+    StringMap::iterator it2 = (*it1).second.second.find(propertyName);
+    if (it2 == (*it1).second.second.end()) {
+        throw std::runtime_error("Invalid property name: " + propertyName);
     } else {
-        (*it).second = propertyValue;
+        (*it2).second = propertyValue;
     }
 }
 
-void PatternIndexAPI::query(std::vector<QueryResult> &answer, int key, const TypeFrame &query)
+void PatternIndexAPI::query(std::vector<QueryResult> &answer, Handle key, const TypeFrame &query)
 {
     applyProperties(key);
-
     std::vector<TypeFrameIndex::ResultPair> queryResult;
-    indexVector.at(key)->query(queryResult, query);
+    indexes.find(std::stoi(key->getName()))->second.first->query(queryResult, query);
     for (unsigned int i = 0; i < queryResult.size(); i++) {
         HandleSeq atoms;
         VariableMapping mapping;
@@ -390,15 +387,14 @@ void PatternIndexAPI::query(std::vector<QueryResult> &answer, int key, const Typ
     }
 }
 
-void PatternIndexAPI::query(std::vector<QueryResult> &answer, int key, const std::string &queryStr)
+void PatternIndexAPI::query(std::vector<QueryResult> &answer, Handle key, const std::string &queryStr)
 {
     TypeFrame queryFrame(queryStr);
     query(answer, key, queryFrame);
 }
 
-Handle PatternIndexAPI::query(Handle keyNode, Handle queryLink)
+Handle PatternIndexAPI::query(Handle key, Handle queryLink)
 {
-    int key = std::stoi(keyNode->getName());
     TypeFrame queryFrame(queryLink);
 
     std::vector<QueryResult> queryResult;
@@ -418,20 +414,19 @@ Handle PatternIndexAPI::query(Handle keyNode, Handle queryLink)
     return atomSpace->add_link(LIST_LINK, resultVector);
 }
 
-void PatternIndexAPI::minePatterns(std::vector<MiningResult> &answer, int key)
+void PatternIndexAPI::minePatterns(std::vector<MiningResult> &answer, Handle key)
 {
     applyProperties(key);
 
     std::vector<std::pair<float,TypeFrame>> patterns;
-    indexVector.at(key)->minePatterns(patterns);
+    indexes.find(std::stoi(key->getName()))->second.first->minePatterns(patterns);
     for (unsigned int i = 0; i < patterns.size(); i++) {
         answer.push_back(std::make_pair(patterns.at(i).first, schemeEval->eval_h(patterns.at(i).second.toSCMString())));
     }
 }
 
-Handle PatternIndexAPI::minePatterns(Handle keyNode)
+Handle PatternIndexAPI::minePatterns(Handle key)
 {
-    int key = std::stoi(keyNode->getName());
     std::vector<MiningResult> miningResults;
     minePatterns(miningResults, key);
     HandleSeq resultVector;
@@ -442,3 +437,11 @@ Handle PatternIndexAPI::minePatterns(Handle keyNode)
 
     return atomSpace->add_link(LIST_LINK, resultVector);
 }
+
+// Compliance with OpenCog's style of singleton access.
+// using patternindex() or PatternIndexAPI::getInstance() is equivalent
+PatternIndexAPI &opencog::patternindex()
+{
+    return PatternIndexAPI::getInstance();
+}
+

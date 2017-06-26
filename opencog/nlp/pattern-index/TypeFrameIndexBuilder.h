@@ -30,9 +30,6 @@
 namespace opencog
 {
 
-/**
- *
- */
 class TypeFrameIndexBuilder : public SCMLoaderCallback
 {
 

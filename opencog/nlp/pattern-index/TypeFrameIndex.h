@@ -34,8 +34,90 @@
 namespace opencog
 {
 
-/**
+/*
+ * Implementation of the index abstraction. 
  *
+ * The index is actually a kind of "inverted list" of patterns pointing to the
+ * original data. Current implementation store original data (a set of TypeFrame
+ * wich is a representation of an atom) as a vector so the inverted list points
+ * to position is this vector. This could be easily changed to store original
+ * data in disk and make the inverted list point to location of actual data in
+ * the disk.
+ *
+ * The simple trick used to build the inverted list is this. When a TypeFrame
+ * (e.g. a Link) is inserted in the index, all the possible patterns that
+ * matches this TypeFrame are computed and added to to index pointing to the
+ * given TypeFrame.
+ *
+ * For example, if the following TypeFrame
+ *
+ * (EvaluationLink
+ *   (PredicateNode "stateOf")
+ *   (ListLink
+ *     (ConceptNode "Florida")
+ *     (COnceptNode "USA")
+ *   )
+ * )
+ *
+ * is inserted in the index. All the following patterns are recorded in the
+ * inverted list pointing to this Typeframe.
+ *
+ * (EvaluationLink
+ *   *
+ *   *
+ * )
+ *
+ * (EvaluationLink
+ *   (PredicateNode "stateOf")
+ *   *
+ * )
+ *
+ * (EvaluationLink
+ *   *
+ *   (ListLink
+ *     (ConceptNode "Florida")
+ *     (ConceptNode "USA")
+ *   )
+ * )
+ *
+ * (EvaluationLink
+ *   (PredicateNode "stateOf")
+ *   (ListLink
+ *     *
+ *     (ConceptNode "USA")
+ *   )
+ * )
+ *
+ * (EvaluationLink
+ *   (PredicateNode "stateOf")
+ *   (ListLink
+ *     (ConceptNode "Florida")
+ *     *
+ *   )
+ * )
+ *
+ * (EvaluationLink
+ *   *
+ *   (ListLink
+ *     *
+ *     (ConceptNode "USA")
+ *   )
+ * )
+ *
+ * (EvaluationLink
+ *   *
+ *   (ListLink
+ *     (ConceptNode "Florida")
+ *     *
+ *   )
+ * )
+ *
+ * To avoid combinatorial explosion, only arity-2 links have all its patterns
+ * possibilities explored this way (this could be easily extended to cover
+ * greater arity links).
+ *
+ * TODO: consider removing the querying and mining algorithms to specialized
+ * classes.
  */
 class TypeFrameIndex 
 {
@@ -47,10 +129,14 @@ public:
     typedef std::set<TypeFrame, TypeFrame::LessThan> TypeFrameSet;
     typedef std::set<TypeFrame, TypeFrame::LessThanUsingEquivalence> EquivalentTypeFrameSet;
     typedef std::pair<TypeFrameSet, VarMapping> ResultPair;
+
+    // TODO 
+    // This is not C++ style. Change these to use struct's () operator
     typedef enum RankingMetric {I_SURPRISINGNESS, N_I_SURPRISINGNESS, II_SURPRISINGNESS, N_II_SURPRISINGNESS} RankingMetric;
     typedef enum CoherenceFunction {CONST_1} CoherenceFunction;
     typedef enum CoherenceModulatorG {ONE_OVER_COHERENCE} CoherenceModulatorG;
     typedef enum CoherenceModulatorH {COHERENCE} CoherenceModulatorH;
+    // more public stuff below
 
 private:
 

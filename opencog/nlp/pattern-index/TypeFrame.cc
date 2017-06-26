@@ -518,12 +518,12 @@ bool TypeFrame::isEquivalent(const TypeFrame &other) const
     return isEquivalent(other, 0, 0);
 }
 
-bool TypeFrame::contains(const TypeFrame &other, unsigned int cursor) const
+bool TypeFrame::containsEquivalent(const TypeFrame &other, unsigned int cursor) const
 {
     bool answer = false;
 
     if (DEBUG) {
-        printf("contains()\n");
+        printf("containsEquivalent()\n");
         printForDebug("this: ", "\n", true);
         other.printForDebug("other:", "\n", true);
     }
@@ -533,7 +533,7 @@ bool TypeFrame::contains(const TypeFrame &other, unsigned int cursor) const
     } else {
         std::vector<int> argPos = getArgumentsPosition(cursor);
         for (unsigned int i = 0; i < argPos.size(); i++) {
-            if (contains(other, argPos.at(i))) {
+            if (containsEquivalent(other, argPos.at(i))) {
                 answer = true;
                 break;
             }

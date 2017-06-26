@@ -32,7 +32,8 @@ namespace opencog
 {
 
 /**
- *
+ * This class is a wrapper around PatternIndexAPI and contains all the black
+ * magic required to integrate PatternIndexAPI with Guile.
  */
 class PatternIndexSCM 
 {
@@ -44,13 +45,12 @@ public:
 
 private:
 
-
-    // Scheme API
-    Handle create_new_index(Handle scmPath);
+    // Scheme API - implementation of some public-defined scheme API
+    Handle create_index(Handle scmPath);
     Handle query(Handle indexKey, Handle queryLink);
     Handle minePatterns(Handle indexKey);
 
-    // Integration magic
+    // Guile integration magic
     void init();
     static void init_in_module(void* data);
     static void* init_in_guile(void* self);
@@ -60,6 +60,7 @@ private:
 
 }
 
+// Guile integration magic
 extern "C" {
     void opencog_patternindex_init(void);
 };

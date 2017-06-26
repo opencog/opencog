@@ -32,6 +32,35 @@ namespace opencog
 {
 
 /**
+ * Implements an iterator to all possible partitions of a set with a given cardinality.
+ *
+ * For example:
+ *
+ *
+ *   PartitionGenerator part(4);
+ *
+ *   while (! part.depleted()) {
+ *       part.printForDebug("", "\n");
+ *       part.generateNext();
+ *   }
+ *
+ * whould give us:
+ *
+ *   {{0} {1 2 3}}
+ *   {{1} {0 2 3}}
+ *   {{2} {0 1 3}}
+ *   {{3} {0 1 2}}
+ *   {{0} {1} {2 3}}
+ *   {{0} {2} {1 3}}
+ *   {{0} {3} {1 2}}
+ *   {{1} {2} {0 3}}
+ *   {{1} {3} {0 2}}
+ *   {{2} {3} {0 1}}
+ *   {{0} {1} {2} {3}}
+ *
+ * NOTE: trivial partition {{}, {0 1 2 3}} is EXCLUDED by default.
+ * 
+ * getPartition() may be used to get the partition at a given iteration.
  *
  */
 class PartitionGenerator 
@@ -74,6 +103,9 @@ public:
     };
     typedef std::set<IntegerSetSet, LessThanSetSet> IntegerSetSetSet;
 
+    /*
+     * includeTrivial = true will include the trivial partition of S: {{}, S}
+     */
     PartitionGenerator(unsigned int n, bool includeTrivial = false);
     ~PartitionGenerator();
     bool depleted() const;

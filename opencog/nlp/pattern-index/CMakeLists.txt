@@ -23,9 +23,13 @@ ADD_EXECUTABLE (patternIndexQueryExample patternIndexQueryExample.cc)
 ADD_EXECUTABLE (patternIndexMiningExample patternIndexMiningExample.cc)
 TARGET_LINK_LIBRARIES(patternIndexQueryExample
 	patternindex
+	${COGUTIL_LIBRARY}
+	${ATOMSPACE_LIBRARIES}
 )
 TARGET_LINK_LIBRARIES(patternIndexMiningExample
 	patternindex
+	${COGUTIL_LIBRARY}
+	${ATOMSPACE_LIBRARIES}
 )
 
 INSTALL (TARGETS patternindex DESTINATION "lib${LIB_DIR_SUFFIX}/opencog")

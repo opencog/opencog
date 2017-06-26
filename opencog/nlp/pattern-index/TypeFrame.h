@@ -35,6 +35,37 @@ namespace opencog
 typedef std::pair<Type, Arity> TypePair;
 
 /**
+ * TypeFrame is a representation of an atom in a format that make it easier to
+ * use to build an index.
+ *
+ * It is a vector of pairs (T, A) representing a subgraph (T = atom type, A =
+ * atom arity).
+ *
+ * Examples.
+ *
+ * (WordNode "name") 
+ *
+ * [(WORD_NODE, 0)]
+ *
+ * (SimilarityLink 
+ *   (ConceptNode "man") 
+ *   (ConceptNode "monkey")
+ * )
+ *
+ * [(SIMILARITY_LINK, 2) (ConceptNode 0) (ConceptNode 0)]
+ *
+ * (EvaluationLink
+ *   (PredicateNode "stateOf")
+ *   (ListLink
+ *     (ConceptNode "Florida")
+ *     (COnceptNode "USA")
+ *   )
+ * )
+ *
+ * [(EVALUATION_LINK, 2) (PREDICATE_NODE 0) (LIST_LINK 2) (CONCEPT_NODE 0) (CONCEPT_NODE 0)]
+ *
+ * Node names are also stored but in a separate hash table (hash key is the
+ * position of the node in the above array).
  *
  */
 class TypeFrame: public std::vector<TypePair>
@@ -129,7 +160,7 @@ public:
     bool equals(const TypeFrame &other) const;
     bool isEquivalent(const TypeFrame &other) const;
     int compareUsingEquivalence(const TypeFrame &other) const;
-    bool contains(const TypeFrame &other, unsigned int cursor = 0) const;
+    bool containsEquivalent(const TypeFrame &other, unsigned int cursor = 0) const;
     bool nodeNameDefined(unsigned int pos) const;
     std::string nodeNameAt(unsigned int pos) const;
     void setNodeNameAt(unsigned int pos, std::string name);
