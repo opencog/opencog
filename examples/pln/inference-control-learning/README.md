@@ -65,7 +65,7 @@ Experiment Algorithm
 1. Run the BC over each problem pj in PS, j is the problem index.
    Save the logs of each problem in opencog-i-j.log.
 2. Store in Si the number of solved problems for this iteration.
-3. Given opencog-i-j.log for j in |0, N), build a collection of
+3. Given opencog-i-j.log for j in 0 to N-1, build a collection of
    inference control rules, called ICRi (see Setion Inference Control
    Rule).
 4. If meta-termination hasn't occured repeat step 1 with passing ICRi
@@ -85,33 +85,35 @@ Inference Control Rule
 
 In this toy experiment the expected inference control rules should be
 that double, triple, etc, deductions are the ones likely to solve the
-problems.
-
-The inference control rules will be represent Cognitive Schematics,
-where
+problems. But generally the inference control rules will be represent
+as Cognitive Schematics, where
 
 * Context:
-  + Running the backward chainer to prove T
-  + About to choose what rule to expand and-BIT A from leaf L
-  + Fulfill some pattern
+  + The backward chainer has been queried to prove T
+  + Is about to choose what rule to expand and-BIT A from leaf L
+  + T, A, L fulfill some pattern
 * Action:
   + Expand with rule R
 * Result:
-  + Produce a subproof of T
+  + Produce a preproof of T
 
-A subproof is a back-inference-tree prefix (or suffix if you start
+A preproof is a back-inference-tree prefix (or suffix if you start
 from the axioms) of a complete proof of T. In other words it is a
-subtree with root T (thus as in graph theory, not computer data
+subtree with root T (such as in graph theory, not computer data
 structure) of an inference tree proving T.
 
-Typically the context that we are running the backward chainer to
-prove T and about to decide what rule to expand with will be assumed,
-because that it is the universal context of our experiment anyway.
-Also, choosing the next inference rule is only *one* decision amonst
-many others the BC has to make, but for now we'll ignore them.
+This experiment is simple enough that the context that the backward
+chainer has been queried to prove T can be ignored. The context that
+it is about to decide what rule to expand can be ignored as well since
+it is the universal context of our experiment anyway. Another context
+that hasn't been mentioned is the AtomSpace itself. Indeed an
+AtomSpace filled with different atoms means different axiom and rule
+sets, and thus different inference controls. Finally, it should be
+clear that choosing the next inference rule is only one decision among
+many others the BC has to make that are ignored for now.
 
 The simplest, most generic inference control rule that we can learn
-expresses the probability of expanding an and-BIT producing a subproof
+expresses the probability of expanding an and-BIT producing a preproof
 of any target. All other inference control rules are specializations
 of this rule.
 
@@ -135,7 +137,7 @@ ImplicationScope <TV>
       "$R"
     "$B"
   Evaluation
-    Predicate "subproof"
+    Predicate "preproof"
     List
       Variable "$B"
       Variable "$T"
@@ -143,7 +145,7 @@ ImplicationScope <TV>
 
 Such an inference control rule may already help a bit the Backward
 Chainer. Indeed partial instantiation over R will calculate the
-probability of a given rule to produce a subproof of any T. To obtain
+probability of a given rule to produce a preproof of any T. To obtain
 a partial instantiation over R, R is subtituted by a certain rule,
 called <rule>, and the TV over the ImplicationScope, called <rule-TV>,
 is obtained by direct evaluation over the subset of observations of
@@ -168,7 +170,7 @@ ImplicationScope <rule-TV>
       <rule>
     "$B"
   Evaluation
-    Predicate "subproof"
+    Predicate "preproof"
     List
       Variable "$B"
       Variable "$T"
@@ -197,7 +199,7 @@ ImplicationScope <target-andbit-rule-TV>
       <rule>
     "$B"
   Evaluation
-    Predicate "subproof"
+    Predicate "preproof"
     List
       Variable "$B"
       <target>
@@ -241,7 +243,7 @@ ImplicationScope <TV>
       "$B"
     <pattern>
   Evaluation
-    Predicate "subproof"
+    Predicate "preproof"
     List
       Variable "$B"
       Variable "$T"
@@ -352,7 +354,7 @@ Using Inference Control Rules
 -----------------------------
 
 The BC wants to use these inference control rules to estimate the
-probabilities of producing a subproof of T for all available inference
+probabilities of producing a preproof of T for all available inference
 rules, as explained in Section Inference Rule Probability
 Estimate. Once we have a distribution over inference rules
 
@@ -377,17 +379,19 @@ uncertainty, when k=n this amount to picking up the rule with highest
 probability, i.e. total certainty.
 
 This method doesn't work well when the probability estimates have very
-different confidences. One option is to account for confidence, if s
-is the probability estimate and c the confidence, then we may base
-tournament selection on score s*c instead of s alone. However if n is
-small this will still not be satisfactory. This is often the case in
-rule selection, as only a couple of rules may be valid for a given
-intermediary target. If n=2, then k can be either 1, total randomness,
-or 2, total determinism.
+different confidences. One option is to account for confidence in the
+score to be passed to tournament selection. If s is the probability
+estimate and c the confidence, then may consider s*c instead of s
+alone. This avoids to pick rules with large strength but low
+confidence, which is perfect for exploitation but bad for exploration.
+On top of that it doesn't work well if n is small, which is often the
+case in rule selection as only a couple of rules may be valid for a
+given intermediary target. If n=2, then k can be either 1, total
+randomness, or 2, total determinism.
 
-In order to address that, I suggest to calculate the actually
-distribution of choice given the distribution of success, there's
-actually a cost-effective way to do that.
+In order to address all that, I suggest to calculate the actually
+distribution of choice given the distribution of success. There's
+actually a cost-effective way to do it.
 
 Assume we have n rules with TVs tv1, ..., tvn. The idea is to
 calculate the probability that a rule is the best based on the pdfs,
@@ -400,7 +404,7 @@ Pi = I1_0^1 ... In_0^1
 ```
 
 where Pi is the probability that rule i is equal or better than all
-the other. 1(.) is the function returning 1 iff its expression is
+the others. 1(.) is the function returning 1 iff its expression is
 true, 0 otherwise.
 
 Such an integration is computationally expensive, O(m^n) where m is
