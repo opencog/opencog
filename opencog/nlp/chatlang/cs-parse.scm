@@ -136,6 +136,14 @@
         (cons
           (make-lexical-token '>> location #f)
           (match:suffix current-match)))
+    ((has-match? "^<" str) ; This should follow <<
+        (cons
+          (make-lexical-token '< location #f)
+          (match:suffix current-match)))
+    ((has-match? "^>" str) ; This should follow >>
+        (cons
+          (make-lexical-token '> location #f)
+          (match:suffix current-match)))
     ((has-match? "^\\*" str)
         (cons
           (make-lexical-token '* location #f)
@@ -187,7 +195,7 @@
     ; Token (aka terminal symbol) definition
     (LPAREN RPAREN NEWLINE CR CONCEPT TOPIC RESPONDERS REJOINDERS GAMBIT
       NotDefined COMMENT SAMPLE_INPUT LITERAL WHITESPACE COMMA NUM
-      _ * << >> ^
+      _ * << >> ^ < >
       ~n ; Range-restricted Wildcards
       ~ ; Concepts
        LSBRACKET RSBRACKET ; Square Brackets []
@@ -234,6 +242,7 @@
       (choices) : (display-token $1)
       (unordered-matchings) : (display-token $1)
       (function) : (display-token $1)
+      (sentence-boundaries) : (display-token $1)
     )
 
     (literals
@@ -267,6 +276,17 @@
 
     (unordered-matching
       (<< patterns >>) : (display-token (string-append "unordered-matchings->" $2))
+    )
+
+    (sentence-boundaries
+      (sentence-boundaries sentence-boundary) :
+          (display-token (string-append $1 " " $2))
+      (sentence-boundary) : (display-token $1)
+    )
+
+    (sentence-boundary
+      (< patterns) : (display-token (format #f "restart_matching(~a)" $2))
+      (patterns >) : (display-token (format #f "match_at_end(~a)" $1))
     )
 
     (function
