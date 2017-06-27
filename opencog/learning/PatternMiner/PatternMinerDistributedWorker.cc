@@ -358,7 +358,7 @@ void DistributedPatternMiner::growPatternsDepthFirstTask(unsigned int thread_ind
 
         swapOneLinkBetweenTwoAtomSpace(originalAtomSpace, observingAtomSpace, cur_link, outgoingLinks, outVariableNodes);
         Handle newLink = observingAtomSpace->add_link(cur_link->getType(), outgoingLinks);
-        newLink->merge(cur_link->getTruthValue());
+        newLink->setTruthValue(cur_link->getTruthValue());
 
 
         // Extract all the possible patterns from this originalLink, and extend till the max_gram links, not duplicating the already existing patterns
