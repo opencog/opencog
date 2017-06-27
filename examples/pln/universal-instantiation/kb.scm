@@ -1,7 +1,6 @@
-;; Knowledge-base of the universal instantiation example
-;;
-;; Says all concepts inherits from the abstractiverse
+;; Knowledge-base for the universal instantiation example
 
+;; All concepts inherits from the abstractverse
 (define forall
 (ForAll (stv 1 1)
   (TypedVariable
@@ -9,11 +8,10 @@
     (Type "ConceptNode"))
   (Inheritance
     (Variable "$C")
-    (Concept "Abstractiverse")))
+    (Concept "Abstractverse")))
 )
 
 ;; Instances of concepts
-
 (Concept "Cat")
 (Concept "Time")
 (Concept "Space")
