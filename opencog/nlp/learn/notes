@@ -10902,7 +10902,10 @@ double check...
 	(fold
 		(lambda (lipr sum) (+ sum (pair-obj 'pair-count lipr)))
 		0 (star-obj 'right-stars left-item)))
-	
+
+This eplicit check reports 638845863.0 so that's perfect.
+All atoms got loaded. Just some of the values did not.
+why?
 
 The freq is short: 0.9777130000000336 i.e. short by 
 14237957.7 = 14M out of 639M
