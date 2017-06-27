@@ -124,6 +124,14 @@
         (cons
           (make-lexical-token 'RSBRACKET location #f)
           (match:suffix current-match)))
+    ((has-match? "^<<" str)
+        (cons
+          (make-lexical-token '<< location #f)
+          (match:suffix current-match)))
+    ((has-match? "^>>" str)
+        (cons
+          (make-lexical-token '>> location #f)
+          (match:suffix current-match)))
     ((has-match? "^\\*" str)
         (cons
           (make-lexical-token '* location #f)
@@ -175,7 +183,7 @@
     ; Token (aka terminal symbol) definition
     (LPAREN RPAREN NEWLINE CR CONCEPT TOPIC RESPONDERS REJOINDERS GAMBIT
       NotDefined COMMENT SAMPLE_INPUT LITERAL WHITESPACE COMMA NUM
-      _ *
+      _ * << >>
       ~n ; Range-restricted Wildcards
       ~ ; Concepts
        LSBRACKET RSBRACKET ; Square Brackets []
@@ -205,6 +213,8 @@
     (rules
       (RESPONDERS a-literal LPAREN patterns RPAREN patterns) :
         (display-token (format #f "rejoiner(~a -> ~a)" $3 $5))
+      (RESPONDERS LPAREN patterns RPAREN patterns) :
+        (display-token (format #f "rejoiner(~a -> ~a)" $3 $5))
       (REJOINDERS LPAREN patterns RPAREN patterns) :
         (display-token (format #f "rejoiner(~a -> ~a)" $3 $5))
       (GAMBIT patterns) : (display-token (string-append "gambit = " $2))
@@ -213,6 +223,7 @@
     (patterns ; TODO: Give this a better name.
       (literals) : (display-token $1)
       (choices) : (display-token $1)
+      (unordered-matchings) : (display-token $1)
     )
 
     (literals
@@ -236,6 +247,16 @@
 
     (choice
       (LSBRACKET literals RSBRACKET) : (display-token (string-append "choices_fn->" $2))
+    )
+
+    (unordered-matchings
+      (unordered-matchings unordered-matching) :
+          (display-token (string-append $1 " " $2))
+      (unordered-matching) : (display-token $1)
+    )
+
+    (unordered-matching
+      (<< patterns >>) : (display-token (string-append "unordered-matchings->" $2))
     )
   )
 )
