@@ -144,6 +144,10 @@
         (cons
           (make-lexical-token '> location #f)
           (match:suffix current-match)))
+    ((has-match? "^\"" str)
+        (cons
+          (make-lexical-token 'DQUOTE location "\"")
+          (match:suffix current-match)))
     ((has-match? "^\\*" str)
         (cons
           (make-lexical-token '* location "*")
@@ -198,7 +202,8 @@
       _ * << >> ^ < >
       ~n ; Range-restricted Wildcards
       ~ ; Concepts
-       LSBRACKET RSBRACKET ; Square Brackets []
+      LSBRACKET RSBRACKET ; Square Brackets []
+      DQUOTE ; Double quote "
     )
 
     ; Parsing rules (aka nonterminal symbols)
@@ -316,6 +321,8 @@
 
     (a-sequence
       (LPAREN patterns RPAREN) : (display-token (format #f "sequence(~a)" $2))
+      (DQUOTE patterns DQUOTE) :
+        (display-token (format #f "sequence(~a ~a ~a)" $1 $2 $3))
     )
   )
 )
