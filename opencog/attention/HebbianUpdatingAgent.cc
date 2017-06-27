@@ -113,7 +113,7 @@ void HebbianUpdatingAgent::updateHebbianLinks(Handle source)
 
         //update truth value accordingly
         TruthValuePtr newtv = SimpleTruthValue::createTV(tc, 0.1);
-        h->merge(newtv);
+        h->setTruthValue(h->getTruthValue()->merge(newtv));
     }
 }
 
