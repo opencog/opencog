@@ -171,34 +171,79 @@ private:
     PatternCountMap patternCountCache;
     float floatUniverseCount;
 
-    void query(std::vector<ResultPair> &result, const TypeFrame &queryFrame, bool distinct, bool noPermutations) const;
-    void query(std::vector<ResultPair> &result, TypeFrame &keyExpression, std::vector<VarMapping> &forbiddenMappings, int &logicOperator, const TypeFrame &queryFrame, int cursor, bool distinct, bool noPermutations) const;
+    void query(std::vector<ResultPair> &result,
+               const TypeFrame &queryFrame,
+               bool distinct,
+               bool noPermutations) const;
+    void query(std::vector<ResultPair> &result,
+               TypeFrame &keyExpression,
+               std::vector<VarMapping> &forbiddenMappings,
+               int &logicOperator,
+               const TypeFrame &queryFrame,
+               int cursor, bool distinct,
+               bool noPermutations) const;
     void addPatternOccurrence(TypeFrame &pattern, int pos);
-    void addPermutations(std::vector<std::vector<int>> &answer, std::vector<int> base);
-    void addSymmetricPermutations(TypeFrameSet &answer, const TypeFrame &frame, unsigned int cursor);
-    void addArity2Patterns(std::vector<TypeFrame> &answer, std::vector<TypeFrame> &recurseResult1, std::vector<TypeFrame> &recurseResult2, TypeFrame &baseFrame, int cursor);
-    std::vector<TypeFrame> computeSubPatterns(TypeFrame &baseFrame, int cursorn, int pos);
-    void selectCurrentElement(TypeFrame &answer, StringMap &variableOccurrences, const TypeFrame &baseFrame, int cursor) const;
-    void buildConstraints(IntPairVector &constraints, StringMap &variableOccurrences) const;
-    void buildQueryTerm(TypeFrame &answer, StringMap &variableOccurrences, const TypeFrame &baseFrame, int cursor) const;
-    bool compatibleVarMappings(const VarMapping &map1, const VarMapping &map2, bool distinct) const;
-    bool mapCover(const VarMapping &map1, const VarMapping &map2) const;
-    bool equivalentVarMappings(const VarMapping &map1, const VarMapping &map2, bool distinct) const;
-    bool isForbiddenMapping(const VarMapping &mapping, const std::vector<VarMapping> &forbiddenVector) const;
-    void typeFrameSetUnion(TypeFrameSet &answer, const TypeFrameSet &set1, const TypeFrameSet &set2) const;
-    void varMappingUnion(VarMapping &answer, const VarMapping &map1, const VarMapping &map2) const;
-    void permutation(std::vector<std::vector<int>> &answer, int *array, int current, int size);
-    void addPatterns(std::vector<TypeFrame> &answer, const TypeFrame &base) const;
+    void addPermutations(std::vector<std::vector<int>> &answer,
+                         const std::vector<int> &base);
+    void addSymmetricPermutations(TypeFrameSet &answer,
+                                  const TypeFrame &frame,
+                                  unsigned int cursor);
+    void addArity2Patterns(std::vector<TypeFrame> &answer,
+                           std::vector<TypeFrame> &recurseResult1,
+                           std::vector<TypeFrame> &recurseResult2,
+                           TypeFrame &baseFrame,
+                           int cursor);
+    std::vector<TypeFrame> computeSubPatterns(TypeFrame &baseFrame,
+                                              int cursorn,
+                                              int pos);
+    void selectCurrentElement(TypeFrame &answer,
+                              StringMap &variableOccurrences,
+                              const TypeFrame &baseFrame,
+                              int cursor) const;
+    void buildConstraints(IntPairVector &constraints,
+                          StringMap &variableOccurrences) const;
+    void buildQueryTerm(TypeFrame &answer,
+                        StringMap &variableOccurrences,
+                        const TypeFrame &baseFrame,
+                        int cursor) const;
+    bool compatibleVarMappings(const VarMapping &map1,
+                               const VarMapping &map2,
+                               bool distinct) const;
+    bool mapCover(const VarMapping &map1,
+                  const VarMapping &map2) const;
+    bool equivalentVarMappings(const VarMapping &map1,
+                               const VarMapping &map2,
+                               bool distinct) const;
+    bool isForbiddenMapping(const VarMapping &mapping,
+                            const std::vector<VarMapping> &forbiddenVector) const;
+    void typeFrameSetUnion(TypeFrameSet &answer,
+                           const TypeFrameSet &set1,
+                           const TypeFrameSet &set2) const;
+    void varMappingUnion(VarMapping &answer,
+                         const VarMapping &map1,
+                         const VarMapping &map2) const;
+    void permutation(std::vector<std::vector<int>> &answer,
+                     int *array,
+                     int current,
+                     int size);
+    void addPatterns(std::vector<TypeFrame> &answer,
+                     const TypeFrame &base) const;
     float computeQuality(const TypeFrame &pattern);
     float computeISurprinsingness(const TypeFrame &pattern, bool normalized);
     float computeIISurprinsingness(const TypeFrame &pattern, bool normalized);
     unsigned int countPattern(const TypeFrame &pattern);
-    void addSupersetFrames(std::vector<TypeFrame> &answer, const TypeFrame &frame) const;
-    void addSubsetFrames(std::vector<TypeFrame> &subset, std::vector<TypeFrame> &star, const TypeFrame &frame) const;
-    void addInferredSetFrames(std::vector<TypeFrame> &subset, std::vector<TypeFrame> &star, const TypeFrame &frame, bool subSetFlag) const;
-    std::pair<float,float> minMaxIndependentProb(const TypeFrame &pattern);
-    std::pair<float,float> minMaxSubsetProb(const TypeFrame &pattern);
-    std::pair<float,float> minMaxSupersetProb(const TypeFrame &pattern);
+    void addSupersetFrames(std::vector<TypeFrame> &answer,
+                           const TypeFrame &frame) const;
+    void addSubsetFrames(std::vector<TypeFrame> &subset,
+                         std::vector<TypeFrame> &star,
+                         const TypeFrame &frame) const;
+    void addInferredSetFrames(std::vector<TypeFrame> &subset,
+                              std::vector<TypeFrame> &star,
+                              const TypeFrame &frame,
+                              bool subSetFlag) const;
+    std::pair<float, float> minMaxIndependentProb(const TypeFrame &pattern);
+    std::pair<float, float> minMaxSubsetProb(const TypeFrame &pattern);
+    std::pair<float, float> minMaxSupersetProb(const TypeFrame &pattern);
     bool enqueueCompoundFrame(const TypeFrame &compoundFrame);
     bool dequeueCompoundFrame(TypeFrame &compoundFrame);
     void setCompoundFramesEnded();

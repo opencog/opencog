@@ -10,6 +10,7 @@
 #include "CartesianProductGenerator.h"
 
 using namespace opencog;
+using namespace std;
 
 const int TypeFrameIndex::OPERATOR_NOP = 0;
 const int TypeFrameIndex::OPERATOR_AND = 1;
@@ -48,14 +49,14 @@ float TypeFrameIndex::computeCoherence(const TypeFrame &frame) const
 {
     switch (COHERENCE_FUNCTION) {
         case CONST_1: return 1;
-        default: throw std::runtime_error("Unknown coherence function\n");
+        default: throw runtime_error("Unknown coherence function\n");
     }
 }
 
 float TypeFrameIndex::one_over_x(float x) const
 {
-    if (x < std::numeric_limits<float>::epsilon()) {
-        return std::numeric_limits<float>::max();
+    if (x < numeric_limits<float>::epsilon()) {
+        return numeric_limits<float>::max();
     } else {
         return 1 / x;
     }
@@ -65,7 +66,7 @@ float TypeFrameIndex::gFunction(float x) const
 {
     switch (COHERENCE_MODULATOR_G) {
         case ONE_OVER_COHERENCE: return one_over_x(x);
-        default: throw std::runtime_error("Unknown coherence modulator G function\n");
+        default: throw runtime_error("Unknown coherence modulator G function\n");
     }
 }
 
@@ -73,7 +74,7 @@ float TypeFrameIndex::hFunction(float x) const
 {
     switch (COHERENCE_MODULATOR_H) {
         case COHERENCE: return x;
-        default: throw std::runtime_error("Unknown coherence modulator H function\n");
+        default: throw runtime_error("Unknown coherence modulator H function\n");
     }
 }
 
@@ -82,7 +83,8 @@ TypeFrame TypeFrameIndex::getFrameAt(int index)
     return frames.at(index);
 }
 
-void TypeFrameIndex::addPatterns(std::vector<TypeFrame> &answer, const TypeFrame &base) const
+void TypeFrameIndex::addPatterns(vector<TypeFrame> &answer,
+                                 const TypeFrame &base) const
 {
     TypeFrameSet nodes;
     base.buildNodesSet(nodes, true, true);
@@ -105,7 +107,7 @@ void TypeFrameIndex::addPatterns(std::vector<TypeFrame> &answer, const TypeFrame
         int count = 0;
         for (TypeFrameSet::iterator it = nodes.begin(); it != nodes.end(); it++) {
             if (selected.at(count)) {
-                std::string varName = "V" + std::to_string(count);
+                string varName = "V" + to_string(count);
                 for (unsigned int k = 0; k < pattern.size(); k++) {
                     if (pattern.subFrameAt(k).equals((*it))) {
                         pattern[k].first = classserver().getType("VariableNode");
@@ -130,7 +132,7 @@ float TypeFrameIndex::computeQuality(const TypeFrame &pattern)
         case N_I_SURPRISINGNESS: answer = computeISurprinsingness(pattern, true); break;
         case II_SURPRISINGNESS: answer = computeIISurprinsingness(pattern, false); break;
         case N_II_SURPRISINGNESS: answer = computeIISurprinsingness(pattern, true); break;
-        default: throw std::runtime_error("Unknown pattern ranking metric\n");
+        default: throw runtime_error("Unknown pattern ranking metric\n");
     }
 
     return answer;
@@ -145,7 +147,7 @@ unsigned int TypeFrameIndex::countPattern(const TypeFrame &pattern)
         }
     }
 
-    std::vector<TypeFrameIndex::ResultPair> queryAnswer;
+    vector<TypeFrameIndex::ResultPair> queryAnswer;
     query(queryAnswer, pattern, true, false);
     unsigned int answer = queryAnswer.size();
 
@@ -156,18 +158,24 @@ unsigned int TypeFrameIndex::countPattern(const TypeFrame &pattern)
     return answer;
 }
 
-void TypeFrameIndex::addSupersetFrames(std::vector<TypeFrame> &answer, const TypeFrame &frame) const
+void TypeFrameIndex::addSupersetFrames(vector<TypeFrame> &answer,
+                                       const TypeFrame &frame) const
 {
-    std::vector<TypeFrame> notUsed;
+    vector<TypeFrame> notUsed;
     addInferredSetFrames(answer, notUsed, frame, false);
 }
 
-void TypeFrameIndex::addSubsetFrames(std::vector<TypeFrame> &subset, std::vector<TypeFrame> &star, const TypeFrame &frame) const
+void TypeFrameIndex::addSubsetFrames(vector<TypeFrame> &subset,
+                                     vector<TypeFrame> &star,
+                                     const TypeFrame &frame) const
 {
     addInferredSetFrames(subset, star, frame, true);
 }
 
-void TypeFrameIndex::addInferredSetFrames(std::vector<TypeFrame> &subset, std::vector<TypeFrame> &star, const TypeFrame &frame, bool subSetFlag) const
+void TypeFrameIndex::addInferredSetFrames(vector<TypeFrame> &subset,
+                                          vector<TypeFrame> &star,
+                                          const TypeFrame &frame,
+                                          bool subSetFlag) const
 {
     subset.clear();
     TypeFrameSet nodes;
@@ -217,16 +225,16 @@ void TypeFrameIndex::addInferredSetFrames(std::vector<TypeFrame> &subset, std::v
     }
 }
 
-std::pair<float,float> TypeFrameIndex::minMaxIndependentProb(const TypeFrame &pattern)
+pair<float, float> TypeFrameIndex::minMaxIndependentProb(const TypeFrame &pattern)
 {
     float minP = 0;
     float maxP = 0;
 
     if (pattern.typeAtEqualsTo(0, "AndLink")) {
         if (DEBUG) printf("pattern is AndLink\n");
-        minP = std::numeric_limits<float>::max();
+        minP = numeric_limits<float>::max();
         unsigned int n = pattern.at(0).second;
-        std::vector<int> argPos = pattern.getArgumentsPosition(0);
+        vector<int> argPos = pattern.getArgumentsPosition(0);
         PartitionGenerator partitionGenerator(n);
         TypeFrame subPattern;
         TypeFrame aux;
@@ -260,12 +268,12 @@ std::pair<float,float> TypeFrameIndex::minMaxIndependentProb(const TypeFrame &pa
         }
     }
 
-    std::pair<float, float> answer = std::make_pair(minP, maxP);
+    pair<float, float> answer = make_pair(minP, maxP);
     
     return answer;
 }
 
-std::pair<float,float> TypeFrameIndex::minMaxSupersetProb(const TypeFrame &pattern)
+pair<float, float> TypeFrameIndex::minMaxSupersetProb(const TypeFrame &pattern)
 {
     float minP = 0;
     float maxP = 0;
@@ -273,19 +281,19 @@ std::pair<float,float> TypeFrameIndex::minMaxSupersetProb(const TypeFrame &patte
     if (pattern.typeAtEqualsTo(0, "AndLink")) {
         if (DEBUG) printf("pattern is AndLink\n");
         unsigned int n = pattern.at(0).second;
-        std::vector<int> argPos = pattern.getArgumentsPosition(0);
+        vector<int> argPos = pattern.getArgumentsPosition(0);
         TypeFrame aux;
         TypeFrame spotFrame;
         TypeFrame compoundFrame;
         for (unsigned int i = 0; i < n; i++) {
             spotFrame.clear();
             spotFrame = pattern.subFrameAt(argPos.at(i));
-            std::vector<TypeFrame> supersetFrames;
+            vector<TypeFrame> supersetFrames;
             if (DEBUG) spotFrame.printForDebug("spotFrame: ", "\n");
             addSupersetFrames(supersetFrames, spotFrame);
             if (DEBUG) printFrameVector(supersetFrames);
             if (supersetFrames.size() > 0) {
-                minP = std::numeric_limits<float>::max();
+                minP = numeric_limits<float>::max();
             }
             for (unsigned int k = 0; k < supersetFrames.size(); k++) {
                 unsigned int countSpot = countPattern(spotFrame);
@@ -327,10 +335,10 @@ std::pair<float,float> TypeFrameIndex::minMaxSupersetProb(const TypeFrame &patte
         }
     }
 
-    return std::make_pair(minP, maxP);
+    return make_pair(minP, maxP);
 }
 
-std::pair<float,float> TypeFrameIndex::minMaxSubsetProb(const TypeFrame &pattern)
+pair<float, float> TypeFrameIndex::minMaxSubsetProb(const TypeFrame &pattern)
 {
     float minP = 0;
     float maxP = 0;
@@ -341,12 +349,12 @@ std::pair<float,float> TypeFrameIndex::minMaxSubsetProb(const TypeFrame &pattern
     if (pattern.typeAtEqualsTo(0, "AndLink")) {
         if (DEBUG) printf("pattern is AndLink\n");
         unsigned int n = pattern.at(0).second;
-        std::vector<int> argPos = pattern.getArgumentsPosition(0);
-        std::vector<std::vector<TypeFrame>> subsetVector;
-        std::vector<std::vector<TypeFrame>> starVector;
-        std::vector<TypeFrame> subsetFrames;
-        std::vector<TypeFrame> starFrames;
-        std::vector<unsigned int> sizes;
+        vector<int> argPos = pattern.getArgumentsPosition(0);
+        vector<vector<TypeFrame>> subsetVector;
+        vector<vector<TypeFrame>> starVector;
+        vector<TypeFrame> subsetFrames;
+        vector<TypeFrame> starFrames;
+        vector<unsigned int> sizes;
         TypeFrame aux;
         TypeFrame compoundFrame;
         TypeFrame compoundStar;
@@ -364,7 +372,7 @@ std::pair<float,float> TypeFrameIndex::minMaxSubsetProb(const TypeFrame &pattern
         }
         CartesianProductGenerator cartesianGenerator(sizes);
         if (! cartesianGenerator.depleted()) {
-            minP = std::numeric_limits<float>::max();
+            minP = numeric_limits<float>::max();
         }
         while (! cartesianGenerator.depleted()) {
             if (DEBUG) cartesianGenerator.printForDebug("Cartesian selection: ", "\n");
@@ -382,7 +390,7 @@ std::pair<float,float> TypeFrameIndex::minMaxSubsetProb(const TypeFrame &pattern
                 productMax *= gFunction(coherence);
             }
             if (DEBUG) compoundStar.printForDebug("compoundStar: ", "\n");
-            std::pair<float,float> ind = minMaxIndependentProb(compoundStar);
+            pair<float, float> ind = minMaxIndependentProb(compoundStar);
             if (DEBUG) printf("ind = <%f,%f>\n", ind.first, ind.second);
             unsigned int countCompound = countPattern(compoundFrame);
             if (DEBUG) printf("%u: ", countCompound);
@@ -396,10 +404,11 @@ std::pair<float,float> TypeFrameIndex::minMaxSubsetProb(const TypeFrame &pattern
         }
     }
 
-    return std::make_pair(minP, maxP);
+    return make_pair(minP, maxP);
 }
 
-float TypeFrameIndex::computeISurprinsingness(const TypeFrame &pattern, bool normalized)
+float TypeFrameIndex::computeISurprinsingness(const TypeFrame &pattern,
+                                              bool normalized)
 {
     if (DEBUG) printf("computeISurprinsingness()\n");
     if (DEBUG) pattern.printForDebug("", "\n");
@@ -416,7 +425,7 @@ float TypeFrameIndex::computeISurprinsingness(const TypeFrame &pattern, bool nor
         return 0;
     }
 
-    std::pair<float,float> pair = minMaxIndependentProb(pattern);
+    pair<float, float> pair = minMaxIndependentProb(pattern);
 
     float c1 = pFull - pair.second;
     float c2 = pair.first - pFull;
@@ -429,7 +438,8 @@ float TypeFrameIndex::computeISurprinsingness(const TypeFrame &pattern, bool nor
     return answer;
 }
 
-float TypeFrameIndex::computeIISurprinsingness(const TypeFrame &pattern, bool normalized)
+float TypeFrameIndex::computeIISurprinsingness(const TypeFrame &pattern,
+                                               bool normalized)
 {
     if (DEBUG) printf("computeIISurprinsingness()\n");
     if (DEBUG) pattern.printForDebug("", "\n");
@@ -445,13 +455,13 @@ float TypeFrameIndex::computeIISurprinsingness(const TypeFrame &pattern, bool no
         return 0;
     }
 
-    std::pair<float,float> minMaxInd = minMaxIndependentProb(pattern);
+    pair<float, float> minMaxInd = minMaxIndependentProb(pattern);
     if (DEBUG) printf("minMaxInd = <%f,%f>\n", minMaxInd.first, minMaxInd.second);
 
-    std::pair<float,float> minMaxSuper = minMaxSupersetProb(pattern);
+    pair<float, float> minMaxSuper = minMaxSupersetProb(pattern);
     if (DEBUG) printf("minMaxSuper = <%f,%f>\n", minMaxSuper.first, minMaxSuper.second);
 
-    std::pair<float,float> minMaxSub = minMaxSubsetProb(pattern);
+    pair<float, float> minMaxSub = minMaxSubsetProb(pattern);
     if (DEBUG) printf("minMaxSub = <%f,%f>\n", minMaxSub.first, minMaxSub.second);
 
     float imaxP = minMaxInd.second;
@@ -481,7 +491,7 @@ float TypeFrameIndex::computeIISurprinsingness(const TypeFrame &pattern, bool no
 
 bool TypeFrameIndex::enqueueCompoundFrame(const TypeFrame &compoundFrame)
 {
-    std::lock_guard<std::mutex> lock(compoundFrameMutex);
+    lock_guard<mutex> lock(compoundFrameMutex);
     static unsigned int queueDebugCount = 0;
     if (DEBUG) printf("enqueueCompoundFrame() BEGIN\n");
     compoundFrameQueue.push(compoundFrame);
@@ -492,7 +502,7 @@ bool TypeFrameIndex::enqueueCompoundFrame(const TypeFrame &compoundFrame)
 
 bool TypeFrameIndex::dequeueCompoundFrame(TypeFrame &compoundFrame)
 {
-    std::lock_guard<std::mutex> lock(compoundFrameMutex);
+    lock_guard<mutex> lock(compoundFrameMutex);
     if (DEBUG) printf("dequeueCompoundFrame() BEGIN\n");
     bool answer = false;
     if (compoundFrameQueue.size() > 0) {
@@ -507,7 +517,7 @@ bool TypeFrameIndex::dequeueCompoundFrame(TypeFrame &compoundFrame)
 
 void TypeFrameIndex::setCompoundFramesEnded()
 {
-    std::lock_guard<std::mutex> lock(compoundFrameMutex);
+    lock_guard<mutex> lock(compoundFrameMutex);
     if (DEBUG) printf("setCompoundFramesEnded() BEGIN\n");
     compoundFramesEnded = true;
     if (DEBUG) printf("setCompoundFramesEnded() END\n");
@@ -515,7 +525,7 @@ void TypeFrameIndex::setCompoundFramesEnded()
 
 bool TypeFrameIndex::checkCompoundPatternsEnded()
 {
-    std::lock_guard<std::mutex> lock(compoundFrameMutex);
+    lock_guard<mutex> lock(compoundFrameMutex);
     if (DEBUG) printf("checkCompoundPatternsEnded() BEGIN\n");
     if (DEBUG) printf("checkCompoundPatternsEnded() END\n");
     return compoundFramesEnded;
@@ -523,7 +533,7 @@ bool TypeFrameIndex::checkCompoundPatternsEnded()
 
 void TypeFrameIndex::addMiningResult(float quality, const TypeFrame &frame)
 {
-    std::lock_guard<std::mutex> lock(miningResultsMutex);
+    lock_guard<mutex> lock(miningResultsMutex);
     miningResultsHeap.push(quality, frame);
 }
 
@@ -533,7 +543,7 @@ void TypeFrameIndex::evaluatePatterns()
     if (DEBUG) printf("evaluatePatterns() BEGIN\n");
     bool finished = false;
     TypeFrame compoundFrame;
-    std::vector<TypeFrame> patterns;
+    vector<TypeFrame> patterns;
 
     while (! finished) {
         if (dequeueCompoundFrame(compoundFrame)) {
@@ -555,7 +565,7 @@ void TypeFrameIndex::evaluatePatterns()
     if (DEBUG) printf("evaluatePatterns() END\n");
 }
 
-void TypeFrameIndex::minePatterns(std::vector<std::pair<float,TypeFrame>> &answer)
+void TypeFrameIndex::minePatterns(vector<pair<float,TypeFrame>> &answer)
 {
     logger().info("[PatternIndex] Start mining");
     answer.clear();
@@ -574,7 +584,7 @@ void TypeFrameIndex::minePatterns(std::vector<std::pair<float,TypeFrame>> &answe
         // compoundFrames so it will take one of the processors.
         // When main thread finish its job, the last working thread is
         // created.
-        evaluationThreads.push_back(new std::thread(&TypeFrameIndex::evaluatePatterns, this));
+        evaluationThreads.push_back(new thread(&TypeFrameIndex::evaluatePatterns, this));
     }
     EquivalentTypeFrameSet baseSet;
 
@@ -607,15 +617,15 @@ void TypeFrameIndex::minePatterns(std::vector<std::pair<float,TypeFrame>> &answe
 
     // Copy the baseSet to a vector to ease further manipulation
     // (memory waste is irrelevant)
-    std::vector<TypeFrame> base(baseSet.begin(), baseSet.end());
+    vector<TypeFrame> base(baseSet.begin(), baseSet.end());
     if (DEBUG) printf("base.size(): %lu\n", base.size());
 
     // Only non-empty-intersection subcompounds are glued together to build a
     // compoundFrame (intersection == sharing of at least 1 Node). Building (a
     // priori) a list of non-empty-intersection elements for each element of 
     // "base" will ease the buiding of compoundFrames
-    std::vector<std::vector<unsigned int>> neighbors;
-    std::vector<unsigned int> aux;
+    vector<vector<unsigned int>> neighbors;
+    vector<unsigned int> aux;
     unsigned int progressIndicatorMax = 0;
     unsigned int progressIndicatorCount = 0;
     for (unsigned int i = 0; i < base.size(); i++) {
@@ -634,11 +644,11 @@ void TypeFrameIndex::minePatterns(std::vector<std::pair<float,TypeFrame>> &answe
 
     // Populates the queue of compundFrames.
     // This queue is processed by the working threads
-    std::vector<std::set<unsigned int>> selection;
-    std::vector<std::vector<unsigned int>> selectionVector;
-    std::vector<unsigned int> sizeVector;
-    std::vector<unsigned int> v;
-    std::set<unsigned int> s;
+    vector<set<unsigned int>> selection;
+    vector<vector<unsigned int>> selectionVector;
+    vector<unsigned int> sizeVector;
+    vector<unsigned int> v;
+    set<unsigned int> s;
     TypeFrame compoundFrame;
     CartesianProductGenerator *cartesianGenerator;
     for (unsigned int i = 0; i < base.size(); i++) {
@@ -655,7 +665,7 @@ void TypeFrameIndex::minePatterns(std::vector<std::pair<float,TypeFrame>> &answe
         for (unsigned int g = 1; g < PATTERNS_GRAM; g++) {
             s.clear();
             selection.push_back(s);
-            for (std::set<unsigned int>::const_iterator it = selection.at(g - 1).begin(); it != selection.at(g - 1).end(); it++) {
+            for (set<unsigned int>::const_iterator it = selection.at(g - 1).begin(); it != selection.at(g - 1).end(); it++) {
                 selection.at(g).insert(neighbors.at(*it).begin(), neighbors.at(*it).end());
             }
         }
@@ -710,7 +720,7 @@ void TypeFrameIndex::minePatterns(std::vector<std::pair<float,TypeFrame>> &answe
     // will sit down and wait for the working threads to finish their jobs.
     // So we start another working thread to avoid (potentially) letting an idle 
     // processor.
-    evaluationThreads.push_back(new std::thread(&TypeFrameIndex::evaluatePatterns, this));
+    evaluationThreads.push_back(new thread(&TypeFrameIndex::evaluatePatterns, this));
 
     for (unsigned int i = 0; i < evaluationThreads.size(); i++) {
         evaluationThreads.at(i)->join();
@@ -724,10 +734,13 @@ void TypeFrameIndex::minePatterns(std::vector<std::pair<float,TypeFrame>> &answe
     logger().info("[PatternIndex] Finished mining");
 }
 
-void TypeFrameIndex::permutation(std::vector<std::vector<int>> &answer, int *array, int current, int size)
+void TypeFrameIndex::permutation(vector<vector<int>> &answer,
+                                 int *array,
+                                 int current,
+                                 int size)
 {
     if (current == size - 1) {
-        std::vector<int> v;
+        vector<int> v;
         for (int i = 0; i < size; i++) {
             v.push_back(array[i]);
         }
@@ -745,7 +758,8 @@ void TypeFrameIndex::permutation(std::vector<std::vector<int>> &answer, int *arr
     }
 }
 
-void TypeFrameIndex::addPermutations(std::vector<std::vector<int>> &answer, std::vector<int> base)
+void TypeFrameIndex::addPermutations(vector<vector<int>> &answer,
+                                     const vector<int> &base)
 {
     int array[base.size()];
     for (unsigned int i = 0; i < base.size(); i++) {
@@ -757,7 +771,7 @@ void TypeFrameIndex::addPermutations(std::vector<std::vector<int>> &answer, std:
 void TypeFrameIndex::addSymmetricPermutations(TypeFrameSet &answer, const TypeFrame &frame, unsigned int cursor)
 {
     unsigned int arity = frame.at(cursor).second;
-    std::vector<int> argPos = frame.getArgumentsPosition(cursor);
+    vector<int> argPos = frame.getArgumentsPosition(cursor);
     if (frame.typeAtIsSymmetricLink(cursor)) {
         if (arity == 2) {
             // optimization of commom case
@@ -773,7 +787,7 @@ void TypeFrameIndex::addSymmetricPermutations(TypeFrameSet &answer, const TypeFr
             answer.insert(permutation);
         } else {
             if (arity <= LIMIT_FOR_UNORDERED_LINKS_PERMUTATION) {
-                std::vector<std::vector<int>> permutationVector;
+                vector<vector<int>> permutationVector;
                 addPermutations(permutationVector, argPos);
                 TypeFrame permutation;
                 for (unsigned int k = 0; k < permutationVector.size(); k++) {
@@ -833,7 +847,7 @@ bool TypeFrameIndex::add(Handle handle, int offset)
 
 }
 
-bool TypeFrameIndex::addFromScheme(const std::string &txt, int offset)
+bool TypeFrameIndex::addFromScheme(const string &txt, int offset)
 {
     bool exitStatus = true;
     TypeFrame frame(txt);
@@ -845,7 +859,11 @@ bool TypeFrameIndex::addFromScheme(const std::string &txt, int offset)
     return exitStatus;
 }
 
-void TypeFrameIndex::addArity2Patterns(std::vector<TypeFrame> &answer, std::vector<TypeFrame> &recurseResult1, std::vector<TypeFrame> &recurseResult2, TypeFrame &baseFrame, int cursor)
+void TypeFrameIndex::addArity2Patterns(vector<TypeFrame> &answer,
+                                       vector<TypeFrame> &recurseResult1,
+                                       vector<TypeFrame> &recurseResult2,
+                                       TypeFrame &baseFrame,
+                                       int cursor)
 {
     TypeFrame pattern;
 
@@ -904,15 +922,17 @@ void TypeFrameIndex::addArity2Patterns(std::vector<TypeFrame> &answer, std::vect
     }
 }
 
-// TODO: This method should allocate answers in the heap instead of the stack to
-// avoid copying data all the away in the recursive calls
-// TODO: Break this method into smaller pieces
-std::vector<TypeFrame> TypeFrameIndex::computeSubPatterns(TypeFrame &baseFrame, int cursor, int pos)
+// TODO: This method should allocate answers in the heap instead of the stack
+// to avoid copying data all the away in the recursive calls
+// TODO: Break this method in smaller pieces
+vector<TypeFrame> TypeFrameIndex::computeSubPatterns(TypeFrame &baseFrame,
+                                                          int cursor,
+                                                          int pos)
 {
-    std::vector<TypeFrame> answer;
+    vector<TypeFrame> answer;
     unsigned int headArity = baseFrame.at(cursor).second;
     bool symmetricHead = baseFrame.typeAtIsSymmetricLink(cursor);
-    std::vector<int> argPos = baseFrame.getArgumentsPosition(cursor);
+    vector<int> argPos = baseFrame.getArgumentsPosition(cursor);
 
     if (headArity == 0) {
 
@@ -937,7 +957,7 @@ std::vector<TypeFrame> TypeFrameIndex::computeSubPatterns(TypeFrame &baseFrame, 
 
         // Arity 2 Link, computes all possible patterns
 
-        std::vector<TypeFrame> recurseResult1, recurseResult2;
+        vector<TypeFrame> recurseResult1, recurseResult2;
 
         recurseResult1 = computeSubPatterns(baseFrame, argPos.at(0), pos);
         recurseResult2 = computeSubPatterns(baseFrame, argPos.at(1), pos);
@@ -970,7 +990,7 @@ std::vector<TypeFrame> TypeFrameIndex::computeSubPatterns(TypeFrame &baseFrame, 
         // links. So this should be done here and let this "generic" computation
         // only for links with arity > 3.
 
-        std::vector<TypeFrame> recurseResult[headArity];
+        vector<TypeFrame> recurseResult[headArity];
         for (unsigned int k = 0; k < headArity; k++) {
             recurseResult[k] = computeSubPatterns(baseFrame, argPos.at(k), pos);
         }
@@ -1043,7 +1063,7 @@ void TypeFrameIndex::buildSubPatternsIndex()
 {
     for (unsigned int i = 0; i < frames.size(); i++) {
         TypeFrame currentFrame = frames.at(i);
-        std::vector<TypeFrame> patterns = computeSubPatterns(currentFrame, 0, i);
+        vector<TypeFrame> patterns = computeSubPatterns(currentFrame, 0, i);
         if (TOPLEVEL_ONLY) {
             addPatternOccurrence(currentFrame, i);
             for (unsigned int j = 0; j < patterns.size(); j++) {
@@ -1054,11 +1074,14 @@ void TypeFrameIndex::buildSubPatternsIndex()
     if (DEBUG) printForDebug(true);
 }
 
-void TypeFrameIndex::selectCurrentElement(TypeFrame &answer, StringMap &variableOccurrences, const TypeFrame &baseFrame, int cursor) const
+void TypeFrameIndex::selectCurrentElement(TypeFrame &answer,
+                                          StringMap &variableOccurrences,
+                                          const TypeFrame &baseFrame,
+                                          int cursor) const
 {
     if (baseFrame.typeAtEqualsTo(cursor, "VariableNode")) {
         answer.push_back(TypeFrame::STAR_PATTERN);
-        std::string key = baseFrame.nodeNameAt(cursor);
+        string key = baseFrame.nodeNameAt(cursor);
         StringMap::iterator it = variableOccurrences.find(key);
         if (it == variableOccurrences.end()) {
             IntegerSet newSet;
@@ -1075,22 +1098,26 @@ void TypeFrameIndex::selectCurrentElement(TypeFrame &answer, StringMap &variable
 }
 
 
-void TypeFrameIndex::buildConstraints(IntPairVector &constraints, StringMap &variableOccurrences) const
+void TypeFrameIndex::buildConstraints(IntPairVector &constraints,
+                                      StringMap &variableOccurrences) const
 {
     constraints.clear();
     StringMap::iterator it = variableOccurrences.begin();
     while (it != variableOccurrences.end()) {
-        std::vector<int> v((*it).second.begin(), (*it).second.end());
+        vector<int> v((*it).second.begin(), (*it).second.end());
         for (unsigned int i = 0; i < v.size(); i++) {
             for (unsigned int j = i + 1; j < v.size(); j++) {
-                constraints.push_back(std::make_pair(v.at(i), v.at(j)));
+                constraints.push_back(make_pair(v.at(i), v.at(j)));
             }
         }
         it++;
     }
 }
 
-void TypeFrameIndex::buildQueryTerm(TypeFrame &answer, StringMap &variableOccurrences, const TypeFrame &baseFrame, int cursor) const
+void TypeFrameIndex::buildQueryTerm(TypeFrame &answer,
+                                    StringMap &variableOccurrences,
+                                    const TypeFrame &baseFrame,
+                                    int cursor) const
 {
     selectCurrentElement(answer, variableOccurrences, baseFrame, cursor);
     int nargs = baseFrame.at(cursor).second;
@@ -1110,27 +1137,34 @@ void TypeFrameIndex::buildQueryTerm(TypeFrame &answer, StringMap &variableOccurr
     }
 }
 
-void TypeFrameIndex::query(std::vector<ResultPair> &result, const std::string &queryScm) const
+void TypeFrameIndex::query(vector<ResultPair> &result,
+                           const string &queryScm) const
 {
     TypeFrame queryFrame(queryScm);
     query(result, queryFrame, DIFFERENT_ASSIGNMENT_FOR_DIFFERENT_VARS, PERMUTATIONS_OF_VARS_CONSIDERED_EQUIVALENT);
 }
 
-void TypeFrameIndex::query(std::vector<ResultPair> &result, const TypeFrame &queryFrame) const
+void TypeFrameIndex::query(vector<ResultPair> &result,
+                           const TypeFrame &queryFrame) const
 {
     query(result, queryFrame, DIFFERENT_ASSIGNMENT_FOR_DIFFERENT_VARS, PERMUTATIONS_OF_VARS_CONSIDERED_EQUIVALENT);
 }
 
-void TypeFrameIndex::query(std::vector<ResultPair> &result, const TypeFrame &queryFrame, bool distinct, bool noPermutations) const
+void TypeFrameIndex::query(vector<ResultPair> &result,
+                           const TypeFrame &queryFrame,
+                           bool distinct,
+                           bool noPermutations) const
 {
     TypeFrame keyExpression;
-    std::vector<VarMapping> forbiddenMappings;
+    vector<VarMapping> forbiddenMappings;
     int headLogicOperator;
 
     query(result, keyExpression, forbiddenMappings, headLogicOperator, queryFrame, 0, distinct, noPermutations);
 }
 
-bool TypeFrameIndex::compatibleVarMappings(const VarMapping &map1, const VarMapping &map2, bool distinct) const
+bool TypeFrameIndex::compatibleVarMappings(const VarMapping &map1,
+                                           const VarMapping &map2,
+                                           bool distinct) const
 {
     if (DEBUG) {
         printf("TypeFrameIndex::compatibleVarMappings()\n");
@@ -1164,7 +1198,9 @@ bool TypeFrameIndex::compatibleVarMappings(const VarMapping &map1, const VarMapp
     return true;
 }
 
-void TypeFrameIndex::typeFrameSetUnion(TypeFrameSet &answer, const TypeFrameSet &set1, const TypeFrameSet &set2) const
+void TypeFrameIndex::typeFrameSetUnion(TypeFrameSet &answer,
+                                       const TypeFrameSet &set1,
+                                       const TypeFrameSet &set2) const
 {
     answer.clear();
     for (TypeFrameSet::const_iterator it1 = set1.begin(); it1 != set1.end(); it1++) {
@@ -1175,7 +1211,9 @@ void TypeFrameIndex::typeFrameSetUnion(TypeFrameSet &answer, const TypeFrameSet 
     }
 }
 
-void TypeFrameIndex::varMappingUnion(VarMapping &answer, const VarMapping &map1, const VarMapping &map2) const
+void TypeFrameIndex::varMappingUnion(VarMapping &answer,
+                                     const VarMapping &map1,
+                                     const VarMapping &map2) const
 {
     for (VarMapping::const_iterator it = map1.begin(); it != map1.end(); it++) {
         answer.insert(*it);
@@ -1185,7 +1223,8 @@ void TypeFrameIndex::varMappingUnion(VarMapping &answer, const VarMapping &map1,
     }
 }
 
-bool TypeFrameIndex::isForbiddenMapping(const VarMapping &mapping, const std::vector<VarMapping> &forbiddenVector) const
+bool TypeFrameIndex::isForbiddenMapping(const VarMapping &mapping,
+                                        const vector<VarMapping> &forbiddenVector) const
 {
     bool answer = false;
     for (unsigned int i = 0; i < forbiddenVector.size(); i++) {
@@ -1206,20 +1245,27 @@ bool TypeFrameIndex::isForbiddenMapping(const VarMapping &mapping, const std::ve
     return answer;
 }
 
-void TypeFrameIndex::query(std::vector<ResultPair> &answer, TypeFrame &keyExpression, std::vector<VarMapping> &forbiddenMappings, int &logicOperator, const TypeFrame &queryFrame, int cursor, bool distinct, bool noPermutations) const
+void TypeFrameIndex::query(vector<ResultPair> &answer,
+                           TypeFrame &keyExpression,
+                           vector<VarMapping> &forbiddenMappings,
+                           int &logicOperator,
+                           const TypeFrame &queryFrame,
+                           int cursor,
+                           bool distinct,
+                           bool noPermutations) const
 {
     if (DEBUG) queryFrame.printForDebug("Query frame: ", "\n", true);
     if (DEBUG) printf("Cursor: %d\n", cursor);
-    std::vector<ResultPair> unfilteredAnswer;
+    vector<ResultPair> unfilteredAnswer;
     answer.clear();
     keyExpression.clear();
     forbiddenMappings.clear();
     unsigned int arity = queryFrame.at(cursor).second;
-    std::vector<int> argPos = queryFrame.getArgumentsPosition(cursor);
-    std::vector<std::vector<ResultPair>> recursionQueryResult(arity);
-    std::vector<TypeFrame> recursionKeyExpression(arity);
-    std::vector<std::vector<VarMapping>> recursionForbiddenMappings(arity);
-    std::vector<int> recursionHeadLogicOperator(arity);
+    vector<int> argPos = queryFrame.getArgumentsPosition(cursor);
+    vector<vector<ResultPair>> recursionQueryResult(arity);
+    vector<TypeFrame> recursionKeyExpression(arity);
+    vector<vector<VarMapping>> recursionForbiddenMappings(arity);
+    vector<int> recursionHeadLogicOperator(arity);
     bool AndFlag = queryFrame.typeAtEqualsTo(cursor, "AndLink");
     bool OrFlag = queryFrame.typeAtEqualsTo(cursor, "OrLink");
     bool NotFlag = queryFrame.typeAtEqualsTo(cursor, "NotLink");
@@ -1261,7 +1307,7 @@ void TypeFrameIndex::query(std::vector<ResultPair> &answer, TypeFrame &keyExpres
                 forbiddenMappings.push_back(recursionForbiddenMappings.at(i).at(j));
             }
         }
-        std::vector<std::vector<ResultPair>> cleanRecursionQueryResult(arity);
+        vector<vector<ResultPair>> cleanRecursionQueryResult(arity);
         for (unsigned int i = 0; i < arity; i++) {
             if (DEBUG) printf("Branch: %u\n", i);
             for (unsigned int j = 0; j < recursionQueryResult.at(i).size(); j++) {
@@ -1279,7 +1325,7 @@ void TypeFrameIndex::query(std::vector<ResultPair> &answer, TypeFrame &keyExpres
                 }
             }
         }
-        std::vector<ResultPair> aux[2];
+        vector<ResultPair> aux[2];
         int src = 0;
         int tgt = 1;
 
@@ -1327,7 +1373,7 @@ void TypeFrameIndex::query(std::vector<ResultPair> &answer, TypeFrame &keyExpres
                                 printTypeFrameSet(newSet);
                                 printVarMapping(newMapping);
                             }
-                            aux[tgt].push_back(std::make_pair(newSet, newMapping));
+                            aux[tgt].push_back(make_pair(newSet, newMapping));
                         } else {
                             if (DEBUG) {
                                 printf("(AND) rejecting non-compatible var maps:\n");
@@ -1414,7 +1460,7 @@ void TypeFrameIndex::query(std::vector<ResultPair> &answer, TypeFrame &keyExpres
         PatternMap::const_iterator it1 = occurrenceSet.find(keyExpression);
         if (it1 != occurrenceSet.end()) {
             for (IntegerSet::iterator it2 = (*it1).second.begin(); it2 != (*it1).second.end(); it2++) {
-                std::vector<int> mapping;
+                vector<int> mapping;
                 if (frames.at(*it2).match(mapping, keyExpression, constraints)) {
                     VarMapping varMap;
                     TypeFrameSet frameSet;
@@ -1428,9 +1474,9 @@ void TypeFrameIndex::query(std::vector<ResultPair> &answer, TypeFrame &keyExpres
                         printVarMapping(varMap);
                     }
                     if (noPermutations) {
-                        unfilteredAnswer.push_back(std::make_pair(frameSet, varMap));
+                        unfilteredAnswer.push_back(make_pair(frameSet, varMap));
                     } else {
-                        answer.push_back(std::make_pair(frameSet, varMap));
+                        answer.push_back(make_pair(frameSet, varMap));
                     }
                 }
             }
@@ -1475,12 +1521,14 @@ bool TypeFrameIndex::mapCover(const VarMapping &map1, const VarMapping &map2) co
     return answer;
 }
 
-bool TypeFrameIndex::equivalentVarMappings(const VarMapping &map1, const VarMapping &map2, bool distinct) const
+bool TypeFrameIndex::equivalentVarMappings(const VarMapping &map1,
+                                           const VarMapping &map2,
+                                           bool distinct) const
 {
     return (distinct ? mapCover(map1, map2) : (mapCover(map1, map2) && mapCover(map2, map1)));
 }
 
-void TypeFrameIndex::printFrameVector(const std::vector<TypeFrame> &v) const
+void TypeFrameIndex::printFrameVector(const vector<TypeFrame> &v) const
 {
     for (unsigned int i = 0; i < v.size(); i++) {
         printf("v[%u] = ", i);
@@ -1503,7 +1551,7 @@ void TypeFrameIndex::printTypeFrameSet(const TypeFrameSet &set) const
     }
 }
 
-void TypeFrameIndex::printRecursionResult(const std::vector<ResultPair> &v) const
+void TypeFrameIndex::printRecursionResult(const vector<ResultPair> &v) const
 {
     for (unsigned int i = 0; i < v.size(); i++) {
         printf("Solution %u\n" , i);

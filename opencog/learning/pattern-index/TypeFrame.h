@@ -38,8 +38,8 @@ typedef std::pair<Type, Arity> TypePair;
  * TypeFrame is a representation of an atom in a format that make it easier to
  * use to build an index.
  *
- * It is a vector of pairs (T, A) representing a subgraph (T = atom type, A =
- * atom arity).
+ * It is a vector of pairs (T, A) representing a subgraph 
+ * (T = atom type, A = atom arity).
  *
  * Examples.
  *
@@ -82,14 +82,20 @@ private:
     NodeNameMap nodeNameMap;
 
     bool isStarPattern(const TypePair &pair) const;
-    bool subFrameEqual(unsigned int cursor, const TypeFrame &other, unsigned int otherCursor);
+    bool subFrameEqual(unsigned int cursor,
+                       const TypeFrame &other,
+                       unsigned int otherCursor);
     unsigned int getNextAtomPos(unsigned int cursor) const;
     bool buildFrameRepresentation(const std::string &schemeRepresentation);
     void recursiveHandleTraverse(Handle handle);
     int countTargets(const std::string &txt, unsigned int begin);
     int recursiveParse(const std::string &txt, unsigned int begin);
-    bool isEquivalent(const TypeFrame &other, int cursorThis, int cursorOther) const;
-    int compareUsingEquivalence(const TypeFrame &other, int cursorThis, int cursorOther) const;
+    bool isEquivalent(const TypeFrame &other,
+                      int cursorThis,
+                      int cursorOther) const;
+    int compareUsingEquivalence(const TypeFrame &other,
+                                int cursorThis,
+                                int cursorOther) const;
     int lineComparisson(const std::vector<std::vector<int>> &matrix) const;
     bool isFeasible(const std::vector<std::vector<bool>> &matrix) const;
 
@@ -155,12 +161,16 @@ public:
     bool isValid() const;
     void clear();
     std::vector<int> getArgumentsPosition(unsigned int cursor) const;
-    void buildNodesSet(std::set<TypeFrame, TypeFrame::LessThan> &answer, bool happensTwiceOrMoreOnly = false, bool excludeVariableNodes = false) const;
+    void buildNodesSet(std::set<TypeFrame,
+                       TypeFrame::LessThan> &answer,
+                       bool happensTwiceOrMoreOnly = false,
+                       bool excludeVariableNodes = false) const;
     TypeFrame buildSignature(unsigned int cursor);
     bool equals(const TypeFrame &other) const;
     bool isEquivalent(const TypeFrame &other) const;
     int compareUsingEquivalence(const TypeFrame &other) const;
-    bool containsEquivalent(const TypeFrame &other, unsigned int cursor = 0) const;
+    bool containsEquivalent(const TypeFrame &other,
+                            unsigned int cursor = 0) const;
     bool nodeNameDefined(unsigned int pos) const;
     std::string nodeNameAt(unsigned int pos) const;
     void setNodeNameAt(unsigned int pos, std::string name);
@@ -169,14 +179,19 @@ public:
     void append(const TypeFrame &other);
     void pickAndPushBack(const TypeFrame &other, unsigned int pos);
     bool match(std::vector<int> &mapping, const TypeFrame &pattern) const;
-    bool match(std::vector<int> &mapping, const TypeFrame &pattern, const IntPairVector &constraints) const;
+    bool match(std::vector<int> &mapping,
+               const TypeFrame &pattern,
+               const IntPairVector &constraints) const;
     bool subFramesEqual(unsigned int cursorA, unsigned int cursorB) const;
     TypeFrame subFrameAt(int pos) const;
     bool topLevelIsLink() const;
-    TypeFrame copyReplacingFrame(const TypeFrame &key, const TypeFrame &frame) const;
+    TypeFrame copyReplacingFrame(const TypeFrame &key,
+                                 const TypeFrame &frame) const;
     bool nonEmptyNodeIntersection(const TypeFrame &other) const;
     std::string toSCMString(unsigned int cursor = 0) const;
-    void printForDebug(std::string prefix = "", std::string suffix = "", bool showNames = true) const;
+    void printForDebug(std::string prefix = "",
+                       std::string suffix = "",
+                       bool showNames = true) const;
 
 };
 }

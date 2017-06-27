@@ -62,7 +62,8 @@ class PatternIndexAPI
 {
     public:
 
-        // These types are used by some API methods to return querying/mining results
+        // These types are used by some API methods to return querying/mining
+        // results
         typedef std::vector<std::pair<Handle, Handle>> VariableMapping;
         typedef std::pair<HandleSeq, VariableMapping> QueryResult;
         typedef std::pair<float, Handle> MiningResult;
@@ -74,8 +75,9 @@ class PatternIndexAPI
             return instance;
         }
         ~PatternIndexAPI();
-        PatternIndexAPI(PatternIndexAPI const&) = delete; // Public to provide better error messages
-        void operator=(PatternIndexAPI const&) = delete; // Public to provide better error messages
+        // public to provide better error messages
+        PatternIndexAPI(PatternIndexAPI const&) = delete;
+        void operator=(PatternIndexAPI const&) = delete;
 
         // Public API
 
@@ -148,10 +150,10 @@ class PatternIndexAPI
          *   )
          * ) 
          *
-         * The answer is a list of query results. Each result is a pair <L1, L2>. L1 is 
-         * a satisfying sub-graph, so each of its elements is a list of atoms. 
-         * L2 is a list of variable assigments, so each of its elements is a 
-         * pair <variable, assigned atom>.
+         * The answer is a list of query results. Each result is a pair
+         * <L1, L2>. L1 is a satisfying sub-graph, so each of its elements is
+         * a list of atoms.  L2 is a list of variable assigments, so each of its
+         * elements is a pair <variable, assigned atom>.
          *
          * The exact rules to match patterns and assign values to variables may
          * vary depending on the parameters setup.
@@ -166,7 +168,9 @@ class PatternIndexAPI
          * vector of QueryResult, which is a C++ structured type with the same
          * information described in the example above.
          */
-        void query(std::vector<QueryResult> &result, Handle key, const std::string &queryStr);
+        void query(std::vector<QueryResult> &result,
+                   Handle key,
+                   const std::string &queryStr);
 
 
         /*
@@ -218,9 +222,14 @@ class PatternIndexAPI
         void setDefaultProperties(StringMap &properties);
         void applyProperties(Handle key);
         void setDefaultProperty(StringMap &map, const std::string propertyKey);
-        void query(std::vector<QueryResult> &answer, Handle key, const TypeFrame &query);
+        void query(std::vector<QueryResult> &answer,
+                   Handle key,
+                   const TypeFrame &query);
         std::string getStringProperty(StringMap &map, const std::string key);
-        int getIntProperty(StringMap &map, const std::string key, int min = std::numeric_limits<int>::min(), int max = std::numeric_limits<int>::max());
+        int getIntProperty(StringMap &map,
+                           const std::string key,
+                           int min = std::numeric_limits<int>::min(),
+                           int max = std::numeric_limits<int>::max());
         bool getBoolProperty(StringMap &map, const std::string key);
 
 };

@@ -35,9 +35,18 @@ void PatternIndexSCM::init()
 {
 #ifdef HAVE_GUILE
     // Bindings for Guile's API
-    define_scheme_primitive("scm-api-create-index", &PatternIndexSCM::create_index, this, "pattern-index");
-    define_scheme_primitive("scm-api-query", &PatternIndexSCM::query, this, "pattern-index");
-    define_scheme_primitive("scm-api-mine-patterns", &PatternIndexSCM::minePatterns, this, "pattern-index");
+    define_scheme_primitive("scm-api-create-index",
+                            &PatternIndexSCM::create_index,
+                            this,
+                            "pattern-index");
+    define_scheme_primitive("scm-api-query",
+                            &PatternIndexSCM::query,
+                            this,
+                            "pattern-index");
+    define_scheme_primitive("scm-api-mine-patterns",
+                            &PatternIndexSCM::minePatterns,
+                            this,
+                            "pattern-index");
 #endif
 }
 

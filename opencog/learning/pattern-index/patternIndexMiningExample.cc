@@ -55,23 +55,45 @@ int main(int argc, char *argv[]) {
         std::chrono::high_resolution_clock::time_point t2 = std::chrono::high_resolution_clock::now();
 
         //
-        // Optional setup of parameters which are relevant to PatternIndexAPI::minePatterns()
+        // Optional setup of parameters which are relevant to
+        // PatternIndexAPI::minePatterns()
         //
         // PatternIndexAPI have sensible defaults but some tuning may
         // be required to adjust quality X memory usage X time performance.
         //
-        // All parameters are described in PatternIndexAPI::setDefaultProperties(). 
+        // All parameters are described in
+        // PatternIndexAPI::setDefaultProperties(). 
         //
-        patternindex().setProperty(indexKey, "PatternCountCacheEnabled", "false");
-        patternindex().setProperty(indexKey, "NumberOfEvaluationThreads", "4");
-        patternindex().setProperty(indexKey, "MinimalFrequencyToComputeQualityMetric", "5");
-        patternindex().setProperty(indexKey, "MaximumSizeOfCompoundFramesQueue", "5000000");
-        patternindex().setProperty(indexKey, "CoherenceFunction", "const1");
-        patternindex().setProperty(indexKey, "CoherenceModulatorG", "oneOverCoherence");
-        patternindex().setProperty(indexKey, "CoherenceModulatorH", "coherence");
-        patternindex().setProperty(indexKey, "PatternsGram", "3");
-        patternindex().setProperty(indexKey, "MaximumNumberOfMiningResults", "10");
-        patternindex().setProperty(indexKey, "PatternRankingMetric", "nisurprisingness");
+        patternindex().setProperty(indexKey,
+                                   "PatternCountCacheEnabled",
+                                   "false");
+        patternindex().setProperty(indexKey,
+                                   "NumberOfEvaluationThreads",
+                                   "4");
+        patternindex().setProperty(indexKey,
+                                   "MinimalFrequencyToComputeQualityMetric",
+                                   "5");
+        patternindex().setProperty(indexKey,
+                                   "MaximumSizeOfCompoundFramesQueue",
+                                   "5000000");
+        patternindex().setProperty(indexKey,
+                                   "CoherenceFunction",
+                                   "const1");
+        patternindex().setProperty(indexKey,
+                                   "CoherenceModulatorG",
+                                   "oneOverCoherence");
+        patternindex().setProperty(indexKey,
+                                   "CoherenceModulatorH",
+                                   "coherence");
+        patternindex().setProperty(indexKey,
+                                   "PatternsGram",
+                                   "3");
+        patternindex().setProperty(indexKey,
+                                   "MaximumNumberOfMiningResults",
+                                   "10");
+        patternindex().setProperty(indexKey,
+                                   "PatternRankingMetric",
+                                   "nisurprisingness");
         
         // Pattern mining
         std::vector<PatternIndexAPI::MiningResult> resultPatterns;
@@ -81,7 +103,9 @@ int main(int argc, char *argv[]) {
 
         printf("Top %lu results\n", resultPatterns.size());
         for (unsigned int i = 0; i < resultPatterns.size(); i++) {
-            printf("%f: %s", resultPatterns.at(i).first, resultPatterns.at(i).second->toString().c_str());
+            printf("%f: %s",
+                   resultPatterns.at(i).first,
+                   resultPatterns.at(i).second->toString().c_str());
         }
         unsigned int delta1 = std::chrono::duration_cast<std::chrono::seconds>(t2 - t1).count();
         unsigned int delta2 = std::chrono::duration_cast<std::chrono::seconds>(t4 - t3).count();

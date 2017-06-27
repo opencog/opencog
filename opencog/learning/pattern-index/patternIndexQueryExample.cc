@@ -53,32 +53,66 @@ int main(int argc, char *argv[]) {
         // Create a new index given a SCM file
         Handle indexKey = patternindex().createIndex(argv[1]);
 
-        // Optional setup of parameters which are relevant to PatternIndexAPI::query()
+        // Optional setup of parameters which are relevant to
+        // PatternIndexAPI::query()
         //
-        // Sensible defaults are provided in PatternIndexAPI::setDefaultProperties() but
-        // some tuning may be required to adjust quality X memory usage X time
-        // performance.
+        // Sensible defaults are provided in
+        // PatternIndexAPI::setDefaultProperties() but some tuning may be
+        // required to adjust quality X memory usage X time performance.
         //
-        // All parameters are described in PatternIndexAPI::setDefaultProperties(). 
-        patternindex().setProperty(indexKey, "PatternCountCacheEnabled", "true");
-        patternindex().setProperty(indexKey, "DifferentAssignmentForDifferentVars", "true");
-        patternindex().setProperty(indexKey, "PermutationsOfVarsConsideredEquivalent", "true");
+        // All parameters are described in
+        // PatternIndexAPI::setDefaultProperties(). 
+        patternindex().setProperty(indexKey,
+                                   "PatternCountCacheEnabled",
+                                   "true");
+        patternindex().setProperty(indexKey,
+                                   "DifferentAssignmentForDifferentVars",
+                                   "true");
+        patternindex().setProperty(indexKey,
+                                   "PermutationsOfVarsConsideredEquivalent",
+                                   "true");
         
         // Query
-        std::string queryStr1 = "(AndLink (SimilarityLink (VariableNode \"X\") (VariableNode \"Y\")) (SimilarityLink (VariableNode \"Y\") (VariableNode \"Z\")))";
+        std::string queryStr1 = "(AndLink\
+                                   (SimilarityLink\
+                                     (VariableNode \"X\")\
+                                     (VariableNode \"Y\")\
+                                   )\
+                                   (SimilarityLink\
+                                     (VariableNode \"Y\")\
+                                     (VariableNode \"Z\")\
+                                   )\
+                                 )";
         Handle queryHandle = schemeEval->eval_h(queryStr1);
         Handle resultHandle = patternindex().query(indexKey, queryHandle);
-        printf("Query1: %s\n", queryStr1.c_str());
+        printf("Query 1:\n");
         printf("Result: %s", resultHandle->toString().c_str());
 
         //
         // optionally, query() may be called passing the SCM string
         //
 
-        std::string queryStr2 = "(AndLink (SimilarityLink (VariableNode \"X\") (VariableNode \"Y\")) (NotLink (AndLink (InheritanceLink (VariableNode \"X\") (VariableNode \"Z\")) (InheritanceLink (VariableNode \"Y\") (VariableNode \"Z\")))))";
+        std::string queryStr2 = "(AndLink\
+                                   (SimilarityLink\
+                                     (VariableNode \"X\")\
+                                     (VariableNode \"Y\")\
+                                   )\
+                                   (NotLink\
+                                     (AndLink\
+                                       (InheritanceLink\
+                                         (VariableNode \"X\")\
+                                         (VariableNode \"Z\")\
+                                       )\
+                                       (InheritanceLink\
+                                         (VariableNode \"Y\")\
+                                         (VariableNode \"Z\")\
+                                       )\
+                                     )\
+                                   )\
+                                 )";
         std::vector<PatternIndexAPI::QueryResult> queryResult;
         patternindex().query(queryResult, indexKey, queryStr2);
-        printf("\n\nQuery2: %s\n", queryStr2.c_str());
+        printf("\n\nQuery 2:\n");
         printf("%lu results\n", queryResult.size());
         for (unsigned int i = 0; i < queryResult.size(); i++) {
             printf("Result #%u:\n\n", i + 1);
@@ -87,7 +121,9 @@ int main(int argc, char *argv[]) {
             }
             printf("Mapping:\n\n");
             for (unsigned int j = 0; j < queryResult.at(i).second.size(); j++) {
-                printf("%s%s\n", queryResult.at(i).second.at(j).first->toString().c_str(), queryResult.at(i).second.at(j).second->toString().c_str());
+                printf("%s%s\n", 
+                       queryResult.at(i).second.at(j).first->toString().c_str(),
+                       queryResult.at(i).second.at(j).second->toString().c_str());
             }
         }
     }
