@@ -116,6 +116,10 @@
         (cons
           (make-lexical-token 'COMMA location ",")
           (match:suffix current-match)))
+    ((has-match? "^\\^" str)
+        (cons
+          (make-lexical-token '^ location #f)
+          (match:suffix current-match)))
     ((has-match? "^\\[" str)
         (cons
           (make-lexical-token 'LSBRACKET location #f)
@@ -183,7 +187,7 @@
     ; Token (aka terminal symbol) definition
     (LPAREN RPAREN NEWLINE CR CONCEPT TOPIC RESPONDERS REJOINDERS GAMBIT
       NotDefined COMMENT SAMPLE_INPUT LITERAL WHITESPACE COMMA NUM
-      _ * << >>
+      _ * << >> ^
       ~n ; Range-restricted Wildcards
       ~ ; Concepts
        LSBRACKET RSBRACKET ; Square Brackets []
@@ -216,7 +220,7 @@
       (RESPONDERS LPAREN patterns RPAREN patterns) :
         (display-token (format #f "responder_x->(~a -> ~a)" $3 $5))
       (REJOINDERS LPAREN patterns RPAREN patterns) :
-        (display-token (format #f "rejoiner(~a -> ~a)" $3 $5))
+        (display-token (format #f "rejoinder(~a -> ~a)" $3 $5))
       (GAMBIT patterns) : (display-token (string-append "gambit = " $2))
     )
 
@@ -224,6 +228,7 @@
       (literals) : (display-token $1)
       (choices) : (display-token $1)
       (unordered-matchings) : (display-token $1)
+      (function) : (display-token $1)
     )
 
     (literals
@@ -257,6 +262,21 @@
 
     (unordered-matching
       (<< patterns >>) : (display-token (string-append "unordered-matchings->" $2))
+    )
+
+    (function
+      (^ a-literal LPAREN args) :
+        (display-token (format #f "function_~a(~a)" $2 $4))
+    )
+
+    (args
+      (args arg) : (display-token (string-append $1 " " $2))
+      (LITERAL args) : (display-token (string-append $1 " " $2))
+      (arg) : (display-token $1)
+    )
+
+    (arg
+      (LITERAL RPAREN) : (display-token $1)
     )
   )
 )
