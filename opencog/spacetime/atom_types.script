@@ -4,6 +4,7 @@
 
 // ====================================================================
 // SpaceServer atoms
+// XXX Review. Are any of these acutally used?
 SPACE_MAP_NODE <- NODE
 OBJECT_NODE <- NODE
 BLOCK_ENTITY_NODE <- OBJECT_NODE

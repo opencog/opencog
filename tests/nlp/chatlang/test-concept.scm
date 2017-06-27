@@ -2,6 +2,9 @@
              (opencog nlp)
              (opencog nlp chatlang))
 
+; concept is not define-public, so we have to load terms.scm to test it.
+(load "../../../opencog/nlp/chatlang/terms.scm")
+
 (define concept (concept "drink"))
 
 ; Check the EvaluationLink created

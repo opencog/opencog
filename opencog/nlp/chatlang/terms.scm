@@ -3,6 +3,7 @@
 ;; Assorted functions for translating individual terms into Atomese fragments.
 
 (use-modules (ice-9 optargs))
+(use-modules (opencog exec))
 
 (define (word STR)
   "Literal word occurrence."

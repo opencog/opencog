@@ -7,7 +7,7 @@
              (opencog nlp)
              (opencog exec)
              (opencog openpsi)
-             (opencog eva-behavior)
+             (opencog movement)
              (srfi srfi-1)
              (rnrs io ports)
              (ice-9 popen)
@@ -97,28 +97,14 @@
            (cons (cons 'wildcard
                        (merge-wildcard (cdr term) (cdr (first prev))))
                  (cdr prev)))
-          ; If we have:
-          ; (wildcard 2 . 5) (variable (wildcard 0 . -1))
-          ; merge them and return a variable
-          ((and (equal? 'wildcard (car term))
-                (equal? 'variable (car (first prev)))
-                (equal? 'wildcard (caadr (first prev))))
-           (cons (cons 'variable
-                       (list (cons 'wildcard
-                                   (merge-wildcard (cdr term)
-                                                   (cdadr (first prev))))))
-                 (cdr prev)))
-          ; Similarly if we have:
+          ; If we have a variable that matches to "zero or more"
+          ; follow by a wildcard, e.g.
           ; (variable (wildcard 0 . -1)) (wildcard 3 . 6)
-          ; merge them and return a variable
+          ; return the variable
           ((and (equal? 'variable (car term))
-                (equal? 'wildcard (caadr term))
+                (equal? (cadr term) (cons 'wildcard (cons 0 -1)))
                 (equal? 'wildcard (car (first prev))))
-           (cons (cons 'variable
-                       (list (cons 'wildcard
-                                   (merge-wildcard (cdadr term)
-                                                   (cdr (first prev))))))
-                 (cdr prev)))
+           (cons term (cdr prev)))
           ; Otherwise accept and append it to the list
           (else (cons term prev))))
     (list (last TERMS))
@@ -201,11 +187,13 @@
 
 (define-public (ground-word GLOB)
   "Get the original words grounded for GLOB."
-  (assoc-ref globs-word GLOB))
+  (let ((gw (assoc-ref globs-word GLOB)))
+       (if (equal? #f gw) (List) gw)))
 
 (define-public (ground-lemma GLOB)
   "Get the lemmas grounded for GLOB."
-  (assoc-ref globs-lemma GLOB))
+  (let ((gl (assoc-ref globs-lemma GLOB)))
+       (if (equal? #f gl) (List) gl)))
 
 (define-public (chatlang-say WORDS)
   "Say the text and update the internal state."
@@ -214,7 +202,6 @@
         (map cog-name (cog-outgoing-set n))
         (list (cog-name n))))
     (cog-outgoing-set WORDS))))
-  (display "----- ") (display txt) (newline)
   (cog-execute! (Put (DefinedPredicate "Say") (Node txt)))
   (State chatlang-anchor (Concept "Default State"))
   (True))

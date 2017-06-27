@@ -99,6 +99,7 @@ void PLNRulesUTest::setUp()
 		eval.eval(eval_str);
 	}
 
+	eval.eval("(add-to-load-path \"/usr/local/share\")");
 	eval.eval("(use-modules (opencog))");
 	eval.eval("(use-modules (opencog query))");
 	eval.eval("(use-modules (opencog logger))");
