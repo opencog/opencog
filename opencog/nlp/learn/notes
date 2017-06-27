@@ -10779,6 +10779,183 @@ Non-REPL: fed by one thread:
 1040259 in 14667 = 71/sec = 255K/hour
 1385628 in 22727 = 61/sec = 220K/hour
 
+529655 in 5247 = 101/sec = 364K/hour
+
+=========================================================================
+Error estimates
+
+(define lpr (Evaluation
+	(LinkGrammarRelationshipNode "ANY")
+	(List (Word "big") (Word "deal"))))
+
+count is 1039
+(define apr (Evaluation
+   (LinkGrammarRelationshipNode "ANY")
+	(ListLink (AnyNode "left-word") (AnyNode "right-word"))))
+6.3884586e+08 == 638845863.0
+
+(/ 1039 638845863.0) = 1.626370397267486e-6
+ln2 = 19.2299127083157
+
+(define  freq-key (PredicateNode "*-FrequencyKey-*"))
+(cog-value lpr freq-key)  log = 19.229913
+
+estimate:
+(1/log2 + ln2) = 19.2299127083157 - 1.4426950408889634 =
+               = 17.787217667426738
+sqrt(p) = 0.0012752922791530912 
+sqrt (p) * (1+log) = 0.022683901358884775
+sqrt (N) = 25275.400352912315
+abs err = 8.97469517481691e-7
+
+rel err = abs / p = 0.5518235692124971
+
+so its 19 +/- 0.5 error... not bad...
+
+So
+(define star-obj (add-pair-stars pair-obj))
+(define cnt-obj (add-pair-count-api star-obj))
+(define frq-obj (add-pair-freq-api star-obj))
+
+(define wild-wild (cntobj 'wild-wild-count))
+(define sqw (sqrt wild-wild))
+
+(define (do-one-pair lipr)
+	(define pr-freq (sqrt (frqobj 'pair-freq lipr)))
+	(define pr-logli (- (frqobj 'pair-logli lipr) 1.4426950408889634))
+	(* pr-freq pr-logli))
+
+(define (do-one-pair lipr) (frqobj 'pair-freq lipr))
+
+(define (right-loop left-item)
+	(fold
+		(lambda (lipr sum) (+ sum (do-one-pair lipr)))
+		0
+		(star-obj 'right-stars left-item)))
+	
+(define (get-tot-error)
+	(define n 0)
+	(fold
+		(lambda (lefty sum)
+			(format #t "sum=~A for ~A of ~A\n" sum n (star-obj 'left-basis-size)) 
+			(set! n (+ n 1))
+			; (+ sum (/ (right-loop lefty) sqw))
+			(+ sum (right-loop lefty)))
+		0
+		(star-obj 'left-basis)))
+
+This gave 0.17825659639240693 for rthree but its wrong
+
+(define (wtf-do-one-pair lipr)
+	(define pr-freq (sqrt (frqobj 'pair-freq lipr)))
+	(define pr-logli (- (frqobj 'pair-logli lipr) 1.4426950408889634))
+	(format #t "Its ~A and ~A \n" lipr pr-freq)
+	(* pr-freq pr-logli))
+
+(define (wtf-right-loop left-item)
+	(fold
+		(lambda (lipr sum) (+ sum (wtf-do-one-pair lipr)))
+		0
+		(star-obj 'right-stars left-item)))
+
+WTF ... get a pr-freq of zero for 
+ ((EvaluationLink (ctv 1 0 6)
+   (LinkGrammarRelationshipNode "ANY")
+   (ListLink
+      (WordNode "substantively" (ctv 1 0 16))
+      (WordNode "events" (ctv 1 0 35225))
+   )
+)
+)
+
+That can't be right so wtf??? 
+
+(cog-value wtf freq-key) gives nothing! !???
+
+(wtf-right-loop (WordNode "substantively" )) 
+
+(ListLink (Word "substantively") (Word "events"))    ; count of 6
+(ListLink (Word "substantively") (Word "important"))  ; count of  13
+(ListLink (Word "substantively") (Any "right-word"))   count of 19
+
+so marginal counts OK.
+check them all..
+
+(define (get-tot)
+	(define n 0)
+	(define lsz (star-obj 'left-basis-size))
+	(fold
+		(lambda (lefty sum)
+			(if (eq? 0 (modulo n 1000))
+				(format #t "sum=~A for ~A of ~A\n" sum n lsz))
+			(set! n (+ n 1))
+			; (+ sum (right-loop lefty))
+			; (+ sum (cnt-obj 'right-wild-count lefty)))
+			; (+ sum (frq-obj 'right-wild-freq lefty))
+			(+ sum (right-cnt lefty))
+		) 0 (star-obj 'left-basis)))
+
+So the right-marginal sum works out.  638845863.0 
+
+double check...
+(define (right-cnt left-item)
+	(fold
+		(lambda (lipr sum) (+ sum (pair-obj 'pair-count lipr)))
+		0 (star-obj 'right-stars left-item)))
+	
+
+The freq is short: 0.9777130000000336 i.e. short by 
+14237957.7 = 14M out of 639M
+
+Points at failed-to-store or failed-to-load?
+
+
+(ListLink (Word "substantively") (Word "events"))    ; count of 6
+(ListLink (Word "substantively") (Any "right-word"))   count of 19
+
+(Word "substantively")  uuid= 32131120
+(Word "events") uuid= 50491
+(AnyNode "right-word") = uuid 33712509
+select * from atoms where outgoing = '{32131120, 50491}' -> 32131316 = List
+LinkGrammarRelationshipNode "ANY" is 7
+
+(Evalu = uuid  32131317
+ -->                      
+en_pairs_rthree_mall=> select * from valuations where atom=32131317;
+   key    |   atom   | type |   floatvalue    | stringvalue | linkvalue 
+----------+----------+------+-----------------+-------------+-----------
+        1 | 32131317 |    7 | {1,0,6}         |             | 
+ 33712529 | 32131317 |    1 | {0,26.66593,0}  |    FrequencyKey
+ 35436504 | 32131317 |    1 | {-0,-12.283042} |    MI key
+(3 rows)
+
+(* 638845863.0  (expt 2 -26.66593)) so taht's correct.
+So correct values are in the DB, but they were not loaded into
+atomspace.
+
+And all MST parsing results are bad.... Shit
+
+either....values not loaded, or values not set
+
+batch-word-pair.scm: fetch-incoming-set any-pair-pred
+../../guile/PersistSCM.cc: &PersistSCM::fetch_incoming_set
+as->fetch_incoming_set
+ _backing_store->getIncomingSet(_atom_table
+SQLBackingStore.cc
+AtomStorage::getInc
+
+SQLAtomStorage::getIncomingSet buff
+hi = table.add(hi, false);
+get_atom_values(hi); at line 1523 hi is in the atom table.
+esponse::get_all_values_cb
+
+
+is it a uuid cockup?
+Add prints to get_atom_values.
+is it ? print in atom->setValue
+
+
+	
 =========================================================================
 
 
