@@ -146,7 +146,7 @@
           (match:suffix current-match)))
     ((has-match? "^\\*" str)
         (cons
-          (make-lexical-token '* location #f)
+          (make-lexical-token '* location "*")
           (match:suffix current-match)))
     ((has-match? "^[0-9]+" str)
         (cons
@@ -223,12 +223,12 @@
     )
 
     (rules
-      (RESPONDERS a-literal LPAREN patterns RPAREN patterns) :
-        (display-token (format #f "responder_~a->(~a -> ~a)" $2 $4 $6))
-      (RESPONDERS LPAREN patterns RPAREN patterns) :
-        (display-token (format #f "responder_x->(~a -> ~a)" $3 $5))
-      (REJOINDERS LPAREN patterns RPAREN patterns) :
-        (display-token (format #f "rejoinder(~a -> ~a)" $3 $5))
+      (RESPONDERS a-literal a-sequence patterns) :
+        (display-token (format #f "responder_~a->(~a -> ~a)" $2 $3 $4))
+      (RESPONDERS a-sequence patterns) :
+        (display-token (format #f "responder_x->(~a -> ~a)" $2 $3))
+      (REJOINDERS a-sequence patterns) :
+        (display-token (format #f "rejoinder(~a -> ~a)" $2 $3))
       (GAMBIT patterns) : (display-token (string-append "gambit = " $2))
     )
 
@@ -237,12 +237,16 @@
       (pattern) : (display-token $1)
     )
 
-    (pattern ; TODO: Give this a better name.
+    ; TODO: Give this a better name. Maybe should be divided into
+    ; action-pattern and context-pattern ????
+    (pattern
       (literals) : (display-token $1)
       (choices) : (display-token $1)
       (unordered-matchings) : (display-token $1)
       (function) : (display-token $1)
       (sentence-boundaries) : (display-token $1)
+      ;(* pattern) : (display-token (format #f "~a ~a" $1 $2))
+      (sequences) : (display-token $1)
     )
 
     (literals
@@ -257,6 +261,7 @@
       (* ~ NUM) : (display-token (string-append "range-restricted-*->~" $3))
       (LITERAL ~n) : (display-token (string-append $1 "<-range_wildecard"))
       (LITERAL COMMA) : (display-token (string-append $1 " " $2))
+      (*) : (display-token $1)
     )
 
     (choices
@@ -265,7 +270,7 @@
     )
 
     (choice
-      (LSBRACKET literals RSBRACKET) : (display-token (string-append "choices_fn->" $2))
+      (LSBRACKET patterns RSBRACKET) : (display-token (string-append "choices_fn->" $2))
     )
 
     (unordered-matchings
@@ -302,6 +307,15 @@
 
     (arg
       (LITERAL RPAREN) : (display-token $1)
+    )
+
+    (sequences
+      (sequences a-sequence) : (display-token (format #f "~a ~a" $1 $2))
+      (a-sequence) : (display-token $1)
+    )
+
+    (a-sequence
+      (LPAREN patterns RPAREN) : (display-token (format #f "sequence(~a)" $2))
     )
   )
 )
