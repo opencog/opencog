@@ -171,7 +171,7 @@ protected:
 
     // = true will filter out atoms with labels contain keyword, = fasle will only filter out atoms with labels equal to any keyword
     bool keyword_black_logic_is_contain;
-    set<Handle> black_keyword_Handles; // only use when keyword_black_logic_is_contain = false
+    HandleSet black_keyword_Handles; // only use when keyword_black_logic_is_contain = false
 
     QUERY_LOGIC keyword_white_list_logic;
 
@@ -203,8 +203,8 @@ protected:
 
     vector<vector<vector<unsigned int>>> components_ngram[3];
 
-    vector<Handle> allLinksContainWhiteKeywords;
-    set<Handle> havenotProcessedWhiteKeywordLinks;
+    HandleSeq allLinksContainWhiteKeywords;
+    HandleSet havenotProcessedWhiteKeywordLinks;
 
    // [gram], this to avoid different threads happen to work on the same links.
    // each string is composed the handles of a group of fact links in the observingAtomSpace in the default hash order using std set
@@ -350,7 +350,7 @@ protected:
 
     HandleSet _getAllNonIgnoredLinksForGivenNode(Handle keywordNode, HandleSet& allSubsetLinks);
 
-    HandleSet _extendOneLinkForSubsetCorpus(HandleSet& allNewLinksLastGram, HandleSet& allSubsetLinks, set<Handle>& extractedNodes);
+    HandleSet _extendOneLinkForSubsetCorpus(HandleSet& allNewLinksLastGram, HandleSet& allSubsetLinks, HandleSet& extractedNodes);
 
     // will write the subset to a scm file
     void _selectSubsetFromCorpus(vector<string>& subsetKeywords, unsigned int max_connection, bool logic_contain = true);
@@ -361,7 +361,7 @@ protected:
 
     bool containIgnoredContent(Handle link );
 
-    bool doesLinkContainNodesInKeyWordNodes(const Handle& link, const set<Handle>& keywordNodes);
+    bool doesLinkContainNodesInKeyWordNodes(const Handle& link, const HandleSet& keywordNodes);
 
     vector<string> keyword_black_list;
     vector<string> keyword_white_list;

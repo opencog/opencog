@@ -848,7 +848,7 @@ bool PatternMiner::isIgnoredContent(string keyword)
     return false;
 }
 
-bool PatternMiner::doesLinkContainNodesInKeyWordNodes(const Handle& link, const set<Handle>& keywordNodes)
+bool PatternMiner::doesLinkContainNodesInKeyWordNodes(const Handle& link, const HandleSet& keywordNodes)
 {
     HandleSeq outgoingLinks = link->getOutgoingSet();
 
