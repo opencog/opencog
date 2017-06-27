@@ -115,7 +115,7 @@ void PatternMiner::findAndRenameVariablesForOneLink(Handle link, map<Handle,Hand
                    string var_name = "$var_"  + toString(varNameMap.size() + 1);
                    Handle var_node = atomSpace->add_node(opencog::PATTERN_VARIABLENODE_TYPE, var_name);
                    // XXX why do we need to set the TV ???
-                   var_node->merge(TruthValue::TRUE_TV());
+                   var_node->setTruthValue(TruthValue::TRUE_TV());
                    varNameMap.insert(std::pair<Handle,Handle>(h,var_node));
                    renameOutgoingLinks.push_back(var_node);
                }
@@ -133,7 +133,7 @@ void PatternMiner::findAndRenameVariablesForOneLink(Handle link, map<Handle,Hand
              findAndRenameVariablesForOneLink(h, varNameMap, _renameOutgoingLinks);
              Handle reLink = atomSpace->add_link(h->getType(),_renameOutgoingLinks);
              // XXX why do we need to set the TV ???
-             reLink->merge(TruthValue::TRUE_TV());
+             reLink->setTruthValue(TruthValue::TRUE_TV());
              renameOutgoingLinks.push_back(reLink);
         }
 
@@ -152,7 +152,7 @@ HandleSeq PatternMiner::RebindVariableNames(HandleSeq& orderedPattern, map<Handl
         findAndRenameVariablesForOneLink(link, orderedVarNameMap, renameOutgoingLinks);
         Handle rebindedLink = atomSpace->add_link(link->getType(),renameOutgoingLinks);
         // XXX why do we need to set the TV ???
-        rebindedLink->merge(TruthValue::TRUE_TV());
+        rebindedLink->setTruthValue(TruthValue::TRUE_TV());
         rebindedPattern.push_back(rebindedLink);
     }
 
@@ -383,7 +383,7 @@ void PatternMiner::generateALinkByChosenVariables(Handle& originalLink, map<Hand
                // this node is considered not a variable, so add its bound value node into the Pattern mining Atomspace
                Handle value_node = atomSpace->add_node(h->getType(), h->getName());
                // XXX why do we need to set the TV ???
-               value_node->merge(TruthValue::TRUE_TV());
+               value_node->setTruthValue(TruthValue::TRUE_TV());
                outputOutgoings.push_back(value_node);
            }
         }
@@ -393,7 +393,7 @@ void PatternMiner::generateALinkByChosenVariables(Handle& originalLink, map<Hand
              generateALinkByChosenVariables(h, valueToVarMap, _outputOutgoings, _fromAtomSpace);
              Handle reLink = atomSpace->add_link(h->getType(),_outputOutgoings);
              // XXX why do we need to set the TV ???
-             reLink->merge(TruthValue::TRUE_TV());
+             reLink->setTruthValue(TruthValue::TRUE_TV());
              outputOutgoings.push_back(reLink);
         }
     }
@@ -606,7 +606,7 @@ void PatternMiner::swapOneLinkBetweenTwoAtomSpace(AtomSpace* fromAtomSpace, Atom
         if (h->isNode())
         {
            Handle new_node = toAtomSpace->add_node(h->getType(), h->getName());
-           new_node->merge(h->getTruthValue());
+           new_node->setTruthValue(h->getTruthValue());
            outgoings.push_back(new_node);
            if (h->getType() == PATTERN_VARIABLENODE_TYPE)
            {
@@ -620,7 +620,7 @@ void PatternMiner::swapOneLinkBetweenTwoAtomSpace(AtomSpace* fromAtomSpace, Atom
 
              swapOneLinkBetweenTwoAtomSpace(fromAtomSpace, toAtomSpace, h, _OutgoingLinks, outVariableNodes);
              Handle _link = toAtomSpace->add_link(h->getType(), _OutgoingLinks);
-             _link->merge(h->getTruthValue());
+             _link->setTruthValue(h->getTruthValue());
 
              outgoings.push_back(_link);
         }
@@ -638,7 +638,7 @@ HandleSeq PatternMiner::swapLinksBetweenTwoAtomSpace(AtomSpace* fromAtomSpace, A
 
         swapOneLinkBetweenTwoAtomSpace(fromAtomSpace, toAtomSpace, link, outgoingLinks, outVariableNodes);
         Handle toLink = toAtomSpace->add_link(link->getType(), outgoingLinks);
-        toLink->merge(link->getTruthValue());
+        toLink->setTruthValue(link->getTruthValue());
 
         outPutLinks.push_back(toLink);
     }
@@ -2268,7 +2268,7 @@ void PatternMiner::reNameNodesForALink(Handle& inputLink, Handle& nodeToBeRename
              HandleSeq _renameOutgoingLinks;
              reNameNodesForALink(h, nodeToBeRenamed, newNamedNode, _renameOutgoingLinks, _fromAtomSpace, _toAtomSpace);
              Handle reLink = _toAtomSpace->add_link(h->getType(), _renameOutgoingLinks);
-             reLink->merge(h->getTruthValue());
+             reLink->setTruthValue(h->getTruthValue());
              renameOutgoingLinks.push_back(reLink);
         }
 
@@ -2306,7 +2306,7 @@ void PatternMiner::getOneMoreGramExtendedLinksFromGivenLeaf(Handle& toBeExtended
         HandleSeq renameOutgoingLinks;
         reNameNodesForALink(extendedHandle, leaf, varNode, renameOutgoingLinks, _fromAtomSpace, atomSpace);
         Handle reLink = atomSpace->add_link(extendedHandle->getType(), renameOutgoingLinks);
-        reLink->merge(extendedHandle->getTruthValue());
+        reLink->setTruthValue(extendedHandle->getTruthValue());
         outPutExtendedPatternLinks.push_back(reLink);
     }
 
@@ -4126,7 +4126,7 @@ void PatternMiner::findAllLinksContainKeyWords(vector<string>& subsetKeywords, u
 
 //                        swapOneLinkBetweenTwoAtomSpace(originalAtomSpace, observingAtomSpace, newh, outgoingLinks, outVariableNodes);
 //                        Handle newLink = observingAtomSpace->add_link(newh->getType(), outgoingLinks);
-//                        newLink->merge(newh->getTruthValue());
+//                        newLink->setTruthValue(newh->getTruthValue());
 //                        linkNumLoadedIntoObservingAtomSpace ++;
 //                    }
 //                }

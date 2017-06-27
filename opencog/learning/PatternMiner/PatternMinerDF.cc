@@ -87,7 +87,7 @@ using namespace opencog;
 
 //        swapOneLinkBetweenTwoAtomSpace(originalAtomSpace, observingAtomSpace, cur_link, outgoingLinks, outVariableNodes);
 //        Handle newLink = observingAtomSpace->add_link(cur_link->getType(), outgoingLinks);
-//        newLink->merge(cur_link->getTruthValue());
+//        newLink->setTruthValue(cur_link->getTruthValue());
 
 //        HandleSeq observedLinks;
 //        observedLinks.push_back(newLink);
@@ -221,7 +221,7 @@ void PatternMiner::growPatternsDepthFirstTask(unsigned int thread_index)
 
             swapOneLinkBetweenTwoAtomSpace(originalAtomSpace, observingAtomSpace, cur_link, outgoingLinks, outVariableNodes);
             Handle newLink = observingAtomSpace->add_link(cur_link->getType(), outgoingLinks);
-            newLink->merge(cur_link->getTruthValue());
+            newLink->setTruthValue(cur_link->getTruthValue());
 
             extendAPatternForOneMoreGramRecursively(newLink, observingAtomSpace, Handle::UNDEFINED, lastGramLinks, 0, lastGramValueToVarMap,patternVarMap, false,
                                                     allNewMinedPatternsCurTask, allHTreeNodesCurTask, allNewMinedPatternInfo, thread_index,startFromLinkContainWhiteKeyword);
@@ -461,7 +461,7 @@ HTreeNode* PatternMiner::extractAPatternFromGivenVarCombination(HandleSeq &input
             HandleSeq outgoingLinks;
             generateALinkByChosenVariables(link, patternVarMap, outgoingLinks, _fromAtomSpace);
             Handle rebindedLink = atomSpace->add_link(link->getType(), outgoingLinks);
-            rebindedLink->merge(TruthValue::TRUE_TV());
+            rebindedLink->setTruthValue(TruthValue::TRUE_TV());
 
             pattern.push_back(rebindedLink);
         }
@@ -1321,7 +1321,7 @@ void PatternMiner::extendAPatternForOneMoreGramRecursively(const Handle &extende
 //                    HandleSeq outgoingLinks;
 //                    generateALinkByChosenVariables(link, patternVarMap, outgoingLinks, _fromAtomSpace);
 //                    Handle rebindedLink = atomSpace->add_link(link->getType(), outgoingLinks);
-//                    rebindedLink->merge(TruthValue::TRUE_TV());
+//                    rebindedLink->setTruthValue(TruthValue::TRUE_TV());
 
 //                    pattern.push_back(rebindedLink);
 //                }
