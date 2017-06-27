@@ -254,16 +254,16 @@ protected:
 
     // valueToVarMap:  the ground value node in the orginal Atomspace to the variable handle in pattenmining Atomspace
     void extractAllNodesInLink(Handle link, map<Handle,Handle>& valueToVarMap, AtomSpace* _fromAtomSpace);
-    void extractAllNodesInLink(Handle link, OrderedHandleSet& allNodes, AtomSpace* _fromAtomSpace);
+    void extractAllNodesInLink(Handle link, HandleSet& allNodes, AtomSpace* _fromAtomSpace);
     void extractAllNodesInLink(Handle link, map<Handle, unsigned int> &allNodes, AtomSpace* _fromAtomSpace, unsigned index); // just find all the nodes in the original atomspace for this link
-    void extractAllVariableNodesInLink(Handle link, OrderedHandleSet& allNodes, AtomSpace* _atomSpace);
+    void extractAllVariableNodesInLink(Handle link, HandleSet& allNodes, AtomSpace* _atomSpace);
 
     // if a link contains only variableNodes , no const nodes
     bool onlyContainVariableNodes(Handle link, AtomSpace* _atomSpace);
 
     bool containVariableNodes(Handle link, AtomSpace* _atomSpace);
 
-    void extractAllPossiblePatternsFromInputLinksBF(HandleSeq& inputLinks,  HTreeNode* parentNode,OrderedHandleSet& sharedNodes, unsigned int gram);
+    void extractAllPossiblePatternsFromInputLinksBF(HandleSeq& inputLinks,  HTreeNode* parentNode,HandleSet& sharedNodes, unsigned int gram);
 
 //    // vector<HTreeNode *> &allHTreeNodes is output all the HTreeNodes found
 //    void extractAllPossiblePatternsFromInputLinksDF(HandleSeq& inputLinks,unsigned int sharedLinkIndex, AtomSpace* _fromAtomSpace,
@@ -281,12 +281,12 @@ protected:
 
     HandleSeq swapLinksBetweenTwoAtomSpaceBF(AtomSpace* fromAtomSpace, AtomSpace* toAtomSpace, HandleSeq& fromLinks, HandleSeq& outVariableNodes, HandleSeq& linksWillBeDel);
 
-    void extractAllVariableNodesInAnInstanceLink(Handle& instanceLink, Handle& patternLink, OrderedHandleSet& allVarNodes);
+    void extractAllVariableNodesInAnInstanceLink(Handle& instanceLink, Handle& patternLink, HandleSet& allVarNodes);
 
     void extractAllVariableNodesInAnInstanceLink(Handle& instanceLink, Handle& patternLink, map<Handle, unsigned int>& allVarNodes, unsigned index);
 
     void extendAllPossiblePatternsForOneMoreGramDF(HandleSeq &instance, AtomSpace* _fromAtomSpace, unsigned int gram,
-                                                   vector<HTreeNode*>& allLastGramHTreeNodes, map<HandleSeq, vector<HTreeNode*> >& allFactLinksToPatterns, vector<OrderedHandleSet>& newConnectedLinksFoundThisGram);
+                                                   vector<HTreeNode*>& allLastGramHTreeNodes, map<HandleSeq, vector<HTreeNode*> >& allFactLinksToPatterns, vector<HandleSet>& newConnectedLinksFoundThisGram);
 
     void extendAllPossiblePatternsForOneMoreGramBF(HandleSeq &instance, HTreeNode* curHTreeNode, unsigned int gram);
 
@@ -348,14 +348,14 @@ protected:
 
     void removeLinkAndItsAllSubLinks(AtomSpace *_atomspace, Handle link);
 
-    OrderedHandleSet _getAllNonIgnoredLinksForGivenNode(Handle keywordNode, OrderedHandleSet& allSubsetLinks);
+    HandleSet _getAllNonIgnoredLinksForGivenNode(Handle keywordNode, HandleSet& allSubsetLinks);
 
-    OrderedHandleSet _extendOneLinkForSubsetCorpus(OrderedHandleSet& allNewLinksLastGram, OrderedHandleSet& allSubsetLinks, set<Handle>& extractedNodes);
+    HandleSet _extendOneLinkForSubsetCorpus(HandleSet& allNewLinksLastGram, HandleSet& allSubsetLinks, set<Handle>& extractedNodes);
 
     // will write the subset to a scm file
     void _selectSubsetFromCorpus(vector<string>& subsetKeywords, unsigned int max_connection, bool logic_contain = true);
 
-    void findAllLinksContainKeyWords(vector<string>& subsetKeywords, unsigned int max_connection, bool logic_contain, OrderedHandleSet& foundLinks);
+    void findAllLinksContainKeyWords(vector<string>& subsetKeywords, unsigned int max_connection, bool logic_contain, HandleSet& foundLinks);
 
     bool isIgnoredContent(string keyword);
 
