@@ -159,5 +159,6 @@ LG_LINK_INSTANCE_LINK <- LIST_LINK
 
 // ---------------------------------------------------------------
 // Types used in the Lojban Parser
+// What do thse types do?
 SET_TYPE_LINK <- ORDERED_LINK
 SET_SIZE_LINK <- ORDERED_LINK
