@@ -15,6 +15,17 @@
     ;; Run all iterations
     (map runiter (iota niter))))
 
-;; Define
+;; Run an iteration i over the given targets
 (define (run-iteration targets i)
-  (display "i = ") (display i) (display "\n"))
+  (display (format #f "run-iteration i = ~a\n" i))
+  (let* ((run-bc-fun (lambda (j) (run-bc (list-ref targets j) i j)))
+         (results (map run-bc-fun (iota pss)))
+         (Si (count values results)))
+    (display (format #f "Number of problem solved = ~a\n" Si))
+    (display "TODO: build collection of rules for the next iteration\n")))
+
+;; Run the backward chainer on target, with index j in iteration
+;; i. Return #t iff successful.
+(define (run-bc target i j)
+  (display (format #f "run-bc target = ~a, i = ~a, j = ~a\n" target i j))
+  #f)

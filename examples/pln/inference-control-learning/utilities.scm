@@ -1,6 +1,7 @@
 ;; Utilities for the inference control learning experiment
 
 (use-modules (srfi srfi-1))
+(use-modules (opencog logger))
 (use-modules (opencog randgen))
 
 ;; Let of characters of the alphabet
