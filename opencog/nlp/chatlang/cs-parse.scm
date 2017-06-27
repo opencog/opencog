@@ -212,9 +212,9 @@
 
     (rules
       (RESPONDERS a-literal LPAREN patterns RPAREN patterns) :
-        (display-token (format #f "rejoiner(~a -> ~a)" $3 $5))
+        (display-token (format #f "responder_~a->(~a -> ~a)" $2 $4 $6))
       (RESPONDERS LPAREN patterns RPAREN patterns) :
-        (display-token (format #f "rejoiner(~a -> ~a)" $3 $5))
+        (display-token (format #f "responder_x->(~a -> ~a)" $3 $5))
       (REJOINDERS LPAREN patterns RPAREN patterns) :
         (display-token (format #f "rejoiner(~a -> ~a)" $3 $5))
       (GAMBIT patterns) : (display-token (string-append "gambit = " $2))
