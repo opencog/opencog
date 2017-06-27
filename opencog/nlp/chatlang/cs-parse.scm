@@ -224,7 +224,12 @@
       (GAMBIT patterns) : (display-token (string-append "gambit = " $2))
     )
 
-    (patterns ; TODO: Give this a better name.
+    (patterns
+      (patterns pattern) : (display-token (format #f "~a ~a\n" $1 $2))
+      (pattern) : (display-token $1)
+    )
+
+    (pattern ; TODO: Give this a better name.
       (literals) : (display-token $1)
       (choices) : (display-token $1)
       (unordered-matchings) : (display-token $1)
