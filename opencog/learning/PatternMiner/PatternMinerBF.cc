@@ -63,7 +63,7 @@ void PatternMiner::extendAllPossiblePatternsForOneMoreGramBF(HandleSeq &instance
 
     // First, extract all the variable nodes in the instance links
     // we only extend one more link on the nodes that are considered as varaibles for this pattern
-    OrderedHandleSet allVarNodes;
+    HandleSet allVarNodes;
 
     HandleSeq::iterator patternLinkIt = curHTreeNode->pattern.begin();
     for (Handle link : instance)
@@ -72,7 +72,7 @@ void PatternMiner::extendAllPossiblePatternsForOneMoreGramBF(HandleSeq &instance
         patternLinkIt ++;
     }
 
-    OrderedHandleSet::iterator varIt;
+    HandleSet::iterator varIt;
 
     for(varIt = allVarNodes.begin(); varIt != allVarNodes.end(); ++ varIt)
     {
@@ -120,7 +120,7 @@ void PatternMiner::extendAllPossiblePatternsForOneMoreGramBF(HandleSeq &instance
 }
 
 void PatternMiner::extractAllPossiblePatternsFromInputLinksBF(HandleSeq& inputLinks,  HTreeNode* parentNode,
-                                                                          OrderedHandleSet& sharedNodes, unsigned int gram)
+                                                              HandleSet& sharedNodes, unsigned int gram)
 {
     map<Handle,Handle> valueToVarMap;  // the ground value node in the orginal Atomspace to the variable handle in pattenmining Atomspace
 
@@ -393,7 +393,7 @@ void PatternMiner::growTheFirstGramPatternsTaskBF()
         originalLinks.push_back(cur_link);
 
         // Extract all the possible patterns from this originalLinks, not duplicating the already existing patterns
-        OrderedHandleSet sharedNodes;
+        HandleSet sharedNodes;
         extractAllPossiblePatternsFromInputLinksBF(originalLinks, 0, sharedNodes, 1);
 
     }
@@ -647,7 +647,7 @@ void PatternMiner::findAllInstancesForGivenPatternBF(HTreeNode* HNode)
 
    HandleSeq patternToMatch = swapLinksBetweenTwoAtomSpaceBF(atomSpace, originalAtomSpace, HNode->pattern, variableNodes, linksWillBeDel);
 
-//   OrderedHandleSet allNodesInPattern;
+//   HandleSet allNodesInPattern;
 //   for (unsigned int i = 0; i < HNode->pattern.size(); ++i)
 //   {
 //       extractAllVariableNodesInLink(HNode->pattern[i],allNodesInPattern, atomSpace);

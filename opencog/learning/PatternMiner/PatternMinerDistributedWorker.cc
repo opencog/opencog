@@ -211,7 +211,7 @@ void DistributedPatternMiner::startMiningWork()
 
             cout << "Finding all Links contains these keywords...\n";
 
-            set<Handle> allLinksContainWhiteKeywordsSet;
+            HandleSet allLinksContainWhiteKeywordsSet;
             findAllLinksContainKeyWords(keyword_white_list, 0, true, allLinksContainWhiteKeywordsSet);
 
             std::copy(allLinksContainWhiteKeywordsSet.begin(), allLinksContainWhiteKeywordsSet.end(), std::back_inserter(allLinksContainWhiteKeywords));

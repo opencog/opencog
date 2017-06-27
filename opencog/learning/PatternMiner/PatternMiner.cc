@@ -427,7 +427,7 @@ void PatternMiner::extractAllNodesInLink(Handle link, map<Handle,Handle>& valueT
     }
 }
 
-void PatternMiner::extractAllVariableNodesInAnInstanceLink(Handle& instanceLink, Handle& patternLink, OrderedHandleSet& allVarNodes)
+void PatternMiner::extractAllVariableNodesInAnInstanceLink(Handle& instanceLink, Handle& patternLink, HandleSet& allVarNodes)
 {
 
     HandleSeq ioutgoingLinks = instanceLink->getOutgoingSet();
@@ -509,7 +509,7 @@ void PatternMiner::extractAllNodesInLink(Handle link, map<Handle, unsigned int>&
     }
 }
 
-void PatternMiner::extractAllNodesInLink(Handle link, OrderedHandleSet& allNodes, AtomSpace* _fromAtomSpace)
+void PatternMiner::extractAllNodesInLink(Handle link, HandleSet& allNodes, AtomSpace* _fromAtomSpace)
 {
     HandleSeq outgoingLinks = link->getOutgoingSet();
 
@@ -529,7 +529,7 @@ void PatternMiner::extractAllNodesInLink(Handle link, OrderedHandleSet& allNodes
     }
 }
 
-void PatternMiner::extractAllVariableNodesInLink(Handle link, OrderedHandleSet& allNodes, AtomSpace* _atomSpace)
+void PatternMiner::extractAllVariableNodesInLink(Handle link, HandleSet& allNodes, AtomSpace* _atomSpace)
 {
     HandleSeq outgoingLinks = link->getOutgoingSet();
 
@@ -680,7 +680,7 @@ void PatternMiner::findAllInstancesForGivenPatternInNestedAtomSpace(HTreeNode* H
     Handle hAndLink = _atomSpace->add_link(AND_LINK, HNode->pattern);
 
     // add variable atoms
-    OrderedHandleSet allVariableNodesInPattern;
+    HandleSet allVariableNodesInPattern;
     for (unsigned int i = 0; i < HNode->pattern.size(); ++i)
     {
         extractAllVariableNodesInLink(HNode->pattern[i],allVariableNodesInPattern, _atomSpace);
@@ -848,7 +848,7 @@ bool PatternMiner::isIgnoredContent(string keyword)
     return false;
 }
 
-bool PatternMiner::doesLinkContainNodesInKeyWordNodes(const Handle& link, const set<Handle>& keywordNodes)
+bool PatternMiner::doesLinkContainNodesInKeyWordNodes(const Handle& link, const HandleSet& keywordNodes)
 {
     HandleSeq outgoingLinks = link->getOutgoingSet();
 
@@ -1638,14 +1638,14 @@ bool PatternMiner::containsLoopVariable(HandleSeq& inputPattern)
 bool PatternMiner::filters(HandleSeq& inputLinks, HandleSeqSeq& oneOfEachSeqShouldBeVars, HandleSeq& leaves, HandleSeq& shouldNotBeVars, HandleSeq& shouldBeVars, AtomSpace* _atomSpace)
 {
 
-    OrderedHandleSet allNodesInEachLink[inputLinks.size()];
+    HandleSet allNodesInEachLink[inputLinks.size()];
 
-    OrderedHandleSet all2ndOutgoingsOfInherlinks;
+    HandleSet all2ndOutgoingsOfInherlinks;
 
     // map<predicate, set<value> >
-    map<Handle, OrderedHandleSet > predicateToValueOfEvalLinks;
+    map<Handle, HandleSet > predicateToValueOfEvalLinks;
 
-    OrderedHandleSet  all1stOutgoingsOfEvalLinks;
+    HandleSet  all1stOutgoingsOfEvalLinks;
 
 
     for (unsigned int i = 0; i < inputLinks.size(); ++i)
@@ -1685,10 +1685,10 @@ bool PatternMiner::filters(HandleSeq& inputLinks, HandleSeqSeq& oneOfEachSeqShou
 
                 if (enable_filter_not_same_var_from_same_predicate)
                 {
-                    map<Handle, OrderedHandleSet >::iterator it = predicateToValueOfEvalLinks.find(predicateNode);
+                    map<Handle, HandleSet >::iterator it = predicateToValueOfEvalLinks.find(predicateNode);
                     if (it != predicateToValueOfEvalLinks.end())
                     {
-                        OrderedHandleSet& values = (it->second);
+                        HandleSet& values = (it->second);
                         if (values.find(valueNode) != values.end())
                             return true;
                         else
@@ -1696,9 +1696,9 @@ bool PatternMiner::filters(HandleSeq& inputLinks, HandleSeqSeq& oneOfEachSeqShou
                     }
                     else
                     {
-                        OrderedHandleSet newValues;
+                        HandleSet newValues;
                         newValues.insert(valueNode);
-                        predicateToValueOfEvalLinks.insert(std::pair<Handle, OrderedHandleSet >(predicateNode,newValues));
+                        predicateToValueOfEvalLinks.insert(std::pair<Handle, HandleSet >(predicateNode,newValues));
                     }
                 }
 
@@ -1812,7 +1812,7 @@ bool PatternMiner::splitDisconnectedLinksIntoConnectedGroups(HandleSeq& inputLin
     if(inputLinks.size() < 2)
         return false;
 
-    OrderedHandleSet allNodesInEachLink[inputLinks.size()];
+    HandleSet allNodesInEachLink[inputLinks.size()];
     for (unsigned int i = 0; i < inputLinks.size(); ++i)
     {
         extractAllVariableNodesInLink(inputLinks[i],allNodesInEachLink[i], atomSpace);
@@ -3983,9 +3983,9 @@ void PatternMiner::testPatternMatcher()
 }
 
 
-OrderedHandleSet PatternMiner::_getAllNonIgnoredLinksForGivenNode(Handle keywordNode, OrderedHandleSet& allSubsetLinks)
+HandleSet PatternMiner::_getAllNonIgnoredLinksForGivenNode(Handle keywordNode, HandleSet& allSubsetLinks)
 {
-    OrderedHandleSet newHandles;
+    HandleSet newHandles;
     IncomingSet incomings = keywordNode->getIncomingSet(originalAtomSpace);
 
     // cout << "\n " << incomings.size() << " incomings found for keyword: " << keywordNode->toShortString() << std::endl;
@@ -4030,14 +4030,14 @@ OrderedHandleSet PatternMiner::_getAllNonIgnoredLinksForGivenNode(Handle keyword
     return newHandles;
 }
 
-OrderedHandleSet PatternMiner::_extendOneLinkForSubsetCorpus(OrderedHandleSet& allNewLinksLastGram, OrderedHandleSet& allSubsetLinks, set<Handle>& extractedNodes)
+HandleSet PatternMiner::_extendOneLinkForSubsetCorpus(HandleSet& allNewLinksLastGram, HandleSet& allSubsetLinks, set<Handle>& extractedNodes)
 {
-    OrderedHandleSet allNewConnectedLinksThisGram;
+    HandleSet allNewConnectedLinksThisGram;
     // only extend the links in allNewLinksLastGram. allNewLinksLastGram is a part of allSubsetLinks
     for (Handle link : allNewLinksLastGram)
     {
         // find all nodes in this link
-        OrderedHandleSet allNodes;
+        HandleSet allNodes;
         extractAllNodesInLink(link, allNodes, originalAtomSpace);
 
         for (Handle neighborNode : allNodes)
@@ -4054,7 +4054,7 @@ OrderedHandleSet PatternMiner::_extendOneLinkForSubsetCorpus(OrderedHandleSet& a
             else
                 extractedNodes.insert(neighborNode);
 
-            OrderedHandleSet newConnectedLinks;
+            HandleSet newConnectedLinks;
             newConnectedLinks = _getAllNonIgnoredLinksForGivenNode(neighborNode, allSubsetLinks);
             allNewConnectedLinksThisGram.insert(newConnectedLinks.begin(),newConnectedLinks.end());
             allSubsetLinks.insert(newConnectedLinks.begin(),newConnectedLinks.end());
@@ -4066,7 +4066,7 @@ OrderedHandleSet PatternMiner::_extendOneLinkForSubsetCorpus(OrderedHandleSet& a
 }
 
 // allSubsetLinks is  output
-void PatternMiner::findAllLinksContainKeyWords(vector<string>& subsetKeywords, unsigned int max_connection, bool logic_contain, OrderedHandleSet& allSubsetLinks)
+void PatternMiner::findAllLinksContainKeyWords(vector<string>& subsetKeywords, unsigned int max_connection, bool logic_contain, HandleSet& allSubsetLinks)
 {
     allSubsetLinks.clear();
     set<Handle> extractedNodes;
@@ -4152,7 +4152,7 @@ void PatternMiner::findAllLinksContainKeyWords(vector<string>& subsetKeywords, u
             else
                 continue;
 
-            OrderedHandleSet newConnectedLinks = _getAllNonIgnoredLinksForGivenNode(keywordNode, allSubsetLinks);
+            HandleSet newConnectedLinks = _getAllNonIgnoredLinksForGivenNode(keywordNode, allSubsetLinks);
 
             allSubsetLinks.insert(newConnectedLinks.begin(), newConnectedLinks.end());
 
@@ -4161,7 +4161,7 @@ void PatternMiner::findAllLinksContainKeyWords(vector<string>& subsetKeywords, u
     }
 
     unsigned int order = 0;
-    OrderedHandleSet allNewConnectedLinksThisGram = allSubsetLinks;
+    HandleSet allNewConnectedLinksThisGram = allSubsetLinks;
 
     while (order < max_connection)
     {
@@ -4174,7 +4174,7 @@ void PatternMiner::findAllLinksContainKeyWords(vector<string>& subsetKeywords, u
 void PatternMiner::selectSubsetAllEntityLinksContainsKeywords(vector<string>& subsetKeywords)
 {
     std::cout << "\nSelecting a subset from loaded corpus in Atomspace for the Entities contain following value keywords." << std::endl ;
-    OrderedHandleSet allSubsetLinks;
+    HandleSet allSubsetLinks;
     string topicsStr = "";
 
     for (string keyword : subsetKeywords)
@@ -4186,7 +4186,7 @@ void PatternMiner::selectSubsetAllEntityLinksContainsKeywords(vector<string>& su
 
     findAllLinksContainKeyWords(subsetKeywords, 0, false, allSubsetLinks);
 
-    OrderedHandleSet allEntityNodes;
+    HandleSet allEntityNodes;
     for (Handle link : allSubsetLinks)
     {  
         Handle firstOutgoing = link->getOutgoingAtom(1);
@@ -4207,7 +4207,7 @@ void PatternMiner::selectSubsetAllEntityLinksContainsKeywords(vector<string>& su
     int processEntityNum = 0;
     for (Handle entityNode : allEntityNodes)
     {
-        OrderedHandleSet allLinks = _getAllNonIgnoredLinksForGivenNode(entityNode, allSubsetLinks);
+        HandleSet allLinks = _getAllNonIgnoredLinksForGivenNode(entityNode, allSubsetLinks);
 
         allSubsetLinks.insert(allLinks.begin(), allLinks.end());
         processEntityNum ++;
@@ -4248,7 +4248,7 @@ void PatternMiner::selectSubsetAllEntityLinksContainsKeywords(vector<string>& su
 void PatternMiner::_selectSubsetFromCorpus(vector<string>& subsetKeywords, unsigned int max_connection, bool logic_contain)
 {
     std::cout << "\nSelecting a subset from loaded corpus in Atomspace for the following keywords within " << max_connection << " distance:" << std::endl ;
-    OrderedHandleSet allSubsetLinks;
+    HandleSet allSubsetLinks;
     string topicsStr = "";
 
     for (string keyword : subsetKeywords)

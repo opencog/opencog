@@ -91,10 +91,10 @@ void MihalceaEdge::annotate_parse(const Handle& h)
 	struct timeval start;
 	gettimeofday(&start, NULL);
 #endif
-	OrderedHandleSet::const_iterator f;
+	HandleSet::const_iterator f;
 	for (f = words.begin(); f != words.end(); ++f)
 	{
-		OrderedHandleSet::const_iterator s = f;
+		HandleSet::const_iterator s = f;
 		++s;
 		for (; s != words.end(); ++s)
 		{
@@ -126,7 +126,7 @@ void MihalceaEdge::annotate_parse_pair(const Handle& ha, const Handle& hb)
 {
 	words.clear();
 	foreach_word_instance(ha, &EdgeUtils::look_at_word, (EdgeUtils *) this);
-	OrderedHandleSet pa_words = words;
+	HandleSet pa_words = words;
 	words.clear();
 	foreach_word_instance(hb, &EdgeUtils::look_at_word, (EdgeUtils *) this);
 
@@ -143,10 +143,10 @@ void MihalceaEdge::annotate_parse_pair(const Handle& ha, const Handle& hb)
 	struct timeval start;
 	gettimeofday(&start, NULL);
 #endif
-	OrderedHandleSet::const_iterator ia;
+	HandleSet::const_iterator ia;
 	for (ia = pa_words.begin(); ia != pa_words.end(); ++ia)
 	{
-		OrderedHandleSet::const_iterator ib;
+		HandleSet::const_iterator ib;
 		for (ib = words.begin(); ib != words.end(); ++ib)
 		{
 			annotate_word_pair(*ia, *ib);
