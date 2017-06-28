@@ -109,9 +109,10 @@
         (cons
           (make-lexical-token '_ location #f)
           (match:suffix current-match)))
-    ((has-match? "^~n" str)
+    ((has-match? "^\\*~[1-9]+" str)
         (cons
-          (make-lexical-token '~n location #f)
+          (make-lexical-token '*~n location
+            (substring (match:substring current-match) 2))
           (match:suffix current-match)))
     ((has-match? "^~" str); Must be after other '~
         (cons
@@ -205,7 +206,7 @@
     (LPAREN RPAREN NEWLINE CR CONCEPT TOPIC RESPONDERS REJOINDERS GAMBIT
       NotDefined COMMENT SAMPLE_INPUT LITERAL WHITESPACE COMMA NUM
       _ * << >> ^ < >
-      ~n ; Range-restricted Wildcards
+      *~n ; Range-restricted Wildcards
       ~ ; Concepts
       LSBRACKET RSBRACKET ; Square Brackets []
       DQUOTE ; Double quote "
@@ -269,8 +270,8 @@
       (LITERAL) : (display-token $1)
       (_ LITERAL) : (display-token (string-append "underscore_fn->" $2))
       (~ LITERAL) : (display-token (string-append "get_concept_fn->" $2))
-      (* ~ NUM) : (display-token (string-append "range-restricted-*->~" $3))
-      (LITERAL ~n) : (display-token (string-append $1 "<-range_wildecard"))
+      (*~n) : (display-token (string-append "range-restricted-*->~" $1))
+      (LITERAL *~n) : (display-token (string-append $1 "<-range_wildecard"))
       (LITERAL COMMA) : (display-token (string-append $1 " " $2))
       (*) : (display-token $1)
       (MVAR) : (display-token (format #f "match_variables->~a" $1))
