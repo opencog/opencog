@@ -100,6 +100,11 @@
         (cons
           (make-lexical-token 'GAMBIT location #f)
           (match:suffix current-match)))
+    ((has-match? "^_[0-9]" str)
+        (cons
+          (make-lexical-token 'MVAR location
+            (substring (match:substring current-match) 1))
+          (match:suffix current-match)))
     ((has-match? "^_" str)
         (cons
           (make-lexical-token '_ location #f)
@@ -204,6 +209,7 @@
       ~ ; Concepts
       LSBRACKET RSBRACKET ; Square Brackets []
       DQUOTE ; Double quote "
+      MVAR ;Match Variables
     )
 
     ; Parsing rules (aka nonterminal symbols)
@@ -267,6 +273,7 @@
       (LITERAL ~n) : (display-token (string-append $1 "<-range_wildecard"))
       (LITERAL COMMA) : (display-token (string-append $1 " " $2))
       (*) : (display-token $1)
+      (MVAR) : (display-token (format #f "match_variables->~a" $1))
     )
 
     (choices
