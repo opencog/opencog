@@ -169,31 +169,47 @@ xorl = orl . tolist2
           myand = andl .tolist2
           mynot = notl . tolist1
 
-
-handleConNeg :: SynIso (LCON,[Atom]) (String,[Atom])
+{-handleConNeg :: SynIso (LCON,[Atom]) (String,[Atom])
 handleConNeg = Iso (pure . f) (pure . g)
     where f ((mna,(s,mnai)),[a1,a2]) = let na1 = if isJust mna
-                                                 then cNL noTv a1
+          then cNL noTv a1
                                                  else a1
                                            na2 = if isJust mnai
-                                                 then cNL noTv a2
+                                                    then cNL noTv a2
                                                  else a2
-                                       in (s,[na1,na2])
+      in (s,[na1,na2])
           g (s,[na1,na2]) = let (mna,a1) = case na1 of
-                                        (NL [a1]) -> (Just "na",a1)
+                                    (NL [a1]) -> (Just "na",a1)
                                         _ -> (Nothing,na1)
                                 (mnai,a2) = case na2 of
-                                        (NL [a2]) -> (Just "nai",a2)
+                                    (NL [a2]) -> (Just "nai",a2)
                                         _ -> (Nothing,na2)
-                            in ((mna,(s,mnai)),[a1,a2])
+                            in ((mna,(s,mnai)),[a1,a2])-}
 
+handleEKMods :: SynIso (EK,(Atom,Atom)) (String,(Atom,Atom))
+handleEKMods = mkIso f g where
+    f ((bna,(bse,(c,bnai))),(a1,a2)) = let na1 = if bna
+                                                 then cNL noTv a1
+                                                 else a1
+                                           na2 = if bnai
+                                                 then cNL noTv a2
+                                                 else a2
+                                       in if bse
+                                             then (c,(na2,na1))
+                                             else (c,(na1,na2))
+    g (s,(na1,na2)) = let (bna,a1) = case na1 of
+                                  (NL [a1]) -> (True,a1)
+                                  _         -> (False,na1)
+                          (bnai,a2) = case na2 of
+                                  (NL [a2]) -> (True ,a2)
+                                  _         -> (False,na2)
+                      in ((bna,(False,(s,bnai))),(a1,a2))
 
-conLink :: SynIso (LCON,[Atom]) Atom
-conLink = conLink' . handleConNeg
-
-conLink' :: SynIso (String,[Atom]) Atom
-conLink' = choice conHandlers
-    where conHandlers = [andl   . rmfst "e"
+conLink :: SynIso (EK,(Atom,Atom)) Atom
+conLink = conLink' . second tolist2 . handleEKMods
+    where conLink' :: SynIso (String,[Atom]) Atom
+          conLink' = choice conHandlers
+          conHandlers = [andl   . rmfst "e"
                         ,orl    . rmfst "a"
                         ,iffl   . rmfst "o"
                         ,uL     . rmfst "u"
