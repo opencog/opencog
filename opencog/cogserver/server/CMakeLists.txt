@@ -10,6 +10,7 @@ ADD_LIBRARY (builtinreqs SHARED
 	Request
 	LoadModuleRequest
 	ObserveSentenceRequest
+	ParseSentenceRequest
 	ListRequest
 	ShutdownRequest
 	UnloadModuleRequest
@@ -109,6 +110,7 @@ INSTALL (FILES
 	ConsoleSocket.h
 	Factory.h
 	ObserveSentenceRequest.h
+	ParseSentenceRequest.h
 	ListRequest.h
 	LoadModuleRequest.h
 	Module.h

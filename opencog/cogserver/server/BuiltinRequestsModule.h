@@ -27,6 +27,7 @@
 
 #include <opencog/cogserver/server/Factory.h>
 #include <opencog/cogserver/server/ObserveSentenceRequest.h>
+#include <opencog/cogserver/server/ParseSentenceRequest.h>
 #include <opencog/cogserver/server/ListRequest.h>
 #include <opencog/cogserver/server/LoadModuleRequest.h>
 #include <opencog/cogserver/server/Module.h>
@@ -49,6 +50,7 @@ class BuiltinRequestsModule : public Module
 private:
 
     Factory<ObserveSentenceRequest, Request>  observeFactory;
+    Factory<ParseSentenceRequest, Request>    parseFactory;
     Factory<ListRequest, Request>             listFactory;
     Factory<ShutdownRequest, Request>         shutdownFactory;
     Factory<LoadModuleRequest, Request>       loadmoduleFactory;
