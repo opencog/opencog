@@ -115,7 +115,7 @@
    for each of the TERMS."
   (define vars '())
   (define globs '())
-  (define var-conds '())
+  (define conds '())
   (define glob-conds '())
   (define term-seq '())
   (define var-cnt 0)
@@ -123,32 +123,36 @@
     (cond ((equal? 'lemma (car t))
            (let ((l (lemma (cdr t))))
                 (set! vars (append vars (car l)))
-                (set! var-conds (append var-conds (cdr l)))
+                (set! conds (append conds (cdr l)))
                 (set! term-seq
                   (append term-seq (list (Word (get-lemma (cdr t))))))))
           ((equal? 'word (car t))
            (let ((w (word (cdr t))))
                 (set! vars (append vars (car w)))
-                (set! var-conds (append var-conds (cdr w)))
+                (set! conds (append conds (cdr w)))
                 (set! term-seq
                   (append term-seq (list (Word (get-lemma (cdr t))))))))
           ((equal? 'phrase (car t))
            (let ((p (phrase (cdr t))))
                 (set! vars (append vars (car p)))
-                (set! var-conds (append var-conds (cdr p)))
+                (set! conds (append conds (cdr p)))
                 (set! term-seq (append term-seq
                   (map Word (map get-lemma (string-split (cdr t) #\sp)))))))
           ((equal? 'concept (car t))
            (let* ((v (choose-var-name))
-                  (c (concept (cdr t) v)))
+                  (c (concept (cdr t) v))
+                  (cl (concept (cdr t) v #t)))
                  (set! globs (append globs (car c)))
-                 (set! glob-conds (append glob-conds (cdr c)))
+                 (set! conds (append conds (cdr c)))
+                 (set! glob-conds (append glob-conds (cdr cl)))
                  (set! term-seq (append term-seq (list (Glob v))))))
           ((equal? 'choices (car t))
            (let* ((v (choose-var-name))
-                  (c (choices (cdr t) v)))
+                  (c (choices (cdr t) v))
+                  (cl (choices (cdr t) v #t)))
                  (set! globs (append globs (car c)))
-                 (set! glob-conds (append glob-conds (cdr c)))
+                 (set! conds (append conds (cdr c)))
+                 (set! glob-conds (append glob-conds (cdr cl)))
                  (set! term-seq (append term-seq (list (Glob v))))))
           ((equal? 'unordered-matching (car t))
            (let* ((v (choose-var-name))
@@ -159,10 +163,10 @@
                  (set! globs (append globs
                    (filter (lambda (x) (equal? 'GlobNode (cog-type (gar x))))
                            (car u))))
-                 (set! var-conds (append var-conds (cdr u)))
+                 (set! conds (append conds (cdr u)))
                  (set! term-seq (append term-seq (list (Glob v))))))
           ((equal? 'negation (car t))
-           (set! var-conds (append var-conds (cdr (negation (cdr t))))))
+           (set! conds (append conds (cdr (negation (cdr t))))))
           ((equal? 'wildcard (car t))
            (let* ((v (choose-var-name))
                   (w (wildcard (cadr t) (cddr t) v)))
@@ -184,7 +188,7 @@
               (length (filter (lambda (x) (equal? 'GlobNode (cog-type x)))
                               term-seq)))
     (MemberLink (List term-seq) chatlang-no-constant))
-  (list vars globs var-conds glob-conds term-seq))
+  (list vars globs conds glob-conds term-seq))
 
 (define-public (ground-word GLOB)
   "Get the original words grounded for GLOB."
@@ -285,14 +289,14 @@
          (proc-terms (process-pattern-terms preproc-terms))
          (vars (append atomese-variable-template (list-ref proc-terms 0)))
          (globs (list-ref proc-terms 1))
-         (var-conds (append atomese-condition-template (list-ref proc-terms 2)))
+         (conds (append atomese-condition-template (list-ref proc-terms 2)))
          (glob-conds (list-ref proc-terms 3))
          (term-seq (Evaluation chatlang-lemma-seq
                      (List (Variable "$S") (List (list-ref proc-terms 4)))))
          (action (process-action ACTION))
          (bindlink (generate-bind globs glob-conds term-seq))
          (psi-rule (psi-rule-nocheck
-                     (list (Satisfaction (VariableList vars) (And var-conds)))
+                     (list (Satisfaction (VariableList vars) (And conds)))
                      action
                      (True)
                      (stv .9 .9)
@@ -363,27 +367,42 @@
     (cog-outgoing-set
       (cog-execute! (Get (Reference (Variable "$x") CONCEPT))))))
 
-(define (is-member? GLOB LST)
+(define (is-member? GLOB LST IN-LEMMA?)
   "Check if GLOB is a member of LST, where LST may contain
-   WordNodes, LemmaNodes, and PhraseNodes."
-  (let* ((raw-txt (string-join (map cog-name
-           (cog-outgoing-set (assoc-ref globs-word (car GLOB))))))
-         (lemma-txt (string-join (map cog-name
-           (cog-outgoing-set (assoc-ref globs-lemma (car GLOB)))))))
-    (any (lambda (t)
-           (or (and (eq? 'WordNode (cog-type t))
-                    (equal? raw-txt (cog-name t)))
-               (and (eq? 'LemmaNode (cog-type t))
-                    (equal? lemma-txt (cog-name t)))
-               (and (eq? 'PhraseNode (cog-type t))
-                    (equal? raw-txt (cog-name t)))))
-         LST)))
+   WordNodes, LemmaNodes, and PhraseNodes. IN-LEMMA? is a flag
+   to indicate whether the comparison should be done purely
+   using lemmas."
+  (if IN-LEMMA?
+      (any (lambda (t)
+        (equal? (string-join (map get-lemma (map cog-name GLOB)))
+                (string-join (map get-lemma (string-split (cog-name t) #\sp)))))
+        LST)
+      (let* ((raw-txt (string-join (map cog-name
+               (cog-outgoing-set (assoc-ref globs-word (car GLOB))))))
+             (lemma-txt (string-join (map cog-name
+               (cog-outgoing-set (assoc-ref globs-lemma (car GLOB)))))))
+        (any (lambda (t)
+               (or (and (eq? 'WordNode (cog-type t))
+                        (equal? raw-txt (cog-name t)))
+                   (and (eq? 'LemmaNode (cog-type t))
+                        (equal? lemma-txt (cog-name t)))
+                   (and (eq? 'PhraseNode (cog-type t))
+                        (equal? raw-txt (cog-name t)))))
+             LST))))
 
 (define-public (chatlang-concept? CONCEPT . GLOB)
   "Check if the value grounded for the GlobNode is actually a member
    of the concept."
-  (cog-logger-debug "In chatlang-concept? CONCEPT: ~a GLOB: ~a" CONCEPT GLOB)
-  (if (is-member? GLOB (get-members CONCEPT))
+  (cog-logger-debug "In chatlang-concept? CONCEPT: ~aGLOB: ~a" CONCEPT GLOB)
+  (if (is-member? GLOB (get-members CONCEPT) #f)
+      (stv 1 1)
+      (stv 0 1)))
+
+(define-public (chatlang-concept-in-lemma? CONCEPT . GLOB)
+  "Check if the value grounded for the GlobNode is actually a member
+   of the concept. All the comparison will be done in lemmas."
+  (cog-logger-debug "In chatlang-concept-in-lemma? CONCEPT: ~aGLOB: ~a" CONCEPT GLOB)
+  (if (is-member? GLOB (get-members CONCEPT) #t)
       (stv 1 1)
       (stv 0 1)))
 
@@ -393,7 +412,17 @@
   (cog-logger-debug "In chatlang-choices? CHOICES: ~aGLOB: ~a" CHOICES GLOB)
   (let* ((chs (cog-outgoing-set CHOICES))
          (cpts (append-map get-members (cog-filter 'ConceptNode chs))))
-        (if (is-member? GLOB (append chs cpts))
+        (if (is-member? GLOB (append chs cpts) #f)
+            (stv 1 1)
+            (stv 0 1))))
+
+(define-public (chatlang-choices-in-lemma? CHOICES . GLOB)
+  "Check if the value grounded for the GlobNode is actually a member
+   of the list of choices. All the comparison will be done in lemmas."
+  (cog-logger-debug "In chatlang-choices-in-lema? CHOICES: ~aGLOB: ~a" CHOICES GLOB)
+  (let* ((chs (cog-outgoing-set CHOICES))
+         (cpts (append-map get-members (cog-filter 'ConceptNode chs))))
+        (if (is-member? GLOB (append chs cpts) #t)
             (stv 1 1)
             (stv 0 1))))
 
