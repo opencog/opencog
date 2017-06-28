@@ -58,6 +58,7 @@ static int sentence_count = 0;
 bool ParseSentenceRequest::execute()
 {
     std::list<std::string>::const_iterator it;
+    std::string delimiter = " ";
 
     if (_parameters.empty())
     {
@@ -112,6 +113,13 @@ bool ParseSentenceRequest::execute()
             }
             no_parse = true;
         }
+        // -delimiter <string> - use this string for a delimiter
+        else if (*it == "-delimiter")
+        {
+            ++it;
+            if (it == _parameters.end()) return syntaxError();
+            delimiter = *it;       
+        }
         // -pair_distance <limit> - limit distance of word pairs
         else if (*it == "-pair_distance")
         {
@@ -162,8 +170,8 @@ bool ParseSentenceRequest::execute()
         // Construct the parse output.
         for (auto & pair : parse_results)
         {
-             *parse_stream << sentence_count << " " << pair.left_index + 1 << " " <<
-                    words[pair.left_index] << " " << pair.right_index  + 1 << " " <<
+             *parse_stream << sentence_count << delimiter << pair.left_index + 1 << delimiter <<
+                    words[pair.left_index] << delimiter << pair.right_index  + 1 << delimiter <<
                     words[pair.right_index] << std::endl;
         }
 
@@ -192,6 +200,7 @@ void ParseSentenceRequest::sendError()
     _error << "Supported options:" << std::endl;
     _error << "    -open_parse_file <file_name> Open the file <file_name> for output." << std::endl;
     _error << "    -close_parse_file            Close the output file." << std::endl;
+    _error << "    -delimiter <string>          Use <string> to delimit fields in output." << std::endl;
     _error << "    -pair_distance <limit>       Create pairs up to <limit> distance apart." << std::endl;
     _error << "    -quiet                       Do not return status over telnet." << std::endl;
     _error << "    -noop                        Perform no op-erations (useful for timing)." << std::endl;

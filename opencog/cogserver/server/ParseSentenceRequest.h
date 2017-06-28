@@ -62,6 +62,7 @@ public:
             "Parse the sentence. Optional flags are:\n"
             "    -open_parse_file <file_name>   Open the file <file_name> for output.\n"
             "    -close_parse_file              Close the output file.\n"
+            "    -delimiter <string>            Use <string> to delimit fields in output.\n"
             "    -pair_distance <limit>         Create pairs up to <limit> distance apart.\n"
             "    -quiet                         Do not return status over telnet.\n"
             "    -noop                          Perform no op-erations (useful for timing).\n"
