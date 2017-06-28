@@ -22,10 +22,11 @@ ADD_EXECUTABLE(parsetest
     ParseSentence
 )
 
-TARGET_COMPILE_OPTIONS(parsetest PRIVATE -DTEST_MAIN -DDEBUG_MAIN)
+TARGET_COMPILE_OPTIONS(parsetest PRIVATE -DTEST_MAIN)
 
 TARGET_LINK_LIBRARIES(parsetest
     nlp-types
+    cogutil
     ${ICU_LIBRARY}
     ${ATOMSPACE_LIBRARIES}
     ${Boost_SYSTEM_LIBRARY}
