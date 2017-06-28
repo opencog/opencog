@@ -46,7 +46,10 @@ using namespace opencog;
 
 void eat_my_parameters(...) {}
 
-#ifdef DEBUG_MAIN
+// #define DEBUG_PARSE
+// #define DEEP_DEBUG
+
+#ifdef DEBUG_PARSE
     #define DEBUG_PRINT printf
 #else
     #define DEBUG_PRINT if (false) eat_my_parameters
@@ -57,7 +60,7 @@ namespace opencog {
 
 typedef std::vector<std::vector<double>> WeightMatrix;
 
-#ifdef DEBUG_MAIN
+#ifdef TEST_MAIN
 void print_pair_weights(const WordVector&   words,
                         const WeightMatrix& pair_weights)
 {
@@ -90,7 +93,7 @@ void print_pair_weights(const WordVector&   words,
     }
     printf("\n");
 }
-#endif // DEBUG_MAIN
+#endif // DEBUG_PARSE
 
 void load_pair_weights( AtomSpace*          as,
                         const HandleSeq&    word_handles,
@@ -259,7 +262,8 @@ void find_max_pair_index(   std::string&        indent,
 size_t potential_cross( std::string&                indent,
                         const std::vector<size_t>&  max_pair_indices,
                         const WordVector&           words,
-                        size_t                      start,
+                        size_t                      fragment_start,
+                        size_t                      current_left,
                         size_t                      current_max_right)
 {
     // Check for potential crosses from right to left since
@@ -273,14 +277,15 @@ size_t potential_cross( std::string&                indent,
     // By searching from right to left, we will find the
     // rightmost potential cross first. We will eliminate it and
     // search again for a cross below.
-    for (int left = current_max_right - 1; left >= (int) start; left--)
+    for (int left = current_max_right - 1; left >= (int) current_left; left--)
     {
-        size_t left_max = max_pair_indices[left - start];
+        size_t left_index = left - fragment_start;
+        size_t left_max = max_pair_indices[left_index];
 
 #ifdef DEEP_DEBUG
-        DEBUG_PRINT("%s checking cross for left [%d] %-10s against [%d] with [%d]\n",
+        DEBUG_PRINT("%s checking cross for left [%d] %-10s against [%d] with [%d] index %d\n",
                 indent.c_str(), left, words[left].c_str(),
-                (int) current_max_right, (int) left_max);
+                (int) current_max_right, (int) left_max, (int) left_index);
 #endif
         // If this pair is to the right of the check then
         // we have a potential crossed pair.
@@ -312,7 +317,7 @@ double parse_fragment(  std::string&            indent,
                         ParseVector&            parse_result,
                         bool                    check_crosses = true)
 {
-    size_t fragment_size = end - start;
+    size_t fragment_size = end - start + 1;
     std::vector<size_t> max_pair_indices(fragment_size);
     std::vector<double> max_pair_weights(fragment_size);
     size_t max_pair_index;
@@ -321,7 +326,8 @@ double parse_fragment(  std::string&            indent,
     parse_recursion++;
     if (parse_recursion > (int) words.size())
     {
-        printf("ERROR: Parse recursion exceeds sentence length...\n");
+        std::cerr << "ERROR: Parse recursion exceeds sentence length."  << std::endl;
+        throw (RuntimeException(TRACE_INFO, "Parse recursion exceeds sentence length."));
         exit(1);
     }
 
@@ -329,8 +335,9 @@ double parse_fragment(  std::string&            indent,
     size_t indent_size_on_entry = indent.size();
     indent += " >";
 
-    DEBUG_PRINT("%s parsing fragment [%d] %-10s to [%d] %-10s\n", indent.c_str(), 
-            (int) start, words[start].c_str(),  (int) end, words[end].c_str());
+    DEBUG_PRINT("%s parsing %d word fragment [%d] %-10s to [%d] %-10s\n", 
+            indent.c_str(), (int) fragment_size, (int) start, words[start].c_str(),
+            (int) end, words[end].c_str());
 
     // Determine the maximum weight pairs. NOTE: This is where the
     // pair distance is checked. That keeps the code in the sections below 
@@ -439,18 +446,33 @@ double parse_fragment(  std::string&            indent,
             // We must check and eliminate potential crosses first...
             size_t cross;
             while ( check_crosses &&
-                    (cross = potential_cross(indent, max_pair_indices, words, left, max_pair_index)))
+                    (cross = potential_cross(indent, max_pair_indices,
+                            words, start, left, max_pair_index)))
             {
                 size_t cross_cache_index = cross - start;
                 size_t cross_right_index = max_pair_indices[cross_cache_index];
-                size_t cross_weight = max_pair_weights[cross_cache_index];
+                double cross_weight = max_pair_weights[cross_cache_index];
                 DEBUG_PRINT("%s edge [%d]__[%d] crosses edge [%d]__[%d]\n",
                         indent.c_str(),  (int) left, (int) max_pair_index,
                         (int) cross, (int) cross_right_index);
+                DEBUG_PRINT("%s start %d, cross %d, cache index %d\n",
+                        indent.c_str(), (int) start, (int) cross,
+                        (int) cross_cache_index);
                 indent += " |";
 
                 // If we get here, we have at least one cross.
                 cross_count++;
+
+                // Sanity check for infinite loops
+                if (cross_count > (int) fragment_size)
+                {
+                    std::cerr << "Fatal parse! Cannot fix cross for :"  << std::endl;
+                    for (auto & word : words)
+                        std::cerr << " " << word;
+                    std::cerr << std::endl;
+                    throw (RuntimeException(TRACE_INFO, "Fatal parse."));
+                    exit(1);
+                }
 
                 // First some terms:
                 // 
@@ -487,16 +509,17 @@ double parse_fragment(  std::string&            indent,
                 // If the left cross wins...
                 if (left_parse_weight > right_parse_weight)
                 {
-                    DEBUG_PRINT("%s removing crossing edge [%d]__[%d]\n",
-                            indent.c_str(),  (int) cross, (int) cross_right_index);
+                    DEBUG_PRINT("%s removing right crossing edge [%d]__[%d] %0.2f > %0.2f\n",
+                            indent.c_str(),  (int) cross, (int) cross_right_index,
+                            left_parse_weight, right_parse_weight);
 
                     // Remove the cross by constricting the range of the maximum pair for the
                     // right so it cannot cross the winning left pair.
                     size_t new_cross_limit = max_pair_index;
                     find_max_pair_index(indent, pair_weights, words, pair_distance_limit,
-                            cross, max_pair_index, max_pair_index, max_pair_weight);
-                    max_pair_indices[cross_cache_index] = max_pair_index;
-                    max_pair_weights[cross_cache_index] = max_pair_weight;
+                            cross, max_pair_index, cross_right_index, cross_weight);
+                    max_pair_indices[cross_cache_index] = cross_right_index;
+                    max_pair_weights[cross_cache_index] = cross_weight;
 
                     DEBUG_PRINT("%s found new max pair for [%d] %-10s up to [%d] at [%d] = %4.02f\n",
                             indent.c_str(),  (int) cross, words[left].c_str(),
@@ -505,11 +528,12 @@ double parse_fragment(  std::string&            indent,
                 // otherwise, the right cross wins...
                 else
                 {
-                    DEBUG_PRINT("%s removing crossing edge [%d]__[%d]\n",
-                            indent.c_str(),  (int) left, (int) max_pair_index);
+                    DEBUG_PRINT("%s removing left crossing edge [%d]__[%d] %0.2f < %0.2f\n",
+                            indent.c_str(),  (int) left, (int) max_pair_index,
+                            left_parse_weight, right_parse_weight);
 
-                    // Remove the cross by constricting the range of the maximum pair for the
-                    // left so it cannot cross the winning cross pair.
+                    // Remove the left cross by constricting the range of its maximum
+                    // pair so it cannot cross the winning rightcross pair.
                     find_max_pair_index(indent, pair_weights, words, pair_distance_limit, 
                             left, cross, max_pair_index, max_pair_weight);
                     max_pair_indices[left_cache_index] = max_pair_index;
@@ -625,7 +649,7 @@ void parse_words(   AtomSpace*          atomspace,
     WeightMatrix pair_weights(total_words, std::vector<double>(total_words, NO_WEIGHT));
     load_pair_weights(atomspace, word_handles, pair_distance_limit, pair_weights);
 
-#ifdef DEBUG_MAIN
+#ifdef TEST_MAIN
     print_pair_weights(words, pair_weights);
 #endif
 

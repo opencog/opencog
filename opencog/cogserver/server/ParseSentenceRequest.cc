@@ -91,7 +91,7 @@ bool ParseSentenceRequest::execute()
             output_stream->exceptions(std::ifstream::failbit | std::ifstream::badbit);
             try
             {
-                printf("opening parse file '%s'\n", file_name.c_str());
+                printf("\nopening parse file '%s'\n", file_name.c_str());
                 output_stream->open(file_name);
 
             } catch (std::system_error& e) {
@@ -106,7 +106,7 @@ bool ParseSentenceRequest::execute()
         { 
             if (output_stream)
             {
-                printf("closing parse file\n");
+                printf("\nclosing parse file\n");
                 output_stream->close();
                 delete output_stream;
                 output_stream = nullptr;
@@ -153,6 +153,8 @@ bool ParseSentenceRequest::execute()
 
         // Break the sentence up into words.
         break_sentence_into_words(_sentence, words);
+
+        std::cerr << "Parsing " << sentence_count << ": " << _sentence << std::endl;
 
         // Parse the words.
         parse_words(&as, words, pair_distance, parse_results);
