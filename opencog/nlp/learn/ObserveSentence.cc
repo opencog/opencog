@@ -47,7 +47,7 @@ void eat_me(...) {}
 namespace opencog {
 
 void break_sentence_into_words( const std::string& sentence,
-                                std::vector<std::string>& words)
+                                WordVector& words)
 {
     const icu::UnicodeString unicode_sentence(sentence.c_str(), sentence.length());
     icu::UnicodeString unicode_word;
@@ -166,9 +166,9 @@ will create structures of the form:
         NumberNode 1
 
 */
-void create_atoms_for_words(AtomSpace*                  as,
-                            std::vector<std::string>&   words,
-                            int                         pair_distance_limit)
+void create_atoms_for_words(AtomSpace*    as,
+                            WordVector&   words,
+                            int           pair_distance_limit)
 {
     // Create the predicate and schema nodes only once.
     Handle predicate = as->add_node(PREDICATE_NODE, "*-Sentence Word Pair-*");
@@ -215,7 +215,7 @@ void observe_sentence(  AtomSpace*      atomspace,
                         std::string&    sentence,
                         int             pair_distance_limit)
 {
-    std::vector<std::string> words;
+    WordVector words;
 
     // Create the corresponding atoms for the words in this sentence.
     break_sentence_into_words(sentence, words);

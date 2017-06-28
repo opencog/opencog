@@ -31,6 +31,11 @@ namespace opencog
 {
     class AtomSpace;
 
+    typedef std::vector<std::string> WordVector;
+
+    void break_sentence_into_words( const std::string& sentence,
+                                    WordVector& words);
+
     void observe_sentence(AtomSpace*      atomspace,
                           std::string&    sentence,
                           int             pair_distance_limit = NO_PAIR_DISTANCE_LIMIT );
