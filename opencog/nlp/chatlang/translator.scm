@@ -419,7 +419,7 @@
 (define-public (chatlang-choices-in-lemma? CHOICES . GLOB)
   "Check if the value grounded for the GlobNode is actually a member
    of the list of choices. All the comparison will be done in lemmas."
-  (cog-logger-debug "In chatlang-choices-in-lema? CHOICES: ~aGLOB: ~a" CHOICES GLOB)
+  (cog-logger-debug "In chatlang-choices-in-lemma? CHOICES: ~aGLOB: ~a" CHOICES GLOB)
   (let* ((chs (cog-outgoing-set CHOICES))
          (cpts (append-map get-members (cog-filter 'ConceptNode chs))))
         (if (is-member? GLOB (append chs cpts) #t)
