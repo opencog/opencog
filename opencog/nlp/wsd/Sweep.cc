@@ -101,10 +101,10 @@ bool Sweep::mark_sense(const Handle& sense, const Handle& edge)
 	return false;
 }
  
-void Sweep::delete_edges(OrderedHandleSet &edges)
+void Sweep::delete_edges(HandleSet &edges)
 {
 	// Remove all of the senses
-	OrderedHandleSet::iterator it;
+	HandleSet::iterator it;
 	for (it=edges.begin(); it != edges.end(); ++it)
 	{
 		Handle edge_h = *it;

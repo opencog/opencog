@@ -45,6 +45,17 @@
 
 ;  ---------------------------------------------------------------------
 
+; Return #t if the section is bigger than what the current postgres
+; backend can store. Currently, the limit is atoms with at most 330
+; atoms in the outgoing set.
+;
+; This typically occurs when the MST parser is fed a long string of
+; punctuation, or a table of some kind, or other strings that are not
+; actual sentences.
+(define (is-oversize? SECTION)
+	(< 330 (cog-arity (gdr SECTION)))
+)
+
 (define-public (observe-mst plain-text)
 "
   observe-mst -- update pseduo-disjunct counts by observing raw text.
@@ -55,7 +66,7 @@
 	; The count-one-atom function fetches from the SQL database,
 	; increments the count by one, and stores the result back
 	(for-each
-		(lambda (dj) (count-one-atom dj))
+		(lambda (dj) (if (not (is-oversize? dj)) (count-one-atom dj)))
 		(make-sections (mst-parse-text plain-text))
 	)
 )

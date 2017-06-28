@@ -197,13 +197,6 @@
 )
 
 ; ---------------------------------------------------------------------
-
-; Return the word-pair of the mst-link, as a listLink of WorNodes.
-(define (mst-link-get-wordpair lnk)
-	(ListLink (mst-link-get-left-atom lnk) (mst-link-get-right-atom lnk))
-)
-
-; ---------------------------------------------------------------------
 ;
 ; (use-modules (opencog) (opencog persist) (opencog persist-sql))
 ; (use-modules (opencog nlp) (opencog nlp learn))
