@@ -25,6 +25,7 @@
 #define _OPENCOG_TYPEFRAME_H
 
 #include <opencog/atoms/base/Atom.h>
+#include <boost/functional/hash.hpp>
 #include <string>
 #include <vector>
 
@@ -78,6 +79,7 @@ private:
 
 
     bool DEBUG = false;
+    std::size_t hashCode = 0;
     bool validInstance;
     NodeNameMap nodeNameMap;
 
@@ -100,7 +102,6 @@ private:
     bool isFeasible(const std::vector<std::vector<bool>> &matrix) const;
 
     void error(std::string message);
-    void check();
 
 public:
 
@@ -152,19 +153,31 @@ public:
             return (it2 != b.end());
         }
     };
+    struct HashCode {
+        std::size_t operator()(const TypeFrame &a) const {
+            return a.hashCode;
+        }
+    };
+    struct EqualsTo {
+        bool operator()(const TypeFrame &a, const TypeFrame &b) const {
+            return a.equals(b);
+        }
+    };
     struct LessThanUsingEquivalence {
         bool operator()(const TypeFrame &a, const TypeFrame &b) const {
             return a.compareUsingEquivalence(b, 0, 0);
         }
     };
 
+    void computeHashCode();
     bool isValid() const;
     void clear();
+    bool check() const;
     std::vector<int> getArgumentsPosition(unsigned int cursor) const;
     void buildNodesSet(std::set<TypeFrame,
                        TypeFrame::LessThan> &answer,
-                       bool happensTwiceOrMoreOnly = false,
-                       bool excludeVariableNodes = false) const;
+                       const std::set<Type> &allowed,
+                       bool happensTwiceOrMoreOnly = false) const;
     TypeFrame buildSignature(unsigned int cursor);
     bool equals(const TypeFrame &other) const;
     bool isEquivalent(const TypeFrame &other) const;

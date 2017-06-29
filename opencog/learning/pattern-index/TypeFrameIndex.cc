@@ -1,5 +1,7 @@
 #include <limits>
 #include <unistd.h>
+#include <chrono>
+#include <time.h>
 
 #include <opencog/util/Logger.h>
 
@@ -37,8 +39,15 @@ TypeFrameIndex::TypeFrameIndex()
     MAXIMUM_NUMBER_OF_MINING_RESULTS = 10;
     PATTERN_RANKING_METRIC = N_I_SURPRISINGNESS;
 
+    ALLOWED_TOP_LEVEL_TYPES.insert(INHERITANCE_LINK);
+    ALLOWED_TOP_LEVEL_TYPES.insert(EVALUATION_LINK);
+
+    ALLOWED_VAR_SUBSTITUTION.insert(CONCEPT_NODE);
+    ALLOWED_VAR_SUBSTITUTION.insert(PREDICATE_NODE);
+
     auxVar1.push_back(TypePair(classserver().getType("VariableNode"), 0));
     auxVar1.setNodeNameAt(0, "V1");
+    time1 = time2 = 0;
 }
 
 TypeFrameIndex::~TypeFrameIndex() 
@@ -87,7 +96,7 @@ void TypeFrameIndex::addPatterns(vector<TypeFrame> &answer,
                                  const TypeFrame &base) const
 {
     TypeFrameSet nodes;
-    base.buildNodesSet(nodes, true, true);
+    base.buildNodesSet(nodes, ALLOWED_VAR_SUBSTITUTION, true);
     CombinationGenerator selected(nodes.size(), true, false);
 
     if (DEBUG) {
@@ -179,7 +188,7 @@ void TypeFrameIndex::addInferredSetFrames(vector<TypeFrame> &subset,
 {
     subset.clear();
     TypeFrameSet nodes;
-    frame.buildNodesSet(nodes, false, true);
+    frame.buildNodesSet(nodes, ALLOWED_VAR_SUBSTITUTION, false);
     if (DEBUG) printTypeFrameSet(nodes);
     CombinationGenerator selected(nodes.size(), true, false);
 
@@ -600,7 +609,7 @@ void TypeFrameIndex::minePatterns(vector<pair<float,TypeFrame>> &answer)
     // processing time of the mining algorithm. Grown is NxNxNx...
     // (PATTERNS_GRAM times)
     for (unsigned int i = 0; i < frames.size(); i++) {
-        if (frames.at(i).topLevelIsLink() && (! frames.at(i).typeAtEqualsTo(0, "ListLink"))) {
+        if (ALLOWED_TOP_LEVEL_TYPES.find(frames.at(i).at(0).first) != ALLOWED_TOP_LEVEL_TYPES.end()) {
             baseSet.insert(frames.at(i));
         }
     }
@@ -734,40 +743,6 @@ void TypeFrameIndex::minePatterns(vector<pair<float,TypeFrame>> &answer)
     logger().info("[PatternIndex] Finished mining");
 }
 
-void TypeFrameIndex::permutation(vector<vector<int>> &answer,
-                                 int *array,
-                                 int current,
-                                 int size)
-{
-    if (current == size - 1) {
-        vector<int> v;
-        for (int i = 0; i < size; i++) {
-            v.push_back(array[i]);
-        }
-        answer.push_back(v);
-    } else {
-        for (int i = current; i < size; i++) {
-            int aux = array[current];
-            array[current] = array[i];
-            array[i] = aux;
-            permutation(answer, array, current + 1, size);
-            aux = array[current];
-            array[current] = array[i];
-            array[i] = aux;
-        }
-    }
-}
-
-void TypeFrameIndex::addPermutations(vector<vector<int>> &answer,
-                                     const vector<int> &base)
-{
-    int array[base.size()];
-    for (unsigned int i = 0; i < base.size(); i++) {
-        array[i] = base.at(i);
-    }
-    permutation(answer, array, 0, base.size());
-}
-
 void TypeFrameIndex::addSymmetricPermutations(TypeFrameSet &answer, const TypeFrame &frame, unsigned int cursor)
 {
     unsigned int arity = frame.at(cursor).second;
@@ -775,7 +750,6 @@ void TypeFrameIndex::addSymmetricPermutations(TypeFrameSet &answer, const TypeFr
     if (frame.typeAtIsSymmetricLink(cursor)) {
         if (arity == 2) {
             // optimization of commom case
-            answer.insert(frame.subFrameAt(cursor));
             TypeFrame permutation;
             for (unsigned int i = 0; i <= cursor; i++) {
                 permutation.pickAndPushBack(frame, i);
@@ -784,29 +758,33 @@ void TypeFrameIndex::addSymmetricPermutations(TypeFrameSet &answer, const TypeFr
             TypeFrame subFrame1 = frame.subFrameAt(argPos.at(1));
             permutation.append(subFrame1);
             permutation.append(subFrame0);
+            for (unsigned int i = permutation.size(); i < frame.size(); i++) {
+                permutation.pickAndPushBack(frame, i);
+            }
             answer.insert(permutation);
         } else {
+            CartesianProductGenerator *cartesianGenerator;
             if (arity <= LIMIT_FOR_UNORDERED_LINKS_PERMUTATION) {
-                vector<vector<int>> permutationVector;
-                addPermutations(permutationVector, argPos);
+                cartesianGenerator = new CartesianProductGenerator(arity, arity, true, false);
+                cartesianGenerator->generateNext(); // discard first combination (original order)
                 TypeFrame permutation;
-                for (unsigned int k = 0; k < permutationVector.size(); k++) {
+                while (! cartesianGenerator->depleted()) {
                     permutation.clear();
                     for (unsigned int i = 0; i <= cursor; i++) {
                         permutation.pickAndPushBack(frame, i);
                     }
-                    TypeFrame subFrame;
                     for (unsigned int j = 0; j < arity; j++) {
-                        subFrame.clear();
-                        subFrame = frame.subFrameAt(permutationVector.at(k).at(j));
-                        permutation.append(subFrame);
+                        permutation.append(frame.subFrameAt(argPos.at(cartesianGenerator->at(j))));
+                    }
+                    for (unsigned int i = permutation.size(); i < frame.size(); i++) {
+                        permutation.pickAndPushBack(frame, i);
                     }
                     answer.insert(permutation);
+                    cartesianGenerator->generateNext();
                 }
+                delete cartesianGenerator;
             }
         }
-    } else {
-        answer.insert(frame.subFrameAt(cursor));
     }
     for (unsigned int i = 0; i < arity; i++) {
         addSymmetricPermutations(answer, frame, argPos.at(i));
@@ -815,12 +793,20 @@ void TypeFrameIndex::addSymmetricPermutations(TypeFrameSet &answer, const TypeFr
 
 bool TypeFrameIndex::addFrame(TypeFrame &frame, int offset)
 {
+    if (DEBUG) frame.printForDebug("addFrame: ", "\n");
     bool exitStatus = true;
-    if (frame.isValid()) {
+    if (frame.isValid() && frame.check()) {
+        frames.push_back(frame);
         TypeFrameSet symmetricPermutations;
         addSymmetricPermutations(symmetricPermutations, frame, 0);
         for (TypeFrameSet::iterator it = symmetricPermutations.begin(); it != symmetricPermutations.end(); it++) {
-            frames.push_back(*it);
+            if ((*it).check()) {
+                frames.push_back(*it);
+            } else {
+                if (DEBUG) frame.printForDebug("frame = ", "\n");
+                if (DEBUG) (*it).printForDebug("invalid permutation = ", "\n");
+                throw runtime_error("Invalid symmetric permutation");
+            }
         }
         if (DEBUG) {
             printf("%d: ", offset);
@@ -828,7 +814,8 @@ bool TypeFrameIndex::addFrame(TypeFrame &frame, int offset)
         }
         exitStatus = false;
     } else {
-        printf("DISCARDING INVALID FRAME (offset = %d)\n", offset);
+        logger().warn("[PatternIndex] DISCARDING INVALID FRAME (offset = " + to_string(offset) + ")");
+        if (DEBUG) frame.printForDebug("INVALID FRAME: ", "\n");
     }
 
     return exitStatus;
@@ -854,7 +841,7 @@ bool TypeFrameIndex::addFromScheme(const string &txt, int offset)
     if (frame.isValid()) {
         exitStatus = addFrame(frame, offset);
     } else {
-        printf("INVALID FRAME <%s>\n", txt.c_str());
+        if (DEBUG) printf("INVALID FRAME <%s>\n", txt.c_str());
     }
     return exitStatus;
 }
@@ -930,6 +917,8 @@ vector<TypeFrame> TypeFrameIndex::computeSubPatterns(TypeFrame &baseFrame,
                                                           int pos)
 {
     vector<TypeFrame> answer;
+    if (DEBUG) baseFrame.printForDebug("baseFrame = ", "\n");
+
     unsigned int headArity = baseFrame.at(cursor).second;
     bool symmetricHead = baseFrame.typeAtIsSymmetricLink(cursor);
     vector<int> argPos = baseFrame.getArgumentsPosition(cursor);
@@ -966,7 +955,7 @@ vector<TypeFrame> TypeFrameIndex::computeSubPatterns(TypeFrame &baseFrame,
                 recurseResult1.at(i).printForDebug("recurseResult1: ", "\n", true);
             }
             for (unsigned int i = 0; i < recurseResult2.size(); i++) {
-                recurseResult1.at(i).printForDebug("recurseResult2: ", "\n", true);
+                recurseResult2.at(i).printForDebug("recurseResult2: ", "\n", true);
             }
         }
 
@@ -1027,12 +1016,19 @@ vector<TypeFrame> TypeFrameIndex::computeSubPatterns(TypeFrame &baseFrame,
                 answer.push_back(pattern);
             }
         }
+        if (DEBUG) printf("Done [] []\n");
+        if (DEBUG) printf("Size =  %lu\n", answer.size());
     }
 
     if (! TOPLEVEL_ONLY) {
+        clock_t t1 = clock();
         for (unsigned int i = 0; i < answer.size(); i++) {
+            if (DEBUG) printf("Adding %u/%lu\n", i, answer.size());
             addPatternOccurrence(answer.at(i), pos);
         }
+        clock_t t2 = clock();
+        double delta = ((double) (t2 - t1)) / CLOCKS_PER_SEC;
+        time2 += delta;
     }
     return answer;
 }
@@ -1040,6 +1036,7 @@ vector<TypeFrame> TypeFrameIndex::computeSubPatterns(TypeFrame &baseFrame,
 void TypeFrameIndex::addPatternOccurrence(TypeFrame &pattern, int pos)
 {
     occurrenceUniverse.insert(pos);
+    pattern.computeHashCode();
     PatternMap::iterator it = occurrenceSet.find(pattern);
     if (it == occurrenceSet.end()) {
         if (DEBUG) {
@@ -1061,9 +1058,19 @@ void TypeFrameIndex::addPatternOccurrence(TypeFrame &pattern, int pos)
 
 void TypeFrameIndex::buildSubPatternsIndex()
 {
+    if (DEBUG) printf("TypeFrameIndex::buildSubPatternsIndex()\nframes.size() = %lu\n", frames.size());
     for (unsigned int i = 0; i < frames.size(); i++) {
+        if ((frames.size() > 100) && (! (i % (frames.size() / 100)))) logger().info("[PatternIndex] Building index %.0f%% done", ((float) i / frames.size()) * 100);
         TypeFrame currentFrame = frames.at(i);
+        if (DEBUG) printf("Computing subpatterns of %u\n", i);
+        if (DEBUG) currentFrame.printForDebug("currentFrame = ", "\n");
+        clock_t t1 = clock();
         vector<TypeFrame> patterns = computeSubPatterns(currentFrame, 0, i);
+        clock_t t2 = clock();
+        double delta = ((double) (t2 - t1)) / CLOCKS_PER_SEC;
+        time1 += delta;
+        if (DEBUG) printf("%.2f\n", (time2 / time1) * 100);
+        if (DEBUG) printf("Computing subpatterns of %u - DONE\n", i);
         if (TOPLEVEL_ONLY) {
             addPatternOccurrence(currentFrame, i);
             for (unsigned int j = 0; j < patterns.size(); j++) {
@@ -1071,6 +1078,7 @@ void TypeFrameIndex::buildSubPatternsIndex()
             }
         }
     }
+    logger().info("[PatternIndex] Building index 100%% done");
     if (DEBUG) printForDebug(true);
 }
 

@@ -577,8 +577,8 @@ bool TypeFrame::nonEmptyNodeIntersection(const TypeFrame &other) const
 
 void TypeFrame::buildNodesSet(set<TypeFrame,
                               TypeFrame::LessThan> &answer,
-                              bool happensTwiceOrMoreOnly,
-                              bool excludeVariableNodes) const
+                              const set<Type> &allowed,
+                              bool happensTwiceOrMoreOnly) const
 {
     answer.clear();
     set<TypeFrame, TypeFrame::LessThan> aux;
@@ -586,9 +586,7 @@ void TypeFrame::buildNodesSet(set<TypeFrame,
     TypeFrame frame;
     for (unsigned int i = 0; i < size(); i++) {
         if (at(i).second == 0) {
-            if ((! excludeVariableNodes) ||
-                (at(i).first != classserver().getType("VariableNode")))
-            {
+            if (allowed.find(at(i).first) != allowed.end()) {
                 frame.clear();
                 frame.pickAndPushBack(*this, i);
                 if (happensTwiceOrMoreOnly) {
@@ -818,7 +816,7 @@ int TypeFrame::recursiveParse(const string &txt, unsigned int begin)
     }
 }
 
-void TypeFrame::check()
+bool TypeFrame::check() const
 {
     unsigned int i;
     int pending = 1;
@@ -829,7 +827,20 @@ void TypeFrame::check()
             break;
         }
     }
-    validInstance = ((i == (size() - 1)) && (pending == 0));
+    return ((i == (size() - 1)) && (pending == 0));
+}
+
+void TypeFrame::computeHashCode()
+{
+    hashCode = 5;
+    // TODO: probably this is not a good hash function.
+    for (unsigned int i = 0; i < size(); i++) {
+        boost::hash_combine(hashCode, at(i).first);
+        boost::hash_combine(hashCode, at(i).second);
+        if (nodeNameDefined(i)) {
+            boost::hash_combine(hashCode, std::hash<std::string>()(nodeNameAt(i)));
+        }
+    }
 }
 
 void TypeFrame::clear()

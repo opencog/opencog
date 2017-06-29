@@ -1,6 +1,8 @@
 #include "PatternIndexAPI.h"
 
 #include <algorithm> 
+#include <sstream>
+#include <iostream>
 
 #include <opencog/guile/SchemePrimitive.h>
 #include <opencog/util/Config.h>
@@ -92,6 +94,7 @@ void PatternIndexAPI::setDefaultProperties(StringMap &properties)
 {
     // -----------------------------------------------------------------------
     // Relevant for querying and mining
+    // -----------------------------------------------------------------------
 
     // Enables the use of a cache to count pattern occurrences.
     // If this flag is set "true", queries and mining tend to be faster
@@ -107,6 +110,7 @@ void PatternIndexAPI::setDefaultProperties(StringMap &properties)
 
     // -----------------------------------------------------------------------
     // Relevant for querying
+    // -----------------------------------------------------------------------
 
     // In queries with more than one VariableNode, setting this parameter "true"
     // will ensure that different VariableNodes are assigned to different Atoms.
@@ -181,6 +185,7 @@ void PatternIndexAPI::setDefaultProperties(StringMap &properties)
 
     // -----------------------------------------------------------------------
     // Relevant for mining
+    // -----------------------------------------------------------------------
 
     // Number of auxiliary threads used to compute patterns quality. 
     // Need to be >= 1.
@@ -272,6 +277,26 @@ void PatternIndexAPI::setDefaultProperties(StringMap &properties)
     // Actually (currently) there's no alternative to the default
     // "coherence" which is h(x) = coherence(x).
     setDefaultProperty(properties, "CoherenceModulatorH");
+
+    // A list of OpenCog's atom types that should be used as "root"
+    // subcomponents to build patterns.
+    //
+    // E.g. if a gram-2 pattern like this:
+    //
+    // (AndLink
+    //   (TypeA ... )
+    //   (TypeB ... )
+    // )
+    //
+    // is supposed to be considered in the pattern mining, so TypeA and TypeB
+    // should be listed here.
+    setDefaultProperty(properties, "RootTypesUsedToBuildPatterns");
+
+    // A list of OpenCog's atom types that may become variables in patterns.
+    //
+    // (see the PatternMiner documentation in Wiki to understand how patterns
+    // are built from AtomSpace subgraphs)
+    setDefaultProperty(properties, "TypesAllowedToBecomeVariables");
 }
 
 Handle PatternIndexAPI::createIndex(const string &scmPath)
@@ -380,6 +405,29 @@ void PatternIndexAPI::applyProperties(Handle key)
         index->PATTERN_RANKING_METRIC = TypeFrameIndex::N_II_SURPRISINGNESS;
     } else {
         throw runtime_error("Invalid value for PatternRankingMetric: " + s);
+    }
+
+    s = getStringProperty((*it).second.second, "RootTypesUsedToBuildPatterns");
+    istringstream iss1(s);
+    string stype;    
+    while (getline(iss1, stype, ',')) {
+        if (classserver().isDefined(stype)) {
+            index->ALLOWED_TOP_LEVEL_TYPES.insert(classserver().getType(stype));
+        } else {
+            printf("type: %u\n", classserver().getType(stype));
+            throw runtime_error("Invalid value for RootTypesUsedToBuildPatterns. Unknown type: " + stype);
+        }
+    }
+
+    s = getStringProperty((*it).second.second, "TypesAllowedToBecomeVariables");
+    istringstream iss2(s);
+    while (getline(iss2, stype, ',')) {
+        if (classserver().isDefined(stype)) {
+            index->ALLOWED_VAR_SUBSTITUTION.insert(classserver().getType(stype));
+        } else {
+            printf("type: %u\n", classserver().getType(stype));
+            throw runtime_error("Invalid value for TypesAllowedToBecomeVariables. Unknown type: " + stype);
+        }
     }
 }
 

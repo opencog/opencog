@@ -144,6 +144,7 @@ private:
     typedef std::vector<std::pair<int, int>> IntPairVector;
     typedef std::vector<std::pair<std::pair<int, int>, std::pair<int, int>>> IntPairPairVector;
     typedef std::map<TypeFrame, IntegerSet, TypeFrame::LessThan> PatternMap;
+    //typedef std::unordered_map<TypeFrame, IntegerSet, TypeFrame::HashCode, TypeFrame::EqualsTo> PatternMap;
     typedef std::map<TypeFrame, int, TypeFrame::LessThan> PatternCountMap;
     typedef std::map<TypeFrame, std::pair<float, float>, TypeFrame::LessThan> SubPatternProbMap;
     typedef std::map<TypeFrame, float, TypeFrame::LessThan> PatternFloatMap;
@@ -164,12 +165,13 @@ private:
     bool compoundFramesEnded;
     PatternHeap miningResultsHeap;
     TypeFrame auxVar1;
-    bool TOPLEVEL_ONLY = true;
+    bool TOPLEVEL_ONLY = false;
     std::vector<TypeFrame> frames;
     PatternMap occurrenceSet;
     IntegerSet occurrenceUniverse;
     PatternCountMap patternCountCache;
     float floatUniverseCount;
+    double time1, time2;
 
     void query(std::vector<ResultPair> &result,
                const TypeFrame &queryFrame,
@@ -183,8 +185,6 @@ private:
                int cursor, bool distinct,
                bool noPermutations) const;
     void addPatternOccurrence(TypeFrame &pattern, int pos);
-    void addPermutations(std::vector<std::vector<int>> &answer,
-                         const std::vector<int> &base);
     void addSymmetricPermutations(TypeFrameSet &answer,
                                   const TypeFrame &frame,
                                   unsigned int cursor);
@@ -222,10 +222,6 @@ private:
     void varMappingUnion(VarMapping &answer,
                          const VarMapping &map1,
                          const VarMapping &map2) const;
-    void permutation(std::vector<std::vector<int>> &answer,
-                     int *array,
-                     int current,
-                     int size);
     void addPatterns(std::vector<TypeFrame> &answer,
                      const TypeFrame &base) const;
     float computeQuality(const TypeFrame &pattern);
@@ -274,6 +270,8 @@ public:
     CoherenceModulatorG COHERENCE_MODULATOR_G;
     CoherenceModulatorH COHERENCE_MODULATOR_H;
     RankingMetric PATTERN_RANKING_METRIC;
+    std::set<Type> ALLOWED_TOP_LEVEL_TYPES;
+    std::set<Type> ALLOWED_VAR_SUBSTITUTION;
 
     TypeFrameIndex();
     ~TypeFrameIndex();

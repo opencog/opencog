@@ -29,7 +29,6 @@
 #include <opencog/util/Config.h>
 
 #include "PatternIndexAPI.h"
-#include "PartitionGenerator.h"
 
 using namespace opencog;
 
@@ -94,6 +93,13 @@ int main(int argc, char *argv[]) {
         patternindex().setProperty(indexKey,
                                    "PatternRankingMetric",
                                    "nisurprisingness");
+        patternindex().setProperty(indexKey,
+                                   "RootTypesUsedToBuildPatterns",
+                                   //"InheritanceLink,EvaluationLink"); // don't use spaces here
+                                   "InheritanceLink,EvaluationLink,BindLink,ExecutionOutputLink,ImplicationLink,LocalQuoteLink,TypedVariableLink,AndLink,OrLink,NotLink,IdenticalLink"); // don't use spaces here
+        patternindex().setProperty(indexKey,
+                                   "TypesAllowedToBecomeVariables",
+                                   "ConceptNode,PredicateNode,GroundedPredicateNode,GroundedSchemaNode"); // don't use spaces here
         
         // Pattern mining
         std::vector<PatternIndexAPI::MiningResult> resultPatterns;

@@ -89,7 +89,7 @@ separetely.
 
 ### Quering requests
 
-We'll use "toy-example-query.scm" to illustrate queries examples.
+Let us use "toy-example-query.scm" to illustrate queries examples.
 
 ```
     (SimilarityLink (ConceptNode "human") (ConceptNode "monkey"))
@@ -307,21 +307,125 @@ To run the examples just execute one of these command lines (from ```build/```):
 
 ```
 ./opencog/learning/pattern-index/patternIndexQueryExample ../opencog/learning/pattern-index/toy-example-query.scm ../opencog/learning/pattern-index/ExampleConfig.conf
-```
-
-```
 ./opencog/learning/pattern-index/patternIndexMiningExample ../opencog/learning/pattern-index/toy-example-mining.scm ../opencog/learning/pattern-index/ExampleConfig.conf
-```
-
-```
 guile -l ../opencog/learning/pattern-index/pattern-index-query-example.scm
-```
-
-```
 guile -l ../opencog/learning/pattern-index/pattern-index-mining-example.scm
 ```
 
 _*NOTE*: The Scheme API read the configuration file in ```lib/opencog.conf``` so you need to add Pattern Index parameters to it. ```cat ../opencog/learning/pattern-index/ExampleConfig.conf >> ./lib/opencog.conf```_
+
+## Design details
+
+Let us see an example to explain how the Pattern Index is built and how queries and pattern mining work.
+Again, lets take "toy-example-query.scm".
+
+```
+    0: (SimilarityLink (ConceptNode "human") (ConceptNode "monkey"))
+    1: (SimilarityLink (ConceptNode "human") (ConceptNode "chimp"))
+    2: (SimilarityLink (ConceptNode "chimp") (ConceptNode "monkey"))
+    3: (SimilarityLink (ConceptNode "snake") (ConceptNode "earthworm"))
+    4: (SimilarityLink (ConceptNode "rhino") (ConceptNode "triceratops"))
+    5: (SimilarityLink (ConceptNode "snake") (ConceptNode "vine"))
+    6: (SimilarityLink (ConceptNode "human") (ConceptNode "ent"))
+    7: (InheritanceLink (ConceptNode "human") (ConceptNode "mammal"))
+    8: (InheritanceLink (ConceptNode "monkey") (ConceptNode "mammal"))
+    9: (InheritanceLink (ConceptNode "chimp") (ConceptNode "mammal"))
+    10: (InheritanceLink (ConceptNode "mammal") (ConceptNode "animal"))
+    11: (InheritanceLink (ConceptNode "reptile") (ConceptNode "animal"))
+    12: (InheritanceLink (ConceptNode "snake") (ConceptNode "reptile"))
+    13: (InheritanceLink (ConceptNode "dinosaur") (ConceptNode "reptile"))
+    14: (InheritanceLink (ConceptNode "triceratops") (ConceptNode "dinosaur"))
+    15: (InheritanceLink (ConceptNode "earthworm") (ConceptNode "animal"))
+    16: (InheritanceLink (ConceptNode "rhino") (ConceptNode "mammal"))
+    17: (InheritanceLink (ConceptNode "vine") (ConceptNode "plant"))
+    18: (InheritanceLink (ConceptNode "ent") (ConceptNode "plant"))
+```
+
+The numbers preceeding the links are any sort of identifier. It may be the
+actual Handle of the link in the AtomSpace or a pointer to a file entry in
+disk. In current implementation we use an int indicating the position of the
+root link in the input file, e.g. "07" is the 7th root link in the scm file.
+
+To implement some of the new features indicated in the section "TODO" below,
+one would need to change the meaning of this to represent the actual desired
+behaviour.
+
+It actually doesn't matter for the index implementation. The idea behind the
+Pattern Index is to build a kind of inverted list of sub-patterns pointing to
+wherever the actual data is. If data is in AtomSpace, disk or elsewhere it
+doesn't really matter.
+
+Thus, given the input above the following inverted list is created:
+
+```
+(ConceptNode 0) "animal" : 10 11 15 
+(ConceptNode 0) "chimp" : 1 2 9 
+(ConceptNode 0) "dinosaur" : 13 14 
+(ConceptNode 0) "earthworm" : 3 15 
+(ConceptNode 0) "ent" : 6 18 
+(ConceptNode 0) "human" : 0 1 6 7 
+(ConceptNode 0) "mammal" : 7 8 9 10 16 
+(ConceptNode 0) "monkey" : 0 2 8 
+(ConceptNode 0) "plant" : 17 18 
+(ConceptNode 0) "reptile" : 11 12 13 
+(ConceptNode 0) "rhino" : 4 16 
+(ConceptNode 0) "snake" : 3 5 12 
+(ConceptNode 0) "triceratops" : 4 14 
+(ConceptNode 0) "vine" : 5 17 
+(InheritanceLink 2) (ConceptNode 0) "chimp" (ConceptNode 0) "mammal" : 9 
+(InheritanceLink 2) (ConceptNode 0) "chimp" (*) : 9 
+(InheritanceLink 2) (ConceptNode 0) "dinosaur" (ConceptNode 0) "reptile" : 13 
+(InheritanceLink 2) (ConceptNode 0) "dinosaur" (*) : 13 
+(InheritanceLink 2) (ConceptNode 0) "earthworm" (ConceptNode 0) "animal" : 15 
+(InheritanceLink 2) (ConceptNode 0) "earthworm" (*) : 15 
+(InheritanceLink 2) (ConceptNode 0) "ent" (ConceptNode 0) "plant" : 18 
+(InheritanceLink 2) (ConceptNode 0) "ent" (*) : 18 
+(InheritanceLink 2) (ConceptNode 0) "human" (ConceptNode 0) "mammal" : 7 
+(InheritanceLink 2) (ConceptNode 0) "human" (*) : 7 
+(InheritanceLink 2) (ConceptNode 0) "mammal" (ConceptNode 0) "animal" : 10 
+(InheritanceLink 2) (ConceptNode 0) "mammal" (*) : 10 
+(InheritanceLink 2) (ConceptNode 0) "monkey" (ConceptNode 0) "mammal" : 8 
+(InheritanceLink 2) (ConceptNode 0) "monkey" (*) : 8 
+(InheritanceLink 2) (ConceptNode 0) "reptile" (ConceptNode 0) "animal" : 11 
+(InheritanceLink 2) (ConceptNode 0) "reptile" (*) : 11 
+(InheritanceLink 2) (ConceptNode 0) "rhino" (ConceptNode 0) "mammal" : 16 
+(InheritanceLink 2) (ConceptNode 0) "rhino" (*) : 16 
+(InheritanceLink 2) (ConceptNode 0) "snake" (ConceptNode 0) "reptile" : 12 
+(InheritanceLink 2) (ConceptNode 0) "snake" (*) : 12 
+(InheritanceLink 2) (ConceptNode 0) "triceratops" (ConceptNode 0) "dinosaur" : 14 
+(InheritanceLink 2) (ConceptNode 0) "triceratops" (*) : 14 
+(InheritanceLink 2) (ConceptNode 0) "vine" (ConceptNode 0) "plant" : 17 
+(InheritanceLink 2) (ConceptNode 0) "vine" (*) : 17 
+(InheritanceLink 2) (*) (ConceptNode 0) "animal" : 10 11 15 
+(InheritanceLink 2) (*) (ConceptNode 0) "dinosaur" : 14 
+(InheritanceLink 2) (*) (ConceptNode 0) "mammal" : 7 8 9 16 
+(InheritanceLink 2) (*) (ConceptNode 0) "plant" : 17 18 
+(InheritanceLink 2) (*) (ConceptNode 0) "reptile" : 12 13 
+(InheritanceLink 2) (*) (*) : 7 8 9 10 11 12 13 14 15 16 17 18 
+(SimilarityLink 2) (ConceptNode 0) "chimp" (ConceptNode 0) "monkey" : 2 
+(SimilarityLink 2) (ConceptNode 0) "chimp" (*) : 2 
+(SimilarityLink 2) (ConceptNode 0) "human" (ConceptNode 0) "chimp" : 1 
+(SimilarityLink 2) (ConceptNode 0) "human" (ConceptNode 0) "ent" : 6 
+(SimilarityLink 2) (ConceptNode 0) "human" (ConceptNode 0) "monkey" : 0 
+(SimilarityLink 2) (ConceptNode 0) "human" (*) : 0 1 6 
+(SimilarityLink 2) (ConceptNode 0) "rhino" (ConceptNode 0) "triceratops" : 4 
+(SimilarityLink 2) (ConceptNode 0) "rhino" (*) : 4 
+(SimilarityLink 2) (ConceptNode 0) "snake" (ConceptNode 0) "earthworm" : 3 
+(SimilarityLink 2) (ConceptNode 0) "snake" (ConceptNode 0) "vine" : 5 
+(SimilarityLink 2) (ConceptNode 0) "snake" (*) : 3 5 
+(SimilarityLink 2) (*) (ConceptNode 0) "chimp" : 1 
+(SimilarityLink 2) (*) (ConceptNode 0) "earthworm" : 3 
+(SimilarityLink 2) (*) (ConceptNode 0) "ent" : 6 
+(SimilarityLink 2) (*) (ConceptNode 0) "monkey" : 0 2 
+(SimilarityLink 2) (*) (ConceptNode 0) "triceratops" : 4 
+(SimilarityLink 2) (*) (ConceptNode 0) "vine" : 5 
+(SimilarityLink 2) (*) (*) : 0 1 2 3 4 5 6 
+
+```
+
+
+
+
 
 ## TODO
 
@@ -331,4 +435,8 @@ _*NOTE*: The Scheme API read the configuration file in ```lib/opencog.conf``` so
 1. Implement optional creation of TypeFrameIndex storing the index itself in disk
 1. Implement distributed version of the mining algorithm
 1. Implement distributed version of TypeFrameIndex
+
+## Known issues
+
+1. 
 
