@@ -68,12 +68,14 @@ bool ParseSentenceRequest::execute()
     }
 
     std::ostringstream oss;
+    std::string dump_file_name;
 
     // Extract the parameters.
     int parameter_count = 0;
     int pair_distance = 0;
     bool no_parse = false;
     bool verbose = false;
+    bool dump_weights = false;
     for (it = _parameters.begin(); it != _parameters.end(); ++it)
     {
         parameter_count++;
@@ -82,9 +84,9 @@ bool ParseSentenceRequest::execute()
         if (*it == "-open_parse")
         { 
             sentence_count = 0;
+            if (it == _parameters.end()) return syntaxError();
             ++it;
             std::string file_name = *it;
-            if (it == _parameters.end()) return syntaxError();
             output_stream = new std::ofstream;
 
              // Set exceptions to be thrown on failure
@@ -127,6 +129,15 @@ bool ParseSentenceRequest::execute()
             if (it == _parameters.end()) return syntaxError();
             pair_distance = atoi(it->c_str());       
         }
+        // -dump_weights - open a file and dump the weights for the pairs
+        if (*it == "-dump_weights")
+        { 
+            if (it == _parameters.end()) return syntaxError();
+            ++it;
+            dump_file_name = *it;
+            printf("\ndumping weights to: '%s'\n", dump_file_name.c_str());
+            dump_weights = true;
+        }
         // -noop - do not perform any operations
         else if (*it == "-noop")
         { 
@@ -144,9 +155,30 @@ bool ParseSentenceRequest::execute()
         }
     }
 
+    // Dump the pair weights.
+    if (dump_weights)
+    {
+        AtomSpace& atomspace = _cogserver.getAtomSpace();
+        AtomSpace* as = &atomspace;
+        std::string error;
+        std::string message = "Dumping weights to: ";
+
+        message += dump_file_name;
+        message += "\n";
+        send(message);
+        if (!dump_pair_weights(as, dump_file_name, _sentence, pair_distance, error))
+        {
+            _error << error << std::endl;
+            sendError();
+            return false;
+        }
+    }
+
+    // Do the actual parse.
     if (!no_parse)
     {
-        AtomSpace& as = _cogserver.getAtomSpace();
+        AtomSpace& atomspace = _cogserver.getAtomSpace();
+        AtomSpace* as = &atomspace;
 
         ParseVector parse_results;
         WordVector words;
@@ -157,7 +189,7 @@ bool ParseSentenceRequest::execute()
         std::cerr << "Parsing " << sentence_count << ": " << _sentence << std::endl;
 
         // Parse the words.
-        parse_words(&as, words, pair_distance, parse_results);
+        parse_words(as, words, pair_distance, parse_results);
 
         // Print out the parse results.
         std::ostringstream  parse_string_stream;
@@ -202,6 +234,8 @@ void ParseSentenceRequest::sendError()
     _error << "Supported options:" << std::endl;
     _error << "    -open_parse_file <file_name> Open the file <file_name> for output." << std::endl;
     _error << "    -close_parse_file            Close the output file." << std::endl;
+    _error << "    -dump_weights <file>         Dump the word pair weights for the sentence to" << std::endl;
+    _error << "                                 <file> as a C++ struct." << std::endl;
     _error << "    -delimiter <string>          Use <string> to delimit fields in output." << std::endl;
     _error << "    -pair_distance <limit>       Create pairs up to <limit> distance apart." << std::endl;
     _error << "    -quiet                       Do not return status over telnet." << std::endl;

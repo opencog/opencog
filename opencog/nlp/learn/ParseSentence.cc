@@ -23,6 +23,8 @@
  */
 
 #include <iostream>
+#include <fstream>
+#include <iomanip>
 #include <string>
 #include <list>
 #include <ctime>
@@ -41,6 +43,7 @@
 
 using namespace opencog;
 
+
 #define NO_EDGE SIZE_MAX
 #define NO_WEIGHT (-999.9)
 
@@ -55,45 +58,14 @@ void eat_my_parameters(...) {}
     #define DEBUG_PRINT if (false) eat_my_parameters
 #endif
 
+
 namespace opencog {
 
-
-typedef std::vector<std::vector<double>> WeightMatrix;
-
 #ifdef TEST_MAIN
-void print_pair_weights(const WordVector&   words,
-                        const WeightMatrix& pair_weights)
-{
-    size_t total_words = words.size();
-
-    // Print the pairs and weights.
-    printf("\nPair Weight Matrix\n");
-    printf("------------------\n\n");
-    printf("%10s", "");
-    for (size_t column = 0; column < total_words; column++)
-        printf("   %8s", words[column].c_str());
-    printf("\n");
-    printf("%10s", "");
-    for (size_t column = 0; column < total_words; column++)
-        DEBUG_PRINT(" %10s", " --------");
-    printf("\n");
-    
-    for (size_t row = 0; row < total_words; row++)
-    {
-        printf("  %-8s", words[row].c_str());
-        for (size_t column = 0; column < total_words; column++)
-        {
-             double fmi = pair_weights[row][column];
-            if (fmi != NO_WEIGHT)
-                printf("   %8.1f", fmi);
-            else
-                printf("         x ");
-        }
-        printf("\n");
-    }
-    printf("\n");
-}
-#endif // DEBUG_PARSE
+void print_pair_weights(std::ostream&       out_stream,
+                        const WordVector&   words,
+                        const WeightMatrix& pair_weights);
+#endif
 
 void load_pair_weights( AtomSpace*          as,
                         const HandleSeq&    word_handles,
@@ -622,6 +594,7 @@ double parse_fragment(  std::string&            indent,
     return fragment_weight;
 }
 
+
 /*
 
 parse_words - builds a parse vector for the words. A parse vector is 
@@ -650,7 +623,7 @@ void parse_words(   AtomSpace*          atomspace,
     load_pair_weights(atomspace, word_handles, pair_distance_limit, pair_weights);
 
 #ifdef TEST_MAIN
-    print_pair_weights(words, pair_weights);
+    print_pair_weights(std::cout, words, pair_weights);
 #endif
 
     // Now that we have setup the word handles and pair weights cache we can
@@ -676,10 +649,201 @@ void parse_sentence(    AtomSpace*      atomspace,
 }
 
 
+
+void print_pair_weights(std::ostream&       out_stream,
+                        const WordVector&   words,
+                        const WeightMatrix& pair_weights)
+{
+    size_t total_words = words.size();
+
+    // Get the max word length
+    size_t max_word_length = 0;
+    for (size_t word_index = 0; word_index < total_words; word_index++)
+    {
+        size_t word_length = words[word_index].size();
+        if (word_length > max_word_length)
+            max_word_length = word_length;
+    }
+
+    // Now add a column header for each word doing a row per character.
+    //
+    //       t        w
+    //       h        a
+    //       i        y
+    //       s        
+    //                |
+    //       |        |
+    //     0.5       0.3
+    // 
+    // NOTE: we intentionally go two past the end of the array since we
+    // want a '|' down for every word.
+    out_stream << std::endl;
+    for (size_t row = 0; row < max_word_length + 2; row++)
+    {
+        // Open the line.
+        out_stream << "/*                      ";
+
+        // Output the single characters for this row.
+        for (size_t column = 0; column < total_words; column++)
+        {
+            if (row < words[column].size())
+                out_stream << std::setw(7) << words[column][row];
+            else if (row < words[column].size() + 1)
+                out_stream << std::setw(7) << " ";
+            else
+                out_stream << std::setw(7) << "|";
+        }
+
+        // Close the line.
+        out_stream << "   */" << std::endl;
+    }
+
+    // Now add a row for each word. This one iterates over words.
+    for (size_t row = 0; row < total_words; row++)
+    {
+        out_stream << "/* " << std::setw(20) << std::left << words[row] << "*/ {";
+
+        // Write out the comma-delimited weights for this word.
+        for (size_t column = 0; column < total_words; column++)
+        {
+            // Add the delimiter.
+            if (column > 0)
+                out_stream << ",";
+
+            // Set floating point output right justtified, width at 6, precision 2 e.g. "  0.02".
+            out_stream << std::right << std::fixed << std::setw(6) << std::setprecision(2);
+
+            // Write the weight (output NO_WEIGHT as 0.0)
+            double fmi = pair_weights[row][column];
+            if (fmi == NO_WEIGHT)
+                fmi = 0.0;
+            out_stream << fmi;
+        }
+
+        // Close the line.
+        out_stream << " }," << std::endl;
+    }
+    out_stream << std::endl;
+}
+
+bool dump_pair_weights( AtomSpace*          as,
+                        std::string&        file_name,
+                        std::string&        sentence,
+                        int                 pair_distance_limit,
+                        std::string&        error)
+{
+    WordVector      words;
+
+    DEBUG_PRINT("dump_pair_weights - file: %s\nsentence: %s\npair distance: %d\n", 
+            file_name.c_str(), sentence.c_str(), pair_distance_limit);
+
+    // Break the sentence up into words.
+    break_sentence_into_words(sentence, words);
+
+    // If there are no words, just return.
+    size_t total_words = words.size();
+    if (total_words <= 0)
+        return true;
+
+    DEBUG_PRINT("found %d words\n", (int) total_words);
+
+    // Create all the word nodes.
+    HandleSeq word_handles;
+    for (size_t index = 0; index < total_words; index++)
+        word_handles.push_back(as->add_node(WORD_NODE, words[index]));
+
+    // Load the pair weights.
+    WeightMatrix pair_weights(total_words, std::vector<double>(total_words, NO_WEIGHT));
+    load_pair_weights(as, word_handles, pair_distance_limit, pair_weights);
+
+    // Open the file.
+
+    DEBUG_PRINT("setting stream exceptions\n");
+
+    // Set exceptions to be thrown on failure...
+    std::ofstream file_stream;
+    file_stream.exceptions(std::ifstream::failbit | std::ifstream::badbit);
+
+    DEBUG_PRINT("opening file\n");
+
+    // Now do the actual open.
+    try
+    {
+        file_stream.open(file_name);
+
+    } catch (std::system_error& e) {
+        error = e.code().message();
+        file_stream.close();
+        return false;
+    } catch (...) {
+        error = "Error opening dump file";
+        file_stream.close();
+        return false;
+    }
+
+    DEBUG_PRINT("successfully opened file stream\n");
+
+    // Write the sentence for which we are dumping weights.
+    file_stream << "std::string dumped_sentence = \"" << sentence << "\";" << std::endl << std::endl;
+
+    // Write the header for the array.
+    file_stream << "double dumped_weights[" << total_words << "][" <<
+                total_words << "] =" << std::endl << "{" << std::endl;
+
+    // Print the pair weights to the file stream.
+    print_pair_weights(file_stream, words, pair_weights);
+
+    // Close out the array definition.
+    file_stream << "};" << std::endl;
+
+    // Close the file.
+    file_stream.close();
+
+    // Return true since if we get here there was no error.
+    return true;
+}
+
+
 } // namespace opencog
 
 
+
 #ifdef TEST_MAIN
+
+void old_print_pair_weights(std::ostream&       out_stream,
+                        const WordVector&   words,
+                        const WeightMatrix& pair_weights)
+{
+    size_t total_words = words.size();
+
+    // Print the pairs and weights.
+    printf("\nPair Weight Matrix\n");
+    printf("------------------\n\n");
+    printf("%10s", "");
+    for (size_t column = 0; column < total_words; column++)
+        printf("   %8s", words[column].c_str());
+    printf("\n");
+    printf("%10s", "");
+    for (size_t column = 0; column < total_words; column++)
+        DEBUG_PRINT(" %10s", " --------");
+    printf("\n");
+    
+    for (size_t row = 0; row < total_words; row++)
+    {
+        printf("  %-8s", words[row].c_str());
+        for (size_t column = 0; column < total_words; column++)
+        {
+             double fmi = pair_weights[row][column];
+            if (fmi != NO_WEIGHT)
+                printf("   %8.1f", fmi);
+            else
+                printf("         x ");
+        }
+        printf("\n");
+    }
+    printf("\n");
+}
+
 void test_parse_sentence(   AtomSpace*      atomspace,
                             std::string&    sentence,
                             int             pair_distance_limit = NO_PAIR_DISTANCE_LIMIT)
@@ -727,7 +891,7 @@ void add_test_word_atoms(AtomSpace*    as,
 
 void add_test_word_weights( AtomSpace*      as,
                             std::string&    sentence,
-                            double          weights[8][8])
+                            void*           weights)
 {
     WordVector words;
     ParseVector parse;
@@ -743,6 +907,11 @@ void add_test_word_weights( AtomSpace*      as,
     // Loop over all the words adding the pair weights.
     int total_words = words.size();
     for (int left = 0; left < total_words - 1; left++)
+    {
+        // Yes, this is ugly but we need to be able to handle any arbitrary matrix of words
+        // and C++ does not know how to determing the size of the arrays at runtime if 
+        // we don't tell it at compile time.
+        double* weight_row = ((double*) weights + (left * total_words));
         for (int right = left + 1; right < total_words; right++)
         {
             // Create the pair atoms.
@@ -752,11 +921,12 @@ void add_test_word_weights( AtomSpace*      as,
             Handle evaluation = as->add_link(EVALUATION_LINK, predicate, pair);
 
             // Set the mutual information weight.
-            double weight = weights[left][right];
+            double weight = weight_row[right];
             std::vector<double> float_list = { (double) 0.0, weight };
             ProtoAtomPtr proto = createFloatValue( float_list );
             evaluation->setValue(mi_key, proto);
         }
+    }
 }
 
 void print_atomspace(AtomSpace* as)
@@ -769,29 +939,36 @@ void print_atomspace(AtomSpace* as)
  
 }
 
+void do_one_test(   AtomSpace*      as,
+                    std::string&    sentence,
+                    void*           weights)
+{
+    std::clock_t    start;
+    double          elapsed;
+
+    printf("\nUpdating weight data.\n");
+    add_test_word_weights(as, sentence, weights);
+
+    printf("Parsing sentence: %s\n", sentence.c_str());
+    start = std::clock();
+    test_parse_sentence(as, sentence);
+    elapsed = ( std::clock() - start ) / (double) CLOCKS_PER_SEC;
+    printf("Sentence parsed in %0.6f seconds\n\n", elapsed);
+}
+
 int main(int argc, char *argv[])
 {
     AtomSpace       atomspace;
     AtomSpace*      as = &atomspace;
     std::string     test_sentence("The dog barked.");
-    std::clock_t    start;
-    double          elapsed;
 
-    double          test_0_weights[8][8] = {
+    double          test_0_weights[3][3] = {
                     // The   dog barked
                        {0.0, 0.5, 0.1} , // The
                        {0.0, 0.0, 1.2} , // dog
                        {0.0, 0.0, 0.0} , // barked
                     };
-
-    printf("\nUpdating weight data.\n");
-    add_test_word_weights(as, test_sentence, test_0_weights);
-
-    printf("Parsing sentence '%s'.\n", test_sentence.c_str());
-    start = std::clock();
-    test_parse_sentence(as, test_sentence);
-    elapsed = ( std::clock() - start ) / (double) CLOCKS_PER_SEC;
-    printf("Sentence parsed in %0.6f seconds\n", elapsed);
+    do_one_test(as, test_sentence, test_0_weights);
 
     test_sentence = "The big dog did eat the little dog";
     double          test_1_weights[8][8] = {
@@ -805,22 +982,7 @@ int main(int argc, char *argv[])
                        {0.0, 0.0, 0.0, 0.0, 0.0, 0.0,    0.0, 1.0} , // little
                        {0.0, 0.0, 0.0, 0.0, 0.0, 0.0,    0.0, 0.0} , // dog
                     };
-
-    printf("\nUpdating weight data.\n");
-    add_test_word_weights(as, test_sentence, test_1_weights);
-
-    printf("Parsing sentence '%s'.\n", test_sentence.c_str());
-    start = std::clock();
-    test_parse_sentence(as, test_sentence);
-    elapsed = ( std::clock() - start ) / (double) CLOCKS_PER_SEC;
-    printf("Sentence parsed in %0.6f seconds\n", elapsed);
-
-    printf("Parsing sentence '%s'.\n", test_sentence.c_str());
-    printf("Pair distance 2.\n");
-    start = std::clock();
-    test_parse_sentence(as, test_sentence, 2);
-    elapsed = ( std::clock() - start ) / (double) CLOCKS_PER_SEC;
-    printf("Sentence parsed in %0.6f seconds\n", elapsed);
+    do_one_test(as, test_sentence, test_1_weights);
 
     double          test_2_weights[8][8] = {
                     // The   big  dog  did  eat  the  little  dog
@@ -833,16 +995,7 @@ int main(int argc, char *argv[])
                        {0.0, 0.0, 0.0, 0.0, 0.0, 0.0,    0.0, 1.0} , // little
                        {0.0, 0.0, 0.0, 0.0, 0.0, 0.0,    0.0, 0.0} , // dog
                     };
-
-    printf("\nUpdating weight data.\n");
-    add_test_word_atoms(as, test_sentence);
-    add_test_word_weights(as, test_sentence, test_2_weights);
-
-    printf("Parsing sentence '%s'.\n", test_sentence.c_str());
-    start = std::clock();
-    test_parse_sentence(as, test_sentence);
-    elapsed = ( std::clock() - start ) / (double) CLOCKS_PER_SEC;
-    printf("Sentence parsed in %0.6f seconds\n", elapsed);
+    do_one_test(as, test_sentence, test_2_weights);
 
     double          test_3_weights[8][8] = {
                     // The   big  dog  did  eat  the  little  dog
@@ -855,16 +1008,51 @@ int main(int argc, char *argv[])
                        {0.0, 0.0, 0.0, 0.0, 0.0, 0.0,    0.0, 1.0} , // little
                        {0.0, 0.0, 0.0, 0.0, 0.0, 0.0,    0.0, 0.0} , // dog
                     };
+    do_one_test(as, test_sentence, test_3_weights);
 
-    printf("\nUpdating weight data.\n");
-    add_test_word_weights(as, test_sentence, test_3_weights);
+    test_sentence = "It is a truth universally acknowledged, that a single man in possession of a good fortune, must be in want of a wife.";
 
-    printf("Parsing sentence '%s'.\n", test_sentence.c_str());
-    start = std::clock();
-    test_parse_sentence(as, test_sentence);
-    elapsed = ( std::clock() - start ) / (double) CLOCKS_PER_SEC;
-    printf("Sentence parsed in %0.6f seconds\n", elapsed);
-
+    double test_4_weights[23][23] =
+    {
+    /*                            I      i      a      t      u      a      t      a      s      m      i      p      o      a      g      f      m      b      i      w      o      a      w    */
+    /*                            t      s             r      n      c      h             i      a      n      o      f             o      o      u      e      n      a      f             i    */
+    /*                                          |      u      i      k      a      |      n      n             s             |      o      r      s                    n             |      f    */
+    /*                            |      |      |      t      v      n      t      |      g             |      s      |      |      d      t      t      |      |      t      |      |      e    */
+    /*                            |      |      |      h      e      o             |      l      |      |      e      |      |             u             |      |             |      |           */
+    /*                            |      |      |             r      w      |      |      e      |      |      s      |      |      |      n      |      |      |      |      |      |      |    */
+    /*                            |      |      |      |      s      l      |      |             |      |      s      |      |      |      e      |      |      |      |      |      |      |    */
+    /*                            |      |      |      |      a      e      |      |      |      |      |      i      |      |      |             |      |      |      |      |      |      |    */
+    /*                            |      |      |      |      l      d      |      |      |      |      |      o      |      |      |      |      |      |      |      |      |      |      |    */
+    /*                            |      |      |      |      l      g      |      |      |      |      |      n      |      |      |      |      |      |      |      |      |      |      |    */
+    /*                            |      |      |      |      y      e      |      |      |      |      |             |      |      |      |      |      |      |      |      |      |      |    */
+    /*                            |      |      |      |             d      |      |      |      |      |      |      |      |      |      |      |      |      |      |      |      |      |    */
+    /*                            |      |      |      |      |             |      |      |      |      |      |      |      |      |      |      |      |      |      |      |      |      |    */
+    /*                            |      |      |      |      |      |      |      |      |      |      |      |      |      |      |      |      |      |      |      |      |      |      |    */
+    /* It                  */ {  0.00, -4.55, -1.56,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00},
+    /* is                  */ {  0.00,  0.00, -1.93, -1.41,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00},
+    /* a                   */ {  0.00,  0.00,  0.00, -0.22, -4.36,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00},
+    /* truth               */ {  0.00,  0.00,  0.00,  0.00, -9.85, -7.18,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00},
+    /* universally         */ {  0.00,  0.00,  0.00,  0.00,  0.00,-10.54, -4.27,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00},
+    /* acknowledged        */ {  0.00,  0.00,  0.00,  0.00,  0.00,  0.00, -3.02, -0.67,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00},
+    /* that                */ {  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  1.15, -1.87,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00},
+    /* a                   */ {  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00, -3.88, -3.62,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00},
+    /* single              */ {  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00, -6.46, -1.82,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00},
+    /* man                 */ {  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00, -1.61, -5.66,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00},
+    /* in                  */ {  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00, -4.18,  0.33,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00},
+    /* possession          */ {  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00, -3.62, -2.75,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00},
+    /* of                  */ {  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00, -0.39, -0.61,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00},
+    /* a                   */ {  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00, -2.83, -1.28,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00},
+    /* good                */ {  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00, -4.72, -0.30,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00},
+    /* fortune             */ {  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00, -2.66, -0.48,  0.00,  0.00,  0.00,  0.00,  0.00},
+    /* must                */ {  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00, -3.78,  0.43,  0.00,  0.00,  0.00,  0.00},
+    /* be                  */ {  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00, -1.23, -1.25,  0.00,  0.00,  0.00},
+    /* in                  */ {  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00, -0.67,  0.33,  0.00,  0.00},
+    /* want                */ {  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00, -3.13, -0.54,  0.00},
+    /* of                  */ {  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00, -0.39, -1.18},
+    /* a                   */ {  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00, -1.83},
+    /* wife                */ {  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00},
+    };
+    do_one_test(as, test_sentence, test_4_weights);
 
     exit(0);
 }

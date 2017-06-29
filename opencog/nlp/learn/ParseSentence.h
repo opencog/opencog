@@ -44,6 +44,7 @@ namespace opencog
     };
     
     typedef std::vector<WordPair> ParseVector;
+    typedef std::vector<std::vector<double>> WeightMatrix;
 
     void parse_words(   AtomSpace*          atomspace,
                         const WordVector&   words,
@@ -54,6 +55,12 @@ namespace opencog
                             const std::string&  sentence,
                             int                 pair_distance_limit,
                             ParseVector&        parse_results);
+
+    bool dump_pair_weights( AtomSpace*          as,
+                            std::string&        file_name,
+                            std::string&        sentence,
+                            int                 pair_distance_limit,
+                            std::string&        error);
 }
 
 #endif // _PARSE_SENTENCE_H
