@@ -129,7 +129,9 @@
         ))
         ;(format #t ">>>>>>>>>>> line being processed ~a\n" cs-line)
       (let ((port-location (get-source-location port
-                              (string-contains initial-line cs-line))))
+              (if (eof-object? cs-line)
+                0
+                (string-contains initial-line cs-line)))))
         (if (eof-object? cs-line)
           '*eoi*
           (let ((result (tokeniz (string-trim-both cs-line) port-location)))
