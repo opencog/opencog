@@ -193,7 +193,7 @@
     )
 
     (patterns
-      (patterns pattern) : (display-token (format #f "~a ~a\n" $1 $2))
+      (patterns pattern) : (display-token (format #f "~a ~a" $1 $2))
       (pattern) : (display-token $1)
     )
 
@@ -205,8 +205,8 @@
       (unordered-matchings) : (display-token $1)
       (function) : (display-token $1)
       (sentence-boundaries) : (display-token $1)
-      ;(* pattern) : (display-token (format #f "~a ~a" $1 $2))
       (sequences) : (display-token $1)
+      (phrases) : (display-token $1)
     )
 
     (literals
@@ -233,7 +233,8 @@
     )
 
     (choice
-      (LSBRACKET patterns RSBRACKET) : (display-token (string-append "choices_fn->" $2))
+      (LSBRACKET patterns RSBRACKET) :
+        (display-token (format #f "choices(~a)" $2))
     )
 
     (unordered-matchings
@@ -279,8 +280,15 @@
 
     (a-sequence
       (LPAREN patterns RPAREN) : (display-token (format #f "sequence(~a)" $2))
-      (DQUOTE patterns DQUOTE) :
-        (display-token (format #f "sequence(~a ~a ~a)" $1 $2 $3))
+    )
+
+    (phrases
+      (phrase) : (display-token $1)
+      (phrases phrase) : (display-token (format #f "~a ~a" $1 $2))
+    )
+
+    (phrase
+      (DQUOTE patterns DQUOTE) : (display-token (format #f "phrase(~a)" $2))
     )
   )
 )
