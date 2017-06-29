@@ -8,6 +8,8 @@
 ; needed for nlp parsing
 (use-modules (opencog nlp) (opencog nlp chatbot) (opencog nlp chatbot-psi))
 
+(use-modules (opencog eva-behavior)) ; for get-input-sent-node def
+
 ; Param setting
 (define valence-activation-level .5)
 
@@ -277,29 +279,6 @@
 (psi-set-event-callback! psi-detect-dialog-sentiment)
 
 
-; ===========================================================================
-; Psi Emotion Representations
-; Todo: move to psi-emotions.scm file?
-
-(define psi-emotion-node (Concept (string-append psi-prefix-str "emotion")))
-
-(define (psi-create-emotion emotion)
-	(define emotion-concept (Concept (string-append psi-prefix-str emotion)))
-	(Inheritance emotion-concept psi-emotion-node)
-	; initialize value ?
-	(psi-set-value! emotion-concept 0)
-	;(format #t "new emotion: ~a\n" emotion-concept)
-	emotion-concept)
-
-(define-public (psi-get-emotions)
-"
-  Returns a list of all psi emotions.
-"
-	(filter
-		(lambda (x) (not (equal? x psi-emotion-node)))
-		(cog-chase-link 'InheritanceLink 'ConceptNode psi-emotion-node))
-)
-
 ; Create emotions
 (define psi-happy (psi-create-emotion "happy"))
 (define psi-sad (psi-create-emotion "sad"))
@@ -343,6 +322,9 @@
 	;	(max (min (- pos-valence (/ (- arousal .5) 2)) 1) 0) )
 
 	(psi-set-current-emotion-state)
+
+	; return atom for ExOutLink requirement
+	(True)
 )
 
 ; Current emotion state
@@ -395,7 +377,7 @@
 
 
 ;---------------------------------------------------
-; Modulator and emotion cyclical rhythms and nose
+; Modulator and emotion cyclical rhythms and noise
 ;---------------------------------------------------
 
 ; default utradian rhythm and noise params
