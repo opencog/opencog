@@ -25,8 +25,6 @@
 #ifndef _PARSE_SENTENCE_H
 #define _PARSE_SENTENCE_H
 
-#define NO_PAIR_DISTANCE_LIMIT 0
-
 namespace opencog
 {
     class AtomSpace;

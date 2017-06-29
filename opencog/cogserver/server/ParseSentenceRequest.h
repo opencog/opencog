@@ -65,7 +65,7 @@ public:
             "    -dump_weights <file>           Dump the word pair weights for the sentence to\n"
             "                                   <file> as a C++ struct.\n"
             "    -delimiter <string>            Use <string> to delimit fields in output.\n"
-            "    -pair_distance <limit>         Create pairs up to <limit> distance apart.\n"
+            "    -pair_distance <limit>         Create pairs up to <limit> distance apart (default 6).\n"
             "    -quiet                         Do not return status over telnet.\n"
             "    -noop                          Perform no op-erations (useful for timing).\n"
         );

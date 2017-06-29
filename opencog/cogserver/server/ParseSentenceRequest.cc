@@ -72,7 +72,7 @@ bool ParseSentenceRequest::execute()
 
     // Extract the parameters.
     int parameter_count = 0;
-    int pair_distance = 0;
+    int pair_distance = DEFAULT_PAIR_DISTANCE;
     bool no_parse = false;
     bool verbose = false;
     bool dump_weights = false;
@@ -186,7 +186,8 @@ bool ParseSentenceRequest::execute()
         // Break the sentence up into words.
         break_sentence_into_words(_sentence, words);
 
-        std::cerr << "Parsing " << sentence_count << ": " << _sentence << std::endl;
+        if (verbose)
+            std::cerr << "Parsing " << sentence_count << ": " << _sentence << std::endl;
 
         // Parse the words.
         parse_words(as, words, pair_distance, parse_results);
@@ -237,7 +238,7 @@ void ParseSentenceRequest::sendError()
     _error << "    -dump_weights <file>         Dump the word pair weights for the sentence to" << std::endl;
     _error << "                                 <file> as a C++ struct." << std::endl;
     _error << "    -delimiter <string>          Use <string> to delimit fields in output." << std::endl;
-    _error << "    -pair_distance <limit>       Create pairs up to <limit> distance apart." << std::endl;
+    _error << "    -pair_distance <limit>       Create pairs up to <limit> distance apart (default " << DEFAULT_PAIR_DISTANCE << ")." << std::endl;
     _error << "    -quiet                       Do not return status over telnet." << std::endl;
     _error << "    -noop                        Perform no op-erations (useful for timing)." << std::endl;
     _error << "Options may be combined" << std::endl << std::endl;

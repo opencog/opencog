@@ -64,7 +64,7 @@ bool ObserveSentenceRequest::execute()
 
     // Extract the parameters.
     int parameter_count = 0;
-    int pair_distance = 0;
+    int pair_distance = DEFAULT_PAIR_DISTANCE;
     bool noop = false;
     bool verbose = false;
     for (it = _parameters.begin(); it != _parameters.end(); ++it)
@@ -116,7 +116,7 @@ void ObserveSentenceRequest::sendError()
 {
     _error << "Format: observe [-pair_distance <limit>] \"<sentence-in-quotes>\"" << std::endl;
     _error << "Supported options:" << std::endl;
-    _error << "    -pair_distance <limit>   Create pairs up to <limit> distance apart." << std::endl;
+    _error << "    -pair_distance <limit>   Observe pairs up to <limit> distance apart (default " << DEFAULT_PAIR_DISTANCE << ")." << std::endl;
     _error << "    -quiet                   Do not return status over telnet." << std::endl;
     _error << "    -noop                    Perform no op-erations (useful for timing)." << std::endl;
     _error << "Options may be combined" << std::endl << std::endl;

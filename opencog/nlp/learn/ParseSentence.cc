@@ -46,6 +46,8 @@ using namespace opencog;
 
 #define NO_EDGE SIZE_MAX
 #define NO_WEIGHT (-999.9)
+#define NO_PAIR_DISTANCE_LIMIT 0
+
 
 void eat_my_parameters(...) {}
 
@@ -56,6 +58,13 @@ void eat_my_parameters(...) {}
     #define DEBUG_PRINT printf
 #else
     #define DEBUG_PRINT if (false) eat_my_parameters
+#endif
+
+//#define DEBUG_RECURSION
+#ifdef DEBUG_RECURSION
+    #define RECURSION_PRINT printf
+#else
+    #define RECURSION_PRINT if (false) eat_my_parameters
 #endif
 
 
@@ -118,6 +127,7 @@ void load_pair_weights( AtomSpace*          as,
 }
 
 static int parse_recursion = 0;
+static int recursion_count = 0;
 
 void add_parse( ParseVector&    parse_result,
                 double          weight,
@@ -296,6 +306,7 @@ double parse_fragment(  std::string&            indent,
     double max_pair_weight;
 
     parse_recursion++;
+    recursion_count++;
     if (parse_recursion > (int) words.size())
     {
         std::cerr << "ERROR: Parse recursion exceeds sentence length."  << std::endl;
@@ -310,6 +321,8 @@ double parse_fragment(  std::string&            indent,
     DEBUG_PRINT("%s parsing %d word fragment [%d] %-10s to [%d] %-10s\n", 
             indent.c_str(), (int) fragment_size, (int) start, words[start].c_str(),
             (int) end, words[end].c_str());
+
+    RECURSION_PRINT("%s %6d[%2d]-[%2d]\n", indent.c_str(), recursion_count, (int) start, (int) end );
 
     // Determine the maximum weight pairs. NOTE: This is where the
     // pair distance is checked. That keeps the code in the sections below 
@@ -459,20 +472,20 @@ double parse_fragment(  std::string&            indent,
                 // Determine the parse weight if the left wins...
                 double left_left_parse_weight = parse_fragment(indent, pair_weights, words,
                         pair_distance_limit, left, max_pair_index, save_parse,
-                        parse_result, DONT_CHECK_CROSSES);
+                        parse_result, check_crosses);
                 double left_right_parse_weight = parse_fragment(indent, pair_weights, words,
                         pair_distance_limit, max_pair_index + 1, cross_right_index,
-                        save_parse, parse_result, DONT_CHECK_CROSSES);
+                        save_parse, parse_result, check_crosses);
                 double left_parse_weight = left_left_parse_weight + 
                         left_right_parse_weight + max_pair_weight;
 
                 // Determine the parse weight if the right wins...
                 double right_left_parse_weight = parse_fragment(indent, pair_weights, words,
                         pair_distance_limit, left, cross, save_parse,
-                        parse_result, DONT_CHECK_CROSSES);
+                        parse_result, check_crosses);
                 double right_right_parse_weight = parse_fragment(indent, pair_weights, words,
                         pair_distance_limit, cross + 1, cross_right_index, save_parse,
-                        parse_result, DONT_CHECK_CROSSES);
+                        parse_result, check_crosses);
                 double right_parse_weight = right_left_parse_weight +
                         right_right_parse_weight + cross_weight;
 
@@ -538,9 +551,12 @@ double parse_fragment(  std::string&            indent,
         // crosses.
         if (max_pair_index > subfragment_start)
         {
+            // The fragment starts out with the weight for this pair.
+            fragment_weight = max_pair_weight;
+
             // Remember the parse.
             if (save_parse)
-                add_parse( parse_result, fragment_weight, left, max_pair_index);
+                add_parse( parse_result, max_pair_weight, left, max_pair_index);
 
             // Parse the contained fragment and connect it one
             // to the left or right.
@@ -582,7 +598,7 @@ double parse_fragment(  std::string&            indent,
 
             // Remember the parse.
             if (save_parse)
-                add_parse(parse_result, fragment_weight, left, max_pair_index);
+                add_parse(parse_result, max_pair_weight, left, max_pair_index);
 
             // Check the next left.
             left++;
@@ -609,6 +625,9 @@ void parse_words(   AtomSpace*          atomspace,
 {
     if (words.size() <= 0)
         return;
+
+    // Reset the recursion count.
+    recursion_count = 0;
 
     // Cache the word nodes.
     HandleSeq word_handles;
@@ -648,15 +667,9 @@ void parse_sentence(    AtomSpace*      atomspace,
     parse_words(atomspace, words, pair_distance_limit, parse_results);
 }
 
-
-
-void print_pair_weights(std::ostream&       out_stream,
-                        const WordVector&   words,
-                        const WeightMatrix& pair_weights)
+size_t max_length(const WordVector& words)
 {
     size_t total_words = words.size();
-
-    // Get the max word length
     size_t max_word_length = 0;
     for (size_t word_index = 0; word_index < total_words; word_index++)
     {
@@ -664,6 +677,15 @@ void print_pair_weights(std::ostream&       out_stream,
         if (word_length > max_word_length)
             max_word_length = word_length;
     }
+    return max_word_length;
+}
+
+void print_pair_weights(std::ostream&       out_stream,
+                        const WordVector&   words,
+                        const WeightMatrix& pair_weights)
+{
+    size_t total_words = words.size();
+    size_t max_word_length = max_length(words);
 
     // Now add a column header for each word doing a row per character.
     //
@@ -677,7 +699,7 @@ void print_pair_weights(std::ostream&       out_stream,
     // 
     // NOTE: we intentionally go two past the end of the array since we
     // want a '|' down for every word.
-    out_stream << std::endl;
+    out_stream << std::right << std::endl;
     for (size_t row = 0; row < max_word_length + 2; row++)
     {
         // Open the line.
@@ -824,14 +846,19 @@ void test_parse_sentence(   AtomSpace*      atomspace,
     parse_words(atomspace, words, pair_distance_limit, parse_results);
 
     // Print out the parse results.
+    size_t max_word_length = max_length(words);
+    std::cout << std::endl;
     for (auto & pair : parse_results)
     {
-        printf(" MI = %0.2f, [%d] %10s -  [%d] %10s\n", pair.edge_weight, 
-                pair.left_index, words[pair.left_index].c_str(),
-                pair.right_index, words[pair.right_index].c_str());
+        std::cout << "MI = " << std::right << std::fixed << std::setw(6) << std::setprecision(2);
+        std::cout << pair.edge_weight << " [";
+        std::cout << std::right << std::fixed << std::setw(3) << pair.left_index << "] ";
+        std::cout << std::left << std::setw(max_word_length + 1) << words[pair.left_index] << "[";
+        std::cout << std::right << std::fixed << std::setw(3) << pair.right_index << "] ";
+        std::cout << std::left << std::setw(max_word_length + 1) << words[pair.right_index];
+        std::cout << std::endl;
     }
-    printf("\n");
-
+    std::cout << std::endl;
 }
 
 void add_test_word_atoms(AtomSpace*    as,
@@ -907,7 +934,8 @@ void print_atomspace(AtomSpace* as)
 
 void do_one_test(   AtomSpace*      as,
                     std::string&    sentence,
-                    void*           weights)
+                    void*           weights,
+                    int             pair_distance = NO_PAIR_DISTANCE_LIMIT)
 {
     std::clock_t    start;
     double          elapsed;
@@ -917,7 +945,7 @@ void do_one_test(   AtomSpace*      as,
 
     printf("Parsing sentence: %s\n", sentence.c_str());
     start = std::clock();
-    test_parse_sentence(as, sentence);
+    test_parse_sentence(as, sentence, pair_distance);
     elapsed = ( std::clock() - start ) / (double) CLOCKS_PER_SEC;
     printf("Sentence parsed in %0.6f seconds\n\n", elapsed);
 }
@@ -976,6 +1004,8 @@ int main(int argc, char *argv[])
                     };
     do_one_test(as, test_sentence, test_3_weights);
 
+#ifdef TEST_HUGE_PARSES
+
     test_sentence = "It is a truth universally acknowledged, that a single man in possession of a good fortune, must be in want of a wife.";
 
     double test_4_weights[23][23] =
@@ -1018,7 +1048,7 @@ int main(int argc, char *argv[])
     /* a                   */ {  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00, -1.83},
     /* wife                */ {  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00},
     };
-    do_one_test(as, test_sentence, test_4_weights);
+    //do_one_test(as, test_sentence, test_4_weights);
 
     test_sentence = "“The disagreement subsisting between yourself and my late honoured father always gave me much uneasiness, and since I have had the misfortune to lose him, I have frequently wished to heal the breach; but for some time I was kept back by my own doubts, fearing lest it might seem disrespectful to his memory for me to be on good terms with anyone with whom it had always pleased him to be at variance.--‘There, Mrs. Bennet.’--My mind, however, is now made up on the subject, for having received ordination at Easter, I have been so fortunate as to be distinguished by the patronage of the Right Honourable Lady Catherine de Bourgh, widow of Sir Lewis de Bourgh, whose bounty and beneficence has preferred me to the valuable rectory of this parish, where it shall be my earnest endeavour to demean myself with grateful respect towards her ladyship, and be ever ready to perform those rites and ceremonies which are instituted by the Church of England.";
 
@@ -1209,7 +1239,8 @@ int main(int argc, char *argv[])
     /* England             */ {  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00 },
 
     };
-    do_one_test(as, test_sentence, test_5_weights);
+    do_one_test(as, test_sentence, test_5_weights, DEFAULT_PAIR_DISTANCE);
+#endif
 
     exit(0);
 }
