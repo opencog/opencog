@@ -341,22 +341,93 @@ TODO: give an example with double deduction.
 [DEBUG] [URE] With inference tree:
 ```
 
-Inference Rule Probability Estimate
------------------------------------
+Learning Inference Control Rules
+--------------------------------
 
-TODO: universal operator induction
-
-```
-P(D') = sum_M P(D'|M) * P(M|D) * P(D)
-```
+TODO: pattern mining, etc.
 
 Using Inference Control Rules
 -----------------------------
 
-The BC wants to use these inference control rules to estimate the
-probabilities of producing a preproof of T for all available inference
-rules, as explained in Section Inference Rule Probability
-Estimate. Once we have a distribution over inference rules
+Once we have a learned a bunch of inference control rules we need
+properly utilize them. Below we describe a way to combine them and
+select the next inference rule based on the results of that
+combination.
+
+### Combining Inference Control Rules
+
+A variety of inference control rules may simultaneously apply and we
+need a way to combine them.
+
+Let's assume we have n valid rules (meaning they unify with the
+current intermediary target and have their contexts true).
+
+```
+ICR1 : C1 & R -> S <TVi>
+...
+ICRn : Cn & R -> S <TVi>
+```
+
+So `ICRi` expresses that in context `Ci` chosing `R` will produce a
+preproof of our final target with truth values `TVi`. `S` stands for
+Success (the production of a preproof). One way of doing that is to
+use a resource bound variation of Solomonoff's Universal Operator
+Induction, which reformulated to fit our problem looks like
+
+```
+P(S|R) = Sum_i=0^n P(ICRi) * ICRi(S|R) * Prod_j ICRi(Sj|Rj)
+```
+
+* `P(S|R)` is the probability that picking up `R` in this instance
+  will produce a preproof of our final target.
+* `P(ICRi)` is the prior of `ICRi`.
+* `ICRj(S|R)` is the probability of success upon choosing R according
+  to `ICRi`.
+* The last term `Prod_j ICRi(Sj|Rj)` is the probability that `ICRi`
+  explains our corpus of past inferences.
+
+Since it is resource bound we cannot consider all computable
+rules. Instead we consider the ones we have, typically obtained by
+pattern mining, and normalize by dividing by a normalizing term, `nt`,
+defined as followed
+
+```
+nt = Sum_i=0^n P(ICRi) * Prod_j ICRi(Sj|Rj)
+```
+
+We layer that with an additional variation, instead of calculating a
+single probability we calculate a truth value, or more generally a pdf
+(probability density function). This is essentially to balance
+exploitation vs exploration as explained in the next subsection.
+
+Generally, one can do that by building a cumulative distribution
+function instead of a probability expectation.
+
+```
+CDF_P(S|R)(x) = Sum_i_in_{ICRi(S|R)<=x} P(ICRi) * Prod_j ICRi(Sj|Rj) / nt
+```
+
+making here explicit the normalization by `nt`. However our models
+`ICRi` calculate TVs (thus pdfs), not probabilities, making
+`ICRi(S|R)<=x` ill-defined. To remedy that we can split `ICRi` into a
+continuous ensemble of models, each of which has a probability from 0
+to 1, not a TV, associated to it. We can then use this ensemble as
+extra models and use the same formula above to calculate the cdf. It
+turns out that the TV on `ICRi` precisely represent the cdf of `Prod_j
+ICRi(Sj|Rj)` (TODO: prove that), so in fact the cdf of `P(S|R)` can be
+simplified into a weighted sum of the cdfs of `ICRi`
+
+```
+CDF_P(S|R) = Sum_i=0^n CDF_ICRi(S|R) * P(ICRi) / nt
+```
+
+Once we have that we can calculate the TVi of success of each valid
+inference rule Ri, either by turning its cdf into a TV or a pdf as it
+will be useful below.
+
+### Inference Rule Selection
+
+Given a distribution of success over inference rules
 
 ```
 R1 <TV1>
@@ -370,28 +441,27 @@ probabilities are uncertain, the one with the highest estimate might
 not be the best. There is also an exploitation vs exploration
 trade-off to make.
 
-The typical way to solve this is to turn the distribution of success
-into a distribution of choice using tournament selection. A k-way
+One way to solve this is to use tournament selection. A k-way
 tournament selection selects k candidates uniformly randomly and picks
 up the best one. The higher the uncertainty the lower k should
 be. When k=1 this amount to uniform random selection, i.e. total
 uncertainty, when k=n this amount to picking up the rule with highest
 probability, i.e. total certainty.
 
-This method doesn't work well when the probability estimates have very
-different confidences. One option is to account for confidence in the
-score to be passed to tournament selection. If s is the probability
-estimate and c the confidence, then may consider s*c instead of s
-alone. This avoids to pick rules with large strength but low
-confidence, which is perfect for exploitation but bad for exploration.
-On top of that it doesn't work well if n is small, which is often the
-case in rule selection as only a couple of rules may be valid for a
-given intermediary target. If n=2, then k can be either 1, total
-randomness, or 2, total determinism.
+Unfortunately this method has some problems. First, it doesn't work
+well when the probability estimates have very different confidences.
+One option is to account for confidence in the score to be passed to
+tournament selection. If s is the probability and c the confidence,
+then we may consider s*c instead of s alone. This avoids to pick rules
+with large strength but low confidence, which is perfect for
+exploitation but bad for exploration.  Second, it doesn't work well if
+n is small, which is often the case in rule selection as only a couple
+of rules may be valid for a given intermediary target. If n=2, then k
+can be either 1, total randomness, or 2, total determinism.
 
-In order to address all that, I suggest to calculate the actually
-distribution of choice given the distribution of success. There's
-actually a cost-effective way to do it.
+In order to address that, I suggest to calculate the actually
+distribution of choice given the distribution of success and offer a
+cost-effective way to do that.
 
 Assume we have n rules with TVs tv1, ..., tvn. The idea is to
 calculate the probability that a rule is the best based on the pdfs,
@@ -431,3 +501,7 @@ Ii_0^j pdfi(pi) dpi
 ```
 in a `n*m` table, for i in [0, n) and j in (0/m, m/m] then the
 complexity should be around `O(n*M)`, all rules considered.
+
+In the end we end up with a distribution that we can hand to our
+random generator to pick up an inference rule amonst the most likely
+ones to produce a preproof of T.
