@@ -94,7 +94,8 @@
       (result:suffix '*~n location
         (substring (match:substring current-match) 2)))
     ((has-match? "^~[a-zA-Z]+" str)
-      (result:suffix 'ID location (match:substring current-match)))
+      (result:suffix 'ID location
+        (substring (match:substring current-match) 1)))
     ((has-match? "^," str) (result:suffix 'COMMA location ","))
     ((has-match? "^\\^" str) (result:suffix '^ location #f))
     ((has-match? "^\\[" str) (result:suffix 'LSBRACKET location #f))
@@ -214,7 +215,7 @@
     (a-literal
       (LITERAL) : (display-token $1)
       (_ LITERAL) : (display-token (string-append "underscore_fn->" $2))
-      (~ LITERAL) : (display-token (string-append "get_concept_fn->" $2))
+      (ID) : (display-token (format #f "concept(~a)" $1))
       (*~n) : (display-token (string-append "range-restricted-*->~" $1))
       (LITERAL *~n) : (display-token (string-append $1 "<-range_wildecard"))
       (LITERAL COMMA) : (display-token (string-append $1 " " $2))
