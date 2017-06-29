@@ -51,6 +51,13 @@
       (make-lexical-token token location value)
       (match:suffix current-match)))
 
+  (define (command-pair)
+    ; Return command string.
+    (let ((match (string-match "~" (match:substring current-match))))
+      ; The suffix is the command and the prefix is the argument
+      (cons (match:suffix match) (match:prefix match))
+    ))
+
   ; NOTE
   ; 1. The matching must be done starting from the most specific to the
   ;    the broadest regex patterns.
@@ -78,6 +85,11 @@
       (result:suffix 'MVAR location
         (substring (match:substring current-match) 1)))
     ((has-match? "^_" str) (result:suffix '_ location #f))
+    ; For dictionary keyword sets
+    ((has-match? "^[a-zA-Z]+~[a-zA-Z1-9]+" str)
+      (result:suffix 'LITERAL~COMMAND location (command-pair)))
+    ; Range-restricted Wildcards.
+    ; TODO Maybe replace with dictionary keyword sets then process it on action?
     ((has-match? "^\\*~[1-9]+" str)
       (result:suffix '*~n location
         (substring (match:substring current-match) 2)))
@@ -114,7 +126,7 @@
           (set! cs-line (read-line port))
           (set! initial-line cs-line)
         ))
-        (format #t ">>>>>>>>>>> line being processed ~a\n" cs-line)
+        ;(format #t ">>>>>>>>>>> line being processed ~a\n" cs-line)
       (let ((port-location (get-source-location port
                               (string-contains initial-line cs-line))))
         (if (eof-object? cs-line)
@@ -136,6 +148,7 @@
       NotDefined COMMENT SAMPLE_INPUT LITERAL WHITESPACE COMMA NUM
       _ * << >> ^ < >
       *~n ; Range-restricted Wildcards
+      LITERAL~COMMAND ; Dictionary Keyword Sets
       ~ ; Concepts
       LSBRACKET RSBRACKET ; Square Brackets []
       DQUOTE ; Double quote "
@@ -207,6 +220,8 @@
       (LITERAL COMMA) : (display-token (string-append $1 " " $2))
       (*) : (display-token $1)
       (MVAR) : (display-token (format #f "match_variables->~a" $1))
+      (LITERAL~COMMAND) :
+        (display-token (format #f "command(~a -> ~a)" (car $1) (cdr $1)))
     )
 
     (choices
