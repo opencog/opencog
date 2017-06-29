@@ -36,21 +36,8 @@
   )
 )
 
-(define (get-concept-name str)
-  (define match (string-match "^~[a-zA-Z]+" str))
-  (if match
-    (cons (match:substring match) (match:suffix match))
-    (error "Issue calling get-concept-name on " str)
-  )
-)
-
 (define (tokeniz str location)
   (define current-match '())
-  (define (tokenization-result token location a-pair)
-    (cons
-      (make-lexical-token token location (car a-pair))
-      (cdr a-pair)))
-
   (define (has-match? pattern str)
     (let ((match (string-match pattern str)))
       (if match
@@ -59,6 +46,7 @@
       )))
 
   (define (result:suffix token location value)
+    ; Returns a lexical-token
     (cons
       (make-lexical-token token location value)
       (match:suffix current-match)))
@@ -72,22 +60,16 @@
     ((has-match? "^\\(" str) (result:suffix 'LPAREN location #f))
     ((has-match? "^\\)" str) (result:suffix 'RPAREN location #f))
     ; Chatscript declarations
-    ((has-match? "^concept:" str)
-        (tokenization-result 'CONCEPT location
-          (get-concept-name (string-trim (match:suffix current-match)))))
-    ((has-match? "^topic:" str)
-        (tokenization-result 'CONCEPT location
-          (get-concept-name (string-trim (match:suffix current-match)))))
+    ((has-match? "^concept:" str) (result:suffix 'CONCEPT location #f))
+    ((has-match? "^topic:" str) (result:suffix 'TOPIC location #f))
     ((has-match? "^\r" str)
         (format #t  ">>lexer cr @ ~a\n" (show-location location))
         (make-lexical-token 'CR location #f))
-    ((string=? "" str)
-        (cons (make-lexical-token 'NEWLINE location #f) ""))
+    ((string=? "" str) (cons (make-lexical-token 'NEWLINE location #f) ""))
     ((has-match? "^#!" str) ; This should be checked always before #
         ; TODO Add tester function for this
         (cons (make-lexical-token 'SAMPLE_INPUT location #f) ""))
-    ((has-match? "^#" str)
-        (cons (make-lexical-token 'COMMENT location #f) ""))
+    ((has-match? "^#" str) (cons (make-lexical-token 'COMMENT location #f) ""))
     ; Chatscript rules
     ((has-match? "^[s?u]:" str) (result:suffix 'RESPONDERS location #f))
     ((has-match? "^[a-q]:" str) (result:suffix 'REJOINDERS location #f))
@@ -99,8 +81,8 @@
     ((has-match? "^\\*~[1-9]+" str)
       (result:suffix '*~n location
         (substring (match:substring current-match) 2)))
-    ; Must be after other '~
-    ((has-match? "^~" str) (result:suffix '~ location #f))
+    ((has-match? "^~[a-zA-Z]+" str)
+      (result:suffix 'ID location (match:substring current-match)))
     ((has-match? "^," str) (result:suffix 'COMMA location ","))
     ((has-match? "^\\^" str) (result:suffix '^ location #f))
     ((has-match? "^\\[" str) (result:suffix 'LSBRACKET location #f))
@@ -158,6 +140,7 @@
       LSBRACKET RSBRACKET ; Square Brackets []
       DQUOTE ; Double quote "
       MVAR ;Match Variables
+      ID ; Identifier or Marking
     )
 
     ; Parsing rules (aka nonterminal symbols)
@@ -167,7 +150,7 @@
     )
 
     (line
-      (declarations) : (format #f "declarations= ~a\n" $1)
+      (declarations) : $1
       (rules) : (format #f "rules= ~a\n" $1)
       (CR) : #f
       (NotDefined) : (display-token $1)
@@ -177,8 +160,10 @@
     )
 
     (declarations
-      (CONCEPT LPAREN patterns RPAREN) : (display-token (string-append $1 " = " $3))
-      (TOPIC LPAREN patterns RPAREN) : (display-token (string-append $1 " = " $3))
+      (CONCEPT ID a-sequence) :
+        (display-token (format #f "concept(~a = ~a)" $2 $3))
+      (TOPIC ID a-sequence) :
+        (display-token (format #f "topic(~a = ~a)" $2 $3))
     )
 
     (rules
