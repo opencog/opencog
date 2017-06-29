@@ -58,17 +58,19 @@
         #f
       )))
 
-  ;NOTE The matching must be done starting from the most specific to the
-  ; the broadest regex patterns.
+  (define (result:suffix token location value)
+    (cons
+      (make-lexical-token token location value)
+      (match:suffix current-match)))
+
+  ; NOTE
+  ; 1. The matching must be done starting from the most specific to the
+  ;    the broadest regex patterns.
+  ; 2. #f is given as a token value for those cases which don't have any
+  ;    semantic values.
   (cond
-    ((has-match? "^\\(" str)
-        (cons
-          (make-lexical-token 'LPAREN location #f)
-          (match:suffix current-match)))
-    ((has-match? "^\\)" str)
-        (cons
-          (make-lexical-token 'RPAREN location #f)
-          (match:suffix current-match)))
+    ((has-match? "^\\(" str) (result:suffix 'LPAREN location #f))
+    ((has-match? "^\\)" str) (result:suffix 'RPAREN location #f))
     ; Chatscript declarations
     ((has-match? "^concept:" str)
         (tokenization-result 'CONCEPT location
@@ -87,87 +89,35 @@
     ((has-match? "^#" str)
         (cons (make-lexical-token 'COMMENT location #f) ""))
     ; Chatscript rules
-    ((has-match? "^[s?u]:" str)
-        (format #t ">>lexer responders @ ~a\n" (show-location location))
-        (cons
-          (make-lexical-token 'RESPONDERS location #f)
-          (match:suffix current-match)))
-    ((has-match? "^[a-q]:" str)
-        (cons
-          (make-lexical-token 'REJOINDERS location #f)
-          (match:suffix current-match)))
-    ((has-match? "^[rt]:" str)
-        (cons
-          (make-lexical-token 'GAMBIT location #f)
-          (match:suffix current-match)))
+    ((has-match? "^[s?u]:" str) (result:suffix 'RESPONDERS location #f))
+    ((has-match? "^[a-q]:" str) (result:suffix 'REJOINDERS location #f))
+    ((has-match? "^[rt]:" str) (result:suffix 'GAMBIT location #f))
     ((has-match? "^_[0-9]" str)
-        (cons
-          (make-lexical-token 'MVAR location
-            (substring (match:substring current-match) 1))
-          (match:suffix current-match)))
-    ((has-match? "^_" str)
-        (cons
-          (make-lexical-token '_ location #f)
-          (match:suffix current-match)))
+      (result:suffix 'MVAR location
+        (substring (match:substring current-match) 1)))
+    ((has-match? "^_" str) (result:suffix '_ location #f))
     ((has-match? "^\\*~[1-9]+" str)
-        (cons
-          (make-lexical-token '*~n location
-            (substring (match:substring current-match) 2))
-          (match:suffix current-match)))
-    ((has-match? "^~" str); Must be after other '~
-        (cons
-          (make-lexical-token '~ location #f)
-          (match:suffix current-match)))
-    ((has-match? "^," str)
-        (cons
-          (make-lexical-token 'COMMA location ",")
-          (match:suffix current-match)))
-    ((has-match? "^\\^" str)
-        (cons
-          (make-lexical-token '^ location #f)
-          (match:suffix current-match)))
-    ((has-match? "^\\[" str)
-        (cons
-          (make-lexical-token 'LSBRACKET location #f)
-          (match:suffix current-match)))
-    ((has-match? "^]" str)
-        (cons
-          (make-lexical-token 'RSBRACKET location #f)
-          (match:suffix current-match)))
-    ((has-match? "^<<" str)
-        (cons
-          (make-lexical-token '<< location #f)
-          (match:suffix current-match)))
-    ((has-match? "^>>" str)
-        (cons
-          (make-lexical-token '>> location #f)
-          (match:suffix current-match)))
-    ((has-match? "^<" str) ; This should follow <<
-        (cons
-          (make-lexical-token '< location #f)
-          (match:suffix current-match)))
-    ((has-match? "^>" str) ; This should follow >>
-        (cons
-          (make-lexical-token '> location #f)
-          (match:suffix current-match)))
-    ((has-match? "^\"" str)
-        (cons
-          (make-lexical-token 'DQUOTE location "\"")
-          (match:suffix current-match)))
-    ((has-match? "^\\*" str)
-        (cons
-          (make-lexical-token '* location "*")
-          (match:suffix current-match)))
+      (result:suffix '*~n location
+        (substring (match:substring current-match) 2)))
+    ; Must be after other '~
+    ((has-match? "^~" str) (result:suffix '~ location #f))
+    ((has-match? "^," str) (result:suffix 'COMMA location ","))
+    ((has-match? "^\\^" str) (result:suffix '^ location #f))
+    ((has-match? "^\\[" str) (result:suffix 'LSBRACKET location #f))
+    ((has-match? "^]" str) (result:suffix 'RSBRACKET location #f))
+    ((has-match? "^<<" str) (result:suffix '<< location #f))
+    ((has-match? "^>>" str) (result:suffix '>> location #f))
+    ; This should follow <<
+    ((has-match? "^<" str) (result:suffix '< location #f))
+    ; This should follow >>
+    ((has-match? "^>" str) (result:suffix '> location #f))
+    ((has-match? "^\"" str) (result:suffix 'DQUOTE location "\""))
+    ((has-match? "^\\*" str) (result:suffix '* location "*"))
     ((has-match? "^[0-9]+" str)
-        (cons
-          (make-lexical-token 'NUM location
-            (match:substring current-match))
-          (match:suffix current-match)))
-    ((has-match? "^['!?.a-zA-Z-]+" str) ; This should always be at the end.
-        (cons
-          (make-lexical-token 'LITERAL location
-            (match:substring current-match))
-          (match:suffix current-match)))
+      (result:suffix 'NUM location (match:substring current-match)))
+    ; This should always be at the end.
+    ((has-match? "^['!?.a-zA-Z-]+" str)
+      (result:suffix 'LITERAL location (match:substring current-match)))
     (else
       (format #t ">>Tokenizer non @ ~a\n" (show-location location))
       (make-lexical-token 'NotDefined location str))
@@ -192,10 +142,7 @@
               (begin
                 (set! cs-line (cdr result))
                 (car result))
-              (error
-                  (format #f "Tokenizer issue => STRING = ~a, LOCATION = ~a"
-                      (lexical-token-value result)
-                      (lexical-token-source result)))
+              (error (format #f "Tokenizer issue => ~a," result))
             )))))
   )
 )
