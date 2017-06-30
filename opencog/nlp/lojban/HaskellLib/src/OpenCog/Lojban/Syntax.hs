@@ -104,7 +104,6 @@ leP = (setWithSize ||| id) --Handle inner quantifier if it exists
               g (Left (pa,a)) = (Just pa,a)
               g (Right a)     = (Nothing,a)
 
-
 --Depending on the word we have a different Relation between the predicate
 -- and the resulting Concept
 leHandlers = [genInstance "IntensionalInheritanceLink" . rmfst "le"
@@ -121,15 +120,14 @@ leHandlers = [genInstance "IntensionalInheritanceLink" . rmfst "le"
 massOf :: String -> SynIso Atom Atom
 massOf itype = instanceOf . _ssl . _frames . addStuff . (implicationOf *** genInstance itype) . reorder
     where pp = Node "PredicateNode" "gunma" noTv
-          arg1 = (Node "VariableNode" "$var" noTv,tag)
-          tag = Nothing
+          var = Node "VariableNode" "$var" noTv
 
           reorder = mkIso f g where
               f a     = (pp,a)
               g (_,m) = m
 
           addStuff = mkIso f g where
-              f (p,a) = ((noTv,p),[arg1,(a,tag)])
+              f (p,a) = ((noTv,p),[(var,"1"),(a,"2")])
               g ((_,p),[_,(a,_)]) = (p,a)
 
 toState :: Int -> SynIso [Atom] ()
@@ -173,8 +171,8 @@ laP = handleName . wordNode <<< sepSelmaho "LA"
                   p <- apply instanceOf (cPN "cmene" lowTv)
                   name <- randName (nodeName a ++ "___" ++ nodeName a)
                   let c = cCN name lowTv
-                      ct = (c,Nothing)
-                      at = (a,Nothing)
+                      at = (a,"1")
+                      ct = (c,"2")
                       pt = (highTv,p)
                   l <- apply _frames (pt,[at,ct])
                   pushAtom l
@@ -382,44 +380,14 @@ sumtiT = (handleFA <<< optional _FA &&& sumtiC) <+> placeholder
                                    ,("fu","5")
                                    ,("fi'a","?")]
 
-
---New Places Can be added from other Predicates
---fihoP <+> baiP figures out the name
---SumitT the actually sumti that will be put in this place
---Handle fi'o creates an Eval link that applies the sumti
---to the fi'o/bai Predicate
-    {-modalSumti :: Syntax Sumti
-modalSumti = handleFIhO .< rmsnd Nothing
-          <+> handleTenseModal .< rmsnd (Just "space_time")
-          <<< tense_modal &&& sumtiC
-    where handleFIhO :: SynIso (Selbri,Atom) Sumti
-          handleFIhO = sndToState 1 . (fi'otag &&& tolist1 . _frame)
-                     . second (addsnd "1")
-
-          fi'otag :: SynIso (Selbri,(Atom,Tag)) Sumti
-          fi'otag = Iso f g where
-              f ((_,PN name),(s,tag)) = pure (s,Just $ (drop 23 name)++"_sumti"++tag)
-              f a = do
-                  state <- get
-                  error $ show a ++ "\n" ++ show state
-              g (s,Just nametag) =
-                let [name,tag,tv] = S.split (S.oneOf "12345") nametag
-                in pure ((read tv,cPN name lowTv),(s,tag))
-
-          handleTenseModal :: SynIso (Selbri,Atom) Sumti
-          handleTenseModal = Iso f g where
-              f ((tv,st),s) = do
-                  ctx <- gets (head.sCtx)
-                  nctx <- (\x -> cCN x noTv) <$> randName (show ctx)
-                  addCtx nctx
-                  pushAtom $ cEvalL tv st (cLL [nctx,s])
-                  pure (s,Just "SKIP")
-              g _ = error $ "Not Implemented g handleTenseModal"
--}
-
 modalSumti :: Syntax Sumti
-modalSumti = addsnd (Just "ModalSumti") . sndToState 1 . (pid &&& tolist1) . handleJJCTTS
-            <<< tag &&& (tolist1 . sumtiC)
+modalSumti = modalSumti' <<< tag &&& (tolist1 . sumtiC)
+
+modalSumti' :: SynIso (JJCTTS,[Atom]) Sumti
+modalSumti' = addsnd (Just "ModalSumti")
+                 . sndToState 1
+                 . (pid &&& tolist1)
+                 . handleJJCTTS
     where pid :: SynIso a a
           pid = Iso f g
           f a = pure a
@@ -428,7 +396,7 @@ modalSumti = addsnd (Just "ModalSumti") . sndToState 1 . (pid &&& tolist1) . han
 handleJJCTTS :: SynIso (JJCTTS,[Atom]) Atom
 handleJJCTTS = Iso f g where
     f (CTLeaf (pred,Nothing),as) = do
-        apply (_frames . second toSumti) (pred,as)
+        apply (_frames . second (handleTAG . toSumti)) (pred,as)
 
     f (CTLeaf (pred,Just "space_time"),as) = do
         apply handleTenseModal (pred,as)
@@ -441,6 +409,7 @@ handleJJCTTS = Iso f g where
             Left joik -> error $ "Joik handeling not implemented."
     g _ = error $ "handleJJCTTS g: not implemented."
 
+    toSumti :: SynIso [Atom] [Sumti]
     toSumti = mkIso f g where
         f = map (\x -> (x,Nothing))
         g = map fst
@@ -599,18 +568,20 @@ tanruElem = (gismuP <+> nuP
                     <+> tanruSE
                     <+> tanruKE
                     <+> meP
-                 -- <+> selmaho "JAI" &&& (jaiFlag . withText tag) &&& tanruElem
+                    <+> (sepSelmaho "JAI"
+                        &&> setFlagIso "JAI" . jaiFlag . tag
+                        &&> tanruElem)
                     <+> moiP
                     <+> gohaP)
 
+jaiFlag :: SynIso JJCTTS ()
 jaiFlag = Iso f g where
-    f t = setFlag $ "JAI:" ++ t
+    f t = setJai t
     g () = do
-        flags <- gets sFlags
-        let mflag = listToMaybe $ filter (isPrefixOf "JAI:") flags
-        case mflag of
-            Just flag -> rmFlag flag >> (pure $ drop 4 flag)
-            Nothing   -> lift $ Left "No JAI flag."
+        mjai <- gets sJAI
+        case mjai of
+            Just jai -> rmJai >> pure jai
+            Nothing  -> lift $ Left "No JAI in state."
 
 tanruKE :: Syntax Atom
 tanruKE = sepSelmaho "KE" &&> tanru <&& optSelmaho "KEhE"
@@ -1026,29 +997,52 @@ handleGIhA = handleCon . (second.second) handleBRIDI . reorder
 handleBRIDI :: SynIso Bridi Atom
 handleBRIDI = handleNA
             -- (MNA,frames)
-            . second handleModalSumtis
+            . second handleSelbriSumtis
             -- (MNA,(Selbri,sumti))
             . inverse associate
             -- ((MNA,Selbri),sumti)
             . mergeSumti
             -- (sumit1,((MNA,Selbri),sumti2))
 
-handleModalSumtis :: SynIso (Selbri,[Sumti]) Atom
-handleModalSumtis = andl . tolist2 . (_frames *** andl . mapIso handleModalSumti . isoDistribute) . reorder . second splitSumti
-    where splitSumti :: SynIso [Sumti] ([Sumti],[Atom])
+handleJAI :: SynIso (Atom,Tag) (Atom,Tag)
+handleJAI = Iso f g where
+    f (a,"fai") = pure (a,"1")
+    f (a,"1") = do
+        mjai <- gets sJAI
+        case mjai of
+            Just jai -> do
+                (na,Just t) <- apply modalSumti' (jai,[a])
+                pure (na,t)
+            Nothing  -> lift $ Left "No JAI in state."
+    f a = pure a
+    g a = pure a --Loosing information
+
+handleSelbriSumtis :: SynIso (Selbri,[Sumti]) Atom
+handleSelbriSumtis = andl . tolist2
+                   . (_frames *** handleModalSumti)
+                   . reorder
+                   . second (splitSumti
+                            . (mapIso handleJAI . ifFlag "JAI" <+> id)
+                            . handleTAG)
+
+    where splitSumti :: SynIso [(Atom,Tag)] ([(Atom,Tag)],[Atom])
           splitSumti = mkIso f g where
               f s = f' ([],[]) s
-              g (ls,rs) = ls ++ map (\a -> (a,Just "ModalSumti")) rs
+              g (ls,rs) = ls ++ map (\a -> (a,"ModalSumti")) rs
+
               f' (ls,rs) [] = (ls,rs)
-              f' (ls,rs) ((a,Just "ModalSumti"):xs) = f' (ls,a:rs) xs
+              f' (ls,rs) ((a,"ModalSumti"):xs) = f' (ls,a:rs) xs
               f' (ls,rs) (a:xs)                = f' (a:ls,rs) xs
-          reorder :: SynIso (Selbri,([Sumti],[Atom])) ((Selbri,[Sumti]),(Atom,[Atom]))
+
           reorder = mkIso f g where
               f ((tv,s),(ls,rs)) = (((tv,s),ls),(s,rs))
               g (((tv,s),ls),(_,rs)) = ((tv,s),(ls,rs))
 
-handleModalSumti :: SynIso (Atom,Atom) Atom
-handleModalSumti = mkIso f g where
+handleModalSumti :: SynIso (Atom,[Atom]) Atom
+handleModalSumti = andl . mapIso handleModalSumti' . isoDistribute
+
+handleModalSumti' :: SynIso (Atom,Atom) Atom
+handleModalSumti' = mkIso f g where
     f (pred,a) = atomMap (fun pred) a
     g atom = (cVN "ignore when printing",cVN "ignore when priting2")
 
@@ -1326,14 +1320,13 @@ handleUI = (handleXu ||| (rmfstAny (xu,tv) ||| handleUI') . switchOnFlag "xu") .
 
 handleUI' :: SynIso ((Atom,TruthVal),Atom) Atom
 handleUI' = sndToState 1
-         . second (tolist1 . _frames . (selbri *** tolist1 . toSumti)
+         . second (tolist1 . _frames . (selbri *** tolist1)
                   )
          . manage
     where manage = mkIso f g where
               f ((ui,tv),a) = (a,((tv,ui),(a,"1")))
               g (a,((tv,ui),_)) = ((ui,tv),a)
 
-          toSumti = id *** just
           selbri  = second instanceOf
 
 handleSEI :: SynIso (Atom,Atom) Atom

@@ -52,6 +52,7 @@ data State = State { sFlags :: [Flag]
                    , sText  :: String
                    , sSeed  :: Int
                    , sCtx   :: [Atom]
+                   , sJAI   :: Maybe JJCTTS
                    } deriving Show
 
 --They Iso we are using

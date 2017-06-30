@@ -33,7 +33,12 @@ import qualified Data.Map as M
 
 --import Text.XML.HXT.Core
 
-mystate s = State {sFlags = [],sAtoms = [],sText = s,sSeed = 0,sCtx = cCN "now" noTv}
+mystate s = State {sFlags = []
+                  ,sAtoms = []
+                  ,sText = s
+                  ,sSeed = 0
+                  ,sCtx = [cCN "now" noTv]
+                  ,sJAI = Nothing}
 
 loadwl = do
     (wl :: WordList State) <- loadWordLists "cmavo.csv" "gismu.csv"

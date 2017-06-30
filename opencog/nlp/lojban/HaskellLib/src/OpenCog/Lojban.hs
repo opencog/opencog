@@ -41,7 +41,8 @@ lojbanToAtomese rstate seed text = wrapAtom . fst <$> evalRWST (apply lojban ())
                         ,sAtoms = []
                         ,sText = text++" "
                         ,sSeed = seed
-                        ,sCtx = now_here}
+                        ,sCtx = now_here
+                        ,sJAI = Nothing}
 
 wrapAtom :: Atom -> Atom
 wrapAtom atom@(Link "SatisfactionLink" _ _) = cLL [cAN "QuestionAnchor" , atom]
@@ -54,6 +55,7 @@ atomeseToLojban rstate seed a@(LL [_an,s]) = sText . fst <$> execRWST (unapply l
                         ,sAtoms = []
                         ,sText = ""
                         ,sSeed = seed
-                        ,sCtx = now_here}
+                        ,sCtx = now_here
+                        ,sJAI = Nothing}
 
 now_here = [cCN "NowAndHere" noTv]

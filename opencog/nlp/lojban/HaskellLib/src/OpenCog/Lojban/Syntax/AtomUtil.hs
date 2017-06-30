@@ -290,8 +290,8 @@ number :: SynIso String Atom
 number = nodeIso "VariableNode" noTv
 
 
-_frames :: SynIso (Selbri,[Sumti]) Atom
-_frames = (id ||| andl) . isSingle . mapIso (handleDA . _frame) . isoDistribute . handleTAG
+_frames :: SynIso (Selbri,[(Atom,Tag)]) Atom
+_frames = (id ||| andl) . isSingle . mapIso (handleDA . _frame) . isoDistribute
     where isSingle = mkIso f g
           f [a] = Left a
           f as  = Right as
@@ -313,27 +313,9 @@ handleDA = Iso f g where
           in pure $ cEvalL tv ps (cLL [p1,da])
     g a = pure a
 
-handleTAG :: SynIso (Selbri,[Sumti]) (Selbri,[(Atom,Tag)])
-handleTAG = second tagger
-
-{-    where handleTAGupdater = mkIso f g
-          f ((s,Nothing),args) = (s,args)
-          f ((s,Just u) ,args) = (s,map (mapf u) args)
-          g (s,args)           = ((s,Nothing),args) --TODO: Should we really just ingore that?
-          mapf = mapSnd . tagUpdater
-
-tagUpdater :: String -> (Tag -> Tag)
-tagUpdater t = case t of
-    "se" -> f [("1","2"),("2","1")]
-                    "te" -> f [("1","3"),("3","1")]
-                    "ve" -> f [("1","4"),("4","1")]
-                    "xe" -> f [("1","5"),("5","1")]
-    where f ls e = maybe e snd $ F.find (\(a,b) -> a == e) ls
--}
-
 --Get the argumetn location of all Sumties
-tagger :: SynIso [(Atom,Maybe String)] [(Atom,String)]
-tagger = post . isoFoldl tagOne . init
+handleTAG :: SynIso [(Atom,Maybe String)] [(Atom,String)]
+handleTAG = post . isoFoldl tagOne . init
     where startMap = M.fromList [("1",True),("2",True),("3",True),("4",True),("5",True)]
           init = mkIso f g where
               f a     = (([],("0",startMap)),a)

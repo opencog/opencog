@@ -94,6 +94,12 @@ ifJustB = mkIso f g where
 --State Helpers
 -------------------------------------------------------------------------------
 
+setJai :: SynMonad t State => JJCTTS -> (t ME) ()
+setJai a = modify (\s -> s {sJAI = Just a})
+
+rmJai :: SynMonad t State => (t ME) ()
+rmJai = modify (\s -> s {sJAI = Nothing})
+
 setCtx :: SynMonad t State => [Atom] -> (t ME) ()
 setCtx a = modify (\s -> s {sCtx = a})
 
