@@ -70,6 +70,11 @@ showReadIso = mkIso show read
 isoIntercalate :: String -> SynIso [String] String
 isoIntercalate x = mkIso (intercalate x) (splitOn x)
 
+isoPrepend :: String -> SynIso String String
+isoPrepend s1 = mkIso f g where
+    f s2 = s1++s2
+    g s  = drop (length s1) s
+
 try :: SynIso a a -> SynIso a a
 try iso = Iso f g where
     f a = apply iso a <|> pure a
@@ -206,3 +211,21 @@ switchOnFlag flag = Iso f g where
            else pure (Right a)
     g (Left a)  = setFlag flag >> pure a
     g (Right a) = pure a
+
+toState :: Int -> SynIso [Atom] ()
+toState i = Iso f g where
+    f as =
+        if length as == i
+           then modify (\s -> s {sAtoms = as ++ sAtoms s})
+           else lift $ Left "List has wrong lenght, is this intended?"
+    g () = do
+        allatoms <- gets sAtoms
+        let (as,atoms) = splitAt i allatoms
+        modify (\s -> s {sAtoms = atoms})
+        pure as
+
+fstToState :: Int -> SynIso ([Atom],a) a
+fstToState i = iunit . commute . first (toState i)
+
+sndToState :: Int -> SynIso (a,[Atom]) a
+sndToState i = iunit . second (toState i)

@@ -73,19 +73,6 @@ ctx = linkIso "ContextLink" noTv
 eval :: SynIso [Atom] Atom
 eval = linkIso "EvaluationLink" noTv
 
-
---Iso Atom Atom
---eval . node x . listl .a pred . addAsnd arg
-
---addAsnd :: Iso c b -> c -> Iso a (a,b)
---addAsnd iso c = iso >. addsnd c
-
---addAfst :: Iso c b -> c -> Iso a (b,a)
---addAfst iso c = iso <. addfst c
-
---(.a) :: Iso [a] a -> Iso b (a,a) -> Iso b a
---(.a) iso1 iso2 = iso1 . tolist2 iso2
-
 evalTv :: SynIso (TruthVal,[Atom]) Atom
 evalTv = linkIso2 "EvaluationLink"
 
@@ -169,23 +156,6 @@ xorl = orl . tolist2
           myand = andl .tolist2
           mynot = notl . tolist1
 
-{-handleConNeg :: SynIso (LCON,[Atom]) (String,[Atom])
-handleConNeg = Iso (pure . f) (pure . g)
-    where f ((mna,(s,mnai)),[a1,a2]) = let na1 = if isJust mna
-          then cNL noTv a1
-                                                 else a1
-                                           na2 = if isJust mnai
-                                                    then cNL noTv a2
-                                                 else a2
-      in (s,[na1,na2])
-          g (s,[na1,na2]) = let (mna,a1) = case na1 of
-                                    (NL [a1]) -> (Just "na",a1)
-                                        _ -> (Nothing,na1)
-                                (mnai,a2) = case na2 of
-                                    (NL [a2]) -> (Just "nai",a2)
-                                        _ -> (Nothing,na2)
-                            in ((mna,(s,mnai)),[a1,a2])-}
-
 handleEKMods :: SynIso (EK,(Atom,Atom)) (String,(Atom,Atom))
 handleEKMods = mkIso f g where
     f ((bna,(bse,(c,bnai))),(a1,a2)) = let na1 = if bna
@@ -214,9 +184,9 @@ conLink = conLink' . second tolist2 . handleEKMods
                         ,iffl   . rmfst "o"
                         ,uL     . rmfst "u"
                 --FIXME:,varl   . rmfst "ji"
-                        ,anotbl . rmfst "enai"
-                        ,xorl   . rmfst "onai"
-                        ,onlyif . rmfst "na.a"
+                        ,anotbl . rmfst "enai" --FIXME: we shouldn't need the nai versions
+                        ,xorl   . rmfst "onai" -- As nai is already handled 1 level higher
+                        ,onlyif . rmfst "na.a" -- same with na
                         ]
 
 _JAtoA :: SynIso String String
@@ -341,34 +311,26 @@ handleTAG = post . isoFoldl tagOne . init
 
 --        Iso       Selbri          Stumti       Atom
 _frame :: SynIso (Selbri,(Atom,Tag)) Atom
-_frame = _evalTv . (id *** (_framePred *** tolist2)) . reorder
+_frame = _evalTv . (second.first) _framePred . reorder
     where reorder = mkIso f g
-          f ((tv,s),(a,t))     = (tv,((s,t),(s,a)))
-          g (tv,((_,t),(s,a))) = ((tv,s),(a,t))
+          f ((tv,s),(a,t)) = (tv,(t,[s,a]))
+          g (tv,(t,[s,a])) = ((tv,s),(a,t))
 
-specialTag :: SynIso Tag Atom
-specialTag = Iso f g where
-    f s = if "_sumti" `isInfixOf` s
-             then pure (cPN s noTv)
-             else lift $ Left "Not a special Tag."
-    g (PN s) = pure "fix_reverse_specialTag_handeling"
+          _framePred :: SynIso Tag Atom
+          _framePred = handleVar <+> specialTag <+> predicate . isoPrepend "sumti"
+              where handleVar :: SynIso Tag Atom
+                    handleVar = Iso f g where
+                        f "?" = cVN <$> randName "?"
+                        f _ = lift $ Left "Not a VariableTag"
+                        g (VN name) = pure "?"
+                        g a = lift $ Left "Not a VariableNode"
 
-node :: SynIso (String,(String,TruthVal)) Atom
-node = mkIso f g where
-    f (t,(n,tv))    = Node t n tv
-    g (Node t n tv) = (t,(n,tv))
-
-_framePred :: SynIso (Atom,Tag) Atom
-_framePred = handleVar <+> (specialTag . rmfstAny (cPN "dummy" noTv)) <+> (node . second (first (isoIntercalate "_sumti". tolist2 .< isoDrop 23)) . reorder .< inverse node)
-    where reorder = mkIso f g where
-                f ((t,(n,tv)),tag) = (t,((n,tag),tv))
-                g (t,((n,tag),tv)) = ((t,(n,tv)),tag)
-          handleVar = Iso f g where
-              f (n,"?") = pure $ cVN (nodeName n)
-              f a = lift $ Left "Not a VariableTag"
-              g (VN name) = pure (cPN name noTv,"$var")
-              g a = lift $ Left "Not a VariableNode"
-
+                    specialTag :: SynIso Tag Atom
+                    specialTag = Iso f g where
+                        f s = if "_sumti" `isInfixOf` s
+                                 then pure (cPN s noTv)
+                                 else lift $ Left "Not a special Tag."
+                        g (PN s) = pure "fix_reverse_specialTag_handeling"
 
 randName :: SynMonad t State => String -> (t ME) String
 randName salt = do
