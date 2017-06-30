@@ -34,8 +34,8 @@
 )
 
 ; Define pln-fc and pln-bc for convenience 
-(define (pln-fc source) (cog-fc pln-rbs source (List) (Set)))
-(define (pln-bc target) (cog-bc pln-rbs target (List) (Set)))
+(define (pln-fc source) (cog-fc pln-rbs source))
+(define (pln-bc target) (cog-bc pln-rbs target))
 
 ;;;;;;;;;;;;;;;;
 ;; Load rules ;;
@@ -44,8 +44,8 @@
 ; Load the rules (use load for relative path w.r.t. to that file)
 (define config-dir (dirname (current-filename)))
 (define (prepend-config-dir fp) (string-append config-dir "/" fp))
-(define rule-files (list "rules/term-logic/deduction-rule.scm"
-                         "rules/wip/modus-ponens-rule.scm"))
+(define rule-files (list "rules/term/deduction.scm"
+                         "rules/wip/modus-ponens.scm"))
 (for-each (lambda (fp) (load (prepend-config-dir fp))) rule-files)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;

@@ -398,39 +398,6 @@ class TestRESTApi():
         new_size = self.atomspace.size()
         assert new_size + 1 == old_size
 
-    def test_i_get_atoms_by_av(self):
-        # Assign some STI values
-        self.bird.sti = 9
-        self.swan.sti = 20
-        self.bird_animal.sti = 15
-        self.animal.sti = 0
-
-        jswan = self.mkswan()
-        jbird = self.mkbird()
-        jbird_animal = self.mkbird_animal()
-        get_response = \
-            self.client.get(self.uri + 'atoms?filterby=attentionalfocus')
-        get_result = json.loads(get_response.data)['result']['atoms']
-        assert len(get_result) == 3
-        assert set([atom['handle'] for atom in get_result]) \
-            == {jbird['handle'],
-                jswan['handle'],
-                jbird_animal['handle']}
-
-        get_response = \
-            self.client.get(self.uri + 'atoms?filterby=stirange&stimin=15')
-        get_result = json.loads(get_response.data)['result']['atoms']
-        assert len(get_result) == 2
-        assert set([atom['handle'] for atom in get_result]) \
-            == {jswan['handle'], jbird_animal['handle']}
-
-        get_response = self.client.get(
-            self.uri + 'atoms?filterby=stirange&stimin=15&stimax=18')
-        get_result = json.loads(get_response.data)['result']['atoms']
-        assert len(get_result) == 1
-        assert set([atom['handle'] for atom in get_result]) \
-            == {jbird_animal['handle']}
-
     def test_j_get_types(self):
         # Verify that a list of valid atom types was returned
         get_response = self.client.get(self.uri + 'types')

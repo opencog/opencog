@@ -258,9 +258,6 @@ public:
     virtual void loadModules(std::vector<std::string> module_paths =
                              std::vector<std::string>());
 
-    /** Open database specified in configuration file */
-    virtual void openDatabase();
-
     /**** Agent Registry API ****/
     /** Register a new agent class/type. Takes the class' id and a
      *  derived factory for this particular agent type. (note: the

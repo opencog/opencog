@@ -116,7 +116,7 @@ Handle LGDictSCM::do_lg_get_dict_entry(Handle h)
     {
 		// check if the dictionary entry is already in the atomspace
 		HandleSeq qExisting;
-		h->getIncomingSetByType(std::back_inserter(qExisting), LG_DISJUNCT, false);
+		h->getIncomingSetByType(std::back_inserter(qExisting), LG_DISJUNCT);
 
 		// avoid the disjuncts building if entries exist
 		if (not qExisting.empty())

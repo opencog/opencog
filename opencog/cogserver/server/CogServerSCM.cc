@@ -133,9 +133,6 @@ std::string CogServerSCM::start_server(AtomSpace* as,
 
     srvr = &cogserver(as);
 
-    // Open database, if any was specified.
-    srvr->openDatabase();
-
     // Load modules specified in config
     srvr->loadModules();
 

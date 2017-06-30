@@ -9,12 +9,12 @@ PLN rules are partitioned into boolean, predicate and term logic.
 These terms are used loosely since PLN is rather different than any of
 those. The folders are organized as follows
 
-- `propositional-logic` contains rules dealing with `AndLink`, `OrLink` and
+- `propositional` contains rules dealing with `AndLink`, `OrLink` and
   `NotLink` evaluation and introduction. They are fuzzy for the most
   part, contrary to what the name folder seems to suggest.
-- `predicate-logic` contains rules for universal and conditional
+- `predicate` contains rules for universal and conditional
   instantiation and generalization.
-- `term-logic` contains rules dealing with deduction, abduction,
+- `term` contains rules dealing with deduction, abduction,
   induction and inversion.
 - `wip` contains work-in-progress rules, incomplete or broken.
 

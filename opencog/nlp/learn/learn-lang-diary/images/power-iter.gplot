@@ -1,0 +1,20 @@
+# set term png small color
+set term png small
+set out 'eigen.png'
+
+#################################################
+# Used to generate the binned word entropy counts
+#
+set term postscript eps enhanced color 28
+set out 'power-iter-close.eps'
+set xrange [0:40]
+set yrange [0:0.2]
+set title "Iterations of Principle Component"
+set xlabel "Rank"
+set ylabel "Value"
+plot "power-iter.dat" using 1:3 with lines linewidth 5 title "Iter 1", \
+     "power-iter.dat" using 1:4 with lines linewidth 5 title "Iter 2", \
+     "power-iter.dat" using 1:5 with lines linewidth 5 title "Iter 3", \
+     "power-iter.dat" using 1:6 with lines linewidth 5 title "Iter 4", \
+     "power-iter.dat" using 1:7 with lines linewidth 5 title "Iter 5"
+

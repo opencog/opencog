@@ -53,33 +53,6 @@ namespace opencog
     }
 
 /**
- * TRIVIAL_MODULE -- Declare a trivial module called MODNAME.
- * This defines the class object, with trivial costructor and 
- * destructor. The primary users of this are expected to be 
- * any .so's that need to define new atom types.  These will
- * be treated as modules, so that the atom types get defined
- * at module load time, rather than later.
- *
- * Here's the technical issue being solved here:
- * 1) Atom types must be defined before use.
- * 2) Atom types get used during scheme (and python!) preloads
- * 3) ergo, shared lib init() ctors must be called before preload.
- * 4) The ctors are not called until some function in the .so is called.
- * 5) dlopen() will cause the init() ctor to run!
- * So the trivial module solves 5) and ergo fixes 1).
- */
-#define TRIVIAL_MODULE(MODNAME)                                       \
-    namespace opencog {                                               \
-    class MODNAME : public Module {                                   \
-    public:                                                           \
-        MODNAME(CogServer& cs) : Module(cs) {}                        \
-        virtual ~MODNAME() {}                                         \
-        const char * id(void);                                        \
-        virtual void init(void) {}                                    \
-    };}
-
-
-/**
  * This class defines the base abstract class that should be extended
  * by all opencog modules.
  *

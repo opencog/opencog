@@ -48,14 +48,24 @@ ADD_DEPENDENCIES(attention attention-types)
 
 TARGET_LINK_LIBRARIES(attention server ${ATOMSPACE_LIBRARIES})
 
+
+INSTALL (TARGETS attention-types
+	LIBRARY DESTINATION "lib${LIB_DIR_SUFFIX}/opencog"
+)
+
 INSTALL (TARGETS attention
 	LIBRARY DESTINATION "lib${LIB_DIR_SUFFIX}/opencog"
 )
 
 INSTALL (FILES
+	${CMAKE_CURRENT_SOURCE_DIR}/attention.scm
+	DESTINATION "${DATADIR}/scm/opencog"
+)
+
+INSTALL (FILES
 	${CMAKE_CURRENT_BINARY_DIR}/attention_types.scm
 	${CMAKE_CURRENT_SOURCE_DIR}/default-param-values.scm
-	DESTINATION "${DATADIR}/scm/attention"
+	DESTINATION "${DATADIR}/scm/opencog/attention"
 )
 
 CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/default-param-values.scm
@@ -69,6 +79,3 @@ INSTALL (FILES
 	HebbianUpdatingAgent.h
 	DESTINATION "include/${PROJECT_NAME}/attention"
 )
-
-INSTALL (TARGETS attention-types
-	LIBRARY DESTINATION "lib${LIB_DIR_SUFFIX}/opencog/modules")

@@ -1,8 +1,8 @@
 (setenv "LTDL_LIBRARY_PATH"
     (if (getenv "LTDL_LIBRARY_PATH")
         (string-append (getenv "LTDL_LIBRARY_PATH")
-            ":/usr/local/lib/opencog:/usr/local/lib/opencog/modules")
-        "/usr/local/lib/opencog:/usr/local/lib/opencog/modules"))
+            ":/usr/local/lib/opencog")
+        "/usr/local/lib/opencog"))
 
 (define-module (opencog nlp fuzzy))
 
@@ -12,7 +12,6 @@
              (ice-9 optargs)      ; for doing define*-public
              (opencog)
              (opencog query)      ; for fuzzy-match
-             (opencog atom-types) ; for WordNode, ParseNode, etc.
              (opencog nlp)
              (opencog nlp sureal)
              (opencog nlp microplanning))

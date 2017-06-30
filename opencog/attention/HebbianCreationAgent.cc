@@ -68,7 +68,7 @@ void HebbianCreationAgent::run()
 
     // Retrieve the atoms in the AttentionalFocus
     
-    OrderedHandleSet attentionalFocus;
+    HandleSet attentionalFocus;
     _bank->get_handle_set_in_attentional_focus(std::inserter(attentionalFocus,attentionalFocus.begin()));
   
     HandleSeq topStiInAF;
@@ -104,14 +104,14 @@ void HebbianCreationAgent::run()
     HandleSeq existingAsTargetHS =
             get_source_neighbors(source, ASYMMETRIC_HEBBIAN_LINK);
 
-    OrderedHandleSet existingAsSource(existingAsSourceHS.begin(),existingAsSourceHS.end());
-    OrderedHandleSet existingAsTarget(existingAsTargetHS.begin(),existingAsTargetHS.end());
+    HandleSet existingAsSource(existingAsSourceHS.begin(),existingAsSourceHS.end());
+    HandleSet existingAsTarget(existingAsTargetHS.begin(),existingAsTargetHS.end());
 
     // Get the set differences between the AttentionalFocus
     // and the sets of existing sources and targets
-    OrderedHandleSet needToBeSource = set_difference(attentionalFocus,
+    HandleSet needToBeSource = set_difference(attentionalFocus,
                                               existingAsSource);
-    OrderedHandleSet needToBeTarget = set_difference(attentionalFocus,
+    HandleSet needToBeTarget = set_difference(attentionalFocus,
                                               existingAsTarget);
 
     int count = 0;
@@ -142,8 +142,15 @@ void HebbianCreationAgent::run()
                 addHebbian(source,target);
         }
     }
+
     //Check the ammount of HebbianLinks the Atom has
-    IncomingSet iset = source->getIncomingSetByType(HEBBIAN_LINK,true);
+    IncomingSet iset;
+    classserver().foreachRecursive(
+        [&] (Type type)->void {
+            IncomingSet ts = source->getIncomingSetByType(type);
+            iset.insert(iset.end(), ts.begin(), ts.end());
+        },
+        HEBBIAN_LINK);
 
     //If it is more then the allowed max delete some randomly.
     //TODO: find a simple rule to decide which atoms to forget

@@ -1,7 +1,12 @@
-(use-modules (opencog)
+(use-modules (srfi srfi-1) (opencog)
              (opencog nlp)
              (opencog nlp chatlang)
              (opencog openpsi))
+
+; unordered-matching is not define-public, so we have to load
+; terms.scm to test it.
+(load "../../../opencog/nlp/chatlang/translator.scm")
+(load "../../../opencog/nlp/chatlang/terms.scm")
 
 (define w (cons 'word "drink"))
 (define l (cons 'lemma "eat"))
@@ -21,5 +26,5 @@
                      (equal? (gdr x) (WordNode "Smith"))
                      (and (equal? (gar x)
                                   (GroundedPredicateNode "scm: chatlang-concept?"))
-                          (equal? (gdr (gdr x)) (ConceptNode "play"))))))
+                          (equal? (gadr x) (ConceptNode "play"))))))
         (cdr unordered)))))

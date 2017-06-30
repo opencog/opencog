@@ -1,6 +1,11 @@
-(use-modules (opencog)
+(use-modules (srfi srfi-1)
+             (opencog)
              (opencog nlp)
              (opencog nlp chatlang))
+
+; choices is not define-public, so we have to load terms.scm to test it.
+(load "../../../opencog/nlp/chatlang/translator.scm")
+(load "../../../opencog/nlp/chatlang/terms.scm")
 
 (define w (cons 'word "drink"))
 (define l (cons 'lemma "eat"))
@@ -13,8 +18,7 @@
     (let ((c (car (cdr choices))))
         (and (eq? (cog-type c) 'EvaluationLink)
              (equal? (gar c) (GroundedPredicateNode "scm: chatlang-choices?"))
-             (equal? (gdr (gdr c)) (ListLink (WordNode "drink")
-                                             (WordNode "eat")
-                                             (ListLink (WordNode "John")
-                                                       (WordNode "Smith"))
-                                             (ConceptNode "play"))))))
+             (equal? (gadr c) (ListLink (WordNode "drink")
+                                        (LemmaNode "eat")
+                                        (PhraseNode "John Smith")
+                                        (ConceptNode "play"))))))
