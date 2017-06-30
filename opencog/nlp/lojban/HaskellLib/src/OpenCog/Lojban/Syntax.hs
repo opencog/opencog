@@ -12,8 +12,8 @@ import Prelude hiding (id,(.),(<*>),(<$>),(*>),(<*))
 import qualified Data.List.Split as S
 import Data.List (nub,partition)
 import qualified Data.Foldable as F (find)
-import Data.Maybe (fromJust)
-import Data.List (isInfixOf)
+import Data.Maybe (fromJust,listToMaybe)
+import Data.List (isInfixOf,isPrefixOf)
 import Data.Hashable
 
 import System.Random
@@ -27,11 +27,10 @@ import Control.Monad.Trans.Class
 import Iso
 import Syntax hiding (SynIso,Syntax)
 
-
 import Lojban
 import Lojban.Syntax.Util
 
-import OpenCog.AtomSpace (Atom(..),TruthVal(..),noTv,stv,atomFold,nodeName,atomElem)
+import OpenCog.AtomSpace (Atom(..),TruthVal(..),noTv,stv,atomFold,nodeName,atomElem,atomMap)
 import OpenCog.Lojban.Util
 
 import OpenCog.Lojban.Syntax.Types
@@ -50,10 +49,7 @@ mytrace2 s a = trace (s ++(' ':show a)) a
 -- FIX: pa + ki'o
 --      da + quantifier
 --      ZAhO explicit representation
---      me'au
---      nup
---      GOhA
---      vo'a rule see ../Lojban.hs
+--      vo'a
 --      make statments explicit
 --      ge'e cai on logical conectives and else?
 --      Does SEI have implicit args?
@@ -73,16 +69,6 @@ mytrace2 s a = trace (s ++(' ':show a)) a
 
 --TODO Printer
 -- da,de,di differentiation
-
----------
---General
----------
-
-_BO :: Syntax (Tagged Selbri)
-_BO = toSelbri <<< anytense <&& sepSelmaho "BO"
-    where toSelbri = mkIso f g where
-              f (CN name) = ((highTv,cPN name lowTv),Nothing)
-              g ((_,PN n),_) = cCN n lowTv
 
 -------------------------------------------------------------------------------
 --Sumti
@@ -118,7 +104,6 @@ leP = (setWithSize ||| id) --Handle inner quantifier if it exists
               g (Left (pa,a)) = (Just pa,a)
               g (Right a)     = (Nothing,a)
 
-
 --Depending on the word we have a different Relation between the predicate
 -- and the resulting Concept
 leHandlers = [genInstance "IntensionalInheritanceLink" . rmfst "le"
@@ -135,39 +120,33 @@ leHandlers = [genInstance "IntensionalInheritanceLink" . rmfst "le"
 massOf :: String -> SynIso Atom Atom
 massOf itype = instanceOf . _ssl . _frames . addStuff . (implicationOf *** genInstance itype) . reorder
     where pp = Node "PredicateNode" "gunma" noTv
-          arg1 = (Node "VariableNode" "$var" noTv,tag)
-          tag = Nothing
+          var = Node "VariableNode" "$var" noTv
 
           reorder = mkIso f g where
               f a     = (pp,a)
               g (_,m) = m
 
           addStuff = mkIso f g where
-              f (p,a) = (((noTv,p),tag),[arg1,(a,tag)])
-              g (((_,p),_),[_,(a,_)]) = (p,a)
+              f (p,a) = ((noTv,p),[(var,"1"),(a,"2")])
+              g ((_,p),[_,(a,_)]) = (p,a)
 
-fstToState :: Int -> SynIso ([Atom],a) a
-fstToState i = Iso f g where
-    f (as,a) =
+toState :: Int -> SynIso [Atom] ()
+toState i = Iso f g where
+    f as =
         if length as == i
-           then modify (\s -> s {sAtoms = as ++ sAtoms s}) >> pure a
+           then modify (\s -> s {sAtoms = as ++ sAtoms s})
            else lift $ Left "List has wrong lenght, is this intended?"
-    g a = do
+    g () = do
         allatoms <- gets sAtoms
         let (as,atoms) = splitAt i allatoms
         modify (\s -> s {sAtoms = atoms})
-        pure (as,a)
+        pure as
 
+fstToState :: Int -> SynIso ([Atom],a) a
+fstToState i = iunit . commute . first (toState i)
 
 sndToState :: Int -> SynIso (a,[Atom]) a
-sndToState i = Iso f g where
-    f (a,as) =
-        if length as == i
-           then modify (\s -> s {sAtoms = as ++ sAtoms s}) >> pure a
-           else lift $ Left "List has wrong lenght, is this intended?"
-    g a = do
-        as <- popAtoms i
-        pure (a,as)
+sndToState i = iunit . second (toState i)
 
 setOf :: String -> SynIso Atom Atom
 setOf itype = sndToState 1 . second (tolist1 . setTypeL . tolist2)
@@ -192,9 +171,9 @@ laP = handleName . wordNode <<< sepSelmaho "LA"
                   p <- apply instanceOf (cPN "cmene" lowTv)
                   name <- randName (nodeName a ++ "___" ++ nodeName a)
                   let c = cCN name lowTv
-                      ct = (c,Nothing)
-                      at = (a,Nothing)
-                      pt = ((highTv,p),Nothing)
+                      at = (a,"1")
+                      ct = (c,"2")
+                      pt = (highTv,p)
                   l <- apply _frames (pt,[at,ct])
                   pushAtom l
                   pure c
@@ -356,11 +335,8 @@ setWithSize = sndToState 2 . second (tolist2 . (sizeL *** setTypeL)) . makeSet
 
 --Connective
 
-_A :: Syntax LCON
-_A = optional (word "na") &&& selmaho "A" &&& optional (word "nai")
-
 _A_BO :: Syntax Con
-_A_BO = wrapA <<< _A &&& optional _BO
+_A_BO = wrapA <<< ek &&& optional _BO
     where wrapA = mkIso f g
           f (a,b) = (Just a,b)
           g (Just a,b) = (a,b)
@@ -376,35 +352,8 @@ sumtiC :: Syntax Atom
 sumtiC = (handleCon . reorder ||| id) . ifJustB
         <<< sumtiLaiP &&& optional (_A_BO &&& sumtiC)
     where reorder = mkIso f g
-          f (a1,(con,a2)) = (con,[a1,a2])
-          g (con,[a1,a2]) = (a1,(con,a2))
-
---HandleCon Connectes the Atoms with 2 possible connectives
---Since booth connectives are in a Maybe we first lift the Atoms into the Maybe
---Then we fmap the isos for each Connective Type over the Maybes
---Finally we merge the results together or pick one
-handleCon :: SynIso (Con,[Atom]) Atom
-handleCon = merge . (mapIso conLink *** mapIso (_frames .> toSumti)) . reorder
-    where reorder = mkIso f g where
-              f ((s,ts),as)                 = (eM (s,as),eM (ts,as))
-              g (Just (s,as) ,Just (ts,_))  = ((Just s,Just ts),as)
-              g (Nothing     ,Just (ts,as)) = ((Nothing,Just ts),as)
-              g (Just (s,as) ,Nothing)      = ((Just s,Nothing),as)
-              eM (Just a,b)  = Just (a,b) --expand Maybe
-              eM (Nothing,b) = Nothing
-
-          toSumti = mkIso f g where
-              f = map (\x -> (x,Nothing))
-              g = map fst
-
-          merge = mkIso f g where
-              f (Just a,Just b) = Link "AndLink" [a,b] highTv
-              f (Nothing,Just b) = b
-              f (Just a,Nothing) = a
-              f (Nothing,Nothing) = error "not allowed to happen."
-              g l@EvalL{} = (Nothing,Just l)
-              g (AL [a,b@EvalL{}]) = (Just a,Just b)
-              g l = (Just l,Nothing)
+          f (a1,(con,a2)) = (con,(a1,a2))
+          g (con,(a1,a2)) = (a1,(con,a2))
 
 --For parsing placeholder like "x1" as a sumti
 --The 1 will be used as the place tag
@@ -431,30 +380,84 @@ sumtiT = (handleFA <<< optional _FA &&& sumtiC) <+> placeholder
                                    ,("fu","5")
                                    ,("fi'a","?")]
 
---New Places Can be added from other Predicates
---fihoP <+> baiP figures out the name
---SumitT the actually sumti that will be put in this place
---Handle fi'o creates an Eval link that applies the sumti
---to the fi'o/bai Predicate
 modalSumti :: Syntax Sumti
-modalSumti = handleFIhO <<< (fihoP <+> baiP) &&& sumtiT
-    where handleFIhO :: SynIso (Tagged Selbri,Sumti) Sumti
-          handleFIhO = sndToState 1 . (fi'otag &&& tolist1 . _frame)
-                     . second (inverse tolist1) . handleTAG . second tolist1
+modalSumti = modalSumti' <<< tag &&& (tolist1 . sumtiC)
 
-          fi'otag :: SynIso (Selbri,(Atom,Tag)) Sumti
-          fi'otag = mkIso f g where
-              f ((_,PN name),(s,tag)) = (s,Just $ name++tag)
-              g (s,Just nametag) =
-                  let [name,tag,tv] = S.split (S.oneOf "12345") nametag
-                  in ((read tv,cPN name lowTv),(s,tag))
+modalSumti' :: SynIso (JJCTTS,[Atom]) Sumti
+modalSumti' = addsnd (Just "ModalSumti")
+                 . sndToState 1
+                 . (pid &&& tolist1)
+                 . handleJJCTTS
+    where pid :: SynIso a a
+          pid = Iso f g
+          f a = pure a
+          g _ = lift $ Left "Only succeds when parsing."
 
-          fihoP :: Syntax (Tagged Selbri)
-          fihoP = sepSelmaho "FIhO" &&> selbriUI <&& optSelmaho "FEhU"
+handleJJCTTS :: SynIso (JJCTTS,[Atom]) Atom
+handleJJCTTS = Iso f g where
+    f (CTLeaf (pred,Nothing),as) = do
+        apply (_frames . second (handleTAG . toSumti)) (pred,as)
+
+    f (CTLeaf (pred,Just "space_time"),as) = do
+        apply handleTenseModal (pred,as)
+
+    f (CTNode joik_jek (x1,x2),as) = do
+        a1 <- f (x1,as)
+        a2 <- f (x2,as)
+        case joik_jek of
+            Right jek -> apply conLink (jek,(a1,a2))
+            Left joik -> error $ "Joik handeling not implemented."
+    g _ = error $ "handleJJCTTS g: not implemented."
+
+    toSumti :: SynIso [Atom] [Sumti]
+    toSumti = mkIso f g where
+        f = map (\x -> (x,Nothing))
+        g = map fst
+
+    handleTenseModal :: SynIso (Selbri,[Atom]) Atom
+    handleTenseModal = Iso f g where
+        f ((tv,st),as) = do
+            case as of
+                [s] -> do
+                    ctx <- gets (head.sCtx)
+                    nctx <- (\x -> cCN x noTv) <$> randName (show ctx)
+                    addCtx nctx
+                    pure $ cEvalL tv st (cLL [nctx,s])
+                _ -> pure $ cEvalL tv st (cLL as)
+        g _ = error $ "Not Implemented g handleTenseModal"
+
+--HandleCon Connectes the Atoms with 2 possible connectives
+--Since booth connectives are in a Maybe we first lift the Atoms into the Maybe
+--Then we fmap the isos for each Connective Type over the Maybes
+--Finally we merge the results together or pick one
+handleCon :: SynIso (Con,(Atom,Atom)) Atom
+handleCon = merge . (mapIso conLink *** mapIso (handleJJCTTS .> tolist2)) . reorder
+    where reorder = mkIso f g where
+              f ((s,ts),as)                 = (eM (s,as),eM (ts,as))
+              g (Just (s,as) ,Just (ts,_))  = ((Just s,Just ts),as)
+              g (Nothing     ,Just (ts,as)) = ((Nothing,Just ts),as)
+              g (Just (s,as) ,Nothing)      = ((Just s,Nothing),as)
+              eM (Just a,b)  = Just (a,b) --expand Maybe
+              eM (Nothing,b) = Nothing
+
+          toSumti = mkIso f g where
+              f = map (\x -> (x,Nothing))
+              g = map fst
+
+          merge = mkIso f g where
+              f (Just a,Just b) = Link "AndLink" [a,b] highTv
+              f (Nothing,Just b) = b
+              f (Just a,Nothing) = a
+              f (Nothing,Nothing) = error "not allowed to happen."
+              g l@EvalL{} = (Nothing,Just l)
+              g (AL [a,b@EvalL{}]) = (Just a,Just b)
+              g l = (Just l,Nothing)
+
+
 
 --bai are shorthands for fi'o selbri
 --in case we find one we transfrom it to the full version
-baiP :: Syntax (Tagged Selbri)
+baiP :: Syntax Selbri
 baiP = ptp _bai iso selbriUI
     where iso = Iso f g where
             f a = do
@@ -465,20 +468,54 @@ baiP = ptp _bai iso selbriUI
                 unapply btf b
           _bai = optional (selmaho "SE") &&& selmaho "BAI"
 
---Another kind of new place for a Predicate
---This time based on a tense
-tenseSumti :: Syntax Sumti
-tenseSumti = reorder <<< anytense &&& sumtiC <&& optSelmaho "KU"
-    where reorder = mkIso f g
-          f (t,s) = (s,Just $ nodeName t)
-          g (s,Just n) = (cCN n noTv,s)
+ctLeaf :: SynIso a (ConnectorTree c a)
+ctLeaf = Iso f g where
+    f a = pure $ CTLeaf a
+    g (CTLeaf a) = pure $ a
+    g _ = lift $ Left "Not a CTLeaf."
 
---Somtimes the tense is not followed by a sumti
---in this case we can just assume a ti
---but only if the tense is not followed by a predicate
---as that would just set the sentence tense
-tenseSumtiP :: Syntax Sumti
-tenseSumtiP = tenseSumti <+> ptp (anytense <&& notsyn selbriAll) addti tenseSumti
+tagPat :: Syntax (Tagged Selbri) -> Syntax JJCTTS
+tagPat syn = isoFoldl toTree <<< ctLeaf . syn
+                             &&& many (joik_jek &&& syn)
+    where toTree :: SynIso (JJCTTS,(JOIK_JEK,Tagged Selbri)) JJCTTS
+          toTree = Iso f g
+          f (a,(c,b)) = pure $ CTNode c (a,CTLeaf b)
+          g (CTNode c (a,CTLeaf b)) = pure (a,(c,b))
+          g _ = lift $ Left "toTree.g: Doesn't match expected pattern."
+
+tag :: Syntax JJCTTS
+tag = tagPat tense_modal
+
+stag :: Syntax JJCTTS
+stag = tagPat simple_tense_modal
+
+tense_modal :: Syntax (Tagged Selbri)
+tense_modal = simple_tense_modal
+            <+> addsnd Nothing . (sepSelmaho "FIhO" &&> selbriUI <&& optSelmaho "FEhU")
+
+simple_tense_modal :: Syntax (Tagged Selbri)
+simple_tense_modal = addsnd Nothing . baiP
+                  <+> addsnd (Just "space_time") . addfst noTv . space_time
+
+{-tense_modal :: SyntaxState s => Syntax s [ADT]
+tense_modal = adtSyntax "tense_modal" <<<
+    simple_tense_modal &+& listoptional (concatSome free)
+    <+> adtSelmaho "FIhO" &+& listoptional (concatSome free)
+                          &+& selbri
+                          &+& listoptional (adtSelmaho "FEhU" &+&
+                                            listoptional (concatSome free))
+
+simple_tense_modal :: SyntaxState s => Syntax s [ADT]
+simple_tense_modal = adtSyntax "simple_tense_modal" <<<
+    listoptional (adtSelmaho "NAhE") &+& listoptional (adtSelmaho "SE")
+                                     &+& adtSelmaho "BAI"
+                                     &+& listoptional (adtSelmaho "NAI")
+                                     &+& listoptional (adtSelmaho "KI")
+    <+> listoptional (adtSelmaho "NAhE") &+&
+        (time &+& listoptional space <+> space &+& listoptional time)
+        <&> adtSelmaho "CAhA" &+& listoptional (adtSelmaho "KI")
+    <+> adtSelmaho "KI"
+    <+> adtSelmaho "CUhE"-}
 
 --Fails when the Syntax Succeds and the other way arround
 --Either the syn succeds then we fail with the zeroArrow
@@ -487,7 +524,7 @@ notsyn :: Syntax a -> Syntax ()
 notsyn x = (zeroArrow ||| id) . ((left <<< lookahead x) <+> (right . insert ()))
 
 sumtiAll :: Syntax Sumti
-sumtiAll = filterState <<< modalSumti <+> sumtiT <+> tenseSumtiP
+sumtiAll = first filterState <<< modalSumti <+> sumtiT
 
 sumtiAllUI :: Syntax Sumti
 sumtiAllUI = withAttitude sumtiAll
@@ -499,20 +536,76 @@ sumtiAllUI = withAttitude sumtiAll
 gismuP :: Syntax Atom
 gismuP = implicationOf . predicate . gismu
 
+meP :: Syntax Atom
+meP = implicationOf . predicate . showReadIso
+     <<< sepSelmaho "ME" &&> sumtiC
+
+_MO :: Syntax Atom
+_MO = varnode . word "mo"
+
+_GOhA :: Syntax Atom
+_GOhA = implicationOf . predicate <<< selmaho "GOhA"
+
+gohaP :: Syntax Atom
+gohaP = _MO <+> _GOhA
+
+{-DefineLink
+    DefinedPredicateNode "seSelbr"
+    ExecutionOutPutLink
+        DefinedSchemaNode "se"
+        PredicateNode "selbri"
+-}
 
 tanru :: Syntax Atom
-tanru = isoFoldl handleTanru . (inverse cons) <<< some (gismuP <+> nuP)
+tanru = isoFoldl handleTanru . (inverse cons) <<< some tanruElem
   where handleTanru = sndToState 1 . second (tolist1 . _iimpl) . reorder
         reorder = mkIso f g
         f (g,t) = (t,(t,g))
         g(t,(_,g)) = (g,t)
 
+tanruElem :: Syntax Atom
+tanruElem = (gismuP <+> nuP
+                    <+> tanruSE
+                    <+> tanruKE
+                    <+> meP
+                    <+> (sepSelmaho "JAI"
+                        &&> setFlagIso "JAI" . jaiFlag . tag
+                        &&> tanruElem)
+                    <+> moiP
+                    <+> gohaP)
 
+jaiFlag :: SynIso JJCTTS ()
+jaiFlag = Iso f g where
+    f t = setJai t
+    g () = do
+        mjai <- gets sJAI
+        case mjai of
+            Just jai -> rmJai >> pure jai
+            Nothing  -> lift $ Left "No JAI in state."
 
+tanruKE :: Syntax Atom
+tanruKE = sepSelmaho "KE" &&> tanru <&& optSelmaho "KEhE"
 
---meP :: Syntax (State Atom)
---meP =  handleME <$> selmaho "ME" <*> sumtiAll <*> optSelmaho "MEhU"
-
+tanruSE :: Syntax Atom
+tanruSE = handle <<< selmaho "SE" &&& tanruElem
+    where handle = Iso f g where
+            f (se,t@(PN name)) = let dpred = cPN (name ++ "_"++ se) noTv
+                                     dsch  = cDSN se
+                                     defl  = cDL noTv
+                                                [dpred
+                                                ,cEXOL noTv
+                                                    [dsch
+                                                    , t
+                                                    ]
+                                                ]
+                                 in do
+                                     pushAtom defl
+                                     pure dpred
+            --FIXME: all popAtom's should be findAtom's
+            g _ = do
+                (DL [_,EXOL [dsch,t]]) <- popAtom
+                let (DSN se) = dsch
+                pure (se,t)
 
 nuP :: Syntax Atom
 nuP = withEmptyState $ choice nuHandlers . (selmaho "NU" &&& bridiUI <&& optSelmaho "KEI")
@@ -636,16 +729,6 @@ moiP = implicationOf . predicate . handleMOI
                           then (Node "NumberNode"  nn noTv,s)
                           else (Node "ConceptNode" nn noTv,s)
 
-_ME :: Syntax ()
-_ME = mytext "me"
-
-meP :: Syntax Atom
-meP = implicationOf . predicate . handleME
-     <<< (_ME &&& sumtiC)
-    where handleME = mkIso f g
-          f (s,a) = show a
-          g name  = ((),read name)
-
 _NAhE :: Syntax TruthVal
 _NAhE = naheToTV <<< (selmaho "NAhE" <+> insert "")
     where naheToTV = mkSynonymIso [("je'a",stv 1    0.9)
@@ -653,92 +736,205 @@ _NAhE = naheToTV <<< (selmaho "NAhE" <+> insert "")
                                   ,("no'e",stv 0.5  0.9)
                                   ,("na'e",stv 0.25 0.9)
                                   ,("to'e",stv 0    0.9)]
-
-
-_MO :: Syntax Atom
-_MO = varnode . word "mo"
-
-_GOhA :: Syntax Atom
-_GOhA = implicationOf . predicate <<< selmaho "GOhA"
-
-gohaP = _MO <+> _GOhA
-
-selbri :: Syntax (Tagged Atom)
-selbri = filterState . commute  <<< optional (selmaho "SE")
-                                &&& (tanru  <+> meP
-                                            <+> moiP
-                                            <+> gohaP)
+selbri :: Syntax Atom
+selbri = filterState <<< tanru
 
 --Selbris can be tagged with a strenght modifier
-selbriP :: Syntax (Tagged Selbri)
-selbriP = associate <<< _NAhE &&& selbri
+selbriP :: Syntax Selbri
+selbriP = _NAhE &&& selbri
 
-selbriUI :: Syntax (Tagged Selbri)
-selbriUI = (first (second handleSOS) ||| id) . reorder
-        <<< (selbriP &&& optional _SOS)
+selbriUI :: Syntax Selbri
+selbriUI = (second handleSOS ||| id) . reorder
+        <<< selbriP &&& optional _SOS
     where reorder = mkIso f g
-              where f (((tv,p),t),Just ui)    = Left  ((tv,(ui,p)),t)
-                    f (p,Nothing)             = Right p
-                    g (Left  ((tv,(ui,p)),t)) = (((tv,p),t),Just ui)
-                    g (Right p)               = (p,Nothing)
-
-_PU :: Syntax String
-_PU = selmaho "PU"
-
-_ZI :: Syntax String
-_ZI = selmaho "ZI"
-
-_VA :: Syntax String
-_VA = selmaho "VA"
-
-_VIhA :: Syntax String
-_VIhA = selmaho "VIhA"
-
-_FAhA :: Syntax String
-_FAhA = selmaho "FAhA"
-
-_ZAhO :: Syntax String
-_ZAhO = selmaho "ZAhO"
-
-_ZEhA :: Syntax String
-_ZEhA = selmaho "ZEhA"
+              where f ((tv,p),Just ui)    = Left  (tv,(ui,p))
+                    f (p,Nothing)         = Right p
+                    g (Left  (tv,(ui,p))) = ((tv,p),Just ui)
+                    g (Right p)           = (p,Nothing)
 
 _CAhA :: Syntax String
 _CAhA = selmaho "CAhA"
 
-anytense :: Syntax Atom
-anytense = concept <<< (_PU   <+> _ZI   <+> _VA <+> _FAhA <+> _ZAhO <+>
-                        _ZEhA <+> _VIhA <+> _CAhA)
+-------------------------------------------------------------------------------
+--Space Time Utils
+-------------------------------------------------------------------------------
 
-_trati :: Syntax (Maybe Atom)
-_trati = handleTrati
-       . many anytense
-    where handleTrati = mkIso f g
-          f [] = Nothing
-          f [x]= Just x
-          f xs = Just (Link "AndLink" xs noTv)
-          g  Nothing       = []
-          g (Just (AL xs)) = xs
-          g (Just x)       = [x]
+oooob :: (Eq a,Show a,Eq b,Show b) => Syntax a -> a -> Syntax b -> b -> Syntax (a,b)
+oooob syna defa synb defb =
+    rmFlagIso "SynA" <<< (setFlagIso "SynA" . syna <+> insert defa)
+                     &&& (synb <+> insert defb . ifFlag "SynA")
+
+oooobm :: (Eq a,Show a,Eq b,Show b) => Syntax a -> Syntax b -> Syntax (Maybe a,Maybe b)
+oooobm syna synb =
+    rmFlagIso "SynA" <<< (setFlagIso "SynA" . just . syna <+> insert Nothing)
+                     &&& (just . synb <+> insert Nothing . ifFlag "SynA")
+
+mergeMaybe :: SynIso (Maybe Atom,Maybe Atom) Atom
+mergeMaybe = Iso f g
+    where f (Just a,Just b) = apply mergePredicates (a,b)
+          f (Just a,Nothing) = pure a
+          f (Nothing,Just b) = pure b
+          f (Nothing,Nothing) = lift $ Left "no interval"
+          g _ = error "Not Implemented g time_interval"
+
+
+mergePredicates :: SynIso (Atom,Atom) Atom
+mergePredicates = Iso f g where
+    f (p1,p2) = do
+        let p1name = nodeName p1
+            p2name = nodeName p2
+            p1pred = drop 20 p1name
+            p2pred = drop 20 p2name
+        name <- randName (p1name ++ p2name)
+        name2 <- randName (p1pred ++ p2pred)
+        let pred = cPN (name ++ "___" ++ name2) noTv
+        pushAtom $ cEquivL noTv (cEvalL noTv pred (cLL [cVN "$1",cVN "$3"]))
+                                (cAL noTv [ cEvalL noTv p1 (cLL [cVN "$1",cVN "$2"])
+                                          , cEvalL noTv p2 (cLL [cVN "$2",cVN "$3"])
+                                          ])
+        pure pred
+    g pred = error $ "Not Implemented g mergePredicates"
+
+imply :: String -> SynIso Atom Atom
+imply string = Iso f g where
+     f a = pushAtom (cImpL noTv a (cPN string noTv)) >> pure a
+     g a = popAtom >> pure a
+
+
+selmahoPred :: String -> Syntax Atom
+selmahoPred s = implicationOf . imply s . predicate . selmaho s
+
+-------------------------------------------------------------------------------
+--SpaceTime
+-------------------------------------------------------------------------------
+
+space_time :: Syntax Atom
+space_time = mergeMaybe . oooobm time space --FIXME fliped order?
+
+time :: Syntax Atom
+time = mergeMaybe <<< oooobm time_offset time_interval
+
+time_offset :: Syntax Atom
+time_offset = general_offset "PU" "ZI"
+
+time_interval :: Syntax Atom
+time_interval = mergeMaybe . oooobm time_interval' interval_property
+
+time_interval' :: Syntax Atom
+time_interval' = handle_interval <<< selmahoPred "ZEhA" &&& optional (selmahoPred "PU")
+    where handle_interval = Iso f g where
+          f (zeha,pu) = do
+              let zehaname = nodeName zeha
+                  puname = maybe "" nodeName pu
+              name <- randName (zehaname ++('_':puname))
+              let pred = cPN (name ++ "interval") noTv
+              pushAtom $ cImpL noTv pred zeha
+              case pu of
+                  Just pu -> pushAtom $ cImpL noTv pred pu
+                  Nothing -> pushAtom $ cImpL noTv pred (cPN "PU" noTv)
+              pure pred
+          g _ = error "Not implemented g time_interval'"
+
+
+space :: Syntax Atom
+space = mergeMaybe . oooobm space_offset space_interval
+
+space_offset :: Syntax Atom
+space_offset = general_offset "FAhA" "VA"
+
+general_offset :: String -> String -> Syntax Atom
+general_offset dir mag = isoFoldl mergePredicates . inverse cons . mapIso (handle_offset dir mag)
+            <<< some (oooobm (selmahoPred dir) (selmahoPred mag))
+            <+> (insert [(Nothing,Nothing)] . ifFlag "WithDefaultTenses")
+
+handle_offset :: String -> String -> SynIso (Maybe Atom,Maybe Atom) Atom
+handle_offset dirC magC = Iso f g
+    where f (mdir,mmag) = do
+              let dirname = maybe "" nodeName mdir
+                  magname = maybe "" nodeName mmag
+              name <- randName (dirname ++('_':magname))
+              let pred = cPN (name ++ "___offset") noTv
+              case mdir of
+                  Just dir -> pushAtom $ cImpL noTv pred dir
+                  _ -> pushAtom $ cImpL noTv pred (cPN dirC noTv)
+              case mmag of
+                  Just mag -> pushAtom $ cImpL noTv pred mag
+                  _ -> pushAtom $ cImpL noTv pred (cPN magC noTv)
+              pure pred
+          g pred = error $ "Not Implemented g handle_offset"
+
+
+space_interval :: Syntax Atom
+space_interval = mergeMaybe . oooobm space_interval' space_int_prop
+
+space_interval' :: Syntax Atom
+space_interval' = handle_interval
+              <<< mergeMaybe . oooobm (selmahoPred "VEhA") (selmahoPred "VIhA")
+              &&& optional (selmahoPred "FAhA")
+    where handle_interval = Iso f g where
+            f (pred,mfaha) = do
+                case mfaha of
+                    Just faha -> pushAtom $ cImpL noTv pred faha
+                    Nothing -> pushAtom $ cImpL noTv pred (cPN "FAhA" noTv)
+                pure pred
+            g _ = error "Not Implemented"
+
+space_int_prop :: Syntax Atom
+space_int_prop = (setFlagIso "FEhE" . sepSelmaho "FEhE") &&> interval_property
+
+interval_property :: Syntax Atom
+interval_property = handle <<< handleROI . (pa &&& selmahoPred "ROI")
+                           <+> selmahoPred "TAhE"
+                           <+> selmahoPred "ZAhO"
+    where handle = Iso f g where
+            f pred = do
+                  flags <- gets sFlags
+                  if "FEhE" `elem` flags
+                     then pushAtom $ cImpL noTv pred (cPN "Spatial" noTv)
+                     else pushAtom $ cImpL noTv pred (cPN "Temporal" noTv)
+                  pushAtom $ cImpL noTv
+                                    (cEvalL noTv pred
+                                                 (cLL [cVN "$1",cVN "$2"]))
+                                    (cSubL noTv (cVN "$1") (cVN "$2"))
+                  pure pred
+            g _ = error "Reverse Interval Property Not implemented."
+          handleROI = Iso f g where
+            f (pa,roi) = do
+                  pushAtom $ cImpL noTv
+                                    (cEvalL noTv roi
+                                                 (cLL [cVN "$1",cVN "$2"]))
+                                    (Link "SetSizeLink"  [cVN "$1",pa] noTv)
+                  pure roi
+            g roi = error "Handle Roi g not implemented"
 
 _NA :: Syntax String
 _NA = selmaho "NA"
 
-selbriAll :: Syntax (Maybe Atom, (Maybe String, Tagged Selbri))
-selbriAll =  _trati
-         &&& optional _NA
+selbriAll :: Syntax (Maybe String, Selbri)
+selbriAll = handleSpaceTime . withFlag "WithDefaultTenses" space_time
+         &&> optional _NA
          &&& selbriUI
+    where handleSpaceTime = Iso f g
+          f pred = do
+              ctx <- gets (head.sCtx)
+              nctx <- (\x -> cCN x noTv) <$> randName (show ctx)
+              setPrimaryCtx nctx
+              pushAtom (cEvalL noTv
+                            pred
+                            (cLL [nctx,ctx])
+                       )
+          g _ = error "Not Implemented g handleSpaceTime"
 
 -------------------------------------------------------------------------------
 --bacru
 -------------------------------------------------------------------------------
 
 --                            trati        na
-bridiTail :: Syntax ((Maybe Atom, (Maybe String, Tagged Selbri)),[Sumti])
-bridiTail = (((second.second.first.second) handleKO . selbriAll) &&& many sumtiAllUI) . ifNotFlag "onlyBE"
+bridiTail :: Syntax ((Maybe String, Selbri),[Sumti])
+bridiTail = (((second.second) handleKO . selbriAll) &&& many sumtiAllUI) . ifNotFlag "onlyBE"
 
-bridiBETail :: Syntax ((Maybe Atom, (Maybe String, Tagged Selbri)),[Sumti])
-bridiBETail = ((second.second.first.second) handleKO . selbriAll) &&& beP
+bridiBETail :: Syntax ((Maybe String, Selbri),[Sumti])
+bridiBETail = ((second.second) handleKO . selbriAll) &&& beP
     where beP :: Syntax [Sumti]
           beP = (cons <<<       sepSelmaho "BE"  &&> sumtiAllUI
                       &&& many (sepSelmaho "BEI" &&> sumtiAllUI)
@@ -756,12 +952,8 @@ handleKO = (sndToState 1 . second (tolist1 . impl) . reorder . ifFlag "ko") <+> 
 -- ((mp,(ma,(s,a))),as)
 -- (bridi,as)
 
-_GIhA ::  Syntax LCON
-_GIhA = optional (word "na") &&& _GIhA' &&& optional (word "nai")
-    where _GIhA' = _GIhAtoA <<< selmaho "GIhA"
-
 _GIhABO :: Syntax Con
-_GIhABO = first just <<< _GIhA &&& optional _BO
+_GIhABO = first just <<< gihek &&& optional _BO
 
 --(s,(bt,(giha,bt)))
 --((s,bt),[(giha,(s,bt))])
@@ -791,7 +983,7 @@ _bridi = isoFoldl handleGIhA . (handleBRIDI *** distribute) . reorder
 --the bridi get's turned into an Atom by handleBRIDI
 --then both atoms get added to the Connective
 handleGIhA :: SynIso (Atom,(Con,Bridi)) Atom
-handleGIhA = handleCon . second (tolist2 .> handleBRIDI) . reorder
+handleGIhA = handleCon . (second.second) handleBRIDI . reorder
     where reorder = mkIso f g where
             f (a,(giha,br)) = (giha,(a,br))
             g (giha,(a,br)) = (a,(giha,br))
@@ -804,21 +996,70 @@ handleGIhA = handleCon . second (tolist2 .> handleBRIDI) . reorder
 --MNA = Maybe NA
 handleBRIDI :: SynIso Bridi Atom
 handleBRIDI = handleNA
-            -- ((MNA,MCtxL)
-            . second _ctx
-            -- ((MNA,(MPU,frames))
+            -- (MNA,frames)
+            . second handleSelbriSumtis
+            -- (MNA,(Selbri,sumti))
             . inverse associate
-            -- (((MNA,MPU),frames)
-            . first commute
-            -- (((MPU,MNA),frames)
-            . second _frames
-            -- ((MPU,MNA),(Tagged Selbri,sumti))
-            . inverse associate
-            -- (((MPU,MNA),Tagged Selbri),sumti)
-            . first associate
-            -- ((MPU,(MNA,Tagged Selbri)),sumti)
+            -- ((MNA,Selbri),sumti)
             . mergeSumti
-            -- (sumit1,((MPU,(MNA,Tagged Selbri)),sumti2))
+            -- (sumit1,((MNA,Selbri),sumti2))
+
+handleJAI :: SynIso (Atom,Tag) (Atom,Tag)
+handleJAI = Iso f g where
+    f (a,"fai") = pure (a,"1")
+    f (a,"1") = do
+        mjai <- gets sJAI
+        case mjai of
+            Just jai -> do
+                (na,Just t) <- apply modalSumti' (jai,[a])
+                pure (na,t)
+            Nothing  -> lift $ Left "No JAI in state."
+    f a = pure a
+    g a = pure a --Loosing information
+
+handleSelbriSumtis :: SynIso (Selbri,[Sumti]) Atom
+handleSelbriSumtis = handle
+                   . (_frames *** handleModalSumti)
+                   . reorder
+                   . second (splitSumti
+                            . (mapIso handleJAI . ifFlag "JAI" <+> id)
+                            . handleTAG)
+
+    where splitSumti :: SynIso [(Atom,Tag)] ([(Atom,Tag)],[Atom])
+          splitSumti = mkIso f g where
+              f s = f' ([],[]) s
+              g (ls,rs) = ls ++ map (\a -> (a,"ModalSumti")) rs
+
+              f' (ls,rs) [] = (ls,rs)
+              f' (ls,rs) ((a,"ModalSumti"):xs) = f' (ls,a:rs) xs
+              f' (ls,rs) (a:xs)                = f' (a:ls,rs) xs
+
+          reorder = mkIso f g where
+              f ((tv,s),(ls,rs)) = (((tv,s),ls),(s,rs))
+              g (((tv,s),ls),(_,rs)) = ((tv,s),(ls,rs))
+
+          handle = Iso f g where
+              f (a1,Just a2) = apply andl [a1,a2]
+              f (a1,Nothing) = pure a1
+              g (AL [a1@(AL _),a2@(AL _)]) = pure (a1,Just a2)
+              g a1 = pure (a1,Nothing)
+
+handleModalSumti :: SynIso (Atom,[Atom]) (Maybe Atom)
+handleModalSumti = handle . mapIso handleModalSumti' . isoDistribute
+    where handle = Iso f g
+          f [] = pure Nothing
+          f as = Just <$> apply andl as
+          g Nothing   = pure []
+          g (Just al) = unapply andl al
+
+handleModalSumti' :: SynIso (Atom,Atom) Atom
+handleModalSumti' = mkIso f g where
+    f (pred,a) = atomMap (fun pred) a
+    g atom = (cVN "ignore when printing",cVN "ignore when priting2")
+
+    fun pred1 (EvalL _ _ (LL [pred2,_])) = cImpL noTv pred2 pred1
+    fun _ a = a
+
 
 handleNA :: SynIso (Maybe String,Atom) Atom
 handleNA = Iso f g where
@@ -836,15 +1077,19 @@ mergeSumti = Iso f g where
                        [] -> lift $ Left "No Sumti to reverse merge."
                        (x:xs) -> pure ([x],(s,xs))
 
-_GA :: Syntax (Maybe LCON)
-_GA = wrapGA . _GAtoA . selmaho "GA"
-    where wrapGA = mkIso f g
-          f a = Just (Nothing,(a,Nothing))
-          g (Just (_,(a,_))) = a
+_GA :: Syntax (String,Bool)
+_GA = _GAtoA . selmaho "GA" &&& optBool "nai"
+
+_GI :: Syntax (Bool,Bool)
+_GI = optBool "se" <&& sepSelmaho "GI" &&& optBool "nai"
 
 bridiGA :: Syntax Atom
-bridiGA = handleGA . (_GA &&& _bridi <&& sepSelmaho "GI" &&& _bridi)
-    where handleGA = handleCon . (addsnd Nothing *** tolist2)
+bridiGA = handleCon . reorder . (_GA &&& _bridi &&& _GI &&& _bridi)
+    where reorder = Iso f g where
+              f ((s,bna),(bridi1,((bse,bnai),bridi2))) =
+                pure ((Just (bna,(bse,(s,bnai))),Nothing),(bridi1,bridi2))
+              g ((Just (bna,(bse,(s,bnai))),Nothing),(bridi1,bridi2)) =
+                pure ((s,bna),(bridi1,((bse,bnai),bridi2)))
 
 bridi = bridiGA <+> _bridi
 
@@ -855,15 +1100,22 @@ bridiUI = (handleSOS ||| id) . ifJustA
 
 addti :: SynIso String String
 statment :: Syntax Atom
-statment = (handleSOS ||| id) . ifJustA
+statment = handleCtx . (handleSOS ||| id) . ifJustA
   <<< optSelmaho "I" &&> optional _SOS &&& statment2
+    where handleCtx = Iso f g
+          f a = do
+              ctxs <- gets sCtx
+              pure $ cCtxL noTv (cSL ctxs) a
+          g (CtxL (SL ctxs) a) = do
+              setCtx ctxs
+              pure a
 
 statment2 :: Syntax Atom
 statment2 = isoFoldl (handleCon . reorder)
     <<< bridi &&& many (sepSelmaho "I" &&> _JA_BO &&& bridiUI)
     where reorder = Iso f g where
-            f (b1,(con,b2)) = pure (con,[b1,b2])
-            g (con,[b1,b2]) = pure (b1,(con,b2))
+            f (b1,(con,b2)) = pure (con,(b1,b2))
+            g (con,(b1,b2)) = pure (b1,(con,b2))
 
 addti = mkIso f g
     where f s = s ++ "ti "
@@ -926,7 +1178,7 @@ vocative = listl . appendAtoms 2 . tolist2 <<< _COI &&& sumtiC
 
 
 freeuiP :: Syntax Atom
-freeuiP = reorder <<< _UI &&& caiP
+freeuiP = reorder <<< uiP
     where reorder = mkIso f g
           f (a,tv) = cCN (nodeName a) tv
           g c@(Node "ConceptNode" name tv) = (c,tv)
@@ -942,20 +1194,12 @@ free = vocative <+> freeuiP <+> freeSumti <+> luP'
 
 --jufra = listl <$> many1 (sepSelmaho "I" *> preti)
 
-_JA ::  Syntax LCON
-_JA = optional (word "na") &&& _JA' &&& optional (word "nai")
-    where _JA' = _JAtoA <<< selmaho "JA"
-
 _JA_BO :: Syntax Con
-_JA_BO = handle <<< optional _JA &&& optional _BO
+_JA_BO = handle <<< optional jek &&& optional _BO
     where handle = Iso f g where
             f (Nothing,Nothing) = lift $ Left "_JA_BO empty"
             f a = pure a
             g = pure
-
-{-_BAI_BO :: Syntax Atom
-_BAI_BO = <$> baiP <* sepSelmaho "BO"
--}
 
 selbriToEval :: SynIso Selbri Atom
 selbriToEval = mkIso f g where
@@ -968,16 +1212,16 @@ _jufra = second ((handle ||| tolist1) . ifJustB)
     where handle = Iso f g where
               f (p,(mc,a:as)) = case mc of
                                     Just c -> do
-                                        x <- apply handleCon (c,[p,a])
+                                        x <- apply handleCon (c,(p,a))
                                         pure (x:as)
                                     Nothing -> pure $ p:a:as
               g (x:as) = (do
-                  (c,[p,a]) <- unapply handleCon x
+                  (c,(p,a)) <- unapply handleCon x
                   pure (p,(Just c, a : as))
                   ) <|> pure (x,(Nothing,as))
 
 jufra :: Syntax Atom
-jufra = listl <<< many preti
+jufra = listl <<< some preti
 
 jufmei = listl . reorder <<< sepSelmaho "NIhO" &&> preti
                         &&& some (sepSelmaho "I" &&> preti)
@@ -1028,24 +1272,32 @@ _CAI = selmaho "CAI"
 _NAI :: Syntax String
 _NAI = selmaho "NAI"
 
-caiP :: Syntax TruthVal
-caiP = naicaiToTV . isoIntercalate "|" . tolist2 <<< (_NAI <+> insert "")
-                                                 &&& (_CAI <+> insert "")
-
-naicaiToTV :: SynIso String TruthVal
-naicaiToTV = mkSynonymIso [("|cai"    ,stv 1     0.9)
-                          ,("|sai"    ,stv 0.833 0.9)
-                          ,("|"       ,stv 0.75  0.9)
-                          ,("|ru'e"   ,stv 0.666 0.9)
-                          ,("|cu'i"   ,stv 0.5   0.9)
-                          ,("nai|ru'e",stv 0.333 0.9)
-                          ,("nai|"    ,stv 0.250 0.9)
-                          ,("nai|sai" ,stv 0.166 0.9)
-                          ,("nai|cai" ,stv 0     0.9)]
-
+naiP :: Syntax Double
+naiP = handleNAI <<< (selmaho "NAI" <+> insert "")
+    where handleNAI = mkSynonymIso [("nai"  , -1)
+                                   ,(""     , 1)
+                                   ,("ja'ai", 1)
+                                   ]
+caiP :: Syntax Double
+caiP = handleCAI <<< (_CAI <+> (insert "" . ifFlag "HaveUI"))
+    where handleCAI :: SynIso String Double
+          handleCAI = mkSynonymIso [("cai"    ,0.99)
+                                   ,("sai"    ,0.75)
+                                   ,(""       ,0.5 )
+                                   ,("ru'e"   ,0.25)
+                                   ,("cu'i"   ,0.01)
+                                   ]
 
 uiP :: Syntax (Atom,TruthVal)
-uiP = _UI &&& caiP
+uiP = handle <<< oooob (_UI &&& naiP) (gehe,1) caiP 0.5
+    where handle = second handleNAICAI . inverse associate
+          handleNAICAI = mkIso f g where
+              f (n,c) = stv ((n*c)/2+0.5) 0.9
+              g (SimpleTV s _) = let v = (s-0.5)*2
+                             in if v >= 0
+                                then (1,v)
+                                else (-1,-v)
+          gehe = cCN "ge'e" noTv
 
 type UI = (Atom,TruthVal)
 
@@ -1079,15 +1331,14 @@ handleUI = (handleXu ||| (rmfstAny (xu,tv) ||| handleUI') . switchOnFlag "xu") .
 
 handleUI' :: SynIso ((Atom,TruthVal),Atom) Atom
 handleUI' = sndToState 1
-         . second (tolist1 . _frames . (selbri *** tolist1 . toSumti)
+         . second (tolist1 . _frames . (selbri *** tolist1)
                   )
          . manage
     where manage = mkIso f g where
               f ((ui,tv),a) = (a,((tv,ui),(a,"1")))
               g (a,((tv,ui),_)) = ((ui,tv),a)
 
-          toSumti = id *** just
-          selbri  = addsnd Nothing . second instanceOf
+          selbri  = second instanceOf
 
 handleSEI :: SynIso (Atom,Atom) Atom
 handleSEI = fstToState 1 . first tolist1
@@ -1095,3 +1346,89 @@ handleSEI = fstToState 1 . first tolist1
 --SOS Second Order Sentence
 handleSOS :: SynIso (Either SEI UI,Atom) Atom
 handleSOS = (handleSEI ||| handleUI) . distribute
+
+
+-------------------------------------------------------------------------------
+--Connective Utils
+-------------------------------------------------------------------------------
+
+optBool :: String -> Syntax Bool
+optBool s = insert True . mytext s <+> insert False
+
+ekPat :: Syntax String -> Syntax EK
+ekPat syn = optBool "na"
+        &&& optBool "se"
+        &&& syn
+        &&& optBool "nai"
+
+_BO :: Syntax JJCTTS
+_BO = stag <&& sepSelmaho "BO"
+
+--type EK = (Bool,(Bool,(String,Bool)))
+
+ek :: Syntax EK
+ek = ekPat (selmaho "A")
+
+jek :: Syntax EK
+jek = ekPat (_JAtoA . selmaho "JA")
+
+gihek :: Syntax EK
+gihek = ekPat (_GIhAtoA . selmaho "GIhA")
+
+--data JOIK = JOI (Bool,(String,Bool))
+--          | INT (Bool,(String,Bool))
+--          | INTGAhO (String,((Bool,(String,Bool)),String))
+--          deriving (Show,Eq)
+
+joik_JOI :: SynIso (Bool,(String,Bool)) JOIK
+joik_JOI = Iso f g where
+    f a = pure $ JOI a
+    g (JOI a) = pure $ a
+    g _ = lift $ Left "Not a JOI."
+
+joik_INT :: SynIso (Bool,(String,Bool)) JOIK
+joik_INT = Iso f g where
+    f a = pure $ INT a
+    g (INT a) = pure $ a
+    g _ = lift $ Left "Not a INT."
+
+joik_INTGAhO :: SynIso (String,((Bool,(String,Bool)),String)) JOIK
+joik_INTGAhO = Iso f g where
+    f a = pure $ INTGAhO a
+    g (INTGAhO a) = pure $ a
+    g _ = lift $ Left "Not a INTGAhO."
+
+joik :: Syntax JOIK
+joik = joik_JOI . (optBool "se" &&& selmaho "JOI" &&& optBool "nai")
+   <+> joik_INT . interval
+   <+> joik_INTGAhO . (selmaho "GAhO" &&& interval &&& selmaho "GAhO")
+    where interval = optBool "se"
+                   &&& selmaho "BIhI"
+                   &&& optBool "nai"
+
+joik_jek :: Syntax JOIK_JEK
+joik_jek = left . joik <+> right . jek
+
+joik_ek :: Syntax JOIK_EK
+joik_ek = left . joik <+> right . ek
+
+{-joik_ek :: SyntaxState s => Syntax s [ADT]
+joik_ek = adtSyntax "joik_ek" <<< joik &+& listoptional (concatSome free)
+    <+> ek &+& listoptional (concatSome free)
+
+joik_jek :: SyntaxState s => Syntax s [ADT]
+joik_jek = adtSyntax "joik_jek" <<< joik &+& listoptional (concatSome free)
+    <+> jek &+& listoptional (concatSome free)
+
+gek :: SyntaxState s => Syntax s [ADT]
+gek = adtSyntax "gek" <<< listoptional (adtSelmaho "SE") &+& adtSelmaho "GA" &+& listoptional (adtSelmaho "NAI") &+& listoptional (concatSome free)
+    <+> joik &+& adtSelmaho "GI" &+& listoptional (concatSome free)
+    <+> stag &+& gik
+
+guhek :: SyntaxState s => Syntax s [ADT]
+guhek = adtSyntax "guhek" <<< listoptional (adtSelmaho "SE") &+& adtSelmaho "GUhA" &+& listoptional (adtSelmaho "NAI") &+& listoptional (concatSome free)
+
+gik :: SyntaxState s => Syntax s [ADT]
+gik = adtSyntax "gik" <<< adtSelmaho "GI" &+& listoptional (adtSelmaho "NAI") &+& listoptional (concatSome free)-}
+
+
