@@ -1018,7 +1018,7 @@ handleJAI = Iso f g where
     g a = pure a --Loosing information
 
 handleSelbriSumtis :: SynIso (Selbri,[Sumti]) Atom
-handleSelbriSumtis = andl . tolist2
+handleSelbriSumtis = handle
                    . (_frames *** handleModalSumti)
                    . reorder
                    . second (splitSumti
@@ -1038,8 +1038,19 @@ handleSelbriSumtis = andl . tolist2
               f ((tv,s),(ls,rs)) = (((tv,s),ls),(s,rs))
               g (((tv,s),ls),(_,rs)) = ((tv,s),(ls,rs))
 
-handleModalSumti :: SynIso (Atom,[Atom]) Atom
-handleModalSumti = andl . mapIso handleModalSumti' . isoDistribute
+          handle = Iso f g where
+              f (a1,Just a2) = apply andl [a1,a2]
+              f (a1,Nothing) = pure a1
+              g (AL [a1@(AL _),a2@(AL _)]) = pure (a1,Just a2)
+              g a1 = pure (a1,Nothing)
+
+handleModalSumti :: SynIso (Atom,[Atom]) (Maybe Atom)
+handleModalSumti = handle . mapIso handleModalSumti' . isoDistribute
+    where handle = Iso f g
+          f [] = pure Nothing
+          f as = Just <$> apply andl as
+          g Nothing   = pure []
+          g (Just al) = unapply andl al
 
 handleModalSumti' :: SynIso (Atom,Atom) Atom
 handleModalSumti' = mkIso f g where
