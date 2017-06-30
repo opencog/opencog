@@ -4,6 +4,10 @@
 (use-modules (opencog logger))
 (use-modules (opencog randgen))
 
+;; Set a logger for the experiment
+(define icl-logger (cog-new-logger))
+(cog-logger-set-component! icl-logger "ICL")
+
 ;; Let of characters of the alphabet
 (define alphabet-list
   (string->list "ABCDEFGHIJKLMNOPQRSTUVWXYZ"))

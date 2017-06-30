@@ -43,17 +43,7 @@
 
 ;; TODO: add as many valid rules are possible
 (define rule-filenames
-  (list "predicate/conditional-partial-instantiation.scm"
-        "wip/implication-scope-to-implication.scm"
-        "wip/and-lambda-distribution.scm"
-        "wip/closed-lambda-introduction.scm"
-        "wip/implication-introduction.scm"
-        "wip/implication-implicant-distribution.scm"
-        "wip/implication-and-lambda-factorization.scm"
-        "term/deduction.scm"
-        "wip/equivalence-to-implication.scm"
-        "wip/implication-implicant-disjunction.scm"
-        "predicate/conditional-full-instantiation.scm"
+  (list "term/deduction.scm"
         )
   )
 (for-each load-from-path rule-filenames)
@@ -66,18 +56,7 @@
 ; List the rules and their weights.
 (define rules
   (list
-        (list conditional-partial-instantiation-meta-rule-name 1)
-        (list implication-scope-to-implication-rule-name 1)
-        ;; (list and-lambda-distribution-rule-name 1)
-        (list closed-lambda-introduction-rule-name 1)
-        (list implication-introduction-rule-name 1)
-        (list implication-implicant-distribution-rule-name 1)
-        (list implication-and-lambda-factorization-rule-name 1)
-        (list deduction-implication-rule-name 1)
-        (list conditional-full-instantiation-meta-rule-name 1)
-        ;; (list implication-full-instantiation-rule-name 1)
-        (list equivalence-to-implication-rule-name 1)
-        ;; (list implication-implicant-disjunction-rule-name 1)
+        (list deduction-inheritance-rule-name 1)
         )
   )
 
@@ -89,7 +68,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;
 
 ;; Termination criteria parameters
-(ure-set-num-parameter pln-rbs "URE:maximum-iterations" 2000)
+(ure-set-num-parameter pln-rbs "URE:maximum-iterations" 20)
 
 ;; Attention allocation (0 to disable it, 1 to enable it)
 (ure-set-fuzzy-bool-parameter pln-rbs "URE:attention-allocation" 0)
