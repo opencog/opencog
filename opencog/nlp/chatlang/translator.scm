@@ -7,7 +7,7 @@
              (opencog nlp)
              (opencog exec)
              (opencog openpsi)
-             (opencog movement)
+             (opencog eva-behavior)
              (srfi srfi-1)
              (rnrs io ports)
              (ice-9 popen)
