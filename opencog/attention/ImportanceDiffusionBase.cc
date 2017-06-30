@@ -40,6 +40,7 @@
 #include <opencog/attentionbank/AttentionBank.h>
 
 #include "ImportanceDiffusionBase.h"
+#include "AttentionStat.h"
 
 #define DEBUG
 #define _unused(x) ((void)x)
@@ -82,7 +83,6 @@ ImportanceDiffusionBase::~ImportanceDiffusionBase()
  */
 void ImportanceDiffusionBase::diffuseAtom(Handle source)
 {
-
     // (1) Find the incident atoms that will be diffused to
     HandleSeq incidentAtoms =
             ImportanceDiffusionBase::incidentAtoms(source);
@@ -130,6 +130,36 @@ void ImportanceDiffusionBase::diffuseAtom(Handle source)
     AttentionValue::sti_t totalDiffusionAmount =
             calculateDiffusionAmount(source);
 
+#ifdef LOG_AV_STAT
+    // Log sti gain from spreading via  non-hebbian links
+    for(const auto& kv : probabilityVectorIncident){
+        if(atom_avstat.find(kv.first) == atom_avstat.end()){
+            AVStat avstat;
+            avstat.link_sti_gain = kv.second;
+            atom_avstat[kv.first] = avstat;
+        }
+        atom_avstat[kv.first].link_sti_gain += kv.second;
+    }
+
+    // Log sti gain from spreading via hebbian links
+    for(const auto& kv : probabilityVectorHebbianAdjacent){
+        if(atom_avstat.find(kv.first) == atom_avstat.end()){
+            AVStat avstat;
+            avstat.heblink_sti_gain = kv.second;
+            atom_avstat[kv.first] = avstat;
+        }
+        atom_avstat[kv.first].heblink_sti_gain += kv.second;
+    }
+
+    // Log amount of sti spread from
+    if(atom_avstat.find(source) == atom_avstat.end()){
+        AVStat avstat;
+        avstat.spreading = totalDiffusionAmount;
+        atom_avstat[source] = avstat;
+    }
+    atom_avstat[source].spreading += totalDiffusionAmount;
+#endif
+/
 #ifdef DEBUG
     std::cout << "Total diffusion amount: " << totalDiffusionAmount << std::endl;
 #endif
