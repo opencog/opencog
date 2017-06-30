@@ -6594,6 +6594,41 @@ RMS Count      1.0433E+6    8.7564E+5     22.88        19.42
 
 
 ==================================================================
+en_pairs_rfour
+---------------
+Random-planar-tree parsed books from tranche-1, 2, 3 and 4. 
+A continutation of en_pairs_rthree. Does NOT contain pair-MI values.
+
+STATUS: good
+DATE: 29 June 2017
+REASON: Best so far, I think.  One issue:
+  1) infix-marks: dashes, ellipsis, long-dashes are not split.
+     It now seems that this would have been the right thing to do.
+
+                        List of relations
+ Schema |    Name    | Type  | Owner  |    Size    | Description 
+--------+------------+-------+--------+------------+-------------
+ public | atoms      | table | ubuntu | 3937 MB    | 
+ public | spaces     | table | ubuntu | 40 kB      | 
+ public | typecodes  | table | ubuntu | 56 kB      | 
+ public | valuations | table | ubuntu | 2619 MB    | 
+ public | values     | table | ubuntu | 8192 bytes | 
+
+select count(*) from atoms;      -- 44676827 = 45M atoms
+select count(*) from valuations; -- 22638956 = 23M valations
+
+2083700214 Bytes = 2.1 GBytes uncompressed
+ 354780718 Bytes compressed = 355 MBytes
+
+md5sum en_pairs_rfour.sql 
+98e873b7626d22e04f914b043c14d6ec  en_pairs_rfour.sql
+6726298084cb8b6ad92a63419c91b416  en_pairs_rfour.sql.bz2
+
+
+==================================================================
+
+dropdb  en_pairs_tthree en_pairs_ttwo en_pairs_rone 
+
 Plan:
 load en_pairs_mst
 load en_pairs_semi_fu
@@ -11045,6 +11080,9 @@ delete from valuations using lws where atom =lws.uuid;
 delete from atoms where type=234;
 
 
+postgres:///en_pairs_ttwo_sim?user=linas
+
+Has a pile of cosines that should be stored ...
 
 	
 =========================================================================
