@@ -149,7 +149,14 @@ probability of a given rule to produce a preproof of any T. To obtain
 a partial instantiation over R, R is subtituted by a certain rule,
 called <rule>, and the TV over the ImplicationScope, called <rule-TV>,
 is obtained by direct evaluation over the subset of observations of
-the corpus of proofs involving <rule>.
+the corpus of proofs involving <rule>. There is a subtlety though, in
+the cases where B is not in the trace of subproofs of T we simply
+don't know whether or not it could be a subproof, as such we cannot
+evaluate its TV as false. Instead we evaluate these as unknown, which
+would correspond to an simple TV with null confidence. So when we
+calculate the TV of the rule we need to take all these unknown into
+account and they will flatten the associate distribution, even when
+the number of instances is very high. TODO: find the exact formula.
 
 ```
 ImplicationScope <rule-TV>

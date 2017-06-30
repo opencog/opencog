@@ -28,22 +28,22 @@
 ;; Run an iteration i over the given targets
 (define (run-iteration targets i)
   (cog-logger-info icl-logger "Run iteration ~a/~a" (+ i 1) niter)
-  (let* ((run-bc-fun (lambda (j) (run-bc (list-ref targets j) i j)))
+  (let* ((run-bc-fun (lambda (j) (run-bc (list-ref targets j) '() i j)))
          (results (map run-bc-fun (iota pss)))
          (Si (count values results)))
     (cog-logger-info icl-logger "Number of problem solved = ~a" Si))
+  ;; TODO: parse the log file to get all the data. Basically fill the
+  ;; preproof(A, T) relationships
+
   ;; TODO: build collection of rules for the next iteration
 )
 
-;; Run the backward chainer on target, with index j in iteration
-;; i. Return #t iff successful.
-(define (run-bc target i j)
+;; Run the backward chainer on target, given the meta-knowledge-base
+;; with index j in iteration i. Return #t iff successful.
+(define (run-bc target mkb i j)
   (cog-logger-info icl-logger "Run BC with target = ~a" target)
-  (reload)
+  ;; (reload)
   (let* ((result (pln-bc target)))
-    ;; (cog-logger-info icl-logger "result = ~a" result)
-    ;; (cog-logger-info icl-logger "Target after run = ~a" target)
-    (tv->bool (cog-tv (gar result)))))     ; For some strange reason the
-                                           ; target tv doesn't get
-                                           ; updated so we take first
-                                           ; result instead.
+    (cog-logger-info icl-logger "result = ~a" result)
+    (cog-logger-info icl-logger "Target after run = ~a" target)
+    (tv->bool (cog-tv (gar result)))))
