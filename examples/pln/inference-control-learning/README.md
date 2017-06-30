@@ -359,23 +359,27 @@ combination.
 A variety of inference control rules may simultaneously apply and we
 need a way to combine them.
 
-Let's assume we have n valid rules (meaning they unify with the
-current intermediary target and have their contexts true).
+Let's assume we have k valid inference control rules for an inference
+rule R. Valid means that they unify with the current intermediary
+target and have their contexts satisfied.
 
 ```
-ICR1 : C1 & R -> S <TVi>
+ICR1 : C1 & R -> S <TV1>
 ...
-ICRn : Cn & R -> S <TVi>
+ICRk : Ck & R -> S <TVk>
 ```
+
+where `->` compactly represent an `ImplicationScopeLink` as described
+above.
 
 So `ICRi` expresses that in context `Ci` chosing `R` will produce a
 preproof of our final target with truth values `TVi`. `S` stands for
-Success (the production of a preproof). One way of doing that is to
-use a resource bound variation of Solomonoff's Universal Operator
-Induction, which reformulated to fit our problem looks like
+Success. One way of doing that is to use a resource bound variation of
+Solomonoff's Universal Operator Induction, which reformulated to fit
+our problem looks like
 
 ```
-P(S|R) = Sum_i=0^n P(ICRi) * ICRi(S|R) * Prod_j ICRi(Sj|Rj)
+P(S|R) = Sum_i=0^k P(ICRi) * ICRi(S|R) * Prod_j ICRi(Sj|Rj) / nt
 ```
 
 * `P(S|R)` is the probability that picking up `R` in this instance
@@ -385,20 +389,19 @@ P(S|R) = Sum_i=0^n P(ICRi) * ICRi(S|R) * Prod_j ICRi(Sj|Rj)
   to `ICRi`.
 * The last term `Prod_j ICRi(Sj|Rj)` is the probability that `ICRi`
   explains our corpus of past inferences.
-
-Since it is resource bound we cannot consider all computable
-rules. Instead we consider the ones we have, typically obtained by
-pattern mining, and normalize by dividing by a normalizing term, `nt`,
-defined as followed
-
+* `nt` is the normalizing term, defined as
 ```
 nt = Sum_i=0^n P(ICRi) * Prod_j ICRi(Sj|Rj)
 ```
 
-We layer that with an additional variation, instead of calculating a
-single probability we calculate a truth value, or more generally a pdf
-(probability density function). This is essentially to balance
-exploitation vs exploration as explained in the next subsection.
+Since it is resource bound we cannot consider all computable rules.
+Instead we consider the ones we have, typically obtained by the
+pattern miner.
+
+On top of that, instead of returning a single probability we want to
+return a truth value, or more generally a pdf (probability density
+function). This is essential to balance exploitation vs exploration as
+explained in the next subsection.
 
 Generally, one can do that by building a cumulative distribution
 function instead of a probability expectation.
@@ -407,19 +410,22 @@ function instead of a probability expectation.
 CDF_P(S|R)(x) = Sum_i_in_{ICRi(S|R)<=x} P(ICRi) * Prod_j ICRi(Sj|Rj) / nt
 ```
 
-making here explicit the normalization by `nt`. However our models
-`ICRi` calculate TVs (thus pdfs), not probabilities, making
-`ICRi(S|R)<=x` ill-defined. To remedy that we can split `ICRi` into a
-continuous ensemble of models, each of which has a probability from 0
-to 1, not a TV, associated to it. We can then use this ensemble as
-extra models and use the same formula above to calculate the cdf. It
-turns out that the TV on `ICRi` precisely represent the cdf of `Prod_j
-ICRi(Sj|Rj)` (TODO: prove that), so in fact the cdf of `P(S|R)` can be
-simplified into a weighted sum of the cdfs of `ICRi`
+However our models `ICRi` calculate TVs (thus pdfs), not
+probabilities, making `ICRi(S|R)<=x` ill-defined. To remedy that we
+can split `ICRi` into a continuous ensemble of models, each of which
+with a probability from 0 to 1, not a TV, associated to it. We can
+then use this ensemble as extra models and use the same formula above
+to calculate the cdf. Luckily it turns out that the TV returned by
+`ICRi` precisely represent the cdf of `Prod_j ICRi(Sj|Rj)`, so in fact
+the cdf of `P(S|R)` is merely a weighted sum of the cdfs of `ICRi`
 
 ```
-CDF_P(S|R) = Sum_i=0^n CDF_ICRi(S|R) * P(ICRi) / nt
+CDF_P(S|R) = Sum_i=0^n CDF_ICRi(S|R) * P(ICRi)
 ```
+
+TODO: prove that
+
+TODO: what to do about nt?
 
 Once we have that we can calculate the TVi of success of each valid
 inference rule Ri, either by turning its cdf into a TV or a pdf as it
