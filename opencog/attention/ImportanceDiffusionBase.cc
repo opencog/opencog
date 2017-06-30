@@ -143,19 +143,17 @@ void ImportanceDiffusionBase::diffuseAtom(Handle source)
     }
 
     // Perform diffusion from the source to each atom target
-    typedef std::map<Handle, double>::iterator it_type;
-    for(it_type iterator = probabilityVector.begin();
-        iterator != probabilityVector.end(); ++iterator)
+    for( const auto& p : probabilityVector)
     {
         DiffusionEventType diffusionEvent;
 
         // Calculate the diffusion amount using the entry in the probability
         // vector for this particular target (stored in iterator->second)
         diffusionEvent.amount = (AttentionValue::sti_t)
-                floor(totalDiffusionAmount * iterator->second);
+                (totalDiffusionAmount * p.second);
 
         diffusionEvent.source = source;
-        diffusionEvent.target = iterator->first;
+        diffusionEvent.target = p.first;
 
         // Add the diffusion event to a stack. The diffusion is stored in a
         // stack, so that all the diffusion events can be processed after the
@@ -398,17 +396,15 @@ ImportanceDiffusionBase::combineIncidentAdjacentVectors(
     // For each hebbian adjacent target, allocate a proportion of STI according
     // to the probability vector for the target, and the proportion that is
     // available for allocation to any particular individual atom
-    typedef std::map<Handle, double>::iterator it_type;
-    for(it_type iterator = adjacentVector.begin();
-        iterator != adjacentVector.end(); ++iterator)
+    for(const auto& p : adjacentVector)
     {
         // iterator->second is the entry in the probability vector for this
         // handle
         double diffusionAmount =
-                hebbianMaximumLinkAllocation * iterator->second;
+                hebbianMaximumLinkAllocation * p.second;
 
         // iterator->first is the handle
-        result.insert({iterator->first, diffusionAmount});
+        result.insert({p.first, diffusionAmount});
 
         // Decrement the amount of remaining diffusion that is available
         hebbianDiffusionUsed += diffusionAmount;
@@ -425,12 +421,11 @@ ImportanceDiffusionBase::combineIncidentAdjacentVectors(
 
     // Allocate the remaining diffusion amount to the incident atoms according
     // to the probability vector for the targets
-    for(it_type iterator = incidentVector.begin();
-        iterator != incidentVector.end(); ++iterator)
+    for(const auto& p : incidentVector)
     {
         double diffusionAmount =
-                diffusionAvailable * iterator->second;
-        result.insert({iterator->first, diffusionAmount});
+                diffusionAvailable * p.second;
+        result.insert({p.first, diffusionAmount});
 
         incidentDiffusionUsed += diffusionAmount;
     }
