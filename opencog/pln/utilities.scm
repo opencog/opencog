@@ -129,7 +129,7 @@
 ; NOTE: It is simple b/c it doesn't try to restrict inference over a
 ; certain source atoms.
 ; TODO: Move logic to ForwardChainer.
-    (let* ((result (cog-fc RB-NODE (Set) (List) (Set FOCUS-SET)))
+    (let* ((result (cog-fc RB-NODE (Set) #:focus-set (Set FOCUS-SET)))
            (result-list (cog-outgoing-set result)))
         ; Cleanup
         (cog-delete result)
