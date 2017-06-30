@@ -6354,12 +6354,13 @@ en_pairs_rone_mst
 The en_pairs_rone dataset used to perform MST parses of tranche-1
 books.  Contains both pair-MI and cset-MI data and summaries.
 
-STATUS: fair/poor
+STATUS: poor
 DATE: 13 June 2017
 REASON: Multiple issues:
  a) Missing links to LEFT-WALL
  b) fails to separete various punctuation
  c) The PseudoWordCset typename needs to be changed to Section, etc.
+ d) MI values have the float truncation bug.
 
 
 en_pairs_rone_mst=> \dt+
@@ -6463,7 +6464,7 @@ en_pairs_rtwo_mst
 -----------------
 en_pairs_rtwo, with tranche-1 and tranche-2 MST parses.
 
-STATUS: fair/poor
+STATUS: poor
 DATE: 14 June 2017
 REASON: Multiple issues:
  a) Missing links to LEFT-WALL
@@ -6542,9 +6543,12 @@ the pair-MI computations.  A continutation of en_pairs_rtwo.
 
 STATUS: good
 DATE: 21 June 2017
-REASON: Best so far, I think.  One issue:
-  infix-marks: dashes, ellipsis, long-dashes are not split.
-  It now seems that this would have been the right thing to do.
+REASON: Best so far, I think.  Two issues:
+  1) infix-marks: dashes, ellipsis, long-dashes are not split.
+     It now seems that this would have been the right thing to do.
+  2) The pair-MI values are bad; they suffer from the float-point
+     truncation bug. (opencog/atomspace#1295) Solution: recompute
+     MI before using.
 
                         List of relations
  Schema |    Name    | Type  | Owner  |    Size    | Description 
@@ -10812,12 +10816,17 @@ rel err = abs / p = 0.5518235692124971
 
 so its 19 +/- 0.5 error... not bad...
 
+ (use-modules (opencog))
+ (use-modules (opencog persist) (opencog persist-sql))
+ (use-modules (opencog nlp) (opencog nlp learn))
+ (use-modules (opencog matrix))
+ (sql-open "postgres:///en_pairs_mst?user=linas")
 So
 (define star-obj (add-pair-stars pair-obj))
 (define cnt-obj (add-pair-count-api star-obj))
 (define frq-obj (add-pair-freq-api star-obj))
 
-(define wild-wild (cntobj 'wild-wild-count))
+(define wild-wild (cnt-obj 'wild-wild-count))
 (define sqw (sqrt wild-wild))
 
 (define (do-one-pair lipr)
@@ -10890,9 +10899,10 @@ check them all..
 				(format #t "sum=~A for ~A of ~A\n" sum n lsz))
 			(set! n (+ n 1))
 			; (+ sum (right-loop lefty))
-			; (+ sum (cnt-obj 'right-wild-count lefty)))
-			; (+ sum (frq-obj 'right-wild-freq lefty))
-			(+ sum (right-cnt lefty))
+			; (+ sum (cnt-obj 'right-wild-count lefty))
+			(+ sum (frq-obj 'right-wild-freq lefty))
+			; (+ sum (right-cnt lefty))
+			; (+ sum (right-frq lefty))
 		) 0 (star-obj 'left-basis)))
 
 So the right-marginal sum works out.  638845863.0 
@@ -10901,6 +10911,11 @@ double check...
 (define (right-cnt left-item)
 	(fold
 		(lambda (lipr sum) (+ sum (pair-obj 'pair-count lipr)))
+		0 (star-obj 'right-stars left-item)))
+
+(define (right-frq left-item)
+	(fold
+		(lambda (lipr sum) (+ sum (frq-obj 'pair-freq lipr)))
 		0 (star-obj 'right-stars left-item)))
 
 This eplicit check reports 638845863.0 so that's perfect.
@@ -10950,12 +10965,85 @@ AtomStorage::getInc
 SQLAtomStorage::getIncomingSet buff
 hi = table.add(hi, false);
 get_atom_values(hi); at line 1523 hi is in the atom table.
-esponse::get_all_values_cb
+  .. is tlbuf addAtom squonky?
+esponse::get_all_values_cb lines 304
 
 
 is it a uuid cockup?
 Add prints to get_atom_values.
 is it ? print in atom->setValue
+
+So: en_pairs_mst on fanny:
+ * counts sum, 
+ * no missing values on load.
+ * right-wild-freqs fail to sum.
+   -- 0.962623000000125 reproducible
+ * right-freqs are missing 40%!!!  ... 0.6004660000000038
+ * (WordNode "the") has no count on it !!! wtf???
+   its missing in the DB too...so that's bad.
+
+(car (star-obj 'left-basis) (WordNode "sumatraus")
+right-stars:
+ to  18
+original 2
+describe  8
+the 4
+ 'right-wild-count = 32 OK
+ 'right-wild-freq = 0.0
+(frq-obj 'pair-freq (list-ref (star-obj 'right-stars (WordNode "sumatraus")) 3))
+
+sumatraus = 2371938357
+original = 645821
+List= 2371941696
+ANY = 152
+Eval link = 2371941697
+select * from valuations where atom=2371941697; 
+select * from atoms where name='*-FrequencyKey-*'; = 2440463582
+
+again, SQL is in order.
+whoa ... 
+(cog-value  (star-obj 'item-pair  (list-ref (star-obj 'right-stars
+(WordNode "sumatraus")) 1)) (Predicate "*-FrequencyKey-*"))
+is perfect!
+
+(frq-obj 'pair-freq (list-ref (star-obj 'right-stars (WordNode "sumatraus")) 1))
+is  wrong/absent...
+
+(pair-obj 'item-pair  (list-ref (star-obj 'right-stars (WordNode "sumatraus")) 1))
+is correct.
+
+Ohhh....
+
+(cog-set-value! (Word "the") (Predicate "foobar") (FloatValue 1.0e-12))
+
+Fuuuuuu
+
+Fixed with this: 
+https://github.com/opencog/atomspace/pull/1295
+-------------------------------------
+en_pairs_rthree_mall restart
+
+delete disjuncts.
+
+delete from atoms where type = 233 ConnectorSeq
+
+  231 | Connector
+  232 | ConnectorDir
+  233 | ConnectorSeq
+  234 | Section
+
+
+MSTConnector
+PseudoConnector 
+MSTLinkNode  174 175 176
+
+
+CREATE TEMP TABLE lws AS SELECT uuid FROM atoms WHERE type=234;
+select count(*) from valuations, lws where valuations.atom=lws.uuid;
+
+delete from valuations using lws where atom =lws.uuid;
+delete from atoms where type=234;
+
 
 
 	
