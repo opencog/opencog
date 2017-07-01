@@ -78,12 +78,18 @@
         (cons (make-lexical-token 'SAMPLE_INPUT location #f) ""))
     ((has-match? "^#" str) (cons (make-lexical-token 'COMMENT location #f) ""))
     ; Chatscript rules
-    ((has-match? "^[s?u]:" str) (result:suffix 'RESPONDERS location #f))
-    ((has-match? "^[a-q]:" str) (result:suffix 'REJOINDERS location #f))
+    ((has-match? "^[s?u]:" str)
+      (result:suffix 'RESPONDERS location
+        (substring (match:substring current-match) 0 1)))
+    ((has-match? "^[a-q]:" str)
+      (result:suffix 'REJOINDERS location
+        (substring (match:substring current-match) 0 1)))
     ((has-match? "^[rt]:" str) (result:suffix 'GAMBIT location #f))
     ((has-match? "^_[0-9]" str)
       (result:suffix 'MVAR location
         (substring (match:substring current-match) 1)))
+    ((has-match? "^[a-zA-Z]+_[a-zA-Z]+" str)
+        (result:suffix 'LITERAL location (match:substring current-match)))
     ((has-match? "^_" str) (result:suffix '_ location #f))
     ; For dictionary keyword sets
     ((has-match? "^[a-zA-Z]+~[a-zA-Z1-9]+" str)
@@ -124,6 +130,7 @@
     (lambda ()
       (if (string=? "" cs-line)
         (begin
+          ;(display "\n--------------------------\n")
           (set! cs-line (read-line port))
           (set! initial-line cs-line)
         ))
@@ -138,6 +145,7 @@
             (if (pair? result)
               (begin
                 (set! cs-line (cdr result))
+                ;(format #t "~a " (lexical-token-category (car result)))
                 (car result))
               (error (format #f "Tokenizer issue => ~a," result))
             )))))
@@ -146,6 +154,14 @@
 
 (define cs-parser
   (lalr-parser
+    ;; --- Options
+    ;; output a parser, called ghost-parser, in a separate file - ghost.yy.scm,
+    (output: ghost-parser "ghost.yy.scm")
+    ;; output the LALR table to ghost.out
+    (out-table: "ghost.out")
+    ;; there should be no conflict
+    ;(expect:    5)
+
     ; Token (aka terminal symbol) definition
     (LPAREN RPAREN NEWLINE CR CONCEPT TOPIC RESPONDERS REJOINDERS GAMBIT
       NotDefined COMMENT SAMPLE_INPUT LITERAL WHITESPACE COMMA NUM
@@ -161,13 +177,13 @@
 
     ; Parsing rules (aka nonterminal symbols)
     (lines
-      (lines line) : (format #t "lines is ~a -- ~a\n" $1 $2)
-      (line) : (format #t "line is ~a\n" $1)
+      (line) : (if $1 (format #t "line is ~a\n" $1))
+      (lines line) : (if $2 (format #t "lines: ~a\n" $2))
     )
 
     (line
       (declarations) : $1
-      (rules) : (format #f "rules= ~a\n" $1)
+      (rules) : $1
       (CR) : #f
       (NotDefined) : (display-token $1)
       (NEWLINE) : #f
@@ -184,23 +200,26 @@
 
     (rules
       (RESPONDERS a-literal a-sequence patterns) :
-        (display-token (format #f "responder_~a->(~a -> ~a)" $2 $3 $4))
+        (display-token (format #f "responder_~a(~a -> ~a)" $2 $3 $4))
+      ; Unlabeled reponder.
+      ; TODO: Maybe should be labeled internally in the atomspace???
       (RESPONDERS a-sequence patterns) :
-        (display-token (format #f "responder_x->(~a -> ~a)" $2 $3))
+        (display-token (format #f "responder_~a(~a -> ~a)" $1 $2 $3))
       (REJOINDERS a-sequence patterns) :
-        (display-token (format #f "rejoinder(~a -> ~a)" $2 $3))
-      (GAMBIT patterns) : (display-token (string-append "gambit = " $2))
+        (display-token (format #f "rejoinder_~a(~a -> ~a)" $1 $2 $3))
+      (GAMBIT patterns) : (display-token (format #f "gambit(~a)" $2))
     )
 
     (patterns
-      (patterns pattern) : (display-token (format #f "~a ~a" $1 $2))
       (pattern) : (display-token $1)
+      (patterns pattern) : (display-token (format #f "~a ~a" $1 $2))
     )
 
     ; TODO: Give this a better name. Maybe should be divided into
     ; action-pattern and context-pattern ????
     (pattern
       (literals) : (display-token $1)
+      (variable)  : (display-token $1)
       (choices) : (display-token $1)
       (unordered-matchings) : (display-token $1)
       (function) : (display-token $1)
@@ -209,27 +228,9 @@
       (phrases) : (display-token $1)
     )
 
-    (literals
-      (literals a-literal) :  (display-token (string-append $1 " " $2))
-      (a-literal) :  (display-token $1)
-    )
-
-    (a-literal
-      (LITERAL) : (display-token $1)
-      (_ LITERAL) : (display-token (string-append "underscore_fn->" $2))
-      (ID) : (display-token (format #f "concept(~a)" $1))
-      (*~n) : (display-token (string-append "range-restricted-*->~" $1))
-      (LITERAL *~n) : (display-token (string-append $1 "<-range_wildecard"))
-      (LITERAL COMMA) : (display-token (string-append $1 " " $2))
-      (*) : (display-token $1)
-      (MVAR) : (display-token (format #f "match_variables->~a" $1))
-      (LITERAL~COMMAND) :
-        (display-token (format #f "command(~a -> ~a)" (car $1) (cdr $1)))
-    )
-
     (choices
-      (choices choice) : (display-token (string-append $1 " " $2))
       (choice) : (display-token $1)
+      (choices choice) : (display-token (string-append $1 " " $2))
     )
 
     (choice
@@ -238,19 +239,19 @@
     )
 
     (unordered-matchings
+      (unordered-matching) : (display-token $1)
       (unordered-matchings unordered-matching) :
           (display-token (string-append $1 " " $2))
-      (unordered-matching) : (display-token $1)
     )
 
     (unordered-matching
-      (<< patterns >>) : (display-token (string-append "unordered-matchings->" $2))
+      (<< patterns >>) : (display-token (format #f "unordered-matching(~a)" $2))
     )
 
     (sentence-boundaries
-      (sentence-boundaries sentence-boundary) :
-          (display-token (string-append $1 " " $2))
       (sentence-boundary) : (display-token $1)
+      (sentence-boundaries sentence-boundary) :
+          (display-token (format #f "~a ~a" $1 $2))
     )
 
     (sentence-boundary
@@ -259,23 +260,13 @@
     )
 
     (function
-      (^ a-literal LPAREN args) :
-        (display-token (format #f "function_~a(~a)" $2 $4))
-    )
-
-    (args
-      (args arg) : (display-token (string-append $1 " " $2))
-      (LITERAL args) : (display-token (string-append $1 " " $2))
-      (arg) : (display-token $1)
-    )
-
-    (arg
-      (LITERAL RPAREN) : (display-token $1)
+      (^ a-literal a-sequence) :
+        (display-token (format #f "function_~a(~a)" $2 $3))
     )
 
     (sequences
-      (sequences a-sequence) : (display-token (format #f "~a ~a" $1 $2))
       (a-sequence) : (display-token $1)
+      (sequences a-sequence) : (display-token (format #f "~a ~a" $1 $2))
     )
 
     (a-sequence
@@ -289,6 +280,27 @@
 
     (phrase
       (DQUOTE patterns DQUOTE) : (display-token (format #f "phrase(~a)" $2))
+    )
+
+    (variable
+      (_ LITERAL) : (display-token (format #f "variable(~a)" $2))
+      (_ choices) : (display-token (format #f "variable(~a)" $2))
+    )
+
+    (literals
+      (a-literal) :  (display-token $1)
+      (literals a-literal) :  (display-token (string-append $1 " " $2))
+    )
+
+    (a-literal
+      (LITERAL) : (display-token $1)
+      (ID) : (display-token (format #f "concept(~a)" $1))
+      (*~n) : (display-token (format #f "range_restricted(* ~a)" $1))
+      (COMMA) : (display-token $1)
+      (*) : (display-token $1)
+      (MVAR) : (display-token (format #f "match_variables->~a" $1))
+      (LITERAL~COMMAND) :
+        (display-token (format #f "command(~a -> ~a)" (car $1) (cdr $1)))
     )
   )
 )
