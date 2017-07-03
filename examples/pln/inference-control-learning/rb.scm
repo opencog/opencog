@@ -29,9 +29,9 @@
    (ConceptNode "URE")
 )
 
-;; Define pln-fc and pln-bc for convenience
-(define (pln-fc source) (cog-fc pln-rbs source))
-(define (pln-bc target) (cog-bc pln-rbs target))
+;; Define pln-bc for convenience
+(define* (pln-bc target #:key (trace-as #f))
+  (cog-bc pln-rbs target #:trace-as trace-as))
 
 ;;;;;;;;;;;;;;;;
 ;; Load rules ;;
