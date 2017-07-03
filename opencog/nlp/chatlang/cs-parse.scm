@@ -20,6 +20,10 @@
 )
 
 (define (get-source-location port column)
+"
+  This returns a record of the source location. It doesn't correct for
+  whitespaces that may get trimmed off.
+"
   (make-source-location
     (port-filename port)
     (port-line port)
