@@ -117,7 +117,7 @@
     ((has-match? "^[0-9]+" str)
       (result:suffix 'NUM location (match:substring current-match)))
     ; This should always be at the end.
-    ((has-match? "^['!?.a-zA-Z-]+" str)
+    ((has-match? "^['!?.,a-zA-Z-]+" str)
       (result:suffix 'LITERAL location (match:substring current-match)))
     (else
       (format #t ">>Tokenizer non @ ~a\n" (show-location location))
@@ -162,23 +162,29 @@
     ;; there should be no conflict
     ;(expect:    5)
 
-    ; Token (aka terminal symbol) definition
-    (LPAREN RPAREN NEWLINE CR CONCEPT TOPIC RESPONDERS REJOINDERS GAMBIT
-      NotDefined COMMENT SAMPLE_INPUT LITERAL WHITESPACE COMMA NUM
-      _ * << >> ^ < >
-      *~n ; Range-restricted Wildcards
-      LITERAL~COMMAND ; Dictionary Keyword Sets
+    ; Tokens (aka terminal symbol) definition
+    ; (left: token-x) reduces on token-x, while (right: token-x) shifts on
+    ; token-x.
+    ; NOTE
+    ; LSBRACKET RSBRACKET = Square Brackets []
+    ; LPAREN RPAREN = parentheses ()
+    ; DQUOTE = Double quote "
+    ; ID = Identifier or Marking
+    ; LITERAL~COMMAND ; Dictionary Keyword Sets
+    ; *~n ; Range-restricted Wildcards
+    (NEWLINE CR CONCEPT TOPIC RESPONDERS REJOINDERS GAMBIT
+      NotDefined COMMENT SAMPLE_INPUT WHITESPACE COMMA
       ~ ; Concepts
-      LSBRACKET RSBRACKET ; Square Brackets []
-      DQUOTE ; Double quote "
       MVAR ;Match Variables
-      ID ; Identifier or Marking
+      (right: LPAREN LSBRACKET << DQUOTE ID _ * ^ <  LITERAL NUM
+        LITERAL~COMMAND *~n)
+      (left: RPAREN RSBRACKET >> >)
     )
 
     ; Parsing rules (aka nonterminal symbols)
     (lines
-      (line) : (if $1 (format #t "line is ~a\n" $1))
-      (lines line) : (if $2 (format #t "lines: ~a\n" $2))
+      (line) : (if $1 (format #t "\nline is ~a\n" $1))
+      (lines line) : (if $2 (format #t "\nlines: ~a\n" $2))
     )
 
     (line
@@ -201,7 +207,7 @@
     (rules
       (RESPONDERS a-literal a-sequence patterns) :
         (display-token (format #f "responder_~a(~a -> ~a)" $2 $3 $4))
-      ; Unlabeled reponder.
+      ; Unlabeled responder.
       ; TODO: Maybe should be labeled internally in the atomspace???
       (RESPONDERS a-sequence patterns) :
         (display-token (format #f "responder_~a(~a -> ~a)" $1 $2 $3))
@@ -218,41 +224,41 @@
     ; TODO: Give this a better name. Maybe should be divided into
     ; action-pattern and context-pattern ????
     (pattern
-      (literals) : (display-token $1)
-      (variable)  : (display-token $1)
-      (choices) : (display-token $1)
-      (unordered-matchings) : (display-token $1)
-      (function) : (display-token $1)
-      (sentence-boundaries) : (display-token $1)
-      (sequences) : (display-token $1)
-      (phrases) : (display-token $1)
+      (a-literal) : (display-token $1)
+      ;(variable)  : (display-token $1)
+      ;(choice) : (display-token $1)
+      ;(unordered-matching) : (display-token $1)
+      ;(function) : (display-token $1)
+      ;(sentence-boundary) : (display-token $1)
+      (a-sequence) : (display-token $1)
+      ;(phrase) : (display-token $1)
     )
 
-    (choices
-      (choice) : (display-token $1)
-      (choices choice) : (display-token (string-append $1 " " $2))
-    )
+    ;(choices
+    ;  (choice) : (display-token $1)
+    ;  (choices choice) : (display-token (string-append $1 " " $2))
+    ;)
 
     (choice
       (LSBRACKET patterns RSBRACKET) :
         (display-token (format #f "choices(~a)" $2))
     )
 
-    (unordered-matchings
-      (unordered-matching) : (display-token $1)
-      (unordered-matchings unordered-matching) :
-          (display-token (string-append $1 " " $2))
-    )
+    ;(unordered-matchings
+    ;  (unordered-matching) : (display-token $1)
+    ;  (unordered-matchings unordered-matching) :
+    ;      (display-token (string-append $1 " " $2))
+    ;)
 
     (unordered-matching
       (<< patterns >>) : (display-token (format #f "unordered-matching(~a)" $2))
     )
 
-    (sentence-boundaries
-      (sentence-boundary) : (display-token $1)
-      (sentence-boundaries sentence-boundary) :
-          (display-token (format #f "~a ~a" $1 $2))
-    )
+    ;(sentence-boundaries
+    ;  (sentence-boundary) : (display-token $1)
+    ;  (sentence-boundaries sentence-boundary) :
+    ;      (display-token (format #f "~a ~a" $1 $2))
+    ;)
 
     (sentence-boundary
       (< patterns) : (display-token (format #f "restart_matching(~a)" $2))
@@ -264,18 +270,8 @@
         (display-token (format #f "function_~a(~a)" $2 $3))
     )
 
-    (sequences
-      (a-sequence) : (display-token $1)
-      (sequences a-sequence) : (display-token (format #f "~a ~a" $1 $2))
-    )
-
     (a-sequence
       (LPAREN patterns RPAREN) : (display-token (format #f "sequence(~a)" $2))
-    )
-
-    (phrases
-      (phrase) : (display-token $1)
-      (phrases phrase) : (display-token (format #f "~a ~a" $1 $2))
     )
 
     (phrase
@@ -284,21 +280,15 @@
 
     (variable
       (_ LITERAL) : (display-token (format #f "variable(~a)" $2))
-      (_ choices) : (display-token (format #f "variable(~a)" $2))
-    )
-
-    (literals
-      (a-literal) :  (display-token $1)
-      (literals a-literal) :  (display-token (string-append $1 " " $2))
+      (_ choice) : (display-token (format #f "variable(~a)" $2))
+      (MVAR) : (display-token (format #f "match_variables->~a" $1))
     )
 
     (a-literal
       (LITERAL) : (display-token $1)
       (ID) : (display-token (format #f "concept(~a)" $1))
       (*~n) : (display-token (format #f "range_restricted(* ~a)" $1))
-      (COMMA) : (display-token $1)
       (*) : (display-token $1)
-      (MVAR) : (display-token (format #f "match_variables->~a" $1))
       (LITERAL~COMMAND) :
         (display-token (format #f "command(~a -> ~a)" (car $1) (cdr $1)))
     )
