@@ -280,8 +280,13 @@
     )
 
     (args
+      (arg) : (display-token $1)
+      (args arg) :  (display-token (format #f "~a ~a" $1 $2))
+    )
+
+    (arg
       (LITERAL) :  (display-token $1)
-      (args LITERAL) :  (display-token (format #f "~a ~a" $1 $2))
+      (concept) :  (display-token $1)
     )
 
     (a-sequence
