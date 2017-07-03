@@ -103,7 +103,7 @@
     ((has-match? "^\\*~[1-9]+" str)
       (result:suffix '*~n location
         (substring (match:substring current-match) 2)))
-    ((has-match? "^~[a-zA-Z]+" str)
+    ((has-match? "^~[a-zA-Z_]+" str)
       (result:suffix 'ID location
         (substring (match:substring current-match) 1)))
     ((has-match? "^," str) (result:suffix 'COMMA location ","))
@@ -136,7 +136,7 @@
     (lambda ()
       (if (string=? "" cs-line)
         (begin
-          (format #t "-------------------------- line ~a \n" (port-line port))
+          (format #t "\n-------------------------- line ~a \n" (port-line port))
           (set! cs-line (read-line port))
           (set! initial-line cs-line)
         ))
@@ -185,9 +185,9 @@
     (NEWLINE CR CONCEPT TOPIC RESPONDERS REJOINDERS GAMBIT
       NotDefined COMMENT SAMPLE_INPUT WHITESPACE COMMA
       ~ ; Concepts
-      (right: LPAREN LSBRACKET << DQUOTE ID _ * ^ < LITERAL NUM
+      (right: LPAREN LSBRACKET << ID _ * ^ < LITERAL NUM
         LITERAL~COMMAND *~n MVAR)
-      (left: RPAREN RSBRACKET >> >)
+      (left: RPAREN RSBRACKET >> > DQUOTE)
       (right: ! ?)
     )
 
@@ -259,6 +259,10 @@
         (display-token (format #f "choices(~a)" $2))
     )
 
+    (concept
+      (ID) : (display-token (format #f "concept(~a)" $1))
+    )
+
     ; TODO: This has a restart_matching effect. See chatscript documentation
     (unordered-matching
       (<< patterns >>) : (display-token (format #f "unordered-matching(~a)" $2))
@@ -288,7 +292,7 @@
 
     (variable
       (_ LITERAL) : (display-token (format #f "variable(~a)" $2))
-      (_ choice) : (display-token (format #f "variable(~a)" $2))
+      (_ collections) : (display-token (format #f "variable(~a)" $2))
       (MVAR) : (display-token (format #f "match_variable(~a)" $1))
     )
 
@@ -298,10 +302,6 @@
       (*) : (display-token $1)
       (LITERAL~COMMAND) :
         (display-token (format #f "command(~a -> ~a)" (car $1) (cdr $1)))
-    )
-
-    (concept
-      (ID) : (display-token (format #f "concept(~a)" $1))
     )
   )
 )
