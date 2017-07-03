@@ -649,8 +649,8 @@ Q5) these links and pick up the combinations that give valid variable mappings
 
 Back from recursion we can now compute R2 which is the results for Q2 = NOT Q3.
 At this point, the querying algorithm will just record the resulting mappings
-of Q3 and define a set of "forbidden" mappings. In R2, S and M are empty for
-all results.
+of Q3 and define a set of "forbidden" mappings. S and M are empty for
+all results in R2.
 
 ```
     R2:
