@@ -33,6 +33,7 @@
 
 #include "AFRentCollectionAgent.h"
 #include "AttentionParamQuery.h"
+#include "AttentionStat.h"
 
 #include <thread>
 //#define DEBUG
@@ -79,6 +80,11 @@ void AFRentCollectionAgent::collectRent(HandleSeq& targetSet)
 
         _bank->set_sti(h, sti - w * stiRent);
         _bank->set_lti(h, lti - w * ltiRent);
+
+#ifdef LOG_AV_STAT
+        atom_avstat[h].rent = (w * stiRent);
+#endif
+
     }
 
     // update elapsed time
