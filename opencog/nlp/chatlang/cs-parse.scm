@@ -275,6 +275,8 @@
     (function
       (^ a-literal LPAREN args RPAREN) :
         (display-token (format #f "function_~a(~a)" $2 $4))
+      (^ a-literal LPAREN RPAREN) :
+        (display-token (format #f "function_~a()" $2))
     )
 
     (args
