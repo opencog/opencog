@@ -183,7 +183,7 @@
       NotDefined COMMENT SAMPLE_INPUT WHITESPACE COMMA
       ~ ; Concepts
       MVAR ;Match Variables
-      (right: LPAREN LSBRACKET << DQUOTE ID _ * ^ <  LITERAL NUM
+      (right: LPAREN LSBRACKET << DQUOTE ID _ * ^ < LITERAL NUM
         LITERAL~COMMAND *~n)
       (left: RPAREN RSBRACKET >> >)
       (right: !)
@@ -239,7 +239,7 @@
       (unordered-matching) : (display-token $1)
       (function) : (display-token $1)
       (! pattern) : (display-token (format #f "Not(~a)" $2))
-      ;(sentence-boundary) : (display-token $1)
+      (< patterns) : (display-token (format #f "restart_matching(~a)" $2))
       (a-sequence) : (display-token $1)
       ;(phrase) : (display-token $1)
     )
@@ -248,20 +248,15 @@
       (LSBRACKET patterns RSBRACKET) :
         (display-token (format #f "choices(~a)" $2))
     )
+
+    ; TODO: This has a restart_matching effect. See chatscript documentation
     (unordered-matching
       (<< patterns >>) : (display-token (format #f "unordered-matching(~a)" $2))
     )
 
-    ;(sentence-boundaries
-    ;  (sentence-boundary) : (display-token $1)
-    ;  (sentence-boundaries sentence-boundary) :
-    ;      (display-token (format #f "~a ~a" $1 $2))
+    ;(sentence-boundary
+    ;  (patterns >) : (display-token (format #f "match_at_end(~a)" $1))
     ;)
-
-    (sentence-boundary
-      (< patterns) : (display-token (format #f "restart_matching(~a)" $2))
-      (patterns >) : (display-token (format #f "match_at_end(~a)" $1))
-    )
 
     (function
       (^ a-literal LPAREN args RPAREN) :
