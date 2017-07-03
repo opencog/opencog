@@ -119,10 +119,11 @@
     ((has-match? "^\"" str) (result:suffix 'DQUOTE location "\""))
     ((has-match? "^\\*" str) (result:suffix '* location "*"))
     ((has-match? "^!" str) (result:suffix '! location "!"))
+    ((has-match? "^[?]" str) (result:suffix '? location "?"))
     ((has-match? "^[0-9]+" str)
       (result:suffix 'NUM location (match:substring current-match)))
     ; This should always be at the end.
-    ((has-match? "^['?.,a-zA-Z-]+" str)
+    ((has-match? "^['.,a-zA-Z-]+" str)
       (result:suffix 'LITERAL location (match:substring current-match)))
     (else
       (format #t ">>Tokenizer non @ ~a\n" (show-location location))
@@ -177,16 +178,17 @@
     ; LPAREN RPAREN = parentheses ()
     ; DQUOTE = Double quote "
     ; ID = Identifier or Marking
-    ; LITERAL~COMMAND ; Dictionary Keyword Sets
-    ; *~n ; Range-restricted Wildcards
+    ; LITERAL~COMMAND = Dictionary Keyword Sets
+    ; *~n = Range-restricted Wildcards
+    ; MVAR = Match Variables
+    ; ? = Comparison tests
     (NEWLINE CR CONCEPT TOPIC RESPONDERS REJOINDERS GAMBIT
       NotDefined COMMENT SAMPLE_INPUT WHITESPACE COMMA
       ~ ; Concepts
-      MVAR ;Match Variables
       (right: LPAREN LSBRACKET << DQUOTE ID _ * ^ < LITERAL NUM
-        LITERAL~COMMAND *~n)
+        LITERAL~COMMAND *~n MVAR)
       (left: RPAREN RSBRACKET >> >)
-      (right: !)
+      (right: ! ?)
     )
 
     ; Parsing rules (aka nonterminal symbols)
@@ -234,14 +236,22 @@
     (pattern
       (a-literal) : (display-token $1)
       (a-literal !) : (display-token (format #f "~a~a" $1 $2))
-      ;(variable)  : (display-token $1)
-      (choice) : (display-token $1)
+      (a-literal ?) : (display-token (format #f "~a~a" $1 $2))
+      (variable)  : (display-token $1)
+      (collections) : (display-token $1)
       (unordered-matching) : (display-token $1)
       (function) : (display-token $1)
       (! pattern) : (display-token (format #f "Not(~a)" $2))
       (< patterns) : (display-token (format #f "restart_matching(~a)" $2))
       (a-sequence) : (display-token $1)
-      ;(phrase) : (display-token $1)
+      (phrase) : (display-token $1)
+      (variable ? collections) :
+        (display-token (format #f "is_member(~a ~a)" $1 $3))
+    )
+
+    (collections
+      (choice) : (display-token $1)
+      (concept) : (display-token $1)
     )
 
     (choice
@@ -279,16 +289,19 @@
     (variable
       (_ LITERAL) : (display-token (format #f "variable(~a)" $2))
       (_ choice) : (display-token (format #f "variable(~a)" $2))
-      (MVAR) : (display-token (format #f "match_variables->~a" $1))
+      (MVAR) : (display-token (format #f "match_variable(~a)" $1))
     )
 
     (a-literal
       (LITERAL) : (display-token $1)
-      (ID) : (display-token (format #f "concept(~a)" $1))
       (*~n) : (display-token (format #f "range_restricted(* ~a)" $1))
       (*) : (display-token $1)
       (LITERAL~COMMAND) :
         (display-token (format #f "command(~a -> ~a)" (car $1) (cdr $1)))
+    )
+
+    (concept
+      (ID) : (display-token (format #f "concept(~a)" $1))
     )
   )
 )
