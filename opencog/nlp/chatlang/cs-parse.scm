@@ -163,8 +163,10 @@
     ;(expect:    5)
 
     ; Tokens (aka terminal symbol) definition
+    ; https://www.gnu.org/software/bison/manual/bison.html#How-Precedence
     ; (left: token-x) reduces on token-x, while (right: token-x) shifts on
     ; token-x.
+    ;
     ; NOTE
     ; LSBRACKET RSBRACKET = Square Brackets []
     ; LPAREN RPAREN = parentheses ()
@@ -226,30 +228,18 @@
     (pattern
       (a-literal) : (display-token $1)
       ;(variable)  : (display-token $1)
-      ;(choice) : (display-token $1)
-      ;(unordered-matching) : (display-token $1)
-      ;(function) : (display-token $1)
+      (choice) : (display-token $1)
+      (unordered-matching) : (display-token $1)
+      (function) : (display-token $1)
       ;(sentence-boundary) : (display-token $1)
       (a-sequence) : (display-token $1)
       ;(phrase) : (display-token $1)
     )
 
-    ;(choices
-    ;  (choice) : (display-token $1)
-    ;  (choices choice) : (display-token (string-append $1 " " $2))
-    ;)
-
     (choice
       (LSBRACKET patterns RSBRACKET) :
         (display-token (format #f "choices(~a)" $2))
     )
-
-    ;(unordered-matchings
-    ;  (unordered-matching) : (display-token $1)
-    ;  (unordered-matchings unordered-matching) :
-    ;      (display-token (string-append $1 " " $2))
-    ;)
-
     (unordered-matching
       (<< patterns >>) : (display-token (format #f "unordered-matching(~a)" $2))
     )
@@ -266,8 +256,13 @@
     )
 
     (function
-      (^ a-literal a-sequence) :
-        (display-token (format #f "function_~a(~a)" $2 $3))
+      (^ a-literal LPAREN args RPAREN) :
+        (display-token (format #f "function_~a(~a)" $2 $4))
+    )
+
+    (args
+      (LITERAL) :  (display-token $1)
+      (args LITERAL) :  (display-token (format #f "~a ~a" $1 $2))
     )
 
     (a-sequence
