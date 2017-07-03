@@ -114,10 +114,11 @@
     ((has-match? "^>" str) (result:suffix '> location #f))
     ((has-match? "^\"" str) (result:suffix 'DQUOTE location "\""))
     ((has-match? "^\\*" str) (result:suffix '* location "*"))
+    ((has-match? "^!" str) (result:suffix '! location "!"))
     ((has-match? "^[0-9]+" str)
       (result:suffix 'NUM location (match:substring current-match)))
     ; This should always be at the end.
-    ((has-match? "^['!?.,a-zA-Z-]+" str)
+    ((has-match? "^['?.,a-zA-Z-]+" str)
       (result:suffix 'LITERAL location (match:substring current-match)))
     (else
       (format #t ">>Tokenizer non @ ~a\n" (show-location location))
@@ -130,7 +131,7 @@
     (lambda ()
       (if (string=? "" cs-line)
         (begin
-          ;(display "\n--------------------------\n")
+          (format #t "-------------------------- line ~a \n" (port-line port))
           (set! cs-line (read-line port))
           (set! initial-line cs-line)
         ))
@@ -181,6 +182,7 @@
       (right: LPAREN LSBRACKET << DQUOTE ID _ * ^ <  LITERAL NUM
         LITERAL~COMMAND *~n)
       (left: RPAREN RSBRACKET >> >)
+      (right: !)
     )
 
     ; Parsing rules (aka nonterminal symbols)
@@ -227,10 +229,12 @@
     ; action-pattern and context-pattern ????
     (pattern
       (a-literal) : (display-token $1)
+      (a-literal !) : (display-token (format #f "~a~a" $1 $2))
       ;(variable)  : (display-token $1)
       (choice) : (display-token $1)
       (unordered-matching) : (display-token $1)
       (function) : (display-token $1)
+      (! pattern) : (display-token (format #f "Not(~a)" $2))
       ;(sentence-boundary) : (display-token $1)
       (a-sequence) : (display-token $1)
       ;(phrase) : (display-token $1)
