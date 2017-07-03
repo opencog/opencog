@@ -316,7 +316,7 @@ _*NOTE*: The Scheme API read the configuration file in ```lib/opencog.conf``` so
 
 ## Design details
 
-Let us see an example to explain how the Pattern Index is built and how queries and pattern mining work.
+Let us see an example to explain how the Pattern Index is built and how queries are processed.
 Again, lets take "toy-example-query.scm".
 
 ```
@@ -372,16 +372,17 @@ detail how the two example queries (provided in the example programs) work.
 First query is:
 
 ```
-    (AndLink
-        (SimilarityLink
-            (VariableNode "X")
-            (VariableNode "Y")
+    Q: 
+        (AndLink
+            (SimilarityLink
+                (VariableNode "X")
+                (VariableNode "Y")
+            )
+            (SimilarityLink
+                (VariableNode "Y")
+                (VariableNode "Z")
+            )
         )
-        (SimilarityLink
-            (VariableNode "Y")
-            (VariableNode "Z")
-        )
-    )
 ```
 
 So we are searching the input database for X, Y and Z | exist (SimilarityLink X
@@ -389,15 +390,17 @@ Y) and (SimilarityLink Y Z).
 
 The querying algorithm interprets AndLink, OrLink and NotLink as logical
 operators. The resulting sub-queries are recursively processed and then joined
-according to the operator.
+according to the operator. Recursion stops when the first non-"logical
+operator" root atom is found.
 
-_*NOTE*: this is not correct. We should have PatternAndLink etc or
-LogicalAndLink etc. This issue is already recorded in the section "Known
-issues" below._
+_*NOTE*: See the section "Known issues" below.  These atom types should be
+changed._
 
-In our example, we'll have two recursive calls for each of these sub-queries:
+In our example, we have two recursive calls for each of these sub-queries:
 
 ```
+    Q1:
+
     (SimilarityLink
         (VariableNode "X")
         (VariableNode "Y")
@@ -407,71 +410,110 @@ In our example, we'll have two recursive calls for each of these sub-queries:
 and
 
 ```
+    Q2:
+
     (SimilarityLink
         (VariableNode "Y")
         (VariableNode "Z")
     )
 ```
 
-The first sub-query is pre-processed to replace VariableNodes by index
-wildcards. So it becomes (SimilarityLink \* \*). This query is submitted to the
-index and the matching results R1 are recorded:
+Q1 is pre-processed to replace VariableNodes by index wildcards. So it becomes
+(SimilarityLink \* \*). This query is submitted to the index and the matching
+results R1 are recorded:
 
 ```
     R1:
 
-    (SimilarityLink (ConceptNode "human") (ConceptNode "monkey")) with X = (ConceptNode "human") and Y = (ConceptNode "monkey") or the inverse
-    (SimilarityLink (ConceptNode "human") (ConceptNode "chimp")) with X = (ConceptNode "human") and Y = (ConceptNode "chimp") or the inverse
-    (SimilarityLink (ConceptNode "chimp") (ConceptNode "monkey")) with X = (ConceptNode "chimp") and Y = (ConceptNode "monkey") or the inverse
-    (SimilarityLink (ConceptNode "snake") (ConceptNode "earthworm")) with X = (ConceptNode "snake") and Y = (ConceptNode "earyhworm") or the inverse
-    (SimilarityLink (ConceptNode "rhino") (ConceptNode "triceratops")) with X = (ConceptNode "rhino) and Y = (ConceptNode "triceratops") or the inverse
-    (SimilarityLink (ConceptNode "snake") (ConceptNode "vine")) with X = (ConceptNode "snake") and Y = (ConceptNode "vine") or the inverse
-    (SimilarityLink (ConceptNode "human") (ConceptNode "ent")) with X = (ConceptNode "human") and Y = (ConceptNode "ent") or the inverse
+        (SimilarityLink (ConceptNode "human") (ConceptNode "monkey"))
+        (SimilarityLink (ConceptNode "human") (ConceptNode "chimp"))
+        (SimilarityLink (ConceptNode "chimp") (ConceptNode "monkey"))
+        (SimilarityLink (ConceptNode "snake") (ConceptNode "earthworm"))
+        (SimilarityLink (ConceptNode "rhino") (ConceptNode "triceratops"))
+        (SimilarityLink (ConceptNode "snake") (ConceptNode "vine"))
+        (SimilarityLink (ConceptNode "human") (ConceptNode "ent"))
 ```
 
-Similarly, the second sub-query will give us R2:
+Similarly, Q2 returns:
 
 ```
     R2:
 
-    (SimilarityLink (ConceptNode "human") (ConceptNode "monkey")) with Y = (ConceptNode "human") and Z = (ConceptNode "monkey") or the inverse
-    (SimilarityLink (ConceptNode "human") (ConceptNode "chimp")) with Y = (ConceptNode "human") and Z = (ConceptNode "chimp") or the inverse
-    (SimilarityLink (ConceptNode "chimp") (ConceptNode "monkey")) with Y = (ConceptNode "chimp") and Z = (ConceptNode "monkey") or the inverse
-    (SimilarityLink (ConceptNode "snake") (ConceptNode "earthworm")) with Y = (ConceptNode "snake") and Z = (ConceptNode "earyhworm") or the inverse
-    (SimilarityLink (ConceptNode "rhino") (ConceptNode "triceratops")) with Y = (ConceptNode "rhino) and Z = (ConceptNode "triceratops") or the inverse
-    (SimilarityLink (ConceptNode "snake") (ConceptNode "vine")) with Y = (ConceptNode "snake") and Z = (ConceptNode "vine") or the inverse
-    (SimilarityLink (ConceptNode "human") (ConceptNode "ent")) with Y = (ConceptNode "human") and Z = (ConceptNode "ent") or the inverse
+        (SimilarityLink (ConceptNode "human") (ConceptNode "monkey"))
+        (SimilarityLink (ConceptNode "human") (ConceptNode "chimp"))
+        (SimilarityLink (ConceptNode "chimp") (ConceptNode "monkey"))
+        (SimilarityLink (ConceptNode "snake") (ConceptNode "earthworm"))
+        (SimilarityLink (ConceptNode "rhino") (ConceptNode "triceratops"))
+        (SimilarityLink (ConceptNode "snake") (ConceptNode "vine"))
+        (SimilarityLink (ConceptNode "human") (ConceptNode "ent"))
 ```
 
+Either R1 and R2 have 7 valid results each. Each of these results are actually a tuple
+(S, M, F) where S is the atom sub-graph that satisfies the query, M is the subjacent
+variable mapping and F is a set of mappings that are forbidden from this point
+up in the recursion. We're showing only S for the sake of simplicity.
+
+E.g. in the first result in R1: 
+
+```
+M = {[X, (ConceptNode "human") or (ConceptNode "monkey")], [Y, (ConceptNode "human") or (ConceptNode "monkey")]}
+```
+
+In R1 and R2 F is empty for all results.
+
 Given R1 and R2 the "AND" operator is processed searching in R1 and R2 for
-combinations of results that give us valid variable mappings.  (the concept of
+combinations of results that gives valid variable mappings.  (the concept of
 "valid" variable mapping deppends on the configured parameters as described in
 the sections above).
 
+Each element (S, M, F) of R = R1 AND R2 is computed using the corresponding
+elements in R1 and R2:
+
+```
+    S = (AndLink S1 S2)
+    M = M1 U M2
+    F = F1 U F2
+```
+
 In this case, the valid combination of results are:
 
-
 ```
-    (AndLink
-        (SimilarityLink (ConceptNode "human") (ConceptNode "monkey")) with Y = (ConceptNode "human") and X = (ConceptNode "monkey")
-        (SimilarityLink (ConceptNode "human") (ConceptNode "chimp")) with Y = (ConceptNode "human") and Z = (ConceptNode "chimp")
-    )
-    (AndLink
-        (SimilarityLink (ConceptNode "human") (ConceptNode "monkey")) with Y = (ConceptNode "human") and X = (ConceptNode "monkey")
-        (SimilarityLink (ConceptNode "human") (ConceptNode "ent")) with Y = (ConceptNode "human") and Z = (ConceptNode "ent")
-    )
-    (AndLink
-        (SimilarityLink (ConceptNode "human") (ConceptNode "chimp")) with Y = (ConceptNode "human") and X = (ConceptNode "chimp")
-        (SimilarityLink (ConceptNode "human") (ConceptNode "ent")) with Y = (ConceptNode "human") and Z = (ConceptNode "ent")
-    )
-    (AndLink
-        (SimilarityLink (ConceptNode "snake") (ConceptNode "earthworm")) with Y = (ConceptNode "snake") and X = (ConceptNode "earyhworm")
-        (SimilarityLink (ConceptNode "snake") (ConceptNode "vine")) with Y = (ConceptNode "snake") and Z = (ConceptNode "vine")
-    )
+    R:
+        S = (AndLink
+            (SimilarityLink (ConceptNode "human") (ConceptNode "monkey"))
+            (SimilarityLink (ConceptNode "human") (ConceptNode "chimp"))
+        )
+        M = {[X, (ConceptNode "monkey")], [Y, (ConceptNode "human")], [Z, (ConceptNode "chimp")]}
+        F = EMPTY
 
+        S = (AndLink
+            (SimilarityLink (ConceptNode "human") (ConceptNode "monkey"))
+            (SimilarityLink (ConceptNode "human") (ConceptNode "ent"))
+        )
+        M = {[X, (ConceptNode "monkey")], [Y, (ConceptNode "human")], [Z, (ConceptNode "ent")]}
+        F = EMPTY
+
+        S = (AndLink
+            (SimilarityLink (ConceptNode "human") (ConceptNode "chimp"))
+            (SimilarityLink (ConceptNode "human") (ConceptNode "ent"))
+        )
+        M = {[X, (ConceptNode "chimp")], [Y, (ConceptNode "human")], [Z, (ConceptNode "ent")]}
+        F = EMPTY
+
+        S = (AndLink
+            (SimilarityLink (ConceptNode "snake") (ConceptNode "earthworm"))
+            (SimilarityLink (ConceptNode "snake") (ConceptNode "vine"))
+        )
+        M = {[X, (ConceptNode "earthworm")], [Y, (ConceptNode "snake")], [Z, (ConceptNode "vine")]}
+        F = EMPTY
 ```
 
-which is the result of the original query. The second query is slightly more interesting:
+Which is the result of the original query Q. Again, each result in R is a tuple
+(S, M, F). F is empty in all these results. M is the combination of the
+mappings of each combined result.
+
+
+The second query is slightly more interesting:
 
 ```
     (AndLink
@@ -553,9 +595,9 @@ Finally, Q3 is split again Q3 = Q4 AND Q5:
 ```
 
 Results for Q4 and Q5 are all the InheritanceLinks in the input database. To
-compute R3 which is the result of Q3 we need to combine (Q4 AND Q5) these links
-and pick up the combinations that give valid variable mappings (as we did in
-the previous example). Thus (ommiting the variable mappings):
+compute R3 which is the result of Q3 = Q4 AND Q5, we need to combine (Q4 AND
+Q5) these links and pick up the combinations that give valid variable mappings
+(as we did in the previous example). Thus (ommiting the variable mappings):
 
 ```
     R3:
@@ -607,25 +649,26 @@ the previous example). Thus (ommiting the variable mappings):
 
 Back from recursion we can now compute R2 which is the results for Q2 = NOT Q3.
 At this point, the querying algorithm will just record the resulting mappings
-of Q3 and define a set of "forbidden" mappings.
-
-Thus after computing R2 we have the following forbidden mappings:
+of Q3 and define a set of "forbidden" mappings. In R2, S and M are empty for
+all results.
 
 ```
-    {X = (ConceptNode "human"), Y = (ConceptNode "monkey"), Z = (ConceptNode "mammal")}
-    {X = (ConceptNode "human"), Y = (ConceptNode "chimp"), Z = (ConceptNode "mammal")}
-    {X = (ConceptNode "human"), Y = (ConceptNode "rhino"), Z = (ConceptNode "mammal")}
-    {X = (ConceptNode "monkey"), Y = (ConceptNode "chimp"), Z = (ConceptNode "mammal")}
-    {X = (ConceptNode "monkey"), Y = (ConceptNode "rhino"), Z = (ConceptNode "mammal")}
-    {X = (ConceptNode "chimp"), Y = (ConceptNode "rhino"), Z = (ConceptNode "mammal")}
-    {X = (ConceptNode "mammal"), Y = (ConceptNode "reptile"), Z = (ConceptNode "animal")}
-    {X = (ConceptNode "mammal"), Y = (ConceptNode "earthworm"), Z = (ConceptNode "animal")}
-    {X = (ConceptNode "snake"), Y = (ConceptNode "dinosaur"), Z = (ConceptNode "reptile")}
-    {X = (ConceptNode "vine"), Y = (ConceptNode "ent"), Z = (ConceptNode "plant")}
+    R2:
+        F = {[X, (ConceptNode "human")], [Y, (ConceptNode "monkey"]}
+        F = {[X, (ConceptNode "human")], [Y, (ConceptNode "chimp"]}
+        F = {[X, (ConceptNode "human")], [Y, (ConceptNode "rhino"]}
+        F = {[X, (ConceptNode "monkey")], [Y, (ConceptNode "chimp"]}
+        F = {[X, (ConceptNode "monkey")], [Y, (ConceptNode "rhino"]}
+        F = {[X, (ConceptNode "chimp")], [Y, (ConceptNode "rhino"]}
+        F = {[X, (ConceptNode "mammal")], [Y, (ConceptNode "reptile"]}
+        F = {[X, (ConceptNode "mammal")], [Y, (ConceptNode "earthworm"]}
+        F = {[X, (ConceptNode "snake")], [Y, (ConceptNode "dinosaur"]}
+        F = {[X, (ConceptNode "vine")], [Y, (ConceptNode "ent"]}
 ```
 
 Thus the recursion gets us back to compute Q = Q1 AND Q2. Results of Q1 are R1.
-Results of Q2 are the forbidden mappings in R2. Thus combination of R1 and R2 gives us:
+Results of Q2 are the forbidden mappings in R2. Thus combination of R1 and R2
+is:
 
 ```
     R: 
