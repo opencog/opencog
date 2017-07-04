@@ -61,7 +61,7 @@
     ; Return command string.
     (let ((match (string-match "~" (match:substring current-match))))
       ; The suffix is the command and the prefix is the argument
-      (cons (match:suffix match) (match:prefix match))
+      (cons (match:suffix match) (string-trim (match:prefix match)))
     ))
 
   ; NOTE
@@ -70,67 +70,64 @@
   ; 2. #f is given as a token value for those cases which don't have any
   ;    semantic values.
   (cond
-    ((has-match? "^\\(" str) (result:suffix 'LPAREN location #f))
-    ((has-match? "^\\)" str) (result:suffix 'RPAREN location #f))
+    ((has-match? "^[ ]*\\(" str) (result:suffix 'LPAREN location #f))
+    ((has-match? "^[ ]*\\)" str) (result:suffix 'RPAREN location #f))
     ; Chatscript declarations
-    ((has-match? "^concept:" str) (result:suffix 'CONCEPT location #f))
-    ((has-match? "^topic:" str) (result:suffix 'TOPIC location #f))
-    ((has-match? "^\r" str)
-        (format #t  ">>lexer cr @ ~a\n" (show-location location))
-        (make-lexical-token 'CR location #f))
+    ((has-match? "^[ ]*concept:" str) (result:suffix 'CONCEPT location #f))
+    ((has-match? "^[ ]*topic:" str) (result:suffix 'TOPIC location #f))
+    ((has-match? "^[ ]*\r" str) (result:suffix 'CR location #f))
     ((string=? "" str) (cons (make-lexical-token 'NEWLINE location #f) ""))
-    ((has-match? "^#!" str) ; This should be checked always before #
-        ; TODO Add tester function for this
-        (cons (make-lexical-token 'SAMPLE_INPUT location #f) ""))
-    ((has-match? "^#" str) (cons (make-lexical-token 'COMMENT location #f) ""))
+    ((has-match? "^[ \t]*#!" str) ; This should be checked always before #
+      ; TODO Add tester function for this
+      (cons (make-lexical-token 'SAMPLE_INPUT location #f) ""))
+    ((has-match? "^[ \t]*#" str)
+      (cons (make-lexical-token 'COMMENT location #f) ""))
     ; Chatscript rules
-    ((has-match? "^[s?u]:" str)
+    ((has-match? "^[ ]*[s?u]:" str)
       (result:suffix 'RESPONDERS location
-        (substring (match:substring current-match) 0 1)))
-    ((has-match? "^[a-q]:" str)
+        (substring (string-trim (match:substring current-match)) 0 1)))
+    ((has-match? "^[ \t]*[a-q]:" str)
       (result:suffix 'REJOINDERS location
-        (substring (match:substring current-match) 0 1)))
-    ((has-match? "^[rt]:" str) (result:suffix 'GAMBIT location #f))
-    ((has-match? "^_[0-9]" str)
+        (substring (string-trim (match:substring current-match)) 0 1)))
+    ((has-match? "^[ ]*[rt]:" str) (result:suffix 'GAMBIT location #f))
+    ((has-match? "^[ ]*_[0-9]" str)
       (result:suffix 'MVAR location
-        (substring (match:substring current-match) 1)))
-    ((has-match? "^[a-zA-Z]+_[a-zA-Z]+" str)
-        (result:suffix 'LITERAL location (match:substring current-match)))
-    ((has-match? "^_" str) (result:suffix '_ location #f))
+        (substring (string-trim (match:substring current-match)) 1)))
+    ((has-match? "^[ ]*_" str) (result:suffix 'VAR location #f))
     ; For dictionary keyword sets
-    ((has-match? "^[a-zA-Z]+~[a-zA-Z1-9]+" str)
+    ((has-match? "^[ ]*[a-zA-Z]+~[a-zA-Z1-9]+" str)
       (result:suffix 'LITERAL~COMMAND location (command-pair)))
     ; Range-restricted Wildcards.
     ; TODO Maybe replace with dictionary keyword sets then process it on action?
-    ((has-match? "^\\*~[1-9]+" str)
+    ((has-match? "^[ ]*\\*~[1-9]+" str)
       (result:suffix '*~n location
-        (substring (match:substring current-match) 2)))
-    ((has-match? "^~[a-zA-Z_]+" str)
+        (substring (string-trim (match:substring current-match)) 2)))
+    ((has-match? "^[ ]*~[a-zA-Z_]+" str)
       (result:suffix 'ID location
-        (substring (match:substring current-match) 1)))
-    ((has-match? "^," str) (result:suffix 'COMMA location ","))
-    ((has-match? "^\\^" str) (result:suffix '^ location #f))
-    ((has-match? "^\\[" str) (result:suffix 'LSBRACKET location #f))
-    ((has-match? "^]" str) (result:suffix 'RSBRACKET location #f))
-    ((has-match? "^<<" str) (result:suffix '<< location #f))
-    ((has-match? "^>>" str) (result:suffix '>> location #f))
+        (substring (string-trim (match:substring current-match)) 1)))
+    ((has-match? "^[ ]*," str) (result:suffix 'COMMA location ","))
+    ((has-match? "^[ ]*\\^" str) (result:suffix '^ location #f))
+    ((has-match? "^[ ]*\\[" str) (result:suffix 'LSBRACKET location #f))
+    ((has-match? "^[ ]*]" str) (result:suffix 'RSBRACKET location #f))
+    ((has-match? "^[ ]*<<" str) (result:suffix '<< location #f))
+    ((has-match? "^[ ]*>>" str) (result:suffix '>> location #f))
     ; This should follow <<
-    ((has-match? "^<" str) (result:suffix '< location #f))
+    ((has-match? "^[ ]*<" str) (result:suffix '< location #f))
     ; This should follow >>
-    ((has-match? "^>" str) (result:suffix '> location #f))
-    ((has-match? "^\"" str) (result:suffix 'DQUOTE location "\""))
-    ((has-match? "^\\*" str) (result:suffix '* location "*"))
-    ((has-match? "^!" str) (result:suffix '! location "!"))
-    ((has-match? "^[?]" str) (result:suffix '? location "?"))
+    ((has-match? "^[ ]*>" str) (result:suffix '> location #f))
+    ((has-match? "^[ ]*\"" str) (result:suffix 'DQUOTE location "\""))
+    ((has-match? "^[ ]*\\*" str) (result:suffix '* location "*"))
+    ((has-match? "^[ ]*!" str) (result:suffix '! location "!"))
+    ((has-match? "^[ ]*[?]" str) (result:suffix '? location "?"))
     ; This should always be near the end, because it is broadest of all.
-    ((has-match? "^['.,0-9a-zA-Z-]+" str)
-      (result:suffix 'LITERAL location (match:substring current-match)))
+    ((has-match? "^[ ]*['.,_0-9a-zA-Z-]+" str)
+      (result:suffix 'LITERAL location
+        (string-trim (match:substring current-match))))
     ; This should always be after the above so as to match words like "3D".
-    ((has-match? "^[0-9]+" str)
-      (result:suffix 'NUM location (match:substring current-match)))
-    (else
-      (format #t ">>Tokenizer non @ ~a\n" (show-location location))
-      (make-lexical-token 'NotDefined location str))
+    ((has-match? "^[ ]*[0-9]+" str)
+      (result:suffix 'NUM location
+        (string-trim (match:substring current-match))))
+    (else (make-lexical-token 'NotDefined location str))
   )
 )
 
@@ -150,7 +147,7 @@
                 (string-contains initial-line cs-line)))))
         (if (eof-object? cs-line)
           '*eoi*
-          (let ((result (tokeniz (string-trim-both cs-line) port-location)))
+          (let ((result (tokeniz cs-line port-location)))
             (if (pair? result)
               (begin
                 (set! cs-line (cdr result))
@@ -188,7 +185,7 @@
     (NEWLINE CR CONCEPT TOPIC RESPONDERS REJOINDERS GAMBIT
       NotDefined COMMENT SAMPLE_INPUT WHITESPACE COMMA
       ~ ; Concepts
-      (right: LPAREN LSBRACKET << ID _ * ^ < LITERAL NUM
+      (right: LPAREN LSBRACKET << ID VAR * ^ < LITERAL NUM
         LITERAL~COMMAND *~n MVAR)
       (left: RPAREN RSBRACKET >> > DQUOTE)
       (right: ! ?)
@@ -299,8 +296,8 @@
     )
 
     (variable
-      (_ LITERAL) : (display-token (format #f "variable(~a)" $2))
-      (_ collections) : (display-token (format #f "variable(~a)" $2))
+      (VAR LITERAL) : (display-token (format #f "variable(~a)" $2))
+      (VAR collections) : (display-token (format #f "variable(~a)" $2))
       (MVAR) : (display-token (format #f "match_variable(~a)" $1))
     )
 
