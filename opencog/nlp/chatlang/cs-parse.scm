@@ -122,11 +122,12 @@
     ((has-match? "^\\*" str) (result:suffix '* location "*"))
     ((has-match? "^!" str) (result:suffix '! location "!"))
     ((has-match? "^[?]" str) (result:suffix '? location "?"))
+    ; This should always be near the end, because it is broadest of all.
+    ((has-match? "^['.,0-9a-zA-Z-]+" str)
+      (result:suffix 'LITERAL location (match:substring current-match)))
+    ; This should always be after the above so as to match words like "3D".
     ((has-match? "^[0-9]+" str)
       (result:suffix 'NUM location (match:substring current-match)))
-    ; This should always be at the end.
-    ((has-match? "^['.,a-zA-Z-]+" str)
-      (result:suffix 'LITERAL location (match:substring current-match)))
     (else
       (format #t ">>Tokenizer non @ ~a\n" (show-location location))
       (make-lexical-token 'NotDefined location str))
@@ -162,11 +163,11 @@
 
 (define cs-parser
   (lalr-parser
-    ;; --- Options
+    ;; Options mainly for debugging
     ;; output a parser, called ghost-parser, in a separate file - ghost.yy.scm,
-    (output: ghost-parser "ghost.yy.scm")
-    ;; output the LALR table to ghost.out
-    (out-table: "ghost.out")
+    ;(output: ghost-parser "ghost.yy.scm")
+    ;;; output the LALR table to ghost.out
+    ;(out-table: "ghost.out")
     ;; there should be no conflict
     ;(expect:    5)
 
@@ -269,10 +270,6 @@
     (unordered-matching
       (<< patterns >>) : (display-token (format #f "unordered-matching(~a)" $2))
     )
-
-    ;(sentence-boundary
-    ;  (patterns >) : (display-token (format #f "match_at_end(~a)" $1))
-    ;)
 
     (function
       (^ a-literal LPAREN args RPAREN) :
