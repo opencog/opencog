@@ -2,6 +2,10 @@
              (opencog nlp)
              (opencog nlp chatlang))
 
+; For getting the lemma
+(load "../../../opencog/nlp/chatlang/translator.scm")
+(set! test-get-lemma #t)
+
 (define exist-concept (create-concept "foo" "swallow"))
 (define concept
     (create-concept "eat" "eat" "ingests" "binge and purge" "~foo"))
