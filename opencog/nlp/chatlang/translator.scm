@@ -124,8 +124,11 @@
   (define var-cnt 0)
   (for-each (lambda (t)
     (cond ((equal? 'lemma (car t))
-           (set! term-seq
-             (append term-seq (list (Word (get-lemma (cdr t)))))))
+           (let ((l (lemma (cdr t))))
+                (set! vars (append vars (car l)))
+                (set! conds (append conds (cdr l)))
+                (set! term-seq
+                  (append term-seq (list (Word (get-lemma (cdr t))))))))
           ((equal? 'word (car t))
            (let ((w (word (cdr t))))
                 (set! vars (append vars (car w)))

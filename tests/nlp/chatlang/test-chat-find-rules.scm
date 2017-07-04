@@ -3,6 +3,7 @@
              (opencog nlp chatlang)
              (opencog exec))
 
+(load "../../../opencog/nlp/chatlang/translator.scm")
 (set! test-get-lemma #t)
 
 ; Utils
