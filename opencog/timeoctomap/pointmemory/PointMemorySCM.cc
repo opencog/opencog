@@ -46,7 +46,7 @@ private:
 	// Check if the named map exists.
 	void have_map(const Handle&);
 
-	std::map<Handle, TimeOctomap*> tsa;
+	std::map<Handle, TimeOctomap<Handle>*> tsa;
 	time_pt get_map_time(const Handle& map_name, const Handle& elapse);
 
 public:
@@ -247,7 +247,7 @@ Handle PointMemorySCM::create_map(Handle map_name, Handle resolution)
 	if (tsa.find(map_name) != tsa.end())
 		throw InvalidParamException(TRACE_INFO, "Map already exists");
 
-	tsa[map_name] = new TimeOctomap(time_units, space_res_mtr,
+	tsa[map_name] = new TimeOctomap<Handle>(time_units, space_res_mtr,
 	                  std::chrono::milliseconds(time_res_milli_sec));
 	return map_name;
 }
