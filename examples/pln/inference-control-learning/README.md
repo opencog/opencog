@@ -12,7 +12,8 @@ Experiment with inference control learning. The plan is to
 
 For now it is a toy experiment with a small taylored series over a
 small, constant knowledge-base. No ECAN is even necessary. The learned
-inference control rule should be that double deduction is useful.
+inference control rules should be that double, triple, etc deductions
+are useful.
 
 Knowledge-base
 --------------
@@ -100,7 +101,12 @@ as Cognitive Schematics, where
 A preproof is a back-inference-tree prefix (or suffix if you start
 from the axioms) of a complete proof of T. In other words it is a
 subtree with root T (such as in graph theory, not computer data
-structure) of an inference tree proving T.
+structure) of an inference tree proving T. The reason we use preproof
+as measure of success, as opposed to say the likelihood of finding a
+proof within the allocated effort, is because it is independent on the
+difficulty of the problem. If we can produce a preproof it means we're
+on the right track no matter. This may hopefully make it easier to
+transfer this knowledge across problem difficulties.
 
 This experiment is simple enough that the context that the backward
 chainer has been queried to prove T can be ignored. The context that
@@ -353,22 +359,22 @@ Learning Inference Control Rules
 
 TODO: pattern mining, etc.
 
-Using Inference Control Rules
------------------------------
+Inference Control Policy
+------------------------
 
 Once we have a learned a bunch of inference control rules we need
-properly utilize them. Below we describe a way to combine them and
-select the next inference rule based on the results of that
-combination.
+properly utilize them to form an Inference Control Policy. Below we
+describe a way to combine them and select the next inference rule
+based on the results of that combination.
 
 ### Combining Inference Control Rules
 
 A variety of inference control rules may simultaneously apply and we
 need a way to combine them.
 
-Let's assume we have k valid inference control rules for an inference
-rule R. Valid means that they unify with the current intermediary
-target and have their contexts satisfied.
+Let's assume we have k valid inference control rules for inference
+rule R (an inference control rule is valid if it unifies with the
+current intermediary target and have its contexts satisfied.)
 
 ```
 ICR1 : C1 & R -> S <TV1>
@@ -379,11 +385,11 @@ ICRk : Ck & R -> S <TVk>
 where `->` compactly represent an `ImplicationScopeLink` as described
 above.
 
-So `ICRi` expresses that in context `Ci` chosing `R` will produce a
+`ICRi` expresses that in context `Ci` chosing `R` will produce a
 preproof of our final target with truth values `TVi`. `S` stands for
 Success. One way of doing that is to use a resource bound variation of
-Solomonoff's Universal Operator Induction, which reformulated to fit
-our problem looks like
+Solomonoff's Universal Operator Induction which, reformulated to fit
+our problem, looks like
 
 ```
 P(S|R) = Sum_i=0^k P(ICRi) * ICRi(S|R) * Prod_j ICRi(Sj|Rj) / nt
@@ -392,8 +398,8 @@ P(S|R) = Sum_i=0^k P(ICRi) * ICRi(S|R) * Prod_j ICRi(Sj|Rj) / nt
 * `P(S|R)` is the probability that picking up `R` in this instance
   will produce a preproof of our final target.
 * `P(ICRi)` is the prior of `ICRi`.
-* `ICRj(S|R)` is the probability of success upon choosing R according
-  to `ICRi`.
+* `ICRj(S|R)` is the probability of success upon choosing `R`
+  according to `ICRi`.
 * The last term `Prod_j ICRi(Sj|Rj)` is the probability that `ICRi`
   explains our corpus of past inferences.
 * `nt` is the normalizing term, defined as
@@ -402,8 +408,8 @@ nt = Sum_i=0^n P(ICRi) * Prod_j ICRi(Sj|Rj)
 ```
 
 Since it is resource bound we cannot consider all computable rules.
-Instead we consider the ones we have, typically obtained by the
-pattern miner.
+Instead we consider the ones we have, obtained by pattern mining or
+such.
 
 On top of that, instead of returning a single probability we want to
 return a truth value, or more generally a pdf (probability density
@@ -422,17 +428,29 @@ probabilities, making `ICRi(S|R)<=x` ill-defined. To remedy that we
 can split `ICRi` into a continuous ensemble of models, each of which
 with a probability from 0 to 1, not a TV, associated to it. We can
 then use this ensemble as extra models and use the same formula above
-to calculate the cdf. Luckily it turns out that the TV returned by
-`ICRi` precisely represent the cdf of `Prod_j ICRi(Sj|Rj)`, so in fact
-the cdf of `P(S|R)` is merely a weighted sum of the cdfs of `ICRi`
+to calculate the cdf. Luckily it turns out that the TV corresponding
+to `ICRi` precisely represents the cdf of `Prod_j ICRi(Sj|Rj)`, so in
+fact the cdf of `P(S|R)` is merely a weighted sum of the cdfs of
+`ICRi`
 
 ```
 CDF_P(S|R) = Sum_i=0^n CDF_ICRi(S|R) * P(ICRi)
 ```
 
-TODO: prove that
+where
 
-TODO: what to do about nt?
+```
+CDF_ICRi(S|R)(x) = Int_0^x p^X*(1-p)^(N-X) dp
+```
+
+`N` is the number of observations and `X` the positive count. Which
+corresponds to, up to a multiplicative constant, the second order
+distribution representing a TV as defined in Section 4.5.1 of the PLN
+book. That is assuming that all observations are certain (based on
+perfect sensors). We'll see that we actually do need to consider
+imperfect sensors.
+
+TODO: how to properly normalize?
 
 Once we have that we can calculate the TVi of success of each valid
 inference rule Ri, either by turning its cdf into a TV or a pdf as it
@@ -463,18 +481,26 @@ probability, i.e. total certainty.
 
 Unfortunately this method has some problems. First, it doesn't work
 well when the probability estimates have very different confidences.
-One option is to account for confidence in the score to be passed to
-tournament selection. If s is the probability and c the confidence,
-then we may consider s*c instead of s alone. This avoids to pick rules
-with large strength but low confidence, which is perfect for
-exploitation but bad for exploration.  Second, it doesn't work well if
-n is small, which is often the case in rule selection as only a couple
-of rules may be valid for a given intermediary target. If n=2, then k
-can be either 1, total randomness, or 2, total determinism.
+One option is to account for the confidence in the score to be passed
+to tournament selection. If s is the probability and c the confidence,
+then we may consider for instance s*c instead of s alone. This avoids
+to pick rules with large strength but low confidence, which is perfect
+for exploitation but bad for exploration.  Second, it doesn't work
+well if n is small, which is often the case in rule selection as only
+a couple of rules may be valid for a given intermediary target. If
+n=2, then k can be either 1, total randomness, or 2, total
+determinism.
 
-In order to address that, I suggest to calculate the actually
-distribution of choice given the distribution of success and offer a
-cost-effective way to do that.
+In order to address that we can estimate the probability distribution
+of actions (here inference rules) in a conceptually similar fashion to
+using Thompson Sampling for controlling universal agents [1]. Though
+instead of sampling the environment we build the probability
+distribution of action and sample from it. I claim that this is more
+adequate in our case (which can be revisited later on). First, the
+horizon is only 1 step ahead so I doubt it is more costly. Second, our
+models, in OpenCog, are partial and represent in fact classes of
+models (that is how uncertainty is modeled, as explained below).
+Third, it helps to clearly seperate the policy from the world model.
 
 Assume we have n rules with TVs tv1, ..., tvn. The idea is to
 calculate the probability that a rule is the best based on the pdfs,
@@ -486,15 +512,16 @@ Pi = I1_0^1 ... In_0^1
      dp1 ... dpn
 ```
 
-where Pi is the probability that rule i is equal or better than all
-the others. 1(.) is the function returning 1 iff its expression is
+where `Pi` is the probability that rule i is equal or better than all
+the others. `1(.)` is the function returning 1 iff its expression is
 true, 0 otherwise.
 
-Such an integration is computationally expensive, O(m^n) where m is
-the number of bins used to discretize the integral. Fortunately it can
-be greatly simplified. First the expression inside 1(.)  merely limits
-the range of the integration variables different than pi. Without loss
-of generality we can assume that this variable is p1, we get
+Such an integration is computationally expensive, `O(m^n)` where `m`
+is the number of bins used to discretize the integral. Fortunately it
+can be greatly simplified. First the expression inside `1(.)` merely
+limits the range of the integration variables different than
+`pi`. Without loss of generality we can assume that this variable is
+`p1`, we get
 
 ```
 P1 = I1_0^1 I2_0_^p1 ... In_0_^p1 pdf1(p1)*...*pdfn(pn) dp1 ... dpn
@@ -505,16 +532,34 @@ independent of each others, starting by the pdf terms
 
 ```
 P1 = I1_0^1 pdf1(p1) I2_0_^p1 pdf2(p2) ... In_0_^p1 pdfn(pn) dpn ... dp1
-   = I1_0^1 pdf1(p1) dp1 * I2_0_^p1 pdf2(p2) dp2 * ... * In_0_^p1 pdfn(pn) dpn
+   = I1_0^1 pdf1(p1) * (I2_0_^p1 pdf2(p2) dp2) * ... * (In_0_^p1 pdfn(pn) dpn) dp1
+```
+
+Using cdfs this can be simplified into
+
+```
+P1 = I1_0^1 pdf1(p1) * cdf2(p1) * ... * cdfn(p1) dp1
 ```
 
 If we store the values of
-```
-Ii_0^j pdfi(pi) dpi
-```
-in a `n*m` table, for i in [0, n) and j in (0/m, m/m] then the
-complexity should be around `O(n*M)`, all rules considered.
 
-In the end we end up with a distribution that we can hand to our
-random generator to pick up an inference rule amonst the most likely
-ones to produce a preproof of T.
+```
+pdfi(p)
+```
+
+and
+
+```
+cdfi(p)
+```
+
+in two `n*m` tables, for `i` in `[0, n)` and `p` in `(0/m, m/m]`, then
+the complexity should be around `O(n*M)`, all rules considered. In the
+end we end up with a distribution of actions according to which we can
+pick up our next inference rule.
+
+References
+----------
+
+[1] Jan Leike et al - Thompson Sampling is Asymptotically Optimal in
+General Environments.
