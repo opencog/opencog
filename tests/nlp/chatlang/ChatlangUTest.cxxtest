@@ -62,6 +62,13 @@ public:
 */
         scm->eval("(add-to-load-path \"" PROJECT_SOURCE_DIR "/tests/nlp/chatlang/\")");
 
+        // This is still needed even if the modules is no longer defined
+        // self-referentially, no idea why...
+        scm->eval("(load-from-path \"opencog/nlp/chatlang/ui.scm\")");
+        scm->eval("(load-from-path \"opencog/nlp/chatlang/terms.scm\")");
+        scm->eval("(load-from-path \"opencog/nlp/chatlang/translator.scm\")");
+        scm->eval("(load-from-path \"opencog/nlp/chatlang/matcher.scm\")");
+
         scm->eval("(setenv \"LTDL_LIBRARY_PATH\" \"/usr/local/lib/opencog\")");
     }
 
@@ -207,21 +214,20 @@ void ChatlangUTest::test_chat_find_rules()
     auto result_7 = scm->eval("test-result-7");
     TSM_ASSERT_EQUALS("Fail on test 7!", "#t\n", result_7);
 
-// TODO: There may be a better way to handle choices and unordered
-//    auto result_8 = scm->eval("test-result-8");
-//    TSM_ASSERT_EQUALS("Fail to find rule 4!", "#t\n", result_8);
+    auto result_8 = scm->eval("test-result-8");
+    TSM_ASSERT_EQUALS("Fail to find rule 4!", "#t\n", result_8);
 
-//    auto result_9 = scm->eval("test-result-9");
-//    TSM_ASSERT_EQUALS("Fail to find rule 4!", "#t\n", result_9);
+    auto result_9 = scm->eval("test-result-9");
+    TSM_ASSERT_EQUALS("Fail to find rule 4!", "#t\n", result_9);
 
-//    auto result_10 = scm->eval("test-result-10");
-//    TSM_ASSERT_EQUALS("Fail to find rule 5!", "#t\n", result_10);
+    auto result_10 = scm->eval("test-result-10");
+    TSM_ASSERT_EQUALS("Fail to find rule 5!", "#t\n", result_10);
 
-//    auto result_11 = scm->eval("test-result-11");
-//    TSM_ASSERT_EQUALS("Fail to find rule 5!", "#t\n", result_11);
+    auto result_11 = scm->eval("test-result-11");
+    TSM_ASSERT_EQUALS("Fail to find rule 5!", "#t\n", result_11);
 
-//    auto result_12 = scm->eval("test-result-12");
-//    TSM_ASSERT_EQUALS("Fail to find rule 6!", "#t\n", result_12);
+    auto result_12 = scm->eval("test-result-12");
+    TSM_ASSERT_EQUALS("Fail to find rule 6!", "#t\n", result_12);
 
     auto result_13 = scm->eval("test-result-13");
     TSM_ASSERT_EQUALS("Fail to find rule 7!", "#t\n", result_13);
