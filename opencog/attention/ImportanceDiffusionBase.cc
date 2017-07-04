@@ -159,7 +159,7 @@ void ImportanceDiffusionBase::diffuseAtom(Handle source)
     }
     atom_avstat[source].spreading += totalDiffusionAmount;
 #endif
-/
+
 #ifdef DEBUG
     std::cout << "Total diffusion amount: " << totalDiffusionAmount << std::endl;
 #endif
