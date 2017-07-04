@@ -19,39 +19,71 @@
 (define niter 2)                       ; Number of iterations
 
 (define (run-experiment)
-  (cog-logger-info icl-logger "Start experiment")
+  (icl-logger-info "Start experiment")
   (let* ((targets (gen-random-targets pss)) ; Generate targets
-         (tr-as (cog-new-atomspace))        ; Trace AtomSpace
-         (runiter (lambda (i) (run-iteration targets tr-as i))))
+         (tr-as (init-tr-as))               ; Initialize Trace AtomSpace
+         (ic-rules '()))                    ; Initialize Inference
+                                            ; Control Rules
+    ;; Function for running all iterations, the inference control
+    ;; rules, icr, and the iteration index, idx. Return the list of
+    ;; solved problems for each iteration (list of list).
+    (define (run-iterations-rec icr i)
+      (if (< idx niter)
+          (let* ((sol-icr (run-iteration targets tr-as icr i)))
+            (cons (cadr sol-icr) (run-iterations-rec (car col-icr) (+ i 1))))
+          '()))
     ;; Run all iterations
-    (map runiter (iota niter))))
+    (run-iterations-rec ic-rules 0)))
 
-;; Run an iteration i over the given targets
-(define (run-iteration targets tr-as i)
-  (cog-logger-info icl-logger "Run iteration ~a/~a" (+ i 1) niter)
-  (let* ((ic-kb '())
-         (run-bc-fun (lambda (j) (run-bc (list-ref targets j) ic-kb tr-as i j)))
-         (results (map run-bc-fun (iota pss)))
-         (Si (count values results)))
-    (cog-logger-info icl-logger "Number of problem solved = ~a" Si))
-  ;; TODO: parse the log file to get all the data. Basically fill the
-  ;; preproof(A, T) relationships
+;; Initialize the trace atomspace with the knowledge and rule bases
+;; for inferring the corpus and the inference control rules.
+(define (init-tr-as)
+  (let* ((tr-as (cog-new-atomspace))    ; Create trace AtomSpace
+         (old-as (cog-set-atomspace! tr-as))) ; Set it as current AtomSpace
+    ;; Load meta-kb and meta-rb containing the axioms the rule bases
+    ;; to infer inference control rules
+    (load "meta-kb.scm")
+    (load "meta-rb.scm")
+    ;; Switch back to the old atomspace and return tr-as
+    (cog-set-atomspace! old-as)))
 
-  ;; TODO: build collection of rules for the next iteration
+;; run iteration i over the given targets. Return a pair
+;;
+;; (solved problems, inference control rules)
+;;
+;; The idea is to pass the inference control rules to the next
+;; iteration.
+(define (run-iteration targets tr-as ic-rules i)
+  (icl-logger-info "Run iteration ~a/~a" (+ i 1) niter)
+  (let* (;; Run the BC and build the trace corpus
+         (run-bc-mk-corpus (lambda (j)
+                             (run-bc (list-ref targets j) tr-as ic-rules i j)
+                             (postprocess-corpus tr-as)))
+         (results (map run-bc-mk-corpus (iota pss)))
+         (sol_count (count values results)))
+    (icl-logger-info "Number of problem solved = ~a" sol_count))
+
+  ;; Build inference control rules for the next iteration
+  (list sol_count (mk-ic-rules tr-as)))
+
+(define (postprocess-corpus tr-as)
+  ;; TODO infer preproof
 )
 
-;; Run the backward chainer on target, given the
-;; inference-control-knowledge-base (ic-kb), recording the trace on
-;; tr-as, with index j in iteration i. Return #t iff successful.
-(define (run-bc target ic-kb tr-as i j)
-  (cog-logger-info icl-logger "Run BC with target = ~a" target)
+(define (infer-ic-rules tr-as)
+  ;; TODO infer ic-rules
+)
+
+;; Run the backward chainer on target, given the current trace
+;; atomspace, tr-as, and inference-control rules, ic-rules, adding the
+;; new traces to tr-as, with index j in iteration i. Return #t iff
+;; target has been successfully proved.
+(define (run-bc target tr-as ic-rules i j)
+  (icl-logger-info "Run BC with target = ~a" target)
   (reload)
-  (let* ((result (pln-bc target #:trace-as tr-as))
+  (let* ((result (pln-bc target #:trace-as tr-as)) ; TODO use ic-rules
          (result-size (length (cog-outgoing-set result)))
          (former-as (cog-atomspace)))
-    (cog-set-atomspace! tr-as)
-    (cog-prt-atomspace)
-    (cog-set-atomspace! former-as)
     (if (= 1 result-size)
         (tv->bool (cog-tv (gar result)))
         #f)))

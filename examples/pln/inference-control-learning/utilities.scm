@@ -7,6 +7,11 @@
 ;; Set a logger for the experiment
 (define icl-logger (cog-new-logger))
 (cog-logger-set-component! icl-logger "ICL")
+(define (icl-logger-error . args) (apply cog-logger-error (cons icl-logger args)))
+(define (icl-logger-warn . args) (apply cog-logger-warn (cons icl-logger args)))
+(define (icl-logger-info . args) (apply cog-logger-info (cons icl-logger args)))
+(define (icl-logger-debug . args) (apply cog-logger-debug (cons icl-logger args)))
+(define (icl-logger-fine . args) (apply cog-logger-fine (cons icl-logger args)))
 
 ;; Let of characters of the alphabet
 (define alphabet-list
