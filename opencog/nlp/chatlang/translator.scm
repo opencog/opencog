@@ -18,9 +18,8 @@
 (define globs-lemma '())
 (define vars-grd '())
 
-; For storing the lemmas
-(define lemma-alist '())
-(define get-lemma-wn #f)
+; For unit test
+(define test-get-lemma #f)
 
 (define-public (chatlang-prefix STR) (string-append "Chatlang: " STR))
 (define chatlang-anchor (Anchor (chatlang-prefix "Currently Processing")))
@@ -368,7 +367,7 @@
 
 (define (get-lemma WORD)
   "Get the lemma of WORD."
-  (if get-lemma-wn
+  (if test-get-lemma
       (get-lemma-from-wn WORD)
       (get-lemma-from-relex WORD)))
 

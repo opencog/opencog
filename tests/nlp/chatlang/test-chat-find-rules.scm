@@ -3,6 +3,8 @@
              (opencog nlp chatlang)
              (opencog exec))
 
+(set! test-get-lemma #t)
+
 ; Utils
 ; -----
 ; Get the SentenceNodes from structures like:
