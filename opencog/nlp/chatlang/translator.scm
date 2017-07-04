@@ -18,6 +18,10 @@
 (define globs-lemma '())
 (define vars-grd '())
 
+; For storing the lemmas
+(define lemma-alist '())
+(define get-lemma-wn #f)
+
 (define-public (chatlang-prefix STR) (string-append "Chatlang: " STR))
 (define chatlang-anchor (Anchor (chatlang-prefix "Currently Processing")))
 (define chatlang-no-constant (Anchor (chatlang-prefix "No constant terms")))
@@ -121,11 +125,8 @@
   (define var-cnt 0)
   (for-each (lambda (t)
     (cond ((equal? 'lemma (car t))
-           (let ((l (lemma (cdr t))))
-                (set! vars (append vars (car l)))
-                (set! conds (append conds (cdr l)))
-                (set! term-seq
-                  (append term-seq (list (Word (get-lemma (cdr t))))))))
+           (set! term-seq
+             (append term-seq (list (Word (get-lemma (cdr t)))))))
           ((equal? 'word (car t))
            (let ((w (word (cdr t))))
                 (set! vars (append vars (car w)))
@@ -339,9 +340,22 @@
        (Evaluation chatlang-lemma-seq (List SENT lemma-seq))
        (cons word-seq lemma-seq)))
 
-(define (get-lemma WORD)
-  "A hacky way to quickly find the lemma of a word using WordNet."
-  (let* ((cmd-string (string-append "wn " WORD " | grep \"Information available for .\\+\""))
+(define (get-lemma-from-relex WORD)
+  "Get the lemma of WORD via the RelEx server."
+  (relex-parse WORD)
+  (let* ((sent (car (get-new-parsed-sentences)))
+         (word-inst (cadar (sent-get-words-in-order sent)))
+         (lemma (car (cog-chase-link 'LemmaLink 'WordNode word-inst))))
+    (release-new-parsed-sents)
+    (if (equal? (string-downcase WORD) (cog-name lemma))
+        WORD
+        (cog-name lemma))))
+
+(define (get-lemma-from-wn WORD)
+  "A hacky way to quickly find the lemma of a word using WordNet,
+   for unit test only."
+  (let* ((cmd-string
+           (string-append "wn " WORD " | grep \"Information available for .\\+\""))
          (port (open-input-pipe cmd-string))
          (lemma ""))
     (do ((line (get-line port) (get-line port)))
@@ -351,6 +365,12 @@
           (set! lemma l))))
     (close-pipe port)
     (if (string-null? lemma) WORD lemma)))
+
+(define (get-lemma WORD)
+  "Get the lemma of WORD."
+  (if get-lemma-wn
+      (get-lemma-from-wn WORD)
+      (get-lemma-from-relex WORD)))
 
 (define (is-lemma? WORD)
   "Check if WORD is a lemma."
