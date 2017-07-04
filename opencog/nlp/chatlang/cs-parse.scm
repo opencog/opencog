@@ -1,7 +1,9 @@
 (use-modules (ice-9 rdelim))
+(use-modules (ice-9 regex))
+(use-modules (ice-9 getopt-long))
 (use-modules (rnrs io ports))
 (use-modules (system base lalr))
-(use-modules (ice-9 regex))
+
 
 (define (display-token token)
 "
@@ -315,6 +317,9 @@
 
 ; Test lexer
 (define (test-lexer lexer)
+"
+  For testing the lexer pass a lexer created by make-cs-lexer.
+"
   (define temp (lexer))
   (if (lexical-token? temp)
     (begin
@@ -328,8 +333,21 @@
   (cs-lexer (open-file-input-port file-path))
 )
 
-;(test-lexer (make-cs-lexer "test.top"))
+(define (main args)
+"
+  This function is to be used from the command-line as follows
 
-; Test parser
-(cs-parser (make-cs-lexer "test.top") error)
-(display "\n--------- Finished a file ---------\n")
+  guile -e main -s parse.scm -f path/to/cs/file.top
+"
+  (let* ((option-spec
+            '((file (single-char #\f) (required? #t) (value #t))))
+  ;(predicate file-exists?)))) FIXME: Wrong type to apply: file-exists?
+    (options (getopt-long args option-spec))
+    (input-file (option-ref options 'file #f)))
+    (if input-file
+      (begin
+        (format #t "\n--------- Starting parsing of ~a ---------\n" input-file)
+        (cs-parser (make-cs-lexer input-file) error)
+        (format #t "\n--------- Finished parsing of ~a ---------\n" input-file)
+      )))
+)
