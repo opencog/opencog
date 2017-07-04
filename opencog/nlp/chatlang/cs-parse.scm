@@ -246,6 +246,8 @@
       (function) : (display-token $1)
       (! pattern) : (display-token (format #f "Not(~a)" $2))
       (< patterns) : (display-token (format #f "restart_matching(~a)" $2))
+      ; FIXME end_of_sentence is not necessarily complete.
+      (pattern >) : (display-token (format #f "@end_of_sentence(~a)" $1))
       (a-sequence) : (display-token $1)
       (phrase) : (display-token $1)
       (variable ? collections) :
