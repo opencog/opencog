@@ -42,6 +42,7 @@
 #include <opencog/atoms/base/Handle.h>
 #include <opencog/atoms/base/atom_types.h>
 #include <opencog/learning/PatternMiner/types/atom_types.h>
+#include <opencog/query/BindLinkAPI.h>
 
 #include "PatternMiner.h"
 
