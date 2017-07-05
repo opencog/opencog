@@ -650,6 +650,11 @@ public:
                                                                   min_surprisingness_II,max_surprisingness_II, gram);
     }
 
+    void OutPutStaticsToCsvFile(int n_gram)
+    {
+        patternMiner->OutPutStaticsToCsvFile(n_gram);
+    }
+
 
     void select_subset_for_DBpedia()
     {
@@ -805,6 +810,7 @@ void PatternMinerSCM::init()
     define_scheme_primitive("pm-select-subset-for-DBpedia", &PatternMinerSCM::select_subset_for_DBpedia, this, "patternminer");
     define_scheme_primitive("pm-load-all-DBpediaKeyNodes", &PatternMinerSCM::load_all_DBpediaKeyNodes, this, "patternminer");
 
+    define_scheme_primitive("pm-out-put-statics-to-csvfile", &PatternMinerSCM::OutPutStaticsToCsvFile, this, "patternminer");
 
     define_scheme_primitive("pm-test-pattern-matcher", &PatternMinerSCM::test_pattern_matcher, this, "patternminer");
 
