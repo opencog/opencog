@@ -29,19 +29,24 @@
 namespace octomap
 {
 // tree definition
-class AtomOcTree : public OccupancyOcTreeBase < AtomOcTreeNode >
+template <typename T>
+class AtomOcTree : public OccupancyOcTreeBase < AtomOcTreeNode<T> >
 {
 
 public:
-
     /// Default constructor, sets resolution of leafs
-    AtomOcTree(double resolution = 0.1); //does not work without optional resolution
+    AtomOcTree(double resolution = 0.1)
+        : OccupancyOcTreeBase< AtomOcTreeNode<T> >(resolution)
+    {
+        atomOcTreeMemberInit.ensureLinking();
+    }
+
 
     /// virtual constructor: creates a new object of same type
     /// (Covariant return type requires an up-to-date compiler)
-    AtomOcTree *create() const
+    AtomOcTree<T> *create() const
     {
-        return new AtomOcTree(resolution);    //changed to this->resolution else templates cause problems
+        return new AtomOcTree<T>(this->resolution);    //changed to this->resolution else templates cause problems
     }
 
     std::string getTreeType() const
@@ -50,9 +55,16 @@ public:
     }
 
     // set node dat at given key or coordinate. Replaces previous dat.
-    AtomOcTreeNode* setNodeData(const OcTreeKey& key, const opencog::Handle& r);
+    AtomOcTreeNode<T>* setNodeData(const OcTreeKey& key, const T& r){
+        AtomOcTreeNode<T>* n = this->search(key);
+        //AtomOcTreeNode<T>* n = dynamic_cast<AtomOcTreeNode<T>*>(this->search(key));
+        if (n != 0) {
+            n->setData(r);//setColor
+        }
+        return n;
+    }
 
-    AtomOcTreeNode* setNodeData(const point3d& xyz, const opencog::Handle& r)
+    AtomOcTreeNode<T>* setNodeData(const point3d& xyz, const T& r)
     {
         OcTreeKey key;
         if (!this->coordToKeyChecked(xyz, key)) return nullptr;
@@ -63,7 +75,6 @@ public:
 
 
 protected:
-    ////void updateInnerOccupancyRecurs(AtomOcTreeNode<T>* node, unsigned int depth);
 
     /**
      * Static member object which ensures that this OcTree's prototype
@@ -73,12 +84,11 @@ protected:
      * ensureLinking() once from the constructor.
      */
 
-    class StaticMemberInitializer
+    struct StaticMemberInitializer
     {
-    public:
         StaticMemberInitializer()
         {
-            AtomOcTree* tree = new AtomOcTree(0.1);
+            AtomOcTree<T>* tree = new AtomOcTree<T>(0.1);
             AbstractOcTree::registerTreeType(tree);
         }
 
@@ -94,9 +104,8 @@ protected:
 
 };
 
-//! user friendly output in format (r g b)
-//std::ostream& operator<<(std::ostream& out, AtomOcTreeNode::T const& c);
-////std::ostream& operator<<(std::ostream& out, opencog::Handle const& c);
+template <typename T>
+typename AtomOcTree<T>::StaticMemberInitializer AtomOcTree<T>::atomOcTreeMemberInit;
 
 } // end namespace
 
