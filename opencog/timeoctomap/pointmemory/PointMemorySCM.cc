@@ -359,7 +359,7 @@ Handle PointMemorySCM::get_last_time(Handle map_name,
 	time_pt tp;
 	bool r = tsa[map_name]->get_last_time_elapse_atom_observed(ato, tpt, tp);
 	if (not r)
-		return UndefinedHandle; // XXX should this throw instead?
+		return Handle::UNDEFINED; // XXX should this throw instead?
 
 	// make and return atTimeLink
 	return timestamp_tag_atom(tp, ato);
