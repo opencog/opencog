@@ -117,10 +117,10 @@
     ((has-match? "^[ ]*>" str) (result:suffix '> location #f))
     ((has-match? "^[ ]*\"" str) (result:suffix 'DQUOTE location "\""))
     ((has-match? "^[ ]*\\*" str) (result:suffix '* location "*"))
-    ((has-match? "^[ ]*!" str) (result:suffix '! location "!"))
+    ((has-match? "^[ ]*!" str) (result:suffix 'NOT location #f))
     ((has-match? "^[ ]*[?]" str) (result:suffix '? location "?"))
     ; This should always be near the end, because it is broadest of all.
-    ((has-match? "^[ ]*['.,_0-9a-zA-Z-]+" str)
+    ((has-match? "^[ ]*['.,_!0-9a-zA-Z-]+" str)
       (result:suffix 'LITERAL location
         (string-trim (match:substring current-match))))
     ; This should always be after the above so as to match words like "3D".
@@ -187,8 +187,8 @@
       ~ ; Concepts
       (right: LPAREN LSBRACKET << ID VAR * ^ < LITERAL NUM
         LITERAL~COMMAND *~n MVAR)
-      (left: RPAREN RSBRACKET >> > DQUOTE)
-      (right: ! ?)
+      (left: RPAREN RSBRACKET >> > DQUOTE NOT)
+      (right: ?)
     )
 
     ; Parsing rules (aka nonterminal symbols)
@@ -235,13 +235,12 @@
     ; action-pattern and context-pattern ????
     (pattern
       (a-literal) : (display-token $1)
-      (a-literal !) : (display-token (format #f "~a~a" $1 $2))
       (a-literal ?) : (display-token (format #f "~a~a" $1 $2))
       (variable)  : (display-token $1)
       (collections) : (display-token $1)
       (unordered-matching) : (display-token $1)
       (function) : (display-token $1)
-      (! pattern) : (display-token (format #f "Not(~a)" $2))
+      (NOT pattern) : (display-token (format #f "Not(~a)" $2))
       (< patterns) : (display-token (format #f "restart_matching(~a)" $2))
       ; FIXME end_of_sentence is not necessarily complete.
       (pattern >) : (display-token (format #f "@end_of_sentence(~a)" $1))
