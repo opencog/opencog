@@ -89,7 +89,7 @@ using namespace opencog;
 
 //        swapOneLinkBetweenTwoAtomSpace(originalAtomSpace, observingAtomSpace, cur_link, outgoingLinks, outVariableNodes);
 //        Handle newLink = observingAtomSpace->add_link(cur_link->getType(), outgoingLinks);
-//        newLink->merge(cur_link->getTruthValue());
+//        newLink->setTruthValue(cur_link->getTruthValue());
 
 //        HandleSeq observedLinks;
 //        observedLinks.push_back(newLink);
@@ -112,7 +112,7 @@ using namespace opencog;
 //        {
 //            map<HandleSeq, vector<HTreeNode*> > ::iterator it = allLastGramLinksToPatterns.begin();
 //            map<HandleSeq, vector<HTreeNode*> > allThisGramLinksToPatterns;
-//            vector<OrderedHandleSet> newConnectedLinksFoundThisGram;
+//            vector<HandleSet> newConnectedLinksFoundThisGram;
 
 //            for(; it != allLastGramLinksToPatterns.end(); ++ it)
 //            {
@@ -223,7 +223,7 @@ void PatternMiner::growPatternsDepthFirstTask(unsigned int thread_index)
 
             swapOneLinkBetweenTwoAtomSpace(originalAtomSpace, observingAtomSpace, cur_link, outgoingLinks, outVariableNodes);
             Handle newLink = observingAtomSpace->add_link(cur_link->getType(), outgoingLinks);
-            newLink->merge(cur_link->getTruthValue());
+            newLink->setTruthValue(cur_link->getTruthValue());
 
             extendAPatternForOneMoreGramRecursively(newLink, observingAtomSpace, Handle::UNDEFINED, lastGramLinks, 0, lastGramValueToVarMap,patternVarMap, false,
                                                     allNewMinedPatternsCurTask, allHTreeNodesCurTask, allNewMinedPatternInfo, thread_index,startFromLinkContainWhiteKeyword);
@@ -468,7 +468,7 @@ HTreeNode* PatternMiner::extractAPatternFromGivenVarCombination(HandleSeq &input
             HandleSeq outgoingLinks;
             generateALinkByChosenVariables(link, patternVarMap, outgoingLinks, _fromAtomSpace);
             Handle rebindedLink = atomSpace->add_link(link->getType(), outgoingLinks);
-            rebindedLink->merge(TruthValue::TRUE_TV());
+            rebindedLink->setTruthValue(TruthValue::TRUE_TV());
 
             pattern.push_back(rebindedLink);
         }
@@ -1048,7 +1048,7 @@ void PatternMiner::extendAPatternForOneMoreGramRecursively(const Handle &extende
 
                                 // check if these fact links already been processed before or by other thread
 
-                                OrderedHandleSet originalLinksSet(inputLinks.begin(), inputLinks.end());
+                                HandleSet originalLinksSet(inputLinks.begin(), inputLinks.end());
                                 originalLinksSet.insert(extendedHandle);
 
                                 for (Handle h  : originalLinksSet)
@@ -1115,7 +1115,7 @@ void PatternMiner::extendAPatternForOneMoreGramRecursively(const Handle &extende
 // this function is old
 // allLastGramHTreeNodes is input, allFactLinksToPatterns is output - the links fact to all its pattern HTreeNodes
 //void PatternMiner::extendAllPossiblePatternsForOneMoreGramDF(HandleSeq &instance, AtomSpace* _fromAtomSpace, unsigned int gram,
-//     vector<HTreeNode*>& allLastGramHTreeNodes, map<HandleSeq, vector<HTreeNode*> >& allFactLinksToPatterns, vector<OrderedHandleSet>& newConnectedLinksFoundThisGram)
+//     vector<HTreeNode*>& allLastGramHTreeNodes, map<HandleSeq, vector<HTreeNode*> >& allFactLinksToPatterns, vector<HandleSet>& newConnectedLinksFoundThisGram)
 //{
 
 //    // First, extract all the variable nodes in the instance links
@@ -1192,14 +1192,14 @@ void PatternMiner::extendAPatternForOneMoreGramRecursively(const Handle &extende
 
 //            // Extract all the possible patterns from this originalLinks, not duplicating the already existing patterns
 
-//            vector<OrderedHandleSet >::iterator newExtendIt;
-//            OrderedHandleSet originalLinksToSet(originalLinks.begin(),originalLinks.end());
+//            vector<HandleSet >::iterator newExtendIt;
+//            HandleSet originalLinksToSet(originalLinks.begin(),originalLinks.end());
 //            bool alreadyExtracted = false;
 
 //            // check if these links have been extracted
 //            for(newExtendIt = newConnectedLinksFoundThisGram.begin(); newExtendIt != newConnectedLinksFoundThisGram.end(); ++newExtendIt)
 //            {
-//                OrderedHandleSet& exitstingLinks = (OrderedHandleSet&)(*newExtendIt);
+//                HandleSet& exitstingLinks = (HandleSet&)(*newExtendIt);
 //                if (exitstingLinks == originalLinksToSet)
 //                {
 //                    alreadyExtracted = true;
@@ -1212,7 +1212,7 @@ void PatternMiner::extendAPatternForOneMoreGramRecursively(const Handle &extende
 //            if (! alreadyExtracted)
 //            {
 //                newConnectedLinksFoundThisGram.push_back(originalLinksToSet);
-////                OrderedHandleSet sharedNodes; // only the current extending shared node is in sharedNodes for Depth first
+////                HandleSet sharedNodes; // only the current extending shared node is in sharedNodes for Depth first
 ////                sharedNodes.insert(extendNode);
 //                vector<HTreeNode*> allThisGramHTreeNodes;
 //                extractAllPossiblePatternsFromInputLinksDF(originalLinks, (unsigned int)(varIt->second), _fromAtomSpace, allLastGramHTreeNodes, allThisGramHTreeNodes, gram);
@@ -1406,7 +1406,7 @@ void PatternMiner::extendAPatternForOneMoreGramRecursively(const Handle &extende
 //                    HandleSeq outgoingLinks;
 //                    generateALinkByChosenVariables(link, patternVarMap, outgoingLinks, _fromAtomSpace);
 //                    Handle rebindedLink = atomSpace->add_link(link->getType(), outgoingLinks);
-//                    rebindedLink->merge(TruthValue::TRUE_TV());
+//                    rebindedLink->setTruthValue(TruthValue::TRUE_TV());
 
 //                    pattern.push_back(rebindedLink);
 //                }
