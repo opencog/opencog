@@ -2951,12 +2951,22 @@ echo "(+" $sum| guile
 =====================================================================
 French pairs
 
+cx1: what to do.
+/home/linas/postgres/etc/init.d/postgresql start
+psql -p 6543
+psql -p 6543 fr_ady
+cd /storage/wikipedia/frwiki-20131220-pages-articles
+./run-all-servers.sh
+
+
+
 french pairs: start again: 22:36PM 30 Jan - find submitted* |wc 17053 
                            12:25PM  2 Feb - find submitted* |wc 24563
                            11:43AM  4 Feb - find submitted* |wc 25361
                            11:34AM  5 Feb - find submitted* |wc 25830
                            19:19PM 10 Feb - find submitted* |wc 27763
                            20:16PM 14 Feb - find submitted* |wc 29720
+                                    2 Jul - find submitted* |wc 32526
 
 disk: 206447916 used 41097304 free
 disk  206574808 used 40970412 free  24 hours later... about 100MB more
@@ -2965,6 +2975,8 @@ disk  208585480 used 38959740 free  11:42 4 Feb ... 2.1GB more
 disk  208897572 used 38647648 free  00:00AM 5 feb
 disk  211829000 used 35716220 free  19:20 10 Feb
 disk  213607532 used 33937688 free  20:16 14 Feb
+-
+psql -p 6543 fr_ady:
 
 select count(*) from atoms;         2090064 --   2.1M -- 12:25PM  2 Feb
 select sum(stv_count) from atoms; 115251031 -- 115M   -- 12:25PM  2 Feb
@@ -2980,6 +2992,14 @@ select sum(stv_count) from atoms; 1289249056 -- 1.29G   -- 19:21PM 10 Feb
 
 select count(*) from atoms;         23072988 --   23.1M -- 20:20PM 14 Feb
 select sum(stv_count) from atoms; 1856669388 -- 1.86G   -- 20:20PM 14 Feb
+
+select count(*) from atoms;         33519967 --   33.5M - 2 Jul
+select sum(stv_count) from atoms; 2923838351 -- 2.92G   -
+
+vs fr_pairs:
+select count(*) from atoms; 11161199 -- 11M
+select sum(stv_count) from atoms; 6842302577 -- 6.8G !!
+
 
 
 guile/java ratio: 6781/683  = 9.93 -- 11:19AM  4 Feb
@@ -6624,6 +6644,24 @@ md5sum en_pairs_rfour.sql
 98e873b7626d22e04f914b043c14d6ec  en_pairs_rfour.sql
 6726298084cb8b6ad92a63419c91b416  en_pairs_rfour.sql.bz2
 
+
+==================================================================
+en_pairs_rthree_mone
+--------------------
+MST-parsed books from tranche-1, using pairs from rthree.
+
+STATUS: good
+DATE: 2 July 2017
+REASON: Best so far, I think.
+
+select count(*) from atoms;      -- 42237812 = 42.2M i.e. 7.2M more than rthree
+select count(*) from valuations; -- 58709672 = 58.7M i.e. 4.6M more than rthree
+
+5114130466 Bytes = 5.1 GBytes uncompressed.
+ 870711778 Bytes = 871 MB compressed
+
+564717bc7a950ede64218cf316459cd9  en_pairs_rthree_mone.sql
+8d508e61dcc2ee0ee4a739273ec37033  en_pairs_rthree_mone.sql.bz2
 
 ==================================================================
 
@@ -11085,6 +11123,7 @@ postgres:///en_pairs_ttwo_sim?user=linas
 Has a pile of cosines that should be stored ...
 
 	
+GC inf loop. ... 6121046016  observe-mst
 =========================================================================
 
 
