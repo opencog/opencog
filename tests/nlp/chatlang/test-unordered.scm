@@ -1,7 +1,13 @@
-(use-modules (opencog)
+(use-modules (srfi srfi-1) (opencog)
              (opencog nlp)
              (opencog nlp chatlang)
              (opencog openpsi))
+
+; unordered-matching is not define-public, so we have to load
+; terms.scm to test it.
+(load "../../../opencog/nlp/chatlang/translator.scm")
+(load "../../../opencog/nlp/chatlang/terms.scm")
+(set! test-get-lemma #t)
 
 (define w (cons 'word "drink"))
 (define l (cons 'lemma "eat"))

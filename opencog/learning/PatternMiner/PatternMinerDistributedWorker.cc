@@ -37,8 +37,6 @@
 #include <opencog/atoms/base/ClassServer.h>
 #include <opencog/atoms/base/Handle.h>
 #include <opencog/atoms/base/atom_types.h>
-#include <opencog/spacetime/atom_types.h>
-#include <opencog/embodiment/atom_types.h>
 #include <opencog/query/BindLinkAPI.h>
 #include <opencog/util/Config.h>
 
@@ -213,7 +211,7 @@ void DistributedPatternMiner::startMiningWork()
 
             cout << "Finding all Links contains these keywords...\n";
 
-            set<Handle> allLinksContainWhiteKeywordsSet;
+            HandleSet allLinksContainWhiteKeywordsSet;
             findAllLinksContainKeyWords(keyword_white_list, 0, true, allLinksContainWhiteKeywordsSet);
 
             std::copy(allLinksContainWhiteKeywordsSet.begin(), allLinksContainWhiteKeywordsSet.end(), std::back_inserter(allLinksContainWhiteKeywords));
@@ -360,7 +358,7 @@ void DistributedPatternMiner::growPatternsDepthFirstTask(unsigned int thread_ind
 
         swapOneLinkBetweenTwoAtomSpace(originalAtomSpace, observingAtomSpace, cur_link, outgoingLinks, outVariableNodes);
         Handle newLink = observingAtomSpace->add_link(cur_link->getType(), outgoingLinks);
-        newLink->merge(cur_link->getTruthValue());
+        newLink->setTruthValue(cur_link->getTruthValue());
 
 
         // Extract all the possible patterns from this originalLink, and extend till the max_gram links, not duplicating the already existing patterns

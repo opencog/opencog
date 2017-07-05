@@ -1,3 +1,6 @@
+
+(use-modules (opencog))
+
 (define AF_RENT_FREQUENCY  (ConceptNode "AF_RENT_FREQUENCY"))
 (define MAX_AF_SIZE (ConceptNode "MAX_AF_SIZE"))
 (define MIN_AF_SIZE (ConceptNode "MIN_AF_SIZE"))

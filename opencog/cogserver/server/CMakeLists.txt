@@ -49,10 +49,6 @@ TARGET_LINK_LIBRARIES(server
 	dl
 )
 
-IF (HAVE_PERSIST_SQL)
-	TARGET_LINK_LIBRARIES(server PersistModule)
-ENDIF (HAVE_PERSIST_SQL)
-
 IF (HAVE_CYTHON)
 	TARGET_LINK_LIBRARIES(server
 		${ATOMSPACE_PythonEval_LIBRARY}
@@ -64,10 +60,6 @@ ENDIF (HAVE_CYTHON)
 # IF (HAVE_GUILE)
 # 	TARGET_LINK_LIBRARIES(server scheme-shell ${ATOMSPACE_LIBRARIES})
 # ENDIF (HAVE_GUILE)
-
-IF (ODBC_FOUND)
-	TARGET_LINK_LIBRARIES(server PersistModule)
-ENDIF (ODBC_FOUND)
 
 # ------------------------------------------------------------
 # This defines the guile scheme loadable module

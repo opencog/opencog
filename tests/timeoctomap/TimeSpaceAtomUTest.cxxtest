@@ -53,7 +53,7 @@ public:
 
     void print_query_info(point3d query, opencog::Handle ato)
     {
-        if (ato != UndefinedHandle) {
+        if (ato != Handle()) {
             cout << "occupancy at " << query << ":\t " << ato<< endl;
         }
         else
@@ -66,7 +66,7 @@ public:
         cout << "generating example map" << endl;
 
         double res = 0.1;
-        TimeOctomap tsa(3, res, std::chrono::seconds(10));
+        TimeOctomap<Handle> tsa(3, res, std::chrono::seconds(10));
         time_pt t1 = tsa.get_current_time();
 
         // Insert some measurements of occupied cells
@@ -111,12 +111,12 @@ public:
         query = point3d(-1.0, -1.0, -1.0);
         result = tsa.get_atom_at_location(query);
         print_query_info(query, result);
-        TS_ASSERT_EQUALS(result, UndefinedHandle);
+        TS_ASSERT_EQUALS(result, Handle());
 
         query = point3d(100.0, 1.0, 1.0);
         result = tsa.get_atom_at_location(query);
         print_query_info(query, result);
-        TS_ASSERT_EQUALS(result, UndefinedHandle);
+        TS_ASSERT_EQUALS(result, Handle());
 
         cout << "at time:";
         query = point3d(0.0, 0.0, 0.0);
@@ -144,7 +144,7 @@ public:
         query = point3d(0.0, 0.0, 0.0);
         result = tsa.get_atom_at_location(query);
         print_query_info(query, result);
-        TS_ASSERT_EQUALS(result, UndefinedHandle);
+        TS_ASSERT_EQUALS(result, Handle());
 
         cout << "get locations at time:";
         pl = tsa.get_locations_of_atom_at_time(t1, testHandle);

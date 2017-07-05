@@ -3,6 +3,7 @@
 ;; Assorted functions for translating individual terms into Atomese fragments.
 
 (use-modules (ice-9 optargs))
+(use-modules (opencog exec))
 
 (define (word STR)
   "Literal word occurrence."
@@ -31,12 +32,31 @@
         (cons '() '())
         (map word (string-split STR #\ ))))
 
-(define* (concept STR #:optional (VAR (choose-var-name)))
+(define (get-concept-length CONCEPT)
+  "Helper function to find the maximum number of words CONCEPT has."
+  (define c (cog-outgoing-set (cog-execute!
+              (Get (Reference (Variable "$x") CONCEPT)))))
+  (if (null? c)
+      0
+      (fold (lambda (term len)
+        (let ((tl (cond ((equal? 'PhraseNode (cog-type term))
+                         (length (string-split (cog-name term) #\sp)))
+                        ((equal? 'ConceptNode (cog-type term))
+                         (get-concept-length term))
+                        (else 1))))
+             (max tl len)))
+        0
+        c)))
+
+(define* (concept STR #:optional (VAR (choose-var-name)) (IN-LEMMA? #f))
   "Occurrence of a concept."
   (cons (list (TypedVariable (Glob VAR)
-                             (TypeSet (Type "WordNode")
-                                      (Interval (Number 1) (Number -1)))))
-        (list (Evaluation (GroundedPredicate "scm: chatlang-concept?")
+                (TypeSet (Type "WordNode")
+                         (Interval (Number 1)
+                                   (Number (get-concept-length (Concept STR)))))))
+        (list (Evaluation (if IN-LEMMA?
+                              (GroundedPredicate "scm: chatlang-concept-in-lemma?")
+                              (GroundedPredicate "scm: chatlang-concept?"))
                           (List (Concept STR)
                                 (Glob VAR))))))
 
@@ -53,14 +73,31 @@
                           (Concept (cdr t)))))
        TERMS))
 
-(define* (choices TERMS #:optional (VAR (choose-var-name)))
+(define (get-term-length TERMS)
+  "Helper function to find the maximum number of words one of
+   the TERMS has."
+  (fold
+    (lambda (term len)
+      (let ((tl (cond ((equal? 'phrase (car term))
+                       (length (string-split (cdr term) #\sp)))
+                      ((equal? 'concept (car term))
+                       (get-concept-length (Concept (cdr term))))
+                      (else 1))))
+           (max len tl)))
+    0
+    TERMS))
+
+(define* (choices TERMS #:optional (VAR (choose-var-name)) (IN-LEMMA? #f))
   "Occurrence of a list of choices. Existence of either one of
    the words/lemmas/phrases/concepts in the list will be considered
    as a match."
   (cons (list (TypedVariable (Glob VAR)
                              (TypeSet (Type "WordNode")
-                                      (Interval (Number 1) (Number -1)))))
-        (list (Evaluation (GroundedPredicate "scm: chatlang-choices?")
+                                      (Interval (Number 1)
+                                                (Number (get-term-length TERMS))))))
+        (list (Evaluation (if IN-LEMMA?
+                              (GroundedPredicate "scm: chatlang-choices-in-lemma?")
+                              (GroundedPredicate "scm: chatlang-choices?"))
                           (List (List (terms-to-atomese TERMS))
                                 (Glob VAR))))))
 
@@ -92,11 +129,20 @@
         (list (Evaluation (GroundedPredicate "scm: chatlang-negation?")
                           (List (terms-to-atomese TERMS))))))
 
-(define (wildcard LOWER UPPER)
+(define* (wildcard LOWER UPPER #:optional (VAR (choose-var-name)))
   "Occurrence of a wildcard that the number of atoms to be matched
    can be restricted. -1 in the upper bound means infinity."
-  (let ((name (choose-var-name)))
-    (cons (list (TypedVariable (Glob name)
-                               (TypeSet (Type "WordNode")
-                                        (Interval (Number LOWER) (Number UPPER)))))
-          (list (Glob name)))))
+  (cons (list (TypedVariable (Glob VAR)
+                             (TypeSet (Type "WordNode")
+                                      (Interval (Number LOWER) (Number UPPER)))))
+        '()))
+
+(define* (variable TERM #:optional (VAR (choose-var-name)))
+  "Occurrence of a variable, where TERM can be a concept, a list of choices,
+   or a wildcard."
+  (cond ((equal? 'concept (car TERM))
+         (concept (cdr TERM) VAR))
+        ((equal? 'choices (car TERM))
+         (choices (cdr TERM) VAR))
+        ((equal? 'wildcard (car TERM))
+         (wildcard (cadr TERM) (cddr TERM) VAR))))

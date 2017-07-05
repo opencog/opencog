@@ -99,6 +99,7 @@ void PLNRulesUTest::setUp()
 		eval.eval(eval_str);
 	}
 
+	eval.eval("(add-to-load-path \"/usr/local/share\")");
 	eval.eval("(use-modules (opencog))");
 	eval.eval("(use-modules (opencog query))");
 	eval.eval("(use-modules (opencog logger))");
@@ -653,7 +654,7 @@ void PLNRulesUTest::test_closed_lambda_introduction()
 
 	// Rather than enumerating all possible constructions we just make
 	// sure the one that matters is in there.
-	std::set<Handle> sss;
+	HandleSet sss;
 	for (auto h : results->getOutgoingSet()) sss.insert(h);
 	TS_ASSERT(is_in(expected, sss));
 }
