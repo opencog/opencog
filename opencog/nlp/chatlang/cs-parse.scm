@@ -1,7 +1,9 @@
 (use-modules (ice-9 rdelim))
+(use-modules (ice-9 regex))
+(use-modules (ice-9 getopt-long))
 (use-modules (rnrs io ports))
 (use-modules (system base lalr))
-(use-modules (ice-9 regex))
+
 
 (define (display-token token)
 "
@@ -59,7 +61,7 @@
     ; Return command string.
     (let ((match (string-match "~" (match:substring current-match))))
       ; The suffix is the command and the prefix is the argument
-      (cons (match:suffix match) (match:prefix match))
+      (cons (match:suffix match) (string-trim (match:prefix match)))
     ))
 
   ; NOTE
@@ -68,66 +70,68 @@
   ; 2. #f is given as a token value for those cases which don't have any
   ;    semantic values.
   (cond
-    ((has-match? "^\\(" str) (result:suffix 'LPAREN location #f))
-    ((has-match? "^\\)" str) (result:suffix 'RPAREN location #f))
+    ((has-match? "^[ ]*\\(" str) (result:suffix 'LPAREN location #f))
+    ((has-match? "^[ ]*\\)" str) (result:suffix 'RPAREN location #f))
     ; Chatscript declarations
-    ((has-match? "^concept:" str) (result:suffix 'CONCEPT location #f))
-    ((has-match? "^topic:" str) (result:suffix 'TOPIC location #f))
-    ((has-match? "^\r" str)
-        (format #t  ">>lexer cr @ ~a\n" (show-location location))
-        (make-lexical-token 'CR location #f))
+    ((has-match? "^[ ]*concept:" str) (result:suffix 'CONCEPT location #f))
+    ((has-match? "^[ ]*topic:" str) (result:suffix 'TOPIC location #f))
+    ; The token value for 'CR is empty-string so as to handle multiline
+    ; rules.
+    ((has-match? "^[ ]*\r" str) (result:suffix 'CR location ""))
+    ; FIXME: This is not really newline.
     ((string=? "" str) (cons (make-lexical-token 'NEWLINE location #f) ""))
-    ((has-match? "^#!" str) ; This should be checked always before #
-        ; TODO Add tester function for this
-        (cons (make-lexical-token 'SAMPLE_INPUT location #f) ""))
-    ((has-match? "^#" str) (cons (make-lexical-token 'COMMENT location #f) ""))
+    ((has-match? "^[ \t]*#!" str) ; This should be checked always before #
+      ; TODO Add tester function for this
+      (cons (make-lexical-token 'SAMPLE_INPUT location #f) ""))
+    ((has-match? "^[ \t]*#" str)
+      (cons (make-lexical-token 'COMMENT location #f) ""))
     ; Chatscript rules
-    ((has-match? "^[s?u]:" str)
+    ((has-match? "^[ ]*[s?u]:" str)
       (result:suffix 'RESPONDERS location
-        (substring (match:substring current-match) 0 1)))
-    ((has-match? "^[a-q]:" str)
+        (substring (string-trim (match:substring current-match)) 0 1)))
+    ((has-match? "^[ \t]*[a-q]:" str)
       (result:suffix 'REJOINDERS location
-        (substring (match:substring current-match) 0 1)))
-    ((has-match? "^[rt]:" str) (result:suffix 'GAMBIT location #f))
-    ((has-match? "^_[0-9]" str)
+        (substring (string-trim (match:substring current-match)) 0 1)))
+    ((has-match? "^[ ]*[rt]:" str) (result:suffix 'GAMBIT location #f))
+    ((has-match? "^[ ]*_[0-9]" str)
       (result:suffix 'MVAR location
-        (substring (match:substring current-match) 1)))
-    ((has-match? "^[a-zA-Z]+_[a-zA-Z]+" str)
-        (result:suffix 'LITERAL location (match:substring current-match)))
-    ((has-match? "^_" str) (result:suffix '_ location #f))
+        (substring (string-trim (match:substring current-match)) 1)))
+    ((has-match? "^[ ]*_" str) (result:suffix 'VAR location #f))
     ; For dictionary keyword sets
-    ((has-match? "^[a-zA-Z]+~[a-zA-Z1-9]+" str)
+    ((has-match? "^[ ]*[a-zA-Z]+~[a-zA-Z1-9]+" str)
       (result:suffix 'LITERAL~COMMAND location (command-pair)))
     ; Range-restricted Wildcards.
     ; TODO Maybe replace with dictionary keyword sets then process it on action?
-    ((has-match? "^\\*~[1-9]+" str)
+    ((has-match? "^[ ]*\\*~[1-9]+" str)
       (result:suffix '*~n location
-        (substring (match:substring current-match) 2)))
-    ((has-match? "^~[a-zA-Z_]+" str)
+        (substring (string-trim (match:substring current-match)) 2)))
+    ((has-match? "^[ ]*~[a-zA-Z_]+" str)
       (result:suffix 'ID location
-        (substring (match:substring current-match) 1)))
-    ((has-match? "^," str) (result:suffix 'COMMA location ","))
-    ((has-match? "^\\^" str) (result:suffix '^ location #f))
-    ((has-match? "^\\[" str) (result:suffix 'LSBRACKET location #f))
-    ((has-match? "^]" str) (result:suffix 'RSBRACKET location #f))
-    ((has-match? "^<<" str) (result:suffix '<< location #f))
-    ((has-match? "^>>" str) (result:suffix '>> location #f))
+        (substring (string-trim (match:substring current-match)) 1)))
+    ((has-match? "^[ ]*," str) (result:suffix 'COMMA location ","))
+    ((has-match? "^[ ]*\\^" str) (result:suffix '^ location #f))
+    ((has-match? "^[ ]*\\[" str) (result:suffix 'LSBRACKET location #f))
+    ((has-match? "^[ ]*]" str) (result:suffix 'RSBRACKET location #f))
+    ((has-match? "^[ ]*<<" str) (result:suffix '<< location #f))
+    ((has-match? "^[ ]*>>" str) (result:suffix '>> location #f))
     ; This should follow <<
-    ((has-match? "^<" str) (result:suffix '< location #f))
+    ((has-match? "^[ ]*<" str) (result:suffix '< location #f))
     ; This should follow >>
-    ((has-match? "^>" str) (result:suffix '> location #f))
-    ((has-match? "^\"" str) (result:suffix 'DQUOTE location "\""))
-    ((has-match? "^\\*" str) (result:suffix '* location "*"))
-    ((has-match? "^!" str) (result:suffix '! location "!"))
-    ((has-match? "^[?]" str) (result:suffix '? location "?"))
-    ((has-match? "^[0-9]+" str)
-      (result:suffix 'NUM location (match:substring current-match)))
-    ; This should always be at the end.
-    ((has-match? "^['.,a-zA-Z-]+" str)
-      (result:suffix 'LITERAL location (match:substring current-match)))
-    (else
-      (format #t ">>Tokenizer non @ ~a\n" (show-location location))
-      (make-lexical-token 'NotDefined location str))
+    ((has-match? "^[ ]*>" str) (result:suffix '> location #f))
+    ((has-match? "^[ ]*\"" str) (result:suffix 'DQUOTE location "\""))
+    ((has-match? "^[ ]*\\*" str) (result:suffix '* location "*"))
+    ((has-match? "^[ ]*!" str) (result:suffix 'NOT location #f))
+    ((has-match? "^[ ]*[?]" str) (result:suffix '? location "?"))
+    ; This should always be near the end, because it is broadest of all.
+    ((has-match? "^[ \t]*['.,_!0-9a-zA-Z-]+" str)
+      (result:suffix 'LITERAL location
+        (string-trim (match:substring current-match))))
+    ; This should always be after the above so as to match words like "3D".
+    ((has-match? "^[ ]*[0-9]+" str)
+      (result:suffix 'NUM location
+        (string-trim (match:substring current-match))))
+    ; NotDefined token is used for errors only and there shouldn't be any rules.
+    (else (cons (make-lexical-token 'NotDefined location str) ""))
   )
 )
 
@@ -147,7 +151,8 @@
                 (string-contains initial-line cs-line)))))
         (if (eof-object? cs-line)
           '*eoi*
-          (let ((result (tokeniz (string-trim-both cs-line) port-location)))
+          (let ((result (tokeniz cs-line port-location)))
+            ; This is a sanity check for the tokenizer
             (if (pair? result)
               (begin
                 (set! cs-line (cdr result))
@@ -155,16 +160,17 @@
                 (car result))
               (error (format #f "Tokenizer issue => ~a," result))
             )))))
+
   )
 )
 
 (define cs-parser
   (lalr-parser
-    ;; --- Options
+    ;; Options mainly for debugging
     ;; output a parser, called ghost-parser, in a separate file - ghost.yy.scm,
-    (output: ghost-parser "ghost.yy.scm")
-    ;; output the LALR table to ghost.out
-    (out-table: "ghost.out")
+    ;(output: ghost-parser "ghost.yy.scm")
+    ;;; output the LALR table to ghost.out
+    ;(out-table: "ghost.out")
     ;; there should be no conflict
     ;(expect:    5)
 
@@ -182,27 +188,24 @@
     ; *~n = Range-restricted Wildcards
     ; MVAR = Match Variables
     ; ? = Comparison tests
-    (NEWLINE CR CONCEPT TOPIC RESPONDERS REJOINDERS GAMBIT
-      NotDefined COMMENT SAMPLE_INPUT WHITESPACE COMMA
-      ~ ; Concepts
-      (right: LPAREN LSBRACKET << ID _ * ^ < LITERAL NUM
-        LITERAL~COMMAND *~n MVAR)
-      (left: RPAREN RSBRACKET >> > DQUOTE)
-      (right: ! ?)
+    (CONCEPT TOPIC RESPONDERS REJOINDERS GAMBIT COMMENT SAMPLE_INPUT WHITESPACE
+      COMMA
+      (right: LPAREN LSBRACKET << ID VAR * ^ < LITERAL NUM LITERAL~COMMAND
+              *~n MVAR)
+      (left: RPAREN RSBRACKET >> > DQUOTE NOT)
+      (right: ? CR NEWLINE)
     )
 
     ; Parsing rules (aka nonterminal symbols)
-    (lines
-      (line) : (if $1 (format #t "\nline is ~a\n" $1))
-      (lines line) : (if $2 (format #t "\nlines: ~a\n" $2))
+    (inputs
+      (input) : (if $1 (format #t "\nInput: ~a\n" $1))
+      (inputs input) : (if $2 (format #t "\nInput: ~a\n" $2))
     )
 
-    (line
+    (input
       (declarations) : $1
       (rules) : $1
-      (CR) : #f
-      (NotDefined) : (display-token $1)
-      (NEWLINE) : #f
+      (enter) : $1
       (COMMENT) : #f
       (SAMPLE_INPUT) : #f ; TODO replace with a tester function
     )
@@ -227,22 +230,35 @@
     )
 
     (patterns
+      (enter) :  $1
       (pattern) : (display-token $1)
       (patterns pattern) : (display-token (format #f "~a ~a" $1 $2))
+      (patterns enter) : (display-token (format #f "~a" $1))
+    )
+
+    (enter
+      (an-enter) : $1
+      (enter an-enter) : $1
+    )
+
+    (an-enter
+      (CR) : $1
+      (NEWLINE) : #f
     )
 
     ; TODO: Give this a better name. Maybe should be divided into
     ; action-pattern and context-pattern ????
     (pattern
       (a-literal) : (display-token $1)
-      (a-literal !) : (display-token (format #f "~a~a" $1 $2))
       (a-literal ?) : (display-token (format #f "~a~a" $1 $2))
       (variable)  : (display-token $1)
       (collections) : (display-token $1)
       (unordered-matching) : (display-token $1)
       (function) : (display-token $1)
-      (! pattern) : (display-token (format #f "Not(~a)" $2))
+      (NOT pattern) : (display-token (format #f "Not(~a)" $2))
       (< patterns) : (display-token (format #f "restart_matching(~a)" $2))
+      ; FIXME end_of_sentence is not necessarily complete.
+      (pattern >) : (display-token (format #f "@end_of_sentence(~a)" $1))
       (a-sequence) : (display-token $1)
       (phrase) : (display-token $1)
       (variable ? collections) :
@@ -267,10 +283,6 @@
     (unordered-matching
       (<< patterns >>) : (display-token (format #f "unordered-matching(~a)" $2))
     )
-
-    ;(sentence-boundary
-    ;  (patterns >) : (display-token (format #f "match_at_end(~a)" $1))
-    ;)
 
     (function
       (^ a-literal LPAREN args RPAREN) :
@@ -298,8 +310,8 @@
     )
 
     (variable
-      (_ LITERAL) : (display-token (format #f "variable(~a)" $2))
-      (_ collections) : (display-token (format #f "variable(~a)" $2))
+      (VAR LITERAL) : (display-token (format #f "variable(~a)" $2))
+      (VAR collections) : (display-token (format #f "variable(~a)" $2))
       (MVAR) : (display-token (format #f "match_variable(~a)" $1))
     )
 
@@ -315,6 +327,9 @@
 
 ; Test lexer
 (define (test-lexer lexer)
+"
+  For testing the lexer pass a lexer created by make-cs-lexer.
+"
   (define temp (lexer))
   (if (lexical-token? temp)
     (begin
@@ -328,8 +343,21 @@
   (cs-lexer (open-file-input-port file-path))
 )
 
-;(test-lexer (make-cs-lexer "test.top"))
+(define (main args)
+"
+  This function is to be used from the command-line as follows
 
-; Test parser
-(cs-parser (make-cs-lexer "test.top") error)
-(display "\n--------- Finished a file ---------\n")
+  guile -e main -s parse.scm -f path/to/cs/file.top
+"
+  (let* ((option-spec
+            '((file (single-char #\f) (required? #t) (value #t))))
+  ;(predicate file-exists?)))) FIXME: Wrong type to apply: file-exists?
+    (options (getopt-long args option-spec))
+    (input-file (option-ref options 'file #f)))
+    (if input-file
+      (begin
+        (format #t "\n--------- Starting parsing of ~a ---------\n" input-file)
+        (cs-parser (make-cs-lexer input-file) error)
+        (format #t "\n--------- Finished parsing of ~a ---------\n" input-file)
+      )))
+)
