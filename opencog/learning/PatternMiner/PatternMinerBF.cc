@@ -566,7 +566,7 @@ void PatternMiner::GrowAllPatternsBF()
     }
 }
 
-void PatternMiner::swapOneLinkBetweenTwoAtomSpaceBF(AtomSpace* fromAtomSpace, AtomSpace* toAtomSpace, Handle& fromLink, HandleSeq& outgoings,
+void PatternMiner::swapOneLinkBetweenTwoAtomSpaceForBindLink(AtomSpace* fromAtomSpace, AtomSpace* toAtomSpace, Handle& fromLink, HandleSeq& outgoings,
                                                   HandleSeq &outVariableNodes, HandleSeq& linksWillBeDel, bool& containVar )
 {
     containVar = false;
@@ -590,7 +590,7 @@ void PatternMiner::swapOneLinkBetweenTwoAtomSpaceBF(AtomSpace* fromAtomSpace, At
         {
              HandleSeq _OutgoingLinks;
              bool _containVar;
-             swapOneLinkBetweenTwoAtomSpaceBF(fromAtomSpace, toAtomSpace, h, _OutgoingLinks, outVariableNodes,linksWillBeDel,  _containVar);
+             swapOneLinkBetweenTwoAtomSpaceForBindLink(fromAtomSpace, toAtomSpace, h, _OutgoingLinks, outVariableNodes,linksWillBeDel,  _containVar);
              Handle _link = toAtomSpace->add_link(h->getType(), _OutgoingLinks);
              _link->setTruthValue(h->getTruthValue());
              if (_containVar)
@@ -604,7 +604,7 @@ void PatternMiner::swapOneLinkBetweenTwoAtomSpaceBF(AtomSpace* fromAtomSpace, At
 }
 
 // linksWillBeDel are all the links contain varaibles. Those links need to be deleted after run BindLink
-HandleSeq PatternMiner::swapLinksBetweenTwoAtomSpaceBF(AtomSpace* fromAtomSpace, AtomSpace* toAtomSpace, HandleSeq& fromLinks, HandleSeq& outVariableNodes, HandleSeq& linksWillBeDel)
+HandleSeq PatternMiner::swapLinksBetweenTwoAtomSpaceForBindLink(AtomSpace* fromAtomSpace, AtomSpace* toAtomSpace, HandleSeq& fromLinks, HandleSeq& outVariableNodes, HandleSeq& linksWillBeDel)
 {
     HandleSeq outPutLinks;
 
@@ -612,7 +612,7 @@ HandleSeq PatternMiner::swapLinksBetweenTwoAtomSpaceBF(AtomSpace* fromAtomSpace,
     {
         HandleSeq outgoingLinks;
         bool containVar;
-        swapOneLinkBetweenTwoAtomSpaceBF(fromAtomSpace, toAtomSpace, link, outgoingLinks, outVariableNodes, linksWillBeDel,containVar);
+        swapOneLinkBetweenTwoAtomSpaceForBindLink(fromAtomSpace, toAtomSpace, link, outgoingLinks, outVariableNodes, linksWillBeDel,containVar);
         Handle toLink = toAtomSpace->add_link(link->getType(), outgoingLinks);
         toLink->setTruthValue(link->getTruthValue());
         if (containVar)
@@ -645,7 +645,7 @@ void PatternMiner::findAllInstancesForGivenPatternBF(HTreeNode* HNode)
 
    HandleSeq bindLinkOutgoings, variableNodes, linksWillBeDel;
 
-   HandleSeq patternToMatch = swapLinksBetweenTwoAtomSpaceBF(atomSpace, originalAtomSpace, HNode->pattern, variableNodes, linksWillBeDel);
+   HandleSeq patternToMatch = swapLinksBetweenTwoAtomSpaceForBindLink(atomSpace, originalAtomSpace, HNode->pattern, variableNodes, linksWillBeDel);
 
 //   HandleSet allNodesInPattern;
 //   for (unsigned int i = 0; i < HNode->pattern.size(); ++i)
