@@ -1335,7 +1335,7 @@ void PatternMiner::OutPutStaticsToCsvFile(unsigned int n_gram)
     csvFile.open(csvfileName.c_str());
 
 
-    csvFile << "Pattern,Frequency,Surprisingness_I,Surprisingness_II, " << std::endl;
+    csvFile << "Frequency,Surprisingness_I,Surprisingness_II, " << std::endl;
 
     for (HTreeNode* htreeNode : patternsForThisGram)
     {
@@ -1344,10 +1344,11 @@ void PatternMiner::OutPutStaticsToCsvFile(unsigned int n_gram)
 
         csvFile << htreeNode->count << "," << htreeNode->nI_Surprisingness << ",";
 
-        if (htreeNode->superPatternRelations.size() > 0)
-            csvFile << htreeNode->nII_Surprisingness;
-        else
-            csvFile << "unknown";
+        csvFile << htreeNode->nII_Surprisingness;
+//        if (htreeNode->superPatternRelations.size() > 0)
+//            csvFile << htreeNode->nII_Surprisingness;
+//        else
+//            csvFile << "unknown";
 
         csvFile << std::endl;
     }
@@ -2735,7 +2736,7 @@ void PatternMiner::calculateSurprisingness( HTreeNode* HNode, AtomSpace *_fromAt
         if (OUTPUT_SURPRISINGNESS_CALCULATION_TO_FILE)
         {
             HNode->surprisingnessInfo += ", expect = " + toString(total_p) + "x" + toString(allNum) + " = "
-                    + toString((int)(total_p * ((float)allNum))) + ", nDiff = " + toString(diff) + "}";
+                    + toString((total_p * ((float)allNum))) + ", nDiff = " + toString(diff) + "}";
         }
 
     }
@@ -2809,6 +2810,7 @@ void PatternMiner::calculateSurprisingness( HTreeNode* HNode, AtomSpace *_fromAt
             // Surprisingness_II (A from Ap) =  |P(A) - P(Ap)*P(Lily)/P(E)| / P(A)
             // when the TruthValue of each atom is not taken into account, because every atom is unique, any P(Const atom) = 1/M , so that P(Lily) = 1/M
             // So: Surprisingness_II (A from Ap) =  |P(A) - P(Ap)/Count(E)| / P(A)
+            // When Count (E) = 1, it means this super pattern is not really more generalized, so this super pattern should be skipped.
 
             // Note that becasue of unifying patern, the varible order in A, Ap, E can be different
             // HandleSeq& patternAp = curSuperRelation.extendedHTreeNode->pattern;
@@ -2827,8 +2829,8 @@ void PatternMiner::calculateSurprisingness( HTreeNode* HNode, AtomSpace *_fromAt
 
             unsigned int patternE_count = getCountOfAConnectedPattern(patternEKey, unifiedPatternE);
 
-//            if (patternE_count == 0)
-//                cout << "Warning: In calculate II_Surprisingness, Extended Link is missing: \n" << patternEKey << std::endl;
+           if (patternE_count == 1)
+               continue; // This super pattern is not really more generalized, skipped it!
 
             float p_ApDivByCountE = p_Ap / ( (float)(patternE_count) );
 
@@ -3453,7 +3455,7 @@ void PatternMiner::runInterestingnessEvaluation()
             std::sort(curGramPatterns.begin(), curGramPatterns.end(),compareHTreeNodeBySurprisingness_II);
             OutPutInterestingPatternsToFile(curGramPatterns,cur_gram,2);
 
-            // OutPutStaticsToCsvFile(cur_gram);
+            OutPutStaticsToCsvFile(cur_gram);
 
             // Get the min threshold of surprisingness_II
             int threshold_index_II;
