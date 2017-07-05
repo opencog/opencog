@@ -33,17 +33,15 @@
 #include <sstream>
 #include <thread>
 
+#include <boost/algorithm/string.hpp>
+#include <boost/algorithm/string/regex.hpp>
+
+#include <opencog/util/Config.h>
+
 #include <opencog/atoms/base/ClassServer.h>
 #include <opencog/atoms/base/Handle.h>
 #include <opencog/atoms/base/atom_types.h>
-#include <opencog/spacetime/atom_types.h>
-#include <opencog/embodiment/atom_types.h>
 #include <opencog/learning/PatternMiner/types/atom_types.h>
-//#include <opencog/atoms/bind/BindLink.h>
-#include <opencog/query/BindLinkAPI.h>
-#include <opencog/util/Config.h>
-#include <boost/algorithm/string.hpp>
-#include <boost/algorithm/string/regex.hpp>
 
 #include "PatternMiner.h"
 
