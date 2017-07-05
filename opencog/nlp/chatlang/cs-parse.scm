@@ -127,7 +127,8 @@
     ((has-match? "^[ ]*[0-9]+" str)
       (result:suffix 'NUM location
         (string-trim (match:substring current-match))))
-    (else (make-lexical-token 'NotDefined location str))
+    ; NotDefined token is used for errors only and there shouldn't be any rules.
+    (else (cons (make-lexical-token 'NotDefined location str) ""))
   )
 )
 
@@ -182,9 +183,8 @@
     ; *~n = Range-restricted Wildcards
     ; MVAR = Match Variables
     ; ? = Comparison tests
-    (NEWLINE CR CONCEPT TOPIC RESPONDERS REJOINDERS GAMBIT
-      NotDefined COMMENT SAMPLE_INPUT WHITESPACE COMMA
-      ~ ; Concepts
+    (NEWLINE CR CONCEPT TOPIC RESPONDERS REJOINDERS GAMBIT COMMENT
+      SAMPLE_INPUT WHITESPACE COMMA
       (right: LPAREN LSBRACKET << ID VAR * ^ < LITERAL NUM
         LITERAL~COMMAND *~n MVAR)
       (left: RPAREN RSBRACKET >> > DQUOTE NOT)
@@ -201,7 +201,6 @@
       (declarations) : $1
       (rules) : $1
       (CR) : #f
-      (NotDefined) : (display-token $1)
       (NEWLINE) : #f
       (COMMENT) : #f
       (SAMPLE_INPUT) : #f ; TODO replace with a tester function
