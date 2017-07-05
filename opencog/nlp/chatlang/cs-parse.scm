@@ -75,7 +75,10 @@
     ; Chatscript declarations
     ((has-match? "^[ ]*concept:" str) (result:suffix 'CONCEPT location #f))
     ((has-match? "^[ ]*topic:" str) (result:suffix 'TOPIC location #f))
-    ((has-match? "^[ ]*\r" str) (result:suffix 'CR location #f))
+    ; The token value for 'CR is empty-string so as to handle multiline
+    ; rules.
+    ((has-match? "^[ ]*\r" str) (result:suffix 'CR location ""))
+    ; FIXME: This is not really newline.
     ((string=? "" str) (cons (make-lexical-token 'NEWLINE location #f) ""))
     ((has-match? "^[ \t]*#!" str) ; This should be checked always before #
       ; TODO Add tester function for this
@@ -120,7 +123,7 @@
     ((has-match? "^[ ]*!" str) (result:suffix 'NOT location #f))
     ((has-match? "^[ ]*[?]" str) (result:suffix '? location "?"))
     ; This should always be near the end, because it is broadest of all.
-    ((has-match? "^[ ]*['.,_!0-9a-zA-Z-]+" str)
+    ((has-match? "^[ \t]*['.,_!0-9a-zA-Z-]+" str)
       (result:suffix 'LITERAL location
         (string-trim (match:substring current-match))))
     ; This should always be after the above so as to match words like "3D".
@@ -149,6 +152,7 @@
         (if (eof-object? cs-line)
           '*eoi*
           (let ((result (tokeniz cs-line port-location)))
+            ; This is a sanity check for the tokenizer
             (if (pair? result)
               (begin
                 (set! cs-line (cdr result))
@@ -156,6 +160,7 @@
                 (car result))
               (error (format #f "Tokenizer issue => ~a," result))
             )))))
+
   )
 )
 
@@ -183,12 +188,12 @@
     ; *~n = Range-restricted Wildcards
     ; MVAR = Match Variables
     ; ? = Comparison tests
-    (NEWLINE CR CONCEPT TOPIC RESPONDERS REJOINDERS GAMBIT COMMENT
-      SAMPLE_INPUT WHITESPACE COMMA
-      (right: LPAREN LSBRACKET << ID VAR * ^ < LITERAL NUM
-        LITERAL~COMMAND *~n MVAR)
+    (CONCEPT TOPIC RESPONDERS REJOINDERS GAMBIT COMMENT SAMPLE_INPUT WHITESPACE
+      COMMA
+      (right: LPAREN LSBRACKET << ID VAR * ^ < LITERAL NUM LITERAL~COMMAND
+              *~n MVAR)
       (left: RPAREN RSBRACKET >> > DQUOTE NOT)
-      (right: ?)
+      (right: ? CR NEWLINE)
     )
 
     ; Parsing rules (aka nonterminal symbols)
@@ -200,8 +205,7 @@
     (line
       (declarations) : $1
       (rules) : $1
-      (CR) : #f
-      (NEWLINE) : #f
+      (enter) : $1
       (COMMENT) : #f
       (SAMPLE_INPUT) : #f ; TODO replace with a tester function
     )
@@ -226,8 +230,20 @@
     )
 
     (patterns
+      (enter) :  $1
       (pattern) : (display-token $1)
       (patterns pattern) : (display-token (format #f "~a ~a" $1 $2))
+      (patterns enter) : (display-token (format #f "~a" $1))
+    )
+
+    (enter
+      (an-enter) : $1
+      (enter an-enter) : $1
+    )
+
+    (an-enter
+      (CR) : $1
+      (NEWLINE) : #f
     )
 
     ; TODO: Give this a better name. Maybe should be divided into
