@@ -22,6 +22,7 @@
 #ifndef TEMPLATE_OCTREE_H
 #define TEMPLATE_OCTREE_H
 
+#include <bitset>
 #include <iostream>
 #include "AtomOcTreeNode.h"
 #include <octomap/OccupancyOcTreeBase.h>
