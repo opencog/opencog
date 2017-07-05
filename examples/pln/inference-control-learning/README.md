@@ -53,8 +53,8 @@ Inheritance
 
 where X is a letter preceding Y.
 
-Experiment Algorithm
---------------------
+Experiment High Level Algorithm
+-------------------------------
 
 0. 
    1. Randomly generate a set of N problems, called PS, given a random
@@ -104,8 +104,8 @@ subtree with root T (such as in graph theory, not computer data
 structure) of an inference tree proving T. The reason we use preproof
 as measure of success, as opposed to say the likelihood of finding a
 proof within the allocated effort, is because it is independent on the
-difficulty of the problem. If we can produce a preproof it means we're
-on the right track no matter. This may hopefully make it easier to
+difficulty of the problem. If we can find a preproof it means we're on
+the right track no matter. This may hopefully make it easier to
 transfer this knowledge across problem difficulties.
 
 This experiment is simple enough that the context that the backward
@@ -158,11 +158,9 @@ is obtained by direct evaluation over the subset of observations of
 the corpus of proofs involving <rule>. There is a subtlety though, in
 the cases where B is not in the trace of subproofs of T we simply
 don't know whether or not it could be a subproof, as such we cannot
-evaluate its TV as false. Instead we evaluate these as unknown, which
-would correspond to an simple TV with null confidence. So when we
-calculate the TV of the rule we need to take all these unknown into
-account and they will flatten the associate distribution, even when
-the number of instances is very high. TODO: find the exact formula.
+evaluate its TV as false. Instead we rely on a uncertain prior as
+explained in Subsection Record Inference Traces to have uncertain and
+partial negative observations.
 
 ```
 ImplicationScope <rule-TV>
@@ -354,13 +352,88 @@ TODO: give an example with double deduction.
 [DEBUG] [URE] With inference tree:
 ```
 
-Learning Inference Control Rules
+Learn Inference Control Rules
+-----------------------------
+
+### Record Inference Traces
+
+The Backward Chainer can record the following knowledge while
+searching for a proof
+
+1. Back-expanding an and-BIT from a certain leaf with certain rule
+   produces a new and-BIT
+```
+   ExecutionLink (stv 1 1)
+     SchemaNode "URE:BC:expand-and-BIT"
+     List
+       <andbit_fcs>
+       <bitleaf_body>
+       <rule>
+     <new_andbit>
+```
+2. A certain and-BIT proofs a certain target
+```
+   EvaluationLink <TV>
+     PredicateNode "URE:BC:proof"
+     List
+       <andbit_fcs>
+       <target_result> <TV>
+```
+
+Combining that with axiomatic knowledge about proof and preproof we
+can produce a corpus relating and-BITs and targets via the preproof
+relationship. For instance if B is a proof of T, we can infer that B
+is preproof of T as well.  Moreover if A expands into B, we can infer
+that A is a preproof of T.
+
+```
+   EvaluationLink <1 1>
+     PredicateNode "ICL:preproof"
+     List
+       <A>
+       <T>
+```
+
+Likewise, if no and-BIT C is ever related to T via the preproof
+relationship, we can infer that C is unlikely, though still possible,
+to be a preproof of T.
+
+```
+   EvaluationLink <0.0001 0.01>
+     PredicateNode "ICL:preproof"
+     List
+       <A>
+       <T>
+```
+
+The low confidence captures that we are unsure about the prior
+itself. But is still important, otherwise we'd have only positive
+examples to build our inference control rules, which would all end up
+with a precision of 1, thus rules with the highest counts would become
+the most important in the mixture model (see Section Produce Inference
+Control Policy), regardless of their discriminative powers. Over time
+this prior should be autoadjusted via PLN reasoning.
+
+These inferences are rather trivial and do not require learning their
+inference control to be tractable. See `meta-kb.scm` and `meta-rb.scm`
+for their knowledge and the rule bases.
+
+### Produce Inference Control Rules
+
+Given a corpus relating and-BITs and targets via the preproof
+relationship we can mine that corpus to obtain inference control
+rules, then combine these inference control rules to obtain an
+inference control policy, as described in the next Section.
+
+We expect the pattern miner will be useful for mining the corpus,
+meanwhile we'll experiment with bruteforce implication scope
+introduction PLN rule that should be less efficient but easier to
+start with. After that, we'll probably want to wrap the pattern miner
+in some more specialized and also more efficient implication scope
+indroduction rule.
+
+Produce Inference Control Policy
 --------------------------------
-
-TODO: pattern mining, etc.
-
-Inference Control Policy
-------------------------
 
 Once we have a learned a bunch of inference control rules we need
 properly utilize them to form an Inference Control Policy. Below we
@@ -446,11 +519,30 @@ CDF_ICRi(S|R)(x) = Int_0^x p^X*(1-p)^(N-X) dp
 `N` is the number of observations and `X` the positive count. Which
 corresponds to, up to a multiplicative constant, the second order
 distribution representing a TV as defined in Section 4.5.1 of the PLN
-book. That is assuming that all observations are certain (based on
-perfect sensors). We'll see that we actually do need to consider
-imperfect sensors.
+book. So up to a multiplicative constant `FCS_ICRi(S|R)` both
+corresponds to the TV of `ICRi(S|R)` and `Prod_j
+ICRi(Sj|Rj)`. According equation 2 in Section 4.5.1 of the PLN book
+this constant factor is
 
-TODO: how to properly normalize?
+```
+(N+1)*(choose N X)
+```
+
+so that `CDF_ICRi(S|R)(1) = 1`. So accounting for that as well as the
+normalization of the prior we end up with a normalizing term
+
+```
+nt = Sum_i=0^n (Ni+1) * (choose Ni Xi) * P(ICRi)
+```
+
+That is assuming that all observations are certain (based on perfect
+sensors). We actually do need to consider imperfect sensors because
+the negative observations of preproof have uncertainties, as explained
+in Subsection Record Inference Traces. It is expected that we'll have
+to resort to convolution products, because the pdf of a random
+variable equal to the sum of other random variables is determined by
+the convolution products of their pdfs. But we let that for later,
+maybe there's a simpler way we haven't seen yet.
 
 Once we have that we can calculate the TVi of success of each valid
 inference rule Ri, either by turning its cdf into a TV or a pdf as it
@@ -541,7 +633,8 @@ Using cdfs this can be simplified into
 P1 = I1_0^1 pdf1(p1) * cdf2(p1) * ... * cdfn(p1) dp1
 ```
 
-If we store the values of
+If we store the values (assuming we don't already have them stored in
+the TV objects) of
 
 ```
 pdfi(p)
@@ -556,7 +649,28 @@ cdfi(p)
 in two `n*m` tables, for `i` in `[0, n)` and `p` in `(0/m, m/m]`, then
 the complexity should be around `O(n*M)`, all rules considered. In the
 end we end up with a distribution of actions according to which we can
-pick up our next inference rule.
+select our next inference rule.
+
+Further Remarks
+---------------
+
+This is a fairely general proprosal, for instance although only the
+rule selection step is considered, it pretty much covers most (if not
+all) hard decision points occuring in the Backward Chainer
+algorithm. For instance choosing an and-BIT for expansion comes down
+to choosing an unexplored preproof. Choosing the next leaf to expand
+from, consists of choosing a leaf such that there exists an inference
+rule that expands into a preproof. So the inference control rules can
+in fact be re-used, or need little modifications, for other decisional
+points.
+
+There is however a problem that has been completely left out. How to
+characterize the AtomSpace, i.e. the knowledge base. Proof structures
+and sizes depends on it. It is expected that we'll have to capture
+relevant properties of the knowledge base, which seems hard given how
+complex it can be. Maybe dimensional embeding will be shown to be
+useful, amonsgt many other techniques. Similarily, how ECAN is gonna
+interact synergetically with this is not clear to me at this point.
 
 References
 ----------
