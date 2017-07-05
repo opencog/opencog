@@ -197,12 +197,12 @@
     )
 
     ; Parsing rules (aka nonterminal symbols)
-    (lines
-      (line) : (if $1 (format #t "\nline is ~a\n" $1))
-      (lines line) : (if $2 (format #t "\nlines: ~a\n" $2))
+    (inputs
+      (input) : (if $1 (format #t "\nInput: ~a\n" $1))
+      (inputs input) : (if $2 (format #t "\nInput: ~a\n" $2))
     )
 
-    (line
+    (input
       (declarations) : $1
       (rules) : $1
       (enter) : $1
