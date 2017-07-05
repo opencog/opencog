@@ -4591,49 +4591,46 @@ HandleSeq PatternMiner::loadPatternIntoAtomSpaceFromString(string patternStr, At
 
     for (string linkStr : strs) // load each link
     {
-        if (linkStr == "")
-            continue;
+        if (linkStr == "") continue;
 
-            HandleSeq rootOutgoings;
+        HandleSeq rootOutgoings;
 
-            std::size_t firstLineEndPos = linkStr.find("\n");
-            std::string rootOutgoingStr = linkStr.substr(firstLineEndPos + 1);
-            stringstream outgoingStream(rootOutgoingStr);
+        std::size_t firstLineEndPos = linkStr.find("\n");
+        std::string rootOutgoingStr = linkStr.substr(firstLineEndPos + 1);
+        stringstream outgoingStream(rootOutgoingStr);
 
-            if (! loadOutgoingsIntoAtomSpaceFromString(outgoingStream, _atomSpace, rootOutgoings))
-            {
-                cout << "Warning: loadPatternIntoAtomSpaceFromString: Parse pattern string error: " << linkStr << std::endl;
-                HandleSeq emptyPattern;
-                return emptyPattern;
-            }
+        if (! loadOutgoingsIntoAtomSpaceFromString(outgoingStream, _atomSpace, rootOutgoings))
+        {
+            cout << "Warning: loadPatternIntoAtomSpaceFromString: Parse pattern string error: " << linkStr << std::endl;
+            HandleSeq emptyPattern;
+            return emptyPattern;
+        }
 
-            std::size_t typeEndPos = linkStr.find(" ");
-            string atomTypeStr = linkStr.substr(1, typeEndPos - 1);
-            string linkOrNodeStr = atomTypeStr.substr(atomTypeStr.size() - 4, 4);
+        std::size_t typeEndPos = linkStr.find(" ");
+        string atomTypeStr = linkStr.substr(1, typeEndPos - 1);
+        string linkOrNodeStr = atomTypeStr.substr(atomTypeStr.size() - 4, 4);
 
-            if (linkOrNodeStr != "Link")
-            {
+        if (linkOrNodeStr != "Link")
+        {
 
-                cout << "Warning: loadPatternIntoAtomSpaceFromString: Not a Link: " << linkOrNodeStr << std::endl;
-                HandleSeq emptyPattern;
-                return emptyPattern;
+            cout << "Warning: loadPatternIntoAtomSpaceFromString: Not a Link: " << linkOrNodeStr << std::endl;
+            HandleSeq emptyPattern;
+            return emptyPattern;
 
-            }
+        }
 
-            Type atomType = classserver().getType(atomTypeStr);
-            if (NOTYPE == atomType)
-            {
+        Type atomType = classserver().getType(atomTypeStr);
+        if (NOTYPE == atomType)
+        {
 
-                cout << "Warning: loadPatternIntoAtomSpaceFromString: Not a valid typename: " << atomTypeStr << std::endl;
-                HandleSeq emptyPattern;
-                return emptyPattern;
+            cout << "Warning: loadPatternIntoAtomSpaceFromString: Not a valid typename: " << atomTypeStr << std::endl;
+            HandleSeq emptyPattern;
+            return emptyPattern;
 
-            }
+        }
 
-            Handle rootLink = _atomSpace->add_link(atomType, rootOutgoings);
-            pattern.push_back(rootLink);
-
-
+        Handle rootLink = _atomSpace->add_link(atomType, rootOutgoings);
+        pattern.push_back(rootLink);
     }
 
     // debug:
@@ -4761,49 +4758,46 @@ HandleSeq PatternMiner::loadPatternIntoAtomSpaceFromFileString(string patternStr
 
     for (string linkStr : strs) // load each link
     {
-        if (linkStr == "")
-            continue;
+        if (linkStr == "") continue;
 
-            HandleSeq rootOutgoings;
+        HandleSeq rootOutgoings;
 
-            std::size_t firstLineEndPos = linkStr.find("\n"); //(EvaluationLink (stv 1.000000 1.000000)\n
-            std::string rootOutgoingStr = linkStr.substr(firstLineEndPos + 1);
-            stringstream outgoingStream(rootOutgoingStr);
+        std::size_t firstLineEndPos = linkStr.find("\n"); //(EvaluationLink (stv 1.000000 1.000000)\n
+        std::string rootOutgoingStr = linkStr.substr(firstLineEndPos + 1);
+        stringstream outgoingStream(rootOutgoingStr);
 
-            if (! loadOutgoingsIntoAtomSpaceFromAtomString(outgoingStream, _atomSpace, rootOutgoings))
-            {
-                cout << "Warning: loadPatternIntoAtomSpaceFromFileString: Parse pattern string error: " << linkStr << std::endl;
-                HandleSeq emptyPattern;
-                return emptyPattern;
-            }
+        if (! loadOutgoingsIntoAtomSpaceFromAtomString(outgoingStream, _atomSpace, rootOutgoings))
+        {
+            cout << "Warning: loadPatternIntoAtomSpaceFromFileString: Parse pattern string error: " << linkStr << std::endl;
+            HandleSeq emptyPattern;
+            return emptyPattern;
+        }
 
-            std::size_t typeEndPos = linkStr.find(" ");
-            string atomTypeStr = linkStr.substr(1, typeEndPos - 2);
-            string linkOrNodeStr = atomTypeStr.substr(atomTypeStr.size() - 4, 4);
+        std::size_t typeEndPos = linkStr.find(" ");
+        string atomTypeStr = linkStr.substr(1, typeEndPos - 2);
+        string linkOrNodeStr = atomTypeStr.substr(atomTypeStr.size() - 4, 4);
 
-            if (linkOrNodeStr != "Link")
-            {
+        if (linkOrNodeStr != "Link")
+        {
 
-                cout << "Warning: loadPatternIntoAtomSpaceFromFileString: Not a Link: " << linkOrNodeStr << std::endl;
-                HandleSeq emptyPattern;
-                return emptyPattern;
+            cout << "Warning: loadPatternIntoAtomSpaceFromFileString: Not a Link: " << linkOrNodeStr << std::endl;
+            HandleSeq emptyPattern;
+            return emptyPattern;
 
-            }
+        }
 
-            Type atomType = classserver().getType(atomTypeStr);
-            if (NOTYPE == atomType)
-            {
+        Type atomType = classserver().getType(atomTypeStr);
+        if (NOTYPE == atomType)
+        {
 
-                cout << "Warning: loadPatternIntoAtomSpaceFromFileString: Not a valid typename: " << atomTypeStr << std::endl;
-                HandleSeq emptyPattern;
-                return emptyPattern;
+            cout << "Warning: loadPatternIntoAtomSpaceFromFileString: Not a valid typename: " << atomTypeStr << std::endl;
+            HandleSeq emptyPattern;
+            return emptyPattern;
 
-            }
+        }
 
-            Handle rootLink = _atomSpace->add_link(atomType, rootOutgoings);
-            pattern.push_back(rootLink);
-
-
+        Handle rootLink = _atomSpace->add_link(atomType, rootOutgoings);
+        pattern.push_back(rootLink);
     }
 
     // debug:
