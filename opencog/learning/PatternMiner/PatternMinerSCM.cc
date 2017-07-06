@@ -650,6 +650,19 @@ public:
                                                                   min_surprisingness_II,max_surprisingness_II, gram);
     }
 
+    void query_patterns_with_frequency_interactioninformation_ranges(const string& ranges, int gram)
+    {
+        vector<string> range_vector;
+        string rangesStr = ranges;
+        rangesStr.erase(std::remove(rangesStr.begin(), rangesStr.end(), ' '), rangesStr.end());
+        boost::split(range_vector, rangesStr , boost::is_any_of(","));
+        unsigned int min_frequency = std::stoi(range_vector[0]);
+        unsigned int max_frequency = std::stoi(range_vector[1]);
+        float min_ii = std::stof(range_vector[2]);
+        float max_ii = std::stof(range_vector[3]);
+        patternMiner->queryPatternsWithFrequencyAndInteractionInformationRanges(min_frequency,  max_frequency, min_ii, max_ii, gram);
+    }
+
     void OutPutStaticsToCsvFile(int n_gram)
     {
         patternMiner->OutPutStaticsToCsvFile(n_gram);
@@ -800,6 +813,8 @@ void PatternMinerSCM::init()
     define_scheme_primitive("pm-apply-whitelist-keyword-filter-after-mining", &PatternMinerSCM::apply_whitelist_keyword_filter_after_mining, this, "patternminer");
     define_scheme_primitive("pm-query-patterns-with-frequency-surprisingnessI-ranges", &PatternMinerSCM::query_patterns_with_frequency_surprisingnessI_ranges, this, "patternminer");
     define_scheme_primitive("pm-query-patterns-with-frequency-surprisingnessI-surprisingnessII-ranges", &PatternMinerSCM::query_patterns_with_surprisingnessI_and_surprisingnessII_ranges, this, "patternminer");
+    define_scheme_primitive("pm-query-patterns-with-frequency-interactioninformation-ranges", &PatternMinerSCM::query_patterns_with_frequency_interactioninformation_ranges, this, "patternminer");
+
     define_scheme_primitive("pm-reset-patternminer", &PatternMinerSCM::reset_patternminer, this, "patternminer");
     define_scheme_primitive("pm-run-interestingness-evaluation", &PatternMinerSCM::run_interestingness_evaluation, this, "patternminer");
     define_scheme_primitive("pm-load-patterns-from-result-file", &PatternMinerSCM::load_patterns_from_result_file, this, "patternminer");

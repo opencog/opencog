@@ -50,7 +50,7 @@ namespace PatternMining
 #define SURPRISINGNESS_I_TOP_THRESHOLD 0.20
 #define SURPRISINGNESS_II_TOP_THRESHOLD 0.40
 #define OUTPUT_SURPRISINGNESS_CALCULATION_TO_FILE 1
-#define GENERATE_TMP_PATTERNS 0
+#define GENERATE_TMP_PATTERNS 1
 #define USE_QUERY_ENTITY_COUNT_FOR_EACH_PREDICATE 0
 #define USE_QUERY_ALL_ENTITY_COUNT 1
 #define USE_ABS_SURPRISINGNESS 0
@@ -168,6 +168,7 @@ protected:
     vector<Type> same_link_types_not_share_second_outgoing;
 
     unsigned int num_of_patterns_without_superpattern_cur_gram;
+    unsigned int *num_of_patterns_with_1_frequency;
 
     unsigned int thresholdFrequency;
 
@@ -445,6 +446,9 @@ public:
     void queryPatternsWithSurprisingnessIAndIIRanges(unsigned int min_frequency, unsigned int max_frequency,
                                                                    float min_surprisingness_I, float max_surprisingness_I,
                                                                    float min_surprisingness_II, float max_surprisingness_II,int gram);
+
+    void queryPatternsWithFrequencyAndInteractionInformationRanges(unsigned int min_frequency, unsigned int max_frequency,
+                                                                   float min_ii, float max_ii, int gram);
 
     void runPatternMiner(bool exit_program_after_finish = true);
 
