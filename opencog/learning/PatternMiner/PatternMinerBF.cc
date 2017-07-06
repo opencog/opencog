@@ -63,7 +63,7 @@ void PatternMiner::extendAllPossiblePatternsForOneMoreGramBF(HandleSeq &instance
 
     // First, extract all the variable nodes in the instance links
     // we only extend one more link on the nodes that are considered as varaibles for this pattern
-    OrderedHandleSet allVarNodes;
+    HandleSet allVarNodes;
 
     HandleSeq::iterator patternLinkIt = curHTreeNode->pattern.begin();
     for (Handle link : instance)
@@ -72,7 +72,7 @@ void PatternMiner::extendAllPossiblePatternsForOneMoreGramBF(HandleSeq &instance
         patternLinkIt ++;
     }
 
-    OrderedHandleSet::iterator varIt;
+    HandleSet::iterator varIt;
 
     for(varIt = allVarNodes.begin(); varIt != allVarNodes.end(); ++ varIt)
     {
@@ -120,7 +120,7 @@ void PatternMiner::extendAllPossiblePatternsForOneMoreGramBF(HandleSeq &instance
 }
 
 void PatternMiner::extractAllPossiblePatternsFromInputLinksBF(HandleSeq& inputLinks,  HTreeNode* parentNode,
-                                                                          OrderedHandleSet& sharedNodes, unsigned int gram)
+                                                              HandleSet& sharedNodes, unsigned int gram)
 {
     map<Handle,Handle> valueToVarMap;  // the ground value node in the orginal Atomspace to the variable handle in pattenmining Atomspace
 
@@ -393,7 +393,7 @@ void PatternMiner::growTheFirstGramPatternsTaskBF()
         originalLinks.push_back(cur_link);
 
         // Extract all the possible patterns from this originalLinks, not duplicating the already existing patterns
-        OrderedHandleSet sharedNodes;
+        HandleSet sharedNodes;
         extractAllPossiblePatternsFromInputLinksBF(originalLinks, 0, sharedNodes, 1);
 
     }
@@ -566,7 +566,7 @@ void PatternMiner::GrowAllPatternsBF()
     }
 }
 
-void PatternMiner::swapOneLinkBetweenTwoAtomSpaceBF(AtomSpace* fromAtomSpace, AtomSpace* toAtomSpace, Handle& fromLink, HandleSeq& outgoings,
+void PatternMiner::swapOneLinkBetweenTwoAtomSpaceForBindLink(AtomSpace* fromAtomSpace, AtomSpace* toAtomSpace, Handle& fromLink, HandleSeq& outgoings,
                                                   HandleSeq &outVariableNodes, HandleSeq& linksWillBeDel, bool& containVar )
 {
     containVar = false;
@@ -590,7 +590,7 @@ void PatternMiner::swapOneLinkBetweenTwoAtomSpaceBF(AtomSpace* fromAtomSpace, At
         {
              HandleSeq _OutgoingLinks;
              bool _containVar;
-             swapOneLinkBetweenTwoAtomSpaceBF(fromAtomSpace, toAtomSpace, h, _OutgoingLinks, outVariableNodes,linksWillBeDel,  _containVar);
+             swapOneLinkBetweenTwoAtomSpaceForBindLink(fromAtomSpace, toAtomSpace, h, _OutgoingLinks, outVariableNodes,linksWillBeDel,  _containVar);
              Handle _link = toAtomSpace->add_link(h->getType(), _OutgoingLinks);
              _link->setTruthValue(h->getTruthValue());
              if (_containVar)
@@ -604,7 +604,7 @@ void PatternMiner::swapOneLinkBetweenTwoAtomSpaceBF(AtomSpace* fromAtomSpace, At
 }
 
 // linksWillBeDel are all the links contain varaibles. Those links need to be deleted after run BindLink
-HandleSeq PatternMiner::swapLinksBetweenTwoAtomSpaceBF(AtomSpace* fromAtomSpace, AtomSpace* toAtomSpace, HandleSeq& fromLinks, HandleSeq& outVariableNodes, HandleSeq& linksWillBeDel)
+HandleSeq PatternMiner::swapLinksBetweenTwoAtomSpaceForBindLink(AtomSpace* fromAtomSpace, AtomSpace* toAtomSpace, HandleSeq& fromLinks, HandleSeq& outVariableNodes, HandleSeq& linksWillBeDel)
 {
     HandleSeq outPutLinks;
 
@@ -612,7 +612,7 @@ HandleSeq PatternMiner::swapLinksBetweenTwoAtomSpaceBF(AtomSpace* fromAtomSpace,
     {
         HandleSeq outgoingLinks;
         bool containVar;
-        swapOneLinkBetweenTwoAtomSpaceBF(fromAtomSpace, toAtomSpace, link, outgoingLinks, outVariableNodes, linksWillBeDel,containVar);
+        swapOneLinkBetweenTwoAtomSpaceForBindLink(fromAtomSpace, toAtomSpace, link, outgoingLinks, outVariableNodes, linksWillBeDel,containVar);
         Handle toLink = toAtomSpace->add_link(link->getType(), outgoingLinks);
         toLink->setTruthValue(link->getTruthValue());
         if (containVar)
@@ -645,9 +645,9 @@ void PatternMiner::findAllInstancesForGivenPatternBF(HTreeNode* HNode)
 
    HandleSeq bindLinkOutgoings, variableNodes, linksWillBeDel;
 
-   HandleSeq patternToMatch = swapLinksBetweenTwoAtomSpaceBF(atomSpace, originalAtomSpace, HNode->pattern, variableNodes, linksWillBeDel);
+   HandleSeq patternToMatch = swapLinksBetweenTwoAtomSpaceForBindLink(atomSpace, originalAtomSpace, HNode->pattern, variableNodes, linksWillBeDel);
 
-//   OrderedHandleSet allNodesInPattern;
+//   HandleSet allNodesInPattern;
 //   for (unsigned int i = 0; i < HNode->pattern.size(); ++i)
 //   {
 //       extractAllVariableNodesInLink(HNode->pattern[i],allNodesInPattern, atomSpace);

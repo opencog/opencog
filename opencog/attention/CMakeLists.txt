@@ -1,5 +1,6 @@
 # To make Boost ublas much more efficient.
 ADD_DEFINITIONS(-DNDEBUG)
+ADD_DEFINITIONS(-DLOG_AV_STAT)
 
 # --------------------------------------------------
 OPENCOG_ADD_ATOM_TYPES(atom_types.script
@@ -75,6 +76,7 @@ CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/default-param-values.scm
 INSTALL (FILES
 	${CMAKE_CURRENT_BINARY_DIR}/atom_types.h
 	AttentionModule.h
+	AttentionStat.h
 	ForgettingAgent.h
 	HebbianUpdatingAgent.h
 	DESTINATION "include/${PROJECT_NAME}/attention"

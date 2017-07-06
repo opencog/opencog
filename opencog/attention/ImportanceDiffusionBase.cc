@@ -40,6 +40,7 @@
 #include <opencog/attentionbank/AttentionBank.h>
 
 #include "ImportanceDiffusionBase.h"
+#include "AttentionStat.h"
 
 #define DEBUG
 #define _unused(x) ((void)x)
@@ -82,7 +83,6 @@ ImportanceDiffusionBase::~ImportanceDiffusionBase()
  */
 void ImportanceDiffusionBase::diffuseAtom(Handle source)
 {
-
     // (1) Find the incident atoms that will be diffused to
     HandleSeq incidentAtoms =
             ImportanceDiffusionBase::incidentAtoms(source);
@@ -130,6 +130,36 @@ void ImportanceDiffusionBase::diffuseAtom(Handle source)
     AttentionValue::sti_t totalDiffusionAmount =
             calculateDiffusionAmount(source);
 
+#ifdef LOG_AV_STAT
+    // Log sti gain from spreading via  non-hebbian links
+    for(const auto& kv : probabilityVectorIncident){
+        if(atom_avstat.find(kv.first) == atom_avstat.end()){
+            AVStat avstat;
+            avstat.link_sti_gain = kv.second;
+            atom_avstat[kv.first] = avstat;
+        }
+        atom_avstat[kv.first].link_sti_gain += kv.second;
+    }
+
+    // Log sti gain from spreading via hebbian links
+    for(const auto& kv : probabilityVectorHebbianAdjacent){
+        if(atom_avstat.find(kv.first) == atom_avstat.end()){
+            AVStat avstat;
+            avstat.heblink_sti_gain = kv.second;
+            atom_avstat[kv.first] = avstat;
+        }
+        atom_avstat[kv.first].heblink_sti_gain += kv.second;
+    }
+
+    // Log amount of sti spread from
+    if(atom_avstat.find(source) == atom_avstat.end()){
+        AVStat avstat;
+        avstat.spreading = totalDiffusionAmount;
+        atom_avstat[source] = avstat;
+    }
+    atom_avstat[source].spreading += totalDiffusionAmount;
+#endif
+
 #ifdef DEBUG
     std::cout << "Total diffusion amount: " << totalDiffusionAmount << std::endl;
 #endif
@@ -143,19 +173,17 @@ void ImportanceDiffusionBase::diffuseAtom(Handle source)
     }
 
     // Perform diffusion from the source to each atom target
-    typedef std::map<Handle, double>::iterator it_type;
-    for(it_type iterator = probabilityVector.begin();
-        iterator != probabilityVector.end(); ++iterator)
+    for( const auto& p : probabilityVector)
     {
         DiffusionEventType diffusionEvent;
 
         // Calculate the diffusion amount using the entry in the probability
         // vector for this particular target (stored in iterator->second)
         diffusionEvent.amount = (AttentionValue::sti_t)
-                floor(totalDiffusionAmount * iterator->second);
+                (totalDiffusionAmount * p.second);
 
         diffusionEvent.source = source;
-        diffusionEvent.target = iterator->first;
+        diffusionEvent.target = p.first;
 
         // Add the diffusion event to a stack. The diffusion is stored in a
         // stack, so that all the diffusion events can be processed after the
@@ -398,17 +426,15 @@ ImportanceDiffusionBase::combineIncidentAdjacentVectors(
     // For each hebbian adjacent target, allocate a proportion of STI according
     // to the probability vector for the target, and the proportion that is
     // available for allocation to any particular individual atom
-    typedef std::map<Handle, double>::iterator it_type;
-    for(it_type iterator = adjacentVector.begin();
-        iterator != adjacentVector.end(); ++iterator)
+    for(const auto& p : adjacentVector)
     {
         // iterator->second is the entry in the probability vector for this
         // handle
         double diffusionAmount =
-                hebbianMaximumLinkAllocation * iterator->second;
+                hebbianMaximumLinkAllocation * p.second;
 
         // iterator->first is the handle
-        result.insert({iterator->first, diffusionAmount});
+        result.insert({p.first, diffusionAmount});
 
         // Decrement the amount of remaining diffusion that is available
         hebbianDiffusionUsed += diffusionAmount;
@@ -425,12 +451,11 @@ ImportanceDiffusionBase::combineIncidentAdjacentVectors(
 
     // Allocate the remaining diffusion amount to the incident atoms according
     // to the probability vector for the targets
-    for(it_type iterator = incidentVector.begin();
-        iterator != incidentVector.end(); ++iterator)
+    for(const auto& p : incidentVector)
     {
         double diffusionAmount =
-                diffusionAvailable * iterator->second;
-        result.insert({iterator->first, diffusionAmount});
+                diffusionAvailable * p.second;
+        result.insert({p.first, diffusionAmount});
 
         incidentDiffusionUsed += diffusionAmount;
     }

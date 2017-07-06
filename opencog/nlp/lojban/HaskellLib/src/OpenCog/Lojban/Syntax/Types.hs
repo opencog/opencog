@@ -35,18 +35,12 @@ type Selbri = (TruthVal,Atom) --STring represents TV
 
 type Tagged a = (a,Maybe Tag)
 
---LCON is the type for logical connectives
-type LCON = (Maybe String,(String,Maybe String))
-
---Con possible contains a Logical Connective and one based on a predicate
-type Con = (Maybe LCON,Maybe (Tagged Selbri))
-
 --A Bridi consits of a some sumti/arguments in the front
 --Then Maybe a Tense
 --Then Maybe a Negation
 --Then the Selbri/Predicate
 --finally some more sumti/arguments
-type Bridi = ([Sumti],((Maybe Atom,(Maybe String,Tagged Selbri)),[Sumti]))
+type Bridi = ([Sumti],((Maybe String, Selbri),[Sumti]))
 
 --The State
 --sFlags : A list of flags then can be used to pass information along
@@ -55,8 +49,10 @@ type Bridi = ([Sumti],((Maybe Atom,(Maybe String,Tagged Selbri)),[Sumti]))
 type Flag = String
 data State = State { sFlags :: [Flag]
                    , sAtoms :: [Atom]
-                   , sText :: String
-                   , sSeed   :: Int
+                   , sText  :: String
+                   , sSeed  :: Int
+                   , sCtx   :: [Atom]
+                   , sJAI   :: Maybe JJCTTS
                    } deriving Show
 
 --They Iso we are using
@@ -70,3 +66,27 @@ instance Syntax.SyntaxState State where
     getText = sText
     addText str sta = sta {sText = str ++ (sText sta)}
     setText str sta = sta {sText = str}
+
+
+-------------------------------------------------------------------------------
+--Connective Types
+-------------------------------------------------------------------------------
+
+data ConnectorTree c e = CTNode c (ConnectorTree c e,ConnectorTree c e)
+                       | CTLeaf e
+                       deriving (Show,Eq)
+
+type JJCTTS = (ConnectorTree JOIK_JEK (Tagged Selbri))
+
+--Con possible contains a Logical Connective and one based on a predicate
+type Con = (Maybe EK,Maybe JJCTTS)
+
+type EK = (Bool,(Bool,(String,Bool)))
+
+data JOIK = JOI (Bool,(String,Bool))
+          | INT (Bool,(String,Bool))
+          | INTGAhO (String,((Bool,(String,Bool)),String))
+          deriving (Show,Eq)
+
+type JOIK_JEK = Either JOIK EK
+type JOIK_EK = Either JOIK EK

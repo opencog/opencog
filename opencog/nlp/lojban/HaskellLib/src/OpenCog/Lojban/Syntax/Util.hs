@@ -94,6 +94,21 @@ ifJustB = mkIso f g where
 --State Helpers
 -------------------------------------------------------------------------------
 
+setJai :: SynMonad t State => JJCTTS -> (t ME) ()
+setJai a = modify (\s -> s {sJAI = Just a})
+
+rmJai :: SynMonad t State => (t ME) ()
+rmJai = modify (\s -> s {sJAI = Nothing})
+
+setCtx :: SynMonad t State => [Atom] -> (t ME) ()
+setCtx a = modify (\s -> s {sCtx = a})
+
+setPrimaryCtx :: SynMonad t State => Atom -> (t ME) ()
+setPrimaryCtx a = modify (\s -> s {sCtx = a : tail (sCtx s)})
+
+addCtx :: SynMonad t State => Atom -> (t ME) ()
+addCtx a = modify (\s -> s {sCtx = (sCtx s) ++ [a]})
+
 setAtoms :: SynMonad t State => [Atom] -> (t ME) ()
 setAtoms a = modify (\s -> s {sAtoms = a})
 
@@ -160,6 +175,8 @@ setFlagIso :: Flag -> SynIso a a
 setFlagIso flag = Iso f g
     where f a = setFlag flag >> pure a
           g a = rmFlag flag >> pure a
+
+rmFlagIso flag = inverse $ setFlagIso flag
 
 withFlag :: Flag -> SynIso a b -> SynIso a b
 withFlag flag syn = inverse (setFlagIso flag) . syn . setFlagIso flag

@@ -9,8 +9,9 @@
 
 ; ----------
 ; For debugging
-(cog-logger-set-level! "debug")
-(cog-logger-set-stdout! #t)
+(define chatlang-logger (cog-new-logger))
+(cog-logger-set-level! chatlang-logger "debug")
+(cog-logger-set-stdout! chatlang-logger #t)
 
 ; ----------
 (define (extract TXT)
@@ -88,11 +89,11 @@
 (define* (identify-terms TXT #:optional (LST '()))
   "Construct a list of terms by extracting the terms one by one
    recursively from the given text."
-  (cog-logger-debug "Constructing term-list from: ~a" TXT)
+  (cog-logger-debug chatlang-logger "Constructing term-list from: ~a" TXT)
   (let* ((term (extract-term (string-trim-both TXT)))
          (newtxt (string-trim (string-drop TXT (string-length term))))
          (newlst (append LST (list term))))
-    (cog-logger-debug "Term extracted: ~a" term)
+    (cog-logger-debug chatlang-logger "Term extracted: ~a" term)
     (if (< 0 (string-length newtxt))
         (identify-terms newtxt newlst)
         newlst)))
@@ -188,8 +189,9 @@
    the terms from the text and interpret them one by one later."
   (define terms (identify-terms (string-trim-both TXT)))
   (define interp-terms (interpret-terms terms))
-  (cog-logger-debug "Total ~d terms were extracted: ~a" (length terms) terms)
-  (cog-logger-debug "Term interpretation: ~a" interp-terms)
+  (cog-logger-debug chatlang-logger "Total ~d terms were extracted: ~a"
+    (length terms) terms)
+  (cog-logger-debug chatlang-logger "Term interpretation: ~a" interp-terms)
   interp-terms)
 
 (define-public (cr PATTERN ACTION)
@@ -204,25 +206,25 @@
   (define interp-pattern
     (append-map
       (lambda (p)
-        (cog-logger-debug "Interpreting pattern: ~a" p)
+        (cog-logger-debug chatlang-logger "Interpreting pattern: ~a" p)
         (cond ; The text input
               ((string? p)
                (interpret-text p))
-              (else (cog-logger-info "Feature not supported: ~a" p))))
+              (else (cog-logger-info chatlang-logger "Feature not supported: ~a" p))))
       PATTERN))
 
   (define interp-action
     (append-map
       (lambda (a)
-        (cog-logger-debug "Interpreting action: ~a" a)
+        (cog-logger-debug chatlang-logger "Interpreting action: ~a" a)
         (cond ; The text output
               ((string? a)
                (cons 'say a))
-              (else (cog-logger-info "Feature not supported: ~a" a))))
+              (else (cog-logger-info chatlang-logger "Feature not supported: ~a" a))))
       ACTION))
 
-  (cog-logger-info "Interpretation of the pattern: ~a" interp-pattern)
-  (cog-logger-info "Interpretation of the action: ~a" interp-action)
+  (cog-logger-info chatlang-logger "Interpretation of the pattern: ~a" interp-pattern)
+  (cog-logger-info chatlang-logger "Interpretation of the action: ~a" interp-action)
 
   ; Now convert into atomese and create the actual psi-rule
   (chat-rule interp-pattern interp-action))

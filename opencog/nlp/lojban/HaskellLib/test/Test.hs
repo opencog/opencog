@@ -15,9 +15,14 @@ import OpenCog.Lojban.Syntax.AtomUtil
 
 import OpenCog.AtomSpace
 
-import Iso hiding (Syntax,SynIso)
+import Iso
+import Syntax hiding (SynIso,Syntax)
+
+import Lojban
+import Lojban.Syntax.Util
 
 import Control.Applicative ((<$>))
+import Control.Arrow
 import Control.Monad.RWS
 import Control.Category (id,(.))
 
@@ -28,7 +33,12 @@ import qualified Data.Map as M
 
 --import Text.XML.HXT.Core
 
-mystate s = State {sFlags = [],sAtoms = [],sText = s,sSeed = 0}
+mystate s = State {sFlags = []
+                  ,sAtoms = []
+                  ,sText = s
+                  ,sSeed = 0
+                  ,sCtx = [cCN "now" noTv]
+                  ,sJAI = Nothing}
 
 loadwl = do
     (wl :: WordList State) <- loadWordLists "cmavo.csv" "gismu.csv"
