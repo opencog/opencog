@@ -47,12 +47,12 @@
          (rules-matched (append-map (lambda (b)
            (cog-chase-link 'ReferenceLink 'ImplicationLink b)) bind-grd)))
 
-        (cog-logger-debug "For input:\n~a" input-lemmas)
-        (cog-logger-debug "Rules with no constant:\n~a" no-const)
-        (cog-logger-debug "Exact match:\n~a" exact-match)
-        (cog-logger-debug "Dual match:\n~a" dual-match)
-        (cog-logger-debug "Grounded:\n~a" bind-grd)
-        (cog-logger-debug "Rules matched:\n~a" rules-matched)
+        (cog-logger-debug chatlang-logger "For input:\n~a" input-lemmas)
+        (cog-logger-debug chatlang-logger "Rules with no constant:\n~a" no-const)
+        (cog-logger-debug chatlang-logger "Exact match:\n~a" exact-match)
+        (cog-logger-debug chatlang-logger "Dual match:\n~a" dual-match)
+        (cog-logger-debug chatlang-logger "Grounded:\n~a" bind-grd)
+        (cog-logger-debug chatlang-logger "Rules matched:\n~a" rules-matched)
 
         ; TODO: Pick the one with the highest weight
         (List (append-map

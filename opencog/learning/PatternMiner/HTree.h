@@ -45,7 +45,7 @@ namespace opencog
          Handle sharedLink; // the link in original pattern that connect to new extended Link
          Handle newExtendedLink; // in super pattern (contains variables, not the instance link), without unifying
          Handle extendedNode; // the node that being extended in the original AtomSpace (the value node, not its variable name node)
-     //    bool isExtendedFromVar; // if it's
+         bool isExtendedFromVar;
      };
 
      class HTreeNode

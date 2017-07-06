@@ -10475,7 +10475,12 @@ what's faster: looking it up, or on-the-fly recompute?
 		(let ((val (poi 'right-cosine wa wb)))
 			(set-val wpr val)
 			val)))
-		
+
+(define (get-cos wa wb)
+	(define cos-fkey (PredicateNode "*-Cosine Filtered Key-*"))
+	(pair-sym-cache wa wb cos-fkey 
+		(lambda (wx wy) (poi 'right-cosine wx wy))))
+
 
 (define rankw (Word "the"))
 (define cranked-csw (sort top-cset-words
@@ -10524,10 +10529,106 @@ what's faster: looking it up, or on-the-fly recompute?
 	(define co (get-cos wa wb))
 	(* co co co co))
 
+(write-flo "/tmp/scat-ecos4.flo" eranked-csw (lambda (wa wb) (p4 wa wb)))
+
 
 (write-flo "/tmp/scat-xxx.flo" (take ranked-csw 100)
    (lambda (wa wb) (get-cos wa wb)))
 
+(define n 0)
+(for-each (lambda (w) (format #t "~A ~A" n w) (set! n (+ n 1))) franked-csw)
+
+287 (WordNode "up" (ctv 1 0 626139))
+288 (WordNode "back" (ctv 1 0 412057))
+289 (WordNode "her" (ctv 1 0 1601673))
+290 (WordNode "it" (ctv 1 0 1888598))
+291 (WordNode "she" (ctv 1 0 929359))
+292 (WordNode "he" (ctv 1 0 2349317))
+293 (WordNode "there" (ctv 1 0 413356))
+294 (WordNode "they" (ctv 1 0 677009))
+295 (WordNode "if" (ctv 1 0 428894))
+296 (WordNode "when" (ctv 1 0 448962))
+297 (WordNode "but" (ctv 1 0 927405))
+298 (WordNode "and" (ctv 1 0 5909625))
+299 (WordNode "," (ctv 1 0 12471397))
+
+
+126 (WordNode "No" (ctv 1 0 102421))
+127 (WordNode "A" (ctv 1 0 179271))
+128 (WordNode "So" (ctv 1 0 100275))
+129 (WordNode "If" (ctv 1 0 138542))
+130 (WordNode "We" (ctv 1 0 118551))
+131 (WordNode "In" (ctv 1 0 151798))
+132 (WordNode "As" (ctv 1 0 106652))
+133 (WordNode "That" (ctv 1 0 106222))
+134 (WordNode "This" (ctv 1 0 136409))
+135 (WordNode "They" (ctv 1 0 191230))
+136 (WordNode "The" (ctv 1 0 988411))
+137 (WordNode "His" (ctv 1 0 144276))
+138 (WordNode "She" (ctv 1 0 414833))
+139 (WordNode "He" (ctv 1 0 944556))
+140 (WordNode "It" (ctv 1 0 443522))
+141 (WordNode "There" (ctv 1 0 153165))
+142 (WordNode "At" (ctv 1 0 74095))
+143 (WordNode "For" (ctv 1 0 74285))
+144 (WordNode "Then" (ctv 1 0 100133))
+145 (WordNode "When" (ctv 1 0 108786))
+146 (WordNode "But" (ctv 1 0 327961))
+147 (WordNode "And" (ctv 1 0 289634))
+148 (WordNode "You" (ctv 1 0 214860))
+149 (WordNode "I" (ctv 1 0 2106188))
+150 (WordNode "John" (ctv 1 0 75731))
+151 (WordNode "Jim" (ctv 1 0 92333))
+152 (WordNode "Ross" (ctv 1 0 202513))
+153 (WordNode "Pitch" (ctv 1 0 157986))
+154 (WordNode "Jack" (ctv 1 0 373882))
+
+How aobout CMI ?
+
+(make-afunc-cache AFUNC)
+
+(define (make-wild-summer LST)
+" Perform wild-card sum get-cos(ITEM, *) with * in LST "
+	(define (summer item)
+		(fold (lambda (it acc) (+ acc (get-cos it item))) 0 LST))
+	(make-afunc-cache summer))
+
+(define summer-100 (make-wild-summer (take ranked-csw 100)))
+
+(define (wild-sum ITEM) (summer-100 ITEM))
+
+(define (wild-wild LST)
+	(fold (lambda (it acc) (+ acc (wild-sum it))) 0 LST))
+
+(define wild-wild-100 (wild-wild (take ranked-csw 100)))
+
+; compute the cosine-MI as defined in the diary, as CMI
+(define (cos-mi wa wb)
+	(define csim (* (get-cos wa wb) wild-wild-100))
+	(define sla (wild-sum wa))
+	(define slb (wild-sum wb))
+	(- 0 (/ (log (/ csim (* sla slb))) (log 2.0)))
+)
+
+(get-cos (Word "any") (Word "little")) = 0.6364163540230326
+(wild-sum (Word "any") (take ranked-csw 100))
+(wild-sum (Word "little") (take ranked-csw 100))
+
+(cos-mi (Word "any") (Word "little")) = 0.17795006068910382
+
+(write-flo "/tmp/scat-cosmi.flo" (take ranked-csw 100) cos-mi)
+
+(for-each
+	(lambda (w) (format #t "Its ~A = ~A\n" w (cos-mi w (Word "he"))))
+	(take ranked-csw 100))
+
+(map (lambda (w) (cons w (cos-mi w (Word "he"))))
+	(take ranked-csw 100))
+
+(sort 
+	(map (lambda (w) (cons w (cos-mi w (Word "he"))))
+		(take ranked-csw 100))
+	(lambda (a b) (> (cdr a) (cdr b))))
 
 -----------------------------------------------------------------
 ---------
@@ -10659,6 +10760,7 @@ at 18:20: 4M -> 2.5M/hour
 43009543 values in 73425 secs = 586/sec = 2.10M/hour
 ... and its stable.
 91M after 43 hours = 2.086M/hour
+112780771 in 193627 = 582/sec = 2.10M/hour
 
 -----
 how about MST?
@@ -10672,6 +10774,10 @@ NonREPL:  fed by four threads
 245K MST after 1 hour
 1.91M MST after 11 hours = 170K/hour
 
+Non-REPL: fed by one thread:
+239K MST updates in 30 mins exactly: 480K/hour
+1040259 in 14667 = 71/sec = 255K/hour
+1385628 in 22727 = 61/sec = 220K/hour
 
 =========================================================================
 

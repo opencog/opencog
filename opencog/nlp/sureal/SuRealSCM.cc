@@ -156,7 +156,7 @@ HandleSeqSeq SuRealSCM::do_sureal_match(Handle h, bool use_cache)
 
     AtomSpace* pAS = SchemeSmob::ss_get_env_as("sureal-match");
 
-    OrderedHandleSet sVars;
+    HandleSet sVars;
 
     // Extract the graph under the SetLink; this is done so that the content
     // of the SetLink could be matched to another SetLink with differnet arity.

@@ -90,9 +90,9 @@ void DimEmbedModule::init()
     define_scheme_primitive("logEmbedding",
                             &DimEmbedModule::logAtomEmbedding,
                             this);
-    define_scheme_primitive("euclidDist",
-                            &DimEmbedModule::euclidDist,
-                            this);
+//    define_scheme_primitive("euclidDist",
+//                            &DimEmbedModule::euclidDist,
+//                            this);
     define_scheme_primitive("kNN",
                             &DimEmbedModule::kNearestNeighbors,
                             this);
@@ -878,7 +878,7 @@ void DimEmbedModule::addKMeansClusters(Type l, int maxClusters,
             double strength = sqrt(std::pow(2.0, -dist));
             TruthValuePtr tv(SimpleTruthValue::createTV(strength, strength));
             Handle hi = as->add_link(INHERITANCE_LINK, *it2, newNode);
-            hi->merge(tv);
+            hi->setTruthValue(hi->getTruthValue()->merge(tv));
 
             for (int i=0; i<numDims; ++i) {
                 strNumer[i] += strength * embedVec[i];
@@ -891,7 +891,7 @@ void DimEmbedModule::addKMeansClusters(Type l, int maxClusters,
             double attrStrength = sqrt(strNumer[i]/strDenom[i]);
             TruthValuePtr tv(SimpleTruthValue::createTV(attrStrength, attrStrength));
             Handle hi = as->add_link(l, newNode, pivots[i]);
-            hi->merge(tv);
+            hi->setTruthValue(hi->getTruthValue()->merge(tv));
         }
     }
 }
@@ -1000,7 +1000,7 @@ Handle DimEmbedModule::blendNodes(Handle n1,
         double strength = sqrt(newVec[i]);
         TruthValuePtr tv(SimpleTruthValue::createTV(strength, strength));
         Handle hi = as->add_link(l, newNode, pivots[i]);
-        hi->merge(tv);
+        hi->setTruthValue(hi->getTruthValue()->merge(tv));
     }
     return newNode;
 }
