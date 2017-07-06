@@ -1,0 +1,15 @@
+
+# set term png small
+set term postscript eps enhanced color 28
+set encoding utf8
+set out 'error.eps'
+set logscale x
+set xrange [1:1e3]
+set title "Entropy vs. Observation Count"
+set xlabel "Number of Observations"
+set ylabel "Entropy"
+plot -(log(x/638.8e6)/log(2)) with lines linewidth 5 title "entropy H", \
+     - (1 + log(x/638.8e6)) / (log(2) * sqrt(x)) with lines linewidth 5 \
+       title  "error {/Symbol D}H"
+
+#################################################

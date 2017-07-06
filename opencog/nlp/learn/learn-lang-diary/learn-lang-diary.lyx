@@ -2225,7 +2225,8 @@ The Boltzmann distribution is the so-called canonical distribution, meaning
 \end_inset
 
  (viz, this is the MaxEnt principle.
- except for MaxEnt, the constraint is not on energy, but a set of features.)
+ Except for MaxEnt, the constraint is not on energy, but rather a set of
+ constraints obtained on some other theoretical grounds.)
 \end_layout
 
 \begin_layout Itemize
@@ -2259,7 +2260,7 @@ Boltzmann Entropy
 
  is the shanon entropy of the microcanonical ensemble: it maximizes the
  entropy (MaxEnt) for a fixed value of the energy.
- (MaxEnt: not the energy, but for a fixed set of features).
+ (MaxEnt: not the energy, but for a fixed set of constraints).
  (viz, 
 \begin_inset Formula $S_{B}=k_{B}\log\left(\epsilon\frac{d\Omega}{dE}\right)$
 \end_inset
@@ -2272,7 +2273,10 @@ Boltzmann Entropy
 \begin_inset Formula $\epsilon$
 \end_inset
 
- a constant of dimension energy to make arg of the log dimensionless.)
+ a constant of dimension energy to make arg of the log dimensionless.) (MaxEnt:
+ replace E by the individual constaints.
+ This suggests that there are many Boltzmann entropies: one for each constraint
+ that is applied!)
 \end_layout
 
 \begin_layout Itemize
@@ -2300,7 +2304,7 @@ Gibbs Entropy
 
  states.
  For a non-sharp cutoff, the Shannon entropy is primal.).
- 
+ (MaxEnt: one gets a different Gibbs entropy for each applied constraint.)
 \end_layout
 
 \begin_layout Itemize
@@ -2967,7 +2971,7 @@ n_co_clustering_and.pdf A Generalized Maximum Entropy Approach to Bregman
 \end_layout
 
 \begin_layout Standard
-The below was going to be a breif note, but I'm turning it into a rough
+The below was going to be a brief note, but I'm turning it into a rough
  draft blog post.
  But after sleeping on it, it seems silly.
  
@@ -24852,12 +24856,134 @@ At any rate, the dataset seems a bit thin, but we already knew this; its
 \end_layout
 
 \begin_layout Subsection*
-Pair Cosine Similarity
+Overlap Similarity
 \end_layout
 
 \begin_layout Standard
-To correctly gauge the disjunct-based cosine similarity, it should be contrasted
- against the simpler pair-based cosine similarity.
+Cosine similarity is perhaps too strict: it judges that two words are similar
+ when they share not only the same collection of disjuncts, but have these
+ occur with the same frequencies.
+ Perhaps its enough to say that two words are grammatically similar, if
+ they simply share the same set of disjuncts.
+ This suggests ignoring the relative counts, or at least, sharply filtering
+ them.
+ Thus, the overlap similarity can be defined as 
+\begin_inset Formula 
+\[
+\mbox{ovl}(w_{1,}w_{2})=\frac{\sum_{d}\sigma(N(w_{1},d))\sigma(N(w_{2},d))}{\sum_{d}\sigma(N(w_{1},d)+N(w_{2},d))}
+\]
+
+\end_inset
+
+where 
+\begin_inset Formula $\sigma(x)$
+\end_inset
+
+ is some sigmoid function.
+ In the most basic case, its a step function: 
+\begin_inset Formula $\sigma(x)=1$
+\end_inset
+
+ if 
+\begin_inset Formula $x>C$
+\end_inset
+
+ for some constant 
+\begin_inset Formula $C$
+\end_inset
+
+ and zero otherwise.
+ Each term in the numerator sum is one only when both disjuncts are present.
+ Each term in the denominotor is one when either disjunct is present.
+ 
+\end_layout
+
+\begin_layout Standard
+This similarity measure essentially boils down to a normalized cylinder-set
+ measure.
+ That is, instead of interpreting the disjuncts as a basis for a vector
+ space, they can be taken as independent observations in a Cartesian product
+ space.
+ This makes more sense than pretening that these form a vector space.
+ Why is that? What makes the cosine angle, and vector dot products so appealing,
+ is that they are presereved by rotations; yet there really is no reason
+ to expect or desire rotational symmetry.
+ In short, the idea that we are dealing with vector spaces give the wrong
+ idea of what's going on: its more appropriate to view the set of disjuncts
+ as elements of a product space.
+ Product spaces have a natural measure: the cylinder-set measure.
+ The overlap similarity is essentially 
+\begin_inset Formula $\mu(A\cap B)/\mu(A\cup B)$
+\end_inset
+
+ with 
+\begin_inset Formula $\mu$
+\end_inset
+
+ the measure, and the intersection/union being taken over the associated
+ disjunct sets.
+\end_layout
+
+\begin_layout Subsection*
+Disjunct Subsets
+\end_layout
+
+\begin_layout Standard
+The above line of thinking suggests that another interesting comparison
+ can be made by looking for a subset relationship between the disjuncts
+ on different words.
+ For example, transitive verbs should have all the connectors that intransitive
+ verbs do, plus some more.
+\end_layout
+
+\begin_layout Standard
+The overlay similarity can be adapted for this purpose: two sets obey a
+ subset relation 
+\begin_inset Formula $A\subset B$
+\end_inset
+
+ if 
+\begin_inset Formula $A\cap(1-B)=\varnothing$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Subsection*
+Connector Similarity
+\end_layout
+
+\begin_layout Standard
+There is another, dual kind of similarity that is very different from the
+ above proposals.
+ A single disjunct is an ordered list of (pseudo-)connectors: 
+\begin_inset Formula 
+\[
+d=\left(c_{1},c_{2},\cdots,c_{k}\right)
+\]
+
+\end_inset
+
+where each pseudo-connector is a word, and a direction indicator.
+ We can judge two connectors to be similar, and thus, two words to be similar,
+ if they appear in a large number of disjuncts that would be identical,
+ but for that one connector.
+\end_layout
+
+\begin_layout Standard
+There are some practical difficulties of writing code to discern this.
+\end_layout
+
+\begin_layout Subsection*
+Word-Pair Cosine Similarity
+\end_layout
+
+\begin_layout Standard
+To correctly gauge the advantage of disjunct-based techniques, one could
+ compare them to the same kinds of measures, but applied to word-pairs,
+ instead of word-disjunct pairs.
+ For exmaple, the disjunct-based cosine similarity, can be contrasted against
+ the simpler word-pair-based cosine similarity.
  This is given by 
 \begin_inset Formula 
 \[
@@ -24970,7 +25096,64 @@ Comparing this to the expression for mutual information suggests that using
 
 \end_inset
 
- and 
+Perhaps the following is closer to the 
+\begin_inset Quotes eld
+\end_inset
+
+original intent
+\begin_inset Quotes erd
+\end_inset
+
+ of mutual information: let 
+\begin_inset Formula $\mbox{dot}(w_{1},w_{2})=\sum_{d}p(w_{1},d)p(w_{2},d)$
+\end_inset
+
+ 
+\begin_inset Formula 
+\[
+\mbox{dmi}(w_{1},w_{2})=-\log_{2}\frac{\mbox{dot}(w_{1},w_{2})\mbox{dot}(*,*)}{\mbox{dot}(w_{1},*)\mbox{dot}(*,w_{2})}
+\]
+
+\end_inset
+
+Or even
+\begin_inset Formula 
+\[
+\mbox{cmi}(w_{1},w_{2})=-\log_{2}\frac{\mbox{sim}(w_{1},w_{2})\mbox{sim}(*,*)}{\mbox{sim}(w_{1},*)\mbox{sim}(*,w_{2})}
+\]
+
+\end_inset
+
+The 
+\begin_inset Formula $\mbox{sim}(*,*)$
+\end_inset
+
+ serves to normalize the entire calculation, so that one is effectively
+ computing with 
+\begin_inset Formula $\mbox{norm-sim}(w_{1},w_{2})=\mbox{sim}(w_{1},w_{2})/\mbox{sim}(*,*)$
+\end_inset
+
+.
+ The only problem here is that cmi kind-of does 
+\begin_inset Quotes eld
+\end_inset
+
+the wrong thing
+\begin_inset Quotes erd
+\end_inset
+
+: it singles out pairs that have a lot to do with each other, but little
+ to do with anything else.
+ Which discriminates 
+\emph on
+against
+\emph default
+ the clusters of similar words, which is not really what we want.
+ We don't want strange, unusual pairings; we want common, likely pairings.
+\end_layout
+
+\begin_layout Standard
+One can be inspired to write some crazy concoctions: 
 \begin_inset Formula 
 \[
 \mbox{mim}(w,d)=-\log_{2}\frac{p(w,d)}{\sum_{w,d}p^{2}(w,d)}
@@ -25568,7 +25751,7 @@ en_pairs_rtwo_mst
 \begin_inset Text
 
 \begin_layout Plain Layout
-
+428K x 434K
 \end_layout
 
 \end_inset
@@ -25577,7 +25760,7 @@ en_pairs_rtwo_mst
 \begin_inset Text
 
 \begin_layout Plain Layout
-
+16.4M
 \end_layout
 
 \end_inset
@@ -25586,7 +25769,7 @@ en_pairs_rtwo_mst
 \begin_inset Text
 
 \begin_layout Plain Layout
-
+639M
 \end_layout
 
 \end_inset
@@ -25595,7 +25778,7 @@ en_pairs_rtwo_mst
 \begin_inset Text
 
 \begin_layout Plain Layout
-
+38.9
 \end_layout
 
 \end_inset
@@ -25604,7 +25787,7 @@ en_pairs_rtwo_mst
 \begin_inset Text
 
 \begin_layout Plain Layout
-
+18.27
 \end_layout
 
 \end_inset
@@ -25613,7 +25796,7 @@ en_pairs_rtwo_mst
 \begin_inset Text
 
 \begin_layout Plain Layout
-
+-1.90
 \end_layout
 
 \end_inset
@@ -25622,7 +25805,7 @@ en_pairs_rtwo_mst
 \begin_inset Text
 
 \begin_layout Plain Layout
-en_pairs_rthree_mst
+en_pairs_rthree
 \end_layout
 
 \end_inset
@@ -25633,9 +25816,16 @@ en_pairs_rthree_mst
 \end_inset
 
 
-\begin_inset Newline newline
+\end_layout
+
+\begin_layout Standard
+\begin_inset VSpace defskip
 \end_inset
 
+
+\end_layout
+
+\begin_layout Standard
 The legend is as follows:
 \end_layout
 
@@ -25721,6 +25911,8 @@ en_pairs_ttwo_mst Tranche two - Everything from tranche one, plus fan-fiction
  from http://archiveofourown.org.
  Most of the selected texts were 10K words or longer.
  See the 'download.sh' file for the precise texts.
+ Issues: tone_mst and ttwo_mst are missing connectors the LEFT-WALL.
+ Certain taypes of punctuation is mis-handled.
 \end_layout
 
 \begin_layout Description
@@ -25728,11 +25920,15 @@ en_pairs_tthree Tranche three - Everything in tranche two, plus several
  hundred of the most recently created Project Gutenberg texts, whatever
  they may be.
  See the 'download.sh' file for the precise texts.
+ The _mst version has the same issues that ttwo_mst has, although some connector
+s to LEFT-WALL do get added.
+ The _mst version is probably not useful for similarity measurements.
 \end_layout
 
 \begin_layout Description
 en_pairs_rone_mst Same as en_pairs_tone_mst, but with minor issues fixed.
- Ditto rtwo, rthree.
+ Ditto rtwo.
+ However, links to LEFT-WALL still missing.
 \end_layout
 
 \begin_layout Standard
@@ -26108,7 +26304,7 @@ en_pairs_ttwo_mst
 \begin_inset Text
 
 \begin_layout Plain Layout
-
+13.2M
 \end_layout
 
 \end_inset
@@ -26117,7 +26313,7 @@ en_pairs_ttwo_mst
 \begin_inset Text
 
 \begin_layout Plain Layout
-
+31.5M
 \end_layout
 
 \end_inset
@@ -26126,7 +26322,7 @@ en_pairs_ttwo_mst
 \begin_inset Text
 
 \begin_layout Plain Layout
-
+2.39
 \end_layout
 
 \end_inset
@@ -26135,7 +26331,7 @@ en_pairs_ttwo_mst
 \begin_inset Text
 
 \begin_layout Plain Layout
-
+21.94
 \end_layout
 
 \end_inset
@@ -26144,7 +26340,7 @@ en_pairs_ttwo_mst
 \begin_inset Text
 
 \begin_layout Plain Layout
-
+15.63
 \end_layout
 
 \end_inset
@@ -26153,7 +26349,7 @@ en_pairs_ttwo_mst
 \begin_inset Text
 
 \begin_layout Plain Layout
-
+10.28
 \end_layout
 
 \end_inset
@@ -26162,7 +26358,7 @@ en_pairs_ttwo_mst
 \begin_inset Text
 
 \begin_layout Plain Layout
-
+-3.97
 \end_layout
 
 \end_inset
@@ -26461,7 +26657,7 @@ What is needed is a recognizer,as follows.
 \begin_inset Formula $w_{n}$
 \end_inset
 
- being individual words, and the 
+T being individual words, and the 
 \begin_inset Formula $b_{n}$
 \end_inset
 
@@ -27523,7 +27719,7 @@ Created with
 \end_layout
 
 \begin_layout Plain Layout
-(define poi (add-pair-cosine-compute pti)) 
+(define poi (add-pair-cosine-compute fsi)) 
 \end_layout
 
 \begin_layout Plain Layout
@@ -28212,8 +28408,44 @@ sim
 So why aren't some of these in the PCA vector?
 \end_layout
 
+\begin_layout Subsubsection*
+IMPORTANT: 
+\end_layout
+
 \begin_layout Standard
-Computing similarity for all pairs is not manageable.
+Some readers have misunderstood this section.
+ We are NOT doing PCA to obtain similarity! We are examining it as an algo
+ for CLUSTERING! That is, instead of doing k-means clustering, or agglomerative
+ clustering, or something like that, the idea is/was to use a thresholded
+ PCA for CLUSTERING! and NOT for similarity, because we've already got reasonabl
+e adequate similarity.
+ Higher-quality similarity might be nice, but that is of seccondary importance,
+ right now.
+\end_layout
+
+\begin_layout Subsection*
+Cosine similarity
+\end_layout
+
+\begin_layout Standard
+This section reviews cosine similarity for the disjunct-tagged words.
+ However, before you look at this, realize that there are TWO classes of
+ words in the corpus: those that are capitalized, and those that are not.
+ Assuming that sentences are 20 words long, this means that the effective
+ size of the capitalized-word corpus is 20x smaller than the uncapitalized
+ corpus.
+ Because it is so much smaller, it should be no surprise that the accuracy
+ will be lower.
+\end_layout
+
+\begin_layout Standard
+In short, you will see quirks in the cosine similarity of the CAPITALIZED
+ words! This is an important point, so please, do not misunderstand it!
+ Don't be like some of the readers who already have missed this.
+\end_layout
+
+\begin_layout Standard
+Computing cosine similarity for all pairs is not manageable.
  However, if we limit ourselves, then there are 803 words that were observed
  1500 times, or more.
  There are 322003 = 803 * 802 / 2 pairs of these.
@@ -28912,7 +29144,7 @@ sim
 This listing skips four pairs (smiled, laughed) (nodded, laughed) (asked,
  sighed) (nodded, asked) that would appear in it.
  Curiously, surprisingly, with the exception of the first pair, these are
- all pairs of propositions! The top pairs to break out of this pattern are:
+ all pairs of prepositions! The top pairs to break out of this pattern are:
  
 \end_layout
 
@@ -29341,6 +29573,829 @@ day
  I think this is very interesting.
  This is new, and I've never seen the corpus-linguistics people talk about
  this (but my experience is limited).
+\end_layout
+
+\begin_layout Subsection*
+Cosine Similarity scatterplots
+\end_layout
+
+\begin_layout Standard
+The following scatterplot visualizes the cosine similarity between 803 word-pair
+s.
+ The rows and columns are ranked by frequency of word occurance, so that
+ the single-most-frequently occuring word is at the upper-left, with less
+ and less frequently occuring words proceeding to the right, and downwards.
+ The color scale is such that red represents 1.0, yellow represents 0.75 (so
+ orange is in between), green is exactly 0.5, and blue is 0.25 or less, fading
+ to black.
+ 
+\end_layout
+
+\begin_layout Standard
+This is for the 
+\noun on
+en_pairs_ttwo
+\noun default
+ dataset, described below.
+ It has several cuts applied here: in this case, all disjuncts with 30 observati
+ons or less are excluded from the cosing calculations, as are any word-disjunct
+ pairs with 10 observations or less.
+ All words with 3500 or fewer observations are discarded; this leaves behind
+ just the 803 words shown.
+ This has the effect of trimming away the noise in the dataset, leaving
+ only 
+\begin_inset Quotes eld
+\end_inset
+
+high-confidence
+\begin_inset Quotes erd
+\end_inset
+
+ word-disjunct pairs contributing to the cosine.
+ Note that cosine similarity is symmetric; this figure is necessarily symmetric
+ about the diagonal.
+ The diagonal can be seen (with difficulty) as a line of red squares.
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Graphics
+	filename scat/scat-cosine-big.png
+	width 100col%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The tartan pattern indicates that some words are very unlike others.
+ Closer examination reveals the usual culprits, already described: the period,
+ and other punctuation marks, tend to be very different than other words.
+ Thus, punctuation acconuts for many of the blue lines.
+\end_layout
+
+\begin_layout Standard
+It would be nice to re-arrange (permute) the rows and columns to bring the
+ matrix into quasi-diagonal form.
+ This is easier said than done.
+ The graph below shows the same data, this time for 300 words, with a different
+ ranking.
+ This time, the first word is the period, and the next word is the one word,
+ out of 299, that has the highest cosine similarity to the period.
+ Next comes the word, out of the remaining 298, that has the highest cosine
+ similarity to the last.
+ This continues on dowm the list, so that word-pairs with the highest similarity
+ are next to each-other, in the list.
+ Effectively, we get the two-highest similarities for each word: the highest
+ being to the word right before, and second-highest to the word right after.
+ The list is organized so that the highest similarity pair occurs in the
+ lower-right.
+ The pairs least-similar to anything else end up on the upper-left.
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Graphics
+	filename scat/scat-fcos.png
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+This ranking does expose a bit of block-diagonal structure, but not that
+ much, and not that strong.
+ The overwhelming color tone of these pictures demonstrate that the vast
+ majority of word-pairs have an alarmingly large amount of cosine-similarity;
+ again, green and yellow representing a similarity of 0.5 and above.
+ The large orange block in the middle is clearly a cluster in a very obvious
+ sense.
+ Looking more closely it consists of two blocks: a big one and a much smaller
+ on to the lower-right.
+ The smaller block consists of these words: Jack Picth Ross Jim John.
+ Clearly, these are all capitalized proper names.
+ The bigger block are these words: I You And But When Then For At There
+ It He She His The They This As In We If So A No.
+ Observe that all of these are capitalized, and none are proper names, indicatin
+g that they are all sentence openers.
+ They are listed in order.
+ Thus, the cosine distance between 
+\begin_inset Quotes eld
+\end_inset
+
+I
+\begin_inset Quotes erd
+\end_inset
+
+ and 
+\begin_inset Quotes eld
+\end_inset
+
+You
+\begin_inset Quotes erd
+\end_inset
+
+ is high, although it is less than that between 
+\begin_inset Quotes eld
+\end_inset
+
+I
+\begin_inset Quotes erd
+\end_inset
+
+ and 
+\begin_inset Quotes eld
+\end_inset
+
+John
+\begin_inset Quotes erd
+\end_inset
+
+, and so on down the line.
+ The similarity between most of these is not surprising, and can certainly
+ be rationalized post-facto.
+\end_layout
+
+\begin_layout Standard
+For comparison, the start of the list (lower-right) are the words: 
+\begin_inset Quotes eld
+\end_inset
+
+,
+\begin_inset Quotes erd
+\end_inset
+
+ and but when if they there he she her it back up.
+ Note that these are all lower-case, which means that they are observed
+ only in the middle of sentences.
+ That these are all pair-wise similar is not all that surprising.
+\end_layout
+
+\begin_layout Standard
+The bands suggests that perhaps a good way of closutering might be to look
+ at not only how similar several words are, but also how different they
+ are from everything else.
+ Cosine similarity does NOT adequately take into account differences.
+ However, mutual information does.
+ So perhaps a mutual-information-inspired similarity would provide better
+ results.
+\end_layout
+
+\begin_layout Subsection*
+Overlap Similarity
+\end_layout
+
+\begin_layout Standard
+Perhaps asking for cosine similarity is too strong -- cosine similarity
+ asks not only for the same disjuncts on a word, but also the same relative
+ ratios of usage.
+ Supose that this is loosened: instead of asking for for the same relative
+ ratios, we merely ask that two words use mostly the same sets of disjuncts,
+ and ignore the frequency.
+ For this, we can define the overlap similarity
+\begin_inset Formula 
+\[
+\mbox{ovl}(w_{1},w_{2})=\frac{\left|\left\{ d\mbox{ s.t. }0<N\left(w_{1},d\right)\right\} \cap\left\{ d\mbox{ s.t. }0<N\left(w_{2},d\right)\right\} \right|}{\left|\left\{ d\mbox{ s.t. }0<N\left(w_{1},d\right)\right\} \cup\left\{ d\mbox{ s.t. }0<N\left(w_{2},d\right)\right\} \right|}
+\]
+
+\end_inset
+
+where 
+\begin_inset Formula $\left\{ d\mbox{ s.t. }0<N\left(w,d\right)\right\} $
+\end_inset
+
+ is the set of disjuncts 
+\begin_inset Formula $d$
+\end_inset
+
+ such that the cset 
+\begin_inset Formula $(w,d)$
+\end_inset
+
+ was observed at least once.
+ 
+\end_layout
+
+\begin_layout Standard
+Results are presented below, for the cut dataset.
+ The cuts are as described below: all words with 
+\begin_inset Formula $N(w,*)<1500$
+\end_inset
+
+ are discarded, as are all observations 
+\begin_inset Formula $N(w,d)<10$
+\end_inset
+
+ and all disjuncts for which 
+\begin_inset Formula $N(*,d)<30$
+\end_inset
+
+.
+ There are 803 words that are left after these cuts, and 322003 = 803 *
+ 802 / 2 word-pairs.
+ The top of the list is
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Tabular
+<lyxtabular version="3" rows="12" columns="2">
+<features tabularvalignment="middle">
+<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top" width="0">
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+pair
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+sim
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+(act .
+ foot)
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\strikeout off
+\uuline off
+\uwave off
+\noun off
+\color none
+ 0.87500
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+(laid .
+ pushed)
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0.84615
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+(Sandy .
+ Bunny)
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0.84211
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+(start .
+ act)
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0.84000
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+(soft .
+ control)
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0.83871
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+(thoughts .
+ heavy)
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0.83333
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+(Mary .
+ Sandy)
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0.83333
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+(teeth .
+ throat)
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0.82609
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+(Sandy .
+ it's)
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0.82353
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+(wide .
+ shoulder) 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0.82143
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+(shut .
+ King)
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0.81818
+\end_layout
+
+\end_inset
+</cell>
+</row>
+</lyxtabular>
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+This appears to offer a less accurate discovery of pairs than cosine similarity.
+ Some of these seem reasonable, or at least plausible, but many do not.
+ Insisiting on more observations gives the following list.
+ Its for the word-pairs formed after cutting 
+\begin_inset Formula $N(w,*)<3500$
+\end_inset
+
+, which leaves 383 words and 73153 word-pairs.
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Tabular
+<lyxtabular version="3" rows="12" columns="2">
+<features tabularvalignment="middle">
+<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top" width="0">
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+pair
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+sim
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+(away .
+ off)
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0.75556
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+(black .
+ white)
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0.73077
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+(off .
+ over)
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0.71856
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+(whole .
+ end)
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0.70175
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+(herself .
+ myself)
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0.70175
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+(both .
+ three)
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0.69663
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+(quite .
+ almost)
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0.69512
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+(each .
+ every)
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0.69474
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+(night .
+ place)
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0.69318
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+(held .
+ stood)
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0.69231
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+(used .
+ hard)
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0.69231
+\end_layout
+
+\end_inset
+</cell>
+</row>
+</lyxtabular>
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+These are not particularly better-matched.
+ Based on the actual scores, they are indeed worse-matched; the large-observatio
+n-count cut is not helping.
+\end_layout
+
+\begin_layout Standard
+The scatter matrix is shown below.
+ Just like the prvious matrix, it shows the 803 words in the dataset that
+ have 3500 or more observations.
+ The rows and columns are in observation-ranking order, so that the most
+ frequent words are to the upper-left.
+ As before, the pattern is necessarily symmetric about the diagonal.
+ As before, there is a Tartan pattern that is clearly visibile, and its
+ there for the same reasons.
+ 
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Graphics
+	filename scat/scat-overlap-big.png
+	width 100text%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Unlike before, there is an arrow-shape to the thing.
+ This is easy to explain: The most frequently observed words also have a
+ large number of disjuncts observed with them.
+ The least frequently observed words have far fewer disjuncts attached to
+ them.
+ Thus, all in all, the denominator for the overlap is necessarily large,
+ when comparing high-observation and low-observation words.
+\end_layout
+
+\begin_layout Subsection*
+Connector similarity
+\end_layout
+
+\begin_layout Standard
+Several remarks about the similarity of connectors.
 \end_layout
 
 \begin_layout Subsection*
@@ -31431,6 +32486,452 @@ to
 \begin_layout Standard
 The significance and interpretation of this vector was already discussed
  in a previous section.
+\end_layout
+
+\begin_layout Section*
+Reboot: 23 June 2017
+\end_layout
+
+\begin_layout Standard
+The cosine similarity gives OK pair-wise similarity results; the overlap
+ similairy gives noticably worse results.
+ There's no obvious matrix-based algorithm that will group together multiple
+ words into a cluster, efficiently, in one shot.
+ Its time for a rethink.
+ 
+\end_layout
+
+\begin_layout Standard
+What are we trying to do here, really?
+\end_layout
+
+\begin_layout Itemize
+Grammatical categories: By grouping multiple words into categories, we hope
+ to discover grammatical categories of words that behave similarly, with
+ respect to grammar.
+\end_layout
+
+\begin_layout Itemize
+Compression: By grouping multiple words into categories, we hope to compress
+ the size of the overall dataset of connector-sets, without loosing much
+ fidelity.
+\end_layout
+
+\begin_layout Itemize
+Idioms: By observing word-disjunct pairs with high MI scores, we hope to
+ discover idioms and set phrases.
+ 
+\end_layout
+
+\begin_layout Itemize
+Meaning: By developing a coherent framework for working with graph sections
+ (of which the connector sets are a special case), we hope to discover synonymou
+s phrases.
+\end_layout
+
+\begin_layout Itemize
+Reference resolution: By developing a coherent framework for working with
+ graph sections, we hope to discover reference resolution (of pronouns and
+ of given names) across multiple sentences.
+\end_layout
+
+\begin_layout Standard
+These seem like they should be acheivable.
+ Preliminary results looking promising, but not yet great.
+ What's the grand scheme of things?
+\end_layout
+
+\begin_layout Itemize
+Discover that certain nouns refer to objects in the physical world.
+\end_layout
+
+\begin_layout Itemize
+Discover that certain verbs refer to actions in the physical world.
+\end_layout
+
+\begin_layout Itemize
+Discover that certain nouns refer to abstract, non-physical concepts.
+\end_layout
+
+\begin_layout Itemize
+Discover the meaning of the verb-phrases 
+\begin_inset Quotes eld
+\end_inset
+
+is-a
+\begin_inset Quotes erd
+\end_inset
+
+, 
+\begin_inset Quotes eld
+\end_inset
+
+has-a
+\begin_inset Quotes erd
+\end_inset
+
+, 
+\begin_inset Quotes eld
+\end_inset
+
+is-a-part-of
+\begin_inset Quotes erd
+\end_inset
+
+, 
+\begin_inset Quotes eld
+\end_inset
+
+belongs-to
+\begin_inset Quotes erd
+\end_inset
+
+ ...
+ or, generally, discover the meanings of prepositional phrases.
+ 
+\end_layout
+
+\begin_layout Itemize
+Perform reasoning on relationships; specifically, on 
+\begin_inset Quotes eld
+\end_inset
+
+is-a
+\begin_inset Quotes erd
+\end_inset
+
+, 
+\begin_inset Quotes eld
+\end_inset
+
+has-a
+\begin_inset Quotes erd
+\end_inset
+
+, ...
+ relationships.
+\end_layout
+
+\begin_layout Itemize
+Develop a database of common-sense knowledge.
+\end_layout
+
+\begin_layout Itemize
+Translate between multiple languages, by employing common-sense knowledge
+ and reasoning.
+\end_layout
+
+\begin_layout Standard
+The first two seem impossible without embodiment.
+ The third bullet holds out hope that progress might be possible for textual-onl
+y analysis.
+ The fourth bullet asks for an algebraic structure to be discerned: 
+\begin_inset Quotes eld
+\end_inset
+
+is-a
+\begin_inset Quotes erd
+\end_inset
+
+ relations are symmetric: 
+\begin_inset Quotes eld
+\end_inset
+
+A is-a B
+\begin_inset Quotes erd
+\end_inset
+
+ if 
+\begin_inset Quotes eld
+\end_inset
+
+B is-a A
+\begin_inset Quotes erd
+\end_inset
+
+, and it should be possible to data-mine such symmetric relations.
+ Likewise for 
+\begin_inset Quotes eld
+\end_inset
+
+next-to
+\begin_inset Quotes erd
+\end_inset
+
+ and 
+\begin_inset Quotes eld
+\end_inset
+
+near
+\begin_inset Quotes erd
+\end_inset
+
+ relationships.
+ It is at least plausible that such relations could be data-mined, with
+ no 
+\emph on
+a priori
+\emph default
+ knowledge of the words.
+ Anyway, this provides the setting for the intial grammatical tasks.
+ So, back to the initial grammatical tasks.
+\end_layout
+
+\begin_layout Standard
+Idioms: based on preliminary evidence, we could make lists of idiomatic
+ phrases, now, based only on high-MI word-disjunct relations.
+ But these are useless, until we can build a list of synonymous words.
+\end_layout
+
+\begin_layout Standard
+Discerning synonymous words based on grammatical usage is tricky.
+ First, it is often antonyms that get observed: e.g.
+ the (black,white) pairs reported above.
+ To discern anonymy, we would also need to discern is-a relationships, apply
+ common-sense reasonsing, and notice that antonyms never describe the same
+ objects, never describe the properties of the same objects.
+ So, antonym detection appears to be an advanced topic.
+\end_layout
+
+\begin_layout Subsection*
+Clustering
+\end_layout
+
+\begin_layout Standard
+We could go full-speed ahead on trying to discern grammatical categories,
+ but for several issues: 
+\end_layout
+
+\begin_layout Itemize
+Merging two items into one necessarily entails a loss of information.
+ That is, one necessarily has that 
+\begin_inset Formula $-(p_{a}+p_{b})\log_{2}(p_{a}+p_{b})\le-p_{a}\log_{2}p_{a}-p_{b}\log_{2}p_{b}$
+\end_inset
+
+.
+ That is, information is necessarily lost.
+ How can we minimize information loss? 
+\end_layout
+
+\begin_layout Itemize
+If a classification error is made early on, can it be spotted, and later
+ corrected? What is the mechanism, and how might it work?
+\end_layout
+
+\begin_layout Standard
+We can use the 
+\begin_inset Quotes eld
+\end_inset
+
+information loss
+\begin_inset Quotes erd
+\end_inset
+
+ to our advantage if the 
+\begin_inset Quotes eld
+\end_inset
+
+lost information
+\begin_inset Quotes erd
+\end_inset
+
+ is in fact just noise in the data.
+ That is, the data is necessarily noisy, and the naive calculation of the
+ entropy and mutual information encodes both that noise and the signal we
+ are searching for.
+ Clustering together items, and the associated information loss, is desirable
+ if the loss results in the filtering out of noise.
+ How can we characterize the noise in the observations?
+\end_layout
+
+\begin_layout Subsection*
+Noise
+\end_layout
+
+\begin_layout Standard
+If an event is normally distributed, then we can characterize the uncertainty
+ as being 
+\begin_inset Formula $1/\sqrt{N}$
+\end_inset
+
+ after 
+\begin_inset Formula $N$
+\end_inset
+
+ observations.
+ We don't actually know if our observations are normally distributed.
+ Its not even clear quite how to even obtain the distribution.
+ But's lets assume they are.
+ Then, given that 
+\begin_inset Formula $p(x,y)=N(x,y)/N(*,*)$
+\end_inset
+
+ and estimating the noise to go as 
+\begin_inset Formula $\sqrt{N(x,y)}$
+\end_inset
+
+ we get that the error in the frequentist probability estimate is given
+ by
+\begin_inset Formula 
+\[
+\frac{N(x,y)\pm\sqrt{N(x,y)}}{N(*,*)}=p(x,y)\pm\sqrt{\frac{p(x,y)}{N(*,*)}}
+\]
+
+\end_inset
+
+where only the pair observations 
+\begin_inset Formula $N(x,y)$
+\end_inset
+
+ are considered to be noisey and the value of 
+\begin_inset Formula $N(*,*)$
+\end_inset
+
+ is held fixed (the natural variation in it is ignored).
+\end_layout
+
+\begin_layout Standard
+The error in the frequentist estimate of the entropy to be
+\begin_inset Formula 
+\[
+-\log_{2}\left[p(x,y)\pm\sqrt{\frac{p(x,y)}{N(*,*)}}\right]=-\left[\log_{2}p(x,y)\right]\pm\frac{1}{\log2}\sqrt{\frac{1}{p(x,y)N(*,*)}}
+\]
+
+\end_inset
+
+where the estimate 
+\begin_inset Formula $\log(1+\epsilon)\approx\epsilon$
+\end_inset
+
+ is used for small 
+\begin_inset Formula $\epsilon$
+\end_inset
+
+.
+ Summing to estimate the total entropy, one gets
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+H\pm\Delta H=-\sum_{x,y}\left[p(x,y)\pm\sqrt{\frac{p(x,y)}{N(*,*)}}\right]\log_{2}\left[p(x,y)\pm\sqrt{\frac{p(x,y)}{N(*,*)}}\right]
+\]
+
+\end_inset
+
+which expands out to
+\begin_inset Formula 
+\[
+\Delta H=\frac{-1}{\sqrt{N(*,*)}}\sum_{x,y}\sqrt{p(x,y)}\left(\frac{1}{\log2}+\log_{2}p(x,y)\right)
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+What might these values be, in practice? As a worked example, consider the
+ word-pair (big, deal) in the 
+\noun on
+en_pairs_rthree
+\noun default
+ dataset.
+ It is observed 1039 times, out of 638845863 pair observations (639M) total.
+ Plugging and chugging, one gets 
+\begin_inset Formula $H=-\log_{2}p(\mbox{big},\mbox{deal})=19.23$
+\end_inset
+
+ and 
+\begin_inset Formula $\Delta H=0.552$
+\end_inset
+
+ which seems to be eminently reasonable.
+ The value of 
+\begin_inset Formula $\Delta H$
+\end_inset
+
+ depends only on 
+\begin_inset Formula $N(x,y)$
+\end_inset
+
+ and 
+\begin_inset Formula $N(*,*)$
+\end_inset
+
+ and is graphed below, for fixed 
+\begin_inset Formula $N(*,*)=639M$
+\end_inset
+
+.
+ It does not take very many observations to drive the uncertainty to a fairly
+ small value.
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Graphics
+	filename images/error.eps
+	width 60col%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+foo
+\end_layout
+
+\begin_layout Subsection*
+Error correction
+\end_layout
+
+\begin_layout Standard
+If a classification error is made early on, can it be spotted, and later
+ corrected? What is the mechanism, and how might it work?
+\end_layout
+
+\begin_layout Subsection*
+Worked example
+\end_layout
+
+\begin_layout Standard
+Bothe the cosine similarity and the overlap similarity suggested that the
+ words 
+\begin_inset Quotes eld
+\end_inset
+
+black
+\begin_inset Quotes erd
+\end_inset
+
+ and 
+\begin_inset Quotes eld
+\end_inset
+
+white
+\begin_inset Quotes erd
+\end_inset
+
+ are similar.
+ What happens when these are grouped together? We not only consider throwing
+ both words into the same bag, but we then may want to consider what happens
+ to other disjuncts, that connected to other words.
+\end_layout
+
+\begin_layout Standard
+Also, when clustering, should we create a single common category 
+\begin_inset Quotes eld
+\end_inset
+
+bw
+\begin_inset Quotes erd
+\end_inset
+
+ holding both words, or should we create three categories: bw, white-prime
+ and black-prime, where bw just has the common disjuncts, and white-prime
+ and black-prime is what's left after taking differences?
 \end_layout
 
 \begin_layout Section*
