@@ -11139,6 +11139,85 @@ Its just ListLink of the pairs. So to store it:
 dammit. Kaboom. Start from scratch.
 
 
+(define foo (add-support-compute poi))
+(foo 'right-length (WordNode "###LEFT-WALL###"))
+72 can go now  108 is next
+108 can go 162 is next
+162 done 243 is next
+
+(define left-marg (make-left-summer (take ranked-csw 108) get-cos))
+
+(define cos-wild-wild
+	(fold (lambda (it acc) (+ acc (left-marg it))) 0 (take ranked-csw 108)))
+
+
+(define get-cmi (make-get-cmi (take ranked-csw 108)))
+
+(define (mk-cmi-prs wa LST)
+	(map (lambda (wb) (get-cmi wa wb)) LST)
+
+(define (mk-all-cmi-prs LST)
+	(map (lambda (wa) (mk-cmi-prs wa LST) LST)))
+
+(define (make-all-cmi WLST RSLT)
+   (define wlen (length WLST))
+   (if (< 0 wlen)
+      (let* ((head (car WLST))
+            (rest (cdr WLST))
+         	(prs (map (lambda (w) (get-cmi head w)) WLST))
+			)
+         (format #t "Pairs remaining: ~A\n" wlen)
+         (make-all-cmi rest (concatenate prs RSLT)))
+		RSLT))
+
+(define all-cmi (make-sym-pairs (take ranked-csw 108) get-cmi))
+(define all-cmi (make-sym-pairs (take ranked-csw 162) get-cmi))
+
+(define ranked-cmi (sort all-cmi (lambda (a b) (> (cdr a) (cdr b)))))
+
+. But 7.366558296223725  0.001619248635083709
+. She 5.439150360752608  0.006026945058317777
+. And 5.325353892901934  0.007068524421558074
+. He 5.1641299882215455  0.007253773644001228
+
+(define all-cmi (make-sym-pairs (take ranked-csw 162) 
+	(lambda (wa wb) (* (get-cos wa wb) (get-cmi wa wb)))))
+
+(define ranked-cmi (sort all-cmi (lambda (a b) (> (cdr a) (cdr b)))))
+
+product:
+(WordNode ";")  (WordNode "said")) . 0.296607939087752) 
+(WordNode "said")  (WordNode "upon")) . 0.29633824003351183) 
+(WordNode "from")  (WordNode "Jack")) . 0.2937570566264612) 
+(WordNode ";")  (WordNode "Jack")) . 0.2936624229096209) 
+(WordNode "with")  (WordNode "said")) . 0.2923745344239661) 
+(WordNode "I")  (WordNode ";")) . 0.2919811998332135) 
+(WordNode "on")  (WordNode "said")) . 0.29101313047631) 
+(WordNode "from")  (WordNode "said")) . 0.29024498064059373) 
+(WordNode "on")  (WordNode "Jack")) . 0.28978802747511617) 
+(WordNode "I")  (WordNode "from")) . 0.2890086903794695))
+
+(get-cos (WordNode ";")  (WordNode "said")) $92 = 0.2723589177762356
+(get-cos (WordNode "said")  (WordNode "upon")) $95 = 0.332603453209047
+
+(get-cos (WordNode "from")  (WordNode "Jack")) 0.3158230495038972
+(get-cos (WordNode ";")  (WordNode "Jack"))  0.25023554371175
+(get-cos (WordNode "with")  (WordNode "said"))  0.3469959252702303
+(get-cos (WordNode "I")  (WordNode ";"))  0.2607676762450459
+(get-cos (WordNode "on")  (WordNode "said"))  0.3738730234710499
+(get-cos (WordNode "from")  (WordNode "said")) 
+(get-cos (WordNode "on")  (WordNode "Jack")) 
+(get-cos (WordNode "I")  (WordNode "from")) 
+
+(get-cmi (WordNode ";")  (WordNode "said"))  1.0890333296574446
+(get-cmi (WordNode "said")  (WordNode "upon")) 0.8909656143806125
+(get-cmi (WordNode "from")  (WordNode "Jack")) 0.930131784516368
+(get-cmi (WordNode ";")  (WordNode "Jack"))  1.1735440079923058
+(get-cmi (WordNode "with")  (WordNode "said"))  0.8425878032898321
+(get-cmi (WordNode "I")  (WordNode ";"))  
+(get-cmi (WordNode "on")  (WordNode "said")) 
+
+
 
 =========================================================================
 	

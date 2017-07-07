@@ -85,14 +85,14 @@
 			(store-atom (List wy wx))
 			wcos)))
 
-; Compute cosines for the top N words.
+; Compute cosines for the N words in the list.
 (define (make-all-cos wordlist)
 	(define wlen (length wordlist))
-	(if (< 1 wlen)
+	(if (< 0 wlen)
 		(let ((head (car wordlist))
 				(rest (cdr wordlist)))
 			(format #t "Pairs remaining: ~A\n" wlen)
-			(for-each (lambda (w) (make-cos head w)) rest)
+			(for-each (lambda (w) (make-cos head w)) wordlist)
 			(make-all-cos rest))))
 
 (make-all-cos (take ranked-csw 40))
@@ -104,6 +104,23 @@
 		(make-all-cos ranked-csw))
 	(if (< nxt (length ranked-csw))
 		(make-them-all (inexact->exact (truncate (* 1.5 nxt))))))
+
+
+; Return a function that computes the cosine mutual information 
+(define (make-get-cmi LST)
+	(define left-marg (make-left-summer LST get-cos))
+	(define right-marg (make-right-summer LST get-cos))
+	(define cos-wild-wild
+		(fold (lambda (it acc) (+ acc (left-marg it))) 0 LST))
+	(define oln2 (- (/ 1.0 (log 2.0))))
+	(lambda (word-a word-b)
+		(* oln2 (log (/ 
+			(* (get-cos word-a word-b) cos-wild-wild)
+			(* (left-marg word-b) (right-marg word-a)))))))
+
+(define get-cmi (make-get-cmi (take ranked-csw 108)))
+(define get-cmi (make-get-cmi (take ranked-csw 162)))
+
 
 ; -----------------------------------------------------------------
 
@@ -143,9 +160,10 @@
 					(set-val flp val)
 					val)))))
 
-(define (left-sum ITEM LST FN)
+(define (make-left-summer LST FN)
 "
- Perform the wild-card sum over FN(*, ITEM) for * in LST
+ Return a function (func ITEM) that performs wild-card sums
+ over FN(*, ITEM) for * in LST.
 "
 	(define (summer ITEM)
 		(fold
@@ -155,3 +173,34 @@
 	(make-afunc-cache summer))
 
 
+(define (make-right-summer LST FN)
+"
+ Return a function (func ITEM) that performs wild-card sums
+ over FN(ITEM, *) for * in LST.
+"
+	(define (summer ITEM)
+		(fold
+			(lambda (it acc) (+ acc (FN ITEM it)))
+			0
+			LST))
+	(make-afunc-cache summer))
+
+(define (make-sym-pairs LST FN)
+"
+ Return a list of pair-value pairs of pairs constructed from LST
+ and values obtained by applying FN.
+
+ That is, return a list of ( (x . y) . v) where x and y are from LST
+ and v is equal to (FN x y)
+"
+	(define (make-all-helper WLST RSLT)
+		(define wlen (length WLST))
+		(if (< 0 wlen)
+			(let* ((head (car WLST))
+					(rest (cdr WLST))
+					(prs (map (lambda (w) (cons (cons head w) (FN head w))) WLST))
+				)
+				(format #t "Pairs remaining: ~A\n" wlen)
+				(make-all-helper rest (append prs RSLT)))
+			RSLT))
+	(make-all-helper LST '()))
