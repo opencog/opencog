@@ -210,32 +210,6 @@
       (SAMPLE_INPUT) : #f ; TODO replace with a tester function
     )
 
-    (declarations
-      (CONCEPT ID a-sequence) :
-        (display-token (format #f "concept(~a = ~a)" $2 $3))
-      (TOPIC ID a-sequence) :
-        (display-token (format #f "topic(~a = ~a)" $2 $3))
-    )
-
-    (rules
-      (RESPONDERS a-literal a-sequence patterns) :
-        (display-token (format #f "responder_~a(~a -> ~a)" $2 $3 $4))
-      ; Unlabeled responder.
-      ; TODO: Maybe should be labeled internally in the atomspace???
-      (RESPONDERS a-sequence patterns) :
-        (display-token (format #f "responder_~a(~a -> ~a)" $1 $2 $3))
-      (REJOINDERS a-sequence patterns) :
-        (display-token (format #f "rejoinder_~a(~a -> ~a)" $1 $2 $3))
-      (GAMBIT patterns) : (display-token (format #f "gambit(~a)" $2))
-    )
-
-    (patterns
-      (enter) :  $1
-      (pattern) : (display-token $1)
-      (patterns pattern) : (display-token (format #f "~a ~a" $1 $2))
-      (patterns enter) : (display-token (format #f "~a" $1))
-    )
-
     (enter
       (an-enter) : $1
       (enter an-enter) : $1
@@ -246,20 +220,87 @@
       (NEWLINE) : #f
     )
 
-    ; TODO: Give this a better name. Maybe should be divided into
-    ; action-pattern and context-pattern ????
+    ; Declaration/annotation(for ghost) grammar
+    (declarations
+      (CONCEPT ID declaration-sequence) :
+        (display-token (format #f "concept(~a = ~a)" $2 $3))
+      (TOPIC ID declaration-sequence) :
+        (display-token (format #f "topic(~a = ~a)" $2 $3))
+    )
+
+    (declaration-sequence
+      (LPAREN declaration-members RPAREN) :
+        (display-token (format #f "declaration-sequence(~a)" $2))
+    )
+
+    (declaration-members
+      (declaration-member) : $1
+      (declaration-members declaration-member) :
+        (display-token (format #f "~a ~a" $1 $2))
+    )
+
+    (declaration-member
+      (LITERAL) :  $1
+      (concept) :  $1
+      (LITERAL~COMMAND) :
+        (display-token (format #f "command(~a -> ~a)" (car $1) (cdr $1)))
+    )
+
+    ; Rule grammar
+    (rules
+      (RESPONDERS a-literal context-sequence action-patterns) :
+        (display-token (format #f "responder_~a(~a -> ~a)" $2 $3 $4))
+      ; Unlabeled responder.
+      ; TODO: Maybe should be labeled internally in the atomspace???
+      (RESPONDERS context-sequence action-patterns) :
+        (display-token (format #f "responder_~a(~a -> ~a)" $1 $2 $3))
+      (REJOINDERS context-sequence action-patterns) :
+        (display-token (format #f "rejoinder_~a(~a -> ~a)" $1 $2 $3))
+      (GAMBIT action-patterns) : (display-token (format #f "gambit(~a)" $2))
+    )
+
+    (context-sequence
+      (LPAREN context-patterns RPAREN) :
+        (display-token (format #f "context(~a)" $2))
+    )
+
+    (context-patterns
+      (enter) :  $1
+      (context-pattern) : (display-token $1)
+      (context-patterns context-pattern) :
+        (display-token (format #f "~a ~a" $1 $2))
+      (context-patterns enter) : $1
+    )
+
+    (context-pattern
+      (pattern) : (display-token $1)
+      (unordered-matching) : (display-token $1)
+      (NOT context-pattern) : (display-token (format #f "Not(~a)" $2))
+      (< context-patterns) :
+        (display-token (format #f "restart_matching(~a)" $2))
+      ; FIXME end_of_sentence is not necessarily complete.
+      (pattern >) : (display-token (format #f "@end_of_sentence(~a)" $1))
+      (context-sequence) : (display-token $1)
+    )
+
+    (action-patterns
+      (enter) :  $1
+      (action-pattern) : (display-token $1)
+      (action-patterns action-pattern) :
+        (display-token (format #f "~a ~a" $1 $2))
+      (action-patterns enter) : (display-token (format #f "action(~a)" $1))
+    )
+
+    (action-pattern
+      (pattern) : $1
+    )
+
     (pattern
       (a-literal) : (display-token $1)
       (a-literal ?) : (display-token (format #f "~a~a" $1 $2))
       (variable)  : (display-token $1)
       (collections) : (display-token $1)
-      (unordered-matching) : (display-token $1)
       (function) : (display-token $1)
-      (NOT pattern) : (display-token (format #f "Not(~a)" $2))
-      (< patterns) : (display-token (format #f "restart_matching(~a)" $2))
-      ; FIXME end_of_sentence is not necessarily complete.
-      (pattern >) : (display-token (format #f "@end_of_sentence(~a)" $1))
-      (a-sequence) : (display-token $1)
       (phrase) : (display-token $1)
       (variable ? collections) :
         (display-token (format #f "is_member(~a ~a)" $1 $3))
@@ -271,7 +312,7 @@
     )
 
     (choice
-      (LSBRACKET patterns RSBRACKET) :
+      (LSBRACKET context-patterns RSBRACKET) :
         (display-token (format #f "choices(~a)" $2))
     )
 
@@ -281,7 +322,8 @@
 
     ; TODO: This has a restart_matching effect. See chatscript documentation
     (unordered-matching
-      (<< patterns >>) : (display-token (format #f "unordered-matching(~a)" $2))
+      (<< context-patterns >>) :
+        (display-token (format #f "unordered-matching(~a)" $2))
     )
 
     (function
@@ -293,7 +335,7 @@
 
     (args
       (arg) : (display-token $1)
-      (args arg) :  (display-token (format #f "~a ~a" $1 $2))
+      (args arg) : (display-token (format #f "~a ~a" $1 $2))
     )
 
     (arg
@@ -301,12 +343,13 @@
       (concept) :  (display-token $1)
     )
 
-    (a-sequence
-      (LPAREN patterns RPAREN) : (display-token (format #f "sequence(~a)" $2))
+    (phrase
+      (DQUOTE literals DQUOTE) : (display-token (format #f "phrase(~a)" $2))
     )
 
-    (phrase
-      (DQUOTE patterns DQUOTE) : (display-token (format #f "phrase(~a)" $2))
+    (literals
+      (LITERAL) : (display-token $1)
+      (literals LITERAL) : (display-token (format #f "~a ~a" $1 $2))
     )
 
     (variable
