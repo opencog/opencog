@@ -25118,9 +25118,9 @@ original intent
 
 Or even
 \begin_inset Formula 
-\[
-\mbox{cmi}(w_{1},w_{2})=-\log_{2}\frac{\mbox{sim}(w_{1},w_{2})\mbox{sim}(*,*)}{\mbox{sim}(w_{1},*)\mbox{sim}(*,w_{2})}
-\]
+\begin{equation}
+\mbox{cmi}(w_{1},w_{2})=-\log_{2}\frac{\mbox{sim}(w_{1},w_{2})\mbox{sim}(*,*)}{\mbox{sim}(w_{1},*)\mbox{sim}(*,w_{2})}\label{eq:cmi (cosine-mi)}
+\end{equation}
 
 \end_inset
 
@@ -29580,8 +29580,14 @@ Cosine Similarity scatterplots
 \end_layout
 
 \begin_layout Standard
-The following scatterplot visualizes the cosine similarity between 803 word-pair
-s.
+The scatterplot in 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:Cosine-similarity-scatterplot"
+
+\end_inset
+
+visualizes the cosine similarity between 803 word-pairs.
  The rows and columns are ranked by frequency of word occurance, so that
  the single-most-frequently occuring word is at the upper-left, with less
  and less frequently occuring words proceeding to the right, and downwards.
@@ -29619,9 +29625,38 @@ high-confidence
 
 \begin_layout Standard
 \align center
+\begin_inset Float figure
+placement h
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Caption
+
+\begin_layout Plain Layout
+Cosine similarity scatterplot
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:Cosine-similarity-scatterplot"
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
 \begin_inset Graphics
 	filename scat/scat-cosine-big.png
 	width 100col%
+
+\end_inset
+
+
+\end_layout
 
 \end_inset
 
@@ -29639,8 +29674,14 @@ The tartan pattern indicates that some words are very unlike others.
 It would be nice to re-arrange (permute) the rows and columns to bring the
  matrix into quasi-diagonal form.
  This is easier said than done.
- The graph below shows the same data, this time for 300 words, with a different
- ranking.
+ The graph 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:Quasi-diagonal-cosine-similarity"
+
+\end_inset
+
+ shows the same data, this time for 300 words, with a different ranking.
  This time, the first word is the period, and the next word is the one word,
  out of 299, that has the highest cosine similarity to the period.
  Next comes the word, out of the remaining 298, that has the highest cosine
@@ -29656,8 +29697,36 @@ It would be nice to re-arrange (permute) the rows and columns to bring the
 
 \begin_layout Standard
 \align center
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Caption
+
+\begin_layout Plain Layout
+Quasi-diagonal cosine similarity
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:Quasi-diagonal-cosine-similarity"
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
 \begin_inset Graphics
 	filename scat/scat-fcos.png
+
+\end_inset
+
+
+\end_layout
 
 \end_inset
 
@@ -30388,6 +30457,62 @@ Unlike before, there is an arrow-shape to the thing.
  them.
  Thus, all in all, the denominator for the overlap is necessarily large,
  when comparing high-observation and low-observation words.
+\end_layout
+
+\begin_layout Subsection*
+Cosine mutual information
+\end_layout
+
+\begin_layout Standard
+Perhaps asking for cosine similarity is too weak: a quick glance at the
+ figures 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:Cosine-similarity-scatterplot"
+
+\end_inset
+
+ and 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:Quasi-diagonal-cosine-similarity"
+
+\end_inset
+
+ suggests that pretty much everything is related to pretty much everything
+ else.
+ The color scheme alone betrays this.
+ An alternative approach is to ask: what things are more related between
+ each other, than they are to anything else? This suggests that equation
+ 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:cmi (cosine-mi)"
+
+\end_inset
+
+ for the cosine mutual information is the thing to look at; this is repeated
+ below.
+\begin_inset Formula 
+\[
+\mbox{cmi}(w_{1},w_{2})=-\log_{2}\frac{\mbox{sim}(w_{1},w_{2})\mbox{sim}(*,*)}{\mbox{sim}(w_{1},*)\mbox{sim}(*,w_{2})}
+\]
+
+\end_inset
+
+This is very much like the standard definition for mutual information, except
+ that 
+\begin_inset Formula $\mbox{sim}(w_{1},w_{2})$
+\end_inset
+
+ takes the place of the counts 
+\begin_inset Formula $N(w_{1},w_{2})$
+\end_inset
+
+.
+ The goal here is to enhance further the things that are most alike, instead
+ of those things that are merely alike.
+ Might this work?
 \end_layout
 
 \begin_layout Subsection*
