@@ -6,6 +6,10 @@
 (use-modules (opencog) (opencog persist) (opencog persist-sql))
 (use-modules (opencog nlp) (opencog nlp learn))
 (use-modules (opencog matrix))
+(use-modules (srfi srfi-1))
+(use-modules (opencog cogserver))
+(start-cogserver)
+
 
 ; The database:
 (sql-open "postgres:///en_pairs_ttwo_sim?user=linas")
@@ -31,7 +35,7 @@
 ;; Total observations: 14382276.0  Avg obs per pair: 2.2338
 ;; Entropy Total: 21.006   Left: 14.906   Right: 10.007
 ;; Total MI: -3.906
-;; 
+;;
 ;;                  Left         Right     Avg-left     Avg-right
 ;;                  ----         -----     --------     ---------
 ;; Support (l_0)  6.1010E+4    9176.
@@ -50,20 +54,56 @@
 
 ; 803 words that were observed 1500 times, or more
 (define top-cset-words
-   (filter (lambda (wrd) (< 1500 (cset-vec-word-observations wrd)))
+	(filter (lambda (wrd) (< 1500 (cset-vec-word-observations wrd)))
 		all-cset-words))
 
 (length top-cset-words) ; 803
 
 ; Rank them according to the number of observations.
 (define ranked-csw (sort top-cset-words
-   (lambda (a b) (> (cset-vec-word-observations a) (cset-vec-word-observations b)))))
+	(lambda (a b) (> (cset-vec-word-observations a) (cset-vec-word-observations b)))))
 
 ; OK, cosine time
 (define poi (add-pair-cosine-compute fsi))
 ; Usage: (poi 'right-cosine WORD-A WORD-B)
 
-; notes, circa line 10540
+; notes, circa line 10556
+
+; Compute, and cache in the atomspace, the cosines.
+(define (get-cos wa wb)
+	(define cos-fkey (PredicateNode "*-Cosine 803 Key-*"))
+	(pair-sym-cache wa wb cos-fkey
+		(lambda (wx wy) (poi 'right-cosine wx wy))))
+
+; Compute, and SQL-store the cosines.
+(define (make-cos wa wb)
+	(define cos-fkey (PredicateNode "*-Cosine 803 Key-*"))
+	(pair-sym-cache wa wb cos-fkey
+		(lambda (wx wy)
+			(define wcos (poi 'right-cosine wx wy))
+			(store-atom (List wx wy))
+			(store-atom (List wy wx))
+			wcos)))
+
+; Compute cosines for the top N words.
+(define (make-all-cos wordlist)
+	(define wlen (length wordlist))
+	(if (< 1 wlen)
+		(let ((head (car wordlist))
+				(rest (cdr wordlist)))
+			(format #t "Pairs remaining: ~A\n" wlen)
+			(for-each (lambda (w) (make-cos head w)) rest)
+			(make-all-cos rest))))
+
+(make-all-cos (take ranked-csw 40))
+
+; Compute all 803 of them, in due time.  This takes days.
+(define (make-them-all nxt)
+	(if (< nxt (length ranked-csw))
+		(make-all-cos (take ranked-csw nxt))
+		(make-all-cos ranked-csw))
+	(if (< nxt (length ranked-csw))
+		(make-them-all (inexact->exact (truncate (* 1.5 nxt))))))
 
 ; -----------------------------------------------------------------
 
