@@ -11117,11 +11117,30 @@ select count(*) from valuations, lws where valuations.atom=lws.uuid;
 delete from valuations using lws where atom =lws.uuid;
 delete from atoms where type=234;
 
+=========================================================================
 
 postgres:///en_pairs_ttwo_sim?user=linas
 
 Has a pile of cosines that should be stored ...
 
+has 802x802 cosines. Which were hard to come by.
+(its ranked-csw) (length ranked-csw)
+
+Its just ListLink of the pairs. So to store it:
+
+(sql-open "postgres:///en_pairs_ttwo_sim?user=linas")
+(for-each
+	(lambda (wordl)
+		(for-each
+			(lambda (wordr) (store-atom (ListLink wordl wordr)))
+			ranked-csw))
+	ranked-csw)
+
+dammit. Kaboom. Start from scratch.
+
+
+
+=========================================================================
 	
 GC inf loop. ... 6121046016  observe-mst
 =========================================================================
