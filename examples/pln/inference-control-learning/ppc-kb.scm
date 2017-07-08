@@ -1,5 +1,7 @@
-;; Meta knowledge-base, what we need to know to infer inference
-;; control rules. Such as what are preproofs.
+;; Knowledge-base about preproof and anything else we need to
+;; post-process the trace atomspace before handing it to the process
+;; in charge of producing inference control rules. ppc stands for
+;; post-process corpus.
 ;;
 ;; 1. Any and-BIT has a very low probability, 0.0001%, of being the
 ;;    preproof of any target, and we have a very low confidence, 0.01,

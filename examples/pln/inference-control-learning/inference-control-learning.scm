@@ -15,69 +15,92 @@
 (cog-logger-set-level! (cog-ure-logger) "debug")
 
 ;; Set parameters
-(define pss 2)                         ; Problem set size
-(define niter 2)                       ; Number of iterations
+(define pss 1)                         ; Problem set size
+(define niter 1)                       ; Number of iterations
 
 (define (run-experiment)
   (icl-logger-info "Start experiment")
   (let* ((targets (gen-random-targets pss)) ; Generate targets
-         (tr-as (init-tr-as))               ; Initialize Trace AtomSpace
+         (ih-as (cog-new-atomspace))        ; Initialize the Global
+                                            ; Inference History
          (ic-rules '()))                    ; Initialize Inference
                                             ; Control Rules
     ;; Function for running all iterations, the inference control
-    ;; rules, icr, and the iteration index, idx. Return the list of
+    ;; rules, icr, and the iteration index, i. Return the list of
     ;; solved problems for each iteration (list of list).
     (define (run-iterations-rec icr i)
-      (if (< idx niter)
-          (let* ((sol-icr (run-iteration targets tr-as icr i)))
+      (if (< i niter)
+          (let* ((sol-icr (run-iteration targets ih-as icr i)))
             (cons (cadr sol-icr) (run-iterations-rec (car col-icr) (+ i 1))))
           '()))
     ;; Run all iterations
     (run-iterations-rec ic-rules 0)))
 
-;; Initialize the trace atomspace with the knowledge and rule bases
-;; for inferring the corpus and the inference control rules.
-(define (init-tr-as)
-  (let* ((tr-as (cog-new-atomspace))    ; Create trace AtomSpace
-         (old-as (cog-set-atomspace! tr-as))) ; Set it as current AtomSpace
-    ;; Load meta-kb and meta-rb containing the axioms the rule bases
-    ;; to infer inference control rules
-    (load "meta-kb.scm")
-    (load "meta-rb.scm")
-    ;; Switch back to the old atomspace and return tr-as
-    (cog-set-atomspace! old-as)))
-
-;; run iteration i over the given targets. Return a pair
+;; Run iteration i over the given targets. Return a pair
 ;;
 ;; (solved problems, inference control rules)
 ;;
 ;; The idea is to pass the inference control rules to the next
 ;; iteration.
-(define (run-iteration targets tr-as ic-rules i)
+(define (run-iteration targets ih-as ic-rules i)
   (icl-logger-info "Run iteration ~a/~a" (+ i 1) niter)
-  (let* (;; Run the BC and build the trace corpus
+  (let* (;; Run the BC and build the inference history corpus for that run
          (run-bc-mk-corpus (lambda (j)
-                             (run-bc (list-ref targets j) tr-as ic-rules i j)
-                             (postprocess-corpus tr-as)))
+                             (let* (;; AtomSpace where to the record
+                                    ;; the inference traces for that run
+                                    (tr-as (cog-new-atomspace))
+                                    ;; Target
+                                    (trg (list-ref targets j))
+                                    ;; Run the BC and put the trace in tr-as
+                                    (bc-result (run-bc trg tr-as ic-rules i j)))
+                               ;; Post-process tr-as and copy the
+                               ;; relevant knowledge in global-ih-as
+                               (icl-logger-info "Post-process the trace and copy it to the inference history")
+                               (postprocess-corpus tr-as ih-as)
+                               bc-result)))
          (results (map run-bc-mk-corpus (iota pss)))
          (sol_count (count values results)))
     (icl-logger-info "Number of problem solved = ~a" sol_count))
 
   ;; Build inference control rules for the next iteration
-  (list sol_count (mk-ic-rules tr-as)))
+  (list sol_count (mk-ic-rules ih-as)))
 
-(define (postprocess-corpus tr-as)
-  ;; TODO infer preproof
-)
+;; Post-process the trace tr-as by inferring knowledge about preproof,
+;; and add all relevant knowledge to the inference history ih-as from
+;; it, leaving out cruft like ppc-kb and such.
+(define (postprocess-corpus tr-as ih-as)
+  (let ((old-as (cog-set-atomspace! tr-as)))
+    ;; Copy the content of tr-as to ih-as
+    (cog-cp-all ih-as)
+    ;; Load the knowledge and rule bases
+    (load "ppc-kb.scm")
+    (load "ppc-rb.scm")
+    ;; Define BC target and vardecl
+    (let* ((target (Evaluation
+                     (Predicate "ICL:preproof")
+                     (List
+                       (Variable "$A")
+                       (Variable "$T"))))
+           (vardecl (VariableList
+                      (TypedVariable
+                        (Variable "$A")
+                        (Type "BindLink"))
+                      (Variable "$T")))
+           (results (ppc-bc target #:vardecl vardecl)))
+      ;; Copy post-processed inference traces to the inference history
+      (cog-cp (cog-outgoing-set results) ih-as))
+    (cog-prt-atomspace)                 ; JUST FOR DEBUGGING
+    (cog-set-atomspace! old-as)))
 
-(define (infer-ic-rules tr-as)
+(define (infer-ic-rules ih-as)
+  (icl-logger-info "Build inference control rules from the inference history")
   ;; TODO infer ic-rules
 )
 
-;; Run the backward chainer on target, given the current trace
-;; atomspace, tr-as, and inference-control rules, ic-rules, adding the
-;; new traces to tr-as, with index j in iteration i. Return #t iff
-;; target has been successfully proved.
+;; Run the backward chainer on target, given the atomspace where to
+;; record the inference traces, tr-as, and inference-control rules
+;; used for guidance, ic-rules, with for jth target in iteration
+;; i. Return #t iff target has been successfully proved.
 (define (run-bc target tr-as ic-rules i j)
   (icl-logger-info "Run BC with target = ~a" target)
   (reload)
