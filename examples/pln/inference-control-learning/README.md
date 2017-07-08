@@ -84,10 +84,8 @@ naturally ongoing meta-learning.
 Inference Control Rule
 ----------------------
 
-In this toy experiment the expected inference control rules should be
-that double, triple, etc, deductions are the ones likely to solve the
-problems. But generally the inference control rules will be represent
-as Cognitive Schematics, where
+Generally the inference control rules will be represent as Cognitive
+Schematics, where
 
 * Context:
   + The backward chainer has been queried to prove T
@@ -138,10 +136,10 @@ ImplicationScope <TV>
   Execution
     GroundedSchema "expand-and-BIT"
     List
-      "$A"
-      "$L"
-      "$R"
-    "$B"
+      Variable "$A"
+      Variable "$L"
+      Variable "$R"
+    Variable "$B"
   Evaluation
     Predicate "preproof"
     List
@@ -176,10 +174,10 @@ ImplicationScope <rule-TV>
   Execution
     GroundedSchema "expand-and-BIT"
     List
-      "$A"
-      "$L"
+      Variable "$A"
+      Variable "$L"
       <rule>
-    "$B"
+    Variable "$B"
   Evaluation
     Predicate "preproof"
     List
@@ -206,9 +204,9 @@ ImplicationScope <target-andbit-rule-TV>
     GroundedSchema "expand-and-BIT"
     List
       <andbit>
-      "$L"
+      Variable "$L"
       <rule>
-    "$B"
+    Variable "$B"
   Evaluation
     Predicate "preproof"
     List
@@ -248,10 +246,10 @@ ImplicationScope <TV>
     Execution
       GroundedSchema "expand-and-BIT"
       List
-        "$A"
-        "$L"
-        "$R"
-      "$B"
+        Variable "$A"
+        Variable "$L"
+        Variable "$R"
+      Variable "$B"
     <pattern>
   Evaluation
     Predicate "preproof"
@@ -263,94 +261,59 @@ ImplicationScope <TV>
 where <pattern> is a predicate body involving all or some of the
 variables T, A, L and R.
 
-TODO: give an example with double deduction.
+Finally, it's important to realize that B never needs to be
+instantiated, in other words, we don't need to try to expand A and
+produce B to estimate whether the expansion is worthwhile.
+
+### Example
+
+In this example we craft a rule saying that double deduction, a
+deduction on top of a deduction tends to produce preproofs. In fact
+since a double deduction requires a single deduction it is likely that
+a rule saying that a single deduction is likely to produce a preproof
+will exist as well, albeit with perhaps a smaller strength since it is
+less specific. Anyway, we solely focus on double deduction
+here. Such rule may look like
 
 ```
-  (ExecutionOutputLink
-    (GroundedSchemaNode "scm: bc-deduction-formula") ; [5481509939359570705][1]
-    (ListLink
-      (InheritanceLink
-        (ConceptNode "A") ; [6977206836600634430][1]
-        (ConceptNode "D") ; [246112806454457922][1]
-      ) ; [9592798904207778024][1]
-      (ExecutionOutputLink
-        (GroundedSchemaNode "scm: bc-deduction-formula") ; [5481509939359570705][1]
-        (ListLink
-          (InheritanceLink
-            (ConceptNode "A") ; [6977206836600634430][1]
-            (VariableNode "$B-6266d6f2") ; [4097372290580364298][15]
-          ) ; [13444058388333684400][15]
-          (InheritanceLink
-            (ConceptNode "A") ; [6977206836600634430][1]
-            (VariableNode "$B-6229393a") ; [6185394777777469381][15]
-          ) ; [15532080875530789483][15]
-          (InheritanceLink
-            (VariableNode "$B-6229393a") ; [6185394777777469381][15]
-            (VariableNode "$B-6266d6f2") ; [4097372290580364298][15]
-          ) ; [14984376557733565207][15]
-        ) ; [18175419943537721797][15]
-      ) ; [16724333062125429183][15]
-      (InheritanceLink
-        (VariableNode "$B-6266d6f2") ; [4097372290580364298][15]
-        (ConceptNode "D") ; [246112806454457922][1]
-      ) ; [16015351290941397556][15]
-    ) ; [15046555205905734382][15]
-  ) ; [13595468324493441768][15]
-
-[15532080875530789483][15] [14984376557733565207][15]
-----------------bc-deduction-formula-----------------
-             [13444058388333684400][15] [16015351290941397556][15]
-             ----------------bc-deduction-formula-----------------
-                           [9592798904207778024][1]
-
-[DEBUG] [URE] Expanded forward chainer strategy:
-(BindLink
-  (VariableList
-    (TypedVariableLink
-      (VariableNode "$B-6266d6f2") ; [4097372290580364298][15]
-      (TypeNode "ConceptNode") ; [3788634541270868382][1]
-    ) ; [11809658565253834475][15]
-    (TypedVariableLink
-      (VariableNode "$B-6229393a") ; [6185394777777469381][15]
-      (TypeNode "ConceptNode") ; [3788634541270868382][1]
-    ) ; [16150796384774871558][15]
-  ) ; [10107478639882222213][15]
-  (AndLink
-  ) ; [17473895290224991152][15]
-  (ExecutionOutputLink
-    (GroundedSchemaNode "scm: bc-deduction-formula") ; [5481509939359570705][1]
-    (ListLink
-      (InheritanceLink
-        (ConceptNode "A") ; [6977206836600634430][1]
-        (ConceptNode "D") ; [246112806454457922][1]
-      ) ; [9592798904207778024][1]
-      (ExecutionOutputLink
-        (GroundedSchemaNode "scm: bc-deduction-formula") ; [5481509939359570705][1]
-        (ListLink
-          (InheritanceLink
-            (ConceptNode "A") ; [6977206836600634430][1]
-            (VariableNode "$B-6266d6f2") ; [4097372290580364298][15]
-          ) ; [13444058388333684400][15]
-          (InheritanceLink
-            (ConceptNode "A") ; [6977206836600634430][1]
-            (VariableNode "$B-6229393a") ; [6185394777777469381][15]
-          ) ; [15532080875530789483][15]
-          (InheritanceLink
-            (VariableNode "$B-6229393a") ; [6185394777777469381][15]
-            (VariableNode "$B-6266d6f2") ; [4097372290580364298][15]
-          ) ; [14984376557733565207][15]
-        ) ; [18175419943537721797][15]
-      ) ; [16724333062125429183][15]
-      (InheritanceLink
-        (VariableNode "$B-6266d6f2") ; [4097372290580364298][15]
-        (ConceptNode "D") ; [246112806454457922][1]
-      ) ; [16015351290941397556][15]
-    ) ; [15046555205905734382][15]
-  ) ; [13595468324493441768][15]
-) ; [17301981865595416016][15]
-
-[DEBUG] [URE] With inference tree:
+ImplicationScope <TV>
+  VariableList
+    Variable "$T"  ;; Theorem/target to prove
+    TypedVariable  ;; and-BIT to expand
+      Variable "$A"
+      Type "BindLink"
+    Variable "$L"  ;; Leaf from A to expand
+    TypedVariable  ;; Resulting and-BIT from the expansion of L from A with rule R
+      Variable "$B"
+      Type "BindLink"
+  And
+    Execution
+      GroundedSchema "expand-and-BIT"
+      List
+        Variable "$A"
+        Variable "$L"
+        <deduction-rule>
+      Variable "$B"
+    Evaluation
+      Predicate "is-premise-of-rule"
+      List
+        Variable "$A"
+        Variable "$L"
+        <deduction-rule>
+  Evaluation
+    Predicate "preproof"
+    List
+      Variable "$B"
+      Variable "$T"
 ```
+
+You may notice that the inference rule has already been instantiated,
+here referred as `<deduction-rule>` to keep the example shorter. Also
+the `Predicate "is-premise-of-rule"` should be expressed in terms of
+patterns mined by the pattern miner. And such pattern would be a
+subtree of A, the outermost deduction in A containing L as a leaf,
+which requires we have some function to check if a the subtree of some
+atom follows some pattern.
 
 Learn Inference Control Rules
 -----------------------------
@@ -410,9 +373,9 @@ The low confidence captures that we are unsure about the prior
 itself. But is still important, otherwise we'd have only positive
 examples to build our inference control rules, which would all end up
 with a precision of 1, thus rules with the highest counts would become
-the most important in the mixture model (see Section Produce Inference
-Control Policy), regardless of their discriminative powers. Over time
-this prior should be autoadjusted via PLN reasoning.
+the most important in the mixture model (see Section Inference Control
+Policy), regardless of their discriminative powers. Over time this
+prior should be autoadjusted via PLN reasoning.
 
 These inferences are rather trivial and do not require learning their
 inference control to be tractable. See `meta-kb.scm` and `meta-rb.scm`
@@ -432,8 +395,8 @@ start with. After that, we'll probably want to wrap the pattern miner
 in some more specialized and also more efficient implication scope
 indroduction rule.
 
-Produce Inference Control Policy
---------------------------------
+Inference Control Policy
+------------------------
 
 Once we have a learned a bunch of inference control rules we need
 properly utilize them to form an Inference Control Policy. Below we
