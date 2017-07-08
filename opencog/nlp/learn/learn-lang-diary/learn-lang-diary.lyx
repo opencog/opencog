@@ -26044,7 +26044,7 @@ Now, for some commentary, as to the summary stats.
 Comparing the English _sim dataset to the _rone, _rtwo and _rthree datasets
  does provide some contrast: The _sim dataset, built from Wikipedia, is
  distinctly different from the Gutenberg datasets.
- Certinly, the prose style in the two datasets is quite different, with
+ Certainly, the prose style in the two datasets is quite different, with
  Wikipedia consisting of statements of facts (
 \begin_inset Quotes eld
 \end_inset
@@ -26093,12 +26093,12 @@ words
 \end_inset
 
 .
- This is partly due to the fixed number of ideagrams in the language.
+ This is partly due to the fixed number of ideograms in the language.
  Remarkably, the entropy and MI are untouched.
  This suggests that the entropy and MI are capturing something about the
  human nature of language use, as opposed to something descriptive of the
  language itself.
- However, a lot more data would be needed to see if this is realy true.
+ However, a lot more data would be needed to see if this is really true.
 \end_layout
 
 \begin_layout Standard
@@ -26644,7 +26644,7 @@ Size The left and right dimensions, as before.
 \end_layout
 
 \begin_layout Description
-Support The support is the average number of word-pairs that a word particpates
+Support The support is the average number of word-pairs that a word participates
  in (on the left, or on the right).
  Viewed as a matrix, this is the average number of non-zero entries in each
  row or column.
@@ -26772,7 +26772,7 @@ average
 
 \begin_layout Standard
 So here's what is so interesting in this table: the support, for Chinese,
- is outraguesly different than it is for English.
+ is outrageously different than it is for English.
  For a given item (hanzi, for Chinese, word, for English), the Chinese hanzi
  participates in three to four fewer item-pairs! Since pairs are formed
  on a sentence-by-sentence basis, this means that the variety of different
@@ -26788,7 +26788,7 @@ morphemes
 \end_inset
 
  (in the sense that Chinese words are typically composed of 1, 2 or 3 hanzi).
- Still, its interesting and suprising.
+ Still, its interesting and surprising.
  This has knock-on effects: the observational counts are much higher, as
  are the average lengths.
  It would be interesting to repeat the previously given analysis of the
