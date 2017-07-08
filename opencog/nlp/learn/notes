@@ -6664,6 +6664,65 @@ select count(*) from valuations; -- 58709672 = 58.7M i.e. 4.6M more than rthree
 8d508e61dcc2ee0ee4a739273ec37033  en_pairs_rthree_mone.sql.bz2
 
 ==================================================================
+zh_pairs_one
+------------
+Mandarin individual character pairs.  Only that, without any pair stats.
+
+STATUS: good
+DATE: 7 July 2017
+REASON: Why wouuldn't it be good?  But I think its missing LEFT-WALL...
+
+zh_pairs     | 4235 MB |  \l+
+
+select count(*) from atoms;  -- 12003950 = 12.0M
+select count(*) from valuations; -- 6081472 = 6.08 M
+
+537357532 bytes uncompressed = 537MB 
+ 96333834 bytes compressed = 96.3MB
+
+0718a3670ac5ea3e3f6bca3a7fb560e9  zh_pairs_one.sql
+cf45874b8d353ca9332040c9acd783ae  zh_pairs_one.sql.bz2
+
+==================================================================
+zh_pairs_sone
+-------------
+Mandarin individual character pairs.  Same as above, but include the pair-MI
+stats.
+
+STATUS: good
+DATE: 8 July 2017
+REASON: Why wouuldn't it be good?  But I think its missing LEFT-WALL...
+
+select count(*) from atoms;      -- 12638021 = 12.6M - 600K more than above.
+select count(*) from valuations; -- 19511577 = 19.5M - 13.4M more
+
+Conclude: 6M word-pairs, total three valuations per word-pair; two added
+here.  What are they? a) pair-count b) pair-freq c) pair-mi
+(plus additional marginals.)
+
+Rows: 158038 Columns: 158991
+Size: 5922477 non-zero entries of 25126619658 possible
+Fraction non-zero: 2.3571E-4 Sparsity (-log_2): 12.051
+Total observations: 728947854.0  Avg obs per pair: 123.08
+Entropy Total: 18.452   Left: 10.265   Right: 10.207
+Total MI: -2.020
+
+                 Left         Right     Avg-left     Avg-right
+                 ----         -----     --------     ---------
+Support (l_0)  6819.        6411.    
+Count   (l_1)  3.7360E+6    3.1244E+6     547.9        487.4    
+Length  (l_2)  2.8408E+5    2.4156E+5     41.66        37.68    
+RMS Count      2.8231E+5    2.3990E+5     41.40        37.42    
+
+1650927558 bytes uncompressed = 1.65 GB
+ 287845261 bytes compressed = 287 GB
+
+d77c4c019cad5dbc788e69187b92428e  zh_pairs_sone.sql
+6ab926514526b74cab4c5a03454c6cd6  zh_pairs_sone.sql.bz2
+
+
+
+==================================================================
 
 dropdb  en_pairs_tthree en_pairs_ttwo en_pairs_rone 
 
@@ -11222,6 +11281,40 @@ product:
 =========================================================================
 	
 GC inf loop. ... 6121046016  observe-mst
+=========================================================================
+zh
+
+
+ (use-modules (opencog))
+ (use-modules (opencog persist) (opencog persist-sql))
+ (use-modules (opencog nlp) (opencog nlp learn))
+ (use-modules (opencog matrix))
+ (sql-open "postgres:///zh_pairs?user=ubuntu&password=asdf")
+
+(use-modules (opencog cogserver))
+(start-cogserver)
+
+(define ala (make-any-link-api))
+(define als (add-pair-stars ala))
+(batch-pairs als)
+
+(print-matrix-summary-report als)
+
+Rows: 158038 Columns: 158991
+Size: 5922477 non-zero entries of 25126619658 possible
+Fraction non-zero: 2.3571E-4 Sparsity (-log_2): 12.051
+Total observations: 728947854.0  Avg obs per pair: 123.08
+Entropy Total: 18.452   Left: 10.265   Right: 10.207
+Total MI: -2.020
+
+                 Left         Right     Avg-left     Avg-right
+                 ----         -----     --------     ---------
+Support (l_0)  6819.        6411.    
+Count   (l_1)  3.7360E+6    3.1244E+6     547.9        487.4    
+Length  (l_2)  2.8408E+5    2.4156E+5     41.66        37.68    
+RMS Count      2.8231E+5    2.3990E+5     41.40        37.42    
+
+
 =========================================================================
 
 
