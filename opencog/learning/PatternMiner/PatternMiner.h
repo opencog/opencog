@@ -49,14 +49,14 @@ namespace PatternMining
 #define FREQUENCY_BOTTOM_THRESHOLD 0.95
 #define SURPRISINGNESS_I_TOP_THRESHOLD 0.20
 #define SURPRISINGNESS_II_TOP_THRESHOLD 0.40
-#define OUTPUT_SURPRISINGNESS_CALCULATION_TO_FILE 1
+#define OUTPUT_SURPRISINGNESS_CALCULATION_TO_FILE 0
 #define GENERATE_TMP_PATTERNS 0
 #define USE_QUERY_ENTITY_COUNT_FOR_EACH_PREDICATE 0
-#define USE_QUERY_ALL_ENTITY_COUNT 1
+#define USE_QUERY_ALL_ENTITY_COUNT 0
 #define USE_ABS_SURPRISINGNESS 0
 #define LINE_INDENTATION "  "
 
-#define PATTERN_VARIABLENODE_TYPE VARIABLE_NODE
+#define PATTERN_VARIABLENODE_TYPE PATTERN_VARIABLE_NODE
 
 struct _non_ordered_pattern
 {
@@ -168,6 +168,7 @@ protected:
     vector<Type> same_link_types_not_share_second_outgoing;
 
     unsigned int num_of_patterns_without_superpattern_cur_gram;
+    unsigned int *num_of_patterns_with_1_frequency;
 
     unsigned int thresholdFrequency;
 
@@ -189,7 +190,15 @@ protected:
     vector<Type> linktype_black_list;
     vector<Type> linktype_white_list;
 
-    bool enable_Frequent_Pattern;
+//    Handle FrequencyHandle;
+//    Handle InteractionInformationHandle;
+//    Handle SurprisingnessIHandle;
+//    Handle SurprisingnessIIHandle;
+    Handle PatternValuesHandle;
+
+    bool if_quote_output_pattern;
+    Type output_pattern_quoted_linktype;
+
     bool enable_Interesting_Pattern;
 
     // Only effective when Enable_Interesting_Pattern is true.
@@ -313,6 +322,10 @@ protected:
                                                  vector<MinedPatternInfo> &allNewMinedPatternInfo, unsigned int thread_index, bool startFromLinkContainWhiteKeyword);
 
     bool containsLoopVariable(HandleSeq& inputPattern);
+
+    void quoteAPattern(HTreeNode* hTreeNode);
+
+    void quoteAllThePatternSForGram(unsigned int gram);
 
     HTreeNode* extractAPatternFromGivenVarCombination(HandleSeq &inputLinks, map<Handle,Handle> &patternVarMap, HandleSeqSeq &oneOfEachSeqShouldBeVars, HandleSeq &leaves,HandleSeq &shouldNotBeVars, HandleSeq &shouldBeVars,
                                                       AtomSpace *_fromAtomSpace, unsigned int &extendedLinkIndex, set<string>& allNewMinedPatternsCurTask, bool &notOutPutPattern, bool &patternAlreadyExtractedInCurTask,bool startFromLinkContainWhiteKeyword);
@@ -445,6 +458,11 @@ public:
     void queryPatternsWithSurprisingnessIAndIIRanges(unsigned int min_frequency, unsigned int max_frequency,
                                                                    float min_surprisingness_I, float max_surprisingness_I,
                                                                    float min_surprisingness_II, float max_surprisingness_II,int gram);
+
+    void queryPatternsWithFrequencyAndInteractionInformationRanges(unsigned int min_frequency, unsigned int max_frequency,
+                                                                   float min_ii, float max_ii, int gram);
+
+    AtomSpace* getResultAtomSpace() {return atomSpace;}
 
     void runPatternMiner(bool exit_program_after_finish = true);
 
