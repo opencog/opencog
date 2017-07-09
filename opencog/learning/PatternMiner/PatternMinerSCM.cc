@@ -668,6 +668,10 @@ public:
         patternMiner->OutPutStaticsToCsvFile(n_gram);
     }
 
+    AtomSpace* get_result_AtomSpace()
+    {
+        patternMiner->getResultAtomSpace();
+    }
 
     void select_subset_for_DBpedia()
     {
@@ -726,6 +730,7 @@ void PatternMinerSCM::init_in_module(void* data)
     self->init();
 }
 
+
 /**
  * The main init function for the PatternMinerSCM object.
  */
@@ -740,6 +745,8 @@ void PatternMinerSCM::init()
     // git pull https://github.com/opencog/atomspace.git master
     //------------------------------------
     define_scheme_primitive("pm-run-patternminer", &PatternMinerSCM::run_patternminer, this, "patternminer");
+
+    define_scheme_primitive("pm-get-result-AtomSpace", &PatternMinerSCM::get_result_AtomSpace, this, "patternminer");
 
     define_scheme_primitive("pm-get-current-settings", &PatternMinerSCM::get_current_settings, this, "patternminer");
     define_scheme_primitive("pm-get-pattern-max-gram", &PatternMinerSCM::get_Pattern_Max_Gram, this, "patternminer");

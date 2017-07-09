@@ -462,7 +462,7 @@ public:
     void queryPatternsWithFrequencyAndInteractionInformationRanges(unsigned int min_frequency, unsigned int max_frequency,
                                                                    float min_ii, float max_ii, int gram);
 
-    // AtomSpace* getPatternResultAtomSpace() {return atomSpace;}
+    AtomSpace* getResultAtomSpace() {return atomSpace;}
 
     void runPatternMiner(bool exit_program_after_finish = true);
 
