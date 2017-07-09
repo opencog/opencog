@@ -609,14 +609,19 @@ void PatternMiner::swapOneLinkBetweenTwoAtomSpace(AtomSpace* fromAtomSpace, Atom
     {
         if (h->isNode())
         {
-           Handle new_node = toAtomSpace->add_node(h->getType(), h->getName());
-           new_node->setTruthValue(h->getTruthValue());
+            Handle new_node;
+
+            if (h->getType() == PATTERN_VARIABLENODE_TYPE)
+            {
+                new_node = toAtomSpace->add_node(VARIABLE_NODE, h->getName());
+                if ( ! isInHandleSeq(new_node, outVariableNodes) ) // should not have duplicated variable nodes
+                 outVariableNodes.push_back(new_node);
+            }
+            else
+                new_node = toAtomSpace->add_node(h->getType(), h->getName());
+
            outgoings.push_back(new_node);
-           if (h->getType() == PATTERN_VARIABLENODE_TYPE)
-           {
-               if ( ! isInHandleSeq(new_node, outVariableNodes) ) // should not have duplicated variable nodes
-                outVariableNodes.push_back(new_node);
-           }
+
         }
         else
         {
