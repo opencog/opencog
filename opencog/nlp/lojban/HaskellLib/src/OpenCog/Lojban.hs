@@ -37,11 +37,12 @@ initParserPrinter cmavoSrc gismuSrc = do
 
 lojbanToAtomese :: (WordList State) -> Int -> String -> Either String Atom
 lojbanToAtomese rstate seed text = wrapAtom . fst <$> evalRWST (apply lojban ()) rstate state
-    where state = State {sFlags = []
+    where state = State {sFlags = M.empty
                         ,sAtoms = []
                         ,sText = text++" "
                         ,sSeed = seed
-                        ,sCtx = now_here
+                        ,sNow = now_here
+                        ,sCtx = [now_here]
                         ,sJAI = Nothing}
 
 wrapAtom :: Atom -> Atom
@@ -51,11 +52,12 @@ wrapAtom atom                               = cLL [cAN "StatementAnchor", atom]
 
 atomeseToLojban :: (WordList State) -> Int -> Atom -> Either String String
 atomeseToLojban rstate seed a@(LL [_an,s]) = sText . fst <$> execRWST (unapply lojban s) rstate state
-    where state = State {sFlags = []
+    where state = State {sFlags = M.empty
                         ,sAtoms = []
                         ,sText = ""
                         ,sSeed = seed
-                        ,sCtx = now_here
+                        ,sNow = now_here
+                        ,sCtx = [now_here]
                         ,sJAI = Nothing}
 
-now_here = [cCN "NowAndHere" noTv]
+now_here = cCN "NowAndHere" noTv
