@@ -556,6 +556,7 @@ HTreeNode* PatternMiner::extractAPatternFromGivenVarCombination(HandleSeq &input
                 newHTreeNode->pattern = unifiedPattern;
                 newHTreeNode->var_num = patternVarMap.size();
 
+
                 if ( (! notOutPutPattern) && only_output_patterns_contains_white_keywords)
                 {
                     // check if this instance contain any white keywords

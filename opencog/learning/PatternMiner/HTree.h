@@ -52,6 +52,7 @@ namespace opencog
          {
          public:
             HandleSeq pattern;
+            Handle quotedPatternLink; // only used when if_quote_output_pattern = true
             vector<HandleSeq> instances; // the corresponding instances of this pattern in the original AtomSpace, only be used by breadth first mining
             set<HTreeNode*> parentLinks;
             set<HTreeNode*> childLinks;
@@ -62,8 +63,8 @@ namespace opencog
             unsigned int count; // instance number
             unsigned int var_num; // the number of all the variables in this pattern
             double interactionInformation;
-            float nI_Surprisingness;
-            float nII_Surprisingness;
+            double nI_Surprisingness;
+            double nII_Surprisingness;
             string surprisingnessInfo; // the middle info record the surpringness calculating process for this pattern
 
             HandleSeq sharedVarNodeList; // all the shared nodes in these links in the original AtomSpace, each handle is a shared node

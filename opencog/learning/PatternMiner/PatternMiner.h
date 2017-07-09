@@ -50,9 +50,9 @@ namespace PatternMining
 #define SURPRISINGNESS_I_TOP_THRESHOLD 0.20
 #define SURPRISINGNESS_II_TOP_THRESHOLD 0.40
 #define OUTPUT_SURPRISINGNESS_CALCULATION_TO_FILE 1
-#define GENERATE_TMP_PATTERNS 1
+#define GENERATE_TMP_PATTERNS 0
 #define USE_QUERY_ENTITY_COUNT_FOR_EACH_PREDICATE 0
-#define USE_QUERY_ALL_ENTITY_COUNT 1
+#define USE_QUERY_ALL_ENTITY_COUNT 0
 #define USE_ABS_SURPRISINGNESS 0
 #define LINE_INDENTATION "  "
 
@@ -190,7 +190,15 @@ protected:
     vector<Type> linktype_black_list;
     vector<Type> linktype_white_list;
 
-    bool enable_Frequent_Pattern;
+//    Handle FrequencyHandle;
+//    Handle InteractionInformationHandle;
+//    Handle SurprisingnessIHandle;
+//    Handle SurprisingnessIIHandle;
+    Handle PatternValuesHandle;
+
+    bool if_quote_output_pattern;
+    Type output_pattern_quoted_linktype;
+
     bool enable_Interesting_Pattern;
 
     // Only effective when Enable_Interesting_Pattern is true.
@@ -314,6 +322,10 @@ protected:
                                                  vector<MinedPatternInfo> &allNewMinedPatternInfo, unsigned int thread_index, bool startFromLinkContainWhiteKeyword);
 
     bool containsLoopVariable(HandleSeq& inputPattern);
+
+    void quoteAPattern(HTreeNode* hTreeNode);
+
+    void quoteAllThePatternSForGram(unsigned int gram);
 
     HTreeNode* extractAPatternFromGivenVarCombination(HandleSeq &inputLinks, map<Handle,Handle> &patternVarMap, HandleSeqSeq &oneOfEachSeqShouldBeVars, HandleSeq &leaves,HandleSeq &shouldNotBeVars, HandleSeq &shouldBeVars,
                                                       AtomSpace *_fromAtomSpace, unsigned int &extendedLinkIndex, set<string>& allNewMinedPatternsCurTask, bool &notOutPutPattern, bool &patternAlreadyExtractedInCurTask,bool startFromLinkContainWhiteKeyword);
@@ -449,6 +461,8 @@ public:
 
     void queryPatternsWithFrequencyAndInteractionInformationRanges(unsigned int min_frequency, unsigned int max_frequency,
                                                                    float min_ii, float max_ii, int gram);
+
+    // AtomSpace* getPatternResultAtomSpace() {return atomSpace;}
 
     void runPatternMiner(bool exit_program_after_finish = true);
 

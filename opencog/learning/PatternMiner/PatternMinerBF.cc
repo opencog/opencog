@@ -490,16 +490,15 @@ void PatternMiner::GrowAllPatternsBF()
 
         cout << "\nFinished mining " << cur_gram << "gram patterns.\n";
 
-        if (enable_Frequent_Pattern)
-        {
-            // sort by frequency
-            std::sort((patternsForGram[cur_gram-1]).begin(), (patternsForGram[cur_gram-1]).end(),compareHTreeNodeByFrequency );
 
-            // Finished mining cur_gram patterns; output to file
-            std::cout<<"Debug: PatternMiner:  done (gram = " + toString(cur_gram) + ") frequent pattern mining!" + toString((patternsForGram[cur_gram-1]).size()) + " patterns found! " << std::endl;
+        // sort by frequency
+        std::sort((patternsForGram[cur_gram-1]).begin(), (patternsForGram[cur_gram-1]).end(),compareHTreeNodeByFrequency );
 
-            OutPutFrequentPatternsToFile(cur_gram, patternsForGram);
-        }
+        // Finished mining cur_gram patterns; output to file
+        std::cout<<"Debug: PatternMiner:  done (gram = " + toString(cur_gram) + ") frequent pattern mining!" + toString((patternsForGram[cur_gram-1]).size()) + " patterns found! " << std::endl;
+
+        OutPutFrequentPatternsToFile(cur_gram, patternsForGram);
+
 
 
         if (enable_Interesting_Pattern)
