@@ -16242,6 +16242,35 @@ Pair counting in planar diagrams gives different results.
 \end_layout
 
 \begin_layout Standard
+The general formula for the number of different planar dependency parses
+ is
+\begin_inset Formula 
+\[
+\frac{1}{2n-1}{3n-1 \choose n-1}
+\]
+
+\end_inset
+
+This formula is given by Deniz Yuret in 
+\begin_inset Quotes eld
+\end_inset
+
+
+\begin_inset CommandInset href
+LatexCommand href
+name "Lexical Attraction Models of Language"
+target "http://www2.denizyuret.com/pub/lex-attr/lam-iscis06.pdf"
+
+\end_inset
+
+
+\begin_inset Quotes erd
+\end_inset
+
+ ISCIS 2006 http://www2.denizyuret.com/pub/lex-attr/lam-iscis06.pdf 
+\end_layout
+
+\begin_layout Standard
 There are 36 edges grand total, and these are unequally distributed.
  The counts are: 
 \end_layout
@@ -16908,8 +16937,13 @@ Count
 \end_layout
 
 \begin_layout Standard
-What are the actual distributions, for these two cases? Bewgine by counting
+What are the actual distributions, for these two cases? Begin by counting
  the number of planar trees.
+ I currently do not know of any published work on this, so below, I make
+ a half-baked attempt to count these myself.
+ Its ...
+ incomplete.
+ Maybe there's some simpler approach.
 \end_layout
 
 \begin_layout Subsection*
