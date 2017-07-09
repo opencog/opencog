@@ -88,6 +88,9 @@ meml = linkIso "MemberLink" noTv
 equivl :: SynIso [Atom] Atom
 equivl = linkIso "EquivalenceLink" noTv
 
+setl :: SynIso [Atom] Atom
+setl = linkIso "SetLink" noTv
+
 subsetL :: SynIso (Atom,Atom) Atom
 subsetL = linkIso "SubsetLink" noTv . tolist2
 
@@ -184,9 +187,6 @@ conLink = conLink' . second tolist2 . handleEKMods
                         ,iffl   . rmfst "o"
                         ,uL     . rmfst "u"
                 --FIXME:,varl   . rmfst "ji"
-                        ,anotbl . rmfst "enai" --FIXME: we shouldn't need the nai versions
-                        ,xorl   . rmfst "onai" -- As nai is already handled 1 level higher
-                        ,onlyif . rmfst "na.a" -- same with na
                         ]
 
 _JAtoA :: SynIso String String
@@ -194,9 +194,6 @@ _JAtoA = mkSynonymIso [("je","e")
                       ,("ja","a")
                       ,("jo","o")
                       ,("ju","u")
-                      ,("jonai","onai")
-                      ,("jenai","enai")
-                      ,("naja","na.a")
                       ,("je'i","ji")]
 
 _GIhAtoA :: SynIso String String
@@ -204,9 +201,6 @@ _GIhAtoA = mkSynonymIso [("gi'e","e")
                         ,("gi'a","a")
                         ,("gi'o","o")
                         ,("gi'u","u")
-                        ,("gi'enai","enai")
-                        ,("gi'onai","onai")
-                        ,("nagi'a","na.a")
                         ,("gi'i","ji")]
 
 _GAtoA :: SynIso String String
@@ -214,11 +208,14 @@ _GAtoA = mkSynonymIso [("ge","e")
                       ,("ga","a")
                       ,("go","o")
                       ,("gu","u")
-                      ,("ganai","na.a")
-                      ,("gonai","onai")
                       ,("ge'i","ji")]
 
-
+_GUhAtoA :: SynIso String String
+_GUhAtoA = mkSynonymIso [("gu'e","e")
+                        ,("gu'a","a")
+                        ,("gu'o","o")
+                        ,("gu'u","u")
+                        ,("gu'i","ji")]
 
 linkIso :: String -> TruthVal -> SynIso [Atom] Atom
 linkIso n tv = Iso f g where
@@ -256,8 +253,8 @@ predicate = nodeIso "PredicateNode" noTv
 varnode :: SynIso String Atom
 varnode = nodeIso "VariableNode" noTv
 
-number :: SynIso String Atom
-number = nodeIso "VariableNode" noTv
+numberNode :: SynIso String Atom
+numberNode = nodeIso "VariableNode" noTv
 
 
 _frames :: SynIso (Selbri,[(Atom,Tag)]) Atom

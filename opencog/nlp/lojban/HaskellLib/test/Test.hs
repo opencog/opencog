@@ -33,11 +33,12 @@ import qualified Data.Map as M
 
 --import Text.XML.HXT.Core
 
-mystate s = State {sFlags = []
+mystate s = State {sFlags = M.empty
                   ,sAtoms = []
                   ,sText = s
                   ,sSeed = 0
-                  ,sCtx = [cCN "now" noTv]
+                  ,sNow = cCN "now_here" noTv
+                  ,sCtx = [cCN "now_here" noTv]
                   ,sJAI = Nothing}
 
 loadwl = do

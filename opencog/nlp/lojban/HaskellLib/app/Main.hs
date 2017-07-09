@@ -31,4 +31,6 @@ mainloop parser printer = do
         Right x -> printAtom x
         Left e  -> putStrLn e
 
+    putStrLn ""
+
     mainloop parser printer
