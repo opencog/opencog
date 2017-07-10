@@ -116,7 +116,7 @@ typedvarl :: SynIso [Atom] Atom
 typedvarl = linkIso "TypedVariableLink" noTv
 
 varll :: SynIso [Atom] Atom
-varll = linkIso "VariableListLink" noTv
+varll = linkIso "VariableList" noTv
 
 notl :: SynIso [Atom] Atom
 notl = linkIso "NotLink" noTv
