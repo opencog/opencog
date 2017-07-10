@@ -55,6 +55,7 @@ data State = State { sFlags :: M.Map String String
                    , sCtx   :: [Atom]
                    , sJAI   :: Maybe JJCTTS
                 -- , sPro   :: M.Map String String
+                   , sXU    :: [Atom]
                    } deriving Show
 
 --They Iso we are using

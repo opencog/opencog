@@ -116,6 +116,17 @@ pid = Iso f g where
 setJai :: SynMonad t State => JJCTTS -> (t ME) ()
 setJai a = modify (\s -> s {sJAI = Just a})
 
+addXUIso :: SynIso Atom Atom
+addXUIso = Iso f g where
+    f a = addXU a >> pure a
+    g a = rmXU a >> pure a
+
+addXU :: SynMonad t State => Atom -> (t ME) ()
+addXU a = modify (\s -> s {sXU = a:(sXU s)})
+
+rmXU :: SynMonad t State => Atom -> (t ME) ()
+rmXU a = modify (\s -> s {sXU = delete a (sXU s)})
+
 rmJai :: SynMonad t State => (t ME) ()
 rmJai = modify (\s -> s {sJAI = Nothing})
 
@@ -206,7 +217,8 @@ cleanState s = State {sFlags = M.empty
                      ,sSeed = sSeed s
                      ,sNow = sNow s
                      ,sCtx = sCtx s
-                     ,sJAI = Nothing}
+                     ,sJAI = Nothing
+                     ,sXU  = []}
 
 mergeState :: State -> State -> State
 mergeState s1 s2 = State {sFlags = sFlags s1
@@ -215,7 +227,8 @@ mergeState s1 s2 = State {sFlags = sFlags s1
                          ,sSeed = sSeed s2
                          ,sNow = sNow s1
                          ,sCtx = sCtx s1
-                         ,sJAI = sJAI s1}
+                         ,sJAI = sJAI s1
+                         ,sXU  = sXU s1}
 
 withEmptyState :: SynIso a b -> SynIso a b
 withEmptyState iso = Iso f g
