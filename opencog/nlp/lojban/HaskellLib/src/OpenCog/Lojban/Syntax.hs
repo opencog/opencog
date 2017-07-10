@@ -108,7 +108,10 @@ text_1 = handle
 -}
 
 text :: Syntax Atom
-text = (text_1 <+> (handleFREEs . addfst (cCN "zo'e" noTv) . frees))
+text = (text_1 <+> (filterDummy . handleFREEs . addfst dummy . frees))
+    where filterDummy = mkIso f id where
+            f (LL ls) = cLL (filter (\a -> not $ atomAny (== dummy) a) ls)
+          dummy = cCN "dummy" noTv
 
 text_1 :: Syntax Atom
 text_1 = paragraphs
@@ -178,7 +181,7 @@ statement_3 = sentence
 
 --FIXME
 fragment :: Syntax Atom
-fragment = listl . gsAtoms
+fragment = listl . cons . addfst (cAN "fragment") . gsAtoms
     -- <<< ek
     -- <+> gihek
        <<< (toState 1 . tolist1 . quantifier)
@@ -186,7 +189,6 @@ fragment = listl . gsAtoms
        <+> (termsToState <<< terms <&& optSelmaho "VAU")
        <+> prenex
        <+> (toState 1 . tolist1 . listl <<< relative_clauses)
-    -- <+> links
        <+> (termsToState <<< linkargs)
        <+> (termsToState <<< links)
     where termsToState = toState 1 . tolist1 . listl . mapIso (rmsndAny Nothing)
@@ -202,9 +204,8 @@ sentence = withCleanState sentence'
 
 sentence' :: Syntax Atom
 sentence' = handleCTX . handleBTCT
-    <<< ((terms <+> zohe) <&& optSelmaho "CU") &&& bridi_tail
-    where zohe = tolist1 . insert (Node "ConceptNode" "zo'e" noTv,Nothing)
-          handleCTX = Iso f g where
+    <<< ((terms <&& optSelmaho "CU") <+> insert []) &&& bridi_tail
+    where handleCTX = Iso f g where
               f a = do
                   atoms <- gets sAtoms
                   now <- gets sNow
@@ -382,16 +383,13 @@ gek_sentence = handleCon . handleGIK
 -------------------------------------------------------------------------------
 
 tail_terms :: Syntax [Sumti]
-tail_terms = handle . optional terms <&& optSelmaho "VAU"
-    where handle = mkIso f g
-          f Nothing  = []
-          f (Just a) = a
-          g [] = Nothing
-          g a  = Just a
-
+tail_terms = termsM <&& optSelmaho "VAU"
 
 terms :: Syntax [Sumti]
 terms = some term
+
+termsM :: Syntax [Sumti]
+termsM = many term
 
 --FIXME Implement TermSets
 --terms_1 :: Syntax [Sumti]
@@ -866,7 +864,7 @@ linkargs = (handleBEhOFREEs ||| id) . ifJustB
     <<< sepSelmaho "BE"
     &&> (cons <<<
               (handleBEFREEs <<< frees &&& tag2 . term)
-              &&& links
+              &&& (links <+> insert [])
         )
     &&& optional (sepSelmaho "BEhO" &&> frees)
     where tag2 = second (mkIso f g)
@@ -882,7 +880,7 @@ linkargs = (handleBEhOFREEs ||| id) . ifJustB
                           . first (commute . first setl . inverse isoZip)
 
 links :: Syntax [Sumti]
-links = many links'
+links = some links'
     where links' :: Syntax Sumti
           links' = first (handleFREEs2 . commute) . associate
               <<< sepSelmaho "BEI" &&> frees
@@ -1269,11 +1267,11 @@ free = atomToFNull . sei
     where atomToFNull = fNull . toState 1 . tolist1
 
 voc1 :: Syntax Atom
-voc1 = (listl . mapIso handleVOC1 . isoDistribute . commute
-       <<< vocative &&& (sumti <+> zohe) <&& optSelmaho "DOhU"
+voc1 = (listl . cons . addfst (cAN "vocative1")
+        . (mapIso handleVOC1 . isoDistribute . commute ||| id) . ifJustB
+       <<< vocatives &&& optional sumti <&& optSelmaho "DOhU"
        )
-    where zohe = insert (Node "ConceptNode" "zo'e" noTv)
-          handleVOC1 = _eval . second tolist1 . commute
+    where handleVOC1 = _eval . second tolist1 . commute
 
 
 --Vice Versa
@@ -1305,13 +1303,12 @@ type SEI = Atom
 --SEIs are second order Statments that can appear almost anywhere
 sei :: Syntax Atom
 sei = handleBRIDI . commute
-   <<< sepSelmaho "SEI" &&> ((terms <&& optSelmaho "CU") <+> zohe)
+   <<< sepSelmaho "SEI" &&> ((terms <&& optSelmaho "CU") <+> insert [])
                         &&& selbri
                         <&& optSelmaho "SEhU"
-    where zohe = insert [(Node "ConceptNode" "zo'e" noTv,Nothing)]
 
-vocative :: Syntax [Atom]
-vocative = mapIso predicate . merge
+vocatives :: Syntax [Atom]
+vocatives = mapIso (implicationOf . predicate) . merge
     <<< oooob (some (handle <<< selmaho "COI" &&& optional (selmaho "NAI"))) []
               (tolist1 . selmaho "DOI")                                      []
     where handle :: SynIso (String,Maybe String) String
