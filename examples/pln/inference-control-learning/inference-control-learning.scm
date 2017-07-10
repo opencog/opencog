@@ -31,7 +31,7 @@
     (define (run-iterations-rec icr i)
       (if (< i niter)
           (let* ((sol-icr (run-iteration targets ih-as icr i)))
-            (cons (cadr sol-icr) (run-iterations-rec (car col-icr) (+ i 1))))
+            (cons (cadr sol-icr) (run-iterations-rec (car sol-icr) (+ i 1))))
           '()))
     ;; Run all iterations
     (run-iterations-rec ic-rules 0)))
@@ -60,16 +60,16 @@
                                bc-result)))
          (results (map run-bc-mk-corpus (iota pss)))
          (sol_count (count values results)))
-    (icl-logger-info "Number of problem solved = ~a" sol_count))
+    (icl-logger-info "Number of problem solved = ~a" sol_count)
 
-  ;; Build inference control rules for the next iteration
-  (list sol_count (mk-ic-rules ih-as)))
+    ;; Build inference control rules for the next iteration
+    (list sol_count (mk-ic-rules ih-as))))
 
 ;; Post-process the trace tr-as by inferring knowledge about preproof,
 ;; and add all relevant knowledge to the inference history ih-as from
 ;; it, leaving out cruft like ppc-kb and such.
 (define (postprocess-corpus tr-as ih-as)
-  (let ((old-as (cog-set-atomspace! tr-as)))
+  (let ((default-as (cog-set-atomspace! tr-as)))
     ;; Copy the content of tr-as to ih-as
     (cog-cp-all ih-as)
     ;; Load the knowledge and rule bases
@@ -89,11 +89,16 @@
            (results (ppc-bc target #:vardecl vardecl)))
       ;; Copy post-processed inference traces to the inference history
       (cog-cp (cog-outgoing-set results) ih-as))
+    (display "tr-as =\n")
     (cog-prt-atomspace)                 ; JUST FOR DEBUGGING
-    (cog-set-atomspace! old-as)))
+    (cog-set-atomspace! default-as)))
 
-(define (infer-ic-rules ih-as)
+(define (mk-ic-rules ih-as)
   (icl-logger-info "Build inference control rules from the inference history")
+  (let ((default-as (cog-set-atomspace! ih-as)))
+    (display "ih-as =\n")
+    (cog-prt-atomspace)
+    (cog-set-atomspace! default-as))
   ;; TODO infer ic-rules
 )
 
@@ -106,7 +111,9 @@
   (reload)
   (let* ((result (pln-bc target #:trace-as tr-as)) ; TODO use ic-rules
          (result-size (length (cog-outgoing-set result)))
-         (former-as (cog-atomspace)))
+         (default-as (cog-set-atomspace! tr-as)))
+    (display "tr-as =\n")
+    (cog-prt-atomspace)
     (if (= 1 result-size)
         (tv->bool (cog-tv (gar result)))
         #f)))
