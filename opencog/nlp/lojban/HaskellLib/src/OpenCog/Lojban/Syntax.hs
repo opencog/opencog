@@ -138,47 +138,21 @@ paragraph = listl . cons . addfst (cAN "paragraph") . cons
                                     &&& (statement <+> fragment)
              )
 
---Handles questions
---A SatisfactionLink is used for this
---The second with a VarNode in the Statement is a fill the blank question
---we wrap the statment in a (Put s (Get s)) that when excuted should fill the blank
-preti :: Syntax Atom
-preti = handleMa <<< handleXu
-    where handleMa :: SynIso Atom Atom
-          handleMa = Iso f g
-          f a = do
-              atoms <- gets sAtoms
-              let x = atomFold (\r a -> r || isMa a) False a
-                  isMa (Node "VariableNode" x noTv) = x /= "$var"
-                  isMa _ = False
-                  all = Link "ListLink" (a:atoms) noTv
-                  na = Link "PutLink" [all,Link "GetLink" [all] noTv] noTv
-              pure (x ? na $ all)
-          g (Link "PutLink"  [LL (a:s),_] _) = setAtoms s >> pure a
-          g (Link "ListLink" (a:s) _)        = setAtoms s >> pure a
-
-          handleXu = Iso f g where
-              f () = do
-                  state0 <- get
-                  res <- apply statement ()
-                  state1 <- get
-                  flags <- gets sFlags
-                  if "xu" `elem` flags
-                     then do
-                         put state0
-                         res2 <- apply (_exl . addfst var . withFlag "handleXu" statement) ()
-                         put state1
-                         case res2 of --If it's the whole sentence ignore
-                             (ExL noTv (VN "xu")(VN "xu")) -> pure ()
-                             _ -> pushAtom res2
-                         apply _satl res
-                    else pure res
-              var = Node "VariableNode" "xu" noTv
-              g a = unapply statement a
-
---FIXME Dump State
 statement :: Syntax Atom
-statement = listl . cons . addfst (cAN "statement") . cons
+statement = handleMa <<< statement'
+    where handleMa :: SynIso Atom Atom
+          handleMa = Iso f g where
+              f a = do
+                  let x = atomFold (\r a -> r || isMa a) False a
+                      isMa (Node "VariableNode" x noTv) = x /= "$var"
+                      isMa _ = False
+                      na = Link "PutLink" [a,Link "GetLink" [a] noTv] noTv
+                  pure (x ? na $ a)
+              g (Link "PutLink"  [a,_] _) = pure a
+              g a                         = pure a
+
+statement' :: Syntax Atom
+statement' = listl . cons . addfst (cAN "statement") . cons
         <<< (statement_1 <+> (prenex &&> statement)) &&& gsAtoms
 
 statement_1 :: Syntax Atom
@@ -461,7 +435,10 @@ modalSumti = addsnd (Just "ModalSumti")
            . second tolist1
 
 sumti :: Syntax Atom
-sumti = (isoFoldl handleKEhA ||| id) . ifJustB
+sumti = handleFREEs2 <<< sumti' &&& frees
+
+sumti' :: Syntax Atom
+sumti' = (isoFoldl handleKEhA ||| id) . ifJustB
     <<< sumti_1 &&& optional (sepSelmaho "VUhO" &&> relative_clauses)
 
 sumti_1 :: Syntax Atom
@@ -540,7 +517,7 @@ handleKEhA = Iso f g where
     switch _ a = a
 
 sumti_6 :: Syntax Atom
-sumti_6 = (handleFREEs2 <<< kohaP &&& frees)
+sumti_6 = kohaP
        <+> le
        <+> laP
        <+> liP
@@ -1396,24 +1373,14 @@ caiP = handleCAI <<< (selmaho "CAI" <+> (insert "" . ifFlag "HaveUI"))
 handleUIs :: SynIso (Atom,[UI]) Atom
 handleUIs = isoFoldl (handleUI . commute)
 
---A UI phrase can be considered an implicit statment
-{-
 handleUI :: SynIso ((Atom,TruthVal),Atom) Atom
-handleUI = (handleXu
-            |||
-           (rmfstAny (xu,tv) ||| handleUI') . switchOnFlag "xu")
-            .
-            switchOnFlag "handleXu"
-    where --We also call handleUI' to keep the random seed consistent
-          handleXu = Iso f g -- . inverse (sndToState 1) . handleUI'
-          f _ = pure $ Node "VariableNode" "xu" noTv
-          g _ = lift $ Left "Printing with handleXu flag is not allowed."
+handleUI = (handleXU ||| handleUI') . switchOnFlag "xu"
+    where handleXU = rmFlagIso "xu" . addXUIso . rmfstAny (xu,tv)
           xu = Node "ConceptNode" "xu" noTv
           tv = stv 0.75  0.9
--}
 
-handleUI :: SynIso ((Atom,TruthVal),Atom) Atom
-handleUI = sndToState 1
+handleUI' :: SynIso ((Atom,TruthVal),Atom) Atom
+handleUI' = sndToState 1
           . second (tolist1 . _frames . first selbri)
           . manage
     where manage = mkIso f g where

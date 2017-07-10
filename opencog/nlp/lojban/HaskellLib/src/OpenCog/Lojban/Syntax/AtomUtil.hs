@@ -258,12 +258,28 @@ numberNode = nodeIso "VariableNode" noTv
 
 
 _frames :: SynIso (Selbri,[(Atom,Tag)]) Atom
-_frames = (id ||| andl) . isSingle . mapIso (handleDA . _frame) . isoDistribute
-    where isSingle = mkIso f g
-          f [a] = Left a
-          f as  = Right as
-          g (Left a) = [a]
-          g (Right as) = as
+_frames = handleXU
+        . second ((id ||| andl) . isSingle . mapIso (handleDA . _frame) . isoDistribute)
+        . reorder
+    where isSingle = mkIso f g where
+            f [a] = Left a
+            f as  = Right as
+            g (Left a) = [a]
+            g (Right as) = as
+
+          reorder = mkIso f g where
+            f a@((_,sa),_) = (sa,a)
+            g (sa,a) = a
+
+handleXU :: SynIso (Atom,Atom) Atom
+handleXU = Iso f g where
+    f (a,e) = do
+        xus <- gets sXU
+        if a `elem` xus
+           then pure $ Link "SatisfactionLink" [e] noTv
+           else pure e
+    g (Link "SatisfactionLink" [e] _) = pure (cCN "dummy" noTv,e)
+    g e                               = pure (cCN "dummy" noTv,e)
 
 handleDA :: SynIso Atom Atom
 handleDA = Iso f g where
@@ -309,10 +325,10 @@ handleTAG = post . isoFoldl tagOne . init
 
 --        Iso       Selbri          Stumti       Atom
 _frame :: SynIso (Selbri,(Atom,Tag)) Atom
-_frame = _evalTv . (second.first) _framePred . reorder
+_frame = handleXU . second (_evalTv . (second.first) _framePred) . reorder
     where reorder = mkIso f g
-          f ((tv,s),(a,t)) = (tv,(t,[s,a]))
-          g (tv,(t,[s,a])) = ((tv,s),(a,t))
+          f ((tv,s),(a,t))     = (a,(tv,(t,[s,a])))
+          g (_,(tv,(t,[s,a]))) = ((tv,s),(a,t))
 
           _framePred :: SynIso Tag Atom
           _framePred = handleVar <+> specialTag <+> predicate . isoPrepend "sumti"
@@ -359,11 +375,13 @@ genInstance :: String -> SynIso Atom Atom
 genInstance typeL = Iso f g where
     f a = do
         let (t,name) = if "Link" `isSuffixOf` atomType a
-                   then ("ConceptNode","")
-                   else (atomType a,nodeName a)
+                          then ("ConceptNode","")
+                          else (atomType a,nodeName a)
         rndname <- randName $ show a
         let i = Node t (rndname  ++ "___" ++ name) noTv
-            l = Link typeL [i,a] highTv
+            l = case a of
+                    VN name -> Link typeL [i,cCN name noTv] highTv
+                    _       -> Link typeL [i,a] highTv
         pushAtom l
         pure i
     g n = do
