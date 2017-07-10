@@ -11317,6 +11317,281 @@ RMS Count      2.8231E+5    2.3990E+5     41.40        37.42
 
 =========================================================================
 
+Aieee
+Expect our sailing in a few hours.
+At six this morning, came on a tremendous gale of wind.
+The wind altered sufficiently to allow us to escape from the Downs.
+She turned to walk to the gate where her carriage was waiting.
+The Sabbath day at Burnhead was a long, long day. 
+He wore a new white sailor suit with pockets.
+
+Maie threw back her veil and smiled
+
+It is the same old tale, I suppose?
+The girl gave a little laugh.
+
+#LEFT  The      -3.54169132577798    << bad
+#LEFT  girl     0.0477763132765396
+#LEFT  gave     -0.709298163143728   << bad
+#LEFT  a        1.20476206351401     << maybe ok
+#LEFT  little   0.748512923494237
+#LEFT  laugh    0.344735358535928
+
+The  girl       -3.70796523865541
+The  gave       -0.100239485796575
+The  a          3.79004006078384       <<< bad
+The  little     -1.63241818246397
+The  laugh      0.713357934442026
+
+the  girl       -2.05346491148124
+the  gave       1.27996427879419
+the  a          2.78647534800109
+the  little     -0.751899481316491
+the  laugh      1.38444380659843
+
+
+girl  gave      -1.39996148448708
+girl  a         0.208481595111202
+girl  little    1.289110990041
+girl  laugh     -0.183992976805794
+
+gave  a         -2.96100943228456
+gave  little    -1.67864014666756
+gave  laugh     -3.18817482182013
+
+a  little       -3.7409985984943
+a  laugh        -2.98654866737527
+
+little  laugh   -3.25530927504408
+
+WTF. Is there a sign reversal????
+
+little laugh N = 496.0         p = 7.764001126512734e-7 OK logli = 20.29669633683304 OK
+ *     laugh N = 50356.0   OK  p = 7.88233953077974e-5  OK logli = 13.631016579715935  OK
+little   *   N = 658993.0  OK  p = 0.00103153677305726  OK logli = 9.92098903216119  OK
+ *       *   N = 638845863.0  OK
+
+MI = 20.29 - 13.63 - 9.92 = -3.25
+
+
+
+(define (foo-parse-text plain-text)
+   (define word-strs (tokenize-text plain-text))
+   (define word-list (map (lambda (str) (WordNode str)) word-strs))
+   (define pair-obj (make-any-link-api))
+   (define mi-source (add-pair-freq-api pair-obj))
+   (define scorer (make-score-fn mi-source 'pair-fmi))
+	(define nsco (lambda (left-atom right-atom distance)
+			(define sco (scorer left-atom right-atom distance))
+			(if (< sco -1000) sco (- sco))))
+
+   ; Process the list of words.
+   (mst-parse-atom-seq word-list nsco)
+)
+
+
+Action plan:
+* add minus sign to the MI code. in the matrix directory.
+* provide a conversion script for the databases
+* uppdate status of all collections
+  e.g. en_pairs_ttwo_sim on fanny is junk.
+* restart MST.
+
+=========================================================================
+The current Mandarin dataset has enough English in it to parse even
+simple English, not well, but not terribly badly, either.  Basically,
+the wikipedia articles contain scattered English, and this is treated
+just like everything else.
+
+The cost is the MI of that pair.   The integers are the word-ordinals.
+
+(print-mst  "this is a test")
+2 . this   <-->  3 . is  cost= 12.596325047561628
+3 . is   <-->  4 . a  cost= 10.684454066752686
+1 . ###LEFT-WALL###   <-->  3 . is  cost= 0.5236859955283215
+1 . ###LEFT-WALL###   <-->  5 . test  cost= -0.8277888080021967
+
+(print-mst  "it is surprising that this works")
+5 . that   <-->  7 . works  cost= 12.824735708193995
+5 . that   <-->  6 . this  cost= 11.23043475606367
+3 . is   <-->  5 . that  cost= 8.50983391898189
+2 . it   <-->  3 . is  cost= 12.720811706832116
+1 . ###LEFT-WALL###   <-->  7 . works  cost= 0.7545942265555112
+
+
+Some random sentences:
+
+也 常 在 工 業 上 與 實 驗 室 中 ， 用 於 有 機 合 成 中 的 強 鹼 （ 超 強 鹼 ）  。
+
+長 時 間 都 跟 男 人 接 觸 ， 不 擅 長 對 待 女 孩 子 。
+
+把 蕾 當 作 戀 人 看 待 ， 記 憶 力 比 一 般 人 優 異 。
+
+道 德 学 社 创 始 人 。
+
+然 而 ， 此 混 战 亦 可 坚 持 三 十 六 日 。
+
+
+These are segmented so that its two hanzi per pair. There is NO word
+segmentation!! I am hoping that word segmentation will happen
+"automatically".  See below.
+
+I do not yet have software to draw the graphs.  You will have to do this
+by hand, for now.
+
+The parses:
+
+(print-mst  "也 常 在 工 業 上 與 實 驗 室 中 ， 用 於 有  機 合 成 中 的 強 鹼 （ 超 強 鹼 ）  。")
+9 . 實   <-->  10 . 驗  cost= 8.67839880455297
+10 . 驗   <-->  11 . 室  cost= 7.808708535957656
+5 . 工   <-->  11 . 室  cost= 3.628109329166861
+5 . 工   <-->  6 . 業  cost= 5.267964316861255
+8 . 與   <-->  9 . 實  cost= 1.5154639602692228
+11 . 室   <-->  18 . 合  cost= 1.3112275389754586
+18 . 合   <-->  19 . 成  cost= 2.8487390406796376
+2 . 也   <-->  19 . 成  cost= 1.3284690162639947
+2 . 也   <-->  3 . 常  cost= 2.670074279865112
+2 . 也   <-->  4 . 在  cost= 1.5999478270616105
+19 . 成   <-->  27 . 鹼  cost= 1.0648751602654372
+23 . 鹼   <-->  27 . 鹼  cost= 7.397179300260998
+22 . 強   <-->  23 . 鹼  cost= 6.6278644991783935
+26 . 強   <-->  27 . 鹼  cost= 6.6278644991783935
+25 . 超   <-->  26 . 強  cost= 4.233373422153647
+21 . 的   <-->  23 . 鹼  cost= 2.189776253921316
+23 . 鹼   <-->  24 . （  cost= 2.0228678213402027
+20 . 中   <-->  21 . 的  cost= 0.7882106238577222
+11 . 室   <-->  13 . ，  cost= 0.7204578405457767
+13 . ，   <-->  15 . 於  cost= 1.3787498338128241
+14 . 用   <-->  15 . 於  cost= 2.3097280192674408
+13 . ，   <-->  16 . 有  cost= 0.8940307468617856
+16 . 有   <-->  17 . 機  cost= 1.5798315464927484
+12 . 中   <-->  13 . ，  cost= 0.702836797299172
+19 . 成   <-->  29 . 。  cost= 0.5752920624938298
+28 . ）   <-->  29 . 。  cost= 1.1524305408117694
+6 . 業   <-->  7 . 上  cost= -0.02469597819435876
+1 . ###LEFT-WALL###   <-->  2 . 也  cost= -0.5802694975440783
+
+
+scheme@(guile-user)> (print-mst  "長 時 間 都 跟 男 人 接 觸 ， 不 擅 長 對 待  女
+孩 子 。")
+9 . 接   <-->  10 . 觸  cost= 8.386123586043663
+9 . 接   <-->  16 . 待  cost= 5.500641386527644
+15 . 對   <-->  16 . 待  cost= 4.527961561831734
+4 . 間   <-->  9 . 接  cost= 3.011954338244294
+3 . 時   <-->  4 . 間  cost= 5.53719025855275
+2 . 長   <-->  4 . 間  cost= 1.4431523444018381
+2 . 長   <-->  19 . 子  cost= 1.6192113159084691
+18 . 孩   <-->  19 . 子  cost= 6.867211688834326
+17 . 女   <-->  18 . 孩  cost= 7.309507215753307
+13 . 擅   <-->  16 . 待  cost= 1.4396781889010661
+13 . 擅   <-->  14 . 長  cost= 7.846183142809686
+12 . 不   <-->  13 . 擅  cost= 4.148490791614584
+11 . ，   <-->  13 . 擅  cost= 2.360114646965709
+4 . 間   <-->  5 . 都  cost= 0.9693867850594948
+5 . 都   <-->  6 . 跟  cost= 2.3990108227984237
+6 . 跟   <-->  7 . 男  cost= 1.3528584177181244
+7 . 男   <-->  8 . 人  cost= 2.705451519003308
+2 . 長   <-->  20 . 。  cost= 0.9405658895019222
+1 . ###LEFT-WALL###   <-->  2 . 長  cost= -0.11680557768830013
+
+
+scheme@(guile-user)> (print-mst  "把 蕾 當 作 戀 人 看 待 ， 記 憶 力 比 一 般  人 優 異 。")
+11 . 記   <-->  12 . 憶  cost= 9.984319885371686
+6 . 戀   <-->  12 . 憶  cost= 4.479455917846746
+6 . 戀   <-->  17 . 人  cost= 3.346336621332618
+6 . 戀   <-->  7 . 人  cost= 3.346336621332618
+6 . 戀   <-->  19 . 異  cost= 3.1326057184954585
+18 . 優   <-->  19 . 異  cost= 7.429036103043035
+12 . 憶   <-->  13 . 力  cost= 2.9092434467610424
+7 . 人   <-->  8 . 看  cost= 1.5817340934392554
+8 . 看   <-->  9 . 待  cost= 6.40562791854984
+6 . 戀   <-->  16 . 般  cost= 1.532540145438297
+15 . 一   <-->  16 . 般  cost= 6.011468981031394
+14 . 比   <-->  16 . 般  cost= 2.133858423252395
+19 . 異   <-->  20 . 。  cost= 1.062610265554028
+5 . 作   <-->  20 . 。  cost= 0.9473091730162793
+4 . 當   <-->  5 . 作  cost= 1.8844566876556712
+2 . 把   <-->  4 . 當  cost= 1.601964785223224
+2 . 把   <-->  3 . 蕾  cost= 3.301384076256177
+1 . ###LEFT-WALL###   <-->  4 . 當  cost= 1.4277603296921786
+8 . 看   <-->  10 . ，  cost= 0.7854131431579994
+
+
+scheme@(guile-user)> (print-mst  "道 德 学 社 创 始 人 。")
+6 . 创   <-->  7 . 始 cost= 5.70773284687867
+4 . 学   <-->  6 . 创  cost= 3.061665951119931
+6 . 创   <-->  8 . 人  cost= 2.1724657173546227
+4 . 学   <-->  5 . 社  cost= 1.2513192358165952
+8 . 人   <-->  9 . 。  cost= 0.9996485775966537
+2 . 道   <-->  9 . 。  cost= 0.566680489393292
+2 . 道   <-->  3 . 德  cost= 2.4802112908263467
+1 . ###LEFT-WALL###   <-->  2 . 道  cost= -0.4271902589965446
+
+
+scheme@(guile-user)> (print-mst  "然 而 ， 此 混 战 亦 可 坚 持 三 十 六 日 。") 
+10 . 坚   <-->  11 . 持  cost= 8.090136242433331
+2 . 然   <-->  10 . 坚  cost= 3.986785521916751
+2 . 然   <-->  3 . 而  cost= 5.260819401185174
+1 . ###LEFT-WALL###   <-->  2 . 然  cost= 1.960750908016161
+2 . 然   <-->  5 . 此  cost= 1.6401055467853318
+4 . ，   <-->  5 . 此  cost= 1.9045829576234112
+5 . 此   <-->  8 . 亦  cost= 1.6941756040836786
+8 . 亦   <-->  9 . 可  cost= 3.9818559895630496
+5 . 此   <-->  7 . 战  cost= 0.7150479036642032
+6 . 混   <-->  7 . 战  cost= 3.4641015339868524
+11 . 持   <-->  16 . 。  cost= 0.667356443539326
+11 . 持   <-->  12 . 三  cost= -0.082652373159668
+12 . 三   <-->  13 . 十  cost= 4.910027341075681
+13 . 十   <-->  14 . 六  cost= 6.198613466629329
+13 . 十   <-->  15 . 日  cost= 1.2911435674834095
+scheme@(guile-user)> 
+
+
+FYI, here are comparable parses, for English, using the English pair dataset.
+They are mostly good, with occasional mediocre links.
+
+ (print-mst "It is the same old tale, I suppose")
+9 . I   <-->  10 . suppose  cost= 5.30352500612982
+1 . ###LEFT-WALL###   <-->  9 . I  cost= 1.81488162256983
+1 . ###LEFT-WALL###   <-->  2 . It  cost= 3.58403195375127
+2 . It   <-->  3 . is  cost= 4.74100503452483
+8 . ,   <-->  9 . I  cost= 1.05294445305262
+7 . tale   <-->  8 . ,  cost= 1.04077920118952
+5 . same   <-->  7 . tale  cost= 2.71210690237531
+4 . the   <-->  5 . same  cost= 3.45495315601723
+6 . old   <-->  7 . tale  cost= 2.49777533091725
+
+scheme@(guile-user)> (print-mst "The girl gave a little laugh")
+5 . a   <-->  6 . little  cost= 3.7409985984943
+6 . little   <-->  7 . laugh  cost= 3.25530927504408
+4 . gave   <-->  7 . laugh  cost= 3.18817482182013
+3 . girl   <-->  4 . gave  cost= 1.39996148448708
+2 . The   <-->  3 . girl  cost= 3.70796523865541
+1 . ###LEFT-WALL###   <-->  2 . The  cost= 3.54169132577798
+
+scheme@(guile-user)> (print-mst "He wore a new white sailor suit with pockets")
+7 . sailor   <-->  8 . suit  cost= 5.49215876834077
+5 . new   <-->  8 . suit  cost= 5.1696331184917
+6 . white   <-->  7 . sailor  cost= 4.43134225309288
+3 . wore   <-->  8 . suit  cost= 3.5690512406128
+2 . He   <-->  3 . wore  cost= 4.4474126513332
+1 . ###LEFT-WALL###   <-->  2 . He  cost= 3.64809278899352
+8 . suit   <-->  10 . pockets  cost= 3.39943721825401
+3 . wore   <-->  4 . a  cost= 3.26884788962874
+8 . suit   <-->  9 . with  cost= 1.22919683159134
+
+scheme@(guile-user)> (print-mst "Maie threw back her veil and smiled")
+2 . Maie   <-->  8 . smiled  cost= 6.90160018627178
+2 . Maie   <-->  3 . threw  cost= 6.8332928881085
+3 . threw   <-->  4 . back  cost= 4.35035476889946
+3 . threw   <-->  6 . veil  cost= 3.23768129913487
+5 . her   <-->  6 . veil  cost= 3.70652214281638
+1 . ###LEFT-WALL###   <-->  8 . smiled  cost= 1.75135762004661
+7 . and   <-->  8 . smiled  cost= 1.67365955937873
+
+
+=========================================================================
+
 
 Crazy idea: iterate; the places we end up at should be the dependents
 since everything points at them, and they never point away.

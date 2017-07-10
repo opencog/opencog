@@ -31,6 +31,7 @@
 ;
 (use-modules (srfi srfi-1))
 (use-modules (srfi srfi-11))
+(use-modules (opencog matrix))
 (use-modules (opencog sheaf))
 
 ; ---------------------------------------------------------------------
