@@ -5698,13 +5698,14 @@ forked from en_pairs_rohit, holds disjunct data from MST parsing.
 Both word-pairs and MST  parses came from wikipedia articles;
 this appears to give only mediocre results.
 
-STATUS: archived.
+STATUS: archived. Total junk, should be deleted.
 DATE: 18 May 2017
 REASON: The wikipedia-based data is mediocre.
 Also:
 a) it fails to separate quotation marks.
 b) The any-disjuncts are junk.
 c) The LgWordCset typename needs to be changed to Section
+d) FATAL ERROR: all disjunct created with minus-the-MI and so are junk.
 
                        List of relations
  Schema |    Name    | Type  | Owner |    Size    | Description
@@ -5758,11 +5759,15 @@ The similarity database published on the web, forked from an earlier
 version of en_pairs_mst.  Contains pairs derived only from wikipedia.
 plus some number of disjuncts from mst parses.
 
+STATUS: Total junk, should be deleted.
+REASON: FATAL ERROR: all disjunct created with minus-the-MI and so are junk.
+
 Published on web 12 May 2017
 322343968 bytes compressed (322MBytes)
 
  md5sum simil_en.sql.bz2
 b9bb221069867c5f4a307670a34387c8  simil_en.sql.bz2
+
 
 ==================================================================
 
@@ -5774,8 +5779,11 @@ Forked from earlier version of en_pairs_mst, contains less data.
 The simil_en is a snapshot of this; the en_pairs_sim contains
 additional caches of partial sums across disjuncts, etc.
 
-STATUS: working DB
+STATUS: TOTAL JUNK, should be deleted.
 DATE: 21 May 2017
+REASON: FATAL ERROR: all disjuncts created with minus-the-MI,
+        and so are junk.
+
 
                        List of relations
  Schema |    Name    | Type  | Owner |    Size    | Description
@@ -5888,11 +5896,13 @@ en_pairs_tone
 Random-planar-tree parsed books from "tranche-1" of mostly project
 gutenberg books. Contains counts for word-pairs, words and disjuncts.
 
-STATUS: fair
+STATUS: poor
 DATE: 24 May 2017
 REASON: Multiple issues:
 a) it fails to separate quotation marks.
 b) The any-disjuncts are junk.
+c) Missing links to ###LEFT-WALL### 
+d) FATAL ERROR: all disjuncts created with minus-the-MI, and so are junk.
 
                         List of relations
  Schema |    Name    | Type  | Owner  |    Size    | Description 
@@ -5942,12 +5952,14 @@ gutenberg books. Based off of the en_pairs_tone. Contains MI for tone,
 but not the cosine angles.
 
 STATUS: poor, obsolete.  Replaced by en_pairs_tone_mst_rev
+        Should be deleted.
 DATE: 27 May 2017  obsoleted on 9 June
 REASON: Three issues:
  a) fails to separate quoation marks (inherited from tone)
  b) contains junk lg-any disjuncts
  c) Uses LgWordCset for for connectors and pseudo-connectors.
     Which screws up statistics. 
+ d) FATAL ERROR: all disjuncts created with minus-the-MI, and so are junk.
 
 en_pairs_tone_mst=> \dt+
                         List of relations
@@ -5994,13 +6006,14 @@ Uses the new PseudoAnd and PseudoWordCset types.
 Kills the bogus lg-any disjuncts.
 Contains table summaries for pairs and csets.
 
-STATUS: fair/poor
+STATUS: Total junk, should be deleted.
 DATE:  9 June 2017
 REASON: Several issues:
  a) Missing links to LEFT-WALL
  b) fails to separate quotation marks (inherited from tone)
  c) fails to separete various other punctuation.
  d) The PseudoWordCset typename needs to be changed to Section, etc.
+ e) FATAL ERROR: all disjunct created with minus-the-MI and so are junk.
 
 en_pairs_tone_mst=> \dt+
                         List of relations
@@ -6067,9 +6080,10 @@ Random parses from tranche-1 and tranche-2.
 
 STATUS: fair
 DATE: 29 May 2017
-REASON: Two issues:
+REASON: Three issues:
  a) fails to separate quoation marks (inherited from tone)
  b) contains junk lg-any disjuncts
+ c) Missing links to LEFT-WALL
 
 
                         List of relations
@@ -6117,12 +6131,13 @@ Random parses from tranche-1 and tranche-2, together with MST parses from
 both tranches. The bogus ANY-disjuncs got removed, and the correct 
 PseudoWordCsets are used.  Contains the summary stats for csets, too.
 
-STATUS: fair/poor
+STATUS: Total junk, should be deleted.
 DATE: 9 Jun 2017
 REASON: Multiple issues:
  a) Missing links to LEFT-WALL
  b) fails to separete various punctuation
  c) The PseudoWordCset typename needs to be changed to Section, etc.
+ d) FATAL ERROR: all disjunct created with minus-the-MI and so are junk.
 
 
                         List of relations
@@ -6289,11 +6304,12 @@ en_pairs_tthree_mst
 ------------------
 MST parses from tranche-1, tranche-2 and tranche_3, and summary stats.
 
-STATUS: OK.
+STATUS: Total junk, should be deleted.
 DATE: 19 Jun 2017
 REASON: Several issues:
  a) Missing many links to LEFT-WALL (on tranche-1,2, and some of 3)
  b) fails to separete some of the punctuation
+ c) FATAL ERROR: all disjunct created with minus-the-MI and so are junk.
 
                         List of relations
  Schema |    Name    | Type  | Owner  |    Size    | Description 
@@ -6374,13 +6390,14 @@ en_pairs_rone_mst
 The en_pairs_rone dataset used to perform MST parses of tranche-1
 books.  Contains both pair-MI and cset-MI data and summaries.
 
-STATUS: poor
+STATUS: Total junk, should be deleted.
 DATE: 13 June 2017
 REASON: Multiple issues:
  a) Missing links to LEFT-WALL
  b) fails to separete various punctuation
  c) The PseudoWordCset typename needs to be changed to Section, etc.
  d) MI values have the float truncation bug.
+ e) FATAL ERROR: all disjunct created with minus-the-MI and so are junk.
 
 
 en_pairs_rone_mst=> \dt+
@@ -6484,12 +6501,14 @@ en_pairs_rtwo_mst
 -----------------
 en_pairs_rtwo, with tranche-1 and tranche-2 MST parses.
 
-STATUS: poor
+STATUS: Total junk, should be deleted.
 DATE: 14 June 2017
 REASON: Multiple issues:
  a) Missing links to LEFT-WALL
  b) fails to separete various punctuation
  c) The PseudoWordCset typename needs to be changed to Section, etc.
+ d) MI values have the float truncation bug.
+ e) FATAL ERROR: all disjunct created with minus-the-MI and so are junk.
 
 
                         List of relations
@@ -6650,9 +6669,9 @@ en_pairs_rthree_mone
 --------------------
 MST-parsed books from tranche-1, using pairs from rthree.
 
-STATUS: good
+STATUS: Total junk, should be deleted.
 DATE: 2 July 2017
-REASON: Best so far, I think.
+REASON: FATAL ERROR: all disjunct created with minus-the-MI, and so are junk.
 
 select count(*) from atoms;      -- 42237812 = 42.2M i.e. 7.2M more than rthree
 select count(*) from valuations; -- 58709672 = 58.7M i.e. 4.6M more than rthree
@@ -6667,10 +6686,13 @@ select count(*) from valuations; -- 58709672 = 58.7M i.e. 4.6M more than rthree
 zh_pairs_one
 ------------
 Mandarin individual character pairs.  Only that, without any pair stats.
+Wikipedia articles only!
 
 STATUS: good
 DATE: 7 July 2017
-REASON: Why wouuldn't it be good?  But I think its missing LEFT-WALL...
+REASON: No known serious defects.  Minor issue: its wikipedia and does
+    not contain any fiction or action or narrative text.
+
 
 zh_pairs     | 4235 MB |  \l+
 
@@ -6686,12 +6708,13 @@ cf45874b8d353ca9332040c9acd783ae  zh_pairs_one.sql.bz2
 ==================================================================
 zh_pairs_sone
 -------------
-Mandarin individual character pairs.  Same as above, but include the pair-MI
-stats.
+Mandarin individual character pairs.  Same as above, but includes the
+pair-MI stats.
 
 STATUS: good
 DATE: 8 July 2017
-REASON: Why wouuldn't it be good?  But I think its missing LEFT-WALL...
+REASON: No known defects.  Minor issue: its wikipedia and does
+    not contain any fiction or action or narrative text.
 
 select count(*) from atoms;      -- 12638021 = 12.6M - 600K more than above.
 select count(*) from valuations; -- 19511577 = 19.5M - 13.4M more
