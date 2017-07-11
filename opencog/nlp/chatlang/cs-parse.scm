@@ -4,6 +4,9 @@
 (use-modules (rnrs io ports))
 (use-modules (system base lalr))
 
+; For storing the outputs of this parser
+(define pattern '())
+(define action '())
 
 (define (display-token token)
 "
@@ -160,7 +163,6 @@
                 (car result))
               (error (format #f "Tokenizer issue => ~a," result))
             )))))
-
   )
 )
 
@@ -367,7 +369,6 @@
     )
   )
 )
-
 ; Test lexer
 (define (test-lexer lexer)
 "
@@ -404,3 +405,7 @@
         (format #t "\n--------- Finished parsing of ~a ---------\n" input-file)
       )))
 )
+
+; TODO: CLI?
+(define-public (test-parse line)
+  (cs-parser (cs-lexer (open-input-string line)) error))
