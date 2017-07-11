@@ -2459,6 +2459,118 @@ such as
  is not a-priori known).
 \end_layout
 
+\begin_layout Subsection*
+Partition Function
+\end_layout
+
+\begin_layout Standard
+Some notes about the Boltzmann distribution.
+ Let 
+\begin_inset Formula $F(w_{l},w_{r})$
+\end_inset
+
+ be a numeric score associated with the edge 
+\begin_inset Formula $(w_{l},w_{r})$
+\end_inset
+
+ -- for example, this might be (minus) the MI.
+ By convention, one introduces a Lagrange multiplier 
+\begin_inset Formula $\beta$
+\end_inset
+
+ and writes 
+\begin_inset Formula $F=\beta f$
+\end_inset
+
+.
+ The probability of a parse tree 
+\begin_inset Formula $T$
+\end_inset
+
+ constructed solely out of edge-pairs is then defined as
+\begin_inset Formula 
+\[
+P(T|S)=\frac{\exp\left(-\beta\sum_{(w_{l},w_{r})\in T}f(w_{l},w_{r})\right)}{Z(S)}
+\]
+
+\end_inset
+
+Here, 
+\begin_inset Formula $S$
+\end_inset
+
+ is the sentence: a sequence of words, and 
+\begin_inset Formula $Z(S)$
+\end_inset
+
+ is the partition function: the sum of the probabilities of all different
+ possible parses for that setence:
+\begin_inset Formula 
+\[
+Z(S)=\sum_{T}\exp\left(-\beta\sum_{(w_{l},w_{r})\in T}f(w_{l},w_{r})\right)
+\]
+
+\end_inset
+
+The MST parse is then the single parse 
+\begin_inset Formula $T$
+\end_inset
+
+ that maximizes the probability 
+\begin_inset Formula $P(T|S)$
+\end_inset
+
+ and this can be easily seen to be the parse that maximizes the sum 
+\begin_inset Formula $\sum_{(w_{l},w_{r})\in T}f(w_{l},w_{r})$
+\end_inset
+
+ on the spanning tree 
+\begin_inset Formula $T$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+Written in this form, it suggests how parsing can be generalized to include
+ other scores.
+ If, for example, one has some other score 
+\begin_inset Formula $g(w_{1},w_{2},w_{3})$
+\end_inset
+
+ over triples of words, then one sums as above, using 
+\begin_inset Formula $g$
+\end_inset
+
+ in place of 
+\begin_inset Formula $f$
+\end_inset
+
+.
+ In general, one can consider scoring functions 
+\begin_inset Formula $f=f(R;S)$
+\end_inset
+
+ for some relation 
+\begin_inset Formula $R$
+\end_inset
+
+ over the sentence 
+\begin_inset Formula $S$
+\end_inset
+
+.
+ The prototypical example would be a scoring function that uses Link Grammar
+ disjuncts for the relation 
+\begin_inset Formula $R$
+\end_inset
+
+, together with some weighting for link lengths (so as to avoid long links),
+ together with some weighting for word pairs (to give greater weight to
+ idioms and set phrases, as opposed to grammatically valid but non-idiomatic
+ parses).
+\end_layout
+
 \begin_layout Section*
 3 March 2014
 \end_layout
