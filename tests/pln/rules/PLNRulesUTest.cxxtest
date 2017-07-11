@@ -49,6 +49,22 @@ public:
 		logger().set_level(Logger::DEBUG);
 		logger().set_timestamp_flag(false);
 		logger().set_print_to_stdout_flag(true);
+
+		string cur_ppp_dir = string(PROJECT_SOURCE_DIR),
+			cur_dir = cur_ppp_dir + "/tests/pln/rules";
+		vector<string> load_paths = {cur_ppp_dir, cur_dir};
+		for (string& p : load_paths)
+		{
+			string eval_str = string("(add-to-load-path \"") + p + string("\")");
+			eval.eval(eval_str);
+		}
+
+		eval.eval("(add-to-load-path \"/usr/local/share\")");
+		eval.eval("(use-modules (opencog))");
+		eval.eval("(use-modules (opencog query))");
+		eval.eval("(use-modules (opencog logger))");
+		eval.eval("(use-modules (opencog rule-engine))");
+		eval.eval("(use-modules (srfi srfi-1))");
 	}
 
 	~PLNRulesUTest()
@@ -79,9 +95,12 @@ public:
 	void test_closed_lambda_introduction();
 	void test_equivalence_to_implication();
 	void test_implication_and_lambda_factorization();
+	// TODO rename this rule into
+	// antecedant-conjunction-introduction-rule
 	void test_implication_implicant_conjunction();
 	void test_implication_direct_evaluation();
 	void test_conditional_full_instantiation_meta_rule();
+	void test_consequent_disjunction_elimination();
 };
 
 void PLNRulesUTest::tearDown()
@@ -90,21 +109,7 @@ void PLNRulesUTest::tearDown()
 
 void PLNRulesUTest::setUp()
 {
-	string cur_ppp_dir = string(PROJECT_SOURCE_DIR),
-		cur_dir = cur_ppp_dir + "/tests/pln/rules";
-	vector<string> load_paths = {cur_ppp_dir, cur_dir};
-	for (string& p : load_paths)
-	{
-		string eval_str = string("(add-to-load-path \"") + p + string("\")");
-		eval.eval(eval_str);
-	}
-
-	eval.eval("(add-to-load-path \"/usr/local/share\")");
-	eval.eval("(use-modules (opencog))");
-	eval.eval("(use-modules (opencog query))");
-	eval.eval("(use-modules (opencog logger))");
-	eval.eval("(use-modules (opencog rule-engine))");
-	eval.eval("(use-modules (srfi srfi-1))");
+	as.clear();
 }
 
 void PLNRulesUTest::load_scm_files(std::vector<std::string> files)
@@ -127,8 +132,6 @@ void PLNRulesUTest::load_scm_files(std::vector<std::string> files)
 void PLNRulesUTest::test_deduction()
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
-
-	as.clear();
 
 	load_scm_files({"tests/pln/rules/simple-assertions.scm",
 				    "opencog/pln/rules/term/deduction.scm"});
@@ -160,8 +163,6 @@ void PLNRulesUTest::test_and_introduction()
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-	as.clear();
-
 	load_scm_files({"tests/pln/rules/simple-predicates.scm",
 	                "opencog/pln/rules/wip/and-introduction.scm"});
 
@@ -179,8 +180,6 @@ void PLNRulesUTest::test_and_introduction()
 void PLNRulesUTest::test_or_introduction()
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
-
-	as.clear();
 
 	load_scm_files({"tests/pln/rules/simple-predicates.scm",
 	                "opencog/pln/rules/wip/or-introduction.scm"});
@@ -200,8 +199,6 @@ void PLNRulesUTest::test_not_introduction()
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-	as.clear();
-
 	load_scm_files({"tests/pln/rules/simple-predicates.scm",
 	               "opencog/pln/rules/wip/not-introduction.scm"});
 
@@ -219,8 +216,6 @@ void PLNRulesUTest::test_not_introduction()
 void PLNRulesUTest::test_forall_full_instantiation()
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
-
-	as.clear();
 
 	load_scm_files({"tests/pln/rules/simple-forall.scm",
 	                "opencog/pln/rules/wip/forall-instantiation.scm"});
@@ -265,8 +260,6 @@ void PLNRulesUTest::test_forall_partial_instantiation()
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-	as.clear();
-
 	load_scm_files({"tests/pln/rules/simple-forall.scm",
 	                "opencog/pln/rules/wip/forall-instantiation.scm"});
 
@@ -291,8 +284,6 @@ void PLNRulesUTest::test_forall_partial_instantiation()
 void PLNRulesUTest::test_forall_implication_to_higher_order()
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
-
-	as.clear();
 
 	load_scm_files({"tests/pln/rules/simple-forall.scm",
 	                "opencog/pln/rules/wip/forall-implication-to-higher-order.scm"});
@@ -332,8 +323,6 @@ void PLNRulesUTest::test_implication_full_instantiation()
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-	as.clear();
-
 	load_scm_files({"tests/pln/rules/simple-implication.scm",
 	                "opencog/pln/rules/wip/implication-instantiation.scm"});
 
@@ -365,8 +354,6 @@ void PLNRulesUTest::test_implication_full_instantiation_extra_variables()
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-	as.clear();
-
 	load_scm_files({"tests/pln/rules/implication-extra-variables.scm",
 	                "opencog/pln/rules/wip/implication-instantiation.scm"});
 
@@ -394,8 +381,6 @@ void PLNRulesUTest::test_implication_full_instantiation_extra_variables()
 void PLNRulesUTest::test_implication_partial_instantiation()
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
-
-	as.clear();
 
 	load_scm_files({"tests/pln/rules/simple-implication.scm",
 	                "opencog/pln/rules/wip/implication-instantiation.scm"});
@@ -454,8 +439,6 @@ void PLNRulesUTest::test_implication_partial_instantiation()
 void PLNRulesUTest::test_implication_scope_to_implication()
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
-
-	as.clear();
 
 	load_scm_files({"tests/pln/rules/simple-implication.scm",
 	                "opencog/pln/rules/wip/implication-scope-to-implication.scm"});
@@ -537,8 +520,6 @@ void PLNRulesUTest::test_and_lambda_distribution()
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-	as.clear();
-
 	load_scm_files({"tests/pln/rules/simple-lambda.scm",
 	                "opencog/pln/rules/wip/and-lambda-distribution.scm"});
 
@@ -573,8 +554,6 @@ void PLNRulesUTest::test_implication_implicant_distribution()
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-	as.clear();
-
 	load_scm_files({"tests/pln/rules/simple-implication.scm",
 	                "opencog/pln/rules/wip/implication-implicant-distribution.scm"});
 
@@ -602,8 +581,6 @@ void PLNRulesUTest::test_implication_implicant_distribution()
 void PLNRulesUTest::test_implication_introduction()
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
-
-	as.clear();
 
 	load_scm_files({"tests/pln/rules/simple-predicates.scm",
 	                "opencog/pln/rules/wip/implication-introduction.scm"});
@@ -633,8 +610,6 @@ void PLNRulesUTest::test_implication_introduction()
 void PLNRulesUTest::test_closed_lambda_introduction()
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
-
-	as.clear();
 
 	load_scm_files({"tests/pln/rules/simple-lambda.scm",
 	                "opencog/pln/rules/wip/closed-lambda-introduction.scm"});
@@ -666,8 +641,6 @@ void PLNRulesUTest::test_closed_lambda_introduction()
 void PLNRulesUTest::test_equivalence_to_implication()
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
-
-	as.clear();
 
 	load_scm_files({"tests/pln/rules/simple-equivalence.scm",
 	                "opencog/pln/rules/wip/equivalence-to-implication.scm"});
@@ -704,8 +677,6 @@ void PLNRulesUTest::test_equivalence_to_implication()
 void PLNRulesUTest::test_implication_and_lambda_factorization()
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
-
-	as.clear();
 
 	load_scm_files({"tests/pln/rules/simple-lambda.scm",
 	                "opencog/pln/rules/wip/implication-and-lambda-factorization.scm"});
@@ -758,8 +729,6 @@ void PLNRulesUTest::test_implication_implicant_conjunction()
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-	as.clear();
-
 	load_scm_files({"tests/pln/rules/simple-implication-implicant-conjunction.scm",
 	                "opencog/pln/rules/wip/implication-implicant-conjunction.scm"});
 
@@ -787,8 +756,6 @@ void PLNRulesUTest::test_implication_implicant_conjunction()
 void PLNRulesUTest::test_implication_direct_evaluation()
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
-
-	as.clear();
 
 	load_scm_files({"tests/pln/rules/implication-direct-evaluation.scm",
 	                "opencog/pln/rules/wip/implication-direct-evaluation.scm"});
@@ -818,8 +785,6 @@ void PLNRulesUTest::test_implication_direct_evaluation()
 void PLNRulesUTest::test_conditional_full_instantiation_meta_rule()
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
-
-	as.clear();
 
 	load_scm_files({"tests/pln/rules/simple-implication-scope.scm",
 	                "opencog/pln/meta-rules/predicate/conditional-full-instantiation.scm"});
@@ -876,6 +841,28 @@ void PLNRulesUTest::test_conditional_full_instantiation_meta_rule()
 		 "    )"
 		 "  )"
 		 ")");
+
+	std::cout << "results = " << results->toString();
+	std::cout << "expected = " << expected->toString();
+
+	TS_ASSERT_EQUALS(results, expected);
+}
+
+void PLNRulesUTest::test_consequent_disjunction_elimination()
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	load_scm_files({"tests/pln/rules/simple-consequent-disjunction-elimination.scm",
+	                "opencog/pln/rules/propositional/consequent-disjunction-elimination.scm"});
+
+	// Apply the rule
+	Handle rule = eval.eval_h("consequent-disjunction-elimination-implication-rule");
+	Handle results = bindlink(&as, rule);
+	Handle expected = eval.eval_h
+		("(SetLink"
+		 "   (Implication"
+		 "      (Predicate \"P\")"
+		 "      (Predicate \"Q1\")))");
 
 	std::cout << "results = " << results->toString();
 	std::cout << "expected = " << expected->toString();
