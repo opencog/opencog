@@ -16267,7 +16267,41 @@ target "http://www2.denizyuret.com/pub/lex-attr/lam-iscis06.pdf"
 \begin_inset Quotes erd
 \end_inset
 
- ISCIS 2006 http://www2.denizyuret.com/pub/lex-attr/lam-iscis06.pdf 
+ ISCIS 2006 (http://www2.denizyuret.com/pub/lex-attr/lam-iscis06.pdf) 
+\end_layout
+
+\begin_layout Standard
+It is important not to confuse this with the 
+\begin_inset Quotes eld
+\end_inset
+
+matrix-tree theorem
+\begin_inset Quotes erd
+\end_inset
+
+ aka 
+\begin_inset CommandInset href
+LatexCommand href
+name "Kirchoff's Theorem"
+target "https://en.wikipedia.org/wiki/Kirchhoff%27s_theorem"
+
+\end_inset
+
+, which counts the number of spanning trees of a graph.
+ In short, it states that the number of spanning trees is equal to any cofactor
+ of its Laplacian matrix.
+ In our case, we are dealing with a complete graph (a clique) and so on
+ might hope that 
+\begin_inset CommandInset href
+LatexCommand href
+name "Cayley's formula"
+target "https://en.wikipedia.org/wiki/Cayley's_formula"
+
+\end_inset
+
+ applies.
+ In fact, neither theorem works, because we are interested in non-self-intersect
+ing planar trees, constrained by linear word-order.
 \end_layout
 
 \begin_layout Standard
