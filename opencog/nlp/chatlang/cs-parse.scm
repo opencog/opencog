@@ -102,7 +102,7 @@
     ((has-match? "^[ ]*_" str) (result:suffix 'VAR location #f))
     ; For dictionary keyword sets
     ((has-match? "^[ ]*[a-zA-Z]+~[a-zA-Z1-9]+" str)
-      (result:suffix 'LITERAL~COMMAND location (command-pair)))
+      (result:suffix 'LEMMA~COMMAND location (command-pair)))
     ; Range-restricted Wildcards.
     ; TODO Maybe replace with dictionary keyword sets then process it on action?
     ((has-match? "^[ ]*\\*~[1-9]+" str)
@@ -127,7 +127,7 @@
     ((has-match? "^[ ]*[?]" str) (result:suffix '? location "?"))
     ; This should always be near the end, because it is broadest of all.
     ((has-match? "^[ \t]*['.,_!0-9a-zA-Z-]+" str)
-      (result:suffix 'LITERAL location
+      (result:suffix 'LEMMA location
         (string-trim (match:substring current-match))))
     ; This should always be after the above so as to match words like "3D".
     ((has-match? "^[ ]*[0-9]+" str)
@@ -186,13 +186,13 @@
     ; LPAREN RPAREN = parentheses ()
     ; DQUOTE = Double quote "
     ; ID = Identifier or Marking
-    ; LITERAL~COMMAND = Dictionary Keyword Sets
+    ; LEMMA~COMMAND = Dictionary Keyword Sets
     ; *~n = Range-restricted Wildcards
     ; MVAR = Match Variables
     ; ? = Comparison tests
     (CONCEPT TOPIC RESPONDERS REJOINDERS GAMBIT COMMENT SAMPLE_INPUT WHITESPACE
       COMMA
-      (right: LPAREN LSBRACKET << ID VAR * ^ < LITERAL NUM LITERAL~COMMAND
+      (right: LPAREN LSBRACKET << ID VAR * ^ < LEMMA NUM LEMMA~COMMAND
               *~n MVAR)
       (left: RPAREN RSBRACKET >> > DQUOTE NOT)
       (right: ? CR NEWLINE)
@@ -242,15 +242,15 @@
     )
 
     (declaration-member
-      (LITERAL) :  $1
+      (LEMMA) :  $1
       (concept) :  $1
-      (LITERAL~COMMAND) :
+      (LEMMA~COMMAND) :
         (display-token (format #f "command(~a -> ~a)" (car $1) (cdr $1)))
     )
 
     ; Rule grammar
     (rules
-      (RESPONDERS a-literal context-sequence action-patterns) :
+      (RESPONDERS a-lemma context-sequence action-patterns) :
         (display-token (format #f "responder_~a(~a -> ~a)" $2 $3 $4))
       ; Unlabeled responder.
       ; TODO: Maybe should be labeled internally in the atomspace???
@@ -298,8 +298,8 @@
     )
 
     (pattern
-      (a-literal) : (display-token $1)
-      (a-literal ?) : (display-token (format #f "~a~a" $1 $2))
+      (a-lemma) : (display-token $1)
+      (a-lemma ?) : (display-token (format #f "~a~a" $1 $2))
       (variable)  : (display-token $1)
       (collections) : (display-token $1)
       (function) : (display-token $1)
@@ -329,9 +329,9 @@
     )
 
     (function
-      (^ a-literal LPAREN args RPAREN) :
+      (^ a-lemma LPAREN args RPAREN) :
         (display-token (format #f "function_~a(~a)" $2 $4))
-      (^ a-literal LPAREN RPAREN) :
+      (^ a-lemma LPAREN RPAREN) :
         (display-token (format #f "function_~a()" $2))
     )
 
@@ -341,30 +341,30 @@
     )
 
     (arg
-      (LITERAL) :  (display-token $1)
+      (LEMMA) :  (display-token $1)
       (concept) :  (display-token $1)
     )
 
     (phrase
-      (DQUOTE literals DQUOTE) : (display-token (format #f "phrase(~a)" $2))
+      (DQUOTE lemmas DQUOTE) : (display-token (format #f "phrase(~a)" $2))
     )
 
-    (literals
-      (LITERAL) : (display-token $1)
-      (literals LITERAL) : (display-token (format #f "~a ~a" $1 $2))
+    (lemmas
+      (LEMMA) : (display-token $1)
+      (lemmas LEMMA) : (display-token (format #f "~a ~a" $1 $2))
     )
 
     (variable
-      (VAR LITERAL) : (display-token (format #f "variable(~a)" $2))
+      (VAR LEMMA) : (display-token (format #f "variable(~a)" $2))
       (VAR collections) : (display-token (format #f "variable(~a)" $2))
       (MVAR) : (display-token (format #f "match_variable(~a)" $1))
     )
 
-    (a-literal
-      (LITERAL) : (display-token $1)
+    (a-lemma
+      (LEMMA) : (display-token $1)
       (*~n) : (display-token (format #f "range_restricted(* ~a)" $1))
       (*) : (display-token $1)
-      (LITERAL~COMMAND) :
+      (LEMMA~COMMAND) :
         (display-token (format #f "command(~a -> ~a)" (car $1) (cdr $1)))
     )
   )
@@ -408,4 +408,5 @@
 
 ; TODO: CLI?
 (define-public (test-parse line)
-  (cs-parser (cs-lexer (open-input-string line)) error))
+  (cs-parser (cs-lexer (open-input-string line)) error)
+)
