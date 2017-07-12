@@ -15938,7 +15938,7 @@ p(MA-\&MB-)=\frac{N(MA-\&MB-)}{N(*-\&*-)}
 The mutual information associated with the disjunct is then 
 \begin_inset Formula 
 \[
-m(MA-\&MB-)=-\log_{2}\frac{p(MA-\&MB-)}{p(MA-\&*-)p(*-\&MB-)}
+m(MA-\&MB-)=\log_{2}\frac{p(MA-\&MB-)}{p(MA-\&*-)p(*-\&MB-)}
 \]
 
 \end_inset
@@ -25561,7 +25561,14 @@ But what if the high quality is based on a pathetically small number of
 \end_layout
 
 \begin_layout Section*
-Multiple datasets 3 June 2017
+Dataset report 3 June 2017
+\begin_inset CommandInset label
+LatexCommand label
+name "sec:Dataset-report"
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -25716,7 +25723,7 @@ Dataset
 \begin_inset Text
 
 \begin_layout Plain Layout
--3.02
+3.02
 \end_layout
 
 \end_inset
@@ -25781,7 +25788,7 @@ en_pairs_sim
 \begin_inset Text
 
 \begin_layout Plain Layout
--2.03
+2.03
 \end_layout
 
 \end_inset
@@ -25846,7 +25853,7 @@ en_pairs_tone_mst
 \begin_inset Text
 
 \begin_layout Plain Layout
--1.84
+1.84
 \end_layout
 
 \end_inset
@@ -25911,7 +25918,7 @@ en_pairs_ttwo_mst
 \begin_inset Text
 
 \begin_layout Plain Layout
--1.93
+1.93
 \end_layout
 
 \end_inset
@@ -25976,7 +25983,7 @@ en_pairs_tthree
 \begin_inset Text
 
 \begin_layout Plain Layout
--1.94
+1.94
 \end_layout
 
 \end_inset
@@ -26041,7 +26048,7 @@ en_pairs_rone_mst
 \begin_inset Text
 
 \begin_layout Plain Layout
--1.79
+1.79
 \end_layout
 
 \end_inset
@@ -26106,7 +26113,7 @@ en_pairs_rtwo_mst
 \begin_inset Text
 
 \begin_layout Plain Layout
--1.90
+1.90
 \end_layout
 
 \end_inset
@@ -26171,7 +26178,7 @@ en_pairs_rthree
 \begin_inset Text
 
 \begin_layout Plain Layout
--2.02
+2.02
 \end_layout
 
 \end_inset
@@ -26243,7 +26250,7 @@ Entropy The total entropy of these pairs in this dataset, as defined previously:
 \begin_layout Description
 MI The total mutual information for the pairs in this dataset, as defined
  previously: 
-\begin_inset Formula $MI=-\sum_{w_{L},w_{R}}p(w_{L},w_{R})\log_{2}\left[p(w_{L},w_{R})/p(w_{L},*)p(*,w_{R})\right]$
+\begin_inset Formula $MI=\sum_{w_{L},w_{R}}p(w_{L},w_{R})\log_{2}\left[p(w_{L},w_{R})/p(w_{L},*)p(*,w_{R})\right]$
 \end_inset
 
 
@@ -27280,7 +27287,7 @@ Notes
 \begin_inset Text
 
 \begin_layout Plain Layout
--7.98
+7.98
 \end_layout
 
 \end_inset
@@ -27363,7 +27370,7 @@ en_pairs_sim
 \begin_inset Text
 
 \begin_layout Plain Layout
--4.16
+4.16
 \end_layout
 
 \end_inset
@@ -27446,7 +27453,7 @@ en_pairs_tone_mst
 \begin_inset Text
 
 \begin_layout Plain Layout
--3.91
+3.91
 \end_layout
 
 \end_inset
@@ -27529,7 +27536,7 @@ en_pairs_ttwo_mst
 \begin_inset Text
 
 \begin_layout Plain Layout
--3.97
+3.97
 \end_layout
 
 \end_inset
@@ -27612,7 +27619,7 @@ en_pairs_tthree_mst
 \begin_inset Text
 
 \begin_layout Plain Layout
--4.15
+4.15
 \end_layout
 
 \end_inset
@@ -27695,7 +27702,7 @@ en_pairs_rone_mst
 \begin_inset Text
 
 \begin_layout Plain Layout
--3.91
+3.91
 \end_layout
 
 \end_inset
@@ -34689,6 +34696,508 @@ bw
  holding both words, or should we create three categories: bw, white-prime
  and black-prime, where bw just has the common disjuncts, and white-prime
  and black-prime is what's left after taking differences?
+\end_layout
+
+\begin_layout Section*
+Chinese character pair dataset July 2017
+\end_layout
+
+\begin_layout Standard
+This report provides a quick sketch of a dataset containing Mandarin Chinese
+ character pairs.
+ This differs from English in two important ways.
+ First, obviously, its not English.
+ Second, there was no word segmentation done: each character (hanzi, ideogram)
+ is treated as being distinct, and so all pairs are between hanzi.
+ The goal/hope here is that word segmentation will appear 
+\begin_inset Quotes eld
+\end_inset
+
+naturally
+\begin_inset Quotes erd
+\end_inset
+
+, as a by-product of high-MI hanzi pairs.
+ The dataset is the 
+\noun on
+zh_pairs_sone
+\noun default
+ dataset described in section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "sec:Dataset-report"
+
+\end_inset
+
+.
+ To recap, its this one:
+\end_layout
+
+\begin_layout Standard
+\begin_inset VSpace defskip
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Tabular
+<lyxtabular version="3" rows="2" columns="7">
+<features tabularvalignment="middle">
+<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top" width="0">
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Size
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Pairs
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Obs'ns
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Obs/pr
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Entropy
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+MI
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Dataset
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+158K x 159K
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+5.92M
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+729M
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+123
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+18.45
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+2.02
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+zh_pairs_sone
+\end_layout
+
+\end_inset
+</cell>
+</row>
+</lyxtabular>
+
+\end_inset
+
+
+\begin_inset VSpace defskip
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The size and support is recaped here below, just copied from section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "sec:Dataset-report"
+
+\end_inset
+
+.
+ The explanation of the column labels can be found there.
+\end_layout
+
+\begin_layout Standard
+\begin_inset VSpace defskip
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Tabular
+<lyxtabular version="3" rows="3" columns="9">
+<features tabularvalignment="middle">
+<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top" width="0">
+<row>
+<cell multicolumn="1" alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Size
+\end_layout
+
+\end_inset
+</cell>
+<cell multicolumn="2" alignment="center" valignment="top" topline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+<cell multicolumn="1" alignment="center" valignment="top" topline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Support
+\end_layout
+
+\end_inset
+</cell>
+<cell multicolumn="2" alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+<cell multicolumn="1" alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Count
+\end_layout
+
+\end_inset
+</cell>
+<cell multicolumn="2" alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+<cell multicolumn="1" alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Length
+\end_layout
+
+\end_inset
+</cell>
+<cell multicolumn="2" alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Dataset
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+L
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+R
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+L
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+R
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+L
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+R
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+L
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+R
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Name
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+158K
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+159K
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+6819
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+6411
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+548
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+487
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+41.7
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+37.7
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+zh_pairs_sone
+\end_layout
+
+\end_inset
+</cell>
+</row>
+</lyxtabular>
+
+\end_inset
+
+
+\begin_inset VSpace defskip
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+As mentioned before: the dimensions of the dataset are larger than the number
+ of hanzi, because the dataset treats all Latin-alphabet words as single
+ words.
+ Since this dataset is generated from Wikipedia, we can expect that many
+ of the entries correspond to English-language technical terms and named
+ entities, such as product names, geographical place names and the names
+ of people.
+\end_layout
+
+\begin_layout Standard
+MI Dis
 \end_layout
 
 \begin_layout Section*
