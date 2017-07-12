@@ -19138,6 +19138,14 @@ This is a report on a small dataset of disjuncts and connector sets, extracted
  
 \end_layout
 
+\begin_layout Standard
+XXX FIXME Pretty much everything below is wrong.
+ The connector sets were computed incorrectly, because the MST parse was
+ done using the MI instead of minus the MI.
+ Foo.
+ Revision in progress.
+\end_layout
+
 \begin_layout Subsection*
 Summary of results
 \end_layout
