@@ -45,6 +45,7 @@
 ; We can also do MST parsing with other kinds of pair-count objects,
 ; for example, the clique-pairs, or the distance-pairs.
 (define pair-obj (make-any-link-api))
+(define star-obj (add-pair-stars pair-obj))
 (pair-obj 'fetch-pairs)
 
 ; Print the sql stats
@@ -53,3 +54,4 @@
 ; Clear the sql cache and the stats counters
 (sql-clear-cache)
 (sql-clear-stats)
+(print-matrix-summary-report star-obj)
