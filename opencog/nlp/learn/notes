@@ -6254,9 +6254,9 @@ en_pairs_tthree_mi
 Random parses from tranche-1, tranche-2 and tranche_3, and pair MI.
 Removed the junk disjuncts from ANY parsing.
 
-STATUS: good
+STATUS: Misleading
 DATE: 9 Jun 2017
-REASON: I think it's good.
+REASON: Worthless: the sign on the MI is backwards.
 
                         List of relations
  Schema |    Name    | Type  | Owner  |    Size    | Description 
@@ -6588,6 +6588,7 @@ REASON: Best so far, I think.  Two issues:
   2) The pair-MI values are bad; they suffer from the float-point
      truncation bug. (opencog/atomspace#1295) Solution: recompute
      MI before using.
+  3) The pair-MI values have the wrong sign.
 
                         List of relations
  Schema |    Name    | Type  | Owner  |    Size    | Description 
@@ -6665,6 +6666,37 @@ md5sum en_pairs_rfour.sql
 
 
 ==================================================================
+en_pairs_rfive
+---------------
+Random-planar-tree parsed books from tranche-1, 2, 3, 4 and 5. 
+A continutation of en_pairs_rfour. Does NOT contain pair-MI values.
+
+STATUS: good
+DATE: 12 July 2017
+REASON: Best so far, I think.  One issue:
+  1) infix-marks: dashes, ellipsis, long-dashes are not split.
+     It now seems that this would have been the right thing to do.
+
+                        List of relations
+ Schema |    Name    | Type  | Owner  |    Size    | Description 
+--------+------------+-------+--------+------------+-------------
+ public | atoms      | table | ubuntu | 5380 MB    | 
+ public | spaces     | table | ubuntu | 40 kB      | 
+ public | typecodes  | table | ubuntu | 56 kB      | 
+ public | valuations | table | ubuntu | 3365 MB    | 
+ public | values     | table | ubuntu | 8192 bytes | 
+
+select count(*) from atoms;      -- 61069212 = 61M atoms
+select count(*) from valuations; -- 30960586 = 31M values
+
+2860579197 bytes uncompressed = 2.86 GB
+ 488196590 butes compressed = 488MB
+
+dd28f22ef60b1d7f3f5854bfba793116  en_pairs_rfive.sql
+2bbe479fe0caa77c5a1438568a22a4c4  en_pairs_rfive.sql.bz2
+
+
+==================================================================
 en_pairs_rthree_mone
 --------------------
 MST-parsed books from tranche-1, using pairs from rthree.
@@ -6709,10 +6741,10 @@ cf45874b8d353ca9332040c9acd783ae  zh_pairs_one.sql.bz2
 zh_pairs_sone
 -------------
 Mandarin individual character pairs.  Same as above, but includes the
-pair-MI stats.
+pair-MI stats. (After the minus-sign fix!)
 
 STATUS: good
-DATE: 8 July 2017
+DATE: 12 July 2017
 REASON: No known defects.  Minor issue: its wikipedia and does
     not contain any fiction or action or narrative text.
 
@@ -6728,7 +6760,7 @@ Size: 5922477 non-zero entries of 25126619658 possible
 Fraction non-zero: 2.3571E-4 Sparsity (-log_2): 12.051
 Total observations: 728947854.0  Avg obs per pair: 123.08
 Entropy Total: 18.452   Left: 10.265   Right: 10.207
-Total MI: -2.020
+Total MI: 2.0195
 
                  Left         Right     Avg-left     Avg-right
                  ----         -----     --------     ---------
@@ -6737,11 +6769,11 @@ Count   (l_1)  3.7360E+6    3.1244E+6     547.9        487.4
 Length  (l_2)  2.8408E+5    2.4156E+5     41.66        37.68    
 RMS Count      2.8231E+5    2.3990E+5     41.40        37.42    
 
-1650927558 bytes uncompressed = 1.65 GB
- 287845261 bytes compressed = 287 GB
+1647543636 bytes uncompressed = 1.65 GB
+ 290683964 bytes compressed = 291 GB
 
-d77c4c019cad5dbc788e69187b92428e  zh_pairs_sone.sql
-6ab926514526b74cab4c5a03454c6cd6  zh_pairs_sone.sql.bz2
+4ab27184db51048f362fc5d6134113c6  zh_pairs_sone
+39748c2abc0be436f266dec021ee4402  zh_pairs_sone.bz2
 
 
 
@@ -11414,11 +11446,24 @@ MI = 20.29 - 13.63 - 9.92 = -3.25
 
 
 Action plan:
-* add minus sign to the MI code. in the matrix directory.
-* provide a conversion script for the databases
-* uppdate status of all collections
+* add minus sign to the MI code. in the matrix directory. DONE.
+* provide a conversion script for the databases NEVER
+* delete the mst databases.  DONE
+  en_pairs_rthree_mst   18 GB 
+  en_pairs_rthree_mall  29 GB 
+  en_pairs_rtwo_mst     22 GB
+  en_pairs_tthree_mst   41 GB
+
+  en_pairs_mst           7 GB
+  en_pairs_sim           9 GB
+  en_pairs_ttwo_mst     15 GB
+  en_pairs_ttwo_sim     17 GB
+  en_pairs_ultrasim     23 GB
+  
+* uppdate status of all collections DONE
   e.g. en_pairs_ttwo_sim on fanny is junk.
 * restart MST.
+* Redo the report on disjuncts!
 
 =========================================================================
 The current Mandarin dataset has enough English in it to parse even
