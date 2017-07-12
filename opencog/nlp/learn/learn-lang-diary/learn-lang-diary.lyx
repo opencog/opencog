@@ -110,6 +110,9 @@ key "Goertzel2014"
 .
  This document contains supplementary notes and a loosely-organized semi-chronol
 ogical diary of results.
+ Its not actully chronological: in general, it is organized so that theory
+ preceeds data analysis.
+ Usually.
 \end_layout
 
 \begin_layout Standard
@@ -152,6 +155,7 @@ The first section of this document is a review of various defintions of
  probabilites that can be obtained from natural langauge text.
  This is followed by a roughly chronological diary of further observaions
  and results.
+ Many revisions are made out of chronological order.
 \end_layout
 
 \begin_layout Subsection*
@@ -2569,6 +2573,124 @@ Written in this form, it suggests how parsing can be generalized to include
  together with some weighting for word pairs (to give greater weight to
  idioms and set phrases, as opposed to grammatically valid but non-idiomatic
  parses).
+\end_layout
+
+\begin_layout Standard
+In many papers on supervised training, it is common to call the relation
+ 
+\begin_inset Formula $R$
+\end_inset
+
+ a 
+\begin_inset Quotes eld
+\end_inset
+
+feature
+\begin_inset Quotes erd
+\end_inset
+
+, and to consider many different possible features 
+\begin_inset Formula $R$
+\end_inset
+
+.
+ Thus, 
+\begin_inset Formula $f=f_{R}(S)$
+\end_inset
+
+ becomes a vector 
+\begin_inset Formula $\vec{f}$
+\end_inset
+
+ over the features 
+\begin_inset Formula $R$
+\end_inset
+
+.
+ The multiplier 
+\begin_inset Formula $-\beta$
+\end_inset
+
+ is replaced by a vector of weights 
+\begin_inset Formula $\vec{w}$
+\end_inset
+
+, and so one considers the probability 
+\begin_inset Formula 
+\[
+P=\frac{\exp\left(\sum\vec{w}\cdot\vec{f}\right)}{Z(S)}
+\]
+
+\end_inset
+
+Supervised training then uses a training corpus marked up with both a feature
+ vector 
+\begin_inset Formula $\vec{f}$
+\end_inset
+
+ and the correct parse; training consists of using various supervised learning
+ algos to find the best-possible weight vector 
+\begin_inset Formula $\vec{w}$
+\end_inset
+
+ that maximizes the fraction of correct parses (or optimizes the ROC curve,
+ or other measure of accuracy).
+ In unsupervised training, we don't have a training corpus, and thus, do
+ not focus on optimizing the weight vector.
+\end_layout
+
+\begin_layout Standard
+Now we do the funky chicken dance.
+ Write
+\begin_inset Formula 
+\[
+Z(S)=\det\, L(S)
+\]
+
+\end_inset
+
+This is commonly done when working with fermions; this is the Berezin determinan
+t or Berezin integral, so named because one may write 
+\begin_inset Formula 
+\[
+\det A=\int\exp\left[-\theta A\eta\right]d\theta d\eta
+\]
+
+\end_inset
+
+for Grassman variables 
+\begin_inset Formula $\theta$
+\end_inset
+
+ and 
+\begin_inset Formula $\eta$
+\end_inset
+
+ and 
+\begin_inset Formula $A$
+\end_inset
+
+ a matrix.
+ Here's the part that surprises me: Koo et al state that 
+\begin_inset Formula $L(S)$
+\end_inset
+
+ can be taken to be a Laplacian matrix of a graph.
+ Wow! The mind boggles.
+\end_layout
+
+\begin_layout Standard
+References:
+\end_layout
+
+\begin_layout Itemize
+Koo, T., Globerson, A., Carreras, X., and Collins, M.
+ (2007).
+ Structured prediction models via the matrix-tree theorem.
+ In Proceedings of the 2007 Joint Conference on Empirical Methods in Natural
+ Language Processing and Computational Natural Language Learning (EMNLP-
+ CoNLL) , pages 141–150, Prague, Czech Republic, June.
+ Association for Computational Linguistics.
 \end_layout
 
 \begin_layout Section*
