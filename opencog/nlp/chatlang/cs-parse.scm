@@ -131,7 +131,7 @@
     ((has-match? "^[ ]*'[a-zA-Z]+\\b" str)
       (result:suffix 'LITERAL location
         (substring (string-trim (match:substring current-match)) 1)))
-    ((has-match? "^[ ]*[a-zA-Z-]+\\b" str)
+    ((has-match? "^[ ]*[a-zA-Z'-]+\\b" str)
       (if (is-lemma? (string-trim (match:substring current-match)))
         (result:suffix 'LEMMA location
           (string-trim (match:substring current-match)))
@@ -172,8 +172,8 @@
             (if (pair? result)
               (begin
                 ; For debugging
-                (format #t "=== tokeniz: ~a\n-> ~a\n"
-                  cs-line (lexical-token-category (car result)))
+;                (format #t "=== tokeniz: ~a\n-> ~a\n"
+;                  cs-line (lexical-token-category (car result)))
                 (set! cs-line (cdr result))
                 (car result))
               (error (format #f "Tokenizer issue => ~a," result))
