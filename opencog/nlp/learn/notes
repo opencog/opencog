@@ -11360,7 +11360,7 @@ Size: 5922477 non-zero entries of 25126619658 possible
 Fraction non-zero: 2.3571E-4 Sparsity (-log_2): 12.051
 Total observations: 728947854.0  Avg obs per pair: 123.08
 Entropy Total: 18.452   Left: 10.265   Right: 10.207
-Total MI: -2.020
+Total MI: -2.020  < wrong sign
 
                  Left         Right     Avg-left     Avg-right
                  ----         -----     --------     ---------
@@ -11372,6 +11372,12 @@ RMS Count      2.8231E+5    2.3990E+5     41.40        37.42
 mv submitted to gamma-pages wc | 135242
 
 guile -l mst-count-zh.scm
+
+als are teh stars
+
+Too many heap sections: Increase MAXHINCR or MAX_HEAP_SECTS
+LARGE_CONFIG
+
 
 
 =========================================================================
@@ -11660,6 +11666,22 @@ scheme@(guile-user)> (print-mst "Maie threw back her veil and smiled")
 5 . her   <-->  6 . veil  cost= 3.70652214281638
 1 . ###LEFT-WALL###   <-->  8 . smiled  cost= 1.75135762004661
 7 . and   <-->  8 . smiled  cost= 1.67365955937873
+
+    +------->WV------->+--MVs-+---CV->+     
+    +--Wd--+-Sp*i+--I--+Osm+  +Cs+-Sp-+--O-+
+    |      |     |     |   |  |  |    |    |
+LEFT-WALL I.p will.v do.v it if you say.v so 
+
+
+   +--MVs-+---CV->+     
+   |      +Cs+-Sp-+--O--+
+   |      |  |    |     |     
+   ?     if  ?  say     ? 
+
+
+         +Cs+
+         |  |
+         if  ?  
 
 
 =========================================================================
