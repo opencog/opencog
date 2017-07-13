@@ -292,6 +292,8 @@
     )
 
     (context-pattern
+      (<) : (display-token "restart_matching()")
+      (>) : (display-token "end_of_sentence()")
       (LEMMA) : (display-token (format #f "lemma(~a)" $1))
       (LITERAL) : (display-token (format #f "literal(~a)" $1))
       (phrase) : (display-token $1)
@@ -307,8 +309,8 @@
       (NOT LITERAL) : (display-token (format #f "not(literal(~a))" $2))
       (NOT concept) : (display-token (format #f "not(~a)" $2))
       (NOT context-choice) : (display-token (format #f "not(~a)" $2))
-      (<) : (display-token "restart_matching()")
-      (>) : (display-token "end_of_sentence()")
+      (variable ? concept) :
+        (display-token (format #f "is_member(~a ~a)" $1 $3))
       (context-sequence) : (display-token $1)
     )
 
