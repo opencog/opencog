@@ -296,19 +296,15 @@
          ;; content rather than variables.
          (produced-vardecl X)
          (produced-clause UA_X)
-         ;; Produced rule preconditions. A and A(X) must have a positive confidence
-         (produced-precondition-1 (Evaluation
-                                    (GroundedPredicate "scm: gt-zero-confidence")
-                                    UA))
-         (produced-precondition-2 (Evaluation
-                                    (GroundedPredicate "scm: gt-zero-confidence")
-                                    UA_X))
+         ;; Produced rule preconditions. A(X) must have a positive confidence
+         (produced-precondition (Evaluation
+                                  (GroundedPredicate "scm: gt-zero-confidence")
+                                  UA_X))
          ;; Produced rule pattern. Look for groundings of P that meet
          ;; the precondition.
          (produced-pattern (And
                              produced-clause
-                             produced-precondition-1
-                             produced-precondition-2))
+                             produced-precondition))
          ;; Produced rewrite rule last premise
          (UAUB (cog-new-link impl-type UA UB))
          ;; Produced rule rewrite. Apply formula to calculate the TV
