@@ -303,12 +303,12 @@
       (*~n) : (display-token (format #f "wildcard(0 ~a)" $1))
       (variable) : (display-token $1)
       (function) : (display-token $1)
-      (context-choice) : (display-token $1)
+      (choice) : (display-token $1)
       (unordered-matching) : (display-token $1)
       (NOT LEMMA) : (display-token (format #f "not(lemma(~a))" $2))
       (NOT LITERAL) : (display-token (format #f "not(literal(~a))" $2))
       (NOT concept) : (display-token (format #f "not(~a)" $2))
-      (NOT context-choice) : (display-token (format #f "not(~a)" $2))
+      (NOT choice) : (display-token (format #f "not(~a)" $2))
       (variable ? concept) :
         (display-token (format #f "is_member(~a ~a)" $1 $3))
       (context-sequence) : (display-token $1)
@@ -318,7 +318,7 @@
       (action-pattern) : (display-token $1)
       (action-patterns action-pattern) :
         (display-token (format #f "~a ~a" $1 $2))
-      (action-patterns enter) : (display-token (format #f "action(~a)" $1))
+      (action-patterns enter) : (display-token $1)
     )
 
     (action-pattern
@@ -331,10 +331,10 @@
       (variable) : (display-token $1)
       (function) : (display-token $1)
       (LSBRACKET action-patterns RSBRACKET) :
-        (display-token (format #f "choices(~a)" $2))
+        (display-token (format #f "action-choice(~a)" $2))
     )
 
-    (context-choice
+    (choice
       (LSBRACKET context-patterns RSBRACKET) :
         (display-token (format #f "choices(~a)" $2))
     )
@@ -401,7 +401,7 @@
       (VAR *~n) : (display-token (format #f "variable(wildcard(0 ~a))" $2))
       (VAR LEMMA) :  (display-token (format #f "variable(lemma(~a))" $2))
       (VAR concept) : (display-token (format #f "variable(~a)" $2))
-      (VAR context-choice) : (display-token (format #f "variable(~a)" $2))
+      (VAR choice) : (display-token (format #f "variable(~a)" $2))
       (MVAR) : (display-token (format #f "match_variable(~a)" $1))
       (MOVAR) : (display-token (format #f "match_orig_variable(~a)" $1))
     )
