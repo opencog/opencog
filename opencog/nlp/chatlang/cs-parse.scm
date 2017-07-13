@@ -267,7 +267,7 @@
 
     ; Rule grammar
     (rules
-      (RESPONDERS name context-sequence action-patterns) :
+      (RESPONDERS word context-sequence action-patterns) :
         (display-token (format #f "responder_~a LABEL_~a (~a -> ~a)"
           $1 $2 $3 $4))
       ; Unlabeled responder.
@@ -327,7 +327,7 @@
       (LEMMA) : (display-token $1)
       (LITERAL) : (display-token $1)
       (STRING) : (display-token $1)
-      (DQUOTE lemmas DQUOTE) : (display-token (format #f "~a ~a ~a" $1 $2 $3))
+      (DQUOTE words DQUOTE) : (display-token (format #f "~a ~a ~a" $1 $2 $3))
       (variable) : (display-token $1)
       (function) : (display-token $1)
       (LSBRACKET action-patterns RSBRACKET) :
@@ -350,11 +350,11 @@
     )
 
     (function
-      (^ name LPAREN args RPAREN) :
+      (^ word LPAREN args RPAREN) :
         (display-token (format #f "function_~a(~a)" $2 $4))
-      (^ name LPAREN RPAREN) :
+      (^ word LPAREN RPAREN) :
         (display-token (format #f "function_~a()" $2))
-      (^ name) :
+      (^ word) :
         (display-token (format #f "function_~a" $2))
     )
 
@@ -371,12 +371,28 @@
     )
 
     (phrase
-      (DQUOTE lemmas DQUOTE) : (display-token (format #f "phrase(~a)" $2))
+      (DQUOTE words DQUOTE) : (display-token (format #f "phrase(~a)" $2))
     )
 
     (lemmas
       (LEMMA) : (display-token $1)
       (lemmas LEMMA) : (display-token (format #f "~a ~a" $1 $2))
+    )
+
+    (literals
+      (LITERAL) : (display-token $1)
+      (literals LITERAL) : (display-token (format #f "~a ~a" $1 $2))
+    )
+
+    (words
+      (word) : $1
+      (words word) : $1
+    )
+
+    (word
+      (LEMMA) : $1
+      (LITERAL) : $1
+      (STRING) : $1
     )
 
     (variable
@@ -388,13 +404,6 @@
       (VAR context-choice) : (display-token (format #f "variable(~a)" $2))
       (MVAR) : (display-token (format #f "match_variable(~a)" $1))
       (MOVAR) : (display-token (format #f "match_orig_variable(~a)" $1))
-    )
-
-    ; The label/ID/name of a function/rule
-    (name
-      (LEMMA) : $1
-      (LITERAL) : $1
-      (STRING) : $1
     )
   )
 )
