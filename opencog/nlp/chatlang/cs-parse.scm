@@ -131,7 +131,7 @@
     ((has-match? "^[ ]*'[a-zA-Z]+\\b" str)
       (result:suffix 'LITERAL location
         (substring (string-trim (match:substring current-match)) 1)))
-    ((has-match? "^[ ]*[a-zA-Z]+\\b" str)
+    ((has-match? "^[ ]*[a-zA-Z-]+\\b" str)
       (if (is-lemma? (string-trim (match:substring current-match)))
         (result:suffix 'LEMMA location
           (string-trim (match:substring current-match)))
