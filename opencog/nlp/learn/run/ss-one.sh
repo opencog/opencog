@@ -2,7 +2,7 @@
 #
 # ss-one.sh <lang> <filename> <cogserver-host> <cogserver-port>
 #
-# Support script for batch parsing of wikipedia articles.
+# Support script for batch parsing of plain-text files.
 # Sentence-split one file, submit it, via perl script, to the parser.
 # When done, move the file over to a 'finished' directory.
 #
