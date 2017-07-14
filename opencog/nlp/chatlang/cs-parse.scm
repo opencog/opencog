@@ -268,7 +268,7 @@
     ; Rule grammar
     (rules
       (RESPONDERS word context-sequence action-patterns) :
-        (display-token (format #f "responder_~a LABEL_~a (~a -> ~a)"
+        (display-token (format #f "responder_~a label_~a (~a -> ~a)"
           $1 $2 $3 $4))
       ; Unlabeled responder.
       ; TODO: Maybe should be labeled internally in the atomspace???
@@ -445,11 +445,16 @@
       )))
 )
 
-; TODO: CLI?
 (define-public (test-parse line)
+"
+  Parse a text string in a Guile shell, for debugging mainly.
+"
   (cs-parser (cs-lexer (open-input-string line)) error)
 )
 
 (define-public (test-parse-file file)
+"
+  Parse a topic file in a Guile shell, for debugging mainly.
+"
   (cs-parser (cs-lexer (open-file-input-port file)) error)
 )

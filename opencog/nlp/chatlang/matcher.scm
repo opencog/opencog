@@ -9,12 +9,6 @@
 (use-modules (opencog logger)
              (opencog exec))
 
-(define-public (show-globs)
-  "For debugging only."
-  (display "globs-word: ") (display globs-word) (newline)
-  (display "globs-lemma: ") (display globs-lemma) (newline)
-  (display "vars-grd: ") (display vars-grd) (newline))
-
 (define (clear-globs)
   "For clearing any previous groundings."
   (set! globs-word '())
@@ -81,3 +75,20 @@
   (Put (DefinedSchema "Find Chat Rules")
        (DefinedSchema "Get Current Input"))
   default-topic)
+
+; -----
+; For debugging only
+(use-modules (opencog nlp chatbot) (opencog eva-behavior))
+
+(define-public (show-globs)
+  "Show the groundings of the GlobNodes."
+  (display "globs-word: ") (display globs-word) (newline)
+  (display "globs-lemma: ") (display globs-lemma) (newline)
+  (display "vars-grd: ") (display vars-grd) (newline))
+
+(define-public (test-chatlang TXT)
+  "Try to find (and execute) the matching rules given an input TXT."
+  (define sent (car (nlp-parse TXT)))
+  (State (Anchor "Chatlang: Currently Processing") sent)
+  (map (lambda (r) (cog-evaluate! (gdar r)))
+       (cog-outgoing-set (chat-find-rules sent))))
