@@ -224,13 +224,20 @@
   "Say the text and clear the state."
   ; Replace the variables, if any, with the corresponding GlobNode
   (define txt-lst
+    ; Iterate through the output word-by-word
     (map (lambda (n)
-      (cond ((not (equal? #f (string-match "'_[0-9]+" n)))
+      (cond ; The grounding of a variable in original words
+            ((not (equal? #f (string-match "'_[0-9]+" n)))
              (ExecutionOutput (GroundedSchema "scm: ground-word")
                (List (list-ref vars-grd (string->number (substring n 2))))))
+            ; The grounding of a variable in lemmas
             ((not (equal? #f (string-match "_[0-9]+" n)))
              (ExecutionOutput (GroundedSchema "scm: ground-lemma")
                (List (list-ref vars-grd (string->number (substring n 1))))))
+            ; A function call with no arguments
+            ((not (equal? #f (string-match "\\^[a-zA-Z0-9_\\-\\(\\)]+" n)))
+             (ExecutionOutput (GroundedSchema (string-append "scm: "
+               (match:substring (string-match "[a-zA-Z0-9_\\-]+" n)))) (List)))
             (else (Word n))))
       (string-split TXT #\sp)))
   (True (Put (DefinedPredicate (chatlang-prefix "Say")) (List txt-lst))))

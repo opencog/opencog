@@ -4,7 +4,6 @@
 (use-modules (rnrs io ports))
 (use-modules (system base lalr))
 
-
 (define (display-token token)
 "
   This is used as a place holder.
@@ -96,19 +95,21 @@
     ((has-match? "^[ ]*_[0-9]" str)
       (result:suffix 'MVAR location
         (substring (string-trim (match:substring current-match)) 1)))
+    ((has-match? "^[ ]*'_[0-9]" str)
+      (result:suffix 'MOVAR location
+        (substring (string-trim (match:substring current-match)) 2)))
     ((has-match? "^[ ]*_" str) (result:suffix 'VAR location #f))
     ; For dictionary keyword sets
     ((has-match? "^[ ]*[a-zA-Z]+~[a-zA-Z1-9]+" str)
-      (result:suffix 'LITERAL~COMMAND location (command-pair)))
+      (result:suffix 'LEMMA~COMMAND location (command-pair)))
     ; Range-restricted Wildcards.
     ; TODO Maybe replace with dictionary keyword sets then process it on action?
-    ((has-match? "^[ ]*\\*~[1-9]+" str)
+    ((has-match? "^[ ]*\\*~[0-9]+" str)
       (result:suffix '*~n location
         (substring (string-trim (match:substring current-match)) 2)))
     ((has-match? "^[ ]*~[a-zA-Z_]+" str)
       (result:suffix 'ID location
         (substring (string-trim (match:substring current-match)) 1)))
-    ((has-match? "^[ ]*," str) (result:suffix 'COMMA location ","))
     ((has-match? "^[ ]*\\^" str) (result:suffix '^ location #f))
     ((has-match? "^[ ]*\\[" str) (result:suffix 'LSBRACKET location #f))
     ((has-match? "^[ ]*]" str) (result:suffix 'RSBRACKET location #f))
@@ -119,13 +120,28 @@
     ; This should follow >>
     ((has-match? "^[ ]*>" str) (result:suffix '> location #f))
     ((has-match? "^[ ]*\"" str) (result:suffix 'DQUOTE location "\""))
+    ; Precise wildcards
+    ((has-match? "^[ ]*\\*[0-9]+" str) (result:suffix '*n location
+       (substring (string-trim (match:substring current-match)) 1)))
+    ; Wildcards
     ((has-match? "^[ ]*\\*" str) (result:suffix '* location "*"))
     ((has-match? "^[ ]*!" str) (result:suffix 'NOT location #f))
     ((has-match? "^[ ]*[?]" str) (result:suffix '? location "?"))
-    ; This should always be near the end, because it is broadest of all.
-    ((has-match? "^[ \t]*['.,_!0-9a-zA-Z-]+" str)
+    ; Literals -- words start with a '
+    ((has-match? "^[ ]*'[a-zA-Z]+\\b" str)
       (result:suffix 'LITERAL location
-        (string-trim (match:substring current-match))))
+        (substring (string-trim (match:substring current-match)) 1)))
+    ((has-match? "^[ ]*[a-zA-Z'-]+\\b" str)
+      (if (is-lemma? (string-trim (match:substring current-match)))
+        (result:suffix 'LEMMA location
+          (string-trim (match:substring current-match)))
+        ; Literals, words in the pattern that are not in their canonical forms
+        (result:suffix 'LITERAL location
+          (string-trim (match:substring current-match)))))
+    ; This should always be near the end, because it is broadest of all.
+    ((has-match? "^[ \t]*['.,_!?0-9a-zA-Z-]+" str)
+        (result:suffix 'STRING location
+          (string-trim (match:substring current-match))))
     ; This should always be after the above so as to match words like "3D".
     ((has-match? "^[ ]*[0-9]+" str)
       (result:suffix 'NUM location
@@ -155,12 +171,13 @@
             ; This is a sanity check for the tokenizer
             (if (pair? result)
               (begin
+                ; For debugging
+;                (format #t "=== tokeniz: ~a\n-> ~a\n"
+;                  cs-line (lexical-token-category (car result)))
                 (set! cs-line (cdr result))
-                ;(format #t "~a " (lexical-token-category (car result)))
                 (car result))
               (error (format #f "Tokenizer issue => ~a," result))
             )))))
-
   )
 )
 
@@ -184,15 +201,15 @@
     ; LPAREN RPAREN = parentheses ()
     ; DQUOTE = Double quote "
     ; ID = Identifier or Marking
-    ; LITERAL~COMMAND = Dictionary Keyword Sets
+    ; LEMMA~COMMAND = Dictionary Keyword Sets
     ; *~n = Range-restricted Wildcards
     ; MVAR = Match Variables
+    ; MOVAR = Match Variables grounded in their original words
     ; ? = Comparison tests
     (CONCEPT TOPIC RESPONDERS REJOINDERS GAMBIT COMMENT SAMPLE_INPUT WHITESPACE
-      COMMA
-      (right: LPAREN LSBRACKET << ID VAR * ^ < LITERAL NUM LITERAL~COMMAND
-              *~n MVAR)
-      (left: RPAREN RSBRACKET >> > DQUOTE NOT)
+      (right: LPAREN LSBRACKET << ID VAR * ^ < LEMMA LITERAL NUM LEMMA~COMMAND
+              STRING *~n *n MVAR MOVAR NOT)
+      (left: RPAREN RSBRACKET >> > DQUOTE)
       (right: ? CR NEWLINE)
     )
 
@@ -240,16 +257,19 @@
     )
 
     (declaration-member
-      (LITERAL) :  $1
+      (LEMMA) :  $1
+      (LITERAL) : $1
+      (STRING) : $1
       (concept) :  $1
-      (LITERAL~COMMAND) :
+      (LEMMA~COMMAND) :
         (display-token (format #f "command(~a -> ~a)" (car $1) (cdr $1)))
     )
 
     ; Rule grammar
     (rules
-      (RESPONDERS a-literal context-sequence action-patterns) :
-        (display-token (format #f "responder_~a(~a -> ~a)" $2 $3 $4))
+      (RESPONDERS word context-sequence action-patterns) :
+        (display-token (format #f "responder_~a label_~a (~a -> ~a)"
+          $1 $2 $3 $4))
       ; Unlabeled responder.
       ; TODO: Maybe should be labeled internally in the atomspace???
       (RESPONDERS context-sequence action-patterns) :
@@ -265,7 +285,6 @@
     )
 
     (context-patterns
-      (enter) :  $1
       (context-pattern) : (display-token $1)
       (context-patterns context-pattern) :
         (display-token (format #f "~a ~a" $1 $2))
@@ -273,42 +292,46 @@
     )
 
     (context-pattern
-      (pattern) : (display-token $1)
+      (<) : (display-token "restart_matching()")
+      (>) : (display-token "end_of_sentence()")
+      (LEMMA) : (display-token (format #f "lemma(~a)" $1))
+      (LITERAL) : (display-token (format #f "literal(~a)" $1))
+      (phrase) : (display-token $1)
+      (concept) : (display-token $1)
+      (*) : (display-token (format #f "wildcard(0 -1)"))
+      (*n) : (display-token (format #f "wildcard(~a ~a)" $1 $1))
+      (*~n) : (display-token (format #f "wildcard(0 ~a)" $1))
+      (variable) : (display-token $1)
+      (function) : (display-token $1)
+      (choice) : (display-token $1)
       (unordered-matching) : (display-token $1)
-      (NOT context-pattern) : (display-token (format #f "Not(~a)" $2))
-      (< context-patterns) :
-        (display-token (format #f "restart_matching(~a)" $2))
-      ; FIXME end_of_sentence is not necessarily complete.
-      (pattern >) : (display-token (format #f "@end_of_sentence(~a)" $1))
+      (NOT LEMMA) : (display-token (format #f "not(lemma(~a))" $2))
+      (NOT LITERAL) : (display-token (format #f "not(literal(~a))" $2))
+      (NOT concept) : (display-token (format #f "not(~a)" $2))
+      (NOT choice) : (display-token (format #f "not(~a)" $2))
+      (variable ? concept) :
+        (display-token (format #f "is_member(~a ~a)" $1 $3))
       (context-sequence) : (display-token $1)
     )
 
     (action-patterns
-      (enter) :  $1
       (action-pattern) : (display-token $1)
       (action-patterns action-pattern) :
         (display-token (format #f "~a ~a" $1 $2))
-      (action-patterns enter) : (display-token (format #f "action(~a)" $1))
+      (action-patterns enter) : (display-token $1)
     )
 
     (action-pattern
-      (pattern) : $1
-    )
-
-    (pattern
-      (a-literal) : (display-token $1)
-      (a-literal ?) : (display-token (format #f "~a~a" $1 $2))
-      (variable)  : (display-token $1)
-      (collections) : (display-token $1)
+      (?) : (display-token "?")
+      (NOT) : (display-token "!")
+      (LEMMA) : (display-token $1)
+      (LITERAL) : (display-token $1)
+      (STRING) : (display-token $1)
+      (DQUOTE words DQUOTE) : (display-token (format #f "~a ~a ~a" $1 $2 $3))
+      (variable) : (display-token $1)
       (function) : (display-token $1)
-      (phrase) : (display-token $1)
-      (variable ? collections) :
-        (display-token (format #f "is_member(~a ~a)" $1 $3))
-    )
-
-    (collections
-      (choice) : (display-token $1)
-      (concept) : (display-token $1)
+      (LSBRACKET action-patterns RSBRACKET) :
+        (display-token (format #f "action-choice(~a)" $2))
     )
 
     (choice
@@ -327,10 +350,12 @@
     )
 
     (function
-      (^ a-literal LPAREN args RPAREN) :
+      (^ word LPAREN args RPAREN) :
         (display-token (format #f "function_~a(~a)" $2 $4))
-      (^ a-literal LPAREN RPAREN) :
+      (^ word LPAREN RPAREN) :
         (display-token (format #f "function_~a()" $2))
+      (^ word) :
+        (display-token (format #f "function_~a" $2))
     )
 
     (args
@@ -339,12 +364,19 @@
     )
 
     (arg
-      (LITERAL) :  (display-token $1)
+      (LEMMA) :  (display-token (format #f "lemma(~a)" $1))
+      (LITERAL) :  (display-token (format #f "literal(~a)" $1))
       (concept) :  (display-token $1)
+      (variable) : (display-token $1)
     )
 
     (phrase
-      (DQUOTE literals DQUOTE) : (display-token (format #f "phrase(~a)" $2))
+      (DQUOTE words DQUOTE) : (display-token (format #f "phrase(~a)" $2))
+    )
+
+    (lemmas
+      (LEMMA) : (display-token $1)
+      (lemmas LEMMA) : (display-token (format #f "~a ~a" $1 $2))
     )
 
     (literals
@@ -352,18 +384,26 @@
       (literals LITERAL) : (display-token (format #f "~a ~a" $1 $2))
     )
 
-    (variable
-      (VAR LITERAL) : (display-token (format #f "variable(~a)" $2))
-      (VAR collections) : (display-token (format #f "variable(~a)" $2))
-      (MVAR) : (display-token (format #f "match_variable(~a)" $1))
+    (words
+      (word) : $1
+      (words word) : $1
     )
 
-    (a-literal
-      (LITERAL) : (display-token $1)
-      (*~n) : (display-token (format #f "range_restricted(* ~a)" $1))
-      (*) : (display-token $1)
-      (LITERAL~COMMAND) :
-        (display-token (format #f "command(~a -> ~a)" (car $1) (cdr $1)))
+    (word
+      (LEMMA) : $1
+      (LITERAL) : $1
+      (STRING) : $1
+    )
+
+    (variable
+      (VAR *) : (display-token "variable(wildcard(0 -1))")
+      (VAR *n) : (display-token (format #f "variable(wildcard(~a ~a))" $2 $2))
+      (VAR *~n) : (display-token (format #f "variable(wildcard(0 ~a))" $2))
+      (VAR LEMMA) :  (display-token (format #f "variable(lemma(~a))" $2))
+      (VAR concept) : (display-token (format #f "variable(~a)" $2))
+      (VAR choice) : (display-token (format #f "variable(~a)" $2))
+      (MVAR) : (display-token (format #f "match_variable(~a)" $1))
+      (MOVAR) : (display-token (format #f "match_orig_variable(~a)" $1))
     )
   )
 )
@@ -403,4 +443,18 @@
         (cs-parser (make-cs-lexer input-file) error)
         (format #t "\n--------- Finished parsing of ~a ---------\n" input-file)
       )))
+)
+
+(define-public (test-parse line)
+"
+  Parse a text string in a Guile shell, for debugging mainly.
+"
+  (cs-parser (cs-lexer (open-input-string line)) error)
+)
+
+(define-public (test-parse-file file)
+"
+  Parse a topic file in a Guile shell, for debugging mainly.
+"
+  (cs-parser (cs-lexer (open-file-input-port file)) error)
 )
