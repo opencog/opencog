@@ -172,8 +172,8 @@
             (if (pair? result)
               (begin
                 ; For debugging
-;                (format #t "=== tokeniz: ~a\n-> ~a\n"
-;                  cs-line (lexical-token-category (car result)))
+                ;(format #t "=== tokeniz: ~a\n-> ~a\n"
+                ;  cs-line (lexical-token-category (car result)))
                 (set! cs-line (cdr result))
                 (car result))
               (error (format #f "Tokenizer issue => ~a," result))
@@ -292,15 +292,16 @@
     )
 
     (context-pattern
-      (<) : (display-token "restart_matching()")
+      (<) : (display-token "start_of_sentence()")
       (>) : (display-token "end_of_sentence()")
+      (*) : (display-token (format #f "wildcard(0 -1)"))
+      (*n) : (display-token (format #f "wildcard(~a ~a)" $1 $1))
+      (*~n) : (display-token (format #f "wildcard(0 ~a)" $1))
+      (< *) : (display-token "restart_matching()")
       (LEMMA) : (display-token (format #f "lemma(~a)" $1))
       (LITERAL) : (display-token (format #f "literal(~a)" $1))
       (phrase) : (display-token $1)
       (concept) : (display-token $1)
-      (*) : (display-token (format #f "wildcard(0 -1)"))
-      (*n) : (display-token (format #f "wildcard(~a ~a)" $1 $1))
-      (*~n) : (display-token (format #f "wildcard(0 ~a)" $1))
       (variable) : (display-token $1)
       (function) : (display-token $1)
       (choice) : (display-token $1)
