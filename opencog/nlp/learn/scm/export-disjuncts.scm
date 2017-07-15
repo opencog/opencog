@@ -133,7 +133,7 @@
 ;  ---------------------------------------------------------------------
 
 ; Store to the database
-(define (make-database DB-NAME)
+(define (make-database DB-NAME COST-FN)
 	(let ((db-obj (dbi-open "sqlite3" DB-NAME)))
 
 		; Add data to the database
@@ -143,10 +143,24 @@
 			(define dj-str (cset-to-lg-dj SECTION))
 			(format #t "OK GO ~A ~A\n" germ-str dj-str)
 
-			(dbi-query db-obj
-				(format #f
-					"INSERT INTO Morphemes VALUES ('~A', '~A', '~A');"
-					germ-str germ-str germ-str))
+			; Insert the word
+			(dbi-query db-obj (format #f
+				"INSERT INTO Morphemes VALUES ('~A', '~A', '~A');"
+				germ-str germ-str germ-str))
+
+			(if (not (equal? 0 (car (dbi-get_status db-obj))))
+				(throw 'fail-insert 'make-database
+					(cdr (dbi-get_status db-obj))))
+
+			; Insert the disjunct, assigning a cost according
+			; to the float-ppoint value returned by teh function
+			(dbi-query db-obj (format #f
+				"INSERT INTO Disjuncts VALUES ('~A', '~A', ~F);"
+				germ-str dj-str (COST-FN SECTION)))
+
+			(if (not (equal? 0 (car (dbi-get_status db-obj))))
+				(throw 'fail-insert 'make-database
+					(cdr (dbi-get_status db-obj))))
 		)
 
 		; Create the tables for words and disjuncts.
@@ -196,6 +210,7 @@
 			"'<dictionary-locale>', 'EN4us+', 0.0);"))
 
 		; Return function that adds data to the database
+		; If SECTION if #f, the database is closed.
 		(lambda (SECTION)
 			(if SECTION
 				(add-section SECTION)
@@ -205,7 +220,7 @@
 
 ;  ---------------------------------------------------------------------
 
-(define (export-them)
+(define (export-all-csets DB-NAME)
 	(define psa (make-pseudo-cset-api))
 
 	; Get from SQL
@@ -213,6 +228,15 @@
 
 	(define all-csets (psa 'all-pairs))
 
-	(map cset-to-lg-dj all-csets)
+	(define (cost-fn SECTION) 0.0)
+
+	; Create a database
+	(define sectioner (make-database DB-NAME cost-fn))
+
+	; Dump all the connector sets into the database
+	(map sectioner all-csets)
+
+	; Close the database
+	(sectioner #f)
 )
 ;  ---------------------------------------------------------------------
