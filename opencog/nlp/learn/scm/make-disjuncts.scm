@@ -3,7 +3,6 @@
 ;
 ; Compute the disjuncts, obtained from an MST parse of a sentence.
 ;
-; Copyright (c) 2015 Rohit Shinde
 ; Copyright (c) 2017 Linas Vepstas
 ;
 ; ---------------------------------------------------------------------
@@ -17,31 +16,18 @@
 ; In the later case, the link-name can be thought of as the
 ; concatenation of the two words it connects.
 ;
-; In either case, once can work "backwards", and obtain the efective
+; In either case, once can work "backwards", and obtain the effective
 ; disjunct on each word, that would have lead to the given MST parse.
-; The scripts in this file compute the disjunct.
+; For each word, this disjunct is just the collection of the other words
+; that it is connected to. It is the unit-distance section of a sheaf.
+;
+; All the hard work is done in the `sheaf` module. This is just a very
+; slim wrapper to parse the text, and update the number of times the
+; disjunct has been observed.
 ; ---------------------------------------------------------------------
 
 (use-modules (srfi srfi-1))
 (use-modules (opencog sheaf))
-
-; ---------------------------------------------------------------------
-; Convert an integer into a string of letters. Useful for creating
-; link-names.  This prepends the letter "T" to all names, so that
-; all MST link-names start with this letter.
-; Example:  0 --> TA, 1 --> TB
-(define (number->tag num)
-
-	; Convert number to a list of letters.
-	(define (number->letters num)
-		(define letters "ABCDEFGHIJKLMNOPQRSTUVWXYZ")
-		(unfold-right negative?
-			(lambda (i) (string-ref letters (remainder i 26)))
-			(lambda (i) (- (quotient i 26) 1))
-			num))
-
-	(list->string (cons #\T (number->letters num)))
-)
 
 ;  ---------------------------------------------------------------------
 
