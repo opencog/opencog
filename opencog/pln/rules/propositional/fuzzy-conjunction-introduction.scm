@@ -36,8 +36,9 @@
          (InheritanceT (Type "InheritanceLink"))
          (OrT (Type "OrLink"))
          (NotT (Type "NotLink"))
+         (ExecutionT (Type "ExecutionLink"))
          ;; Not AndLink because we'd rather have that already flattened
-         (type (TypeChoice EvaluationT InheritanceT OrT NotT))
+         (type (TypeChoice EvaluationT InheritanceT OrT NotT ExecutionT))
          (gen-typed-variable (lambda (x) (TypedVariable x type)))
          (vardecl (VariableList (map gen-typed-variable variables)))
          (pattern (And variables))
