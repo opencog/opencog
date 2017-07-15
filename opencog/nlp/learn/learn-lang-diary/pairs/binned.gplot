@@ -1,0 +1,22 @@
+
+# set data style linespoints
+# set data style points
+
+#################################################
+# Used to generate the binned MI observations
+#
+set term postscript eps enhanced color 28
+set out 'binned-hanpr-mi.eps'
+set yrange [:1]
+set logscale y
+set format y "10^{%L}"
+set title "Chinese hanzi pair distribution"
+set xlabel "Mutual Information"
+set ylabel "Probability"
+binwidth= (26.0734091363079 + 10.557297813964905) / 400
+count=5922477
+# Probability is divided by total count, and divided by bin-width.
+plot "binned-hanpr-mi.dat" using 2:($3/(binwidth*count)) with lines linewidth 5 title "", \
+     "binned-hanpr-mi.dat" using 2:(0.1 * 2**(-0.25*$2)) with lines linewidth 5 title "2^{-MI/4}", \
+     "binned-hanpr-mi.dat" using 2:(50 * 2**(2.4*$2)) with lines linewidth 5 title "2^{2.4 MI}"
+

@@ -35863,7 +35863,31 @@ As mentioned before: the dimensions of the dataset are larger than the number
 \end_layout
 
 \begin_layout Standard
-MI Dis
+\align center
+\begin_inset Graphics
+	filename pairs/binned-hanpr-mi.eps
+	width 60col%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The above figure shows the distribution of the mutual information of the
+ hanzi pairs.
+ The peak of the distribution occurs near an MI=-0.25.
+ The two striaght lines are eyeballed fits to the bimodal distribution.
+ The 
+\begin_inset Quotes eld
+\end_inset
+
+meaningful
+\begin_inset Quotes erd
+\end_inset
+
+ mode, with positive MI, has a slope of -0.25.
+ The negative-MI mode has a slope of 2.4.
 \end_layout
 
 \begin_layout Section*
