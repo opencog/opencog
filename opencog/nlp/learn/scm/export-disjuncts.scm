@@ -132,11 +132,44 @@
 
 ;  ---------------------------------------------------------------------
 
+; Store to the database
+(define (make-database DB-NAME)
+	(let ((db-obj (dbi-open "sqlite3" DB-NAME)))
+
+		; Create the tables for words and disjuncts.
+		; Refer to the Link Grammar documentation to see a
+		; description of this table format. Specifically,
+		; take a look at `dict.sql`.
+		(dbi-query db-obj (string-append
+			"CREATE TABLE Morphemes ( "
+			"morpheme TEXT NOT NULL, "
+			"subscript TEXT UNIQUE NOT NULL, "
+			"classname TEXT NOT NULL);" ))
+
+		(dbi-query db-obj
+			"CREATE INDEX morph_idx ON Morphemes(morpheme);")
+
+		(dbi-query db-obj (string-append
+			"CREATE TABLE Disjuncts ("
+			"classname TEXT NOT NULL, "
+			"disjunct TEXT NOT NULL, "
+			"cost REAL );"))
+
+		(dbi-query db-obj
+			"CREATE INDEX class_idx ON Disjuncts(classname);")
+
+		(lambda (SECTION)
+			(format #t "OK GO\n")
+		))
+)
+
+;  ---------------------------------------------------------------------
+
 (define (export-them)
 	(define psa (make-pseudo-cset-api))
 
 	; Get from SQL
-	(psa 'fetch-pairs)
+	; (psa 'fetch-pairs)
 
 	(define all-csets (psa 'all-pairs))
 
