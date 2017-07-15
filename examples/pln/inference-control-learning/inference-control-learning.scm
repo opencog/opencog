@@ -84,20 +84,21 @@
            (vardecl (VariableList
                       (TypedVariable
                         (Variable "$A")
-                        (Type "BindLink"))
+                        (Type "DontExecLink"))
                       (Variable "$T")))
            (results (ppc-bc target #:vardecl vardecl)))
       ;; Copy post-processed inference traces to the inference history
+      (icl-logger-info "postprocess-corpus results = ~a" results)
       (cog-cp (cog-outgoing-set results) ih-as))
-    (display "tr-as =\n")
-    (cog-prt-atomspace)                 ; JUST FOR DEBUGGING
+    ;; (display "post-process-corpus tr-as =\n")
+    ;; (cog-prt-atomspace)                 ; JUST FOR DEBUGGING
     (cog-set-atomspace! default-as)))
 
 (define (mk-ic-rules ih-as)
   (icl-logger-info "Build inference control rules from the inference history")
   (let ((default-as (cog-set-atomspace! ih-as)))
-    (display "ih-as =\n")
-    (cog-prt-atomspace)
+    ;; (display "mk-ic-rules ih-as =\n")
+    ;; (cog-prt-atomspace)
     (cog-set-atomspace! default-as))
   ;; TODO infer ic-rules
 )
@@ -112,8 +113,8 @@
   (let* ((result (pln-bc target #:trace-as tr-as)) ; TODO use ic-rules
          (result-size (length (cog-outgoing-set result)))
          (default-as (cog-set-atomspace! tr-as)))
-    (display "tr-as =\n")
-    (cog-prt-atomspace)
+    ;; (display "run-bc tr-as =\n")
+    ;; (cog-prt-atomspace)
     (if (= 1 result-size)
         (tv->bool (cog-tv (gar result)))
         #f)))
