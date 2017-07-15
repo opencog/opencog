@@ -96,13 +96,16 @@
 
 (define cnr-to-left (ConnectorDir "-"))
 
-(define (cset-to-lg SECTION)
+(define (cset-to-lg-dj SECTION)
 "
-  cset-to-lg - SECTION should be a SectionLink
+  cset-to-lg-dj - SECTION should be a SectionLink
+  Return a link-grammar compatible disjunct string.
 "
-	; The string name of the germ of the section.
+	; The germ of the section.
 	(define germ (gar SECTION))
-	(define (connector-to-lg CONNECTOR)
+
+	; Get a link-name identifying this word-pair.
+	(define (connector-to-lg-link CONNECTOR)
 		(define cnr (gar CONNECTOR))
 		(define dir (gdr CONNECTOR))
 
@@ -112,7 +115,19 @@
 		)
 	)
 
-	(map connector-to-lg (cog-outgoing-set (gdr SECTION)))
+	; Get a connector, by concatenating the link name with the direction.
+	(define (connector-to-lg-cnr CONNECTOR)
+		(string-append
+			(connector-to-lg-link CONNECTOR)
+			(cog-name (gdr CONNECTOR))))
+
+	; A list of connnectors, in the proper connector order.
+	(define cnrs (map connector-to-lg-cnr (cog-outgoing-set (gdr SECTION))))
+
+	; Create a single string of the connectors, in order.
+	(fold
+		(lambda (cnr dj) (if dj (string-append dj " & " cnr) cnr))
+		#f cnrs)
 )
 
 ;  ---------------------------------------------------------------------
@@ -125,6 +140,6 @@
 
 	(define all-csets (psa 'all-pairs))
 
-	(map cset-to-lg all-csets)
+	(map cset-to-lg-dj all-csets)
 )
 ;  ---------------------------------------------------------------------
