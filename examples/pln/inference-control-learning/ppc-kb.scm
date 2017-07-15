@@ -18,10 +18,10 @@
 ;;     Variable "$T"
 ;;   And
 ;;     Evaluation
-;;       Predicate "ICL:and-BIT"
+;;       Predicate "URE:BC:and-BIT"
 ;;       Variable "$A"
 ;;     Evaluation
-;;       Predicate "ICL:target"
+;;       Predicate "URE:BC:target"
 ;;       Variable "$T"
 ;;   Evaluation
 ;;     Predicate "ICL:preproof"
@@ -81,7 +81,7 @@
 ;;         Variable "$B"
 ;;         Variable "$T"
 ;;   Evaluation
-;;     Predicate "ICL::preproof"
+;;     Predicate "ICL:preproof"
 ;;     List
 ;;       Variable "$A"
 ;;       Variable "$T"
@@ -94,20 +94,23 @@
 ;;
 ;; are preproof if there exists a proof of T but it doesn't appear
 ;; immediately obviously useful so we let that aside.
+;;
+;; Technical remark: and-BITs, rules are wrapped by DontExecLinks to
+;; garanty that they won't be executed while reasoning on them.
 
 ;; 1. And-BIT prior
 (ImplicationScope (stv 0.0001 0.001)
   (VariableList
     (TypedVariable
       (Variable "$A")
-      (Type "BindLink"))
+      (Type "DontExecLink"))
     (Variable "$T"))
   (And
     (Evaluation
-      (Predicate "ICL:and-BIT")
+      (Predicate "URE:BC:and-BIT")
       (Variable "$A"))
     (Evaluation
-      (Predicate "ICL:target")
+      (Predicate "URE:BC:target")
       (Variable "$T")))
   (Evaluation
     (Predicate "ICL:preproof")
@@ -126,13 +129,13 @@
   (VariableList
     (TypedVariable
       (Variable "$A")
-      (Type "BindLink"))
+      (Type "DontExecLink"))
     (TypedVariable
       (Variable "$B")
-      (Type "BindLink"))
+      (Type "DontExecLink"))
     (TypedVariable
       (Variable "$R")
-      (Type "BindLink"))
+      (Type "DontExecLink"))
     (Variable "$L")
     (Variable "$T"))
   (And
@@ -149,7 +152,7 @@
         (Variable "$B")
         (Variable "$T"))))
   (Evaluation
-    (Predicate "ICL::preproof")
+    (Predicate "ICL:preproof")
     (List
       (Variable "$A")
       (Variable "$T"))))
