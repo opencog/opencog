@@ -130,7 +130,7 @@
 ;  ---------------------------------------------------------------------
 
 ; Store to the database
-(define (make-database DB-NAME COST-FN)
+(define (make-database DB-NAME LOCALE COST-FN)
 	(let ((db-obj (dbi-open "sqlite3" DB-NAME))
 			(cnt 0)
 		)
@@ -208,7 +208,9 @@
 
 		(dbi-query db-obj (string-append
 			"INSERT INTO Disjuncts VALUES ("
-			"'<dictionary-locale>', 'EN4us+', 0.0);"))
+			"'<dictionary-locale>', '"
+			(string-map (lambda (c) (if (equal? c #\_) #\4 c)) LOCALE)
+			"+', 0.0);"))
 
 		; Return function that adds data to the database
 		; If SECTION if #f, the database is closed.
@@ -221,7 +223,13 @@
 
 ;  ---------------------------------------------------------------------
 
-(define (export-all-csets DB-NAME)
+; Write all connector sets to a Link Grammar-compatible sqlite3 file.
+; DB-NAME is the databse name to write to.
+; LOCALE is the locale to use; e.g EN_us or ZH_cn
+;
+; Example usage:
+; (export-all-csets "foobar.sql" "EN_us")
+(define (export-all-csets DB-NAME LOCALE)
 	(define psa (make-pseudo-cset-api))
 
 	; Get from SQL
@@ -232,7 +240,7 @@
 	(define (cost-fn SECTION) 0.0)
 
 	; Create a database
-	(define sectioner (make-database DB-NAME cost-fn))
+	(define sectioner (make-database DB-NAME LOCALE cost-fn))
 
 	; Dump all the connector sets into the database
 	(map sectioner all-csets)
