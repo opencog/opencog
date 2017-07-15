@@ -14,12 +14,9 @@
 ; the can be exported to the link Grammar parser, where they can be used
 ; to parse sentences.
 ;
-; In either case, once can work "backwards", and obtain the efective
-; disjunct on each word, that would have lead to the given MST parse.
-; The scripts in this file compute the disjunct.
-;
-; Currently an experimental hack job. Needs the guile-dbi interfaces,
-; in order to write the SQL files.
+; Currently an hack job.
+; What's hacky here is that no word-classes (clusters) are used.
+; Needs the guile-dbi interfaces, in order to write the SQL files.
 ; ---------------------------------------------------------------------
 
 (use-modules (srfi srfi-1))
@@ -134,19 +131,23 @@
 
 ; Store to the database
 (define (make-database DB-NAME COST-FN)
-	(let ((db-obj (dbi-open "sqlite3" DB-NAME)))
+	(let ((db-obj (dbi-open "sqlite3" DB-NAME))
+			(cnt 0)
+		)
 
 		; Add data to the database
 		(define (add-section SECTION)
 			; The germ of the section (the word)
 			(define germ-str (cog-name (gar SECTION)))
 			(define dj-str (cset-to-lg-dj SECTION))
-			(format #t "OK GO ~A ~A\n" germ-str dj-str)
+
+			(format #t "Will insert ~A: ~A;\n" germ-str dj-str)
 
 			; Insert the word
+			(set! cnt (+ cnt 1))
 			(dbi-query db-obj (format #f
-				"INSERT INTO Morphemes VALUES ('~A', '~A', '~A');"
-				germ-str germ-str germ-str))
+				"INSERT INTO Morphemes VALUES ('~A', '~A.~D', '~A');"
+				germ-str germ-str cnt germ-str))
 
 			(if (not (equal? 0 (car (dbi-get_status db-obj))))
 				(throw 'fail-insert 'make-database
