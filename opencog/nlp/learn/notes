@@ -11684,6 +11684,9 @@ LEFT-WALL I.p will.v do.v it if you say.v so
          if  ?  
 
 
+guile-mst-zh> MST-Processing file >>>止-灣/汤加国徽<<<
+
+
 =========================================================================
 
 
@@ -11694,3 +11697,11 @@ Bugs: relex is returning incorrect disjuncts because LG is reporting the
 multi-connectors only ... with the incorrect mutiplicities.
 
 Bugs: using ListLink for the partial sums on csets... why???
+
+Bugs: the mst parse algo is O^5 and yuret gives a nice O^3 also
+
+Bugs: graphing takes too long.
+
+Bugs: follow up on the guile hang bug
+
+Items: create LG feederbacker
