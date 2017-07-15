@@ -4,7 +4,6 @@ ADD_GUILE_MODULE (FILES
 	common.scm
 	gram-sim.scm
 	link-pipeline.scm
-	make-disjuncts.scm
 	mst-parser.scm
 	pseudo-csets.scm
 	singletons.scm
