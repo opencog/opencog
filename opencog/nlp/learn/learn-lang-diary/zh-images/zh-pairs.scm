@@ -31,7 +31,7 @@
 
 (define scored-hanpr-mi (score hanpr-mi all-hanprs))
 
-(define binned-hanpr-mi (bin-count-simple sorted-hanpr-mi 400))
+(define binned-hanpr-mi (bin-count-simple scored-hanpr-mi 400))
 
 (let ((outport (open-file "/tmp/binned-hanpr-mi.dat" "w")))
 	(print-bincounts-tsv binned-hanpr-mi outport)

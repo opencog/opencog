@@ -6378,6 +6378,30 @@ REASON: Best so far, I think.  One issue:
 select count(*) from atoms; -- 11224348 = 11M
 select count(*) from valuations; -- 5679764 = 5.7M
 
+Does not contain MI info, but it if did, it would be this:
+Left type: WordNode    Right Type: WordNode    Pair Type: ListLink
+Wildcard: (EvaluationLink (ctv 0 0 1.7409991e+08)
+   (LinkGrammarRelationshipNode "ANY")
+   (ListLink
+      (AnyNode "left-word")
+      (AnyNode "right-word")
+   )
+)
+Rows: 133792 Columns: 135156
+Size: 5544578 non-zero entries of 18082791552 possible
+Fraction non-zero: 3.0662E-4 Sparsity (-log_2): 11.671
+Total observations: 174099906.0  Avg obs per pair: 31.400
+Entropy Total: 17.667   Left: 9.8592   Right: 9.7506
+Total MI: 1.9426
+
+                 Left         Right     Avg-left     Avg-right
+                 ----         -----     --------     ---------
+Support (l_0)  1.7398E+4    1.7417E+4
+Count   (l_1)  2.4875E+6    2.2524E+6     143.0        129.3
+Length  (l_2)  2.8788E+5    2.4347E+5     16.55        13.98
+RMS Count      2.8758E+5    2.4316E+5     16.53        13.96
+
+
 502761623 Bytes = 503MB uncompressed
 86534772 Bytes = 86MBytes compressed
 
@@ -11685,6 +11709,14 @@ LEFT-WALL I.p will.v do.v it if you say.v so
 
 
 guile-mst-zh> MST-Processing file >>>止-灣/汤加国徽<<<
+
+-------------------------------------------------------------
+export stuff
+en_pairs_tthree_mst 8 gb
+Not just  en_pairs_rone.sql.bz2  and to the rest by hand just for junk.
+
+(sql-open "postgres:///en_pairs_rone?user=linas")
+
 
 
 =========================================================================
