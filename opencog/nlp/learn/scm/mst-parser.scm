@@ -3,29 +3,31 @@
 ;
 ; Maximum Spanning Tree parser.
 ;
-; Copyright (c) 2014 Linas Vepstas
+; Copyright (c) 2014, 2017 Linas Vepstas
 ;
 ; ---------------------------------------------------------------------
 ; OVERVIEW
 ; --------
-; The scripts below use a simple spanning-tree (MST) parser to create
-; MST parse of a sentence. The goal of this parse is to create a base
-; set of link-grammar disjuncts.
+; The scripts below use a simple minimum spanning-tree (MST) parser to
+; create an MST parse of a text sentence. This parse tree is then used
+; to create a set of equivalent Link Grammar disjuncts (which are
+; essentially the same thing as a local section of a sheaf of graphs;
+; this is explained more, below).
 ;
-; Input to this should be a single sentence. It is presumed, as
-; background, that a large number of word-pairs with associated mutual
-; information is already avaialable from the atomspace (obtained
-; previously).
+; Input to this should be a single unicode utf8-encoded text sentence.
+; It is presumed, as background, that the atomspace is loaded with a
+; large number of word-pairs and thier associated mutual information.
+; These word-pairs need to have been previously computed.
 ;
-; The algorithm implemented is a basic maximum spanning tree algorithm.
-; Conceptually, the graph to be spanned by the tree is a clique, with
-; with every word in the sentence being connected to every other word.
-; The edge-lengths are given by the mutual information betweeen word-pairs
-; (although perhaps other metrics are possible; see below).
+; The sentence is tokenized, assuming that white-space represents word
+; boundaries. Leading and trailing punctuation is stripped from each
+; word, and is treated as a distinct "word".
 ;
-; The spanning tree is then obtained. Finally, disjuncts are created from
-; the resulting parse, by looking at how each word is attached to the
-; other words.  The disjuncts are then recorded.
+; The set of words is treated as the set of vertexes of a complete graph
+; or "clique", with the edges being word-pairs. The MST parser obtains
+; the spanning tree that maximizes the sum of the mutual information (or
+; other additive quantity) associated with the edges. This tree is the
+; MST tree.
 ;
 ; ---------------------------------------------------------------------
 ;
