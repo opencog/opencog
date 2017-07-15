@@ -101,7 +101,7 @@
   cset-to-lg-dj - SECTION should be a SectionLink
   Return a link-grammar compatible disjunct string.
 "
-	; The germ of the section.
+	; The germ of the section (the word)
 	(define germ (gar SECTION))
 
 	; Get a link-name identifying this word-pair.
@@ -136,6 +136,19 @@
 (define (make-database DB-NAME)
 	(let ((db-obj (dbi-open "sqlite3" DB-NAME)))
 
+		; Add data to the database
+		(define (add-section SECTION)
+			; The germ of the section (the word)
+			(define germ-str (cog-name (gar SECTION)))
+			(define dj-str (cset-to-lg-dj SECTION))
+			(format #t "OK GO ~A ~A\n" germ-str dj-str)
+
+			(dbi-query db-obj
+				(format #f
+					"INSERT INTO Morphemes VALUES ('~A', '~A', '~A');"
+					germ-str germ-str germ-str))
+		)
+
 		; Create the tables for words and disjuncts.
 		; Refer to the Link Grammar documentation to see a
 		; description of this table format. Specifically,
@@ -145,6 +158,10 @@
 			"morpheme TEXT NOT NULL, "
 			"subscript TEXT UNIQUE NOT NULL, "
 			"classname TEXT NOT NULL);" ))
+
+		(if (not (equal? 0 (car (dbi-get_status db-obj))))
+			(throw 'fail-create 'make-database
+				(cdr (dbi-get_status db-obj))))
 
 		(dbi-query db-obj
 			"CREATE INDEX morph_idx ON Morphemes(morpheme);")
@@ -158,8 +175,31 @@
 		(dbi-query db-obj
 			"CREATE INDEX class_idx ON Disjuncts(classname);")
 
+		(dbi-query db-obj (string-append
+			"INSERT INTO Morphemes VALUES ("
+			"'<dictionary-version-number>', "
+			"'<dictionary-version-number>', "
+			"'<dictionary-version-number>');"))
+
+		(dbi-query db-obj (string-append
+			"INSERT INTO Disjuncts VALUES ("
+			"'<dictionary-version-number>', 'V5v4v0+', 0.0);"))
+
+		(dbi-query db-obj (string-append
+			"INSERT INTO Morphemes VALUES ("
+			"'<dictionary-locale>', "
+			"'<dictionary-locale>', "
+			"'<dictionary-locale>');"))
+
+		(dbi-query db-obj (string-append
+			"INSERT INTO Disjuncts VALUES ("
+			"'<dictionary-locale>', 'EN4us+', 0.0);"))
+
+		; Return function that adds data to the database
 		(lambda (SECTION)
-			(format #t "OK GO\n")
+			(if SECTION
+				(add-section SECTION)
+				(dbi-close db-obj))
 		))
 )
 
