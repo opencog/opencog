@@ -11717,6 +11717,13 @@ Not just  en_pairs_rone.sql.bz2  and to the rest by hand just for junk.
 
 (sql-open "postgres:///en_pairs_rone?user=linas")
 
+(observe-mst "He wandered through the fog")
+(observe-mst "He thought about home")
+
+!!fog
+Found expression for word fog: Debug: TI-
+Token "fog" matches nothing in the dictionary.
+
 
 
 =========================================================================

@@ -17,6 +17,14 @@
 ; Currently an hack job.
 ; What's hacky here is that no word-classes (clusters) are used.
 ; Needs the guile-dbi interfaces, in order to write the SQL files.
+;
+; Example usage:
+; (export-all-csets "dict.db" "EN_us")
+;
+; Then, in bash:
+; cp -pr /usr/local/share/link-grammar/demo-sql ./my-place
+; cp dict.db ./my-place
+; link-parser ./my-place
 ; ---------------------------------------------------------------------
 
 (use-modules (srfi srfi-1))
@@ -129,7 +137,20 @@
 
 ;  ---------------------------------------------------------------------
 
-; Store to the database
+; Create a function that can store connector-sets to a database.
+;
+; DB-NAME is the databse name to write to.
+; LOCALE is the locale to use; e.g EN_us or ZH_cn
+; COST-FN is a function that assigns a link-parser cost to each disjunct.
+;
+; This returns a function that will write sections to the database.
+; That is, this returns (lambda (SECTION) ...) so that, when you call
+; it, that section will be saved to the database. Calling with #f closes
+; the database.
+;
+; Example usage:
+; (make-database "dict.db" "EN_us" ...)
+;
 (define (make-database DB-NAME LOCALE COST-FN)
 	(let ((db-obj (dbi-open "sqlite3" DB-NAME))
 			(cnt 0)
@@ -227,8 +248,11 @@
 ; DB-NAME is the databse name to write to.
 ; LOCALE is the locale to use; e.g EN_us or ZH_cn
 ;
+; Note that link-grammar expects the database file to be called
+; "dict.db", always!
+;
 ; Example usage:
-; (export-all-csets "foobar.sql" "EN_us")
+; (export-all-csets "dict.db" "EN_us")
 (define (export-all-csets DB-NAME LOCALE)
 	(define psa (make-pseudo-cset-api))
 
