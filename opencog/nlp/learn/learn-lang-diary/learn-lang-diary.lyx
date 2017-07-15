@@ -35364,6 +35364,54 @@ en_pairs_rone
 The dataset contains 5544578 pairs.
 \end_layout
 
+\begin_layout Subsection*
+Distribution of Mutual Information
+\end_layout
+
+\begin_layout Standard
+The figure below shows the distribution of the mutual information of English
+ word-pairs.
+ 
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Graphics
+	filename pairs/binned-enpr-mi.eps
+	width 60col%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The peak of the distribution occurs near an MI=1.0.
+ The two straight lines are eyeballed to fit the bimodal distribution.
+ The 
+\begin_inset Quotes eld
+\end_inset
+
+meaningful
+\begin_inset Quotes erd
+\end_inset
+
+ mode, with positive MI, has a slope of -0.4.
+ The negative-MI mode has a slope of 2.
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+Graph obtained from the binned-enpr-mi data, in the en-pairs.scm file.
+\end_layout
+
+\end_inset
+
+ Note that this is qualtitively similar to the Chinese hanzi pairs distribution,
+ shown below, although the slopes are different, and the peak is slightly
+ shifted.
+\end_layout
+
 \begin_layout Section*
 Chinese character pair dataset July 2017
 \end_layout
@@ -35860,6 +35908,18 @@ As mentioned before: the dimensions of the dataset are larger than the number
  of the entries correspond to English-language technical terms and named
  entities, such as product names, geographical place names and the names
  of people.
+ There is also likely to be a mixture of simplified and traaditional hanzi
+ in the dataset.
+\end_layout
+
+\begin_layout Subsection*
+Distribution of Mutual Information
+\end_layout
+
+\begin_layout Standard
+The figure below shows the distribution of the mutual information of the
+ hanzi pairs.
+ 
 \end_layout
 
 \begin_layout Standard
@@ -35874,10 +35934,8 @@ As mentioned before: the dimensions of the dataset are larger than the number
 \end_layout
 
 \begin_layout Standard
-The above figure shows the distribution of the mutual information of the
- hanzi pairs.
- The peak of the distribution occurs near an MI=-0.25.
- The two striaght lines are eyeballed fits to the bimodal distribution.
+The peak of the distribution occurs near an MI=-0.25.
+ The two straight lines are eyeballed to fit the bimodal distribution.
  The 
 \begin_inset Quotes eld
 \end_inset
@@ -35888,6 +35946,18 @@ meaningful
 
  mode, with positive MI, has a slope of -0.25.
  The negative-MI mode has a slope of 2.4.
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+Graph obtained from the binned-hanpr-mi data, in the zh-pairs.scm file.
+\end_layout
+
+\end_inset
+
+ Note that this is qualtitively similar to the English word-pairs distribution,
+ shown above, although the slopes are different, and the peak is slightly
+ shifted.
 \end_layout
 
 \begin_layout Section*
