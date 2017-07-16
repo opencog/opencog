@@ -238,7 +238,9 @@
 			"+', 0.0);"))
 
 		; The UNKNOWN-WORD device is needed to make wild-card searches
-		; work. We're also going to give it a plausible value.
+		; work (when dict debugging). The XXXBOGUS+ will not link to
+		; anything. `({@T-} & {@T+})` would almost work, except everything
+		; is upper-case, and we can't match arbitrary upper-case.
 		(dbi-query db-obj (string-append
 			"INSERT INTO Morphemes VALUES ("
 			"'UNKNOWN-WORD', "
@@ -247,7 +249,7 @@
 
 		(dbi-query db-obj (string-append
 			"INSERT INTO Disjuncts VALUES ("
-			"'UNKNOWN-WORD', '{@T-} & {@T+}', 0.0);"))
+			"'UNKNOWN-WORD', 'XXXBOGUS+', 0.0);"))
 
 		; Return function that adds data to the database
 		; If SECTION if #f, the database is closed.
