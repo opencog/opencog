@@ -162,6 +162,10 @@
 			(define germ-str (cog-name (gar SECTION)))
 			(define dj-str (cset-to-lg-dj SECTION))
 
+			; Oh no!!! Need to fix LEFT-WLL!
+			(if (string=? germ-str "###LEFT-WALL###")
+				(set! germ-str "LEFT-WALL"))
+
 			(format #t "Will insert ~A: ~A;\n" germ-str dj-str)
 
 			; Insert the word
@@ -232,6 +236,18 @@
 			"'<dictionary-locale>', '"
 			(string-map (lambda (c) (if (equal? c #\_) #\4 c)) LOCALE)
 			"+', 0.0);"))
+
+		; The UNKNOWN-WORD device is needed to make wild-card searches
+		; work. We're also going to give it a plausible value.
+		(dbi-query db-obj (string-append
+			"INSERT INTO Morphemes VALUES ("
+			"'UNKNOWN-WORD', "
+			"'UNKNOWN-WORD', "
+			"'UNKNOWN-WORD');"))
+
+		(dbi-query db-obj (string-append
+			"INSERT INTO Disjuncts VALUES ("
+			"'UNKNOWN-WORD', '{@T-} & {@T+}', 0.0);"))
 
 		; Return function that adds data to the database
 		; If SECTION if #f, the database is closed.

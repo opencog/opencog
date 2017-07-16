@@ -11724,6 +11724,17 @@ Not just  en_pairs_rone.sql.bz2  and to the rest by hand just for junk.
 Found expression for word fog: Debug: TI-
 Token "fog" matches nothing in the dictionary.
 
+###LEFT-WALL###: TB+
+He: TB- & TG+
+thought: TG- & TD+
+about: TD- & TE+
+home: TE-
+LEFT-WALL  -> LEFT-WALL
+UNKNOWN-WORD
+
+seg fault
+
+
 
 
 =========================================================================
