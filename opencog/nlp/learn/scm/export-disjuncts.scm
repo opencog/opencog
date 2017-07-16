@@ -269,17 +269,29 @@
 ;
 ; Example usage:
 ; (export-all-csets "dict.db" "EN_us")
+;
 (define (export-all-csets DB-NAME LOCALE)
-	(define psa (make-pseudo-cset-api))
 
-	; Get from SQL
+	; Create the object that knows where the disuncts are in the
+	; atomspace. Create the object that knows how to get the MI
+	; of a word-disjunct pair.
+	(define pca (make-pseudo-cset-api))
+	(define psa (add-pair-stars pca))
+	(define mi-source (add-pair-freq-api psa))
+
+	; Load the atomspace up with the dataset, if needed.
 	; (psa 'fetch-pairs)
 
+	; Make a list of all pairs. This is costly and time-consuming.
 	(define all-csets (psa 'all-pairs))
 
-	(define (cost-fn SECTION) 0.0)
+	; Use the MI between word and disjunct as the link-grammar cost
+	; LG treats high-cost as "bad", we treat high-MI as "good" so revese
+	; the sign.
+	(define (cost-fn SECTION)
+		(- (mi-source 'pair-fmi SECTION)))
 
-	; Create a database
+	; Create the SQLite3 database.
 	(define sectioner (make-database DB-NAME LOCALE cost-fn))
 
 	; Dump all the connector sets into the database
@@ -288,4 +300,5 @@
 	; Close the database
 	(sectioner #f)
 )
+
 ;  ---------------------------------------------------------------------
