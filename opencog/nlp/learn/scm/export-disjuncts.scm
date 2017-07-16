@@ -171,8 +171,8 @@
 			; Insert the word
 			(set! cnt (+ cnt 1))
 			(dbi-query db-obj (format #f
-				"INSERT INTO Morphemes VALUES ('~A', '~A.~D', '~A');"
-				germ-str germ-str cnt germ-str))
+				"INSERT INTO Morphemes VALUES ('~A', '~A.~D', '(~A.~D)');"
+				germ-str germ-str cnt germ-str cnt))
 
 			(if (not (equal? 0 (car (dbi-get_status db-obj))))
 				(throw 'fail-insert 'make-database
@@ -181,8 +181,8 @@
 			; Insert the disjunct, assigning a cost according
 			; to the float-ppoint value returned by teh function
 			(dbi-query db-obj (format #f
-				"INSERT INTO Disjuncts VALUES ('~A', '~A', ~F);"
-				germ-str dj-str (COST-FN SECTION)))
+				"INSERT INTO Disjuncts VALUES ('(~A.~D)', '~A', ~F);"
+				germ-str cnt dj-str (COST-FN SECTION)))
 
 			(if (not (equal? 0 (car (dbi-get_status db-obj))))
 				(throw 'fail-insert 'make-database
