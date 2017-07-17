@@ -1,3 +1,5 @@
+#! /usr/bin/python
+#
 import time
 import sys
 import glob
@@ -5,7 +7,7 @@ import os
 sys.path.append("../")
 import jieba
 jieba.initialize()
-jieba.load_userdict("userdict.txt")
+jieba.load_userdict("mandarin.txt")
 
 path = sys.argv[1]
 path_out = sys.argv[2]
