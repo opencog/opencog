@@ -254,8 +254,8 @@ So, set up the text-ingestion pipeline:
   `run/jieba-segment.py PATH-IN PATH-OUT`
 
   Instead of using the `zh` or `yue` languages for sentence splitting,
-  you will want to use `sh` for the language; this disables the addition
-  of spaces between hanzi characters.
+  you will want to use `zh-pre` or `yue-pre` for the language; this
+  disables the addition of spaces between hanzi characters.
 
 11) After doing at least several days worth of parsing  (i.e. at least
    hundreds of articles, tens of thousands of sentences) the word-pair
