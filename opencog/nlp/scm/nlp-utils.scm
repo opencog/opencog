@@ -46,6 +46,7 @@
 ;
 
 (use-modules (srfi srfi-1))
+(use-modules (opencog))
 
 ; ---------------------------------------------------------------------
 (define-public (document-get-sentences DOCO)

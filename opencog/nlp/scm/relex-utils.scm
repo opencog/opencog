@@ -39,6 +39,7 @@
 ;
 
 (use-modules (srfi srfi-1))
+(use-modules (opencog))
 
 ; --------------------------------------------------------------------
 (define-public (parse-get-relex-relations parse-node)
