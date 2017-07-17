@@ -56,6 +56,7 @@ namespace opencog
             vector<HandleSeq> instances; // the corresponding instances of this pattern in the original AtomSpace, only be used by breadth first mining
             set<HTreeNode*> parentLinks;
             set<HTreeNode*> childLinks;
+
             // set<string> instancesUidStrings;// all uid in each instance HandleSeq in all instances, in the form of 5152_815_201584. to prevent the same instance being count multiple times
 
             vector<ExtendRelation> superPatternRelations; // store all the connections to its super patterns
@@ -65,6 +66,8 @@ namespace opencog
             double interactionInformation;
             double nI_Surprisingness;
             double nII_Surprisingness;
+            double nII_Surprisingness_b; // calculated from the other same gram patterns
+            unsigned int subpattern_b_num; // the number of sub patterns of the same gram
             string surprisingnessInfo; // the middle info record the surpringness calculating process for this pattern
 
             HandleSeq sharedVarNodeList; // all the shared nodes in these links in the original AtomSpace, each handle is a shared node
@@ -79,8 +82,10 @@ namespace opencog
                 count = 0;
                 var_num = 0;
                 interactionInformation = 0.0;
-                nI_Surprisingness = 0.0f;
-                nII_Surprisingness = 0.0f;
+                nI_Surprisingness = 0.0;
+                nII_Surprisingness = 0.0;
+                nII_Surprisingness_b = 1.0;
+                subpattern_b_num = 0;
 
             }
 

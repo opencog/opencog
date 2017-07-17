@@ -49,14 +49,14 @@ namespace PatternMining
 #define FREQUENCY_BOTTOM_THRESHOLD 0.95
 #define SURPRISINGNESS_I_TOP_THRESHOLD 0.20
 #define SURPRISINGNESS_II_TOP_THRESHOLD 0.40
-#define OUTPUT_SURPRISINGNESS_CALCULATION_TO_FILE 0
+#define OUTPUT_SURPRISINGNESS_CALCULATION_TO_FILE 1
 #define GENERATE_TMP_PATTERNS 0
 #define USE_QUERY_ENTITY_COUNT_FOR_EACH_PREDICATE 0
-#define USE_QUERY_ALL_ENTITY_COUNT 0
+#define USE_QUERY_ALL_ENTITY_COUNT 1
 #define USE_ABS_SURPRISINGNESS 0
 #define LINE_INDENTATION "  "
 
-#define PATTERN_VARIABLENODE_TYPE PATTERN_VARIABLE_NODE
+#define PATTERN_VARIABLENODE_TYPE VARIABLE_NODE
 
 struct _non_ordered_pattern
 {
@@ -266,6 +266,10 @@ protected:
     // rename the variable names in a ordered pattern according to the orders of the variables appear in the orderedPattern
     HandleSeq RebindVariableNames(HandleSeq& orderedPattern, map<Handle,Handle>& orderedVarNameMap);
 
+    void ReplaceConstNodeWithVariableForOneLink(Handle link, Handle constNode, Handle newVariableNode, HandleSeq& renameOutgoingLinks);
+
+    HandleSeq ReplaceConstNodeWithVariableForAPattern(HandleSeq& pattern, Handle constNode, Handle newVariableNode);
+
     void generateIndexesOfSharedVars(Handle& link, HandleSeq& orderedHandles, vector<vector<std::pair<int, size_t> > > &indexes);
 
     // generate the outgoings for a link in a pattern in the Pattern mining Atomspace, according to the given group of variables
@@ -276,6 +280,7 @@ protected:
     void extractAllNodesInLink(Handle link, HandleSet& allNodes, AtomSpace* _fromAtomSpace);
     void extractAllNodesInLink(Handle link, map<Handle, unsigned int> &allNodes, AtomSpace* _fromAtomSpace, unsigned index); // just find all the nodes in the original atomspace for this link
     void extractAllVariableNodesInLink(Handle link, HandleSet& allNodes, AtomSpace* _atomSpace);
+    void extractAllConstNodesInALink(Handle link, HandleSet& allConstNodes, AtomSpace* _atomSpace);
 
     // if a link contains only variableNodes , no const nodes
     bool onlyContainVariableNodes(Handle link, AtomSpace* _atomSpace);
