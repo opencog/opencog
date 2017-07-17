@@ -6901,6 +6901,49 @@ fe8a58ae4f66f61c57da90a92d5787c3  zen_pairs.sql
 16e651cf0a719fe9e6d0883155e9a5b8  zen_pairs.sql.bz2
 
 ==================================================================
+zen_pairs_mi
+------------
+Mandarin word-pairs. Segmentation into words done by Ruiting.
+Includes word-pair MI statstics.
+
+STATUS: good
+DATE: 17 July 2017
+REASON: No known defects.
+
+                        List of relations
+ Schema |    Name    | Type  | Owner  |    Size    | Description 
+--------+------------+-------+--------+------------+-------------
+ public | atoms      | table | ubuntu | 325 MB     | 
+ public | spaces     | table | ubuntu | 8192 bytes | 
+ public | typecodes  | table | ubuntu | 48 kB      | 
+ public | valuations | table | ubuntu | 622 MB     | 
+ public | values     | table | ubuntu | 8192 bytes | 
+
+select count(*) from atoms;      -- 3659843 = 3.6M
+select count(*) from valuations; -- 5700207 = 5.7M
+
+Rows: 60123 Columns: 60143
+Size: 1679575 non-zero entries of 3615977589 possible
+Fraction non-zero: 4.6449E-4 Sparsity (-log_2): 11.072
+Total observations: 87843720.0  Avg obs per pair: 52.301
+Entropy Total: 17.473   Left: 10.253   Right: 10.107
+Total MI: 2.8871
+
+                 Left         Right     Avg-left     Avg-right
+                 ----         -----     --------     ---------
+Support (l_0)  8170.        8702.    
+Count   (l_1)  1.5620E+6    1.3583E+6     191.2        156.1    
+Length  (l_2)  1.4766E+5    1.3177E+5     18.07        15.14    
+RMS Count      1.4721E+5    1.3142E+5     18.02        15.10    
+
+472247960 Bytes uncompressed = 472 MB
+ 84150547 Bytes compressed = 84 MB
+
+b4e48f00a94fa8d3d1d08e8331d0d84a9  zen_pairs_mi.sql
+2c6d2667a4ff2d9f54d89765a91c3e37  zen_pairs_mi.sql.bz2
+
+
+==================================================================
 ==================================================================
 ==================================================================
 ==================================================================
