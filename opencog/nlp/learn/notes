@@ -6739,6 +6739,50 @@ select count(*) from valuations; -- 58709672 = 58.7M i.e. 4.6M more than rthree
 8d508e61dcc2ee0ee4a739273ec37033  en_pairs_rthree_mone.sql.bz2
 
 ==================================================================
+en_pairs_rfive_mone
+-------------------
+Random-planar-tree parsed books from tranche-1, 2, 3, 4 and 5. 
+MST-parsed trance-one. Contains pair-MI values; does NOT contain
+any dusjunct marginals.
+
+STATUS: good
+DATE: 16 July 2017
+REASON: Best so far, I think.  Same issues as en_pairs_rfive
+
+                        List of relations
+ Schema |    Name    | Type  | Owner  |    Size    | Description 
+--------+------------+-------+--------+------------+-------------
+ public | atoms      | table | ubuntu | 6502 MB    | 
+ public | spaces     | table | ubuntu | 40 kB      | 
+ public | typecodes  | table | ubuntu | 56 kB      | 
+ public | valuations | table | ubuntu | 11 GB      | 
+ public | values     | table | ubuntu | 8192 bytes | 
+
+select count(*) from atoms;  -- 73314120 = 73M
+select count(*) from valuations; -- 104615442 = 105M
+
+Summary Report for Correlation Matrix Link Grammar ANY link Word Pairs
+Rows: 839266 Columns: 850510
+Size: 30108620 non-zero entries of 713804125660 possible
+Fraction non-zero: 4.2181E-5 Sparsity (-log_2): 14.533
+Total observations: 1352780591.0  Avg obs per pair: 44.930
+Entropy Total: 18.535   Left: 10.247   Right: 10.125
+Total MI: 1.8370
+
+                 Left         Right     Avg-left     Avg-right
+                 ----         -----     --------     ---------
+Support (l_0)  8.0633E+4    8.0657E+4
+Count   (l_1)  2.0090E+7    1.8514E+7     249.2        229.5    
+Length  (l_2)  2.2769E+6    1.9732E+6     28.24        24.46    
+RMS Count      2.2764E+6    1.9726E+6     28.23        24.46    
+
+9088177187 bytes uncompressed = 9.1GB
+1542005839 bytes compressed = 1.54GB
+
+f226416e374414c0ef8decb19047b596  en_pairs_rfive_mone.sql
+a4f8fbc42f802dd4ffc218296d20f703  en_pairs_rfive_mone.sql.bz2
+
+==================================================================
 zh_pairs_one
 ------------
 Mandarin individual character pairs.  Only that, without any pair stats.
@@ -11739,6 +11783,7 @@ Both He's have the wrong disjunct -- classname! ah OK
    (define mi-source (add-pair-freq-api pair-obj))
 pair-fmi
 
+en_pairs_rfive_mi
 
 
 
