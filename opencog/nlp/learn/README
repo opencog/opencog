@@ -251,7 +251,10 @@ So, set up the text-ingestion pipeline:
   to be performed outside of OpenCog. This can be done using jieba
   https://github.com/fxsjy/jieba So: first, install it:
   `pip install jieba` and then segment text:
-  `run/jieba-segment.py PATH-IN PATH-OUT`
+  `run/jieba-segment.py PATH-IN PATH-OUT`. This python utility is in
+  the `run` directory.  It might be best to create modified versions
+  of the `run/ss-one.sh` and `run/mst-one.sh` scripts to invoke jieba;
+  I have not done this yet. Soon...
 
   Instead of using the `zh` or `yue` languages for sentence splitting,
   you will want to use `zh-pre` or `yue-pre` for the language; this
