@@ -468,7 +468,7 @@
 
 	; Make sure all word-pairs are in the atomspace.
 	(call-only-once (lambda() (LLOBJ 'fetch-pairs)))
-	(display "Finished loading any-word-pairs\n")
+	(display "Finished loading sparse matrix pairs\n")
 
 	(batch-all-pair-mi LLOBJ)
 )

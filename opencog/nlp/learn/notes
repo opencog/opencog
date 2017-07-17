@@ -11856,6 +11856,113 @@ LEFT-WALL I.p will.v do.v it if you say.v so
 
 guile-mst-zh> MST-Processing file >>>止-灣/汤加国徽<<<
 
+(define (print-mst TXT)
+	(define (prt-mpr MPR)
+		(format #t "~D . ~A  <--> ~D . ~A  \t  MI = ~6F\n"
+			(car (caar MPR)) (cog-name (cdr (caar MPR)))
+			(car (cdar MPR)) (cog-name (cdr (cdar MPR)))
+			(cdr MPR)
+	))
+	(for-each prt-mpr (mst-parse-text TXT))
+)
+
+
+(print-mst "然杜氏 恶 撰 ， 述 一漏 百 ， 且 多 谬误 。")
+(print-mst "丙寅年 夏日 ， 王门 胡氏 焚香 敬撰 。")
+(print-mst "今书 已成 ， 余喜 史家 案头 ， 又 添 新书 ， 更喜 日后 家事 ， 彼无 遁词 ， 遂 成此序 。")
+(print-mst "母猪 的 价格 暴涨 ， 可见 事态 之 严重 。")
+(print-mst "干爷 ， 你 不是 这么 教导 我们 的 吗 ？")
+
+Hi Ben, Ruiting,
+
+Below are MST parses of five sentences. Just as before, an MI value
+of 4 or below is usually junk, and 10 or above is high confidence.
+This dataset probably does not contain MI's above 25; larger datasets
+would.
+
+These are 5 sentences I picked from wangxiaobo-7
+
+I will have non-clustered link-grammar parses in about 3 days or so.
+I expect that they will be of higher quality, but who knows.
+
+If all goes well, I might have (non-clustered) English LG parses
+later today.
+
+--linas
+
+(print-mst "然杜氏 恶 撰 ， 述 一漏 百 ， 且 多 谬误 。")
+6 . 述  <--> 7 . 一漏     MI = 21.128
+4 . 撰  <--> 6 . 述       MI = 19.009
+2 . 然杜氏  <--> 4 . 撰   MI = 18.885
+7 . 一漏  <--> 8 . 百     MI = 16.029
+2 . 然杜氏  <--> 3 . 恶   MI = 15.179
+6 . 述  <--> 12 . 谬误    MI = 13.671
+7 . 一漏  <--> 10 . 且    MI = 12.479
+6 . 述  <--> 11 . 多      MI = 7.7579
+1 . ###LEFT-WALL###  <--> 2 . 然杜氏      MI = 3.6985
+4 . 撰  <--> 13 . 。      MI = 2.6162
+5 . ，  <--> 6 . 述       MI = 2.3806
+9 . ，  <--> 10 . 且      MI = 2.3653
+
+(print-mst "丙寅年 夏日 ， 王门 胡氏 焚香 敬撰 。")
+5 . 王门  <--> 6 . 胡氏   MI = 21.478
+6 . 胡氏  <--> 7 . 焚香   MI = 21.471
+7 . 焚香  <--> 8 . 敬撰   MI = 21.301
+2 . 丙寅年  <--> 5 . 王门 MI = 18.049
+2 . 丙寅年  <--> 3 . 夏日 MI = 19.518
+8 . 敬撰  <--> 9 . 。     MI = 4.0183
+1 . ###LEFT-WALL###  <--> 2 . 丙寅年      MI = 3.6985
+4 . ，  <--> 5 . 王门     MI = 2.7025
+
+(print-mst "今书 已成 ， 余喜 史家 案头 ， 又 添 新书 ， 更喜 日后 家事 ， 彼无 遁词 ， 遂 成此序 。")
+17 . 彼无  <--> 18 . 遁词 MI = 21.236
+18 . 遁词  <--> 21 . 成此序       MI = 19.366
+15 . 家事  <--> 18 . 遁词 MI = 18.688
+13 . 更喜  <--> 15 . 家事 MI = 19.674
+20 . 遂  <--> 21 . 成此序 MI = 18.160
+14 . 日后  <--> 15 . 家事 MI = 16.529
+11 . 新书  <--> 13 . 更喜 MI = 15.155
+10 . 添  <--> 15 . 家事   MI = 12.060
+21 . 成此序  <--> 22 . 。 MI = 4.0183
+9 . 又  <--> 10 . 添      MI = 3.9017
+7 . 案头  <--> 9 . 又     MI = 3.9325
+5 . 余喜  <--> 7 . 案头   MI = 18.569
+5 . 余喜  <--> 6 . 史家   MI = 20.508
+3 . 已成  <--> 5 . 余喜   MI = 16.793
+2 . 今书  <--> 3 . 已成   MI = 17.234
+1 . ###LEFT-WALL###  <--> 2 . 今书        MI = 3.6985
+16 . ，  <--> 17 . 彼无   MI = 3.1355
+18 . 遁词  <--> 19 . ，   MI = 3.0673
+12 . ，  <--> 13 . 更喜   MI = 2.9131
+4 . ，  <--> 5 . 余喜     MI = 2.6880
+8 . ，  <--> 9 . 又       MI = 1.2527
+
+
+(print-mst "母猪 的 价格 暴涨 ， 可见 事态 之 严重 。")
+4 . 价格  <--> 5 . 暴涨   MI = 16.213
+5 . 暴涨  <--> 7 . 可见   MI = 13.902
+2 . 母猪  <--> 5 . 暴涨   MI = 12.817
+7 . 可见  <--> 8 . 事态   MI = 10.562
+8 . 事态  <--> 10 . 严重  MI = 8.6693
+8 . 事态  <--> 9 . 之     MI = 6.1207
+5 . 暴涨  <--> 6 . ，     MI = 3.1828
+3 . 的  <--> 4 . 价格     MI = 2.8438
+7 . 可见  <--> 11 . 。    MI = 1.7341
+1 . ###LEFT-WALL###  <--> 7 . 可见        MI = 0.9190
+
+(print-mst "干爷 ， 你 不是 这么 教导 我们 的 吗 ？")
+2 . 干爷  <--> 7 . 教导   MI = 9.8548
+7 . 教导  <--> 8 . 我们   MI = 6.5231
+2 . 干爷  <--> 6 . 这么   MI = 5.1008
+2 . 干爷  <--> 4 . 你     MI = 4.5330
+2 . 干爷  <--> 5 . 不是   MI = 2.7742
+1 . ###LEFT-WALL###  <--> 2 . 干爷        MI = 2.7416
+2 . 干爷  <--> 3 . ，     MI = 2.0854
+7 . 教导  <--> 10 . 吗    MI = 1.9647
+10 . 吗  <--> 11 . ？     MI = 7.6251
+8 . 我们  <--> 9 . 的     MI = 0.7513
+
+
 -------------------------------------------------------------
 export stuff
 en_pairs_tthree_mst 8 gb
@@ -11886,6 +11993,11 @@ Both He's have the wrong disjunct -- classname! ah OK
 pair-fmi
 
 en_pairs_rfive_mi
+(sql-open "postgres:///en_pairs_rfive_mtwo?user=linas")
+ (define pca (make-pseudo-cset-api))
+ (define psa (add-pair-stars pca))
+ (batch-pairs psa)
+(print-matrix-summary-report psa)
 
 
 
