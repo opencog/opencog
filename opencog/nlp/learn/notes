@@ -6742,8 +6742,8 @@ select count(*) from valuations; -- 58709672 = 58.7M i.e. 4.6M more than rthree
 en_pairs_rfive_mone
 -------------------
 Random-planar-tree parsed books from tranche-1, 2, 3, 4 and 5. 
-MST-parsed trance-one. Contains pair-MI values; does NOT contain
-any dusjunct marginals.
+MST-parsed tranche-one. Contains pair-MI values; does NOT contain
+any disjunct marginals.
 
 STATUS: good
 DATE: 16 July 2017
@@ -6781,6 +6781,35 @@ RMS Count      2.2764E+6    1.9726E+6     28.23        24.46
 
 f226416e374414c0ef8decb19047b596  en_pairs_rfive_mone.sql
 a4f8fbc42f802dd4ffc218296d20f703  en_pairs_rfive_mone.sql.bz2
+
+==================================================================
+en_pairs_rfive_mtwo
+-------------------
+Random-planar-tree parsed books from tranche-1, 2, 3, 4 and 5. 
+MST-parsed tranche-1 and 2. Contains pair-MI values; does NOT contain
+any disjunct marginals.
+
+STATUS: good
+DATE: 17 July 2017
+REASON: Best so far, I think.  Same issues as en_pairs_rfive_mone
+
+                        List of relations
+ Schema |    Name    | Type  | Owner  |    Size    | Description 
+--------+------------+-------+--------+------------+-------------
+ public | atoms      | table | ubuntu | 7082 MB    | 
+ public | spaces     | table | ubuntu | 40 kB      | 
+ public | typecodes  | table | ubuntu | 56 kB      | 
+ public | valuations | table | ubuntu | 11 GB      | 
+ public | values     | table | ubuntu | 8192 bytes | 
+
+select count(*) from atoms;      --  79586531 = 79M = 6M more
+select count(*) from valuations; -- 108255875 = 108M = 5M more
+
+9455749625 Bytes uncompressed = 9.45 GB
+1610511576 Bytes compressed   = 1.61 GB
+
+83fa68d57ec5db8604e3487862223efb  en_pairs_rfive_mtwo.sql
+de95af1f2ddb7c696b19a4cc3a3e443e  en_pairs_rfive_mtwo.sql.bz2
 
 ==================================================================
 zh_pairs_one
@@ -6843,8 +6872,38 @@ RMS Count      2.8231E+5    2.3990E+5     41.40        37.42
 4ab27184db51048f362fc5d6134113c6  zh_pairs_sone
 39748c2abc0be436f266dec021ee4402  zh_pairs_sone.bz2
 
+==================================================================
+zen_pairs
+---------
+Mandarin word-pairs. Segmentation into words done by Ruiting. Does
+NOT include pair-MI stats.
 
+STATUS: good
+DATE: 17 July 2017
+REASON: No known defects.
 
+                        List of relations
+ Schema |    Name    | Type  | Owner  |    Size    | Description 
+--------+------------+-------+--------+------------+-------------
+ public | atoms      | table | ubuntu | 303 MB     | 
+ public | spaces     | table | ubuntu | 8192 bytes | 
+ public | typecodes  | table | ubuntu | 48 kB      | 
+ public | valuations | table | ubuntu | 187 MB     | 
+ public | values     | table | ubuntu | 8192 bytes | 
+
+select count(*) from atoms;      -- 3419298 = 3.4M
+select count(*) from valuations; -- 1739721 = 1.7M whoa
+
+152263232 Bytes uncompressed = 152MB
+ 25488421 Bytes compressed = 25MBytes
+
+fe8a58ae4f66f61c57da90a92d5787c3  zen_pairs.sql
+16e651cf0a719fe9e6d0883155e9a5b8  zen_pairs.sql.bz2
+
+==================================================================
+==================================================================
+==================================================================
+==================================================================
 ==================================================================
 
 dropdb  en_pairs_tthree en_pairs_ttwo en_pairs_rone 
