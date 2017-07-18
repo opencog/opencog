@@ -17,8 +17,6 @@
 ;; inference a lot of crazy shit about the order. Another option would
 ;; be to use a less-than transitive predicate.
 
-(load "utilities.scm")
-
 (define (gen-knowledge-base)
   (gen-knowledge-base-rec alphabet-list 1))
 
