@@ -5,10 +5,10 @@
 (use-modules (opencog randgen))
 
 ;; Set a logger for the experiment
-;; (define icl-logger (cog-new-logger))
-(define icl-logger (cog-default-logger))
+(define icl-logger (cog-new-logger))
 (cog-logger-set-component! icl-logger "ICL")
 (cog-logger-set-stdout! icl-logger #t)
+;; (cog-logger-set-sync! icl-logger #t)
 (define (icl-logger-error . args) (apply cog-logger-error (cons icl-logger args)))
 (define (icl-logger-warn . args) (apply cog-logger-warn (cons icl-logger args)))
 (define (icl-logger-info . args) (apply cog-logger-info (cons icl-logger args)))
@@ -42,7 +42,9 @@
       '()
       (cons (gen-random-target) (gen-random-targets (- N 1)))))
 
-;; Log the given atomspace at debug level
+;; Log the given atomspace at some level
+(define (icl-logger-info-atomspace as)
+  (icl-logger-info "~a" (atomspace->string as)))
 (define (icl-logger-debug-atomspace as)
   (icl-logger-debug "~a" (atomspace->string as)))
 
@@ -59,4 +61,3 @@
          (all-atoms-string (apply string-append (map atom->string all-atoms))))
     (cog-set-atomspace! old-as)
     all-atoms-string))
-

@@ -55,7 +55,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;
 
 ;; Termination criteria parameters
-(ure-set-num-parameter ppc-rbs "URE:maximum-iterations" 50)
+(ure-set-num-parameter ppc-rbs "URE:maximum-iterations" 100)
 
 ;; Attention allocation (0 to disable it, 1 to enable it)
 (ure-set-fuzzy-bool-parameter ppc-rbs "URE:attention-allocation" 0)
