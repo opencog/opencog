@@ -131,20 +131,20 @@
 			(connector-to-lg-link CONNECTOR)
 			(cog-name (gdr CONNECTOR))))
 
-	; A list of connnectors, in the opencog-internal connector order.
-	; Tht is, as noted above: far- & near- & near+ & far+
-	(define cnrs (map connector-to-lg-cnr (cog-outgoing-set (gdr SECTION))))
-
-	; Link Grammar expects near- & far- & near+ & far+
-	(define (strappend cnr dj)
-		(if (equal? (gdr cnr) cnr-to-left)
+	; Link Grammar expects: near- & far- & near+ & far+
+	(define (strappend CONNECTOR dj)
+		(define cnr (connector-to-lg-cnr CONNECTOR))
+		(if (equal? (gdr CONNECTOR) cnr-to-left)
 			(string-append cnr " & " dj)
 			(string-append dj " & " cnr)))
 
 	; Create a single string of the connectors, in order.
+	; The connectors in SECTION are in the order as noted above:
+	;   far- & near- & near+ & far+
 	(fold
 		(lambda (cnr dj) (if dj (strappend cnr dj) cnr))
-		#f cnrs)
+		#f
+		(cog-outgoing-set (gdr SECTION)))
 )
 
 ;  ---------------------------------------------------------------------
