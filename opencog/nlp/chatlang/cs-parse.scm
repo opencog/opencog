@@ -345,7 +345,7 @@
       (NOT choice) : (display-token (format #f "not(~a)" $2))
       (variable ? concept) :
         (display-token (format #f "is_member(~a ~a)" $1 $3))
-      (context-sequence) : (display-token $1)
+      (sequence) : (display-token $1)
     )
 
     (action-patterns
@@ -366,6 +366,27 @@
       (function) : (display-token $1)
       (LSBRACKET action-patterns RSBRACKET) :
         (display-token (format #f "action-choice(~a)" $2))
+    )
+
+    (sequence
+      (LPAREN sequence-terms RPAREN) : (format #f "sequence(~a)" $2)
+    )
+
+    (sequence-terms
+      (sequence-term) : $1
+      (sequence-terms sequence-term) : (format #f "~a ~a" $1 $2)
+    )
+
+    (sequence-term
+      (*) : (display-token (format #f "wildcard(0 -1)"))
+      (*n) : (display-token (format #f "wildcard(~a ~a)" $1 $1))
+      (*~n) : (display-token (format #f "wildcard(0 ~a)" $1))
+      (LEMMA) : (display-token (format #f "lemma(~a)" $1))
+      (LITERAL) : (display-token (format #f "literal(~a)" $1))
+      (phrase) : (display-token $1)
+      (concept) : (display-token $1)
+      (variable) : (display-token $1)
+      (choice) : (display-token $1)
     )
 
     (choice
@@ -433,16 +454,6 @@
 
     (phrase
       (DQUOTE words DQUOTE) : (display-token (format #f "phrase(~a)" $2))
-    )
-
-    (lemmas
-      (LEMMA) : (display-token $1)
-      (lemmas LEMMA) : (display-token (format #f "~a ~a" $1 $2))
-    )
-
-    (literals
-      (LITERAL) : (display-token $1)
-      (literals LITERAL) : (display-token (format #f "~a ~a" $1 $2))
     )
 
     (words
