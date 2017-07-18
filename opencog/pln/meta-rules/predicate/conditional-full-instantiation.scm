@@ -146,7 +146,7 @@
          (Pinst-c (tv-conf Pinst-tv))
          (Qinst-s (* Impl-s Pinst-s))
          ;; (Qinst-c (* Impl-c Pinst-c (if (< 0 P-c ) (- 1 P-s) 1))))
-         (Qinst-c (* Impl-c Pinst-c (- 1 P-s))))
+         (Qinst-c (* Impl-c Pinst-c (if (< 0.99 Qinst-s) 1 (- 1 P-s)))))
     (stv Qinst-s Qinst-c)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
