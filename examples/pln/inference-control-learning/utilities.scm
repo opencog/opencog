@@ -40,3 +40,22 @@
   (if (= N 0)
       '()
       (cons (gen-random-target) (gen-random-targets (- N 1)))))
+
+;; Log the given atomspace at debug level
+(define (icl-logger-debug-atomspace as)
+  (icl-logger-debug "~a" (atomspace->string as)))
+
+;; Convert the given atomspace into a string.
+(define (atomspace->string as)
+  (let* ((old-as (cog-set-atomspace! as))
+         ;; Get all atoms in as
+         (all-atoms (apply append (map cog-get-atoms (cog-get-types))))
+         (atom->string (lambda (h)
+                         (if (null? (cog-incoming-set h))  ; Avoid redundant
+                                                           ; corrections
+                             (format "~a" h)
+                             "")))
+         (all-atoms-string (apply string-append (map atom->string all-atoms))))
+    (cog-set-atomspace! old-as)
+    all-atoms-string))
+
