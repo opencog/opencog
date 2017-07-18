@@ -11,12 +11,15 @@
 ;; Set the random seed of the experiment
 (cog-randgen-set-seed! 0)
 
-;; Set ure logger to debug
+;; Set loggers levels
 (cog-logger-set-level! (cog-ure-logger) "debug")
+(cog-logger-set-level! icl-logger "debug")
+
+
 
 ;; Set parameters
-(define pss 1)                         ; Problem set size
-(define niter 1)                       ; Number of iterations
+(define pss 10)                         ; Problem set size
+(define niter 3)                        ; Number of iterations
 
 (define (run-experiment)
   (icl-logger-info "Start experiment")
