@@ -5,7 +5,8 @@
 (use-modules (opencog randgen))
 
 ;; Set a logger for the experiment
-(define icl-logger (cog-new-logger))
+;; (define icl-logger (cog-new-logger))
+(define icl-logger (cog-default-logger))
 (cog-logger-set-component! icl-logger "ICL")
 (cog-logger-set-stdout! icl-logger #t)
 (define (icl-logger-error . args) (apply cog-logger-error (cons icl-logger args)))
