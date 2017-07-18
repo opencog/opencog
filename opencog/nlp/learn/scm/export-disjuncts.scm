@@ -142,7 +142,8 @@
 	; The connectors in SECTION are in the order as noted above:
 	;   far- & near- & near+ & far+
 	(fold
-		(lambda (cnr dj) (if dj (strappend cnr dj) cnr))
+		(lambda (CNR dj) (if dj (strappend CNR dj)
+				(connector-to-lg-cnr CNR)))
 		#f
 		(cog-outgoing-set (gdr SECTION)))
 )
