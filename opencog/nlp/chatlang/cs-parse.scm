@@ -115,6 +115,8 @@
     ((has-match? "^[ ]*]" str) (result:suffix 'RSBRACKET location #f))
     ((has-match? "^[ ]*<<" str) (result:suffix '<< location #f))
     ((has-match? "^[ ]*>>" str) (result:suffix '>> location #f))
+    ; For restarting matching position -- "< *"
+    ((has-match? "^[ ]*<[ ]*\\*" str) (result:suffix 'RESTART location #f))
     ; This should follow <<
     ((has-match? "^[ ]*<" str) (result:suffix '< location #f))
     ; This should follow >>
@@ -208,7 +210,7 @@
     ; ? = Comparison tests
     (CONCEPT TOPIC RESPONDERS REJOINDERS GAMBIT COMMENT SAMPLE_INPUT WHITESPACE
       (right: LPAREN LSBRACKET << ID VAR * ^ < LEMMA LITERAL NUM LEMMA~COMMAND
-              STRING *~n *n MVAR MOVAR NOT)
+              STRING *~n *n MVAR MOVAR NOT RESTART)
       (left: RPAREN RSBRACKET >> > DQUOTE)
       (right: ? CR NEWLINE)
     )
@@ -329,7 +331,6 @@
       (*) : (display-token (format #f "wildcard(0 -1)"))
       (*n) : (display-token (format #f "wildcard(~a ~a)" $1 $1))
       (*~n) : (display-token (format #f "wildcard(0 ~a)" $1))
-      (< *) : (display-token "restart_matching()")
       (LEMMA) : (display-token (format #f "lemma(~a)" $1))
       (LITERAL) : (display-token (format #f "literal(~a)" $1))
       (phrase) : (display-token $1)
@@ -378,8 +379,35 @@
 
     ; TODO: This has a restart_matching effect. See chatscript documentation
     (unordered-matching
-      (<< context-patterns >>) :
+      (<< unordered-terms >>) :
         (display-token (format #f "unordered-matching(~a)" $2))
+      ; Couldn't come up with any better and robust way than stacking up
+      ; RESTART tokens like this...
+      (unordered-term RESTART unordered-term) :
+        (display-token (format #f "unordered-matching(~a ~a)" $1 $3))
+      (unordered-term RESTART unordered-term RESTART unordered-term) :
+        (display-token (format #f "unordered-matching(~a ~a ~a)" $1 $3 $5))
+      (unordered-term RESTART unordered-term RESTART unordered-term
+        RESTART unordered-term) :
+          (display-token (format #f "unordered-matching(~a ~a ~a ~a)"
+            $1 $3 $5 $7))
+      (unordered-term RESTART unordered-term RESTART unordered-term
+        RESTART unordered-term RESTART unordered-term) :
+          (display-token (format #f "unordered-matching(~a ~a ~a ~a ~a)"
+            $1 $3 $5 $7 $9))
+    )
+
+    (unordered-terms
+      (unordered-term) : (display-token $1)
+      (unordered-terms unordered-term) : (display-token (format #f "~a ~a" $1 $2))
+    )
+
+    (unordered-term
+      (LEMMA) : (display-token (format #f "lemma(~a)" $1))
+      (LITERAL) : (display-token (format #f "literal(~a)" $1))
+      (phrase) : (display-token $1)
+      (concept) : (display-token $1)
+      (choice) : (display-token $1)
     )
 
     (function
