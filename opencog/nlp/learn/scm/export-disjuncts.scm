@@ -178,7 +178,8 @@
 				(set! germ-str "LEFT-WALL"))
 
 			(set! nprt (+ nprt 1))
-			(format #t "~D Will insert ~A: ~A;\n" nprt germ-str dj-str)
+			(if (equal? 0 (quotient nprt 1000))
+				(format #t "~D Will insert ~A: ~A;\n" nprt germ-str dj-str))
 
 			(set! germ-str (escquote germ-str 0))
 
@@ -205,6 +206,7 @@
 
 		; Write to disk, and close the database.
 		(define (shutdown)
+			(format #t "Finished inserting ~D records\n" nprt)
 			(dbi-query db-obj "END TRANSACTION;")
 			(dbi-close db-obj)
 		)
@@ -297,7 +299,7 @@
 ; Example usage:
 ; (export-all-csets "dict.db" "EN_us")
 ;
-(define (export-all-csets DB-NAME LOCALE)
+(define-public (export-all-csets DB-NAME LOCALE)
 
 	; Create the object that knows where the disuncts are in the
 	; atomspace. Create the object that knows how to get the MI
