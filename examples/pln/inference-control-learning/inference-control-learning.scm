@@ -8,18 +8,22 @@
   (load "kb.scm")
   (load "rb.scm"))
 
+(define (ppc-reload)
+  (clear)
+  (load "ppc-kb.scm")
+  (load "ppc-rb.scm"))
+
 ;; Set the random seed of the experiment
 (cog-randgen-set-seed! 0)
 
 ;; Set loggers levels
 (cog-logger-set-level! (cog-ure-logger) "debug")
-(cog-logger-set-level! icl-logger "debug")
-
-
+(cog-logger-set-level! icl-logger "info")
+(cog-logger-set-level! "info")
 
 ;; Set parameters
-(define pss 10)                         ; Problem set size
-(define niter 3)                        ; Number of iterations
+(define pss 10)                          ; Problem set size
+(define niter 3)                         ; Number of iterations
 
 (define (run-experiment)
   (icl-logger-info "Start experiment")
@@ -38,8 +42,8 @@
           '()))
     ;; Run all iterations
     (run-iterations-rec ic-rules 0)
-    (icl-logger-debug "Inference History AtomSpace:")
-    (icl-logger-debug-atomspace ih-as)))
+    (icl-logger-info "Inference History AtomSpace:")
+    (icl-logger-info-atomspace ih-as)))
 
 ;; Run iteration i over the given targets. Return a pair
 ;;
@@ -48,7 +52,7 @@
 ;; The idea is to pass the inference control rules to the next
 ;; iteration.
 (define (run-iteration targets ih-as ic-rules i)
-  (icl-logger-info "Run iteration ~a/~a" (+ i 1) niter)
+  (icl-logger-info "Run iteration (i=~a/~a)" (+ i 1) niter)
   (let* (;; Run the BC and build the inference history corpus for that run
          (run-bc-mk-corpus (lambda (j)
                              (let* (;; AtomSpace where to the record
@@ -73,13 +77,14 @@
 ;; and add all relevant knowledge to the inference history ih-as from
 ;; it, leaving out cruft like ppc-kb and such.
 (define (postprocess-corpus tr-as ih-as)
-  (icl-logger-info "Post-process the trace and copy it to the inference history")
+  (icl-logger-info "Post-process trace and copy it to the inference history")
+  ;; Reload the postprocessing knowledge and rules
+  (ppc-reload)
   (let ((default-as (cog-set-atomspace! tr-as)))
-    ;; Copy the content of tr-as to ih-as (disabled for now)
-    ;; (cog-cp-all ih-as)
-    ;; Load the knowledge and rule bases
-    (load "ppc-kb.scm")
-    (load "ppc-rb.scm")
+    ;; Copy tr-as to the default atomspace
+    (cog-cp-all default-as)
+    ;; Switch to the default atomspace
+    (cog-set-atomspace! default-as)
     ;; Define BC target and vardecl
     (let* ((target (Evaluation
                      (Predicate "ICL:preproof")
@@ -94,8 +99,7 @@
            (results (ppc-bc target #:vardecl vardecl)))
       ;; Copy post-processed inference traces to the inference history
       (icl-logger-debug "Results:\n~a" results)
-      (cog-cp (cog-outgoing-set results) ih-as))
-    (cog-set-atomspace! default-as)))
+      (cog-cp (cog-outgoing-set results) ih-as))))
 
 (define (mk-ic-rules ih-as)
   (icl-logger-info "Build inference control rules from the inference history")
@@ -109,11 +113,11 @@
 ;; used for guidance, ic-rules, with for jth target in iteration
 ;; i. Return #t iff target has been successfully proved.
 (define (run-bc target tr-as ic-rules i j)
-  (icl-logger-info "Run BC with target = ~a" target)
+  (icl-logger-info "Run BC (i=~a/~a,j=~a/~a) with target:\n~a"
+                   (+ i 1) niter (+ j 1) pss target)
   (reload)
   (let* ((result (pln-bc target #:trace-as tr-as)) ; TODO use ic-rules
-         (result-size (length (cog-outgoing-set result)))
-         (default-as (cog-set-atomspace! tr-as)))
+         (result-size (length (cog-outgoing-set result))))
     (if (= 1 result-size)
         (tv->bool (cog-tv (gar result)))
         #f)))
