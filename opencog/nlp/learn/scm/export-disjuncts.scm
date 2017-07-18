@@ -289,18 +289,20 @@
 
 ;  ---------------------------------------------------------------------
 
-; Write all connector sets to a Link Grammar-compatible sqlite3 file.
-; DB-NAME is the databse name to write to.
-; LOCALE is the locale to use; e.g EN_us or ZH_cn
-;
-; Note that link-grammar expects the database file to be called
-; "dict.db", always!
-;
-; Example usage:
-; (export-all-csets "dict.db" "EN_us")
-;
 (define-public (export-all-csets DB-NAME LOCALE)
+"
+  export-all-csets DB-NAME LOCALE
 
+  Write all connector sets to a Link Grammar-compatible sqlite3 file.
+  DB-NAME is the databse name to write to.
+  LOCALE is the locale to use; e.g EN_us or ZH_cn
+
+  Note that link-grammar expects the database file to be called
+  \"dict.db\", always!
+
+  Example usage:
+     (export-all-csets \"dict.db\" \"EN_us\")
+"
 	; Create the object that knows where the disuncts are in the
 	; atomspace. Create the object that knows how to get the MI
 	; of a word-disjunct pair.
