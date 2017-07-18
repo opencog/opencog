@@ -101,6 +101,11 @@
 
 (define cnr-to-left (ConnectorDir "-"))
 
+; Link Grammar expects connectors to be structured in the order of:
+;   near- & far- & near+ & far+
+; whereas the sections we compute from MST are in the form of
+;   far- & near- & near+ & far+
+; Thus, for the leftwards-connectors, we have to reverse the order.
 (define (cset-to-lg-dj SECTION)
 "
   cset-to-lg-dj - SECTION should be a SectionLink
@@ -126,12 +131,19 @@
 			(connector-to-lg-link CONNECTOR)
 			(cog-name (gdr CONNECTOR))))
 
-	; A list of connnectors, in the proper connector order.
+	; A list of connnectors, in the opencog-internal connector order.
+	; Tht is, as noted above: far- & near- & near+ & far+
 	(define cnrs (map connector-to-lg-cnr (cog-outgoing-set (gdr SECTION))))
+
+	; Link Grammar expects near- & far- & near+ & far+
+	(define (strappend cnr dj)
+		(if (equal? (gdr cnr) cnr-to-left)
+			(string-append cnr " & " dj)
+			(string-append dj " & " cnr)))
 
 	; Create a single string of the connectors, in order.
 	(fold
-		(lambda (cnr dj) (if dj (string-append dj " & " cnr) cnr))
+		(lambda (cnr dj) (if dj (strappend cnr dj) cnr))
 		#f cnrs)
 )
 

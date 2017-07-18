@@ -11932,6 +11932,10 @@ later today.
 
 --linas
 
+The parses below are completely random junk. About half of the words
+have been observed once and only once, and are thus have no meaningful
+statistical sample.
+
 (print-mst "然杜氏 恶 撰 ， 述 一漏 百 ， 且 多 谬误 。")
 6 . 述  <--> 7 . 一漏     MI = 21.128
 4 . 撰  <--> 6 . 述       MI = 19.009
@@ -12005,6 +12009,41 @@ later today.
 8 . 我们  <--> 9 . 的     MI = 0.7513
 
 run/mst-one.sh run/ss-one.sh
+
+OK what borked?
+
+(print-mst "丙寅年 夏日 ， 王门 胡氏 焚香 敬撰 。")
+a 5 . 王门     <--> 6 . 胡氏   MI = 21.478
+b 6 . 胡氏     <--> 7 . 焚香   MI = 21.471
+c 7 . 焚香     <--> 8 . 敬撰   MI = 21.301
+d 2 . 丙寅年   <--> 5 . 王门   MI = 18.049
+e 2 . 丙寅年   <--> 3 . 夏日   MI = 19.518   OK its there.
+f 8 . 敬撰     <--> 9 . 。     MI = 4.0183
+g 1 . LEFT-WALL<--> 2 . 丙寅年 MI = 3.6985
+h 4 . ，      <--> 5 . 王门    MI = 2.7025
+
+
+                                        near+    far+
+丙寅年.399826              (g)TXYJK- & eTPYYP+ & dTRZZG+
+ 夏日.232814                eTPYYP- 
+                            far-      near-
+ 王门.270759                dTRZZG- & (h)TRZZH- & aTRZZI+
+ 胡氏.349378                aTRZZI- & bTVWZI+
+ 焚香.506188                bTVWZI- & cTPSCX+
+ 敬撰.227735                cTPSCX- & (f)TPSCY+
+
+
+
+ERROR: In procedure gc:
+ERROR: In procedure dbi-close: Wrong type argument in position 1: #<finalized
+smob 556c0402ec00>
+
+
+LG expects:
+test: D- & Os- (near- & far-) & (close+) & (far+)
+
+
+
 
 -------------------------------------------------------------
 export stuff
