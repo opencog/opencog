@@ -154,6 +154,7 @@
 (define (make-database DB-NAME LOCALE COST-FN)
 	(let ((db-obj (dbi-open "sqlite3" DB-NAME))
 			(cnt 0)
+			(nprt 0)
 		)
 
 		; Add data to the database
@@ -166,7 +167,8 @@
 			(if (string=? germ-str "###LEFT-WALL###")
 				(set! germ-str "LEFT-WALL"))
 
-			(format #t "Will insert ~A: ~A;\n" germ-str dj-str)
+			(set! nprt (+ nprt 1))
+			(format #t "~D Will insert ~A: ~A;\n" nprt germ-str dj-str)
 
 			; Insert the word
 			(set! cnt (+ cnt 1))

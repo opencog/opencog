@@ -11962,6 +11962,7 @@ later today.
 10 . 吗  <--> 11 . ？     MI = 7.6251
 8 . 我们  <--> 9 . 的     MI = 0.7513
 
+run/mst-one.sh run/ss-one.sh
 
 -------------------------------------------------------------
 export stuff
@@ -11998,6 +11999,20 @@ en_pairs_rfive_mi
  (define psa (add-pair-stars pca))
  (batch-pairs psa)
 (print-matrix-summary-report psa)
+
+Rows: 137078 Columns: 6239997
+Size: 8629163 non-zero entries of 855366308766 possible
+Fraction non-zero: 1.0088E-5 Sparsity (-log_2): 16.597
+Total observations: 18489594.0  Avg obs per pair: 2.1427
+Entropy Total: 20.957   Left: 19.143   Right: 9.7111
+Total MI: 7.8969
+
+                 Left         Right     Avg-left     Avg-right
+                 ----         -----     --------     ---------
+Support (l_0)  4.8875E+4    145.4
+Count   (l_1)  2.2958E+5    3440.         4.697        23.66
+Length  (l_2)  1.3729E+4    1773.         .2809        12.19
+RMS Count      1.3696E+4    1732.         .2802        11.91
 
 
 
