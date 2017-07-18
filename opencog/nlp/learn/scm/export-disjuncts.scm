@@ -191,7 +191,7 @@
 				(set! germ-str "LEFT-WALL"))
 
 			(set! nprt (+ nprt 1))
-			(if (equal? 0 (quotient nprt 1000))
+			(if (equal? 0 (remainder nprt 1000))
 				(format #t "~D Will insert ~A: ~A;\n" nprt germ-str dj-str))
 
 			(set! germ-str (escquote germ-str 0))
