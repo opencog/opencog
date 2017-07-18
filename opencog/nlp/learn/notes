@@ -12015,7 +12015,19 @@ Length  (l_2)  1.3729E+4    1773.         .2809        12.19
 RMS Count      1.3696E+4    1732.         .2802        11.91
 
 
+(length all-csets)
+$16 = 8629163
 
+
+(define (escquote STR BEG)
+	(define pos (string-index STR (lambda (C) (equal? C #\')) BEG))
+	(if pos
+		(escquote
+			(string-replace STR "''" pos pos 1 2)
+			(+ pos 2))
+		STR))
+
+		(string-replace "fo's" "''" 2 2 1 2)
 =========================================================================
 
 

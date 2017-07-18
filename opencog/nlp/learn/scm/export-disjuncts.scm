@@ -157,6 +157,16 @@
 			(nprt 0)
 		)
 
+		; Escape quotes -- replace single quotes by two successive
+		; single-quotes. Example: (escquote "fo'sis'a'blort" 0)
+		(define (escquote STR BEG)
+			(define pos (string-index STR (lambda (C) (equal? C #\')) BEG))
+			(if pos
+				(escquote
+					(string-replace STR "''" pos pos 1 2)
+					(+ pos 2))
+				STR))
+
 		; Add data to the database
 		(define (add-section SECTION)
 			; The germ of the section (the word)
@@ -169,6 +179,8 @@
 
 			(set! nprt (+ nprt 1))
 			(format #t "~D Will insert ~A: ~A;\n" nprt germ-str dj-str)
+
+			(set! germ-str (escquote germ-str 0))
 
 			; Insert the word
 			(set! cnt (+ cnt 1))
@@ -298,6 +310,8 @@
 
 	; Create the SQLite3 database.
 	(define sectioner (make-database DB-NAME LOCALE cost-fn))
+
+	(format #t "Store ~D csets\n" (length all-csets))
 
 	; Dump all the connector sets into the database
 	(map sectioner all-csets)
