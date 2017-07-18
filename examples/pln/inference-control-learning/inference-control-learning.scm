@@ -77,7 +77,7 @@
 ;; and add all relevant knowledge to the inference history ih-as from
 ;; it, leaving out cruft like ppc-kb and such.
 (define (postprocess-corpus tr-as ih-as)
-  (icl-logger-info "Post-process trace and copy it to the inference history")
+  (icl-logger-info "Post-process trace, add to inference history")
   ;; Reload the postprocessing knowledge and rules
   (ppc-reload)
   (let ((default-as (cog-set-atomspace! tr-as)))
@@ -99,7 +99,8 @@
            (results (ppc-bc target #:vardecl vardecl)))
       ;; Copy post-processed inference traces to the inference history
       (icl-logger-debug "Results:\n~a" results)
-      (cog-cp (cog-outgoing-set results) ih-as))))
+      (cog-cp (cog-outgoing-set results) ih-as)
+      (remove-dangling-atoms ih-as))))
 
 (define (mk-ic-rules ih-as)
   (icl-logger-info "Build inference control rules from the inference history")

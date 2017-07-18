@@ -61,3 +61,17 @@
          (all-atoms-string (apply string-append (map atom->string all-atoms))))
     (cog-set-atomspace! old-as)
     all-atoms-string))
+
+;; Remove dangling atoms from an atomspace. That is atoms with default
+;; TV (null confidence) with empty incoming set
+(define (remove-dangling-atoms as)
+  (let ((old-as (cog-set-atomspace! as))
+        (all-atoms (apply append (map cog-get-atoms (cog-get-types)))))
+    (for-each remove-dangling-atom all-atoms)
+    (cog-set-atomspace! old-as)))
+
+;; Remove the atom from the current atomspace if it is dangling. That
+;; is it has an empty incoming set and its TV has null confidence.
+(define (remove-dangling-atom atom)
+  (if (and (null? (cog-incoming-set atom)) (= 0 (tv-conf (cog-tv atom))))
+      (extract-hypergraph atom)))
