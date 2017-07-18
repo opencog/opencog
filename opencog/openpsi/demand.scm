@@ -58,7 +58,7 @@
 )
 
 ; --------------------------------------------------------------
-(define-public (psi-get-all-demands)
+(define (psi-get-all-demands)
 "
   psi-get-all-demands - Return a list of all demand-nodes.
 "
@@ -69,7 +69,7 @@
 
 
 ; --------------------------------------------------------------
-(define-public (psi-get-all-enabled-demands)
+(define (psi-get-all-enabled-demands)
 "
   psi-get-all-enabled-demands - Return list of all demands that are enabled.
 "
@@ -78,12 +78,12 @@
 )
 
 ; Backwards-compat wrapper
-(define-public (psi-get-all-valid-demands)
+(define (psi-get-all-valid-demands)
 "  Do not use this, use psi-get-all-enabled-demands instead "
 (psi-get-all-enabled-demands))
 
 ; --------------------------------------------------------------
-(define-public (psi-demand demand-name desired-value)
+(define (psi-demand demand-name desired-value)
 "
   psi-demand NAME VALUE
 
@@ -120,7 +120,7 @@
 )
 
 ; --------------------------------------------------------------
-(define-public (psi-demand? node)
+(define (psi-demand? node)
 "
   psi-demand? NODE - Return #t if NODE is a demand, else return #f.
 
@@ -137,7 +137,7 @@
 )
 
 ; --------------------------------------------------------------
-(define-public (psi-set-demand-value demand-node demand-value)
+(define (psi-set-demand-value demand-node demand-value)
 "
   psi-set-demand-value DEMAND VALUE - Set the DEMAND to VALUE.
 
@@ -253,7 +253,7 @@
 ; --------------------------------------------------------------
 ; Functions to help define standard action-rules
 ; --------------------------------------------------------------
-(define-public (psi-goal-increase demand-node rate)
+(define (psi-goal-increase demand-node rate)
 "
   psi-goal-increase DEMAND RATE
 
@@ -272,7 +272,7 @@
             (NumberNode rate)))
 )
 
-(define-public (psi-demand-value-increase demand-node rate-node)
+(define (psi-demand-value-increase demand-node rate-node)
 "
   psi-demand-value-increase DEMAND RATE
 
@@ -290,7 +290,7 @@
 )
 
 ; --------------------------------------------------------------
-(define-public (psi-goal-decrease demand-node rate)
+(define (psi-goal-decrease demand-node rate)
 "
   psi-goal-decrease DEMAND RATE
 
@@ -307,7 +307,7 @@
             (NumberNode rate)))
 )
 
-(define-public (psi-demand-value-decrease demand-node rate-node)
+(define (psi-demand-value-decrease demand-node rate-node)
 "
   psi-demand-value-decrease DEMAND RATE
 
@@ -329,7 +329,7 @@
 (define psi-label-skip (ConceptNode (string-append psi-prefix-str "skip")))
 
 ; --------------------------------------------------------------
-(define-public (psi-demand-skip demand)
+(define (psi-demand-skip demand)
 "
   psi-demand-skip DEMAND - Disable DEMAND.
 
@@ -346,7 +346,7 @@
 )
 
 ; --------------------------------------------------------------
-(define-public (psi-demand-skip? demand)
+(define (psi-demand-skip? demand)
 "
   psi-demand-skip? DEMAND - return #t if DEMAND should be skipped.
 "

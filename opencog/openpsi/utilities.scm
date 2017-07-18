@@ -11,11 +11,11 @@
 
 ; --------------------------------------------------------------
 ; XXX TODO: does this really need to be public?
-(define-public psi-prefix-str "OpenPsi: ")
+(define psi-prefix-str "OpenPsi: ")
 
 ; --------------------------------------------------------------
 ; XXX TODO: does this really need to be public?
-(define-public (psi-suffix-str a-string)
+(define (psi-suffix-str a-string)
 "
   psi-suffix-str STRING
 
@@ -55,7 +55,7 @@
 
 ; --------------------------------------------------------------
 
-(define-public (psi-get-exact-match ATOM)
+(define (psi-get-exact-match ATOM)
 "
   psi-get-exact-match ATOM - Return list of all of the MemberLinks
   holding rules whose context or action apply exactly (without
@@ -75,7 +75,7 @@
         (delete-duplicates (cog-filter 'MemberLink inset)))
 )
 
-(define-public (psi-get-dual-match ATOM)
+(define (psi-get-dual-match ATOM)
 "
   psi-get-dual-match ATOM - Return list of the MemberLinks
   holding rules whose context or action might apply to ATOM,
@@ -101,7 +101,7 @@
         (delete-duplicates (cog-filter 'MemberLink duset)))
 )
 
-(define-public (psi-get-members ATOM)
+(define (psi-get-members ATOM)
 "
   psi-get-members ATOM - Return list of all of the MemberLinks
   holding rules whose context or action might apply to ATOM.
@@ -394,7 +394,7 @@
 	            ;(format #t "Set value-rep type: ~a\n" rep-type)
 	            rep-type))))
 
-(define-public (psi-get-number-values-for-vars . vars)
+(define (psi-get-number-values-for-vars . vars)
 "
 	Get the current numerical values for a list of psi-related internal
 	variables. This function is written for calling via the REST API interface,
@@ -430,12 +430,12 @@
 
 ; --------------------------------------------------------------
 ; Baseline value functionality
-(define-public psi-baseline-value-node (Concept "psi-baseline-value"))
+(define psi-baseline-value-node (Concept "psi-baseline-value"))
 
-(define-public (psi-set-baseline-value! modulator value)
+(define (psi-set-baseline-value! modulator value)
   (psi-set-value!
     (List modulator psi-baseline-value-node) value))
 
-(define-public (psi-get-baseline-value modulator)
+(define (psi-get-baseline-value modulator)
   (psi-get-number-value
     (List modulator psi-baseline-value-node)))
