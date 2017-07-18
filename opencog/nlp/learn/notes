@@ -6942,6 +6942,48 @@ RMS Count      1.4721E+5    1.3142E+5     18.02        15.10
 b4e48f00a94fa8d3d1d08e8331d0d84a9  zen_pairs_mi.sql
 2c6d2667a4ff2d9f54d89765a91c3e37  zen_pairs_mi.sql.bz2
 
+==================================================================
+zen_pairs_mst
+-------------
+Mandarin word-pairs. Segmentation into words done by Ruiting.
+Includes word-pair MI statstics, disjuncts and disjunct-MI.
+
+STATUS: good
+DATE: 17 July 2017
+REASON: No known defects.
+
+                        List of relations
+ Schema |    Name    | Type  | Owner  |    Size    | Description 
+--------+------------+-------+--------+------------+-------------
+ public | atoms      | table | ubuntu | 522 MB     | 
+ public | spaces     | table | ubuntu | 40 kB      | 
+ public | typecodes  | table | ubuntu | 56 kB      | 
+ public | valuations | table | ubuntu | 1219 MB    | 
+ public | values     | table | ubuntu | 8192 bytes | 
+
+Summary Report for Correlation Matrix Word-Disjunct Pairs (Connector Sets)
+Rows: 60143 Columns: 602124
+Size: 800855 non-zero entries of 36213543732 possible
+Fraction non-zero: 2.2115E-5 Sparsity (-log_2): 15.465
+Total observations: 1188456.0  Avg obs per pair: 1.4840
+Entropy Total: 18.859   Left: 17.994   Right: 10.125
+Total MI: 9.2606
+
+                 Left         Right     Avg-left     Avg-right
+                 ----         -----     --------     ---------
+Support (l_0)  6327.        7.399    
+Count   (l_1)  1.8066E+4    94.14         2.855        12.72    
+Length  (l_2)  722.8        67.89         .1142        9.175    
+RMS Count      695.7        62.85         .1100        8.494    
+
+select count(*) from atoms;      -- 5845332 = 5.85 M atoms
+select count(*) from valuations; -- 11414113 = 11.4M values
+
+901757880 Bytes uncompressed = 902 MB
+125868179 Bytes compressed   = 126 MB
+
+c4df6f2da0c476a561cbea82981a6853  zen_pairs_mst.sql
+ff7cb1628cb7aad0a59c71b98a626121  zen_pairs_mst.sql.bz2
 
 ==================================================================
 ==================================================================
@@ -12028,6 +12070,13 @@ $16 = 8629163
 		STR))
 
 		(string-replace "fo's" "''" 2 2 1 2)
+
+zen_pairs_mst
+(export-all-csets "dict-zen.db" "ZH_cn")
+Store 800855 csets
+
+Mandarin word pairs + MI values; Ruitings segemented text
+
 =========================================================================
 
 

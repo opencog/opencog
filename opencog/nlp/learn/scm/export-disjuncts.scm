@@ -203,6 +203,12 @@
 					(cdr (dbi-get_status db-obj))))
 		)
 
+		; Write to disk, and close the database.
+		(define (shutdown)
+			(dbi-query db-obj "END TRANSACTION;")
+			(dbi-close db-obj)
+		)
+
 		; Create the tables for words and disjuncts.
 		; Refer to the Link Grammar documentation to see a
 		; description of this table format. Specifically,
@@ -266,12 +272,16 @@
 			"INSERT INTO Disjuncts VALUES ("
 			"'UNKNOWN-WORD', 'XXXBOGUS+', 0.0);"))
 
+		(dbi-query db-obj "PRAGMA synchronous = OFF;")
+		(dbi-query db-obj "PRAGMA journal_mode = MEMORY;")
+		(dbi-query db-obj "BEGIN TRANSACTION;")
+
 		; Return function that adds data to the database
 		; If SECTION if #f, the database is closed.
 		(lambda (SECTION)
 			(if SECTION
 				(add-section SECTION)
-				(dbi-close db-obj))
+				(shutdown))
 		))
 )
 
