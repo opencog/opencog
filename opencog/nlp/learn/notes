@@ -12032,6 +12032,56 @@ h 4 . ，      <--> 5 . 王门    MI = 2.7025
  焚香.506188                bTVWZI- & cTPSCX+
  敬撰.227735                cTPSCX- & (f)TPSCY+
 
+-------------------
+wtf this one two
+
+(print-mst "然杜氏 恶 撰 ， 述 一漏 百 ， 且 多 谬误 。")
+a 6 . 述  <--> 7 . 一漏     MI = 21.128
+b 4 . 撰  <--> 6 . 述       MI = 19.009
+c 2 . 然杜氏  <--> 4 . 撰   MI = 18.885
+d 7 . 一漏  <--> 8 . 百     MI = 16.029
+e 2 . 然杜氏  <--> 3 . 恶   MI = 15.179
+f 6 . 述  <--> 12 . 谬误    MI = 13.671
+g 7 . 一漏  <--> 10 . 且    MI = 12.479
+h 6 . 述  <--> 11 . 多      MI = 7.7579
+i 1 . ###LEFT-WALL###  <--> 2 . 然杜氏      MI = 3.6985
+j 4 . 撰  <--> 13 . 。      MI = 2.6162
+k 5 . ，  <--> 6 . 述       MI = 2.3806
+l 9 . ，  <--> 10 . 且      MI = 2.3653
+
+
+然杜氏.274017              (i)TSEOZ- & eTSEPA+ & cTSEPB+
+恶.490429                  eTSEPA-
+撰.425002                  cTSEPB- & bTYVJC+ & (j)TVWQA+
+
+                            near-      far-
+述.524662                  (k)TVWZA- & bTYVJC- & aTWBEZ+ & hTXAHR+ & fTLYRB+
+一漏.353033                aTWBEZ- & dTWBFA+ & gTIVQI+
+多.375900                  hTXAHR-
+谬误.163229                fTLYRB-
+百.519512                  dTWBFA-
+且.115701                  (l)TBOFC- & dTIVQI-
+
+Above should link, but its not ... why?
+
+l->r pass removed 117441
+LEFT-WALL[15044] 然杜氏[3] 恶[1] 撰[3] ，[10192] 述[5] 一漏[3] 百[2] ，[10192] 且[5] 多[136] 谬误[1] 。[10] 
+
+r->l pass removed 35544
+LEFT-WALL[3] 然杜氏[3] 恶[1] 撰[3] ，[3] 述[5] 一漏[3] 百[1] ，[1] 且[2] 多[2] 谬误[1] 。[3] 
+
+l->r pass removed 0
+LEFT-WALL[3] 然杜氏[3] 恶[1] 撰[3] ，[3] 述[5] 一漏[3] 百[1] ，[1] 且[2] 多[2] 谬误[1] 。[3] 
+
+++++ Finished expression pruning             0.09 seconds
+After expanding expressions into disjuncts:LEFT-WALL(2) 然杜氏(1) 恶(1) 撰(1) ，(1) 述(1) 一漏(1) 百(1) ，(0) 且(1) 多(2) 谬误(1) 。(3) 
+
+So expression prunning removed the comma ... why?
+
+
+Also bad line-wrapping: 
+母猪 的 价格 暴涨 ， 可见 事态 之 严重 。
+
 
 
 ERROR: In procedure gc:
