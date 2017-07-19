@@ -168,6 +168,7 @@
 	(let ((db-obj (dbi-open "sqlite3" DB-NAME))
 			(cnt 0)
 			(nprt 0)
+			(secs (current-time))
 		)
 
 		; Escape quotes -- replace single quotes by two successive
@@ -191,8 +192,14 @@
 				(set! germ-str "LEFT-WALL"))
 
 			(set! nprt (+ nprt 1))
-			(if (equal? 0 (remainder nprt 1000))
-				(format #t "~D Will insert ~A: ~A;\n" nprt germ-str dj-str))
+			(if (equal? 0 (remainder nprt 5000))
+				(begin
+					(format #t "~D Will insert ~A: ~A; in ~D secs\n"
+						nprt germ-str dj-str (- (current-time) secs))
+					(set! secs (current-time))
+					(dbi-query db-obj "END TRANSACTION;")
+					(dbi-query db-obj "BEGIN TRANSACTION;")
+				))
 
 			(set! germ-str (escquote germ-str 0))
 
