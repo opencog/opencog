@@ -105,9 +105,11 @@
                         (Type "DontExecLink"))
                       (Variable "$T")))
            (results (ppc-bc target #:vardecl vardecl)))
-      ;; Copy post-processed inference traces to the inference history
+      ;; Copy post-processed inference traces to the inference
+      ;; history. Execution relationships + preproof evaluations
       (icl-logger-debug "Results:\n~a" results)
       (cog-cp (cog-outgoing-set results) ih-as)
+      (cog-cp (cog-get-atoms 'ExecutionLink) ih-as)
       (remove-dangling-atoms ih-as))))
 
 (define (mk-ic-rules ih-as)
