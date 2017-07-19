@@ -128,7 +128,10 @@
                    (+ i 1) niter (+ j 1) pss target)
   (reload)
   (let* ((result (pln-bc target #:trace-as tr-as)) ; TODO use ic-rules
-         (result-size (length (cog-outgoing-set result))))
-    (if (= 1 result-size)
-        (tv->bool (cog-tv (gar result)))
-        #f)))
+         (result-size (length (cog-outgoing-set result)))
+         (success (if (= 1 result-size)
+                      (tv->bool (cog-tv (gar result)))
+                      #f)))
+    (icl-logger-info (if success "Success" "Failure"))
+    success))
+
