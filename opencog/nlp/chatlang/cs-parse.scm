@@ -269,80 +269,76 @@
 
     ; Rule grammar
     (rules
-      (RESPONDERS word context-sequence action-patterns) :
-        (display-token (format #f "responder_~a label_~a (~a -> ~a)"
+      (RESPONDERS txt context-sequence action-patterns) :
+        (display-token (format #f "\nresponder: ~a\nlabel: ~a\n~a\n--- action:\n~a"
           $1 $2 $3 $4))
       ; Unlabeled responder.
       ; TODO: Maybe should be labeled internally in the atomspace???
       (RESPONDERS context-sequence action-patterns) :
-        (display-token (format #f "responder_~a(~a -> ~a)" $1 $2 $3))
+        (display-token (format #f "\nresponder: ~a\n~a\n--- action:\n~a" $1 $2 $3))
       (REJOINDERS context-sequence action-patterns) :
-        (display-token (format #f "rejoinder_~a(~a -> ~a)" $1 $2 $3))
+        (display-token (format #f "\nrejoinder: ~a\n~a\n--- action:\n~a" $1 $2 $3))
       (GAMBIT action-patterns) : (display-token (format #f "gambit(~a)" $2))
     )
 
     (context-sequence
       (LPAREN context-patterns RPAREN) :
+        (display-token (format #f "--- context:\n~a" $2))
         ; Rearrange the terms in the intended order if there are any
         ; sentence anchors in the context, and append those implicit
         ; wildcards to the beginning and/or the end of the pattern
         ; if appropriate
-        (format #f "context(~a)"
-          (let* ((wc "wildcard(0 -1)")
-                 (start-anchor (string-match "start_of_sentence\\(\\)" $2))
-                 (end-anchor (string-match "end_of_sentence\\(\\)" $2)))
-            (cond ; e.g. turning "< A B C >" into "* A B C *"
-                  ((and start-anchor end-anchor)
-                   (string-trim-both (substring $2
-                     (match:end start-anchor) (match:start end-anchor))))
-                  ; e.g. turning "< A B C" into "A B C *"
-                  ((and start-anchor (string-null? (match:prefix start-anchor)))
-                   (string-append (string-trim-both
-                     (match:suffix start-anchor)) " " wc))
-                  ; e.g. turning "C < A B" into "A B * C *"
-                  (start-anchor (string-append (string-trim-both
-                    (match:suffix start-anchor)) " " wc " "
-                      (string-trim-both (match:prefix start-anchor)) " " wc))
-                  ; e.g. turning "A B C >" into "* A B C"
-                  ((and end-anchor (string-null? (match:suffix end-anchor)))
-                   (string-append wc " " (string-trim-both
-                     (match:prefix end-anchor))))
-                  ; e.g. turning "C > A B" into "* A B * C"
-                  (end-anchor (string-append wc " " (string-trim-both
-                    (match:suffix end-anchor)) " " wc " "
-                      (string-trim-both (match:prefix end-anchor))))
-                  ; if there is no sentence anchor at all, append those implicit
-                  ; wildcards at the beginning and the end of the pattern
-                  ; e.g. turning "A B C" into "* A B C *"
-                  (else (string-append wc " " $2 " " wc))))
-        )
+;        (format #f "context(~a)"
+;          (let* ((wc "wildcard(0 -1)")
+;                 (start-anchor (string-match "start_of_sentence\\(\\)" $2))
+;                 (end-anchor (string-match "end_of_sentence\\(\\)" $2)))
+;            (cond ; e.g. turning "< A B C >" into "* A B C *"
+;                  ((and start-anchor end-anchor)
+;                   (string-trim-both (substring $2
+;                     (match:end start-anchor) (match:start end-anchor))))
+;                  ; e.g. turning "< A B C" into "A B C *"
+;                  ((and start-anchor (string-null? (match:prefix start-anchor)))
+;                   (string-append (string-trim-both
+;                     (match:suffix start-anchor)) " " wc))
+;                  ; e.g. turning "C < A B" into "A B * C *"
+;                  (start-anchor (string-append (string-trim-both
+;                    (match:suffix start-anchor)) " " wc " "
+;                      (string-trim-both (match:prefix start-anchor)) " " wc))
+;                  ; e.g. turning "A B C >" into "* A B C"
+;                  ((and end-anchor (string-null? (match:suffix end-anchor)))
+;                   (string-append wc " " (string-trim-both
+;                     (match:prefix end-anchor))))
+;                  ; e.g. turning "C > A B" into "* A B * C"
+;                  (end-anchor (string-append wc " " (string-trim-both
+;                    (match:suffix end-anchor)) " " wc " "
+;                      (string-trim-both (match:prefix end-anchor))))
+;                  ; if there is no sentence anchor at all, append those implicit
+;                  ; wildcards at the beginning and the end of the pattern
+;                  ; e.g. turning "A B C" into "* A B C *"
+;                  (else (string-append wc " " $2 " " wc))))
+;        )
     )
 
     (context-patterns
       (context-pattern) : (display-token $1)
       (context-patterns context-pattern) :
-        (display-token (format #f "~a ~a" $1 $2))
+        (display-token (format #f "~a\n~a" $1 $2))
       (context-patterns enter) : $1
     )
 
     (context-pattern
-      (<) : (display-token "start_of_sentence()")
-      (>) : (display-token "end_of_sentence()")
-      (*) : (display-token (format #f "wildcard(0 -1)"))
-      (*n) : (display-token (format #f "wildcard(~a ~a)" $1 $1))
-      (*~n) : (display-token (format #f "wildcard(0 ~a)" $1))
-      (LEMMA) : (display-token (format #f "lemma(~a)" $1))
-      (LITERAL) : (display-token (format #f "literal(~a)" $1))
-      (phrase) : (display-token $1)
-      (concept) : (display-token $1)
-      (variable) : (display-token $1)
+      (<) : "(cons 'anchor-start \"<\")"
+      (>) : "(cons 'anchor-end \">\")"
+      (wildcard) : $1
+      (lemma) : $1
+      (literal) : $1
+      (phrase) : $1
+      (concept) : $1
+      (variable) : $1
       (function) : (display-token $1)
-      (choice) : (display-token $1)
+      (choice) : $1
       (unordered-matching) : (display-token $1)
-      (NOT LEMMA) : (display-token (format #f "not(lemma(~a))" $2))
-      (NOT LITERAL) : (display-token (format #f "not(literal(~a))" $2))
-      (NOT concept) : (display-token (format #f "not(~a)" $2))
-      (NOT choice) : (display-token (format #f "not(~a)" $2))
+      (negation) : $1
       (variable ? concept) :
         (display-token (format #f "is_member(~a ~a)" $1 $3))
       (sequence) : (display-token $1)
@@ -361,15 +357,118 @@
       (LEMMA) : (display-token $1)
       (LITERAL) : (display-token $1)
       (STRING) : (display-token $1)
-      (DQUOTE words DQUOTE) : (display-token (format #f "~a ~a ~a" $1 $2 $3))
+      (DQUOTE txts DQUOTE) : (display-token (format #f "~a ~a ~a" $1 $2 $3))
       (variable) : (display-token $1)
       (function) : (display-token $1)
       (LSBRACKET action-patterns RSBRACKET) :
         (display-token (format #f "action-choice(~a)" $2))
     )
 
+    (lemma
+      (LEMMA) : (format #f "(cons 'lemma \"~a\")" $1)
+    )
+
+    (literal
+      (LITERAL) : (format #f "(cons 'word \"~a\")" $1)
+    )
+
+    (phrase
+      (DQUOTE phrase-terms DQUOTE) :
+        (format #f "(cons 'phrase \"~a\")" $2)
+    )
+
+    (phrase-terms
+      (phrase-term) : $1
+      (phrase-terms phrase-term) : (format #f "~a ~a" $1 $2)
+    )
+
+    (phrase-term
+      (LEMMA) : $1
+      (LITERAL) : $1
+      (STRING) : $1
+    )
+
+    (concept
+      (ID) : (format #f "(cons 'concept \"~a\")" $1)
+    )
+
+    (choice
+      (LSBRACKET choice-terms RSBRACKET) :
+        (format #f "(cons 'choice (list ~a))" $2)
+    )
+
+    (choice-terms
+      (choice-term) : $1
+      (choice-terms choice-term) : (format #f "~a ~a" $1 $2)
+    )
+
+    (choice-term
+      (lemma) : $1
+      (literal) : $1
+      (phrase) : $1
+      (concept) : $1
+      (negation) : $1
+    )
+
+    (wildcard
+      (*) : "(cons 'wildcard (cons 0 -1))"
+      (*n) : (format #f "(cons 'wildcard (cons ~a ~a))" $1 $1)
+      (*~n) : (format #f "(cons 'wildcard (cons 0 ~a))" $1)
+    )
+
+    (variable
+      (VAR wildcard) : (format #f "(cons 'variable ~a)" $2)
+      (VAR lemma) :  (format #f "(cons 'variable ~a)" $2)
+      (VAR concept) : (format #f "(cons 'variable ~a)" $2)
+      (VAR choice) : (format #f "(cons 'variable ~a)" $2)
+      ; TODO
+      (MVAR) : (display-token (format #f "match_variable(~a)" $1))
+      (MOVAR) : (display-token (format #f "match_orig_variable(~a)" $1))
+    )
+
+    (negation
+      (NOT lemma) : (format #f "(cons 'negation (list ~a))" $2)
+      (NOT literal) : (format #f "(cons 'negation (list ~a))" $2)
+      (NOT phrase) : (format #f "(cons 'negation (list ~a))" $2)
+      (NOT concept) : (format #f "(cons 'negation (list ~a))" $2)
+      (NOT choice) : (format #f "(cons 'negation (list ~a))" $2)
+    )
+
+    (function
+      (^ txt LPAREN args RPAREN) :
+        (format #f "(cons 'function (list \"~a\" ~a))" $2 $4)
+      (^ txt LPAREN RPAREN) :
+        (format #f "(cons 'function (list \"~a\"))" $2)
+      (^ txt) :
+        (format #f "(cons 'function (list \"~a\"))" $2)
+    )
+
+    (txts
+      (txt) : $1
+      (txts) : $1
+    )
+
+    (txt
+      (LEMMA) : $1
+      (LITERAL) : $1
+      (STRING) : $1
+    )
+
+    (args
+      (arg) : $1
+      (args arg) : (format #f "~a ~a" $1 $2)
+    )
+
+    (arg
+      (LEMMA) : (format #f "\"~a\"" $1)
+      (LITERAL) : (format #f "\"~a\"" $1)
+      (MVAR) : $1
+      (MOVAR) : $1
+    )
+
     (sequence
-      (LPAREN sequence-terms RPAREN) : (format #f "sequence(~a)" $2)
+      (LPAREN sequence-terms RPAREN) :
+        (format #f "(cons 'sequence (list ~a))" $2)
     )
 
     (sequence-terms
@@ -378,104 +477,46 @@
     )
 
     (sequence-term
-      (*) : (display-token (format #f "wildcard(0 -1)"))
-      (*n) : (display-token (format #f "wildcard(~a ~a)" $1 $1))
-      (*~n) : (display-token (format #f "wildcard(0 ~a)" $1))
-      (LEMMA) : (display-token (format #f "lemma(~a)" $1))
-      (LITERAL) : (display-token (format #f "literal(~a)" $1))
-      (phrase) : (display-token $1)
-      (concept) : (display-token $1)
-      (variable) : (display-token $1)
-      (choice) : (display-token $1)
-    )
-
-    (choice
-      (LSBRACKET context-patterns RSBRACKET) :
-        (display-token (format #f "choices(~a)" $2))
-    )
-
-    (concept
-      (ID) : (display-token (format #f "concept(~a)" $1))
+      (wildcard) : $1
+      (lemma) : $1
+      (literal) : $1
+      (phrase) : $1
+      (concept) : $1
+      (variable) : $1
+      (choice) : $1
     )
 
     ; TODO: This has a restart_matching effect. See chatscript documentation
     (unordered-matching
       (<< unordered-terms >>) :
-        (display-token (format #f "unordered-matching(~a)" $2))
+        (format #f "(cons 'unordered-matching (list ~a))" $2)
       ; Couldn't come up with any better and robust way than stacking up
       ; RESTART tokens like this...
       (unordered-term RESTART unordered-term) :
-        (display-token (format #f "unordered-matching(~a ~a)" $1 $3))
+        (format #f "(cons 'unordered-matching (list ~a ~a))" $1 $3)
       (unordered-term RESTART unordered-term RESTART unordered-term) :
-        (display-token (format #f "unordered-matching(~a ~a ~a)" $1 $3 $5))
+        (format #f "(cons 'unordered-matching (list ~a ~a ~a))" $1 $3 $5)
       (unordered-term RESTART unordered-term RESTART unordered-term
         RESTART unordered-term) :
-          (display-token (format #f "unordered-matching(~a ~a ~a ~a)"
-            $1 $3 $5 $7))
+          (format #f "(cons 'unordered-matching (list ~a ~a ~a ~a))"
+            $1 $3 $5 $7)
       (unordered-term RESTART unordered-term RESTART unordered-term
         RESTART unordered-term RESTART unordered-term) :
-          (display-token (format #f "unordered-matching(~a ~a ~a ~a ~a)"
-            $1 $3 $5 $7 $9))
+          (format #f "(cons 'unordered-matching (list ~a ~a ~a ~a ~a))"
+            $1 $3 $5 $7 $9)
     )
 
     (unordered-terms
-      (unordered-term) : (display-token $1)
-      (unordered-terms unordered-term) : (display-token (format #f "~a ~a" $1 $2))
+      (unordered-term) : $1
+      (unordered-terms unordered-term) : (format #f "~a ~a" $1 $2)
     )
 
     (unordered-term
-      (LEMMA) : (display-token (format #f "lemma(~a)" $1))
-      (LITERAL) : (display-token (format #f "literal(~a)" $1))
-      (phrase) : (display-token $1)
-      (concept) : (display-token $1)
-      (choice) : (display-token $1)
-    )
-
-    (function
-      (^ word LPAREN args RPAREN) :
-        (display-token (format #f "function_~a(~a)" $2 $4))
-      (^ word LPAREN RPAREN) :
-        (display-token (format #f "function_~a()" $2))
-      (^ word) :
-        (display-token (format #f "function_~a" $2))
-    )
-
-    (args
-      (arg) : (display-token $1)
-      (args arg) : (display-token (format #f "~a ~a" $1 $2))
-    )
-
-    (arg
-      (LEMMA) :  (display-token (format #f "lemma(~a)" $1))
-      (LITERAL) :  (display-token (format #f "literal(~a)" $1))
-      (concept) :  (display-token $1)
-      (variable) : (display-token $1)
-    )
-
-    (phrase
-      (DQUOTE words DQUOTE) : (display-token (format #f "phrase(~a)" $2))
-    )
-
-    (words
-      (word) : $1
-      (words word) : $1
-    )
-
-    (word
-      (LEMMA) : $1
-      (LITERAL) : $1
-      (STRING) : $1
-    )
-
-    (variable
-      (VAR *) : (display-token "variable(wildcard(0 -1))")
-      (VAR *n) : (display-token (format #f "variable(wildcard(~a ~a))" $2 $2))
-      (VAR *~n) : (display-token (format #f "variable(wildcard(0 ~a))" $2))
-      (VAR LEMMA) :  (display-token (format #f "variable(lemma(~a))" $2))
-      (VAR concept) : (display-token (format #f "variable(~a)" $2))
-      (VAR choice) : (display-token (format #f "variable(~a)" $2))
-      (MVAR) : (display-token (format #f "match_variable(~a)" $1))
-      (MOVAR) : (display-token (format #f "match_orig_variable(~a)" $1))
+      (lemma) : $1
+      (literal) : $1
+      (phrase) : $1
+      (concept) : $1
+      (choice) : $1
     )
   )
 )
