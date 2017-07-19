@@ -16,7 +16,9 @@
 ; For storing the groundings
 (define globs-word '())
 (define globs-lemma '())
-(define vars-grd '())
+
+; Keep a record of the variables, if any, found in the pattern of a rule
+(define pat-vars '())
 
 ; For unit test
 (define test-get-lemma #f)
@@ -121,7 +123,6 @@
   (define conds '())
   (define glob-conds '())
   (define term-seq '())
-  (define var-cnt 0)
   (for-each (lambda (t)
     (cond ((equal? 'lemma (car t))
            (let ((l (lemma (cdr t))))
@@ -175,14 +176,37 @@
                   (w (wildcard (cadr t) (cddr t) v)))
                  (set! globs (append globs (car w)))
                  (set! term-seq (append term-seq (list (Glob v))))))
-          ((equal? 'variable (car t))
+          ((and (equal? 'variable (car t)) (equal? 'wildcard (caadr t)))
            (let* ((v (choose-var-name))
-                  (x (variable (cadr t) v))
+                  (w (wildcard (cadadr t) (cddadr t) v))
                   (glob (Glob v)))
-                 (set! globs (append globs (car x)))
+                 (set! globs (append globs (car w)))
                  (set! term-seq (append term-seq (list glob)))
-                 (set! vars-grd (append vars-grd (list glob)))
-                 (set! var-cnt (+ var-cnt 1))))))
+                 (set! pat-vars (append pat-vars (list glob)))))
+          ((and (equal? 'variable (car t)) (equal? 'lemma (caadr t)))
+           (let* ((v (choose-var-name))
+                  (vl (var-lemma (cdadr t) v))
+                  (glob (Glob v)))
+                 (set! globs (append globs (car vl)))
+                 (set! glob-conds (append glob-conds (cdr vl)))
+                 (set! term-seq (append term-seq (list glob)))
+                 (set! pat-vars (append pat-vars (list glob)))))
+          ((and (equal? 'variable (car t)) (equal? 'concept (caadr t)))
+           (let* ((v (choose-var-name))
+                  (cl (concept (cdadr t) v #t))
+                  (glob (Glob v)))
+                 (set! globs (append globs (car cl)))
+                 (set! glob-conds (append glob-conds (cdr cl)))
+                 (set! term-seq (append term-seq (list (Glob v))))
+                 (set! pat-vars (append pat-vars (list glob)))))
+          ((and (equal? 'variable (car t)) (equal? 'choices (caadr t)))
+           (let* ((v (choose-var-name))
+                  (cl (choices (cdadr t) v #t))
+                  (glob (Glob v)))
+                 (set! globs (append globs (car cl)))
+                 (set! glob-conds (append glob-conds (cdr cl)))
+                 (set! term-seq (append term-seq (list (Glob v))))
+                 (set! pat-vars (append pat-vars (list glob)))))))
     TERMS)
   ; DualLink couldn't match patterns with no constant terms in it
   ; Mark the rules with no constant terms so that they can be found
@@ -229,11 +253,11 @@
       (cond ; The grounding of a variable in original words
             ((not (equal? #f (string-match "'_[0-9]+" n)))
              (ExecutionOutput (GroundedSchema "scm: ground-word")
-               (List (list-ref vars-grd (string->number (substring n 2))))))
+               (List (list-ref pat-vars (string->number (substring n 2))))))
             ; The grounding of a variable in lemmas
             ((not (equal? #f (string-match "_[0-9]+" n)))
              (ExecutionOutput (GroundedSchema "scm: ground-lemma")
-               (List (list-ref vars-grd (string->number (substring n 1))))))
+               (List (list-ref pat-vars (string->number (substring n 1))))))
             ; A function call with no arguments
             ((not (equal? #f (string-match "\\^[a-zA-Z0-9_\\-\\(\\)]+" n)))
              (ExecutionOutput (GroundedSchema (string-append "scm: "
@@ -400,7 +424,7 @@
   "Check if GLOB is a member of LST, where LST may contain
    WordNodes, LemmaNodes, and PhraseNodes. IN-LEMMA? is a flag
    to indicate whether the comparison should be done purely
-   using lemmas."
+   in lemmas."
   (if IN-LEMMA?
       (any (lambda (t)
         (equal? (string-join (map get-lemma (map cog-name GLOB)))
@@ -458,6 +482,17 @@
         (if (is-member? GLOB (append chs cpts) #t)
             (stv 1 1)
             (stv 0 1))))
+
+(define-public (chatlang-lemma? LEMMA . GLOB)
+  "Check if the lemma of the value grounded for the GlobNode is LEMMA.
+   For example if there is a variable \"_play\" in the pattern of a rule,
+   it will be accepted if the value grounded is either play, plays, or
+   played."
+  (cog-logger-debug chatlang-logger
+    "In chatlang-lemma? LEMMA: ~aGLOB: ~a" LEMMA GLOB)
+  (if (is-member? GLOB (list LEMMA) #t)
+    (stv 1 1)
+    (stv 0 1)))
 
 (define (text-contains? RTXT LTXT TERM)
   "Check if either RTXT (raw) or LTXT (lemma) contains TERM."
