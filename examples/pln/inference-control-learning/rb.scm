@@ -43,7 +43,8 @@
 
 ;; TODO: add as many valid rules are possible
 (define rule-filenames
-  (list "term/deduction.scm"
+  (list "propositional/contraposition.scm"
+        "term/deduction.scm"
         )
   )
 (for-each load-from-path rule-filenames)
@@ -56,6 +57,7 @@
 ; List the rules and their weights.
 (define rules
   (list
+        (list contraposition-inheritance-rule-name 1)
         (list deduction-inheritance-rule-name 1)
         )
   )
