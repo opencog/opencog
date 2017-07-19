@@ -269,27 +269,24 @@
 
     ; Rule grammar
     (rules
-      (RESPONDERS txt context-sequence action-patterns) :
-        (display-token (format #f "\nresponder: ~a\nlabel: ~a\n~a\n--- action:\n~a"
-          $1 $2 $3 $4))
+      (RESPONDERS name context action) :
+        (format #f "\nresponder: ~a\nlabel: ~a\n~a\n~a" $1 $2 $3 $4)
       ; Unlabeled responder.
       ; TODO: Maybe should be labeled internally in the atomspace???
-      (RESPONDERS context-sequence action-patterns) :
-        (display-token (format #f "\nresponder: ~a\n~a\n--- action:\n~a" $1 $2 $3))
-      (REJOINDERS context-sequence action-patterns) :
-        (display-token (format #f "\nrejoinder: ~a\n~a\n--- action:\n~a" $1 $2 $3))
-      (GAMBIT action-patterns) : (display-token (format #f "gambit(~a)" $2))
+      (RESPONDERS context action) :
+        (format #f "\nresponder: ~a\n~a\n~a" $1 $2 $3)
+      (REJOINDERS context action) :
+        (format #f "\nrejoinder: ~a\n~a\n~a" $1 $2 $3)
+      (GAMBIT action-patterns) : (format #f "gambit: ~a" $2)
     )
 
-    (context-sequence
-      (LPAREN context-patterns RPAREN) :
-        (display-token (format #f "--- context:\n~a" $2))
+    (context
+      (LPAREN context-patterns RPAREN) : (format #f "--- context:\n~a" $2)
     )
 
     (context-patterns
-      (context-pattern) : (display-token $1)
-      (context-patterns context-pattern) :
-        (display-token (format #f "~a\n~a" $1 $2))
+      (context-pattern) : $1
+      (context-patterns context-pattern) : (format #f "~a\n~a" $1 $2)
       (context-patterns enter) : $1
     )
 
@@ -302,33 +299,44 @@
       (phrase) : $1
       (concept) : $1
       (variable) : $1
-      (function) : (display-token $1)
+      (function) : $1
       (choice) : $1
-      (unordered-matching) : (display-token $1)
+      (unordered-matching) : $1
       (negation) : $1
       (variable ? concept) :
-        (display-token (format #f "is_member(~a ~a)" $1 $3))
-      (sequence) : (display-token $1)
+        (format #f "(cons 'is_member (list ~a ~a))" $1 $3)
+      (sequence) : $1
+    )
+
+    (action
+      (action-choices) : (format #f "--- action (choices):\n~a" $1)
+      (action-patterns) : (format #f "--- action:\n" $1)
+    )
+
+    (action-choices
+      (action-choice) : $1
+      (action-choices action-choice) : (format #f "~a\n~a" $1 $2)
+    )
+
+    (action-choice
+      (LSBRACKET action-patterns RSBRACKET) : (format #f "\"~a\"" $2)
     )
 
     (action-patterns
-      (action-pattern) : (display-token $1)
-      (action-patterns action-pattern) :
-        (display-token (format #f "~a ~a" $1 $2))
-      (action-patterns enter) : (display-token $1)
+      (action-pattern) : $1
+      (action-patterns action-pattern) : (format #f "~a ~a" $1 $2)
+      (action-patterns enter) : $1
     )
 
     (action-pattern
-      (?) : (display-token "?")
-      (NOT) : (display-token "!")
-      (LEMMA) : (display-token $1)
-      (LITERAL) : (display-token $1)
-      (STRING) : (display-token $1)
-      (DQUOTE txts DQUOTE) : (display-token (format #f "~a ~a ~a" $1 $2 $3))
-      (variable) : (display-token $1)
-      (function) : (display-token $1)
-      (LSBRACKET action-patterns RSBRACKET) :
-        (display-token (format #f "action-choice(~a)" $2))
+      (?) : $1
+      (NOT) : "!"
+      (DQUOTE) : "\\\""
+      (LEMMA) : $1
+      (LITERAL) : $1
+      (STRING) : $1
+      (variable) : $1
+      (function) : $1
     )
 
     (lemma
@@ -340,8 +348,7 @@
     )
 
     (phrase
-      (DQUOTE phrase-terms DQUOTE) :
-        (format #f "(cons 'phrase \"~a\")" $2)
+      (DQUOTE phrase-terms DQUOTE) : (format #f "(cons 'phrase \"~a\")" $2)
     )
 
     (phrase-terms
@@ -361,7 +368,7 @@
 
     (choice
       (LSBRACKET choice-terms RSBRACKET) :
-        (format #f "(cons 'choice (list ~a))" $2)
+        (format #f "(cons 'choices (list ~a))" $2)
     )
 
     (choice-terms
@@ -375,6 +382,7 @@
       (phrase) : $1
       (concept) : $1
       (negation) : $1
+      (sequence) : $1
     )
 
     (wildcard
@@ -402,20 +410,20 @@
     )
 
     (function
-      (^ txt LPAREN args RPAREN) :
+      (^ name LPAREN args RPAREN) :
         (format #f "(cons 'function (list \"~a\" ~a))" $2 $4)
-      (^ txt LPAREN RPAREN) :
+      (^ name LPAREN RPAREN) :
         (format #f "(cons 'function (list \"~a\"))" $2)
-      (^ txt) :
+      (^ name) :
         (format #f "(cons 'function (list \"~a\"))" $2)
     )
 
-    (txts
-      (txt) : $1
-      (txts) : $1
+    (names
+      (name) : $1
+      (names) : $1
     )
 
-    (txt
+    (name
       (LEMMA) : $1
       (LITERAL) : $1
       (STRING) : $1
@@ -484,6 +492,7 @@
       (phrase) : $1
       (concept) : $1
       (choice) : $1
+      (negation) : $1
     )
   )
 )
