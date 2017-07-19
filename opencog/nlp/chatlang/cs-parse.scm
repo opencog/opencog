@@ -284,39 +284,6 @@
     (context-sequence
       (LPAREN context-patterns RPAREN) :
         (display-token (format #f "--- context:\n~a" $2))
-        ; Rearrange the terms in the intended order if there are any
-        ; sentence anchors in the context, and append those implicit
-        ; wildcards to the beginning and/or the end of the pattern
-        ; if appropriate
-;        (format #f "context(~a)"
-;          (let* ((wc "wildcard(0 -1)")
-;                 (start-anchor (string-match "start_of_sentence\\(\\)" $2))
-;                 (end-anchor (string-match "end_of_sentence\\(\\)" $2)))
-;            (cond ; e.g. turning "< A B C >" into "* A B C *"
-;                  ((and start-anchor end-anchor)
-;                   (string-trim-both (substring $2
-;                     (match:end start-anchor) (match:start end-anchor))))
-;                  ; e.g. turning "< A B C" into "A B C *"
-;                  ((and start-anchor (string-null? (match:prefix start-anchor)))
-;                   (string-append (string-trim-both
-;                     (match:suffix start-anchor)) " " wc))
-;                  ; e.g. turning "C < A B" into "A B * C *"
-;                  (start-anchor (string-append (string-trim-both
-;                    (match:suffix start-anchor)) " " wc " "
-;                      (string-trim-both (match:prefix start-anchor)) " " wc))
-;                  ; e.g. turning "A B C >" into "* A B C"
-;                  ((and end-anchor (string-null? (match:suffix end-anchor)))
-;                   (string-append wc " " (string-trim-both
-;                     (match:prefix end-anchor))))
-;                  ; e.g. turning "C > A B" into "* A B * C"
-;                  (end-anchor (string-append wc " " (string-trim-both
-;                    (match:suffix end-anchor)) " " wc " "
-;                      (string-trim-both (match:prefix end-anchor))))
-;                  ; if there is no sentence anchor at all, append those implicit
-;                  ; wildcards at the beginning and the end of the pattern
-;                  ; e.g. turning "A B C" into "* A B C *"
-;                  (else (string-append wc " " $2 " " wc))))
-;        )
     )
 
     (context-patterns
