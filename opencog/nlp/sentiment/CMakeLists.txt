@@ -14,4 +14,4 @@ INSTALL (FILES
 	dicts/dec.yml
 	dicts/inv.yml
 	dicts/sentiWordNet.txt
-	DESTINATION "/usr/local/etc/opencog/dicts")
+	DESTINATION "${CMAKE_INSTALL_PREFIX}/etc/opencog/dicts")
