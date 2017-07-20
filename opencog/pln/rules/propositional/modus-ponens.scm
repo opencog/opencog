@@ -13,6 +13,8 @@
 ;;       modus-ponens-implication-rule
 ;;       modus-ponens-subset-rule
 ;;
+;; This rule contains less premises but thus is less precises than
+;; PreciseModusPonens.
 ;;
 ;; -----------------------------------------------------------------------------
 (load "formulas.scm")
@@ -64,7 +66,6 @@
        (cA (cog-stv-confidence A))
        (sAB (cog-stv-strength AB))
        (cAB (cog-stv-confidence AB))
-       ;; Define another rule where these are moved into the premises
        (snotAB 0.2)
        (cnotAB 1))
     (cog-set-tv!
