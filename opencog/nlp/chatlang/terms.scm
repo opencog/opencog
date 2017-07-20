@@ -137,12 +137,12 @@
                                       (Interval (Number LOWER) (Number UPPER)))))
         '()))
 
-(define* (variable TERM #:optional (VAR (choose-var-name)))
-  "Occurrence of a variable, where TERM can be a concept, a list of choices,
-   or a wildcard."
-  (cond ((equal? 'concept (car TERM))
-         (concept (cdr TERM) VAR))
-        ((equal? 'choices (car TERM))
-         (choices (cdr TERM) VAR))
-        ((equal? 'wildcard (car TERM))
-         (wildcard (cadr TERM) (cddr TERM) VAR))))
+(define (var-lemma LEMMA VAR)
+  "Occurence of a variable that should be grounded to LEMMA."
+  (cons (list (TypedVariable (Glob VAR)
+                             (TypeSet (Type "WordNode")
+                                      (Interval (Number 1)
+                                                (Number 1)))))
+        (list (Evaluation (GroundedPredicate "scm: chatlang-lemma?")
+                          (List (LemmaNode LEMMA)
+                                (Glob VAR))))))
