@@ -223,7 +223,7 @@
 
     (input
       (declarations) : $1
-      (rules) : $1
+      (rule) : $1
       (enter) : $1
       (COMMENT) : #f
       (SAMPLE_INPUT) : #f ; TODO replace with a tester function
@@ -268,7 +268,7 @@
     )
 
     ; Rule grammar
-    (rules
+    (rule
       (RESPONDERS name context action) :
         (format #f "\nresponder: ~a\nlabel: ~a\n~a\n~a" $1 $2 $3 $4)
       ; Unlabeled responder.
@@ -281,7 +281,8 @@
     )
 
     (context
-      (LPAREN context-patterns RPAREN) : (format #f "--- context:\n~a" $2)
+;      (LPAREN context-patterns RPAREN) : (format #f "--- context:\n~a" $2)
+      (LPAREN context-patterns RPAREN) : $2
     )
 
     (context-patterns
@@ -392,21 +393,31 @@
     )
 
     (variable
-      (VAR wildcard) : (format #f "(cons 'variable ~a)" $2)
-      (VAR lemma) :  (format #f "(cons 'variable ~a)" $2)
-      (VAR concept) : (format #f "(cons 'variable ~a)" $2)
-      (VAR choice) : (format #f "(cons 'variable ~a)" $2)
+      (VAR wildcard) : (format #f "(cons 'variable (list ~a))" $2)
+      (VAR lemma) :  (format #f "(cons 'variable (list ~a))" $2)
+      (VAR concept) : (format #f "(cons 'variable (list ~a))" $2)
+      (VAR choice) : (format #f "(cons 'variable (list ~a))" $2)
       ; TODO
       (MVAR) : (display-token (format #f "match_variable(~a)" $1))
       (MOVAR) : (display-token (format #f "match_orig_variable(~a)" $1))
     )
 
     (negation
-      (NOT lemma) : (format #f "(cons 'negation (list ~a))" $2)
-      (NOT literal) : (format #f "(cons 'negation (list ~a))" $2)
-      (NOT phrase) : (format #f "(cons 'negation (list ~a))" $2)
-      (NOT concept) : (format #f "(cons 'negation (list ~a))" $2)
-      (NOT choice) : (format #f "(cons 'negation (list ~a))" $2)
+      (NOT negation-term) : (format #f "(cons 'negation (list ~a))" $2)
+      (NOT LSBRACKET negation-terms RSBRACKET) :
+        (format #f "(cons 'negation (list ~a))" $3)
+    )
+
+    (negation-terms
+      (negation-term) : $1
+      (negation-terms negation-term) : (format #f "~a ~a" $1 $2)
+    )
+
+    (negation-term
+      (lemma) : $1
+      (literal) : $1
+      (phrase) : $1
+      (concept) : $1
     )
 
     (function
