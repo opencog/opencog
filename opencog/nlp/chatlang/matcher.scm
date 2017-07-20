@@ -82,9 +82,9 @@
 
 (define-public (show-globs)
   "Show the groundings of the GlobNodes."
+  (display "pat-vars: ") (display pat-vars) (newline)
   (display "globs-word: ") (display globs-word) (newline)
-  (display "globs-lemma: ") (display globs-lemma) (newline)
-  (display "vars-grd: ") (display vars-grd) (newline))
+  (display "globs-lemma: ") (display globs-lemma) (newline))
 
 (define-public (test-chatlang TXT)
   "Try to find (and execute) the matching rules given an input TXT."
