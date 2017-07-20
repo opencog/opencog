@@ -1127,20 +1127,14 @@ void TypeFrameIndex::buildQueryTerm(TypeFrame &answer,
                                     const TypeFrame &baseFrame,
                                     int cursor) const
 {
+
     selectCurrentElement(answer, variableOccurrences, baseFrame, cursor);
-    int nargs = baseFrame.at(cursor).second;
-    while (nargs > 0) {
-        cursor++;
-        selectCurrentElement(answer, variableOccurrences, baseFrame, cursor);
-        nargs--;
-        if (nargs > 0) {
-            int skip = baseFrame.at(cursor).second;
-            while (skip > 0) {
-                cursor++;
-                selectCurrentElement(answer, variableOccurrences, baseFrame, cursor);
-                skip += baseFrame.at(cursor).second;
-                skip--;
-            }
+    vector<int> argPos = baseFrame.getArgumentsPosition(cursor);
+    for (unsigned int i = 0; i < argPos.size(); i++) {
+        if (baseFrame.at(argPos.at(i)).second == 0) {
+            selectCurrentElement(answer, variableOccurrences, baseFrame, argPos.at(i));
+        } else {
+            buildQueryTerm(answer, variableOccurrences, baseFrame, argPos.at(i));
         }
     }
 }
