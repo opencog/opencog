@@ -214,7 +214,9 @@ HandleSeq PatternMiner::ReplaceConstNodeWithVariableForAPattern(HandleSeq& patte
 // the input links should be like: only specify the const node, all the variable node name should not be specified:
 // unifiedLastLinkIndex is to return where the last link in the input pattern is now in the ordered pattern
 // because the last link in input pattern is the externed link from last gram pattern
-HandleSeq PatternMiner::UnifyPatternOrder(HandleSeq& inputPattern, unsigned int& unifiedLastLinkIndex)
+// in orderedVarNameMap, the first Handle is the variable node in the input unordered pattern,
+// the second Handle is the renamed ordered variable node in the output ordered pattern.
+HandleSeq PatternMiner::UnifyPatternOrder(HandleSeq& inputPattern, unsigned int& unifiedLastLinkIndex, map<Handle,Handle>& orderedVarNameMap)
 {
 
     // Step 1: take away all the variable names, make the pattern into such format string:
@@ -326,10 +328,6 @@ HandleSeq PatternMiner::UnifyPatternOrder(HandleSeq& inputPattern, unsigned int&
         ++ lastLinkIndex;
 
     }
-
-    // in this map, the first Handle is the variable node is the original Atomspace,
-    // the second Handle is the renamed ordered variable node in the Pattern Mining Atomspace.
-    map<Handle,Handle> orderedVarNameMap;
 
     HandleSeq rebindPattern = RebindVariableNames(orderedHandles, orderedVarNameMap);
 
@@ -1443,7 +1441,7 @@ void PatternMiner::OutPutStaticsToCsvFile(unsigned int n_gram)
 
         csvFile << htreeNode->count << "," << htreeNode->nI_Surprisingness << ","
 
-                << htreeNode->nII_Surprisingness << htreeNode->nII_Surprisingness_b << htreeNode->subpattern_b_num;
+                << htreeNode->nII_Surprisingness << "," << htreeNode->nII_Surprisingness_b << "," << htreeNode->subpattern_b_num;
 //        if (htreeNode->superPatternRelations.size() > 0)
 //            csvFile << htreeNode->nII_Surprisingness;
 //        else
@@ -2064,7 +2062,8 @@ void PatternMiner::calculateInteractionInformation(HTreeNode* HNode)
              }
 
              unsigned int unifiedLastLinkIndex;
-             HandleSeq unifiedSubPattern = UnifyPatternOrder(subPattern, unifiedLastLinkIndex);
+             map<Handle,Handle> orderedVarNameMap;
+             HandleSeq unifiedSubPattern = UnifyPatternOrder(subPattern, unifiedLastLinkIndex,orderedVarNameMap);
              string subPatternKey = unifiedPatternToKeyString(unifiedSubPattern);
 
 //             std::cout<< "Subpattern: " << subPatternKey;
@@ -2081,7 +2080,8 @@ void PatternMiner::calculateInteractionInformation(HTreeNode* HNode)
                  {
                      // Unify it again
                      unsigned int _unifiedLastLinkIndex;
-                     HandleSeq unifiedConnectedSubPattern = UnifyPatternOrder(aConnectedSubPart, _unifiedLastLinkIndex);
+                     map<Handle,Handle> suborderedVarNameMap;
+                     HandleSeq unifiedConnectedSubPattern = UnifyPatternOrder(aConnectedSubPart, _unifiedLastLinkIndex,suborderedVarNameMap);
                      string connectedSubPatternKey = unifiedPatternToKeyString(unifiedConnectedSubPattern);
 //                     cout << "a splitted part: " << connectedSubPatternKey;
                      double h = calculateEntropyOfASubConnectedPattern(connectedSubPatternKey, unifiedConnectedSubPattern);
@@ -2712,7 +2712,8 @@ void PatternMiner::calculateSurprisingness( HTreeNode* HNode, AtomSpace *_fromAt
         // only try to find it from mined patterns, will not query it by pattern matcher
 
         unsigned int unifiedLastLinkIndex;
-        HandleSeq unifiedSuperPattern = UnifyPatternOrder(oneSuperPattern, unifiedLastLinkIndex);
+        map<Handle,Handle> suborderedVarNameMap;
+        HandleSeq unifiedSuperPattern = UnifyPatternOrder(oneSuperPattern, unifiedLastLinkIndex, suborderedVarNameMap);
 
         if (OUTPUT_SURPRISINGNESS_CALCULATION_TO_FILE)
         {
@@ -2872,7 +2873,8 @@ void PatternMiner::calculateSurprisingness( HTreeNode* HNode, AtomSpace *_fromAt
             }
 
             unsigned int unifiedLastLinkIndex;
-            HandleSeq unifiedSubPattern = UnifyPatternOrder(subPattern, unifiedLastLinkIndex);
+            map<Handle,Handle> orderedVarNameMap;
+            HandleSeq unifiedSubPattern = UnifyPatternOrder(subPattern, unifiedLastLinkIndex, orderedVarNameMap);
             string subPatternKey = unifiedPatternToKeyString(unifiedSubPattern);
 
 //            std::cout<< "Subpattern: " << subPatternKey;
@@ -3061,7 +3063,9 @@ void PatternMiner::calculateSurprisingness( HTreeNode* HNode, AtomSpace *_fromAt
             patternE.push_back(curSuperRelation.newExtendedLink);
             // unify patternE
             unsigned int unifiedLastLinkIndex;
-            HandleSeq unifiedPatternE = UnifyPatternOrder(patternE, unifiedLastLinkIndex);
+            map<Handle,Handle> EorderedVarNameMap;
+            HandleSeq unifiedPatternE = UnifyPatternOrder(patternE, unifiedLastLinkIndex, EorderedVarNameMap);
+
             string patternEKey = unifiedPatternToKeyString(unifiedPatternE, atomSpace);
 
             unsigned int patternE_count = getCountOfAConnectedPattern(patternEKey, unifiedPatternE);

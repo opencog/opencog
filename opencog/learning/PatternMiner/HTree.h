@@ -39,13 +39,25 @@ namespace opencog
 
      class  HTreeNode;
 
-     struct ExtendRelation // to store a super pattern of a pattern, only store when it's extended from a const
+     struct ExtendRelation // to store a super pattern of a pattern
      {
          HTreeNode* extendedHTreeNode; // the super pattern HTreeNode
          Handle sharedLink; // the link in original pattern that connect to new extended Link
          Handle newExtendedLink; // in super pattern (contains variables, not the instance link), without unifying
          Handle extendedNode; // the node that being extended in the original AtomSpace (the value node, not its variable name node)
          bool isExtendedFromVar;
+     };
+
+     struct SuperRelation_b // to store a super pattern of the same gram of a pattern
+     {
+         HTreeNode* superHTreeNode; // the super pattern HTreeNode
+         Handle constNode; // the const Node  ,
+     };
+
+     struct SubRelation_b // to store a sub pattern of the same gram of a pattern
+     {
+         HTreeNode* subHTreeNode; // the sub pattern HTreeNode
+         Handle constNode; // the const Node
      };
 
      class HTreeNode
@@ -60,6 +72,10 @@ namespace opencog
             // set<string> instancesUidStrings;// all uid in each instance HandleSeq in all instances, in the form of 5152_815_201584. to prevent the same instance being count multiple times
 
             vector<ExtendRelation> superPatternRelations; // store all the connections to its super patterns
+
+            vector<SuperRelation_b> superRelation_b_list; // store all the superRelation_b
+
+            map<Handle, vector<SubRelation_b>> SubRelation_b_map;// map<VariableNode, vector<SubRelation_b>>
 
             unsigned int count; // instance number
             unsigned int var_num; // the number of all the variables in this pattern

@@ -53,8 +53,9 @@ namespace PatternMining
 #define GENERATE_TMP_PATTERNS 0
 #define USE_QUERY_ENTITY_COUNT_FOR_EACH_PREDICATE 0
 #define USE_QUERY_ALL_ENTITY_COUNT 1
-#define USE_ABS_SURPRISINGNESS 0
+#define USE_ABS_SURPRISINGNESS 1
 #define LINE_INDENTATION "  "
+#define CALCULATE_TYPE_B_SURPRISINGNESS 1
 
 #define PATTERN_VARIABLENODE_TYPE VARIABLE_NODE
 
@@ -256,7 +257,7 @@ protected:
     //       )
     //    )
     // Return unified ordered Handle vector
-    HandleSeq UnifyPatternOrder(HandleSeq& inputPattern, unsigned int &unifiedLastLinkIndex);
+    HandleSeq UnifyPatternOrder(HandleSeq& inputPattern, unsigned int &unifiedLastLinkIndex, map<Handle,Handle>& orderedVarNameMap);
 
     void addAtomTypesFromString(string node_types_str, vector<Type> &typeListToAddTo);
 
@@ -332,7 +333,7 @@ protected:
 
     void quoteAllThePatternSForGram(unsigned int gram);
 
-    HTreeNode* extractAPatternFromGivenVarCombination(HandleSeq &inputLinks, map<Handle,Handle> &patternVarMap, HandleSeqSeq &oneOfEachSeqShouldBeVars, HandleSeq &leaves,HandleSeq &shouldNotBeVars, HandleSeq &shouldBeVars,
+    HTreeNode* extractAPatternFromGivenVarCombination(HandleSeq &inputLinks, map<Handle,Handle> &patternVarMap, map<Handle,Handle>& orderedVarNameMap,HandleSeqSeq &oneOfEachSeqShouldBeVars, HandleSeq &leaves,HandleSeq &shouldNotBeVars, HandleSeq &shouldBeVars,
                                                       AtomSpace *_fromAtomSpace, unsigned int &extendedLinkIndex, set<string>& allNewMinedPatternsCurTask, bool &notOutPutPattern, bool &patternAlreadyExtractedInCurTask,bool startFromLinkContainWhiteKeyword);
 
 
