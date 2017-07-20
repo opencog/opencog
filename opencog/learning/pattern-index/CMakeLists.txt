@@ -32,7 +32,6 @@ TARGET_LINK_LIBRARIES(patternIndexMiningExample
 	${ATOMSPACE_LIBRARIES}
 )
 
-INSTALL (TARGETS patternindex DESTINATION "lib${LIB_DIR_SUFFIX}/opencog")
 INSTALL (FILES
 	SCMLoader.h
 	SCMLoaderCallback.h
@@ -48,5 +47,9 @@ INSTALL (FILES
 	DESTINATION "include/${PROJECT_NAME}/learning/pattern-index"
 )
 
-ADD_GUILE_MODULE (pattern-index.scm)
+INSTALL (TARGETS patternindex DESTINATION "lib${LIB_DIR_SUFFIX}/opencog")
 
+ADD_GUILE_MODULE (FILES
+	pattern-index.scm
+	MODULE_DESTINATION "${DATADIR}/scm/opencog/learning/pattern-index"
+)
