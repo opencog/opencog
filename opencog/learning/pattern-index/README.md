@@ -680,6 +680,7 @@ is:
 ## TODO
 
 1. Implement C++ and Scheme API to allow creation of empty index followed by addition of atoms and finally actual creation of the index.
+1. Incorporate AttentionValue and TruthValue in the index
 1. Implement multi-thread version of TypeframeIndex::query()
 1. Implement optional creation of TypeFrameIndex pointing to elements in disk
 1. Implement optional creation of TypeFrameIndex storing the index itself in disk
@@ -690,6 +691,9 @@ is:
 
 1. Replace VariableNode, AndLink, OrLink and NotLink by PatternVariableNode,
 PatternAndLink, PatternOrLink and PatternNotLink respectively.
+1. TypeFrameIndex::query() is terribly (time) inneficient. It needs a complete
+refatoring to make rational use of allocated memory and avoid unnecessary
+copying of data among recursive calls.
 1. Current implementation is adding all the possible permutations of
 UNORDERED_LINK (only links with arity <= 5). Thus if we have a (SimilarityLink
 A B), all the patterns (SimilarityLink * *), (SimilarityLink A *),
