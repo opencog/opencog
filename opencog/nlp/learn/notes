@@ -2967,6 +2967,7 @@ french pairs: start again: 22:36PM 30 Jan - find submitted* |wc 17053
                            19:19PM 10 Feb - find submitted* |wc 27763
                            20:16PM 14 Feb - find submitted* |wc 29720
                                     2 Jul - find submitted* |wc 32526
+                                   19 Jul - 39077
 
 disk: 206447916 used 41097304 free
 disk  206574808 used 40970412 free  24 hours later... about 100MB more
@@ -2987,14 +2988,17 @@ select sum(stv_count) from atoms;  351323640 --  351M   -- 11:19AM  4 Feb
 select count(*) from atoms;          7714679 --    7.7M -- 11:38AM  5 Feb
 select sum(stv_count) from atoms;  502509756 --  503M   -- 11:38AM  5 Feb
 
-select count(*) from atoms;         16945084 --   16.9M -- 19:21PM 10 Feb
-select sum(stv_count) from atoms; 1289249056 -- 1.29G   -- 19:21PM 10 Feb
+select count(*) from atoms;         16945084 --    16.9M -- 19:21PM 10 Feb
+select sum(stv_count) from atoms; 1289249056 -- 1.29G    -- 19:21PM 10 Feb
 
-select count(*) from atoms;         23072988 --   23.1M -- 20:20PM 14 Feb
-select sum(stv_count) from atoms; 1856669388 -- 1.86G   -- 20:20PM 14 Feb
+select count(*) from atoms;         23072988 --    23.1M -- 20:20PM 14 Feb
+select sum(stv_count) from atoms; 1856669388 -- 1.86G    -- 20:20PM 14 Feb
 
-select count(*) from atoms;         33519967 --   33.5M - 2 Jul
-select sum(stv_count) from atoms; 2923838351 -- 2.92G   -
+select count(*) from atoms;         33519967 --    33.5M - 2 Jul 2017
+select sum(stv_count) from atoms; 2923838351 -- 2.92G    -
+
+select count(*) from atoms;         54337413 --    54.3M - 19 Jul 2017
+select sum(stv_count) from atoms; 5257433115 -- 5.26G
 
 vs fr_pairs:
 select count(*) from atoms; 11161199 -- 11M
@@ -12064,6 +12068,10 @@ l 9 . ，  <--> 10 . 且      MI = 2.3653
 
 Above should link, but its not ... why?
 
+wrong commas: expect:
+,  with TVWZA+
+, with TBOFC+
+
 l->r pass removed 117441
 LEFT-WALL[15044] 然杜氏[3] 恶[1] 撰[3] ，[10192] 述[5] 一漏[3] 百[2] ，[10192] 且[5] 多[136] 谬误[1] 。[10] 
 
@@ -12071,16 +12079,47 @@ r->l pass removed 35544
 LEFT-WALL[3] 然杜氏[3] 恶[1] 撰[3] ，[3] 述[5] 一漏[3] 百[1] ，[1] 且[2] 多[2] 谬误[1] 。[3] 
 
 l->r pass removed 0
+print_expression_sizes(sent);
+prepare/exprune.c:			size += size_of_expression(x->exp);
 LEFT-WALL[3] 然杜氏[3] 恶[1] 撰[3] ，[3] 述[5] 一漏[3] 百[1] ，[1] 且[2] 多[2] 谬误[1] 。[3] 
 
+for (d=sent->word[i].d; d != NULL; d = d->next) c++; is the dj count ..
+sent->word[i].alternatives[0]
 ++++ Finished expression pruning             0.09 seconds
+
+build_disjuncts_for_exp
+
+line 171
 After expanding expressions into disjuncts:LEFT-WALL(2) 然杜氏(1) 恶(1) 撰(1) ，(1) 述(1) 一漏(1) 百(1) ，(0) 且(1) 多(2) 谬误(1) 。(3) 
 
-So expression prunning removed the comma ... why?
+So expression prunning removed the comma ... why?  Because of cost-max
+!cost-max = 50
+d->left
+void print_connector_list(Connector * e);
+void print_disjunct_list(Disjunct * c);
 
+wrong commas: expect:
+,  with TVWZA+
+, with TBOFC+
+
+Hmm first comma did have: TBOFC+ TVWZA+ but that is all....
+
+，
+
+
+------------------------------------------------------------
 
 Also bad line-wrapping: 
 母猪 的 价格 暴涨 ， 可见 事态 之 严重 。
+glyph_width += mk_wcwidth(ws[i]);
+
+wchar_t  wc;
+mbstate_t mbss;
+memset(&mbss, 0, sizeof(mbss));
+
+mbrtowc(&wc, ssss, MB_CUR_MAX, nbss);
+wc = xxx
+glyph_width = mk_wcwidth(wc);
 
 
 
@@ -12165,6 +12204,10 @@ zen_pairs_mst
 Store 800855 csets
 
 Mandarin word pairs + MI values; Ruitings segemented text
+
+
+gettimeofday
+timeradd
 
 =========================================================================
 
