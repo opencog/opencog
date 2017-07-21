@@ -650,6 +650,23 @@ public:
                                                                   min_surprisingness_II,max_surprisingness_II, gram);
     }
 
+    void query_patterns_with_frequency_surprisingnessB_and_subpatternnum_ranges(const string& ranges, int gram)
+    {
+        vector<string> range_vector;
+        string rangesStr = ranges;
+        rangesStr.erase(std::remove(rangesStr.begin(), rangesStr.end(), ' '), rangesStr.end());
+        boost::split(range_vector, rangesStr , boost::is_any_of(","));
+        unsigned int min_frequency = std::stoi(range_vector[0]);
+        unsigned int max_frequency = std::stoi(range_vector[1]);
+        double min_surprisingness_B = std::stof(range_vector[2]);
+        double max_surprisingness_B = std::stof(range_vector[3]);
+        unsigned int min_subpattern_num = std::stof(range_vector[4]);
+        unsigned int max_subpattern_num = std::stof(range_vector[5]);
+        patternMiner->queryPatternsWithFrequencySurprisingnessBRanges(min_frequency, max_frequency,
+                                                                      min_surprisingness_B, max_surprisingness_B,
+                                                                      min_subpattern_num, max_subpattern_num, gram);
+    }
+
     void query_patterns_with_frequency_interactioninformation_ranges(const string& ranges, int gram)
     {
         vector<string> range_vector;
@@ -820,6 +837,7 @@ void PatternMinerSCM::init()
     define_scheme_primitive("pm-apply-whitelist-keyword-filter-after-mining", &PatternMinerSCM::apply_whitelist_keyword_filter_after_mining, this, "patternminer");
     define_scheme_primitive("pm-query-patterns-with-frequency-surprisingnessI-ranges", &PatternMinerSCM::query_patterns_with_frequency_surprisingnessI_ranges, this, "patternminer");
     define_scheme_primitive("pm-query-patterns-with-frequency-surprisingnessI-surprisingnessII-ranges", &PatternMinerSCM::query_patterns_with_surprisingnessI_and_surprisingnessII_ranges, this, "patternminer");
+    define_scheme_primitive("pm-query-patterns-with-frequency-surprisingnessB-subpatternnum-ranges", &PatternMinerSCM::query_patterns_with_frequency_surprisingnessB_and_subpatternnum_ranges, this, "patternminer");
     define_scheme_primitive("pm-query-patterns-with-frequency-interactioninformation-ranges", &PatternMinerSCM::query_patterns_with_frequency_interactioninformation_ranges, this, "patternminer");
 
     define_scheme_primitive("pm-reset-patternminer", &PatternMinerSCM::reset_patternminer, this, "patternminer");
