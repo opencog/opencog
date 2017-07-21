@@ -774,15 +774,15 @@ void PatternMiner::extendAPatternForOneMoreGramRecursively(const Handle &extende
 
     bool* indexes = new bool[n_max]; //  indexes[i]=true means this i is a variable, indexes[i]=false means this i is a const
 
-    if ((cur_pattern_gram == 2) && (n_max == 0))
-    {
-        int x = 0;
-        x ++;
-        for(Handle h : inputLinks)
-            cout << h->toShortString();
+//    if ((cur_pattern_gram == 2) && (n_max == 0)) // debug
+//    {
+//        int x = 0;
+//        x ++;
+//        for(Handle h : inputLinks)
+//            cout << h->toShortString();
 
-        cout << std::endl;
-    }
+//        cout << std::endl;
+//    }
 //    // debug
 //    string lastGramLinksStr = "";
 //    for (Handle h : lastGramLinks)
@@ -937,10 +937,10 @@ void PatternMiner::extendAPatternForOneMoreGramRecursively(const Handle &extende
                     if ((cur_pattern_gram == 1) && (CALCULATE_TYPE_B_SURPRISINGNESS) && (var_num <= n_limit_putin_result))
                     {
 
-                        cout << "\n-------------------Found sub type b patterns for current pattern: -----------------\n";
-                        for (Handle plink : thisGramHTreeNode->pattern)
-                            cout << plink->toShortString();
-                        cout << std::endl;
+//                        cout << "\n-------------------Found sub type b patterns for current pattern: -----------------\n";
+//                        for (Handle plink : thisGramHTreeNode->pattern)
+//                            cout << plink->toShortString();
+//                        cout << std::endl;
                         string indexStr = "";
 
                         for (unsigned int  index_i = 0; index_i < n_max ; index_i ++)

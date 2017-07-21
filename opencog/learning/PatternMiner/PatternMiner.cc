@@ -2660,6 +2660,7 @@ void PatternMiner::calculateSurprisingness( HTreeNode* HNode, AtomSpace *_fromAt
     float p;
     unsigned int allNum;
 
+
     if (USE_QUERY_ENTITY_COUNT_FOR_EACH_PREDICATE) // this setting only for the corpus that only contains EvalutionLinks
     {
         // generate the allPattern for this pattern, e.g.:
@@ -2698,13 +2699,13 @@ void PatternMiner::calculateSurprisingness( HTreeNode* HNode, AtomSpace *_fromAt
     }
     else
     {
-        p = ((float)HNode->count)/atomspaceSizeFloat;
-        allNum = atomspaceSizeFloat;
+        p = ((float)HNode->count)/((float)actualProcessedLinkNum);
+        allNum = actualProcessedLinkNum;
     }
 
     float abs_min_diff = 999999999.9f;
     float min_diff = 999999999.9f;
-    // cout << "For this pattern itself: p = " <<  HNode->count << " / " <<  (int)atomspaceSizeFloat << " = " << p << std::endl;
+    // cout << "For this pattern itself: p = " <<  HNode->count << " / " <<  (int)actualProcessedLinkNum << " = " << p << std::endl;
 
     for (vector<vector<unsigned int>>&  oneCombin : components_ngram[gram-2])
     {
@@ -2799,15 +2800,15 @@ void PatternMiner::calculateSurprisingness( HTreeNode* HNode, AtomSpace *_fromAt
                 }
                 else
                 {
-                    p_i = ((float)(component_count)) / atomspaceSizeFloat;
+                    p_i = ((float)(component_count)) / ((float)actualProcessedLinkNum);
 
                     if (OUTPUT_SURPRISINGNESS_CALCULATION_TO_FILE)
                     {
-                        HNode->surprisingnessInfo += toString(component_count) + "/" + toString(atomspaceSizeFloat) + "=" + toString(p_i);
+                        HNode->surprisingnessInfo += toString(component_count) + "/" + toString(actualProcessedLinkNum) + "=" + toString(p_i);
                     }
                 }
 
-                // cout << ", p = " << component_count  << " / " << (int)atomspaceSizeFloat << " = " << p_i << std::endl;
+                // cout << ", p = " << component_count  << " / " << (int)actualProcessedLinkNum << " = " << p_i << std::endl;
                 total_p *= p_i;
 //                std::cout << std::endl;
 
