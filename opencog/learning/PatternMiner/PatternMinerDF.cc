@@ -1019,12 +1019,12 @@ void PatternMiner::extendAPatternForOneMoreGramRecursively(const Handle &extende
                                         (sub_b_relation_it->second).push_back(onesub_b);
                                     }
 
-                                    cout << "const node:" << superb.constNode->toShortString() << std::endl;
-                                    cout << "variable node: " << orderedVarHandle->toShortString() << std::endl;
-                                    cout << "Sub pattern: " << std::endl;
-                                    for (Handle plink : sub_b_htreenode->pattern)
-                                        cout << plink->toShortString();
-                                    cout << std::endl;
+//                                    cout << "const node:" << superb.constNode->toShortString() << std::endl;
+//                                    cout << "variable node: " << orderedVarHandle->toShortString() << std::endl;
+//                                    cout << "Sub pattern: " << std::endl;
+//                                    for (Handle plink : sub_b_htreenode->pattern)
+//                                        cout << plink->toShortString();
+//                                    cout << std::endl;
 
                                 }
                             }

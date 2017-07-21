@@ -1214,6 +1214,18 @@ bool compareHTreeNodeBySurprisingness_II(HTreeNode* node1, HTreeNode* node2)
     return (node1->var_num < node2->var_num);
 }
 
+bool compareHTreeNodeBySurprisingness_b(HTreeNode* node1, HTreeNode* node2)
+{
+
+    if ( node1-> nII_Surprisingness_b- node2->nII_Surprisingness_b > FLOAT_MIN_DIFF)
+        return true;
+    else if ( node2->nII_Surprisingness_b - node1->nII_Surprisingness_b > FLOAT_MIN_DIFF)
+        return false;
+
+    return (node1->var_num < node2->var_num);
+}
+
+
 
 // only used by Surprisingness evaluation mode
 void PatternMiner::OutPutFinalPatternsToFile(unsigned int n_gram)
@@ -1418,6 +1430,68 @@ void PatternMiner::OutPutInterestingPatternsToFile(vector<HTreeNode*> &patternsF
 }
 
 
+
+void PatternMiner::OutPutSurpringnessBToFile(vector<HTreeNode*> &patternsForThisGram, unsigned int n_gram)
+{
+
+    // out put the n_gram patterns to a file
+    ofstream resultFile;
+    string fileName = "Surprisingness_b_" + toString(n_gram) + "gram.scm";
+
+    std::cout<<"\nDebug: PatternMiner: writing (gram = " + toString(n_gram) + ") interesting patterns to file " + fileName << std::endl;
+
+    resultFile.open(fileName.c_str());
+
+    resultFile << ";Interesting Pattern Mining results for " + toString(n_gram) + " gram patterns. Total pattern number: " + toString(patternsForThisGram.size()) << endl;
+
+    for (HTreeNode* htreeNode : patternsForThisGram)
+    {
+        if (htreeNode->count < thresholdFrequency)
+            continue;
+
+
+        resultFile << endl << ";Pattern: Frequency = " << toString(htreeNode->count);
+
+        resultFile << ", Surprisingnes_II_b = " << toString(htreeNode->nII_Surprisingness_b);
+
+        if (htreeNode->SubRelation_b_map.size() != 0)
+        {
+            unsigned int max_sub_num = 0;
+
+            for (std::pair<Handle, vector<SubRelation_b>> sub : htreeNode->SubRelation_b_map)
+            {
+                if (sub.second.size() > max_sub_num)
+                    max_sub_num = sub.second.size();
+            }
+
+            htreeNode->max_b_subpattern_num = max_sub_num;
+        }
+
+        resultFile << ", max_b_subpattern_num = " << htreeNode->max_b_subpattern_num;
+
+        resultFile << endl;
+
+        // resultFile << unifiedPatternToKeyString(htreeNode->pattern)<< endl;
+
+        if (if_quote_output_pattern)
+            resultFile << htreeNode->quotedPatternLink->toShortString();
+        else
+        {
+            for (Handle link : htreeNode->pattern)
+            {
+                resultFile << link->toShortString();
+            }
+        }
+
+        resultFile << std::endl;
+    }
+
+    resultFile << std::endl;
+    resultFile.close();
+
+}
+
+
 // call this function only after sort by frequency
 void PatternMiner::OutPutStaticsToCsvFile(unsigned int n_gram)
 {
@@ -1431,8 +1505,7 @@ void PatternMiner::OutPutStaticsToCsvFile(unsigned int n_gram)
 
     csvFile.open(csvfileName.c_str());
 
-
-    csvFile << "Frequency,Surprisingness_I,Surprisingness_II,nII_Surprisingness_b" << std::endl;
+    csvFile << "Frequency,Surprisingness_I,Surprisingness_II,II_Surprisingness_b, max_b_subpattern_num" << std::endl;
 
     for (HTreeNode* htreeNode : patternsForThisGram)
     {
@@ -1441,7 +1514,7 @@ void PatternMiner::OutPutStaticsToCsvFile(unsigned int n_gram)
 
         csvFile << htreeNode->count << "," << htreeNode->nI_Surprisingness << ","
 
-                << htreeNode->nII_Surprisingness << "," << htreeNode->nII_Surprisingness_b ;
+                << htreeNode->nII_Surprisingness << "," << htreeNode->nII_Surprisingness_b << htreeNode->max_b_subpattern_num;
 //        if (htreeNode->superPatternRelations.size() > 0)
 //            csvFile << htreeNode->nII_Surprisingness;
 //        else
@@ -3649,18 +3722,15 @@ void PatternMiner::runPatternMiner(bool exit_program_after_finish)
 
     std::cout<<"PatternMiner:  mining finished!\n";
 
-    if (if_quote_output_pattern)
-        quoteAllThePatternSForGram(1);
-
-    if (enable_Interesting_Pattern && (MAX_GRAM >1))
+    if (enable_Interesting_Pattern )
     {
         runInterestingnessEvaluation();
     }
-    else if (MAX_GRAM > 1)
-    {
-        for(unsigned int gram = 2; gram <= MAX_GRAM; gram ++)
-            quoteAllThePatternSForGram(gram);
-    }
+
+
+    for(unsigned int gram = 1; gram <= MAX_GRAM; gram ++)
+        quoteAllThePatternSForGram(gram);
+
 
     // out put all patterns with a frequency above the thresthold
     num_of_patterns_with_1_frequency = new unsigned int [MAX_GRAM];
@@ -3783,8 +3853,8 @@ void PatternMiner::runInterestingnessEvaluation()
 
         if (Enable_surprisingness)
         {
-            // sort by frequency
-            std::sort((patternsForGram[cur_gram-1]).begin(), (patternsForGram[cur_gram-1]).end(),compareHTreeNodeByFrequency);
+//            // sort by frequency
+//            std::sort((patternsForGram[cur_gram-1]).begin(), (patternsForGram[cur_gram-1]).end(),compareHTreeNodeByFrequency);
 
 //            int max_frequency_threshold_index = FREQUENCY_BOTTOM_THRESHOLD * ((float)(patternsForGram[cur_gram-1].size()));
 //            OutPutLowFrequencyHighSurprisingnessPatternsToFile(patternsForGram[cur_gram-1], cur_gram, max_frequency_threshold_index);
@@ -3792,9 +3862,22 @@ void PatternMiner::runInterestingnessEvaluation()
 //            int min_frequency_threshold_index = FREQUENCY_TOP_THRESHOLD * ((float)(patternsForGram[cur_gram-1].size() - num_of_patterns_with_1_frequency[cur_gram-1]));
 //            OutPutHighFrequencyHighSurprisingnessPatternsToFile(patternsForGram[cur_gram-1], cur_gram,  min_frequency_threshold_index);
 
-            // sort by surprisingness_I first
-            std::sort((patternsForGram[cur_gram-1]).begin(), (patternsForGram[cur_gram-1]).end(),compareHTreeNodeBySurprisingness_I);
-            OutPutInterestingPatternsToFile(patternsForGram[cur_gram-1], cur_gram,1);
+            if (cur_gram > 1)
+            {
+                // sort by surprisingness_I first
+                std::sort((patternsForGram[cur_gram-1]).begin(), (patternsForGram[cur_gram-1]).end(),compareHTreeNodeBySurprisingness_I);
+                OutPutInterestingPatternsToFile(patternsForGram[cur_gram-1], cur_gram,1);
+            }
+
+            // output surpringness b
+            if ((cur_gram == 1) || GENERATE_TYPE_B_RELATION_WHEN_CALCULATE_SURPRISINGNESS)
+            {
+                // sort by surprisingness_I first
+                std::sort((patternsForGram[cur_gram-1]).begin(), (patternsForGram[cur_gram-1]).end(),compareHTreeNodeBySurprisingness_b);
+                OutPutSurpringnessBToFile(patternsForGram[cur_gram-1], cur_gram);
+            }
+
+            OutPutStaticsToCsvFile(cur_gram);
 
             if (cur_gram == MAX_GRAM)
                 break;
@@ -3805,7 +3888,7 @@ void PatternMiner::runInterestingnessEvaluation()
             std::sort(curGramPatterns.begin(), curGramPatterns.end(),compareHTreeNodeBySurprisingness_II);
             OutPutInterestingPatternsToFile(curGramPatterns,cur_gram,2);
 
-            OutPutStaticsToCsvFile(cur_gram);
+
 
             // Get the min threshold of surprisingness_II
             int threshold_index_II;

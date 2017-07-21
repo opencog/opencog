@@ -83,6 +83,7 @@ namespace opencog
             double nI_Surprisingness;
             double nII_Surprisingness;
             double nII_Surprisingness_b; // calculated from the other same gram patterns
+            unsigned int max_b_subpattern_num;
 
             string surprisingnessInfo; // the middle info record the surpringness calculating process for this pattern
 
@@ -101,6 +102,7 @@ namespace opencog
                 nI_Surprisingness = 0.0;
                 nII_Surprisingness = 0.0;
                 nII_Surprisingness_b = 1.0;
+                max_b_subpattern_num = 0;
 
             }
 

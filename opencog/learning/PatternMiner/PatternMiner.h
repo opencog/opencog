@@ -58,7 +58,7 @@ namespace PatternMining
 #define CALCULATE_TYPE_B_SURPRISINGNESS 1
 #define GENERATE_TYPE_B_RELATION_WHEN_CALCULATE_SURPRISINGNESS 0
 
-#define PATTERN_VARIABLENODE_TYPE VARIABLE_NODE
+#define PATTERN_VARIABLENODE_TYPE PATTERN_VARIABLE_NODE
 
 struct _non_ordered_pattern
 {
@@ -457,6 +457,8 @@ public:
     void OutPutHighSurprisingILowSurprisingnessIIPatternsToFile(vector<HTreeNode*> &patternsForThisGram, unsigned int n_gram, float min_surprisingness_I, float max_surprisingness_II);
 
     void OutPutInterestingPatternsToFile(vector<HTreeNode*> &patternsForThisGram, unsigned int n_gram, int surprisingness, string _fileNamebasic = "");
+
+    void OutPutSurpringnessBToFile(vector<HTreeNode*> &patternsForThisGram, unsigned int n_gram);
 
     void OutPutFinalPatternsToFile(unsigned int n_gram);
 
