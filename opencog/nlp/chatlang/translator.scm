@@ -28,6 +28,7 @@
 (define chatlang-no-constant (Anchor (chatlang-prefix "No constant terms")))
 (define chatlang-word-seq (Predicate (chatlang-prefix "Word Sequence")))
 (define chatlang-lemma-seq (Predicate (chatlang-prefix "Lemma Sequence")))
+(define chatlang-lemma-set (Predicate (chatlang-prefix "Lemma Set")))
 
 ;; Shared variables for all terms
 (define atomese-variable-template (list (TypedVariable (Variable "$S")
@@ -348,7 +349,7 @@
    It also creates an EvaluationLink linking the
    SENT with the word-list and lemma-list."
   (define (get-seq TYPE)
-    (List (append-map
+    (append-map
       (lambda (w)
         ; Ignore LEFT-WALL and punctuations
         (if (or (string-prefix? "LEFT-WALL" (cog-name w))
@@ -365,13 +366,16 @@
               (if (integer? (string-index name #\_))
                   (map Word (string-split name  #\_))
                   (list wn)))))
-      (car (sent-get-words-in-order SENT)))))
-  (let ((word-seq (get-seq 'ReferenceLink))
-        (lemma-seq (get-seq 'LemmaLink)))
-       ; These EvaluationLinks will be used in the matching process
-       (Evaluation chatlang-word-seq (List SENT word-seq))
-       (Evaluation chatlang-lemma-seq (List SENT lemma-seq))
-       (cons word-seq lemma-seq)))
+      (car (sent-get-words-in-order SENT))))
+  (let* ((word-seq (List (get-seq 'ReferenceLink)))
+         (lseq (get-seq 'LemmaLink))
+         (lemma-seq (List lseq))
+         (lemma-set (Set lseq)))
+        ; These EvaluationLinks will be used in the matching process
+        (Evaluation chatlang-word-seq (List SENT word-seq))
+        (Evaluation chatlang-lemma-seq (List SENT lemma-seq))
+        (Evaluation chatlang-lemma-set (List SENT lemma-set))
+        (list word-seq lemma-seq lemma-set)))
 
 (define (get-lemma-from-relex WORD)
   "Get the lemma of WORD via the RelEx server."
