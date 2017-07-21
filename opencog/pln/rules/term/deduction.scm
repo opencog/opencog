@@ -17,6 +17,9 @@
 ;;       deduction-implication-rule
 ;;       deduction-subset-rule
 ;;
+;; This deduction rule makes assumptions to avoid having too many
+;; premises. Another more precise rule should be created as well.
+;;
 ;; -----------------------------------------------------------------------------
 
 (use-modules (opencog logger))
