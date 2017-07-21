@@ -37,7 +37,7 @@
   (define c (cog-outgoing-set (cog-execute!
               (Get (Reference (Variable "$x") CONCEPT)))))
   (if (null? c)
-      0
+      -1  ; This may happen if the concept is not yet defined in the system...
       (fold (lambda (term len)
         (let ((tl (cond ((equal? 'PhraseNode (cog-type term))
                          (length (string-split (cog-name term) #\sp)))
