@@ -101,28 +101,6 @@
                           (List (List (terms-to-atomese TERMS))
                                 (Glob VAR))))))
 
-(define* (unordered-matching TERMS #:optional (VAR (choose-var-name)))
-  "Occurrence of a list of terms (words/lemmas/phrases/concepts)
-   that can be matched in any orders."
-  (fold (lambda (t lst)
-                (cons (append (car lst) (car t))
-                      (append (cdr lst) (cdr t))))
-        (cons (list (TypedVariable (Glob VAR)
-                        (TypeSet (Type "WordNode")
-                                 (Interval (Number (length TERMS))
-                                           (Number (length TERMS))))))
-              '())
-        (map (lambda (t)
-          (cond ((equal? 'word (car t))
-                 (word (cdr t)))
-                ((equal? 'lemma (car t))
-                 (lemma (cdr t)))
-                ((equal? 'phrase (car t))
-                 (phrase (cdr t)))
-                ((equal? 'concept (car t))
-                 (concept (cdr t)))))
-          TERMS)))
-
 (define (negation TERMS)
   "Absent of a term or a list of terms (words/phrases/concepts)."
   (cons '()  ; No variable declaration
