@@ -2659,7 +2659,7 @@ void PatternMiner::calculateSurprisingness( HTreeNode* HNode, AtomSpace *_fromAt
 
     float p;
     unsigned int allNum;
-
+    float allNumFloat; // the divisor
 
     if (USE_QUERY_ENTITY_COUNT_FOR_EACH_PREDICATE) // this setting only for the corpus that only contains EvalutionLinks
     {
@@ -2687,25 +2687,30 @@ void PatternMiner::calculateSurprisingness( HTreeNode* HNode, AtomSpace *_fromAt
         }
         else
         {
-            p = ((float)HNode->count) / ((float)allEntityCount);
             allNum = allEntityCount;
-            // cout << "allEntityCount = " << allEntityCount << std::endl;
-
-            if (OUTPUT_SURPRISINGNESS_CALCULATION_TO_FILE)
-            {
-                HNode->surprisingnessInfo += ";p = " + toString(HNode->count) + "/" + toString(allEntityCount) + " = " + toString(p) + "\n";
-            }
         }
+    }
+    else if (USE_QUERY_ALL_ENTITY_COUNT)
+    {
+        allNum = allEntityNumMap.size();
     }
     else
     {
-        p = ((float)HNode->count)/((float)actualProcessedLinkNum);
         allNum = actualProcessedLinkNum;
     }
 
+    allNumFloat = (float)allNum;
+    p = ((float)HNode->count)/((float)allNumFloat);
+
+    if (OUTPUT_SURPRISINGNESS_CALCULATION_TO_FILE)
+    {
+        HNode->surprisingnessInfo += ";p = " + toString(HNode->count) + "/" + toString(allNumFloat) + " = " + toString(p) + "\n";
+    }
+
+
     float abs_min_diff = 999999999.9f;
     float min_diff = 999999999.9f;
-    // cout << "For this pattern itself: p = " <<  HNode->count << " / " <<  (int)actualProcessedLinkNum << " = " << p << std::endl;
+    // cout << "For this pattern itself: p = " <<  HNode->count << " / " <<  allNum << " = " << p << std::endl;
 
     for (vector<vector<unsigned int>>&  oneCombin : components_ngram[gram-2])
     {
@@ -2800,15 +2805,15 @@ void PatternMiner::calculateSurprisingness( HTreeNode* HNode, AtomSpace *_fromAt
                 }
                 else
                 {
-                    p_i = ((float)(component_count)) / ((float)actualProcessedLinkNum);
+                    p_i = ((float)(component_count)) / allNumFloat;
 
                     if (OUTPUT_SURPRISINGNESS_CALCULATION_TO_FILE)
                     {
-                        HNode->surprisingnessInfo += toString(component_count) + "/" + toString(actualProcessedLinkNum) + "=" + toString(p_i);
+                        HNode->surprisingnessInfo += toString(component_count) + "/" + toString(allNum) + "=" + toString(p_i);
                     }
                 }
 
-                // cout << ", p = " << component_count  << " / " << (int)actualProcessedLinkNum << " = " << p_i << std::endl;
+                // cout << ", p = " << component_count  << " / " << allNum << " = " << p_i << std::endl;
                 total_p *= p_i;
 //                std::cout << std::endl;
 
@@ -3067,18 +3072,6 @@ void PatternMiner::calculateTypeBSurprisingness( HTreeNode* HNode, AtomSpace *_f
             return;
         }
 
-        if (OUTPUT_SURPRISINGNESS_CALCULATION_TO_FILE)
-        {
-            surpringnessIICalfile << "=================Debug: calculate II_Surprisingness_b for pattern: ====================\n";
-            surpringnessIICalfile << "Count = " << HNode->count << std::endl;
-            for (Handle link : HNode->pattern)
-            {
-                surpringnessIICalfile << link->toShortString();
-            }
-
-            surpringnessIICalfile << std::endl;
-        }
-
         // 1-gram patterns already has superRelation_b_list and SubRelation_b_map
         // so first, find this type b relations for 2-gram and bigger patterns
         if (HNode->pattern.size() > 1)
@@ -3136,6 +3129,11 @@ void PatternMiner::calculateTypeBSurprisingness( HTreeNode* HNode, AtomSpace *_f
 
         }
 
+        if (HNode->superRelation_b_list.size() == 0)
+        {
+            HNode->nII_Surprisingness_b = 9999999.9;
+            return;
+        }
 
         // calculate II_Surprisingness_b
         if (OUTPUT_SURPRISINGNESS_CALCULATION_TO_FILE)
@@ -3150,7 +3148,7 @@ void PatternMiner::calculateTypeBSurprisingness( HTreeNode* HNode, AtomSpace *_f
             surpringnessIICalfile << std::endl;
         }
 
-        double min_II_Surprisingness_b = 1.0;
+        double min_II_Surprisingness_b = 9999999.9;
 
         for (SuperRelation_b& superb : HNode->superRelation_b_list)
         {
@@ -3723,7 +3721,7 @@ void PatternMiner::runInterestingnessEvaluation()
         }
 
         cout << "All entity number = " << allEntityHandles.size() << std::endl;
-        atomspaceSizeFloat = (float)(allEntityHandles.size());
+
     }
 
     if (OUTPUT_SURPRISINGNESS_CALCULATION_TO_FILE)
@@ -3731,15 +3729,23 @@ void PatternMiner::runInterestingnessEvaluation()
         surpringnessIICalfile.open("surpringnessII_calcualtion_info.scm");
     }
 
-    for(cur_gram = 2; cur_gram <= MAX_GRAM; cur_gram ++)
+    for(cur_gram = 1; cur_gram <= MAX_GRAM; cur_gram ++)
     {
 
         cout << "\nCalculating";
-        if (Enable_Interaction_Information)
-            cout << " Interaction_Information ";
+        if (cur_gram > 1)
+        {
+            if (Enable_Interaction_Information)
+                cout << " Interaction_Information ";
+            if (Enable_surprisingness)
+                cout << " Surprisingness ";
+        }
+        else
+        {
+            if (Enable_surprisingness)
+                cout << " Surprisingness ";
+        }
 
-        if (Enable_surprisingness)
-            cout << " Surprisingness ";
 
         cout << "for " << cur_gram << " gram patterns." << std::endl;
 
@@ -4255,14 +4261,8 @@ void PatternMiner::evaluateInterestingnessTask()
         }
 
 
-        if (Enable_Interaction_Information)
+        if ((cur_gram > 1) && Enable_Interaction_Information)
         {
-
-           if (cur_gram == 3)
-           {
-               int x = 0;
-               x ++;
-           }
            calculateInteractionInformation(htreeNode);
         }
 

@@ -356,7 +356,7 @@ void PatternMiner::runPatternMinerDepthFirst()
     delete [] threads;
 
     cout << "\nFinished mining 1~" << MAX_GRAM << " gram patterns.\n";
-    cout << "\nprocessedLinkNum = " << processedLinkNum << std::endl;
+    cout << "\ntotalLinkNum = " << processedLinkNum << ", actualProcessedLinkNum = " << actualProcessedLinkNum << std::endl;
 
 
 }
