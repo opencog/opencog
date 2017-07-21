@@ -24,15 +24,19 @@
   "The action selector. It first searches for the rules using DualLink,
    and then does the filtering by evaluating the context of the rules.
    Eventually returns a list of weighted rules that can satisfy the demand."
-  (let* ((input-lemmas (cdr (sent-get-word-seqs SENT)))
+  (let* ((sent-seqs (sent-get-word-seqs SENT))
+         (input-lseq (list-ref sent-seqs 1))
+         (input-lset (list-ref sent-seqs 2))
          ; The ones that contains no variables/globs
-         (exact-match (get-bindlinks (list input-lemmas)))
+         (exact-match (append (get-bindlinks (list input-lseq))
+                              (get-bindlinks (list input-lset))))
          ; The ones that contains no constant terms in the term-seq
          (no-const (get-bindlinks
            (cog-chase-link 'MemberLink 'ListLink chatlang-no-constant)))
          ; The ones found by the recognizer
-         (dual-match (get-bindlinks
-           (cog-outgoing-set (cog-execute! (Dual input-lemmas)))))
+         (dual-match (append
+           (get-bindlinks (cog-outgoing-set (cog-execute! (Dual input-lseq))))
+           (get-bindlinks (cog-outgoing-set (cog-execute! (Dual input-lset))))))
          ; The ones that can actually be grounded (a match)
          (bind-grd (filter (lambda (b)
            (not (equal? (Set) (cog-execute! b))))
@@ -41,7 +45,7 @@
          (rules-matched (append-map (lambda (b)
            (cog-chase-link 'ReferenceLink 'ImplicationLink b)) bind-grd)))
 
-        (cog-logger-debug chatlang-logger "For input:\n~a" input-lemmas)
+        (cog-logger-debug chatlang-logger "For input:\n~a" input-lseq)
         (cog-logger-debug chatlang-logger "Rules with no constant:\n~a" no-const)
         (cog-logger-debug chatlang-logger "Exact match:\n~a" exact-match)
         (cog-logger-debug chatlang-logger "Dual match:\n~a" dual-match)
