@@ -20390,15 +20390,16 @@ of exponent -1.1.
 \end_layout
 
 \begin_layout Standard
-The first ten words in the word ranking are: 
-\strikeout on
-"the" "," "." "of" "and" "in" "to" "a" "was".
-
-\strikeout default
+The first ten words in the word ranking are: "LEFT-WALL" "," "." "the" "and"
+ "to" "of" "a" """ "in".
  This is the ranking of how often these words appear, overall, in the MST-parsed
  corpus.
- The number of periods should be equal to the number of sentences in the
- corpus; commas and the word 
+ The number of connections to LEFT-WALL should be equal to the number of
+ sentences in the corpus, as the parser is set up to make one LEFT-WALL
+ connection to a sentence.
+ Most sentences will end in a period; some with question marks of other
+ punctuation.
+ Commas and the word 
 \begin_inset Quotes eld
 \end_inset
 
@@ -20407,18 +20408,20 @@ the
 \end_inset
 
  can appear more than once in a sentence.
- This list is repeated in the table below.
- The frequency is just the count divided by 
-\strikeout on
-661104
-\strikeout default
-.
+ The frequent occurance of the straight double-quote mark is due to the
+ fact that the corpus is heavily weighted with dialog: i.e.
+ with fictional novels, where the characters are speaking a lot.
+\end_layout
+
+\begin_layout Standard
+This list is repeated in the table below.
+ The frequency is just the count divided by 18489594.
 \end_layout
 
 \begin_layout Standard
 \align center
 \begin_inset Tabular
-<lyxtabular version="3" rows="10" columns="4">
+<lyxtabular version="3" rows="11" columns="4">
 <features tabularvalignment="middle">
 <column alignment="center" valignment="top" width="0">
 <column alignment="center" valignment="top" width="0">
@@ -20470,7 +20473,7 @@ frequency
 \begin_inset Text
 
 \begin_layout Plain Layout
-the
+LEFT-WALL
 \end_layout
 
 \end_inset
@@ -20479,7 +20482,7 @@ the
 \begin_inset Text
 
 \begin_layout Plain Layout
-38977
+972963
 \end_layout
 
 \end_inset
@@ -20488,7 +20491,7 @@ the
 \begin_inset Text
 
 \begin_layout Plain Layout
-0.0589
+0.05262
 \end_layout
 
 \end_inset
@@ -20497,7 +20500,7 @@ the
 \begin_inset Text
 
 \begin_layout Plain Layout
-4.084
+4.248
 \end_layout
 
 \end_inset
@@ -20517,7 +20520,7 @@ the
 \begin_inset Text
 
 \begin_layout Plain Layout
-37524
+957593
 \end_layout
 
 \end_inset
@@ -20526,7 +20529,7 @@ the
 \begin_inset Text
 
 \begin_layout Plain Layout
-0.0568
+0.05179
 \end_layout
 
 \end_inset
@@ -20535,7 +20538,7 @@ the
 \begin_inset Text
 
 \begin_layout Plain Layout
-4.139
+4.271
 \end_layout
 
 \end_inset
@@ -20555,7 +20558,7 @@ the
 \begin_inset Text
 
 \begin_layout Plain Layout
-32536
+849354
 \end_layout
 
 \end_inset
@@ -20564,7 +20567,7 @@ the
 \begin_inset Text
 
 \begin_layout Plain Layout
-0.0489
+0.04594
 \end_layout
 
 \end_inset
@@ -20573,7 +20576,7 @@ the
 \begin_inset Text
 
 \begin_layout Plain Layout
-4.353
+4.444
 \end_layout
 
 \end_inset
@@ -20584,7 +20587,7 @@ the
 \begin_inset Text
 
 \begin_layout Plain Layout
-of
+the
 \end_layout
 
 \end_inset
@@ -20593,7 +20596,7 @@ of
 \begin_inset Text
 
 \begin_layout Plain Layout
-22654
+727027
 \end_layout
 
 \end_inset
@@ -20602,7 +20605,7 @@ of
 \begin_inset Text
 
 \begin_layout Plain Layout
-0.0343
+0.03932
 \end_layout
 
 \end_inset
@@ -20611,7 +20614,7 @@ of
 \begin_inset Text
 
 \begin_layout Plain Layout
-4.867
+4.669
 \end_layout
 
 \end_inset
@@ -20631,7 +20634,7 @@ and
 \begin_inset Text
 
 \begin_layout Plain Layout
-17708
+420942
 \end_layout
 
 \end_inset
@@ -20640,7 +20643,7 @@ and
 \begin_inset Text
 
 \begin_layout Plain Layout
-0.0268
+0.02277
 \end_layout
 
 \end_inset
@@ -20649,45 +20652,7 @@ and
 \begin_inset Text
 
 \begin_layout Plain Layout
-5.222
-\end_layout
-
-\end_inset
-</cell>
-</row>
-<row>
-<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-in
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-14900
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-0.0225
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-5.471
+5.457
 \end_layout
 
 \end_inset
@@ -20707,7 +20672,7 @@ to
 \begin_inset Text
 
 \begin_layout Plain Layout
-12825
+401967
 \end_layout
 
 \end_inset
@@ -20716,7 +20681,7 @@ to
 \begin_inset Text
 
 \begin_layout Plain Layout
-0.0194
+0.02174
 \end_layout
 
 \end_inset
@@ -20725,7 +20690,45 @@ to
 \begin_inset Text
 
 \begin_layout Plain Layout
-5.688
+5.523
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+of
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+371211
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0.02008
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+5.638
 \end_layout
 
 \end_inset
@@ -20745,7 +20748,7 @@ a
 \begin_inset Text
 
 \begin_layout Plain Layout
-11882
+289631
 \end_layout
 
 \end_inset
@@ -20754,7 +20757,7 @@ a
 \begin_inset Text
 
 \begin_layout Plain Layout
-0.0180
+0.01566
 \end_layout
 
 \end_inset
@@ -20763,7 +20766,45 @@ a
 \begin_inset Text
 
 \begin_layout Plain Layout
-5.798
+5.996
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+"
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+256785
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0.01389
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+6.170
 \end_layout
 
 \end_inset
@@ -20774,7 +20815,7 @@ a
 \begin_inset Text
 
 \begin_layout Plain Layout
-was
+in
 \end_layout
 
 \end_inset
@@ -20783,7 +20824,7 @@ was
 \begin_inset Text
 
 \begin_layout Plain Layout
-6970
+208745
 \end_layout
 
 \end_inset
@@ -20792,7 +20833,7 @@ was
 \begin_inset Text
 
 \begin_layout Plain Layout
-0.0105
+0.01129
 \end_layout
 
 \end_inset
@@ -20801,7 +20842,7 @@ was
 \begin_inset Text
 
 \begin_layout Plain Layout
-6.568
+6.469
 \end_layout
 
 \end_inset
@@ -20822,6 +20863,10 @@ The main point of this table is to demonstrate the log-likelihood column.
  The range of magnitudes -- 4 to 7 -- is no accident, and similar ranges
  will be seen later.
  
+\end_layout
+
+\begin_layout Standard
+xx
 \end_layout
 
 \begin_layout Standard
