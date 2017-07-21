@@ -41,9 +41,10 @@
 (add-to-load-path "../../../opencog/pln/rules/")
 (add-to-load-path "../../../opencog/pln/meta-rules/")
 
-;; TODO: add as many valid rules are possible
+;; TODO: add more rules
 (define rule-filenames
   (list "propositional/contraposition.scm"
+        "propositional/modus-ponens.scm"
         "term/deduction.scm"
         )
   )
@@ -53,12 +54,19 @@
 ;; Associate rules to PLN ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-;; TODO: add as many valid rules are possible
+;; TODO: add more rules
 ; List the rules and their weights.
 (define rules
   (list
+        (list modus-ponens-inheritance-rule-name 1)
+        (list modus-ponens-implication-rule-name 1)
+        (list modus-ponens-subset-rule-name 1)
         (list contraposition-inheritance-rule-name 1)
+        (list contraposition-implication-rule-name 1)
+        (list crisp-contraposition-implication-scope-rule-name 1)
         (list deduction-inheritance-rule-name 1)
+        (list deduction-implication-rule-name 1)
+        (list deduction-subset-rule-name 1)
         )
   )
 
