@@ -20357,24 +20357,25 @@ status open
 
 \begin_layout Plain Layout
 Obtained by running (print-ts-rank sorted-word-obs outport) from the disjunct-st
-ats.scm file, on the en_pairs_sim database.
+ats.scm file, on the en_pairs_rfive_mtwo database.
  The second one prints sorted-dj-obs.
+ The graphs generated with ranked.gplot
 \end_layout
 
 \end_inset
 
 .
  The first follows the canonical Zipf distribution.
- The green line is an eyeballed, approximate fit, 
+ The green line is an eyeballed, approximate fit, of exponent -1.1.
+ T
 \strikeout on
-of exponent -1.1.
- The second has an exponent of -0.85.
+he second has an exponent of -0.85.
 \end_layout
 
 \begin_layout Standard
 \align center
 \begin_inset Graphics
-	filename images/ranked-word-obs.eps
+	filename en-dj/ranked-word-obs.eps
 	width 50text%
 
 \end_inset

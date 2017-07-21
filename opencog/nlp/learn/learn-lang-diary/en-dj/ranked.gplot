@@ -10,7 +10,7 @@
 #
 set term postscript eps enhanced color 28
 set out 'ranked-word-obs.eps'
-set yrange [1:100000]
+set yrange [1:1e7]
 set logscale x
 set logscale y
 set format x "10^{%L}"
@@ -19,7 +19,7 @@ set title "Observed counts of words"
 set xlabel "Rank"
 set ylabel "Number of observations"
 plot "ranked-word-obs.dat" using 1:2 with lines linewidth 5 title "", \
-     "ranked-word-obs.dat" using 1:(90000/$1 ** 1.1) with lines linewidth 5 title "rank^{-1.1}"
+     (3170000/x ** 1.1) with lines linewidth 5 title "rank^{-1.1}"
 
 
 #################################################
