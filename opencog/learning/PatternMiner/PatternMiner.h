@@ -56,6 +56,7 @@ namespace PatternMining
 #define USE_ABS_SURPRISINGNESS 1
 #define LINE_INDENTATION "  "
 #define CALCULATE_TYPE_B_SURPRISINGNESS 1
+#define GENERATE_TYPE_B_RELATION_WHEN_CALCULATE_SURPRISINGNESS 0
 
 #define PATTERN_VARIABLENODE_TYPE VARIABLE_NODE
 
@@ -408,6 +409,8 @@ protected:
     unsigned int getAllEntityCountWithSamePredicatesForAPattern(HandleSeq& pattern);
 
     void calculateSurprisingness( HTreeNode* HNode, AtomSpace *_fromAtomSpace);
+
+    void calculateTypeBSurprisingness( HTreeNode* HNode, AtomSpace *_fromAtomSpace);
 
     void getOneMoreGramExtendedLinksFromGivenLeaf(Handle& toBeExtendedLink, Handle& leaf, Handle& varNode,
                                                   HandleSeq& outPutExtendedPatternLinks, AtomSpace* _fromAtomSpace);

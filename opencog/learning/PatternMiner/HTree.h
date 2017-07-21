@@ -83,7 +83,7 @@ namespace opencog
             double nI_Surprisingness;
             double nII_Surprisingness;
             double nII_Surprisingness_b; // calculated from the other same gram patterns
-            unsigned int subpattern_b_num; // the number of sub patterns of the same gram
+
             string surprisingnessInfo; // the middle info record the surpringness calculating process for this pattern
 
             HandleSeq sharedVarNodeList; // all the shared nodes in these links in the original AtomSpace, each handle is a shared node
@@ -101,7 +101,6 @@ namespace opencog
                 nI_Surprisingness = 0.0;
                 nII_Surprisingness = 0.0;
                 nII_Surprisingness_b = 1.0;
-                subpattern_b_num = 0;
 
             }
 
