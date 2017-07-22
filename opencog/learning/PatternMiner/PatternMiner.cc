@@ -1514,7 +1514,7 @@ void PatternMiner::OutPutStaticsToCsvFile(unsigned int n_gram)
 
         csvFile << htreeNode->count << "," << htreeNode->nI_Surprisingness << ","
 
-                << htreeNode->nII_Surprisingness << "," << htreeNode->nII_Surprisingness_b << htreeNode->max_b_subpattern_num;
+                << htreeNode->nII_Surprisingness << "," << htreeNode->nII_Surprisingness_b << "," << htreeNode->max_b_subpattern_num;
 //        if (htreeNode->superPatternRelations.size() > 0)
 //            csvFile << htreeNode->nII_Surprisingness;
 //        else
@@ -3404,7 +3404,7 @@ void PatternMiner::reSetAllSettingsFromConfig()
 
     thresholdFrequency = config().get_int("Frequency_threshold");
 
-    max_var_num_percent = config().get_double("max_var_num");
+    max_var_num_percent = config().get_double("max_var_num_percent");
 
     if_quote_output_pattern = config().get_bool("if_quote_output_pattern");
     string quotedTypeStr = config().get("output_pattern_quoted_linktype");
