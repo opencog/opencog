@@ -30,6 +30,7 @@ plot "binned-word-counts.dat" using 2:3 with lines linewidth 5 title "", \
 set term postscript eps enhanced color 28
 set out 'binned-word-logli.eps'
 set key left
+set xrange [10:]
 set yrange [1:100000]
 set logscale y
 set format y "10^{%L}"
@@ -38,7 +39,7 @@ set xlabel "Log liklihood"
 set ylabel "Number of words"
 plot "binned-word-logli.dat" using 2:3 with lines linewidth 5 title "", \
      "binned-word-logli.dat" using 2:(2**(1.5*($2-13.7))) with lines linewidth 5 title "2^{1.5(logli-13.7)}", \
-     "binned-word-logli.dat" using 2:(2**(0.8*($2-7))) with lines linewidth 5 title "2^{0.8(logli-7)}"
+     "binned-word-logli.dat" using 2:(2**(0.8*($2-10))) with lines linewidth 5 title "2^{0.8(logli-10)}"
 
 set key right
 #################################################

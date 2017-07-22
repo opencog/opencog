@@ -21275,16 +21275,16 @@ is
  the same graph, except that the x-axis is now labeled differently, and
  some of the counts have been binned together.
  So first: note that 
-\begin_inset Formula $-\log_{2}1/661104=19.334$
+\begin_inset Formula $-\log_{2}(1/18489594)=24.140$
 \end_inset
 
  and so this is the location of the first spike on the far-right.
  Next, 
-\begin_inset Formula $-\log_{2}2/661104=18.334$
+\begin_inset Formula $-\log_{2}(2/18489594)=23.140$
 \end_inset
 
  and 
-\begin_inset Formula $-\log_{2}3/661104=17.750$
+\begin_inset Formula $-\log_{2}(3/18489594)=22.555$
 \end_inset
 
  are the locations of the second and third spikes: these correspond to words
