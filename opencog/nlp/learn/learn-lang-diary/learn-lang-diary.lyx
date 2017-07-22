@@ -21156,10 +21156,6 @@ high quality
 \end_layout
 
 \begin_layout Standard
-xxx
-\end_layout
-
-\begin_layout Standard
 It is also interesting to turn this graph 
 \begin_inset Quotes eld
 \end_inset
@@ -21169,14 +21165,14 @@ on it's side
 \end_inset
 
 .
- So, in this dataset, there were 15270 words observed exactly once (out
- of a total of 661104 observations of 37413 words).
+ So, in this dataset, there were 53076 words observed exactly once (out
+ of a total of 18.5M observations of 137K words).
  This is quite something: of all the words observed, almost half were seen
  only once.
  More than half were seen twice, or less.
  These are presumably rare typos, foreign words, IPA pronunciation guides:
  any word that appears only once must be unusual; and yet, there are a lot
- of them! There are 5790 words that appear twice, 3093 that appear exactly
+ of them! There are 17120 words that appear twice, 9081 that appear exactly
  3 times, 
 \emph on
 etc.
@@ -21187,7 +21183,7 @@ etc.
 status collapsed
 
 \begin_layout Plain Layout
-graph of binned-word-counts.dat, generated in disjunct-stats.scm 
+Graph of binned-word-counts.dat, generated in disjunct-stats.scm 
 \end_layout
 
 \end_inset
@@ -21198,7 +21194,7 @@ graph of binned-word-counts.dat, generated in disjunct-stats.scm
 \begin_layout Standard
 \align center
 \begin_inset Graphics
-	filename images/binned-word-counts.eps
+	filename en-dj/binned-word-counts.eps
 	width 70text%
 
 \end_inset
@@ -21209,8 +21205,15 @@ graph of binned-word-counts.dat, generated in disjunct-stats.scm
 \begin_layout Standard
 This graph indicates that most (almost all) words were observed less than
  100 times.
- In this dataset, there were only 630 words that were observed more than
- 100 times, and 267 words that were observed 200 or more times.
+ In this dataset, there were only 9425 words that were observed more than
+ 100 times, 5683 words that were observed more than 200 times, and 3263
+ words that were observed 400 or more times.
+ Percentage-wise: about 6.8% of the words were observed 100 times or more.
+ This should be enough to give confidence in the syntactic usage of the
+ commonly-used English words; but most of the rest of this dataset includes
+ odities of various sorts, including place names and given names.
+ The challenge will be to see if these can be grouped into grammatical categorie
+s.
 \end_layout
 
 \begin_layout Standard
@@ -21220,7 +21223,7 @@ Writing
 
  for the number of times that some word was observed, it appears that there
  are approximately 
-\begin_inset Formula $15270\times N^{-3/2}$
+\begin_inset Formula $53076\times N^{-3/2}$
 \end_inset
 
  words observed that many times.
@@ -21245,6 +21248,10 @@ where
 \end_inset
 
  denotes the size of that set of words.
+\end_layout
+
+\begin_layout Standard
+xxx
 \end_layout
 
 \begin_layout Standard
