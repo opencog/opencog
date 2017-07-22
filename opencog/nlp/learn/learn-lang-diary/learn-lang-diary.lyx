@@ -21196,6 +21196,13 @@ Graph of binned-word-counts.dat, generated in disjunct-stats.scm
 \end_inset
 
 
+\begin_inset CommandInset label
+LatexCommand label
+name "graph word frequency"
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -21545,7 +21552,102 @@ N^{-1.8} & \mbox{for }N>400
 
 \end_inset
 
-What does this mean? What is this saying? 
+What does this mean? What is this saying? Here's what I think it is saying:
+ when a word is observed less than about 400 times, the way it participates
+ in the grammar is as if it were a part of a radnom network, with a scaling
+ factor of 3/2 primarily determined by the statistics of random planar trees.
+ That is, when a word is observed only a few times, the MI score is necessarily
+ going to be high, since it is very strongly assocaited with the context
+ that its in.
+ A small number of contexts means that anything that occurs in those contexts
+ will have a high MI.
+ When parsing setneces with these 
+\begin_inset Quotes eld
+\end_inset
+
+rare
+\begin_inset Quotes erd
+\end_inset
+
+ words, the MST parse will award them, will preferentially choose them for
+ the parse because of thier high MI.
+ 
+\end_layout
+
+\begin_layout Standard
+Put it this way: the MST parser does not know if we are feeding it English,
+ or random garbled strings of junk.
+ It will happily collect word-pairs and assign high MI values to rare word-pairs
+, even if its random junk.
+ The resulting distribution of disjuncts is essentially the distribution
+ of disjuncts formed on planar parse trees of random sentences.
+ That is my hypothesis for the 
+\begin_inset Formula $N<400$
+\end_inset
+
+ data.
+ Its a testable hypothesis.
+ I have not (yet) tested it.
+\end_layout
+
+\begin_layout Standard
+Above 400 observations, we start to see how actual English words are actually
+ being used in grammaticlly meaningful fashion.
+ We start seeing the structure of actual human language usage, finally.
+ The less frequently observed words were still English, probably...
+ but ...
+ but, at this point, we have to review what the corpus is.
+ Again: the corpus is assorted texts from Project Gutenberg.
+ These texts wil contain stray markup, including tables of contents, chapter
+ headings, indexes, figure captions and itemized lists.
+ Quite often, ASCII artwork is used to delimit chapters or sections.
+ Capter headings are often written in all-upper-case.
+ There are stray quotations in Latin, snippets of Latin prose and poetry.
+ Travelogues will include miscellaneous foreign sayings and unusal place-names.
+ All of this stuff adds up: it will be observed only once, twice, maybe
+ a a few dozen times.
+ It may as well be random text, from the point of view of the word-pair
+ MI statistics, and from the point of view of the MST parser.
+ There is no easy way to remove this 
+\begin_inset Quotes eld
+\end_inset
+
+garbage
+\begin_inset Quotes erd
+\end_inset
+
+ in any 
+\emph on
+a priori
+\emph default
+ fashion.
+ It is there, and it is unavoidable.
+ It is indistinguishable from random sentences.
+ The knee in the distribution curve seems to be a signal indicating how
+ to tell apart these two regimes.
+\end_layout
+
+\begin_layout Standard
+Of course, I could be completel wrong about this interpretation.
+ Its a hypothesis, for now.
+ Note that this knee is NOT visible in the Zipfian distribution -- nothing
+ happens at 
+\begin_inset Formula $N=400$
+\end_inset
+
+ - it is smooth as silk.
+ It maybe could have been visible in the 
+\begin_inset CommandInset ref
+LatexCommand vref
+reference "graph word frequency"
+
+\end_inset
+
+ graph, except that the far edge of that graph ends at exactly 
+\begin_inset Formula $N=400$
+\end_inset
+
+, and does not continue past there! This seems to be a fairly subtle effect.
 \end_layout
 
 \begin_layout Subsection*
@@ -21589,6 +21691,10 @@ narrow
  Thus, if a disjunct is seen a lot, it probably connects to another word,
  forming a high-MI pair.
  This can be explicitly seen in the example further below.
+\end_layout
+
+\begin_layout Standard
+xxxx
 \end_layout
 
 \begin_layout Standard
