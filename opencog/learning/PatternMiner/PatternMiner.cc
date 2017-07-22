@@ -3404,6 +3404,8 @@ void PatternMiner::reSetAllSettingsFromConfig()
 
     thresholdFrequency = config().get_int("Frequency_threshold");
 
+    max_var_num_percent = config().get_double("max_var_num");
+
     if_quote_output_pattern = config().get_bool("if_quote_output_pattern");
     string quotedTypeStr = config().get("output_pattern_quoted_linktype");
 //    cout << "quotedTypeStr = " << quotedTypeStr << std::endl;

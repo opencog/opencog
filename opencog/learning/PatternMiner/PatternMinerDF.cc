@@ -711,7 +711,7 @@ void PatternMiner::extendAPatternForOneMoreGramRecursively(const Handle &extende
     //      (ConceptNode "dead")
     //      (ConceptNode "dead")
     //    ) ; [44694]
-    n_limit_putin_result = valueToVarMap.size()/2.0f - lastGramTotalVarNum;
+    n_limit_putin_result = valueToVarMap.size() * max_var_num_percent - lastGramTotalVarNum;
     n_limit_putin_result ++;
 
     if (n_limit_putin_result == 1)

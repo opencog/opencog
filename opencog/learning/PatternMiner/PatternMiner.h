@@ -151,6 +151,8 @@ protected:
 
     unsigned int cur_gram;
 
+    double max_var_num_percent;
+
     int cur_index;
 
     int allLinkNumber;
