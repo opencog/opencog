@@ -21024,7 +21024,7 @@ op cit
 \begin_layout Standard
 \align center
 \begin_inset Graphics
-	filename images/ranked-cset-obs.eps
+	filename en-dj/ranked-cset-obs.eps
 	width 70text%
 
 \end_inset
@@ -21033,11 +21033,81 @@ op cit
 \end_layout
 
 \begin_layout Standard
-The top-ten connector-sets are ".: )-" "and: ,-" "in: the+" "(: )+" ",: and+"
- "the: of-" "of: the+" "): .+" "He: was+".
- These are hard to read, so, decoded: the first is a parenthesis followed
- by a period.
- The second is a comma, followed by 
+The top-ten connector-sets are "LEFT-WALL: He+;" "LEFT-WALL: The+;" "LEFT-WALL:
+ “+;" "LEFT-WALL: "+;" ".: "+;" "LEFT-WALL: I+;" "and: ,-;" "LEFT-WALL: It+;"
+ "LEFT-WALL: She+;" ".: ”+;"
+\end_layout
+
+\begin_layout Standard
+These are hard to read, so, decoded: the four are connectors from the left
+ side of the sentence to the words 
+\begin_inset Quotes eld
+\end_inset
+
+He
+\begin_inset Quotes erd
+\end_inset
+
+ and 
+\begin_inset Quotes eld
+\end_inset
+
+The
+\begin_inset Quotes erd
+\end_inset
+
+, and two different styles of double-quote marks: a right-leaning double-quote,
+ and a vertical double-quote.
+ This was commented on before: the corpus has many novels, and so many sentences
+ will begin with quotes.
+ Next comes a period which links to a double-quote on it's right.
+ Last comes period followed by a leaning double-quote.
+ Clearly, this is expected in the corpus.
+ Also visible are the sentence openers 
+\begin_inset Quotes eld
+\end_inset
+
+I
+\begin_inset Quotes erd
+\end_inset
+
+ 
+\begin_inset Quotes eld
+\end_inset
+
+It
+\begin_inset Quotes erd
+\end_inset
+
+ 
+\begin_inset Quotes eld
+\end_inset
+
+She
+\begin_inset Quotes erd
+\end_inset
+
+.
+ In that list is the word 
+\begin_inset Quotes eld
+\end_inset
+
+and
+\begin_inset Quotes erd
+\end_inset
+
+, which connects to the 
+\emph on
+left
+\emph default
+ to a commma.
+ Not a surprise.
+\end_layout
+
+\begin_layout Standard
+Not visible in the top-ten, but can be seen in the top-fifty are mirror-images,
+ for example: ",: and+;" in 14th place, which states that the comma expects
+ to be followed by the 
 \begin_inset Quotes eld
 \end_inset
 
@@ -21046,71 +21116,47 @@ and
 \end_inset
 
 .
- The third is the word-pair 
+ The counts differ: the sixth-place "and: ,-;" had 32755 counts, while 14th
+ place had 17745.
+ Presumably this is due the comma having a different or more complex linkage
+ about half the time.
+ Other items in the top-50 that are not sentence openers include "”: ?-;"
+ ",: but+;" ".: him-; "in: the+;" ".: ’+;" "”: .-;" "of: the+;".
+ The first disjunct with more than one connector in is is "It: LEFT-WALL-
+ was+;" which states that 
 \begin_inset Quotes eld
 \end_inset
 
-in the
+It
 \begin_inset Quotes erd
 \end_inset
 
-.
- All the others are pairs, also.
- Written in order: 
+ wants to be a sentence opener, but wants to be followed by the word 
 \begin_inset Quotes eld
 \end_inset
 
-()
+was
 \begin_inset Quotes erd
 \end_inset
 
- (presumably with other text between the parens) 
+ on the right.
+ Not surprising.
+ Proceeding down the list, the disjunts continue in this manner.
+ This does not necessarily mean that they are 
 \begin_inset Quotes eld
 \end_inset
 
-, and
+high quality
 \begin_inset Quotes erd
 \end_inset
 
- 
-\begin_inset Quotes eld
-\end_inset
+, only that they were frequently observed in MST parses.
+ It might be the case that the quality is given by the MI between the word
+ and its disjunct; this is explored later.
+\end_layout
 
-of the
-\begin_inset Quotes erd
-\end_inset
-
- 
-\begin_inset Quotes eld
-\end_inset
-
-of the
-\begin_inset Quotes erd
-\end_inset
-
- 
-\begin_inset Quotes eld
-\end_inset
-
-) .
-\begin_inset Quotes erd
-\end_inset
-
- and 
-\begin_inset Quotes eld
-\end_inset
-
-He was
-\begin_inset Quotes erd
-\end_inset
-
-.
- Curiously the 1st and 8th give the same pair, as do 2nd and 5th, and the
- 6th and 7th.
- This makes sense: if one word-disjunct pair is observed a lot, the converse
- should be also.
- This duality might be behind the slope of slightly less than -0.6 in the
- graph.
+\begin_layout Standard
+xxx
 \end_layout
 
 \begin_layout Standard
