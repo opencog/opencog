@@ -3232,11 +3232,17 @@ void PatternMiner::calculateTypeBSurprisingness( HTreeNode* HNode, AtomSpace *_f
 
             if (OUTPUT_SURPRISINGNESS_CALCULATION_TO_FILE)
             {
-                surpringnessIICalfile << "Count(S) = " << superb.superHTreeNode->count << ", II_Surprisingness_b = "
-                                      << HNode->count << " / " << superb.superHTreeNode->count << " = " << II_Surprisingness_b;
-            }
+                surpringnessIICalfile << "\nCount(S) = " << superb.superHTreeNode->count << ", II_Surprisingness_b = "
+                                      << HNode->count << " / " << superb.superHTreeNode->count << " = " << II_Surprisingness_b << std::endl;
 
-            surpringnessIICalfile << "-----------end super pattern :---------------\n";
+                for (Handle link : superb.superHTreeNode->pattern)
+                {
+                    surpringnessIICalfile << link->toShortString();
+                }
+
+
+                surpringnessIICalfile << "\n-----------end super pattern :---------------\n";
+            }
 
         }
 
@@ -3245,7 +3251,7 @@ void PatternMiner::calculateTypeBSurprisingness( HTreeNode* HNode, AtomSpace *_f
         if (OUTPUT_SURPRISINGNESS_CALCULATION_TO_FILE)
         {
             surpringnessIICalfile << "\nmin_II_Surprisingness_b = " << min_II_Surprisingness_b
-                                  << "\n=================Debug: calculate I_Surprisingness for pattern: ====================\n";
+                                  << "\n=================end calculate II_Surprisingness_b  ====================\n";
         }
 }
 
