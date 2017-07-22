@@ -12124,8 +12124,8 @@ glyph_width = mk_wcwidth(wc);
 
 
 ERROR: In procedure gc:
-ERROR: In procedure dbi-close: Wrong type argument in position 1: #<finalized
-smob 556c0402ec00>
+ERROR: In procedure dbi-close: Wrong type argument in position 1: #<finalized smob 556c0402ec00>
+ This is still an issue....
 
 
 LG expects:
@@ -12163,12 +12163,18 @@ Both He's have the wrong disjunct -- classname! ah OK
    (define mi-source (add-pair-freq-api pair-obj))
 pair-fmi
 
+------------------------
+
 en_pairs_rfive_mi
 (sql-open "postgres:///en_pairs_rfive_mtwo?user=linas")
  (define pca (make-pseudo-cset-api))
  (define psa (add-pair-stars pca))
- (batch-pairs psa)
+;  (batch-pairs psa)
+(psa 'fetch-pairs)
 (print-matrix-summary-report psa)
+
+(define psc (add-pair-count-api psa))
+(define psf (add-pair-freq-api psa))
 
 Rows: 137078 Columns: 6239997
 Size: 8629163 non-zero entries of 855366308766 possible
@@ -12187,7 +12193,80 @@ RMS Count      1.3696E+4    1732.         .2802        11.91
 
 (length all-csets)
 $16 = 8629163
+expect approx 8629163 + 3*137078 + 2*6239997 =  21520391 = 21.5M atoms, approx.
 
+Actual: 21651917 which is 131526 more than expected ...
+and is 43GB virt = 2KB/atom
+and elapsed= 4543 secs = 4.77K atoms/sec
+cpu time: 435:31.67 = 26131 secs -? 5.75 parallel
+
+heap: 1421955072
+45.036 
+Uhh oh.
+
+NO MI for DJ (WordNode \"Jud\") ...
+
+(Section (WordNode "Jud") 
+   (ConnectorSeq (Connector (WordNode "Prudie") (ConnectorDir "+"))))
+
+(define psf (add-pair-freq-api psa))
+(fetch-incoming-by-type (WordNode "Jud") 'Section)
+(psf 'pair-fmi  ... throws)
+(PredicateNode "*-Mutual Info Key-*") 
+
+(cog-keys jud) doesn't list it. ... it was not saved.
+how to recomp only one MI?
+count=3
+
+left-wild=17.7478927873962
+right-wild = 15.6685349957829
+wild-wild:  18489594 
+
+so freq should be: 1.622534275225297e-7
+logli = 22.55524770945383
+fmi = 10.861180073725272
+mi = 1.7622636939013273e-6
+
+set-pair-freq
+set-pair-mi
+
+(Section (WordNode "set") 
+ (ConnectorSeq  (Connector (WordNode "watch")  (ConnectorDir "+"))))
+
+count=4
+right-wild-count 5698.0 
+right-wild-logli 11.6639703038511
+left 15.478432112403
+
+logli=22.140210210174985
+fmi = 5.0021922060791155
+mi = 2.1633790336337293e-7 * above
+
+Whoa .. store atom didn't work!? Yes it did ....
+
+(Section         66400472
+(WordNode "set")    310
+ (ConnectorSeq      64865853
+  (Connector        64865826
+  (WordNode "watch")  69402
+ (ConnectorDir "+") 64841132
+)))
+
+So fetch-atom is not working....
+get_atom_values is called...
+
+getLink
+doGetLink  yes ...
+setValue yes... called 1,2,3 times
+but cog-keys still shows junk.
+
+oc_to_string
+
+
+
+How many words?
+(psf 'left-basis-size)
+(psf 'right-basis-size)
 
 (define (escquote STR BEG)
 	(define pos (string-index STR (lambda (C) (equal? C #\')) BEG))
@@ -12205,7 +12284,7 @@ Store 800855 csets
 
 Mandarin word pairs + MI values; Ruitings segemented text
 
-
+--------------------
 gettimeofday
 timeradd
 
