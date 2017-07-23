@@ -12262,6 +12262,45 @@ but cog-keys still shows junk.
 
 oc_to_string
 
+(Section                73785651
+(WordNode "Reinaert")   11727194
+  (ConnectorSeq         73785641
+  (Connector            73785640
+(WordNode "Isengrim")   11727422
+  (ConnectorDir "+")))) 64841132
+
+Ahhh!  Soo .. no MI was stored for this!   it was lost!
+
+Also: not fetchable if been open a long time ... !?
+
+count=1
+wild-wild = 18489594
+right-wild-logli = 18.8182821152876
+left- = 18.8922826967314
+
+so fmi = 13.570354601844016
+
+cog-logger
+(use-modules (opencog logger))
+
+@0x7ffc6ba59e40:
+getLink
+doGetLink   its in TLB so we are good ...
+get_atom_values
+
+@0x7ffc6ba59d90:  is what sql works with.
+
+get_all_values_cb
+atom->setValue
+... fails because atom in TLB has no atomspace!!!!
+    _atom_space->_value_table.addValuation(key, getHandle(), value);
+which is why its not printing...
+
+but fetches after individual access do work corrctly.
+Soits the bulk fretch of all apirs that failed to date TLB...
+
+(load-atoms-of-type 'Section)
+
 
 
 How many words?

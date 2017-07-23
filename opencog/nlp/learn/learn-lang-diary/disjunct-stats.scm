@@ -426,11 +426,27 @@
 	(print-bincounts-tsv binned-word-counts outport)
 	(close outport))
 
+;--------------
+; Create a binned graph of the number of words observed with a given
+; log-liklihood.  Although this is in the binning tradition of the
+; other binned graphs, its really the same thing as the log-log
+; graph of the word-counts, but renormalized.
+; (define pca (make-pseudo-cset-api))
+; (define psa (add-pair-stars pca))
+; (define pcw (add-pair-wildcards psa))
+; (define pmi (add-pair-mi-compute psa))
+(define (cset-vec-word-logli WORD)
+	(psf 'right-wild-logli WORD))
+
+(define sorted-word-logli (score-and-rank cset-vec-word-logli all-cset-words))
+(define binned-word-logli (bin-count-simple sorted-word-logli 1200 9.0 24.0))
+
+(let ((outport (open-file "/tmp/binned-word-logli.dat" "w")))
+	(print-bincounts-tsv binned-word-logli outport)
+	(close outport))
+
 ; -------
 ; Rank words according to thier fractonal entropy
-(define pca (make-pseudo-cset-api))
-(define pcw (add-pair-wildcards pca))
-(define pmi (add-pair-mi-compute pca))
 (define (cset-vec-word-ent WORD)
 		(pmi 'compute-right-fentropy WORD))
 
@@ -447,21 +463,6 @@
 
 (let ((outport (open-file "/tmp/binned-word-ent.dat" "w")))
 	(print-bincounts-tsv binned-word-ent outport)
-	(close outport))
-
-;--------------
-; Create a binned graph of the number of words observed with a given
-; log-liklihood.  Although this is in the binning tradition of the
-; other binned graphs, its really the same thing as the log-log
-; graph of the word-counts, but renormalized.
-(define (cset-vec-word-logli WORD)
-	(pmi 'right-wild-logli WORD))
-
-(define sorted-word-logli (score-and-rank cset-vec-word-logli all-cset-words))
-(define binned-word-logli (bin-count-simple sorted-word-logli 200 10.0 20.0))
-
-(let ((outport (open-file "/tmp/binned-word-logli.dat" "w")))
-	(print-bincounts-tsv binned-word-logli outport)
 	(close outport))
 
 ;--------------

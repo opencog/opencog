@@ -123,11 +123,9 @@
 			all-csets)
 
 		; Fetch (from the database) all pseudo-csets
-		; XXX this doesn't get the wild-cards, making the report
-		; not work, and also some of the freq-api, right? Because we
-		; put the wild-cards into List's above....
 		(define (fetch-pseudo-csets)
 			(define start-time (current-time))
+			; marginals are located on any-left, any-right
 			(fetch-incoming-set any-left)
 			(fetch-incoming-set any-right)
 			(load-atoms-of-type 'Section)
