@@ -19158,13 +19158,12 @@ The primary results reported below are these:
 \begin_layout Standard
 * Most scores and metrics that can be assigned to connector sets give a
  (scale-free) Zipfian ranking distribution, and are thus fairly boring.
+ Although there are some oddities here and there.
 \end_layout
 
 \begin_layout Standard
-* 
-\strikeout on
-The greater the average number of observations per disjunct, the more grammatica
-lly acceptable (accurate) the disjunct seems to be.
+* The greater the average number of observations per disjunct, the more
+ grammatically acceptable (accurate) the disjunct seems to be.
  This is good news: it means that the general technique is not generating
  ungrammatical garbage.
 \end_layout
@@ -21151,8 +21150,12 @@ high quality
  and its disjunct; this is explored later.
 \end_layout
 
+\begin_layout Subsection*
+Word distribution
+\end_layout
+
 \begin_layout Standard
-It is also interesting to turn this graph 
+It is also interesting to turn the word distribution graph 
 \begin_inset Quotes eld
 \end_inset
 
@@ -21161,8 +21164,18 @@ on it's side
 \end_inset
 
 .
- So, in this dataset, there were 53076 words observed exactly once (out
- of a total of 18.5M observations of 137K words).
+ This is meant to be a simple exercise, so as to place some later graphs
+ into context.
+ Despite the simplcity, the analysis turns out to be somewhat surprising,
+ and somewhat subtle.
+ In particular, the last graph elicits some features in the dataset that
+ are not otherwise easily visible.
+ 
+\end_layout
+
+\begin_layout Standard
+In this dataset, there were 53076 words observed exactly once (out of a
+ total of 18.5M observations of 137K words).
  This is quite something: of all the words observed, almost half were seen
  only once.
  More than half were seen twice, or less.
@@ -21552,52 +21565,26 @@ N^{-1.8} & \mbox{for }N>400
 
 \end_inset
 
-What does this mean? What is this saying? Here's what I think it is saying:
- when a word is observed less than about 400 times, the way it participates
- in the grammar is as if it were a part of a random network, with a scaling
- factor of 3/2 primarily determined by the statistics of random planar trees.
- That is, when a word is observed only a few times, the MI score is necessarily
- going to be high, since it is very strongly associated with the context
- that its in.
- A small number of contexts means that anything that occurs in those contexts
- will have a high MI.
- When parsing sentences with these 
-\begin_inset Quotes eld
-\end_inset
-
-rare
-\begin_inset Quotes erd
-\end_inset
-
- words, the MST parse will award them, will preferentially choose them for
- the parse because of their high MI.
+It was noted before that there are 3263 words in the dataset that were observed
+ 400 or more times.
  
 \end_layout
 
 \begin_layout Standard
-Put it this way: the MST parser does not know if we are feeding it English,
- or random garbled strings of junk.
- It will happily collect word-pairs and assign high MI values to rare word-pairs
-, even if its random junk.
- The resulting distribution of disjuncts is essentially the distribution
- of disjuncts formed on planar parse trees of random sentences.
- That is my hypothesis for the 
-\begin_inset Formula $N<400$
-\end_inset
-
- data.
- Its a testable hypothesis.
- I have not (yet) tested it.
+What does this mean? What is this saying? Its not entirely clear.
+ It seems to suggest that there are about 3.3K words that are used perferentially
+ more often than the rest.
+ That is, they are used more often not only in absolute terms, but also
+ in relative terms: the form a core of the vocabulary, enjoying a popularity
+ exceeding the trend line for less-frequently used words.
 \end_layout
 
 \begin_layout Standard
-Above 400 observations, we start to see how actual English words are actually
- being used in grammatically meaningful fashion.
- We start seeing the structure of actual human language usage, finally.
- The less frequently observed words were still English, probably...
- but ...
- but, at this point, we have to review what the corpus is.
- Again: the corpus is assorted texts from Project Gutenberg.
+Its not clear if this is a generic feature of the English language, or if
+ this is peculiar to the particular corpus.
+ Lets's review the corpus again.
+ The corpus comprises assorted late-19th and early 20th century texts from
+ Project Gutenberg, a dozen sci-fi/fantasy novels, and a sampling of fan-fiction.
  These texts will contain stray markup, including tables of contents, chapter
  headings, indexes, figure captions and itemized lists.
  Quite often, ASCII artwork is used to delimit chapters or sections.
@@ -21623,13 +21610,31 @@ a priori
  fashion.
  It is there, and it is unavoidable.
  It is indistinguishable from random sentences.
- The knee in the distribution curve seems to be a signal indicating how
- to tell apart these two regimes.
+ However, it seems that the fact that some significant portion is 
+\begin_inset Quotes eld
+\end_inset
+
+ungrammatical
+\begin_inset Quotes erd
+\end_inset
+
+ should not affect word-count statistics, unlless it just so happens that
+ there is a core of 3.3K vocabulary words, followed by 130K words that are
+ given names, arcane terms, and other 
+\begin_inset Quotes eld
+\end_inset
+
+junk
+\begin_inset Quotes erd
+\end_inset
+
+.
+ This does not seem plausible.
 \end_layout
 
 \begin_layout Standard
-Of course, I could be completely wrong about this interpretation.
- Its a hypothesis, for now.
+Thus, it is unclear on what the meaning of this knee in the graph really
+ is, and how it should be explained.
  Note that this knee is NOT visible in the Zipfian distribution -- nothing
  happens at 
 \begin_inset Formula $N=400$
