@@ -21221,9 +21221,9 @@ name "graph word frequency"
 \begin_layout Standard
 This graph indicates that most (almost all) words were observed less than
  100 times.
- In this dataset, there were only 9425 words that were observed more than
- 100 times, 5683 words that were observed more than 200 times, and 3263
- words that were observed 400 or more times.
+ In this dataset, there were only 9425 words that were observed 100 or more
+ times, 5683 words that were observed 200 or more times, and 3263 words
+ that were observed 400 or more times.
  Percentage-wise: about 6.8% of the words were observed 100 times or more.
  This should be enough to give confidence in the syntactic usage of the
  commonly-used English words; but most of the rest of this dataset includes
@@ -21689,17 +21689,13 @@ narrow
 \end_inset
 
  the grammatical usage of a word is.
- If the average is high, it means that the word just does not have very
+ If the average is high, it suggests that the word just does not have very
  many disjuncts on it; the few that it does have are observed a lot.
  Recall that these disjuncts (pseudo-disjuncts) connect to individual words,
  and not to word-classes.
  Thus, if a disjunct is seen a lot, it probably connects to another word,
  forming a high-MI pair.
  This can be explicitly seen in the example further below.
-\end_layout
-
-\begin_layout Standard
-xxxx
 \end_layout
 
 \begin_layout Standard
@@ -21714,11 +21710,19 @@ Computed with the sorted-avg list in disjunct-stats.scm
 
 \end_inset
 
- Words with fewer than 100 observations have been excluded, so as to minimize
- the spurious noise.
- Note that although the line is straight in this log-log graph, the Zipf
- exponent is approximately -1/4.
- The graph on the right expresses an alternate view of the same idea: this
+ The ranking is dstinctly not Zipfian; this is confirmed by slicing the
+ data three ways: excluding words with less than 400 observations (leaving
+ 3263 words), excluding words with less than 100 observations (leaving 9425
+ words), and excluding words with less than 20 observations (leaving 25505
+ words out of 137K words).
+\end_layout
+
+\begin_layout Standard
+xxx
+\end_layout
+
+\begin_layout Standard
+The graph on the right expresses an alternate view of the same idea: this
  one shows a bin-count of all of the words.
  Reaffirming the graph on the left, it indicates that almost all words have
  an average disjunct observation count of less than three.
@@ -21730,7 +21734,7 @@ Computed with the sorted-avg list in disjunct-stats.scm
 \begin_layout Standard
 \align center
 \begin_inset Graphics
-	filename images/ranked-avg.eps
+	filename en-dj/ranked-avg.eps
 	width 50text%
 
 \end_inset

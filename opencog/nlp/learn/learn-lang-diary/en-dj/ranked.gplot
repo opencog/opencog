@@ -74,22 +74,25 @@ plot "ranked-support.dat" using 1:2 with lines linewidth 5 title "", \
      "ranked-support.dat" using 1:(20000/$1 ** 1) with lines linewidth 5 title "rank^{-1}"
 
 #################################################
-# Used to generate the connector-set ranking graphs.
+# Used to generate the averge connector-set ranking graphs.
 #
 set term postscript eps enhanced color 28
 set out 'ranked-avg.eps'
-set yrange [1:6]
-set ytics (1,2,3,4,5,6)
 set logscale x
 set logscale y
+set yrange [1:200]
+set xrange [1:20000]
 set title "Rank by average observations"
 set xlabel "Rank"
 set ylabel "Average observations per disjunct"
-plot "ranked-avg.dat" using 1:2 with lines linewidth 5 title "", \
-     "ranked-avg.dat" using 1:(5/$1 ** 0.25) with lines linewidth 5 title "rank^{-0.25}"
+plot "ranked-avg-400.dat" using 1:2 with lines linewidth 5 title "400+ obs", \
+     "ranked-avg-100.dat" using 1:2 with lines linewidth 5 title "100+ obs", \
+     "ranked-avg-20.dat" using 1:2 with lines linewidth 5 title "20+ obs", \
+     "ranked-avg-20.dat" using 1:(100/$1 ** 0.5) with lines linewidth 5 title "rank^{-0.5}"
 
 unset ytics
 set ytics
+
 
 #################################################
 # Used to generate the connector-set ranking graphs.
