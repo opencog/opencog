@@ -50,8 +50,9 @@ using namespace opencog;
 
 #define NO_EDGE SIZE_MAX
 #define NO_WEIGHT (-999.9)
-#define NO_PAIR_DISTANCE_LIMIT 0
-
+#define DEFAULT_PAIR_DISTANCE 6
+#define NO_PAIR_DISTANCE 0
+#define DONT_PRINT_PARSE_RESULTS false
 
 void eat_my_parameters(...) {}
 
@@ -74,15 +75,9 @@ void eat_my_parameters(...) {}
 
 namespace opencog {
 
-#ifdef TEST_MAIN
-void print_pair_weights(std::ostream&       out_stream,
-                        const WordVector&   words,
-                        const WeightMatrix& pair_weights);
-#endif
-
 void load_pair_weights( AtomSpace*          as,
                         const HandleSeq&    word_handles,
-                        int                 pair_distance_limit,
+                        int                 pair_distance,
                         WeightMatrix&       pair_weights)
 {
     size_t total_words = word_handles.size();
@@ -97,9 +92,9 @@ void load_pair_weights( AtomSpace*          as,
     {
         // Compute the last word accounting for our pair distance limits.
         size_t last_word;
-        if (pair_distance_limit)
+        if (pair_distance)
         {
-            last_word = left + 1 + pair_distance_limit;
+            last_word = left + 1 + pair_distance;
             if (total_words < last_word)
                 last_word = total_words;
         }
@@ -225,7 +220,7 @@ double connect_range(   std::string&            indent,
 void find_max_pair_index(   std::string&        indent,
                             WeightMatrix&       pair_weights,
                             const WordVector&   words,
-                            int                 pair_distance_limit,
+                            int                 pair_distance,
                             size_t              left,
                             size_t              end,
                             size_t&             max_pair_index,
@@ -236,7 +231,7 @@ void find_max_pair_index(   std::string&        indent,
     max_pair_weight = NO_WEIGHT;
 
     // Constrain to the pair distance limit.
-    size_t last_right = left + pair_distance_limit;
+    size_t last_right = left + pair_distance;
     if (end < last_right)
         last_right = end;
     for (size_t right = left + 1; right <= end; right++)
@@ -256,12 +251,13 @@ void find_max_pair_index(   std::string&        indent,
 #endif
 }
 
-size_t potential_cross( std::string&                indent,
+bool potential_cross(   std::string&                indent,
                         const std::vector<size_t>&  max_pair_indices,
                         const WordVector&           words,
                         size_t                      fragment_start,
                         size_t                      current_left,
-                        size_t                      current_max_right)
+                        size_t                      current_max_right,
+                        size_t&                     cross)
 {
     // Check for potential crosses from right to left since
     // if we find a cross and the cross has a greater weighted
@@ -293,11 +289,12 @@ size_t potential_cross( std::string&                indent,
                     indent.c_str(), left, words[left].c_str(),
                     (int) current_max_right, (int) left_max);
 #endif
-            return (size_t) left;
+            cross = left;
+            return true;
         }
     }
 
-    return (size_t) false;
+    return false;
 }
 
 #define DONT_CHECK_CROSSES false
@@ -307,7 +304,7 @@ size_t potential_cross( std::string&                indent,
 double parse_fragment(  std::string&            indent,
                         WeightMatrix&           pair_weights,
                         const WordVector&       words,
-                        int                     pair_distance_limit,
+                        int                     pair_distance,
                         size_t                  start,
                         size_t                  end,
                         bool                    save_parse,
@@ -347,7 +344,7 @@ double parse_fragment(  std::string&            indent,
     for (size_t left = start; left < end; left++)
     {
         // Save the maximum pair index and weight.
-        find_max_pair_index(indent, pair_weights, words, pair_distance_limit,
+        find_max_pair_index(indent, pair_weights, words, pair_distance,
                     left, end, max_pair_index, max_pair_weight);
         left_cache_index = left - start;
         max_pair_indices[left_cache_index] = max_pair_index;
@@ -443,110 +440,112 @@ double parse_fragment(  std::string&            indent,
             bool saving_parse_on_entry = save_parse;
             save_parse = false;
             
-            // We must check and eliminate potential crosses first...
-            size_t cross;
-            while ( check_crosses &&
-                    (cross = potential_cross(indent, max_pair_indices,
-                            words, start, left, max_pair_index)))
+            if (check_crosses)
             {
-                size_t cross_cache_index = cross - start;
-                size_t cross_right_index = max_pair_indices[cross_cache_index];
-                double cross_weight = max_pair_weights[cross_cache_index];
-                DEBUG_PRINT("%s edge [%d]__[%d] crosses edge [%d]__[%d]\n",
-                        indent.c_str(),  (int) left, (int) max_pair_index,
-                        (int) cross, (int) cross_right_index);
-                DEBUG_PRINT("%s start %d, cross %d, cache index %d\n",
-                        indent.c_str(), (int) start, (int) cross,
-                        (int) cross_cache_index);
-                indent += " |";
-
-                // If we get here, we have at least one cross.
-                cross_count++;
-
-                // Sanity check for infinite loops
-                if (cross_count > (int) fragment_size)
+                // We must check and eliminate potential crosses first...
+                size_t cross;
+                while (potential_cross(indent, max_pair_indices, words, start,
+                        left, max_pair_index, cross))
                 {
-                    std::cerr << "Fatal parse! Cannot fix cross for :"  << std::endl;
-                    for (auto & word : words)
-                        std::cerr << " " << word;
-                    std::cerr << std::endl;
-                    throw (RuntimeException(TRACE_INFO, "Fatal parse."));
-                    exit(1);
-                }
-
-                // First some terms:
-                // 
-                // left_left_parse_weight - the weight of the parse from left to it's max_pair_index
-                // left_right_parse_weight - the weight of the parse from the left's max_pair_index to 
-                //                           the cross's max_pair index
-                //
-                // right_left_parse_weight - the weight of the parse to the cross
-                // right_right_parse_weight - the weight of the parse from the cross to it's max_pair_index
-                //
-                
-                // Determine the parse weight if the left wins...
-                double left_left_parse_weight = parse_fragment(indent, pair_weights, words,
-                        pair_distance_limit, left, max_pair_index, save_parse,
-                        parse_result, check_crosses);
-                double left_right_parse_weight = parse_fragment(indent, pair_weights, words,
-                        pair_distance_limit, max_pair_index + 1, cross_right_index,
-                        save_parse, parse_result, check_crosses);
-                double left_parse_weight = left_left_parse_weight + 
-                        left_right_parse_weight + max_pair_weight;
-
-                // Determine the parse weight if the right wins...
-                double right_left_parse_weight = parse_fragment(indent, pair_weights, words,
-                        pair_distance_limit, left, cross, save_parse,
-                        parse_result, check_crosses);
-                double right_right_parse_weight = parse_fragment(indent, pair_weights, words,
-                        pair_distance_limit, cross + 1, cross_right_index, save_parse,
-                        parse_result, check_crosses);
-                double right_parse_weight = right_left_parse_weight +
-                        right_right_parse_weight + cross_weight;
-
-                // The parse with the greatest total fragment weight wins.
-
-                // If the left cross wins...
-                if (left_parse_weight > right_parse_weight)
-                {
-                    DEBUG_PRINT("%s removing right crossing edge [%d]__[%d] %0.2f > %0.2f\n",
-                            indent.c_str(),  (int) cross, (int) cross_right_index,
-                            left_parse_weight, right_parse_weight);
-
-                    // Remove the cross by constricting the range of the maximum pair for the
-                    // right so it cannot cross the winning left pair.
-                    size_t new_cross_limit = max_pair_index;
-                    find_max_pair_index(indent, pair_weights, words, pair_distance_limit,
-                            cross, max_pair_index, cross_right_index, cross_weight);
-                    max_pair_indices[cross_cache_index] = cross_right_index;
-                    max_pair_weights[cross_cache_index] = cross_weight;
-
-                    DEBUG_PRINT("%s found new max pair for [%d] %-10s up to [%d] at [%d] = %4.02f\n",
-                            indent.c_str(),  (int) cross, words[left].c_str(),
-                            (int) new_cross_limit, (int) max_pair_index, max_pair_weight);
-                }
-                // otherwise, the right cross wins...
-                else
-                {
-                    DEBUG_PRINT("%s removing left crossing edge [%d]__[%d] %0.2f < %0.2f\n",
+                    size_t cross_cache_index = cross - start;
+                    size_t cross_right_index = max_pair_indices[cross_cache_index];
+                    double cross_weight = max_pair_weights[cross_cache_index];
+                    DEBUG_PRINT("%s edge [%d]__[%d] crosses edge [%d]__[%d]\n",
                             indent.c_str(),  (int) left, (int) max_pair_index,
-                            left_parse_weight, right_parse_weight);
+                            (int) cross, (int) cross_right_index);
+                    DEBUG_PRINT("%s start %d, cross %d, cache index %d\n",
+                            indent.c_str(), (int) start, (int) cross,
+                            (int) cross_cache_index);
+                    indent += " |";
 
-                    // Remove the left cross by constricting the range of its maximum
-                    // pair so it cannot cross the winning rightcross pair.
-                    find_max_pair_index(indent, pair_weights, words, pair_distance_limit, 
-                            left, cross, max_pair_index, max_pair_weight);
-                    max_pair_indices[left_cache_index] = max_pair_index;
-                    max_pair_weights[left_cache_index] = max_pair_weight;
+                    // If we get here, we have at least one cross.
+                    cross_count++;
 
-                    DEBUG_PRINT("%s found new max pair for [%d] %-10s up to [%d] at [%d] = %4.02f\n",
-                            indent.c_str(),  (int) left, words[left].c_str(),
-                            (int) cross, (int) max_pair_index, max_pair_weight);
-                }
+                    // Sanity check for infinite loops
+                    if (cross_count > (int) fragment_size)
+                    {
+                        std::cerr << "Fatal parse! Cannot fix cross for :"  << std::endl;
+                        for (auto & word : words)
+                            std::cerr << " " << word;
+                        std::cerr << std::endl;
+                        throw (RuntimeException(TRACE_INFO, "Fatal parse."));
+                        exit(1);
+                    }
 
-                indent.resize(indent.size() - 2);
+                    // First some terms:
+                    // 
+                    // left_left_parse_weight - the weight of the parse from left to it's max_pair_index
+                    // left_right_parse_weight - the weight of the parse from the left's max_pair_index to 
+                    //                           the cross's max_pair index
+                    //
+                    // right_left_parse_weight - the weight of the parse to the cross
+                    // right_right_parse_weight - the weight of the parse from the cross to it's max_pair_index
+                    //
+                    
+                    // Determine the parse weight if the left wins...
+                    double left_left_parse_weight = parse_fragment(indent, pair_weights, words,
+                            pair_distance, left, max_pair_index, save_parse,
+                            parse_result, check_crosses);
+                    double left_right_parse_weight = parse_fragment(indent, pair_weights, words,
+                            pair_distance, max_pair_index + 1, cross_right_index,
+                            save_parse, parse_result, check_crosses);
+                    double left_parse_weight = left_left_parse_weight + 
+                            left_right_parse_weight + max_pair_weight;
 
-            } // while (checking potential crosses)
+                    // Determine the parse weight if the right wins...
+                    double right_left_parse_weight = parse_fragment(indent, pair_weights, words,
+                            pair_distance, left, cross, save_parse,
+                            parse_result, check_crosses);
+                    double right_right_parse_weight = parse_fragment(indent, pair_weights, words,
+                            pair_distance, cross + 1, cross_right_index, save_parse,
+                            parse_result, check_crosses);
+                    double right_parse_weight = right_left_parse_weight +
+                            right_right_parse_weight + cross_weight;
+
+                    // The parse with the greatest total fragment weight wins.
+
+                    // If the left cross wins...
+                    if (left_parse_weight > right_parse_weight)
+                    {
+                        DEBUG_PRINT("%s removing right crossing edge [%d]__[%d] %0.2f > %0.2f\n",
+                                indent.c_str(),  (int) cross, (int) cross_right_index,
+                                left_parse_weight, right_parse_weight);
+
+                        // Remove the cross by constricting the range of the maximum pair for the
+                        // right so it cannot cross the winning left pair.
+                        size_t new_cross_limit = max_pair_index;
+                        find_max_pair_index(indent, pair_weights, words, pair_distance,
+                                cross, max_pair_index, cross_right_index, cross_weight);
+                        max_pair_indices[cross_cache_index] = cross_right_index;
+                        max_pair_weights[cross_cache_index] = cross_weight;
+
+                        DEBUG_PRINT("%s found new max pair for [%d] %-10s up to [%d] at [%d] = %4.02f\n",
+                                indent.c_str(),  (int) cross, words[left].c_str(),
+                                (int) new_cross_limit, (int) max_pair_index, max_pair_weight);
+                    }
+                    // otherwise, the right cross wins...
+                    else
+                    {
+                        DEBUG_PRINT("%s removing left crossing edge [%d]__[%d] %0.2f < %0.2f\n",
+                                indent.c_str(),  (int) left, (int) max_pair_index,
+                                left_parse_weight, right_parse_weight);
+
+                        // Remove the left cross by constricting the range of its maximum
+                        // pair so it cannot cross the winning rightcross pair.
+                        find_max_pair_index(indent, pair_weights, words, pair_distance, 
+                                left, cross, max_pair_index, max_pair_weight);
+                        max_pair_indices[left_cache_index] = max_pair_index;
+                        max_pair_weights[left_cache_index] = max_pair_weight;
+
+                        DEBUG_PRINT("%s found new max pair for [%d] %-10s up to [%d] at [%d] = %4.02f\n",
+                                indent.c_str(),  (int) left, words[left].c_str(),
+                                (int) cross, (int) max_pair_index, max_pair_weight);
+                    }
+
+                    indent.resize(indent.size() - 2);
+
+                } // while (checking potential crosses)
+            }
 
             // Restore the saving parse flag...
             save_parse = saving_parse_on_entry;
@@ -586,7 +585,7 @@ double parse_fragment(  std::string&            indent,
                 size_t range_start = left + 1;
                 size_t range_end = max_pair_index - 1;
                 double subfragment_weight = parse_fragment(indent, pair_weights, words,
-                        pair_distance_limit, range_start, range_end, save_parse, parse_result);
+                        pair_distance, range_start, range_end, save_parse, parse_result);
                 double connection_weight = connect_range(indent, pair_weights, words, 
                         range_start, range_end, save_parse, parse_result);
                 fragment_weight += subfragment_weight + connection_weight;
@@ -702,7 +701,7 @@ mutual information tree.
 */
 void parse_words(   AtomSpace*          atomspace,
                     const WordVector&   words,
-                    int                 pair_distance_limit,
+                    int                 pair_distance,
                     ParseVector&        parse_result)
 {
     if (words.size() <= 0)
@@ -721,23 +720,19 @@ void parse_words(   AtomSpace*          atomspace,
     // of the parsing anyway,  this will allow us to not load compare pairs more
     // than once since we can just use the computed weight cache.
     WeightMatrix pair_weights(total_words, std::vector<double>(total_words, NO_WEIGHT));
-    load_pair_weights(atomspace, word_handles, pair_distance_limit, pair_weights);
-
-#ifdef TEST_MAIN
-    print_pair_weights(std::cout, words, pair_weights);
-#endif
+    load_pair_weights(atomspace, word_handles, pair_distance, pair_weights);
 
     // Now that we have setup the word handles and pair weights cache we can
     // do our recursive fragment parsing, passing in indexes for the whole sentence.
     std::string indent = "";
-    double parse_weight = parse_fragment(indent, pair_weights, words, pair_distance_limit,
+    double parse_weight = parse_fragment(indent, pair_weights, words, pair_distance,
             0, total_words - 1, SAVE_PARSE, parse_result);
     DEBUG_PRINT("Parse total weight = %.2f.\n", parse_weight);
 }
 
 void parse_sentence(    AtomSpace*      atomspace,
                         std::string&    sentence,
-                        int             pair_distance_limit,
+                        int             pair_distance,
                         ParseVector&    parse_results)
 {
     WordVector words;
@@ -746,7 +741,7 @@ void parse_sentence(    AtomSpace*      atomspace,
     break_sentence_into_words(sentence, words);
 
     // Parse the words.
-    parse_words(atomspace, words, pair_distance_limit, parse_results);
+    parse_words(atomspace, words, pair_distance, parse_results);
 }
 
 size_t max_length(const WordVector& words)
@@ -762,11 +757,21 @@ size_t max_length(const WordVector& words)
     return max_word_length;
 }
 
-void print_pair_weights(std::ostream&       out_stream,
+void print_pair_weights(AtomSpace*          as,
+                        std::ostream&       out_stream,
                         const WordVector&   words,
-                        const WeightMatrix& pair_weights)
+                        size_t              pair_distance)
 {
+    // Create all the word nodes.
     size_t total_words = words.size();
+    HandleSeq word_handles;
+    for (size_t index = 0; index < total_words; index++)
+        word_handles.push_back(as->add_node(WORD_NODE, words[index]));
+
+    // Load the pair weights.
+    WeightMatrix pair_weights(total_words, std::vector<double>(total_words, NO_WEIGHT));
+    load_pair_weights(as, word_handles, pair_distance, pair_weights);
+
     size_t max_word_length = max_length(words);
 
     // Now add a column header for each word doing a row per character.
@@ -833,13 +838,13 @@ void print_pair_weights(std::ostream&       out_stream,
 bool dump_pair_weights( AtomSpace*          as,
                         std::string&        file_name,
                         std::string&        sentence,
-                        int                 pair_distance_limit,
+                        int                 pair_distance,
                         std::string&        error)
 {
     WordVector      words;
 
     DEBUG_PRINT("dump_pair_weights - file: %s\nsentence: %s\npair distance: %d\n", 
-            file_name.c_str(), sentence.c_str(), pair_distance_limit);
+            file_name.c_str(), sentence.c_str(), pair_distance);
 
     // Break the sentence up into words.
     break_sentence_into_words(sentence, words);
@@ -850,15 +855,6 @@ bool dump_pair_weights( AtomSpace*          as,
         return true;
 
     DEBUG_PRINT("found %d words\n", (int) total_words);
-
-    // Create all the word nodes.
-    HandleSeq word_handles;
-    for (size_t index = 0; index < total_words; index++)
-        word_handles.push_back(as->add_node(WORD_NODE, words[index]));
-
-    // Load the pair weights.
-    WeightMatrix pair_weights(total_words, std::vector<double>(total_words, NO_WEIGHT));
-    load_pair_weights(as, word_handles, pair_distance_limit, pair_weights);
 
     // Open the file.
 
@@ -895,7 +891,7 @@ bool dump_pair_weights( AtomSpace*          as,
                 total_words << "] =" << std::endl << "{" << std::endl;
 
     // Print the pair weights to the file stream.
-    print_pair_weights(file_stream, words, pair_weights);
+    print_pair_weights(as, file_stream, words, pair_distance);
 
     // Close out the array definition.
     file_stream << "};" << std::endl;
@@ -914,9 +910,10 @@ bool dump_pair_weights( AtomSpace*          as,
 
 #ifdef TEST_MAIN
 
-void test_parse_sentence(   AtomSpace*      atomspace,
+void test_parse_sentence(   AtomSpace*      as,
                             std::string&    sentence,
-                            int             pair_distance_limit = NO_PAIR_DISTANCE_LIMIT)
+                            int             pair_distance,
+                            bool            print_parse_results)
 {
     ParseVector     parse_results;
     WordVector      words;
@@ -925,22 +922,29 @@ void test_parse_sentence(   AtomSpace*      atomspace,
     break_sentence_into_words(sentence, words);
 
     // Parse the words.
-    parse_words(atomspace, words, pair_distance_limit, parse_results);
+    parse_words(as, words, pair_distance, parse_results);
 
     // Print out the parse results.
-    size_t max_word_length = max_length(words);
-    std::cout << std::endl;
-    for (auto & pair : parse_results)
+    if (print_parse_results)
     {
-        std::cout << "MI = " << std::right << std::fixed << std::setw(6) << std::setprecision(2);
-        std::cout << pair.edge_weight << " [";
-        std::cout << std::right << std::fixed << std::setw(3) << pair.left_index << "] ";
-        std::cout << std::left << std::setw(max_word_length + 1) << words[pair.left_index] << "[";
-        std::cout << std::right << std::fixed << std::setw(3) << pair.right_index << "] ";
-        std::cout << std::left << std::setw(max_word_length + 1) << words[pair.right_index];
+#ifdef TEST_MAIN
+    print_pair_weights(as, std::cout, words, pair_distance);
+#endif
+
+        size_t max_word_length = max_length(words);
+        std::cout << std::endl;
+        for (auto & pair : parse_results)
+        {
+            std::cout << "MI = " << std::right << std::fixed << std::setw(6) << std::setprecision(2);
+            std::cout << pair.edge_weight << " [";
+            std::cout << std::right << std::fixed << std::setw(3) << pair.left_index << "] ";
+            std::cout << std::left << std::setw(max_word_length + 1) << words[pair.left_index] << "[";
+            std::cout << std::right << std::fixed << std::setw(3) << pair.right_index << "] ";
+            std::cout << std::left << std::setw(max_word_length + 1) << words[pair.right_index];
+            std::cout << std::endl;
+        }
         std::cout << std::endl;
     }
-    std::cout << std::endl;
 }
 
 void add_test_word_atoms(AtomSpace*    as,
@@ -961,7 +965,7 @@ void add_test_word_atoms(AtomSpace*    as,
     // Create the pair atoms so our timings don't include atom creation times as
     // they will be loaded for actual parsing.
     WeightMatrix pair_weights(total_words, std::vector<double>(total_words, NO_WEIGHT));
-    load_pair_weights(as, word_handles, NO_PAIR_DISTANCE_LIMIT, pair_weights);
+    load_pair_weights(as, word_handles, NO_PAIR_DISTANCE, pair_weights);
 }
 
 void add_test_word_weights( AtomSpace*      as,
@@ -984,7 +988,7 @@ void add_test_word_weights( AtomSpace*      as,
     for (int left = 0; left < total_words - 1; left++)
     {
         // Yes, this is ugly but we need to be able to handle any arbitrary matrix of words
-        // and C++ does not know how to determing the size of the arrays at runtime if 
+        // and C++ does not know how to determine the size of the arrays at runtime if 
         // we don't tell it at compile time.
         double* weight_row = ((double*) weights + (left * total_words));
         for (int right = left + 1; right < total_words; right++)
@@ -1017,17 +1021,18 @@ void print_atomspace(AtomSpace* as)
 void do_one_test(   AtomSpace*      as,
                     std::string&    sentence,
                     void*           weights,
-                    int             pair_distance = NO_PAIR_DISTANCE_LIMIT)
+                    int             pair_distance,
+                    bool            print_parse_results = true)
 {
     std::clock_t    start;
     double          elapsed;
 
-    printf("\nUpdating weight data.\n");
     add_test_word_weights(as, sentence, weights);
 
-    printf("Parsing sentence: %s\n", sentence.c_str());
+    if (print_parse_results)
+        printf("Parsing sentence: %s\n", sentence.c_str());
     start = std::clock();
-    test_parse_sentence(as, sentence, pair_distance);
+    test_parse_sentence(as, sentence, pair_distance, print_parse_results);
     elapsed = ( std::clock() - start ) / (double) CLOCKS_PER_SEC;
     printf("Sentence parsed in %0.6f seconds\n\n", elapsed);
 }
@@ -1044,7 +1049,7 @@ int main(int argc, char *argv[])
                        {0.0, 0.0, 1.2} , // dog
                        {0.0, 0.0, 0.0} , // barked
                     };
-    do_one_test(as, test_sentence, test_0_weights);
+    do_one_test(as, test_sentence, test_0_weights, DEFAULT_PAIR_DISTANCE);
 
     test_sentence = "The big dog did eat the little dog";
     double          test_1_weights[8][8] = {
@@ -1058,7 +1063,7 @@ int main(int argc, char *argv[])
                        {0.0, 0.0, 0.0, 0.0, 0.0, 0.0,    0.0, 1.0} , // little
                        {0.0, 0.0, 0.0, 0.0, 0.0, 0.0,    0.0, 0.0} , // dog
                     };
-    do_one_test(as, test_sentence, test_1_weights);
+    do_one_test(as, test_sentence, test_1_weights, DEFAULT_PAIR_DISTANCE);
 
     double          test_2_weights[8][8] = {
                     // The   big  dog  did  eat  the  little  dog
@@ -1071,7 +1076,7 @@ int main(int argc, char *argv[])
                        {0.0, 0.0, 0.0, 0.0, 0.0, 0.0,    0.0, 1.0} , // little
                        {0.0, 0.0, 0.0, 0.0, 0.0, 0.0,    0.0, 0.0} , // dog
                     };
-    do_one_test(as, test_sentence, test_2_weights);
+    do_one_test(as, test_sentence, test_2_weights, DEFAULT_PAIR_DISTANCE);
 
     double          test_3_weights[8][8] = {
                     // The   big  dog  did  eat  the  little  dog
@@ -1084,9 +1089,10 @@ int main(int argc, char *argv[])
                        {0.0, 0.0, 0.0, 0.0, 0.0, 0.0,    0.0, 1.0} , // little
                        {0.0, 0.0, 0.0, 0.0, 0.0, 0.0,    0.0, 0.0} , // dog
                     };
-    do_one_test(as, test_sentence, test_3_weights);
+    do_one_test(as, test_sentence, test_3_weights, DEFAULT_PAIR_DISTANCE);
 
-#ifdef TEST_HUGE_PARSES
+#define TEST_BIG_PARSES
+#ifdef TEST_BIG_PARSES
 
     test_sentence = "It is a truth universally acknowledged, that a single man in possession of a good fortune, must be in want of a wife.";
 
@@ -1130,8 +1136,11 @@ int main(int argc, char *argv[])
     /* a                   */ {  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00, -1.83},
     /* wife                */ {  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00},
     };
-    //do_one_test(as, test_sentence, test_4_weights);
+    do_one_test(as, test_sentence, test_4_weights, DEFAULT_PAIR_DISTANCE);
 
+#endif
+
+#ifdef TEST_HUGE_PARSES
     test_sentence = "“The disagreement subsisting between yourself and my late honoured father always gave me much uneasiness, and since I have had the misfortune to lose him, I have frequently wished to heal the breach; but for some time I was kept back by my own doubts, fearing lest it might seem disrespectful to his memory for me to be on good terms with anyone with whom it had always pleased him to be at variance.--‘There, Mrs. Bennet.’--My mind, however, is now made up on the subject, for having received ordination at Easter, I have been so fortunate as to be distinguished by the patronage of the Right Honourable Lady Catherine de Bourgh, widow of Sir Lewis de Bourgh, whose bounty and beneficence has preferred me to the valuable rectory of this parish, where it shall be my earnest endeavour to demean myself with grateful respect towards her ladyship, and be ever ready to perform those rites and ceremonies which are instituted by the Church of England.";
 
     double test_5_weights[167][167] =
@@ -1321,7 +1330,15 @@ int main(int argc, char *argv[])
     /* England             */ {  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00,  0.00 },
 
     };
+
     do_one_test(as, test_sentence, test_5_weights, DEFAULT_PAIR_DISTANCE);
+
+    for (int pair_distance = 10; pair_distance < 50; pair_distance += 10)
+    {
+        std::cout << "Pair distance " << pair_distance << std::endl;
+        do_one_test(as, test_sentence, test_5_weights, pair_distance, DONT_PRINT_PARSE_RESULTS);
+    }
+
 #endif
 
     exit(0);
