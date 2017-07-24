@@ -21745,15 +21745,46 @@ The graph on the right expresses an alternate view of the same idea: it
 \end_layout
 
 \begin_layout Standard
-xxx
+The first ten on the ranked list are "*" "Literary" "Archive" "Gutenberg"
+ "Notes" "...." "|" "Foundation" "Project" "Summary".
+ This suggests that these all come from exactly the same parse of a small
+ group of sentences having a very regular, formulatic structure, occurring
+ repeatedly in multiple texts.
+ One of those sentences is easily found; it begins as: 
+\begin_inset Quotes eld
+\end_inset
+
+The Project Gutenberg Literary Archive Foundation has been created...
+\begin_inset Quotes erd
+\end_inset
+
+ 
 \end_layout
 
 \begin_layout Standard
-The first ten on the ranked list are "According" "Gestalt" "Cao" "Berger"
- "2015" "It" "U.S" "United" "However" "y".
- Unsurprisingly, most of these are all capitalized, suggesting that they
- are either part of a proper name, or that perhaps they begin a sentence.
- 
+Closer examination indicates that more or less all words having an average
+ of more than three observations per disjunct are associated with the Project
+ Gutenberg legal boilerplate.
+ The first 80 entries in the 400+ list have an average observation count
+ of above three, and they are all boilerplate words: "fee" "copies" "trademark"
+ "agreement" "electronic" "copyright" "donations", and so on.
+ This suggests that pretty much all of the 
+\begin_inset Quotes eld
+\end_inset
+
+bump
+\begin_inset Quotes erd
+\end_inset
+
+ on the above-left graph is entirely due to license boilerplate!
+\end_layout
+
+\begin_layout Standard
+For the "fee"
+\end_layout
+
+\begin_layout Standard
+xxxx
 \end_layout
 
 \begin_layout Standard
@@ -21776,12 +21807,12 @@ United States
 , and so this probably dominates the disjunct count.
  This is confirmed by manual inspection
 \begin_inset Foot
-status collapsed
+status open
 
 \begin_layout Plain Layout
 View disjuncts by saying (filter (lambda (cset) (< 10 (get-count cset)))
- (cog-incoming-by-type (Word "foo") 'LgWordCset)) where 10 is the minimum
- number of counts.
+ (cog-incoming-by-type (Word "foo") 'Section)) where 10 is the minimum number
+ of counts.
 \end_layout
 
 \end_inset
