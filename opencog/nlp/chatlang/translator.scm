@@ -222,32 +222,29 @@
           (Evaluation (GroundedPredicate "scm: chatlang-say")
                       (List (Variable "$x")))))
 
-(define-public (say TXT)
-  "Say the text and clear the state."
+(define (process-action ACTION)
+  "Convert ACTION into atomese."
   ; Replace the variables, if any, with the corresponding GlobNode
-  (define txt-lst
+  (define atomese
     ; Iterate through the output word-by-word
     (map (lambda (n)
       (cond ; The grounding of a variable in original words
-            ((not (equal? #f (string-match "'_[0-9]+" n)))
+            ((equal? 'get_wvar (car n))
              (ExecutionOutput (GroundedSchema "scm: ground-word")
-               (List (list-ref pat-vars (string->number (substring n 2))))))
+               (List (list-ref pat-vars (cdr n)))))
             ; The grounding of a variable in lemmas
-            ((not (equal? #f (string-match "_[0-9]+" n)))
+            ((equal? 'get_lvar (car n))
              (ExecutionOutput (GroundedSchema "scm: ground-lemma")
-               (List (list-ref pat-vars (string->number (substring n 1))))))
-            ; A function call with no arguments
-            ((not (equal? #f (string-match "\\^[a-zA-Z0-9_\\-\\(\\)]+" n)))
-             (ExecutionOutput (GroundedSchema (string-append "scm: "
-               (match:substring (string-match "[a-zA-Z0-9_\\-]+" n)))) (List)))
+               (List (list-ref pat-vars (cdr n)))))
+            ; A function call
+            ((equal? 'function (car n))
+             (ExecutionOutput (GroundedSchema (string-append "scm: " (cadr n)))
+                              ; TODO: Use ConceptNode or?
+                              (List (map Node (cddr n)))))
             (else (Word n))))
-      (string-split TXT #\sp)))
-  (True (Put (DefinedPredicate (chatlang-prefix "Say")) (List txt-lst))))
-
-(define (process-action ACTION)
-  "Process a single action -- converting it into atomese."
-  (cond ((equal? 'say (car ACTION))
-         (say (cdr ACTION)))))
+      ACTION))
+  ; TODO: How about an action that only updates internal parameters?
+  (True (Put (DefinedPredicate (chatlang-prefix "Say")) (List atomese))))
 
 (define-public (record-groundings GLOB GRD)
   "Record the groundings of a variable/glob, in both original words
@@ -257,7 +254,7 @@
   (set! globs-lemma (assoc-set! globs-lemma GLOB (List GED)))
   (True))
 
-(define* (chat-rule PATTERN ACTION #:optional (TOPIC default-topic) NAME)
+(define* (create-rule PATTERN ACTION #:optional (TOPIC default-topic) NAME)
   "Top level translation function. Pattern is a quoted list of terms,
    and action is a quoted list of actions or a single action."
   (let* ((ordered-terms (order-terms PATTERN))
