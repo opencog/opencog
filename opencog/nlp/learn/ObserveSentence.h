@@ -26,6 +26,7 @@
 #define _OBSERVE_SENTENCE_H
 
 #define NO_PAIR_DISTANCE_LIMIT 0
+#define DEFAULT_PAIR_DISTANCE 6
 
 namespace opencog
 {

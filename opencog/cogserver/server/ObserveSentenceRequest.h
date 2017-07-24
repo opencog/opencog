@@ -59,7 +59,7 @@ public:
             "Observe the sentence and create corresponding language learning atoms",
             "Usage: learn [-pair_distance <limit>] \"<sentence-in-quotes>\"\n\n"
             "Create language learning atoms for the sentence. Optional flags are:\n"
-            "    -pair_distance <limit>    Create pairs up to <limit> distance apart.\n"
+            "    -pair_distance <limit>    Create pairs up to <limit> distance apart (default 6).\n"
             "    -quiet                    Do not return status over telnet.\n"
             "    -noop                     Perform no op-erations (useful for timing).\n"
         );

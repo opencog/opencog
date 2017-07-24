@@ -72,7 +72,7 @@ bool ParseSentenceRequest::execute()
 
     // Extract the parameters.
     int parameter_count = 0;
-    int pair_distance = 0;
+    int pair_distance = DEFAULT_PAIR_DISTANCE;
     bool no_parse = false;
     bool verbose = false;
     bool dump_weights = false;
