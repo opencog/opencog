@@ -44,7 +44,7 @@ std::string ConsoleSocket::_prompt;
 // connection. With the default `ulimit -a` of 1024 open files,
 // this should work OK (including open files for the logger, the
 // databases, etc.).
-unsigned int ConsoleSocket::_max_open_sockets = 60;
+unsigned int ConsoleSocket::_max_open_sockets = std::thread::hardware_concurrency();
 volatile unsigned int ConsoleSocket::_num_open_sockets = 0;
 std::mutex ConsoleSocket::_max_mtx;
 std::condition_variable ConsoleSocket::_max_cv;
