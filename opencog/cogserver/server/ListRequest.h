@@ -46,6 +46,8 @@ protected:
 
     HandleSeq _handles;
     std::ostringstream  _error;
+    bool _count_only;
+    size_t _count;
 
     void sendOutput(void);
     void sendError (void);
@@ -64,6 +66,7 @@ public:
             "   -t <name>:   list the atoms of the specified type\n"
             "   -T <name>:   list the atoms of the specified type (including subtypes)\n"
             "   -m <num>:    list the nodes up to the specified size"
+            "   -c:          count only (don't list atoms)"
         );
         return _cci;
     }
