@@ -100,6 +100,9 @@ setTypeL = linkIso "SetTypeLink" noTv
 sizeL  :: SynIso [Atom] Atom
 sizeL = linkIso "SetSizeLink" noTv
 
+inhl :: SynIso [Atom] Atom
+inhl = linkIso "InheritanceLink" noTv
+
 impl :: SynIso [Atom] Atom
 impl = linkIso "ImplicationLink" noTv
 
