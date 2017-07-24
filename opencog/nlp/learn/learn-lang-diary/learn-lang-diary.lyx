@@ -21718,17 +21718,12 @@ Computed with the sorted-avg list in disjunct-stats.scm
 \end_layout
 
 \begin_layout Standard
-xxx
-\end_layout
-
-\begin_layout Standard
-The graph on the right expresses an alternate view of the same idea: this
- one shows a bin-count of all of the words.
+The graph on the right expresses an alternate view of the same idea: it
+ shows a bin-count of all of the words.
  Reaffirming the graph on the left, it indicates that almost all words have
- an average disjunct observation count of less than three.
- Both of these graphs emphasize just how thin and weak this dataset is:
- to be certain of a disjunct, it sure would be nice to observe it, in actual
- use, more than half-a-dozen times! 
+ an average disjunct observation count of less than four.
+ It also conveys the sense that when the average disjunct count is greater
+ than about four, that this is unusual, and perhaps meaningful in some way.
 \end_layout
 
 \begin_layout Standard
@@ -21741,7 +21736,7 @@ The graph on the right expresses an alternate view of the same idea: this
 
 
 \begin_inset Graphics
-	filename images/binned-avg.eps
+	filename en-dj/binned-avg.eps
 	width 50text%
 
 \end_inset
@@ -21750,14 +21745,7 @@ The graph on the right expresses an alternate view of the same idea: this
 \end_layout
 
 \begin_layout Standard
-The spike on the far right on the graph on the right suggests that there
- are about 30 words that have an average number of observations of greater
- than 6! Since they are 
-\emph on
-not
-\emph default
- showing up in the graph on the left, this shows that the underlying word
- have fewer than 100 observations.
+xxx
 \end_layout
 
 \begin_layout Standard

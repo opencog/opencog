@@ -61,6 +61,24 @@ plot "binned-word-logli-60.dat" using 2:3 with lines linewidth 5 title "", \
      "binned-word-logli-60.dat" using 2:(2**(0.9*($2-5.5))) with lines linewidth 5 title "2^{0.9(logli-5.5)}"
 
 set key right
+
+#################################################
+# Used to generate the binned average observations
+#
+set term postscript eps enhanced color 28
+set out 'binned-avg.eps'
+set yrange [1:3000]
+set xrange [1:10]
+set xtics (1,2,3,4,5,6,7,8,9,10)
+set logscale x
+set logscale y
+set format y "10^{%L}"
+set title "Distribution of average observations"
+set xlabel "Average observations per disjunct"
+set ylabel "Number of words"
+plot "binned-avg.dat" using 2:3 with lines linewidth 5 title "", \
+     "binned-avg.dat" using 2:(1500/($2**5)) with lines linewidth 5 title "<obs>^{-5}"
+
 #################################################
 # Used to generate the binned connector-set counts
 #
@@ -122,19 +140,6 @@ set title "Distr. of word fractional entropy"
 set xlabel "Fractional entropy of word"
 set ylabel "Count"
 plot "binned-word-ent.dat" using 2:3 with lines linewidth 5 title ""
-
-#################################################
-# Used to generate the binned average observations
-#
-set term postscript eps enhanced color 28
-set out 'binned-avg.eps'
-set yrange [1:30000]
-set logscale y
-set format y "10^{%L}"
-set title "Distribution of average observations"
-set xlabel "Average observations per disjunct"
-set ylabel "Number of words"
-plot "binned-avg.dat" using 2:3 with lines linewidth 5 title ""
 
 #################################################
 # Used to generate the binned squared-len/norm ratio

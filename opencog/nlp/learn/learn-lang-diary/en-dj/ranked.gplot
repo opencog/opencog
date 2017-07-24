@@ -88,11 +88,8 @@ set ylabel "Average observations per disjunct"
 plot "ranked-avg-400.dat" using 1:2 with lines linewidth 5 title "400+ obs", \
      "ranked-avg-100.dat" using 1:2 with lines linewidth 5 title "100+ obs", \
      "ranked-avg-20.dat" using 1:2 with lines linewidth 5 title "20+ obs", \
-     "ranked-avg-20.dat" using 1:(100/$1 ** 0.5) with lines linewidth 5 title "rank^{-0.5}"
-
-unset ytics
-set ytics
-
+     "ranked-avg-20.dat" using 1:(100/$1 ** 0.5) with lines linewidth 5 title "rank^{-0.5}", \
+     "ranked-avg-20.dat" using 1:(8/$1 ** 0.25) with lines linewidth 5 title "rank^{-0.25}"
 
 #################################################
 # Used to generate the connector-set ranking graphs.
