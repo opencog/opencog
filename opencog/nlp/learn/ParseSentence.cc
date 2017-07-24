@@ -29,20 +29,24 @@
 #include <list>
 #include <ctime>
 
+#include <sys/sysinfo.h>
+
 #include "unicode/unistr.h"
 #include "unicode/locid.h"
 #include "unicode/brkiter.h"
 
 #include <opencog/nlp/types/atom_types.h>
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/atomspace/AtomSpace.h>
+#include <opencog/atoms/base/Atom.h>
+#include <opencog/atoms/base/Node.h>
+#include <opencog/atoms/base/Link.h>
 #include <opencog/truthvalue/CountTruthValue.h>
+#include <opencog/util/random.h>
 
 #include "ObserveSentence.h"
 #include "ParseSentence.h"
 
 using namespace opencog;
-
 
 #define NO_EDGE SIZE_MAX
 #define NO_WEIGHT (-999.9)
@@ -101,19 +105,30 @@ void load_pair_weights( AtomSpace*          as,
             // Get the valuation for the mutual information key.
             Handle pair = as->add_link(LIST_LINK, word_handles[left], word_handles[right]);
             Handle evaluation = as->add_link(EVALUATION_LINK, predicate, pair);
-            try {
+            try
+            {
                 ProtoAtomPtr proto = evaluation->getValue(mi_key);
                 fmi = FloatValueCast(proto)->value()[1];
             }
             catch (...)
             {
                 fmi = NO_WEIGHT;
-                std::cerr << "Missing *-Sentence Word Pair-* for <"  << 
-                        word_handles[left]->getName().c_str() << "," <<
-                        word_handles[right]->getName().c_str() << ">" << std::endl;
+
+                // Check the count to see if this valuation was skipped
+                // in the mutual information computation or not observed.
+                TruthValuePtr tv = evaluation->getTruthValue();
+                count_t count = 0;
+                if (COUNT_TRUTH_VALUE == tv->getType())
+                    count = tv->getCount();
+                if (count < 1)
+                {
+                    std::cerr << "Missing *-Sentence Word Pair-* for <"  <<
+                            word_handles[left]->getName().c_str() << "," <<
+                            word_handles[right]->getName().c_str() << ">" << std::endl;
+                }
             }
             pair_weights[left][right] = fmi;
-        }    
+        }
     }
 }
 
@@ -594,6 +609,73 @@ double parse_fragment(  std::string&            indent,
     return fragment_weight;
 }
 
+
+
+bool check_parse_pairs( AtomSpace*          as,
+                        const WordVector&   words,
+                        int                 pair_distance_limit)
+{
+    if (words.size() <= 0)
+        return true;
+
+    // Cache the word nodes.
+    HandleSeq word_handles;
+    size_t total_words = words.size();
+    for (size_t index = 0; index < total_words; index++)
+        word_handles.push_back(as->add_node(WORD_NODE, words[index]));
+
+    Handle predicate = as->add_node(PREDICATE_NODE, "*-Sentence Word Pair-*");
+
+    for (size_t left = 0; left < total_words - 1; left++)
+    {
+        // Compute the last word accounting for our pair distance limits.
+        size_t last_word;
+        if (pair_distance_limit)
+        {
+            last_word = left + 1 + pair_distance_limit;
+            if (total_words < last_word)
+                last_word = total_words;
+        }
+        else
+        {
+            last_word = total_words;
+        }
+
+        // Get and cache the value for this pair...
+        for (size_t right = left + 1; right < last_word; right++)
+        {
+            // Get the valuation for the mutual information key.
+            Handle pair = as->add_link(LIST_LINK, word_handles[left], word_handles[right]);
+            Handle evaluation = as->add_link(EVALUATION_LINK, predicate, pair);
+            try
+            {
+                // Check the count to see if this valuation was skipped
+                // in the mutual information computation or not observed.
+                TruthValuePtr tv = evaluation->getTruthValue();
+                count_t count = 0;
+                if (COUNT_TRUTH_VALUE == tv->getType())
+                    count = tv->getCount();
+                if (count < 1)
+                {
+                    std::cerr << "Missing *-Sentence Word Pair-* for <"  <<
+                            word_handles[left]->getName().c_str() << "," <<
+                            word_handles[right]->getName().c_str() << ">" << std::endl;
+                    return false;
+                }
+            }
+            catch (...)
+            {
+                std::cerr << "Exception checking *-Sentence Word Pair-* for <"  <<
+                        word_handles[left]->getName().c_str() << "," <<
+                        word_handles[right]->getName().c_str() << ">" << std::endl;
+                return false;
+            }
+        }
+    }
+
+    // If we get here, then all the pairs were found.
+    return true;
+}
 
 /*
 

@@ -46,6 +46,10 @@ namespace opencog
     typedef std::vector<WordPair> ParseVector;
     typedef std::vector<std::vector<double>> WeightMatrix;
 
+    bool check_parse_pairs( AtomSpace*          atomspace,
+                            const WordVector&   words,
+                            int                 pair_distance_limit);
+
     void parse_words(   AtomSpace*          atomspace,
                         const WordVector&   words,
                         int                 pair_distance_limit,

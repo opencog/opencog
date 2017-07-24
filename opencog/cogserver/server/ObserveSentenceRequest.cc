@@ -97,8 +97,18 @@ bool ObserveSentenceRequest::execute()
 
     if (!noop)
     {
-        AtomSpace& as = _cogserver.getAtomSpace();
-        observe_sentence(&as, _sentence, pair_distance);
+
+        try
+        {
+            AtomSpace& as = _cogserver.getAtomSpace();
+            observe_sentence(&as, _sentence, pair_distance);
+        }
+        catch (...)
+        {
+            std::cerr << "ERROR observing sentence: '" << _sentence << "'" << std::endl;
+            sendError();
+            return false;
+       }
     }
     if (verbose)
         sendOutput();

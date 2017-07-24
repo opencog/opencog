@@ -209,6 +209,7 @@ void create_atoms_for_words(AtomSpace*    as,
             increment_count(as, execution);
         }
     }
+
 }
 
 void observe_sentence(  AtomSpace*      atomspace,

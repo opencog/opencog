@@ -76,6 +76,7 @@ bool ParseSentenceRequest::execute()
     bool no_parse = false;
     bool verbose = false;
     bool dump_weights = false;
+    bool check_pairs = false;
     for (it = _parameters.begin(); it != _parameters.end(); ++it)
     {
         parameter_count++;
@@ -113,6 +114,12 @@ bool ParseSentenceRequest::execute()
                 delete output_stream;
                 output_stream = nullptr;
             }
+            no_parse = true;
+        }
+        // -check_pairs - check the pairs for existence
+        else if (*it == "-check_pairs")
+        {
+            check_pairs = true;
             no_parse = true;
         }
         // -delimiter <string> - use this string for a delimiter
@@ -174,22 +181,51 @@ bool ParseSentenceRequest::execute()
         }
     }
 
+    AtomSpace& atomspace = _cogserver.getAtomSpace();
+    AtomSpace* as = &atomspace;
+    WordVector words;
+
+    // Break the sentence up into words if we are checking or parsing...
+    if (check_pairs || !no_parse)
+        break_sentence_into_words(_sentence, words);
+
+    // Check the pairs for existence.
+    if (check_pairs)
+    {
+        try
+        {
+            // Check the sentence for sentence pairs to be used later in parsing.
+            // std::cerr << "Checking " << sentence_count << ": " << _sentence << std::endl;
+            if (!check_parse_pairs(as, words, pair_distance))
+            {
+                _error << "CHECK PAIRS failed for sentence: '" << _sentence << "'" << std::endl;
+                std::cerr << _error.str();
+                send(_error.str());
+            }
+        }
+        catch (...)
+        {
+            _error << "ERROR checking sentence: '" << _sentence << "'" << std::endl;
+            std::cerr << _error.str();
+            send(_error.str());
+        }
+    }
+
     // Do the actual parse.
     if (!no_parse)
     {
-        AtomSpace& atomspace = _cogserver.getAtomSpace();
-        AtomSpace* as = &atomspace;
-
         ParseVector parse_results;
-        WordVector words;
-
-        // Break the sentence up into words.
-        break_sentence_into_words(_sentence, words);
-
-        std::cerr << "Parsing " << sentence_count << ": " << _sentence << std::endl;
-
-        // Parse the words.
-        parse_words(as, words, pair_distance, parse_results);
+        try
+        {
+            // Parse the words.
+            parse_words(as, words, pair_distance, parse_results);
+        }
+        catch (...)
+        {
+            _error << "ERROR parsing sentence: '" << _sentence << "'" << std::endl;
+            std::cerr << _error.str();
+            send(_error.str());
+        }
 
         // Print out the parse results.
         std::ostringstream  parse_string_stream;
@@ -217,6 +253,7 @@ bool ParseSentenceRequest::execute()
     return true;
 }
 
+
 void ParseSentenceRequest::sendOutput()
 {
     std::ostringstream oss;
@@ -232,14 +269,16 @@ void ParseSentenceRequest::sendError()
 {
     _error << "Format: parse [-pair_distance <limit>] \"<sentence-in-quotes>\"" << std::endl;
     _error << "Supported options:" << std::endl;
-    _error << "    -open_parse_file <file_name> Open the file <file_name> for output." << std::endl;
-    _error << "    -close_parse_file            Close the output file." << std::endl;
-    _error << "    -dump_weights <file>         Dump the word pair weights for the sentence to" << std::endl;
-    _error << "                                 <file> as a C++ struct." << std::endl;
-    _error << "    -delimiter <string>          Use <string> to delimit fields in output." << std::endl;
-    _error << "    -pair_distance <limit>       Create pairs up to <limit> distance apart." << std::endl;
-    _error << "    -quiet                       Do not return status over telnet." << std::endl;
-    _error << "    -noop                        Perform no op-erations (useful for timing)." << std::endl;
+    _error << "    -open_parse <file_name>  Open the file <file_name> for output." << std::endl;
+    _error << "    -close_parse             Close the output file." << std::endl;
+    _error << "    -dump_weights <file>     Dump the word pair weights for the sentence to" << std::endl;
+    _error << "                             <file> as a C++ struct." << std::endl;
+    _error << "    -delimiter <string>      Use <string> to delimit fields in output." << std::endl;
+    _error << "    -check_pairs             Check pair sentence observations." << std::endl;
+    _error << "    -pair_distance <limit>   Create pairs up to <limit> distance apart." << std::endl;
+    _error << "    -quiet                   Do not return status over telnet." << std::endl;
+    _error << "    -noop                    Perform no op-erations (useful for timing)." << std::endl;
     _error << "Options may be combined" << std::endl << std::endl;
     send(_error.str());
 }
+ 

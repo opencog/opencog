@@ -60,14 +60,15 @@ public:
             "Parse the sentence.",
             "Usage: parse [-pair_distance <limit>] \"<sentence-in-quotes>\"\n\n"
             "Parse the sentence. Optional flags are:\n"
-            "    -open_parse_file <file_name>   Open the file <file_name> for output.\n"
-            "    -close_parse_file              Close the output file.\n"
-            "    -dump_weights <file>           Dump the word pair weights for the sentence to\n"
-            "                                   <file> as a C++ struct.\n"
-            "    -delimiter <string>            Use <string> to delimit fields in output.\n"
-            "    -pair_distance <limit>         Create pairs up to <limit> distance apart.\n"
-            "    -quiet                         Do not return status over telnet.\n"
-            "    -noop                          Perform no op-erations (useful for timing).\n"
+            "    -open_parse <file_name>    Open the file <file_name> for output.\n"
+            "    -close_parse               Close the output file.\n"
+            "    -dump_weights <file>       Dump the word pair weights for the sentence to\n"
+            "                               <file> as a C++ struct.\n"
+            "    -delimiter <string>        Use <string> to delimit fields in output.\n"
+            "    -check_pairs               Check pair sentence observations.\n"
+            "    -pair_distance <limit>     Create pairs up to <limit> distance apart.\n"
+            "    -quiet                     Do not return status over telnet.\n"
+            "    -noop                      Perform no op-erations (useful for timing).\n"
         );
         return _cci;
     }
