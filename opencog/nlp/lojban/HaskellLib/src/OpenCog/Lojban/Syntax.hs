@@ -147,12 +147,15 @@ statement = handleMa <<< statement'
           handleMa = Iso f g where
               f a = do
                   let x = atomFold (\r a -> r || isMa a) False a
-                      isMa (Node "VariableNode" x noTv) = x /= "$var"
+                      list = "$var" : ((('$':).show) <$> [0..10])
+                      isMa (Node "VariableNode" x noTv) = x `notElem` list
                       isMa _ = False
-                      na = Link "PutLink" [a,Link "GetLink" [a] noTv] noTv
+                      inter = cCN "Interrogative" noTv
+                  interinst <- apply instanceOf inter
+                  let na = cInhL noTv interinst (cSSScL noTv [a])
                   pure (x ? na $ a)
-              g (Link "PutLink"  [a,_] _) = pure a
-              g a                         = pure a
+              g (InhL _ _ (SSScL [a])) = pure a
+              g a                      = pure a
 
 statement' :: Syntax Atom
 statement' = listl . cons . addfst (cAN "statement") . cons
@@ -1685,15 +1688,19 @@ handleJJCTTS_Selbri = Iso f g where
         pushAtom $ cImpL noTv selb pred
         pure selb
 
-    f (CTLeaf ((_tv,pred),Just "space_time"),_) = do
-        apply handleSpaceTime pred
+    f (CTLeaf ((_tv,pred),Just "space_time"),selb) = do
+        atom <- apply handleSpaceTime pred
+        pushAtom atom
+        pure selb
 
     f (CTNode joik_jek (x1,x2),s) = do
-        a1 <- f (x1,s)
-        a2 <- f (x2,s)
+        f (x1,s)
+        a1 <- popAtom
+        f (x2,s)
+        a2 <- popAtom
         case joik_jek of
-            Right jek -> apply conLink (jek,(a1,a2))
-            Left joik -> apply handleJOIK (joik,(a1,a2))
+            Right jek -> apply conLink (jek,(a1,a2)) >> pure s
+            Left joik -> apply handleJOIK (joik,(a1,a2)) >> pure s
     g _ = error $ "handleJJCTTS g: not implemented."
 
     toSumti :: SynIso [Atom] [Sumti]
