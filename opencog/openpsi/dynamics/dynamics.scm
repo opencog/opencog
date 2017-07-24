@@ -26,9 +26,12 @@
     psi-set-event-callback! do-psi-updater-step adjust-psi-var-level
     psi-ultradian-update psi-noise-update get-random-cycle-offset
     psi-updater-running? psi-updater-run psi-updater-halt
+
+    ; From utilities.scm
+    psi-get-number-values-for-vars psi-baseline-value-node
+    psi-set-baseline-value! psi-get-baseline-value
     )
 )
-
 
 (load-from-path "opencog/openpsi/dynamics/emotion.scm")
 (load-from-path "opencog/openpsi/dynamics/event.scm")
@@ -36,3 +39,4 @@
 (load-from-path "opencog/openpsi/dynamics/modulator.scm")
 (load-from-path "opencog/openpsi/dynamics/sec.scm")
 (load-from-path "opencog/openpsi/dynamics/updater.scm")
+(load-from-path "opencog/openpsi/dynamics/utilities.scm")

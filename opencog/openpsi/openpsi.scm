@@ -34,8 +34,7 @@
 
     ; From utilities.scm
     psi-prefix-str psi-suffix-str psi-get-exact-match psi-get-dual-match
-    psi-get-members psi-get-number-values-for-vars psi-baseline-value-node
-    psi-set-baseline-value! psi-get-baseline-value
+    psi-get-members
     )
 )
 

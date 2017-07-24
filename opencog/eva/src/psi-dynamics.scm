@@ -3,8 +3,8 @@
 ;
 ; OpenPsi dynamics control for Hanson robot
 
-(use-modules (opencog) (opencog exec) (opencog openpsi)
-						(opencog openpsi dynamics))
+(use-modules (opencog) (opencog exec) (opencog openpsi))
+(use-modules (opencog openpsi dynamics))
 
 ; needed for nlp parsing
 (use-modules (opencog nlp) (opencog nlp chatbot) (opencog nlp chatbot-psi))
