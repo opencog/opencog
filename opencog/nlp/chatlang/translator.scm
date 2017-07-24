@@ -18,6 +18,7 @@
 (define globs-lemma '())
 
 ; Keep a record of the variables, if any, found in the pattern of a rule
+; TODO: Move it to process-pattern-terms?
 (define pat-vars '())
 
 ; For unit test
@@ -32,16 +33,14 @@
 (define chatlang-lemma-set (Predicate (chatlang-prefix "Lemma Set")))
 
 ;; Shared variables for all terms
-(define atomese-variable-template (list (TypedVariable (Variable "$S")
-                                                       (Type "SentenceNode"))
-                                        (TypedVariable (Variable "$P")
-                                                       (Type "ParseNode"))))
+(define atomese-variable-template
+  (list (TypedVariable (Variable "$S") (Type "SentenceNode"))
+        (TypedVariable (Variable "$P") (Type "ParseNode"))))
 
 ;; Shared conditions for all terms
-(define atomese-condition-template (list (Parse (Variable "$P")
-                                                (Variable "$S"))
-                                         (State chatlang-anchor
-                                                (Variable "$S"))))
+(define atomese-condition-template
+  (list (Parse (Variable "$P") (Variable "$S"))
+        (State chatlang-anchor (Variable "$S"))))
 
 (define (order-terms TERMS)
   "Order the terms in the intended order, and insert wildcards into
@@ -117,105 +116,84 @@
     (list (last TERMS))
     (list-head TERMS (- (length TERMS) 1))))
 
+; JJJ TODO FIXME
+; - use fold
+; - don't do recursive process-pattern-terms calls, may generate
+;   no-constant garbage
 (define (process-pattern-terms TERMS)
   "Generate the atomese (i.e. the variable declaration and the pattern)
    for each of the TERMS."
   (define vars '())
-  (define globs '())
   (define conds '())
-  (define glob-conds '())
-  (define term-seq '())
+  (define word-seq '())
+  (define lemma-seq '())
   (define is-unordered? #f)
   (for-each (lambda (t)
     (cond ((equal? 'unordered-matching (car t))
            (let ((terms (process-pattern-terms (cdr t))))
                 (set! vars (append vars (list-ref terms 0)))
-                (set! globs (append globs (list-ref terms 1)))
-                (set! conds (append conds (list-ref terms 2)))
-                (set! glob-conds (append glob-conds (list-ref terms 3)))
-                (set! term-seq (append term-seq (list-ref terms 4)))
+                (set! conds (append conds (list-ref terms 1)))
+                (set! word-seq (append word-seq (list-ref terms 2)))
+                (set! lemma-seq (append lemma-seq (list-ref terms 3)))
                 (set! is-unordered? #t)))
-          ((equal? 'lemma (car t))
-           (let ((l (lemma (cdr t))))
-                (set! vars (append vars (car l)))
-                (set! conds (append conds (cdr l)))
-                (set! term-seq
-                  (append term-seq (list (Word (get-lemma (cdr t))))))))
           ((equal? 'word (car t))
            (let ((w (word (cdr t))))
-                (set! vars (append vars (car w)))
-                (set! conds (append conds (cdr w)))
-                (set! term-seq
-                  (append term-seq (list (Word (get-lemma (cdr t))))))))
+                (set! vars (append vars (list-ref w 0)))
+                (set! conds (append conds (list-ref w 1)))
+                (set! word-seq (append word-seq (list-ref w 2)))
+                (set! lemma-seq (append lemma-seq (list-ref w 3)))))
+          ((equal? 'lemma (car t))
+           (let ((l (lemma (cdr t))))
+                (set! vars (append vars (list-ref l 0)))
+                (set! conds (append conds (list-ref l 1)))
+                (set! word-seq (append word-seq (list-ref l 2)))
+                (set! lemma-seq (append lemma-seq (list-ref l 3)))))
           ((equal? 'phrase (car t))
            (let ((p (phrase (cdr t))))
-                (set! vars (append vars (car p)))
-                (set! conds (append conds (cdr p)))
-                (set! term-seq (append term-seq
-                  (map Word (map get-lemma (string-split (cdr t) #\sp)))))))
+                (set! vars (append vars (list-ref p 0)))
+                (set! conds (append conds (list-ref p 1)))
+                (set! word-seq (append word-seq (list-ref p 2)))
+                (set! lemma-seq (append lemma-seq (list-ref p 3)))))
           ((equal? 'concept (car t))
-           (let* ((v (choose-var-name))
-                  (c (concept (cdr t) v))
-                  (cl (concept (cdr t) v #t)))
-                 (set! globs (append globs (car c)))
-                 (set! conds (append conds (cdr c)))
-                 (set! glob-conds (append glob-conds (cdr cl)))
-                 (set! term-seq (append term-seq (list (Glob v))))))
+           (let ((c (concept (cdr t))))
+                (set! vars (append vars (list-ref c 0)))
+                (set! conds (append conds (list-ref c 1)))
+                (set! word-seq (append word-seq (list-ref c 2)))
+                (set! lemma-seq (append lemma-seq (list-ref c 3)))))
           ((equal? 'choices (car t))
-           (let* ((v (choose-var-name))
-                  (c (choices (cdr t) v))
-                  (cl (choices (cdr t) v #t)))
-                 (set! globs (append globs (car c)))
-                 (set! conds (append conds (cdr c)))
-                 (set! glob-conds (append glob-conds (cdr cl)))
-                 (set! term-seq (append term-seq (list (Glob v))))))
+           (let ((c (choices (cdr t))))
+                (set! vars (append vars (list-ref c 0)))
+                (set! conds (append conds (list-ref c 1)))
+                (set! word-seq (append word-seq (list-ref c 2)))
+                (set! lemma-seq (append lemma-seq (list-ref c 3)))))
           ((equal? 'negation (car t))
-           (set! conds (append conds (cdr (negation (cdr t))))))
+           ; Sure just do the same things like the above, not just for 1
+           (set! conds (append conds (list-ref (negation (cdr t)) 1))))
           ((equal? 'wildcard (car t))
-           (let* ((v (choose-var-name))
-                  (w (wildcard (cadr t) (cddr t) v)))
-                 (set! globs (append globs (car w)))
-                 (set! term-seq (append term-seq (list (Glob v))))))
-          ((and (equal? 'variable (car t)) (equal? 'wildcard (caadr t)))
-           (let* ((v (choose-var-name))
-                  (w (wildcard (cadadr t) (cddadr t) v))
-                  (glob (Glob v)))
-                 (set! globs (append globs (car w)))
-                 (set! term-seq (append term-seq (list glob)))
-                 (set! pat-vars (append pat-vars (list glob)))))
-          ((and (equal? 'variable (car t)) (equal? 'lemma (caadr t)))
-           (let* ((v (choose-var-name))
-                  (vl (var-lemma (cdadr t) v))
-                  (glob (Glob v)))
-                 (set! globs (append globs (car vl)))
-                 (set! glob-conds (append glob-conds (cdr vl)))
-                 (set! term-seq (append term-seq (list glob)))
-                 (set! pat-vars (append pat-vars (list glob)))))
-          ((and (equal? 'variable (car t)) (equal? 'concept (caadr t)))
-           (let* ((v (choose-var-name))
-                  (cl (concept (cdadr t) v #t))
-                  (glob (Glob v)))
-                 (set! globs (append globs (car cl)))
-                 (set! glob-conds (append glob-conds (cdr cl)))
-                 (set! term-seq (append term-seq (list (Glob v))))
-                 (set! pat-vars (append pat-vars (list glob)))))
-          ((and (equal? 'variable (car t)) (equal? 'choices (caadr t)))
-           (let* ((v (choose-var-name))
-                  (cl (choices (cdadr t) v #t))
-                  (glob (Glob v)))
-                 (set! globs (append globs (car cl)))
-                 (set! glob-conds (append glob-conds (cdr cl)))
-                 (set! term-seq (append term-seq (list (Glob v))))
-                 (set! pat-vars (append pat-vars (list glob)))))))
+           (let ((w (wildcard (cadr t) (cddr t))))
+                (set! vars (append vars (list-ref w 0)))
+                (set! conds (append conds (list-ref w 1)))
+                (set! word-seq (append word-seq (list-ref w 2)))
+                (set! lemma-seq (append lemma-seq (list-ref w 3)))))
+           ((equal? 'variable (car t))
+            (let ((terms (process-pattern-terms (cdr t))))
+                 (set! vars (append vars (list-ref terms 0)))
+                 (set! conds (append conds
+                                    (list-ref terms 1)
+                                    (variable (list-ref terms 2))))
+                 (set! word-seq (append word-seq (list-ref terms 2)))
+                 (set! lemma-seq (append lemma-seq (list-ref terms 3)))
+                 (set! pat-vars (append pat-vars (list-ref terms 2)))))))
     TERMS)
   ; DualLink couldn't match patterns with no constant terms in it
   ; Mark the rules with no constant terms so that they can be found
   ; easily during the matching process
-  (if (equal? (length term-seq)
+  (if (equal? (length lemma-seq)
               (length (filter (lambda (x) (equal? 'GlobNode (cog-type x)))
-                              term-seq)))
-    (MemberLink (List term-seq) chatlang-no-constant))
-  (list vars globs conds glob-conds term-seq is-unordered?))
+                              lemma-seq)))
+      (begin (MemberLink (List lemma-seq) chatlang-no-constant)
+             (MemberLink (Set lemma-seq) chatlang-no-constant)))
+  (list vars conds word-seq lemma-seq is-unordered?))
 
 (define-public (ground-word GLOB)
   "Get the original words grounded for GLOB."
@@ -271,49 +249,13 @@
   (cond ((equal? 'say (car ACTION))
          (say (cdr ACTION)))))
 
-(define-public (store-groundings SENT GRD)
-  "Store the groundings, both original words and lemmas,
-   for each of the GlobNode in the pattern.
-   They will be referenced at the stage of evaluating the context
-   of the psi-rules, or executing the action of the psi-rules."
-  (let ((sent-word-seq (cog-outgoing-set (car (sent-get-word-seqs SENT))))
-        (cnt 0))
-       (for-each (lambda (g)
-         (if (equal? 'ListLink (cog-type g))
-             (if (equal? (gar g) (gadr g))
-                 ; If the grounded value is the GlobNode itself,
-                 ; that means the GlobNode is grounded to nothing
-                 (begin
-                   (set! globs-word (assoc-set! globs-word (gar g) (List)))
-                   (set! globs-lemma (assoc-set! globs-lemma (gar g) (List))))
-                 ; Store the GlobNode and the groundings
-                 (begin
-                   (set! globs-word (assoc-set! globs-word (gar g)
-                     (List (take (drop sent-word-seq cnt)
-                                 (length (cog-outgoing-set (gdr g)))))))
-                   (set! globs-lemma (assoc-set! globs-lemma (gar g) (gdr g)))
-                   (set! cnt (+ cnt (length (cog-outgoing-set (gdr g)))))))
-             ; Move on if it's not a GlobNode
-             (set! cnt (+ cnt 1))))
-         (cog-outgoing-set GRD)))
+(define-public (record-groundings GLOB GRD)
+  "Record the groundings of a variable/glob, in both original words
+   and lemmas. They will be referenced at the stage of evaluating the
+   context of the psi-rules, or executing the action of the psi-rules."
+  (set! globs-word (assoc-set! globs-word GLOB (List GRD)))
+  (set! globs-lemma (assoc-set! globs-lemma GLOB (List GED)))
   (True))
-
-(define (generate-bind GLOB-DECL GLOB-COND TERM-SEQ)
-  "Generate a BindLink that contains the TERM-SEQ and the
-   restrictions on the GlobNode in the TERM-SEQ, if any."
-  (Bind (VariableList GLOB-DECL
-                      (TypedVariable (Variable "$S")
-                                     (Type "SentenceNode")))
-        (And GLOB-COND
-             TERM-SEQ
-             (State chatlang-anchor (Variable "$S")))
-        (ExecutionOutput (GroundedSchema "scm: store-groundings")
-                         (List (Variable "$S")
-                               (List (map (lambda (x)
-                                 (if (equal? 'GlobNode (cog-type x))
-                                     (List (Quote x) (List x))
-                                     x))
-                                 (cog-outgoing-set (gddr TERM-SEQ))))))))
 
 (define* (chat-rule PATTERN ACTION #:optional (TOPIC default-topic) NAME)
   "Top level translation function. Pattern is a quoted list of terms,
@@ -322,18 +264,22 @@
          (preproc-terms (preprocess-terms ordered-terms))
          (proc-terms (process-pattern-terms preproc-terms))
          (vars (append atomese-variable-template (list-ref proc-terms 0)))
-         (globs (list-ref proc-terms 1))
-         (conds (append atomese-condition-template (list-ref proc-terms 2)))
-         (glob-conds (list-ref proc-terms 3))
-         (terms (list-ref proc-terms 4))
-         (is-unordered? (list-ref proc-terms 5))
-         (term-seq (if is-unordered?
-           (Evaluation chatlang-lemma-set (List (Variable "$S") (Set terms)))
-           (Evaluation chatlang-lemma-seq (List (Variable "$S") (List terms)))))
+         (conds (append atomese-condition-template (list-ref proc-terms 1)))
+         (is-unordered? (list-ref proc-terms 4))
+         (words (if is-unordered?
+           (Evaluation chatlang-word-set
+             (List (Variable "$S") (Set (list-ref proc-terms 2))))
+           (Evaluation chatlang-word-seq
+             (List (Variable "$S") (List (list-ref proc-terms 2))))))
+         (lemmas (if is-unordered?
+           (Evaluation chatlang-lemma-set
+             (List (Variable "$S") (Set (list-ref proc-terms 3))))
+           (Evaluation chatlang-lemma-seq
+             (List (Variable "$S") (List (list-ref proc-terms 3))))))
          (action (process-action ACTION))
-         (bindlink (generate-bind globs glob-conds term-seq))
          (psi-rule (psi-rule-nocheck
-                     (list (Satisfaction (VariableList vars) (And conds)))
+                     (list (Satisfaction (VariableList vars)
+                                         (And words lemmas conds)))
                      action
                      (True)
                      (stv .9 .9)
@@ -341,10 +287,9 @@
                      NAME)))
         (cog-logger-debug chatlang-logger "ordered-terms: ~a" ordered-terms)
         (cog-logger-debug chatlang-logger "preproc-terms: ~a" preproc-terms)
-        (cog-logger-debug chatlang-logger "BindLink: ~a" bindlink)
         (cog-logger-debug chatlang-logger "psi-rule: ~a" psi-rule)
-        ; Link both the newly generated BindLink and psi-rule together
-        (Reference bindlink psi-rule)))
+        (set! pat-vars '())  ; Reset pat-vars
+        psi-rule))
 
 (define (sent-get-word-seqs SENT)
   "Get the words (original and lemma) associate with SENT.
@@ -380,7 +325,7 @@
         (Evaluation chatlang-word-set (List SENT word-set))
         (Evaluation chatlang-lemma-seq (List SENT lemma-seq))
         (Evaluation chatlang-lemma-set (List SENT lemma-set))
-        (list word-seq lemma-seq lemma-set)))
+        (list word-seq word-set lemma-seq lemma-set)))
 
 (define (get-lemma-from-relex WORD)
   "Get the lemma of WORD via the RelEx server."
@@ -429,79 +374,39 @@
     (cog-outgoing-set
       (cog-execute! (Get (Reference (Variable "$x") CONCEPT))))))
 
-(define (is-member? GLOB LST IN-LEMMA?)
-  "Check if GLOB is a member of LST, where LST may contain
-   WordNodes, LemmaNodes, and PhraseNodes. IN-LEMMA? is a flag
-   to indicate whether the comparison should be done purely
-   in lemmas."
-  (if IN-LEMMA?
-      (any (lambda (t)
-        (equal? (string-join (map get-lemma (map cog-name GLOB)))
-                (string-join (map get-lemma (string-split (cog-name t) #\sp)))))
-        LST)
-      (let* ((raw-txt (string-join (map cog-name
-               (cog-outgoing-set (assoc-ref globs-word (car GLOB))))))
-             (lemma-txt (string-join (map cog-name
-               (cog-outgoing-set (assoc-ref globs-lemma (car GLOB)))))))
-        (any (lambda (t)
-               (or (and (eq? 'WordNode (cog-type t))
-                        (equal? raw-txt (cog-name t)))
-                   (and (eq? 'LemmaNode (cog-type t))
-                        (equal? lemma-txt (cog-name t)))
-                   (and (eq? 'PhraseNode (cog-type t))
-                        (equal? raw-txt (cog-name t)))))
-             LST))))
+(define (is-member? GRD LST)
+  "Check if GRD (the grounding of a glob) is a member of LST,
+   where LST may contain WordNodes, LemmaNodes, and PhraseNodes."
+  (let* ((raw-txt (string-join (map cog-name GRD)))
+         (lemma-txt (car (map (lambda (w) (get-lemma (cog-name w))) GRD))))
+    (any (lambda (t)
+           (or (and (eq? 'WordNode (cog-type t))
+                    (equal? raw-txt (cog-name t)))
+               (and (eq? 'LemmaNode (cog-type t))
+                    (equal? lemma-txt (cog-name t)))
+               (and (eq? 'PhraseNode (cog-type t))
+                    (equal? raw-txt (cog-name t)))))
+         LST)))
 
-(define-public (chatlang-concept? CONCEPT . GLOB)
+(define-public (chatlang-concept? CONCEPT . GRD)
   "Check if the value grounded for the GlobNode is actually a member
    of the concept."
   (cog-logger-debug chatlang-logger
-    "In chatlang-concept? CONCEPT: ~aGLOB: ~a" CONCEPT GLOB)
-  (if (is-member? GLOB (get-members CONCEPT) #f)
+    "In chatlang-concept? CONCEPT: ~aGRD: ~a" CONCEPT GRD)
+  (if (is-member? GRD (get-members CONCEPT))
       (stv 1 1)
       (stv 0 1)))
 
-(define-public (chatlang-concept-in-lemma? CONCEPT . GLOB)
-  "Check if the value grounded for the GlobNode is actually a member
-   of the concept. All the comparison will be done in lemmas."
-  (cog-logger-debug chatlang-logger
-    "In chatlang-concept-in-lemma? CONCEPT: ~aGLOB: ~a" CONCEPT GLOB)
-  (if (is-member? GLOB (get-members CONCEPT) #t)
-      (stv 1 1)
-      (stv 0 1)))
-
-(define-public (chatlang-choices? CHOICES . GLOB)
+(define-public (chatlang-choices? CHOICES . GRD)
   "Check if the value grounded for the GlobNode is actually a member
    of the list of choices."
   (cog-logger-debug chatlang-logger
-    "In chatlang-choices? CHOICES: ~aGLOB: ~a" CHOICES GLOB)
+    "In chatlang-choices? CHOICES: ~aGRD: ~a" CHOICES GRD)
   (let* ((chs (cog-outgoing-set CHOICES))
          (cpts (append-map get-members (cog-filter 'ConceptNode chs))))
-        (if (is-member? GLOB (append chs cpts) #f)
+        (if (is-member? GRD (append chs cpts))
             (stv 1 1)
             (stv 0 1))))
-
-(define-public (chatlang-choices-in-lemma? CHOICES . GLOB)
-  "Check if the value grounded for the GlobNode is actually a member
-   of the list of choices. All the comparison will be done in lemmas."
-  (cog-logger-debug chatlang-logger
-    "In chatlang-choices-in-lemma? CHOICES: ~aGLOB: ~a" CHOICES GLOB)
-  (let* ((chs (cog-outgoing-set CHOICES))
-         (cpts (append-map get-members (cog-filter 'ConceptNode chs))))
-        (if (is-member? GLOB (append chs cpts) #t)
-            (stv 1 1)
-            (stv 0 1))))
-
-(define-public (chatlang-lemma? LEMMA . GLOB)
-  "Check if the lemma of the value grounded for the GlobNode is LEMMA.
-   For example if there is a variable \"_play\" in the pattern of a rule,
-   it will be accepted if the value grounded is either play, plays, or
-   played."
-  (cog-logger-debug chatlang-logger
-    "In chatlang-lemma? LEMMA: ~aGLOB: ~a" LEMMA GLOB)
-  (if (is-member? GLOB (list LEMMA) #t)
-    (stv 1 1)
-    (stv 0 1)))
 
 (define (text-contains? RTXT LTXT TERM)
   "Check if either RTXT (raw) or LTXT (lemma) contains TERM."
