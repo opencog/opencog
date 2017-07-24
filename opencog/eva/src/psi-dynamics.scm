@@ -3,7 +3,8 @@
 ;
 ; OpenPsi dynamics control for Hanson robot
 
-(use-modules (opencog) (opencog exec) (opencog openpsi))
+(use-modules (opencog) (opencog exec) (opencog openpsi)
+						(opencog openpsi dynamics))
 
 ; needed for nlp parsing
 (use-modules (opencog nlp) (opencog nlp chatbot) (opencog nlp chatbot-psi))
@@ -19,9 +20,6 @@
 
 (define prev-value-node (Concept "previous value"))
 (define current-sentence-node (Concept "current sentence"))
-
-; Temporary call needed to load dynamics code while it's in dev phase
-(load-openpsi-in-development)
 
 ; Function called by OpenPsi when it believes expression command updates should
 ; occur based on event detection and subsequent OpenPsi variable updating

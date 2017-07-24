@@ -3,7 +3,7 @@
 
 (define psi-emotion-node (Concept (string-append psi-prefix-str "emotion")))
 
-(define-public (psi-create-emotion emotion)
+(define (psi-create-emotion emotion)
 	(define emotion-concept (Concept (string-append psi-prefix-str emotion)))
 	(Inheritance emotion-concept psi-emotion-node)
 	; initialize value ?
@@ -11,7 +11,7 @@
 	;(format #t "new emotion: ~a\n" emotion-concept)
 	emotion-concept)
 
-(define-public (psi-get-emotions)
+(define (psi-get-emotions)
 "
 	Returns a list of all psi emotions.
 "
