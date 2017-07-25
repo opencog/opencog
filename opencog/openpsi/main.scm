@@ -23,7 +23,7 @@
 (define psi-do-run-loop #f)
 
 ; --------------------------------------------------------------
-(define-public (psi-running?)
+(define (psi-running?)
 "
   psi-running?
 
@@ -35,7 +35,7 @@
 ; --------------------------------------------------------------
 (define psi-loop-count 0)
 
-(define-public (psi-get-loop-count)
+(define (psi-get-loop-count)
 "
   psi-get-loop-count
 
@@ -45,7 +45,7 @@
 )
 
 ; --------------------------------------------------------------
-(define-public (psi-run-continue?)  ; public only because its in a GPN
+(define (psi-run-continue?)  ; public only because its in a GPN
 "
   psi-run-continue?
 
@@ -60,7 +60,7 @@
 )
 
 ; ----------------------------------------------------------------------
-(define-public (psi-step)
+(define (psi-step)
 "
   psi-step - Take one step of the OpenPsi rule engine.
 
@@ -150,7 +150,7 @@
 ; psi rules.  For now, this is OK, but at some point, this will become
 ; a bottleneck, as we will need to evaluate more rules more often.
 ;
-(define-public (psi-run)
+(define (psi-run)
 "
   psi-run
 
@@ -186,7 +186,7 @@
 
 ; -------------------------------------------------------------
 
-(define-public (psi-halt)
+(define (psi-halt)
 "
   psi-halt
 

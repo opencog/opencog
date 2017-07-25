@@ -14,7 +14,7 @@
 	(ConceptNode (string-append psi-prefix-str "modulator")))
 
 ; --------------------------------------------------------------
-(define-public (psi-create-modulator modulator-name initial-value)
+(define (psi-create-modulator modulator-name initial-value)
 "
   Creates and returns ConceptNode that represents an OpenPsi modulator
 
@@ -44,7 +44,7 @@
 	)
 )
 
-(define-public (psi-get-modulators)
+(define (psi-get-modulators)
 	; todo: cog-chase-link bug? - it is returning the anchor node in the results
 	;(cog-chase-link 'InheritanceLink 'ConceptNode psi-modulator-node))
 	(cog-outgoing-set (cog-execute!
@@ -64,20 +64,20 @@
 ; -------------------------------------------------------------
 ; Getters
 
-(define-public (psi-get-arousal)
+(define (psi-get-arousal)
 	(psi-get-number-value arousal))
 
-(define-public (psi-get-pos-valence)
+(define (psi-get-pos-valence)
 	(psi-get-number-value pos-valence))
 
-(define-public (psi-get-neg-valence)
+(define (psi-get-neg-valence)
 	(psi-get-number-value neg-valence))
 
-(define-public (psi-get-resolution-level)
+(define (psi-get-resolution-level)
 	(psi-get-number-value resolution-level))
 
-(define-public (psi-get-selection-threshold)
+(define (psi-get-selection-threshold)
 	(psi-get-number-value selection-threshold))
 
-(define-public (psi-get-securing-threshold)
+(define (psi-get-securing-threshold)
 	(psi-get-number-value securing-threshold))

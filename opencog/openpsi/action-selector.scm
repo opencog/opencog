@@ -17,7 +17,7 @@
 ;; (define *-act-sel-node-*
 ;;     (ConceptNode (string-append psi-prefix-str "action-selector")))
 ;;
-;; (define-public (psi-action-selector-set! dsn)
+;; (define (psi-action-selector-set! dsn)
 ;; "
 ;;   psi-action-selector-set! EXE
 ;;
@@ -36,7 +36,7 @@
 ;; )
 ;;
 ;; --------------------------------------------------------------
-;; (define-public (psi-get-action-selector-generic)
+;; (define (psi-get-action-selector-generic)
 ;; "
 ;;   Returns a list containing the user-defined action-selector.
 ;; "
@@ -55,7 +55,7 @@
 ;;
 ;; --------------------------------------------------------------
 ;;
-;; (define-public (psi-select-rules)
+;; (define (psi-select-rules)
 ;; "
 ;;   psi-select-rules
 ;;
@@ -76,7 +76,7 @@
 ;; )
 ;;
 ;; --------------------------------------------------------------
-;; (define-public (psi-add-action-selector exec-term name)
+;; (define (psi-add-action-selector exec-term name)
 ;; "
 ;;   psi-add-action-selector EXE NAME
 ;;
@@ -110,7 +110,7 @@
 ;; )
 ;;
 ;; --------------------------------------------------------------
-;; (define-public (psi-default-action-selector)
+;; (define (psi-default-action-selector)
 ;; "
 ;;   psi-default-action-selector
 ;;
@@ -130,7 +130,7 @@
 ;; )
 ;;
 ; ----------------------------------------------------------------------
-(define-public (psi-set-action-selector exec-term demand-node)
+(define (psi-set-action-selector exec-term demand-node)
 "
   psi-set-action-selector EXEC-TERM DEMAND-NODE - Sets EXEC-TERM as
   the function used to select rules for the DEMAND-NODE.
@@ -142,7 +142,7 @@
 )
 
 ; ----------------------------------------------------------------------
-(define-public (psi-get-action-selector demand-node)
+(define (psi-get-action-selector demand-node)
 "
   psi-get-action-selector DEMAND-NODE - Gets the action-selector of
   DEMAND-NODE.
@@ -242,7 +242,7 @@
 )
 
 ; --------------------------------------------------------------
-(define-public (psi-select-rules-per-demand d)
+(define (psi-select-rules-per-demand d)
 "
   psi-select-rules-per-demand DEMAND
 

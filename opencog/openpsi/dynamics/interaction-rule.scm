@@ -108,7 +108,7 @@
 )
 
 
-(define-public (psi-create-general-rule antecedent consequent consequent-params)
+(define (psi-create-general-rule antecedent consequent consequent-params)
 	(define rule
 		(PredictiveImplication
 			(TimeNode 1)
@@ -120,4 +120,3 @@
 	;(display rule)
 	rule
 )
-
