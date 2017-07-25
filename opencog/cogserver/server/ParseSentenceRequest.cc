@@ -84,6 +84,7 @@ bool ParseSentenceRequest::execute()
     bool verbose = false;
     bool dump_weights = false;
     bool check_pairs = false;
+    bool test_reply = false;
     for (it = _parameters.begin(); it != _parameters.end(); ++it)
     {
         parameter_count++;
@@ -128,6 +129,11 @@ bool ParseSentenceRequest::execute()
         {
             check_pairs = true;
             no_parse = true;
+        }
+        // -test - if test is set then we return an answer
+        else if (*it == "-test_reply")
+        {
+            test_reply = true;
         }
         // -delimiter <string> - use this string for a delimiter
         else if (*it == "-delimiter")
@@ -203,7 +209,12 @@ bool ParseSentenceRequest::execute()
         {
             // Check the sentence for sentence pairs to be used later in parsing.
             // std::cerr << "Checking " << sentence_count << ": " << _sentence << std::endl;
-            if (!check_parse_pairs(as, words, pair_distance))
+            if (check_parse_pairs(as, words, pair_distance))
+            {
+                if (test_reply)
+                    send("<pairs present>\n");
+            }
+            else
             {
                 _error << "CHECK PAIRS failed for sentence: '" << _sentence << "'" << std::endl;
                 std::cerr << _error.str();
