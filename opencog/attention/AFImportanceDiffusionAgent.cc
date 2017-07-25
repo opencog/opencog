@@ -30,6 +30,8 @@
 
 #include "AFImportanceDiffusionAgent.h"
 #include "AttentionParamQuery.h"
+#include "Attention.h"
+#include "AttentionStat.h"
 
 using namespace opencog;
 

@@ -247,6 +247,19 @@ So, set up the text-ingestion pipeline:
   and pre-processing texts from Project Gutenberg, Wikipedia, and the
   "Archive of Our Own" fan-fiction website.
 
+10a) The current pipeline for Chinese text requires word segmentation
+  to be performed outside of OpenCog. This can be done using jieba
+  https://github.com/fxsjy/jieba So: first, install it:
+  `pip install jieba` and then segment text:
+  `run/jieba-segment.py PATH-IN PATH-OUT`. This python utility is in
+  the `run` directory.  It might be best to create modified versions
+  of the `run/ss-one.sh` and `run/mst-one.sh` scripts to invoke jieba;
+  I have not done this yet. Soon...
+
+  Instead of using the `zh` or `yue` languages for sentence splitting,
+  you will want to use `zh-pre` or `yue-pre` for the language; this
+  disables the addition of spaces between hanzi characters.
+
 11) After doing at least several days worth of parsing  (i.e. at least
    hundreds of articles, tens of thousands of sentences) the word-pair
    mutual information can be extracted. Do the stuff in section "Mutual

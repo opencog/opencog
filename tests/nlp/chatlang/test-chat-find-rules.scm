@@ -3,8 +3,8 @@
              (opencog nlp chatlang)
              (opencog exec))
 
-; I have no idea why this is needed for the ChatlangUTest to pass...
 (load "../../../opencog/nlp/chatlang/translator.scm")
+(set! test-get-lemma #t)
 
 ; Utils
 ; -----

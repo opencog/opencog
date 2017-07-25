@@ -9,12 +9,6 @@
 (use-modules (opencog logger)
              (opencog exec))
 
-(define-public (show-globs)
-  "For debugging only."
-  (display "globs-word: ") (display globs-word) (newline)
-  (display "globs-lemma: ") (display globs-lemma) (newline)
-  (display "vars-grd: ") (display vars-grd) (newline))
-
 (define (clear-globs)
   "For clearing any previous groundings."
   (set! globs-word '())
@@ -47,12 +41,12 @@
          (rules-matched (append-map (lambda (b)
            (cog-chase-link 'ReferenceLink 'ImplicationLink b)) bind-grd)))
 
-        (cog-logger-debug "For input:\n~a" input-lemmas)
-        (cog-logger-debug "Rules with no constant:\n~a" no-const)
-        (cog-logger-debug "Exact match:\n~a" exact-match)
-        (cog-logger-debug "Dual match:\n~a" dual-match)
-        (cog-logger-debug "Grounded:\n~a" bind-grd)
-        (cog-logger-debug "Rules matched:\n~a" rules-matched)
+        (cog-logger-debug chatlang-logger "For input:\n~a" input-lemmas)
+        (cog-logger-debug chatlang-logger "Rules with no constant:\n~a" no-const)
+        (cog-logger-debug chatlang-logger "Exact match:\n~a" exact-match)
+        (cog-logger-debug chatlang-logger "Dual match:\n~a" dual-match)
+        (cog-logger-debug chatlang-logger "Grounded:\n~a" bind-grd)
+        (cog-logger-debug chatlang-logger "Rules matched:\n~a" rules-matched)
 
         ; TODO: Pick the one with the highest weight
         (List (append-map
@@ -81,3 +75,20 @@
   (Put (DefinedSchema "Find Chat Rules")
        (DefinedSchema "Get Current Input"))
   default-topic)
+
+; -----
+; For debugging only
+(use-modules (opencog nlp chatbot) (opencog eva-behavior))
+
+(define-public (show-globs)
+  "Show the groundings of the GlobNodes."
+  (display "pat-vars: ") (display pat-vars) (newline)
+  (display "globs-word: ") (display globs-word) (newline)
+  (display "globs-lemma: ") (display globs-lemma) (newline))
+
+(define-public (test-chatlang TXT)
+  "Try to find (and execute) the matching rules given an input TXT."
+  (define sent (car (nlp-parse TXT)))
+  (State (Anchor "Chatlang: Currently Processing") sent)
+  (map (lambda (r) (cog-evaluate! (gdar r)))
+       (cog-outgoing-set (chat-find-rules sent))))

@@ -494,7 +494,7 @@
 	; from relex seem to cause bad memory fragmentation.
 	(define maybe-gc
 		(let ((cnt 0)
-				(max-size (* 750 1000 1000)))  ; 750 MB
+				(max-size (* 2750 1000 1000)))  ; 750 MB
 			(lambda ()
 				(if (< max-size (- (assoc-ref (gc-stats) 'heap-size)
 							(assoc-ref (gc-stats) 'heap-free-size)))

@@ -48,13 +48,15 @@
         0
         c)))
 
-(define* (concept STR #:optional (VAR (choose-var-name)))
+(define* (concept STR #:optional (VAR (choose-var-name)) (IN-LEMMA? #f))
   "Occurrence of a concept."
   (cons (list (TypedVariable (Glob VAR)
                 (TypeSet (Type "WordNode")
                          (Interval (Number 1)
                                    (Number (get-concept-length (Concept STR)))))))
-        (list (Evaluation (GroundedPredicate "scm: chatlang-concept?")
+        (list (Evaluation (if IN-LEMMA?
+                              (GroundedPredicate "scm: chatlang-concept-in-lemma?")
+                              (GroundedPredicate "scm: chatlang-concept?"))
                           (List (Concept STR)
                                 (Glob VAR))))))
 
@@ -85,7 +87,7 @@
     0
     TERMS))
 
-(define* (choices TERMS #:optional (VAR (choose-var-name)))
+(define* (choices TERMS #:optional (VAR (choose-var-name)) (IN-LEMMA? #f))
   "Occurrence of a list of choices. Existence of either one of
    the words/lemmas/phrases/concepts in the list will be considered
    as a match."
@@ -93,7 +95,9 @@
                              (TypeSet (Type "WordNode")
                                       (Interval (Number 1)
                                                 (Number (get-term-length TERMS))))))
-        (list (Evaluation (GroundedPredicate "scm: chatlang-choices?")
+        (list (Evaluation (if IN-LEMMA?
+                              (GroundedPredicate "scm: chatlang-choices-in-lemma?")
+                              (GroundedPredicate "scm: chatlang-choices?"))
                           (List (List (terms-to-atomese TERMS))
                                 (Glob VAR))))))
 
@@ -133,12 +137,12 @@
                                       (Interval (Number LOWER) (Number UPPER)))))
         '()))
 
-(define* (variable TERM #:optional (VAR (choose-var-name)))
-  "Occurrence of a variable, where TERM can be a concept, a list of choices,
-   or a wildcard."
-  (cond ((equal? 'concept (car TERM))
-         (concept (cdr TERM) VAR))
-        ((equal? 'choices (car TERM))
-         (choices (cdr TERM) VAR))
-        ((equal? 'wildcard (car TERM))
-         (wildcard (cadr TERM) (cddr TERM) VAR))))
+(define (var-lemma LEMMA VAR)
+  "Occurence of a variable that should be grounded to LEMMA."
+  (cons (list (TypedVariable (Glob VAR)
+                             (TypeSet (Type "WordNode")
+                                      (Interval (Number 1)
+                                                (Number 1)))))
+        (list (Evaluation (GroundedPredicate "scm: chatlang-lemma?")
+                          (List (LemmaNode LEMMA)
+                                (Glob VAR))))))

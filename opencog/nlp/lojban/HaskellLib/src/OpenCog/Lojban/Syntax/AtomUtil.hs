@@ -15,7 +15,7 @@ import Syntax hiding (SynIso,Syntax)
 import qualified Data.Map as M
 import qualified Data.Foldable as F
 import Data.Maybe (fromJust,isJust)
-import Data.List (isSuffixOf,nub)
+import Data.List (isSuffixOf,nub,isInfixOf)
 import Data.Hashable
 import Data.Char (chr)
 
@@ -73,19 +73,6 @@ ctx = linkIso "ContextLink" noTv
 eval :: SynIso [Atom] Atom
 eval = linkIso "EvaluationLink" noTv
 
-
---Iso Atom Atom
---eval . node x . listl .a pred . addAsnd arg
-
---addAsnd :: Iso c b -> c -> Iso a (a,b)
---addAsnd iso c = iso >. addsnd c
-
---addAfst :: Iso c b -> c -> Iso a (b,a)
---addAfst iso c = iso <. addfst c
-
---(.a) :: Iso [a] a -> Iso b (a,a) -> Iso b a
---(.a) iso1 iso2 = iso1 . tolist2 iso2
-
 evalTv :: SynIso (TruthVal,[Atom]) Atom
 evalTv = linkIso2 "EvaluationLink"
 
@@ -101,14 +88,20 @@ meml = linkIso "MemberLink" noTv
 equivl :: SynIso [Atom] Atom
 equivl = linkIso "EquivalenceLink" noTv
 
-setTypeL  :: SynIso [Atom] Atom
-setTypeL = linkIso "SetTypeLink" noTv
+setl :: SynIso [Atom] Atom
+setl = linkIso "SetLink" noTv
 
 subsetL :: SynIso (Atom,Atom) Atom
 subsetL = linkIso "SubsetLink" noTv . tolist2
 
+setTypeL  :: SynIso [Atom] Atom
+setTypeL = linkIso "SetTypeLink" noTv
+
 sizeL  :: SynIso [Atom] Atom
 sizeL = linkIso "SetSizeLink" noTv
+
+inhl :: SynIso [Atom] Atom
+inhl = linkIso "InheritanceLink" noTv
 
 impl :: SynIso [Atom] Atom
 impl = linkIso "ImplicationLink" noTv
@@ -126,7 +119,7 @@ typedvarl :: SynIso [Atom] Atom
 typedvarl = linkIso "TypedVariableLink" noTv
 
 varll :: SynIso [Atom] Atom
-varll = linkIso "VariableListLink" noTv
+varll = linkIso "VariableList" noTv
 
 notl :: SynIso [Atom] Atom
 notl = linkIso "NotLink" noTv
@@ -169,38 +162,34 @@ xorl = orl . tolist2
           myand = andl .tolist2
           mynot = notl . tolist1
 
-
-handleConNeg :: SynIso (LCON,[Atom]) (String,[Atom])
-handleConNeg = Iso (pure . f) (pure . g)
-    where f ((mna,(s,mnai)),[a1,a2]) = let na1 = if isJust mna
+handleEKMods :: SynIso (EK,(Atom,Atom)) (String,(Atom,Atom))
+handleEKMods = mkIso f g where
+    f ((bna,(bse,(c,bnai))),(a1,a2)) = let na1 = if bna
                                                  then cNL noTv a1
                                                  else a1
-                                           na2 = if isJust mnai
+                                           na2 = if bnai
                                                  then cNL noTv a2
                                                  else a2
-                                       in (s,[na1,na2])
-          g (s,[na1,na2]) = let (mna,a1) = case na1 of
-                                        (NL [a1]) -> (Just "na",a1)
-                                        _ -> (Nothing,na1)
-                                (mnai,a2) = case na2 of
-                                        (NL [a2]) -> (Just "nai",a2)
-                                        _ -> (Nothing,na2)
-                            in ((mna,(s,mnai)),[a1,a2])
+                                       in if bse
+                                             then (c,(na2,na1))
+                                             else (c,(na1,na2))
+    g (s,(na1,na2)) = let (bna,a1) = case na1 of
+                                  (NL [a1]) -> (True,a1)
+                                  _         -> (False,na1)
+                          (bnai,a2) = case na2 of
+                                  (NL [a2]) -> (True ,a2)
+                                  _         -> (False,na2)
+                      in ((bna,(False,(s,bnai))),(a1,a2))
 
-
-conLink :: SynIso (LCON,[Atom]) Atom
-conLink = conLink' . handleConNeg
-
-conLink' :: SynIso (String,[Atom]) Atom
-conLink' = choice conHandlers
-    where conHandlers = [andl   . rmfst "e"
+conLink :: SynIso (EK,(Atom,Atom)) Atom
+conLink = conLink' . second tolist2 . handleEKMods
+    where conLink' :: SynIso (String,[Atom]) Atom
+          conLink' = choice conHandlers
+          conHandlers = [andl   . rmfst "e"
                         ,orl    . rmfst "a"
                         ,iffl   . rmfst "o"
                         ,uL     . rmfst "u"
                 --FIXME:,varl   . rmfst "ji"
-                        ,anotbl . rmfst "enai"
-                        ,xorl   . rmfst "onai"
-                        ,onlyif . rmfst "na.a"
                         ]
 
 _JAtoA :: SynIso String String
@@ -208,9 +197,6 @@ _JAtoA = mkSynonymIso [("je","e")
                       ,("ja","a")
                       ,("jo","o")
                       ,("ju","u")
-                      ,("jonai","onai")
-                      ,("jenai","enai")
-                      ,("naja","na.a")
                       ,("je'i","ji")]
 
 _GIhAtoA :: SynIso String String
@@ -218,9 +204,6 @@ _GIhAtoA = mkSynonymIso [("gi'e","e")
                         ,("gi'a","a")
                         ,("gi'o","o")
                         ,("gi'u","u")
-                        ,("gi'enai","enai")
-                        ,("gi'onai","onai")
-                        ,("nagi'a","na.a")
                         ,("gi'i","ji")]
 
 _GAtoA :: SynIso String String
@@ -228,11 +211,14 @@ _GAtoA = mkSynonymIso [("ge","e")
                       ,("ga","a")
                       ,("go","o")
                       ,("gu","u")
-                      ,("ganai","na.a")
-                      ,("gonai","onai")
                       ,("ge'i","ji")]
 
-
+_GUhAtoA :: SynIso String String
+_GUhAtoA = mkSynonymIso [("gu'e","e")
+                        ,("gu'a","a")
+                        ,("gu'o","o")
+                        ,("gu'u","u")
+                        ,("gu'i","ji")]
 
 linkIso :: String -> TruthVal -> SynIso [Atom] Atom
 linkIso n tv = Iso f g where
@@ -270,17 +256,33 @@ predicate = nodeIso "PredicateNode" noTv
 varnode :: SynIso String Atom
 varnode = nodeIso "VariableNode" noTv
 
-number :: SynIso String Atom
-number = nodeIso "VariableNode" noTv
+numberNode :: SynIso String Atom
+numberNode = nodeIso "VariableNode" noTv
 
 
-_frames :: SynIso (Tagged Selbri,[Sumti]) Atom
-_frames = (id ||| andl) . isSingle . mapIso (handleDA . _frame) . isoDistribute . handleTAG
-    where isSingle = mkIso f g
-          f [a] = Left a
-          f as  = Right as
-          g (Left a) = [a]
-          g (Right as) = as
+_frames :: SynIso (Selbri,[(Atom,Tag)]) Atom
+_frames = handleXU
+        . second ((id ||| andl) . isSingle . mapIso (handleDA . _frame) . isoDistribute)
+        . reorder
+    where isSingle = mkIso f g where
+            f [a] = Left a
+            f as  = Right as
+            g (Left a) = [a]
+            g (Right as) = as
+
+          reorder = mkIso f g where
+            f a@((_,sa),_) = (sa,a)
+            g (sa,a) = a
+
+handleXU :: SynIso (Atom,Atom) Atom
+handleXU = Iso f g where
+    f (a,e) = do
+        xus <- gets sXU
+        if a `elem` xus
+           then pure $ Link "SatisfactionLink" [e] noTv
+           else pure e
+    g (Link "SatisfactionLink" [e] _) = pure (cCN "dummy" noTv,e)
+    g e                               = pure (cCN "dummy" noTv,e)
 
 handleDA :: SynIso Atom Atom
 handleDA = Iso f g where
@@ -290,6 +292,7 @@ handleDA = Iso f g where
             name <- randName ((show p1) ++ "___" ++ n)
             pure $ let i = cVN name
                    in cExL tv i (cEvalL tv ps (cLL [p1,i]))
+
     f a = pure a
     g (ExL _ _ (EvalL tv ps (LL [p1,VN name])))
         = let n = drop 23 name
@@ -297,25 +300,9 @@ handleDA = Iso f g where
           in pure $ cEvalL tv ps (cLL [p1,da])
     g a = pure a
 
-handleTAG :: SynIso (Tagged Selbri,[Sumti]) (Selbri,[(Atom,Tag)])
-handleTAG = handleTAGupdater . second tagger
-    where handleTAGupdater = mkIso f g
-          f ((s,Nothing),args) = (s,args)
-          f ((s,Just u) ,args) = (s,map (mapf u) args)
-          g (s,args)           = ((s,Nothing),args) --TODO: Should we really just ingore that?
-          mapf = mapSnd . tagUpdater
-
-tagUpdater :: String -> (Tag -> Tag)
-tagUpdater t = case t of
-                    "se" -> f [("1","2"),("2","1")]
-                    "te" -> f [("1","3"),("3","1")]
-                    "ve" -> f [("1","4"),("4","1")]
-                    "xe" -> f [("1","5"),("5","1")]
-    where f ls e = maybe e snd $ F.find (\(a,b) -> a == e) ls
-
 --Get the argumetn location of all Sumties
-tagger :: SynIso [(Atom,Maybe String)] [(Atom,String)]
-tagger = post . isoFoldl tagOne . init
+handleTAG :: SynIso [(Atom,Maybe String)] [(Atom,String)]
+handleTAG = post . isoFoldl tagOne . init
     where startMap = M.fromList [("1",True),("2",True),("3",True),("4",True),("5",True)]
           init = mkIso f g where
               f a     = (([],("0",startMap)),a)
@@ -341,27 +328,26 @@ tagger = post . isoFoldl tagOne . init
 
 --        Iso       Selbri          Stumti       Atom
 _frame :: SynIso (Selbri,(Atom,Tag)) Atom
-_frame = _evalTv . (id *** (_framePred *** tolist2)) . reorder
+_frame = handleXU . second (_evalTv . (second.first) _framePred) . reorder
     where reorder = mkIso f g
-          f ((tv,s),(a,t))     = (tv,((s,t),(s,a)))
-          g (tv,((_,t),(s,a))) = ((tv,s),(a,t))
+          f ((tv,s),(a,t))     = (a,(tv,(t,[s,a])))
+          g (_,(tv,(t,[s,a]))) = ((tv,s),(a,t))
 
-node :: SynIso (String,(String,TruthVal)) Atom
-node = mkIso f g where
-    f (t,(n,tv))    = Node t n tv
-    g (Node t n tv) = (t,(n,tv))
+          _framePred :: SynIso Tag Atom
+          _framePred = handleVar <+> specialTag <+> predicate . isoPrepend "sumti"
+              where handleVar :: SynIso Tag Atom
+                    handleVar = Iso f g where
+                        f "?" = cVN <$> randName "?"
+                        f _ = lift $ Left "Not a VariableTag"
+                        g (VN name) = pure "?"
+                        g a = lift $ Left "Not a VariableNode"
 
-_framePred :: SynIso (Atom,Tag) Atom
-_framePred = handleVar $ node . second (first (isoIntercalate "_sumti". tolist2 .< isoDrop 23)) . reorder .< inverse node
-    where reorder = mkIso f g where
-                f ((t,(n,tv)),tag) = (t,((n,tag),tv))
-                g (t,((n,tag),tv)) = ((t,(n,tv)),tag)
-          handleVar iso = Iso f g where
-              f (n,"?") = pure $ cVN (nodeName n)
-              f a = apply iso a
-              g (VN name) = pure (cPN name noTv,"$var")
-              g a = unapply iso a
-
+                    specialTag :: SynIso Tag Atom
+                    specialTag = Iso f g where
+                        f s = if "_sumti" `isInfixOf` s
+                                 then pure (cPN s noTv)
+                                 else lift $ Left "Not a special Tag."
+                        g (PN s) = pure "fix_reverse_specialTag_handeling"
 
 randName :: SynMonad t State => String -> (t ME) String
 randName salt = do
@@ -392,11 +378,13 @@ genInstance :: String -> SynIso Atom Atom
 genInstance typeL = Iso f g where
     f a = do
         let (t,name) = if "Link" `isSuffixOf` atomType a
-                   then ("ConceptNode","")
-                   else (atomType a,nodeName a)
+                          then ("ConceptNode","")
+                          else (atomType a,nodeName a)
         rndname <- randName $ show a
         let i = Node t (rndname  ++ "___" ++ name) noTv
-            l = Link typeL [i,a] highTv
+            l = case a of
+                    VN name -> Link typeL [i,cCN name noTv] highTv
+                    _       -> Link typeL [i,a] highTv
         pushAtom l
         pure i
     g n = do
@@ -409,12 +397,12 @@ genInstance typeL = Iso f g where
     ff n (Link "InheritanceLink" [b,_] _) = n == b
     ff n a = False
 
-filterState :: SynIso Sumti Sumti
+filterState :: SynIso Atom Atom
 filterState = Iso f g where
-    f       = pure
-    g (a,t) = do
+    f   = pure
+    g a = do
         modify (\s -> s {sAtoms = getDefinitions [a] (sAtoms s)})
-        pure (a,t)
+        pure a
 
 
 getDefinitions :: [Atom] -> [Atom] -> [Atom]

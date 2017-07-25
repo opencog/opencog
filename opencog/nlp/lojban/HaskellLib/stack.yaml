@@ -8,11 +8,11 @@ packages:
 - '.'
 - location:
    git: https://github.com/rTreutlein/LojbanValidator
-   commit: cf4ba1fb96ea4555d90dac75390bf5c95b5a47b5
+   commit: 93a06e1166ef5ca041fd3c62124b0b5e25bb1e6b
   extra-dep: true
 - location:
    git: https://github.com/rTreutlein/IsoSyntax
-   commit: 98a7ed254b3670f2869ee35cfae4a491a7376e99
+   commit: 0dc1f0c8c4a7c217558a5011716c2559075b5ba4
   extra-dep: true
 
 # Packages to be pulled from upstream that are not in the resolver (e.g., acme-missiles-0.3)

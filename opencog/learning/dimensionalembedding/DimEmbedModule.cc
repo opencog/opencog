@@ -90,9 +90,9 @@ void DimEmbedModule::init()
     define_scheme_primitive("logEmbedding",
                             &DimEmbedModule::logAtomEmbedding,
                             this);
-    define_scheme_primitive("euclidDist",
-                            &DimEmbedModule::euclidDist,
-                            this);
+//    define_scheme_primitive("euclidDist",
+//                            &DimEmbedModule::euclidDist,
+//                            this);
     define_scheme_primitive("kNN",
                             &DimEmbedModule::kNearestNeighbors,
                             this);
