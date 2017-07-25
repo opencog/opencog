@@ -12459,10 +12459,6 @@ a- time+ 212
 enough+ 201
 
 
- 
-
-
-
 How many words?
 (psf 'left-basis-size)
 (psf 'right-basis-size)
@@ -12484,8 +12480,19 @@ Store 800855 csets
 Mandarin word pairs + MI values; Ruitings segemented text
 
 --------------------
-gettimeofday
-timeradd
+
+1) filter
+2) replacde cset-vec-cosine by filtered cosine  in gram-sim
+3) use filter-specific predicate.
+4) wait .. batch in matrix?
+
+filters?
+   (define key-name
+      (if (LLOBJ 'filters?)
+         (string-append "*-Norm Key " (LLOBJ 'id))
+         "*-Norm Key-*"))
+
+
 
 =========================================================================
 

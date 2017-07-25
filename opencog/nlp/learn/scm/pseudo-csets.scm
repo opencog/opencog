@@ -136,6 +136,7 @@
 		(lambda (message . args)
 			(apply (case message
 				((name) (lambda () "Word-Disjunct Pairs (Connector Sets)"))
+				((id)   (lambda () "cset"))
 				((left-type) get-left-type)
 				((right-type) get-right-type)
 				((pair-type) get-pair-type)
