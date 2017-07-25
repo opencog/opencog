@@ -20,7 +20,7 @@
 
 ;; TODO: turn that into a generator
 
-(define condition-direct-evaluation-implication-scope-rule
+(define conditional-direct-evaluation-implication-scope-rule
   (Bind
     (TypedVariable
       (Variable "$I")
@@ -67,3 +67,9 @@
                         0))
        (confidence (exact->inexact (/ antecedent-length K))))
     (stv strength confidence)))
+
+;; Name the rule
+(define conditional-direct-evaluation-implication-scope-rule-name
+  (DefinedSchemaNode "conditional-direct-evaluation-implication-scope-rule"))
+(DefineLink conditional-direct-evaluation-implication-scope-rule-name
+  conditional-direct-evaluation-implication-scope-rule)
