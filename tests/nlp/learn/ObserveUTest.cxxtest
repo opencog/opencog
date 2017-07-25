@@ -1,8 +1,10 @@
 /*
- * tests/server/ShellUTest.cxxtest
+ * tests/server/ObserveUTest.cxxtest
  *
- * Copyright (C) 2016 Linas Vepstas
+  * Copyright (C) 2017 by OpenCog Foundation
  * All Rights Reserved
+ *
+ * Written by Curtis Faith
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
