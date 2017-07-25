@@ -165,6 +165,9 @@
                     (List (Quote VAR) VAR))))
 
 (define (uvar-exist? VAR)
-  "Occurence of a user variable."
-  (list (Evaluation (GroundedPredicate "scm: chatlang-uvar-exist?")
-                    (List (Concept VAR)))))
+  "Check if a user variable has been defined in the atomspace."
+  (list (Not (Equal (Set) (Get (State (Node VAR) (Variable "$x")))))))
+
+(define (uvar-equal? VAR VAL)
+  "Check if the value of the user variable VAR equals to VAL."
+  (list (Equal (Set (Node VAL)) (Get (State (Node VAR) (Variable "$x"))))))

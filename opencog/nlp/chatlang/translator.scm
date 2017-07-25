@@ -186,6 +186,8 @@
                  (set! pat-vars (append pat-vars (list-ref terms 2)))))
            ((equal? 'uvar_exist (car t))
             (set! conds (append conds (uvar-exist? (cdr t)))))
+           ((equal? 'uvar_equal (car t))
+            (set! conds (append conds (uvar-equal? (cadr t) (caddr t)))))
            ((equal? 'function (car t))
             (set! conds (append conds (list
               (Evaluation (GroundedPredicate (string-append "scm: " (cadr t)))
@@ -275,6 +277,7 @@
 (define* (create-rule PATTERN ACTION #:optional (TOPIC default-topic) NAME)
   "Top level translation function. Pattern is a quoted list of terms,
    and action is a quoted list of actions or a single action."
+  (cog-logger-debug "In create-rule\nPATTERN = ~a\nACTION = ~a" PATTERN ACTION)
   (let* ((ordered-terms (order-terms PATTERN))
          (preproc-terms (preprocess-terms ordered-terms))
          (proc-terms (process-pattern-terms preproc-terms))
@@ -447,13 +450,6 @@
         (if (any (lambda (t) (text-contains? rtxt ltxt t)) TERMS)
             (stv 0 1)
             (stv 1 1))))
-
-(define-public (chatlang-uvar-exist? VAR)
-  "Check if a user variable VAR exist in the atomspace."
-  (if (null? (cog-outgoing-set (cog-execute!
-        (Get (State VAR (Variable "$x"))))))
-      (stv 0 1)
-      (stv 1 1)))
 
 (define (member-words STR)
   "Convert the member in the form of a string into an atom, which can

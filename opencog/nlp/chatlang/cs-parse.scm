@@ -140,6 +140,7 @@
     ((has-match? "^[ ]*\\*" str) (result:suffix '* location "*"))
     ((has-match? "^[ ]*!" str) (result:suffix 'NOT location #f))
     ((has-match? "^[ ]*[?]" str) (result:suffix '? location "?"))
+    ((has-match? "^[ ]*=" str) (result:suffix 'EQUAL location #f))
     ; Literals -- words start with a '
     ((has-match? "^[ ]*'[a-zA-Z]+\\b" str)
       (result:suffix 'LITERAL location
@@ -221,7 +222,7 @@
     ; ? = Comparison tests
     (CONCEPT TOPIC RESPONDERS REJOINDERS GAMBIT COMMENT SAMPLE_INPUT WHITESPACE
       (right: LPAREN LSBRACKET << ID VAR * ^ < LEMMA LITERAL NUM LEMMA~COMMAND
-              STRING *~n *n UVAR MVAR MOVAR NOT RESTART)
+              STRING *~n *n UVAR MVAR MOVAR EQUAL NOT RESTART)
       (left: RPAREN RSBRACKET >> > DQUOTE)
       (right: ? CR NEWLINE)
     )
@@ -314,6 +315,7 @@
       (phrase) : $1
       (concept) : $1
       (variable) : $1
+      (user-variable) : $1
       (function) : $1
       (choice) : $1
       (unordered-matching) : $1
@@ -349,7 +351,7 @@
       (DQUOTE) : "(cons 'str \"\\\"\")"
       (LEMMA) : (format #f "(cons 'str \"~a\")" $1)
       (LITERAL) : (format #f "(cons 'str \"~a\")" $1)
-      (STRING) : (format #f "cons 'str \"~a\")" $1)
+      (STRING) : (format #f "(cons 'str \"~a\")" $1)
       (variable) : $1
       (function) : $1
     )
@@ -413,7 +415,12 @@
       (VAR choice) : (format #f "(cons 'variable (list ~a))" $2)
       (MVAR) : (format #f "(cons 'get_lvar ~a)" $1)
       (MOVAR) : (format #f "(cons 'get_wvar ~a)" $1)
+    )
+
+    (user-variable
       (UVAR) : (format #f "(cons 'uvar_exist \"~a\")" $1)
+      (UVAR EQUAL LEMMA) : ;(format #f "~a ~a" $1 $3)
+        (format #f "(cons 'uvar_equal (list \"~a\" \"~a\"))" $1 $3)
     )
 
     (negation
