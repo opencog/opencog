@@ -10,7 +10,7 @@
 (use-modules (opencog logger))
 (define chatlang-logger (cog-new-logger))
 (cog-logger-set-level! chatlang-logger "debug")
-(cog-logger-set-stdout! chatlang-logger #f)
+(cog-logger-set-stdout! chatlang-logger #t)
 
 (define (display-token token)
 "
@@ -106,6 +106,9 @@
     ((has-match? "^[ ]*'_[0-9]" str)
       (result:suffix 'MOVAR location
         (substring (string-trim (match:substring current-match)) 2)))
+    ((has-match? "^[ ]*\\$[a-zA-Z0-9_-]+" str)
+      (result:suffix 'UVAR location
+        (substring (string-trim (match:substring current-match)) 1)))
     ((has-match? "^[ ]*_" str) (result:suffix 'VAR location #f))
     ; For dictionary keyword sets
     ((has-match? "^[ ]*[a-zA-Z]+~[a-zA-Z1-9]+" str)
@@ -218,7 +221,7 @@
     ; ? = Comparison tests
     (CONCEPT TOPIC RESPONDERS REJOINDERS GAMBIT COMMENT SAMPLE_INPUT WHITESPACE
       (right: LPAREN LSBRACKET << ID VAR * ^ < LEMMA LITERAL NUM LEMMA~COMMAND
-              STRING *~n *n MVAR MOVAR NOT RESTART)
+              STRING *~n *n UVAR MVAR MOVAR NOT RESTART)
       (left: RPAREN RSBRACKET >> > DQUOTE)
       (right: ? CR NEWLINE)
     )
@@ -410,6 +413,7 @@
       (VAR choice) : (format #f "(cons 'variable (list ~a))" $2)
       (MVAR) : (format #f "(cons 'get_lvar ~a)" $1)
       (MOVAR) : (format #f "(cons 'get_wvar ~a)" $1)
+      (UVAR) : (format #f "(cons 'uvar_exist \"~a\")" $1)
     )
 
     (negation

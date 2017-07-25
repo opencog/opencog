@@ -184,6 +184,8 @@
                  (set! word-seq (append word-seq (list-ref terms 2)))
                  (set! lemma-seq (append lemma-seq (list-ref terms 3)))
                  (set! pat-vars (append pat-vars (list-ref terms 2)))))
+           ((equal? 'uvar_exist (car t))
+            (set! conds (append conds (uvar-exist? (cdr t)))))
            ((equal? 'function (car t))
             (set! conds (append conds (list
               (Evaluation (GroundedPredicate (string-append "scm: " (cadr t)))
@@ -269,14 +271,6 @@
                                     (cdar ACTION)))))
               (True (Put (DefinedPredicate (chatlang-prefix "Say"))
                          (List (to-atomese (cdar ACTION)))))))
-
-(define-public (record-groundings GLOB GRD)
-  "Record the groundings of a variable/glob, in both original words
-   and lemmas. They will be referenced at the stage of evaluating the
-   context of the psi-rules, or executing the action of the psi-rules."
-  (set! globs-word (assoc-set! globs-word GLOB (List GRD)))
-  (set! globs-lemma (assoc-set! globs-lemma GLOB (List GED)))
-  (True))
 
 (define* (create-rule PATTERN ACTION #:optional (TOPIC default-topic) NAME)
   "Top level translation function. Pattern is a quoted list of terms,
@@ -454,6 +448,13 @@
             (stv 0 1)
             (stv 1 1))))
 
+(define-public (chatlang-uvar-exist? VAR)
+  "Check if a user variable VAR exist in the atomspace."
+  (if (null? (cog-outgoing-set (cog-execute!
+        (Get (State VAR (Variable "$x"))))))
+      (stv 0 1)
+      (stv 1 1)))
+
 (define (member-words STR)
   "Convert the member in the form of a string into an atom, which can
    either be a WordNode, LemmaNode, ConceptNode, or a PhraseNode."
@@ -472,6 +473,14 @@
    of the concept."
   (append-map (lambda (m) (list (Reference (member-words m) (Concept NAME))))
               MEMBERS))
+
+(define-public (chatlang-record-groundings GLOB GRD)
+  "Record the groundings of a variable/glob, in both original words
+   and lemmas. They will be referenced at the stage of evaluating the
+   context of the psi-rules, or executing the action of the psi-rules."
+  (set! globs-word (assoc-set! globs-word GLOB (List GRD)))
+  (set! globs-lemma (assoc-set! globs-lemma GLOB (List GED)))
+  (True))
 
 ; ----------
 ; Topic

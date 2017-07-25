@@ -161,5 +161,10 @@
 (define (variable VAR)
   "Occurence of a variable. The value grounded for it needs to be recorded.
    VAR can either be a VariableNode or a GlobNode."
-  (list (Evaluation (GroundedPredicate "scm: record-groundings")
+  (list (Evaluation (GroundedPredicate "scm: chatlang-record-groundings")
                     (List (Quote VAR) VAR))))
+
+(define (uvar-exist? VAR)
+  "Occurence of a user variable."
+  (list (Evaluation (GroundedPredicate "scm: chatlang-uvar-exist?")
+                    (List (Concept VAR)))))
