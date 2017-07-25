@@ -183,7 +183,14 @@
                                     (variable (list-ref terms 2))))
                  (set! word-seq (append word-seq (list-ref terms 2)))
                  (set! lemma-seq (append lemma-seq (list-ref terms 3)))
-                 (set! pat-vars (append pat-vars (list-ref terms 2)))))))
+                 (set! pat-vars (append pat-vars (list-ref terms 2)))))
+           ((equal? 'function (car t))
+            (set! conds (append conds (list
+              (Evaluation (GroundedPredicate (string-append "scm: " (cadr t)))
+                (List (map Node (cddr t))))))))
+           ; TODO: Do something else for features that are not currently supported?
+           (else
+            (cog-logger-error "Feature not supported: \"~a ~a\"" (car t) (cdr t)))))
     TERMS)
   ; DualLink couldn't match patterns with no constant terms in it
   ; Mark the rules with no constant terms so that they can be found
