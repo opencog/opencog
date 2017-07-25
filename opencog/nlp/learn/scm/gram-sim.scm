@@ -32,23 +32,43 @@
 (use-modules (srfi srfi-1))
 (use-modules (opencog) (opencog persist) (opencog persist-sql))
 
+; ---------------------------------------------------------------------
+(define-public (make-cosine-api LLOBJ)
+"
+  make-cosine-api - Add API to batch-compute and access cosine
+  similarity between rows or columns of the LLOBJ.  This create
+  a new sparse matrix that is essentially the matrix product of
+  LLOBJ-transpose with LLOBJ.
+"
+	(let ((foo "bar")
+			)
+
+		(define pair-sim-type 'SimilarityLink)
+
+		; fetch-cos-pairs - fetch all SimilarityLinks from the database backend.
+		(define (fetch-cos-pairs)
+			(define start-time (current-time))
+			(load-atoms-of-type pair-sim-type)
+			(format #t "Elapsed time to load sims: ~A secs\n"
+				(- (current-time) start-time)))
+
+
+		; Methods on the object
+		(lambda (message . args)
+			(case message
+				((pair-type)     pair-sim-type)
+				((fetch-pairs)   (fetch-cos-pairs))
+				(else (error "Bad method call on cosine API:" message))))
+)
+
+; ---------------------------------------------------------------------
+
 (define cos-key (PredicateNode "*-Cosine Distance Key-*"))
 
 ; Define the atom at which the cosine similarity value will be stored.
 (define (sim-pair WORD-A WORD-B) (SimilarityLink WORD-A WORD-B))
 
 ; ---------------------------------------------------------------------
-; Public API for fetching the batched results
-
-(define-public (fetch-all-sims)
-"
-  fetch-all-sims - fetch all SimilarityLinks from the database backend.
-"
-	(define start-time (current-time))
-	(load-atoms-of-type 'SimilarityLink)
-	(format #t "Elapsed time to load sims: ~A secs\n"
-		(- (current-time) start-time))
-)
 
 (define (pair-sim WORD-A WORD-B)
 	(cog-link 'SimilarityLink WORD-A WORD-B))
