@@ -217,6 +217,8 @@
   (True))
 
 (define-public (chatlang-pick-one-action ACTIONS)
+  "Choose one of the ACTIONS and execute it."
+  ; TODO: Use RandomChoiceLink?
   (define os (cog-outgoing-set ACTIONS))
   (define num (random (length os) (random-state-from-platform)))
   (chatlang-say (list-ref os num)))
@@ -444,3 +446,52 @@
         (if (any (lambda (t) (text-contains? rtxt ltxt t)) TERMS)
             (stv 0 1)
             (stv 1 1))))
+
+(define (member-words STR)
+  "Convert the member in the form of a string into an atom, which can
+   either be a WordNode, LemmaNode, ConceptNode, or a PhraseNode."
+  (let ((words (string-split STR #\sp)))
+    (if (= 1 (length words))
+        (let ((w (car words)))
+             (cond ((string-prefix? "~" w) (Concept (substring w 1)))
+                   ((is-lemma? w) (LemmaNode w))
+                   (else (WordNode w))))
+        (PhraseNode STR))))
+
+(define (create-concept NAME MEMBERS)
+  "Create named concepts with explicit membership lists.
+   The first argument is the name of the concept, and the rest is the
+   list of words and/or concepts that will be considered as the members
+   of the concept."
+  (append-map (lambda (m) (list (Reference (member-words m) (Concept NAME))))
+              MEMBERS))
+
+; ----------
+; Topic
+; ----------
+(define default-topic '())
+
+(define-public (create-topic TOPIC-NAME)
+"
+  create-topic TOPIC-NAME
+
+  Creates a psi-demand named as TOPIC-NAME, sets the default-topic to be it
+  and returns ConceptNode that represent the topic(aka demand).
+"
+  ; NOTE:The intention is to follow chatscript like authoring approach. Once a
+  ; topic is created, then the rules that are added after that will be under
+  ; that topic.
+
+  ; TODO:
+  ; 1. Should this be a skipped demand, so as to separate the dialogue loop
+  ; be independent of the psi-loop? Or, is it better to resturcture openpsi to
+  ; allow as many loops as possilbe as that might be required for the DMT
+  ; implementation?
+  ; 2. Should the weight be accessable? Specially if the execution graph is
+  ; separate from the content, thus allowing learing, why?
+
+  (set! default-topic (psi-demand TOPIC-NAME 0.9))
+  default-topic)
+
+; This is the default topic.
+(create-topic "Yakking")
