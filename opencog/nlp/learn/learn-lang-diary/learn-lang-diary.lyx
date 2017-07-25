@@ -21780,34 +21780,9 @@ bump
 \end_layout
 
 \begin_layout Standard
-For the "fee"
-\end_layout
-
-\begin_layout Standard
-xxxx
-\end_layout
-
-\begin_layout Standard
-For example, the appearance of 
-\begin_inset Quotes eld
-\end_inset
-
-United
-\begin_inset Quotes erd
-\end_inset
-
- is almost surely due to the high-MI pair 
-\begin_inset Quotes eld
-\end_inset
-
-United States
-\begin_inset Quotes erd
-\end_inset
-
-, and so this probably dominates the disjunct count.
- This is confirmed by manual inspection
+Its entertaining to look at some of these close-up.
 \begin_inset Foot
-status open
+status collapsed
 
 \begin_layout Plain Layout
 View disjuncts by saying (filter (lambda (cset) (< 10 (get-count cset)))
@@ -21817,7 +21792,358 @@ View disjuncts by saying (filter (lambda (cset) (< 10 (get-count cset)))
 
 \end_inset
 
-, per table below.
+ The word 
+\begin_inset Quotes eld
+\end_inset
+
+Prince
+\begin_inset Quotes erd
+\end_inset
+
+ shows up 99th on the list, with an average of 2.885 observations per disjunct.
+ It has a total of 773 different disjuncts on it.
+ The top six disjuncts are just single links, shown in the table below.
+ Clearly all are princes.
+ This leaves 767 other disjuncts with far fewer counts.
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Tabular
+<lyxtabular version="3" rows="7" columns="2">
+<features tabularvalignment="middle">
+<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top" width="0">
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+disjunct
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+number of observations
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Andrew+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+626
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Vasili+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+149
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Andrew's+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+46
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Edouard+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+46
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Hans+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+33
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Bagration+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+32
+\end_layout
+
+\end_inset
+</cell>
+</row>
+</lyxtabular>
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The word 
+\begin_inset Quotes eld
+\end_inset
+
+think
+\begin_inset Quotes erd
+\end_inset
+
+ appears as number 140 on the list, with an average of 2.6104 observations
+ per disjunct.
+ It has 5462 disjuncts in total; only six are observed more than 200 times.
+ The last in the list below is the first clear appearance of a transitive
+ verb.
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Tabular
+<lyxtabular version="3" rows="7" columns="2">
+<features tabularvalignment="middle">
+<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top" width="0">
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+disjunct
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+number of observations
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+I-
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+1321
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+you-
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+308
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+don't-
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+265
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+to-
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+244
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+do- you-
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+211
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+I- it+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+202
+\end_layout
+
+\end_inset
+</cell>
+</row>
+</lyxtabular>
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The word 
+\begin_inset Quotes eld
+\end_inset
+
+long
+\begin_inset Quotes erd
+\end_inset
+
+ appears as 195 on the list, with an average of 2.3825 observations per disjunct.
+ It has 5412 different disjuncts on it; only five are seen more tha 200
+ times.
+ These are:
 \end_layout
 
 \begin_layout Standard
@@ -21852,7 +22178,7 @@ number of observations
 \begin_inset Text
 
 \begin_layout Plain Layout
-the- States+
+a-
 \end_layout
 
 \end_inset
@@ -21861,7 +22187,7 @@ the- States+
 \begin_inset Text
 
 \begin_layout Plain Layout
-108
+385
 \end_layout
 
 \end_inset
@@ -21872,7 +22198,7 @@ the- States+
 \begin_inset Text
 
 \begin_layout Plain Layout
-in- the- States+
+as+
 \end_layout
 
 \end_inset
@@ -21881,7 +22207,7 @@ in- the- States+
 \begin_inset Text
 
 \begin_layout Plain Layout
-41
+335
 \end_layout
 
 \end_inset
@@ -21892,7 +22218,7 @@ in- the- States+
 \begin_inset Text
 
 \begin_layout Plain Layout
-States+
+how-
 \end_layout
 
 \end_inset
@@ -21901,7 +22227,7 @@ States+
 \begin_inset Text
 
 \begin_layout Plain Layout
-35
+236
 \end_layout
 
 \end_inset
@@ -21912,7 +22238,7 @@ States+
 \begin_inset Text
 
 \begin_layout Plain Layout
-the- Kingdom+
+a- time+
 \end_layout
 
 \end_inset
@@ -21921,7 +22247,7 @@ the- Kingdom+
 \begin_inset Text
 
 \begin_layout Plain Layout
-16
+212
 \end_layout
 
 \end_inset
@@ -21932,7 +22258,7 @@ the- Kingdom+
 \begin_inset Text
 
 \begin_layout Plain Layout
-the- the- States+
+enough+
 \end_layout
 
 \end_inset
@@ -21941,7 +22267,7 @@ the- the- States+
 \begin_inset Text
 
 \begin_layout Plain Layout
-14
+201
 \end_layout
 
 \end_inset
@@ -21955,258 +22281,7 @@ the- the- States+
 \end_layout
 
 \begin_layout Standard
-Only the first four disjuncts seem to be grammatically acceptable.
- In the first, second and fourth usage, 
-\begin_inset Quotes eld
-\end_inset
 
-States
-\begin_inset Quotes erd
-\end_inset
-
- seems to be a head word, with 
-\begin_inset Quotes eld
-\end_inset
-
-United
-\begin_inset Quotes erd
-\end_inset
-
- being the dependent.
- In the third case, it would appears that 
-\begin_inset Quotes eld
-\end_inset
-
-United
-\begin_inset Quotes erd
-\end_inset
-
- is the head-word, and 
-\begin_inset Quotes eld
-\end_inset
-
-States
-\begin_inset Quotes erd
-\end_inset
-
- the dependent.
- 
-\end_layout
-
-\begin_layout Standard
-The fifth most frequent disjunct is grammatical garbage: noise from bad
- MST parses.
- There are even more disjuncts, which occur with lower frequency: there
- are 156 in all.
- Almost all of these are presumably junk of some kind.
- We conclude that the signal/noise ratio here is about 
-\begin_inset Formula $10\log_{10}(108/14)$
-\end_inset
-
- or about 9 dB.
- These first four disjuncts really pull up the average, which is quite low,
- given this skew: the average number of observations per disjunct for 
-\begin_inset Quotes eld
-\end_inset
-
-United
-\begin_inset Quotes erd
-\end_inset
-
- is 2.96.
-\end_layout
-
-\begin_layout Standard
-The corresponding table for 
-\begin_inset Quotes eld
-\end_inset
-
-It
-\begin_inset Quotes erd
-\end_inset
-
- is
-\end_layout
-
-\begin_layout Standard
-\align center
-\begin_inset Tabular
-<lyxtabular version="3" rows="6" columns="2">
-<features tabularvalignment="middle">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<row>
-<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-disjunct
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-number of observations
-\end_layout
-
-\end_inset
-</cell>
-</row>
-<row>
-<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-is+
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-216
-\end_layout
-
-\end_inset
-</cell>
-</row>
-<row>
-<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-was+
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-197
-\end_layout
-
-\end_inset
-</cell>
-</row>
-<row>
-<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-has+
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-55
-\end_layout
-
-\end_inset
-</cell>
-</row>
-<row>
-<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-was+ was+
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-12
-\end_layout
-
-\end_inset
-</cell>
-</row>
-<row>
-<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-is+ was+
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-10
-\end_layout
-
-\end_inset
-</cell>
-</row>
-</lyxtabular>
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-This also is much as expected: 
-\begin_inset Quotes eld
-\end_inset
-
-It
-\begin_inset Quotes erd
-\end_inset
-
- is a sentence opener, and the three sentence types it opens are 
-\begin_inset Quotes eld
-\end_inset
-
-It is
-\begin_inset Quotes erd
-\end_inset
-
-, 
-\begin_inset Quotes eld
-\end_inset
-
-It was
-\begin_inset Quotes erd
-\end_inset
-
- and 
-\begin_inset Quotes eld
-\end_inset
-
-It has
-\begin_inset Quotes erd
-\end_inset
-
-.
- The fourth and fifth disjuncts are grammatical garbage.
- The average number of disjunct observations is 3.03, almost identical to
- that for 
-\begin_inset Quotes eld
-\end_inset
-
-United
-\begin_inset Quotes erd
-\end_inset
-
-.
 \end_layout
 
 \begin_layout Standard
@@ -22222,8 +22297,15 @@ Disjunct count distribution
 \end_layout
 
 \begin_layout Standard
-The graph below shows the distribution of the disjunct observations on the
- two words 
+The graph below shows the distribution of the disjunct observations on 
+\end_layout
+
+\begin_layout Standard
+xxxx
+\end_layout
+
+\begin_layout Standard
+the two words 
 \begin_inset Quotes eld
 \end_inset
 
