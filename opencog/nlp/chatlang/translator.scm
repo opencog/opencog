@@ -216,6 +216,17 @@
   (State chatlang-anchor (Concept "Default State"))
   (True))
 
+(define-public (chatlang-pick-one-action ACTIONS)
+  (define os (cog-outgoing-set ACTIONS))
+  (define num (random (length os) (random-state-from-platform)))
+  (chatlang-say (list-ref os num)))
+
+(Define
+  (DefinedPredicate (chatlang-prefix "Pick One Action"))
+  (Lambda (Variable "$x")
+          (Evaluation (GroundedPredicate "scm: chatlang-pick-one-action")
+                      (List (Variable "$x")))))
+
 (Define
   (DefinedPredicate (chatlang-prefix "Say"))
   (Lambda (Variable "$x")
@@ -223,9 +234,8 @@
                       (List (Variable "$x")))))
 
 (define (process-action ACTION)
-  "Convert ACTION into atomese."
-  ; Replace the variables, if any, with the corresponding GlobNode
-  (define atomese
+  "Convert ACTIONS into atomese."
+  (define (to-atomese actions)
     ; Iterate through the output word-by-word
     (map (lambda (n)
       (cond ; The grounding of a variable in original words
@@ -241,10 +251,15 @@
              (ExecutionOutput (GroundedSchema (string-append "scm: " (cadr n)))
                               ; TODO: Use ConceptNode or?
                               (List (map Node (cddr n)))))
-            (else (Word n))))
-      ACTION))
+            (else (Word (cdr n)))))
+      actions))
   ; TODO: How about an action that only updates internal parameters?
-  (True (Put (DefinedPredicate (chatlang-prefix "Say")) (List atomese))))
+  (if (equal? 'action-choices (caar ACTION))
+              (True (Put (DefinedPredicate (chatlang-prefix "Pick One Action"))
+                         (List (map (lambda (a) (List (to-atomese a)))
+                                    (cdar ACTION)))))
+              (True (Put (DefinedPredicate (chatlang-prefix "Say"))
+                         (List (to-atomese (cdar ACTION)))))))
 
 (define-public (record-groundings GLOB GRD)
   "Record the groundings of a variable/glob, in both original words
