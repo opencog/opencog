@@ -280,9 +280,13 @@
     ; Rule grammar
     (rule
       (RESPONDERS name context action) :
+; JJJ
+(begin
+(display "@@@ Sending: ") (display $3) (newline) (display $4) (newline)
         (create-rule
           (eval-string (string-append "(list " $3 ")"))
           (eval-string (string-append "(list " $4 ")")))
+)
         ; (format #f "\nresponder: ~a\nlabel: ~a\n~a\n~a" $1 $2 $3 $4)
       ; Unlabeled responder.
       ; TODO: Maybe should be labeled internally in the atomspace???
@@ -353,6 +357,12 @@
       (LITERAL) : (format #f "(cons 'str \"~a\")" $1)
       (STRING) : (format #f "(cons 'str \"~a\")" $1)
       (variable) : $1
+      (UVAR) : (format #f "(cons 'get_uvar \"~a\")" $1)
+      (UVAR EQUAL name) :
+        (format #f "(cons 'assign_uvar (list \"~a\" \"~a\"))" $1 $3)
+      ; TODO
+      (UVAR EQUAL variable) :
+        (format #f "(cons 'assign_uvar (list \"~a\" \"~a\"))" $1 $3)
       (function) : $1
     )
 
@@ -419,7 +429,7 @@
 
     (user-variable
       (UVAR) : (format #f "(cons 'uvar_exist \"~a\")" $1)
-      (UVAR EQUAL LEMMA) : ;(format #f "~a ~a" $1 $3)
+      (UVAR EQUAL name) :
         (format #f "(cons 'uvar_equal (list \"~a\" \"~a\"))" $1 $3)
     )
 

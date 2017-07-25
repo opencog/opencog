@@ -161,13 +161,41 @@
 (define (variable VAR)
   "Occurence of a variable. The value grounded for it needs to be recorded.
    VAR can either be a VariableNode or a GlobNode."
-  (list (Evaluation (GroundedPredicate "scm: chatlang-record-groundings")
-                    (List (Quote VAR) VAR))))
+  (Evaluation (GroundedPredicate "scm: chatlang-record-groundings")
+              (List (Quote VAR) VAR)))
+
+(define (context-function NAME ARGS)
+  "Occurrence of a function in the context of a rule."
+  (Evaluation (GroundedPredicate (string-append "scm: " NAME))
+              (List (map Node ARGS))))
+
+(define (action-function NAME ARGS)
+  "Occurrence of a function in the action of a rule."
+  (ExecutionOutput (GroundedSchema (string-append "scm: " NAME))
+                   (List (map Node ARGS))))
+
+(define (get-var-words NUM)
+  "Get the value grounded for a variable, in original words."
+  (ExecutionOutput (GroundedSchema "scm: ground-word")
+                   (List (list-ref pat-vars NUM))))
+
+(define (get-var-lemmas NUM)
+  "Get the value grounded for a variable, in lemmas."
+  (ExecutionOutput (GroundedSchema "scm: ground-lemma")
+                   (List (list-ref pat-vars NUM))))
+
+(define (get-user-variable VAR)
+  "Get the value of a user variable."
+  (Get (State (Node VAR) (Variable "$x"))))
+
+(define (assign-user-variable VAR VAL)
+  "Assign the value of a user variable."
+  (Put (State (Node VAR) (Variable "$x")) (Set (WordNode VAL))))
 
 (define (uvar-exist? VAR)
   "Check if a user variable has been defined in the atomspace."
-  (list (Not (Equal (Set) (Get (State (Node VAR) (Variable "$x")))))))
+  (Not (Equal (Set) (Get (State (Node VAR) (Variable "$x"))))))
 
 (define (uvar-equal? VAR VAL)
   "Check if the value of the user variable VAR equals to VAL."
-  (list (Equal (Set (Node VAL)) (Get (State (Node VAR) (Variable "$x"))))))
+  (Equal (Set (WordNode VAL)) (Get (State (Node VAR) (Variable "$x")))))

@@ -180,18 +180,16 @@
                  (set! vars (append vars (list-ref terms 0)))
                  (set! conds (append conds
                                     (list-ref terms 1)
-                                    (variable (list-ref terms 2))))
+                                    (list (variable (list-ref terms 2)))))
                  (set! word-seq (append word-seq (list-ref terms 2)))
                  (set! lemma-seq (append lemma-seq (list-ref terms 3)))
                  (set! pat-vars (append pat-vars (list-ref terms 2)))))
            ((equal? 'uvar_exist (car t))
-            (set! conds (append conds (uvar-exist? (cdr t)))))
+            (set! conds (append conds (list (uvar-exist? (cdr t))))))
            ((equal? 'uvar_equal (car t))
-            (set! conds (append conds (uvar-equal? (cadr t) (caddr t)))))
+            (set! conds (append conds (list (uvar-equal? (cadr t) (caddr t))))))
            ((equal? 'function (car t))
-            (set! conds (append conds (list
-              (Evaluation (GroundedPredicate (string-append "scm: " (cadr t)))
-                (List (map Node (cddr t))))))))
+            (set! conds (append conds (list (context-function (cadr t) (cddr t))))))
            ; TODO: Do something else for features that are not currently supported?
            (else
             (cog-logger-error "Feature not supported: \"~a ~a\"" (car t) (cdr t)))))
@@ -218,8 +216,9 @@
 
 (define-public (chatlang-say WORDS)
   "Say the text and update the internal state."
-  (define txt (string-join (append-map (lambda (n)
-    (if (equal? 'ListLink (cog-type n))
+  (define txt
+    (string-join (append-map (lambda (n)
+    (if (cog-link?  n)
         (map cog-name (cog-outgoing-set n))
         (list (cog-name n))))
     (cog-outgoing-set WORDS))))
@@ -252,18 +251,15 @@
     ; Iterate through the output word-by-word
     (map (lambda (n)
       (cond ; The grounding of a variable in original words
-            ((equal? 'get_wvar (car n))
-             (ExecutionOutput (GroundedSchema "scm: ground-word")
-               (List (list-ref pat-vars (cdr n)))))
+            ((equal? 'get_wvar (car n)) (get-var-words (cdr n)))
             ; The grounding of a variable in lemmas
-            ((equal? 'get_lvar (car n))
-             (ExecutionOutput (GroundedSchema "scm: ground-lemma")
-               (List (list-ref pat-vars (cdr n)))))
+            ((equal? 'get_lvar (car n)) (get-var-lemmas (cdr n)))
+            ; Get the value of a user variable
+            ((equal? 'get_uvar (car n)) (get-user-variable (cdr n)))
+            ; Assign the value of a user variable
+            ((equal? 'assign_var (car n)) (assign-user-variable (cdr n)))
             ; A function call
-            ((equal? 'function (car n))
-             (ExecutionOutput (GroundedSchema (string-append "scm: " (cadr n)))
-                              ; TODO: Use ConceptNode or?
-                              (List (map Node (cddr n)))))
+            ((equal? 'function (car n)) (action-function (cadr n) (cddr n)))
             (else (Word (cdr n)))))
       actions))
   ; TODO: How about an action that only updates internal parameters?
