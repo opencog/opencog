@@ -89,9 +89,12 @@
 
 (define all-csets (get-all-csets))
 
-; words with 100 or more observations.
+; Words with 100 or more observations. rfive_mtwo has 9425 of these.
+; There are 25505 with 20 or more
+; There are 20284 with 30 or more
+; There are 3263 with 400 or more
 (define top-cset-words
-	(filter (lambda (wrd) (< 100 (cset-vec-word-observations wrd)))
+	(filter (lambda (wrd) (<= 100 (cset-vec-word-observations wrd)))
 		all-cset-words))
 
 ; ---------------------------------------------------------------------
@@ -146,7 +149,10 @@
 (define sorted-avg
 	(score-and-rank avg-obs all-cset-words))
 
-(define binned-avg (bin-count-simple sorted-avg 100 1.0 6.0))
+(define sorted-avg
+	(score-and-rank avg-obs top-cset-words))
+
+(define binned-avg (bin-count-simple sorted-avg 200 1.0 20.0))
 
 (let ((outport (open-file "/tmp/binned-avg.dat" "w")))
 	(print-bincounts-tsv binned-avg outport)

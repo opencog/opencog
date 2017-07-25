@@ -12300,6 +12300,166 @@ but fetches after individual access do work corrctly.
 Soits the bulk fretch of all apirs that failed to date TLB...
 
 (load-atoms-of-type 'Section)
+getIncomingByType
+getIncoming
+      hi = table.add(hi, false);
+      _tlbuf.addAtom(hi, p->uuid);
+
+wait ... atom->setAtomSpace(_as); does happn so wtf...!?
+
+x/4a 0x7ffc6ba59e40
+(gdb) x/4a 0x7ffc6ba59e40
+0x7ffc6ba59e40: 0x7f26dfca8440  0x7f26dfca8430
+(gdb) x 0x7f26dfca8440
+0x7f26dfca8440: 0x7f303c11e1b8 <_ZTVN7opencog4LinkE+16>
+
+(gdb) print *this                             
+$15 = {<> = {<> = {_M_weak_this = {<No data fields>}}, 
+    _vptr.ProtoAtom = 0x7f303c11e1b8 <vtable for opencog::Link+16>,
+    _type = 127}, _flags = 0 '\000', _content_hash = 11383300620556476978,
+  _atom_space = 0x0, _truthValue = {<No data fields>},
+  _mtx = {<No data fields>}, _incoming_set = {<No data fields>}}        
+
+So... 
+
+atomspace should be 0x55595edc1590
+
+(gdb) x/16 0x7f26dfca8440
+0x7f26dfca8440: 0x7f303c11e1b8 <_ZTVN7opencog4LinkE+16> 0x7f26dfca8440
+0x7f26dfca8450: 0x7f26dfca8430  0x353635383700007f  << type=7f = 127 good
+0x7f26dfca8460: 0x9df99b9a63c0a232      0x55595edc1590 << atomspace is good
+0x7f26dfca8470: 0x5559659b7c10  0x5559659b7c00
+0x7f26dfca8480: 0x0     0x0
+0x7f26dfca8490: 0x0     0x0
+
+whereas tlb is holding:
+$26 = (struct Handle &) @0x7ffc6ba59d90: {<No data fields>}
+(gdb) x 0x7ffc6ba59d90
+0x7ffc6ba59d90: 0x7f26dfca8240
+
+(gdb) x/12 0x7f26dfca8240
+0x7f26dfca8240: 0x7f303c11e1b8 <_ZTVN7opencog4LinkE+16> 0x7f26dfca8240
+0x7f26dfca8250: 0x7f26dfca8230  0x7f26df00007f << type=7f = 127 good
+0x7f26dfca8260: 0x9df99b9a63c0a232      0x0  << hash is same, atomspace bad
+0x7f26dfca8270: 0x5559659b7c10  0x5559659b7c00
+0x7f26dfca8280: 0x0     0x0
+0x7f26dfca8290: 0x0     0x0
+
+      _tlbuf.addAtom(hi, p->uuid);
+
+(define sec (Section (WordNode "Reinaert") (ConnectorSeq (Connector
+(WordNode "Isengrim") (ConnectorDir "+")))))
+
+(define foo (Predicate "foo"))
+(cog-value sec foo)
+(cog-set-value! sec foo (FloatValue 1 ))
+wtf
+"Atom not in atomspace" ??? Ahh!
+
+Atom::setValue from 
+        8: SQLAtomStorage.cc:307
+opencog::SQLAtomStorage::Response::get_all_values_cb()
+10: SQLAtomStorage.cc:1687  :getLink
+
+so doGetLink top-code returned an atom that's not in the AS.
+
+doGetLink does no table insert directly! cause table not available.
+But the tlb resolve fixes it up for us! Cause the fetch was already
+in the as.
+
+vs. the incoming set .... 
+getIncomingByType  1566
+getIncoming  1502
+  ... get_recursive_if_not_exists  1459
+        does a _tlbuf.addAtom(link, p->uuid);
+             but that link is not in AS yet.
+  add lnk to table
+  get values of tabled link
+   _tlbuf.addAtom(hi, p->uuid); 
+      but some other ato already in tlb....
+
+  so:
+   h is in the as.
+   hr is == h
+
+   _handle_map.find(hr); returns ... !?
+
+So the second addAtom fails to resolve or update ad the first failed to
+resolve.
+
+ValuationPtr  .. s a triple, and thus is too much.
+Atom has pairs of key, ProtoAtomPtr&  
+
+Remove the valuation table, do not even build it. DONE
+remove special-case for tv in sql  DONE
+
+==================
+United:
+States+  36
+
+domain- domain- the- the- States+ States+ 80
+the- domain- anyone- in- th- States+ 40
+outside- the- States+  51
+owns- the- States+ States+  108
+status- outside- the- States+
+
+
+
+99  2.8848641655886156 "Prince"
+
+Prince  773
+
+Andrew+ 626
+Vasili+ 149
+Andrew's+ 46
+Edouard+ 46
+Hans+ 33
+Bagration+ 32
+the- Andrew+ 27 
+the- Wales+ 27
+Hippolyte+ 21 
+Arthur+ 21
+the- 17
+Bolkonski+ 16
+Natasha- Andrew+ 18
+The- Andrew+ 15
+Vasili's+ 14
+"-  Andrew+  11
+LEFT-WALL- Edouard+ 11
+
+112  2.801255090459977 "his" -- 49 dj > 200
+140  2.6103991212010254 "think" -- 6 dj > 200
+148  2.5431777546500145 "was"  -- 35
+161  2.4965609797013926 "head" -- 5
+171  2.4537177541729895 "middle" --  1
+195  2.382483370288248 "long" -- 5 
+196  2.3804440649017935 "day" -- 2
+208  2.3244970859184058 "going" -- 2
+
+think: 5462
+I- 1321
+you- 308
+do- you- 211
+don't- 265
+to- 244
+I- it+ 202
+
+head:  5961
+his- 777
+shook- .+ 751
+shook- 683
+her- 358
+his- .+ 238
+
+long  5412
+a- 385
+as+ 335
+how- 236
+a- time+ 212
+enough+ 201
+
+
+ 
 
 
 
