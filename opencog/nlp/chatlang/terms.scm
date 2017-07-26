@@ -50,14 +50,16 @@
 (define (terms-to-atomese TERMS)
   "Helper function to convert a list of terms into atomese.
    For use of choices and negation."
-  (map (lambda (t) (cond ((equal? 'word (car t))
-                          (WordNode (cdr t)))
-                         ((equal? 'lemma (car t))
-                          (LemmaNode (get-lemma (cdr t))))
-                         ((equal? 'phrase (car t))
-                          (PhraseNode (cdr t)))
-                         ((equal? 'concept (car t))
-                          (Concept (cdr t)))))
+  (map (lambda (t)
+    (cond ((equal? 'word (car t))
+           (WordNode (cdr t)))
+          ((equal? 'lemma (car t))
+           (LemmaNode (get-lemma (cdr t))))
+          ((equal? 'phrase (car t))
+           (PhraseNode (cdr t)))
+          ((equal? 'concept (car t))
+           (Concept (cdr t)))
+          (else (feature-not-supported NAME VAL))))
        TERMS))
 
 ; ----------
@@ -162,7 +164,7 @@
   "Occurence of a variable. The value grounded for it needs to be recorded.
    VAR is the variable name.
    WGRD and LGRD can either be a VariableNode or a GlobNode, which pass
-   the actual value grounded for it in original words and lemmas  at runtime."
+   the actual value grounded for it in original words and lemmas at runtime."
   (Evaluation (GroundedPredicate "scm: chatlang-record-groundings")
     (List (List (chatlang-var-word VAR) WGRD)
           (List (chatlang-var-lemma VAR) LGRD))))
@@ -176,6 +178,11 @@
   "Occurrence of a function in the action of a rule."
   (ExecutionOutput (GroundedSchema (string-append "scm: " NAME))
                    (List ARGS)))
+
+(define (action-choices ACTIONS)
+  "Pick one of the ACTIONS."
+  (ExecutionOutput (GroundedSchema "scm: chatlang-pick-action")
+                   (Set ACTIONS)))
 
 (define (get-var-words NUM)
   "Get the value grounded for a variable, in original words."

@@ -283,14 +283,12 @@
         (create-rule
           (eval-string (string-append "(list " $3 ")"))
           (eval-string (string-append "(list " $4 ")")))
-        ; (format #f "\nresponder: ~a\nlabel: ~a\n~a\n~a" $1 $2 $3 $4)
       ; Unlabeled responder.
       ; TODO: Maybe should be labeled internally in the atomspace???
       (RESPONDERS context action) :
         (create-rule
           (eval-string (string-append "(list " $2 ")"))
           (eval-string (string-append "(list " $3 ")")))
-        ; (format #f "\nresponder: ~a\n~a\n~a" $1 $2 $3)
       (REJOINDERS context action) :
         (format #f "\nrejoinder: ~a\n~a\n~a" $1 $2 $3)
       (GAMBIT action) : (format #f "gambit: ~a" $2)
@@ -326,17 +324,7 @@
     )
 
     (action
-      (action-choices) : (format #f "(cons 'action-choices (list ~a))" $1)
       (action-patterns) : (format #f "(cons 'action (list ~a))" $1)
-    )
-
-    (action-choices
-      (action-choice) : (format #f "(list ~a)" $1)
-      (action-choices action-choice) : (format #f "~a (list ~a)" $1 $2)
-    )
-
-    (action-choice
-      (LSBRACKET action-patterns RSBRACKET) : $2
     )
 
     (action-patterns
@@ -353,12 +341,17 @@
       (LITERAL) : (format #f "(cons 'str \"~a\")" $1)
       (STRING) : (format #f "(cons 'str \"~a\")" $1)
       (variable) : $1
+      ; e.g. $username
       (UVAR) : (format #f "(cons 'get_uvar \"~a\")" $1)
+      ; e.g. $username=Bob
       (UVAR EQUAL name) :
         (format #f "(cons 'assign_uvar (list \"~a\" (cons 'str \"~a\")))" $1 $3)
+      ; e.g. $username='_0
       (UVAR EQUAL variable-grounding) :
         (format #f "(cons 'assign_uvar (list \"~a\" ~a))" $1 $3)
       (function) : $1
+      (LSBRACKET action-patterns RSBRACKET) :
+        (format #f "(cons 'action-choices (list ~a))" $2)
     )
 
     (lemma

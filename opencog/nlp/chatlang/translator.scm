@@ -34,6 +34,11 @@
 (define chatlang-lemma-seq (Predicate (chatlang-prefix "Lemma Sequence")))
 (define chatlang-lemma-set (Predicate (chatlang-prefix "Lemma Set")))
 
+; For features that are not currently supported
+(define (feature-not-supported NAME VAL)
+  "Notify the user that a particular is not currently supported."
+  (cog-logger-error "Feature not supported: \"~a ~a\"" NAME VAL))
+
 ;; Shared variables for all terms
 (define atomese-variable-template
   (list (TypedVariable (Variable "$S") (Type "SentenceNode"))
@@ -201,9 +206,7 @@
                         ((equal? 'get_uvar (car a)) (get-user-variable (cdr a)))
                         (else (WordNode (cdr a)))))
                   (cddr t)))))))
-           ; TODO: Do something else for features that are not currently supported?
-           (else
-            (cog-logger-error "Feature not supported: \"~a ~a\"" (car t) (cdr t)))))
+           (else (feature-not-supported (car t) (cdr t)))))
     TERMS)
   ; DualLink couldn't match patterns with no constant terms in it
   ; Mark the rules with no constant terms so that they can be found
@@ -215,63 +218,68 @@
              (MemberLink (Set lemma-seq) chatlang-no-constant)))
   (list vars conds word-seq lemma-seq is-unordered?))
 
-(define-public (chatlang-say WORDS)
+(define-public (chatlang-execute-action WORDS)
   "Say the text and update the internal state."
   (define txt
     (string-join (append-map (lambda (n)
     (if (cog-link? n)
-        (map cog-name (cog-outgoing-set n))
+        (map cog-name (cog-get-all-nodes n))
         (list (cog-name n))))
     (cog-outgoing-set WORDS))))
-  (cog-execute! (Put (DefinedPredicate "Say") (Node txt)))
+  ; If there is something to say?
+  (if (not (string-null? (string-trim txt)))
+      (cog-execute! (Put (DefinedPredicate "Say") (Node txt))))
   (State chatlang-anchor (Concept "Default State"))
   (True))
 
-(define-public (chatlang-pick-one-action ACTIONS)
-  "Choose one of the ACTIONS and execute it."
-  ; TODO: Use RandomChoiceLink?
+(define-public (chatlang-pick-action ACTIONS)
+  "Pick one of the ACTIONS randomly."
   (define os (cog-outgoing-set ACTIONS))
-  (define num (random (length os) (random-state-from-platform)))
-  (chatlang-say (list-ref os num)))
+  (list-ref os (random (length os) (random-state-from-platform))))
 
 (Define
-  (DefinedPredicate (chatlang-prefix "Pick One Action"))
+  (DefinedPredicate (chatlang-prefix "Pick and Execute Action"))
   (Lambda (Variable "$x")
-          (Evaluation (GroundedPredicate "scm: chatlang-pick-one-action")
+          (Evaluation (GroundedPredicate "scm: chatlang-pick&execute-action")
                       (List (Variable "$x")))))
 
 (Define
-  (DefinedPredicate (chatlang-prefix "Say"))
+  (DefinedPredicate (chatlang-prefix "Execute Action"))
   (Lambda (Variable "$x")
-          (Evaluation (GroundedPredicate "scm: chatlang-say")
+          (Evaluation (GroundedPredicate "scm: chatlang-execute-action")
                       (List (Variable "$x")))))
 
 (define (process-action ACTION)
-  "Convert ACTIONS into atomese."
+  "Iterate through each of the ACTIONS and convert them into atomese."
   (define (to-atomese actions)
-    ; Iterate through the output word-by-word
-    (map (lambda (n)
-      (cond ; The grounding of a variable in original words
-            ((equal? 'get_wvar (car n)) (get-var-words (cdr n)))
-            ; The grounding of a variable in lemmas
-            ((equal? 'get_lvar (car n)) (get-var-lemmas (cdr n)))
-            ; Get the value of a user variable
-            ((equal? 'get_uvar (car n)) (get-user-variable (cdr n)))
-            ; Assign a value to a user variable
-            ((equal? 'assign_uvar (car n))
-             (assign-user-variable (cadr n) (car (to-atomese (cddr n)))))
-            ; A function call
-            ((equal? 'function (car n))
-             (action-function (cadr n) (to-atomese (cddr n))))
-            (else (Word (cdr n)))))
-      actions))
-  ; TODO: How about an action that only updates internal parameters?
-  (if (equal? 'action-choices (caar ACTION))
-              (True (Put (DefinedPredicate (chatlang-prefix "Pick One Action"))
-                         (List (map (lambda (a) (List (to-atomese a)))
-                                    (cdar ACTION)))))
-              (True (Put (DefinedPredicate (chatlang-prefix "Say"))
-                         (List (to-atomese (cdar ACTION)))))))
+    (define choices '())
+    (append
+      ; Iterate through the output word-by-word
+      (map (lambda (n)
+        (cond ; The grounding of a variable in original words
+              ((equal? 'get_wvar (car n)) (get-var-words (cdr n)))
+              ; The grounding of a variable in lemmas
+              ((equal? 'get_lvar (car n)) (get-var-lemmas (cdr n)))
+              ; Get the value of a user variable
+              ((equal? 'get_uvar (car n)) (get-user-variable (cdr n)))
+              ; Assign a value to a user variable
+              ((equal? 'assign_uvar (car n))
+               (assign-user-variable (cadr n) (car (to-atomese (cddr n)))))
+              ; A function call
+              ((equal? 'function (car n))
+               (action-function (cadr n) (to-atomese (cddr n))))
+              ; Gather all the action choices
+              ((equal? 'action-choices (car n))
+               (set! choices (append choices (list (List (to-atomese (cdr n))))))
+               '())
+              (else (Word (cdr n)))))
+        actions)
+      (if (null? choices)
+          '()
+          (list (action-choices choices)))))
+  (cog-logger-debug chatlang-logger "action: ~a" ACTION)
+  (True (Put (DefinedPredicate (chatlang-prefix "Execute Action"))
+             (List (to-atomese (cdar ACTION))))))
 
 (define* (create-rule PATTERN ACTION #:optional (TOPIC default-topic) NAME)
   "Top level translation function. Pattern is a quoted list of terms,
