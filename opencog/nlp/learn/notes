@@ -12492,9 +12492,20 @@ e.g.
 (define fca (add-subtotal-filter psa 50 50 10))
 (define fsa (add-pair-stars fca))
 (fsa 'left-basis-size)  14666
-(fsa 'right-basis-size)
-(length (fsa 'all-pairs))
+(fsa 'right-basis-size)  23565
+(length (fsa 'all-pairs))  76834
 
+Need a map over all elts exists, its the looper.
+get rid of all-csets DONE
+
+(define cnt 0)
+(define (cntr x) (set! cnt (+ cnt 1)))
+(define looper (add-loop-api psa))
+(looper 'for-each-pair cntr)
+
+fuuuu 
+(psf 'pair-fmi sec) works
+(fsf 'pair-fmi sec) fails
 
 
 2) replace cset-vec-cosine by filtered cosine  in gram-sim
@@ -12509,13 +12520,44 @@ filters?
          (string-append "*-Norm Key " (LLOBJ 'id))
          "*-Norm Key-*"))
 
-
 6) create generic API to fetch and store values on matrix by key name
    well, maybe not...
 7) create generic product matix kind-of-done-ish
 8) create generic cosine matrix. kind-of-done-ish
 9) fetch all atoms with key
    this will make fetching cosines better!?
+
+--------------------------------------------
+
+Fuuuu
+He looked away
+link-grammar/prepare/exprune.c:318
+#0  expression_prune (sent=sent@entry=0x555555928f50)
+    at ../../link-grammar/prepare/exprune.c:318
+#1  0x00007ffff7b6f2e8 in sentence_parse (sent=0x555555928f50, 
+    opts=0x55555576f580) at ../../link-grammar/api.c:700
+
+x->exp == 0
+he.2549 has no exp....
+
+sqlite> select * from Morphemes where subscript='he.2549';
+he|he.2549|(he.2549)
+
+he.2025041
+has no disjunct.
+NULL X_node
+
+
+sqlite3 bad.db
+.mode insert
+.output dump_all.sql
+.dump
+.exit
+
+sqlite3 renew.db
+.read dump_all.sql
+
+ant ant-optional
 
 
 

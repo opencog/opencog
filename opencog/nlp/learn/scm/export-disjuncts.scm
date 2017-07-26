@@ -324,7 +324,7 @@
   Example usage:
      (define pca (make-pseudo-cset-api))
      (define fca (add-subtotal-filter pca 50 50 10))
-     (export-all-csets fca \"dict.db\" \"EN_us\")
+     (export-csets fca \"dict.db\" \"EN_us\")
 "
 	; Create the object that knows where the disuncts are in the
 	; atomspace. Create the object that knows how to get the MI
@@ -342,7 +342,10 @@
 	; Create the SQLite3 database.
 	(define sectioner (make-database DB-NAME LOCALE cost-fn))
 
-	; (format #t "Store ~D csets\n" (length all-csets))
+	(define cnt 0)
+	(define (cntr x) (set! cnt (+ cnt 1)))
+	(looper 'for-each-pair cntr)
+	(format #t "Store ~D csets\n" cnt)
 
 	; Dump all the connector sets into the database
 	(looper 'for-each-pair sectioner)
