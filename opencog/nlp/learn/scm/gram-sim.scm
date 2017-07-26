@@ -33,7 +33,7 @@
 (use-modules (opencog) (opencog persist) (opencog persist-sql))
 
 ; ---------------------------------------------------------------------
-(define-public (make-cosine-api LLOBJ TRANSP?)
+(define-public (make-xxxcosine-api LLOBJ TRANSP?)
 "
   make-cosine-api - Add API to batch-compute and access cosine
   similarity between rows or columns of the LLOBJ.  This creates
@@ -61,6 +61,7 @@
 				((pair-type)     pair-sim-type)
 				((fetch-pairs)   (fetch-cos-pairs))
 				(else (error "Bad method call on cosine API:" message))))
+	)
 )
 
 ; ---------------------------------------------------------------------
