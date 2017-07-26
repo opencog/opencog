@@ -3,4 +3,4 @@ LINK_LIBRARIES(
 	${COGUTIL_LIBRARY}
 )
 
-ADD_CXXTEST(ChatlangUTest)
+#ADD_CXXTEST(ChatlangUTest)
