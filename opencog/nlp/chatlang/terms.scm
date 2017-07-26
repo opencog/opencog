@@ -158,11 +158,14 @@
         (list g1)
         (list g2))))
 
-(define (variable VAR)
+(define (variable VAR WGRD LGRD)
   "Occurence of a variable. The value grounded for it needs to be recorded.
-   VAR can either be a VariableNode or a GlobNode."
+   VAR is the variable name.
+   WGRD and LGRD can either be a VariableNode or a GlobNode, which pass
+   the actual value grounded for it in original words and lemmas  at runtime."
   (Evaluation (GroundedPredicate "scm: chatlang-record-groundings")
-              (List (Quote VAR) VAR)))
+    (List (List (chatlang-var-word VAR) WGRD)
+          (List (chatlang-var-lemma VAR) LGRD))))
 
 (define (context-function NAME ARGS)
   "Occurrence of a function in the context of a rule."
@@ -176,13 +179,11 @@
 
 (define (get-var-words NUM)
   "Get the value grounded for a variable, in original words."
-  (ExecutionOutput (GroundedSchema "scm: ground-word")
-                   (List (list-ref pat-vars NUM))))
+  (Get (State (chatlang-var-word NUM) (Variable "$x"))))
 
 (define (get-var-lemmas NUM)
   "Get the value grounded for a variable, in lemmas."
-  (ExecutionOutput (GroundedSchema "scm: ground-lemma")
-                   (List (list-ref pat-vars NUM))))
+  (Get (State (chatlang-var-lemma NUM) (Variable "$x"))))
 
 (define (get-user-variable VAR)
   "Get the value of a user variable."

@@ -9,12 +9,6 @@
 (use-modules (opencog logger)
              (opencog exec))
 
-(define (clear-globs)
-  "For clearing any previous groundings."
-  (set! globs-word '())
-  (set! globs-lemma '())
-  (set! vars-grd '()))
-
 (define-public (chat-find-rules SENT)
   "The action selector. It first searches for the rules using DualLink,
    and then does the filtering by evaluating the context of the rules.
@@ -72,12 +66,6 @@
 ; -----
 ; For debugging only
 (use-modules (opencog nlp chatbot) (opencog eva-behavior))
-
-(define-public (show-globs)
-  "Show the groundings of the GlobNodes."
-  (display "pat-vars: ") (display pat-vars) (newline)
-  (display "globs-word: ") (display globs-word) (newline)
-  (display "globs-lemma: ") (display globs-lemma) (newline))
 
 (define-public (test-chatlang TXT)
   "Try to find (and execute) the matching rules given an input TXT."

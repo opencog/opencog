@@ -13,10 +13,6 @@
              (ice-9 popen)
              (ice-9 optargs))
 
-; For storing the groundings
-(define globs-word '())
-(define globs-lemma '())
-
 ; Keep a record of the variables, if any, found in the pattern of a rule
 ; TODO: Move it to process-pattern-terms?
 (define pat-vars '())
@@ -25,6 +21,12 @@
 (define test-get-lemma #f)
 
 (define-public (chatlang-prefix STR) (string-append "Chatlang: " STR))
+(define (chatlang-var-word NUM)
+  (Node (chatlang-prefix
+    (string-append "variable-word-" (number->string NUM)))))
+(define (chatlang-var-lemma NUM)
+  (Node (chatlang-prefix
+    (string-append "variable-lemma-" (number->string NUM)))))
 (define chatlang-anchor (Anchor (chatlang-prefix "Currently Processing")))
 (define chatlang-no-constant (Anchor (chatlang-prefix "No constant terms")))
 (define chatlang-word-seq (Predicate (chatlang-prefix "Word Sequence")))
@@ -179,8 +181,10 @@
             (let ((terms (process-pattern-terms (cdr t))))
                  (set! vars (append vars (list-ref terms 0)))
                  (set! conds (append conds
-                                    (list-ref terms 1)
-                                    (list (variable (list-ref terms 2)))))
+                   (list-ref terms 1)
+                   (list (variable (length pat-vars)
+                                   (list-ref terms 2)
+                                   (list-ref terms 3)))))
                  (set! word-seq (append word-seq (list-ref terms 2)))
                  (set! lemma-seq (append lemma-seq (list-ref terms 3)))
                  (set! pat-vars (append pat-vars (list-ref terms 2)))))
@@ -204,21 +208,11 @@
              (MemberLink (Set lemma-seq) chatlang-no-constant)))
   (list vars conds word-seq lemma-seq is-unordered?))
 
-(define-public (ground-word GLOB)
-  "Get the original words grounded for GLOB."
-  (let ((gw (assoc-ref globs-word GLOB)))
-       (if (equal? #f gw) (List) gw)))
-
-(define-public (ground-lemma GLOB)
-  "Get the lemmas grounded for GLOB."
-  (let ((gl (assoc-ref globs-lemma GLOB)))
-       (if (equal? #f gl) (List) gl)))
-
 (define-public (chatlang-say WORDS)
   "Say the text and update the internal state."
   (define txt
     (string-join (append-map (lambda (n)
-    (if (cog-link?  n)
+    (if (cog-link? n)
         (map cog-name (cog-outgoing-set n))
         (list (cog-name n))))
     (cog-outgoing-set WORDS))))
@@ -466,12 +460,12 @@
   (append-map (lambda (m) (list (Reference (member-words m) (Concept NAME))))
               MEMBERS))
 
-(define-public (chatlang-record-groundings GLOB GRD)
+(define-public (chatlang-record-groundings WGRD LGRD)
   "Record the groundings of a variable/glob, in both original words
    and lemmas. They will be referenced at the stage of evaluating the
    context of the psi-rules, or executing the action of the psi-rules."
-  (set! globs-word (assoc-set! globs-word GLOB (List GRD)))
-  (set! globs-lemma (assoc-set! globs-lemma GLOB (List GED)))
+  (State (gar WGRD) (gdr WGRD))
+  (State (gar LGRD) (gdr LGRD))
   (True))
 
 ; ----------
