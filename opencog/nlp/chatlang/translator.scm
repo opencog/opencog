@@ -195,10 +195,12 @@
            ((equal? 'function (car t))
             (set! conds (append conds
               (list (context-function (cadr t)
-                (cond ((equal? 'get_wvar (caaddr t)) (get-var-words (cdaddr t)))
-                      ((equal? 'get_lvar (caaddr t)) (get-var-lemmas (cdaddr t)))
-                      ((equal? 'get_uvar (caaddr t)) (get-user-variable (cdaddr t)))
-                      (else (WordNode (cdaddr t)))))))))
+                (map (lambda (a)
+                  (cond ((equal? 'get_wvar (car a)) (get-var-words (cdr a)))
+                        ((equal? 'get_lvar (car a)) (get-var-lemmas (cdr a)))
+                        ((equal? 'get_uvar (car a)) (get-user-variable (cdr a)))
+                        (else (WordNode (cdr a)))))
+                  (cddr t)))))))
            ; TODO: Do something else for features that are not currently supported?
            (else
             (cog-logger-error "Feature not supported: \"~a ~a\"" (car t) (cdr t)))))
