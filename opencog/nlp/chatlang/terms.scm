@@ -59,7 +59,7 @@
            (PhraseNode (cdr t)))
           ((equal? 'concept (car t))
            (Concept (cdr t)))
-          (else (feature-not-supported NAME VAL))))
+          (else (feature-not-supported (car t) (cdr t)))))
        TERMS))
 
 ; ----------
