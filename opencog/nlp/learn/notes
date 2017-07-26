@@ -12481,16 +12481,41 @@ Mandarin word pairs + MI values; Ruitings segemented text
 
 --------------------
 
-1) filter
-2) replacde cset-vec-cosine by filtered cosine  in gram-sim
+1) filter the dictionary write...
+e.g. 
+(define pca (make-pseudo-cset-api) 
+(define psa (add-pair-stars pca))
+(psa 'left-basis-size)  137078
+(psa 'right-basis-size)  6239997
+(length (psa 'all-pairs))  8629163
+
+(define fca (add-subtotal-filter psa 50 50 10))
+(define fsa (add-pair-stars fca))
+(fsa 'left-basis-size)  14666
+(fsa 'right-basis-size)
+(length (fsa 'all-pairs))
+
+
+
+2) replace cset-vec-cosine by filtered cosine  in gram-sim
 3) use filter-specific predicate.
 4) wait .. batch in matrix?
+
+5) make graph of filtering ... why? we can already guess...
 
 filters?
    (define key-name
       (if (LLOBJ 'filters?)
          (string-append "*-Norm Key " (LLOBJ 'id))
          "*-Norm Key-*"))
+
+
+6) create generic API to fetch and store values on matrix by key name
+   well, maybe not...
+7) create generic product matix kind-of-done-ish
+8) create generic cosine matrix. kind-of-done-ish
+9) fetch all atoms with key
+   this will make fetching cosines better!?
 
 
 

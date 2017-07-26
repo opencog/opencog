@@ -309,11 +309,12 @@
 
 ;  ---------------------------------------------------------------------
 
-(define-public (export-all-csets DB-NAME LOCALE)
+(define-public (export-csets CSETS DB-NAME LOCALE)
 "
-  export-all-csets DB-NAME LOCALE
+  export-csets CSETS DB-NAME LOCALE
 
-  Write all connector sets to a Link Grammar-compatible sqlite3 file.
+  Write connector sets to a Link Grammar-compatible sqlite3 file.
+  CSETS is a matrix containing the connector sets to be written.
   DB-NAME is the databse name to write to.
   LOCALE is the locale to use; e.g EN_us or ZH_cn
 
@@ -321,20 +322,16 @@
   \"dict.db\", always!
 
   Example usage:
-     (export-all-csets \"dict.db\" \"EN_us\")
+     (define pca (make-pseudo-cset-api))
+     (define fca (add-subtotal-filter pca 50 50 10))
+     (export-all-csets fca \"dict.db\" \"EN_us\")
 "
 	; Create the object that knows where the disuncts are in the
 	; atomspace. Create the object that knows how to get the MI
 	; of a word-disjunct pair.
-	(define pca (make-pseudo-cset-api))
-	(define psa (add-pair-stars pca))
+	(define psa (add-pair-stars CSETS))
 	(define mi-source (add-pair-freq-api psa))
-
-	; Load the atomspace up with the dataset, if needed.
-	; (psa 'fetch-pairs)
-
-	; Make a list of all pairs. This is costly and time-consuming.
-	(define all-csets (psa 'all-pairs))
+	(define looper (add-loop-api psa))
 
 	; Use the MI between word and disjunct as the link-grammar cost
 	; LG treats high-cost as "bad", we treat high-MI as "good" so revese
@@ -345,10 +342,10 @@
 	; Create the SQLite3 database.
 	(define sectioner (make-database DB-NAME LOCALE cost-fn))
 
-	(format #t "Store ~D csets\n" (length all-csets))
+	; (format #t "Store ~D csets\n" (length all-csets))
 
 	; Dump all the connector sets into the database
-	(map sectioner all-csets)
+	(looper 'for-each-pair sectioner)
 
 	; Close the database
 	(sectioner #f)

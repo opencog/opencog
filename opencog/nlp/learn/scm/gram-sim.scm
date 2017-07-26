@@ -33,12 +33,14 @@
 (use-modules (opencog) (opencog persist) (opencog persist-sql))
 
 ; ---------------------------------------------------------------------
-(define-public (make-cosine-api LLOBJ)
+(define-public (make-cosine-api LLOBJ TRANSP?)
 "
   make-cosine-api - Add API to batch-compute and access cosine
-  similarity between rows or columns of the LLOBJ.  This create
+  similarity between rows or columns of the LLOBJ.  This creates
   a new sparse matrix that is essentially the matrix product of
-  LLOBJ-transpose with LLOBJ.
+  LLOBJ with it's transpose.
+
+  If TRANSP? is #f, then the matrix 
 "
 	(let ((foo "bar")
 			)
