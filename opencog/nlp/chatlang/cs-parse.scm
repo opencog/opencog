@@ -293,7 +293,7 @@
         ; (format #f "\nresponder: ~a\n~a\n~a" $1 $2 $3)
       (REJOINDERS context action) :
         (format #f "\nrejoinder: ~a\n~a\n~a" $1 $2 $3)
-      (GAMBIT action-patterns) : (format #f "gambit: ~a" $2)
+      (GAMBIT action) : (format #f "gambit: ~a" $2)
     )
 
     (context
