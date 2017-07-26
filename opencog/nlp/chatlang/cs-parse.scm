@@ -280,13 +280,9 @@
     ; Rule grammar
     (rule
       (RESPONDERS name context action) :
-; JJJ
-(begin
-(display "@@@ Sending: ") (display $3) (newline) (display $4) (newline)
         (create-rule
           (eval-string (string-append "(list " $3 ")"))
           (eval-string (string-append "(list " $4 ")")))
-)
         ; (format #f "\nresponder: ~a\nlabel: ~a\n~a\n~a" $1 $2 $3 $4)
       ; Unlabeled responder.
       ; TODO: Maybe should be labeled internally in the atomspace???
@@ -359,10 +355,9 @@
       (variable) : $1
       (UVAR) : (format #f "(cons 'get_uvar \"~a\")" $1)
       (UVAR EQUAL name) :
-        (format #f "(cons 'assign_uvar (list \"~a\" \"~a\"))" $1 $3)
-      ; TODO
-      (UVAR EQUAL variable) :
-        (format #f "(cons 'assign_uvar (list \"~a\" \"~a\"))" $1 $3)
+        (format #f "(cons 'assign_uvar (list \"~a\" (cons 'str \"~a\")))" $1 $3)
+      (UVAR EQUAL variable-grounding) :
+        (format #f "(cons 'assign_uvar (list \"~a\" ~a))" $1 $3)
       (function) : $1
     )
 
@@ -423,6 +418,10 @@
       (VAR lemma) :  (format #f "(cons 'variable (list ~a))" $2)
       (VAR concept) : (format #f "(cons 'variable (list ~a))" $2)
       (VAR choice) : (format #f "(cons 'variable (list ~a))" $2)
+      (variable-grounding) : $1
+    )
+
+    (variable-grounding
       (MVAR) : (format #f "(cons 'get_lvar ~a)" $1)
       (MOVAR) : (format #f "(cons 'get_wvar ~a)" $1)
     )
@@ -477,10 +476,10 @@
     )
 
     (arg
-      (LEMMA) : (format #f "\"~a\"" $1)
-      (LITERAL) : (format #f "\"~a\"" $1)
-      (MVAR) : $1
-      (MOVAR) : $1
+      (LEMMA) : (format #f "(cons 'arg \"~a\")" $1)
+      (LITERAL) : (format #f "(cons 'arg \"~a\")" $1)
+      (STRING) : (format #f "(cons 'arg \"~a\")" $1)
+      (variable-grounding) : $1
     )
 
     (sequence

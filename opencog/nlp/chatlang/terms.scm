@@ -170,12 +170,12 @@
 (define (context-function NAME ARGS)
   "Occurrence of a function in the context of a rule."
   (Evaluation (GroundedPredicate (string-append "scm: " NAME))
-              (List (map Node ARGS))))
+              (List ARGS)))
 
 (define (action-function NAME ARGS)
   "Occurrence of a function in the action of a rule."
   (ExecutionOutput (GroundedSchema (string-append "scm: " NAME))
-                   (List (map Node ARGS))))
+                   (List ARGS)))
 
 (define (get-var-words NUM)
   "Get the value grounded for a variable, in original words."
@@ -190,8 +190,12 @@
   (Get (State (Node VAR) (Variable "$x"))))
 
 (define (assign-user-variable VAR VAL)
-  "Assign the value of a user variable."
-  (Put (State (Node VAR) (Variable "$x")) (Set (WordNode VAL))))
+  "Assign a string value to a user variable."
+  (Put (State (Node VAR) (Variable "$x"))
+    ; Just to make sure there is no unneeded SetLink
+    (if (equal? 'GetLink (cog-type VAL))
+        VAL
+        (Set VAL))))
 
 (define (uvar-exist? VAR)
   "Check if a user variable has been defined in the atomspace."

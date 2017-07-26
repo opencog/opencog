@@ -193,7 +193,12 @@
            ((equal? 'uvar_equal (car t))
             (set! conds (append conds (list (uvar-equal? (cadr t) (caddr t))))))
            ((equal? 'function (car t))
-            (set! conds (append conds (list (context-function (cadr t) (cddr t))))))
+            (set! conds (append conds
+              (list (context-function (cadr t)
+                (cond ((equal? 'get_wvar (caaddr t)) (get-var-words (cdaddr t)))
+                      ((equal? 'get_lvar (caaddr t)) (get-var-lemmas (cdaddr t)))
+                      ((equal? 'get_uvar (caaddr t)) (get-user-variable (cdaddr t)))
+                      (else (WordNode (cdaddr t)))))))))
            ; TODO: Do something else for features that are not currently supported?
            (else
             (cog-logger-error "Feature not supported: \"~a ~a\"" (car t) (cdr t)))))
@@ -250,10 +255,12 @@
             ((equal? 'get_lvar (car n)) (get-var-lemmas (cdr n)))
             ; Get the value of a user variable
             ((equal? 'get_uvar (car n)) (get-user-variable (cdr n)))
-            ; Assign the value of a user variable
-            ((equal? 'assign_var (car n)) (assign-user-variable (cdr n)))
+            ; Assign a value to a user variable
+            ((equal? 'assign_uvar (car n))
+             (assign-user-variable (cadr n) (car (to-atomese (cddr n)))))
             ; A function call
-            ((equal? 'function (car n)) (action-function (cadr n) (cddr n)))
+            ((equal? 'function (car n))
+             (action-function (cadr n) (to-atomese (cddr n))))
             (else (Word (cdr n)))))
       actions))
   ; TODO: How about an action that only updates internal parameters?
@@ -466,7 +473,7 @@
    context of the psi-rules, or executing the action of the psi-rules."
   (State (gar WGRD) (gdr WGRD))
   (State (gar LGRD) (gdr LGRD))
-  (True))
+  (stv 1 1))
 
 ; ----------
 ; Topic
