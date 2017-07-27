@@ -168,6 +168,7 @@
 		(lambda (message . args)
 			(apply (case message
 					((name) (lambda () "Link Grammar ANY link Word Pairs"))
+					((id)   (lambda () "ANY"))
 					((left-type) get-left-type)
 					((right-type) get-right-type)
 					((pair-type) get-pair-type)
@@ -267,6 +268,7 @@
 		(lambda (message . args)
 			(apply (case message
 					((name) (lambda () "Sentence Clique Word Pairs"))
+					((id)   (lambda () "cliq"))
 					((left-type) get-left-type)
 					((right-type) get-right-type)
 					((pair-type) get-pair-type)
@@ -387,6 +389,7 @@
 		(lambda (message . args)
 			(apply (case message
 					((name) (lambda () "Sentence Clique Distance-Limited Word Pairs"))
+					((id)   (lambda () "cldist"))
 					((left-type) get-left-type)
 					((right-type) get-right-type)
 					((pair-type) get-pair-type)

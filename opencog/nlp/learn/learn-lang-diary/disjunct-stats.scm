@@ -23,23 +23,28 @@
 ; Load the dataset that is analyzed throughout.
 (use-modules (opencog) (opencog persist) (opencog persist-sql))
 (use-modules (opencog nlp) (opencog nlp learn))
-(use-modules (opencog analysis))
-(sql-open "postgres:///en_pairs_sim?user=linas")
-
-(fetch-all-words)         ; 581 seconds from cold spinning media.
-                          ; 22 seconds from hot buffer cache
-(length (get-all-words))  ; 396262 words as always.
+(use-modules (opencog matrix))
+; (sql-open "postgres:///en_pairs_sim?user=linas")
+(sql-open "postgres:///en_pairs_rfive_mtwo?user=linas")
 
 (define pca (make-pseudo-cset-api))
-(pca 'fetch-pairs)        ; 456 secs after above
+(define psa (add-pair-stars pca))
+(psa 'fetch-pairs)                  ; 4436 secs
+(print-matrix-summary-report psa)
 
-(define ac (get-all-cset-words))
-(length ac)               ; 37413 s always
+(define psc (add-pair-count-api psa))
+(define psf (add-pair-freq-api psa))
 
-(define ad (get-all-disjuncts))
-(length ad)               ; 291637 as always
+; (fetch-all-words)
+; (length (get-all-words))  ; 
 
-(fetch-all-sims)          ; 17 seconds
+(define ac (psa 'left-basis))
+(length ac)               ; 137078
+
+(define ad (psa 'right-basis))
+(length ad)               ; 6239997
+
+;;; (fetch-all-sims)
 
 
 ; ---------------------------------------------------------------------
@@ -77,16 +82,19 @@
 ; ---------------------------------------------------------------------
 ; A list of all words that have csets. (Not all of the words
 ; in the database got tagged with a cset)
-(define all-cset-words (get-all-cset-words))
+(define all-cset-words (psa 'left-basis))  ; (get-all-cset-words)
 
 ; A list of all disjucnts (appearing in all csets)
-(define all-disjuncts (get-all-disjuncts))
+(define all-disjuncts (psa 'right-basis)) ; (get-all-disjuncts))
 
 (define all-csets (get-all-csets))
 
-; words with 100 or more observations.
+; Words with 100 or more observations. rfive_mtwo has 9425 of these.
+; There are 25505 with 20 or more
+; There are 20284 with 30 or more
+; There are 3263 with 400 or more
 (define top-cset-words
-	(filter (lambda (wrd) (< 100 (cset-vec-word-observations wrd)))
+	(filter (lambda (wrd) (<= 100 (cset-vec-word-observations wrd)))
 		all-cset-words))
 
 ; ---------------------------------------------------------------------
@@ -95,7 +103,7 @@
 ; number of times that the word was observed during MST parsing. That is
 ; because exactly one disjunct is extracted per word, per MST parse.
 (define sorted-word-obs
-	(score-and-rank cset-vec-word-observations all-cset-words)
+	(score-and-rank cset-vec-word-observations all-cset-words))
 
 ; Print above to a file, so that it can be graphed.
 (let ((outport (open-file "/tmp/ranked-word-obs.dat" "w")))
@@ -141,7 +149,10 @@
 (define sorted-avg
 	(score-and-rank avg-obs all-cset-words))
 
-(define binned-avg (bin-count-simple sorted-avg 100 1.0 6.0))
+(define sorted-avg
+	(score-and-rank avg-obs top-cset-words))
+
+(define binned-avg (bin-count-simple sorted-avg 200 1.0 20.0))
 
 (let ((outport (open-file "/tmp/binned-avg.dat" "w")))
 	(print-bincounts-tsv binned-avg outport)
@@ -408,10 +419,40 @@
 	(- (word-entropy-bits disjunct-entropy-bits) cset-entropy-bits)
 
 ; ---------------------------------------------------------------------
+; A simple graph of how many words were observed once, twice, etc.
+; So: first column: how many times a word was observed.
+; Second column: the number of words that were observed tat many times.
+;
+(define sorted-word-counts
+	(score-and-rank cset-vec-word-observations all-cset-words))
+(define binned-word-counts
+	(bin-count-simple sorted-word-counts 400 0.5 400.5))
+
+(let ((outport (open-file "/tmp/binned-word-counts.dat" "w")))
+	(print-bincounts-tsv binned-word-counts outport)
+	(close outport))
+
+;--------------
+; Create a binned graph of the number of words observed with a given
+; log-liklihood.  Although this is in the binning tradition of the
+; other binned graphs, its really the same thing as the log-log
+; graph of the word-counts, but renormalized.
+; (define pca (make-pseudo-cset-api))
+; (define psa (add-pair-stars pca))
+; (define pcw (add-pair-wildcards psa))
+; (define pmi (add-pair-mi-compute psa))
+(define (cset-vec-word-logli WORD)
+	(psf 'right-wild-logli WORD))
+
+(define sorted-word-logli (score-and-rank cset-vec-word-logli all-cset-words))
+(define binned-word-logli (bin-count-simple sorted-word-logli 1200 9.0 24.0))
+
+(let ((outport (open-file "/tmp/binned-word-logli.dat" "w")))
+	(print-bincounts-tsv binned-word-logli outport)
+	(close outport))
+
+; -------
 ; Rank words according to thier fractonal entropy
-(define pca (make-pseudo-cset-api))
-(define pcw (add-pair-wildcards pca))
-(define pmi (add-pair-mi-compute pca))
 (define (cset-vec-word-ent WORD)
 		(pmi 'compute-right-fentropy WORD))
 
@@ -428,35 +469,6 @@
 
 (let ((outport (open-file "/tmp/binned-word-ent.dat" "w")))
 	(print-bincounts-tsv binned-word-ent outport)
-	(close outport))
-
-;--------------
-; Create a binned graph of the number of words observed with a given
-; log-liklihood.  Although this is in the binning tradition of the
-; other binned graphs, its really the same thing as the log-log
-; graph of the word-counts, but renormalized.
-(define (cset-vec-word-logli WORD)
-	(pmi 'right-wild-logli WORD))
-
-(define sorted-word-logli (score-and-rank cset-vec-word-logli all-cset-words))
-(define binned-word-logli (bin-count-simple sorted-word-logli 200 10.0 20.0))
-
-(let ((outport (open-file "/tmp/binned-word-logli.dat" "w")))
-	(print-bincounts-tsv binned-word-logli outport)
-	(close outport))
-
-; -------
-; A simple graph of how many words were observed once, twice, etc.
-; So: first column: how many times a word was observed.
-; Second column: the number of words that were observed tat many times.
-;
-(define sorted-word-counts
-	(score-and-rank cset-vec-word-observations all-cset-words))
-(define binned-word-counts
-	(bin-count-simple sorted-word-counts 200 0.5 200.5))
-
-(let ((outport (open-file "/tmp/binned-word-counts.dat" "w")))
-	(print-bincounts-tsv binned-word-counts outport)
 	(close outport))
 
 ;--------------

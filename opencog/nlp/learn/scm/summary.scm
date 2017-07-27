@@ -36,7 +36,7 @@
 
 (define-public (print-word-pair-report)
 "
-  print-word-pair-report - Summarize properties about wor-pairs.
+  print-word-pair-report - Summarize properties about word-pairs.
 "
 	(define any-pairs-obj (make-any-link-api))
 	(define wild-obj (add-pair-stars (any-pairs-obj)))
