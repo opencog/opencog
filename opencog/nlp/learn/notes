@@ -12489,7 +12489,7 @@ e.g.
 (psa 'right-basis-size)  6239997
 (length (psa 'all-pairs))  8629163
 
-(define fca (add-subtotal-filter psa 50 50 10))
+(define fca (add-subtotal-filter psa 50 50 10 #f))
 (define fsa (add-pair-stars fca))
 (fsa 'left-basis-size)  14666
 (fsa 'right-basis-size)  23565
@@ -12504,12 +12504,17 @@ get rid of all-csets DONE
 (looper 'for-each-pair cntr)
 
 fuuuu 
+(define fsf (add-pair-freq-api fsa))
 (psf 'pair-fmi sec) works
 (fsf 'pair-fmi sec) fails
 
+(define (foo x) (format #f "bar ~D" x))
+(define* (st FOO   #:optional (ID (FOO 2)))
+	(format #t "hey its ~A\n" ID))
+
 
 2) replace cset-vec-cosine by filtered cosine  in gram-sim
-3) use filter-specific predicate.
+3) use filter-specific predicate.  DONE
 4) wait .. batch in matrix?
 
 5) make graph of filtering ... why? we can already guess...
@@ -12524,7 +12529,7 @@ filters?
    well, maybe not...
 7) create generic product matix kind-of-done-ish
 8) create generic cosine matrix. kind-of-done-ish
-9) fetch all atoms with key
+9) fetch all atoms with key  DONE
    this will make fetching cosines better!?
 
 --------------------------------------------

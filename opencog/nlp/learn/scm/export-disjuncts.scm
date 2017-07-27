@@ -323,7 +323,7 @@
 
   Example usage:
      (define pca (make-pseudo-cset-api))
-     (define fca (add-subtotal-filter pca 50 50 10))
+     (define fca (add-subtotal-filter pca 50 50 10 #f))
      (export-csets fca \"dict.db\" \"EN_us\")
 "
 	; Create the object that knows where the disuncts are in the
