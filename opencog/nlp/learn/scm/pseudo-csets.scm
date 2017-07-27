@@ -136,7 +136,7 @@
 				((fetch-pairs) fetch-pseudo-csets)
 				((provides) (lambda (symb) #f))
 				((filters?) (lambda () #f))
-				(else (error "Bad method call on psuedo-cset:" message)))
+				(else (error "Bad method call on pseudo-cset:" message)))
 			args)))
 )
 
