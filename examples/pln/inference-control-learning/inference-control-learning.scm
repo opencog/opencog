@@ -97,7 +97,7 @@
     (cog-set-atomspace! default-as)
     ;; Define BC target and vardecl
     (let* ((target (Evaluation
-                     (Predicate "ICL:preproof")
+                     (Predicate "URE:BC:preproof")
                      (List
                        (Variable "$A")
                        (Variable "$T"))))

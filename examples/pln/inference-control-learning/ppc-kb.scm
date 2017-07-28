@@ -24,7 +24,7 @@
 ;;       Predicate "URE:BC:target"
 ;;       Variable "$T"
 ;;   Evaluation
-;;     Predicate "ICL:preproof"
+;;     Predicate "URE:BC:preproof"
 ;;     List
 ;;       Variable "$A"
 ;;       Variable "$T"
@@ -49,7 +49,7 @@
 ;;
 ;; Implication <1 1>
 ;;   Predicate "URE:BC:proof"
-;;   Predicate "ICL:preproof"
+;;   Predicate "URE:BC:preproof"
 ;;
 ;; 3. If and-BIT A expands into and-BIT B that is a preproof of target T,
 ;;    then A is a preproof of T as well.
@@ -76,12 +76,12 @@
 ;;         Variable "$R"
 ;;       Variable "$B"
 ;;     Evaluation
-;;       Predicate "ICL:preproof"
+;;       Predicate "URE:BC:preproof"
 ;;       List
 ;;         Variable "$B"
 ;;         Variable "$T"
 ;;   Evaluation
-;;     Predicate "ICL:preproof"
+;;     Predicate "URE:BC:preproof"
 ;;     List
 ;;       Variable "$A"
 ;;       Variable "$T"
@@ -113,7 +113,7 @@
       (Predicate "URE:BC:target")
       (Variable "$T")))
   (Evaluation
-    (Predicate "ICL:preproof")
+    (Predicate "URE:BC:preproof")
     (List
       (Variable "$A")
       (Variable "$T"))))
@@ -121,7 +121,7 @@
 ;; 2. If and-BIT A is a proof of target T, then it is a preproof of T.
 (Implication (stv 1 1)
   (Predicate "URE:BC:proof")
-  (Predicate "ICL:preproof"))
+  (Predicate "URE:BC:preproof"))
 
 ;; 3. If and-BIT A expands into and-BIT B that is a preproof of target T,
 ;;    then A is a preproof of T.
@@ -147,12 +147,12 @@
         (Variable "$R"))
       (Variable "$B"))
     (Evaluation
-      (Predicate "ICL:preproof")
+      (Predicate "URE:BC:preproof")
       (List
         (Variable "$B")
         (Variable "$T"))))
   (Evaluation
-    (Predicate "ICL:preproof")
+    (Predicate "URE:BC:preproof")
     (List
       (Variable "$A")
       (Variable "$T"))))
