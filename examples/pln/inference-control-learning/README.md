@@ -151,14 +151,14 @@ Such an inference control rule may already help a bit the Backward
 Chainer. Indeed partial instantiation over R will calculate the
 probability of a given rule to produce a preproof of any T. To obtain
 a partial instantiation over R, R is subtituted by a certain rule,
-called <rule>, and the TV over the ImplicationScope, called <rule-TV>,
-is obtained by direct evaluation over the subset of observations of
-the corpus of proofs involving <rule>. There is a subtlety though, in
-the cases where B is not in the trace of subproofs of T we simply
-don't know whether or not it could be a subproof, as such we cannot
-evaluate its TV as false. Instead we rely on a uncertain prior as
-explained in Subsection Record Inference Traces to have uncertain and
-partial negative observations.
+called `<rule>`, and the TV over the ImplicationScope, called
+`<rule-TV>`, is obtained by direct evaluation over the subset of
+observations of the corpus of proofs involving `<rule>`. There is a
+subtlety though, in the cases where B is not in the trace of subproofs
+of T we simply don't know whether or not it could be a subproof, as
+such we cannot evaluate its TV as false. Instead we rely on a
+uncertain prior as explained in Subsection Record Inference Traces to
+have uncertain and partial negative observations.
 
 ```
 ImplicationScope <rule-TV>
@@ -214,10 +214,10 @@ ImplicationScope <target-andbit-rule-TV>
       <target>
 ```
 
-where <target-andbit-rule-TV> is calculated based on the subset of
-observations in the corpus where <target>, <andbit> and <rule> occurs
-simultanously. In most cases though such subset will be small and
-<target-andbit-rule-TV> will have a low confidence. Moreover the
+where `<target-andbit-rule-TV>` is calculated based on the subset of
+observations in the corpus where `<target>`, `<andbit>` and `<rule>`
+occurs simultanously. In most cases though such subset will be small
+and `<target-andbit-rule-TV>` will have a low confidence. Moreover the
 complexity of such a predictor will be high because the complexity of
 the instances of T, A, etc, will be counted as well, which will give
 it a low prior and in turn will lower the confidence of the produced
@@ -258,7 +258,7 @@ ImplicationScope <TV>
       Variable "$T"
 ```
 
-where <pattern> is a predicate body involving all or some of the
+where `<pattern>` is a predicate body involving all or some of the
 variables T, A, L and R.
 
 Finally, it's important to realize that B never needs to be
@@ -351,7 +351,7 @@ that A is a preproof of T.
 
 ```
    EvaluationLink <1 1>
-     PredicateNode "ICL:preproof"
+     PredicateNode "URE:BC:preproof"
      List
        <A>
        <T>
@@ -363,7 +363,7 @@ to be a preproof of T.
 
 ```
    EvaluationLink <0.0001 0.01>
-     PredicateNode "ICL:preproof"
+     PredicateNode "URE:BC:preproof"
      List
        <A>
        <T>
@@ -465,18 +465,18 @@ can split `ICRi` into a continuous ensemble of models, each of which
 with a probability from 0 to 1, not a TV, associated to it. We can
 then use this ensemble as extra models and use the same formula above
 to calculate the cdf. Luckily it turns out that the TV corresponding
-to `ICRi` precisely represents the cdf of `Prod_j ICRi(Sj|Rj)`, so in
-fact the cdf of `P(S|R)` is merely a weighted sum of the cdfs of
-`ICRi`
+to `ICRi` is equal to the cdf of `Prod_j ICRi(Sj|Rj)` up to a
+multiplicative constant, so in fact the cdf of `P(S|R)` is merely a
+weighted sum of the cdfs of `ICRi`
 
 ```
-CDF_P(S|R) = Sum_i=0^n CDF_ICRi(S|R) * P(ICRi)
+CDF_P(S|R) = Sum_i=0^n alpha_i * CDF_ICRi(S|R) * P(ICRi)
 ```
 
 where
 
 ```
-CDF_ICRi(S|R)(x) = Int_0^x p^X*(1-p)^(N-X) dp
+alpha_i * CDF_ICRi(S|R)(x) = Int_0^x p^X*(1-p)^(N-X) dp
 ```
 
 `N` is the number of observations and `X` the positive count. Which
@@ -491,11 +491,17 @@ this constant factor is
 (N+1)*(choose N X)
 ```
 
-so that `CDF_ICRi(S|R)(1) = 1`. So accounting for that as well as the
-normalization of the prior we end up with a normalizing term
+so that `CDF_ICRi(S|R)(1) = 1`. To cancel this factor out we must
+choose `alpha_i` such that
 
 ```
-nt = Sum_i=0^n (Ni+1) * (choose Ni Xi) * P(ICRi)
+alpha_i = 1 / (N+1)*(choose N X)
+```
+
+Which gives us a normalizing factor of
+
+```
+nt = Sum_i=0^n P(ICRi) / ((Ni+1) * (choose Ni Xi))
 ```
 
 That is assuming that all observations are certain (based on perfect
@@ -505,7 +511,10 @@ in Subsection Record Inference Traces. It is expected that we'll have
 to resort to convolution products, because the pdf of a random
 variable equal to the sum of other random variables is determined by
 the convolution products of their pdfs. But we let that for later,
-maybe there's a simpler way we haven't seen yet.
+maybe there's a simpler way.
+
+There is also the problem is that `ICRi(Sj|Rj)` is undefined for some
+`j`, we haven't figured this out yet.
 
 Once we have that we can calculate the TVi of success of each valid
 inference rule Ri, either by turning its cdf into a TV or a pdf as it
