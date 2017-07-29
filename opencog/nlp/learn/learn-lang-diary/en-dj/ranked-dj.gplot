@@ -26,12 +26,12 @@ plot "ranked-dj-counts.dat" using 1:2 with lines linewidth 5 title "", \
 #
 set term postscript eps enhanced color 28
 set out 'ranked-dj-prince.eps'
-set yrange [1:300]
-set xrange [1:100]
+set yrange [1:6000]
+set xrange [1:1000]
 set logscale x
 set logscale y
 set format y "10^{%L}"
-set title "Ranking by N(w,d) for 'Prince', 'think', 'long' 'fact', 'from'"
+set title "Ranking by N(w,d) for five words"
 set xlabel "Rank"
 set ylabel "Number of observations"
 plot "ranked-dj-prince.dat" using 1:2 with lines linewidth 5 title "N(Prince,d)", \
