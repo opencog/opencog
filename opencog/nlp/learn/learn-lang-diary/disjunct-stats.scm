@@ -173,7 +173,7 @@
 ; ---------------------------------------------------------------------
 ; A sorted list of score-word pairs, where the score is the cset length
 
-(define sorted-lengths (score-and-rank cset-vec-word-len all-cset-words)
+(define sorted-lengths (score-and-rank cset-vec-word-len all-cset-words))
 
 (let ((outport (open-file "/tmp/ranked-lengths.dat" "w")))
 	(print-ts-rank sorted-lengths outport)
@@ -198,7 +198,7 @@
 (define sorted-lensq-norm
 	(score-and-rank lensq-vs-obs all-cset-words))
 
-(define binned-sqlen-norm (bin-count-simple sorted-lensq-norm 100 0.0 10.0))
+(define binned-sqlen-norm (bin-count-simple sorted-lensq-norm 200 0.0 100.0))
 
 (let ((outport (open-file "/tmp/binned-sqlen-norm.dat" "w")))
 	(print-bincounts-tsv binned-sqlen-norm outport)
