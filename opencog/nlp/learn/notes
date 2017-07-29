@@ -12512,8 +12512,20 @@ fuuuu
 (define* (st FOO   #:optional (ID (FOO 2)))
 	(format #t "hey its ~A\n" ID))
 
+(define (foo LLOBJ)
+      (lambda (message . args)
+         (case message
+            ((id)     "cset")
+            (else     (apply LLOBJ (cons message args)))
+      )))
 
-2) replace cset-vec-cosine by filtered cosine  in gram-sim
+
+2) replace cset-vec-cosine by filtered cosine  in gram-sim DONE
+
+	(define fsm (add-similarity-api fsf #f))
+	(define fsb (batch-similarity fsf #f))
+	(fsb 'batch-compute)
+
 3) use filter-specific predicate.  DONE
 4) wait .. batch in matrix?
 

@@ -276,23 +276,37 @@
 ;
 ; Distributions for two particular words.
 
-(define dj-united (score-and-rank get-count
-		(get-cset-vec (Word "United"))))
+(define dj-prince (score-and-rank get-count
+		(get-cset-vec (Word "Prince"))))
 
-(define dj-it (score-and-rank get-count
-		(get-cset-vec (Word "It"))))
+(define dj-think (score-and-rank get-count
+		(get-cset-vec (Word "think"))))
+
+(define dj-long (score-and-rank get-count
+		(get-cset-vec (Word "long"))))
+
+(define dj-fact (score-and-rank get-count
+		(get-cset-vec (Word "fact"))))
+
+(define dj-from (score-and-rank get-count
+		(get-cset-vec (Word "from"))))
 
 ; Print to port a tab-separated table of rankings
-(define (print-ts-dj-rank cset-a cset-b port)
+(define (print-ts-dj-rank cset-a cset-b 
+                cset-c cset-d cset-e port)
 	(define idx 0)
 	(for-each
-		(lambda (pra prb)
+		(lambda (pra prb prc  prd pre)
 			(set! idx (+ idx 1))
-			(format port "~A	~A	~A\n" idx (car pra) (car prb)))
-		cset-a cset-b))
+			(format port "~A	~A	~A	~A	~A	~A\n" idx 
+				(car pra) (car prb)
+				(car prc) (car prd)
+				(car pre)))
+		cset-a cset-b cset-c cset-e cset-e ))
 
-(let ((outport (open-file "/tmp/ranked-dj-united.dat" "w")))
-	(print-ts-dj-rank dj-united dj-it outport)
+(let ((outport (open-file "/tmp/ranked-dj-prince.dat" "w")))
+	(print-ts-dj-rank 
+		dj-prince dj-think dj-long dj-fact dj-from outport)
 	(close outport))
 
 ; ---------------------------------------------------------------------
