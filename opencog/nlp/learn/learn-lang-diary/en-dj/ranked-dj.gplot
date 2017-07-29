@@ -10,8 +10,8 @@
 #
 set term postscript eps enhanced color 28
 set out 'ranked-dj-counts.eps'
-set yrange [1:20000]
-set xrange [1:20000]
+set yrange [1:1000000]
+set xrange [1:200000]
 set logscale x
 set logscale y
 set format y "10^{%L}"
@@ -19,7 +19,7 @@ set title "Summed count {/Symbol S}_w N(w, ranked d)"
 set xlabel "Rank"
 set ylabel "Total number of observations"
 plot "ranked-dj-counts.dat" using 1:2 with lines linewidth 5 title "", \
-     "ranked-dj-counts.dat" using 1:(15000/$1 ** 1) with lines linewidth 5 title "rank^{-1}"
+     "ranked-dj-counts.dat" using 1:(691928.0/$1 ** 1) with lines linewidth 5 title "rank^{-1}"
 
 #################################################
 # Used to generate the connector-set ranking graphs.

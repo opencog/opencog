@@ -22358,7 +22358,7 @@ pink noise
 
 .
 \begin_inset Foot
-status open
+status collapsed
 
 \begin_layout Plain Layout
 Computed with the dj-prince and dj-think etc.
@@ -22390,10 +22390,6 @@ Can one get a smoother distribution by summing together these two graphs?
 \end_layout
 
 \begin_layout Standard
-xxx
-\end_layout
-
-\begin_layout Standard
 That graph is shown below.
 \begin_inset Foot
 status collapsed
@@ -22410,7 +22406,7 @@ Computed with the accum-dj-all function in disjunct-stats.scm
 \begin_layout Standard
 \align center
 \begin_inset Graphics
-	filename images/ranked-dj-counts.eps
+	filename en-dj/ranked-dj-counts.eps
 	width 70text%
 
 \end_inset
@@ -22420,10 +22416,10 @@ Computed with the accum-dj-all function in disjunct-stats.scm
 
 \begin_layout Standard
 Its kind of a strange graph.
- Yes, the x-axis of this graph does imply that there are dozens, if not
- hundreds of words with more than a thousand disjuncts on them, and maybe
- half-a-dozen that have more than ten-thousand (unique, different) disjuncts
- on them! Exactly what does this mean? This is covered in the next section.
+ Yes, the x-axis of this graph does imply that there are thousands of words
+ with more than a thousand disjuncts on them, and hundreds that have more
+ than ten-thousand (unique, different) disjuncts on them! Exactly what does
+ this mean? This is covered in the next section.
 \end_layout
 
 \begin_layout Subsection*
@@ -22432,7 +22428,15 @@ Disjunct Support Distribution
 
 \begin_layout Standard
 Is it possible that some words have a large number of disjuncts on them?
- Yes, it is.
+ 
+\end_layout
+
+\begin_layout Standard
+xxx
+\end_layout
+
+\begin_layout Standard
+Yes, it is.
  For example, the period was observed to have 18200 unique, different disjuncts
  associated with it.
  The word 
