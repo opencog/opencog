@@ -22297,19 +22297,36 @@ Disjunct count distribution
 \end_layout
 
 \begin_layout Standard
-The graph below shows the distribution of the disjunct observations on 
-\end_layout
-
-\begin_layout Standard
-xxxx
-\end_layout
-
-\begin_layout Standard
-the two words 
+The graph below shows the distribution of the disjunct observations on the
+ five words 
 \begin_inset Quotes eld
 \end_inset
 
-United
+Prince
+\begin_inset Quotes erd
+\end_inset
+
+, 
+\begin_inset Quotes eld
+\end_inset
+
+think
+\begin_inset Quotes erd
+\end_inset
+
+, 
+\begin_inset Quotes eld
+\end_inset
+
+long
+\begin_inset Quotes erd
+\end_inset
+
+, 
+\begin_inset Quotes eld
+\end_inset
+
+fact
 \begin_inset Quotes erd
 \end_inset
 
@@ -22317,7 +22334,7 @@ United
 \begin_inset Quotes eld
 \end_inset
 
-It
+from
 \begin_inset Quotes erd
 \end_inset
 
@@ -22341,10 +22358,11 @@ pink noise
 
 .
 \begin_inset Foot
-status collapsed
+status open
 
 \begin_layout Plain Layout
-Computed with the dj-united and dj-it arrays indisjunct-stats.scm 
+Computed with the dj-prince and dj-think etc.
+ arrays in disjunct-stats.scm 
 \end_layout
 
 \end_inset
@@ -22355,7 +22373,7 @@ Computed with the dj-united and dj-it arrays indisjunct-stats.scm
 \begin_layout Standard
 \align center
 \begin_inset Graphics
-	filename images/ranked-dj-united.eps
+	filename en-dj/ranked-dj-prince.eps
 	width 70text%
 
 \end_inset
@@ -22368,7 +22386,15 @@ Can one get a smoother distribution by summing together these two graphs?
  Sure...
  and one can sum together not just these two words, but all words (that
  have been observed at least 100 times).
- That graph is shown below.
+ 
+\end_layout
+
+\begin_layout Standard
+xxx
+\end_layout
+
+\begin_layout Standard
+That graph is shown below.
 \begin_inset Foot
 status collapsed
 
@@ -25339,7 +25365,7 @@ The current dataset being analyzed contains 1985 words whose length is greater
  15808 pairs with a cosine similarity of greater than 0.5.
  These can be sorted and ranked.
 \begin_inset Foot
-status collapsed
+status open
 
 \begin_layout Plain Layout
 See the good-sims and ranked-sims in disjunct-stats.scm file.

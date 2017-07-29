@@ -25,15 +25,18 @@ plot "ranked-dj-counts.dat" using 1:2 with lines linewidth 5 title "", \
 # Used to generate the connector-set ranking graphs.
 #
 set term postscript eps enhanced color 28
-set out 'ranked-dj-united.eps'
+set out 'ranked-dj-prince.eps'
 set yrange [1:300]
 set xrange [1:100]
 set logscale x
 set logscale y
 set format y "10^{%L}"
-set title "Ranking by N(w,d) for 'United', 'It'"
+set title "Ranking by N(w,d) for 'Prince', 'think', 'long' 'fact', 'from'"
 set xlabel "Rank"
 set ylabel "Number of observations"
-plot "ranked-dj-united.dat" using 1:2 with lines linewidth 5 title "N(United,d)", \
-     "ranked-dj-united.dat" using 1:3 with lines linewidth 5 title "N(It,d)", \
-     "ranked-dj-united.dat" using 1:(150/$1 ** 1) with lines linewidth 5 title "rank^{-1}"
+plot "ranked-dj-prince.dat" using 1:2 with lines linewidth 5 title "N(Prince,d)", \
+     "ranked-dj-prince.dat" using 1:3 with lines linewidth 5 title "N(think,d)", \
+     "ranked-dj-prince.dat" using 1:4 with lines linewidth 5 title "N(long,d)", \
+     "ranked-dj-prince.dat" using 1:5 with lines linewidth 5 title "N(fact,d)", \
+     "ranked-dj-prince.dat" using 1:6 with lines linewidth 5 title "N(from,d)", \
+     "ranked-dj-prince.dat" using 1:(150/$1 ** 1) with lines linewidth 5 title "rank^{-1}"
