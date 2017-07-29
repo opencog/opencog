@@ -200,6 +200,11 @@
 
 (define binned-sqlen-norm (bin-count-simple sorted-lensq-norm 200 0.0 100.0))
 
+(define binned-sqlen-norm (bin-count sorted-lensq-norm 100
+	(lambda (item) (/ (log (first item)) (log 2.0)))
+	(lambda (item) 1)
+	1.0 10.0))
+
 (let ((outport (open-file "/tmp/binned-sqlen-norm.dat" "w")))
 	(print-bincounts-tsv binned-sqlen-norm outport)
 	(close outport))

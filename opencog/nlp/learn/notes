@@ -12575,6 +12575,22 @@ sqlite3 renew.db
 .read dump_all.sql
 
 ant ant-optional
+-------------------
+
+(for-each
+	(lambda (item)
+		(format #t "wtf ~A\n" (/ (log (first item)) (log 2.0))) )
+	(take sorted-lensq-norm 50))
+
+(define binned-sqlen-norm (bin-count 
+	(take sorted-lensq-norm 50 )
+	50
+   (lambda (item) 
+		(define val (/ (log (first item)) (log 2.0)))
+   	(format #t "wtf ~A\n" val)
+		val)
+   (lambda (item) 1)
+   1.0 30.0))
 
 
 
