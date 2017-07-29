@@ -72,7 +72,7 @@ set title "Ranking by support of the disjunct set"
 set xlabel "Rank"
 set ylabel "Size of the set"
 plot "ranked-support.dat" using 1:2 with lines linewidth 5 title "", \
-     "ranked-support.dat" using 1:(640000/$1 ** 0.9) with lines linewidth 5 title "rank^{-0.9}"
+     "ranked-support.dat" using 1:(540000/$1 ** 0.9) with lines linewidth 5 title "rank^{-0.9}"
 
 #################################################
 # Used to generate the averge connector-set ranking graphs.
