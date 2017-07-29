@@ -22648,20 +22648,34 @@ This seems like the interesting ratio, because the Zipf exponent of -0.65
 \end_layout
 
 \begin_layout Standard
-xxxxx
-\end_layout
-
-\begin_layout Standard
 Words high in this score will be words that have relatively few disjuncts
  on them, or at least, few that matter much, that rise above the level of
  noise.
- The first ten on this list are (after excluding all words with fewer than
- 100 observations): "It" "According" "He" ")" "and" "(" "United" "as" "."
- "well".
- Note that most are capitalized: that means that these words appeared at
- the beginning of sentences; the way in which the can link to what follows
- is fairly constrained, and thus it is no surprise that these have only
- a few disjuncts on them.
+ The first ten words on this list, exluding punctuation, and excluding all
+ words with fewer than 100 observations: "It" "and" "but" "in" "Two" "as"
+ "Notes" "not" "There" "Summary".
+ A review of the input corpus shows that the word "Summary" appears in only
+ one input text: Charles Darwin's 
+\begin_inset Quotes eld
+\end_inset
+
+On the Origin of Species
+\begin_inset Quotes erd
+\end_inset
+
+, and then only to indicate an actual summary! The word 
+\begin_inset Quotes eld
+\end_inset
+
+Notes
+\begin_inset Quotes erd
+\end_inset
+
+ appears in less than a dozen input texts, with almost every usage being
+ formulaic and rigid.
+ The grammatical usage of these two words in the input corpus is fairly
+ constrained, and thus it is no surprise that these have relatively narrower
+ disjunct distributions on them.
  
 \end_layout
 
@@ -22723,7 +22737,7 @@ word
 \begin_inset Text
 
 \begin_layout Plain Layout
-5 
+7
 \end_layout
 
 \end_inset
@@ -22732,7 +22746,7 @@ word
 \begin_inset Text
 
 \begin_layout Plain Layout
-41.4
+1956
 \end_layout
 
 \end_inset
@@ -22752,35 +22766,6 @@ and
 \begin_inset Text
 
 \begin_layout Plain Layout
-8
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-31.6
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-as
-\end_layout
-
-\end_inset
-</cell>
-</row>
-<row>
-<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
 10
 \end_layout
 
@@ -22790,7 +22775,7 @@ as
 \begin_inset Text
 
 \begin_layout Plain Layout
-30.1
+1147
 \end_layout
 
 \end_inset
@@ -22799,7 +22784,7 @@ as
 \begin_inset Text
 
 \begin_layout Plain Layout
-well
+but
 \end_layout
 
 \end_inset
@@ -22810,7 +22795,7 @@ well
 \begin_inset Text
 
 \begin_layout Plain Layout
-11
+12
 \end_layout
 
 \end_inset
@@ -22819,7 +22804,7 @@ well
 \begin_inset Text
 
 \begin_layout Plain Layout
-29.9
+1043
 \end_layout
 
 \end_inset
@@ -22839,7 +22824,7 @@ in
 \begin_inset Text
 
 \begin_layout Plain Layout
-18
+14
 \end_layout
 
 \end_inset
@@ -22848,7 +22833,7 @@ in
 \begin_inset Text
 
 \begin_layout Plain Layout
-18.8
+814
 \end_layout
 
 \end_inset
@@ -22857,7 +22842,36 @@ in
 \begin_inset Text
 
 \begin_layout Plain Layout
-first
+as
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+16
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+776
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+not
 \end_layout
 
 \end_inset
@@ -22877,7 +22891,7 @@ first
 \begin_inset Text
 
 \begin_layout Plain Layout
-17.2
+590
 \end_layout
 
 \end_inset
@@ -22886,7 +22900,7 @@ first
 \begin_inset Text
 
 \begin_layout Plain Layout
-is
+been
 \end_layout
 
 \end_inset
@@ -22906,7 +22920,7 @@ is
 \begin_inset Text
 
 \begin_layout Plain Layout
-16.7
+568
 \end_layout
 
 \end_inset
@@ -22915,7 +22929,7 @@ is
 \begin_inset Text
 
 \begin_layout Plain Layout
-also
+be
 \end_layout
 
 \end_inset
@@ -22926,7 +22940,7 @@ also
 \begin_inset Text
 
 \begin_layout Plain Layout
-23
+26
 \end_layout
 
 \end_inset
@@ -22935,7 +22949,7 @@ also
 \begin_inset Text
 
 \begin_layout Plain Layout
-15.3
+453
 \end_layout
 
 \end_inset
@@ -22944,7 +22958,7 @@ also
 \begin_inset Text
 
 \begin_layout Plain Layout
-can
+one
 \end_layout
 
 \end_inset
@@ -22955,7 +22969,7 @@ can
 \begin_inset Text
 
 \begin_layout Plain Layout
-24
+27
 \end_layout
 
 \end_inset
@@ -22964,7 +22978,7 @@ can
 \begin_inset Text
 
 \begin_layout Plain Layout
-15.3
+440
 \end_layout
 
 \end_inset
@@ -22973,7 +22987,7 @@ can
 \begin_inset Text
 
 \begin_layout Plain Layout
-on
+at
 \end_layout
 
 \end_inset
@@ -22984,7 +22998,7 @@ on
 \begin_inset Text
 
 \begin_layout Plain Layout
-25
+30
 \end_layout
 
 \end_inset
@@ -22993,7 +23007,7 @@ on
 \begin_inset Text
 
 \begin_layout Plain Layout
-14.9
+386
 \end_layout
 
 \end_inset
@@ -23002,7 +23016,7 @@ on
 \begin_inset Text
 
 \begin_layout Plain Layout
-at
+own
 \end_layout
 
 \end_inset
@@ -23057,93 +23071,6 @@ word
 \begin_inset Text
 
 \begin_layout Plain Layout
-26
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-14.4
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-been
-\end_layout
-
-\end_inset
-</cell>
-</row>
-<row>
-<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-31
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-13.2
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-but
-\end_layout
-
-\end_inset
-</cell>
-</row>
-<row>
-<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-32
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-13.1
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-part
-\end_layout
-
-\end_inset
-</cell>
-</row>
-<row>
-<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
 34
 \end_layout
 
@@ -23153,7 +23080,7 @@ part
 \begin_inset Text
 
 \begin_layout Plain Layout
-12.8
+329
 \end_layout
 
 \end_inset
@@ -23162,7 +23089,7 @@ part
 \begin_inset Text
 
 \begin_layout Plain Layout
-with
+of
 \end_layout
 
 \end_inset
@@ -23182,7 +23109,7 @@ with
 \begin_inset Text
 
 \begin_layout Plain Layout
-12.8
+328
 \end_layout
 
 \end_inset
@@ -23191,7 +23118,7 @@ with
 \begin_inset Text
 
 \begin_layout Plain Layout
-old
+to
 \end_layout
 
 \end_inset
@@ -23211,7 +23138,7 @@ old
 \begin_inset Text
 
 \begin_layout Plain Layout
-12.7
+324
 \end_layout
 
 \end_inset
@@ -23220,7 +23147,36 @@ old
 \begin_inset Text
 
 \begin_layout Plain Layout
-same
+with
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+37
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+319
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+other
 \end_layout
 
 \end_inset
@@ -23240,7 +23196,7 @@ same
 \begin_inset Text
 
 \begin_layout Plain Layout
-11.9
+315
 \end_layout
 
 \end_inset
@@ -23249,7 +23205,7 @@ same
 \begin_inset Text
 
 \begin_layout Plain Layout
-one
+it
 \end_layout
 
 \end_inset
@@ -23260,7 +23216,7 @@ one
 \begin_inset Text
 
 \begin_layout Plain Layout
-39
+42
 \end_layout
 
 \end_inset
@@ -23269,7 +23225,7 @@ one
 \begin_inset Text
 
 \begin_layout Plain Layout
-11.6
+284
 \end_layout
 
 \end_inset
@@ -23278,7 +23234,7 @@ one
 \begin_inset Text
 
 \begin_layout Plain Layout
-which
+when
 \end_layout
 
 \end_inset
@@ -23298,7 +23254,7 @@ which
 \begin_inset Text
 
 \begin_layout Plain Layout
-10.8
+275
 \end_layout
 
 \end_inset
@@ -23307,7 +23263,65 @@ which
 \begin_inset Text
 
 \begin_layout Plain Layout
-not
+for
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+45
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+271
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+he
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+46
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+265
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+have
 \end_layout
 
 \end_inset
@@ -23327,7 +23341,7 @@ not
 \begin_inset Text
 
 \begin_layout Plain Layout
-10.2
+248
 \end_layout
 
 \end_inset
@@ -23336,7 +23350,7 @@ not
 \begin_inset Text
 
 \begin_layout Plain Layout
-the
+that
 \end_layout
 
 \end_inset
@@ -23354,12 +23368,12 @@ It is surprising because, grammatically, we expect most of these words to
  have a large number of varied disjuncts attached to them.
  We expect them to be diffuse, not sharp: we expect that these would have
  a large number of observations smeared over a large variety of disjuncts,
- instead of having their weight concentrated in only one or two disjuncts,
+ instead of having their weight concentrated in only a handful of disjuncts,
  the way that 
 \begin_inset Quotes eld
 \end_inset
 
-United
+Prince
 \begin_inset Quotes erd
 \end_inset
 
@@ -23368,15 +23382,13 @@ United
 \end_layout
 
 \begin_layout Standard
-The distribution is unusual; it is shown below.
- Note that the x-axis is drawn with a log-scale.
- It appears to be linear, with an exponent of -4.
+The distribution, shown below, is a power-law.
 \end_layout
 
 \begin_layout Standard
 \align center
 \begin_inset Graphics
-	filename images/binned-sqlen-norm.eps
+	filename en-dj/binned-sqlen-norm.eps
 	width 70text%
 
 \end_inset
@@ -23447,7 +23459,15 @@ MI_{cset}=\sum_{w,d}p(w,d)MI_{pair}(w,d)
 
 Fractional MI is interesting because it usually has a reasonably nice distributi
 on.
- For this particular dataset, it ranges from about -20 to +8.
+ 
+\end_layout
+
+\begin_layout Standard
+xxxx
+\end_layout
+
+\begin_layout Standard
+For this particular dataset, it ranges from about -20 to +8.
  The distribution is shown in the graphs below.
 \begin_inset Foot
 status collapsed
