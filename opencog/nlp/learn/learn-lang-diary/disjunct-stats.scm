@@ -310,13 +310,14 @@
 	(close outport))
 
 ; ---------------------------------------------------------------------
-; Sum over distributions. Basically, above gave two ranking
+; Sum over distributions. Basically, above gave five ranking
 ; distributions, one for each word.  They can be averaged together
 ; to get a smoother graph.  Here, we create a ranking for each
 ; word, and then average them all together. This is kind of hokey,
 ; in the end, but whatever.
 
-; Create and zero out array.
+; Create and zero out array. 312K is just some large "big-enough"
+; number big enough to hold data without overflowing.
 (define dj-sum (make-array 0 312500))
 
 ; Create a ranked list of disjuncts for WORD
@@ -339,7 +340,7 @@
 		WORD-LIST))
 
 ; Accumulate all, but only for those with 100 or more observations.
-(accum-dj-all top-csets-words)
+(accum-dj-all top-cset-words)
 
 (define (print-dj-acc port)
 	(define idx 0)
