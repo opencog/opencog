@@ -93,11 +93,12 @@ plot "ranked-avg-400.dat" using 1:2 with lines linewidth 5 title "400+ obs", \
      "ranked-avg-20.dat" using 1:(8/$1 ** 0.25) with lines linewidth 5 title "rank^{-0.25}"
 
 #################################################
-# Used to generate the connector-set ranking graphs.
+# Used to generate the euclidean-length ranking graph.
 #
 set term postscript eps enhanced color 28
 set out 'ranked-lengths.eps'
-set yrange [:2000]
+set xrange [1:100000]
+set yrange [1:200000]
 set logscale x
 set logscale y
 set format x "10^{%L}"
@@ -106,7 +107,7 @@ set title "Ranked RMS size of set of disjuncts"
 set xlabel "Rank"
 set ylabel "RMS size of disjunct set"
 plot "ranked-lengths.dat" using 1:2 with lines linewidth 5 title "", \
-     "ranked-lengths.dat" using 1:(1000/$1 ** 0.65) with lines linewidth 5 title "rank^{-0.65}"
+     "ranked-lengths.dat" using 1:(120000/$1 ** 1) with lines linewidth 5 title "rank^{-1.00}"
 
 #################################################
 # Used to generate the word-mi ranking graphs.
