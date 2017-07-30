@@ -50,7 +50,7 @@
 ; ---------------------------------------------------------------------
 ; Ranking and printing utilities
 ;
-; Assign each word a score, using SCORE-FN,
+; Assign each word a score, using SCORE-FN
 (define (score SCORE-FN WORD-LIST)
 	(map (lambda (wrd) (cons (SCORE-FN wrd) wrd)) WORD-LIST))
 
@@ -521,10 +521,10 @@
 ; ---------------------------------------------------------------------
 ; Rank word-disjunct pairs according to thier fractonal MI.
 
-(define pfrq (add-pair-freq-api  pca))
-(define (cset-mi CSET) (pfrq 'pair-fmi CSET))
+(define (cset-mi CSET) (psf 'pair-fmi CSET))
 
 (define sorted-cset-mi (score-and-rank cset-mi all-csets))
+(define scored-cset-mi (score cset-mi all-csets))
 
 ; Print above to a file, so that it can be graphed.
 (let ((outport (open-file "/tmp/ranked-cset-mi.dat" "w")))
@@ -532,16 +532,16 @@
 	(close outport))
 
 (define binned-cset-mi (bin-count-simple sorted-cset-mi 100))
-(define binned-cset-mi (bin-count-simple sorted-cset-mi 200))
+(define binned-cset-mi (bin-count-simple scored-cset-mi 200))
 
 (let ((outport (open-file "/tmp/binned-cset-mi.dat" "w")))
 	(print-bincounts-tsv binned-cset-mi outport)
 	(close outport))
 
-(define (cset-freq CSET) (pfrq 'pair-freq CSET))
+(define (cset-freq CSET) (psf 'pair-freq CSET))
 
 (define weighted-cset-mi
-	(bin-count-weighted sorted-cset-mi 200
+	(bin-count-weighted scored-cset-mi 200
 		(lambda (scored-item) (cset-freq (cdr scored-item)))))
 
 (let ((outport (open-file "/tmp/weighted-cset-mi.dat" "w")))

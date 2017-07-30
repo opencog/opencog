@@ -12522,9 +12522,11 @@ fuuuu
 
 2) replace cset-vec-cosine by filtered cosine  in gram-sim DONE
 
-	(define fsm (add-similarity-api fsf #f))
-	(define fsb (batch-similarity fsf #f))
+(define fsf (add-pair-freq-api fsa))
+	(define fsm (add-similarity-api fsa #f))
+	(define fsb (batch-similarity fsa #f))
 	(fsb 'batch-compute)
+	(fsb 'paralel-batch 3)
 
 3) use filter-specific predicate.  DONE
 4) wait .. batch in matrix?
