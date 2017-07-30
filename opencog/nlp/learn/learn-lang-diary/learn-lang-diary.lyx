@@ -23463,14 +23463,14 @@ on.
 \end_layout
 
 \begin_layout Standard
-xxxx
+xxxx 8629163 csets
 \end_layout
 
 \begin_layout Standard
 For this particular dataset, it ranges from about -20 to +8.
  The distribution is shown in the graphs below.
 \begin_inset Foot
-status collapsed
+status open
 
 \begin_layout Plain Layout
 These are graphed by binned-cset-mi and weighted-cset-mi in the disjunct-stats.sc

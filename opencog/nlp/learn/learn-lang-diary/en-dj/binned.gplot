@@ -80,17 +80,22 @@ plot "binned-avg.dat" using 2:3 with lines linewidth 5 title "", \
      "binned-avg.dat" using 2:(1500/($2**5)) with lines linewidth 5 title "<obs>^{-5}"
 
 #################################################
-# Used to generate the binned connector-set counts
+# Used to generate the binned connector-set MI graphs
 #
 set term postscript eps enhanced color 28
-set out 'binned-cset-mi.eps'
+set out 'binned-cset-mi.eps
+set key left
+set yrange [1:1e6]
 set logscale y
 set format y "10^{%L}"
 set title "Distribution of connector set MI"
 set xlabel "Mutual information of c-set"
 set ylabel "Count"
-plot "binned-cset-mi.dat" using 2:3 with lines linewidth 5 title ""
+plot "binned-cset-mi.dat" using 2:3 with lines linewidth 5 title "", \
+     "binned-cset-mi.dat" using 2:(160000 * 2**(-0.038*($2-11)**2)) with lines linewidth 5 title "2^-0.038(mi-11)^2"
 
+#     "binned-cset-mi.dat" using 2:(160000 * 2**(-(0.2*($2-11))**2)) with lines linewidth 2 title "1.6e5 2^"
+#
 #################################################
 # Used to generate the weighted binned connector-set counts
 #
