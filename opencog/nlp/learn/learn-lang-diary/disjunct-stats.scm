@@ -473,8 +473,7 @@
 
 ; -------
 ; Rank words according to thier fractional entropy
-(define (cset-vec-word-ent WORD)
-		(pmi 'compute-right-fentropy WORD))
+(define (cset-vec-word-ent WORD) (psf 'right-wild-fentropy WORD))
 
 ; rank only the top-100
 (define sorted-word-ent (score-and-rank cset-vec-word-ent top-cset-words))

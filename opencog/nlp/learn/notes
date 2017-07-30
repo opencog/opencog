@@ -12609,6 +12609,12 @@ ant ant-optional
 almost exactly 1/3rd have sim > 0.5 ... 
 total = 142270 sim links
 
+198 dupes ... how is that possible??
+
+select count(*) from atoms where type=27; -- 142270 so that's perfect.
+where are the dupes coming from?
+
+
 
 
 =========================================================================
