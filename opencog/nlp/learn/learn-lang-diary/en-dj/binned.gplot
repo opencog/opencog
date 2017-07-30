@@ -149,12 +149,17 @@ plot "binned-dj-mi.dat" using 2:3 with lines linewidth 5 title "", \
 #
 set term postscript eps enhanced color 28
 set out 'binned-word-ent.eps'
+set key left
+set xrange [16:24]
+set yrange [1:10000]
 set logscale y
 set format y "10^{%L}"
-set title "Distr. of word fractional entropy"
-set xlabel "Fractional entropy of word"
+set title "Distr. of word fractional marginal entropy"
+set xlabel "Fractional marginal entropy of word"
 set ylabel "Count"
-plot "binned-word-ent.dat" using 2:3 with lines linewidth 5 title ""
+plot "binned-word-ent.dat" using 2:3 with lines linewidth 5 title "", \
+     "binned-word-ent.dat" using 2:(20*exp(0.5*(0.7*($2-19.5))**2)) with lines linewidth 5 title "exp (0.7 (FE-19.5))^2 /2"
+
 
 #################################################
 # Used to generate the binned squared-len/norm ratio
