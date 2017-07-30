@@ -24301,16 +24301,8 @@ Fractional Entropy
 \end_layout
 
 \begin_layout Standard
-There 
-\end_layout
-
-\begin_layout Standard
-xxx
-\end_layout
-
-\begin_layout Standard
-is a simpler variant than the mutual information, that is also worth understandi
-ng: the fractional contribution to the total entropy.
+There is a simpler variant than the mutual information, that is also worth
+ understanding: the fractional contribution to the total entropy.
  This is given by the sum 
 \begin_inset Formula 
 \[
@@ -24369,7 +24361,15 @@ Generated from sorted-word-ent in disjunct-stats.scm.
 \end_inset
 
  It only shows those words that have been observed 100 times, or more.
- It resembles the graph for the ranked fractional MI, above.
+ 
+\end_layout
+
+\begin_layout Standard
+xxx
+\end_layout
+
+\begin_layout Standard
+It resembles the graph for the ranked fractional MI, above.
  The graph on the right shows the distribution of the entropy, for all of
  the words.
  This affirms (or explains?) the sharp knee in the graph on the left: the
@@ -24380,7 +24380,7 @@ Generated from sorted-word-ent in disjunct-stats.scm.
 \begin_layout Standard
 \align center
 \begin_inset Graphics
-	filename images/ranked-word-ent.eps
+	filename en-dj/ranked-word-ent.eps
 	width 50text%
 
 \end_inset

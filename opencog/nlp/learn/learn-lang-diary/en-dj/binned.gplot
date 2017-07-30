@@ -134,12 +134,14 @@ plot "binned-word-mi.dat" using 2:3 with lines linewidth 5 title "", \
 #
 set term postscript eps enhanced color 28
 set out 'binned-dj-mi.eps'
+set xrange [2:23]
 set logscale y
 set format y "10^{%L}"
-set title "Distr. of disjunct fractional MI"
-set xlabel "Fractional MI of disjunct"
+set title "Distr. of disjunct fractional marginal MI"
+set xlabel "Fractional marginal MI of disjunct"
 set ylabel "Count"
-plot "binned-dj-mi.dat" using 2:3 with lines linewidth 5 title ""
+plot "binned-dj-mi.dat" using 2:3 with lines linewidth 5 title "", \
+     "binned-dj-mi.dat" using 2:(50000*exp(-0.5*(0.27*($2-13.7))**2)) with lines linewidth 5 title "exp -(0.27 (FMMI-13.7))^2 /2"
 
 
 #################################################

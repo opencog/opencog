@@ -126,11 +126,11 @@ plot "ranked-word-mi-hi-p.dat" using 1:2 with lines linewidth 5 title ""
 set term postscript eps enhanced color 28
 set out 'ranked-word-ent.eps'
 set logscale x
+set format x "10^{%L}"
 set title "Ranking by fractional word entropy"
 set xlabel "Rank"
 set ylabel "Fractional Word Entropy"
 plot "ranked-word-ent.dat" using 1:2 with lines linewidth 5 title ""
-
 
 #################################################
 # Used to generate the vertex-degree ranking graphs.
