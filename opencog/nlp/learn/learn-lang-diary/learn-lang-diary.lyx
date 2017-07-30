@@ -23715,375 +23715,74 @@ reference "logli distribution graph"
 \end_layout
 
 \begin_layout Standard
-What are the disjuncts like at either end of this distribution? 
-\end_layout
-
-\begin_layout Standard
-xxx
-\end_layout
-
-\begin_layout Standard
-The first ten words in the ranking are: "Cao" "Award" "x" "y" "Prime" "we"
- "per" "Division" "League" "Game".
+What are the disjuncts like at either end of this distribution? The first
+ few words in the ranking are: "LICENSE" "FULL" "formats" "BREACH" "AGREE"
+ "WARRANTIES" "WARRANTY" and are clearly parts of the set phrases that make
+ up the Project Gutenberg license agreement.
  The word 
 \begin_inset Quotes eld
 \end_inset
 
-United
+Prince
 \begin_inset Quotes erd
 \end_inset
 
-, examined previously, is 86th in this rank.
- Lets look at some of these.
+, examined previously, is 7378th in this rank.
+ 
 \end_layout
 
 \begin_layout Standard
-The word 
+Its entertaining to look at some of these.
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+View disjuncts by saying (filter (lambda (cset) (< 10 (get-count cset)))
+ (cog-incoming-by-type (Word "foo") 'Section)) where 10 is the minimum number
+ of counts.
+\end_layout
+
+\end_inset
+
+ The word "LICENSE" is surely under-sampled, as, in this all-capitals form,
+ it only appears in the Gutenberg boilerplate, and nowhere else.
+ This we cannot expect accurate MST parses, and cannot expect accurate disjuncts
+ for this word.
+ Yet other set phrases quickly top the list.
+ The word 
 \begin_inset Quotes eld
 \end_inset
 
-Award
+San
 \begin_inset Quotes erd
 \end_inset
 
- has only two disjuncts that were observed more than twice:
-\end_layout
-
-\begin_layout Standard
-\align center
-\begin_inset Tabular
-<lyxtabular version="3" rows="3" columns="2">
-<features tabularvalignment="middle">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<row>
-<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-count
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-disjunct
-\end_layout
-
-\end_inset
-</cell>
-</row>
-<row>
-<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-8
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\family roman
-\series medium
-\shape up
-\size normal
-\emph off
-\bar no
-\strikeout off
-\uuline off
-\uwave off
-\noun off
-\color none
- Grammy- for+ Best+
-\end_layout
-
-\end_inset
-</cell>
-</row>
-<row>
-<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-7
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-Academy- for+ Best+
-\end_layout
-
-\end_inset
-</cell>
-</row>
-</lyxtabular>
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-\begin_inset VSpace defskip
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-It is already clear from this one example that the hi-MI words will be those
- that take part in idioms, 
+, number 33 in the list, is seen only with the disjuncts 
 \begin_inset Quotes eld
 \end_inset
 
-set phrases
+Francisco+
 \begin_inset Quotes erd
 \end_inset
 
- or 
+ and 
 \begin_inset Quotes eld
 \end_inset
 
-institutional phrases
+Antonio+
 \begin_inset Quotes erd
 \end_inset
 
-, and that the disjunct identifies the words taking part in the setting.
-\end_layout
-
-\begin_layout Standard
-\align center
-\begin_inset Tabular
-<lyxtabular version="3" rows="5" columns="2">
-<features tabularvalignment="middle">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<row>
-<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-count
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-disjunct for 
+.
+ The word 
 \begin_inset Quotes eld
 \end_inset
 
-Prime
+Tomb
 \begin_inset Quotes erd
 \end_inset
 
-
-\end_layout
-
-\end_inset
-</cell>
-</row>
-<row>
-<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-23
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-Minister+
-\end_layout
-
-\end_inset
-</cell>
-</row>
-<row>
-<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-5
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-the- Minister+
-\end_layout
-
-\end_inset
-</cell>
-</row>
-<row>
-<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-3
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-as- Minister+
-\end_layout
-
-\end_inset
-</cell>
-</row>
-<row>
-<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-3
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-Governor-General- Minister+
-\end_layout
-
-\end_inset
-</cell>
-</row>
-</lyxtabular>
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-\begin_inset VSpace defskip
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-Only one disjunct for 
-\begin_inset Quotes eld
-\end_inset
-
-Division
-\begin_inset Quotes erd
-\end_inset
-
- was observed 4 times; those with 3 observations or less suggest that they
- were extracted from tables listing WWII military battles and equipment.
-\end_layout
-
-\begin_layout Standard
-\align center
-\begin_inset Tabular
-<lyxtabular version="3" rows="2" columns="2">
-<features tabularvalignment="middle">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<row>
-<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-count
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-disjunct for 
-\begin_inset Quotes eld
-\end_inset
-
-Division
-\begin_inset Quotes erd
-\end_inset
-
-
-\end_layout
-
-\end_inset
-</cell>
-</row>
-<row>
-<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-4
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-NCAA-
-\end_layout
-
-\end_inset
-</cell>
-</row>
-</lyxtabular>
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-\begin_inset VSpace defskip
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-The disjuncts for 
-\begin_inset Quotes eld
-\end_inset
-
-League
-\begin_inset Quotes erd
-\end_inset
-
- correspond to word-pairs, and these will clearly be high-MI word-pairs.
+ is 40th in the list and has three disjuncts observed more than twice:
 \end_layout
 
 \begin_layout Standard
@@ -24111,7 +23810,265 @@ disjunct for
 \begin_inset Quotes eld
 \end_inset
 
-League
+Tomb
+\begin_inset Quotes erd
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+19
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Great- of+ Nazarick+
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+15
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Underground- of+ Nazarick+
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+7
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+The- Great- of+ Nazarick+
+\end_layout
+
+\end_inset
+</cell>
+</row>
+</lyxtabular>
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset VSpace defskip
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+It is already clear from this one example that the high marginal-MI words
+ will be those that take part in idioms, 
+\begin_inset Quotes eld
+\end_inset
+
+set phrases
+\begin_inset Quotes erd
+\end_inset
+
+ or 
+\begin_inset Quotes eld
+\end_inset
+
+institutional phrases
+\begin_inset Quotes erd
+\end_inset
+
+, and that the disjunct identifies the words taking part in the setting.
+ The word 
+\begin_inset Quotes eld
+\end_inset
+
+prominently
+\begin_inset Quotes erd
+\end_inset
+
+ appears 50th in the list, and suggests that it is only used only in a rather
+ rigid and formulaic way:
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Tabular
+<lyxtabular version="3" rows="3" columns="2">
+<features tabularvalignment="middle">
+<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top" width="0">
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+count
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+disjunct for 
+\begin_inset Quotes eld
+\end_inset
+
+prominently
+\begin_inset Quotes erd
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+51
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+appear- whenever+
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+51
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+without- displaying+
+\end_layout
+
+\end_inset
+</cell>
+</row>
+</lyxtabular>
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset VSpace defskip
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The word 
+\begin_inset Quotes eld
+\end_inset
+
+Corps
+\begin_inset Quotes erd
+\end_inset
+
+ appears 95th in the list.
+ Note that both the English and French word-ordering appears: 
+\begin_inset Quotes eld
+\end_inset
+
+Diplomatic Corps
+\begin_inset Quotes erd
+\end_inset
+
+ and 
+\begin_inset Quotes eld
+\end_inset
+
+Corps Diplomatique
+\begin_inset Quotes erd
+\end_inset
+
+, as witness on the different sign on the disjuncts:
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Tabular
+<lyxtabular version="3" rows="6" columns="2">
+<features tabularvalignment="middle">
+<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top" width="0">
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+count
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+disjunct for 
+\begin_inset Quotes eld
+\end_inset
+
+Corps
 \begin_inset Quotes erd
 \end_inset
 
@@ -24135,7 +24092,7 @@ League
 \begin_inset Text
 
 \begin_layout Plain Layout
-Baseball+
+Supply-
 \end_layout
 
 \end_inset
@@ -24146,7 +24103,7 @@ Baseball+
 \begin_inset Text
 
 \begin_layout Plain Layout
-5
+6
 \end_layout
 
 \end_inset
@@ -24155,7 +24112,47 @@ Baseball+
 \begin_inset Text
 
 \begin_layout Plain Layout
-Premier-
+Marine-
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+4
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Medical-
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+3
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Diplomatic-
 \end_layout
 
 \end_inset
@@ -24166,7 +24163,7 @@ Premier-
 \begin_inset Text
 
 \begin_layout Plain Layout
-4
+3
 \end_layout
 
 \end_inset
@@ -24175,7 +24172,7 @@ Premier-
 \begin_inset Text
 
 \begin_layout Plain Layout
-Justice-
+Diplomatique+
 \end_layout
 
 \end_inset
@@ -24189,69 +24186,33 @@ Justice-
 \end_layout
 
 \begin_layout Standard
-This ranking also captures a fair amount of the 
-\begin_inset Quotes eld
+\begin_inset VSpace defskip
 \end_inset
 
-garbage
-\begin_inset Quotes erd
-\end_inset
 
- in Wikipedia (which is the source for the dataset): the disjuncts on 
-\begin_inset Quotes eld
-\end_inset
-
-x
-\begin_inset Quotes erd
-\end_inset
-
- and 
-\begin_inset Quotes eld
-\end_inset
-
-y
-\begin_inset Quotes erd
-\end_inset
-
- indicate that these occur almost exclusively in mathematical formulas of
- some sort, involving single-letter variables, plus signs and equal signs.
- The most frequent disjunct on 
-\begin_inset Quotes eld
-\end_inset
-
-per
-\begin_inset Quotes erd
-\end_inset
-
- was observed 5 times, and was 
-\begin_inset Quotes eld
-\end_inset
-
-100,000+ 100,000+ 100,000+ 100,000+ 100,000+
-\begin_inset Quotes erd
-\end_inset
-
- suggesting that it arose in some parse of a table listing.
- None of the disjuncts on 
-\begin_inset Quotes eld
-\end_inset
-
-we
-\begin_inset Quotes erd
-\end_inset
-
- were observed more than 4 times, and seemed to consist of some sort of
- grammatical word-salad.
- This is not surprising: Wikipedia has a severe shortage of pronouns; style
- guidelines prohibit their use.
 \end_layout
 
 \begin_layout Standard
-At the other extreme, the ten words with the lowest MI are: "The" "a" "to"
- "in" "of" "and" "the" "," ".".
+At the other extreme, the ten words with the lowest MI are: "it" "in" "of"
+ "that" "to" "and" "the" "LEFT-WALL" "," "." ranging from 5.07 for "it" down
+ to 3.33 for the period.
  These are already familiar from previous rankings: they occur with very
  high frequency; the disjunct lists on them will be lengthly variable, diffuse.
  
+\end_layout
+
+\begin_layout Standard
+These samplings of disjuncts are sharply reminiscent of the technique of
+ collocation used in corpus linguistics, but with a big, important difference.
+ There, the linguist examins a window that is some 6-8 words wide, and examines
+ the frequency of all phrases appearing within that window, containing the
+ word-of-interest in the center.
+ Here, we again have a word-of-interest, but this time, instead of seeing
+ phrases, we see the grammatical structure revealed directly, by means of
+ the disjuncts extracted from MST parses.
+ The philosophical basis used to justify corpus linguistics, i.e.
+ that of frequentism, is accepted and applied here as well.
+ In this case, it is used to obtain grammatical structure.
 \end_layout
 
 \begin_layout Subsection*
@@ -24284,7 +24245,15 @@ MI=\sum_{d}p(*,d)MI_{disjunct}(d)
 
 \end_inset
 
-The distribution is shown below.
+The distribution 
+\end_layout
+
+\begin_layout Standard
+xxx
+\end_layout
+
+\begin_layout Standard
+is shown below.
 \begin_inset Foot
 status collapsed
 
