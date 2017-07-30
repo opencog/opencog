@@ -23581,17 +23581,22 @@ i.e.
 Both graphs show an eyeballed fit in green.
  The left graph shows that the distribution can be approximated by a Gaussian
  (visually a parabola, due to the logarithmic scale), given by 
-\begin_inset Formula $\exp-(0.23(MI-11))^{2}/2$
+\begin_inset Formula $\exp-(0.23(MI_{pair}-11))^{2}/2$
 \end_inset
 
 .
  The shape of the graph on the right is harder to pin down.
  It has hints of parabolic behavior, yet the left edge appears more straight
  than curved, that is, to be exponential, given by 
-\begin_inset Formula $2^{1.3MI}=\exp0.9MI$
+\begin_inset Formula $2^{1.3MI_{pair}}=\exp0.9MI_{pair}$
 \end_inset
 
 .
+ The eyeballed blue parabola is given by 
+\begin_inset Formula $\exp-(0.15(MI_{pair}-12))^{2}/2$
+\end_inset
+
+, it's clearly missing a large excess in the middle of the graph.
 \end_layout
 
 \begin_layout Subsection*
@@ -23681,7 +23686,7 @@ reference "logli distribution graph"
  The distribution appears to be gaussian, and of approximately the same
  width as before, although located at a different center: the green line
  in the graph is the gaussian given by 
-\begin_inset Formula $\exp-(0.24(FMMI-20))^{2}/2$
+\begin_inset Formula $\exp-(0.24(MI_{word}-20))^{2}/2$
 \end_inset
 
  as compared to 0.23 for the non-marginal MI distribution above.
@@ -24274,7 +24279,7 @@ reference "logli distribution graph"
  The green line shows an eyeballed fit to a gaussian.
  As before, the width appears to be almost 1/4th, but not quite.
  It is given by 
-\begin_inset Formula $\exp-(0.27(FMMI-13.7))^{2}/2$
+\begin_inset Formula $\exp-(0.27(MI_{disjunct}-13.7))^{2}/2$
 \end_inset
 
 
@@ -24365,16 +24370,23 @@ Generated from sorted-word-ent in disjunct-stats.scm.
 \end_layout
 
 \begin_layout Standard
-xxx
-\end_layout
-
-\begin_layout Standard
-It resembles the graph for the ranked fractional MI, above.
+It resembles the graph for the ranked fractional marginal MI, above.
  The graph on the right shows the distribution of the entropy, for all of
  the words.
  This affirms (or explains?) the sharp knee in the graph on the left: the
  knee occurs because almost all words have a large disjunct-entropy.
- This is explained below.
+ Remarkably, the distribution is anti-gaussian, in that it appears to diverge,
+ the larger the entropy.
+ In that respect, it cannot even be a proper distribution, as it cannot
+ be normalized to a probability of 1.0 - the distribution increases without
+ bound! Yet, as the graph illustrates, that is what it seems to be.
+ The green curve is the anti-gaussian, given by 
+\begin_inset Formula $\exp(0.27(FME-13.7))^{2}/2$
+\end_inset
+
+.
+ As before, it has a width of approximately 1/4th.
+ 
 \end_layout
 
 \begin_layout Standard
