@@ -92,7 +92,9 @@ set title "Distribution of connector set MI"
 set xlabel "Mutual information of c-set"
 set ylabel "Count"
 plot "binned-cset-mi.dat" using 2:3 with lines linewidth 5 title "", \
-     "binned-cset-mi.dat" using 2:(160000 * 2**(-0.038*($2-11)**2)) with lines linewidth 5 title "2^-0.038(mi-11)^2"
+      "binned-cset-mi.dat" using 2:(160000 * exp(-0.5*(0.23*($2-11))**2)) with lines linewidth 5 title "exp-(0.23(mi-11))^2/2"
+
+#     "binned-cset-mi.dat" using 2:(160000 * 2**(-0.038*($2-11)**2)) with lines linewidth 5 title "2^{-0.038(mi-11)^2}"
 
 #     "binned-cset-mi.dat" using 2:(160000 * 2**(-(0.2*($2-11))**2)) with lines linewidth 2 title "1.6e5 2^"
 #
