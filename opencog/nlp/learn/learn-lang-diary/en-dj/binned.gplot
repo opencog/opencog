@@ -114,17 +114,20 @@ plot "weighted-cset-mi.dat" using 2:3 with lines linewidth 5 title "", \
 
 
 #################################################
-# Used to generate the binned word-MI graph
+# Used to generate the binned word marginal MI graph
 #
 set term postscript eps enhanced color 28
 set out 'binned-word-mi.eps'
+set key left
+set xrange [4:23]
+set yrange [1:10000]
 set logscale y
 set format y "10^{%L}"
-set title "Distribution of word fractional MI"
-set xlabel "Fractional MI of word"
+set title "Distribution of word fractional marginal MI"
+set xlabel "Fractional marginal MI of word"
 set ylabel "Count"
-plot "binned-word-mi.dat" using 2:3 with lines linewidth 5 title ""
-
+plot "binned-word-mi.dat" using 2:3 with lines linewidth 5 title "", \
+     "binned-word-mi.dat" using 2:(1900*exp(-0.5*(0.24*($2-20))**2)) with lines linewidth 5 title "exp -(0.24 (FMMI-20))^2 /2"
 
 #################################################
 # Used to generate the binned disjunct MI counts

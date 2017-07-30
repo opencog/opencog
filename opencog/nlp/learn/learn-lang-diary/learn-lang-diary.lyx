@@ -23595,12 +23595,12 @@ Both graphs show an eyeballed fit in green.
 \end_layout
 
 \begin_layout Subsection*
-Mutual Information of words
+Marginal Mutual Information of Words
 \end_layout
 
 \begin_layout Standard
-The mutual information of a single word can be defined by summing the (fractiona
-l) mutual information between a word, and all of it's disjuncts:
+The marginal mutual information of a single word can be defined by summing
+ the (fractional) mutual information between a word, and all of it's disjuncts:
 \begin_inset Formula 
 \[
 MI_{word}(w)=\frac{1}{p(w)}\sum_{d}p(w,d)MI_{pair}(w,d)
@@ -23630,31 +23630,20 @@ That is,
 \end_inset
 
  is the fractional contribution of the word to the total MI.
- The fractional MI is very convenient for comparing different words, since
- it factors out the frequency of how often a word is observed: the MI of
- two words with two very different frequencies can be directly compared.
+ The fractional marginal MI is very convenient for comparing different words,
+ since it factors out the frequency of how often a word is observed: the
+ MI of two words with two very different frequencies can be directly compared.
  
 \end_layout
 
 \begin_layout Standard
-xxxxx
-\end_layout
-
-\begin_layout Standard
-As can be seen from the graph below, the fractional MI ranges between +3
- and +19 for this dataset.
-\end_layout
-
-\begin_layout Standard
-The total MI for the dataset is measured to be 7.8969 bits.
- 
-\end_layout
-
-\begin_layout Standard
-The distribution can be visualized in two different ways.
+As can be seen from the graph below, the fractional marginal MI ranges between
+ +3 and +18 for this dataset.
+ The total MI for the dataset is measured to be 7.8969 bits.
+ The distribution can be visualized in two different ways.
  The graph on the left, below
 \begin_inset Foot
-status open
+status collapsed
 
 \begin_layout Plain Layout
 This is graphed by sorted-word-mi-hi-p in disjunct-stats.scm 
@@ -23671,11 +23660,8 @@ This is graphed by sorted-word-mi-hi-p in disjunct-stats.scm
 \end_layout
 
 \begin_layout Standard
-The graph on the right shows the distribution, for all 37413 words, bin-counted
+The graph on the right shows the distribution, for all 137078 words, bin-counted
  into 100 bins.
- Unfortunately, this sampling remains small and noisy, so the suggestion
- of a log-linear decay to both left and right is hidden by rather noisy
- spikes.
  The combs on the far right are again the same combs as noted in the last
  figure in section 
 \begin_inset CommandInset ref
@@ -23692,6 +23678,15 @@ reference "logli distribution graph"
 \end_inset
 
 .
+ The distribution appears to be gaussian, and of approximately the same
+ width as before, although located at a different center: the green line
+ in the graph is the gaussian given by 
+\begin_inset Formula $\exp-(0.24(FMMI-20))^{2}/2$
+\end_inset
+
+ as compared to 0.23 for the non-marginal MI distribution above.
+ The difference between 0.24 and 0.23 seems to be significant: changing one
+ to the other seems to give a noticably poorer fit.
 \end_layout
 
 \begin_layout Standard
@@ -23704,7 +23699,7 @@ reference "logli distribution graph"
 
 
 \begin_inset Graphics
-	filename images/binned-word-mi.eps
+	filename en-dj/binned-word-mi.eps
 	width 50col%
 
 \end_inset
@@ -23720,9 +23715,16 @@ reference "logli distribution graph"
 \end_layout
 
 \begin_layout Standard
-What re the disjuncts like at either end of this distribution? The first
- ten words in the ranking are: "Cao" "Award" "x" "y" "Prime" "we" "per"
- "Division" "League" "Game".
+What are the disjuncts like at either end of this distribution? 
+\end_layout
+
+\begin_layout Standard
+xxx
+\end_layout
+
+\begin_layout Standard
+The first ten words in the ranking are: "Cao" "Award" "x" "y" "Prime" "we"
+ "per" "Division" "League" "Game".
  The word 
 \begin_inset Quotes eld
 \end_inset
