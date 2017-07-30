@@ -115,9 +115,9 @@ plot "ranked-lengths.dat" using 1:2 with lines linewidth 5 title "", \
 set term postscript eps enhanced color 28
 set out 'ranked-word-mi-hi-p.eps'
 set logscale x
-set title "Word mututa, information"
+set title "Marginal mutual information of words"
 set xlabel "Rank"
-set ylabel "MI of word"
+set ylabel "Marginal MI of word"
 plot "ranked-word-mi-hi-p.dat" using 1:2 with lines linewidth 5 title ""
 
 #################################################

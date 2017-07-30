@@ -23646,7 +23646,7 @@ As can be seen from the graph below, the fractional MI ranges between +3
 \end_layout
 
 \begin_layout Standard
-The total MI for the dataset is measured to be 7.985 bits.
+The total MI for the dataset is measured to be 7.8969 bits.
  
 \end_layout
 
@@ -23654,7 +23654,7 @@ The total MI for the dataset is measured to be 7.985 bits.
 The distribution can be visualized in two different ways.
  The graph on the left, below
 \begin_inset Foot
-status collapsed
+status open
 
 \begin_layout Plain Layout
 This is graphed by sorted-word-mi-hi-p in disjunct-stats.scm 
@@ -23662,7 +23662,7 @@ This is graphed by sorted-word-mi-hi-p in disjunct-stats.scm
 
 \end_inset
 
- shows the ranked MI of the 630 words that have been observed more than
+ shows the ranked MI of the 9425 words that have been observed more than
  100 times in this dataset.
  Note that it is a semi-log plot; it is NOT Zipfian.
  Note that the MI seems to decay logarithmically, for a good long ways,
@@ -23697,7 +23697,7 @@ reference "logli distribution graph"
 \begin_layout Standard
 \align center
 \begin_inset Graphics
-	filename images/ranked-word-mi-hi-p.eps
+	filename en-dj/ranked-word-mi-hi-p.eps
 	width 50text%
 
 \end_inset
