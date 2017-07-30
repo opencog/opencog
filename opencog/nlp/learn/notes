@@ -12595,6 +12595,21 @@ ant ant-optional
    1.0 30.0))
 
 
+(define cnt 0)
+(define many (cog-count-atoms 'SimilarityLink))
+(define (sto at)
+	(store-atom at)
+	(set! cnt (+ cnt 1))
+	(if (eqv?  0 (modulo cnt 1000))
+		(format #t "stored ~A of ~A\n" cnt many))
+	#f)
+ (cog-map-type sto 'SimilarityLink)
+16:04
+
+almost exactly 1/3rd have sim > 0.5 ... 
+total = 142270 sim links
+
+
 
 =========================================================================
 

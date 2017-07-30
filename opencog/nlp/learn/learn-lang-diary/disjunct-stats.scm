@@ -472,7 +472,7 @@
 	(close outport))
 
 ; -------
-; Rank words according to thier fractonal entropy
+; Rank words according to thier fractional entropy
 (define (cset-vec-word-ent WORD)
 		(pmi 'compute-right-fentropy WORD))
 
@@ -559,7 +559,10 @@
 	(close outport))
 
 ; ---------------------------------------------------------------------
-; Rank words according to the MI between them and thier disjuncts
+
+(define (cset-vec-word-mi WORD) (psf 'right-wild-fmi WORD))
+
+; Rank words according to the marginal MI between them and thier disjuncts
 (define sorted-word-mi (score-and-rank cset-vec-word-mi all-cset-words))
 
 ; Like above, but high-ferequency only
@@ -595,12 +598,12 @@
 ; ---------------------------------------------------------------------
 ; Create the binned distribution graphs for dj-MI
 
-(define (cset-vec-disjunct-mi DJ)
-	(pseudo-cset-mi-api 'compute-left-fmi DJ))
+(define (cset-vec-disjunct-mi DJ) (psf 'left-wild-fmi DJ))
 
 (define sorted-dj-mi (score-and-rank cset-vec-disjunct-mi all-disjuncts))
+(define scored-dj-mi (score cset-vec-disjunct-mi all-disjuncts))
 
-(define binned-dj-mi (bin-count-simple sorted-dj-mi 100))
+(define binned-dj-mi (bin-count-simple scored-dj-mi 200))
 
 (let ((outport (open-file "/tmp/binned-dj-mi.dat" "w")))
 	(print-bincounts-tsv binned-dj-mi outport)
