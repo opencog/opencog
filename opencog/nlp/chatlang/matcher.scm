@@ -25,7 +25,13 @@
          ; The ones found by the recognizer
          (dual-match (filter psi-rule? (append-map cog-get-trunk
            (append (cog-outgoing-set (cog-execute! (Dual input-lseq)))
-                   (cog-outgoing-set (cog-execute! (Dual input-lset)))))))
+                   ; TODO FIXME: If the input is too long, it may take
+                   ; forever for the recognizer to match any rules being
+                   ; wrapped in an unordered link, so only do this if
+                   ; the input is not too long, for now...
+                   (if (<= 8 (length sent-seqs))
+                       (cog-outgoing-set (cog-execute! (Dual input-lset)))
+                       '())))))
          ; Get the psi-rules associate with them
          (rules-matched (append exact-match no-const dual-match)))
 
