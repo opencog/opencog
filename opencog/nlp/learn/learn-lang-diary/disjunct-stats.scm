@@ -29,11 +29,12 @@
 
 (define pca (make-pseudo-cset-api))
 (define psa (add-pair-stars pca))
+(define psc (add-pair-count-api psa))
+(define psf (add-pair-freq-api psa))
+
 (psa 'fetch-pairs)                  ; 4436 secs
 (print-matrix-summary-report psa)
 
-(define psc (add-pair-count-api psa))
-(define psf (add-pair-freq-api psa))
 
 ; (fetch-all-words)
 ; (length (get-all-words))  ; 
@@ -620,24 +621,27 @@
 
 (define psu (add-support-api psa))
 (define long-words
-	(filter (lambda (word) (<= 16 (psu 'right-length word)))
+	(filter (lambda (word) (<= 64 (psu 'right-length word)))
 		(psu 'left-basis)))
 
 (length long-words) ; 6568 of len >= 16
 ; and 32 <= len has 3278 
+; 64 <= len has 1608
+; 130 <= has 783
+; 128 <= has 797 .. lets do those.
 
 (define pslon
    (add-generic-filter psa
-      (lambda (word) (<= 32 (psu 'right-length word)))
+      (lambda (word) (<= 128 (psu 'right-length word)))
       (lambda (dj) #t)
       (lambda (dj) #t)
       (lambda (dj) #t)
       (lambda (dj) #t)
-      "cut len<32"
+      "cut len<128"
       #f))
 
 (define psls (add-pair-stars pslon))
-(define pss (batch-similarity psls #f))
+(define pss (batch-similarity psls #f #f 0.0))
 (pss 'paralel-batch 3)
 
 (cog-map-type ato 'SimilarityLink)

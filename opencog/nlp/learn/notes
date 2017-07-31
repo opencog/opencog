@@ -12669,6 +12669,22 @@ Fuu
 
 (cog-map-type new-sim 'SimilarityLink)
 
+(define (kill-sim ato)
+	(define sim (cog-value-ref (cog-value ato cos-key) 0))
+	(if (< sim 0.4)
+	   (cog-set-value! ato cos-key #f))
+	#f)
+(cog-map-type kill-sim 'SimilarityLink)
+
+(define scnt 0)
+(define (showone ato)
+	(if (not (null? (cog-value ato cos-key)))
+		(begin
+			(format #t "yo ~A ~A\n"
+				(cog-value-ref (cog-value ato cos-key) 0) ato)
+			(set! scnt (+ scnt 1))))
+	#f)
+
 Fuuuu.
 (define psu (add-support-api psa))
 (psu 'right-length
@@ -12676,12 +12692,12 @@ Fuuuu.
 
 (define pslon
 	(add-generic-filter psa
-		(lambda (word) (<= 32 (psu 'right-length word)))
+		(lambda (word) (<= 128 (psu 'right-length word)))
 		(lambda (dj) #t)
 		(lambda (dj) #t)
 		(lambda (dj) #t)
 		(lambda (dj) #t)
-		"cut len<32"
+		"cut len<128"
 		#f))
 	
 
