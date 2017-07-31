@@ -24984,15 +24984,7 @@ K(w)=\frac{\sum_{d,c}N(w,d)C(d,c)}{N(w,*)}
 
 \end_inset
 
-This 
-\end_layout
-
-\begin_layout Standard
-xxxx
-\end_layout
-
-\begin_layout Standard
-is graphed, below, for all words that have at least 100 observations.
+This is graphed, below, for all words that have at least 100 observations.
 \begin_inset Foot
 status collapsed
 
@@ -25008,7 +25000,7 @@ Computed with sorted-avg-connectors in disjunct-stats.scm
 \begin_layout Standard
 \align center
 \begin_inset Graphics
-	filename images/ranked-avg-connectors.eps
+	filename en-dj/ranked-avg-connectors.eps
 	width 70text%
 
 \end_inset
@@ -25017,11 +25009,67 @@ Computed with sorted-avg-connectors in disjunct-stats.scm
 \end_layout
 
 \begin_layout Standard
-This graph is unexpected; in part, having an average number of connectors
- that exceed 5 or 6 is intuitively surprising.
- What's happening here? The first ten items in the ranking are: "-" "de"
- "y" ":" "(" ")" "General" "Department" "x" "Act".
+This graph is unexpected.
+ Having an average number of connectors that exceed 5 or 6 is intuitively
+ surprising.
+ In proper grammar, it would be hard to reach even this degree without having
+ a transitive or ditranstive verb with several modifiers, and a particle
+ or prepostion.
+ The first tne items are out of control.
+ What's happening here? The first ten items in the ranking are: "|" "#"
+ "+" "||" "_" "ASCII" "electronically" "Northup" "disclaimer" "u".
+ The first five are presumably formating markup or possibly decroative markup
+ in the texts.
+ Three of the words appear to be license boilerplate.
+ The name "Northup" appears in only one text in the corpus: an autobiorgraphy,
  
+\begin_inset Quotes eld
+\end_inset
+
+Twelve Years a Slave
+\begin_inset Quotes erd
+\end_inset
+
+, by Solomon Northup.
+ Besides the title-page, the word Northup appears repeatedly in the table
+ of contents, which is bound to make for awkard parsing.
+ This presumably 
+\begin_inset Quotes eld
+\end_inset
+
+explains
+\begin_inset Quotes erd
+\end_inset
+
+ why the average connector count would be 11.2 for this word.
+\end_layout
+
+\begin_layout Standard
+Moving further down this list, many of the words and symbols suggest that
+ they appear in tables or lists embedded in the corpus.
+ The 
+\begin_inset Quotes eld
+\end_inset
+
+grammar
+\begin_inset Quotes erd
+\end_inset
+
+ of tables and lists is necessarily awkward, and seems unlikely to get much
+ of a meaningful parse from the MST parser.
+ This is further strengthened by an earlier analysis of a Wikipedia-based
+ dataset, re-reported below.
+\end_layout
+
+\begin_layout Subsubsection*
+Vertex degree in Wikipedia
+\end_layout
+
+\begin_layout Standard
+A similar analysis, performed on a much smaller dataset consisting entirely
+ of Wikipedia articles found a similar bheavior.
+ The first ten items in the ranking were: "-" "de" - "y" ":" "(" ")" "General"
+ "Department" "x" "Act".
 \end_layout
 
 \begin_layout Standard
@@ -25072,7 +25120,7 @@ Figueroa+ (+ (+ y+
  suggesting that there were possibly 51 really bad parses of a very long
  table of Spanish kings, which was mistaken for being a single sentence.
  Clearly, its junk; its frequently-occurring junk, which suggests that the
- table was repeatedly included in maybe 51 different Wikipedia pages.
+ table was repeatedly transcluded in maybe 51 different Wikipedia pages.
  
 \end_layout
 
