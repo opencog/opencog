@@ -611,19 +611,53 @@
 ; ---------------------------------------------------------------------
 ; ---------------------------------------------------------------------
 ; ---------------------------------------------------------------------
+; disjunct tools.
+
+(filter (lambda (cset) (< 0 (get-count cset))) (cog-incoming-by-type
+(Word "horses") 'Section))
+
+; ---------------------------------------------------------------------
+
+(define psu (add-support-api psa))
+(define long-words
+	(filter (lambda (word) (<= 16 (psu 'right-length word)))
+		(psu 'left-basis)))
+
+(length long-words) ; 6568 of len >= 16
+; and 32 <= len has 3278 
+
+(define pslon
+   (add-generic-filter psa
+      (lambda (word) (<= 32 (psu 'right-length word)))
+      (lambda (dj) #t)
+      (lambda (dj) #t)
+      (lambda (dj) #t)
+      (lambda (dj) #t)
+      "cut len<32"
+      #f))
+
+(define psls (add-pair-stars pslon))
+(define pss (batch-similarity psls #f))
+(pss 'paralel-batch 3)
+
+(cog-map-type ato 'SimilarityLink)
+
+; ---------------------------------------------------------------------
 ; Similarity.  Cosine distance.
 ; Assumes that cosine similarities have been batch-computed, already,
 ; using the code in gram-sim.scm
 
-(define cos-key (PredicateNode "*-Cosine Distance Key-*"))
 
 (define all-sims '())
 (cog-map-type
 	(lambda (sim)  (set! all-sims (cons sim all-sims)) #f)
 	'SimilarityLink)
 
-(length all-sims)    ; 23993
-; or 44139852 = 44M with the 0.1 cutoff.
+(length all-sims)    ;  142270 for a cutoff of 0.5
+
+(define (sim-cosine SIM)
+	(define cos-key (PredicateNode "*-Cosine Sim Key-*"))
+   (cog-value-ref (cog-value SIM cos-key) 0))
 
 (define good-sims
 	(filter
@@ -633,7 +667,7 @@
 				(< 8 (cset-vec-word-len (gdr sim)))))
 		all-sims))
 
-(length good-sims)   ;  15808
+(length good-sims)   ;  142270 -- identical to all sims.  Why?
 
 (define ranked-sims
 	(sort good-sims

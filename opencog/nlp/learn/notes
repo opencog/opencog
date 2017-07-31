@@ -12614,6 +12614,76 @@ total = 142270 sim links
 select count(*) from atoms where type=27; -- 142270 so that's perfect.
 where are the dupes coming from?
 
+----------------
+617
+
+(define (print-connector CON)
+	(string-append (cog-name (gar CON)) (cog-name (gdr CON)) " "))
+
+(define (section->dj-str SEC)
+	(string-concatenate 
+		(map print-connector (cog-outgoing-set (gdr SEC))))
+)
+
+(define (print-disjuncts WORD)
+	(define all-secs (cog-incoming-by-type WORD 'Section))
+	(define sorted-secs (sort all-secs
+		 (lambda (a b) (> (get-count a) (get-count b)))))
+	(define (prt-one con)
+		(format #t "~D  ~A\n" (get-count con) (section->dj-str con)))
+	(for-each prt-one sorted-secs))
+
+porch .. horses
+
+fsm .... filteres similarity
+   (define fca (add-subtotal-filter psa 50 50 10 #f))
+   (define fsa (add-pair-stars fca))
+	(define fsm (add-similarity-api fsa #f))
+	(define fsb (batch-similarity fsa #f))
+
+(fsb 'compute-similarity (Word "porch") (Word "horses"))
+(fsa 'right-stars (Word "porch")) 
+(fsa 'right-stars (Word "horses"))
+
+Fuu
+"cset cut-50-50-10"
+
+"*-SimKey cset cut-50-50-10"
+
+(cog-map-type sto 'SimilarityLink)
+
+(define cos-key (Predicate "*-Cosine Sim Key-*"))
+(define cut-key (Predicate "*-SimKey cset cut-50-50-10"))
+(define (mov-sim ato)
+	(define sim (cog-value ato cos-key))
+	(cog-set-value! ato cut-key sim)
+	(cog-set-value! ato cos-key (FloatValue 0.0))
+	#f)
+(cog-map-type mov-sim 'SimilarityLink)
+
+(define pss (batch-similarity psa #f))
+(define (new-sim ato)
+	(define fsim (pss 'compute-similarity (gar ato) (gdr ato)))
+	(cog-set-value! ato cos-key (FloatValue fsim))
+	#f)
+
+(cog-map-type new-sim 'SimilarityLink)
+
+Fuuuu.
+(define psu (add-support-api psa))
+(psu 'right-length
+
+
+(define pslon
+	(add-generic-filter psa
+		(lambda (word) (<= 32 (psu 'right-length word)))
+		(lambda (dj) #t)
+		(lambda (dj) #t)
+		(lambda (dj) #t)
+		(lambda (dj) #t)
+		"cut len<32"
+		#f))
+	
 
 
 
