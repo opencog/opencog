@@ -12,8 +12,8 @@ Experiment with inference control learning. The plan is to
 
 For now it is a toy experiment with a small taylored series over a
 small, constant knowledge-base. No ECAN is even necessary. The learned
-inference control rules should be that double, triple, etc deductions
-are useful.
+inference control rules, or control rules for short, should be that
+double, triple, etc deductions are useful.
 
 Knowledge-base
 --------------
@@ -67,8 +67,7 @@ Experiment High Level Algorithm
    Save the logs of each problem in opencog-i-j.log.
 2. Store in Si the number of solved problems for this iteration.
 3. Given opencog-i-j.log for j in 0 to N-1, build a collection of
-   inference control rules, called ICRi (see Setion Inference Control
-   Rule).
+   control rules, called ICRi (see Setion Control Rule).
 4. If meta-termination hasn't occured repeat step 1 with passing ICRi
    to the BC.
 
@@ -84,8 +83,8 @@ naturally ongoing meta-learning.
 Inference Control Rule
 ----------------------
 
-Generally the inference control rules will be represent as Cognitive
-Schematics, where
+Generally the control rules will be represent as Cognitive Schematics,
+where
 
 * Context:
   + The backward chainer has been queried to prove T
@@ -116,10 +115,9 @@ sets, and thus different inference controls. Finally, it should be
 clear that choosing the next inference rule is only one decision among
 many others the BC has to make that are ignored for now.
 
-The simplest, most generic inference control rule that we can learn
-expresses the probability of expanding an and-BIT producing a preproof
-of any target. All other inference control rules are specializations
-of this rule.
+The simplest, most generic control rule that we can learn expresses
+the probability of expanding an and-BIT producing a preproof of any
+target. All other control rules are specializations of this rule.
 
 ```
 ImplicationScope <TV>
@@ -147,18 +145,18 @@ ImplicationScope <TV>
       Variable "$T"
 ```
 
-Such an inference control rule may already help a bit the Backward
-Chainer. Indeed partial instantiation over R will calculate the
-probability of a given rule to produce a preproof of any T. To obtain
-a partial instantiation over R, R is subtituted by a certain rule,
-called `<rule>`, and the TV over the ImplicationScope, called
-`<rule-TV>`, is obtained by direct evaluation over the subset of
-observations of the corpus of proofs involving `<rule>`. There is a
-subtlety though, in the cases where B is not in the trace of subproofs
-of T we simply don't know whether or not it could be a subproof, as
-such we cannot evaluate its TV as false. Instead we rely on a
-uncertain prior as explained in Subsection Record Inference Traces to
-have uncertain and partial negative observations.
+Such a control rule may already help a bit the Backward Chainer.
+Indeed partial instantiation over R will calculate the probability of
+a given rule to produce a preproof of any T. To obtain a partial
+instantiation over R, R is subtituted by a certain rule, called
+`<rule>`, and the TV over the ImplicationScope, called `<rule-TV>`, is
+obtained by direct evaluation over the subset of observations of the
+corpus of proofs involving `<rule>`. There is a subtlety though, in
+the cases where B is not in the trace of subproofs of T we simply
+don't know whether or not it could be a subproof, as such we cannot
+evaluate its TV as false. Instead we rely on a uncertain prior as
+explained in Subsection Record Inference Traces to have uncertain and
+partial negative observations.
 
 ```
 ImplicationScope <rule-TV>
@@ -370,12 +368,10 @@ to be a preproof of T.
 ```
 
 The low confidence captures that we are unsure about the prior
-itself. But is still important, otherwise we'd have only positive
-examples to build our inference control rules, which would all end up
-with a precision of 1, thus rules with the highest counts would become
-the most important in the mixture model (see Section Inference Control
-Policy), regardless of their discriminative powers. Over time this
-prior should be autoadjusted via PLN reasoning.
+itself. These numbers are made up, however it is important that the
+confidence remains below 1 so that in case `<A>` happens to be a
+preproof of `<T>` this believe can be revised. Over time these numbers
+might be autoadjusted via PLN reasoning or such.
 
 These inferences are rather trivial and do not require learning their
 inference control to be tractable. See `meta-kb.scm` and `meta-rb.scm`
@@ -384,9 +380,9 @@ for their knowledge and the rule bases.
 ### Produce Inference Control Rules
 
 Given a corpus relating and-BITs and targets via the preproof
-relationship we can mine that corpus to obtain inference control
-rules, then combine these inference control rules to obtain an
-inference control policy, as described in the next Section.
+relationship we can mine that corpus to obtain control rules, then
+combine these control rules to obtain a inference control policy, as
+described in the next Section.
 
 We expect the pattern miner will be useful for mining the corpus,
 meanwhile we'll experiment with bruteforce implication scope
@@ -398,19 +394,19 @@ indroduction rule.
 Inference Control Policy
 ------------------------
 
-Once we have a learned a bunch of inference control rules we need
-properly utilize them to form an Inference Control Policy. Below we
-describe a way to combine them and select the next inference rule
-based on the results of that combination.
+Once we have a learned a bunch of control rules we need properly
+utilize them to form an Inference Control Policy. Below we describe a
+way to combine them and select the next inference rule based on the
+results of that combination.
 
 ### Combining Inference Control Rules
 
-A variety of inference control rules may simultaneously apply and we
-need a way to combine them.
+A variety of control rules may simultaneously apply and we need a way
+to combine them.
 
-Let's assume we have k valid inference control rules for inference
-rule R (an inference control rule is valid if it unifies with the
-current intermediary target and have its contexts satisfied.)
+Let's assume we have k valid control rules for inference rule R (a
+control rule is valid if it unifies with the current intermediary
+target and have its contexts satisfied.)
 
 ```
 ICR1 : C1 & R -> S <TV1>
@@ -513,8 +509,19 @@ variable equal to the sum of other random variables is determined by
 the convolution products of their pdfs. But we let that for later,
 maybe there's a simpler way.
 
-There is also the problem is that `ICRi(Sj|Rj)` is undefined for some
-`j`, we haven't figured this out yet.
+There is also the problem that `ICRi(Sj|Rj)` is undefined for some
+observations. TODO: assume that the algorithmic complexity of the
+complete operator is
+
+```
+K(i)+a*sum_j_in_Ei (L(j)
+```
+
+where `Ei` is the set of observations that are undefined by rule `i`
+and `L(j)` is the length, or entropy, of observation `j`.
+
+Another option is to use distributional truth values to complete the
+operator.
 
 Once we have that we can calculate the TVi of success of each valid
 inference rule Ri, either by turning its cdf into a TV or a pdf as it
@@ -623,6 +630,17 @@ the complexity should be around `O(n*M)`, all rules considered. In the
 end we end up with a distribution of actions according to which we can
 select our next inference rule.
 
+Maybe it's possible to have all this done by PLN itself by "inverting"
+the cognitive schematics to make it say
+
+```
+C & G -> A
+```
+
+that is, if we are in context `C` and want to fulfill goal `G` then
+what is the probability that should be `A` selected. Then merely use
+"holistic" instantiation.
+
 Further Remarks
 ---------------
 
@@ -632,9 +650,8 @@ all) hard decision points occuring in the Backward Chainer
 algorithm. For instance choosing an and-BIT for expansion comes down
 to choosing an unexplored preproof. Choosing the next leaf to expand
 from, consists of choosing a leaf such that there exists an inference
-rule that expands into a preproof. So the inference control rules can
-in fact be re-used, or need little modifications, for other decisional
-points.
+rule that expands into a preproof. So the control rules can in fact be
+re-used, or need little modifications, for other decisional points.
 
 There is however a problem that has been completely left out. How to
 characterize the AtomSpace, i.e. the knowledge base. Proof structures
