@@ -1,7 +1,0 @@
-
-                       Viterbi Parser
-                       --------------
-
-This directory contains code pertaining to an experimental Viterbi
-parser for the Link Grammar dictionary.   As of April 2013, work
-has barely begun; an initial protype is in the link-grammar code.

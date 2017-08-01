@@ -56,7 +56,7 @@ public:
     void print_query_info(point3d query, OcTreeNode* node)
     {
         if (node != nullptr) {
-            opencog::Handle i=(static_cast<AtomOcTreeNode*>(node))->getData();
+            opencog::Handle i=(static_cast<AtomOcTreeNode<Handle>*>(node))->getData();
             cout << "occupancy probability at " << query << ":\t " << node->getOccupancy() << ";"<< endl;
         }
         else
@@ -68,7 +68,7 @@ public:
         cout << endl;
         cout << "generating example map" << endl;
 
-        AtomOcTree tree (0.1);  // create empty tree with resolution 0.1
+        AtomOcTree<Handle> tree (0.1);  // create empty tree with resolution 0.1
 
 
         // insert some measurements of occupied cells
@@ -101,7 +101,7 @@ public:
         OcTreeNode* result = tree.search (query);
         print_query_info(query, result);
         TS_ASSERT_DIFFERS(result,(OcTreeNode*)nullptr);
-        TS_ASSERT_EQUALS((static_cast<AtomOcTreeNode*>(result))->getData(),testHandle);
+        TS_ASSERT_EQUALS((static_cast<AtomOcTreeNode<Handle>*>(result))->getData(),testHandle);
 
         query = point3d(-1.,-1.,-1.);
         result = tree.search (query);

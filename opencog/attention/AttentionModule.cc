@@ -54,7 +54,6 @@ AttentionModule::~AttentionModule()
     _cogserver.unregisterAgent(WAImportanceDiffusionAgent::info().id);
 
     _cogserver.unregisterAgent(ForgettingAgent::info().id);
-    _cogserver.unregisterAgent(FocusBoundaryUpdatingAgent::info().id);
     _cogserver.unregisterAgent(HebbianUpdatingAgent::info().id);
     _cogserver.unregisterAgent(HebbianCreationAgent::info().id);
 
@@ -81,15 +80,12 @@ void AttentionModule::init()
 
     _cogserver.registerAgent(ForgettingAgent::info().id,          &forgettingFactory);
     _cogserver.registerAgent(HebbianCreationAgent::info().id,&hebbianCreationFactory);
-    _cogserver.registerAgent(FocusBoundaryUpdatingAgent::info().id,&focusUpdatingFactory);
     _cogserver.registerAgent(HebbianUpdatingAgent::info().id,&hebbianUpdatingFactory);
 
     _forgetting_agentptr =
         _cogserver.createAgent(ForgettingAgent::info().id, false);
     _hebbiancreation_agentptr =
         _cogserver.createAgent(HebbianCreationAgent::info().id,false);
-    _focusupdating_agentptr =
-        _cogserver.createAgent(FocusBoundaryUpdatingAgent::info().id,false);
     _hebbianupdating_agentptr =
         _cogserver.createAgent(HebbianUpdatingAgent::info().id,false);
 
@@ -120,7 +116,6 @@ std::string AttentionModule::do_start_ecan(Request *req, std::list<std::string> 
     _cogserver.startAgent(_waRentAgentPtr, true, waRent);
 
    // _cogserver.startAgent(_forgetting_agentptr,true,"attention");
-    _cogserver.startAgent(_focusupdating_agentptr,true,"attention");
 
    // _cogserver.startAgent(_hebbiancreation_agentptr,true,"hca");
    // _cogserver.startAgent(_hebbianupdating_agentptr,true,"hua");
@@ -138,7 +133,6 @@ std::string AttentionModule::do_stop_ecan(Request *req, std::list<std::string> a
     _cogserver.stopAgent(_waRentAgentPtr);
 
     _cogserver.stopAgent(_forgetting_agentptr);
-    _cogserver.stopAgent(_focusupdating_agentptr);
 
     _cogserver.stopAgent(_hebbiancreation_agentptr);
     _cogserver.stopAgent(_hebbianupdating_agentptr);

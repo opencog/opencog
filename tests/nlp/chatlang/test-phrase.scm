@@ -1,6 +1,11 @@
-(use-modules (opencog)
+(use-modules (srfi srfi-1)
+             (opencog)
              (opencog nlp)
              (opencog nlp chatlang))
+
+; phrase is not define-public, so we have to load terms.scm to test it.
+(load "../../../opencog/nlp/chatlang/translator.scm")
+(load "../../../opencog/nlp/chatlang/terms.scm")
 
 (define phrase (phrase "John Smith"))
 

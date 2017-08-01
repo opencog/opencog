@@ -37,7 +37,6 @@
 (add-to-ltdl-path (string-append (getcwd) "/opencog/nlp/types"))
 (add-to-ltdl-path (string-append (getcwd) "/opencog/spacetime"))
 (add-to-ltdl-path (string-append (getcwd) "/opencog/attention"))
-(add-to-ltdl-path (string-append (getcwd) "/opencog/embodiment"))
 
 ; Scheme wrappers for c++ code
 (add-to-ltdl-path (string-append (getcwd) "/opencog/nlp/fuzzy"))

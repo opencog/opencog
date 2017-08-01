@@ -1,6 +1,6 @@
 ADD_GUILE_MODULE (FILES
 	chatlang.scm
-	ui.scm
+	cs-parse.scm
 	terms.scm
 	translator.scm
 	matcher.scm

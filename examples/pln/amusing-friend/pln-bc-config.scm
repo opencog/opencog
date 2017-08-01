@@ -40,8 +40,8 @@
 )
 
 ;; Define pln-fc and pln-bc for convenience 
-(define (pln-fc source) (cog-fc pln-rbs source (List) (Set)))
-(define (pln-bc target) (cog-bc pln-rbs target (List) (Set)))
+(define (pln-fc source) (cog-fc pln-rbs source))
+(define (pln-bc target) (cog-bc pln-rbs target))
 
 ;;;;;;;;;;;;;;;;
 ;; Load rules ;;
@@ -52,17 +52,17 @@
 (add-to-load-path "../../../opencog/pln/meta-rules/")
 
 (define rule-filenames
-  (list "predicate-logic/conditional-full-instantiation-meta-rule.scm"
-        "wip/implication-scope-to-implication-rule.scm"
-        ;; "wip/equivalence-to-implication-rule.scm"
-        "wip/predicate-lambda-evaluation-rule.scm"
-        "wip/inversion-rule.scm"
-        "wip/implication-implicant-conjunction-rule.scm"
-        ;; "wip/and-lambda-factorization-double-implication-rule.scm"
-        "term-logic/deduction-rule.scm"
-        ;; "wip/implication-to-implication-scope-rule.scm"
-        ;; "wip/equivalence-scope-distribution-rule.scm"
-        ;; "wip/and-introduction-rule.scm"
+  (list "predicate/conditional-full-instantiation.scm"
+        "wip/implication-scope-to-implication.scm"
+        ;; "wip/equivalence-to-implication.scm"
+        "wip/predicate-lambda-evaluation.scm"
+        "wip/inversion.scm"
+        "wip/implication-implicant-conjunction.scm"
+        ;; "wip/and-lambda-factorization-double-implication.scm"
+        "term/deduction.scm"
+        ;; "wip/implication-to-implication-scope.scm"
+        ;; "wip/equivalence-scope-distribution.scm"
+        ;; "wip/and-introduction.scm"
         )
   )
 (for-each load-from-path rule-filenames)

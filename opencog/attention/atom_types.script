@@ -9,6 +9,7 @@
 
 // ====================================================================
 // Attention allocation atoms:
+//
 HEBBIAN_LINK <- LINK
 ASYMMETRIC_HEBBIAN_LINK <- ORDERED_LINK,HEBBIAN_LINK
 SYMMETRIC_HEBBIAN_LINK <- UNORDERED_LINK,HEBBIAN_LINK

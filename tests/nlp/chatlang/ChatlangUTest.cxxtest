@@ -52,33 +52,24 @@ public:
     {
         as = new AtomSpace();
         scm = new SchemeEval(as);
+        scm->eval("(add-to-load-path \"/usr/local/share/\")");
         scm->eval("(add-to-load-path \"/usr/local/share/opencog/scm\")");
+/*
+ These extra paths cause the unit tests to fail ... I don't understand why.
         scm->eval("(add-to-load-path \"" PROJECT_BINARY_DIR "\")");
         scm->eval("(add-to-load-path \"" PROJECT_BINARY_DIR "/opencog/\")");
         scm->eval("(add-to-load-path \"" PROJECT_BINARY_DIR "/opencog/scm/\")");
+*/
         scm->eval("(add-to-load-path \"" PROJECT_SOURCE_DIR "/tests/nlp/chatlang/\")");
 
-        scm->eval("(setenv \"LTDL_LIBRARY_PATH\" "
-                  "\"/usr/local/lib/opencog:/usr/local/lib/opencog/modules:"
-                  PROJECT_BINARY_DIR "/opencog/spacetime:"
-                  PROJECT_BINARY_DIR "/opencog/attention:"
-                  PROJECT_BINARY_DIR "/opencog/embodiment:"
-                  PROJECT_BINARY_DIR "/opencog/nlp/types"
-         "\")");
+        // This is still needed even if the modules is no longer defined
+        // self-referentially, no idea why...
+        scm->eval("(load-from-path \"opencog/nlp/chatlang/ui.scm\")");
+        scm->eval("(load-from-path \"opencog/nlp/chatlang/terms.scm\")");
+        scm->eval("(load-from-path \"opencog/nlp/chatlang/translator.scm\")");
+        scm->eval("(load-from-path \"opencog/nlp/chatlang/matcher.scm\")");
 
-        // This is really really strange... we should not need to actually load
-        // any of the codes like this as they are part of the chatlang module?
-        // But for some reason two of the chatlang tests were failing on my
-        // computer because somehow the definitions of the functions were not found??
-        // How did the rest pass with the exact same setup? Makes no sense to me...
-        scm->eval("(load \"" PROJECT_SOURCE_DIR
-                   "/opencog/nlp/chatlang/ui.scm\")");
-        scm->eval("(load \"" PROJECT_SOURCE_DIR
-                   "/opencog/nlp/chatlang/terms.scm\")");
-        scm->eval("(load \"" PROJECT_SOURCE_DIR
-                   "/opencog/nlp/chatlang/translator.scm\")");
-        scm->eval("(load \"" PROJECT_SOURCE_DIR
-                   "/opencog/nlp/chatlang/matcher.scm\")");
+        scm->eval("(setenv \"LTDL_LIBRARY_PATH\" \"/usr/local/lib/opencog\")");
     }
 
     void tearDown()
@@ -95,9 +86,7 @@ public:
     void test_create_phrase();
     void test_create_concept();
     void test_create_choices();
-    void test_unordered_matching();
     void test_negation();
-    void test_create_chat_rule();
     void test_chat_find_rules();
 };
 
@@ -173,18 +162,6 @@ void ChatlangUTest::test_create_choices()
     logger().info("END TEST: %s", __FUNCTION__);
 }
 
-void ChatlangUTest::test_unordered_matching()
-{
-    logger().info("BEGIN TEST: %s", __FUNCTION__);
-
-    scm->eval("(load-from-path \"test-unordered.scm\")");
-
-    auto result = scm->eval("test-unordered-result");
-    TSM_ASSERT_EQUALS("Fail to create unordered terms!", "#t\n", result);
-
-    logger().info("END TEST: %s", __FUNCTION__);
-}
-
 void ChatlangUTest::test_negation()
 {
     logger().info("BEGIN TEST: %s", __FUNCTION__);
@@ -193,18 +170,6 @@ void ChatlangUTest::test_negation()
 
     auto result = scm->eval("test-negation-result");
     TSM_ASSERT_EQUALS("Fail to create negations!", "#t\n", result);
-
-    logger().info("END TEST: %s", __FUNCTION__);
-}
-
-void ChatlangUTest::test_create_chat_rule()
-{
-    logger().info("BEGIN TEST: %s", __FUNCTION__);
-
-    scm->eval("(load-from-path \"test-chat-rule.scm\")");
-
-    auto result = scm->eval("test-chat-rule-result");
-    TSM_ASSERT_EQUALS("Fail to create chat rules!", "#t\n", result);
 
     logger().info("END TEST: %s", __FUNCTION__);
 }
@@ -248,11 +213,38 @@ void ChatlangUTest::test_chat_find_rules()
     auto result_11 = scm->eval("test-result-11");
     TSM_ASSERT_EQUALS("Fail to find rule 5!", "#t\n", result_11);
 
-    auto result_12 = scm->eval("test-result-1");
+    auto result_12 = scm->eval("test-result-12");
     TSM_ASSERT_EQUALS("Fail to find rule 6!", "#t\n", result_12);
 
-    auto result_13 = scm->eval("test-result-1");
+    auto result_13 = scm->eval("test-result-13");
     TSM_ASSERT_EQUALS("Fail to find rule 7!", "#t\n", result_13);
+
+    auto result_14 = scm->eval("test-result-14");
+    TSM_ASSERT_EQUALS("Fail to find rule 8!", "#t\n", result_14);
+
+    auto result_15 = scm->eval("test-result-15");
+    TSM_ASSERT_EQUALS("Test 15 failed!", "#t\n", result_15);
+
+    auto result_16 = scm->eval("test-result-16");
+    TSM_ASSERT_EQUALS("Test 16 failed!", "#t\n", result_16);
+
+    auto result_17 = scm->eval("test-result-17");
+    TSM_ASSERT_EQUALS("Test 17 failed!", "#t\n", result_17);
+
+    auto result_18 = scm->eval("test-result-18");
+    TSM_ASSERT_EQUALS("Test 18 failed!", "#t\n", result_18);
+
+    auto result_19 = scm->eval("test-result-19");
+    TSM_ASSERT_EQUALS("Test 19 failed!", "#t\n", result_19);
+
+    auto result_20 = scm->eval("test-result-20");
+    TSM_ASSERT_EQUALS("Test 20 failed!", "#t\n", result_20);
+
+    auto result_21 = scm->eval("test-result-21");
+    TSM_ASSERT_EQUALS("Test 21 failed!", "#t\n", result_21);
+
+    auto result_22 = scm->eval("test-result-22");
+    TSM_ASSERT_EQUALS("Test 2 failed!", "#t\n", result_22);
 
     logger().info("END TEST: %s", __FUNCTION__);
 }

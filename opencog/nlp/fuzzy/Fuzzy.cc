@@ -212,7 +212,7 @@ void Fuzzy::calculate_tfidf(const HandleSeq& word_insts)
         // No. of times this word exists in the sentence
         int word_cnt = std::count_if(word_insts.begin(), word_insts.end(), word_match);
 
-        OrderedHandleSet hs;
+        HandleSet hs;
         for (const Handle& l : get_source_neighbors(w, LEMMA_LINK))
         {
             for (const Handle& p : get_target_neighbors(l, WORD_INSTANCE_LINK))
@@ -315,7 +315,7 @@ bool Fuzzy::accept_starter(const Handle& hp)
  */
 bool Fuzzy::try_match(const Handle& soln)
 {
-    if (_af_only and bank->get_sti(soln) < bank->getAttentionalFocusBoundary())
+    if (_af_only and !bank->atom_is_in_AF(soln))
         return false;
 
     if (target == soln)

@@ -1,0 +1,18 @@
+
+#################################################
+# Used to generate the row counts
+#
+set term postscript eps enhanced color 28
+set out 'count-rows.eps'
+set logscale y
+set logscale x
+set yrange [0.05:1]
+set title "Cumulative Distribution of Row Subtotals"
+set xlabel "Number of observations in row"
+set ylabel "Fraction of rows"
+plot "count-rows.dat" using ($2+1):($3/175559) with lines linewidth 5 title "", \
+     "count-rows.dat" using ($2+1):(1/($2+1)) with lines linewidth 5 title "1 / N", \
+     "count-rows.dat" using ($2+1):(0.67/($2+1)** 0.55) with lines linewidth 2 \
+      title "0.67 / N^{0.55}"
+
+#################################################

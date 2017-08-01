@@ -1,345 +1,327 @@
 {-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE FlexibleContexts           #-}
 module OpenCog.Lojban.Syntax.Util where
 
-import Prelude hiding (id,(.),(<*>),(<$>),pure,(*>),(<*),foldl)
+import Prelude hiding (id,(.),(<*>),(<$>),(*>),(<*),foldl)
 
-import qualified Data.Map as M
-import qualified Data.List.Split as S
-import qualified Data.Foldable as F
-import Data.List (partition,intercalate)
+import Data.List.Split (splitOn)
+import Data.List (intercalate,find,delete)
 import Data.Char (chr,isLetter,isDigit)
 import Data.Maybe
+import Data.Map (findWithDefault)
 
-
-import Control.Monad.Trans.Reader
+import Control.Category
+import Control.Arrow
+import Control.Applicative hiding (many,some,optional)
 import Control.Monad
-import qualified Control.Applicative as A
+import Control.Monad.RWS.Class
+import Control.Monad.Trans.Class
+
 
 import System.Random
 
-import Control.Category (id,(.))
-import Control.Isomorphism.Partial
-import Control.Isomorphism.Partial.Unsafe
-import Text.Syntax
+import Iso
+import Syntax hiding (SynIso,Syntax)
 
+import OpenCog.AtomSpace (Atom(..))
 import OpenCog.Lojban.Syntax.Types
 
+import qualified Data.Map as M
 import qualified Data.ListTrie.Patricia.Set.Ord as TS
 
 -------------------------------------------------------------------------------
 --Iso Util
 -------------------------------------------------------------------------------
 
-isofmap :: Functor f => Iso a b -> Iso (f a) (f b)
-isofmap iso = Iso f g where
-    f = Just . fmap (fromJust . apply iso)
-    g = Just . fmap (fromJust . unapply iso)
+mapIso :: Traversable t => SynIso a b -> SynIso (t a) (t b)
+mapIso iso = Iso f g where
+    f = traverse (apply iso)
+    g = traverse (unapply iso)
 
-second :: Iso a b -> Iso (c,a) (c,b)
-second a = id *** a
-
-first :: Iso a b -> Iso (a,c) (b,c)
-first  a = a *** id
-
-insert :: a -> Iso () a
-insert = inverse . ignore
-
-iunit = inverse unit
-
-ciunit = iunit . commute
-
-addfst :: a -> Iso b (a,b)
-addfst a = inverse $ rmfst a
-
-addsnd :: a -> Iso b (b,a)
-addsnd a = inverse $ rmsnd a
-
-rmfst :: a -> Iso (a,b) b
-rmfst a = iunit . commute .< ignore a
-
-rmsnd :: a -> Iso (b,a) b
-rmsnd a = iunit .> ignore a
-
-choice :: Eq c => [(c,Iso a b)] -> Iso (c,a) b
+choice :: [SynIso (c,a) b] -> SynIso (c,a) b
 choice lst = Iso f g where
-    f (c,a) = let found = F.find (\(k,_) -> c == k) lst
-              in case found of
-                Just (_,iso) -> apply iso a
-                Nothing -> Nothing
-    g b = let Just (c,iso) = F.find (\(c,iso) -> isJust $ unapply iso b) lst
-          in Just (c,fromJust $ unapply iso b)
+    f i = foldl1 mplus $ map (`apply` i) lst
+    g i = foldl1 mplus $ map (`unapply` i) lst
 
-infixr 8 .>
-infixr 8 .<
-infixr 8 >.
-infixr 8 <.
+infix 8 .>
+infix 8 .<
+infix 8 >.
+infix 8 <.
 
-(<.) :: Iso b d -> Iso a (b,c) -> Iso a (d,c)
+(<.) :: SynIso b d -> SynIso a (b,c) -> SynIso a (d,c)
 (<.) i j = first i . j
 
-(>.) :: Iso b d -> Iso a (c,b) -> Iso a (c,d)
+(>.) :: SynIso b d -> SynIso a (c,b) -> SynIso a (c,d)
 (>.) i j = second i . j
 
-(.<) :: Iso (a,b) c -> Iso d a -> Iso (d,b) c
+(.<) :: SynIso (a,b) c -> SynIso d a -> SynIso (d,b) c
 (.<) i j = i . first j
 
-(.>) :: Iso (a,b) c -> Iso d b -> Iso (a,d) c
+(.>) :: SynIso (a,b) c -> SynIso d b -> SynIso (a,d) c
 (.>) i j = i . second j
-
-(<^.) :: Iso b (State c) -> Iso a (State (b,d)) -> Iso a (State (c,d))
-(<^.) i j = reorder . (first i <. j)
-    where reorder = Iso (Just . f) (Just . g)
-          f (((c,s1),d),s2) = ((c,d),s1++s2)
-          g ((c,d),s)       = (((c,s),d),s)
-
-(>^.) :: Iso b (State c) -> Iso a (State (d,b)) -> Iso a (State (d,c))
-(>^.) i j =  reorder . (second i <. j)
-    where reorder = Iso (Just . f) (Just . g)
-          f ((c,(d,s1)),s2) = ((c,d),s1++s2)
-          g ((c,d),s)       = ((c,(d,s)),s)
-
-infixr 9 =.
-
-(=.) :: Iso b (State c) -> Iso a (State b) -> Iso a (State c)
-(=.) i j = collapsState . (i <. j)
-
-(*^*) :: Iso a (State b) -> Iso c (State d) -> Iso (State (a,c)) (State (b,d))
-(*^*) i j = reorder .< iso
-    where iso = Iso f g
-          f (a,c) = liftM2 (,) (apply i a) (apply j c)
-          g (b,d) = liftM2 (,) (unapply i b) (unapply j d)
-          reorder = Iso rf rg
-          rf (((b,s1),(d,s2)),s3) = Just ((b,d),s1++s2++s3)
-          rg ((b,d),s)            = Just (((b,s),(d,s)),s)
 
 infix 8 |^|
 
-(|^|) :: Iso gamma alpha -> Iso gamma beta -> Iso gamma (Either alpha beta)
+(|^|) :: SynIso gamma alpha -> SynIso gamma beta -> SynIso gamma (Either alpha beta)
 (|^|) i j = inverse (inverse i ||| inverse j)
 
-showReadIso :: (Read a, Show a) => Iso a String
-showReadIso = Iso (Just . show) (Just . read)
+showReadIso :: (Read a, Show a) => SynIso a String
+showReadIso = mkIso show read
 
-partitionIso :: (a -> Bool) -> Iso [a] ([a],[a])
-partitionIso p = Iso f g where
-    f ls = Just $ partition p ls
-    g (xs,ys) = Just $ xs ++ ys
+isoIntercalate :: String -> SynIso [String] String
+isoIntercalate x = mkIso (intercalate x) (splitOn x)
 
-isoConcat :: String -> Iso [String] String
-isoConcat x = Iso (Just . intercalate x) (Just . S.splitOn x)
+isoPrepend :: String -> SynIso String String
+isoPrepend s1 = mkIso f g where
+    f s2 = s1++s2
+    g s  = drop (length s1) s
 
-isoConcat2 :: Iso [[a]] [a]
-isoConcat2 = Iso f g where
-    f = Just . concat
-    g = Just . map (\x -> [x])
+isoAppend :: String -> SynIso String String
+isoAppend s1 = mkIso f g where
+    f s2 = s2++s1
+    g s  = take (length s - length s1) s
 
-isoDrop :: Int -> Iso String String
-isoDrop i = Iso (Just . drop i) (Just . id)
-
-isoReverse :: Iso [a] [a]
-isoReverse = Iso (Just . reverse) (Just . reverse)
-
-stripSpace :: Iso String String
-stripSpace = Iso (Just . f) (Just . g) where
-    f [] = []
-    f (' ':xs) = f xs
-    f (x:xs) = x : f xs
-    g x = x
-
---For converting elements or tuples into lists
---Lists are needed as arguments to form Link Atoms
-tolist1 :: Iso a [a]
-tolist1 = Iso (\a -> Just [a]) (\[a] -> Just a)
-
-tolist2 :: Show a => Iso (a,a) [a]
-tolist2 = Iso (\(a1,a2) -> Just [a1,a2])
-              (\case {[a1,a2] -> Just (a1,a2); a -> error $ "tolist2: " ++ show a})
-
-isoZip :: Iso ([a],[b]) [(a,b)]
-isoZip = Iso (Just . uncurry zip) (Just . unzip)
-
-isoDistribute :: Iso (a,[b]) [(a,b)]
-isoDistribute = isoZip . reorder
-    where reorder = Iso f g
-          f (a,b)   = Just (replicate (length b) a,b)
-          g (a:_,b) = Just (a,b)
-          g ([],_)  = error $ "This can't happen can it?"
-
-
-mapIso :: Iso a b -> Iso [a] [b]
-mapIso iso = Iso f g where
-    f = mapM $ apply iso
-    g = mapM $ unapply iso
-
-mkSynonymIso :: (Eq a, Eq b) => [(a,b)] -> Iso a b
-mkSynonymIso ls = Iso f g where
-    f e = snd `fmap` F.find (\(a,b) -> a == e) ls
-    g e = fst `fmap` F.find (\(a,b) -> b == e) ls
-
-try :: Iso a a -> Iso a a
+try :: SynIso a a -> SynIso a a
 try iso = Iso f g where
-    f a = apply iso a A.<|> Just a
-    g a = unapply iso a A.<|> Just a
+    f a = apply iso a <|> pure a
+    g a = unapply iso a <|> pure a
 
 --For dealing with maybes from/for Optional in the first or second position
-ifJustA :: Iso (Maybe a,b) (Either (a,b) b)
-ifJustA = Iso (\case {(Just a,b) -> Just $ Left (a,b) ; (Nothing,b) -> Just $  Right b})
-              (\case {Left (a,b) -> Just (Just a,b) ;  Right b  -> Just (Nothing,b)})
+ifJustA :: SynIso (Maybe a,b) (Either (a,b) b)
+ifJustA = mkIso f g where
+    f (Just a,b)  = Left (a,b)
+    f (Nothing,b) = Right b
+    g (Left (a,b))= (Just a,b)
+    g (Right b)   = (Nothing,b)
 
-ifJustB :: Iso (a,Maybe b) (Either (a,b) a)
-ifJustB = Iso (\case {(a,Just b) -> Just $ Left (a,b) ; (a,Nothing) -> Just $  Right a})
-              (\case {Left (a,b) -> Just (a,Just b) ;  Right a  -> Just (a,Nothing)})
--------------------------------------------------------------------------------
---State Util
--------------------------------------------------------------------------------
+ifJustB :: SynIso (a,Maybe b) (Either (a,b) a)
+ifJustB = mkIso f g where
+    f (a,Just b)  = Left (a,b)
+    f (a,Nothing) = Right a
+    g (Left (a,b))= (a,Just b)
+    g (Right a)   = (a,Nothing)
 
-infixr 6 <&>
-
-(<&>) :: Syntax delta => delta (State a) -> delta (State b) -> delta (State (a,b))
-a <&> b =  mergeState <$> a <*> b
-
-mergeState :: Iso (State a,State b) (State (a,b)) --((Atom,Atom),[Atoms])
-mergeState = Iso f g where
-    f ((a1,s1),(a2,s2)) = Just ((a1,a2),s1++s2)
-    g ((a1,a2),s)       = Just ((a1,s) ,(a2,s))
-
-optState :: Syntax delta => delta (State a) -> delta (State (Maybe a))
-optState syn = iso <$> optional syn
-    where iso = Iso (Just . f) (Just . g)
-            where f (Just (a,as)) = (Just a, as)
-                  f Nothing       = (Nothing, [])
-                  g (Nothing,_)   =  Nothing
-                  g (Just a ,as)  = Just (a,as)
-
-stateMany :: (Eq alpha,Syntax delta) => delta (State alpha)
-                                     -> delta (State [alpha])
-stateMany p = (first cons <$> p <&> stateMany p) <|> pure ([],[])
-
-stateMany1 :: (Eq alpha,Syntax delta) => delta (State alpha)
-                                      -> delta (State [alpha])
-stateMany1 p = first cons <$> p <&> stateMany p
-
-stateList :: Iso [State a] (State [a])
-stateList = foldl ff . init
-    where ff = Iso (Just . f) (Just . g)
-          f ((a,xs),(b,ys)) = (b:a,xs++ys)
-          g (b:a,xs) = ((a,xs),(b,xs))
-          init = Iso (\ls -> Just (([],[]),ls))
-                     (\(_,ls) -> Just ls)
-
-collapsState :: Iso (State (State a)) (State a)
-collapsState = Iso (Just . f) (Just . g) where
-    f ((a,ys),xs) = (a,xs++ys)
-    g (a,xs) = ((a,xs),xs)
-
-expandState :: Iso (State a,b) (State (a,b))
-expandState = Iso (Just . f) (Just . g) where
-    f ((a,s),b) = ((a,b),s)
-    g ((a,b),s) = ((a,s),b)
-
-joinState :: Iso (State a,State b) (State (a,b))
-joinState = Iso (Just . f) (Just . g) where
-    f ((a,s1),(b,s2)) = ((a,b),s1++s2)
-    g ((a,b),s)       = ((a,s),(b,s))
-
-reorder0 :: Iso a (State a)
-reorder0 = Iso (\a -> Just (a,[]))
-               (\(a,_) -> Just a)
-
+--Parser ID that fails when printing
+--Use to force a path in (maybe . pid &&& something)
+pid :: SynIso a a
+pid = Iso f g where
+    f a = pure a
+    g _ = lift $ Left "Only succeds when parsing."
 
 -------------------------------------------------------------------------------
---SyntaxReader Util
+--State Helpers
 -------------------------------------------------------------------------------
 
+setJai :: SynMonad t State => JJCTTS -> (t ME) ()
+setJai a = modify (\s -> s {sJAI = Just a})
 
-withSeed :: SyntaxReader a -> SyntaxReader (a,Int)
-withSeed r = ReaderT (\e@(_,_,_,seed) ->
-                            runReaderT r e <*> pure seed) ---XXX can't work with printing as we don't no seed make pure just swallo it
+addXUIso :: SynIso Atom Atom
+addXUIso = Iso f g where
+    f a = addXU a >> pure a
+    g a = rmXU a >> pure a
 
-withSeedState :: SyntaxReader (State a) -> SyntaxReader (State (a,Int))
-withSeedState r = ReaderT (\e@(_,_,_,seed) ->
-                                runReaderT r e <&> pure (seed,[])) ---XXX can't work with printing as we don't no seed make pure just swallo it
+addXU :: SynMonad t State => Atom -> (t ME) ()
+addXU a = modify (\s -> s {sXU = a:(sXU s)})
 
+rmXU :: SynMonad t State => Atom -> (t ME) ()
+rmXU a = modify (\s -> s {sXU = delete a (sXU s)})
 
-------------------------------------------------------------------------
-letter, digit :: Syntax delta => delta Char
-letter  =  subset (\x -> isLetter x || x=='\'' || x=='.') <$> token
-digit   =  subset isDigit <$> token
+rmJai :: SynMonad t State => (t ME) ()
+rmJai = modify (\s -> s {sJAI = Nothing})
 
-anyWord :: Syntax delta => delta String
-anyWord = many1 letter <* sepSpace
+setCtx :: SynMonad t State => [Atom] -> (t ME) ()
+setCtx a = modify (\s -> s {sCtx = a})
 
---any :: Syntax delta => delta String
---any = many token
+setNow :: SynMonad t State => Atom -> (t ME) ()
+setNow a = modify (\s -> s {sNow = a})
 
---Handling for simple Strings
-{-# ANN module "HLint: ignore Use foldr" #-}
-string :: Syntax delta => String -> delta String
-string [] =  pure []
-string (x:xs) = cons <$> (subset (== x) <$> token) <*> string xs
+setPrimaryCtx :: SynMonad t State => Atom -> (t ME) ()
+setPrimaryCtx a = modify (\s -> s {sCtx = a : sCtx s})
 
-word :: Syntax delta => String -> delta String
-word s = string s <* sepSpace
+addCtx :: SynMonad t State => Atom -> (t ME) ()
+addCtx a = modify (\s -> s {sCtx = (sCtx s) ++ [a]})
 
-mytext :: Syntax delta => String -> delta ()
-mytext s = text s <* sepSpace
+setAtoms :: SynMonad t State => [Atom] -> (t ME) ()
+setAtoms a = modify (\s -> s {sAtoms = a})
 
---For text that is both optional and should be parsed into ()
-optext :: Syntax delta => String -> delta ()
-optext t = (text t <* sepSpace) <|> (text "" <* optSpace)
+getAtoms :: SynMonad t State => (t ME) [Atom]
+getAtoms = gets sAtoms
 
---Handles 1 of many options from a list
-oneOfS :: Syntax delta => (a -> delta b) -> [a] -> delta b
-oneOfS f [] = empty
-oneOfS f (x:xs) = f x <|> oneOfS f xs
+gsAtoms :: SynIso () [Atom]
+gsAtoms = Iso f g where
+    f _ = do
+        as <- getAtoms
+        setAtoms []
+        pure as
+    g a = setAtoms a
 
-oneOf :: Syntax delta => StringSet -> delta String
-oneOf ss = memberIso ss <$> anyWord
+rmAtom ::  SynMonad t State => Atom -> (t ME) ()
+rmAtom a = modify (\s -> s {sAtoms = delete a (sAtoms s)})
 
-memberIso :: StringSet -> Iso String String
-memberIso ss = Iso f f where
-    f e = if TS.member e ss
-             then Just e
-             else Nothing
+pushAtom :: SynMonad t State => Atom -> (t ME) ()
+pushAtom a = modify (\s -> s {sAtoms = a : sAtoms s})
 
-multipleOf :: Syntax delta => StringSet -> delta [String]
-multipleOf ss = isoReverse . memberIso2 ss <$> anyWord
+pushAtoms :: SynMonad t State => [Atom] -> (t ME) ()
+pushAtoms a = modify (\s -> s {sAtoms = a ++ sAtoms s})
 
-memberIso2 :: StringSet -> Iso String [String]
-memberIso2 sss = Iso (f sss [] []) (g) where
-    f ss [] erg [] = Just erg
-    f ss l erg [] = if TS.member l ss
-                     then Just (l:erg)
-                     else Nothing
-    f ss l erg (x:xs) = let key= l++[x]
-                            ns = TS.lookupPrefix key ss
-                        in case TS.size ns of
-                              0 -> if TS.member l ss
-                                      then f sss [] (l:erg) (x:xs)
-                                      else Nothing
-                              1 -> if TS.member key ns
-                                      then f sss [] (key:erg) xs
-                                      else f ns key erg xs
-                              _ -> f ns key erg xs
-    g ls = Just $ concat ls --FIXME
+popAtom :: SynMonad t State => (t ME) Atom
+popAtom = do
+    atoms <- gets sAtoms
+    let ([a],as) = splitAt 1 atoms
+    setAtoms as
+    pure a
 
-gismu :: SyntaxReader String
-gismu = ReaderT (\(_,gismus,_,_) -> oneOf gismus)
+popAtoms :: SynMonad t State => Int -> (t ME) [Atom]
+popAtoms i = do
+    atoms <- gets sAtoms
+    let (a,as) = splitAt i atoms
+    setAtoms as
+    pure a
 
-selmaho :: String -> SyntaxReader String
-selmaho s = ReaderT (\(cmavo,_,_,_) -> oneOf (M.findWithDefault TS.empty s cmavo))
+consAtoms :: SynIso Atom [Atom]
+consAtoms = Iso f g where
+    f a = do
+        atoms <- gets sAtoms
+        pure (a:atoms)
+    g (a:atoms) = do
+        setAtoms atoms
+        pure a
 
-joiSelmaho :: String -> SyntaxReader [String]
-joiSelmaho s = ReaderT (\(cmavo,_,_,_) -> multipleOf (M.findWithDefault TS.empty s cmavo))
+appendAtoms :: Int -> SynIso [Atom] [Atom]
+appendAtoms i = Iso f g where
+    f as = do
+        atoms <- gets sAtoms
+        pure (as++atoms)
+    g atoms = do
+        let (a,as) = splitAt i atoms
+        setAtoms as
+        pure a
 
-sepSelmaho :: String -> SyntaxReader ()
-sepSelmaho s = ReaderT (\(cmavo,_,_,_) ->
-    oneOfS mytext (TS.toList $ M.findWithDefault TS.empty s cmavo))
+--FIXME???
+withCleanState :: Syntax a -> Syntax a
+withCleanState syn = Iso f g where
+    f () = do
+        state <- get
+        put (cleanState state)
+        res <- apply syn ()
+        state2 <-get
+        put (mergeState state state2)
+        pure res
+    g a = unapply syn a
 
-optSelmaho :: String -> SyntaxReader ()
-optSelmaho s = handle <$> optional (selmaho s)
-    where handle = Iso f g where
-            f _ = Just ()
-            g () = Just Nothing
+cleanState :: State -> State
+cleanState s = State {sFlags = M.empty
+                     ,sAtoms = []
+                     ,sText = sText s
+                     ,sSeed = sSeed s
+                     ,sNow = sNow s
+                     ,sCtx = sCtx s
+                     ,sJAI = Nothing
+                     ,sXU  = []}
 
+mergeState :: State -> State -> State
+mergeState s1 s2 = State {sFlags = sFlags s1
+                         ,sAtoms = sAtoms s1
+                         ,sText = sText s2
+                         ,sSeed = sSeed s2
+                         ,sNow = sNow s1
+                         ,sCtx = sCtx s1
+                         ,sJAI = sJAI s1
+                         ,sXU  = sXU s1}
+
+withEmptyState :: SynIso a b -> SynIso a b
+withEmptyState iso = Iso f g
+  where
+    f a = do
+       atoms <- gets sAtoms
+       setAtoms []
+       b <- apply iso a
+       pushAtoms atoms
+       pure b
+    g = unapply iso
+
+setSeed :: SynMonad t State => Int -> (t ME) ()
+setSeed i = modify (\s -> s {sSeed = i})
+
+setFlag :: SynMonad t State => Flag -> (t ME) ()
+setFlag f = modify (\s -> s {sFlags = M.insert f "" (sFlags s) })
+
+setFlagValue :: SynMonad t State => Flag -> String -> (t ME) ()
+setFlagValue f v = modify (\s -> s {sFlags = M.insert f v (sFlags s) })
+
+getFlagValue :: SynMonad t State => Flag -> (t ME) String
+getFlagValue f = do
+    flags <- gets sFlags
+    case M.lookup f flags of
+        Just a -> pure a
+        Nothing -> lift $ Left "Flag Value doesn't exist."
+
+getFlagValueIso :: Flag -> SynIso () String
+getFlagValueIso flag = Iso f g where
+    f () = getFlagValue flag
+    g s  = setFlagValue flag s
+
+setFlagValueIso :: Flag -> SynIso String ()
+setFlagValueIso flag = inverse (getFlagValueIso flag)
+
+rmFlag :: SynMonad t State => Flag -> (t ME) ()
+rmFlag f = modify (\s -> s {sFlags = M.delete f (sFlags s)})
+
+setFlagIso :: Flag -> SynIso a a
+setFlagIso flag = Iso f g
+    where f a = setFlag flag >> pure a
+          g a = rmFlag flag >> pure a
+
+rmFlagIso :: Flag -> SynIso a a
+rmFlagIso flag = inverse $ setFlagIso flag
+
+withFlag :: Flag -> SynIso a b -> SynIso a b
+withFlag flag syn = inverse (setFlagIso flag) . syn . setFlagIso flag
+
+toggleFlag :: Flag -> SynIso a a
+toggleFlag f = setFlagIso f . ifNotFlag f <+> rmFlagIso f . ifFlag f
+
+ifFlag :: Flag -> SynIso a a
+ifFlag flag = Iso f f where
+    f a = do
+        flags <- gets sFlags
+        if flag `M.member` flags
+           then pure a
+           else lift $ Left $ "Flag: " ++ flag ++ " is not set."
+
+ifNotFlag :: Flag -> SynIso a a
+ifNotFlag flag = Iso f f where
+    f a = do
+        flags <- gets sFlags
+        if flag `M.member` flags
+           then lift $ Left $ "Flag: " ++ flag ++ " is set."
+           else pure a
+
+switchOnFlag :: Flag -> SynIso a (Either a a)
+switchOnFlag flag = Iso f g where
+    f a = do
+        flags <- gets sFlags
+        if flag `M.member` flags
+           then pure (Left a)
+           else pure (Right a)
+    g (Left a)  = setFlag flag >> pure a
+    g (Right a) = pure a
+
+toState :: Int -> SynIso [Atom] ()
+toState i = Iso f g where
+    f as =
+        if length as == i
+           then modify (\s -> s {sAtoms = as ++ sAtoms s})
+           else lift $ Left "List has wrong lenght, is this intended?"
+    g () = do
+        allatoms <- gets sAtoms
+        let (as,atoms) = splitAt i allatoms
+        modify (\s -> s {sAtoms = atoms})
+        pure as
+
+fstToState :: Int -> SynIso ([Atom],a) a
+fstToState i = iunit . commute . first (toState i)
+
+sndToState :: Int -> SynIso (a,[Atom]) a
+sndToState i = iunit . second (toState i)

@@ -41,7 +41,7 @@ extern "C"
 
     char* lojban_print(opencog::AtomSpace *, HsStablePtr, opencog::Handle *);
 
-    HsStablePtr lojban_init(const char *);
+    HsStablePtr lojban_init(const char *,const char *);
 
     void lojban_exit(HsStablePtr);
 }
@@ -78,7 +78,7 @@ public:
                         "Parse a Lojban Sentence to Atomese.\n",
                         "Usage: parse-lojban sentence\n", false, true)
 
-    LojbanModule(CogServer&,bool test = false);
+    LojbanModule(CogServer&);
     virtual ~LojbanModule();
 
     const char * id(void);

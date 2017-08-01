@@ -65,8 +65,10 @@ FUNCTION(ADD_GUILE_MODULE)
     CMAKE_PARSE_ARGUMENTS(SCM "${options}" "${oneValueArgs}"
         "${multiValueArgs}" ${ARGN})
 
-    # NOTE:  The keyword arguments 'FILES' and 'MODULE_DESTINATION' are
-    # required.
+    # NOTE:
+    # 1. The keyword arguments 'FILES' and 'MODULE_DESTINATION' are required.
+    # 2. The keyword argument 'FILES' only works with file-names and not path
+    # to files.
     IF((DEFINED SCM_FILES) AND (DEFINED SCM_MODULE_DESTINATION))
         FOREACH(FILE_NAME ${SCM_FILES})
             # Check if the file exists in the current source directory.

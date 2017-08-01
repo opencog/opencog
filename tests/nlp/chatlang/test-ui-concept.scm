@@ -2,22 +2,23 @@
              (opencog nlp)
              (opencog nlp chatlang))
 
+; For getting the lemma
+(load "../../../opencog/nlp/chatlang/translator.scm")
+(set! test-get-lemma #t)
+
 (define exist-concept (create-concept "foo" "swallow"))
 (define concept
-    (create-concept "eat" "eat" "ingest" "binge and purge" "~foo"))
+    (create-concept "eat" "eat" "ingests" "binge and purge" "~foo"))
 
 (define expected-result
     (list (ReferenceLink
-              (WordNode "eat")
+              (LemmaNode "eat")
               (ConceptNode "eat"))
           (ReferenceLink
-              (WordNode "ingest")
+              (WordNode "ingests")
               (ConceptNode "eat"))
           (ReferenceLink
-              (ListLink
-                  (WordNode "binge")
-                  (WordNode "and")
-                  (WordNode "purge"))
+              (PhraseNode "binge and purge")
               (ConceptNode "eat"))
           (ReferenceLink
               (ConceptNode "foo")

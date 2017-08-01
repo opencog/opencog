@@ -1,67 +1,65 @@
 {-# LANGUAGE LambdaCase                 #-}
 module OpenCog.Lojban
-( WordList
-, initParserPrinter
+( initParserPrinter
 , lojbanToAtomese
-, lojbanToAtomeseRaw
 , atomeseToLojban
 , loadWordLists
+, State
 ) where
+
+import Lojban
 
 import OpenCog.Lojban.Syntax
 import OpenCog.Lojban.Util
-import OpenCog.Lojban.WordList
-import OpenCog.Lojban.Syntax.Types (WordList)
+import OpenCog.Lojban.Syntax.Types
 
 import OpenCog.AtomSpace
 
 import Control.Monad.IO.Class
-import Control.Monad.Trans.Reader
+import Control.Monad.RWS
 import Control.Exception
 import System.Random
 import Data.Char (chr)
 import Data.Maybe
 import qualified Data.Map as M
 
-import Text.Syntax.Parser.Naive
-import qualified Text.Syntax.Printer.Naive as P
+import Control.Monad.RWS
+import Control.Monad.Trans.Class
 
-initParserPrinter :: String -> IO (String -> Maybe Atom, Atom -> Maybe String)
-initParserPrinter path = do
-    wordlist <- loadWordLists path
-    return (lojbanToAtomese wordlist,atomeseToLojban wordlist)
+import Iso hiding (Syntax,SynIso)
 
-lojbanToAtomese :: WordList -> String -> Maybe Atom
-lojbanToAtomese state text =
-    wrapAtom <$> listToMaybe (parse (runReaderT lojban state) (text++" "))
+initParserPrinter :: String -> String
+                  -> IO (String -> Either String Atom, Atom -> Either String String)
+initParserPrinter cmavoSrc gismuSrc = do
+    wordlist <- loadWordLists cmavoSrc gismuSrc
+    seed <- randomIO
+    return (lojbanToAtomese wordlist seed,atomeseToLojban wordlist seed)
 
-lojbanToAtomeseRaw :: WordList -> String -> Maybe (Atom,String)
-lojbanToAtomeseRaw state text =
-    listToMaybe (rawparse (runReaderT lojban state) (text++" "))
+lojbanToAtomese :: (WordList State) -> Int -> String -> Either String Atom
+lojbanToAtomese rstate seed text = wrapAtom . fst <$> evalRWST (apply lojban ()) rstate state
+    where state = State {sFlags = M.empty
+                        ,sAtoms = []
+                        ,sText = text++" "
+                        ,sSeed = seed
+                        ,sNow = now_here
+                        ,sCtx = [now_here]
+                        ,sJAI = Nothing
+                        ,sXU = []}
 
 wrapAtom :: Atom -> Atom
 wrapAtom atom@(Link "SatisfactionLink" _ _) = cLL [cAN "QuestionAnchor" , atom]
 wrapAtom atom@(Link "PutLink" _ _)          = cLL [cAN "QuestionAnchor" , atom]
 wrapAtom atom                               = cLL [cAN "StatementAnchor", atom]
 
-atomeseToLojban :: WordList -> Atom -> Maybe String
-atomeseToLojban state a@(LL [_an,s]) = P.print (runReaderT preti state) s
+atomeseToLojban :: (WordList State) -> Int -> Atom -> Either String String
+atomeseToLojban rstate seed a@(LL [_an,s]) = sText . fst <$> execRWST (unapply lojban s) rstate state
+    where state = State {sFlags = M.empty
+                        ,sAtoms = []
+                        ,sText = ""
+                        ,sSeed = seed
+                        ,sNow = now_here
+                        ,sCtx = [now_here]
+                        ,sJAI = Nothing
+                        ,sXU = []}
 
-{-tvToLojban :: TruthVal -> String
-tvToLojban tv
-    | tvMean tv > 0.5 = "go'i"
-    | tvMean tv <= 0.5 = "nago'i"-}
-
-
-{-EquivalenceLink
-    EvaluationLink
-        VariableNode "var1!!!"
-        ListLink
-            VariableNode "var2"
-            ConceptNode "vo'a"
-    EvaluationLink
-        PredicateNode "sumti1"
-        ListLink "var2"
-            VariableNode "var2"
-            ConceptNode "something"
--}
+now_here = cCN "NowAndHere" noTv

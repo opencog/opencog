@@ -2,7 +2,7 @@
 #
 # ss-one.sh <lang> <filename> <cogserver-host> <cogserver-port>
 #
-# Support script for batch parsing of wikipedia articles.
+# Support script for batch parsing of plain-text files.
 # Sentence-split one file, submit it, via perl script, to the parser.
 # When done, move the file over to a 'finished' directory.
 #
@@ -26,13 +26,7 @@ splitdir=split-articles
 subdir=submitted-articles
 observe="observe-text"
 
-# Punt if the cogserver has crashed. The grep is looking for the
-# uniquely-named config file.
-# haveserver=`ps aux |grep cogserver |grep opencog-$lang`
-# if [[ -z "$haveserver" ]] ; then
-# 	exit 1
-# fi
-# Alternate cogserver test: use netcat to ping it.
+# Punt if the cogserver has crashed.  Use netcat to ping it.
 haveping=`echo foo | nc $coghost $cogport`
 if [[ $? -ne 0 ]] ; then
 	exit 1
@@ -63,10 +57,6 @@ cat "$splitdir/$rest" | ./submit-one.pl $coghost $cogport $observe
 
 # Punt if the cogserver has crashed (second test,
 # before doing the mv and rm below)
-# haveserver=`ps aux |grep cogserver |grep opencog-$lang`
-# if [[ -z "$haveserver" ]] ; then
-# 	exit 1
-# fi
 haveping=`echo foo | nc $coghost $cogport`
 if [[ $? -ne 0 ]] ; then
 	exit 1

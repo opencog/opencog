@@ -39,9 +39,6 @@
 
 #include <opencog/atoms/base/ClassServer.h>
 #include <opencog/atoms/base/Handle.h>
-#include <opencog/atoms/base/atom_types.h>
-#include <opencog/spacetime/atom_types.h>
-#include <opencog/embodiment/atom_types.h>
 #include <opencog/query/BindLinkAPI.h>
 #include <opencog/util/Config.h>
 
@@ -406,6 +403,7 @@ void DistributedPatternMiner::parseAPatternTask(json::value jval)
         string ParentPatternStr = jval[U("ParentPattern")].as_string();
         // cout << "ParentPatternStr = " << ParentPatternStr << std::endl;
         int ExtendedLinkIndex = jval[U("ExtendedLinkIndex")].as_integer();
+        bool notOutPutPattern = jval[U("notOutPutPattern")].as_bool();
         // cout << "ExtendedLinkIndex = " << ExtendedLinkIndex << std::endl;
         string clientIDStr = jval[U("ClientUID")].as_string();
         unsigned int processedFactsNum = (unsigned int)(jval[U("ProcessedFactsNum")].as_integer());
@@ -454,11 +452,18 @@ void DistributedPatternMiner::parseAPatternTask(json::value jval)
             keyStrToHTreeNodeMap.insert(std::pair<string, HTreeNode*>(PatternStr, newHTreeNode));
             uniqueKeyLock.unlock();
 
+        }
 
+        if (newHTreeNode->count == 1)
+        {
             addNewPatternLock.lock();
-            (patternsForGram[patternHandleSeq.size()-1]).push_back(newHTreeNode);
-            addNewPatternLock.unlock();
 
+            if (notOutPutPattern)
+                (tmpPatternsForGram[newHTreeNode->pattern.size()-1]).push_back(newHTreeNode);
+            else
+                (patternsForGram[newHTreeNode->pattern.size()-1]).push_back(newHTreeNode);
+
+            addNewPatternLock.unlock();
         }
 
         if (newHTreeNode->pattern.size() > 1) // this pattern is more than 1 gram, it should have a parent pattern
@@ -504,10 +509,9 @@ void DistributedPatternMiner::parseAPatternTask(json::value jval)
                     keyStrToHTreeNodeMap.insert(std::pair<string, HTreeNode*>(ParentPatternStr, parentNode));
                     uniqueKeyLock.unlock();
 
-                    addNewPatternLock.lock();
-                    (patternsForGram[parentPatternHandleSeq.size()-1]).push_back(parentNode);
-                    addNewPatternLock.unlock();
-
+//                    addNewPatternLock.lock();
+//                    (patternsForGram[parentPatternHandleSeq.size()-1]).push_back(parentNode);
+//                    addNewPatternLock.unlock();
 
                 }
                 else
@@ -539,23 +543,22 @@ void DistributedPatternMiner::parseAPatternTask(json::value jval)
 
 void DistributedPatternMiner::centralServerEvaluateInterestingness()
 {
-    if (enable_Frequent_Pattern)
+
+    std::cout<<"Debug: PatternMiner:  done frequent pattern mining for 1 to "<< MAX_GRAM <<"gram patterns!\n";
+
+    for(unsigned int gram = 1; gram <= MAX_GRAM; gram ++)
     {
-        std::cout<<"Debug: PatternMiner:  done frequent pattern mining for 1 to "<< MAX_GRAM <<"gram patterns!\n";
+        // sort by frequency
+        std::sort((patternsForGram[gram-1]).begin(), (patternsForGram[gram-1]).end(),compareHTreeNodeByFrequency );
 
-        for(unsigned int gram = 1; gram <= MAX_GRAM; gram ++)
-        {
-            // sort by frequency
-            std::sort((patternsForGram[gram-1]).begin(), (patternsForGram[gram-1]).end(),compareHTreeNodeByFrequency );
+        // Finished mining gram patterns; output to file
+        std::cout<<"gram = " + toString(gram) + ": " + toString((patternsForGram[gram-1]).size()) + " patterns found! ";
 
-            // Finished mining gram patterns; output to file
-            std::cout<<"gram = " + toString(gram) + ": " + toString((patternsForGram[gram-1]).size()) + " patterns found! ";
+        OutPutFrequentPatternsToFile(gram, patternsForGram);
 
-            OutPutFrequentPatternsToFile(gram, patternsForGram);
-
-            std::cout<< std::endl;
-        }
+        std::cout<< std::endl;
     }
+
 
 
     if (enable_Interesting_Pattern)

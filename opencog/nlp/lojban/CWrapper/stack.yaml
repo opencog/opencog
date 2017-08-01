@@ -39,13 +39,14 @@ packages:
 - '.'
 - '../HaskellLib'
 - location:
-   git: https://github.com/rTreutlein/invertible-syntax
-   commit: 5185ee11763ffcef6fe121da53db2e0da773b56e
+   git: https://github.com/rTreutlein/LojbanValidator
+   commit: 93a06e1166ef5ca041fd3c62124b0b5e25bb1e6b
   extra-dep: true
-- location:
-   git: https://github.com/rTreutlein/partial-isomorphisms
-   commit: a8d1b86de0a1e1a85c20a25937f50a173b0a990d
+- location: #./../../../../../Iso/
+   git: https://github.com/rTreutlein/IsoSyntax
+   commit: 0dc1f0c8c4a7c217558a5011716c2559075b5ba4
   extra-dep: true
+
 # Dependency packages to be pulled from upstream that are not in the resolver
 # (e.g., acme-missiles-0.3)
 extra-deps: [opencog-atomspace-0.1.0.8,list-tries-0.6.3]

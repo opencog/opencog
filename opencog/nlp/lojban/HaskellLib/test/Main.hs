@@ -15,7 +15,7 @@ import System.Exit (exitFailure,exitSuccess)
 main :: IO ()
 main = do
     putStrLn "Starting Test"
-    (parser,printer) <- initParserPrinter "lojban.xml"
+    (parser,printer) <- initParserPrinter "cmavo.csv" "gismu.csv"
     sentences <- loadData
     let parsed = parMap rpar (ptest parser) sentences
     testRes <- sequence parsed
@@ -27,20 +27,20 @@ main = do
         then exitSuccess
         else exitFailure
 
-ptest :: (String -> Maybe Atom) -> String -> IO Bool
+ptest :: (String -> Either String Atom) -> String -> IO Bool
 ptest parser text = do
     case parser text of
-        Nothing -> print text >> print False >> return False
-        Just _  -> return True
+        Left e  -> print text >> putStrLn e >> return False
+        Right _ -> return True
 
-pptest :: (String -> Maybe Atom) -> (Atom -> Maybe String) -> String -> IO Bool
+pptest :: (String -> Either String Atom) -> (Atom -> Either String String) -> String -> IO Bool
 pptest parser printer text =
     case parser text of
-        Nothing  -> print False >> return False
-        Just res ->
+        Left e    -> print False >> return False
+        Right res ->
             case printer res of
-                Nothing    -> print False >> return False
-                Just ptext ->
+                Left e      -> print False >> return False
+                Right ptext ->
                     if ptext == text
                         then return True
                         else print text >> print ptext >> return False

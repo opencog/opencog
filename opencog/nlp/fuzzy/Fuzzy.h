@@ -75,7 +75,7 @@ class Fuzzy :
 
         // The solutions
         RankedHandleSeq solns;
-        OrderedHandleSet solns_seen;
+        HandleSet solns_seen;
 
         // Some caches
         std::map<Handle, double> tfidf_weights;

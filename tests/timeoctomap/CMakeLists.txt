@@ -1,5 +1,6 @@
 LINK_LIBRARIES(
 time_octomap
+${ATOMSPACE_LIBRARIES}
 )
 ADD_CXXTEST(AtomOcTreeUTest)
 ADD_CXXTEST(TimeSpaceAtomUTest)

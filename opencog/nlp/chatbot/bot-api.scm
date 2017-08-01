@@ -100,7 +100,7 @@
     (define rule-base)
     (set! tmp (fAtom query))
     (set! bc (cog-bc rule-base 
-        (cog-new-link 'InheritanceLink (VariableNode "$x") (gdr tmp)) (List) (Set)))
+        (cog-new-link 'InheritanceLink (VariableNode "$x") (gdr tmp))))
 )
 ;-------------------------------------------------------------------
 ; Used by 'truth_query_process' to find the input for the backward
