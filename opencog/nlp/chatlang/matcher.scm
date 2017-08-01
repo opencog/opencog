@@ -29,7 +29,7 @@
                    ; forever for the recognizer to match any rules being
                    ; wrapped in an unordered link, so only do this if
                    ; the input is not too long, for now...
-                   (if (<= 8 (length sent-seqs))
+                   (if (>= 8 (length sent-seqs))
                        (cog-outgoing-set (cog-execute! (Dual input-lset)))
                        '())))))
          ; Get the psi-rules associate with them
