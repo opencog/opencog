@@ -4,8 +4,7 @@
 
 (use-modules (opencog))
 
-(load "chatlang/cs-parse.scm")
-(load "chatlang/ui.scm")
 (load "chatlang/terms.scm")
 (load "chatlang/translator.scm")
 (load "chatlang/matcher.scm")
+(load "chatlang/cs-parse.scm")

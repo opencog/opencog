@@ -101,6 +101,11 @@
 
 (define cnr-to-left (ConnectorDir "-"))
 
+; Link Grammar expects connectors to be structured in the order of:
+;   near- & far- & near+ & far+
+; whereas the sections we compute from MST are in the form of
+;   far- & near- & near+ & far+
+; Thus, for the leftwards-connectors, we have to reverse the order.
 (define (cset-to-lg-dj SECTION)
 "
   cset-to-lg-dj - SECTION should be a SectionLink
@@ -126,13 +131,21 @@
 			(connector-to-lg-link CONNECTOR)
 			(cog-name (gdr CONNECTOR))))
 
-	; A list of connnectors, in the proper connector order.
-	(define cnrs (map connector-to-lg-cnr (cog-outgoing-set (gdr SECTION))))
+	; Link Grammar expects: near- & far- & near+ & far+
+	(define (strappend CONNECTOR dj)
+		(define cnr (connector-to-lg-cnr CONNECTOR))
+		(if (equal? (gdr CONNECTOR) cnr-to-left)
+			(string-append cnr " & " dj)
+			(string-append dj " & " cnr)))
 
 	; Create a single string of the connectors, in order.
+	; The connectors in SECTION are in the order as noted above:
+	;   far- & near- & near+ & far+
 	(fold
-		(lambda (cnr dj) (if dj (string-append dj " & " cnr) cnr))
-		#f cnrs)
+		(lambda (CNR dj) (if dj (strappend CNR dj)
+				(connector-to-lg-cnr CNR)))
+		#f
+		(cog-outgoing-set (gdr SECTION)))
 )
 
 ;  ---------------------------------------------------------------------
@@ -154,7 +167,19 @@
 (define (make-database DB-NAME LOCALE COST-FN)
 	(let ((db-obj (dbi-open "sqlite3" DB-NAME))
 			(cnt 0)
+			(nprt 0)
+			(secs (current-time))
 		)
+
+		; Escape quotes -- replace single quotes by two successive
+		; single-quotes. Example: (escquote "fo'sis'a'blort" 0)
+		(define (escquote STR BEG)
+			(define pos (string-index STR (lambda (C) (equal? C #\')) BEG))
+			(if pos
+				(escquote
+					(string-replace STR "''" pos pos 1 2)
+					(+ pos 2))
+				STR))
 
 		; Add data to the database
 		(define (add-section SECTION)
@@ -166,7 +191,17 @@
 			(if (string=? germ-str "###LEFT-WALL###")
 				(set! germ-str "LEFT-WALL"))
 
-			(format #t "Will insert ~A: ~A;\n" germ-str dj-str)
+			(set! nprt (+ nprt 1))
+			(if (equal? 0 (remainder nprt 5000))
+				(begin
+					(format #t "~D Will insert ~A: ~A; in ~D secs\n"
+						nprt germ-str dj-str (- (current-time) secs))
+					(set! secs (current-time))
+					(dbi-query db-obj "END TRANSACTION;")
+					(dbi-query db-obj "BEGIN TRANSACTION;")
+				))
+
+			(set! germ-str (escquote germ-str 0))
 
 			; Insert the word
 			(set! cnt (+ cnt 1))
@@ -187,6 +222,13 @@
 			(if (not (equal? 0 (car (dbi-get_status db-obj))))
 				(throw 'fail-insert 'make-database
 					(cdr (dbi-get_status db-obj))))
+		)
+
+		; Write to disk, and close the database.
+		(define (shutdown)
+			(format #t "Finished inserting ~D records\n" nprt)
+			(dbi-query db-obj "END TRANSACTION;")
+			(dbi-close db-obj)
 		)
 
 		; Create the tables for words and disjuncts.
@@ -252,41 +294,44 @@
 			"INSERT INTO Disjuncts VALUES ("
 			"'UNKNOWN-WORD', 'XXXBOGUS+', 0.0);"))
 
+		(dbi-query db-obj "PRAGMA synchronous = OFF;")
+		(dbi-query db-obj "PRAGMA journal_mode = MEMORY;")
+		(dbi-query db-obj "BEGIN TRANSACTION;")
+
 		; Return function that adds data to the database
 		; If SECTION if #f, the database is closed.
 		(lambda (SECTION)
 			(if SECTION
 				(add-section SECTION)
-				(dbi-close db-obj))
+				(shutdown))
 		))
 )
 
 ;  ---------------------------------------------------------------------
 
-; Write all connector sets to a Link Grammar-compatible sqlite3 file.
-; DB-NAME is the databse name to write to.
-; LOCALE is the locale to use; e.g EN_us or ZH_cn
-;
-; Note that link-grammar expects the database file to be called
-; "dict.db", always!
-;
-; Example usage:
-; (export-all-csets "dict.db" "EN_us")
-;
-(define (export-all-csets DB-NAME LOCALE)
+(define-public (export-csets CSETS DB-NAME LOCALE)
+"
+  export-csets CSETS DB-NAME LOCALE
 
+  Write connector sets to a Link Grammar-compatible sqlite3 file.
+  CSETS is a matrix containing the connector sets to be written.
+  DB-NAME is the databse name to write to.
+  LOCALE is the locale to use; e.g EN_us or ZH_cn
+
+  Note that link-grammar expects the database file to be called
+  \"dict.db\", always!
+
+  Example usage:
+     (define pca (make-pseudo-cset-api))
+     (define fca (add-subtotal-filter pca 50 50 10 #f))
+     (export-csets fca \"dict.db\" \"EN_us\")
+"
 	; Create the object that knows where the disuncts are in the
 	; atomspace. Create the object that knows how to get the MI
 	; of a word-disjunct pair.
-	(define pca (make-pseudo-cset-api))
-	(define psa (add-pair-stars pca))
+	(define psa (add-pair-stars CSETS))
 	(define mi-source (add-pair-freq-api psa))
-
-	; Load the atomspace up with the dataset, if needed.
-	; (psa 'fetch-pairs)
-
-	; Make a list of all pairs. This is costly and time-consuming.
-	(define all-csets (psa 'all-pairs))
+	(define looper (add-loop-api psa))
 
 	; Use the MI between word and disjunct as the link-grammar cost
 	; LG treats high-cost as "bad", we treat high-MI as "good" so revese
@@ -297,8 +342,13 @@
 	; Create the SQLite3 database.
 	(define sectioner (make-database DB-NAME LOCALE cost-fn))
 
+	(define cnt 0)
+	(define (cntr x) (set! cnt (+ cnt 1)))
+	(looper 'for-each-pair cntr)
+	(format #t "Store ~D csets\n" cnt)
+
 	; Dump all the connector sets into the database
-	(map sectioner all-csets)
+	(looper 'for-each-pair sectioner)
 
 	; Close the database
 	(sectioner #f)

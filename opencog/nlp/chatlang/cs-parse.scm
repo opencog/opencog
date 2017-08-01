@@ -3,6 +3,14 @@
 (use-modules (ice-9 getopt-long))
 (use-modules (rnrs io ports))
 (use-modules (system base lalr))
+(use-modules (ice-9 eval-string))
+
+; ----------
+; For debugging
+(use-modules (opencog logger))
+(define chatlang-logger (cog-new-logger))
+(cog-logger-set-level! chatlang-logger "debug")
+(cog-logger-set-stdout! chatlang-logger #t)
 
 (define (display-token token)
 "
@@ -98,6 +106,9 @@
     ((has-match? "^[ ]*'_[0-9]" str)
       (result:suffix 'MOVAR location
         (substring (string-trim (match:substring current-match)) 2)))
+    ((has-match? "^[ ]*\\$[a-zA-Z0-9_-]+" str)
+      (result:suffix 'UVAR location
+        (substring (string-trim (match:substring current-match)) 1)))
     ((has-match? "^[ ]*_" str) (result:suffix 'VAR location #f))
     ; For dictionary keyword sets
     ((has-match? "^[ ]*[a-zA-Z]+~[a-zA-Z1-9]+" str)
@@ -129,6 +140,7 @@
     ((has-match? "^[ ]*\\*" str) (result:suffix '* location "*"))
     ((has-match? "^[ ]*!" str) (result:suffix 'NOT location #f))
     ((has-match? "^[ ]*[?]" str) (result:suffix '? location "?"))
+    ((has-match? "^[ ]*=" str) (result:suffix 'EQUAL location #f))
     ; Literals -- words start with a '
     ((has-match? "^[ ]*'[a-zA-Z]+\\b" str)
       (result:suffix 'LITERAL location
@@ -210,15 +222,15 @@
     ; ? = Comparison tests
     (CONCEPT TOPIC RESPONDERS REJOINDERS GAMBIT COMMENT SAMPLE_INPUT WHITESPACE
       (right: LPAREN LSBRACKET << ID VAR * ^ < LEMMA LITERAL NUM LEMMA~COMMAND
-              STRING *~n *n MVAR MOVAR NOT RESTART)
+              STRING *~n *n UVAR MVAR MOVAR EQUAL NOT RESTART)
       (left: RPAREN RSBRACKET >> > DQUOTE)
       (right: ? CR NEWLINE)
     )
 
     ; Parsing rules (aka nonterminal symbols)
     (inputs
-      (input) : (if $1 (format #t "\nInput: ~a\n" $1))
-      (inputs input) : (if $2 (format #t "\nInput: ~a\n" $2))
+      (input) : (if $1 (format #t "\nInput:\n~a\n" $1))
+      (inputs input) : (if $2 (format #t "\nInput:\n~a\n" $2))
     )
 
     (input
@@ -242,20 +254,18 @@
     ; Declaration/annotation(for ghost) grammar
     (declarations
       (CONCEPT ID declaration-sequence) :
-        (display-token (format #f "concept(~a = ~a)" $2 $3))
+        (create-concept $2 (string-split $3 #\sp))
       (TOPIC ID declaration-sequence) :
         (display-token (format #f "topic(~a = ~a)" $2 $3))
     )
 
     (declaration-sequence
-      (LPAREN declaration-members RPAREN) :
-        (display-token (format #f "declaration-sequence(~a)" $2))
+      (LPAREN declaration-members RPAREN) : $2
     )
 
     (declaration-members
       (declaration-member) : $1
-      (declaration-members declaration-member) :
-        (display-token (format #f "~a ~a" $1 $2))
+      (declaration-members declaration-member) : (format #f "~a ~a" $1 $2)
     )
 
     (declaration-member
@@ -270,18 +280,21 @@
     ; Rule grammar
     (rule
       (RESPONDERS name context action) :
-        (format #f "\nresponder: ~a\nlabel: ~a\n~a\n~a" $1 $2 $3 $4)
+        (create-rule
+          (eval-string (string-append "(list " $3 ")"))
+          (eval-string (string-append "(list " $4 ")")))
       ; Unlabeled responder.
       ; TODO: Maybe should be labeled internally in the atomspace???
       (RESPONDERS context action) :
-        (format #f "\nresponder: ~a\n~a\n~a" $1 $2 $3)
+        (create-rule
+          (eval-string (string-append "(list " $2 ")"))
+          (eval-string (string-append "(list " $3 ")")))
       (REJOINDERS context action) :
         (format #f "\nrejoinder: ~a\n~a\n~a" $1 $2 $3)
-      (GAMBIT action-patterns) : (format #f "gambit: ~a" $2)
+      (GAMBIT action) : (format #f "gambit: ~a" $2)
     )
 
     (context
-;      (LPAREN context-patterns RPAREN) : (format #f "--- context:\n~a" $2)
       (LPAREN context-patterns RPAREN) : $2
     )
 
@@ -300,6 +313,7 @@
       (phrase) : $1
       (concept) : $1
       (variable) : $1
+      (user-variable) : $1
       (function) : $1
       (choice) : $1
       (unordered-matching) : $1
@@ -310,17 +324,7 @@
     )
 
     (action
-      (action-choices) : (format #f "--- action (choices):\n~a" $1)
-      (action-patterns) : (format #f "--- action:\n" $1)
-    )
-
-    (action-choices
-      (action-choice) : $1
-      (action-choices action-choice) : (format #f "~a\n~a" $1 $2)
-    )
-
-    (action-choice
-      (LSBRACKET action-patterns RSBRACKET) : (format #f "\"~a\"" $2)
+      (action-patterns) : (format #f "(cons 'action (list ~a))" $1)
     )
 
     (action-patterns
@@ -330,14 +334,24 @@
     )
 
     (action-pattern
-      (?) : $1
-      (NOT) : "!"
-      (DQUOTE) : "\\\""
-      (LEMMA) : $1
-      (LITERAL) : $1
-      (STRING) : $1
+      (?) : "(cons 'str \"?\")"
+      (NOT) : "(cons 'str \"!\")"
+      (DQUOTE) : "(cons 'str \"\\\"\")"
+      (LEMMA) : (format #f "(cons 'str \"~a\")" $1)
+      (LITERAL) : (format #f "(cons 'str \"~a\")" $1)
+      (STRING) : (format #f "(cons 'str \"~a\")" $1)
       (variable) : $1
+      ; e.g. $username
+      (UVAR) : (format #f "(cons 'get_uvar \"~a\")" $1)
+      ; e.g. $username=Bob
+      (UVAR EQUAL name) :
+        (format #f "(cons 'assign_uvar (list \"~a\" (cons 'str \"~a\")))" $1 $3)
+      ; e.g. $username='_0
+      (UVAR EQUAL variable-grounding) :
+        (format #f "(cons 'assign_uvar (list \"~a\" ~a))" $1 $3)
       (function) : $1
+      (LSBRACKET action-patterns RSBRACKET) :
+        (format #f "(cons 'action-choices (list ~a))" $2)
     )
 
     (lemma
@@ -397,9 +411,18 @@
       (VAR lemma) :  (format #f "(cons 'variable (list ~a))" $2)
       (VAR concept) : (format #f "(cons 'variable (list ~a))" $2)
       (VAR choice) : (format #f "(cons 'variable (list ~a))" $2)
-      ; TODO
-      (MVAR) : (display-token (format #f "match_variable(~a)" $1))
-      (MOVAR) : (display-token (format #f "match_orig_variable(~a)" $1))
+      (variable-grounding) : $1
+    )
+
+    (variable-grounding
+      (MVAR) : (format #f "(cons 'get_lvar ~a)" $1)
+      (MOVAR) : (format #f "(cons 'get_wvar ~a)" $1)
+    )
+
+    (user-variable
+      (UVAR) : (format #f "(cons 'uvar_exist \"~a\")" $1)
+      (UVAR EQUAL name) :
+        (format #f "(cons 'uvar_equal (list \"~a\" \"~a\"))" $1 $3)
     )
 
     (negation
@@ -446,10 +469,10 @@
     )
 
     (arg
-      (LEMMA) : (format #f "\"~a\"" $1)
-      (LITERAL) : (format #f "\"~a\"" $1)
-      (MVAR) : $1
-      (MOVAR) : $1
+      (LEMMA) : (format #f "(cons 'arg \"~a\")" $1)
+      (LITERAL) : (format #f "(cons 'arg \"~a\")" $1)
+      (STRING) : (format #f "(cons 'arg \"~a\")" $1)
+      (variable-grounding) : $1
     )
 
     (sequence

@@ -2967,6 +2967,7 @@ french pairs: start again: 22:36PM 30 Jan - find submitted* |wc 17053
                            19:19PM 10 Feb - find submitted* |wc 27763
                            20:16PM 14 Feb - find submitted* |wc 29720
                                     2 Jul - find submitted* |wc 32526
+                                   19 Jul - 39077
 
 disk: 206447916 used 41097304 free
 disk  206574808 used 40970412 free  24 hours later... about 100MB more
@@ -2987,14 +2988,17 @@ select sum(stv_count) from atoms;  351323640 --  351M   -- 11:19AM  4 Feb
 select count(*) from atoms;          7714679 --    7.7M -- 11:38AM  5 Feb
 select sum(stv_count) from atoms;  502509756 --  503M   -- 11:38AM  5 Feb
 
-select count(*) from atoms;         16945084 --   16.9M -- 19:21PM 10 Feb
-select sum(stv_count) from atoms; 1289249056 -- 1.29G   -- 19:21PM 10 Feb
+select count(*) from atoms;         16945084 --    16.9M -- 19:21PM 10 Feb
+select sum(stv_count) from atoms; 1289249056 -- 1.29G    -- 19:21PM 10 Feb
 
-select count(*) from atoms;         23072988 --   23.1M -- 20:20PM 14 Feb
-select sum(stv_count) from atoms; 1856669388 -- 1.86G   -- 20:20PM 14 Feb
+select count(*) from atoms;         23072988 --    23.1M -- 20:20PM 14 Feb
+select sum(stv_count) from atoms; 1856669388 -- 1.86G    -- 20:20PM 14 Feb
 
-select count(*) from atoms;         33519967 --   33.5M - 2 Jul
-select sum(stv_count) from atoms; 2923838351 -- 2.92G   -
+select count(*) from atoms;         33519967 --    33.5M - 2 Jul 2017
+select sum(stv_count) from atoms; 2923838351 -- 2.92G    -
+
+select count(*) from atoms;         54337413 --    54.3M - 19 Jul 2017
+select sum(stv_count) from atoms; 5257433115 -- 5.26G
 
 vs fr_pairs:
 select count(*) from atoms; 11161199 -- 11M
@@ -6942,6 +6946,48 @@ RMS Count      1.4721E+5    1.3142E+5     18.02        15.10
 b4e48f00a94fa8d3d1d08e8331d0d84a9  zen_pairs_mi.sql
 2c6d2667a4ff2d9f54d89765a91c3e37  zen_pairs_mi.sql.bz2
 
+==================================================================
+zen_pairs_mst
+-------------
+Mandarin word-pairs. Segmentation into words done by Ruiting.
+Includes word-pair MI statstics, disjuncts and disjunct-MI.
+
+STATUS: good
+DATE: 17 July 2017
+REASON: No known defects.
+
+                        List of relations
+ Schema |    Name    | Type  | Owner  |    Size    | Description 
+--------+------------+-------+--------+------------+-------------
+ public | atoms      | table | ubuntu | 522 MB     | 
+ public | spaces     | table | ubuntu | 40 kB      | 
+ public | typecodes  | table | ubuntu | 56 kB      | 
+ public | valuations | table | ubuntu | 1219 MB    | 
+ public | values     | table | ubuntu | 8192 bytes | 
+
+Summary Report for Correlation Matrix Word-Disjunct Pairs (Connector Sets)
+Rows: 60143 Columns: 602124
+Size: 800855 non-zero entries of 36213543732 possible
+Fraction non-zero: 2.2115E-5 Sparsity (-log_2): 15.465
+Total observations: 1188456.0  Avg obs per pair: 1.4840
+Entropy Total: 18.859   Left: 17.994   Right: 10.125
+Total MI: 9.2606
+
+                 Left         Right     Avg-left     Avg-right
+                 ----         -----     --------     ---------
+Support (l_0)  6327.        7.399    
+Count   (l_1)  1.8066E+4    94.14         2.855        12.72    
+Length  (l_2)  722.8        67.89         .1142        9.175    
+RMS Count      695.7        62.85         .1100        8.494    
+
+select count(*) from atoms;      -- 5845332 = 5.85 M atoms
+select count(*) from valuations; -- 11414113 = 11.4M values
+
+901757880 Bytes uncompressed = 902 MB
+125868179 Bytes compressed   = 126 MB
+
+c4df6f2da0c476a561cbea82981a6853  zen_pairs_mst.sql
+ff7cb1628cb7aad0a59c71b98a626121  zen_pairs_mst.sql.bz2
 
 ==================================================================
 ==================================================================
@@ -11890,6 +11936,10 @@ later today.
 
 --linas
 
+The parses below are completely random junk. About half of the words
+have been observed once and only once, and are thus have no meaningful
+statistical sample.
+
 (print-mst "然杜氏 恶 撰 ， 述 一漏 百 ， 且 多 谬误 。")
 6 . 述  <--> 7 . 一漏     MI = 21.128
 4 . 撰  <--> 6 . 述       MI = 19.009
@@ -11962,6 +12012,127 @@ later today.
 10 . 吗  <--> 11 . ？     MI = 7.6251
 8 . 我们  <--> 9 . 的     MI = 0.7513
 
+run/mst-one.sh run/ss-one.sh
+
+OK what borked?
+
+(print-mst "丙寅年 夏日 ， 王门 胡氏 焚香 敬撰 。")
+a 5 . 王门     <--> 6 . 胡氏   MI = 21.478
+b 6 . 胡氏     <--> 7 . 焚香   MI = 21.471
+c 7 . 焚香     <--> 8 . 敬撰   MI = 21.301
+d 2 . 丙寅年   <--> 5 . 王门   MI = 18.049
+e 2 . 丙寅年   <--> 3 . 夏日   MI = 19.518   OK its there.
+f 8 . 敬撰     <--> 9 . 。     MI = 4.0183
+g 1 . LEFT-WALL<--> 2 . 丙寅年 MI = 3.6985
+h 4 . ，      <--> 5 . 王门    MI = 2.7025
+
+
+                                        near+    far+
+丙寅年.399826              (g)TXYJK- & eTPYYP+ & dTRZZG+
+ 夏日.232814                eTPYYP- 
+                            far-      near-
+ 王门.270759                dTRZZG- & (h)TRZZH- & aTRZZI+
+ 胡氏.349378                aTRZZI- & bTVWZI+
+ 焚香.506188                bTVWZI- & cTPSCX+
+ 敬撰.227735                cTPSCX- & (f)TPSCY+
+
+-------------------
+wtf this one two
+
+(print-mst "然杜氏 恶 撰 ， 述 一漏 百 ， 且 多 谬误 。")
+a 6 . 述  <--> 7 . 一漏     MI = 21.128
+b 4 . 撰  <--> 6 . 述       MI = 19.009
+c 2 . 然杜氏  <--> 4 . 撰   MI = 18.885
+d 7 . 一漏  <--> 8 . 百     MI = 16.029
+e 2 . 然杜氏  <--> 3 . 恶   MI = 15.179
+f 6 . 述  <--> 12 . 谬误    MI = 13.671
+g 7 . 一漏  <--> 10 . 且    MI = 12.479
+h 6 . 述  <--> 11 . 多      MI = 7.7579
+i 1 . ###LEFT-WALL###  <--> 2 . 然杜氏      MI = 3.6985
+j 4 . 撰  <--> 13 . 。      MI = 2.6162
+k 5 . ，  <--> 6 . 述       MI = 2.3806
+l 9 . ，  <--> 10 . 且      MI = 2.3653
+
+
+然杜氏.274017              (i)TSEOZ- & eTSEPA+ & cTSEPB+
+恶.490429                  eTSEPA-
+撰.425002                  cTSEPB- & bTYVJC+ & (j)TVWQA+
+
+                            near-      far-
+述.524662                  (k)TVWZA- & bTYVJC- & aTWBEZ+ & hTXAHR+ & fTLYRB+
+一漏.353033                aTWBEZ- & dTWBFA+ & gTIVQI+
+多.375900                  hTXAHR-
+谬误.163229                fTLYRB-
+百.519512                  dTWBFA-
+且.115701                  (l)TBOFC- & dTIVQI-
+
+Above should link, but its not ... why?
+
+wrong commas: expect:
+,  with TVWZA+
+, with TBOFC+
+
+l->r pass removed 117441
+LEFT-WALL[15044] 然杜氏[3] 恶[1] 撰[3] ，[10192] 述[5] 一漏[3] 百[2] ，[10192] 且[5] 多[136] 谬误[1] 。[10] 
+
+r->l pass removed 35544
+LEFT-WALL[3] 然杜氏[3] 恶[1] 撰[3] ，[3] 述[5] 一漏[3] 百[1] ，[1] 且[2] 多[2] 谬误[1] 。[3] 
+
+l->r pass removed 0
+print_expression_sizes(sent);
+prepare/exprune.c:			size += size_of_expression(x->exp);
+LEFT-WALL[3] 然杜氏[3] 恶[1] 撰[3] ，[3] 述[5] 一漏[3] 百[1] ，[1] 且[2] 多[2] 谬误[1] 。[3] 
+
+for (d=sent->word[i].d; d != NULL; d = d->next) c++; is the dj count ..
+sent->word[i].alternatives[0]
+++++ Finished expression pruning             0.09 seconds
+
+build_disjuncts_for_exp
+
+line 171
+After expanding expressions into disjuncts:LEFT-WALL(2) 然杜氏(1) 恶(1) 撰(1) ，(1) 述(1) 一漏(1) 百(1) ，(0) 且(1) 多(2) 谬误(1) 。(3) 
+
+So expression prunning removed the comma ... why?  Because of cost-max
+!cost-max = 50
+d->left
+void print_connector_list(Connector * e);
+void print_disjunct_list(Disjunct * c);
+
+wrong commas: expect:
+,  with TVWZA+
+, with TBOFC+
+
+Hmm first comma did have: TBOFC+ TVWZA+ but that is all....
+
+，
+
+
+------------------------------------------------------------
+
+Also bad line-wrapping: 
+母猪 的 价格 暴涨 ， 可见 事态 之 严重 。
+glyph_width += mk_wcwidth(ws[i]);
+
+wchar_t  wc;
+mbstate_t mbss;
+memset(&mbss, 0, sizeof(mbss));
+
+mbrtowc(&wc, ssss, MB_CUR_MAX, nbss);
+wc = xxx
+glyph_width = mk_wcwidth(wc);
+
+
+
+ERROR: In procedure gc:
+ERROR: In procedure dbi-close: Wrong type argument in position 1: #<finalized smob 556c0402ec00>
+ This is still an issue....
+
+
+LG expects:
+test: D- & Os- (near- & far-) & (close+) & (far+)
+
+
+
 
 -------------------------------------------------------------
 export stuff
@@ -11992,12 +12163,406 @@ Both He's have the wrong disjunct -- classname! ah OK
    (define mi-source (add-pair-freq-api pair-obj))
 pair-fmi
 
+------------------------
+
 en_pairs_rfive_mi
 (sql-open "postgres:///en_pairs_rfive_mtwo?user=linas")
  (define pca (make-pseudo-cset-api))
  (define psa (add-pair-stars pca))
- (batch-pairs psa)
+;  (batch-pairs psa)
+(psa 'fetch-pairs)
 (print-matrix-summary-report psa)
+
+(define psc (add-pair-count-api psa))
+(define psf (add-pair-freq-api psa))
+
+Rows: 137078 Columns: 6239997
+Size: 8629163 non-zero entries of 855366308766 possible
+Fraction non-zero: 1.0088E-5 Sparsity (-log_2): 16.597
+Total observations: 18489594.0  Avg obs per pair: 2.1427
+Entropy Total: 20.957   Left: 19.143   Right: 9.7111
+Total MI: 7.8969
+
+                 Left         Right     Avg-left     Avg-right
+                 ----         -----     --------     ---------
+Support (l_0)  4.8875E+4    145.4
+Count   (l_1)  2.2958E+5    3440.         4.697        23.66
+Length  (l_2)  1.3729E+4    1773.         .2809        12.19
+RMS Count      1.3696E+4    1732.         .2802        11.91
+
+
+(length all-csets)
+$16 = 8629163
+expect approx 8629163 + 3*137078 + 2*6239997 =  21520391 = 21.5M atoms, approx.
+
+Actual: 21651917 which is 131526 more than expected ...
+and is 43GB virt = 2KB/atom
+and elapsed= 4543 secs = 4.77K atoms/sec
+cpu time: 435:31.67 = 26131 secs -? 5.75 parallel
+
+heap: 1421955072
+45.036 
+Uhh oh.
+
+NO MI for DJ (WordNode \"Jud\") ...
+
+(Section (WordNode "Jud") 
+   (ConnectorSeq (Connector (WordNode "Prudie") (ConnectorDir "+"))))
+
+(define psf (add-pair-freq-api psa))
+(fetch-incoming-by-type (WordNode "Jud") 'Section)
+(psf 'pair-fmi  ... throws)
+(PredicateNode "*-Mutual Info Key-*") 
+
+(cog-keys jud) doesn't list it. ... it was not saved.
+how to recomp only one MI?
+count=3
+
+left-wild=17.7478927873962
+right-wild = 15.6685349957829
+wild-wild:  18489594 
+
+so freq should be: 1.622534275225297e-7
+logli = 22.55524770945383
+fmi = 10.861180073725272
+mi = 1.7622636939013273e-6
+
+set-pair-freq
+set-pair-mi
+
+(Section (WordNode "set") 
+ (ConnectorSeq  (Connector (WordNode "watch")  (ConnectorDir "+"))))
+
+count=4
+right-wild-count 5698.0 
+right-wild-logli 11.6639703038511
+left 15.478432112403
+
+logli=22.140210210174985
+fmi = 5.0021922060791155
+mi = 2.1633790336337293e-7 * above
+
+Whoa .. store atom didn't work!? Yes it did ....
+
+(Section         66400472
+(WordNode "set")    310
+ (ConnectorSeq      64865853
+  (Connector        64865826
+  (WordNode "watch")  69402
+ (ConnectorDir "+") 64841132
+)))
+
+So fetch-atom is not working....
+get_atom_values is called...
+
+getLink
+doGetLink  yes ...
+setValue yes... called 1,2,3 times
+but cog-keys still shows junk.
+
+oc_to_string
+
+(Section                73785651
+(WordNode "Reinaert")   11727194
+  (ConnectorSeq         73785641
+  (Connector            73785640
+(WordNode "Isengrim")   11727422
+  (ConnectorDir "+")))) 64841132
+
+Ahhh!  Soo .. no MI was stored for this!   it was lost!
+
+Also: not fetchable if been open a long time ... !?
+
+count=1
+wild-wild = 18489594
+right-wild-logli = 18.8182821152876
+left- = 18.8922826967314
+
+so fmi = 13.570354601844016
+
+cog-logger
+(use-modules (opencog logger))
+
+@0x7ffc6ba59e40:
+getLink
+doGetLink   its in TLB so we are good ...
+get_atom_values
+
+@0x7ffc6ba59d90:  is what sql works with.
+
+get_all_values_cb
+atom->setValue
+... fails because atom in TLB has no atomspace!!!!
+    _atom_space->_value_table.addValuation(key, getHandle(), value);
+which is why its not printing...
+
+but fetches after individual access do work corrctly.
+Soits the bulk fretch of all apirs that failed to date TLB...
+
+(load-atoms-of-type 'Section)
+getIncomingByType
+getIncoming
+      hi = table.add(hi, false);
+      _tlbuf.addAtom(hi, p->uuid);
+
+wait ... atom->setAtomSpace(_as); does happn so wtf...!?
+
+x/4a 0x7ffc6ba59e40
+(gdb) x/4a 0x7ffc6ba59e40
+0x7ffc6ba59e40: 0x7f26dfca8440  0x7f26dfca8430
+(gdb) x 0x7f26dfca8440
+0x7f26dfca8440: 0x7f303c11e1b8 <_ZTVN7opencog4LinkE+16>
+
+(gdb) print *this                             
+$15 = {<> = {<> = {_M_weak_this = {<No data fields>}}, 
+    _vptr.ProtoAtom = 0x7f303c11e1b8 <vtable for opencog::Link+16>,
+    _type = 127}, _flags = 0 '\000', _content_hash = 11383300620556476978,
+  _atom_space = 0x0, _truthValue = {<No data fields>},
+  _mtx = {<No data fields>}, _incoming_set = {<No data fields>}}        
+
+So... 
+
+atomspace should be 0x55595edc1590
+
+(gdb) x/16 0x7f26dfca8440
+0x7f26dfca8440: 0x7f303c11e1b8 <_ZTVN7opencog4LinkE+16> 0x7f26dfca8440
+0x7f26dfca8450: 0x7f26dfca8430  0x353635383700007f  << type=7f = 127 good
+0x7f26dfca8460: 0x9df99b9a63c0a232      0x55595edc1590 << atomspace is good
+0x7f26dfca8470: 0x5559659b7c10  0x5559659b7c00
+0x7f26dfca8480: 0x0     0x0
+0x7f26dfca8490: 0x0     0x0
+
+whereas tlb is holding:
+$26 = (struct Handle &) @0x7ffc6ba59d90: {<No data fields>}
+(gdb) x 0x7ffc6ba59d90
+0x7ffc6ba59d90: 0x7f26dfca8240
+
+(gdb) x/12 0x7f26dfca8240
+0x7f26dfca8240: 0x7f303c11e1b8 <_ZTVN7opencog4LinkE+16> 0x7f26dfca8240
+0x7f26dfca8250: 0x7f26dfca8230  0x7f26df00007f << type=7f = 127 good
+0x7f26dfca8260: 0x9df99b9a63c0a232      0x0  << hash is same, atomspace bad
+0x7f26dfca8270: 0x5559659b7c10  0x5559659b7c00
+0x7f26dfca8280: 0x0     0x0
+0x7f26dfca8290: 0x0     0x0
+
+      _tlbuf.addAtom(hi, p->uuid);
+
+(define sec (Section (WordNode "Reinaert") (ConnectorSeq (Connector
+(WordNode "Isengrim") (ConnectorDir "+")))))
+
+(define foo (Predicate "foo"))
+(cog-value sec foo)
+(cog-set-value! sec foo (FloatValue 1 ))
+wtf
+"Atom not in atomspace" ??? Ahh!
+
+Atom::setValue from 
+        8: SQLAtomStorage.cc:307
+opencog::SQLAtomStorage::Response::get_all_values_cb()
+10: SQLAtomStorage.cc:1687  :getLink
+
+so doGetLink top-code returned an atom that's not in the AS.
+
+doGetLink does no table insert directly! cause table not available.
+But the tlb resolve fixes it up for us! Cause the fetch was already
+in the as.
+
+vs. the incoming set .... 
+getIncomingByType  1566
+getIncoming  1502
+  ... get_recursive_if_not_exists  1459
+        does a _tlbuf.addAtom(link, p->uuid);
+             but that link is not in AS yet.
+  add lnk to table
+  get values of tabled link
+   _tlbuf.addAtom(hi, p->uuid); 
+      but some other ato already in tlb....
+
+  so:
+   h is in the as.
+   hr is == h
+
+   _handle_map.find(hr); returns ... !?
+
+So the second addAtom fails to resolve or update ad the first failed to
+resolve.
+
+ValuationPtr  .. s a triple, and thus is too much.
+Atom has pairs of key, ProtoAtomPtr&  
+
+Remove the valuation table, do not even build it. DONE
+remove special-case for tv in sql  DONE
+
+==================
+United:
+States+  36
+
+domain- domain- the- the- States+ States+ 80
+the- domain- anyone- in- th- States+ 40
+outside- the- States+  51
+owns- the- States+ States+  108
+status- outside- the- States+
+
+
+
+99  2.8848641655886156 "Prince"
+
+Prince  773
+
+Andrew+ 626
+Vasili+ 149
+Andrew's+ 46
+Edouard+ 46
+Hans+ 33
+Bagration+ 32
+the- Andrew+ 27 
+the- Wales+ 27
+Hippolyte+ 21 
+Arthur+ 21
+the- 17
+Bolkonski+ 16
+Natasha- Andrew+ 18
+The- Andrew+ 15
+Vasili's+ 14
+"-  Andrew+  11
+LEFT-WALL- Edouard+ 11
+
+112  2.801255090459977 "his" -- 49 dj > 200
+140  2.6103991212010254 "think" -- 6 dj > 200
+148  2.5431777546500145 "was"  -- 35
+161  2.4965609797013926 "head" -- 5
+171  2.4537177541729895 "middle" --  1
+195  2.382483370288248 "long" -- 5 
+196  2.3804440649017935 "day" -- 2
+208  2.3244970859184058 "going" -- 2
+
+think: 5462
+I- 1321
+you- 308
+do- you- 211
+don't- 265
+to- 244
+I- it+ 202
+
+head:  5961
+his- 777
+shook- .+ 751
+shook- 683
+her- 358
+his- .+ 238
+
+long  5412
+a- 385
+as+ 335
+how- 236
+a- time+ 212
+enough+ 201
+
+
+How many words?
+(psf 'left-basis-size)
+(psf 'right-basis-size)
+
+(define (escquote STR BEG)
+	(define pos (string-index STR (lambda (C) (equal? C #\')) BEG))
+	(if pos
+		(escquote
+			(string-replace STR "''" pos pos 1 2)
+			(+ pos 2))
+		STR))
+
+		(string-replace "fo's" "''" 2 2 1 2)
+
+zen_pairs_mst
+(export-all-csets "dict-zen.db" "ZH_cn")
+Store 800855 csets
+
+Mandarin word pairs + MI values; Ruitings segemented text
+
+--------------------
+
+1) filter the dictionary write...
+e.g. 
+(define pca (make-pseudo-cset-api) 
+(define psa (add-pair-stars pca))
+(psa 'left-basis-size)  137078
+(psa 'right-basis-size)  6239997
+(length (psa 'all-pairs))  8629163
+
+(define fca (add-subtotal-filter psa 50 50 10 #f))
+(define fsa (add-pair-stars fca))
+(fsa 'left-basis-size)  14666
+(fsa 'right-basis-size)  23565
+(length (fsa 'all-pairs))  76834
+
+Need a map over all elts exists, its the looper.
+get rid of all-csets DONE
+
+(define cnt 0)
+(define (cntr x) (set! cnt (+ cnt 1)))
+(define looper (add-loop-api psa))
+(looper 'for-each-pair cntr)
+
+fuuuu 
+(define fsf (add-pair-freq-api fsa))
+(psf 'pair-fmi sec) works
+(fsf 'pair-fmi sec) fails
+
+(define (foo x) (format #f "bar ~D" x))
+(define* (st FOO   #:optional (ID (FOO 2)))
+	(format #t "hey its ~A\n" ID))
+
+
+2) replace cset-vec-cosine by filtered cosine  in gram-sim
+3) use filter-specific predicate.  DONE
+4) wait .. batch in matrix?
+
+5) make graph of filtering ... why? we can already guess...
+
+filters?
+   (define key-name
+      (if (LLOBJ 'filters?)
+         (string-append "*-Norm Key " (LLOBJ 'id))
+         "*-Norm Key-*"))
+
+6) create generic API to fetch and store values on matrix by key name
+   well, maybe not...
+7) create generic product matix kind-of-done-ish
+8) create generic cosine matrix. kind-of-done-ish
+9) fetch all atoms with key  DONE
+   this will make fetching cosines better!?
+
+--------------------------------------------
+
+Fuuuu
+He looked away
+link-grammar/prepare/exprune.c:318
+#0  expression_prune (sent=sent@entry=0x555555928f50)
+    at ../../link-grammar/prepare/exprune.c:318
+#1  0x00007ffff7b6f2e8 in sentence_parse (sent=0x555555928f50, 
+    opts=0x55555576f580) at ../../link-grammar/api.c:700
+
+x->exp == 0
+he.2549 has no exp....
+
+sqlite> select * from Morphemes where subscript='he.2549';
+he|he.2549|(he.2549)
+
+he.2025041
+has no disjunct.
+NULL X_node
+
+
+sqlite3 bad.db
+.mode insert
+.output dump_all.sql
+.dump
+.exit
+
+sqlite3 renew.db
+.read dump_all.sql
+
+ant ant-optional
 
 
 

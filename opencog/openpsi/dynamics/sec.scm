@@ -14,7 +14,7 @@
 
 (define psi-sec-node (Concept (string-append psi-prefix-str "SEC")))
 
-(define-public (psi-create-sec name initial-value)
+(define (psi-create-sec name initial-value)
 "
 	Create a new SEC
 
@@ -42,7 +42,7 @@
 
 	sec)
 
-(define-public (psi-create-stimulus-sec stimulus sec initial-value)
+(define (psi-create-stimulus-sec stimulus sec initial-value)
 "
   Create a stimulus-SEC association and assign its initial value.
   A stimulus-SEC takes the form (List stimulus SEC) and its current value is
@@ -57,11 +57,11 @@
 	(psi-set-value! stimulus-sec initial-value)
 	stimulus-sec)
 
-(define-public (psi-get-secs)
+(define (psi-get-secs)
 	(cog-outgoing-set
 		(cog-execute! (Get (Inheritance (Variable "$sec") psi-sec-node)))))
 
-(define-public (psi-is-sec? atom)
+(define (psi-is-sec? atom)
 	(member atom (psi-get-secs)))
 
 ; Todo: add variable names (?) and add getters for agent-state secs

@@ -17,7 +17,7 @@
 (load "utilities.scm")
 
 ; --------------------------------------------------------------
-(define-public (psi-set-updater! updater tag-node)
+(define (psi-set-updater! updater tag-node)
 "
   psi-set-updater! UPDATER TAG
 
@@ -31,7 +31,7 @@
 )
 
 ; --------------------------------------------------------------
-(define-public (psi-get-updater tag-node)
+(define (psi-get-updater tag-node)
 "
   psi-get-updater TAG
 
@@ -57,13 +57,13 @@
 ; updating the weights at a time.
 
 ; The states of the psi-controller
-(define-public psi-controller (Anchor
+(define psi-controller (Anchor
     (string-append psi-prefix-str "psi-controller")))
 
-(define-public psi-controller-idle
+(define psi-controller-idle
     (Concept (string-append psi-prefix-str "psi-controller-idle")))
 
-(define-public psi-controller-busy
+(define psi-controller-busy
     (Concept (string-append psi-prefix-str "psi-controller-busy")))
 
 (State psi-controller psi-controller-idle)
@@ -71,7 +71,7 @@
 ; -----
 ; For locking and releasing the controller
 
-(define-public (psi-controller-occupy)
+(define (psi-controller-occupy)
     (while (equal? psi-controller-busy
             (gar (cog-execute! (Get (State psi-controller (Variable "$x"))))))
         (sleep 0.5)
@@ -80,14 +80,14 @@
     (State psi-controller psi-controller-busy)
 )
 
-(define-public (psi-controller-release)
+(define (psi-controller-release)
     (State psi-controller psi-controller-idle)
 )
 
 ; --------------------------------------------------------------
 ; FIXME -- can we have a shorter/better name for this method?
 ;
-(define-public (psi-rule-set-atomese-weight psi-rule weight)
+(define (psi-rule-set-atomese-weight psi-rule weight)
 "
   psi-rule-set-atomese-weight RULE WEIGHT
 
@@ -116,7 +116,7 @@
 )
 
 ; --------------------------------------------------------------
-(define-public (psi-set-controlled-rule psi-rule)
+(define (psi-set-controlled-rule psi-rule)
 "
   psi-set-controlled-rule RULE
 
@@ -131,7 +131,7 @@
 )
 
 ; --------------------------------------------------------------
-(define-public (psi-get-controlled-rules)
+(define (psi-get-controlled-rules)
 "
   Returns a list of all the rules that are going to be controlled
 "
@@ -145,7 +145,7 @@
 )
 
 ; --------------------------------------------------------------
-(define-public (psi-rule-atomese-weight psi-rule)
+(define (psi-rule-atomese-weight psi-rule)
 "
   Returns a list with a NumberNode that has the weight of the given psi-rule if
   the weight is represented in atomese, if not it returns `null`.
@@ -178,7 +178,7 @@
 )
 
 ; --------------------------------------------------------------
-(define-public (psi-controller-update-weights)
+(define (psi-controller-update-weights)
 "
   This gets all the psi-rules that inherit from the psi-control-node & update
   their weight.
@@ -200,7 +200,7 @@
 )
 
 ; --------------------------------------------------------------
-(define-public (psi-rule-disable rule-alias psi-rule-list)
+(define (psi-rule-disable rule-alias psi-rule-list)
 "
   Disable the psi-rule which is aliased as `rule-alias`. A disabled rule is
   one with weight of zero.
@@ -220,7 +220,7 @@
 )
 
 ; --------------------------------------------------------------
-(define-public (psi-rule-enable rule-alias psi-rule-list)
+(define (psi-rule-enable rule-alias psi-rule-list)
 "
   Disable the psi-rule which is aliased as `rule-alias`. An enabled rule is
   one with weight greater than zero. Here the weight is set to 0.9

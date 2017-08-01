@@ -57,7 +57,7 @@
 ; propagate through the system after an event has occurred.
 (define psi-expression-loop-delay 4)
 
-; Rate of decay of modulators and secs toward their baseline values at each time 
+; Rate of decay of modulators and secs toward their baseline values at each time
 ; step.
 (define decay-rate .001)
 (define decay-factor (- 1 decay-rate))
@@ -98,7 +98,7 @@
 	(set! psi-expression-callback callback)
 )
 
-(define-public (psi-set-event-callback! callback)
+(define (psi-set-event-callback! callback)
 "
   psi-set-event-callback! CALLBACK - Set function for event detection.
 "
@@ -127,12 +127,12 @@
 	(if verbose (display "psi-updater-init\n"))
 
 	; Init previous value table for the monitored entities
-	(for-each 
+	(for-each
 		(lambda (eval-link)
 			(define key (gadr eval-link))
 			(define value (psi-get-number-value key))
 			(hash-set! prev-value-table key value)
-			(set! psi-monitored-entities (append psi-monitored-entities 
+			(set! psi-monitored-entities (append psi-monitored-entities
 				(list key)))
 		)
 		evals-with-change-pred)
@@ -176,7 +176,7 @@
 
 ; ----------------------------------------------------------------------
 
-(define-public (do-psi-updater-step)
+(define (do-psi-updater-step)
 "
   Main function that executes the actions to be taken in every cycle.
   At each step:
@@ -410,7 +410,7 @@
 	)
 
 	; Update prev-value-table entries for the changed (monitored) params
-	(for-each 
+	(for-each
 		(lambda (param)
 			(define value (hash-ref value-at-step-start param))
 			(hash-set! prev-value-table param value))
@@ -418,7 +418,7 @@
 
 	; Update prev-value-table entries for the changed pau's
 	;(This is just for log highlighint for testing)
-	(for-each 
+	(for-each
 		(lambda (pau)
 			(define value (hash-ref value-at-step-start pau))
 			(hash-set! prev-value-table pau value))
@@ -445,7 +445,7 @@
 
 ; --------------------------------------------------------------
 
-(define-public (adjust-psi-var-level target strength trigger)
+(define (adjust-psi-var-level target strength trigger)
 "
  Adjust psi-related variable based on triggered interaction rule
 
@@ -567,7 +567,7 @@
 ; Ultradian rhythm update function
 ; Updates value of var based on cos wave function
 ; Called via GroundedSchemaNodes in Implication rules
-(define-public (psi-ultradian-update var Beta omega offset)
+(define (psi-ultradian-update var Beta omega offset)
 "
   var - psi variable as Atom
   Beta - amplitude as NumberNode
@@ -597,7 +597,7 @@
 
 ; Adjust openpsi variable by adding noise
 ; Called via GSN's in Implication rules
-(define-public (psi-noise-update var width)
+(define (psi-noise-update var width)
 "
   var - psi variable as Atom
   width - width of the random number adjustement range as NumberNode. Noise to
@@ -616,7 +616,7 @@
 )
 
 ; Return random offset based on cycle frequence
-(define-public (get-random-cycle-offset omega)
+(define (get-random-cycle-offset omega)
 	(random (/ (* 2 3.14) omega)))
 
 ; --------------------------------------------------------------
@@ -724,7 +724,7 @@
 	(if (pred? atom)
 		(set! results (append results (list atom))))
 	(if (cog-link? atom)
-		(for-each 
+		(for-each
 			(lambda (sub-atom)
 				(set! results
 					(append (cog-filter-hypergraph pred? sub-atom) results))
@@ -750,7 +750,7 @@
 (define psi-updater-loop-count 0)
 (define continue-psi-updater-loop (stv 1 1))
 
-(define-public (psi-updater-running?)
+(define (psi-updater-running?)
 "
   Return #t if the openpsi dynamics updater loop is running, else return #f.
 "
@@ -773,7 +773,7 @@
 
 
 ; --------------------------------------------------------------
-(define-public (psi-updater-run)
+(define (psi-updater-run)
 "
   Run `psi-step` in a new thread. Call (psi-updater-halt) to exit the loop.
 "
@@ -807,7 +807,7 @@
 	)
 )
 
-(define-public (psi-updater-halt)
+(define (psi-updater-halt)
 "
   Tells the psi loop thread, that is started by running `(psi-update-run)`, to
   exit.

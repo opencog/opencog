@@ -125,7 +125,7 @@
 )
 
 ; --------------------------------------------------------------
-(define-public (psi-get-rules demand-node)
+(define (psi-get-rules demand-node)
 "
   Returns a list of all psi-rules that affect the given demand.
 
@@ -136,7 +136,7 @@
 )
 
 ; --------------------------------------------------------------
-(define-public (psi-get-all-rules)
+(define (psi-get-all-rules)
 "
   Returns a list of all known openpsi rules.
 
@@ -149,7 +149,7 @@ there are 100K rules!
 )
 
 ; --------------------------------------------------------------
-(define-public (psi-rule? atom)
+(define (psi-rule? atom)
 "
   psi-rule? ATOM
 
@@ -169,7 +169,7 @@ there are 100K rules!
 )
 
 ; --------------------------------------------------------------
-(define-public (psi-get-all-actions)
+(define (psi-get-all-actions)
 "
   Returns a list of all openpsi actions.
 
@@ -183,7 +183,7 @@ actions are EvaluationLinks, not schemas or ExecutionOutputLinks.
 )
 
 ; --------------------------------------------------------------
-(define-public (psi-action? ATOM)
+(define (psi-action? ATOM)
 "
   Check if ATOM is an action and return `#t`, if it is, and `#f`
   otherwise. An atom is an action if it a member of the set
@@ -207,7 +207,7 @@ actions are EvaluationLinks, not schemas or ExecutionOutputLinks.
 )
 
 ; --------------------------------------------------------------
-(define-public (psi-get-context rule)
+(define (psi-get-context rule)
 "
   psi-get-context RULE - Get the context of the openpsi-rule RULE.
 
@@ -217,7 +217,7 @@ actions are EvaluationLinks, not schemas or ExecutionOutputLinks.
 )
 
 ; --------------------------------------------------------------
-(define-public (psi-get-action rule)
+(define (psi-get-action rule)
 "
   psi-get-action RULE
 
@@ -231,7 +231,7 @@ actions are EvaluationLinks, not schemas or ExecutionOutputLinks.
 )
 
 ; --------------------------------------------------------------
-(define-public (psi-get-goal rule)
+(define (psi-get-goal rule)
 "
   psi-get-goal RULE
 
@@ -241,7 +241,7 @@ actions are EvaluationLinks, not schemas or ExecutionOutputLinks.
 )
 
 ; --------------------------------------------------------------
-(define-public (psi-rule-alias psi-rule)
+(define (psi-rule-alias psi-rule)
 "
   psi-rule-alias RULE
 
@@ -264,7 +264,7 @@ actions are EvaluationLinks, not schemas or ExecutionOutputLinks.
 )
 
 ; --------------------------------------------------------------
-(define-public (psi-partition-rule-with-alias rule-alias psi-rule-list)
+(define (psi-partition-rule-with-alias rule-alias psi-rule-list)
 "
   psi-partition-rule-with-alias ALIAS RULE-LIST
 
@@ -279,7 +279,7 @@ actions are EvaluationLinks, not schemas or ExecutionOutputLinks.
 )
 
 ; --------------------------------------------------------------
-(define-public (psi-related-goals action)
+(define (psi-related-goals action)
 "
   psi-related-goals ACTION
 
@@ -316,7 +316,7 @@ actions are EvaluationLinks, not schemas or ExecutionOutputLinks.
 )
 
 ; --------------------------------------------------------------
-(define-public (psi-satisfiable? rule)
+(define (psi-satisfiable? rule)
 "
   psi-satisfiable? RULE - Return a TV indicating if the context of
   the RULE is satisfiable.
@@ -347,7 +347,7 @@ actions are EvaluationLinks, not schemas or ExecutionOutputLinks.
     (equal? (stv 1 1) (psi-satisfiable? RULE))
 )
 
-(define-public (psi-rule-satisfiability rule)
+(define (psi-rule-satisfiability rule)
 "
   psi-rule-satisfiability RULE
 
@@ -365,7 +365,7 @@ actions are EvaluationLinks, not schemas or ExecutionOutputLinks.
 )
 
 ; --------------------------------------------------------------
-(define-public (psi-get-satisfiable-rules demand-node)
+(define (psi-get-satisfiable-rules demand-node)
 "
   psi-get-satisfiable-rules DEMAND
 
@@ -376,7 +376,7 @@ actions are EvaluationLinks, not schemas or ExecutionOutputLinks.
 )
 
 ; --------------------------------------------------------------
-(define-public (psi-get-weighted-satisfiable-rules demand-node)
+(define (psi-get-weighted-satisfiable-rules demand-node)
 "
   psi-get-weighted-satisfiable-rules DEMAND
 
@@ -391,7 +391,7 @@ actions are EvaluationLinks, not schemas or ExecutionOutputLinks.
 )
 
 ; --------------------------------------------------------------
-(define-public (psi-get-all-satisfiable-rules)
+(define (psi-get-all-satisfiable-rules)
 "
   psi-get-all-satisfiable-rules
 
@@ -401,7 +401,7 @@ actions are EvaluationLinks, not schemas or ExecutionOutputLinks.
 )
 
 ; --------------------------------------------------------------
-(define-public (psi-get-all-weighted-satisfiable-rules)
+(define (psi-get-all-weighted-satisfiable-rules)
 "
   psi-get-all-weighted-satisfiable-rules
 
@@ -415,7 +415,7 @@ actions are EvaluationLinks, not schemas or ExecutionOutputLinks.
 )
 
 ; --------------------------------------------------------------
-(define-public (psi-context-weight rule)
+(define (psi-context-weight rule)
 "
   psi-context-weight RULE
 
@@ -441,7 +441,7 @@ actions are EvaluationLinks, not schemas or ExecutionOutputLinks.
 ;; --------------------------------------------------------------
 ;; DEAD CODE not used anywhere
 ;;
-;; (define-public (psi-action-weight rule)
+;; (define (psi-action-weight rule)
 ;; "
 ;;   psi-action-weight RULE
 ;;
