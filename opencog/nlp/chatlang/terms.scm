@@ -67,14 +67,12 @@
 
 (define (word STR)
   "Literal word occurrence."
-  (let* ((v1 (Variable (genvar STR #t)))
+  (let* ((v1 (WordNode STR))
          (v2 (Variable (genvar STR #f)))
          (l (WordNode (get-lemma STR)))
-         (v (list (TypedVariable v1 (Type "WordNode"))
-                  (TypedVariable v2 (Type "WordInstanceNode"))))
-         (c (list (ReferenceLink v2 v1)
-                  (WordInstanceLink v2 (Variable "$P"))
-                  (ReferenceLink v2 (WordNode STR)))))
+         (v (list (TypedVariable v2 (Type "WordInstanceNode"))))
+         (c (list (WordInstanceLink v2 (Variable "$P"))
+                  (ReferenceLink v2 v1))))
     (list v c (list v1) (list l))))
 
 (define (lemma STR)
