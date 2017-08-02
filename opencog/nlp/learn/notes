@@ -12661,7 +12661,8 @@ Fuu
 	#f)
 (cog-map-type mov-sim 'SimilarityLink)
 
-(define pss (batch-similarity psa #f))
+(define pss (add-similarity-api psa #f))
+(define psb (batch-similarity psa #f))
 (define (new-sim ato)
 	(define fsim (pss 'compute-similarity (gar ato) (gdr ato)))
 	(cog-set-value! ato cos-key (FloatValue fsim))
@@ -12671,7 +12672,7 @@ Fuu
 
 (define (kill-sim ato)
 	(define sim (cog-value-ref (cog-value ato cos-key) 0))
-	(if (< sim 0.4)
+	(if (< sim 1.0e-5)
 	   (cog-set-value! ato cos-key #f))
 	#f)
 (cog-map-type kill-sim 'SimilarityLink)
@@ -12684,22 +12685,118 @@ Fuu
 				(cog-value-ref (cog-value ato cos-key) 0) ato)
 			(set! scnt (+ scnt 1))))
 	#f)
+(cog-map-type showone 'SimilarityLink)
+
+(define (cntone ato)
+	(define val (cog-value ato cos-key))
+	(if (not (null? val)) 
+; (and (not (null? val)) (< 1e-10 (cog-value-ref val 0)))
+(begin (set! scnt (+ scnt 1)))
+  (store-atom ato)
+)
+	#f)
+(cog-map-type cntone 'SimilarityLink)
+
+(define scnt 0)
+2932
+3052 + (69*68)/2 - (37*36)/2 = 4732
+(define (rpt) (set! scnt 0) (cog-map-type cntone 'SimilarityLink) scnt)
+
 
 Fuuuu.
 (define psu (add-support-api psa))
 (psu 'right-length
 
+(define psm (add-similarity-api psa #f))
+(define pac (add-pair-cosine-compute psa))
 
-(define pslon
-	(add-generic-filter psa
-		(lambda (word) (<= 128 (psu 'right-length word)))
-		(lambda (dj) #t)
-		(lambda (dj) #t)
-		(lambda (dj) #t)
-		(lambda (dj) #t)
-		"cut len<128"
-		#f))
-	
+ (define (compute-sim A B)
+   (define val (psm 'pair-similarity (cog-link 'SimilarityLink A B)))
+     (if 
+; (and (not (null? val)) (< 1.0e-6 (cog-value-ref val 0)))
+ (not (null? val)) 
+(format #t "Already got one ~A ~A ~A \n" (cog-value-ref val 0) A B)
+(begin (format #t "Gonna do it for ~A=~D ~A=~D\n"
+A (length (cog-incoming-by-type A 'Section))
+B (length (cog-incoming-by-type B 'Section)))
+      (psm 'set-pair-similarity
+           (SimilarityLink A B) 
+          (FloatValue (pac 'right-cosine A  B))))))
+
+;          (compute-right-cosine A  B)))))
+
+(define (batch-simlist ITEM ITEM-LIST)
+   (for-each (lambda (item) (compute-sim ITEM item)) ITEM-LIST))
+
+(define (make-pairs ITM-LST)
+            (if (not (null? ITM-LST))
+               (begin
+			(batch-simlist (car ITM-LST) (cdr ITM-LST))
+                  (make-pairs (cdr ITM-LST)))))
+
+      (define (compute-right-cosine ROW-A ROW-B)
+         (define prod (compute-right-product ROW-A ROW-B))
+         (define deno (exact->inexact (*
+            (get-right-length ROW-A)
+            (get-right-length ROW-B))))
+         (if (eqv? 0.0 deno) 0.0 (/ prod deno)))
+
+(define ptm (add-tuple-math psa * 'pair-count))
+(define prd (add-support-compute ptm))
+
+      (define (compute-right-product ROW-A ROW-B)
+         (prd 'right-count (list ROW-A ROW-B)))
+
+      (define (get-right-length ROW) (psu 'right-length ROW))
+
+Q: does star basis behave corectly on the tuple?
+A: duddn't matter only stars are used.
+
+(define ptms (add-pair-stars ptm))
+ (ptms 'right-stars (list ROW-A ROW-B))
+
+Replace below by hash:
+
+	(define (get-right-union TUPLE)
+		(let* ((start-time (current-time))
+				(res (delete-duplicates!
+			(append-map!
+				(lambda (item) (map! gdr (psa 'right-stars item)))
+				TUPLE))))
+			(format #t "tooks ~A secs\n" (- (current-time) start-time))
+			res))
+
+
+(define (make-union)
+	(define cache (make-hash-table))
+	(define (atom-hash ATOM SZ) (modulo (cog-handle ATOM) SZ))
+	(define (atom-assoc ATOM ALIST)
+		(find (lambda (pr) (equal? ATOM (car pr))) ALIST))
+			
+	(lambda (ITEM)
+		(if ITEM
+			(hashx-set! atom-hash atom-assoc cache ITEM #f)
+			(let ((ats '()))
+				(hash-for-each-handle
+					(lambda (PR) (set! ats (cons (car PR) ats)))
+					cache)
+				ats))))
+
+(define atom-set (make-union))
+
+(for-each atom-set (map! gdr (psa 'right-stars W)))
+
+wall -- 64125
+at -- 28773
+sum = 92898 
+wall-at: 92322
+
+'item-pair   return hi-pr only if lopr
+'make-pair
+
+
+
+
 
 
 

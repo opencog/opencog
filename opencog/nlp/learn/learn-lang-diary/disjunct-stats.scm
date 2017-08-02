@@ -621,7 +621,7 @@
 
 (define psu (add-support-api psa))
 (define long-words
-	(filter (lambda (word) (<= 64 (psu 'right-length word)))
+	(filter (lambda (word) (<= 256 (psu 'right-length word)))
 		(psu 'left-basis)))
 
 (length long-words) ; 6568 of len >= 16
@@ -629,20 +629,27 @@
 ; 64 <= len has 1608
 ; 130 <= has 783
 ; 128 <= has 797 .. lets do those.
+; 256  has 427
+; 512  has 245
+; 1024 has 130
+; 2048 has 69
+; 4096 has 37...
+; 4500 has 32
 
 (define pslon
    (add-generic-filter psa
-      (lambda (word) (<= 128 (psu 'right-length word)))
+      (lambda (word) (<= 2048 (psu 'right-length word)))
       (lambda (dj) #t)
       (lambda (dj) #t)
       (lambda (dj) #t)
       (lambda (dj) #t)
-      "cut len<128"
+      "cut len<2048"
       #f))
 
 (define psls (add-pair-stars pslon))
 (define pss (batch-similarity psls #f #f 0.0))
-(pss 'paralel-batch 3)
+(pss 'batch-compute)
+(pss 'paralel-batch 6)
 
 (cog-map-type ato 'SimilarityLink)
 
