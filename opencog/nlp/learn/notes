@@ -6816,6 +6816,36 @@ select count(*) from valuations; -- 108255875 = 108M = 5M more
 de95af1f2ddb7c696b19a4cc3a3e443e  en_pairs_rfive_mtwo.sql.bz2
 
 ==================================================================
+en_pairs_rfive_mthree
+-------------------
+Random-planar-tree parsed books from tranche-1, 2, 3, 4 and 5. 
+MST-parsed tranche-1, 2 and 3. Contains pair-MI values; does NOT
+contain any disjunct marginals.
+
+STATUS: good
+DATE: 2 August 2017
+REASON: Best so far, I think.  Same issues as en_pairs_rfive_mone
+
+                        List of relations
+ Schema |    Name    | Type  | Owner  |    Size    | Description 
+--------+------------+-------+--------+------------+-------------
+ public | atoms      | table | ubuntu | 8437 MB    | 
+ public | spaces     | table | ubuntu | 40 kB      | 
+ public | typecodes  | table | ubuntu | 56 kB      | 
+ public | valuations | table | ubuntu | 11 GB      | 
+ public | values     | table | ubuntu | 8192 bytes | 
+
+select count(*) from atoms;      --  94097585 =  94M = 15M more
+select count(*) from valuations; -- 116409279 = 116M =  8M more
+
+10315553282 Bytes uncompressed = 10.3 GB
+ 1767006478 Bytes compressed = 1.7GB
+
+2ec9c3544f307c7f58a49fa22762724e  en_pairs_rfive_mthree.sql
+ca4bcdf8d041053ac0d4bc72624a2978  en_pairs_rfive_mthree.sql.bz2
+
+
+==================================================================
 zh_pairs_one
 ------------
 Mandarin individual character pairs.  Only that, without any pair stats.
@@ -12672,7 +12702,7 @@ Fuu
 
 (define (kill-sim ato)
 	(define sim (cog-value-ref (cog-value ato cos-key) 0))
-	(if (< sim 1.0e-5)
+	(if (< sim 1.0e-25)
 	   (cog-set-value! ato cos-key #f))
 	#f)
 (cog-map-type kill-sim 'SimilarityLink)
@@ -12691,16 +12721,21 @@ Fuu
 	(define val (cog-value ato cos-key))
 	(if (not (null? val)) 
 ; (and (not (null? val)) (< 1e-10 (cog-value-ref val 0)))
-(begin (set! scnt (+ scnt 1)))
+(begin (set! scnt (+ scnt 1))
   (store-atom ato)
-)
-	#f)
-(cog-map-type cntone 'SimilarityLink)
+)) #f)
 
 (define scnt 0)
+(cog-map-type cntone 'SimilarityLink)
+(define (rpt) (set! scnt 0) (cog-map-type cntone 'SimilarityLink) scnt)
+
 2932
 3052 + (69*68)/2 - (37*36)/2 = 4732
-(define (rpt) (set! scnt 0) (cog-map-type cntone 'SimilarityLink) scnt)
+4700 + (130 * 129) / 2 - (69*68)/2 = 10739
+10708 + (427 * 426)/ 2 - (130 * 129) / 2 = 93274.0
+
+17199 at 11:50  -> shoot for about 30K at 512 - 245 = 29890
+37044 when done (- (* 0.5 427 426) (* 0.5 245 244))) = 98105
 
 
 Fuuuu.
@@ -12794,6 +12829,14 @@ wall-at: 92322
 'item-pair   return hi-pr only if lopr
 'make-pair
 
+
+(define good-sims
+   (filter
+      (lambda (sim) (and
+            (< 0.5 (sim-cosine sim))
+            (< 8 (cset-vec-word-len (gar sim)))
+            (< 8 (cset-vec-word-len (gdr sim)))))
+      all-sims))
 
 
 

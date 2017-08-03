@@ -636,14 +636,17 @@
 ; 4096 has 37...
 ; 4500 has 32
 
+(define psm (add-similarity-api psa #f))
+(psm 'fetch-pairs)
+
 (define pslon
    (add-generic-filter psa
-      (lambda (word) (<= 2048 (psu 'right-length word)))
+      (lambda (word) (<= 128 (psu 'right-length word)))
       (lambda (dj) #t)
       (lambda (dj) #t)
       (lambda (dj) #t)
       (lambda (dj) #t)
-      "cut len<2048"
+      "cut len<128"
       #f))
 
 (define psls (add-pair-stars pslon))
@@ -658,10 +661,15 @@
 ; Assumes that cosine similarities have been batch-computed, already,
 ; using the code in gram-sim.scm
 
+(define cos-key (PredicateNode "*-Cosine Sim Key-*"))
 
 (define all-sims '())
 (cog-map-type
-	(lambda (sim)  (set! all-sims (cons sim all-sims)) #f)
+	(lambda (ato) 
+		(define val (cog-value ato cos-key)) 
+		(if (not (null? val))
+			(set! all-sims (cons ato all-sims)))
+		 #f)
 	'SimilarityLink)
 
 (length all-sims)    ;  142270 for a cutoff of 0.5
@@ -673,9 +681,9 @@
 (define good-sims
 	(filter
 		(lambda (sim) (and
-				(< 0.5 (sim-cosine sim))
-				(< 8 (cset-vec-word-len (gar sim)))
-				(< 8 (cset-vec-word-len (gdr sim)))))
+				; (< 0.5 (sim-cosine sim))
+				(< 128 (cset-vec-word-len (gar sim)))
+				(< 128 (cset-vec-word-len (gdr sim)))))
 		all-sims))
 
 (length good-sims)   ;  142270 -- identical to all sims.  Why?
