@@ -27,27 +27,21 @@
 
 (use-modules (opencog))
 (use-modules (opencog query))  ; XXX work-around relex2logic bug
-(load "time-map.scm") ;;; octomap for faces
+(use-modules (opencog eva-model))
 ; Start the cogsserver.  It is used by the face-tracker to poke data
 ; into the atomspace.
 (use-modules (opencog cogserver))
-(start-cogserver "../scripts/opencog.conf")
+(start-cogserver)
 
-; Load the behavior trees.
-(use-modules (opencog eva-behavior))
+; Load the behavior trees associated psi-rules.
 (use-modules (opencog openpsi))
+(use-modules (opencog eva-behavior))
+
+; Load the sophia's personality configuration.
+(load-sophia-config)
 
 (use-modules (opencog movement))
 (start-ros-movement-node)
-
-; Load the Eva personality configuration.
-; (display %load-path)
-(add-to-load-path "../src")
-; (load-from-path "cfg-eva.scm") ;;; <<<=== See, its Eva here!
-(load-from-path "cfg-sophia.scm") ;;; <<<=== See, its Sophia here!
-
-;; Load the actual psi rules.
-(load-from-path "psi-behavior.scm")
 
 ;; Call (run) to run the main loop, (halt) to pause the loop.
 ;; The main loop runs in its own thread.
