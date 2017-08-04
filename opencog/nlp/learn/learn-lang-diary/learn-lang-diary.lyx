@@ -25311,7 +25311,7 @@ reference "graph: ranked length"
 .
  The similarity between all pairs of these was computed; this resulted in
  
-\begin_inset Formula $797*796/2=317206$
+\begin_inset Formula $797\times796/2=317206$
 \end_inset
 
  pairs.
@@ -25354,6 +25354,42 @@ Well, that's new! The similarity ranking is very well fit by a parabola
 \end_layout
 
 \begin_layout Standard
+There are 427 words observed 256 or more times, these form 
+\begin_inset Formula $427\times426/2=90951$
+\end_inset
+
+ pairs.
+ There are 245 words observed 512 or more times; these form 
+\begin_inset Formula $245\times244/2=29890$
+\end_inset
+
+ pairs.
+ There are 130 words observed 1024 or more times, these form 
+\begin_inset Formula $130\times129/2=8385$
+\end_inset
+
+ pairs.
+ The ranking for these are shown below.
+ There are 69 words observed 2048 or more times; these form 
+\begin_inset Formula $69\times68/2=2346$
+\end_inset
+
+ pairs.
+ The ranking of these are shown below.
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Graphics
+	filename en-dj/ranked-graded-sims.eps
+	width 70page%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
 xxxx
 \end_layout
 
@@ -25369,19 +25405,19 @@ Produced by binned-good-sims.
 
 \end_inset
 
- There are 5544 words for which 
-\begin_inset Formula $4<\mbox{len}(w)$
+ There are 797 words for which 
+\begin_inset Formula $128<\mbox{len}(w)$
 \end_inset
 
 .
- This shows the distribution of the 2.17 million word-pairs formed from these
- words, and for which 
+ This shows the distribution of the 317206 word-pairs formed from these
+ words, for which 
 \begin_inset Formula $0.1\le\mbox{sim}(w_{1},w_{2})$
 \end_inset
 
 .
  The eyeballed fit is for 
-\begin_inset Formula $\exp(-8\mbox{sim})$
+\begin_inset Formula $\exp(-3.5\times\mbox{sim})$
 \end_inset
 
 .
@@ -25391,7 +25427,7 @@ Produced by binned-good-sims.
 \begin_layout Standard
 \align center
 \begin_inset Graphics
-	filename images/binned-sims.eps
+	filename en-dj/binned-sims.eps
 	width 70text%
 
 \end_inset
