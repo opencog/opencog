@@ -25390,10 +25390,6 @@ There are 427 words observed 256 or more times, these form
 \end_layout
 
 \begin_layout Standard
-xxxx
-\end_layout
-
-\begin_layout Standard
 The graph below shows the distribution of cosine similarity.
 \begin_inset Foot
 status collapsed
@@ -25436,32 +25432,31 @@ Produced by binned-good-sims.
 \end_layout
 
 \begin_layout Standard
-The top-ten similarity pairs are: 'Poir ..
- Perls' 'Poir ..
- Sevan' 'Sevan ..
- Perls' 'Sevan ..
- Ruins' 'Ruins ..
- Perls' 'Poir ..
- Ruins' 'Gongora ..
- Perls' 'Poir ..
- Gongora' 'Gongora ..
- Sevan' 'Gongora ..
- Ruins' 'Poir ..
- Gag'.
- The first three all have a cosine of 1.0, and the rest in the 0.999 range.
- The three words 
-\begin_inset Quotes eld
+The top-ten similarity pairs (for which 
+\begin_inset Formula $128<\mbox{len}(w)$
 \end_inset
 
-Poir
-\begin_inset Quotes erd
-\end_inset
-
+) are: 'Stats ..
+ Category' 'Notes ..
+ Summary' 'Stats ..
+ Rating' 'Category ..
+ Rating' 'She ..
+ He' 'Category ..
+ Fandom' 'Stats ..
+ Fandom' 'Category ..
+ Character' 'Stats ..
+ Character' 'she ..
+ he'.
+ The first one has a cosine of exactly 1.0, and the rest are above 0.975.
  
+\end_layout
+
+\begin_layout Standard
+The two words 
 \begin_inset Quotes eld
 \end_inset
 
-Perls
+Stats
 \begin_inset Quotes erd
 \end_inset
 
@@ -25469,26 +25464,38 @@ Perls
 \begin_inset Quotes eld
 \end_inset
 
-Sevan
+Category
 \begin_inset Quotes erd
 \end_inset
 
- all have exactly one disjunct, containing exactly one connector, linking
- them to a period, presumably at the end of a sentence.
- Its observed a few dozen times, and that's it.
- 
-\begin_inset Quotes eld
-\end_inset
+ have exactly one disjunct: it is 'LEFT-WALL- :+' That is, these appear
+ as the first word in a sentence, and are immediately followed by a colon.
+ The word 'Notes' has 27 distinct disjuncts, but only three are observed
+ more than 6 times: 'Chapter- or LEFT-WALL- or End-' That is, 'Notes' appears
+ either all by itself, or as the phrase 'Chapter Notes' or as 'End Notes'.
+ The word 'Summary' has 47 distinct disjuncts, but only two appear more
+ than 6 times: 'Chapter- or LEFT-WALL-' i.e.
+ either as a solitary word, or as the phrase 'Chapter Summary'.
+ This is why 'Notes' and 'Summary' are considered to be so similar.
+\end_layout
 
-Gongora
-\begin_inset Quotes erd
-\end_inset
+\begin_layout Standard
+Continuing in this fashion: 'Rating' has 7 disjuncts, four of which are
+ observed more than 6 times: '(LEFT-WALL- :+) or (LEFT-WALL- :+ Audiences+)
+ or (LEFT-WALL- :+ Explicit+) or (LEFT-WALL- :+ Mature+)' This suggests
+ it appears in a table of some sort.
+ The first disjunct '(LEFT-WALL- :+)' accounts for its high similarity to
+ both 'Stats' and 'Category'.
+\end_layout
 
- has three disjuncts; (.+) is observed 56 times, (,+) is observed twice and
- (,+ .+) is observed twice.
- So, yes, all these words have been discovered to behave in a grammatically
- similar fashion, however, this behavior seems quite boring: links to a
- period.
+\begin_layout Standard
+So, yes, all these words have been discovered to behave in a grammatically
+ similar fashion; however, this behavior is somewhat boring: they arise
+ from the regularity of some table listing.
+\end_layout
+
+\begin_layout Standard
+xxx
 \end_layout
 
 \begin_layout Standard
