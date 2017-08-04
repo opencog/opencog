@@ -22603,6 +22603,13 @@ The RMS size of the set is thus larger not only when more disjuncts have
 \end_inset
 
 
+\begin_inset CommandInset label
+LatexCommand label
+name "graph: ranked length"
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -25285,11 +25292,29 @@ where
 \end_layout
 
 \begin_layout Standard
-The current dataset being analyzed contains 1985 words whose length is greater
- than 8; the ranking-by-length was already shown up above, in a previous
- graph.
+The current dataset being analyzed contains 797 words whose length is greater
+ than or equal to 8.
+ The ranking-by-length was already shown up above, in the graph 
+\begin_inset CommandInset ref
+LatexCommand nameref
+reference "graph: ranked length"
+
+\end_inset
+
+
+\begin_inset CommandInset ref
+LatexCommand vpageref
+reference "graph: ranked length"
+
+\end_inset
+
+.
  The similarity between all pairs of these was computed; this resulted in
- 15808 pairs with a cosine similarity of greater than 0.5.
+ 
+\begin_inset Formula $797*796/2=317206$
+\end_inset
+
+ pairs.
  These can be sorted and ranked.
 \begin_inset Foot
 status open
@@ -25306,7 +25331,7 @@ See the good-sims and ranked-sims in disjunct-stats.scm file.
 \begin_layout Standard
 \align center
 \begin_inset Graphics
-	filename images/ranked-sims.eps
+	filename en-dj/ranked-sims.eps
 	width 70text%
 
 \end_inset
@@ -25315,13 +25340,21 @@ See the good-sims and ranked-sims in disjunct-stats.scm file.
 \end_layout
 
 \begin_layout Standard
-Well, that's new! The similarity ranking is very well fit by a cubic! In
- the above, the green line is given by 
-\begin_inset Formula $1-\log^{3}(rank)/1800$
+Well, that's new! The similarity ranking is very well fit by a parabola
+ at the high end, and a cubic at the low end! In the above, the green line
+ is given by 
+\begin_inset Formula $1-\log^{2}(rank)/160$
 \end_inset
 
- and it fits the tailing end of the distribution so well, that the red data
- line is almost completely hidden under the green line!
+ and while the blue line is given by 
+\begin_inset Formula $-\log^{3}(rank/317206).$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+xxxx
 \end_layout
 
 \begin_layout Standard
