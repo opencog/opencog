@@ -25263,6 +25263,13 @@ Given the earlier Zipfian results on the average degree
 
 \begin_layout Subsection*
 Disjunct Cosine Similarity
+\begin_inset CommandInset label
+LatexCommand label
+name "sub:Disjunct-Cosine-Similarity"
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -25300,8 +25307,12 @@ where
 \end_layout
 
 \begin_layout Standard
-The current dataset being analyzed contains 797 words whose length is greater
- than or equal to 8.
+The current dataset being analyzed (the 
+\noun on
+en_pairs_rfive_mtwo
+\noun default
+ dataset, same as above) contains 797 words whose length is greater than
+ or equal to 128.
  The ranking-by-length was already shown up above, in the graph 
 \begin_inset CommandInset ref
 LatexCommand nameref
@@ -25325,7 +25336,7 @@ reference "graph: ranked length"
  pairs.
  These can be sorted and ranked.
 \begin_inset Foot
-status open
+status collapsed
 
 \begin_layout Plain Layout
 See the good-sims and ranked-sims in disjunct-stats.scm file.
@@ -30906,38 +30917,42 @@ reference "fig:Cosine-similarity-scatterplot"
 
 \end_inset
 
-visualizes the cosine similarity between 803 word-pairs.
+visualizes the cosine similarity between 797 word-pairs.
  The rows and columns are ranked by frequency of word occurance, so that
  the single-most-frequently occuring word is at the upper-left, with less
  and less frequently occuring words proceeding to the right, and downwards.
  The color scale is such that red represents 1.0, yellow represents 0.75 (so
  orange is in between), green is exactly 0.5, and blue is 0.25 or less, fading
  to black.
- 
+ This is for the same 
+\noun on
+en_pairs_rfive_mtwo
+\noun default
+ dataset as above, and examined in detail in section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "sub:Disjunct-Cosine-Similarity"
+
+\end_inset
+
+
+\begin_inset CommandInset ref
+LatexCommand vpageref
+reference "sub:Disjunct-Cosine-Similarity"
+
+\end_inset
+
+.
+ That is, it computes the similarity between the 797 words whose length
+ is greater than 128.
 \end_layout
 
 \begin_layout Standard
-This is for the 
-\noun on
-en_pairs_ttwo
-\noun default
- dataset, described below.
- It has several cuts applied here: in this case, all disjuncts with 30 observati
-ons or less are excluded from the cosing calculations, as are any word-disjunct
- pairs with 10 observations or less.
- All words with 3500 or fewer observations are discarded; this leaves behind
- just the 803 words shown.
- This has the effect of trimming away the noise in the dataset, leaving
- only 
-\begin_inset Quotes eld
-\end_inset
+xxxx
+\end_layout
 
-high-confidence
-\begin_inset Quotes erd
-\end_inset
-
- word-disjunct pairs contributing to the cosine.
- Note that cosine similarity is symmetric; this figure is necessarily symmetric
+\begin_layout Standard
+Note that cosine similarity is symmetric; this figure is necessarily symmetric
  about the diagonal.
  The diagonal can be seen (with difficulty) as a line of red squares.
 \end_layout
