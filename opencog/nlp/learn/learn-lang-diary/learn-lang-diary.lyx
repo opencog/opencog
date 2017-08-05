@@ -25910,10 +25910,21 @@ word-pair
 \end_layout
 
 \begin_layout Standard
-Its worth looking at a few of these, to see how they work out.
+It is worth looking at a few of these, to see how they work out.
  The word 'she' has 27578 distinct disjuncts on it; the word 'he' has 57330
- disjuncts.The table below shows the top-ranked disjunts for each.
- It makes quite clear why the tow have a high similarity.
+ disjuncts.
+ The table below shows the top-ranked disjunts for each.
+ It makes quite clear why the two have a high similarity.
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+Print the disjuncts with the `print-disjuncts` function.
+\end_layout
+
+\end_inset
+
+
 \begin_inset VSpace defskip
 \end_inset
 
@@ -27587,7 +27598,302 @@ The above table clearly indicates why the cosine similarity between these
 \end_layout
 
 \begin_layout Standard
-xxx
+The similarity above is predicated on the frequent pairing of a word with
+ a determiner.
+ The pairing itself is correct, but perhaps not entirely significant: the
+ word-pairs that needed to appear in the MST parse to extract these disjuncts
+ had almost abysmally low MI values.
+ They were clearly high enough to allow the MST parse to move forward, but
+ are not otherwise terribly promising.
+ They are shown below.
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Tabular
+<lyxtabular version="3" rows="9" columns="2">
+<features tabularvalignment="middle">
+<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top" width="0">
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+word-pair
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+fractional mi
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+the city
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+2.7827
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+the house
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+2.4228
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+the village
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+2.6635
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+the world
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+3.0578
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+city .
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+1.0167
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+house .
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+1.0095
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+village .
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0.8765
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+world .
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+1.2255
+\end_layout
+
+\end_inset
+</cell>
+</row>
+</lyxtabular>
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Recall that, for word-pairs, that MI scores below 4 are considered to be
+ quite poor.
+ That the scores above are poor is not surprising: determiners link with
+ almost any noun, but not to verbs: this is enough to get them into the
+ 2-3 range for MI.
+ By contrast, the period can appear after almost any word, except maybe
+ for prepostiions, adjectives and adverbs.
+ This is apparently enough to drive the MI positive, but that's all.
+\end_layout
+
+\begin_layout Standard
+The above suggests that perhaps other kinds of measures could be entertained,
+ besides cosine similarity.
+ 
+\end_layout
+
+\begin_layout Subsection*
+Quality Cosine
+\end_layout
+
+\begin_layout Standard
+The
+\end_layout
+
+\begin_layout Standard
+The motivation for using cosine similarity is to find pairs of words that
+ act in a grammatically similar fashion: they are used in the same way,
+ with the same kinds of disjuncts.
+ However, observational counts are subject to the vicissitudes of the input
+ text: perhaps, instead of using vectors where the components are given
+ by the frequency, once could instead use components based on, say, the
+ 
+\begin_inset Quotes eld
+\end_inset
+
+quality
+\begin_inset Quotes erd
+\end_inset
+
+ of the disjunct itself.
+ A disjunct could be judged as being 
+\begin_inset Quotes eld
+\end_inset
+
+high quality
+\begin_inset Quotes erd
+\end_inset
+
+ if 
+\begin_inset Formula $mi(w,d)=MI_{pair}(w,d)$
+\end_inset
+
+ as defined in equation 
+\begin_inset CommandInset ref
+LatexCommand vref
+reference "eq:mi-word-disjunct"
+
+\end_inset
+
+ is high.
+ This motivates a 
+\begin_inset Quotes eld
+\end_inset
+
+quality cosine
+\begin_inset Quotes erd
+\end_inset
+
+: 
+\begin_inset Formula 
+\[
+\mbox{qim}(w_{1},w_{2})=\frac{\sum_{d}mi(w_{1},d)mi(w_{2},d)}{\sqrt{\sum_{d}mi^{2}(w_{1},d)}\sqrt{\sum_{d}mi^{2}(w_{2},d)}}
+\]
+
+\end_inset
+
+But what if the high quality is based on a pathetically small number of
+ observations? Perhaps there should be some observational weighting.
+ One can contemplate defining 
+\begin_inset Formula $pi(w,d)=p(w,d)mi(w,d)$
+\end_inset
+
+ and so the cosine 
+\begin_inset Formula 
+\[
+\mbox{pim}(w_{1},w_{2})=\frac{\sum_{d}pi(w_{1},d)pi(w_{2},d)}{\sqrt{\sum_{d}pi^{2}(w_{1},d)}\sqrt{\sum_{d}pi^{2}(w_{2},d)}}
+\]
+
+\end_inset
+
+ The suitability of these different means of judging similarity is not clear.
 \end_layout
 
 \begin_layout Subsection*
@@ -27921,80 +28227,6 @@ mutual length
 \end_inset
 
  device.
-\end_layout
-
-\begin_layout Subsection*
-Quality Cosine
-\end_layout
-
-\begin_layout Standard
-More possibilities exist.
- The motivation for using cosine similarity is to find pairs of words that
- act in a grammatically similar fashion: they are used in the same way,
- with the same kinds of disjuncts.
- However, observational counts are subject to the vicissitudes of the input
- text: perhaps, instead of using vectors where the components are given
- by the frequency, once could instead use components based on, say, the
- 
-\begin_inset Quotes eld
-\end_inset
-
-quality
-\begin_inset Quotes erd
-\end_inset
-
- of the disjunct itself.
- A disjunct could be judged as being 
-\begin_inset Quotes eld
-\end_inset
-
-high quality
-\begin_inset Quotes erd
-\end_inset
-
- if 
-\begin_inset Formula $mi(w,d)=MI_{pair}(w,d)$
-\end_inset
-
- as defined in equation 
-\begin_inset CommandInset ref
-LatexCommand vref
-reference "eq:mi-word-disjunct"
-
-\end_inset
-
- is high.
- This motivates a 
-\begin_inset Quotes eld
-\end_inset
-
-quality cosine
-\begin_inset Quotes erd
-\end_inset
-
-: 
-\begin_inset Formula 
-\[
-\mbox{qim}(w_{1},w_{2})=\frac{\sum_{d}mi(w_{1},d)mi(w_{2},d)}{\sqrt{\sum_{d}mi^{2}(w_{1},d)}\sqrt{\sum_{d}mi^{2}(w_{2},d)}}
-\]
-
-\end_inset
-
-But what if the high quality is based on a pathetically small number of
- observations? Perhaps there should be some observational weighting.
- One can contemplate defining 
-\begin_inset Formula $pi(w,d)=p(w,d)mi(w,d)$
-\end_inset
-
- and so the cosine 
-\begin_inset Formula 
-\[
-\mbox{pim}(w_{1},w_{2})=\frac{\sum_{d}pi(w_{1},d)pi(w_{2},d)}{\sqrt{\sum_{d}pi^{2}(w_{1},d)}\sqrt{\sum_{d}pi^{2}(w_{2},d)}}
-\]
-
-\end_inset
-
- The suitability of these different means of judging similarity is not clear.
 \end_layout
 
 \begin_layout Section*
