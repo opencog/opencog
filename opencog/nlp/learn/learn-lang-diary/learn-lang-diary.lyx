@@ -27814,17 +27814,84 @@ Recall that, for word-pairs, that MI scores below 4 are considered to be
 \end_layout
 
 \begin_layout Standard
-The above suggests that perhaps other kinds of measures could be entertained,
- besides cosine similarity.
+The above suggests that using the raw observation count to compute the cosine
+ similarity is perhaps not the best way to compute similarity.
  
 \end_layout
 
 \begin_layout Subsection*
-Quality Cosine
+Score Cosine
 \end_layout
 
 \begin_layout Standard
-The
+The above results suggest that perhaps the correct way to assign a score
+ is to total up the word-pair MI scores for each disjunct, and use that
+ to form a cosine.
+ That is, define
+\begin_inset Formula 
+\[
+sc(w,d)=\sum_{c\in d_{+}}mi(w,c)+\sum_{c\in d_{-}}mi(c,w)
+\]
+
+\end_inset
+
+where 
+\begin_inset Formula $d_{+}\subseteq d$
+\end_inset
+
+ is the subset of connectors that connect to the right, and 
+\begin_inset Formula $d_{-}\subseteq d$
+\end_inset
+
+ is the subset of connectors that connect to the left.
+ Here, 
+\begin_inset Formula $c\in d$
+\end_inset
+
+ is simply one of the words that the connector is connecting to.
+ Then, 
+\begin_inset Formula $mi(w,c)$
+\end_inset
+
+ and 
+\begin_inset Formula $mi(c,w)$
+\end_inset
+
+ are the word-pair MI scores.
+ The cosine similarity might then be defined as 
+\begin_inset Formula 
+\[
+\mbox{sos}(w_{1},w_{2})=\frac{\sum_{d}sc(w_{1},d)sc(w_{2},d)}{\sqrt{\sum_{d}sc{}^{2}(w_{1},d)}\sqrt{\sum_{d}sc^{2}(w_{2},d)}}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The idea here is that connectors to punctuation, and connectors to determiners,
+ which might be observed quite often, but have a naturally low MI score,
+ will contribute relatively little to the overall cosine similarity.
+ 
+\end_layout
+
+\begin_layout Standard
+Why is this a reasonable thing to do? Well, the previous two tables already
+ suggested that the four words 'city' 'house' 'village' and 'world' should
+ be placed into the same grammatical class, simply because of the high frequency
+ with which they connect to a determiner.
+ More subtle differences carrying a semantic signal might be getting washed
+ out in this process.
+ Perhaps the sos cosine score would be more sensitive to those processes.
+\end_layout
+
+\begin_layout Standard
+But, if we are inventing scores, much more is possible.
+\end_layout
+
+\begin_layout Subsection*
+Quality Cosine
 \end_layout
 
 \begin_layout Standard
@@ -27880,7 +27947,10 @@ quality cosine
 \end_inset
 
 But what if the high quality is based on a pathetically small number of
- observations? Perhaps there should be some observational weighting.
+ observations? Whenever one has a small number of observations, one has,
+ almost automatically, a high MI value, simply because these two things
+ are seen together, and nothing else is.
+ Perhaps there should be some observational weighting.
  One can contemplate defining 
 \begin_inset Formula $pi(w,d)=p(w,d)mi(w,d)$
 \end_inset
@@ -27898,10 +27968,6 @@ But what if the high quality is based on a pathetically small number of
 
 \begin_layout Subsection*
 Overlap Similarity
-\end_layout
-
-\begin_layout Standard
-xxx
 \end_layout
 
 \begin_layout Standard
