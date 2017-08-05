@@ -1,4 +1,7 @@
-
+;
+; scatter.scm - create scatterplot images. Write out single-channel
+; "flo" images.
+;
 (use-modules (ice-9 format))
 (use-modules (ice-9 binary-ports))
 (use-modules (rnrs bytevectors))
@@ -8,10 +11,23 @@
 "
  write-flo - write a single-color-channel floating-point image of a
  matrix. This assumes that FN is a function, taking two arguments,
- returning a float. The LST is assumed to be a list of basis eleemnts
+ returning a float. The LST is assumed to be a list of basis elements
  to be passed to FN.  The resulting image consists of the x and y
  dimensions (in ASCII) followed by the floats.  The result is saved to
  `filename`.
+
+ Example usage:
+    (define psu (add-support-api psa))
+    (define long-words
+       (filter (lambda (word) (<= 128 (psu 'right-length word)))
+          (psu 'left-basis)))
+
+    (define (pair-cos A B)
+       (define cos-key (PredicateNode \"*-Cosine Sim Key-*\"))
+       (define SIM (SimilarityLink A B))
+       (cog-value-ref (cog-value SIM cos-key) 0))
+
+    (write-flo \"scat-cosine-big.flo\" long-words pair-cos)
 "
 	(define xsz (length LST))
 	(define ysz (length LST))
@@ -42,4 +58,3 @@
 		LST)
 	(close-port flo)
 )
-
