@@ -19126,25 +19126,27 @@ AMI(w_{l},w_{r})=MI(w_{l},w_{r})/\log
 \end_layout
 
 \begin_layout Section*
-Connector Sets 7 May 2017
+Connector Sets 7 May 2017 (revised July 2017)
 \end_layout
 
 \begin_layout Standard
-This is a report on a small dataset of disjuncts and connector sets, extracted
+This is a report on a dataset of disjuncts and connector sets, extracted
  from MST parses of a batch of sentences.
  First, a recap of what these are, then a characterization of the database
- contents, and finally, a short report on the grammatical similarity of
- words in the dataset.
+ contents, and finally, a report on the grammatical similarity of words
+ in the dataset.
  
 \end_layout
 
 \begin_layout Standard
-XXX FIXME Pretty much all of the reported data below is wrong.
- The connector sets were computed incorrectly, because the MST parse was
- done using the MI instead of minus the MI.
- Foo.
- Revision in progress.
- Bad text is struck out.
+The original report, dated 7 May 2017, was prepared on a painfully small
+ dataset, which also (may have?) incorporated a fatal bug in the disjunct
+ code: disjuncts were being assembled incorrectly, due to a reversed sign
+ in the MI calculations.
+ This bug was eventually uncovered, and so it seemed best to entirely discard
+ the intial analysis, and instead repeat it with a newer and larger dataset
+ that was correctly assembled.
+ The revised analysis was done mostly in July.
 \end_layout
 
 \begin_layout Subsection*
@@ -19169,24 +19171,33 @@ The primary results reported below are these:
 \end_layout
 
 \begin_layout Standard
-
-\strikeout on
 * Connector sets can be given a mutual information score.
- The ranking distribution for this is not at all Zipfian.
- The MI score seems to be quite good at identifying words that participate
+ The distribution for the MI scores appears to be Gaussian (i.e.
+ bell curve).
+ This comes as a bit of a surprise.
+ I am not aware of what kind of network theory gives a natural rise to Gaussians.
+\end_layout
+
+\begin_layout Standard
+* The MI score seems to be quite good at identifying words that participate
  in idioms, set phrases and institutional phrases.
 \end_layout
 
 \begin_layout Standard
-
-\strikeout on
 * The average number of connectors per disjunct, which should have indicated
  the part-of-speech that the word belongs to, fails to do this.
- This seems to be due to the small size of the dataset, the fact that it
- is polluted with lists and tables, masquerading as sentences (its a Wikipedia
- sample), and that there seem the be very few verbs in the sample (Wikipedia
- articles describe concepts and events, using the copula to describe them:
- 
+ This seems to be due to the fact that the dataset is polluted with lists
+ and tables (including tables-of-contents, and indexes), all of which are
+ mis-interpreted as sentences by the processing software.
+ This causes some very unusual disjuncts to be constructed.
+\end_layout
+
+\begin_layout Standard
+* In ther earlier sample, derived from Wikipedia, it became clear that there
+ were very few verbs that aren't relationship verbs.
+ Wikipedia articles describe concepts and events.
+ The relationship between these require the copula and other relationship
+ verbs: 
 \begin_inset Quotes eld
 \end_inset
 
@@ -19210,7 +19221,8 @@ was
 \begin_inset Quotes erd
 \end_inset
 
-, and is almost devoid of narrative verbs: 
+.
+ Wikipedia is almost completely devoid of narrative verbs: 
 \begin_inset Quotes eld
 \end_inset
 
@@ -19258,24 +19270,20 @@ took
 \begin_inset Quotes erd
 \end_inset
 
-.) The WP sources need to be supplemented with narrative texts, ideally from
- young-adult literature.
+.
+ Thus, we discern two very different styles of human communication: the
+ exchange of facts, and the exchange of stories.
+ Narratives contain a far richer selection of verbs, and thus, for language
+ learning, a text corpus of narratives is required.
+ Ideally, this would be from young-adult literature, which is a bit more
+ direct in its kinesthetic content than adult literature might be.
 \end_layout
 
 \begin_layout Standard
-
-\strikeout on
 * Cosine similarity applied to connector sets seems to be an effective way
  of determining the grammatical similarity of words.
- This is despite the fact that closer examination reveals that the dataset
- is quite thin and poor, and the similarity is based on scant evidence.
- Despite the scant evidence, the similarity scores do seem to distinguish
- different kinds of nouns quite well.
- A big surprise is that it also seems to cluster prepositions quite well.
- There seem to be few or no verbs in the dataset, as already noted.
- It seems that even small datasets are sufficient to get started with grammatica
-l similarity clustering, but much larger samples are needed for discovering
- more sophisticated grammar.
+ Yet, it is not so unambigously great, that other kinds of measures shouldn't
+ be contemplated.
 \end_layout
 
 \begin_layout Subsection*
@@ -26294,8 +26302,12 @@ that- was+
 \end_layout
 
 \begin_layout Standard
-The word 'guess' has 859 disjuncts on it.
+The list above contains the pairs 'guess ..
+ suppose' and also 'suppose ..
+ hope'.
+ The word 'guess' has 859 disjuncts on it.
  The word 'suppose' has 805 disjuncts on it.
+ The word 'hope' has 1735 disjuncts on it.
  The table below indicates why thier cosine distance is close.
 \begin_inset VSpace defskip
 \end_inset
