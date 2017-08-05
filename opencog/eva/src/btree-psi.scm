@@ -40,6 +40,7 @@
 ; Load the sophia's personality configuration.
 (load-sophia-config)
 
+; Module from ros-behavior-scripting
 (use-modules (opencog movement))
 (start-ros-movement-node)
 
