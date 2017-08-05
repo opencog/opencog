@@ -25486,50 +25486,25 @@ Continuing in this fashion: 'Rating' has 7 disjuncts, four of which are
  it appears in a table of some sort.
  The first disjunct '(LEFT-WALL- :+)' accounts for its high similarity to
  both 'Stats' and 'Category'.
-\end_layout
-
-\begin_layout Standard
-So, yes, all these words have been discovered to behave in a grammatically
+ So, yes, all these words have been discovered to behave in a grammatically
  similar fashion; however, this behavior is somewhat boring: they arise
  from the regularity of some table listing.
 \end_layout
 
 \begin_layout Standard
-xxx
-\end_layout
-
-\begin_layout Standard
-The next 300 entries are all links between capitalized words, most of them
- to the words above.
- After that, the list is just barely slightly more varied, with e.g.
+The first non-capitalized word-pair appears at position ten.
+ Of the top thirty, the table below shows the non-capitalized word-pairs.
  
-\begin_inset Quotes eld
+\begin_inset VSpace defskip
 \end_inset
 
-tonight
-\begin_inset Quotes erd
-\end_inset
 
- showing up occasionally, presumably because there are many sentences that
- end with the word 
-\begin_inset Quotes eld
-\end_inset
-
-tonight
-\begin_inset Quotes erd
-\end_inset
-
-, followed by a period.
- There are very few links to lower-case words, but the ones that show up
- are..
- interesting.
- The table below gives some hand-picked examples.
 \end_layout
 
 \begin_layout Standard
 \align center
 \begin_inset Tabular
-<lyxtabular version="3" rows="14" columns="3">
+<lyxtabular version="3" rows="13" columns="3">
 <features tabularvalignment="middle">
 <column alignment="center" valignment="top" width="0">
 <column alignment="center" valignment="top" width="0">
@@ -25568,7 +25543,7 @@ word-pair
 \begin_inset Text
 
 \begin_layout Plain Layout
-504
+10
 \end_layout
 
 \end_inset
@@ -25577,7 +25552,7 @@ word-pair
 \begin_inset Text
 
 \begin_layout Plain Layout
-0.868
+0.977
 \end_layout
 
 \end_inset
@@ -25586,8 +25561,8 @@ word-pair
 \begin_inset Text
 
 \begin_layout Plain Layout
-'in ..
- from'
+'she ..
+ he'
 \end_layout
 
 \end_inset
@@ -25598,7 +25573,7 @@ word-pair
 \begin_inset Text
 
 \begin_layout Plain Layout
-633
+16
 \end_layout
 
 \end_inset
@@ -25607,7 +25582,7 @@ word-pair
 \begin_inset Text
 
 \begin_layout Plain Layout
-0.855
+0.955
 \end_layout
 
 \end_inset
@@ -25616,8 +25591,8 @@ word-pair
 \begin_inset Text
 
 \begin_layout Plain Layout
-'in ..
- at'
+'guess ..
+ suppose'
 \end_layout
 
 \end_inset
@@ -25628,7 +25603,7 @@ word-pair
 \begin_inset Text
 
 \begin_layout Plain Layout
-637
+17
 \end_layout
 
 \end_inset
@@ -25637,7 +25612,7 @@ word-pair
 \begin_inset Text
 
 \begin_layout Plain Layout
-0.854
+0.954
 \end_layout
 
 \end_inset
@@ -25646,8 +25621,8 @@ word-pair
 \begin_inset Text
 
 \begin_layout Plain Layout
-'In ..
- By'
+'city ..
+ house'
 \end_layout
 
 \end_inset
@@ -25658,7 +25633,7 @@ word-pair
 \begin_inset Text
 
 \begin_layout Plain Layout
-643
+19
 \end_layout
 
 \end_inset
@@ -25667,7 +25642,7 @@ word-pair
 \begin_inset Text
 
 \begin_layout Plain Layout
-0.854
+0.950
 \end_layout
 
 \end_inset
@@ -25676,8 +25651,8 @@ word-pair
 \begin_inset Text
 
 \begin_layout Plain Layout
-'in ..
- After'
+'would ..
+ might'
 \end_layout
 
 \end_inset
@@ -25688,7 +25663,7 @@ word-pair
 \begin_inset Text
 
 \begin_layout Plain Layout
-740
+20
 \end_layout
 
 \end_inset
@@ -25697,7 +25672,7 @@ word-pair
 \begin_inset Text
 
 \begin_layout Plain Layout
-0.846
+0.945
 \end_layout
 
 \end_inset
@@ -25706,8 +25681,8 @@ word-pair
 \begin_inset Text
 
 \begin_layout Plain Layout
-'canal ..
- swamp'
+'re ..
+ non'
 \end_layout
 
 \end_inset
@@ -25718,7 +25693,7 @@ word-pair
 \begin_inset Text
 
 \begin_layout Plain Layout
-754
+21
 \end_layout
 
 \end_inset
@@ -25727,7 +25702,7 @@ word-pair
 \begin_inset Text
 
 \begin_layout Plain Layout
-0.843
+0.944
 \end_layout
 
 \end_inset
@@ -25736,8 +25711,8 @@ word-pair
 \begin_inset Text
 
 \begin_layout Plain Layout
-'at ..
- At'
+'village ..
+ city'
 \end_layout
 
 \end_inset
@@ -25748,7 +25723,7 @@ word-pair
 \begin_inset Text
 
 \begin_layout Plain Layout
-757
+24
 \end_layout
 
 \end_inset
@@ -25757,7 +25732,7 @@ word-pair
 \begin_inset Text
 
 \begin_layout Plain Layout
-0.843
+0.931
 \end_layout
 
 \end_inset
@@ -25766,8 +25741,8 @@ word-pair
 \begin_inset Text
 
 \begin_layout Plain Layout
-'in ..
- In
+'father ..
+ mother'
 \end_layout
 
 \end_inset
@@ -25778,7 +25753,7 @@ word-pair
 \begin_inset Text
 
 \begin_layout Plain Layout
-818
+25
 \end_layout
 
 \end_inset
@@ -25787,7 +25762,7 @@ word-pair
 \begin_inset Text
 
 \begin_layout Plain Layout
-0.838
+0.928
 \end_layout
 
 \end_inset
@@ -25796,8 +25771,8 @@ word-pair
 \begin_inset Text
 
 \begin_layout Plain Layout
-'in ..
- on'
+'village ..
+ house'
 \end_layout
 
 \end_inset
@@ -25808,7 +25783,7 @@ word-pair
 \begin_inset Text
 
 \begin_layout Plain Layout
-840
+26
 \end_layout
 
 \end_inset
@@ -25817,7 +25792,7 @@ word-pair
 \begin_inset Text
 
 \begin_layout Plain Layout
-0.836
+0.928
 \end_layout
 
 \end_inset
@@ -25826,8 +25801,8 @@ word-pair
 \begin_inset Text
 
 \begin_layout Plain Layout
-'creation ..
- existence'
+'don ..
+ sama'
 \end_layout
 
 \end_inset
@@ -25838,7 +25813,7 @@ word-pair
 \begin_inset Text
 
 \begin_layout Plain Layout
-878
+27
 \end_layout
 
 \end_inset
@@ -25847,7 +25822,7 @@ word-pair
 \begin_inset Text
 
 \begin_layout Plain Layout
-0.833
+0.923
 \end_layout
 
 \end_inset
@@ -25856,8 +25831,8 @@ word-pair
 \begin_inset Text
 
 \begin_layout Plain Layout
-'e.g ..
- i.e'
+'world ..
+ city'
 \end_layout
 
 \end_inset
@@ -25868,7 +25843,7 @@ word-pair
 \begin_inset Text
 
 \begin_layout Plain Layout
-965
+28
 \end_layout
 
 \end_inset
@@ -25877,7 +25852,7 @@ word-pair
 \begin_inset Text
 
 \begin_layout Plain Layout
-0.826
+0.921
 \end_layout
 
 \end_inset
@@ -25886,38 +25861,8 @@ word-pair
 \begin_inset Text
 
 \begin_layout Plain Layout
-'and ..
- but'
-\end_layout
-
-\end_inset
-</cell>
-</row>
-<row>
-<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-969
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-0.826
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-'in ..
- With'
+'son ..
+ daughter'
 \end_layout
 
 \end_inset
@@ -25928,7 +25873,7 @@ word-pair
 \begin_inset Text
 
 \begin_layout Plain Layout
-971
+29
 \end_layout
 
 \end_inset
@@ -25937,7 +25882,7 @@ word-pair
 \begin_inset Text
 
 \begin_layout Plain Layout
-0.826
+0.918
 \end_layout
 
 \end_inset
@@ -25946,8 +25891,8 @@ word-pair
 \begin_inset Text
 
 \begin_layout Plain Layout
-'in ..
- inside'
+'suppose ..
+ hope'
 \end_layout
 
 \end_inset
@@ -25958,81 +25903,89 @@ word-pair
 \end_inset
 
 
-\end_layout
-
-\begin_layout Standard
-This table is surprising in several different ways.
- First, that the first entry in which two words are both not capitalized
- does not occur until about 3% into the list.
- Next, that this entry, and most of the others, involve prepositions! Not
- adjectives, adverbs, verbs; although we noted already that the source text
- is verb-poor.
- It is also pleasantly surprising that all of these equivalences appear
- to be correct, including the equivalence of upper-case prepositions that
- start sentences, with lower-case ones that appear mid-sentence.
- The identification of e.g.
- with i.e.
- seems like a bonus, as does the 'and ..
- but' equivalence.
- 
-\end_layout
-
-\begin_layout Standard
-Lets look at this gift-horse in the mouth.
- The equivalence 'canal ..
- swamp' is rather pathetic.
- So, 'canal' was observed with 68 different, unique disjuncts, but most
- have a count of only 1 or 2.
- The top-ranked disjunct on 'canal' is (the-) which is seen 20 times, followed
- by (the- .+) 8 times.
- Similarly, 'swamp' has 18 distinct disjuncts attached, most with counts
- of 1 or 2; the top-ranked disjunct is (the-) with 14 counts, and (the-
- .+) 3 times.
- So, yes, these are both nouns, evidenced by the connection to the word
- 
-\begin_inset Quotes eld
+\begin_inset VSpace defskip
 \end_inset
 
-the
-\begin_inset Quotes erd
+
+\end_layout
+
+\begin_layout Standard
+Its worth looking at a few of these, to see how they work out.
+ The word 'she' has 27578 distinct disjuncts on it; the word 'he' has 57330
+ disjuncts.The table below shows the top-ranked disjunts for each.
+ It makes quite clear why the tow have a high similarity.
+\begin_inset VSpace defskip
 \end_inset
 
-, but the evidence is otherwise very weak.
- 
-\end_layout
 
-\begin_layout Standard
-Likewise, 'creation' gets the disjunct (the- of+) 18 times, and no other
- disjuncts observed more than twice.
- 'existence' gets the same disjunct 10 times, and no other is observed more
- than 3 times.
- In total, 'creation' had 22 disjuncts on it, while 'exstence' had 26, with
- almost all having counts of 1 or 2.
- Again, the evidence is thin, with one notable point: 'creation' is not
- at all like 'canal', in that 'canal' has zero counts of (the- of+) while
- 'creation' has only one count of (the-).
- As nouns, they are actually quite different, even based on the thin evidence
- available.
- 
-\end_layout
-
-\begin_layout Standard
-The equivalence of 'in ..
- from' is much more interesting.
- The preposition 'in' has a total of 8338 different unique disjuncts --
- this is huge, compared to the nouns above.
- Likewise, 'from' has 2185 different disjuncts observed.
- The top-ranked disjuncts for each are shown in the tables below.
 \end_layout
 
 \begin_layout Standard
 \align center
 \begin_inset Tabular
-<lyxtabular version="3" rows="8" columns="2">
+<lyxtabular version="3" rows="9" columns="4">
 <features tabularvalignment="middle">
 <column alignment="center" valignment="top" width="0">
 <column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top" width="0">
 <row>
+<cell multicolumn="1" alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+she
+\end_layout
+
+\end_inset
+</cell>
+<cell multicolumn="2" alignment="center" valignment="top" topline="true" bottomline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+<cell multicolumn="1" alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+he
+\end_layout
+
+\end_inset
+</cell>
+<cell multicolumn="2" alignment="center" valignment="top" topline="true" bottomline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+count
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+disjunct
+\end_layout
+
+\end_inset
+</cell>
 <cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
 \begin_inset Text
 
@@ -26046,7 +25999,7 @@ count
 \begin_inset Text
 
 \begin_layout Plain Layout
-'in' disjunct
+disjunct
 \end_layout
 
 \end_inset
@@ -26057,7 +26010,7 @@ count
 \begin_inset Text
 
 \begin_layout Plain Layout
-627
+2501
 \end_layout
 
 \end_inset
@@ -26066,7 +26019,25 @@ count
 \begin_inset Text
 
 \begin_layout Plain Layout
-the+
+said+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+4673
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+said+
 \end_layout
 
 \end_inset
@@ -26077,7 +26048,7 @@ the+
 \begin_inset Text
 
 \begin_layout Plain Layout
-75
+1060
 \end_layout
 
 \end_inset
@@ -26086,7 +26057,25 @@ the+
 \begin_inset Text
 
 \begin_layout Plain Layout
-a+
+was+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+2643
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+was+
 \end_layout
 
 \end_inset
@@ -26097,7 +26086,7 @@ a+
 \begin_inset Text
 
 \begin_layout Plain Layout
-61
+983
 \end_layout
 
 \end_inset
@@ -26106,7 +26095,25 @@ a+
 \begin_inset Text
 
 \begin_layout Plain Layout
-which+
+had+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+1959
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+had+
 \end_layout
 
 \end_inset
@@ -26117,7 +26124,7 @@ which+
 \begin_inset Text
 
 \begin_layout Plain Layout
-49
+656
 \end_layout
 
 \end_inset
@@ -26126,7 +26133,25 @@ which+
 \begin_inset Text
 
 \begin_layout Plain Layout
-the+ the+
+asked+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+1293
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+could+
 \end_layout
 
 \end_inset
@@ -26137,7 +26162,7 @@ the+ the+
 \begin_inset Text
 
 \begin_layout Plain Layout
-36
+593
 \end_layout
 
 \end_inset
@@ -26146,7 +26171,25 @@ the+ the+
 \begin_inset Text
 
 \begin_layout Plain Layout
-used-
+”-
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+1281
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+asked+
 \end_layout
 
 \end_inset
@@ -26157,7 +26200,7 @@ used-
 \begin_inset Text
 
 \begin_layout Plain Layout
-33
+474
 \end_layout
 
 \end_inset
@@ -26166,7 +26209,25 @@ used-
 \begin_inset Text
 
 \begin_layout Plain Layout
-his+
+could+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+909
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+that- was+
 \end_layout
 
 \end_inset
@@ -26177,7 +26238,7 @@ his+
 \begin_inset Text
 
 \begin_layout Plain Layout
-32
+372
 \end_layout
 
 \end_inset
@@ -26186,7 +26247,25 @@ his+
 \begin_inset Text
 
 \begin_layout Plain Layout
-order+
+that- was+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+813
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+”-
 \end_layout
 
 \end_inset
@@ -26196,17 +26275,89 @@ order+
 
 \end_inset
 
- 
-\begin_inset space \qquad{}
+
+\begin_inset VSpace defskip
 \end_inset
 
- 
+
+\end_layout
+
+\begin_layout Standard
+The word 'guess' has 859 disjuncts on it.
+ The word 'suppose' has 805 disjuncts on it.
+ The table below indicates why thier cosine distance is close.
+\begin_inset VSpace defskip
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\align center
 \begin_inset Tabular
-<lyxtabular version="3" rows="8" columns="2">
+<lyxtabular version="3" rows="9" columns="4">
 <features tabularvalignment="middle">
 <column alignment="center" valignment="top" width="0">
 <column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top" width="0">
 <row>
+<cell multicolumn="1" alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+guess
+\end_layout
+
+\end_inset
+</cell>
+<cell multicolumn="2" alignment="center" valignment="top" topline="true" bottomline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+<cell multicolumn="1" alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+suppose
+\end_layout
+
+\end_inset
+</cell>
+<cell multicolumn="2" alignment="center" valignment="top" topline="true" bottomline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+count
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+disjunct
+\end_layout
+
+\end_inset
+</cell>
 <cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
 \begin_inset Text
 
@@ -26220,7 +26371,7 @@ count
 \begin_inset Text
 
 \begin_layout Plain Layout
-'from' disjunct
+disjunct
 \end_layout
 
 \end_inset
@@ -26231,7 +26382,7 @@ count
 \begin_inset Text
 
 \begin_layout Plain Layout
-155
+272
 \end_layout
 
 \end_inset
@@ -26240,7 +26391,101 @@ count
 \begin_inset Text
 
 \begin_layout Plain Layout
-the+
+I-
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+377
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+I-
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+57
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+I- .+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+66
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+I- you+
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+21
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+I- it's+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+45
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+I- .+
 \end_layout
 
 \end_inset
@@ -26260,8 +26505,25 @@ the+
 \begin_inset Text
 
 \begin_layout Plain Layout
-:+ :+ :+ ..
- 0+ 0+ 0+
+I- you're+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+39
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+I- that+
 \end_layout
 
 \end_inset
@@ -26272,7 +26534,7 @@ the+
 \begin_inset Text
 
 \begin_layout Plain Layout
-18
+16
 \end_layout
 
 \end_inset
@@ -26281,7 +26543,25 @@ the+
 \begin_inset Text
 
 \begin_layout Plain Layout
-a+
+I- so+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+33
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+I- it+
 \end_layout
 
 \end_inset
@@ -26292,7 +26572,7 @@ a+
 \begin_inset Text
 
 \begin_layout Plain Layout
-9
+15
 \end_layout
 
 \end_inset
@@ -26301,18 +26581,16 @@ a+
 \begin_inset Text
 
 \begin_layout Plain Layout
-derived-
+could-
 \end_layout
 
 \end_inset
 </cell>
-</row>
-<row>
 <cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
 \begin_inset Text
 
 \begin_layout Plain Layout
-9
+27
 \end_layout
 
 \end_inset
@@ -26321,27 +26599,7 @@ derived-
 \begin_inset Text
 
 \begin_layout Plain Layout
-until+
-\end_layout
-
-\end_inset
-</cell>
-</row>
-<row>
-<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-9
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-degree-
+I- ?+
 \end_layout
 
 \end_inset
@@ -26352,7 +26610,7 @@ degree-
 \begin_inset Text
 
 \begin_layout Plain Layout
-8
+15
 \end_layout
 
 \end_inset
@@ -26361,7 +26619,25 @@ degree-
 \begin_inset Text
 
 \begin_layout Plain Layout
-his+
+I- you+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+25
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+I- ,+
 \end_layout
 
 \end_inset
@@ -26372,85 +26648,954 @@ his+
 \end_inset
 
 
+\begin_inset VSpace defskip
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
-The similarity of these two are driven primarily by the word-pairs 
-\begin_inset Quotes eld
+The words 'city', 'house', 'village' and 'world' are all similar.
+ These are shown below.
+\begin_inset VSpace defskip
 \end_inset
 
-in the
-\begin_inset Quotes erd
-\end_inset
 
- and 
-\begin_inset Quotes eld
-\end_inset
-
-from the
-\begin_inset Quotes erd
-\end_inset
-
-, followed by 
-\begin_inset Quotes eld
-\end_inset
-
-in a
-\begin_inset Quotes erd
-\end_inset
-
- and 
-\begin_inset Quotes eld
-\end_inset
-
-from a
-\begin_inset Quotes erd
-\end_inset
-
-.
- Notable also is the common appearance of the pronoun 
-\begin_inset Quotes eld
-\end_inset
-
-his
-\begin_inset Quotes erd
-\end_inset
-
-, with 
-\begin_inset Quotes eld
-\end_inset
-
-in his
-\begin_inset Quotes erd
-\end_inset
-
- and 
-\begin_inset Quotes eld
-\end_inset
-
-from his
-\begin_inset Quotes erd
-\end_inset
-
-.
- The second disjunct on 'from' appears to be some sort of garbage, presumably
- due to the parse of a list of numeric values of some kind.
- 
 \end_layout
 
 \begin_layout Standard
-Just as the case with nouns, the evidence for the similarity for these two
- prepositions seems quite thin.
- The surprise is that, despite this, the identification does seem correct.
+\align center
+\begin_inset Tabular
+<lyxtabular version="3" rows="12" columns="8">
+<features tabularvalignment="middle">
+<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top" width="0">
+<row>
+<cell multicolumn="1" alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+city
+\end_layout
+
+\end_inset
+</cell>
+<cell multicolumn="2" alignment="center" valignment="top" topline="true" bottomline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+<cell multicolumn="1" alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+house
+\end_layout
+
+\end_inset
+</cell>
+<cell multicolumn="2" alignment="center" valignment="top" topline="true" bottomline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+<cell multicolumn="1" alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+village
+\end_layout
+
+\end_inset
+</cell>
+<cell multicolumn="2" alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+<cell multicolumn="1" alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+world
+\end_layout
+
+\end_inset
+</cell>
+<cell multicolumn="2" alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell multicolumn="1" alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+1332 total obs
+\end_layout
+
+\end_inset
+</cell>
+<cell multicolumn="2" alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+<cell multicolumn="1" alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+3330 total obs
+\end_layout
+
+\end_inset
+</cell>
+<cell multicolumn="2" alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+<cell multicolumn="1" alignment="center" valignment="top" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+1019 total obs
+\end_layout
+
+\end_inset
+</cell>
+<cell multicolumn="2" alignment="center" valignment="top" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+<cell multicolumn="1" alignment="center" valignment="top" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+3024 total obs
+\end_layout
+
+\end_inset
+</cell>
+<cell multicolumn="2" alignment="center" valignment="top" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+count
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+disjunct
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+count
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+disjunct
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+count
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+disjunct
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+count
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+disjunct
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+258
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+the-
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+598
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+the-
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+157
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+the-
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+646
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+the-
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+96
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+the- ,+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+275
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+the- ,+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+57
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+the- .+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+265
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+the- .+
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+94
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+the- .+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+226
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+the- .+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+57
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+the- ,+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+202
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+the- ,+
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+27
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+the- and+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+80
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+a-
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+23
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+street+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+158
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+in- the-
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+24
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+this-
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+79
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+into- the-
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+21
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+the- Mbonga+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+117
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+in- the- .+
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+17
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+the- of+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+58
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+the- and+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+14
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+a-
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+112
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+in- the- ,+
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+15
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+The- the- .+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+54
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+his-
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+12
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+their-
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+82
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+this-
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+14
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+the- the- .+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+48
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+my-
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+11
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+the- and+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+43
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+.+
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+13
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+a-
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+45
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+the- was+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+9
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+the- of+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+39
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+the- is+
+\end_layout
+
+\end_inset
+</cell>
+</row>
+</lyxtabular>
+
+\end_inset
+
+
+\begin_inset VSpace defskip
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
-At any rate, the dataset seems a bit thin, but we already knew this; its
- based on a fairly small sample.
+The above table clearly indicates why the cosine similarity between these
+ four words is high.
+ Yet, it is also disappointing: the primary reason is that they all take
+ the determiner 'the', and occur at the end of phrases (the- ,+) or at the
+ end of sentences (the- .+).
+ This seems superficial, at best.
+ After that, there's not so much similarity, and what there is still falls
+ back onto the presence of determiners.
+\end_layout
+
+\begin_layout Standard
+xxx
 \end_layout
 
 \begin_layout Subsection*
 Overlap Similarity
+\end_layout
+
+\begin_layout Standard
+xxx
 \end_layout
 
 \begin_layout Standard
