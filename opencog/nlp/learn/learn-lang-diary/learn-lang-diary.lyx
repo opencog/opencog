@@ -30894,6 +30894,243 @@ But what if the high quality is based on a pathetically small number of
  The suitability of these different means of judging similarity is not clear.
 \end_layout
 
+\begin_layout Subsection*
+Cosine Similarity scatterplots
+\end_layout
+
+\begin_layout Standard
+The scatterplot in 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:Cosine-similarity-scatterplot"
+
+\end_inset
+
+visualizes the cosine similarity between 803 word-pairs.
+ The rows and columns are ranked by frequency of word occurance, so that
+ the single-most-frequently occuring word is at the upper-left, with less
+ and less frequently occuring words proceeding to the right, and downwards.
+ The color scale is such that red represents 1.0, yellow represents 0.75 (so
+ orange is in between), green is exactly 0.5, and blue is 0.25 or less, fading
+ to black.
+ 
+\end_layout
+
+\begin_layout Standard
+This is for the 
+\noun on
+en_pairs_ttwo
+\noun default
+ dataset, described below.
+ It has several cuts applied here: in this case, all disjuncts with 30 observati
+ons or less are excluded from the cosing calculations, as are any word-disjunct
+ pairs with 10 observations or less.
+ All words with 3500 or fewer observations are discarded; this leaves behind
+ just the 803 words shown.
+ This has the effect of trimming away the noise in the dataset, leaving
+ only 
+\begin_inset Quotes eld
+\end_inset
+
+high-confidence
+\begin_inset Quotes erd
+\end_inset
+
+ word-disjunct pairs contributing to the cosine.
+ Note that cosine similarity is symmetric; this figure is necessarily symmetric
+ about the diagonal.
+ The diagonal can be seen (with difficulty) as a line of red squares.
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Float figure
+placement h
+wide false
+sideways false
+status collapsed
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Caption
+
+\begin_layout Plain Layout
+Cosine similarity scatterplot
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:Cosine-similarity-scatterplot"
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\begin_inset Graphics
+	filename scat/scat-cosine-big.png
+	width 100col%
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The tartan pattern indicates that some words are very unlike others.
+ Closer examination reveals the usual culprits, already described: the period,
+ and other punctuation marks, tend to be very different than other words.
+ Thus, punctuation acconuts for many of the blue lines.
+\end_layout
+
+\begin_layout Standard
+It would be nice to re-arrange (permute) the rows and columns to bring the
+ matrix into quasi-diagonal form.
+ This is easier said than done.
+ The graph 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:Quasi-diagonal-cosine-similarity"
+
+\end_inset
+
+ shows the same data, this time for 300 words, with a different ranking.
+ This time, the first word is the period, and the next word is the one word,
+ out of 299, that has the highest cosine similarity to the period.
+ Next comes the word, out of the remaining 298, that has the highest cosine
+ similarity to the last.
+ This continues on dowm the list, so that word-pairs with the highest similarity
+ are next to each-other, in the list.
+ Effectively, we get the two-highest similarities for each word: the highest
+ being to the word right before, and second-highest to the word right after.
+ The list is organized so that the highest similarity pair occurs in the
+ lower-right.
+ The pairs least-similar to anything else end up on the upper-left.
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Float figure
+wide false
+sideways false
+status collapsed
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Caption
+
+\begin_layout Plain Layout
+Quasi-diagonal cosine similarity
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:Quasi-diagonal-cosine-similarity"
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\begin_inset Graphics
+	filename scat/scat-fcos.png
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+This ranking does expose a bit of block-diagonal structure, but not that
+ much, and not that strong.
+ The overwhelming color tone of these pictures demonstrate that the vast
+ majority of word-pairs have an alarmingly large amount of cosine-similarity;
+ again, green and yellow representing a similarity of 0.5 and above.
+ The large orange block in the middle is clearly a cluster in a very obvious
+ sense.
+ Looking more closely it consists of two blocks: a big one and a much smaller
+ on to the lower-right.
+ The smaller block consists of these words: Jack Picth Ross Jim John.
+ Clearly, these are all capitalized proper names.
+ The bigger block are these words: I You And But When Then For At There
+ It He She His The They This As In We If So A No.
+ Observe that all of these are capitalized, and none are proper names, indicatin
+g that they are all sentence openers.
+ They are listed in order.
+ Thus, the cosine distance between 
+\begin_inset Quotes eld
+\end_inset
+
+I
+\begin_inset Quotes erd
+\end_inset
+
+ and 
+\begin_inset Quotes eld
+\end_inset
+
+You
+\begin_inset Quotes erd
+\end_inset
+
+ is high, although it is less than that between 
+\begin_inset Quotes eld
+\end_inset
+
+I
+\begin_inset Quotes erd
+\end_inset
+
+ and 
+\begin_inset Quotes eld
+\end_inset
+
+John
+\begin_inset Quotes erd
+\end_inset
+
+, and so on down the line.
+ The similarity between most of these is not surprising, and can certainly
+ be rationalized post-facto.
+\end_layout
+
+\begin_layout Standard
+For comparison, the start of the list (lower-right) are the words: 
+\begin_inset Quotes eld
+\end_inset
+
+,
+\begin_inset Quotes erd
+\end_inset
+
+ and but when if they there he she her it back up.
+ Note that these are all lower-case, which means that they are observed
+ only in the middle of sentences.
+ That these are all pair-wise similar is not all that surprising.
+\end_layout
+
+\begin_layout Standard
+The bands suggests that perhaps a good way of closutering might be to look
+ at not only how similar several words are, but also how different they
+ are from everything else.
+ Cosine similarity does NOT adequately take into account differences.
+ However, mutual information does.
+ So perhaps a mutual-information-inspired similarity would provide better
+ results.
+\end_layout
+
 \begin_layout Section*
 Dataset report 3 June 2017
 \begin_inset CommandInset label
@@ -34952,243 +35189,6 @@ Some readers have misunderstood this section.
 e adequate similarity.
  Higher-quality similarity might be nice, but that is of seccondary importance,
  right now.
-\end_layout
-
-\begin_layout Subsection*
-Cosine Similarity scatterplots
-\end_layout
-
-\begin_layout Standard
-The scatterplot in 
-\begin_inset CommandInset ref
-LatexCommand ref
-reference "fig:Cosine-similarity-scatterplot"
-
-\end_inset
-
-visualizes the cosine similarity between 803 word-pairs.
- The rows and columns are ranked by frequency of word occurance, so that
- the single-most-frequently occuring word is at the upper-left, with less
- and less frequently occuring words proceeding to the right, and downwards.
- The color scale is such that red represents 1.0, yellow represents 0.75 (so
- orange is in between), green is exactly 0.5, and blue is 0.25 or less, fading
- to black.
- 
-\end_layout
-
-\begin_layout Standard
-This is for the 
-\noun on
-en_pairs_ttwo
-\noun default
- dataset, described below.
- It has several cuts applied here: in this case, all disjuncts with 30 observati
-ons or less are excluded from the cosing calculations, as are any word-disjunct
- pairs with 10 observations or less.
- All words with 3500 or fewer observations are discarded; this leaves behind
- just the 803 words shown.
- This has the effect of trimming away the noise in the dataset, leaving
- only 
-\begin_inset Quotes eld
-\end_inset
-
-high-confidence
-\begin_inset Quotes erd
-\end_inset
-
- word-disjunct pairs contributing to the cosine.
- Note that cosine similarity is symmetric; this figure is necessarily symmetric
- about the diagonal.
- The diagonal can be seen (with difficulty) as a line of red squares.
-\end_layout
-
-\begin_layout Standard
-\align center
-\begin_inset Float figure
-placement h
-wide false
-sideways false
-status open
-
-\begin_layout Plain Layout
-\align center
-\begin_inset Caption
-
-\begin_layout Plain Layout
-Cosine similarity scatterplot
-\begin_inset CommandInset label
-LatexCommand label
-name "fig:Cosine-similarity-scatterplot"
-
-\end_inset
-
-
-\end_layout
-
-\end_inset
-
-
-\begin_inset Graphics
-	filename scat/scat-cosine-big.png
-	width 100col%
-
-\end_inset
-
-
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-The tartan pattern indicates that some words are very unlike others.
- Closer examination reveals the usual culprits, already described: the period,
- and other punctuation marks, tend to be very different than other words.
- Thus, punctuation acconuts for many of the blue lines.
-\end_layout
-
-\begin_layout Standard
-It would be nice to re-arrange (permute) the rows and columns to bring the
- matrix into quasi-diagonal form.
- This is easier said than done.
- The graph 
-\begin_inset CommandInset ref
-LatexCommand ref
-reference "fig:Quasi-diagonal-cosine-similarity"
-
-\end_inset
-
- shows the same data, this time for 300 words, with a different ranking.
- This time, the first word is the period, and the next word is the one word,
- out of 299, that has the highest cosine similarity to the period.
- Next comes the word, out of the remaining 298, that has the highest cosine
- similarity to the last.
- This continues on dowm the list, so that word-pairs with the highest similarity
- are next to each-other, in the list.
- Effectively, we get the two-highest similarities for each word: the highest
- being to the word right before, and second-highest to the word right after.
- The list is organized so that the highest similarity pair occurs in the
- lower-right.
- The pairs least-similar to anything else end up on the upper-left.
-\end_layout
-
-\begin_layout Standard
-\align center
-\begin_inset Float figure
-wide false
-sideways false
-status open
-
-\begin_layout Plain Layout
-\align center
-\begin_inset Caption
-
-\begin_layout Plain Layout
-Quasi-diagonal cosine similarity
-\begin_inset CommandInset label
-LatexCommand label
-name "fig:Quasi-diagonal-cosine-similarity"
-
-\end_inset
-
-
-\end_layout
-
-\end_inset
-
-
-\begin_inset Graphics
-	filename scat/scat-fcos.png
-
-\end_inset
-
-
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-This ranking does expose a bit of block-diagonal structure, but not that
- much, and not that strong.
- The overwhelming color tone of these pictures demonstrate that the vast
- majority of word-pairs have an alarmingly large amount of cosine-similarity;
- again, green and yellow representing a similarity of 0.5 and above.
- The large orange block in the middle is clearly a cluster in a very obvious
- sense.
- Looking more closely it consists of two blocks: a big one and a much smaller
- on to the lower-right.
- The smaller block consists of these words: Jack Picth Ross Jim John.
- Clearly, these are all capitalized proper names.
- The bigger block are these words: I You And But When Then For At There
- It He She His The They This As In We If So A No.
- Observe that all of these are capitalized, and none are proper names, indicatin
-g that they are all sentence openers.
- They are listed in order.
- Thus, the cosine distance between 
-\begin_inset Quotes eld
-\end_inset
-
-I
-\begin_inset Quotes erd
-\end_inset
-
- and 
-\begin_inset Quotes eld
-\end_inset
-
-You
-\begin_inset Quotes erd
-\end_inset
-
- is high, although it is less than that between 
-\begin_inset Quotes eld
-\end_inset
-
-I
-\begin_inset Quotes erd
-\end_inset
-
- and 
-\begin_inset Quotes eld
-\end_inset
-
-John
-\begin_inset Quotes erd
-\end_inset
-
-, and so on down the line.
- The similarity between most of these is not surprising, and can certainly
- be rationalized post-facto.
-\end_layout
-
-\begin_layout Standard
-For comparison, the start of the list (lower-right) are the words: 
-\begin_inset Quotes eld
-\end_inset
-
-,
-\begin_inset Quotes erd
-\end_inset
-
- and but when if they there he she her it back up.
- Note that these are all lower-case, which means that they are observed
- only in the middle of sentences.
- That these are all pair-wise similar is not all that surprising.
-\end_layout
-
-\begin_layout Standard
-The bands suggests that perhaps a good way of closutering might be to look
- at not only how similar several words are, but also how different they
- are from everything else.
- Cosine similarity does NOT adequately take into account differences.
- However, mutual information does.
- So perhaps a mutual-information-inspired similarity would provide better
- results.
 \end_layout
 
 \begin_layout Subsection*
