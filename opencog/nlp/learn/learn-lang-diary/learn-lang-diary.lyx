@@ -27929,7 +27929,7 @@ where
 
  and zero otherwise.
  Each term in the numerator sum is one only when both disjuncts are present.
- Each term in the denominotor is one when either disjunct is present.
+ Each term in the denominator is one when either disjunct is present.
  
 \end_layout
 
@@ -27955,8 +27955,69 @@ This similarity measure essentially boils down to a normalized cylinder-set
 \begin_inset Formula $\mu$
 \end_inset
 
- the measure, and the intersection/union being taken over the associated
+ the Borel measure, and the intersection/union being taken over the associated
  disjunct sets.
+\end_layout
+
+\begin_layout Standard
+Continuing in this vein, what should be taken as the measure 
+\begin_inset Formula $\mu(A)$
+\end_inset
+
+ of 
+\begin_inset Formula $A$
+\end_inset
+
+? The counting measure is a natural choice; that is, 
+\begin_inset Formula $\mu(A)=\left|A\right|$
+\end_inset
+
+ being the number of elements in set 
+\begin_inset Formula $A$
+\end_inset
+
+.
+ Because we also have a count associated with the members of the set, we
+ can consider using the 
+\begin_inset Formula $l_{p}$
+\end_inset
+
+ norms for the measure.
+ That is, 
+\begin_inset Formula $\left|A\right|$
+\end_inset
+
+ is just the 
+\begin_inset Formula $l_{0}$
+\end_inset
+
+ norm; perhaps 
+\begin_inset Formula $\mu(A)=\left\Vert A\right\Vert _{p}$
+\end_inset
+
+ could also work.
+ For the purposes here, this may be enough; note, however, that only 
+\begin_inset Formula $l_{0}$
+\end_inset
+
+ and 
+\begin_inset Formula $l_{1}$
+\end_inset
+
+ satisfy one of the axioms of measure theory: namely, that when 
+\begin_inset Formula $A\cap B=\varnothing$
+\end_inset
+
+ then 
+\begin_inset Formula $\mu(A\cup B)=\mu(A)+\mu(B)$
+\end_inset
+
+.
+ The other 
+\begin_inset Formula $l_{p}$
+\end_inset
+
+ norms do not satisfy this.
 \end_layout
 
 \begin_layout Subsection*
