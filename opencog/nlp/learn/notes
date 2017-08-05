@@ -12825,6 +12825,9 @@ wall -- 64125
 at -- 28773
 sum = 92898 
 wall-at: 92322
+last: 94888
+
+finally: 317206 = (797 * 796) / 2  for len=128
 
 'item-pair   return hi-pr only if lopr
 'make-pair
@@ -12839,7 +12842,11 @@ wall-at: 92322
       all-sims))
 
 
+Notes: Chapter- or LEFT-WALL- or End-;  27 total
+Summary: Chapter- or LEFT-WALL-;  44 total 
 
+Rting: (LEFT-WALL- & :+) or (LEFT-WALL- & :+ & Audiences+) or
+(LEFT-WALL- & :+ & Explicit+) or (LEFT-WALL- & :+ & Mature+)
 
 
 

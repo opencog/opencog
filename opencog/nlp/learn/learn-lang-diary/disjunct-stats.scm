@@ -641,16 +641,16 @@
 
 (define pslon
    (add-generic-filter psa
-      (lambda (word) (<= 128 (psu 'right-length word)))
+      (lambda (word) (<= 16 (psu 'right-length word)))
       (lambda (dj) #t)
       (lambda (dj) #t)
       (lambda (dj) #t)
       (lambda (dj) #t)
-      "cut len<128"
+      "cut len<=16"
       #f))
 
 (define psls (add-pair-stars pslon))
-(define pss (batch-similarity psls #f #f 0.0))
+(define pss (batch-similarity psls #f #f 0.1))
 (pss 'batch-compute)
 (pss 'paralel-batch 6)
 
@@ -672,21 +672,22 @@
 		 #f)
 	'SimilarityLink)
 
-(length all-sims)    ;  142270 for a cutoff of 0.5
+(length all-sims)    ;  317206
 
 (define (sim-cosine SIM)
 	(define cos-key (PredicateNode "*-Cosine Sim Key-*"))
    (cog-value-ref (cog-value SIM cos-key) 0))
 
-(define good-sims
+(define (filter-sim LEN)
 	(filter
 		(lambda (sim) (and
 				; (< 0.5 (sim-cosine sim))
-				(< 128 (cset-vec-word-len (gar sim)))
-				(< 128 (cset-vec-word-len (gdr sim)))))
+				(< LEN (cset-vec-word-len (gar sim)))
+				(< LEN (cset-vec-word-len (gdr sim)))))
 		all-sims))
 
-(length good-sims)   ;  142270 -- identical to all sims.  Why?
+(define good-sims (filter-sim 256))
+(length good-sims)   ;  
 
 (define ranked-sims
 	(sort good-sims
@@ -696,7 +697,7 @@
 	(format port "~A	'~A .. ~A'\n" (sim-cosine sim)
 		(cog-name (gar sim)) (cog-name (gdr sim))))
 
-(let ((outport (open-file "/tmp/ranked-sims.dat" "w")))
+(let ((outport (open-file "/tmp/ranked-sims-256.dat" "w")))
 	(define cnt 0)
 	(for-each (lambda (sim)
 			(set! cnt (+ cnt 1))
@@ -707,7 +708,7 @@
 
 ; ------ again, but binned.
 
-(define scored-sims (score sim-cosine all-sims))  ; 44139852 = 44M  wow
+(define scored-sims (score sim-cosine all-sims)) 
 
 (define binned-sims (bin-count-simple scored-sims 300))
 
@@ -734,6 +735,37 @@
 (define all-good-words (filter (lambda (w) (< 4 (cset-vec-word-len w))) ac))
 
 (length all-good-words)   ;  5544 of length 4 or more
+
+; ---------------------------------------------------------------------
+; Connector-printing utilities.
+(define (print-connector CON)
+	(string-append (cog-name (gar CON)) (cog-name (gdr CON)) " "))
+
+(define (section->dj-str SEC)
+	(string-concatenate
+		(map print-connector (cog-outgoing-set (gdr SEC))))
+)
+
+(define (print-disjuncts WORD CUT)
+	(define cnt 0)
+	(define all-secs (cog-incoming-by-type WORD 'Section))
+	(define sorted-secs (sort all-secs
+		 (lambda (a b) (> (get-count a) (get-count b)))))
+	(define (prt-one con)
+		(set! cnt (+ 1 cnt))
+		(if (<= CUT (get-count con))
+			(format #t "~D  ~A\n" (get-count con) (section->dj-str con))))
+	(for-each prt-one sorted-secs)
+	(format #t "Total of ~D disjuncts\n" cnt))
+
+; ---------------------------------------------------------------------
+
+(define wpa (make-any-link-api))
+(define wps (add-pair-stars wpa))
+(define wpf (add-pair-freq-api wps)
+
+(fetch-incoming-set (List (Word "the") (Word "city"))
+ (wpf 'pair-fmi (List (Word "the") (Word "city")))
 
 ; ---------------------------------------------------------------------
 ; what fraction of the rows have more than N observations?
