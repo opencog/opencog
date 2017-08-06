@@ -30569,6 +30569,141 @@ Continuing in this vein, what should be taken as the measure
  norms do not satisfy this.
 \end_layout
 
+\begin_layout Standard
+The (opencog matrix) module currently implements an overlap similarity which
+ computes the 
+\begin_inset Formula $l_{0}$
+\end_inset
+
+-norm based similarity: 
+\begin_inset Formula 
+\[
+\mbox{ovl}_{0}(w_{1},w_{2})=\frac{\left|\left\{ d\mbox{ s.t. }0<N\left(w_{1},d\right)\right\} \cap\left\{ d\mbox{ s.t. }0<N\left(w_{2},d\right)\right\} \right|}{\left|\left\{ d\mbox{ s.t. }0<N\left(w_{1},d\right)\right\} \cup\left\{ d\mbox{ s.t. }0<N\left(w_{2},d\right)\right\} \right|}
+\]
+
+\end_inset
+
+where 
+\begin_inset Formula $\left\{ d\mbox{ s.t. }0<N\left(w,d\right)\right\} $
+\end_inset
+
+ is the set of disjuncts 
+\begin_inset Formula $d$
+\end_inset
+
+ such that the cset 
+\begin_inset Formula $(w,d)$
+\end_inset
+
+ was observed at least once.
+ As always, 
+\begin_inset Formula $\left|\left\{ x\right\} \right|$
+\end_inset
+
+ is the number of elements in the set 
+\begin_inset Formula $\left\{ x\right\} $
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+Some experimentation was done with this similarity measure, but the results
+ were not particuarly impressive.
+ What does become quickly apparent is that the most frequently observed
+ words will necessarily have a low similarity to the low-frequency words.
+ This is because the high-frequency words will have a large number of disjuncts
+ observed with them, thus causing the denominator to grow large.
+ The numerator, by contrast, stays small, essentially limited by the number
+ of disjuncts observed on the low-frequency word.
+ This behavior is not what we want.
+ Intuition suggests that we really do want to be able to compare words,
+ independent of how frequently they occur.
+\end_layout
+
+\begin_layout Standard
+This suggests a modified form of overlap similarity, by normalizing to a
+ common count.
+ That is, one should work with 
+\begin_inset Formula $N(w,d)/N(w,*)$
+\end_inset
+
+, which can be understood as the normalized probability of observing a disjunct
+ 
+\begin_inset Formula $d$
+\end_inset
+
+ on some word 
+\begin_inset Formula $w$
+\end_inset
+
+.
+ So, arrange the words such that 
+\begin_inset Formula $N\left(w_{1},*\right)>N\left(w_{2},*\right)$
+\end_inset
+
+ and define 
+\begin_inset Formula $K\left(w_{1},d\right)=N\left(w_{1},d\right)N\left(w_{2},*\right)/N\left(w_{1},*\right)$
+\end_inset
+
+ -- this makes the counts on 
+\begin_inset Formula $w_{1}$
+\end_inset
+
+ directly comparable to those on 
+\begin_inset Formula $w_{2}$
+\end_inset
+
+, giving
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\mbox{rovl}(w_{1},w_{2})=\frac{\left|\left\{ d\mbox{ s.t. }1\le K\left(w_{1},d\right)\right\} \cap\left\{ d\mbox{ s.t. }1\le N\left(w_{2},d\right)\right\} \right|}{\left|\left\{ d\mbox{ s.t. }1\le K\left(w_{1},d\right)\right\} \cup\left\{ d\mbox{ s.t. }1\le N\left(w_{2},d\right)\right\} \right|}
+\]
+
+\end_inset
+
+That is, the condition 
+\begin_inset Formula $1\le N\left(w_{2},d\right)$
+\end_inset
+
+ simply tests for the presence or absence of disjunct 
+\begin_inset Formula $d$
+\end_inset
+
+ on 
+\begin_inset Formula $w_{2}$
+\end_inset
+
+, while 
+\begin_inset Formula $K\left(w_{1},d\right)$
+\end_inset
+
+ gives the probability of observing disjunct 
+\begin_inset Formula $d$
+\end_inset
+
+ on 
+\begin_inset Formula $w_{1}$
+\end_inset
+
+, if 
+\begin_inset Formula $w_{1}$
+\end_inset
+
+ had been observed as often as 
+\begin_inset Formula $w_{2}$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+The above considerations suggest
+\end_layout
+
 \begin_layout Subsection*
 Disjunct Subsets
 \end_layout
@@ -35938,661 +36073,6 @@ Some readers have misunderstood this section.
 e adequate similarity.
  Higher-quality similarity might be nice, but that is of seccondary importance,
  right now.
-\end_layout
-
-\begin_layout Subsection*
-Overlap Similarity
-\end_layout
-
-\begin_layout Standard
-Perhaps asking for cosine similarity is too strong -- cosine similarity
- asks not only for the same disjuncts on a word, but also the same relative
- ratios of usage.
- Supose that this is loosened: instead of asking for for the same relative
- ratios, we merely ask that two words use mostly the same sets of disjuncts,
- and ignore the frequency.
- For this, we can define the overlap similarity
-\begin_inset Formula 
-\[
-\mbox{ovl}(w_{1},w_{2})=\frac{\left|\left\{ d\mbox{ s.t. }0<N\left(w_{1},d\right)\right\} \cap\left\{ d\mbox{ s.t. }0<N\left(w_{2},d\right)\right\} \right|}{\left|\left\{ d\mbox{ s.t. }0<N\left(w_{1},d\right)\right\} \cup\left\{ d\mbox{ s.t. }0<N\left(w_{2},d\right)\right\} \right|}
-\]
-
-\end_inset
-
-where 
-\begin_inset Formula $\left\{ d\mbox{ s.t. }0<N\left(w,d\right)\right\} $
-\end_inset
-
- is the set of disjuncts 
-\begin_inset Formula $d$
-\end_inset
-
- such that the cset 
-\begin_inset Formula $(w,d)$
-\end_inset
-
- was observed at least once.
- 
-\end_layout
-
-\begin_layout Standard
-Results are presented below, for the cut dataset.
- The cuts are as described below: all words with 
-\begin_inset Formula $N(w,*)<1500$
-\end_inset
-
- are discarded, as are all observations 
-\begin_inset Formula $N(w,d)<10$
-\end_inset
-
- and all disjuncts for which 
-\begin_inset Formula $N(*,d)<30$
-\end_inset
-
-.
- There are 803 words that are left after these cuts, and 322003 = 803 *
- 802 / 2 word-pairs.
- The top of the list is
-\end_layout
-
-\begin_layout Standard
-\align center
-\begin_inset Tabular
-<lyxtabular version="3" rows="12" columns="2">
-<features tabularvalignment="middle">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<row>
-<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-pair
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-sim
-\end_layout
-
-\end_inset
-</cell>
-</row>
-<row>
-<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-(act .
- foot)
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\family roman
-\series medium
-\shape up
-\size normal
-\emph off
-\bar no
-\strikeout off
-\uuline off
-\uwave off
-\noun off
-\color none
- 0.87500
-\end_layout
-
-\end_inset
-</cell>
-</row>
-<row>
-<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-(laid .
- pushed)
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-0.84615
-\end_layout
-
-\end_inset
-</cell>
-</row>
-<row>
-<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-(Sandy .
- Bunny)
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-0.84211
-\end_layout
-
-\end_inset
-</cell>
-</row>
-<row>
-<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-(start .
- act)
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-0.84000
-\end_layout
-
-\end_inset
-</cell>
-</row>
-<row>
-<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-(soft .
- control)
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-0.83871
-\end_layout
-
-\end_inset
-</cell>
-</row>
-<row>
-<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-(thoughts .
- heavy)
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-0.83333
-\end_layout
-
-\end_inset
-</cell>
-</row>
-<row>
-<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-(Mary .
- Sandy)
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-0.83333
-\end_layout
-
-\end_inset
-</cell>
-</row>
-<row>
-<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-(teeth .
- throat)
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-0.82609
-\end_layout
-
-\end_inset
-</cell>
-</row>
-<row>
-<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-(Sandy .
- it's)
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-0.82353
-\end_layout
-
-\end_inset
-</cell>
-</row>
-<row>
-<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-(wide .
- shoulder) 
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-0.82143
-\end_layout
-
-\end_inset
-</cell>
-</row>
-<row>
-<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-(shut .
- King)
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-0.81818
-\end_layout
-
-\end_inset
-</cell>
-</row>
-</lyxtabular>
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-This appears to offer a less accurate discovery of pairs than cosine similarity.
- Some of these seem reasonable, or at least plausible, but many do not.
- Insisiting on more observations gives the following list.
- Its for the word-pairs formed after cutting 
-\begin_inset Formula $N(w,*)<3500$
-\end_inset
-
-, which leaves 383 words and 73153 word-pairs.
-\end_layout
-
-\begin_layout Standard
-\align center
-\begin_inset Tabular
-<lyxtabular version="3" rows="12" columns="2">
-<features tabularvalignment="middle">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<row>
-<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-pair
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-sim
-\end_layout
-
-\end_inset
-</cell>
-</row>
-<row>
-<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-(away .
- off)
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-0.75556
-\end_layout
-
-\end_inset
-</cell>
-</row>
-<row>
-<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-(black .
- white)
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-0.73077
-\end_layout
-
-\end_inset
-</cell>
-</row>
-<row>
-<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-(off .
- over)
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-0.71856
-\end_layout
-
-\end_inset
-</cell>
-</row>
-<row>
-<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-(whole .
- end)
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-0.70175
-\end_layout
-
-\end_inset
-</cell>
-</row>
-<row>
-<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-(herself .
- myself)
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-0.70175
-\end_layout
-
-\end_inset
-</cell>
-</row>
-<row>
-<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-(both .
- three)
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-0.69663
-\end_layout
-
-\end_inset
-</cell>
-</row>
-<row>
-<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-(quite .
- almost)
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-0.69512
-\end_layout
-
-\end_inset
-</cell>
-</row>
-<row>
-<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-(each .
- every)
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-0.69474
-\end_layout
-
-\end_inset
-</cell>
-</row>
-<row>
-<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-(night .
- place)
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-0.69318
-\end_layout
-
-\end_inset
-</cell>
-</row>
-<row>
-<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-(held .
- stood)
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-0.69231
-\end_layout
-
-\end_inset
-</cell>
-</row>
-<row>
-<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-(used .
- hard)
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-0.69231
-\end_layout
-
-\end_inset
-</cell>
-</row>
-</lyxtabular>
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-These are not particularly better-matched.
- Based on the actual scores, they are indeed worse-matched; the large-observatio
-n-count cut is not helping.
-\end_layout
-
-\begin_layout Standard
-The scatter matrix is shown below.
- Just like the prvious matrix, it shows the 803 words in the dataset that
- have 3500 or more observations.
- The rows and columns are in observation-ranking order, so that the most
- frequent words are to the upper-left.
- As before, the pattern is necessarily symmetric about the diagonal.
- As before, there is a Tartan pattern that is clearly visibile, and its
- there for the same reasons.
- 
-\end_layout
-
-\begin_layout Standard
-\align center
-\begin_inset Graphics
-	filename scat/scat-overlap-big.png
-	width 100text%
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-Unlike before, there is an arrow-shape to the thing.
- This is easy to explain: The most frequently observed words also have a
- large number of disjuncts observed with them.
- The least frequently observed words have far fewer disjuncts attached to
- them.
- Thus, all in all, the denominator for the overlap is necessarily large,
- when comparing high-observation and low-observation words.
-\end_layout
-
-\begin_layout Subsection*
-Connector similarity
-\end_layout
-
-\begin_layout Standard
-Several remarks about the similarity of connectors.
 \end_layout
 
 \begin_layout Subsection*
