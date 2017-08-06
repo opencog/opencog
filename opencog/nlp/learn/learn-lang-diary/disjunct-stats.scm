@@ -813,6 +813,11 @@
 (write-flo "/tmp/scat-dcos.flo" eranked-long pair-cos)
 (write-flo "/tmp/scat-ecos.flo" eranked-long pair-cos)
 
+(define (prt-sim LST)
+	(if (not (null? (cdr LST))) (begin
+		(format #t "~A .. ~A  ~5F\n" (car LST) (cadr LST)
+			(get-cos (Word (car LST)) (Word (cadr LST))))
+		(prt-sim (cdr LST)))))
 
 
 
