@@ -404,9 +404,8 @@ results of that combination.
 A variety of control rules may simultaneously apply and we need a way
 to combine them.
 
-Let's assume we have k valid control rules for inference rule R (a
-control rule is valid if it unifies with the current intermediary
-target and have its contexts satisfied.)
+Let's assume we have k active control rules for inference rule R (a
+control rule is active if its context is satisfied).
 
 ```
 ICR1 : C1 & R -> S <TV1>
@@ -418,7 +417,7 @@ where `->` compactly represent an `ImplicationScopeLink` as described
 above.
 
 `ICRi` expresses that in context `Ci` chosing `R` will produce a
-preproof of our final target with truth values `TVi`. `S` stands for
+preproof of our final target with truth value `TVi`. `S` stands for
 Success. One way of doing that is to use a resource bound variation of
 Solomonoff's Universal Operator Induction which, reformulated to fit
 our problem, looks like
@@ -466,7 +465,7 @@ multiplicative constant, so in fact the cdf of `P(S|R)` is merely a
 weighted sum of the cdfs of `ICRi`
 
 ```
-CDF_P(S|R) = Sum_i=0^n alpha_i * CDF_ICRi(S|R) * P(ICRi)
+CDF_P(S|R) = Sum_i=0^n alpha_i * CDF_ICRi(S|R) * P(ICRi) / nt
 ```
 
 where
@@ -497,17 +496,25 @@ alpha_i = 1 / (N+1)*(choose N X)
 Which gives us a normalizing factor of
 
 ```
-nt = Sum_i=0^n P(ICRi) / ((Ni+1) * (choose Ni Xi))
+nt = Sum_i=0^n P(ICRi) / ((Ni+1)*(choose Ni Xi))
 ```
 
-That is assuming that all observations are certain (based on perfect
+So the final equation is
+
+```
+CDF_P(S|R) = Sum_i=0^n CDF_ICRi(S|R) * P(ICRi) / ((Ni+1)*(choose Ni Xi))
+           / Sum_i=0^n P(ICRi) / ((Ni+1)*(choose Ni Xi))
+```
+
+This assumes that all observations are certain (based on perfect
 sensors). We actually do need to consider imperfect sensors because
 the negative observations of preproof have uncertainties, as explained
 in Subsection Record Inference Traces. It is expected that we'll have
 to resort to convolution products, because the pdf of a random
 variable equal to the sum of other random variables is determined by
-the convolution products of their pdfs. But we let that for later,
-maybe there's a simpler way.
+the convolution products of their pdfs. However it is suspected that
+the convolution products of 2 beta-distributions is a
+beta-distribution, which should simplify things a lot.
 
 There is also the problem that `ICRi(Sj|Rj)` is undefined for some
 observations. TODO: assume that the algorithmic complexity of the
@@ -523,7 +530,7 @@ and `L(j)` is the length, or entropy, of observation `j`.
 Another option is to use distributional truth values to complete the
 operator.
 
-Once we have that we can calculate the TVi of success of each valid
+Once we have that we can calculate the TVi of success of each active
 inference rule Ri, either by turning its cdf into a TV or a pdf as it
 will be useful below.
 
