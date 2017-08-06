@@ -30701,7 +30701,31 @@ That is, the condition
 \end_layout
 
 \begin_layout Standard
-The above considerations suggest
+The above considerations suggest a more approrpriate defintion for overlap
+ similarity that allows for frequency-independent observations: namely
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\mbox{ovl}(w_{1,}w_{2})=\frac{\sum_{d}\sigma(f(w_{1},d))\sigma(f(w_{2},d))}{\sum_{d}\sigma(f(w_{1},d)+f(w_{2},d))}
+\]
+
+\end_inset
+
+with 
+\begin_inset Formula $f(w,d)=N(w,d)/N(w,*)$
+\end_inset
+
+.
+ In this form, the numerator now starts to resemble the numerator of the
+ cosine similarity measure: both the cosine numerator, and this numerator
+ are computing a kind-of overlap or intersection of sets of disjuncts.
+ The denominators differ.
+ Based on gut intuition, the above measure may be be more suitable for judging
+ similarity than the cosine measure, precisely because it emphasizes the
+ set-like qualities of connector sets, as opposed to vector-like qualities.
+ 
 \end_layout
 
 \begin_layout Subsection*
@@ -30727,6 +30751,11 @@ The overlay similarity can be adapted for this purpose: two sets obey a
 \end_inset
 
 .
+\end_layout
+
+\begin_layout Standard
+This re-affirms the previous observation: we expect connector-sets to behave
+ in a set-like fashion, not a vector-like fashion.
 \end_layout
 
 \begin_layout Subsection*
