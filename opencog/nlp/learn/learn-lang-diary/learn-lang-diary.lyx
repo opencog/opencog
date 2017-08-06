@@ -31020,6 +31020,16 @@ reference "fig:Quasi-diagonal-cosine-similarity"
  one word, out of 796, that has the highest cosine similarity to the period.
  Next comes the word, out of the remaining 795, that has the highest cosine
  similarity to the last.
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+Computed with the `dranked` function, and the `dranked-long` list graphed,
+ from the `disjunct-stats.scm` file.
+\end_layout
+
+\end_inset
+
  This continues on down the list, so that word-pairs with the highest similarity
  are next to each-other, in the list.
  Effectively, we get the two-highest similarities for each word: the highest
@@ -31069,11 +31079,735 @@ name "fig:Quasi-diagonal-cosine-similarity"
 \end_layout
 
 \begin_layout Standard
-This ranking does expose a bit of block-diagonal structure, 
+This ranking exposes block-diagonal structure in the dataset.
+ The block in the upper-right consists entirely of punctuation and various
+ capitalized words.
+ The middle poritions are quite interesting.
+ The full list of 797 words is shown in table 
+\begin_inset CommandInset ref
+LatexCommand vpageref
+reference "tab:Block-ranked-words"
+
+\end_inset
+
+.
+ Its sort of interesting to read.
+ So, the word that is most similar to the LEFT-WALL is the double-dash --
+ perhaps not to surprising, as the double dash is often used to start new
+ sentence phrases.
+ That various forms of punctuation follow is not surprising.
+ 
 \end_layout
 
 \begin_layout Standard
+After this are various capitalized words.
+ As noted previously, capitalized words are observed far less frequently
+ than thier u-capitalized counterparts -- usually only one capitalized word
+ per sentence! Thus, capitalized words have far fewer disjuncts on them,
+ thus making it easier for them to appear superficially similar, when they
+ really should not be.
+ Despite this, it is reassuring to see 
+\begin_inset Quotes eld
+\end_inset
 
+Where Who What Why How
+\begin_inset Quotes erd
+\end_inset
+
+ occur in succesion.
+ Other confidence-instilling sequences include 
+\begin_inset Quotes eld
+\end_inset
+
+2 1 4 3 A
+\begin_inset Quotes erd
+\end_inset
+
+ and some names: 
+\begin_inset Quotes eld
+\end_inset
+
+Mai Demelza Richard John George
+\begin_inset Quotes erd
+\end_inset
+
+.
+ Then another reassuring sequence: 
+\begin_inset Quotes eld
+\end_inset
+
+nothing something anything everything
+\begin_inset Quotes erd
+\end_inset
+
+.
+ Why 
+\begin_inset Quotes eld
+\end_inset
+
+George
+\begin_inset Quotes erd
+\end_inset
+
+ should be similar to 
+\begin_inset Quotes eld
+\end_inset
+
+nothing
+\begin_inset Quotes erd
+\end_inset
+
+ is best left unasked.
+ But we'll ask anyway.
+ 
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Float table
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\begin_inset Caption
+
+\begin_layout Plain Layout
+Block-ranked words
+\begin_inset CommandInset label
+LatexCommand label
+name "tab:Block-ranked-words"
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+LEFT-WALL -- ...
+ ..
+ ....
+ *** Two Bit - The “ And But So Perhaps Though When As Then While If Have
+ Can Did Do Will Thank Are Where Who What Why How Or Now Here This That
+ It There He She I You We They Some One Most Instead However Besides Well
+ Oh Ah No Yes Yeah Good Ham 2 1 4 3 A Mai Demelza Richard John George nothing
+ something anything everything it there who which that what where when until
+ as because since if before while little small large good great second woman
+ man child boy girl king house city village world town country ship sun
+ latter land others children people men things them us me him her his my
+ your their our the this every another leave take get find see hear speak
+ move stop fight be make give show keep bring meet follow call ask tell
+ help go live stay talk turn run change use read say understand remember
+ know think suppose guess hope promise believe mean am myself fear thought
+ knew saw felt found called happy fine certain new single word moment minute
+ year day night evening morning way book letter party distance light fire
+ forest room air sea earth ground floor table subject story line case question
+ place time thing person family soul heart body own wife brother sister
+ father mother daughter son hands face feet mouth eyes hand mind friends
+ friend thoughts arm arms chest staff words office past water door window
+ truth same whole best present first last least once home back down up at
+ over on in by from upon under through into for with such having like quite
+ only also still born gone already been seen done taken known given brought
+ made making taking after above among between of all near against to will
+ can cannot may must might would should could did does was is seems seemed
+ appeared used began tried wanted needed meant came went turned continued
+ said says spoke had has always never ever usual possible well soon far
+ much late bad strong big young white black dark blue closed opened open
+ hold put stand sleep answer try return come enough ready trying going supposed
+ beginning rest sound corner direction presence name side power nature one
+ most part kind sort number lot bit couple matter group other two three
+ four five ten several many some out length force death life voice hair
+ husband lips head shoulder eye bed business point state view sense feeling
+ thinking saying now indeed therefore however sir yes God dear lady poor
+ old dead wrong right here doing glad afraid sure sorry coming close hard
+ long short real different clear probably certainly simply just almost not
+ hardly easily feel have shall wish need want seem next following Queen
+ captain wall future general London work himself herself smiled sighed nodded
+ asked replied cried got stood sat looked look smile chance reason means
+ longer doubt idea end edge bottom top account instead perhaps and or but
+ though although then thus yet even really heard left lost passed met were
+ are do love told gave took held followed behind within half an raised free
+ better less more rather often true alone again ) too so very pretty a its
+ these those anyone you we they he she North Jack Pitch Ross Jim Dallas
+ Telzey Goth Sir san together along off away around round about how why
+ – ; , : … ! .
+ ? — All From In On By To With After For It’s It's Not Just Even At See
+ paragraph spirit cause middle sight front spite charge form attention throat
+ breath money law human few hundred thousand years hours minutes days times
+ later ago ' " ” 」 ’ _ etc Mr Mrs Dr sama don ul looking especially nor
+ either each any no finally suddenly slowly quietly Mary King Lord Lady
+ Miss Captain I'm I’m My Her His Your ( ‘ Illustration Stats Category Rating
+ Fandom Character Warning Is Really Please Father Mother May course being
+ without let set sitting drawing living high heavy cold public fact particular
+ full relief order hour individual General outside both talking able happened
+ exactly else hell non re self S t six natural than fell deep wide deal
+ agree don’t don't didn’t didn't received paid care drop provide York agreement
+ ape medium author laws terms works forward forth shook enjoyed originally
+ access permission instance chapter comment St Princess Old New Summary
+ Notes Our THE # * Of { including Prince notes states copies copy ‐ YOU
+ THIS OF OR Section CHAPTER Chapter + | Project eBook eBooks Gutenberg }
+ P tax States fee electronic associated Archive Foundation United & copyright
+ Literary donations License trademark distribution refund Van distributing
+ Ooal Additional Posted archive Tags 
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The block-ranked words are a kind of 
+\begin_inset Quotes eld
+\end_inset
+
+stream-of-consciousness
+\begin_inset Quotes erd
+\end_inset
+
+ with regard to similarity.
+ This is shown in the table below.
+ So, the numbers are all quite similar to each other, but the letter 'A'
+ is not very similar to '3'.
+ It just so happens that 'A' is more similar to '3', than any other subsequent
+ word.
+ 'A' and 'Mai' are not similar, but then all of the given names are quite
+ similar.
+ Next, it turns out that 'George' and 'nothing' really don't have very much
+ to do with one-another.
+ And so the block-diagonal structure is exposed.
+\begin_inset VSpace defskip
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Tabular
+<lyxtabular version="3" rows="23" columns="2">
+<features tabularvalignment="middle">
+<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top" width="0">
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Pair
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Similarity
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+2 ..
+ 1
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0.881
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+1 ..
+ 4
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0.791
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+4 ..
+ 3
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0.835
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+3 ..
+ A
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0.375
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+A ..
+ Mai
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0.351
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Mai ..
+ Demelza
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0.615
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Demelza ..
+ Richard
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0.515
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Richard ..
+ John
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0.602
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+John ..
+ George
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0.648
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+George ..
+ nothing
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0.342
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+nothing ..
+ something
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0.483
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+something ..
+ anything
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0.549
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+anything ..
+ everything
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0.369
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+everything ..
+ it
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0.496
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+it ..
+ there
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0.743
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+there ..
+ who
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0.416
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+who ..
+ which
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0.618
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+which ..
+ that 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0.580
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+that ..
+ what
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0.730
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+what ..
+ where
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0.722
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+where ..
+ when
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0.830
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+when ..
+ until
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0.886
+\end_layout
+
+\end_inset
+</cell>
+</row>
+</lyxtabular>
+
+\end_inset
+
+
+\begin_inset VSpace defskip
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Reading through the list of 797 words in table 
+\begin_inset CommandInset ref
+LatexCommand vpageref
+reference "tab:Block-ranked-words"
+
+\end_inset
+
+ reveals a lot of interesting runs.
+ All this suggests that cosine similarity really is doing the right thing.
+ Equally reassuring are the failures of similarity: the end of the list
+ of 797 words is populated with Gutenberg license boilerplate words.
+ This is good: they are at the end of the list because they don't fit into
+ any other grammatical usage patterns.
+ They don't fit because they have been observed hundreds of times, which
+ propels them into thehigh-frequency category; yet, since they always appear
+ in set phrases, they can't be similar to anything else.
+\end_layout
+
+\begin_layout Subsection*
+Filtering
 \end_layout
 
 \begin_layout Standard
