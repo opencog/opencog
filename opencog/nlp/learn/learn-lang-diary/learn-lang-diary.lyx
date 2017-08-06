@@ -20356,7 +20356,7 @@ Two graphs, dual to one-another.
 
 , also ranked.
 \begin_inset Foot
-status collapsed
+status open
 
 \begin_layout Plain Layout
 Obtained by running (print-ts-rank sorted-word-obs outport) from the disjunct-st
@@ -31005,10 +31005,6 @@ The tartan pattern indicates that some words are very unlike others, and
 \end_layout
 
 \begin_layout Standard
-xxx
-\end_layout
-
-\begin_layout Standard
 It would be nice to re-arrange (permute) the rows and columns to bring the
  matrix into quasi-diagonal form.
  This is easier said than done.
@@ -31019,18 +31015,19 @@ reference "fig:Quasi-diagonal-cosine-similarity"
 
 \end_inset
 
- shows the same data, this time for 300 words, with a different ranking.
- This time, the first word is the period, and the next word is the one word,
- out of 299, that has the highest cosine similarity to the period.
- Next comes the word, out of the remaining 298, that has the highest cosine
+ shows the same data, with a different ranking.
+ This time, the first word is the the LEFT-WALL, and the next word is the
+ one word, out of 796, that has the highest cosine similarity to the period.
+ Next comes the word, out of the remaining 795, that has the highest cosine
  similarity to the last.
- This continues on dowm the list, so that word-pairs with the highest similarity
+ This continues on down the list, so that word-pairs with the highest similarity
  are next to each-other, in the list.
  Effectively, we get the two-highest similarities for each word: the highest
  being to the word right before, and second-highest to the word right after.
  The list is organized so that the highest similarity pair occurs in the
- lower-right.
- The pairs least-similar to anything else end up on the upper-left.
+ upper-left.
+ The pairs least-similar to anything else end up on the lower-right.
+ The color scheme is as before.
 \end_layout
 
 \begin_layout Standard
@@ -31038,7 +31035,7 @@ reference "fig:Quasi-diagonal-cosine-similarity"
 \begin_inset Float figure
 wide false
 sideways false
-status collapsed
+status open
 
 \begin_layout Plain Layout
 \align center
@@ -31072,72 +31069,11 @@ name "fig:Quasi-diagonal-cosine-similarity"
 \end_layout
 
 \begin_layout Standard
-This ranking does expose a bit of block-diagonal structure, but not that
- much, and not that strong.
- The overwhelming color tone of these pictures demonstrate that the vast
- majority of word-pairs have an alarmingly large amount of cosine-similarity;
- again, green and yellow representing a similarity of 0.5 and above.
- The large orange block in the middle is clearly a cluster in a very obvious
- sense.
- Looking more closely it consists of two blocks: a big one and a much smaller
- on to the lower-right.
- The smaller block consists of these words: Jack Pitch Ross Jim John.
- Clearly, these are all capitalized proper names.
- The bigger block are these words: I You And But When Then For At There
- It He She His The They This As In We If So A No.
- Observe that all of these are capitalized, and none are proper names, indicatin
-g that they are all sentence openers.
- They are listed in order.
- Thus, the cosine distance between 
-\begin_inset Quotes eld
-\end_inset
-
-I
-\begin_inset Quotes erd
-\end_inset
-
- and 
-\begin_inset Quotes eld
-\end_inset
-
-You
-\begin_inset Quotes erd
-\end_inset
-
- is high, although it is less than that between 
-\begin_inset Quotes eld
-\end_inset
-
-I
-\begin_inset Quotes erd
-\end_inset
-
- and 
-\begin_inset Quotes eld
-\end_inset
-
-John
-\begin_inset Quotes erd
-\end_inset
-
-, and so on down the line.
- The similarity between most of these is not surprising, and can certainly
- be rationalized post-facto.
+This ranking does expose a bit of block-diagonal structure, 
 \end_layout
 
 \begin_layout Standard
-For comparison, the start of the list (lower-right) are the words: 
-\begin_inset Quotes eld
-\end_inset
 
-,
-\begin_inset Quotes erd
-\end_inset
-
- and but when if they there he she her it back up.
- Note that these are all lower-case, which means that they are observed
- only in the middle of sentences.
- That these are all pair-wise similar is not all that surprising.
 \end_layout
 
 \begin_layout Standard
