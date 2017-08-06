@@ -1,4 +1,4 @@
-
+;
 ; disjunct-stats.scm
 ;
 ; Assorted ad-hoc collection of tools for understanding the
@@ -10,9 +10,6 @@
 ; more of a kind-of work-log of what was needed to generate those
 ; pictures, than anything else. Of course, this can be recycled for
 ; other datasets, too.
-;
-; TODO: move this file to the lang-learn-diary directory. It does
-; not belong here, in the main repo
 ;
 ; Copyright (c) 2017 Linas Vepstas
 ;
@@ -655,6 +652,12 @@
 (pss 'paralel-batch 6)
 
 (cog-map-type ato 'SimilarityLink)
+
+(define ranked-long
+	(sort long-words
+		(lambda (a b) (> (psu 'right-count a) (psu 'right-count b)))))
+		; (lambda (a b) (> (psu 'right-support a) (psu 'right-support b)))))
+		; (lambda (a b) (> (psu 'right-length a) (psu 'right-length b)))))
 
 ; ---------------------------------------------------------------------
 ; Similarity.  Cosine distance.

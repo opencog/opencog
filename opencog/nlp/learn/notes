@@ -12848,7 +12848,22 @@ Summary: Chapter- or LEFT-WALL-;  44 total
 Rting: (LEFT-WALL- & :+) or (LEFT-WALL- & :+ & Audiences+) or
 (LEFT-WALL- & :+ & Explicit+) or (LEFT-WALL- & :+ & Mature+)
 
+    (define (pair-cos A B)
+       (define cos-key (PredicateNode "*-Cosine Sim Key-*"))
+       (define SIM (SimilarityLink A B))
+		(define val (cog-value SIM cos-key))
+(if (equal? A B) 1.0
+   (if (not (null? val)) (cog-value-ref val 0) 0.0)))
 
+
+sorted-word-obs
+ vs. (psu 'right-length a)
+cset-vec-word-observations
+
+(psu 'right-support      64215.0
+(psu 'right-count       972963.0
+(psc 'right-wild-count  972963.0
+(psu 'right-length      122353.945
 
 =========================================================================
 

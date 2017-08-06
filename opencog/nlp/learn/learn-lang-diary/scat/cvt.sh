@@ -13,8 +13,8 @@ BINDIR=/home/linas/src/fractal/generate/
 # $BINDIR/renorm scat-cosine ren 1
 # cat ren.flo | $FLODIR/flo2mtv |mtvtoppm | pnmtopng > scat-cosine.png
 
-# $BINDIR/renorm scat-cosine-big ren 1
-# cat ren.flo | $FLODIR/flo2mtv |mtvtoppm | pnmtopng > scat-cosine-big.png
+$BINDIR/renorm scat-cosine-big ren 1
+cat ren.flo | $FLODIR/flo2mtv |mtvtoppm | pnmtopng > scat-cosine-big.png
 
 # $BINDIR/renorm scat-ecos ren 0.8
 # cat ren.flo | $FLODIR/flo2mtv |mtvtoppm | pnmtopng > scat-ecos.png
@@ -31,4 +31,4 @@ BINDIR=/home/linas/src/fractal/generate/
 # $BINDIR/renorm scat-overlap-big ren 1.5
 # cat ren.flo | $FLODIR/flo2mtv |mtvtoppm | pnmtopng > scat-overlap-big.png
 
-cat /tmp/scat-cosmi.flo | $FLODIR/flo2mtv |mtvtoppm | pnmtopng > scat-pcos.png
+# cat /tmp/scat-cosmi.flo | $FLODIR/flo2mtv |mtvtoppm | pnmtopng > scat-pcos.png
