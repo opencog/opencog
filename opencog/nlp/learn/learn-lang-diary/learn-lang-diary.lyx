@@ -31811,13 +31811,59 @@ Filtering
 \end_layout
 
 \begin_layout Standard
-The bands suggests that perhaps a good way of closutering might be to look
- at not only how similar several words are, but also how different they
- are from everything else.
- Cosine similarity does NOT adequately take into account differences.
- However, mutual information does.
- So perhaps a mutual-information-inspired similarity would provide better
- results.
+An earlier draft of this report showed a very different figure, which turned
+ out to have been created based on what seemed to be a valid assumption,
+ but turns out not to be so wise.
+ It deserves a some discussion here, which is resumed in a later sction.
+\end_layout
+
+\begin_layout Standard
+The idea (recaptured below) is that it can be a good thing to filter out
+ noisy data.
+ For example, one may choose to ignore words that have not been seen many
+ times.
+ This is the cut done up above: there are only 797 words observed with a
+ length of 128 or greater.
+ This is a convenient number only because it allows a 797-pixel-wide color
+ plot to be made.
+ A different cut might exclude words that were observed less than N times.
+ 
+\end_layout
+
+\begin_layout Standard
+Another possibility, and this seems to be the fatal one, is to exclude disjuncts
+ that are seen only a handful of times.
+ Superficially, this seems like a very plausible thing to do.
+ In practice, this turns out to be an almost completeely disasterous cut.
+ Setting it too high renders almost all capitalized words identical to one-anoth
+er, having a similarity of exactly one.
+ Capitalized words are observed only infrequently; discarding low-frequency
+ disjuncts leaves the capitalized wors almost naked, and thus essentially
+ identical.
+ Just about all of them connect to the LEFT-WALL, since they are the first
+ word in a sentence, and so all of them share a very high observation count
+ of links to LEFT-WALL, and low observation counts of links to anything
+ else.
+ Ergo: they are al similar, since they all start sentences.
+\end_layout
+
+\begin_layout Standard
+The damage doesn't stop there.
+ It turns out that such trimming also raises similarity across the board:
+ it ends up so that everything seems to be pretty darn similar to everything
+ else, thus erasing too much of the 
+\begin_inset Quotes eld
+\end_inset
+
+signal
+\begin_inset Quotes erd
+\end_inset
+
+ that we are looking for.
+ The original hope was to raise the signal-to-noise ratio by applying judicious
+ cuts; but hope is not enough.
+ Injudicious cuts can destroy the signal all too easily.
+ Careful data analysis is needed; blind trust is not enough.
 \end_layout
 
 \begin_layout Section*
