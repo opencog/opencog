@@ -771,6 +771,52 @@
  (wpf 'pair-fmi (List (Word "the") (Word "city")))
 
 ; ---------------------------------------------------------------------
+; Scatterplot stuff. Grep for drank-helper in the notes file. Its
+; reproduced here, updated and modernized.
+
+; Create a sorted list of words, such that the next word in the list
+; has the highest cosine of all to the previous word in the list.
+; wlist -- list of words
+; drl -- set this to nil.
+(define (drank-helper wlist drl)
+	(define (get-cos A B)
+		(sim-cosine (SimilarityLink A B)))
+	(define rest (cdr wlist))
+	; (format #t "duude enter wlsi=~A\n	and drl=~A\n" (length wlist) drl)
+	; If the list is one item long, we are done.
+	(if (null? rest) (cons (car wlist) drl)
+		; Otherwise, find the word with the highest cosine to the previous
+		; word that was picked.  rankw is the previous one picked.
+		; next-rankw will be th next one.
+		(let ((rankw (car drl))
+				(next-rankw '()))
+			(fold
+				(lambda (item biggest)
+					(define cosi (get-cos rankw item))
+					(if (and (> cosi biggest) (not (equal? item rankw)))
+						(begin (set! next-rankw item) cosi) biggest))
+				-1e20
+				wlist)
+			(drank-helper
+				(remove (lambda (w) (equal? w next-rankw)) wlist)
+				(cons next-rankw drl)))))
+
+(define (drank wlist)
+	(drank-helper (cdr wlist) (cons (car wlist) '())))
+
+(define dranked-long (drank (take ranked-long 40)))
+(define dranked-long (drank (take ranked-long 300)))
+(define dranked-long (drank ranked-long))
+
+(define eranked-long (reverse dranked-long))
+
+(write-flo "/tmp/scat-dcos.flo" eranked-long pair-cos)
+(write-flo "/tmp/scat-ecos.flo" eranked-long pair-cos)
+
+
+
+
+; ---------------------------------------------------------------------
 ; what fraction of the rows have more than N observations?
 ; (subtotaled for that entire row?)
 
