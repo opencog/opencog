@@ -30918,12 +30918,20 @@ reference "fig:Cosine-similarity-scatterplot"
 \end_inset
 
 visualizes the cosine similarity between 797 word-pairs.
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+Generated with 'scatter.scm'
+\end_layout
+
+\end_inset
+
  The rows and columns are ranked by frequency of word occurance, so that
  the single-most-frequently occuring word is at the upper-left, with less
  and less frequently occuring words proceeding to the right, and downwards.
- The color scale is such that red represents 1.0, yellow represents 0.75 (so
- orange is in between), green is exactly 0.5, and blue is 0.25 or less, fading
- to black.
+ The color scale is such that red represents 1.0, yellow represents 0.75,
+ green is exactly 0.5, and blue is 0.25 or less, fading to black.
  This is for the same 
 \noun on
 en_pairs_rfive_mtwo
@@ -30945,16 +30953,9 @@ reference "sub:Disjunct-Cosine-Similarity"
 .
  That is, it computes the similarity between the 797 words whose length
  is greater than 128.
-\end_layout
-
-\begin_layout Standard
-xxxx
-\end_layout
-
-\begin_layout Standard
-Note that cosine similarity is symmetric; this figure is necessarily symmetric
+ Note that cosine similarity is symmetric; this figure is necessarily symmetric
  about the diagonal.
- The diagonal can be seen (with difficulty) as a line of red squares.
+ The diagonal can be seen as a red line, representing a similarity of 1.0.
 \end_layout
 
 \begin_layout Standard
@@ -30963,7 +30964,7 @@ Note that cosine similarity is symmetric; this figure is necessarily symmetric
 placement h
 wide false
 sideways false
-status collapsed
+status open
 
 \begin_layout Plain Layout
 \align center
@@ -30998,10 +30999,13 @@ name "fig:Cosine-similarity-scatterplot"
 \end_layout
 
 \begin_layout Standard
-The tartan pattern indicates that some words are very unlike others.
- Closer examination reveals the usual culprits, already described: the period,
- and other punctuation marks, tend to be very different than other words.
- Thus, punctuation acconuts for many of the blue lines.
+The tartan pattern indicates that some words are very unlike others, and
+ that most words are very unlike one-another.
+ 
+\end_layout
+
+\begin_layout Standard
+xxx
 \end_layout
 
 \begin_layout Standard
@@ -31077,7 +31081,7 @@ This ranking does expose a bit of block-diagonal structure, but not that
  sense.
  Looking more closely it consists of two blocks: a big one and a much smaller
  on to the lower-right.
- The smaller block consists of these words: Jack Picth Ross Jim John.
+ The smaller block consists of these words: Jack Pitch Ross Jim John.
  Clearly, these are all capitalized proper names.
  The bigger block are these words: I You And But When Then For At There
  It He She His The They This As In We If So A No.
