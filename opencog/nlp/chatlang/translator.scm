@@ -17,6 +17,9 @@
 ; TODO: Move it to process-pattern-terms?
 (define pat-vars '())
 
+; Keep a record of the lemmas we have seen
+(define lemma-alist '())
+
 ; For unit test
 (define test-get-lemma #f)
 
@@ -332,11 +335,11 @@
   (relex-parse WORD)
   (let* ((sent (car (get-new-parsed-sentences)))
          (word-inst (cadar (sent-get-words-in-order sent)))
-         (lemma (car (cog-chase-link 'LemmaLink 'WordNode word-inst))))
+         (lemma (cog-name (car (cog-chase-link 'LemmaLink 'WordNode word-inst)))))
     (release-new-parsed-sents)
-    (if (equal? (string-downcase WORD) (cog-name lemma))
+    (if (equal? (string-downcase WORD) lemma)
         WORD
-        (cog-name lemma))))
+        lemma)))
 
 (define (get-lemma-from-wn WORD)
   "A hacky way to quickly find the lemma of a word using WordNet,
@@ -355,9 +358,15 @@
 
 (define (get-lemma WORD)
   "Get the lemma of WORD."
-  (if test-get-lemma
-      (get-lemma-from-wn WORD)
-      (get-lemma-from-relex WORD)))
+  (define seen-lemma (assoc-ref lemma-alist WORD))
+  (if (equal? #f seen-lemma)
+      (let ((lemma
+        (if test-get-lemma
+            (get-lemma-from-wn WORD)
+            (get-lemma-from-relex WORD))))
+        (set! lemma-alist (assoc-set! lemma-alist WORD lemma))
+        lemma)
+      seen-lemma))
 
 (define (is-lemma? WORD)
   "Check if WORD is a lemma."
