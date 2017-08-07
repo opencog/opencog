@@ -12396,7 +12396,7 @@ name "fig:Cosine-similarity-scatterplot"
 
 
 \begin_inset Graphics
-	filename scat/scat-cosine-big.png
+	filename ../scat/scat-cosine-big.png
 	width 100col%
 
 \end_inset
@@ -12477,7 +12477,7 @@ name "fig:Quasi-diagonal-cosine-similarity"
 
 
 \begin_inset Graphics
-	filename scat/scat-fcos.png
+	filename ../scat/scat-fcos.png
 
 \end_inset
 
