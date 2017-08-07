@@ -19,6 +19,13 @@
 (load "utilities.scm")
 
 ; --------------------------------------------------------------
+; Configure openpsi logger
+(define opl (cog-new-logger))
+(cog-logger-set-component! opl "OpenPsi")
+(cog-logger-set-level! opl "debug")
+(cog-logger-set-stdout! opl #t)
+
+; --------------------------------------------------------------
 ; Variable for controlling whether to keep on running the loop or not.
 (define psi-do-run-loop #f)
 
@@ -90,8 +97,7 @@
                (goals (psi-related-goals action))
                (context-atoms (get-context-grounding-atoms rule)))
 
-            (cog-logger-debug "[OpenPsi] Starting evaluation of psi-rule ~a"
-                rule)
+            (cog-logger-debug opl "Starting evaluation of psi-rule ~a" rule)
 
             ; The #t condition is for evaluatable-contexts. These are
             ; contexts that only have evaluatable-terms that return TRUE_TV
@@ -110,14 +116,12 @@
             ; results in the achievement of the goals, even if the context of
             ; the other rules aren't not satisfied.
             (map cog-evaluate! goals)
-            (cog-logger-debug "[OpenPsi] Finished evaluating of psi-rule ~a"
-                rule)
+            (cog-logger-debug opl "Finished evaluating of psi-rule ~a" rule)
         ))
 
     (set! psi-loop-count (+ psi-loop-count 1))
 
-    (cog-logger-debug "[OpenPsi] Taking one psi-step, loop-count = ~a"
-        psi-loop-count)
+    (cog-logger-debug opl "Taking one psi-step, loop-count = ~a" psi-loop-count)
 
     ; Run the controller that updates the weight.
     (psi-controller-update-weights)
@@ -137,7 +141,7 @@
         (psi-get-all-enabled-demands)
     )
 
-    (cog-logger-debug "[OpenPsi] Ending psi-step, loop-count = ~a"
+    (cog-logger-debug opl "Ending psi-step, loop-count = ~a"
         (psi-get-loop-count))
 
     (stv 1 1) ; For continuing psi-run loop.

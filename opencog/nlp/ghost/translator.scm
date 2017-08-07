@@ -1,4 +1,4 @@
-;; ChatLang DSL for chat authoring rules
+;; GHOST DSL for chat authoring rules
 ;;
 ;; A partial implementation of the top level translator that produces
 ;; PSI rules.
@@ -17,22 +17,25 @@
 ; TODO: Move it to process-pattern-terms?
 (define pat-vars '())
 
+; Keep a record of the lemmas we have seen
+(define lemma-alist '())
+
 ; For unit test
 (define test-get-lemma #f)
 
-(define-public (chatlang-prefix STR) (string-append "Chatlang: " STR))
-(define (chatlang-var-word NUM)
-  (Node (chatlang-prefix
+(define-public (ghost-prefix STR) (string-append "GHOST: " STR))
+(define (ghost-var-word NUM)
+  (Node (ghost-prefix
     (string-append "variable-word-" (number->string NUM)))))
-(define (chatlang-var-lemma NUM)
-  (Node (chatlang-prefix
+(define (ghost-var-lemma NUM)
+  (Node (ghost-prefix
     (string-append "variable-lemma-" (number->string NUM)))))
-(define chatlang-anchor (Anchor (chatlang-prefix "Currently Processing")))
-(define chatlang-no-constant (Anchor (chatlang-prefix "No constant terms")))
-(define chatlang-word-seq (Predicate (chatlang-prefix "Word Sequence")))
-(define chatlang-word-set (Predicate (chatlang-prefix "Word Set")))
-(define chatlang-lemma-seq (Predicate (chatlang-prefix "Lemma Sequence")))
-(define chatlang-lemma-set (Predicate (chatlang-prefix "Lemma Set")))
+(define ghost-anchor (Anchor (ghost-prefix "Currently Processing")))
+(define ghost-no-constant (Anchor (ghost-prefix "No constant terms")))
+(define ghost-word-seq (Predicate (ghost-prefix "Word Sequence")))
+(define ghost-word-set (Predicate (ghost-prefix "Word Set")))
+(define ghost-lemma-seq (Predicate (ghost-prefix "Lemma Sequence")))
+(define ghost-lemma-set (Predicate (ghost-prefix "Lemma Set")))
 
 ; For features that are not currently supported
 (define (feature-not-supported NAME VAL)
@@ -47,7 +50,7 @@
 ;; Shared conditions for all terms
 (define atomese-condition-template
   (list (Parse (Variable "$P") (Variable "$S"))
-        (State chatlang-anchor (Variable "$S"))))
+        (State ghost-anchor (Variable "$S"))))
 
 (define (order-terms TERMS)
   "Order the terms in the intended order, and insert wildcards into
@@ -189,11 +192,11 @@
   (if (equal? (length (list-ref proc-terms 3))
               (length (filter (lambda (x) (equal? 'GlobNode (cog-type x)))
                               (list-ref proc-terms 3))))
-      (begin (MemberLink (List (list-ref proc-terms 3)) chatlang-no-constant)
-             (MemberLink (Set (list-ref proc-terms 3)) chatlang-no-constant)))
+      (begin (MemberLink (List (list-ref proc-terms 3)) ghost-no-constant)
+             (MemberLink (Set (list-ref proc-terms 3)) ghost-no-constant)))
   proc-terms)
 
-(define-public (chatlang-execute-action WORDS)
+(define-public (ghost-execute-action WORDS)
   "Say the text and update the internal state."
   (define txt
     (string-join (append-map (lambda (n)
@@ -204,24 +207,24 @@
   ; If there is something to say?
   (if (not (string-null? (string-trim txt)))
       (cog-execute! (Put (DefinedPredicate "Say") (Node txt))))
-  (State chatlang-anchor (Concept "Default State"))
+  (State ghost-anchor (Concept "Default State"))
   (True))
 
-(define-public (chatlang-pick-action ACTIONS)
+(define-public (ghost-pick-action ACTIONS)
   "Pick one of the ACTIONS randomly."
   (define os (cog-outgoing-set ACTIONS))
   (list-ref os (random (length os) (random-state-from-platform))))
 
 (Define
-  (DefinedPredicate (chatlang-prefix "Pick and Execute Action"))
+  (DefinedPredicate (ghost-prefix "Pick and Execute Action"))
   (Lambda (Variable "$x")
-          (Evaluation (GroundedPredicate "scm: chatlang-pick&execute-action")
+          (Evaluation (GroundedPredicate "scm: ghost-pick&execute-action")
                       (List (Variable "$x")))))
 
 (Define
-  (DefinedPredicate (chatlang-prefix "Execute Action"))
+  (DefinedPredicate (ghost-prefix "Execute Action"))
   (Lambda (Variable "$x")
-          (Evaluation (GroundedPredicate "scm: chatlang-execute-action")
+          (Evaluation (GroundedPredicate "scm: ghost-execute-action")
                       (List (Variable "$x")))))
 
 (define (process-action ACTION)
@@ -252,8 +255,8 @@
       (if (null? choices)
           '()
           (list (action-choices choices)))))
-  (cog-logger-debug chatlang-logger "action: ~a" ACTION)
-  (True (Put (DefinedPredicate (chatlang-prefix "Execute Action"))
+  (cog-logger-debug ghost-logger "action: ~a" ACTION)
+  (True (Put (DefinedPredicate (ghost-prefix "Execute Action"))
              (List (to-atomese (cdar ACTION))))))
 
 (define* (create-rule PATTERN ACTION #:optional (TOPIC default-topic) NAME)
@@ -267,14 +270,14 @@
          (conds (append atomese-condition-template (list-ref proc-terms 1)))
          (is-unordered? (list-ref proc-terms 4))
          (words (if is-unordered?
-           (Evaluation chatlang-word-set
+           (Evaluation ghost-word-set
              (List (Variable "$S") (Set (list-ref proc-terms 2))))
-           (Evaluation chatlang-word-seq
+           (Evaluation ghost-word-seq
              (List (Variable "$S") (List (list-ref proc-terms 2))))))
          (lemmas (if is-unordered?
-           (Evaluation chatlang-lemma-set
+           (Evaluation ghost-lemma-set
              (List (Variable "$S") (Set (list-ref proc-terms 3))))
-           (Evaluation chatlang-lemma-seq
+           (Evaluation ghost-lemma-seq
              (List (Variable "$S") (List (list-ref proc-terms 3))))))
          (action (process-action ACTION))
          (psi-rule (psi-rule-nocheck
@@ -285,9 +288,9 @@
                      (stv .9 .9)
                      TOPIC
                      NAME)))
-        (cog-logger-debug chatlang-logger "ordered-terms: ~a" ordered-terms)
-        (cog-logger-debug chatlang-logger "preproc-terms: ~a" preproc-terms)
-        (cog-logger-debug chatlang-logger "psi-rule: ~a" psi-rule)
+        (cog-logger-debug ghost-logger "ordered-terms: ~a" ordered-terms)
+        (cog-logger-debug ghost-logger "preproc-terms: ~a" preproc-terms)
+        (cog-logger-debug ghost-logger "psi-rule: ~a" psi-rule)
         (set! pat-vars '())  ; Reset pat-vars
         psi-rule))
 
@@ -321,10 +324,10 @@
          (lemma-seq (List lseq))
          (lemma-set (Set lseq)))
         ; These EvaluationLinks will be used in the matching process
-        (Evaluation chatlang-word-seq (List SENT word-seq))
-        (Evaluation chatlang-word-set (List SENT word-set))
-        (Evaluation chatlang-lemma-seq (List SENT lemma-seq))
-        (Evaluation chatlang-lemma-set (List SENT lemma-set))
+        (Evaluation ghost-word-seq (List SENT word-seq))
+        (Evaluation ghost-word-set (List SENT word-set))
+        (Evaluation ghost-lemma-seq (List SENT lemma-seq))
+        (Evaluation ghost-lemma-set (List SENT lemma-set))
         (list word-seq word-set lemma-seq lemma-set)))
 
 (define (get-lemma-from-relex WORD)
@@ -332,11 +335,11 @@
   (relex-parse WORD)
   (let* ((sent (car (get-new-parsed-sentences)))
          (word-inst (cadar (sent-get-words-in-order sent)))
-         (lemma (car (cog-chase-link 'LemmaLink 'WordNode word-inst))))
+         (lemma (cog-name (car (cog-chase-link 'LemmaLink 'WordNode word-inst)))))
     (release-new-parsed-sents)
-    (if (equal? (string-downcase WORD) (cog-name lemma))
+    (if (equal? (string-downcase WORD) lemma)
         WORD
-        (cog-name lemma))))
+        lemma)))
 
 (define (get-lemma-from-wn WORD)
   "A hacky way to quickly find the lemma of a word using WordNet,
@@ -355,9 +358,15 @@
 
 (define (get-lemma WORD)
   "Get the lemma of WORD."
-  (if test-get-lemma
-      (get-lemma-from-wn WORD)
-      (get-lemma-from-relex WORD)))
+  (define seen-lemma (assoc-ref lemma-alist WORD))
+  (if (equal? #f seen-lemma)
+      (let ((lemma
+        (if test-get-lemma
+            (get-lemma-from-wn WORD)
+            (get-lemma-from-relex WORD))))
+        (set! lemma-alist (assoc-set! lemma-alist WORD lemma))
+        lemma)
+      seen-lemma))
 
 (define (is-lemma? WORD)
   "Check if WORD is a lemma."
@@ -388,20 +397,20 @@
                     (equal? raw-txt (cog-name t)))))
          LST)))
 
-(define-public (chatlang-concept? CONCEPT . GRD)
+(define-public (ghost-concept? CONCEPT . GRD)
   "Check if the value grounded for the GlobNode is actually a member
    of the concept."
-  (cog-logger-debug chatlang-logger
-    "In chatlang-concept? CONCEPT: ~aGRD: ~a" CONCEPT GRD)
+  (cog-logger-debug ghost-logger
+    "In ghost-concept? CONCEPT: ~aGRD: ~a" CONCEPT GRD)
   (if (is-member? GRD (get-members CONCEPT))
       (stv 1 1)
       (stv 0 1)))
 
-(define-public (chatlang-choices? CHOICES . GRD)
+(define-public (ghost-choices? CHOICES . GRD)
   "Check if the value grounded for the GlobNode is actually a member
    of the list of choices."
-  (cog-logger-debug chatlang-logger
-    "In chatlang-choices? CHOICES: ~aGRD: ~a" CHOICES GRD)
+  (cog-logger-debug ghost-logger
+    "In ghost-choices? CHOICES: ~aGRD: ~a" CHOICES GRD)
   (let* ((chs (cog-outgoing-set CHOICES))
          (cpts (append-map get-members (cog-filter 'ConceptNode chs))))
         (if (is-member? GRD (append chs cpts))
@@ -423,10 +432,10 @@
          (any (lambda (t) (text-contains? RTXT LTXT t))
               (get-members TERM)))))
 
-(define-public (chatlang-negation? . TERMS)
+(define-public (ghost-negation? . TERMS)
   "Check if the input sentence has none of the terms specified."
   (let* ; Get the raw text input
-        ((sent (car (cog-chase-link 'StateLink 'SentenceNode chatlang-anchor)))
+        ((sent (car (cog-chase-link 'StateLink 'SentenceNode ghost-anchor)))
          (rtxt (cog-name (car (cog-chase-link 'ListLink 'Node sent))))
          (ltxt (string-join (map get-lemma (string-split rtxt #\sp)))))
         (if (any (lambda (t) (text-contains? rtxt ltxt t)) TERMS)
@@ -452,7 +461,7 @@
   (append-map (lambda (m) (list (Reference (member-words m) (Concept NAME))))
               MEMBERS))
 
-(define-public (chatlang-record-groundings WGRD LGRD)
+(define-public (ghost-record-groundings WGRD LGRD)
   "Record the groundings of a variable/glob, in both original words
    and lemmas. They will be referenced at the stage of evaluating the
    context of the psi-rules, or executing the action of the psi-rules."

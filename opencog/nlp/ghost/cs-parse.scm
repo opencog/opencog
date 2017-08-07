@@ -8,9 +8,9 @@
 ; ----------
 ; For debugging
 (use-modules (opencog logger))
-(define chatlang-logger (cog-new-logger))
-(cog-logger-set-level! chatlang-logger "debug")
-(cog-logger-set-stdout! chatlang-logger #t)
+(define ghost-logger (cog-new-logger))
+(cog-logger-set-level! ghost-logger "debug")
+(cog-logger-set-stdout! ghost-logger #t)
 
 (define (display-token token)
 "
@@ -254,7 +254,13 @@
     ; Declaration/annotation(for ghost) grammar
     (declarations
       (CONCEPT ID declaration-sequence) :
-        (create-concept $2 (string-split $3 #\sp))
+        (create-concept $2
+            ; Double-quotes are used to wrap the words/phrases,
+            ; remove them here before calling "create-concept"
+            (map (lambda (s)
+                (let ((ms (match:substring s)))
+                    (substring ms 1 (- (string-length ms) 1))))
+            (list-matches "\"[a-zA-Z0-9 ]+?\"" $3)))
       (TOPIC ID declaration-sequence) :
         (display-token (format #f "topic(~a = ~a)" $2 $3))
     )
@@ -269,10 +275,11 @@
     )
 
     (declaration-member
-      (LEMMA) :  $1
-      (LITERAL) : $1
-      (STRING) : $1
-      (concept) :  $1
+      (LEMMA) :  (format #f "\"~a\"" $1)
+      (LITERAL) : (format #f "\"~a\"" $1)
+      (STRING) : (format #f "\"~a\"" $1)
+      (concept) : (format #f "\"~a\"" $1)
+      (DQUOTE phrase-terms DQUOTE) : (format #f "~a~a~a" $1 $2 $3)
       (LEMMA~COMMAND) :
         (display-token (format #f "command(~a -> ~a)" (car $1) (cdr $1)))
     )
