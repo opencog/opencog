@@ -168,7 +168,7 @@ set logscale x
 set format x "10^{%L}"
 set title "Ranking by cosine similarity"
 set xlabel "Rank"
-set ylabel "Cosimine similarity"
+set ylabel "Cosine similarity"
 plot "ranked-sims.dat" using 1:2 with lines linewidth 5 title "", \
      "ranked-sims.dat" using 1:(c($1)) with lines linewidth 5 title "1-log(rank)^2/160", \
      "ranked-sims.dat" using 1:(t($1)) with lines linewidth 5 title "-(log(rank/max))^3/115"
@@ -187,7 +187,7 @@ set logscale x
 set format x "10^{%L}"
 set title "Ranking by cosine similarity"
 set xlabel "Rank"
-set ylabel "Cosimine similarity"
+set ylabel "Cosine similarity"
 plot "ranked-sims.dat" using 1:2 with lines linewidth 5 title "L>128", \
      "ranked-sims-256.dat" using 1:2 with lines linewidth 5 title "L>256", \
      "ranked-sims-512.dat" using 1:2 with lines linewidth 5 title "L>512", \
