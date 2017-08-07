@@ -6816,6 +6816,45 @@ select count(*) from valuations; -- 108255875 = 108M = 5M more
 de95af1f2ddb7c696b19a4cc3a3e443e  en_pairs_rfive_mtwo.sql.bz2
 
 ==================================================================
+en_pairs_rfive_mthree
+-------------------
+Random-planar-tree parsed books from tranche-1, 2, 3, 4 and 5. 
+MST-parsed tranche-1, 2 and 3. Contains pair-MI values; does NOT
+contain any disjunct marginals.
+
+STATUS: good
+DATE: 2 August 2017
+REASON: Best so far, I think.  Same issues as en_pairs_rfive_mone
+
+                        List of relations
+ Schema |    Name    | Type  | Owner  |    Size    | Description 
+--------+------------+-------+--------+------------+-------------
+ public | atoms      | table | ubuntu | 8437 MB    | 
+ public | spaces     | table | ubuntu | 40 kB      | 
+ public | typecodes  | table | ubuntu | 56 kB      | 
+ public | valuations | table | ubuntu | 11 GB      | 
+ public | values     | table | ubuntu | 8192 bytes | 
+
+select count(*) from atoms;      --  94097585 =  94M = 15M more
+select count(*) from valuations; -- 116409279 = 116M =  8M more
+
+10315553282 Bytes uncompressed = 10.3 GB
+ 1767006478 Bytes compressed = 1.7GB
+
+2ec9c3544f307c7f58a49fa22762724e  en_pairs_rfive_mthree.sql
+ca4bcdf8d041053ac0d4bc72624a2978  en_pairs_rfive_mthree.sql.bz2
+
+
+==================================================================
+en_pairs_rfive_mfour
+--------------------
+Random-planar-tree parsed books from tranche-1, 2, 3, 4 and 5. 
+MST-parsed tranche-1, 2, 3 and 4. Contains pair-MI values; does NOT
+contain any disjunct marginals.
+
+STATUS: in press
+
+==================================================================
 zh_pairs_one
 ------------
 Mandarin individual character pairs.  Only that, without any pair stats.
@@ -12512,8 +12551,22 @@ fuuuu
 (define* (st FOO   #:optional (ID (FOO 2)))
 	(format #t "hey its ~A\n" ID))
 
+(define (foo LLOBJ)
+      (lambda (message . args)
+         (case message
+            ((id)     "cset")
+            (else     (apply LLOBJ (cons message args)))
+      )))
 
-2) replace cset-vec-cosine by filtered cosine  in gram-sim
+
+2) replace cset-vec-cosine by filtered cosine  in gram-sim DONE
+
+(define fsf (add-pair-freq-api fsa))
+	(define fsm (add-similarity-api fsa #f))
+	(define fsb (batch-similarity fsa #f))
+	(fsb 'batch-compute)
+	(fsb 'paralel-batch 3)
+
 3) use filter-specific predicate.  DONE
 4) wait .. batch in matrix?
 
@@ -12563,6 +12616,318 @@ sqlite3 renew.db
 .read dump_all.sql
 
 ant ant-optional
+-------------------
+
+(for-each
+	(lambda (item)
+		(format #t "wtf ~A\n" (/ (log (first item)) (log 2.0))) )
+	(take sorted-lensq-norm 50))
+
+(define binned-sqlen-norm (bin-count 
+	(take sorted-lensq-norm 50 )
+	50
+   (lambda (item) 
+		(define val (/ (log (first item)) (log 2.0)))
+   	(format #t "wtf ~A\n" val)
+		val)
+   (lambda (item) 1)
+   1.0 30.0))
+
+
+(define cnt 0)
+(define many (cog-count-atoms 'SimilarityLink))
+(define (sto at)
+	(store-atom at)
+	(set! cnt (+ cnt 1))
+	(if (eqv?  0 (modulo cnt 1000))
+		(format #t "stored ~A of ~A\n" cnt many))
+	#f)
+ (cog-map-type sto 'SimilarityLink)
+16:04
+
+almost exactly 1/3rd have sim > 0.5 ... 
+total = 142270 sim links
+
+198 dupes ... how is that possible??
+
+select count(*) from atoms where type=27; -- 142270 so that's perfect.
+where are the dupes coming from?
+
+----------------
+617
+
+(define (print-connector CON)
+	(string-append (cog-name (gar CON)) (cog-name (gdr CON)) " "))
+
+(define (section->dj-str SEC)
+	(string-concatenate 
+		(map print-connector (cog-outgoing-set (gdr SEC))))
+)
+
+(define (print-disjuncts WORD)
+	(define all-secs (cog-incoming-by-type WORD 'Section))
+	(define sorted-secs (sort all-secs
+		 (lambda (a b) (> (get-count a) (get-count b)))))
+	(define (prt-one con)
+		(format #t "~D  ~A\n" (get-count con) (section->dj-str con)))
+	(for-each prt-one sorted-secs))
+
+porch .. horses
+
+fsm .... filteres similarity
+   (define fca (add-subtotal-filter psa 50 50 10 #f))
+   (define fsa (add-pair-stars fca))
+	(define fsm (add-similarity-api fsa #f))
+	(define fsb (batch-similarity fsa #f))
+
+(fsb 'compute-similarity (Word "porch") (Word "horses"))
+(fsa 'right-stars (Word "porch")) 
+(fsa 'right-stars (Word "horses"))
+
+Fuu
+"cset cut-50-50-10"
+
+"*-SimKey cset cut-50-50-10"
+
+(cog-map-type sto 'SimilarityLink)
+
+(define cos-key (Predicate "*-Cosine Sim Key-*"))
+(define cut-key (Predicate "*-SimKey cset cut-50-50-10"))
+(define (mov-sim ato)
+	(define sim (cog-value ato cos-key))
+	(cog-set-value! ato cut-key sim)
+	(cog-set-value! ato cos-key (FloatValue 0.0))
+	#f)
+(cog-map-type mov-sim 'SimilarityLink)
+
+(define pss (add-similarity-api psa #f))
+(define psb (batch-similarity psa #f))
+(define (new-sim ato)
+	(define fsim (pss 'compute-similarity (gar ato) (gdr ato)))
+	(cog-set-value! ato cos-key (FloatValue fsim))
+	#f)
+
+(cog-map-type new-sim 'SimilarityLink)
+
+(define (kill-sim ato)
+	(define sim (cog-value-ref (cog-value ato cos-key) 0))
+	(if (< sim 1.0e-25)
+	   (cog-set-value! ato cos-key #f))
+	#f)
+(cog-map-type kill-sim 'SimilarityLink)
+
+(define scnt 0)
+(define (showone ato)
+	(if (not (null? (cog-value ato cos-key)))
+		(begin
+			(format #t "yo ~A ~A\n"
+				(cog-value-ref (cog-value ato cos-key) 0) ato)
+			(set! scnt (+ scnt 1))))
+	#f)
+(cog-map-type showone 'SimilarityLink)
+
+(define (cntone ato)
+	(define val (cog-value ato cos-key))
+	(if (not (null? val)) 
+; (and (not (null? val)) (< 1e-10 (cog-value-ref val 0)))
+(begin (set! scnt (+ scnt 1))
+  (store-atom ato)
+)) #f)
+
+(define scnt 0)
+(cog-map-type cntone 'SimilarityLink)
+(define (rpt) (set! scnt 0) (cog-map-type cntone 'SimilarityLink) scnt)
+
+2932
+3052 + (69*68)/2 - (37*36)/2 = 4732
+4700 + (130 * 129) / 2 - (69*68)/2 = 10739
+10708 + (427 * 426)/ 2 - (130 * 129) / 2 = 93274.0
+
+17199 at 11:50  -> shoot for about 30K at 512 - 245 = 29890
+37044 when done (- (* 0.5 427 426) (* 0.5 245 244))) = 98105
+
+
+Fuuuu.
+(define psu (add-support-api psa))
+(psu 'right-length
+
+(define psm (add-similarity-api psa #f))
+(define pac (add-pair-cosine-compute psa))
+
+ (define (compute-sim A B)
+   (define val (psm 'pair-similarity (cog-link 'SimilarityLink A B)))
+     (if 
+; (and (not (null? val)) (< 1.0e-6 (cog-value-ref val 0)))
+ (not (null? val)) 
+(format #t "Already got one ~A ~A ~A \n" (cog-value-ref val 0) A B)
+(begin (format #t "Gonna do it for ~A=~D ~A=~D\n"
+A (length (cog-incoming-by-type A 'Section))
+B (length (cog-incoming-by-type B 'Section)))
+      (psm 'set-pair-similarity
+           (SimilarityLink A B) 
+          (FloatValue (pac 'right-cosine A  B))))))
+
+;          (compute-right-cosine A  B)))))
+
+(define (batch-simlist ITEM ITEM-LIST)
+   (for-each (lambda (item) (compute-sim ITEM item)) ITEM-LIST))
+
+(define (make-pairs ITM-LST)
+            (if (not (null? ITM-LST))
+               (begin
+			(batch-simlist (car ITM-LST) (cdr ITM-LST))
+                  (make-pairs (cdr ITM-LST)))))
+
+      (define (compute-right-cosine ROW-A ROW-B)
+         (define prod (compute-right-product ROW-A ROW-B))
+         (define deno (exact->inexact (*
+            (get-right-length ROW-A)
+            (get-right-length ROW-B))))
+         (if (eqv? 0.0 deno) 0.0 (/ prod deno)))
+
+(define ptm (add-tuple-math psa * 'pair-count))
+(define prd (add-support-compute ptm))
+
+      (define (compute-right-product ROW-A ROW-B)
+         (prd 'right-count (list ROW-A ROW-B)))
+
+      (define (get-right-length ROW) (psu 'right-length ROW))
+
+Q: does star basis behave corectly on the tuple?
+A: duddn't matter only stars are used.
+
+(define ptms (add-pair-stars ptm))
+ (ptms 'right-stars (list ROW-A ROW-B))
+
+Replace below by hash:
+
+	(define (get-right-union TUPLE)
+		(let* ((start-time (current-time))
+				(res (delete-duplicates!
+			(append-map!
+				(lambda (item) (map! gdr (psa 'right-stars item)))
+				TUPLE))))
+			(format #t "tooks ~A secs\n" (- (current-time) start-time))
+			res))
+
+
+(define (make-union)
+	(define cache (make-hash-table))
+	(define (atom-hash ATOM SZ) (modulo (cog-handle ATOM) SZ))
+	(define (atom-assoc ATOM ALIST)
+		(find (lambda (pr) (equal? ATOM (car pr))) ALIST))
+			
+	(lambda (ITEM)
+		(if ITEM
+			(hashx-set! atom-hash atom-assoc cache ITEM #f)
+			(let ((ats '()))
+				(hash-for-each-handle
+					(lambda (PR) (set! ats (cons (car PR) ats)))
+					cache)
+				ats))))
+
+(define atom-set (make-union))
+
+(for-each atom-set (map! gdr (psa 'right-stars W)))
+
+wall -- 64125
+at -- 28773
+sum = 92898 
+wall-at: 92322
+last: 94888
+
+finally: 317206 = (797 * 796) / 2  for len=128
+
+'item-pair   return hi-pr only if lopr
+'make-pair
+
+
+(define good-sims
+   (filter
+      (lambda (sim) (and
+            (< 0.5 (sim-cosine sim))
+            (< 8 (cset-vec-word-len (gar sim)))
+            (< 8 (cset-vec-word-len (gdr sim)))))
+      all-sims))
+
+
+Notes: Chapter- or LEFT-WALL- or End-;  27 total
+Summary: Chapter- or LEFT-WALL-;  44 total 
+
+Rting: (LEFT-WALL- & :+) or (LEFT-WALL- & :+ & Audiences+) or
+(LEFT-WALL- & :+ & Explicit+) or (LEFT-WALL- & :+ & Mature+)
+
+    (define (pair-cos A B)
+       (define cos-key (PredicateNode "*-Cosine Sim Key-*"))
+       (define SIM (SimilarityLink A B))
+		(define val (cog-value SIM cos-key))
+(if (equal? A B) 1.0
+   (if (not (null? val)) (cog-value-ref val 0) 0.0)))
+
+
+sorted-word-obs
+ vs. (psu 'right-length a)
+cset-vec-word-observations
+
+(psu 'right-support      64215.0
+(psu 'right-count       972963.0
+(psc 'right-wild-count  972963.0
+(psu 'right-length      122353.945
+
+(define psu (add-support-api psa))
+
+
+dranked:
+
+LEFT-WALL -- ... .. .... *** Two Bit - The “ And But So Perhaps Though When As Then While If Have Can Did Do Will Thank Are Where Who What Why How Or Now Here This That It There He She I You We They Some One Most Instead However Besides Well Oh Ah No Yes Yeah Good Ham 2 1 4 3 A Mai Demelza Richard John George nothing something anything everything it there who which that what where when until as because since if before while little small large good great second woman man child boy girl king house city village world town country ship sun latter land others children people men things them us me him her his my your their our the this every another leave take get find see hear speak move stop fight be make give show keep bring meet follow call ask tell help go live stay talk turn run change use read say understand remember know think suppose guess hope promise believe mean am myself fear thought knew saw felt found called happy fine certain new single word moment minute year day night evening morning way book letter party distance light fire forest room air sea earth ground floor table subject story line case question place time thing person family soul heart body own wife brother sister father mother daughter son hands face feet mouth eyes hand mind friends friend thoughts arm arms chest staff words office past water door window truth same whole best present first last least once home back down up at over on in by from upon under through into for with such having like quite only also still born gone already been seen done taken known given brought made making taking after above among between of all near against to will can cannot may must might would should could did does was is seems seemed appeared used began tried wanted needed meant came went turned continued said says spoke had has always never ever usual possible well soon far much late bad strong big young white black dark blue closed opened open hold put stand sleep answer try return come enough ready trying going supposed beginning rest sound corner direction presence name side power nature one most part kind sort number lot bit couple matter group other two three four five ten several many some out length force death life voice hair husband lips head shoulder eye bed business point state view sense feeling thinking saying now indeed therefore however sir yes God dear lady poor old dead wrong right here doing glad afraid sure sorry coming close hard long short real different clear probably certainly simply just almost not hardly easily feel have shall wish need want seem next following Queen captain wall future general London work himself herself smiled sighed nodded asked replied cried got stood sat looked look smile chance reason means longer doubt idea end edge bottom top account instead perhaps and or but though although then thus yet even really heard left lost passed met were are do love told gave took held followed behind within half an raised free better less more rather often true alone again ) too so very pretty a its these those anyone you we they he she North Jack Pitch Ross Jim Dallas Telzey Goth Sir san together along off away around round about how why – ; , : … ! . ? — All From In On By To With After For It’s It's Not Just Even At See paragraph spirit cause middle sight front spite charge form attention throat breath money law human few hundred thousand years hours minutes days times later ago ' " ” 」 ’ _ etc Mr Mrs Dr sama don ul looking especially nor either each any no finally suddenly slowly quietly Mary King Lord Lady Miss Captain I'm I’m My Her His Your ( ‘ Illustration Stats Category Rating Fandom Character Warning Is Really Please Father Mother May course being without let set sitting drawing living high heavy cold public fact particular full relief order hour individual General outside both talking able happened exactly else hell non re self S t six natural than fell deep wide deal agree don’t don't didn’t didn't received paid care drop provide York agreement ape medium author laws terms works forward forth shook enjoyed originally access permission instance chapter comment St Princess Old New Summary Notes Our THE # * Of { including Prince notes states copies copy ‐ YOU THIS OF OR Section CHAPTER Chapter + | Project eBook eBooks Gutenberg } P tax States fee electronic associated Archive Foundation United & copyright Literary donations License trademark distribution refund Van distributing Ooal Additional Posted archive Tags  
+
+"Ham" "2" "1" "4" "3" "A" "Mai" "Demelza" "Richard" "John" "George" "nothing" "something" "anything" "everything" "it" "there" "who" "which" "that" "what" "where" "when" "until" "as" "because" "since" 
+
+Ham .. 2  0.721
+2 .. 1  0.881
+1 .. 4  0.791
+4 .. 3  0.835
+3 .. A  0.375
+A .. Mai  0.351
+Mai .. Demelza  0.615
+Demelza .. Richard  0.515
+Richard .. John  0.602
+John .. George  0.648
+George .. nothing  0.342
+nothing .. something  0.483
+something .. anything  0.549
+anything .. everything  0.369
+everything .. it  0.496
+it .. there  0.743
+there .. who  0.416
+who .. which  0.618
+which .. that  0.580
+that .. what  0.730
+what .. where  0.722
+where .. when  0.830
+when .. until  0.886
+until .. as  0.807
+as .. because  0.728
+because .. since  0.707
+
+
+-------------------
+overlap similarity again. This time, a newer way:
+
+(define acc (add-pair-cosine-compute psa))
+(define pso (add-similarity-api psa #f "Overlap"))
+(define psob (batch-similarity psa #f "Overlap" 0.0
+	(lambda (x y) (acc 'right-overlap x y))
+
+and then do the pslon thing....
+Nahh skip it.
+
+--------------------
+Redo PCA.
+First, filter all words of length 128 or more.:w
+
+(define cos-key (PredicateNode "*-Cosine Sim Key-*"))
+
 
 
 
