@@ -12928,6 +12928,25 @@ First, filter all words of length 128 or more.:w
 
 (define cos-key (PredicateNode "*-Cosine Sim Key-*"))
 
+add-similarity-api foo #f
+make-cosine-matrix
+
+-----------------
+Bitseat Tadesse
+/home/linas/ftp/script-to-download-books.sh
+
+sent splitter quotation marks mishandled. 
+” after a period is part of that sentence, not the next. also ’
+
+Hmm. was working on zh_pairs_mst !!
+
+find mst-articles |wc   12245
+find gamma-pages  |wc  123000
+find beta-pages   |wc  883737
+ls -la headings |wc =  23
+find alpha-data   |wc 1018949
+
+mst+gamma+beta= 1018982 - 23 = 1018959 - crap = alpha-data
 
 
 
