@@ -12865,6 +12865,8 @@ cset-vec-word-observations
 (psc 'right-wild-count  972963.0
 (psu 'right-length      122353.945
 
+(define psu (add-support-api psa))
+
 
 dranked:
 
@@ -12899,6 +12901,15 @@ until .. as  0.807
 as .. because  0.728
 because .. since  0.707
 
+
+overlap similarity again. This time, a newer way:
+
+(define acc (add-pair-cosine-compute psa))
+(define pso (add-similarity-api psa #f "Overlap"))
+(define psob (batch-similarity psa #f "Overlap" 0.0
+	(lambda (x y) (acc 'right-overlap x y))
+
+and then do the pslon thing....
 
 
 =========================================================================

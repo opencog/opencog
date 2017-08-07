@@ -28,6 +28,7 @@
 (define psa (add-pair-stars pca))
 (define psc (add-pair-count-api psa))
 (define psf (add-pair-freq-api psa))
+(define psu (add-support-api psa))
 
 (psa 'fetch-pairs)                  ; 4436 secs
 (print-matrix-summary-report psa)
@@ -94,6 +95,16 @@
 (define top-cset-words
 	(filter (lambda (wrd) (<= 100 (cset-vec-word-observations wrd)))
 		all-cset-words))
+
+; ---------------------------------------------------------------------
+; Print the support, size and length of for a word,
+
+(define (show-counts word-str)
+	(define w (WordNode word-str))
+	(format #t "Suport=~A Count=~A Length=~A\n"
+		(psu 'right-support w)
+		(psu 'right-count w)
+		(psu 'right-length w)))
 
 ; ---------------------------------------------------------------------
 ; A sorted list of score-word pairs, where the score is the count
