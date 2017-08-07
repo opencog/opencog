@@ -10,7 +10,7 @@
 \maintain_unincluded_children false
 \language english
 \language_package default
-\inputencoding utf8
+\inputencoding utf8-plain
 \fontencoding global
 \font_roman times
 \font_sans helvet
@@ -20250,7 +20250,7 @@ The dataset contains 851964 words.
  These words have been observed a total of 18489594  times, for an average
  of 18489594/137078 = 21.70 observations per word.
  This dataset contains 6239997 different, unique disjuncts, for an average
- of 18489594/6239997 = 2.963 observations per disjunct.
+ of 18489594 / 6239997 = 2.963 observations per disjunct.
  
 \end_layout
 
@@ -20263,8 +20263,8 @@ The period appears 849354.0 times, suggesting that this many sentences were
 \end_layout
 
 \begin_layout Standard
-The dataset contains 6239997 unique connector-sets, for an average of 18489594/6
-239997 = 2.96 observations per cset.
+The dataset contains 6239997 unique connector-sets, for an average of 18489594
+ / 6239997 = 2.96 observations per cset.
  This last number that makes this dataset feel thin and sparse.
  Its not clear how accurate that perception is: an earlier dataset was about
  one-tenth to one-twentieth the size, in the number of words, disjuncts
@@ -20307,13 +20307,9 @@ H_{word}=-\sum_{w}p(w)\log_{2}p(w)
 \end_inset
 
 and was measured to be 
-\strikeout on
-
 \begin_inset Formula $H_{word}=9.71$
 \end_inset
 
-
-\strikeout default
  bits.
 \begin_inset Foot
 status collapsed
@@ -20392,7 +20388,7 @@ Two graphs, dual to one-another.
 
 , also ranked.
 \begin_inset Foot
-status open
+status collapsed
 
 \begin_layout Plain Layout
 Obtained by running (print-ts-rank sorted-word-obs outport) from the disjunct-st
@@ -25673,7 +25669,7 @@ There are 427 words observed 256 or more times, these form
 \align center
 \begin_inset Graphics
 	filename en-dj/ranked-graded-sims.eps
-	width 70page%
+	width 70text%
 
 \end_inset
 
@@ -31508,6 +31504,7 @@ name "fig:Quasi-diagonal-cosine-similarity"
 
 \begin_inset Graphics
 	filename scat/scat-fcos.png
+	width 100col%
 
 \end_inset
 
