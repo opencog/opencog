@@ -1,4 +1,4 @@
-;; ChatLang DSL for chat authoring rules
+;; GHOST DSL for chat authoring rules
 ;;
 ;; Assorted functions for translating individual terms into Atomese fragments.
 
@@ -111,7 +111,7 @@
                 (TypedVariable g2 (TypeSet (Type "WordNode")
                                            (Interval (Number 1)
                                                      (Number clength)))))
-          (list (Evaluation (GroundedPredicate "scm: chatlang-concept?")
+          (list (Evaluation (GroundedPredicate "scm: ghost-concept?")
                             (List (Concept STR) g1)))
           (list g1)
           (list g2))))
@@ -129,7 +129,7 @@
                 (TypedVariable g2 (TypeSet (Type "WordNode")
                                            (Interval (Number 1)
                                                      (Number tlength)))))
-          (list (Evaluation (GroundedPredicate "scm: chatlang-choices?")
+          (list (Evaluation (GroundedPredicate "scm: ghost-choices?")
                             (List (List (terms-to-atomese TERMS)) g1)))
           (list g1)
           (list g2))))
@@ -137,7 +137,7 @@
 (define (negation TERMS)
   "Absent of a term or a list of terms (words/phrases/concepts)."
   (list '()  ; No variable declaration
-        (list (Evaluation (GroundedPredicate "scm: chatlang-negation?")
+        (list (Evaluation (GroundedPredicate "scm: ghost-negation?")
                           (List (terms-to-atomese TERMS))))
         ; Nothing for the word-seq and lemma-seq
         '() '()))
@@ -163,9 +163,9 @@
    VAR is the variable name.
    WGRD and LGRD can either be a VariableNode or a GlobNode, which pass
    the actual value grounded for it in original words and lemmas at runtime."
-  (Evaluation (GroundedPredicate "scm: chatlang-record-groundings")
-    (List (List (chatlang-var-word VAR) WGRD)
-          (List (chatlang-var-lemma VAR) LGRD))))
+  (Evaluation (GroundedPredicate "scm: ghost-record-groundings")
+    (List (List (ghost-var-word VAR) WGRD)
+          (List (ghost-var-lemma VAR) LGRD))))
 
 (define (context-function NAME ARGS)
   "Occurrence of a function in the context of a rule."
@@ -179,16 +179,16 @@
 
 (define (action-choices ACTIONS)
   "Pick one of the ACTIONS."
-  (ExecutionOutput (GroundedSchema "scm: chatlang-pick-action")
+  (ExecutionOutput (GroundedSchema "scm: ghost-pick-action")
                    (Set ACTIONS)))
 
 (define (get-var-words NUM)
   "Get the value grounded for a variable, in original words."
-  (Get (State (chatlang-var-word NUM) (Variable "$x"))))
+  (Get (State (ghost-var-word NUM) (Variable "$x"))))
 
 (define (get-var-lemmas NUM)
   "Get the value grounded for a variable, in lemmas."
-  (Get (State (chatlang-var-lemma NUM) (Variable "$x"))))
+  (Get (State (ghost-var-lemma NUM) (Variable "$x"))))
 
 (define (get-user-variable VAR)
   "Get the value of a user variable."
