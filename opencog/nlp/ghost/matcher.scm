@@ -1,4 +1,4 @@
-;; ChatLang DSL for chat authoring rules
+;; GHOST DSL for chat authoring rules
 ;;
 ;; This is the custom action selector that allows OpenPsi to find the authored
 ;; rules.
@@ -76,6 +76,6 @@
 (define-public (test-ghost TXT)
   "Try to find (and execute) the matching rules given an input TXT."
   (define sent (car (nlp-parse TXT)))
-  (State (Anchor "Chatlang: Currently Processing") sent)
+  (State (Anchor "GHOST: Currently Processing") sent)
   (map (lambda (r) (cog-evaluate! (gdar r)))
        (cog-outgoing-set (chat-find-rules sent))))

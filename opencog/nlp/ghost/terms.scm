@@ -1,4 +1,4 @@
-;; ChatLang DSL for chat authoring rules
+;; GHOST DSL for chat authoring rules
 ;;
 ;; Assorted functions for translating individual terms into Atomese fragments.
 

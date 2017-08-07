@@ -1,4 +1,4 @@
-;; ChatLang DSL for chat authoring rules
+;; GHOST DSL for chat authoring rules
 ;;
 ;; A partial implementation of the top level translator that produces
 ;; PSI rules.
