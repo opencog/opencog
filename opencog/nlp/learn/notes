@@ -6846,6 +6846,15 @@ ca4bcdf8d041053ac0d4bc72624a2978  en_pairs_rfive_mthree.sql.bz2
 
 
 ==================================================================
+en_pairs_rfive_mfour
+--------------------
+Random-planar-tree parsed books from tranche-1, 2, 3, 4 and 5. 
+MST-parsed tranche-1, 2, 3 and 4. Contains pair-MI values; does NOT
+contain any disjunct marginals.
+
+STATUS: in press
+
+==================================================================
 zh_pairs_one
 ------------
 Mandarin individual character pairs.  Only that, without any pair stats.
@@ -12902,6 +12911,7 @@ as .. because  0.728
 because .. since  0.707
 
 
+-------------------
 overlap similarity again. This time, a newer way:
 
 (define acc (add-pair-cosine-compute psa))
@@ -12910,6 +12920,15 @@ overlap similarity again. This time, a newer way:
 	(lambda (x y) (acc 'right-overlap x y))
 
 and then do the pslon thing....
+Nahh skip it.
+
+--------------------
+Redo PCA.
+First, filter all words of length 128 or more.:w
+
+(define cos-key (PredicateNode "*-Cosine Sim Key-*"))
+
+
 
 
 =========================================================================

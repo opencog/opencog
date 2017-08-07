@@ -869,7 +869,7 @@
 (define col-dist (cnt-obs-cols 100 '()))
 
 ; ---------------------------------------------------------------------
-; Support  This is for the table about filters.
+; Support -- This is for the table about filters.
 
 (define fsa (add-subtotal-filter psa 1 1 0))
 (define fsb (add-subtotal-filter psa 4 4 0))
@@ -916,6 +916,34 @@
 (ssi 'total-count)    ; 4363640.0
 
 ; ---------------------------------------------------------------------
+; Redo the PCA results, but with a different filtering
+
+; This cut everything except for 797 words. Cuts no disjuncts.
+;
+(define ps-128
+   (add-generic-filter psa
+      (lambda (word) (<= 128 (psu 'right-length word)))
+      (lambda (dj) #t)
+      (lambda (dj) #t)
+      (lambda (dj) #t)
+      (lambda (dj) #t)
+      "cut len<=128"
+      #f))
+
+(define long-words
+	(filter (lambda (word) (<= 128 (psu 'right-length word)))
+		(psu 'left-basis)))
+
+; Its OK to use make-cosine-matrix -- this will still give the correct
+; cosines for the above, because the above does Not cut any disjuncts.
+(define pci (make-cosine-matrix ps-128))
+(define pti (make-power-iter-pca pci 'left-unit))
+
+(define feig (pti 'make-left-unit long-words))
+(define lit (pti 'left-iterate feig 8)) 
+(pti 'left-print lit 20) 
+
+ ---------------------------------------------------------------------
 
 (define sorted-eigen
 	(sort
