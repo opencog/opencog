@@ -73,7 +73,7 @@
 \begin_body
 
 \begin_layout Title
-Language Learning Diary
+Connector Sets (Revised) 
 \end_layout
 
 \begin_layout Author
@@ -81,25 +81,22 @@ Linas Vepstas
 \end_layout
 
 \begin_layout Abstract
-The language-learning effort involves research and software development
- to implement the ideas described in ArXiv abs/1401.3372
-\begin_inset CommandInset citation
-LatexCommand cite
-key "Goertzel2014"
-
-\end_inset
-
-.
- This document contains supplementary notes and a loosely-organized semi-chronol
-ogical diary of results.
+Extract from the language-learning diary, reporting on an initial dataset
+ containing connector sets.
+ This is a revised (6 August 2017) version of the original 11 May 2017 report.
+ It re-analyzes and expands the original analysis on a newer, larger dataset.
+ This was motivated in part due to several errors found and fixed in the
+ processing pipeline in late June/early July.
+ In retrospect, it appears these errors mostly did not affect the earlier
+ analysis, as the most significant error was introduced after the inital
+ analysis was made.
+ None-the-less, it seemed prudent to redo the report.
+ Sadly, several months were lost in the confusion, requiring large datasets
+ to be discarded.
 \end_layout
 
 \begin_layout Section*
 Introduction
-\end_layout
-
-\begin_layout Section*
-Connector Sets 7 May 2017 (revised July 2017)
 \end_layout
 
 \begin_layout Standard
@@ -111,6 +108,10 @@ This is a report on a dataset of disjuncts and connector sets, extracted
  
 \end_layout
 
+\begin_layout Subsection*
+The errors
+\end_layout
+
 \begin_layout Standard
 The original report, dated 7 May 2017, was prepared on a painfully small
  dataset, which also (may have?) incorporated a fatal bug in the disjunct
@@ -120,6 +121,38 @@ The original report, dated 7 May 2017, was prepared on a painfully small
  the initial analysis, and instead repeat it with a newer and larger dataset
  that was correctly assembled.
  The revised analysis was done mostly in July.
+ Sadly, the discovery of this bug required that multiple large datasets
+ be discarded and reconstructed.
+ This caused a month of effort to be lost.
+\end_layout
+
+\begin_layout Standard
+Simultaneously, there was a lot of confusion about the efficacy of the cosine
+ similarity measure.
+ Initial work on cosine similarity used a filtered dataset, with the goal
+ of filtering to reduce 
+\begin_inset Quotes eld
+\end_inset
+
+noise
+\begin_inset Quotes erd
+\end_inset
+
+ in the dataset, as well as to manage dataset size.
+ It turns out that this filtering also had the undesired side-effect of
+ destroying much of the 
+\begin_inset Quotes eld
+\end_inset
+
+signal
+\begin_inset Quotes erd
+\end_inset
+
+ as well -- it rendered many grammatically unrelated words to be judged
+ to be very similar.
+ Between the accidental sign reversal, and the excessively strong data cuts,
+ it was all very confusing, and has taken another month to recover from
+ this -- I'm back to where I was in May, just older and wiser, now.
 \end_layout
 
 \begin_layout Subsection*
@@ -1329,7 +1362,7 @@ Two graphs, dual to one-another.
 
 , also ranked.
 \begin_inset Foot
-status open
+status collapsed
 
 \begin_layout Plain Layout
 Obtained by running (print-ts-rank sorted-word-obs outport) from the disjunct-st

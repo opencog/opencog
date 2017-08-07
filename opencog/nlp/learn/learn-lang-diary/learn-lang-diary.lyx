@@ -19138,6 +19138,10 @@ This is a report on a dataset of disjuncts and connector sets, extracted
  
 \end_layout
 
+\begin_layout Subsection*
+The errors
+\end_layout
+
 \begin_layout Standard
 The original report, dated 7 May 2017, was prepared on a painfully small
  dataset, which also (may have?) incorporated a fatal bug in the disjunct
@@ -19147,6 +19151,38 @@ The original report, dated 7 May 2017, was prepared on a painfully small
  the initial analysis, and instead repeat it with a newer and larger dataset
  that was correctly assembled.
  The revised analysis was done mostly in July.
+ Sadly, the discovery of this bug required that multiple large datasets
+ be discarded and reconstructed.
+ This caused a month of effort to be lost.
+\end_layout
+
+\begin_layout Standard
+Simultaneously, there was a lot of confusion about the efficacy of the cosine
+ similarity measure.
+ Initial work on cosine similarity used a filtered dataset, with the goal
+ of filtering to reduce 
+\begin_inset Quotes eld
+\end_inset
+
+noise
+\begin_inset Quotes erd
+\end_inset
+
+ in the dataset, as well as to manage dataset size.
+ It turns out that this filtering also had the undesired side-effect of
+ destroying much of the 
+\begin_inset Quotes eld
+\end_inset
+
+signal
+\begin_inset Quotes erd
+\end_inset
+
+ as well -- it rendered many grammatically unrelated words to be judged
+ to be very similar.
+ Between the accidental sign reversal, and the excessively strong data cuts,
+ it was all very confusing, and has taken another month to recover from
+ this -- I'm back to where I was in May, just older and wiser, now.
 \end_layout
 
 \begin_layout Subsection*
