@@ -21,7 +21,7 @@
 ; --------------------------------------------------------------
 ; Configure openpsi logger
 (define opl (cog-new-logger))
-(cog-logger-set-component! op1 "OpenPsi")
+(cog-logger-set-component! opl "OpenPsi")
 (cog-logger-set-level! opl "debug")
 (cog-logger-set-stdout! opl #t)
 
