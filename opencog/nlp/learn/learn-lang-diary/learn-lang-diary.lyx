@@ -19144,7 +19144,7 @@ The original report, dated 7 May 2017, was prepared on a painfully small
  code: disjuncts were being assembled incorrectly, due to a reversed sign
  in the MI calculations.
  This bug was eventually uncovered, and so it seemed best to entirely discard
- the intial analysis, and instead repeat it with a newer and larger dataset
+ the initial analysis, and instead repeat it with a newer and larger dataset
  that was correctly assembled.
  The revised analysis was done mostly in July.
 \end_layout
@@ -19193,7 +19193,7 @@ The primary results reported below are these:
 \end_layout
 
 \begin_layout Standard
-* In ther earlier sample, derived from Wikipedia, it became clear that there
+* In the earlier sample, derived from Wikipedia, it became clear that there
  were very few verbs that aren't relationship verbs.
  Wikipedia articles describe concepts and events.
  The relationship between these require the copula and other relationship
@@ -19282,7 +19282,7 @@ took
 \begin_layout Standard
 * Cosine similarity applied to connector sets seems to be an effective way
  of determining the grammatical similarity of words.
- Yet, it is not so unambigously great, that other kinds of measures shouldn't
+ Yet, it is not so unambiguously great, that other kinds of measures shouldn't
  be contemplated.
 \end_layout
 
@@ -20417,14 +20417,48 @@ the
 
 \begin_layout Standard
 This list is repeated in the table below.
+ The support is 
+\begin_inset Formula $\left|(w,*)\right|$
+\end_inset
+
+, that is, the number of different kinds of disjuncts observed for that
+ word.
+ The count is 
+\begin_inset Formula $N(w,*)$
+\end_inset
+
+, that is, the total number of times those disjuncts have been observed
+ for that word.
  The frequency is just the count divided by 18489594.
+ The length is 
+\begin_inset Formula $\mbox{len}(w,*)=\sqrt{\sum_{d}N^{2}(w,d)}$
+\end_inset
+
+, that is, the root of the sum of the squares of the observations.
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+A printing utility for these three is `show-counts` in the `disjunct-stats.scm`
+ file.
+\end_layout
+
+\end_inset
+
+
+\begin_inset VSpace defskip
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
 \align center
 \begin_inset Tabular
-<lyxtabular version="3" rows="11" columns="4">
+<lyxtabular version="3" rows="11" columns="6">
 <features tabularvalignment="middle">
+<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top" width="0">
 <column alignment="center" valignment="top" width="0">
 <column alignment="center" valignment="top" width="0">
 <column alignment="center" valignment="top" width="0">
@@ -20435,6 +20469,15 @@ This list is repeated in the table below.
 
 \begin_layout Plain Layout
 word
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+support
 \end_layout
 
 \end_inset
@@ -20457,7 +20500,7 @@ frequency
 
 \end_inset
 </cell>
-<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
 \begin_inset Text
 
 \begin_layout Plain Layout
@@ -20469,6 +20512,15 @@ frequency
 
 \end_inset
 </cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+length
+\end_layout
+
+\end_inset
+</cell>
 </row>
 <row>
 <cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
@@ -20476,6 +20528,15 @@ frequency
 
 \begin_layout Plain Layout
 LEFT-WALL
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+64215
 \end_layout
 
 \end_inset
@@ -20498,11 +20559,20 @@ LEFT-WALL
 
 \end_inset
 </cell>
-<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
 \begin_inset Text
 
 \begin_layout Plain Layout
 4.248
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+122353.9
 \end_layout
 
 \end_inset
@@ -20514,6 +20584,15 @@ LEFT-WALL
 
 \begin_layout Plain Layout
 ,
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+243987
 \end_layout
 
 \end_inset
@@ -20536,11 +20615,20 @@ LEFT-WALL
 
 \end_inset
 </cell>
-<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
 \begin_inset Text
 
 \begin_layout Plain Layout
 4.271
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+25475.4
 \end_layout
 
 \end_inset
@@ -20552,6 +20640,15 @@ LEFT-WALL
 
 \begin_layout Plain Layout
 .
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+106195
 \end_layout
 
 \end_inset
@@ -20574,11 +20671,20 @@ LEFT-WALL
 
 \end_inset
 </cell>
-<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
 \begin_inset Text
 
 \begin_layout Plain Layout
 4.444
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+55168.0
 \end_layout
 
 \end_inset
@@ -20590,6 +20696,15 @@ LEFT-WALL
 
 \begin_layout Plain Layout
 the
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+215324
 \end_layout
 
 \end_inset
@@ -20612,11 +20727,20 @@ the
 
 \end_inset
 </cell>
-<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
 \begin_inset Text
 
 \begin_layout Plain Layout
 4.669
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+9264.2
 \end_layout
 
 \end_inset
@@ -20628,6 +20752,15 @@ the
 
 \begin_layout Plain Layout
 and
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+126861
 \end_layout
 
 \end_inset
@@ -20650,11 +20783,20 @@ and
 
 \end_inset
 </cell>
-<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
 \begin_inset Text
 
 \begin_layout Plain Layout
 5.457
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+28694.7
 \end_layout
 
 \end_inset
@@ -20666,6 +20808,15 @@ and
 
 \begin_layout Plain Layout
 to
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+117110
 \end_layout
 
 \end_inset
@@ -20688,11 +20839,20 @@ to
 
 \end_inset
 </cell>
-<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
 \begin_inset Text
 
 \begin_layout Plain Layout
 5.523
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+11480.0
 \end_layout
 
 \end_inset
@@ -20704,6 +20864,15 @@ to
 
 \begin_layout Plain Layout
 of
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+108951
 \end_layout
 
 \end_inset
@@ -20726,11 +20895,20 @@ of
 
 \end_inset
 </cell>
-<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
 \begin_inset Text
 
 \begin_layout Plain Layout
 5.638
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+11047.5
 \end_layout
 
 \end_inset
@@ -20742,6 +20920,15 @@ of
 
 \begin_layout Plain Layout
 a
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+102720
 \end_layout
 
 \end_inset
@@ -20764,11 +20951,20 @@ a
 
 \end_inset
 </cell>
-<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
 \begin_inset Text
 
 \begin_layout Plain Layout
 5.996
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+6855.1
 \end_layout
 
 \end_inset
@@ -20780,6 +20976,15 @@ a
 
 \begin_layout Plain Layout
 "
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+51289
 \end_layout
 
 \end_inset
@@ -20802,11 +21007,20 @@ a
 
 \end_inset
 </cell>
-<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
 \begin_inset Text
 
 \begin_layout Plain Layout
 6.170
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+21388.8
 \end_layout
 
 \end_inset
@@ -20818,6 +21032,15 @@ a
 
 \begin_layout Plain Layout
 in
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+64011
 \end_layout
 
 \end_inset
@@ -20840,7 +21063,7 @@ in
 
 \end_inset
 </cell>
-<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
 \begin_inset Text
 
 \begin_layout Plain Layout
@@ -20849,9 +21072,22 @@ in
 
 \end_inset
 </cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+14758.1
+\end_layout
+
+\end_inset
+</cell>
 </row>
 </lyxtabular>
 
+\end_inset
+
+
+\begin_inset VSpace defskip
 \end_inset
 
 
@@ -21174,7 +21410,7 @@ on it's side
 .
  This is meant to be a simple exercise, so as to place some later graphs
  into context.
- Despite the simplcity, the analysis turns out to be somewhat surprising,
+ Despite the simplicity, the analysis turns out to be somewhat surprising,
  and somewhat subtle.
  In particular, the last graph elicits some features in the dataset that
  are not otherwise easily visible.
@@ -21580,7 +21816,7 @@ It was noted before that there are 3263 words in the dataset that were observed
 
 \begin_layout Standard
 What does this mean? What is this saying? Its not entirely clear.
- It seems to suggest that there are about 3.3K words that are used perferentially
+ It seems to suggest that there are about 3.3K words that are used preferentially
  more often than the rest.
  That is, they are used more often not only in absolute terms, but also
  in relative terms: the form a core of the vocabulary, enjoying a popularity
@@ -21590,7 +21826,7 @@ What does this mean? What is this saying? Its not entirely clear.
 \begin_layout Standard
 Its not clear if this is a generic feature of the English language, or if
  this is peculiar to the particular corpus.
- Lets's review the corpus again.
+ Let's review the corpus again.
  The corpus comprises assorted late-19th and early 20th century texts from
  Project Gutenberg, a dozen sci-fi/fantasy novels, and a sampling of fan-fiction.
  These texts will contain stray markup, including tables of contents, chapter
@@ -21626,7 +21862,7 @@ ungrammatical
 \begin_inset Quotes erd
 \end_inset
 
- should not affect word-count statistics, unlless it just so happens that
+ should not affect word-count statistics, unless it just so happens that
  there is a core of 3.3K vocabulary words, followed by 130K words that are
  given names, arcane terms, and other 
 \begin_inset Quotes eld
@@ -21718,7 +21954,7 @@ Computed with the sorted-avg list in disjunct-stats.scm
 
 \end_inset
 
- The ranking is dstinctly not Zipfian; this is confirmed by slicing the
+ The ranking is distinctly not Zipfian; this is confirmed by slicing the
  data three ways: excluding words with less than 400 observations (leaving
  3263 words), excluding words with less than 100 observations (leaving 9425
  words), and excluding words with less than 20 observations (leaving 25505
@@ -21756,7 +21992,7 @@ The graph on the right expresses an alternate view of the same idea: it
 The first ten on the ranked list are "*" "Literary" "Archive" "Gutenberg"
  "Notes" "...." "|" "Foundation" "Project" "Summary".
  This suggests that these all come from exactly the same parse of a small
- group of sentences having a very regular, formulatic structure, occurring
+ group of sentences having a very regular, formulaic structure, occurring
  repeatedly in multiple texts.
  One of those sentences is easily found; it begins as: 
 \begin_inset Quotes eld
@@ -22149,7 +22385,7 @@ long
 \end_inset
 
  appears as 195 on the list, with an average of 2.3825 observations per disjunct.
- It has 5412 different disjuncts on it; only five are seen more tha 200
+ It has 5412 different disjuncts on it; only five are seen more than 200
  times.
  These are:
 \end_layout
@@ -22666,9 +22902,9 @@ This seems like the interesting ratio, because the Zipf exponent of -0.65
 Words high in this score will be words that have relatively few disjuncts
  on them, or at least, few that matter much, that rise above the level of
  noise.
- The first ten words on this list, exluding punctuation, and excluding all
- words with fewer than 100 observations: "It" "and" "but" "in" "Two" "as"
- "Notes" "not" "There" "Summary".
+ The first ten words on this list, excluding punctuation, and excluding
+ all words with fewer than 100 observations: "It" "and" "but" "in" "Two"
+ "as" "Notes" "not" "There" "Summary".
  A review of the input corpus shows that the word "Summary" appears in only
  one input text: Charles Darwin's 
 \begin_inset Quotes eld
@@ -23698,15 +23934,15 @@ reference "logli distribution graph"
 \end_inset
 
 .
- The distribution appears to be gaussian, and of approximately the same
+ The distribution appears to be Gaussian, and of approximately the same
  width as before, although located at a different center: the green line
- in the graph is the gaussian given by 
+ in the graph is the Gaussian given by 
 \begin_inset Formula $\exp-(0.24(MI_{word}-20))^{2}/2$
 \end_inset
 
  as compared to 0.23 for the non-marginal MI distribution above.
  The difference between 0.24 and 0.23 seems to be significant: changing one
- to the other seems to give a noticably poorer fit.
+ to the other seems to give a noticeably poorer fit.
 \end_layout
 
 \begin_layout Standard
@@ -24224,9 +24460,9 @@ At the other extreme, the ten words with the lowest MI are: "it" "in" "of"
 \begin_layout Standard
 These samplings of disjuncts are sharply reminiscent of the technique of
  collocation used in corpus linguistics, but with a big, important difference.
- There, the linguist examins a window that is some 6-8 words wide, and examines
- the frequency of all phrases appearing within that window, containing the
- word-of-interest in the center.
+ There, the linguist examines a window that is some 6-8 words wide, and
+ examines the frequency of all phrases appearing within that window, containing
+ the word-of-interest in the center.
  Here, we again have a word-of-interest, but this time, instead of seeing
  phrases, we see the grammatical structure revealed directly, by means of
  the disjuncts extracted from MST parses.
@@ -24291,7 +24527,7 @@ reference "logli distribution graph"
 \end_inset
 
 .
- The green line shows an eyeballed fit to a gaussian.
+ The green line shows an eyeballed fit to a Gaussian.
  As before, the width appears to be almost 1/4th, but not quite.
  It is given by 
 \begin_inset Formula $\exp-(0.27(MI_{disjunct}-13.7))^{2}/2$
@@ -24390,12 +24626,12 @@ It resembles the graph for the ranked fractional marginal MI, above.
  the words.
  This affirms (or explains?) the sharp knee in the graph on the left: the
  knee occurs because almost all words have a large disjunct-entropy.
- Remarkably, the distribution is anti-gaussian, in that it appears to diverge,
+ Remarkably, the distribution is anti-Gaussian, in that it appears to diverge,
  the larger the entropy.
  In that respect, it cannot even be a proper distribution, as it cannot
  be normalized to a probability of 1.0 - the distribution increases without
  bound! Yet, as the graph illustrates, that is what it seems to be.
- The green curve is the anti-gaussian, given by 
+ The green curve is the anti-Gaussian, given by 
 \begin_inset Formula $\exp(0.27(FME-13.7))^{2}/2$
 \end_inset
 
@@ -24427,7 +24663,7 @@ The top-ranked words (which have been observed 100 times or more) are "clawing"
  "manages" "noting" "anyways" "circling" "choke" "neared" "urging" "pursuing"
  "exited".
  This is not a list that has been exposed with other statistics.
- Almost all of these are verbs, a grammaitcal class that never appeared
+ Almost all of these are verbs, a grammatical class that never appeared
  in any of the previous lists.
  Why these? 
 \end_layout
@@ -24461,7 +24697,7 @@ Looking deeper into the disjunct set, the sensation that the words with
  A sampling is given in the table below.
  All of these words have a large support (i.e.
  have at least 100 observations of disjuncts on each), but each disjunct
- is obeserved only once, rarely twice; almost never more than that.
+ is observed only once, rarely twice; almost never more than that.
  For example, 
 \begin_inset Quotes eld
 \end_inset
@@ -24481,7 +24717,7 @@ gripped
 \begin_inset Quotes erd
 \end_inset
 
-: (He- staff+) is the disjunct obsrved three times.
+: (He- staff+) is the disjunct observed three times.
  Four of the seven observed twice are (had- him+) (she- his+ hand+) (He-
  staff+ tightly+) (his+ hand+) and look to be a part of rather formulaic
  sentences (possibly from the fan-fiction part of the corpus).
@@ -24495,7 +24731,7 @@ gripped
 \begin_layout Standard
 This observation, and the table below, reinforces the need to the urgency
  of clustering words: by clustering words together into grammatical categories,
- this should increase the number of observations of category-pairs, improviing
+ this should increase the number of observations of category-pairs, improving
  MST parses, as well as increasing the number of observations of disjuncts,
  hopefully drowning out the weak and bizarre disjuncts.
  Given that the high-entropy words seem to be predominantly verbs, this
@@ -25029,14 +25265,14 @@ This graph is unexpected.
  surprising.
  In proper grammar, it would be hard to reach even this degree without having
  a transitive or ditranstive verb with several modifiers, and a particle
- or prepostion.
- The first tne items are out of control.
+ or preposition.
+ The first ten items are out of control.
  What's happening here? The first ten items in the ranking are: "|" "#"
  "+" "||" "_" "ASCII" "electronically" "Northup" "disclaimer" "u".
- The first five are presumably formating markup or possibly decroative markup
+ The first five are presumably formating markup or possibly decorative markup
  in the texts.
  Three of the words appear to be license boilerplate.
- The name "Northup" appears in only one text in the corpus: an autobiorgraphy,
+ The name "Northup" appears in only one text in the corpus: an autobiography,
  
 \begin_inset Quotes eld
 \end_inset
@@ -25047,7 +25283,7 @@ Twelve Years a Slave
 
 , by Solomon Northup.
  Besides the title-page, the word Northup appears repeatedly in the table
- of contents, which is bound to make for awkard parsing.
+ of contents, which is bound to make for awkward parsing.
  This presumably 
 \begin_inset Quotes eld
 \end_inset
@@ -25082,7 +25318,7 @@ Vertex degree in Wikipedia
 
 \begin_layout Standard
 A similar analysis, performed on a much smaller dataset consisting entirely
- of Wikipedia articles found a similar bheavior.
+ of Wikipedia articles found a similar behavior.
  The first ten items in the ranking were: "-" "de" - "y" ":" "(" ")" "General"
  "Department" "x" "Act".
 \end_layout
@@ -26201,7 +26437,7 @@ word-pair
 It is worth looking at a few of these, to see how they work out.
  The word 'she' has 27578 distinct disjuncts on it; the word 'he' has 57330
  disjuncts.
- The table below shows the top-ranked disjunts for each.
+ The table below shows the top-ranked disjuncts for each.
  It makes quite clear why the two have a high similarity.
 \begin_inset Foot
 status collapsed
@@ -26588,7 +26824,7 @@ The list above contains the pairs 'guess ..
  The word 'guess' has 859 disjuncts on it.
  The word 'suppose' has 805 disjuncts on it.
  The word 'hope' has 1735 disjuncts on it.
- The table below indicates why thier cosine distance is close.
+ The table below indicates why their cosine distance is close.
 \begin_inset VSpace defskip
 \end_inset
 
@@ -27184,7 +27420,7 @@ The pair 're ..
  between these two.
  The pair 'don ..
  sama' is also strange.
- The similarity is due entirely to thier linking to dashes and other punctuation.
+ The similarity is due entirely to their linking to dashes and other punctuation.
  It seems to be due to a Finnish text that has snuck into the corpus.
 \end_layout
 
@@ -27192,7 +27428,7 @@ The pair 're ..
 Some more verbs are worth looking at.
  Here is 'leave ..
  take', below.
- Almost all of teh similarity is due the infinitive form; the only other
+ Almost all of the similarity is due the infinitive form; the only other
  shared disjunct appearing in the table is 'to- it+', although there are
  more common disjuncts at lower counts.
 \begin_inset VSpace defskip
@@ -27641,7 +27877,7 @@ I- it+
 
 \begin_layout Standard
 The pair 'believe ..
- think' is as follows; several kinds of constructinos are clearly shared.
+ think' is as follows; several kinds of constructions are clearly shared.
 \begin_inset VSpace defskip
 \end_inset
 
@@ -28075,9 +28311,9 @@ I- you+
 \begin_layout Standard
 The first prepositions in the list are 'in ..
  by' and so are worth a look.
- Most of the similarity is accounted for by having them preceed a determiner.
+ Most of the similarity is accounted for by having them precede a determiner.
  Why there is a strong link to a determiner is unclear.
- Whther there is also a strong link between the determiner and a subsequent
+ Whether there is also a strong link between the determiner and a subsequent
  noun is also unclear.
  
 \begin_inset VSpace defskip
@@ -30358,7 +30594,7 @@ Recall that, for word-pairs, that MI scores below 4 are considered to be
  almost any noun, but not to verbs: this is enough to get them into the
  2-3 range for MI.
  By contrast, the period can appear after almost any word, except maybe
- for prepostiions, adjectives and adverbs.
+ for prepositions, adjectives and adverbs.
  This is apparently enough to drive the MI positive, but that's all.
 \end_layout
 
@@ -30488,9 +30724,9 @@ This similarity measure essentially boils down to a normalized cylinder-set
  That is, instead of interpreting the disjuncts as a basis for a vector
  space, they can be taken as independent observations in a Cartesian product
  space.
- This makes more sense than pretening that these form a vector space.
+ This makes more sense than pretending that these form a vector space.
  Why is that? What makes the cosine angle, and vector dot products so appealing,
- is that they are presereved by rotations; yet there really is no reason
+ is that they are preserved by rotations; yet there really is no reason
  to expect or desire rotational symmetry.
  In short, the idea that we are dealing with vector spaces give the wrong
  idea of what's going on: its more appropriate to view the set of disjuncts
@@ -30609,7 +30845,7 @@ where
 
 \begin_layout Standard
 Some experimentation was done with this similarity measure, but the results
- were not particuarly impressive.
+ were not particularly impressive.
  What does become quickly apparent is that the most frequently observed
  words will necessarily have a low similarity to the low-frequency words.
  This is because the high-frequency words will have a large number of disjuncts
@@ -30701,7 +30937,7 @@ That is, the condition
 \end_layout
 
 \begin_layout Standard
-The above considerations suggest a more approrpriate defintion for overlap
+The above considerations suggest a more appropriate definition for overlap
  similarity that allows for frequency-independent observations: namely
 \end_layout
 
@@ -30791,7 +31027,7 @@ Word-Pair Cosine Similarity
 To correctly gauge the advantage of disjunct-based techniques, one could
  compare them to the same kinds of measures, but applied to word-pairs,
  instead of word-disjunct pairs.
- For exmaple, the disjunct-based cosine similarity, can be contrasted against
+ For example, the disjunct-based cosine similarity, can be contrasted against
  the simpler word-pair-based cosine similarity.
  This is given by 
 \begin_inset Formula 
@@ -30961,7 +31197,7 @@ against
  the clusters of similar words, which is not what we want.
  We don't want strange, unusual pairings; we want common, likely pairings.
  The level of discrimination can be severe: some really, really bad pairings
- show up, but only because they are unlike enything else.
+ show up, but only because they are unlike anything else.
  This score is strong when sim is weak, and is essentially picking up the
  tail-end of the sim distribution.
 \end_layout
@@ -31096,9 +31332,9 @@ Generated with 'scatter.scm'
 
 \end_inset
 
- The rows and columns are ranked by frequency of word occurance, so that
- the single-most-frequently occuring word is at the upper-left, with less
- and less frequently occuring words proceeding to the right, and downwards.
+ The rows and columns are ranked by frequency of word occurrence, so that
+ the single-most-frequently occurring word is at the upper-left, with less
+ and less frequently occurring words proceeding to the right, and downwards.
  The color scale is such that red represents 1.0, yellow represents 0.75,
  green is exactly 0.5, and blue is 0.25 or less, fading to black.
  This is for the same 
@@ -31251,7 +31487,7 @@ name "fig:Quasi-diagonal-cosine-similarity"
 This ranking exposes block-diagonal structure in the dataset.
  The block in the upper-right consists entirely of punctuation and various
  capitalized words.
- The middle poritions are quite interesting.
+ The middle portions are quite interesting.
  The full list of 797 words is shown in table 
 \begin_inset CommandInset ref
 LatexCommand vpageref
@@ -31271,7 +31507,7 @@ reference "tab:Block-ranked-words"
 \begin_layout Standard
 After this are various capitalized words.
  As noted previously, capitalized words are observed far less frequently
- than thier u-capitalized counterparts -- usually only one capitalized word
+ than their u-capitalized counterparts -- usually only one capitalized word
  per sentence! Thus, capitalized words have far fewer disjuncts on them,
  thus making it easier for them to appear superficially similar, when they
  really should not be.
@@ -31283,7 +31519,7 @@ Where Who What Why How
 \begin_inset Quotes erd
 \end_inset
 
- occur in succesion.
+ occur in succession.
  Other confidence-instilling sequences include 
 \begin_inset Quotes eld
 \end_inset
@@ -31980,7 +32216,7 @@ reference "tab:Block-ranked-words"
  This is good: they are at the end of the list because they don't fit into
  any other grammatical usage patterns.
  They don't fit because they have been observed hundreds of times, which
- propels them into thehigh-frequency category; yet, since they always appear
+ propels them into the high-frequency category; yet, since they always appear
  in set phrases, they can't be similar to anything else.
 \end_layout
 
@@ -31992,7 +32228,7 @@ Filtering
 An earlier draft of this report showed a very different figure, which turned
  out to have been created based on what seemed to be a valid assumption,
  but turns out not to be so wise.
- It deserves a some discussion here, which is resumed in a later sction.
+ It deserves a some discussion here, which is resumed in a later section.
 \end_layout
 
 \begin_layout Standard
@@ -32012,17 +32248,17 @@ The idea (recaptured below) is that it can be a good thing to filter out
 Another possibility, and this seems to be the fatal one, is to exclude disjuncts
  that are seen only a handful of times.
  Superficially, this seems like a very plausible thing to do.
- In practice, this turns out to be an almost completeely disasterous cut.
+ In practice, this turns out to be an almost completely disastrous cut.
  Setting it too high renders almost all capitalized words identical to one-anoth
 er, having a similarity of exactly one.
  Capitalized words are observed only infrequently; discarding low-frequency
- disjuncts leaves the capitalized wors almost naked, and thus essentially
+ disjuncts leaves the capitalized words almost naked, and thus essentially
  identical.
  Just about all of them connect to the LEFT-WALL, since they are the first
  word in a sentence, and so all of them share a very high observation count
  of links to LEFT-WALL, and low observation counts of links to anything
  else.
- Ergo: they are al similar, since they all start sentences.
+ Ergo: they are all similar, since they all start sentences.
 \end_layout
 
 \begin_layout Standard
@@ -34419,7 +34655,7 @@ What plays the role of
 \end_layout
 
 \begin_layout Standard
-What we have on hand, foundationaly, is the frequency matrix 
+What we have on hand, foundationally, is the frequency matrix 
 \begin_inset Formula $P$
 \end_inset
 
@@ -35363,7 +35599,7 @@ a
  and so on, the remaining entries filled out in roughly the same order,
  by the same words, as in the frequency PCA.
 \begin_inset Foot
-status collapsed
+status open
 
 \begin_layout Plain Layout
 Created as follows:
@@ -36100,7 +36336,7 @@ Some readers have misunderstood this section.
  clustering, or something like that, the idea is/was to use a thresholded
  PCA for CLUSTERING! and NOT for similarity, because we've already got reasonabl
 e adequate similarity.
- Higher-quality similarity might be nice, but that is of seccondary importance,
+ Higher-quality similarity might be nice, but that is of secondary importance,
  right now.
 \end_layout
 
@@ -36257,7 +36493,7 @@ Most interesting is perhaps this: the sentences of a language are observed
 It seems to me that one could make this very generic: every language, and
  not just first-order logic, but any language, as considered in model theory,
  has a set of sentences.
- This sentences are composed of the terms in thier term algebra, and these
+ This sentences are composed of the terms in their term algebra, and these
  terms and how they connect, define a graph.
  That graph can be viewed in terms of sheaves, germs, stalks, etale spaces.
  This implies that every model, of model theory, has a corresponding cohomology.
@@ -36266,8 +36502,8 @@ It seems to me that one could make this very generic: every language, and
  But I suspect that it's not been sufficiently popularized: certainly, the
  standard computer-science textbooks that tell you what a language is do
  not tell you that it has a cohomology associated with it.
- And yet, this seems blantly obvious, in retrospect, and naggingly it might
- actually be important for some reason or another.
+ And yet, this seems blatantly obvious, in retrospect, and naggingly it
+ might actually be important for some reason or another.
 \end_layout
 
 \begin_layout Standard
@@ -37096,7 +37332,7 @@ en_pairs_ttwo_mst
 \end_inset
 
 To avoid accidental corruption of this dataset, a copy was made, in which
- assorted sporatic results are maintined.
+ assorted sporadic results are maintained.
  The copy is the 
 \noun on
 en_pairs_ttwo_sim
@@ -38210,7 +38446,7 @@ Reboot: 23 June 2017
 
 \begin_layout Standard
 The cosine similarity gives OK pair-wise similarity results; the overlap
- similairy gives noticably worse results.
+ similarity gives noticeably worse results.
  There's no obvious matrix-based algorithm that will group together multiple
  words into a cluster, efficiently, in one shot.
  Its time for a rethink.
@@ -38252,7 +38488,7 @@ Reference resolution: By developing a coherent framework for working with
 \end_layout
 
 \begin_layout Standard
-These seem like they should be acheivable.
+These seem like they should be achievable.
  Preliminary results looking promising, but not yet great.
  What's the grand scheme of things?
 \end_layout
@@ -38389,7 +38625,7 @@ near
 a priori
 \emph default
  knowledge of the words.
- Anyway, this provides the setting for the intial grammatical tasks.
+ Anyway, this provides the setting for the initial grammatical tasks.
  So, back to the initial grammatical tasks.
 \end_layout
 
@@ -38403,9 +38639,9 @@ Idioms: based on preliminary evidence, we could make lists of idiomatic
 Discerning synonymous words based on grammatical usage is tricky.
  First, it is often antonyms that get observed: e.g.
  the (black,white) pairs reported above.
- To discern anonymy, we would also need to discern is-a relationships, apply
- common-sense reasonsing, and notice that antonyms never describe the same
- objects, never describe the properties of the same objects.
+ To discern antonymy, we would also need to discern is-a relationships,
+ apply common-sense reasoning, and notice that antonyms never describe the
+ same objects, never describe the properties of the same objects.
  So, antonym detection appears to be an advanced topic.
 \end_layout
 
@@ -38477,7 +38713,7 @@ If an event is normally distributed, then we can characterize the uncertainty
  observations.
  We don't actually know if our observations are normally distributed.
  Its not even clear quite how to even obtain the distribution.
- But's lets assume they are.
+ But lets assume they are.
  Then, given that 
 \begin_inset Formula $p(x,y)=N(x,y)/N(*,*)$
 \end_inset
@@ -38499,7 +38735,7 @@ where only the pair observations
 \begin_inset Formula $N(x,y)$
 \end_inset
 
- are considered to be noisey and the value of 
+ are considered to be noisy and the value of 
 \begin_inset Formula $N(*,*)$
 \end_inset
 
@@ -38836,7 +39072,7 @@ en_pairs_rone_mst
 \end_layout
 
 \begin_layout Standard
-The size and support is recaped here below, just copied from section 
+The size and support is recapped here below, just copied from section 
 \begin_inset CommandInset ref
 LatexCommand ref
 reference "sec:Dataset-report"
@@ -39175,8 +39411,8 @@ Graph obtained from the binned-enpr-mi data, in the en-pairs.scm file.
 
 \end_inset
 
- Note that this is qualtitively similar to the Chinese hanzi pairs distribution,
- shown below, although the slopes are different, and the peak is slightly
+ Note that this is qualitatively similar to the Chinese hanzi pairs distribution
+, shown below, although the slopes are different, and the peak is slightly
  shifted.
 \end_layout
 
@@ -39376,7 +39612,7 @@ zh_pairs_sone
 \end_layout
 
 \begin_layout Standard
-The size and support is recaped here below, just copied from section 
+The size and support is recapped here below, just copied from section 
 \begin_inset CommandInset ref
 LatexCommand ref
 reference "sec:Dataset-report"
@@ -39676,7 +39912,7 @@ As mentioned before: the dimensions of the dataset are larger than the number
  of the entries correspond to English-language technical terms and named
  entities, such as product names, geographical place names and the names
  of people.
- There is also likely to be a mixture of simplified and traaditional hanzi
+ There is also likely to be a mixture of simplified and traditional hanzi
  in the dataset.
 \end_layout
 
@@ -39727,7 +39963,7 @@ Graph obtained from the binned-hanpr-mi data, in the zh-pairs.scm file.
 
 \end_inset
 
- Note that this is qualtitively similar to the English word-pairs distribution,
+ Note that this is qualitatively similar to the English word-pairs distribution,
  shown above, although the slopes are different, and the peak is slightly
  shifted.
 \end_layout
@@ -39746,7 +39982,7 @@ higher level
 \begin_inset Quotes erd
 \end_inset
 
- I mean both the problem of detecting idioms in English, and semgmenting
+ I mean both the problem of detecting idioms in English, and segmenting
  words in Chinese.
  I claim that applying traditional algorithms to sheaves is sufficient to
  get good results.
@@ -39857,7 +40093,7 @@ The Morphology of Chinese A Linguistic and Cognitive Approach
 \begin_inset Quotes erd
 \end_inset
 
- (2000) Cambridge University Presss lists the following:
+ (2000) Cambridge University Press lists the following:
 \end_layout
 
 \begin_layout Itemize
@@ -40113,14 +40349,14 @@ status open
 
 \begin_layout Standard
 If this was a European language, we would expect any extra links to attach
- to the last morpheme; this is due to the morphology of Indoeuropean, where
- the semantic (meeaning-carrying) stem is always to the left of the grammaticall
-y active suffixes.
+ to the last morpheme; this is due to the morphology of Indo-European, where
+ the semantic (meaning-carrying) stem is always to the left of the grammatically
+ active suffixes.
  Note Japanese, although it has a minimal morphology, as also similarly
  structured; i.e.
  the suffix carries the syntactic structure.
  With Chinese, this is less obviously the case, and ideally, the correct
- attchment will be discovered.
+ attachment will be discovered.
 \end_layout
 
 \begin_layout Section*
