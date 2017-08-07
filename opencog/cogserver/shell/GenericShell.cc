@@ -132,7 +132,10 @@ void GenericShell::set_socket(ConsoleSocket *s)
 /* ============================================================== */
 
 static std::mutex _stdout_redirect_mutex;
+
+#ifdef PERFORM_STDOUT_DUPLICATION
 static GenericShell* _redirector = nullptr;
+#endif
 
 // Implementation requirements:
 //
