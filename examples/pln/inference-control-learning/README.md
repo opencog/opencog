@@ -619,6 +619,15 @@ Using cdfs this can be simplified into
 P1 = I1_0^1 pdf1(p1) * cdf2(p1) * ... * cdfn(p1) dp1
 ```
 
+Thus rewritting the above for any Pi and simplifying a bit
+
+```
+Pi = I_0^1 pdfi(p) * Prod_j!=i cdfi(p) dp
+```
+
+where `Prod_j!=i fi` is the product of all fi with j from 1 to n,
+except i.
+
 If we store the values (assuming we don't already have them stored in
 the TV objects) of
 
