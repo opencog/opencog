@@ -8,9 +8,9 @@
 ; ----------
 ; For debugging
 (use-modules (opencog logger))
-(define chatlang-logger (cog-new-logger))
-(cog-logger-set-level! chatlang-logger "debug")
-(cog-logger-set-stdout! chatlang-logger #t)
+(define ghost-logger (cog-new-logger))
+(cog-logger-set-level! ghost-logger "debug")
+(cog-logger-set-stdout! ghost-logger #t)
 
 (define (display-token token)
 "

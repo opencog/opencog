@@ -21,7 +21,7 @@
            (append-map cog-get-trunk (list input-lseq input-lset))))
          ; The ones that contains no constant terms
          (no-const (filter psi-rule? (append-map cog-get-trunk
-           (cog-chase-link 'MemberLink 'ListLink chatlang-no-constant))))
+           (cog-chase-link 'MemberLink 'ListLink ghost-no-constant))))
          ; The ones found by the recognizer
          (dual-match (filter psi-rule? (append-map cog-get-trunk
            (append (cog-outgoing-set (cog-execute! (Dual input-lseq)))
@@ -35,11 +35,11 @@
          ; Get the psi-rules associate with them
          (rules-matched (append exact-match no-const dual-match)))
 
-        (cog-logger-debug chatlang-logger "For input:\n~a" input-lseq)
-        (cog-logger-debug chatlang-logger "Rules with no constant:\n~a" no-const)
-        (cog-logger-debug chatlang-logger "Exact match:\n~a" exact-match)
-        (cog-logger-debug chatlang-logger "Dual match:\n~a" dual-match)
-        (cog-logger-debug chatlang-logger "Rules matched:\n~a" rules-matched)
+        (cog-logger-debug ghost-logger "For input:\n~a" input-lseq)
+        (cog-logger-debug ghost-logger "Rules with no constant:\n~a" no-const)
+        (cog-logger-debug ghost-logger "Exact match:\n~a" exact-match)
+        (cog-logger-debug ghost-logger "Dual match:\n~a" dual-match)
+        (cog-logger-debug ghost-logger "Rules matched:\n~a" rules-matched)
 
         ; TODO: Pick the one with the highest weight
         (List (append-map
@@ -53,7 +53,7 @@
 
 (Define
   (DefinedSchema "Get Current Input")
-  (Get (State chatlang-anchor
+  (Get (State ghost-anchor
               (Variable "$x"))))
 
 (Define
@@ -73,7 +73,7 @@
 ; For debugging only
 (use-modules (opencog nlp chatbot) (opencog eva-behavior))
 
-(define-public (test-chatlang TXT)
+(define-public (test-ghost TXT)
   "Try to find (and execute) the matching rules given an input TXT."
   (define sent (car (nlp-parse TXT)))
   (State (Anchor "Chatlang: Currently Processing") sent)
