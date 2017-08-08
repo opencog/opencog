@@ -25,13 +25,13 @@
 (cog-logger-set-level! icl-logger "info")
 (cog-logger-set-level! "info")
 
+;; Set loggers stdout
+(cog-logger-set-stdout! icl-logger #t)
+
 ;; ;; Set loggers sync (for debugging)
 ;; (cog-logger-set-sync! #t)
 ;; (cog-logger-set-sync! icl-logger #t)
 ;; (cog-logger-set-sync! (cog-ure-logger) #t)
-
-;; Set loggers stdout
-(cog-logger-set-stdout! icl-logger #t)
 
 ;; Set parameters
 (define pss 10)                          ; Problem set size
