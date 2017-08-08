@@ -6864,16 +6864,15 @@ REASON: Best so far, I think.  Same issues as en_pairs_rfive_mone
  public | typecodes  | table | ubuntu | 56 kB      | 
  public | valuations | table | ubuntu | 12 GB      | 
  public | values     | table | ubuntu | 8192 bytes | 
-`
+
 select count(*) from atoms;      -- 106482665 = 106M = 12M more
 select count(*) from valuations; -- 123419676 = 123M =  7M more
 
 11069504769 bytes uncompressed = 11.1 GBytes
-
+ 1901439821 bytes compressed   = 1.90 GBytes
 
 eff6127b82ab205502bc1f9e8b4e139d  en_pairs_rfive_mfour.sql
-
-
+763ffc8bf032127501692a5ee61538ec  en_pairs_rfive_mfour.sql.bz2
 
 ==================================================================
 zh_pairs_one
@@ -12978,6 +12977,32 @@ todo:
 -- maybe save zh_pairs_mst
 -- maybe copy tranche
 
+its NOT big-5
+CN-GB sort-of works...
+iconv: illegal input sequence at position 7594
+CN no
+GB no
+GB2312 no
+GB13000 ---- yes
+GB18030 -- yes!
+GBK -- yes
+
+use 7z -x not unzip
+iconv -f  GB18030 -t UTF-8 
+find *.txt | iconv -f  GB18030 -t UTF-8  | xargs 
+
+find *.txt | xargs -I foobar cat foobar | iconv -f  GB18030 -t UTF-8 > uh 
+find *.txt | xargs -I foobar cat foobar | iconv -f  GB18030 -t UTF-8 > `echo foobar | iconv -f  GB18030 -t UTF-8`
+
+find tmp/*.txt | while read f; do cat $f | iconv -f  GB18030 -t UTF-8 >
+foo; echo $f | iconv -f  GB18030 -t UTF-8  ; done
+
+find tmp/*.txt | while read f; do cat x > `echo $f | iconv -f  GB18030 -t UTF-8`  ; done
+find tmp/*.txt | while read f; do cat $f | iconv -f  GB18030 -t UTF-8  >
+`echo $f.utf8 | iconv -f  GB18030 -t UTF-8` ; done
+
+find tmp/*.txt | while read f; do cat $f | iconv -f  GB18030 -t UTF-8  >
+foo; mv foo `echo $f.utf8 | iconv -f  GB18030 -t UTF-8` ; done
 
 =========================================================================
 

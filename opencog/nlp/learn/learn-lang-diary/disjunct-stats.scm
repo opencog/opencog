@@ -662,7 +662,7 @@
 (define psls (add-pair-stars pslon))
 (define pss (batch-similarity psls #f #f 0.1))
 (pss 'batch-compute)
-(pss 'paralel-batch 4)
+(pss 'paralel-batch 3)
 
 (cog-map-type ato 'SimilarityLink)
 
