@@ -6852,7 +6852,28 @@ Random-planar-tree parsed books from tranche-1, 2, 3, 4 and 5.
 MST-parsed tranche-1, 2, 3 and 4. Contains pair-MI values; does NOT
 contain any disjunct marginals.
 
-STATUS: in press
+STATUS: good
+DATE: 8 August 2017
+REASON: Best so far, I think.  Same issues as en_pairs_rfive_mone
+
+                        List of relations
+ Schema |    Name    | Type  | Owner  |    Size    | Description 
+--------+------------+-------+--------+------------+-------------
+ public | atoms      | table | ubuntu | 9598 MB    | 
+ public | spaces     | table | ubuntu | 40 kB      | 
+ public | typecodes  | table | ubuntu | 56 kB      | 
+ public | valuations | table | ubuntu | 12 GB      | 
+ public | values     | table | ubuntu | 8192 bytes | 
+`
+select count(*) from atoms;      -- 106482665 = 106M = 12M more
+select count(*) from valuations; -- 123419676 = 123M =  7M more
+
+11069504769 bytes uncompressed = 11.1 GBytes
+
+
+eff6127b82ab205502bc1f9e8b4e139d  en_pairs_rfive_mfour.sql
+
+
 
 ==================================================================
 zh_pairs_one
@@ -6919,7 +6940,7 @@ RMS Count      2.8231E+5    2.3990E+5     41.40        37.42
 zen_pairs
 ---------
 Mandarin word-pairs. Segmentation into words done by Ruiting. Does
-NOT include pair-MI stats.
+NOT include pair-MI stats. This is the alpha-segmented-1 texts only.
 
 STATUS: good
 DATE: 17 July 2017
@@ -6947,7 +6968,8 @@ fe8a58ae4f66f61c57da90a92d5787c3  zen_pairs.sql
 zen_pairs_mi
 ------------
 Mandarin word-pairs. Segmentation into words done by Ruiting.
-Includes word-pair MI statstics.
+This is the alpha-segmented-1 texts only.  Includes word-pair
+MI statstics.
 
 STATUS: good
 DATE: 17 July 2017
@@ -6989,7 +7011,9 @@ b4e48f00a94fa8d3d1d08e8331d0d84a9  zen_pairs_mi.sql
 zen_pairs_mst
 -------------
 Mandarin word-pairs. Segmentation into words done by Ruiting.
-Includes word-pair MI statstics, disjuncts and disjunct-MI.
+This is the alpha-segmented-1 texts only.  Includes word-pair
+MI statstics, disjuncts and disjunct-MI. MST texts were the
+same alpha-segmented-1 texts.
 
 STATUS: good
 DATE: 17 July 2017
@@ -12948,6 +12972,11 @@ find alpha-data   |wc 1018949
 
 mst+gamma+beta= 1018982 - 23 = 1018959 - crap = alpha-data
 
+zh-wp-tranche-1
+
+todo:
+-- maybe save zh_pairs_mst
+-- maybe copy tranche
 
 
 =========================================================================
