@@ -30,8 +30,8 @@
 )
 
 ;; Define pln-bc for convenience
-(define* (pln-bc target #:key (trace-as #f))
-  (cog-bc pln-rbs target #:trace-as trace-as))
+(define* (pln-bc . args)
+  (apply cog-bc (cons pln-rbs args)))
 
 ;;;;;;;;;;;;;;;;
 ;; Load rules ;;
