@@ -1,6 +1,13 @@
 #!/bin/bash
 #
-# Download Chinese book texts; convert to utf8
+# Download Chinese book texts; convert to utf8.
+#
+# The downloaded books are placed into the whole-books directory.
+# Edit the `seq` line to change how many get downloaded.
+# Edit the NUM line to change the range of books downloaded.
+# After running the script, verify that the `tmp` directory has
+# been deleted; if not, then whatever junk is in there needs to
+# be dealt with.
 #
 mkdir tmp
 mkdir whole-books
@@ -26,3 +33,6 @@ for f in `seq 1 12`; do
 
 	mv tmp/*.txt.utf8 whole-books
 done
+
+# Remove the tmp directory, if its empty.
+rmdir tmp

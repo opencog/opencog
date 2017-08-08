@@ -12991,18 +12991,8 @@ use 7z -x not unzip
 iconv -f  GB18030 -t UTF-8 
 find *.txt | iconv -f  GB18030 -t UTF-8  | xargs 
 
-find *.txt | xargs -I foobar cat foobar | iconv -f  GB18030 -t UTF-8 > uh 
-find *.txt | xargs -I foobar cat foobar | iconv -f  GB18030 -t UTF-8 > `echo foobar | iconv -f  GB18030 -t UTF-8`
+find tmp/*.txt | while read f; do cat $f | iconv -f  GB18030 -t UTF-8  > `echo $f.utf8 | iconv -f  GB18030 -t UTF-8`; rm $f ; done
 
-find tmp/*.txt | while read f; do cat $f | iconv -f  GB18030 -t UTF-8 >
-foo; echo $f | iconv -f  GB18030 -t UTF-8  ; done
-
-find tmp/*.txt | while read f; do cat x > `echo $f | iconv -f  GB18030 -t UTF-8`  ; done
-find tmp/*.txt | while read f; do cat $f | iconv -f  GB18030 -t UTF-8  >
-`echo $f.utf8 | iconv -f  GB18030 -t UTF-8` ; done
-
-find tmp/*.txt | while read f; do cat $f | iconv -f  GB18030 -t UTF-8  >
-foo; mv foo `echo $f.utf8 | iconv -f  GB18030 -t UTF-8` ; done
 
 =========================================================================
 
