@@ -158,3 +158,10 @@
   (DefinedSchemaNode "contraposition-implication-rule"))
 (DefineLink contraposition-implication-rule-name
   contraposition-implication-rule)
+
+(define contraposition-inheritance-rule
+  (gen-contraposition-rule InheritanceLink))
+(define contraposition-inheritance-rule-name
+  (DefinedSchemaNode "contraposition-inheritance-rule"))
+(DefineLink contraposition-inheritance-rule-name
+  contraposition-inheritance-rule)

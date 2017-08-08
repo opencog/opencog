@@ -29,29 +29,46 @@
    (ConceptNode "URE")
 )
 
-;; Define pln-fc and pln-bc for convenience
-(define (pln-fc source) (cog-fc pln-rbs source))
-(define (pln-bc target vardecl) (cog-bc pln-rbs target #:vardecl vardecl))
+;; Define pln-bc for convenience
+(define* (pln-bc . args)
+  (apply cog-bc (cons pln-rbs args)))
 
 ;;;;;;;;;;;;;;;;
 ;; Load rules ;;
 ;;;;;;;;;;;;;;;;
 
 ;; Load the rules. Either w.r.t this file path
+(add-to-load-path "../../../opencog/pln/rules/")
 (add-to-load-path "../../../opencog/pln/meta-rules/")
 
+;; TODO: add more rules
 (define rule-filenames
-  (list "predicate/universal-full-instantiation.scm"))
+  (list "propositional/contraposition.scm"
+        "propositional/modus-ponens.scm"
+        "term/deduction.scm"
+        )
+  )
 (for-each load-from-path rule-filenames)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Associate rules to PLN ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+;; TODO: add more rules
 ; List the rules and their weights.
 (define rules
   (list
-    (list universal-full-instantiation-forall-1ary-meta-rule-name 1)))
+        (list modus-ponens-inheritance-rule-name 1)
+        (list modus-ponens-implication-rule-name 1)
+        (list modus-ponens-subset-rule-name 1)
+        (list contraposition-inheritance-rule-name 1)
+        (list contraposition-implication-rule-name 1)
+        (list crisp-contraposition-implication-scope-rule-name 1)
+        (list deduction-inheritance-rule-name 1)
+        (list deduction-implication-rule-name 1)
+        (list deduction-subset-rule-name 1)
+        )
+  )
 
 ;; Associate rules to PLN
 (ure-add-rules pln-rbs rules)
@@ -61,10 +78,13 @@
 ;;;;;;;;;;;;;;;;;;;;;;
 
 ;; Termination criteria parameters
-(ure-set-num-parameter pln-rbs "URE:maximum-iterations" 10)
+(ure-set-num-parameter pln-rbs "URE:maximum-iterations" 100)
 
 ;; Attention allocation (0 to disable it, 1 to enable it)
 (ure-set-fuzzy-bool-parameter pln-rbs "URE:attention-allocation" 0)
 
 ;; Complexity penalty
 (ure-set-num-parameter pln-rbs "URE:BC:complexity-penalty" 1)
+
+;; BIT reduction parameters
+(ure-set-num-parameter pln-rbs "URE:BC:maximum-bit-size" 100000)
