@@ -1,10 +1,11 @@
 # LG-Dict
 
-Modules and functions for generating a LG dictionary entry of a word in the atomspace.
+Modules and functions for generating a LG dictionary entry of a word
+in the atomspace.
 
-## LGDictModule
+## Scheme module `(opencog nlp lg-dict)`
 
-Contains the following scheme primitives coded in C++
+Contains the following scheme primitives:
 
 - `(lg-get-dict-entry (WordNode "..."))`
 
@@ -74,7 +75,15 @@ Contains the following scheme primitives coded in C++
   This function does not care which connector is "-" and which is "+", as long
   as they are different.
 
-## utilities.scm
+## TODO
+The core design of this module is not optimal.
 
-Contains more simple scheme codes for working with disjuncts.
+* It currently allows only one dictionary to be open at a time, i.e.
+  there can only be one single global dictionary that is open. This
+  should probably be fixed.
+
+* The `lg-get-dict-entry` returns a SetLink. It is deprecated; use
+  the `lg-dict-entry` method instead. Alternately, perhaps the
+  `lg-get-dict-entry` could be redesigned to return a LinkValue,
+  instead?
 

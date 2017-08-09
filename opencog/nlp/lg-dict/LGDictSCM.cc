@@ -136,6 +136,35 @@ void LGDictSCM::do_lg_dictclose(void)
 }
 
 /**
+ * Implementation of the "lg-dict-entry" scheme primitive.
+ *
+ * The corresponding implementation for the "lg-dict-entry"
+ * primitive, which accepts a WordNode as input and places
+ * the LG dictionary entry into the atomspace.
+ *
+ * @param h   the input WordNode containing the word string
+ */
+void LGDictSCM::do_lg_dict_entry(Handle h)
+{
+	if (h->getType() != WORD_NODE) return;
+
+	// Check if the dictionary entry is already in the atomspace.
+	HandleSeq qExisting;
+	h->getIncomingSetByType(std::back_inserter(qExisting), LG_DISJUNCT);
+
+	// Avoid the disjuncts building if entries exist.
+	if (not qExisting.empty()) return;
+
+	if (nullptr == m_pDictionary)
+		m_pDictionary = dictionary_create_default_lang();
+
+	AtomSpace* pAS = SchemeSmob::ss_get_env_as("lg-dict-entry");
+	LGDictReader reader(m_pDictionary, pAS);
+
+	reader.getAtom(h->getName());
+}
+
+/**
  * Implementation of the "lg-get-dict-entry" scheme primitive.
  *
  * The corresponding implementation for the "lg-get-dict-entry"
@@ -152,8 +181,6 @@ void LGDictSCM::do_lg_dictclose(void)
  */
 Handle LGDictSCM::do_lg_get_dict_entry(Handle h)
 {
-	AtomSpace* pAS = SchemeSmob::ss_get_env_as("lg-get-dict-entry");
-
 	if (h->getType() != WORD_NODE)
 		return Handle::UNDEFINED;
 
@@ -167,6 +194,8 @@ Handle LGDictSCM::do_lg_get_dict_entry(Handle h)
 
 	if (nullptr == m_pDictionary)
 		m_pDictionary = dictionary_create_default_lang();
+
+	AtomSpace* pAS = SchemeSmob::ss_get_env_as("lg-get-dict-entry");
 	LGDictReader reader(m_pDictionary, pAS);
 
 	return reader.getAtom(h->getName());
