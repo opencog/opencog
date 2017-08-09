@@ -12751,8 +12751,10 @@ Fuu
 
 (define (cntone ato)
 	(define val (cog-value ato cos-key))
-	(if (not (null? val)) 
-; (and (not (null? val)) (< 1e-10 (cog-value-ref val 0)))
+	(if
+; (not (null? val))
+;  (and (not (null? val)) (< 1e-10 (cog-value-ref val 0)))
+  (and (not (null? val)) (<= 0.1 (cog-value-ref val 0)))
 (begin (set! scnt (+ scnt 1))
   (store-atom ato)
 )) #f)
@@ -12760,6 +12762,8 @@ Fuu
 (define scnt 0)
 (cog-map-type cntone 'SimilarityLink)
 (define (rpt) (set! scnt 0) (cog-map-type cntone 'SimilarityLink) scnt)
+
+
 
 2932
 3052 + (69*68)/2 - (37*36)/2 = 4732
@@ -12992,6 +12996,8 @@ iconv -f  GB18030 -t UTF-8
 find *.txt | iconv -f  GB18030 -t UTF-8  | xargs 
 
 find tmp/*.txt | while read f; do cat $f | iconv -f  GB18030 -t UTF-8  > `echo $f.utf8 | iconv -f  GB18030 -t UTF-8`; rm $f ; done
+
+
 
 
 =========================================================================

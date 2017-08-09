@@ -31,10 +31,8 @@
 #include "LGDictReader.h"
 #include "LGDictUtils.h"
 
-
 using namespace opencog::nlp;
 using namespace opencog;
-
 
 /**
  * The constructor for LGDictSCM.
@@ -88,14 +86,12 @@ void LGDictSCM::init()
 {
     m_pDictionary = dictionary_create_default_lang();
 
-#ifdef HAVE_GUILE
     define_scheme_primitive("lg-get-dict-entry",
          &LGDictSCM::do_lg_get_dict_entry, this, "nlp lg-dict");
     define_scheme_primitive("lg-conn-type-match?",
          &LGDictSCM::do_lg_conn_type_match, this, "nlp lg-dict");
     define_scheme_primitive("lg-conn-linkable?",
          &LGDictSCM::do_lg_conn_linkable, this, "nlp lg-dict");
-#endif
 }
 
 /**
@@ -109,7 +105,6 @@ void LGDictSCM::init()
  */
 Handle LGDictSCM::do_lg_get_dict_entry(Handle h)
 {
-#ifdef HAVE_GUILE
     AtomSpace* pAS = SchemeSmob::ss_get_env_as("lg-get-dict-entry");
 
     if (h->getType() == WORD_NODE)
@@ -128,10 +123,6 @@ Handle LGDictSCM::do_lg_get_dict_entry(Handle h)
     }
 
     return Handle::UNDEFINED;
-
-#else
-    return Handle::UNDEFINED;
-#endif
 }
 
 /**
@@ -143,11 +134,7 @@ Handle LGDictSCM::do_lg_get_dict_entry(Handle h)
  */
 bool LGDictSCM::do_lg_conn_type_match(Handle h1, Handle h2)
 {
-#ifdef HAVE_GUILE
     return lg_conn_type_match(h1, h2);
-#else
-    return false;
-#endif
 }
 
 /**
@@ -159,13 +146,8 @@ bool LGDictSCM::do_lg_conn_type_match(Handle h1, Handle h2)
  */
 bool LGDictSCM::do_lg_conn_linkable(Handle h1, Handle h2)
 {
-#ifdef HAVE_GUILE
     return lg_conn_linkable(h1, h2);
-#else
-    return false;
-#endif
 }
-
 
 void opencog_nlp_lgdict_init(void)
 {
