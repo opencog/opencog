@@ -71,15 +71,15 @@ LGDictReader::~LGDictReader()
  * @param word   the input word string
  * @return       the handle to the newly created atom
  */
-Handle LGDictReader::getAtom(const std::string& word)
+HandleSeq LGDictReader::getDictEntry(const std::string& word)
 {
     // See if we know about this word, or not.
     Dict_node* dn_head = dictionary_lookup_list(_dictionary, word.c_str());
 
-    if (!dn_head)
-        return Handle::UNDEFINED;
-
     HandleSeq outgoing;
+
+    if (!dn_head) return outgoing;
+
     Handle hWord = _as->add_node(WORD_NODE, word);
 
     for (Dict_node* dn = dn_head; dn; dn = dn->right)
@@ -91,8 +91,7 @@ Handle LGDictReader::getAtom(const std::string& word)
     }
 
     free_lookup_list(_dictionary, dn_head);
-
-    return Handle(createLink(outgoing, SET_LINK));
+    return outgoing;
 }
 
 /**

@@ -153,11 +153,11 @@ void LGDictSCM::do_lg_dict_entry(Handle h)
 	if (h->getType() != WORD_NODE) return;
 
 	// Check if the dictionary entry is already in the atomspace.
-	HandleSeq qExisting;
-	h->getIncomingSetByType(std::back_inserter(qExisting), LG_DISJUNCT);
+	HandleSeq djset;
+	h->getIncomingSetByType(std::back_inserter(djset), LG_DISJUNCT);
 
 	// Avoid the disjuncts building if entries exist.
-	if (not qExisting.empty()) return;
+	if (not djset.empty()) return;
 
 	if (nullptr == m_pDictionary)
 		m_pDictionary = dictionary_create_default_lang();
@@ -165,7 +165,7 @@ void LGDictSCM::do_lg_dict_entry(Handle h)
 	AtomSpace* pAS = SchemeSmob::ss_get_env_as("lg-dict-entry");
 	LGDictReader reader(m_pDictionary, pAS);
 
-	reader.getAtom(h->getName());
+	reader.getDictEntry(h->getName());
 }
 
 /**
@@ -189,12 +189,12 @@ Handle LGDictSCM::do_lg_get_dict_entry(Handle h)
 		return Handle::UNDEFINED;
 
 	// Check if the dictionary entry is already in the atomspace.
-	HandleSeq qExisting;
-	h->getIncomingSetByType(std::back_inserter(qExisting), LG_DISJUNCT);
+	HandleSeq djset;
+	h->getIncomingSetByType(std::back_inserter(djset), LG_DISJUNCT);
 
 	// Avoid the disjuncts building if entries exist.
-	if (not qExisting.empty())
-		return Handle(createLink(qExisting, SET_LINK));
+	if (not djset.empty())
+		return Handle(createLink(djset, SET_LINK));
 
 	if (nullptr == m_pDictionary)
 		m_pDictionary = dictionary_create_default_lang();
@@ -202,7 +202,8 @@ Handle LGDictSCM::do_lg_get_dict_entry(Handle h)
 	AtomSpace* pAS = SchemeSmob::ss_get_env_as("lg-get-dict-entry");
 	LGDictReader reader(m_pDictionary, pAS);
 
-	return reader.getAtom(h->getName());
+	djset = reader.getDictEntry(h->getName());
+	return Handle(createLink(djset, SET_LINK));
 }
 
 /**

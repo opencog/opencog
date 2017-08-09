@@ -87,3 +87,9 @@ The core design of this module is not optimal.
   `lg-get-dict-entry` could be redesigned to return a LinkValue,
   instead?
 
+* Many of the utilities take an explicit AtomSpace argument, and poke
+  atoms into the atomspace. This is not really needed; they could more
+  easily just return assorted atoms to the user, who could then perform
+  a single bulk insert into whatever atomspace they need/desire. This
+  would result in faster, more efficient code, since bulk inserts are
+  faster than piecemeal inserts.

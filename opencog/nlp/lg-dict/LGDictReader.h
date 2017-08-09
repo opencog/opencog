@@ -47,7 +47,7 @@ public:
     LGDictReader(Dictionary, AtomSpace*);
     ~LGDictReader();
 
-    Handle getAtom(const std::string& word);
+    HandleSeq getDictEntry(const std::string& word);
 
 private:
     LGDictExpContainer lg_exp_to_container(Exp*);
