@@ -11,6 +11,25 @@
 
 ; ---------------------------------------------------------------------
 
+(export lg-dict-open)
+(set-procedure-property! lg-dict-open 'documentation
+"
+  lg-dict-open  NAME
+     Open the dictionary named in the node NAME.  The NAME must
+     be a Node whose string value indicates a dictionary that can
+     subsequently be found in the file system. This sets a single
+     global dictionary, and all subsequent LG access routines will
+     access this dictionary.
+")
+
+(export lg-dict-close)
+(set-procedure-property! lg-dict-close 'documentation
+"
+  lg-dict-close
+     Close the single global dictionary.
+")
+
+(export lg-get-dict-entry)
 (set-procedure-property! lg-get-dict-entry 'documentation
 "
   lg-get-dict-entry  WORD
@@ -21,6 +40,7 @@
      (cog-incoming-by-type WORD 'LgDisjunct)
 ")
 
+(export lg-conn-type-match?)
 (set-procedure-property! lg-conn-type-match? 'documentation
 "
   lg-conn-type-match? CON-A CON-B
@@ -32,6 +52,7 @@
      connector matching rules.
 ")
 
+(export lg-conn-linkable?)
 (set-procedure-property! lg-conn-linkable? 'documentation
 "
   lg-conn-linkable? CON-A CON-B
