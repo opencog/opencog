@@ -92,9 +92,13 @@ void LGDictSCM::init()
 	define_scheme_primitive("lg-dict-close",
 		 &LGDictSCM::do_lg_dictclose, this, "nlp lg-dict");
 
-	// XXX FIXME rename to lg-dict-entry to be consistent
+	define_scheme_primitive("lg-dict-entry",
+		 &LGDictSCM::do_lg_dict_entry, this, "nlp lg-dict");
+
+	// XXX this is deprecated.
 	define_scheme_primitive("lg-get-dict-entry",
 		 &LGDictSCM::do_lg_get_dict_entry, this, "nlp lg-dict");
+
 	define_scheme_primitive("lg-conn-type-match?",
 		 &LGDictSCM::do_lg_conn_type_match, this, "nlp lg-dict");
 	define_scheme_primitive("lg-conn-linkable?",

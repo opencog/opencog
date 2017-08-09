@@ -29,6 +29,17 @@
      Close the single global dictionary.
 ")
 
+(export lg-dict-entry)
+(set-procedure-property! lg-dict-entry 'documentation
+"
+  lg-dict-entry  WORD
+     Fetch the dictionary entry for WORD and place it in the atomspace.
+     WORD must be a WordNode.
+
+     The dictionary entry can subsequently be obtained by calling
+     (cog-incoming-by-type WORD 'LgDisjunct)
+")
+
 (export lg-get-dict-entry)
 (set-procedure-property! lg-get-dict-entry 'documentation
 "
@@ -38,6 +49,8 @@
 
      The dictionary entry can subsequently be obtained by calling
      (cog-incoming-by-type WORD 'LgDisjunct)
+
+     DEPRECATED! Use lg-dict-entry instead!
 ")
 
 (export lg-conn-type-match?)
