@@ -28,10 +28,8 @@
 
 #include "LGDictReader.h"
 
-
 using namespace opencog::nlp;
 using namespace opencog;
-
 
 /**
  * Constructor of the LGDictReader class.
@@ -42,7 +40,6 @@ using namespace opencog;
 LGDictReader::LGDictReader(Dictionary pDict, AtomSpace* pAS)
     : _dictionary(pDict), _as(pAS)
 {
-
 }
 
 /**
@@ -50,7 +47,6 @@ LGDictReader::LGDictReader(Dictionary pDict, AtomSpace* pAS)
  */
 LGDictReader::~LGDictReader()
 {
-
 }
 
 /**

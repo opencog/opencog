@@ -42,6 +42,7 @@ LGDictSCM::LGDictSCM()
 	static bool is_init = false;
 	if (is_init) return;
 	is_init = true;
+	m_pDictionary = nullptr;
 	scm_with_guile(init_in_guile, this);
 }
 
@@ -50,7 +51,8 @@ LGDictSCM::LGDictSCM()
  */
 LGDictSCM::~LGDictSCM()
 {
-	dictionary_delete(m_pDictionary);
+	if (m_pDictionary)
+		dictionary_delete(m_pDictionary);
 }
 
 /**
@@ -84,14 +86,53 @@ void LGDictSCM::init_in_module(void* data)
  */
 void LGDictSCM::init()
 {
-	m_pDictionary = dictionary_create_default_lang();
+	define_scheme_primitive("lg-dict-open",
+		 &LGDictSCM::do_lg_dictopen, this, "nlp lg-dict");
 
+	define_scheme_primitive("lg-dict-close",
+		 &LGDictSCM::do_lg_dictclose, this, "nlp lg-dict");
+
+	// XXX FIXME rename to lg-dict-entry to be consistent
 	define_scheme_primitive("lg-get-dict-entry",
 		 &LGDictSCM::do_lg_get_dict_entry, this, "nlp lg-dict");
 	define_scheme_primitive("lg-conn-type-match?",
 		 &LGDictSCM::do_lg_conn_type_match, this, "nlp lg-dict");
 	define_scheme_primitive("lg-conn-linkable?",
 		 &LGDictSCM::do_lg_conn_linkable, this, "nlp lg-dict");
+}
+
+/**
+ * Implementation of the "lg-dict-open" scheme primitive.
+ *
+ * XXX FIXME the current API allows only one global dictionary
+ * at a time.  Some future version should fix this, to allow
+ * multiple dictionaries at a time, right?  This is a low-priority
+ * though, it seems.
+ */
+void LGDictSCM::do_lg_dictopen(Handle h)
+{
+	if (not h->isNode()) return;
+
+	if (m_pDictionary)
+		dictionary_delete(m_pDictionary);
+
+	const char * lang = h->getName().c_str();
+	m_pDictionary = dictionary_create_lang(lang);
+}
+
+/**
+ * Implementation of the "lg-dict-close" scheme primitive.
+ *
+ * XXX FIXME the current API allows only one global dictionary
+ * at a time.  Some future version should fix this, to allow
+ * multiple dictionaries at a time, right?  This is a low-priority
+ * though, it seems.
+ */
+void LGDictSCM::do_lg_dictclose(void)
+{
+	if (m_pDictionary)
+		dictionary_delete(m_pDictionary);
+	m_pDictionary = nullptr;
 }
 
 /**
@@ -124,6 +165,8 @@ Handle LGDictSCM::do_lg_get_dict_entry(Handle h)
 	if (not qExisting.empty())
 		return Handle(createLink(qExisting, SET_LINK));
 
+	if (nullptr == m_pDictionary)
+		m_pDictionary = dictionary_create_default_lang();
 	LGDictReader reader(m_pDictionary, pAS);
 
 	return reader.getAtom(h->getName());

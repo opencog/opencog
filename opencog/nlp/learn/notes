@@ -13004,6 +13004,8 @@ lg-conn-linkable?
 lg_conn_linkable CON CON
 lg_conn_type_match
 
+LGDictReader
+
 
 =========================================================================
 
