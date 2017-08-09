@@ -8,3 +8,4 @@
 (load "ghost/translator.scm")
 (load "ghost/matcher.scm")
 (load "ghost/cs-parse.scm")
+(load "ghost/test.scm")
