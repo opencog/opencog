@@ -39,10 +39,10 @@ using namespace opencog;
  */
 LGDictSCM::LGDictSCM()
 {
-    static bool is_init = false;
-    if (is_init) return;
-    is_init = true;
-    scm_with_guile(init_in_guile, this);
+	static bool is_init = false;
+	if (is_init) return;
+	is_init = true;
+	scm_with_guile(init_in_guile, this);
 }
 
 /**
@@ -50,7 +50,7 @@ LGDictSCM::LGDictSCM()
  */
 LGDictSCM::~LGDictSCM()
 {
-    dictionary_delete(m_pDictionary);
+	dictionary_delete(m_pDictionary);
 }
 
 /**
@@ -63,9 +63,9 @@ LGDictSCM::~LGDictSCM()
  */
 void* LGDictSCM::init_in_guile(void* self)
 {
-    scm_c_define_module("opencog nlp lg-dict", init_in_module, self);
-    scm_c_use_module("opencog nlp lg-dict");
-    return NULL;
+	scm_c_define_module("opencog nlp lg-dict", init_in_module, self);
+	scm_c_use_module("opencog nlp lg-dict");
+	return NULL;
 }
 
 /**
@@ -75,8 +75,8 @@ void* LGDictSCM::init_in_guile(void* self)
  */
 void LGDictSCM::init_in_module(void* data)
 {
-    LGDictSCM* self = (LGDictSCM*) data;
-    self->init();
+	LGDictSCM* self = (LGDictSCM*) data;
+	self->init();
 }
 
 /**
@@ -84,14 +84,14 @@ void LGDictSCM::init_in_module(void* data)
  */
 void LGDictSCM::init()
 {
-    m_pDictionary = dictionary_create_default_lang();
+	m_pDictionary = dictionary_create_default_lang();
 
-    define_scheme_primitive("lg-get-dict-entry",
-         &LGDictSCM::do_lg_get_dict_entry, this, "nlp lg-dict");
-    define_scheme_primitive("lg-conn-type-match?",
-         &LGDictSCM::do_lg_conn_type_match, this, "nlp lg-dict");
-    define_scheme_primitive("lg-conn-linkable?",
-         &LGDictSCM::do_lg_conn_linkable, this, "nlp lg-dict");
+	define_scheme_primitive("lg-get-dict-entry",
+		 &LGDictSCM::do_lg_get_dict_entry, this, "nlp lg-dict");
+	define_scheme_primitive("lg-conn-type-match?",
+		 &LGDictSCM::do_lg_conn_type_match, this, "nlp lg-dict");
+	define_scheme_primitive("lg-conn-linkable?",
+		 &LGDictSCM::do_lg_conn_linkable, this, "nlp lg-dict");
 }
 
 /**
@@ -138,7 +138,7 @@ Handle LGDictSCM::do_lg_get_dict_entry(Handle h)
  */
 bool LGDictSCM::do_lg_conn_type_match(Handle h1, Handle h2)
 {
-    return lg_conn_type_match(h1, h2);
+	return lg_conn_type_match(h1, h2);
 }
 
 /**
@@ -150,10 +150,10 @@ bool LGDictSCM::do_lg_conn_type_match(Handle h1, Handle h2)
  */
 bool LGDictSCM::do_lg_conn_linkable(Handle h1, Handle h2)
 {
-    return lg_conn_linkable(h1, h2);
+	return lg_conn_linkable(h1, h2);
 }
 
 void opencog_nlp_lgdict_init(void)
 {
-    static LGDictSCM lgdict;
+	static LGDictSCM lgdict;
 }

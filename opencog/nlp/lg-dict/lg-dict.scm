@@ -19,10 +19,31 @@
 
      The dictionary entry can subsequently be obtained by calling
      (cog-incoming-by-type WORD 'LgDisjunct)
+")
+
+(set-procedure-property! lg-conn-type-match? 'documentation
 "
-)
+  lg-conn-type-match? CON-A CON-B
+     Return #t if connector CON-A matches CON-B, else return #f.
+     Both CON-A and CON-B must be of type LgConnector.
+
+     This does NOT check connector direction agreement; it only
+     checks the connector strings, using the standard Link Grammar
+     connector matching rules.
+")
+
+(set-procedure-property! lg-conn-linkable? 'documentation
+"
+  lg-conn-linkable? CON-A CON-B
+     Return #t if connector CON-A can link to CON-B, else return #f.
+     Both CON-A and CON-B must be of type LgConnector.
+
+     This checks the connector strings for linkability, using the
+     standard Link Grammar connector matching rules.
+")
 
 ; ---------------------------------------------------------------------
+
 (define-public (lg-similar? word1 word2)
 "
   lg-similar? WORD1 WORD2 - Check if two words' LG entries intersect
@@ -43,19 +64,20 @@
 )
 
 ; ---------------------------------------------------------------------
+
 (define-public (lg-conn-get-type conn)
 "
-  lg-conn-get-type - Get the LgConnectorNode out of LgConnector link
+  lg-conn-get-type CON - Get the LgConnectorNode out of LgConnector link
 "
-	(car (cog-outgoing-set conn))
+	(cog-outgoing-atom conn 0)
 )
 
 ; ---------------------------------------------------------------------
 (define-public (lg-conn-get-dir conn)
 "
-  lg-conn-get-dir - Get the LgConnDirNode out of LgConnector link
+  lg-conn-get-dir CON - Get the LgConnDirNode out of LgConnector link
 "
-	(cadr (cog-outgoing-set conn))
+	(cog-outgoing-atom conn 1)
 )
 
 ; ---------------------------------------------------------------------

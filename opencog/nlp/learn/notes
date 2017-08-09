@@ -12997,7 +12997,12 @@ find *.txt | iconv -f  GB18030 -t UTF-8  | xargs
 
 find tmp/*.txt | while read f; do cat $f | iconv -f  GB18030 -t UTF-8  > `echo $f.utf8 | iconv -f  GB18030 -t UTF-8`; rm $f ; done
 
+lg-get-dict-entry  WORD
+lg-conn-type-match?
+lg-conn-linkable?
 
+lg_conn_linkable CON CON
+lg_conn_type_match
 
 
 =========================================================================
