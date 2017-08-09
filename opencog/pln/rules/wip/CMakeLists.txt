@@ -40,7 +40,6 @@ ADD_GUILE_MODULE(FILES
 	inheritance-to-member.scm
 	intensional-similarity-evaluation.scm
 	member-to-inheritance.scm
-	modus-ponens.scm
 	not-introduction.scm
 	not-elimination.scm
 	not-simplification.scm
