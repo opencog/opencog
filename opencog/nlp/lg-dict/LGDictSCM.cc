@@ -97,32 +97,36 @@ void LGDictSCM::init()
 /**
  * Implementation of the "lg-get-dict-entry" scheme primitive.
  *
- * The corresponding implementation for the "lg-get-dict-entry" primitive,
- * which accepts a WordNode as input and output the LG dictionary atom.
+ * The corresponding implementation for the "lg-get-dict-entry"
+ * primitive, which accepts a WordNode as input and output the LG
+ * dictionary atom.
+ *
+ * XXX FIXME! This should NOT return a SetLink!  It should return
+ * nothing at all; users can already get the needed data by calling
+ * getIncomingSetByType() themselves.  SetLink just clogs the atomspace
+ * with junk.
  *
  * @param h   the input WordNode containing the word string
  * @return    the LG dictionary atom
  */
 Handle LGDictSCM::do_lg_get_dict_entry(Handle h)
 {
-    AtomSpace* pAS = SchemeSmob::ss_get_env_as("lg-get-dict-entry");
+	AtomSpace* pAS = SchemeSmob::ss_get_env_as("lg-get-dict-entry");
 
-    if (h->getType() == WORD_NODE)
-    {
-		// check if the dictionary entry is already in the atomspace
-		HandleSeq qExisting;
-		h->getIncomingSetByType(std::back_inserter(qExisting), LG_DISJUNCT);
+	if (h->getType() != WORD_NODE)
+		return Handle::UNDEFINED;
 
-		// avoid the disjuncts building if entries exist
-		if (not qExisting.empty())
-			return Handle(createLink(qExisting, SET_LINK));
+	// Check if the dictionary entry is already in the atomspace.
+	HandleSeq qExisting;
+	h->getIncomingSetByType(std::back_inserter(qExisting), LG_DISJUNCT);
 
-        LGDictReader reader(m_pDictionary, pAS);
+	// Avoid the disjuncts building if entries exist.
+	if (not qExisting.empty())
+		return Handle(createLink(qExisting, SET_LINK));
 
-        return reader.getAtom(h->getName());
-    }
+	LGDictReader reader(m_pDictionary, pAS);
 
-    return Handle::UNDEFINED;
+	return reader.getAtom(h->getName());
 }
 
 /**

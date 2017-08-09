@@ -10,9 +10,22 @@
 (load-extension "liblg-dict" "opencog_nlp_lgdict_init")
 
 ; ---------------------------------------------------------------------
+
+(set-procedure-property! lg-get-dict-entry 'documentation
+"
+  lg-get-dict-entry  WORD
+     Fetch the dictionary entry for WORD and place it in the atomspace.
+     WORD must be a WordNode.
+
+     The dictionary entry can subsequently be obtained by calling
+     (cog-incoming-by-type WORD 'LgDisjunct)
+"
+)
+
+; ---------------------------------------------------------------------
 (define-public (lg-similar? word1 word2)
 "
-  lg-similar? - Check if two words' LG entries intersect
+  lg-similar? WORD1 WORD2 - Check if two words' LG entries intersect
 "
 	(define (get-set w)
 		(define roots (filter
