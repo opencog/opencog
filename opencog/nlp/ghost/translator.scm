@@ -195,15 +195,22 @@
              (MemberLink (Set (list-ref proc-terms 3)) ghost-no-constant)))
   proc-terms)
 
-(define-public (ghost-execute-action WORDS)
+(define-public (ghost-execute-action ACTION)
   "Say the text and update the internal state."
-  (define txt
-    (string-join (append-map (lambda (n)
-    (if (cog-link? n)
-        (map cog-name (cog-get-all-nodes n))
-        (list (cog-name n))))
-    (cog-outgoing-set WORDS))))
-  ; If there is something to say?
+  (define (extract-txt action)
+    ; TODO: Right now it is extracting text only, but should be extended
+    ; to support actions that contains are not text as well.
+    (string-join (append-map
+      (lambda (a)
+        (cond ((cog-link? a)
+               (list (extract-txt a)))
+              ((equal? 'WordNode (cog-type a))
+               (list (cog-name a)))
+              ; TODO: things other than text
+              (else '())))
+        (cog-outgoing-set action))))
+  (define txt (extract-txt ACTION))
+  ; Is there anything to say?
   (if (not (string-null? (string-trim txt)))
       (cog-execute! (Put (DefinedPredicate "Say") (Node txt))))
   (State ghost-anchor (Concept "Default State"))
@@ -215,16 +222,16 @@
   (list-ref os (random (length os) (random-state-from-platform))))
 
 (Define
-  (DefinedPredicate (ghost-prefix "Pick and Execute Action"))
+  (DefinedSchema (ghost-prefix "Pick and Execute Action"))
   (Lambda (Variable "$x")
-          (Evaluation (GroundedPredicate "scm: ghost-pick&execute-action")
-                      (List (Variable "$x")))))
+          (ExecutionOutput (GroundedSchema "scm: ghost-pick&execute-action")
+                           (List (Variable "$x")))))
 
 (Define
-  (DefinedPredicate (ghost-prefix "Execute Action"))
+  (DefinedSchema (ghost-prefix "Execute Action"))
   (Lambda (Variable "$x")
-          (Evaluation (GroundedPredicate "scm: ghost-execute-action")
-                      (List (Variable "$x")))))
+          (ExecutionOutput (GroundedSchema "scm: ghost-execute-action")
+                           (List (Variable "$x")))))
 
 (define (process-action ACTION)
   "Iterate through each of the ACTIONS and convert them into atomese."
@@ -245,7 +252,8 @@
               ; A function call
               ((equal? 'function (car n))
                (action-function (cadr n) (to-atomese (cddr n))))
-              ; Gather all the action choices
+              ; Gather all the action choices, i.e. a list of actions
+              ; available but only one of them will be executed
               ((equal? 'action-choices (car n))
                (set! choices (append choices (list (List (to-atomese (cdr n))))))
                '())
@@ -255,7 +263,7 @@
           '()
           (list (action-choices choices)))))
   (cog-logger-debug ghost-logger "action: ~a" ACTION)
-  (True (Put (DefinedPredicate (ghost-prefix "Execute Action"))
+  (True (Put (DefinedSchema (ghost-prefix "Execute Action"))
              (List (to-atomese (cdar ACTION))))))
 
 (define* (create-rule PATTERN ACTION #:optional (TOPIC default-topic) NAME)
