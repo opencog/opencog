@@ -49,6 +49,7 @@ protected:
 public:
 	LgDictNode(const std::string&);
 	LgDictNode(const Node&);
+	virtual ~LgDictNode();
 
 	Dictionary get_dictionary(void) const { return _dict; }
 

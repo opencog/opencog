@@ -5,15 +5,16 @@ INCLUDE_DIRECTORIES (
 )
 
 ADD_LIBRARY (lg-dict SHARED
-	LGDictSCM
+	LGDictExpContainer
 	LGDictReader
 	LGDictUtils
-	LGDictExpContainer
+
+	LGDictNode
+
+	LGDictSCM
 )
 
-ADD_DEPENDENCIES (lg-dict
-	nlp_atom_types
-)
+ADD_DEPENDENCIES (lg-dict nlp_atom_types)
 
 TARGET_LINK_LIBRARIES (lg-dict
 	nlp-types
