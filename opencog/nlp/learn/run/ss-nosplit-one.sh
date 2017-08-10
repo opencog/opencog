@@ -19,10 +19,12 @@ filename="$1"
 coghost="$2"
 cogport=$3
 
+splitdir=split-articles
 subdir=submitted-articles
 observe="observe-text"
 
-# Punt if the cogserver has crashed.  Use netcat to ping it.
+# Punt if the cogserver has crashed.
+# Alternate cogserver test: use netcat to ping it.
 haveping=`echo foo | nc $coghost $cogport`
 if [[ $? -ne 0 ]] ; then
 	exit 1
@@ -42,10 +44,14 @@ rest=`echo $filename | cut -d \/ -f 2-6`
 echo "Processing file >>>$rest<<<"
 
 # Create directories if missing
+mkdir -p $(dirname "$splitdir/$rest")
 mkdir -p $(dirname "$subdir/$rest")
 
-# Submit the split article
-cat "$filename" | ./submit-one.pl $coghost $cogport $observe
+# Move article to temp directory, while processing.
+mv "$filename" "$splitdir/$rest"
+
+# Submit the pre-split article
+cat "$splitdir/$rest" | ./submit-one.pl $coghost $cogport $observe
 
 # Punt if the cogserver has crashed (second test,
 # before doing the mv and rm below)
@@ -59,4 +65,4 @@ if [[ -z "$haveserver" ]] ; then
 fi
 
 # Move article to the done-queue
-mv "$filename" "$subdir/$rest"
+mv "$splitdir/$rest" "$subdir/$rest"
