@@ -42,7 +42,15 @@ LgDictNode::~LgDictNode()
 	_dict = nullptr;
 }
 
-Handle LgDictNode::factory(const Handle&)
+Handle LgDictNode::factory(const Handle& base)
 {
-	return Handle();
+	if (LgDictNodeCast(base)) return base;
+	Handle h(createLgDictNode(base->getName()));
+	return h;
+}
+
+/* This runs when the shared lib is loaded. */
+static __attribute__ ((constructor)) void init(void)
+{
+   classserver().addFactory(LG_DICT_NODE, &LgDictNode::factory);
 }
