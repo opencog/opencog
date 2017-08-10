@@ -120,8 +120,12 @@ SPECIFIC_ENTITY_NODE <- NODE
 // Link Grammar dictionary types.
 // See
 // https://github.com/opencog/link-grammar/blob/master/viterbi/README
-// for details on what these mean.
+// for details on what these mean. These are currently used in the
+// sureal codebase.
 //
+// Dictionary. Holds a reference to an LG Dictionary.
+LG_DICT_NODE <- NODE
+
 // Connector: same meaning and syntax as in link-grammar, except that
 // the direction and the multi-connector parts get distinct types.
 LG_CONNECTOR_NODE <- PREDICATE_NODE   // e.g. "MX"
