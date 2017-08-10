@@ -144,21 +144,60 @@ Handle LGParseLink::cvt_linkage(Linkage lkg, int i, const char* idstr,
 	snprintf(parseid, 80, "%s_parse_%d", idstr, i);
 	Handle pnode(as->add_node(PARSE_NODE, parseid));
 
+	// Loop over all the words.
+	HandleSeq wrds;
 	int nwords = linkage_get_num_words(lkg);
 	for (int w=0; w<nwords; w++)
 	{
 		const char* wrd = linkage_get_word(lkg, w);
-printf("dduuude uuisd=%d %s %s\n", i, wrd, parseid);
 		char buff[800] = "";
 		strncat(buff, wrd, 800);
 		strncat(buff, "@", 800);
 		strncat(buff, parseid, 800);
 		Handle winst(as->add_node(WORD_INSTANCE_NODE, buff));
+		wrds.push_back(winst);
+
 		as->add_link(WORD_INSTANCE_LINK, winst, pnode);
 		as->add_link(REFERENCE_LINK, winst,
 			as->add_node(WORD_NODE, wrd));
 		as->add_link(WORD_SEQUENCE_LINK, winst,
 			Handle(createNumberNode(++wcnt)));
+	}
+
+	// Loop over all the links
+	int nlinks = linkage_get_num_links(lkg);
+	for (int lk=0; lk<nlinks; lk++)
+	{
+		int lword = linkage_get_link_lword(lkg, lk);
+		int rword = linkage_get_link_rword(lkg, lk);
+		Handle lst(as->add_link(LIST_LINK, wrds[lword], wrds[rword]));
+
+		// The link
+		const char* label = linkage_get_link_label(lkg, lk);
+		Handle lrel(as->add_node(LINK_GRAMMAR_RELATIONSHIP_NODE, label));
+printf("dduuude lk=%d %d %d %s\n", lk, lword, rword, label);
+		as->add_link(EVALUATION_LINK, lrel, lst);
+
+		// The link instance.
+		char buff[140];
+		snprintf(buff, 140, "%s@%s-link-%d", label, parseid, lk);
+		Handle linst(as->add_node(LG_LINK_INSTANCE_NODE, buff));
+		as->add_link(EVALUATION_LINK, linst, lst);
+
+		// The relation between link and link instance
+		as->add_link(REFERENCE_LINK, linst, lrel);
+
+		// The connectors for the link instance.
+		const char* llab = linkage_get_link_llabel(lkg, lk);
+		const char* rlab = linkage_get_link_rlabel(lkg, lk);
+		as->add_link(LG_LINK_INSTANCE_LINK,
+			linst,
+			as->add_link(LG_CONNECTOR,
+				as->add_node(LG_CONNECTOR_NODE, llab),
+				as->add_node(LG_CONN_DIR_NODE, "-")),
+			as->add_link(LG_CONNECTOR,
+				as->add_node(LG_CONNECTOR_NODE, rlab),
+				as->add_node(LG_CONN_DIR_NODE, "+")));
 	}
 
 	return pnode;
