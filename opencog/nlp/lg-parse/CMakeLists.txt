@@ -15,6 +15,7 @@ TARGET_LINK_LIBRARIES (lg-parse
 	nlp-types
 	${ATOMSPACE_smob_LIBRARY}
 	${LINK_GRAMMAR_LIBRARY}
+	uuid
 )
 
 INSTALL (TARGETS lg-parse DESTINATION "lib${LIB_DIR_SUFFIX}/opencog")

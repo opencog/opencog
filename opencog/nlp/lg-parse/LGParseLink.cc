@@ -21,6 +21,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <uuid/uuid.h>
 #include <link-grammar/link-includes.h>
 
 #include <opencog/atoms/base/Node.h>
@@ -81,18 +82,54 @@ Handle LGParseLink::execute(AtomSpace* as) const
 
 	// Count the number of parses
 	int num_linkages = sentence_parse(sent, opts);
-	if (num_linkages < 0) goto fail;
+	if (num_linkages < 0)
+	{
+		sentence_delete(sent);
+		parse_options_delete(opts);
+		return Handle();
+	}
 
 	// XXX TODO: if num_links is zero, we should try again with null
 	// links.
-	if (num_linkages == 0) goto fail;
+	if (num_linkages == 0)
+	{
+		sentence_delete(sent);
+		parse_options_delete(opts);
+		return Handle();
+	}
 
 printf("duude hurrah! nlink=%d\n", num_linkages);
+	int max_linkages = 4;
+	if (max_linkages < num_linkages) num_linkages = max_linkages;
 
-fail:
+	// Hmm. I hope that uuid_generate() won't block if there is not
+	// enough entropy in the entropy pool....
+	uuid_t uu;
+	uuid_generate(uu);
+	char idstr[37];
+	uuid_unparse(uu, idstr);
+
+	char sentstr[48] = "sentence@";
+	strncat(sentstr, idstr, 48);
+
+	Handle snode(createNode(SENTENCE_NODE, sentstr));
+
+	for (int i=0; i<num_linkages; i++)
+	{
+		Linkage lkg = linkage_create(i, sent, opts);
+		cvt_linkage(lkg, idstr, as);
+		linkage_delete(lkg);
+	}
+
 	sentence_delete(sent);
 	parse_options_delete(opts);
-	return Handle();
+	return snode;
+}
+
+void LGParseLink::cvt_linkage(Linkage lkg, const char* idstr,
+                              AtomSpace* as) const
+{
+printf("dduuude uuisd=%s\n", idstr);
 }
 
 DEFINE_LINK_FACTORY(LGParseLink, LG_PARSE_LINK)

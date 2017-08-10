@@ -24,6 +24,8 @@
 #ifndef _OPENCOG_LG_PARSE_H
 #define _OPENCOG_LG_PARSE_H
 
+#include <link-grammar/link-includes.h>
+
 #include <opencog/atoms/core/FunctionLink.h>
 #include <opencog/nlp/types/atom_types.h>
 
@@ -40,6 +42,8 @@ namespace opencog
 class LGParseLink : public FunctionLink
 {
 protected:
+	void cvt_linkage(Linkage, const char*, AtomSpace*) const;
+
 public:
 	LGParseLink(const HandleSeq&, Type=LG_PARSE_LINK);
 	LGParseLink(const Link&);
