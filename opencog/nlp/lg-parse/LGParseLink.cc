@@ -21,7 +21,10 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <link-grammar/link-includes.h>
+
 #include <opencog/atoms/base/Node.h>
+#include "LGDictNode.h"
 #include "LGParseLink.h"
 
 using namespace opencog;
@@ -65,7 +68,31 @@ Handle LGParseLink::execute(AtomSpace* as) const
 	if (PHRASE_NODE != _outgoing[0]->getType()) return Handle();
 	if (LG_DICT_NODE != _outgoing[1]->getType()) return Handle();
 
-	return Handle(createNode(SENTENCE_NODE, "foo"));
+	// Get the dictionary
+	LgDictNodePtr ldn(LgDictNodeCast(_outgoing[1]));
+	Dictionary dict = ldn->get_dictionary();
+
+	// Set up the sentence
+	Sentence sent = sentence_create(_outgoing[0]->getName().c_str(), dict);
+	if (nullptr == sent) return Handle();
+
+	// Work with the default parse options
+	Parse_Options opts = parse_options_create();
+
+	// Count the number of parses
+	int num_linkages = sentence_parse(sent, opts);
+	if (num_linkages < 0) goto fail;
+
+	// XXX TODO: if num_links is zero, we should try again with null
+	// links.
+	if (num_linkages == 0) goto fail;
+
+printf("duude hurrah! nlink=%d\n", num_linkages);
+
+fail:
+	sentence_delete(sent);
+	parse_options_delete(opts);
+	return Handle();
 }
 
 DEFINE_LINK_FACTORY(LGParseLink, LG_PARSE_LINK)
