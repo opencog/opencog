@@ -61,12 +61,17 @@ LGDictReader::~LGDictReader()
  * may have only one child: these can be removed.
  *
  * Note that the order of the connectors is important: while linking,
- * these must be satisfied in left-to-right (nested!?) order.
+ * these must be satisfied in left-to-right, nested order.
  *
  * Optional clauses are indicated by OR-ing with null, where "null"
  * is a CONNECTOR Node with string-value "0".  Optional clauses are
  * not necessarily in any sort of normal form; the null connector can
  * appear anywhere.
+*
+* XXX FIXME -- this gives incorrect results if the word has non-trivial
+* morphology e.g. if its Russian, and can be split into a stem and a
+* suffix.  The problem is that in LG, both stem and suffix count as
+* distinct words, and so word splitting must be done first.
  *
  * @param word   the input word string
  * @return       the handle to the newly created atom
@@ -78,6 +83,10 @@ HandleSeq LGDictReader::getDictEntry(const std::string& word)
 
     HandleSeq outgoing;
 
+// XXX FIXME -- if dn_head is null, then we should check regexes.
+// Currently, LG does not do this automatically, but it almost surely
+// should. i.e. the LG public API needs to also handle regexes
+// automatically.
     if (!dn_head) return outgoing;
 
     Handle hWord = _as->add_node(WORD_NODE, word);

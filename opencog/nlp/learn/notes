@@ -13005,6 +13005,10 @@ lg_conn_linkable CON CON
 lg_conn_type_match
 
 LGDictReader
+   /* Recurse, if it's a regex match */
+   regex_name = match_regex(dict->regex_root, word);
+   if (regex_name)
+       dn_head = dictionary_lookup_wild(dict, word);
 
 
 =========================================================================
