@@ -42,14 +42,15 @@ namespace opencog
 class LGParseLink : public FunctionLink
 {
 protected:
-	void cvt_linkage(Linkage, const char*, AtomSpace*) const;
+	Handle cvt_linkage(Linkage, int, const char*,
+	                   AtomSpace*) const;
 
 public:
 	LGParseLink(const HandleSeq&, Type=LG_PARSE_LINK);
 	LGParseLink(const Link&);
 
 	// Return a pointer to the atom being specified.
-	virtual Handle execute(AtomSpace* = NULL) const;
+	virtual Handle execute(AtomSpace* = nullptr) const;
 
 	static Handle factory(const Handle&);
 };

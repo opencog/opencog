@@ -21,10 +21,13 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <atomic>
 #include <uuid/uuid.h>
 #include <link-grammar/link-includes.h>
 
 #include <opencog/atoms/base/Node.h>
+#include <opencog/atoms/NumberNode.h>
+#include <opencog/atomspace/AtomSpace.h>
 #include "LGDictNode.h"
 #include "LGParseLink.h"
 
@@ -69,6 +72,11 @@ Handle LGParseLink::execute(AtomSpace* as) const
 	if (PHRASE_NODE != _outgoing[0]->getType()) return Handle();
 	if (LG_DICT_NODE != _outgoing[1]->getType()) return Handle();
 
+	if (nullptr == as) as = getAtomSpace();
+	if (nullptr == as)
+		throw InvalidParamException(TRACE_INFO,
+			"LgParseLink requires an atomspace to parse");
+
 	// Get the dictionary
 	LgDictNodePtr ldn(LgDictNodeCast(_outgoing[1]));
 	Dictionary dict = ldn->get_dictionary();
@@ -112,12 +120,13 @@ printf("duude hurrah! nlink=%d\n", num_linkages);
 	char sentstr[48] = "sentence@";
 	strncat(sentstr, idstr, 48);
 
-	Handle snode(createNode(SENTENCE_NODE, sentstr));
+	Handle snode(as->add_node(SENTENCE_NODE, sentstr));
 
 	for (int i=0; i<num_linkages; i++)
 	{
 		Linkage lkg = linkage_create(i, sent, opts);
-		cvt_linkage(lkg, idstr, as);
+		Handle pnode = cvt_linkage(lkg, i, sentstr, as);
+		as->add_link(PARSE_LINK, pnode, snode);
 		linkage_delete(lkg);
 	}
 
@@ -126,10 +135,33 @@ printf("duude hurrah! nlink=%d\n", num_linkages);
 	return snode;
 }
 
-void LGParseLink::cvt_linkage(Linkage lkg, const char* idstr,
+static std::atomic<unsigned long> wcnt;
+
+Handle LGParseLink::cvt_linkage(Linkage lkg, int i, const char* idstr,
                               AtomSpace* as) const
 {
-printf("dduuude uuisd=%s\n", idstr);
+	char parseid[80];
+	snprintf(parseid, 80, "%s_parse_%d", idstr, i);
+	Handle pnode(as->add_node(PARSE_NODE, parseid));
+
+	int nwords = linkage_get_num_words(lkg);
+	for (int w=0; w<nwords; w++)
+	{
+		const char* wrd = linkage_get_word(lkg, w);
+printf("dduuude uuisd=%d %s %s\n", i, wrd, parseid);
+		char buff[800] = "";
+		strncat(buff, wrd, 800);
+		strncat(buff, "@", 800);
+		strncat(buff, parseid, 800);
+		Handle winst(as->add_node(WORD_INSTANCE_NODE, buff));
+		as->add_link(WORD_INSTANCE_LINK, winst, pnode);
+		as->add_link(REFERENCE_LINK, winst,
+			as->add_node(WORD_NODE, wrd));
+		as->add_link(WORD_SEQUENCE_LINK, winst,
+			Handle(createNumberNode(++wcnt)));
+	}
+
+	return pnode;
 }
 
 DEFINE_LINK_FACTORY(LGParseLink, LG_PARSE_LINK)
