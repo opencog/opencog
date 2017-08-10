@@ -8,9 +8,6 @@ ADD_LIBRARY (lg-dict SHARED
 	LGDictExpContainer
 	LGDictReader
 	LGDictUtils
-
-	LGDictNode
-
 	LGDictSCM
 )
 

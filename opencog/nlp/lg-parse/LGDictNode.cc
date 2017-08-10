@@ -77,3 +77,8 @@ static __attribute__ ((constructor)) void init(void)
 {
    classserver().addFactory(LG_DICT_NODE, &LgDictNode::factory);
 }
+
+/* This allows guile to load this shared library */
+extern "C" {
+	void opencog_nlp_lgparse_init(void) {}
+};
