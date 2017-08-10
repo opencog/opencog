@@ -1,9 +1,9 @@
 /*
- * LGDictExpContainer.h
+ * LGParse.h
  *
- * Copyright (C) 2015 OpenCog Foundation
+ * Copyright (C) 2017 Linas Vepstas
  *
- * Author: William Ma <https://github.com/williampma>
+ * Author: Linas Vepstas <linasvepstas@gmail.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -21,13 +21,11 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _OPENCOG_LG_DICT_EXP_H
-#define _OPENCOG_LG_DICT_EXP_H
+#ifndef _OPENCOG_LG_PARSE_H
+#define _OPENCOG_LG_PARSE_H
 
 #include <link-grammar/dict-api.h>
-
 #include <opencog/atomspace/AtomSpace.h>
-
 
 namespace opencog
 {
@@ -35,32 +33,22 @@ namespace nlp
 {
 
 /**
- * Link Grammar expression container.
+ * Link Grammar parser.
  *
- * A helper class for doing operations on LG expression.
+ * An atomspace wrapper to the LG parser.
  */
-class LGDictExpContainer
+class LGParser
 {
 public:
-    LGDictExpContainer(Exp_type, Exp* exp);
-    LGDictExpContainer(Exp_type, std::vector<LGDictExpContainer>);
+    LGParser(Dictionary, AtomSpace*);
+    ~LGParser();
 
-    HandleSeq to_handle(AtomSpace* as, Handle h);
-
+    void parse(const std::string& sentence);
 private:
-    void basic_flatten();
-    void basic_dnf();
-    void basic_normal_order();
 
-    Exp_type m_type;
-
-    std::string m_string;
-    char m_direction;
-    bool m_multi;
-
-    std::vector<LGDictExpContainer> m_subexps;
+    Dictionary _dictionary;
+    AtomSpace* _as;
 };
 
 }}
-
-#endif // _OPENCOG_LG_DICT_EXP_H
+#endif // _OPENCOG_LG_PARSE_H
