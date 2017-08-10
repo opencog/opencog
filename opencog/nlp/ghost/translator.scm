@@ -164,8 +164,7 @@
                   (update-lists terms)
                   (set! conds (append conds
                     (list (variable (length pat-vars)
-                                    (list-ref terms 2)
-                                    (list-ref terms 3)))))
+                                    (list-ref terms 2)))))
                   (set! pat-vars (append pat-vars (list-ref terms 2)))))
             ((equal? 'uvar_exist (car t))
              (set! conds (append conds (list (uvar-exist? (cdr t))))))
@@ -367,6 +366,10 @@
         (set! lemma-alist (assoc-set! lemma-alist WORD lemma))
         lemma)
       seen-lemma))
+
+(define-public (ghost-get-lemma . WORD)
+  "Get the lemma of WORD, where WORD can be one or more WordNodes."
+  (List (map Word (map get-lemma (map cog-name WORD)))))
 
 (define (is-lemma? WORD)
   "Check if WORD is a lemma."

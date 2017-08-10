@@ -158,14 +158,16 @@
         (list g1)
         (list g2))))
 
-(define (variable VAR WGRD LGRD)
+(define (variable VAR . GRD)
   "Occurence of a variable. The value grounded for it needs to be recorded.
-   VAR is the variable name.
-   WGRD and LGRD can either be a VariableNode or a GlobNode, which pass
-   the actual value grounded for it in original words and lemmas at runtime."
+   VAR is a number, it will be included as part of the variable name.
+   GRD can either be a VariableNode or a GlobNode, which pass the actual
+   value grounded in original words at runtime."
   (Evaluation (GroundedPredicate "scm: ghost-record-groundings")
-    (List (List (ghost-var-word VAR) WGRD)
-          (List (ghost-var-lemma VAR) LGRD))))
+    (List (List (ghost-var-word VAR) (List GRD))
+          (List (ghost-var-lemma VAR)
+                (ExecutionOutput (GroundedSchema "scm: ghost-get-lemma")
+                                 (List GRD))))))
 
 (define (context-function NAME ARGS)
   "Occurrence of a function in the context of a rule."

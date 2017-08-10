@@ -53,8 +53,7 @@
 
 (Define
   (DefinedSchema "Get Current Input")
-  (Get (State ghost-anchor
-              (Variable "$x"))))
+  (Get (State ghost-anchor (Variable "$x"))))
 
 (Define
   (DefinedSchema "Find Chat Rules")

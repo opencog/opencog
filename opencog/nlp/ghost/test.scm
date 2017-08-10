@@ -15,8 +15,3 @@
   "Show the lemmas stored."
   (display lemma-alist)
   (newline))
-
-(define-public (ghost-test-get-lemma WORD)
-  "Returns the lemma of WORD."
-  (display (get-lemma WORD))
-  (newline))
