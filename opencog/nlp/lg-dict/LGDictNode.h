@@ -51,7 +51,7 @@ public:
 	LgDictNode(const Node&);
 	virtual ~LgDictNode();
 
-	Dictionary get_dictionary(void) const { return _dict; }
+	Dictionary get_dictionary(void);
 
 	static Handle factory(const Handle&);
 };

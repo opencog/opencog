@@ -81,7 +81,8 @@ some pretty important.
 
 * It currently allows only one dictionary to be open at a time, i.e.
   there can only be one single global dictionary that is open. This
-  should probably be fixed.
+  should probably be fixed. This is easily fixed by passing an
+  LgDictNode as an argument.
 
 * The `lg-get-dict-entry` returns a SetLink. It is deprecated; use
   the `lg-dict-entry` method instead. Alternately, perhaps the

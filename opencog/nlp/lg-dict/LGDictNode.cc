@@ -27,19 +27,42 @@
 using namespace opencog;
 
 LgDictNode::LgDictNode(const std::string& name)
-	: Node(LG_DICT_NODE, name)
+	: Node(LG_DICT_NODE, name), _dict(nullptr)
 {
-	// _dict= ...
 }
 
 LgDictNode::LgDictNode(const Node& n)
-	: Node(n)
+	: Node(n), _dict(nullptr)
 {
+	// Type must be as expected
+	Type tdict = n.getType();
+	if (not classserver().isA(tdict, LG_DICT_NODE))
+	{
+		const std::string& tname = classserver().getTypeName(tdict);
+		throw InvalidParamException(TRACE_INFO,
+			"Expecting an LgDictNode, got %s", tname.c_str());
+	}
 }
 
 LgDictNode::~LgDictNode()
 {
+	if (_dict)
+		dictionary_delete(_dict);
+
 	_dict = nullptr;
+}
+
+/// Get the dictionary associated with the node.  This performs a
+/// delayed open, because we don't really want the open to happen
+/// in the constructor (since the constructor might run mmultiple
+/// times!?)
+Dictionary LgDictNode::get_dictionary()
+{
+	if (_dict) return _dict;
+
+	const char * lang = getName().c_str();
+	_dict = dictionary_create_lang(lang);
+	return _dict;
 }
 
 Handle LgDictNode::factory(const Handle& base)
