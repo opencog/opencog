@@ -1,5 +1,5 @@
 /*
- * LGParse.h
+ * LGParseLink.h
  *
  * Copyright (C) 2017 Linas Vepstas
  *
@@ -24,31 +24,41 @@
 #ifndef _OPENCOG_LG_PARSE_H
 #define _OPENCOG_LG_PARSE_H
 
-#include <link-grammar/dict-api.h>
-#include <opencog/atomspace/AtomSpace.h>
+#include <opencog/atoms/core/FunctionLink.h>
+#include <opencog/nlp/types/atom_types.h>
 
 namespace opencog
 {
-namespace nlp
-{
-
-/**
- * Link Grammar parser.
- *
- * An atomspace wrapper to the LG parser.
+/** \addtogroup grp_atomspace
+ *  @{
  */
-class LGParser
+
+/// Link Grammar parser.
+///
+/// An atomspace wrapper to the LG parser.
+
+class LGParseLink : public FunctionLink
 {
+protected:
 public:
-    LGParser(Dictionary, AtomSpace*);
-    ~LGParser();
+	LGParseLink(const HandleSeq&, Type=LG_PARSE_LINK);
+	LGParseLink(const Link&);
 
-    void parse(const std::string& sentence);
-private:
+	// Return a pointer to the atom being specified.
+	virtual Handle execute(AtomSpace* = NULL) const;
 
-    Dictionary _dictionary;
-    AtomSpace* _as;
+	static Handle factory(const Handle&);
 };
 
-}}
+typedef std::shared_ptr<LGParseLink> LGParseLinkPtr;
+static inline LGParseLinkPtr LGParseLinkCast(const Handle& h)
+	{ AtomPtr a(h); return std::dynamic_pointer_cast<LGParseLink>(a); }
+static inline LGParseLinkPtr LGParseLinkCast(AtomPtr a)
+	{ return std::dynamic_pointer_cast<LGParseLink>(a); }
+
+// XXX temporary hack ...
+#define createLGParseLink std::make_shared<LGParseLink>
+
+/** @}*/
+}
 #endif // _OPENCOG_LG_PARSE_H

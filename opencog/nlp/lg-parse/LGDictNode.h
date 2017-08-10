@@ -39,8 +39,6 @@ namespace opencog
 /// obtain grammatical data.  The Node holds a pointer to the Link
 /// Grammar Dictionary itself, so that it can be directly accessed.
 
-class LgDictNode;
-typedef std::shared_ptr<LgDictNode> LgDictNodePtr;
 class LgDictNode : public Node
 {
 protected:
@@ -56,6 +54,7 @@ public:
 	static Handle factory(const Handle&);
 };
 
+typedef std::shared_ptr<LgDictNode> LgDictNodePtr;
 static inline LgDictNodePtr LgDictNodeCast(const Handle& h)
 	{ AtomPtr a(h); return std::dynamic_pointer_cast<LgDictNode>(a); }
 static inline LgDictNodePtr LgDictNodeCast(AtomPtr a)

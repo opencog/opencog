@@ -126,6 +126,9 @@ SPECIFIC_ENTITY_NODE <- NODE
 // Dictionary. Holds a reference to an LG Dictionary.
 LG_DICT_NODE <- NODE
 
+// Parser - parses sentences.
+LG_PARSE_LINK <- FUNCTION_LINK
+
 // Connector: same meaning and syntax as in link-grammar, except that
 // the direction and the multi-connector parts get distinct types.
 LG_CONNECTOR_NODE <- PREDICATE_NODE   // e.g. "MX"
