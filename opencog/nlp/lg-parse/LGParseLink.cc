@@ -97,7 +97,7 @@ Handle LGParseLink::execute(AtomSpace* as) const
 {
 	if (PHRASE_NODE != _outgoing[0]->getType()) return Handle();
 	if (LG_DICT_NODE != _outgoing[1]->getType()) return Handle();
-	if (3 == _ougoing.size() and
+	if (3 == _outgoing.size() and
 	   NUMBER_NODE != _outgoing[2]->getType()) return Handle();
 
 	if (nullptr == as) as = getAtomSpace();
@@ -146,7 +146,7 @@ Handle LGParseLink::execute(AtomSpace* as) const
 
 	// The number of linkages to process.
 	int max_linkages = 4;
-	if (3 == _ougoing.size())
+	if (3 == _outgoing.size())
 	{
 		NumberNodePtr nnp(NumberNodeCast(_outgoing[2]));
 		max_linkages = nnp->get_value() + 0.5;
@@ -210,7 +210,7 @@ Handle LGParseLink::cvt_linkage(Linkage lkg, int i, const char* idstr,
 		// Convert the disjunct to atomese.
 		// This requires parsing a string. Fortunately, the
 		// string is a very simple format, and always ends with
-		a blank cahr before the newline.
+		// a blank char before the newline.
 		const char* djstr = linkage_get_disjunct_str(lkg, w);
 
 		HandleSeq conseq;
@@ -244,7 +244,7 @@ Handle LGParseLink::cvt_linkage(Linkage lkg, int i, const char* idstr,
 		}
 
 		// Set up the disjuncts on each word
-		if (0 < conseq.size()
+		if (0 < conseq.size())
 			as->add_link(LG_WORD_CSET, winst,
 				as->add_link(LG_AND, conseq));
 	}
