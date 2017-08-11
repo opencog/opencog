@@ -106,7 +106,6 @@ Handle LGParseLink::execute(AtomSpace* as) const
 		return Handle();
 	}
 
-printf("duude hurrah! nlink=%d\n", num_linkages);
 	int max_linkages = 4;
 	if (max_linkages < num_linkages) num_linkages = max_linkages;
 
@@ -157,11 +156,48 @@ Handle LGParseLink::cvt_linkage(Linkage lkg, int i, const char* idstr,
 		Handle winst(as->add_node(WORD_INSTANCE_NODE, buff));
 		wrds.push_back(winst);
 
+		// Associate the word with the parse.
 		as->add_link(WORD_INSTANCE_LINK, winst, pnode);
 		as->add_link(REFERENCE_LINK, winst,
 			as->add_node(WORD_NODE, wrd));
 		as->add_link(WORD_SEQUENCE_LINK, winst,
 			Handle(createNumberNode(++wcnt)));
+
+		// Convert the disjunct to atomese.
+		const char* djstr = linkage_get_disjunct_str(lkg, w);
+
+		HandleSeq conseq;
+		const char* p = djstr;
+		while (*p)
+		{
+			bool multi = false;
+			if ('@' == *p) { multi = true; p++; }
+			const char* s = strchr(p, ' ');
+			char cstr[60];
+			size_t len = s-p-1;
+			if (60<len) len = 59;
+			strncpy(cstr, p, len);
+			cstr[len] = 0;
+			Handle con(createNode(LG_CONNECTOR_NODE, cstr));
+			cstr[0] = *(s-1);
+			cstr[1] = 0;
+			Handle dir(createNode(LG_CONN_DIR_NODE, cstr));
+			p = s+1;
+
+			HandleSeq cono;
+			cono.push_back(con);
+			cono.push_back(dir);
+			if (multi)
+			{
+				Handle mu(createNode(LG_CONN_MULTI_NODE, "@"));
+				cono.push_back(mu);
+			}
+			Handle conl(createLink(cono, LG_CONNECTOR));
+			conseq.push_back(conl);
+		}
+		// Set up the disjuncts on each word
+		as->add_link(LG_WORD_CSET, winst,
+			as->add_link(LG_AND, conseq));
 	}
 
 	// Loop over all the links
@@ -175,7 +211,6 @@ Handle LGParseLink::cvt_linkage(Linkage lkg, int i, const char* idstr,
 		// The link
 		const char* label = linkage_get_link_label(lkg, lk);
 		Handle lrel(as->add_node(LINK_GRAMMAR_RELATIONSHIP_NODE, label));
-printf("dduuude lk=%d %d %d %s\n", lk, lword, rword, label);
 		as->add_link(EVALUATION_LINK, lrel, lst);
 
 		// The link instance.
@@ -194,10 +229,10 @@ printf("dduuude lk=%d %d %d %s\n", lk, lword, rword, label);
 			linst,
 			as->add_link(LG_CONNECTOR,
 				as->add_node(LG_CONNECTOR_NODE, llab),
-				as->add_node(LG_CONN_DIR_NODE, "-")),
+				as->add_node(LG_CONN_DIR_NODE, "+")),
 			as->add_link(LG_CONNECTOR,
 				as->add_node(LG_CONNECTOR_NODE, rlab),
-				as->add_node(LG_CONN_DIR_NODE, "+")));
+				as->add_node(LG_CONN_DIR_NODE, "-")));
 	}
 
 	return pnode;
