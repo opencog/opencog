@@ -1,13 +1,7 @@
 ; -----
 ; Tools generally useful for testing / debugging GHOST
 
-(use-modules (opencog nlp chatbot)
-             (opencog eva-behavior)
-             (opencog logger))
-
-(define ghost-logger (cog-new-logger))
-(cog-logger-set-level! ghost-logger "info")
-(cog-logger-set-stdout! ghost-logger #t)
+(use-modules (opencog nlp chatbot))
 
 (define-public (ghost-debug-mode)
   (cog-logger-set-level! ghost-logger "debug")

@@ -28,7 +28,14 @@
 (define lemma-alist '())
 
 ; For unit test
+; Use RelEx server to get the lemma, by default
+; Otherwise, use WordNet CLI
 (define test-get-lemma #f)
+
+; Define the logger for GHOST
+(define ghost-logger (cog-new-logger))
+(cog-logger-set-level! ghost-logger "info")
+(cog-logger-set-stdout! ghost-logger #t)
 
 (define-public (ghost-prefix STR) (string-append "GHOST: " STR))
 (define (ghost-var-word NUM)

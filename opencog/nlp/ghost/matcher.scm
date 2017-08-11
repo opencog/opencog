@@ -6,9 +6,6 @@
 ;; OpenPsi should be able to know how and what kinds of rules it should be
 ;; looking for at a particular point in time.
 
-(use-modules (opencog logger)
-             (opencog exec))
-
 (define-public (chat-find-rules SENT)
   "The action selector. It first searches for the rules using DualLink,
    and then does the filtering by evaluating the context of the rules.
