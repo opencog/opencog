@@ -40,8 +40,8 @@ using namespace opencog;
 ///         LgDictNode "en"
 ///         NumberNode  6   -- optional, number of parses.
 ///
-/// When executed, the result of parsing he phrase text, using the
-/// specifiedadictionary, is placed in the atomspace. Execution
+/// When executed, the result of parsing the phrase text, using the
+/// specified dictionary, is placed in the atomspace.  Execution
 /// returns a Sentencenode pointing at the parse results.  If the third,
 /// optional NumberNode is present, then that will be the number of
 /// parses that are captured. If the NumberNode is not present, it
@@ -108,6 +108,10 @@ Handle LGParseLink::execute(AtomSpace* as) const
 	// Get the dictionary
 	LgDictNodePtr ldn(LgDictNodeCast(_outgoing[1]));
 	Dictionary dict = ldn->get_dictionary();
+	if (nullptr == dict)
+		throw InvalidParamException(TRACE_INFO,
+			"LgParseLink requires valid dictionary! %s was given.",
+			ldn->getName().c_str());
 
 	// Set up the sentence
 	Sentence sent = sentence_create(_outgoing[0]->getName().c_str(), dict);
