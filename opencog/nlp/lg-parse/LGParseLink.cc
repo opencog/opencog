@@ -205,7 +205,7 @@ Handle LGParseLink::execute(AtomSpace* as) const
 	uuid_unparse(uu, idstr);
 
 	char sentstr[48] = "sentence@";
-	strncat(sentstr, idstr, 48);
+	strncat(sentstr, idstr, 47);
 
 	Handle snode(as->add_node(SENTENCE_NODE, sentstr));
 
