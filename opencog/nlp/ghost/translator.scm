@@ -32,11 +32,13 @@
 
 (define-public (ghost-prefix STR) (string-append "GHOST: " STR))
 (define (ghost-var-word NUM)
-  (Node (ghost-prefix
+  (Variable (ghost-prefix
     (string-append "variable-word-" (number->string NUM)))))
 (define (ghost-var-lemma NUM)
-  (Node (ghost-prefix
+  (Variable (ghost-prefix
     (string-append "variable-lemma-" (number->string NUM)))))
+(define (ghost-uvar STR)
+  (Variable (ghost-prefix (string-append "user-variable-" STR))))
 (define ghost-anchor (Anchor (ghost-prefix "Currently Processing")))
 (define ghost-no-constant (Anchor (ghost-prefix "No constant terms")))
 (define ghost-word-seq (Predicate (ghost-prefix "Word Sequence")))

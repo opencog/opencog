@@ -194,23 +194,23 @@
   (ExecutionOutput (GroundedSchema "scm: ghost-get-var-lemmas")
                    (List (ghost-var-lemma NUM))))
 
-(define (get-user-variable VAR)
+(define (get-user-variable UVAR)
   "Get the value of a user variable."
   (ExecutionOutput (GroundedSchema "scm: ghost-get-user-variable")
-                   (List (Node VAR))))
+                   (List (ghost-uvar UVAR))))
 
-(define (set-user-variable VAR VAL)
+(define (set-user-variable UVAR VAL)
   "Assign a string value to a user variable."
   (ExecutionOutput (GroundedSchema "scm: ghost-set-user-variable")
-                   (List (Node VAR) VAL)))
+                   (List (ghost-uvar UVAR) VAL)))
 
-(define (uvar-exist? VAR)
+(define (uvar-exist? UVAR)
   "Check if a user variable has been defined."
   (Evaluation (GroundedPredicate "scm: ghost-user-variable-exist?")
-              (List (Node VAR))))
+              (List (ghost-uvar UVAR))))
 
-(define (uvar-equal? VAR VAL)
+(define (uvar-equal? UVAR VAL)
   "Check if the value of the user variable VAR equals to VAL."
   ; TODO: VAL can also be a concept etc?
   (Evaluation (GroundedPredicate "scm: ghost-user-variable-equal?")
-              (List (Node VAR) (Word VAL))))
+              (List (ghost-uvar UVAR) (Word VAL))))
