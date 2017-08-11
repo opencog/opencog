@@ -13026,6 +13026,8 @@ Bugs: the mst parse algo is O^5 and yuret gives a nice O^3 also
 
 Bugs: graphing takes too long.
 
-Bugs: follow up on the guile hang bug
+Bugs: follow up on the guile hang bug - its a string parsing thing.
+
+Bugs: guile goes GC-crazy after a while, and never recovers.
 
 Items: create LG feederbacker

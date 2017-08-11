@@ -69,6 +69,7 @@
 ; maintained on the LgWordCset for a given word.
 ;
 (use-modules (opencog) (opencog nlp) (opencog persist))
+(use-modules (opencog exec) (opencog nlp lg-parse))
 (use-modules (srfi srfi-1))
 
 ; ---------------------------------------------------------------------
@@ -447,14 +448,13 @@
 
 	; Loop -- process any that we find. This will typically race
 	; against other threads, but I think that's OK.
-	(define (process-sents)
-		(let ((sent (get-one-new-sentence)))
-			(if (null? sent) '()
-				(begin
-					(update-counts sent)
-					(delete-sentence sent)
-					(monitor-rate '())
-					(process-sents)))))
+	(define (process-sent SENT)
+		(if (null? SENT) '()
+			(begin
+				(update-counts SENT)
+				(delete-sentence SENT)
+				(monitor-rate '())
+				(process-sents)))))
 
 	; -------------------------------------------------------
 	; Manually run the garbage collector, every now and then.
@@ -504,9 +504,30 @@
 						;(avg-gc-cpu-time)
 					)))))
 
-	(relex-parse plain-text) ;; send plain-text to server
-	(process-sents)
-	(maybe-gc) ;; need agressive gc to keep RAM under control.
+	; Use the RelEx server to parse the text via Link Grammar.
+	; Return a SentenceNode. Attention: when run in parallel,
+	; the returned SentenCenode is not necessarily that of the
+	; the one that was submitted for parsing! It might be just
+	; some other sentence that is sitting there, ready to go.
+	(define (relex-process TXT)
+		(relex-parse TXT)
+		(get-one-new-sentence)
+		(maybe-gc) ;; need agressive gc to keep RAM under control.
+	)
+
+	; Process the text locally, using the LG API link.
+	(define (local-process TXT)
+		(define lgn (LgParseLink (Phrase TXT) (LgDict "any") (Number 24)))
+		(define sent (cog-execute! lgn))
+		(cog-extract lgn)
+		sent
+	)
+
+	;; Send plain-text to the relex server
+	; (process-sent (relex-process plain-text))
+
+	; Handle the plain-text locally
+	(process-sent (local-process plain-text))
 )
 
 ; ---------------------------------------------------------------------
