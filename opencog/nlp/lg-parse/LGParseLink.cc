@@ -97,9 +97,15 @@ Handle LGParseLink::execute(AtomSpace* as) const
 		return Handle();
 	}
 
-	// XXX TODO: if num_links is zero, we should try again with null
-	// links.
+	// if num_links is zero, we should try again with null links.
 	if (num_linkages == 0)
+	{
+		parse_options_set_min_null_count(opts, 1);
+		parse_options_set_max_null_count(opts, sentence_length(sent));
+		num_linkages = sentence_parse(sent, opts);
+	}
+
+	if (num_linkages <= 0)
 	{
 		sentence_delete(sent);
 		parse_options_delete(opts);
@@ -164,6 +170,9 @@ Handle LGParseLink::cvt_linkage(Linkage lkg, int i, const char* idstr,
 			Handle(createNumberNode(++wcnt)));
 
 		// Convert the disjunct to atomese.
+		// This requires parsing a string. Fortunately, the
+		// string is a very simple format, and always ends with
+		a blank cahr before the newline.
 		const char* djstr = linkage_get_disjunct_str(lkg, w);
 
 		HandleSeq conseq;
@@ -195,9 +204,11 @@ Handle LGParseLink::cvt_linkage(Linkage lkg, int i, const char* idstr,
 			Handle conl(createLink(cono, LG_CONNECTOR));
 			conseq.push_back(conl);
 		}
+
 		// Set up the disjuncts on each word
-		as->add_link(LG_WORD_CSET, winst,
-			as->add_link(LG_AND, conseq));
+		if (0 < conseq.size()
+			as->add_link(LG_WORD_CSET, winst,
+				as->add_link(LG_AND, conseq));
 	}
 
 	// Loop over all the links
