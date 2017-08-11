@@ -33,11 +33,28 @@
 
 using namespace opencog;
 
+/// The expected format of an LgParseLink is:
+///
+///     LgParseLink
+///         PhraseNode "this is a test."
+///         LgDictNode "en"
+///         NumberNode  6   -- optional, number of parses.
+///
+/// When executed, the result of parsing he phrase text, using the
+/// specifiedadictionary, is placed in the atomspace. Execution
+/// returns a Sentencenode pointing at the parse results.  If the third,
+/// optional NumberNode is present, then that will be the number of
+/// parses that are captured. If the NumberNode is not present, it
+/// defaults to four.
+///
+/// The LgParseLink is a kind of FunctionLink, and can thus be used in
+/// any expression that FunctionLinks can be used with.
+///
 LGParseLink::LGParseLink(const HandleSeq& oset, Type t)
 	: FunctionLink(oset, t)
 {
 	size_t osz = oset.size();
-	if (2 != osz)
+	if (2 != osz and 3 != osz)
 		throw InvalidParamException(TRACE_INFO,
 			"LGParseLink: Expecting two arguments, got %lu", osz);
 
@@ -52,6 +69,15 @@ LGParseLink::LGParseLink(const HandleSeq& oset, Type t)
 		throw InvalidParamException(TRACE_INFO,
 			"LGParseLink: Expecting LgDictNode, got %s",
 			oset[1]->toString().c_str());
+
+	if (3 == osz)
+	{
+		Type nit = oset[2]->getType();
+		if (NUMBER_NODE != nit and VARIABLE_NODE != nit and GLOB_NODE != nit)
+			throw InvalidParamException(TRACE_INFO,
+				"LGParseLink: Expecting NumberNode, got %s",
+				oset[2]->toString().c_str());
+	}
 }
 
 LGParseLink::LGParseLink(const Link& l)
@@ -71,6 +97,8 @@ Handle LGParseLink::execute(AtomSpace* as) const
 {
 	if (PHRASE_NODE != _outgoing[0]->getType()) return Handle();
 	if (LG_DICT_NODE != _outgoing[1]->getType()) return Handle();
+	if (3 == _ougoing.size() and
+	   NUMBER_NODE != _outgoing[2]->getType()) return Handle();
 
 	if (nullptr == as) as = getAtomSpace();
 	if (nullptr == as)
@@ -112,7 +140,13 @@ Handle LGParseLink::execute(AtomSpace* as) const
 		return Handle();
 	}
 
+	// The number of linkages to process.
 	int max_linkages = 4;
+	if (3 == _ougoing.size())
+	{
+		NumberNodePtr nnp(NumberNodeCast(_outgoing[2]));
+		max_linkages = nnp->get_value() + 0.5;
+	}
 	if (max_linkages < num_linkages) num_linkages = max_linkages;
 
 	// Hmm. I hope that uuid_generate() won't block if there is not
