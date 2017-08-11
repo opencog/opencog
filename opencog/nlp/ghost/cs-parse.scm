@@ -189,7 +189,7 @@
   )
 )
 
-(define cs-parser
+(define (cs-parser)
   (lalr-parser
     ;; Options mainly for debugging
     ;; output a parser, called ghost-parser, in a separate file - ghost.yy.scm,
@@ -575,12 +575,14 @@
 "
   Parse a text string in a Guile shell, for debugging mainly.
 "
-  (cs-parser (cs-lexer (open-input-string line)) error)
+  (define parser (cs-parser))
+  (parser (cs-lexer (open-input-string line)) error)
 )
 
 (define-public (test-parse-file file)
 "
   Parse a topic file in a Guile shell, for debugging mainly.
 "
-  (cs-parser (cs-lexer (open-file-input-port file)) error)
+  (define parser (cs-parser))
+  (parser (cs-lexer (open-file-input-port file)) error)
 )
