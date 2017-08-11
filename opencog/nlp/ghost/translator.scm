@@ -17,19 +17,35 @@
 ; TODO: Move it to process-pattern-terms?
 (define pat-vars '())
 
+; Keep a record of the groundings of variables that authors defined
+(define var-grd-words '())
+(define var-grd-lemmas '())
+
+; Keep a record of the value assigned to the user variables that authors defined
+(define uvars '())
+
 ; Keep a record of the lemmas we have seen
 (define lemma-alist '())
 
 ; For unit test
+; Use RelEx server to get the lemma, by default
+; Otherwise, use WordNet CLI
 (define test-get-lemma #f)
+
+; Define the logger for GHOST
+(define ghost-logger (cog-new-logger))
+(cog-logger-set-level! ghost-logger "info")
+(cog-logger-set-stdout! ghost-logger #t)
 
 (define-public (ghost-prefix STR) (string-append "GHOST: " STR))
 (define (ghost-var-word NUM)
-  (Node (ghost-prefix
+  (Variable (ghost-prefix
     (string-append "variable-word-" (number->string NUM)))))
 (define (ghost-var-lemma NUM)
-  (Node (ghost-prefix
+  (Variable (ghost-prefix
     (string-append "variable-lemma-" (number->string NUM)))))
+(define (ghost-uvar STR)
+  (Variable (ghost-prefix (string-append "user-variable-" STR))))
 (define ghost-anchor (Anchor (ghost-prefix "Currently Processing")))
 (define ghost-no-constant (Anchor (ghost-prefix "No constant terms")))
 (define ghost-word-seq (Predicate (ghost-prefix "Word Sequence")))
@@ -40,7 +56,7 @@
 ; For features that are not currently supported
 (define (feature-not-supported NAME VAL)
   "Notify the user that a particular is not currently supported."
-  (cog-logger-error "Feature not supported: \"~a ~a\"" NAME VAL))
+  (cog-logger-error ghost-logger "Feature not supported: \"~a ~a\"" NAME VAL))
 
 ;; Shared variables for all terms
 (define atomese-variable-template
@@ -164,8 +180,7 @@
                   (update-lists terms)
                   (set! conds (append conds
                     (list (variable (length pat-vars)
-                                    (list-ref terms 2)
-                                    (list-ref terms 3)))))
+                                    (list-ref terms 2)))))
                   (set! pat-vars (append pat-vars (list-ref terms 2)))))
             ((equal? 'uvar_exist (car t))
              (set! conds (append conds (list (uvar-exist? (cdr t))))))
@@ -196,19 +211,27 @@
              (MemberLink (Set (list-ref proc-terms 3)) ghost-no-constant)))
   proc-terms)
 
-(define-public (ghost-execute-action WORDS)
+(define-public (ghost-execute-action ACTION)
   "Say the text and update the internal state."
-  (define txt
-    (string-join (append-map (lambda (n)
-    (if (cog-link? n)
-        (map cog-name (cog-get-all-nodes n))
-        (list (cog-name n))))
-    (cog-outgoing-set WORDS))))
-  ; If there is something to say?
+  (define (extract-txt action)
+    ; TODO: Right now it is extracting text only, but should be extended
+    ; to support actions that contains are not text as well.
+    (string-join (append-map
+      (lambda (a)
+        (cond ((cog-link? a)
+               (list (extract-txt a)))
+              ((equal? 'WordNode (cog-type a))
+               (list (cog-name a)))
+              ; TODO: things other than text
+              (else '())))
+        (cog-outgoing-set action))))
+  (define txt (extract-txt ACTION))
+  ; Is there anything to say?
   (if (not (string-null? (string-trim txt)))
-      (cog-execute! (Put (DefinedPredicate "Say") (Node txt))))
-  (State ghost-anchor (Concept "Default State"))
-  (True))
+      (begin (cog-logger-info ghost-logger "Say: \"~a\"" txt)
+             (cog-execute! (Put (DefinedPredicate "Say") (Node txt)))))
+  ; Reset the state
+  (State ghost-anchor (Concept "Default State")))
 
 (define-public (ghost-pick-action ACTIONS)
   "Pick one of the ACTIONS randomly."
@@ -216,16 +239,16 @@
   (list-ref os (random (length os) (random-state-from-platform))))
 
 (Define
-  (DefinedPredicate (ghost-prefix "Pick and Execute Action"))
+  (DefinedSchema (ghost-prefix "Pick and Execute Action"))
   (Lambda (Variable "$x")
-          (Evaluation (GroundedPredicate "scm: ghost-pick&execute-action")
-                      (List (Variable "$x")))))
+          (ExecutionOutput (GroundedSchema "scm: ghost-pick&execute-action")
+                           (List (Variable "$x")))))
 
 (Define
-  (DefinedPredicate (ghost-prefix "Execute Action"))
+  (DefinedSchema (ghost-prefix "Execute Action"))
   (Lambda (Variable "$x")
-          (Evaluation (GroundedPredicate "scm: ghost-execute-action")
-                      (List (Variable "$x")))))
+          (ExecutionOutput (GroundedSchema "scm: ghost-execute-action")
+                           (List (Variable "$x")))))
 
 (define (process-action ACTION)
   "Iterate through each of the ACTIONS and convert them into atomese."
@@ -242,11 +265,12 @@
               ((equal? 'get_uvar (car n)) (get-user-variable (cdr n)))
               ; Assign a value to a user variable
               ((equal? 'assign_uvar (car n))
-               (assign-user-variable (cadr n) (car (to-atomese (cddr n)))))
+               (set-user-variable (cadr n) (car (to-atomese (cddr n)))))
               ; A function call
               ((equal? 'function (car n))
                (action-function (cadr n) (to-atomese (cddr n))))
-              ; Gather all the action choices
+              ; Gather all the action choices, i.e. a list of actions
+              ; available but only one of them will be executed
               ((equal? 'action-choices (car n))
                (set! choices (append choices (list (List (to-atomese (cdr n))))))
                '())
@@ -256,7 +280,7 @@
           '()
           (list (action-choices choices)))))
   (cog-logger-debug ghost-logger "action: ~a" ACTION)
-  (True (Put (DefinedPredicate (ghost-prefix "Execute Action"))
+  (True (Put (DefinedSchema (ghost-prefix "Execute Action"))
              (List (to-atomese (cdar ACTION))))))
 
 (define* (create-rule PATTERN ACTION #:optional (TOPIC default-topic) NAME)
@@ -368,6 +392,10 @@
         lemma)
       seen-lemma))
 
+(define-public (ghost-get-lemma . WORD)
+  "Get the lemma of WORD, where WORD can be one or more WordNodes."
+  (List (map Word (map get-lemma (map cog-name WORD)))))
+
 (define (is-lemma? WORD)
   "Check if WORD is a lemma."
   (equal? WORD (get-lemma WORD)))
@@ -461,12 +489,47 @@
   (append-map (lambda (m) (list (Reference (member-words m) (Concept NAME))))
               MEMBERS))
 
+(define-public (ghost-get-var-words VAR)
+  "Get the grounding of VAR, in original words."
+  (define grd (assoc-ref var-grd-words VAR))
+  (if (equal? grd #f)
+      (List)
+      grd))
+
+(define-public (ghost-get-var-lemmas VAR)
+  "Get the grounding of VAR, in lemmas."
+  (define grd (assoc-ref var-grd-lemmas VAR))
+  (if (equal? grd #f) (List) grd))
+
+(define-public (ghost-get-user-variable UVAR)
+  "Get the value stored for VAR."
+  (define grd (assoc-ref uvars UVAR))
+  (if (equal? grd #f) (List) grd))
+
+(define-public (ghost-set-user-variable UVAR VAL)
+  "Assign VAL to UVAR."
+  (set! uvars (assoc-set! uvars UVAR VAL))
+  (True))
+
+(define-public (ghost-user-variable-exist? UVAR)
+  "Check if UVAR has been defined."
+  (if (equal? (assoc-ref uvars UVAR) #f)
+      (stv 0 1)
+      (stv 1 1)))
+
+(define-public (ghost-user-variable-equal? UVAR VAL)
+  "Check if the value of UVAR equals VAL."
+  (if (equal? (assoc-ref uvars UVAR) VAL)
+      (stv 1 1)
+      (stv 0 1)))
+
 (define-public (ghost-record-groundings WGRD LGRD)
-  "Record the groundings of a variable/glob, in both original words
-   and lemmas. They will be referenced at the stage of evaluating the
-   context of the psi-rules, or executing the action of the psi-rules."
-  (State (gar WGRD) (gdr WGRD))
-  (State (gar LGRD) (gdr LGRD))
+  "Record the groundings of a variable, in both original words and lemmas.
+   They will be referenced at the stage of evaluating the context of the
+   psi-rules, or executing the action of the psi-rules."
+  (cog-logger-debug ghost-logger "--- Recording groundings:\n~a\n~a" WGRD LGRD)
+  (set! var-grd-words (assoc-set! var-grd-words (gar WGRD) (gdr WGRD)))
+  (set! var-grd-lemmas (assoc-set! var-grd-lemmas (gar LGRD) (gdr LGRD)))
   (stv 1 1))
 
 ; ----------

@@ -6,9 +6,6 @@
 ;; OpenPsi should be able to know how and what kinds of rules it should be
 ;; looking for at a particular point in time.
 
-(use-modules (opencog logger)
-             (opencog exec))
-
 (define-public (chat-find-rules SENT)
   "The action selector. It first searches for the rules using DualLink,
    and then does the filtering by evaluating the context of the rules.
@@ -53,8 +50,7 @@
 
 (Define
   (DefinedSchema "Get Current Input")
-  (Get (State ghost-anchor
-              (Variable "$x"))))
+  (Get (State ghost-anchor (Variable "$x"))))
 
 (Define
   (DefinedSchema "Find Chat Rules")
@@ -68,14 +64,3 @@
   (Put (DefinedSchema "Find Chat Rules")
        (DefinedSchema "Get Current Input"))
   default-topic)
-
-; -----
-; For debugging only
-(use-modules (opencog nlp chatbot) (opencog eva-behavior))
-
-(define-public (test-ghost TXT)
-  "Try to find (and execute) the matching rules given an input TXT."
-  (define sent (car (nlp-parse TXT)))
-  (State (Anchor "GHOST: Currently Processing") sent)
-  (map (lambda (r) (cog-evaluate! (gdar r)))
-       (cog-outgoing-set (chat-find-rules sent))))

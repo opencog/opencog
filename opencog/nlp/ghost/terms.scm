@@ -2,9 +2,6 @@
 ;;
 ;; Assorted functions for translating individual terms into Atomese fragments.
 
-(use-modules (ice-9 optargs))
-(use-modules (opencog exec))
-
 ; ----------
 ; Helper functions
 
@@ -158,14 +155,16 @@
         (list g1)
         (list g2))))
 
-(define (variable VAR WGRD LGRD)
+(define (variable VAR . GRD)
   "Occurence of a variable. The value grounded for it needs to be recorded.
-   VAR is the variable name.
-   WGRD and LGRD can either be a VariableNode or a GlobNode, which pass
-   the actual value grounded for it in original words and lemmas at runtime."
+   VAR is a number, it will be included as part of the variable name.
+   GRD can either be a VariableNode or a GlobNode, which pass the actual
+   value grounded in original words at runtime."
   (Evaluation (GroundedPredicate "scm: ghost-record-groundings")
-    (List (List (ghost-var-word VAR) WGRD)
-          (List (ghost-var-lemma VAR) LGRD))))
+    (List (List (ghost-var-word VAR) (List GRD))
+          (List (ghost-var-lemma VAR)
+                (ExecutionOutput (GroundedSchema "scm: ghost-get-lemma")
+                                 (List GRD))))))
 
 (define (context-function NAME ARGS)
   "Occurrence of a function in the context of a rule."
@@ -184,28 +183,31 @@
 
 (define (get-var-words NUM)
   "Get the value grounded for a variable, in original words."
-  (Get (State (ghost-var-word NUM) (Variable "$x"))))
+  (ExecutionOutput (GroundedSchema "scm: ghost-get-var-words")
+                   (List (ghost-var-word NUM))))
 
 (define (get-var-lemmas NUM)
   "Get the value grounded for a variable, in lemmas."
-  (Get (State (ghost-var-lemma NUM) (Variable "$x"))))
+  (ExecutionOutput (GroundedSchema "scm: ghost-get-var-lemmas")
+                   (List (ghost-var-lemma NUM))))
 
-(define (get-user-variable VAR)
+(define (get-user-variable UVAR)
   "Get the value of a user variable."
-  (Get (State (Node VAR) (Variable "$x"))))
+  (ExecutionOutput (GroundedSchema "scm: ghost-get-user-variable")
+                   (List (ghost-uvar UVAR))))
 
-(define (assign-user-variable VAR VAL)
+(define (set-user-variable UVAR VAL)
   "Assign a string value to a user variable."
-  (Put (State (Node VAR) (Variable "$x"))
-    ; Just to make sure there is no unneeded SetLink
-    (if (equal? 'GetLink (cog-type VAL))
-        VAL
-        (Set VAL))))
+  (ExecutionOutput (GroundedSchema "scm: ghost-set-user-variable")
+                   (List (ghost-uvar UVAR) VAL)))
 
-(define (uvar-exist? VAR)
-  "Check if a user variable has been defined in the atomspace."
-  (Not (Equal (Set) (Get (State (Node VAR) (Variable "$x"))))))
+(define (uvar-exist? UVAR)
+  "Check if a user variable has been defined."
+  (Evaluation (GroundedPredicate "scm: ghost-user-variable-exist?")
+              (List (ghost-uvar UVAR))))
 
-(define (uvar-equal? VAR VAL)
+(define (uvar-equal? UVAR VAL)
   "Check if the value of the user variable VAR equals to VAL."
-  (Equal (Set (WordNode VAL)) (Get (State (Node VAR) (Variable "$x")))))
+  ; TODO: VAL can also be a concept etc?
+  (Evaluation (GroundedPredicate "scm: ghost-user-variable-equal?")
+              (List (ghost-uvar UVAR) (Word VAL))))

@@ -5,13 +5,6 @@
 (use-modules (system base lalr))
 (use-modules (ice-9 eval-string))
 
-; ----------
-; For debugging
-(use-modules (opencog logger))
-(define ghost-logger (cog-new-logger))
-(cog-logger-set-level! ghost-logger "debug")
-(cog-logger-set-stdout! ghost-logger #t)
-
 (define (display-token token)
 "
   This is used as a place holder.
@@ -170,7 +163,8 @@
     (lambda ()
       (if (string=? "" cs-line)
         (begin
-          (format #t "\n-------------------------- line ~a \n" (port-line port))
+          (cog-logger-debug ghost-logger
+            "\n-------------------------- line ~a \n" (port-line port))
           (set! cs-line (read-line port))
           (set! initial-line cs-line)
         ))
@@ -195,7 +189,7 @@
   )
 )
 
-(define cs-parser
+(define (cs-parser)
   (lalr-parser
     ;; Options mainly for debugging
     ;; output a parser, called ghost-parser, in a separate file - ghost.yy.scm,
@@ -229,8 +223,10 @@
 
     ; Parsing rules (aka nonterminal symbols)
     (inputs
-      (input) : (if $1 (format #t "\nInput:\n~a\n" $1))
-      (inputs input) : (if $2 (format #t "\nInput:\n~a\n" $2))
+      (input) :
+        (if $1 (begin (cog-logger-debug ghost-logger "\nRule:\n~a\n" $1) #t))
+      (inputs input) :
+        (if $2 (begin (cog-logger-debug ghost-logger "\nRule:\n~a\n" $2) #t))
     )
 
     (input
@@ -579,12 +575,14 @@
 "
   Parse a text string in a Guile shell, for debugging mainly.
 "
-  (cs-parser (cs-lexer (open-input-string line)) error)
+  (define parser (cs-parser))
+  (parser (cs-lexer (open-input-string line)) error)
 )
 
 (define-public (test-parse-file file)
 "
   Parse a topic file in a Guile shell, for debugging mainly.
 "
-  (cs-parser (cs-lexer (open-file-input-port file)) error)
+  (define parser (cs-parser))
+  (parser (cs-lexer (open-file-input-port file)) error)
 )
