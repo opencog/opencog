@@ -454,7 +454,7 @@
 				(update-counts SENT)
 				(delete-sentence SENT)
 				(monitor-rate '())
-				(process-sents)))))
+				(process-sents))))
 
 	; -------------------------------------------------------
 	; Manually run the garbage collector, every now and then.
