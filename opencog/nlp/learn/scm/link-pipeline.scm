@@ -453,8 +453,7 @@
 			(begin
 				(update-counts SENT)
 				(delete-sentence SENT)
-				(monitor-rate '())
-				(process-sents))))
+				(monitor-rate '()))))
 
 	; -------------------------------------------------------
 	; Manually run the garbage collector, every now and then.
@@ -510,8 +509,13 @@
 	; the one that was submitted for parsing! It might be just
 	; some other sentence that is sitting there, ready to go.
 	(define (relex-process TXT)
+		(define (do-all-sents)
+			(let ((sent (get-one-new-sentence)))
+				(if (null? sent) '()
+					(begin (process-sent sent) (do-all-sents)))))
+
 		(relex-parse TXT)
-		(get-one-new-sentence)
+		(do-all-sents)
 		(maybe-gc) ;; need agressive gc to keep RAM under control.
 	)
 
@@ -520,14 +524,14 @@
 		(define lgn (LgParseLink (Phrase TXT) (LgDict "any") (Number 24)))
 		(define sent (cog-execute! lgn))
 		(cog-extract lgn)
-		sent
+		(process-sent sent)
 	)
 
 	;; Send plain-text to the relex server
-	; (process-sent (relex-process plain-text))
+	; (relex-process plain-text)
 
 	; Handle the plain-text locally
-	(process-sent (local-process plain-text))
+	(local-process plain-text)
 )
 
 ; ---------------------------------------------------------------------
