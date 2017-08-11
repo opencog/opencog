@@ -20,6 +20,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <link-grammar/link-includes.h>
+#include <opencog/util/Logger.h>
 #include <opencog/nlp/types/atom_types.h>
 
 #include "LGDictNode.h"
@@ -65,6 +67,9 @@ Dictionary LgDictNode::get_dictionary()
 	return _dict;
 }
 
+// ------------------------------------------------------
+// Factory stuff.
+
 Handle LgDictNode::factory(const Handle& base)
 {
 	if (LgDictNodeCast(base)) return base;
@@ -78,7 +83,27 @@ static __attribute__ ((constructor)) void init(void)
    classserver().addFactory(LG_DICT_NODE, &LgDictNode::factory);
 }
 
+// ------------------------------------------------------
+
+// Convert LG errors to opencog log messges
+void error_handler(lg_errinfo *ei, void *data)
+{
+	if (lg_Fatal == ei->severity or lg_Error == ei->severity)
+		logger().error("%s", ei->text);
+	else if (lg_Warn == ei->severity)
+		logger().warn("%s", ei->text);
+	else
+		logger().info("%s", ei->text);
+}
+
+// ------------------------------------------------------
+
 /* This allows guile to load this shared library */
 extern "C" {
-	void opencog_nlp_lgparse_init(void) {}
+	void opencog_nlp_lgparse_init(void);
 };
+
+void opencog_nlp_lgparse_init(void)
+{
+	lg_error_set_handler(error_handler, nullptr);
+}

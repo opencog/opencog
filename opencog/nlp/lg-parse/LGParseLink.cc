@@ -118,7 +118,7 @@ Handle LGParseLink::execute(AtomSpace* as) const
 	if (nullptr == sent) return Handle();
 
 	// Work with the default parse options (mostly).
-	// Suppress printing of warnings.
+	// Suppress printing of combinatorial-overflow warning.
 	Parse_Options opts = parse_options_create();
 	parse_options_set_verbosity(opts, 0);
 
@@ -177,6 +177,8 @@ Handle LGParseLink::execute(AtomSpace* as) const
 
 	sentence_delete(sent);
 	parse_options_delete(opts);
+	lg_error_flush();
+	lg_error_clearall();
 	return snode;
 }
 

@@ -13019,6 +13019,23 @@ atoms: 6111927
 valuations: 6938625
 
 Suppress printing of "Warning: Combinatorial explosion!"
+api.c prt_error  .. set verb
+verb=0
+set lg_error.handler
+ parse_options_set_verbosity
+lg_error_set_handler (lg_error_handler,, void*)
+void (*lg_error_handler)(lg_errinfo *, void *);
+   lg_error_severity severity;
+   const char *severity_label;
+   const char *text;
+   lg_Fatal = 1,
+   lg_Error,
+   lg_Warn,
+   lg_Info,
+
+
+lg_error_flush
+lg_error_clearall
 
 remove the relex check  Punt from ss-nosplit-one.sh
 
