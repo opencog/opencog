@@ -48,7 +48,7 @@ mkdir -p $(dirname "$splitdir/$rest")
 mkdir -p $(dirname "$subdir/$rest")
 
 # Move article to temp directory, while processing.
-mv "$filename" "$splitdir/$rest"
+cp "$filename" "$splitdir/$rest"
 
 # Submit the pre-split article
 cat "$splitdir/$rest" | ./submit-one.pl $coghost $cogport $observe
@@ -66,3 +66,4 @@ fi
 
 # Move article to the done-queue
 mv "$splitdir/$rest" "$subdir/$rest"
+rm "$base/$rest"

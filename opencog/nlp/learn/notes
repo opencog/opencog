@@ -13019,6 +13019,7 @@ atoms: 6111927
 valuations: 6938625
 
 Suppress printing of "Warning: Combinatorial explosion!" DONE
+except its still printing dict ver wtf.
 
 remove the relex check  Punt from ss-nosplit-one.sh
 
@@ -13028,6 +13029,35 @@ remove the relex check  Punt from ss-nosplit-one.sh
 foo cnt=951 rate=1.1375598073147588
 vs slog of 0.43 previously, after 24 hours
 foo cnt=104494 rate=2.8365047910446783
+
+Again with minimal:
+(monitor-rate "foo")                                        
+foo cnt=571 rate=4.167883182665671
+foo cnt=1836 rate=4.636363625198028
+foo cnt=8922 rate=3.7725158547155386
+foo cnt=71196 rate=4.316740435086596
+
+
+  PID USER      PR  NI    VIRT    RES    SHR S  %CPU %MEM     TIME+ COMMAND    
+ 3792 ubuntu    30  10 12.392g 1.270g  35144 S 291.3  0.5   7:37.33 guile      
+ 3792 ubuntu    30  10 12.886g 4.362g  35252 S 287.3  1.7 108:03.44 guile      
+ 3792 ubuntu    30  10 13.053g 6.788g  35252 S 222.7  2.7 694:53.99 guile      
+
+cogserver: if it fails the first time, its says runing the second tim
+and then stop crashes
+
+  PID USER      PR  NI    VIRT    RES    SHR S  %CPU %MEM     TIME+ COMMAND    
+27600 ubuntu    30  10 12.905g 3.073g  34772 S 283.0  1.2  57:47.82 guile      
+
+(monitor-rate "foo")
+foo cnt=10805 rate=7.71785713759977
+foo cnt=20403 rate=7.336569576772133
+foo cnt=25451 rate=7.197680993533868
+
+
+
+
+Still rate-limited by atom insert-delete.
 
 
 Maybe provide a minimal parse!  Wow!   DONE
@@ -13040,6 +13070,8 @@ update-lg-link-counts -- just needs the Evals for links
 
 No one needs the link instances.
 
+
+remove use-relex-server
 =========================================================================
 
 
