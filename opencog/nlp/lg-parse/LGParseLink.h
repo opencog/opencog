@@ -38,11 +38,17 @@ namespace opencog
 /// Link Grammar parser.
 ///
 /// An atomspace wrapper to the LG parser.
+/// The LGParseLink places a full parse into the atomspace, including
+/// the disjuncts and the link-instances.
+///
+/// The LGParseMinimal ony places the words, word-sequence and links
+/// into the atomspace.
 
 class LGParseLink : public FunctionLink
 {
 protected:
-	Handle cvt_linkage(Linkage, int, const char*,
+	void init();
+	Handle cvt_linkage(Linkage, int, const char*, bool,
 	                   AtomSpace*) const;
 
 public:
@@ -60,9 +66,6 @@ class LGParseMinimal : public LGParseLink
 public:
 	LGParseMinimal(const HandleSeq&, Type=LG_PARSE_MINIMAL);
 	LGParseMinimal(const Link&);
-
-	// Return a pointer to the atom being specified.
-	virtual Handle execute(AtomSpace* = nullptr) const;
 
 	static Handle factory(const Handle&);
 };

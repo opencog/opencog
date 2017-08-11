@@ -50,9 +50,10 @@ using namespace opencog;
 /// The LgParseLink is a kind of FunctionLink, and can thus be used in
 /// any expression that FunctionLinks can be used with.
 ///
-LGParseLink::LGParseLink(const HandleSeq& oset, Type t)
-	: FunctionLink(oset, t)
+void LGParseLink::init()
 {
+	const HandleSeq& oset = _outgoing;
+
 	size_t osz = oset.size();
 	if (2 != osz and 3 != osz)
 		throw InvalidParamException(TRACE_INFO,
@@ -80,6 +81,19 @@ LGParseLink::LGParseLink(const HandleSeq& oset, Type t)
 	}
 }
 
+LGParseLink::LGParseLink(const HandleSeq& oset, Type t)
+	: FunctionLink(oset, t)
+{
+	// Type must be as expected
+	if (not classserver().isA(t, LG_PARSE_LINK))
+	{
+		const std::string& tname = classserver().getTypeName(t);
+		throw InvalidParamException(TRACE_INFO,
+			"Expecting an LgParseLink, got %s", tname.c_str());
+	}
+	init();
+}
+
 LGParseLink::LGParseLink(const Link& l)
 	: FunctionLink(l)
 {
@@ -92,6 +106,34 @@ LGParseLink::LGParseLink(const Link& l)
 			"Expecting an LgParseLink, got %s", tname.c_str());
 	}
 }
+
+LGParseMinimal::LGParseMinimal(const HandleSeq& oset, Type t)
+	: LGParseLink(oset, t)
+{
+	// Type must be as expected
+	if (not classserver().isA(t, LG_PARSE_MINIMAL))
+	{
+		const std::string& tname = classserver().getTypeName(t);
+		throw InvalidParamException(TRACE_INFO,
+			"Expecting an LgParseMinimal, got %s", tname.c_str());
+	}
+	init();
+}
+
+LGParseMinimal::LGParseMinimal(const Link& l)
+	: LGParseLink(l)
+{
+	// Type must be as expected
+	Type tparse = l.getType();
+	if (not classserver().isA(tparse, LG_PARSE_MINIMAL))
+	{
+		const std::string& tname = classserver().getTypeName(tparse);
+		throw InvalidParamException(TRACE_INFO,
+			"Expecting an LgParseMinimal, got %s", tname.c_str());
+	}
+}
+
+// =================================================================
 
 Handle LGParseLink::execute(AtomSpace* as) const
 {
@@ -167,10 +209,11 @@ Handle LGParseLink::execute(AtomSpace* as) const
 
 	Handle snode(as->add_node(SENTENCE_NODE, sentstr));
 
+	bool minimal = (getType() == LG_PARSE_MINIMAL);
 	for (int i=0; i<num_linkages; i++)
 	{
 		Linkage lkg = linkage_create(i, sent, opts);
-		Handle pnode = cvt_linkage(lkg, i, sentstr, as);
+		Handle pnode = cvt_linkage(lkg, i, sentstr, minimal, as);
 		as->add_link(PARSE_LINK, pnode, snode);
 		linkage_delete(lkg);
 	}
@@ -185,7 +228,7 @@ Handle LGParseLink::execute(AtomSpace* as) const
 static std::atomic<unsigned long> wcnt;
 
 Handle LGParseLink::cvt_linkage(Linkage lkg, int i, const char* idstr,
-                              AtomSpace* as) const
+                                bool minimal, AtomSpace* as) const
 {
 	char parseid[80];
 	snprintf(parseid, 80, "%s_parse_%d", idstr, i);
@@ -210,6 +253,9 @@ Handle LGParseLink::cvt_linkage(Linkage lkg, int i, const char* idstr,
 			as->add_node(WORD_NODE, wrd));
 		as->add_link(WORD_SEQUENCE_LINK, winst,
 			Handle(createNumberNode(++wcnt)));
+
+		// Don't bother with disjuncts for the minimal parses.
+		if (minimal) continue;
 
 		// Convert the disjunct to atomese.
 		// This requires parsing a string. Fortunately, the
@@ -265,6 +311,9 @@ Handle LGParseLink::cvt_linkage(Linkage lkg, int i, const char* idstr,
 		const char* label = linkage_get_link_label(lkg, lk);
 		Handle lrel(as->add_node(LINK_GRAMMAR_RELATIONSHIP_NODE, label));
 		as->add_link(EVALUATION_LINK, lrel, lst);
+
+		// Don't bother with the link instances for the minimal parse.
+		if (minimal) continue;
 
 		// The link instance.
 		char buff[140];
