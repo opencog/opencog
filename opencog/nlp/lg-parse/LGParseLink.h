@@ -55,6 +55,18 @@ public:
 	static Handle factory(const Handle&);
 };
 
+class LGParseMinimal : public LGParseLink
+{
+public:
+	LGParseMinimal(const HandleSeq&, Type=LG_PARSE_MINIMAL);
+	LGParseMinimal(const Link&);
+
+	// Return a pointer to the atom being specified.
+	virtual Handle execute(AtomSpace* = nullptr) const;
+
+	static Handle factory(const Handle&);
+};
+
 typedef std::shared_ptr<LGParseLink> LGParseLinkPtr;
 static inline LGParseLinkPtr LGParseLinkCast(const Handle& h)
 	{ AtomPtr a(h); return std::dynamic_pointer_cast<LGParseLink>(a); }
@@ -63,6 +75,15 @@ static inline LGParseLinkPtr LGParseLinkCast(AtomPtr a)
 
 // XXX temporary hack ...
 #define createLGParseLink std::make_shared<LGParseLink>
+
+typedef std::shared_ptr<LGParseMinimal> LGParseMinimalPtr;
+static inline LGParseMinimalPtr LGParseMinimalCast(const Handle& h)
+	{ AtomPtr a(h); return std::dynamic_pointer_cast<LGParseMinimal>(a); }
+static inline LGParseMinimalPtr LGParseMinimalCast(AtomPtr a)
+	{ return std::dynamic_pointer_cast<LGParseMinimal>(a); }
+
+// XXX temporary hack ...
+#define createLGParseMinimal std::make_shared<LGParseMinimal>
 
 /** @}*/
 }

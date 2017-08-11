@@ -13018,24 +13018,7 @@ prior to start:
 atoms: 6111927
 valuations: 6938625
 
-Suppress printing of "Warning: Combinatorial explosion!"
-api.c prt_error  .. set verb
-verb=0
-set lg_error.handler
- parse_options_set_verbosity
-lg_error_set_handler (lg_error_handler,, void*)
-void (*lg_error_handler)(lg_errinfo *, void *);
-   lg_error_severity severity;
-   const char *severity_label;
-   const char *text;
-   lg_Fatal = 1,
-   lg_Error,
-   lg_Warn,
-   lg_Info,
-
-
-lg_error_flush
-lg_error_clearall
+Suppress printing of "Warning: Combinatorial explosion!" DONE
 
 remove the relex check  Punt from ss-nosplit-one.sh
 
@@ -13048,6 +13031,14 @@ foo cnt=104494 rate=2.8365047910446783
 
 
 Maybe provide a minimal parse!  Wow!
+Need only: LinkGrammarRelationshipNode WordInstanceNode for pairs
+
+update-word-counts -- just needs WordInstanceLink for parses
+update-lg-link-counts -- just needs the Evals for links
+; update-disjunct-counts -- word-inst-get-cset needs csets
+; update-clique-pair-counts -- needs numbering. WordSequenceLink
+
+No one needs the link instances.
 
 =========================================================================
 
