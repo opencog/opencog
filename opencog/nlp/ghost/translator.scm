@@ -219,9 +219,10 @@
   (define txt (extract-txt ACTION))
   ; Is there anything to say?
   (if (not (string-null? (string-trim txt)))
-      (cog-execute! (Put (DefinedPredicate "Say") (Node txt))))
-  (State ghost-anchor (Concept "Default State"))
-  (True))
+      (begin (cog-logger-info ghost-logger "Say: \"~a\"" txt)
+             (cog-execute! (Put (DefinedPredicate "Say") (Node txt)))))
+  ; Reset the state
+  (State ghost-anchor (Concept "Default State")))
 
 (define-public (ghost-pick-action ACTIONS)
   "Pick one of the ACTIONS randomly."
