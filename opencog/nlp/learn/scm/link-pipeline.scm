@@ -523,10 +523,14 @@
 
 	; Process the text locally, using the LG API link.
 	(define (local-process TXT)
-		; (define lgn (LgParseLink (Phrase TXT) (LgDict "any") (Number 24)))
-		(define lgn (LgParseMinimal (Phrase TXT) (LgDict "any") (Number 24)))
+		(define phr (Phrase TXT))
+		; (define lgn (LgParseLink phr (LgDict "any") (Number 24)))
+		(define lgn (LgParseMinimal phr (LgDict "any") (Number 24)))
 		(define sent (cog-execute! lgn))
+
+		; Remove crud so it doesn't build up.
 		(cog-extract lgn)
+		(cog-extract phr)
 		(process-sent sent)
 	)
 
