@@ -117,8 +117,10 @@ Handle LGParseLink::execute(AtomSpace* as) const
 	Sentence sent = sentence_create(_outgoing[0]->getName().c_str(), dict);
 	if (nullptr == sent) return Handle();
 
-	// Work with the default parse options
+	// Work with the default parse options (mostly).
+	// Suppress printing of warnings.
 	Parse_Options opts = parse_options_create();
+	parse_options_set_verbosity(opts, 0);
 
 	// Count the number of parses
 	int num_linkages = sentence_parse(sent, opts);

@@ -13010,6 +13010,27 @@ LGDictReader
    if (regex_name)
        dn_head = dictionary_lookup_wild(dict, word);
 
+echo "始知 天理 有 循环 。" | ./submit-one.pl localhost 17008 observe-text
+echo "站 在 旁边 的 一名 老者 问 ： “ 不 就是 一个 女子 么 ？" | ./submit-one.pl localhost 17008 observe-text
+
+
+prior to start:
+atoms: 6111927
+valuations: 6938625
+
+Suppress printing of "Warning: Combinatorial explosion!"
+
+remove the relex check  Punt from ss-nosplit-one.sh
+
+  PID USER      PR  NI    VIRT    RES    SHR S  %CPU %MEM     TIME+ COMMAND    
+26784 ubuntu    30  10 12.463g 1.495g  34788 S 207.3  0.6  12:24.44 guile      
+26784 ubuntu    30  10 13.065g 7.990g  34788 S 232.0  3.2   1483:55 guile      
+foo cnt=951 rate=1.1375598073147588
+vs slog of 0.43 previously, after 24 hours
+foo cnt=104494 rate=2.8365047910446783
+
+
+Maybe provide a minimal parse!  Wow!
 
 =========================================================================
 
