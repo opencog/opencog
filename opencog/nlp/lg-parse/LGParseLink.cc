@@ -240,7 +240,7 @@ Handle LGParseLink::cvt_linkage(Linkage lkg, int i, const char* idstr,
 	for (int w=0; w<nwords; w++)
 	{
 		const char* wrd = linkage_get_word(lkg, w);
-		char buff[800] = "";
+		char buff[801] = "";
 		strncat(buff, wrd, 800);
 		strncat(buff, "@", 800);
 		strncat(buff, parseid, 800);
