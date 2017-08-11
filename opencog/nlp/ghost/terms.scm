@@ -186,28 +186,31 @@
 
 (define (get-var-words NUM)
   "Get the value grounded for a variable, in original words."
-  (Get (State (ghost-var-word NUM) (Variable "$x"))))
+  (ExecutionOutput (GroundedSchema "scm: ghost-get-var-words")
+                   (List (ghost-var-word NUM))))
 
 (define (get-var-lemmas NUM)
   "Get the value grounded for a variable, in lemmas."
-  (Get (State (ghost-var-lemma NUM) (Variable "$x"))))
+  (ExecutionOutput (GroundedSchema "scm: ghost-get-var-lemmas")
+                   (List (ghost-var-lemma NUM))))
 
 (define (get-user-variable VAR)
   "Get the value of a user variable."
-  (Get (State (Node VAR) (Variable "$x"))))
+  (ExecutionOutput (GroundedSchema "scm: ghost-get-user-variable")
+                   (List (Node VAR))))
 
-(define (assign-user-variable VAR VAL)
+(define (set-user-variable VAR VAL)
   "Assign a string value to a user variable."
-  (Put (State (Node VAR) (Variable "$x"))
-    ; Just to make sure there is no unneeded SetLink
-    (if (equal? 'GetLink (cog-type VAL))
-        VAL
-        (Set VAL))))
+  (ExecutionOutput (GroundedSchema "scm: ghost-set-user-variable")
+                   (List (Node VAR) VAL)))
 
 (define (uvar-exist? VAR)
-  "Check if a user variable has been defined in the atomspace."
-  (Not (Equal (Set) (Get (State (Node VAR) (Variable "$x"))))))
+  "Check if a user variable has been defined."
+  (Evaluation (GroundedPredicate "scm: ghost-user-variable-exist?")
+              (List (Node VAR))))
 
 (define (uvar-equal? VAR VAL)
   "Check if the value of the user variable VAR equals to VAL."
-  (Equal (Set (WordNode VAL)) (Get (State (Node VAR) (Variable "$x")))))
+  ; TODO: VAL can also be a concept etc?
+  (Evaluation (GroundedPredicate "scm: ghost-user-variable-equal?")
+              (List (Node VAR) (Word VAL))))

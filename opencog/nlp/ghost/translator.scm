@@ -17,6 +17,13 @@
 ; TODO: Move it to process-pattern-terms?
 (define pat-vars '())
 
+; Keep a record of the groundings of variables that authors defined
+(define var-grd-words '())
+(define var-grd-lemmas '())
+
+; Keep a record of the value assigned to the user variables that authors defined
+(define uvars '())
+
 ; Keep a record of the lemmas we have seen
 (define lemma-alist '())
 
@@ -40,7 +47,7 @@
 ; For features that are not currently supported
 (define (feature-not-supported NAME VAL)
   "Notify the user that a particular is not currently supported."
-  (cog-logger-error "Feature not supported: \"~a ~a\"" NAME VAL))
+  (cog-logger-error ghost-logger "Feature not supported: \"~a ~a\"" NAME VAL))
 
 ;; Shared variables for all terms
 (define atomese-variable-template
@@ -248,7 +255,7 @@
               ((equal? 'get_uvar (car n)) (get-user-variable (cdr n)))
               ; Assign a value to a user variable
               ((equal? 'assign_uvar (car n))
-               (assign-user-variable (cadr n) (car (to-atomese (cddr n)))))
+               (set-user-variable (cadr n) (car (to-atomese (cddr n)))))
               ; A function call
               ((equal? 'function (car n))
                (action-function (cadr n) (to-atomese (cddr n))))
@@ -472,12 +479,47 @@
   (append-map (lambda (m) (list (Reference (member-words m) (Concept NAME))))
               MEMBERS))
 
+(define-public (ghost-get-var-words VAR)
+  "Get the grounding of VAR, in original words."
+  (define grd (assoc-ref var-grd-words VAR))
+  (if (equal? grd #f)
+      (List)
+      grd))
+
+(define-public (ghost-get-var-lemmas VAR)
+  "Get the grounding of VAR, in lemmas."
+  (define grd (assoc-ref var-grd-lemmas VAR))
+  (if (equal? grd #f) (List) grd))
+
+(define-public (ghost-get-user-variable UVAR)
+  "Get the value stored for VAR."
+  (define grd (assoc-ref uvars UVAR))
+  (if (equal? grd #f) (List) grd))
+
+(define-public (ghost-set-user-variable UVAR VAL)
+  "Assign VAL to UVAR."
+  (set! uvars (assoc-set! uvars UVAR VAL))
+  (True))
+
+(define-public (ghost-user-variable-exist? UVAR)
+  "Check if UVAR has been defined."
+  (if (equal? (assoc-ref uvars UVAR) #f)
+      (stv 0 1)
+      (stv 1 1)))
+
+(define-public (ghost-user-variable-equal? UVAR VAL)
+  "Check if the value of UVAR equals VAL."
+  (if (equal? (assoc-ref uvars UVAR) VAL)
+      (stv 1 1)
+      (stv 0 1)))
+
 (define-public (ghost-record-groundings WGRD LGRD)
-  "Record the groundings of a variable/glob, in both original words
-   and lemmas. They will be referenced at the stage of evaluating the
-   context of the psi-rules, or executing the action of the psi-rules."
-  (State (gar WGRD) (gdr WGRD))
-  (State (gar LGRD) (gdr LGRD))
+  "Record the groundings of a variable, in both original words and lemmas.
+   They will be referenced at the stage of evaluating the context of the
+   psi-rules, or executing the action of the psi-rules."
+  (cog-logger-debug ghost-logger "--- Recording groundings:\n~a\n~a" WGRD LGRD)
+  (set! var-grd-words (assoc-set! var-grd-words (gar WGRD) (gdr WGRD)))
+  (set! var-grd-lemmas (assoc-set! var-grd-lemmas (gar LGRD) (gdr LGRD)))
   (stv 1 1))
 
 ; ----------
