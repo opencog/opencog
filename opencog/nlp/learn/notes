@@ -13030,7 +13030,7 @@ vs slog of 0.43 previously, after 24 hours
 foo cnt=104494 rate=2.8365047910446783
 
 
-Maybe provide a minimal parse!  Wow!
+Maybe provide a minimal parse!  Wow!   DONE
 Need only: LinkGrammarRelationshipNode WordInstanceNode for pairs
 
 update-word-counts -- just needs WordInstanceLink for parses

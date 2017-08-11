@@ -442,6 +442,8 @@
 				; (update-clique-pair-counts sent 6 #f)
 				(update-word-counts sent)
 				(update-lg-link-counts sent)
+				; If you uncomment this, be sure to also uncomment
+				; LgParseLink below, because LgParseMinimal is not enough.
 				; (update-disjunct-counts sent)
 			))
 			(lambda (key . args) #f)))
@@ -521,7 +523,8 @@
 
 	; Process the text locally, using the LG API link.
 	(define (local-process TXT)
-		(define lgn (LgParseLink (Phrase TXT) (LgDict "any") (Number 24)))
+		; (define lgn (LgParseLink (Phrase TXT) (LgDict "any") (Number 24)))
+		(define lgn (LgParseMinimal (Phrase TXT) (LgDict "any") (Number 24)))
 		(define sent (cog-execute! lgn))
 		(cog-extract lgn)
 		(process-sent sent)
