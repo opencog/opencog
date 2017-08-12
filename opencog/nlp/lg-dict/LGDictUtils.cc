@@ -39,12 +39,12 @@ namespace nlp
 
 Handle lg_conn_get_type(const Handle& hConn)
 {
-    return LinkCast(hConn)->getOutgoingSet()[0];
+    return hConn->getOutgoingSet()[0];
 }
 
 Handle lg_conn_get_dir(const Handle& hConn)
 {
-    return LinkCast(hConn)->getOutgoingSet()[1];
+    return hConn->getOutgoingSet()[1];
 }
 
 /**
@@ -65,8 +65,8 @@ bool lg_conn_type_match(const Handle& hConn1, const Handle& hConn2)
         return false;
 
     // Convert the types to string
-    std::string type1 = NodeCast(lg_conn_get_type(hConn1))->getName();
-    std::string type2 = NodeCast(lg_conn_get_type(hConn2))->getName();
+    std::string type1 = lg_conn_get_type(hConn1)->getName();
+    std::string type2 = lg_conn_get_type(hConn2)->getName();
     uint i1 = 0;
     uint i2 = 0;
 
