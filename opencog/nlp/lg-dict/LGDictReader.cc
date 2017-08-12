@@ -99,8 +99,8 @@ static LGDictExpContainer lg_exp_to_container(Exp* exp)
  * @param word   the input word string
  * @return       the handle to the newly created atom
  */
-HandleSeq getDictEntry(Dictionary _dictionary,
-                       const std::string& word)
+HandleSeq opencog::getDictEntry(Dictionary _dictionary,
+                                const std::string& word)
 {
     // See if we know about this word, or not.
     Dict_node* dn_head = dictionary_lookup_list(_dictionary, word.c_str());
