@@ -39,9 +39,6 @@ private:
     static void init_in_module(void*);
     void init(void);
 
-    void do_lg_dictopen(Handle);
-    void do_lg_dictclose(void);
-    void do_lg_dict_entry(Handle);
     Handle do_lg_get_dict_entry(Handle);
     bool do_lg_conn_type_match(Handle, Handle);
     bool do_lg_conn_linkable(Handle, Handle);

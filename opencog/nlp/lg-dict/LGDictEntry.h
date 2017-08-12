@@ -52,6 +52,8 @@ namespace opencog
 class LGDictEntry : public FunctionLink
 {
 protected:
+	void init();
+
 public:
 	LGDictEntry(const HandleSeq&, Type=LG_DICT_ENTRY);
 	LGDictEntry(const Link&);
