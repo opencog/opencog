@@ -21,11 +21,29 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <opencog/atoms/base/Handle.h>
 #include <opencog/guile/SchemePrimitive.h>
 
-#include "LGDictSCM.h"
 #include "LGDictReader.h"
 #include "LGDictUtils.h"
+
+namespace opencog
+{
+class LGDictSCM
+{
+private:
+    static void* init_in_guile(void*);
+    static void init_in_module(void*);
+    void init(void);
+
+    bool do_lg_conn_type_match(Handle, Handle);
+    bool do_lg_conn_linkable(Handle, Handle);
+
+public:
+    LGDictSCM();
+};
+
+}
 
 using namespace opencog::nlp;
 using namespace opencog;
@@ -102,7 +120,9 @@ bool LGDictSCM::do_lg_conn_linkable(Handle h1, Handle h2)
 	return lg_conn_linkable(h1, h2);
 }
 
+extern "C" {
 void opencog_nlp_lgdict_init(void)
 {
 	static LGDictSCM lgdict;
 }
+};
