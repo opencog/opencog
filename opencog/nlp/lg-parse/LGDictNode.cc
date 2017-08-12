@@ -28,6 +28,21 @@
 
 using namespace opencog;
 
+// ------------------------------------------------------
+// Convert LG errors to opencog log messges
+void error_handler(lg_errinfo *ei, void *data);
+void error_handler(lg_errinfo *ei, void *data)
+{
+	if (lg_Fatal == ei->severity or lg_Error == ei->severity)
+		logger().error("%s", ei->text);
+	else if (lg_Warn == ei->severity)
+		logger().warn("%s", ei->text);
+	else
+		logger().info("%s", ei->text);
+}
+
+// ------------------------------------------------------
+
 LgDictNode::LgDictNode(const std::string& name)
 	: Node(LG_DICT_NODE, name), _dict(nullptr)
 {
@@ -62,6 +77,7 @@ Dictionary LgDictNode::get_dictionary()
 {
 	if (_dict) return _dict;
 
+	lg_error_set_handler(error_handler, nullptr);
 	const char * lang = getName().c_str();
 	_dict = dictionary_create_lang(lang);
 	return _dict;
@@ -85,25 +101,7 @@ static __attribute__ ((constructor)) void init(void)
 
 // ------------------------------------------------------
 
-// Convert LG errors to opencog log messges
-void error_handler(lg_errinfo *ei, void *data)
-{
-	if (lg_Fatal == ei->severity or lg_Error == ei->severity)
-		logger().error("%s", ei->text);
-	else if (lg_Warn == ei->severity)
-		logger().warn("%s", ei->text);
-	else
-		logger().info("%s", ei->text);
-}
-
-// ------------------------------------------------------
-
 /* This allows guile to load this shared library */
 extern "C" {
-	void opencog_nlp_lgparse_init(void);
+	void opencog_nlp_lgparse_init(void) {}
 };
-
-void opencog_nlp_lgparse_init(void)
-{
-	lg_error_set_handler(error_handler, nullptr);
-}

@@ -32,6 +32,7 @@
 #include "LGParseLink.h"
 
 using namespace opencog;
+void error_handler(lg_errinfo *ei, void *data);
 
 /// The expected format of an LgParseLink is:
 ///
@@ -146,6 +147,11 @@ Handle LGParseLink::execute(AtomSpace* as) const
 	if (nullptr == as)
 		throw InvalidParamException(TRACE_INFO,
 			"LgParseLink requires an atomspace to parse");
+
+	// Link grammar, for some reson, has a different error handler
+	// per thread. Don't know why. So we have to set it every time,
+	// because we don't know what thread we are in.
+	lg_error_set_handler(error_handler, nullptr);
 
 	// Get the dictionary
 	LgDictNodePtr ldn(LgDictNodeCast(_outgoing[1]));
