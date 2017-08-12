@@ -23,24 +23,12 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <opencog/nlp/types/atom_types.h>
 #include <opencog/atoms/base/Link.h>
-
+#include <opencog/atoms/base/Node.h>
+#include <opencog/nlp/types/atom_types.h>
 #include "LGDictReader.h"
 
-using namespace opencog::nlp;
 using namespace opencog;
-
-/**
- * Constructor of the LGDictReader class.
- *
- * @param pDict   the Dictionary to read from
- * @param pAS     the AtomSpace where atoms will be created
- */
-LGDictReader::LGDictReader(Dictionary pDict, AtomSpace* pAS)
-    : _dictionary(pDict), _as(pAS)
-{
-}
 
 /**
  * Method to construct LG dictionary atom.
@@ -69,7 +57,8 @@ LGDictReader::LGDictReader(Dictionary pDict, AtomSpace* pAS)
  * @param word   the input word string
  * @return       the handle to the newly created atom
  */
-HandleSeq LGDictReader::getDictEntry(const std::string& word)
+HandleSeq LGDictReader::getDictEntry(Dictionary _dictionary,
+                                     const std::string& word)
 {
     // See if we know about this word, or not.
     Dict_node* dn_head = dictionary_lookup_list(_dictionary, word.c_str());

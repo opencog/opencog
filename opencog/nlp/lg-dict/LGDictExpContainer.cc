@@ -26,7 +26,6 @@
 #include <opencog/nlp/types/atom_types.h>
 #include "LGDictExpContainer.h"
 
-using namespace opencog::nlp;
 using namespace opencog;
 
 /**

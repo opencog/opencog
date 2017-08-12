@@ -27,7 +27,6 @@
 #include "LGDictReader.h"
 
 using namespace opencog;
-using namespace opencog::nlp;
 
 /// The expected format of an LgDictEntry is:
 ///
@@ -110,8 +109,10 @@ Handle LGDictEntry::execute(AtomSpace* as) const
 			"LgDictEntry requires valid dictionary! %s was given.",
 			ldn->getName().c_str());
 
-	LGDictReader reader(dict, as);
-	reader.getDictEntry(_outgoing[0]->getName());
+	LGDictReader reader;
+	HandleSeq djs = reader.getDictEntry(dict, _outgoing[0]->getName());
+
+	for (const Handle& dj: djs) as->add_atom(dj);
 
 	return _outgoing[0];
 }

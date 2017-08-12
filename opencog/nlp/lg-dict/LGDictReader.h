@@ -25,14 +25,9 @@
 #define _OPENCOG_LG_DICT_READER_H
 
 #include <link-grammar/dict-api.h>
-
-#include <opencog/atomspace/AtomSpace.h>
-
 #include "LGDictExpContainer.h"
 
 namespace opencog
-{
-namespace nlp
 {
 
 /**
@@ -44,17 +39,12 @@ namespace nlp
 class LGDictReader
 {
 public:
-    LGDictReader(Dictionary, AtomSpace*);
-    HandleSeq getDictEntry(const std::string& word);
+    HandleSeq getDictEntry(Dictionary, const std::string& word);
 
 private:
     LGDictExpContainer lg_exp_to_container(Exp*);
-
-    Dictionary _dictionary;
-    AtomSpace* _as;
 };
 
-}
 }
 
 #endif // _OPENCOG_LG_DICT_READER_H
