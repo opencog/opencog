@@ -58,7 +58,7 @@ void LGParseLink::init()
 	size_t osz = oset.size();
 	if (2 != osz and 3 != osz)
 		throw InvalidParamException(TRACE_INFO,
-			"LGParseLink: Expecting two arguments, got %lu", osz);
+			"LGParseLink: Expecting two or three arguments, got %lu", osz);
 
 	Type pht = oset[0]->getType();
 	if (PHRASE_NODE != pht and VARIABLE_NODE != pht and GLOB_NODE != pht)
