@@ -21,14 +21,13 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <opencog/atoms/base/Link.h>
+#include <opencog/atoms/base/Node.h>
 #include <opencog/nlp/types/atom_types.h>
-
 #include "LGDictExpContainer.h"
-
 
 using namespace opencog::nlp;
 using namespace opencog;
-
 
 /**
  * Constructor for CONNECTOR_type.
@@ -211,24 +210,24 @@ void LGDictExpContainer::basic_normal_order()
  */
 HandleSeq LGDictExpContainer::to_handle(AtomSpace *as, Handle hWordNode)
 {
-    static Handle multi = createNode(LG_CONN_MULTI_NODE, "@");
-    static Handle optnl = createLink(LG_CONNECTOR,
-                             createNode(LG_CONNECTOR_NODE, "0"));
+    static Handle multi(createNode(LG_CONN_MULTI_NODE, "@"));
+    static Handle optnl(createLink(LG_CONNECTOR,
+                           Handle(createNode(LG_CONNECTOR_NODE, "0"))));
 
     if (m_type == CONNECTOR_type)
     {
         // XXX FIXME this does not smell right; optionals should get
         // blown up into pairs of disjuncts, one with and one without.
-        if (m_string == "OPTIONAL") return optnl;
+        if (m_string == "OPTIONAL") return { optnl };
 
         Handle connector(createNode(LG_CONNECTOR_NODE, m_string));
         Handle direction(createNode(LG_CONN_DIR_NODE,
                           std::string(1, m_direction)));
 
         if (m_multi)
-            return createLink(LG_CONNECTOR, connector, direction, multi);
+            return { Handle(createLink(LG_CONNECTOR, connector, direction, multi)) };
         else
-            return createLink(LG_CONNECTOR, connector, direction);
+            return { Handle(createLink(LG_CONNECTOR, connector, direction)) };
     }
 
     HandleSeq outgoing;
@@ -240,17 +239,18 @@ HandleSeq LGDictExpContainer::to_handle(AtomSpace *as, Handle hWordNode)
     }
 
     if (m_type == AND_type)
-        return createLink(LG_AND, outgoing);
+        return { Handle(createLink(outgoing, LG_AND)) };
 
     // remove repeated atoms from OR
     if (m_type == OR_type)
     {
+        // XXX FIXME ... using an std::map would be more efficient.
         std::sort(outgoing.begin(), outgoing.end());
         outgoing.erase(std::unique(outgoing.begin(), outgoing.end()), outgoing.end());
 
         HandleSeq qDisjuncts;
         for (const Handle& h : outgoing)
-            qDisjuncts.push_back(createLink(LG_DISJUNCT, hWordNode, h));
+            qDisjuncts.push_back(Handle(createLink(LG_DISJUNCT, hWordNode, h)));
 
         return qDisjuncts;
     }
