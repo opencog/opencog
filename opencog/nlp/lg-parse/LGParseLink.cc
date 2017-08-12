@@ -148,7 +148,7 @@ Handle LGParseLink::execute(AtomSpace* as) const
 		throw InvalidParamException(TRACE_INFO,
 			"LgParseLink requires an atomspace to parse");
 
-	// Link grammar, for some reson, has a different error handler
+	// Link grammar, for some reason, has a different error handler
 	// per thread. Don't know why. So we have to set it every time,
 	// because we don't know what thread we are in.
 	lg_error_set_handler(error_handler, nullptr);
