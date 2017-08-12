@@ -109,9 +109,16 @@ void LGDictSCM::init()
  * Implementation of the "lg-dict-open" scheme primitive.
  *
  * XXX FIXME the current API allows only one global dictionary
- * at a time.  Some future version should fix this, to allow
- * multiple dictionaries at a time, right?  This is a low-priority
- * though, it seems.
+ * at a time.  The correct fix is to invent a new Link type that
+ * inherits from FunctionLink:
+ *
+ *    LgDictEntry
+ *        WordNode "foobar"
+ *        LgDictNode "en"
+ *
+ * When the above is executed, the word would be looked up, and the
+ * disjuncts placed into the atomspace.  See the implementation of
+ * LgParse for an example of how to do this.
  */
 void LGDictSCM::do_lg_dictopen(Handle h)
 {
