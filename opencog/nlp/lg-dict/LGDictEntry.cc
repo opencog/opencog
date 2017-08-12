@@ -21,11 +21,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <atomic>
-#include <uuid/uuid.h>
-#include <link-grammar/link-includes.h>
-
-#include <opencog/atoms/base/Node.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include "LGDictNode.h"
 #include "LGDictEntry.h"
@@ -33,7 +28,6 @@
 
 using namespace opencog;
 using namespace opencog::nlp;
-void error_handler(lg_errinfo *ei, void *data);
 
 /// The expected format of an LgDictEntry is:
 ///
@@ -108,11 +102,6 @@ Handle LGDictEntry::execute(AtomSpace* as) const
 		throw InvalidParamException(TRACE_INFO,
 			"LgDictEntry requires an atomspace to work");
 
-	// Link grammar, for some reason, has a different error handler
-	// per thread. Don't know why. So we have to set it every time,
-	// because we don't know what thread we are in.
-	lg_error_set_handler(error_handler, nullptr);
-
 	// Get the dictionary
 	LgDictNodePtr ldn(LgDictNodeCast(_outgoing[1]));
 	Dictionary dict = ldn->get_dictionary();
@@ -121,23 +110,10 @@ Handle LGDictEntry::execute(AtomSpace* as) const
 			"LgDictEntry requires valid dictionary! %s was given.",
 			ldn->getName().c_str());
 
-	// A convenient name.
-	const Handle& h = _outgoing[0];
-
-	// Check if the dictionary entry is already in the atomspace.
-	// XXX Is this really correct?  No, not really, but its what the
-	// old code did, so we do it too.
-	HandleSeq djset;
-	h->getIncomingSetByType(std::back_inserter(djset), LG_DISJUNCT);
-
-	// Avoid building the disjuncts if entries exist.
-	if (not djset.empty()) return h;
-
 	LGDictReader reader(dict, as);
+	reader.getDictEntry(_outgoing[0]->getName());
 
-	reader.getDictEntry(h->getName());
-
-	return h;
+	return _outgoing[0];
 }
 
 DEFINE_LINK_FACTORY(LGDictEntry, LG_DICT_ENTRY)
