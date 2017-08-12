@@ -5,7 +5,6 @@ INCLUDE_DIRECTORIES (
 )
 
 ADD_LIBRARY (lg-parse SHARED
-	LGDictNode
 	LGParseLink
 )
 

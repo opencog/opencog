@@ -28,7 +28,7 @@
 #include <opencog/atoms/base/Node.h>
 #include <opencog/atoms/NumberNode.h>
 #include <opencog/atomspace/AtomSpace.h>
-#include "LGDictNode.h"
+#include <opencog/nlp/lg-dict/LGDictNode.h>
 #include "LGParseLink.h"
 
 using namespace opencog;
