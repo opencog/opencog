@@ -211,18 +211,24 @@ void LGDictExpContainer::basic_normal_order()
  */
 HandleSeq LGDictExpContainer::to_handle(AtomSpace *as, Handle hWordNode)
 {
+    static Handle multi = createNode(LG_CONN_MULTI_NODE, "@");
+    static Handle optnl = createLink(LG_CONNECTOR,
+                             createNode(LG_CONNECTOR_NODE, "0"));
+
     if (m_type == CONNECTOR_type)
     {
-        if (m_string == "OPTIONAL")
-            return { as->add_link(LG_CONNECTOR, as->add_node(LG_CONNECTOR_NODE, "0")) };
+        // XXX FIXME this does not smell right; optionals should get
+        // blown up into pairs of disjuncts, one with and one without.
+        if (m_string == "OPTIONAL") return optnl;
 
-        Handle connector = as->add_node(LG_CONNECTOR_NODE, m_string);
-        Handle direction = as->add_node(LG_CONN_DIR_NODE, std::string(1, m_direction));
+        Handle connector(createNode(LG_CONNECTOR_NODE, m_string));
+        Handle direction(createNode(LG_CONN_DIR_NODE,
+                          std::string(1, m_direction)));
 
         if (m_multi)
-            return { as->add_link(LG_CONNECTOR, connector, direction, as->add_node(LG_CONN_MULTI_NODE, "@")) };
+            return createLink(LG_CONNECTOR, connector, direction, multi);
         else
-            return { as->add_link(LG_CONNECTOR, connector, direction) };
+            return createLink(LG_CONNECTOR, connector, direction);
     }
 
     HandleSeq outgoing;
@@ -234,7 +240,7 @@ HandleSeq LGDictExpContainer::to_handle(AtomSpace *as, Handle hWordNode)
     }
 
     if (m_type == AND_type)
-        return { as->add_link(LG_AND, outgoing) };
+        return createLink(LG_AND, outgoing);
 
     // remove repeated atoms from OR
     if (m_type == OR_type)
@@ -244,7 +250,7 @@ HandleSeq LGDictExpContainer::to_handle(AtomSpace *as, Handle hWordNode)
 
         HandleSeq qDisjuncts;
         for (const Handle& h : outgoing)
-            qDisjuncts.push_back(as->add_link(LG_DISJUNCT, hWordNode, h));
+            qDisjuncts.push_back(createLink(LG_DISJUNCT, hWordNode, h));
 
         return qDisjuncts;
     }
