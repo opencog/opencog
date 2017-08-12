@@ -45,8 +45,6 @@ class LGDictReader
 {
 public:
     LGDictReader(Dictionary, AtomSpace*);
-    ~LGDictReader();
-
     HandleSeq getDictEntry(const std::string& word);
 
 private:

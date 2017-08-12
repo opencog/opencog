@@ -43,13 +43,6 @@ LGDictReader::LGDictReader(Dictionary pDict, AtomSpace* pAS)
 }
 
 /**
- * Destructor of the LGDictReader class.
- */
-LGDictReader::~LGDictReader()
-{
-}
-
-/**
  * Method to construct LG dictionary atom.
  *
  * Given a word string, construct the corresponding atom representing
