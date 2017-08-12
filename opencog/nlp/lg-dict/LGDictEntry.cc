@@ -109,9 +109,7 @@ Handle LGDictEntry::execute(AtomSpace* as) const
 			"LgDictEntry requires valid dictionary! %s was given.",
 			ldn->getName().c_str());
 
-	LGDictReader reader;
-	HandleSeq djs = reader.getDictEntry(dict, _outgoing[0]->getName());
-
+	HandleSeq djs = getDictEntry(dict, _outgoing[0]->getName());
 	for (const Handle& dj: djs) as->add_atom(dj);
 
 	return _outgoing[0];

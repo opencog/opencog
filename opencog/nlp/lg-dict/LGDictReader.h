@@ -31,19 +31,11 @@ namespace opencog
 {
 
 /**
- * Link Grammar dictionary reader.
+ * Link Grammar dictionary entry reader.
  *
- * A helper class for reading the LG dictionary's entry for a specific
- * word, and for creating the corresponding atom.
+ * Return a list of Link Grammar disjuncts for the word.
  */
-class LGDictReader
-{
-public:
-    HandleSeq getDictEntry(Dictionary, const std::string& word);
-
-private:
-    LGDictExpContainer lg_exp_to_container(Exp*);
-};
+HandleSeq getDictEntry(Dictionary, const std::string& word);
 
 }
 
