@@ -33,10 +33,11 @@ if [[ $? -ne 0 ]] ; then
 fi
 
 # Punt if relex or link-grammar have crashed.
-haveserver=`ps aux |grep relex |grep linkgram`
-if [[ -z "$haveserver" ]] ; then
-	exit 1
-fi
+# Not using relex any longer.
+# haveserver=`ps aux |grep relex |grep linkgram`
+# if [[ -z "$haveserver" ]] ; then
+# 	exit 1
+# fi
 
 
 # Split the filename into two parts
@@ -61,10 +62,12 @@ haveping=`echo foo | nc $coghost $cogport`
 if [[ $? -ne 0 ]] ; then
 	exit 1
 fi
-haveserver=`ps aux |grep relex |grep linkgram`
-if [[ -z "$haveserver" ]] ; then
-	exit 1
-fi
+
+# Not using relex any longer.
+# haveserver=`ps aux |grep relex |grep linkgram`
+# if [[ -z "$haveserver" ]] ; then
+# 	exit 1
+# fi
 
 # Move article to the done-queue
 mv "$splitdir/$rest" "$subdir/$rest"
