@@ -21,11 +21,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <opencog/atomspace/AtomSpace.h>
-#include <opencog/atoms/base/Link.h>
-#include <opencog/atoms/base/Node.h>
 #include <opencog/guile/SchemePrimitive.h>
-#include <opencog/nlp/types/atom_types.h>
 
 #include "LGDictSCM.h"
 #include "LGDictReader.h"
@@ -42,17 +38,7 @@ LGDictSCM::LGDictSCM()
 	static bool is_init = false;
 	if (is_init) return;
 	is_init = true;
-	m_pDictionary = nullptr;
 	scm_with_guile(init_in_guile, this);
-}
-
-/**
- * The destructor for LGDictSCM.
- */
-LGDictSCM::~LGDictSCM()
-{
-	if (m_pDictionary)
-		dictionary_delete(m_pDictionary);
 }
 
 /**
@@ -86,52 +72,10 @@ void LGDictSCM::init_in_module(void* data)
  */
 void LGDictSCM::init()
 {
-	// XXX this is deprecated.
-	define_scheme_primitive("lg-get-dict-entry",
-		 &LGDictSCM::do_lg_get_dict_entry, this, "nlp lg-dict");
-
 	define_scheme_primitive("lg-conn-type-match?",
 		 &LGDictSCM::do_lg_conn_type_match, this, "nlp lg-dict");
 	define_scheme_primitive("lg-conn-linkable?",
 		 &LGDictSCM::do_lg_conn_linkable, this, "nlp lg-dict");
-}
-
-/**
- * Implementation of the "lg-get-dict-entry" scheme primitive.
- *
- * The corresponding implementation for the "lg-get-dict-entry"
- * primitive, which accepts a WordNode as input and output the LG
- * dictionary atom.
- *
- * XXX FIXME! This should NOT return a SetLink!  It should return
- * nothing at all; users can already get the needed data by calling
- * getIncomingSetByType() themselves.  SetLink just clogs the atomspace
- * with junk.
- *
- * @param h   the input WordNode containing the word string
- * @return    the LG dictionary atom
- */
-Handle LGDictSCM::do_lg_get_dict_entry(Handle h)
-{
-	if (h->getType() != WORD_NODE)
-		return Handle::UNDEFINED;
-
-	// Check if the dictionary entry is already in the atomspace.
-	HandleSeq djset;
-	h->getIncomingSetByType(std::back_inserter(djset), LG_DISJUNCT);
-
-	// Avoid the disjuncts building if entries exist.
-	if (not djset.empty())
-		return Handle(createLink(djset, SET_LINK));
-
-	if (nullptr == m_pDictionary)
-		m_pDictionary = dictionary_create_default_lang();
-
-	AtomSpace* pAS = SchemeSmob::ss_get_env_as("lg-get-dict-entry");
-	LGDictReader reader(m_pDictionary, pAS);
-
-	djset = reader.getDictEntry(h->getName());
-	return Handle(createLink(djset, SET_LINK));
 }
 
 /**
