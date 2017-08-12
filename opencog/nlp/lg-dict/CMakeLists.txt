@@ -25,6 +25,7 @@ TARGET_LINK_LIBRARIES (lg-dict-entry
 )
 
 TARGET_LINK_LIBRARIES (lg-dict
+	lg-dict-entry
 	${ATOMSPACE_smob_LIBRARY}
 )
 

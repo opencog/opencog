@@ -29,8 +29,10 @@
 #include <opencog/atomspace/AtomSpace.h>
 #include "LGDictNode.h"
 #include "LGDictEntry.h"
+#include "LGDictReader.h"
 
 using namespace opencog;
+using namespace opencog::nlp;
 void error_handler(lg_errinfo *ei, void *data);
 
 /// The expected format of an LgDictEntry is:
@@ -119,7 +121,23 @@ Handle LGDictEntry::execute(AtomSpace* as) const
 			"LgDictEntry requires valid dictionary! %s was given.",
 			ldn->getName().c_str());
 
-	return Handle();
+	// A convenient name.
+	const Handle& h = _outgoing[0];
+
+	// Check if the dictionary entry is already in the atomspace.
+	// XXX Is this really correct?  No, not really, but its what the
+	// old code did, so we do it too.
+	HandleSeq djset;
+	h->getIncomingSetByType(std::back_inserter(djset), LG_DISJUNCT);
+
+	// Avoid building the disjuncts if entries exist.
+	if (not djset.empty()) return h;
+
+	LGDictReader reader(dict, as);
+
+	reader.getDictEntry(h->getName());
+
+	return h;
 }
 
 DEFINE_LINK_FACTORY(LGDictEntry, LG_DICT_ENTRY)
