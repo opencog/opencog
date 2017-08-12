@@ -79,18 +79,6 @@ Contains the following scheme primitives:
 The core design of this module has a number of issues, some minor, and
 some pretty important.
 
-* It currently allows only one dictionary to be open at a time, i.e.
-  there can only be one single global dictionary that is open. The
-  correct fix for this is to create a kind-of FunctionLink, that,
-  when executed, obtains the dictionary anetry. For example:
-```
-       LgDictEntryLink
-            WordNode "foobar"
-            LgDictNode "en"
-```
-  The would work a lot like the LgParse Link, but instead of parsing
-  a sentence, it just looks up a single word, when executed.
-
 * The `lg-get-dict-entry` returns a SetLink. It is deprecated; use
   the `lg-dict-entry` method instead. Alternately, perhaps the
   `lg-get-dict-entry` could be redesigned to return a LinkValue,
@@ -125,3 +113,8 @@ some pretty important.
   non-trivial morphology, and we don't handle Russian.  The other
   reason is that sureal and microplanning are the only users of this
   system, and those are also ignorant of morphology.
+
+* The format of the word-disjunct association in the atomspace does not
+  indicatte which dictionary the disjuncts came from. This prevents
+  multi-dictionary use, because its not clear which disjuncts came from
+  which dictionary. This might make translation difficult.

@@ -40,7 +40,7 @@
 "
   lg-dict-entry  WORD
      Fetch the dictionary entry for WORD and place it in the atomspace.
-     WORD must be a WordNode.
+     WORD must be a WordNode. The langauge is assumed to be English.
 
      The dictionary entry can subsequently be obtained by calling
      (cog-incoming-by-type WORD 'LgDisjunct)
@@ -52,7 +52,7 @@
 			(cog-extract dentry)
 			(cog-incoming-by-type WORD 'LgDisjunct)
 		)
-		djset
+		djset)
 )
 
 
@@ -60,7 +60,7 @@
 "
   lg-get-dict-entry  WORD
      Fetch the dictionary entry for WORD and place it in the atomspace.
-     WORD must be a WordNode.
+     WORD must be a WordNode.  The language is assumed to be English.
 
      The dictionary entry can subsequently be obtained by calling
      (cog-incoming-by-type WORD 'LgDisjunct)
