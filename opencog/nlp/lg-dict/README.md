@@ -5,15 +5,23 @@ in the atomspace.
 
 ## Scheme module `(opencog nlp lg-dict)`
 
-Contains the following scheme primitives:
+Defines the LgDictNode and the LgDictEntryNode.  These can be used
+together to look up Link Grammar dictionary entries, and place them
+into the atomspace.  For example:
 
-- `(lg-get-dict-entry (WordNode "..."))`
-
-  Takes a WordNode as input, and output the LG disjuncts in the atomspace.  The
-  output is of the form:
+```
+	(use-modules (opencog) (opencog nlp) (opencog nlp lg-dict))
+	(use-modules (opencog exec))
+	(cog-execute!
+		(LgDictEntry
+			(WordNode "...")
+			(LgDictNode "en")))
+```
+will look up the word "..." in the English langauge Link Grammar
+dictionary, and place the resulting disjuncts into the atomspace.
+The output should resemble the below:
 
   ```
-  (SetLink
    (LgDisjunct
       (WordNode "...")
       (LgConnector
@@ -35,27 +43,40 @@ Contains the following scheme primitives:
          ...
       )
    )
-   ...
-  )
   ```
 
-  The disjuncts are in Disjuntive Normal Form (DNF)
-  as described http://en.wikipedia.org/wiki/Disjunctive_normal_form
-  where `LgOr` and `LgAnd` correspond to the `or` and `&` notation of LG.
+The disjuncts are in Disjuntive Normal Form (DNF)
+as described http://en.wikipedia.org/wiki/Disjunctive_normal_form
+where `LgOr` and `LgAnd` correspond to the `or` and `&` notation of LG.
+Note that `LgOr` is actually a menu choice, and NOT a boolean OR.
 
-  Each LG connector is fully described within the `LgConnector` link, with the
-  connector name in `LgConnectorNode`, direction in `LgConnDirNode`, and the
-  multi-connect property in `LgConnMultiNode`.
+Each LG connector is fully described within the `LgConnector` link,
+with the connector name in `LgConnectorNode`, direction in
+`LgConnDirNode`, and the multi-connect property in `LgConnMultiNode`.
 
-  The connector ordering are kept intact, as described on
-  http://www.abisource.com/projects/link-grammar/dict/introduction.html
-  section 1.2.1
+The connector ordering are kept intact, as described on
+http://www.abisource.com/projects/link-grammar/dict/introduction.html
+section 1.2.1
 
-  For more information on the Node & Link, see `nlp/types/atom_types.script`
+For more information on the Node & Link, see `nlp/types/atom_types.script`
 
-  **Since the disjuncts are in DNF, for some words there will be an explosion
-  of atoms creation (for example, up to 9000 disjuncts for a word, each
-  disjunct containing 5+ connectors).**
+**Since the disjuncts are in DNF, for some words there will be an explosion
+of atoms creation (for example, up to 9000 disjuncts for a word, each
+disjunct containing 5+ connectors).**
+
+
+In addition, the following scheme utilities are provided:
+- `(lg-dict-entry (WordNode "..."))`
+
+  Wraps up the above-described `(cog-execute (LgDictEnty ...))` into
+  a nice short convenience utility.
+
+- `(lg-get-dict-entry (WordNode "..."))`
+
+  Identical to calling `(SetLink (lg-dict-entry (WordNode "...")))`
+  Deprecated!  Using the SetLink in this fashion causes a number of
+  problems; SetLinks should not be used as dumping grounds for random
+  assortments of atoms!
 
 - `(lg-conn-type-match? (LGConnector ...) (LGConnector ...))`
 
