@@ -19157,6 +19157,69 @@ This is a report on a dataset of disjuncts and connector sets, extracted
 \end_layout
 
 \begin_layout Section*
+MST parsing algos
+\end_layout
+
+\begin_layout Standard
+There are multiple MST algos, some better than others.
+ A short list with some references.
+\end_layout
+
+\begin_layout Itemize
+The current implementation in the (opencog sheaf) directory is an MST algo
+ for generating planar MST trees from undirected edges.
+ Its a simple-minded planar adaptation of Borůvka's algo (see wikipedia
+ for a description).
+ Curtis reported that its not very fast, running at about 
+\begin_inset Formula $O\left(n^{4.5}\right)$
+\end_inset
+
+ for 
+\begin_inset Formula $n$
+\end_inset
+
+ words.
+ So that kind-of stinks.
+\end_layout
+
+\begin_layout Itemize
+The Chu-Liu-Edmonds algorithm finds spanning trees in directed graphs.
+ It is described by Ryan McDonald, Fernando Pereira, Kiril Ribarov Jan Hajič,
+ 
+\begin_inset Quotes eld
+\end_inset
+
+Non-projective Dependency Parsing using Spanning Tree Algorithms
+\begin_inset Quotes erd
+\end_inset
+
+ http://www2.denizyuret.com/ref/mcdonald/nonprojectiveHLT-EMNLP2005.pdf
+\end_layout
+
+\begin_layout Itemize
+A super-linear algorithm is described by Effi Levi, Roi Reichart, Ari Rappoport,
+ 
+\begin_inset Quotes eld
+\end_inset
+
+Edge-Linear First-Order Dependency Parsing with Undirected Minimum Spanning
+ Tree Inference
+\begin_inset Quotes erd
+\end_inset
+
+ https://www.aclweb.org/anthology/P/P16/P16-1198.pdf Since this is edge linear,
+ I think that means it claims 
+\begin_inset Formula $O\left(n^{2}\right)$
+\end_inset
+
+ for 
+\begin_inset Formula $n$
+\end_inset
+
+ words.
+\end_layout
+
+\begin_layout Section*
 Dataset report 3 June 2017
 \begin_inset CommandInset label
 LatexCommand label
