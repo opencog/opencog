@@ -208,7 +208,7 @@ void LGDictExpContainer::basic_normal_order()
  * @param as   pointer to the AtomSpace
  * @return     handle to the atom
  */
-HandleSeq LGDictExpContainer::to_handle(AtomSpace *as, Handle hWordNode)
+HandleSeq LGDictExpContainer::to_handle(const Handle& hWordNode)
 {
     static Handle multi(createNode(LG_CONN_MULTI_NODE, "@"));
     static Handle optnl(createLink(LG_CONNECTOR,
@@ -234,7 +234,7 @@ HandleSeq LGDictExpContainer::to_handle(AtomSpace *as, Handle hWordNode)
 
     for (auto& exp: m_subexps)
     {
-        HandleSeq q = exp.to_handle(as, hWordNode);
+        HandleSeq q = exp.to_handle(hWordNode);
         outgoing.insert(outgoing.end(), q.begin(), q.end());
     }
 

@@ -45,7 +45,7 @@ public:
     LGDictExpContainer(Exp_type, Exp* exp);
     LGDictExpContainer(Exp_type, std::vector<LGDictExpContainer>);
 
-    HandleSeq to_handle(AtomSpace* as, Handle h);
+    HandleSeq to_handle(const Handle& h);
 
 private:
     void basic_flatten();

@@ -82,12 +82,12 @@ HandleSeq LGDictReader::getDictEntry(const std::string& word)
 // automatically.
     if (!dn_head) return outgoing;
 
-    Handle hWord = _as->add_node(WORD_NODE, word);
+    Handle hWord(createNode(WORD_NODE, word));
 
     for (Dict_node* dn = dn_head; dn; dn = dn->right)
     {
         Exp* exp = dn->exp;
-        HandleSeq qLG = lg_exp_to_container(exp).to_handle(_as, hWord);
+        HandleSeq qLG = lg_exp_to_container(exp).to_handle(hWord);
 
         outgoing.insert(outgoing.end(), qLG.begin(), qLG.end());
     }

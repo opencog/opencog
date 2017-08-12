@@ -105,13 +105,6 @@ some pretty important.
   `lg-get-dict-entry` could be redesigned to return a LinkValue,
   instead?
 
-* Many of the utilities take an explicit AtomSpace argument, and poke
-  atoms into the atomspace. This is not really needed; they could more
-  easily just return assorted atoms to the user, who could then perform
-  a single bulk insert into whatever atomspace they need/desire. This
-  would result in faster, more efficient code, since bulk inserts are
-  faster than piecemeal inserts.
-
 * The `lg-get-dict-entry` and `lg-dict-entry` methods fail to perform
   regex lookup of the word. Properly, this is a bug in the link-grammar
   API for word lookup; regexes should have been handled automatically.
