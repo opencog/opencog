@@ -28,7 +28,7 @@
 #include <opencog/atoms/base/Node.h>
 #include <opencog/atoms/NumberNode.h>
 #include <opencog/atomspace/AtomSpace.h>
-#include "LGDictNode.h"
+#include <opencog/nlp/lg-dict/LGDictNode.h>
 #include "LGParseLink.h"
 
 using namespace opencog;
@@ -58,7 +58,7 @@ void LGParseLink::init()
 	size_t osz = oset.size();
 	if (2 != osz and 3 != osz)
 		throw InvalidParamException(TRACE_INFO,
-			"LGParseLink: Expecting two arguments, got %lu", osz);
+			"LGParseLink: Expecting two or three arguments, got %lu", osz);
 
 	Type pht = oset[0]->getType();
 	if (PHRASE_NODE != pht and VARIABLE_NODE != pht and GLOB_NODE != pht)

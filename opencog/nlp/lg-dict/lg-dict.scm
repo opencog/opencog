@@ -5,53 +5,11 @@
 ;
 (define-module (opencog nlp lg-dict))
 
-(use-modules (srfi srfi-1) (opencog) (opencog nlp))
+(use-modules (srfi srfi-1) (opencog) (opencog nlp) (opencog exec))
 
 (load-extension "liblg-dict" "opencog_nlp_lgdict_init")
 
 ; ---------------------------------------------------------------------
-
-(export lg-dict-open)
-(set-procedure-property! lg-dict-open 'documentation
-"
-  lg-dict-open  NAME
-     Open the dictionary named in the node NAME.  The NAME must
-     be a Node whose string value indicates a dictionary that can
-     subsequently be found in the file system. This sets a single
-     global dictionary, and all subsequent LG access routines will
-     access this dictionary.
-")
-
-(export lg-dict-close)
-(set-procedure-property! lg-dict-close 'documentation
-"
-  lg-dict-close
-     Close the single global dictionary.
-")
-
-(export lg-dict-entry)
-(set-procedure-property! lg-dict-entry 'documentation
-"
-  lg-dict-entry  WORD
-     Fetch the dictionary entry for WORD and place it in the atomspace.
-     WORD must be a WordNode.
-
-     The dictionary entry can subsequently be obtained by calling
-     (cog-incoming-by-type WORD 'LgDisjunct)
-")
-
-(export lg-get-dict-entry)
-(set-procedure-property! lg-get-dict-entry 'documentation
-"
-  lg-get-dict-entry  WORD
-     Fetch the dictionary entry for WORD and place it in the atomspace.
-     WORD must be a WordNode.
-
-     The dictionary entry can subsequently be obtained by calling
-     (cog-incoming-by-type WORD 'LgDisjunct)
-
-     DEPRECATED! Use lg-dict-entry instead!
-")
 
 (export lg-conn-type-match?)
 (set-procedure-property! lg-conn-type-match? 'documentation
@@ -77,6 +35,40 @@
 ")
 
 ; ---------------------------------------------------------------------
+
+(define-public (lg-dict-entry WORD)
+"
+  lg-dict-entry  WORD
+     Fetch the dictionary entry for WORD and place it in the atomspace.
+     WORD must be a WordNode. The langauge is assumed to be English.
+
+     The dictionary entry can subsequently be obtained by calling
+     (cog-incoming-by-type WORD 'LgDisjunct)
+"
+	(define djset (cog-incoming-by-type WORD 'LgDisjunct))
+	(if (null? djset)
+		(let ((dentry (LgDictEntry WORD (LgDictNode "en"))))
+			(cog-execute! dentry)
+			(cog-extract dentry)
+			(cog-incoming-by-type WORD 'LgDisjunct)
+		)
+		djset)
+)
+
+
+(define-public (lg-get-dict-entry WORD)
+"
+  lg-get-dict-entry  WORD
+     Fetch the dictionary entry for WORD and place it in the atomspace.
+     WORD must be a WordNode.  The language is assumed to be English.
+
+     The dictionary entry can subsequently be obtained by calling
+     (cog-incoming-by-type WORD 'LgDisjunct)
+
+     DEPRECATED! Use lg-dict-entry instead!
+"
+	(SetLink (lg-dict-entry WORD))
+)
 
 (define-public (lg-similar? word1 word2)
 "

@@ -5,13 +5,13 @@ INCLUDE_DIRECTORIES (
 )
 
 ADD_LIBRARY (lg-parse SHARED
-	LGDictNode
 	LGParseLink
 )
 
 ADD_DEPENDENCIES (lg-parse nlp_atom_types)
 
 TARGET_LINK_LIBRARIES (lg-parse
+	lg-dict-entry
 	nlp-types
 	${ATOMSPACE_smob_LIBRARY}
 	${LINK_GRAMMAR_LIBRARY}

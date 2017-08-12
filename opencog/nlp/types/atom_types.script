@@ -126,6 +126,9 @@ SPECIFIC_ENTITY_NODE <- NODE
 // Dictionary. Holds a reference to an LG Dictionary.
 LG_DICT_NODE <- NODE
 
+// Looks up a single word in the LG dictionary
+LG_DICT_ENTRY <- FUNCTION_LINK
+
 // Parser - parses sentences.
 LG_PARSE_LINK <- FUNCTION_LINK
 LG_PARSE_MINIMAL <- LG_PARSE_LINK
