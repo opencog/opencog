@@ -13054,11 +13054,7 @@ foo cnt=10805 rate=7.71785713759977
 foo cnt=20403 rate=7.336569576772133
 foo cnt=25451 rate=7.197680993533868
 
-
-
-
-Still rate-limited by atom insert-delete.
-
+Still rate-limited by atomspace insert-delete.
 
 Maybe provide a minimal parse!  Wow!   DONE
 Need only: LinkGrammarRelationshipNode WordInstanceNode for pairs
@@ -13068,10 +13064,9 @@ update-lg-link-counts -- just needs the Evals for links
 ; update-disjunct-counts -- word-inst-get-cset needs csets
 ; update-clique-pair-counts -- needs numbering. WordSequenceLink
 
-No one needs the link instances.
+No one needs the link instances.  DONE
 
-
-remove use-relex-server
+remove use-relex-server DONE
 =========================================================================
 
 
@@ -13080,6 +13075,7 @@ since everything points at them, and they never point away.
 
 Bugs: relex is returning incorrect disjuncts because LG is reporting the 
 multi-connectors only ... with the incorrect mutiplicities.
+??? Is this still an issue? 
 
 Bugs: using ListLink for the partial sums on csets... why???
 
@@ -13089,6 +13085,7 @@ Bugs: graphing takes too long.
 
 Bugs: follow up on the guile hang bug - its a string parsing thing.
 
-Bugs: guile goes GC-crazy after a while, and never recovers.
+Bugs: while mst parsing, guile goes GC-crazy after a while, and
+      never recovers.
 
 Items: create LG feederbacker
