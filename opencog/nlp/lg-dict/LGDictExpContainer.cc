@@ -36,11 +36,12 @@ using namespace opencog;
  * @param t     must be CONNECTOR_type
  * @param exp   pointer to the LG Exp structure
  */
-LGDictExpContainer::LGDictExpContainer(Exp_type t, Exp* exp) throw (InvalidParamException)
+LGDictExpContainer::LGDictExpContainer(Exp_type t, Exp* exp)
     : m_type(t)
 {
     if (t != CONNECTOR_type)
-        throw InvalidParamException(TRACE_INFO, "Expected CONNECTOR_type for expression type.");
+        throw InvalidParamException(TRACE_INFO,
+            "Expected CONNECTOR_type for expression type.");
 
     // fill stuff with fixed junk for the OPTIONAL connector
     if (exp == NULL)
@@ -62,11 +63,13 @@ LGDictExpContainer::LGDictExpContainer(Exp_type t, Exp* exp) throw (InvalidParam
  * @param t    AND_type or OR_type
  * @param s    vector of next level's containers
  */
-LGDictExpContainer::LGDictExpContainer(Exp_type t, std::vector<LGDictExpContainer> s) throw (InvalidParamException)
+LGDictExpContainer::LGDictExpContainer(Exp_type t,
+                                       std::vector<LGDictExpContainer> s)
     : m_type(t), m_subexps(s)
 {
     if (t != AND_type && t != OR_type)
-        throw InvalidParamException(TRACE_INFO, "Expected AND_type/OR_type for expression type.");
+        throw InvalidParamException(TRACE_INFO,
+            "Expected AND_type/OR_type for expression type.");
 
     // flatten & dnf on construction
     basic_flatten();
@@ -240,7 +243,7 @@ HandleSeq LGDictExpContainer::to_handle(AtomSpace *as, Handle hWordNode)
         outgoing.erase(std::unique(outgoing.begin(), outgoing.end()), outgoing.end());
 
         HandleSeq qDisjuncts;
-        for (Handle& h : outgoing)
+        for (const Handle& h : outgoing)
             qDisjuncts.push_back(as->add_link(LG_DISJUNCT, hWordNode, h));
 
         return qDisjuncts;

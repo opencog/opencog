@@ -23,3 +23,11 @@
    ```
    parse-lojban mi jimpe ti
    ```
+##TODO
+Bugs and open work items.
+
+* Lojban currently defines a SetSizeLink and a SetTypeLink which are
+  terribly generic names and are completely undocumented. Can we pick
+  a better name for these things, so as to avoid confusion with
+  SetLink (which is about sets) and the various Type Nodes and Links
+  that handle opencog Atom types?

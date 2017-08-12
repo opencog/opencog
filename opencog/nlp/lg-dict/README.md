@@ -1,10 +1,11 @@
 # LG-Dict
 
-Modules and functions for generating a LG dictionary entry of a word in the atomspace.
+Modules and functions for generating a LG dictionary entry of a word
+in the atomspace.
 
-## LGDictModule
+## Scheme module `(opencog nlp lg-dict)`
 
-Contains the following scheme primitives coded in C++
+Contains the following scheme primitives:
 
 - `(lg-get-dict-entry (WordNode "..."))`
 
@@ -74,7 +75,53 @@ Contains the following scheme primitives coded in C++
   This function does not care which connector is "-" and which is "+", as long
   as they are different.
 
-## utilities.scm
+## TODO - architecture and design issues.
+The core design of this module has a number of issues, some minor, and
+some pretty important.
 
-Contains more simple scheme codes for working with disjuncts.
+* It currently allows only one dictionary to be open at a time, i.e.
+  there can only be one single global dictionary that is open. The
+  correct fix for this is to create a kind-of FunctionLink, that,
+  when executed, obtains the dictionary anetry. For example:
+```
+       LgDictEntryLink
+            WordNode "foobar"
+            LgDictNode "en"
+```
+  The would work a lot like the LgParse Link, but instead of parsing
+  a sentence, it just looks up a single word, when executed.
 
+* The `lg-get-dict-entry` returns a SetLink. It is deprecated; use
+  the `lg-dict-entry` method instead. Alternately, perhaps the
+  `lg-get-dict-entry` could be redesigned to return a LinkValue,
+  instead?
+
+* Many of the utilities take an explicit AtomSpace argument, and poke
+  atoms into the atomspace. This is not really needed; they could more
+  easily just return assorted atoms to the user, who could then perform
+  a single bulk insert into whatever atomspace they need/desire. This
+  would result in faster, more efficient code, since bulk inserts are
+  faster than piecemeal inserts.
+
+* The `lg-get-dict-entry` and `lg-dict-entry` methods fail to perform
+  regex lookup of the word. Properly, this is a bug in the link-grammar
+  API for word lookup; regexes should have been handled automatically.
+  this will take a few afternoons to fix.
+
+* The `lg-get-dict-entry` and `lg-dict-entry` do the wrong thing, or
+  are invalid/inappropriate, if the word has a non-trivial mophology
+  (i.e. can be split into multiple morphemes). In LG, each morpheme
+  is treated as a "word", and so a single word-string can be split
+  in several different ways (i.e. have multiple splittings).  Word
+  splitting is non-trivial in LG.
+
+  One way to fix this last issue is to have LG provide an API where
+  the word is split into morphemes, and then the mrophemes are
+  recombined, and disjuncts are returned for the recombined splits.
+  That is, the morphology can be hidden "under the covers", which is
+  part of the beauty of the disjunct style.
+
+  Right now, this is low priiority, since only Russian currently has a
+  non-trivial morphology, and we don't handle Russian.  The other
+  reason is that sureal and microplanning are the only users of this
+  system, and those are also ignorant of morphology.

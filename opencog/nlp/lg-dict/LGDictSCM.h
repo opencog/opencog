@@ -24,16 +24,13 @@
 #ifndef _OPENCOG_LG_DICT_SCM_H
 #define _OPENCOG_LG_DICT_SCM_H
 
-
 #include <link-grammar/dict-api.h>
 #include <opencog/atoms/base/Handle.h>
-
 
 namespace opencog
 {
 namespace nlp
 {
-
 
 class LGDictSCM
 {
@@ -42,6 +39,9 @@ private:
     static void init_in_module(void*);
     void init(void);
 
+    void do_lg_dictopen(Handle);
+    void do_lg_dictclose(void);
+    void do_lg_dict_entry(Handle);
     Handle do_lg_get_dict_entry(Handle);
     bool do_lg_conn_type_match(Handle, Handle);
     bool do_lg_conn_linkable(Handle, Handle);
@@ -53,13 +53,10 @@ public:
     ~LGDictSCM();
 };
 
-
-}
-}
+}}
 
 extern "C" {
 void opencog_nlp_lgdict_init(void);
 };
-
 
 #endif // _OPENCOG_LG_DICT_SCM_H

@@ -6852,7 +6852,27 @@ Random-planar-tree parsed books from tranche-1, 2, 3, 4 and 5.
 MST-parsed tranche-1, 2, 3 and 4. Contains pair-MI values; does NOT
 contain any disjunct marginals.
 
-STATUS: in press
+STATUS: good
+DATE: 8 August 2017
+REASON: Best so far, I think.  Same issues as en_pairs_rfive_mone
+
+                        List of relations
+ Schema |    Name    | Type  | Owner  |    Size    | Description 
+--------+------------+-------+--------+------------+-------------
+ public | atoms      | table | ubuntu | 9598 MB    | 
+ public | spaces     | table | ubuntu | 40 kB      | 
+ public | typecodes  | table | ubuntu | 56 kB      | 
+ public | valuations | table | ubuntu | 12 GB      | 
+ public | values     | table | ubuntu | 8192 bytes | 
+
+select count(*) from atoms;      -- 106482665 = 106M = 12M more
+select count(*) from valuations; -- 123419676 = 123M =  7M more
+
+11069504769 bytes uncompressed = 11.1 GBytes
+ 1901439821 bytes compressed   = 1.90 GBytes
+
+eff6127b82ab205502bc1f9e8b4e139d  en_pairs_rfive_mfour.sql
+763ffc8bf032127501692a5ee61538ec  en_pairs_rfive_mfour.sql.bz2
 
 ==================================================================
 zh_pairs_one
@@ -6919,7 +6939,7 @@ RMS Count      2.8231E+5    2.3990E+5     41.40        37.42
 zen_pairs
 ---------
 Mandarin word-pairs. Segmentation into words done by Ruiting. Does
-NOT include pair-MI stats.
+NOT include pair-MI stats. This is the alpha-segmented-1 texts only.
 
 STATUS: good
 DATE: 17 July 2017
@@ -6947,7 +6967,8 @@ fe8a58ae4f66f61c57da90a92d5787c3  zen_pairs.sql
 zen_pairs_mi
 ------------
 Mandarin word-pairs. Segmentation into words done by Ruiting.
-Includes word-pair MI statstics.
+This is the alpha-segmented-1 texts only.  Includes word-pair
+MI statstics.
 
 STATUS: good
 DATE: 17 July 2017
@@ -6989,7 +7010,9 @@ b4e48f00a94fa8d3d1d08e8331d0d84a9  zen_pairs_mi.sql
 zen_pairs_mst
 -------------
 Mandarin word-pairs. Segmentation into words done by Ruiting.
-Includes word-pair MI statstics, disjuncts and disjunct-MI.
+This is the alpha-segmented-1 texts only.  Includes word-pair
+MI statstics, disjuncts and disjunct-MI. MST texts were the
+same alpha-segmented-1 texts.
 
 STATUS: good
 DATE: 17 July 2017
@@ -12728,8 +12751,10 @@ Fuu
 
 (define (cntone ato)
 	(define val (cog-value ato cos-key))
-	(if (not (null? val)) 
-; (and (not (null? val)) (< 1e-10 (cog-value-ref val 0)))
+	(if
+; (not (null? val))
+;  (and (not (null? val)) (< 1e-10 (cog-value-ref val 0)))
+  (and (not (null? val)) (<= 0.1 (cog-value-ref val 0)))
 (begin (set! scnt (+ scnt 1))
   (store-atom ato)
 )) #f)
@@ -12737,6 +12762,8 @@ Fuu
 (define scnt 0)
 (cog-map-type cntone 'SimilarityLink)
 (define (rpt) (set! scnt 0) (cog-map-type cntone 'SimilarityLink) scnt)
+
+
 
 2932
 3052 + (69*68)/2 - (37*36)/2 = 4732
@@ -12928,9 +12955,118 @@ First, filter all words of length 128 or more.:w
 
 (define cos-key (PredicateNode "*-Cosine Sim Key-*"))
 
+add-similarity-api foo #f
+make-cosine-matrix
+
+-----------------
+Bitseat Tadesse
+/home/linas/ftp/script-to-download-books.sh
+
+sent splitter quotation marks mishandled. 
+” after a period is part of that sentence, not the next. also ’
+
+Hmm. was working on zh_pairs_mst !!
+
+find mst-articles |wc   12245
+find gamma-pages  |wc  123000
+find beta-pages   |wc  883737
+ls -la headings |wc =  23
+find alpha-data   |wc 1018949
+
+mst+gamma+beta= 1018982 - 23 = 1018959 - crap = alpha-data
+
+zh-wp-tranche-1
+
+todo:
+-- maybe save zh_pairs_mst
+-- maybe copy tranche
+
+its NOT big-5
+CN-GB sort-of works...
+iconv: illegal input sequence at position 7594
+CN no
+GB no
+GB2312 no
+GB13000 ---- yes
+GB18030 -- yes!
+GBK -- yes
+
+use 7z -x not unzip
+iconv -f  GB18030 -t UTF-8 
+find *.txt | iconv -f  GB18030 -t UTF-8  | xargs 
+
+find tmp/*.txt | while read f; do cat $f | iconv -f  GB18030 -t UTF-8  > `echo $f.utf8 | iconv -f  GB18030 -t UTF-8`; rm $f ; done
+
+lg-get-dict-entry  WORD
+lg-conn-type-match?
+lg-conn-linkable?
+
+lg_conn_linkable CON CON
+lg_conn_type_match
+
+LGDictReader
+   /* Recurse, if it's a regex match */
+   regex_name = match_regex(dict->regex_root, word);
+   if (regex_name)
+       dn_head = dictionary_lookup_wild(dict, word);
+
+echo "始知 天理 有 循环 。" | ./submit-one.pl localhost 17008 observe-text
+echo "站 在 旁边 的 一名 老者 问 ： “ 不 就是 一个 女子 么 ？" | ./submit-one.pl localhost 17008 observe-text
 
 
+prior to start:
+atoms: 6111927
+valuations: 6938625
 
+Suppress printing of "Warning: Combinatorial explosion!" DONE
+except its still printing dict ver wtf.
+
+remove the relex check  Punt from ss-nosplit-one.sh
+
+  PID USER      PR  NI    VIRT    RES    SHR S  %CPU %MEM     TIME+ COMMAND    
+26784 ubuntu    30  10 12.463g 1.495g  34788 S 207.3  0.6  12:24.44 guile      
+26784 ubuntu    30  10 13.065g 7.990g  34788 S 232.0  3.2   1483:55 guile      
+foo cnt=951 rate=1.1375598073147588
+vs slog of 0.43 previously, after 24 hours
+foo cnt=104494 rate=2.8365047910446783
+
+Again with minimal:
+(monitor-rate "foo")                                        
+foo cnt=571 rate=4.167883182665671
+foo cnt=1836 rate=4.636363625198028
+foo cnt=8922 rate=3.7725158547155386
+foo cnt=71196 rate=4.316740435086596
+
+
+  PID USER      PR  NI    VIRT    RES    SHR S  %CPU %MEM     TIME+ COMMAND    
+ 3792 ubuntu    30  10 12.392g 1.270g  35144 S 291.3  0.5   7:37.33 guile      
+ 3792 ubuntu    30  10 12.886g 4.362g  35252 S 287.3  1.7 108:03.44 guile      
+ 3792 ubuntu    30  10 13.053g 6.788g  35252 S 222.7  2.7 694:53.99 guile      
+
+cogserver: if it fails the first time, its says runing the second tim
+and then stop crashes
+
+  PID USER      PR  NI    VIRT    RES    SHR S  %CPU %MEM     TIME+ COMMAND    
+27600 ubuntu    30  10 12.905g 3.073g  34772 S 283.0  1.2  57:47.82 guile      
+
+(monitor-rate "foo")
+foo cnt=10805 rate=7.71785713759977
+foo cnt=20403 rate=7.336569576772133
+foo cnt=25451 rate=7.197680993533868
+
+Still rate-limited by atomspace insert-delete.
+
+Maybe provide a minimal parse!  Wow!   DONE
+Need only: LinkGrammarRelationshipNode WordInstanceNode for pairs
+
+update-word-counts -- just needs WordInstanceLink for parses
+update-lg-link-counts -- just needs the Evals for links
+; update-disjunct-counts -- word-inst-get-cset needs csets
+; update-clique-pair-counts -- needs numbering. WordSequenceLink
+
+No one needs the link instances.  DONE
+
+remove use-relex-server DONE
 =========================================================================
 
 
@@ -12939,6 +13075,7 @@ since everything points at them, and they never point away.
 
 Bugs: relex is returning incorrect disjuncts because LG is reporting the 
 multi-connectors only ... with the incorrect mutiplicities.
+??? Is this still an issue? 
 
 Bugs: using ListLink for the partial sums on csets... why???
 
@@ -12946,6 +13083,9 @@ Bugs: the mst parse algo is O^5 and yuret gives a nice O^3 also
 
 Bugs: graphing takes too long.
 
-Bugs: follow up on the guile hang bug
+Bugs: follow up on the guile hang bug - its a string parsing thing.
+
+Bugs: while mst parsing, guile goes GC-crazy after a while, and
+      never recovers.
 
 Items: create LG feederbacker

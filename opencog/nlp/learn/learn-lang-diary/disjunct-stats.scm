@@ -21,6 +21,8 @@
 (use-modules (opencog) (opencog persist) (opencog persist-sql))
 (use-modules (opencog nlp) (opencog nlp learn))
 (use-modules (opencog matrix))
+(use-modules (opencog cogserver))
+(start-cogserver)
 ; (sql-open "postgres:///en_pairs_sim?user=linas")
 (sql-open "postgres:///en_pairs_rfive_mtwo?user=linas")
 
@@ -660,7 +662,7 @@
 (define psls (add-pair-stars pslon))
 (define pss (batch-similarity psls #f #f 0.1))
 (pss 'batch-compute)
-(pss 'paralel-batch 6)
+(pss 'paralel-batch 3)
 
 (cog-map-type ato 'SimilarityLink)
 

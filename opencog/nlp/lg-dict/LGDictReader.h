@@ -35,7 +35,6 @@ namespace opencog
 namespace nlp
 {
 
-
 /**
  * Link Grammar dictionary reader.
  *
@@ -48,7 +47,7 @@ public:
     LGDictReader(Dictionary, AtomSpace*);
     ~LGDictReader();
 
-    Handle getAtom(const std::string& word);
+    HandleSeq getDictEntry(const std::string& word);
 
 private:
     LGDictExpContainer lg_exp_to_container(Exp*);
@@ -56,7 +55,6 @@ private:
     Dictionary _dictionary;
     AtomSpace* _as;
 };
-
 
 }
 }

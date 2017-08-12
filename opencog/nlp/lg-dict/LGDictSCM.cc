@@ -31,20 +31,19 @@
 #include "LGDictReader.h"
 #include "LGDictUtils.h"
 
-
 using namespace opencog::nlp;
 using namespace opencog;
-
 
 /**
  * The constructor for LGDictSCM.
  */
 LGDictSCM::LGDictSCM()
 {
-    static bool is_init = false;
-    if (is_init) return;
-    is_init = true;
-    scm_with_guile(init_in_guile, this);
+	static bool is_init = false;
+	if (is_init) return;
+	is_init = true;
+	m_pDictionary = nullptr;
+	scm_with_guile(init_in_guile, this);
 }
 
 /**
@@ -52,7 +51,8 @@ LGDictSCM::LGDictSCM()
  */
 LGDictSCM::~LGDictSCM()
 {
-    dictionary_delete(m_pDictionary);
+	if (m_pDictionary)
+		dictionary_delete(m_pDictionary);
 }
 
 /**
@@ -65,9 +65,9 @@ LGDictSCM::~LGDictSCM()
  */
 void* LGDictSCM::init_in_guile(void* self)
 {
-    scm_c_define_module("opencog nlp lg-dict", init_in_module, self);
-    scm_c_use_module("opencog nlp lg-dict");
-    return NULL;
+	scm_c_define_module("opencog nlp lg-dict", init_in_module, self);
+	scm_c_use_module("opencog nlp lg-dict");
+	return NULL;
 }
 
 /**
@@ -77,8 +77,8 @@ void* LGDictSCM::init_in_guile(void* self)
  */
 void LGDictSCM::init_in_module(void* data)
 {
-    LGDictSCM* self = (LGDictSCM*) data;
-    self->init();
+	LGDictSCM* self = (LGDictSCM*) data;
+	self->init();
 }
 
 /**
@@ -86,52 +86,131 @@ void LGDictSCM::init_in_module(void* data)
  */
 void LGDictSCM::init()
 {
-    m_pDictionary = dictionary_create_default_lang();
+	define_scheme_primitive("lg-dict-open",
+		 &LGDictSCM::do_lg_dictopen, this, "nlp lg-dict");
 
-#ifdef HAVE_GUILE
-    define_scheme_primitive("lg-get-dict-entry",
-         &LGDictSCM::do_lg_get_dict_entry, this, "nlp lg-dict");
-    define_scheme_primitive("lg-conn-type-match?",
-         &LGDictSCM::do_lg_conn_type_match, this, "nlp lg-dict");
-    define_scheme_primitive("lg-conn-linkable?",
-         &LGDictSCM::do_lg_conn_linkable, this, "nlp lg-dict");
-#endif
+	define_scheme_primitive("lg-dict-close",
+		 &LGDictSCM::do_lg_dictclose, this, "nlp lg-dict");
+
+	define_scheme_primitive("lg-dict-entry",
+		 &LGDictSCM::do_lg_dict_entry, this, "nlp lg-dict");
+
+	// XXX this is deprecated.
+	define_scheme_primitive("lg-get-dict-entry",
+		 &LGDictSCM::do_lg_get_dict_entry, this, "nlp lg-dict");
+
+	define_scheme_primitive("lg-conn-type-match?",
+		 &LGDictSCM::do_lg_conn_type_match, this, "nlp lg-dict");
+	define_scheme_primitive("lg-conn-linkable?",
+		 &LGDictSCM::do_lg_conn_linkable, this, "nlp lg-dict");
+}
+
+/**
+ * Implementation of the "lg-dict-open" scheme primitive.
+ *
+ * XXX FIXME the current API allows only one global dictionary
+ * at a time.  The correct fix is to invent a new Link type that
+ * inherits from FunctionLink:
+ *
+ *    LgDictEntry
+ *        WordNode "foobar"
+ *        LgDictNode "en"
+ *
+ * When the above is executed, the word would be looked up, and the
+ * disjuncts placed into the atomspace.  See the implementation of
+ * LgParse for an example of how to do this.
+ */
+void LGDictSCM::do_lg_dictopen(Handle h)
+{
+	if (not h->isNode()) return;
+
+	if (m_pDictionary)
+		dictionary_delete(m_pDictionary);
+
+	const char * lang = h->getName().c_str();
+	m_pDictionary = dictionary_create_lang(lang);
+}
+
+/**
+ * Implementation of the "lg-dict-close" scheme primitive.
+ *
+ * XXX FIXME the current API allows only one global dictionary
+ * at a time.  Some future version should fix this, to allow
+ * multiple dictionaries at a time, right?  This is a low-priority
+ * though, it seems.
+ */
+void LGDictSCM::do_lg_dictclose(void)
+{
+	if (m_pDictionary)
+		dictionary_delete(m_pDictionary);
+	m_pDictionary = nullptr;
+}
+
+/**
+ * Implementation of the "lg-dict-entry" scheme primitive.
+ *
+ * The corresponding implementation for the "lg-dict-entry"
+ * primitive, which accepts a WordNode as input and places
+ * the LG dictionary entry into the atomspace.
+ *
+ * @param h   the input WordNode containing the word string
+ */
+void LGDictSCM::do_lg_dict_entry(Handle h)
+{
+	if (h->getType() != WORD_NODE) return;
+
+	// Check if the dictionary entry is already in the atomspace.
+	HandleSeq djset;
+	h->getIncomingSetByType(std::back_inserter(djset), LG_DISJUNCT);
+
+	// Avoid the disjuncts building if entries exist.
+	if (not djset.empty()) return;
+
+	if (nullptr == m_pDictionary)
+		m_pDictionary = dictionary_create_default_lang();
+
+	AtomSpace* pAS = SchemeSmob::ss_get_env_as("lg-dict-entry");
+	LGDictReader reader(m_pDictionary, pAS);
+
+	reader.getDictEntry(h->getName());
 }
 
 /**
  * Implementation of the "lg-get-dict-entry" scheme primitive.
  *
- * The corresponding implementation for the "lg-get-dict-entry" primitive,
- * which accepts a WordNode as input and output the LG dictionary atom.
+ * The corresponding implementation for the "lg-get-dict-entry"
+ * primitive, which accepts a WordNode as input and output the LG
+ * dictionary atom.
+ *
+ * XXX FIXME! This should NOT return a SetLink!  It should return
+ * nothing at all; users can already get the needed data by calling
+ * getIncomingSetByType() themselves.  SetLink just clogs the atomspace
+ * with junk.
  *
  * @param h   the input WordNode containing the word string
  * @return    the LG dictionary atom
  */
 Handle LGDictSCM::do_lg_get_dict_entry(Handle h)
 {
-#ifdef HAVE_GUILE
-    AtomSpace* pAS = SchemeSmob::ss_get_env_as("lg-get-dict-entry");
+	if (h->getType() != WORD_NODE)
+		return Handle::UNDEFINED;
 
-    if (h->getType() == WORD_NODE)
-    {
-		// check if the dictionary entry is already in the atomspace
-		HandleSeq qExisting;
-		h->getIncomingSetByType(std::back_inserter(qExisting), LG_DISJUNCT);
+	// Check if the dictionary entry is already in the atomspace.
+	HandleSeq djset;
+	h->getIncomingSetByType(std::back_inserter(djset), LG_DISJUNCT);
 
-		// avoid the disjuncts building if entries exist
-		if (not qExisting.empty())
-			return Handle(createLink(qExisting, SET_LINK));
+	// Avoid the disjuncts building if entries exist.
+	if (not djset.empty())
+		return Handle(createLink(djset, SET_LINK));
 
-        LGDictReader reader(m_pDictionary, pAS);
+	if (nullptr == m_pDictionary)
+		m_pDictionary = dictionary_create_default_lang();
 
-        return reader.getAtom(h->getName());
-    }
+	AtomSpace* pAS = SchemeSmob::ss_get_env_as("lg-get-dict-entry");
+	LGDictReader reader(m_pDictionary, pAS);
 
-    return Handle::UNDEFINED;
-
-#else
-    return Handle::UNDEFINED;
-#endif
+	djset = reader.getDictEntry(h->getName());
+	return Handle(createLink(djset, SET_LINK));
 }
 
 /**
@@ -143,11 +222,7 @@ Handle LGDictSCM::do_lg_get_dict_entry(Handle h)
  */
 bool LGDictSCM::do_lg_conn_type_match(Handle h1, Handle h2)
 {
-#ifdef HAVE_GUILE
-    return lg_conn_type_match(h1, h2);
-#else
-    return false;
-#endif
+	return lg_conn_type_match(h1, h2);
 }
 
 /**
@@ -159,15 +234,10 @@ bool LGDictSCM::do_lg_conn_type_match(Handle h1, Handle h2)
  */
 bool LGDictSCM::do_lg_conn_linkable(Handle h1, Handle h2)
 {
-#ifdef HAVE_GUILE
-    return lg_conn_linkable(h1, h2);
-#else
-    return false;
-#endif
+	return lg_conn_linkable(h1, h2);
 }
-
 
 void opencog_nlp_lgdict_init(void)
 {
-    static LGDictSCM lgdict;
+	static LGDictSCM lgdict;
 }
