@@ -169,6 +169,10 @@ protected:
     bool enable_filter_first_outgoing_evallink_should_be_var;
     bool enable_filter_node_types_should_not_be_vars;
     vector<Type> node_types_should_not_be_vars;
+
+    bool enable_filter_node_types_should_be_vars;
+    vector<Type> node_types_should_be_vars;
+
     vector<Type> same_link_types_not_share_second_outgoing;
 
     unsigned int num_of_patterns_without_superpattern_cur_gram;
@@ -565,6 +569,13 @@ public:
     bool add_node_type_to_node_types_should_not_be_vars(Type _type);
     bool remove_node_type_from_node_types_should_not_be_vars(Type _type);
     void clear_node_types_should_not_be_vars(){node_types_should_not_be_vars.clear();}
+
+    void set_enable_filter_node_types_should_be_vars(bool _enable){enable_filter_node_types_should_be_vars = _enable;}
+    bool get_enable_filter_node_types_should_be_vars(){return enable_filter_node_types_should_be_vars;}
+    vector<Type> get_node_types_should_be_vars(){return node_types_should_be_vars;}
+    bool add_node_type_to_node_types_should_be_vars(Type _type);
+    bool remove_node_type_from_node_types_should_be_vars(Type _type);
+    void clear_node_types_should_be_vars(){node_types_should_be_vars.clear();}
 
     // -------------------------------end filter settings----------------------
 

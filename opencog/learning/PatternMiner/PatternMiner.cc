@@ -1086,6 +1086,33 @@ bool PatternMiner::remove_node_type_from_node_types_should_not_be_vars(Type _typ
     return false; // not exist
 }
 
+bool PatternMiner::add_node_type_to_node_types_should_be_vars(Type _type)
+{
+    for (Type t : node_types_should_be_vars)
+    {
+        if (t == _type)
+            return false; //  exist
+    }
+
+    node_types_should_be_vars.push_back(_type);
+    return true;
+}
+
+bool PatternMiner::remove_node_type_from_node_types_should_be_vars(Type _type)
+{
+    vector<Type>::iterator it;
+    for (it = node_types_should_be_vars.begin(); it != node_types_should_be_vars.end(); it ++)
+    {
+        if ((Type)(*it) == _type)
+        {
+           node_types_should_be_vars.erase(it);
+           return true;
+        }
+    }
+
+    return false; // not exist
+}
+
 bool PatternMiner::add_keyword_to_black_list(string _keyword)
 {
     if (_keyword == "")
@@ -1960,8 +1987,8 @@ bool PatternMiner::filters(HandleSeq& inputLinks, HandleSeqSeq& oneOfEachSeqShou
     }
 
 
-    // only check node_types_should_not_be_vars for 1 gram patterns
-    if (enable_filter_leaves_should_not_be_vars || enable_filter_node_types_should_not_be_vars)
+
+    if (enable_filter_leaves_should_not_be_vars || enable_filter_node_types_should_not_be_vars || enable_filter_node_types_should_be_vars)
     {
 
         for (unsigned i = 0; i < inputLinks.size(); i ++)
@@ -1969,7 +1996,7 @@ bool PatternMiner::filters(HandleSeq& inputLinks, HandleSeqSeq& oneOfEachSeqShou
             for (Handle node : allNodesInEachLink[i])
             {
 
-                // find leaves
+                // find leaves , do not check this for 1-gram
                 if ((inputLinks.size() > 1) && enable_filter_leaves_should_not_be_vars)
                 {
                     bool is_leaf = true;
@@ -1992,16 +2019,33 @@ bool PatternMiner::filters(HandleSeq& inputLinks, HandleSeqSeq& oneOfEachSeqShou
                         leaves.push_back(node);
                 }
 
-                // check if this node is in node_types_should_not_be_vars
-                if (enable_filter_node_types_should_not_be_vars)
+                if (enable_filter_node_types_should_not_be_vars || enable_filter_node_types_should_be_vars)
                 {
                     Type t = node->getType();
-                    for (Type noType : node_types_should_not_be_vars)
+
+                    // check if this node type is in node_types_should_not_be_vars
+                    if (enable_filter_node_types_should_not_be_vars)
                     {
-                        if (t == noType)
+
+                        for (Type noType : node_types_should_not_be_vars)
                         {
-                            shouldNotBeVars.push_back(node);
-                            break;
+                            if (t == noType)
+                            {
+                                shouldNotBeVars.push_back(node);
+                                break;
+                            }
+                        }
+                    }
+
+                    if (enable_filter_node_types_should_be_vars)
+                    {
+                        for (Type shouldType : node_types_should_be_vars)
+                        {
+                            if (t == shouldType)
+                            {
+                                shouldBeVars.push_back(node);
+                                break;
+                            }
                         }
                     }
                 }
@@ -3460,6 +3504,7 @@ void PatternMiner::reSetAllSettingsFromConfig()
     enable_filter_leaves_should_not_be_vars = config().get_bool("enable_filter_leaves_should_not_be_vars");
     enable_filter_links_should_connect_by_vars = config().get_bool("enable_filter_links_should_connect_by_vars");
     enable_filter_node_types_should_not_be_vars =  config().get_bool("enable_filter_node_types_should_not_be_vars");
+    enable_filter_node_types_should_be_vars =  config().get_bool("enable_filter_node_types_should_be_vars");
     enable_filter_links_of_same_type_not_share_second_outgoing = config().get_bool("enable_filter_links_of_same_type_not_share_second_outgoing");
     enable_filter_not_all_first_outgoing_const = config().get_bool("enable_filter_not_all_first_outgoing_const");
     enable_filter_not_same_var_from_same_predicate = config().get_bool("enable_filter_not_same_var_from_same_predicate");
@@ -3470,6 +3515,10 @@ void PatternMiner::reSetAllSettingsFromConfig()
     string node_types_str = config().get("node_types_should_not_be_vars");
     addAtomTypesFromString(node_types_str, node_types_should_not_be_vars);
 
+
+    node_types_should_be_vars.clear();
+    node_types_str = config().get("node_types_should_be_vars");
+    addAtomTypesFromString(node_types_str, node_types_should_be_vars);
 
     same_link_types_not_share_second_outgoing.clear();
     string link_types_str = config().get("same_link_types_not_share_second_outgoing");
