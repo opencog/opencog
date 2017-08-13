@@ -426,6 +426,66 @@ public:
     void clear_node_types_should_not_be_vars(){patternMiner->clear_node_types_should_not_be_vars();}
 
 
+    string set_enable_filter_node_types_should_be_vars(bool _enable)
+    {
+        patternMiner->set_enable_filter_node_types_should_be_vars(_enable);
+        return get_enable_filter_node_types_should_be_vars();
+    }
+
+    string get_enable_filter_node_types_should_be_vars()
+    {
+        bool enable = patternMiner->get_enable_filter_node_types_should_be_vars();
+
+        if (enable)
+            return "enable_filter_node_types_should_be_vars: true";
+        else
+            return "enable_filter_node_types_should_be_vars: false";
+    }
+
+    string get_node_types_should_be_vars()
+    {
+        string result =  "node_types_should_be_vars:";
+        vector<Type> _list = patternMiner->get_node_types_should_be_vars();
+        for (Type type : _list)
+            result +=  " " + classserver().getTypeName(type);
+
+        return result;
+    }
+
+    string add_node_type_to_node_types_should_be_vars(const string& _typeStr)
+    {
+        Type atomType = classserver().getType(_typeStr);
+        if (atomType == NOTYPE)
+            return "Error: Input type doesn't exist!";
+
+        string result = "";
+
+        if (patternMiner->add_node_type_to_node_types_should_be_vars(atomType))
+            result += "Added!\n";
+        else
+            result += "Input type already exists in the node_types_should_be_vars list!\n";
+
+        return result + get_node_types_should_be_vars();
+
+    }
+
+    string remove_node_type_from_node_types_should_be_vars(const string& _typeStr)
+    {
+        Type atomType = classserver().getType(_typeStr);
+        if (atomType == NOTYPE)
+            return "Error: Input type doesn't exist!";
+
+        string result = "";
+        if (patternMiner->remove_node_type_from_node_types_should_be_vars(atomType))
+            result += "Removed!\n";
+        else
+            result += "Input type does not exist in the node_types_should_be_vars list!\n";
+
+        return result + get_node_types_should_be_vars();
+
+    }
+
+    void clear_node_types_should_be_vars(){patternMiner->clear_node_types_should_not_be_vars();}
 
 
     string set_enable_filter_links_of_same_type_not_share_second_outgoing(bool _enable)
@@ -509,6 +569,8 @@ public:
         result += get_same_link_types_not_share_second_outgoing()  + "\n";
         result += get_enable_filter_node_types_should_not_be_vars()  + "\n";
         result += get_node_types_should_not_be_vars() + "\n";
+        result += get_enable_filter_node_types_should_be_vars()  + "\n";
+        result += get_node_types_should_be_vars() + "\n";
 
         return result;
 
@@ -797,6 +859,19 @@ void PatternMinerSCM::init()
                             &PatternMinerSCM::remove_node_type_from_node_types_should_not_be_vars, this, "patternminer");
     define_scheme_primitive("pm-clear-node-types-should-not-be-vars",
                             &PatternMinerSCM::clear_node_types_should_not_be_vars, this, "patternminer");
+
+    define_scheme_primitive("pm-get-enable-filter-node-types-should-not-be-vars",
+                            &PatternMinerSCM::get_enable_filter_node_types_should_be_vars, this, "patternminer");
+    define_scheme_primitive("pm-set-enable-filter-node-types-should-not-be-vars",
+                            &PatternMinerSCM::set_enable_filter_node_types_should_be_vars, this, "patternminer");
+    define_scheme_primitive("pm-get-node-types-should-not-be-vars",
+                            &PatternMinerSCM::get_node_types_should_be_vars, this, "patternminer");
+    define_scheme_primitive("pm-add-node-type-to-node-types-should-not-be-vars",
+                            &PatternMinerSCM::add_node_type_to_node_types_should_be_vars, this, "patternminer");
+    define_scheme_primitive("pm-remove-node-type-from-node-types-should-not-be-vars",
+                            &PatternMinerSCM::remove_node_type_from_node_types_should_be_vars, this, "patternminer");
+    define_scheme_primitive("pm-clear-node-types-should-not-be-vars",
+                            &PatternMinerSCM::clear_node_types_should_be_vars, this, "patternminer");
 
 
     define_scheme_primitive("pm-get-enable-filter-links-of-same-type-not-share-second-outgoing",
