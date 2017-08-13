@@ -19167,11 +19167,11 @@ There are multiple MST algos, some better than others.
 
 \begin_layout Itemize
 The current implementation in the (opencog sheaf) directory is an MST algo
- for generating planar MST trees from undirected edges.
- Its a simple-minded planar adaptation of Borůvka's algo (see wikipedia
+ for generating projective MST trees from undirected edges.
+ Its a simple-minded projective adaptation of Borůvka's algo (see wikipedia
  for a description).
- Curtis reported that its not very fast, running at about 
-\begin_inset Formula $O\left(n^{4.5}\right)$
+ I just measured it to run at 
+\begin_inset Formula $O\left(n^{3}\right)$
 \end_inset
 
  for 
@@ -19179,11 +19179,64 @@ The current implementation in the (opencog sheaf) directory is an MST algo
 \end_inset
 
  words.
- So that kind-of stinks.
+ See atomspace/opencog/bench-ms/README.md.
 \end_layout
 
 \begin_layout Itemize
-The Chu-Liu-Edmonds algorithm finds spanning trees in directed graphs.
+The 
+\begin_inset Formula $O\left(n^{3}\right)$
+\end_inset
+
+ is for the case of arbitrary-length links.
+ If the scoring function is altered to give bad scores to link lengths >6
+ long, then the algo kicks over to 
+\begin_inset Formula $O\left(n^{2.3}\right)$
+\end_inset
+
+ after about 
+\begin_inset Formula $8<n$
+\end_inset
+
+ or so.
+ Awesome! See graphs in atomspace/opencog/bench-ms/ for a better look.
+\end_layout
+
+\begin_layout Itemize
+This isn't bad, per se, since Yuret published his best projective MST algo
+ which ran at 
+\begin_inset Formula $O\left(n^{3}\right)$
+\end_inset
+
+ for 
+\begin_inset Formula $n$
+\end_inset
+
+ words.
+ So we are in the right ballpark...
+\end_layout
+
+\begin_layout Itemize
+The state-of-the-art projective algo (for directed edges) is supposed to
+ be Eisner's algo, which runs at 
+\begin_inset Formula $O\left(n^{3}\right)$
+\end_inset
+
+ for 
+\begin_inset Formula $n$
+\end_inset
+
+ words.
+ So we are still in the right ballpark.
+ Eisner, Jason, 1996.
+ “Three New Probabilistic Models for Dependency Parsing.” In Proceedings
+ of the 16th Conference on Computational Linguistics (CoLING 96) .
+ Saarbruecken: ACL, 340–345.
+ 
+\end_layout
+
+\begin_layout Itemize
+The Chu-Liu-Edmonds algorithm finds (non-projective) spanning trees in directed
+ graphs.
  It is described by Ryan McDonald, Fernando Pereira, Kiril Ribarov Jan Hajič,
  
 \begin_inset Quotes eld
@@ -19193,11 +19246,24 @@ Non-projective Dependency Parsing using Spanning Tree Algorithms
 \begin_inset Quotes erd
 \end_inset
 
- http://www2.denizyuret.com/ref/mcdonald/nonprojectiveHLT-EMNLP2005.pdf
+ http://www2.denizyuret.com/ref/mcdonald/nonprojectiveHLT-EMNLP2005.pdf Its
+ supposed to run in 
+\begin_inset Formula $O\left(n^{2}\right)$
+\end_inset
+
+ time.
 \end_layout
 
 \begin_layout Itemize
-A super-linear algorithm is described by Effi Levi, Roi Reichart, Ari Rappoport,
+An non-projective algorithm that is 
+\begin_inset Quotes eld
+\end_inset
+
+super-linear
+\begin_inset Quotes erd
+\end_inset
+
+ in the number of edges is described by Effi Levi, Roi Reichart, Ari Rappoport,
  
 \begin_inset Quotes eld
 \end_inset
@@ -19207,8 +19273,8 @@ Edge-Linear First-Order Dependency Parsing with Undirected Minimum Spanning
 \begin_inset Quotes erd
 \end_inset
 
- https://www.aclweb.org/anthology/P/P16/P16-1198.pdf Since this is edge linear,
- I think that means it claims 
+ (2016) https://www.aclweb.org/anthology/P/P16/P16-1198.pdf Since this is edge-line
+ar, I think that, for us, it claims 
 \begin_inset Formula $O\left(n^{2}\right)$
 \end_inset
 
@@ -19217,6 +19283,9 @@ Edge-Linear First-Order Dependency Parsing with Undirected Minimum Spanning
 \end_inset
 
  words.
+ (Since, for us, we don't know, a priori, if we have an edge, or not).
+ Its also not projective.
+ https://arxiv.org/pdf/1510.07482.pdf
 \end_layout
 
 \begin_layout Section*

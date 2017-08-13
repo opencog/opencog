@@ -5531,7 +5531,13 @@ reference "logli distribution graph"
 \begin_inset Formula $\exp-(0.27(MI_{disjunct}-13.7))^{2}/2$
 \end_inset
 
+.
+ That is, the mean MI is 13.7, and with a standard deviation of about 
+\begin_inset Formula $\sqrt{1/0.27}=1.92$
+\end_inset
 
+.
+ 
 \end_layout
 
 \begin_layout Standard
