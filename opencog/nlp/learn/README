@@ -352,14 +352,18 @@ functions defined in `(opencog nlp learn)`.
 
 ```
 	(use-modules (opencog) (opencog persist) (opencog persist-sql))
+	(use-modules (opencog matrix))
 	(use-modules (opencog nlp) (opencog nlp learn))
 	(sql-open "postgres:///en_pairs?user=ubuntu&password=asdf")
-	(batch-all-pairs)
+	(define ala (make-any-link-api))
+	(define asa (add-pair-stars ala))
+	(batch-pairs asa)
+	(print-matrix-summary-report asa)
 ```
 
-If tracing is turned on, a trace file is written to `/tmp/progress`.
 Batch-counting might take hours or longer, depending on your dataset
-size.
+size. The batching routine will print to stdout, giving a hint of
+the rate of progress.
 
 Example stats and performance:
 current fr_pairs db has 16785 words and 177960 pairs.

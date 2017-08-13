@@ -7052,6 +7052,35 @@ c4df6f2da0c476a561cbea82981a6853  zen_pairs_mst.sql
 ff7cb1628cb7aad0a59c71b98a626121  zen_pairs_mst.sql.bz2
 
 ==================================================================
+zen_pairs_three
+---------------
+Mandarin word-pairs. Segmentation into words done by Ruiting. Does
+NOT include pair-MI stats. This is the alpha-segmented-1 texts plus
+100 texts from alpha-segmented-2 (aka alpha-segmented-2-part1)
+
+STATUS: good
+DATE: 13 August 2017
+REASON: No known defects.
+
+                        List of relations
+ Schema |    Name    | Type  | Owner  |    Size    | Description 
+--------+------------+-------+--------+------------+-------------
+ public | atoms      | table | ubuntu | 2623 MB    | 
+ public | spaces     | table | ubuntu | 40 kB      | 
+ public | typecodes  | table | ubuntu | 56 kB      | 
+ public | valuations | table | ubuntu | 2221 MB    | 
+ public | values     | table | ubuntu | 8192 bytes | 
+
+select count(*) from atoms;      -- 29749942 == 29.7M atoms
+select count(*) from valuations; -- 18890832 == 18.9M valuations
+
+1735058352 bytes uncompressed = 1.7GB
+ 290672147 bytes compresed = 291MB
+
+71f266f7b85661f36f73fbf0d63e2699  zen_pairs_three.sql
+76e4bdce961b0bc760ad33329fee65e5  zen_pairs_three.sql.bz2
+
+==================================================================
 ==================================================================
 ==================================================================
 ==================================================================
@@ -13067,6 +13096,19 @@ update-lg-link-counts -- just needs the Evals for links
 No one needs the link instances.  DONE
 
 remove use-relex-server DONE
+-----------
+Bugs: the mst parse algo is O^5 and yuret gives a nice O^3 also
+False. Curtis was mistaken when he said this. DONE.
+
+--------
+/dev/md127 on /data 
+/dev/md127 on /home2/linas/lxc-local-containers/learn-en/rootfs/var/lib/postgres
+fstab!!!
+
+cd /home2/linas/lxc-local-containers/learn-zh
+cp -pr --parents rootfs/var/lib/postgresql /data/lxc-databases/learn-zh/
+
+
 =========================================================================
 
 
@@ -13078,8 +13120,6 @@ multi-connectors only ... with the incorrect mutiplicities.
 ??? Is this still an issue? 
 
 Bugs: using ListLink for the partial sums on csets... why???
-
-Bugs: the mst parse algo is O^5 and yuret gives a nice O^3 also
 
 Bugs: graphing takes too long.
 
