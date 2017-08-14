@@ -62,7 +62,7 @@ A general sketch of the desired system:
    so that these other parts might eventually work right.
 
  * High-level dialog structure: the rheme/theme structure, e.g.
-   "I am saying X about Y", andd more generally dialectics (how will
+   "I am saying X about Y", and more generally dialectics (how will
    I get my point across).
 
  * Learning. The need to associate verbal acts with specific
@@ -115,7 +115,7 @@ fuzzy
 -----
 A system for performing some "fuzzy" grammatical pattern matching.
 The idea was that if there was a question, and grammatical pattern
-matchining cannot find an exact answer in the AtomSpaace, then perhaps
+machining cannot find an exact answer in the AtomSpace, then perhaps
 a "fuzzy" match might find something "good enough". Underwhelming.
 
 ghost
