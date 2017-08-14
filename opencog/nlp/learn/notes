@@ -6817,7 +6817,7 @@ de95af1f2ddb7c696b19a4cc3a3e443e  en_pairs_rfive_mtwo.sql.bz2
 
 ==================================================================
 en_pairs_rfive_mthree
--------------------
+---------------------
 Random-planar-tree parsed books from tranche-1, 2, 3, 4 and 5. 
 MST-parsed tranche-1, 2 and 3. Contains pair-MI values; does NOT
 contain any disjunct marginals.
@@ -6873,6 +6873,35 @@ select count(*) from valuations; -- 123419676 = 123M =  7M more
 
 eff6127b82ab205502bc1f9e8b4e139d  en_pairs_rfive_mfour.sql
 763ffc8bf032127501692a5ee61538ec  en_pairs_rfive_mfour.sql.bz2
+
+==================================================================
+en_pairs_rfive_mfive
+--------------------
+Random-planar-tree parsed books from tranche-1, 2, 3, 4 and 5. 
+MST-parsed tranche-1, 2, 3, 4 and 5. Contains pair-MI values; does NOT
+contain any disjunct marginals.
+
+STATUS: good
+DATE: 14 August 2017
+REASON: Best so far, I think.  Same issues as en_pairs_rfive_mone
+
+                        List of relations
+ Schema |    Name    | Type  | Owner  |    Size    | Description 
+--------+------------+-------+--------+------------+-------------
+ public | atoms      | table | ubuntu | 11 GB      | 
+ public | spaces     | table | ubuntu | 40 kB      | 
+ public | typecodes  | table | ubuntu | 56 kB      | 
+ public | valuations | table | ubuntu | 13 GB      | 
+ public | values     | table | ubuntu | 8192 bytes | 
+
+select count(*) from atoms;      -- 124866072 = 125M = 19M more
+select count(*) from valuations; -- 133848790 = 134M = 11M more
+
+12210323166 bytes uncompressed = 12.2GBytes
+ 2104485691 byttes compressed  = 2.10 GBytes
+
+988be345ccaffc9312db6446693a3625  en_pairs_rfive_mfive.sql
+1bd09cb8c014ec2c8e33ee7d101f4357  en_pairs_rfive_mfive.sql.bz2
 
 ==================================================================
 zh_pairs_one
@@ -13144,6 +13173,10 @@ fstab!!!
 
 cd /home2/linas/lxc-local-containers/learn-zh
 cp -pr --parents rootfs/var/lib/postgresql /data/lxc-databases/learn-zh/
+
+wtf:
+ fatal flex scanner internal error--end of buffer missed
+en_pairs_rfive_mi
 
 
 =========================================================================
