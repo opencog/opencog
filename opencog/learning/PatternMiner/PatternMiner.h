@@ -213,6 +213,8 @@ protected:
     bool Enable_Interaction_Information;
     bool Enable_surprisingness;
 
+    bool enable_unify_unordered_links; // if the corpus contains unordered Links like AND_LINK
+
     bool only_mine_patterns_start_from_white_list;
     bool only_mine_patterns_start_from_white_list_contain;
 
@@ -264,15 +266,22 @@ protected:
     //       )
     //    )
     // Return unified ordered Handle vector
+    HandleSeq _UnifyPatternOrder(HandleSeq& inputPattern, unsigned int& unifiedLastLinkIndex);
+
     HandleSeq UnifyPatternOrder(HandleSeq& inputPattern, unsigned int &unifiedLastLinkIndex, map<Handle,Handle>& orderedVarNameMap);
+
+    Handle UnifyOneLinkForUnorderedLink(Handle& link,std::map<Handle,Type> &orderedTmpLinkToType);
+
+
+    Handle rebindLinkTypeRecursively(Handle &inputLink, std::map<Handle,Type> &orderedTmpLinkToType);
 
     void addAtomTypesFromString(string node_types_str, vector<Type> &typeListToAddTo);
 
     // this function is called by RebindVariableNames
-    void findAndRenameVariablesForOneLink(Handle link, map<Handle,Handle>& varNameMap, HandleSeq& renameOutgoingLinks);
+    void findAndRenameVariablesForOneLink(Handle link, map<Handle,Handle>& varNameMap, HandleSeq& renameOutgoingLinks, std::map<Handle,Type> &orderedTmpLinkToType);
 
     // rename the variable names in a ordered pattern according to the orders of the variables appear in the orderedPattern
-    HandleSeq RebindVariableNames(HandleSeq& orderedPattern, map<Handle,Handle>& orderedVarNameMap);
+    HandleSeq RebindVariableNames(HandleSeq& orderedPattern, map<Handle,Handle>& orderedVarNameMap,std::map<Handle,Type> &orderedTmpLinkToType);
 
     void ReplaceConstNodeWithVariableForOneLink(Handle link, Handle constNode, Handle newVariableNode, HandleSeq& renameOutgoingLinks);
 

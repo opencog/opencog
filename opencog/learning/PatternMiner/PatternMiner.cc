@@ -95,7 +95,7 @@ void PatternMiner::generateIndexesOfSharedVars(Handle& link, HandleSeq& orderedH
     }
 }
 
-void PatternMiner::findAndRenameVariablesForOneLink(Handle link, map<Handle,Handle>& varNameMap, HandleSeq& renameOutgoingLinks)
+void PatternMiner::findAndRenameVariablesForOneLink(Handle link, map<Handle,Handle>& varNameMap, HandleSeq& renameOutgoingLinks, std::map<Handle,Type> &orderedTmpLinkToType)
 {
 
     HandleSeq outgoingLinks = link->getOutgoingSet();
@@ -131,8 +131,21 @@ void PatternMiner::findAndRenameVariablesForOneLink(Handle link, map<Handle,Hand
         else
         {
              HandleSeq _renameOutgoingLinks;
-             findAndRenameVariablesForOneLink(h, varNameMap, _renameOutgoingLinks);
-             Handle reLink = atomSpace->add_link(h->getType(),_renameOutgoingLinks);
+             findAndRenameVariablesForOneLink(h, varNameMap, _renameOutgoingLinks, orderedTmpLinkToType);
+
+             Handle reLink;
+
+             if (enable_unify_unordered_links && orderedTmpLinkToType.size() > 0)
+             {
+
+                std::map<Handle,Type>::iterator typeIt = orderedTmpLinkToType.find(h);
+                if (typeIt != orderedTmpLinkToType.end())
+                    reLink = atomSpace->add_link((Type)(typeIt->second),_renameOutgoingLinks);
+                else
+                    reLink = atomSpace->add_link(h->getType(),_renameOutgoingLinks);
+             }
+             else
+                reLink = atomSpace->add_link(h->getType(),_renameOutgoingLinks);
 
              renameOutgoingLinks.push_back(reLink);
         }
@@ -141,18 +154,31 @@ void PatternMiner::findAndRenameVariablesForOneLink(Handle link, map<Handle,Hand
 
 }
 
-HandleSeq PatternMiner::RebindVariableNames(HandleSeq& orderedPattern, map<Handle,Handle>& orderedVarNameMap)
+HandleSeq PatternMiner::RebindVariableNames(HandleSeq& orderedPattern, map<Handle,Handle>& orderedVarNameMap, std::map<Handle,Type> &orderedTmpLinkToType)
 {
 
     HandleSeq rebindedPattern;
 
-    for (Handle link : orderedPattern)
+    for (Handle h : orderedPattern)
     {
         HandleSeq renameOutgoingLinks;
-        findAndRenameVariablesForOneLink(link, orderedVarNameMap, renameOutgoingLinks);
-        Handle rebindedLink = atomSpace->add_link(link->getType(),renameOutgoingLinks);
+        findAndRenameVariablesForOneLink(h, orderedVarNameMap, renameOutgoingLinks, orderedTmpLinkToType);
 
-        rebindedPattern.push_back(rebindedLink);
+        Handle reLink;
+
+        if (enable_unify_unordered_links && orderedTmpLinkToType.size() > 0)
+        {
+
+           std::map<Handle,Type>::iterator typeIt = orderedTmpLinkToType.find(h);
+           if (typeIt != orderedTmpLinkToType.end())
+               reLink = atomSpace->add_link((Type)(typeIt->second),renameOutgoingLinks);
+           else
+               reLink = atomSpace->add_link(h->getType(),renameOutgoingLinks);
+        }
+        else
+           reLink = atomSpace->add_link(h->getType(),renameOutgoingLinks);
+
+        rebindedPattern.push_back(reLink);
     }
 
     return rebindedPattern;
@@ -217,6 +243,42 @@ HandleSeq PatternMiner::ReplaceConstNodeWithVariableForAPattern(HandleSeq& patte
 // in orderedVarNameMap, the first Handle is the variable node in the input unordered pattern,
 // the second Handle is the renamed ordered variable node in the output ordered pattern.
 HandleSeq PatternMiner::UnifyPatternOrder(HandleSeq& inputPattern, unsigned int& unifiedLastLinkIndex, map<Handle,Handle>& orderedVarNameMap)
+{
+    HandleSeq orderedHandles;
+
+    std::map<Handle,Type> orderedTmpLinkToType;
+
+    if (enable_unify_unordered_links)
+    {
+        // check for unordered links and unify them first
+
+        HandleSeq orderedOutgoings;
+        for (Handle link : inputPattern)
+        {
+            Handle reLink = UnifyOneLinkForUnorderedLink(link, orderedTmpLinkToType);
+            orderedOutgoings.push_back(reLink);
+        }
+
+        orderedHandles = _UnifyPatternOrder(orderedOutgoings, unifiedLastLinkIndex);
+
+    }
+    else
+        orderedHandles = _UnifyPatternOrder(inputPattern, unifiedLastLinkIndex);
+
+    HandleSeq rebindPattern = RebindVariableNames(orderedHandles, orderedVarNameMap,orderedTmpLinkToType);
+
+
+    return rebindPattern;
+
+}
+
+
+// the input links should be like: only specify the const node, all the variable node name should not be specified:
+// unifiedLastLinkIndex is to return where the last link in the input pattern is now in the ordered pattern
+// because the last link in input pattern is the externed link from last gram pattern
+// in orderedVarNameMap, the first Handle is the variable node in the input unordered pattern,
+// the second Handle is the renamed ordered variable node in the output ordered pattern.
+HandleSeq PatternMiner::_UnifyPatternOrder(HandleSeq& inputPattern, unsigned int& unifiedLastLinkIndex)
 {
 
     // Step 1: take away all the variable names, make the pattern into such format string:
@@ -329,11 +391,83 @@ HandleSeq PatternMiner::UnifyPatternOrder(HandleSeq& inputPattern, unsigned int&
 
     }
 
-    HandleSeq rebindPattern = RebindVariableNames(orderedHandles, orderedVarNameMap);
-
-    return rebindPattern;
+    return orderedHandles;
 
 }
+
+
+// This function should only be called when enable_unify_unordered_links = true
+// when a link in a pattern is unordered type, need to unify it, the order and var names
+// they could be nested, so they need to be unify recursively, e.g.:
+//SetLink
+//   AndLink
+//      AndLink
+//      ListLink
+//   AndLink
+//   ListLink
+Handle PatternMiner::UnifyOneLinkForUnorderedLink(Handle& link,std::map<Handle,Type> &orderedTmpLinkToType)
+{
+    HandleSeq outgoingLinks = link->getOutgoingSet();
+    HandleSeq outputOutgoingLinks;
+    bool containNodes = false;
+
+    for (Handle h : outgoingLinks)
+    {
+        if (h->isNode())
+        {
+           // it's a  node, just add it
+           outputOutgoingLinks.push_back(h);
+           containNodes = true;
+        }
+        else
+        {
+             Handle reLink = UnifyOneLinkForUnorderedLink(h, orderedTmpLinkToType);
+             outputOutgoingLinks.push_back(reLink);
+        }
+    }
+
+    Handle returnLink;
+
+    Type originalType = link->getType();
+    if (classserver().isA(originalType, UNORDERED_LINK))
+    {
+
+        unsigned int unifiedLastLinkIndex;
+        HandleSeq orderedOutgoings;
+        // check if there are only Links in the outgoings
+        if (containNodes)
+        {
+            HandleSeq outgoingLinksTobeUnified;
+            HandleSeq nodesInOutgoings;
+            // if it also contain Nodes, then only sort the Links, leave all the Nodes in the top of the list
+            for (Handle h1 : outputOutgoingLinks)
+            {
+                if (h1->isLink())
+                    outgoingLinksTobeUnified.push_back(h1);
+                else
+                    nodesInOutgoings.push_back(h1);
+            }
+
+            orderedOutgoings = _UnifyPatternOrder(outgoingLinksTobeUnified,unifiedLastLinkIndex);
+            orderedOutgoings.insert(orderedOutgoings.begin(), nodesInOutgoings.begin(), nodesInOutgoings.end());
+        }
+        else
+            orderedOutgoings = _UnifyPatternOrder(outputOutgoingLinks,unifiedLastLinkIndex);
+
+        // change the original unordered type into a tmp ListLink
+        returnLink = atomSpace->add_link(LIST_LINK, orderedOutgoings);
+
+        orderedTmpLinkToType.insert(std::pair<Handle,Type>(returnLink,originalType));
+    }
+    else
+        returnLink = atomSpace->add_link(originalType, outputOutgoingLinks);
+
+    return returnLink;
+
+}
+
+
+
 
 string PatternMiner::unifiedPatternToKeyString(HandleSeq& inputPattern, const AtomSpace *atomspace)
 {
@@ -3529,6 +3663,7 @@ void PatternMiner::reSetAllSettingsFromConfig()
 
     only_output_patterns_contains_white_keywords = config().get_bool("only_output_patterns_contains_white_keywords");
 
+    enable_unify_unordered_links = config().get_bool("enable_unify_unordered_links");
 }
 
 // release everything
