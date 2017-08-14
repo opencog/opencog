@@ -207,19 +207,8 @@ microseconds.
 
 ======================================================================
 
-Input file format
------------------
-This style of input may be produced in one of two ways. It is produced
-directly by RelEx, when using the opencog output format: the -o flag
-appended to the `relex.RelationExtractor` executable. The other way is
-indirect, but can be considerably more convenient: First, parse text
-using the `relex.WebFormat` module, to create the "compact file format".
-Then, use the `relex/src/perl/cff-to-opencog.pl` perl script to convert
-this to the final output.
-
-
 A Side-note About Syntactic Sugar
-===================================
+=================================
 This has been said before, but it bears repeating. Consider the node
 type WordInstanceNode, for example:
 
@@ -260,10 +249,6 @@ which stands for the more "primitive" construct:
 Notationally, these forms should be considered to be "equivalent"
 although there is a bunch of actual code that depends on the one or
 the other, and cannot freely intermingle these cases.
-
-Not everything in the RelEx export gets its own specially-declared
-node or link type. Those that do not are explicitly declared in the
-file "src/nlp/scm/type-definitions.scm"
 
 ======================================================================
 References:
