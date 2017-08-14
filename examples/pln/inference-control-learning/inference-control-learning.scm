@@ -22,7 +22,7 @@
 
 ;; Set loggers levels
 (cog-logger-set-level! (cog-ure-logger) "debug")
-(cog-logger-set-level! icl-logger "info")
+(cog-logger-set-level! icl-logger "debug")
 (cog-logger-set-level! "info")
 
 ;; Set loggers stdout
@@ -34,8 +34,8 @@
 ;; (cog-logger-set-sync! (cog-ure-logger) #t)
 
 ;; Set parameters
-(define pss 10)                          ; Problem set size
-(define niter 3)                         ; Number of iterations
+(define pss 5)                          ; Problem set size
+(define niter 2)                         ; Number of iterations
 
 (define (run-experiment)
   (icl-logger-info "Start experiment")
@@ -54,8 +54,8 @@
           '()))
     ;; Run all iterations
     (run-iterations-rec 0)
-    (icl-logger-info "Inference History AtomSpace:")
-    (icl-logger-info-atomspace ih-as)))
+    (icl-logger-debug "Inference History AtomSpace:")
+    (icl-logger-debug-atomspace ih-as)))
 
 ;; Run iteration i over the given targets and return the list of
 ;; solved problems.
@@ -76,7 +76,7 @@
                                bc-result)))
          (results (map run-bc-mk-corpus (iota pss)))
          (sol_count (count values results)))
-    (icl-logger-info "Number of problems solved = ~a" sol_count)
+    (icl-logger-info "Number of solved problems = ~a" sol_count)
 
     ;; Build inference control rules for the next iteration
     (mk-ic-rules ih-as icr-as)
@@ -118,11 +118,15 @@
   (icl-logger-info "Build inference control rules from the inference history")
   ;; Reload the rule base for producing inference control rules
   (icr-reload)
+  (icl-logger-debug "Default atomspace after loading the icr rule base:")
+  (icl-logger-debug-atomspace (cog-atomspace))
   (let ((default-as (cog-set-atomspace! ih-as)))
-    ;; Copy tr-as to the default atomspace
+    ;; Copy ih-as to the default atomspace
     (cog-cp-all default-as)
     ;; Switch to the default atomspace
     (cog-set-atomspace! default-as)
+    (icl-logger-debug "Default atomspace after adding the inference history:")
+    (icl-logger-debug-atomspace (cog-atomspace))
     ;; Define BC target and vardecl
     (let* ((vardecl (TypedVariable
                        (Variable "$Rule")
@@ -145,11 +149,12 @@
                          (DontExec (Variable "$Rule")))
                        (DontExec (Variable "$B")))
                      (Evaluation
-                       (Predicate "ICL:preproof")
+                       (Predicate "URE:BC:preproof")
                        (List
                          (DontExec (Variable "$A"))
                          (Variable "$T")))))
            (results (icr-bc target #:vardecl vardecl)))
+      (icl-logger-debug "Query target = ~a" target)
       ;; Copy inference control rules to the Inference Control Rules
       ;; atomspace.
       (icl-logger-debug "Results:\n~a" results)
@@ -162,6 +167,9 @@
 (define (run-bc target tr-as icr-as i j)
   (icl-logger-info "Run BC (i=~a/~a,j=~a/~a) with target:\n~a"
                    (+ i 1) niter (+ j 1) pss target)
+  (icl-logger-debug "Control AtomSpace:")
+  (icl-logger-debug-atomspace icr-as)
+
   (reload)
   (let* ((result (pln-bc target #:trace-as tr-as #:control-as icr-as))
          (result-size (length (cog-outgoing-set result)))
