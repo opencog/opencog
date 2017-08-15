@@ -23997,6 +23997,17 @@ The contractability of connectors into links means that the Link Grammar
 \end_layout
 
 \begin_layout Standard
+Bob Coecke has written repeatedly on this topic, any one of his papers on
+ pregroup grammars or closed monoidal categories applied to linguistics
+ is adequate to grasp the concept.
+ His notation is easily and readily translated into Link Grammar notation.
+ The primary insigh is to understand that the Link Grammar connector letters
+ should be understood as type labels: they provide a simple, easy notational
+ device, overcoming the notational complexity that is otherwise required
+ when presenting categorial grammars.
+\end_layout
+
+\begin_layout Standard
 What's the point of all this? Well categorical grammars are all the rage,
  and the fact that LG is a categorical grammar seems to be frequently overlooked
  or misunderstood.
