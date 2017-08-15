@@ -52,6 +52,11 @@
          ;; Get all atoms in as
          (all-atoms (apply append (map cog-get-atoms (cog-get-types))))
          (atom->string (lambda (h)
+                         (cog-logger-debug "h = ~a" h)
+                         (cog-logger-debug "(length (cog-incoming-set h)) = ~a"
+                                           (length (cog-incoming-set h)))
+                         (cog-logger-debug "(null? (cog-incoming-set h)) = ~a"
+                                           (null? (cog-incoming-set h)))
                          (if (null? (cog-incoming-set h))  ; Avoid redundant
                                                            ; corrections
                              (format "~a" h)
@@ -73,3 +78,9 @@
 (define (remove-dangling-atom atom)
   (if (and (null? (cog-incoming-set atom)) (= 0 (tv-conf (cog-tv atom))))
       (extract-hypergraph atom)))
+
+;; Copy all atoms from an atomspace to another atomspace
+(define (cp-as src dst)
+  (let ((old-as (cog-set-atomspace! src)))
+    (cog-cp-all dst)
+    (cog-set-atomspace! old-as)))
