@@ -168,6 +168,7 @@
 		(lambda (message . args)
 			(apply (case message
 					((name) (lambda () "Link Grammar ANY link Word Pairs"))
+					((id)   (lambda () "ANY"))
 					((left-type) get-left-type)
 					((right-type) get-right-type)
 					((pair-type) get-pair-type)
@@ -238,7 +239,8 @@
 			(make-pair (ListLink any-left any-right)))
 
 		; get-all-pairs - return a list holding all of the observed
-		; word-pairs.  Caution: this can be tens of millions long!
+		; word-pairs.  Caution: this can be tens of millions long, and
+		; take many hours to run!
 		(define (do-get-all-pairs)
 			; The list of pairs is mostly just the incoming set of the
 			; ANY node. However, this does include some junk, sooo ...
@@ -266,6 +268,7 @@
 		(lambda (message . args)
 			(apply (case message
 					((name) (lambda () "Sentence Clique Word Pairs"))
+					((id)   (lambda () "cliq"))
 					((left-type) get-left-type)
 					((right-type) get-right-type)
 					((pair-type) get-pair-type)
@@ -386,6 +389,7 @@
 		(lambda (message . args)
 			(apply (case message
 					((name) (lambda () "Sentence Clique Distance-Limited Word Pairs"))
+					((id)   (lambda () "cldist"))
 					((left-type) get-left-type)
 					((right-type) get-right-type)
 					((pair-type) get-pair-type)
@@ -467,7 +471,7 @@
 
 	; Make sure all word-pairs are in the atomspace.
 	(call-only-once (lambda() (LLOBJ 'fetch-pairs)))
-	(display "Finished loading any-word-pairs\n")
+	(display "Finished loading sparse matrix pairs\n")
 
 	(batch-all-pair-mi LLOBJ)
 )

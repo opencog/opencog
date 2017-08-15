@@ -64,12 +64,16 @@
 
 (use-modules (opencog logger))
 
+;; Limit an number to be within a certain range
+(define (limit x l u)
+  (max l (min u x)))
+
 ; Consistency Conditions
 (define (smallest-intersection-probability sA sB)
-  (max (/ (+ sA sB -1) sA) 0))
+  (limit (/ (+ sA sB -1) sA) 0 1))
 
 (define (largest-intersection-probability sA sB)
-  (min (/ sB sA) 1))
+  (limit (/ sB sA) 0 1))
 
 (define (conditional-probability-consistency sA sB sAB)
   (and (< 0 sA)

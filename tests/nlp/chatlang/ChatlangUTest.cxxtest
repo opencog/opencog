@@ -86,7 +86,6 @@ public:
     void test_create_phrase();
     void test_create_concept();
     void test_create_choices();
-    void test_unordered_matching();
     void test_negation();
     void test_chat_find_rules();
 };
@@ -159,18 +158,6 @@ void ChatlangUTest::test_create_choices()
 
     auto result = scm->eval("test-choices-result");
     TSM_ASSERT_EQUALS("Fail to create choices!", "#t\n", result);
-
-    logger().info("END TEST: %s", __FUNCTION__);
-}
-
-void ChatlangUTest::test_unordered_matching()
-{
-    logger().info("BEGIN TEST: %s", __FUNCTION__);
-
-    scm->eval("(load-from-path \"test-unordered.scm\")");
-
-    auto result = scm->eval("test-unordered-result");
-    TSM_ASSERT_EQUALS("Fail to create unordered terms!", "#t\n", result);
 
     logger().info("END TEST: %s", __FUNCTION__);
 }

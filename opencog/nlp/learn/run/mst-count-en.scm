@@ -28,11 +28,11 @@
 ;;;   (run-server (make-tcp-server-socket #:port 19005)))
 ;;;)
 
-(start-cogserver "opencog-mst-en-r.conf")
+(start-cogserver "opencog-mst-en.conf")
 
 ; Open the database.
 ; Edit the below, setting the database name, user and password.
-(sql-open "postgres:///en_pairs_rthree_mall?user=ubuntu&password=asdf")
+(sql-open "postgres:///en_pairs_rfive_mi?user=ubuntu&password=asdf")
 
 ; Load up the words
 (display "Fetch all words from database. This may take several minutes.\n")
@@ -45,6 +45,7 @@
 ; We can also do MST parsing with other kinds of pair-count objects,
 ; for example, the clique-pairs, or the distance-pairs.
 (define pair-obj (make-any-link-api))
+(define star-obj (add-pair-stars pair-obj))
 (pair-obj 'fetch-pairs)
 
 ; Print the sql stats
@@ -53,3 +54,4 @@
 ; Clear the sql cache and the stats counters
 (sql-clear-cache)
 (sql-clear-stats)
+(print-matrix-summary-report star-obj)

@@ -21,38 +21,42 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <opencog/atomspace/AtomSpace.h>
-#include <opencog/atoms/base/Link.h>
-#include <opencog/atoms/base/Node.h>
+#include <opencog/atoms/base/Handle.h>
 #include <opencog/guile/SchemePrimitive.h>
-#include <opencog/nlp/types/atom_types.h>
 
-#include "LGDictSCM.h"
 #include "LGDictReader.h"
 #include "LGDictUtils.h"
 
+namespace opencog
+{
+class LGDictSCM
+{
+private:
+    static void* init_in_guile(void*);
+    static void init_in_module(void*);
+    void init(void);
+
+    bool do_lg_conn_type_match(Handle, Handle);
+    bool do_lg_conn_linkable(Handle, Handle);
+
+public:
+    LGDictSCM();
+};
+
+}
 
 using namespace opencog::nlp;
 using namespace opencog;
-
 
 /**
  * The constructor for LGDictSCM.
  */
 LGDictSCM::LGDictSCM()
 {
-    static bool is_init = false;
-    if (is_init) return;
-    is_init = true;
-    scm_with_guile(init_in_guile, this);
-}
-
-/**
- * The destructor for LGDictSCM.
- */
-LGDictSCM::~LGDictSCM()
-{
-    dictionary_delete(m_pDictionary);
+	static bool is_init = false;
+	if (is_init) return;
+	is_init = true;
+	scm_with_guile(init_in_guile, this);
 }
 
 /**
@@ -65,9 +69,9 @@ LGDictSCM::~LGDictSCM()
  */
 void* LGDictSCM::init_in_guile(void* self)
 {
-    scm_c_define_module("opencog nlp lg-dict", init_in_module, self);
-    scm_c_use_module("opencog nlp lg-dict");
-    return NULL;
+	scm_c_define_module("opencog nlp lg-dict", init_in_module, self);
+	scm_c_use_module("opencog nlp lg-dict");
+	return NULL;
 }
 
 /**
@@ -77,8 +81,8 @@ void* LGDictSCM::init_in_guile(void* self)
  */
 void LGDictSCM::init_in_module(void* data)
 {
-    LGDictSCM* self = (LGDictSCM*) data;
-    self->init();
+	LGDictSCM* self = (LGDictSCM*) data;
+	self->init();
 }
 
 /**
@@ -86,52 +90,10 @@ void LGDictSCM::init_in_module(void* data)
  */
 void LGDictSCM::init()
 {
-    m_pDictionary = dictionary_create_default_lang();
-
-#ifdef HAVE_GUILE
-    define_scheme_primitive("lg-get-dict-entry",
-         &LGDictSCM::do_lg_get_dict_entry, this, "nlp lg-dict");
-    define_scheme_primitive("lg-conn-type-match?",
-         &LGDictSCM::do_lg_conn_type_match, this, "nlp lg-dict");
-    define_scheme_primitive("lg-conn-linkable?",
-         &LGDictSCM::do_lg_conn_linkable, this, "nlp lg-dict");
-#endif
-}
-
-/**
- * Implementation of the "lg-get-dict-entry" scheme primitive.
- *
- * The corresponding implementation for the "lg-get-dict-entry" primitive,
- * which accepts a WordNode as input and output the LG dictionary atom.
- *
- * @param h   the input WordNode containing the word string
- * @return    the LG dictionary atom
- */
-Handle LGDictSCM::do_lg_get_dict_entry(Handle h)
-{
-#ifdef HAVE_GUILE
-    AtomSpace* pAS = SchemeSmob::ss_get_env_as("lg-get-dict-entry");
-
-    if (h->getType() == WORD_NODE)
-    {
-		// check if the dictionary entry is already in the atomspace
-		HandleSeq qExisting;
-		h->getIncomingSetByType(std::back_inserter(qExisting), LG_DISJUNCT);
-
-		// avoid the disjuncts building if entries exist
-		if (not qExisting.empty())
-			return Handle(createLink(qExisting, SET_LINK));
-
-        LGDictReader reader(m_pDictionary, pAS);
-
-        return reader.getAtom(h->getName());
-    }
-
-    return Handle::UNDEFINED;
-
-#else
-    return Handle::UNDEFINED;
-#endif
+	define_scheme_primitive("lg-conn-type-match?",
+		 &LGDictSCM::do_lg_conn_type_match, this, "nlp lg-dict");
+	define_scheme_primitive("lg-conn-linkable?",
+		 &LGDictSCM::do_lg_conn_linkable, this, "nlp lg-dict");
 }
 
 /**
@@ -143,11 +105,7 @@ Handle LGDictSCM::do_lg_get_dict_entry(Handle h)
  */
 bool LGDictSCM::do_lg_conn_type_match(Handle h1, Handle h2)
 {
-#ifdef HAVE_GUILE
-    return lg_conn_type_match(h1, h2);
-#else
-    return false;
-#endif
+	return lg_conn_type_match(h1, h2);
 }
 
 /**
@@ -159,15 +117,12 @@ bool LGDictSCM::do_lg_conn_type_match(Handle h1, Handle h2)
  */
 bool LGDictSCM::do_lg_conn_linkable(Handle h1, Handle h2)
 {
-#ifdef HAVE_GUILE
-    return lg_conn_linkable(h1, h2);
-#else
-    return false;
-#endif
+	return lg_conn_linkable(h1, h2);
 }
 
-
+extern "C" {
 void opencog_nlp_lgdict_init(void)
 {
-    static LGDictSCM lgdict;
+	static LGDictSCM lgdict;
 }
+};

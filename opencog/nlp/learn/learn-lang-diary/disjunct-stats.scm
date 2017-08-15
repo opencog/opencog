@@ -1,4 +1,4 @@
-
+;
 ; disjunct-stats.scm
 ;
 ; Assorted ad-hoc collection of tools for understanding the
@@ -11,9 +11,6 @@
 ; pictures, than anything else. Of course, this can be recycled for
 ; other datasets, too.
 ;
-; TODO: move this file to the lang-learn-diary directory. It does
-; not belong here, in the main repo
-;
 ; Copyright (c) 2017 Linas Vepstas
 ;
 
@@ -23,29 +20,38 @@
 ; Load the dataset that is analyzed throughout.
 (use-modules (opencog) (opencog persist) (opencog persist-sql))
 (use-modules (opencog nlp) (opencog nlp learn))
-(use-modules (opencog analysis))
-(sql-open "postgres:///en_pairs_sim?user=linas")
-
-(fetch-all-words)         ; 581 seconds from cold spinning media.
-                          ; 22 seconds from hot buffer cache
-(length (get-all-words))  ; 396262 words as always.
+(use-modules (opencog matrix))
+(use-modules (opencog cogserver))
+(start-cogserver)
+; (sql-open "postgres:///en_pairs_sim?user=linas")
+(sql-open "postgres:///en_pairs_rfive_mtwo?user=linas")
 
 (define pca (make-pseudo-cset-api))
-(pca 'fetch-pairs)        ; 456 secs after above
+(define psa (add-pair-stars pca))
+(define psc (add-pair-count-api psa))
+(define psf (add-pair-freq-api psa))
+(define psu (add-support-api psa))
 
-(define ac (get-all-cset-words))
-(length ac)               ; 37413 s always
+(psa 'fetch-pairs)                  ; 4436 secs
+(print-matrix-summary-report psa)
 
-(define ad (get-all-disjuncts))
-(length ad)               ; 291637 as always
 
-(fetch-all-sims)          ; 17 seconds
+; (fetch-all-words)
+; (length (get-all-words))  ; 
+
+(define ac (psa 'left-basis))
+(length ac)               ; 137078
+
+(define ad (psa 'right-basis))
+(length ad)               ; 6239997
+
+;;; (fetch-all-sims)
 
 
 ; ---------------------------------------------------------------------
 ; Ranking and printing utilities
 ;
-; Assign each word a score, using SCORE-FN,
+; Assign each word a score, using SCORE-FN
 (define (score SCORE-FN WORD-LIST)
 	(map (lambda (wrd) (cons (SCORE-FN wrd) wrd)) WORD-LIST))
 
@@ -77,17 +83,30 @@
 ; ---------------------------------------------------------------------
 ; A list of all words that have csets. (Not all of the words
 ; in the database got tagged with a cset)
-(define all-cset-words (get-all-cset-words))
+(define all-cset-words (psa 'left-basis))  ; (get-all-cset-words)
 
 ; A list of all disjucnts (appearing in all csets)
-(define all-disjuncts (get-all-disjuncts))
+(define all-disjuncts (psa 'right-basis)) ; (get-all-disjuncts))
 
 (define all-csets (get-all-csets))
 
-; words with 100 or more observations.
+; Words with 100 or more observations. rfive_mtwo has 9425 of these.
+; There are 25505 with 20 or more
+; There are 20284 with 30 or more
+; There are 3263 with 400 or more
 (define top-cset-words
-	(filter (lambda (wrd) (< 100 (cset-vec-word-observations wrd)))
+	(filter (lambda (wrd) (<= 100 (cset-vec-word-observations wrd)))
 		all-cset-words))
+
+; ---------------------------------------------------------------------
+; Print the support, size and length of for a word,
+
+(define (show-counts word-str)
+	(define w (WordNode word-str))
+	(format #t "Suport=~A Count=~A Length=~A\n"
+		(psu 'right-support w)
+		(psu 'right-count w)
+		(psu 'right-length w)))
 
 ; ---------------------------------------------------------------------
 ; A sorted list of score-word pairs, where the score is the count
@@ -95,7 +114,7 @@
 ; number of times that the word was observed during MST parsing. That is
 ; because exactly one disjunct is extracted per word, per MST parse.
 (define sorted-word-obs
-	(score-and-rank cset-vec-word-observations all-cset-words)
+	(score-and-rank cset-vec-word-observations all-cset-words))
 
 ; Print above to a file, so that it can be graphed.
 (let ((outport (open-file "/tmp/ranked-word-obs.dat" "w")))
@@ -141,7 +160,10 @@
 (define sorted-avg
 	(score-and-rank avg-obs all-cset-words))
 
-(define binned-avg (bin-count-simple sorted-avg 100 1.0 6.0))
+(define sorted-avg
+	(score-and-rank avg-obs top-cset-words))
+
+(define binned-avg (bin-count-simple sorted-avg 200 1.0 20.0))
 
 (let ((outport (open-file "/tmp/binned-avg.dat" "w")))
 	(print-bincounts-tsv binned-avg outport)
@@ -162,7 +184,7 @@
 ; ---------------------------------------------------------------------
 ; A sorted list of score-word pairs, where the score is the cset length
 
-(define sorted-lengths (score-and-rank cset-vec-word-len all-cset-words)
+(define sorted-lengths (score-and-rank cset-vec-word-len all-cset-words))
 
 (let ((outport (open-file "/tmp/ranked-lengths.dat" "w")))
 	(print-ts-rank sorted-lengths outport)
@@ -187,7 +209,12 @@
 (define sorted-lensq-norm
 	(score-and-rank lensq-vs-obs all-cset-words))
 
-(define binned-sqlen-norm (bin-count-simple sorted-lensq-norm 100 0.0 10.0))
+(define binned-sqlen-norm (bin-count-simple sorted-lensq-norm 200 0.0 100.0))
+
+(define binned-sqlen-norm (bin-count sorted-lensq-norm 100
+	(lambda (item) (/ (log (first item)) (log 2.0)))
+	(lambda (item) 1)
+	1.0 10.0))
 
 (let ((outport (open-file "/tmp/binned-sqlen-norm.dat" "w")))
 	(print-bincounts-tsv binned-sqlen-norm outport)
@@ -265,33 +292,48 @@
 ;
 ; Distributions for two particular words.
 
-(define dj-united (score-and-rank get-count
-		(get-cset-vec (Word "United"))))
+(define dj-prince (score-and-rank get-count
+		(get-cset-vec (Word "Prince"))))
 
-(define dj-it (score-and-rank get-count
-		(get-cset-vec (Word "It"))))
+(define dj-think (score-and-rank get-count
+		(get-cset-vec (Word "think"))))
+
+(define dj-long (score-and-rank get-count
+		(get-cset-vec (Word "long"))))
+
+(define dj-fact (score-and-rank get-count
+		(get-cset-vec (Word "fact"))))
+
+(define dj-from (score-and-rank get-count
+		(get-cset-vec (Word "from"))))
 
 ; Print to port a tab-separated table of rankings
-(define (print-ts-dj-rank cset-a cset-b port)
+(define (print-ts-dj-rank cset-a cset-b 
+                cset-c cset-d cset-e port)
 	(define idx 0)
 	(for-each
-		(lambda (pra prb)
+		(lambda (pra prb prc  prd pre)
 			(set! idx (+ idx 1))
-			(format port "~A	~A	~A\n" idx (car pra) (car prb)))
-		cset-a cset-b))
+			(format port "~A	~A	~A	~A	~A	~A\n" idx 
+				(car pra) (car prb)
+				(car prc) (car prd)
+				(car pre)))
+		cset-a cset-b cset-c cset-e cset-e ))
 
-(let ((outport (open-file "/tmp/ranked-dj-united.dat" "w")))
-	(print-ts-dj-rank dj-united dj-it outport)
+(let ((outport (open-file "/tmp/ranked-dj-prince.dat" "w")))
+	(print-ts-dj-rank 
+		dj-prince dj-think dj-long dj-fact dj-from outport)
 	(close outport))
 
 ; ---------------------------------------------------------------------
-; Sum over distributions. Basically, above gave two ranking
+; Sum over distributions. Basically, above gave five ranking
 ; distributions, one for each word.  They can be averaged together
 ; to get a smoother graph.  Here, we create a ranking for each
 ; word, and then average them all together. This is kind of hokey,
 ; in the end, but whatever.
 
-; Create and zero out array.
+; Create and zero out array. 312K is just some large "big-enough"
+; number big enough to hold data without overflowing.
 (define dj-sum (make-array 0 312500))
 
 ; Create a ranked list of disjuncts for WORD
@@ -314,7 +356,7 @@
 		WORD-LIST))
 
 ; Accumulate all, but only for those with 100 or more observations.
-(accum-dj-all top-csets-words)
+(accum-dj-all top-cset-words)
 
 (define (print-dj-acc port)
 	(define idx 0)
@@ -408,12 +450,41 @@
 	(- (word-entropy-bits disjunct-entropy-bits) cset-entropy-bits)
 
 ; ---------------------------------------------------------------------
-; Rank words according to thier fractonal entropy
-(define pca (make-pseudo-cset-api))
-(define pcw (add-pair-wildcards pca))
-(define pmi (add-pair-mi-compute pca))
-(define (cset-vec-word-ent WORD)
-		(pmi 'compute-right-fentropy WORD))
+; A simple graph of how many words were observed once, twice, etc.
+; So: first column: how many times a word was observed.
+; Second column: the number of words that were observed tat many times.
+;
+(define sorted-word-counts
+	(score-and-rank cset-vec-word-observations all-cset-words))
+(define binned-word-counts
+	(bin-count-simple sorted-word-counts 400 0.5 400.5))
+
+(let ((outport (open-file "/tmp/binned-word-counts.dat" "w")))
+	(print-bincounts-tsv binned-word-counts outport)
+	(close outport))
+
+;--------------
+; Create a binned graph of the number of words observed with a given
+; log-liklihood.  Although this is in the binning tradition of the
+; other binned graphs, its really the same thing as the log-log
+; graph of the word-counts, but renormalized.
+; (define pca (make-pseudo-cset-api))
+; (define psa (add-pair-stars pca))
+; (define pcw (add-pair-wildcards psa))
+; (define pmi (add-pair-mi-compute psa))
+(define (cset-vec-word-logli WORD)
+	(psf 'right-wild-logli WORD))
+
+(define sorted-word-logli (score-and-rank cset-vec-word-logli all-cset-words))
+(define binned-word-logli (bin-count-simple sorted-word-logli 1200 9.0 24.0))
+
+(let ((outport (open-file "/tmp/binned-word-logli.dat" "w")))
+	(print-bincounts-tsv binned-word-logli outport)
+	(close outport))
+
+; -------
+; Rank words according to thier fractional entropy
+(define (cset-vec-word-ent WORD) (psf 'right-wild-fentropy WORD))
 
 ; rank only the top-100
 (define sorted-word-ent (score-and-rank cset-vec-word-ent top-cset-words))
@@ -428,35 +499,6 @@
 
 (let ((outport (open-file "/tmp/binned-word-ent.dat" "w")))
 	(print-bincounts-tsv binned-word-ent outport)
-	(close outport))
-
-;--------------
-; Create a binned graph of the number of words observed with a given
-; log-liklihood.  Although this is in the binning tradition of the
-; other binned graphs, its really the same thing as the log-log
-; graph of the word-counts, but renormalized.
-(define (cset-vec-word-logli WORD)
-	(pmi 'right-wild-logli WORD))
-
-(define sorted-word-logli (score-and-rank cset-vec-word-logli all-cset-words))
-(define binned-word-logli (bin-count-simple sorted-word-logli 200 10.0 20.0))
-
-(let ((outport (open-file "/tmp/binned-word-logli.dat" "w")))
-	(print-bincounts-tsv binned-word-logli outport)
-	(close outport))
-
-; -------
-; A simple graph of how many words were observed once, twice, etc.
-; So: first column: how many times a word was observed.
-; Second column: the number of words that were observed tat many times.
-;
-(define sorted-word-counts
-	(score-and-rank cset-vec-word-observations all-cset-words))
-(define binned-word-counts
-	(bin-count-simple sorted-word-counts 200 0.5 200.5))
-
-(let ((outport (open-file "/tmp/binned-word-counts.dat" "w")))
-	(print-bincounts-tsv binned-word-counts outport)
 	(close outport))
 
 ;--------------
@@ -489,10 +531,10 @@
 ; ---------------------------------------------------------------------
 ; Rank word-disjunct pairs according to thier fractonal MI.
 
-(define pfrq (add-pair-freq-api  pca))
-(define (cset-mi CSET) (pfrq 'pair-fmi CSET))
+(define (cset-mi CSET) (psf 'pair-fmi CSET))
 
 (define sorted-cset-mi (score-and-rank cset-mi all-csets))
+(define scored-cset-mi (score cset-mi all-csets))
 
 ; Print above to a file, so that it can be graphed.
 (let ((outport (open-file "/tmp/ranked-cset-mi.dat" "w")))
@@ -500,16 +542,16 @@
 	(close outport))
 
 (define binned-cset-mi (bin-count-simple sorted-cset-mi 100))
-(define binned-cset-mi (bin-count-simple sorted-cset-mi 200))
+(define binned-cset-mi (bin-count-simple scored-cset-mi 200))
 
 (let ((outport (open-file "/tmp/binned-cset-mi.dat" "w")))
 	(print-bincounts-tsv binned-cset-mi outport)
 	(close outport))
 
-(define (cset-freq CSET) (pfrq 'pair-freq CSET))
+(define (cset-freq CSET) (psf 'pair-freq CSET))
 
 (define weighted-cset-mi
-	(bin-count-weighted sorted-cset-mi 200
+	(bin-count-weighted scored-cset-mi 200
 		(lambda (scored-item) (cset-freq (cdr scored-item)))))
 
 (let ((outport (open-file "/tmp/weighted-cset-mi.dat" "w")))
@@ -527,7 +569,10 @@
 	(close outport))
 
 ; ---------------------------------------------------------------------
-; Rank words according to the MI between them and thier disjuncts
+
+(define (cset-vec-word-mi WORD) (psf 'right-wild-fmi WORD))
+
+; Rank words according to the marginal MI between them and thier disjuncts
 (define sorted-word-mi (score-and-rank cset-vec-word-mi all-cset-words))
 
 ; Like above, but high-ferequency only
@@ -563,12 +608,12 @@
 ; ---------------------------------------------------------------------
 ; Create the binned distribution graphs for dj-MI
 
-(define (cset-vec-disjunct-mi DJ)
-	(pseudo-cset-mi-api 'compute-left-fmi DJ))
+(define (cset-vec-disjunct-mi DJ) (psf 'left-wild-fmi DJ))
 
 (define sorted-dj-mi (score-and-rank cset-vec-disjunct-mi all-disjuncts))
+(define scored-dj-mi (score cset-vec-disjunct-mi all-disjuncts))
 
-(define binned-dj-mi (bin-count-simple sorted-dj-mi 100))
+(define binned-dj-mi (bin-count-simple scored-dj-mi 200))
 
 (let ((outport (open-file "/tmp/binned-dj-mi.dat" "w")))
 	(print-bincounts-tsv binned-dj-mi outport)
@@ -577,29 +622,88 @@
 ; ---------------------------------------------------------------------
 ; ---------------------------------------------------------------------
 ; ---------------------------------------------------------------------
+; disjunct tools.
+
+(filter (lambda (cset) (< 0 (get-count cset))) (cog-incoming-by-type
+(Word "horses") 'Section))
+
+; ---------------------------------------------------------------------
+
+(define psu (add-support-api psa))
+(define long-words
+	(filter (lambda (word) (<= 256 (psu 'right-length word)))
+		(psu 'left-basis)))
+
+(length long-words) ; 6568 of len >= 16
+; and 32 <= len has 3278 
+; 64 <= len has 1608
+; 130 <= has 783
+; 128 <= has 797 .. lets do those.
+; 256  has 427
+; 512  has 245
+; 1024 has 130
+; 2048 has 69
+; 4096 has 37...
+; 4500 has 32
+
+(define psm (add-similarity-api psa #f))
+(psm 'fetch-pairs)
+
+(define pslon
+   (add-generic-filter psa
+      (lambda (word) (<= 16 (psu 'right-length word)))
+      (lambda (dj) #t)
+      (lambda (dj) #t)
+      (lambda (dj) #t)
+      (lambda (dj) #t)
+      "cut len<=16"
+      #f))
+
+(define psls (add-pair-stars pslon))
+(define pss (batch-similarity psls #f #f 0.1))
+(pss 'batch-compute)
+(pss 'paralel-batch 3)
+
+(cog-map-type ato 'SimilarityLink)
+
+(define ranked-long
+	(sort long-words
+		(lambda (a b) (> (psu 'right-count a) (psu 'right-count b)))))
+		; (lambda (a b) (> (psu 'right-support a) (psu 'right-support b)))))
+		; (lambda (a b) (> (psu 'right-length a) (psu 'right-length b)))))
+
+; ---------------------------------------------------------------------
 ; Similarity.  Cosine distance.
 ; Assumes that cosine similarities have been batch-computed, already,
 ; using the code in gram-sim.scm
 
-(define cos-key (PredicateNode "*-Cosine Distance Key-*"))
+(define cos-key (PredicateNode "*-Cosine Sim Key-*"))
 
 (define all-sims '())
 (cog-map-type
-	(lambda (sim)  (set! all-sims (cons sim all-sims)) #f)
+	(lambda (ato) 
+		(define val (cog-value ato cos-key)) 
+		(if (not (null? val))
+			(set! all-sims (cons ato all-sims)))
+		 #f)
 	'SimilarityLink)
 
-(length all-sims)    ; 23993
-; or 44139852 = 44M with the 0.1 cutoff.
+(length all-sims)    ;  317206
 
-(define good-sims
+(define (sim-cosine SIM)
+	(define cos-key (PredicateNode "*-Cosine Sim Key-*"))
+   (cog-value-ref (cog-value SIM cos-key) 0))
+
+(define (filter-sim LEN)
 	(filter
 		(lambda (sim) (and
-				(< 0.5 (sim-cosine sim))
-				(< 8 (cset-vec-word-len (gar sim)))
-				(< 8 (cset-vec-word-len (gdr sim)))))
+				; (< 0.5 (sim-cosine sim))
+				(< LEN (cset-vec-word-len (gar sim)))
+				(< LEN (cset-vec-word-len (gdr sim)))))
 		all-sims))
 
-(length good-sims)   ;  15808
+(define good-sims (filter-sim 256))
+(length good-sims)   ;  
 
 (define ranked-sims
 	(sort good-sims
@@ -609,7 +713,7 @@
 	(format port "~A	'~A .. ~A'\n" (sim-cosine sim)
 		(cog-name (gar sim)) (cog-name (gdr sim))))
 
-(let ((outport (open-file "/tmp/ranked-sims.dat" "w")))
+(let ((outport (open-file "/tmp/ranked-sims-256.dat" "w")))
 	(define cnt 0)
 	(for-each (lambda (sim)
 			(set! cnt (+ cnt 1))
@@ -620,7 +724,7 @@
 
 ; ------ again, but binned.
 
-(define scored-sims (score sim-cosine all-sims))  ; 44139852 = 44M  wow
+(define scored-sims (score sim-cosine all-sims)) 
 
 (define binned-sims (bin-count-simple scored-sims 300))
 
@@ -647,6 +751,88 @@
 (define all-good-words (filter (lambda (w) (< 4 (cset-vec-word-len w))) ac))
 
 (length all-good-words)   ;  5544 of length 4 or more
+
+; ---------------------------------------------------------------------
+; Connector-printing utilities.
+(define (print-connector CON)
+	(string-append (cog-name (gar CON)) (cog-name (gdr CON)) " "))
+
+(define (section->dj-str SEC)
+	(string-concatenate
+		(map print-connector (cog-outgoing-set (gdr SEC))))
+)
+
+(define (print-disjuncts WORD CUT)
+	(define cnt 0)
+	(define all-secs (cog-incoming-by-type WORD 'Section))
+	(define sorted-secs (sort all-secs
+		 (lambda (a b) (> (get-count a) (get-count b)))))
+	(define (prt-one con)
+		(set! cnt (+ 1 cnt))
+		(if (<= CUT (get-count con))
+			(format #t "~D  ~A\n" (get-count con) (section->dj-str con))))
+	(for-each prt-one sorted-secs)
+	(format #t "Total of ~D disjuncts\n" cnt))
+
+; ---------------------------------------------------------------------
+
+(define wpa (make-any-link-api))
+(define wps (add-pair-stars wpa))
+(define wpf (add-pair-freq-api wps)
+
+(fetch-incoming-set (List (Word "the") (Word "city"))
+ (wpf 'pair-fmi (List (Word "the") (Word "city")))
+
+; ---------------------------------------------------------------------
+; Scatterplot stuff. Grep for drank-helper in the notes file. Its
+; reproduced here, updated and modernized.
+
+; Create a sorted list of words, such that the next word in the list
+; has the highest cosine of all to the previous word in the list.
+; wlist -- list of words
+; drl -- set this to nil.
+(define (drank-helper wlist drl)
+	(define (get-cos A B)
+		(sim-cosine (SimilarityLink A B)))
+	(define rest (cdr wlist))
+	; (format #t "duude enter wlsi=~A\n	and drl=~A\n" (length wlist) drl)
+	; If the list is one item long, we are done.
+	(if (null? rest) (cons (car wlist) drl)
+		; Otherwise, find the word with the highest cosine to the previous
+		; word that was picked.  rankw is the previous one picked.
+		; next-rankw will be th next one.
+		(let ((rankw (car drl))
+				(next-rankw '()))
+			(fold
+				(lambda (item biggest)
+					(define cosi (get-cos rankw item))
+					(if (and (> cosi biggest) (not (equal? item rankw)))
+						(begin (set! next-rankw item) cosi) biggest))
+				-1e20
+				wlist)
+			(drank-helper
+				(remove (lambda (w) (equal? w next-rankw)) wlist)
+				(cons next-rankw drl)))))
+
+(define (drank wlist)
+	(drank-helper (cdr wlist) (cons (car wlist) '())))
+
+(define dranked-long (drank (take ranked-long 40)))
+(define dranked-long (drank (take ranked-long 300)))
+(define dranked-long (drank ranked-long))
+
+(define eranked-long (reverse dranked-long))
+
+(write-flo "/tmp/scat-dcos.flo" eranked-long pair-cos)
+(write-flo "/tmp/scat-ecos.flo" eranked-long pair-cos)
+
+(define (prt-sim LST)
+	(if (not (null? (cdr LST))) (begin
+		(format #t "~A .. ~A  ~5F\n" (car LST) (cadr LST)
+			(get-cos (Word (car LST)) (Word (cadr LST))))
+		(prt-sim (cdr LST)))))
+
+
 
 ; ---------------------------------------------------------------------
 ; what fraction of the rows have more than N observations?
@@ -685,7 +871,7 @@
 (define col-dist (cnt-obs-cols 100 '()))
 
 ; ---------------------------------------------------------------------
-; Support  This is for the table about filters.
+; Support -- This is for the table about filters.
 
 (define fsa (add-subtotal-filter psa 1 1 0))
 (define fsb (add-subtotal-filter psa 4 4 0))
@@ -732,6 +918,34 @@
 (ssi 'total-count)    ; 4363640.0
 
 ; ---------------------------------------------------------------------
+; Redo the PCA results, but with a different filtering
+
+; This cut everything except for 797 words. Cuts no disjuncts.
+;
+(define ps-128
+   (add-generic-filter psa
+      (lambda (word) (<= 128 (psu 'right-length word)))
+      (lambda (dj) #t)
+      (lambda (dj) #t)
+      (lambda (dj) #t)
+      (lambda (dj) #t)
+      "cut len<=128"
+      #f))
+
+(define long-words
+	(filter (lambda (word) (<= 128 (psu 'right-length word)))
+		(psu 'left-basis)))
+
+; Its OK to use make-cosine-matrix -- this will still give the correct
+; cosines for the above, because the above does Not cut any disjuncts.
+(define pci (make-cosine-matrix ps-128))
+(define pti (make-power-iter-pca pci 'left-unit))
+
+(define feig (pti 'make-left-unit long-words))
+(define lit (pti 'left-iterate feig 8)) 
+(pti 'left-print lit 20) 
+
+ ---------------------------------------------------------------------
 
 (define sorted-eigen
 	(sort

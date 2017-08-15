@@ -25,40 +25,18 @@
 #define _OPENCOG_LG_DICT_READER_H
 
 #include <link-grammar/dict-api.h>
-
-#include <opencog/atomspace/AtomSpace.h>
-
 #include "LGDictExpContainer.h"
 
 namespace opencog
 {
-namespace nlp
-{
-
 
 /**
- * Link Grammar dictionary reader.
+ * Link Grammar dictionary entry reader.
  *
- * A helper class for reading the LG dictionary's entry for a specific
- * word, and for creating the corresponding atom.
+ * Return a list of Link Grammar disjuncts for the word.
  */
-class LGDictReader
-{
-public:
-    LGDictReader(Dictionary, AtomSpace*);
-    ~LGDictReader();
+HandleSeq getDictEntry(Dictionary, const std::string& word);
 
-    Handle getAtom(const std::string& word);
-
-private:
-    LGDictExpContainer lg_exp_to_container(Exp*);
-
-    Dictionary _dictionary;
-    AtomSpace* _as;
-};
-
-
-}
 }
 
 #endif // _OPENCOG_LG_DICT_READER_H

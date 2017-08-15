@@ -543,23 +543,22 @@ void DistributedPatternMiner::parseAPatternTask(json::value jval)
 
 void DistributedPatternMiner::centralServerEvaluateInterestingness()
 {
-    if (enable_Frequent_Pattern)
+
+    std::cout<<"Debug: PatternMiner:  done frequent pattern mining for 1 to "<< MAX_GRAM <<"gram patterns!\n";
+
+    for(unsigned int gram = 1; gram <= MAX_GRAM; gram ++)
     {
-        std::cout<<"Debug: PatternMiner:  done frequent pattern mining for 1 to "<< MAX_GRAM <<"gram patterns!\n";
+        // sort by frequency
+        std::sort((patternsForGram[gram-1]).begin(), (patternsForGram[gram-1]).end(),compareHTreeNodeByFrequency );
 
-        for(unsigned int gram = 1; gram <= MAX_GRAM; gram ++)
-        {
-            // sort by frequency
-            std::sort((patternsForGram[gram-1]).begin(), (patternsForGram[gram-1]).end(),compareHTreeNodeByFrequency );
+        // Finished mining gram patterns; output to file
+        std::cout<<"gram = " + toString(gram) + ": " + toString((patternsForGram[gram-1]).size()) + " patterns found! ";
 
-            // Finished mining gram patterns; output to file
-            std::cout<<"gram = " + toString(gram) + ": " + toString((patternsForGram[gram-1]).size()) + " patterns found! ";
+        OutPutFrequentPatternsToFile(gram, patternsForGram);
 
-            OutPutFrequentPatternsToFile(gram, patternsForGram);
-
-            std::cout<< std::endl;
-        }
+        std::cout<< std::endl;
     }
+
 
 
     if (enable_Interesting_Pattern)

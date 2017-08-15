@@ -27,6 +27,9 @@ A quick overview:
   with it.  Note that there are hard-coded paths in here, pointing to
   the sentence splitter.
 
+* `ss-nosplit-one.sh`: similar to above, but assumes that the text-file
+  contains one sentence per line - i.e. has been pre-split.
+
 * `submit-one.pl`: script to actually send sentences to the REPL server.
 
 * `split-sentences.pl`: split text into sentences. Accepts free-form text,

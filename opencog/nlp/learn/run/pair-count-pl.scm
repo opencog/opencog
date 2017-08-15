@@ -16,7 +16,8 @@
 ; Tell opencog where the relex server is located.
 ; The port should match that in `relex-server-ady.sh`
 ; Note: this is the morphology split-into-two server.
-(use-relex-server "127.0.0.1" 4446)
+; Not using RelEx any longer.
+; (use-relex-server "127.0.0.1" 4446)
 
 ;;; Start the network REPL server on port 17005
 ;;; Unfortunately, this runs about 3x slower than the cogserver,

@@ -3,34 +3,53 @@
 ;
 ; Maximum Spanning Tree parser.
 ;
-; Copyright (c) 2014 Linas Vepstas
+; Copyright (c) 2014, 2017 Linas Vepstas
 ;
 ; ---------------------------------------------------------------------
 ; OVERVIEW
 ; --------
-; The scripts below use a simple spanning-tree (MST) parser to create
-; MST parse of a sentence. The goal of this parse is to create a base
-; set of link-grammar disjuncts.
+; The scripts below use a simple minimum spanning-tree (MST) parser to
+; create an MST parse of a text sentence. This parse tree is then used
+; to create a set of equivalent Link Grammar disjuncts (which are
+; essentially the same thing as a local section of a sheaf of graphs;
+; this is explained more, below).
 ;
-; Input to this should be a single sentence. It is presumed, as
-; background, that a large number of word-pairs with associated mutual
-; information is already avaialable from the atomspace (obtained
-; previously).
+; Input to this should be a single unicode utf8-encoded text sentence.
+; It is presumed, as background, that the atomspace is loaded with a
+; large number of word-pairs and thier associated mutual information.
+; These word-pairs need to have been previously computed.
 ;
-; The algorithm implemented is a basic maximum spanning tree algorithm.
-; Conceptually, the graph to be spanned by the tree is a clique, with
-; with every word in the sentence being connected to every other word.
-; The edge-lengths are given by the mutual information betweeen word-pairs
-; (although perhaps other metrics are possible; see below).
+; The sentence is tokenized, assuming that white-space represents word
+; boundaries. Leading and trailing punctuation is stripped from each
+; word, and is treated as a distinct "word".
 ;
-; The spanning tree is then obtained. Finally, disjuncts are created from
-; the resulting parse, by looking at how each word is attached to the
-; other words.  The disjuncts are then recorded.
+; The set of words is treated as the set of vertexes of a complete graph
+; or "clique", with the edges being word-pairs. The MST parser obtains
+; the spanning tree that maximizes the sum of the mutual information (or
+; other additive quantity) associated with the edges. This tree is the
+; MST tree.
 ;
+; After an sentence has been parsed with the MST parser, the links
+; between words in the parse can be interpreted as Link Grammar links.
+; There are two possible interpretations that can be given to these
+; links: they are either "ANY" links, that connect between any words,
+; or they are links capable of connecting ONLY those two words.
+; In the later case, the link-name can be thought of as the
+; concatenation of the two words it connects.
+;
+; In either case, one can work "backwards", and obtain the effective
+; disjunct on each word, that would have lead to the given MST parse.
+; For each word, this disjunct is just the collection of the other words
+; that it is connected to. It is the unit-distance section of a sheaf.
+;
+; All the hard work is done in the `sheaf` module. This is just a very
+; slim wrapper to parse the text, and update the number of times the
+; disjunct has been observed.
 ; ---------------------------------------------------------------------
 ;
 (use-modules (srfi srfi-1))
 (use-modules (srfi srfi-11))
+(use-modules (opencog matrix))
 (use-modules (opencog sheaf))
 
 ; ---------------------------------------------------------------------
@@ -196,6 +215,33 @@
 	(mst-parse-atom-seq word-list scorer)
 )
 
+; ---------------------------------------------------------------------
+; Return #t if the section is bigger than what the current postgres
+; backend can store. Currently, the limit is atoms with at most 330
+; atoms in the outgoing set.
+;
+; This typically occurs when the MST parser is fed a long string of
+; punctuation, or a table of some kind, or other strings that are not
+; actual sentences.
+(define (is-oversize? SECTION)
+	(< 330 (cog-arity (gdr SECTION)))
+)
+
+(define-public (observe-mst plain-text)
+"
+  observe-mst -- update pseduo-disjunct counts by observing raw text.
+
+  This is the second part of the learning algo: simply count how
+  often pseudo-disjuncts show up.
+"
+	; The count-one-atom function fetches from the SQL database,
+	; increments the count by one, and stores the result back
+	(for-each
+		(lambda (dj) (if (not (is-oversize? dj)) (count-one-atom dj)))
+		(make-sections (mst-parse-text plain-text))
+	)
+)
+; ---------------------------------------------------------------------
 ; ---------------------------------------------------------------------
 ;
 ; (use-modules (opencog) (opencog persist) (opencog persist-sql))

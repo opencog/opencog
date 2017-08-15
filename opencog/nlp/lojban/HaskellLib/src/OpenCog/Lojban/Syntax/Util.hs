@@ -18,6 +18,7 @@ import Control.Monad
 import Control.Monad.RWS.Class
 import Control.Monad.Trans.Class
 
+
 import System.Random
 
 import Iso
@@ -26,6 +27,7 @@ import Syntax hiding (SynIso,Syntax)
 import OpenCog.AtomSpace (Atom(..))
 import OpenCog.Lojban.Syntax.Types
 
+import qualified Data.Map as M
 import qualified Data.ListTrie.Patricia.Set.Ord as TS
 
 -------------------------------------------------------------------------------
@@ -70,6 +72,16 @@ showReadIso = mkIso show read
 isoIntercalate :: String -> SynIso [String] String
 isoIntercalate x = mkIso (intercalate x) (splitOn x)
 
+isoPrepend :: String -> SynIso String String
+isoPrepend s1 = mkIso f g where
+    f s2 = s1++s2
+    g s  = drop (length s1) s
+
+isoAppend :: String -> SynIso String String
+isoAppend s1 = mkIso f g where
+    f s2 = s2++s1
+    g s  = take (length s - length s1) s
+
 try :: SynIso a a -> SynIso a a
 try iso = Iso f g where
     f a = apply iso a <|> pure a
@@ -90,6 +102,13 @@ ifJustB = mkIso f g where
     g (Left (a,b))= (a,Just b)
     g (Right a)   = (a,Nothing)
 
+--Parser ID that fails when printing
+--Use to force a path in (maybe . pid &&& something)
+pid :: SynIso a a
+pid = Iso f g where
+    f a = pure a
+    g _ = lift $ Left "Only succeds when parsing."
+
 -------------------------------------------------------------------------------
 --State Helpers
 -------------------------------------------------------------------------------
@@ -97,20 +116,48 @@ ifJustB = mkIso f g where
 setJai :: SynMonad t State => JJCTTS -> (t ME) ()
 setJai a = modify (\s -> s {sJAI = Just a})
 
+addXUIso :: SynIso Atom Atom
+addXUIso = Iso f g where
+    f a = addXU a >> pure a
+    g a = rmXU a >> pure a
+
+addXU :: SynMonad t State => Atom -> (t ME) ()
+addXU a = modify (\s -> s {sXU = a:(sXU s)})
+
+rmXU :: SynMonad t State => Atom -> (t ME) ()
+rmXU a = modify (\s -> s {sXU = delete a (sXU s)})
+
 rmJai :: SynMonad t State => (t ME) ()
 rmJai = modify (\s -> s {sJAI = Nothing})
 
 setCtx :: SynMonad t State => [Atom] -> (t ME) ()
 setCtx a = modify (\s -> s {sCtx = a})
 
+setNow :: SynMonad t State => Atom -> (t ME) ()
+setNow a = modify (\s -> s {sNow = a})
+
 setPrimaryCtx :: SynMonad t State => Atom -> (t ME) ()
-setPrimaryCtx a = modify (\s -> s {sCtx = a : tail (sCtx s)})
+setPrimaryCtx a = modify (\s -> s {sCtx = a : sCtx s})
 
 addCtx :: SynMonad t State => Atom -> (t ME) ()
 addCtx a = modify (\s -> s {sCtx = (sCtx s) ++ [a]})
 
 setAtoms :: SynMonad t State => [Atom] -> (t ME) ()
 setAtoms a = modify (\s -> s {sAtoms = a})
+
+getAtoms :: SynMonad t State => (t ME) [Atom]
+getAtoms = gets sAtoms
+
+gsAtoms :: SynIso () [Atom]
+gsAtoms = Iso f g where
+    f _ = do
+        as <- getAtoms
+        setAtoms []
+        pure as
+    g a = setAtoms a
+
+rmAtom ::  SynMonad t State => Atom -> (t ME) ()
+rmAtom a = modify (\s -> s {sAtoms = delete a (sAtoms s)})
 
 pushAtom :: SynMonad t State => Atom -> (t ME) ()
 pushAtom a = modify (\s -> s {sAtoms = a : sAtoms s})
@@ -151,6 +198,38 @@ appendAtoms i = Iso f g where
         setAtoms as
         pure a
 
+--FIXME???
+withCleanState :: Syntax a -> Syntax a
+withCleanState syn = Iso f g where
+    f () = do
+        state <- get
+        put (cleanState state)
+        res <- apply syn ()
+        state2 <-get
+        put (mergeState state state2)
+        pure res
+    g a = unapply syn a
+
+cleanState :: State -> State
+cleanState s = State {sFlags = M.empty
+                     ,sAtoms = []
+                     ,sText = sText s
+                     ,sSeed = sSeed s
+                     ,sNow = sNow s
+                     ,sCtx = sCtx s
+                     ,sJAI = Nothing
+                     ,sXU  = []}
+
+mergeState :: State -> State -> State
+mergeState s1 s2 = State {sFlags = sFlags s1
+                         ,sAtoms = sAtoms s1
+                         ,sText = sText s2
+                         ,sSeed = sSeed s2
+                         ,sNow = sNow s1
+                         ,sCtx = sCtx s1
+                         ,sJAI = sJAI s1
+                         ,sXU  = sXU s1}
+
 withEmptyState :: SynIso a b -> SynIso a b
 withEmptyState iso = Iso f g
   where
@@ -166,26 +245,48 @@ setSeed :: SynMonad t State => Int -> (t ME) ()
 setSeed i = modify (\s -> s {sSeed = i})
 
 setFlag :: SynMonad t State => Flag -> (t ME) ()
-setFlag f = modify (\s -> s {sFlags = f : sFlags s})
+setFlag f = modify (\s -> s {sFlags = M.insert f "" (sFlags s) })
+
+setFlagValue :: SynMonad t State => Flag -> String -> (t ME) ()
+setFlagValue f v = modify (\s -> s {sFlags = M.insert f v (sFlags s) })
+
+getFlagValue :: SynMonad t State => Flag -> (t ME) String
+getFlagValue f = do
+    flags <- gets sFlags
+    case M.lookup f flags of
+        Just a -> pure a
+        Nothing -> lift $ Left "Flag Value doesn't exist."
+
+getFlagValueIso :: Flag -> SynIso () String
+getFlagValueIso flag = Iso f g where
+    f () = getFlagValue flag
+    g s  = setFlagValue flag s
+
+setFlagValueIso :: Flag -> SynIso String ()
+setFlagValueIso flag = inverse (getFlagValueIso flag)
 
 rmFlag :: SynMonad t State => Flag -> (t ME) ()
-rmFlag f = modify (\s -> s {sFlags = delete f (sFlags s)})
+rmFlag f = modify (\s -> s {sFlags = M.delete f (sFlags s)})
 
 setFlagIso :: Flag -> SynIso a a
 setFlagIso flag = Iso f g
     where f a = setFlag flag >> pure a
           g a = rmFlag flag >> pure a
 
+rmFlagIso :: Flag -> SynIso a a
 rmFlagIso flag = inverse $ setFlagIso flag
 
 withFlag :: Flag -> SynIso a b -> SynIso a b
 withFlag flag syn = inverse (setFlagIso flag) . syn . setFlagIso flag
 
+toggleFlag :: Flag -> SynIso a a
+toggleFlag f = setFlagIso f . ifNotFlag f <+> rmFlagIso f . ifFlag f
+
 ifFlag :: Flag -> SynIso a a
 ifFlag flag = Iso f f where
     f a = do
         flags <- gets sFlags
-        if flag `elem` flags
+        if flag `M.member` flags
            then pure a
            else lift $ Left $ "Flag: " ++ flag ++ " is not set."
 
@@ -193,7 +294,7 @@ ifNotFlag :: Flag -> SynIso a a
 ifNotFlag flag = Iso f f where
     f a = do
         flags <- gets sFlags
-        if flag `elem` flags
+        if flag `M.member` flags
            then lift $ Left $ "Flag: " ++ flag ++ " is set."
            else pure a
 
@@ -201,8 +302,26 @@ switchOnFlag :: Flag -> SynIso a (Either a a)
 switchOnFlag flag = Iso f g where
     f a = do
         flags <- gets sFlags
-        if flag `elem` flags
+        if flag `M.member` flags
            then pure (Left a)
            else pure (Right a)
     g (Left a)  = setFlag flag >> pure a
     g (Right a) = pure a
+
+toState :: Int -> SynIso [Atom] ()
+toState i = Iso f g where
+    f as =
+        if length as == i
+           then modify (\s -> s {sAtoms = as ++ sAtoms s})
+           else lift $ Left "List has wrong lenght, is this intended?"
+    g () = do
+        allatoms <- gets sAtoms
+        let (as,atoms) = splitAt i allatoms
+        modify (\s -> s {sAtoms = atoms})
+        pure as
+
+fstToState :: Int -> SynIso ([Atom],a) a
+fstToState i = iunit . commute . first (toState i)
+
+sndToState :: Int -> SynIso (a,[Atom]) a
+sndToState i = iunit . second (toState i)

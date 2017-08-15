@@ -39,16 +39,20 @@ namespace nlp
 
 Handle lg_conn_get_type(const Handle& hConn)
 {
-    return LinkCast(hConn)->getOutgoingSet()[0];
+    return hConn->getOutgoingSet()[0];
 }
 
 Handle lg_conn_get_dir(const Handle& hConn)
 {
-    return LinkCast(hConn)->getOutgoingSet()[1];
+    return hConn->getOutgoingSet()[1];
 }
 
 /**
  * Check if two connectors' type matches.
+
+XXX FIXME -- this currently fails to correctly handle the head-tail
+indicators on link types.  Perhaps it would be better to just call
+the same matchinng routines the link-grammar uses?
  *
  * @param hConn1   the first LGConnector
  * @param hConn2   the second LGConnector
@@ -56,12 +60,13 @@ Handle lg_conn_get_dir(const Handle& hConn)
  */
 bool lg_conn_type_match(const Handle& hConn1, const Handle& hConn2)
 {
-    if (hConn1->getType() != LG_CONNECTOR || hConn2->getType() != LG_CONNECTOR)
+    if (hConn1->getType() != LG_CONNECTOR or
+        hConn2->getType() != LG_CONNECTOR)
         return false;
 
-    // convert the types to string
-    std::string type1 = NodeCast(lg_conn_get_type(hConn1))->getName();
-    std::string type2 = NodeCast(lg_conn_get_type(hConn2))->getName();
+    // Convert the types to string
+    std::string type1 = lg_conn_get_type(hConn1)->getName();
+    std::string type2 = lg_conn_get_type(hConn2)->getName();
     uint i1 = 0;
     uint i2 = 0;
 
@@ -74,9 +79,9 @@ bool lg_conn_type_match(const Handle& hConn1, const Handle& hConn2)
     if (i1 > 0 && i2 > 0 && type1[0] == type2[0])
         return false;
 
-    while (i1 < type1.length() && i2 < type2.length())
+    while (i1 < type1.length() and i2 < type2.length())
     {
-        if (isupper((int) type1[i1]) || isupper((int) type2[i2]))
+        if (isupper((int) type1[i1]) or isupper((int) type2[i2]))
         {
             if (type1[i1] != type2[i2])
                 return false;
@@ -86,7 +91,7 @@ bool lg_conn_type_match(const Handle& hConn1, const Handle& hConn2)
             continue;
         }
 
-        if (type1[i1] != '*' && type2[i2] != '*' && type1[i1] != type2[i2])
+        if (type1[i1] != '*' and type2[i2] != '*' and type1[i1] != type2[i2])
             return false;
 
         i1++;
@@ -108,7 +113,8 @@ bool lg_conn_type_match(const Handle& hConn1, const Handle& hConn2)
  */
 bool lg_conn_linkable(const Handle& hConn1, const Handle& hConn2)
 {
-    return lg_conn_type_match(hConn1, hConn2) && lg_conn_get_dir(hConn1) != lg_conn_get_dir(hConn2);
+    return lg_conn_type_match(hConn1, hConn2) and
+        lg_conn_get_dir(hConn1) != lg_conn_get_dir(hConn2);
 }
 
 }

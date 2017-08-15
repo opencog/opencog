@@ -69,6 +69,7 @@
 ; maintained on the LgWordCset for a given word.
 ;
 (use-modules (opencog) (opencog nlp) (opencog persist))
+(use-modules (opencog exec) (opencog nlp lg-parse))
 (use-modules (srfi srfi-1))
 
 ; ---------------------------------------------------------------------
@@ -441,20 +442,20 @@
 				; (update-clique-pair-counts sent 6 #f)
 				(update-word-counts sent)
 				(update-lg-link-counts sent)
+				; If you uncomment this, be sure to also uncomment
+				; LgParseLink below, because LgParseMinimal is not enough.
 				; (update-disjunct-counts sent)
 			))
 			(lambda (key . args) #f)))
 
 	; Loop -- process any that we find. This will typically race
 	; against other threads, but I think that's OK.
-	(define (process-sents)
-		(let ((sent (get-one-new-sentence)))
-			(if (null? sent) '()
-				(begin
-					(update-counts sent)
-					(delete-sentence sent)
-					(monitor-rate '())
-					(process-sents)))))
+	(define (process-sent SENT)
+		(if (null? SENT) '()
+			(begin
+				(update-counts SENT)
+				(delete-sentence SENT)
+				(monitor-rate '()))))
 
 	; -------------------------------------------------------
 	; Manually run the garbage collector, every now and then.
@@ -494,7 +495,7 @@
 	; from relex seem to cause bad memory fragmentation.
 	(define maybe-gc
 		(let ((cnt 0)
-				(max-size (* 750 1000 1000)))  ; 750 MB
+				(max-size (* 2750 1000 1000)))  ; 750 MB
 			(lambda ()
 				(if (< max-size (- (assoc-ref (gc-stats) 'heap-size)
 							(assoc-ref (gc-stats) 'heap-free-size)))
@@ -504,9 +505,40 @@
 						;(avg-gc-cpu-time)
 					)))))
 
-	(relex-parse plain-text) ;; send plain-text to server
-	(process-sents)
-	(maybe-gc) ;; need agressive gc to keep RAM under control.
+	; Use the RelEx server to parse the text via Link Grammar.
+	; Return a SentenceNode. Attention: when run in parallel,
+	; the returned SentenCenode is not necessarily that of the
+	; the one that was submitted for parsing! It might be just
+	; some other sentence that is sitting there, ready to go.
+	(define (relex-process TXT)
+		(define (do-all-sents)
+			(let ((sent (get-one-new-sentence)))
+				(if (null? sent) '()
+					(begin (process-sent sent) (do-all-sents)))))
+
+		(relex-parse TXT)
+		(do-all-sents)
+		(maybe-gc) ;; need agressive gc to keep RAM under control.
+	)
+
+	; Process the text locally, using the LG API link.
+	(define (local-process TXT)
+		(define phr (Phrase TXT))
+		; (define lgn (LgParseLink phr (LgDict "any") (Number 24)))
+		(define lgn (LgParseMinimal phr (LgDict "any") (Number 24)))
+		(define sent (cog-execute! lgn))
+
+		; Remove crud so it doesn't build up.
+		(cog-extract lgn)
+		(cog-extract phr)
+		(process-sent sent)
+	)
+
+	;; Send plain-text to the relex server
+	; (relex-process plain-text)
+
+	; Handle the plain-text locally
+	(local-process plain-text)
 )
 
 ; ---------------------------------------------------------------------

@@ -2951,12 +2951,23 @@ echo "(+" $sum| guile
 =====================================================================
 French pairs
 
+cx1: what to do.
+/home/linas/postgres/etc/init.d/postgresql start
+psql -p 6543
+psql -p 6543 fr_ady
+cd /storage/wikipedia/frwiki-20131220-pages-articles
+./run-all-servers.sh
+
+
+
 french pairs: start again: 22:36PM 30 Jan - find submitted* |wc 17053 
                            12:25PM  2 Feb - find submitted* |wc 24563
                            11:43AM  4 Feb - find submitted* |wc 25361
                            11:34AM  5 Feb - find submitted* |wc 25830
                            19:19PM 10 Feb - find submitted* |wc 27763
                            20:16PM 14 Feb - find submitted* |wc 29720
+                                    2 Jul - find submitted* |wc 32526
+                                   19 Jul - 39077
 
 disk: 206447916 used 41097304 free
 disk  206574808 used 40970412 free  24 hours later... about 100MB more
@@ -2965,6 +2976,8 @@ disk  208585480 used 38959740 free  11:42 4 Feb ... 2.1GB more
 disk  208897572 used 38647648 free  00:00AM 5 feb
 disk  211829000 used 35716220 free  19:20 10 Feb
 disk  213607532 used 33937688 free  20:16 14 Feb
+-
+psql -p 6543 fr_ady:
 
 select count(*) from atoms;         2090064 --   2.1M -- 12:25PM  2 Feb
 select sum(stv_count) from atoms; 115251031 -- 115M   -- 12:25PM  2 Feb
@@ -2975,11 +2988,22 @@ select sum(stv_count) from atoms;  351323640 --  351M   -- 11:19AM  4 Feb
 select count(*) from atoms;          7714679 --    7.7M -- 11:38AM  5 Feb
 select sum(stv_count) from atoms;  502509756 --  503M   -- 11:38AM  5 Feb
 
-select count(*) from atoms;         16945084 --   16.9M -- 19:21PM 10 Feb
-select sum(stv_count) from atoms; 1289249056 -- 1.29G   -- 19:21PM 10 Feb
+select count(*) from atoms;         16945084 --    16.9M -- 19:21PM 10 Feb
+select sum(stv_count) from atoms; 1289249056 -- 1.29G    -- 19:21PM 10 Feb
 
-select count(*) from atoms;         23072988 --   23.1M -- 20:20PM 14 Feb
-select sum(stv_count) from atoms; 1856669388 -- 1.86G   -- 20:20PM 14 Feb
+select count(*) from atoms;         23072988 --    23.1M -- 20:20PM 14 Feb
+select sum(stv_count) from atoms; 1856669388 -- 1.86G    -- 20:20PM 14 Feb
+
+select count(*) from atoms;         33519967 --    33.5M - 2 Jul 2017
+select sum(stv_count) from atoms; 2923838351 -- 2.92G    -
+
+select count(*) from atoms;         54337413 --    54.3M - 19 Jul 2017
+select sum(stv_count) from atoms; 5257433115 -- 5.26G
+
+vs fr_pairs:
+select count(*) from atoms; 11161199 -- 11M
+select sum(stv_count) from atoms; 6842302577 -- 6.8G !!
+
 
 
 guile/java ratio: 6781/683  = 9.93 -- 11:19AM  4 Feb
@@ -5678,13 +5702,14 @@ forked from en_pairs_rohit, holds disjunct data from MST parsing.
 Both word-pairs and MST  parses came from wikipedia articles;
 this appears to give only mediocre results.
 
-STATUS: archived.
+STATUS: archived. Total junk, should be deleted.
 DATE: 18 May 2017
 REASON: The wikipedia-based data is mediocre.
 Also:
 a) it fails to separate quotation marks.
 b) The any-disjuncts are junk.
 c) The LgWordCset typename needs to be changed to Section
+d) FATAL ERROR: all disjunct created with minus-the-MI and so are junk.
 
                        List of relations
  Schema |    Name    | Type  | Owner |    Size    | Description
@@ -5738,11 +5763,15 @@ The similarity database published on the web, forked from an earlier
 version of en_pairs_mst.  Contains pairs derived only from wikipedia.
 plus some number of disjuncts from mst parses.
 
+STATUS: Total junk, should be deleted.
+REASON: FATAL ERROR: all disjunct created with minus-the-MI and so are junk.
+
 Published on web 12 May 2017
 322343968 bytes compressed (322MBytes)
 
  md5sum simil_en.sql.bz2
 b9bb221069867c5f4a307670a34387c8  simil_en.sql.bz2
+
 
 ==================================================================
 
@@ -5754,8 +5783,11 @@ Forked from earlier version of en_pairs_mst, contains less data.
 The simil_en is a snapshot of this; the en_pairs_sim contains
 additional caches of partial sums across disjuncts, etc.
 
-STATUS: working DB
+STATUS: TOTAL JUNK, should be deleted.
 DATE: 21 May 2017
+REASON: FATAL ERROR: all disjuncts created with minus-the-MI,
+        and so are junk.
+
 
                        List of relations
  Schema |    Name    | Type  | Owner |    Size    | Description
@@ -5868,11 +5900,13 @@ en_pairs_tone
 Random-planar-tree parsed books from "tranche-1" of mostly project
 gutenberg books. Contains counts for word-pairs, words and disjuncts.
 
-STATUS: fair
+STATUS: poor
 DATE: 24 May 2017
 REASON: Multiple issues:
 a) it fails to separate quotation marks.
 b) The any-disjuncts are junk.
+c) Missing links to ###LEFT-WALL### 
+d) FATAL ERROR: all disjuncts created with minus-the-MI, and so are junk.
 
                         List of relations
  Schema |    Name    | Type  | Owner  |    Size    | Description 
@@ -5922,12 +5956,14 @@ gutenberg books. Based off of the en_pairs_tone. Contains MI for tone,
 but not the cosine angles.
 
 STATUS: poor, obsolete.  Replaced by en_pairs_tone_mst_rev
+        Should be deleted.
 DATE: 27 May 2017  obsoleted on 9 June
 REASON: Three issues:
  a) fails to separate quoation marks (inherited from tone)
  b) contains junk lg-any disjuncts
  c) Uses LgWordCset for for connectors and pseudo-connectors.
     Which screws up statistics. 
+ d) FATAL ERROR: all disjuncts created with minus-the-MI, and so are junk.
 
 en_pairs_tone_mst=> \dt+
                         List of relations
@@ -5974,13 +6010,14 @@ Uses the new PseudoAnd and PseudoWordCset types.
 Kills the bogus lg-any disjuncts.
 Contains table summaries for pairs and csets.
 
-STATUS: fair/poor
+STATUS: Total junk, should be deleted.
 DATE:  9 June 2017
 REASON: Several issues:
  a) Missing links to LEFT-WALL
  b) fails to separate quotation marks (inherited from tone)
  c) fails to separete various other punctuation.
  d) The PseudoWordCset typename needs to be changed to Section, etc.
+ e) FATAL ERROR: all disjunct created with minus-the-MI and so are junk.
 
 en_pairs_tone_mst=> \dt+
                         List of relations
@@ -6047,9 +6084,10 @@ Random parses from tranche-1 and tranche-2.
 
 STATUS: fair
 DATE: 29 May 2017
-REASON: Two issues:
+REASON: Three issues:
  a) fails to separate quoation marks (inherited from tone)
  b) contains junk lg-any disjuncts
+ c) Missing links to LEFT-WALL
 
 
                         List of relations
@@ -6097,12 +6135,13 @@ Random parses from tranche-1 and tranche-2, together with MST parses from
 both tranches. The bogus ANY-disjuncs got removed, and the correct 
 PseudoWordCsets are used.  Contains the summary stats for csets, too.
 
-STATUS: fair/poor
+STATUS: Total junk, should be deleted.
 DATE: 9 Jun 2017
 REASON: Multiple issues:
  a) Missing links to LEFT-WALL
  b) fails to separete various punctuation
  c) The PseudoWordCset typename needs to be changed to Section, etc.
+ d) FATAL ERROR: all disjunct created with minus-the-MI and so are junk.
 
 
                         List of relations
@@ -6219,9 +6258,9 @@ en_pairs_tthree_mi
 Random parses from tranche-1, tranche-2 and tranche_3, and pair MI.
 Removed the junk disjuncts from ANY parsing.
 
-STATUS: good
+STATUS: Misleading
 DATE: 9 Jun 2017
-REASON: I think it's good.
+REASON: Worthless: the sign on the MI is backwards.
 
                         List of relations
  Schema |    Name    | Type  | Owner  |    Size    | Description 
@@ -6269,11 +6308,12 @@ en_pairs_tthree_mst
 ------------------
 MST parses from tranche-1, tranche-2 and tranche_3, and summary stats.
 
-STATUS: OK.
+STATUS: Total junk, should be deleted.
 DATE: 19 Jun 2017
 REASON: Several issues:
  a) Missing many links to LEFT-WALL (on tranche-1,2, and some of 3)
  b) fails to separete some of the punctuation
+ c) FATAL ERROR: all disjunct created with minus-the-MI and so are junk.
 
                         List of relations
  Schema |    Name    | Type  | Owner  |    Size    | Description 
@@ -6342,6 +6382,30 @@ REASON: Best so far, I think.  One issue:
 select count(*) from atoms; -- 11224348 = 11M
 select count(*) from valuations; -- 5679764 = 5.7M
 
+Does not contain MI info, but it if did, it would be this:
+Left type: WordNode    Right Type: WordNode    Pair Type: ListLink
+Wildcard: (EvaluationLink (ctv 0 0 1.7409991e+08)
+   (LinkGrammarRelationshipNode "ANY")
+   (ListLink
+      (AnyNode "left-word")
+      (AnyNode "right-word")
+   )
+)
+Rows: 133792 Columns: 135156
+Size: 5544578 non-zero entries of 18082791552 possible
+Fraction non-zero: 3.0662E-4 Sparsity (-log_2): 11.671
+Total observations: 174099906.0  Avg obs per pair: 31.400
+Entropy Total: 17.667   Left: 9.8592   Right: 9.7506
+Total MI: 1.9426
+
+                 Left         Right     Avg-left     Avg-right
+                 ----         -----     --------     ---------
+Support (l_0)  1.7398E+4    1.7417E+4
+Count   (l_1)  2.4875E+6    2.2524E+6     143.0        129.3
+Length  (l_2)  2.8788E+5    2.4347E+5     16.55        13.98
+RMS Count      2.8758E+5    2.4316E+5     16.53        13.96
+
+
 502761623 Bytes = 503MB uncompressed
 86534772 Bytes = 86MBytes compressed
 
@@ -6354,12 +6418,14 @@ en_pairs_rone_mst
 The en_pairs_rone dataset used to perform MST parses of tranche-1
 books.  Contains both pair-MI and cset-MI data and summaries.
 
-STATUS: fair/poor
+STATUS: Total junk, should be deleted.
 DATE: 13 June 2017
 REASON: Multiple issues:
  a) Missing links to LEFT-WALL
  b) fails to separete various punctuation
  c) The PseudoWordCset typename needs to be changed to Section, etc.
+ d) MI values have the float truncation bug.
+ e) FATAL ERROR: all disjunct created with minus-the-MI and so are junk.
 
 
 en_pairs_rone_mst=> \dt+
@@ -6463,12 +6529,14 @@ en_pairs_rtwo_mst
 -----------------
 en_pairs_rtwo, with tranche-1 and tranche-2 MST parses.
 
-STATUS: fair/poor
+STATUS: Total junk, should be deleted.
 DATE: 14 June 2017
 REASON: Multiple issues:
  a) Missing links to LEFT-WALL
  b) fails to separete various punctuation
  c) The PseudoWordCset typename needs to be changed to Section, etc.
+ d) MI values have the float truncation bug.
+ e) FATAL ERROR: all disjunct created with minus-the-MI and so are junk.
 
 
                         List of relations
@@ -6542,9 +6610,13 @@ the pair-MI computations.  A continutation of en_pairs_rtwo.
 
 STATUS: good
 DATE: 21 June 2017
-REASON: Best so far, I think.  One issue:
-  infix-marks: dashes, ellipsis, long-dashes are not split.
-  It now seems that this would have been the right thing to do.
+REASON: Best so far, I think.  Two issues:
+  1) infix-marks: dashes, ellipsis, long-dashes are not split.
+     It now seems that this would have been the right thing to do.
+  2) The pair-MI values are bad; they suffer from the float-point
+     truncation bug. (opencog/atomspace#1295) Solution: recompute
+     MI before using.
+  3) The pair-MI values have the wrong sign.
 
                         List of relations
  Schema |    Name    | Type  | Owner  |    Size    | Description 
@@ -6590,6 +6662,403 @@ RMS Count      1.0433E+6    8.7564E+5     22.88        19.42
 
 
 ==================================================================
+en_pairs_rfour
+---------------
+Random-planar-tree parsed books from tranche-1, 2, 3 and 4. 
+A continutation of en_pairs_rthree. Does NOT contain pair-MI values.
+
+STATUS: good
+DATE: 29 June 2017
+REASON: Best so far, I think.  One issue:
+  1) infix-marks: dashes, ellipsis, long-dashes are not split.
+     It now seems that this would have been the right thing to do.
+
+                        List of relations
+ Schema |    Name    | Type  | Owner  |    Size    | Description 
+--------+------------+-------+--------+------------+-------------
+ public | atoms      | table | ubuntu | 3937 MB    | 
+ public | spaces     | table | ubuntu | 40 kB      | 
+ public | typecodes  | table | ubuntu | 56 kB      | 
+ public | valuations | table | ubuntu | 2619 MB    | 
+ public | values     | table | ubuntu | 8192 bytes | 
+
+select count(*) from atoms;      -- 44676827 = 45M atoms
+select count(*) from valuations; -- 22638956 = 23M valations
+
+2083700214 Bytes = 2.1 GBytes uncompressed
+ 354780718 Bytes compressed = 355 MBytes
+
+md5sum en_pairs_rfour.sql 
+98e873b7626d22e04f914b043c14d6ec  en_pairs_rfour.sql
+6726298084cb8b6ad92a63419c91b416  en_pairs_rfour.sql.bz2
+
+
+==================================================================
+en_pairs_rfive
+---------------
+Random-planar-tree parsed books from tranche-1, 2, 3, 4 and 5. 
+A continutation of en_pairs_rfour. Does NOT contain pair-MI values.
+
+STATUS: good
+DATE: 12 July 2017
+REASON: Best so far, I think.  One issue:
+  1) infix-marks: dashes, ellipsis, long-dashes are not split.
+     It now seems that this would have been the right thing to do.
+
+                        List of relations
+ Schema |    Name    | Type  | Owner  |    Size    | Description 
+--------+------------+-------+--------+------------+-------------
+ public | atoms      | table | ubuntu | 5380 MB    | 
+ public | spaces     | table | ubuntu | 40 kB      | 
+ public | typecodes  | table | ubuntu | 56 kB      | 
+ public | valuations | table | ubuntu | 3365 MB    | 
+ public | values     | table | ubuntu | 8192 bytes | 
+
+select count(*) from atoms;      -- 61069212 = 61M atoms
+select count(*) from valuations; -- 30960586 = 31M values
+
+2860579197 bytes uncompressed = 2.86 GB
+ 488196590 butes compressed = 488MB
+
+dd28f22ef60b1d7f3f5854bfba793116  en_pairs_rfive.sql
+2bbe479fe0caa77c5a1438568a22a4c4  en_pairs_rfive.sql.bz2
+
+
+==================================================================
+en_pairs_rthree_mone
+--------------------
+MST-parsed books from tranche-1, using pairs from rthree.
+
+STATUS: Total junk, should be deleted.
+DATE: 2 July 2017
+REASON: FATAL ERROR: all disjunct created with minus-the-MI, and so are junk.
+
+select count(*) from atoms;      -- 42237812 = 42.2M i.e. 7.2M more than rthree
+select count(*) from valuations; -- 58709672 = 58.7M i.e. 4.6M more than rthree
+
+5114130466 Bytes = 5.1 GBytes uncompressed.
+ 870711778 Bytes = 871 MB compressed
+
+564717bc7a950ede64218cf316459cd9  en_pairs_rthree_mone.sql
+8d508e61dcc2ee0ee4a739273ec37033  en_pairs_rthree_mone.sql.bz2
+
+==================================================================
+en_pairs_rfive_mone
+-------------------
+Random-planar-tree parsed books from tranche-1, 2, 3, 4 and 5. 
+MST-parsed tranche-one. Contains pair-MI values; does NOT contain
+any disjunct marginals.
+
+STATUS: good
+DATE: 16 July 2017
+REASON: Best so far, I think.  Same issues as en_pairs_rfive
+
+                        List of relations
+ Schema |    Name    | Type  | Owner  |    Size    | Description 
+--------+------------+-------+--------+------------+-------------
+ public | atoms      | table | ubuntu | 6502 MB    | 
+ public | spaces     | table | ubuntu | 40 kB      | 
+ public | typecodes  | table | ubuntu | 56 kB      | 
+ public | valuations | table | ubuntu | 11 GB      | 
+ public | values     | table | ubuntu | 8192 bytes | 
+
+select count(*) from atoms;  -- 73314120 = 73M
+select count(*) from valuations; -- 104615442 = 105M
+
+Summary Report for Correlation Matrix Link Grammar ANY link Word Pairs
+Rows: 839266 Columns: 850510
+Size: 30108620 non-zero entries of 713804125660 possible
+Fraction non-zero: 4.2181E-5 Sparsity (-log_2): 14.533
+Total observations: 1352780591.0  Avg obs per pair: 44.930
+Entropy Total: 18.535   Left: 10.247   Right: 10.125
+Total MI: 1.8370
+
+                 Left         Right     Avg-left     Avg-right
+                 ----         -----     --------     ---------
+Support (l_0)  8.0633E+4    8.0657E+4
+Count   (l_1)  2.0090E+7    1.8514E+7     249.2        229.5    
+Length  (l_2)  2.2769E+6    1.9732E+6     28.24        24.46    
+RMS Count      2.2764E+6    1.9726E+6     28.23        24.46    
+
+9088177187 bytes uncompressed = 9.1GB
+1542005839 bytes compressed = 1.54GB
+
+f226416e374414c0ef8decb19047b596  en_pairs_rfive_mone.sql
+a4f8fbc42f802dd4ffc218296d20f703  en_pairs_rfive_mone.sql.bz2
+
+==================================================================
+en_pairs_rfive_mtwo
+-------------------
+Random-planar-tree parsed books from tranche-1, 2, 3, 4 and 5. 
+MST-parsed tranche-1 and 2. Contains pair-MI values; does NOT contain
+any disjunct marginals.
+
+STATUS: good
+DATE: 17 July 2017
+REASON: Best so far, I think.  Same issues as en_pairs_rfive_mone
+
+                        List of relations
+ Schema |    Name    | Type  | Owner  |    Size    | Description 
+--------+------------+-------+--------+------------+-------------
+ public | atoms      | table | ubuntu | 7082 MB    | 
+ public | spaces     | table | ubuntu | 40 kB      | 
+ public | typecodes  | table | ubuntu | 56 kB      | 
+ public | valuations | table | ubuntu | 11 GB      | 
+ public | values     | table | ubuntu | 8192 bytes | 
+
+select count(*) from atoms;      --  79586531 = 79M = 6M more
+select count(*) from valuations; -- 108255875 = 108M = 5M more
+
+9455749625 Bytes uncompressed = 9.45 GB
+1610511576 Bytes compressed   = 1.61 GB
+
+83fa68d57ec5db8604e3487862223efb  en_pairs_rfive_mtwo.sql
+de95af1f2ddb7c696b19a4cc3a3e443e  en_pairs_rfive_mtwo.sql.bz2
+
+==================================================================
+en_pairs_rfive_mthree
+-------------------
+Random-planar-tree parsed books from tranche-1, 2, 3, 4 and 5. 
+MST-parsed tranche-1, 2 and 3. Contains pair-MI values; does NOT
+contain any disjunct marginals.
+
+STATUS: good
+DATE: 2 August 2017
+REASON: Best so far, I think.  Same issues as en_pairs_rfive_mone
+
+                        List of relations
+ Schema |    Name    | Type  | Owner  |    Size    | Description 
+--------+------------+-------+--------+------------+-------------
+ public | atoms      | table | ubuntu | 8437 MB    | 
+ public | spaces     | table | ubuntu | 40 kB      | 
+ public | typecodes  | table | ubuntu | 56 kB      | 
+ public | valuations | table | ubuntu | 11 GB      | 
+ public | values     | table | ubuntu | 8192 bytes | 
+
+select count(*) from atoms;      --  94097585 =  94M = 15M more
+select count(*) from valuations; -- 116409279 = 116M =  8M more
+
+10315553282 Bytes uncompressed = 10.3 GB
+ 1767006478 Bytes compressed = 1.7GB
+
+2ec9c3544f307c7f58a49fa22762724e  en_pairs_rfive_mthree.sql
+ca4bcdf8d041053ac0d4bc72624a2978  en_pairs_rfive_mthree.sql.bz2
+
+
+==================================================================
+en_pairs_rfive_mfour
+--------------------
+Random-planar-tree parsed books from tranche-1, 2, 3, 4 and 5. 
+MST-parsed tranche-1, 2, 3 and 4. Contains pair-MI values; does NOT
+contain any disjunct marginals.
+
+STATUS: good
+DATE: 8 August 2017
+REASON: Best so far, I think.  Same issues as en_pairs_rfive_mone
+
+                        List of relations
+ Schema |    Name    | Type  | Owner  |    Size    | Description 
+--------+------------+-------+--------+------------+-------------
+ public | atoms      | table | ubuntu | 9598 MB    | 
+ public | spaces     | table | ubuntu | 40 kB      | 
+ public | typecodes  | table | ubuntu | 56 kB      | 
+ public | valuations | table | ubuntu | 12 GB      | 
+ public | values     | table | ubuntu | 8192 bytes | 
+
+select count(*) from atoms;      -- 106482665 = 106M = 12M more
+select count(*) from valuations; -- 123419676 = 123M =  7M more
+
+11069504769 bytes uncompressed = 11.1 GBytes
+ 1901439821 bytes compressed   = 1.90 GBytes
+
+eff6127b82ab205502bc1f9e8b4e139d  en_pairs_rfive_mfour.sql
+763ffc8bf032127501692a5ee61538ec  en_pairs_rfive_mfour.sql.bz2
+
+==================================================================
+zh_pairs_one
+------------
+Mandarin individual character pairs.  Only that, without any pair stats.
+Wikipedia articles only!
+
+STATUS: good
+DATE: 7 July 2017
+REASON: No known serious defects.  Minor issue: its wikipedia and does
+    not contain any fiction or action or narrative text.
+
+
+zh_pairs     | 4235 MB |  \l+
+
+select count(*) from atoms;  -- 12003950 = 12.0M
+select count(*) from valuations; -- 6081472 = 6.08 M
+
+537357532 bytes uncompressed = 537MB 
+ 96333834 bytes compressed = 96.3MB
+
+0718a3670ac5ea3e3f6bca3a7fb560e9  zh_pairs_one.sql
+cf45874b8d353ca9332040c9acd783ae  zh_pairs_one.sql.bz2
+
+==================================================================
+zh_pairs_sone
+-------------
+Mandarin individual character pairs.  Same as above, but includes the
+pair-MI stats. (After the minus-sign fix!)
+
+STATUS: good
+DATE: 12 July 2017
+REASON: No known defects.  Minor issue: its wikipedia and does
+    not contain any fiction or action or narrative text.
+
+select count(*) from atoms;      -- 12638021 = 12.6M - 600K more than above.
+select count(*) from valuations; -- 19511577 = 19.5M - 13.4M more
+
+Conclude: 6M word-pairs, total three valuations per word-pair; two added
+here.  What are they? a) pair-count b) pair-freq c) pair-mi
+(plus additional marginals.)
+
+Rows: 158038 Columns: 158991
+Size: 5922477 non-zero entries of 25126619658 possible
+Fraction non-zero: 2.3571E-4 Sparsity (-log_2): 12.051
+Total observations: 728947854.0  Avg obs per pair: 123.08
+Entropy Total: 18.452   Left: 10.265   Right: 10.207
+Total MI: 2.0195
+
+                 Left         Right     Avg-left     Avg-right
+                 ----         -----     --------     ---------
+Support (l_0)  6819.        6411.    
+Count   (l_1)  3.7360E+6    3.1244E+6     547.9        487.4    
+Length  (l_2)  2.8408E+5    2.4156E+5     41.66        37.68    
+RMS Count      2.8231E+5    2.3990E+5     41.40        37.42    
+
+1647543636 bytes uncompressed = 1.65 GB
+ 290683964 bytes compressed = 291 GB
+
+4ab27184db51048f362fc5d6134113c6  zh_pairs_sone
+39748c2abc0be436f266dec021ee4402  zh_pairs_sone.bz2
+
+==================================================================
+zen_pairs
+---------
+Mandarin word-pairs. Segmentation into words done by Ruiting. Does
+NOT include pair-MI stats. This is the alpha-segmented-1 texts only.
+
+STATUS: good
+DATE: 17 July 2017
+REASON: No known defects.
+
+                        List of relations
+ Schema |    Name    | Type  | Owner  |    Size    | Description 
+--------+------------+-------+--------+------------+-------------
+ public | atoms      | table | ubuntu | 303 MB     | 
+ public | spaces     | table | ubuntu | 8192 bytes | 
+ public | typecodes  | table | ubuntu | 48 kB      | 
+ public | valuations | table | ubuntu | 187 MB     | 
+ public | values     | table | ubuntu | 8192 bytes | 
+
+select count(*) from atoms;      -- 3419298 = 3.4M
+select count(*) from valuations; -- 1739721 = 1.7M whoa
+
+152263232 Bytes uncompressed = 152MB
+ 25488421 Bytes compressed = 25MBytes
+
+fe8a58ae4f66f61c57da90a92d5787c3  zen_pairs.sql
+16e651cf0a719fe9e6d0883155e9a5b8  zen_pairs.sql.bz2
+
+==================================================================
+zen_pairs_mi
+------------
+Mandarin word-pairs. Segmentation into words done by Ruiting.
+This is the alpha-segmented-1 texts only.  Includes word-pair
+MI statstics.
+
+STATUS: good
+DATE: 17 July 2017
+REASON: No known defects.
+
+                        List of relations
+ Schema |    Name    | Type  | Owner  |    Size    | Description 
+--------+------------+-------+--------+------------+-------------
+ public | atoms      | table | ubuntu | 325 MB     | 
+ public | spaces     | table | ubuntu | 8192 bytes | 
+ public | typecodes  | table | ubuntu | 48 kB      | 
+ public | valuations | table | ubuntu | 622 MB     | 
+ public | values     | table | ubuntu | 8192 bytes | 
+
+select count(*) from atoms;      -- 3659843 = 3.6M
+select count(*) from valuations; -- 5700207 = 5.7M
+
+Rows: 60123 Columns: 60143
+Size: 1679575 non-zero entries of 3615977589 possible
+Fraction non-zero: 4.6449E-4 Sparsity (-log_2): 11.072
+Total observations: 87843720.0  Avg obs per pair: 52.301
+Entropy Total: 17.473   Left: 10.253   Right: 10.107
+Total MI: 2.8871
+
+                 Left         Right     Avg-left     Avg-right
+                 ----         -----     --------     ---------
+Support (l_0)  8170.        8702.    
+Count   (l_1)  1.5620E+6    1.3583E+6     191.2        156.1    
+Length  (l_2)  1.4766E+5    1.3177E+5     18.07        15.14    
+RMS Count      1.4721E+5    1.3142E+5     18.02        15.10    
+
+472247960 Bytes uncompressed = 472 MB
+ 84150547 Bytes compressed = 84 MB
+
+b4e48f00a94fa8d3d1d08e8331d0d84a9  zen_pairs_mi.sql
+2c6d2667a4ff2d9f54d89765a91c3e37  zen_pairs_mi.sql.bz2
+
+==================================================================
+zen_pairs_mst
+-------------
+Mandarin word-pairs. Segmentation into words done by Ruiting.
+This is the alpha-segmented-1 texts only.  Includes word-pair
+MI statstics, disjuncts and disjunct-MI. MST texts were the
+same alpha-segmented-1 texts.
+
+STATUS: good
+DATE: 17 July 2017
+REASON: No known defects.
+
+                        List of relations
+ Schema |    Name    | Type  | Owner  |    Size    | Description 
+--------+------------+-------+--------+------------+-------------
+ public | atoms      | table | ubuntu | 522 MB     | 
+ public | spaces     | table | ubuntu | 40 kB      | 
+ public | typecodes  | table | ubuntu | 56 kB      | 
+ public | valuations | table | ubuntu | 1219 MB    | 
+ public | values     | table | ubuntu | 8192 bytes | 
+
+Summary Report for Correlation Matrix Word-Disjunct Pairs (Connector Sets)
+Rows: 60143 Columns: 602124
+Size: 800855 non-zero entries of 36213543732 possible
+Fraction non-zero: 2.2115E-5 Sparsity (-log_2): 15.465
+Total observations: 1188456.0  Avg obs per pair: 1.4840
+Entropy Total: 18.859   Left: 17.994   Right: 10.125
+Total MI: 9.2606
+
+                 Left         Right     Avg-left     Avg-right
+                 ----         -----     --------     ---------
+Support (l_0)  6327.        7.399    
+Count   (l_1)  1.8066E+4    94.14         2.855        12.72    
+Length  (l_2)  722.8        67.89         .1142        9.175    
+RMS Count      695.7        62.85         .1100        8.494    
+
+select count(*) from atoms;      -- 5845332 = 5.85 M atoms
+select count(*) from valuations; -- 11414113 = 11.4M values
+
+901757880 Bytes uncompressed = 902 MB
+125868179 Bytes compressed   = 126 MB
+
+c4df6f2da0c476a561cbea82981a6853  zen_pairs_mst.sql
+ff7cb1628cb7aad0a59c71b98a626121  zen_pairs_mst.sql.bz2
+
+==================================================================
+==================================================================
+==================================================================
+==================================================================
+==================================================================
+
+dropdb  en_pairs_tthree en_pairs_ttwo en_pairs_rone 
+
 Plan:
 load en_pairs_mst
 load en_pairs_semi_fu
@@ -10779,6 +11248,1825 @@ Non-REPL: fed by one thread:
 1040259 in 14667 = 71/sec = 255K/hour
 1385628 in 22727 = 61/sec = 220K/hour
 
+529655 in 5247 = 101/sec = 364K/hour
+
+=========================================================================
+Error estimates
+
+(define lpr (Evaluation
+	(LinkGrammarRelationshipNode "ANY")
+	(List (Word "big") (Word "deal"))))
+
+count is 1039
+(define apr (Evaluation
+   (LinkGrammarRelationshipNode "ANY")
+	(ListLink (AnyNode "left-word") (AnyNode "right-word"))))
+6.3884586e+08 == 638845863.0
+
+(/ 1039 638845863.0) = 1.626370397267486e-6
+ln2 = 19.2299127083157
+
+(define  freq-key (PredicateNode "*-FrequencyKey-*"))
+(cog-value lpr freq-key)  log = 19.229913
+
+estimate:
+(1/log2 + ln2) = 19.2299127083157 - 1.4426950408889634 =
+               = 17.787217667426738
+sqrt(p) = 0.0012752922791530912 
+sqrt (p) * (1+log) = 0.022683901358884775
+sqrt (N) = 25275.400352912315
+abs err = 8.97469517481691e-7
+
+rel err = abs / p = 0.5518235692124971
+
+so its 19 +/- 0.5 error... not bad...
+
+ (use-modules (opencog))
+ (use-modules (opencog persist) (opencog persist-sql))
+ (use-modules (opencog nlp) (opencog nlp learn))
+ (use-modules (opencog matrix))
+ (sql-open "postgres:///en_pairs_mst?user=linas")
+So
+(define star-obj (add-pair-stars pair-obj))
+(define cnt-obj (add-pair-count-api star-obj))
+(define frq-obj (add-pair-freq-api star-obj))
+
+(define wild-wild (cnt-obj 'wild-wild-count))
+(define sqw (sqrt wild-wild))
+
+(define (do-one-pair lipr)
+	(define pr-freq (sqrt (frqobj 'pair-freq lipr)))
+	(define pr-logli (- (frqobj 'pair-logli lipr) 1.4426950408889634))
+	(* pr-freq pr-logli))
+
+(define (do-one-pair lipr) (frqobj 'pair-freq lipr))
+
+(define (right-loop left-item)
+	(fold
+		(lambda (lipr sum) (+ sum (do-one-pair lipr)))
+		0
+		(star-obj 'right-stars left-item)))
+	
+(define (get-tot-error)
+	(define n 0)
+	(fold
+		(lambda (lefty sum)
+			(format #t "sum=~A for ~A of ~A\n" sum n (star-obj 'left-basis-size)) 
+			(set! n (+ n 1))
+			; (+ sum (/ (right-loop lefty) sqw))
+			(+ sum (right-loop lefty)))
+		0
+		(star-obj 'left-basis)))
+
+This gave 0.17825659639240693 for rthree but its wrong
+
+(define (wtf-do-one-pair lipr)
+	(define pr-freq (sqrt (frqobj 'pair-freq lipr)))
+	(define pr-logli (- (frqobj 'pair-logli lipr) 1.4426950408889634))
+	(format #t "Its ~A and ~A \n" lipr pr-freq)
+	(* pr-freq pr-logli))
+
+(define (wtf-right-loop left-item)
+	(fold
+		(lambda (lipr sum) (+ sum (wtf-do-one-pair lipr)))
+		0
+		(star-obj 'right-stars left-item)))
+
+WTF ... get a pr-freq of zero for 
+ ((EvaluationLink (ctv 1 0 6)
+   (LinkGrammarRelationshipNode "ANY")
+   (ListLink
+      (WordNode "substantively" (ctv 1 0 16))
+      (WordNode "events" (ctv 1 0 35225))
+   )
+)
+)
+
+That can't be right so wtf??? 
+
+(cog-value wtf freq-key) gives nothing! !???
+
+(wtf-right-loop (WordNode "substantively" )) 
+
+(ListLink (Word "substantively") (Word "events"))    ; count of 6
+(ListLink (Word "substantively") (Word "important"))  ; count of  13
+(ListLink (Word "substantively") (Any "right-word"))   count of 19
+
+so marginal counts OK.
+check them all..
+
+(define (get-tot)
+	(define n 0)
+	(define lsz (star-obj 'left-basis-size))
+	(fold
+		(lambda (lefty sum)
+			(if (eq? 0 (modulo n 1000))
+				(format #t "sum=~A for ~A of ~A\n" sum n lsz))
+			(set! n (+ n 1))
+			; (+ sum (right-loop lefty))
+			; (+ sum (cnt-obj 'right-wild-count lefty))
+			(+ sum (frq-obj 'right-wild-freq lefty))
+			; (+ sum (right-cnt lefty))
+			; (+ sum (right-frq lefty))
+		) 0 (star-obj 'left-basis)))
+
+So the right-marginal sum works out.  638845863.0 
+
+double check...
+(define (right-cnt left-item)
+	(fold
+		(lambda (lipr sum) (+ sum (pair-obj 'pair-count lipr)))
+		0 (star-obj 'right-stars left-item)))
+
+(define (right-frq left-item)
+	(fold
+		(lambda (lipr sum) (+ sum (frq-obj 'pair-freq lipr)))
+		0 (star-obj 'right-stars left-item)))
+
+This eplicit check reports 638845863.0 so that's perfect.
+All atoms got loaded. Just some of the values did not.
+why?
+
+The freq is short: 0.9777130000000336 i.e. short by 
+14237957.7 = 14M out of 639M
+
+Points at failed-to-store or failed-to-load?
+
+
+(ListLink (Word "substantively") (Word "events"))    ; count of 6
+(ListLink (Word "substantively") (Any "right-word"))   count of 19
+
+(Word "substantively")  uuid= 32131120
+(Word "events") uuid= 50491
+(AnyNode "right-word") = uuid 33712509
+select * from atoms where outgoing = '{32131120, 50491}' -> 32131316 = List
+LinkGrammarRelationshipNode "ANY" is 7
+
+(Evalu = uuid  32131317
+ -->                      
+en_pairs_rthree_mall=> select * from valuations where atom=32131317;
+   key    |   atom   | type |   floatvalue    | stringvalue | linkvalue 
+----------+----------+------+-----------------+-------------+-----------
+        1 | 32131317 |    7 | {1,0,6}         |             | 
+ 33712529 | 32131317 |    1 | {0,26.66593,0}  |    FrequencyKey
+ 35436504 | 32131317 |    1 | {-0,-12.283042} |    MI key
+(3 rows)
+
+(* 638845863.0  (expt 2 -26.66593)) so taht's correct.
+So correct values are in the DB, but they were not loaded into
+atomspace.
+
+And all MST parsing results are bad.... Shit
+
+either....values not loaded, or values not set
+
+batch-word-pair.scm: fetch-incoming-set any-pair-pred
+../../guile/PersistSCM.cc: &PersistSCM::fetch_incoming_set
+as->fetch_incoming_set
+ _backing_store->getIncomingSet(_atom_table
+SQLBackingStore.cc
+AtomStorage::getInc
+
+SQLAtomStorage::getIncomingSet buff
+hi = table.add(hi, false);
+get_atom_values(hi); at line 1523 hi is in the atom table.
+  .. is tlbuf addAtom squonky?
+esponse::get_all_values_cb lines 304
+
+
+is it a uuid cockup?
+Add prints to get_atom_values.
+is it ? print in atom->setValue
+
+So: en_pairs_mst on fanny:
+ * counts sum, 
+ * no missing values on load.
+ * right-wild-freqs fail to sum.
+   -- 0.962623000000125 reproducible
+ * right-freqs are missing 40%!!!  ... 0.6004660000000038
+ * (WordNode "the") has no count on it !!! wtf???
+   its missing in the DB too...so that's bad.
+
+(car (star-obj 'left-basis) (WordNode "sumatraus")
+right-stars:
+ to  18
+original 2
+describe  8
+the 4
+ 'right-wild-count = 32 OK
+ 'right-wild-freq = 0.0
+(frq-obj 'pair-freq (list-ref (star-obj 'right-stars (WordNode "sumatraus")) 3))
+
+sumatraus = 2371938357
+original = 645821
+List= 2371941696
+ANY = 152
+Eval link = 2371941697
+select * from valuations where atom=2371941697; 
+select * from atoms where name='*-FrequencyKey-*'; = 2440463582
+
+again, SQL is in order.
+whoa ... 
+(cog-value  (star-obj 'item-pair  (list-ref (star-obj 'right-stars
+(WordNode "sumatraus")) 1)) (Predicate "*-FrequencyKey-*"))
+is perfect!
+
+(frq-obj 'pair-freq (list-ref (star-obj 'right-stars (WordNode "sumatraus")) 1))
+is  wrong/absent...
+
+(pair-obj 'item-pair  (list-ref (star-obj 'right-stars (WordNode "sumatraus")) 1))
+is correct.
+
+Ohhh....
+
+(cog-set-value! (Word "the") (Predicate "foobar") (FloatValue 1.0e-12))
+
+Fuuuuuu
+
+Fixed with this: 
+https://github.com/opencog/atomspace/pull/1295
+-------------------------------------
+en_pairs_rthree_mall restart
+
+delete disjuncts.
+
+delete from atoms where type = 233 ConnectorSeq
+
+  231 | Connector
+  232 | ConnectorDir
+  233 | ConnectorSeq
+  234 | Section
+
+
+MSTConnector
+PseudoConnector 
+MSTLinkNode  174 175 176
+
+
+CREATE TEMP TABLE lws AS SELECT uuid FROM atoms WHERE type=234;
+select count(*) from valuations, lws where valuations.atom=lws.uuid;
+
+delete from valuations using lws where atom =lws.uuid;
+delete from atoms where type=234;
+
+=========================================================================
+
+postgres:///en_pairs_ttwo_sim?user=linas
+
+Has a pile of cosines that should be stored ...
+
+has 802x802 cosines. Which were hard to come by.
+(its ranked-csw) (length ranked-csw)
+
+Its just ListLink of the pairs. So to store it:
+
+(sql-open "postgres:///en_pairs_ttwo_sim?user=linas")
+(for-each
+	(lambda (wordl)
+		(for-each
+			(lambda (wordr) (store-atom (ListLink wordl wordr)))
+			ranked-csw))
+	ranked-csw)
+
+dammit. Kaboom. Start from scratch.
+
+
+(define foo (add-support-compute poi))
+(foo 'right-length (WordNode "###LEFT-WALL###"))
+72 can go now  108 is next
+108 can go 162 is next
+162 done 243 is next
+
+(define left-marg (make-left-summer (take ranked-csw 108) get-cos))
+
+(define cos-wild-wild
+	(fold (lambda (it acc) (+ acc (left-marg it))) 0 (take ranked-csw 108)))
+
+
+(define get-cmi (make-get-cmi (take ranked-csw 108)))
+
+(define (mk-cmi-prs wa LST)
+	(map (lambda (wb) (get-cmi wa wb)) LST)
+
+(define (mk-all-cmi-prs LST)
+	(map (lambda (wa) (mk-cmi-prs wa LST) LST)))
+
+(define (make-all-cmi WLST RSLT)
+   (define wlen (length WLST))
+   (if (< 0 wlen)
+      (let* ((head (car WLST))
+            (rest (cdr WLST))
+         	(prs (map (lambda (w) (get-cmi head w)) WLST))
+			)
+         (format #t "Pairs remaining: ~A\n" wlen)
+         (make-all-cmi rest (concatenate prs RSLT)))
+		RSLT))
+
+(define all-cmi (make-sym-pairs (take ranked-csw 108) get-cmi))
+(define all-cmi (make-sym-pairs (take ranked-csw 162) get-cmi))
+
+(define ranked-cmi (sort all-cmi (lambda (a b) (> (cdr a) (cdr b)))))
+
+. But 7.366558296223725  0.001619248635083709
+. She 5.439150360752608  0.006026945058317777
+. And 5.325353892901934  0.007068524421558074
+. He 5.1641299882215455  0.007253773644001228
+
+(define all-cmi (make-sym-pairs (take ranked-csw 162) 
+	(lambda (wa wb) (* (get-cos wa wb) (get-cmi wa wb)))))
+
+(define ranked-cmi (sort all-cmi (lambda (a b) (> (cdr a) (cdr b)))))
+
+product:
+(WordNode ";")  (WordNode "said")) . 0.296607939087752) 
+(WordNode "said")  (WordNode "upon")) . 0.29633824003351183) 
+(WordNode "from")  (WordNode "Jack")) . 0.2937570566264612) 
+(WordNode ";")  (WordNode "Jack")) . 0.2936624229096209) 
+(WordNode "with")  (WordNode "said")) . 0.2923745344239661) 
+(WordNode "I")  (WordNode ";")) . 0.2919811998332135) 
+(WordNode "on")  (WordNode "said")) . 0.29101313047631) 
+(WordNode "from")  (WordNode "said")) . 0.29024498064059373) 
+(WordNode "on")  (WordNode "Jack")) . 0.28978802747511617) 
+(WordNode "I")  (WordNode "from")) . 0.2890086903794695))
+
+(get-cos (WordNode ";")  (WordNode "said")) $92 = 0.2723589177762356
+(get-cos (WordNode "said")  (WordNode "upon")) $95 = 0.332603453209047
+
+(get-cos (WordNode "from")  (WordNode "Jack")) 0.3158230495038972
+(get-cos (WordNode ";")  (WordNode "Jack"))  0.25023554371175
+(get-cos (WordNode "with")  (WordNode "said"))  0.3469959252702303
+(get-cos (WordNode "I")  (WordNode ";"))  0.2607676762450459
+(get-cos (WordNode "on")  (WordNode "said"))  0.3738730234710499
+(get-cos (WordNode "from")  (WordNode "said")) 
+(get-cos (WordNode "on")  (WordNode "Jack")) 
+(get-cos (WordNode "I")  (WordNode "from")) 
+
+(get-cmi (WordNode ";")  (WordNode "said"))  1.0890333296574446
+(get-cmi (WordNode "said")  (WordNode "upon")) 0.8909656143806125
+(get-cmi (WordNode "from")  (WordNode "Jack")) 0.930131784516368
+(get-cmi (WordNode ";")  (WordNode "Jack"))  1.1735440079923058
+(get-cmi (WordNode "with")  (WordNode "said"))  0.8425878032898321
+(get-cmi (WordNode "I")  (WordNode ";"))  
+(get-cmi (WordNode "on")  (WordNode "said")) 
+
+
+
+=========================================================================
+	
+GC inf loop. ... 6121046016  observe-mst
+=========================================================================
+zh
+
+
+ (use-modules (opencog))
+ (use-modules (opencog persist) (opencog persist-sql))
+ (use-modules (opencog nlp) (opencog nlp learn))
+ (use-modules (opencog matrix))
+ (sql-open "postgres:///zh_pairs?user=ubuntu&password=asdf")
+
+(use-modules (opencog cogserver))
+(start-cogserver)
+
+(define ala (make-any-link-api))
+(define als (add-pair-stars ala))
+(batch-pairs als)
+
+(print-matrix-summary-report als)
+
+Rows: 158038 Columns: 158991
+Size: 5922477 non-zero entries of 25126619658 possible
+Fraction non-zero: 2.3571E-4 Sparsity (-log_2): 12.051
+Total observations: 728947854.0  Avg obs per pair: 123.08
+Entropy Total: 18.452   Left: 10.265   Right: 10.207
+Total MI: -2.020  < wrong sign
+
+                 Left         Right     Avg-left     Avg-right
+                 ----         -----     --------     ---------
+Support (l_0)  6819.        6411.    
+Count   (l_1)  3.7360E+6    3.1244E+6     547.9        487.4    
+Length  (l_2)  2.8408E+5    2.4156E+5     41.66        37.68    
+RMS Count      2.8231E+5    2.3990E+5     41.40        37.42    
+
+mv submitted to gamma-pages wc | 135242
+
+guile -l mst-count-zh.scm
+
+als are teh stars
+
+Too many heap sections: Increase MAXHINCR or MAX_HEAP_SECTS
+LARGE_CONFIG
+
+
+
+=========================================================================
+
+Aieee
+Expect our sailing in a few hours.
+At six this morning, came on a tremendous gale of wind.
+The wind altered sufficiently to allow us to escape from the Downs.
+She turned to walk to the gate where her carriage was waiting.
+The Sabbath day at Burnhead was a long, long day. 
+He wore a new white sailor suit with pockets.
+
+Maie threw back her veil and smiled
+
+It is the same old tale, I suppose?
+The girl gave a little laugh.
+
+#LEFT  The      -3.54169132577798    << bad
+#LEFT  girl     0.0477763132765396
+#LEFT  gave     -0.709298163143728   << bad
+#LEFT  a        1.20476206351401     << maybe ok
+#LEFT  little   0.748512923494237
+#LEFT  laugh    0.344735358535928
+
+The  girl       -3.70796523865541
+The  gave       -0.100239485796575
+The  a          3.79004006078384       <<< bad
+The  little     -1.63241818246397
+The  laugh      0.713357934442026
+
+the  girl       -2.05346491148124
+the  gave       1.27996427879419
+the  a          2.78647534800109
+the  little     -0.751899481316491
+the  laugh      1.38444380659843
+
+
+girl  gave      -1.39996148448708
+girl  a         0.208481595111202
+girl  little    1.289110990041
+girl  laugh     -0.183992976805794
+
+gave  a         -2.96100943228456
+gave  little    -1.67864014666756
+gave  laugh     -3.18817482182013
+
+a  little       -3.7409985984943
+a  laugh        -2.98654866737527
+
+little  laugh   -3.25530927504408
+
+WTF. Is there a sign reversal????
+
+little laugh N = 496.0         p = 7.764001126512734e-7 OK logli = 20.29669633683304 OK
+ *     laugh N = 50356.0   OK  p = 7.88233953077974e-5  OK logli = 13.631016579715935  OK
+little   *   N = 658993.0  OK  p = 0.00103153677305726  OK logli = 9.92098903216119  OK
+ *       *   N = 638845863.0  OK
+
+MI = 20.29 - 13.63 - 9.92 = -3.25
+
+
+
+(define (foo-parse-text plain-text)
+   (define word-strs (tokenize-text plain-text))
+   (define word-list (map (lambda (str) (WordNode str)) word-strs))
+   (define pair-obj (make-any-link-api))
+   (define mi-source (add-pair-freq-api pair-obj))
+   (define scorer (make-score-fn mi-source 'pair-fmi))
+	(define nsco (lambda (left-atom right-atom distance)
+			(define sco (scorer left-atom right-atom distance))
+			(if (< sco -1000) sco (- sco))))
+
+   ; Process the list of words.
+   (mst-parse-atom-seq word-list nsco)
+)
+
+
+Action plan:
+* add minus sign to the MI code. in the matrix directory. DONE.
+* provide a conversion script for the databases NEVER
+* delete the mst databases.  DONE
+  en_pairs_rthree_mst   18 GB 
+  en_pairs_rthree_mall  29 GB 
+  en_pairs_rtwo_mst     22 GB
+  en_pairs_tthree_mst   41 GB
+
+  en_pairs_mst           7 GB
+  en_pairs_sim           9 GB
+  en_pairs_ttwo_mst     15 GB
+  en_pairs_ttwo_sim     17 GB
+  en_pairs_ultrasim     23 GB
+  
+* uppdate status of all collections DONE
+  e.g. en_pairs_ttwo_sim on fanny is junk.
+* restart MST.
+* Redo the report on disjuncts!
+
+=========================================================================
+The current Mandarin dataset has enough English in it to parse even
+simple English, not well, but not terribly badly, either.  Basically,
+the wikipedia articles contain scattered English, and this is treated
+just like everything else.
+
+The cost is the MI of that pair.   The integers are the word-ordinals.
+
+(print-mst  "this is a test")
+2 . this   <-->  3 . is  cost= 12.596325047561628
+3 . is   <-->  4 . a  cost= 10.684454066752686
+1 . ###LEFT-WALL###   <-->  3 . is  cost= 0.5236859955283215
+1 . ###LEFT-WALL###   <-->  5 . test  cost= -0.8277888080021967
+
+(print-mst  "it is surprising that this works")
+5 . that   <-->  7 . works  cost= 12.824735708193995
+5 . that   <-->  6 . this  cost= 11.23043475606367
+3 . is   <-->  5 . that  cost= 8.50983391898189
+2 . it   <-->  3 . is  cost= 12.720811706832116
+1 . ###LEFT-WALL###   <-->  7 . works  cost= 0.7545942265555112
+
+
+Some random sentences:
+
+也 常 在 工 業 上 與 實 驗 室 中 ， 用 於 有 機 合 成 中 的 強 鹼 （ 超 強 鹼 ）  。
+
+長 時 間 都 跟 男 人 接 觸 ， 不 擅 長 對 待 女 孩 子 。
+
+把 蕾 當 作 戀 人 看 待 ， 記 憶 力 比 一 般 人 優 異 。
+
+道 德 学 社 创 始 人 。
+
+然 而 ， 此 混 战 亦 可 坚 持 三 十 六 日 。
+
+
+These are segmented so that its two hanzi per pair. There is NO word
+segmentation!! I am hoping that word segmentation will happen
+"automatically".  See below.
+
+I do not yet have software to draw the graphs.  You will have to do this
+by hand, for now.
+
+The parses:
+
+(print-mst  "也 常 在 工 業 上 與 實 驗 室 中 ， 用 於 有  機 合 成 中 的 強 鹼 （ 超 強 鹼 ）  。")
+9 . 實   <-->  10 . 驗  cost= 8.67839880455297
+10 . 驗   <-->  11 . 室  cost= 7.808708535957656
+5 . 工   <-->  11 . 室  cost= 3.628109329166861
+5 . 工   <-->  6 . 業  cost= 5.267964316861255
+8 . 與   <-->  9 . 實  cost= 1.5154639602692228
+11 . 室   <-->  18 . 合  cost= 1.3112275389754586
+18 . 合   <-->  19 . 成  cost= 2.8487390406796376
+2 . 也   <-->  19 . 成  cost= 1.3284690162639947
+2 . 也   <-->  3 . 常  cost= 2.670074279865112
+2 . 也   <-->  4 . 在  cost= 1.5999478270616105
+19 . 成   <-->  27 . 鹼  cost= 1.0648751602654372
+23 . 鹼   <-->  27 . 鹼  cost= 7.397179300260998
+22 . 強   <-->  23 . 鹼  cost= 6.6278644991783935
+26 . 強   <-->  27 . 鹼  cost= 6.6278644991783935
+25 . 超   <-->  26 . 強  cost= 4.233373422153647
+21 . 的   <-->  23 . 鹼  cost= 2.189776253921316
+23 . 鹼   <-->  24 . （  cost= 2.0228678213402027
+20 . 中   <-->  21 . 的  cost= 0.7882106238577222
+11 . 室   <-->  13 . ，  cost= 0.7204578405457767
+13 . ，   <-->  15 . 於  cost= 1.3787498338128241
+14 . 用   <-->  15 . 於  cost= 2.3097280192674408
+13 . ，   <-->  16 . 有  cost= 0.8940307468617856
+16 . 有   <-->  17 . 機  cost= 1.5798315464927484
+12 . 中   <-->  13 . ，  cost= 0.702836797299172
+19 . 成   <-->  29 . 。  cost= 0.5752920624938298
+28 . ）   <-->  29 . 。  cost= 1.1524305408117694
+6 . 業   <-->  7 . 上  cost= -0.02469597819435876
+1 . ###LEFT-WALL###   <-->  2 . 也  cost= -0.5802694975440783
+
+
+scheme@(guile-user)> (print-mst  "長 時 間 都 跟 男 人 接 觸 ， 不 擅 長 對 待  女
+孩 子 。")
+9 . 接   <-->  10 . 觸  cost= 8.386123586043663
+9 . 接   <-->  16 . 待  cost= 5.500641386527644
+15 . 對   <-->  16 . 待  cost= 4.527961561831734
+4 . 間   <-->  9 . 接  cost= 3.011954338244294
+3 . 時   <-->  4 . 間  cost= 5.53719025855275
+2 . 長   <-->  4 . 間  cost= 1.4431523444018381
+2 . 長   <-->  19 . 子  cost= 1.6192113159084691
+18 . 孩   <-->  19 . 子  cost= 6.867211688834326
+17 . 女   <-->  18 . 孩  cost= 7.309507215753307
+13 . 擅   <-->  16 . 待  cost= 1.4396781889010661
+13 . 擅   <-->  14 . 長  cost= 7.846183142809686
+12 . 不   <-->  13 . 擅  cost= 4.148490791614584
+11 . ，   <-->  13 . 擅  cost= 2.360114646965709
+4 . 間   <-->  5 . 都  cost= 0.9693867850594948
+5 . 都   <-->  6 . 跟  cost= 2.3990108227984237
+6 . 跟   <-->  7 . 男  cost= 1.3528584177181244
+7 . 男   <-->  8 . 人  cost= 2.705451519003308
+2 . 長   <-->  20 . 。  cost= 0.9405658895019222
+1 . ###LEFT-WALL###   <-->  2 . 長  cost= -0.11680557768830013
+
+
+scheme@(guile-user)> (print-mst  "把 蕾 當 作 戀 人 看 待 ， 記 憶 力 比 一 般  人 優 異 。")
+11 . 記   <-->  12 . 憶  cost= 9.984319885371686
+6 . 戀   <-->  12 . 憶  cost= 4.479455917846746
+6 . 戀   <-->  17 . 人  cost= 3.346336621332618
+6 . 戀   <-->  7 . 人  cost= 3.346336621332618
+6 . 戀   <-->  19 . 異  cost= 3.1326057184954585
+18 . 優   <-->  19 . 異  cost= 7.429036103043035
+12 . 憶   <-->  13 . 力  cost= 2.9092434467610424
+7 . 人   <-->  8 . 看  cost= 1.5817340934392554
+8 . 看   <-->  9 . 待  cost= 6.40562791854984
+6 . 戀   <-->  16 . 般  cost= 1.532540145438297
+15 . 一   <-->  16 . 般  cost= 6.011468981031394
+14 . 比   <-->  16 . 般  cost= 2.133858423252395
+19 . 異   <-->  20 . 。  cost= 1.062610265554028
+5 . 作   <-->  20 . 。  cost= 0.9473091730162793
+4 . 當   <-->  5 . 作  cost= 1.8844566876556712
+2 . 把   <-->  4 . 當  cost= 1.601964785223224
+2 . 把   <-->  3 . 蕾  cost= 3.301384076256177
+1 . ###LEFT-WALL###   <-->  4 . 當  cost= 1.4277603296921786
+8 . 看   <-->  10 . ，  cost= 0.7854131431579994
+
+
+scheme@(guile-user)> (print-mst  "道 德 学 社 创 始 人 。")
+6 . 创   <-->  7 . 始 cost= 5.70773284687867
+4 . 学   <-->  6 . 创  cost= 3.061665951119931
+6 . 创   <-->  8 . 人  cost= 2.1724657173546227
+4 . 学   <-->  5 . 社  cost= 1.2513192358165952
+8 . 人   <-->  9 . 。  cost= 0.9996485775966537
+2 . 道   <-->  9 . 。  cost= 0.566680489393292
+2 . 道   <-->  3 . 德  cost= 2.4802112908263467
+1 . ###LEFT-WALL###   <-->  2 . 道  cost= -0.4271902589965446
+
+
+scheme@(guile-user)> (print-mst  "然 而 ， 此 混 战 亦 可 坚 持 三 十 六 日 。") 
+10 . 坚   <-->  11 . 持  cost= 8.090136242433331
+2 . 然   <-->  10 . 坚  cost= 3.986785521916751
+2 . 然   <-->  3 . 而  cost= 5.260819401185174
+1 . ###LEFT-WALL###   <-->  2 . 然  cost= 1.960750908016161
+2 . 然   <-->  5 . 此  cost= 1.6401055467853318
+4 . ，   <-->  5 . 此  cost= 1.9045829576234112
+5 . 此   <-->  8 . 亦  cost= 1.6941756040836786
+8 . 亦   <-->  9 . 可  cost= 3.9818559895630496
+5 . 此   <-->  7 . 战  cost= 0.7150479036642032
+6 . 混   <-->  7 . 战  cost= 3.4641015339868524
+11 . 持   <-->  16 . 。  cost= 0.667356443539326
+11 . 持   <-->  12 . 三  cost= -0.082652373159668
+12 . 三   <-->  13 . 十  cost= 4.910027341075681
+13 . 十   <-->  14 . 六  cost= 6.198613466629329
+13 . 十   <-->  15 . 日  cost= 1.2911435674834095
+scheme@(guile-user)> 
+
+
+FYI, here are comparable parses, for English, using the English pair dataset.
+They are mostly good, with occasional mediocre links.
+
+ (print-mst "It is the same old tale, I suppose")
+9 . I   <-->  10 . suppose  cost= 5.30352500612982
+1 . ###LEFT-WALL###   <-->  9 . I  cost= 1.81488162256983
+1 . ###LEFT-WALL###   <-->  2 . It  cost= 3.58403195375127
+2 . It   <-->  3 . is  cost= 4.74100503452483
+8 . ,   <-->  9 . I  cost= 1.05294445305262
+7 . tale   <-->  8 . ,  cost= 1.04077920118952
+5 . same   <-->  7 . tale  cost= 2.71210690237531
+4 . the   <-->  5 . same  cost= 3.45495315601723
+6 . old   <-->  7 . tale  cost= 2.49777533091725
+
+scheme@(guile-user)> (print-mst "The girl gave a little laugh")
+5 . a   <-->  6 . little  cost= 3.7409985984943
+6 . little   <-->  7 . laugh  cost= 3.25530927504408
+4 . gave   <-->  7 . laugh  cost= 3.18817482182013
+3 . girl   <-->  4 . gave  cost= 1.39996148448708
+2 . The   <-->  3 . girl  cost= 3.70796523865541
+1 . ###LEFT-WALL###   <-->  2 . The  cost= 3.54169132577798
+
+scheme@(guile-user)> (print-mst "He wore a new white sailor suit with pockets")
+7 . sailor   <-->  8 . suit  cost= 5.49215876834077
+5 . new   <-->  8 . suit  cost= 5.1696331184917
+6 . white   <-->  7 . sailor  cost= 4.43134225309288
+3 . wore   <-->  8 . suit  cost= 3.5690512406128
+2 . He   <-->  3 . wore  cost= 4.4474126513332
+1 . ###LEFT-WALL###   <-->  2 . He  cost= 3.64809278899352
+8 . suit   <-->  10 . pockets  cost= 3.39943721825401
+3 . wore   <-->  4 . a  cost= 3.26884788962874
+8 . suit   <-->  9 . with  cost= 1.22919683159134
+
+scheme@(guile-user)> (print-mst "Maie threw back her veil and smiled")
+2 . Maie   <-->  8 . smiled  cost= 6.90160018627178
+2 . Maie   <-->  3 . threw  cost= 6.8332928881085
+3 . threw   <-->  4 . back  cost= 4.35035476889946
+3 . threw   <-->  6 . veil  cost= 3.23768129913487
+5 . her   <-->  6 . veil  cost= 3.70652214281638
+1 . ###LEFT-WALL###   <-->  8 . smiled  cost= 1.75135762004661
+7 . and   <-->  8 . smiled  cost= 1.67365955937873
+
+    +------->WV------->+--MVs-+---CV->+     
+    +--Wd--+-Sp*i+--I--+Osm+  +Cs+-Sp-+--O-+
+    |      |     |     |   |  |  |    |    |
+LEFT-WALL I.p will.v do.v it if you say.v so 
+
+
+   +--MVs-+---CV->+     
+   |      +Cs+-Sp-+--O--+
+   |      |  |    |     |     
+   ?     if  ?  say     ? 
+
+
+         +Cs+
+         |  |
+         if  ?  
+
+
+guile-mst-zh> MST-Processing file >>>止-灣/汤加国徽<<<
+
+(define (print-mst TXT)
+	(define (prt-mpr MPR)
+		(format #t "~D . ~A  <--> ~D . ~A  \t  MI = ~6F\n"
+			(car (caar MPR)) (cog-name (cdr (caar MPR)))
+			(car (cdar MPR)) (cog-name (cdr (cdar MPR)))
+			(cdr MPR)
+	))
+	(for-each prt-mpr (mst-parse-text TXT))
+)
+
+
+(print-mst "然杜氏 恶 撰 ， 述 一漏 百 ， 且 多 谬误 。")
+(print-mst "丙寅年 夏日 ， 王门 胡氏 焚香 敬撰 。")
+(print-mst "今书 已成 ， 余喜 史家 案头 ， 又 添 新书 ， 更喜 日后 家事 ， 彼无 遁词 ， 遂 成此序 。")
+(print-mst "母猪 的 价格 暴涨 ， 可见 事态 之 严重 。")
+(print-mst "干爷 ， 你 不是 这么 教导 我们 的 吗 ？")
+
+Hi Ben, Ruiting,
+
+Below are MST parses of five sentences. Just as before, an MI value
+of 4 or below is usually junk, and 10 or above is high confidence.
+This dataset probably does not contain MI's above 25; larger datasets
+would.
+
+These are 5 sentences I picked from wangxiaobo-7
+
+I will have non-clustered link-grammar parses in about 3 days or so.
+I expect that they will be of higher quality, but who knows.
+
+If all goes well, I might have (non-clustered) English LG parses
+later today.
+
+--linas
+
+The parses below are completely random junk. About half of the words
+have been observed once and only once, and are thus have no meaningful
+statistical sample.
+
+(print-mst "然杜氏 恶 撰 ， 述 一漏 百 ， 且 多 谬误 。")
+6 . 述  <--> 7 . 一漏     MI = 21.128
+4 . 撰  <--> 6 . 述       MI = 19.009
+2 . 然杜氏  <--> 4 . 撰   MI = 18.885
+7 . 一漏  <--> 8 . 百     MI = 16.029
+2 . 然杜氏  <--> 3 . 恶   MI = 15.179
+6 . 述  <--> 12 . 谬误    MI = 13.671
+7 . 一漏  <--> 10 . 且    MI = 12.479
+6 . 述  <--> 11 . 多      MI = 7.7579
+1 . ###LEFT-WALL###  <--> 2 . 然杜氏      MI = 3.6985
+4 . 撰  <--> 13 . 。      MI = 2.6162
+5 . ，  <--> 6 . 述       MI = 2.3806
+9 . ，  <--> 10 . 且      MI = 2.3653
+
+(print-mst "丙寅年 夏日 ， 王门 胡氏 焚香 敬撰 。")
+5 . 王门  <--> 6 . 胡氏   MI = 21.478
+6 . 胡氏  <--> 7 . 焚香   MI = 21.471
+7 . 焚香  <--> 8 . 敬撰   MI = 21.301
+2 . 丙寅年  <--> 5 . 王门 MI = 18.049
+2 . 丙寅年  <--> 3 . 夏日 MI = 19.518
+8 . 敬撰  <--> 9 . 。     MI = 4.0183
+1 . ###LEFT-WALL###  <--> 2 . 丙寅年      MI = 3.6985
+4 . ，  <--> 5 . 王门     MI = 2.7025
+
+(print-mst "今书 已成 ， 余喜 史家 案头 ， 又 添 新书 ， 更喜 日后 家事 ， 彼无 遁词 ， 遂 成此序 。")
+17 . 彼无  <--> 18 . 遁词 MI = 21.236
+18 . 遁词  <--> 21 . 成此序       MI = 19.366
+15 . 家事  <--> 18 . 遁词 MI = 18.688
+13 . 更喜  <--> 15 . 家事 MI = 19.674
+20 . 遂  <--> 21 . 成此序 MI = 18.160
+14 . 日后  <--> 15 . 家事 MI = 16.529
+11 . 新书  <--> 13 . 更喜 MI = 15.155
+10 . 添  <--> 15 . 家事   MI = 12.060
+21 . 成此序  <--> 22 . 。 MI = 4.0183
+9 . 又  <--> 10 . 添      MI = 3.9017
+7 . 案头  <--> 9 . 又     MI = 3.9325
+5 . 余喜  <--> 7 . 案头   MI = 18.569
+5 . 余喜  <--> 6 . 史家   MI = 20.508
+3 . 已成  <--> 5 . 余喜   MI = 16.793
+2 . 今书  <--> 3 . 已成   MI = 17.234
+1 . ###LEFT-WALL###  <--> 2 . 今书        MI = 3.6985
+16 . ，  <--> 17 . 彼无   MI = 3.1355
+18 . 遁词  <--> 19 . ，   MI = 3.0673
+12 . ，  <--> 13 . 更喜   MI = 2.9131
+4 . ，  <--> 5 . 余喜     MI = 2.6880
+8 . ，  <--> 9 . 又       MI = 1.2527
+
+
+(print-mst "母猪 的 价格 暴涨 ， 可见 事态 之 严重 。")
+4 . 价格  <--> 5 . 暴涨   MI = 16.213
+5 . 暴涨  <--> 7 . 可见   MI = 13.902
+2 . 母猪  <--> 5 . 暴涨   MI = 12.817
+7 . 可见  <--> 8 . 事态   MI = 10.562
+8 . 事态  <--> 10 . 严重  MI = 8.6693
+8 . 事态  <--> 9 . 之     MI = 6.1207
+5 . 暴涨  <--> 6 . ，     MI = 3.1828
+3 . 的  <--> 4 . 价格     MI = 2.8438
+7 . 可见  <--> 11 . 。    MI = 1.7341
+1 . ###LEFT-WALL###  <--> 7 . 可见        MI = 0.9190
+
+(print-mst "干爷 ， 你 不是 这么 教导 我们 的 吗 ？")
+2 . 干爷  <--> 7 . 教导   MI = 9.8548
+7 . 教导  <--> 8 . 我们   MI = 6.5231
+2 . 干爷  <--> 6 . 这么   MI = 5.1008
+2 . 干爷  <--> 4 . 你     MI = 4.5330
+2 . 干爷  <--> 5 . 不是   MI = 2.7742
+1 . ###LEFT-WALL###  <--> 2 . 干爷        MI = 2.7416
+2 . 干爷  <--> 3 . ，     MI = 2.0854
+7 . 教导  <--> 10 . 吗    MI = 1.9647
+10 . 吗  <--> 11 . ？     MI = 7.6251
+8 . 我们  <--> 9 . 的     MI = 0.7513
+
+run/mst-one.sh run/ss-one.sh
+
+OK what borked?
+
+(print-mst "丙寅年 夏日 ， 王门 胡氏 焚香 敬撰 。")
+a 5 . 王门     <--> 6 . 胡氏   MI = 21.478
+b 6 . 胡氏     <--> 7 . 焚香   MI = 21.471
+c 7 . 焚香     <--> 8 . 敬撰   MI = 21.301
+d 2 . 丙寅年   <--> 5 . 王门   MI = 18.049
+e 2 . 丙寅年   <--> 3 . 夏日   MI = 19.518   OK its there.
+f 8 . 敬撰     <--> 9 . 。     MI = 4.0183
+g 1 . LEFT-WALL<--> 2 . 丙寅年 MI = 3.6985
+h 4 . ，      <--> 5 . 王门    MI = 2.7025
+
+
+                                        near+    far+
+丙寅年.399826              (g)TXYJK- & eTPYYP+ & dTRZZG+
+ 夏日.232814                eTPYYP- 
+                            far-      near-
+ 王门.270759                dTRZZG- & (h)TRZZH- & aTRZZI+
+ 胡氏.349378                aTRZZI- & bTVWZI+
+ 焚香.506188                bTVWZI- & cTPSCX+
+ 敬撰.227735                cTPSCX- & (f)TPSCY+
+
+-------------------
+wtf this one two
+
+(print-mst "然杜氏 恶 撰 ， 述 一漏 百 ， 且 多 谬误 。")
+a 6 . 述  <--> 7 . 一漏     MI = 21.128
+b 4 . 撰  <--> 6 . 述       MI = 19.009
+c 2 . 然杜氏  <--> 4 . 撰   MI = 18.885
+d 7 . 一漏  <--> 8 . 百     MI = 16.029
+e 2 . 然杜氏  <--> 3 . 恶   MI = 15.179
+f 6 . 述  <--> 12 . 谬误    MI = 13.671
+g 7 . 一漏  <--> 10 . 且    MI = 12.479
+h 6 . 述  <--> 11 . 多      MI = 7.7579
+i 1 . ###LEFT-WALL###  <--> 2 . 然杜氏      MI = 3.6985
+j 4 . 撰  <--> 13 . 。      MI = 2.6162
+k 5 . ，  <--> 6 . 述       MI = 2.3806
+l 9 . ，  <--> 10 . 且      MI = 2.3653
+
+
+然杜氏.274017              (i)TSEOZ- & eTSEPA+ & cTSEPB+
+恶.490429                  eTSEPA-
+撰.425002                  cTSEPB- & bTYVJC+ & (j)TVWQA+
+
+                            near-      far-
+述.524662                  (k)TVWZA- & bTYVJC- & aTWBEZ+ & hTXAHR+ & fTLYRB+
+一漏.353033                aTWBEZ- & dTWBFA+ & gTIVQI+
+多.375900                  hTXAHR-
+谬误.163229                fTLYRB-
+百.519512                  dTWBFA-
+且.115701                  (l)TBOFC- & dTIVQI-
+
+Above should link, but its not ... why?
+
+wrong commas: expect:
+,  with TVWZA+
+, with TBOFC+
+
+l->r pass removed 117441
+LEFT-WALL[15044] 然杜氏[3] 恶[1] 撰[3] ，[10192] 述[5] 一漏[3] 百[2] ，[10192] 且[5] 多[136] 谬误[1] 。[10] 
+
+r->l pass removed 35544
+LEFT-WALL[3] 然杜氏[3] 恶[1] 撰[3] ，[3] 述[5] 一漏[3] 百[1] ，[1] 且[2] 多[2] 谬误[1] 。[3] 
+
+l->r pass removed 0
+print_expression_sizes(sent);
+prepare/exprune.c:			size += size_of_expression(x->exp);
+LEFT-WALL[3] 然杜氏[3] 恶[1] 撰[3] ，[3] 述[5] 一漏[3] 百[1] ，[1] 且[2] 多[2] 谬误[1] 。[3] 
+
+for (d=sent->word[i].d; d != NULL; d = d->next) c++; is the dj count ..
+sent->word[i].alternatives[0]
+++++ Finished expression pruning             0.09 seconds
+
+build_disjuncts_for_exp
+
+line 171
+After expanding expressions into disjuncts:LEFT-WALL(2) 然杜氏(1) 恶(1) 撰(1) ，(1) 述(1) 一漏(1) 百(1) ，(0) 且(1) 多(2) 谬误(1) 。(3) 
+
+So expression prunning removed the comma ... why?  Because of cost-max
+!cost-max = 50
+d->left
+void print_connector_list(Connector * e);
+void print_disjunct_list(Disjunct * c);
+
+wrong commas: expect:
+,  with TVWZA+
+, with TBOFC+
+
+Hmm first comma did have: TBOFC+ TVWZA+ but that is all....
+
+，
+
+
+------------------------------------------------------------
+
+Also bad line-wrapping: 
+母猪 的 价格 暴涨 ， 可见 事态 之 严重 。
+glyph_width += mk_wcwidth(ws[i]);
+
+wchar_t  wc;
+mbstate_t mbss;
+memset(&mbss, 0, sizeof(mbss));
+
+mbrtowc(&wc, ssss, MB_CUR_MAX, nbss);
+wc = xxx
+glyph_width = mk_wcwidth(wc);
+
+
+
+ERROR: In procedure gc:
+ERROR: In procedure dbi-close: Wrong type argument in position 1: #<finalized smob 556c0402ec00>
+ This is still an issue....
+
+
+LG expects:
+test: D- & Os- (near- & far-) & (close+) & (far+)
+
+
+
+
+-------------------------------------------------------------
+export stuff
+en_pairs_tthree_mst 8 gb
+Not just  en_pairs_rone.sql.bz2  and to the rest by hand just for junk.
+
+(sql-open "postgres:///en_pairs_rone?user=linas")
+
+(observe-mst "He wandered through the fog")
+(observe-mst "He thought about home")
+
+!!fog
+Found expression for word fog: Debug: TI-
+Token "fog" matches nothing in the dictionary.
+
+###LEFT-WALL###: TB+
+He: TB- & TG+
+thought: TG- & TD+
+about: TD- & TE+
+home: TE-
+LEFT-WALL  -> LEFT-WALL
+UNKNOWN-WORD
+
+seg fault
+
+Both He's have the wrong disjunct -- classname! ah OK
+
+   (define mi-source (add-pair-freq-api pair-obj))
+pair-fmi
+
+------------------------
+
+en_pairs_rfive_mi
+(sql-open "postgres:///en_pairs_rfive_mtwo?user=linas")
+ (define pca (make-pseudo-cset-api))
+ (define psa (add-pair-stars pca))
+;  (batch-pairs psa)
+(psa 'fetch-pairs)
+(print-matrix-summary-report psa)
+
+(define psc (add-pair-count-api psa))
+(define psf (add-pair-freq-api psa))
+
+Rows: 137078 Columns: 6239997
+Size: 8629163 non-zero entries of 855366308766 possible
+Fraction non-zero: 1.0088E-5 Sparsity (-log_2): 16.597
+Total observations: 18489594.0  Avg obs per pair: 2.1427
+Entropy Total: 20.957   Left: 19.143   Right: 9.7111
+Total MI: 7.8969
+
+                 Left         Right     Avg-left     Avg-right
+                 ----         -----     --------     ---------
+Support (l_0)  4.8875E+4    145.4
+Count   (l_1)  2.2958E+5    3440.         4.697        23.66
+Length  (l_2)  1.3729E+4    1773.         .2809        12.19
+RMS Count      1.3696E+4    1732.         .2802        11.91
+
+
+(length all-csets)
+$16 = 8629163
+expect approx 8629163 + 3*137078 + 2*6239997 =  21520391 = 21.5M atoms, approx.
+
+Actual: 21651917 which is 131526 more than expected ...
+and is 43GB virt = 2KB/atom
+and elapsed= 4543 secs = 4.77K atoms/sec
+cpu time: 435:31.67 = 26131 secs -? 5.75 parallel
+
+heap: 1421955072
+45.036 
+Uhh oh.
+
+NO MI for DJ (WordNode \"Jud\") ...
+
+(Section (WordNode "Jud") 
+   (ConnectorSeq (Connector (WordNode "Prudie") (ConnectorDir "+"))))
+
+(define psf (add-pair-freq-api psa))
+(fetch-incoming-by-type (WordNode "Jud") 'Section)
+(psf 'pair-fmi  ... throws)
+(PredicateNode "*-Mutual Info Key-*") 
+
+(cog-keys jud) doesn't list it. ... it was not saved.
+how to recomp only one MI?
+count=3
+
+left-wild=17.7478927873962
+right-wild = 15.6685349957829
+wild-wild:  18489594 
+
+so freq should be: 1.622534275225297e-7
+logli = 22.55524770945383
+fmi = 10.861180073725272
+mi = 1.7622636939013273e-6
+
+set-pair-freq
+set-pair-mi
+
+(Section (WordNode "set") 
+ (ConnectorSeq  (Connector (WordNode "watch")  (ConnectorDir "+"))))
+
+count=4
+right-wild-count 5698.0 
+right-wild-logli 11.6639703038511
+left 15.478432112403
+
+logli=22.140210210174985
+fmi = 5.0021922060791155
+mi = 2.1633790336337293e-7 * above
+
+Whoa .. store atom didn't work!? Yes it did ....
+
+(Section         66400472
+(WordNode "set")    310
+ (ConnectorSeq      64865853
+  (Connector        64865826
+  (WordNode "watch")  69402
+ (ConnectorDir "+") 64841132
+)))
+
+So fetch-atom is not working....
+get_atom_values is called...
+
+getLink
+doGetLink  yes ...
+setValue yes... called 1,2,3 times
+but cog-keys still shows junk.
+
+oc_to_string
+
+(Section                73785651
+(WordNode "Reinaert")   11727194
+  (ConnectorSeq         73785641
+  (Connector            73785640
+(WordNode "Isengrim")   11727422
+  (ConnectorDir "+")))) 64841132
+
+Ahhh!  Soo .. no MI was stored for this!   it was lost!
+
+Also: not fetchable if been open a long time ... !?
+
+count=1
+wild-wild = 18489594
+right-wild-logli = 18.8182821152876
+left- = 18.8922826967314
+
+so fmi = 13.570354601844016
+
+cog-logger
+(use-modules (opencog logger))
+
+@0x7ffc6ba59e40:
+getLink
+doGetLink   its in TLB so we are good ...
+get_atom_values
+
+@0x7ffc6ba59d90:  is what sql works with.
+
+get_all_values_cb
+atom->setValue
+... fails because atom in TLB has no atomspace!!!!
+    _atom_space->_value_table.addValuation(key, getHandle(), value);
+which is why its not printing...
+
+but fetches after individual access do work corrctly.
+Soits the bulk fretch of all apirs that failed to date TLB...
+
+(load-atoms-of-type 'Section)
+getIncomingByType
+getIncoming
+      hi = table.add(hi, false);
+      _tlbuf.addAtom(hi, p->uuid);
+
+wait ... atom->setAtomSpace(_as); does happn so wtf...!?
+
+x/4a 0x7ffc6ba59e40
+(gdb) x/4a 0x7ffc6ba59e40
+0x7ffc6ba59e40: 0x7f26dfca8440  0x7f26dfca8430
+(gdb) x 0x7f26dfca8440
+0x7f26dfca8440: 0x7f303c11e1b8 <_ZTVN7opencog4LinkE+16>
+
+(gdb) print *this                             
+$15 = {<> = {<> = {_M_weak_this = {<No data fields>}}, 
+    _vptr.ProtoAtom = 0x7f303c11e1b8 <vtable for opencog::Link+16>,
+    _type = 127}, _flags = 0 '\000', _content_hash = 11383300620556476978,
+  _atom_space = 0x0, _truthValue = {<No data fields>},
+  _mtx = {<No data fields>}, _incoming_set = {<No data fields>}}        
+
+So... 
+
+atomspace should be 0x55595edc1590
+
+(gdb) x/16 0x7f26dfca8440
+0x7f26dfca8440: 0x7f303c11e1b8 <_ZTVN7opencog4LinkE+16> 0x7f26dfca8440
+0x7f26dfca8450: 0x7f26dfca8430  0x353635383700007f  << type=7f = 127 good
+0x7f26dfca8460: 0x9df99b9a63c0a232      0x55595edc1590 << atomspace is good
+0x7f26dfca8470: 0x5559659b7c10  0x5559659b7c00
+0x7f26dfca8480: 0x0     0x0
+0x7f26dfca8490: 0x0     0x0
+
+whereas tlb is holding:
+$26 = (struct Handle &) @0x7ffc6ba59d90: {<No data fields>}
+(gdb) x 0x7ffc6ba59d90
+0x7ffc6ba59d90: 0x7f26dfca8240
+
+(gdb) x/12 0x7f26dfca8240
+0x7f26dfca8240: 0x7f303c11e1b8 <_ZTVN7opencog4LinkE+16> 0x7f26dfca8240
+0x7f26dfca8250: 0x7f26dfca8230  0x7f26df00007f << type=7f = 127 good
+0x7f26dfca8260: 0x9df99b9a63c0a232      0x0  << hash is same, atomspace bad
+0x7f26dfca8270: 0x5559659b7c10  0x5559659b7c00
+0x7f26dfca8280: 0x0     0x0
+0x7f26dfca8290: 0x0     0x0
+
+      _tlbuf.addAtom(hi, p->uuid);
+
+(define sec (Section (WordNode "Reinaert") (ConnectorSeq (Connector
+(WordNode "Isengrim") (ConnectorDir "+")))))
+
+(define foo (Predicate "foo"))
+(cog-value sec foo)
+(cog-set-value! sec foo (FloatValue 1 ))
+wtf
+"Atom not in atomspace" ??? Ahh!
+
+Atom::setValue from 
+        8: SQLAtomStorage.cc:307
+opencog::SQLAtomStorage::Response::get_all_values_cb()
+10: SQLAtomStorage.cc:1687  :getLink
+
+so doGetLink top-code returned an atom that's not in the AS.
+
+doGetLink does no table insert directly! cause table not available.
+But the tlb resolve fixes it up for us! Cause the fetch was already
+in the as.
+
+vs. the incoming set .... 
+getIncomingByType  1566
+getIncoming  1502
+  ... get_recursive_if_not_exists  1459
+        does a _tlbuf.addAtom(link, p->uuid);
+             but that link is not in AS yet.
+  add lnk to table
+  get values of tabled link
+   _tlbuf.addAtom(hi, p->uuid); 
+      but some other ato already in tlb....
+
+  so:
+   h is in the as.
+   hr is == h
+
+   _handle_map.find(hr); returns ... !?
+
+So the second addAtom fails to resolve or update ad the first failed to
+resolve.
+
+ValuationPtr  .. s a triple, and thus is too much.
+Atom has pairs of key, ProtoAtomPtr&  
+
+Remove the valuation table, do not even build it. DONE
+remove special-case for tv in sql  DONE
+
+==================
+United:
+States+  36
+
+domain- domain- the- the- States+ States+ 80
+the- domain- anyone- in- th- States+ 40
+outside- the- States+  51
+owns- the- States+ States+  108
+status- outside- the- States+
+
+
+
+99  2.8848641655886156 "Prince"
+
+Prince  773
+
+Andrew+ 626
+Vasili+ 149
+Andrew's+ 46
+Edouard+ 46
+Hans+ 33
+Bagration+ 32
+the- Andrew+ 27 
+the- Wales+ 27
+Hippolyte+ 21 
+Arthur+ 21
+the- 17
+Bolkonski+ 16
+Natasha- Andrew+ 18
+The- Andrew+ 15
+Vasili's+ 14
+"-  Andrew+  11
+LEFT-WALL- Edouard+ 11
+
+112  2.801255090459977 "his" -- 49 dj > 200
+140  2.6103991212010254 "think" -- 6 dj > 200
+148  2.5431777546500145 "was"  -- 35
+161  2.4965609797013926 "head" -- 5
+171  2.4537177541729895 "middle" --  1
+195  2.382483370288248 "long" -- 5 
+196  2.3804440649017935 "day" -- 2
+208  2.3244970859184058 "going" -- 2
+
+think: 5462
+I- 1321
+you- 308
+do- you- 211
+don't- 265
+to- 244
+I- it+ 202
+
+head:  5961
+his- 777
+shook- .+ 751
+shook- 683
+her- 358
+his- .+ 238
+
+long  5412
+a- 385
+as+ 335
+how- 236
+a- time+ 212
+enough+ 201
+
+
+How many words?
+(psf 'left-basis-size)
+(psf 'right-basis-size)
+
+(define (escquote STR BEG)
+	(define pos (string-index STR (lambda (C) (equal? C #\')) BEG))
+	(if pos
+		(escquote
+			(string-replace STR "''" pos pos 1 2)
+			(+ pos 2))
+		STR))
+
+		(string-replace "fo's" "''" 2 2 1 2)
+
+zen_pairs_mst
+(export-all-csets "dict-zen.db" "ZH_cn")
+Store 800855 csets
+
+Mandarin word pairs + MI values; Ruitings segemented text
+
+--------------------
+
+1) filter the dictionary write...
+e.g. 
+(define pca (make-pseudo-cset-api) 
+(define psa (add-pair-stars pca))
+(psa 'left-basis-size)  137078
+(psa 'right-basis-size)  6239997
+(length (psa 'all-pairs))  8629163
+
+(define fca (add-subtotal-filter psa 50 50 10 #f))
+(define fsa (add-pair-stars fca))
+(fsa 'left-basis-size)  14666
+(fsa 'right-basis-size)  23565
+(length (fsa 'all-pairs))  76834
+
+Need a map over all elts exists, its the looper.
+get rid of all-csets DONE
+
+(define cnt 0)
+(define (cntr x) (set! cnt (+ cnt 1)))
+(define looper (add-loop-api psa))
+(looper 'for-each-pair cntr)
+
+fuuuu 
+(define fsf (add-pair-freq-api fsa))
+(psf 'pair-fmi sec) works
+(fsf 'pair-fmi sec) fails
+
+(define (foo x) (format #f "bar ~D" x))
+(define* (st FOO   #:optional (ID (FOO 2)))
+	(format #t "hey its ~A\n" ID))
+
+(define (foo LLOBJ)
+      (lambda (message . args)
+         (case message
+            ((id)     "cset")
+            (else     (apply LLOBJ (cons message args)))
+      )))
+
+
+2) replace cset-vec-cosine by filtered cosine  in gram-sim DONE
+
+(define fsf (add-pair-freq-api fsa))
+	(define fsm (add-similarity-api fsa #f))
+	(define fsb (batch-similarity fsa #f))
+	(fsb 'batch-compute)
+	(fsb 'paralel-batch 3)
+
+3) use filter-specific predicate.  DONE
+4) wait .. batch in matrix?
+
+5) make graph of filtering ... why? we can already guess...
+
+filters?
+   (define key-name
+      (if (LLOBJ 'filters?)
+         (string-append "*-Norm Key " (LLOBJ 'id))
+         "*-Norm Key-*"))
+
+6) create generic API to fetch and store values on matrix by key name
+   well, maybe not...
+7) create generic product matix kind-of-done-ish
+8) create generic cosine matrix. kind-of-done-ish
+9) fetch all atoms with key  DONE
+   this will make fetching cosines better!?
+
+--------------------------------------------
+
+Fuuuu
+He looked away
+link-grammar/prepare/exprune.c:318
+#0  expression_prune (sent=sent@entry=0x555555928f50)
+    at ../../link-grammar/prepare/exprune.c:318
+#1  0x00007ffff7b6f2e8 in sentence_parse (sent=0x555555928f50, 
+    opts=0x55555576f580) at ../../link-grammar/api.c:700
+
+x->exp == 0
+he.2549 has no exp....
+
+sqlite> select * from Morphemes where subscript='he.2549';
+he|he.2549|(he.2549)
+
+he.2025041
+has no disjunct.
+NULL X_node
+
+
+sqlite3 bad.db
+.mode insert
+.output dump_all.sql
+.dump
+.exit
+
+sqlite3 renew.db
+.read dump_all.sql
+
+ant ant-optional
+-------------------
+
+(for-each
+	(lambda (item)
+		(format #t "wtf ~A\n" (/ (log (first item)) (log 2.0))) )
+	(take sorted-lensq-norm 50))
+
+(define binned-sqlen-norm (bin-count 
+	(take sorted-lensq-norm 50 )
+	50
+   (lambda (item) 
+		(define val (/ (log (first item)) (log 2.0)))
+   	(format #t "wtf ~A\n" val)
+		val)
+   (lambda (item) 1)
+   1.0 30.0))
+
+
+(define cnt 0)
+(define many (cog-count-atoms 'SimilarityLink))
+(define (sto at)
+	(store-atom at)
+	(set! cnt (+ cnt 1))
+	(if (eqv?  0 (modulo cnt 1000))
+		(format #t "stored ~A of ~A\n" cnt many))
+	#f)
+ (cog-map-type sto 'SimilarityLink)
+16:04
+
+almost exactly 1/3rd have sim > 0.5 ... 
+total = 142270 sim links
+
+198 dupes ... how is that possible??
+
+select count(*) from atoms where type=27; -- 142270 so that's perfect.
+where are the dupes coming from?
+
+----------------
+617
+
+(define (print-connector CON)
+	(string-append (cog-name (gar CON)) (cog-name (gdr CON)) " "))
+
+(define (section->dj-str SEC)
+	(string-concatenate 
+		(map print-connector (cog-outgoing-set (gdr SEC))))
+)
+
+(define (print-disjuncts WORD)
+	(define all-secs (cog-incoming-by-type WORD 'Section))
+	(define sorted-secs (sort all-secs
+		 (lambda (a b) (> (get-count a) (get-count b)))))
+	(define (prt-one con)
+		(format #t "~D  ~A\n" (get-count con) (section->dj-str con)))
+	(for-each prt-one sorted-secs))
+
+porch .. horses
+
+fsm .... filteres similarity
+   (define fca (add-subtotal-filter psa 50 50 10 #f))
+   (define fsa (add-pair-stars fca))
+	(define fsm (add-similarity-api fsa #f))
+	(define fsb (batch-similarity fsa #f))
+
+(fsb 'compute-similarity (Word "porch") (Word "horses"))
+(fsa 'right-stars (Word "porch")) 
+(fsa 'right-stars (Word "horses"))
+
+Fuu
+"cset cut-50-50-10"
+
+"*-SimKey cset cut-50-50-10"
+
+(cog-map-type sto 'SimilarityLink)
+
+(define cos-key (Predicate "*-Cosine Sim Key-*"))
+(define cut-key (Predicate "*-SimKey cset cut-50-50-10"))
+(define (mov-sim ato)
+	(define sim (cog-value ato cos-key))
+	(cog-set-value! ato cut-key sim)
+	(cog-set-value! ato cos-key (FloatValue 0.0))
+	#f)
+(cog-map-type mov-sim 'SimilarityLink)
+
+(define pss (add-similarity-api psa #f))
+(define psb (batch-similarity psa #f))
+(define (new-sim ato)
+	(define fsim (pss 'compute-similarity (gar ato) (gdr ato)))
+	(cog-set-value! ato cos-key (FloatValue fsim))
+	#f)
+
+(cog-map-type new-sim 'SimilarityLink)
+
+(define (kill-sim ato)
+	(define sim (cog-value-ref (cog-value ato cos-key) 0))
+	(if (< sim 1.0e-25)
+	   (cog-set-value! ato cos-key #f))
+	#f)
+(cog-map-type kill-sim 'SimilarityLink)
+
+(define scnt 0)
+(define (showone ato)
+	(if (not (null? (cog-value ato cos-key)))
+		(begin
+			(format #t "yo ~A ~A\n"
+				(cog-value-ref (cog-value ato cos-key) 0) ato)
+			(set! scnt (+ scnt 1))))
+	#f)
+(cog-map-type showone 'SimilarityLink)
+
+(define (cntone ato)
+	(define val (cog-value ato cos-key))
+	(if
+; (not (null? val))
+;  (and (not (null? val)) (< 1e-10 (cog-value-ref val 0)))
+  (and (not (null? val)) (<= 0.1 (cog-value-ref val 0)))
+(begin (set! scnt (+ scnt 1))
+  (store-atom ato)
+)) #f)
+
+(define scnt 0)
+(cog-map-type cntone 'SimilarityLink)
+(define (rpt) (set! scnt 0) (cog-map-type cntone 'SimilarityLink) scnt)
+
+
+
+2932
+3052 + (69*68)/2 - (37*36)/2 = 4732
+4700 + (130 * 129) / 2 - (69*68)/2 = 10739
+10708 + (427 * 426)/ 2 - (130 * 129) / 2 = 93274.0
+
+17199 at 11:50  -> shoot for about 30K at 512 - 245 = 29890
+37044 when done (- (* 0.5 427 426) (* 0.5 245 244))) = 98105
+
+
+Fuuuu.
+(define psu (add-support-api psa))
+(psu 'right-length
+
+(define psm (add-similarity-api psa #f))
+(define pac (add-pair-cosine-compute psa))
+
+ (define (compute-sim A B)
+   (define val (psm 'pair-similarity (cog-link 'SimilarityLink A B)))
+     (if 
+; (and (not (null? val)) (< 1.0e-6 (cog-value-ref val 0)))
+ (not (null? val)) 
+(format #t "Already got one ~A ~A ~A \n" (cog-value-ref val 0) A B)
+(begin (format #t "Gonna do it for ~A=~D ~A=~D\n"
+A (length (cog-incoming-by-type A 'Section))
+B (length (cog-incoming-by-type B 'Section)))
+      (psm 'set-pair-similarity
+           (SimilarityLink A B) 
+          (FloatValue (pac 'right-cosine A  B))))))
+
+;          (compute-right-cosine A  B)))))
+
+(define (batch-simlist ITEM ITEM-LIST)
+   (for-each (lambda (item) (compute-sim ITEM item)) ITEM-LIST))
+
+(define (make-pairs ITM-LST)
+            (if (not (null? ITM-LST))
+               (begin
+			(batch-simlist (car ITM-LST) (cdr ITM-LST))
+                  (make-pairs (cdr ITM-LST)))))
+
+      (define (compute-right-cosine ROW-A ROW-B)
+         (define prod (compute-right-product ROW-A ROW-B))
+         (define deno (exact->inexact (*
+            (get-right-length ROW-A)
+            (get-right-length ROW-B))))
+         (if (eqv? 0.0 deno) 0.0 (/ prod deno)))
+
+(define ptm (add-tuple-math psa * 'pair-count))
+(define prd (add-support-compute ptm))
+
+      (define (compute-right-product ROW-A ROW-B)
+         (prd 'right-count (list ROW-A ROW-B)))
+
+      (define (get-right-length ROW) (psu 'right-length ROW))
+
+Q: does star basis behave corectly on the tuple?
+A: duddn't matter only stars are used.
+
+(define ptms (add-pair-stars ptm))
+ (ptms 'right-stars (list ROW-A ROW-B))
+
+Replace below by hash:
+
+	(define (get-right-union TUPLE)
+		(let* ((start-time (current-time))
+				(res (delete-duplicates!
+			(append-map!
+				(lambda (item) (map! gdr (psa 'right-stars item)))
+				TUPLE))))
+			(format #t "tooks ~A secs\n" (- (current-time) start-time))
+			res))
+
+
+(define (make-union)
+	(define cache (make-hash-table))
+	(define (atom-hash ATOM SZ) (modulo (cog-handle ATOM) SZ))
+	(define (atom-assoc ATOM ALIST)
+		(find (lambda (pr) (equal? ATOM (car pr))) ALIST))
+			
+	(lambda (ITEM)
+		(if ITEM
+			(hashx-set! atom-hash atom-assoc cache ITEM #f)
+			(let ((ats '()))
+				(hash-for-each-handle
+					(lambda (PR) (set! ats (cons (car PR) ats)))
+					cache)
+				ats))))
+
+(define atom-set (make-union))
+
+(for-each atom-set (map! gdr (psa 'right-stars W)))
+
+wall -- 64125
+at -- 28773
+sum = 92898 
+wall-at: 92322
+last: 94888
+
+finally: 317206 = (797 * 796) / 2  for len=128
+
+'item-pair   return hi-pr only if lopr
+'make-pair
+
+
+(define good-sims
+   (filter
+      (lambda (sim) (and
+            (< 0.5 (sim-cosine sim))
+            (< 8 (cset-vec-word-len (gar sim)))
+            (< 8 (cset-vec-word-len (gdr sim)))))
+      all-sims))
+
+
+Notes: Chapter- or LEFT-WALL- or End-;  27 total
+Summary: Chapter- or LEFT-WALL-;  44 total 
+
+Rting: (LEFT-WALL- & :+) or (LEFT-WALL- & :+ & Audiences+) or
+(LEFT-WALL- & :+ & Explicit+) or (LEFT-WALL- & :+ & Mature+)
+
+    (define (pair-cos A B)
+       (define cos-key (PredicateNode "*-Cosine Sim Key-*"))
+       (define SIM (SimilarityLink A B))
+		(define val (cog-value SIM cos-key))
+(if (equal? A B) 1.0
+   (if (not (null? val)) (cog-value-ref val 0) 0.0)))
+
+
+sorted-word-obs
+ vs. (psu 'right-length a)
+cset-vec-word-observations
+
+(psu 'right-support      64215.0
+(psu 'right-count       972963.0
+(psc 'right-wild-count  972963.0
+(psu 'right-length      122353.945
+
+(define psu (add-support-api psa))
+
+
+dranked:
+
+LEFT-WALL -- ... .. .... *** Two Bit - The “ And But So Perhaps Though When As Then While If Have Can Did Do Will Thank Are Where Who What Why How Or Now Here This That It There He She I You We They Some One Most Instead However Besides Well Oh Ah No Yes Yeah Good Ham 2 1 4 3 A Mai Demelza Richard John George nothing something anything everything it there who which that what where when until as because since if before while little small large good great second woman man child boy girl king house city village world town country ship sun latter land others children people men things them us me him her his my your their our the this every another leave take get find see hear speak move stop fight be make give show keep bring meet follow call ask tell help go live stay talk turn run change use read say understand remember know think suppose guess hope promise believe mean am myself fear thought knew saw felt found called happy fine certain new single word moment minute year day night evening morning way book letter party distance light fire forest room air sea earth ground floor table subject story line case question place time thing person family soul heart body own wife brother sister father mother daughter son hands face feet mouth eyes hand mind friends friend thoughts arm arms chest staff words office past water door window truth same whole best present first last least once home back down up at over on in by from upon under through into for with such having like quite only also still born gone already been seen done taken known given brought made making taking after above among between of all near against to will can cannot may must might would should could did does was is seems seemed appeared used began tried wanted needed meant came went turned continued said says spoke had has always never ever usual possible well soon far much late bad strong big young white black dark blue closed opened open hold put stand sleep answer try return come enough ready trying going supposed beginning rest sound corner direction presence name side power nature one most part kind sort number lot bit couple matter group other two three four five ten several many some out length force death life voice hair husband lips head shoulder eye bed business point state view sense feeling thinking saying now indeed therefore however sir yes God dear lady poor old dead wrong right here doing glad afraid sure sorry coming close hard long short real different clear probably certainly simply just almost not hardly easily feel have shall wish need want seem next following Queen captain wall future general London work himself herself smiled sighed nodded asked replied cried got stood sat looked look smile chance reason means longer doubt idea end edge bottom top account instead perhaps and or but though although then thus yet even really heard left lost passed met were are do love told gave took held followed behind within half an raised free better less more rather often true alone again ) too so very pretty a its these those anyone you we they he she North Jack Pitch Ross Jim Dallas Telzey Goth Sir san together along off away around round about how why – ; , : … ! . ? — All From In On By To With After For It’s It's Not Just Even At See paragraph spirit cause middle sight front spite charge form attention throat breath money law human few hundred thousand years hours minutes days times later ago ' " ” 」 ’ _ etc Mr Mrs Dr sama don ul looking especially nor either each any no finally suddenly slowly quietly Mary King Lord Lady Miss Captain I'm I’m My Her His Your ( ‘ Illustration Stats Category Rating Fandom Character Warning Is Really Please Father Mother May course being without let set sitting drawing living high heavy cold public fact particular full relief order hour individual General outside both talking able happened exactly else hell non re self S t six natural than fell deep wide deal agree don’t don't didn’t didn't received paid care drop provide York agreement ape medium author laws terms works forward forth shook enjoyed originally access permission instance chapter comment St Princess Old New Summary Notes Our THE # * Of { including Prince notes states copies copy ‐ YOU THIS OF OR Section CHAPTER Chapter + | Project eBook eBooks Gutenberg } P tax States fee electronic associated Archive Foundation United & copyright Literary donations License trademark distribution refund Van distributing Ooal Additional Posted archive Tags  
+
+"Ham" "2" "1" "4" "3" "A" "Mai" "Demelza" "Richard" "John" "George" "nothing" "something" "anything" "everything" "it" "there" "who" "which" "that" "what" "where" "when" "until" "as" "because" "since" 
+
+Ham .. 2  0.721
+2 .. 1  0.881
+1 .. 4  0.791
+4 .. 3  0.835
+3 .. A  0.375
+A .. Mai  0.351
+Mai .. Demelza  0.615
+Demelza .. Richard  0.515
+Richard .. John  0.602
+John .. George  0.648
+George .. nothing  0.342
+nothing .. something  0.483
+something .. anything  0.549
+anything .. everything  0.369
+everything .. it  0.496
+it .. there  0.743
+there .. who  0.416
+who .. which  0.618
+which .. that  0.580
+that .. what  0.730
+what .. where  0.722
+where .. when  0.830
+when .. until  0.886
+until .. as  0.807
+as .. because  0.728
+because .. since  0.707
+
+
+-------------------
+overlap similarity again. This time, a newer way:
+
+(define acc (add-pair-cosine-compute psa))
+(define pso (add-similarity-api psa #f "Overlap"))
+(define psob (batch-similarity psa #f "Overlap" 0.0
+	(lambda (x y) (acc 'right-overlap x y))
+
+and then do the pslon thing....
+Nahh skip it.
+
+--------------------
+Redo PCA.
+First, filter all words of length 128 or more.:w
+
+(define cos-key (PredicateNode "*-Cosine Sim Key-*"))
+
+add-similarity-api foo #f
+make-cosine-matrix
+
+-----------------
+Bitseat Tadesse
+/home/linas/ftp/script-to-download-books.sh
+
+sent splitter quotation marks mishandled. 
+” after a period is part of that sentence, not the next. also ’
+
+Hmm. was working on zh_pairs_mst !!
+
+find mst-articles |wc   12245
+find gamma-pages  |wc  123000
+find beta-pages   |wc  883737
+ls -la headings |wc =  23
+find alpha-data   |wc 1018949
+
+mst+gamma+beta= 1018982 - 23 = 1018959 - crap = alpha-data
+
+zh-wp-tranche-1
+
+todo:
+-- maybe save zh_pairs_mst
+-- maybe copy tranche
+
+its NOT big-5
+CN-GB sort-of works...
+iconv: illegal input sequence at position 7594
+CN no
+GB no
+GB2312 no
+GB13000 ---- yes
+GB18030 -- yes!
+GBK -- yes
+
+use 7z -x not unzip
+iconv -f  GB18030 -t UTF-8 
+find *.txt | iconv -f  GB18030 -t UTF-8  | xargs 
+
+find tmp/*.txt | while read f; do cat $f | iconv -f  GB18030 -t UTF-8  > `echo $f.utf8 | iconv -f  GB18030 -t UTF-8`; rm $f ; done
+
+lg-get-dict-entry  WORD
+lg-conn-type-match?
+lg-conn-linkable?
+
+lg_conn_linkable CON CON
+lg_conn_type_match
+
+LGDictReader
+   /* Recurse, if it's a regex match */
+   regex_name = match_regex(dict->regex_root, word);
+   if (regex_name)
+       dn_head = dictionary_lookup_wild(dict, word);
+
+echo "始知 天理 有 循环 。" | ./submit-one.pl localhost 17008 observe-text
+echo "站 在 旁边 的 一名 老者 问 ： “ 不 就是 一个 女子 么 ？" | ./submit-one.pl localhost 17008 observe-text
+
+
+prior to start:
+atoms: 6111927
+valuations: 6938625
+
+Suppress printing of "Warning: Combinatorial explosion!" DONE
+except its still printing dict ver wtf.
+
+remove the relex check  Punt from ss-nosplit-one.sh
+
+  PID USER      PR  NI    VIRT    RES    SHR S  %CPU %MEM     TIME+ COMMAND    
+26784 ubuntu    30  10 12.463g 1.495g  34788 S 207.3  0.6  12:24.44 guile      
+26784 ubuntu    30  10 13.065g 7.990g  34788 S 232.0  3.2   1483:55 guile      
+foo cnt=951 rate=1.1375598073147588
+vs slog of 0.43 previously, after 24 hours
+foo cnt=104494 rate=2.8365047910446783
+
+Again with minimal:
+(monitor-rate "foo")                                        
+foo cnt=571 rate=4.167883182665671
+foo cnt=1836 rate=4.636363625198028
+foo cnt=8922 rate=3.7725158547155386
+foo cnt=71196 rate=4.316740435086596
+
+
+  PID USER      PR  NI    VIRT    RES    SHR S  %CPU %MEM     TIME+ COMMAND    
+ 3792 ubuntu    30  10 12.392g 1.270g  35144 S 291.3  0.5   7:37.33 guile      
+ 3792 ubuntu    30  10 12.886g 4.362g  35252 S 287.3  1.7 108:03.44 guile      
+ 3792 ubuntu    30  10 13.053g 6.788g  35252 S 222.7  2.7 694:53.99 guile      
+
+cogserver: if it fails the first time, its says runing the second tim
+and then stop crashes
+
+  PID USER      PR  NI    VIRT    RES    SHR S  %CPU %MEM     TIME+ COMMAND    
+27600 ubuntu    30  10 12.905g 3.073g  34772 S 283.0  1.2  57:47.82 guile      
+
+(monitor-rate "foo")
+foo cnt=10805 rate=7.71785713759977
+foo cnt=20403 rate=7.336569576772133
+foo cnt=25451 rate=7.197680993533868
+
+Still rate-limited by atomspace insert-delete.
+
+Maybe provide a minimal parse!  Wow!   DONE
+Need only: LinkGrammarRelationshipNode WordInstanceNode for pairs
+
+update-word-counts -- just needs WordInstanceLink for parses
+update-lg-link-counts -- just needs the Evals for links
+; update-disjunct-counts -- word-inst-get-cset needs csets
+; update-clique-pair-counts -- needs numbering. WordSequenceLink
+
+No one needs the link instances.  DONE
+
+remove use-relex-server DONE
 =========================================================================
 
 
@@ -10787,5 +13075,17 @@ since everything points at them, and they never point away.
 
 Bugs: relex is returning incorrect disjuncts because LG is reporting the 
 multi-connectors only ... with the incorrect mutiplicities.
+??? Is this still an issue? 
 
 Bugs: using ListLink for the partial sums on csets... why???
+
+Bugs: the mst parse algo is O^5 and yuret gives a nice O^3 also
+
+Bugs: graphing takes too long.
+
+Bugs: follow up on the guile hang bug - its a string parsing thing.
+
+Bugs: while mst parsing, guile goes GC-crazy after a while, and
+      never recovers.
+
+Items: create LG feederbacker

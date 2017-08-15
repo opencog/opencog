@@ -1,18 +1,27 @@
 # LG-Dict
 
-Modules and functions for generating a LG dictionary entry of a word in the atomspace.
+Modules and functions for generating a LG dictionary entry of a word
+in the atomspace.
 
-## LGDictModule
+## Scheme module `(opencog nlp lg-dict)`
 
-Contains the following scheme primitives coded in C++
+Defines the LgDictNode and the LgDictEntryNode.  These can be used
+together to look up Link Grammar dictionary entries, and place them
+into the atomspace.  For example:
 
-- `(lg-get-dict-entry (WordNode "..."))`
-
-  Takes a WordNode as input, and output the LG disjuncts in the atomspace.  The
-  output is of the form:
+```
+	(use-modules (opencog) (opencog nlp) (opencog nlp lg-dict))
+	(use-modules (opencog exec))
+	(cog-execute!
+		(LgDictEntry
+			(WordNode "...")
+			(LgDictNode "en")))
+```
+will look up the word "..." in the English langauge Link Grammar
+dictionary, and place the resulting disjuncts into the atomspace.
+The output should resemble the below:
 
   ```
-  (SetLink
    (LgDisjunct
       (WordNode "...")
       (LgConnector
@@ -34,27 +43,40 @@ Contains the following scheme primitives coded in C++
          ...
       )
    )
-   ...
-  )
   ```
 
-  The disjuncts are in Disjuntive Normal Form (DNF)
-  as described http://en.wikipedia.org/wiki/Disjunctive_normal_form
-  where `LgOr` and `LgAnd` correspond to the `or` and `&` notation of LG.
+The disjuncts are in Disjuntive Normal Form (DNF)
+as described http://en.wikipedia.org/wiki/Disjunctive_normal_form
+where `LgOr` and `LgAnd` correspond to the `or` and `&` notation of LG.
+Note that `LgOr` is actually a menu choice, and NOT a boolean OR.
 
-  Each LG connector is fully described within the `LgConnector` link, with the
-  connector name in `LgConnectorNode`, direction in `LgConnDirNode`, and the
-  multi-connect property in `LgConnMultiNode`.
+Each LG connector is fully described within the `LgConnector` link,
+with the connector name in `LgConnectorNode`, direction in
+`LgConnDirNode`, and the multi-connect property in `LgConnMultiNode`.
 
-  The connector ordering are kept intact, as described on
-  http://www.abisource.com/projects/link-grammar/dict/introduction.html
-  section 1.2.1
+The connector ordering are kept intact, as described on
+http://www.abisource.com/projects/link-grammar/dict/introduction.html
+section 1.2.1
 
-  For more information on the Node & Link, see `nlp/types/atom_types.script`
+For more information on the Node & Link, see `nlp/types/atom_types.script`
 
-  **Since the disjuncts are in DNF, for some words there will be an explosion
-  of atoms creation (for example, up to 9000 disjuncts for a word, each
-  disjunct containing 5+ connectors).**
+**Since the disjuncts are in DNF, for some words there will be an explosion
+of atoms creation (for example, up to 9000 disjuncts for a word, each
+disjunct containing 5+ connectors).**
+
+
+In addition, the following scheme utilities are provided:
+- `(lg-dict-entry (WordNode "..."))`
+
+  Wraps up the above-described `(cog-execute (LgDictEnty ...))` into
+  a nice short convenience utility.
+
+- `(lg-get-dict-entry (WordNode "..."))`
+
+  Identical to calling `(SetLink (lg-dict-entry (WordNode "...")))`
+  Deprecated!  Using the SetLink in this fashion causes a number of
+  problems; SetLinks should not be used as dumping grounds for random
+  assortments of atoms!
 
 - `(lg-conn-type-match? (LGConnector ...) (LGConnector ...))`
 
@@ -74,7 +96,39 @@ Contains the following scheme primitives coded in C++
   This function does not care which connector is "-" and which is "+", as long
   as they are different.
 
-## utilities.scm
+## TODO - architecture and design issues.
+The core design of this module has a number of issues, some minor, and
+some pretty important.
 
-Contains more simple scheme codes for working with disjuncts.
+* The `lg-get-dict-entry` returns a SetLink. It is deprecated; use
+  the `lg-dict-entry` method instead. Alternately, perhaps the
+  `lg-get-dict-entry` could be redesigned to return a LinkValue,
+  instead?
 
+* The `lg-get-dict-entry` and `lg-dict-entry` methods fail to perform
+  regex lookup of the word. Properly, this is a bug in the link-grammar
+  API for word lookup; regexes should have been handled automatically.
+  this will take a few afternoons to fix.
+
+* The `lg-get-dict-entry` and `lg-dict-entry` do the wrong thing, or
+  are invalid/inappropriate, if the word has a non-trivial mophology
+  (i.e. can be split into multiple morphemes). In LG, each morpheme
+  is treated as a "word", and so a single word-string can be split
+  in several different ways (i.e. have multiple splittings).  Word
+  splitting is non-trivial in LG.
+
+  One way to fix this last issue is to have LG provide an API where
+  the word is split into morphemes, and then the mrophemes are
+  recombined, and disjuncts are returned for the recombined splits.
+  That is, the morphology can be hidden "under the covers", which is
+  part of the beauty of the disjunct style.
+
+  Right now, this is low priiority, since only Russian currently has a
+  non-trivial morphology, and we don't handle Russian.  The other
+  reason is that sureal and microplanning are the only users of this
+  system, and those are also ignorant of morphology.
+
+* The format of the word-disjunct association in the atomspace does not
+  indicatte which dictionary the disjuncts came from. This prevents
+  multi-dictionary use, because its not clear which disjuncts came from
+  which dictionary. This might make translation difficult.
