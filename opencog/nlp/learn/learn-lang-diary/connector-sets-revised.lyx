@@ -11675,8 +11675,86 @@ Why is this a reasonable thing to do? Well, the previous two tables already
  Perhaps the sos cosine score would be more sensitive to those processes.
 \end_layout
 
+\begin_layout Subsection*
+Quality Cosine
+\end_layout
+
 \begin_layout Standard
-But, if we are inventing scores, much more is possible.
+Some disjuncts are more important than others.
+ This is indicated by the word-disjunct MI, and gives a different perspective
+ than the word-disjunct frequency.
+ This suggests that either a cosine score, or an MI-weighted overlap similarity
+ may capture the grammatical similarity of words better.
+\end_layout
+
+\begin_layout Standard
+The motivation for using cosine similarity is to find pairs of words that
+ act in a grammatically similar fashion: they are used in the same way,
+ with the same kinds of disjuncts.
+ However, observational counts are subject to the vicissitudes of the input
+ text: perhaps, the 
+\begin_inset Quotes eld
+\end_inset
+
+quality
+\begin_inset Quotes erd
+\end_inset
+
+ of the disjunct itself is better judged by it's MI.
+ A disjunct could be judged as being 
+\begin_inset Quotes eld
+\end_inset
+
+high quality
+\begin_inset Quotes erd
+\end_inset
+
+ if 
+\begin_inset Formula $mi(w,d)=MI_{pair}(w,d)$
+\end_inset
+
+ as defined in equation 
+\begin_inset CommandInset ref
+LatexCommand vref
+reference "eq:mi-word-disjunct"
+
+\end_inset
+
+ is high.
+ This motivates a 
+\begin_inset Quotes eld
+\end_inset
+
+quality cosine
+\begin_inset Quotes erd
+\end_inset
+
+: 
+\begin_inset Formula 
+\[
+\mbox{qim}(w_{1},w_{2})=\frac{\sum_{d}mi(w_{1},d)mi(w_{2},d)}{\sqrt{\sum_{d}mi^{2}(w_{1},d)}\sqrt{\sum_{d}mi^{2}(w_{2},d)}}
+\]
+
+\end_inset
+
+But what if the high quality is based on a pathetically small number of
+ observations? Whenever one has a small number of observations, one has,
+ almost automatically, a high MI value, simply because these two things
+ are seen together, and nothing else is.
+ Perhaps there should be some observational weighting.
+ One can contemplate defining 
+\begin_inset Formula $pi(w,d)=p(w,d)mi(w,d)$
+\end_inset
+
+ and so the cosine 
+\begin_inset Formula 
+\[
+\mbox{pim}(w_{1},w_{2})=\frac{\sum_{d}pi(w_{1},d)pi(w_{2},d)}{\sqrt{\sum_{d}pi^{2}(w_{1},d)}\sqrt{\sum_{d}pi^{2}(w_{2},d)}}
+\]
+
+\end_inset
+
+ The suitability of these different means of judging similarity is not clear.
 \end_layout
 
 \begin_layout Subsection*
@@ -11999,6 +12077,20 @@ This re-affirms the previous observation: we expect connector-sets to behave
 \end_layout
 
 \begin_layout Subsection*
+Quality Overlaps
+\end_layout
+
+\begin_layout Standard
+Overlap alone may be too weak: again, some of the observed disjuncts may
+ just be junk, or may correlate poorly with the word.
+ This suggests several different approaches.
+ One would be to trim the dataset to discard low-MI word-disjunct pairs,
+ before computing overlap.
+ Another would be to weight the overlap with the MI (discarding negative
+ MI values).
+\end_layout
+
+\begin_layout Subsection*
 Connector Similarity
 \end_layout
 
@@ -12028,7 +12120,7 @@ Word-Pair Cosine Similarity
 \end_layout
 
 \begin_layout Standard
-To correctly gauge the advantage of disjunct-based techniques, one could
+To correctly gauge the advantage of disjunct-based techniques, one should
  compare them to the same kinds of measures, but applied to word-pairs,
  instead of word-disjunct pairs.
  For example, the disjunct-based cosine similarity, can be contrasted against
@@ -12183,7 +12275,7 @@ The
 \end_inset
 
 .
- Some experiments cmi were performed,, and it quickly became apparent that
+ Some experiments cmi were performed, and it quickly became apparent that
  cmi does 
 \begin_inset Quotes eld
 \end_inset
@@ -12236,82 +12328,6 @@ mutual length
 \end_inset
 
  device.
-\end_layout
-
-\begin_layout Subsection*
-Quality Cosine
-\end_layout
-
-\begin_layout Standard
-The motivation for using cosine similarity is to find pairs of words that
- act in a grammatically similar fashion: they are used in the same way,
- with the same kinds of disjuncts.
- However, observational counts are subject to the vicissitudes of the input
- text: perhaps, instead of using vectors where the components are given
- by the frequency, once could instead use components based on, say, the
- 
-\begin_inset Quotes eld
-\end_inset
-
-quality
-\begin_inset Quotes erd
-\end_inset
-
- of the disjunct itself.
- A disjunct could be judged as being 
-\begin_inset Quotes eld
-\end_inset
-
-high quality
-\begin_inset Quotes erd
-\end_inset
-
- if 
-\begin_inset Formula $mi(w,d)=MI_{pair}(w,d)$
-\end_inset
-
- as defined in equation 
-\begin_inset CommandInset ref
-LatexCommand vref
-reference "eq:mi-word-disjunct"
-
-\end_inset
-
- is high.
- This motivates a 
-\begin_inset Quotes eld
-\end_inset
-
-quality cosine
-\begin_inset Quotes erd
-\end_inset
-
-: 
-\begin_inset Formula 
-\[
-\mbox{qim}(w_{1},w_{2})=\frac{\sum_{d}mi(w_{1},d)mi(w_{2},d)}{\sqrt{\sum_{d}mi^{2}(w_{1},d)}\sqrt{\sum_{d}mi^{2}(w_{2},d)}}
-\]
-
-\end_inset
-
-But what if the high quality is based on a pathetically small number of
- observations? Whenever one has a small number of observations, one has,
- almost automatically, a high MI value, simply because these two things
- are seen together, and nothing else is.
- Perhaps there should be some observational weighting.
- One can contemplate defining 
-\begin_inset Formula $pi(w,d)=p(w,d)mi(w,d)$
-\end_inset
-
- and so the cosine 
-\begin_inset Formula 
-\[
-\mbox{pim}(w_{1},w_{2})=\frac{\sum_{d}pi(w_{1},d)pi(w_{2},d)}{\sqrt{\sum_{d}pi^{2}(w_{1},d)}\sqrt{\sum_{d}pi^{2}(w_{2},d)}}
-\]
-
-\end_inset
-
- The suitability of these different means of judging similarity is not clear.
 \end_layout
 
 \begin_layout Subsection*
