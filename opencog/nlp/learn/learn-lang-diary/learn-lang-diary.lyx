@@ -23853,6 +23853,141 @@ target "https://github.com/opencog/atomspace/tree/master/opencog/sheaf"
 \end_layout
 
 \begin_layout Subsection*
+Disjuncts are compositional
+\end_layout
+
+\begin_layout Standard
+One reason that a disjunct representation of a graph is important is that
+ disjuncts can be composed, so that the product is again a disjunct.
+ This is in contrast to the vertex-edge model.
+ where neither vertexes nor edges can be composed to obtain a new vertex
+ or edge.
+ That is, disjuncts form a monoidal category.
+ This section tries to spell out very clearly what this means, if it is
+ not already apparent.
+ 
+\end_layout
+
+\begin_layout Standard
+So, for example: the Link Grammar parse for 
+\begin_inset Quotes eld
+\end_inset
+
+this is a test
+\begin_inset Quotes erd
+\end_inset
+
+ involves four disjuncts:
+\end_layout
+
+\begin_layout Itemize
+this: S+
+\end_layout
+
+\begin_layout Itemize
+is: S- & O+
+\end_layout
+
+\begin_layout Itemize
+a: D+
+\end_layout
+
+\begin_layout Itemize
+test: D- & O-
+\end_layout
+
+\begin_layout Standard
+The determiner connectors D+ and D- can be composed to form a determiner
+ D link, leaving a phrase that is still describable by a disjunct, a single
+ object O- connector that can attach to verbs: 
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Quotes eld
+\end_inset
+
+a test
+\begin_inset Quotes erd
+\end_inset
+
+: O-
+\end_layout
+
+\begin_layout Standard
+This has only one connector, but it is a perfectly ordinary connector, not
+ differing from that which might be found on a single word.
+ That is, Link Grammar makes no particular distinction between words and
+ word-phrases.
+ Using the same argument, it is why Link Grammar can work for morpho-syntax.
+ One can continue composing:
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Quotes eld
+\end_inset
+
+is a test
+\begin_inset Quotes erd
+\end_inset
+
+: S-
+\end_layout
+
+\begin_layout Standard
+which has a subject connector S- that can connect to any subject.
+ One can also, perhaps foolishly, perform some net-very-sensical disjuncts:
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Quotes eld
+\end_inset
+
+is a
+\begin_inset Quotes erd
+\end_inset
+
+: S- & O+ & D+
+\end_layout
+
+\begin_layout Standard
+or
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Quotes eld
+\end_inset
+
+this ...
+ a
+\begin_inset Quotes erd
+\end_inset
+
+: S+ & D+
+\end_layout
+
+\begin_layout Standard
+This last has to use elipses as an awkward notation to indicate the projectivity
+ constraint.
+ Projectivity can be discard, provided some other means ensures a tight
+ parse.
+\end_layout
+
+\begin_layout Standard
+The point here is that the category of disjuncts can be taken to be a monoidal
+ category, i.e.
+ a category with a tensor product 
+\begin_inset Formula $\otimes$
+\end_inset
+
+, with tensoring simply being the writing of two disjuncts next to each
+ other.
+ As the first three examples illustrate, the typical usage is not only to
+ tensor together two disjuncts, but also to contract some of the connectors,
+ as well.
+ 
+\end_layout
+
+\begin_layout Subsection*
 Conclusions
 \end_layout
 
