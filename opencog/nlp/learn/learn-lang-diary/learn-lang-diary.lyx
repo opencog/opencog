@@ -20267,6 +20267,11 @@ zen_pairs A parse of a small set of Mandarin novels, with text segmented
  into words by external third-party tools (provided by Ruiting).
 \end_layout
 
+\begin_layout Description
+zen_pairs_three Word-pairs for tranch-1 and tranche-2-part-1 of Mandarin
+ novels, segmentation by Ruiting.
+\end_layout
+
 \begin_layout Standard
 Now, for some commentary, as to the summary stats.
  For English, as the number of pair observations increase, so do the number
@@ -20324,8 +20329,16 @@ went
 
 \begin_layout Standard
 Comparing English to Chinese is very interesting.
- The Chinese dataset has three times, almost four times more observations
- per pair; equivalently about 3-4 fewer 
+ The Chinese 
+\begin_inset Quotes eld
+\end_inset
+
+zh
+\begin_inset Quotes erd
+\end_inset
+
+ dataset has three times, almost four times more observations per pair;
+ equivalently about 3-4 fewer 
 \begin_inset Quotes eld
 \end_inset
 
@@ -20343,6 +20356,44 @@ words
 \end_layout
 
 \begin_layout Standard
+By contrast, the 
+\begin_inset Quotes eld
+\end_inset
+
+zen_pairs
+\begin_inset Quotes erd
+\end_inset
+
+ dataset, where the Mandarin was pre-segmented into words by 3rd-party tools,
+ behaves much more like English in it's statistics.
+ This is also evident in the table below, where the 
+\begin_inset Quotes eld
+\end_inset
+
+zen
+\begin_inset Quotes erd
+\end_inset
+
+ dataset behaves like 
+\begin_inset Quotes eld
+\end_inset
+
+en
+\begin_inset Quotes erd
+\end_inset
+
+, and not like 
+\begin_inset Quotes eld
+\end_inset
+
+zh
+\begin_inset Quotes erd
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
 There's something else interesting going on, shown in the table below.
 \begin_inset VSpace defskip
 \end_inset
@@ -20353,7 +20404,7 @@ There's something else interesting going on, shown in the table below.
 \begin_layout Standard
 \align center
 \begin_inset Tabular
-<lyxtabular version="3" rows="8" columns="9">
+<lyxtabular version="3" rows="9" columns="9">
 <features tabularvalignment="middle">
 <column alignment="center" valignment="top" width="0">
 <column alignment="center" valignment="top" width="0">
@@ -20691,6 +20742,89 @@ zh_pairs_sone
 
 \begin_layout Plain Layout
 zen_pairs
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+351K
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+351K
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+28.8K
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+27.1K
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+239
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+203
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+22.9
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+19.8
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+zen_pairs_three
 \end_layout
 
 \end_inset
@@ -21216,7 +21350,7 @@ Next, datasets that hold disjuncts.
 \begin_inset Formula $H_{left}$
 \end_inset
 
- entropy values were lower, hovered around 15, and the MI was int the 3-5
+ entropy values were lower, hovered around 15, and the MI was in the 3-5
  range, while 
 \begin_inset Formula $H_{right}$
 \end_inset
@@ -21234,7 +21368,7 @@ Next, datasets that hold disjuncts.
 \begin_layout Standard
 \align center
 \begin_inset Tabular
-<lyxtabular version="3" rows="4" columns="9">
+<lyxtabular version="3" rows="5" columns="9">
 <features tabularvalignment="middle">
 <column alignment="center" valignment="top" width="0">
 <column alignment="center" valignment="top" width="0">
@@ -21501,7 +21635,7 @@ en_pairs_rfive_mtwo
 </cell>
 </row>
 <row>
-<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
 \begin_inset Text
 
 \begin_layout Plain Layout
@@ -21510,7 +21644,7 @@ en_pairs_rfive_mtwo
 
 \end_inset
 </cell>
-<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
 \begin_inset Text
 
 \begin_layout Plain Layout
@@ -21519,7 +21653,7 @@ en_pairs_rfive_mtwo
 
 \end_inset
 </cell>
-<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
 \begin_inset Text
 
 \begin_layout Plain Layout
@@ -21528,7 +21662,7 @@ en_pairs_rfive_mtwo
 
 \end_inset
 </cell>
-<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
 \begin_inset Text
 
 \begin_layout Plain Layout
@@ -21537,7 +21671,7 @@ en_pairs_rfive_mtwo
 
 \end_inset
 </cell>
-<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
 \begin_inset Text
 
 \begin_layout Plain Layout
@@ -21546,7 +21680,7 @@ en_pairs_rfive_mtwo
 
 \end_inset
 </cell>
-<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
 \begin_inset Text
 
 \begin_layout Plain Layout
@@ -21555,7 +21689,7 @@ en_pairs_rfive_mtwo
 
 \end_inset
 </cell>
-<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
 \begin_inset Text
 
 \begin_layout Plain Layout
@@ -21564,7 +21698,7 @@ en_pairs_rfive_mtwo
 
 \end_inset
 </cell>
-<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
 \begin_inset Text
 
 \begin_layout Plain Layout
@@ -21573,11 +21707,94 @@ en_pairs_rfive_mtwo
 
 \end_inset
 </cell>
-<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
 \begin_inset Text
 
 \begin_layout Plain Layout
 zen_pairs_mst
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+85K x4.88M
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+7.02M
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+17.8M
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+2.54
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+20.48
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+17.06
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+9.52
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+6.10
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+zen_pairs_three_mst
 \end_layout
 
 \end_inset
@@ -21613,6 +21830,46 @@ Left-Right The left and right entropies, as defined previously.
  holds, by definition.
  Not given for the word-pairs table, because these two are nearly equal,
  and are half the difference between the entropy and the MI.
+\end_layout
+
+\begin_layout Standard
+Note how the MI is considerably larger than that for the word-pairs.
+ Higher MI implies a stronger correlation, and this is good: this suggests
+ that the disjuncts are capturing meaningful structures in the language.
+\end_layout
+
+\begin_layout Standard
+The behavior of the 
+\begin_inset Quotes eld
+\end_inset
+
+zen
+\begin_inset Quotes erd
+\end_inset
+
+ dataset might be explained by two issues that this dataset has.
+ The smaller 
+\begin_inset Quotes eld
+\end_inset
+
+zen_pairs_mst
+\begin_inset Quotes erd
+\end_inset
+
+ dataset is tiny, with a large fraction (most?) words observed only once,
+ most disjuncts observed only once, and so the high MI being a false signal,
+ an artifact of the tiny size of the set.
+ By contrast, the unexpectedly low MI on the 
+\begin_inset Quotes eld
+\end_inset
+
+zen_pairs_three_mst
+\begin_inset Quotes erd
+\end_inset
+
+ dataset might be blamed on the 3rd-party word segmentation tool.
+ It is known not to be very accurate, and the low MI might be a by-product
+ of that.
 \end_layout
 
 \begin_layout Section*
