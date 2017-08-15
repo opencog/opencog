@@ -483,13 +483,15 @@ you can start exploring.
 ```
   (use-modules (opencog) (opencog persist) (opencog persist-sql))
   (use-modules (opencog nlp) (opencog nlp learn))
+  (use-modules (opencog matrix))
   (sql-open "postgres:///en_pairs_sim?user=linas")
   (fetch-all-words)
   (length (get-all-words))
   ; This reports 396262 for one my DB's has.
 
   (define pca (make-pseudo-cset-api))
-  (pca 'fetch-pairs)
+  (define psa (add-pair-stars pca))
+  (psa 'fetch-pairs)
   (define all-cset-words (get-all-cset-words))
   (length all-cset-words)
   ; This reports 37413 in for my `en_pairs_sim`.
@@ -516,6 +518,15 @@ you can start exploring.
   The `lang-learn-diary/disjunct-stats.scm` file contains ad-hoc code
   used to prepare the summary report.  To use it, just cut-n-paste to
   the guile prompt, to get it to do things.
+
+  The marginal entropies and the mutual information between words and
+  disjuncts can be computed in the same way that it's done for
+  word-pairs:
+```
+  (define pca (make-pseudo-cset-api))
+  (define psa (add-pair-stars pca))
+  (batch-pairs psa)
+```
 
 
 Precomputed LXC containers
@@ -596,9 +607,6 @@ TODO List
 =========
 * Count single-word probabilities.
 * Resume work on morphology.
-* Create an LXC container for public use. DONE.
-  But not updated....
-* Prune low observation counts.
 * Implement sql-delete.
 
 DONE
@@ -633,6 +641,10 @@ DONE
 * Fix (WordNode "…!ANY-PUNCT") Done.
 * Rework pipeline to use literary English sources. DONE.
   New scripts in the `download` directory.
+* Prune low observation counts. Well, no that is a bad idea.
+  However, the (opencog matrix) code now includes data filters.
+* Create an LXC container for public use. DONE.
+  But not updated.... Well no one is interested in thsi so punt.
 
 
 Some typical entropies for word-pairs
