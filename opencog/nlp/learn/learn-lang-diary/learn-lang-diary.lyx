@@ -23862,7 +23862,8 @@ One reason that a disjunct representation of a graph is important is that
  This is in contrast to the vertex-edge model.
  where neither vertexes nor edges can be composed to obtain a new vertex
  or edge.
- That is, disjuncts form a monoidal category.
+ That is, disjuncts form a monoidal category, and, specifically, a compact-close
+d category.
  This section tries to spell out very clearly what this means, if it is
  not already apparent.
  
@@ -23985,6 +23986,20 @@ The point here is that the category of disjuncts can be taken to be a monoidal
  tensor together two disjuncts, but also to contract some of the connectors,
  as well.
  
+\end_layout
+
+\begin_layout Standard
+The contractability of connectors into links means that the Link Grammar
+ forms a compact-closed category.
+ Its too boring for me to walk through this, but its a good exercise for
+ someone.
+ 
+\end_layout
+
+\begin_layout Standard
+What's the point of all this? Well categorical grammars are all the rage,
+ and the fact that LG is a categorical grammar seems to be frequently overlooked
+ or misunderstood.
 \end_layout
 
 \begin_layout Subsection*
