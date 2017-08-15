@@ -11589,6 +11589,13 @@ world .
 \end_inset
 
 
+\begin_inset CommandInset label
+LatexCommand label
+name "Table:prototype table"
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -11673,6 +11680,209 @@ Why is this a reasonable thing to do? Well, the previous two tables already
  More subtle differences carrying a semantic signal might be getting washed
  out in this process.
  Perhaps the sos cosine score would be more sensitive to those processes.
+\end_layout
+
+\begin_layout Subsection*
+Prototype Theory
+\end_layout
+
+\begin_layout Standard
+Another way to interpret the table 
+\begin_inset CommandInset ref
+LatexCommand vpageref
+reference "Table:prototype table"
+
+\end_inset
+
+ is that the highest MI entry defines the 
+\begin_inset Quotes eld
+\end_inset
+
+prototype
+\begin_inset Quotes erd
+\end_inset
+
+ for the class of similar words.
+ That is, the cosine score suggests that (world, city, village, house) should
+ be taken as a grammatical category.
+ The highest-MI entry suggests that 
+\begin_inset Quotes eld
+\end_inset
+
+world
+\begin_inset Quotes erd
+\end_inset
+
+ should be taken as the prototype for this class.
+ 
+\end_layout
+
+\begin_layout Standard
+Here, the intended sense for 
+\begin_inset Quotes eld
+\end_inset
+
+prototype
+\begin_inset Quotes erd
+\end_inset
+
+ is that of 
+\begin_inset Quotes eld
+\end_inset
+
+
+\begin_inset CommandInset href
+LatexCommand href
+name "prototype theory"
+target "https://en.wikipedia.org/wiki/Prototype_theory"
+
+\end_inset
+
+
+\begin_inset Quotes erd
+\end_inset
+
+ of cognitive semantics, which suggests that a good representative of a
+ class provides the underlying 
+\begin_inset Quotes eld
+\end_inset
+
+meaning
+\begin_inset Quotes erd
+\end_inset
+
+ of an otherwise flat description of the extensional and intensional qualities
+ of a set.
+ To create a brige to the statistical tools available here, one might say
+ that an intensional or an extensional description of a class is a flat,
+ unweighted collection of features or members.
+ In fact, some features or members are more important than others, so that
+ a 
+\begin_inset Quotes eld
+\end_inset
+
+robin
+\begin_inset Quotes erd
+\end_inset
+
+ is a better representative of 
+\begin_inset Quotes eld
+\end_inset
+
+birds
+\begin_inset Quotes erd
+\end_inset
+
+ than a 
+\begin_inset Quotes eld
+\end_inset
+
+penguin
+\begin_inset Quotes erd
+\end_inset
+
+ is.
+ There are at least two ways of judging a 
+\begin_inset Quotes eld
+\end_inset
+
+better representative
+\begin_inset Quotes erd
+\end_inset
+
+: frequency, and MI.
+ A frequency approach means that 
+\begin_inset Quotes eld
+\end_inset
+
+robins
+\begin_inset Quotes erd
+\end_inset
+
+ are more prototypical of birds simply because cultural English speakers
+ (Americans, Europeans) see robins more frequently than penguins, and so
+ are aculturated to this prototype.
+ The MI approach means that robins are more prototypical of birds because
+ they have a high MI, when correlating intensional and extensional qualities.
+ That is, a large value for 
+\begin_inset Formula 
+\[
+mi(robin)=\sum_{feat\in bird-features}mi(robin,feat)
+\]
+
+\end_inset
+
+states that robins have many bird-like qualities.
+ Likewise, feathers are more representative of birds than weight or color,
+ suggesting a large value for 
+\begin_inset Formula 
+\[
+mi(feather)=\sum_{bird\in birds}mi(bird,feather)
+\]
+
+\end_inset
+
+where the individual MI score was computed over all pairs (thing, feature)
+ over the class of all things and all features.
+ 
+\end_layout
+
+\begin_layout Standard
+What determines a category itself? Wikipedia summerizes this aptly:
+\end_layout
+
+\begin_layout Itemize
+maximize the number of attributes shared by members of the category, and
+ 
+\end_layout
+
+\begin_layout Itemize
+minimize the number of attributes shared with other categories.
+\end_layout
+
+\begin_layout Standard
+Taking 
+\begin_inset Quotes eld
+\end_inset
+
+attribute
+\begin_inset Quotes erd
+\end_inset
+
+ to be a disjunct, and 
+\begin_inset Quotes eld
+\end_inset
+
+member
+\begin_inset Quotes erd
+\end_inset
+
+ to be a word, this suggests that a grammatical category is a coolection
+ of words that share many disjuncts (large overlap, large cosine similarity),
+ while minimizing the disjuncts shared with other words (large MI).
+\end_layout
+
+\begin_layout Standard
+The later point is perhaps the most important: MI scores provide a sense
+ of 
+\begin_inset Quotes eld
+\end_inset
+
+mutual exclusion
+\begin_inset Quotes erd
+\end_inset
+
+: a word-disjunct pair has a high MI exactly when that disjunct is not shared
+ with other words.
+ This motivates a measure such as the 
+\begin_inset Quotes eld
+\end_inset
+
+quality cosine
+\begin_inset Quotes erd
+\end_inset
+
+, given below.
 \end_layout
 
 \begin_layout Subsection*
