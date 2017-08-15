@@ -7147,6 +7147,56 @@ select count(*) from valuations; -- 47599360 == 47.6M
 9f7a097611c2e0196e626038a26869ba  zen_pairs_three_mi.sql.bz2
 
 ==================================================================
+zen_pairs_three_mst
+-------------------
+Mandarin word-pairs. Segmentation into words done by Ruiting.
+This is the alpha-segmented-1 texts plus 100 texts from
+alpha-segmented-2 (aka alpha-segmented-2-part1). MST parsed,
+and include disjunct MI's and marginals.
+
+STATUS: good
+DATE: 15 August 2017
+REASON: No known defects.
+
+                        List of relations
+ Schema |    Name    | Type  | Owner  |    Size    | Description 
+--------+------------+-------+--------+------------+-------------
+ public | atoms      | table | ubuntu | 4300 MB    | 
+ public | spaces     | table | ubuntu | 40 kB      | 
+ public | typecodes  | table | ubuntu | 56 kB      | 
+ public | valuations | table | ubuntu | 9589 MB    | 
+ public | values     | table | ubuntu | 8192 bytes | 
+
+Summary Report for Correlation Matrix Word-Disjunct Pairs (Connector Sets)
+Left type: WordNode    Right Type: ConnectorSeq    Pair Type: Section
+Wildcard: (ListLink (ctv 0 0 17846845)
+   (AnyNode "cset-word")
+   (AnyNode "cset-disjunct")
+)
+Rows: 84656 Columns: 4889243
+Size: 7015959 non-zero entries of 413903755408 possible
+Fraction non-zero: 1.6951E-5 Sparsity (-log_2): 15.848
+Total observations: 17846845.0  Avg obs per pair: 2.5437
+Entropy Total: 20.476   Left: 17.060   Right: 9.5156
+Total MI: 6.0994
+
+                 Left         Right     Avg-left     Avg-right
+                 ----         -----     --------     ---------
+Support (l_0)  1.0066E+5    3158.    
+Count   (l_1)  3.4329E+5    4.6825E+4     3.410        14.83    
+Length  (l_2)  2.2804E+4    8751.         .2265        2.771    
+RMS Count      2.2762E+4    8671.         .2261        2.745    
+
+select count(*) from atoms;      -- 47962056 == 47.9M
+select count(*) from valuations; -- 93516734 == 93.5M
+
+7648907200 bytes uncompressed == 7.65GBytes
+1077724617 bytes compressed   == 1.08 GBytes
+
+2d23fd42209ac9c3fdf7c7d599262069  zen_pairs_three_mst.sql
+31543876d6b836f9d6a53e9cd0a75a25  zen_pairs_three_mst.sql.bz2
+
+==================================================================
 ==================================================================
 ==================================================================
 ==================================================================
