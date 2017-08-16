@@ -50,20 +50,37 @@
 (define (atomspace->string as)
   (let* ((old-as (cog-set-atomspace! as))
          ;; Get all atoms in as
-         (all-atoms (apply append (map cog-get-atoms (cog-get-types))))
-         (atom->string (lambda (h)
-                         (cog-logger-debug "h = ~a" h)
-                         (cog-logger-debug "(length (cog-incoming-set h)) = ~a"
-                                           (length (cog-incoming-set h)))
-                         (cog-logger-debug "(null? (cog-incoming-set h)) = ~a"
-                                           (null? (cog-incoming-set h)))
-                         (if (null? (cog-incoming-set h))  ; Avoid redundant
-                                                           ; corrections
-                             (format "~a" h)
-                             "")))
-         (all-atoms-string (apply string-append (map atom->string all-atoms))))
+         (all-atoms (get-all-atoms))
+         (all-atoms-strings (map atom->string (get-all-atoms)))
+         (all-atoms-string (apply string-append all-atoms-strings)))
+    ;; (cog-logger-debug "types = ~a" types)
+    ;; (cog-logger-debug "all-atoms (handles) = ~a" (map cog-handle all-atoms))
     (cog-set-atomspace! old-as)
     all-atoms-string))
+
+(define (get-all-atoms)
+  (apply append (map get-and-log-atoms (cog-get-types))))
+
+(define (get-and-log-atoms type)
+  (let* ((atoms (cog-get-atoms type)))
+    (cog-logger-debug "get-and-log-atoms type = ~a" type)
+    (cog-logger-debug "get-and-log-atoms atoms = ~a" (map cog-handle atoms))
+    atoms))
+
+;; Convert the given atom into a string if its incoming set is null,
+;; otherwise the string is empty.
+(define (atom->string h)
+  (cog-logger-debug "(length (cog-incoming-set ~a)) = ~a"
+                    (cog-handle h)
+                    (length (cog-incoming-set h)))
+  (cog-logger-debug "(null? (cog-incoming-set ~a)) = ~a"
+                    (cog-handle h)
+                    (null? (cog-incoming-set h)))
+  (cog-logger-debug "h[~a] = ~a" (cog-handle h) h)
+  (if (null? (cog-incoming-set h))  ; Avoid redundant
+                                    ; corrections
+      (format "~a" h)
+      ""))
 
 ;; Remove dangling atoms from an atomspace. That is atoms with default
 ;; TV (null confidence) with empty incoming set

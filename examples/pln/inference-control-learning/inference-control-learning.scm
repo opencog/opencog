@@ -23,19 +23,19 @@
 ;; Set loggers levels
 (cog-logger-set-level! (cog-ure-logger) "debug")
 (cog-logger-set-level! icl-logger "debug")
-(cog-logger-set-level! "info")
+(cog-logger-set-level! "debug")
 
 ;; Set loggers stdout
 (cog-logger-set-stdout! icl-logger #t)
 
 ;; ;; Set loggers sync (for debugging)
-;; (cog-logger-set-sync! #t)
-;; (cog-logger-set-sync! icl-logger #t)
-;; (cog-logger-set-sync! (cog-ure-logger) #t)
+(cog-logger-set-sync! #t)
+(cog-logger-set-sync! icl-logger #t)
+(cog-logger-set-sync! (cog-ure-logger) #t)
 
 ;; Set parameters
 (define pss 5)                          ; Problem set size
-(define niter 2)                         ; Number of iterations
+(define niter 1)                         ; Number of iterations
 
 (define (run-experiment)
   (icl-logger-info "Start experiment")
