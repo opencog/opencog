@@ -20252,6 +20252,19 @@ en_pairs_rfive As above, tranche 1,2,3,4 & 5.
 \end_layout
 
 \begin_layout Description
+en_pairs_rfive_mtwo The MST parses of tranches 1-2, performed on the word-pairs
+ computed from en_pairs_rfive.
+ That is, the word-pair stats were accumulated to completion first, before
+ the MST parsing is started.
+\end_layout
+
+\begin_layout Description
+en_pairs_rfive_mst As above, except that this is the MST parse of all of
+ the tranches 1-5.
+ That is, the MST corpus is the same corpus as the word-pair corpus.
+\end_layout
+
+\begin_layout Description
 zh_pairs_sone A parse of Mandarin Wikipedia, with each individual character
  (hanzi) treated as a single item (so that, during pair-counting, pairs
  are formed between items).
@@ -21368,7 +21381,7 @@ Next, datasets that hold disjuncts.
 \begin_layout Standard
 \align center
 \begin_inset Tabular
-<lyxtabular version="3" rows="5" columns="9">
+<lyxtabular version="3" rows="6" columns="9">
 <features tabularvalignment="middle">
 <column alignment="center" valignment="top" width="0">
 <column alignment="center" valignment="top" width="0">
@@ -21629,6 +21642,89 @@ en_pairs_sim
 
 \begin_layout Plain Layout
 en_pairs_rfive_mtwo
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+522K x 25.2M
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+en_pairs_rfive_mst
 \end_layout
 
 \end_inset
@@ -23991,8 +24087,9 @@ The point here is that the category of disjuncts can be taken to be a monoidal
 \begin_layout Standard
 The contractability of connectors into links means that the Link Grammar
  forms a compact-closed category.
- Its too boring for me to walk through this, but its a good exercise for
- someone.
+ I've been through this one too many times, so won't try to sketch this
+ here.
+ It is a good homework exercise for novices.
  
 \end_layout
 
@@ -27851,6 +27948,177 @@ If this was a European language, we would expect any extra links to attach
 \end_layout
 
 \begin_layout Section*
+Meaning
+\end_layout
+
+\begin_layout Standard
+So here's one approach to meaning.
+ It is already clear that disjuncts are correlated with meaning, so one
+ provisional approach might be to assign each disjunct a unique meaning.
+ Alternately, this can be used as a doorway to the intensional meaning of
+ a word.
+ 
+\end_layout
+
+\begin_layout Standard
+Consider the phrases 
+\begin_inset Quotes eld
+\end_inset
+
+the big balloon
+\begin_inset Quotes erd
+\end_inset
+
+, 
+\begin_inset Quotes eld
+\end_inset
+
+the red balloon
+\begin_inset Quotes erd
+\end_inset
+
+, 
+\begin_inset Quotes eld
+\end_inset
+
+the small ballon
+\begin_inset Quotes erd
+\end_inset
+
+...
+ The pseudo-disjuncts on balloon in these three cases would be 
+\begin_inset Quotes eld
+\end_inset
+
+the- big-
+\begin_inset Quotes erd
+\end_inset
+
+ 
+\begin_inset Quotes eld
+\end_inset
+
+the - red-
+\begin_inset Quotes erd
+\end_inset
+
+ and 
+\begin_inset Quotes eld
+\end_inset
+
+the- small-
+\begin_inset Quotes erd
+\end_inset
+
+ (plus an additional connector to the verb).
+ Examining this connector-by-connector, we expect that the MI for the word
+ pair (the, balloon) to be small, while the MI for the word-pairs (big,
+ balloon), (red, balloon) and (small, balloon) to be large(r).
+ Its thus tempting to identify the set {big, red, small} as the set of intension
+al attributes associated with 
+\begin_inset Quotes eld
+\end_inset
+
+balloon
+\begin_inset Quotes erd
+\end_inset
+
+.
+ The strength of the MI values to each of the connectors might be taken
+ as a judgement of how much that attribute is prototypical of the object
+ (see other section on 
+\begin_inset Quotes eld
+\end_inset
+
+prototype theory
+\begin_inset Quotes erd
+\end_inset
+
+).
+\end_layout
+
+\begin_layout Standard
+The disjuncts associated with 
+\begin_inset Quotes eld
+\end_inset
+
+balloon
+\begin_inset Quotes erd
+\end_inset
+
+ will also connect to a verb.
+ These verb connectors may be taken as another set of intensional attributes,
+ for example {floats, drifts, rose, popped}.
+ It should be possible to distinguish these as an orthogonal set of attributes,
+ in that one might observe 
+\begin_inset Quotes eld
+\end_inset
+
+the- red- floats+
+\begin_inset Quotes erd
+\end_inset
+
+ and 
+\begin_inset Quotes eld
+\end_inset
+
+the- red- drifts+
+\begin_inset Quotes erd
+\end_inset
+
+ but never observe 
+\begin_inset Quotes eld
+\end_inset
+
+floats- drifts+
+\begin_inset Quotes erd
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Section*
+The Plan
+\end_layout
+
+\begin_layout Standard
+Here's the plan.
+ Its time for a more complete day-to-day activity plan.
+ So:
+\end_layout
+
+\begin_layout Itemize
+Collect more zh stats.
+\end_layout
+
+\begin_layout Itemize
+Write code to extract zh words, per discussion above.
+\end_layout
+
+\begin_layout Itemize
+Write code to create 
+\begin_inset Quotes eld
+\end_inset
+
+grammatical classes
+\begin_inset Quotes erd
+\end_inset
+
+, by merging similar words, and decomposing the remainders into orthogonal
+ components.
+ This requires definingthe types, doing the merging, documenting, and setting
+ up the export code to handle this.
+\end_layout
+
+\begin_layout Itemize
+Work on meaning extraction
+\end_layout
+
+\begin_layout Itemize
+Hook it to PLN...
+\end_layout
+
+\begin_layout Section*
 TODO
 \end_layout
 
@@ -27867,6 +28135,7 @@ mutual exclusion
 \end_inset
 
  principle.
+ Well, MI already provides a certain measure of exclusivity.
 \end_layout
 
 \begin_layout Section*
