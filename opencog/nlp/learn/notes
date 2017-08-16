@@ -13228,9 +13228,11 @@ wtf:
  fatal flex scanner internal error--end of buffer missed
 en_pairs_rfive_mi
 
+Need lock.
+
 
 =========================================================================
-very good:
+OK-ish misses the mark:
 arxiv 1703.08314v1 coecke Interacting conceptual spaces
 
 
@@ -13259,3 +13261,11 @@ Bugs: while mst parsing, guile goes GC-crazy after a while, and
       never recovers.
 
 Items: create LG feederbacker
+
+Bugs; get rid of [!] in words
+
+Bugs: cleanup zen due to above
+Bugs: clean up zh due to above
+Bugs: cleanup embedded daashes in en 
+
+Bugs
