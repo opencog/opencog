@@ -13228,7 +13228,34 @@ wtf:
  fatal flex scanner internal error--end of buffer missed
 en_pairs_rfive_mi
 
-Need lock.
+Need lock. DONE.
+--------------
+
+also -- dump the all-atoms thing!!!!
+
+line 460 of compute-mi.scm do-one-pair
+(right-loop
+(WordNode "fields" 
+
+(define psf (add-pair-freq-api psa))
+(define (dop lipr)
+	(format #t "yo ~A" lipr )
+	(format #t "has ~A\n" (psf 'pair-freq lipr))
+)
+(for-each dop rs)
+
+(Section
+   (WordNode "fields")
+   (ConnectorSeq
+      (Connector (WordNode "the" ) (ConnectorDir "-"))
+      (Connector (WordNode "broad" ) (ConnectorDir "-"))
+      (Connector (WordNode "rice" ) (ConnectorDir "+"))
+      (Connector (WordNode "passes" ) (ConnectorDir "+"))
+      (Connector (WordNode "." ) (ConnectorDir "+"))
+   )
+)
+
+(psf 'set-pair-freq fa  1.285376022487705e-8)
 
 
 =========================================================================
@@ -13262,10 +13289,10 @@ Bugs: while mst parsing, guile goes GC-crazy after a while, and
 
 Items: create LG feederbacker
 
-Bugs; get rid of [!] in words
+Bugs; get rid of [!] in words DONE
 
 Bugs: cleanup zen due to above
 Bugs: clean up zh due to above
 Bugs: cleanup embedded daashes in en 
 
-Bugs
+Bugs: get rid of all-atoms in matrix
