@@ -20,6 +20,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <mutex>
+
 #include <link-grammar/link-includes.h>
 #include <opencog/util/Logger.h>
 #include <opencog/nlp/types/atom_types.h>
@@ -79,6 +81,14 @@ Dictionary LgDictNode::get_dictionary()
 
 	lg_error_set_handler(error_handler, nullptr);
 	const char * lang = getName().c_str();
+
+	// Link grammar dictionary creation is NOT thread-safe.
+	static std::mutex _global_mtx;
+	std::lock_guard<std::mutex> lck(_global_mtx);
+
+	// Check again, this time under the lock.
+	if (_dict) return _dict;
+
 	_dict = dictionary_create_lang(lang);
 	return _dict;
 }
