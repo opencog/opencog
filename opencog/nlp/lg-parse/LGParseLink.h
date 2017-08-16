@@ -48,8 +48,8 @@ class LGParseLink : public FunctionLink
 {
 protected:
 	void init();
-	Handle cvt_linkage(Linkage, int, const char*, bool,
-	                   AtomSpace*) const;
+	Handle cvt_linkage(Linkage, int, const char*, const char*,
+	                   bool, AtomSpace*) const;
 
 public:
 	LGParseLink(const HandleSeq&, Type=LG_PARSE_LINK);
