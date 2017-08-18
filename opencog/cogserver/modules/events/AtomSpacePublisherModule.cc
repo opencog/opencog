@@ -39,7 +39,6 @@
 #include <opencog/truthvalue/ProbabilisticTruthValue.h>
 #include <opencog/truthvalue/FuzzyTruthValue.h>
 #include <opencog/truthvalue/IndefiniteTruthValue.h>
-#include <opencog/truthvalue/GenericTruthValue.h>
 
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atoms/base/Link.h>
@@ -388,19 +387,6 @@ Object AtomSpacePublisherModule::tvToJSON(TruthValuePtr tvp)
         jsonDetails.push_back(Pair("strength", tvp->getMean()));
         jsonDetails.push_back(Pair("count", tvp->getCount()));
         jsonDetails.push_back(Pair("confidence", tvp->getConfidence()));
-        json.push_back(Pair("details", jsonDetails));
-    }
-    else if (tvt == GENERIC_TRUTH_VALUE) {
-        auto gtvp = std::dynamic_pointer_cast<const GenericTruthValue>(tvp);
-
-        json.push_back(Pair("type", "generic"));
-        jsonDetails.push_back(Pair("positive-evidence",
-            gtvp->getPositiveEvidence()));
-        jsonDetails.push_back(Pair("total-evidence", gtvp->getTotalEvidence()));
-        jsonDetails.push_back(Pair("frequency", gtvp->getFrequency()));
-        jsonDetails.push_back(Pair("fuzzy-strength", gtvp->getFuzzyStrength()));
-        jsonDetails.push_back(Pair("confidence", gtvp->getConfidence()));
-        jsonDetails.push_back(Pair("entropy", gtvp->getEntropy()));
         json.push_back(Pair("details", jsonDetails));
     }
     else {
