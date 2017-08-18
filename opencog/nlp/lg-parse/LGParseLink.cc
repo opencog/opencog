@@ -26,7 +26,7 @@
 #include <link-grammar/link-includes.h>
 
 #include <opencog/atoms/base/Node.h>
-#include <opencog/atoms/NumberNode.h>
+#include <opencog/atoms/core/NumberNode.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/nlp/lg-dict/LGDictNode.h>
 #include "LGParseLink.h"
