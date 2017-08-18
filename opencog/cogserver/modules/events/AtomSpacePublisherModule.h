@@ -116,6 +116,7 @@ class AtomSpacePublisherModule : public Module
         Object atomToJSON(Handle h);
         Object tvToJSON(TruthValuePtr tv);
         Object avToJSON(AttentionValuePtr av);
+        // TODO: add protoatom to JSON functionality
 
         DECLARE_CMD_REQUEST(AtomSpacePublisherModule, "publisher-enable-signals",
            do_publisherEnableSignals,
