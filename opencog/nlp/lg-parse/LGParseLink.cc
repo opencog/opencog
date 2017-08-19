@@ -260,7 +260,10 @@ Handle LGParseLink::cvt_linkage(Linkage lkg, int i, const char* idstr,
 		if (eb == sb)
 			wrd = linkage_get_word(lkg, w);
 		else
+		{
+			if (' ' == phrstr[eb]) eb--;
 			wrd = strndupa(phrstr + sb, eb-sb+1);
+		}
 
 		char buff[801] = "";
 		strncat(buff, wrd, 800);
