@@ -69,7 +69,7 @@
 ;; The cache lifetime is a single call of a Microplanner query
 (define-public (cached-sureal a-set-link)
 "
-  sureal SETLINK -- main entry point for sureface realization
+  sureal SETLINK -- main entry point for surface realization
 
   Expect SETLINK to be a SetLink -- since it is assumed that the
   output of the micro-planner is unordered.
