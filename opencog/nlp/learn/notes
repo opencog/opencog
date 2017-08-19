@@ -13286,6 +13286,192 @@ wait -- were teh uuids removed? yes they were.
 cog-delete-recursive is weierd
 how to find handles....  handle_to_scm won't work.
 
+-----------------
+(define subtotal-obj (add-subtotal-mi-compute psa))
+(subtotal-obj 'cache-all-subtotals)
+
+         (for-each cache-left-entropy (star-obj 'right-basis))
+
+(define fail '())
+(define (cle rig) (set! fail rig) (psf  'left-wild-freq rig))
+(for-each cle (psa 'right-basis))
+
+(define fail '())
+(define (wtf rig)
+	(for-each (lambda (pr) (set! fail pr) (psf 'pair-mi pr))
+		(psa 'left-stars rig)))
+(for-each wtf (psa 'right-basis))
+
+(define cs 
+(ConnectorSeq
+   (Connector (WordNode "the") (ConnectorDir "-"))
+   (Connector (WordNode "broad") (ConnectorDir "-"))
+   (Connector (WordNode "rice") (ConnectorDir "+"))
+   (Connector (WordNode "passes") (ConnectorDir "+"))
+   (Connector (WordNode ".") (ConnectorDir "+"))))
+fields, again!
+(cog-set-tv!  (ListLink (AnyNode "cset-word") cs) (ctv 1 0 1))
+
+(define lw (ListLink (AnyNode "cset-word") cs))
+(define sec (Section  (WordNode "fields") cs))
+(psf 'set-left-wild-freq cs (psf 'pair-freq sec))
+(store-atom sec)
+(store-atom cs)
+
+(psf 'pair-mi  sec)
+
+
+(define fail '())
+(define (cle rig) (set! fail rig) (psf  'right-wild-freq rig))
+(for-each cle (psa 'left-basis))
+--------------------
+
+
+(fetch-all-words)
+
+(define aw (get-all-words))
+(length aw)
+
+(define abw '())
+
+; Look for foo[!]
+(define (is-bad? wstr)
+	(define wlen (string-length wstr))
+	(if (< 2 wlen)
+		(let ((ope (string-ref wstr (- wlen 3)))
+				(clo (string-ref wstr (- wlen 1))))
+			(and (equal? #\[ ope) (equal? #\] clo)))
+		#f))
+	
+
+; Look for trailing blank.
+(define (is-bad? wstr)
+	(define wlen (string-length wstr))
+	(equal? #\space  (string-ref wstr (- wlen 1))))
+	
+
+; Look for embedded punctuation.
+; embeded OK short-dash, periiods quote. -’'.
+; period colon comma if numeric.  :.,·
+; dot-if-numeric is OK.
+; Embedded bad: two or more dots, two or more dashes
+; —
+; leading or trailing _
+; more than one dash.
+(define (is-bad? wstr)
+	(define wlen (string-length wstr))
+	(define punc (string-index wstr char-set:punctuation))
+	(cond
+		((not punc) #f)
+		((= 1 wlen) #f)
+		((and (equal? (string-ref wstr punc) #\.)  (string-ref wstr 0)
+		(and (< 0 punc) (< punc wlen)) #f)
+)
+
+English: all embeded punct: 342245
+(length (get-all-words))  ; 851964
+
+(define cnt 0)
+(define start 0)
+(define (get-bad wrdnod)
+	(define wstr (cog-name wrdnod))
+	(define wlen (string-length wstr))
+	(if (is-bad? wstr)
+		(begin
+			(set! cnt (+ cnt 1))
+			; (set! abw (cons wrdnod abw))
+			; (cog-delete-recursive wrdnod)
+			(if (equal? 0 (modulo cnt 1000))
+				(let ((end (current-time)))
+					(format #t "deleted ~D ~A in ~A secs\n"
+		 				cnt wstr (- end start))
+					(set! start end)))
+		)))
+
+(define start (current-time))
+(for-each get-bad (get-all-words))
+
+zh only has 5653 bad words...
+
+with txn, running at 7 secs-ish or sometime12 12-14 ish
+deleted 1000 阿紫道[!] in 111 secs
+deleted 2000 一百二十斤[!] in 97 secs
+deleted 3000 可呼守用[!] in 205 secs
+deleted 4000 這玉才[!] in 158 secs
+deleted 5000 真有假[!] in 68 secs
+deleted 6000 吹号[!] in 73 secs
+deleted 7000 诺扑乐[!] in 78 secs
+deleted 8000 找起[!] in 75 secs
+deleted 9000 碎砖[!] in 87 secs
+deleted 10000 地向床[!] in 82 secs
+deleted 11000 安恬[!] in 98 secs
+
+
+without txn, run at ... 
+deleted 1000 肢体冲突[!] in 91 secs
+deleted 2000 掮客[!] in 96 secs
+deleted 3000 华然[!] in 106 secs
+deleted 4000 诚诚[!] in 125 secs
+deleted 5000 那陷[!] in 115 secs
+
+
+write queue is always a store....
+
+(fetch-all-words)
+
+
+84894 
+2 .... 18 
+
+reg: 377872  RSS  fetch in 75  total of 
+max-load=3 -- 376524  piffle
+
+
+zen: before
+atoms  45733040 = 45M
+vals:  26941144 = 27M
+468821  words...
+383945 bad words ... x 0.1secs/word = 10 hours. Yikes!
+
+again, restart: 
+
+zen_pairs_two
+zen_pairs_three
+
+why so slow?
+---
+SELECT key FROM Valuations WHERE atom = 
+SELECT uuid FROM Atoms WHERE outgoing @> ARRAY[CAST(%lu AS BIGINT)]
+SELECT * FROM Valuations WHERE key = %lu AND atom = %lu;
+DELETE FROM Valuations WHERE key = %lu AND atom = %lu
+
+\di+ 
+!!Missing:
+CREATE INDEX ON Valuations (key);  but not needed either...
+queue them up...
+
+select waiting, state, query_start, query from pg_stat_activity;
+state_change
+
+wtf: SELECT * FROM Atoms WHERE type = -- from loadType wtf??? OK, idle.
+
+CREATE INDEX incoming_idx on Atoms USING GIN(outgoing);
+
+EXPLAIN ANALYZE
+SELECT uuid FROM Atoms WHERE outgoing @> ARRAY[CAST(39859733 AS BIGINT)];
+17 seconds to run query
+
+
+wtf zh gets a trailing blank!  dammit
+1392 of them.
+
+(use-modules (opencog exec))
+(cog-execute! (LgParse (PhraseNode "派  解  嚎  嗒") (LgDict "any")))
+(cog-get-atoms 'WordNode)
+
+
+
+
 
 =========================================================================
 OK-ish misses the mark:
@@ -13308,21 +13494,23 @@ multi-connectors only ... with the incorrect mutiplicities.
 ??? Is this still an issue? 
 
 Bugs: using ListLink for the partial sums on csets... why???
+      (ListLink (AnyNode "cset-word") (ConnectorSeq...))
+      instead of (Section ...)
 
 Bugs: graphing takes too long.
 
 Bugs: follow up on the guile hang bug - its a string parsing thing.
 
 Bugs: while mst parsing, guile goes GC-crazy after a while, and
-      never recovers.
+      never recovers. (doesn't happen with shorter dist links.)
 
 Items: create LG feederbacker
 
 Bugs; get rid of [!] in words DONE
 
 Bugs: cleanup zen due to above
-Bugs: clean up zh due to above
-Bugs: cleanup embedded daashes in en 
+Bugs: clean up zh due to above    DONE
+Bugs: cleanup embedded dashes in en 
 
-Bugs: get rid of all-atoms in matrix
+Bugs: get rid of all-atoms in matrix  DONE
 
