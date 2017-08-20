@@ -342,7 +342,7 @@
 ; --------------------------------------------------------------------
 (define-public (delete-sentence sent)
 "
-  delete-sentence -- delete all atoms associated with a sentence.
+  delete-sentence SENT -- delete all atoms associated with a sentence.
 
   Delete the parses and word-instances associated with the sentence,
   including LemmaLink's, ReferenceLinks, RelEx relations, and
@@ -360,7 +360,7 @@
 "
 	; Purge stuff associated with a single LgLinkInstanceNode
 	(define (extract-link-instance li)
-		(if (not (null? li)) (cog-extract-recursive li))
+		(if (cog-atom? li) (cog-extract-recursive li))
 	)
 
 	; Purge stuff associated with a single word-instance.
@@ -390,15 +390,17 @@
 	(define (extract-word-instance wi)
 		(for-each
 			(lambda (x)
-				(if (eq? 'ListLink (cog-type x))
-					(for-each extract-link-instance
-						(cog-chase-link 'EvaluationLink 'LgLinkInstanceNode x)))
+				(cond
+					((not (cog-atom? x)) #f)
+					((eq? 'ListLink (cog-type x))
+						(for-each extract-link-instance
+							(cog-chase-link 'EvaluationLink 'LgLinkInstanceNode x)))
 
-				; Extract the NumberNode, but only if it's not used.
-				(if (eq? 'WordSequenceLink (cog-type x))
-					(let ((oset (cog-outgoing-set x)))
-						(cog-extract x)
-						(cog-extract (cadr oset)))))
+					; Extract the NumberNode, but only if it's not used.
+					((eq? 'WordSequenceLink (cog-type x))
+						(let ((oset (cog-outgoing-set x)))
+							(cog-extract x)
+							(cog-extract (cadr oset))))))
 			(cog-incoming-set wi))
 		(cog-extract-recursive wi)
 	)
@@ -414,7 +416,7 @@
 	(define (extract-parse parse)
 		(for-each
 			(lambda (x)
-				(if (eq? 'WordInstanceLink (cog-type x))
+				(if (and (cog-atom? x) (eq? 'WordInstanceLink (cog-type x)))
 					(extract-word-instance (car (cog-outgoing-set x)))))
 			(cog-incoming-set parse)
 		)
@@ -429,16 +431,17 @@
 	;         SentenceNode
 	(for-each
 		(lambda (x)
-			(if (eq? 'ParseLink (cog-type x))
-				; The car will be a ParseNode
-				(extract-parse (car (cog-outgoing-set x)))
-			)
+			(cond
+				((not (cog-atom? x)) #f)
+				((eq? 'ParseLink (cog-type x))
+					; The car will be a ParseNode
+					(extract-parse (car (cog-outgoing-set x))))
 
-			; Extract the NumberNode, but only if it's not used.
-			(if (eq? 'SentenceSequenceLink (cog-type x))
-				(let ((oset (cog-outgoing-set x)))
-					(cog-extract x)
-					(cog-extract (cadr oset)))
+				; Extract the NumberNode, but only if it's not used.
+				((eq? 'SentenceSequenceLink (cog-type x))
+					(let ((oset (cog-outgoing-set x)))
+						(cog-extract x)
+						(cog-extract (cadr oset))))
 			)
 		)
 		(cog-incoming-set sent)

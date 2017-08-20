@@ -13393,7 +13393,32 @@ wtf zh gets a trailing blank!  dammit
 (cog-execute! (LgParse (PhraseNode "派  解  嚎  嗒") (LgDict "any")))
 (cog-get-atoms 'WordNode)
 
+-------------
+WTF Now what!????
+(cog-report-counts)
+95M value updates
+1,5M in tlb
+1.8M links
+90M writes
 
+was: 1554375
+(cog-count-atoms 'NumberNode)
+(delete-sentence SENT)
+
+1608119
+1607958
+(cog-count-atoms 'SentenceNode) ;4779
+
+(define cnt 0)
+(for-each (lambda (sent)
+		(set! cnt (+ cnt 1))
+		(format #t "delete ~D\n" cnt)
+		(delete-sentence sent))
+	(cog-get-atoms 'SentenceNode))
+
+61377
+
+134574
 
 
 
