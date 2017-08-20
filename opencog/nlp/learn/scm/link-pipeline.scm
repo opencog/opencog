@@ -441,14 +441,11 @@
 			))
 			(lambda (key . args) #f)))
 
-	; Loop -- process any that we find. This will typically race
-	; against other threads, but I think that's OK.
+	; Count the atoms in the sentence, and then delete it.
 	(define (process-sent SENT)
-		(if (null? SENT) '()
-			(begin
-				(update-counts SENT)
-				(delete-sentence SENT)
-				(monitor-rate '()))))
+		(update-counts SENT)
+		(delete-sentence SENT)
+		(monitor-rate '()))
 
 	; -------------------------------------------------------
 	; Manually run the garbage collector, every now and then.
@@ -506,7 +503,7 @@
 	(define (relex-process TXT)
 		(define (do-all-sents)
 			(let ((sent (get-one-new-sentence)))
-				(if (null? sent) '()
+				(if (not (null? sent))
 					(begin (process-sent sent) (do-all-sents)))))
 
 		(relex-parse TXT)
