@@ -12740,7 +12740,7 @@ was: 1554375
 (for-each (lambda (sent)
 		(set! cnt (+ cnt 1))
 		(format #t "delete ~D\n" cnt)
-		(delete-sentence sent))
+		(yelete sent))
 	(cog-get-atoms 'SentenceNode))
 
 61377
@@ -12788,7 +12788,7 @@ Bugs: cleanup zen due to above DONE
       what about zen_pairs_three? Ans: its junk!  Delete! DONE
 
 Bugs: clean up zh due to above    DONE
-Bugs: cleanup embedded dashes in en 
+Bugs: cleanup embedded dashes in en  DONE
      -- save en_pairs_r again
      -- maybe recompute mst?? (since it was so quick!?)
 

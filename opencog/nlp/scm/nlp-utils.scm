@@ -391,7 +391,6 @@
 		(for-each
 			(lambda (x)
 				(cond
-					((not (cog-atom? x)) #f)
 					((eq? 'ListLink (cog-type x))
 						(for-each extract-link-instance
 							(cog-chase-link 'EvaluationLink 'LgLinkInstanceNode x)))
@@ -416,7 +415,7 @@
 	(define (extract-parse parse)
 		(for-each
 			(lambda (x)
-				(if (and (cog-atom? x) (eq? 'WordInstanceLink (cog-type x)))
+				(if (eq? 'WordInstanceLink (cog-type x))
 					(extract-word-instance (car (cog-outgoing-set x)))))
 			(cog-incoming-set parse)
 		)
@@ -432,7 +431,6 @@
 	(for-each
 		(lambda (x)
 			(cond
-				((not (cog-atom? x)) #f)
 				((eq? 'ParseLink (cog-type x))
 					; The car will be a ParseNode
 					(extract-parse (car (cog-outgoing-set x))))
