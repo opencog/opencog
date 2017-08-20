@@ -7080,121 +7080,6 @@ select count(*) from valuations; -- 11414113 = 11.4M values
 c4df6f2da0c476a561cbea82981a6853  zen_pairs_mst.sql
 ff7cb1628cb7aad0a59c71b98a626121  zen_pairs_mst.sql.bz2
 
-==================================================================
-zen_pairs_three
----------------
-Mandarin word-pairs. Segmentation into words done by Ruiting. Does
-NOT include pair-MI stats. This is the alpha-segmented-1 texts plus
-100 texts from alpha-segmented-2 (aka alpha-segmented-2-part1)
-
-STATUS: good
-DATE: 13 August 2017
-REASON: No known defects.
-
-                        List of relations
- Schema |    Name    | Type  | Owner  |    Size    | Description 
---------+------------+-------+--------+------------+-------------
- public | atoms      | table | ubuntu | 2623 MB    | 
- public | spaces     | table | ubuntu | 40 kB      | 
- public | typecodes  | table | ubuntu | 56 kB      | 
- public | valuations | table | ubuntu | 2221 MB    | 
- public | values     | table | ubuntu | 8192 bytes | 
-
-select count(*) from atoms;      -- 29749942 == 29.7M atoms
-select count(*) from valuations; -- 18890832 == 18.9M valuations
-
-1735058352 bytes uncompressed = 1.7GB
- 290672147 bytes compresed = 291MB
-
-71f266f7b85661f36f73fbf0d63e2699  zen_pairs_three.sql
-76e4bdce961b0bc760ad33329fee65e5  zen_pairs_three.sql.bz2
-
-==================================================================
-zen_pairs_three_mi
-------------------
-Mandarin word-pairs. Segmentation into words done by Ruiting. 
-Contains the MI stats. See above for description.
-
-STATUS: good
-DATE: 13 August 2017
-REASON: No known defects.
-
-Summary Report for Correlation Matrix Link Grammar ANY link Word Pairs
-Left type: WordNode    Right Type: WordNode    Pair Type: ListLink
-
-Rows: 350889 Columns: 351293
-Size: 14579049 non-zero entries of 123264849477 possible
-Fraction non-zero: 1.1827E-4 Sparsity (-log_2): 13.046
-Total observations: 632143240.0  Avg obs per pair: 43.360
-Entropy Total: 19.346   Left: 11.460   Right: 11.252
-Total MI: 3.3656
-
-                 Left         Right     Avg-left     Avg-right
-                 ----         -----     --------     ---------
-Support (l_0)  2.8811E+4    2.7144E+4
-Count   (l_1)  6.8919E+6    5.5041E+6     239.2        202.8    
-Length  (l_2)  6.5943E+5    5.3804E+5     22.89        19.82    
-RMS Count      6.5889E+5    5.3761E+5     22.87        19.81    
-
-
-select count(*) from atoms;      -- 30913774 == 31M
-select count(*) from valuations; -- 47599360 == 47.6M
-
-4094403983 bytes uncompressed = 4.1GB
- 706360370 bytes compressed   = 706 MB
-
-6991e8464e54492642881e005efb1de4  zen_pairs_three_mi.sql
-9f7a097611c2e0196e626038a26869ba  zen_pairs_three_mi.sql.bz2
-
-==================================================================
-zen_pairs_three_mst
--------------------
-Mandarin word-pairs. Segmentation into words done by Ruiting.
-This is the alpha-segmented-1 texts plus 100 texts from
-alpha-segmented-2 (aka alpha-segmented-2-part1). MST parsed,
-and include disjunct MI's and marginals.
-
-STATUS: good
-DATE: 15 August 2017
-REASON: No known defects.
-
-                        List of relations
- Schema |    Name    | Type  | Owner  |    Size    | Description 
---------+------------+-------+--------+------------+-------------
- public | atoms      | table | ubuntu | 4300 MB    | 
- public | spaces     | table | ubuntu | 40 kB      | 
- public | typecodes  | table | ubuntu | 56 kB      | 
- public | valuations | table | ubuntu | 9589 MB    | 
- public | values     | table | ubuntu | 8192 bytes | 
-
-Summary Report for Correlation Matrix Word-Disjunct Pairs (Connector Sets)
-Left type: WordNode    Right Type: ConnectorSeq    Pair Type: Section
-Wildcard: (ListLink (ctv 0 0 17846845)
-   (AnyNode "cset-word")
-   (AnyNode "cset-disjunct")
-)
-Rows: 84656 Columns: 4889243
-Size: 7015959 non-zero entries of 413903755408 possible
-Fraction non-zero: 1.6951E-5 Sparsity (-log_2): 15.848
-Total observations: 17846845.0  Avg obs per pair: 2.5437
-Entropy Total: 20.476   Left: 17.060   Right: 9.5156
-Total MI: 6.0994
-
-                 Left         Right     Avg-left     Avg-right
-                 ----         -----     --------     ---------
-Support (l_0)  1.0066E+5    3158.    
-Count   (l_1)  3.4329E+5    4.6825E+4     3.410        14.83    
-Length  (l_2)  2.2804E+4    8751.         .2265        2.771    
-RMS Count      2.2762E+4    8671.         .2261        2.745    
-
-select count(*) from atoms;      -- 47962056 == 47.9M
-select count(*) from valuations; -- 93516734 == 93.5M
-
-7648907200 bytes uncompressed == 7.65GBytes
-1077724617 bytes compressed   == 1.08 GBytes
-
-2d23fd42209ac9c3fdf7c7d599262069  zen_pairs_three_mst.sql
-31543876d6b836f9d6a53e9cd0a75a25  zen_pairs_three_mst.sql.bz2
 
 ==================================================================
 ==================================================================
@@ -13286,6 +13171,256 @@ wait -- were teh uuids removed? yes they were.
 cog-delete-recursive is weierd
 how to find handles....  handle_to_scm won't work.
 
+-----------------
+(define subtotal-obj (add-subtotal-mi-compute psa))
+(subtotal-obj 'cache-all-subtotals)
+
+         (for-each cache-left-entropy (star-obj 'right-basis))
+
+(define fail '())
+(define (cle rig) (set! fail rig) (psf  'left-wild-freq rig))
+(for-each cle (psa 'right-basis))
+
+(define fail '())
+(define (wtf rig)
+	(for-each (lambda (pr) (set! fail pr) (psf 'pair-mi pr))
+		(psa 'left-stars rig)))
+(for-each wtf (psa 'right-basis))
+
+(define cs 
+(ConnectorSeq
+   (Connector (WordNode "the") (ConnectorDir "-"))
+   (Connector (WordNode "broad") (ConnectorDir "-"))
+   (Connector (WordNode "rice") (ConnectorDir "+"))
+   (Connector (WordNode "passes") (ConnectorDir "+"))
+   (Connector (WordNode ".") (ConnectorDir "+"))))
+fields, again!
+(cog-set-tv!  (ListLink (AnyNode "cset-word") cs) (ctv 1 0 1))
+
+(define lw (ListLink (AnyNode "cset-word") cs))
+(define sec (Section  (WordNode "fields") cs))
+(psf 'set-left-wild-freq cs (psf 'pair-freq sec))
+(store-atom sec)
+(store-atom cs)
+
+(psf 'pair-mi  sec)
+
+
+(define fail '())
+(define (cle rig) (set! fail rig) (psf  'right-wild-freq rig))
+(for-each cle (psa 'left-basis))
+--------------------
+
+
+(fetch-all-words)
+
+(define aw (get-all-words))
+(length aw)
+
+(define abw '())
+
+; Look for foo[!]
+(define (is-bad? wstr)
+	(define wlen (string-length wstr))
+	(if (< 2 wlen)
+		(let ((ope (string-ref wstr (- wlen 3)))
+				(clo (string-ref wstr (- wlen 1))))
+			(and (equal? #\[ ope) (equal? #\] clo)))
+		#f))
+	
+
+; Look for trailing blank.
+(define (is-bad? wstr)
+	(define wlen (string-length wstr))
+	(equal? #\space  (string-ref wstr (- wlen 1))))
+	
+
+
+(define (is-numeric? wstr)
+	(char-set-contains? char-set:digit (string-ref wstr 0)))
+
+(define (is-alpha? wstr)
+	(and
+		(char-set-contains? char-set:letter (string-ref wstr 0))
+		(char-set-contains? char-set:letter 
+			(string-ref wstr (- (string-length wstr) 1)))))
+
+; Look for embedded punctuation.
+; embeded OK short-dash, periiods quote. -’'.
+; period colon comma if numeric.  :.,·
+; dot-if-numeric is OK.
+; Embedded bad: two or more dots, two or more dashes
+; —
+; leading or trailing _
+; more than one dash.
+(define (is-bad? wstr)
+	(define wlen (string-length wstr))
+	(define punc (string-index wstr char-set:punctuation))
+	(cond
+		; If no punctuation, then OK.
+		((not punc) #f)
+		; If unit-length then OK
+		((= 1 wlen) #f)
+		; If numeric, and punct is dot or comma, then its OK
+		((and (is-numeric? wstr)
+			(char-set-contains? (->char-set ".,:·") (string-ref wstr punc))) #f)
+
+		; Starts with a . ends with a digit.
+		((and (equal? #\. (string-ref wstr 0))
+			(char-set-contains? char-set:digit (string-ref wstr (- wlen 1)))) #f)
+
+		; If embeded dash, single-quote is OK.
+		; note the second dash is actually "e2 80 90"
+		((and (is-alpha? wstr)
+			(char-set-contains? (->char-set "-‐’'") (string-ref wstr punc))) #f)
+
+		; Embedded multi-periods OK, if not consecutive.
+		((and (is-alpha? wstr)
+			(equal? #\. (string-ref wstr punc))
+			(< punc (- wlen 1))
+			(not  (equal? #\. (string-ref wstr (+ punc 1))))) #f)
+
+		; else its bad
+		(else #t))
+)
+
+fly‐leaf
+hair‐shirt
+
+English: all embeded punct: 342245
+Bad embeded punct: 231044
+conservative bad punct: 228416
+(length (get-all-words))  ; 851964
+after: 623548
+
+(define cnt 0)
+(define start 0)
+(define (get-bad wrdnod)
+	(define wstr (cog-name wrdnod))
+	(define wlen (string-length wstr))
+	(if (is-bad? wstr)
+		(begin
+			(set! cnt (+ cnt 1))
+			; (set! abw (cons wrdnod abw))
+			; (cog-delete-recursive wrdnod)
+			(if (equal? 0 (modulo cnt 1000))
+				(let ((end (current-time)))
+					(format #t "deleted ~D ~A in ~A secs\n"
+		 				cnt wstr (- end start))
+					(set! start end)))
+		)))
+
+(define start (current-time))
+(for-each get-bad (get-all-words))
+
+zh only has 5653 bad words...
+
+with txn, running at 7 secs-ish or sometime12 12-14 ish
+deleted 1000 阿紫道[!] in 111 secs
+deleted 2000 一百二十斤[!] in 97 secs
+deleted 3000 可呼守用[!] in 205 secs
+deleted 4000 這玉才[!] in 158 secs
+deleted 5000 真有假[!] in 68 secs
+deleted 6000 吹号[!] in 73 secs
+deleted 7000 诺扑乐[!] in 78 secs
+deleted 8000 找起[!] in 75 secs
+deleted 9000 碎砖[!] in 87 secs
+deleted 10000 地向床[!] in 82 secs
+deleted 11000 安恬[!] in 98 secs
+
+
+without txn, run at ... 
+deleted 1000 肢体冲突[!] in 91 secs
+deleted 2000 掮客[!] in 96 secs
+deleted 3000 华然[!] in 106 secs
+deleted 4000 诚诚[!] in 125 secs
+deleted 5000 那陷[!] in 115 secs
+
+
+write queue is always a store....
+
+(fetch-all-words)
+
+
+84894 
+2 .... 18 
+
+reg: 377872  RSS  fetch in 75  total of 
+max-load=3 -- 376524  piffle
+
+
+zen: before
+atoms  45733040 = 45M
+vals:  26941144 = 27M
+468821  words...
+383945 bad words ... x 0.1secs/word = 10 hours. Yikes!
+
+zen_three: 351295 words ... 266419 bad ones. Discard thios POS.
+
+again, restart: 
+
+zen_pairs_two
+zen_pairs_three
+
+why so slow?
+---
+SELECT key FROM Valuations WHERE atom = 
+SELECT uuid FROM Atoms WHERE outgoing @> ARRAY[CAST(%lu AS BIGINT)]
+SELECT * FROM Valuations WHERE key = %lu AND atom = %lu;
+DELETE FROM Valuations WHERE key = %lu AND atom = %lu
+
+\di+ 
+!!Missing:
+CREATE INDEX ON Valuations (key);  but not needed either...
+queue them up...
+
+select waiting, state, query_start, query from pg_stat_activity;
+state_change
+
+wtf: SELECT * FROM Atoms WHERE type = -- from loadType wtf??? OK, idle.
+
+CREATE INDEX incoming_idx on Atoms USING GIN(outgoing);
+
+EXPLAIN ANALYZE
+SELECT uuid FROM Atoms WHERE outgoing @> ARRAY[CAST(39859733 AS BIGINT)];
+17 seconds to run query
+
+
+wtf zh gets a trailing blank!  dammit
+1392 of them.
+
+(use-modules (opencog exec))
+(cog-execute! (LgParse (PhraseNode "派  解  嚎  嗒") (LgDict "any")))
+(cog-get-atoms 'WordNode)
+
+-------------
+WTF Now what!????
+(cog-report-counts)
+95M value updates
+1,5M in tlb
+1.8M links
+90M writes
+
+was: 1554375
+(cog-count-atoms 'NumberNode)
+(delete-sentence SENT)
+
+1608119
+1607958
+(cog-count-atoms 'SentenceNode) ;4779
+
+(define cnt 0)
+(for-each (lambda (sent)
+		(set! cnt (+ cnt 1))
+		(format #t "delete ~D\n" cnt)
+		(delete-sentence sent))
+	(cog-get-atoms 'SentenceNode))
+
+61377
+
+134574
+
+
 
 =========================================================================
 OK-ish misses the mark:
@@ -13308,21 +13443,27 @@ multi-connectors only ... with the incorrect mutiplicities.
 ??? Is this still an issue? 
 
 Bugs: using ListLink for the partial sums on csets... why???
+      (ListLink (AnyNode "cset-word") (ConnectorSeq...))
+      instead of (Section ...)
 
 Bugs: graphing takes too long.
 
 Bugs: follow up on the guile hang bug - its a string parsing thing.
 
 Bugs: while mst parsing, guile goes GC-crazy after a while, and
-      never recovers.
+      never recovers. (doesn't happen with shorter dist links.)
 
 Items: create LG feederbacker
 
 Bugs; get rid of [!] in words DONE
 
-Bugs: cleanup zen due to above
-Bugs: clean up zh due to above
-Bugs: cleanup embedded daashes in en 
+Bugs: cleanup zen due to above DONE
+      what about zen_pairs_three? Ans: its junk!  Delete! DONE
 
-Bugs: get rid of all-atoms in matrix
+Bugs: clean up zh due to above    DONE
+Bugs: cleanup embedded dashes in en 
+     -- save en_pairs_r again
+     -- maybe recompute mst?? (since it was so quick!?)
+
+Bugs: get rid of all-atoms in matrix  DONE
 
