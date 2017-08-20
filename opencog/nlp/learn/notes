@@ -13350,6 +13350,16 @@ fields, again!
 	(equal? #\space  (string-ref wstr (- wlen 1))))
 	
 
+
+(define (is-numeric? wstr)
+	(char-set-contains? char-set:digit (string-ref wstr 0)))
+
+(define (is-alpha? wstr)
+	(and
+		(char-set-contains? char-set:letter (string-ref wstr 0))
+		(char-set-contains? char-set:letter 
+			(string-ref wstr (- (string-length wstr) 1)))))
+
 ; Look for embedded punctuation.
 ; embeded OK short-dash, periiods quote. -’'.
 ; period colon comma if numeric.  :.,·
@@ -13362,14 +13372,41 @@ fields, again!
 	(define wlen (string-length wstr))
 	(define punc (string-index wstr char-set:punctuation))
 	(cond
+		; If no punctuation, then OK.
 		((not punc) #f)
+		; If unit-length then OK
 		((= 1 wlen) #f)
-		((and (equal? (string-ref wstr punc) #\.)  (string-ref wstr 0)
-		(and (< 0 punc) (< punc wlen)) #f)
+		; If numeric, and punct is dot or comma, then its OK
+		((and (is-numeric? wstr)
+			(char-set-contains? (->char-set ".,:·") (string-ref wstr punc))) #f)
+
+		; Starts with a . ends with a digit.
+		((and (equal? #\. (string-ref wstr 0))
+			(char-set-contains? char-set:digit (string-ref wstr (- wlen 1)))) #f)
+
+		; If embeded dash, single-quote is OK.
+		; note the second dash is actually "e2 80 90"
+		((and (is-alpha? wstr)
+			(char-set-contains? (->char-set "-‐’'") (string-ref wstr punc))) #f)
+
+		; Embedded multi-periods OK, if not consecutive.
+		((and (is-alpha? wstr)
+			(equal? #\. (string-ref wstr punc))
+			(< punc (- wlen 1))
+			(not  (equal? #\. (string-ref wstr (+ punc 1))))) #f)
+
+		; else its bad
+		(else #t))
 )
 
+fly‐leaf
+hair‐shirt
+
 English: all embeded punct: 342245
+Bad embeded punct: 231044
+conservative bad punct: 228416
 (length (get-all-words))  ; 851964
+after: 623548
 
 (define cnt 0)
 (define start 0)
@@ -13380,7 +13417,7 @@ English: all embeded punct: 342245
 		(begin
 			(set! cnt (+ cnt 1))
 			; (set! abw (cons wrdnod abw))
-			; (cog-delete-recursive wrdnod)
+			(cog-delete-recursive wrdnod)
 			(if (equal? 0 (modulo cnt 1000))
 				(let ((end (current-time)))
 					(format #t "deleted ~D ~A in ~A secs\n"
@@ -13511,6 +13548,8 @@ Bugs; get rid of [!] in words DONE
 Bugs: cleanup zen due to above
 Bugs: clean up zh due to above    DONE
 Bugs: cleanup embedded dashes in en 
+     -- save en_pairs_r again
+     -- maybe recompute mst?? (since it was so quick!?)
 
 Bugs: get rid of all-atoms in matrix  DONE
 
