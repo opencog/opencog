@@ -12740,12 +12740,16 @@ was: 1554375
 (for-each (lambda (sent)
 		(set! cnt (+ cnt 1))
 		(format #t "delete ~D\n" cnt)
-		(yelete sent))
+		(zelete sent))
 	(cog-get-atoms 'SentenceNode))
 
 61377
 
+2471125 atoms 209 sentences = approx 547844 atoms = 2621 atoms/sent
 134574
+
+359 now in zen
+sentence too long, contains more than 254 words
 
 
 
@@ -12794,3 +12798,5 @@ Bugs: cleanup embedded dashes in en  DONE
 
 Bugs: get rid of all-atoms in matrix  DONE
 
+Bugs: split sent: quote after period
+Bugs: sentences with more than 254 words....
