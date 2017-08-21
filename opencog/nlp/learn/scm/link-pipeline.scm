@@ -513,15 +513,27 @@
 
 	; Process the text locally, using the LG API link.
 	(define (local-process TXT)
-		(define phr (Phrase TXT))
-		; (define lgn (LgParseLink phr (LgDict "any") (Number 24)))
-		(define lgn (LgParseMinimal phr (LgDict "any") (Number 24)))
-		(define sent (cog-execute! lgn))
-
-		; Remove crud so it doesn't build up.
-		(cog-extract lgn)
-		(cog-extract phr)
-		(process-sent sent)
+		; try-catch wrapper for duplicated text. Here's the problem:
+		; If this routine is called in rapid succession with the same
+		; block of text, then only one PhraseNode and LgParseLink will
+		; be created for both calls.  The extract at the end will remove
+		; this, even while these atoms are being accessed by the second
+		; call.  Thus, `lgn` might throw because `phr` doesn't exist, or
+		; `cog-execute!` might throw because lgn does't exist. Either of
+		; the cog-extracts might also throw. Hide this messiness.
+		(catch #t
+			(lambda ()
+				(let* ((phr (Phrase TXT))
+						;(lgn (LgParseLink phr (LgDict "any") (Number 24)))
+						(lgn (LgParseMinimal phr (LgDict "any") (Number 24)))
+						(sent (cog-execute! lgn))
+					)
+					(process-sent sent)
+					; Remove crud so it doesn't build up.
+					(cog-extract lgn)
+					(cog-extract phr)
+				))
+			(lambda (key . args) #f))
 	)
 
 	;; Send plain-text to the relex server

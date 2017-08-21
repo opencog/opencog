@@ -12751,6 +12751,18 @@ was: 1554375
 359 now in zen
 sentence too long, contains more than 254 words
 
+456 now with 2
+477 with 0
+489
+no leak with update-counts
+998 with 0
+no leak with delete-sentence either. WTF
+
+1028 with 0
+Bingo! 
+Now  1345 with 0
+
+
 
 
 =========================================================================
