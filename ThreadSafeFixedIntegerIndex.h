@@ -42,8 +42,6 @@ class Atom;
  */
 class ThreadSafeFixedIntegerIndex : public FixedIntegerIndex
 {
-    typedef std::unordered_set<Atom*> AtomSet;
-
     private:
         using FixedIntegerIndex::idx;
         mutable std::vector<std::unique_ptr<std::mutex>> _locks;
