@@ -52,14 +52,15 @@
 (define (evidence-to-tv antecedent-terms consequent-terms)
   (let* ;; TODO replace by a distributional TV based calculation.
       ((K 800) ; parameter to convert from count to confidence
-       (true-enough? (lambda A) (let* ((TV (cog-tv A))
-                                       (s (tv-mean TV))
-                                       (c (tv-conf TV)))
-                                  (and (> s 0.5) (> c 0))))
-       (both-true-enough? (lambda A B) (and (true-enough? A) (true-enough? B)))
+       (true-enough? (lambda (A) (let* ((TV (cog-tv A))
+                                        (s (tv-mean TV))
+                                        (c (tv-conf TV)))
+                                   (and (> s 0.5) (> c 0)))))
+       (both-true-enough? (lambda (pair) (and (true-enough? (car pair))
+                                              (true-enough? (cadr pair)))))
        (true-enough-antecedent-terms (filter true-enough? antecedent-terms))
-       (true-enough-inter-terms (filter both true-enough?
-                                        antecedent-terms consequent-terms))
+       (ant-con-pairs (map list antecedent-terms consequent-terms))
+       (true-enough-inter-terms (filter both-true-enough? ant-con-pairs))
        (antecedent-length (length true-enough-antecedent-terms))
        (inter-length (length true-enough-inter-terms))
        (strength (if (> antecedent-length 0)
