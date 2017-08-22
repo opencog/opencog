@@ -6,7 +6,7 @@
 (define (reload)
   (clear)
   (load "kb.scm")
-  (load "rb.scm"))
+  (load "pln-rb.scm"))
 
 (define (ppc-reload)
   (clear)
