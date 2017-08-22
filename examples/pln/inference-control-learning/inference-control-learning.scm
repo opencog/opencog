@@ -142,7 +142,6 @@
       ;; (icl-logger-debug-atomspace history-as))))
       (icl-logger-debug "postprocess-corpus current atomspace after pp")
       (icl-logger-debug-atomspace (cog-atomspace))
-      (display "beeeeeuuuuuu")
       )))
 
 (define (mk-ic-rules)
