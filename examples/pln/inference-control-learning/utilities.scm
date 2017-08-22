@@ -85,19 +85,27 @@
 ;; Remove dangling atoms from an atomspace. That is atoms with default
 ;; TV (null confidence) with empty incoming set
 (define (remove-dangling-atoms as)
-  (let ((old-as (cog-set-atomspace! as))
-        (all-atoms (apply append (map cog-get-atoms (cog-get-types)))))
+  (let* ((old-as (cog-set-atomspace! as))
+         (all-atoms (apply append (map cog-get-atoms (cog-get-types)))))
+    ;; (icl-logger-debug "all-atoms = ~a" all-atoms)
     (for-each remove-dangling-atom all-atoms)
     (cog-set-atomspace! old-as)))
 
 ;; Remove the atom from the current atomspace if it is dangling. That
 ;; is it has an empty incoming set and its TV has null confidence.
 (define (remove-dangling-atom atom)
-  (if (and (null? (cog-incoming-set atom)) (= 0 (tv-conf (cog-tv atom))))
+  ;; (icl-logger-debug "remove-dangling-atom atom = ~a" atom)
+  (if (and (cog-atom? atom) (null? (cog-incoming-set atom)) (= 0 (tv-conf (cog-tv atom))))
       (extract-hypergraph atom)))
 
 ;; Copy all atoms from an atomspace to another atomspace
 (define (cp-as src dst)
   (let ((old-as (cog-set-atomspace! src)))
     (cog-cp-all dst)
+    (cog-set-atomspace! old-as)))
+
+;; Clear a given atomspace
+(define (clear-as as)
+  (let ((old-as (cog-set-atomspace! as)))
+    (clear)
     (cog-set-atomspace! old-as)))

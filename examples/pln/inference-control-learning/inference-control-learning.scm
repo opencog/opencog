@@ -29,67 +29,83 @@
 (cog-logger-set-stdout! icl-logger #t)
 
 ;; ;; Set loggers sync (for debugging)
-(cog-logger-set-sync! #t)
-(cog-logger-set-sync! icl-logger #t)
-(cog-logger-set-sync! (cog-ure-logger) #t)
+;; (cog-logger-set-sync! #t)
+;; (cog-logger-set-sync! icl-logger #t)
+;; (cog-logger-set-sync! (cog-ure-logger) #t)
 
 ;; Set parameters
 (define pss 5)                          ; Problem set size
 (define niter 1)                         ; Number of iterations
 
+;; AtomSpace containing the targets in there to no forget them
+(define targets-as (cog-new-atomspace))
+
+;; AtomSpace containing the inference traces of a particular run
+(define trace-as (cog-new-atomspace))
+
+;; AtomSpace containing the global inference history
+(define history-as (cog-new-atomspace))
+
+;; AtomSpace containing the control rules
+(define control-as (cog-new-atomspace))
+
 (define (run-experiment)
+  (icl-logger-debug "run-experiment current atomspace = ~a" (cog-atomspace))
   (icl-logger-info "Start experiment")
-  (let* ((targets (gen-random-targets pss)) ; Generate targets
-         (history-as (cog-new-atomspace))   ; Initialize the Global
-                                            ; Inference History
-         (control-as (cog-new-atomspace)))  ; Initialize Inference
-                                            ; Control Rules
+  (let* ((default-as (cog-set-atomspace! targets-as)) ; Switch to targets-as
+         (targets (gen-random-targets pss))) ; Generate targets
+
     ;; Function for running all iterations given the iteration index,
     ;; i. Return the list of solved problems for each iteration (list
     ;; of list).
     (define (run-iterations-rec i)
       (if (< i niter)
-          (let* ((sol (run-iteration targets history-as control-as i)))
+          (let* ((sol (run-iteration targets i)))
             (cons sol (run-iterations-rec (+ i 1))))
           '()))
+
+    (icl-logger-debug "run-experiment targets-as = ~a" targets-as)
+    (icl-logger-debug "run-experiment history-as = ~a" history-as)
+    (icl-logger-debug "run-experiment control-as = ~a" control-as)
+
+    ;; Switch back to the default atomspace
+    (cog-set-atomspace! default-as)
+
     ;; Run all iterations
     (run-iterations-rec 0)))
 
 ;; Run iteration i over the given targets and return the list of
 ;; solved problems.
-(define (run-iteration targets history-as control-as i)
+(define (run-iteration targets i)
+  (icl-logger-debug "run-iteration current atomspace = ~a" (cog-atomspace))
   (icl-logger-info "Run iteration (i=~a/~a)" (+ i 1) niter)
+  (icl-logger-debug "targets = ~a" targets)
   (let* (;; Run the BC and build the inference history corpus for that run
          (run-bc-mk-corpus (lambda (j)
-                             (let* (;; AtomSpace where to the record
-                                    ;; the inference traces for that run
-                                    (trace-as (cog-new-atomspace))
-                                    ;; Target
+                             (let* (;; Target
                                     (trg (list-ref targets j))
                                     ;; Run the BC with control-as
                                     ;; while putting the trace in
                                     ;; trace-as
-                                    (bc-result (run-bc trg
-                                                       trace-as
-                                                       control-as
-                                                       i j)))
+                                    (bc-result (run-bc trg i j)))
                                ;; Post-process trace-as and copy the
                                ;; relevant knowledge in history-as
-                               (postprocess-corpus trace-as history-as)
+                               (postprocess-corpus)
                                bc-result)))
          (results (map run-bc-mk-corpus (iota pss)))
          (sol_count (count values results)))
     (icl-logger-info "Number of solved problems = ~a" sol_count)
 
     ;; Build inference control rules for the next iteration
-    (mk-ic-rules history-as control-as)
+    (mk-ic-rules)
     ;; Return results for each problem
     results))
 
 ;; Post-process the trace trace-as by inferring knowledge about
 ;; preproof, and add all relevant knowledge to the inference history
 ;; history-as from it, leaving out cruft like ppc-kb and such.
-(define (postprocess-corpus trace-as history-as)
+(define (postprocess-corpus)
+  (icl-logger-debug "postprocess-corpus current atomspace = ~a" (cog-atomspace))
   (icl-logger-info "Post-process trace, add to inference history")
   ;; Reload the postprocessing knowledge and rules
   (ppc-reload)
@@ -99,6 +115,8 @@
     ;; Switch to the default atomspace
     (cog-set-atomspace! default-as)
     ;; Define BC target and vardecl
+    (icl-logger-debug "postprocess-corpus current atomspace before pp")
+    (icl-logger-debug-atomspace (cog-atomspace))
     (let* ((target (Evaluation
                      (Predicate "URE:BC:preproof")
                      (List
@@ -112,18 +130,23 @@
            (results (ppc-bc target #:vardecl vardecl)))
       ;; Copy post-processed inference traces to the inference
       ;; history. Execution relationships + preproof evaluations
-      (icl-logger-debug "Results:\n~a" results)
-      (cog-cp (cog-outgoing-set results) history-as)
-      (icl-logger-debug "history-as after copying results")
-      (icl-logger-debug-atomspace history-as)
-      (cog-cp (cog-get-atoms 'ExecutionLink) history-as)
-      (icl-logger-debug "history-as after copying execution links")
-      (icl-logger-debug-atomspace history-as)
-      (remove-dangling-atoms history-as)
-      (icl-logger-debug "history-as after removing dangling atoms")
-      (icl-logger-debug-atomspace history-as))))
+      ;; (icl-logger-debug "Results:\n~a" results)
+      ;; (cog-cp (cog-outgoing-set results) history-as)
+      ;; (icl-logger-debug "history-as after copying results")
+      ;; (icl-logger-debug-atomspace history-as)
+      ;; (cog-cp (cog-get-atoms 'ExecutionLink) history-as)
+      ;; (icl-logger-debug "history-as after copying execution links")
+      ;; (icl-logger-debug-atomspace history-as)
+      ;; (remove-dangling-atoms history-as)
+      ;; (icl-logger-debug "history-as after removing dangling atoms")
+      ;; (icl-logger-debug-atomspace history-as))))
+      (icl-logger-debug "postprocess-corpus current atomspace after pp")
+      (icl-logger-debug-atomspace (cog-atomspace))
+      (display "beeeeeuuuuuu")
+      )))
 
-(define (mk-ic-rules history-as control-as)
+(define (mk-ic-rules)
+  (icl-logger-debug "mk-ic-rules current atomspace = ~a" (cog-atomspace))
   (icl-logger-debug "history-as before anything")
   (icl-logger-debug-atomspace history-as)
   (clear)
@@ -189,13 +212,39 @@
 ;; record the inference traces, trace-as, and inference-control rules
 ;; used for guidance, ic-rules, with for jth target in iteration
 ;; i. Return #t iff target has been successfully proved.
-(define (run-bc target trace-as control-as i j)
+(define (run-bc target i j)
+  (icl-logger-debug "run-bc current atomspace = ~a" (cog-atomspace))
   (icl-logger-info "Run BC (i=~a/~a,j=~a/~a) with target:\n~a"
                    (+ i 1) niter (+ j 1) pss target)
   (icl-logger-debug "Control AtomSpace:")
   (icl-logger-debug-atomspace control-as)
 
+  ;; (icl-logger-debug "run-bc trace-as before deleting")
+  ;; (icl-logger-debug-atomspace trace-as)
+
+  (clear-as trace-as)
+
+  (icl-logger-debug "run-bc trace-as after deleting")
+  (icl-logger-debug-atomspace trace-as)
+
+  (icl-logger-debug "targets AtomSpace before reload:")
+  (icl-logger-debug-atomspace targets-as)
+
+  (icl-logger-debug "run-bc atomspace before reload = ~a" (cog-atomspace))
+
+  ;; (icl-logger-debug-atomspace (cog-atomspace))
+
+  (clear)
+
+  (icl-logger-debug "run-bc atomspace between reload = ~a" (cog-atomspace))
+
   (reload)
+
+  (icl-logger-debug "run-bc atomspace after reload = ~a" (cog-atomspace))
+
+  (icl-logger-debug "Targets AtomSpace after reload:")
+  (icl-logger-debug-atomspace targets-as)
+
   (let* ((result (pln-bc target #:trace-as trace-as #:control-as control-as))
          (result-size (length (cog-outgoing-set result)))
          (success (if (= 1 result-size)
