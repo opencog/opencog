@@ -15,7 +15,8 @@
 
 ; Tell opencog where the relex server is located.
 ; The port should match that in `relex-server-any.sh`
-(use-relex-server "127.0.0.1" 4445)
+; Not using RelEx any longer.
+; (use-relex-server "127.0.0.1" 4445)
 
 ;;; Start the network REPL server on port 17005
 ;;; Unfortunately, this runs about 3x slower than the cogserver,

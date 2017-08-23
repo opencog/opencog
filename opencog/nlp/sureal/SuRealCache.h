@@ -35,19 +35,19 @@ namespace nlp
 /**
  * A Cache between SuReal and PatternMatcher. This class is a Singleton.
  *
- * This cache stores the results of calls to differents methods of PatternMatcherCallBack 
+ * This cache stores the results of calls to differents methods of PatternMatcherCallBack
  * in separate Caches. This makes sense because such calls in SuReal are
  * time expensive and in some scenarios (in particular when SuReal is being used
  * by microplanner) sureal is called A LOT of times with very similar
  * parameters.
  *
- * This class have a reeset() methoid whihc is supposed to be called when the
+ * This class have a reset() method which is supposed to be called when the
  * bunch of similar SuReal requests have ended.
  *
  * A major deficiency of this cache is that is is not ready to be used in a
  * multi-thread scenario.
  */
-class SuRealCache 
+class SuRealCache
 {
 
 public:

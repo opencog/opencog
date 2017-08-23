@@ -48,20 +48,25 @@ A general sketch of the desired system:
 
  * Anaphora resolution.  "My name is Romain. "I saw..." deduce "I" is
   "Romain".  Code in nlp/anaphora directory. Should kind-of-ish work,
-   hasn't been tested for a year. Its not hooked up.
+   hasn't been tested for years. Its not hooked up.
 
  * Reference resolution "saw the man" ->  "the man" is actually a
-   creeper in the minecraft world. We don't have code for that. The
-   minecraft code is being hacked now.  Also, HR "eva/sophia" has a
-   web-cam eye, and can see people.  Under active development.
+   creeper in the minecraft world. There's some abandoned code for
+   minecraft; its not working right now.  The Hanson Robotics
+   "chatbot-eva" has a some hand-coded stuff that can see people via
+   web-cam, and listen via microphone.  Under active development.
 
  * PLN does not only logic, but helps clarify interpretations and
    reference resolution, and disambiguates word-meanings.  So its a
    mess, for now.  Its not just "hooking up PLN", its hooking it up
    so that these other parts might eventually work right.
 
- * Finally, there is the rheme/theme structure,  (I am saying X about Y)
-   and more generally dialectics (how will I get my point accross)
+ * High-level dialog structure: the rheme/theme structure, e.g.
+   "I am saying X about Y", and more generally dialectics (how will
+   I get my point across).
+
+ * Learning. The need to associate verbal acts with specific
+   physical-world actions, and physical world objects.
 
 
 Subdirectories (in alphabetical order)
@@ -85,15 +90,18 @@ Scripts for running the current IRC-based chatbot.
 chatbot-eva
 -----------
 Scripts for running a mashup of the IRC chatbot, attached to the
-Hanson Robotics Sophia head.
+Hanson Robotics Sophia head.  Can obey a very small set of direct
+commands, e.g. "Smile! Act sad! Look afraid! Look left!".
 
 chatbot-old
 -----------
-The chatbot-old directory contains some code to tie opencog NLP
-processing to chat systems, and particularly, to IRC chat.  Provides
-a high-level implementation of a simple, hard-coded question-answering
-system, resting on the foundations of "seme" and "triples".  It worked,
-but had various interesting design difficulties and flaws.
+The chatbot-old directory implemented a question-answering system.
+It could answer factual questions, e.g. "Tom threw a ball. Who threw a
+ball?" It could answer a variety of questions, and came with a small
+common-sense database.  It implemented a full processing pipeline:
+IRC chatbot -> link-grammar parse -> grammatical pattern matcher.
+As long as a question fit the grammatical pattern of a known answer,
+it could answer that question.
 
 dialog_system
 -------------
@@ -103,6 +111,17 @@ diary
 -----
 Research notes.
 
+fuzzy
+-----
+A system for performing some "fuzzy" grammatical pattern matching.
+The idea was that if there was a question, and grammatical pattern
+machining cannot find an exact answer in the AtomSpace, then perhaps
+a "fuzzy" match might find something "good enough". Underwhelming.
+
+ghost
+-----
+A dialog authoring system. Resembles ChatScript.
+
 irc
 ---
 Interfaces to IRC; provide an easy way to connect opencog to IRC.
@@ -111,12 +130,22 @@ learn
 -----
 Language learning code. Goal is to learn any language at all, given
 some sufficiently large corpus.  Experiment is in progress, results
-are promising but inconclusive. Starved for time.
+are promising.
 
 lg-dict
 -------
-Code to convert the Link Grammar dictionaries to "atomese". These are
-used to construct and validate generated sentences for correct syntax.
+Import Link Grammar dictionary entries into the AtomSpace. These are
+used by `sureal` to generate grammatically correct sentences.
+Implements the `LgDictNode` and the `LgDictLookup` atoms.
+
+lg-parse
+--------
+Parse sentences and place parse results into the AtomSpace. Implements
+the 'LgParse` atom.
+
+lojban
+------
+A Lojban parser.
 
 microplanning
 -------------
@@ -131,12 +160,19 @@ relex2logic
 Convert RelEx dependency relations to logical predicates/assertions. The
 point here is that PLN can only reason on logical forms, and so we need
 to convert dependencies into (first-order, probabilistic) logic forms.
+Relex2Logic consists of a bunch of hand-authored rules, but these are a
+bit problematic. The system is semi-deprecated, but does not yet have a
+viable alternative.
 
 scm
 ---
 The scm directory contains miscellaneous scheme scripts of general
 utility for NLP work. This includes scripts for pulling out link-grammar
 disjuncts from parse data.
+
+sentiment
+---------
+Some scaffolding for integrating 3rd party sentiment analysis tools.
 
 sureal
 ------
@@ -147,13 +183,6 @@ sentences.
 types
 -----
 Scripts specifying NLP-specific atom types.
-
-viterbi
--------
-A barely-started, mostly abandoned attempt to create a viterbi parser
-for link-grammar (actually, a port of the partly-implemented viterbi
-parser in the link-grammar code base, which is more functional than
-this one, but is still broken.)
 
 wsd
 ---
@@ -178,19 +207,8 @@ microseconds.
 
 ======================================================================
 
-Input file format
------------------
-This style of input may be produced in one of two ways. It is produced
-directly by RelEx, when using the opencog output format: the -o flag
-appended to the `relex.RelationExtractor` executable. The other way is
-indirect, but can be considerably more convenient: First, parse text
-using the `relex.WebFormat` module, to create the "compact file format".
-Then, use the `relex/src/perl/cff-to-opencog.pl` perl script to convert
-this to the final output.
-
-
 A Side-note About Syntactic Sugar
-===================================
+=================================
 This has been said before, but it bears repeating. Consider the node
 type WordInstanceNode, for example:
 
@@ -231,10 +249,6 @@ which stands for the more "primitive" construct:
 Notationally, these forms should be considered to be "equivalent"
 although there is a bunch of actual code that depends on the one or
 the other, and cannot freely intermingle these cases.
-
-Not everything in the RelEx export gets its own specially-declared
-node or link type. Those that do not are explicitly declared in the
-file "src/nlp/scm/type-definitions.scm"
 
 ======================================================================
 References:

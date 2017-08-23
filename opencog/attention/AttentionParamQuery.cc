@@ -1,9 +1,10 @@
 
-#include "AttentionParamQuery.h"
-
 #include <opencog/atoms/base/Link.h>
-#include <opencog/util/Config.h>
 #include <opencog/guile/SchemeEval.h>
+#include <opencog/query/BindLinkAPI.h>
+#include <opencog/util/Config.h>
+
+#include "AttentionParamQuery.h"
 
 using namespace opencog;
 

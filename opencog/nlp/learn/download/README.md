@@ -21,16 +21,29 @@ The tranche-1,2,3 files indicate specific texts at specific URLS that
 were actually used to obtain actual, specific texts for the tranche-1,2,3
 database dumps. The goal here is reproducibility of processing.
 
+Directories
+===========
+* en-tranche-* -- download five batches of books, mostly Gutenberg,
+  but also some fanfic.  Prep for processing, including spiltting
+  into smaller files. the tranche-5 scripts are the most mature.
+
+* wikipedia -- download and prep wikipedia
+
+* zh -- download Mandarin Chinese novels. TODO -- this downloads only;
+  doesn't yet do the prep stage needed for processing.
+
+
+Shell scripts
+=============
 
 chapters.sh, chapters-epub.sh
 -----------------------------
 Split Project Gutenberg files (and other text files) into pieces.
 
-
 down-guten.sh
 -------------
 Download and prep for processing a bunch of Project gutenberg
-books. These form teh bulk of the English "tranche-1" series.
+books. These form the bulk of the English "tranche-1" series.
 
 down-fanfic.sh
 --------------

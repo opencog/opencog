@@ -1,7 +1,11 @@
 ;
 ; Notes and tools that were used to create the cosine-similarity
-; explorations in the diary, circa June, July 2017.
+; explorations in the diary, circa June, early July 2017.
 ; See also the 'notes' file one directory down.
+;
+; Hmm. obsolete. Had to redo the stats, and did not use this file.
+; used the stuff in disjunct-stats.scm instead.  The cosing calcs
+; got moved into generic (opencog matrix) module.
 
 (use-modules (opencog) (opencog persist) (opencog persist-sql))
 (use-modules (opencog nlp) (opencog nlp learn))

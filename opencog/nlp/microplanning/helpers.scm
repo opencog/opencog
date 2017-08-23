@@ -1,3 +1,4 @@
+(use-modules (srfi srfi-1)) ; For 'every'
 
 ; =======================================================================
 ; Helper functions
@@ -279,7 +280,7 @@
 				(cons curr-dist (right2left-helper (cdr sub-list) (+ 1 curr-dist)))
 			)
 		      )
-		)				
+		)
 	)
 
 	(set! result-list (left2right-helper result-list len))
@@ -288,4 +289,3 @@
 	(set! result-list (reverse result-list))
 	result-list
 )
-

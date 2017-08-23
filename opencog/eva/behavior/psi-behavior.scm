@@ -6,7 +6,6 @@
 (use-modules (opencog))
 (use-modules (opencog exec))
 (use-modules (opencog openpsi))
-(load "face-priority.scm")
 
 ;; ------------------------------------------------------------------
 ; Demand associated with faces

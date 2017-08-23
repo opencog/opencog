@@ -13,5 +13,4 @@
 (load "learn/batch-word-pair.scm")
 (load "learn/mst-parser.scm")
 (load "learn/pseudo-csets.scm")
-(load "learn/gram-sim.scm")
 (load "learn/summary.scm")

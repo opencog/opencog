@@ -670,7 +670,7 @@ public:
 
     AtomSpace* get_result_AtomSpace()
     {
-        patternMiner->getResultAtomSpace();
+        return patternMiner->getResultAtomSpace();
     }
 
     void select_subset_for_DBpedia()

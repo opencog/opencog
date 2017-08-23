@@ -146,9 +146,8 @@ five at most. But what to do for the next few minutes? There's a
 library of previously learned/authored "scripts" to guide behavior. The
 library is indexed according to the triggering stimulus and current
 situation. We search to find one or more scripts that fit. Currently,
-this library consists of a bunch of hand-authored scripts, here:
-[behavior.scm]
-(https://github.com/opencog/ros-behavior-scripting/blob/master/src/behavior.scm)
+this library consists of a bunch of hand-authored scripts,
+[here](/opencog/eva/behavior/behavior.scm)
 -- this would need to be expanded, and made more flexible. The
 coupling of "current situation" to "script" needs to be
 revamped/redesigned. We also need either better SQL management tools,
@@ -258,9 +257,7 @@ Each script is tagged with state." We can use either the crisp pattern
 matcher to query these, or the fuzzy matcher. Or both. The tagging need
 not be crisp.
 
-(This requires refactoring [behavior.scm]
-(https://github.com/opencog/ros-behavior-scripting/blob/master/src/behavior.scm)
-in this directory.)
+(This requires refactoring [behavior.scm](/opencog/eva/behavior/behavior.scm))
 
 F.  Attach language descriptors to the behaviors as well. The idea: if
 someone says "Eva, please quiet down and listen!", we could fuzzy-match
@@ -269,8 +266,7 @@ extension of the current verbal commands, which associate verb+object to
 a single blender animation ("look afraid"), and instead associate verb
 or verb-phrase with a behavior tree snippet/script, the same script
 library as in task (E), steps (2)-(3) above.  (The current verbal
-subsystem is located in the [opencog nlp subsystem]
-(https://github.com/opencog/opencog/tree/master/opencog/nlp/chatbot-eva)
+subsystem is located in the [opencog nlp subsystem](/opencog/eva/chatbot-eva)
 mostly in the imperative.scm, knowledge.scm, imperative-rules.scm files.
 
 G.  Dust off the concept blending code, or redesign it from scratch, to

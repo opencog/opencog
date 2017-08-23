@@ -474,6 +474,7 @@
 	(display "Finished loading sparse matrix pairs\n")
 
 	(batch-all-pair-mi LLOBJ)
+	(print-matrix-summary-report LLOBJ)
 )
 
 (define-public (batch-any-pairs)
