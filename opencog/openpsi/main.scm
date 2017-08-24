@@ -141,9 +141,17 @@
         (psi-get-all-enabled-demands)
     )
 
-    (cog-logger-debug opl "Ending psi-step, loop-count = ~a"
-        (psi-get-loop-count))
+    ; Do garbage collection. This is a replacement to (run-behavior-tree-gc)
+    (when (equal? 0 (modulo psi-loop-count 1000))
+        (cog-map-type (lambda (a) (cog-delete a) #f) 'SetLink)
+        (cog-map-type (lambda (a) (cog-delete a) #f) 'ListLink)
+        (cog-map-type (lambda (a) (cog-delete a) #f) 'NumberNode)
+        (cog-map-type (lambda (a) (cog-delete a) #f) 'ConceptNode)
+        (cog-logger-debug opl
+            "Finished garbage collection, loop-count = ~a" psi-loop-count)
+    )
 
+    (cog-logger-debug opl "Ending psi-step, loop-count = ~a" psi-loop-count)
     (stv 1 1) ; For continuing psi-run loop.
 )
 

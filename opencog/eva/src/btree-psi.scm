@@ -76,9 +76,5 @@
    (stv 1 1)
 )
 
-; ---------------------------------------------------------
-; Run the hacky garbage collection loop.
-(run-behavior-tree-gc)
-
 ; Silence the output.
 *unspecified*
