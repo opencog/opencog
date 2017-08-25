@@ -23,7 +23,16 @@
 (define opl (cog-new-logger))
 (cog-logger-set-component! opl "OpenPsi")
 (cog-logger-set-level! opl "debug")
-(cog-logger-set-stdout! opl #t)
+(cog-logger-set-stdout! opl #f)
+
+(define-public (psi-get-logger)
+"
+  psi-get-logger
+
+  Returns the looger for openpsi.
+"
+  opl
+)
 
 ; --------------------------------------------------------------
 ; Variable for controlling whether to keep on running the loop or not.
