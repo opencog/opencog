@@ -26,6 +26,7 @@
 (add-to-load-path "/usr/local/share/opencog/scm")
 
 (use-modules (opencog))
+(use-modules (opencog logger))
 (use-modules (opencog query))  ; XXX work-around relex2logic bug
 (use-modules (opencog eva-model))
 ; Start the cogsserver.  It is used by the face-tracker to poke data
@@ -75,6 +76,40 @@
    )
    (stv 1 1)
 )
+
+; Configure the logger
+(define (configure-loggers LOG-LEVEL)
+"
+  configure-loggers LOG-LEVEL
+
+  Set the loggers to the same level and separate their logs between runs.
+  For each call of this function, the logs are created in
+  /tmp/<current-filename>/<module-name>-Year-Month-Day-Hour-Minute-Second.log
+"
+  (define log-dir (format #f "/tmp/~a" (basename (current-filename))))
+  (if (not (file-exists? log-dir)) (mkdir log-dir))
+
+  ; Configure openpsi logger
+  (let ((psi-logger (psi-get-logger))
+      (psi-log-file (format #f "~a/openpsi-~a.log" log-dir
+        (strftime "%F-%H-%M-%S" (localtime (current-time))))))
+
+    (cog-logger-set-level! LOG-LEVEL)
+    (cog-logger-set-filename! psi-logger psi-log-file)
+    (cog-logger-set-stdout! psi-logger #f)
+  )
+
+  ; Configure opencog default logger
+  (let ((oc-log-file (format #f "~a/opencog-~a.log" log-dir
+        (strftime "%F-%H-%M-%S" (localtime (current-time))))))
+
+    (cog-logger-set-level! LOG-LEVEL)
+    (cog-logger-set-filename! oc-log-file)
+    (cog-logger-set-stdout! #f)
+  )
+)
+
+(configure-loggers "debug")
 
 ; Silence the output.
 *unspecified*
