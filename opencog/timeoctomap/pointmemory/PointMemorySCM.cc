@@ -29,7 +29,7 @@
 #include <opencog/atoms/base/Handle.h>
 #include <opencog/atoms/base/Link.h>
 #include <opencog/atoms/base/Node.h>
-#include <opencog/atoms/NumberNode.h>
+#include <opencog/atoms/core/NumberNode.h>
 #include <opencog/guile/SchemePrimitive.h>
 #include <opencog/spacetime/atom_types.h>
 #include <opencog/timeoctomap/TimeOctomap.h>

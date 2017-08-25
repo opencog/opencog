@@ -25,11 +25,10 @@
 #ifndef ATTENTION_PARAM_CONFIG_H
 #define ATTENTION_PARAM_CONFIG_H
 
-#include <opencog/atoms/NumberNode.h>
-#include <opencog/query/BindLinkAPI.h>
-#include <opencog/atomspaceutils/AtomSpaceUtils.h>
-
 #include <sstream>
+#include <string>
+#include <opencog/atoms/base/atom_types.h>
+#include <opencog/atomspace/AtomSpace.h>
 
 namespace opencog
 {
@@ -89,7 +88,7 @@ namespace opencog
                     Handle hvalue  = _as->add_node(NUMBER_NODE, 
                                                    sstream.str());
 
-                    _as->add_link(STATE_LINK,HandleSeq{param, hvalue});
+                    _as->add_link(STATE_LINK, HandleSeq{param, hvalue});
                 }
     }; // class
 

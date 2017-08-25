@@ -26,7 +26,7 @@
 #include <link-grammar/link-includes.h>
 
 #include <opencog/atoms/base/Node.h>
-#include <opencog/atoms/NumberNode.h>
+#include <opencog/atoms/core/NumberNode.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/nlp/lg-dict/LGDictNode.h>
 #include "LGParseLink.h"
@@ -162,7 +162,8 @@ Handle LGParseLink::execute(AtomSpace* as) const
 			ldn->getName().c_str());
 
 	// Set up the sentence
-	Sentence sent = sentence_create(_outgoing[0]->getName().c_str(), dict);
+	const char* phrstr = _outgoing[0]->getName().c_str() ;
+	Sentence sent = sentence_create(phrstr, dict);
 	if (nullptr == sent) return Handle();
 
 	// Work with the default parse options (mostly).
@@ -219,7 +220,7 @@ Handle LGParseLink::execute(AtomSpace* as) const
 	for (int i=0; i<num_linkages; i++)
 	{
 		Linkage lkg = linkage_create(i, sent, opts);
-		Handle pnode = cvt_linkage(lkg, i, sentstr, minimal, as);
+		Handle pnode = cvt_linkage(lkg, i, sentstr, phrstr, minimal, as);
 		as->add_link(PARSE_LINK, pnode, snode);
 		linkage_delete(lkg);
 	}
@@ -234,6 +235,7 @@ Handle LGParseLink::execute(AtomSpace* as) const
 static std::atomic<unsigned long> wcnt;
 
 Handle LGParseLink::cvt_linkage(Linkage lkg, int i, const char* idstr,
+                                const char* phrstr,
                                 bool minimal, AtomSpace* as) const
 {
 	char parseid[80];
@@ -245,7 +247,24 @@ Handle LGParseLink::cvt_linkage(Linkage lkg, int i, const char* idstr,
 	int nwords = linkage_get_num_words(lkg);
 	for (int w=0; w<nwords; w++)
 	{
-		const char* wrd = linkage_get_word(lkg, w);
+		size_t sb = linkage_get_word_byte_start(lkg, w);
+		size_t eb = linkage_get_word_byte_end(lkg, w);
+
+		// Problem: the default LG API supplies the word together with
+		// the subscript, and with word regex and guess-marks. We really
+		// do NOT want that crud. So use the byte offsets to get the
+		// actual original string.  Since LEFT-WALL and RIGHT-WALL have
+		// no offsets, we need to handle those differently.
+		// strndupa allocates on stack, no need to free.
+		const char* wrd;
+		if (eb == sb)
+			wrd = linkage_get_word(lkg, w);
+		else
+		{
+			if (' ' == phrstr[eb]) eb--;
+			wrd = strndupa(phrstr + sb, eb-sb+1);
+		}
+
 		char buff[801] = "";
 		strncat(buff, wrd, 800);
 		strncat(buff, "@", 800);

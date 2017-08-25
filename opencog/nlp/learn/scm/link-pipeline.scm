@@ -14,13 +14,9 @@
 ; Main entry point: `(observe-text plain-text)`
 ;
 ; Call this entry point with exactly one sentance as a plain text
-; string. It will be parsed by RelEx, and the resulting link-grammar
-; link usage counts will be updated in the atomspace. The counts are
-; flushed to the SQL database so that they're not forgotten.
-;
-; RelEx is used for only one reason: it prints out the required
-; atomese format. The rule-engine in RelEx is NOT used!  This could
-; be redesigned and XXX FIXME, it should be.
+; string. It will be parsed, and the resulting link-grammar link usage
+; counts will be updated in the atomspace. The counts are flushed to
+; the SQL database so that they're not forgotten.
 ;
 ; This tracks multiple, independent counts:
 ; *) how many sentences have been observed.
@@ -89,9 +85,6 @@
 ;         (NumberNode "4"))
 ;
 ; when the sentence was "this is some foo".
-;
-; Due to a RelEx bug in parenthesis handling, the `word-inst-get-word`
-; function used here can throw an exception. See documentation.
 ;
 (define (make-word-sequence PARSE)
 
@@ -431,7 +424,7 @@
 	; then avoid doing any counting at all for this sentence.
 	;
 	; Note: update-clique-pair-counts commented out. If you want this,
-	; then uncommment it, and adjust the length.
+	; then uncomment it, and adjust the length.
 	; Note: update-disjunct-counts commented out. It generates some
 	; data, but none of it will be interesting to most people.
 	(define (update-counts sent)
@@ -448,14 +441,11 @@
 			))
 			(lambda (key . args) #f)))
 
-	; Loop -- process any that we find. This will typically race
-	; against other threads, but I think that's OK.
+	; Count the atoms in the sentence, and then delete it.
 	(define (process-sent SENT)
-		(if (null? SENT) '()
-			(begin
-				(update-counts SENT)
-				(delete-sentence SENT)
-				(monitor-rate '()))))
+		(update-counts SENT)
+		(delete-sentence SENT)
+		(monitor-rate '()))
 
 	; -------------------------------------------------------
 	; Manually run the garbage collector, every now and then.
@@ -507,13 +497,13 @@
 
 	; Use the RelEx server to parse the text via Link Grammar.
 	; Return a SentenceNode. Attention: when run in parallel,
-	; the returned SentenCenode is not necessarily that of the
+	; the returned SentenceNode is not necessarily that of the
 	; the one that was submitted for parsing! It might be just
 	; some other sentence that is sitting there, ready to go.
 	(define (relex-process TXT)
 		(define (do-all-sents)
 			(let ((sent (get-one-new-sentence)))
-				(if (null? sent) '()
+				(if (not (null? sent))
 					(begin (process-sent sent) (do-all-sents)))))
 
 		(relex-parse TXT)
@@ -523,15 +513,27 @@
 
 	; Process the text locally, using the LG API link.
 	(define (local-process TXT)
-		(define phr (Phrase TXT))
-		; (define lgn (LgParseLink phr (LgDict "any") (Number 24)))
-		(define lgn (LgParseMinimal phr (LgDict "any") (Number 24)))
-		(define sent (cog-execute! lgn))
-
-		; Remove crud so it doesn't build up.
-		(cog-extract lgn)
-		(cog-extract phr)
-		(process-sent sent)
+		; try-catch wrapper for duplicated text. Here's the problem:
+		; If this routine is called in rapid succession with the same
+		; block of text, then only one PhraseNode and LgParseLink will
+		; be created for both calls.  The extract at the end will remove
+		; this, even while these atoms are being accessed by the second
+		; call.  Thus, `lgn` might throw because `phr` doesn't exist, or
+		; `cog-execute!` might throw because lgn does't exist. Either of
+		; the cog-extracts might also throw. Hide this messiness.
+		(catch #t
+			(lambda ()
+				(let* ((phr (Phrase TXT))
+						;(lgn (LgParseLink phr (LgDict "any") (Number 24)))
+						(lgn (LgParseMinimal phr (LgDict "any") (Number 24)))
+						(sent (cog-execute! lgn))
+					)
+					(process-sent sent)
+					; Remove crud so it doesn't build up.
+					(cog-extract lgn)
+					(cog-extract phr)
+				))
+			(lambda (key . args) #f))
 	)
 
 	;; Send plain-text to the relex server
