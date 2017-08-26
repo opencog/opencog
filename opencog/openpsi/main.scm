@@ -91,7 +91,7 @@
         (let* ((pattern (GetLink (AndLink (psi-get-context rule))))
                 ;FIXME: Cache `results` during `psi-select-rules` stage
                (results (cog-execute! pattern)))
-            (cog-delete pattern)
+            (cog-extract pattern)
             ; If it is only links then nothing to pass to an action.
             (if (null? (cog-get-all-nodes results))
                 '()
@@ -152,10 +152,10 @@
 
     ; Do garbage collection. This is a replacement to (run-behavior-tree-gc)
     (when (equal? 0 (modulo psi-loop-count 1000))
-        (cog-map-type (lambda (a) (cog-delete a) #f) 'SetLink)
-        (cog-map-type (lambda (a) (cog-delete a) #f) 'ListLink)
-        (cog-map-type (lambda (a) (cog-delete a) #f) 'NumberNode)
-        (cog-map-type (lambda (a) (cog-delete a) #f) 'ConceptNode)
+        (cog-map-type (lambda (a) (cog-extract a) #f) 'SetLink)
+        (cog-map-type (lambda (a) (cog-extract a) #f) 'ListLink)
+        (cog-map-type (lambda (a) (cog-extract a) #f) 'NumberNode)
+        (cog-map-type (lambda (a) (cog-extract a) #f) 'ConceptNode)
         (cog-logger-debug opl
             "Finished garbage collection, loop-count = ~a" psi-loop-count)
     )
