@@ -94,6 +94,45 @@ struct _non_ordered_pattern
     }
 };
 
+
+struct advanced_non_ordered_pattern // only when complex patterns like pln patterns, used when enable_unify_unordered_links = true
+{
+    Handle link;
+    vector< vector <std::pair<int,std::size_t> > > indexesOfSharedVars; // the shared vars indexes appear in the already sorted links
+
+
+    bool operator <(const _non_ordered_pattern& other) const
+    {
+        // first, use indexesOfSharedVars
+        for (unsigned int i = 0; i < indexesOfSharedVars.size(); ++ i)
+        {
+            if (indexesOfSharedVars[i].size() < other.indexesOfSharedVars[i].size())
+                return true;
+            else if (indexesOfSharedVars[i].size() > other.indexesOfSharedVars[i].size())
+                return false;
+
+            for (unsigned int j = 0; j < indexesOfSharedVars[i].size(); ++ j)
+            {
+                if ((indexesOfSharedVars[i][j]).first< (other.indexesOfSharedVars[i][j]).first)
+                    return true;
+                else if ((indexesOfSharedVars[i][j]).first > (other.indexesOfSharedVars[i][j]).first)
+                    return false;
+
+                if ((indexesOfSharedVars[i][j]).second < (other.indexesOfSharedVars[i][j]).second)
+                    return true;
+                else if ((indexesOfSharedVars[i][j]).second > (other.indexesOfSharedVars[i][j]).second)
+                    return false;
+            }
+        }
+
+        // if indexesOfSharedVars cannot decide the result, use
+
+        // if all above criteria cannot figure out the order of these two patterns, just return true and output a warning
+        cout << "\n warning: _non_ordered_pattern: Fail to figure out the order of  two patterns!\n";
+        return true;
+    }
+};
+
 //! Returns a string from the given argument by using the << operator
 template <typename T>
 std::string toString(T data)

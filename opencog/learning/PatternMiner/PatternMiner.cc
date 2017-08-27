@@ -135,16 +135,16 @@ void PatternMiner::findAndRenameVariablesForOneLink(Handle link, map<Handle,Hand
 
              Handle reLink;
 
-             if (enable_unify_unordered_links && orderedTmpLinkToType.size() > 0)
-             {
+//             if (enable_unify_unordered_links && orderedTmpLinkToType.size() > 0)
+//             {
 
-                std::map<Handle,Type>::iterator typeIt = orderedTmpLinkToType.find(h);
-                if (typeIt != orderedTmpLinkToType.end())
-                    reLink = atomSpace->add_link((Type)(typeIt->second),_renameOutgoingLinks);
-                else
-                    reLink = atomSpace->add_link(h->getType(),_renameOutgoingLinks);
-             }
-             else
+//                std::map<Handle,Type>::iterator typeIt = orderedTmpLinkToType.find(h);
+//                if (typeIt != orderedTmpLinkToType.end())
+//                    reLink = atomSpace->add_link((Type)(typeIt->second),_renameOutgoingLinks);
+//                else
+//                    reLink = atomSpace->add_link(h->getType(),_renameOutgoingLinks);
+//             }
+//             else
                 reLink = atomSpace->add_link(h->getType(),_renameOutgoingLinks);
 
              renameOutgoingLinks.push_back(reLink);
@@ -166,16 +166,16 @@ HandleSeq PatternMiner::RebindVariableNames(HandleSeq& orderedPattern, map<Handl
 
         Handle reLink;
 
-        if (enable_unify_unordered_links && orderedTmpLinkToType.size() > 0)
-        {
+//        if (enable_unify_unordered_links && orderedTmpLinkToType.size() > 0)
+//        {
 
-           std::map<Handle,Type>::iterator typeIt = orderedTmpLinkToType.find(h);
-           if (typeIt != orderedTmpLinkToType.end())
-               reLink = atomSpace->add_link((Type)(typeIt->second),renameOutgoingLinks);
-           else
-               reLink = atomSpace->add_link(h->getType(),renameOutgoingLinks);
-        }
-        else
+//           std::map<Handle,Type>::iterator typeIt = orderedTmpLinkToType.find(h);
+//           if (typeIt != orderedTmpLinkToType.end())
+//               reLink = atomSpace->add_link((Type)(typeIt->second),renameOutgoingLinks);
+//           else
+//               reLink = atomSpace->add_link(h->getType(),renameOutgoingLinks);
+//        }
+//        else
            reLink = atomSpace->add_link(h->getType(),renameOutgoingLinks);
 
         rebindedPattern.push_back(reLink);
