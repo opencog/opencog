@@ -934,7 +934,7 @@ void PatternMiner::extendAPatternForOneMoreGramRecursively(const Handle &extende
                 if (! patternAlreadyExtractedInCurTask)
                 {
                     //  track type b super-sub relations - currently only for 1-gram patterns
-                    if ((cur_pattern_gram == 1) && (CALCULATE_TYPE_B_SURPRISINGNESS) && (var_num <= n_limit_putin_result))
+                    if ((cur_pattern_gram == 1) && (calculate_type_b_surprisingness) && (var_num <= n_limit_putin_result))
                     {
 
 //                        cout << "\n-------------------Found sub type b patterns for current pattern: -----------------\n";

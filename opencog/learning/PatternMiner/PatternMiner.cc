@@ -2883,7 +2883,7 @@ void PatternMiner::calculateSurprisingness( HTreeNode* HNode, AtomSpace *_fromAt
         return;
     }
 
-    if (CALCULATE_TYPE_B_SURPRISINGNESS)
+    if (calculate_type_b_surprisingness)
         calculateTypeBSurprisingness(HNode, _fromAtomSpace);
 
 
@@ -3598,6 +3598,8 @@ void PatternMiner::reSetAllSettingsFromConfig()
     {
         cout << "\nError: output_pattern_quoted_linktype : "<< quotedTypeStr << " in config file doesn't exist!" << std::endl;
     }
+
+    calculate_type_b_surprisingness = config().get_bool("calculate_type_b_surprisingness");
 
     use_keyword_black_list = config().get_bool("use_keyword_black_list");
     use_keyword_white_list = config().get_bool("use_keyword_white_list");

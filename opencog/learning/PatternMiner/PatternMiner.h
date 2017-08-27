@@ -246,6 +246,8 @@ protected:
     bool if_quote_output_pattern;
     Type output_pattern_quoted_linktype;
 
+    bool calculate_type_b_surprisingness;
+
     bool enable_Interesting_Pattern;
 
     // Only effective when Enable_Interesting_Pattern is true.
