@@ -3790,7 +3790,7 @@ void PatternMiner::quoteAPattern(HTreeNode* hTreeNode)
 
 void PatternMiner::quoteAllThePatternSForGram(unsigned int gram)
 {
-    cout << "Quoting all " << gram << "-gram patterns with " << classserver().getTypeName(output_pattern_quoted_linktype) << std::endl;
+    cout << "\nQuoting all " << gram << "-gram patterns with " << classserver().getTypeName(output_pattern_quoted_linktype) << std::endl;
     for (HTreeNode* hTreeNode : patternsForGram[gram - 1])
     {
         quoteAPattern(hTreeNode);
@@ -3918,11 +3918,14 @@ void PatternMiner::runPatternMiner(bool exit_program_after_finish)
     {
         runInterestingnessEvaluation();
     }
-
-
-    for(unsigned int gram = 1; gram <= MAX_GRAM; gram ++)
-        quoteAllThePatternSForGram(gram);
-
+    else
+    {
+        if (if_quote_output_pattern)
+        {
+            for(unsigned int gram = 1; gram <= MAX_GRAM; gram ++)
+                quoteAllThePatternSForGram(gram);
+        }
+    }
 
     // out put all patterns with a frequency above the thresthold
     num_of_patterns_with_1_frequency = new unsigned int [MAX_GRAM];
