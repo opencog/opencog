@@ -53,50 +53,37 @@
          (all-atoms (get-all-atoms))
          (all-atoms-strings (map atom->string (get-all-atoms)))
          (all-atoms-string (apply string-append all-atoms-strings)))
-    ;; (cog-logger-debug "types = ~a" types)
-    ;; (cog-logger-debug "all-atoms (handles) = ~a" (map cog-handle all-atoms))
     (cog-set-atomspace! old-as)
     all-atoms-string))
 
 (define (get-all-atoms)
-  (apply append (map get-and-log-atoms (cog-get-types))))
-
-(define (get-and-log-atoms type)
-  (let* ((atoms (cog-get-atoms type)))
-    (cog-logger-debug "get-and-log-atoms type = ~a" type)
-    (cog-logger-debug "get-and-log-atoms atoms = ~a" (map cog-handle atoms))
-    atoms))
+  (apply append (map cog-get-atoms (cog-get-types))))
 
 ;; Convert the given atom into a string if its incoming set is null,
 ;; otherwise the string is empty.
 (define (atom->string h)
-  (cog-logger-debug "(length (cog-incoming-set ~a)) = ~a"
-                    (cog-handle h)
-                    (length (cog-incoming-set h)))
-  (cog-logger-debug "(null? (cog-incoming-set ~a)) = ~a"
-                    (cog-handle h)
-                    (null? (cog-incoming-set h)))
-  (cog-logger-debug "h[~a] = ~a" (cog-handle h) h)
-  (if (null? (cog-incoming-set h))  ; Avoid redundant
-                                    ; corrections
+  (if (null? (cog-incoming-set h))  ; Avoid redundant corrections
       (format "~a" h)
       ""))
 
 ;; Remove dangling atoms from an atomspace. That is atoms with default
 ;; TV (null confidence) with empty incoming set
 (define (remove-dangling-atoms as)
-  (let* ((old-as (cog-set-atomspace! as))
-         (all-atoms (apply append (map cog-get-atoms (cog-get-types)))))
-    ;; (icl-logger-debug "all-atoms = ~a" all-atoms)
-    (for-each remove-dangling-atom all-atoms)
+  (let* ((old-as (cog-set-atomspace! as)))
+    (for-each remove-dangling-atom (get-all-atoms))
     (cog-set-atomspace! old-as)))
 
 ;; Remove the atom from the current atomspace if it is dangling. That
 ;; is it has an empty incoming set and its TV has null confidence.
 (define (remove-dangling-atom atom)
-  ;; (icl-logger-debug "remove-dangling-atom atom = ~a" atom)
-  (if (and (cog-atom? atom) (null? (cog-incoming-set atom)) (= 0 (tv-conf (cog-tv atom))))
+  (if (and (cog-atom? atom) (null-incoming-set? atom) (null-confidence? atom))
       (extract-hypergraph atom)))
+
+(define (null-incoming-set? atom)
+  (null? (cog-incoming-set atom)))
+
+(define (null-confidence? atom)
+  (= 0 (tv-conf (cog-tv atom))))
 
 ;; Copy all atoms from an atomspace to another atomspace
 (define (cp-as src dst)
