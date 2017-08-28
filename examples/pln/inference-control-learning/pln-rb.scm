@@ -30,7 +30,7 @@
 )
 
 ;; Define pln-bc for convenience
-(define* (pln-bc . args)
+(define (pln-bc . args)
   (apply cog-bc (cons pln-rbs args)))
 
 ;;;;;;;;;;;;;;;;
@@ -44,8 +44,8 @@
 ;; TODO: add more rules
 (define rule-filenames
   (list "propositional/modus-ponens.scm"
-        ;; "propositional/contraposition.scm"
-        ;; "term/deduction.scm"
+        "propositional/contraposition.scm"
+        "term/deduction.scm"
         )
   )
 (for-each load-from-path rule-filenames)
@@ -55,18 +55,18 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;; TODO: add more rules
-; List the rules and their weights.
+; List the rules
 (define rules
   (list
         modus-ponens-inheritance-rule-name
-        ;; modus-ponens-implication-rule-name
-        ;; modus-ponens-subset-rule-name
-        ;; contraposition-inheritance-rule-name
-        ;; contraposition-implication-rule-name
-        ;; crisp-contraposition-implication-scope-rule-name
-        ;; deduction-inheritance-rule-name
-        ;; deduction-implication-rule-name
-        ;; deduction-subset-rule-name
+        modus-ponens-implication-rule-name
+        modus-ponens-subset-rule-name
+        contraposition-inheritance-rule-name
+        contraposition-implication-rule-name
+        crisp-contraposition-implication-scope-rule-name
+        deduction-inheritance-rule-name
+        deduction-implication-rule-name
+        deduction-subset-rule-name
         )
   )
 
@@ -78,13 +78,13 @@
 ;;;;;;;;;;;;;;;;;;;;;;
 
 ;; Termination criteria parameters
-(ure-set-num-parameter pln-rbs "URE:maximum-iterations" 1)
+(ure-set-num-parameter pln-rbs "URE:maximum-iterations" 100)
 
-;; ;; Attention allocation (0 to disable it, 1 to enable it)
-;; (ure-set-fuzzy-bool-parameter pln-rbs "URE:attention-allocation" 0)
+;; Attention allocation (0 to disable it, 1 to enable it)
+(ure-set-fuzzy-bool-parameter pln-rbs "URE:attention-allocation" 0)
 
-;; ;; Complexity penalty
-;; (ure-set-num-parameter pln-rbs "URE:BC:complexity-penalty" 1)
+;; Complexity penalty
+(ure-set-num-parameter pln-rbs "URE:BC:complexity-penalty" 1)
 
-;; ;; BIT reduction parameters
-;; (ure-set-num-parameter pln-rbs "URE:BC:maximum-bit-size" 100000)
+;; BIT reduction parameters
+(ure-set-num-parameter pln-rbs "URE:BC:maximum-bit-size" 100000)
