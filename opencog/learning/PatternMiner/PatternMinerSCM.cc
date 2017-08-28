@@ -426,6 +426,66 @@ public:
     void clear_node_types_should_not_be_vars(){patternMiner->clear_node_types_should_not_be_vars();}
 
 
+    string set_enable_filter_node_types_should_be_vars(bool _enable)
+    {
+        patternMiner->set_enable_filter_node_types_should_be_vars(_enable);
+        return get_enable_filter_node_types_should_be_vars();
+    }
+
+    string get_enable_filter_node_types_should_be_vars()
+    {
+        bool enable = patternMiner->get_enable_filter_node_types_should_be_vars();
+
+        if (enable)
+            return "enable_filter_node_types_should_be_vars: true";
+        else
+            return "enable_filter_node_types_should_be_vars: false";
+    }
+
+    string get_node_types_should_be_vars()
+    {
+        string result =  "node_types_should_be_vars:";
+        vector<Type> _list = patternMiner->get_node_types_should_be_vars();
+        for (Type type : _list)
+            result +=  " " + classserver().getTypeName(type);
+
+        return result;
+    }
+
+    string add_node_type_to_node_types_should_be_vars(const string& _typeStr)
+    {
+        Type atomType = classserver().getType(_typeStr);
+        if (atomType == NOTYPE)
+            return "Error: Input type doesn't exist!";
+
+        string result = "";
+
+        if (patternMiner->add_node_type_to_node_types_should_be_vars(atomType))
+            result += "Added!\n";
+        else
+            result += "Input type already exists in the node_types_should_be_vars list!\n";
+
+        return result + get_node_types_should_be_vars();
+
+    }
+
+    string remove_node_type_from_node_types_should_be_vars(const string& _typeStr)
+    {
+        Type atomType = classserver().getType(_typeStr);
+        if (atomType == NOTYPE)
+            return "Error: Input type doesn't exist!";
+
+        string result = "";
+        if (patternMiner->remove_node_type_from_node_types_should_be_vars(atomType))
+            result += "Removed!\n";
+        else
+            result += "Input type does not exist in the node_types_should_be_vars list!\n";
+
+        return result + get_node_types_should_be_vars();
+
+    }
+
+    void clear_node_types_should_be_vars(){patternMiner->clear_node_types_should_not_be_vars();}
 
 
     string set_enable_filter_links_of_same_type_not_share_second_outgoing(bool _enable)
@@ -509,6 +569,8 @@ public:
         result += get_same_link_types_not_share_second_outgoing()  + "\n";
         result += get_enable_filter_node_types_should_not_be_vars()  + "\n";
         result += get_node_types_should_not_be_vars() + "\n";
+        result += get_enable_filter_node_types_should_be_vars()  + "\n";
+        result += get_node_types_should_be_vars() + "\n";
 
         return result;
 
@@ -650,6 +712,23 @@ public:
                                                                   min_surprisingness_II,max_surprisingness_II, gram);
     }
 
+    void query_patterns_with_frequency_surprisingnessB_and_subpatternnum_ranges(const string& ranges, int gram)
+    {
+        vector<string> range_vector;
+        string rangesStr = ranges;
+        rangesStr.erase(std::remove(rangesStr.begin(), rangesStr.end(), ' '), rangesStr.end());
+        boost::split(range_vector, rangesStr , boost::is_any_of(","));
+        unsigned int min_frequency = std::stoi(range_vector[0]);
+        unsigned int max_frequency = std::stoi(range_vector[1]);
+        double min_surprisingness_B = std::stof(range_vector[2]);
+        double max_surprisingness_B = std::stof(range_vector[3]);
+        unsigned int min_subpattern_num = std::stof(range_vector[4]);
+        unsigned int max_subpattern_num = std::stof(range_vector[5]);
+        patternMiner->queryPatternsWithFrequencySurprisingnessBRanges(min_frequency, max_frequency,
+                                                                      min_surprisingness_B, max_surprisingness_B,
+                                                                      min_subpattern_num, max_subpattern_num, gram);
+    }
+
     void query_patterns_with_frequency_interactioninformation_ranges(const string& ranges, int gram)
     {
         vector<string> range_vector;
@@ -781,6 +860,19 @@ void PatternMinerSCM::init()
     define_scheme_primitive("pm-clear-node-types-should-not-be-vars",
                             &PatternMinerSCM::clear_node_types_should_not_be_vars, this, "patternminer");
 
+    define_scheme_primitive("pm-get-enable-filter-node-types-should-not-be-vars",
+                            &PatternMinerSCM::get_enable_filter_node_types_should_be_vars, this, "patternminer");
+    define_scheme_primitive("pm-set-enable-filter-node-types-should-not-be-vars",
+                            &PatternMinerSCM::set_enable_filter_node_types_should_be_vars, this, "patternminer");
+    define_scheme_primitive("pm-get-node-types-should-not-be-vars",
+                            &PatternMinerSCM::get_node_types_should_be_vars, this, "patternminer");
+    define_scheme_primitive("pm-add-node-type-to-node-types-should-not-be-vars",
+                            &PatternMinerSCM::add_node_type_to_node_types_should_be_vars, this, "patternminer");
+    define_scheme_primitive("pm-remove-node-type-from-node-types-should-not-be-vars",
+                            &PatternMinerSCM::remove_node_type_from_node_types_should_be_vars, this, "patternminer");
+    define_scheme_primitive("pm-clear-node-types-should-not-be-vars",
+                            &PatternMinerSCM::clear_node_types_should_be_vars, this, "patternminer");
+
 
     define_scheme_primitive("pm-get-enable-filter-links-of-same-type-not-share-second-outgoing",
                             &PatternMinerSCM::get_enable_filter_links_of_same_type_not_share_second_outgoing, this, "patternminer");
@@ -820,6 +912,7 @@ void PatternMinerSCM::init()
     define_scheme_primitive("pm-apply-whitelist-keyword-filter-after-mining", &PatternMinerSCM::apply_whitelist_keyword_filter_after_mining, this, "patternminer");
     define_scheme_primitive("pm-query-patterns-with-frequency-surprisingnessI-ranges", &PatternMinerSCM::query_patterns_with_frequency_surprisingnessI_ranges, this, "patternminer");
     define_scheme_primitive("pm-query-patterns-with-frequency-surprisingnessI-surprisingnessII-ranges", &PatternMinerSCM::query_patterns_with_surprisingnessI_and_surprisingnessII_ranges, this, "patternminer");
+    define_scheme_primitive("pm-query-patterns-with-frequency-surprisingnessB-subpatternnum-ranges", &PatternMinerSCM::query_patterns_with_frequency_surprisingnessB_and_subpatternnum_ranges, this, "patternminer");
     define_scheme_primitive("pm-query-patterns-with-frequency-interactioninformation-ranges", &PatternMinerSCM::query_patterns_with_frequency_interactioninformation_ranges, this, "patternminer");
 
     define_scheme_primitive("pm-reset-patternminer", &PatternMinerSCM::reset_patternminer, this, "patternminer");
