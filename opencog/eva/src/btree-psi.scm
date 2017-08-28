@@ -87,22 +87,23 @@
   /tmp/<current-filename>/<module-name>-Year-Month-Day-Hour-Minute-Second.log
 "
   (define log-dir (format #f "/tmp/~a" (basename (current-filename))))
+  (define z-time (strftime "%F-%H-%M-%S" (localtime (current-time))))
+  (define (configure-logger logger name)
+    (cog-logger-set-level! logger LOG-LEVEL)
+    (cog-logger-set-stdout! logger #f)
+    (cog-logger-set-filename! logger
+      (format #f "~a/~a-~a.log" log-dir name z-time)))
+
   (if (not (file-exists? log-dir)) (mkdir log-dir))
 
   ; Configure openpsi logger
-  (let ((psi-logger (psi-get-logger))
-      (psi-log-file (format #f "~a/openpsi-~a.log" log-dir
-        (strftime "%F-%H-%M-%S" (localtime (current-time))))))
+  (configure-logger (psi-get-logger) "openpsi")
 
-    (cog-logger-set-level! LOG-LEVEL)
-    (cog-logger-set-filename! psi-logger psi-log-file)
-    (cog-logger-set-stdout! psi-logger #f)
-  )
+  ; Configure eva-model logger
+  (configure-logger (eva-get-logger) "eva")
 
   ; Configure opencog default logger
-  (let ((oc-log-file (format #f "~a/opencog-~a.log" log-dir
-        (strftime "%F-%H-%M-%S" (localtime (current-time))))))
-
+  (let ((oc-log-file (format #f "~a/opencog-~a.log" log-dir z-time)))
     (cog-logger-set-level! LOG-LEVEL)
     (cog-logger-set-filename! oc-log-file)
     (cog-logger-set-stdout! #f)
