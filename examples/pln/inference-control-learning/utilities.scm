@@ -63,7 +63,7 @@
 ;; otherwise the string is empty.
 (define (atom->string h)
   (if (null? (cog-incoming-set h))  ; Avoid redundant corrections
-      (format "~a" h)
+      (format #f "~a" h)
       ""))
 
 ;; Remove dangling atoms from an atomspace. That is atoms with default
