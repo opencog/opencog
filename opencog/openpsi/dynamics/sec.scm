@@ -71,8 +71,8 @@
 
 (define default-secs '())
 
-(define (add-to-default-secs NAME MODULATOR)
-	(set! default-secs (assoc-set! default-modulators NAME MODULATOR))
+(define (add-to-default-secs NAME SEC)
+	(set! default-secs (assoc-set! default-secs NAME SEC))
 )
 
 (add-to-default-secs "novelty"
