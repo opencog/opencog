@@ -12,12 +12,12 @@
     psi-most-recent-occurrence-pred psi-set-event-occurrence!
 
     ; From interaction-rule.scm
-    psi-create-general-rule
+    psi-create-general-rule psi-create-interaction-rule
 
     ; From modulator.scm
     psi-create-modulator psi-get-modulators psi-get-arousal psi-get-pos-valence
     psi-get-neg-valence psi-get-resolution-level psi-get-selection-threshold
-    psi-get-securing-threshold
+    psi-get-securing-threshold psi-default-modulator-alist
 
     ; From sec.scm
     psi-create-sec psi-create-stimulus-sec psi-get-secs psi-is-sec?
@@ -26,6 +26,7 @@
     psi-set-event-callback! do-psi-updater-step adjust-psi-var-level
     psi-ultradian-update psi-noise-update get-random-cycle-offset
     psi-updater-running? psi-updater-run psi-updater-halt
+    psi-set-expression-callback!
 
     ; From utilities.scm
     psi-get-number-values-for-vars psi-baseline-value-node
