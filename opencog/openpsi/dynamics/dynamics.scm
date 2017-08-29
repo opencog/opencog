@@ -1,6 +1,7 @@
 ; Copyright (C) 2017 OpenCog Foundation
 
 (define-module (opencog openpsi dynamics)
+  #:use-module (srfi srfi-1)
   #:use-module (opencog)
   #:use-module (opencog openpsi)
   #:export (

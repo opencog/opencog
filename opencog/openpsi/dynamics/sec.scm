@@ -73,28 +73,29 @@
 
 (define (add-to-default-secs NAME SEC)
 	(set! default-secs (assoc-set! default-secs NAME SEC))
+	SEC
 )
 
-(add-to-default-secs "novelty"
-	(psi-create-sec "novelty" agent-state-sec-init-value))
-(add-to-default-secs "goal-relevance"
-	(psi-create-sec "goal-relevance" agent-state-sec-init-value))
-(add-to-default-secs "pleasantness"
-	(psi-create-sec "pleasantness" agent-state-sec-init-value))
-(add-to-default-secs "outcome-probability"
-	(psi-create-sec "outcome-probability" agent-state-sec-init-value))
-(add-to-default-secs "surprise"
-	(psi-create-sec "surprise" agent-state-sec-init-value))
-(add-to-default-secs "agent-and-intention"
-	(psi-create-sec "agent-and-intention" agent-state-sec-init-value))
-(add-to-default-secs "control"
-	(psi-create-sec "control" agent-state-sec-init-value))
-(add-to-default-secs "power"
-	(psi-create-sec "power" agent-state-sec-init-value))
-(add-to-default-secs "adjustment"
-	(psi-create-sec "adjustment" agent-state-sec-init-value))
-(add-to-default-secs "standards"
-	(psi-create-sec "standards" agent-state-sec-init-value))
+(define novelty (add-to-default-secs "novelty"
+	(psi-create-sec "novelty" agent-state-sec-init-value)))
+(define goal-relevance (add-to-default-secs "goal-relevance"
+	(psi-create-sec "goal-relevance" agent-state-sec-init-value)))
+(define pleasantness (add-to-default-secs "pleasantness"
+	(psi-create-sec "pleasantness" agent-state-sec-init-value)))
+(define outcome-probability (add-to-default-secs "outcome-probability"
+	(psi-create-sec "outcome-probability" agent-state-sec-init-value)))
+(define surprise (add-to-default-secs "surprise"
+	(psi-create-sec "surprise" agent-state-sec-init-value)))
+(define agent-and-intention (add-to-default-secs "agent-and-intention"
+	(psi-create-sec "agent-and-intention" agent-state-sec-init-value)))
+(define control (add-to-default-secs "control"
+	(psi-create-sec "control" agent-state-sec-init-value)))
+(define power (add-to-default-secs "power"
+	(psi-create-sec "power" agent-state-sec-init-value)))
+(define adjustment (add-to-default-secs "adjustment"
+	(psi-create-sec "adjustment" agent-state-sec-init-value)))
+(define standards (add-to-default-secs "standards"
+	(psi-create-sec "standards" agent-state-sec-init-value)))
 
 (define (psi-default-sec-alist)
 "
