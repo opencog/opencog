@@ -21,6 +21,7 @@
 
     ; From sec.scm
     psi-create-sec psi-create-stimulus-sec psi-get-secs psi-is-sec?
+    psi-default-sec-alist
 
     ; From updater.scm
     psi-set-event-callback! do-psi-updater-step adjust-psi-var-level
