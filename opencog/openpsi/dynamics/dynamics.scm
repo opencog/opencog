@@ -27,11 +27,12 @@
     psi-set-event-callback! do-psi-updater-step adjust-psi-var-level
     psi-ultradian-update psi-noise-update get-random-cycle-offset
     psi-updater-running? psi-updater-run psi-updater-halt
-    psi-set-expression-callback!
+    psi-set-expression-callback! psi-get-interaction-rules
 
     ; From utilities.scm
     psi-get-number-values-for-vars psi-baseline-value-node
-    psi-set-baseline-value! psi-get-baseline-value
+    psi-set-baseline-value! psi-get-baseline-value psi-get-value
+    psi-set-value! psi-get-number-value
     )
 )
 
