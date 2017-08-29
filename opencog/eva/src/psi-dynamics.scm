@@ -11,6 +11,23 @@
 
 (use-modules (opencog eva-behavior)) ; for get-input-sent-node def
 
+
+; ------------------------------------------------------------------
+; Default modulators
+(define openpsi-modulators (psi-default-modulator-alist))
+
+(define arousal (assoc-ref openpsi-modulators "arousal"))
+(define neg-valence (assoc-ref openpsi-modulators "neg-valence"))
+(define pos-valence (assoc-ref openpsi-modulators "pos-valence"))
+(define resolution-level (assoc-ref openpsi-modulators "resolution-level"))
+(define goal-directedness (assoc-ref openpsi-modulators "goal-directedness"))
+
+; Default SEC
+(define openpsi-secs (psi-default-sec-alist))
+
+(define power (assoc-ref openpsi-secs "power"))
+
+; ------------------------------------------------------------------
 ; Param setting
 (define valence-activation-level .5)
 
@@ -150,9 +167,9 @@
 
 ; Loud noise rules
 (define loud-noise->arousal
-	(psi-create-interaction-rule loud-noise-event increased arousal .9))
+	(psi-create-interaction-rule loud-noise-event "increased" arousal .9))
 (define loud-noise->neg-valence
-	(psi-create-interaction-rule loud-noise-event increased neg-valence .7))
+	(psi-create-interaction-rule loud-noise-event "increased" neg-valence .7))
 
 
 ; Room Luminance
@@ -168,7 +185,8 @@
 			(begin
 				(psi-set-event-occurrence! room-got-bright-event)
 				(set! room-was-bright #t)
-				(if verbose (display "**** Room got bright *****\n"))
+				; TODO Replace with openpsi-dynamics logger when it is available.
+				;(if verbose (display "**** Room got bright *****\n"))
 			)
 		)
 		(if room-was-bright
@@ -182,7 +200,8 @@
 			(begin
 				(psi-set-event-occurrence! room-got-dark-event)
 				(set! room-was-dark #t)
-				(if verbose (display "**** Room got dark *****\n"))
+				; TODO Replace with openpsi-dynamics logger when it is available.
+				;(if verbose (display "**** Room got dark *****\n"))
 			)
 		)
 		(if room-was-dark
@@ -195,10 +214,10 @@
 
 ; Luminance rules
 (define room-got-bright->arousal
-	(psi-create-interaction-rule room-got-bright-event changed arousal .5))
+	(psi-create-interaction-rule room-got-bright-event "changed" arousal .5))
 
 (define room-got-dark->arousal
-	(psi-create-interaction-rule room-got-dark-event changed arousal -.4))
+	(psi-create-interaction-rule room-got-dark-event "changed" arousal -.4))
 
 (define (get-luminance-value)
     (define result (cog-outgoing-set (cog-execute!
@@ -429,37 +448,35 @@
 
 ; The following change-predicate types have been defined in
 ; opencog/opencog/openpsi/interaction-rule.scm:
-;(define changed "changed")
-;(define increased "increased")
-;(define decreased "decreased")
+; "changed" "increased" "decreased"
 
 ;--------------------------------------
 ; Internal dynamic interactions rules
 
 ; pos valence up decreases neg valence
-(psi-create-interaction-rule pos-valence increased neg-valence -.2)
+(psi-create-interaction-rule pos-valence "increased" neg-valence -.2)
 
 ; neg valence up decreases pos valence
-(psi-create-interaction-rule neg-valence increased pos-valence -.2)
+(psi-create-interaction-rule neg-valence "increased" pos-valence -.2)
 
 ; power increases arousal
 ;(define power->arousal
-;	(psi-create-interaction-rule power changed arousal .3))
+;	(psi-create-interaction-rule power "changed" arousal .3))
 
 ; arousal decreases resolution
-(psi-create-interaction-rule arousal changed resolution-level .5)
+(psi-create-interaction-rule arousal "changed" resolution-level .5)
 
 ; arousal increases goal directedness
-(psi-create-interaction-rule arousal changed goal-directedness .5)
+(psi-create-interaction-rule arousal "changed" goal-directedness .5)
 
 ; power decreases neg valence
-(psi-create-interaction-rule power changed neg-valence -.2)
+(psi-create-interaction-rule power "changed" neg-valence -.2)
 
 ; arousal increases pos valence
-(psi-create-interaction-rule arousal increased pos-valence .1)
+(psi-create-interaction-rule arousal "increased" pos-valence .1)
 
 ; pos valence increases power
-(psi-create-interaction-rule pos-valence changed power .2)
+(psi-create-interaction-rule pos-valence "changed" power .2)
 
 ; ^ arousal >>>> pos valence
 ; pos valence >>> power
@@ -472,37 +489,36 @@
 ; User dialog sentiment
 (define pos-sentiment->pos-valence
 	(psi-create-interaction-rule positive-sentiment-dialog
-		increased pos-valence .3))
+		"increased" pos-valence .3))
 (define pos-sentiment->neg-valence
 	(psi-create-interaction-rule positive-sentiment-dialog
-		increased neg-valence -.3))
+		"increased" neg-valence -.3))
 (define neg-sentiment->neg-valence
 	(psi-create-interaction-rule negative-sentiment-dialog
-		increased neg-valence .3))
+		"increased" neg-valence .3))
 (define neg-sentiment->pos-valence
 	(psi-create-interaction-rule negative-sentiment-dialog
-		increased pos-valence -.3))
+		"increased" pos-valence -.3))
 
 ; Speech giving starts
 (define speech->power
-	(psi-create-interaction-rule speech-giving-starts increased
+	(psi-create-interaction-rule speech-giving-starts "increased"
 		power .5))
 
 ; New face
 (define new-face->arousal
-	(psi-create-interaction-rule new-face increased arousal .3))
+	(psi-create-interaction-rule new-face "increased" arousal .3))
 
 ; Voice width
-(define voice-width
-	(create-pau "voice width" .2))
+(define voice-width (create-pau "voice width" .2))
 
 ; power increases voice-width
 (define power->voice
-	(psi-create-interaction-rule power changed voice-width .7))
+	(psi-create-interaction-rule power "changed" voice-width .7))
 
 ; arousal decreases voice-width
 (define arousal->voice
-	(psi-create-interaction-rule arousal changed voice-width -.3))
+	(psi-create-interaction-rule arousal "changed" voice-width -.3))
 
 
 ; --------------------------------------------------------
