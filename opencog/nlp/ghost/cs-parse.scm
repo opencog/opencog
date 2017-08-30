@@ -551,25 +551,6 @@
   (cs-lexer (open-file-input-port file-path))
 )
 
-(define (main args)
-"
-  This function is to be used from the command-line as follows
-
-  guile -e main -s parse.scm -f path/to/cs/file.top
-"
-  (let* ((option-spec
-            '((file (single-char #\f) (required? #t) (value #t))))
-  ;(predicate file-exists?)))) FIXME: Wrong type to apply: file-exists?
-    (options (getopt-long args option-spec))
-    (input-file (option-ref options 'file #f)))
-    (if input-file
-      (begin
-        (format #t "\n--------- Starting parsing of ~a ---------\n" input-file)
-        (cs-parser (make-cs-lexer input-file) error)
-        (format #t "\n--------- Finished parsing of ~a ---------\n" input-file)
-      )))
-)
-
 (define-public (test-parse line)
 "
   Parse a text string in a Guile shell, for debugging mainly.
