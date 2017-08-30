@@ -23,7 +23,16 @@
 (define opl (cog-new-logger))
 (cog-logger-set-component! opl "OpenPsi")
 (cog-logger-set-level! opl "debug")
-(cog-logger-set-stdout! opl #t)
+(cog-logger-set-stdout! opl #f)
+
+(define-public (psi-get-logger)
+"
+  psi-get-logger
+
+  Returns the looger for openpsi.
+"
+  opl
+)
 
 ; --------------------------------------------------------------
 ; Variable for controlling whether to keep on running the loop or not.
@@ -82,7 +91,7 @@
         (let* ((pattern (GetLink (AndLink (psi-get-context rule))))
                 ;FIXME: Cache `results` during `psi-select-rules` stage
                (results (cog-execute! pattern)))
-            (cog-delete pattern)
+            (cog-extract pattern)
             ; If it is only links then nothing to pass to an action.
             (if (null? (cog-get-all-nodes results))
                 '()
@@ -141,9 +150,17 @@
         (psi-get-all-enabled-demands)
     )
 
-    (cog-logger-debug opl "Ending psi-step, loop-count = ~a"
-        (psi-get-loop-count))
+    ; Do garbage collection. This is a replacement to (run-behavior-tree-gc)
+    (when (equal? 0 (modulo psi-loop-count 1000))
+        (cog-map-type (lambda (a) (cog-extract a) #f) 'SetLink)
+        (cog-map-type (lambda (a) (cog-extract a) #f) 'ListLink)
+        (cog-map-type (lambda (a) (cog-extract a) #f) 'NumberNode)
+        (cog-map-type (lambda (a) (cog-extract a) #f) 'ConceptNode)
+        (cog-logger-debug opl
+            "Finished garbage collection, loop-count = ~a" psi-loop-count)
+    )
 
+    (cog-logger-debug opl "Ending psi-step, loop-count = ~a" psi-loop-count)
     (stv 1 1) ; For continuing psi-run loop.
 )
 

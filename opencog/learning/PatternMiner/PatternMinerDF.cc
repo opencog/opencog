@@ -356,7 +356,7 @@ void PatternMiner::runPatternMinerDepthFirst()
     delete [] threads;
 
     cout << "\nFinished mining 1~" << MAX_GRAM << " gram patterns.\n";
-    cout << "\nprocessedLinkNum = " << processedLinkNum << std::endl;
+    cout << "\ntotalLinkNum = " << processedLinkNum << ", actualProcessedLinkNum = " << actualProcessedLinkNum << std::endl;
 
 
 }
@@ -365,7 +365,7 @@ void PatternMiner::runPatternMinerDepthFirst()
 // vector<HTreeNode*> &allHTreeNodesCurTask is only used in distributed version
 // notOutPutPattern is passed from extendAPatternForOneMoreGramRecursively, also may be modify in this function.
 // it indicates if one pattern is only generated for middle process - calculate interestingness for its superpatterns, but not put in output results
-HTreeNode* PatternMiner::extractAPatternFromGivenVarCombination(HandleSeq &inputLinks, map<Handle,Handle> &patternVarMap, HandleSeqSeq &oneOfEachSeqShouldBeVars, HandleSeq &leaves,
+HTreeNode* PatternMiner::extractAPatternFromGivenVarCombination(HandleSeq &inputLinks, map<Handle,Handle> &patternVarMap, map<Handle,Handle>& orderedVarNameMap,HandleSeqSeq &oneOfEachSeqShouldBeVars, HandleSeq &leaves,
                                                                 HandleSeq &shouldNotBeVars, HandleSeq &shouldBeVars,AtomSpace* _fromAtomSpace, unsigned int & extendedLinkIndex,
                                                                 set<string>& allNewMinedPatternsCurTask, bool& notOutPutPattern, bool &patternAlreadyExtractedInCurTask, bool startFromLinkContainWhiteKeyword)
 {
@@ -477,7 +477,8 @@ HTreeNode* PatternMiner::extractAPatternFromGivenVarCombination(HandleSeq &input
         }
 
         // unify the pattern
-        unifiedPattern = UnifyPatternOrder(pattern, extendedLinkIndex);
+
+        unifiedPattern = UnifyPatternOrder(pattern, extendedLinkIndex, orderedVarNameMap);
 
         string keyString = unifiedPatternToKeyString(unifiedPattern);
 
@@ -705,51 +706,56 @@ void PatternMiner::extendAPatternForOneMoreGramRecursively(const Handle &extende
     unsigned int n_limit;
     unsigned int n_limit_putin_result = n_max;
 
-    if (cur_pattern_gram == 1) // do not have litmit for 1 gram patterns
-    {
-        n_limit = valueToVarMap.size();
-    }
-    else
-    {
-        // sometimes there is only one variable in a link, like:
+    // sometimes there is only one variable in a link, like:
     //    (DuringLink
     //      (ConceptNode "dead")
     //      (ConceptNode "dead")
     //    ) ; [44694]
+    n_limit_putin_result = valueToVarMap.size() * max_var_num_percent - lastGramTotalVarNum;
+    n_limit_putin_result ++;
 
-        n_limit = valueToVarMap.size()/2.0f - lastGramTotalVarNum;
+    if (n_limit_putin_result == 1)
+        n_limit_putin_result = 2;
 
-        if (GENERATE_TMP_PATTERNS)
-        {
-            n_limit_putin_result = n_limit + 1;
-            n_limit += 2;
-        }
-        else
-            n_limit ++;
-
-        if (n_limit > n_max)
-            n_limit = n_max;       
-
-        if (GENERATE_TMP_PATTERNS)
-        {
-            if (n_limit_putin_result > n_max)
-                n_limit_putin_result = n_max;
-
-            if (n_limit_putin_result == 1)
-                n_limit_putin_result = 2;
-
-            if (n_limit_putin_result > n_limit)
-                n_limit_putin_result = n_limit;
-        }
-        else
-        {
-
-            if (n_limit == 1)
-                n_limit = 2;
-        }
+    if (GENERATE_TMP_PATTERNS)
+    {
+        n_limit = n_limit_putin_result + 1;
+    }
+    else
+    {
+        n_limit = n_limit_putin_result;
 
     }
 
+    // sometimes an extended Link do not have any new nodes compared to its parent
+    // so  that newValueToVarMap.size() can be , e.g.:
+//        (EvaluationLink (stv 1.000000 1.000000)
+//          (PredicateNode "spouse")
+//          (ListLink (stv 1.000000 1.000000)
+//            (ConceptNode "Ann_Druyan")
+//            (ConceptNode "Carl_Sagan")
+//          )
+//        )
+//        (EvaluationLink (stv 1.000000 1.000000)
+//          (PredicateNode "spouse")
+//          (ListLink (stv 1.000000 1.000000)
+//            (ConceptNode "Carl_Sagan")
+//            (ConceptNode "Ann_Druyan")
+//          )
+//        )
+    if (n_max == 0)
+    {
+        n_limit_putin_result = 1;
+        n_limit = 1;
+    }
+    else
+    {
+        if (n_limit_putin_result > n_max)
+            n_limit_putin_result = n_max;
+
+        if (n_limit > n_max)
+            n_limit = n_max;
+    }
 
 
     // Get all the shared nodes and leaves
@@ -768,6 +774,15 @@ void PatternMiner::extendAPatternForOneMoreGramRecursively(const Handle &extende
 
     bool* indexes = new bool[n_max]; //  indexes[i]=true means this i is a variable, indexes[i]=false means this i is a const
 
+//    if ((cur_pattern_gram == 2) && (n_max == 0)) // debug
+//    {
+//        int x = 0;
+//        x ++;
+//        for(Handle h : inputLinks)
+//            cout << h->toShortString();
+
+//        cout << std::endl;
+//    }
 //    // debug
 //    string lastGramLinksStr = "";
 //    for (Handle h : lastGramLinks)
@@ -785,6 +800,10 @@ void PatternMiner::extendAPatternForOneMoreGramRecursively(const Handle &extende
         var_num = 0;
     else
         var_num = 1;
+
+    // todo: store the var combinations to HTreeNode map for finding super/sub_patternrelation_b
+    // the string is one combination of indexes to string , e.g.: "0010"
+    map<string, HTreeNode*> varCombinToHTreeNode;
 
     for (; var_num < n_limit; ++ var_num)
     {
@@ -842,8 +861,9 @@ void PatternMiner::extendAPatternForOneMoreGramRecursively(const Handle &extende
 
             unsigned int extendedLinkIndex = 999;
             bool patternAlreadyExtractedInCurTask;
+            map<Handle,Handle> orderedVarNameMap;
 
-            HTreeNode* thisGramHTreeNode = extractAPatternFromGivenVarCombination(inputLinks, patternVarMap, oneOfEachSeqShouldBeVars, leaves, shouldNotBeVars, shouldBeVars,
+            HTreeNode* thisGramHTreeNode = extractAPatternFromGivenVarCombination(inputLinks, patternVarMap, orderedVarNameMap,oneOfEachSeqShouldBeVars, leaves, shouldNotBeVars, shouldBeVars,
                                           _fromAtomSpace, extendedLinkIndex, allNewMinedPatternsCurTask, notOutPutPattern, patternAlreadyExtractedInCurTask, startFromLinkContainWhiteKeyword);
 
             if (thisGramHTreeNode)
@@ -913,6 +933,111 @@ void PatternMiner::extendAPatternForOneMoreGramRecursively(const Handle &extende
 
                 if (! patternAlreadyExtractedInCurTask)
                 {
+                    //  track type b super-sub relations - currently only for 1-gram patterns
+                    if ((cur_pattern_gram == 1) && (calculate_type_b_surprisingness) && (var_num <= n_limit_putin_result))
+                    {
+
+//                        cout << "\n-------------------Found sub type b patterns for current pattern: -----------------\n";
+//                        for (Handle plink : thisGramHTreeNode->pattern)
+//                            cout << plink->toShortString();
+//                        cout << std::endl;
+                        string indexStr = "";
+
+                        for (unsigned int  index_i = 0; index_i < n_max ; index_i ++)
+                        {
+                            if (indexes[index_i]) // if this node in this index is variable
+                            {
+                                indexStr += "1";
+
+                                // changed it back into a const,
+                                // and try to find its type-b sub patterns in varCombinToHTreeNode
+
+                                // first generate the sub pattern varCombin string
+                                string sub_b_str = "";
+
+                                for (unsigned int  b_index_i = 0; b_index_i < n_max ; b_index_i ++)
+                                {
+                                    if (indexes[b_index_i]) // if this node in this index is variable
+                                    {
+                                        if (b_index_i == index_i) // change it into const
+                                            sub_b_str += "0";
+                                        else
+                                            sub_b_str += "1";
+                                    }
+                                    else
+                                        sub_b_str  += "0";
+
+                                }
+
+                                // find the type b sub pattern with the sub pattern varCombin string
+                                map<string, HTreeNode*>::iterator sub_b_it = varCombinToHTreeNode.find(sub_b_str);
+                                if (sub_b_it != varCombinToHTreeNode.end())
+                                {
+                                    HTreeNode* sub_b_htreenode = (HTreeNode*)(sub_b_it->second);
+
+                                    SuperRelation_b superb;
+                                    superb.superHTreeNode = thisGramHTreeNode;
+
+                                    unsigned int const_index = 0;
+                                    Handle oldVarHandle;
+                                    for (iter = newValueToVarMap.begin(); iter != newValueToVarMap.end(); ++ iter)
+                                    {
+                                        if (const_index == index_i)
+                                        {
+                                            superb.constNode = iter->first;
+                                            oldVarHandle = iter->second;
+
+                                            break;
+                                        }
+
+                                        const_index ++;
+                                    }
+
+                                    // add the super b relation into the sub_b_treednode
+                                    sub_b_htreenode->superRelation_b_list.push_back(superb);
+
+
+                                    //
+                                    // find out what is variable name this const node became in current pattern:
+                                    Handle orderedVarHandle = orderedVarNameMap[oldVarHandle];
+
+                                    SubRelation_b onesub_b;
+                                    onesub_b.subHTreeNode = sub_b_htreenode;
+                                    onesub_b.constNode = superb.constNode;
+
+                                    // find if this variable already exists in the type b sub pattern relations of current pattern
+                                    map<Handle, vector<SubRelation_b>>::iterator sub_b_relation_it = thisGramHTreeNode->SubRelation_b_map.find(orderedVarHandle);
+                                    if (sub_b_relation_it == thisGramHTreeNode->SubRelation_b_map.end())
+                                    {
+                                        vector<SubRelation_b> subRelations;
+                                        subRelations.push_back(onesub_b);
+                                        thisGramHTreeNode->SubRelation_b_map.insert(std::pair<Handle, vector<SubRelation_b>>(orderedVarHandle, subRelations));
+
+                                    }
+                                    else
+                                    {
+                                        (sub_b_relation_it->second).push_back(onesub_b);
+                                    }
+
+//                                    cout << "const node:" << superb.constNode->toShortString() << std::endl;
+//                                    cout << "variable node: " << orderedVarHandle->toShortString() << std::endl;
+//                                    cout << "Sub pattern: " << std::endl;
+//                                    for (Handle plink : sub_b_htreenode->pattern)
+//                                        cout << plink->toShortString();
+//                                    cout << std::endl;
+
+                                }
+                            }
+                            else // it is a const node
+                                indexStr += "0";
+
+                        }
+
+                        varCombinToHTreeNode.insert(std::pair<string, HTreeNode*>(indexStr, thisGramHTreeNode));
+
+                    }
+
+
                     // check if the current gram is already the MAX_GRAM
                     if(cur_pattern_gram >= MAX_GRAM)
                     {

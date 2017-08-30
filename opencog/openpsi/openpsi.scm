@@ -31,6 +31,7 @@
 
     ; From main.scm
     psi-running? psi-get-loop-count psi-run-continue? psi-step psi-run psi-halt
+    psi-get-logger
 
     ; From utilities.scm
     psi-prefix-str psi-suffix-str psi-get-exact-match psi-get-dual-match
