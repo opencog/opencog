@@ -34,8 +34,18 @@
 
 ; Define the logger for GHOST
 (define ghost-logger (cog-new-logger))
+(cog-logger-set-component! ghost-logger "Ghost")
 (cog-logger-set-level! ghost-logger "info")
 (cog-logger-set-stdout! ghost-logger #t)
+
+(define-public (ghost-get-logger)
+"
+  ghost-get-logger
+
+  Returns the looger for ghost.
+"
+  ghost-logger
+)
 
 (define-public (ghost-prefix STR) (string-append "GHOST: " STR))
 (define (ghost-var-word NUM)

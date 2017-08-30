@@ -168,7 +168,6 @@
           (set! cs-line (read-line port))
           (set! initial-line cs-line)
         ))
-        ;(format #t ">>>>>>>>>>> line being processed ~a\n" cs-line)
       (let ((port-location (get-source-location port
               (if (eof-object? cs-line)
                 0
@@ -180,8 +179,8 @@
             (if (pair? result)
               (begin
                 ; For debugging
-                ;(format #t "=== tokeniz: ~a\n-> ~a\n"
-                ;  cs-line (lexical-token-category (car result)))
+                (cog-logger-debug ghost-logger "=== tokeniz: ~a\n-> ~a\n"
+                  cs-line (lexical-token-category (car result)))
                 (set! cs-line (cdr result))
                 (car result))
               (error (format #f "Tokenizer issue => ~a," result))
