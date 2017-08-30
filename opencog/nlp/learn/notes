@@ -12740,7 +12740,7 @@ was: 1554375
 (for-each (lambda (sent)
 		(set! cnt (+ cnt 1))
 		(format #t "delete ~D\n" cnt)
-		(zelete sent))
+		(if (cog-atom? sent) (delete-sentence sent)))
 	(cog-get-atoms 'SentenceNode))
 
 61377
