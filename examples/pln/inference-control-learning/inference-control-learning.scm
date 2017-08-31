@@ -102,28 +102,25 @@
   (icl-logger-info "Post-process trace, add to inference history")
   ;; Reload the postprocessing knowledge and rules
   (ppc-reload)
-  (let ((default-as (cog-set-atomspace! trace-as)))
-    ;; Copy trace-as to the default atomspace
-    (cog-cp-all default-as)
-    ;; Switch to the default atomspace
-    (cog-set-atomspace! default-as)
-    ;; Define BC target and vardecl
-    (let* ((target (Evaluation
-                     (Predicate "URE:BC:preproof")
-                     (List
-                       (Variable "$A")
-                       (Variable "$T"))))
-           (vardecl (VariableList
-                      (TypedVariable
-                        (Variable "$A")
-                        (Type "DontExecLink"))
-                      (Variable "$T")))
-           (results (ppc-bc target #:vardecl vardecl)))
-      ;; Copy post-processed inference traces to the inference
-      ;; history. Execution relationships + preproof evaluations
-      (cog-cp (cog-outgoing-set results) history-as)
-      (cog-cp (cog-get-atoms 'ExecutionLink) history-as)
-      (remove-dangling-atoms history-as))))
+  ;; Copy trace-as to the default atomspace
+  (cp-as trace-as (cog-atomspace))
+  ;; Define BC target and vardecl
+  (let* ((target (Evaluation
+                   (Predicate "URE:BC:preproof")
+                   (List
+                     (Variable "$A")
+                     (Variable "$T"))))
+         (vardecl (VariableList
+                    (TypedVariable
+                      (Variable "$A")
+                      (Type "DontExecLink"))
+                    (Variable "$T")))
+         (results (ppc-bc target #:vardecl vardecl)))
+    ;; Copy post-processed inference traces to the inference
+    ;; history. Execution relationships + preproof evaluations
+    (cog-cp (cog-outgoing-set results) history-as)
+    (cog-cp (cog-get-atoms 'ExecutionLink) history-as)
+    (remove-dangling-atoms history-as)))
 
 (define (mk-ic-rules)
   (icl-logger-info "Build inference control rules from the inference history")
@@ -134,6 +131,8 @@
     (cog-cp-all default-as)
     ;; Switch to the default atomspace
     (cog-set-atomspace! default-as)
+    (icl-logger-debug "mk-ic-rules default-as:")
+    (icl-logger-debug-atomspace default-as)
     ;; Define BC target and vardecl
     (let* ((vardecl (TypedVariable
                        (Variable "$Rule")
@@ -188,3 +187,5 @@
                       #f)))
     (icl-logger-info (if success "Success" "Failure"))
     success))
+
+(run-experiment)
