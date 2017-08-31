@@ -14,8 +14,6 @@
 ; Copyright 2016 Hanson Robotics
 ;
 (use-modules (srfi srfi-1) )
-(use-modules (opencog) (opencog atom-types)
-	(opencog eva-model) (opencog eva-behavior))
 
 (use-modules (opencog pointmem)); needed for maps
 

@@ -53,13 +53,36 @@
 ; =============================================================================
 ; CREATE MODULATORS
 
-(define arousal (psi-create-modulator "arousal" .5))
-(define pos-valence (psi-create-modulator "positive-valence" .5))
-(define neg-valence (psi-create-modulator "negative-valence" .5))
-(define resolution-level (psi-create-modulator "resolution-level" .5))
-(define selection-threshold (psi-create-modulator "selection-threshold" .5))
-(define securing-threshold (psi-create-modulator "securing-threshold" .5))
-(define goal-directedness (psi-create-modulator "goal-directedness" .5))
+(define default-modulators '())
+
+(define (add-to-default-modulators NAME MODULATOR)
+	(set! default-modulators (assoc-set! default-modulators NAME MODULATOR))
+	MODULATOR
+)
+
+(define arousal (add-to-default-modulators "arousal"
+	(psi-create-modulator "arousal" .5)))
+(define pos-valence (add-to-default-modulators "pos-valence"
+	(psi-create-modulator "positive-valence" .5)))
+(define neg-valence (add-to-default-modulators "neg-valence"
+	(psi-create-modulator "negative-valence" .5)))
+(define resolution-level (add-to-default-modulators "resolution-level"
+	(psi-create-modulator "resolution-level" .5)))
+(define selection-threshold (add-to-default-modulators "selection-threshold"
+	(psi-create-modulator "selection-threshold" .5)))
+(define securing-threshold (add-to-default-modulators "securing-threshold"
+	(psi-create-modulator "securing-threshold" .5)))
+(define goal-directedness (add-to-default-modulators "goal-directedness"
+	(psi-create-modulator "goal-directedness" .5)))
+
+(define (psi-default-modulator-alist)
+"
+	psi-default-modulator-alist
+
+	Returns an alist with modulator-names for keys and modulator-nodes for values.
+"
+	default-modulators
+)
 
 ; -------------------------------------------------------------
 ; Getters
