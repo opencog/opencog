@@ -6045,7 +6045,7 @@ select count(*) from atoms;      -- 61069212 = 61M atoms
 select count(*) from valuations; -- 30960586 = 31M values
 
 2860579197 bytes uncompressed = 2.86 GB
- 488196590 butes compressed = 488MB
+ 488196590 bytes compressed   = 488MB
 
 dd28f22ef60b1d7f3f5854bfba793116  en_pairs_rfive.sql
 2bbe479fe0caa77c5a1438568a22a4c4  en_pairs_rfive.sql.bz2
@@ -6229,6 +6229,61 @@ select count(*) from valuations; -- 133848790 = 134M = 11M more
 
 988be345ccaffc9312db6446693a3625  en_pairs_rfive_mfive.sql
 1bd09cb8c014ec2c8e33ee7d101f4357  en_pairs_rfive_mfive.sql.bz2
+
+==================================================================
+en_pairs_rfive_mst
+------------------
+Same as en_pairs_rfive_mfive, but with word-disjunct marginals in it.
+
+STATUS: good
+DATE: 1 Sept 2017
+REASON: Best so far, I think. Except it contains infixed punctuation.
+    Which is a pointless waste of space. And which throws off stats
+    slightly, I suppose.
+
+                        List of relations
+ Schema |    Name    | Type  | Owner  |    Size    | Description 
+--------+------------+-------+--------+------------+-------------
+ public | atoms      | table | ubuntu | 13 GB      | 
+ public | spaces     | table | ubuntu | 40 kB      | 
+ public | typecodes  | table | ubuntu | 56 kB      | 
+ public | valuations | table | ubuntu | 34 GB      | 
+ public | values     | table | ubuntu | 8192 bytes | 
+
+select count(*) from atoms;      -- 150550752 = 150M (so +25M for marginals)
+select count(*) from valuations; -- 330716326 = 331M (+200M for marginals!!!)
+
+
+==================================================================
+en_pairs_cfive
+---------------
+Random-planar-tree parsed books from tranche-1, 2, 3, 4 and 5. 
+A cleaned-up version of en_pairs_rfive.  Words with infix marks
+were removed.  However, hyphenated words and apostrophised words
+remain.  Does NOT contain pair-MI values.
+
+STATUS: good
+DATE: 1 Sept 2017
+REASON: Best so far, I think.  One issue:
+
+                        List of relations
+ Schema |    Name    | Type  | Owner  |    Size    | Description 
+--------+------------+-------+--------+------------+-------------
+ public | atoms      | table | ubuntu | 5380 MB    | 
+ public | spaces     | table | ubuntu | 40 kB      | 
+ public | typecodes  | table | ubuntu | 56 kB      | 
+ public | valuations | table | ubuntu | 3365 MB    | 
+ public | values     | table | ubuntu | 8192 bytes | 
+
+select count(*) from atoms;      -- 56409030 = 56M = 5M fewer than rfive.
+select count(*) from valuations; -- 28516287 = 28.5M = 2.5M fewer 
+
+2638878848 bytes uncompressed = 2.64 GBytes
+ 453916099 bytes compressed   = 454 MBytes
+
+3f9a82d6f5ab8547d15b8a32b27896a2  en_pairs_cfive.psql
+ad6e0ad034855441be507344f201f624  en_pairs_cfive.psql.bz2
+
 
 ==================================================================
 zh_pairs_one
@@ -12762,6 +12817,35 @@ no leak with delete-sentence either. WTF
 Bingo! 
 Now  1345 with 0
 
+-------------------------------------------
+Bugs fixed
+
+Bugs: get rid of [!] in words DONE
+
+Bugs: cleanup zen due to above DONE
+      what about zen_pairs_three? Ans: its junk!  Delete! DONE
+
+Bugs: clean up zh due to above    DONE
+
+Bugs: get rid of all-atoms in matrix  DONE
+
+960251608  721650216 189753488  80% /data
+
+------------------------------------------
+OK, so ... where was I?
+-- computed similarity for huge number of English pairs.
+I think this is in en_pairs_rfive_mtwo on fanny? Huhh ??
+where is this?
+
+-- Need to re-graph cos sim for this much larger set.
+
+-- cleaned up dashes .. did I save this DB? No, not yet.
+   kind-of should redo MI calcs, and MST parsing. See below,
+   not done yet.
+
+-- Need to redo the PCA....
+   
+-- If two words are similar, then ... 
 
 
 
@@ -12798,17 +12882,10 @@ Bugs: while mst parsing, guile goes GC-crazy after a while, and
 
 Items: create LG feederbacker
 
-Bugs; get rid of [!] in words DONE
-
-Bugs: cleanup zen due to above DONE
-      what about zen_pairs_three? Ans: its junk!  Delete! DONE
-
-Bugs: clean up zh due to above    DONE
 Bugs: cleanup embedded dashes in en  DONE
      -- save en_pairs_r again
+     -- should pboably recompute pair-MI after above,
      -- maybe recompute mst?? (since it was so quick!?)
-
-Bugs: get rid of all-atoms in matrix  DONE
 
 Bugs: split sent: quote after period
 Bugs: sentences with more than 254 words....
