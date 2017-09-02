@@ -1,14 +1,21 @@
 ;
 ; gram-class.scm
 ;
-; Classify words into grammatical categories, using the "thresholding
-; PCA" (Principal Component Analsysis) algo. 
+; Merge words into grammatical categories.
 ;
 ; ---------------------------------------------------------------------
 ; OVERVIEW
 ; --------
-; The overall algo is described in the language diary.  The bulk of the
-; computation is performed in the (opencog matrix) toolkit.
+; When a pair of words are judged to be grammatically similar, they
+; can be used to create a "grammatical class", containing both the
+; words, and behaving as thier union/sum.  When a word is judged to
+; belong to an existing grammatical-class, then some mechanism must
+; be provided to add that word to the class.  This file implements
+; the tools for creating and managing such classes.  It does not
+; dictate how to judge when words belong to a class; this is done
+; independently of the structure of the classes themselves.
+;
+; A grammatical class is represented as....
 ;
 ; ---------------------------------------------------------------------
 

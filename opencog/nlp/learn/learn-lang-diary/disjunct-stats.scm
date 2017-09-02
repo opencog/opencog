@@ -664,8 +664,6 @@
 (pss 'batch-compute)
 (pss 'paralel-batch 3)
 
-(cog-map-type ato 'SimilarityLink)
-
 (define ranked-long
 	(sort long-words
 		(lambda (a b) (> (psu 'right-count a) (psu 'right-count b)))))
@@ -674,8 +672,9 @@
 
 ; ---------------------------------------------------------------------
 ; Similarity.  Cosine distance.
-; Assumes that cosine similarities have been batch-computed, already,
-; using the code in gram-sim.scm
+; Assumes that cosine similarities have been batch-computed, already.
+; Uses the (define psm (add-similarity-api psa #f) API above to 
+; fetch the similarity into the atomspace.
 
 (define cos-key (PredicateNode "*-Cosine Sim Key-*"))
 
@@ -688,7 +687,8 @@
 		 #f)
 	'SimilarityLink)
 
-(length all-sims)    ;  317206
+(length all-sims)    ;  317206 for the (797 * 796)/2 pairs
+(length all-sims)    ;  1457522 for all pairs in rfive_mtwo with sim > 0.1
 
 (define (sim-cosine SIM)
 	(define cos-key (PredicateNode "*-Cosine Sim Key-*"))
@@ -704,6 +704,14 @@
 
 (define good-sims (filter-sim 256))
 (length good-sims)   ;  
+
+(define (filter-sim)
+	(filter
+		(lambda (sim) (< 0.1 (sim-cosine sim)))
+		all-sims))
+
+(define good-sims (filter-sim))
+(length good-sims)   ; 1058120
 
 (define ranked-sims
 	(sort good-sims
@@ -739,7 +747,7 @@
 				(< 4 (cset-vec-word-len (gdr sim)))))
 		all-sims))
 
-(length all-good-sims) ; 2172114 = 2M
+(length all-good-sims) ; 2172114 = 2M ????
 
 (define scored-good-sims (score sim-cosine all-good-sims))
 (define binned-good-sims (bin-count-simple scored-good-sims 100))
@@ -751,6 +759,8 @@
 (define all-good-words (filter (lambda (w) (< 4 (cset-vec-word-len w))) ac))
 
 (length all-good-words)   ;  5544 of length 4 or more
+
+; ---------------------------------------------------------------------
 
 ; ---------------------------------------------------------------------
 ; Connector-printing utilities.

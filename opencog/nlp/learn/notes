@@ -12550,7 +12550,7 @@ delete hl3 then hl2 then hl
 
 wait -- were teh uuids removed? yes they were.
 
-cog-delete-recursive is weierd
+cog-delete-recursive is wierd
 how to find handles....  handle_to_scm won't work.
 
 -----------------
@@ -12834,18 +12834,36 @@ Bugs: get rid of all-atoms in matrix  DONE
 ------------------------------------------
 OK, so ... where was I?
 -- computed similarity for huge number of English pairs.
-I think this is in en_pairs_rfive_mtwo on fanny? Huhh ??
-where is this?
+I think this is in en_pairs_rfive_mtwo on fanny.
+ 86498236 |     1 |   89 |      0 | *-SimKey cset cut-50-50-10 |
+ 86355966 |     1 |   89 |      0 | *-Cosine Sim Key-*         |
+
+select count(*) from valuations where key=86498236; --  142270 = 
+select count(*) from valuations where key=86355966; -- 1457522 = 1.4M
 
 -- Need to re-graph cos sim for this much larger set.
+   (define psm (add-similarity-api psa #f)
+   (psm 'fetch-pairs)  -- size = 1.4GB i.e. 1KB/atom fetched at
+       rate of 1K atoms/sec
+   there are 1058120  sims of length > 0.1
 
--- cleaned up dashes .. did I save this DB? No, not yet.
+	(define n 0)
+   (cog-map-type (lambda (ato) (set! n (+ n 1)) #f) 'WordNode) 
+   have 5843 words that are in similarity-pairs.
+   By contrast, there are  .... fuuu what is in this dataset????
+
+
+-- cleaned up dashes .. did I save this DB? Yes, done - en_pairs_cfive.
    kind-of should redo MI calcs, and MST parsing. See below,
    not done yet.
+   * clean up infix punct in rfive_mfive call it rfive_mfx
 
 -- Need to redo the PCA....
    
 -- If two words are similar, then ... 
+   * issue a uniq group ID
+   * sum the counts
+   
 
 
 
