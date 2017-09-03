@@ -1,14 +1,14 @@
 #!/bin/sh -e
 #
-# Edit this script and replace the username 'linas' by your usernname.
+# /etc/rc.local.shutdown
 #
-# Copy this script to /etc/rc.local.shutdown
+# This script is executed during system shutdown.
 #
-# This script is executed during system shutdown
+# Be sure to run `sudo install rc.local.shutdown /etc`
 #
-echo "Shut down user LXC containers" > /root/lxc-shutdown.log
-date >> /root/lxc-shutdown.log
+echo "Shut down the opencog system" > /root/opencog-shutdown.log
+date >> /root/opencog-shutdown.log
 
-sudo -u linas lxc-ls --active | xargs -r -n1 lxc-stop -n >> /root/lxc-shutdown.log
+sudo -u ubuntu /home/ubuntu/run/halt.sh >> /root/opencog-shutdown.log
 
 exit 0
