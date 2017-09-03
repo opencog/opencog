@@ -12829,7 +12829,7 @@ Bugs: clean up zh due to above    DONE
 
 Bugs: get rid of all-atoms in matrix  DONE
 
-960251608  721650216 189753488  80% /data
+Bugs: split sent: quote after period DONE
 
 ------------------------------------------
 OK, so ... where was I?
@@ -12856,6 +12856,7 @@ select count(*) from valuations where key=86355966; -- 1457522 = 1.4M
 -- cleaned up dashes .. did I save this DB? Yes, done - en_pairs_cfive.
    kind-of should redo MI calcs, and MST parsing. See below,
    not done yet.
+   * This dataset is too big to fit in RAM...
    * clean up infix punct in rfive_mfive call it rfive_mfx
 
 -- Need to redo the PCA....
@@ -12865,6 +12866,14 @@ select count(*) from valuations where key=86355966; -- 1457522 = 1.4M
    * sum the counts
    
 
+
+lxc-ls --active
+lxc-stop -n xxx
+
+pg_dump zen_pairs
+
+$(id -n)
+write portno to file?
 
 
 =========================================================================
@@ -12905,5 +12914,8 @@ Bugs: cleanup embedded dashes in en  DONE
      -- should pboably recompute pair-MI after above,
      -- maybe recompute mst?? (since it was so quick!?)
 
-Bugs: split sent: quote after period
 Bugs: sentences with more than 254 words....
+
+Bugs: make postgres run nice.
+
+Bugs: lxc containers not shutting down correctly during power loss
