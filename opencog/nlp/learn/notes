@@ -12872,9 +12872,23 @@ lxc-stop -n xxx
 
 pg_dump zen_pairs
 
-$(id -n)
+$(id -nu)
 write portno to file?
 
+1) root to kill all lxc
+2) each lxc to shutdown cleanly
+   send (sql-cose) to portno .. which portno?
+
+ERROR:  could not create unique index "valuations_key_atom_idx"
+DETAIL:  Key (key, atom)=(1, 3853322) is duplicated.
+CREATE INDEX ON Valuations (key, atom); 
+
+/etc/init.d/rc.local
+
+rc-local.service
+/lib/systemd/system/rc-local.service.d
+rc-local-shutdown.service
+/etc/rc.local.shutdown
 
 =========================================================================
 OK-ish misses the mark:
