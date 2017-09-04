@@ -18,7 +18,6 @@
   #:use-module (system base lalr)
 )
 
-
 (load "ghost/translator.scm")
 (load "ghost/terms.scm")
 (load "ghost/matcher.scm")
