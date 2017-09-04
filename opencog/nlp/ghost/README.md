@@ -74,6 +74,52 @@ Alice killed the dinosaurs".
 Currently Ghost supports calling Scheme functions only, but this can be changed
 if needed.
 
+## How To Run
+
+1) Start the [RelEx server](https://github.com/opencog/relex#opencog-serversh)
+2) Start Guile
+3) Load the needed modules
+```
+(use-modules (opencog)
+             (opencog nlp relex2logic)
+             (opencog openpsi)
+             (opencog eva-behavior)
+             (opencog nlp ghost))
+```
+4) Start authoring
+
+A rule can be created by using `ghost-parse`:
+
+```
+(ghost-parse "s: (hi robot) Hello human")
+```
+
+Similarly for creating concepts:
+
+```
+(ghost-parse "concept: ~young (child kid youngster)")
+```
+
+One can also load a topic file by using `ghost-parse-file`:
+
+```
+(ghost-parse-file "path/to/the/topic/file")
+```
+
+5) Play with it
+
+One can quickly test if a rule can be triggered by using `test-ghost`:
+
+```
+(test-ghost "hi robot good morning")
+```
+
+The output `[INFO] [Ghost] Say: "Hello human"` will be printed.
+
+*Note*: `test-ghost` is mainly for testing and debugging purposes. The
+proper way of running it is to start the OpenPsi loop and should use
+`ghost` instead of `test-ghost` to send the input.
+
 ## To Do
 
 Here is a list of features that are partially working/need to be implemented.
