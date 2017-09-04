@@ -78,14 +78,16 @@ if needed.
 
 Here is a list of features that are partially working/need to be implemented.
 - Goal Assignment
-Assign one or more goals to a rule, right now a default goal is assigned to all
-of the rules.
+
+Allow author to assign one or more goals to a rule, e.g.
 
 ```
 #goal: novelty=0.8
 #goal: please_user=0.4
 s: ( what be you name ) I forgot; what's YOUR name, sweet wonderful human
 ```
+
+right now a default goal is assigned to all of the rules.
 
 - Speech Acts
 
