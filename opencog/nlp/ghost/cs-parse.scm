@@ -1,10 +1,3 @@
-(use-modules (ice-9 rdelim))
-(use-modules (ice-9 regex))
-(use-modules (ice-9 getopt-long))
-(use-modules (rnrs io ports))
-(use-modules (system base lalr))
-(use-modules (ice-9 eval-string))
-
 (define (display-token token)
 "
   This is used as a place holder.

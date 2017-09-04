@@ -1,7 +1,4 @@
-; -----
 ; Tools generally useful for testing / debugging GHOST
-
-(use-modules (opencog nlp chatbot))
 
 (define-public (ghost-debug-mode)
   (cog-logger-set-level! ghost-logger "debug")
