@@ -37,49 +37,66 @@ purposes than they are normally used in ChatScript; and also contains some
 additional features.
 
 Here is a list of features that are fully supported in GHOST:
-#####[Word/Lemma](https://github.com/bwilcox-1234/ChatScript/blob/master/WIKI/ChatScript-Basic-User-Manual.md#canonization)
-#####[Phrase](https://github.com/bwilcox-1234/ChatScript/blob/master/WIKI/ChatScript-Basic-User-Manual.md#proper-names)
-#####[Concept](https://github.com/bwilcox-1234/ChatScript/blob/master/WIKI/ChatScript-Basic-User-Manual.md#concepts)
-#####[Choice](https://github.com/bwilcox-1234/ChatScript/blob/master/WIKI/ChatScript-Basic-User-Manual.md#choices--)
-#####[Indefinite Wildcard](https://github.com/bwilcox-1234/ChatScript/blob/master/WIKI/ChatScript-Basic-User-Manual.md#simple-indefinite-wildcards-)
-#####[Precise Wildcard](https://github.com/bwilcox-1234/ChatScript/blob/master/WIKI/ChatScript-Basic-User-Manual.md#precise-wildcards-n)
-#####[Range-restricted Wildcard](https://github.com/bwilcox-1234/ChatScript/blob/master/WIKI/ChatScript-Basic-User-Manual.md#range-restricted-wildcards-n)
-#####[Variable](https://github.com/bwilcox-1234/ChatScript/blob/master/WIKI/ChatScript-Basic-User-Manual.md#_-match-variables)
-#####[User Variable](https://github.com/bwilcox-1234/ChatScript/blob/master/WIKI/ChatScript-Basic-User-Manual.md#user_variables)
-#####[Sentence Boundary](https://github.com/bwilcox-1234/ChatScript/blob/master/WIKI/ChatScript-Basic-User-Manual.md#sentence-boundaries--and-)
-#####[Negation](https://github.com/bwilcox-1234/ChatScript/blob/master/WIKI/ChatScript-Basic-User-Manual.md#not--and-notnot-)
-#####[Function](https://github.com/bwilcox-1234/ChatScript/blob/master/WIKI/ChatScript-Advanced-User-Manual.md#functions)
+- [Word/Lemma](https://github.com/bwilcox-1234/ChatScript/blob/master/WIKI/ChatScript-Basic-User-Manual.md#canonization)
+- [Phrase](https://github.com/bwilcox-1234/ChatScript/blob/master/WIKI/ChatScript-Basic-User-Manual.md#proper-names)
+- [Concept](https://github.com/bwilcox-1234/ChatScript/blob/master/WIKI/ChatScript-Basic-User-Manual.md#concepts)
+- [Choice](https://github.com/bwilcox-1234/ChatScript/blob/master/WIKI/ChatScript-Basic-User-Manual.md#choices--)
+- [Indefinite Wildcard](https://github.com/bwilcox-1234/ChatScript/blob/master/WIKI/ChatScript-Basic-User-Manual.md#simple-indefinite-wildcards-)
+- [Precise Wildcard](https://github.com/bwilcox-1234/ChatScript/blob/master/WIKI/ChatScript-Basic-User-Manual.md#precise-wildcards-n)
+- [Range-restricted Wildcard](https://github.com/bwilcox-1234/ChatScript/blob/master/WIKI/ChatScript-Basic-User-Manual.md#range-restricted-wildcards-n)
+- [Variable](https://github.com/bwilcox-1234/ChatScript/blob/master/WIKI/ChatScript-Basic-User-Manual.md#_-match-variables)
+- [User Variable](https://github.com/bwilcox-1234/ChatScript/blob/master/WIKI/ChatScript-Basic-User-Manual.md#user_variables)
+- [Sentence Boundary](https://github.com/bwilcox-1234/ChatScript/blob/master/WIKI/ChatScript-Basic-User-Manual.md#sentence-boundaries--and-)
+- [Negation](https://github.com/bwilcox-1234/ChatScript/blob/master/WIKI/ChatScript-Basic-User-Manual.md#not--and-notnot-)
+- [Function](https://github.com/bwilcox-1234/ChatScript/blob/master/WIKI/ChatScript-Advanced-User-Manual.md#functions)
+
 A function can be called by putting `^` followed by the name of the function, e.g.
 
-?: ( who killed _* ) I think ^findkiller killed the '_0
+```
+?: ( who killed the _* ) I think ^findkiller killed the '_0
+```
 
 means that when there is a matching input received, a Scheme function named
 `findkiller` will be called before outputting the respond. The Scheme function
 needs to be defined by using `define-public`, e.g.
 
+```
 (define-public (findkiller)
   ; ... the process of finding the killer ...
   ; The answer should be a list of nodes wrapped in a ListLink
   (List (Word "Bob") (Word "and") (Word "Alice")))
+```
 
 If the input is "who killed the dinosaurs", the above rule will be triggered,
-`findkiller` will be called, and finally the output will be
-"I think Bob and Alice killed the dinosaurs".
+`findkiller` will be called, and finally the output will be "I think Bob and
+Alice killed the dinosaurs".
 
-Currently Ghost supports calling Scheme functions only, but this can be changed if needed.
+Currently Ghost supports calling Scheme functions only, but this can be changed
+if needed.
 
 ## To Do
-Assign one or more goals to a rule, right now a default goal is assigned to all of the rules.
+
+Here is a list of features that are partially working/need to be implemented.
+- Goal Assignment
+Assign one or more goals to a rule, right now a default goal is assigned to all
+of the rules.
+
 ```
 #goal: novelty=0.8
 #goal: please_user=0.4
 s: ( what be you name ) I forgot; what's YOUR name, sweet wonderful human
 ```
 
-Speech Acts
+- Speech Acts
 
-Gambits
+A rule starts with:
 
-Rejoinders
+```
+s: is equivalent to declarative or imperative in OpenCog
+?: is equivalent to truth query or interrogative in OpenCog
+u: means union of the both above
+```
 
-Unordered Matching
+- Gambit & Rejoinders
+
+- Unordered Matching
