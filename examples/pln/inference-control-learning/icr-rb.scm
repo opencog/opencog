@@ -16,7 +16,7 @@
    icr-rbs
    (ConceptNode "URE"))
 
-;; Define ppc-bc for convenience
+;; Define icr-bc for convenience
 (define (icr-bc . args)
   (apply cog-bc (cons icr-rbs args)))
 

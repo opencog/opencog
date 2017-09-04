@@ -35,7 +35,7 @@
 ;; (cog-logger-set-sync! (cog-ure-logger) #t)
 
 ;; Set parameters
-(define pss 5)                          ; Problem set size
+(define pss 1)                          ; Problem set size
 (define niter 2)                         ; Number of iterations
 
 ;; AtomSpace containing the targets in there to no forget them
@@ -124,47 +124,61 @@
 
 (define (mk-ic-rules)
   (icl-logger-info "Build inference control rules from the inference history")
+
   ;; Reload the rule base for producing inference control rules
   (icr-reload)
-  (let ((default-as (cog-set-atomspace! history-as)))
-    ;; Copy history-as to the default atomspace
-    (cog-cp-all default-as)
-    ;; Switch to the default atomspace
-    (cog-set-atomspace! default-as)
-    (icl-logger-debug "mk-ic-rules default-as:")
-    (icl-logger-debug-atomspace default-as)
-    ;; Define BC target and vardecl
-    (let* ((vardecl (TypedVariable
-                       (Variable "$Rule")
+
+  ;; Copy history-as to the default atomspace
+  (cp-as history-as (cog-atomspace))
+
+  ;; Load PLN to have access to the PLN rules
+  (load "pln-rb.scm")
+
+  (icl-logger-debug "mk-ic-rules default-as:")
+  (icl-logger-debug-atomspace (cog-atomspace))
+
+  ;; Define BC target and vardecl
+  (let* ((vardecl (TypedVariable
+                    (Variable "$Rule")
+                    (Type "DefinedSchemaNode")))
+         (target (ImplicationScope
+                   (VariableList
+                     (Variable "$T")
+                     (TypedVariable
+                       (Variable "$A")
+                       (Type "BindLink"))
+                     (Variable "$L")
+                     (TypedVariable
+                       (Variable "$B")
                        (Type "BindLink")))
-           (target (ImplicationScope
-                     (VariableList
-                       (Variable "$T")
-                       (TypedVariable
-                         (Variable "$A")
-                         (Type "BindLink"))
+                   (Execution
+                     (Schema "URE:BC:expand-and-BIT")
+                     (List
+                       (DontExec (Variable "$A"))
                        (Variable "$L")
-                       (TypedVariable
-                         (Variable "$B")
-                         (Type "BindLink")))
-                     (Execution
-                       (Schema "URE:BC:expand-and-BIT")
-                       (List
-                         (DontExec (Variable "$A"))
-                         (Variable "$L")
-                         (DontExec (Variable "$Rule")))
-                       (DontExec (Variable "$B")))
-                     (Evaluation
-                       (Predicate "URE:BC:preproof")
-                       (List
-                         (DontExec (Variable "$A"))
-                         (Variable "$T")))))
-           (results (icr-bc target #:vardecl vardecl)))
-      (icl-logger-debug "Query target = ~a" target)
-      ;; Copy inference control rules to the Inference Control Rules
-      ;; atomspace.
-      (icl-logger-debug "Results:\n~a" results)
-      (cog-cp (cog-outgoing-set results) control-as))))
+                       (DontExec (Variable "$Rule")))
+                     (DontExec (Variable "$B")))
+                   (Evaluation
+                     (Predicate "URE:BC:preproof")
+                     (List
+                       (DontExec (Variable "$A"))
+                       (Variable "$T")))))
+         ;; Instantiate the targets as required by icr-bc
+         (rules-to-targets (Bind
+                             vardecl
+                             (Member
+                               (Variable "$Rule")
+                               pln-rbs)
+                             target))
+         (targets (cog-bind rules-to-targets))
+         ;; Produce the inference control rules
+         (results (icr-bc target #:vardecl vardecl)))
+    (icl-logger-debug "Targets = ~a" targets)
+    (icl-logger-debug "Query target = ~a" target)
+    (icl-logger-debug "Results:\n~a" results)
+    ;; Copy inference control rules to the Inference Control Rules
+    ;; atomspace.
+    (cog-cp (cog-outgoing-set results) control-as)))
 
 ;; Run the backward chainer on target, given the atomspace where to
 ;; record the inference traces, trace-as, and inference-control rules
