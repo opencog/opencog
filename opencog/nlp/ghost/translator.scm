@@ -1,17 +1,4 @@
 ;; GHOST DSL for chat authoring rules
-;;
-;; A partial implementation of the top level translator that produces
-;; PSI rules.
-(use-modules (opencog)
-             (opencog logger)
-             (opencog nlp)
-             (opencog exec)
-             (opencog openpsi)
-             (opencog eva-behavior)
-             (srfi srfi-1)
-             (rnrs io ports)
-             (ice-9 popen)
-             (ice-9 optargs))
 
 ; Keep a record of the variables, if any, found in the pattern of a rule
 ; TODO: Move it to process-pattern-terms?
@@ -42,7 +29,7 @@
 "
   ghost-get-logger
 
-  Returns the looger for ghost.
+  Returns the logger for ghost.
 "
   ghost-logger
 )
