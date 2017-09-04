@@ -23,3 +23,16 @@
 (load "ghost/matcher.scm")
 (load "ghost/cs-parse.scm")
 (load "ghost/test.scm")
+
+(define-public (ghost-parse TXT)
+  "Parse the TXT, convert them into atomese."
+  (test-parse TXT))
+
+(define-public (ghost-parse-file FILE)
+  "Parse everything in FILE, convert them into atomese."
+  (test-parse-file FILE))
+
+(define-public (ghost TXT)
+  "Parse the input TXT using nlp-parse and connect it to the GHOST anchor.
+   Should run this with the main OpenPsi loop."
+  (State (Anchor "GHOST: Currently Processing") (car (nlp-parse TXT))))

@@ -4,14 +4,6 @@
   (cog-logger-set-level! ghost-logger "debug")
   (cog-logger-set-stdout! ghost-logger #t))
 
-(define-public (ghost-parse TXT)
-  "Parse the TXT, convert them into atomese."
-  (test-parse TXT))
-
-(define-public (ghost-parse-file FILE)
-  "Parse everything in FILE, convert them into atomese."
-  (test-parse-file FILE))
-
 (define-public (test-ghost TXT)
   "Try to find (and execute) the matching rules given an input TXT."
   (define sent (car (nlp-parse TXT)))

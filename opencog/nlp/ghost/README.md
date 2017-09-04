@@ -116,7 +116,7 @@ One can quickly test if a rule can be triggered by using `test-ghost`:
 
 The output `[INFO] [Ghost] Say: "Hello human"` will be printed.
 
-*Note*: `test-ghost` is mainly for testing and debugging purposes. The
+*Note*: `test-ghost` is mainly for testing and debugging. The
 proper way of running it is to start the OpenPsi loop and should use
 `ghost` instead of `test-ghost` to send the input.
 
