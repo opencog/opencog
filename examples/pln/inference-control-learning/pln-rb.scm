@@ -58,15 +58,15 @@
 ; List the rules and their weights.
 (define rules
   (list
-        (list modus-ponens-inheritance-rule-name 1)
-        ;; (list modus-ponens-implication-rule-name 1)
-        ;; (list modus-ponens-subset-rule-name 1)
-        ;; (list contraposition-inheritance-rule-name 1)
-        ;; (list contraposition-implication-rule-name 1)
-        ;; (list crisp-contraposition-implication-scope-rule-name 1)
-        ;; (list deduction-inheritance-rule-name 1)
-        ;; (list deduction-implication-rule-name 1)
-        ;; (list deduction-subset-rule-name 1)
+        modus-ponens-inheritance-rule-name
+        ;; modus-ponens-implication-rule-name
+        ;; modus-ponens-subset-rule-name
+        ;; contraposition-inheritance-rule-name
+        ;; contraposition-implication-rule-name
+        ;; crisp-contraposition-implication-scope-rule-name
+        ;; deduction-inheritance-rule-name
+        ;; deduction-implication-rule-name
+        ;; deduction-subset-rule-name
         )
   )
 

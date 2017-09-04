@@ -48,10 +48,10 @@
 ;; Associate rules to PLN ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-; List the rules and their weights.
+; List the rules
 (define rules
   (list
-    (list universal-full-instantiation-forall-1ary-meta-rule-name 1)))
+    universal-full-instantiation-forall-1ary-meta-rule-name))
 
 ;; Associate rules to PLN
 (ure-add-rules pln-rbs rules)
