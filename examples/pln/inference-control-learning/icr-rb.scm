@@ -37,11 +37,9 @@
 ;; Associate rules to PLN ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-; List the rules and their weights.
+;; List the rules
 (define rules
-  (list
-     (list conditional-direct-evaluation-implication-scope-rule-name 1)
-  )
+  (list conditional-direct-evaluation-implication-scope-rule-name)
 )
 
 ;; Associate rules to ppc
