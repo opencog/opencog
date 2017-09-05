@@ -7,7 +7,7 @@
 (define-public (test-ghost TXT)
   "Try to find (and execute) the matching rules given an input TXT."
   (define sent (car (nlp-parse TXT)))
-  (State (Anchor "GHOST: Currently Processing") sent)
+  (State ghost-anchor sent)
   (map (lambda (r) (cog-evaluate! (gdar r)))
        (cog-outgoing-set (chat-find-rules sent)))
   *unspecified*)

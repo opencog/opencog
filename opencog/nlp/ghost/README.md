@@ -81,7 +81,6 @@ if needed.
 3) Load the needed modules
 ```
 (use-modules (opencog)
-             (opencog nlp relex2logic)
              (opencog openpsi)
              (opencog eva-behavior)
              (opencog nlp ghost))
