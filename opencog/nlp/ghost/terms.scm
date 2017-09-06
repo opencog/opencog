@@ -143,6 +143,7 @@
         (list g1)
         (list g2))))
 
+; TODO: Should be placed in the action of the rule
 (define-public (ghost-record-groundings WGRD LGRD)
   "Record the groundings of a variable, in both original words and lemmas.
    They will be referenced at the stage of evaluating the context of the
