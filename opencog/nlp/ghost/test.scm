@@ -26,7 +26,7 @@
 (define-public (ghost-get-curr-sent)
   "Get the SentenceNode that is being processed currently."
   (define sent (cog-chase-link 'StateLink 'SentenceNode ghost-anchor))
-  (if sent (car sent) '()))
+  (if (null? sent) '() (car sent)))
 
 (define*-public (ghost-show-relation #:optional (SENT (ghost-get-curr-sent)))
   "Get a subset of the RelEx outputs of a sentence that GHOST cares.

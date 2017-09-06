@@ -32,9 +32,9 @@ will be executed as a result.
 ## Current Status
 
 For verbal interaction authoring in particular, GHOST syntax is modeled heavily
-on ChatScript. However, GHOST uses several ChatScript features for different
-purposes than they are normally used in ChatScript; and also contains some
-additional features.
+on [ChatScript](https://github.com/bwilcox-1234/ChatScript/blob/master/WIKI/ChatScript-Basic-User-Manual.md#rules).
+However, GHOST uses several ChatScript features for different purposes than
+they are normally used in ChatScript; and also contains some additional features.
 
 Here is a list of features that are fully supported in GHOST:
 - [Word/Lemma](https://github.com/bwilcox-1234/ChatScript/blob/master/WIKI/ChatScript-Basic-User-Manual.md#canonization)
@@ -50,29 +50,7 @@ Here is a list of features that are fully supported in GHOST:
 - [Negation](https://github.com/bwilcox-1234/ChatScript/blob/master/WIKI/ChatScript-Basic-User-Manual.md#not--and-notnot-)
 - [Function](https://github.com/bwilcox-1234/ChatScript/blob/master/WIKI/ChatScript-Advanced-User-Manual.md#functions)
 
-A function can be called by putting `^` followed by the name of the function, e.g.
-
-```
-?: ( who killed the _* ) I think ^findkiller killed the '_0
-```
-
-means that when there is a matching input received, a Scheme function named
-`findkiller` will be called before outputting the respond. The Scheme function
-needs to be defined by using `define-public`, e.g.
-
-```
-(define-public (findkiller)
-  ; ... the process of finding the killer ...
-  ; The answer should be a list of nodes wrapped in a ListLink
-  (List (Word "Bob") (Word "and") (Word "Alice")))
-```
-
-If the input is "who killed the dinosaurs", the above rule will be triggered,
-`findkiller` will be called, and finally the output will be "I think Bob and
-Alice killed the dinosaurs".
-
-Currently Ghost supports calling Scheme functions only, but this can be changed
-if needed.
+Basic examples of how to use GHOST is available [HERE](https://github.com/opencog/opencog/blob/master/examples/ghost/basic.scm)
 
 ## How To Run
 

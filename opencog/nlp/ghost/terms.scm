@@ -169,14 +169,14 @@
                                  (List GRD))))))
 
 (define (context-function NAME ARGS)
-  "Occurrence of a function in the context of a rule."
-  (Evaluation (GroundedPredicate (string-append "scm: " NAME))
-              (List ARGS)))
+  "Occurrence of a function in the context of a rule.
+   The DefinedPredicateNode named NAME should have already been defined."
+  (Put (DefinedPredicate NAME) (List ARGS)))
 
 (define (action-function NAME ARGS)
-  "Occurrence of a function in the action of a rule."
-  (ExecutionOutput (GroundedSchema (string-append "scm: " NAME))
-                   (List ARGS)))
+  "Occurrence of a function in the action of a rule.
+   The DefinedSchemaNode named NAME should have already been defined."
+  (Put (DefinedSchema NAME) (List ARGS)))
 
 (define-public (ghost-pick-action ACTIONS)
   "The actual Scheme function being called by the GroundedSchemaNode
@@ -254,30 +254,24 @@
   (Evaluation (GroundedPredicate "scm: ghost-user-variable-equal?")
               (List (ghost-uvar UVAR) (Word VAL))))
 
-(define-public (ghost-execute-action ACTION)
+(define-public (ghost-execute-action . ACTIONS)
   "Say the text and update the internal state."
-  (define (extract-txt action)
+  (define (extract-txt actions)
     ; TODO: Right now it is extracting text only, but should be extended
     ; to support actions that contains are not text as well.
     (string-join (append-map
       (lambda (a)
         (cond ((cog-link? a)
-               (list (extract-txt a)))
+               (list (extract-txt (cog-outgoing-set a))))
               ((equal? 'WordNode (cog-type a))
                (list (cog-name a)))
               ; TODO: things other than text
               (else '())))
-        (cog-outgoing-set action))))
-  (define txt (extract-txt ACTION))
+        actions)))
+  (define txt (extract-txt ACTIONS))
   ; Is there anything to say?
   (if (not (string-null? (string-trim txt)))
       (begin (cog-logger-info ghost-logger "Say: \"~a\"" txt)
              (cog-execute! (Put (DefinedPredicate "Say") (Node txt)))))
   ; Reset the state
   (State ghost-anchor (Concept "Default State")))
-
-(Define
-  (DefinedSchema (ghost-prefix "Execute Action"))
-  (Lambda (Variable "$x")
-          (ExecutionOutput (GroundedSchema "scm: ghost-execute-action")
-                           (List (Variable "$x")))))

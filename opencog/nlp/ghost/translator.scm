@@ -183,8 +183,8 @@
           '()
           (list (action-choices choices)))))
   (cog-logger-debug ghost-logger "action: ~a" ACTION)
-  (True (Put (DefinedSchema (ghost-prefix "Execute Action"))
-             (List (to-atomese (cdar ACTION))))))
+  (True (ExecutionOutput (GroundedSchema "scm: ghost-execute-action")
+        (List (to-atomese (cdar ACTION))))))
 
 (define* (create-rule PATTERN ACTION #:optional (TOPIC default-topic) NAME)
   "Top level translation function. Pattern is a quoted list of terms,
