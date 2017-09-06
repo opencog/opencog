@@ -169,14 +169,14 @@
                                  (List GRD))))))
 
 (define (context-function NAME ARGS)
-  "Occurrence of a function in the context of a rule."
-  (Evaluation (GroundedPredicate (string-append "scm: " NAME))
-              (List ARGS)))
+  "Occurrence of a function in the context of a rule.
+   The DefinedPredicateNode named NAME should have already been defined."
+  (Put (DefinedPredicate NAME) (List ARGS)))
 
 (define (action-function NAME ARGS)
-  "Occurrence of a function in the action of a rule."
-  (ExecutionOutput (GroundedSchema (string-append "scm: " NAME))
-                   (List ARGS)))
+  "Occurrence of a function in the action of a rule.
+   The DefinedSchemaNode named NAME should have already been defined."
+  (Put (DefinedSchema NAME) (List ARGS)))
 
 (define-public (ghost-pick-action ACTIONS)
   "The actual Scheme function being called by the GroundedSchemaNode
