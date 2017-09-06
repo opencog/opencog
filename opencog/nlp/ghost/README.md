@@ -50,7 +50,7 @@ Here is a list of features that are fully supported in GHOST:
 - [Negation](https://github.com/bwilcox-1234/ChatScript/blob/master/WIKI/ChatScript-Basic-User-Manual.md#not--and-notnot-)
 - [Function](https://github.com/bwilcox-1234/ChatScript/blob/master/WIKI/ChatScript-Advanced-User-Manual.md#functions)
 
-Basic examples of how to use GHOST is available [HERE](https://github.com/opencog/opencog/tree/master/examples/ghost)
+Basic examples of how to use GHOST is available [HERE](https://github.com/opencog/opencog/blob/master/examples/ghost/basic.scm)
 
 ## How To Run
 

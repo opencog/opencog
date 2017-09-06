@@ -254,7 +254,7 @@
   (Evaluation (GroundedPredicate "scm: ghost-user-variable-equal?")
               (List (ghost-uvar UVAR) (Word VAL))))
 
-(define-public (ghost-execute-action ACTION)
+(define-public (ghost-execute-action . ACTION)
   "Say the text and update the internal state."
   (define (extract-txt action)
     ; TODO: Right now it is extracting text only, but should be extended
@@ -267,7 +267,7 @@
                (list (cog-name a)))
               ; TODO: things other than text
               (else '())))
-        (cog-outgoing-set action))))
+        action)))
   (define txt (extract-txt ACTION))
   ; Is there anything to say?
   (if (not (string-null? (string-trim txt)))
@@ -275,9 +275,3 @@
              (cog-execute! (Put (DefinedPredicate "Say") (Node txt)))))
   ; Reset the state
   (State ghost-anchor (Concept "Default State")))
-
-(Define
-  (DefinedSchema (ghost-prefix "Execute Action"))
-  (Lambda (Variable "$x")
-          (ExecutionOutput (GroundedSchema "scm: ghost-execute-action")
-                           (List (Variable "$x")))))
