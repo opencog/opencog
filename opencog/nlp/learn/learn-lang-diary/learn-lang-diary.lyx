@@ -20254,14 +20254,15 @@ en_pairs_rfive As above, tranche 1,2,3,4 & 5.
 \begin_layout Description
 en_pairs_rfive_mtwo The MST parses of tranches 1-2, performed on the word-pairs
  computed from en_pairs_rfive.
- That is, the word-pair stats were accumulated to completion first, before
- the MST parsing is started.
+ That is, the word-pair stats for tranches 1-5 were accumulated to completion
+ first, before the MST parsing is started.
 \end_layout
 
 \begin_layout Description
 en_pairs_rfive_mst As above, except that this is the MST parse of all of
  the tranches 1-5.
  That is, the MST corpus is the same corpus as the word-pair corpus.
+ (Same as en_pairs_rfive_mfive, but with dj marginals)
 \end_layout
 
 \begin_layout Description
@@ -21688,7 +21689,7 @@ en_pairs_rfive_mtwo
 \begin_inset Text
 
 \begin_layout Plain Layout
-
+22.82
 \end_layout
 
 \end_inset
@@ -21697,7 +21698,7 @@ en_pairs_rfive_mtwo
 \begin_inset Text
 
 \begin_layout Plain Layout
-
+20.92
 \end_layout
 
 \end_inset
@@ -21706,7 +21707,7 @@ en_pairs_rfive_mtwo
 \begin_inset Text
 
 \begin_layout Plain Layout
-
+10.09
 \end_layout
 
 \end_inset
@@ -21715,7 +21716,7 @@ en_pairs_rfive_mtwo
 \begin_inset Text
 
 \begin_layout Plain Layout
-
+8.18
 \end_layout
 
 \end_inset
