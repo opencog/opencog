@@ -17,6 +17,7 @@
 
 (use-modules (srfi srfi-1))
 (use-modules (opencog query))
+(use-modules (opencog logger))
 
 ;; TODO: turn that into a generator
 
@@ -36,20 +37,34 @@
          (vardecl (if (= arity 2) #f (list-ref out 0)))
          (antecedent (list-ref out (if (= arity 2) 0 1)))
          (consequent (list-ref out (if (= arity 2) 1 2)))
-         ;; Fetch all antecedent terms, or rather their values
-         ;; associated to their variables
-         (query (Get vardecl antecedent))
-         (antecedent-values (cog-satisfying-set query))
-         ;; Generate the antecedent and consequent terms, to get there
-         ;; TVs
-         (antecedent-terms (Put vardecl antecedent (List antecedent-values)))
-         (consequent-terms (Put vardecl consequent (List consequent-values)))
-         ;; Calculate the TV based on the evidence
-         (tv (evidence-to-tv antecedent-terms consequent-terms)))
-    (if (tv-non-null-conf? tv)
-        (I tv))))
 
-(define (evidence-to-tv antecedent-terms consequent-terms)
+         ;; Fetch all antecedent values
+         (antecedent-get (Get vardecl antecedent))
+         (antecedent-result (cog-satisfying-set antecedent-get))
+         (antecedent-values (cog-outgoing-set antecedent-result))
+
+         ;; Generate the antecedent and consequent terms
+         (antecedent-lambda (Lambda vardecl antecedent))
+         (consequent-lambda (Lambda vardecl consequent))
+         (antecedent-terms (map-beta-reduce antecedent-lambda antecedent-values))
+         (consequent-terms (map-beta-reduce consequent-lambda antecedent-values))
+
+         ;; Calculate the TV based on the evidence
+         (tv (evidence->tv antecedent-terms consequent-terms)))
+
+    (if (tv-non-null-conf? tv)
+        (cog-merge-hi-conf-tv! I tv))))
+
+;; Given a list of values and a lambda link generate a list of terms
+;; as the results of beta reductions of values within the lambda. We
+;; can't just execute a put link because the result will be a set link
+;; and we need to preserve the order.
+(define (map-beta-reduce lambda-link values)
+  (map (lambda (v) (cog-execute! (Put lambda-link v))) values))
+
+;; Given a list of antecedent and consequent terms calculate the TV of
+;; the implication
+(define (evidence->tv antecedent-terms consequent-terms)
   (let* ;; TODO replace by a distributional TV based calculation.
       ((K 800) ; parameter to convert from count to confidence
        (true-enough? (lambda (A) (let* ((TV (cog-tv A))
