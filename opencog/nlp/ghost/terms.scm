@@ -254,21 +254,21 @@
   (Evaluation (GroundedPredicate "scm: ghost-user-variable-equal?")
               (List (ghost-uvar UVAR) (Word VAL))))
 
-(define-public (ghost-execute-action . ACTION)
+(define-public (ghost-execute-action . ACTIONS)
   "Say the text and update the internal state."
-  (define (extract-txt action)
+  (define (extract-txt actions)
     ; TODO: Right now it is extracting text only, but should be extended
     ; to support actions that contains are not text as well.
     (string-join (append-map
       (lambda (a)
         (cond ((cog-link? a)
-               (list (extract-txt a)))
+               (list (extract-txt (cog-outgoing-set a))))
               ((equal? 'WordNode (cog-type a))
                (list (cog-name a)))
               ; TODO: things other than text
               (else '())))
-        action)))
-  (define txt (extract-txt ACTION))
+        actions)))
+  (define txt (extract-txt ACTIONS))
   ; Is there anything to say?
   (if (not (string-null? (string-trim txt)))
       (begin (cog-logger-info ghost-logger "Say: \"~a\"" txt)
