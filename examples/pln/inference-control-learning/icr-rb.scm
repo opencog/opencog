@@ -7,18 +7,21 @@
 (use-modules (opencog))
 (use-modules (opencog rule-engine))
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Define post-process corpus rule-base system ;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Define inference control rule-base system ;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(define icr-rbs (ConceptNode "inference-control-rules-rule-base"))
-(InheritanceLink
-   icr-rbs
-   (ConceptNode "URE"))
-
-;; Define icr-bc for convenience
+;; Define icr-bc to evaluation inference control rule implication
+;; scope link based on evidence
+(define icr-rb (ConceptNode "icr-rb"))
 (define (icr-bc . args)
-  (apply cog-bc (cons icr-rbs args)))
+  (apply cog-bc (cons icr-rb args)))
+
+;; Define pre-processing rule-base to produce antecedants then used by
+;; icr-rb
+(define pp-icr-rb (ConceptNode "pp-icr-rb"))
+(define (pp-icr-bc . args)
+  (apply cog-bc (cons pp-icr-rb args)))
 
 ;;;;;;;;;;;;;;;;
 ;; Load rules ;;
@@ -29,34 +32,21 @@
 
 (define rule-filenames
   (list "rules/predicate/conditional-direct-evaluation.scm"
+        "rules/propositional/fuzzy-conjunction-introduction.scm"
         )
   )
 (for-each load-from-path rule-filenames)
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Associate rules to PLN ;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Associate rules to rule bases ;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-;; List the rules
-(define rules
-  (list conditional-direct-evaluation-implication-scope-rule-name)
-)
-
-;; Associate rules to ppc
-(ure-add-rules icr-rbs rules)
+(ure-add-rule icr-rb conditional-direct-evaluation-implication-scope-rule-name)
+(ure-add-rule pp-icr-rb fuzzy-conjunction-introduction-2ary-rule-name)
 
 ;;;;;;;;;;;;;;;;;;;;;;
 ;; Other parameters ;;
 ;;;;;;;;;;;;;;;;;;;;;;
 
-;; Termination criteria parameters
-(ure-set-num-parameter icr-rbs "URE:maximum-iterations" 100)
-
-;; Attention allocation (0 to disable it, 1 to enable it)
-(ure-set-fuzzy-bool-parameter icr-rbs "URE:attention-allocation" 0)
-
-;; Complexity penalty
-(ure-set-num-parameter icr-rbs "URE:BC:complexity-penalty" 1)
-
-;; BIT reduction parameters
-(ure-set-num-parameter icr-rbs "URE:BC:maximum-bit-size" 100000)
+(ure-set-num-parameter icr-rb "URE:maximum-iterations" 2)
+(ure-set-num-parameter pp-icr-rb "URE:maximum-iterations" 2)

@@ -35,7 +35,7 @@
 ;; (cog-logger-set-sync! (cog-ure-logger) #t)
 
 ;; Set parameters
-(define pss 1)                          ; Problem set size
+(define pss 10)                          ; Problem set size
 (define niter 2)                         ; Number of iterations
 
 ;; AtomSpace containing the targets in there to no forget them
@@ -134,35 +134,42 @@
   ;; Load PLN to have access to the PLN rules
   (load "pln-rb.scm")
 
-  (icl-logger-debug "mk-ic-rules default-as:")
-  (icl-logger-debug-atomspace (cog-atomspace))
-
   ;; Define BC target and vardecl
   (let* ((vardecl (TypedVariable
                     (Variable "$Rule")
                     (Type "DefinedSchemaNode")))
+         (impl-vardecl (VariableList
+                         (Variable "$T")
+                         (TypedVariable
+                           (Variable "$A")
+                           (Type "DontExecLink"))
+                         (Variable "$L")
+                         (TypedVariable
+                           (Variable "$B")
+                           (Type "DontExecLink"))))
+         (impl-antecedant (And
+                            (Evaluation
+                              (Predicate "URE:BC:preproof")
+                              (List
+                                (Variable "$A")
+                                (Variable "$T")))
+                            (Execution
+                              (Schema "URE:BC:expand-and-BIT")
+                              (List
+                                (Variable "$A")
+                                (Variable "$L")
+                                (DontExec (Variable "$Rule")))
+                              (Variable "$B"))))
+         (impl-consequent (Evaluation
+                            (Predicate "URE:BC:preproof")
+                            (List
+                              (Variable "$B")
+                              (Variable "$T"))))
          (target (ImplicationScope
-                   (VariableList
-                     (Variable "$T")
-                     (TypedVariable
-                       (Variable "$A")
-                       (Type "BindLink"))
-                     (Variable "$L")
-                     (TypedVariable
-                       (Variable "$B")
-                       (Type "BindLink")))
-                   (Execution
-                     (Schema "URE:BC:expand-and-BIT")
-                     (List
-                       (DontExec (Variable "$A"))
-                       (Variable "$L")
-                       (DontExec (Variable "$Rule")))
-                     (DontExec (Variable "$B")))
-                   (Evaluation
-                     (Predicate "URE:BC:preproof")
-                     (List
-                       (DontExec (Variable "$A"))
-                       (Variable "$T")))))
+                   impl-vardecl
+                   impl-antecedant
+                   impl-consequent))
+
          ;; Instantiate the targets as required by icr-bc
          (rules-to-targets (Bind
                              vardecl
@@ -171,14 +178,18 @@
                                pln-rbs)
                              target))
          (targets (cog-bind rules-to-targets))
+
+         ;; Evaluate the antecedants
+         (antecedants-result (pp-icr-bc impl-antecedant))
+
          ;; Produce the inference control rules
          (results (icr-bc target #:vardecl vardecl)))
-    (icl-logger-debug "Targets = ~a" targets)
-    (icl-logger-debug "Query target = ~a" target)
-    (icl-logger-debug "Results:\n~a" results)
     ;; Copy inference control rules to the Inference Control Rules
     ;; atomspace.
-    (cog-cp (cog-outgoing-set results) control-as)))
+    (cog-cp (cog-outgoing-set results) control-as))
+
+  (icl-logger-debug "Control AtomSpace:")
+  (icl-logger-debug-atomspace control-as))
 
 ;; Run the backward chainer on target, given the atomspace where to
 ;; record the inference traces, trace-as, and inference-control rules
@@ -187,9 +198,6 @@
 (define (run-bc target i j)
   (icl-logger-info "Run BC (i=~a/~a,j=~a/~a) with target:\n~a"
                    (+ i 1) niter (+ j 1) pss target)
-  (icl-logger-debug "Control AtomSpace:")
-  (icl-logger-debug-atomspace control-as)
-
   (clear-as trace-as)
 
   (reload)
