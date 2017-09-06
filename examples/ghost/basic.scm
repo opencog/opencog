@@ -69,3 +69,20 @@
 ; (test-ghost "there is a cat in the park")
 ; ... but not triggered by
 ; (test-ghost "I think there is a cat")
+
+; -----
+; Use of function
+
+(define-public (findkiller)
+  ; ... the process of finding the killer ...
+  ; The answer should be a list of nodes wrapped in a ListLink
+  (List (Word "Bob") (Word "and") (Word "Alice")))
+
+(Define
+  (DefinedSchema "findkiller")
+  (Lambda (ExecutionOutput (GroundedSchema "scm: findkiller") (List))))
+
+(ghost-parse "u: (who killed the _*) I think ^findkiller killed the '_0")
+
+; To trigger the rule
+; (test-ghost "who killed the dinosaurs")
