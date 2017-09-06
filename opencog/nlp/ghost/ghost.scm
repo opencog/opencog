@@ -52,9 +52,6 @@
   "Notify the user that a particular feature is not currently supported."
   (cog-logger-error ghost-logger "Feature not supported: \"~a ~a\"" NAME VAL))
 
-; Keep a record of the variables, if any, found in the pattern of a rule
-(define pat-vars '())
-
 ; Keep a record of the groundings of variables that authors defined
 (define var-grd-words '())
 (define var-grd-lemmas '())
@@ -72,6 +69,7 @@
 ;; --------------------
 ;; The required files
 
+(load "ghost/utils.scm")
 (load "ghost/translator.scm")
 (load "ghost/terms.scm")
 (load "ghost/matcher.scm")
