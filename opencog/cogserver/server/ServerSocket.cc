@@ -40,6 +40,7 @@ ServerSocket::~ServerSocket()
 {
     logger().debug("ServerSocket::~ServerSocket()");
 
+    SetCloseAndDelete();
     delete _socket;
     _socket = nullptr;
 }
@@ -192,7 +193,6 @@ void ServerSocket::handle_connection(void)
         OnLine(line);
 
     logger().debug("ServerSocket::exiting handle_connection()");
-    SetCloseAndDelete();
 
     // In the standard scenario, ConsoleSocket inherits from this, and
     // so deleting this will cause the ConsoleSocket dtor to run. This
