@@ -69,6 +69,7 @@
 ;; --------------------
 ;; The required files
 
+(load "ghost/utils.scm")
 (load "ghost/translator.scm")
 (load "ghost/terms.scm")
 (load "ghost/matcher.scm")
