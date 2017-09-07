@@ -5,6 +5,5 @@ ADD_GUILE_MODULE (FILES
 	translator.scm
 	matcher.scm
 	test.scm
-	utils.scm
 	MODULE_DESTINATION "${DATADIR}/scm/opencog/nlp/ghost"
 )

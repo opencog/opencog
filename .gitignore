@@ -2,6 +2,7 @@
 *.log
 .vagrant
 .DS_Store
+*.swp
 
 # misc binaries
 bin
