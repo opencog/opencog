@@ -159,7 +159,9 @@ void ConsoleSocket::OnConnection()
 
 void ConsoleSocket::sendPrompt()
 {
-    Send(_prompt);
+    // Hush prompts are empty. Don't call.
+    if (0 < _prompt.size())
+        Send(_prompt);
 }
 
 void ConsoleSocket::OnLine(const std::string& line)
