@@ -6317,6 +6317,20 @@ ad6e0ad034855441be507344f201f624  en_pairs_cfive.psql.bz2
 
 
 ==================================================================
+en_pairs_cfive_mst
+------------------
+Same as en_pairs_rfive_mst, but with infix-punctuation words removed.
+
+STATUS: good
+DATE: 7 Sept 2017
+REASON: Best so far, I think. The pair marginals, and the dj marginals
+    however, still include the astts, and the 
+ISSUES: Too big to fit into RAM.  Just loading disjunct marginals
+    requires 75GBytes. (25M csets and 25M ListLinks and umpteen valuations) 
+
+working on it ...
+
+==================================================================
 zh_pairs_one
 ------------
 Mandarin individual character pairs.  Only that, without any pair stats.
@@ -12726,6 +12740,8 @@ after: 623548
 (define start (current-time))
 (for-each get-bad (get-all-words))
 
+----------
+en_pairs_rfive_mst
 Again: en_pairs_mfive_mst:
 total of 522243 words == 522K words appearing in disjuncts
 total of 851964 words when all are considered Uhh oh.
@@ -12733,6 +12749,8 @@ After (fetch-all-words) have
 zero with []
 zero trailing blanks
 228416 which embeded punct.  Same as before
+
+after deletion, have
 
 (define (first-bad wrdnod)
 	(define wstr (cog-name wrdnod))
@@ -12744,7 +12762,26 @@ _châtelaines  15:07
 ... delete needs what index??
 CREATE INDEX incoming_idx on Atoms USING GIN(outgoing);
 
+ report -- fetch only thte stats for reporting.
+print-matrix-summary-report
 
+fetch incoming set of (LLOBJ 'wild-wild))
+
+(fetch-incoming-set (AnyNode "cset-word"))
+75GB in size
+(length (cog-incoming-set (AnyNode "cset-word"))) ; 25162435 = 25M
+(cog-report-counts)
+((ListLink . 25162435) (Connector . 1032779) 
+(ConnectorSeq . 25162434) (WordNode . 522243) 
+(fetch-incoming-set (AnyNode "cset-disjunct"))
+above is before;
+afterwards have
+((ListLink . 24169074)  (Connector .  988068) 
+(ConnectorSeq . 23670834) (WordNode . 623548) 
+
+so ... a little shrnkage, not that much,..
+
+----------
 zh only has 5653 bad words...
 
 with txn, running at 7 secs-ish or sometime12 12-14 ish
@@ -12942,22 +12979,6 @@ rc-local-shutdown.service
 
 except /etc/rc.local.shutdown did not actually run. Crap.
 Why?
-
-----------
-en_pairs_rfive_mst
-
- report -- fetch only thte stats for reporting.
-print-matrix-summary-report
-
-fetch incoming set of (LLOBJ 'wild-wild))
-
-(fetch-incoming-set (AnyNode "cset-word"))
-75GB in size
-(length (cog-incoming-set (AnyNode "cset-word"))) ; 25162435 = 25M
-(cog-report-counts)
-$4 = ((ListLink . 25162435) (Connector . 1032779) 
-(ConnectorSeq . 25162434) (WordNode . 522243) 
-(fetch-incoming-set (AnyNode "cset-disjunct"))
 
 
 =========================================================================
