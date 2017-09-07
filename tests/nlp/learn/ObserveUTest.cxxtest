@@ -1,0 +1,120 @@
+/*
+ * tests/server/ObserveUTest.cxxtest
+ *
+  * Copyright (C) 2017 by OpenCog Foundation
+ * All Rights Reserved
+ *
+ * Written by Curtis Faith
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+#include <thread>
+#include <unistd.h>
+
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <time.h>
+
+#include <opencog/util/Config.h>
+#include <opencog/cogserver/server/CogServer.h>
+
+using namespace opencog;
+
+#define BUFFER_SIZE 1000
+
+std::string cmd_exec(const char* cmd)
+{
+	char buffer[BUFFER_SIZE];
+	std::string result;
+	std::shared_ptr<FILE> pope(popen(cmd, "r"), pclose);
+	if (!pope) throw std::runtime_error("popen() failed!");
+	while (!feof(pope.get())) {
+		if (fgets(buffer, BUFFER_SIZE, pope.get()) != NULL)
+			result += buffer;
+	}
+	return result;
+}
+
+
+
+class ShellUTest :  public CxxTest::TestSuite
+{
+private:
+	AtomSpace atomspace;
+	CogServer* cogserver;
+	std::thread* main_loop;
+
+public:
+
+	ShellUTest()
+	{
+		logger().set_level(Logger::DEBUG);
+		//logger().set_print_to_stdout_flag(true);
+	}
+
+	~ShellUTest()
+	{
+		// erase the log file if no assertions failed
+		if (!CxxTest::TestTracker::tracker().suiteFailed())
+			std::remove(logger().get_filename().c_str());
+	}
+
+	void setUp()
+	{
+		
+		cogserver = new CogServer();
+		cogserver->loadModules();
+		cogserver->loadModule("libscheme-shell.so");
+		cogserver->enableNetworkServer(17333);
+		main_loop = new std::thread(&CogServer::serverLoop, cogserver);
+
+		// Wait for the cogserver to finish initializing.
+		sleep(1);
+	}
+
+	void tearDown()
+	{
+		cogserver->stop();
+		main_loop->join();
+		delete main_loop;
+		delete cogserver;
+	}
+
+	// Test observe for a test sentence, and then check
+	// the pairs using parse.
+	void testObserve()
+	{
+		logger().debug("BEGIN TEST: %s", __FUNCTION__);
+		std::string reply = cmd_exec(
+			"echo 'observe \"This is a test.\"\n' | nc -q 1 localhost 17333");
+
+		// Now check the pairs using the parse command which will check the
+		// atomspace for the atoms. nc -q 1 means "wait for a reply"
+		reply = cmd_exec(
+			"echo 'parse -check_pairs -test_reply \"This is a test.\"\n' | nc -q 1 localhost 17333");
+
+		// We should get 97 bytes given the default prompts and a <pairs present> also checked below.
+		printf("Received %lu bytes: %s\n", reply.size(), reply.c_str());
+		TS_ASSERT_EQUALS(97, reply.size());
+
+		// Expect to get <pairs present> in the reply mixed with some prompts.
+		TS_ASSERT(reply.npos != reply.find("<pairs present>"));
+
+		logger().debug("END TEST: %s", __FUNCTION__);
+	}
+
+};

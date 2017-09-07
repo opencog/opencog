@@ -38,16 +38,20 @@ DECLARE_MODULE(BuiltinRequestsModule)
 
 BuiltinRequestsModule::BuiltinRequestsModule(CogServer& cs) : Module(cs)
 {
-    _cogserver.registerRequest(ListRequest::info().id,         &listFactory);
-    _cogserver.registerRequest(ShutdownRequest::info().id,     &shutdownFactory);
-    _cogserver.registerRequest(LoadModuleRequest::info().id,   &loadmoduleFactory);
-    _cogserver.registerRequest(UnloadModuleRequest::info().id, &unloadmoduleFactory);
-    _cogserver.registerRequest(ListModulesRequest::info().id,  &listmodulesFactory);
+    _cogserver.registerRequest(ObserveSentenceRequest::info().id,   &observeFactory);
+    _cogserver.registerRequest(ParseSentenceRequest::info().id,     &parseFactory);
+    _cogserver.registerRequest(ListRequest::info().id,              &listFactory);
+    _cogserver.registerRequest(ShutdownRequest::info().id,          &shutdownFactory);
+    _cogserver.registerRequest(LoadModuleRequest::info().id,        &loadmoduleFactory);
+    _cogserver.registerRequest(UnloadModuleRequest::info().id,      &unloadmoduleFactory);
+    _cogserver.registerRequest(ListModulesRequest::info().id,       &listmodulesFactory);
     registerAgentRequests();
 }
 
 BuiltinRequestsModule::~BuiltinRequestsModule()
 {
+    _cogserver.unregisterRequest(ObserveSentenceRequest::info().id);
+    _cogserver.unregisterRequest(ParseSentenceRequest::info().id);
     _cogserver.unregisterRequest(ListRequest::info().id);
     _cogserver.unregisterRequest(ShutdownRequest::info().id);
     _cogserver.unregisterRequest(LoadModuleRequest::info().id);

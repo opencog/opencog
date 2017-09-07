@@ -9,6 +9,8 @@ ADD_LIBRARY (builtinreqs SHARED
 	BuiltinRequestsModule
 	Request
 	LoadModuleRequest
+	ObserveSentenceRequest
+	ParseSentenceRequest
 	ListRequest
 	ShutdownRequest
 	UnloadModuleRequest
@@ -17,6 +19,7 @@ ADD_LIBRARY (builtinreqs SHARED
 
 TARGET_LINK_LIBRARIES(builtinreqs
 	server
+	learn
 	${ATOMSPACE_LIBRARY}
 	${COGUTIL_LIBRARY}
 )
@@ -106,6 +109,8 @@ INSTALL (FILES
 	CogServer.h
 	ConsoleSocket.h
 	Factory.h
+	ObserveSentenceRequest.h
+	ParseSentenceRequest.h
 	ListRequest.h
 	LoadModuleRequest.h
 	Module.h
