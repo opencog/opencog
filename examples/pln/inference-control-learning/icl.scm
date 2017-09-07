@@ -35,7 +35,7 @@
 ;; (cog-logger-set-sync! (cog-ure-logger) #t)
 
 ;; Set parameters
-(define pss 10)                          ; Problem set size
+(define pss 100)                          ; Problem set size
 (define niter 2)                         ; Number of iterations
 
 ;; AtomSpace containing the targets in there to no forget them

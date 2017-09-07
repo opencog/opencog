@@ -89,6 +89,7 @@ where
 * Context:
   + The backward chainer has been queried to prove T
   + Is about to choose what rule to expand and-BIT A from leaf L
+  + A is a preproof of T
   + T, A, L fulfill some pattern
 * Action:
   + Expand with rule R
@@ -108,12 +109,20 @@ transfer this knowledge across problem difficulties.
 This experiment is simple enough that the context that the backward
 chainer has been queried to prove T can be ignored. The context that
 it is about to decide what rule to expand can be ignored as well since
-it is the universal context of our experiment anyway. Another context
-that hasn't been mentioned is the AtomSpace itself. Indeed an
-AtomSpace filled with different atoms means different axiom and rule
-sets, and thus different inference controls. Finally, it should be
-clear that choosing the next inference rule is only one decision among
-many others the BC has to make that are ignored for now.
+it is the universal context of our experiment anyway. The context that
+A is a preproof of T seems strange as we have no way to know whether
+it is true or not, but we don't need to! It's enough that there is
+some positive probability, however small it may be, to put such rule
+in use, the conditional instantiation should ultimately take this
+probability into about to estimate the probability of R expanding A
+into a preproof of T.
+
+Another context that hasn't been mentioned is the AtomSpace
+itself. Indeed an AtomSpace filled with different atoms means
+different axiom and rule sets, and thus different inference
+controls. Finally, it should be clear that choosing the next inference
+rule is only one decision among many others the BC has to make that
+are ignored for now.
 
 The simplest, most generic control rule that we can learn expresses
 the probability of expanding an and-BIT producing a preproof of any
@@ -131,13 +140,19 @@ ImplicationScope <TV>
     TypedVariable  ;; Resulting and-BIT from the expansion of L from A with rule R
       Variable "$B"
       Type "BindLink"
-  Execution
-    GroundedSchema "expand-and-BIT"
-    List
-      Variable "$A"
-      Variable "$L"
-      Variable "$R"
-    Variable "$B"
+  And
+    Execution
+      GroundedSchema "expand-and-BIT"
+      List
+        Variable "$A"
+        Variable "$L"
+        Variable "$R"
+      Variable "$B"
+    Evaluation
+      Predicate "preproof"
+      List
+        Variable "$A"
+        Variable "$T"
   Evaluation
     Predicate "preproof"
     List
@@ -169,13 +184,19 @@ ImplicationScope <rule-TV>
     TypedVariable
       Variable "$B"
       Type "BindLink"
-  Execution
-    GroundedSchema "expand-and-BIT"
-    List
-      Variable "$A"
-      Variable "$L"
-      <rule>
-    Variable "$B"
+  And
+    Execution
+      GroundedSchema "expand-and-BIT"
+      List
+        Variable "$A"
+        Variable "$L"
+        <rule>
+      Variable "$B"
+    Evaluation
+      Predicate "preproof"
+      List
+        Variable "$A"
+        Variable "$T"
   Evaluation
     Predicate "preproof"
     List
@@ -198,13 +219,19 @@ ImplicationScope <target-andbit-rule-TV>
     TypedVariable
       Variable "$B"
       Type "BindLink"
-  Execution
-    GroundedSchema "expand-and-BIT"
-    List
-      <andbit>
-      Variable "$L"
-      <rule>
-    Variable "$B"
+  And
+    Execution
+      GroundedSchema "expand-and-BIT"
+      List
+        <andbit>
+        Variable "$L"
+        <rule>
+      Variable "$B"
+    Evaluation
+      Predicate "preproof"
+      List
+        <andbit>
+        <target>
   Evaluation
     Predicate "preproof"
     List
@@ -249,6 +276,11 @@ ImplicationScope <TV>
         Variable "$R"
       Variable "$B"
     <pattern>
+    Evaluation
+      Predicate "preproof"
+      List
+        Variable "$A"
+        Variable "$T"
   Evaluation
     Predicate "preproof"
     List
@@ -292,6 +324,11 @@ ImplicationScope <TV>
         Variable "$L"
         <deduction-rule>
       Variable "$B"
+    Evaluation
+      Predicate "preproof"
+      List
+        Variable "$A"
+        Variable "$T"
     Evaluation
       Predicate "is-premise-of-rule"
       List
