@@ -243,7 +243,7 @@ void ConsoleSocket::OnLine(const std::string& line)
 
     if (is_shell)
     {
-        logger().debug("ConsoleSocket::OnLine() request %s is a shell",
+        logger().debug("ConsoleSocket::OnLine() request \"%s\" is a shell",
                        line.c_str());
 
         // Force a drain of the request queue, because we *must* enter
