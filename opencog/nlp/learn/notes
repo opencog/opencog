@@ -6322,16 +6322,36 @@ en_pairs_cfive_mst
 Same as en_pairs_rfive_mst, but with infix-punctuation words removed.
 
 STATUS: good
-DATE: 7 Sept 2017
-REASON: Best so far, I think. The pair marginals, and the dj marginals
+DATE: 8 Sept 2017
+REASON: Best so far, I think. The pair marginals have been recomputed.
+, and the dj marginals
     however, still include the astts, and the 
-ISSUES: Too big to fit into RAM.  Just loading disjunct marginals
+ISSUES: Too big to fit into RAM. 
+    Loading word-pairs and marginals requires 72GBytes.
+
+    Just loading disjunct marginals
     requires 75GBytes. (25M csets and 25M ListLinks and umpteen valuations) 
 
-working on it ... 75GB to load pairs
+Summary Report for Correlation Matrix Link Grammar ANY link Word Pairs
+Rows: 619168 Columns: 580804
+Size: 27892737 non-zero entries of 359615251072 possible
+Fraction non-zero: 7.7563E-5 Sparsity (-log_2): 13.654
+Total observations: 1247457239.0  Avg obs per pair: 44.723
+Entropy Total: 18.645   Left: 10.053   Right: 10.390
+Total MI: 1.7982
 
-MI left=619168 right= 580804  total-count= 1247457239.0
-27892737 pairs
+                 Left         Right     Avg-left     Avg-right
+                 ----         -----     --------     ---------
+Support (l_0)  5.3758E+4    7.3126E+4
+Count   (l_1)  1.5140E+7    1.8578E+7     281.6        254.1    
+Length  (l_2)  1.8653E+6    1.8923E+6     34.70        25.88    
+RMS Count      1.8647E+6    1.8917E+6     34.69        25.87    
+
+
+working on it ... 75GB to load pairs
+(define 
+(batch-pairs
+
 
 ==================================================================
 zh_pairs_one
@@ -12782,7 +12802,14 @@ afterwards have
 ((ListLink . 24169074)  (Connector .  988068) 
 (ConnectorSeq . 23670834) (WordNode . 623548) 
 
-so ... a little shrnkage, not that much,..
+so ... a little shrinkage, not that much,..
+
+Overall, we expect .... 
+24M conseq + 24M any-con-list-links + 35M sections = 83M atoms
+plus 2M slop = 85M!? atoms
+
+82GB for 59M atoms = 1.3K/atom
+xxxxxxxxxxxxxxxxxxxxx
 
 ----------
 zh only has 5653 bad words...
@@ -12984,7 +13011,7 @@ except /etc/rc.local.shutdown did not actually run. Crap.
 Why?
 
 =======
-hatta:
+mhatta:
 Request dtor calls
    ConsoleSocket::OnRequestComplete which does nothing but print...
    ConsoleSocket::put() decrements use count.

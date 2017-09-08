@@ -15,7 +15,23 @@
 ; dictate how to judge when words belong to a class; this is done
 ; independently of the structure of the classes themselves.
 ;
-; A grammatical class is represented as....
+; A grammatical class is represented as
+;
+;     MemberLink
+;         WordNode "wordy"      ; the word itself
+;         WordClassNode "noun"  ; the grammatical class of the word.
+;
+; Word classes have a designated grammatic behavior, using Sections,
+; behaving just lik the pseudo-connectors on single words. Thus, either
+; a WordNode or a WordClassNode can appear in a Connector link, as
+; shown below.
+;
+;     Section
+;         WordClassNode "noun"
+;         ConnectorSeq
+;             Connector
+;                WordNode ; or WordClassNode
+;                LgConnDirNode "-"   ; for example
 ;
 ; ---------------------------------------------------------------------
 
