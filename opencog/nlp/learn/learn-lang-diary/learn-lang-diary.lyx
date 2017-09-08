@@ -19327,7 +19327,7 @@ ANY
 \begin_layout Standard
 \align center
 \begin_inset Tabular
-<lyxtabular version="3" rows="12" columns="7">
+<lyxtabular version="3" rows="13" columns="7">
 <features tabularvalignment="middle">
 <column alignment="center" valignment="top" width="0">
 <column alignment="center" valignment="top" width="0">
@@ -19926,6 +19926,71 @@ en_pairs_rfive
 \begin_inset Text
 
 \begin_layout Plain Layout
+619K x 581K
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+27.9M
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+1.25G
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+44.7
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+18.65
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+1.80
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+en_pairse_cfive_mst
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
 158K x 159K
 \end_layout
 
@@ -20266,6 +20331,13 @@ en_pairs_rfive_mst As above, except that this is the MST parse of all of
 \end_layout
 
 \begin_layout Description
+en_pairs_cfive_mst Same as en_pairs_rfive_mst above, but with all words
+ that contained bogus infix punctuation removed.
+ (hyphenated words remain, as do decimal numbers and abbreviations).
+ 
+\end_layout
+
+\begin_layout Description
 zh_pairs_sone A parse of Mandarin Wikipedia, with each individual character
  (hanzi) treated as a single item (so that, during pair-counting, pairs
  are formed between items).
@@ -20418,7 +20490,7 @@ There's something else interesting going on, shown in the table below.
 \begin_layout Standard
 \align center
 \begin_inset Tabular
-<lyxtabular version="3" rows="9" columns="9">
+<lyxtabular version="3" rows="10" columns="9">
 <features tabularvalignment="middle">
 <column alignment="center" valignment="top" width="0">
 <column alignment="center" valignment="top" width="0">
@@ -20839,6 +20911,89 @@ zen_pairs
 
 \begin_layout Plain Layout
 zen_pairs_three
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+619K
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+581K
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+53.8K
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+73.1K
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+282
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+254
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+34.7
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+25.9
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+en_pairs_cfive_mst
 \end_layout
 
 \end_inset
@@ -21382,7 +21537,7 @@ Next, datasets that hold disjuncts.
 \begin_layout Standard
 \align center
 \begin_inset Tabular
-<lyxtabular version="3" rows="6" columns="9">
+<lyxtabular version="3" rows="7" columns="9">
 <features tabularvalignment="middle">
 <column alignment="center" valignment="top" width="0">
 <column alignment="center" valignment="top" width="0">
@@ -21726,6 +21881,89 @@ en_pairs_rfive_mtwo
 
 \begin_layout Plain Layout
 en_pairs_rfive_mst
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+en_pairs_cfive_mst
 \end_layout
 
 \end_inset
@@ -26283,6 +26521,113 @@ lost information
  Clustering together items, and the associated information loss, is desirable
  if the loss results in the filtering out of noise.
  How can we characterize the noise in the observations?
+\end_layout
+
+\begin_layout Subsection*
+Merging Words to form Word Classes
+\end_layout
+
+\begin_layout Standard
+After the grammatical behavior of two words is considered to be similar,
+ how should a merged word-class be created? How should the mergger be performed?
+ There are several different ways in which words can be merged together
+ to form word classes.
+ These are reviewed below.
+\end_layout
+
+\begin_layout Standard
+Merging is not straight-forward, because the process needs to result in
+ an orthogonalization of the space for grammatical behavior.
+ That is, the disjunct counts on any given word might be partly representative
+ of its behavior as one of many different kinds of fine-grained parts of
+ speech.
+ That is, the goal is to take the disjuncts on any given word, separate
+ them into two classes, and merge one class into an existing (or new) grammatica
+l class, while leaving the rest as-is, which might be subsequently re-organized
+ into some other class, ad infinitum.
+\end_layout
+
+\begin_layout Subsubsection*
+Linear merging
+\end_layout
+
+\begin_layout Standard
+Linear merging treats words as vectors, computing thier sum to define the
+ new merged class, and then computing the perpendicular components as the
+ left-over, un-accounted-for remainders.
+ More precisely, the disjuncts are considered to be the basis elements of
+ the vector space, and the count (or frequency) of each disjunct defines
+ the vector.
+\end_layout
+
+\begin_layout Standard
+Consider merging two words or word-classes 
+\begin_inset Formula $w_{a}$
+\end_inset
+
+ and 
+\begin_inset Formula $w_{b}$
+\end_inset
+
+ (that is, each of 
+\begin_inset Formula $w_{a}$
+\end_inset
+
+ and 
+\begin_inset Formula $w_{b}$
+\end_inset
+
+ can be either a word, or a word-class).
+ Let 
+\begin_inset Formula $M(w,d)$
+\end_inset
+
+ be a number associated with the word-disjunct pair 
+\begin_inset Formula $(w,d)$
+\end_inset
+
+.
+ Typically it will be the count 
+\begin_inset Formula $N(w,d)$
+\end_inset
+
+ that the pair was observed (or equivalently, the normalized frequency 
+\begin_inset Formula $p(w,d)=N(w,d)/N(*,*)).$
+\end_inset
+
+ The corresponding vector is then
+\begin_inset Formula 
+\[
+\vec{w}=\sum_{d}M(w,d)\;\widehat{d}
+\]
+
+\end_inset
+
+where 
+\begin_inset Formula $\widehat{d}$
+\end_inset
+
+ is the basis element.
+ The merged word-class can then be defined as 
+\begin_inset Formula $\vec{w}_{c}=\vec{w}_{a}+\vec{w}_{b}$
+\end_inset
+
+.
+ It seems
+\end_layout
+
+\begin_layout Standard
+The remaining parts of the 
+\end_layout
+
+\begin_layout Standard
+of the number of the corresponding vectors are 
+\end_layout
+
+\begin_layout Standard
+First, compute the intersection of the sets of disjuncts on these two words.
+ The intersection is presumably substantial, if the two words are grammatically
+ similar.
 \end_layout
 
 \begin_layout Subsection*
