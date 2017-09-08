@@ -79,6 +79,7 @@ class GenericShell
 		// Concurrency handling
 		void eval_loop();
 		void poll_loop();
+		void poll_and_send();
 		bool _eval_done;
 		std::condition_variable _cv;
 		std::mutex _mtx;

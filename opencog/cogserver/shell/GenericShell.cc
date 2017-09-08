@@ -478,11 +478,11 @@ void GenericShell::eval_loop(void)
 	{
 		// As mentioned before, do not begin the next queued expr until
 		// the last has finished. Failure to do this results in crashes.
-		poll_output();
+		poll_and_send();
 		while (not _eval_done)
 		{
 			usleep(10000);
-			poll_output();
+			poll_and_send();
 		}
 
 		try
@@ -501,10 +501,25 @@ void GenericShell::eval_loop(void)
 		_evaluator->eval_expr(in);
 	}
 
+	// Continue polling until the evaluation really is done.
+	poll_and_send();
+	while (not _eval_done)
+	{
+		usleep(10000);
+		poll_and_send();
+	}
+
 	// After we exit, the _evaluator will be reclaimed by the
 	// thread dtor running in the evaluator pool.
 	_evaluator = nullptr;
 	logger().debug("[GenericShell] exit eval loop");
+}
+
+void GenericShell::poll_and_send(void)
+{
+	std::string retstr(poll_output());
+	if (0 < retstr.size())
+		socket->Send(retstr);
 }
 
 void GenericShell::poll_loop(void)
@@ -514,9 +529,7 @@ void GenericShell::poll_loop(void)
 	// Poll for output from the evaluator, and send back results.
 	while (not self_destruct)
 	{
-		std::string retstr(poll_output());
-		if (0 < retstr.size())
-			socket->Send(retstr);
+		poll_and_send();
 
 		// Continue polling, about 100 times per second, even if
 		// evaluation of the the previous expr is completed. It
@@ -527,19 +540,18 @@ void GenericShell::poll_loop(void)
 		if (_eval_done) usleep(10000);
 	}
 
-	// It's also possible that it reaches the dtor (turning self_destruct == true)
-	// shortly after an evaluation has just finished. It may then exit the loop
-	// above without polling the output, eventually causing the evalthr to stay
-	// in while_not_done() forever. So let's do it one more time here
-	std::string retstr(poll_output());
-	if (0 < retstr.size())
-		socket->Send(retstr);
-
-	while (not _eval_done)
+	// It's also possible that another thread reaches the dtor
+	// (setting self_destruct == true) shortly after an evaluation
+	// has just finished. It may then exit the loop above without
+	// polling the output, eventually causing the evalthr to stay
+	// in while_not_done() forever. So let's poll again, one more
+	// time, here.
+	do
 	{
-		poll_output();
 		usleep(10000);
+		poll_and_send();
 	}
+	while (not _eval_done);
 }
 
 void GenericShell::thread_init(void)
