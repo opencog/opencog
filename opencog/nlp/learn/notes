@@ -6328,7 +6328,10 @@ REASON: Best so far, I think. The pair marginals, and the dj marginals
 ISSUES: Too big to fit into RAM.  Just loading disjunct marginals
     requires 75GBytes. (25M csets and 25M ListLinks and umpteen valuations) 
 
-working on it ...
+working on it ... 75GB to load pairs
+
+MI left=619168 right= 580804  total-count= 1247457239.0
+27892737 pairs
 
 ==================================================================
 zh_pairs_one
@@ -13015,6 +13018,8 @@ ServerSocket::Send(                 .... miss   ... miss
 [GenericShell] dtor, wait for eval thread  yes    too
                          .....................  Send( the second delayed!!
                          ...................... Send third
+
+Below only happens if self-destruct runs
 [GenericShell] finishing; eval of  ..... not in orig  ... miss in third
 [GenericShell] exit eval loop       yes   too
 [GenericShell] dtor, joined eval thread  yes too
