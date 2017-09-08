@@ -12980,6 +12980,47 @@ rc-local-shutdown.service
 except /etc/rc.local.shutdown did not actually run. Crap.
 Why?
 
+=======
+hatta:
+Request dtor calls
+   ConsoleSocket::OnRequestComplete which does nothing but print...
+   ConsoleSocket::put() decrements use count.
+
+handle_connection on socket remote close does 
+SetCloseAndDelete
+fractional line is dispatched in the thread of handle_connection
+ ... using OnLine which just calls shell...
+  but befoer the fractional line is done, the socket is closed.
+  because ServerSocket::SetCloseAndDelete runs
+
+fuck.
+OK, remote end closes, 
+ServerSocket::handle_connection prints that its leaving...
+calls dtor on ConsoleSocket
+Generic shell is finishing up....
+
+First one:
+ServerSocket::handle_connection()   yes    too
+[ConsoleSocket] OnConnection        yes    too
+[ConsoleSocket] OnLine [scm hush]   yes    too
+...
+[ConsoleSocket] OnRequestComplete   yes    too
+[GenericShell] enter eval loop      yes    too
+[GenericShell] line disc: expr      yes    tooo
+[GenericShell] start eval of       ............?   also missgin 2x
+ServerSocket::exiting handle_connection()   yes   too
+[ConsoleSocket] destructor          yes    too
+                        .................... start eval of for third
+ServerSocket::Send(                 .... miss   ... miss
+[GenericShell] dtor, wait for eval thread  yes    too
+                         .....................  Send( the second delayed!!
+                         ...................... Send third
+[GenericShell] finishing; eval of  ..... not in orig  ... miss in third
+[GenericShell] exit eval loop       yes   too
+[GenericShell] dtor, joined eval thread  yes too
+
+
+
 
 =========================================================================
 OK-ish misses the mark:
