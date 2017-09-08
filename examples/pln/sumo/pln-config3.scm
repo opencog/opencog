@@ -60,14 +60,14 @@
 ;; Associate rules to PLN ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-; List the rules and their weights.
+; List the rules
 (define rules
-  (list ;; (list deduction-inheritance-rule-name 1)
-        (list conditional-full-instantiation-implication-scope-meta-rule-name 1)
-        (list conditional-full-instantiation-implication-meta-rule-name 1)
-        (list conditional-full-instantiation-inheritance-meta-rule-name 1)
-        (list fuzzy-conjunction-introduction-3ary-rule-name 1)
-        (list crisp-contraposition-implication-scope-rule-name 1)
+  (list ;; deduction-inheritance-rule-name
+        conditional-full-instantiation-implication-scope-meta-rule-name
+        conditional-full-instantiation-implication-meta-rule-name
+        conditional-full-instantiation-inheritance-meta-rule-name
+        fuzzy-conjunction-introduction-3ary-rule-name
+        crisp-contraposition-implication-scope-rule-name
   )
 )
 

@@ -38,11 +38,9 @@
 ;; Associate rules to PLN ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-; List the rules and their weights.
+;; List the rules
 (define rules
-  (list
-     (list conditional-full-instantiation-implication-scope-meta-rule-name 1)
-  )
+  (list conditional-full-instantiation-implication-scope-meta-rule-name)
 )
 
 ;; Associate rules to bug

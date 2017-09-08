@@ -35,6 +35,8 @@
 (load "interaction-rule.scm")
 (load "event.scm")
 
+; TODO Replace verbose & logger variable in openpsi/dyanmics/updater.scm with
+; cog-logger-component for this module.
 (define logging #t)
 (define verbose #f)
 (define slo-mo #f)

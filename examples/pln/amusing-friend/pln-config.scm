@@ -68,19 +68,19 @@
 ;; Associate rules to PLN ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-; List the rules and their weights.
+; List the rules
 (define rules
-  (list (list implication-scope-to-implication-rule-name 1)
-        (list implication-full-instantiation-rule-name 1)
-        (list equivalence-to-implication-rule-name 1)
-        (list lambda-predicate-evaluation-rule-name 1)
-        (list inversion-implication-rule-name 1)
-        (list implication-implicant-conjunction-rule-name 1)
-        (list and-lambda-factorization-double-implication-rule-name 1)
-        (list deduction-implication-rule-name 1)
-        (list implication-to-implication-scope-rule-name 1)
-        (list equivalence-scope-distribution-rule-name 1)
-        (list and-introduction-grounded-evaluation-rule-name 1)
+  (list scope-to-implication-rule-name
+        full-instantiation-rule-name
+        equivalence-to-implication-rule-name
+        lambda-predicate-evaluation-rule-name
+        inversion-implication-rule-name
+        implication-implicant-conjunction-rule-name
+        and-lambda-factorization-double-implication-rule-name
+        deduction-implication-rule-name
+        implication-to-implication-scope-rule-name
+        equivalence-scope-distribution-rule-name
+        and-introduction-grounded-evaluation-rule-name
         )
   )
 

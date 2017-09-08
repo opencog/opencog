@@ -57,11 +57,11 @@
     (ure-set-fuzzy-bool-parameter rb "URE:attention-allocation" 0)
 
     (ure-define-add-rule rb "abduction-inheritance-rule"
-         abduction-inheritance-rule .8)
+         abduction-inheritance-rule (stv 1 1))
     (ure-define-add-rule rb "deduction-inheritance-rule"
-        deduction-inheritance-rule .8)
+        deduction-inheritance-rule (stv 1 1))
     (ure-define-add-rule rb "sog-hack-decomposition-rule"
-        sog-hack-decomposition-rule .8)
+        sog-hack-decomposition-rule (stv 1 1))
 
     ; Return the rule-base
     rb

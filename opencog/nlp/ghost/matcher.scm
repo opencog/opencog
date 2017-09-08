@@ -30,7 +30,8 @@
                        (cog-outgoing-set (cog-execute! (Dual input-lset)))
                        '())))))
          ; Get the psi-rules associate with them
-         (rules-matched (append exact-match no-const dual-match)))
+         (rules-matched (delete-duplicates
+           (append exact-match no-const dual-match))))
 
         (cog-logger-debug ghost-logger "For input:\n~a" input-lseq)
         (cog-logger-debug ghost-logger "Rules with no constant:\n~a" no-const)

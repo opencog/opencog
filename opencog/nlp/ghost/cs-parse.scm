@@ -1,10 +1,3 @@
-(use-modules (ice-9 rdelim))
-(use-modules (ice-9 regex))
-(use-modules (ice-9 getopt-long))
-(use-modules (rnrs io ports))
-(use-modules (system base lalr))
-(use-modules (ice-9 eval-string))
-
 (define (display-token token)
 "
   This is used as a place holder.
@@ -168,7 +161,6 @@
           (set! cs-line (read-line port))
           (set! initial-line cs-line)
         ))
-        ;(format #t ">>>>>>>>>>> line being processed ~a\n" cs-line)
       (let ((port-location (get-source-location port
               (if (eof-object? cs-line)
                 0
@@ -180,8 +172,8 @@
             (if (pair? result)
               (begin
                 ; For debugging
-                ;(format #t "=== tokeniz: ~a\n-> ~a\n"
-                ;  cs-line (lexical-token-category (car result)))
+                (cog-logger-debug ghost-logger "=== tokeniz: ~a\n-> ~a\n"
+                  cs-line (lexical-token-category (car result)))
                 (set! cs-line (cdr result))
                 (car result))
               (error (format #f "Tokenizer issue => ~a," result))
@@ -550,25 +542,6 @@
 
 (define (make-cs-lexer file-path)
   (cs-lexer (open-file-input-port file-path))
-)
-
-(define (main args)
-"
-  This function is to be used from the command-line as follows
-
-  guile -e main -s parse.scm -f path/to/cs/file.top
-"
-  (let* ((option-spec
-            '((file (single-char #\f) (required? #t) (value #t))))
-  ;(predicate file-exists?)))) FIXME: Wrong type to apply: file-exists?
-    (options (getopt-long args option-spec))
-    (input-file (option-ref options 'file #f)))
-    (if input-file
-      (begin
-        (format #t "\n--------- Starting parsing of ~a ---------\n" input-file)
-        (cs-parser (make-cs-lexer input-file) error)
-        (format #t "\n--------- Finished parsing of ~a ---------\n" input-file)
-      )))
 )
 
 (define-public (test-parse line)

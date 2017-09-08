@@ -1,130 +1,128 @@
-# ChatScript-like DSL for Chatbot Authoring
+# GHOST
 
-This is a work in progress, not yet functional implementation of a DSL designed
-for easy authoring of chatbot rules and supporting behavior and knowledge. The
-DSL is inspired by ChatScript in its syntax, but aiming to use OpenPSI as the
-engine for topic selection and topic management.
+GHOST (General Holistic Organism Scripting Tool) is a DSL (Domain-Specific
+Language) designed to allow human authors to script behaviors for artificial
+characters. GHOST is inspired by ChatScript in its syntax, but it uses OpenPsi
+as the engine for topic selection and topic management, as well as various
+other OpenCog components for different purposes.
 
 ## Design Overview
 
-Let's look at an example. The ChatScript rule
+When one tries to create a rule in GHOST, it will firstly be passed to the
+parser (`cs-parser.scm`) for syntax checking and preliminary interpretation.
+Any rules that is not syntactically correct will be rejected at this stage.
 
-```
-s: (I ~eat meat) Do you really? I am a vegan.
-```
+The parser will then pass the interpretations to the translator (`translator.scm`)
+by calling `create-rule`, or other appropriate functions such as `create-concept`
+or the like if it is not a rule, and convert each of the interpreted terms into
+their corresponding atomese (defined in `terms.scm`). A psi-rule will be created
+if the input is a rule (i.e. responder, rejoinder, or gambit).
 
-would look like this, in the final version of the DSL:
+At this stage, GHOST rule authoring is mostly identical to ChatScript rule authoring.
+One has to create topic files and define concepts/rules etc in the appropriate
+topic files.
 
-```
-(chat-rule "I ~eat meat"
-           (say "Do you really? I am a vegan."))
-```
-
-but that requires code for syntax sugaring and parsing, which isn't there
-yet. This parser would generate the following version of the same rule:
-
-```
-(chat-rule '((lemma "I") (concept "eat") (lemma "meat"))
-           '(say "Do you really? I am a vegan."))
-```
-
-and executing the `chat-rule` function should create a PSI rule like this:
-
-```
-(psi-rule context
-          action
-          some-goal
-          (stv .9 .9)
-          some-demand)
-```
-
-where the action, goal and demand are mostly like existing behavior control
-rules used, for instance, for Hanson robots and in the `chatbot-psi` module. The
-context, of course, is the relevant bit. We build it incrementally, and it has
-three components:
-
-1. A set of variables and conditions common to all terms in the rule.
-2. A set of variables and conditions specific to each term.
-3. By default, a check for term order (rule terms are matched in order unless
-   unordered match is explicitly called for).
-
-So the context template is something like:
-
-```
-(Satisfaction
- (VariableList
-  (shared-variables)
-  ... term specific variables ...)
- (And
-  (shared-conditions)
-  ... term specific conditions ...
-  (term-order-check)))
-```
-
-The shared variables and conditions just connect the `SatisfactionLink` to the
-currently-being-processed sentence and its parse. The top-level sentence just
-goes through the list of terms and builds the term specific components of this
-template by calling functions to interpret each term. These are defined in
-`terms.scm`. Once we've been through all three terms in the above rule, we end
-up with the following context structure:
-
-```
-(Satisfaction
- (VariableList
-  (TypedVariable (Variable "$S") (Type "SentenceNode"))
-  (TypedVariable (Variable "$P") (Type "ParseNode"))
-  (TypedVariable (Variable "$var1")  (Type "WordInstanceNode")) ;; I
-  (TypedVariable (Variable "$var2") (Type "WordInstanceNode")) ;; ~eat
-  (TypedVariable (Variable "$var3") (Type "WordNode"))
-  (TypedVariable (Variable "$var4") (Type "WordInstanceNode"))) ;; meat
- (And
-  (Parse (Variable "$P") (Variable "$S"))
-  (State (Anchor "GHOST: Currently Processing") (Variable "$S"))
-  (WordInstance (Variable "$var1") (Variable "$P")) ;; I
-  (Lemma (Variable "$var1") (Word "I"))
-  (WordInstance (Variable "$var2") (Variable "$P")) ;; ~eat
-  (Reference (Variable "$var2") (Variable "$var3"))
-  (Reference (Variable "$var3") (Concept "eat"))
-  (WordInstance (Variable "$var4") (Variable "$P")) ;; meat
-  (Lemma (Variable "$var4") (Word "meat"))
-  (term-order-check)))
-```
-
-The work in progress code that builds this structure and generates a PSI rule is
-in `translator.scm`.
+An action selector is defined in `matcher.scm` for rule matching and selection.
+When a textual input is received, it will be converted into a list of WordNodes,
+wrapped in a `DualLink` and passed to the recognizer in order to find candidates
+(i.e. psi-rules) that may satisfy the current context. A full context evaluation
+will be done for each of the candidates and the actions of those satisfying ones
+will be executed as a result.
 
 ## Current Status
 
-Experimental, not-quite-yet working code. This is being put under source control
-so others can start fixing and extending the code, hopefully bringing it to
-functional alpha state in the near future.
+For verbal interaction authoring in particular, GHOST syntax is modeled heavily
+on [ChatScript](https://github.com/bwilcox-1234/ChatScript/blob/master/WIKI/ChatScript-Basic-User-Manual.md#rules).
+However, GHOST uses several ChatScript features for different purposes than
+they are normally used in ChatScript; and also contains some additional features.
+
+Here is a list of features that are fully supported in GHOST:
+- [Word/Lemma](https://github.com/bwilcox-1234/ChatScript/blob/master/WIKI/ChatScript-Basic-User-Manual.md#canonization)
+- [Phrase](https://github.com/bwilcox-1234/ChatScript/blob/master/WIKI/ChatScript-Basic-User-Manual.md#proper-names)
+- [Concept](https://github.com/bwilcox-1234/ChatScript/blob/master/WIKI/ChatScript-Basic-User-Manual.md#concepts)
+- [Choice](https://github.com/bwilcox-1234/ChatScript/blob/master/WIKI/ChatScript-Basic-User-Manual.md#choices--)
+- [Indefinite Wildcard](https://github.com/bwilcox-1234/ChatScript/blob/master/WIKI/ChatScript-Basic-User-Manual.md#simple-indefinite-wildcards-)
+- [Precise Wildcard](https://github.com/bwilcox-1234/ChatScript/blob/master/WIKI/ChatScript-Basic-User-Manual.md#precise-wildcards-n)
+- [Range-restricted Wildcard](https://github.com/bwilcox-1234/ChatScript/blob/master/WIKI/ChatScript-Basic-User-Manual.md#range-restricted-wildcards-n)
+- [Variable](https://github.com/bwilcox-1234/ChatScript/blob/master/WIKI/ChatScript-Basic-User-Manual.md#_-match-variables)
+- [User Variable](https://github.com/bwilcox-1234/ChatScript/blob/master/WIKI/ChatScript-Basic-User-Manual.md#user_variables)
+- [Sentence Boundary](https://github.com/bwilcox-1234/ChatScript/blob/master/WIKI/ChatScript-Basic-User-Manual.md#sentence-boundaries--and-)
+- [Negation](https://github.com/bwilcox-1234/ChatScript/blob/master/WIKI/ChatScript-Basic-User-Manual.md#not--and-notnot-)
+- [Function](https://github.com/bwilcox-1234/ChatScript/blob/master/WIKI/ChatScript-Advanced-User-Manual.md#functions)
+
+Basic examples of how to use GHOST is available [HERE](https://github.com/opencog/opencog/blob/master/examples/ghost/basic.scm)
+
+## How To Run
+
+1) Start the [RelEx server](https://github.com/opencog/relex#opencog-serversh)
+2) Start Guile
+3) Load the needed modules
+```
+(use-modules (opencog)
+             (opencog nlp relex2logic)
+             (opencog openpsi)
+             (opencog eva-behavior)
+             (opencog nlp ghost))
+```
+4) Start authoring
+
+A rule can be created by using `ghost-parse`:
+
+```
+(ghost-parse "s: (hi robot) Hello human")
+```
+
+Similarly for creating concepts:
+
+```
+(ghost-parse "concept: ~young (child kid youngster)")
+```
+
+One can also load a topic file by using `ghost-parse-file`:
+
+```
+(ghost-parse-file "path/to/the/topic/file")
+```
+
+5) Play with it
+
+One can quickly test if a rule can be triggered by using `test-ghost`:
+
+```
+(test-ghost "hi robot good morning")
+```
+
+The output `[INFO] [Ghost] Say: "Hello human"` will be printed.
+
+*Note*: `test-ghost` is mainly for testing and debugging. The
+proper way of running it is to start the OpenPsi loop and should use
+`ghost` instead of `test-ghost` to send the input.
 
 ## To Do
 
-### Trivial Next Steps
+Here is a list of features that are partially working/need to be implemented.
+- Goal Assignment
 
-1. Expand the example/test script so it loads a few rules and a few sentences.
-   Once it's working, add this folder to the cmake build files.
-2. Write term functions for proper nouns, main subject, verb and object, and
-   position anchors.
+Allow author to assign one or more goals to a rule, e.g.
 
-### Not So Trivial Next Steps
+```
+#goal: novelty=0.8
+#goal: please_user=0.4
+s: ( what be you name ) I forgot; what's YOUR name, sweet wonderful human
+```
 
-1. Handle sequencing (default rule syntax) and unordered collections of
-   terms. This needs a bit of discussion to prevent very ugly Atomese
-   representations. Our current proposed representation matches verbatim words,
-   but needs to handle lemmas, concept membership, etc.
-2. Write term functions for nested terms, such as or, negation, and collections
-   as sub-clauses.
-3. Extend GlobNode (or invent something similar) to handle stars that have a
-   max. number of terms to skip. One possibility is to have a GlobLink that
-   takes that as an input (as we do with TypedVariables).
-4. Test the use of non-verbal perceptions and actions. In principle these should
-   just work, to the extent that they work under current OpenPSI dynamics.
+right now a default goal is assigned to all of the rules.
 
-### Major Next Steps
+- Speech Acts
 
-1. Syntax sugaring for rule definition.
-2. Topic selection and execution in PSI.
-3. Implement the rule base and topic dynamics for the Harry bot (the simplest
-   example bot in the ChatScript codebase) and get it to work using PSI.
+A rule starts with:
+
+```
+s: is equivalent to declarative or imperative in OpenCog
+?: is equivalent to truth query or interrogative in OpenCog
+u: means union of the both above
+```
+
+- Gambit & Rejoinders
+
+- Unordered Matching

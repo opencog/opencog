@@ -20,24 +20,23 @@
 ; Some debug prints.
 ; The are define-public, because otherwise the
 ; `(GroundedPredicate "scm: print-msg")` won't work.
+(define eva-logger (eva-get-logger))
 
-(define-public (print-msg node) 
-	(cog-logger-info "~a\n" (cog-name node))
-	; (format #f "~a\n" (cog-name node))
+(define-public (print-msg node)
+	(cog-logger-info eva-logger "~a\n" (cog-name node))
 	(stv 1 1))
-(define (print-atom atom) (format #t "~a\n" atom) (stv 1 1))
 
 ; Print message, and print the current interaction face-id
 (define-public (print-msg-face node)
-	(cog-logger-info "~a with face id: ~a\n"
+	(cog-logger-info eva-logger "~a with face id: ~a"
 		(cog-name node)
-		(cog-name (car (cog-outgoing-set (cog-execute!
-			(DefinedSchemaNode "Current interaction target"))))))
+		(cog-name (cog-outgoing-atom (cog-execute!
+			(DefinedSchemaNode "Current interaction target")) 0)))
 	(stv 1 1))
 
 ; Print message, then print elapsed time
 (define-public (print-msg-time node time)
-	(cog-logger-info "~a Elapsed: ~a seconds\n"
+	(cog-logger-info eva-logger "~a Elapsed: ~a seconds"
 		(cog-name node)
 		(cog-name time))
 	(stv 1 1))
