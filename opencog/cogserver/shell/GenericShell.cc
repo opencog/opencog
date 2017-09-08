@@ -430,12 +430,13 @@ void GenericShell::eval_loop(void)
 	auto poll_wrapper = [&](void) { poll_loop(); };
 	pollthr = new std::thread(poll_wrapper);
 
-	// Derived-class initializer. (The scheme shell uses this to set the
-	// atomspace).
+	// Derived-class initializer. (The scheme shell uses this to set
+	// the atomspace).
 	thread_init();
 
+	// Go through the body of the loop at least once.
 	std::string in;
-	while (not self_destruct)
+	do
 	{
 		try
 		{
@@ -444,7 +445,7 @@ void GenericShell::eval_loop(void)
 			// weird crashes in the SchemeEval class.
 			while_not_done();
 
-			// Note that this pop will wait until the queue
+			// Note that this pop will stall until the queue
 			// becomes non-empty.
 			evalque.pop(in);
 			logger().debug("[GenericShell] start eval of '%s'", in.c_str());
@@ -456,7 +457,7 @@ void GenericShell::eval_loop(void)
 		{
 			break;
 		}
-	}
+	} while (not self_destruct);
 
 	// If we are here, then we can safely assume that the socket has
 	// been closed, that the dtor for this instance has been called.
