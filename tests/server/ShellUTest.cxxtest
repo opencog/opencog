@@ -225,23 +225,23 @@ public:
 	void testControlD()
 	{
 		logger().debug("BEGIN TEST: %s", __FUNCTION__);
-		int rc = system("echo '(Concept \"42\")\n' | nc localhost 17333");
+		int rc = system("echo '(Concept \"42\")\n' | nc -q 0 localhost 17333");
 		if (rc != 0) printf("Error: first call failed\n");
 		TS_ASSERT_EQUALS(rc, 0);
 		usleep(50000);
 
 		// The hexadecimal \x4 is ctrl-D.
-		rc = system("echo 'scm\n(+ 2 2)\n\x4\n' | nc localhost 17333");
+		rc = system("echo 'scm\n(+ 2 2)\n\x4\n' | nc -q 0 localhost 17333");
 		if (rc != 0) printf("Error: second call failed\n");
 		TS_ASSERT_EQUALS(rc, 0);
 		usleep(50000);
 
-		rc = system("echo 'scm\n(Concept \"42\")\n' | nc localhost 17333");
+		rc = system("echo 'scm\n(Concept \"42\")\n' | nc -q 0 localhost 17333");
 		if (rc != 0) printf("Error: third call failed\n");
 		TS_ASSERT_EQUALS(rc, 0);
 		usleep(50000);
 
-		rc = system("echo '(+ 2 2)\n.\n' | nc localhost 17333");
+		rc = system("echo '(+ 2 2)\n.\n' | nc -q 0 localhost 17333");
 		if (rc != 0) printf("Error: fourth call failed\n");
 		TS_ASSERT_EQUALS(rc, 0);
 		usleep(50000);
@@ -257,7 +257,7 @@ public:
 		// The hexadecimal \x16 is ctrl-C.
 		// The interrupt should kill the sleep immediately.
 		// Elapsed time should be well under a second.
-		int rc = system("echo '(sleep 42)\n\x16' | nc localhost 17333");
+		int rc = system("echo '(sleep 42)\n\x16' | nc -q 0 localhost 17333");
 		if (rc != 0) printf("Error: first call failed\n");
 		TS_ASSERT_EQUALS(rc, 0);
 
@@ -267,7 +267,7 @@ public:
 
 		start = time(0);
 		// The hexadecimal \x18 is ctrl-X aka "cancel"
-		rc = system("echo '(sleep 42)\n\x18' | nc localhost 17333");
+		rc = system("echo '(sleep 42)\n\x18' | nc -q 0 localhost 17333");
 		if (rc != 0) printf("Error: first call failed\n");
 		TS_ASSERT_EQUALS(rc, 0);
 
@@ -277,7 +277,7 @@ public:
 
 		start = time(0);
 		// The hexadecimal \x1b is ctrl-[ aka "escape"
-		rc = system("echo '(sleep 42)\n\x1b' | nc localhost 17333");
+		rc = system("echo '(sleep 42)\n\x1b' | nc -q 0 localhost 17333");
 		if (rc != 0) printf("Error: first call failed\n");
 		TS_ASSERT_EQUALS(rc, 0);
 
@@ -297,7 +297,7 @@ public:
 		logger().debug("BEGIN TEST: %s", __FUNCTION__);
 		cmd_exec(
 			"echo 'scm\n (Concept \"A\")\n (sleep 1)\n (Concept \"B\")\n"
-			"(sleep 1)\n (Concept \"C\")\n' | nc localhost 17333");
+			"(sleep 1)\n (Concept \"C\")\n' | nc -q 0 localhost 17333");
 
 		// Wait for above to finish
 		sleep(4);
