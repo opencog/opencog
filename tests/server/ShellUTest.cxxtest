@@ -50,7 +50,7 @@ void gargleblast(int tid, int reps)
 {
 	for (int i=0; i<reps; i++)
 	{
-		int j = i+10;
+		int j = i + 10 + (tid+10)*1000;
 		char buf[1000];
 		sprintf(buf, "echo '(Evaluation (Predicate \"visible face\") (List (Number %d)))\n' | nc -q 1 localhost 17333", j);
 
@@ -61,18 +61,18 @@ void gargleblast(int tid, int reps)
 		// guile> (EvaluationLink
 		//   (PredicateNode "visible face")
 		//   (ListLink
-		//      (NumberNode "10.000000")
+		//      (NumberNode "28010.000000")
 		//   )
 		// )
 		//
 		// guile> 
 		// guile> ; note blank space here
-		// Which is exactly 278 chars long.
+		// Which is exactly 282 chars long.
 		// If the greeting changes, then adjust for the correct size.
-
+		//
 		// Hmm. Seems that sometimes some trailing newline gets cut,
 		// and so the reply might be short by one byte. Seems harmless.
-#define CUR_MSG_SZ 277
+#define CUR_MSG_SZ 281
 		TS_ASSERT_LESS_THAN_EQUALS(CUR_MSG_SZ, reso.size());
 		TS_ASSERT_LESS_THAN_EQUALS(reso.size(), CUR_MSG_SZ+1);
 		if (reso.size() < CUR_MSG_SZ or (CUR_MSG_SZ+1) < reso.size())
@@ -90,7 +90,7 @@ void gargleblast(int tid, int reps)
 			TS_ASSERT_LESS_THAN_EQUALS(CUR_DEL_SZ, delo.size());
 			TS_ASSERT_LESS_THAN_EQUALS(delo.size(), CUR_DEL_SZ+1);
 			if (delo.size() < CUR_DEL_SZ or (CUR_DEL_SZ+1) < delo.size())
-				printf("Error: Create rep %d of %d in thread %d failed\n"
+				printf("Error: Delete rep %d of %d in thread %d failed\n"
 				       "\tGot: %lu >>>%s<<<\n",
 				       i, reps, tid, delo.size(), delo.c_str());
 		}
@@ -225,23 +225,23 @@ public:
 	void testControlD()
 	{
 		logger().debug("BEGIN TEST: %s", __FUNCTION__);
-		int rc = system("echo '(Concept \"42\")\n' | nc localhost 17333");
+		int rc = system("echo '(Concept \"42\")\n' | nc -q 0 localhost 17333");
 		if (rc != 0) printf("Error: first call failed\n");
 		TS_ASSERT_EQUALS(rc, 0);
 		usleep(50000);
 
 		// The hexadecimal \x4 is ctrl-D.
-		rc = system("echo 'scm\n(+ 2 2)\n\x4\n' | nc localhost 17333");
+		rc = system("echo 'scm\n(+ 2 2)\n\x4\n' | nc -q 0 localhost 17333");
 		if (rc != 0) printf("Error: second call failed\n");
 		TS_ASSERT_EQUALS(rc, 0);
 		usleep(50000);
 
-		rc = system("echo 'scm\n(Concept \"42\")\n' | nc localhost 17333");
+		rc = system("echo 'scm\n(Concept \"42\")\n' | nc -q 0 localhost 17333");
 		if (rc != 0) printf("Error: third call failed\n");
 		TS_ASSERT_EQUALS(rc, 0);
 		usleep(50000);
 
-		rc = system("echo '(+ 2 2)\n.\n' | nc localhost 17333");
+		rc = system("echo '(+ 2 2)\n.\n' | nc -q 0 localhost 17333");
 		if (rc != 0) printf("Error: fourth call failed\n");
 		TS_ASSERT_EQUALS(rc, 0);
 		usleep(50000);
@@ -257,7 +257,7 @@ public:
 		// The hexadecimal \x16 is ctrl-C.
 		// The interrupt should kill the sleep immediately.
 		// Elapsed time should be well under a second.
-		int rc = system("echo '(sleep 42)\n\x16' | nc localhost 17333");
+		int rc = system("echo '(sleep 42)\n\x16' | nc -q 0 localhost 17333");
 		if (rc != 0) printf("Error: first call failed\n");
 		TS_ASSERT_EQUALS(rc, 0);
 
@@ -267,7 +267,7 @@ public:
 
 		start = time(0);
 		// The hexadecimal \x18 is ctrl-X aka "cancel"
-		rc = system("echo '(sleep 42)\n\x18' | nc localhost 17333");
+		rc = system("echo '(sleep 42)\n\x18' | nc -q 0 localhost 17333");
 		if (rc != 0) printf("Error: first call failed\n");
 		TS_ASSERT_EQUALS(rc, 0);
 
@@ -277,7 +277,7 @@ public:
 
 		start = time(0);
 		// The hexadecimal \x1b is ctrl-[ aka "escape"
-		rc = system("echo '(sleep 42)\n\x1b' | nc localhost 17333");
+		rc = system("echo '(sleep 42)\n\x1b' | nc -q 0 localhost 17333");
 		if (rc != 0) printf("Error: first call failed\n");
 		TS_ASSERT_EQUALS(rc, 0);
 
@@ -297,7 +297,7 @@ public:
 		logger().debug("BEGIN TEST: %s", __FUNCTION__);
 		cmd_exec(
 			"echo 'scm\n (Concept \"A\")\n (sleep 1)\n (Concept \"B\")\n"
-			"(sleep 1)\n (Concept \"C\")\n' | nc localhost 17333");
+			"(sleep 1)\n (Concept \"C\")\n' | nc -q 0 localhost 17333");
 
 		// Wait for above to finish
 		sleep(4);
