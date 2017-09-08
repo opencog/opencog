@@ -40,6 +40,7 @@ ServerSocket::~ServerSocket()
 {
     logger().debug("ServerSocket::~ServerSocket()");
 
+    SetCloseAndDelete();
     delete _socket;
     _socket = nullptr;
 }
@@ -177,7 +178,7 @@ void ServerSocket::handle_connection(void)
         }
     }
 
-    // If the data sent to use is not new-line terminated, then
+    // If the data sent to us is not new-line terminated, then
     // there may still be some bytes sitting in the buffer. Get
     // them and forward them on.  These are typically scheme
     // strings issued from netcat, that simply did not have
@@ -192,7 +193,6 @@ void ServerSocket::handle_connection(void)
         OnLine(line);
 
     logger().debug("ServerSocket::exiting handle_connection()");
-    SetCloseAndDelete();
 
     // In the standard scenario, ConsoleSocket inherits from this, and
     // so deleting this will cause the ConsoleSocket dtor to run. This
