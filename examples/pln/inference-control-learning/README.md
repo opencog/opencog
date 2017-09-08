@@ -53,6 +53,23 @@ Inheritance
 
 where X is a letter preceding Y.
 
+Usage
+-----
+
+To run the experiment, launch guile and load `icl.scm`
+
+```
+guile -l icl.scm
+```
+
+it will automatically run the experiment. After a while you can see
+that at the second meta-iteration the number of problems solved has
+significantly gone up. In that experiment only context-free control
+rules are learned, but that is enough, so no pattern miner is actually
+used for now.
+
+The remaining sections explain how it all works.
+
 Experiment High Level Algorithm
 -------------------------------
 
