@@ -12808,8 +12808,14 @@ Overall, we expect ....
 24M conseq + 24M any-con-list-links + 35M sections = 83M atoms
 plus 2M slop = 85M!? atoms
 
-82GB for 59M atoms = 1.3K/atom
-xxxxxxxxxxxxxxxxxxxxx
+82GB for 59M atoms = 1.4K/atom
+expect about 115GB when done... actual 113GB
+81350152 atoms
+
+((ListLink . 24169074) (SchemaNode . 1) (PredicateNode . 11) (Connector .
+971810) (ConnectorDir . 2) (ConnectorSeq . 23670834) (Section . 31914870)
+(WordNode . 623548) (AnyNode . 2))
+
 
 ----------
 zh only has 5653 bad words...

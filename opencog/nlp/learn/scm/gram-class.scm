@@ -22,7 +22,7 @@
 ;         WordClassNode "noun"  ; the grammatical class of the word.
 ;
 ; Word classes have a designated grammatic behavior, using Sections,
-; behaving just lik the pseudo-connectors on single words. Thus, either
+; behaving just like the pseudo-connectors on single words. Thus, either
 ; a WordNode or a WordClassNode can appear in a Connector link, as
 ; shown below.
 ;
@@ -30,12 +30,35 @@
 ;         WordClassNode "noun"
 ;         ConnectorSeq
 ;             Connector
-;                WordNode ; or WordClassNode
-;                LgConnDirNode "-"   ; for example
+;                WordClassNode "verb" ; or possibly a WordNode
+;                LgConnDirNode "+"
+;             Connector
+;                ....
+;
+; There are several ways of handling the merger of words into classes.
+; Consider first merging 
+; The "linear" approach is to intersect the co
 ;
 ; ---------------------------------------------------------------------
 
 (use-modules (opencog) (opencog matrix))
+
+(define (transfer-count WA WB DJ NUM)
+"
+  transfer-count WA WB DJ NUM - subtract NUM DJ's from WB and add to WA.
+
+  If WB is in a section with the connector-seq DJ, and has a count of
+  at least NUM, then subtract NUM from the count of this section, and
+  add it to the corresponding section on WA.  If tehre is no such
+  section on WA, it is created.  If the count on WB is less than NUM,
+  then the entire count is transfered to WA, and the section on WB
+  is deleted.  NUM must be a positie number.
+"
+	(define sec-b (cog-link 'SectionLink WB DJ))
+	(define vsec-b
+		(if (null? sec-b) '()
+			(cog-value sec-b 
+) 
 
 (define (do-it)
 	(let ((pca (make-pseudo-cset-api))
@@ -45,7 +68,4 @@
 
 	(define pta (make-thresh-pca pfa))
 	(define all-words (get-all-cset-words))
-
-
-
 )
