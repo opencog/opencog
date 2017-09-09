@@ -26524,6 +26524,163 @@ lost information
 \end_layout
 
 \begin_layout Subsection*
+Word Meanings
+\end_layout
+
+\begin_layout Standard
+Take as an assumption that word-meaning is strongly correlated with grammatical
+ usage.
+ That is, 
+\begin_inset Quotes eld
+\end_inset
+
+saw
+\begin_inset Quotes erd
+\end_inset
+
+, the noun, has a different meaning than 
+\begin_inset Quotes eld
+\end_inset
+
+saw
+\begin_inset Quotes erd
+\end_inset
+
+, the verb.
+ Thus, as a hypothesis, write
+\begin_inset Formula 
+\[
+[w,m_{1}]=\{(w,d_{a}),\,(w,d_{b}),\,(w,d_{c}),\,\cdots\}
+\]
+
+\end_inset
+
+that is, the word 
+\begin_inset Formula $w$
+\end_inset
+
+ might have meaning 
+\begin_inset Formula $m_{1}$
+\end_inset
+
+ whenever is used with any of the disjunts 
+\begin_inset Formula $d_{k}$
+\end_inset
+
+ from the indicated set.
+ The meaning 
+\begin_inset Formula $m_{2}$
+\end_inset
+
+ of a word will be associated with a different set of disjuncts.
+ In general, the sets 
+\begin_inset Formula $[w,m_{1}]$
+\end_inset
+
+ and 
+\begin_inset Formula $[w,m_{2}]$
+\end_inset
+
+ will overlap.
+ 
+\end_layout
+
+\begin_layout Standard
+Individually, 
+\begin_inset Formula $[w,m]$
+\end_inset
+
+ is just a set, and has no weights or probabilities associated with it.
+ However, if the disjunct 
+\begin_inset Formula $(w,d)$
+\end_inset
+
+ is observed, one can say that there is a frequency or probability 
+\begin_inset Formula $p([w,m]|(w,d))$
+\end_inset
+
+ that the meaning 
+\begin_inset Formula $m$
+\end_inset
+
+ of word 
+\begin_inset Formula $w$
+\end_inset
+
+ is intended when 
+\begin_inset Formula $(w,d)$
+\end_inset
+
+ is obeserved.
+ This is written as a conditional probability, so that one has
+\begin_inset Formula 
+\[
+\sum_{m}p([w,m]|(w,d))=1
+\]
+
+\end_inset
+
+That is, given that 
+\begin_inset Formula $(w,d)$
+\end_inset
+
+ was observed, there must be some meaning 
+\begin_inset Formula $m$
+\end_inset
+
+ that was intended; the list of possible meanings is complete and exhaustive.
+ I'm assuming that one possible meaning is 
+\begin_inset Quotes eld
+\end_inset
+
+nonsense
+\begin_inset Quotes erd
+\end_inset
+
+ or 
+\begin_inset Quotes eld
+\end_inset
+
+junk
+\begin_inset Quotes erd
+\end_inset
+
+ or 
+\begin_inset Quotes eld
+\end_inset
+
+unknown
+\begin_inset Quotes erd
+\end_inset
+
+; just add it to the list of possible meanings.
+\end_layout
+
+\begin_layout Standard
+One of the tasks is to discover the complete set of meanings 
+\begin_inset Formula $\{m_{i}\}$
+\end_inset
+
+ for a word.
+ Another task is to discern the probabilities 
+\begin_inset Formula $p([w,m]|(w,d))$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Subsection*
+Word Classes
+\end_layout
+
+\begin_layout Standard
+Any given word might belong to one of many different word classes (noun,
+ verb, ...) and the collected disjunct usage observations on that word will
+ in general be a linear combination of such different usages.
+ Distinguishing word-classes require untangling these relationships.
+\end_layout
+
+\begin_layout Subsection*
 Merging Words to form Word Classes
 \end_layout
 
