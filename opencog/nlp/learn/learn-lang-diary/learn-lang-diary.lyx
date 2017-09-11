@@ -21891,7 +21891,7 @@ en_pairs_rfive_mst
 \begin_inset Text
 
 \begin_layout Plain Layout
-
+445K x 23.4M
 \end_layout
 
 \end_inset
@@ -21900,7 +21900,7 @@ en_pairs_rfive_mst
 \begin_inset Text
 
 \begin_layout Plain Layout
-
+31.9M
 \end_layout
 
 \end_inset
@@ -21909,7 +21909,7 @@ en_pairs_rfive_mst
 \begin_inset Text
 
 \begin_layout Plain Layout
-
+69.4M
 \end_layout
 
 \end_inset
@@ -21918,7 +21918,7 @@ en_pairs_rfive_mst
 \begin_inset Text
 
 \begin_layout Plain Layout
-
+2.18
 \end_layout
 
 \end_inset
@@ -26680,13 +26680,393 @@ Any given word might belong to one of many different word classes (noun,
  Distinguishing word-classes require untangling these relationships.
 \end_layout
 
+\begin_layout Standard
+The setup for this problem is mostly identical to the problem above, except
+ that the 
+\begin_inset Quotes eld
+\end_inset
+
+meaning
+\begin_inset Quotes erd
+\end_inset
+
+ 
+\begin_inset Formula $m$
+\end_inset
+
+ is re-interpreted as the word-class 
+\begin_inset Formula $g$
+\end_inset
+
+, short for 
+\begin_inset Quotes eld
+\end_inset
+
+grammatical class
+\begin_inset Quotes erd
+\end_inset
+
+.
+ That is, the above did not specify the definition of 
+\begin_inset Formula $m$
+\end_inset
+
+, rather, it was presented in general terms.
+ Here, likewise, but a stricter defintion is proposed for a 
+\begin_inset Quotes eld
+\end_inset
+
+word class
+\begin_inset Quotes erd
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+A word class 
+\begin_inset Formula $g$
+\end_inset
+
+ is a set of words 
+\begin_inset Formula $\{w_{i}\}$
+\end_inset
+
+, together with a set of disjuncts 
+\begin_inset Formula $\{d_{j}\}$
+\end_inset
+
+, such that all words in the word-class are commonly used with any of the
+ disjuncts in the disjunct-set.
+ That is, 
+\begin_inset Formula 
+\[
+g=\left(\{w_{i}\},\{d_{j}\}\right)
+\]
+
+\end_inset
+
+ subject to the constraint that the vector
+\begin_inset Formula 
+\[
+[w_{1},g]=\left\{ (w_{1},d_{a}),\,(w_{1},d_{b}),\,(w_{1},d_{c}),\,\cdots\right\} 
+\]
+
+\end_inset
+
+ is judged to be similar to the vector
+\begin_inset Formula 
+\[
+[w_{2},g]=\left\{ (w_{2},d_{a}),\,(w_{2},d_{b}),\,(w_{2},d_{c}),\,\cdots\right\} 
+\]
+
+\end_inset
+
+according to some similarity measure (e.g.
+ cosine similarity).
+ The idea is that any of the words in 
+\begin_inset Formula $g$
+\end_inset
+
+ use any of the disjuncts in 
+\begin_inset Formula $g$
+\end_inset
+
+ in similar ways.
+\end_layout
+
+\begin_layout Standard
+Any given word might belone to multiple different classes 
+\begin_inset Formula $g$
+\end_inset
+
+.
+ For example, the verb 
+\begin_inset Quotes eld
+\end_inset
+
+saw
+\begin_inset Quotes erd
+\end_inset
+
+ will belong to a different class than the noun 
+\begin_inset Quotes eld
+\end_inset
+
+saw
+\begin_inset Quotes erd
+\end_inset
+
+.
+ As a general rule, whenever 
+\begin_inset Formula $g_{1}\ne g_{2}$
+\end_inset
+
+ then the set of disjuncts in 
+\begin_inset Formula $g_{1}$
+\end_inset
+
+ and 
+\begin_inset Formula $g_{2}$
+\end_inset
+
+ will not overlap very much, if at all.
+\end_layout
+
+\begin_layout Subsection*
+Assigning Word to Word Classes
+\end_layout
+
+\begin_layout Standard
+Assigning a word to a word-class has a knock-on network effect.
+ That is, words appear not only in isolation, but also as connectors in
+ disjuncts.
+ If two words are considered to be similar, then perhaps two connectors
+ should be judged to be similar.
+ If two connectors are similar, then perhaps the disjuncts they appear in
+ are similar.
+ If two disjuncts are similar, then perhaps some other pair of words can
+ now be considered to be similar.
+ The question arises of how far to follow this network effect, and how to
+ assign cutoffs.
+ 
+\end_layout
+
+\begin_layout Standard
+Note that the network can be traced in either one of two directions.
+ Given a pair of similar words, one can ask if any of the disjuncts attached
+ to those words are similar to one-another, or not.
+ In the other direction, one can ask how similar connectors imply similar
+ disjuncts.
+ This is made more explicit below.
+\end_layout
+
+\begin_layout Standard
+Starting with a single word, one can examine all of the disjuncts on that
+ word, to see if any of them are similar.
+ For example, the word 
+\begin_inset Quotes eld
+\end_inset
+
+the
+\begin_inset Quotes erd
+\end_inset
+
+ should have disjuncts 
+\begin_inset Quotes eld
+\end_inset
+
+book+
+\begin_inset Quotes erd
+\end_inset
+
+ and 
+\begin_inset Quotes eld
+\end_inset
+
+novel+
+\begin_inset Quotes erd
+\end_inset
+
+ on it, and one can ask if 
+\begin_inset Quotes eld
+\end_inset
+
+book
+\begin_inset Quotes erd
+\end_inset
+
+ and 
+\begin_inset Quotes eld
+\end_inset
+
+novel
+\begin_inset Quotes erd
+\end_inset
+
+ are similar.
+ If so, they can be merged into a grammatical class 
+\begin_inset Formula $g=\left\{ \mbox{book},\mbox{novel}\right\} $
+\end_inset
+
+ and the two disjuncts 
+\begin_inset Quotes eld
+\end_inset
+
+book+
+\begin_inset Quotes erd
+\end_inset
+
+ and 
+\begin_inset Quotes eld
+\end_inset
+
+novel+
+\begin_inset Quotes erd
+\end_inset
+
+ replaced by 
+\begin_inset Formula $g+$
+\end_inset
+
+.
+ The observation count (and likewise the probability) on (the, g+) should
+ be the sum of N(the, book+) and N(the, novel+).
+ The process is then repeated recursively, examining each of the words appearing
+ in the disjuncts.
+\end_layout
+
+\begin_layout Standard
+Alternately, one may walk the network in the 
+\begin_inset Quotes eld
+\end_inset
+
+other
+\begin_inset Quotes erd
+\end_inset
+
+ direction, and merge disjuncts as they appear in similar words.
+ Let disjunct 
+\begin_inset Formula $d$
+\end_inset
+
+ be a sequence of connectors: 
+\begin_inset Formula $d=(c_{1},c_{2},c_{3,}\cdots)$
+\end_inset
+
+ and each connector is a word and a direction indicator: 
+\begin_inset Formula $c=(w,\pm)$
+\end_inset
+
+.
+ Given two similar words 
+\begin_inset Formula $w_{a}$
+\end_inset
+
+ and 
+\begin_inset Formula $w_{b}$
+\end_inset
+
+, one can trace through the connectors 
+\begin_inset Formula $c_{a+}=(w_{a},+)$
+\end_inset
+
+ and 
+\begin_inset Formula $c_{b+}=(w_{b},+)$
+\end_inset
+
+ and likewise for the - direction.
+ One then forms the set of all disjuncts in which 
+\begin_inset Formula $c_{a+}$
+\end_inset
+
+appears: 
+\begin_inset Formula 
+\[
+\left\{ d_{k}=(c_{1},c_{2},c_{3},\cdots)|c_{j}=c_{a+}\,\mbox{for some }j\right\} 
+\]
+
+\end_inset
+
+Then, given one 
+\begin_inset Formula $d_{k}$
+\end_inset
+
+, one constructs 
+\begin_inset Formula $\widetilde{d_{k}}$
+\end_inset
+
+ so that 
+\begin_inset Formula $c_{b+}$
+\end_inset
+
+ replaces 
+\begin_inset Formula $c_{a+}$
+\end_inset
+
+.
+ One then constructs the set of all words that appear with 
+\begin_inset Formula $\widetilde{d_{k}}$
+\end_inset
+
+ :
+\begin_inset Formula 
+\[
+\upsilon=\left\{ w|N(w,\widetilde{d_{k}})>0\right\} 
+\]
+
+\end_inset
+
+and ask whether any of these words already belong to the same grammatical
+ class.
+ If not, then they should be compared to one-another, to see if they might.
+\end_layout
+
+\begin_layout Standard
+If a pair of words in 
+\begin_inset Formula $\upsilon$
+\end_inset
+
+ already belong to the same grammatical class, then the two disjuncts 
+\begin_inset Formula $d_{k}$
+\end_inset
+
+ and 
+\begin_inset Formula $\widetilde{d_{k}}$
+\end_inset
+
+ can be merged into one.
+ Do this by forming the grammatical class 
+\begin_inset Formula $g=\{w_{a},w_{b}\}$
+\end_inset
+
+ and construct the connector 
+\begin_inset Formula $c_{g+}=(g,+)$
+\end_inset
+
+.
+ Then construct 
+\begin_inset Formula $\overbrace{d_{k}}$
+\end_inset
+
+ so that that 
+\begin_inset Formula $c_{g+}$
+\end_inset
+
+ replaces 
+\begin_inset Formula $c_{a+}$
+\end_inset
+
+, and replace both 
+\begin_inset Formula $d_{k}$
+\end_inset
+
+ and 
+\begin_inset Formula $\widetilde{d_{k}}$
+\end_inset
+
+ by 
+\begin_inset Formula $\overbrace{d_{k}}$
+\end_inset
+
+ in the relevant sections.
+ The observation counts are copied over.
+ The process is recursive, repeating for each pair of words judged sufficiently
+ similar.
+ Alternately, one might defer the creation of 
+\begin_inset Formula $g$
+\end_inset
+
+ until one has walked enough of the network to determine general similarity.
+\end_layout
+
 \begin_layout Subsection*
 Merging Words to form Word Classes
 \end_layout
 
 \begin_layout Standard
 After the grammatical behavior of two words is considered to be similar,
- how should a merged word-class be created? How should the mergger be performed?
+ how should a merged word-class be created? How should the merger be performed?
  There are several different ways in which words can be merged together
  to form word classes.
  These are reviewed below.
