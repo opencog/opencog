@@ -27150,21 +27150,129 @@ where
 \end_inset
 
 .
- It seems
+ 
+\end_layout
+
+\begin_layout Subsubsection*
+Erasure vs.
+ orthogonal replacement
 \end_layout
 
 \begin_layout Standard
-The remaining parts of the 
+After the merger, there are two alternatives for what to do with 
+\begin_inset Formula $\vec{w}_{a}$
+\end_inset
+
+ and 
+\begin_inset Formula $\vec{w}_{b}$
+\end_inset
+
+ in the dataset.
+ One alternative is to remove both 
+\begin_inset Formula $\vec{w}_{a}$
+\end_inset
+
+ and 
+\begin_inset Formula $\vec{w}_{b}$
+\end_inset
+
+ entirely.
+ The other alternative is to compute the components of 
+\begin_inset Formula $\vec{w}_{a}$
+\end_inset
+
+ and 
+\begin_inset Formula $\vec{w}_{b}$
+\end_inset
+
+ that are orthogonal to 
+\begin_inset Formula $\vec{w}_{c}$
+\end_inset
+
+, and replace 
+\begin_inset Formula $\vec{w}_{a}$
+\end_inset
+
+ and 
+\begin_inset Formula $\vec{w}_{b}$
+\end_inset
+
+ by these orthogonal components.
+ That is, given a vector 
+\begin_inset Formula $\vec{v}$
+\end_inset
+
+ (which might be 
+\begin_inset Formula $\vec{w}_{a}$
+\end_inset
+
+ or 
+\begin_inset Formula $\vec{w}_{b}$
+\end_inset
+
+), compute 
+\begin_inset Formula 
+\[
+\vec{v}_{\bot}=\vec{v}-\widehat{w}_{c}\left(\widehat{w}_{c}\cdot\vec{v}\right)
+\]
+
+\end_inset
+
+ where 
+\begin_inset Formula $\widehat{w}_{c}=\vec{w}_{c}/\left|\vec{w}_{c}\right|$
+\end_inset
+
+ is the normalized unit vector pointing in the 
+\begin_inset Formula $\vec{w}_{c}$
+\end_inset
+
+ direction.
+ 
 \end_layout
 
 \begin_layout Standard
-of the number of the corresponding vectors are 
+The goal of maintaining the orthogonal components is that perhaps 
+\begin_inset Formula $\vec{w}_{a}$
+\end_inset
+
+ and 
+\begin_inset Formula $\vec{w}_{b}$
+\end_inset
+
+ have admixtures of other grammatical categories in them; what these are
+ cannot be known a-priori.
+ The discard option effectively discards these admixtures, hiding them from
+ later iterations.
+ This kind of hiding/data-destruction seems undesirable.
 \end_layout
 
 \begin_layout Standard
-First, compute the intersection of the sets of disjuncts on these two words.
+The orthogonal component potentially has negative coefficients appearing
+ in it; it seems that these must be zeroed out to preserve 
+\begin_inset Quotes eld
+\end_inset
+
+physicality
+\begin_inset Quotes erd
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Subsubsection*
+Linear overlap
+\end_layout
+
+\begin_layout Standard
+This would work like linear merging, described above, except that the intersecti
+on of the sets of disjuncts on these two words is computed first, and the
+ vector basis is taken only over this intersected set.
  The intersection is presumably substantial, if the two words are grammatically
  similar.
+ For the replacement step, one has three alternatives: total discard, which
+ seems inappropriate (as the non-intersected disjuncts get discarded); partial
+ discard, which discards only the intersected components, and orthogoanl
+ replacement.
 \end_layout
 
 \begin_layout Subsection*
