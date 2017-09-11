@@ -6422,7 +6422,7 @@ NOT include pair-MI stats. This is the alpha-segmented-1 texts only.
 
 STATUS: good
 DATE: 17 July 2017
-REASON: No known defects.
+REASON: No known defects. Except that the dataset is too small.
 
                         List of relations
  Schema |    Name    | Type  | Owner  |    Size    | Description 
@@ -6529,6 +6529,36 @@ select count(*) from valuations; -- 11414113 = 11.4M values
 
 c4df6f2da0c476a561cbea82981a6853  zen_pairs_mst.sql
 ff7cb1628cb7aad0a59c71b98a626121  zen_pairs_mst.sql.bz2
+
+
+==================================================================
+zen_pairs_two
+-------------
+Mandarin word-pairs. Segmentation into words done by Ruiting. Does
+NOT include pair-MI stats. This is includes alpha-segmented-1 and
+alpha-segmented-2 texts.
+
+STATUS: good
+DATE: 10 Sept 2017
+REASON: No known defects. Except that the dataset is too big.
+
+                        List of relations
+ Schema |    Name    | Type  | Owner  |    Size    | Description 
+--------+------------+-------+--------+------------+-------------
+ public | atoms      | table | ubuntu | 8947 MB    | 
+ public | spaces     | table | ubuntu | 40 kB      | 
+ public | typecodes  | table | ubuntu | 56 kB      | 
+ public | valuations | table | ubuntu | 103 GB     | 
+ public | values     | table | ubuntu | 8192 bytes | 
+
+select count(*) from atoms;      -- 101322902 = 101 M atoms
+select count(*) from valuations; --  54922685 =  55 M valuations
+
+5140909514 bytes uncompressed = 5.14 GBytes
+ 863704716 bytes compressed   = 864 MBytes
+
+c8ec47ba53fedad6ce0871c8a7482410  zen_pairs_two.sql
+c8dc76a1bd5e68c8a6d08689f6485610  zen_pairs_two.sql.bz2
 
 
 ==================================================================
@@ -12815,6 +12845,19 @@ expect about 115GB when done... actual 113GB
 ((ListLink . 24169074) (SchemaNode . 1) (PredicateNode . 11) (Connector .
 971810) (ConnectorDir . 2) (ConnectorSeq . 23670834) (Section . 31914870)
 (WordNode . 623548) (AnyNode . 2))
+
+Elapsed time to load csets: 22555 secs -- 6+ hours! ouch
+Finished loading sparse matrix pairs
+Start computing the basis
+
+(define psa (add-pair-stars pca))
+(batch-all-pair-mi psa)
+Support: found num left= 444903 num right= 23444293 in 1014 secs
+Done with wild-card count N(x,*) and N(*,y) in 29048 secs
+Done computing N(*,*) total-count= 69447009.0 in 1101 secs
+Going to do individual pair frequencies
+Done computing 31914870 pairs in 925 secs
+
 
 
 ----------
