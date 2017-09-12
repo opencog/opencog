@@ -20,6 +20,11 @@
   (append-map (lambda (m) (list (Reference (member-words m) (Concept NAME))))
               MEMBERS))
 
+(define (create-shared-goal GOAL)
+  "Create a topic level goal that will be shared among the rules under the
+   same topic."
+  (set! shared-goals GOAL))
+
 (define (word STR)
   "Literal word occurrence."
   (let* ((v1 (WordNode STR))

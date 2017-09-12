@@ -189,6 +189,7 @@
 (define (process-goal GOAL)
   "Create the goals in OpenPsi."
   ; TODO: Wait for the API
+  ; TODO: Add shared-goals as well, if any
   (True))
 
 (define* (create-rule PATTERN ACTION #:optional (GOAL (True))

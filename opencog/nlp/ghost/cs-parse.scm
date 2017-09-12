@@ -74,6 +74,7 @@
     ; FIXME: This is not really newline.
     ((string=? "" str) (cons (make-lexical-token 'NEWLINE location #f) ""))
     ((has-match? "^[ \t]*goal:" str) (result:suffix 'GOAL location #f))
+    ((has-match? "^[ \t]*#goal:" str) (result:suffix 'RGOAL location #f))
     ((has-match? "^[ \t]*#!" str) ; This should be checked always before #
       ; TODO Add tester function for this
       (cons (make-lexical-token 'SAMPLE_INPUT location #f) ""))
@@ -206,7 +207,7 @@
     ; MVAR = Match Variables
     ; MOVAR = Match Variables grounded in their original words
     ; ? = Comparison tests
-    (CONCEPT TOPIC RESPONDERS REJOINDERS GAMBIT GOAL COMMENT SAMPLE_INPUT
+    (CONCEPT TOPIC RESPONDERS REJOINDERS GAMBIT GOAL RGOAL COMMENT SAMPLE_INPUT
      WHITESPACE
       (right: LPAREN LSBRACKET << ID VAR * ^ < LEMMA LITERAL NUM LEMMA~COMMAND
               STRING *~n *n UVAR MVAR MOVAR EQUAL NOT RESTART)
@@ -217,13 +218,14 @@
     ; Parsing rules (aka nonterminal symbols)
     (inputs
       (input) :
-        (if $1 (begin (cog-logger-debug ghost-logger "\nRule:\n~a\n" $1) #t))
+        (if $1 (begin (cog-logger-debug ghost-logger "\nParsed:\n~a\n" $1) #t))
       (inputs input) :
-        (if $2 (begin (cog-logger-debug ghost-logger "\nRule:\n~a\n" $2) #t))
+        (if $2 (begin (cog-logger-debug ghost-logger "\nParsed:\n~a\n" $2) #t))
     )
 
     (input
       (declarations) : $1
+      (goal) : (begin (create-shared-goal (list $1)) $1)
       (rule) : $1
       (enter) : $1
       (COMMENT) : #f
@@ -275,12 +277,12 @@
 
     ; Rule grammar
     (rule
-      (goal RESPONDERS name context action) :
+      (rule-goal RESPONDERS name context action) :
         (create-rule
           (eval-string (string-append "(list " $4 ")"))
           (eval-string (string-append "(list " $5 ")"))
           (eval-string (string-append "(list " $1 ")")))
-      (goal RESPONDERS context action) :
+      (rule-goal RESPONDERS context action) :
         (create-rule
           (eval-string (string-append "(list " $3 ")"))
           (eval-string (string-append "(list " $4 ")"))
@@ -296,6 +298,10 @@
       (REJOINDERS context action) :
         (format #f "\nrejoinder: ~a\n~a\n~a" $1 $2 $3)
       (GAMBIT action) : (format #f "gambit: ~a" $2)
+    )
+
+    (rule-goal
+        (RGOAL LPAREN goal-members RPAREN) : $3
     )
 
     (goal
