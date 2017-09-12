@@ -16,8 +16,8 @@
 
     ; From demand.scm
     psi-get-all-demands psi-get-all-enabled-demands psi-get-all-valid-demands
-    psi-demand psi-demand? psi-set-demand-value psi-goal-increase
-    psi-demand-value-increase psi-goal-decrease psi-demand-value-decrease
+    psi-demand psi-demand? psi-set-demand-value
+    psi-demand-value-increase psi-demand-value-decrease
     psi-demand-skip psi-demand-skip?
 
     ; From control.scm
