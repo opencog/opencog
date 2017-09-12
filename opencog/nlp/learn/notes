@@ -6322,15 +6322,26 @@ en_pairs_cfive_mst
 Same as en_pairs_rfive_mst, but with infix-punctuation words removed.
 
 STATUS: good
-DATE: 8 Sept 2017
+DATE: 12 Sept 2017
 REASON: Best so far, I think. The pair marginals have been recomputed.
-, and the dj marginals
-    however, still include the astts, and the 
+    and the dj marginals also.
 ISSUES: Too big to fit into RAM. 
     Loading word-pairs and marginals requires 72GBytes.
+    Just loading disjunct marginals requires 75GBytes. 
+    (25M csets and 25M ListLinks and umpteen valuations) 
+    Recomputing disjunct marginals uses 134GB RAM.
 
-    Just loading disjunct marginals
-    requires 75GBytes. (25M csets and 25M ListLinks and umpteen valuations) 
+                        List of relations
+ Schema |    Name    | Type  | Owner  |    Size    | Description 
+--------+------------+-------+--------+------------+-------------
+ public | atoms      | table | ubuntu | 13 GB      | 
+ public | spaces     | table | ubuntu | 40 kB      | 
+ public | typecodes  | table | ubuntu | 56 kB      | 
+ public | valuations | table | ubuntu | 57 GB      | 
+ public | values     | table | ubuntu | 8192 bytes | 
+
+select count(*) from atoms;      -- 139638908 = 140 M atoms (10M less)
+select count(*) from valuations; -- 307109283 = 307 M values (24M less)
 
 Summary Report for Correlation Matrix Link Grammar ANY link Word Pairs
 Rows: 619168 Columns: 580804
@@ -6347,10 +6358,31 @@ Count   (l_1)  1.5140E+7    1.8578E+7     281.6        254.1
 Length  (l_2)  1.8653E+6    1.8923E+6     34.70        25.88    
 RMS Count      1.8647E+6    1.8917E+6     34.69        25.87    
 
+Summary Report for Correlation Matrix Word-Disjunct Pairs (Connector Sets)
+Left type: WordNode    Right Type: ConnectorSeq    Pair Type: Section
+Wildcard: (ListLink (ctv 0 0 69447009)
+   (AnyNode "cset-word")
+   (AnyNode "cset-disjunct")
+)
+Rows: 444903 Columns: 23444293
+Size: 31914870 non-zero entries of 10430436288579 possible
+Fraction non-zero: 3.0598E-6 Sparsity (-log_2): 18.318
+Total observations: 69447009.0  Avg obs per pair: 2.1760
+Entropy Total: 23.092   Left: 21.137   Right: 10.112
+Total MI: 8.1569
 
-working on it ... 75GB to load pairs
-(define 
-(batch-pairs
+                 Left         Right     Avg-left     Avg-right
+                 ----         -----     --------     ---------
+Support (l_0)  2.2742E+5    367.6    
+Count   (l_1)  9.4430E+5    7917.         4.152        21.54    
+Length  (l_2)  2.4549E+4    2397.         .1079        6.520    
+RMS Count      2.4499E+4    2379.         .1077        6.472    
+
+24893983049 bytes uncompressed = 24.9 GB 
+ 3197324260 bytes compressed   =  3.2 GB
+
+85a872a283314d5bc1900b20da35a017  en_pairs_cfive_mst.sql
+8f5eab41474c92c1a084ce9fc60f243c  en_pairs_cfive_mst.sql.bz2
 
 
 ==================================================================
@@ -13025,7 +13057,7 @@ select count(*) from valuations where key=86355966; -- 1457522 = 1.4M
    * This dataset is too big to fit in RAM...
    * clean up infix punct in rfive_mfive call it rfive_mfx
 
--- Need to redo the PCA....
+-- Need to redo the PCA.... DONE
    
 -- If two words are similar, then ... 
    * issue a uniq group ID
@@ -13100,6 +13132,25 @@ Below only happens if self-destruct runs
 [GenericShell] exit eval loop       yes   too
 [GenericShell] dtor, joined eval thread  yes too
 
+------------------------
+wait ... 
+concurrent_set uses std:less... Handle
+
+a->operator<
+... use atoms_less
+
+------------------------
+zen = 101M before  (+ 55m val)
+en = 56M  + 28M
+
+how?
+1) fetch words
+
+2) fetch incoming for one word
+3) do left+right MI for that word
+4) do marginals for taht word
+5) delete the pair.
+
 
 
 
@@ -13137,12 +13188,15 @@ Bugs: while mst parsing, guile goes GC-crazy after a while, and
 Items: create LG feederbacker
 
 Bugs: cleanup embedded dashes in en  DONE
-     -- save en_pairs_r again
+     -- save en_pairs_r again DONE
      -- should pboably recompute pair-MI after above,
      -- maybe recompute mst?? (since it was so quick!?)
 
 Bugs: sentences with more than 254 words....
 
-Bugs: make postgres run nice.
+Bugs: make postgres run nice. half-done, w/ renice.
 
 Bugs: lxc containers not shutting down correctly during power loss
+
+Bugs/feat:  no way to compute marginals incrementally, if the DB does
+      not fit in RAM.
