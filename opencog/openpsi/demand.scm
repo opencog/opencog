@@ -84,38 +84,15 @@
 (psi-get-all-enabled-demands))
 
 ; --------------------------------------------------------------
-(define (psi-demand demand-name desired-value)
+(define (psi-demand NAME)
 "
   psi-demand NAME VALUE
 
   Create and return a ConceptNode that represents an OpenPsi demand.
-  The NAME should be a string. The VALUE should be a floating-point
-  number in the range [0,1].
+  The NAME should be a string.
 "
-
-    ; Check arguments
-    (if (not (string? demand-name))
-        (error "ERROR: psi-demand, expected first argument to be a string"))
-
-    (if (or (> 0 desired-value) (< 1 desired-value))
-       (error (string-append
-            "ERROR: psi-demand, expected second argument to be a number "
-            "in the range [0,1], got:") desired-value))
-
-    (let* ((demand-str (string-append psi-prefix-str demand-name))
-           (demand-node (ConceptNode demand-str (stv desired-value 1))))
-
+    (let* ((demand-node (ConceptNode NAME)))
         (InheritanceLink demand-node psi-demand-node)
-
-        ; NOTE: Not sure that this link is needed. One possible use is
-        ; to measure how the demand-value has changed over time.  XXX
-        ; Is this actaully used anywhere?
-        (EvaluationLink
-            (PredicateNode (string-append psi-prefix-str "desired_value"))
-            (ListLink
-                demand-node
-                (NumberNode desired-value)))
-
         demand-node
     )
 )

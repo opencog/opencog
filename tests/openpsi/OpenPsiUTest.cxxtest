@@ -318,7 +318,7 @@ public:
         TSM_ASSERT_EQUALS("Expected ()", "()\n", result_1_1);
         auto result_1_2 = _scm->eval("(demand-value demand-1)");
         CHKERR
-        TSM_ASSERT_EQUALS("Expected `0.87`", "0.87\n", result_1_2);
+        TSM_ASSERT_EQUALS("Expected `1.0`", "1.0\n", result_1_2);
 
         // For rule-2
         auto result_1_3 = _scm->eval("(cog-node 'ConceptNode \"act-2\")");
@@ -326,7 +326,7 @@ public:
         TSM_ASSERT_EQUALS("Expected ()", "()\n", result_1_3);
         auto result_1_4 = _scm->eval("(demand-value demand-2)");
         CHKERR
-        TSM_ASSERT_EQUALS("Expected `0.87`", "0.87\n", result_1_4);
+        TSM_ASSERT_EQUALS("Expected `1.0`", "1.0\n", result_1_4);
 
         logger().info("END TEST: %s", __FUNCTION__);
     }
@@ -356,7 +356,7 @@ public:
         TSM_ASSERT_EQUALS("Expected ()", "()\n", result_2_3);
         auto result_2_4 = _scm->eval("(demand-value demand-2)");
         CHKERR
-        TSM_ASSERT_EQUALS("Expected `0.87`", "0.87\n", result_2_4);
+        TSM_ASSERT_EQUALS("Expected `1.0`", "1.0\n", result_2_4);
 
         logger().info("END TEST: %s", __FUNCTION__);
     }

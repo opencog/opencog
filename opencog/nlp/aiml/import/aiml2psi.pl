@@ -1185,7 +1185,7 @@ sub psi_tail
 	my $num_choices = $_[2];
 	my $wadjust = $_[3];
 	my $chat_goal = "   (Concept \"AIML chat subsystem goal\")\n";
-	my $demand = "   (psi-demand \"AIML chat demand\" 0.97)\n";
+	my $demand = "   (psi-demand \"AIML chat demand\")\n";
 
 	# Stupid hack for rule priority, for lack of something better.
 	# Adjust weights so that more than one star is strongly punished.

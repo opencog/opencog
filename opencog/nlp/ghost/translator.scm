@@ -244,7 +244,7 @@
   ; 2. Should the weight be accessable? Specially if the execution graph is
   ; separate from the content, thus allowing learing, why?
 
-  (set! default-topic (psi-demand TOPIC-NAME 0.9))
+  (set! default-topic (psi-demand TOPIC-NAME))
   default-topic)
 
 ; This is the default topic.

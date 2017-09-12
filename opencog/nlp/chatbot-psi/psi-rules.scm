@@ -4,7 +4,7 @@
 
 ;-------------------------------------------------------------------------------
 ; Define the demands
-(define sociality (psi-demand "Sociality" .8))
+(define sociality (psi-demand "Sociality"))
 
 ;-------------------------------------------------------------------------------
 ; Define the psi-rules
