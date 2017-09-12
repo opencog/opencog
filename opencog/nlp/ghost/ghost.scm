@@ -87,7 +87,7 @@
   (test-parse TXT))
 
 (define-public (ghost-parse-file FILE)
-  "Parse everything in FILE, convert them into atomese."
+  "Parse everything in the topic FILE, and convert them into atomese."
   (test-parse-file FILE))
 
 (define-public (ghost TXT)
