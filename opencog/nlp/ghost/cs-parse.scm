@@ -278,11 +278,13 @@
       (goal RESPONDERS name context action) :
         (create-rule
           (eval-string (string-append "(list " $4 ")"))
-          (eval-string (string-append "(list " $5 ")")))
+          (eval-string (string-append "(list " $5 ")"))
+          (eval-string (string-append "(list " $1 ")")))
       (goal RESPONDERS context action) :
         (create-rule
           (eval-string (string-append "(list " $3 ")"))
-          (eval-string (string-append "(list " $4 ")")))
+          (eval-string (string-append "(list " $4 ")"))
+          (eval-string (string-append "(list " $1 ")")))
       (RESPONDERS name context action) :
         (create-rule
           (eval-string (string-append "(list " $3 ")"))
