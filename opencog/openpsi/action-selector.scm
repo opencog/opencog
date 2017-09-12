@@ -4,6 +4,7 @@
 ; The action selector chooses one (or more) rules to run.
 ;
 ; Copyright (C) 2016 OpenCog Foundation
+; Copyright (C) 2017 MindCloud
 
 (use-modules (opencog) (opencog exec))
 

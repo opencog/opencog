@@ -2,6 +2,7 @@
 ; control.scm
 ;
 ; Copyright (C) 2016 OpenCog Foundation
+; Copyright (C) 2017 MindCloud
 ;
 ; Design Notes:
 ; Weights are associated to rules using a StateLink.  However, the

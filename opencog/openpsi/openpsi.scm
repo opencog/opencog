@@ -1,4 +1,10 @@
+; openpsi.scm
+;
+; Define (opencog openpsi) module.
+;
 ; Copyright (C) 2016 OpenCog Foundation
+; Copyright (C) 2017 MindCloud
+
 
 ; --------------------------------------------------------------
 (define-module (opencog openpsi)

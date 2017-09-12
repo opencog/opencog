@@ -3,6 +3,7 @@
 ; Utilities for defining and working with OpenPsi rules.
 ;
 ; Copyright (C) 2016 OpenCog Foundation
+; Copyright (C) 2017 MindCloud
 ;
 ; Design Notes:
 ; Aliases: Rules can be given a "name", called an "alias", below.

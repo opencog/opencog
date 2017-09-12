@@ -3,6 +3,7 @@
 ; Methods to define and work with demands.
 ;
 ; Copyright (C) 2015-2016 OpenCog Foundation
+; Copyright (C) 2017 MindCloud
 ;
 ; Design Notes:
 ; Demands are associated with demand values. There are two different,

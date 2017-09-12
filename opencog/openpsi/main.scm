@@ -5,6 +5,7 @@
 ; to call it.
 ;
 ; Copyright (C) 2015-2016 OpenCog Foundation
+; Copyright (C) 2017 MindCloud
 
 (use-modules (srfi srfi-1)) ; For `append-map`
 (use-modules (ice-9 threads)) ; For par-map
