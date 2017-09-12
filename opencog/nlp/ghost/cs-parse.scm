@@ -299,7 +299,17 @@
     )
 
     (goal
-        (GOAL LEMMA EQUAL NUM) : (format #f "(cons \"~a\" ~a)" $2 $4)
+        (GOAL LPAREN goal-members RPAREN) : $3
+    )
+
+    (goal-members
+        (goal-member) : $1
+        (goal-members goal-member) : (format #f "~a ~a" $1 $2)
+    )
+
+    (goal-member
+        (LEMMA EQUAL NUM) : (format #f "(cons \"~a\" ~a)" $1 $3)
+        (STRING EQUAL NUM) : (format #f "(cons \"~a\" ~a)" $1 $3)
     )
 
     (context
