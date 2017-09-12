@@ -58,7 +58,7 @@ public:
      * @param callbackListener An object that will be notified just before and
      * just after each toplevel atom insertion.
      */
-    static bool load(const std::string &fileName, AtomSpace &atomSpace, SCMLoaderCallback *callbackListener = NULL);
+    static bool load(const std::string &fileName, AtomSpace &atomSpace, SCMLoaderCallback *callbackListener=nullptr);
 
 private:
 

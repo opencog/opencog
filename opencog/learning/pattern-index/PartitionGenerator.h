@@ -106,7 +106,7 @@ public:
     /*
      * includeTrivial = true will include the trivial partition of S: {{}, S}
      */
-    PartitionGenerator(unsigned int n, bool includeTrivial = false);
+    PartitionGenerator(unsigned int n, bool includeTrivial=false);
     ~PartitionGenerator();
     bool depleted() const;
     void generateNext();

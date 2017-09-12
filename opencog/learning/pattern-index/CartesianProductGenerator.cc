@@ -90,8 +90,8 @@ void CartesianProductGenerator::drop(unsigned int pos)
 
 void CartesianProductGenerator::checkForRepetition()
 {
-    bool eqFlag = false;
     if (! depletedFlag) {
+        bool eqFlag = false;
         for (unsigned int i = 0; i < cursorVector.size(); i++) {
             for (unsigned int j = i + 1; j < cursorVector.size(); j++) {
                 if (cursorVector.at(i) == cursorVector.at(j)) {

@@ -77,8 +77,10 @@ public:
      * avoidEqual = true makes at(i) != at(j) for all i != j (any iteration)
      * triangularFlag = true makes at(i) < at(j) for all i < j (any iteration)
      */
-    CartesianProductGenerator(unsigned int n, unsigned int m, bool avoidEqual = false, bool triangularFlag = false);
-    CartesianProductGenerator(const std::vector<unsigned int> &v, bool avoidEqual = false, bool triangularFlag = false);
+    CartesianProductGenerator(unsigned int n, unsigned int m,
+                              bool avoidEqual=false, bool triangularFlag=false);
+    CartesianProductGenerator(const std::vector<unsigned int> &v,
+                              bool avoidEqual=false, bool triangularFlag=false);
 
     ~CartesianProductGenerator();
     bool depleted() const;

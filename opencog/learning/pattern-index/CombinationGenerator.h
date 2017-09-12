@@ -83,7 +83,7 @@ public:
      * avoidAllZero = true excludes the element (0 0 ... 0) 
      * avoidAllOne = true excludes the element (1 1 ... 1) 
      */
-    CombinationGenerator(unsigned int n, bool avoidAllZero = false, bool avoidAllOne = false);
+    CombinationGenerator(unsigned int n, bool avoidAllZero=false, bool avoidAllOne=false);
     CombinationGenerator(unsigned int n, unsigned int k);
 
     ~CombinationGenerator();

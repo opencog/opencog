@@ -42,7 +42,7 @@ class PatternHeap: public std::vector<std::pair<float, TypeFrame>>
 
 public:
 
-    PatternHeap(unsigned int maxSize = 10);
+    explicit PatternHeap(unsigned int maxSize=10);
 
     unsigned int maxSize;
     void push(float v, const TypeFrame &frame);
