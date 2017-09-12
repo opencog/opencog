@@ -28,13 +28,43 @@
 (define psi-rule-name-predicate-node
     (PredicateNode (string-append psi-prefix-str "rule_name")))
 
+(define psi-goal-node (ConceptNode (string-append psi-prefix-str "goal")))
+
+; --------------------------------------------------------------
+(define (psi-goal NAME)
+"
+  psi-goal NAME
+
+  Create and return a ConceptNode that represents an OpenPsi goal.
+  The NAME should be a string.
+"
+  ; NOTE: Why not make this part of psi-rule function? Because, developers
+  ; might want to specify the behavior they prefer, when it comes to how
+  ; to measure the level of achivement of goal, and how the goal's measurement
+  ; value should change.
+  (let* ((goal-node (ConceptNode NAME)))
+    (InheritanceLink goal-node psi-goal-node)
+    goal-node
+  )
+)
+
+; --------------------------------------------------------------
+(define (psi-goal? ATOM)
+"
+  Check if ATOM is a goal and return `#t`, if it is, and `#f`
+  otherwise. An atom is a goal if it a member of the set
+  represented by (ConceptNode \"OpenPsi: goal\").
+"
+    (not (null?  (cog-link 'MemberLink ATOM psi-goal)))
+)
+
 ; --------------------------------------------------------------
 (define* (psi-rule context action goal a-stv demand  #:optional name)
 "
   psi-rule CONTEXT ACTION GOAL TV DEMAND [NAME] - create a psi-rule.
 
   Associate an action with a context such that, if the action is
-  taken, then the goal will be satisfied.  The structure of a rule
+  taken, then the goal will be satisfied. The structure of a rule
   is in the form of an `ImplicationLink`:
 
     (ImplicationLink TV
@@ -50,12 +80,11 @@
     only if the boolean-AND of the return values is true.
 
   ACTION is an evaluatable atom, i.e. it should return a TV when
-    evaluated by `cog-evaluate!`.  The return value is currently
-    ignored.
+    evaluated by `cog-evaluate!`.
 
-  GOAL is an evaluatable atom, i.e. returns a TV when evaluated by
-    `cog-evaluate!`.  The returned TV is used as a formula to rank
-    how this rule affects the demands.
+  GOAL is an atom that represents what goal is affected when an action
+    is made in the specified context. If multiple goals are affected by
+    the context and action then multiple psi-rules should be created.
 
   TV is the TruthValue assigned to the ImplicationLink. It should
     be a SimpleTruthValue.
@@ -154,13 +183,7 @@ actions are EvaluationLinks, not schemas or ExecutionOutputLinks.
   otherwise. An atom is an action if it a member of the set
   represented by (ConceptNode \"OpenPsi: action\").
 "
-    (let ((candidates (cog-chase-link 'MemberLink 'ConceptNode ATOM)))
-
-        ; A filter is used to account for empty list as well as
-        ; cog-chase-link returning multiple results, just in case.
-        (not (null?
-            (filter (lambda (x) (equal? x psi-action)) candidates)))
-    )
+    (not (null?  (cog-link 'MemberLink ATOM psi-action)))
 )
 
 ; --------------------------------------------------------------

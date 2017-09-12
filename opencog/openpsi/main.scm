@@ -104,7 +104,7 @@
     (define (act-and-evaluate rule)
         ;NOTE: This is the job of the action-orchestrator.
         (let* ((action (psi-get-action rule))
-               (goals (psi-related-goals action))
+              ; (goals (psi-related-goals action))
                (context-atoms (get-context-grounding-atoms rule)))
 
             (cog-logger-debug opl "Starting evaluation of psi-rule ~a" rule)
@@ -125,7 +125,9 @@
             ; An evaluation of an action that is common in mulitple rules
             ; results in the achievement of the goals, even if the context of
             ; the other rules aren't not satisfied.
-            (map cog-evaluate! goals)
+            ; NOTE: The evalution of goals is disabled as it isn't being used
+            ; and is a candidate to be refactored out.
+            ;(map cog-evaluate! goals)
             (cog-logger-debug opl "Finished evaluating of psi-rule ~a" rule)
         ))
 
