@@ -78,8 +78,8 @@ public:
             while (it1 != a.end()) {
                 if ((*it1) < (*it2)) return true;
                 if ((*it2) < (*it1)) return false;
-                it1++;
-                it2++;
+                ++it1;
+                ++it2;
             }
             return false;
         }
@@ -95,8 +95,8 @@ public:
                 PartitionGenerator::LessThanSet comp;
                 if (comp((*it1), (*it2))) return true;
                 if (comp((*it2), (*it1))) return false;
-                it1++;
-                it2++;
+                ++it1;
+                ++it2;
             }
             return false;
         }

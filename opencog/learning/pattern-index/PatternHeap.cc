@@ -32,7 +32,7 @@ void PatternHeap::push(float v, const TypeFrame &frame)
             pop_back();
         }
         iterator it;
-        for (it = begin(); it != end(); it++) {
+        for (it = begin(); it != end(); ++it) {
             if (v >= (*it).first) {
                 break;
             }

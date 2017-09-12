@@ -51,10 +51,10 @@ void PartitionGenerator::printForDebug(std::string prefix, std::string suffix) c
 {
     printf("%s{", prefix.c_str());
     unsigned int count1 = 0;
-    for (IntegerSetSet::const_iterator itComp = (*partitionIterator).begin(); itComp != (*partitionIterator).end(); itComp++) {
+    for (IntegerSetSet::const_iterator itComp = (*partitionIterator).begin(); itComp != (*partitionIterator).end(); ++itComp) {
         printf("{");
         unsigned int count2 = 0;
-        for (IntegerSet::const_iterator it = (*itComp).begin(); it != (*itComp).end(); it++) {
+        for (IntegerSet::const_iterator it = (*itComp).begin(); it != (*itComp).end(); ++it) {
             printf("%u", (*it));
             if (count2++ != ((*itComp).size() - 1)) {
                 printf(" ");
@@ -95,14 +95,14 @@ void PartitionGenerator::computePartitions(IntegerSetSetSet &answer, unsigned in
             answer.insert(partition);
             recurseAnswer.clear();
             computePartitions(recurseAnswer, n - 1);
-            for (IntegerSetSetSet::const_iterator itPart = recurseAnswer.begin(); itPart != recurseAnswer.end(); itPart++) {
+            for (IntegerSetSetSet::const_iterator itPart = recurseAnswer.begin(); itPart != recurseAnswer.end(); ++itPart) {
                 partition.clear();
                 component.clear();
                 component.insert(i);
                 partition.insert(component);
-                for (IntegerSetSet::const_iterator itComp = (*itPart).begin(); itComp != (*itPart).end(); itComp++) {
+                for (IntegerSetSet::const_iterator itComp = (*itPart).begin(); itComp != (*itPart).end(); ++itComp) {
                     component.clear();
-                    for (IntegerSet::const_iterator it = (*itComp).begin(); it != (*itComp).end(); it++) {
+                    for (IntegerSet::const_iterator it = (*itComp).begin(); it != (*itComp).end(); ++it) {
                         if ((*it) < i) {
                             component.insert(*it);
                         } else {
