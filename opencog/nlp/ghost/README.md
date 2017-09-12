@@ -50,7 +50,17 @@ Here is a list of features that are fully supported in GHOST:
 - [Negation](https://github.com/bwilcox-1234/ChatScript/blob/master/WIKI/ChatScript-Basic-User-Manual.md#not--and-notnot-)
 - [Function](https://github.com/bwilcox-1234/ChatScript/blob/master/WIKI/ChatScript-Advanced-User-Manual.md#functions)
 
+
+One or more goals can be specified for a rule in this way:
+
+```
+goal: (novelty=0.8 please_user=0.4)
+s: ( what be you name ) I forgot; what's YOUR name, sweet wonderful human
+```
+
+
 Basic examples of how to use GHOST is available [HERE](https://github.com/opencog/opencog/blob/master/examples/ghost/basic.scm)
+
 
 ## How To Run
 
