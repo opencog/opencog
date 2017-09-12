@@ -55,7 +55,7 @@
   otherwise. An atom is a goal if it a member of the set
   represented by (ConceptNode \"OpenPsi: goal\").
 "
-    (not (null?  (cog-link 'MemberLink ATOM psi-goal)))
+    (not (null?  (cog-link 'InheritanceLink ATOM psi-goal-node)))
 )
 
 ; --------------------------------------------------------------
