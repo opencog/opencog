@@ -463,9 +463,9 @@ void PatternIndexAPI::query(vector<QueryResult> &answer,
         for (TypeFrameIndex::VarMapping::const_iterator it = (*itqr).second.begin(); it != (*itqr).second.end(); ++it) {
             Handle var = schemeEval->eval_h("(VariableNode \"" + (*it).first + "\")");
             Handle value = schemeEval->eval_h((*it).second.toSCMString());
-            mapping.push_back(make_pair(var, value));
+            mapping.emplace_back(var, value);
         }
-        answer.push_back(make_pair(atoms, mapping));
+        answer.emplace_back(atoms, mapping);
     }
 }
 
@@ -513,7 +513,7 @@ void PatternIndexAPI::minePatterns(vector<MiningResult> &answer,
     vector<pair<float,TypeFrame>> patterns;
     indexes.find(stoi(key->getName()))->second.first->minePatterns(patterns);
     for (unsigned int i = 0; i < patterns.size(); i++) {
-        answer.push_back(make_pair(patterns.at(i).first, schemeEval->eval_h(patterns.at(i).second.toSCMString())));
+        answer.emplace_back(patterns.at(i).first, schemeEval->eval_h(patterns.at(i).second.toSCMString()));
     }
 }
 

@@ -1115,10 +1115,10 @@ void TypeFrameIndex::buildConstraints(IntPairVector &constraints,
         vector<int> v((*it).second.begin(), (*it).second.end());
         for (unsigned int i = 0; i < v.size(); i++) {
             for (unsigned int j = i + 1; j < v.size(); j++) {
-                constraints.push_back(make_pair(v.at(i), v.at(j)));
+                constraints.emplace_back(v.at(i), v.at(j));
             }
         }
-        it++;
+        ++it;
     }
 }
 
@@ -1375,7 +1375,7 @@ void TypeFrameIndex::query(vector<ResultPair> &answer,
                                 printTypeFrameSet(newSet);
                                 printVarMapping(newMapping);
                             }
-                            aux[tgt].push_back(make_pair(newSet, newMapping));
+                            aux[tgt].emplace_back(newSet, newMapping);
                         } else {
                             if (DEBUG) {
                                 printf("(AND) rejecting non-compatible var maps:\n");
@@ -1476,9 +1476,9 @@ void TypeFrameIndex::query(vector<ResultPair> &answer,
                         printVarMapping(varMap);
                     }
                     if (noPermutations) {
-                        unfilteredAnswer.push_back(make_pair(frameSet, varMap));
+                        unfilteredAnswer.emplace_back(frameSet, varMap);
                     } else {
-                        answer.push_back(make_pair(frameSet, varMap));
+                        answer.emplace_back(frameSet, varMap);
                     }
                 }
             }

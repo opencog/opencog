@@ -693,7 +693,7 @@ void TypeFrame::recursiveHandleTraverse(Handle handle)
 {
     bool isLink = handle->isLink();
     unsigned int n = (isLink ? handle->getArity() : 0);
-    push_back(make_pair(handle->getType(), n));
+    emplace_back(handle->getType(), n);
     if (isLink) {
         for (unsigned int i = 0; i < n; i++) {
             recursiveHandleTraverse(handle->getOutgoingAtom(i));
