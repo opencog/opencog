@@ -102,7 +102,7 @@ void TypeFrameIndex::addPatterns(vector<TypeFrame> &answer,
     if (DEBUG) {
         base.printForDebug("Compound frame: ", "\n", true);
         printf("Nodes: ");
-        for (TypeFrameSet::iterator it = nodes.begin(); it != nodes.end(); it++) {
+        for (TypeFrameSet::iterator it = nodes.begin(); it != nodes.end(); ++it) {
             (*it).printForDebug("", " ", true);
         }
         printf("\n");
@@ -114,7 +114,7 @@ void TypeFrameIndex::addPatterns(vector<TypeFrame> &answer,
         pattern.clear();
         pattern.append(base);
         int count = 0;
-        for (TypeFrameSet::iterator it = nodes.begin(); it != nodes.end(); it++) {
+        for (TypeFrameSet::iterator it = nodes.begin(); it != nodes.end(); ++it) {
             if (selected.at(count)) {
                 string varName = "V" + to_string(count);
                 for (unsigned int k = 0; k < pattern.size(); k++) {
@@ -201,7 +201,7 @@ void TypeFrameIndex::addInferredSetFrames(vector<TypeFrame> &subset,
     while (! selected.depleted()) {
         if (DEBUG) selected.printForDebug("selected: ", "\n");
         int count = 0;
-        for (TypeFrameSet::iterator it = nodes.begin(); it != nodes.end(); it++) {
+        for (TypeFrameSet::iterator it = nodes.begin(); it != nodes.end(); ++it) {
             if (selected.at(count++)) {
                 aux1.clear();
                 if (DEBUG) frame.printForDebug("base: ", "\n");
@@ -251,12 +251,12 @@ pair<float, float> TypeFrameIndex::minMaxIndependentProb(const TypeFrame &patter
             if (DEBUG) partitionGenerator.printForDebug("Partition: ", "\n");
             PartitionGenerator::IntegerSetSet partition = partitionGenerator.getPartition();
             float prod = 1;
-            for (PartitionGenerator::IntegerSetSet::const_iterator it1 = partition.begin(); it1 != partition.end(); it1++) {
+            for (PartitionGenerator::IntegerSetSet::const_iterator it1 = partition.begin(); it1 != partition.end(); ++it1) {
                 subPattern.clear();
                 if ((*it1).size() > 1) {
                     subPattern.push_back(TypePair(classserver().getType("AndLink"), (*it1).size()));
                 }
-                for (PartitionGenerator::IntegerSet::const_iterator it2 = (*it1).begin(); it2 != (*it1).end(); it2++) {
+                for (PartitionGenerator::IntegerSet::const_iterator it2 = (*it1).begin(); it2 != (*it1).end(); ++it2) {
                     aux = pattern.subFrameAt(argPos.at(*it2));
                     subPattern.append(aux);
                 }
@@ -674,7 +674,7 @@ void TypeFrameIndex::minePatterns(vector<pair<float,TypeFrame>> &answer)
         for (unsigned int g = 1; g < PATTERNS_GRAM; g++) {
             s.clear();
             selection.push_back(s);
-            for (set<unsigned int>::const_iterator it = selection.at(g - 1).begin(); it != selection.at(g - 1).end(); it++) {
+            for (set<unsigned int>::const_iterator it = selection.at(g - 1).begin(); it != selection.at(g - 1).end(); ++it) {
                 selection.at(g).insert(neighbors.at(*it).begin(), neighbors.at(*it).end());
             }
         }
@@ -799,7 +799,7 @@ bool TypeFrameIndex::addFrame(TypeFrame &frame, int offset)
         frames.push_back(frame);
         TypeFrameSet symmetricPermutations;
         addSymmetricPermutations(symmetricPermutations, frame, 0);
-        for (TypeFrameSet::iterator it = symmetricPermutations.begin(); it != symmetricPermutations.end(); it++) {
+        for (TypeFrameSet::iterator it = symmetricPermutations.begin(); it != symmetricPermutations.end(); ++it) {
             if ((*it).check()) {
                 frames.push_back(*it);
             } else {
@@ -1175,7 +1175,7 @@ bool TypeFrameIndex::compatibleVarMappings(const VarMapping &map1,
         printVarMapping(map2);
     }
 
-    for (VarMapping::const_iterator it1 = map1.begin(); it1 != map1.end(); it1++) {
+    for (VarMapping::const_iterator it1 = map1.begin(); it1 != map1.end(); ++it1) {
         VarMapping::const_iterator it2 = map2.find((*it1).first);
         if ((it2 != map2.end()) && (! (*it1).second.equals((*it2).second))) {
             if (DEBUG) {
@@ -1185,8 +1185,8 @@ bool TypeFrameIndex::compatibleVarMappings(const VarMapping &map1,
         }
     }
     if (distinct) {
-        for (VarMapping::const_iterator it1 = map1.begin(); it1 != map1.end(); it1++) {
-            for (VarMapping::const_iterator it2 = map2.begin(); it2 != map2.end(); it2++) {
+        for (VarMapping::const_iterator it1 = map1.begin(); it1 != map1.end(); ++it1) {
+            for (VarMapping::const_iterator it2 = map2.begin(); it2 != map2.end(); ++it2) {
                 if (((*it1).first.compare((*it2).first) != 0) && ((*it1).second.equals((*it2).second))) {
                     if (DEBUG) {
                         printf("* Failed at %s\n", (*it1).first.c_str());
@@ -1205,10 +1205,10 @@ void TypeFrameIndex::typeFrameSetUnion(TypeFrameSet &answer,
                                        const TypeFrameSet &set2) const
 {
     answer.clear();
-    for (TypeFrameSet::const_iterator it1 = set1.begin(); it1 != set1.end(); it1++) {
+    for (TypeFrameSet::const_iterator it1 = set1.begin(); it1 != set1.end(); ++it1) {
         answer.insert(*it1);
     }
-    for (TypeFrameSet::const_iterator it2 = set2.begin(); it2 != set2.end(); it2++) {
+    for (TypeFrameSet::const_iterator it2 = set2.begin(); it2 != set2.end(); ++it2) {
         answer.insert(*it2);
     }
 }
@@ -1217,10 +1217,10 @@ void TypeFrameIndex::varMappingUnion(VarMapping &answer,
                                      const VarMapping &map1,
                                      const VarMapping &map2) const
 {
-    for (VarMapping::const_iterator it = map1.begin(); it != map1.end(); it++) {
+    for (VarMapping::const_iterator it = map1.begin(); it != map1.end(); ++it) {
         answer.insert(*it);
     }
-    for (VarMapping::const_iterator it = map2.begin(); it != map2.end(); it++) {
+    for (VarMapping::const_iterator it = map2.begin(); it != map2.end(); ++it) {
         answer.insert(*it);
     }
 }
@@ -1231,7 +1231,7 @@ bool TypeFrameIndex::isForbiddenMapping(const VarMapping &mapping,
     bool answer = false;
     for (unsigned int i = 0; i < forbiddenVector.size(); i++) {
         bool match = true;
-        for (VarMapping::const_iterator it1 = forbiddenVector.at(i).begin(); it1 != forbiddenVector.at(i).end(); it1++) {
+        for (VarMapping::const_iterator it1 = forbiddenVector.at(i).begin(); it1 != forbiddenVector.at(i).end(); ++it1) {
             VarMapping::const_iterator it2 = mapping.find((*it1).first);
             if ((it2 != mapping.end()) && (! (*it1).second.equals((*it2).second))) {
                 match = false;
@@ -1448,9 +1448,9 @@ void TypeFrameIndex::query(vector<ResultPair> &answer,
         buildConstraints(constraints, variableOccurrences);
         if (DEBUG) {
             keyExpression.printForDebug("Key: ", "\n", true);
-            for (StringMap::iterator it1 = variableOccurrences.begin(); it1 != variableOccurrences.end(); it1++) {
+            for (StringMap::iterator it1 = variableOccurrences.begin(); it1 != variableOccurrences.end(); ++it1) {
                 printf("%s: ", (*it1).first.c_str());
-                for (IntegerSet::iterator it2 = (*it1).second.begin(); it2 != (*it1).second.end(); it2++) {
+                for (IntegerSet::iterator it2 = (*it1).second.begin(); it2 != (*it1).second.end(); ++it2) {
                     printf("%d ", (*it2));
                 }
                 printf("\n");
@@ -1461,12 +1461,12 @@ void TypeFrameIndex::query(vector<ResultPair> &answer,
         }
         PatternMap::const_iterator it1 = occurrenceSet.find(keyExpression);
         if (it1 != occurrenceSet.end()) {
-            for (IntegerSet::iterator it2 = (*it1).second.begin(); it2 != (*it1).second.end(); it2++) {
+            for (IntegerSet::iterator it2 = (*it1).second.begin(); it2 != (*it1).second.end(); ++it2) {
                 vector<int> mapping;
                 if (frames.at(*it2).match(mapping, keyExpression, constraints)) {
                     VarMapping varMap;
                     TypeFrameSet frameSet;
-                    for (StringMap::iterator it = variableOccurrences.begin(); it != variableOccurrences.end(); it++) {
+                    for (StringMap::iterator it = variableOccurrences.begin(); it != variableOccurrences.end(); ++it) {
                         varMap.insert(VarMapping::value_type((*it).first, frames.at(*it2).subFrameAt(*((*it).second.begin()))));
                     }
                     frameSet.insert(frames.at(*it2));
@@ -1509,11 +1509,11 @@ void TypeFrameIndex::query(vector<ResultPair> &answer,
 bool TypeFrameIndex::mapCover(const VarMapping &map1, const VarMapping &map2) const
 {
     TypeFrameSet set;
-    for (VarMapping::const_iterator it = map1.begin(); it != map1.end(); it++) {
+    for (VarMapping::const_iterator it = map1.begin(); it != map1.end(); ++it) {
         set.insert((*it).second);
     }
     bool answer = true;
-    for (VarMapping::const_iterator it = map2.begin(); it != map2.end(); it++) {
+    for (VarMapping::const_iterator it = map2.begin(); it != map2.end(); ++it) {
         if (set.find((*it).second) == set.end()) {
             answer = false;
             break;
@@ -1540,7 +1540,7 @@ void TypeFrameIndex::printFrameVector(const vector<TypeFrame> &v) const
 
 void TypeFrameIndex::printVarMapping(const VarMapping &map) const
 {
-    for (VarMapping::const_iterator it = map.begin(); it != map.end(); it++) {
+    for (VarMapping::const_iterator it = map.begin(); it != map.end(); ++it) {
         printf("%s = ", (*it).first.c_str());
         (*it).second.printForDebug("", "\n", true);
     }
@@ -1548,7 +1548,7 @@ void TypeFrameIndex::printVarMapping(const VarMapping &map) const
 
 void TypeFrameIndex::printTypeFrameSet(const TypeFrameSet &set) const
 {
-    for (TypeFrameSet::const_iterator it = set.begin(); it != set.end(); it++) {
+    for (TypeFrameSet::const_iterator it = set.begin(); it != set.end(); ++it) {
         (*it).printForDebug("", "\n", true);
     }
 }
@@ -1570,10 +1570,10 @@ void TypeFrameIndex::printForDebug(bool showNodeNames) const
         IntegerSet::iterator it2 = (*it1).second.begin();
         while (it2 != (*it1).second.end()) {
             printf("%d ", *it2);
-            it2++;
+            ++it2;
         }
         printf("\n");
-        it1++;
+        ++it1;
     }
 }
 

@@ -495,12 +495,12 @@ int TypeFrame::compareUsingEquivalence(const TypeFrame &other, int cursorThis, i
                 // TODO XXX
                 //printf(" \n");
                 if (! isFeasible(equivalent)) {
-                    for (vector<int>::iterator it = zeroLine.begin(); it != zeroLine.end(); it++) {
+                    for (vector<int>::iterator it = zeroLine.begin(); it != zeroLine.end(); ++it) {
                         for (int j = 0; j < n; j++) {
                             comparisson[*it][j] = 0;
                         }
                     }
-                    for (vector<int>::iterator it = zeroColumn.begin(); it != zeroColumn.end(); it++) {
+                    for (vector<int>::iterator it = zeroColumn.begin(); it != zeroColumn.end(); ++it) {
                         for (int i = 0; i < n; i++) {
                             comparisson[i][*it] = 0;
                         }
