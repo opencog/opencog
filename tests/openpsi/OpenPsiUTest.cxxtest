@@ -307,6 +307,9 @@ public:
     // Test that actions and goals are not evaluated.
     void test_psi_step_1()
     {
+        // NOTE: The demand-value checks are commented out because the
+        // psi-step default behavior of evaluating goals is being refactored
+        // out.
         logger().info("BEGIN TEST: %s", __FUNCTION__);
 
         _scm->eval("(setup_test_psi_step_1)");
@@ -316,17 +319,17 @@ public:
         auto result_1_1 = _scm->eval("(cog-node 'ConceptNode \"act-1\")");
         CHKERR
         TSM_ASSERT_EQUALS("Expected ()", "()\n", result_1_1);
-        auto result_1_2 = _scm->eval("(demand-value demand-1)");
-        CHKERR
-        TSM_ASSERT_EQUALS("Expected `0.87`", "0.87\n", result_1_2);
+        // auto result_1_2 = _scm->eval("(demand-value demand-1)");
+        // CHKERR
+        // TSM_ASSERT_EQUALS("Expected `1.0`", "1.0\n", result_1_2);
 
         // For rule-2
         auto result_1_3 = _scm->eval("(cog-node 'ConceptNode \"act-2\")");
         CHKERR
         TSM_ASSERT_EQUALS("Expected ()", "()\n", result_1_3);
-        auto result_1_4 = _scm->eval("(demand-value demand-2)");
-        CHKERR
-        TSM_ASSERT_EQUALS("Expected `0.87`", "0.87\n", result_1_4);
+        // auto result_1_4 = _scm->eval("(demand-value demand-2)");
+        // CHKERR
+        // TSM_ASSERT_EQUALS("Expected `1.0`", "1.0\n", result_1_4);
 
         logger().info("END TEST: %s", __FUNCTION__);
     }
@@ -336,6 +339,9 @@ public:
     // Test that action-1 and goal-1 are not evaluated.
     void test_psi_step_2()
     {
+        // NOTE: The demand-value checks are commented out because the
+        // psi-step default behavior of evaluating goals is being refactored
+        // out.
         logger().info("BEGIN TEST: %s", __FUNCTION__);
 
         _scm->eval("(setup_test_psi_step_2)");
@@ -345,18 +351,17 @@ public:
         auto result_2_1 = _scm->eval("(test_psi_step_2_1)");
         CHKERR
         TSM_ASSERT_EQUALS("Expected #t", "#t\n", result_2_1);
-        auto result_2_2 = _scm->eval("(demand-value demand-1)");
-        CHKERR
-
-        TSM_ASSERT_EQUALS("Expected `0.5`", "0.5\n", result_2_2);
+        // auto result_2_2 = _scm->eval("(demand-value demand-1)");
+        // CHKERR
+        // TSM_ASSERT_EQUALS("Expected `0.5`", "0.5\n", result_2_2);
 
         // For rule-2
         auto result_2_3 = _scm->eval("(cog-node 'ConceptNode \"act-2\")");
         CHKERR
         TSM_ASSERT_EQUALS("Expected ()", "()\n", result_2_3);
-        auto result_2_4 = _scm->eval("(demand-value demand-2)");
-        CHKERR
-        TSM_ASSERT_EQUALS("Expected `0.87`", "0.87\n", result_2_4);
+        // auto result_2_4 = _scm->eval("(demand-value demand-2)");
+        // CHKERR
+        // TSM_ASSERT_EQUALS("Expected `1.0`", "1.0\n", result_2_4);
 
         logger().info("END TEST: %s", __FUNCTION__);
     }
@@ -366,6 +371,9 @@ public:
     // Test that action-2, goal-1 and goal-2 are evaluated.
     void test_psi_step_3()
     {
+        // NOTE: The demand-value checks are commented out because the
+        // psi-step default behavior of evaluating goals is being refactored
+        // out.
         logger().info("BEGIN TEST: %s", __FUNCTION__);
 
         _scm->eval("(setup_test_psi_step_3)");
@@ -375,17 +383,17 @@ public:
         auto result_3_1 = _scm->eval("(test_psi_step_3_1)");
         CHKERR
         TSM_ASSERT_EQUALS("Expected #t", "#t\n", result_3_1);
-        auto result_3_2 = _scm->eval("(demand-value demand-2)");
-        CHKERR
-        TSM_ASSERT_EQUALS("Expected `0.5`", "0.5\n", result_3_2);
+        // auto result_3_2 = _scm->eval("(demand-value demand-2)");
+        // CHKERR
+        // TSM_ASSERT_EQUALS("Expected `0.5`", "0.5\n", result_3_2);
 
         // For rule-1
         auto result_3_3 = _scm->eval("(test_psi_step_2_1)");
         CHKERR
         TSM_ASSERT_EQUALS("Expected #f", "#f\n", result_3_3);
-        auto result_3_4 = _scm->eval("(demand-value demand-1)");
-        CHKERR
-        TSM_ASSERT_EQUALS("Expected `0.5`", "0.5\n", result_3_4);
+        // auto result_3_4 = _scm->eval("(demand-value demand-1)");
+        // CHKERR
+        // TSM_ASSERT_EQUALS("Expected `0.5`", "0.5\n", result_3_4);
 
         logger().info("END TEST: %s", __FUNCTION__);
     }
@@ -396,6 +404,9 @@ public:
     // contexts are handled properly.
     void test_psi_step_4()
     {
+        // NOTE: The demand-value checks are commented out because the
+        // psi-step default behavior of evaluating goals is being refactored
+        // out.
         logger().info("BEGIN TEST: %s", __FUNCTION__);
 
         _scm->eval("(setup_test_psi_step_4)");
@@ -405,9 +416,9 @@ public:
         auto result_3_1 = _scm->eval("(test_psi_step_4)");
         CHKERR
         TSM_ASSERT_EQUALS("Expected #t", "#t\n", result_3_1);
-        auto result_3_2 = _scm->eval("(demand-value demand-4)");
-        CHKERR
-        TSM_ASSERT_EQUALS("Expected `0.5`", "0.5\n", result_3_2);
+        // auto result_3_2 = _scm->eval("(demand-value demand-4)");
+        // CHKERR
+        // TSM_ASSERT_EQUALS("Expected `0.5`", "0.5\n", result_3_2);
 
         logger().info("END TEST: %s", __FUNCTION__);
     }

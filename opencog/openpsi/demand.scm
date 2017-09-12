@@ -3,6 +3,7 @@
 ; Methods to define and work with demands.
 ;
 ; Copyright (C) 2015-2016 OpenCog Foundation
+; Copyright (C) 2017 MindCloud
 ;
 ; Design Notes:
 ; Demands are associated with demand values. There are two different,
@@ -83,38 +84,15 @@
 (psi-get-all-enabled-demands))
 
 ; --------------------------------------------------------------
-(define (psi-demand demand-name desired-value)
+(define (psi-demand NAME)
 "
   psi-demand NAME VALUE
 
   Create and return a ConceptNode that represents an OpenPsi demand.
-  The NAME should be a string. The VALUE should be a floating-point
-  number in the range [0,1].
+  The NAME should be a string.
 "
-
-    ; Check arguments
-    (if (not (string? demand-name))
-        (error "ERROR: psi-demand, expected first argument to be a string"))
-
-    (if (or (> 0 desired-value) (< 1 desired-value))
-       (error (string-append
-            "ERROR: psi-demand, expected second argument to be a number "
-            "in the range [0,1], got:") desired-value))
-
-    (let* ((demand-str (string-append psi-prefix-str demand-name))
-           (demand-node (ConceptNode demand-str (stv desired-value 1))))
-
+    (let* ((demand-node (ConceptNode NAME)))
         (InheritanceLink demand-node psi-demand-node)
-
-        ; NOTE: Not sure that this link is needed. One possible use is
-        ; to measure how the demand-value has changed over time.  XXX
-        ; Is this actaully used anywhere?
-        (EvaluationLink
-            (PredicateNode (string-append psi-prefix-str "desired_value"))
-            (ListLink
-                demand-node
-                (NumberNode desired-value)))
-
         demand-node
     )
 )
@@ -147,131 +125,9 @@
     (cog-set-tv! demand-node (stv demand-value (tv-conf (cog-tv demand-node))))
 )
 
-; ; --------------------------------------------------------------
-; Not used anywhere.
-;
-; (define (psi-demand-value-term< threshold)
-; "
-;   Returns an evaluatable term that checks if a demand has value less than
-;   the given threshold number.
-;
-;   threshold:
-;   - The boundary of the demand-value to be checked at.
-; "
-;     (EvaluationLink
-;         (GroundedPredicateNode "scm: psi-demand-value<")
-;         (ListLink
-;             (VariableNode "Demand")
-;             (NumberNode threshold)))
-; )
-;
-; (define (psi-demand-value< demand-node threshold-node)
-; "
-;   Returns True-TruthValue if a given demand-node has value less than the
-;   given threshold-node number value else False-TruthValue. This doesn't
-;   check if the node given actually defines a demand. And is primarily to be
-;   used as evaluatable term.
-;
-;   demand-node:
-;   - The node representing the demand.
-;
-;   threshold-node:
-;   - A NumberNode representing the boundary of the demand-value to be checked
-;     at.
-; "
-;     (if (< (tv-mean (cog-tv demand-node))
-;            (string->number (cog-name threshold-node)))
-;         (stv 1 1)
-;         (stv 0 1)
-;     )
-; )
-;
-; --------------------------------------------------------------
-; Not used anywhere.
-;
-; (define (psi-demand-value-term> threshold)
-; "
-;   Returns an evaluatable term that checks if a demand has value greater than
-;   the given threshold number.
-;
-;   threshold:
-;   - The boundary of the demand-value to be checked at.
-; "
-;     (EvaluationLink
-;         (GroundedPredicateNode "scm: psi-demand-value>")
-;         (ListLink
-;             (VariableNode "Demand")
-;             (NumberNode threshold)))
-; )
-;
-; (define (psi-demand-value> demand-node threshold-node)
-; "
-;   Returns True-TruthValue if a given demand-node has value greater than the
-;   given threshold-node number value else False-TruthValue. This doesn't
-;   check if the node given actually defines a demand. And is primarily to be
-;   used as evaluatable term.
-;
-;   demand-node:
-;   - The node representing the demand.
-;
-;   threshold-node:
-;   - A NumberNode representing the boundary of the demand-value to be checked
-;     at.
-; "
-;     (if (> (tv-mean (cog-tv demand-node))
-;            (string->number (cog-name threshold-node)))
-;         (stv 1 1)
-;         (stv 0 1)
-;     )
-; )
-;
-;; --------------------------------------------------------------
-;;
-;; Not used anywhere. Not clear how this could even be useful.
-;;
-;; (define (psi-lowest-demand? atom)
-;; "
-;;   psi-lowest-demand? ATOM - Return #t if ATOM is a demand, and has a
-;;   demand-value as low or lower than any other demand.
-;; "
-;;     ; check if atom is a demand-node
-;;     (if (not (psi-demand? atom))
-;;         (error "Expected argument to be a demand-node, got: " atom))
-;;
-;;     (let ((atom-strength (tv-mean (cog-tv atom)))
-;;           (lowest-demand-value (car (list-sort < (delete-duplicates
-;;               (map (lambda (x) (tv-mean (cog-tv x)))
-;;                    (psi-get-all-demands))))))
-;;          )
-;;          (if (<= atom-strength lowest-demand-value)
-;;             (stv 1 1)
-;;             (stv 0 1)
-;;          )
-;;     )
-;; )
-;;
 ; --------------------------------------------------------------
 ; Functions to help define standard action-rules
 ; --------------------------------------------------------------
-(define (psi-goal-increase demand-node rate)
-"
-  psi-goal-increase DEMAND RATE
-
-  Return an action that increases the satsifaction of a demand.
-  That is, if the action is performed, then the value of the demand
-  goes up.  XXX WTF?? this seems backward.
-
-  rate:
-  - A number for the percentage of change that a demand-value will be updated
-    with, on each step. XXX WTF ???
-"
-    (EvaluationLink
-        (GroundedPredicateNode "scm: psi-demand-value-increase")
-        (ListLink
-            demand-node
-            (NumberNode rate)))
-)
-
 (define (psi-demand-value-increase demand-node rate-node)
 "
   psi-demand-value-increase DEMAND RATE
@@ -290,23 +146,6 @@
 )
 
 ; --------------------------------------------------------------
-(define (psi-goal-decrease demand-node rate)
-"
-  psi-goal-decrease DEMAND RATE
-
-  Returns an action that, if performed, will decrease the value of
-  DEMAND.
-
-  RATE must be a floating-point number, holding a percentage value
-  by which the demand will be changed on each step.
-"
-    (EvaluationLink
-        (GroundedPredicateNode "scm: psi-demand-value-decrease")
-        (ListLink
-            demand-node
-            (NumberNode rate)))
-)
-
 (define (psi-demand-value-decrease demand-node rate-node)
 "
   psi-demand-value-decrease DEMAND RATE

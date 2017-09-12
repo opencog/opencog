@@ -774,7 +774,7 @@ sub process_random
 
 		$rules .= ";;; random choice $i of $num_choices: ";
 		$rules .= $cattext . "\n";
-		$rules .= "(psi-rule-nocheck\n";
+		$rules .= "(psi-rule\n";
 		$rules .= "   ; context\n";
 		$rules .= $psi_ctxt;
 		$rules .= "   ; action\n";
@@ -1185,7 +1185,7 @@ sub psi_tail
 	my $num_choices = $_[2];
 	my $wadjust = $_[3];
 	my $chat_goal = "   (Concept \"AIML chat subsystem goal\")\n";
-	my $demand = "   (psi-demand \"AIML chat demand\" 0.97)\n";
+	my $demand = "   (psi-demand \"AIML chat demand\")\n";
 
 	# Stupid hack for rule priority, for lack of something better.
 	# Adjust weights so that more than one star is strongly punished.
@@ -1363,7 +1363,7 @@ while (my $line = <FIN>)
 				my $wadj = &get_weight($cattext);
 				$rule = ";;; COMPLEX CODE BRANCH\n";
 				$rule .= ";;; " . $cattext . "\n";
-				$rule .= "(psi-rule-nocheck\n";
+				$rule .= "(psi-rule\n";
 				$rule .= "   ;; context\n";
 				$rule .= $psi_ctxt;
 				$rule .= "   ;; action\n";
@@ -1380,7 +1380,7 @@ while (my $line = <FIN>)
 			my $wadj = &get_weight($cattext);
 			$rule = ";;; NO RAW CODE\n";
 			$rule .= ";;; $cattext\n";
-			$rule .= "(psi-rule-nocheck\n";
+			$rule .= "(psi-rule\n";
 			$rule .= "   ;; context\n";
 			$rule .= $psi_ctxt;
 			$rule .= "   ;; action\n";

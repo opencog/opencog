@@ -2,6 +2,7 @@
 ; control.scm
 ;
 ; Copyright (C) 2016 OpenCog Foundation
+; Copyright (C) 2017 MindCloud
 ;
 ; Design Notes:
 ; Weights are associated to rules using a StateLink.  However, the
@@ -48,7 +49,7 @@
 ; NOTE: This is a hack b/c once the weight of the rules is separated into atom
 ; or protoatom wrapped in a StateLink then (or somehting like that) then it
 ; would be easier to update.
-(define psi-controller-demand (psi-demand "controller" .000000000))
+(define psi-controller-demand (psi-demand "controller"))
 
 ; --------------------------------------------------------------
 ; To indicate whether the weights of the psi-controlled-rules

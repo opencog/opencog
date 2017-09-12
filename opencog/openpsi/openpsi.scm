@@ -1,4 +1,10 @@
+; openpsi.scm
+;
+; Define (opencog openpsi) module.
+;
 ; Copyright (C) 2016 OpenCog Foundation
+; Copyright (C) 2017 MindCloud
+
 
 ; --------------------------------------------------------------
 (define-module (opencog openpsi)
@@ -10,8 +16,8 @@
 
     ; From demand.scm
     psi-get-all-demands psi-get-all-enabled-demands psi-get-all-valid-demands
-    psi-demand psi-demand? psi-set-demand-value psi-goal-increase
-    psi-demand-value-increase psi-goal-decrease psi-demand-value-decrease
+    psi-demand psi-demand? psi-set-demand-value
+    psi-demand-value-increase psi-demand-value-decrease
     psi-demand-skip psi-demand-skip?
 
     ; From control.scm
@@ -20,6 +26,7 @@
     psi-rule-set-atomese-weight psi-set-controlled-rule
     psi-get-controlled-rules psi-rule-atomese-weight
     psi-controller-update-weights psi-rule-disable psi-rule-enable
+    psi-rule
 
     ; From rule.scm
     psi-get-rules psi-get-all-rules psi-rule? psi-get-all-actions psi-action?
@@ -28,6 +35,7 @@
     psi-rule-satisfiability psi-get-satisfiable-rules
     psi-get-weighted-satisfiable-rules psi-get-all-satisfiable-rules
     psi-get-all-weighted-satisfiable-rules psi-context-weight psi-action-weight
+    psi-goal psi-goal?
 
     ; From main.scm
     psi-running? psi-get-loop-count psi-run-continue? psi-step psi-run psi-halt

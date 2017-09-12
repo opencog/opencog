@@ -42,8 +42,8 @@
 	(stv 0.1 1)
 )
 
-(define demand-foo (psi-demand "foo" 0.8))
-(define demand-bar (psi-demand "bar" 0.5))
+(define demand-foo (psi-demand "foo"))
+(define demand-bar (psi-demand "bar"))
 
 (Member
 	(psi-rule
@@ -93,4 +93,3 @@
 ; is not recommended for this demo, because it will clog the output
 ; with print statements.
 ; (psi-run)
-

@@ -9,24 +9,24 @@
 
 ;; ------------------------------------------------------------------
 ; Demand associated with faces
-(define face-demand (psi-demand "face interaction" 1))
+(define face-demand (psi-demand "face interaction"))
 (define face-demand-satisfied (True))
 
 ; Demand associated with speech interaction
-(define speech-demand (psi-demand "speech interaction" 1))
+(define speech-demand (psi-demand "speech interaction"))
 (define speech-demand-satisfied (True))
 
 ; Demand for tracking faces
 ; TODO: make generic for orchestration.
-(define track-demand (psi-demand "track demand" 1))
+(define track-demand (psi-demand "track demand"))
 (define track-demand-satisfied (True))
 
 ; Demand for saliency tracking
-(define salient-demand (psi-demand "salient demand" 1))
+(define salient-demand (psi-demand "salient demand"))
 (define salient-demand-satisfied (True))
 
 ; Demand for contorl with web-ui
-(define update-demand (psi-demand "update demand" 1))
+(define update-demand (psi-demand "update demand"))
 (define update-demand-satisfied (True))
 
 (DefineLink

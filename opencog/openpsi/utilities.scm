@@ -3,6 +3,7 @@
 ; Helper functions for OpenPsi
 ;
 ; Copyright (C) 2015-2016 OpenCog Foundation
+; Copyright (C) 2017 MindCloud
 
 (use-modules (ice-9 regex)) ; For string-match
 (use-modules (srfi srfi-1)) ; For fold, delete-duplicates

@@ -207,7 +207,7 @@
            (Evaluation ghost-lemma-seq
              (List (Variable "$S") (List (list-ref proc-terms 3))))))
          (action (process-action ACTION))
-         (psi-rule (psi-rule-nocheck
+         (psi-rule (psi-rule
                      (list (Satisfaction (VariableList vars)
                                          (And words lemmas conds)))
                      action
@@ -244,7 +244,7 @@
   ; 2. Should the weight be accessable? Specially if the execution graph is
   ; separate from the content, thus allowing learing, why?
 
-  (set! default-topic (psi-demand TOPIC-NAME 0.9))
+  (set! default-topic (psi-demand TOPIC-NAME))
   default-topic)
 
 ; This is the default topic.

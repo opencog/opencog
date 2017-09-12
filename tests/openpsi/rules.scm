@@ -38,7 +38,7 @@
     (stv 1 1)
 )
 
-(define demand-1 (psi-demand  "demand-1" .87))
+(define demand-1 (psi-demand  "demand-1"))
 
 (define goal-1
     (EvaluationLink
@@ -92,7 +92,7 @@
     (stv 1 1)
 )
 
-(define demand-2 (psi-demand  "demand-2" .87))
+(define demand-2 (psi-demand  "demand-2"))
 
 (define goal-2
     (EvaluationLink
@@ -177,7 +177,7 @@
 
 ; --------------------------------------------------------------
 ; Helper functions for `OpenPsiUTest::test_psi_get_dual_rules`
-(define demand-4 (psi-demand  "demand-4" .87))
+(define demand-4 (psi-demand  "demand-4"))
 
 (define action-4
     (EvaluationLink
@@ -239,7 +239,7 @@
 (define (test_psi_step_4) (cog-node? (cog-node 'ConceptNode "act-6")))
 
 ; --------------------------------------------------------------
-;(define demand-5 (psi-demand  "demand-5" .87))
+;(define demand-5 (psi-demand  "demand-5"))
 
 ;(define (rule-5)
 ;    (psi-rule
