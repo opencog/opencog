@@ -79,13 +79,21 @@ Reading the example programs mentioned above are the best way to understand how 
 
 #### Scheme
 
+First you need to load the pattern-index module
+
+```
+    (use-modules (opencog learning pattern-index))
+```
+
+then create an index given a file name
+
 ```
     (define indexKey (pi-create-index (ConceptNode "toy-example-query.scm")))
 ```
 
 indexKey will be used in further calls to query or mine the newly created
 index. You can create many indexes using different sets of atoms and query them
-separetely.
+separately.
 
 ### Quering requests
 
@@ -512,7 +520,6 @@ Which is the result of the original query Q. Again, each result in R is a tuple
 (S, M, F). F is empty in all these results. M is the combination of the
 mappings of each combined result.
 
-
 The second query is slightly more interesting:
 
 ```
@@ -680,29 +687,29 @@ is:
 ## TODO
 
 1. Implement C++ and Scheme API to allow creation of empty index followed by addition of atoms and finally actual creation of the index.
-1. Incorporate AttentionValue and TruthValue in the index
-1. Implement multi-thread version of TypeframeIndex::query()
-1. Implement optional creation of TypeFrameIndex pointing to elements in disk
-1. Implement optional creation of TypeFrameIndex storing the index itself in disk
-1. Implement distributed version of the mining algorithm
-1. Implement distributed version of TypeFrameIndex
+2. Incorporate AttentionValue and TruthValue in the index
+3. Implement multi-thread version of TypeframeIndex::query()
+4. Implement optional creation of TypeFrameIndex pointing to elements in disk
+5. Implement optional creation of TypeFrameIndex storing the index itself in disk
+6. Implement distributed version of the mining algorithm
+7. Implement distributed version of TypeFrameIndex
+8. Add scheme bindings for the configuration options
 
 ## Known issues
 
 1. Replace VariableNode, AndLink, OrLink and NotLink by PatternVariableNode,
 PatternAndLink, PatternOrLink and PatternNotLink respectively.
-1. TypeFrameIndex::query() is terribly (time) inneficient. It needs a complete
+2. TypeFrameIndex::query() is terribly (time) inefficient. It needs a complete
 refatoring to make rational use of allocated memory and avoid unnecessary
 copying of data among recursive calls.
-1. Current implementation is adding all the possible permutations of
+3. Current implementation is adding all the possible permutations of
 UNORDERED_LINK (only links with arity <= 5). Thus if we have a (SimilarityLink
 A B), all the patterns (SimilarityLink * *), (SimilarityLink A *),
 (SimilarityLink * A), (SimilarityLink B *) and (SimilarityLink * B) are being
 inserted in the index. The proper way would be to insert only three patterns
 (SimilarityLink * *), (SimilarityLink A *) and (SimilarityLink B *) and deal
 with ORDERED_LINK permutations in the query() method.
-1. User should be able to control the Atom types that should be "expanded" when
+4. User should be able to control the Atom types that should be "expanded" when
 creating the patterns. For example, the user may want to prevent (ListLink A B)
 from becoming patterns like (ListLink A *) etc. This sort of customization may
 be crucial when trying to do pattern mining.
-
