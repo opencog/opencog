@@ -333,7 +333,7 @@ Handle PatternIndexAPI::createIndex(const HandleSeq &handles)
     tkt = ++lastUsedTicket;
     StringMap props;
     setDefaultProperties(props);
-    indexes.insert(IndexMap::value_type(tkt, make_pair(index, props)));
+    indexes.emplace(tkt, make_pair(index, props));
 
     return atomSpace->add_node(ANCHOR_NODE, to_string(tkt));
 }

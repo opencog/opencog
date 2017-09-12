@@ -62,11 +62,11 @@ string TypeFrame::nodeNameAt(unsigned int pos) const
     return answer;
 }
 
-void TypeFrame::setNodeNameAt(unsigned int pos, string name)
+void TypeFrame::setNodeNameAt(unsigned int pos, const string& name)
 {
     NodeNameMap::iterator it = nodeNameMap.find(pos);
     if (it == nodeNameMap.end()) {
-        nodeNameMap.insert(NodeNameMap::value_type(pos, name));
+        nodeNameMap.emplace(pos, name);
     } else {
         (*it).second = name;
     }
@@ -800,7 +800,7 @@ int TypeFrame::recursiveParse(const string &txt, unsigned int begin)
             char c = txt.at(cursor++);
             if (c == '\"') {
                 nameEndedFlag = true;
-                nodeNameMap.insert(NodeNameMap::value_type(size() - 1, nodeName));
+                nodeNameMap.emplace(size() - 1, nodeName);
             } else {
                 if (nameEndedFlag) {
                     if (c == '(') level++;

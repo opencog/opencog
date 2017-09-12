@@ -186,7 +186,7 @@ public:
                             unsigned int cursor=0) const;
     bool nodeNameDefined(unsigned int pos) const;
     std::string nodeNameAt(unsigned int pos) const;
-    void setNodeNameAt(unsigned int pos, std::string name);
+    void setNodeNameAt(unsigned int pos, const std::string& name);
     bool typeAtIsSymmetricLink(unsigned int pos) const;
     bool typeAtEqualsTo(unsigned int pos, const std::string &typeName) const;
     void append(const TypeFrame &other);

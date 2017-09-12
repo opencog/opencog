@@ -161,7 +161,7 @@ unsigned int TypeFrameIndex::countPattern(const TypeFrame &pattern)
     unsigned int answer = queryAnswer.size();
 
     if (PATTERN_COUNT_CACHE_ENABLED) {
-        patternCountCache.insert(PatternCountMap::value_type(pattern, answer));
+        patternCountCache.emplace(pattern, answer);
     }
 
     return answer;
@@ -1045,7 +1045,7 @@ void TypeFrameIndex::addPatternOccurrence(TypeFrame &pattern, int pos)
         }
         IntegerSet newSet;
         newSet.insert(pos);
-        occurrenceSet.insert(PatternMap::value_type(pattern, newSet));
+        occurrenceSet.emplace(pattern, newSet);
     } else {
         if (DEBUG) {
             printf("%d: ", pos);
@@ -1094,7 +1094,7 @@ void TypeFrameIndex::selectCurrentElement(TypeFrame &answer,
         if (it == variableOccurrences.end()) {
             IntegerSet newSet;
             newSet.insert(answer.size() - 1);
-            variableOccurrences.insert(StringMap::value_type(key, newSet));
+            variableOccurrences.emplace(key, newSet);
             if (DEBUG) printf("ADD NEW SET variable occurrence %s %lu\n", key.c_str(), answer.size() - 1);
         } else {
             if (DEBUG) printf("ADD variable occurrence %s %lu\n", key.c_str(), answer.size() - 1);
@@ -1467,7 +1467,7 @@ void TypeFrameIndex::query(vector<ResultPair> &answer,
                     VarMapping varMap;
                     TypeFrameSet frameSet;
                     for (StringMap::iterator it = variableOccurrences.begin(); it != variableOccurrences.end(); ++it) {
-                        varMap.insert(VarMapping::value_type((*it).first, frames.at(*it2).subFrameAt(*((*it).second.begin()))));
+                        varMap.emplace((*it).first, frames.at(*it2).subFrameAt(*((*it).second.begin())));
                     }
                     frameSet.insert(frames.at(*it2));
                     if (DEBUG) {
