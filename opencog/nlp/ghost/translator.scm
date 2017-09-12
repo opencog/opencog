@@ -207,7 +207,7 @@
            (Evaluation ghost-lemma-seq
              (List (Variable "$S") (List (list-ref proc-terms 3))))))
          (action (process-action ACTION))
-         (psi-rule (psi-rule-nocheck
+         (psi-rule (psi-rule
                      (list (Satisfaction (VariableList vars)
                                          (And words lemmas conds)))
                      action

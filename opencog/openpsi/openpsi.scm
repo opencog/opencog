@@ -26,6 +26,7 @@
     psi-rule-set-atomese-weight psi-set-controlled-rule
     psi-get-controlled-rules psi-rule-atomese-weight
     psi-controller-update-weights psi-rule-disable psi-rule-enable
+    psi-rule
 
     ; From rule.scm
     psi-get-rules psi-get-all-rules psi-rule? psi-get-all-actions psi-action?

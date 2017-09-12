@@ -1186,7 +1186,7 @@ todo: random expresion context is really part of self-model.
 
 ================================================
 
-(psi-rule-nocheck
+(psi-rule
 	;; context
 	(list (AndLink
 		(Predicate "input thing")
@@ -1228,7 +1228,7 @@ clobbers it
 
 ================================================
 
-(psi-rule-nocheck
+(psi-rule
 	;; context
 	(list (AndLink
 		(Predicate "input thing")

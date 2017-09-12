@@ -16,7 +16,7 @@
 
 
 (use-modules (ice-9 threads)) ; For `par-map`
-(use-modules (ice-9 optargs)) ; For `define*-public`
+(use-modules (ice-9 optargs)) ; For `define*`
 (use-modules (srfi srfi-1)) ; For `drop-right`, `append-map`, etc.
 (use-modules (opencog) (opencog query))
 
@@ -29,41 +29,7 @@
     (PredicateNode (string-append psi-prefix-str "rule_name")))
 
 ; --------------------------------------------------------------
-(define*-public (psi-rule-nocheck context action goal a-stv demand
-     #:optional name)
-"
-  psi-rule-nocheck -- same as psi-rule, but does not check the arguments
-  for proper structure.
-"
-
-    (let ((implication
-            (Implication a-stv (SequentialAndLink context action) goal)))
-
-        ; The membership below is used to simplify filtering and searching.
-        ; Other alternative designs are possible.
-        ; TODO: Remove this, when ExecutionLinks are used, as that can
-        ; be used for filtering. (?? Huh? Please explain...)
-        (MemberLink action psi-action)
-
-        ; This MemberLink is used to make it easy to find rules that
-        ; fulfil demands. (and also to find goals that meet demands).
-        (MemberLink implication demand)
-
-        ; If a name is given, its used for control/feedback purposes.
-        (if name
-            (EvaluationLink
-                psi-rule-name-predicate-node
-                (ListLink
-                    implication
-                    (ConceptNode (string-append psi-prefix-str name))))
-        )
-
-        implication
-    )
-)
-
-; --------------------------------------------------------------
-(define*-public (psi-rule context action goal a-stv demand  #:optional name)
+(define* (psi-rule context action goal a-stv demand  #:optional name)
 "
   psi-rule CONTEXT ACTION GOAL TV DEMAND [NAME] - create a psi-rule.
 
@@ -99,30 +65,28 @@
   NAME is an optional argument; if it is provided, then it should be
     a string that will be associated with the rule.
 "
-; TODO: aliases shouldn't be used to create a subset, as is done in
-; chatbot-psi.  Subsets should be created at the demand level. The
-; purpose of an alias is only for controlling a SINGLE rule during
-; testing/demoing, and not a set of rules.
-    (define func-name "psi-rule") ; For use in error reporting
+    (let ((implication
+            (Implication a-stv (SequentialAndLink context action) goal)))
 
-    ; Check arguments
-    (if (not (list? context))
-        (error (string-append "In procedure " func-name ", expected first "
-            "argument to be a list, got:") context))
-    (if (not (cog-atom? action))
-        (error (string-append "In procedure " func-name ", expected second "
-            "argument to be an atom, got:") action))
-    (if (not (cog-atom? goal))
-        (error (string-append "In procedure " func-name ", expected third "
-            "argument to be an atom, got:") goal))
-    (if (not (cog-tv? a-stv))
-        (error (string-append "In procedure " func-name ", expected fourth "
-            "argument to be a stv, got:") a-stv))
-    (if (not (psi-demand? demand))
-        (error (string-append "In procedure " func-name ", expected fifth "
-            "argument to be a node representing a demand, got:") demand))
+        ; The membership below is used to simplify filtering and searching.
+        ; Other alternative designs are possible.
+        (MemberLink action psi-action)
 
-    (psi-rule-nocheck context action goal a-stv demand name)
+        (MemberLink implication demand)
+
+        ; If a name is given, its used for control/feedback purposes.
+        ; TODO: This isn't necessary the hash (returned value by of cog-handle)
+        ; could be used as a hash is unique and reproducable.
+        (if name
+            (EvaluationLink
+                psi-rule-name-predicate-node
+                (ListLink
+                    implication
+                    (ConceptNode (string-append psi-prefix-str name))))
+        )
+
+        implication
+    )
 )
 
 ; --------------------------------------------------------------
