@@ -146,8 +146,8 @@ public:
                         }
                     }
                 }
-                it1++;
-                it2++;
+                ++it1;
+                ++it2;
                 cursor++;
             }
             return (it2 != b.end());
@@ -177,13 +177,13 @@ public:
     void buildNodesSet(std::set<TypeFrame,
                        TypeFrame::LessThan> &answer,
                        const std::set<Type> &allowed,
-                       bool happensTwiceOrMoreOnly = false) const;
+                       bool happensTwiceOrMoreOnly=false) const;
     TypeFrame buildSignature(unsigned int cursor);
     bool equals(const TypeFrame &other) const;
     bool isEquivalent(const TypeFrame &other) const;
     int compareUsingEquivalence(const TypeFrame &other) const;
     bool containsEquivalent(const TypeFrame &other,
-                            unsigned int cursor = 0) const;
+                            unsigned int cursor=0) const;
     bool nodeNameDefined(unsigned int pos) const;
     std::string nodeNameAt(unsigned int pos) const;
     void setNodeNameAt(unsigned int pos, std::string name);
@@ -201,10 +201,10 @@ public:
     TypeFrame copyReplacingFrame(const TypeFrame &key,
                                  const TypeFrame &frame) const;
     bool nonEmptyNodeIntersection(const TypeFrame &other) const;
-    std::string toSCMString(unsigned int cursor = 0) const;
-    void printForDebug(std::string prefix = "",
-                       std::string suffix = "",
-                       bool showNames = true) const;
+    std::string toSCMString(unsigned int cursor=0) const;
+    void printForDebug(std::string prefix="",
+                       std::string suffix="",
+                       bool showNames=true) const;
 
 };
 }

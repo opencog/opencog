@@ -64,7 +64,7 @@ class PatternIndexAPI
 
         // These types are used by some API methods to return querying/mining
         // results
-        typedef std::vector<std::pair<Handle, Handle>> VariableMapping;
+        typedef HandlePairSeq VariableMapping;
         typedef std::pair<HandleSeq, VariableMapping> QueryResult;
         typedef std::pair<float, Handle> MiningResult;
 

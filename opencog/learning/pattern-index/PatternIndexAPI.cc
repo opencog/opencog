@@ -21,13 +21,12 @@ PatternIndexAPI::PatternIndexAPI()
 
 PatternIndexAPI::~PatternIndexAPI()
 {
-    for (IndexMap::iterator it = indexes.begin(); it != indexes.end(); it++) {
+    for (IndexMap::iterator it = indexes.begin(); it != indexes.end(); ++it) {
         delete (*it).second.first;
     }
 }
 
-string PatternIndexAPI::getStringProperty(StringMap &map,
-                                               const string key)
+string PatternIndexAPI::getStringProperty(StringMap &map, const string key)
 {
     StringMap::iterator it = map.find(key);
     if (it == map.end()) {
@@ -326,7 +325,7 @@ Handle PatternIndexAPI::createIndex(const HandleSeq &handles)
     int tkt = -1;
     TypeFrameIndex *index = new TypeFrameIndex();
 
-    for (HandleSeq::const_iterator it = handles.begin(); it != handles.end(); it++) {
+    for (HandleSeq::const_iterator it = handles.begin(); it != handles.end(); ++it) {
         index->add(*it, 0);
     }
 
@@ -458,10 +457,10 @@ void PatternIndexAPI::query(vector<QueryResult> &answer,
     for (itqr = queryResult.begin(); itqr != queryResult.end(); itqr++) {
         HandleSeq atoms;
         VariableMapping mapping;
-        for (TypeFrameIndex::TypeFrameSet::const_iterator it = (*itqr).first.begin(); it != (*itqr).first.end(); it++) {
+        for (TypeFrameIndex::TypeFrameSet::const_iterator it = (*itqr).first.begin(); it != (*itqr).first.end(); ++it) {
             atoms.push_back(schemeEval->eval_h((*it).toSCMString()));
         }
-        for (TypeFrameIndex::VarMapping::const_iterator it = (*itqr).second.begin(); it != (*itqr).second.end(); it++) {
+        for (TypeFrameIndex::VarMapping::const_iterator it = (*itqr).second.begin(); it != (*itqr).second.end(); ++it) {
             Handle var = schemeEval->eval_h("(VariableNode \"" + (*it).first + "\")");
             Handle value = schemeEval->eval_h((*it).second.toSCMString());
             mapping.push_back(make_pair(var, value));
