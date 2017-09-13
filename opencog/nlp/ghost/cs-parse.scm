@@ -225,7 +225,8 @@
 
     (input
       (declarations) : $1
-      (goal) : (begin (create-shared-goal (list $1)) $1)
+      (goal) : (begin (create-shared-goal
+        (eval-string (string-append "(list " $1 ")"))) $1)
       (rule) : $1
       (enter) : $1
       (COMMENT) : #f

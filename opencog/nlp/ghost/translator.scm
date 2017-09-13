@@ -187,13 +187,18 @@
         (List (to-atomese (cdar ACTION))))))
 
 (define (process-goal GOAL)
-  "Create the goals in OpenPsi."
-  ; TODO: Wait for the API
-  ; TODO: Add shared-goals as well, if any, and overwrite duplicate ones
-  (True))
+  "Go through each of the goals, including the shared ones."
+  (if (null? GOAL)
+      (list (cons (ghost-prefix "Default Goal") 0.9))
+      ; The shared goals will be overwritten if the same goal is specified
+      ; to this rule
+      (append GOAL
+        (remove (lambda (sg) (any (lambda (g) (equal? (car sg) (car g))) GOAL))
+                shared-goals))))
 
-(define* (create-rule PATTERN ACTION #:optional (GOAL (True))
-                                                (TOPIC default-topic) NAME)
+(define* (create-rule PATTERN ACTION #:optional (GOAL '())
+                                                (TOPIC default-topic)
+                                                NAME)
   "Top level translation function. Pattern is a quoted list of terms,
    and action is a quoted list of actions or a single action."
   (cog-logger-debug "In create-rule\nPATTERN = ~a\nACTION = ~a" PATTERN ACTION)
@@ -214,15 +219,16 @@
            (Evaluation ghost-lemma-seq
              (List (Variable "$S") (List (list-ref proc-terms 3))))))
          (action (process-action ACTION))
-         (goal (process-goal GOAL))
-         (rule (psi-rule
-                 (list (Satisfaction (VariableList vars)
-                                     (And words lemmas conds)))
-                 action
-                 goal
-                 (stv .9 .9)
-                 TOPIC
-                 NAME)))
+         (rule (map (lambda (goal)
+                      (psi-rule
+                        (list (Satisfaction (VariableList vars)
+                                            (And words lemmas conds)))
+                        action
+                        (psi-goal (car goal))
+                        (stv (cdr goal) .9)
+                        TOPIC
+                        NAME))
+                    (process-goal GOAL))))
         (cog-logger-debug ghost-logger "ordered-terms: ~a" ordered-terms)
         (cog-logger-debug ghost-logger "preproc-terms: ~a" preproc-terms)
         (cog-logger-debug ghost-logger "psi-rule: ~a" rule)
