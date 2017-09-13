@@ -43,22 +43,62 @@
 
 (use-modules (opencog) (opencog matrix))
 
-(define (transfer-count WA WB DJ NUM)
+(define (transfer-count LLOBJ WA WB DJ NUM)
 "
   transfer-count WA WB DJ NUM - subtract NUM DJ's from WB and add to WA.
 
-  If WB is in a section with the connector-seq DJ, and has a count of
-  at least NUM, then subtract NUM from the count of this section, and
-  add it to the corresponding section on WA.  If tehre is no such
+  WA and WB shoud be WordNodes or WordClassNodes.
+  DJ should be a disjunct i.e. a ConnectorSeq
+  NUM shoud be a floating-point number.
+  LLOBJ is used to access counts on pairs.  Pairs are SectionLinks,
+     that is, are (word,disjunct) pairs wrapped in a SectionLink.
+
+  If the pair (WB, DJ) exists, and has a count of at least NUM, then subtract NUM from the count of this section, and
+  add it to the corresponding section on WA.  If there is no such
   section on WA, it is created.  If the count on WB is less than NUM,
   then the entire count is transfered to WA, and the section on WB
-  is deleted.  NUM must be a positie number.
+  is deleted.  NUM must be a positive number.
 "
 	(define sec-b (cog-link 'SectionLink WB DJ))
 	(define vsec-b
-		(if (null? sec-b) '()
-			(cog-value sec-b 
+		(if (null? sec-b) '() '()))
+
+(define (func a b)
+	(format #t "Its ~A and ~A\n" a b)
+)
+
+; (define ptu (add-tuple-math psa func))
+
+#f
 ) 
+
+(define (add-dynamic-stars LLOBJ)
+"
+  add-dynamic-stars LLOBJ - Extend LLOBJ with row and column access
+  methods (aka wildcard methods), specifically, to get all non-zero
+  elements in a given row or column.
+
+  Similar to the (add-pair-stars LLOBJ) class, except that this
+  attempts to work without having to load all pairs into RAM at the
+  same time; instead, pairs are fetched from the database dynamically,
+  on demand.  This is attempting to address the problem where not all
+  of the matrix can fit into RAM at the same time.  If all of the
+  matrix can fit, then (add-pair-stars LLOBJ) is more efficient.
+  
+"
+	(let ((pair-type (LLOBJ 'pair-type))
+		)
+
+		(define (fetch-left left-item)
+			(fetch-incoming-by-type left-item pair-type))
+
+		;-------------------------------------------
+		; Methods on this class.
+		(lambda (message . args)
+			(case message
+				((feth-left)     (apply fetch-left args))
+				(else            (apply LLOBJ (cons message args))))
+		)))
 
 (define (do-it)
 	(let ((pca (make-pseudo-cset-api))
@@ -66,6 +106,13 @@
 			(pfa (add-pair-freq-api psa))
 		)
 
-	(define pta (make-thresh-pca pfa))
-	(define all-words (get-all-cset-words))
+		(load-atoms-of-type 'WordNode)
+
+		; (define pta (make-thresh-pca pfa))
+		; this can't work unless the whole matrix is already loaded...
+		; (define all-words (get-all-cset-words))
+		; brute force.
+		(define all-words (cog-get-atoms 'WordNode))
+
+	)
 )
