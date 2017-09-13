@@ -84,20 +84,57 @@
   on demand.  This is attempting to address the problem where not all
   of the matrix can fit into RAM at the same time.  If all of the
   matrix can fit, then (add-pair-stars LLOBJ) is more efficient.
-  
+
+  The supported methods are:
+  'left-basis - Return all items (atoms) that might be used to index
+      a row in the matrix.  This may return more items than there are
+      rows; no check is performed for empty or invalid rows. However,
+      all valid rows will appear in the set: the returned set is a
+      superset.  All of the elements of this set will be atoms of type
+      (LLOBJ 'left-type).
+
+  'right-basis - Likewise, but for columns.
 "
-	(let ((pair-type (LLOBJ 'pair-type))
+	(let ((l-basis '())
+			(r-basis '())
+			(pair-type (LLOBJ 'pair-type))
 		)
+
+		(define (get-atoms TYPE)
+			(load-atoms-of-type TYPE)
+			(cog-get-atoms  TYPE))
+
+		(define (get-left-basis)
+			(if (null? l-basis)
+				(set! l-basis (get-atoms (LLOBJ 'left-type))))
+			l-basis)
+
+		(define (get-right-basis)
+			(if (null? r-basis)
+				(set! r-basis (get-atoms (LLOBJ 'right-type))))
+			r-basis)
 
 		(define (fetch-left left-item)
 			(fetch-incoming-by-type left-item pair-type))
 
 		;-------------------------------------------
+		; Explain what it is that I provide. This helps classes
+		; above understand what it is that this class does.
+		(define (provides meth)
+			(case meth
+				((left-basis)       get-left-basis)
+				((right-basis)      get-right-basis)
+				(else               (LLOBJ 'provides meth))))
+
+		;-------------------------------------------
 		; Methods on this class.
 		(lambda (message . args)
 			(case message
-				((feth-left)     (apply fetch-left args))
-				(else            (apply LLOBJ (cons message args))))
+				((left-basis)     (get-left-basis))
+				((right-basis)    (get-right-basis))
+				((fetch-left)     (apply fetch-left args))
+				((provides)       (apply provides args))
+				(else             (apply LLOBJ (cons message args))))
 		)))
 
 (define (do-it)
@@ -112,7 +149,7 @@
 		; this can't work unless the whole matrix is already loaded...
 		; (define all-words (get-all-cset-words))
 		; brute force.
-		(define all-words (cog-get-atoms 'WordNode))
+		; (define all-words (cog-get-atoms 'WordNode))
 
 	)
 )
