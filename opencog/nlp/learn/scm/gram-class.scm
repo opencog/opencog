@@ -36,43 +36,47 @@
 ;                ....
 ;
 ; There are several ways of handling the merger of words into classes.
-; Consider first merging 
+; Consider first merging
 ; The "linear" approach is to intersect the co
 ;
 ; ---------------------------------------------------------------------
 
 (use-modules (opencog) (opencog matrix))
 
-(define (transfer-count LLOBJ WA WB DJ NUM)
+(define (merge-ortho LLOBJ WA WB)
 "
-  transfer-count WA WB DJ NUM - subtract NUM DJ's from WB and add to WA.
+  merge-ortho WA WB - merge WA and WB into a grammatical class.
 
-  WA and WB shoud be WordNodes or WordClassNodes.
-  DJ should be a disjunct i.e. a ConnectorSeq
-  NUM shoud be a floating-point number.
+  WA and WB should be WordNodes or WordClassNodes.
   LLOBJ is used to access counts on pairs.  Pairs are SectionLinks,
      that is, are (word,disjunct) pairs wrapped in a SectionLink.
 
-  If the pair (WB, DJ) exists, and has a count of at least NUM, then subtract NUM from the count of this section, and
-  add it to the corresponding section on WA.  If there is no such
-  section on WA, it is created.  If the count on WB is less than NUM,
-  then the entire count is transfered to WA, and the section on WB
-  is deleted.  NUM must be a positive number.
-"
-	(define sec-b (cog-link 'SectionLink WB DJ))
-	(define vsec-b
-		(if (null? sec-b) '() '()))
+  The merger of WA and WB are performed, using the "orthogoanal
+  merge" strategy. This is done like so. If WA and WB are both
+  WordNodes, then a WordClass is created, having both WA and WB as
+  members.  The counts on that word-class are the sum of the counts
+  on WA and WB. Next, the counts on WA and WB are adjusted, so that
+  only the orthogonal components are left (that is, the parts
+  orthogonal to the sum). Next, zero-clamping is applied, so that
+  any non-positive components are erased.
 
-(define (func a b)
-	(format #t "Its ~A and ~A\n" a b)
+  If WA is a WordClassNodes, and WB is not, then WB is merged into
+  WA. Currently, WB must never be a WordClass....
+"
+	(define (func a b)
+		(format #t "Its ~A and ~A\n" a b)
+		42
+	)
+	(let ((ptu (add-tuple-math psa func))
+		)
+#f
+	)
 )
+
 
 ; (define ptu (add-tuple-math psa func))
 ; (define run-n-jump (ptu 'right-stars (list (Word "run") (Word "jump"))))
 ; (ptu 'pair-count (car run-n-jump))
-
-#f
-) 
 
 (define (add-dynamic-stars LLOBJ)
 "
