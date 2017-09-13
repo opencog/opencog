@@ -1,8 +1,8 @@
 (define (gen-var STR LEMMA?)
   "Helper function for generating the name of a VariableNode,
    so as to make it slightly easier for a human to debug the code.
-   is-literal? flag is for indicating whether this variable
-   or glob is supposed to go to the word-seq or lemma-seq."
+   Lemma? flag indicates whether this word should be represented
+   in lemma or not."
   (if LEMMA?
       (string-append (get-lemma STR) "-" (choose-var-name))
       (string-append STR "-" (choose-var-name))))
@@ -156,6 +156,7 @@
          LST)))
 
 (define (text-contains? RTXT LTXT TERM)
+  "Check if either RTXT or LTXT contains the string (name of) TERM."
   (define (contains? txt term)
     (not (equal? #f (regexp-exec
       (make-regexp (string-append "\\b" term "\\b") regexp/icase) txt))))

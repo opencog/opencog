@@ -50,7 +50,25 @@ Here is a list of features that are fully supported in GHOST:
 - [Negation](https://github.com/bwilcox-1234/ChatScript/blob/master/WIKI/ChatScript-Basic-User-Manual.md#not--and-notnot-)
 - [Function](https://github.com/bwilcox-1234/ChatScript/blob/master/WIKI/ChatScript-Advanced-User-Manual.md#functions)
 
+
+One or more goals can be specified for a rule in this way:
+
+```
+#goal: (novelty=0.8 please_user=0.4)
+s: ( what be you name ) I forgot; what's YOUR name, sweet wonderful human
+```
+
+Topic level goals can also be specified:
+
+```
+goal: (please_user=0.5)
+```
+
+in which case the specified goals will be applied to every single rule under
+the same topic.
+
 Basic examples of how to use GHOST is available [HERE](https://github.com/opencog/opencog/blob/master/examples/ghost/basic.scm)
+
 
 ## How To Run
 
@@ -100,18 +118,7 @@ proper way of running it is to start the OpenPsi loop and should use
 
 ## To Do
 
-Here is a list of features that are partially working/need to be implemented.
-- Goal Assignment
-
-Allow author to assign one or more goals to a rule, e.g.
-
-```
-#goal: novelty=0.8
-#goal: please_user=0.4
-s: ( what be you name ) I forgot; what's YOUR name, sweet wonderful human
-```
-
-right now a default goal is assigned to all of the rules.
+Here is a list of features that are partially working/need to be implemented:
 
 - Speech Acts
 
@@ -126,3 +133,11 @@ u: means union of the both above
 - Gambit & Rejoinders
 
 - Unordered Matching
+
+- Nested pattern e.g. "you < * [(live * long) long-lived]"
+
+- Common system functions, e.g. ^reuse
+
+- Port all the DefinedPredicateNodes available in chatbot-psi and eva modules
+
+- Topic management

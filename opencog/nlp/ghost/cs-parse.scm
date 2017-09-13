@@ -73,6 +73,8 @@
     ((has-match? "^[ ]*\r" str) (result:suffix 'CR location ""))
     ; FIXME: This is not really newline.
     ((string=? "" str) (cons (make-lexical-token 'NEWLINE location #f) ""))
+    ((has-match? "^[ \t]*goal:" str) (result:suffix 'GOAL location #f))
+    ((has-match? "^[ \t]*#goal:" str) (result:suffix 'RGOAL location #f))
     ((has-match? "^[ \t]*#!" str) ; This should be checked always before #
       ; TODO Add tester function for this
       (cons (make-lexical-token 'SAMPLE_INPUT location #f) ""))
@@ -138,14 +140,13 @@
         ; Literals, words in the pattern that are not in their canonical forms
         (result:suffix 'LITERAL location
           (string-trim (match:substring current-match)))))
+    ((has-match? "^[ ]*[0-9.]+" str)
+      (result:suffix 'NUM location
+        (string-trim (match:substring current-match))))
     ; This should always be near the end, because it is broadest of all.
     ((has-match? "^[ \t]*['.,_!?0-9a-zA-Z-]+" str)
         (result:suffix 'STRING location
           (string-trim (match:substring current-match))))
-    ; This should always be after the above so as to match words like "3D".
-    ((has-match? "^[ ]*[0-9]+" str)
-      (result:suffix 'NUM location
-        (string-trim (match:substring current-match))))
     ; NotDefined token is used for errors only and there shouldn't be any rules.
     (else (cons (make-lexical-token 'NotDefined location str) ""))
   )
@@ -206,7 +207,8 @@
     ; MVAR = Match Variables
     ; MOVAR = Match Variables grounded in their original words
     ; ? = Comparison tests
-    (CONCEPT TOPIC RESPONDERS REJOINDERS GAMBIT COMMENT SAMPLE_INPUT WHITESPACE
+    (CONCEPT TOPIC RESPONDERS REJOINDERS GAMBIT GOAL RGOAL COMMENT SAMPLE_INPUT
+     WHITESPACE
       (right: LPAREN LSBRACKET << ID VAR * ^ < LEMMA LITERAL NUM LEMMA~COMMAND
               STRING *~n *n UVAR MVAR MOVAR EQUAL NOT RESTART)
       (left: RPAREN RSBRACKET >> > DQUOTE)
@@ -216,13 +218,15 @@
     ; Parsing rules (aka nonterminal symbols)
     (inputs
       (input) :
-        (if $1 (begin (cog-logger-debug ghost-logger "\nRule:\n~a\n" $1) #t))
+        (if $1 (begin (cog-logger-debug ghost-logger "\nParsed:\n~a\n" $1) #t))
       (inputs input) :
-        (if $2 (begin (cog-logger-debug ghost-logger "\nRule:\n~a\n" $2) #t))
+        (if $2 (begin (cog-logger-debug ghost-logger "\nParsed:\n~a\n" $2) #t))
     )
 
     (input
       (declarations) : $1
+      (goal) : (begin (create-shared-goal
+        (eval-string (string-append "(list " $1 ")"))) $1)
       (rule) : $1
       (enter) : $1
       (COMMENT) : #f
@@ -274,12 +278,20 @@
 
     ; Rule grammar
     (rule
+      (rule-goal RESPONDERS name context action) :
+        (create-rule
+          (eval-string (string-append "(list " $4 ")"))
+          (eval-string (string-append "(list " $5 ")"))
+          (eval-string (string-append "(list " $1 ")")))
+      (rule-goal RESPONDERS context action) :
+        (create-rule
+          (eval-string (string-append "(list " $3 ")"))
+          (eval-string (string-append "(list " $4 ")"))
+          (eval-string (string-append "(list " $1 ")")))
       (RESPONDERS name context action) :
         (create-rule
           (eval-string (string-append "(list " $3 ")"))
           (eval-string (string-append "(list " $4 ")")))
-      ; Unlabeled responder.
-      ; TODO: Maybe should be labeled internally in the atomspace???
       (RESPONDERS context action) :
         (create-rule
           (eval-string (string-append "(list " $2 ")"))
@@ -287,6 +299,24 @@
       (REJOINDERS context action) :
         (format #f "\nrejoinder: ~a\n~a\n~a" $1 $2 $3)
       (GAMBIT action) : (format #f "gambit: ~a" $2)
+    )
+
+    (rule-goal
+        (RGOAL LPAREN goal-members RPAREN) : $3
+    )
+
+    (goal
+        (GOAL LPAREN goal-members RPAREN) : $3
+    )
+
+    (goal-members
+        (goal-member) : $1
+        (goal-members goal-member) : (format #f "~a ~a" $1 $2)
+    )
+
+    (goal-member
+        (LEMMA EQUAL NUM) : (format #f "(cons \"~a\" ~a)" $1 $3)
+        (STRING EQUAL NUM) : (format #f "(cons \"~a\" ~a)" $1 $3)
     )
 
     (context
