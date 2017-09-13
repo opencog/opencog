@@ -26,7 +26,7 @@
 (cog-logger-set-level! opl "debug")
 (cog-logger-set-stdout! opl #f)
 
-(define-public (psi-get-logger)
+(define (psi-get-logger)
 "
   psi-get-logger
 
