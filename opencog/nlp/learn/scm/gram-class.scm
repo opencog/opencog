@@ -41,6 +41,7 @@
 ;
 ; ---------------------------------------------------------------------
 
+(use-modules (srfi srfi-1))
 (use-modules (opencog) (opencog matrix))
 
 (define (merge-ortho LLOBJ WA WB)
@@ -51,8 +52,8 @@
   LLOBJ is used to access counts on pairs.  Pairs are SectionLinks,
      that is, are (word,disjunct) pairs wrapped in a SectionLink.
 
-  The merger of WA and WB are performed, using the "orthogoanal
-  merge" strategy. This is done like so. If WA and WB are both
+  The merger of WA and WB are performed, using the 'orthogoanal
+  merge' strategy. This is done like so. If WA and WB are both
   WordNodes, then a WordClass is created, having both WA and WB as
   members.  The counts on that word-class are the sum of the counts
   on WA and WB. Next, the counts on WA and WB are adjusted, so that
@@ -63,13 +64,28 @@
   If WA is a WordClassNodes, and WB is not, then WB is merged into
   WA. Currently, WB must never be a WordClass....
 "
-	(define (func a b)
-		(format #t "Its ~A and ~A\n" a b)
-		42
+
+	; Create a new word-class.
+	(define mrg-class (WordClassNode
+			(string-append (cog-name WA) (cog-name WB))))
+
+	(define (bogus a b) (format #t "Its ~A and ~A\n" a b))
+
+	(define (merge-func WORD-PAIR)
+		(define lw (first WORD-PAIR))
+		(define rw (second WORD-PAIR))
+(format "duuude its ~A and ~A\n" lw rw)
 	)
-	(let ((ptu (add-tuple-math psa func))
+
+	; Put the two words into the new word-class.
+	(MemberLink WA mrg-class)
+	(MemberLink WB mrg-class)
+
+	(let* ((ptu (add-tuple-math psa bogus))
+			(mrg-basis (ptu 'right-stars (list WA WB)))
 		)
-#f
+
+		(for-each merge-func mrg-basis)
 	)
 )
 
