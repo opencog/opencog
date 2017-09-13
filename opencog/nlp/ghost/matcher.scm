@@ -29,9 +29,17 @@
                    (if (>= 8 (length sent-seqs))
                        (cog-outgoing-set (cog-execute! (Dual input-lset)))
                        '())))))
-         ; Get the psi-rules associate with them
-         (rules-matched (delete-duplicates
-           (append exact-match no-const dual-match))))
+         ; Get the psi-rules associate with them with duplicates removed
+         (rules-matched
+           (fold (lambda (rule prev)
+                   ; Since a psi-rule can satisfy multiple goals and an
+                   ; ImplicationLink will be generated for each of them,
+                   ; we are comparing the implicant of the rules instead
+                   ; of the rules themselves, and create a list of rules
+                   ; with unique implicants
+                   (if (any (lambda (r) (equal? (gar r) (gar rule))) prev)
+                       prev (append prev (list rule))))
+                 (list) (append exact-match no-const dual-match))))
 
         (cog-logger-debug ghost-logger "For input:\n~a" input-lseq)
         (cog-logger-debug ghost-logger "Rules with no constant:\n~a" no-const)
