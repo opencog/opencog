@@ -94,28 +94,46 @@
       (LLOBJ 'left-type).
 
   'right-basis - Likewise, but for columns.
+
+  'left-stars COL - Returns pairs (*, COL), same as documented in the
+  pair-stars API.
+
+  'right-stars ROW - Likewise, but returns the set (ROW, *).
 "
-	(let ((l-basis '())
+	(let ((stars-obj (add-pair-stars LLOBJ))
+			(l-basis '())
 			(r-basis '())
 			(pair-type (LLOBJ 'pair-type))
 		)
 
+		; Retreive all atoms of TYPE from the database
 		(define (get-atoms TYPE)
 			(load-atoms-of-type TYPE)
 			(cog-get-atoms  TYPE))
 
+		; Return a list of all items that might be rows.
 		(define (get-left-basis)
 			(if (null? l-basis)
 				(set! l-basis (get-atoms (LLOBJ 'left-type))))
 			l-basis)
 
+		; Return a list of all items that might be columns.
 		(define (get-right-basis)
 			(if (null? r-basis)
 				(set! r-basis (get-atoms (LLOBJ 'right-type))))
 			r-basis)
 
-		(define (fetch-left left-item)
-			(fetch-incoming-by-type left-item pair-type))
+		; Return a list matrix entries with ITEM on the right;
+		; that is, a wild-card on the left. That is, the set of
+		; entries { (*, ITEM) }.  Uses the stars-obj to filter
+		; the valid pairs, after fetching them from the database.
+		(define (get-left-stars ITEM)
+			(fetch-incoming-by-type ITEM pair-type)
+			(stars-obj 'left-stars ITEM))
+
+		(define (get-right-stars ITEM)
+			(fetch-incoming-by-type ITEM pair-type)
+			(stars-obj 'right-stars ITEM))
 
 		;-------------------------------------------
 		; Explain what it is that I provide. This helps classes
@@ -124,6 +142,8 @@
 			(case meth
 				((left-basis)       get-left-basis)
 				((right-basis)      get-right-basis)
+				((left-stars)       get-left-stars)
+				((right-stars)      get-right-stars)
 				(else               (LLOBJ 'provides meth))))
 
 		;-------------------------------------------
@@ -132,7 +152,8 @@
 			(case message
 				((left-basis)     (get-left-basis))
 				((right-basis)    (get-right-basis))
-				((fetch-left)     (apply fetch-left args))
+				((left-stars)     (apply get-left-stars args))
+				((right-stars)    (apply get-right-stars args))
 				((provides)       (apply provides args))
 				(else             (apply LLOBJ (cons message args))))
 		)))
