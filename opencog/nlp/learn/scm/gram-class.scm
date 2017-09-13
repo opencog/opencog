@@ -74,7 +74,7 @@
 	(define (merge-func WORD-PAIR)
 		(define lw (first WORD-PAIR))
 		(define rw (second WORD-PAIR))
-(format "duuude its ~A and ~A\n" lw rw)
+(format #t "duuude its ~A and ~A\n" lw rw)
 	)
 
 	; Put the two words into the new word-class.
@@ -90,7 +90,9 @@
 )
 
 
-; (define ptu (add-tuple-math psa func))
+; (define psa (add-dynamic-stars pca))
+; (define (bogus a b) (format #t "Its ~A and ~A\n" a b))
+; (define ptu (add-tuple-math psa bogus))
 ; (define run-n-jump (ptu 'right-stars (list (Word "run") (Word "jump"))))
 ; (ptu 'pair-count (car run-n-jump))
 
