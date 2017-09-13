@@ -68,6 +68,8 @@
 )
 
 ; (define ptu (add-tuple-math psa func))
+; (define run-n-jump (ptu 'right-stars (list (Word "run") (Word "jump"))))
+; (ptu 'pair-count (car run-n-jump))
 
 #f
 ) 
@@ -103,6 +105,7 @@
 	(let ((stars-obj (add-pair-stars LLOBJ))
 			(l-basis '())
 			(r-basis '())
+			(cache-incoming '())
 			(pair-type (LLOBJ 'pair-type))
 		)
 
@@ -123,16 +126,24 @@
 				(set! r-basis (get-atoms (LLOBJ 'right-type))))
 			r-basis)
 
+		; Fetch the incoming set for ITEM, but only if we haven't
+		; already done so.
+		(define (get-incoming ITEM)
+			(if (not (member ITEM cache-incoming))
+				(begin
+					(fetch-incoming-by-type ITEM pair-type)
+					(set! cache-incoming (cons ITEM cache-incoming)))))
+
 		; Return a list matrix entries with ITEM on the right;
 		; that is, a wild-card on the left. That is, the set of
 		; entries { (*, ITEM) }.  Uses the stars-obj to filter
 		; the valid pairs, after fetching them from the database.
 		(define (get-left-stars ITEM)
-			(fetch-incoming-by-type ITEM pair-type)
+			(get-incoming ITEM)
 			(stars-obj 'left-stars ITEM))
 
 		(define (get-right-stars ITEM)
-			(fetch-incoming-by-type ITEM pair-type)
+			(get-incoming ITEM)
 			(stars-obj 'right-stars ITEM))
 
 		;-------------------------------------------
