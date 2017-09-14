@@ -98,7 +98,7 @@
 		; The summed counts
 		(set-count mrg cnt)
 
-		; (store-atom mrg) ; save to SQL
+		(store-atom mrg) ; save to SQL
 	)
 
 	(define (orthogonalize CLS WRD)
@@ -122,11 +122,15 @@
 			(define cc (LLOBJ 'pair-count cla))
 			(define wc (if (null? wrd) 0 (LLOBJ 'pair-count wrd)))
 
-			(define orth (if (null? wrd) 0
+			; The orthogonal component.
+			(define orth (if (null? wrd) -999
 					(- wc (* cc dot-prod))))
-(if (< orth 0)
-(format #t "duuude its ~A and ~A and dot=~A or=~A\n" cla wrd dot-prod orth)
-)
+
+			; Update count on postive sections;
+			; Delete non-postive sections.
+			(if (< 0 orth)
+				(set-count wrd orth)
+				(if (not (null? wrd)) (cog-delete! wrd)))
 		)
 
 		; Compute the dot-product of WA and the merged class.
