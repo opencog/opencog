@@ -71,14 +71,16 @@
 	(define mrg-class (WordClassNode (string-concatenate
 		(list (cog-name WA) " " (cog-name WB)))))
 
-	(define (bogus a b) (format #t "Its ~A and ~A\n" a b))
+	; The length-squared of the merge vector.
+	(define lensq 0.0)
 
+	; Merge two words into a word-class.
 	(define (merge-func WORD-PAIR)
 		; The two words to merge
 		(define lw (first WORD-PAIR))
 		(define rw (second WORD-PAIR))
 
-		; The counts on them or zero.
+		; The counts on each, or zero.
 		(define lc (if (null? lw) 0 (LLOBJ 'pair-count lw)))
 		(define rc (if (null? rw) 0 (LLOBJ 'pair-count rw)))
 		(define cnt (+ rc lc))
@@ -90,22 +92,68 @@
 		; The merged word-class
 		(define mrg (Section mrg-class seq))
 
+		; Update the sum-square length
+		(set! lensq (+ lensq (* cnt cnt)))
+
 		; The summed counts
 		(set-count mrg cnt)
 
 		; (store-atom mrg) ; save to SQL
 	)
 
+	(define (orthogonalize CLS WRD)
+		(define dot-prod 0.0)
+		(define (compute-dot-prod CLAPR)
+			(define cla (first CLAPR))
+			(define wrd (second CLAPR))
+
+			; The counts on each, or zero.
+			(define cc (LLOBJ 'pair-count cla))
+			(define wc (if (null? wrd) 0 (LLOBJ 'pair-count wrd)))
+
+			(set! dot-prod (+ dot-prod (* cc wc)))
+		)
+
+		(define (ortho CLAPR)
+			(define cla (first CLAPR))
+			(define wrd (second CLAPR))
+
+			; The counts on each, or zero.
+			(define cc (LLOBJ 'pair-count cla))
+			(define wc (if (null? wrd) 0 (LLOBJ 'pair-count wrd)))
+
+			(define orth (if (null? wrd) 0
+					(- wc (* cc dot-prod))))
+(if (< orth 0)
+(format #t "duuude its ~A and ~A and dot=~A or=~A\n" cla wrd dot-prod orth)
+)
+		)
+
+		; Compute the dot-product of WA and the merged class.
+		; We could use fold here, but we won't.
+		(for-each compute-dot-prod (ptu 'right-stars (list CLS WRD)))
+
+(format #t "sum dotty ~A lens ~A\n" dot-prod lensq)
+		(set! dot-prod (/ dot-prod lensq))
+(format #t "final dotty ~A\n" dot-prod)
+
+		; Compute the orthogonal components
+		(for-each ortho (ptu 'right-stars (list CLS WRD)))
+	)
+
+	(define psa (add-dynamic-stars LLOBJ))
+	(define (bogus a b) (format #t "Its ~A and ~A\n" a b))
+	(define ptu (add-tuple-math LLOBJ bogus))
+
 	; Put the two words into the new word-class.
 	(MemberLink WA mrg-class)
 	(MemberLink WB mrg-class)
 
-	(let* ((ptu (add-tuple-math psa bogus))
-			(mrg-basis (ptu 'right-stars (list WA WB)))
-		)
+	; Create the merged vector.
+	(for-each merge-func (ptu 'right-stars (list WA WB)))
 
-		(for-each merge-func mrg-basis)
-	)
+	(orthogonalize mrg-class WA)
+	(orthogonalize mrg-class WB)
 )
 
 
