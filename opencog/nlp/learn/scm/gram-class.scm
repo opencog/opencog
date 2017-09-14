@@ -163,21 +163,26 @@
   orthogonal to the sum). Next, zero-clamping is applied, so that
   any non-positive components are erased.
 
-  If WA is a WordClassNodes, and WB is not, then WB is merged into
+  If WA is a WordClassNode, and WB is not, then WB is merged into
   WA. Currently, WB must never be a WordClass....
 "
 	; set-count ATOM CNT - Set the raw observational count on ATOM.
 	(define (set-count ATOM CNT) (cog-set-tv! ATOM (cog-new-ctv 1 0 CNT)))
 
-	; Create a new word-class.
-	(define mrg-class (WordClassNode (string-concatenate
-		(list (cog-name WA) " " (cog-name WB)))))
+	; Create a new word-class out of the two words.
+	(define wrd-class
+		(if (eq? 'WordClassNode (cog-type WA)) WA
+			(WordClassNode (string-concatenate
+					(list (cog-name WA) " " (cog-name WB))))))
 
 	; The length-squared of the merge vector.
 	(define lensq 0.0)
 
 	; Merge two words into a word-class.
-	(define (merge-func WORD-PAIR)
+	; This works fine for merging two words, or for merging
+	; a word and a word-class.  It even worsk for merging
+	; two word-classes.
+	(define (merge-word-pair WORD-PAIR)
 		; The two words to merge
 		(define lw (first WORD-PAIR))
 		(define rw (second WORD-PAIR))
@@ -192,7 +197,7 @@
 				(cog-outgoing-atom lw 1)))
 
 		; The merged word-class
-		(define mrg (Section mrg-class seq))
+		(define mrg (Section wrd-class seq))
 
 		; Update the sum-square length
 		(set! lensq (+ lensq (* cnt cnt)))
@@ -272,15 +277,34 @@
 	(define (bogus a b) (format #t "Its ~A and ~A\n" a b))
 	(define ptu (add-tuple-math LLOBJ bogus))
 
-	; Put the two words into the new word-class.
-	(MemberLink WA mrg-class)
-	(MemberLink WB mrg-class)
 
-	; Create the merged vector.
-	(for-each merge-func (ptu 'right-stars (list WA WB)))
+	(if (eq? 'WordNode (cog-type WA))
+		(begin
 
-	(orthogonalize mrg-class WA)
-	(orthogonalize mrg-class WB)
+			; Put the two words into the new word-class.
+			(MemberLink WA wrd-class)
+			(MemberLink WB wrd-class)
+
+			; Create the merged vector.
+			(for-each merge-word-pair (ptu 'right-stars (list WA WB)))
+
+			(orthogonalize wrd-class WA)
+			(orthogonalize wrd-class WB))
+
+		; If WA is not a WordNode, assume its a WordClassNode.
+		; The process is similar, but slightly altered.
+		; We assume that WB is a WordNode, but perform no safety
+		; checking to verify this.
+		(begin
+			; Add WB to the mrg-class (which is WA already)
+			(MemberLink WB wrd-class)
+
+			; Merge WB into the word-class
+			(for-each merge-word-pair (ptu 'right-stars (list WA WB)))
+
+			; Redefine WB to be orthogonal to the word-class.
+			(orthogonalize wrd-class WB))
+	)
 )
 
 ; ---------------------------------------------------------------
