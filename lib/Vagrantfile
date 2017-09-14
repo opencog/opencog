@@ -21,6 +21,7 @@ Vagrant.require_version ">= 2.0.0"
 Vagrant.configure("2") do |config|
   # Configure the box for opencog development
   config.vm.box = "ubuntu/trusty64"
+  config.vm.hostname = "opencog"
   config.vm.provision :shell, inline: "wget -O /tmp/octool \
     https://raw.githubusercontent.com/opencog/ocpkg/master/ocpkg \
      && chmod +rx /tmp/octool"
@@ -33,9 +34,10 @@ Vagrant.configure("2") do |config|
   # Configure port for telnet access to shell
   config.vm.network "forwarded_port", guest: 17001, host: 17001,
     host_ip: "127.0.0.1"
-  # Set --host to 192.168.50.2 when running opencog-server.sh in RelEx,
-  # to pass RelEx's OpenCog scheme output to cogbox.
-  # config.vm.network "private_network", ip: "192.168.50.2"
+
+  # Assign a private network ip that can be used for accesing the guest from
+  # host.
+  config.vm.network "private_network", type: "dhcp"
 
   # Sync directory containing this Vagrantfile.
   config.vm.synced_folder ".", "/home/vagrant/opencog"
@@ -44,6 +46,7 @@ Vagrant.configure("2") do |config|
 
   config.vm.provider :virtualbox do |vb|
       vb.linked_clone = true
+      vb.name = "opencog-dev"
       vb.memory = "2048"
       vb.cpus = 1
   end
