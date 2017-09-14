@@ -3,6 +3,8 @@
 .vagrant
 .DS_Store
 *.swp
+# chatscript files
+*.top
 
 # misc binaries
 bin
