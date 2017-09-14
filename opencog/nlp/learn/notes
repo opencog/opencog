@@ -13159,6 +13159,36 @@ fold
 
 
 =========================================================================
+out-of-control GC
+
+try:  (gc-disable) 
+
+Tomas writes:
+> To just add one more: total memory usage (gc and non-gc) seems to enter
+> the gc triggering heuristics [1] (I couldn't follow in detail how, and
+> I don't know whether this is still valid in the 2.2 branch).
+> 
+> It just might be that Guile is seeing the outrageous process's memory
+> footprint and tries desperately to free some memory (which of course
+> can't suceed in your case because most memory usage isn't "guile's").
+> 
+> [1] http://git.savannah.gnu.org/cgit/guile.git/tree/libguile/gc.c?h=v2.0.13#n770
+
+Hans writes:
+
+> Does it have to do with this issue [1], that the Boehm GC initially
+> uses a small amount of heap. One can use say
+>   export GC_INITIAL_HEAP_SIZE=50G
+> on the shell command line before running the program.
+> 
+> 1. https://github.com/Macaulay2/M2/issues/500
+
+Mark Weaver writes:
+> http://www.hboehm.info/gc/gcdescr.html
+
+and see eail about this.
+
+=========================================================================
 OK-ish misses the mark:
 arxiv 1703.08314v1 coecke Interacting conceptual spaces
 
