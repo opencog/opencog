@@ -101,7 +101,15 @@
 		(store-atom mrg) ; save to SQL
 	)
 
+	; Given a WordClassNode CLS and a WordNode WRD, alter the
+	; counts on the disjuncts on WRD, so that they are orthogonal
+	; to CLS.  If the counts are negative, that word-disjunct pair
+	; is deleted (from the database as well as the atomspace).
+	; The updated counts are stored in the database.
 	(define (orthogonalize CLS WRD)
+
+		; Machinery to compute the dot-product between the WRD
+		; vector and the CLS vector.
 		(define dot-prod 0.0)
 		(define (compute-dot-prod CLAPR)
 			(define cla (first CLAPR))
@@ -114,6 +122,10 @@
 			(set! dot-prod (+ dot-prod (* cc wc)))
 		)
 
+		; Alter the counts on the word so that they are orthogonal
+		; to the class. Assumes that the dot-prduct was previously
+		; computed, and also that the mean-square length of the
+		; class was also previously computed.
 		(define (ortho CLAPR)
 			(define cla (first CLAPR))
 			(define wrd (second CLAPR))
@@ -130,16 +142,25 @@
 			; Delete non-postive sections.
 			(if (< 0 orth)
 				(set-count wrd orth)
-				(if (not (null? wrd)) (cog-delete! wrd)))
+				(if (not (null? wrd))
+					(begin
+						; Set to 0 just in case the delete below can't happen.
+						(set-count wrd 0)
+						(cog-delete wrd))))
+
+			; Update the database.
+			(if (cog-atom? wrd) (store-atom wrd))
+
+			; (if (< 3 orth) (format #t "Large remainder: ~A\n" wrd))
 		)
 
 		; Compute the dot-product of WA and the merged class.
 		; We could use fold here, but we won't.
 		(for-each compute-dot-prod (ptu 'right-stars (list CLS WRD)))
 
-(format #t "sum dotty ~A lens ~A\n" dot-prod lensq)
+; (format #t "sum ~A dotty ~A lens ~A\n" WRD dot-prod lensq)
 		(set! dot-prod (/ dot-prod lensq))
-(format #t "final dotty ~A\n" dot-prod)
+; (format #t "final dotty ~A\n" dot-prod)
 
 		; Compute the orthogonal components
 		(for-each ortho (ptu 'right-stars (list CLS WRD)))
@@ -160,12 +181,6 @@
 	(orthogonalize mrg-class WB)
 )
 
-
-; (define psa (add-dynamic-stars pca))
-; (define (bogus a b) (format #t "Its ~A and ~A\n" a b))
-; (define ptu (add-tuple-math psa bogus))
-; (define run-n-jump (ptu 'right-stars (list (Word "run") (Word "jump"))))
-; (ptu 'pair-count (car run-n-jump))
 
 (define (add-dynamic-stars LLOBJ)
 "
@@ -262,10 +277,10 @@
 				(else             (apply LLOBJ (cons message args))))
 		)))
 
+; ---------------------------------------------------------------
 (define (do-it)
 	(let ((pca (make-pseudo-cset-api))
-			(psa (add-pair-stars pca))
-			(pfa (add-pair-freq-api psa))
+			(psa (add-dynamic-stars pca))
 		)
 
 		(load-atoms-of-type 'WordNode)
@@ -278,3 +293,15 @@
 
 	)
 )
+
+; ---------------------------------------------------------------
+; Example usage
+;
+; (define psa (add-dynamic-stars pca))
+;
+; (define (bogus a b) (format #t "Its ~A and ~A\n" a b))
+; (define ptu (add-tuple-math psa bogus))
+; (define run-n-jump (ptu 'right-stars (list (Word "run") (Word "jump"))))
+; (ptu 'pair-count (car run-n-jump))
+;
+; (merge-ortho psa (Word "run") (Word "jump"))
