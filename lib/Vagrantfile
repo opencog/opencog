@@ -56,7 +56,7 @@ Vagrant.configure("2") do |config|
   config.vm.post_up_message = "
   To ssh into the virtual machine run 'vagrant ssh'.
 
-  The virtual machine has all the dependendencies required for working on
+  The virtual machine has all the dependencies required for working on
   cogutils, atomspace, moses, and opencog.
 
   octool can be found at '/tmp/octool'.
