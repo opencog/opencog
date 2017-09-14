@@ -44,6 +44,108 @@
 (use-modules (srfi srfi-1))
 (use-modules (opencog) (opencog matrix))
 
+; ---------------------------------------------------------------------
+; TODO: move the below to the atomsace matrix directory, when its
+; ready. Its not ready, it needs to impleemnt extract, to unclog RAM.
+;
+
+(define-public (add-dynamic-stars LLOBJ)
+"
+  add-dynamic-stars LLOBJ - Extend LLOBJ with row and column access
+  methods (aka wildcard methods), specifically, to get all non-zero
+  elements in a given row or column.
+
+  Similar to the (add-pair-stars LLOBJ) class, except that this
+  attempts to work without having to load all pairs into RAM at the
+  same time; instead, pairs are fetched from the database dynamically,
+  on demand.  This is attempting to address the problem where not all
+  of the matrix can fit into RAM at the same time.  If all of the
+  matrix can fit, then (add-pair-stars LLOBJ) is more efficient.
+
+  The supported methods are:
+  'left-basis - Return all items (atoms) that might be used to index
+      a row in the matrix.  This may return more items than there are
+      rows; no check is performed for empty or invalid rows. However,
+      all valid rows will appear in the set: the returned set is a
+      superset.  All of the elements of this set will be atoms of type
+      (LLOBJ 'left-type).
+
+  'right-basis - Likewise, but for columns.
+
+  'left-stars COL - Returns pairs (*, COL), same as documented in the
+  pair-stars API.
+
+  'right-stars ROW - Likewise, but returns the set (ROW, *).
+"
+	(let ((stars-obj (add-pair-stars LLOBJ))
+			(l-basis '())
+			(r-basis '())
+			(cache-incoming '())
+			(pair-type (LLOBJ 'pair-type))
+		)
+
+		; Retreive all atoms of TYPE from the database
+		(define (get-atoms TYPE)
+			(load-atoms-of-type TYPE)
+			(cog-get-atoms  TYPE))
+
+		; Return a list of all items that might be rows.
+		(define (get-left-basis)
+			(if (null? l-basis)
+				(set! l-basis (get-atoms (LLOBJ 'left-type))))
+			l-basis)
+
+		; Return a list of all items that might be columns.
+		(define (get-right-basis)
+			(if (null? r-basis)
+				(set! r-basis (get-atoms (LLOBJ 'right-type))))
+			r-basis)
+
+		; Fetch the incoming set for ITEM, but only if we haven't
+		; already done so.
+		(define (get-incoming ITEM)
+			(if (not (member ITEM cache-incoming))
+				(begin
+					(fetch-incoming-by-type ITEM pair-type)
+					(set! cache-incoming (cons ITEM cache-incoming)))))
+
+		; Return a list matrix entries with ITEM on the right;
+		; that is, a wild-card on the left. That is, the set of
+		; entries { (*, ITEM) }.  Uses the stars-obj to filter
+		; the valid pairs, after fetching them from the database.
+		(define (get-left-stars ITEM)
+			(get-incoming ITEM)
+			(stars-obj 'left-stars ITEM))
+
+		(define (get-right-stars ITEM)
+			(get-incoming ITEM)
+			(stars-obj 'right-stars ITEM))
+
+		;-------------------------------------------
+		; Explain what it is that I provide. This helps classes
+		; above understand what it is that this class does.
+		(define (provides meth)
+			(case meth
+				((left-basis)       get-left-basis)
+				((right-basis)      get-right-basis)
+				((left-stars)       get-left-stars)
+				((right-stars)      get-right-stars)
+				(else               (LLOBJ 'provides meth))))
+
+		;-------------------------------------------
+		; Methods on this class.
+		(lambda (message . args)
+			(case message
+				((left-basis)     (get-left-basis))
+				((right-basis)    (get-right-basis))
+				((left-stars)     (apply get-left-stars args))
+				((right-stars)    (apply get-right-stars args))
+				((provides)       (apply provides args))
+				(else             (apply LLOBJ (cons message args))))
+		)))
+
+; ---------------------------------------------------------------------
+
 (define (merge-ortho LLOBJ WA WB)
 "
   merge-ortho WA WB - merge WA and WB into a grammatical class.
@@ -180,102 +282,6 @@
 	(orthogonalize mrg-class WA)
 	(orthogonalize mrg-class WB)
 )
-
-
-(define (add-dynamic-stars LLOBJ)
-"
-  add-dynamic-stars LLOBJ - Extend LLOBJ with row and column access
-  methods (aka wildcard methods), specifically, to get all non-zero
-  elements in a given row or column.
-
-  Similar to the (add-pair-stars LLOBJ) class, except that this
-  attempts to work without having to load all pairs into RAM at the
-  same time; instead, pairs are fetched from the database dynamically,
-  on demand.  This is attempting to address the problem where not all
-  of the matrix can fit into RAM at the same time.  If all of the
-  matrix can fit, then (add-pair-stars LLOBJ) is more efficient.
-
-  The supported methods are:
-  'left-basis - Return all items (atoms) that might be used to index
-      a row in the matrix.  This may return more items than there are
-      rows; no check is performed for empty or invalid rows. However,
-      all valid rows will appear in the set: the returned set is a
-      superset.  All of the elements of this set will be atoms of type
-      (LLOBJ 'left-type).
-
-  'right-basis - Likewise, but for columns.
-
-  'left-stars COL - Returns pairs (*, COL), same as documented in the
-  pair-stars API.
-
-  'right-stars ROW - Likewise, but returns the set (ROW, *).
-"
-	(let ((stars-obj (add-pair-stars LLOBJ))
-			(l-basis '())
-			(r-basis '())
-			(cache-incoming '())
-			(pair-type (LLOBJ 'pair-type))
-		)
-
-		; Retreive all atoms of TYPE from the database
-		(define (get-atoms TYPE)
-			(load-atoms-of-type TYPE)
-			(cog-get-atoms  TYPE))
-
-		; Return a list of all items that might be rows.
-		(define (get-left-basis)
-			(if (null? l-basis)
-				(set! l-basis (get-atoms (LLOBJ 'left-type))))
-			l-basis)
-
-		; Return a list of all items that might be columns.
-		(define (get-right-basis)
-			(if (null? r-basis)
-				(set! r-basis (get-atoms (LLOBJ 'right-type))))
-			r-basis)
-
-		; Fetch the incoming set for ITEM, but only if we haven't
-		; already done so.
-		(define (get-incoming ITEM)
-			(if (not (member ITEM cache-incoming))
-				(begin
-					(fetch-incoming-by-type ITEM pair-type)
-					(set! cache-incoming (cons ITEM cache-incoming)))))
-
-		; Return a list matrix entries with ITEM on the right;
-		; that is, a wild-card on the left. That is, the set of
-		; entries { (*, ITEM) }.  Uses the stars-obj to filter
-		; the valid pairs, after fetching them from the database.
-		(define (get-left-stars ITEM)
-			(get-incoming ITEM)
-			(stars-obj 'left-stars ITEM))
-
-		(define (get-right-stars ITEM)
-			(get-incoming ITEM)
-			(stars-obj 'right-stars ITEM))
-
-		;-------------------------------------------
-		; Explain what it is that I provide. This helps classes
-		; above understand what it is that this class does.
-		(define (provides meth)
-			(case meth
-				((left-basis)       get-left-basis)
-				((right-basis)      get-right-basis)
-				((left-stars)       get-left-stars)
-				((right-stars)      get-right-stars)
-				(else               (LLOBJ 'provides meth))))
-
-		;-------------------------------------------
-		; Methods on this class.
-		(lambda (message . args)
-			(case message
-				((left-basis)     (get-left-basis))
-				((right-basis)    (get-right-basis))
-				((left-stars)     (apply get-left-stars args))
-				((right-stars)    (apply get-right-stars args))
-				((provides)       (apply provides args))
-				(else             (apply LLOBJ (cons message args))))
-		)))
 
 ; ---------------------------------------------------------------
 (define (do-it)
