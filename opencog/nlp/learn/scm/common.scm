@@ -22,7 +22,7 @@
 (define-public (get-count ATOM) (cog-tv-count (cog-tv ATOM)))
 
 ; set-count ATOM CNT - Set the raw observational count on ATOM.
-(define (set-count ATOM CNT) (cog-set-tv! ATOM (cog-new-ctv 0 0 CNT)))
+(define (set-count ATOM CNT) (cog-set-tv! ATOM (cog-new-ctv 1 0 CNT)))
 
 ; ---------------------------------------------------------------------
 

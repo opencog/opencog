@@ -64,17 +64,36 @@
   If WA is a WordClassNodes, and WB is not, then WB is merged into
   WA. Currently, WB must never be a WordClass....
 "
+	; set-count ATOM CNT - Set the raw observational count on ATOM.
+	(define (set-count ATOM CNT) (cog-set-tv! ATOM (cog-new-ctv 1 0 CNT)))
 
 	; Create a new word-class.
-	(define mrg-class (WordClassNode
-			(string-append (cog-name WA) (cog-name WB))))
+	(define mrg-class (WordClassNode (string-concatenate
+		(list (cog-name WA) " " (cog-name WB)))))
 
 	(define (bogus a b) (format #t "Its ~A and ~A\n" a b))
 
 	(define (merge-func WORD-PAIR)
+		; The two words to merge
 		(define lw (first WORD-PAIR))
 		(define rw (second WORD-PAIR))
-(format #t "duuude its ~A and ~A\n" lw rw)
+
+		; The counts on them or zero.
+		(define lc (if (null? lw) 0 (LLOBJ 'pair-count lw)))
+		(define rc (if (null? rw) 0 (LLOBJ 'pair-count rw)))
+		(define cnt (+ rc lc))
+
+		; The disjunct. Both lw and rw have the same disjunct.
+		(define seq (if (null? lw) (cog-outgoing-atom rw 1)
+				(cog-outgoing-atom lw 1)))
+
+		; The merged word-class
+		(define mrg (Section mrg-class seq))
+
+		; The summed counts
+		(set-count mrg cnt)
+
+		; (store-atom mrg) ; save to SQL
 	)
 
 	; Put the two words into the new word-class.
