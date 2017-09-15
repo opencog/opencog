@@ -37,10 +37,11 @@ if ($HELP) {
 	exit;
 }
 
-# Specifying `-l zh` or `-l yue` will pade each and every hanzi
+# Specifying `-l zh` or `-l yue` will pad each and every hanzi
 # character with whitespace.  Specifying `-l zh-pre` or `-l yue-pre`
 # implies that the input text is pre-split into words, and whitespace
-# is not added.
+# is not added. In either case, splitting into sentences is still
+# performed.
 if ($language =~ /-pre$/) {
 	$language =~ s/-pre//;
 	$hanzi = 0;
@@ -146,7 +147,8 @@ sub preprocess
 	# Sentences that end in punctuation, followed by a double-dash.
 	$text =~ s/([?!\.]) +(--[ \'\"\(\[\¿\¡\p{IsPi}]*[\p{IsUpper}])/$1\n$2/g;
 
-	$text =~ s/([。．？！♪])/$1\n/g;
+	# Sentence-ending punctuation, followed by optional close-quote.
+	$text =~ s/([。．？！♪]”?)/$1\n/g;
 	$text =~ s/([\.?!]) *(\p{InCJK})/$1\n$2/g;
 	if ($hanzi) { $text =~ s/(\p{InCJK})/ $1 /g; }
 	$text =~ s/ +/ /g;

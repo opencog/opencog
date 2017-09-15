@@ -9,27 +9,11 @@
 // show up elsewhere!
 //
 // ====================================================================
-// Older parsing and language handling nodes;
-// Commented out, as these are currently unused,
-// and are being replaced by newer RelEx forms.
-// Some of these may be revived. See below.
 //
-// COLLOCATION_NODE <- WORD_NODE
-// SEQUENCE_LINK <- ORDERED_LINK
-//
-// QUANTITY_LINK <- FEATURE_LINK
-// NOUN_NUMBER_LINK <- FEATURE_LINK
-// WORD_GENDER_LINK <- FEATURE_LINK
-//
-// TENSE_NODE <- FEATURE_NODE
-// NOUN_NUMBER_NODE <- FEATURE_NODE
-// WORD_GENDER_NODE <- FEATURE_NODE
-//
-// QUERY_VARIABLE_LINK <- ORDERED_LINK
-//
-
 WORD_NODE <- NODE
 ANY_NODE <- NODE    // Explicit wildcard node, used for counting.
+WORD_CLASS_NODE <- NODE  // A signifier of a set of words
+
 REFERENCE_LINK <- ORDERED_LINK
 
 // Imperative command. See chatbot-eva for details.
@@ -63,12 +47,8 @@ SENTENCE_SEQUENCE_LINK <- SEQUENCE_LINK
 DOCUMENT_SEQUENCE_LINK <- SEQUENCE_LINK
 
 // Custom atoms to identify features, relations
-// Note that the feature links could (should ??) be replaced by
-// predicate links, where the feature type is encoded in the
-// predicate name, rather than in the link type.  However, there
-// is no immediate need for this, and custom link-types use less RAM.
-// So we define a bunch of custom link types.
-FEATURE_NODE <- CONCEPT_NODE
+// These are not used anywhere, right???
+FEATURE_NODE <- PREDICATE_NODE
 FEATURE_LINK <- ORDERED_LINK
 
 // XXX TODO -- below should be replaced by LG_LINK_NODE
@@ -78,7 +58,7 @@ LINK_GRAMMAR_RELATIONSHIP_NODE <- PREDICATE_NODE   // e.g. "MX"
 // ---------------------------------------------------------------
 // Used to represent RelEx dependency relations
 // Since RelEx is deprecated, thes should eventually go away.
-DEFINED_LINGUISTIC_CONCEPT_NODE <- FEATURE_NODE
+DEFINED_LINGUISTIC_CONCEPT_NODE <- CONCEPT_NODE // is this used anywhere??
 DEFINED_LINGUISTIC_PREDICATE_NODE <- PREDICATE_NODE
 DEFINED_LINGUISTIC_RELATIONSHIP_NODE <- PREDICATE_NODE // e.g. _subj, _obj
 PREPOSITIONAL_RELATIONSHIP_NODE <- PREDICATE_NODE  // e.g. of, next, to
@@ -141,7 +121,7 @@ LG_CONN_DIR_NODE <- NODE    // e.g. "+"
 
 // Consists of the connector node, the direction, and possibly the
 // multi-connector node.
-LG_CONNECTOR <- LINK   // e.g. "MX+"
+LG_CONNECTOR <- CONNECTOR   // e.g. "MX+"
 
 // These vaguely resemble AND_LINK and OR_LINK, but DO NOT BE FOOLED!
 // They are not really the same, as they are not boolean; rather they
@@ -161,8 +141,8 @@ LG_OR  <- OR_LINK     // Exclusive-OR, completely disjunctive.
 // Ideally, these are fully disjoined before use.
 // In the case of WordInstanceNode, it should always be a
 // LgAnd disjunct used in the corresponding sentence.
-LG_WORD_CSET <- LIST_LINK
-LG_DISJUNCT <- LIST_LINK
+LG_WORD_CSET <- CONNECTOR_SEQ
+LG_DISJUNCT <- SECTION
 
 // For LG link instance of a specific parse of a sentence
 // LgLinkInstanceNode will be an instance of LinkGrammarRelationshipNode

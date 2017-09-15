@@ -504,7 +504,7 @@
 ; AND typecodes.typename='WordNode';
 ;
 ; If it all looks good, then:
-; (batch-all-pair-mi (make-any-link-api))
+; (batch-pairs (make-any-link-api))
 ;
 ; (define wtfl  (EvaluationLink  (LinkGrammarRelationshipNode "ANY")
 ;   (ListLink (AnyNode "left-word") (WordNode "famille"))))

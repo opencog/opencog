@@ -6045,7 +6045,7 @@ select count(*) from atoms;      -- 61069212 = 61M atoms
 select count(*) from valuations; -- 30960586 = 31M values
 
 2860579197 bytes uncompressed = 2.86 GB
- 488196590 butes compressed = 488MB
+ 488196590 bytes compressed   = 488MB
 
 dd28f22ef60b1d7f3f5854bfba793116  en_pairs_rfive.sql
 2bbe479fe0caa77c5a1438568a22a4c4  en_pairs_rfive.sql.bz2
@@ -6231,6 +6231,161 @@ select count(*) from valuations; -- 133848790 = 134M = 11M more
 1bd09cb8c014ec2c8e33ee7d101f4357  en_pairs_rfive_mfive.sql.bz2
 
 ==================================================================
+en_pairs_rfive_mst
+------------------
+Same as en_pairs_rfive_mfive, but with word-disjunct marginals in it.
+
+STATUS: good
+DATE: 6 Sept 2017
+REASON: Best so far, I think. Except it contains infixed punctuation.
+    Which is a pointless waste of space. And which throws off stats
+    slightly, I suppose.
+ISSUES: Too big to fit into RAM.  Just loading disjunct marginals
+    requires 75GBytes. (25M csets and 25M ListLinks and umpteen valuations) 
+
+                        List of relations
+ Schema |    Name    | Type  | Owner  |    Size    | Description 
+--------+------------+-------+--------+------------+-------------
+ public | atoms      | table | ubuntu | 13 GB      | 
+ public | spaces     | table | ubuntu | 40 kB      | 
+ public | typecodes  | table | ubuntu | 56 kB      | 
+ public | valuations | table | ubuntu | 34 GB      | 
+ public | values     | table | ubuntu | 8192 bytes | 
+
+select count(*) from atoms;      -- 150550752 = 150M (so +25M for marginals)
+select count(*) from valuations; -- 330716326 = 331M (+200M for marginals!!!)
+
+Not possible to load the whole dataset, so:
+(fetch-incoming-set (AnyNode "cset-word"))
+(print-matrix-summary-report psa)
+Summary Report for Correlation Matrix Word-Disjunct Pairs (Connector Sets)
+Left type: WordNode    Right Type: ConnectorSeq    Pair Type: Section
+Wildcard: (ListLink (ctv 0 0 77798246)
+   (AnyNode "cset-word")
+   (AnyNode "cset-disjunct")
+)
+Rows: 522243 Columns: 25162434
+Size: 34222079 non-zero entries of 13140905019462 possible
+Fraction non-zero: 2.6042E-6 Sparsity (-log_2): 18.551
+Total observations: 77798246.0  Avg obs per pair: 2.2733
+Entropy Total: 22.821   Left: 20.920   Right: 10.085
+Total MI: 8.1836
+
+                 Left         Right     Avg-left     Avg-right
+                 ----         -----     --------     ---------
+Support (l_0)  2.2054E+5    392.2    
+Count   (l_1)  1.0180E+6    1.0483E+4     4.616        26.73    
+Length  (l_2)  4.0497E+4    4661.         .1836        11.88    
+RMS Count      4.0447E+4    4596.         .1834        11.72    
+
+26935688497 bytes uncomepressed = 26.9 GBytes
+ 3389925594 bytes compressed = 3.4 GBytes
+
+61bd65b782182bf98c66abc2bc2e4612  en_pairs_rfive_mst.sql
+28cce911418ca8c82428cb1e6776aa2d  en_pairs_rfive_mst.sql.bz2
+
+
+==================================================================
+en_pairs_cfive
+---------------
+Random-planar-tree parsed books from tranche-1, 2, 3, 4 and 5. 
+A cleaned-up version of en_pairs_rfive.  Words with infix marks
+were removed.  However, hyphenated words and apostrophised words
+remain.  Does NOT contain pair-MI values.
+
+STATUS: good
+DATE: 1 Sept 2017
+REASON: Best so far, I think.  One issue:
+
+                        List of relations
+ Schema |    Name    | Type  | Owner  |    Size    | Description 
+--------+------------+-------+--------+------------+-------------
+ public | atoms      | table | ubuntu | 5380 MB    | 
+ public | spaces     | table | ubuntu | 40 kB      | 
+ public | typecodes  | table | ubuntu | 56 kB      | 
+ public | valuations | table | ubuntu | 3365 MB    | 
+ public | values     | table | ubuntu | 8192 bytes | 
+
+select count(*) from atoms;      -- 56409030 = 56M = 5M fewer than rfive.
+select count(*) from valuations; -- 28516287 = 28.5M = 2.5M fewer 
+
+2638878848 bytes uncompressed = 2.64 GBytes
+ 453916099 bytes compressed   = 454 MBytes
+
+3f9a82d6f5ab8547d15b8a32b27896a2  en_pairs_cfive.psql
+ad6e0ad034855441be507344f201f624  en_pairs_cfive.psql.bz2
+
+
+==================================================================
+en_pairs_cfive_mst
+------------------
+Same as en_pairs_rfive_mst, but with infix-punctuation words removed.
+
+STATUS: good
+DATE: 12 Sept 2017
+REASON: Best so far, I think. The pair marginals have been recomputed.
+    and the dj marginals also.
+ISSUES: Too big to fit into RAM. 
+    Loading word-pairs and marginals requires 72GBytes.
+    Just loading disjunct marginals requires 75GBytes. 
+    (25M csets and 25M ListLinks and umpteen valuations) 
+    Recomputing disjunct marginals uses 134GB RAM.
+
+                        List of relations
+ Schema |    Name    | Type  | Owner  |    Size    | Description 
+--------+------------+-------+--------+------------+-------------
+ public | atoms      | table | ubuntu | 13 GB      | 
+ public | spaces     | table | ubuntu | 40 kB      | 
+ public | typecodes  | table | ubuntu | 56 kB      | 
+ public | valuations | table | ubuntu | 57 GB      | 
+ public | values     | table | ubuntu | 8192 bytes | 
+
+select count(*) from atoms;      -- 139638908 = 140 M atoms (10M less)
+select count(*) from valuations; -- 307109283 = 307 M values (24M less)
+
+Summary Report for Correlation Matrix Link Grammar ANY link Word Pairs
+Rows: 619168 Columns: 580804
+Size: 27892737 non-zero entries of 359615251072 possible
+Fraction non-zero: 7.7563E-5 Sparsity (-log_2): 13.654
+Total observations: 1247457239.0  Avg obs per pair: 44.723
+Entropy Total: 18.645   Left: 10.053   Right: 10.390
+Total MI: 1.7982
+
+                 Left         Right     Avg-left     Avg-right
+                 ----         -----     --------     ---------
+Support (l_0)  5.3758E+4    7.3126E+4
+Count   (l_1)  1.5140E+7    1.8578E+7     281.6        254.1    
+Length  (l_2)  1.8653E+6    1.8923E+6     34.70        25.88    
+RMS Count      1.8647E+6    1.8917E+6     34.69        25.87    
+
+Summary Report for Correlation Matrix Word-Disjunct Pairs (Connector Sets)
+Left type: WordNode    Right Type: ConnectorSeq    Pair Type: Section
+Wildcard: (ListLink (ctv 0 0 69447009)
+   (AnyNode "cset-word")
+   (AnyNode "cset-disjunct")
+)
+Rows: 444903 Columns: 23444293
+Size: 31914870 non-zero entries of 10430436288579 possible
+Fraction non-zero: 3.0598E-6 Sparsity (-log_2): 18.318
+Total observations: 69447009.0  Avg obs per pair: 2.1760
+Entropy Total: 23.092   Left: 21.137   Right: 10.112
+Total MI: 8.1569
+
+                 Left         Right     Avg-left     Avg-right
+                 ----         -----     --------     ---------
+Support (l_0)  2.2742E+5    367.6    
+Count   (l_1)  9.4430E+5    7917.         4.152        21.54    
+Length  (l_2)  2.4549E+4    2397.         .1079        6.520    
+RMS Count      2.4499E+4    2379.         .1077        6.472    
+
+24893983049 bytes uncompressed = 24.9 GB 
+ 3197324260 bytes compressed   =  3.2 GB
+
+85a872a283314d5bc1900b20da35a017  en_pairs_cfive_mst.sql
+8f5eab41474c92c1a084ce9fc60f243c  en_pairs_cfive_mst.sql.bz2
+
+
+==================================================================
 zh_pairs_one
 ------------
 Mandarin individual character pairs.  Only that, without any pair stats.
@@ -6299,7 +6454,7 @@ NOT include pair-MI stats. This is the alpha-segmented-1 texts only.
 
 STATUS: good
 DATE: 17 July 2017
-REASON: No known defects.
+REASON: No known defects. Except that the dataset is too small.
 
                         List of relations
  Schema |    Name    | Type  | Owner  |    Size    | Description 
@@ -6406,6 +6561,36 @@ select count(*) from valuations; -- 11414113 = 11.4M values
 
 c4df6f2da0c476a561cbea82981a6853  zen_pairs_mst.sql
 ff7cb1628cb7aad0a59c71b98a626121  zen_pairs_mst.sql.bz2
+
+
+==================================================================
+zen_pairs_two
+-------------
+Mandarin word-pairs. Segmentation into words done by Ruiting. Does
+NOT include pair-MI stats. This is includes alpha-segmented-1 and
+alpha-segmented-2 texts.
+
+STATUS: good
+DATE: 10 Sept 2017
+REASON: No known defects. Except that the dataset is too big.
+
+                        List of relations
+ Schema |    Name    | Type  | Owner  |    Size    | Description 
+--------+------------+-------+--------+------------+-------------
+ public | atoms      | table | ubuntu | 8947 MB    | 
+ public | spaces     | table | ubuntu | 40 kB      | 
+ public | typecodes  | table | ubuntu | 56 kB      | 
+ public | valuations | table | ubuntu | 103 GB     | 
+ public | values     | table | ubuntu | 8192 bytes | 
+
+select count(*) from atoms;      -- 101322902 = 101 M atoms
+select count(*) from valuations; --  54922685 =  55 M valuations
+
+5140909514 bytes uncompressed = 5.14 GBytes
+ 863704716 bytes compressed   = 864 MBytes
+
+c8ec47ba53fedad6ce0871c8a7482410  zen_pairs_two.sql
+c8dc76a1bd5e68c8a6d08689f6485610  zen_pairs_two.sql.bz2
 
 
 ==================================================================
@@ -12495,7 +12680,7 @@ delete hl3 then hl2 then hl
 
 wait -- were teh uuids removed? yes they were.
 
-cog-delete-recursive is weierd
+cog-delete-recursive is wierd
 how to find handles....  handle_to_scm won't work.
 
 -----------------
@@ -12624,12 +12809,12 @@ after: 623548
 (define start 0)
 (define (get-bad wrdnod)
 	(define wstr (cog-name wrdnod))
-	(define wlen (string-length wstr))
+	; (define wlen (string-length wstr))
 	(if (is-bad? wstr)
 		(begin
 			(set! cnt (+ cnt 1))
 			; (set! abw (cons wrdnod abw))
-			; (cog-delete-recursive wrdnod)
+			(cog-delete-recursive wrdnod)
 			(if (equal? 0 (modulo cnt 1000))
 				(let ((end (current-time)))
 					(format #t "deleted ~D ~A in ~A secs\n"
@@ -12640,6 +12825,74 @@ after: 623548
 (define start (current-time))
 (for-each get-bad (get-all-words))
 
+----------
+en_pairs_rfive_mst
+Again: en_pairs_mfive_mst:
+total of 522243 words == 522K words appearing in disjuncts
+total of 851964 words when all are considered Uhh oh.
+After (fetch-all-words) have 
+zero with []
+zero trailing blanks
+228416 which embeded punct.  Same as before
+
+after deletion, have
+
+(define (first-bad wrdnod)
+	(define wstr (cog-name wrdnod))
+	(if (is-bad? wstr)
+		(begin
+          (format #t "~A\n" wstr)  (foobar))))
+
+_châtelaines  15:07
+... delete needs what index??
+CREATE INDEX incoming_idx on Atoms USING GIN(outgoing);
+
+ report -- fetch only thte stats for reporting.
+print-matrix-summary-report
+
+fetch incoming set of (LLOBJ 'wild-wild))
+
+(fetch-incoming-set (AnyNode "cset-word"))
+75GB in size
+(length (cog-incoming-set (AnyNode "cset-word"))) ; 25162435 = 25M
+(cog-report-counts)
+((ListLink . 25162435) (Connector . 1032779) 
+(ConnectorSeq . 25162434) (WordNode . 522243) 
+(fetch-incoming-set (AnyNode "cset-disjunct"))
+above is before;
+afterwards have
+((ListLink . 24169074)  (Connector .  988068) 
+(ConnectorSeq . 23670834) (WordNode . 623548) 
+
+so ... a little shrinkage, not that much,..
+
+Overall, we expect .... 
+24M conseq + 24M any-con-list-links + 35M sections = 83M atoms
+plus 2M slop = 85M!? atoms
+
+82GB for 59M atoms = 1.4K/atom
+expect about 115GB when done... actual 113GB
+81350152 atoms
+
+((ListLink . 24169074) (SchemaNode . 1) (PredicateNode . 11) (Connector .
+971810) (ConnectorDir . 2) (ConnectorSeq . 23670834) (Section . 31914870)
+(WordNode . 623548) (AnyNode . 2))
+
+Elapsed time to load csets: 22555 secs -- 6+ hours! ouch
+Finished loading sparse matrix pairs
+Start computing the basis
+
+(define psa (add-pair-stars pca))
+(batch-all-pair-mi psa)
+Support: found num left= 444903 num right= 23444293 in 1014 secs
+Done with wild-card count N(x,*) and N(*,y) in 29048 secs
+Done computing N(*,*) total-count= 69447009.0 in 1101 secs
+Going to do individual pair frequencies
+Done computing 31914870 pairs in 925 secs
+
+
+
+----------
 zh only has 5653 bad words...
 
 with txn, running at 7 secs-ish or sometime12 12-14 ish
@@ -12740,7 +12993,7 @@ was: 1554375
 (for-each (lambda (sent)
 		(set! cnt (+ cnt 1))
 		(format #t "delete ~D\n" cnt)
-		(zelete sent))
+		(if (cog-atom? sent) (delete-sentence sent)))
 	(cog-get-atoms 'SentenceNode))
 
 61377
@@ -12762,8 +13015,178 @@ no leak with delete-sentence either. WTF
 Bingo! 
 Now  1345 with 0
 
+-------------------------------------------
+Bugs fixed
+
+Bugs: get rid of [!] in words DONE
+
+Bugs: cleanup zen due to above DONE
+      what about zen_pairs_three? Ans: its junk!  Delete! DONE
+
+Bugs: clean up zh due to above    DONE
+
+Bugs: get rid of all-atoms in matrix  DONE
+
+Bugs: split sent: quote after period DONE
+
+------------------------------------------
+OK, so ... where was I?
+-- computed similarity for huge number of English pairs.
+I think this is in en_pairs_rfive_mtwo on fanny.
+ 86498236 |     1 |   89 |      0 | *-SimKey cset cut-50-50-10 |
+ 86355966 |     1 |   89 |      0 | *-Cosine Sim Key-*         |
+
+select count(*) from valuations where key=86498236; --  142270 = 
+select count(*) from valuations where key=86355966; -- 1457522 = 1.4M
+
+-- Need to re-graph cos sim for this much larger set.
+   (define psm (add-similarity-api psa #f)
+   (psm 'fetch-pairs)  -- size = 1.4GB i.e. 1KB/atom fetched at
+       rate of 1K atoms/sec
+   there are 1058120  sims of length > 0.1
+
+	(define n 0)
+   (cog-map-type (lambda (ato) (set! n (+ n 1)) #f) 'WordNode) 
+   have 5843 words that are in similarity-pairs.
+   By contrast, there are  .... fuuu what is in this dataset????
 
 
+-- cleaned up dashes .. did I save this DB? Yes, done - en_pairs_cfive.
+   kind-of should redo MI calcs, and MST parsing. See below,
+   not done yet.
+   * This dataset is too big to fit in RAM...
+   * clean up infix punct in rfive_mfive call it rfive_mfx
+
+-- Need to redo the PCA.... DONE
+   
+-- If two words are similar, then ... 
+   * issue a uniq group ID
+   * sum the counts
+   
+
+
+lxc-ls --active
+lxc-stop -n xxx
+
+pg_dump zen_pairs
+
+$(id -nu)
+write portno to file?
+
+1) root to kill all lxc
+2) each lxc to shutdown cleanly
+   send (sql-cose) to portno .. which portno?
+
+ERROR:  could not create unique index "valuations_key_atom_idx"
+DETAIL:  Key (key, atom)=(1, 3853322) is duplicated.
+CREATE INDEX ON Valuations (key, atom); 
+
+/etc/init.d/rc.local
+
+rc-local.service
+/lib/systemd/system/rc-local.service.d
+rc-local-shutdown.service
+/etc/rc.local.shutdown
+
+except /etc/rc.local.shutdown did not actually run. Crap.
+Why?
+
+=======
+mhatta:
+Request dtor calls
+   ConsoleSocket::OnRequestComplete which does nothing but print...
+   ConsoleSocket::put() decrements use count.
+
+handle_connection on socket remote close does 
+SetCloseAndDelete
+fractional line is dispatched in the thread of handle_connection
+ ... using OnLine which just calls shell...
+  but befoer the fractional line is done, the socket is closed.
+  because ServerSocket::SetCloseAndDelete runs
+
+fuck.
+OK, remote end closes, 
+ServerSocket::handle_connection prints that its leaving...
+calls dtor on ConsoleSocket
+Generic shell is finishing up....
+
+First one:
+ServerSocket::handle_connection()   yes    too
+[ConsoleSocket] OnConnection        yes    too
+[ConsoleSocket] OnLine [scm hush]   yes    too
+...
+[ConsoleSocket] OnRequestComplete   yes    too
+[GenericShell] enter eval loop      yes    too
+[GenericShell] line disc: expr      yes    tooo
+[GenericShell] start eval of       ............?   also missgin 2x
+ServerSocket::exiting handle_connection()   yes   too
+[ConsoleSocket] destructor          yes    too
+                        .................... start eval of for third
+ServerSocket::Send(                 .... miss   ... miss
+[GenericShell] dtor, wait for eval thread  yes    too
+                         .....................  Send( the second delayed!!
+                         ...................... Send third
+
+Below only happens if self-destruct runs
+[GenericShell] finishing; eval of  ..... not in orig  ... miss in third
+[GenericShell] exit eval loop       yes   too
+[GenericShell] dtor, joined eval thread  yes too
+
+------------------------
+wait ... 
+concurrent_set uses std:less... Handle
+
+a->operator<
+... use atoms_less
+
+------------------------
+zen = 101M before  (+ 55m val)
+en = 56M  + 28M
+
+how?
+1) fetch words
+
+2) fetch incoming for one word
+3) do left+right MI for that word
+4) do marginals for taht word
+5) delete the pair.
+
+------------------------
+linear
+tuple math
+fold 
+
+
+
+=========================================================================
+out-of-control GC
+
+try:  (gc-disable) 
+
+Tomas writes:
+> To just add one more: total memory usage (gc and non-gc) seems to enter
+> the gc triggering heuristics [1] (I couldn't follow in detail how, and
+> I don't know whether this is still valid in the 2.2 branch).
+> 
+> It just might be that Guile is seeing the outrageous process's memory
+> footprint and tries desperately to free some memory (which of course
+> can't suceed in your case because most memory usage isn't "guile's").
+> 
+> [1] http://git.savannah.gnu.org/cgit/guile.git/tree/libguile/gc.c?h=v2.0.13#n770
+
+Hans writes:
+
+> Does it have to do with this issue [1], that the Boehm GC initially
+> uses a small amount of heap. One can use say
+>   export GC_INITIAL_HEAP_SIZE=50G
+> on the shell command line before running the program.
+> 
+> 1. https://github.com/Macaulay2/M2/issues/500
+
+Mark Weaver writes:
+> http://www.hboehm.info/gc/gcdescr.html
+
+and see eail about this.
 
 =========================================================================
 OK-ish misses the mark:
@@ -12798,17 +13221,16 @@ Bugs: while mst parsing, guile goes GC-crazy after a while, and
 
 Items: create LG feederbacker
 
-Bugs; get rid of [!] in words DONE
-
-Bugs: cleanup zen due to above DONE
-      what about zen_pairs_three? Ans: its junk!  Delete! DONE
-
-Bugs: clean up zh due to above    DONE
 Bugs: cleanup embedded dashes in en  DONE
-     -- save en_pairs_r again
+     -- save en_pairs_r again DONE
+     -- should pboably recompute pair-MI after above,
      -- maybe recompute mst?? (since it was so quick!?)
 
-Bugs: get rid of all-atoms in matrix  DONE
-
-Bugs: split sent: quote after period
 Bugs: sentences with more than 254 words....
+
+Bugs: make postgres run nice. half-done, w/ renice.
+
+Bugs: lxc containers not shutting down correctly during power loss
+
+Bugs/feat:  no way to compute marginals incrementally, if the DB does
+      not fit in RAM.
