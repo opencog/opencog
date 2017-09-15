@@ -21,8 +21,8 @@ PatternIndexAPI::PatternIndexAPI()
 
 PatternIndexAPI::~PatternIndexAPI()
 {
-    for (IndexMap::iterator it = indexes.begin(); it != indexes.end(); ++it) {
-        delete (*it).second.first;
+	for (const IndexMap::value_type& index : indexes) {
+        delete index.second.first;
     }
 }
 
@@ -325,8 +325,8 @@ Handle PatternIndexAPI::createIndex(const HandleSeq &handles)
     int tkt = -1;
     TypeFrameIndex *index = new TypeFrameIndex();
 
-    for (HandleSeq::const_iterator it = handles.begin(); it != handles.end(); ++it) {
-        index->add(*it, 0);
+    for (const Handle h : handles) {
+        index->add(h, 0);
     }
 
     index->buildSubPatternsIndex();
@@ -451,18 +451,17 @@ void PatternIndexAPI::query(vector<QueryResult> &answer,
                             const TypeFrame &query)
 {
     applyProperties(key);
-    vector<TypeFrameIndex::ResultPair> queryResult;
-    vector<TypeFrameIndex::ResultPair>::const_iterator itqr;
-    indexes.find(stoi(key->getName()))->second.first->query(queryResult, query);
-    for (itqr = queryResult.begin(); itqr != queryResult.end(); itqr++) {
+    vector<TypeFrameIndex::ResultPair> queryResults;
+    indexes.find(stoi(key->getName()))->second.first->query(queryResults, query);
+    for (const TypeFrameIndex::ResultPair& result : queryResults) {
         HandleSeq atoms;
         VariableMapping mapping;
-        for (TypeFrameIndex::TypeFrameSet::const_iterator it = (*itqr).first.begin(); it != (*itqr).first.end(); ++it) {
-            atoms.push_back(schemeEval->eval_h((*it).toSCMString()));
+        for (const TypeFrame& frame : result.first) {
+            atoms.push_back(schemeEval->eval_h(frame.toSCMString()));
         }
-        for (TypeFrameIndex::VarMapping::const_iterator it = (*itqr).second.begin(); it != (*itqr).second.end(); ++it) {
-            Handle var = schemeEval->eval_h("(VariableNode \"" + (*it).first + "\")");
-            Handle value = schemeEval->eval_h((*it).second.toSCMString());
+        for (const auto& varframe : result.second) {
+            Handle var = schemeEval->eval_h("(VariableNode \"" + varframe.first + "\")");
+            Handle value = schemeEval->eval_h(varframe.second.toSCMString());
             mapping.emplace_back(var, value);
         }
         answer.emplace_back(atoms, mapping);
@@ -481,20 +480,19 @@ Handle PatternIndexAPI::query(Handle key, Handle queryLink)
 {
     TypeFrame queryFrame(queryLink);
 
-    vector<QueryResult> queryResult;
-    vector<QueryResult>::const_iterator itqr;
-    query(queryResult, key, queryFrame);
+    vector<QueryResult> queryResults;
+    query(queryResults, key, queryFrame);
     HandleSeq resultVector;
     HandleSeq variableMapping;
-    for (itqr = queryResult.begin(); itqr != queryResult.end(); itqr++) {
+    for (const QueryResult& result : queryResults) {
         variableMapping.clear();
-        for (unsigned int j = 0; j < (*itqr).second.size(); j++) {
-            Handle link = atomSpace->add_link(LIST_LINK, 
-                                              (*itqr).second.at(j).first,
-                                              (*itqr).second.at(j).second);
+        for (const HandlePair& vargnd : result.second) {
+            Handle link = atomSpace->add_link(LIST_LINK,
+                                              vargnd.first,
+                                              vargnd.second);
             variableMapping.push_back(link);
         }
-        Handle satisfyingSubgraph = atomSpace->add_link(LIST_LINK, (*itqr).first);
+        Handle satisfyingSubgraph = atomSpace->add_link(LIST_LINK, result.first);
         Handle varMapping = atomSpace->add_link(LIST_LINK, variableMapping);
         Handle rLink = atomSpace->add_link(LIST_LINK,
                                            satisfyingSubgraph,
@@ -512,8 +510,9 @@ void PatternIndexAPI::minePatterns(vector<MiningResult> &answer,
 
     vector<pair<float,TypeFrame>> patterns;
     indexes.find(stoi(key->getName()))->second.first->minePatterns(patterns);
-    for (unsigned int i = 0; i < patterns.size(); i++) {
-        answer.emplace_back(patterns.at(i).first, schemeEval->eval_h(patterns.at(i).second.toSCMString()));
+    for (const auto& pattern : patterns) {
+        answer.emplace_back(pattern.first,
+                            schemeEval->eval_h(pattern.second.toSCMString()));
     }
 }
 
@@ -522,12 +521,12 @@ Handle PatternIndexAPI::minePatterns(Handle key)
     vector<MiningResult> miningResults;
     minePatterns(miningResults, key);
     HandleSeq resultVector;
-    for (unsigned int i = 0; i < miningResults.size(); i++) {
+    for (const MiningResult& result : miningResults) {
         Handle quality = atomSpace->add_node(NUMBER_NODE,
-                                             to_string(miningResults.at(i).first));
+                                             to_string(result.first));
         Handle link = atomSpace->add_link(LIST_LINK,
                                           quality,
-                                          miningResults.at(i).second);
+                                          result.second);
         resultVector.push_back(link);
     }
 

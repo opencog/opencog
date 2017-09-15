@@ -108,10 +108,10 @@ int main(int argc, char *argv[]) {
         std::chrono::high_resolution_clock::time_point t4 = std::chrono::high_resolution_clock::now();
 
         printf("Top %lu results\n", resultPatterns.size());
-        for (unsigned int i = 0; i < resultPatterns.size(); i++) {
+        for (const auto& pattern : resultPatterns) {
             printf("%f: %s",
-                   resultPatterns.at(i).first,
-                   resultPatterns.at(i).second->toString().c_str());
+                   pattern.first,
+                   pattern.second->toString().c_str());
         }
         unsigned int delta1 = std::chrono::duration_cast<std::chrono::seconds>(t2 - t1).count();
         unsigned int delta2 = std::chrono::duration_cast<std::chrono::seconds>(t4 - t3).count();

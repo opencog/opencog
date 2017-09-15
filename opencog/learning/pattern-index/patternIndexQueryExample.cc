@@ -110,20 +110,20 @@ int main(int argc, char *argv[]) {
                                      )\
                                    )\
                                  )";
-        std::vector<PatternIndexAPI::QueryResult> queryResult;
-        patternindex().query(queryResult, indexKey, queryStr2);
+        std::vector<PatternIndexAPI::QueryResult> queryResults;
+        patternindex().query(queryResults, indexKey, queryStr2);
         printf("\n\nQuery 2:\n");
-        printf("%lu results\n", queryResult.size());
-        for (unsigned int i = 0; i < queryResult.size(); i++) {
+        printf("%lu results\n", queryResults.size());
+        for (unsigned int i = 0; i < queryResults.size(); i++) {
             printf("Result #%u:\n\n", i + 1);
-            for (unsigned int j = 0; j < queryResult.at(i).first.size(); j++) {
-                printf("%s\n", queryResult.at(i).first.at(j)->toString().c_str());
+            for (const Handle& result : queryResults.at(i).first) {
+                printf("%s\n", result->toString().c_str());
             }
             printf("Mapping:\n\n");
-            for (unsigned int j = 0; j < queryResult.at(i).second.size(); j++) {
+            for (const auto& vargnd : queryResults.at(i).second) {
                 printf("%s%s\n", 
-                       queryResult.at(i).second.at(j).first->toString().c_str(),
-                       queryResult.at(i).second.at(j).second->toString().c_str());
+                       vargnd.first->toString().c_str(),
+                       vargnd.second->toString().c_str());
             }
         }
     }

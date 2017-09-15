@@ -30,7 +30,7 @@ PartitionGenerator::~PartitionGenerator()
 
 bool PartitionGenerator::depleted() const
 {
-    return (partitionIterator == partitions.end());
+    return partitionIterator == partitions.end();
 }
 
 void PartitionGenerator::generateNext()
@@ -39,24 +39,24 @@ void PartitionGenerator::generateNext()
         throw std::runtime_error("PartitionGenerator depleted\n");
     }
 
-    partitionIterator++;
+    ++partitionIterator;
 }
 
 PartitionGenerator::IntegerSetSet PartitionGenerator::getPartition() const
 {
-    return (*partitionIterator);
+    return *partitionIterator;
 }
 
 void PartitionGenerator::printForDebug(std::string prefix, std::string suffix) const
 {
     printf("%s{", prefix.c_str());
     unsigned int count1 = 0;
-    for (IntegerSetSet::const_iterator itComp = (*partitionIterator).begin(); itComp != (*partitionIterator).end(); ++itComp) {
+    for (const IntegerSet& comp : *partitionIterator) {
         printf("{");
         unsigned int count2 = 0;
-        for (IntegerSet::const_iterator it = (*itComp).begin(); it != (*itComp).end(); ++it) {
-            printf("%u", (*it));
-            if (count2++ != ((*itComp).size() - 1)) {
+        for (unsigned int el : comp) {
+            printf("%u", el);
+            if (count2++ != (comp.size() - 1)) {
                 printf(" ");
             }
         }
@@ -95,19 +95,15 @@ void PartitionGenerator::computePartitions(IntegerSetSetSet &answer, unsigned in
             answer.insert(partition);
             recurseAnswer.clear();
             computePartitions(recurseAnswer, n - 1);
-            for (IntegerSetSetSet::const_iterator itPart = recurseAnswer.begin(); itPart != recurseAnswer.end(); ++itPart) {
+            for (const IntegerSetSet& part : recurseAnswer) {
                 partition.clear();
                 component.clear();
                 component.insert(i);
                 partition.insert(component);
-                for (IntegerSetSet::const_iterator itComp = (*itPart).begin(); itComp != (*itPart).end(); ++itComp) {
+                for (const IntegerSet& comp : part) {
                     component.clear();
-                    for (IntegerSet::const_iterator it = (*itComp).begin(); it != (*itComp).end(); ++it) {
-                        if ((*it) < i) {
-                            component.insert(*it);
-                        } else {
-                            component.insert(*it + 1);
-                        }
+                    for (unsigned int el : comp) {
+	                    component.insert(el + (el < i ? 0 : 1));
                     }
                     partition.insert(component);
                 }

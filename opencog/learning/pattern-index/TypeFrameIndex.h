@@ -126,6 +126,7 @@ public:
 
     typedef std::set<int> IntegerSet;
     typedef std::map<std::string, TypeFrame> VarMapping;
+    typedef std::vector<VarMapping> VarMappingSeq;
     typedef std::set<TypeFrame, TypeFrame::LessThan> TypeFrameSet;
     typedef std::set<TypeFrame, TypeFrame::LessThanUsingEquivalence> EquivalentTypeFrameSet;
     typedef std::pair<TypeFrameSet, VarMapping> ResultPair;
@@ -179,7 +180,7 @@ private:
                bool noPermutations) const;
     void query(std::vector<ResultPair> &result,
                TypeFrame &keyExpression,
-               std::vector<VarMapping> &forbiddenMappings,
+               VarMappingSeq &forbiddenMappings,
                int &logicOperator,
                const TypeFrame &queryFrame,
                int cursor, bool distinct,
@@ -209,13 +210,17 @@ private:
     bool compatibleVarMappings(const VarMapping &map1,
                                const VarMapping &map2,
                                bool distinct) const;
+
+	/**
+	 * Return true iff all values (TypeFrames) of map2 are in map1
+	 */
     bool mapCover(const VarMapping &map1,
                   const VarMapping &map2) const;
     bool equivalentVarMappings(const VarMapping &map1,
                                const VarMapping &map2,
                                bool distinct) const;
     bool isForbiddenMapping(const VarMapping &mapping,
-                            const std::vector<VarMapping> &forbiddenVector) const;
+                            const VarMappingSeq &forbiddenVector) const;
     void typeFrameSetUnion(TypeFrameSet &answer,
                            const TypeFrameSet &set1,
                            const TypeFrameSet &set2) const;

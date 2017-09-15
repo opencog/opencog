@@ -27,7 +27,7 @@ bool PatternHeap::contains(float v, const TypeFrame &frame) const
 
 void PatternHeap::push(float v, const TypeFrame &frame)
 {
-    if (((size() < maxSize) || (back().first < v)) && (! contains(v, frame))) {
+    if ((size() < maxSize || back().first < v) && !contains(v, frame)) {
         if (size() == maxSize) {
             pop_back();
         }

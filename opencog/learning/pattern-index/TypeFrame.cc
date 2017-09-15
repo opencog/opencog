@@ -116,11 +116,10 @@ TypeFrame TypeFrame::buildSignature(unsigned int cursor)
 {
     TypeFrame answer;
 
-    vector<int> argPos = getArgumentsPosition(cursor);
-    for (unsigned int i = 0; i < argPos.size(); i++) {
-        answer.push_back(at(argPos.at(i)));
-        if (nodeNameDefined(argPos.at(i))) {
-            answer.setNodeNameAt(answer.size() - 1, nodeNameAt(argPos.at(i)));
+    for (int pos : getArgumentsPosition(cursor)) {
+        answer.push_back(at(pos));
+        if (nodeNameDefined(pos)) {
+            answer.setNodeNameAt(answer.size() - 1, nodeNameAt(pos));
         }
     }
 
@@ -248,8 +247,9 @@ bool TypeFrame::match(vector<int> &mapping,
     bool answer = true;
 
     if (match(mapping, pattern)) {
-        for (unsigned int i = 0; i < constraints.size(); i++) {
-            if (! subFramesEqual(mapping.at(constraints.at(i).first), mapping.at(constraints.at(i).second))) {
+        for (const auto& constraint : constraints) {
+            if (! subFramesEqual(mapping.at(constraint.first),
+                                 mapping.at(constraint.second))) {
                 answer = false;
                 break;
             }
@@ -495,14 +495,14 @@ int TypeFrame::compareUsingEquivalence(const TypeFrame &other, int cursorThis, i
                 // TODO XXX
                 //printf(" \n");
                 if (! isFeasible(equivalent)) {
-                    for (vector<int>::iterator it = zeroLine.begin(); it != zeroLine.end(); ++it) {
+                    for (int i : zeroLine) {
                         for (int j = 0; j < n; j++) {
-                            comparisson[*it][j] = 0;
+                            comparisson[i][j] = 0;
                         }
                     }
-                    for (vector<int>::iterator it = zeroColumn.begin(); it != zeroColumn.end(); ++it) {
+                    for (int j : zeroColumn) {
                         for (int i = 0; i < n; i++) {
-                            comparisson[i][*it] = 0;
+                            comparisson[i][j] = 0;
                         }
                     }
                     answer = lineComparisson(comparisson);
@@ -542,9 +542,8 @@ bool TypeFrame::containsEquivalent(const TypeFrame &other, unsigned int cursor) 
     if (isEquivalent(other, cursor, 0)) {
         answer = true;
     } else {
-        vector<int> argPos = getArgumentsPosition(cursor);
-        for (unsigned int i = 0; i < argPos.size(); i++) {
-            if (containsEquivalent(other, argPos.at(i))) {
+        for (int pos : getArgumentsPosition(cursor)) {
+            if (containsEquivalent(other, pos)) {
                 answer = true;
                 break;
             }
@@ -616,11 +615,10 @@ TypeFrame TypeFrame::copyReplacingFrame(const TypeFrame &key,
             answer.append(*this);
         }
     } else {
-        vector<int> argPos = getArgumentsPosition(0);
         answer.push_back(at(0));
-        for (unsigned int i = 0; i < argPos.size(); i++) {
+        for (int pos : getArgumentsPosition(0)) {
             aux.clear();
-            aux = subFrameAt(argPos.at(i));
+            aux = subFrameAt(pos);
             // TODO XXX
             // perhaps using isEquivalent() instead of equals() makes more sense
             if (aux.equals(key)) {
@@ -641,9 +639,8 @@ string TypeFrame::toSCMString(unsigned int cursor) const
     if (at(cursor).second == 0) {
         answer += "\"" + nodeNameAt(cursor) + "\"";
     } else {
-        vector<int> argPos = getArgumentsPosition(cursor);
-        for (unsigned int i = 0; i < argPos.size(); i++) {
-            answer += toSCMString(argPos.at(i));
+        for (int pos : getArgumentsPosition(cursor)) {
+            answer += toSCMString(pos);
         }
     }
     answer += ") ";

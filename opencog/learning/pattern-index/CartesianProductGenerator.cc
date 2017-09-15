@@ -10,8 +10,7 @@ CartesianProductGenerator::CartesianProductGenerator(unsigned int n, unsigned in
 
     avoidEqualFlag = avoidEqual;
     triangularFlag = triangular;
-    std::vector<unsigned int> v;
-    for (unsigned int i = 0; i < n; i++) v.push_back(m);
+    std::vector<unsigned int> v(n, m);
     init(v);
 }
 

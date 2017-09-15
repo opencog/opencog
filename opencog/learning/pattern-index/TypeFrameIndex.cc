@@ -102,8 +102,8 @@ void TypeFrameIndex::addPatterns(vector<TypeFrame> &answer,
     if (DEBUG) {
         base.printForDebug("Compound frame: ", "\n", true);
         printf("Nodes: ");
-        for (TypeFrameSet::iterator it = nodes.begin(); it != nodes.end(); ++it) {
-            (*it).printForDebug("", " ", true);
+        for (const TypeFrame& node : nodes) {
+            node.printForDebug("", " ", true);
         }
         printf("\n");
     }
@@ -114,11 +114,11 @@ void TypeFrameIndex::addPatterns(vector<TypeFrame> &answer,
         pattern.clear();
         pattern.append(base);
         int count = 0;
-        for (TypeFrameSet::iterator it = nodes.begin(); it != nodes.end(); ++it) {
+        for (const TypeFrame& node : nodes) {
             if (selected.at(count)) {
                 string varName = "V" + to_string(count);
                 for (unsigned int k = 0; k < pattern.size(); k++) {
-                    if (pattern.subFrameAt(k).equals((*it))) {
+                    if (pattern.subFrameAt(k).equals(node)) {
                         pattern[k].first = classserver().getType("VariableNode");
                         pattern.setNodeNameAt(k, varName);
                     }
@@ -201,13 +201,13 @@ void TypeFrameIndex::addInferredSetFrames(vector<TypeFrame> &subset,
     while (! selected.depleted()) {
         if (DEBUG) selected.printForDebug("selected: ", "\n");
         int count = 0;
-        for (TypeFrameSet::iterator it = nodes.begin(); it != nodes.end(); ++it) {
+        for (const TypeFrame& node : nodes) {
             if (selected.at(count++)) {
                 aux1.clear();
                 if (DEBUG) frame.printForDebug("base: ", "\n");
-                if (DEBUG) (*it).printForDebug("key: ", "\n");
+                if (DEBUG) node.printForDebug("key: ", "\n");
                 if (DEBUG) auxInternalVar1.printForDebug("subst for: ", "\n");
-                aux1 = frame.copyReplacingFrame((*it), auxInternalVar1);
+                aux1 = frame.copyReplacingFrame(node, auxInternalVar1);
                 if (DEBUG) aux1.printForDebug("result: ", "\n");
                 compoundFrame.clear();
                 compoundFrame.push_back(TypePair(classserver().getType("AndLink"), 2));
@@ -215,7 +215,7 @@ void TypeFrameIndex::addInferredSetFrames(vector<TypeFrame> &subset,
                 if (subSetFlag) {
                     compoundFrame.push_back(TypePair(classserver().getType("InheritanceLink"), 2));
                     compoundFrame.append(auxInternalVar1);
-                    compoundFrame.append(*it);
+                    compoundFrame.append(node);
                     starFrame.clear();
                     starFrame.push_back(TypePair(classserver().getType("AndLink"), 2));
                     starFrame.append(frame);
@@ -224,7 +224,7 @@ void TypeFrameIndex::addInferredSetFrames(vector<TypeFrame> &subset,
                     star.push_back(starFrame);
                 } else {
                     compoundFrame.push_back(TypePair(classserver().getType("InheritanceLink"), 2));
-                    compoundFrame.append(*it);
+                    compoundFrame.append(node);
                     compoundFrame.append(auxInternalVar1);
                 }
                 subset.push_back(compoundFrame);
@@ -251,13 +251,13 @@ pair<float, float> TypeFrameIndex::minMaxIndependentProb(const TypeFrame &patter
             if (DEBUG) partitionGenerator.printForDebug("Partition: ", "\n");
             PartitionGenerator::IntegerSetSet partition = partitionGenerator.getPartition();
             float prod = 1;
-            for (PartitionGenerator::IntegerSetSet::const_iterator it1 = partition.begin(); it1 != partition.end(); ++it1) {
+            for (const PartitionGenerator::IntegerSet & block : partition) {
                 subPattern.clear();
-                if ((*it1).size() > 1) {
-                    subPattern.push_back(TypePair(classserver().getType("AndLink"), (*it1).size()));
+                if (block.size() > 1) {
+                    subPattern.push_back(TypePair(classserver().getType("AndLink"), block.size()));
                 }
-                for (PartitionGenerator::IntegerSet::const_iterator it2 = (*it1).begin(); it2 != (*it1).end(); ++it2) {
-                    aux = pattern.subFrameAt(argPos.at(*it2));
+                for (unsigned int i : block) {
+                    aux = pattern.subFrameAt(argPos.at(i));
                     subPattern.append(aux);
                 }
                 if (DEBUG) subPattern.printForDebug("subPattern: ", "\n", true);
@@ -558,9 +558,9 @@ void TypeFrameIndex::evaluatePatterns()
         if (dequeueCompoundFrame(compoundFrame)) {
             patterns.clear();
             addPatterns(patterns, compoundFrame);
-            for (unsigned int i = 0; i < patterns.size(); i++) {
-                float quality = computeQuality(patterns.at(i));
-                addMiningResult(quality, patterns.at(i));
+            for (const TypeFrame& pattern : patterns) {
+                float quality = computeQuality(pattern);
+                addMiningResult(quality, pattern);
             }
         } else {
             if (checkCompoundPatternsEnded()) {
@@ -608,9 +608,9 @@ void TypeFrameIndex::minePatterns(vector<pair<float,TypeFrame>> &answer)
     // inserted in "base". The size of "base" is crux to determine the
     // processing time of the mining algorithm. Grown is NxNxNx...
     // (PATTERNS_GRAM times)
-    for (unsigned int i = 0; i < frames.size(); i++) {
-        if (ALLOWED_TOP_LEVEL_TYPES.find(frames.at(i).at(0).first) != ALLOWED_TOP_LEVEL_TYPES.end()) {
-            baseSet.insert(frames.at(i));
+    for (const TypeFrame& frame : frames) {
+        if (ALLOWED_TOP_LEVEL_TYPES.find(frame.at(0).first) != ALLOWED_TOP_LEVEL_TYPES.end()) {
+            baseSet.insert(frame);
         }
     }
 
@@ -639,7 +639,8 @@ void TypeFrameIndex::minePatterns(vector<pair<float,TypeFrame>> &answer)
     unsigned int progressIndicatorCount = 0;
     for (unsigned int i = 0; i < base.size(); i++) {
         if (DEBUG) printf("setting neighbors for: %u\n", i);
-        if ((base.size() > 100) && (! (i % (base.size() / 100)))) logger().info("[PatternIndex] Step 1/2 %.0f%% done", ((float) i / base.size()) * 100);
+        if ((base.size() > 100) && (! (i % (base.size() / 100))))
+	        logger().info("[PatternIndex] Step 1/2 %.0f%% done", ((float) i / base.size()) * 100);
         aux.clear();
         for (unsigned int j = i + 1; j < base.size(); j++) {
             if (base.at(i).nonEmptyNodeIntersection(base.at(j))) {
@@ -662,7 +663,8 @@ void TypeFrameIndex::minePatterns(vector<pair<float,TypeFrame>> &answer)
     CartesianProductGenerator *cartesianGenerator;
     for (unsigned int i = 0; i < base.size(); i++) {
         // select a seed element from base
-        if ((progressIndicatorMax > 10000) && (! (progressIndicatorCount % (progressIndicatorMax / 10000)))) logger().info("[PatternIndex] Step 2/2 %.2f%% done", ((float) progressIndicatorCount / progressIndicatorMax) * 100);
+        if ((progressIndicatorMax > 10000) && (! (progressIndicatorCount % (progressIndicatorMax / 10000))))
+	        logger().info("[PatternIndex] Step 2/2 %.2f%% done", ((float) progressIndicatorCount / progressIndicatorMax) * 100);
         progressIndicatorCount += neighbors.at(i).size();
         if (DEBUG) printf("base[%u] : %lu\n", i, neighbors.at(i).size());
         selection.clear();
@@ -731,15 +733,16 @@ void TypeFrameIndex::minePatterns(vector<pair<float,TypeFrame>> &answer)
     // processor.
     evaluationThreads.push_back(new thread(&TypeFrameIndex::evaluatePatterns, this));
 
-    for (unsigned int i = 0; i < evaluationThreads.size(); i++) {
-        evaluationThreads.at(i)->join();
+    for (thread* evaluationThread : evaluationThreads) {
+        evaluationThread->join();
     }
+
+    // TODO dealocate the theads as they seem no longer useful
 
     if (DEBUG) printf("Finished mining. heap size = %lu\n", miningResultsHeap.size());
 
-    for (unsigned int i = 0; i < miningResultsHeap.size(); i++) {
-        answer.push_back(miningResultsHeap.at(i));
-    }
+    answer = miningResultsHeap;
+
     logger().info("[PatternIndex] Finished mining");
 }
 
@@ -799,12 +802,12 @@ bool TypeFrameIndex::addFrame(TypeFrame &frame, int offset)
         frames.push_back(frame);
         TypeFrameSet symmetricPermutations;
         addSymmetricPermutations(symmetricPermutations, frame, 0);
-        for (TypeFrameSet::iterator it = symmetricPermutations.begin(); it != symmetricPermutations.end(); ++it) {
-            if ((*it).check()) {
-                frames.push_back(*it);
+        for (const TypeFrame& perm : symmetricPermutations) {
+            if (perm.check()) {
+                frames.push_back(perm);
             } else {
                 if (DEBUG) frame.printForDebug("frame = ", "\n");
-                if (DEBUG) (*it).printForDebug("invalid permutation = ", "\n");
+                if (DEBUG) perm.printForDebug("invalid permutation = ", "\n");
                 throw runtime_error("Invalid symmetric permutation");
             }
         }
@@ -913,8 +916,8 @@ void TypeFrameIndex::addArity2Patterns(vector<TypeFrame> &answer,
 // to avoid copying data all the away in the recursive calls
 // TODO: Break this method in smaller pieces
 vector<TypeFrame> TypeFrameIndex::computeSubPatterns(TypeFrame &baseFrame,
-                                                          int cursor,
-                                                          int pos)
+                                                     int cursor,
+                                                     int pos)
 {
     vector<TypeFrame> answer;
     if (DEBUG) baseFrame.printForDebug("baseFrame = ", "\n");
@@ -951,11 +954,11 @@ vector<TypeFrame> TypeFrameIndex::computeSubPatterns(TypeFrame &baseFrame,
         recurseResult1 = computeSubPatterns(baseFrame, argPos.at(0), pos);
         recurseResult2 = computeSubPatterns(baseFrame, argPos.at(1), pos);
         if (DEBUG) {
-            for (unsigned int i = 0; i < recurseResult1.size(); i++) {
-                recurseResult1.at(i).printForDebug("recurseResult1: ", "\n", true);
+            for (const TypeFrame& frame : recurseResult1) {
+                frame.printForDebug("recurseResult1: ", "\n", true);
             }
-            for (unsigned int i = 0; i < recurseResult2.size(); i++) {
-                recurseResult2.at(i).printForDebug("recurseResult2: ", "\n", true);
+            for (const TypeFrame& frame : recurseResult2) {
+                frame.printForDebug("recurseResult2: ", "\n", true);
             }
         }
 
@@ -1060,7 +1063,8 @@ void TypeFrameIndex::buildSubPatternsIndex()
 {
     if (DEBUG) printf("TypeFrameIndex::buildSubPatternsIndex()\nframes.size() = %lu\n", frames.size());
     for (unsigned int i = 0; i < frames.size(); i++) {
-        if ((frames.size() > 100) && (! (i % (frames.size() / 100)))) logger().info("[PatternIndex] Building index %.0f%% done", ((float) i / frames.size()) * 100);
+        if ((frames.size() > 100) && (! (i % (frames.size() / 100))))
+            logger().info("[PatternIndex] Building index %.0f%% done", ((float) i / frames.size()) * 100);
         TypeFrame currentFrame = frames.at(i);
         if (DEBUG) printf("Computing subpatterns of %u\n", i);
         if (DEBUG) currentFrame.printForDebug("currentFrame = ", "\n");
@@ -1073,8 +1077,8 @@ void TypeFrameIndex::buildSubPatternsIndex()
         if (DEBUG) printf("Computing subpatterns of %u - DONE\n", i);
         if (TOPLEVEL_ONLY) {
             addPatternOccurrence(currentFrame, i);
-            for (unsigned int j = 0; j < patterns.size(); j++) {
-                addPatternOccurrence(patterns.at(j), i);
+            for (TypeFrame& pattern : patterns) {
+                addPatternOccurrence(pattern, i);
             }
         }
     }
@@ -1110,15 +1114,13 @@ void TypeFrameIndex::buildConstraints(IntPairVector &constraints,
                                       StringMap &variableOccurrences) const
 {
     constraints.clear();
-    StringMap::iterator it = variableOccurrences.begin();
-    while (it != variableOccurrences.end()) {
-        vector<int> v((*it).second.begin(), (*it).second.end());
+    for (const auto& namevars : variableOccurrences) {
+        vector<int> v(namevars.second.begin(), namevars.second.end());
         for (unsigned int i = 0; i < v.size(); i++) {
             for (unsigned int j = i + 1; j < v.size(); j++) {
                 constraints.emplace_back(v.at(i), v.at(j));
             }
         }
-        ++it;
     }
 }
 
@@ -1129,12 +1131,11 @@ void TypeFrameIndex::buildQueryTerm(TypeFrame &answer,
 {
 
     selectCurrentElement(answer, variableOccurrences, baseFrame, cursor);
-    vector<int> argPos = baseFrame.getArgumentsPosition(cursor);
-    for (unsigned int i = 0; i < argPos.size(); i++) {
-        if (baseFrame.at(argPos.at(i)).second == 0) {
-            selectCurrentElement(answer, variableOccurrences, baseFrame, argPos.at(i));
+    for (int pos : baseFrame.getArgumentsPosition(cursor)) {
+        if (baseFrame.at(pos).second == 0) {
+            selectCurrentElement(answer, variableOccurrences, baseFrame, pos);
         } else {
-            buildQueryTerm(answer, variableOccurrences, baseFrame, argPos.at(i));
+            buildQueryTerm(answer, variableOccurrences, baseFrame, pos);
         }
     }
 }
@@ -1158,7 +1159,7 @@ void TypeFrameIndex::query(vector<ResultPair> &result,
                            bool noPermutations) const
 {
     TypeFrame keyExpression;
-    vector<VarMapping> forbiddenMappings;
+    VarMappingSeq forbiddenMappings;
     int headLogicOperator;
 
     query(result, keyExpression, forbiddenMappings, headLogicOperator, queryFrame, 0, distinct, noPermutations);
@@ -1175,21 +1176,22 @@ bool TypeFrameIndex::compatibleVarMappings(const VarMapping &map1,
         printVarMapping(map2);
     }
 
-    for (VarMapping::const_iterator it1 = map1.begin(); it1 != map1.end(); ++it1) {
-        VarMapping::const_iterator it2 = map2.find((*it1).first);
-        if ((it2 != map2.end()) && (! (*it1).second.equals((*it2).second))) {
+    for (const auto& varframe : map1) {
+        VarMapping::const_iterator it2 = map2.find(varframe.first);
+        if (it2 != map2.end() && !varframe.second.equals(it2->second)) {
             if (DEBUG) {
-                printf("Failed at %s\n", (*it1).first.c_str());
+                printf("Failed at %s\n", varframe.first.c_str());
             }
             return false;
         }
     }
     if (distinct) {
-        for (VarMapping::const_iterator it1 = map1.begin(); it1 != map1.end(); ++it1) {
-            for (VarMapping::const_iterator it2 = map2.begin(); it2 != map2.end(); ++it2) {
-                if (((*it1).first.compare((*it2).first) != 0) && ((*it1).second.equals((*it2).second))) {
+        for (const auto& varframe1 : map1) {
+            for (const auto& varframe2 : map2) {
+                if (varframe1.first.compare(varframe2.first) != 0
+                    && varframe1.second.equals(varframe2.second)) {
                     if (DEBUG) {
-                        printf("* Failed at %s\n", (*it1).first.c_str());
+                        printf("* Failed at %s\n", varframe1.first.c_str());
                     }
                     return false;
                 }
@@ -1204,36 +1206,28 @@ void TypeFrameIndex::typeFrameSetUnion(TypeFrameSet &answer,
                                        const TypeFrameSet &set1,
                                        const TypeFrameSet &set2) const
 {
-    answer.clear();
-    for (TypeFrameSet::const_iterator it1 = set1.begin(); it1 != set1.end(); ++it1) {
-        answer.insert(*it1);
-    }
-    for (TypeFrameSet::const_iterator it2 = set2.begin(); it2 != set2.end(); ++it2) {
-        answer.insert(*it2);
-    }
+    answer.insert(set1.begin(), set1.end());
+    answer.insert(set2.begin(), set2.end());
 }
 
 void TypeFrameIndex::varMappingUnion(VarMapping &answer,
                                      const VarMapping &map1,
                                      const VarMapping &map2) const
 {
-    for (VarMapping::const_iterator it = map1.begin(); it != map1.end(); ++it) {
-        answer.insert(*it);
-    }
-    for (VarMapping::const_iterator it = map2.begin(); it != map2.end(); ++it) {
-        answer.insert(*it);
-    }
+	answer.insert(map1.begin(), map1.end());
+	answer.insert(map2.begin(), map2.end());
 }
 
+// TODO from here
 bool TypeFrameIndex::isForbiddenMapping(const VarMapping &mapping,
-                                        const vector<VarMapping> &forbiddenVector) const
+                                        const VarMappingSeq &forbiddenVector) const
 {
     bool answer = false;
-    for (unsigned int i = 0; i < forbiddenVector.size(); i++) {
+    for (const VarMapping& varmap : forbiddenVector) {
         bool match = true;
-        for (VarMapping::const_iterator it1 = forbiddenVector.at(i).begin(); it1 != forbiddenVector.at(i).end(); ++it1) {
-            VarMapping::const_iterator it2 = mapping.find((*it1).first);
-            if ((it2 != mapping.end()) && (! (*it1).second.equals((*it2).second))) {
+        for (const auto& varframe : varmap) {
+            VarMapping::const_iterator it = mapping.find(varframe.first);
+            if (it != mapping.end() && !varframe.second.equals(it->second)) {
                 match = false;
                 break;
             }
@@ -1249,7 +1243,7 @@ bool TypeFrameIndex::isForbiddenMapping(const VarMapping &mapping,
 
 void TypeFrameIndex::query(vector<ResultPair> &answer,
                            TypeFrame &keyExpression,
-                           vector<VarMapping> &forbiddenMappings,
+                           VarMappingSeq &forbiddenMappings,
                            int &logicOperator,
                            const TypeFrame &queryFrame,
                            int cursor,
@@ -1266,7 +1260,7 @@ void TypeFrameIndex::query(vector<ResultPair> &answer,
     vector<int> argPos = queryFrame.getArgumentsPosition(cursor);
     vector<vector<ResultPair>> recursionQueryResult(arity);
     vector<TypeFrame> recursionKeyExpression(arity);
-    vector<vector<VarMapping>> recursionForbiddenMappings(arity);
+    vector<VarMappingSeq> recursionForbiddenMappings(arity);
     vector<int> recursionHeadLogicOperator(arity);
     bool AndFlag = queryFrame.typeAtEqualsTo(cursor, "AndLink");
     bool OrFlag = queryFrame.typeAtEqualsTo(cursor, "OrLink");
@@ -1301,28 +1295,28 @@ void TypeFrameIndex::query(vector<ResultPair> &answer,
         if (DEBUG) printf("Start processing AND\n");
         logicOperator = OPERATOR_AND;
         for (unsigned int i = 0; i < arity; i++) {
-            for (unsigned int j = 0; j < recursionForbiddenMappings.at(i).size(); j++) {
+            for (const VarMapping& varmap : recursionForbiddenMappings.at(i)) {
                 if (DEBUG) {
                     printf("(AND) Adding forbidden mapping:\n");
-                    printVarMapping(recursionQueryResult.at(i).at(j).second);
+                    printVarMapping(varmap);
                 }
-                forbiddenMappings.push_back(recursionForbiddenMappings.at(i).at(j));
+                forbiddenMappings.push_back(varmap);
             }
         }
         vector<vector<ResultPair>> cleanRecursionQueryResult(arity);
         for (unsigned int i = 0; i < arity; i++) {
             if (DEBUG) printf("Branch: %u\n", i);
-            for (unsigned int j = 0; j < recursionQueryResult.at(i).size(); j++) {
-                if (! isForbiddenMapping(recursionQueryResult.at(i).at(j).second, forbiddenMappings)) {
-                    cleanRecursionQueryResult.at(i).push_back(recursionQueryResult.at(i).at(j));
+            for (const ResultPair& result : recursionQueryResult.at(i)) {
+                if (! isForbiddenMapping(result.second, forbiddenMappings)) {
+                    cleanRecursionQueryResult.at(i).push_back(result);
                     if (DEBUG) {
                         printf("Pushing:\n");
-                        printTypeFrameSet(recursionQueryResult.at(i).at(j).first);
+                        printTypeFrameSet(result.first);
                     }
                 } else {
                     if (DEBUG) {
                         printf("Forbidden:\n");
-                        printTypeFrameSet(recursionQueryResult.at(i).at(j).first);
+                        printTypeFrameSet(result.first);
                     }
                 }
             }
@@ -1337,12 +1331,12 @@ void TypeFrameIndex::query(vector<ResultPair> &answer,
             if (recursionHeadLogicOperator.at(i) != OPERATOR_NOT) {
                 baseBranch = i;
                 selectedFlag = true;
-                for (unsigned int j = 0; j < cleanRecursionQueryResult.at(baseBranch).size(); j++) {
-                    aux[tgt].push_back(cleanRecursionQueryResult.at(baseBranch).at(j));
+                for (const ResultPair& result : cleanRecursionQueryResult.at(baseBranch)) {
+                    aux[tgt].push_back(result);
                     if (DEBUG) {
                         printf("(AND) Adding solution to result:\n");
-                        printTypeFrameSet(cleanRecursionQueryResult.at(baseBranch).at(j).first);
-                        printVarMapping(cleanRecursionQueryResult.at(baseBranch).at(j).second);
+                        printTypeFrameSet(result.first);
+                        printVarMapping(result.second);
                     }
                 }
                 break;
@@ -1356,21 +1350,21 @@ void TypeFrameIndex::query(vector<ResultPair> &answer,
                 tgt = 1 - src;
                 aux[tgt].clear();
                 TypeFrameSet newSet;
-                for (unsigned int b = 0; b < cleanRecursionQueryResult.at(i).size(); b++) {
-                    for (unsigned int a = 0; a < aux[src].size(); a++) {
-                        if (compatibleVarMappings(aux[src].at(a).second, cleanRecursionQueryResult.at(i).at(b).second, distinct)) {
+                for (const ResultPair& b : cleanRecursionQueryResult.at(i)) {
+	                for (const ResultPair& a : aux[src]) {
+                        if (compatibleVarMappings(a.second, b.second, distinct)) {
                             TypeFrameSet newSet;
                             VarMapping newMapping;
-                            typeFrameSetUnion(newSet, aux[src].at(a).first, cleanRecursionQueryResult.at(i).at(b).first);
-                            varMappingUnion(newMapping, aux[src].at(a).second, cleanRecursionQueryResult.at(i).at(b).second);
+                            typeFrameSetUnion(newSet, a.first, b.first);
+                            varMappingUnion(newMapping, a.second, b.second);
                             if (DEBUG) {
                                 printf("(AND) Adding solution to result:\n");
                                 printf("Base:\n");
-                                printTypeFrameSet(aux[src].at(a).first);
-                                printVarMapping(aux[src].at(a).second);
+                                printTypeFrameSet(a.first);
+                                printVarMapping(a.second);
                                 printf("Adding:\n");
-                                printTypeFrameSet(cleanRecursionQueryResult.at(i).at(b).first);
-                                printVarMapping(cleanRecursionQueryResult.at(i).at(b).second);
+                                printTypeFrameSet(b.first);
+                                printVarMapping(b.second);
                                 printf("Union:\n");
                                 printTypeFrameSet(newSet);
                                 printVarMapping(newMapping);
@@ -1385,34 +1379,34 @@ void TypeFrameIndex::query(vector<ResultPair> &answer,
                 }
             }
         }
-        for (unsigned int j = 0; j < aux[tgt].size(); j++) {
+        for (const ResultPair& a : aux[tgt]) {
             if (noPermutations) {
-                unfilteredAnswer.push_back(aux[tgt].at(j));
+                unfilteredAnswer.push_back(a);
             } else {
-                answer.push_back(aux[tgt].at(j));
+                answer.push_back(a);
             }
         }
     } else if (OrFlag) {
         if (DEBUG) printf("Start processing OR\n");
         logicOperator = OPERATOR_OR;
         for (unsigned int i = 0; i < arity; i++) {
-            for (unsigned int j = 0; j < recursionQueryResult.at(i).size(); j++) {
-                if (! isForbiddenMapping(recursionQueryResult.at(i).at(j).second, recursionForbiddenMappings.at(i))) {
+            for (const ResultPair& result : recursionQueryResult.at(i)) {
+                if (! isForbiddenMapping(result.second, recursionForbiddenMappings.at(i))) {
                     if (DEBUG) {
                         printf("(OR) Adding solution to result:\n");
-                        printTypeFrameSet(recursionQueryResult.at(i).at(j).first);
-                        printVarMapping(recursionQueryResult.at(i).at(j).second);
+                        printTypeFrameSet(result.first);
+                        printVarMapping(result.second);
                     }
                     if (noPermutations) {
-                        unfilteredAnswer.push_back(recursionQueryResult.at(i).at(j));
+                        unfilteredAnswer.push_back(result);
                     } else {
-                        answer.push_back(recursionQueryResult.at(i).at(j));
+                        answer.push_back(result);
                     }
                 } else {
                     if (DEBUG) {
                         printf("(OR) Rejecting solution:\n");
-                        printTypeFrameSet(recursionQueryResult.at(i).at(j).first);
-                        printVarMapping(recursionQueryResult.at(i).at(j).second);
+                        printTypeFrameSet(result.first);
+                        printVarMapping(result.second);
                     }
                 }
             }
@@ -1421,23 +1415,23 @@ void TypeFrameIndex::query(vector<ResultPair> &answer,
         if (DEBUG) printf("Start processing NOT\n");
         logicOperator = OPERATOR_NOT;
         // arity is 1
-        for (unsigned int j = 0; j < recursionQueryResult.at(0).size(); j++) {
+        for (const ResultPair& result : recursionQueryResult.at(0)) {
             if (DEBUG) {
                 printf("(NOT) Adding solution to result:\n");
-                printTypeFrameSet(recursionQueryResult.at(0).at(j).first);
-                printVarMapping(recursionQueryResult.at(0).at(j).second);
+                printTypeFrameSet(result.first);
+                printVarMapping(result.second);
             }
             if (noPermutations) {
-                unfilteredAnswer.push_back(recursionQueryResult.at(0).at(j));
+                unfilteredAnswer.push_back(result);
             } else {
-                answer.push_back(recursionQueryResult.at(0).at(j));
+                answer.push_back(result);
             }
-            if (! isForbiddenMapping(recursionQueryResult.at(0).at(j).second, recursionForbiddenMappings.at(0))) {
+            if (! isForbiddenMapping(result.second, recursionForbiddenMappings.at(0))) {
                 if (DEBUG) {
                     printf("(NOT) Adding forbidden mapping:\n");
-                    printVarMapping(recursionQueryResult.at(0).at(j).second);
+                    printVarMapping(result.second);
                 }
-                forbiddenMappings.push_back(recursionQueryResult.at(0).at(j).second);
+                forbiddenMappings.push_back(result.second);
             }
         }
     } else {
@@ -1448,28 +1442,28 @@ void TypeFrameIndex::query(vector<ResultPair> &answer,
         buildConstraints(constraints, variableOccurrences);
         if (DEBUG) {
             keyExpression.printForDebug("Key: ", "\n", true);
-            for (StringMap::iterator it1 = variableOccurrences.begin(); it1 != variableOccurrences.end(); ++it1) {
-                printf("%s: ", (*it1).first.c_str());
-                for (IntegerSet::iterator it2 = (*it1).second.begin(); it2 != (*it1).second.end(); ++it2) {
-                    printf("%d ", (*it2));
+            for (const StringMap::value_type& s : variableOccurrences) {
+                printf("%s: ", s.first.c_str());
+                for (int i : s.second) {
+                    printf("%d ", i);
                 }
                 printf("\n");
             }
-            for (unsigned int i = 0; i < constraints.size(); i++) {
-                printf("%d %d\n", constraints.at(i).first, constraints.at(i).second);
+            for (const auto& constraint : constraints) {
+                printf("%d %d\n", constraint.first, constraint.second);
             }
         }
-        PatternMap::const_iterator it1 = occurrenceSet.find(keyExpression);
-        if (it1 != occurrenceSet.end()) {
-            for (IntegerSet::iterator it2 = (*it1).second.begin(); it2 != (*it1).second.end(); ++it2) {
+        PatternMap::const_iterator it = occurrenceSet.find(keyExpression);
+        if (it != occurrenceSet.end()) {
+            for (int i : it->second) {
                 vector<int> mapping;
-                if (frames.at(*it2).match(mapping, keyExpression, constraints)) {
+                if (frames.at(i).match(mapping, keyExpression, constraints)) {
                     VarMapping varMap;
                     TypeFrameSet frameSet;
-                    for (StringMap::iterator it = variableOccurrences.begin(); it != variableOccurrences.end(); ++it) {
-                        varMap.emplace((*it).first, frames.at(*it2).subFrameAt(*((*it).second.begin())));
+                    for (const StringMap::value_type& s : variableOccurrences) {
+                        varMap.emplace(s.first, frames.at(i).subFrameAt(*(s.second.begin())));
                     }
-                    frameSet.insert(frames.at(*it2));
+                    frameSet.insert(frames.at(i));
                     if (DEBUG) {
                         printf("(LEAF) Adding solution to result:\n");
                         printTypeFrameSet(frameSet);
@@ -1486,16 +1480,15 @@ void TypeFrameIndex::query(vector<ResultPair> &answer,
     }
 
     if (noPermutations) {
-        for (unsigned int i = 0; i < unfilteredAnswer.size(); i++) {
-            bool flag = true;
-            for (unsigned int j = 0; j < answer.size(); j++) {
-                if (equivalentVarMappings(unfilteredAnswer.at(i).second, answer.at(j).second, distinct)) {
-                    flag = false;
-                    break;
-                }
-            }
-            if (flag) {
-                answer.push_back(unfilteredAnswer.at(i));
+        for (const ResultPair& ufa : unfilteredAnswer) {
+            bool none_eq =
+                std::none_of(answer.begin(), answer.end(),
+                             [&](const ResultPair& asw) {
+                                 return equivalentVarMappings(ufa.second,
+                                                              asw.second,
+                                                              distinct); });
+            if (none_eq) {
+                answer.push_back(ufa);
             }
         }
     }
@@ -1509,25 +1502,20 @@ void TypeFrameIndex::query(vector<ResultPair> &answer,
 bool TypeFrameIndex::mapCover(const VarMapping &map1, const VarMapping &map2) const
 {
     TypeFrameSet set;
-    for (VarMapping::const_iterator it = map1.begin(); it != map1.end(); ++it) {
-        set.insert((*it).second);
+    for (const auto& el : map1) {
+        set.insert(el.second);
     }
-    bool answer = true;
-    for (VarMapping::const_iterator it = map2.begin(); it != map2.end(); ++it) {
-        if (set.find((*it).second) == set.end()) {
-            answer = false;
-            break;
-        }
-    }
-
-    return answer;
+    return std::all_of(map2.begin(), map2.end(),
+                       [&](const VarMapping::value_type& el) {
+                           return set.find(el.second) != set.end(); });
 }
 
 bool TypeFrameIndex::equivalentVarMappings(const VarMapping &map1,
                                            const VarMapping &map2,
                                            bool distinct) const
 {
-    return (distinct ? mapCover(map1, map2) : (mapCover(map1, map2) && mapCover(map2, map1)));
+    return (distinct ? mapCover(map1, map2)
+            : (mapCover(map1, map2) && mapCover(map2, map1)));
 }
 
 void TypeFrameIndex::printFrameVector(const vector<TypeFrame> &v) const
@@ -1540,16 +1528,16 @@ void TypeFrameIndex::printFrameVector(const vector<TypeFrame> &v) const
 
 void TypeFrameIndex::printVarMapping(const VarMapping &map) const
 {
-    for (VarMapping::const_iterator it = map.begin(); it != map.end(); ++it) {
-        printf("%s = ", (*it).first.c_str());
-        (*it).second.printForDebug("", "\n", true);
+    for (const auto& el : map) {
+        printf("%s = ", el.first.c_str());
+        el.second.printForDebug("", "\n", true);
     }
 }
 
 void TypeFrameIndex::printTypeFrameSet(const TypeFrameSet &set) const
 {
-    for (TypeFrameSet::const_iterator it = set.begin(); it != set.end(); ++it) {
-        (*it).printForDebug("", "\n", true);
+    for (const TypeFrame& tf : set) {
+        tf.printForDebug("", "\n", true);
     }
 }
 
@@ -1564,16 +1552,12 @@ void TypeFrameIndex::printRecursionResult(const vector<ResultPair> &v) const
 
 void TypeFrameIndex::printForDebug(bool showNodeNames) const
 {
-    PatternMap::const_iterator it1 = occurrenceSet.begin();
-    while (it1 != occurrenceSet.end()) {
-        (*it1).first.printForDebug("[", "]: ", showNodeNames);
-        IntegerSet::iterator it2 = (*it1).second.begin();
-        while (it2 != (*it1).second.end()) {
-            printf("%d ", *it2);
-            ++it2;
+    for (const auto& occur : occurrenceSet) {
+        occur.first.printForDebug("[", "]: ", showNodeNames);
+        for (int i : occur.second) {
+            printf("%d ", i);
         }
         printf("\n");
-        ++it1;
     }
 }
 
