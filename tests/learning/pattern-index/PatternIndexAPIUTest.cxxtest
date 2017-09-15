@@ -139,9 +139,9 @@ void PatternIndexAPIUTest::test_query()
     std::vector<PatternIndexAPI::QueryResult> queryResult;
     patternindex().query(queryResult, indexKey, queryStr);
     TS_ASSERT_EQUALS(queryResult.size(), 4);
-    for (unsigned int i = 0; i < queryResult.size(); i++) {
-        TS_ASSERT_EQUALS(queryResult.at(i).first.size(), 1);
-        Handle link = queryResult.at(i).first.at(0);
+    for (const PatternIndexAPI::QueryResult& result : queryResult) {
+        TS_ASSERT_EQUALS(result.first.size(), 1);
+        Handle link = result.first.at(0);
         TS_ASSERT_EQUALS(link->getType(), SIMILARITY_LINK);
         HandleSeq outgoing = link->getOutgoingSet();
         TS_ASSERT_EQUALS(outgoing.size(), 2);
