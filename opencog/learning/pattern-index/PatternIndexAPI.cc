@@ -32,7 +32,7 @@ string PatternIndexAPI::getStringProperty(StringMap &map, const string key)
     if (it == map.end()) {
         throw runtime_error("Invalid property key: " + key);
     } else {
-        return (*it).second;
+        return it->second;
     }
 }
 
@@ -47,7 +47,7 @@ int PatternIndexAPI::getIntProperty(StringMap &map,
     if (it == map.end()) {
         throw runtime_error("Invalid property key: " + key);
     } else {
-        answer = stoi((*it).second);
+        answer = stoi(it->second);
         if ((answer < min) || (answer > max)) {
             string m = "Invalid value for " + 
                             key + ": " + to_string(answer);
@@ -66,7 +66,7 @@ bool PatternIndexAPI::getBoolProperty(StringMap &map, const string key)
     if (it == map.end()) {
         throw runtime_error("Invalid property key: " + key);
     } else {
-        string value = (*it).second;
+        string value = it->second;
         transform(value.begin(), value.end(), value.begin(), ::tolower);
         if (value.compare("true") == 0) {
             answer = true;
@@ -74,7 +74,7 @@ bool PatternIndexAPI::getBoolProperty(StringMap &map, const string key)
             answer = false;
         } else {
             string m = "Invalid value for " + 
-                            key + ": " + (*it).second;
+                            key + ": " + it->second;
             throw runtime_error(m);
         }
     }
@@ -345,7 +345,7 @@ void PatternIndexAPI::deleteIndex(Handle key)
         throw runtime_error("Invalid index key: " + key->toString());
     }
 
-    delete (*it).second.first;
+    delete it->second.first;
     indexes.erase(it);
 }
 
@@ -356,44 +356,44 @@ void PatternIndexAPI::applyProperties(Handle key)
         throw runtime_error("Invalid index key: " + key->toString());
     }
 
-    TypeFrameIndex *index = (*it).second.first;
+    TypeFrameIndex *index = it->second.first;
 
-    index->PATTERN_COUNT_CACHE_ENABLED = getBoolProperty((*it).second.second, "PatternCountCacheEnabled");
-    int n = getIntProperty((*it).second.second, "NumberOfEvaluationThreads", 1);
+    index->PATTERN_COUNT_CACHE_ENABLED = getBoolProperty(it->second.second, "PatternCountCacheEnabled");
+    int n = getIntProperty(it->second.second, "NumberOfEvaluationThreads", 1);
     index->NUMBER_OF_EVALUATION_THREADS = n;
     if (n > 1) {
         index->PATTERN_COUNT_CACHE_ENABLED = false;
     }
-    index->MINIMAL_FREQUENCY_TO_COMPUTE_QUALITY_METRIC = getIntProperty((*it).second.second, "MinimalFrequencyToComputeQualityMetric", 1);
-    index->MAX_SIZE_OF_COMPOUND_FRAMES_QUEUE = getIntProperty((*it).second.second, "MaximumSizeOfCompoundFramesQueue", 1);
+    index->MINIMAL_FREQUENCY_TO_COMPUTE_QUALITY_METRIC = getIntProperty(it->second.second, "MinimalFrequencyToComputeQualityMetric", 1);
+    index->MAX_SIZE_OF_COMPOUND_FRAMES_QUEUE = getIntProperty(it->second.second, "MaximumSizeOfCompoundFramesQueue", 1);
 
-    string s = getStringProperty((*it).second.second, "CoherenceFunction");
+    string s = getStringProperty(it->second.second, "CoherenceFunction");
     if (s.compare("const1") == 0) {
         index->COHERENCE_FUNCTION = TypeFrameIndex::CONST_1;
     } else {
         throw runtime_error("Invalid value for CoherenceFunction: " + s);
     }
 
-    s = getStringProperty((*it).second.second, "CoherenceModulatorG");
+    s = getStringProperty(it->second.second, "CoherenceModulatorG");
     if (s.compare("oneOverCoherence") == 0) {
         index->COHERENCE_MODULATOR_G = TypeFrameIndex::ONE_OVER_COHERENCE;
     } else {
         throw runtime_error("Invalid value for CoherenceModulatorG: " + s);
     }
 
-    s = getStringProperty((*it).second.second, "CoherenceModulatorH");
+    s = getStringProperty(it->second.second, "CoherenceModulatorH");
     if (s.compare("coherence") == 0) {
         index->COHERENCE_MODULATOR_H = TypeFrameIndex::COHERENCE;
     } else {
         throw runtime_error("Invalid value for CoherenceModulatorH: " + s);
     }
 
-    index->DIFFERENT_ASSIGNMENT_FOR_DIFFERENT_VARS = getBoolProperty((*it).second.second, "DifferentAssignmentForDifferentVars");
-    index->PERMUTATIONS_OF_VARS_CONSIDERED_EQUIVALENT = getBoolProperty((*it).second.second, "PermutationsOfVarsConsideredEquivalent");
-    index->PATTERNS_GRAM = getIntProperty((*it).second.second, "PatternsGram", 1);
-    index->MAXIMUM_NUMBER_OF_MINING_RESULTS = getIntProperty((*it).second.second, "MaximumNumberOfMiningResults", 1);
+    index->DIFFERENT_ASSIGNMENT_FOR_DIFFERENT_VARS = getBoolProperty(it->second.second, "DifferentAssignmentForDifferentVars");
+    index->PERMUTATIONS_OF_VARS_CONSIDERED_EQUIVALENT = getBoolProperty(it->second.second, "PermutationsOfVarsConsideredEquivalent");
+    index->PATTERNS_GRAM = getIntProperty(it->second.second, "PatternsGram", 1);
+    index->MAXIMUM_NUMBER_OF_MINING_RESULTS = getIntProperty(it->second.second, "MaximumNumberOfMiningResults", 1);
 
-    s = getStringProperty((*it).second.second, "PatternRankingMetric");
+    s = getStringProperty(it->second.second, "PatternRankingMetric");
     if (s.compare("isurprisingness") == 0) {
         index->PATTERN_RANKING_METRIC = TypeFrameIndex::I_SURPRISINGNESS;
     } else if (s.compare("nisurprisingness") == 0) {
@@ -406,7 +406,7 @@ void PatternIndexAPI::applyProperties(Handle key)
         throw runtime_error("Invalid value for PatternRankingMetric: " + s);
     }
 
-    s = getStringProperty((*it).second.second, "RootTypesUsedToBuildPatterns");
+    s = getStringProperty(it->second.second, "RootTypesUsedToBuildPatterns");
     istringstream iss1(s);
     string stype;    
     while (getline(iss1, stype, ',')) {
@@ -418,7 +418,7 @@ void PatternIndexAPI::applyProperties(Handle key)
         }
     }
 
-    s = getStringProperty((*it).second.second, "TypesAllowedToBecomeVariables");
+    s = getStringProperty(it->second.second, "TypesAllowedToBecomeVariables");
     istringstream iss2(s);
     while (getline(iss2, stype, ',')) {
         if (classserver().isDefined(stype)) {
@@ -438,11 +438,11 @@ void PatternIndexAPI::setProperty(Handle key,
     if (it1 == indexes.end()) {
         throw runtime_error("Invalid index key: " + key->toString());
     }
-    StringMap::iterator it2 = (*it1).second.second.find(propertyName);
-    if (it2 == (*it1).second.second.end()) {
+    StringMap::iterator it2 = it1->second.second.find(propertyName);
+    if (it2 == it1->second.second.end()) {
         throw runtime_error("Invalid property name: " + propertyName);
     } else {
-        (*it2).second = propertyValue;
+        it2->second = propertyValue;
     }
 }
 

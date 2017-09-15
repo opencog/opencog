@@ -152,7 +152,7 @@ unsigned int TypeFrameIndex::countPattern(const TypeFrame &pattern)
     if (PATTERN_COUNT_CACHE_ENABLED) {
         PatternCountMap::const_iterator it = patternCountCache.find(pattern);
         if (it != patternCountCache.end()) {
-            return (*it).second;
+            return it->second;
         }
     }
 
@@ -1053,9 +1053,9 @@ void TypeFrameIndex::addPatternOccurrence(TypeFrame &pattern, int pos)
         if (DEBUG) {
             printf("%d: ", pos);
             pattern.printForDebug("ADD PATTERN ", "\n", true);
-            (*it).first.printForDebug("Found: ", "\n", true);
+            it->first.printForDebug("Found: ", "\n", true);
         }
-        (*it).second.insert(pos);
+        it->second.insert(pos);
     }
 }
 
@@ -1102,7 +1102,7 @@ void TypeFrameIndex::selectCurrentElement(TypeFrame &answer,
             if (DEBUG) printf("ADD NEW SET variable occurrence %s %lu\n", key.c_str(), answer.size() - 1);
         } else {
             if (DEBUG) printf("ADD variable occurrence %s %lu\n", key.c_str(), answer.size() - 1);
-            (*it).second.insert(answer.size() - 1);
+            it->second.insert(answer.size() - 1);
         }
     } else {
         answer.pickAndPushBack(baseFrame, cursor);
@@ -1218,7 +1218,6 @@ void TypeFrameIndex::varMappingUnion(VarMapping &answer,
 	answer.insert(map2.begin(), map2.end());
 }
 
-// TODO from here
 bool TypeFrameIndex::isForbiddenMapping(const VarMapping &mapping,
                                         const VarMappingSeq &forbiddenVector) const
 {

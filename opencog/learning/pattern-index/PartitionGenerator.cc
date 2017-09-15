@@ -61,7 +61,7 @@ void PartitionGenerator::printForDebug(std::string prefix, std::string suffix) c
             }
         }
         printf("}");
-        if (count1++ != ((*partitionIterator).size() - 1)) {
+        if (count1++ != (partitionIterator->size() - 1)) {
             printf(" ");
         }
     }

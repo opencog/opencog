@@ -57,7 +57,7 @@ string TypeFrame::nodeNameAt(unsigned int pos) const
     if (it == nodeNameMap.end()) {
         fprintf(stderr, "Attempting to get name at non-node position: %d\n", pos);
     } else {
-        answer = (*it).second;
+        answer = it->second;
     }
     return answer;
 }
@@ -68,7 +68,7 @@ void TypeFrame::setNodeNameAt(unsigned int pos, const string& name)
     if (it == nodeNameMap.end()) {
         nodeNameMap.emplace(pos, name);
     } else {
-        (*it).second = name;
+        it->second = name;
     }
 }
 
@@ -666,7 +666,7 @@ void TypeFrame::printForDebug(string prefix, string suffix, bool showNames) cons
             if (it == nodeNameMap.end()) {
                 printf("\"*\" ");
             } else {
-                printf("\"%s\" ", (*it).second.c_str());
+                printf("\"%s\" ", it->second.c_str());
             }
         }
     }

@@ -120,14 +120,14 @@ public:
             int cursor = 0;
             while (it1 < a.end()) {
                 if (it2 == b.end()) return false;
-                if ((*it1).first < (*it2).first) {
+                if (it1->first < it2->first) {
                     return true;
-                } else if ((*it1).first > (*it2).first) {
+                } else if (it1->first > it2->first) {
                     return false;
                 } else {
-                    if ((*it1).second < (*it2).second) {
+                    if (it1->second < it2->second) {
                         return true;
-                    } else if ((*it1).second > (*it2).second) {
+                    } else if (it1->second > it2->second) {
                         return false;
                     } else {
                         bool check1 = a.nodeNameDefined(cursor);
