@@ -134,7 +134,7 @@
 		; to really be sure that this is a part of the matrix; it's
 		; assumed that the pair-type is enough to acheive this.
 		(define (release-extract ITEM)
-			(for-each cog-extract (get-incoming-by-type ITEM pair-type)))
+			(for-each cog-extract (cog-incoming-by-type ITEM pair-type)))
 
 		;-------------------------------------------
 		; Explain what it is that I provide. This helps classes
@@ -323,6 +323,48 @@
 			(orthogonalize wrd-class WB))
 	)
 )
+
+; ---------------------------------------------------------------
+; stub wrapper for word-similarity.
+; Return #t if the two should be merged, else return #f
+; XXX do something here.
+(define (ok-to-merge WORD-A WORD-B)
+	#f
+)
+
+; ---------------------------------------------------------------
+;
+; Given just one word, assemble a list of all of the words that
+; appear in the disjuncts on that word.
+(define (get-dj-words WORD)
+
+	; Given a Section i.e. (word, connector-set), walk over all
+	; the connectors in the connector set, and add the word appearing
+	; in the connector to the word-list. But add it only if it is not
+	; already in the list.
+	(define (add-to-list SEC LST)
+		(fold
+			(lambda (CNCTR LST)
+				(define WRD (first CNCTR))
+				(if (and
+					; Is it actuall a word (and not a word-class?)
+					(eq? 'WordNode (cog-type WRD))
+					; Is it already in the list?
+					(eq? '() (find (lambda (wrd) (equal? WRD wrd)) LST)))
+					(cons WRD LST) LST))
+			'()
+			; second of Section is a ConnectorSeq
+			(cog-outgoing-set (cog-outgoing-atom SEC 1))))
+
+	; Walk over all the Sections on the word.
+	(fold add-to-list '() (cog-incoming-by-type WORD 'Section))
+)
+
+; Given just one word, assemble a list of all of the words that
+; appear in the disjuncts on that word.  Compare these pair-wise,
+; to see if any of them should be merged.  Ifso, perform the merge.
+;
+
 
 ; ---------------------------------------------------------------
 (define (do-it)
