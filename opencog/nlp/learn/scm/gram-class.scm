@@ -76,6 +76,14 @@
   pair-stars API.
 
   'right-stars ROW - Likewise, but returns the set (ROW, *).
+
+  'left-release COL - Remove pairs (*, COL) from the atomspace. This
+  intended to be used to minimize RAM usage when working with a large
+  database.  The atoms are NOT removed from the database; only from
+  the atospace. If the atoms are in use (have a non-empty incoming
+  set) they are not removed.
+
+  'right-release ROW - same but for pairs in ROW.
 "
 	(let ((stars-obj (add-pair-stars LLOBJ))
 			(l-basis '())
@@ -122,6 +130,13 @@
 			(stars-obj 'right-stars ITEM))
 
 		;-------------------------------------------
+		; Release (extract) row or column. No spcific check is made
+		; to really be sure that this is a part of the matrix; it's
+		; assumed that the pair-type is enough to acheive this.
+		(define (release-extract ITEM)
+			(for-each cog-extract (get-incoming-by-type ITEM pair-type)))
+
+		;-------------------------------------------
 		; Explain what it is that I provide. This helps classes
 		; above understand what it is that this class does.
 		(define (provides meth)
@@ -140,6 +155,8 @@
 				((right-basis)    (get-right-basis))
 				((left-stars)     (apply get-left-stars args))
 				((right-stars)    (apply get-right-stars args))
+				((left-release)   (apply release-extract args))
+				((right-release)  (apply release-extract args))
 				((provides)       (apply provides args))
 				(else             (apply LLOBJ (cons message args))))
 		)))
