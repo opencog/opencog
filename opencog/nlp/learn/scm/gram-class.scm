@@ -42,7 +42,7 @@
 ; ---------------------------------------------------------------------
 
 (use-modules (srfi srfi-1))
-(use-modules (opencog) (opencog matrix))
+(use-modules (opencog) (opencog matrix) (opencog persist))
 
 ; ---------------------------------------------------------------------
 ; TODO: move the below to the atomsace matrix directory, when its
