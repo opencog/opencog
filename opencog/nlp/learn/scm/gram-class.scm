@@ -332,9 +332,6 @@
 			(WordClassNode (string-concatenate
 					(list (cog-name WA) " " (cog-name WB))))))
 
-	; The length-squared of the merge vector.
-	(define lensq 0.0)
-
 	; Merge two sections into one section built from the word-class.
 	; One or the other sections can be null. If both sections are not
 	; null, then both are assumed to have exactly the same disjunct.
@@ -342,7 +339,10 @@
 	; This works fine for merging two words, or for merging
 	; a word and a word-class.  It even works for merging
 	; two word-classes.
-	(define (merge-word-pair SECT-PAIR)
+	;
+	; This is a fold-helper; the fold accumulates the length-squared
+	; of the merged vector.
+	(define (merge-word-pair SECT-PAIR LENSQ)
 		; The two word-sections to merge
 		(define lsec (first SECT-PAIR))
 		(define rsec (second SECT-PAIR))
@@ -375,14 +375,17 @@
 		; The merged word-class
 		(define mrg (Section wrd-class seq))
 
-		; Update the sum-square length
-		(set! lensq (+ lensq (* cnt cnt)))
-
 		; The summed counts
 		(set-count mrg cnt)
+		(store-atom mrg) ; save to the database.
 
-		(store-atom mrg) ; save to SQL
+		; Return the accumulated sum-square length
+		(+ LENSQ (* cnt cnt))
 	)
+
+	; The length-squared of the merged vector.
+	(define lensq
+		(fold merge-word-pair 0.0 (ptu 'right-stars (list WA WB))))
 
 	; Given a WordClassNode CLS and a WordNode WRD, alter the
 	; counts on the disjuncts on WRD, so that they are orthogonal
@@ -466,9 +469,6 @@
 			(MemberLink WA wrd-class)
 			(MemberLink WB wrd-class)
 
-			; Create the merged vector.
-			(for-each merge-word-pair (ptu 'right-stars (list WA WB)))
-
 			(orthogonalize wrd-class WA)
 			(orthogonalize wrd-class WB))
 
@@ -479,9 +479,6 @@
 		(begin
 			; Add WB to the mrg-class (which is WA already)
 			(MemberLink WB wrd-class)
-
-			; Merge WB into the word-class
-			(for-each merge-word-pair (ptu 'right-stars (list WA WB)))
 
 			; Redefine WB to be orthogonal to the word-class.
 			(orthogonalize wrd-class WB))
