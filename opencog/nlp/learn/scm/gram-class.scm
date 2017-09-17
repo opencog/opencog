@@ -297,6 +297,7 @@
 (define (merge-ortho LLOBJ WA WB FRAC)
 "
   merge-ortho WA WB FRAC - merge WA and WB into a grammatical class.
+  Return the merged class.
 
   WA and WB should be WordNodes or WordClassNodes.
   FRAC should be a floating point nummber between zero and one,
@@ -483,6 +484,7 @@
 			; Redefine WB to be orthogonal to the word-class.
 			(orthogonalize wrd-class WB))
 	)
+	wrd-class
 )
 
 ; ---------------------------------------------------------------
@@ -518,6 +520,7 @@
 ; ---------------------------------------------------------------
 ; stub wrapper for word-similarity.
 ; Return #t if the two should be merged, else return #f
+; WORD-A might be a WordClassNode or a WordNode.
 ; XXX do something here.
 (define (ok-to-merge WORD-A WORD-B)
 	#f
@@ -552,30 +555,24 @@
 )
 
 ; ---------------------------------------------------------------
-; Given a list of words, compare the pair-wise, to see if any of them
-; should be merged.  If so, perform the merge. This is a very simple
-; (too siple!?) O(N^2) algorithm.  I think we can do better.
-; There are several problems with this approach: new classes are created
-; willy-nilly; no attempt is made to grow any existing classes.
-; See the next one.
-(define (compare-pairs WORD-LIST)
-	(define (comp-n-merge WORD REST)
-		(if (not (null? REST))
-			(let ((nxt-word (car REST))
-					(nxt-rest (cdr REST)))
-				(if (ok-to-merge WORD nxt-word)
-					(merge-ortho LLOBJ WORD nxt-word FRAC))
-				(comp-n-merge WORD nxt-rest)
-				(comp-n-merge nxt-word nxt-rest))))
-
-	(comp-n-merge (car WORD-LIST) (cdr WORD-LIST))
+; Given a grammatical class, and a list of words, scan the word list
+; to see if any can be merged into the class. If they can, merge them
+; in. This is an O(n) algo.
+;
+; GRM-CLS should be the WordClassNode to be enlarged.
+; WRD-LST should be list of WordNodes to compare to the class.
+; LLOBJ is the object to use for obtaining counts.
+; FRAC is the fraction of union vs. intersection during merge.
+; (These last two are passed blindly to the merge function).
+;
+(define (expand-gram-class LLOBJ GRM-CLS WRD-LST FRAC)
+	(if (not (null? WRD-LST))
+		(let ((wrd (car WRD-LST)))
+			(if (ok-to-merge GRM-CLS wrd)
+				(merge-ortho LLOBJ GRM-CLS wrd FRAC))
+			(expand-gram-class GRM-CLS (cdr WRD-LST))))
 )
 
-; ---------------------------------------------------------------
-; Given a list of words, find the first pair of words that seem to be
-; sufficiently similar to one another. Create a single grammatical
-; class for these, and then attempt to find additional words to be added
-; to this class. 
 ; ---------------------------------------------------------------
 (define (do-it)
 	(let ((pca (make-pseudo-cset-api))
