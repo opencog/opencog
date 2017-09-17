@@ -551,12 +551,31 @@
 	(fold add-to-list '() (cog-incoming-by-type WORD 'Section))
 )
 
-; Given just one word, assemble a list of all of the words that
-; appear in the disjuncts on that word.  Compare these pair-wise,
-; to see if any of them should be merged.  Ifso, perform the merge.
-;
+; ---------------------------------------------------------------
+; Given a list of words, compare the pair-wise, to see if any of them
+; should be merged.  If so, perform the merge. This is a very simple
+; (too siple!?) O(N^2) algorithm.  I think we can do better.
+; There are several problems with this approach: new classes are created
+; willy-nilly; no attempt is made to grow any existing classes.
+; See the next one.
+(define (compare-pairs WORD-LIST)
+	(define (comp-n-merge WORD REST)
+		(if (not (null? REST))
+			(let ((nxt-word (car REST))
+					(nxt-rest (cdr REST)))
+				(if (ok-to-merge WORD nxt-word)
+					(merge-ortho LLOBJ WORD nxt-word FRAC))
+				(comp-n-merge WORD nxt-rest)
+				(comp-n-merge nxt-word nxt-rest))))
 
+	(comp-n-merge (car WORD-LIST) (cdr WORD-LIST))
+)
 
+; ---------------------------------------------------------------
+; Given a list of words, find the first pair of words that seem to be
+; sufficiently similar to one another. Create a single grammatical
+; class for these, and then attempt to find additional words to be added
+; to this class. 
 ; ---------------------------------------------------------------
 (define (do-it)
 	(let ((pca (make-pseudo-cset-api))
