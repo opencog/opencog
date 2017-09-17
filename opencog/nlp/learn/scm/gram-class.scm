@@ -389,12 +389,15 @@
 	; to CLS.  If the counts are negative, that word-disjunct pair
 	; is deleted (from the database as well as the atomspace).
 	; The updated counts are stored in the database.
+	;
+	; NOTE: actually, both CLS and WRD are Sections, its just that
+	; CLS is a section for a WordClassNode, and WRD is a section for
+	; a WordNode.  The sectinos hold the counts, of course.
 	(define (orthogonalize CLS WRD)
 
-		; Machinery to compute the dot-product between the WRD
+		; Fold-helper to compute the dot-product between the WRD
 		; vector and the CLS vector.
-		(define dot-prod 0.0)
-		(define (compute-dot-prod CLAPR)
+		(define (compute-dot-prod CLAPR DOT-PROD)
 			(define cla (first CLAPR))
 			(define wrd (second CLAPR))
 
@@ -402,8 +405,17 @@
 			(define cc (LLOBJ 'pair-count cla))
 			(define wc (if (null? wrd) 0 (LLOBJ 'pair-count wrd)))
 
-			(set! dot-prod (+ dot-prod (* cc wc)))
+			(+ DOT-PROD (* cc wc))
 		)
+
+		; Compute the dot-product of WA and the merged class.
+		; We could use fold here, but we won't.
+		(define dot-prod
+			(fold compute-dot-prod 0.0 (ptu 'right-stars (list CLS WRD))))
+		(define unit-prod (/ dot-prod lensq))
+
+		; (format #t "sum ~A dot-prod=~A length=~A unit=~A\n"
+		;      WRD dot-prod lensq unit-prod)
 
 		; Alter the counts on the word so that they are orthogonal
 		; to the class. Assumes that the dot-prduct was previously
@@ -414,15 +426,17 @@
 			(define wrd (second CLAPR))
 
 			; The counts on each, or zero.
+			; Both cla and wrd are actually Sections.
 			(define cc (LLOBJ 'pair-count cla))
 			(define wc (if (null? wrd) 0 (LLOBJ 'pair-count wrd)))
 
 			; The orthogonal component.
 			(define orth (if (null? wrd) -999
-					(- wc (* cc dot-prod))))
+					(- wc (* cc unit-prod))))
 
 			; Update count on postive sections;
-			; Delete non-postive sections.
+			; Delete non-postive sections. The deletion is not just
+			; from the atomspace, but also the database backend!
 			(if (< 0 orth)
 				(set-count wrd orth)
 				(if (not (null? wrd))
@@ -436,14 +450,6 @@
 
 			; (if (< 3 orth) (format #t "Large remainder: ~A\n" wrd))
 		)
-
-		; Compute the dot-product of WA and the merged class.
-		; We could use fold here, but we won't.
-		(for-each compute-dot-prod (ptu 'right-stars (list CLS WRD)))
-
-; (format #t "sum ~A dotty ~A lens ~A\n" WRD dot-prod lensq)
-		(set! dot-prod (/ dot-prod lensq))
-; (format #t "final dotty ~A\n" dot-prod)
 
 		; Compute the orthogonal components
 		(for-each ortho (ptu 'right-stars (list CLS WRD)))
