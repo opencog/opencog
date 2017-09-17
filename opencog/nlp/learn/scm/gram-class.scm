@@ -286,11 +286,15 @@
 
 ; ---------------------------------------------------------------------
 
-(define (merge-ortho LLOBJ WA WB)
+(define (merge-ortho LLOBJ WA WB FRAC)
 "
-  merge-ortho WA WB - merge WA and WB into a grammatical class.
+  merge-ortho WA WB FRAC - merge WA and WB into a grammatical class.
 
   WA and WB should be WordNodes or WordClassNodes.
+  FRAC should be a floating point nummber between zero and one,
+     indicating the fraction of a non-shared count to be used.
+     Setting this to 1.0 gives the sum of the union of supports;
+     setting this to 0.0 gives the sum of the intersection of supports.
   LLOBJ is used to access counts on pairs.  Pairs are SectionLinks,
      that is, are (word,disjunct) pairs wrapped in a SectionLink.
 
@@ -302,6 +306,9 @@
   only the orthogonal components are left (that is, the parts
   orthogonal to the sum). Next, zero-clamping is applied, so that
   any non-positive components are erased.
+
+  The counts are summed only if both counts are non-zero. Otherwise,
+  only a WEIGHT fraction of a single, unmatched count is transfered.
 
   If WA is a WordClassNode, and WB is not, then WB is merged into
   WA. Currently, WB must never be a WordClass....
@@ -330,7 +337,11 @@
 		; The counts on each, or zero.
 		(define lc (if (null? lw) 0 (LLOBJ 'pair-count lw)))
 		(define rc (if (null? rw) 0 (LLOBJ 'pair-count rw)))
-		(define cnt (+ rc lc))
+
+		; If the other count is zero, take only a FRAC of the count.
+		(define wlc (if (null? rw) (* FRAC lc) lc))
+		(define wrc (if (null? lw) (* FRAC rc) rc))
+		(define cnt (+ wlc wrc))
 
 		; The disjunct. Both lw and rw have the same disjunct.
 		(define seq (if (null? lw) (cog-outgoing-atom rw 1)
