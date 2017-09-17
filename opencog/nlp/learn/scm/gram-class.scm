@@ -348,12 +348,12 @@
 		(define rsec (second SECT-PAIR))
 
 		; The counts on each, or zero.
-		(define lcnt (if (null? lw) 0 (LLOBJ 'pair-count lsec)))
-		(define rcnt (if (null? rw) 0 (LLOBJ 'pair-count rsec)))
+		(define lcnt (if (null? lsec) 0 (LLOBJ 'pair-count lsec)))
+		(define rcnt (if (null? rsec) 0 (LLOBJ 'pair-count rsec)))
 
 		; Return #t if sect is a Word section, not a word-class section.
-		(define (is-word-sec? sect)
-			(eq? 'WordNode (cog-type (cog-outgoing-atom 0) sect)))
+		(define (is-word-sect? sect)
+			(eq? 'WordNode (cog-type (cog-outgoing-atom sect 0))))
 
 		; If the other count is zero, take only a FRAC of the count.
 		; But only if we are merging in a word, not a word-class;
