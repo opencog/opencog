@@ -486,6 +486,36 @@
 )
 
 ; ---------------------------------------------------------------
+; Compare two ConnectorSeq links, to see if they are the same,
+; differing in only one location.  If this is the case, return
+; the index offset to the location that is different. The index
+; is zero-based. If they are not matchable, return #f.
+
+(define (connector-seq-compare SEQA SEQB)
+	; Get the index of the difference. Return #f if there are two
+	; or more differences. If both are equal, it returns the length.
+	; Could not figure out how to implement this without using set!
+	(define (get-idx)
+		(define mismatch-idx #f)
+		(define cnt 0)
+		(pair-fold
+			(lambda (subseq-a subseq-b idx)
+				; (format #t "duude ~A and ~A and ifx=~A\n" subseq-a subseq-b idx)
+				(if (not (equal? (car subseq-a) (car subseq-b)))
+					(begin (set! mismatch-idx idx)
+						(set! cnt (+ cnt 1))))
+				(+ idx 1))
+			0 (cog-outgoing-set SEQA) (cog-outgoing-set SEQB))
+		(if (eq? 1 cnt) mismatch-idx #f))
+
+	; Return false if they are equal, else return the index
+	(if (or (eq? SEQA SEQB) (not (eq? (cog-arity SEQA) (cog-arity SEQB))))
+		 #f
+		 (get-idx))
+)
+
+
+; ---------------------------------------------------------------
 ; stub wrapper for word-similarity.
 ; Return #t if the two should be merged, else return #f
 ; XXX do something here.
