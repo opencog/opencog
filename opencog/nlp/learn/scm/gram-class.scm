@@ -21,7 +21,7 @@
 ;         WordNode "wordy"      ; the word itself
 ;         WordClassNode "noun"  ; the grammatical class of the word.
 ;
-; Word classes have a designated grammatic behavior, using Sections,
+; Word classes have a designated grammatical behavior, using Sections,
 ; behaving just like the pseudo-connectors on single words. Thus, either
 ; a WordNode or a WordClassNode can appear in a Connector link, as
 ; shown below.
@@ -35,9 +35,66 @@
 ;             Connector
 ;                ....
 ;
-; There are several ways of handling the merger of words into classes.
-; Consider first merging
-; The "linear" approach is to intersect the co
+; Basic assumptions
+; -----------------
+; It is assummed that grammatical classes are stepping stones to word
+; meaning; that meaning and grammatical class are at least partly
+; correlated. It is assumed that words can have multiple meanings,
+; and can belong to multiple grammatical classes. It is assumed that
+; the sum total numner of observations of a word is a linear combination
+; of the different ways that the word was used in the text sample.
+; Thus, the task is to decompose the observed counts on a single word,
+; and assign them to one of a number of different grammatical classes.
+;
+; The above implies that each word should be viewed as a vector; the
+; disjuncts form the basis of the vector space, and the count of
+; observations of different disjuncts indicating the direction of the
+; vector. It is the linearity of the observations that implies that
+; such a vector-based linear approach is correct.
+;
+; The number of grammatical classes that a word might belong to can
+; vary from a few to a few dozen; in addition, there will be some
+; unknown amount of "noise": incorrect sections due to incorrect parses.
+;
+; It is assumed that when a word belong to several grammatical classes,
+; the sets of disjuncts defining those classes are not necessarily
+; disjoint; there may be significant overlap.
+;
+; Merging
+; -------
+; There are several ways in which two words might be merged into a
+; word-class, or a word added to a word-class. All of these are
+; quasi-linear, trying to project out the different classes that
+; the word belongs to.
+;
+; Union word-pair merging
+; ------------------------
+; Given two words, add them as vectors, creating a new vector, the
+; word-class. This is purely linear summation. Next, compute the
+; orthogonal components of the words to the word-class, and replace
+; the words by thier orthogonal components - i.e. subtract the parallel
+; components. It seems best to avoid negative observation counts, so
+; if any count on any section is negative, it is clamped to zero (i.e.
+; that section is removed, as this is a sparse vector). This last step
+; renders this process only quasi-linear.
+;
+; Note the following properties of the above algo:
+; a) the combined vector has strictly equal or larger support than
+;    the parts. 
+; The above merge seems to make the most sense if similarity is being
+; judged based on total overlap e.g. cosine similarity. The goal of
+; separating out the orthogonal components (and keeping them, instead
+; of discarding them) is to be able to separate one word sense from
+; another in a linear combination of observed counts arising from
+; multiple senses.
+; 
+; Overlap merging
+; ---------------
+; Similar to the above, a linear sum is taken, but the sum is only over
+; those disjuncts that both words have in common. This might be more
+; appropriate for disentangling linear cobinaations of multiple
+; word-senes. It might work best with relatively lower similarity
+; scores.
 ;
 ; ---------------------------------------------------------------------
 
