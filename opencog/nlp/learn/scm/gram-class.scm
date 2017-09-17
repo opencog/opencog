@@ -79,22 +79,88 @@
 ; renders this process only quasi-linear.
 ;
 ; Note the following properties of the above algo:
-; a) the combined vector has strictly equal or larger support than
-;    the parts. 
-; The above merge seems to make the most sense if similarity is being
-; judged based on total overlap e.g. cosine similarity. The goal of
-; separating out the orthogonal components (and keeping them, instead
-; of discarding them) is to be able to separate one word sense from
-; another in a linear combination of observed counts arising from
-; multiple senses.
-; 
+; a) The combined vector has strictly equal or larger support than
+;    the parts. This might not be correct, as it seems that it will
+;    mix in disjuncts that should have been assigned to other meanings.
+; b) The process is not quite linear, as orthogonal coponents with
+;    negative counts are clamped to zero.
+; c) The number of vectors being tracked in the system is increasing:
+;    before there were two, once for each word, now there are three:
+;    each word remains, with altered counts, as well as thier sum.
+;    It might be nice to prune the number of vectors, so that the
+;    dataset does not get outrageously large. Its possible that short
+;    vectors might be mostly noise.
+; d) There is another non-linearity, when a word is assigned to an
+;    existing word-class. This assignment will slightly alter the
+;    direction of the word-class vector, but will not trigger the
+;    recomputation of previous orthognoal components.
+;
 ; Overlap merging
 ; ---------------
 ; Similar to the above, a linear sum is taken, but the sum is only over
-; those disjuncts that both words have in common. This might be more
-; appropriate for disentangling linear cobinaations of multiple
-; word-senes. It might work best with relatively lower similarity
-; scores.
+; those disjuncts that both words share in common. This might be more
+; appropriate for disentangling linear combinaations of multiple
+; word-senes. It seems like it could be robust even with lower
+; similarity scores (e.g. when using cosine similarity).
+;
+; Overlap merging appears to solve the problem a) above, but. on the
+; flip side, it also seems to prevent the discovery and broadening
+; of the ways in which a word might be used.
+;
+; Broadening
+; ----------
+; The issue described in a) is an issue of broadening the known usages
+; of a word, beyond what has been strictly observed in the text.  There
+; are two distinct opportunities to broaden: first, in the union vs.
+; overlap merging above, and second, in the merging of disjuncts. That
+; is, the above merging did not alter the number of disjuncts in use:
+; its disjuncts is a sequence of connectors, each connector specifies
+; a single word. At some point, disjuncts should also be merged, i.e.
+; by merging the connectors on them.
+;
+; If disjunct merging is performed after a series of word mergers have
+; been done, then when a connector-word is replaced by a connector
+; word-class, that class may be larger than the number of connectors
+; originally witnessed. Again, the known usage of the word is broaded.
+;
+; Disjunct merging
+; ----------------
+; Disjunct merging can be done in one of two ways.
+;
+; Strict disjunct merging
+; -----------------------
+; In strict disjunct merging, one picks a single word, and then compares
+; all connecctor sequences on that word.  If two connector sequences are
+; nearly identical, differing in only one location, then those two
+; connectors can be merged into one. When the connectors are merged, a
+; new word-class is formed to hold the two words.
+;
+; There are several properties of this merge style:
+; e) This seems like a "strict" way to merge, because it does not allow
+;    any broadening to take place.
+; f) The resulting word-class does not have any sections associated with
+;    it! It cannot because of the way it was constructed, but this seems
+;    wrong.
+;
+; Connected disjunct merging
+; --------------------------
+; Property f) above seems wrong: word-classes should appeary fully
+; connected in the graph, symmetrically.  This suggests a disjunct
+; merger style that aintains connectivity.
+;
+; As above, given a single word, one scans the sections on, looking
+; for sections that differ in only one location. As before, the words
+; that appear at this variable location are tossed into a set. However,
+; this time, a search is made to see if this set overlaps, or is
+; a subset of an existing grammatical class. If so, then the counts
+; on all of these sections are totalled, a new disjunct is created,
+; using the grammatical class in the connector, and the individual
+; sections are discarded. (If there are multiple grammatical classes
+; that might be appropriate, then a cosine similarity could be used
+; to pick between them.
+;
+; This has the nice property:
+; g) The total number of sections is decreasing.
 ;
 ; ---------------------------------------------------------------------
 
