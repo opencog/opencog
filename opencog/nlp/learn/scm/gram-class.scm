@@ -574,6 +574,14 @@
 )
 
 ; ---------------------------------------------------------------
+; Given a list of words, compare them pairwise to find a similar
+; pair. Merge these to form a grammatical class, and then try to
+; expand that class as much as possible.
+(define (make-gram-class LLOBJ WRD-LST FRAC)
+
+)
+
+; ---------------------------------------------------------------
 (define (do-it)
 	(let ((pca (make-pseudo-cset-api))
 			(psa (add-dynamic-stars pca))
