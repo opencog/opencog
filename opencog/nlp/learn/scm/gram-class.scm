@@ -555,6 +555,12 @@
 )
 
 ; ---------------------------------------------------------------
+; Predicate - is the word a member of the grammatical class, already?
+(define (in-gram-class? WORD GCLS)
+	(define memlnk (cog-link 'MemberLink WORD GCLS))
+	(if (null? memlnk) #f #t))
+
+; ---------------------------------------------------------------
 ; Given a grammatical class, and a list of words, scan the word list
 ; to see if any can be merged into the class. If they can, merge them
 ; in. This is an O(n) algo.
@@ -568,9 +574,15 @@
 (define (expand-gram-class LLOBJ GRM-CLS WRD-LST FRAC)
 	(if (not (null? WRD-LST))
 		(let ((wrd (car WRD-LST)))
-			(if (ok-to-merge GRM-CLS wrd)
+
+			; If the word is not already in the class, and its mergeable,
+			; then merge it. XXX Do we really need the in-gram-class?
+			; check? Probably not ... if its in the class, then what's
+			; left is not mergable.
+			(if (and (not (in-gram-class? wrd GRM-CLS))
+					(ok-to-merge GRM-CLS wrd))
 				(merge-ortho LLOBJ GRM-CLS wrd FRAC))
-			(expand-gram-class GRM-CLS (cdr WRD-LST))))
+			(expand-gram-class LLOBJ GRM-CLS (cdr WRD-LST) FRAC)))
 )
 
 ; ---------------------------------------------------------------
@@ -579,6 +591,19 @@
 ; expand that class as much as possible.
 (define (make-gram-class LLOBJ WRD-LST FRAC)
 
+	; Try to make a grammatical class out of the word, and another
+	; in the list. Return it, if possible, else return nil.
+	(define (make-first-one word rest)
+		(if (null? rest) '()
+			(if (ok-to-merge word (car rest))
+				(merge-ortho LLOBJ word (car rest) FRAC)
+				; If they are NOT mergable, recurse,
+				; looking for a pair that is.
+				(make-first-one (car rest) (cdr rest)))))
+
+	(define grm-class (make-first-one (car WRD-LST) (cdr WRD-LST)))
+	(if (not (null? grm-class))
+		(expand-gram-class LLOBJ grm-class WRD-LST FRAC))
 )
 
 ; ---------------------------------------------------------------
