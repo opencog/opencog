@@ -36,6 +36,8 @@ namespace opencog
  * This is here because standard heap implementations (using priority_queue)
  * have a couple of annoyances like the lack of an iterator and an elegant way
  * to avoid equivalent answers to be kept.
+ *
+ * TODO: maybe could be a map, would be faster if maxSize is large.
  */
 class PatternHeap: public std::vector<std::pair<float, TypeFrame>>
 {
