@@ -735,9 +735,8 @@ void TypeFrameIndex::minePatterns(vector<pair<float,TypeFrame>> &answer)
 
     for (thread* evaluationThread : evaluationThreads) {
         evaluationThread->join();
+        delete evaluationThread;
     }
-
-    // TODO dealocate the theads as they seem no longer useful
 
     if (DEBUG) printf("Finished mining. heap size = %lu\n", miningResultsHeap.size());
 
