@@ -192,9 +192,9 @@ private:
     void addArity2Patterns(std::vector<TypeFrame> &answer,
                            std::vector<TypeFrame> &recurseResult1,
                            std::vector<TypeFrame> &recurseResult2,
-                           TypeFrame &baseFrame,
+                           const TypeFrame &baseFrame,
                            int cursor);
-    std::vector<TypeFrame> computeSubPatterns(TypeFrame &baseFrame,
+    std::vector<TypeFrame> computeSubPatterns(const TypeFrame &baseFrame,
                                               int cursorn,
                                               int pos);
     void selectCurrentElement(TypeFrame &answer,

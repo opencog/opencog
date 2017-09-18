@@ -852,7 +852,7 @@ bool TypeFrameIndex::addFromScheme(const string &txt, int offset)
 void TypeFrameIndex::addArity2Patterns(vector<TypeFrame> &answer,
                                        vector<TypeFrame> &recurseResult1,
                                        vector<TypeFrame> &recurseResult2,
-                                       TypeFrame &baseFrame,
+                                       const TypeFrame &baseFrame,
                                        int cursor)
 {
     TypeFrame pattern;
@@ -915,7 +915,7 @@ void TypeFrameIndex::addArity2Patterns(vector<TypeFrame> &answer,
 // TODO: This method should allocate answers in the heap instead of the stack
 // to avoid copying data all the away in the recursive calls
 // TODO: Break this method in smaller pieces
-vector<TypeFrame> TypeFrameIndex::computeSubPatterns(TypeFrame &baseFrame,
+vector<TypeFrame> TypeFrameIndex::computeSubPatterns(const TypeFrame &baseFrame,
                                                      int cursor,
                                                      int pos)
 {
