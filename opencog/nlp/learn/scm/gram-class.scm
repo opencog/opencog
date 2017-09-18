@@ -548,7 +548,7 @@
 	; the connectors in the connector set, and add the word appearing
 	; in the connector to the word-list. But add it only if it is not
 	; already in the list.
-	(define (add-to-list SEC LST)
+	(define (add-to-list SEC WORD-LIST)
 		(fold
 			(lambda (CNCTR LST)
 				(define WRD (cog-outgoing-atom CNCTR 0))
@@ -558,7 +558,7 @@
 					; Is it not yet in the list?
 					(not (find (lambda (wrd) (equal? WRD wrd)) LST)))
 					(cons WRD LST) LST))
-			'()
+			WORD-LIST
 			; second of Section is a ConnectorSeq
 			(cog-outgoing-set (cog-outgoing-atom SEC 1))))
 
