@@ -524,13 +524,14 @@
 ; stub wrapper for word-similarity.
 ; Return #t if the two should be merged, else return #f
 ; WORD-A might be a WordClassNode or a WordNode.
-; XXX do something here.
+; XXX do something fancy here.
 (define (ok-to-merge WORD-A WORD-B)
 	; (define pca (make-pseudo-cset-api))
 	; (define psa (add-dynamic-stars pca))
 	; (define pcos (add-pair-cosine-compute psa))
 
 	(define sim (pcos 'right-cosine WORD-A WORD-B))
+(format #t "Cosine=~A for \"~A\" -- \"~A\"\n" sim (cog-name WORD-A) (cog-name WORD-B))
 
 	; True, if sim is more than 0.9
 	(< 0.9 sim)
@@ -539,7 +540,8 @@
 ; ---------------------------------------------------------------
 ;
 ; Given just one word, assemble a list of all of the words that
-; appear in the disjuncts on that word.
+; appear in the disjuncts on that word.  Assumes that the disjuncts
+; for the word are already in the atomspace.
 (define (get-dj-words WORD)
 
 	; Given a Section i.e. (word, connector-set), walk over all
@@ -549,12 +551,12 @@
 	(define (add-to-list SEC LST)
 		(fold
 			(lambda (CNCTR LST)
-				(define WRD (first CNCTR))
+				(define WRD (cog-outgoing-atom CNCTR 0))
 				(if (and
-					; Is it actuall a word (and not a word-class?)
+					; Is it actually a word (and not a word-class?)
 					(eq? 'WordNode (cog-type WRD))
-					; Is it already in the list?
-					(eq? '() (find (lambda (wrd) (equal? WRD wrd)) LST)))
+					; Is it not yet in the list?
+					(not (find (lambda (wrd) (equal? WRD wrd)) LST)))
 					(cons WRD LST) LST))
 			'()
 			; second of Section is a ConnectorSeq

@@ -13155,6 +13155,27 @@ how?
 linear
 tuple math
 fold 
+----------------------
+(define pca (make-pseudo-cset-api))
+(define psa (add-dynamic-stars pca))
+(define pcos (add-pair-cosine-compute psa)
+(define psup (add-support-compute psa))
+
+right-cosine compute-right-cosine
+/ get-right-length "short"
+
+(length (psa 'right-stars  (Word "short")))  ; 1840
+(length (psa 'right-stars  (Word "tall")))   ; 971
+(psup 'right-length (Word "short"))  ;   208.86119792819346
+(psup 'right-length (Word "tall"))  ; 64.00781202322104
+(pcos 'right-product (Word "tall") (Word "short")) ; 800.0
+
+(length (psa 'right-stars  (Word "the"))) ;
+(define nou (get-dj-words (Word "the")))  ; lngth = 
+(define nou (get-dj-words (Word "tall"))) ; length = 
+(length nou)
+(make-gram-class psa nou 0)
+
 
 
 
