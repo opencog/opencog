@@ -552,18 +552,30 @@
 		(fold
 			(lambda (CNCTR LST)
 				(define WRD (cog-outgoing-atom CNCTR 0))
-				(if (and
+				(if ; (and
 					; Is it actually a word (and not a word-class?)
 					(eq? 'WordNode (cog-type WRD))
 					; Is it not yet in the list?
-					(not (find (lambda (wrd) (equal? WRD wrd)) LST)))
+					; Its not efficient to check here; this becomes very
+					; slow for long lists - it's O(N^2)
+					; (not (find (lambda (wrd) (equal? WRD wrd)) LST)))
 					(cons WRD LST) LST))
 			WORD-LIST
-			; second of Section is a ConnectorSeq
+			; second atom of Section is a ConnectorSeq
 			(cog-outgoing-set (cog-outgoing-atom SEC 1))))
 
 	; Walk over all the Sections on the word.
-	(fold add-to-list '() (cog-incoming-by-type WORD 'Section))
+	(define all-words
+		(fold add-to-list '() (cog-incoming-by-type WORD 'Section)))
+
+	; It is faster, more cpu-efficient to sort first, and then filter.
+	(define sorted-words (sort all-words cog-atom-less?))
+	(if (null? sorted-words) '()
+		(fold
+			(lambda (WRD LST)
+				(if (equal? WRD (car LST)) LST (cons WRD LST)))
+			(car sorted-words)
+			(cdr sorted-words)))
 )
 
 ; ---------------------------------------------------------------
