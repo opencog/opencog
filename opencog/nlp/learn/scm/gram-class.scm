@@ -193,6 +193,9 @@
   of the matrix can fit into RAM at the same time.  If all of the
   matrix can fit, then (add-pair-stars LLOBJ) is more efficient.
 
+  This overloads the standard add-pair-stars methods, so that the
+  fetching occurs automatically and transparently to the user.
+
   The supported methods are:
   'left-basis - Return all items (atoms) that might be used to index
       a row in the matrix.  This may return more items than there are
@@ -523,7 +526,14 @@
 ; WORD-A might be a WordClassNode or a WordNode.
 ; XXX do something here.
 (define (ok-to-merge WORD-A WORD-B)
-	#f
+	; (define pca (make-pseudo-cset-api))
+	; (define psa (add-dynamic-stars pca))
+	; (define pcos (add-pair-cosine-compute psa))
+
+	(define sim (pcos 'right-cosine WORD-A WORD-B))
+
+	; True, if sim is more than 0.9
+	(< 0.9 sim)
 )
 
 ; ---------------------------------------------------------------
@@ -607,27 +617,26 @@
 )
 
 ; ---------------------------------------------------------------
+
 (define (do-it)
 	(let ((pca (make-pseudo-cset-api))
 			(psa (add-dynamic-stars pca))
+			(pcos (add-pair-cosine-compute psa))
 		)
 
 		(load-atoms-of-type 'WordNode)
-
-		; (define pta (make-thresh-pca pfa))
-		; this can't work unless the whole matrix is already loaded...
-		; (define all-words (get-all-cset-words))
-		; brute force.
-		; (define all-words (cog-get-atoms 'WordNode))
-
+		; Verify that words have been loaded
+		;  (define all-words (get-all-cset-words))
 	)
 )
 
 ; ---------------------------------------------------------------
 ; Example usage
 ;
+; (define pca (make-pseudo-cset-api))
 ; (define psa (add-dynamic-stars pca))
 ;
+; Verify that support is correctly computed.
 ; (define (bogus a b) (format #t "Its ~A and ~A\n" a b))
 ; (define ptu (add-tuple-math psa bogus))
 ; (define run-n-jump (ptu 'right-stars (list (Word "run") (Word "jump"))))
