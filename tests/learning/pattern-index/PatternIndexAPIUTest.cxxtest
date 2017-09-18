@@ -28,16 +28,15 @@
 #include <opencog/guile/SchemeEval.h>
 
 #include <vector>
-#include <stdio.h>
+#include <cstdio>
 
 using namespace opencog;
 
 class PatternIndexAPIUTest : public CxxTest::TestSuite
 {
 private:
-    const char *queringFile = "/tmp/__pi_test_query.scm";
-    std::string fname = queringFile;
-	AtomSpace atomSpace;
+    std::string fname;          // Temporary KB file name for querying
+    AtomSpace atomSpace;
     SchemeEval *schemeEval;
 
 public:
@@ -52,10 +51,7 @@ public:
 };
 
 // PatternIndexAPIUTest::PatternIndexAPIUTest() : _scm(&atomSpace) {}
-PatternIndexAPIUTest::PatternIndexAPIUTest() {}
-PatternIndexAPIUTest::~PatternIndexAPIUTest() {}
-
-void PatternIndexAPIUTest::setUp()
+PatternIndexAPIUTest::PatternIndexAPIUTest()
 {
     SchemeEval::init_scheme();
     SchemeEval::set_scheme_as(&atomSpace);
@@ -76,7 +72,9 @@ void PatternIndexAPIUTest::setUp()
     config().set("PatternIndex::CoherenceModulatorG", "oneOverCoherence");
     config().set("PatternIndex::CoherenceModulatorH", "coherence");
 
-    FILE *f = fopen(queringFile, "w");
+    // Fill temporary kb file for querying
+    fname = std::tmpnam(nullptr);
+    FILE *f = std::fopen(fname.c_str(), "w");
     fputs("(SimilarityLink (ConceptNode \"human\") (ConceptNode \"monkey\"))\n", f);
     fputs("(SimilarityLink (ConceptNode \"human\") (ConceptNode \"chimp\"))\n", f);
     fputs("(SimilarityLink (ConceptNode \"chimp\") (ConceptNode \"monkey\"))\n", f);
@@ -97,12 +95,19 @@ void PatternIndexAPIUTest::setUp()
     fputs("(InheritanceLink (ConceptNode \"vine\") (ConceptNode \"plant\"))\n", f);
     fputs("(InheritanceLink (ConceptNode \"ent\") (ConceptNode \"plant\"))\n", f);
     fclose(f);
+}
 
+PatternIndexAPIUTest::~PatternIndexAPIUTest()
+{
+    delete schemeEval;
+}
+
+void PatternIndexAPIUTest::setUp()
+{
 }
 
 void PatternIndexAPIUTest::tearDown() 
 {  
-
 }
 
 void PatternIndexAPIUTest::test_createAndDelete()
