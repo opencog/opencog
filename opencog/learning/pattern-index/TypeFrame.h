@@ -188,7 +188,7 @@ public:
     std::string nodeNameAt(unsigned int pos) const;
     void setNodeNameAt(unsigned int pos, const std::string& name);
     bool typeAtIsSymmetricLink(unsigned int pos) const;
-    bool typeAtEqualsTo(unsigned int pos, const std::string &typeName) const;
+    bool typeAtEqualsTo(unsigned int pos, Type type) const;
     void append(const TypeFrame &other);
     void pickAndPushBack(const TypeFrame &other, unsigned int pos);
     bool match(std::vector<int> &mapping, const TypeFrame &pattern) const;

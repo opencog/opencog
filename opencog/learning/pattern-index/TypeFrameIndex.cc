@@ -45,7 +45,7 @@ TypeFrameIndex::TypeFrameIndex()
     ALLOWED_VAR_SUBSTITUTION.insert(CONCEPT_NODE);
     ALLOWED_VAR_SUBSTITUTION.insert(PREDICATE_NODE);
 
-    auxVar1.push_back(TypePair(classserver().getType("VariableNode"), 0));
+    auxVar1.push_back(TypePair(VARIABLE_NODE, 0));
     auxVar1.setNodeNameAt(0, "V1");
     time1 = time2 = 0;
 }
@@ -119,7 +119,7 @@ void TypeFrameIndex::addPatterns(vector<TypeFrame> &answer,
                 string varName = "V" + to_string(count);
                 for (unsigned int k = 0; k < pattern.size(); k++) {
                     if (pattern.subFrameAt(k).equals(node)) {
-                        pattern[k].first = classserver().getType("VariableNode");
+                        pattern[k].first = VARIABLE_NODE;
                         pattern.setNodeNameAt(k, varName);
                     }
                 }
@@ -195,7 +195,7 @@ void TypeFrameIndex::addInferredSetFrames(vector<TypeFrame> &subset,
     TypeFrame starFrame, compoundFrame;
     TypeFrame aux1;
     TypeFrame auxInternalVar1;
-    auxInternalVar1.push_back(TypePair(classserver().getType("VariableNode"), 0));
+    auxInternalVar1.push_back(TypePair(VARIABLE_NODE, 0));
     auxInternalVar1.setNodeNameAt(0, "IV1");
 
     while (! selected.depleted()) {
@@ -210,20 +210,20 @@ void TypeFrameIndex::addInferredSetFrames(vector<TypeFrame> &subset,
                 aux1 = frame.copyReplacingFrame(node, auxInternalVar1);
                 if (DEBUG) aux1.printForDebug("result: ", "\n");
                 compoundFrame.clear();
-                compoundFrame.push_back(TypePair(classserver().getType("AndLink"), 2));
+                compoundFrame.push_back(TypePair(AND_LINK, 2));
                 compoundFrame.append(aux1);
                 if (subSetFlag) {
-                    compoundFrame.push_back(TypePair(classserver().getType("InheritanceLink"), 2));
+                    compoundFrame.push_back(TypePair(INHERITANCE_LINK, 2));
                     compoundFrame.append(auxInternalVar1);
                     compoundFrame.append(node);
                     starFrame.clear();
-                    starFrame.push_back(TypePair(classserver().getType("AndLink"), 2));
+                    starFrame.push_back(TypePair(AND_LINK, 2));
                     starFrame.append(frame);
-                    starFrame.push_back(TypePair(classserver().getType("NotLink"), 1));
+                    starFrame.push_back(TypePair(NOT_LINK, 1));
                     starFrame.append(compoundFrame);
                     star.push_back(starFrame);
                 } else {
-                    compoundFrame.push_back(TypePair(classserver().getType("InheritanceLink"), 2));
+                    compoundFrame.push_back(TypePair(INHERITANCE_LINK, 2));
                     compoundFrame.append(node);
                     compoundFrame.append(auxInternalVar1);
                 }
@@ -239,7 +239,7 @@ pair<float, float> TypeFrameIndex::minMaxIndependentProb(const TypeFrame &patter
     float minP = 0;
     float maxP = 0;
 
-    if (pattern.typeAtEqualsTo(0, "AndLink")) {
+    if (pattern.typeAtEqualsTo(0, AND_LINK)) {
         if (DEBUG) printf("pattern is AndLink\n");
         minP = numeric_limits<float>::max();
         unsigned int n = pattern.at(0).second;
@@ -254,7 +254,7 @@ pair<float, float> TypeFrameIndex::minMaxIndependentProb(const TypeFrame &patter
             for (const PartitionGenerator::IntegerSet & block : partition) {
                 subPattern.clear();
                 if (block.size() > 1) {
-                    subPattern.push_back(TypePair(classserver().getType("AndLink"), block.size()));
+                    subPattern.push_back(TypePair(AND_LINK, block.size()));
                 }
                 for (unsigned int i : block) {
                     aux = pattern.subFrameAt(argPos.at(i));
@@ -287,7 +287,7 @@ pair<float, float> TypeFrameIndex::minMaxSupersetProb(const TypeFrame &pattern)
     float minP = 0;
     float maxP = 0;
 
-    if (pattern.typeAtEqualsTo(0, "AndLink")) {
+    if (pattern.typeAtEqualsTo(0, AND_LINK)) {
         if (DEBUG) printf("pattern is AndLink\n");
         unsigned int n = pattern.at(0).second;
         vector<int> argPos = pattern.getArgumentsPosition(0);
@@ -318,7 +318,7 @@ pair<float, float> TypeFrameIndex::minMaxSupersetProb(const TypeFrame &pattern)
                     pSpot = ((float) countSpot) / floatUniverseCount;
                     pSuperset = ((float) countSuperset) / floatUniverseCount;
                     compoundFrame.clear();
-                    compoundFrame.push_back(TypePair(classserver().getType("AndLink"), n));
+                    compoundFrame.push_back(TypePair(AND_LINK, n));
                     for (unsigned int j = 0; j < n; j++) {
                         if (j == i) {
                             compoundFrame.append(supersetFrames.at(k));
@@ -355,7 +355,7 @@ pair<float, float> TypeFrameIndex::minMaxSubsetProb(const TypeFrame &pattern)
     if (DEBUG) printf("floatUniverseCount = %f\n", floatUniverseCount);
 
     if (DEBUG) printf("minMaxSubsetProb()\n");
-    if (pattern.typeAtEqualsTo(0, "AndLink")) {
+    if (pattern.typeAtEqualsTo(0, AND_LINK)) {
         if (DEBUG) printf("pattern is AndLink\n");
         unsigned int n = pattern.at(0).second;
         vector<int> argPos = pattern.getArgumentsPosition(0);
@@ -387,8 +387,8 @@ pair<float, float> TypeFrameIndex::minMaxSubsetProb(const TypeFrame &pattern)
             if (DEBUG) cartesianGenerator.printForDebug("Cartesian selection: ", "\n");
             compoundFrame.clear();
             compoundStar.clear();
-            compoundFrame.push_back(TypePair(classserver().getType("AndLink"), n));
-            compoundStar.push_back(TypePair(classserver().getType("AndLink"), n));
+            compoundFrame.push_back(TypePair(AND_LINK, n));
+            compoundStar.push_back(TypePair(AND_LINK, n));
             float productMin = 1;
             float productMax = 1;
             for (unsigned int i = 0; i < n; i++) {
@@ -691,7 +691,7 @@ void TypeFrameIndex::minePatterns(vector<pair<float,TypeFrame>> &answer)
         cartesianGenerator = new CartesianProductGenerator(sizeVector, true, false);
         while (! cartesianGenerator->depleted()) {
             compoundFrame.clear();
-            compoundFrame.push_back(TypePair(classserver().getType("AndLink"), 0));
+            compoundFrame.push_back(TypePair(AND_LINK, 0));
             bool flag = true;
             for (unsigned int g = 0; g < PATTERNS_GRAM; g++) {
                 if ((g > 0) && compoundFrame.containsEquivalent(base.at(selectionVector.at(g).at(cartesianGenerator->at(g))), 0)) {
@@ -1091,7 +1091,7 @@ void TypeFrameIndex::selectCurrentElement(TypeFrame &answer,
                                           const TypeFrame &baseFrame,
                                           int cursor) const
 {
-    if (baseFrame.typeAtEqualsTo(cursor, "VariableNode")) {
+    if (baseFrame.typeAtEqualsTo(cursor, VARIABLE_NODE)) {
         answer.push_back(TypeFrame::STAR_PATTERN);
         string key = baseFrame.nodeNameAt(cursor);
         StringMap::iterator it = variableOccurrences.find(key);
@@ -1261,9 +1261,9 @@ void TypeFrameIndex::query(vector<ResultPair> &answer,
     vector<TypeFrame> recursionKeyExpression(arity);
     vector<VarMappingSeq> recursionForbiddenMappings(arity);
     vector<int> recursionHeadLogicOperator(arity);
-    bool AndFlag = queryFrame.typeAtEqualsTo(cursor, "AndLink");
-    bool OrFlag = queryFrame.typeAtEqualsTo(cursor, "OrLink");
-    bool NotFlag = queryFrame.typeAtEqualsTo(cursor, "NotLink");
+    bool AndFlag = queryFrame.typeAtEqualsTo(cursor, AND_LINK);
+    bool OrFlag = queryFrame.typeAtEqualsTo(cursor, OR_LINK);
+    bool NotFlag = queryFrame.typeAtEqualsTo(cursor, NOT_LINK);
     if (DEBUG) printf("Head is %s\n", (AndFlag ? "AND" : (OrFlag ? "OR" : (NotFlag ? "NOT" : "LEAF"))));
 
     if (AndFlag || OrFlag || NotFlag) {

@@ -40,9 +40,9 @@ bool TypeFrame::nodeNameDefined(unsigned int pos) const
     return (nodeNameMap.find(pos) != nodeNameMap.end());
 }
 
-bool TypeFrame::typeAtEqualsTo(unsigned int pos, const string &typeName) const
+bool TypeFrame::typeAtEqualsTo(unsigned int pos, Type type) const
 {
-    return (classserver().getTypeName(at(pos).first).compare(typeName) == 0);
+    return at(pos).first == type;
 }
 
 bool TypeFrame::typeAtIsSymmetricLink(unsigned int pos) const
