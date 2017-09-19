@@ -13170,9 +13170,9 @@ right-cosine compute-right-cosine
 (psup 'right-length (Word "tall"))  ; 64.00781202322104
 (pcos 'right-product (Word "tall") (Word "short")) ; 800.0
 
-(length (psa 'right-stars  (Word "the"))) ;
-(define nou (get-dj-words (Word "the")))  ; lngth = 
-(define nou (get-dj-words (Word "tall"))) ; length = 
+(length (psa 'right-stars  (Word "the"))) ; 215324
+(define nou (get-dj-words (Word "the")))  ; length = 37718
+(define nou (get-dj-words (Word "tall"))) ; length = 685
 (length nou)
 (make-gram-class psa nou 0)
 

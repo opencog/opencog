@@ -82,7 +82,7 @@
 ; a) The combined vector has strictly equal or larger support than
 ;    the parts. This might not be correct, as it seems that it will
 ;    mix in disjuncts that should have been assigned to other meanings.
-; b) The process is not quite linear, as orthogonal coponents with
+; b) The process is not quite linear, as orthogonal components with
 ;    negative counts are clamped to zero.
 ; c) The number of vectors being tracked in the system is increasing:
 ;    before there were two, once for each word, now there are three:
@@ -94,6 +94,11 @@
 ;    existing word-class. This assignment will slightly alter the
 ;    direction of the word-class vector, but will not trigger the
 ;    recomputation of previous orthognoal components.
+; e) The replacement of word-vectors by thier orthogonal components
+;    means that the original word vectors are "lost". This could be
+;    avoided by creating new "left-over" word vectors to hold just
+;    the orthogonal components. However, this increases the size of
+;    the dataset, and does not seem to serve any useful purpose.
 ;
 ; Overlap merging
 ; ---------------
@@ -144,17 +149,17 @@
 ; new word-class is formed to hold the two words.
 ;
 ; There are several properties of this merge style:
-; e) This seems like a "strict" way to merge, because it does not allow
+; f) This seems like a "strict" way to merge, because it does not allow
 ;    any broadening to take place.
-; f) The resulting word-class does not have any sections associated with
+; g) The resulting word-class does not have any sections associated with
 ;    it! It cannot because of the way it was constructed, but this seems
 ;    wrong.
 ;
 ; Connected disjunct merging
 ; --------------------------
-; Property f) above seems wrong: word-classes should appeary fully
+; Property g) above seems wrong: word-classes should appeary fully
 ; connected in the graph, symmetrically.  This suggests a disjunct
-; merger style that aintains connectivity.
+; merger style that maintains connectivity.
 ;
 ; As above, given a single word, one scans the sections on, looking
 ; for sections that differ in only one location. As before, the words
@@ -168,7 +173,7 @@
 ; to pick between them.
 ;
 ; This has the nice property:
-; g) The total number of sections is decreasing.
+; h) The total number of sections is decreasing.
 ;
 ; ---------------------------------------------------------------------
 
