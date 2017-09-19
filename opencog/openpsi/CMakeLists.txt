@@ -21,3 +21,7 @@ TARGET_LINK_LIBRARIES (openpsi
 )
 
 INSTALL (TARGETS openpsi DESTINATION "lib${LIB_DIR_SUFFIX}/opencog")
+
+INSTALL (FILES OpenPsiImplicator.h
+	DESTINATION "include/opencog/openpsi/"
+)
