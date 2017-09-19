@@ -694,6 +694,7 @@ is:
 6. Implement distributed version of the mining algorithm
 7. Implement distributed version of TypeFrameIndex
 8. Add scheme bindings for the configuration options
+9. Move examples under <PROJECT_DIRECTORY>examples/learning/pattern-index
 
 ## Known issues
 
