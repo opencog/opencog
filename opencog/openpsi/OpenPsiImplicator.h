@@ -23,6 +23,7 @@
 #ifndef _OPENCOG_OPENPSI_IMPLICATOR_H
 #define _OPENCOG_OPENPSI_IMPLICATOR_H
 
+#include <opencog/atoms/pattern/PatternLink.h>
 #include <opencog/atomspace/AtomSpace.h>
 
 #include <opencog/query/Satisfier.h>
@@ -35,8 +36,16 @@ class OpenPsiImplicator: public virtual Satisfier
   public:
     OpenPsiImplicator(AtomSpace* as);
 
+    /**
+     * Return true if a single grounding has been found.
+     */
     bool grounding(const HandleMap &var_soln,
                    const HandleMap &term_soln);
+
+    /**
+     * Returns TRUE_TV if there is grounding else returns FALSE_TV.
+     */
+    TruthValuePtr check_satisfiability(const Handle& himplication);
 };
 
 }; // namespace opencog

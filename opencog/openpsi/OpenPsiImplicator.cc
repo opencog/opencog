@@ -34,7 +34,7 @@ bool OpenPsiImplicator::grounding(const HandleMap &var_soln,
                                   const HandleMap &term_soln)
 {
 
-  // The psi-rule weight calculations could be done here
+  // The psi-rule weight calculations could be done here.
   _result = TruthValue::TRUE_TV();
 
   // NOTE: If a single grounding is found then why search for more? If there
@@ -42,4 +42,13 @@ bool OpenPsiImplicator::grounding(const HandleMap &var_soln,
   // the implicand. Satisfier::grounding does exaustive search so this should
   // theoretically speed psi-loop.
   return true;
+}
+
+TruthValuePtr OpenPsiImplicator::check_satisfiability(
+  const Handle& himplication)
+{
+  PatternLinkPtr plp =  createPatternLink(himplication->getOutgoingAtom(0));
+  plp->satisfy(*this);
+
+  return _result;
 }

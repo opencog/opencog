@@ -19,7 +19,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <opencog/atoms/pattern/PatternLink.h>
 #include <opencog/guile/SchemePrimitive.h>
 
 #include "OpenPsiImplicator.h"
@@ -49,14 +48,10 @@ void OpenPsiSCM::init()
 
 TruthValuePtr OpenPsiSCM::satisfiable(const Handle& himplication)
 {
-  // TODO: Rname to psi-satisfiable? once c++ cache is implemented.
+  // TODO: Rename to psi-satisfiable? once c++ cache is implemented.
   AtomSpace *as = SchemeSmob::ss_get_env_as("psi-satisfy");
   OpenPsiImplicator imply(as);
-
-  PatternLinkPtr plp =  createPatternLink(himplication->getOutgoingAtom(0));
-  plp->satisfy(imply);
-
-  return imply._result;
+  return imply.check_satisfiability(himplication);
 }
 
 /**
