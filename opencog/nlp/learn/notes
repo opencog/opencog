@@ -13179,18 +13179,6 @@ right-cosine compute-right-cosine
 (define gra (merge-ortho psa (Word "building") (Word "jungle") 0.0))
 
 
-   (define (bogus a b) (format #t "Its ~A and ~A\n" a b))
-(define ptu (add-tuple-math psa bogus))
-   (define lensq
-      (fold merge-word-pair 0.0 (ptu 'right-stars (list WA WB))))
-
-(merge-word-pair
-
-lsec rsec
-
-
-
-
 
 =========================================================================
 out-of-control GC
