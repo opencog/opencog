@@ -371,7 +371,7 @@
 				(and (null? rsec) (is-word-sect? lsec))
 				(* FRAC lcnt) lcnt))
 		(define wrc (if
-				(and (null? rsec) (is-word-sect? rsec))
+				(and (null? lsec) (is-word-sect? rsec))
 				(* FRAC rcnt) rcnt))
 
 		; Sum them.

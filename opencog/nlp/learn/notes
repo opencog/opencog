@@ -13176,6 +13176,8 @@ right-cosine compute-right-cosine
 (length nou)
 (make-gram-class psa nou 0)
 
+(define gra (merge-ortho psa (Word "building") (Word "jungle") 0.0)
+
 
 
 
