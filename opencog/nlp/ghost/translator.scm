@@ -196,9 +196,7 @@
         (remove (lambda (sg) (any (lambda (g) (equal? (car sg) (car g))) GOAL))
                 shared-goals))))
 
-(define* (create-rule PATTERN ACTION #:optional (GOAL '())
-                                                (TOPIC default-topic)
-                                                NAME)
+(define (create-rule PATTERN ACTION GOAL TOPIC NAME)
   "Top level translation function. Pattern is a quoted list of terms,
    and action is a quoted list of actions or a single action."
   (cog-logger-debug "In create-rule\nPATTERN = ~a\nACTION = ~a" PATTERN ACTION)
@@ -218,15 +216,14 @@
              (List (Variable "$S") (Set (list-ref proc-terms 3))))
            (Evaluation ghost-lemma-seq
              (List (Variable "$S") (List (list-ref proc-terms 3))))))
-         (action (process-action ACTION))
          (rule (map (lambda (goal)
                       (psi-rule
                         (list (Satisfaction (VariableList vars)
                                             (And words lemmas conds)))
-                        action
+                        (process-action ACTION)
                         (psi-goal (car goal))
                         (stv (cdr goal) .9)
-                        TOPIC
+                        (if (null? TOPIC) default-topic TOPIC)
                         NAME))
                     (process-goal GOAL))))
         (cog-logger-debug ghost-logger "ordered-terms: ~a" ordered-terms)
