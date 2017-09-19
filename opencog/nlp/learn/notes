@@ -13158,7 +13158,7 @@ fold
 ----------------------
 (define pca (make-pseudo-cset-api))
 (define psa (add-dynamic-stars pca))
-(define pcos (add-pair-cosine-compute psa)
+(define pcos (add-pair-cosine-compute psa))
 (define psup (add-support-compute psa))
 
 right-cosine compute-right-cosine

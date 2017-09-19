@@ -586,7 +586,7 @@
 		(fold
 			(lambda (WRD LST)
 				(if (equal? WRD (car LST)) LST (cons WRD LST)))
-			(car sorted-words)
+			(list (car sorted-words))
 			(cdr sorted-words)))
 )
 
