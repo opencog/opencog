@@ -44,8 +44,13 @@
     ; From utilities.scm
     psi-prefix-str psi-suffix-str psi-get-exact-match psi-get-dual-match
     psi-get-members
+
+    ; C++ bindings from libopenpsi
+    psi-satisfy
     )
 )
+
+(load-extension "libopenpsi" "opencog_openpsi_init")
 
 (load-from-path "opencog/openpsi/action-selector.scm")
 (load-from-path "opencog/openpsi/demand.scm")
