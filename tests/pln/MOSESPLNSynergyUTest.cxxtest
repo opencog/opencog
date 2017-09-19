@@ -121,11 +121,13 @@ void MOSESPLNSynergyUTest::test_moses_pln_synergy_pm()
 
 	TS_ASSERT_DIFFERS(target, Handle::UNDEFINED);
 
-#define confidenceToCount(x) 800.0 * ((x) / (1.0-(x))
-	strength_t expected_strength = 0.603579;
-	confidence_t expected_confidence = 0.65475;
-	SimpleTruthValue expected_tv(expected_strength, expected_confidence);
-	TS_ASSERT(target->getTruthValue()->operator==(expected_tv));
+	strength_t target_strength = target->getTruthValue()->getMean(),
+		expected_strength = 0.603579;
+	confidence_t target_confidence = target->getTruthValue()->getConfidence(),
+		expected_confidence = 0.65475;
+#define TEST_EPSILON 1e-6
+	TS_ASSERT_DELTA(target_strength, expected_strength, TEST_EPSILON);
+	TS_ASSERT_DELTA(target_confidence, expected_confidence, TEST_EPSILON);
 }
 
 // This takes too long (3 to 4 days), disabled until it gets severely
