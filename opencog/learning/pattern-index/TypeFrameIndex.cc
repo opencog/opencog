@@ -3,6 +3,8 @@
 #include <chrono>
 #include <time.h>
 
+#include <boost/range/algorithm/set_algorithm.hpp>
+
 #include <opencog/util/Logger.h>
 
 #include "TypeFrameIndex.h"
@@ -1499,13 +1501,10 @@ void TypeFrameIndex::query(vector<ResultPair> &answer,
 
 bool TypeFrameIndex::mapCover(const VarMapping &map1, const VarMapping &map2) const
 {
-    TypeFrameSet set;
-    for (const auto& el : map1) {
-        set.insert(el.second);
-    }
-    return std::all_of(map2.begin(), map2.end(),
-                       [&](const VarMapping::value_type& el) {
-                           return set.find(el.second) != set.end(); });
+    TypeFrameSet set1, set2;
+    for (const auto& el : map1) set1.insert(el.second);
+    for (const auto& el : map2) set2.insert(el.second);
+    return boost::includes(set2, set1, TypeFrame::LessThan());
 }
 
 bool TypeFrameIndex::equivalentVarMappings(const VarMapping &map1,
