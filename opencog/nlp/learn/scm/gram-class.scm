@@ -377,16 +377,20 @@
 		; Sum them.
 		(define cnt (+ wlc wrc))
 
-		; The disjunct. Both lsec and rsec have the same disjunct.
-		(define seq (if (null? lsec) (cog-outgoing-atom rsec 1)
-				(cog-outgoing-atom lsec 1)))
+		; The cnt can be zero, if FRAC is zero.  Do nothing in this case.
+		(if (< 0 cnt)
+			(let* (
+					; The disjunct. Both lsec and rsec have the same disjunct.
+					(seq (if (null? lsec) (cog-outgoing-atom rsec 1)
+							(cog-outgoing-atom lsec 1)))
+					; The merged word-class
+					(mrg (Section wrd-class seq))
+				)
 
-		; The merged word-class
-		(define mrg (Section wrd-class seq))
-
-		; The summed counts
-		(set-count mrg cnt)
-		(store-atom mrg) ; save to the database.
+				; The summed counts
+				(set-count mrg cnt)
+				(store-atom mrg) ; save to the database.
+			))
 
 		; Return the accumulated sum-square length
 		(+ LENSQ (* cnt cnt))
