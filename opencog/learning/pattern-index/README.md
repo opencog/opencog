@@ -1,7 +1,7 @@
 # Pattern Index - an index for fast lookup of patterns in the AtomSpace
 
 This module provides two interfaces (C++ and Guile) for a data abstraction that
-alows the user to create indexes for subsets of Atoms from the AtomSpace and
+allows the user to create indexes for subsets of Atoms from the AtomSpace and
 then submit queries to retrieve subgraphs that matches a given pattern.
 
 _*NOTE*: this is not a wrapper around OpenCog's PatternMatcher._
@@ -21,9 +21,9 @@ may be essential to allow the algorithms to run in acceptable time.
 So this module allows the user to do something like:
 
 1. Load a large SCM with lots of atoms
-1. Build an index with only the relevant atoms
-1. Use this index to gather information from the AtomSpace as required by the algorithm
-1. Optionally discard the index when it is no longer necessary (this will have no effect in the AtomSpace)
+2. Build an index with only the relevant atoms
+3. Use this index to gather information from the AtomSpace as required by the algorithm
+4. Optionally discard the index when it is no longer necessary (this will have no effect on the AtomSpace)
 
 Although it's not the main purpose of this module, Pattern Index have
 additional algorithms to perform pattern mining in the indexed patterns. Those
@@ -37,7 +37,7 @@ _*NOTE*: this functionality is not a wrapper around OpenCog's PatternMiner_
 ## Additional motivation for the Pattern Index
 
 The Pattern Index internal structure have been designed to allow building the
-index in the disk (rather in in RAM) and without the need af having an actual
+index in the disk (rather in in RAM) and without the need of having an actual
 AtomSpace in memory.
 
 This is relevant because one would be able to build an index (entirely in the
@@ -134,7 +134,7 @@ In C++ one can query an index either passing a Handle or a std::string represent
 resultHandle will point to a ListLink with the query result. This link is a
 list with all the satisfying subgraphs (each represented by a ListLink) and the
 respective variable assignments (also represented by ListLinks to pairs
-```<variable, assigned atom>```).
+`<variable, assigned atom>`).
 
 ```
     (ListLink
@@ -185,8 +185,8 @@ respective variable assignments (also represented by ListLinks to pairs
     )
 ```
 
-Optionally one can pass the query in a std::string.  Using this syntax,
-```query()``` will populate a vector of QueryResult with all the subgraphs (and
+Optionally one can pass the query in a `std::string`.  Using this syntax,
+`query()` will populate a vector of QueryResult with all the subgraphs (and
 respective variable assigments) that satisfies the passed pattern.
 
 ```
