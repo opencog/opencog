@@ -133,8 +133,7 @@ public:
         // execution.
         auto result_2_2 = _scm->eval_tv("(satisfiable? (rule-1))");
         CHKERR
-            TSM_ASSERT_EQUALS("Expected (stv 1 1)", TruthValue::TRUE_TV(), result_2_2);
-
+        TSM_ASSERT_EQUALS("Expected (stv 1 1)", TruthValue::TRUE_TV(), result_2_2);
 
         logger().info("END TEST: %s", __FUNCTION__);
     }
