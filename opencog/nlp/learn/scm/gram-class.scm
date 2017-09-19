@@ -330,6 +330,10 @@
   If WA is a WordClassNode, and WB is not, then WB is merged into
   WA. Currently, WB must never be a WordClass....
 "
+	(define psa (add-dynamic-stars LLOBJ))
+	(define (bogus a b) (format #t "Its ~A and ~A\n" a b))
+	(define ptu (add-tuple-math LLOBJ bogus))
+
 	; set-count ATOM CNT - Set the raw observational count on ATOM.
 	(define (set-count ATOM CNT) (cog-set-tv! ATOM (cog-new-ctv 1 0 CNT)))
 
@@ -470,10 +474,6 @@
 		; Compute the orthogonal components
 		(for-each ortho (ptu 'right-stars (list CLS WRD)))
 	)
-
-	(define psa (add-dynamic-stars LLOBJ))
-	(define (bogus a b) (format #t "Its ~A and ~A\n" a b))
-	(define ptu (add-tuple-math LLOBJ bogus))
 
 	(if (eq? 'WordNode (cog-type WA))
 		(begin
