@@ -410,9 +410,6 @@
 	; is deleted (from the database as well as the atomspace).
 	; The updated counts are stored in the database.
 	;
-	; NOTE: actually, both CLS and WRD are Sections, its just that
-	; CLS is a section for a WordClassNode, and WRD is a section for
-	; a WordNode.  The sectinos hold the counts, of course.
 	(define (orthogonalize CLS WRD)
 
 		; Fold-helper to compute the dot-product between the WRD
@@ -422,14 +419,13 @@
 			(define wrd (second CLAPR))
 
 			; The counts on each, or zero.
-			(define cc (LLOBJ 'pair-count cla))
+			(define cc (if (null? cla) 0 (LLOBJ 'pair-count cla)))
 			(define wc (if (null? wrd) 0 (LLOBJ 'pair-count wrd)))
 
 			(+ DOT-PROD (* cc wc))
 		)
 
 		; Compute the dot-product of WA and the merged class.
-		; We could use fold here, but we won't.
 		(define dot-prod
 			(fold compute-dot-prod 0.0 (ptu 'right-stars (list CLS WRD))))
 		(define unit-prod (/ dot-prod lensq))
@@ -447,7 +443,7 @@
 
 			; The counts on each, or zero.
 			; Both cla and wrd are actually Sections.
-			(define cc (LLOBJ 'pair-count cla))
+			(define cc (if (null? cla) 0 (LLOBJ 'pair-count cla)))
 			(define wc (if (null? wrd) 0 (LLOBJ 'pair-count wrd)))
 
 			; The orthogonal component.
