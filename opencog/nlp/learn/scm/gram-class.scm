@@ -161,7 +161,7 @@
 ; connected in the graph, symmetrically.  This suggests a disjunct
 ; merger style that maintains connectivity.
 ;
-; As above, given a single word, one scans the sections on, looking
+; As above, given a single word, one scans the sections, looking
 ; for sections that differ in only one location. As before, the words
 ; that appear at this variable location are tossed into a set. However,
 ; this time, a search is made to see if this set overlaps, or is
@@ -625,15 +625,21 @@
 
 	; Try to make a grammatical class out of the word, and another
 	; in the list. Return it, if possible, else return nil.
-	(define (make-first-one word rest)
-		(if (null? rest) '()
-			(if (ok-to-merge word (car rest))
-				(merge-ortho LLOBJ word (car rest) FRAC)
-				; If they are NOT mergable, recurse,
-				; looking for a pair that is.
-				(make-first-one (car rest) (cdr rest)))))
+	; This performs an O(N^2) iteration of pairs until it finds
+	; something. Please note that O(N^2) can become large!
+	(define (make-first-one primary rest)
+		(define more (cdr primary))
+		(if (null? more) '()
+			(if (null? rest)
+				(make-first-one more (cdr more))
+				(let ((word) (car primary))
+					(if (ok-to-merge word (car rest))
+						(merge-ortho LLOBJ word (car rest) FRAC)
+						; If they are NOT mergable, recurse,
+						; looking for a pair that is.
+						(make-first-one primary (cdr rest)))))
 
-	(define grm-class (make-first-one (car WRD-LST) (cdr WRD-LST)))
+	(define grm-class (make-first-one WRD-LST (cdr WRD-LST)))
 	(if (not (null? grm-class))
 		(expand-gram-class LLOBJ grm-class WRD-LST FRAC))
 )
