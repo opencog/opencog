@@ -289,7 +289,7 @@
           (eval-string (string-append "(list " $3 ")"))
           (eval-string (string-append "(list " $4 ")"))
           (eval-string (string-append "(list " $1 ")"))
-          (list) (list))
+          (list) "")
       (RESPONDERS name context action) :
         (create-rule
           (eval-string (string-append "(list " $3 ")"))
@@ -299,7 +299,7 @@
         (create-rule
           (eval-string (string-append "(list " $2 ")"))
           (eval-string (string-append "(list " $3 ")"))
-          (list) (list) (list))
+          (list) (list) "")
       (REJOINDERS context action) :
         (format #f "\nrejoinder: ~a\n~a\n~a" $1 $2 $3)
       (GAMBIT action) : (format #f "gambit: ~a" $2)
