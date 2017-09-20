@@ -100,7 +100,7 @@
     ((has-match? "^[ ]*_" str) (result:suffix 'VAR location #f))
     ; For dictionary keyword sets
     ((has-match? "^[ ]*[a-zA-Z]+~[a-zA-Z1-9]+" str)
-      (result:suffix 'LEMMA~COMMAND location (command-pair)))
+      (result:suffix 'DICTKEY location (command-pair)))
     ; Range-restricted Wildcards.
     ; TODO Maybe replace with dictionary keyword sets then process it on action?
     ((has-match? "^[ ]*\\*~[0-9]+" str)
@@ -202,14 +202,14 @@
     ; LPAREN RPAREN = parentheses ()
     ; DQUOTE = Double quote "
     ; ID = Identifier or Marking
-    ; LEMMA~COMMAND = Dictionary Keyword Sets
+    ; DICTKEY = Dictionary Keyword Sets
     ; *~n = Range-restricted Wildcards
     ; MVAR = Match Variables
     ; MOVAR = Match Variables grounded in their original words
     ; ? = Comparison tests
     (CONCEPT TOPIC RESPONDERS REJOINDERS GAMBIT GOAL RGOAL COMMENT SAMPLE_INPUT
      WHITESPACE
-      (right: LPAREN LSBRACKET << ID VAR * ^ < LEMMA LITERAL NUM LEMMA~COMMAND
+      (right: LPAREN LSBRACKET << ID VAR * ^ < LEMMA LITERAL NUM DICTKEY
               STRING *~n *n UVAR MVAR MOVAR EQUAL NOT RESTART)
       (left: RPAREN RSBRACKET >> > DQUOTE)
       (right: ? CR NEWLINE)
@@ -272,8 +272,8 @@
       (STRING) : (format #f "\"~a\"" $1)
       (concept) : (format #f "\"~a\"" $1)
       (DQUOTE phrase-terms DQUOTE) : (format #f "~a~a~a" $1 $2 $3)
-      (LEMMA~COMMAND) :
-        (display-token (format #f "command(~a -> ~a)" (car $1) (cdr $1)))
+      (DICTKEY) :
+        (format #f "(cons 'dictkey (cons \"~a\" \"~a\"))" (car $1) (cdr $1))
     )
 
     ; Rule grammar
