@@ -635,7 +635,7 @@
 				(let ((word (car primary))
 						(next-word (car rest)))
 					(format #t "~A ~A " (length primary) (length rest))
-					(if (ok-to-merge word next-word))
+					(if (ok-to-merge word next-word)
 						(merge-ortho LLOBJ word next-word FRAC)
 						; If they are NOT mergable, recurse,
 						; looking for a pair that is.
