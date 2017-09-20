@@ -618,32 +618,40 @@
 )
 
 ; ---------------------------------------------------------------
+; Call function FUNC on all unordered pairs from LST
+; The return value is unspecified.
+; All of the N(N-1)/2 unordered pairs are explored.
+; This means that the runtime is O(N^2)
+(define (for-all-unordered-pairs FUNC LST)
+
+	(define (make-next-pair primary rest)
+		(define more (cdr primary))
+		(if (not (null? more))
+			(if (null? rest)
+				(make-next-pair more (cdr more))
+				(let ((item (car primary))
+						(next-item (car rest)))
+					(format #t "~A ~A " (length primary) (length rest))
+					(FUNC item next-item)
+					(make-next-pair primary (cdr rest))))))
+
+	(make-next-pair LST (cdr LST))
+)
+
+; ---------------------------------------------------------------
 ; Given a list of words, compare them pairwise to find a similar
 ; pair. Merge these to form a grammatical class, and then try to
-; expand that class as much as possible.
+; expand that class as much as possible. Repeat until all pairs
+; have been explored.  This is an O(N^2) algo in the length of the
+; word-list!
 (define (make-gram-class LLOBJ WRD-LST FRAC)
 
-	; Try to make a grammatical class out of the word, and another
-	; in the list. Return it, if possible, else return nil.
-	; This performs an O(N^2) iteration of pairs until it finds
-	; something. Please note that O(N^2) can become large!
-	(define (make-first-one primary rest)
-		(define more (cdr primary))
-		(if (null? more) '()
-			(if (null? rest)
-				(make-first-one more (cdr more))
-				(let ((word (car primary))
-						(next-word (car rest)))
-					(format #t "~A ~A " (length primary) (length rest))
-					(if (ok-to-merge word next-word)
-						(merge-ortho LLOBJ word next-word FRAC)
-						; If they are NOT mergable, recurse,
-						; looking for a pair that is.
-						(make-first-one primary (cdr rest)))))))
+	(define (check-pair WORD-A WORD-B)
+		(if (ok-to-merge WORD-A WORD-B)
+			(let ((grm-class (merge-ortho LLOBJ WORD-A WORD-B FRAC)))
+				(expand-gram-class LLOBJ grm-class WRD-LST FRAC))))
 
-	(define grm-class (make-first-one WRD-LST (cdr WRD-LST)))
-	(if (not (null? grm-class))
-		(expand-gram-class LLOBJ grm-class WRD-LST FRAC))
+	(for-all-unordered-pairs check-pair WRD-LST)
 )
 
 ; ---------------------------------------------------------------
