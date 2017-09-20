@@ -50,7 +50,7 @@
 ; For features that are not currently supported
 (define (feature-not-supported NAME VAL)
   "Notify the user that a particular feature is not currently supported."
-  (cog-logger-error ghost-logger "Feature not supported: \"~a ~a\"" NAME VAL))
+  (cog-logger-warn ghost-logger "Feature not supported: \"~a ~a\"" NAME VAL))
 
 ; A list of shared goals for all the rules under the same topic file
 (define shared-goals '())
