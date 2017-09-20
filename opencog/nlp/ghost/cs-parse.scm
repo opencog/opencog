@@ -140,7 +140,7 @@
         ; Literals, words in the pattern that are not in their canonical forms
         (result:suffix 'LITERAL location
           (string-trim (match:substring current-match)))))
-    ((has-match? "^[ ]*[0-9.]+" str)
+    ((has-match? "^[ ]*[0-9]+[0-9.]*" str)
       (result:suffix 'NUM location
         (string-trim (match:substring current-match))))
     ; This should always be near the end, because it is broadest of all.
