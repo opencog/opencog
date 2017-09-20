@@ -43,9 +43,23 @@ public:
                  const HandleMap &term_soln);
 
   /**
-   * Returns TRUE_TV if there is grounding else returns FALSE_TV.
+   * Returns TRUE_TV if there is grounding else returns FALSE_TV. If the
+   * cache has entry for the context then TRUE_TV is returned.
    */
   TruthValuePtr check_satisfiability(const Handle& himplication);
+
+private:
+  /**
+   * Cache used to store context with the variable groundings.
+   */
+  static std::map<Handle, HandleMap> _satisfiability_cache;
+
+  /**
+   * Used to signal whether cache should be updated or not. By default the
+   * cache is updated. It isn't static because one might only want to
+   * use the cache for a subset of contexts.
+   */
+  bool _update_cache = true;
 };
 
 }; // namespace opencog

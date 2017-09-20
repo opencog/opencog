@@ -24,6 +24,8 @@
 
 using namespace opencog;
 
+std::map<Handle, HandleMap> OpenPsiImplicator::_satisfiability_cache = {};
+
 OpenPsiImplicator::OpenPsiImplicator(AtomSpace* as) :
   InitiateSearchCB(as),
   DefaultPatternMatchCB(as),
@@ -37,6 +39,9 @@ bool OpenPsiImplicator::grounding(const HandleMap &var_soln,
   // The psi-rule weight calculations could be done here.
   _result = TruthValue::TRUE_TV();
 
+  // Store the result in cache.
+  _satisfiability_cache[_pattern_body] = var_soln;
+
   // NOTE: If a single grounding is found then why search for more? If there
   // is an issue with instantiating the implicand then there is an issue with
   // the implicand. Satisfier::grounding does exaustive search so this should
@@ -44,11 +49,21 @@ bool OpenPsiImplicator::grounding(const HandleMap &var_soln,
   return true;
 }
 
+// TruthValuePtr OpenPsiImplicator::imply(
 TruthValuePtr OpenPsiImplicator::check_satisfiability(
   const Handle& himplication)
 {
-  PatternLinkPtr plp =  createPatternLink(himplication->getOutgoingAtom(0));
-  plp->satisfy(*this);
+  Handle context = himplication->getOutgoingAtom(0);
 
-  return _result;
+  // TODO: How to prevent stale cache?
+  if (_update_cache) {
+    PatternLinkPtr plp =  createPatternLink(context);
+    plp->satisfy(*this);
+  }
+
+  if (_satisfiability_cache.count(context)) {
+    return TruthValue::TRUE_TV();
+  } else {
+    return TruthValue::FALSE_TV();
+  }
 }
