@@ -632,9 +632,11 @@
 		(if (null? more) '()
 			(if (null? rest)
 				(make-first-one more (cdr more))
-				(let ((word (car primary)))
-					(if (ok-to-merge word (car rest))
-						(merge-ortho LLOBJ word (car rest) FRAC)
+				(let ((word (car primary))
+						(next-word (car-rest)))
+					(format #t "~A ~A " (length primary) (length rest))
+					(if (ok-to-merge word next-word))
+						(merge-ortho LLOBJ word next-word FRAC)
 						; If they are NOT mergable, recurse,
 						; looking for a pair that is.
 						(make-first-one primary (cdr rest)))))))
