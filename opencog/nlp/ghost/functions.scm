@@ -4,7 +4,7 @@
                                (Concept (string-append "OpenPsi: " (cog-name LABEL)))))
   (if (null? rule)
       (cog-logger-error ghost "Failed to find the GHOST rule \"~a\"" (cog-name LABEL))
-      (cog-evaluate! (psi-get-action (car rule)))))
+      (psi-get-action (car rule))))
 
 (Define
   (DefinedSchema "reuse")

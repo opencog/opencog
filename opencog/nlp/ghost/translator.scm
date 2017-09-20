@@ -155,6 +155,7 @@
 
 (define (process-action ACTION)
   "Convert ACTION into atomese."
+  (define reuse #f)
   (define (to-atomese actions)
     (define choices '())
     (append
@@ -171,6 +172,7 @@
                (set-user-variable (cadr n) (car (to-atomese (cddr n)))))
               ; A function call
               ((equal? 'function (car n))
+               (if (equal? "reuse" (cadr n)) (set! reuse #t))
                (action-function (cadr n) (to-atomese (cddr n))))
               ; Gather all the action choices, i.e. a list of actions
               ; available but only one of them will be executed
@@ -182,9 +184,11 @@
       (if (null? choices)
           '()
           (list (action-choices choices)))))
+  (define action-atomese (to-atomese (cdar ACTION)))
   (cog-logger-debug ghost-logger "action: ~a" ACTION)
-  (True (ExecutionOutput (GroundedSchema "scm: ghost-execute-action")
-        (List (to-atomese (cdar ACTION))))))
+  (True (if reuse action-atomese
+                  (ExecutionOutput (GroundedSchema "scm: ghost-execute-action")
+                                   (List action-atomese)))))
 
 (define (process-goal GOAL)
   "Go through each of the goals, including the shared ones."
