@@ -632,7 +632,7 @@
 		(if (null? more) '()
 			(if (null? rest)
 				(make-first-one more (cdr more))
-				(let ((word) (car primary))
+				(let ((word (car primary)))
 					(if (ok-to-merge word (car rest))
 						(merge-ortho LLOBJ word (car rest) FRAC)
 						; If they are NOT mergable, recurse,
