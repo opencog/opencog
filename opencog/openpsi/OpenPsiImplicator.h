@@ -33,19 +33,19 @@ namespace opencog
 
 class OpenPsiImplicator: public virtual Satisfier
 {
-  public:
-    OpenPsiImplicator(AtomSpace* as);
+public:
+  OpenPsiImplicator(AtomSpace* as);
 
-    /**
-     * Return true if a single grounding has been found.
-     */
-    bool grounding(const HandleMap &var_soln,
-                   const HandleMap &term_soln);
+  /**
+   * Return true if a single grounding has been found.
+   */
+  bool grounding(const HandleMap &var_soln,
+                 const HandleMap &term_soln);
 
-    /**
-     * Returns TRUE_TV if there is grounding else returns FALSE_TV.
-     */
-    TruthValuePtr check_satisfiability(const Handle& himplication);
+  /**
+   * Returns TRUE_TV if there is grounding else returns FALSE_TV.
+   */
+  TruthValuePtr check_satisfiability(const Handle& himplication);
 };
 
 }; // namespace opencog
