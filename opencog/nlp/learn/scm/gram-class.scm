@@ -637,7 +637,7 @@
 						(merge-ortho LLOBJ word (car rest) FRAC)
 						; If they are NOT mergable, recurse,
 						; looking for a pair that is.
-						(make-first-one primary (cdr rest)))))
+						(make-first-one primary (cdr rest)))))))
 
 	(define grm-class (make-first-one WRD-LST (cdr WRD-LST)))
 	(if (not (null? grm-class))
