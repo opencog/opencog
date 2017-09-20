@@ -633,7 +633,7 @@
 			(if (null? rest)
 				(make-first-one more (cdr more))
 				(let ((word (car primary))
-						(next-word (car-rest)))
+						(next-word (car rest)))
 					(format #t "~A ~A " (length primary) (length rest))
 					(if (ok-to-merge word next-word))
 						(merge-ortho LLOBJ word next-word FRAC)
