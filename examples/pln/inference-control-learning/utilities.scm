@@ -3,6 +3,7 @@
 (use-modules (srfi srfi-1))
 (use-modules (opencog logger))
 (use-modules (opencog randgen))
+(use-modules (opencog query))
 
 ;; Set a logger for the experiment
 (define icl-logger (cog-new-logger))
@@ -91,8 +92,26 @@
     (cog-cp-all dst)
     (cog-set-atomspace! old-as)))
 
+;; Copy a list of atoms from an atomspace to another atomspace
+(define (cp-as-atoms src atoms dst)
+  (let ((old-as (cog-set-atomspace! src)))
+    (cog-cp atoms dst)
+    (cog-set-atomspace! old-as)))
+
 ;; Clear a given atomspace
 (define (clear-as as)
   (let ((old-as (cog-set-atomspace! as)))
     (clear)
     (cog-set-atomspace! old-as)))
+
+;; Apply a rule to the given atoms
+(define (apply-rule rule . atoms)
+  ;; Create a temporary atomspace, Copy the rule and the atoms in it
+  (let ((tmp-as (cog-new-atomspace)))
+    (cog-cp (cons rule atoms) tmp-as)
+    ;; Switch to the temporary atomspace and apply the rule
+    (let ((init-as (cog-set-atomspace! tmp-as))
+          (results (cog-outgoing-set (cog-bind rule))))
+      ;; Switch back to the initial atomspace and return the results
+      (cog-set-atomspace! init-as)
+      results)))

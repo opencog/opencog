@@ -43,7 +43,6 @@
 (define rules
   (list
      conditional-full-instantiation-implication-scope-meta-rule-name
-     conditional-full-instantiation-implication-meta-rule-name
      fuzzy-conjunction-introduction-2ary-rule-name
   )
 )
@@ -57,12 +56,3 @@
 
 ;; Termination criteria parameters
 (ure-set-num-parameter ppc-rbs "URE:maximum-iterations" 100)
-
-;; Attention allocation (0 to disable it, 1 to enable it)
-(ure-set-fuzzy-bool-parameter ppc-rbs "URE:attention-allocation" 0)
-
-;; Complexity penalty
-(ure-set-num-parameter ppc-rbs "URE:BC:complexity-penalty" 1)
-
-;; BIT reduction parameters
-(ure-set-num-parameter ppc-rbs "URE:BC:maximum-bit-size" 100000)

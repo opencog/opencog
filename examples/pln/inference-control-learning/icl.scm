@@ -8,11 +8,6 @@
   (load "kb.scm")
   (load "pln-rb.scm"))
 
-(define (ppc-reload)
-  (clear)
-  (load "ppc-kb.scm")
-  (load "ppc-rb.scm"))
-
 (define (icr-reload)
   (clear)
   (load "icr-rb.scm"))
@@ -28,6 +23,7 @@
 ;; Set loggers stdout
 ;; (cog-logger-set-stdout! #t)
 (cog-logger-set-stdout! icl-logger #t)
+;; (cog-logger-set-stdout! (cog-ure-logger) #t)
 
 ;; ;; Set loggers sync (for debugging)
 ;; (cog-logger-set-sync! #t)
@@ -35,8 +31,9 @@
 ;; (cog-logger-set-sync! (cog-ure-logger) #t)
 
 ;; Set parameters
-(define pss 100)                          ; Problem set size
-(define niter 2)                         ; Number of iterations
+(define pss 100)                    ; Problem set size
+(define niter 2)                    ; Number of iterations
+(define piter 30)                   ; Number of iterations used for each problem
 
 ;; AtomSpace containing the targets in there to no forget them
 (define targets-as (cog-new-atomspace))
@@ -100,12 +97,37 @@
 ;; history-as from it, leaving out cruft like ppc-kb and such.
 (define (postprocess-corpus)
   (icl-logger-info "Post-process trace, add to inference history")
-  ;; Reload the postprocessing knowledge and rules
-  (ppc-reload)
-  ;; Copy trace-as to the default atomspace
-  (cp-as trace-as (cog-atomspace))
-  ;; Define BC target and vardecl
-  (let* ((target (Evaluation
+
+  ;; Apply preprocessing rules (or rule bases) to trace-as (the order
+  ;; is important)
+  (apply-proof-is-preproof)
+  (apply-preproof-expander-is-preproof)
+  (apply-and-bit-prior)
+
+  ;; Copy Execution relationships to history-as to capture the
+  ;; expansions and finally remove all possible cruft from it
+  (cp-as-atoms trace-as (cog-get-atoms 'ExecutionLink) history-as)
+  (remove-dangling-atoms history-as))
+
+;; Turn apply proof-is-preproof rule to trace-as and copy the results
+;; to history-as
+(define (apply-proof-is-preproof)
+  (load "proof-is-preproof.scm")
+  (let* ((default-as (cog-set-atomspace! trace-as))
+         (results (cog-bind proof-is-preproof-rule)))
+    (cog-cp (cog-outgoing-set results) history-as)
+    (remove-dangling-atoms trace-as)
+    (cog-set-atomspace! default-as)))
+
+;; Run preproof-expander-is-preproof rule base over trace-as and copy
+;; the results to history-as
+(define (apply-preproof-expander-is-preproof)
+  (let* (;; Switch to trace-as
+         (default-as (cog-set-atomspace! trace-as))
+         ;; Load preproof-expanded-is-preproof rule base
+         (dummy (load "preproof-expander-is-preproof.scm"))
+         ;; Define BC target and vardecl
+         (target (Evaluation
                    (Predicate "URE:BC:preproof")
                    (List
                      (Variable "$A")
@@ -115,12 +137,41 @@
                       (Variable "$A")
                       (Type "DontExecLink"))
                     (Variable "$T")))
-         (results (ppc-bc target #:vardecl vardecl)))
+         ;; Run pep over trace-as
+         (results (pep-bc target #:vardecl vardecl)))
     ;; Copy post-processed inference traces to the inference
-    ;; history. Execution relationships + preproof evaluations
+    ;; history.
     (cog-cp (cog-outgoing-set results) history-as)
-    (cog-cp (cog-get-atoms 'ExecutionLink) history-as)
-    (remove-dangling-atoms history-as)))
+    (cog-delete results)
+    (remove-dangling-atoms trace-as)
+    (cog-set-atomspace! default-as)))
+
+;; Run and-bit-prior rule base over trace-as and copy its results to
+;; history-as.
+(define (apply-and-bit-prior)
+  (let* (;; Switch to trace-as
+         (default-as (cog-set-atomspace! trace-as))
+         ;; Load and-bit-prior rule base
+         (dummy (load "and-bit-prior.scm"))
+         ;; Define BC target and vardecl
+         (target (Evaluation
+                   (Predicate "URE:BC:preproof")
+                   (List
+                     (Variable "$A")
+                     (Variable "$T"))))
+         (vardecl (VariableList
+                    (TypedVariable
+                      (Variable "$A")
+                      (Type "DontExecLink"))
+                    (Variable "$T")))
+         ;; Run pep over trace-as
+         (results (abp-bc target #:vardecl vardecl)))
+    ;; Copy post-processed inference traces to the inference
+    ;; history.
+    (cog-cp (cog-outgoing-set results) history-as)
+    (cog-delete results)
+    (remove-dangling-atoms trace-as)
+    (cog-set-atomspace! default-as)))
 
 (define (mk-ic-rules)
   (icl-logger-info "Build inference control rules from the inference history")
