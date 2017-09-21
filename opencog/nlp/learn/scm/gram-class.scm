@@ -618,7 +618,8 @@
 )
 
 ; ---------------------------------------------------------------
-; Call function FUNC on all unordered pairs from LST
+; Call function FUNC on all unordered pairs from LST.
+; The function FUNC must accept two arguments.
 ; The return value is unspecified.
 ; All of the N(N-1)/2 unordered pairs are explored.
 ; This means that the runtime is O(N^2)
@@ -639,19 +640,46 @@
 )
 
 ; ---------------------------------------------------------------
+; Call function FUNC on all unordered pairs from LST.
+; The function FUNC must accept three arguments: the first two
+; are the pair, and the last is the accumulated (folded) value.
+; It must return the (modified) accumulated value.
+; The return value is the result of folding on these.
+; All of the N(N-1)/2 unordered pairs are explored.
+; This means that the runtime is O(N^2)
+(define (fold-unordered-pairs ACC FUNC LST)
+
+	(define (make-next-pair primary rest accum)
+		(define more (cdr primary))
+		(if (null? more) accum
+			(if (null? rest)
+				(make-next-pair more (cdr more) accum)
+				(let ((item (car primary))
+						(next-item (car rest)))
+					(format #t "~A ~A " (length primary) (length rest))
+					(make-next-pair primary (cdr rest)
+						(FUNC item next-item accum))
+				))))
+
+	(make-next-pair LST (cdr LST) ACC)
+)
+
+; ---------------------------------------------------------------
 ; Given a list of words, compare them pairwise to find a similar
 ; pair. Merge these to form a grammatical class, and then try to
 ; expand that class as much as possible. Repeat until all pairs
 ; have been explored.  This is an O(N^2) algo in the length of the
 ; word-list!
+; This returns a list of the classes that were created.
 (define (make-gram-class LLOBJ WRD-LST FRAC)
 
-	(define (check-pair WORD-A WORD-B)
+	(define (check-pair WORD-A WORD-B CLS-LST)
 		(if (ok-to-merge WORD-A WORD-B)
 			(let ((grm-class (merge-ortho LLOBJ WORD-A WORD-B FRAC)))
-				(expand-gram-class LLOBJ grm-class WRD-LST FRAC))))
+				(expand-gram-class LLOBJ grm-class WRD-LST FRAC)
+				(cons grm-class CLS-LST))))
 
-	(for-all-unordered-pairs check-pair WRD-LST)
+	(fold-unordered-pairs '() check-pair WRD-LST)
 )
 
 ; ---------------------------------------------------------------
