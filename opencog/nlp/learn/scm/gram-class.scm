@@ -581,6 +581,9 @@
 ; assigned, create a new class. Return a list of all of the classes,
 ; the ones that were given plus the ones taht were created.
 (define (assign-to-classes LLOBJ FRAC WRD-LST CLS-LST)
+	(format #t "---------  Words remaining=~A Classes=~A tot=~A ------------\n"
+		(length WRD-LST) (length CLS-LST)
+		(+ (length WRD-LST) (length CLS-LST)))
 	(if (null? WRD-LST) CLS-LST
 		(let* ((wrd (car WRD-LST))
 				(rest (cdr WRD-LST))

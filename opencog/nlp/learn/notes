@@ -13202,7 +13202,10 @@ affair - 5.3677896 affter
 (cog-get-atoms 'WordClassNode)
 (drop nou 39) - restart at 646
 (drop nou 12) - restart at 634
+(drop nou 34) - restart at 600
+by support ot by length....
 
+(assign-to-classes psa 0.3 nou '())
 
 =========================================================================
 out-of-control GC
