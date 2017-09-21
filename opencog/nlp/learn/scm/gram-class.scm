@@ -457,7 +457,7 @@
 		(fold add-to-list '() (cog-incoming-by-type WORD 'Section)))
 
 	; It is faster, more cpu-efficient to sort first, and then filter.
-	(define sorted-words (sort all-words cog-atom-less?))
+	(define sorted-words (sort! all-words cog-atom-less?))
 	(if (null? sorted-words) '()
 		(fold
 			(lambda (WRD LST)
@@ -563,9 +563,13 @@
 )
 
 ; ---------------------------------------------------------------
-; Given the list LST of atoms, sort it, returning the same list, 
+; Given the list LST of atoms, sort it, returning the same list,
 ; ranked in order of the number of observations.
 (define (rank-by-observations LST)
+
+	(sort! LST (lambda (ATOM-A ATOM-B)
+		; Rank so that the highest count words are first in the list.
+		(> (get-count ATOM-A) (get-count ATOM-B))))
 )
 
 ; ---------------------------------------------------------------
@@ -579,6 +583,7 @@
 		(load-atoms-of-type 'WordNode)
 		; Verify that words have been loaded
 		;  (define all-words (get-all-cset-words))
+		; (define all-words (cog-get-atoms 'WordNode))
 	)
 )
 
