@@ -36,7 +36,6 @@ OpenPsiImplicator::OpenPsiImplicator(AtomSpace* as) :
 bool OpenPsiImplicator::grounding(const HandleMap &var_soln,
                                   const HandleMap &term_soln)
 {
-
   // The psi-rule weight calculations could be done here.
   _result = TruthValue::TRUE_TV();
 

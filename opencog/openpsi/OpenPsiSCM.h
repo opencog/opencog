@@ -30,16 +30,32 @@ namespace opencog
 
 class OpenPsiSCM
 {
-  public:
-    OpenPsiSCM();
+public:
+  OpenPsiSCM();
 
-  private:
-    static void* init_in_guile(void*);
-    static void init_in_module(void*);
-    void init(void);
+private:
+  TruthValuePtr satisfiable(const Handle& himplication);
+  Handle psi_imply(const Handle& himplication);
 
-    TruthValuePtr satisfiable(const Handle& himplication);
-    Handle psi_imply(const Handle& himplication);
+  /**
+   * Init function for using with scm_with_guile. It creates the
+   * openpsi scheme module and uses it by default.
+   *
+   * @param self pointer to the OpenPsiSCM object
+   */
+  static void* init_in_guile(void*);
+
+  /**
+   * The main function for defining stuff in the openpsi scheme module.
+   *
+   * @param data  pointer to the OpenPsiSCM object
+   */
+  static void init_in_module(void*);
+
+  /**
+   * The main init function for the OpenPsiSCM object.
+   */
+  void init(void);
 };
 
 } // namespace opencog

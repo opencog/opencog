@@ -26,9 +26,6 @@
 
 using namespace opencog;
 
-/**
- * The constructor for OpenPsiSCM.
- */
 OpenPsiSCM::OpenPsiSCM()
 {
   static bool is_init = false;
@@ -37,9 +34,6 @@ OpenPsiSCM::OpenPsiSCM()
   scm_with_guile(init_in_guile, this);
 }
 
-/**
- * The main init function for the OpenPsiSCM object.
- */
 void OpenPsiSCM::init()
 {
   define_scheme_primitive("psi-satisfy", &OpenPsiSCM::satisfiable,
@@ -64,13 +58,6 @@ Handle OpenPsiSCM::psi_imply(const Handle& himplication)
   return implicator.imply(himplication);
 }
 
-/**
- * Init function for using with scm_with_guile.
- *
- * Creates the openpsi scheme module and uses it by default.
- *
- * @param self  pointer to the OpenPsiSCM object
- */
 void* OpenPsiSCM::init_in_guile(void* self)
 {
   scm_c_define_module("opencog openpsi", init_in_module, self);
@@ -78,11 +65,6 @@ void* OpenPsiSCM::init_in_guile(void* self)
   return NULL;
 }
 
-/**
- * The main function for defining stuff in the openpsi scheme module.
- *
- * @param data  pointer to the OpenPsiSCM object
- */
 void OpenPsiSCM::init_in_module(void* data)
 {
   OpenPsiSCM* self = (OpenPsiSCM*) data;
