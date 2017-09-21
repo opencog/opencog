@@ -303,6 +303,7 @@
           (list) (list) "")
       (REJOINDERS context action) :
         (format #f "\nrejoinder: ~a\n~a\n~a" $1 $2 $3)
+      (GAMBIT context action) : (format #f "gambit: ~a ~a" $2 $3)
       (GAMBIT action) : (format #f "gambit: ~a" $2)
     )
 
