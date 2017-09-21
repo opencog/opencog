@@ -545,13 +545,13 @@
 )
 
 ; ---------------------------------------------------------------
-; Given a list of words, compare them pairwise to find a similar
+; Given a list of words, compare them pair-wise to find a similar
 ; pair. Merge these to form a grammatical class, and then try to
 ; expand that class as much as possible. Repeat until all pairs
 ; have been explored.  This is an O(N^2) algo in the length of the
 ; word-list!
 ; This returns a list of the classes that were created.
-(define (make-gram-class LLOBJ WRD-LST FRAC)
+(define (classify-pair-wise LLOBJ WRD-LST FRAC)
 
 	(define (check-pair WORD-A WORD-B CLS-LST)
 		(if (ok-to-merge WORD-A WORD-B)
@@ -560,6 +560,19 @@
 				(cons grm-class CLS-LST))))
 
 	(fold-unordered-pairs '() check-pair WRD-LST)
+)
+
+; ---------------------------------------------------------------
+; Given a word and a list of grammatical classes, attempt to
+; assign the the word to one of the classes.  Return the class
+; it was assigned to, or just the word, if it was not assigned
+; to any of them.
+(define (assign-to-class LLOBJ FRAC WRD CLS-LST)
+	(if (null? CLS-LST) WRD
+		(let ((cls (car CLS-LST)))
+			(if (ok-to-merge cls WRD)
+				(merge-ortho LLOBJ cls WRD FRAC)
+				(assign-to-class LLOBJ FRAC WRD (cdr CLS-LST)))))
 )
 
 ; ---------------------------------------------------------------
@@ -572,6 +585,18 @@
 		(> (get-count ATOM-A) (get-count ATOM-B))))
 )
 
+; ---------------------------------------------------------------
+; Loop over all words, attempting to place them into grammatical
+; classes. This is an O(N^2) algorithm, and so several "cheats"
+; are employed to maintain some amount of progress. So,
+; A) the list of words is ranked by order of the number of
+;    observations; thus punctuation and "the, "a" come first.
+; B) The ranked list is divided into power-of-two ranges, and only
+;    the words in a given range are compared to one-another.
+; The idea is that it is unlikely that words with very different
+; observational counts will be similar.  NOTE: this idea has NOT
+; been empirically tested, yet.
+;
 ; ---------------------------------------------------------------
 
 (define (do-it)
