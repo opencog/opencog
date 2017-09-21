@@ -38,14 +38,14 @@
 ;;;;;;;;;;;;;;;;
 
 ;; Load the rules. Either w.r.t this file path
-(add-to-load-path "../../../opencog/pln/rules/")
-(add-to-load-path "../../../opencog/pln/meta-rules/")
+(add-to-load-path "../../../opencog/pln/")
 
 ;; TODO: add more rules
 (define rule-filenames
-  (list "propositional/modus-ponens.scm"
-        "propositional/contraposition.scm"
-        "term/deduction.scm"
+  (list "rules/propositional/modus-ponens.scm"
+        "rules/propositional/contraposition.scm"
+        "rules/term/deduction.scm"
+        "meta-rules/predicate/conditional-full-instantiation.scm"
         )
   )
 (for-each load-from-path rule-filenames)
@@ -67,6 +67,9 @@
         deduction-inheritance-rule-name
         deduction-implication-rule-name
         deduction-subset-rule-name
+        ;; conditional-full-instantiation-implication-scope-meta-rule-name
+        ;; conditional-full-instantiation-implication-meta-rule-name
+        ;; conditional-full-instantiation-inheritance-meta-rule-name
         )
   )
 
@@ -78,13 +81,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;
 
 ;; Termination criteria parameters
-(ure-set-num-parameter pln-rbs "URE:maximum-iterations" 30)
-
-;; Attention allocation (0 to disable it, 1 to enable it)
-(ure-set-fuzzy-bool-parameter pln-rbs "URE:attention-allocation" 0)
+(ure-set-num-parameter pln-rbs "URE:maximum-iterations" piter)
 
 ;; Complexity penalty
 (ure-set-num-parameter pln-rbs "URE:BC:complexity-penalty" 0.001)
-
-;; BIT reduction parameters
-(ure-set-num-parameter pln-rbs "URE:BC:maximum-bit-size" 100000)
