@@ -576,6 +576,15 @@
 )
 
 ; ---------------------------------------------------------------
+; Create a singleton word-class.  That is, create a new word-class
+; that contains only that one word.
+(define (create-singleton-class LLOBJ FRAC WRD)
+	(define new-cls (WordClassNode (cog-name WRD)))
+	(MemberLink WRD new-cls)
+	(merge-ortho LLOBJ new-cls WRD FRAC)
+)
+
+; ---------------------------------------------------------------
 ; Given a word-list and a list of grammatical classes, assign
 ; each word to one of the classes, or, if the word cannot be
 ; assigned, create a new class. Return a list of all of the classes,
@@ -590,8 +599,7 @@
 				(cls (assign-word-to-class LLOBJ FRAC wrd CLS-LST)))
 			(if (eq? 'WordClassNode (cog-type cls))
 				(assign-to-classes LLOBJ FRAC rest CLS-LST)
-				(let ((new-cls (WordClassNode (cog-name wrd))))
-					(MemberLink wrd new-cls)
+				(let ((new-cls (create-singleton-class LLOBJ FRAC wrd)))
 					(assign-to-classes LLOBJ FRAC rest
 						; Use append, not cons, so as to preferentially
 						; choose the older classes, as opposed to the

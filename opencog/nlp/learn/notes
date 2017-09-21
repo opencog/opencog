@@ -13206,6 +13206,10 @@ affair - 5.3677896 affter
 by support ot by length....
 
 (assign-to-classes psa 0.3 nou '())
+(for-each (lambda (cls)
+	(if (eq? 1 (length (cog-incoming-set cls)))
+		(cog-delete-recursive cls)))
+	(cog-get-atoms 'WordClassNode))
 
 =========================================================================
 out-of-control GC
