@@ -567,12 +567,35 @@
 ; assign the the word to one of the classes.  Return the class
 ; it was assigned to, or just the word, if it was not assigned
 ; to any of them.
-(define (assign-to-class LLOBJ FRAC WRD CLS-LST)
+(define (assign-word-to-class LLOBJ FRAC WRD CLS-LST)
 	(if (null? CLS-LST) WRD
 		(let ((cls (car CLS-LST)))
 			(if (ok-to-merge cls WRD)
 				(merge-ortho LLOBJ cls WRD FRAC)
-				(assign-to-class LLOBJ FRAC WRD (cdr CLS-LST)))))
+				(assign-word-to-class LLOBJ FRAC WRD (cdr CLS-LST)))))
+)
+
+; ---------------------------------------------------------------
+; Given a word-list and a list of grammatical classes, assign
+; each word to one of the classes, or, if the word cannot be
+; assigned, create a new class. Return a list of all of the classes,
+; the ones that were given plus the ones taht were created.
+(define (assign-to-classes LLOBJ FRAC WRD-LST CLS-LST)
+	(if (null? WRD-LST) CLS-LST
+		(let* ((wrd (car WRD-LST))
+				(rest (cdr WRD-LST))
+				(cls (assign-word-to-class LLOBJ FRAC wrd CLS-LST)))
+			(if (eq? 'WordClassNode (cog-type cls))
+				(assign-to-classes LLOBJ FRAC rest CLS-LST)
+				(let ((new-cls (WordClassNode (cog-name wrd))))
+					(MemberLink wrd new-cls)
+					(assign-to-classes LLOBJ FRAC rest
+						; Use append, not cons, so as to preferentially
+						; choose the older classes, as opposed to the
+						; newer ones.
+						; (cons new-cls CLS-LST)
+						(append! CLS-LST (list new-cls))
+					)))))
 )
 
 ; ---------------------------------------------------------------
