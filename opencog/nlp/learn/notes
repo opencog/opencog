@@ -13178,8 +13178,6 @@ right-cosine compute-right-cosine
 (length nou)
 (make-gram-class psa nou 0)
 
-(drop nou 39) - restart at 646
-
 (define gra (merge-ortho psa (Word "building") (Word "jungle") 0.0))
 
 "island" -- "hill"
@@ -13202,6 +13200,8 @@ group - 15 before ortho  9.1974925 after
 affair - 5.3677896 affter
 
 (cog-get-atoms 'WordClassNode)
+(drop nou 39) - restart at 646
+(drop nou 12) - restart at 634
 
 
 =========================================================================
