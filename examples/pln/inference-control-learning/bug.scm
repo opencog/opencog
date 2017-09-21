@@ -18,7 +18,7 @@
 ;; history-as.
 (define (run-bug)
   (let* (;; Switch to trace-as
-         (default-as (cog-set-atomspace! trace-as))
+         (default-as (cog-set-atomspace! trace-as)) ;; <--- bug
          ;; Load and-bit-prior rule base
          (dummy (load "bug-and-bit-prior.scm"))
          ;; Define BC target and vardecl
@@ -34,8 +34,8 @@
                     (Variable "$T")))
          ;; Run pep over trace-as
          (results (abp-bc target #:vardecl vardecl)))  ;; <--- bug
-    (cog-logger-debug "apply-and-bit-prior Trace AtomSpace 4:")
+    (cog-logger-debug "apply-and-bit-prior trace atomspace:")
     (cog-logger-debug-atomspace trace-as)
-    (cog-set-atomspace! default-as)))
+    (cog-logger-debug-atomspace (cog-atomspace))))
 
 (run-bug)
