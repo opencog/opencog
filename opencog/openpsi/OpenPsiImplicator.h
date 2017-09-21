@@ -48,6 +48,15 @@ public:
    */
   TruthValuePtr check_satisfiability(const Handle& himplication);
 
+  /**
+   * Instantiate the implicand of the given ImplicationLink.
+   *
+   * @param himplication Handle to the ImplicationLink.
+   * @param vars Map from variables to their groundings.
+   * @return The handle to the grounded atom.
+   */
+  Handle imply(const Handle& himplication);
+
 private:
   /**
    * Cache used to store context with the variable groundings.
@@ -60,6 +69,10 @@ private:
    * use the cache for a subset of contexts.
    */
   bool _update_cache = true;
+
+  // Because two of the ancestor classes that this class inherites
+  // from have _as variable.
+  using DefaultPatternMatchCB::_as;
 };
 
 }; // namespace opencog

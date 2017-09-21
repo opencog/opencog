@@ -19,6 +19,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <opencog/atoms/execution/Instantiator.h>
 
 #include "OpenPsiImplicator.h"
 
@@ -49,10 +50,11 @@ bool OpenPsiImplicator::grounding(const HandleMap &var_soln,
   return true;
 }
 
-// TruthValuePtr OpenPsiImplicator::imply(
 TruthValuePtr OpenPsiImplicator::check_satisfiability(
   const Handle& himplication)
 {
+  // TODO: Replace this with the context, as psi-rule is
+  // (context + action ->goal)
   Handle context = himplication->getOutgoingAtom(0);
 
   // TODO: How to prevent stale cache?
@@ -65,5 +67,23 @@ TruthValuePtr OpenPsiImplicator::check_satisfiability(
     return TruthValue::TRUE_TV();
   } else {
     return TruthValue::FALSE_TV();
+  }
+}
+
+Handle OpenPsiImplicator::imply(const Handle& himplication)
+{
+  // TODO: Replace this with the action, as psi-rule is
+  // (context + action ->goal)
+  Handle context = himplication->getOutgoingAtom(0);
+  Instantiator inst(_as);
+
+  if (_satisfiability_cache.count(context)) {
+    return inst.instantiate(himplication->getOutgoingAtom(1),
+              _satisfiability_cache.at(context), true);
+  } else {
+    // NOTE: Trying to check for satisfiablity isn't done because it
+    // is the responsibility of the action-selector for determining
+    // what action is to be taken.
+    return Handle::UNDEFINED;
   }
 }

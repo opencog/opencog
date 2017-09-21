@@ -39,7 +39,7 @@ class OpenPsiSCM
     void init(void);
 
     TruthValuePtr satisfiable(const Handle& himplication);
-
+    Handle psi_imply(const Handle& himplication);
 };
 
 } // namespace opencog
