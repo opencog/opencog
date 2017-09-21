@@ -259,6 +259,7 @@
 
     (declaration-sequence
       (LPAREN declaration-members RPAREN) : $2
+      (LSBRACKET declaration-members RSBRACKET) : $2
     )
 
     (declaration-members
