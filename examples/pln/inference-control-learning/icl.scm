@@ -1,6 +1,6 @@
 ;; Contain the main inference control learning experiment loop
 
-(load "utilities.scm")
+(load "icl-utilities.scm")
 
 ;; Clear and reload the kb and rb
 (define (reload)

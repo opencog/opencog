@@ -2,50 +2,14 @@
 
 (use-modules (srfi srfi-1))
 (use-modules (opencog logger))
-(use-modules (opencog randgen))
 (use-modules (opencog query))
-
-;; Set a logger for the experiment
-(define icl-logger (cog-new-logger))
-(cog-logger-set-component! icl-logger "ICL")
-(define (icl-logger-error . args) (apply cog-logger-error (cons icl-logger args)))
-(define (icl-logger-warn . args) (apply cog-logger-warn (cons icl-logger args)))
-(define (icl-logger-info . args) (apply cog-logger-info (cons icl-logger args)))
-(define (icl-logger-debug . args) (apply cog-logger-debug (cons icl-logger args)))
-(define (icl-logger-fine . args) (apply cog-logger-fine (cons icl-logger args)))
-
-;; Let of characters of the alphabet
-(define alphabet-list
-  (string->list "ABCDEFGHIJKLMNOPQRSTUVWXYZ"))
-
-;; Given a number between 0 and 25 return the corresponding letter as
-;; a string.
-(define (alphabet-ref i)
-  (list->string (list (list-ref alphabet-list i))))
-
-;; Randomly select between 2 ordered letters and create a target
-;;
-;; Inheritance
-;;   X
-;;   Y
-(define (gen-random-target)
-  (let* ((Ai (cog-randgen-randint 25))
-         (Bi (+ Ai (random (- 26 Ai))))
-         (A (alphabet-ref Ai))
-         (B (alphabet-ref Bi)))
-    (Inheritance (Concept A) (Concept B))))
-
-;; Randomly generate N targets
-(define (gen-random-targets N)
-  (if (= N 0)
-      '()
-      (cons (gen-random-target) (gen-random-targets (- N 1)))))
+(use-modules (opencog rule-engine))
 
 ;; Log the given atomspace at some level
-(define (icl-logger-info-atomspace as)
-  (icl-logger-info "~a" (atomspace->string as)))
-(define (icl-logger-debug-atomspace as)
-  (icl-logger-debug "~a" (atomspace->string as)))
+(define (cog-logger-info-atomspace as)
+  (cog-logger-info "~a" (atomspace->string as)))
+(define (cog-logger-debug-atomspace as)
+  (cog-logger-debug "~a" (atomspace->string as)))
 
 ;; Convert the given atomspace into a string.
 (define (atomspace->string as)
@@ -85,24 +49,6 @@
 
 (define (null-confidence? atom)
   (= 0 (tv-conf (cog-tv atom))))
-
-;; Copy all atoms from an atomspace to another atomspace
-(define (cp-as src dst)
-  (let ((old-as (cog-set-atomspace! src)))
-    (cog-cp-all dst)
-    (cog-set-atomspace! old-as)))
-
-;; Copy a list of atoms from an atomspace to another atomspace
-(define (cp-as-atoms src atoms dst)
-  (let ((old-as (cog-set-atomspace! src)))
-    (cog-cp atoms dst)
-    (cog-set-atomspace! old-as)))
-
-;; Clear a given atomspace
-(define (clear-as as)
-  (let ((old-as (cog-set-atomspace! as)))
-    (clear)
-    (cog-set-atomspace! old-as)))
 
 ;; Apply a rule to the given atoms
 (define (apply-rule rule . atoms)
