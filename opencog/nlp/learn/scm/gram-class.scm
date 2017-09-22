@@ -664,6 +664,28 @@
 ; observational counts will be similar.  NOTE: this idea has NOT
 ; been empirically tested, yet.
 ;
+(define (loop-over-words LLOBJ FRAC WRD-LST CLS-LST)
+	(define ranked-words (rank-by-observations WRD-LST))
+	(define (chunk-blocks wlist size clist)
+		(if (null? wlist) '()
+			(let* ((wsz (length wlist))
+					; the smallier of word-list and requested size.
+					(minsz (if (< wsz size) wsz size))
+					; the first block
+					(chunk (take wlist minsz))
+					; the remainder
+					(rest (drop wlist minsz))
+					; perform clustering
+					(new-clist (assign-to-classes LLOBJ FRAC chunk clist)))
+				; Recurse and do the next block.
+				(chunk-blocks rest (* 2 size) new-clist)
+			)
+		)
+	)
+
+	(chunk-blocks WRD-LST 20 CLS-LST)
+)
+
 ; ---------------------------------------------------------------
 
 (define (do-it)
@@ -673,9 +695,13 @@
 		)
 
 		(load-atoms-of-type 'WordNode)
+		(load-atoms-of-type 'WordClassNode)
 		; Verify that words have been loaded
 		;  (define all-words (get-all-cset-words))
 		; (define all-words (cog-get-atoms 'WordNode))
+		(loop-over-words psa 0.3
+			(cog-get-atoms 'WordNode)
+			(cog-get-atoms 'WordClassNode))
 	)
 )
 
