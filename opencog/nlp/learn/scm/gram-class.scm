@@ -629,17 +629,17 @@
 				; If the word was not assigned to an existing class,
 				; see if it can be merged with any of the other words 
 				; in the word-list.
-
-loop over sing-list
-if merge then append else appen.
-				(let ((new-cls (create-singleton-class LLOBJ FRAC wrd)))
-					(assign-to-classes LLOBJ FRAC rest
-						; Use append, not cons, so as to preferentially
-						; choose the older classes, as opposed to the
-						; newer ones.
-						; (cons new-cls CLS-LST)
-						(append! CLS-LST (list new-cls))
-					)))))
+				(let* ((new-cls (assign-expand-class LLOBJ FRAC wrd rest))
+						(new-lst
+							(if (eq? 'WordClassNode (cog-type new-cls))
+								; Use append, not cons, so as to preferentially
+								; choose the older classes, as opposed to the
+								; newer ones.
+								; (cons new-cls CLS-LST)
+								(append! CLS-LST (list new-cls))
+								; else the old class-list
+								CLS-LST)))
+					(assign-to-classes LLOBJ FRAC rest new-cls)))))
 )
 
 ; ---------------------------------------------------------------
