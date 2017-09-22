@@ -473,49 +473,63 @@
 	(if (null? memlnk) #f #t))
 
 ; ---------------------------------------------------------------
-; Give a word, and a list of words, scan the word list to see if
-; the given word can be merged into any one of them. If so, then
-; perform the merge, and return the new word-class; else return
-; nil.
+; Given a single word and a list of words or grammatical classes,
+; attempt to assign the the word to one of the classes (or merge
+; the word with one of the other words).  Return the class
+; it was assigned to, or just the original word itself, if it was
+; not assigned to any of them.
+;
+; See also the `assign-expand-class` function.
 ;
 ; WORD should be the WordNode to test.
-; WRD-LST should be list of WordNodes to compare to the class.
+; CLS-LST should be list of WordNodes or WordClassNodes to compare
+;          to the WORD.
 ; LLOBJ is the object to use for obtaining counts.
 ; FRAC is the fraction of union vs. intersection during merge.
 ; (These last two are passed blindly to the merge function).
 ;
-(define (maybe-make-gram-class LLOBJ FRAC WORD WRD-LST)
-	(if (not (null? WRD-LST))
-		(let ((tst-wrd (car WRD-LST)))
-
-			(if (ok-to-merge WORD tst-wrd)
-				(merge-ortho LLOBJ FRAC WORD tst-wrd)
-				(maybe-make-gram-class LLOBJ FRAC WORD (cdr WRD-LST)))))
+(define (assign-word-to-class LLOBJ FRAC WRD CLS-LST)
+	(if (null? CLS-LST) WRD
+		(let ((cls (car CLS-LST)))
+			; If the word can be merged into a class, then do it,
+			; and return the class. Else try again.
+			(if (ok-to-merge cls WRD)
+				(merge-ortho LLOBJ FRAC cls WRD)
+				(assign-word-to-class LLOBJ FRAC WRD (cdr CLS-LST)))))
 )
 
 ; ---------------------------------------------------------------
-; Given a grammatical class, and a list of words, scan the word list
-; to see if any can be merged into the class. If they can, merge them
-; in. This is an O(n) algo.
+; Given a word or a grammatical class, and a list of words, scan
+; the word list to see if any of them can be merged into the given
+; word/class.  If so, then perform the merge, and return the
+; word-class; else return the original word. If the initial merge
+; can be performed, then the remainder of the list is scanned, to
+; see if the word-class can be further enlarged.
 ;
-; GRM-CLS should be the WordClassNode to be enlarged.
-; WRD-LST should be list of WordNodes to compare to the class.
+; This is an O(n) algo in the length of WRD-LST.
+;
+; This is similar to `assign-word-to-class` function, except that
+; the roles of the arguments are reversed, and this function tries
+; to maximally expand the resulting class.
+;
+; WRD-OR-CLS should be the WordNode or WordClassNode to merge into.
+; WRD-LST should be list of WordNodes to merge into WRD-OR-CLS.
 ; LLOBJ is the object to use for obtaining counts.
 ; FRAC is the fraction of union vs. intersection during merge.
 ; (These last two are passed blindly to the merge function).
 ;
-(define (expand-gram-class LLOBJ GRM-CLS WRD-LST FRAC)
-	(if (not (null? WRD-LST))
-		(let ((wrd (car WRD-LST)))
-
-			; If the word is not already in the class, and its mergeable,
-			; then merge it. XXX Do we really need the in-gram-class?
-			; check? Probably not ... if its in the class, then what's
-			; left is not mergable.
-			(if (and (not (in-gram-class? wrd GRM-CLS))
-					(ok-to-merge GRM-CLS wrd))
-				(merge-ortho LLOBJ FRAC GRM-CLS wrd))
-			(expand-gram-class LLOBJ GRM-CLS (cdr WRD-LST) FRAC)))
+(define (assign-expand-class LLOBJ FRAC WRD-OR-CLS WRD-LST)
+	(if (null? WRD-LST) WORD
+		(let ((wrd (car WRD-LST))
+				(rest (cdr WRD-LST)))
+			; If the word can be merged into a class, then do it,
+			; and then expand the class. Else try again.
+			(if (ok-to-merge WRD-OR-CLS wrd)
+				; Merge, and try to expand.
+				(assign-expand-class LLOBJ FRAC
+					(merge-ortho LLOBJ FRAC WRD-OR-CLS wrd) rest)
+				; Else keep trying.
+				(assign-expand-class LLOBJ FRAC WRD-OR-CLS rest))))
 )
 
 ; ---------------------------------------------------------------
@@ -572,28 +586,15 @@
 ; have been explored.  This is an O(N^2) algo in the length of the
 ; word-list!
 ; This returns a list of the classes that were created.
-(define (classify-pair-wise LLOBJ WRD-LST FRAC)
+(define (classify-pair-wise LLOBJ FRAC WRD-LST)
 
 	(define (check-pair WORD-A WORD-B CLS-LST)
 		(if (ok-to-merge WORD-A WORD-B)
 			(let ((grm-class (merge-ortho LLOBJ FRAC WORD-A WORD-B)))
-				(expand-gram-class LLOBJ grm-class WRD-LST FRAC)
+				(assign-expand-class LLOBJ FRAC grm-class WRD-LST)
 				(cons grm-class CLS-LST))))
 
 	(fold-unordered-pairs '() check-pair WRD-LST)
-)
-
-; ---------------------------------------------------------------
-; Given a word and a list of grammatical classes, attempt to
-; assign the the word to one of the classes.  Return the class
-; it was assigned to, or just the word, if it was not assigned
-; to any of them.
-(define (assign-word-to-class LLOBJ FRAC WRD CLS-LST)
-	(if (null? CLS-LST) WRD
-		(let ((cls (car CLS-LST)))
-			(if (ok-to-merge cls WRD)
-				(merge-ortho LLOBJ FRAC cls WRD)
-				(assign-word-to-class LLOBJ FRAC WRD (cdr CLS-LST)))))
 )
 
 ; ---------------------------------------------------------------
