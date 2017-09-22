@@ -639,7 +639,7 @@
 								(append! CLS-LST (list new-cls))
 								; else the old class-list
 								CLS-LST)))
-					(assign-to-classes LLOBJ FRAC rest new-cls)))))
+					(assign-to-classes LLOBJ FRAC rest new-lst)))))
 )
 
 ; ---------------------------------------------------------------
