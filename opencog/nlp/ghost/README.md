@@ -130,14 +130,22 @@ s: is equivalent to declarative or imperative in OpenCog
 u: means union of the both above
 ```
 
-- Gambit & Rejoinders
-
-- Unordered Matching
+- Unordered matching
 
 - Nested pattern e.g. "you < * [(live * long) long-lived]"
 
-- Common system functions, e.g. ^reuse
+- System functions
+  - ^gambit()
+
+- System variables
+  - %input
+
+- Rule selection / topic management
+  - Gambits
+  - Rejoinders
+  - Weight the rules by the order of the rules in the topic file
+  - Block topic from accidental access, like doing "t: (!~) ^fail(topic)" in ChatScript
+
+- Action orchestrator
 
 - Port all the DefinedPredicateNodes available in chatbot-psi and eva modules
-
-- Topic management
