@@ -182,7 +182,7 @@
 
 ; ---------------------------------------------------------------------
 
-(define (merge-ortho LLOBJ WA WB FRAC)
+(define (merge-ortho LLOBJ FRAC WA WB)
 "
   merge-ortho WA WB FRAC - merge WA and WB into a grammatical class.
   Return the merged class.
@@ -473,6 +473,27 @@
 	(if (null? memlnk) #f #t))
 
 ; ---------------------------------------------------------------
+; Give a word, and a list of words, scan the word list to see if
+; the given word can be merged into any one of them. If so, then
+; perform the merge, and return the new word-class; else return
+; nil.
+;
+; WORD should be the WordNode to test.
+; WRD-LST should be list of WordNodes to compare to the class.
+; LLOBJ is the object to use for obtaining counts.
+; FRAC is the fraction of union vs. intersection during merge.
+; (These last two are passed blindly to the merge function).
+;
+(define (maybe-make-gram-class LLOBJ FRAC WORD WRD-LST)
+	(if (not (null? WRD-LST))
+		(let ((tst-wrd (car WRD-LST)))
+
+			(if (ok-to-merge WORD tst-wrd)
+				(merge-ortho LLOBJ FRAC WORD tst-wrd)
+				(maybe-make-gram-class LLOBJ FRAC WORD (cdr WRD-LST)))))
+)
+
+; ---------------------------------------------------------------
 ; Given a grammatical class, and a list of words, scan the word list
 ; to see if any can be merged into the class. If they can, merge them
 ; in. This is an O(n) algo.
@@ -493,7 +514,7 @@
 			; left is not mergable.
 			(if (and (not (in-gram-class? wrd GRM-CLS))
 					(ok-to-merge GRM-CLS wrd))
-				(merge-ortho LLOBJ GRM-CLS wrd FRAC))
+				(merge-ortho LLOBJ FRAC GRM-CLS wrd))
 			(expand-gram-class LLOBJ GRM-CLS (cdr WRD-LST) FRAC)))
 )
 
@@ -555,7 +576,7 @@
 
 	(define (check-pair WORD-A WORD-B CLS-LST)
 		(if (ok-to-merge WORD-A WORD-B)
-			(let ((grm-class (merge-ortho LLOBJ WORD-A WORD-B FRAC)))
+			(let ((grm-class (merge-ortho LLOBJ FRAC WORD-A WORD-B)))
 				(expand-gram-class LLOBJ grm-class WRD-LST FRAC)
 				(cons grm-class CLS-LST))))
 
@@ -571,34 +592,45 @@
 	(if (null? CLS-LST) WRD
 		(let ((cls (car CLS-LST)))
 			(if (ok-to-merge cls WRD)
-				(merge-ortho LLOBJ cls WRD FRAC)
+				(merge-ortho LLOBJ FRAC cls WRD)
 				(assign-word-to-class LLOBJ FRAC WRD (cdr CLS-LST)))))
-)
-
-; ---------------------------------------------------------------
-; Create a singleton word-class.  That is, create a new word-class
-; that contains only that one word.
-(define (create-singleton-class LLOBJ FRAC WRD)
-	(define new-cls (WordClassNode (cog-name WRD)))
-	(MemberLink WRD new-cls)
-	(merge-ortho LLOBJ new-cls WRD FRAC)
 )
 
 ; ---------------------------------------------------------------
 ; Given a word-list and a list of grammatical classes, assign
 ; each word to one of the classes, or, if the word cannot be
-; assigned, create a new class. Return a list of all of the classes,
-; the ones that were given plus the ones taht were created.
+; assigned, treat it as if it werre a new class. Return a list
+; of all of the classes, the ones that were given plus the ones
+; that were created.
+;
+; The typical use is to call this with an empty class-list,
+; initially.
+;
+; If the class-list contains WordNodes (instead of the expected
+; WordClassNodes) and a merge is possible, then that WordNode will
+; be merged to create a class.
 (define (assign-to-classes LLOBJ FRAC WRD-LST CLS-LST)
 	(format #t "---------  Words remaining=~A Classes=~A tot=~A ------------\n"
 		(length WRD-LST) (length CLS-LST)
 		(+ (length WRD-LST) (length CLS-LST)))
+
+	; If the WRD-LST is empty, we are done; otherwise compute.
 	(if (null? WRD-LST) CLS-LST
 		(let* ((wrd (car WRD-LST))
 				(rest (cdr WRD-LST))
+				; Can we assign the word to a class?
 				(cls (assign-word-to-class LLOBJ FRAC wrd CLS-LST)))
+
+			; If the word was merged into a class, then recurse
 			(if (eq? 'WordClassNode (cog-type cls))
 				(assign-to-classes LLOBJ FRAC rest CLS-LST)
+
+				; If the word was not assigned to an existing class,
+				; see if it can be merged with any of the other words 
+				; in the word-list.
+
+loop over sing-list
+if merge then append else appen.
 				(let ((new-cls (create-singleton-class LLOBJ FRAC wrd)))
 					(assign-to-classes LLOBJ FRAC rest
 						; Use append, not cons, so as to preferentially

@@ -13178,6 +13178,11 @@ right-cosine compute-right-cosine
 (length nou)
 (make-gram-class psa nou 0)
 
+(define nou (rank-by-observations nou))
+(define nou (drop nou 20))
+(assign-to-classes psa 0.3 nou '())
+---------------------
+
 (define gra (merge-ortho psa (Word "building") (Word "jungle") 0.0))
 
 "island" -- "hill"
@@ -13209,6 +13214,38 @@ by support ot by length....
 (for-each (lambda (cls)
 	(if (eq? 1 (length (cog-incoming-set cls)))
 		(cog-delete-recursive cls)))
+	(cog-get-atoms 'WordClassNode))
+--------------
+953620 atoms
+total loads = 924632
+total stores = 29350
+valuation updates = 70232
+write items=42976
+_num_atom_removes
+_num_atom_recursive_removes
+_num_valuation_removes
+76 flushes in 2000 secs ouch
+SELECT key FROM Valuations WHERE atom = 
+CREATE INDEX incoming_idx on Atoms USING GIN(outgoing);
+
+SELECT uuid FROM Atoms WHERE outgoing @> ARRAY[CAST(%lu AS BIGINT)]
+DELETE FROM Atoms WHERE uuid =  uuid is primary
+
+664 total initially and 658 finally .. meh
+
+(define (copy-sect TO FRM)
+	(for-each (lambda (sect)
+		(store-atom (Section TO (cog-outgoing-atom sect 1)))
+		(cog-delete sect))
+	(cog-incoming-by-type FRM 'Section)))
+
+(for-each (lambda (cls)
+	(define mem (cog-incoming-by-type cls 'MemberLink))
+	(if (eq? 1 (length mem)) (begin
+		(format #t "hey ~A\n" mem)
+		(copy-sect (Word (cog-name cls)) cls)
+		(cog-delete-recursive cls)
+	)))
 	(cog-get-atoms 'WordClassNode))
 
 =========================================================================
