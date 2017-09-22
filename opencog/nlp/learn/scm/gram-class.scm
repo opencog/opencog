@@ -418,7 +418,9 @@
 	(define sim (pcos 'right-cosine WORD-A WORD-B))
 
 	(define cut 0.65)
-	(format #t "Cosine=~A for \"~A\" -- \"~A\"\n" sim (cog-name WORD-A) (cog-name WORD-B))
+	(format #t "Cosine=~A for ~A \"~A\" -- \"~A\"\n" sim
+		(if (eq? 'WordNode (cog-type WORD-A)) "word" "class")
+		(cog-name WORD-A) (cog-name WORD-B))
 	(if (< cut sim) (display "------------------------------ Bingo!\n"))
 
 	; True, if sim is more than 0.9
