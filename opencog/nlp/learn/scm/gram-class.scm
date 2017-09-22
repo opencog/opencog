@@ -519,7 +519,7 @@
 ; (These last two are passed blindly to the merge function).
 ;
 (define (assign-expand-class LLOBJ FRAC WRD-OR-CLS WRD-LST)
-	(if (null? WRD-LST) WORD
+	(if (null? WRD-LST) WRD-OR-CLS
 		(let ((wrd (car WRD-LST))
 				(rest (cdr WRD-LST)))
 			; If the word can be merged into a class, then do it,
