@@ -391,6 +391,7 @@
 
     (literal
       (LITERAL) : (format #f "(cons 'word \"~a\")" $1)
+      (STRING) : (format #f "(cons 'word \"~a\")" $1)
     )
 
     (phrase
