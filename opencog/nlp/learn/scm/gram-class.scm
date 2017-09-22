@@ -622,7 +622,7 @@
 				; Can we assign the word to a class?
 				(cls (assign-word-to-class LLOBJ FRAC wrd CLS-LST)))
 
-			; If the word was merged into a class, then recurse
+			; If the word was merged into an existing class, then recurse
 			(if (eq? 'WordClassNode (cog-type cls))
 				(assign-to-classes LLOBJ FRAC rest CLS-LST)
 
