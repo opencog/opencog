@@ -157,7 +157,7 @@
 ;
 ; Connected disjunct merging
 ; --------------------------
-; Property g) above seems wrong: word-classes should appeary fully
+; Property g) above seems wrong: word-classes should appear fully
 ; connected in the graph, symmetrically.  This suggests a disjunct
 ; merger style that maintains connectivity.
 ;
@@ -170,7 +170,7 @@
 ; using the grammatical class in the connector, and the individual
 ; sections are discarded. (If there are multiple grammatical classes
 ; that might be appropriate, then a cosine similarity could be used
-; to pick between them.
+; to pick between them.)
 ;
 ; This has the nice property:
 ; h) The total number of sections is decreasing.
@@ -374,36 +374,6 @@
 	)
 	wrd-class
 )
-
-; ---------------------------------------------------------------
-; Compare two ConnectorSeq links, to see if they are the same,
-; differing in only one location.  If this is the case, return
-; the index offset to the location that is different. The index
-; is zero-based. If they are not matchable, return #f.
-
-(define (connector-seq-compare SEQA SEQB)
-	; Get the index of the difference. Return #f if there are two
-	; or more differences. If both are equal, it returns the length.
-	; Could not figure out how to implement this without using set!
-	(define (get-idx)
-		(define mismatch-idx #f)
-		(define cnt 0)
-		(pair-fold
-			(lambda (subseq-a subseq-b idx)
-				; (format #t "duude ~A and ~A and ifx=~A\n" subseq-a subseq-b idx)
-				(if (not (equal? (car subseq-a) (car subseq-b)))
-					(begin (set! mismatch-idx idx)
-						(set! cnt (+ cnt 1))))
-				(+ idx 1))
-			0 (cog-outgoing-set SEQA) (cog-outgoing-set SEQB))
-		(if (eq? 1 cnt) mismatch-idx #f))
-
-	; Return false if they are equal, else return the index
-	(if (or (eq? SEQA SEQB) (not (eq? (cog-arity SEQA) (cog-arity SEQB))))
-		 #f
-		 (get-idx))
-)
-
 
 ; ---------------------------------------------------------------
 ; stub wrapper for word-similarity.
@@ -613,9 +583,8 @@
 ; WordClassNodes) and a merge is possible, then that WordNode will
 ; be merged to create a class.
 (define (assign-to-classes LLOBJ FRAC WRD-LST CLS-LST)
-	(format #t "---------  Words remaining=~A Classes=~A tot=~A ------------\n"
-		(length WRD-LST) (length CLS-LST)
-		(+ (length WRD-LST) (length CLS-LST)))
+	(format #t "---------  Words remaining=~A Classes=~A ------------\n"
+		(length WRD-LST) (length CLS-LST))
 
 	; If the WRD-LST is empty, we are done; otherwise compute.
 	(if (null? WRD-LST) CLS-LST
@@ -666,6 +635,9 @@
 ; observational counts will be similar.  NOTE: this idea has NOT
 ; been empirically tested, yet.
 ;
+; TODO - the word-class list should probably also be ranked, so
+; we preferentially add to the largest existing classes.
+;
 (define (loop-over-words LLOBJ FRAC WRD-LST CLS-LST)
 	(define ranked-words (rank-by-observations WRD-LST))
 	(define (chunk-blocks wlist size clist)
@@ -688,6 +660,56 @@
 	(chunk-blocks WRD-LST 20 CLS-LST)
 )
 
+; ---------------------------------------------------------------
+; ---------------------------------------------------------------
+; ---------------------------------------------------------------
+; ---------------------------------------------------------------
+; Compare two ConnectorSeq links, to see if they are the same,
+; differing in only one location.  If this is the case, return
+; the index offset to the location that is different. The index
+; is zero-based. If they are not matchable, return #f.
+
+; Compare two ConnectorSeq links, to see if they are the same,
+; differing in only one location.  If this is the case, return
+; the index offset to the location that is different. The index
+; is zero-based. If they are not matchable, return #f.
+
+; Compare two ConnectorSeq links, to see if they are the same,
+; differing in only one location.  If this is the case, return
+; the index offset to the location that is different. The index
+; is zero-based. If they are not matchable, return #f.
+
+; Compare two ConnectorSeq links, to see if they are the same,
+; differing in only one location.  If this is the case, return
+; the index offset to the location that is different. The index
+; is zero-based. If they are not matchable, return #f.
+
+(define (connector-seq-compare SEQA SEQB)
+	; Get the index of the difference. Return #f if there are two
+	; or more differences. If both are equal, it returns the length.
+	; Could not figure out how to implement this without using set!
+	(define (get-idx)
+		(define mismatch-idx #f)
+		(define cnt 0)
+		(pair-fold
+			(lambda (subseq-a subseq-b idx)
+				; (format #t "duude ~A and ~A and ifx=~A\n" subseq-a subseq-b idx)
+				(if (not (equal? (car subseq-a) (car subseq-b)))
+					(begin (set! mismatch-idx idx)
+						(set! cnt (+ cnt 1))))
+				(+ idx 1))
+			0 (cog-outgoing-set SEQA) (cog-outgoing-set SEQB))
+		(if (eq? 1 cnt) mismatch-idx #f))
+
+	; Return false if they are equal, else return the index
+	(if (or (eq? SEQA SEQB) (not (eq? (cog-arity SEQA) (cog-arity SEQB))))
+		 #f
+		 (get-idx))
+)
+
+; ---------------------------------------------------------------
+; ---------------------------------------------------------------
+; ---------------------------------------------------------------
 ; ---------------------------------------------------------------
 
 (define (do-it)

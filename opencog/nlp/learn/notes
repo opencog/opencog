@@ -13181,6 +13181,12 @@ right-cosine compute-right-cosine
 (define nou (rank-by-observations nou))
 (define nou (drop nou 20))
 (assign-to-classes psa 0.3 nou '())
+
+(load-atoms-of-type 'WordClassNode)
+(define cls (cog-get-atoms 'WordClassNode))
+
+(loop-over-words psa 0.3 nou cls)
+
 ---------------------
 
 (define gra (merge-ortho psa (Word "building") (Word "jungle") 0.0))
@@ -13232,6 +13238,10 @@ SELECT uuid FROM Atoms WHERE outgoing @> ARRAY[CAST(%lu AS BIGINT)]
 DELETE FROM Atoms WHERE uuid =  uuid is primary
 
 664 total initially and 658 finally .. meh
+
+is it idempotent?
+664 again ... 
+(assign-to-classes psa 0.3 nou '())
 
 (define (copy-sect TO FRM)
 	(for-each (lambda (sect)
