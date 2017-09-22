@@ -138,42 +138,10 @@
 ;
 ; Disjunct merging
 ; ----------------
-; Disjunct merging can be done in one of two ways.
-;
-; Strict disjunct merging
-; -----------------------
-; In strict disjunct merging, one picks a single word, and then compares
-; all connecctor sequences on that word.  If two connector sequences are
-; nearly identical, differing in only one location, then those two
-; connectors can be merged into one. When the connectors are merged, a
-; new word-class is formed to hold the two words.
-;
-; There are several properties of this merge style:
-; f) This seems like a "strict" way to merge, because it does not allow
-;    any broadening to take place.
-; g) The resulting word-class does not have any sections associated with
-;    it! It cannot because of the way it was constructed, but this seems
-;    wrong.
-;
-; Connected disjunct merging
-; --------------------------
-; Property g) above seems wrong: word-classes should appear fully
-; connected in the graph, symmetrically.  This suggests a disjunct
-; merger style that maintains connectivity.
-;
-; As above, given a single word, one scans the sections, looking
-; for sections that differ in only one location. As before, the words
-; that appear at this variable location are tossed into a set. However,
-; this time, a search is made to see if this set overlaps, or is
-; a subset of an existing grammatical class. If so, then the counts
-; on all of these sections are totalled, a new disjunct is created,
-; using the grammatical class in the connector, and the individual
-; sections are discarded. (If there are multiple grammatical classes
-; that might be appropriate, then a cosine similarity could be used
-; to pick between them.)
-;
-; This has the nice property:
-; h) The total number of sections is decreasing.
+; Disjunct merging is the second step in creating grammatical classes.
+; The idea here is to replace individual connectors that specifiy words
+; with connectors that specify word-classes. This step is examined in
+; greater detail in `cset-class.scm`.
 ;
 ; ---------------------------------------------------------------------
 
@@ -598,7 +566,7 @@
 				(assign-to-classes LLOBJ FRAC rest CLS-LST)
 
 				; If the word was not assigned to an existing class,
-				; see if it can be merged with any of the other words 
+				; see if it can be merged with any of the other words
 				; in the word-list.
 				(let* ((new-cls (assign-expand-class LLOBJ FRAC wrd rest))
 						(new-lst

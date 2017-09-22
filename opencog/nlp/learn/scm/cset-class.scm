@@ -1,37 +1,43 @@
 ;
 ; cset-class.scm
 ;
-; Merge connector sets.
+; Merge connectors into classes of connectors -  merge connector sets.
 ;
 ; ---------------------------------------------------------------------
 ; OVERVIEW
 ; --------
-
+; The merging of words into word-classes proceeds in two parts. The
+; first part is reviewed in `gram-class.scm` and concists on comparing
+; words to see if they share similar sets of sections. If they do,
+; then the words can be judged to be similar, and merged into a word
+; class.  The second part, reviewed here, is to merge connector
+; sequences, so that connectors become word classes, instead of just
+; being individual words.
 ;
-; A grammatical class is represented as
+; Before any merging, a single section on a single word has the
+; general form
+;
+;     Section
+;         WordNode "foo"
+;         ConnectorSeq
+;             Connector
+;                WordNode "bar"
+;                LgConnDirNode "+"
+;             Connector
+;                ....
+;
+; The goal of connector-set merging (aka disjunct-merging) is to
+; replace the WordNode's in a Connector by WordClassNode's, and
+; thence merge two similar ConnectorSeq's into one.  Of course,
+; such a merger can be done only if it "makes sense", and preserves
+; the overall grammatical structure.
+;
+; Recall that a grammatical class is represented as
 ;
 ;     MemberLink
 ;         WordNode "wordy"      ; the word itself
 ;         WordClassNode "noun"  ; the grammatical class of the word.
 ;
-; Word classes have a designated grammatical behavior, using Sections,
-; behaving just like the pseudo-connectors on single words. Thus, either
-; a WordNode or a WordClassNode can appear in a Connector link, as
-; shown below.
-;
-;     Section
-;         WordClassNode "noun"
-;         ConnectorSeq
-;             Connector
-;                WordClassNode "verb" ; or possibly a WordNode
-;                LgConnDirNode "+"
-;             Connector
-;                ....
-;
-;
-; Disjunct merging
-; ----------------
-; Disjunct merging can be done in one of two ways.
 ;
 ; Strict disjunct merging
 ; -----------------------
@@ -108,10 +114,3 @@
 ; (define pca (make-pseudo-cset-api))
 ; (define psa (add-dynamic-stars pca))
 ;
-; Verify that support is correctly computed.
-; (define (bogus a b) (format #t "Its ~A and ~A\n" a b))
-; (define ptu (add-tuple-math psa bogus))
-; (define run-n-jump (ptu 'right-stars (list (Word "run") (Word "jump"))))
-; (ptu 'pair-count (car run-n-jump))
-;
-; (merge-ortho psa (Word "run") (Word "jump"))
