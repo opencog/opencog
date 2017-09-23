@@ -39,26 +39,30 @@
 ;         WordClassNode "noun"  ; the grammatical class of the word.
 ;
 ;
-; Strict disjunct merging
-; -----------------------
-; In strict disjunct merging, one picks a single word, and then compares
-; all connecctor sequences on that word.  If two connector sequences are
-; nearly identical, differing in only one location, then those two
-; connectors can be merged into one. When the connectors are merged, a
-; new word-class is formed to hold the two words.
+; Single-difference merging
+; -------------------------
+; In single-difference merging, one compares all connector sequences
+; on some given word.  If two connector sequences are nearly identical,
+; differing in only one location, then those two connectors can be
+; merged into one. When the connectors are merged, a new word-class is
+; formed to hold the two words.
 ;
 ; There are several properties of this merge style:
-; f) This seems like a "strict" way to merge, because it does not allow
-;    any broadening to take place.
-; g) The resulting word-class does not have any sections associated with
+; a) The total number of sections on a word decreases as a result
+;    of the merge.  The total atom count probably decreases slightly.
+; b) This seems like a "strict" or very conservative way to merge,
+;    because it does not create any broadening of the allowed
+;    connectors on a word. That is, the grammatical structure on the
+;    word is not altered by this merge.
+; c) The resulting word-class does not have any sections associated with
 ;    it! It cannot because of the way it was constructed, but this seems
-;    wrong.
+;    wrong. Its a kind-of dead-end word-class.
 ;
 ; Connected disjunct merging
 ; --------------------------
-; Property g) above seems wrong: word-classes should appear fully
-; connected in the graph, symmetrically.  This suggests a disjunct
-; merger style that maintains connectivity.
+; Property c) above seems wrong: word-classes should appear fully
+; connected in the graph, symmetrically.  This suggests a merger
+; policy that can maintain graph connectivity.
 ;
 ; As above, given a single word, one scans the sections, looking
 ; for sections that differ in only one location. As before, the words
@@ -71,8 +75,11 @@
 ; that might be appropriate, then a cosine similarity could be used
 ; to pick between them.)
 ;
-; This has the nice property:
-; h) The total number of sections is decreasing.
+; This merge style overcomes the objection in c), in that the merged
+; class is already participating in many sections. Note, though, it
+; is no longer conservative: the existing grammatical class will 
+; typically be larger than the merged class, and so will signficantly
+; broaden the grammatical reach.
 ;
 ; ---------------------------------------------------------------------
 
@@ -100,6 +107,8 @@
 						(set! cnt (+ cnt 1))))
 				(+ idx 1))
 			0 (cog-outgoing-set SEQA) (cog-outgoing-set SEQB))
+
+		; Only one difference allowed.
 		(if (eq? 1 cnt) mismatch-idx #f))
 
 	; Return false if they are equal, else return the index
@@ -108,6 +117,9 @@
 		 (get-idx))
 )
 
+; ---------------------------------------------------------------
+; Fetch from storage (load into RAM) all connector sequences that
+; use words that are in some word-
 ; ---------------------------------------------------------------
 ; Example usage
 ;
