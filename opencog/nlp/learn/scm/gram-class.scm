@@ -366,44 +366,6 @@
 )
 
 ; ---------------------------------------------------------------
-;
-; Given just one word, assemble a list of all of the words that
-; appear in the disjuncts on that word.  Assumes that the disjuncts
-; for the word are already in the atomspace.
-(define (get-dj-words WORD)
-
-	; Given a Section i.e. (word, connector-set), walk over all
-	; the connectors in the connector set, and add the word appearing
-	; in the connector to the word-list. But add it only if it is not
-	; already in the list.
-	(define (add-to-list SEC WORD-LIST)
-		(fold
-			(lambda (CNCTR LST)
-				(define WRD (cog-outgoing-atom CNCTR 0))
-				(if ; (and
-					; Is it actually a word (and not a word-class?)
-					(eq? 'WordNode (cog-type WRD))
-					; Is it not yet in the list?
-					; Its not efficient to check here; this becomes very
-					; slow for long lists - it's O(N^2)
-					; (not (find (lambda (wrd) (equal? WRD wrd)) LST)))
-					(cons WRD LST) LST))
-			WORD-LIST
-			; second atom of Section is a ConnectorSeq
-			(cog-outgoing-set (cog-outgoing-atom SEC 1))))
-
-	; Walk over all the Sections on the word.
-	(delete-dup-atoms
-		(fold add-to-list '() (cog-incoming-by-type WORD 'Section)))
-)
-
-; ---------------------------------------------------------------
-; Predicate - is the word a member of the grammatical class, already?
-(define (in-gram-class? WORD GCLS)
-	(define memlnk (cog-link 'MemberLink WORD GCLS))
-	(if (null? memlnk) #f #t))
-
-; ---------------------------------------------------------------
 ; Given a single word and a list of words or grammatical classes,
 ; attempt to assign the the word to one of the classes (or merge
 ; the word with one of the other words).  Return the class
