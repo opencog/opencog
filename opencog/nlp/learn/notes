@@ -13263,7 +13263,9 @@ is it idempotent?
 (define seq (cog-outgoing-atom (car iset) 1))
 
 (define psup (add-support-compute psa))
-(psup 'left-
+(define pss (add-support-api psa))
+(fetch-incoming-set seq)
+(pss 'left-count seq)
 
 
 =========================================================================

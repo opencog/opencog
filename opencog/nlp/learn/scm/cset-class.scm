@@ -58,8 +58,8 @@
 ;    it! It cannot because of the way it was constructed, but this seems
 ;    wrong. Its a kind-of dead-end word-class.
 ;
-; Connected disjunct merging
-; --------------------------
+; Connected merging
+; -----------------
 ; Property c) above seems wrong: word-classes should appear fully
 ; connected in the graph, symmetrically.  This suggests a merger
 ; policy that can maintain graph connectivity.
@@ -80,6 +80,23 @@
 ; is no longer conservative: the existing grammatical class will 
 ; typically be larger than the merged class, and so will signficantly
 ; broaden the grammatical reach.
+;
+; Generous merging
+; ----------------
+; Another possibility is a generaous merge, where, whenever a word
+; appears in a ConnectorSeq, and that word is also in a WordClass,
+; then the word is immediately replaced by the WordClass it is in.
+; This has the properties:
+;
+; d) The grammatical usage of that particular connector sequence
+;    is immediately broadened to the new WordClass.
+; e) The proceedure is questionable if the word belongs to more
+;    than one WordClass.
+;
+; Property e) is what contrasts this to the connected-merge strategy
+; above: in the connected-merge, a search is made for at least two
+; words belonging to the same class, to confirm (disambiguate) the
+; class membership.
 ;
 ; ---------------------------------------------------------------------
 
@@ -128,6 +145,13 @@
 
 	(define (fetch-connectors WORD)
 		(fetch-incoming-by-type WORD 'Connector)
+		; The incoming set of a Connector is a ConnectorSeq
+		(for-each
+			(lambda (CNCTR)
+				(fetch-incoming-set CNCTR)
+				
+			)
+			(cog-incoming-by-type WORD 'Connector))
 	)
 
 	; Loop over all WordClassNodes
