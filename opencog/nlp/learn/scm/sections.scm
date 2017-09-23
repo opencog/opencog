@@ -39,6 +39,58 @@
 
 ; ---------------------------------------------------------------
 ;
+(define-public (get-germ-connector-seqs WORD)
+"
+  get-germ-connector-seqs WORD - return all connector seqeucences
+  that appear in sections on the WORD. There is one connector sequence
+  per section.
+
+  Given a word, the \"germ\", assemble a list of all of the connector
+  sequences that appear in sections for that germ.
+
+  Assumes that the sections for the word are already in the atomspace.
+  These can be loaded by saying (fetch-incoming-by-type WORD 'Section)
+"
+	; Walk over all the Sections on the word.
+	; The ConnectorSeq is in position 1 in the section.
+	(map (lambda (SEC) (cog-outgoing-atom SEC 1))
+		(cog-incoming-by-type WORD 'Section))
+)
+
+; ---------------------------------------------------------------
+;
+(define-public (get-germ-connectors WORD)
+"
+  get-germ-connectors WORD - return all connectors that appear in
+  sections on the WORD.
+
+  Given a word, the \"germ\", assemble a list of all of the connectors
+  that appear in the connector sets (disjuncts) in sections for that
+  germ.
+
+  Assumes that the sections for the word are already in the atomspace.
+  These can be loaded by saying (fetch-incoming-by-type WORD 'Section)
+"
+	; Given a Section i.e. (word, connector-set), walk over all
+	; the connectors in the connector set, and add the connector
+	; to the word-list.
+	(define (add-to-list SEQ WORD-LIST)
+		(fold
+			(lambda (CNCTR LST)
+				; Hmm. Is this test for the type really needed?
+				(if (eq? 'Connector (cog-type CNCTR))
+					(cons CNCTR LST) LST))
+			WORD-LIST
+			; second atom of Section is a ConnectorSeq
+			(cog-outgoing-set SEQ)))
+
+	; Walk over all the Sections on the word.
+	(delete-dup-atoms
+		(fold add-to-list '() (get-germ-connector-seqs WORD)))
+)
+
+; ---------------------------------------------------------------
+;
 (define-public (get-germ-endpoints WORD)
 "
   get-germ-endpoints WORD - return all words that appear in disjuncts.
@@ -48,32 +100,13 @@
   germ.
 
   Assumes that the sections for the word are already in the atomspace.
-  These can be loaded by saying
-  (fetch-incoming-by-type WORD 'Section)
+  These can be loaded by saying (fetch-incoming-by-type WORD 'Section)
 "
-	; Given a Section i.e. (word, connector-set), walk over all
-	; the connectors in the connector set, and add the word appearing
-	; in the connector to the word-list. But add it only if it is not
-	; already in the list.
-	(define (add-to-list SEC WORD-LIST)
-		(fold
-			(lambda (CNCTR LST)
-				(define WRD (cog-outgoing-atom CNCTR 0))
-				(if ; (and
-					; Is it actually a word (and not a word-class?)
-					(eq? 'WordNode (cog-type WRD))
-					; Is it not yet in the list?
-					; Its not efficient to check here; this becomes very
-					; slow for long lists - it's O(N^2)
-					; (not (find (lambda (wrd) (equal? WRD wrd)) LST)))
-					(cons WRD LST) LST))
-			WORD-LIST
-			; second atom of Section is a ConnectorSeq
-			(cog-outgoing-set (cog-outgoing-atom SEC 1))))
-
-	; Walk over all the Sections on the word.
+	; Walk over all the connectors, extracting the words.
 	(delete-dup-atoms
-		(fold add-to-list '() (cog-incoming-by-type WORD 'Section)))
+		(map
+			(lambda (CNCTR) (cog-outgoing-atom CNCTR 0))
+			(get-germ-connectors WORD)))
 )
 
 ; ---------------------------------------------------------------
