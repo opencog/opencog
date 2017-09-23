@@ -142,11 +142,11 @@
 
 ; ---------------------------------------------------------------
 ; Fetch from storage (load into RAM) all words that appear as members
-; of one of the provided word-classes.
+; of one of the provided word-classes. Return the list of words.
 ;
 ; CLS-LST should be a list of word-classes.
 ;
-(define (fetch-words CLS-LST)
+(define (fetch-class-words CLS-LST)
 
 	; Return a list without duplicates.
 	(delete-dup-atoms
@@ -154,10 +154,6 @@
 		(fold
 			(lambda (WCLS WLST)  ; WCLS is a WordClassNode
 				(fetch-incoming-by-type WCLS 'MemberLink)
-(format #t "duudue cls=~A and lst=~A\n"
-WCLS  (map (lambda (MEMB) (cog-outgoing-atom MEMB 0))
-   (cog-incoming-by-type WCLS 'MemberLink)) )
-
 				(append!
 					(map
 						; MEMB is a MemberLink; the zeroth atom in
@@ -191,15 +187,9 @@ WCLS  (map (lambda (MEMB) (cog-outgoing-atom MEMB 0))
 					(cog-incoming-by-type CNCTR 'ConnectorSeq)))
 			(cog-incoming-by-type WORD 'Connector)))
 
+	(define wrd-lst (fetch-class-words CLS-LST))
 	; Loop over all WordClassNodes
-	(for-each
-		(lambda (WCLS)  ; WCLS is a WordClassNode
-			(for-each
-				(lambda (MEMB)  ; MEMB is a MemberLink
-					; The zeroth atom in the MemberLink is the WordNode.
-					(fetch-connectors (cog-outgoing-atom MEMB 0)))
-				(cog-incoming-by-type WCLS 'MemberLink)))
-		CLS-LST)
+	(for-each fetch-connectors wrd-lst)
 )
 
 ; ---------------------------------------------------------------
