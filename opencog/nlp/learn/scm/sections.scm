@@ -6,7 +6,7 @@
 ; ---------------------------------------------------------------------
 ; OVERVIEW
 ; --------
-; Recall what a section looks like>
+; Recall what a section looks like:
 ;
 ;     Section
 ;         WordNode "foo" ; or possibly a WordClassNode
@@ -17,6 +17,21 @@
 ;             Connector
 ;                ....
 ;
+; It should be thought of as being shaped like a spider, with a body
+; at the center, and a bunch of legs. In the above, the body is the
+; word "foo", and "bar" is one of the legs.  Or rather, "bar" is at
+; the end of one of the legs, so that foo-bar can be though of as an
+; edge connecting these two words. Its a labelled edge - the
+; LgConnDirNode is the label.  Formally, the body iscalled the "germ".
+;
+; The utilities here include:
+; get-dj-words - given the germ, return a list of all endpoints (legs)
+;       on all sections having that germ.
+;
+;
+; XXX TODO - most of these utilities should be made generic, someday.
+; They implement generic concepts pertaining to sections, and should
+; not really be tied just to the NLP bits.
 ; ---------------------------------------------------------------------
 
 (use-modules (srfi srfi-1))
@@ -24,11 +39,6 @@
 
 ; ---------------------------------------------------------------
 ;
-; XXX TODO - the below could probably be made generic, someday:
-; given a germ, this gets all the sections on that germ, and then
-; gets everything that the sections can connect to.  This is a
-; generic concept ... just that the data strcutures we are using
-; are not yet sufficiently generic to do this easily.
 (define (get-dj-words WORD)
 "
   get-dj-words WORD - return all words that appear in disjuncts.
@@ -63,9 +73,14 @@
 )
 
 ; ---------------------------------------------------------------
-; Predicate - is the word a member of the grammatical class, already?
-(define (in-gram-class? WORD GCLS)
+
+(define-public (in-gram-class? WORD GCLS)
+"
+  in-gram-class? WORD GRAM-CLASS - is the WORD a member of the
+  grammatical class CRAM-CLASS? Returns ither #t or #f.
+"
 	(define memlnk (cog-link 'MemberLink WORD GCLS))
-	(if (null? memlnk) #f #t))
+	(if (null? memlnk) #f #t)
+)
 
 ; ---------------------------------------------------------------
