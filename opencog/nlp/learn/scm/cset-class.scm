@@ -118,11 +118,34 @@
 )
 
 ; ---------------------------------------------------------------
-; Fetch from storage (load into RAM) all connector sequences that
-; use words that are in some word-
+; Fetch from storage (load into RAM) all connector sequences and
+; sections that are potentially mergable; i.e. that use words from
+; one of the provided word-classes.
+;
+; CLS-LST should be a list of word-classes.
+;
+(define (fetch-mergable-sections CLS-LST)
+
+	(define (fetch-connectors WORD)
+		(fetch-incoming-by-type WORD 'Connector)
+	)
+
+	; Loop over all WordClassNodes
+	(for-each
+		(lambda (WCLS)  ; WCLS is a WordClassNode
+			(for-each
+				(lambda (MEMB)  ; MEMB is a MemberLink
+					; The zeroth atom in the MemberLink is the WordNode.
+					(fetch-connectors (cog-outgoing-atom MEMB 0)))
+				(cog-incoming-by-type WCLS 'MemberLink)))
+		CLS-LST)
+)
+
 ; ---------------------------------------------------------------
 ; Example usage
 ;
 ; (define pca (make-pseudo-cset-api))
 ; (define psa (add-dynamic-stars pca))
 ;
+; (define cls-lst (cog-get-atoms 'WordClassNode))
+; (fetch-mergable-sections cls-lst)
