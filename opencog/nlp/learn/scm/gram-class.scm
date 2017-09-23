@@ -393,17 +393,8 @@
 			(cog-outgoing-set (cog-outgoing-atom SEC 1))))
 
 	; Walk over all the Sections on the word.
-	(define all-words
+	(delete-dup-atoms
 		(fold add-to-list '() (cog-incoming-by-type WORD 'Section)))
-
-	; It is faster, more cpu-efficient to sort first, and then filter.
-	(define sorted-words (sort! all-words cog-atom-less?))
-	(if (null? sorted-words) '()
-		(fold
-			(lambda (WRD LST)
-				(if (equal? WRD (car LST)) LST (cons WRD LST)))
-			(list (car sorted-words))
-			(cdr sorted-words)))
 )
 
 ; ---------------------------------------------------------------
