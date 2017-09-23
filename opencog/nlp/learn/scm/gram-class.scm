@@ -323,8 +323,8 @@
 		(begin
 
 			; Put the two words into the new word-class.
-			(MemberLink WA wrd-class)
-			(MemberLink WB wrd-class)
+			(store-atom (MemberLink WA wrd-class))
+			(store-atom (MemberLink WB wrd-class))
 
 			(orthogonalize wrd-class WA)
 			(orthogonalize wrd-class WB))
@@ -335,7 +335,7 @@
 		; checking to verify this.
 		(begin
 			; Add WB to the mrg-class (which is WA already)
-			(MemberLink WB wrd-class)
+			(store-atom (MemberLink WB wrd-class))
 
 			; Redefine WB to be orthogonal to the word-class.
 			(orthogonalize wrd-class WB))
