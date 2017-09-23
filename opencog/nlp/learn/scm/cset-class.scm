@@ -77,7 +77,7 @@
 ;
 ; This merge style overcomes the objection in c), in that the merged
 ; class is already participating in many sections. Note, though, it
-; is no longer conservative: the existing grammatical class will 
+; is no longer conservative: the existing grammatical class will
 ; typically be larger than the merged class, and so will signficantly
 ; broaden the grammatical reach.
 ;
@@ -92,6 +92,12 @@
 ;    is immediately broadened to the new WordClass.
 ; e) The proceedure is questionable if the word belongs to more
 ;    than one WordClass.
+; f) This algorithm is O(N) in the number N of sections, as opposed
+;    to O(N^2) or worse for the others.  That is, one need only loop
+;    once over all the sections, and replace words by word-classes.
+;    There is no need to compare sections pair-wise. (with the de
+;    facto property that the vast majority of such compares will
+;    be rejected.)
 ;
 ; Property e) is what contrasts this to the connected-merge strategy
 ; above: in the connected-merge, a search is made for at least two
@@ -135,6 +141,35 @@
 )
 
 ; ---------------------------------------------------------------
+; Fetch from storage (load into RAM) all words that appear as members
+; of one of the provided word-classes.
+;
+; CLS-LST should be a list of word-classes.
+;
+(define (fetch-words CLS-LST)
+
+	; Return a list without duplicates.
+	(delete-dup-atoms
+		; Loop over all WordClassNodes
+		(fold
+			(lambda (WCLS WLST)  ; WCLS is a WordClassNode
+				(fetch-incoming-by-type WCLS 'MemberLink)
+(format #t "duudue cls=~A and lst=~A\n"
+WCLS  (map (lambda (MEMB) (cog-outgoing-atom MEMB 0))
+   (cog-incoming-by-type WCLS 'MemberLink)) )
+
+				(append!
+					(map
+						; MEMB is a MemberLink; the zeroth atom in
+						; the MemberLink is the WordNode.
+						(lambda (MEMB) (cog-outgoing-atom MEMB 0))
+						(cog-incoming-by-type WCLS 'MemberLink))
+					WLST))
+			'()
+			CLS-LST))
+)
+
+; ---------------------------------------------------------------
 ; Fetch from storage (load into RAM) all connector sequences and
 ; sections that are potentially mergable; i.e. that use words from
 ; one of the provided word-classes.
@@ -143,16 +178,18 @@
 ;
 (define (fetch-mergable-sections CLS-LST)
 
+	(define (fetch-sections CNSEQ)
+(format #t "duuude got seq ~A" CNSEQ)
+	)
 	(define (fetch-connectors WORD)
 		(fetch-incoming-by-type WORD 'Connector)
 		; The incoming set of a Connector is a ConnectorSeq
 		(for-each
 			(lambda (CNCTR)
 				(fetch-incoming-set CNCTR)
-				
-			)
-			(cog-incoming-by-type WORD 'Connector))
-	)
+				(for-each fetch-sections
+					(cog-incoming-by-type CNCTR 'ConnectorSeq)))
+			(cog-incoming-by-type WORD 'Connector)))
 
 	; Loop over all WordClassNodes
 	(for-each

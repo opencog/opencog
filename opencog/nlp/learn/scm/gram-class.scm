@@ -597,6 +597,9 @@
 ; TODO - the word-class list should probably also be ranked, so
 ; we preferentially add to the largest existing classes.
 ;
+; XXX Different kinds of rankings should probably be explored.
+; The ranking-by-observation-count is just a simple one, for now.
+;
 (define (loop-over-words LLOBJ FRAC WRD-LST CLS-LST)
 	(define ranked-words (rank-by-observations WRD-LST))
 	(define (chunk-blocks wlist size clist)

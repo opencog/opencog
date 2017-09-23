@@ -13267,6 +13267,8 @@ is it idempotent?
 (fetch-incoming-set seq)
 (pss 'left-count seq)
 
+delete-dup-atoms
+
 
 =========================================================================
 out-of-control GC
