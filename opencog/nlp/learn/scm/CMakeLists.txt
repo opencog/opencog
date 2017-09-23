@@ -5,6 +5,7 @@ ADD_GUILE_MODULE (FILES
 	link-pipeline.scm
 	mst-parser.scm
 	pseudo-csets.scm
+	sections.scm
 	singletons.scm
 	summary.scm
 	MODULE_DESTINATION "${DATADIR}/scm/opencog/nlp/learn"

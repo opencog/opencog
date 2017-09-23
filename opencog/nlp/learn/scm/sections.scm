@@ -25,8 +25,8 @@
 ; LgConnDirNode is the label.  Formally, the body iscalled the "germ".
 ;
 ; The utilities here include:
-; get-dj-words - given the germ, return a list of all endpoints (legs)
-;       on all sections having that germ.
+; get-germ-endpoints - given the germ, return a list of all endpoints
+;      (legs) on all sections having that germ.
 ;
 ;
 ; XXX TODO - most of these utilities should be made generic, someday.
@@ -39,13 +39,17 @@
 
 ; ---------------------------------------------------------------
 ;
-(define (get-dj-words WORD)
+(define-public (get-germ-endpoints WORD)
 "
-  get-dj-words WORD - return all words that appear in disjuncts.
+  get-germ-endpoints WORD - return all words that appear in disjuncts.
 
-  Given just one word, assemble a list of all of the words that
-  appear in the connector sets (disjuncts) in sections for that word.
+  Given one word, the \"germ\", assemble a list of all of the words
+  that appear in the connector sets (disjuncts) in sections for that
+  germ.
+
   Assumes that the sections for the word are already in the atomspace.
+  These can be loaded by saying
+  (fetch-incoming-by-type WORD 'Section)
 "
 	; Given a Section i.e. (word, connector-set), walk over all
 	; the connectors in the connector set, and add the word appearing
