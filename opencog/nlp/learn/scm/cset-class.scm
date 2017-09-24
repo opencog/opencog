@@ -161,19 +161,19 @@
 
 	; Return a list without duplicates.
 	(delete-dup-atoms
-		; Loop over all WordClassNodes
-		(fold
-			(lambda (WCLS WLST)  ; WCLS is a WordClassNode
-				(fetch-incoming-by-type WCLS 'MemberLink)
-				(append!
+		(concatenate!
+			; Loop over all WordClassNodes
+			(map
+				; This lambda returns a list of words.
+				(lambda (WRDCLS)  ; WRDCLS is a WordClasNode
+					(fetch-incoming-by-type WRDCLS 'MemberLink)
+					; map converts list of MemberLinks into list of words.
 					(map
 						; MEMB is a MemberLink; the zeroth atom in
 						; the MemberLink is the WordNode.
 						(lambda (MEMB) (cog-outgoing-atom MEMB 0))
-						(cog-incoming-by-type WCLS 'MemberLink))
-					WLST))
-			'()
-			CLS-LST))
+						(cog-incoming-by-type WRDCLS 'MemberLink)))
+				CLS-LST)))
 )
 
 ; ---------------------------------------------------------------
