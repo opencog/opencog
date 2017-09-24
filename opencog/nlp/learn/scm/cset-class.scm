@@ -107,7 +107,7 @@
 ; ---------------------------------------------------------------------
 
 (use-modules (srfi srfi-1))
-(use-modules (opencog) (opencog matrix) (opencog persist))
+(use-modules (opencog) (opencog sheaf) (opencog persist))
 
 ; ---------------------------------------------------------------
 
@@ -178,29 +178,19 @@
 
 ; ---------------------------------------------------------------
 ; Fetch from storage (load into RAM) all connector sequences and
-; sections that are potentially mergable; i.e. that use words from
-; one of the provided word-classes.
+; sections that are potentially mergeable; i.e. that use words from
+; one of the provided word-classes. This returns a list of all the
+; sections that contain a connector using a word from one of the
+; word-classes.
 ;
 ; CLS-LST should be a list of word-classes.
 ;
 (define (fetch-mergable-sections CLS-LST)
 
-	(define (fetch-sections CNSEQ)
-(format #t "duuude got seq ~A" CNSEQ)
-	)
-	(define (fetch-connectors WORD)
-		(fetch-incoming-by-type WORD 'Connector)
-		; The incoming set of a Connector is a ConnectorSeq
-		(for-each
-			(lambda (CNCTR)
-				(fetch-incoming-set CNCTR)
-				(for-each fetch-sections
-					(cog-incoming-by-type CNCTR 'ConnectorSeq)))
-			(cog-incoming-by-type WORD 'Connector)))
-
-	(define wrd-lst (fetch-class-words CLS-LST))
 	; Loop over all WordClassNodes
-	(for-each fetch-connectors wrd-lst)
+	(delete-dup-atoms
+		(map fetch-endpoint-sections
+			(fetch-class-words CLS-LST)))
 )
 
 ; ---------------------------------------------------------------
