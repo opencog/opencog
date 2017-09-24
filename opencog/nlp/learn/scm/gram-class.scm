@@ -536,21 +536,17 @@
 
 ; ---------------------------------------------------------------
 ; Given the list LST of atoms, sort it, returning the same list,
-; ranked in order of the number of observations.
+; ranked in order of the observed number of sections on the word.
+; (i.e. the sum of the counts on each of the sections).
 ;
-; Note: for WordNodes, this does not work very well, as the
+; Note: an earlier version of this ranked by the number of times
+; each word was observed: viz:
+;      (> (get-count ATOM-A) (get-count ATOM-B))
+; However, for WordNodes, this does not work very well, as the
 ; observation count may be high from any-pair parsing, but
-; infrequently used in MST parsing.  Ranking by support is
-; surely better in this case.
+; infrequently used in MST parsing.
+;
 (define (rank-by-observations LST)
-
-	(sort! LST
-		; Rank so that the highest count words are first in the list.
-		(lambda (ATOM-A ATOM-B)
-			(> (get-count ATOM-A) (get-count ATOM-B))))
-)
-
-(define (rank-by-support LLOBJ LST)
 	(define pss (add-support-api LLOBJ))
 
 	; The support API won't work, if we don't have the wild-cards
@@ -562,7 +558,7 @@
 	(sort! LST
 		; Rank so that the highest support words are first in the list.
 		(lambda (ATOM-A ATOM-B)
-		(> (pss 'right-count ATOM-A) (pss 'right-count ATOM-B))))
+			(> (pss 'right-count ATOM-A) (pss 'right-count ATOM-B))))
 )
 
 ; ---------------------------------------------------------------
@@ -584,7 +580,7 @@
 ; The ranking-by-observation-count is just a simple one, for now.
 ;
 (define (loop-over-words LLOBJ FRAC WRD-LST CLS-LST)
-	(define ranked-words (rank-by-support WRD-LST))
+	(define ranked-words (rank-by-observations WRD-LST))
 	(define (chunk-blocks wlist size clist)
 		(if (null? wlist) '()
 			(let* ((wsz (length wlist))
