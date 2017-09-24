@@ -110,6 +110,17 @@
 (use-modules (opencog) (opencog matrix) (opencog persist))
 
 ; ---------------------------------------------------------------
+
+(define-public (in-gram-class? WORD GCLS)
+"
+  in-gram-class? WORD GRAM-CLASS - is the WORD a member of the
+  grammatical class CRAM-CLASS? Returns ither #t or #f.
+"
+	(define memlnk (cog-link 'MemberLink WORD GCLS))
+	(if (null? memlnk) #f #t)
+)
+
+; ---------------------------------------------------------------
 ; Compare two ConnectorSeq links, to see if they are the same,
 ; differing in only one location.  If this is the case, return
 ; the index offset to the location that is different. The index

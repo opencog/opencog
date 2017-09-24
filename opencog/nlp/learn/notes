@@ -13269,6 +13269,9 @@ is it idempotent?
 
 delete-dup-atoms
 
+Oof -- need to fetch secions, need to fetch Connector too
+done.
+
 
 =========================================================================
 out-of-control GC
