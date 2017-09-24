@@ -535,9 +535,12 @@
 )
 
 ; ---------------------------------------------------------------
-; Given the list LST of atoms, sort it, returning the same list,
-; ranked in order of the observed number of sections on the word.
-; (i.e. the sum of the counts on each of the sections).
+; Given the list LST of atoms, trim it, discarding atoms with
+; low observation couns, and then sort it, returning the sorted
+; list, ranked in order of the observed number of sections on the
+; word. (i.e. the sum of the counts on each of the sections).
+;
+; Words with fewer than MIN-CNT observations on them are discarded.
 ;
 ; Note: an earlier version of this ranked by the number of times
 ; each word was observed: viz:
@@ -546,8 +549,11 @@
 ; observation count may be high from any-pair parsing, but
 ; infrequently used in MST parsing.
 ;
-(define (rank-by-observations LST)
+(define (trim-and-rank LLOBJ LST MIN-CNT)
 	(define pss (add-support-api LLOBJ))
+
+	; nobs == number of observations
+	(define (nobs WRD) (pss 'right-count WRD))
 
 	; The support API won't work, if we don't have the wild-cards
 	; in the atomspace before we sort. The wild-cards store the
@@ -555,10 +561,13 @@
 	(for-each
 		(lambda (WRD) (fetch-atom (LLOBJ 'right-wildcard WRD)))
 		LST)
-	(sort! LST
+
+	(sort!
+		; Before sorting, trim the list, discarding words with
+		; low counts.
+		(filter (lambda (WRD) (<= MIN-CNT (nobs WRD))) LST)
 		; Rank so that the highest support words are first in the list.
-		(lambda (ATOM-A ATOM-B)
-			(> (pss 'right-count ATOM-A) (pss 'right-count ATOM-B))))
+		(lambda (ATOM-A ATOM-B) (> (nobs ATOM-A) (nobs ATOM-B))))
 )
 
 ; ---------------------------------------------------------------
@@ -576,11 +585,18 @@
 ; TODO - the word-class list should probably also be ranked, so
 ; we preferentially add to the largest existing classes.
 ;
-; XXX Different kinds of rankings should probably be explored.
-; The ranking-by-observation-count is just a simple one, for now.
+; XXX There is a user-adjustable paramter used below, to
+; control the ranking. It should be exposed in the API or
+; something like that!
 ;
 (define (loop-over-words LLOBJ FRAC WRD-LST CLS-LST)
-	(define ranked-words (rank-by-observations WRD-LST))
+	; XXX Adjust the minimum cutoff as desired!!!
+	; This is a tunable paramter!
+	; Right now, set to 20 observations, minimum. Less
+	; than this and weird typos and stuff get in.
+	(define min-obs-cutoff 20)
+	(define ranked-words (trim-and-rank LLOBJ WRD-LST min-obs-cutoff))
+
 	(define (chunk-blocks wlist size clist)
 		(if (null? wlist) '()
 			(let* ((wsz (length wlist))
@@ -593,12 +609,17 @@
 					; perform clustering
 					(new-clist (assign-to-classes LLOBJ FRAC chunk clist)))
 				; Recurse and do the next block.
+				; XXX the block sizes are by powers of 2...
+				; perhaps they should be something else?
 				(chunk-blocks rest (* 2 size) new-clist)
 			)
 		)
 	)
 
-	(chunk-blocks ranked-words 20 CLS-LST)
+	; The initial chunk block-size.  This is a tunable parameter.
+	; Perhaps it should be a random number, altered between runs?
+	(define chunk-block-size 20)
+	(chunk-blocks ranked-words chunk-block-size CLS-LST)
 )
 
 ; ---------------------------------------------------------------
