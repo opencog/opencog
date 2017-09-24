@@ -581,7 +581,7 @@
 		)
 	)
 
-	(chunk-blocks WRD-LST 20 CLS-LST)
+	(chunk-blocks ranked-words 20 CLS-LST)
 )
 
 ; ---------------------------------------------------------------
