@@ -19,8 +19,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef OPENPSI_H
-#define OPENPSI_H
+#ifndef _OPENCOG_OPENPSI_SCM_H
+#define _OPENCOG_OPENPSI_SCM_H
 
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/truthvalue/TruthValue.h>
@@ -64,4 +64,4 @@ extern "C" {
 void opencog_openpsi_init(void);
 };
 
-#endif  // OPENPSI_H
+#endif  // _OPENCOG_OPENPSI_SCM_H
