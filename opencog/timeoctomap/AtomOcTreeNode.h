@@ -152,6 +152,8 @@ public:
         return s;
     }
 
+    
+
 protected:
     T dat;
 };

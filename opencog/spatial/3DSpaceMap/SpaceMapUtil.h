@@ -5,11 +5,12 @@
 #include <set>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atoms/base/Handle.h>
-#include "OpencogOcTree.h"
+#include <opencog/timeoctomap/AtomOcTree.h>
 #include "Block3DMapUtil.h"
 #include "EntityRecorder.h"
 
 using namespace std;
+using namespace octomap;
 
 namespace opencog
 {
@@ -53,8 +54,8 @@ namespace opencog
          * Check if given position in given spaceMap is standable
          */
 
-        bool checkStandable(AtomSpace& atomSpace, const OpencogOcTree& spaceMap, const BlockVector& pos);
-        bool checkStandableWithProb(AtomSpace& atomSpace, const OpencogOcTree& spaceMap, const BlockVector& pos, float logOddsOccupancy);
+        bool checkStandable(AtomSpace& atomSpace, const AtomOcTree<Handle>& spaceMap, const BlockVector& pos);
+        bool checkStandableWithProb(AtomSpace& atomSpace, const AtomOcTree<Handle>& spaceMap, const BlockVector& pos, float logOddsOccupancy);
 
 	/**
 	 * Find a free point near a given position, at a given distance
@@ -68,7 +69,7 @@ namespace opencog
 	 */
 
 	BlockVector getNearFreePointAtDistance(AtomSpace& atomSpace,
-                                               const OpencogOcTree& spaceMap,
+                                               const AtomOcTree<Handle>& spaceMap,
                                                const BlockVector& position,
                                                int distance,
                                                const BlockVector& startDirection,
@@ -85,14 +86,14 @@ namespace opencog
          *       DOUBLE_MAX may make user confused..
 	 */
 
-	double distanceBetween(const OpencogOcTree& spaceMap,
+	double distanceBetween(const AtomOcTree<Handle>& spaceMap,
                                const EntityRecorder& entityRecorder,
                                const Handle& objectA,
                                const Handle& objectB);
-	double distanceBetween(const OpencogOcTree& spaceMap,
+	double distanceBetween(const AtomOcTree<Handle>& spaceMap,
                                const BlockVector& posA,
                                const BlockVector& posB);
-	double distanceBetween(const OpencogOcTree& spaceMap,
+	double distanceBetween(const AtomOcTree<Handle>& spaceMap,
                                const EntityRecorder& entityRecorder,
                                const Handle& objectA,
                                const BlockVector& posB);

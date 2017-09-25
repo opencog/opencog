@@ -69,12 +69,12 @@ namespace opencog
         }
 
 
-        bool checkStandable(AtomSpace& atomSpace, const OpencogOcTree& spaceMap, const BlockVector& pos)
+        bool checkStandable(AtomSpace& atomSpace, const AtomOcTree<Handle>& spaceMap, const BlockVector& pos)
         {
             return checkStandableWithProb(atomSpace, spaceMap, pos, spaceMap.getOccupancyThresLog());
         }
 
-        bool checkStandableWithProb(AtomSpace& atomSpace, const OpencogOcTree& spaceMap, const BlockVector& pos, float logOddsOccupancy)
+        bool checkStandableWithProb(AtomSpace& atomSpace, const AtomOcTree<Handle>& spaceMap, const BlockVector& pos, float logOddsOccupancy)
         {
             if (spaceMap.checkIsOutOfRange(pos)) {
                 logger().error("checkstandable: You want to check a pos which outside the limit of the map: at x = %f, y = %f, z= %f ! /n",
@@ -124,7 +124,7 @@ namespace opencog
 
 
         BlockVector getNearFreePointAtDistance(AtomSpace& atomSpace,
-                                               const OpencogOcTree& spaceMap,
+                                               const AtomOcTree<Handle>& spaceMap,
                                                const BlockVector& position,
                                                int distance,
                                                const BlockVector& startDirection,
@@ -182,7 +182,7 @@ namespace opencog
             return BlockVector::ZERO;
         }
 
-        double distanceBetween(const OpencogOcTree& spaceMap,
+        double distanceBetween(const AtomOcTree<Handle>& spaceMap,
                                const EntityRecorder& entityRecorder,
                                const Handle& objectA,
                                const Handle& objectB)
@@ -209,14 +209,14 @@ namespace opencog
             }
         }
 
-        double distanceBetween(const OpencogOcTree& spaceMap,
+        double distanceBetween(const AtomOcTree<Handle>& spaceMap,
                                const BlockVector& posA,
                                const BlockVector& posB)
         {
             return (posA - posB);
         }
 
-        double distanceBetween(const OpencogOcTree& spaceMap,
+        double distanceBetween(const AtomOcTree<Handle>& spaceMap,
                                const EntityRecorder& entityRecorder,
                                const Handle& objectA,
                                const BlockVector& posB)

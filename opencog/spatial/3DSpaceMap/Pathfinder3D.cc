@@ -28,11 +28,16 @@
 #include <algorithm>
 #include "SpaceMapUtil.h"
 #include "Pathfinder3D.h"
+#include <opencog/timeoctomap/AtomOcTree.h>
+
 using namespace opencog;
 using namespace opencog::spatial;
 
-bool Pathfinder3D::AStar3DPathFinder(AtomSpace* atomSpace, OpencogOcTree *mapManager,  const BlockVector& begin, const BlockVector& target, vector<BlockVector>& path,
-                                     BlockVector& nearestPos, BlockVector& bestPos, bool getNearestPos, bool getBestPos, bool tryOptimal)
+bool Pathfinder3D::AStar3DPathFinder(AtomSpace* atomSpace, octomap::AtomOcTree<Handle> *mapManager,
+                                     const BlockVector& begin, const BlockVector& target,
+                                     vector<BlockVector>& path, BlockVector& nearestPos, 
+                                     BlockVector& bestPos, bool getNearestPos,
+                                     bool getBestPos, bool tryOptimal)
 {
     BlockVector end = target;
     map<BlockVector,double> costMap;
@@ -45,7 +50,8 @@ bool Pathfinder3D::AStar3DPathFinder(AtomSpace* atomSpace, OpencogOcTree *mapMan
     bool nostandable = false;
 
     // check if the begin and target pos standable first
-    if ((! checkStandable(*atomSpace, *mapManager, begin)) || (! checkStandable(*atomSpace, *mapManager, target)))
+    if ((! checkStandable(*atomSpace, *mapManager, begin)) || 
+            (! checkStandable(*atomSpace, *mapManager, target)))
     {
         nostandable = true;
         if ((! getNearestPos) && (! getBestPos))
@@ -182,8 +188,11 @@ bool Pathfinder3D::AStar3DPathFinder(AtomSpace* atomSpace, OpencogOcTree *mapMan
 }
 
 
-double Pathfinder3D::calculateCostByDistance(const BlockVector& begin, const BlockVector& target,  const BlockVector& pos,
-                                             float& nearestDis,BlockVector& nearestPos, float& bestHeuristic, BlockVector& bestPos)
+double Pathfinder3D::calculateCostByDistance(const BlockVector& begin, 
+        const BlockVector& target,
+        const BlockVector& pos,
+        float& nearestDis,BlockVector& nearestPos,
+        float& bestHeuristic, BlockVector& bestPos)
 {
     float dis = target - pos;
     if (dis < nearestDis)
@@ -204,7 +213,9 @@ double Pathfinder3D::calculateCostByDistance(const BlockVector& begin, const Blo
 
 
 // before call this funciton, please make sure the pos want to access is standable first
-bool Pathfinder3D::checkNeighbourAccessable(OpencogOcTree *mapManager, BlockVector& lastPos, int i, int j, int k)
+bool Pathfinder3D::checkNeighbourAccessable(octomap::AtomOcTree<Handle> *mapManager,
+        BlockVector& lastPos,
+        int i, int j, int k)
 {
     // if want to access the pos 1 unit lower than last pos
     if (k == -1)
