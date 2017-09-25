@@ -164,10 +164,13 @@
               ((equal? 'action-choices (car n))
                (set! choices (append choices (list (List (to-atomese (cdr n))))))
                '())
+              ; Generate the DefinedSchema once we have finished going through
+              ; all the choices
               ((not (null? choices))
                (let ((ac (action-choices choices)))
                     (set! choices '())
-                    (list ac)))
+                    ; Generate the atoms for the current one
+                    (append (list ac) (to-atomese (list n)))))
               ; The grounding of a variable in original words
               ((equal? 'get_wvar (car n))
                (list-ref pat-vars (cdr n)))
