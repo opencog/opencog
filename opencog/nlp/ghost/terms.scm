@@ -148,31 +148,6 @@
         (list g1)
         (list g2))))
 
-; TODO: Should be placed in the action of the rule
-(define-public (ghost-record-groundings WGRD LGRD)
-  "Record the groundings of a variable, in both original words and lemmas.
-   They will be referenced at the stage of evaluating the context of the
-   psi-rules, or executing the action of the psi-rules."
-  (cog-logger-debug ghost-logger "--- Recording groundings:\n~a\n~a" WGRD LGRD)
-  (set! var-grd-words (assoc-set! var-grd-words (gar WGRD) (gdr WGRD)))
-  (set! var-grd-lemmas (assoc-set! var-grd-lemmas (gar LGRD) (gdr LGRD)))
-  (stv 1 1))
-
-(define-public (ghost-get-lemma . WORD)
-  "Get the lemma of WORD, where WORD can be one or more WordNodes."
-  (List (map Word (map get-lemma (map cog-name WORD)))))
-
-(define (variable VAR . GRD)
-  "Occurence of a variable. The value grounded for it needs to be recorded.
-   VAR is a number, it will be included as part of the variable name.
-   GRD can either be a VariableNode or a GlobNode, which pass the actual
-   value grounded in original words at runtime."
-  (Evaluation (GroundedPredicate "scm: ghost-record-groundings")
-    (List (List (ghost-var-word VAR) (List GRD))
-          (List (ghost-var-lemma VAR)
-                (ExecutionOutput (GroundedSchema "scm: ghost-get-lemma")
-                                 (List GRD))))))
-
 (define (context-function NAME ARGS)
   "Occurrence of a function in the context of a rule.
    The DefinedPredicateNode named NAME should have already been defined."
@@ -198,27 +173,15 @@
   (ExecutionOutput (GroundedSchema "scm: ghost-pick-action")
                    (Set ACTIONS)))
 
-(define-public (ghost-get-var-words VAR)
-  "Get the grounding of VAR, in original words."
-  (define grd (assoc-ref var-grd-words VAR))
-  (if (equal? grd #f)
-      (List)
-      grd))
+(define-public (ghost-get-lemma GRD)
+  "Get the lemma of GRD, where GRD can be one or a list of WordNodes."
+  (List (map Word (map get-lemma (map cog-name
+    (if (cog-link? GRD) (cog-outgoing-set GRD) (list GRD)))))))
 
-(define (get-var-words NUM)
-  "Get the value grounded for a variable, in original words."
-  (ExecutionOutput (GroundedSchema "scm: ghost-get-var-words")
-                   (List (ghost-var-word NUM))))
-
-(define-public (ghost-get-var-lemmas VAR)
-  "Get the grounding of VAR, in lemmas."
-  (define grd (assoc-ref var-grd-lemmas VAR))
-  (if (equal? grd #f) (List) grd))
-
-(define (get-var-lemmas NUM)
-  "Get the value grounded for a variable, in lemmas."
-  (ExecutionOutput (GroundedSchema "scm: ghost-get-var-lemmas")
-                   (List (ghost-var-lemma NUM))))
+(define (get-var-lemmas VAR)
+  "Turn the value grounded for VAR into lemmas."
+  (ExecutionOutput (GroundedSchema "scm: ghost-get-lemma")
+                   (List VAR)))
 
 (define-public (ghost-get-user-variable UVAR)
   "Get the value stored for VAR."

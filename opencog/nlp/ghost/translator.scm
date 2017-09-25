@@ -85,8 +85,6 @@
 (define (process-pattern-terms TERMS)
   "Generate the atomese (i.e. the variable declaration and the pattern)
    for each of the TERMS."
-  ; Keep a record of the variables, if any, found in the pattern of a rule
-  (define pat-vars '())
   (define (process terms)
     (define vars '())
     (define conds '())
@@ -120,9 +118,6 @@
             ((equal? 'variable (car t))
              (let ((terms (process (cdr t))))
                   (update-lists terms)
-                  (set! conds (append conds
-                    (list (variable (length pat-vars)
-                                    (list-ref terms 2)))))
                   (set! pat-vars (append pat-vars (list-ref terms 2)))))
             ((equal? 'uvar_exist (car t))
              (set! conds (append conds (list (uvar-exist? (cdr t))))))
@@ -132,9 +127,12 @@
              (set! conds (append conds
                (list (context-function (cadr t)
                  (map (lambda (a)
-                   (cond ((equal? 'get_wvar (car a)) (get-var-words (cdr a)))
-                         ((equal? 'get_lvar (car a)) (get-var-lemmas (cdr a)))
-                         ((equal? 'get_uvar (car a)) (get-user-variable (cdr a)))
+                   (cond ((equal? 'get_wvar (car a))
+                          (list-ref pat-vars (cdr a)))
+                         ((equal? 'get_lvar (car a))
+                          (get-var-lemmas (list-ref pat-vars (cdr a))))
+                         ((equal? 'get_uvar (car a))
+                          (get-user-variable (cdr a)))
                          (else (WordNode (cdr a)))))
                    (cddr t)))))))
             (else (feature-not-supported (car t) (cdr t)))))
@@ -162,9 +160,11 @@
       ; Iterate through the output word-by-word
       (map (lambda (n)
         (cond ; The grounding of a variable in original words
-              ((equal? 'get_wvar (car n)) (get-var-words (cdr n)))
+              ((equal? 'get_wvar (car n))
+               (list-ref pat-vars (cdr n)))
               ; The grounding of a variable in lemmas
-              ((equal? 'get_lvar (car n)) (get-var-lemmas (cdr n)))
+              ((equal? 'get_lvar (car n))
+               (get-var-lemmas (list-ref pat-vars (cdr n))))
               ; Get the value of a user variable
               ((equal? 'get_uvar (car n)) (get-user-variable (cdr n)))
               ; Assign a value to a user variable
@@ -230,6 +230,7 @@
                         (if (null? TOPIC) default-topic TOPIC)
                         NAME))
                     (process-goal GOAL))))
+        (set! pat-vars '())
         (cog-logger-debug ghost-logger "ordered-terms: ~a" ordered-terms)
         (cog-logger-debug ghost-logger "preproc-terms: ~a" preproc-terms)
         (cog-logger-debug ghost-logger "psi-rule: ~a" rule)

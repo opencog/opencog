@@ -55,9 +55,8 @@
 ; A list of shared goals for all the rules under the same topic file
 (define shared-goals '())
 
-; Keep a record of the groundings of variables that authors defined
-(define var-grd-words '())
-(define var-grd-lemmas '())
+; Keep a record of the variables, if any, found in the pattern of a rule
+(define pat-vars '())
 
 ; Keep a record of the value assigned to the user variables that authors defined
 (define uvars '())
