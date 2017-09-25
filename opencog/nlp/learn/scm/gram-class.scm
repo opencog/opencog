@@ -138,42 +138,10 @@
 ;
 ; Disjunct merging
 ; ----------------
-; Disjunct merging can be done in one of two ways.
-;
-; Strict disjunct merging
-; -----------------------
-; In strict disjunct merging, one picks a single word, and then compares
-; all connecctor sequences on that word.  If two connector sequences are
-; nearly identical, differing in only one location, then those two
-; connectors can be merged into one. When the connectors are merged, a
-; new word-class is formed to hold the two words.
-;
-; There are several properties of this merge style:
-; f) This seems like a "strict" way to merge, because it does not allow
-;    any broadening to take place.
-; g) The resulting word-class does not have any sections associated with
-;    it! It cannot because of the way it was constructed, but this seems
-;    wrong.
-;
-; Connected disjunct merging
-; --------------------------
-; Property g) above seems wrong: word-classes should appeary fully
-; connected in the graph, symmetrically.  This suggests a disjunct
-; merger style that maintains connectivity.
-;
-; As above, given a single word, one scans the sections on, looking
-; for sections that differ in only one location. As before, the words
-; that appear at this variable location are tossed into a set. However,
-; this time, a search is made to see if this set overlaps, or is
-; a subset of an existing grammatical class. If so, then the counts
-; on all of these sections are totalled, a new disjunct is created,
-; using the grammatical class in the connector, and the individual
-; sections are discarded. (If there are multiple grammatical classes
-; that might be appropriate, then a cosine similarity could be used
-; to pick between them.
-;
-; This has the nice property:
-; h) The total number of sections is decreasing.
+; Disjunct merging is the second step in creating grammatical classes.
+; The idea here is to replace individual connectors that specifiy words
+; with connectors that specify word-classes. This step is examined in
+; greater detail in `cset-class.scm`.
 ;
 ; ---------------------------------------------------------------------
 
@@ -181,128 +149,8 @@
 (use-modules (opencog) (opencog matrix) (opencog persist))
 
 ; ---------------------------------------------------------------------
-; TODO: move the below to the atomsace matrix directory, when its
-; ready. Its not ready, it needs to impleemnt extract, to unclog RAM.
-;
 
-(define-public (add-dynamic-stars LLOBJ)
-"
-  add-dynamic-stars LLOBJ - Extend LLOBJ with row and column access
-  methods (aka wildcard methods), specifically, to get all non-zero
-  elements in a given row or column.
-
-  Similar to the (add-pair-stars LLOBJ) class, except that this
-  attempts to work without having to load all pairs into RAM at the
-  same time; instead, pairs are fetched from the database dynamically,
-  on demand.  This is attempting to address the problem where not all
-  of the matrix can fit into RAM at the same time.  If all of the
-  matrix can fit, then (add-pair-stars LLOBJ) is more efficient.
-
-  This overloads the standard add-pair-stars methods, so that the
-  fetching occurs automatically and transparently to the user.
-
-  The supported methods are:
-  'left-basis - Return all items (atoms) that might be used to index
-      a row in the matrix.  This may return more items than there are
-      rows; no check is performed for empty or invalid rows. However,
-      all valid rows will appear in the set: the returned set is a
-      superset.  All of the elements of this set will be atoms of type
-      (LLOBJ 'left-type).
-
-  'right-basis - Likewise, but for columns.
-
-  'left-stars COL - Returns pairs (*, COL), same as documented in the
-  pair-stars API.
-
-  'right-stars ROW - Likewise, but returns the set (ROW, *).
-
-  'left-release COL - Remove pairs (*, COL) from the atomspace. This
-  intended to be used to minimize RAM usage when working with a large
-  database.  The atoms are NOT removed from the database; only from
-  the atospace. If the atoms are in use (have a non-empty incoming
-  set) they are not removed.
-
-  'right-release ROW - same but for pairs in ROW.
-"
-	(let ((stars-obj (add-pair-stars LLOBJ))
-			(l-basis '())
-			(r-basis '())
-			(cache-incoming '())
-			(pair-type (LLOBJ 'pair-type))
-		)
-
-		; Retreive all atoms of TYPE from the database
-		(define (get-atoms TYPE)
-			(load-atoms-of-type TYPE)
-			(cog-get-atoms  TYPE))
-
-		; Return a list of all items that might be rows.
-		(define (get-left-basis)
-			(if (null? l-basis)
-				(set! l-basis (get-atoms (LLOBJ 'left-type))))
-			l-basis)
-
-		; Return a list of all items that might be columns.
-		(define (get-right-basis)
-			(if (null? r-basis)
-				(set! r-basis (get-atoms (LLOBJ 'right-type))))
-			r-basis)
-
-		; Fetch the incoming set for ITEM, but only if we haven't
-		; already done so.
-		(define (get-incoming ITEM)
-			(if (not (member ITEM cache-incoming))
-				(begin
-					(fetch-incoming-by-type ITEM pair-type)
-					(set! cache-incoming (cons ITEM cache-incoming)))))
-
-		; Return a list matrix entries with ITEM on the right;
-		; that is, a wild-card on the left. That is, the set of
-		; entries { (*, ITEM) }.  Uses the stars-obj to filter
-		; the valid pairs, after fetching them from the database.
-		(define (get-left-stars ITEM)
-			(get-incoming ITEM)
-			(stars-obj 'left-stars ITEM))
-
-		(define (get-right-stars ITEM)
-			(get-incoming ITEM)
-			(stars-obj 'right-stars ITEM))
-
-		;-------------------------------------------
-		; Release (extract) row or column. No spcific check is made
-		; to really be sure that this is a part of the matrix; it's
-		; assumed that the pair-type is enough to acheive this.
-		(define (release-extract ITEM)
-			(for-each cog-extract (cog-incoming-by-type ITEM pair-type)))
-
-		;-------------------------------------------
-		; Explain what it is that I provide. This helps classes
-		; above understand what it is that this class does.
-		(define (provides meth)
-			(case meth
-				((left-basis)       get-left-basis)
-				((right-basis)      get-right-basis)
-				((left-stars)       get-left-stars)
-				((right-stars)      get-right-stars)
-				(else               (LLOBJ 'provides meth))))
-
-		;-------------------------------------------
-		; Methods on this class.
-		(lambda (message . args)
-			(case message
-				((left-basis)     (get-left-basis))
-				((right-basis)    (get-right-basis))
-				((left-stars)     (apply get-left-stars args))
-				((right-stars)    (apply get-right-stars args))
-				((left-release)   (apply release-extract args))
-				((right-release)  (apply release-extract args))
-				((provides)       (apply provides args))
-				(else             (apply LLOBJ (cons message args))))
-		)))
-
-; ---------------------------------------------------------------------
-
-(define (merge-ortho LLOBJ WA WB FRAC)
+(define (merge-ortho LLOBJ FRAC WA WB)
 "
   merge-ortho WA WB FRAC - merge WA and WB into a grammatical class.
   Return the merged class.
@@ -475,8 +323,8 @@
 		(begin
 
 			; Put the two words into the new word-class.
-			(MemberLink WA wrd-class)
-			(MemberLink WB wrd-class)
+			(store-atom (MemberLink WA wrd-class))
+			(store-atom (MemberLink WB wrd-class))
 
 			(orthogonalize wrd-class WA)
 			(orthogonalize wrd-class WB))
@@ -487,43 +335,13 @@
 		; checking to verify this.
 		(begin
 			; Add WB to the mrg-class (which is WA already)
-			(MemberLink WB wrd-class)
+			(store-atom (MemberLink WB wrd-class))
 
 			; Redefine WB to be orthogonal to the word-class.
 			(orthogonalize wrd-class WB))
 	)
 	wrd-class
 )
-
-; ---------------------------------------------------------------
-; Compare two ConnectorSeq links, to see if they are the same,
-; differing in only one location.  If this is the case, return
-; the index offset to the location that is different. The index
-; is zero-based. If they are not matchable, return #f.
-
-(define (connector-seq-compare SEQA SEQB)
-	; Get the index of the difference. Return #f if there are two
-	; or more differences. If both are equal, it returns the length.
-	; Could not figure out how to implement this without using set!
-	(define (get-idx)
-		(define mismatch-idx #f)
-		(define cnt 0)
-		(pair-fold
-			(lambda (subseq-a subseq-b idx)
-				; (format #t "duude ~A and ~A and ifx=~A\n" subseq-a subseq-b idx)
-				(if (not (equal? (car subseq-a) (car subseq-b)))
-					(begin (set! mismatch-idx idx)
-						(set! cnt (+ cnt 1))))
-				(+ idx 1))
-			0 (cog-outgoing-set SEQA) (cog-outgoing-set SEQB))
-		(if (eq? 1 cnt) mismatch-idx #f))
-
-	; Return false if they are equal, else return the index
-	(if (or (eq? SEQA SEQB) (not (eq? (cog-arity SEQA) (cog-arity SEQB))))
-		 #f
-		 (get-idx))
-)
-
 
 ; ---------------------------------------------------------------
 ; stub wrapper for word-similarity.
@@ -538,7 +356,9 @@
 	(define sim (pcos 'right-cosine WORD-A WORD-B))
 
 	(define cut 0.65)
-	(format #t "Cosine=~A for \"~A\" -- \"~A\"\n" sim (cog-name WORD-A) (cog-name WORD-B))
+	(format #t "Cosine=~A for ~A \"~A\" -- \"~A\"\n" sim
+		(if (eq? 'WordNode (cog-type WORD-A)) "word" "class")
+		(cog-name WORD-A) (cog-name WORD-B))
 	(if (< cut sim) (display "------------------------------ Bingo!\n"))
 
 	; True, if sim is more than 0.9
@@ -546,96 +366,260 @@
 )
 
 ; ---------------------------------------------------------------
+; Given a single word and a list of words or grammatical classes,
+; attempt to assign the the word to one of the classes (or merge
+; the word with one of the other words).  Return the class
+; it was assigned to, or just the original word itself, if it was
+; not assigned to any of them.
 ;
-; Given just one word, assemble a list of all of the words that
-; appear in the disjuncts on that word.  Assumes that the disjuncts
-; for the word are already in the atomspace.
-(define (get-dj-words WORD)
-
-	; Given a Section i.e. (word, connector-set), walk over all
-	; the connectors in the connector set, and add the word appearing
-	; in the connector to the word-list. But add it only if it is not
-	; already in the list.
-	(define (add-to-list SEC WORD-LIST)
-		(fold
-			(lambda (CNCTR LST)
-				(define WRD (cog-outgoing-atom CNCTR 0))
-				(if ; (and
-					; Is it actually a word (and not a word-class?)
-					(eq? 'WordNode (cog-type WRD))
-					; Is it not yet in the list?
-					; Its not efficient to check here; this becomes very
-					; slow for long lists - it's O(N^2)
-					; (not (find (lambda (wrd) (equal? WRD wrd)) LST)))
-					(cons WRD LST) LST))
-			WORD-LIST
-			; second atom of Section is a ConnectorSeq
-			(cog-outgoing-set (cog-outgoing-atom SEC 1))))
-
-	; Walk over all the Sections on the word.
-	(define all-words
-		(fold add-to-list '() (cog-incoming-by-type WORD 'Section)))
-
-	; It is faster, more cpu-efficient to sort first, and then filter.
-	(define sorted-words (sort all-words cog-atom-less?))
-	(if (null? sorted-words) '()
-		(fold
-			(lambda (WRD LST)
-				(if (equal? WRD (car LST)) LST (cons WRD LST)))
-			(list (car sorted-words))
-			(cdr sorted-words)))
-)
-
-; ---------------------------------------------------------------
-; Predicate - is the word a member of the grammatical class, already?
-(define (in-gram-class? WORD GCLS)
-	(define memlnk (cog-link 'MemberLink WORD GCLS))
-	(if (null? memlnk) #f #t))
-
-; ---------------------------------------------------------------
-; Given a grammatical class, and a list of words, scan the word list
-; to see if any can be merged into the class. If they can, merge them
-; in. This is an O(n) algo.
+; See also the `assign-expand-class` function.
 ;
-; GRM-CLS should be the WordClassNode to be enlarged.
-; WRD-LST should be list of WordNodes to compare to the class.
+; WORD should be the WordNode to test.
+; CLS-LST should be list of WordNodes or WordClassNodes to compare
+;          to the WORD.
 ; LLOBJ is the object to use for obtaining counts.
 ; FRAC is the fraction of union vs. intersection during merge.
 ; (These last two are passed blindly to the merge function).
 ;
-(define (expand-gram-class LLOBJ GRM-CLS WRD-LST FRAC)
-	(if (not (null? WRD-LST))
-		(let ((wrd (car WRD-LST)))
-
-			; If the word is not already in the class, and its mergeable,
-			; then merge it. XXX Do we really need the in-gram-class?
-			; check? Probably not ... if its in the class, then what's
-			; left is not mergable.
-			(if (and (not (in-gram-class? wrd GRM-CLS))
-					(ok-to-merge GRM-CLS wrd))
-				(merge-ortho LLOBJ GRM-CLS wrd FRAC))
-			(expand-gram-class LLOBJ GRM-CLS (cdr WRD-LST) FRAC)))
+(define (assign-word-to-class LLOBJ FRAC WRD CLS-LST)
+	(if (null? CLS-LST) WRD
+		(let ((cls (car CLS-LST)))
+			; If the word can be merged into a class, then do it,
+			; and return the class. Else try again.
+			(if (ok-to-merge cls WRD)
+				(merge-ortho LLOBJ FRAC cls WRD)
+				(assign-word-to-class LLOBJ FRAC WRD (cdr CLS-LST)))))
 )
 
 ; ---------------------------------------------------------------
-; Given a list of words, compare them pairwise to find a similar
+; Given a word or a grammatical class, and a list of words, scan
+; the word list to see if any of them can be merged into the given
+; word/class.  If so, then perform the merge, and return the
+; word-class; else return the original word. If the initial merge
+; can be performed, then the remainder of the list is scanned, to
+; see if the word-class can be further enlarged.
+;
+; This is an O(n) algo in the length of WRD-LST.
+;
+; This is similar to `assign-word-to-class` function, except that
+; the roles of the arguments are reversed, and this function tries
+; to maximally expand the resulting class.
+;
+; WRD-OR-CLS should be the WordNode or WordClassNode to merge into.
+; WRD-LST should be list of WordNodes to merge into WRD-OR-CLS.
+; LLOBJ is the object to use for obtaining counts.
+; FRAC is the fraction of union vs. intersection during merge.
+; (These last two are passed blindly to the merge function).
+;
+(define (assign-expand-class LLOBJ FRAC WRD-OR-CLS WRD-LST)
+	(if (null? WRD-LST) WRD-OR-CLS
+		(let ((wrd (car WRD-LST))
+				(rest (cdr WRD-LST)))
+			; If the word can be merged into a class, then do it,
+			; and then expand the class. Else try again.
+			(if (ok-to-merge WRD-OR-CLS wrd)
+				; Merge, and try to expand.
+				(assign-expand-class LLOBJ FRAC
+					(merge-ortho LLOBJ FRAC WRD-OR-CLS wrd) rest)
+				; Else keep trying.
+				(assign-expand-class LLOBJ FRAC WRD-OR-CLS rest))))
+)
+
+; ---------------------------------------------------------------
+; Call function FUNC on all unordered pairs from LST.
+; The function FUNC must accept two arguments.
+; The return value is unspecified.
+; All of the N(N-1)/2 unordered pairs are explored.
+; This means that the runtime is O(N^2)
+(define (for-all-unordered-pairs FUNC LST)
+
+	(define (make-next-pair primary rest)
+		(define more (cdr primary))
+		(if (not (null? more))
+			(if (null? rest)
+				(make-next-pair more (cdr more))
+				(let ((item (car primary))
+						(next-item (car rest)))
+					(format #t "~A ~A " (length primary) (length rest))
+					(FUNC item next-item)
+					(make-next-pair primary (cdr rest))))))
+
+	(make-next-pair LST (cdr LST))
+)
+
+; ---------------------------------------------------------------
+; Call function FUNC on all unordered pairs from LST.
+; The function FUNC must accept three arguments: the first two
+; are the pair, and the last is the accumulated (folded) value.
+; It must return the (modified) accumulated value.
+; The return value is the result of folding on these.
+; All of the N(N-1)/2 unordered pairs are explored.
+; This means that the runtime is O(N^2)
+(define (fold-unordered-pairs ACC FUNC LST)
+
+	(define (make-next-pair primary rest accum)
+		(define more (cdr primary))
+		(if (null? more) accum
+			(if (null? rest)
+				(make-next-pair more (cdr more) accum)
+				(let ((item (car primary))
+						(next-item (car rest)))
+					(format #t "~A ~A " (length primary) (length rest))
+					(make-next-pair primary (cdr rest)
+						(FUNC item next-item accum))
+				))))
+
+	(make-next-pair LST (cdr LST) ACC)
+)
+
+; ---------------------------------------------------------------
+; Given a list of words, compare them pair-wise to find a similar
 ; pair. Merge these to form a grammatical class, and then try to
-; expand that class as much as possible.
-(define (make-gram-class LLOBJ WRD-LST FRAC)
+; expand that class as much as possible. Repeat until all pairs
+; have been explored.  This is an O(N^2) algo in the length of the
+; word-list!
+; This returns a list of the classes that were created.
+(define (classify-pair-wise LLOBJ FRAC WRD-LST)
 
-	; Try to make a grammatical class out of the word, and another
-	; in the list. Return it, if possible, else return nil.
-	(define (make-first-one word rest)
-		(if (null? rest) '()
-			(if (ok-to-merge word (car rest))
-				(merge-ortho LLOBJ word (car rest) FRAC)
-				; If they are NOT mergable, recurse,
-				; looking for a pair that is.
-				(make-first-one (car rest) (cdr rest)))))
+	(define (check-pair WORD-A WORD-B CLS-LST)
+		(if (ok-to-merge WORD-A WORD-B)
+			(let ((grm-class (merge-ortho LLOBJ FRAC WORD-A WORD-B)))
+				(assign-expand-class LLOBJ FRAC grm-class WRD-LST)
+				(cons grm-class CLS-LST))))
 
-	(define grm-class (make-first-one (car WRD-LST) (cdr WRD-LST)))
-	(if (not (null? grm-class))
-		(expand-gram-class LLOBJ grm-class WRD-LST FRAC))
+	(fold-unordered-pairs '() check-pair WRD-LST)
+)
+
+; ---------------------------------------------------------------
+; Given a word-list and a list of grammatical classes, assign
+; each word to one of the classes, or, if the word cannot be
+; assigned, treat it as if it werre a new class. Return a list
+; of all of the classes, the ones that were given plus the ones
+; that were created.
+;
+; The typical use is to call this with an empty class-list,
+; initially.
+;
+; If the class-list contains WordNodes (instead of the expected
+; WordClassNodes) and a merge is possible, then that WordNode will
+; be merged to create a class.
+(define (assign-to-classes LLOBJ FRAC WRD-LST CLS-LST)
+	(format #t "---------  Words remaining=~A Classes=~A ------------\n"
+		(length WRD-LST) (length CLS-LST))
+
+	; If the WRD-LST is empty, we are done; otherwise compute.
+	(if (null? WRD-LST) CLS-LST
+		(let* ((wrd (car WRD-LST))
+				(rest (cdr WRD-LST))
+				; Can we assign the word to a class?
+				(cls (assign-word-to-class LLOBJ FRAC wrd CLS-LST)))
+
+			; If the word was merged into an existing class, then recurse
+			(if (eq? 'WordClassNode (cog-type cls))
+				(assign-to-classes LLOBJ FRAC rest CLS-LST)
+
+				; If the word was not assigned to an existing class,
+				; see if it can be merged with any of the other words
+				; in the word-list.
+				(let* ((new-cls (assign-expand-class LLOBJ FRAC wrd rest))
+						(new-lst
+							(if (eq? 'WordClassNode (cog-type new-cls))
+								; Use append, not cons, so as to preferentially
+								; choose the older classes, as opposed to the
+								; newer ones.
+								; (cons new-cls CLS-LST)
+								(append! CLS-LST (list new-cls))
+								; else the old class-list
+								CLS-LST)))
+					(assign-to-classes LLOBJ FRAC rest new-lst)))))
+)
+
+; ---------------------------------------------------------------
+; Given the list LST of atoms, trim it, discarding atoms with
+; low observation couns, and then sort it, returning the sorted
+; list, ranked in order of the observed number of sections on the
+; word. (i.e. the sum of the counts on each of the sections).
+;
+; Words with fewer than MIN-CNT observations on them are discarded.
+;
+; Note: an earlier version of this ranked by the number of times
+; each word was observed: viz:
+;      (> (get-count ATOM-A) (get-count ATOM-B))
+; However, for WordNodes, this does not work very well, as the
+; observation count may be high from any-pair parsing, but
+; infrequently used in MST parsing.
+;
+(define (trim-and-rank LLOBJ LST MIN-CNT)
+	(define pss (add-support-api LLOBJ))
+
+	; nobs == number of observations
+	(define (nobs WRD) (pss 'right-count WRD))
+
+	; The support API won't work, if we don't have the wild-cards
+	; in the atomspace before we sort. The wild-cards store the
+	; support subtotals.
+	(for-each
+		(lambda (WRD) (fetch-atom (LLOBJ 'right-wildcard WRD)))
+		LST)
+
+	(sort!
+		; Before sorting, trim the list, discarding words with
+		; low counts.
+		(filter (lambda (WRD) (<= MIN-CNT (nobs WRD))) LST)
+		; Rank so that the highest support words are first in the list.
+		(lambda (ATOM-A ATOM-B) (> (nobs ATOM-A) (nobs ATOM-B))))
+)
+
+; ---------------------------------------------------------------
+; Loop over all words, attempting to place them into grammatical
+; classes. This is an O(N^2) algorithm, and so several "cheats"
+; are employed to maintain some amount of progress. So,
+; A) the list of words is ranked by order of the number of
+;    observations; thus punctuation and "the, "a" come first.
+; B) The ranked list is divided into power-of-two ranges, and only
+;    the words in a given range are compared to one-another.
+; The idea is that it is unlikely that words with very different
+; observational counts will be similar.  NOTE: this idea has NOT
+; been empirically tested, yet.
+;
+; TODO - the word-class list should probably also be ranked, so
+; we preferentially add to the largest existing classes.
+;
+; XXX There is a user-adjustable paramter used below, to
+; control the ranking. It should be exposed in the API or
+; something like that!
+;
+(define (loop-over-words LLOBJ FRAC WRD-LST CLS-LST)
+	; XXX Adjust the minimum cutoff as desired!!!
+	; This is a tunable paramter!
+	; Right now, set to 20 observations, minimum. Less
+	; than this and weird typos and stuff get in.
+	(define min-obs-cutoff 20)
+	(define ranked-words (trim-and-rank LLOBJ WRD-LST min-obs-cutoff))
+
+	(define (chunk-blocks wlist size clist)
+		(if (null? wlist) '()
+			(let* ((wsz (length wlist))
+					; the smallier of word-list and requested size.
+					(minsz (if (< wsz size) wsz size))
+					; the first block
+					(chunk (take wlist minsz))
+					; the remainder
+					(rest (drop wlist minsz))
+					; perform clustering
+					(new-clist (assign-to-classes LLOBJ FRAC chunk clist)))
+				; Recurse and do the next block.
+				; XXX the block sizes are by powers of 2...
+				; perhaps they should be something else?
+				(chunk-blocks rest (* 2 size) new-clist)
+			)
+		)
+	)
+
+	; The initial chunk block-size.  This is a tunable parameter.
+	; Perhaps it should be a random number, altered between runs?
+	(define chunk-block-size 20)
+	(chunk-blocks ranked-words chunk-block-size CLS-LST)
 )
 
 ; ---------------------------------------------------------------
@@ -647,8 +631,13 @@
 		)
 
 		(load-atoms-of-type 'WordNode)
+		(load-atoms-of-type 'WordClassNode)
 		; Verify that words have been loaded
 		;  (define all-words (get-all-cset-words))
+		; (define all-words (cog-get-atoms 'WordNode))
+		(loop-over-words psa 0.3
+			(cog-get-atoms 'WordNode)
+			(cog-get-atoms 'WordClassNode))
 	)
 )
 
