@@ -159,7 +159,16 @@
     (append
       ; Iterate through the output word-by-word
       (map (lambda (n)
-        (cond ; The grounding of a variable in original words
+        (cond ; Gather all the action choices, i.e. a list of actions
+              ; available but only one of them will be executed
+              ((equal? 'action-choices (car n))
+               (set! choices (append choices (list (List (to-atomese (cdr n))))))
+               '())
+              ((not (null? choices))
+               (let ((ac (action-choices choices)))
+                    (set! choices '())
+                    (list ac)))
+              ; The grounding of a variable in original words
               ((equal? 'get_wvar (car n))
                (list-ref pat-vars (cdr n)))
               ; The grounding of a variable in lemmas
@@ -174,11 +183,6 @@
               ((equal? 'function (car n))
                (if (equal? "reuse" (cadr n)) (set! reuse #t))
                (action-function (cadr n) (to-atomese (cddr n))))
-              ; Gather all the action choices, i.e. a list of actions
-              ; available but only one of them will be executed
-              ((equal? 'action-choices (car n))
-               (set! choices (append choices (list (List (to-atomese (cdr n))))))
-               '())
               (else (Word (cdr n)))))
         actions)
       (if (null? choices)
