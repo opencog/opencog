@@ -26,6 +26,11 @@
   (define sent (cog-chase-link 'StateLink 'SentenceNode ghost-anchor))
   (if (null? sent) '() (car sent)))
 
+(define-public (ghost-currently-processing)
+  "Get the sentence that is currently being processed."
+  (car (filter (lambda (e) (equal? ghost-word-seq (gar e)))
+               (cog-get-pred (ghost-get-curr-sent) 'PredicateNode))))
+
 (define*-public (ghost-show-relation #:optional (SENT (ghost-get-curr-sent)))
   "Get a subset of the RelEx outputs of a sentence that GHOST cares.
    SENT is a SentenceNode, if not given, it will be the current input."
