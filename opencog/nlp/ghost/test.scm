@@ -31,6 +31,10 @@
   (car (filter (lambda (e) (equal? ghost-word-seq (gar e)))
                (cog-get-pred (ghost-get-curr-sent) 'PredicateNode))))
 
+(define-public (ghost-get-relex-outputs)
+  "Get the RelEx outputs generated for the current sentence."
+  (parse-get-relex-outputs (car (sentence-get-parses (ghost-get-curr-sent)))))
+
 (define*-public (ghost-show-relation #:optional (SENT (ghost-get-curr-sent)))
   "Get a subset of the RelEx outputs of a sentence that GHOST cares.
    SENT is a SentenceNode, if not given, it will be the current input."
