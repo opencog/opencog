@@ -19,9 +19,7 @@
 
 (define-public (ghost-show-vars)
   "Show the groundings of variables stored."
-  (display "=== Variables (words)\n") (display var-grd-words) (newline)
-  (display "=== Variables (lemmas)\n") (display var-grd-lemmas) (newline)
-  (display "=== User Variables\n") (display uvars) (newline))
+  (format #t "=== User Variables\n~a\n" uvars))
 
 (define-public (ghost-get-curr-sent)
   "Get the SentenceNode that is being processed currently."
