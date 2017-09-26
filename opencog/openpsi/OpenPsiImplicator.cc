@@ -36,6 +36,9 @@ OpenPsiImplicator::OpenPsiImplicator(AtomSpace* as) :
 bool OpenPsiImplicator::grounding(const HandleMap &var_soln,
                                   const HandleMap &term_soln)
 {
+  // TODO: Saperated component patterns aren't handled by this function
+  // as PMCGroundings is used instead. Update to handle such cases.
+
   // The psi-rule weight calculations could be done here.
   _result = TruthValue::TRUE_TV();
 
@@ -56,7 +59,11 @@ TruthValuePtr OpenPsiImplicator::check_satisfiability(
   // (context + action ->goal)
   Handle context = himplication->getOutgoingAtom(0);
 
-  // TODO: How to prevent stale cache?
+  // TODO:
+  // 1. How to prevent stale cache?
+  // 2. Also remove entry if the context isn't grounding?
+  // 3. What happens if the atoms are removed for the atomspace for
+  // whatever reason? Is signal the only means?
   if (_update_cache) {
     PatternLinkPtr plp =  createPatternLink(context);
     plp->satisfy(*this);
