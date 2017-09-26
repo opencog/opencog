@@ -13,6 +13,7 @@ ADD_SUBDIRECTORY (dynamics)
 
 ADD_LIBRARY (openpsi SHARED
 	OpenPsiImplicator.cc
+	OpenPsiRules.cc
 	OpenPsiSCM.cc
 )
 
