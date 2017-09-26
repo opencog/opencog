@@ -34,7 +34,20 @@ public:
   OpenPsiSCM();
 
 private:
+  /**
+   * Returns TRUE_TV or FALSE_TV depending on whether the context of the
+   * given psi-rule is satisfiable or not.
+   *
+   * @param himplication A psi-rule.
+   */
   TruthValuePtr satisfiable(const Handle& himplication);
+
+  /**
+   * Instantiates the action of the psi-rule if their is an entry in
+   * the cache for the groundings of its context.
+   *
+   * @param himplication A psi-rule.
+   */
   Handle psi_imply(const Handle& himplication);
 
   /**
