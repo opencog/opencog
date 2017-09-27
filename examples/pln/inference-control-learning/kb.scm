@@ -54,7 +54,7 @@
 (define (gen-knowledge-base)
   (let* ((letters (gen-letters))
          (letter-members (map gen-letter-member letters))
-         (letter-pairs (map gen-letter-pair (cdr letters) (drop-right letters 1)))
+         (letter-pairs (map gen-letter-pair (drop-right letters 1) (cdr letters)))
          (X (Variable "$X"))
          (A (Concept "A"))
          (ConceptT (Type "ConceptNode")))
