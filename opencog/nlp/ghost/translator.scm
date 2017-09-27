@@ -57,35 +57,6 @@
               ; end with a wildcard
               (else (append (list wc) TERMS (list wc))))))
 
-(define (preprocess-terms TERMS)
-  "Make sure there is no meaningless wildcard/variable in TERMS,
-   which may cause problems in rule matching or variable grounding."
-  (define (merge-wildcard INT1 INT2)
-    (cons (max (car INT1) (car INT2))
-          (cond ((or (negative? (cdr INT1)) (negative? (cdr INT2))) -1)
-                (else (max (cdr INT1) (cdr INT2))))))
-  (fold-right (lambda (term prev)
-    (cond ; If there are two consecutive wildcards, e.g.
-          ; (wildcard 0 . -1) (wildcard 3. 5)
-          ; merge them
-          ((and (equal? 'wildcard (car term))
-                (equal? 'wildcard (car (first prev))))
-           (cons (cons 'wildcard
-                       (merge-wildcard (cdr term) (cdr (first prev))))
-                 (cdr prev)))
-          ; If we have a variable that matches to "zero or more"
-          ; follow by a wildcard, e.g.
-          ; (variable (wildcard 0 . -1)) (wildcard 3 . 6)
-          ; return the variable
-          ((and (equal? 'variable (car term))
-                (equal? (cadr term) (cons 'wildcard (cons 0 -1)))
-                (equal? 'wildcard (car (first prev))))
-           (cons term (cdr prev)))
-          ; Otherwise accept and append it to the list
-          (else (cons term prev))))
-    (list (last TERMS))
-    (list-head TERMS (- (length TERMS) 1))))
-
 (define (process-pattern-terms TERMS)
   "Generate the atomese (i.e. the variable declaration and the pattern)
    for each of the TERMS."
@@ -238,8 +209,7 @@
    and action is a quoted list of actions or a single action."
   (cog-logger-debug "In create-rule\nPATTERN = ~a\nACTION = ~a" PATTERN ACTION)
   (let* ((ordered-terms (order-terms PATTERN))
-         (preproc-terms (preprocess-terms ordered-terms))
-         (proc-terms (process-pattern-terms preproc-terms))
+         (proc-terms (process-pattern-terms ordered-terms))
          (vars (append atomese-variable-template (list-ref proc-terms 0)))
          (conds (append atomese-condition-template (list-ref proc-terms 1)))
          (rule (map (lambda (goal)
@@ -252,7 +222,6 @@
                         NAME))
                     (process-goal GOAL))))
         (cog-logger-debug ghost-logger "ordered-terms: ~a" ordered-terms)
-        (cog-logger-debug ghost-logger "preproc-terms: ~a" preproc-terms)
         (cog-logger-debug ghost-logger "psi-rule: ~a" rule)
         (set! pat-vars '())
         rule))
