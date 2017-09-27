@@ -10,17 +10,21 @@
 
 (define (order-terms TERMS)
   "Order the terms in the intended order, and insert wildcards into
-   appropriate positions of the sequence."
+   appropriate positions of the sequence.
+   No operation is needed if the pattern is supposed to be matched in
+   any order."
   (let* ((as (cons 'anchor-start "<"))
          (ae (cons 'anchor-end ">"))
          (wc (cons 'wildcard (cons 0 -1)))
+         (unordered? (any (lambda (t) (equal? 'unordered-matching (car t))) TERMS))
          (start-anchor? (any (lambda (t) (equal? as t)) TERMS))
          (end-anchor? (any (lambda (t) (equal? ae t)) TERMS))
          (start (if start-anchor? (cdr (member as TERMS)) (list wc)))
          (end (if end-anchor?
                   (take-while (lambda (t) (not (equal? ae t))) TERMS)
                   (list wc))))
-        (cond ((and start-anchor? end-anchor?)
+        (cond (unordered? TERMS)  ; Nothing needs to be done
+              ((and start-anchor? end-anchor?)
                (if (equal? start-anchor? end-anchor?)
                    ; If they are equal, we are not expecting
                    ; anything else, either one of them is
@@ -85,12 +89,12 @@
 (define (process-pattern-terms TERMS)
   "Generate the atomese (i.e. the variable declaration and the pattern)
    for each of the TERMS."
+  (define vars '())
+  (define conds '())
+  (define word-seq '())
+  (define lemma-seq '())
+  (define is-unordered? #f)
   (define (process terms)
-    (define vars '())
-    (define conds '())
-    (define word-seq '())
-    (define lemma-seq '())
-    (define is-unordered? #f)
     (define (update-lists t)
       (set! vars (append vars (list-ref t 0)))
       (set! conds (append conds (list-ref t 1)))
@@ -98,9 +102,8 @@
       (set! lemma-seq (append lemma-seq (list-ref t 3))))
     (for-each (lambda (t)
       (cond ((equal? 'unordered-matching (car t))
-             (let ((terms (process (cdr t))))
-                  (update-lists terms)
-                  (set! is-unordered? #t)))
+             (process (cdr t))
+             (set! is-unordered? #t))
             ((equal? 'word (car t))
              (update-lists (word (cdr t))))
             ((equal? 'lemma (car t))
@@ -116,9 +119,8 @@
             ((equal? 'wildcard (car t))
              (update-lists (wildcard (cadr t) (cddr t))))
             ((equal? 'variable (car t))
-             (let ((terms (process (cdr t))))
-                  (update-lists terms)
-                  (set! pat-vars (append pat-vars (list-ref terms 2)))))
+             (process (cdr t))
+             (set! pat-vars (append pat-vars (last-pair word-seq))))
             ((equal? 'uvar_exist (car t))
              (set! conds (append conds (list (uvar-exist? (cdr t))))))
             ((equal? 'uvar_equal (car t))
@@ -136,20 +138,44 @@
                          (else (WordNode (cdr a)))))
                    (cddr t)))))))
             (else (feature-not-supported (car t) (cdr t)))))
-      terms)
-    (list vars conds word-seq lemma-seq is-unordered?))
+      terms))
   ; Start the processing
-  (define proc-terms (process TERMS))
+  (process TERMS)
+  ; Check if it's ordered or unordered
+  (if is-unordered?
+      ; Generate an EvaluationLink for each of the term in the seq
+      ; if it's an unordered match
+      (begin
+        (for-each
+          (lambda (t)
+            (let ((wc (wildcard 0 -1)))
+              (set! vars (append vars (list-ref wc 0)))
+              (set! conds (append conds (list
+                (Evaluation ghost-word-seq (List (Variable "$S")
+                  (List (list-ref wc 2) t (list-ref wc 3)))))))))
+          word-seq)
+        (for-each
+          (lambda (t)
+            (let ((wc (wildcard 0 -1)))
+              (set! vars (append vars (list-ref wc 0)))
+              (set! conds (append conds (list
+                (Evaluation ghost-lemma-seq (List (Variable "$S")
+                  (List (list-ref wc 2) t (list-ref wc 3)))))))))
+          lemma-seq))
+      ; Below is for a typical ordered match
+      (set! conds (append conds (list
+        (Evaluation ghost-word-seq
+          (List (Variable "$S") (List word-seq)))
+        (Evaluation ghost-lemma-seq
+          (List (Variable "$S") (List lemma-seq)))))))
   ; DualLink couldn't match patterns with no constant terms in it
   ; Mark the rules with no constant terms so that they can be found
   ; easily during the matching process
-  ; (list-ref proc-terms 3) is the lemma-seq
-  (if (equal? (length (list-ref proc-terms 3))
+  (if (equal? (length lemma-seq)
               (length (filter (lambda (x) (equal? 'GlobNode (cog-type x)))
-                              (list-ref proc-terms 3))))
-      (begin (MemberLink (List (list-ref proc-terms 3)) ghost-no-constant)
-             (MemberLink (Set (list-ref proc-terms 3)) ghost-no-constant)))
-  proc-terms)
+                              lemma-seq)))
+      (MemberLink (List lemma-seq) ghost-no-constant))
+  (list vars conds))
 
 (define (process-action ACTION)
   "Convert ACTION into atomese."
@@ -216,31 +242,19 @@
          (proc-terms (process-pattern-terms preproc-terms))
          (vars (append atomese-variable-template (list-ref proc-terms 0)))
          (conds (append atomese-condition-template (list-ref proc-terms 1)))
-         (is-unordered? (list-ref proc-terms 4))
-         (words (if is-unordered?
-           (Evaluation ghost-word-set
-             (List (Variable "$S") (Set (list-ref proc-terms 2))))
-           (Evaluation ghost-word-seq
-             (List (Variable "$S") (List (list-ref proc-terms 2))))))
-         (lemmas (if is-unordered?
-           (Evaluation ghost-lemma-set
-             (List (Variable "$S") (Set (list-ref proc-terms 3))))
-           (Evaluation ghost-lemma-seq
-             (List (Variable "$S") (List (list-ref proc-terms 3))))))
          (rule (map (lambda (goal)
                       (psi-rule
-                        (list (Satisfaction (VariableList vars)
-                                            (And words lemmas conds)))
+                        (list (Satisfaction (VariableList vars) (And conds)))
                         (process-action ACTION)
                         (psi-goal (car goal))
                         (stv (cdr goal) .9)
                         (if (null? TOPIC) default-topic TOPIC)
                         NAME))
                     (process-goal GOAL))))
-        (set! pat-vars '())
         (cog-logger-debug ghost-logger "ordered-terms: ~a" ordered-terms)
         (cog-logger-debug ghost-logger "preproc-terms: ~a" preproc-terms)
         (cog-logger-debug ghost-logger "psi-rule: ~a" rule)
+        (set! pat-vars '())
         rule))
 
 ; ----------

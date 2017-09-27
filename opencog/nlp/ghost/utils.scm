@@ -77,16 +77,12 @@
       (car (sent-get-words-in-order SENT))))
   (let* ((wseq (get-seq 'ReferenceLink))
          (word-seq (List wseq))
-         (word-set (Set wseq))
          (lseq (get-seq 'LemmaLink))
-         (lemma-seq (List lseq))
-         (lemma-set (Set lseq)))
+         (lemma-seq (List lseq)))
         ; These EvaluationLinks will be used in the matching process
         (Evaluation ghost-word-seq (List SENT word-seq))
-        (Evaluation ghost-word-set (List SENT word-set))
         (Evaluation ghost-lemma-seq (List SENT lemma-seq))
-        (Evaluation ghost-lemma-set (List SENT lemma-set))
-        (list word-seq word-set lemma-seq lemma-set)))
+        (list word-seq lemma-seq)))
 
 (define (get-lemma-from-relex WORD)
   "Get the lemma of WORD via the RelEx server."

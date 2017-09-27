@@ -130,8 +130,6 @@ s: is equivalent to declarative or imperative in OpenCog
 u: means union of the both above
 ```
 
-- Unordered matching
-
 - Nested pattern e.g. "you < * [(live * long) long-lived]"
 
 - System functions

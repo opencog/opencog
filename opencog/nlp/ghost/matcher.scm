@@ -11,24 +11,15 @@
    and then does the filtering by evaluating the context of the rules.
    Eventually returns a list of weighted rules that can satisfy the demand."
   (let* ((sent-seqs (sent-get-word-seqs SENT))
-         (input-lseq (list-ref sent-seqs 2))
-         (input-lset (list-ref sent-seqs 3))
+         (input-lseq (list-ref sent-seqs 1))
          ; The ones that contains no variables/globs
-         (exact-match (filter psi-rule?
-           (append-map cog-get-trunk (list input-lseq input-lset))))
+         (exact-match (filter psi-rule? (cog-get-trunk input-lseq)))
          ; The ones that contains no constant terms
          (no-const (filter psi-rule? (append-map cog-get-trunk
            (cog-chase-link 'MemberLink 'ListLink ghost-no-constant))))
          ; The ones found by the recognizer
          (dual-match (filter psi-rule? (append-map cog-get-trunk
-           (append (cog-outgoing-set (cog-execute! (Dual input-lseq)))
-                   ; TODO FIXME: If the input is too long, it may take
-                   ; forever for the recognizer to match any rules being
-                   ; wrapped in an unordered link, so only do this if
-                   ; the input is not too long, for now...
-                   (if (>= 8 (length sent-seqs))
-                       (cog-outgoing-set (cog-execute! (Dual input-lset)))
-                       '())))))
+           (cog-outgoing-set (cog-execute! (Dual input-lseq))))))
          ; Get the psi-rules associate with them with duplicates removed
          (rules-matched
            (fold (lambda (rule prev)

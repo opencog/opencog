@@ -33,9 +33,7 @@
 (define ghost-anchor (Anchor (ghost-prefix "Currently Processing")))
 (define ghost-no-constant (Anchor (ghost-prefix "No constant terms")))
 (define ghost-word-seq (Predicate (ghost-prefix "Word Sequence")))
-(define ghost-word-set (Predicate (ghost-prefix "Word Set")))
 (define ghost-lemma-seq (Predicate (ghost-prefix "Lemma Sequence")))
-(define ghost-lemma-set (Predicate (ghost-prefix "Lemma Set")))
 
 ; Define the logger for GHOST
 (define ghost-logger (cog-new-logger))
