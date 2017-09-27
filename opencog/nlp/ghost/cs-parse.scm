@@ -327,6 +327,7 @@
 
     (context
       (LPAREN context-patterns RPAREN) : $2
+      (LPAREN unordered-matching RPAREN) : $2
     )
 
     (context-patterns
@@ -347,7 +348,6 @@
       (user-variable) : $1
       (function) : $1
       (choice) : $1
-      (unordered-matching) : $1
       (negation) : $1
       (variable ? concept) :
         (format #f "(cons 'is_member (list ~a ~a))" $1 $3)
