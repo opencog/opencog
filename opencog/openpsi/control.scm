@@ -117,16 +117,18 @@
 )
 
 ; --------------------------------------------------------------
-(define (psi-set-controlled-rule psi-rule)
+(define (psi-set-controlled-rule psi-rule name)
 "
-  psi-set-controlled-rule RULE
+  psi-set-controlled-rule RULE NAME
 
-  Specify that RULE is to be controlled. Controlling means modifying the
-  weight of the rule, thus affecting the likelyhood of it being choosen.
+  Specify that RULE is to be controlled and give it a NAME. Controlling means
+  modifying the weight of the rule, thus affecting the likelyhood of it being choosen.
 "
     (MemberLink psi-rule psi-controller-demand)
 
     (psi-rule-set-atomese-weight psi-rule (tv-mean (cog-tv psi-rule)))
+
+    (psi-rule-set-alias psi-rule name)
 
     psi-rule
 )

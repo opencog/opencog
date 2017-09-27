@@ -35,7 +35,7 @@
     psi-rule-satisfiability psi-get-satisfiable-rules
     psi-get-weighted-satisfiable-rules psi-get-all-satisfiable-rules
     psi-get-all-weighted-satisfiable-rules psi-context-weight psi-action-weight
-    psi-goal psi-goal?
+    psi-goal psi-goal? psi-rule-set-alias
 
     ; From main.scm
     psi-running? psi-get-loop-count psi-run-continue? psi-step psi-run psi-halt
