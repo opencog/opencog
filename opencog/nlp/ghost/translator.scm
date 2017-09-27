@@ -189,7 +189,6 @@
           '()
           (list (action-choices choices)))))
   (define action-atomese (to-atomese (cdar ACTION)))
-  (cog-logger-debug ghost-logger "action: ~a" ACTION)
   (True (if reuse action-atomese
                   (ExecutionOutput (GroundedSchema "scm: ghost-execute-action")
                                    (List action-atomese)))))
@@ -212,19 +211,21 @@
          (proc-terms (process-pattern-terms ordered-terms))
          (vars (append atomese-variable-template (list-ref proc-terms 0)))
          (conds (append atomese-condition-template (list-ref proc-terms 1)))
-         (rule (map (lambda (goal)
-                      (psi-rule
-                        (list (Satisfaction (VariableList vars) (And conds)))
-                        (process-action ACTION)
-                        (psi-goal (car goal))
-                        (stv (cdr goal) .9)
-                        (if (null? TOPIC) default-topic TOPIC)
-                        NAME))
-                    (process-goal GOAL))))
-        (cog-logger-debug ghost-logger "ordered-terms: ~a" ordered-terms)
-        (cog-logger-debug ghost-logger "psi-rule: ~a" rule)
+         (action (process-action ACTION))
+         (goals (process-goal GOAL)))
         (set! pat-vars '())
-        rule))
+        (cog-logger-debug ghost-logger "Context: ~a" ordered-terms)
+        (cog-logger-debug ghost-logger "Procedure: ~a" ACTION)
+        (cog-logger-debug ghost-logger "Goal(s): ~a" goals)
+        (map (lambda (goal)
+               (psi-rule
+                 (list (Satisfaction (VariableList vars) (And conds)))
+                 action
+                 (psi-goal (car goal))
+                 (stv (cdr goal) .9)
+                 (if (null? TOPIC) default-topic TOPIC)
+                 NAME))
+             goals)))
 
 ; ----------
 ; Topic
