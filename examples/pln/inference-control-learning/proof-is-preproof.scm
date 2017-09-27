@@ -2,12 +2,12 @@
 ;;    target T as well.
 ;;
 ;; Implication <1 1>
-;;   Predicate "URE:BC:proof"
-;;   Predicate "URE:BC:preproof"
+;;   Predicate "URE:BC:proof-of"
+;;   Predicate "URE:BC:preproof-of"
 (define proof-is-preproof
   (Implication (stv 1 1)
-    (Predicate "URE:BC:proof")
-    (Predicate "URE:BC:preproof")))
+    (Predicate "URE:BC:proof-of")
+    (Predicate "URE:BC:preproof-of")))
 
 ;; Load conditional-full-instantiation-implication-meta-rule
 (add-to-load-path "../../../opencog/pln/")

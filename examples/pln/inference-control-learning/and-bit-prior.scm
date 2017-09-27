@@ -19,7 +19,7 @@
 ;;       Predicate "URE:BC:target"
 ;;       Variable "$T"
 ;;   Evaluation
-;;     Predicate "URE:BC:preproof"
+;;     Predicate "URE:BC:preproof-of"
 ;;     List
 ;;       Variable "$A"
 ;;       Variable "$T"
@@ -53,7 +53,7 @@
         (Predicate "URE:BC:target")
         (Variable "$T")))
     (Evaluation
-      (Predicate "URE:BC:preproof")
+      (Predicate "URE:BC:preproof-of")
       (List
         (Variable "$A")
         (Variable "$T")))))

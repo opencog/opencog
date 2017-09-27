@@ -128,7 +128,7 @@
          (dummy (load "preproof-expander-is-preproof.scm"))
          ;; Define BC target and vardecl
          (target (Evaluation
-                   (Predicate "URE:BC:preproof")
+                   (Predicate "URE:BC:preproof-of")
                    (List
                      (Variable "$A")
                      (Variable "$T"))))
@@ -155,7 +155,7 @@
          (dummy (load "and-bit-prior.scm"))
          ;; Define BC target and vardecl
          (target (Evaluation
-                   (Predicate "URE:BC:preproof")
+                   (Predicate "URE:BC:preproof-of")
                    (List
                      (Variable "$A")
                      (Variable "$T"))))
@@ -200,7 +200,7 @@
                            (Type "DontExecLink"))))
          (impl-antecedant (And
                             (Evaluation
-                              (Predicate "URE:BC:preproof")
+                              (Predicate "URE:BC:preproof-of")
                               (List
                                 (Variable "$A")
                                 (Variable "$T")))
@@ -212,7 +212,7 @@
                                 (DontExec (Variable "$Rule")))
                               (Variable "$B"))))
          (impl-consequent (Evaluation
-                            (Predicate "URE:BC:preproof")
+                            (Predicate "URE:BC:preproof-of")
                             (List
                               (Variable "$B")
                               (Variable "$T"))))
