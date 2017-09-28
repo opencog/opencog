@@ -10,14 +10,16 @@
 (define (term-length TERMS)
   "Helper function to find the maximum number of words one of
    the TERMS has, for setting the upper bound of the GlobNode."
+  (define (get-length term)
+    (cond ((equal? 'phrase (car term))
+           (length (string-split (cdr term) #\sp)))
+          ((equal? 'concept (car term))
+           (concept-length (Concept (cdr term))))
+          ((equal? 'sequence (car term))
+           (apply + (map get-length (cdr term))))
+          (else 1)))
   (fold
-    (lambda (term len)
-      (let ((tl (cond ((equal? 'phrase (car term))
-                       (length (string-split (cdr term) #\sp)))
-                      ((equal? 'concept (car term))
-                       (concept-length (Concept (cdr term))))
-                      (else 1))))
-           (max len tl)))
+    (lambda (term len) (max len (get-length term)))
     0
     TERMS))
 
@@ -28,8 +30,8 @@
   (if (null? c)
       -1  ; This may happen if the concept is not yet defined in the system...
       (fold (lambda (term len)
-        (let ((tl (cond ((equal? 'PhraseNode (cog-type term))
-                         (length (string-split (cog-name term) #\sp)))
+        (let ((tl (cond ((equal? 'ListLink (cog-type term))
+                         (length (cog-outgoing-set term)))
                         ((equal? 'ConceptNode (cog-type term))
                          (concept-length term))
                         (else 1))))
@@ -46,9 +48,11 @@
           ((equal? 'lemma (car t))
            (LemmaNode (get-lemma (cdr t))))
           ((equal? 'phrase (car t))
-           (PhraseNode (cdr t)))
+           (ListLink (map Word (string-split (cdr t) #\sp))))
           ((equal? 'concept (car t))
-           (Concept (cdr t)))
+           (ConceptNode (cdr t)))
+          ((equal? 'sequence (car t))
+           (List (flatten-list (terms-to-atomese (cdr t)))))
           (else (feature-not-supported (car t) (cdr t)))))
        TERMS))
 
@@ -137,19 +141,21 @@
     (cog-outgoing-set
       (cog-execute! (Get (Reference (Variable "$x") CONCEPT))))))
 
-(define (is-member? GRD LST)
-  "Check if GRD (the grounding of a glob) is a member of LST,
-   where LST may contain WordNodes, LemmaNodes, and PhraseNodes."
-  (let* ((raw-txt (string-join (map cog-name GRD)))
-         (lemma-txt (car (map (lambda (w) (get-lemma (cog-name w))) GRD))))
-    (any (lambda (t)
-           (or (and (eq? 'WordNode (cog-type t))
-                    (equal? raw-txt (cog-name t)))
-               (and (eq? 'LemmaNode (cog-type t))
-                    (equal? lemma-txt (cog-name t)))
-               (and (eq? 'PhraseNode (cog-type t))
-                    (equal? raw-txt (cog-name t)))))
-         LST)))
+(define (is-member? GRD MEMB)
+  "Check if GRD (the grounding of a glob) is a member of MEMB,
+   where MEMB may be a WordNode, LemmaNode, or a mix of them."
+  (any (lambda (m)
+         (or (and (equal? 'WordNode (cog-type m))
+                  (equal? 1 (length GRD))
+                  (equal? (cog-name m) (cog-name (car GRD))))
+             (and (equal? 'LemmaNode (cog-type m))
+                  (equal? 1 (length GRD))
+                  (equal? (cog-name m) (get-lemma (cog-name (car GRD)))))
+             (and (equal? 'ListLink (cog-type m))
+                  (equal? (length (cog-outgoing-set m)) (length GRD))
+                  (every (lambda (x y) (is-member? (list x) (list y)))
+                         GRD (cog-outgoing-set m)))))
+       MEMB))
 
 (define (text-contains? RTXT LTXT TERM)
   "Check if either RTXT or LTXT contains the string (name of) TERM."
@@ -160,8 +166,20 @@
          (contains? RTXT (cog-name TERM)))
         ((equal? 'LemmaNode (cog-type TERM))
          (contains? LTXT (cog-name TERM)))
-        ((equal? 'PhraseNode (cog-type TERM))
-         (contains? RTXT (cog-name TERM)))
+        ((equal? 'ListLink (cog-type TERM))
+         (contains? RTXT (string-join (map cog-name (cog-outgoing-set TERM)))))
         ((equal? 'ConceptNode (cog-type TERM))
          (any (lambda (t) (text-contains? RTXT LTXT t))
               (get-members TERM)))))
+
+(define (flatten-list LST)
+  "Remove unnecessary ListLink in LST, if any.
+   For example, turning:
+     (ListLink (Word \"hi\") (ListLink (Word \"you\") (Word \"robot\")))
+   into:
+     (ListLink (Word \"hi\") (Word \"you\") (Word \"robot\"))"
+  (map (lambda (x)
+         (if (equal? 'ListLink (cog-type x))
+             (cog-outgoing-set x)
+             x))
+       LST))

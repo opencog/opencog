@@ -119,17 +119,7 @@
     (list v c ws ls))
 
   (define (generate-eval pred seq)
-    ; If there is a ListLink in seq, e.g.
-    ; ((Word "good") (Word "to") (List (Word "see") (Word "you")))
-    ; get the outgoing set of it.
-    (define proc-seq
-      (map
-        (lambda (s)
-          (if (equal? 'ListLink (cog-type s))
-            (cog-outgoing-set s)
-            s))
-        seq))
-    (Evaluation pred (List (Variable "$S") (List proc-seq))))
+    (Evaluation pred (List (Variable "$S") (List (flatten-list seq)))))
 
   ; Start the processing
   (define terms (process TERMS))
@@ -239,7 +229,7 @@
         (set! pat-vars '())
         (cog-logger-debug ghost-logger "Context: ~a" ordered-terms)
         (cog-logger-debug ghost-logger "Procedure: ~a" ACTION)
-        (cog-logger-debug ghost-logger "Goal(s): ~a" goals)
+        (cog-logger-debug ghost-logger "Goal: ~a" goals)
         (map (lambda (goal)
                (psi-rule
                  (list (Satisfaction (VariableList vars) (And conds)))

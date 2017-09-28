@@ -8,7 +8,8 @@
    list of words and/or concepts that will be considered as the members
    of the concept."
   ; Convert the member in the form of a string into an atom, which can
-  ; either be a WordNode, LemmaNode, ConceptNode, or a PhraseNode.
+  ; either be a WordNode, LemmaNode, ConceptNode, or a list of WordNodes
+  ; or LemmaNodes
   (define (member-words STR)
     (let ((words (string-split STR #\sp)))
       (if (= 1 (length words))
@@ -16,7 +17,7 @@
                (cond ((string-prefix? "~" w) (Concept (substring w 1)))
                      ((is-lemma? w) (LemmaNode w))
                      (else (WordNode w))))
-          (PhraseNode STR))))
+          (ListLink (map Word words)))))
   (append-map (lambda (m) (list (Reference (member-words m) (Concept NAME))))
               MEMBERS))
 
@@ -43,7 +44,6 @@
          (l (WordNode (get-lemma STR)))
          (v (list (TypedVariable v1 (Type "WordNode"))
                   (TypedVariable v2 (Type "WordInstanceNode"))))
-         ; Note: This converts STR to its lemma
          (c (list (ReferenceLink v2 v1)
                   (LemmaLink v2 l)
                   (WordInstanceLink v2 (Variable "$P")))))

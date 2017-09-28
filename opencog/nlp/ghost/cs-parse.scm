@@ -518,13 +518,9 @@
     )
 
     (sequence-term
-      (wildcard) : $1
       (lemma) : $1
       (literal) : $1
       (phrase) : $1
-      (concept) : $1
-      (variable) : $1
-      (choice) : $1
     )
 
     ; TODO: This has a restart_matching effect. See chatscript documentation
