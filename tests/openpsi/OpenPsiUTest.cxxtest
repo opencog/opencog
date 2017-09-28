@@ -84,8 +84,7 @@ public:
         // core part of the other functions, that are tested, most tests fail
         // as a result. That is why main.scm is loaded here instead of running
         // (use-modules (opencog openpsi)).
-        _scm->eval("(load \"" PROJECT_SOURCE_DIR
-                   "/opencog/openpsi/main.scm\")");
+        _scm->eval("(use-modules (opencog openpsi))");
         CHKERR
         _scm->eval("(load \"" OPENPSI_TEST_PATH "/rules.scm\")");
         CHKERR
