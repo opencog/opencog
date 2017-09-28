@@ -60,20 +60,20 @@
 (define (process-pattern-terms TERMS)
   "Generate the atomese (i.e. the variable declaration and the pattern)
    for each of the TERMS."
-  (define vars '())
-  (define conds '())
-  (define word-seq '())
-  (define lemma-seq '())
   (define is-unordered? #f)
   (define (process terms)
+    (define v '())
+    (define c '())
+    (define ws '())
+    (define ls '())
     (define (update-lists t)
-      (set! vars (append vars (list-ref t 0)))
-      (set! conds (append conds (list-ref t 1)))
-      (set! word-seq (append word-seq (list-ref t 2)))
-      (set! lemma-seq (append lemma-seq (list-ref t 3))))
+      (set! v (append v (list-ref t 0)))
+      (set! c (append c (list-ref t 1)))
+      (set! ws (append ws (list-ref t 2)))
+      (set! ls (append ls (list-ref t 3))))
     (for-each (lambda (t)
       (cond ((equal? 'unordered-matching (car t))
-             (process (cdr t))
+             (update-lists (process (cdr t)))
              (set! is-unordered? #t))
             ((equal? 'word (car t))
              (update-lists (word (cdr t))))
@@ -90,8 +90,8 @@
             ((equal? 'wildcard (car t))
              (update-lists (wildcard (cadr t) (cddr t))))
             ((equal? 'variable (car t))
-             (process (cdr t))
-             (set! pat-vars (append pat-vars (last-pair word-seq))))
+             (update-lists (process (cdr t)))
+             (set! pat-vars (append pat-vars (last-pair ws))))
             ((equal? 'uvar_exist (car t))
              (set! conds (append conds (list (uvar-exist? (cdr t))))))
             ((equal? 'uvar_equal (car t))
@@ -108,11 +108,36 @@
                           (get-user-variable (cdr a)))
                          (else (WordNode (cdr a)))))
                    (cddr t)))))))
+            ((equal? 'sequence (car t))
+             (let ((pt (process (cdr t))))
+                  ; Wrap the sequences with a ListLink
+                  (list-set! pt 2 (list (List (list-ref pt 2))))
+                  (list-set! pt 3 (list (List (list-ref pt 3))))
+                  (update-lists pt)))
             (else (feature-not-supported (car t) (cdr t)))))
-      terms))
+      terms)
+    (list v c ws ls))
+
+  (define (generate-eval pred seq)
+    ; If there is a ListLink in seq, e.g.
+    ; ((Word "good") (Word "to") (List (Word "see") (Word "you")))
+    ; get the outgoing set of it.
+    (define proc-seq
+      (map
+        (lambda (s)
+          (if (equal? 'ListLink (cog-type s))
+            (cog-outgoing-set s)
+            s))
+        seq))
+    (Evaluation pred (List (Variable "$S") (List proc-seq))))
+
   ; Start the processing
-  (process TERMS)
-  ; Check if it's ordered or unordered
+  (define terms (process TERMS))
+  (define vars (list-ref terms 0))
+  (define conds (list-ref terms 1))
+  (define word-seq (list-ref terms 2))
+  (define lemma-seq (list-ref terms 3))
+
   (if is-unordered?
       ; Generate an EvaluationLink for each of the term in the seq
       ; if it's an unordered match
@@ -121,24 +146,21 @@
           (lambda (t)
             (let ((wc (wildcard 0 -1)))
               (set! vars (append vars (list-ref wc 0)))
-              (set! conds (append conds (list
-                (Evaluation ghost-word-seq (List (Variable "$S")
-                  (List (list-ref wc 2) t (list-ref wc 3)))))))))
+              (set! conds (append conds (list (generate-eval ghost-word-seq
+                (list (car (list-ref wc 2)) t (car (list-ref wc 3)))))))))
           word-seq)
         (for-each
           (lambda (t)
             (let ((wc (wildcard 0 -1)))
               (set! vars (append vars (list-ref wc 0)))
-              (set! conds (append conds (list
-                (Evaluation ghost-lemma-seq (List (Variable "$S")
-                  (List (list-ref wc 2) t (list-ref wc 3)))))))))
+              (set! conds (append conds (list (generate-eval ghost-lemma-seq
+                (list (car (list-ref wc 2)) t (car (list-ref wc 3)))))))))
           lemma-seq))
-      ; Below is for a typical ordered match
+      ; Otherwise it's an ordered match
       (set! conds (append conds (list
-        (Evaluation ghost-word-seq
-          (List (Variable "$S") (List word-seq)))
-        (Evaluation ghost-lemma-seq
-          (List (Variable "$S") (List lemma-seq)))))))
+        (generate-eval ghost-word-seq word-seq)
+        (generate-eval ghost-lemma-seq lemma-seq)))))
+
   ; DualLink couldn't match patterns with no constant terms in it
   ; Mark the rules with no constant terms so that they can be found
   ; easily during the matching process
@@ -146,6 +168,7 @@
               (length (filter (lambda (x) (equal? 'GlobNode (cog-type x)))
                               lemma-seq)))
       (MemberLink (List lemma-seq) ghost-no-constant))
+
   (list vars conds))
 
 (define (process-action ACTION)
