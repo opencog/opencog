@@ -59,7 +59,7 @@
 )
 
 ; --------------------------------------------------------------
-(define* (psi-rule context action goal a-stv demand)
+(define* (psi-rule-old context action goal a-stv demand)
 "
   psi-rule CONTEXT ACTION GOAL TV DEMAND - create a psi-rule.
 

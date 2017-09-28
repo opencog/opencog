@@ -34,6 +34,13 @@ public:
 
   /**
    * Add a rule to the atomspace and the psi-rule index.
+   * @return An ImplicationLink that forms a psi-rule. The structure
+   *  of the rule is
+   *    (ImplicationLink TV
+   *      (SequentialAndLink
+   *        context
+   *        action)
+   *      goal)
    */
   Handle add_rule(const HandleSeq& context, const Handle& action,
     const Handle& goal, const TruthValuePtr stv, const Handle& demand);

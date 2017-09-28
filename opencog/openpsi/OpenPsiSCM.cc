@@ -22,6 +22,8 @@
 #include <opencog/guile/SchemePrimitive.h>
 
 #include "OpenPsiImplicator.h"
+#include "OpenPsiRules.h"
+
 #include "OpenPsiSCM.h"
 
 using namespace opencog;
@@ -41,6 +43,9 @@ void OpenPsiSCM::init()
 
   define_scheme_primitive("psi-imply", &OpenPsiSCM::psi_imply,
     this, "openpsi");
+
+  define_scheme_primitive("psi-rule", &OpenPsiSCM::psi_rule,
+    this, "openpsi");
 }
 
 TruthValuePtr OpenPsiSCM::satisfiable(const Handle& himplication)
@@ -56,6 +61,16 @@ Handle OpenPsiSCM::psi_imply(const Handle& himplication)
   AtomSpace* as = SchemeSmob::ss_get_env_as("psi-imply");
   OpenPsiImplicator implicator(as);
   return implicator.imply(himplication);
+}
+
+Handle OpenPsiSCM::psi_rule(const HandleSeq& context, const Handle& action,
+  const Handle& goal, const TruthValuePtr stv, const Handle& demand)
+{
+  AtomSpace* as = SchemeSmob::ss_get_env_as("psi-rule");
+  // TODO: Should this be a singleton? What could be the issues that need
+  // to be handled?
+  OpenPsiRules rule_constructor(as);
+  return rule_constructor.add_rule(context, action, goal, stv, demand);
 }
 
 void* OpenPsiSCM::init_in_guile(void* self)

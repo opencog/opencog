@@ -51,6 +51,14 @@ private:
   Handle psi_imply(const Handle& himplication);
 
   /**
+   * Add psi-rule.
+   *
+   * @return An implication link which is a psi-rule.
+   */
+  Handle psi_rule(const HandleSeq& context, const Handle& action,
+    const Handle& goal, const TruthValuePtr stv, const Handle& demand);
+
+  /**
    * Init function for using with scm_with_guile. It creates the
    * openpsi scheme module and uses it by default.
    *
