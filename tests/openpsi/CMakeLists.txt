@@ -1,7 +1,9 @@
 LINK_LIBRARIES(
   ${ATOMSPACE_LIBRARIES}
   ${COGUTIL_LIBRARY}
+  openpsi
 )
 
 ADD_CXXTEST(OpenPsiUTest)
+ADD_CXXTEST(OpenPsiImplicatorUTest)
 #ADD_CXXTEST(OpenPsiExampleTest)

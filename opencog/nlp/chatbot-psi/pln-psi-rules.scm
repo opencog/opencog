@@ -14,8 +14,8 @@
         (True)
         (stv .95 .9)
         sociality
-        "select_pln_answer"
     )
+    "select_pln_answer"
 )
 
 ; If it's in the PLN reasoning mode and the reasoner hasn't have an
@@ -39,8 +39,8 @@
         (True)
         (stv .95 .9)
         sociality
-        "select_pln_answer"
     )
+    "select_pln_answer"
 )
 
 (psi-set-controlled-rule
@@ -55,8 +55,8 @@
         (True)
         (stv .95 .9)
         sociality
-        "select_pln_answer"
     )
+    "select_pln_answer"
 )
 
 (psi-set-controlled-rule
@@ -70,6 +70,6 @@
         (True)
         (stv .95 .9)
         sociality
-        "select_pln_answer"
     )
+    "select_pln_answer"
 )

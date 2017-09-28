@@ -138,7 +138,8 @@
 (psi-set-controlled-rule
 	(psi-rule (list (True))
 		(DefinedPredicate "Salient:Curious")
-		salient-demand-satisfied (stv 1 1) salient-demand "saliency-tracking"))
+		salient-demand-satisfied (stv 1 1) salient-demand)
+	"saliency-tracking")
 
 (psi-rule (list (DefinedPredicate "Room bright?"))
 	(DefinedPredicate "Bright:happy")
