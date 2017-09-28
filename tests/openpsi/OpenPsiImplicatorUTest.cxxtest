@@ -37,9 +37,10 @@ class OpenPsiImplicatorUTest : public CxxTest::TestSuite
 private:
   AtomSpace* _as;
   SchemeEval* _scm;
+  OpenPsiImplicator* _opi;
 
 public:
-  OpenPsiImplicatorUTest(): _as(nullptr), _scm(nullptr)
+  OpenPsiImplicatorUTest(): _as(nullptr), _scm(nullptr), _opi(nullptr)
   {
     logger().set_level(Logger::DEBUG);
     logger().set_print_level_flag(true);
@@ -49,10 +50,7 @@ public:
   ~OpenPsiImplicatorUTest()
   {
     // Clean Up
-    delete _as;
-    _as = nullptr;
-    delete _scm;
-    _scm = nullptr;
+    tearDown();
 
     // Erase the log file if no assertions failed
     if(!CxxTest::TestTracker::tracker().suiteFailed())
@@ -64,6 +62,7 @@ public:
     // The scheme environment is reset between each test.
     _as = new AtomSpace();
     _scm = new SchemeEval(_as);
+    _opi = new OpenPsiImplicator(_as);
 
     // Configure scheme load-paths that are common for all tests.
     _scm->eval("(add-to-load-path \"/usr/local/share/opencog/scm\")");
@@ -72,12 +71,21 @@ public:
     // Load require modules to be tested and populate the atomspace
     _scm->eval("(use-modules (opencog))");
     CHKERR
+    logger().info("##### Finished setting up to run a test #####");
   }
 
   void tearDown()
   {
     delete _as;
     _as = nullptr;
+    delete _scm;
+    _scm = nullptr;
+
+    // Reset the cache between each test.
+    _opi->_satisfiability_cache = {};
+    // OpenPsiImplicator::_satisfiability_cache = {};
+    delete _opi;
+    _opi = nullptr;
   }
 
   void test_check_satisfiability()
@@ -90,20 +98,47 @@ public:
     // Common Setup
     auto rule_1 = _scm->eval_h("(rule-1)");
     CHKERR
-    OpenPsiImplicator imply(_as);
     TruthValuePtr tv;
 
     // Test 1:
-    // Test behaviour when there is no grounding.
-    tv = imply.check_satisfiability(rule_1);
+    // Test when there is no grounding.
+    tv = _opi->check_satisfiability(rule_1);
     TSM_ASSERT_EQUALS("Expected (stv 0 1)", TruthValue::FALSE_TV(), tv);
 
     // Test 2:
-    // Test behaviour when there is a grounding.
+    // Test when there is a grounding.
     _scm->eval("(groundable-content-1)");
     CHKERR
-    tv = imply.check_satisfiability(rule_1);
+    tv = _opi->check_satisfiability(rule_1);
     TSM_ASSERT_EQUALS("Expected (stv 1 1)", TruthValue::TRUE_TV(), tv);
+
+    logger().info("END TEST: %s", __FUNCTION__);
+  }
+
+  void test_imply()
+  {
+    logger().info("BEGIN TEST: %s", __FUNCTION__);
+    // Load test atomspace configuration file.
+    _scm->eval("(load \"" OPENPSI_TEST_PATH "/psi-implicator.scm\")");
+    CHKERR
+
+    // Common Setup
+    auto rule_1 = _scm->eval_h("(groundable-content-1) (rule-1)");
+    CHKERR
+
+    // Test 1:
+    // Test when satisfiablity hasn't been checked.
+    Handle result_1 = _opi->imply(rule_1);
+    TSM_ASSERT_EQUALS("Expected null", nullptr, result_1);
+
+    // Test 2:
+    // Test when satisfiablity has been checked.
+    _opi->check_satisfiability(rule_1);
+    Handle result_2 = _opi->imply(rule_1);
+    auto expected_result = _scm->eval_h("(test_imply_solution)");
+    CHKERR
+    TSM_ASSERT_EQUALS("Expected grounded InheritanceLink",
+      expected_result, result_2);
 
     logger().info("END TEST: %s", __FUNCTION__);
   }

@@ -23,12 +23,18 @@
     (List
       (ConceptNode "Abeba")
       (ConceptNode "Beso")))
+  ;(InheritanceLink
+  ;  (ConceptNode "Chala")
+  ;  (ConceptNode "human"))
+  ;(EvaluationLink
+  ;  (Predicate "eat")
+  ;  (List
+  ;    (ConceptNode "Chala")
+  ;    (ConceptNode "Beso")))
+)
+
+(define (test_imply_solution)
   (InheritanceLink
-    (ConceptNode "Chala")
-    (ConceptNode "human"))
-  (EvaluationLink
-    (Predicate "eat")
-    (List
-      (ConceptNode "Chala")
-      (ConceptNode "Beso")))
+    (ConceptNode "Abeba")
+    (ConceptNode "animal"))
 )

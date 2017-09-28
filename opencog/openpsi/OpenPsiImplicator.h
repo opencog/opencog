@@ -28,11 +28,17 @@
 
 #include <opencog/query/Satisfier.h>
 
+class OpenPsiImplicatorUTest;
+
 namespace opencog
 {
 
 class OpenPsiImplicator: public virtual Satisfier
 {
+  // Needed for resetting private cache.
+  // TODO Why would one need to reset during psi-loop?
+  friend class ::OpenPsiImplicatorUTest;
+
 public:
   OpenPsiImplicator(AtomSpace* as);
 
