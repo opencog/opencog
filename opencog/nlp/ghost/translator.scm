@@ -93,11 +93,11 @@
              (update-lists (process (cdr t)))
              (set! pat-vars (append pat-vars (last-pair ws))))
             ((equal? 'uvar_exist (car t))
-             (set! conds (append conds (list (uvar-exist? (cdr t))))))
+             (set! c (append c (list (uvar-exist? (cdr t))))))
             ((equal? 'uvar_equal (car t))
-             (set! conds (append conds (list (uvar-equal? (cadr t) (caddr t))))))
+             (set! c (append c (list (uvar-equal? (cadr t) (caddr t))))))
             ((equal? 'function (car t))
-             (set! conds (append conds
+             (set! c (append c
                (list (context-function (cadr t)
                  (map (lambda (a)
                    (cond ((equal? 'get_wvar (car a))
