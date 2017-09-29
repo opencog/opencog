@@ -166,12 +166,12 @@ ImplicationScope <TV>
         Variable "$R"
       Variable "$B"
     Evaluation
-      Predicate "preproof"
+      Predicate "preproof-of"
       List
         Variable "$A"
         Variable "$T"
   Evaluation
-    Predicate "preproof"
+    Predicate "preproof-of"
     List
       Variable "$B"
       Variable "$T"
@@ -210,12 +210,12 @@ ImplicationScope <rule-TV>
         <rule>
       Variable "$B"
     Evaluation
-      Predicate "preproof"
+      Predicate "preproof-of"
       List
         Variable "$A"
         Variable "$T"
   Evaluation
-    Predicate "preproof"
+    Predicate "preproof-of"
     List
       Variable "$B"
       Variable "$T"
@@ -245,12 +245,12 @@ ImplicationScope <target-andbit-rule-TV>
         <rule>
       Variable "$B"
     Evaluation
-      Predicate "preproof"
+      Predicate "preproof-of"
       List
         <andbit>
         <target>
   Evaluation
-    Predicate "preproof"
+    Predicate "preproof-of"
     List
       Variable "$B"
       <target>
@@ -294,12 +294,12 @@ ImplicationScope <TV>
       Variable "$B"
     <pattern>
     Evaluation
-      Predicate "preproof"
+      Predicate "preproof-of"
       List
         Variable "$A"
         Variable "$T"
   Evaluation
-    Predicate "preproof"
+    Predicate "preproof-of"
     List
       Variable "$B"
       Variable "$T"
@@ -342,7 +342,7 @@ ImplicationScope <TV>
         <deduction-rule>
       Variable "$B"
     Evaluation
-      Predicate "preproof"
+      Predicate "preproof-of"
       List
         Variable "$A"
         Variable "$T"
@@ -353,7 +353,7 @@ ImplicationScope <TV>
         Variable "$L"
         <deduction-rule>
   Evaluation
-    Predicate "preproof"
+    Predicate "preproof-of"
     List
       Variable "$B"
       Variable "$T"
@@ -389,7 +389,7 @@ searching for a proof
 2. A certain and-BIT proofs a certain target
 ```
    EvaluationLink <TV>
-     PredicateNode "URE:BC:proof"
+     PredicateNode "URE:BC:proof-of"
      List
        <andbit_fcs>
        <target_result> <TV>
@@ -403,7 +403,7 @@ that A is a preproof of T.
 
 ```
    EvaluationLink <1 1>
-     PredicateNode "URE:BC:preproof"
+     PredicateNode "URE:BC:preproof-of"
      List
        <A>
        <T>
@@ -415,7 +415,7 @@ to be a preproof of T.
 
 ```
    EvaluationLink <0.0001 0.01>
-     PredicateNode "URE:BC:preproof"
+     PredicateNode "URE:BC:preproof-of"
      List
        <A>
        <T>

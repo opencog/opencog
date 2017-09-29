@@ -3,6 +3,8 @@
 (use-modules (srfi srfi-1))
 (use-modules (opencog logger))
 (use-modules (opencog randgen))
+(use-modules (opencog query))
+(use-modules (opencog rule-engine))
 
 ;; Set a logger for the experiment
 (define icl-logger (cog-new-logger))
@@ -36,6 +38,7 @@
 
 ;; Randomly generate N targets
 (define (gen-random-targets N)
+  ;; (list (Inheritance (Concept "B") (Concept "D"))))
   (if (= N 0)
       '()
       (cons (gen-random-target) (gen-random-targets (- N 1)))))
@@ -70,14 +73,20 @@
 ;; TV (null confidence) with empty incoming set
 (define (remove-dangling-atoms as)
   (let* ((old-as (cog-set-atomspace! as)))
-    (for-each remove-dangling-atom (get-all-atoms))
+    (remove-dangling-atom-list (get-all-atoms))
     (cog-set-atomspace! old-as)))
 
+(define (remove-dangling-atom-list atoms)
+  (for-each remove-dangling-atom atoms))
+
 ;; Remove the atom from the current atomspace if it is dangling. That
-;; is it has an empty incoming set and its TV has null confidence.
+;; is it has an empty incoming set and its TV has null
+;; confidence. Then call recursively on its outgoing set.
 (define (remove-dangling-atom atom)
   (if (and (cog-atom? atom) (null-incoming-set? atom) (null-confidence? atom))
-      (extract-hypergraph atom)))
+      (let* ((outgoings (cog-outgoing-set atom)))
+        (cog-delete atom)
+        (remove-dangling-atoms outgoings))))
 
 (define (null-incoming-set? atom)
   (null? (cog-incoming-set atom)))
@@ -91,8 +100,35 @@
     (cog-cp-all dst)
     (cog-set-atomspace! old-as)))
 
+;; Get atoms of a certain types from a given atomspace
+(define (cog-get-atoms-as as type)
+  (let ((old-as (cog-set-atomspace! as))
+        (atoms (cog-get-atoms type)))
+    (cog-set-atomspace! old-as)
+    atoms))
+
 ;; Clear a given atomspace
 (define (clear-as as)
   (let ((old-as (cog-set-atomspace! as)))
     (clear)
     (cog-set-atomspace! old-as)))
+
+;; Apply a rule to the given atoms
+(define (apply-rule rule . atoms)
+  ;; Create a temporary atomspace, Copy the rule and the atoms in it
+  (let ((tmp-as (cog-new-atomspace)))
+    (cog-cp (cons rule atoms) tmp-as)
+    ;; Switch to the temporary atomspace and apply the rule
+    (let ((init-as (cog-set-atomspace! tmp-as))
+          (results (cog-outgoing-set (cog-bind rule))))
+      ;; Switch back to the initial atomspace and return the results
+      (cog-set-atomspace! init-as)
+      results)))
+
+;; Apply rule n times and gather the results in a list of unique elements
+(define (repeat-apply-rule rule n)
+  (if (< 0 n)
+      (let* ((results-n (cog-outgoing-set (cog-bind rule)))
+             (results-rec (repeat-apply-rule rule (- n 1))))
+        (lset-union equal? results-n results-rec))
+      '()))
