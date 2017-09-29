@@ -32,6 +32,14 @@ class OpenPsiRules
 public:
   OpenPsiRules(AtomSpace* as);
 
+  inline Handle add_demand(const std::string& name) {
+    return add_tag(_psi_demand, name);
+  }
+
+  inline Handle add_goal(const std::string& name) {
+    return add_tag(_psi_goal, name);
+  }
+
   /**
    * Add a rule to the atomspace and the psi-rule index.
    * @return An ImplicationLink that forms a psi-rule. The structure
@@ -65,6 +73,17 @@ public:
 
 private:
   /**
+   * Declare a new_tag by adding the following structured atom into the
+   * atomspace
+   *      (InheritanceLink (ConceptNode "name") tag_type_node)
+   *
+   * @param tag_type_node The Node from which the new tag node inherites from.
+   * @param name The name of the ConceptNode that is going to be added
+   * @return ConceptNode created.
+   */
+  Handle add_tag(const Handle tag_type_node, const std::string& name);
+
+  /**
    * The structure of the tuple is (context, action, goal).
    */
   typedef std::tuple<HandleSeq, Handle, Handle> PsiTuple;
@@ -91,7 +110,12 @@ private:
   /**
    * Node used to declare a goal.
    */
-  // static Handle _psi_goal;
+  static Handle _psi_goal;
+
+  /**
+   * Node used to declare a demand.
+   */
+  static Handle _psi_demand;
 
   AtomSpace* _as;
 };
