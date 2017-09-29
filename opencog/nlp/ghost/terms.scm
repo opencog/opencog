@@ -176,7 +176,15 @@
 (define-public (ghost-get-lemma GRD)
   "Get the lemma of GRD, where GRD can be one or a list of WordNodes."
   (List (map Word (map get-lemma (map cog-name
-    (if (cog-link? GRD) (cog-outgoing-set GRD) (list GRD)))))))
+    (if (cog-link? GRD)
+        (cog-outgoing-set GRD)
+        ; If GRD is of type GlobNode or VariableNode,
+        ; something is wrong when grounding it,
+        ; but at least don't let the robot to say it out
+        (if (or (equal? 'GlobNode (cog-type GRD))
+                (equal? 'VariableNode (cog-type GRD)))
+            '()
+            (list GRD))))))))
 
 (define (get-var-lemmas VAR)
   "Turn the value grounded for VAR into lemmas."
