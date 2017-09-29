@@ -28,6 +28,8 @@
             (VariableNode "y1"))
         ))
 
+(define (context-1-cpp) (List context-1))
+
 (define action-1
     (EvaluationLink
         (GroundedPredicate "scm: act-1")
@@ -38,14 +40,9 @@
     (stv 1 1)
 )
 
-(define demand-1 (psi-demand  "demand-1"))
+(define (demand-1) (psi-demand  "demand-1"))
 
-(define goal-1
-    (EvaluationLink
-        (GroundedPredicateNode "scm: test-update-tv")
-        (ListLink
-            demand-1
-            (NumberNode .5))))
+(define goal-1 (Concept "goal-1"))
 
 (define (test-update-tv node strength)
     (cog-set-tv! node
@@ -53,7 +50,34 @@
     (stv 1 1)
 )
 
-(define (rule-1) (psi-rule context-1 action-1 goal-1 (stv 1 1) demand-1))
+(define (rule-1) (psi-rule context-1 action-1 goal-1 (stv 1 1) (demand-1)))
+(define (rule-1-cpp)
+  (ImplicationLink (stv 1 1)
+     (SequentialAndLink
+        (ListLink
+           (VariableNode "x1")
+           (VariableNode "y1")
+           (ConceptNode "Required constant for DualLink-1")
+           (VariableNode "z1")
+        )
+        (InheritanceLink
+           (VariableNode "x1")
+           (VariableNode "z1")
+        )
+        (EqualLink
+           (VariableNode "x1")
+           (VariableNode "y1")
+        )
+        (EvaluationLink
+           (GroundedPredicateNode "scm: act-1")
+           (ListLink
+              (VariableNode "$abc")
+           )
+        )
+     )
+     (ConceptNode "goal-1")
+  )
+)
 
 (define (groundable-content-1)
     (list
@@ -92,16 +116,11 @@
     (stv 1 1)
 )
 
-(define demand-2 (psi-demand  "demand-2"))
+(define (demand-2) (psi-demand  "demand-2"))
 
-(define goal-2
-    (EvaluationLink
-        (GroundedPredicateNode "scm: test-update-tv")
-        (ListLink
-            demand-2
-            (NumberNode .5))))
+(define goal-2 (Concept "goal-2"))
 
-(define (rule-2) (psi-rule context-2 action-2 goal-2 (stv 1 1) demand-2))
+(define (rule-2) (psi-rule context-2 action-2 goal-2 (stv 1 1) (demand-2)))
 
 (define (groundable-content-2)
     (list ; They are in a list so as to simplify removal.
@@ -114,7 +133,7 @@
             (NumberNode 2)))
 )
 
-(define (rule-3) (psi-rule context-2 action-2 goal-1 (stv 1 1) demand-1))
+(define (rule-3) (psi-rule context-2 action-2 goal-1 (stv 1 1) (demand-1)))
 
 ; --------------------------------------------------------------
 ; Helper functions for `OpenPsiUTest::test_psi_related_goals`
@@ -177,7 +196,7 @@
 
 ; --------------------------------------------------------------
 ; Helper functions for `OpenPsiUTest::test_psi_get_dual_rules`
-(define demand-4 (psi-demand  "demand-4"))
+(define (demand-4) (psi-demand  "demand-4"))
 
 (define action-4
     (EvaluationLink
@@ -189,12 +208,7 @@
     (stv 1 1)
 )
 
-(define goal-4
-    (EvaluationLink
-        (GroundedPredicateNode "scm: test-update-tv")
-        (ListLink
-            demand-4
-            (NumberNode .5))))
+(define goal-4 (Concept "goal-4"))
 
 
 (define (groundable-content-4)
@@ -210,13 +224,13 @@
 ; (rule-4) & (rule-5) are for usage with DualLink version of action-selection
 ; i.e. psi-satisfiable? should use DualLink
 (define (rule-4)
-    (psi-rule (groundable-content-4) action-4 goal-4 (stv 1 1) demand-4))
+    (psi-rule (groundable-content-4) action-4 goal-4 (stv 1 1) (demand-4)))
 
 ; --------------------------------------------------------------
 ; This doesn't have any groudings and as such is a rule of the
 ; evaluatable form.
 (define (rule-6)
-    (psi-rule (list (True)) action-6 goal-4 (stv 1 1) demand-4)
+    (psi-rule (list (True)) action-6 goal-4 (stv 1 1) (demand-4))
 )
 
 (define action-6
@@ -239,12 +253,12 @@
 (define (test_psi_step_4) (cog-node? (cog-node 'ConceptNode "act-6")))
 
 ; --------------------------------------------------------------
-;(define demand-5 (psi-demand  "demand-5"))
+;(define (demand-5) (psi-demand  "demand-5"))
 
 ;(define (rule-5)
 ;    (psi-rule
 ;        (list context-1 (groundable-content-4))
-;        action-1 goal-2 (stv 1 1) demand-5)
+;        action-1 goal-2 (stv 1 1) (demand-5))
 ;)
 
 ;(define (test_psi_get_dual_rules_1_1)

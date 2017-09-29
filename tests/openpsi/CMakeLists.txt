@@ -6,4 +6,5 @@ LINK_LIBRARIES(
 
 ADD_CXXTEST(OpenPsiUTest)
 ADD_CXXTEST(OpenPsiImplicatorUTest)
+ADD_CXXTEST(OpenPsiRulesUTest)
 #ADD_CXXTEST(OpenPsiExampleTest)
