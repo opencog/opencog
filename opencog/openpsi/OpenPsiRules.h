@@ -57,19 +57,19 @@ public:
    * @param rule A psi-rule.
    * @return Context of the given psi-rule.
    */
-  HandleSeq psi_get_context(const Handle rule);
+  HandleSeq get_context(const Handle rule);
 
   /**
    * @param rule A psi-rule.
    * @return Action of the given psi-rule.
    */
-  Handle psi_get_action(const Handle rule);
+  Handle get_action(const Handle rule);
 
   /**
    * @param rule A psi-rule.
    * @return Goal of the given psi-rule.
    */
-  Handle psi_get_goal(const Handle rule);
+  Handle get_goal(const Handle rule);
 
 private:
   /**

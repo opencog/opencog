@@ -52,12 +52,11 @@ bool OpenPsiImplicator::grounding(const HandleMap &var_soln,
   return true;
 }
 
-TruthValuePtr OpenPsiImplicator::check_satisfiability(
-  const Handle& himplication)
+TruthValuePtr OpenPsiImplicator::check_satisfiability(const Handle& rule)
 {
   // TODO: Replace this with the context, as psi-rule is
   // (context + action ->goal)
-  Handle context = himplication->getOutgoingAtom(0);
+  Handle context = rule->getOutgoingAtom(0);
 
   // TODO:
   // 1. How to prevent stale cache?
@@ -76,15 +75,15 @@ TruthValuePtr OpenPsiImplicator::check_satisfiability(
   }
 }
 
-Handle OpenPsiImplicator::imply(const Handle& himplication)
+Handle OpenPsiImplicator::imply(const Handle& rule)
 {
   // TODO: Replace this with the action, as psi-rule is
   // (context + action ->goal)
-  Handle context = himplication->getOutgoingAtom(0);
+  Handle context = rule->getOutgoingAtom(0);
   Instantiator inst(_as);
 
   if (_satisfiability_cache.count(context)) {
-    return inst.instantiate(himplication->getOutgoingAtom(1),
+    return inst.instantiate(rule->getOutgoingAtom(1),
               _satisfiability_cache.at(context), true);
   } else {
     // NOTE: Trying to check for satisfiablity isn't done because it

@@ -67,7 +67,7 @@ Handle OpenPsiRules::add_tag(const Handle tag_type_node,
   return tag;
 }
 
-HandleSeq OpenPsiRules::psi_get_context(const Handle rule)
+HandleSeq OpenPsiRules::get_context(const Handle rule)
 {
   if(_psi_rules.count(rule)) {
     return std::get<0>(_psi_rules[rule]);
@@ -76,7 +76,7 @@ HandleSeq OpenPsiRules::psi_get_context(const Handle rule)
   }
 }
 
-Handle OpenPsiRules::psi_get_action(const Handle rule)
+Handle OpenPsiRules::get_action(const Handle rule)
 {
   if(_psi_rules.count(rule)) {
     return std::get<1>(_psi_rules[rule]);
@@ -85,7 +85,7 @@ Handle OpenPsiRules::psi_get_action(const Handle rule)
   }
 }
 
-Handle OpenPsiRules::psi_get_goal(const Handle rule)
+Handle OpenPsiRules::get_goal(const Handle rule)
 {
   if(_psi_rules.count(rule)) {
     return std::get<2>(_psi_rules[rule]);
