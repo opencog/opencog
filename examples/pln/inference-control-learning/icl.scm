@@ -128,21 +128,10 @@
          ;; Load preproof-expanded-is-preproof rule base
          (dummy (load "preproof-expander-is-preproof.scm"))
          ;; Define BC target and vardecl
-         (target (Evaluation
-                   (Predicate "URE:BC:preproof-of")
-                   (List
-                     (Variable "$A")
-                     (Variable "$T"))))
-         (vardecl (VariableList
-                    (TypedVariable
-                      (Variable "$A")
-                      (Type "DontExecLink"))
-                    (Variable "$T")))
-         ;; Run pep over trace-as
-         (results (pep-bc target #:vardecl vardecl)))
+         (results (repeat-apply-rule pep-rule (- piter 1))))
     ;; Copy post-processed inference traces to the inference
     ;; history.
-    (cog-cp (cog-outgoing-set results) history-as)
+    (cog-cp results history-as)
     (remove-dangling-atoms trace-as)
     (cog-set-atomspace! default-as)))
 

@@ -38,6 +38,7 @@
 
 ;; Randomly generate N targets
 (define (gen-random-targets N)
+  ;; (list (Inheritance (Concept "B") (Concept "D"))))
   (if (= N 0)
       '()
       (cons (gen-random-target) (gen-random-targets (- N 1)))))
@@ -123,3 +124,11 @@
       ;; Switch back to the initial atomspace and return the results
       (cog-set-atomspace! init-as)
       results)))
+
+;; Apply rule n times and gather the results in a list of unique elements
+(define (repeat-apply-rule rule n)
+  (if (< 0 n)
+      (let* ((results-n (cog-outgoing-set (cog-bind rule)))
+             (results-rec (repeat-apply-rule rule (- n 1))))
+        (lset-union equal? results-n results-rec))
+      '()))

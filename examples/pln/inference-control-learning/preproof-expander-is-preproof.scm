@@ -78,6 +78,7 @@
         (Variable "$T")))))
 
 ;; Load useful PLN rules
+(add-to-load-path "../../../opencog/pln/")
 (define rule-filenames
   (list "meta-rules/predicate/conditional-full-instantiation.scm"
         "rules/propositional/fuzzy-conjunction-introduction.scm"
@@ -165,3 +166,141 @@
 ;; we can do that since the backward chainer is linear (it has only
 ;; one branch).
 (ure-set-num-parameter pep-rbs "URE:BC:complexity-penalty" -2)
+
+;; Actually: to speed this up we instead reapply the following rule,
+;; corresponding to a conditional instantiation followed by a
+;; conjunction, piter-1 times
+(define pep-rule
+(BindLink
+  (VariableList
+    (TypedVariableLink
+      (VariableNode "$A")
+      (TypeNode "DontExecLink")
+    )
+    (VariableNode "$T")
+    (TypedVariableLink
+      (VariableNode "$B-cc00185")
+      (TypeNode "DontExecLink")
+    )
+    (TypedVariableLink
+      (VariableNode "$R-7b43bfa2")
+      (TypeNode "DontExecLink")
+    )
+    (VariableNode "$L-359df4eb")
+  )
+  (AndLink
+    (EvaluationLink
+      (PredicateNode "URE:BC:preproof-of")
+      (ListLink
+        (VariableNode "$B-cc00185")
+        (VariableNode "$T")
+      )
+    )
+    (ExecutionLink
+      (SchemaNode "URE:BC:expand-and-BIT")
+      (ListLink
+        (VariableNode "$A")
+        (VariableNode "$L-359df4eb")
+        (VariableNode "$R-7b43bfa2")
+      )
+      (VariableNode "$B-cc00185")
+    )
+  )
+  (ExecutionOutputLink
+    (GroundedSchemaNode "scm: conditional-full-instantiation-scope-formula")
+    (ListLink
+      (EvaluationLink
+        (PredicateNode "URE:BC:preproof-of")
+        (ListLink
+          (VariableNode "$A")
+          (VariableNode "$T")
+        )
+      )
+      (ExecutionOutputLink
+        (GroundedSchemaNode "scm: fuzzy-conjunction-introduction-formula")
+        (ListLink
+          (AndLink
+            (EvaluationLink
+              (PredicateNode "URE:BC:preproof-of")
+              (ListLink
+                (VariableNode "$B-cc00185")
+                (VariableNode "$T")
+              )
+            )
+            (ExecutionLink
+              (SchemaNode "URE:BC:expand-and-BIT")
+              (ListLink
+                (VariableNode "$A")
+                (VariableNode "$L-359df4eb")
+                (VariableNode "$R-7b43bfa2")
+              )
+              (VariableNode "$B-cc00185")
+            )
+          )
+          (SetLink
+            (EvaluationLink
+              (PredicateNode "URE:BC:preproof-of")
+              (ListLink
+                (VariableNode "$B-cc00185")
+                (VariableNode "$T")
+              )
+            )
+            (ExecutionLink
+              (SchemaNode "URE:BC:expand-and-BIT")
+              (ListLink
+                (VariableNode "$A")
+                (VariableNode "$L-359df4eb")
+                (VariableNode "$R-7b43bfa2")
+              )
+              (VariableNode "$B-cc00185")
+            )
+          )
+        )
+      )
+      (ImplicationScopeLink (stv 1.000000 1.000000)
+        (VariableList
+          (TypedVariableLink
+            (VariableNode "$A")
+            (TypeNode "DontExecLink")
+          )
+          (TypedVariableLink
+            (VariableNode "$B")
+            (TypeNode "DontExecLink")
+          )
+          (TypedVariableLink
+            (VariableNode "$R")
+            (TypeNode "DontExecLink")
+          )
+          (VariableNode "$L")
+          (VariableNode "$T")
+        )
+        (AndLink
+          (ExecutionLink
+            (SchemaNode "URE:BC:expand-and-BIT")
+            (ListLink
+              (VariableNode "$A")
+              (VariableNode "$L")
+              (VariableNode "$R")
+            )
+            (VariableNode "$B")
+          )
+          (EvaluationLink
+            (PredicateNode "URE:BC:preproof-of")
+            (ListLink
+              (VariableNode "$B")
+              (VariableNode "$T")
+            )
+          )
+        )
+        (EvaluationLink
+          (PredicateNode "URE:BC:preproof-of")
+          (ListLink
+            (VariableNode "$A")
+            (VariableNode "$T")
+          )
+        )
+      )
+    )
+  )
+)
+)
