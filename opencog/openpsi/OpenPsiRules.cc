@@ -49,5 +49,35 @@ Handle OpenPsiRules::add_rule(const HandleSeq& context, const Handle& action,
   rule->setTruthValue(stv);
   _as->add_link(MEMBER_LINK, rule, demand);
 
+  // Add to the index of rules.
+  _psi_rules[rule] = std::make_tuple(context, action, goal);
+
   return rule;
+}
+
+HandleSeq OpenPsiRules::psi_get_context(const Handle rule)
+{
+  if(_psi_rules.count(rule)) {
+    return std::get<0>(_psi_rules[rule]);
+  } else {
+    return {};
+  }
+}
+
+Handle OpenPsiRules::psi_get_action(const Handle rule)
+{
+  if(_psi_rules.count(rule)) {
+    return std::get<1>(_psi_rules[rule]);
+  } else {
+    return Handle::UNDEFINED;
+  }
+}
+
+Handle OpenPsiRules::psi_get_goal(const Handle rule)
+{
+  if(_psi_rules.count(rule)) {
+    return std::get<2>(_psi_rules[rule]);
+  } else {
+    return Handle::UNDEFINED;
+  }
 }
