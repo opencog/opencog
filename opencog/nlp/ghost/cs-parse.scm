@@ -370,6 +370,7 @@
       (DQUOTE) : "(cons 'str \"\\\"\")"
       (LEMMA) : (format #f "(cons 'str \"~a\")" $1)
       (LITERAL) : (format #f "(cons 'str \"~a\")" $1)
+      (NUM) : (format #f "(cons 'str \"~a\")" $1)
       (STRING) : (format #f "(cons 'str \"~a\")" $1)
       (variable) : $1
       ; e.g. $username
