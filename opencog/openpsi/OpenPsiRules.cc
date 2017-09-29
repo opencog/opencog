@@ -67,12 +67,13 @@ Handle OpenPsiRules::add_tag(const Handle tag_type_node,
   return tag;
 }
 
-HandleSeq OpenPsiRules::get_context(const Handle rule)
+HandleSeq& OpenPsiRules::get_context(const Handle rule)
 {
   if(_psi_rules.count(rule)) {
     return std::get<0>(_psi_rules[rule]);
   } else {
-    return {};
+    HandleSeq* hs = new HandleSeq();
+    return *hs;
   }
 }
 

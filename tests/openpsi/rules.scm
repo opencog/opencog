@@ -106,6 +106,8 @@
             (VariableNode "z2")))
         ))
 
+(define (context-2-cpp) (List context-2))
+
 (define action-2
     (EvaluationLink
         (GroundedPredicate "scm: act-2")
@@ -121,6 +123,35 @@
 (define goal-2 (Concept "goal-2"))
 
 (define (rule-2) (psi-rule context-2 action-2 goal-2 (stv 1 1) (demand-2)))
+
+(define (rule-2-cpp)
+  (ImplicationLink (stv 1 1)
+     (SequentialAndLink
+        (ListLink
+           (VariableNode "x2")
+           (ConceptNode "Required constant for DualLink-2")
+           (VariableNode "z2")
+        )
+        (InheritanceLink
+           (VariableNode "x2")
+           (VariableNode "z2")
+        )
+        (NotLink
+           (EqualLink
+              (VariableNode "x2")
+              (VariableNode "z2")
+           )
+        )
+        (EvaluationLink
+           (GroundedPredicateNode "scm: act-2")
+           (ListLink
+              (VariableNode "$abc")
+           )
+        )
+     )
+     (ConceptNode "goal-2")
+  )
+)
 
 (define (groundable-content-2)
     (list ; They are in a list so as to simplify removal.

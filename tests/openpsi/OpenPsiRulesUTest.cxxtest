@@ -21,6 +21,7 @@
 
 #include <cxxtest/TestSuite.h>
 
+#include <opencog/atoms/base/Link.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/guile/SchemeEval.h>
 #include <opencog/truthvalue/SimpleTruthValue.h>
@@ -86,14 +87,17 @@ public:
     // Reset the cache between each test.
     delete _opr;
     _opr = nullptr;
+    // TODO: Clear the index.
   }
 
+  // Check OpenPsiRules::add_rule is addng the openpsi rule properly.
   void test_add_rule()
   {
     logger().info("BEGIN TEST: %s", __FUNCTION__);
+
     _scm->eval("(load \"" OPENPSI_TEST_PATH "/rules.scm\")");
     CHKERR
-    Handle context_1 = _scm->eval_h("(context-1-cpp)");
+    HandleSeq context_1 = _scm->eval_h("(context-1-cpp)")->getOutgoingSet();
     CHKERR
     Handle action_1 = _scm->eval_h("action-1");
     CHKERR
@@ -103,11 +107,51 @@ public:
 
     // Test 1:
     // Check if the rule is added properly.
-    Handle rule_1 = _opr->add_rule(context_1->getOutgoingSet(),
-      action_1, goal_1, SimpleTruthValue::createTV(1.0, 1.0), demand_1);
+    Handle rule_1 = _opr->add_rule(context_1, action_1, goal_1,
+      SimpleTruthValue::createTV(1.0, 1.0), demand_1);
     Handle expected_rule_1 = _scm->eval_h("(rule-1-cpp)");
     CHKERR
     TSM_ASSERT_EQUALS("Expected to be equal", expected_rule_1, rule_1);
+
+    // TODO: Add test to check if the index is being updated when
+    // multiple rules are added.
+
+    logger().info("END TEST: %s", __FUNCTION__);
+  }
+
+  // Check OpenPsiRules::get_context is behaving as expected. If the rule
+  // is added into the atomspace using OpenPsiRules::add_rule then it
+  // should behave as tested here.
+  void test_get_context()
+  {
+    logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+    // Common Setup
+    _scm->eval("(use-modules (opencog openpsi))");
+    CHKERR
+    _scm->eval("(load \"" OPENPSI_TEST_PATH "/rules.scm\")");
+    CHKERR
+
+    // Test 1:
+    // If the rule isn't added using OpenPsiRules::add_rule then
+    // the index doesn't know about it.
+    Handle rule_2 = _scm->eval_h("(rule-2-cpp)");
+    CHKERR
+    HandleSeq& result_1 = OpenPsiRules::get_context(rule_2);
+    TSM_ASSERT_EQUALS("Expected to be empty", 0, result_1.size());
+
+    // Test 2:
+    // If the rule is added using OpenPsiRules::add_rule then
+    // the index is aware of it.
+    _scm->eval_h("(rule-2)");
+    CHKERR
+    HandleSeq expected_context_2 = \
+    _scm->eval_h("(context-2-cpp)")->getOutgoingSet();
+    CHKERR
+    HandleSeq& result_2 = OpenPsiRules::get_context(rule_2);
+    // A Link is created so as to use operator==.
+    TSM_ASSERT_EQUALS("Expected to be equal",
+      *(createLink(expected_context_2).get()), *(createLink(result_2).get()));
 
     logger().info("END TEST: %s", __FUNCTION__);
   }

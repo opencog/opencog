@@ -57,7 +57,7 @@ public:
    * @param rule A psi-rule.
    * @return Context of the given psi-rule.
    */
-  HandleSeq get_context(const Handle rule);
+  static HandleSeq& get_context(const Handle rule);
 
   /**
    * @param rule A psi-rule.
@@ -86,6 +86,8 @@ private:
   /**
    * The structure of the tuple is (context, action, goal).
    */
+  // TODO: should the context be a HandleSeq pointer? Maybe just wrap it
+  // in a link?
   typedef std::tuple<HandleSeq, Handle, Handle> PsiTuple;
 
   /**
