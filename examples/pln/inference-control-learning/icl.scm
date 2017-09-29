@@ -25,10 +25,10 @@
 (cog-logger-set-stdout! icl-logger #t)
 ;; (cog-logger-set-stdout! (cog-ure-logger) #t)
 
-;; ;; Set loggers sync (for debugging)
-;; (cog-logger-set-sync! #t)
-;; (cog-logger-set-sync! icl-logger #t)
-;; (cog-logger-set-sync! (cog-ure-logger) #t)
+;; Set loggers sync (for debugging)
+(cog-logger-set-sync! #t)
+(cog-logger-set-sync! icl-logger #t)
+(cog-logger-set-sync! (cog-ure-logger) #t)
 
 ;; Set parameters
 (define pss 100)                    ; Problem set size
@@ -105,18 +105,19 @@
   (apply-and-bit-prior)
 
   ;; Copy Execution relationships to history-as to capture the
-  ;; expansions and finally remove all possible cruft from it
-  (cp-as-atoms trace-as (cog-get-atoms 'ExecutionLink) history-as)
+  ;; expansions and remove cruft from it
+  (cog-cp (cog-get-atoms-as trace-as 'ExecutionLink) history-as)
   (remove-dangling-atoms history-as))
 
-;; Turn apply proof-is-preproof rule to trace-as and copy the results
-;; to history-as
+;; Apply proof-is-preproof rule to trace-as and copy the results to
+;; history-as
 (define (apply-proof-is-preproof)
-  (load "proof-is-preproof.scm")
   (let* ((default-as (cog-set-atomspace! trace-as))
+         (dummy (load "proof-is-preproof.scm"))
          (results (cog-bind proof-is-preproof-rule)))
     (cog-cp (cog-outgoing-set results) history-as)
     (remove-dangling-atoms trace-as)
+    (extract-hypergraph proof-is-preproof)
     (cog-set-atomspace! default-as)))
 
 ;; Run preproof-expander-is-preproof rule base over trace-as and copy
@@ -142,7 +143,6 @@
     ;; Copy post-processed inference traces to the inference
     ;; history.
     (cog-cp (cog-outgoing-set results) history-as)
-    (cog-delete results)
     (remove-dangling-atoms trace-as)
     (cog-set-atomspace! default-as)))
 
@@ -169,7 +169,6 @@
     ;; Copy post-processed inference traces to the inference
     ;; history.
     (cog-cp (cog-outgoing-set results) history-as)
-    (cog-delete results)
     (remove-dangling-atoms trace-as)
     (cog-set-atomspace! default-as)))
 

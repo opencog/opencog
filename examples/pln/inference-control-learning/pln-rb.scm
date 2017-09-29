@@ -84,4 +84,4 @@
 (ure-set-num-parameter pln-rbs "URE:maximum-iterations" piter)
 
 ;; Complexity penalty
-(ure-set-num-parameter pln-rbs "URE:BC:complexity-penalty" 0.001)
+(ure-set-num-parameter pln-rbs "URE:BC:complexity-penalty" 1)

@@ -72,14 +72,20 @@
 ;; TV (null confidence) with empty incoming set
 (define (remove-dangling-atoms as)
   (let* ((old-as (cog-set-atomspace! as)))
-    (for-each remove-dangling-atom (get-all-atoms))
+    (remove-dangling-atom-list (get-all-atoms))
     (cog-set-atomspace! old-as)))
 
+(define (remove-dangling-atom-list atoms)
+  (for-each remove-dangling-atom atoms))
+
 ;; Remove the atom from the current atomspace if it is dangling. That
-;; is it has an empty incoming set and its TV has null confidence.
+;; is it has an empty incoming set and its TV has null
+;; confidence. Then call recursively on its outgoing set.
 (define (remove-dangling-atom atom)
   (if (and (cog-atom? atom) (null-incoming-set? atom) (null-confidence? atom))
-      (extract-hypergraph atom)))
+      (let* ((outgoings (cog-outgoing-set atom)))
+        (cog-delete atom)
+        (remove-dangling-atoms outgoings))))
 
 (define (null-incoming-set? atom)
   (null? (cog-incoming-set atom)))
@@ -93,11 +99,12 @@
     (cog-cp-all dst)
     (cog-set-atomspace! old-as)))
 
-;; Copy a list of atoms from an atomspace to another atomspace
-(define (cp-as-atoms src atoms dst)
-  (let ((old-as (cog-set-atomspace! src)))
-    (cog-cp atoms dst)
-    (cog-set-atomspace! old-as)))
+;; Get atoms of a certain types from a given atomspace
+(define (cog-get-atoms-as as type)
+  (let ((old-as (cog-set-atomspace! as))
+        (atoms (cog-get-atoms type)))
+    (cog-set-atomspace! old-as)
+    atoms))
 
 ;; Clear a given atomspace
 (define (clear-as as)

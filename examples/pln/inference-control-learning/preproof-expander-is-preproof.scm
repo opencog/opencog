@@ -112,9 +112,56 @@
 ;; Associate rules to rule base
 (ure-add-rules pep-rbs rules)
 
-;; Termination criteria parameters. We need 2*piter + 1, 1 to
-;; initialize the BIT, and 2*piter because piter is the maximum depth
-;; of expansions that may happen while solving the problem, and we
-;; need to combine 2 rules, preproof-expander-is-preproof and
-;; fuzzy-conjunction-introduction-2ary.
-(ure-set-num-parameter pep-rbs "URE:maximum-iterations" (+ 1 (* 2 piter)))
+;; Termination criteria parameters. Let n = piter-1, which is the
+;; maximum inference size we may obtain from solving a problem, -1
+;; comes from the fact the first iteration merely initialize the BIT.
+;;
+;; We have to grow a chain of preproof expansion of maximum size 2*n
+;; because 2 rules must be applied in series, conditional
+;; instantiation followed by conjunction introduction. At each
+;; iteration, assuming the chain has size i, there are at most i/2+1
+;; premises to choose from, i/2 dead-ends and 1 correct, to understand
+;; why you may look at the inference tree example
+;;
+;;  [12683283867560939830][14] [12823859965981897975][14]
+;;  =======fuzzy-conjunction-introduction-formula========
+;;               [16933538436290672077][14] [10726136630260592600][3]
+;;               ----conditional-full-instantiation-scope-formula----
+;; [16373111896861386537][14] [17721967112989671184][14]
+;; =======fuzzy-conjunction-introduction-formula========
+;;              [14468762034246325305][14] [10726136630260592600][3]
+;;              ----conditional-full-instantiation-scope-formula----
+;;                           [10889719491974701818][3]
+;;
+;; here i=4, the correct premise to expand is either
+;; [12683283867560939830][14] or [12823859965981897975][14], while
+;; [16373111896861386537][14] is surely a dead-end but may still be
+;; choosen for expansion during this iteration. Premise
+;; [10726136630260592600][3] won't be expanded because it has a
+;; confidence of 1. So the number of premises that can be expanded is
+;; 3, or 4/2+1.
+;;
+;; Thus in the course of the inference the maximum number of
+;; iterations we may need is
+;;
+;; 1 + sum_i=0^(2*n) i/2+1
+;;
+;; 1 for initializing the BIT, and the rest for the sum of all
+;; possible expansions assuming the inference has maximum size i so
+;; far.
+;;
+;; Which can be simplified into
+;;
+;; (piter + 1) / 2 + piter^2
+;;
+;; TODO: it's still expensive. I can think of 2 other options 1. write
+;;       or even better learn control rules to speed that up.
+;;       2. iterate piter-1 times instantiation . conjunction
+(ure-set-num-parameter pep-rbs "URE:maximum-iterations"
+                       (ceiling (exact->inexact (+ (/ (+ piter 1) 2)
+                                                   (* piter piter)))))
+
+;; Complexity penalty, negative so that it always expands the biggest,
+;; we can do that since the backward chainer is linear (it has only
+;; one branch).
+(ure-set-num-parameter pep-rbs "URE:BC:complexity-penalty" -2)
