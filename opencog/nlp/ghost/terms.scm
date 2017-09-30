@@ -245,6 +245,8 @@
                (list (extract-txt (cog-outgoing-set a))))
               ((equal? 'WordNode (cog-type a))
                (list (cog-name a)))
+              ((equal? 'ConceptNode (cog-type a))
+               (list (cog-name a)))
               ; TODO: things other than text
               (else '())))
         actions)))
