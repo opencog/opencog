@@ -31,7 +31,8 @@
 ;;   Y
 (define (gen-random-target)
   (let* ((Ai (cog-randgen-randint 25))
-         (Bi (+ Ai (random (- 26 Ai))))
+         (offset (+ Ai 1))
+         (Bi (+ offset (random (- 26 offset))))
          (A (alphabet-ref Ai))
          (B (alphabet-ref Bi)))
     (Inheritance (Concept A) (Concept B))))
