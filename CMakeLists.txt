@@ -133,8 +133,8 @@ ENDIF (WIN32)
 # ===================================================================
 # Check for existance of various required, optional packages.
 
-# Check for cogutils first, then check for atomspace
-# Cogutils
+# Check for cogutil first, then check for atomspace
+# Cogutil
 FIND_PACKAGE(CogUtil 2.0.1 REQUIRED)
 IF (COGUTIL_FOUND)
 	MESSAGE(STATUS "CogUtil found.")
