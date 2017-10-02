@@ -25,10 +25,10 @@
 (cog-logger-set-stdout! icl-logger #t)
 ;; (cog-logger-set-stdout! (cog-ure-logger) #t)
 
-;; Set loggers sync (for debugging)
-(cog-logger-set-sync! #t)
-(cog-logger-set-sync! icl-logger #t)
-(cog-logger-set-sync! (cog-ure-logger) #t)
+;; ;; Set loggers sync (for debugging)
+;; (cog-logger-set-sync! #t)
+;; (cog-logger-set-sync! icl-logger #t)
+;; (cog-logger-set-sync! (cog-ure-logger) #t)
 
 ;; Set parameters
 (define pss 100)                    ; Problem set size
@@ -98,16 +98,37 @@
 (define (postprocess-corpus)
   (icl-logger-info "Post-process trace, add to inference history")
 
+  (icl-logger-debug "Size of history-as 1 = ~a" (count-atoms-as history-as))
+  (icl-logger-debug "Size of trace-as 1 = ~a" (count-atoms-as trace-as))
+
   ;; Apply preprocessing rules (or rule bases) to trace-as (the order
   ;; is important)
   (apply-proof-is-preproof)
+
+  (icl-logger-debug "Size of history-as 2 = ~a" (count-atoms-as history-as))
+  (icl-logger-debug "Size of trace-as 2 = ~a" (count-atoms-as trace-as))
+
   (apply-preproof-expander-is-preproof)
+
+  (icl-logger-debug "Size of history-as 3 = ~a" (count-atoms-as history-as))
+  (icl-logger-debug "Size of trace-as 3 = ~a" (count-atoms-as trace-as))
+
   (apply-and-bit-prior)
+
+  (icl-logger-debug "Size of history-as 4 = ~a" (count-atoms-as history-as))
+  (icl-logger-debug "Size of trace-as 4 = ~a" (count-atoms-as trace-as))
 
   ;; Copy Execution relationships to history-as to capture the
   ;; expansions and remove cruft from it
   (cog-cp (cog-get-atoms-as trace-as 'ExecutionLink) history-as)
-  (remove-dangling-atoms history-as))
+
+  (icl-logger-debug "Size of history-as 5 = ~a" (count-atoms-as history-as))
+  (icl-logger-debug "Size of trace-as 5 = ~a" (count-atoms-as trace-as))
+
+  (remove-dangling-atoms history-as)
+
+  (icl-logger-debug "Size of history-as 6 = ~a" (count-atoms-as history-as))
+  (icl-logger-debug "Size of trace-as 6 = ~a" (count-atoms-as trace-as)))
 
 ;; Apply proof-is-preproof rule to trace-as and copy the results to
 ;; history-as
