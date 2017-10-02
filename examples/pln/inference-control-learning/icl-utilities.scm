@@ -133,3 +133,10 @@
              (results-rec (repeat-apply-rule rule (- n 1))))
         (lset-union equal? results-n results-rec))
       '()))
+
+;; Count the number of atoms in an given atomspace
+(define (count-atoms-as as)
+  (let ((old-as (cog-set-atomspace! as))
+        (result (count-all)))
+    (cog-set-atomspace! old-as)
+    result))
