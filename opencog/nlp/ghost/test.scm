@@ -8,7 +8,7 @@
   "Try to find (and execute) the matching rules given an input TXT."
   (define sent (car (nlp-parse TXT)))
   (State ghost-anchor sent)
-  (map (lambda (r) (cog-evaluate! (gdar r)))
+  (map (lambda (r) (psi-imply r))
        (cog-outgoing-set (chat-find-rules sent)))
   *unspecified*)
 
