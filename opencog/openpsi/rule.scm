@@ -59,9 +59,9 @@
 )
 
 ; --------------------------------------------------------------
-(define* (psi-rule context action goal a-stv demand  #:optional name)
+(define* (psi-rule-old context action goal a-stv demand)
 "
-  psi-rule CONTEXT ACTION GOAL TV DEMAND [NAME] - create a psi-rule.
+  psi-rule CONTEXT ACTION GOAL TV DEMAND - create a psi-rule.
 
   Associate an action with a context such that, if the action is
   taken, then the goal will be satisfied. The structure of a rule
@@ -90,9 +90,6 @@
     be a SimpleTruthValue.
 
   DEMAND is a Node, representing the demand that this rule affects.
-
-  NAME is an optional argument; if it is provided, then it should be
-    a string that will be associated with the rule.
 "
     (let ((implication
             (Implication a-stv (SequentialAndLink context action) goal)))
@@ -102,17 +99,6 @@
         (MemberLink action psi-action)
 
         (MemberLink implication demand)
-
-        ; If a name is given, its used for control/feedback purposes.
-        ; TODO: This isn't necessary the hash (returned value by of cog-handle)
-        ; could be used as a hash is unique and reproducable.
-        (if name
-            (EvaluationLink
-                psi-rule-name-predicate-node
-                (ListLink
-                    implication
-                    (ConceptNode (string-append psi-prefix-str name))))
-        )
 
         implication
     )
@@ -228,6 +214,23 @@ actions are EvaluationLinks, not schemas or ExecutionOutputLinks.
     (cog-outgoing-atom rule 1)
 )
 
+; --------------------------------------------------------------
+(define (psi-rule-set-alias psi-rule name)
+"
+  psi-rule-set-alias PSI-RULE NAME
+
+  NAME is a string that will be associated with the rule and is used
+    as a repeatable means of referring to the rule. The hash of the
+    rule can't be used, because it is a function of the Type of atoms,
+    and there is no guarantee that the relationship between Types is
+    static as a result of which the hash-value could change.
+"
+    (EvaluationLink
+        psi-rule-name-predicate-node
+        (ListLink
+            psi-rule
+            (ConceptNode (string-append psi-prefix-str name))))
+)
 ; --------------------------------------------------------------
 (define (psi-rule-alias psi-rule)
 "

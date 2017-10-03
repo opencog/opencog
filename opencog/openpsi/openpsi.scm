@@ -26,7 +26,6 @@
     psi-rule-set-atomese-weight psi-set-controlled-rule
     psi-get-controlled-rules psi-rule-atomese-weight
     psi-controller-update-weights psi-rule-disable psi-rule-enable
-    psi-rule
 
     ; From rule.scm
     psi-get-rules psi-get-all-rules psi-rule? psi-get-all-actions psi-action?
@@ -35,7 +34,7 @@
     psi-rule-satisfiability psi-get-satisfiable-rules
     psi-get-weighted-satisfiable-rules psi-get-all-satisfiable-rules
     psi-get-all-weighted-satisfiable-rules psi-context-weight psi-action-weight
-    psi-goal psi-goal?
+    psi-goal psi-goal? psi-rule-set-alias
 
     ; From main.scm
     psi-running? psi-get-loop-count psi-run-continue? psi-step psi-run psi-halt
@@ -44,8 +43,13 @@
     ; From utilities.scm
     psi-prefix-str psi-suffix-str psi-get-exact-match psi-get-dual-match
     psi-get-members
+
+    ; C++ bindings from libopenpsi
+    psi-satisfy psi-imply psi-rule
     )
 )
+
+(load-extension "libopenpsi" "opencog_openpsi_init")
 
 (load-from-path "opencog/openpsi/action-selector.scm")
 (load-from-path "opencog/openpsi/demand.scm")

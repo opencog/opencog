@@ -96,9 +96,9 @@ installer at `/scripts/octool`.  Users of any version of Linux may
 use the Dockerfile to quickly build a container in which OpenCog will
 be built and run.
 
-###### cogutils
+###### cogutil
 > Common OpenCog C++ utilities
-> http://github.com/opencog/cogutils
+> http://github.com/opencog/cogutil
 > It uses exactly the same build procedure as this package. Be sure
   to `sudo make install` at the end.
 

@@ -2,7 +2,7 @@ This directory contains example scripts for starting the restapi and
 interacting with it through a client.
 
 # Steps
-1. Install atomspace and cogutils
+1. Install atomspace and cogutil
 2. Run the following, replace `/path/to/opencog/clone` with your actual git
    clone path.
 

@@ -33,6 +33,12 @@
 ;; Note that depending on <eval-type> the arguments should be
 ;; swapped. For instance MemberLink and EvaluationLink have swapped
 ;; arguments.
+;;
+;; Defined rules are:
+;;
+;; conditional-full-instantiation-implication-scope-meta-rule
+;; conditional-full-instantiation-implication-meta-rule
+;; conditional-full-instantiation-inheritance-meta-rule
 ;; -----------------------------------------------------------------------
 
 (use-modules (srfi srfi-1))
