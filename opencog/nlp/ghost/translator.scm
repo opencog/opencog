@@ -12,7 +12,14 @@
   "Order the terms in the intended order, and insert wildcards into
    appropriate positions of the sequence.
    No operation is needed if the pattern is supposed to be matched in
-   any order."
+   any order.
+   Finally make sure there is no meaningless consecutive
+   wildcard/variable in the term list we are going to return, as that
+   may cause a glob to be grounded incorrectly."
+  (define (merge-wildcard INT1 INT2)
+    (cons (max (car INT1) (car INT2))
+          (cond ((or (negative? (cdr INT1)) (negative? (cdr INT2))) -1)
+                (else (max (cdr INT1) (cdr INT2))))))
   (let* ((as (cons 'anchor-start "<"))
          (ae (cons 'anchor-end ">"))
          (wc (cons 'wildcard (cons 0 -1)))
@@ -22,40 +29,70 @@
          (start (if start-anchor? (cdr (member as TERMS)) (list wc)))
          (end (if end-anchor?
                   (take-while (lambda (t) (not (equal? ae t))) TERMS)
-                  (list wc))))
-        (cond (unordered? TERMS)  ; Nothing needs to be done
-              ((and start-anchor? end-anchor?)
-               (if (equal? start-anchor? end-anchor?)
-                   ; If they are equal, we are not expecting
-                   ; anything else, either one of them is
-                   ; the whole sequence
-                   (drop-right start 1)
-                   ; If they are not equal, put a wildcard
-                   ; in between them
-                   (append start (list wc) end)))
-               ; If there is only a start-anchor, append it and
-               ; a wildcard with the main-seq
-              (start-anchor?
-               (let ((before-anchor-start
-                       (take-while (lambda (t) (not (equal? as t))) TERMS)))
-                    (if (null? before-anchor-start)
-                        (append start end)
-                        ; In case there are terms before anchor-start,
-                        ; get it and add an extra wildcard
-                        (append start (list wc) before-anchor-start end))))
-              ; If there is only an end-anchor, the main-seq should start
-              ; with a wildcard, follow by another wildcard and finally
-              ; the end-seq
-              (end-anchor?
-               (let ((after-anchor-end (cdr (member ae TERMS))))
-                    (if (null? after-anchor-end)
-                        (append start end)
-                        ; In case there are still terms after anchor-end,
-                        ; get it and add an extra wildcard
-                        (append start after-anchor-end (list wc) end))))
-              ; If there is no anchor, the main-seq should start and
-              ; end with a wildcard
-              (else (append (list wc) TERMS (list wc))))))
+                  (list wc)))
+         (term-lst (cond (unordered? TERMS)  ; Nothing needs to be done
+                   ((and start-anchor? end-anchor?)
+                    (if (equal? start-anchor? end-anchor?)
+                        ; If they are equal, we are not expecting
+                        ; anything else, either one of them is
+                        ; the whole sequence
+                        (drop-right start 1)
+                        ; If they are not equal, put a wildcard
+                        ; in between them
+                        (append start (list wc) end)))
+                    ; If there is only a start-anchor, append it and
+                    ; a wildcard with the main-seq
+                   (start-anchor?
+                    (let ((before-anchor-start
+                            (take-while (lambda (t) (not (equal? as t))) TERMS)))
+                         (if (null? before-anchor-start)
+                             (append start end)
+                             ; In case there are terms before anchor-start,
+                             ; get it and add an extra wildcard
+                             (append start (list wc) before-anchor-start end))))
+                   ; If there is only an end-anchor, the main-seq should start
+                   ; with a wildcard, follow by another wildcard and finally
+                   ; the end-seq
+                   (end-anchor?
+                    (let ((after-anchor-end (cdr (member ae TERMS))))
+                         (if (null? after-anchor-end)
+                             (append start end)
+                             ; In case there are still terms after anchor-end,
+                             ; get it and add an extra wildcard
+                             (append start after-anchor-end (list wc) end))))
+                   ; If there is no anchor, the main-seq should start and
+                   ; end with a wildcard
+                   (else (append (list wc) TERMS (list wc))))))
+        (fold-right
+          (lambda (term prev)
+            (cond ; If there are two consecutive wildcards, e.g.
+                  ; (wildcard 0 . -1) (wildcard 3. 5)
+                  ; merge them
+                  ((and (equal? 'wildcard (car term))
+                        (equal? 'wildcard (car (first prev))))
+                   (cons (cons 'wildcard
+                               (merge-wildcard (cdr term) (cdr (first prev))))
+                         (cdr prev)))
+                  ; If there is a variable that matches to "zero or more"
+                  ; followed by a wildcard, e.g.
+                  ; (variable (wildcard 0 . -1)) (wildcard 3 . 6)
+                  ; return the variable
+                  ((and (equal? 'variable (car term))
+                        (equal? (cadr term) (cons 'wildcard (cons 0 -1)))
+                        (equal? 'wildcard (car (first prev))))
+                   (cons term (cdr prev)))
+                  ; Similarly if there is a wildcard followed by a variable
+                  ; that matches to "zero or more", e.g.
+                  ; (wildcard 0 . -1) (variable (wildcard 0 . -1))
+                  ; return the variable, i.e. ignore this wildcard
+                  ((and (equal? 'wildcard (car term))
+                        (equal? 'variable (car (first prev)))
+                        (equal? (cadr (first prev)) (cons 'wildcard (cons 0 -1))))
+                   prev)
+                  ; Otherwise accept and append it to the list
+                  (else (cons term prev))))
+          (list (last term-lst))
+          (list-head term-lst (- (length term-lst) 1)))))
 
 (define (process-pattern-terms TERMS)
   "Generate the atomese (i.e. the variable declaration and the pattern)

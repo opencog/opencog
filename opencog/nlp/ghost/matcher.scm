@@ -40,7 +40,6 @@
 
         ; TODO: Pick the one with the highest weight
         (List (append-map
-          ; TODO: "psi-satisfiable?" doesn't work here (?)
           (lambda (r)
             (if (equal? (stv 1 1) (psi-satisfy r))
                 (list r)
