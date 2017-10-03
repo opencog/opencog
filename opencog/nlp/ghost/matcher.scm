@@ -30,21 +30,22 @@
                    ; with unique implicants
                    (if (any (lambda (r) (equal? (gar r) (gar rule))) prev)
                        prev (append prev (list rule))))
-                 (list) (append exact-match no-const dual-match))))
-
+                 (list) (append exact-match no-const dual-match)))
+         ; Evaluate the matched rules one by one and see which of them satisfy
+         (rules-satisfied
+           (append-map
+             (lambda (r)
+               (if (equal? (stv 1 1) (psi-satisfy r))
+                   (list r)
+                   '()))
+             rules-matched)))
         (cog-logger-debug ghost-logger "For input:\n~a" input-lseq)
         (cog-logger-debug ghost-logger "Rules with no constant:\n~a" no-const)
         (cog-logger-debug ghost-logger "Exact match:\n~a" exact-match)
         (cog-logger-debug ghost-logger "Dual match:\n~a" dual-match)
         (cog-logger-debug ghost-logger "Rules matched:\n~a" rules-matched)
-
-        ; TODO: Pick the one with the highest weight
-        (List (append-map
-          (lambda (r)
-            (if (equal? (stv 1 1) (psi-satisfy r))
-                (list r)
-                '()))
-          rules-matched))))
+        (cog-logger-debug ghost-logger "Rules satisfied:\n~a" rules-satisfied)
+        (List rules-satisfied)))
 
 (Define
   (DefinedSchema "Get Current Input")
