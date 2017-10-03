@@ -232,8 +232,6 @@
 (define-public (ghost-execute-action . ACTIONS)
   "Say the text and update the internal state."
   (define (extract-txt actions)
-    ; TODO: Right now it is extracting text only, but should be extended
-    ; to support actions that contains are not text as well.
     (string-join (append-map
       (lambda (a)
         (cond ((cog-link? a)
@@ -245,9 +243,9 @@
               ; TODO: things other than text
               (else '())))
         actions)))
-  (define txt (extract-txt ACTIONS))
+  (define txt (string-trim (extract-txt ACTIONS)))
   ; Is there anything to say?
-  (if (not (string-null? (string-trim txt)))
+  (if (not (string-null? txt))
       (begin (cog-logger-info ghost-logger "Say: \"~a\"" txt)
              (cog-execute! (Put (DefinedPredicate "Say") (Node txt)))))
   ; Reset the state
