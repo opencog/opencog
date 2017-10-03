@@ -42,8 +42,7 @@
         (List (append-map
           ; TODO: "psi-satisfiable?" doesn't work here (?)
           (lambda (r)
-            (if (equal? (stv 1 1)
-                        (cog-evaluate! (car (psi-get-context r))))
+            (if (equal? (stv 1 1) (psi-satisfy r))
                 (list r)
                 '()))
           rules-matched))))
