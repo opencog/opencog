@@ -98,7 +98,7 @@
 ;; Copy all atoms from an atomspace to another atomspace
 (define (cp-as src dst)
   (let ((old-as (cog-set-atomspace! src)))
-    (cog-cp-all dst)
+    (icl-cp-all dst)
     (cog-set-atomspace! old-as)))
 
 ;; Get atoms of a certain types from a given atomspace
@@ -118,13 +118,15 @@
 (define (apply-rule rule . atoms)
   ;; Create a temporary atomspace, Copy the rule and the atoms in it
   (let ((tmp-as (cog-new-atomspace)))
-    (cog-cp (cons rule atoms) tmp-as)
+    (icl-cp tmp-as (cons rule atoms))
     ;; Switch to the temporary atomspace and apply the rule
-    (let ((init-as (cog-set-atomspace! tmp-as))
-          (results (cog-outgoing-set (cog-bind rule))))
-      ;; Switch back to the initial atomspace and return the results
+    (let* ((init-as (cog-set-atomspace! tmp-as))
+           (results (cog-outgoing-set (cog-bind rule)))
+           (init-results (icl-cp init-as results)))
+
+      ;; Switch back to it and return the results
       (cog-set-atomspace! init-as)
-      results)))
+      init-results)))
 
 ;; Apply rule n times and gather the results in a list of unique elements
 (define (repeat-apply-rule rule n)
@@ -140,3 +142,40 @@
         (result (count-all)))
     (cog-set-atomspace! old-as)
     result))
+
+;; Build an atomspace that is a union of a list of atomspaces
+(define (union-as dst atomspaces)
+  (for-each (lambda (src) (cp-as src dst)) atomspaces))
+
+;; Redefine cog-cp and cog-cp-all to return a list of copied atoms
+;; (indeed these are not the same the ones in the source).
+(define-public (icl-cp AS LST)
+"
+  icl-cp AS LST - Copy the atoms in LST to the given atomspace AS and
+  return the list of atoms now in AS.
+"
+  (define initial-as (cog-atomspace))
+
+  (if (equal? AS initial-as)
+    (error "Destination atomspace is the same as the current atomspace\n"))
+
+  ;; Switch to destination atomspace.
+  (cog-set-atomspace! AS)
+
+  ;; The creation of a ListLink result in the atoms being inserted in
+  ;; the current atomspace.
+  (let* ((LST-List (List LST))
+         (results (cog-outgoing-set LST-List)))
+    ;; Remove List link cruft
+    (cog-delete LST-List)
+    ;; Switch back to initial atomspace.
+    (cog-set-atomspace! initial-as)
+    ;; Return the copied LST now in AS
+    results))
+
+(define-public (icl-cp-all AS)
+"
+  icl-cp-all AS - Copy all atoms in the current atomspace to the given atomspace AS and returns the list of copied atoms.
+"
+  (icl-cp AS (apply append (map cog-get-atoms (cog-get-types))))
+)
