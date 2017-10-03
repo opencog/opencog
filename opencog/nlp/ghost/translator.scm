@@ -230,15 +230,16 @@
         (cog-logger-debug ghost-logger "Context: ~a" ordered-terms)
         (cog-logger-debug ghost-logger "Procedure: ~a" ACTION)
         (cog-logger-debug ghost-logger "Goal: ~a" goals)
-        (map (lambda (goal)
-               (psi-rule
-                 (list (Satisfaction (VariableList vars) (And conds)))
-                 action
-                 (psi-goal (car goal))
-                 (stv (cdr goal) .9)
-                 (if (null? TOPIC) default-topic TOPIC)
-                 NAME))
-             goals)))
+        (map (lambda (rule)
+               (if (string-null? NAME) rule (psi-rule-set-alias rule NAME)))
+             (map (lambda (goal)
+                    (psi-rule
+                      (list (Satisfaction (VariableList vars) (And conds)))
+                      action
+                      (psi-goal (car goal))
+                      (stv (cdr goal) .9)
+                      (if (null? TOPIC) default-topic TOPIC)))
+                  goals))))
 
 ; ----------
 ; Topic
