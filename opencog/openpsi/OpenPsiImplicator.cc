@@ -22,6 +22,7 @@
 #include <opencog/atoms/execution/Instantiator.h>
 
 #include "OpenPsiImplicator.h"
+#include "OpenPsiRules.h"
 
 using namespace opencog;
 
@@ -56,7 +57,7 @@ TruthValuePtr OpenPsiImplicator::check_satisfiability(const Handle& rule)
 {
   // TODO: Replace this with the context, as psi-rule is
   // (context + action ->goal)
-  Handle context = rule->getOutgoingAtom(0);
+  Handle query =  OpenPsiRules::get_query(rule);
 
   // TODO:
   // 1. How to prevent stale cache?
@@ -64,11 +65,11 @@ TruthValuePtr OpenPsiImplicator::check_satisfiability(const Handle& rule)
   // 3. What happens if the atoms are removed for the atomspace for
   // whatever reason? Is signal the only means?
   if (_update_cache) {
-    PatternLinkPtr plp =  createPatternLink(context);
+    PatternLinkPtr plp =  createPatternLink(query);
     plp->satisfy(*this);
   }
 
-  if (_satisfiability_cache.count(context)) {
+  if (_satisfiability_cache.count(query)) {
     return TruthValue::TRUE_TV();
   } else {
     return TruthValue::FALSE_TV();
@@ -79,12 +80,12 @@ Handle OpenPsiImplicator::imply(const Handle& rule)
 {
   // TODO: Replace this with the action, as psi-rule is
   // (context + action ->goal)
-  Handle context = rule->getOutgoingAtom(0);
+  Handle query = OpenPsiRules::get_query(rule);
   Instantiator inst(_as);
 
-  if (_satisfiability_cache.count(context)) {
-    return inst.instantiate(rule->getOutgoingAtom(1),
-              _satisfiability_cache.at(context), true);
+  if (_satisfiability_cache.count(query)) {
+    return inst.instantiate(OpenPsiRules::get_action(rule),
+              _satisfiability_cache.at(query), true);
   } else {
     // NOTE: Trying to check for satisfiablity isn't done because it
     // is the responsibility of the action-selector for determining

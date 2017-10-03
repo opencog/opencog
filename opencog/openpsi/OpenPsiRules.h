@@ -63,13 +63,20 @@ public:
    * @param rule A psi-rule.
    * @return Action of the given psi-rule.
    */
-  Handle get_action(const Handle rule);
+  static Handle get_action(const Handle rule);
 
   /**
    * @param rule A psi-rule.
    * @return Goal of the given psi-rule.
    */
   Handle get_goal(const Handle rule);
+
+  /**
+   * @param rule A psi-rule.
+   * @return Query atom used to check if the context of the given psi-rule is
+   *  satisfiable or not.
+   */
+  static Handle get_query(const Handle rule);
 
 private:
   /**
@@ -84,11 +91,14 @@ private:
   Handle add_tag(const Handle tag_type_node, const std::string& name);
 
   /**
-   * The structure of the tuple is (context, action, goal).
+   * The structure of the tuple is (context, action, goal, query_body),
+   * where query_body is structured as (AndLink context), and is not added
+   * to the atomspace.
+   *
    */
-  // TODO: should the context be a HandleSeq pointer? Maybe just wrap it
-  // in a link?
-  typedef std::tuple<HandleSeq, Handle, Handle> PsiTuple;
+  // TODO should query_body replace context ? Why shouldn't the context
+  // of a psi-rule be wrapped in an AndLink?
+  typedef std::tuple<HandleSeq, Handle, Handle, Handle> PsiTuple;
 
   /**
    * This is a index with the keys being the psi-rules and the corresponding

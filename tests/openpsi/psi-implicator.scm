@@ -1,17 +1,29 @@
-(define (rule-1)
-  (Implication
-      (And
-        (InheritanceLink
-          (VariableNode "$H")
-          (ConceptNode "human"))
-        (EvaluationLink
-          (Predicate "eat")
-          (List
-            (VariableNode "$H")
-            (ConceptNode "Beso"))))
-     (InheritanceLink
+(use-modules (opencog) (opencog openpsi))
+
+(define context-1
+  (list
+    (InheritanceLink
+      (VariableNode "$H")
+      (ConceptNode "human"))
+    (EvaluationLink
+      (Predicate "eat")
+      (List
         (VariableNode "$H")
-        (ConceptNode "animal"))))
+        (ConceptNode "Beso"))))
+)
+
+(define action-1
+  (InheritanceLink
+    (VariableNode "$H")
+    (ConceptNode "animal"))
+)
+
+(define (demand-1) (psi-demand  "demand-1"))
+
+; TODO Replace with psi-goal.
+(define goal-1 (Concept "goal-1"))
+
+(define (rule-1) (psi-rule context-1 action-1 goal-1 (stv 1 1) (demand-1)))
 
 (define (groundable-content-1)
 ; Some data to populate the atomspace for grounding (rule-1)

@@ -71,7 +71,6 @@ public:
     // Load require modules to be tested and populate the atomspace
     _scm->eval("(use-modules (opencog))");
     CHKERR
-    logger().info("##### Finished setting up to run a test #####");
   }
 
   void tearDown()
@@ -91,11 +90,10 @@ public:
   void test_check_satisfiability()
   {
     logger().info("BEGIN TEST: %s", __FUNCTION__);
-    // Load test atomspace configuration file.
-    _scm->eval("(load \"" OPENPSI_TEST_PATH "/psi-implicator.scm\")");
-    CHKERR
 
     // Common Setup
+    _scm->eval("(load \"" OPENPSI_TEST_PATH "/psi-implicator.scm\")");
+    CHKERR
     auto rule_1 = _scm->eval_h("(rule-1)");
     CHKERR
     TruthValuePtr tv;
@@ -118,11 +116,10 @@ public:
   void test_imply()
   {
     logger().info("BEGIN TEST: %s", __FUNCTION__);
-    // Load test atomspace configuration file.
-    _scm->eval("(load \"" OPENPSI_TEST_PATH "/psi-implicator.scm\")");
-    CHKERR
 
     // Common Setup
+    _scm->eval("(load \"" OPENPSI_TEST_PATH "/psi-implicator.scm\")");
+    CHKERR
     auto rule_1 = _scm->eval_h("(groundable-content-1) (rule-1)");
     CHKERR
 

@@ -20,6 +20,7 @@
  */
 
 #include <opencog/atoms/base/Node.h>
+#include <opencog/atoms/base/Link.h>
 
 #include "OpenPsiRules.h"
 
@@ -53,8 +54,11 @@ Handle OpenPsiRules::add_rule(const HandleSeq& context, const Handle& action,
   rule->setTruthValue(stv);
   _as->add_link(MEMBER_LINK, rule, demand);
 
+  // Construct the query atom that is used to check satisfiablity
+  Handle query_body = Handle(createLink(context, AND_LINK)) ;
+
   // Add to the index of rules.
-  _psi_rules[rule] = std::make_tuple(context, action, goal);
+  _psi_rules[rule] = std::make_tuple(context, action, goal, query_body);
 
   return rule;
 }
@@ -72,6 +76,7 @@ HandleSeq& OpenPsiRules::get_context(const Handle rule)
   if(_psi_rules.count(rule)) {
     return std::get<0>(_psi_rules[rule]);
   } else {
+    // TODO: Should this be a shared ptr to avoid memory leak?
     HandleSeq* hs = new HandleSeq();
     return *hs;
   }
@@ -90,6 +95,15 @@ Handle OpenPsiRules::get_goal(const Handle rule)
 {
   if(_psi_rules.count(rule)) {
     return std::get<2>(_psi_rules[rule]);
+  } else {
+    return Handle::UNDEFINED;
+  }
+}
+
+Handle OpenPsiRules::get_query(const Handle rule)
+{
+  if(_psi_rules.count(rule)) {
+    return std::get<3>(_psi_rules[rule]);
   } else {
     return Handle::UNDEFINED;
   }
