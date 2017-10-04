@@ -151,7 +151,10 @@
                   (list-set! pt 2 (list (List (list-ref pt 2))))
                   (list-set! pt 3 (list (List (list-ref pt 3))))
                   (update-lists pt)))
-            (else (feature-not-supported (car t) (cdr t)))))
+            (else (begin
+              (cog-logger-warn ghost-logger
+                "Feature not supported: \"(~a ~a)\"" (car t) (cdr t))
+              (throw 'FeatureNotSupported (car t) (cdr t))))))
       terms)
     (list v c ws ls))
 
@@ -257,26 +260,31 @@
   "Top level translation function. Pattern is a quoted list of terms,
    and action is a quoted list of actions or a single action."
   (cog-logger-debug "In create-rule\nPATTERN = ~a\nACTION = ~a" PATTERN ACTION)
-  (let* ((ordered-terms (order-terms PATTERN))
-         (proc-terms (process-pattern-terms ordered-terms))
-         (vars (append atomese-variable-template (list-ref proc-terms 0)))
-         (conds (append atomese-condition-template (list-ref proc-terms 1)))
-         (action (process-action ACTION))
-         (goals (process-goal GOAL)))
-        (set! pat-vars '())
-        (cog-logger-debug ghost-logger "Context: ~a" ordered-terms)
-        (cog-logger-debug ghost-logger "Procedure: ~a" ACTION)
-        (cog-logger-debug ghost-logger "Goal: ~a" goals)
-        (map (lambda (rule)
-               (if (string-null? NAME) rule (psi-rule-set-alias rule NAME)))
-             (map (lambda (goal)
-                    (psi-rule
-                      (list (Satisfaction (VariableList vars) (And conds)))
-                      action
-                      (psi-goal (car goal))
-                      (stv (cdr goal) .9)
-                      (if (null? TOPIC) default-topic TOPIC)))
-                  goals))))
+  (catch #t
+    (lambda ()
+      (let* ((ordered-terms (order-terms PATTERN))
+             (proc-terms (process-pattern-terms ordered-terms))
+             (vars (append atomese-variable-template (list-ref proc-terms 0)))
+             (conds (append atomese-condition-template (list-ref proc-terms 1)))
+             (action (process-action ACTION))
+             (goals (process-goal GOAL)))
+            (set! pat-vars '())
+            (cog-logger-debug ghost-logger "Context: ~a" ordered-terms)
+            (cog-logger-debug ghost-logger "Procedure: ~a" ACTION)
+            (cog-logger-debug ghost-logger "Goal: ~a" goals)
+            (map (lambda (rule)
+                   (if (string-null? NAME) rule (psi-rule-set-alias rule NAME)))
+                 (map (lambda (goal)
+                        (psi-rule
+                          (list (Satisfaction (VariableList vars) (And conds)))
+                          action
+                          (psi-goal (car goal))
+                          (stv (cdr goal) .9)
+                          (if (null? TOPIC) default-topic TOPIC)))
+                      goals))))
+    (lambda (key . parameters)
+      (if (not (equal? key 'FeatureNotSupported))
+          (cog-logger-error ghost-logger "~a: ~a" key parameters)))))
 
 ; ----------
 ; Topic

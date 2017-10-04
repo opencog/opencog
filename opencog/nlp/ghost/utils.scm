@@ -53,7 +53,10 @@
            (ConceptNode (cdr t)))
           ((equal? 'sequence (car t))
            (List (flatten-list (terms-to-atomese (cdr t)))))
-          (else (feature-not-supported (car t) (cdr t)))))
+          (else (begin
+            (cog-logger-warn ghost-logger
+              "Feature not supported: \"(~a ~a)\"" (car t) (cdr t))
+            (throw 'FeatureNotSupported (car t) (cdr t))))))
        TERMS))
 
 (define (sent-get-word-seqs SENT)
