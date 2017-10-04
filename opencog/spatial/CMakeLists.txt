@@ -34,11 +34,13 @@ ADD_LIBRARY(SpaceMap SHARED
 ADD_DEPENDENCIES(SpaceMap
 	spacetime_atom_types
 	spacetime-types
+    time_octomap
 )
 
 TARGET_LINK_LIBRARIES(SpaceMap
 	server
 	spacetime-types
+    time_octomap
 	${ATOMSPACE_query_LIBRARY}
 	${ATOMSPACE_LIBRARY}
 	${Boost_THREAD_LIBRARY}

@@ -31,7 +31,6 @@ void OpencogOcTreeNode::cloneNodeRecur(const OpencogOcTreeNode& rhs)
             }
         }
     }
-
 }
 
 OpencogOcTreeNode::OpencogOcTreeNode(const OpencogOcTreeNode& rhs): OcTreeNode(rhs)

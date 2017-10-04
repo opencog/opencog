@@ -98,6 +98,7 @@ IF (HAVE_ATOMSPACE)
 		INSTALL (TARGETS spacetime_cython
 			DESTINATION "lib${LIB_DIR_SUFFIX}/python2.7/dist-packages/opencog")
 
+IF(FALSE) #TO COMMENT OUT THE BELOW CODE
 		############################ spatial #########################
 		CYTHON_ADD_MODULE_PYX(spatial
 			"${ATOMSPACE_INCLUDE_DIR}/opencog/cython/opencog/atomspace.pxd"
@@ -126,6 +127,7 @@ IF (HAVE_ATOMSPACE)
 			DESTINATION "lib${LIB_DIR_SUFFIX}/python2.7/dist-packages/opencog")
 	ENDIF (HAVE_OCTOMAP)
 ENDIF (HAVE_ATOMSPACE)
+ENDIF()
 
 
 IF (HAVE_SERVER)

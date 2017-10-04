@@ -27,10 +27,10 @@
 #include <vector>
 #include <opencog/atomspace/AtomSpace.h>
 #include "Block3DMapUtil.h"
-#include "OpencogOcTree.h"
 
 
 using namespace std;
+
 namespace opencog
 {
 /** \addtogroup grp_spatial
@@ -39,20 +39,30 @@ namespace opencog
 
     namespace spatial
     {
-        class OpencogOcTree;
+        class AtomOcTree;
 
         class Pathfinder3D
         {
-        public:
-            // When getNearestPos is true,return the nearestPos as well, which would possibably useful when it cannot find a path,at least it find the nearest location to the target;
-            // The bestPos is calculated by the A* heuristics which consider the cost of moving and the distance to the target, heuristic = (target - pos)*1.41421356f + (begin - pos)
-static bool AStar3DPathFinder(AtomSpace* atomSpace, OpencogOcTree* mapManager, const BlockVector& begin, const BlockVector& target,
-                                          vector<BlockVector>& path, BlockVector& nearestPos,BlockVector& bestPos, bool getNearestPos = false, bool getBestPos = false, bool tryOptimal = false);
-            static double calculateCostByDistance(const BlockVector& begin,const BlockVector& target,const BlockVector& pos,float &nearestDis,BlockVector& nearestPos,float& bestHeuristic, BlockVector& bestPos);
-            static bool checkNeighbourAccessable(OpencogOcTree *mapManager, BlockVector& lastPos, int i, int j, int k);
+            public:
+                // When getNearestPos is true,return the nearestPos as well, which would possibably useful when
+                // it cannot find a path,at least it find the nearest location to the target;
+                // The bestPos is calculated by the A* heuristics which consider the cost of moving and the distance
+                //  to the target, heuristic = (target - pos)*1.41421356f + (begin - pos)
+
+                static bool AStar3DPathFinder(AtomSpace* atomSpace, octomap::AtomOcTree<Handle>* mapManager,
+                        const BlockVector& begin, const BlockVector& target,
+                        vector<BlockVector>& path, BlockVector& nearestPos,
+                        BlockVector& bestPos, bool getNearestPos = false, 
+                        bool getBestPos = false, bool tryOptimal = false);
+
+                static double calculateCostByDistance(const BlockVector& begin,const BlockVector& target,
+                        const BlockVector& pos,float &nearestDis,BlockVector& nearestPos,
+                        float& bestHeuristic, BlockVector& bestPos);
+
+                static bool checkNeighbourAccessable(octomap::AtomOcTree<Handle> *mapManager, BlockVector& lastPos, int i, int j, int k);
         };
     }
-/** @}*/
+    /** @}*/
 }
 
 
