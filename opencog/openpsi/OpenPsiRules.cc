@@ -55,7 +55,7 @@ Handle OpenPsiRules::add_rule(const HandleSeq& context, const Handle& action,
   _as->add_link(MEMBER_LINK, rule, demand);
 
   // Construct the query atom that is used to check satisfiablity
-  Handle query_body = Handle(createLink(context, AND_LINK)) ;
+  Handle query_body(createLink(context, AND_LINK)) ;
 
   // Add to the index of rules.
   _psi_rules[rule] = std::make_tuple(context, action, goal, query_body);
