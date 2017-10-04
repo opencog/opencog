@@ -46,23 +46,15 @@
 
 (define (run-experiment)
   (icl-logger-info "Start experiment")
+
   (let* ((default-as (cog-set-atomspace! targets-as)) ; Switch to targets-as
          (targets (gen-random-targets pss))) ; Generate targets
-
-    ;; Function for running all iterations given the iteration index,
-    ;; i. Return the list of solved problems for each iteration (list
-    ;; of list).
-    (define (run-iterations-rec i)
-      (if (< i niter)
-          (let* ((sol (run-iteration targets i)))
-            (cons sol (run-iterations-rec (+ i 1))))
-          '()))
 
     ;; Switch back to the default atomspace
     (cog-set-atomspace! default-as)
 
     ;; Run all iterations
-    (run-iterations-rec 0)))
+    (map (lambda (i) (run-iteration targets i)) (iota niter))))
 
 ;; Run iteration i over the given targets and return the list of
 ;; solved problems.
@@ -86,6 +78,9 @@
     ;; Copy all atomspaces for histories to history-as
     (icl-logger-info "Move all problem histories to history-as")
     (union-as history-as histories)
+
+    ;; Build inference control rules for the next iteration
+    (mk-control-rules)
 
     ;; Return results for each problem
     results))
