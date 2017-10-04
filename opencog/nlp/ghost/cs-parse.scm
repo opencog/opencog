@@ -328,6 +328,7 @@
     (context
       (LPAREN context-patterns RPAREN) : $2
       (LPAREN unordered-matching RPAREN) : $2
+      (LPAREN negation unordered-matching RPAREN) : $2
     )
 
     (context-patterns
@@ -519,6 +520,7 @@
     )
 
     (sequence-term
+      (wildcard) : $1
       (lemma) : $1
       (literal) : $1
       (phrase) : $1
