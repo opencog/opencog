@@ -72,13 +72,13 @@
 ;; combined with the knowledge that an other letter different than A
 ;; is after A
 ;;
-;; Evaluation
+;; Evaluation (stv 1 1)
 ;;   Predicate "alphabetical-order"
 ;;   List
 ;;     Concept "A"
 ;;     Concept "B"
 ;; ...
-;; Evaluation
+;; Evaluation (stv 1 1)
 ;;   Predicate "alphabetical-order"
 ;;   List
 ;;     Concept "A"
@@ -93,7 +93,7 @@
 
 (define (gen-knowledge-base)
   (gen-inheritance-contiguous-letters)
-  (gen-A-before-all-letters-smart))
+  (gen-A-before-all-letters-stupid))
 
 (define (gen-A-before-all-letters-smart)
   (gen-A-inherits-all-letters-smart-rule))

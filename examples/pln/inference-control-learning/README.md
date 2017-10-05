@@ -4,23 +4,21 @@ Inference Control Learning
 Experiment with inference control learning. The plan is to
 
 1. run a series of backward inferences,
-2. create a corpus of successful ones,
-3. Run the pattern miner over them,
-4. build cognitive schematics out of these patterns,
-5. repeat with more inferences passing these cognitive schematics to
-   the backward chainer for speeding it up.
+2. create a corpus of inference traces,
+3. Run the pattern miner and other learning algorithms over them,
+4. build inference control rules out of these patterns,
+5. repeat while reusing these learned inference control rules to speed
+   up the backward chainer.
 
 For now it is a toy experiment with a small taylored series over a
-small, constant knowledge-base. No ECAN is even necessary. The learned
-inference control rules, or control rules for short, should be that
-double, triple, etc deductions are useful.
+small, constant knowledge-base. No ECAN is even necessary.
 
 Knowledge-base
 --------------
 
 The knowledge-base is the upper case latin alphabet order. The order
 relationship is represented with Inheritance between 2 consecutive
-letters:
+letters.
 
 ```
 Inheritance (stv 1 1)
@@ -35,10 +33,50 @@ Inheritance (stv 1 1)
 The concept strengths, 1/26 to 26/26, are defined to be consistent
 with PLN semantics.
 
+On top of that we have the knowledge that A precedes all other
+letters.
+
+```
+Evaluation (stv 1 1)
+  Predicate "alphabetical-order"
+  List
+    Concept "A"
+    Concept "B"
+...
+Evaluation (stv 1 1)
+  Predicate "alphabetical-order"
+  List
+    Concept "A"
+    Concept "Z"
+```
+
+Combined with a rule to infer that if letter X occurs before Y, then X
+inherits Y.
+
+```
+ImplicationScope (stv 1 1)
+  VariableList
+    TypedVariable
+      Variable "$X"
+      Type "ConceptNode"
+    TypedVariable
+      Variable "$Y"
+      Type "ConceptNode"
+  Evaluation
+    Predicate "alphabetical-order"
+    List
+      Variable "$X"
+      Variable "$Y"
+  Inheritance
+    Variable "$X"
+    Variable "$Y"
+```
+
 Rule-base
 ---------
 
-All PLN rules are included, to make solving problems more difficult.
+As many PLN rules are included, to make solving problems more
+difficult.
 
 Targets
 -------
@@ -52,6 +90,33 @@ Inheritance
 ```
 
 where X is a letter preceding Y.
+
+Goal
+----
+
+The goal of the experiment is to learn control rules. There will be 2
+types of useful control rules.
+
+1. Deduction is often useful. That is because chaining an number of
+   deductions is enough to prove that any 2 letters are ordered.
+2. If the target is of the form Inheritance A X, then conditional
+   instantiation is useful. That is because in that case we can use
+   this rule over the fact that
+   ```
+   Evaluation
+     alphabetical-order
+     List
+       A
+       X
+   ```
+   is true for all other letters, combined with the implication that
+   is letter X occurs before Y then X inherits from Y.
+
+The first control rule can easily be learned by PLN alone, using
+direct evaluation. The second rule however requires something more
+sophisticated like the pattern miner to notice that using conditional
+instantiation is only fruitful when the first letter of the target is
+A.
 
 Usage
 -----
@@ -84,7 +149,7 @@ Experiment High Level Algorithm
    Save the logs of each problem in opencog-i-j.log.
 2. Store in Si the number of solved problems for this iteration.
 3. Given opencog-i-j.log for j in 0 to N-1, build a collection of
-   control rules, called ICRi (see Setion Control Rule).
+   control rules, called ICRi (see Section Control Rule).
 4. If meta-termination hasn't occured repeat step 1 with passing ICRi
    to the BC.
 
@@ -115,13 +180,13 @@ where
 
 A preproof is a back-inference-tree prefix (or suffix if you start
 from the axioms) of a complete proof of T. In other words it is a
-subtree with root T (such as in graph theory, not computer data
-structure) of an inference tree proving T. The reason we use preproof
-as measure of success, as opposed to say the likelihood of finding a
-proof within the allocated effort, is because it is independent on the
-difficulty of the problem. If we can find a preproof it means we're on
-the right track no matter. This may hopefully make it easier to
-transfer this knowledge across problem difficulties.
+subtree with root T (as in graph theory, not computer data structure)
+of an inference tree proving T. The reason we use preproof as measure
+of success, as opposed to say the likelihood of finding a proof within
+the allocated effort, is because it is independent on the difficulty
+of the problem. If we can find a preproof it means we're on the right
+track no matter what. This may hopefully make it easier to transfer
+this knowledge across problem difficulties.
 
 This experiment is simple enough that the context that the backward
 chainer has been queried to prove T can be ignored. The context that
@@ -129,8 +194,8 @@ it is about to decide what rule to expand can be ignored as well since
 it is the universal context of our experiment anyway. The context that
 A is a preproof of T seems strange as we have no way to know whether
 it is true or not, but we don't need to! It's enough that there is
-some positive probability, however small it may be, to put such rule
-in use, the conditional instantiation should ultimately take this
+some positive probability, however small that it may be, to put such
+rule in use, the conditional instantiation should ultimately take this
 probability into about to estimate the probability of R expanding A
 into a preproof of T.
 
@@ -266,7 +331,7 @@ it a low prior and in turn will lower the confidence of the produced
 term by conditional instantiation (see Section Conditional
 Instantiation Confidence).
 
-To go beyond this level-0 meta-learning type we need to introduce more
+To go beyond this level-0 meta-learning we need to introduce more
 expressive specializations in order to generalize well when new
 instances of T, A, L, etc, are encountered.
 
@@ -292,12 +357,12 @@ ImplicationScope <TV>
         Variable "$L"
         Variable "$R"
       Variable "$B"
-    <pattern>
     Evaluation
       Predicate "preproof-of"
       List
         Variable "$A"
         Variable "$T"
+    <pattern>
   Evaluation
     Predicate "preproof-of"
     List
@@ -309,18 +374,14 @@ where `<pattern>` is a predicate body involving all or some of the
 variables T, A, L and R.
 
 Finally, it's important to realize that B never needs to be
-instantiated, in other words, we don't need to try to expand A and
+instantiated. In other words, we don't need to try to expand A and
 produce B to estimate whether the expansion is worthwhile.
 
 ### Example
 
-In this example we craft a rule saying that double deduction, a
-deduction on top of a deduction tends to produce preproofs. In fact
-since a double deduction requires a single deduction it is likely that
-a rule saying that a single deduction is likely to produce a preproof
-will exist as well, albeit with perhaps a smaller strength since it is
-less specific. Anyway, we solely focus on double deduction
-here. Such rule may look like
+In this example we craft a rule saying that if the letter in the
+target (or leaf) is A, then conditional instantiation almost surely
+produce a preproof. Such rule may look like
 
 ```
 ImplicationScope <TV>
@@ -339,7 +400,7 @@ ImplicationScope <TV>
       List
         Variable "$A"
         Variable "$L"
-        <deduction-rule>
+        <conditional-instantiation>
       Variable "$B"
     Evaluation
       Predicate "preproof-of"
@@ -347,11 +408,8 @@ ImplicationScope <TV>
         Variable "$A"
         Variable "$T"
     Evaluation
-      Predicate "is-premise-of-rule"
-      List
-        Variable "$A"
-        Variable "$L"
-        <deduction-rule>
+      Predicate "first-letter-is-A"
+      Variable "$L"
   Evaluation
     Predicate "preproof-of"
     List
@@ -360,12 +418,10 @@ ImplicationScope <TV>
 ```
 
 You may notice that the inference rule has already been instantiated,
-here referred as `<deduction-rule>` to keep the example shorter. Also
-the `Predicate "is-premise-of-rule"` should be expressed in terms of
-patterns mined by the pattern miner. And such pattern would be a
-subtree of A, the outermost deduction in A containing L as a leaf,
-which requires we have some function to check if a the subtree of some
-atom follows some pattern.
+here referred as `<conditional-instantiation>` to keep the example
+short. Also the `Predicate "first-letter-is-A"` should be expressed in
+terms of patterns mined by the pattern miner. It's note clear to me
+yet how this is gonna be done.
 
 Learn Inference Control Rules
 -----------------------------
