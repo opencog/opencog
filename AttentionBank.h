@@ -32,8 +32,6 @@
 
 #include <boost/signals2.hpp>
 
-#include <opencog/util/recent_val.h>
-
 #include <opencog/truthvalue/AttentionValue.h>
 #include <opencog/attentionbank/ImportanceIndex.h>
 #include <opencog/attentionbank/StochasticImportanceDiffusion.h>
@@ -84,16 +82,6 @@ class AttentionBank
      */
     AFCHSigl _AddAFSignal;
     AFCHSigl _RemoveAFSignal;
-
-    /**
-     * Running average min and max STI, together with locks to
-     * protect updates.
-     */
-    opencog::recent_val<AttentionValue::sti_t> _maxSTI;
-    opencog::recent_val<AttentionValue::sti_t> _minSTI;
-
-    mutable std::mutex _lock_maxSTI;
-    mutable std::mutex _lock_minSTI;
 
     /**
      * The amount importance funds available in the AttentionBank.
@@ -211,29 +199,19 @@ public:
         return fundsLTI += diff;
     }
 
-    /**
-     * Get the maximum STI observed in the AttentionBank.
-     *
-     * @param average If true, return an exponentially decaying
-     *        average of maximum STI, otherwise return the actual
-     *        maximum.
-     * @return Maximum STI
-     */
-    AttentionValue::sti_t getMaxSTI(bool average=true) const;
-
-    /**
-     * Get the minimum STI observed in the AttentionBank.
-     *
-     * @param average If true, return an exponentially decaying
-     *        average of minimum STI, otherwise return the actual
-     *        minimum.
-     * @return Minimum STI
-     */
-    AttentionValue::sti_t getMinSTI(bool average=true) const;
-
     AttentionValue::sti_t calculateSTIWage(void);
 
     AttentionValue::sti_t calculateLTIWage(void);
+
+    AttentionValue::sti_t getMinSTI(bool average=true) const
+    {
+        return _importanceIndex.getMinSTI(average);
+    }
+
+    AttentionValue::sti_t getMaxSTI(bool average=true) const
+    {
+        return _importanceIndex.getMaxSTI(average);
+    }
 
     /**
      * Update the minimum STI observed in the AttentionBank.

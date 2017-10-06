@@ -89,6 +89,8 @@ void ImportanceIndex::updateImportance(Atom* atom, int oldbin, int newbin)
     updateTopStiValues(atom);
 }
 
+// ==============================================================
+
 void ImportanceIndex::removeAtom(const Handle& h)
 {
     AttentionValuePtr oldav = get_av(h);
@@ -107,6 +109,8 @@ void ImportanceIndex::removeAtom(const Handle& h)
     if (it != topKSTIValuedHandles.end()) topKSTIValuedHandles.erase(it);
     //TODO Find the next highest STI valued atom to replace the removed one.
 }
+
+// ==============================================================
 
 void ImportanceIndex::updateTopStiValues(Atom* atom)
 {
@@ -138,6 +142,29 @@ void ImportanceIndex::updateTopStiValues(Atom* atom)
     }
 }
 
+// ==============================================================
+
+AttentionValue::sti_t ImportanceIndex::getMaxSTI(bool average) const
+{
+    std::lock_guard<std::mutex> lock(_mtx);
+    if (average) {
+        return (AttentionValue::sti_t) _maxSTI.recent;
+    } else {
+        return _maxSTI.val;
+    }
+}
+
+AttentionValue::sti_t ImportanceIndex::getMinSTI(bool average) const
+{
+    std::lock_guard<std::mutex> lock(_mtx);
+    if (average) {
+        return (AttentionValue::sti_t) _minSTI.recent;
+    } else {
+        return _minSTI.val;
+    }
+}
+
+// ==============================================================
 
 UnorderedHandleSet ImportanceIndex::getHandleSet(
         AttentionValue::sti_t lowerBound,

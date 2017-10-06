@@ -25,6 +25,8 @@
 #define _OPENCOG_IMPORTANCEINDEX_H
 
 #include <mutex>
+#include <opencog/util/recent_val.h>
+
 #include <opencog/truthvalue/AttentionValue.h>
 #include <opencog/attentionbank/AVUtils.h>
 #include <opencog/attentionbank/ThreadSafeFixedIntegerIndex.h>
@@ -46,14 +48,38 @@ private:
     std::mutex _mtx;
 
     ThreadSafeFixedIntegerIndex _index;
+
+    /// Running average min and max STI.
+    opencog::recent_val<AttentionValue::sti_t> _maxSTI;
+    opencog::recent_val<AttentionValue::sti_t> _minSTI;
+
     std::vector<HandleSTIPair> topKSTIValuedHandles; // TOP K STI values
     int minAFSize;
-
     void updateTopStiValues(Atom* atom);
 
 public:
     ImportanceIndex();
     void removeAtom(const Handle&);
+
+    /**
+     * Get the maximum STI observed.
+     *
+     * @param average If true, return an exponentially decaying
+     *        average of maximum STI, otherwise return the actual
+     *        maximum.
+     * @return Maximum STI
+     */
+    AttentionValue::sti_t getMaxSTI(bool average=true) const;
+
+    /**
+     * Get the minimum STI observed.
+     *
+     * @param average If true, return an exponentially decaying
+     *        average of minimum STI, otherwise return the actual
+     *        minimum.
+     * @return Minimum STI
+     */
+    AttentionValue::sti_t getMinSTI(bool average=true) const;
 
     /**
      * Updates the importance index for the given atom.

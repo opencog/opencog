@@ -179,26 +179,6 @@ void AttentionBank::updateMinSTI(AttentionValue::sti_t m)
     _minSTI.update(m);
 }
 
-AttentionValue::sti_t AttentionBank::getMaxSTI(bool average) const
-{
-    std::lock_guard<std::mutex> lock(_lock_maxSTI);
-    if (average) {
-        return (AttentionValue::sti_t) _maxSTI.recent;
-    } else {
-        return _maxSTI.val;
-    }
-}
-
-AttentionValue::sti_t AttentionBank::getMinSTI(bool average) const
-{
-    std::lock_guard<std::mutex> lock(_lock_minSTI);
-    if (average) {
-        return (AttentionValue::sti_t) _minSTI.recent;
-    } else {
-        return _minSTI.val;
-    }
-}
-
 AttentionValue::sti_t AttentionBank::calculateSTIWage()
 {
     long funds = getSTIFunds();
