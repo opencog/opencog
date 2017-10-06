@@ -28,8 +28,8 @@
 #include <opencog/util/recent_val.h>
 
 #include <opencog/truthvalue/AttentionValue.h>
+#include <opencog/attentionbank/AtomBins.h>
 #include <opencog/attentionbank/AVUtils.h>
-#include <opencog/attentionbank/ThreadSafeFixedIntegerIndex.h>
 
 namespace opencog
 {
@@ -41,13 +41,14 @@ namespace opencog
  * Implements an index with additional routines needed for managing
  * short-term importance.  This index is thread-safe.
  */
-using HandleSTIPair = std::pair<Handle,AttentionValue::sti_t>;
+using HandleSTIPair = std::pair<Handle, AttentionValue::sti_t>;
+
 class ImportanceIndex
 {
 private:
     std::mutex _mtx;
 
-    ThreadSafeFixedIntegerIndex _index;
+    AtomBins _index;
 
     /// Running average min and max STI.
     opencog::recent_val<AttentionValue::sti_t> _maxSTI;
