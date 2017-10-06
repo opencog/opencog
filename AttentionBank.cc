@@ -62,16 +62,16 @@ static const Handle& attn_key(void)
 
 void AttentionBank::remove_atom_from_index(const AtomPtr& atom)
 {
+    AttentionValuePtr oldav = get_av(HandleCast(atom));
     atom->setValue(attn_key(), nullptr);
 
-    int bin = ImportanceIndex::importanceBin(av->getSTI());
+    int bin = ImportanceIndex::importanceBin(oldav->getSTI());
     _importanceIndex.removeAtom(atom.operator->(), bin);
 }
 
 void AttentionBank::change_av(const Handle& h, AttentionValuePtr newav)
 {
     AttentionValuePtr oldav = get_av(h);
-    h->setValue(attn_key(), newav);
 
     // Get old and new bins.
     int oldBin = ImportanceIndex::importanceBin(oldav->getSTI());
@@ -99,20 +99,17 @@ void AttentionBank::set_lti(const Handle& h, AttentionValue::lti_t ltiValue)
     AttentionValuePtr new_av = createAV(
         old_av->getSTI(), ltiValue, old_av->getVLTI());
 
-    h->setValue(attn_key(), new_av);
     AVChanged(h, old_av, new_av);
 }
 
 void AttentionBank::change_vlti(const Handle& h, int unit)
 {
     AttentionValuePtr old_av = get_av(h);
-
     AttentionValuePtr new_av = createAV(
         old_av->getSTI(),
         old_av->getLTI(),
         old_av->getVLTI() + unit);
 
-    h->setValue(attn_key(), new_av);
     AVChanged(h, old_av, new_av);
 }
 
@@ -127,6 +124,9 @@ void AttentionBank::AVChanged(const Handle& h,
                               const AttentionValuePtr& old_av,
                               const AttentionValuePtr& new_av)
 {
+    // First, update the atom's actual AV.
+    h->setValue(attn_key(), new_av);
+
     AttentionValue::sti_t oldSti = old_av->getSTI();
     AttentionValue::sti_t newSti = new_av->getSTI();
     
