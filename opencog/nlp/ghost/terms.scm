@@ -2,30 +2,6 @@
 ;;
 ;; Assorted functions for translating individual terms into Atomese fragments.
 
-(define (create-concept NAME MEMBERS)
-  "Create named concepts with explicit membership lists.
-   The first argument is the name of the concept, and the rest is the
-   list of words and/or concepts that will be considered as the members
-   of the concept."
-  ; Convert the member in the form of a string into an atom, which can
-  ; either be a WordNode, LemmaNode, ConceptNode, or a list of WordNodes
-  ; or LemmaNodes
-  (define (member-words STR)
-    (let ((words (string-split STR #\sp)))
-      (if (= 1 (length words))
-          (let ((w (car words)))
-               (cond ((string-prefix? "~" w) (Concept (substring w 1)))
-                     ((is-lemma? w) (LemmaNode w))
-                     (else (WordNode w))))
-          (ListLink (map Word words)))))
-  (append-map (lambda (m) (list (Reference (member-words m) (Concept NAME))))
-              MEMBERS))
-
-(define (create-shared-goal GOAL)
-  "Create a topic level goal that will be shared among the rules under the
-   same topic."
-  (set! shared-goals GOAL))
-
 (define (word STR)
   "Literal word occurrence."
   (let* ((v1 (WordNode STR))

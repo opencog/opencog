@@ -291,6 +291,19 @@
       (if (not (equal? key 'FeatureNotSupported))
           (cog-logger-error ghost-logger "~a: ~a" key parameters)))))
 
+(define (create-concept NAME MEMBERS)
+  "Create named concepts with explicit membership lists.
+   The first argument is the name of the concept, and the rest is the
+   list of words and/or concepts that will be considered as the members
+   of the concept."
+  (map (lambda (m) (Reference m (Concept NAME)))
+       (terms-to-atomese MEMBERS)))
+
+(define (create-shared-goal GOAL)
+  "Create a topic level goal that will be shared among the rules under the
+   same topic."
+  (set! shared-goals GOAL))
+
 ; ----------
 ; Topic
 ; ----------

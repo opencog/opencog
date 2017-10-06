@@ -246,13 +246,7 @@
     ; Declaration/annotation(for ghost) grammar
     (declarations
       (CONCEPT ID declaration-sequence) :
-        (create-concept $2
-            ; Double-quotes are used to wrap the words/phrases,
-            ; remove them here before calling "create-concept"
-            (map (lambda (s)
-                (let ((ms (match:substring s)))
-                    (substring ms 1 (- (string-length ms) 1))))
-            (list-matches "\"[a-zA-Z0-9 ]+?\"" $3)))
+        (create-concept $2 (eval-string (string-append "(list " $3 ")")))
       (TOPIC ID declaration-sequence) :
         (display-token (format #f "topic(~a = ~a)" $2 $3))
     )
@@ -268,11 +262,11 @@
     )
 
     (declaration-member
-      (LEMMA) :  (format #f "\"~a\"" $1)
-      (LITERAL) : (format #f "\"~a\"" $1)
-      (STRING) : (format #f "\"~a\"" $1)
-      (concept) : (format #f "\"~a\"" $1)
-      (DQUOTE phrase-terms DQUOTE) : (format #f "~a~a~a" $1 $2 $3)
+      (lemma) : $1
+      (literal) : $1
+      (phrase) : $1
+      (concept) : $1
+      (sequence) : $1
       (DICTKEY) :
         (format #f "(cons 'dictkey (cons \"~a\" \"~a\"))" (car $1) (cdr $1))
     )
