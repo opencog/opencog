@@ -260,7 +260,7 @@ public:
      * @warning Should only be used by attention allocation system.
      * @param m New minimum STI
      */
-    void updateMinSTI(AttentionValue::sti_t m);
+    void updateMinSTI(AttentionValue::sti_t);
 
     /**
      * Update the maximum STI observed in the AttentionBank.
@@ -271,10 +271,10 @@ public:
      * @warning Should only be used by attention allocation system.
      * @param m New maximum STI
      */
-    void updateMaxSTI(AttentionValue::sti_t m);
+    void updateMaxSTI(AttentionValue::sti_t);
 
     /** Change the Very-Long-Term Importance of an attention value holder */
-    //void setVLTI(AttentionValueHolderPtr avh, AttentionValue::vlti_t);
+    //void setVLTI(AttentionValueHolderPtr, AttentionValue::vlti_t);
 
     /**
      * Retrieve the doubly normalised Short-Term Importance between -1..1
@@ -340,10 +340,9 @@ public:
     get_handle_set_in_attentional_focus(OutputIterator result)
     {
          std::lock_guard<std::mutex> lock(AFMutex);
-         for(const auto p : attentionalFocus){
+         for (const auto p : attentionalFocus) {
              *result++ = p.first;
          }
-
          return result;
     }
 
@@ -353,6 +352,7 @@ public:
     Handle getRandomAtom(void);
 
     bool atom_is_in_AF(const Handle&);
+
     /**
      * Updates the importance index for the given atom. According to the
      * new importance of the atom, it may change importance bins.

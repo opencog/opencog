@@ -61,7 +61,6 @@ class ThreadSafeFixedIntegerIndex : public FixedIntegerIndex
         {
             resize(size);
         }
-        ~ThreadSafeFixedIntegerIndex () {}
 
         void insert(size_t i, Atom* a)
         {
@@ -94,13 +93,13 @@ class ThreadSafeFixedIntegerIndex : public FixedIntegerIndex
         }
 
         template <typename OutputIterator> OutputIterator
-        getContentIf(size_t i
-                    ,OutputIterator out
-                    ,std::function<bool(Atom *)> pred) const
+        getContentIf(size_t i,
+                    OutputIterator out,
+                    std::function<bool(Atom*)> pred) const
         {
             std::lock_guard<std::mutex> lck(*_locks[i]);
             const AtomSet &s(idx.at(i));
-            return std::copy_if(s.begin(), s.end(), out,pred);
+            return std::copy_if(s.begin(), s.end(), out, pred);
         }
 };
 
