@@ -55,7 +55,7 @@ private:
 
     std::vector<HandleSTIPair> topKSTIValuedHandles; // TOP K STI values
     int minAFSize;
-    void updateTopStiValues(Atom* atom);
+    void updateTopStiValues(const Handle&);
 
 public:
     ImportanceIndex();

@@ -113,31 +113,38 @@ void ImportanceIndex::removeAtom(const Handle& h)
 
 // ==============================================================
 
-void ImportanceIndex::updateTopStiValues(Atom* atom)
+void ImportanceIndex::updateTopStiValues(const Handle& h)
 {
     std::lock_guard<std::mutex> lock(_mtx);
 
-    auto insertHandle = [this](Handle h){
+    auto insertHandle = [this](Handle h)
+    {
         // delete if this handle is already in the vector. TODO find efficient
         // way of doing this.
-        auto it = std::find_if(topKSTIValuedHandles.begin(), topKSTIValuedHandles.end()
-                ,[&h](HandleSTIPair p){return p.first == h; });
-        if(it != topKSTIValuedHandles.end()) topKSTIValuedHandles.erase(it);
+        auto it = std::find_if(topKSTIValuedHandles.begin(),
+                               topKSTIValuedHandles.end(),
+                               [&h](HandleSTIPair p)
+                                    { return p.first == h; });
+
+        if (it != topKSTIValuedHandles.end()) topKSTIValuedHandles.erase(it);
 
         HandleSTIPair p(h, get_sti(h));
         it = std::lower_bound(topKSTIValuedHandles.begin(),
-                topKSTIValuedHandles.end(), p,
-                [=](const HandleSTIPair& hsti1, const HandleSTIPair& hsti2){
-                return hsti1.second < hsti2.second;
+                              topKSTIValuedHandles.end(), p,
+                [=](const HandleSTIPair& hsti1, const HandleSTIPair& hsti2)
+                {
+                      return hsti1.second < hsti2.second;
                 });
         topKSTIValuedHandles.insert(it, HandleSTIPair(h, get_sti(h)));
     };
 
-    Handle h = atom->getHandle();
     AttentionValue::sti_t sti = get_sti(h);
-    if(static_cast<int>(topKSTIValuedHandles.size()) < minAFSize){
-        insertHandle(atom->getHandle());
-    } else if (topKSTIValuedHandles.begin()->second < sti) {
+    if (static_cast<int>(topKSTIValuedHandles.size()) < minAFSize)
+    {
+        insertHandle(h);
+    }
+    else if (topKSTIValuedHandles.begin()->second < sti)
+    {
         topKSTIValuedHandles.erase(topKSTIValuedHandles.begin());
         insertHandle(h);
     }
