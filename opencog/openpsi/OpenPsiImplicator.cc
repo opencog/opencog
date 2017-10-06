@@ -20,6 +20,8 @@
  */
 
 #include <opencog/atoms/execution/Instantiator.h>
+#include <opencog/atoms/base/Link.h>
+#include <opencog/atoms/base/ClassServer.h>
 
 #include "OpenPsiImplicator.h"
 #include "OpenPsiRules.h"
@@ -43,14 +45,38 @@ bool OpenPsiImplicator::grounding(const HandleMap &var_soln,
   // The psi-rule weight calculations could be done here.
   _result = TruthValue::TRUE_TV();
 
-  // Store the result in cache.
-  _satisfiability_cache[_pattern_body] = var_soln;
+  if (0 < var_soln.size()) {
+    for( auto it = var_soln.begin(); it != var_soln.end(); ++it )
+    {
+      if(classserver().isA(VARIABLE_NODE, (it->second)->getType())) {
+        return false;
+      }
+    }
 
-  // NOTE: If a single grounding is found then why search for more? If there
-  // is an issue with instantiating the implicand then there is an issue with
-  // the implicand. Satisfier::grounding does exaustive search so this should
-  // theoretically speed psi-loop.
-  return true;
+    // TODO: If we are here it means the suggested groundings doesn't have
+    // VariableNodes, and can be cached. This doesn't account for terms
+    // that are under QuoteLink, or other similar type links. How should
+    // such cases be handled?
+
+    // Store the result in cache.
+    _satisfiability_cache[_pattern_body] = var_soln;
+
+    // NOTE: If a single grounding is found then why search for more? If there
+    // is an issue with instantiating the implicand then there is an issue with
+    // the declard relationship between the implicant and the implicand, aka
+    // user-error.
+    return true;
+  } else {
+    // TODO: This happens when InitiateSearchCB::no_search has groundings.
+    // Cases for when this happens hasn't been tested yet. Explore the
+    // behavior and find a better solution. For now, log it and continue
+    // searching.
+    logger().info("In %s: the following _pattern_body triggered "
+      "InitiateSearchCB::no_search \n %s", __FUNCTION__ ,
+      _pattern_body->toString().c_str());
+
+    return false;
+  }
 }
 
 TruthValuePtr OpenPsiImplicator::check_satisfiability(const Handle& rule)

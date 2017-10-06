@@ -12,6 +12,20 @@
         (ConceptNode "Beso"))))
 )
 
+; Used for testing the case when the context is grounded by
+; its alpha-equivalent pattern.
+(define (context-1-alpha-equivalent)
+  (list
+    (InheritanceLink
+      (VariableNode "$H2")
+      (ConceptNode "human"))
+    (EvaluationLink
+      (Predicate "eat")
+      (List
+        (VariableNode "$H2")
+        (ConceptNode "Beso"))))
+)
+
 (define action-1
   (InheritanceLink
     (VariableNode "$H")

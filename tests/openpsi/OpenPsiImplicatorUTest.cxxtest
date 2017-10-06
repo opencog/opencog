@@ -104,6 +104,13 @@ public:
     TSM_ASSERT_EQUALS("Expected (stv 0 1)", TruthValue::FALSE_TV(), tv);
 
     // Test 2:
+    // Test when there is an alpha-equivalent pattern.
+    _scm->eval("(context-1-alpha-equivalent)");
+    CHKERR
+    tv = _opi->check_satisfiability(rule_1);
+    TSM_ASSERT_EQUALS("Expected (stv 0 1)", TruthValue::FALSE_TV(), tv);
+
+    // Test 3:
     // Test when there is a grounding.
     _scm->eval("(groundable-content-1)");
     CHKERR
