@@ -2,6 +2,7 @@
  * opencog/attentionbank/ImportanceIndex.h
  *
  * Copyright (C) 2008-2011 OpenCog Foundation
+ * Copyright (C) 2017 Linas Vepstas <linasvepstas@gmail.com>
  * All Rights Reserved
  *
  * This program is free software; you can redistribute it and/or modify
@@ -42,9 +43,10 @@ using HandleSTIPair = std::pair<Handle,AttentionValue::sti_t>;
 class ImportanceIndex
 {
 private:
+    std::mutex _mtx;
+
     ThreadSafeFixedIntegerIndex _index;
     std::vector<HandleSTIPair> topKSTIValuedHandles; // TOP K STI values
-    std::mutex topKSTIUpdateMutex;
     int minAFSize;
 
     void updateTopStiValues(Atom* atom);

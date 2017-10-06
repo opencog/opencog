@@ -98,7 +98,7 @@ void ImportanceIndex::removeAtom(const Handle& h)
 
     _index.remove(bin, h.operator->());
 
-    std::lock_guard<std::mutex> lock(topKSTIUpdateMutex);
+    std::lock_guard<std::mutex> lock(_mtx);
     // Also remove from topKSTIValueHandles vector
     auto it = std::find_if(
             topKSTIValuedHandles.begin(),
@@ -110,7 +110,7 @@ void ImportanceIndex::removeAtom(const Handle& h)
 
 void ImportanceIndex::updateTopStiValues(Atom* atom)
 {
-    std::lock_guard<std::mutex> lock(topKSTIUpdateMutex);
+    std::lock_guard<std::mutex> lock(_mtx);
 
     auto insertHandle = [this](Handle h){
         // delete if this handle is already in the vector. TODO find efficient
@@ -223,9 +223,9 @@ UnorderedHandleSet ImportanceIndex::getMinBinContents()
 
 HandleSeq ImportanceIndex::getTopSTIValuedHandles()
 {
-    std::lock_guard<std::mutex> lock(topKSTIUpdateMutex);
+    std::lock_guard<std::mutex> lock(_mtx);
     HandleSeq hseq;
-    for(HandleSTIPair p : topKSTIValuedHandles)
+    for (const HandleSTIPair& p : topKSTIValuedHandles)
         hseq.push_back(p.first);
     return  hseq;
 }
