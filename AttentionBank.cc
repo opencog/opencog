@@ -61,16 +61,9 @@ void AttentionBank::remove_atom_from_bank(const AtomPtr& atom)
 
 void AttentionBank::change_av(const Handle& h, AttentionValuePtr newav)
 {
+    _importanceIndex.updateImportance(h, newav);
+
     AttentionValuePtr oldav = get_av(h);
-
-    // Get old and new bins.
-    int oldBin = ImportanceIndex::importanceBin(oldav->getSTI());
-    int newBin = ImportanceIndex::importanceBin(newav->getSTI());
-
-    // If the atom importance has changed its bin,
-    // update the importance index.
-    if (oldBin != newBin) updateImportanceIndex(h, oldBin, newBin);
-
     AVChanged(h, oldav, newav);
 }
 

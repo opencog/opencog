@@ -2,6 +2,7 @@
  * opencog/attentionbank/ImportanceIndex.cc
  *
  * Copyright (C) 2008-2011 OpenCog Foundation
+ * Copyright (C) 2017 Linas Vepstas <linasvepstas@gmail.com>
  * All Rights Reserved
  *
  * This program is free software; you can redistribute it and/or modify
@@ -80,8 +81,13 @@ unsigned int ImportanceIndex::importanceBin(short importance)
     return bin;
 }
 
-void ImportanceIndex::updateImportance(const Handle& h, int oldbin, int newbin)
+void ImportanceIndex::updateImportance(const Handle& h,
+                                       const AttentionValuePtr& newav)
 {
+    AttentionValuePtr oldav = get_av(h);
+
+    int oldbin = importanceBin(oldav->getSTI());
+    int newbin = importanceBin(newav->getSTI());
     if (oldbin == newbin) return;
 
     Atom* atom = h.operator->();

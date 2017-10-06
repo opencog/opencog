@@ -53,6 +53,16 @@ private:
     opencog::recent_val<AttentionValue::sti_t> _maxSTI;
     opencog::recent_val<AttentionValue::sti_t> _minSTI;
 
+    /**
+     * This method returns which importance bin an atom with the given
+     * importance should be placed.
+     *
+     * @param Importance value to be mapped.
+     * @return The importance bin which an atom of the given importance
+     * should be placed.
+     */
+    static unsigned int importanceBin(short);
+
     std::vector<HandleSTIPair> topKSTIValuedHandles; // TOP K STI values
     int minAFSize;
     void updateTopStiValues(const Handle&);
@@ -85,11 +95,8 @@ public:
 
     /**
      * Updates the importance index for the given atom.
-     *
-     * @param The atom whose importance index will be updated.
-     * @param The old importance bin where the atom originally was.
      */
-    void updateImportance(const Handle&, int oldbin, int newbin);
+    void updateImportance(const Handle&, AttentionValuePtr);
 
     /**
      * Returns the set of atoms within the given importance range.
@@ -102,23 +109,11 @@ public:
                                     AttentionValue::sti_t upperBound =
                                          AttentionValue::MAXSTI) const;
 
-    /**
-     * This method returns which importance bin an atom with the given
-     * importance should be placed.
-     *
-     * @param Importance value to be mapped.
-     * @return The importance bin which an atom of the given importance
-     * should be placed.
-     */
-    static unsigned int importanceBin(short);
-
-    /**
-     * Get the content of an ImportanceBin at index i.
-    */
+    // Get the content of an ImportanceBin at index i.
     template <typename OutputIterator> OutputIterator
     getContent(size_t i,OutputIterator out) const
     {
-            return _index.getContent(i,out);
+        return _index.getContent(i,out);
     }
 
     Handle getRandomAtom(void)
