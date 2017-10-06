@@ -28,21 +28,9 @@
 #include <opencog/atoms/base/Handle.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include "AttentionBank.h"
+#include "AVUtils.h"
 
 using namespace opencog;
-
-static const Handle& attn_key(void)
-{
-	static Handle ak(createNode(PREDICATE_NODE, "*-AttentionValueKey-*"));
-	return ak;
-}
-
-AttentionValuePtr get_av(const Handle& h)
-{
-    auto pr = h->getValue(attn_key());
-    if (nullptr == pr) return AttentionValue::DEFAULT_AV();
-    return AttentionValueCast(pr);
-}
 
 AttentionBank::AttentionBank(AtomSpace* asp) :
     _importanceIndex(*this)
@@ -70,7 +58,7 @@ AttentionBank::~AttentionBank()
 void AttentionBank::remove_atom_from_index(const AtomPtr& atom)
 {
     AttentionValuePtr oldav = get_av(HandleCast(atom));
-    atom->setValue(attn_key(), nullptr);
+    set_av(Handle(atom), nullptr);
 
     int bin = ImportanceIndex::importanceBin(oldav->getSTI());
     _importanceIndex.removeAtom(atom.operator->(), bin);
@@ -125,7 +113,7 @@ void AttentionBank::AVChanged(const Handle& h,
                               const AttentionValuePtr& new_av)
 {
     // First, update the atom's actual AV.
-    h->setValue(attn_key(), new_av);
+    set_av(h, new_av);
 
     AttentionValue::sti_t oldSti = old_av->getSTI();
     AttentionValue::sti_t newSti = new_av->getSTI();

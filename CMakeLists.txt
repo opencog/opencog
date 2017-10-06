@@ -1,6 +1,7 @@
 
 
 ADD_LIBRARY (attentionbank
+	AVUtils.cc
 	AttentionBank.cc
 	ImportanceIndex.cc
 	StochasticImportanceDiffusion.cc
@@ -12,7 +13,6 @@ TARGET_LINK_LIBRARIES(attentionbank
 	atombase
 	truthvalue
 	${COGUTIL_LIBRARY}
-	${Boost_THREAD_LIBRARY}
 )
 
 INSTALL (TARGETS attentionbank
@@ -20,6 +20,7 @@ INSTALL (TARGETS attentionbank
 )
 
 INSTALL (FILES
+	AVUtils.h
 	AttentionBank.h
 	ImportanceIndex.h
 	StochasticImportanceDiffusion.h
