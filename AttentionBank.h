@@ -347,7 +347,10 @@ public:
     /**
      * Return a random atom drawn from the importanceBin.
      */
-    Handle getRandomAtom(void);
+    Handle getRandomAtom(void) const
+    {
+        return _importanceIndex.getRandomAtom();
+    }
 
     bool atom_is_in_AF(const Handle&);
 

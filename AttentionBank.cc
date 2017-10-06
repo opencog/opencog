@@ -306,11 +306,6 @@ AttentionBank& opencog::attentionbank(AtomSpace* asp)
     return *_instance;
 }
 
-Handle AttentionBank::getRandomAtom()
-{
-   return _importanceIndex.getRandomAtom();
-}
-
 bool AttentionBank::atom_is_in_AF(const Handle& h)
 {
     auto it = std::find_if(attentionalFocus.begin(), attentionalFocus.end(),
