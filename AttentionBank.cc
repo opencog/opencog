@@ -129,7 +129,7 @@ void AttentionBank::AVChanged(const Handle& h,
 
     AttentionValue::sti_t oldSti = old_av->getSTI();
     AttentionValue::sti_t newSti = new_av->getSTI();
-    
+
     // Add the old attention values to the AttentionBank funds and
     // subtract the new attention values from the AttentionBank funds
     updateSTIFunds(oldSti - newSti);
@@ -280,7 +280,7 @@ double AttentionBank::getNormalisedZeroToOneSTI(AttentionValuePtr av,
 
 /** Unique singleton instance (for now) */
 // This implementation is pretty hokey, and is a stop-gap until some
-// sort of moreelegant way of managing the attentionbank is found.
+// sort of more elegant way of managing the attentionbank is found.
 // One of the issues is that access via this function can be CPU-wasteful.
 AttentionBank& opencog::attentionbank(AtomSpace* asp)
 {
@@ -314,8 +314,8 @@ bool AttentionBank::atom_is_in_AF(const Handle& h)
 {
     auto it = std::find_if(attentionalFocus.begin(), attentionalFocus.end(),
             [h](std::pair<Handle, AttentionValuePtr> p)
-            { if(p.first == h )
-                      return true;
+            {
+               if (p.first == h) return true;
                return false;
             });
     return  (it != attentionalFocus.end());
@@ -324,7 +324,7 @@ bool AttentionBank::atom_is_in_AF(const Handle& h)
 /**
  *  Updates list of top K important atoms based on STI value.
  */
-void AttentionBank::updateAttentionalFocus(const Handle& h, 
+void AttentionBank::updateAttentionalFocus(const Handle& h,
                     const AttentionValuePtr& old_av,
                     const AttentionValuePtr& new_av)
 {
@@ -334,19 +334,26 @@ void AttentionBank::updateAttentionalFocus(const Handle& h,
     bool insertable = false;
     auto it = std::find_if(attentionalFocus.begin(), attentionalFocus.end(),
             [h](std::pair<Handle, AttentionValuePtr> p)
-            { if(p.first == h ) return true; return false;});
+            { if (p.first == h) return true; return false;});
 
     // Update the STI value if atoms was already in AF
-    if(it != attentionalFocus.end()){
+    if (it != attentionalFocus.end())
+    {
         attentionalFocus.erase(it);
         attentionalFocus.insert(std::make_pair(h, new_av));
         return;
+    }
+
     // Simply insert the new Atom if AF is not full yet.
-    } else if(attentionalFocus.size() < minAFSize){
+    else if (attentionalFocus.size() < minAFSize)
+    {
         insertable = true;
+    }
+
     // Remove the least sti valued atom in the AF and repace
     // it with the new atom holding higher STI value.
-    } else if( sti > (least->second)->getSTI()){
+    else if (sti > (least->second)->getSTI())
+    {
         Handle hrm = least->first;
         AttentionValuePtr hrm_new_av = get_av(hrm);
         // Value recorded when this atom entered into AF
@@ -359,10 +366,10 @@ void AttentionBank::updateAttentionalFocus(const Handle& h,
     }
 
     // Insert the new atom in to AF and emit the AddAFSignal.
-    if(insertable){
+    if (insertable)
+    {
         attentionalFocus.insert(std::make_pair(h, new_av));
         AFCHSigl& afch = AddAFSignal();
         afch(h, old_av, new_av);
     }
 }
-
