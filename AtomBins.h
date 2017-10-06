@@ -28,21 +28,22 @@
 #include <atomic>
 #include <memory>
 
+#include <opencog/atoms/base/Handle.h>
+
 namespace opencog
 {
 /** \addtogroup grp_atomspace
  *  @{
  */
 
-class Atom;
 /**
- * Implements a vector of atom sets.
+ * Implements a bin classifier.
  */
 class AtomBins
 {
     private:
         mutable std::mutex _mtx;
-        std::vector<AtomSet> _idx;
+        std::vector<HandleSet> _idx;
 
     public:
         AtomBins(size_t sz)
@@ -50,13 +51,13 @@ class AtomBins
             _idx.resize(sz);
         }
 
-        void insert(size_t i, Atom* a)
+        void insert(size_t i, const Handle& a)
         {
             std::lock_guard<std::mutex> lck(_mtx);
             _idx.at(i).insert(a);
         }
 
-        void remove(size_t i, Atom* a)
+        void remove(size_t i, const Handle& a)
         {
             std::lock_guard<std::mutex> lck(_mtx);
             _idx.at(i).erase(a);
@@ -68,7 +69,7 @@ class AtomBins
             return _idx.at(i).size();
         }
 
-        Handle getRandomAtom(void);
+        Handle getRandomAtom(void) const;
 
         size_t size() const;
 
@@ -76,17 +77,17 @@ class AtomBins
         getContent(size_t i, OutputIterator out) const
         {
             std::lock_guard<std::mutex> lck(_mtx);
-            const AtomSet& s(_idx.at(i));
+            const HandleSet& s(_idx.at(i));
             return std::copy(s.begin(), s.end(), out);
         }
 
         template <typename OutputIterator> OutputIterator
         getContentIf(size_t i,
                     OutputIterator out,
-                    std::function<bool(Atom*)> pred) const
+                    std::function<bool(const Handle&)> pred) const
         {
             std::lock_guard<std::mutex> lck(_mtx);
-            const AtomSet& s(idx.at(i));
+            const HandleSet& s(_idx.at(i));
             return std::copy_if(s.begin(), s.end(), out, pred);
         }
 };

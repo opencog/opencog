@@ -2,7 +2,7 @@
  * opencog/attentionbank/AttentionBank.h
  *
  * Copyright (C) 2011 OpenCog Foundation
- * Copyright (C) 2016,2017 Linas Vepstas <linasvepstas@gmail.com>
+ * Copyright (C) 2016, 2017 Linas Vepstas <linasvepstas@gmail.com>
  * All Rights Reserved
  *
  * Written by Joel Pitt <joel@opencog.org>
@@ -277,11 +277,6 @@ public:
     AttentionValue::sti_t getMaxSTI(bool average=true) const
     {
         return _importanceIndex.getMaxSTI(average);
-    }
-
-    void updateImportanceIndex(const Handle& h, int oldbin, int newbin)
-    {
-        _importanceIndex.updateImportance(h, oldbin, newbin);
     }
 
     UnorderedHandleSet getHandlesByAV(AttentionValue::sti_t lowerBound,

@@ -20,6 +20,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <opencog/atoms/base/Handle.h>
+#include <opencog/atoms/base/Node.h>
 #include <opencog/attentionbank/AVUtils.h>
 
 using namespace opencog;

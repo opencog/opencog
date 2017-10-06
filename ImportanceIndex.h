@@ -119,7 +119,7 @@ public:
         return _index.getContent(i,out);
     }
 
-    Handle getRandomAtom(void)
+    Handle getRandomAtom(void) const
     {
         return _index.getRandomAtom();
     }

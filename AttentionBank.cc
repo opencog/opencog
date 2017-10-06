@@ -62,7 +62,7 @@ void AttentionBank::remove_atom_from_bank(const AtomPtr& atom)
 void AttentionBank::set_sti(const Handle& h, AttentionValue::sti_t stiValue)
 {
     AttentionValuePtr oldav = get_av(h);
-    AttentionValuePtr newav = createAV(
+    AttentionValuePtr newav = AttentionValue::createAV(
         stiValue, oldav->getLTI(), oldav->getVLTI());
 
     _importanceIndex.updateImportance(h, oldav, newav);
@@ -72,7 +72,7 @@ void AttentionBank::set_sti(const Handle& h, AttentionValue::sti_t stiValue)
 void AttentionBank::set_lti(const Handle& h, AttentionValue::lti_t ltiValue)
 {
     AttentionValuePtr old_av = get_av(h);
-    AttentionValuePtr new_av = createAV(
+    AttentionValuePtr new_av = AttentionValue::createAV(
         old_av->getSTI(), ltiValue, old_av->getVLTI());
 
     AVChanged(h, old_av, new_av);
@@ -81,7 +81,7 @@ void AttentionBank::set_lti(const Handle& h, AttentionValue::lti_t ltiValue)
 void AttentionBank::change_vlti(const Handle& h, int unit)
 {
     AttentionValuePtr old_av = get_av(h);
-    AttentionValuePtr new_av = createAV(
+    AttentionValuePtr new_av = AttentionValue::createAV(
         old_av->getSTI(),
         old_av->getLTI(),
         old_av->getVLTI() + unit);
@@ -122,13 +122,14 @@ void AttentionBank::stimulate(const Handle& h, double stimulus)
     // If two different threads stimulate the same atom at the same
     // time, then the calculations will be bad. Does it matter?
     AttentionValuePtr oldav(get_av(h));
-    AttentionValue::sti_t sti   = oldav->getSTI(h);
-    AttentionValue::lti_t lti   = oldav->getLTI(h);
-    AttentionValue::vlti_t vlti = oldav->getVLTI(h);
+    AttentionValue::sti_t sti   = oldav->getSTI();
+    AttentionValue::lti_t lti   = oldav->getLTI();
+    AttentionValue::vlti_t vlti = oldav->getVLTI();
 
     AttentionValue::sti_t stiWage = calculateSTIWage() * stimulus;
     AttentionValue::lti_t ltiWage = calculateLTIWage() * stimulus;
-    AttentionValuePtr newav = createAV(sti + stiWage, lti + ltiWage, vlti);
+    AttentionValuePtr newav = AttentionValue::createAV(
+           sti + stiWage, lti + ltiWage, vlti);
     _importanceIndex.updateImportance(h, oldav, newav);
     AVChanged(h, oldav, newav);
 }

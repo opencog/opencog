@@ -33,14 +33,13 @@ size_t AtomBins::size() const
     size_t cnt = 0;
     for (unsigned int i = 0; i < _idx.size(); i++)
     {
-        const AtomSet& s(_idx.at(i));
-        cnt += s.size();
+        cnt += _idx.at(i).size();
     }
 
     return cnt;
 }
 
-Handle AtomBins::getRandomAtom(void)
+Handle AtomBins::getRandomAtom(void) const
 {
     auto seed = duration_cast< microseconds >(
             system_clock::now().time_since_epoch());
@@ -52,7 +51,7 @@ Handle AtomBins::getRandomAtom(void)
     bool empty = true;
     for (size_t i=0; i<bins; i++)
     {
-        if (0 < _idx.at(i).size(i))
+        if (0 < _idx.at(i).size())
         {
             empty = false;
             break;
@@ -68,16 +67,15 @@ Handle AtomBins::getRandomAtom(void)
     {
         bin = rng.randint(bins-1);
         attempts++;
-    } while (_idx.at(bin).size(bin) <= 0 or attempts < bins);
+    } while (_idx.at(bin).size() <= 0 or attempts < bins);
 
-    const AtomSet& s(_idx.at(bin));
+    const HandleSet& s(_idx.at(bin));
     if (0 == s.size()) return Handle::UNDEFINED;
 
     size_t idx = rng.randint(s.size()-1);
     auto it = s.begin();
     std::advance(it, idx);
-    Atom* atom = *it;
-    return atom->getHandle();
+    return *it;
 }
 
 // ================================================================
