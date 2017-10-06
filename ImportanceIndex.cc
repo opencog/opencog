@@ -104,9 +104,9 @@ void ImportanceIndex::removeAtom(const Handle& h)
 
     int bin = ImportanceIndex::importanceBin(oldav->getSTI());
 
+    std::lock_guard<std::mutex> lock(_mtx);
     _index.remove(bin, h.operator->());
 
-    std::lock_guard<std::mutex> lock(_mtx);
     // Also remove from topKSTIValueHandles vector
     auto it = std::find_if(
             topKSTIValuedHandles.begin(),
@@ -232,6 +232,7 @@ UnorderedHandleSet ImportanceIndex::getHandleSet(
             return (lowerBound <= sti and sti <= upperBound);
         };
 
+    std::lock_guard<std::mutex> lock(_mtx);
     AtomSet set;
     _index.getContentIf(lowerBin, inserter(set), pred);
 
@@ -260,6 +261,7 @@ UnorderedHandleSet ImportanceIndex::getMaxBinContents()
 {
     AtomSet set;
     UnorderedHandleSet ret;
+    std::lock_guard<std::mutex> lock(_mtx);
     for (int i = IMPORTANCE_INDEX_SIZE ; i >= 0 ; i--)
     {
         if (_index.size(i) > 0)
@@ -277,6 +279,7 @@ UnorderedHandleSet ImportanceIndex::getMinBinContents()
 {
     AtomSet set;
     UnorderedHandleSet ret;
+    std::lock_guard<std::mutex> lock(_mtx);
     for (int i = IMPORTANCE_INDEX_SIZE ; i >= 0 ; i--)
     {
         if (_index.size(i) > 0)
@@ -301,10 +304,12 @@ HandleSeq ImportanceIndex::getTopSTIValuedHandles()
 
 size_t ImportanceIndex::bin_size() const
 {
+    std::lock_guard<std::mutex> lock(_mtx);
     return _index.bin_size();
 }
 
 size_t ImportanceIndex::size(int i) const
 {
+    std::lock_guard<std::mutex> lock(_mtx);
     return _index.size(i);
 }
