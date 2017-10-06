@@ -326,6 +326,7 @@
     )
 
     (context
+      (LPAREN negation RPAREN) : $2
       (LPAREN context-patterns RPAREN) : $2
       (LPAREN negation context-patterns RPAREN) : (format #f "~a ~a" $2 $3)
       (LPAREN unordered-matching RPAREN) : $2

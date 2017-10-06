@@ -24,6 +24,9 @@
          (ae (cons 'anchor-end ">"))
          (wc (cons 'wildcard (cons 0 -1)))
          (unordered? (any (lambda (t) (equal? 'unordered-matching (car t))) TERMS))
+         ; It's possible that the sequence does not having any word or concept etc,
+         ; e.g. a rule may just be about not having either one of these words
+         (empty-seq? (every (lambda (t) (equal? 'negation (car t))) TERMS))
          (start-anchor? (any (lambda (t) (equal? as t)) TERMS))
          (end-anchor? (any (lambda (t) (equal? ae t)) TERMS))
          (start (if start-anchor? (cdr (member as TERMS)) (list wc)))
@@ -60,6 +63,8 @@
                              ; In case there are still terms after anchor-end,
                              ; get it and add an extra wildcard
                              (append start after-anchor-end (list wc) end))))
+                   ; Just having one wildcard is enough for an empty sequence
+                   (empty-seq? (append TERMS (list wc)))
                    ; If there is no anchor, the main-seq should start and
                    ; end with a wildcard
                    (else (append (list wc) TERMS (list wc))))))
