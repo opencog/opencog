@@ -174,8 +174,9 @@ void ImportanceIndex::update(void)
     if (minSTISeen > maxSTISeen)
         minSTISeen = maxSTISeen;
 
-    updateMinSTI(minSTISeen);
-    updateMaxSTI(maxSTISeen);
+    std::lock_guard<std::mutex> lock(_mtx);
+    _minSTI = minSTISeen;
+    _maxSTTI = maxSTISeen;
 }
 
 // ==============================================================
