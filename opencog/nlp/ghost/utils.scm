@@ -59,10 +59,9 @@
             (throw 'FeatureNotSupported (car t) (cdr t))))))
        TERMS))
 
-(define (sent-get-word-seqs SENT)
-  "Get the words (original and lemma) associate with SENT.
-   It also creates an EvaluationLink linking the
-   SENT with the word-list and lemma-list."
+(define (generate-word-seqs SENT)
+  "Get the words and their corresponding lemmas associate with SENT
+   and put them into two lists -- word-seq and lemma-seq."
   (define (get-seq TYPE)
     (append-map
       (lambda (w)
@@ -88,8 +87,7 @@
          (lemma-seq (List lseq)))
         ; These EvaluationLinks will be used in the matching process
         (Evaluation ghost-word-seq (List SENT word-seq))
-        (Evaluation ghost-lemma-seq (List SENT lemma-seq))
-        (list word-seq lemma-seq)))
+        (Evaluation ghost-lemma-seq (List SENT lemma-seq))))
 
 (define (get-lemma-from-relex WORD)
   "Get the lemma of WORD via the RelEx server."

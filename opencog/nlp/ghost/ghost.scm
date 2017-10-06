@@ -86,4 +86,6 @@
 (define-public (ghost TXT)
   "Parse the input TXT using nlp-parse and connect it to the GHOST anchor.
    Should run this with the main OpenPsi loop."
-  (State ghost-anchor (car (nlp-parse TXT))))
+  (define sent (car (nlp-parse TXT)))
+  (generate-word-seqs sent)
+  (State ghost-anchor sent))

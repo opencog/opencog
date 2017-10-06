@@ -10,8 +10,9 @@
   "The action selector. It first searches for the rules using DualLink,
    and then does the filtering by evaluating the context of the rules.
    Eventually returns a list of weighted rules that can satisfy the demand."
-  (let* ((sent-seqs (sent-get-word-seqs SENT))
-         (input-lseq (list-ref sent-seqs 1))
+  (let* ((input-lseq (gddr (car (filter (lambda (e)
+           (equal? ghost-lemma-seq (gar e)))
+             (cog-get-pred SENT 'PredicateNode)))))
          ; The ones that contains no variables/globs
          (exact-match (filter psi-rule? (cog-get-trunk input-lseq)))
          ; The ones that contains no constant terms

@@ -6,10 +6,10 @@
 
 (define-public (test-ghost TXT)
   "Try to find (and execute) the matching rules given an input TXT."
-  (define sent (car (nlp-parse TXT)))
-  (State ghost-anchor sent)
+  (ghost TXT)
   (map (lambda (r) (psi-imply r))
-       (cog-outgoing-set (chat-find-rules sent)))
+       (cog-outgoing-set (chat-find-rules (ghost-get-curr-sent))))
+  ; TODO: Clear the variable-cache in OpenPsiImplicator
   *unspecified*)
 
 (define-public (ghost-show-lemmas)
