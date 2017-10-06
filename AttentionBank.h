@@ -2,7 +2,7 @@
  * opencog/attentionbank/AttentionBank.h
  *
  * Copyright (C) 2011 OpenCog Foundation
- * Copyright (C) 2016 Linas Vepstas <linasvepstas@gmail.com>
+ * Copyright (C) 2016,2017 Linas Vepstas <linasvepstas@gmail.com>
  * All Rights Reserved
  *
  * Written by Joel Pitt <joel@opencog.org>
@@ -60,9 +60,6 @@ class AttentionBank
 {
     friend class ecan::StochasticDiffusionAmountCalculator; //need to access _importanceIndex
 
-    /** The attention values of all the atoms in the attention bank */
-    std::mutex _idx_mtx;
-    std::unordered_map<Handle, AttentionValuePtr> _atom_index;
     std::mutex AFMutex;
     unsigned int minAFSize;
     struct compare_sti_less{
