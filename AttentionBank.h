@@ -150,7 +150,7 @@ public:
     }
 
     AttentionValue::sti_t get_af_max_sti(void) const {
-        if(attentionalFocus.rbegin() != attentionalFocus.rend())
+        if (attentionalFocus.rbegin() != attentionalFocus.rend())
             return (attentionalFocus.rbegin()->second)->getSTI();
         else
             return 0;
