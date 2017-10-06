@@ -109,7 +109,7 @@ class AttentionBank
     AVCHSigl _AVChangedSignal;
 
     void change_vlti(const Handle&, int);
-    void remove_atom_from_index(const AtomPtr& atom);
+    void remove_atom_from_bank(const AtomPtr& atom);
 
 public:
     AttentionBank(AtomSpace*);

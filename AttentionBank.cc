@@ -46,7 +46,7 @@ AttentionBank::AttentionBank(AtomSpace* asp)
 
     _removeAtomConnection =
         asp->removeAtomSignal(
-            boost::bind(&AttentionBank::remove_atom_from_index, this, _1));
+            boost::bind(&AttentionBank::remove_atom_from_bank, this, _1));
 }
 
 AttentionBank::~AttentionBank()
@@ -54,7 +54,7 @@ AttentionBank::~AttentionBank()
     _removeAtomConnection.disconnect();
 }
 
-void AttentionBank::remove_atom_from_index(const AtomPtr& atom)
+void AttentionBank::remove_atom_from_bank(const AtomPtr& atom)
 {
     _importanceIndex.removeAtom(Handle(atom));
 }
