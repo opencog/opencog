@@ -62,9 +62,10 @@ class AttentionBank
 
     std::mutex AFMutex;
     unsigned int minAFSize;
-    struct compare_sti_less{
+    struct compare_sti_less {
         bool operator()(const std::pair<Handle, AttentionValuePtr>& h1,
-                        const std::pair<Handle, AttentionValuePtr>& h2){
+                        const std::pair<Handle, AttentionValuePtr>& h2)
+        {
             return  (h1.second)->getSTI() < (h2.second)->getSTI();
         }
     };
