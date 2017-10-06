@@ -202,7 +202,7 @@ public:
 
     AttentionValue::sti_t calculateSTIWage(void);
 
-    AttentionValue::sti_t calculateLTIWage(void);
+    AttentionValue::lti_t calculateLTIWage(void);
 
     /** Change the Very-Long-Term Importance of an attention value holder */
     //void setVLTI(AttentionValueHolderPtr, AttentionValue::vlti_t);
