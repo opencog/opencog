@@ -51,7 +51,7 @@ private:
 
 public:
     ImportanceIndex();
-    void removeAtom(Atom*, int);
+    void removeAtom(const Handle&);
 
     /**
      * Updates the importance index for the given atom.

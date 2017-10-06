@@ -89,16 +89,22 @@ void ImportanceIndex::updateImportance(Atom* atom, int oldbin, int newbin)
     updateTopStiValues(atom);
 }
 
-void ImportanceIndex::removeAtom(Atom* atom, int bin)
+void ImportanceIndex::removeAtom(const Handle& h)
 {
-    _index.remove(bin, atom);
+    AttentionValuePtr oldav = get_av(h);
+    set_av(h, nullptr);
+
+    int bin = ImportanceIndex::importanceBin(oldav->getSTI());
+
+    _index.remove(bin, h.operator->());
 
     std::lock_guard<std::mutex> lock(topKSTIUpdateMutex);
     // Also remove from topKSTIValueHandles vector
-    Handle h = atom->getHandle();
-    auto it = std::find_if(topKSTIValuedHandles.begin(), topKSTIValuedHandles.end()
-            ,[&h](HandleSTIPair p){return p.first == h; });
-    if(it != topKSTIValuedHandles.end()) topKSTIValuedHandles.erase(it);
+    auto it = std::find_if(
+            topKSTIValuedHandles.begin(),
+            topKSTIValuedHandles.end(),
+            [&h](const HandleSTIPair& p) {return p.first == h; });
+    if (it != topKSTIValuedHandles.end()) topKSTIValuedHandles.erase(it);
     //TODO Find the next highest STI valued atom to replace the removed one.
 }
 

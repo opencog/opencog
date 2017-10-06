@@ -56,11 +56,7 @@ AttentionBank::~AttentionBank()
 
 void AttentionBank::remove_atom_from_index(const AtomPtr& atom)
 {
-    AttentionValuePtr oldav = get_av(HandleCast(atom));
-    set_av(Handle(atom), nullptr);
-
-    int bin = ImportanceIndex::importanceBin(oldav->getSTI());
-    _importanceIndex.removeAtom(atom.operator->(), bin);
+    _importanceIndex.removeAtom(Handle(atom));
 }
 
 void AttentionBank::change_av(const Handle& h, AttentionValuePtr newav)
