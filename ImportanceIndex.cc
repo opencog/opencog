@@ -82,10 +82,9 @@ unsigned int ImportanceIndex::importanceBin(short importance)
 }
 
 void ImportanceIndex::updateImportance(const Handle& h,
+                                       const AttentionValuePtr& oldav,
                                        const AttentionValuePtr& newav)
 {
-    AttentionValuePtr oldav = get_av(h);
-
     int oldbin = importanceBin(oldav->getSTI());
     int newbin = importanceBin(newav->getSTI());
     if (oldbin == newbin) return;

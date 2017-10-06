@@ -96,7 +96,9 @@ public:
     /**
      * Updates the importance index for the given atom.
      */
-    void updateImportance(const Handle&, AttentionValuePtr);
+    void updateImportance(const Handle&,
+                          AttentionValuePtr oldav,
+                          AttentionValuePtr newav);
 
     /**
      * Returns the set of atoms within the given importance range.

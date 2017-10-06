@@ -61,11 +61,11 @@ void AttentionBank::remove_atom_from_bank(const AtomPtr& atom)
 
 void AttentionBank::set_sti(const Handle& h, AttentionValue::sti_t stiValue)
 {
-    AttentionValuePtr old_av = get_av(h);
-    AttentionValuePtr new_av = createAV(
-        stiValue, old_av->getLTI(), old_av->getVLTI());
+    AttentionValuePtr oldav = get_av(h);
+    AttentionValuePtr newav = createAV(
+        stiValue, oldav->getLTI(), oldav->getVLTI());
 
-    _importanceIndex.updateImportance(h, newav);
+    _importanceIndex.updateImportance(h, oldav, newav);
     AVChanged(h, oldav, newav);
 }
 
@@ -129,7 +129,7 @@ void AttentionBank::stimulate(const Handle& h, double stimulus)
     AttentionValue::sti_t stiWage = calculateSTIWage() * stimulus;
     AttentionValue::lti_t ltiWage = calculateLTIWage() * stimulus;
     AttentionValuePtr newav = createAV(sti + stiWage, lti + ltiWage, vlti);
-    _importanceIndex.updateImportance(h, newav);
+    _importanceIndex.updateImportance(h, oldav, newav);
     AVChanged(h, oldav, newav);
 }
 
