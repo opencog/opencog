@@ -1,7 +1,8 @@
 /*
- * opencog/attentinbank/ThreadSafeFixedIntegerIndex.h
+ * opencog/attentinbank/AtomBins.h
  *
  * Copyright (C) 2016 Roman Treutlein <roman.treutlein@gmail.com>
+ * Copyright (C) 2017 Linas Vepstas <linasvepstas@gmail.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -19,8 +20,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _OPENCOG_THREADSAFEFIXEDINTEGERINDEX_H
-#define _OPENCOG_THREADSAFEFIXEDINTEGERINDEX_H
+#ifndef _OPENCOG_ATOM_BINS_H
+#define _OPENCOG_ATOM_BINS_H
 
 #include <vector>
 #include <mutex>
@@ -37,14 +38,14 @@ class Atom;
 /**
  * Implements a vector of atom sets.
  */
-class ThreadSafeFixedIntegerIndex
+class AtomBins
 {
     private:
         mutable std::mutex _mtx;
         std::vector<AtomSet> _idx;
 
     public:
-        ThreadSafeFixedIntegerIndex(size_t sz)
+        AtomBins(size_t sz)
         {
             _idx.resize(sz);
         }
@@ -93,4 +94,4 @@ class ThreadSafeFixedIntegerIndex
 /** @}*/
 } //namespace opencog
 
-#endif // _OPENCOG_FIXEDINTEGERINDEX_H
+#endif // _OPENCOG_ATOMBINS_H

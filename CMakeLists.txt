@@ -1,11 +1,11 @@
 
 
 ADD_LIBRARY (attentionbank
-	AVUtils.cc
+	AtomBins.cc
 	AttentionBank.cc
+	AVUtils.cc
 	ImportanceIndex.cc
 	StochasticImportanceDiffusion.cc
-	ThreadSafeFixedIntegerIndex.cc
 )
 
 TARGET_LINK_LIBRARIES(attentionbank
@@ -20,10 +20,10 @@ INSTALL (TARGETS attentionbank
 )
 
 INSTALL (FILES
-	AVUtils.h
+	AtomBins.h
 	AttentionBank.h
+	AVUtils.h
 	ImportanceIndex.h
 	StochasticImportanceDiffusion.h
-	ThreadSafeFixedIntegerIndex.h
 	DESTINATION "include/opencog/attentionbank"
 )

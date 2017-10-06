@@ -1,7 +1,8 @@
 /*
- * opencog/attentionbank/ThreadSafeFixedIntegerIndex.cc
+ * opencog/attentionbank/AtomBins.cc
  *
  * Copyright (C) 2016 Roman Treutlein <roman.treutlein@gmail.com>
+ * Copyright (C) 2017 Linas Vepstas <linasvepstas@gmail.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -20,13 +21,13 @@
  */
 #include <chrono>
 
-#include <opencog/attentionbank/ThreadSafeFixedIntegerIndex.h>
+#include <opencog/attentionbank/AtomBins.h>
 #include <opencog/util/mt19937ar.h>
 
 using namespace opencog;
 using namespace std::chrono;
 
-size_t ThreadSafeFixedIntegerIndex::size() const
+size_t AtomBins::size() const
 {
     std::lock_guard<std::mutex> lck(_mtx);
     size_t cnt = 0;
@@ -39,7 +40,7 @@ size_t ThreadSafeFixedIntegerIndex::size() const
     return cnt;
 }
 
-Handle ThreadSafeFixedIntegerIndex::getRandomAtom(void)
+Handle AtomBins::getRandomAtom(void)
 {
     auto seed = duration_cast< microseconds >(
             system_clock::now().time_since_epoch());
