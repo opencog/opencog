@@ -93,8 +93,16 @@ public:
      */
     void updateImportance(Atom*, int, int);
 
-    UnorderedHandleSet getHandleSet(AttentionValue::sti_t,
-                                    AttentionValue::sti_t) const;
+    /**
+     * Returns the set of atoms within the given importance range.
+     *
+     * @param Importance range lower bound (inclusive).
+     * @param Importance range upper bound (inclusive).
+     * @return The set of atoms within the given importance range.
+     */
+    UnorderedHandleSet getHandleSet(AttentionValue::sti_t lowerBound,
+                                    AttentionValue::sti_t upperBound =
+                                         AttentionValue::MAXSTI) const;
 
     /**
      * This method returns which importance bin an atom with the given

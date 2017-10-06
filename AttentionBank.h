@@ -269,13 +269,6 @@ public:
      */
     double getNormalisedZeroToOneSTI(AttentionValuePtr, bool average, bool clip) const;
 
-    /**
-     * Returns the set of atoms within the given importance range.
-     *
-     * @param Importance range lower bound (inclusive).
-     * @param Importance range upper bound (inclusive).
-     * @return The set of atoms within the given importance range.
-     */
     UnorderedHandleSet getHandlesByAV(AttentionValue::sti_t lowerBound,
                   AttentionValue::sti_t upperBound = AttentionValue::MAXSTI) const
     {
