@@ -144,6 +144,34 @@ void ImportanceIndex::updateTopStiValues(Atom* atom)
 
 // ==============================================================
 
+void ImportanceIndex::update(void)
+{
+    // Update MinMax STI values
+    AttentionValue::sti_t minSTISeen = 0;
+    UnorderedHandleSet minbin = getMinBinContents();
+    auto minit = std::min_element(minbin.begin(), minbin.end(),
+            [&](const Handle& h1, const Handle& h2) {
+                return get_sti(h1) < get_sti(h2);
+            });
+    if (minit != minbin.end()) minSTISeen = get_sti(*minit);
+
+    AttentionValue::sti_t maxSTISeen = 0;
+    UnorderedHandleSet maxbin = getMinBinContents();
+    auto maxit = std::max_element(maxbin.begin(), maxbin.end(),
+            [&](const Handle& h1, const Handle& h2) {
+                return get_sti(h1) < get_sti(h2);
+            });
+    if (maxit != maxbin.end()) maxSTISeen = get_sti(*maxit);
+
+    if (minSTISeen > maxSTISeen)
+        minSTISeen = maxSTISeen;
+
+    updateMinSTI(minSTISeen);
+    updateMaxSTI(maxSTISeen);
+}
+
+// ==============================================================
+
 AttentionValue::sti_t ImportanceIndex::getMaxSTI(bool average) const
 {
     std::lock_guard<std::mutex> lock(_mtx);

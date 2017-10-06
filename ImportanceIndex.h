@@ -61,6 +61,8 @@ public:
     ImportanceIndex();
     void removeAtom(const Handle&);
 
+    void update(void);
+
     /**
      * Get the maximum STI observed.
      *

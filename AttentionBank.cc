@@ -118,28 +118,7 @@ void AttentionBank::AVChanged(const Handle& h,
     updateSTIFunds(oldSti - newSti);
     updateLTIFunds(old_av->getLTI() - new_av->getLTI());
 
-    // Update MinMax STI values
-    AttentionValue::sti_t minSTISeen = 0;
-    UnorderedHandleSet minbin = _importanceIndex.getMinBinContents();
-    auto minit = std::min_element(minbin.begin(), minbin.end(),
-            [&](const Handle& h1, const Handle& h2) {
-                return get_sti(h1) < get_sti(h2);
-            });
-    if (minit != minbin.end()) minSTISeen = get_sti(*minit);
-
-    AttentionValue::sti_t maxSTISeen = 0;
-    UnorderedHandleSet maxbin = _importanceIndex.getMinBinContents();
-    auto maxit = std::max_element(maxbin.begin(), maxbin.end(),
-            [&](const Handle& h1, const Handle& h2) {
-                return get_sti(h1) < get_sti(h2);
-            });
-    if (maxit != maxbin.end()) maxSTISeen = get_sti(*maxit);
-
-    if (minSTISeen > maxSTISeen)
-        minSTISeen = maxSTISeen;
-
-    updateMinSTI(minSTISeen);
-    updateMaxSTI(maxSTISeen);
+    _importanceIndex.update();
 
     logger().fine("AVChanged: fundsSTI = %d, old_av: %d, new_av: %d",
                    fundsSTI.load(), oldSti, newSti);
@@ -147,7 +126,7 @@ void AttentionBank::AVChanged(const Handle& h,
     // Notify any interested parties that the AV changed.
     _AVChangedSignal(h, old_av, new_av);
 
-    //update AF
+    // update AF
     updateAttentionalFocus(h, old_av, new_av);
 }
 
