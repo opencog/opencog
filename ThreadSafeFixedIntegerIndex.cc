@@ -45,11 +45,13 @@ Handle ThreadSafeFixedIntegerIndex::getRandomAtom(void)
             system_clock::now().time_since_epoch());
     MT19937RandGen rng(seed.count());
 
-    size_t  bins = bin_size();
+    std::lock_guard<std::mutex> lck(_mtx);
+
+    size_t bins = _idx.size();
     bool empty = true;
     for (size_t i=0; i<bins; i++)
     {
-        if (size(i) > 0 )
+        if (0 < _idx.at(i).size(i))
         {
             empty = false;
             break;
@@ -63,15 +65,14 @@ Handle ThreadSafeFixedIntegerIndex::getRandomAtom(void)
     size_t bin = 0, attempts = 0;
     do
     {
-        bin = rng.randint(bins-1);  
+        bin = rng.randint(bins-1);
         attempts++;
-    } while (size(bin) <= 0 or attempts < bins);
+    } while (_idx.at(bin).size(bin) <= 0 or attempts < bins);
 
-    std::vector<Atom*> bin_content;
-    std::lock_guard<std::mutex> lck(_mtx);
-    const AtomSet &s(_idx.at(bin));
-    if (not s.size()) return Handle::UNDEFINED;
-    size_t idx = rng.randint(bin_content.size()-1); 
+    const AtomSet& s(_idx.at(bin));
+    if (0 == s.size()) return Handle::UNDEFINED;
+
+    size_t idx = rng.randint(s.size()-1);
     auto it = s.begin();
     std::advance(it, idx);
     Atom* atom = *it;

@@ -40,44 +40,35 @@ class Atom;
 class ThreadSafeFixedIntegerIndex
 {
     private:
-        std::vector<AtomSet> _idx;
         mutable std::mutex _mtx;
-        //mutable std::vector<std::mutex> _locks;
-
-        void resize(size_t sz)
-        {
-            _idx.resize(sz);
-        }
+        std::vector<AtomSet> _idx;
 
     public:
-        ThreadSafeFixedIntegerIndex(size_t size)
+        ThreadSafeFixedIntegerIndex(size_t sz)
         {
-            resize(size);
+            _idx.resize(sz);
         }
 
         void insert(size_t i, Atom* a)
         {
             std::lock_guard<std::mutex> lck(_mtx);
-            AtomSet& s(_idx.at(i));
-            s.insert(a);
+            _idx.at(i).insert(a);
         }
 
         void remove(size_t i, Atom* a)
         {
             std::lock_guard<std::mutex> lck(_mtx);
-            AtomSet &s = _idx.at(i);
-            s.erase(a);
+            _idx.at(i).erase(a);
         }
 
         size_t size(size_t i) const
         {
             std::lock_guard<std::mutex> lck(_mtx);
-            const AtomSet& s(_idx.at(i));
-            return s.size();
+            return _idx.at(i).size();
         }
 
         Handle getRandomAtom(void);
-        
+
         size_t size() const;
 
         template <typename OutputIterator> OutputIterator
