@@ -133,18 +133,6 @@ void AttentionBank::stimulate(const Handle& h, double stimulus)
     AVChanged(h, oldav, newav);
 }
 
-void AttentionBank::updateMaxSTI(AttentionValue::sti_t m)
-{
-    std::lock_guard<std::mutex> lock(_lock_maxSTI);
-    _maxSTI.update(m);
-}
-
-void AttentionBank::updateMinSTI(AttentionValue::sti_t m)
-{
-    std::lock_guard<std::mutex> lock(_lock_minSTI);
-    _minSTI.update(m);
-}
-
 AttentionValue::sti_t AttentionBank::calculateSTIWage()
 {
     long funds = getSTIFunds();

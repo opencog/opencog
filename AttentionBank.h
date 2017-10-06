@@ -204,28 +204,6 @@ public:
 
     AttentionValue::sti_t calculateLTIWage(void);
 
-    /**
-     * Update the minimum STI observed in the AttentionBank.
-     * Min/max are not updated on setSTI because average is calculate
-     * by lobe cycle, although this could potentially also be handled
-     * by the cogServer.
-     *
-     * @warning Should only be used by attention allocation system.
-     * @param m New minimum STI
-     */
-    void updateMinSTI(AttentionValue::sti_t);
-
-    /**
-     * Update the maximum STI observed in the AttentionBank.
-     * Min/max are not updated on setSTI because average is calculate
-     * by lobe cycle, although this could potentially also be handled
-     * by the cogServer.
-     *
-     * @warning Should only be used by attention allocation system.
-     * @param m New maximum STI
-     */
-    void updateMaxSTI(AttentionValue::sti_t);
-
     /** Change the Very-Long-Term Importance of an attention value holder */
     //void setVLTI(AttentionValueHolderPtr, AttentionValue::vlti_t);
 
