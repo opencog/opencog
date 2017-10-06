@@ -27,8 +27,6 @@
 #include <atomic>
 #include <memory>
 
-#include <opencog/atomspace/FixedIntegerIndex.h>
-
 namespace opencog
 {
 /** \addtogroup grp_atomspace
@@ -37,23 +35,18 @@ namespace opencog
 
 class Atom;
 /**
- * Implements a vector of atom sets; each set can be found via an
- * integer index.
+ * Implements a vector of atom sets.
  */
-class ThreadSafeFixedIntegerIndex : public FixedIntegerIndex
+class ThreadSafeFixedIntegerIndex
 {
     private:
-        using FixedIntegerIndex::idx;
-        mutable std::vector<std::unique_ptr<std::mutex>> _locks;
+        std::vector<AtomSet> _idx;
+        mutable std::mutex _mtx;
         //mutable std::vector<std::mutex> _locks;
 
         void resize(size_t sz)
         {
-            FixedIntegerIndex::resize(sz);
-            //std::vector<std::mutex> new_locks(sz);
-            _locks.resize(sz);
-            for (auto iter = _locks.begin(); iter != _locks.end(); ++iter)
-                (*iter) = std::unique_ptr<std::mutex>(new std::mutex());
+            _idx.resize(sz);
         }
 
     public:
@@ -64,20 +57,23 @@ class ThreadSafeFixedIntegerIndex : public FixedIntegerIndex
 
         void insert(size_t i, Atom* a)
         {
-            std::lock_guard<std::mutex> lck(*_locks[i]);
-            FixedIntegerIndex::insert(i,a);
+            std::lock_guard<std::mutex> lck(_mtx);
+            AtomSet& s(_idx.at(i));
+            s.insert(a);
         }
 
         void remove(size_t i, Atom* a)
         {
-            std::lock_guard<std::mutex> lck(*_locks[i]);
-            FixedIntegerIndex::remove(i,a);
+            std::lock_guard<std::mutex> lck(_mtx);
+            AtomSet &s = _idx.at(i);
+            s.erase(a);
         }
 
         size_t size(size_t i) const
         {
-            std::lock_guard<std::mutex> lck(*_locks[i]);
-            return FixedIntegerIndex::size(i);
+            std::lock_guard<std::mutex> lck(_mtx);
+            const AtomSet& s(_idx.at(i));
+            return s.size();
         }
 
         Handle getRandomAtom(void);
@@ -85,10 +81,10 @@ class ThreadSafeFixedIntegerIndex : public FixedIntegerIndex
         size_t size() const;
 
         template <typename OutputIterator> OutputIterator
-        getContent(size_t i,OutputIterator out) const
+        getContent(size_t i, OutputIterator out) const
         {
-            std::lock_guard<std::mutex> lck(*_locks[i]);
-            const AtomSet &s(idx.at(i));
+            std::lock_guard<std::mutex> lck(_mtx);
+            const AtomSet& s(_idx.at(i));
             return std::copy(s.begin(), s.end(), out);
         }
 
@@ -97,8 +93,8 @@ class ThreadSafeFixedIntegerIndex : public FixedIntegerIndex
                     OutputIterator out,
                     std::function<bool(Atom*)> pred) const
         {
-            std::lock_guard<std::mutex> lck(*_locks[i]);
-            const AtomSet &s(idx.at(i));
+            std::lock_guard<std::mutex> lck(_mtx);
+            const AtomSet& s(idx.at(i));
             return std::copy_if(s.begin(), s.end(), out, pred);
         }
 };

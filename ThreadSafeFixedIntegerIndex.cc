@@ -28,9 +28,14 @@ using namespace std::chrono;
 
 size_t ThreadSafeFixedIntegerIndex::size() const
 {
+    std::lock_guard<std::mutex> lck(_mtx);
     size_t cnt = 0;
-    for (unsigned int i = 0; i < idx.size(); i++)
-        cnt += size(i);
+    for (unsigned int i = 0; i < _idx.size(); i++)
+    {
+        const AtomSet& s(_idx.at(i));
+        cnt += s.size();
+    }
+
     return cnt;
 }
 
@@ -39,34 +44,38 @@ Handle ThreadSafeFixedIntegerIndex::getRandomAtom(void)
     auto seed = duration_cast< microseconds >(
             system_clock::now().time_since_epoch());
     MT19937RandGen rng(seed.count());
+
     size_t  bins = bin_size();
     bool empty = true;
-    for(size_t i=0; i< bins; i++){
-        if(size(i) > 0 ){
+    for (size_t i=0; i<bins; i++)
+    {
+        if (size(i) > 0 )
+        {
             empty = false;
             break;
         }
     }
 
-    if(empty)
+    if (empty)
         return Handle::UNDEFINED;
 
+    // `attempts` prevents an infinite loop.
     size_t bin = 0, attempts = 0;
-    do{
+    do
+    {
         bin = rng.randint(bins-1);  
         attempts++;
-    }while(size(bin) <= 0 or attempts < bins);//Just making sure it won't loop forever.
+    } while (size(bin) <= 0 or attempts < bins);
 
     std::vector<Atom*> bin_content;
-    std::lock_guard<std::mutex> lck(*_locks[bin]);
-    const AtomSet &s(idx.at(bin));
-    //In between selecting a bin and locking on the bin, the bin could be
-    //modified and thus might be empty due to changes made in another thread.
-    if(not s.size()) return Handle::UNDEFINED; //TODO instead try to find a non empty bin. 
+    std::lock_guard<std::mutex> lck(_mtx);
+    const AtomSet &s(_idx.at(bin));
+    if (not s.size()) return Handle::UNDEFINED;
     size_t idx = rng.randint(bin_content.size()-1); 
     auto it = s.begin();
-    std::advance(it,idx);
+    std::advance(it, idx);
     Atom* atom = *it;
     return atom->getHandle();
 }
+
 // ================================================================
