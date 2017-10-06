@@ -25,6 +25,7 @@
 
 #include <mutex>
 #include <opencog/truthvalue/AttentionValue.h>
+#include <opencog/attentionbank/AVUtils.h>
 #include <opencog/attentionbank/ThreadSafeFixedIntegerIndex.h>
 
 namespace opencog
@@ -33,7 +34,6 @@ namespace opencog
  *  @{
  */
 
-class AttentionBank;
 /**
  * Implements an index with additional routines needed for managing
  * short-term importance.  This index is thread-safe.
@@ -42,7 +42,6 @@ using HandleSTIPair = std::pair<Handle,AttentionValue::sti_t>;
 class ImportanceIndex
 {
 private:
-    AttentionBank& _bank;
     ThreadSafeFixedIntegerIndex _index;
     std::vector<HandleSTIPair> topKSTIValuedHandles; // TOP K STI values
     std::mutex topKSTIUpdateMutex;
@@ -51,7 +50,7 @@ private:
     void updateTopStiValues(Atom* atom);
 
 public:
-    ImportanceIndex(AttentionBank&);
+    ImportanceIndex();
     void removeAtom(Atom*, int);
 
     /**

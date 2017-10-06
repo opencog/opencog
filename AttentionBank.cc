@@ -32,8 +32,7 @@
 
 using namespace opencog;
 
-AttentionBank::AttentionBank(AtomSpace* asp) :
-    _importanceIndex(*this)
+AttentionBank::AttentionBank(AtomSpace* asp)
 {
     startingFundsSTI = fundsSTI = config().get_int("STARTING_STI_FUNDS", 100000);
     startingFundsLTI = fundsLTI = config().get_int("STARTING_LTI_FUNDS", 100000);

@@ -26,8 +26,8 @@
 #include <opencog/util/functional.h>
 #include <opencog/util/Config.h>
 
+#include <opencog/attentionbank/AVUtils.h>
 #include <opencog/attentionbank/ImportanceIndex.h>
-#include <opencog/attentionbank/AttentionBank.h>
 
 using namespace opencog;
 
@@ -47,8 +47,8 @@ using namespace opencog;
 
 // ==============================================================
 
-ImportanceIndex::ImportanceIndex(AttentionBank& bank)
-    : _bank(bank), _index(IMPORTANCE_INDEX_SIZE+1)
+ImportanceIndex::ImportanceIndex()
+    : _index(IMPORTANCE_INDEX_SIZE+1)
 {
     minAFSize = config().get_int("ECAN_MIN_AF_SIZE", 100);
 }
@@ -92,7 +92,7 @@ void ImportanceIndex::updateImportance(Atom* atom, int oldbin, int newbin)
 void ImportanceIndex::removeAtom(Atom* atom, int bin)
 {
     _index.remove(bin, atom);
-    
+
     std::lock_guard<std::mutex> lock(topKSTIUpdateMutex);
     // Also remove from topKSTIValueHandles vector
     Handle h = atom->getHandle();
@@ -113,17 +113,17 @@ void ImportanceIndex::updateTopStiValues(Atom* atom)
                 ,[&h](HandleSTIPair p){return p.first == h; });
         if(it != topKSTIValuedHandles.end()) topKSTIValuedHandles.erase(it);
 
-        HandleSTIPair p(h, _bank.get_sti(h));
+        HandleSTIPair p(h, get_sti(h));
         it = std::lower_bound(topKSTIValuedHandles.begin(),
                 topKSTIValuedHandles.end(), p,
                 [=](const HandleSTIPair& hsti1, const HandleSTIPair& hsti2){
                 return hsti1.second < hsti2.second;
                 });
-        topKSTIValuedHandles.insert(it,HandleSTIPair(h, _bank.get_sti(h)));
+        topKSTIValuedHandles.insert(it, HandleSTIPair(h, get_sti(h)));
     };
 
     Handle h = atom->getHandle();
-    AttentionValue::sti_t sti = _bank.get_sti(h);
+    AttentionValue::sti_t sti = get_sti(h);
     if(static_cast<int>(topKSTIValuedHandles.size()) < minAFSize){
         insertHandle(atom->getHandle());
     } else if (topKSTIValuedHandles.begin()->second < sti) {
@@ -153,7 +153,7 @@ UnorderedHandleSet ImportanceIndex::getHandleSet(
     // upperBound.
     std::function<bool(Atom *)> pred =
         [&](Atom* atom)->bool {
-            AttentionValue::sti_t sti = _bank.get_sti(atom->getHandle());
+            AttentionValue::sti_t sti = get_sti(atom->getHandle());
             return (lowerBound <= sti and sti <= upperBound);
         };
 
@@ -233,4 +233,3 @@ size_t ImportanceIndex::size(int i) const
 {
     return _index.size(i);
 }
-
