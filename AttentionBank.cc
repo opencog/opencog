@@ -31,6 +31,19 @@
 
 using namespace opencog;
 
+static const Handle& attn_key(void)
+{
+	static Handle ak(createNode(PREDICATE_NODE, "*-AttentionValueKey-*"));
+	return ak;
+}
+
+AttentionValuePtr get_av(const Handle& h)
+{
+    auto pr = h->getValue(attn_key());
+    if (nullptr == pr) return AttentionValue::DEFAULT_AV();
+    return AttentionValueCast(pr);
+}
+
 AttentionBank::AttentionBank(AtomSpace* asp) :
     _importanceIndex(*this)
 {
@@ -52,12 +65,6 @@ AttentionBank::AttentionBank(AtomSpace* asp) :
 AttentionBank::~AttentionBank()
 {
     _removeAtomConnection.disconnect();
-}
-
-static const Handle& attn_key(void)
-{
-	static Handle ak(createNode(PREDICATE_NODE, "*-AttentionValueKey-*"));
-	return ak;
 }
 
 void AttentionBank::remove_atom_from_index(const AtomPtr& atom)
@@ -111,13 +118,6 @@ void AttentionBank::change_vlti(const Handle& h, int unit)
         old_av->getVLTI() + unit);
 
     AVChanged(h, old_av, new_av);
-}
-
-AttentionValuePtr AttentionBank::get_av(const Handle& h)
-{
-    auto pr = h->getValue(attn_key());
-    if (nullptr == pr) return AttentionValue::DEFAULT_AV();
-    return AttentionValueCast(pr);
 }
 
 void AttentionBank::AVChanged(const Handle& h,

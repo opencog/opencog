@@ -45,6 +45,23 @@ namespace opencog
  *  @{
  */
 
+/**
+ * Handy utilities to get the attention value of an atom.
+ */
+AttentionValuePtr get_av(const Handle&);
+AttentionValue::sti_t get_sti(const Handle& h)
+{
+    return get_av(h)->getSTI();
+}
+AttentionValue::lti_t get_lti(const Handle& h)
+{
+    return get_av(h)->getLTI();
+}
+AttentionValue::vlti_t get_vlti(const Handle& h)
+{
+    return get_av(h)->getVLTI();
+}
+
 /* Attention Value changed */
 typedef boost::signals2::signal<void (const Handle&,
                                       const AttentionValuePtr&,
@@ -136,21 +153,8 @@ public:
     /** Provide ability for others to find out about AV changes */
     AVCHSigl& getAVChangedSignal() { return _AVChangedSignal; }
 
-    /**
-     * Get the attention value of an atom.
-     */
-    AttentionValuePtr get_av(const Handle&);
-    AttentionValue::sti_t get_sti(const Handle& h) {
-        return get_av(h)->getSTI();
-    }
-    AttentionValue::lti_t get_lti(const Handle& h) {
-        return get_av(h)->getLTI();
-    }
-    AttentionValue::vlti_t get_vlti(const Handle& h) {
-        return get_av(h)->getVLTI();
-    }
-
-    AttentionValue::sti_t get_af_max_sti(void) const {
+    AttentionValue::sti_t get_af_max_sti(void) const
+    {
         if (attentionalFocus.rbegin() != attentionalFocus.rend())
             return (attentionalFocus.rbegin()->second)->getSTI();
         else
