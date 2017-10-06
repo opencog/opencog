@@ -85,13 +85,11 @@ public:
 
     /**
      * Updates the importance index for the given atom.
-     * According to the new importance of the atom, it may change importance
-     * bins.
      *
      * @param The atom whose importance index will be updated.
      * @param The old importance bin where the atom originally was.
      */
-    void updateImportance(Atom*, int, int);
+    void updateImportance(const Handle&, int oldbin, int newbin);
 
     /**
      * Returns the set of atoms within the given importance range.

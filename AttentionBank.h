@@ -109,6 +109,8 @@ class AttentionBank
     AVCHSigl _AVChangedSignal;
 
     void change_vlti(const Handle&, int);
+    void remove_atom_from_index(const AtomPtr& atom);
+
 public:
     AttentionBank(AtomSpace*);
     ~AttentionBank();
@@ -203,16 +205,6 @@ public:
 
     AttentionValue::sti_t calculateLTIWage(void);
 
-    AttentionValue::sti_t getMinSTI(bool average=true) const
-    {
-        return _importanceIndex.getMinSTI(average);
-    }
-
-    AttentionValue::sti_t getMaxSTI(bool average=true) const
-    {
-        return _importanceIndex.getMaxSTI(average);
-    }
-
     /**
      * Update the minimum STI observed in the AttentionBank.
      * Min/max are not updated on setSTI because average is calculate
@@ -256,6 +248,7 @@ public:
      * @see getNormalisedSTI()
      */
     double getNormalisedSTI(AttentionValuePtr) const;
+
     /**
      * Retrieve the linearly normalised Short-Term Importance between 0..1
      * for a given AttentionValue.
@@ -269,21 +262,7 @@ public:
      */
     double getNormalisedZeroToOneSTI(AttentionValuePtr, bool average, bool clip) const;
 
-    UnorderedHandleSet getHandlesByAV(AttentionValue::sti_t lowerBound,
-                  AttentionValue::sti_t upperBound = AttentionValue::MAXSTI) const
-    {
-        return _importanceIndex.getHandleSet(lowerBound, upperBound);
-    }
-
-    /** Same as above, different API */
-    template <typename OutputIterator> OutputIterator
-    get_handles_by_AV(OutputIterator result,
-                      AttentionValue::sti_t lowerBound,
-                      AttentionValue::sti_t upperBound = AttentionValue::MAXSTI) const
-    {
-        UnorderedHandleSet hs = getHandlesByAV(lowerBound, upperBound);
-        return std::copy(hs.begin(), hs.end(), result);
-    }
+    bool atom_is_in_AF(const Handle&);
 
     /**
      * Gets the set of all handles in the Attentional Focus
@@ -301,29 +280,49 @@ public:
          return result;
     }
 
-    /**
-     * Return a random atom drawn from the importanceBin.
-     */
+
+    // =========================================================
+    // Utility wrappers around the Importance Index.
+    // XXX TODO -- Is this really needed? Users can operate thier
+    // own importance index, if they need one, right?
+
+    /// Return a random atom drawn from the importanceBin.
     Handle getRandomAtom(void) const
     {
         return _importanceIndex.getRandomAtom();
     }
 
-    bool atom_is_in_AF(const Handle&);
-
-    /**
-     * Updates the importance index for the given atom. According to the
-     * new importance of the atom, it may change importance bins.
-     *
-     * @param The atom whose importance index will be updated.
-     * @param The old importance bin where the atom originally was.
-     */
-    void updateImportanceIndex(const Handle& h, int oldbin, int newbin)
+    AttentionValue::sti_t getMinSTI(bool average=true) const
     {
-        _importanceIndex.updateImportance(h.operator->(), oldbin, newbin);
+        return _importanceIndex.getMinSTI(average);
     }
 
-    void remove_atom_from_index(const AtomPtr& atom);
+    AttentionValue::sti_t getMaxSTI(bool average=true) const
+    {
+        return _importanceIndex.getMaxSTI(average);
+    }
+
+    void updateImportanceIndex(const Handle& h, int oldbin, int newbin)
+    {
+        _importanceIndex.updateImportance(h, oldbin, newbin);
+    }
+
+    UnorderedHandleSet getHandlesByAV(AttentionValue::sti_t lowerBound,
+                  AttentionValue::sti_t upperBound = AttentionValue::MAXSTI) const
+    {
+        return _importanceIndex.getHandleSet(lowerBound, upperBound);
+    }
+
+    /** Same as above, different API */
+    template <typename OutputIterator> OutputIterator
+    get_handles_by_AV(OutputIterator result,
+                      AttentionValue::sti_t lowerBound,
+                      AttentionValue::sti_t upperBound = AttentionValue::MAXSTI) const
+    {
+        UnorderedHandleSet hs = getHandlesByAV(lowerBound, upperBound);
+        return std::copy(hs.begin(), hs.end(), result);
+    }
+
 };
 
 /* Singleton instance (for now) */

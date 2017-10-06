@@ -80,10 +80,11 @@ unsigned int ImportanceIndex::importanceBin(short importance)
     return bin;
 }
 
-void ImportanceIndex::updateImportance(Atom* atom, int oldbin, int newbin)
+void ImportanceIndex::updateImportance(const Handle& h, int oldbin, int newbin)
 {
     if (oldbin == newbin) return;
 
+    Atom* atom = h.operator->();
     _index.remove(oldbin, atom);
     _index.insert(newbin, atom);
     updateTopStiValues(atom);
