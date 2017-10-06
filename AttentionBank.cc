@@ -59,21 +59,14 @@ void AttentionBank::remove_atom_from_bank(const AtomPtr& atom)
     _importanceIndex.removeAtom(Handle(atom));
 }
 
-void AttentionBank::change_av(const Handle& h, AttentionValuePtr newav)
-{
-    _importanceIndex.updateImportance(h, newav);
-
-    AttentionValuePtr oldav = get_av(h);
-    AVChanged(h, oldav, newav);
-}
-
 void AttentionBank::set_sti(const Handle& h, AttentionValue::sti_t stiValue)
 {
     AttentionValuePtr old_av = get_av(h);
     AttentionValuePtr new_av = createAV(
         stiValue, old_av->getLTI(), old_av->getVLTI());
 
-    change_av(h, new_av);
+    _importanceIndex.updateImportance(h, newav);
+    AVChanged(h, oldav, newav);
 }
 
 void AttentionBank::set_lti(const Handle& h, AttentionValue::lti_t ltiValue)
@@ -128,15 +121,16 @@ void AttentionBank::stimulate(const Handle& h, double stimulus)
     // XXX This is not protected or made atomic in any way ...
     // If two different threads stimulate the same atom at the same
     // time, then the calculations will be bad. Does it matter?
-    AttentionValuePtr av(get_av(h));
-    AttentionValue::sti_t sti   = av->getSTI(h);
-    AttentionValue::lti_t lti   = av->getLTI(h);
-    AttentionValue::vlti_t vlti = av->getVLTI(h);
+    AttentionValuePtr oldav(get_av(h));
+    AttentionValue::sti_t sti   = oldav->getSTI(h);
+    AttentionValue::lti_t lti   = oldav->getLTI(h);
+    AttentionValue::vlti_t vlti = oldav->getVLTI(h);
 
     AttentionValue::sti_t stiWage = calculateSTIWage() * stimulus;
     AttentionValue::lti_t ltiWage = calculateLTIWage() * stimulus;
-    AttentionValuePtr new_av = createAV(sti + stiWage, lti + ltiWage, vlti);
-    change_av(h, new_av);
+    AttentionValuePtr newav = createAV(sti + stiWage, lti + ltiWage, vlti);
+    _importanceIndex.updateImportance(h, newav);
+    AVChanged(h, oldav, newav);
 }
 
 void AttentionBank::updateMaxSTI(AttentionValue::sti_t m)

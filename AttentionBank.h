@@ -144,7 +144,6 @@ public:
     /**
      * Change the attention value of an atom.
      */
-    void change_av(const Handle&, AttentionValuePtr);
     void set_sti(const Handle&, AttentionValue::sti_t);
     void set_lti(const Handle&, AttentionValue::lti_t);
     void inc_vlti(const Handle& h) { change_vlti(h, +1); }
