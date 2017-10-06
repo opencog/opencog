@@ -33,9 +33,7 @@
 (define ghost-anchor (Anchor (ghost-prefix "Currently Processing")))
 (define ghost-no-constant (Anchor (ghost-prefix "No constant terms")))
 (define ghost-word-seq (Predicate (ghost-prefix "Word Sequence")))
-(define ghost-word-set (Predicate (ghost-prefix "Word Set")))
 (define ghost-lemma-seq (Predicate (ghost-prefix "Lemma Sequence")))
-(define ghost-lemma-set (Predicate (ghost-prefix "Lemma Set")))
 
 ; Define the logger for GHOST
 (define ghost-logger (cog-new-logger))
@@ -47,17 +45,11 @@
   ghost-logger
 )
 
-; For features that are not currently supported
-(define (feature-not-supported NAME VAL)
-  "Notify the user that a particular feature is not currently supported."
-  (cog-logger-warn ghost-logger "Feature not supported: \"~a ~a\"" NAME VAL))
-
 ; A list of shared goals for all the rules under the same topic file
 (define shared-goals '())
 
-; Keep a record of the groundings of variables that authors defined
-(define var-grd-words '())
-(define var-grd-lemmas '())
+; Keep a record of the variables, if any, found in the pattern of a rule
+(define pat-vars '())
 
 ; Keep a record of the value assigned to the user variables that authors defined
 (define uvars '())
@@ -94,4 +86,6 @@
 (define-public (ghost TXT)
   "Parse the input TXT using nlp-parse and connect it to the GHOST anchor.
    Should run this with the main OpenPsi loop."
-  (State ghost-anchor (car (nlp-parse TXT))))
+  (define sent (car (nlp-parse TXT)))
+  (generate-word-seqs sent)
+  (State ghost-anchor sent))

@@ -49,6 +49,7 @@ Here is a list of features that are fully supported in GHOST:
 - [Sentence Boundary](https://github.com/bwilcox-1234/ChatScript/blob/master/WIKI/ChatScript-Basic-User-Manual.md#sentence-boundaries--and-)
 - [Negation](https://github.com/bwilcox-1234/ChatScript/blob/master/WIKI/ChatScript-Basic-User-Manual.md#not--and-notnot-)
 - [Function](https://github.com/bwilcox-1234/ChatScript/blob/master/WIKI/ChatScript-Advanced-User-Manual.md#functions)
+- [Unordered Matching](https://github.com/bwilcox-1234/ChatScript/blob/master/WIKI/ChatScript-Basic-User-Manual.md#unordered-matching--)
 
 
 One or more goals can be specified for a rule in this way:
@@ -130,14 +131,20 @@ s: is equivalent to declarative or imperative in OpenCog
 u: means union of the both above
 ```
 
-- Gambit & Rejoinders
-
-- Unordered Matching
-
 - Nested pattern e.g. "you < * [(live * long) long-lived]"
 
-- Common system functions, e.g. ^reuse
+- System functions
+  - ^gambit()
+
+- System variables
+  - %input
+
+- Rule selection / topic management
+  - Gambits
+  - Rejoinders
+  - Weight the rules by the order of the rules in the topic file
+  - Block topic from accidental access, like doing "t: (!~) ^fail(topic)" in ChatScript
+
+- Action orchestrator
 
 - Port all the DefinedPredicateNodes available in chatbot-psi and eva modules
-
-- Topic management

@@ -2,29 +2,6 @@
 ;;
 ;; Assorted functions for translating individual terms into Atomese fragments.
 
-(define (create-concept NAME MEMBERS)
-  "Create named concepts with explicit membership lists.
-   The first argument is the name of the concept, and the rest is the
-   list of words and/or concepts that will be considered as the members
-   of the concept."
-  ; Convert the member in the form of a string into an atom, which can
-  ; either be a WordNode, LemmaNode, ConceptNode, or a PhraseNode.
-  (define (member-words STR)
-    (let ((words (string-split STR #\sp)))
-      (if (= 1 (length words))
-          (let ((w (car words)))
-               (cond ((string-prefix? "~" w) (Concept (substring w 1)))
-                     ((is-lemma? w) (LemmaNode w))
-                     (else (WordNode w))))
-          (PhraseNode STR))))
-  (append-map (lambda (m) (list (Reference (member-words m) (Concept NAME))))
-              MEMBERS))
-
-(define (create-shared-goal GOAL)
-  "Create a topic level goal that will be shared among the rules under the
-   same topic."
-  (set! shared-goals GOAL))
-
 (define (word STR)
   "Literal word occurrence."
   (let* ((v1 (WordNode STR))
@@ -43,7 +20,6 @@
          (l (WordNode (get-lemma STR)))
          (v (list (TypedVariable v1 (Type "WordNode"))
                   (TypedVariable v2 (Type "WordInstanceNode"))))
-         ; Note: This converts STR to its lemma
          (c (list (ReferenceLink v2 v1)
                   (LemmaLink v2 l)
                   (WordInstanceLink v2 (Variable "$P")))))
@@ -148,31 +124,6 @@
         (list g1)
         (list g2))))
 
-; TODO: Should be placed in the action of the rule
-(define-public (ghost-record-groundings WGRD LGRD)
-  "Record the groundings of a variable, in both original words and lemmas.
-   They will be referenced at the stage of evaluating the context of the
-   psi-rules, or executing the action of the psi-rules."
-  (cog-logger-debug ghost-logger "--- Recording groundings:\n~a\n~a" WGRD LGRD)
-  (set! var-grd-words (assoc-set! var-grd-words (gar WGRD) (gdr WGRD)))
-  (set! var-grd-lemmas (assoc-set! var-grd-lemmas (gar LGRD) (gdr LGRD)))
-  (stv 1 1))
-
-(define-public (ghost-get-lemma . WORD)
-  "Get the lemma of WORD, where WORD can be one or more WordNodes."
-  (List (map Word (map get-lemma (map cog-name WORD)))))
-
-(define (variable VAR . GRD)
-  "Occurence of a variable. The value grounded for it needs to be recorded.
-   VAR is a number, it will be included as part of the variable name.
-   GRD can either be a VariableNode or a GlobNode, which pass the actual
-   value grounded in original words at runtime."
-  (Evaluation (GroundedPredicate "scm: ghost-record-groundings")
-    (List (List (ghost-var-word VAR) (List GRD))
-          (List (ghost-var-lemma VAR)
-                (ExecutionOutput (GroundedSchema "scm: ghost-get-lemma")
-                                 (List GRD))))))
-
 (define (context-function NAME ARGS)
   "Occurrence of a function in the context of a rule.
    The DefinedPredicateNode named NAME should have already been defined."
@@ -198,27 +149,18 @@
   (ExecutionOutput (GroundedSchema "scm: ghost-pick-action")
                    (Set ACTIONS)))
 
-(define-public (ghost-get-var-words VAR)
-  "Get the grounding of VAR, in original words."
-  (define grd (assoc-ref var-grd-words VAR))
-  (if (equal? grd #f)
-      (List)
-      grd))
+(define-public (ghost-get-lemma . GRD)
+  "Get the lemma of GRD, where GRD can be one or more WordNodes."
+  (if (any (lambda (g) (or (equal? 'GlobNode (cog-type g))
+                           (equal? 'VariableNode (cog-type g))))
+           GRD)
+      '()
+      (List (map Word (map get-lemma (map cog-name GRD))))))
 
-(define (get-var-words NUM)
-  "Get the value grounded for a variable, in original words."
-  (ExecutionOutput (GroundedSchema "scm: ghost-get-var-words")
-                   (List (ghost-var-word NUM))))
-
-(define-public (ghost-get-var-lemmas VAR)
-  "Get the grounding of VAR, in lemmas."
-  (define grd (assoc-ref var-grd-lemmas VAR))
-  (if (equal? grd #f) (List) grd))
-
-(define (get-var-lemmas NUM)
-  "Get the value grounded for a variable, in lemmas."
-  (ExecutionOutput (GroundedSchema "scm: ghost-get-var-lemmas")
-                   (List (ghost-var-lemma NUM))))
+(define (get-var-lemmas VAR)
+  "Turn the value grounded for VAR into lemmas."
+  (ExecutionOutput (GroundedSchema "scm: ghost-get-lemma")
+                   (List VAR)))
 
 (define-public (ghost-get-user-variable UVAR)
   "Get the value stored for VAR."
@@ -266,20 +208,20 @@
 (define-public (ghost-execute-action . ACTIONS)
   "Say the text and update the internal state."
   (define (extract-txt actions)
-    ; TODO: Right now it is extracting text only, but should be extended
-    ; to support actions that contains are not text as well.
     (string-join (append-map
       (lambda (a)
         (cond ((cog-link? a)
                (list (extract-txt (cog-outgoing-set a))))
               ((equal? 'WordNode (cog-type a))
                (list (cog-name a)))
+              ((equal? 'ConceptNode (cog-type a))
+               (list (cog-name a)))
               ; TODO: things other than text
               (else '())))
         actions)))
-  (define txt (extract-txt ACTIONS))
+  (define txt (string-trim (extract-txt ACTIONS)))
   ; Is there anything to say?
-  (if (not (string-null? (string-trim txt)))
+  (if (not (string-null? txt))
       (begin (cog-logger-info ghost-logger "Say: \"~a\"" txt)
              (cog-execute! (Put (DefinedPredicate "Say") (Node txt)))))
   ; Reset the state

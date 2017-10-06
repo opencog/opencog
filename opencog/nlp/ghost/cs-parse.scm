@@ -144,7 +144,7 @@
       (result:suffix 'NUM location
         (string-trim (match:substring current-match))))
     ; This should always be near the end, because it is broadest of all.
-    ((has-match? "^[ \t]*['.,_!?0-9a-zA-Z-]+" str)
+    ((has-match? "^[ \t]*[~'.,_!?0-9a-zA-Z-]+" str)
         (result:suffix 'STRING location
           (string-trim (match:substring current-match))))
     ; NotDefined token is used for errors only and there shouldn't be any rules.
@@ -246,13 +246,7 @@
     ; Declaration/annotation(for ghost) grammar
     (declarations
       (CONCEPT ID declaration-sequence) :
-        (create-concept $2
-            ; Double-quotes are used to wrap the words/phrases,
-            ; remove them here before calling "create-concept"
-            (map (lambda (s)
-                (let ((ms (match:substring s)))
-                    (substring ms 1 (- (string-length ms) 1))))
-            (list-matches "\"[a-zA-Z0-9 ]+?\"" $3)))
+        (create-concept $2 (eval-string (string-append "(list " $3 ")")))
       (TOPIC ID declaration-sequence) :
         (display-token (format #f "topic(~a = ~a)" $2 $3))
     )
@@ -268,11 +262,11 @@
     )
 
     (declaration-member
-      (LEMMA) :  (format #f "\"~a\"" $1)
-      (LITERAL) : (format #f "\"~a\"" $1)
-      (STRING) : (format #f "\"~a\"" $1)
-      (concept) : (format #f "\"~a\"" $1)
-      (DQUOTE phrase-terms DQUOTE) : (format #f "~a~a~a" $1 $2 $3)
+      (lemma) : $1
+      (literal) : $1
+      (phrase) : $1
+      (concept) : $1
+      (sequence) : $1
       (DICTKEY) :
         (format #f "(cons 'dictkey (cons \"~a\" \"~a\"))" (car $1) (cdr $1))
     )
@@ -303,6 +297,7 @@
           (list) (list) "")
       (REJOINDERS context action) :
         (format #f "\nrejoinder: ~a\n~a\n~a" $1 $2 $3)
+      (GAMBIT context action) : (format #f "gambit: ~a ~a" $2 $3)
       (GAMBIT action) : (format #f "gambit: ~a" $2)
     )
 
@@ -325,7 +320,12 @@
     )
 
     (context
+      (LPAREN RPAREN) : "(cons 'wildcard (cons 0 -1))"
+      (LPAREN negation RPAREN) : $2
       (LPAREN context-patterns RPAREN) : $2
+      (LPAREN negation context-patterns RPAREN) : (format #f "~a ~a" $2 $3)
+      (LPAREN unordered-matching RPAREN) : $2
+      (LPAREN negation unordered-matching RPAREN) : (format #f "~a ~a" $2 $3)
     )
 
     (context-patterns
@@ -346,8 +346,6 @@
       (user-variable) : $1
       (function) : $1
       (choice) : $1
-      (unordered-matching) : $1
-      (negation) : $1
       (variable ? concept) :
         (format #f "(cons 'is_member (list ~a ~a))" $1 $3)
       (sequence) : $1
@@ -369,6 +367,7 @@
       (DQUOTE) : "(cons 'str \"\\\"\")"
       (LEMMA) : (format #f "(cons 'str \"~a\")" $1)
       (LITERAL) : (format #f "(cons 'str \"~a\")" $1)
+      (NUM) : (format #f "(cons 'str \"~a\")" $1)
       (STRING) : (format #f "(cons 'str \"~a\")" $1)
       (variable) : $1
       ; e.g. $username
@@ -390,6 +389,7 @@
 
     (literal
       (LITERAL) : (format #f "(cons 'word \"~a\")" $1)
+      (STRING) : (format #f "(cons 'word \"~a\")" $1)
     )
 
     (phrase
@@ -426,7 +426,6 @@
       (literal) : $1
       (phrase) : $1
       (concept) : $1
-      (negation) : $1
       (sequence) : $1
     )
 
@@ -520,9 +519,6 @@
       (lemma) : $1
       (literal) : $1
       (phrase) : $1
-      (concept) : $1
-      (variable) : $1
-      (choice) : $1
     )
 
     ; TODO: This has a restart_matching effect. See chatscript documentation

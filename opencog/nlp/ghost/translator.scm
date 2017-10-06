@@ -10,99 +10,113 @@
 
 (define (order-terms TERMS)
   "Order the terms in the intended order, and insert wildcards into
-   appropriate positions of the sequence."
+   appropriate positions of the sequence.
+   No operation is needed if the pattern is supposed to be matched in
+   any order.
+   Finally make sure there is no meaningless consecutive
+   wildcard/variable in the term list we are going to return, as that
+   may cause a glob to be grounded incorrectly."
+  (define (merge-wildcard INT1 INT2)
+    (cons (max (car INT1) (car INT2))
+          (cond ((or (negative? (cdr INT1)) (negative? (cdr INT2))) -1)
+                (else (max (cdr INT1) (cdr INT2))))))
   (let* ((as (cons 'anchor-start "<"))
          (ae (cons 'anchor-end ">"))
          (wc (cons 'wildcard (cons 0 -1)))
+         (unordered? (any (lambda (t) (equal? 'unordered-matching (car t))) TERMS))
+         ; It's possible that the sequence does not having any word or concept etc,
+         ; e.g. a rule may just be about not having either one of these words
+         (empty-seq? (every (lambda (t) (equal? 'negation (car t))) TERMS))
          (start-anchor? (any (lambda (t) (equal? as t)) TERMS))
          (end-anchor? (any (lambda (t) (equal? ae t)) TERMS))
          (start (if start-anchor? (cdr (member as TERMS)) (list wc)))
          (end (if end-anchor?
                   (take-while (lambda (t) (not (equal? ae t))) TERMS)
-                  (list wc))))
-        (cond ((and start-anchor? end-anchor?)
-               (if (equal? start-anchor? end-anchor?)
-                   ; If they are equal, we are not expecting
-                   ; anything else, either one of them is
-                   ; the whole sequence
-                   (drop-right start 1)
-                   ; If they are not equal, put a wildcard
-                   ; in between them
-                   (append start (list wc) end)))
-               ; If there is only a start-anchor, append it and
-               ; a wildcard with the main-seq
-              (start-anchor?
-               (let ((before-anchor-start
-                       (take-while (lambda (t) (not (equal? as t))) TERMS)))
-                    (if (null? before-anchor-start)
-                        (append start end)
-                        ; In case there are terms before anchor-start,
-                        ; get it and add an extra wildcard
-                        (append start (list wc) before-anchor-start end))))
-              ; If there is only an end-anchor, the main-seq should start
-              ; with a wildcard, follow by another wildcard and finally
-              ; the end-seq
-              (end-anchor?
-               (let ((after-anchor-end (cdr (member ae TERMS))))
-                    (if (null? after-anchor-end)
-                        (append start end)
-                        ; In case there are still terms after anchor-end,
-                        ; get it and add an extra wildcard
-                        (append start after-anchor-end (list wc) end))))
-              ; If there is no anchor, the main-seq should start and
-              ; end with a wildcard
-              (else (append (list wc) TERMS (list wc))))))
-
-(define (preprocess-terms TERMS)
-  "Make sure there is no meaningless wildcard/variable in TERMS,
-   which may cause problems in rule matching or variable grounding."
-  (define (merge-wildcard INT1 INT2)
-    (cons (max (car INT1) (car INT2))
-          (cond ((or (negative? (cdr INT1)) (negative? (cdr INT2))) -1)
-                (else (max (cdr INT1) (cdr INT2))))))
-  (fold-right (lambda (term prev)
-    (cond ; If there are two consecutive wildcards, e.g.
-          ; (wildcard 0 . -1) (wildcard 3. 5)
-          ; merge them
-          ((and (equal? 'wildcard (car term))
-                (equal? 'wildcard (car (first prev))))
-           (cons (cons 'wildcard
-                       (merge-wildcard (cdr term) (cdr (first prev))))
-                 (cdr prev)))
-          ; If we have a variable that matches to "zero or more"
-          ; follow by a wildcard, e.g.
-          ; (variable (wildcard 0 . -1)) (wildcard 3 . 6)
-          ; return the variable
-          ((and (equal? 'variable (car term))
-                (equal? (cadr term) (cons 'wildcard (cons 0 -1)))
-                (equal? 'wildcard (car (first prev))))
-           (cons term (cdr prev)))
-          ; Otherwise accept and append it to the list
-          (else (cons term prev))))
-    (list (last TERMS))
-    (list-head TERMS (- (length TERMS) 1))))
+                  (list wc)))
+         (term-lst (cond (unordered? TERMS)  ; Nothing needs to be done
+                   ((and start-anchor? end-anchor?)
+                    (if (equal? start-anchor? end-anchor?)
+                        ; If they are equal, we are not expecting
+                        ; anything else, either one of them is
+                        ; the whole sequence
+                        (drop-right start 1)
+                        ; If they are not equal, put a wildcard
+                        ; in between them
+                        (append start (list wc) end)))
+                    ; If there is only a start-anchor, append it and
+                    ; a wildcard with the main-seq
+                   (start-anchor?
+                    (let ((before-anchor-start
+                            (take-while (lambda (t) (not (equal? as t))) TERMS)))
+                         (if (null? before-anchor-start)
+                             (append start end)
+                             ; In case there are terms before anchor-start,
+                             ; get it and add an extra wildcard
+                             (append start (list wc) before-anchor-start end))))
+                   ; If there is only an end-anchor, the main-seq should start
+                   ; with a wildcard, follow by another wildcard and finally
+                   ; the end-seq
+                   (end-anchor?
+                    (let ((after-anchor-end (cdr (member ae TERMS))))
+                         (if (null? after-anchor-end)
+                             (append start end)
+                             ; In case there are still terms after anchor-end,
+                             ; get it and add an extra wildcard
+                             (append start after-anchor-end (list wc) end))))
+                   ; Just having one wildcard is enough for an empty sequence
+                   (empty-seq? (append TERMS (list wc)))
+                   ; If there is no anchor, the main-seq should start and
+                   ; end with a wildcard
+                   (else (append (list wc) TERMS (list wc))))))
+        (fold-right
+          (lambda (term prev)
+            (cond ; If there are two consecutive wildcards, e.g.
+                  ; (wildcard 0 . -1) (wildcard 3. 5)
+                  ; merge them
+                  ((and (equal? 'wildcard (car term))
+                        (equal? 'wildcard (car (first prev))))
+                   (cons (cons 'wildcard
+                               (merge-wildcard (cdr term) (cdr (first prev))))
+                         (cdr prev)))
+                  ; If there is a variable that matches to "zero or more"
+                  ; followed by a wildcard, e.g.
+                  ; (variable (wildcard 0 . -1)) (wildcard 3 . 6)
+                  ; return the variable
+                  ((and (equal? 'variable (car term))
+                        (equal? (cadr term) (cons 'wildcard (cons 0 -1)))
+                        (equal? 'wildcard (car (first prev))))
+                   (cons term (cdr prev)))
+                  ; Similarly if there is a wildcard followed by a variable
+                  ; that matches to "zero or more", e.g.
+                  ; (wildcard 0 . -1) (variable (wildcard 0 . -1))
+                  ; return the variable, i.e. ignore this wildcard
+                  ((and (equal? 'wildcard (car term))
+                        (equal? 'variable (car (first prev)))
+                        (equal? (cadr (first prev)) (cons 'wildcard (cons 0 -1))))
+                   prev)
+                  ; Otherwise accept and append it to the list
+                  (else (cons term prev))))
+          (list (last term-lst))
+          (list-head term-lst (- (length term-lst) 1)))))
 
 (define (process-pattern-terms TERMS)
   "Generate the atomese (i.e. the variable declaration and the pattern)
    for each of the TERMS."
-  ; Keep a record of the variables, if any, found in the pattern of a rule
-  (define pat-vars '())
+  (define is-unordered? #f)
   (define (process terms)
-    (define vars '())
-    (define conds '())
-    (define word-seq '())
-    (define lemma-seq '())
-    (define is-unordered? #f)
+    (define v '())
+    (define c '())
+    (define ws '())
+    (define ls '())
     (define (update-lists t)
-      (set! vars (append vars (list-ref t 0)))
-      (set! conds (append conds (list-ref t 1)))
-      (set! word-seq (append word-seq (list-ref t 2)))
-      (set! lemma-seq (append lemma-seq (list-ref t 3))))
+      (set! v (append v (list-ref t 0)))
+      (set! c (append c (list-ref t 1)))
+      (set! ws (append ws (list-ref t 2)))
+      (set! ls (append ls (list-ref t 3))))
     (for-each (lambda (t)
       (cond ((equal? 'unordered-matching (car t))
-             (let ((terms (process (cdr t))))
-                  (update-lists terms)
-                  (set! is-unordered? #t)))
+             (update-lists (process (cdr t)))
+             (set! is-unordered? #t))
             ((equal? 'word (car t))
              (update-lists (word (cdr t))))
             ((equal? 'lemma (car t))
@@ -118,40 +132,79 @@
             ((equal? 'wildcard (car t))
              (update-lists (wildcard (cadr t) (cddr t))))
             ((equal? 'variable (car t))
-             (let ((terms (process (cdr t))))
-                  (update-lists terms)
-                  (set! conds (append conds
-                    (list (variable (length pat-vars)
-                                    (list-ref terms 2)))))
-                  (set! pat-vars (append pat-vars (list-ref terms 2)))))
+             (update-lists (process (cdr t)))
+             (set! pat-vars (append pat-vars (last-pair ws))))
             ((equal? 'uvar_exist (car t))
-             (set! conds (append conds (list (uvar-exist? (cdr t))))))
+             (set! c (append c (list (uvar-exist? (cdr t))))))
             ((equal? 'uvar_equal (car t))
-             (set! conds (append conds (list (uvar-equal? (cadr t) (caddr t))))))
+             (set! c (append c (list (uvar-equal? (cadr t) (caddr t))))))
             ((equal? 'function (car t))
-             (set! conds (append conds
+             (set! c (append c
                (list (context-function (cadr t)
                  (map (lambda (a)
-                   (cond ((equal? 'get_wvar (car a)) (get-var-words (cdr a)))
-                         ((equal? 'get_lvar (car a)) (get-var-lemmas (cdr a)))
-                         ((equal? 'get_uvar (car a)) (get-user-variable (cdr a)))
+                   (cond ((equal? 'get_wvar (car a))
+                          (list-ref pat-vars (cdr a)))
+                         ((equal? 'get_lvar (car a))
+                          (get-var-lemmas (list-ref pat-vars (cdr a))))
+                         ((equal? 'get_uvar (car a))
+                          (get-user-variable (cdr a)))
                          (else (WordNode (cdr a)))))
                    (cddr t)))))))
-            (else (feature-not-supported (car t) (cdr t)))))
+            ((equal? 'sequence (car t))
+             (let ((pt (process (cdr t))))
+                  ; Wrap the sequences with a ListLink
+                  (list-set! pt 2 (list (List (list-ref pt 2))))
+                  (list-set! pt 3 (list (List (list-ref pt 3))))
+                  (update-lists pt)))
+            (else (begin
+              (cog-logger-warn ghost-logger
+                "Feature not supported: \"(~a ~a)\"" (car t) (cdr t))
+              (throw 'FeatureNotSupported (car t) (cdr t))))))
       terms)
-    (list vars conds word-seq lemma-seq is-unordered?))
+    (list v c ws ls))
+
+  (define (generate-eval pred seq)
+    (Evaluation pred (List (Variable "$S") (List (flatten-list seq)))))
+
   ; Start the processing
-  (define proc-terms (process TERMS))
+  (define terms (process TERMS))
+  (define vars (list-ref terms 0))
+  (define conds (list-ref terms 1))
+  (define word-seq (list-ref terms 2))
+  (define lemma-seq (list-ref terms 3))
+
+  (if is-unordered?
+      ; Generate an EvaluationLink for each of the term in the seq
+      ; if it's an unordered match
+      (begin
+        (for-each
+          (lambda (t)
+            (let ((wc (wildcard 0 -1)))
+              (set! vars (append vars (list-ref wc 0)))
+              (set! conds (append conds (list (generate-eval ghost-word-seq
+                (list (car (list-ref wc 2)) t (car (list-ref wc 3)))))))))
+          word-seq)
+        (for-each
+          (lambda (t)
+            (let ((wc (wildcard 0 -1)))
+              (set! vars (append vars (list-ref wc 0)))
+              (set! conds (append conds (list (generate-eval ghost-lemma-seq
+                (list (car (list-ref wc 2)) t (car (list-ref wc 3)))))))))
+          lemma-seq))
+      ; Otherwise it's an ordered match
+      (set! conds (append conds (list
+        (generate-eval ghost-word-seq word-seq)
+        (generate-eval ghost-lemma-seq lemma-seq)))))
+
   ; DualLink couldn't match patterns with no constant terms in it
   ; Mark the rules with no constant terms so that they can be found
   ; easily during the matching process
-  ; (list-ref proc-terms 3) is the lemma-seq
-  (if (equal? (length (list-ref proc-terms 3))
+  (if (equal? (length lemma-seq)
               (length (filter (lambda (x) (equal? 'GlobNode (cog-type x)))
-                              (list-ref proc-terms 3))))
-      (begin (MemberLink (List (list-ref proc-terms 3)) ghost-no-constant)
-             (MemberLink (Set (list-ref proc-terms 3)) ghost-no-constant)))
-  proc-terms)
+                              lemma-seq)))
+      (MemberLink (List lemma-seq) ghost-no-constant))
+
+  (list vars conds))
 
 (define (process-action ACTION)
   "Convert ACTION into atomese."
@@ -161,10 +214,24 @@
     (append
       ; Iterate through the output word-by-word
       (map (lambda (n)
-        (cond ; The grounding of a variable in original words
-              ((equal? 'get_wvar (car n)) (get-var-words (cdr n)))
+        (cond ; Gather all the action choices, i.e. a list of actions
+              ; available but only one of them will be executed
+              ((equal? 'action-choices (car n))
+               (set! choices (append choices (list (List (to-atomese (cdr n))))))
+               '())
+              ; Generate the DefinedSchema once we have finished going through
+              ; all the choices
+              ((not (null? choices))
+               (let ((ac (action-choices choices)))
+                    (set! choices '())
+                    ; Generate the atoms for the current one
+                    (append (list ac) (to-atomese (list n)))))
+              ; The grounding of a variable in original words
+              ((equal? 'get_wvar (car n))
+               (list-ref pat-vars (cdr n)))
               ; The grounding of a variable in lemmas
-              ((equal? 'get_lvar (car n)) (get-var-lemmas (cdr n)))
+              ((equal? 'get_lvar (car n))
+               (get-var-lemmas (list-ref pat-vars (cdr n))))
               ; Get the value of a user variable
               ((equal? 'get_uvar (car n)) (get-user-variable (cdr n)))
               ; Assign a value to a user variable
@@ -174,18 +241,12 @@
               ((equal? 'function (car n))
                (if (equal? "reuse" (cadr n)) (set! reuse #t))
                (action-function (cadr n) (to-atomese (cddr n))))
-              ; Gather all the action choices, i.e. a list of actions
-              ; available but only one of them will be executed
-              ((equal? 'action-choices (car n))
-               (set! choices (append choices (list (List (to-atomese (cdr n))))))
-               '())
               (else (Word (cdr n)))))
         actions)
       (if (null? choices)
           '()
           (list (action-choices choices)))))
   (define action-atomese (to-atomese (cdar ACTION)))
-  (cog-logger-debug ghost-logger "action: ~a" ACTION)
   (True (if reuse action-atomese
                   (ExecutionOutput (GroundedSchema "scm: ghost-execute-action")
                                    (List action-atomese)))))
@@ -204,36 +265,44 @@
   "Top level translation function. Pattern is a quoted list of terms,
    and action is a quoted list of actions or a single action."
   (cog-logger-debug "In create-rule\nPATTERN = ~a\nACTION = ~a" PATTERN ACTION)
-  (let* ((ordered-terms (order-terms PATTERN))
-         (preproc-terms (preprocess-terms ordered-terms))
-         (proc-terms (process-pattern-terms preproc-terms))
-         (vars (append atomese-variable-template (list-ref proc-terms 0)))
-         (conds (append atomese-condition-template (list-ref proc-terms 1)))
-         (is-unordered? (list-ref proc-terms 4))
-         (words (if is-unordered?
-           (Evaluation ghost-word-set
-             (List (Variable "$S") (Set (list-ref proc-terms 2))))
-           (Evaluation ghost-word-seq
-             (List (Variable "$S") (List (list-ref proc-terms 2))))))
-         (lemmas (if is-unordered?
-           (Evaluation ghost-lemma-set
-             (List (Variable "$S") (Set (list-ref proc-terms 3))))
-           (Evaluation ghost-lemma-seq
-             (List (Variable "$S") (List (list-ref proc-terms 3))))))
-         (rule (map (lambda (goal)
-                      (psi-rule
-                        (list (Satisfaction (VariableList vars)
-                                            (And words lemmas conds)))
-                        (process-action ACTION)
-                        (psi-goal (car goal))
-                        (stv (cdr goal) .9)
-                        (if (null? TOPIC) default-topic TOPIC)
-                        NAME))
-                    (process-goal GOAL))))
-        (cog-logger-debug ghost-logger "ordered-terms: ~a" ordered-terms)
-        (cog-logger-debug ghost-logger "preproc-terms: ~a" preproc-terms)
-        (cog-logger-debug ghost-logger "psi-rule: ~a" rule)
-        rule))
+  (catch #t
+    (lambda ()
+      (let* ((ordered-terms (order-terms PATTERN))
+             (proc-terms (process-pattern-terms ordered-terms))
+             (vars (append atomese-variable-template (list-ref proc-terms 0)))
+             (conds (append atomese-condition-template (list-ref proc-terms 1)))
+             (action (process-action ACTION))
+             (goals (process-goal GOAL)))
+            (set! pat-vars '())
+            (cog-logger-debug ghost-logger "Context: ~a" ordered-terms)
+            (cog-logger-debug ghost-logger "Procedure: ~a" ACTION)
+            (cog-logger-debug ghost-logger "Goal: ~a" goals)
+            (map (lambda (rule)
+                   (if (string-null? NAME) rule (psi-rule-set-alias rule NAME)))
+                 (map (lambda (goal)
+                        (psi-rule
+                          (list (Satisfaction (VariableList vars) (And conds)))
+                          action
+                          (psi-goal (car goal))
+                          (stv (cdr goal) .9)
+                          (if (null? TOPIC) default-topic TOPIC)))
+                      goals))))
+    (lambda (key . parameters)
+      (if (not (equal? key 'FeatureNotSupported))
+          (cog-logger-error ghost-logger "~a: ~a" key parameters)))))
+
+(define (create-concept NAME MEMBERS)
+  "Create named concepts with explicit membership lists.
+   The first argument is the name of the concept, and the rest is the
+   list of words and/or concepts that will be considered as the members
+   of the concept."
+  (map (lambda (m) (Reference m (Concept NAME)))
+       (terms-to-atomese MEMBERS)))
+
+(define (create-shared-goal GOAL)
+  "Create a topic level goal that will be shared among the rules under the
+   same topic."
+  (set! shared-goals GOAL))
 
 ; ----------
 ; Topic
