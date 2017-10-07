@@ -197,6 +197,7 @@ double AttentionBank::getNormalisedZeroToOneSTI(AttentionValuePtr av,
 {
     AttentionValue::sti_t s = av->getSTI();
     int normaliser = getMaxSTI(average) - getMinSTI(average);
+
     if (normaliser == 0) return 0.0;
 
     double val = (s - getMinSTI(average)) / (double) normaliser;
