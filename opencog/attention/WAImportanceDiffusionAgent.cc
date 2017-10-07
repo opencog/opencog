@@ -100,8 +100,8 @@ HandleSeq WAImportanceDiffusionAgent::diffusionSourceVector(void)
 
 AttentionValue::sti_t WAImportanceDiffusionAgent::calculateDiffusionAmount(Handle h)
 {
-    static ecan::StochasticDiffusionAmountCalculator sdac(_as);
+    static ecan::StochasticDiffusionAmountCalculator sdac;
     float current_estimate = sdac.diffused_value(h, maxSpreadPercentage);
 
-    return _bank->get_sti(h) - current_estimate;
+    return get_sti(h) - current_estimate;
 }
