@@ -92,6 +92,7 @@ void AttentionBank::change_vlti(const Handle& h, int unit)
 void AttentionBank::change_av(const Handle& h, const AttentionValuePtr& new_av)
 {
     AttentionValuePtr old_av = get_av(h);
+    _importanceIndex.updateImportance(h, old_av, new_av);
     AVChanged(h, old_av, new_av);
 }
 

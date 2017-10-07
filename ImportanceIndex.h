@@ -61,13 +61,13 @@ private:
 
     /**
      * This method returns which importance bin an atom with the given
-     * importance should be placed.
+     * STI should be placed.
      *
      * @param Importance value to be mapped.
      * @return The importance bin which an atom of the given importance
      * should be placed.
      */
-    static unsigned int importanceBin(short);
+    static size_t importanceBin(AttentionValue::sti_t);
 
     std::vector<HandleSTIPair> topKSTIValuedHandles; // TOP K STI values
     int minAFSize;

@@ -54,8 +54,10 @@ ImportanceIndex::ImportanceIndex()
     minAFSize = config().get_int("ECAN_MIN_AF_SIZE", 100);
 }
 
-unsigned int ImportanceIndex::importanceBin(short importance)
+size_t ImportanceIndex::importanceBin(AttentionValue::sti_t impo)
 {
+    short importance = (short) impo;
+
     if (importance < 0)
         return 0;
     if (importance < 2*GROUP_SIZE)
@@ -72,11 +74,13 @@ unsigned int ImportanceIndex::importanceBin(short importance)
         sum = sum + std::pow(2,i);
     }
 
-    int ad = GROUP_SIZE - std::ceil(importance / std::pow(2,(i-1)));
+    int ad = GROUP_SIZE - std::ceil(importance / std::pow(2, (i-1)));
 
-    unsigned int bin = ((i * GROUP_SIZE) - ad);
+    size_t bin = ((i * GROUP_SIZE) - ad);
+#if 0
     if (bin > 104)
         std::cout << "ibin: "<< bin << "\n";
+#endif
     assert(bin <= IMPORTANCE_INDEX_SIZE);
     return bin;
 }
@@ -168,7 +172,7 @@ void ImportanceIndex::update(void)
     if (minit != minbin.end()) minSTISeen = get_sti(*minit);
 
     AttentionValue::sti_t maxSTISeen = 0;
-    UnorderedHandleSet maxbin = getMinBinContents();
+    UnorderedHandleSet maxbin = getMaxBinContents();
     auto maxit = std::max_element(maxbin.begin(), maxbin.end(),
             [&](const Handle& h1, const Handle& h2) {
                 return get_sti(h1) < get_sti(h2);
@@ -255,7 +259,7 @@ UnorderedHandleSet ImportanceIndex::getMaxBinContents()
     std::lock_guard<std::mutex> lock(_mtx);
     for (int i = IMPORTANCE_INDEX_SIZE ; i >= 0 ; i--)
     {
-        if (_index.size(i) > 0)
+        if (0 < _index.size(i))
         {
             _index.getContent(i, inserter(ret));
             return ret;
@@ -270,7 +274,7 @@ UnorderedHandleSet ImportanceIndex::getMinBinContents()
     std::lock_guard<std::mutex> lock(_mtx);
     for (int i = 0; i < IMPORTANCE_INDEX_SIZE; i++)
     {
-        if (_index.size(i) > 0)
+        if (0 < _index.size(i))
         {
             _index.getContent(i, inserter(ret));
             return ret;
