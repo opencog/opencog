@@ -13185,7 +13185,10 @@ right-cosine compute-right-cosine
 (load-atoms-of-type 'WordClassNode)
 (define cls (cog-get-atoms 'WordClassNode))
 
+(define sec (fetch-germ-sections  (Word "spoke")))
+(define nou (get-germ-endpoints (Word "spoke"))) ; length = 1190
 (loop-over-words psa 0.3 nou cls)
+start with 30 classes.
 
 ---------------------
 
@@ -13271,6 +13274,8 @@ delete-dup-atoms
 
 Oof -- need to fetch secions, need to fetch Connector too
 done.
+
+(AnyNode "left-word")
 
 
 =========================================================================

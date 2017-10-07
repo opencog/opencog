@@ -597,6 +597,9 @@
 	(define min-obs-cutoff 20)
 	(define ranked-words (trim-and-rank LLOBJ WRD-LST min-obs-cutoff))
 
+	; Been there, done that; drop the top-20.
+	; (define top-trimed-words (drop ranked-words 20))
+
 	(define (chunk-blocks wlist size clist)
 		(if (null? wlist) '()
 			(let* ((wsz (length wlist))
@@ -619,6 +622,8 @@
 	; The initial chunk block-size.  This is a tunable parameter.
 	; Perhaps it should be a random number, altered between runs?
 	(define chunk-block-size 20)
+	(format #t "Start classification of ~A (of ~A) words, chunksz=~A\n"
+		(length ranked-words) (length WRD-LST) chunk-block-size)
 	(chunk-blocks ranked-words chunk-block-size CLS-LST)
 )
 
