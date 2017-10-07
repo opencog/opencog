@@ -43,8 +43,13 @@ namespace opencog
  */
 using HandleSTIPair = std::pair<Handle, AttentionValue::sti_t>;
 
+namespace ecan {
+    class StochasticDiffusionAmountCalculator;
+};
 class ImportanceIndex
 {
+    // Needs to access importanceBin
+    friend class ecan::StochasticDiffusionAmountCalculator;
 private:
     mutable std::mutex _mtx;
 

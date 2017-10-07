@@ -34,7 +34,6 @@
 
 #include <opencog/truthvalue/AttentionValue.h>
 #include <opencog/attentionbank/ImportanceIndex.h>
-#include <opencog/attentionbank/StochasticImportanceDiffusion.h>
 
 namespace opencog
 {
@@ -55,8 +54,6 @@ typedef boost::signals2::signal<void (const Handle&,
 class AtomSpace;
 class AttentionBank
 {
-    friend class ecan::StochasticDiffusionAmountCalculator; //need to access _importanceIndex
-
     std::mutex AFMutex;
     unsigned int minAFSize;
     struct compare_sti_less {

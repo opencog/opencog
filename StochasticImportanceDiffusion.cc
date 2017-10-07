@@ -32,21 +32,25 @@
 using namespace opencog;
 using namespace opencog::ecan;
 
-unsigned int StochasticDiffusionAmountCalculator::bin_index(const Handle& h)
+// XXX FIXME - the implementation below is kind-of unusual.
+// It should be restructured so that the importance bins and the
+// diffusion bins are in one-to-one correspondance, so that the
+// integer bin index would not be required to track.
+size_t StochasticDiffusionAmountCalculator::bin_index(const Handle& h)
 {
-    return _ab->_importanceIndex.importanceBin(_ab->get_sti(h));
+    return ImportanceIndex::importanceBin(get_sti(h));
 }
 
 size_t StochasticDiffusionAmountCalculator::bin_size(unsigned int index)
 {
-   return _ab->_importanceIndex.size(index);
+   return _imidx->size(index);
 }
 
 void StochasticDiffusionAmountCalculator::update_bin(const Handle& h)
 {
-    unsigned short index = bin_index(h);
-    auto it = std::find_if(_bins.begin(),_bins.end(),
-            [=](const DiffusionRecordBin& bin){ return (bin.index == index); });
+    size_t index = bin_index(h);
+    auto it = std::find_if(_bins.begin(), _bins.end(),
+            [=](const DiffusionRecordBin& bin) { return (bin.index == index); });
 
     if (it == _bins.end())
     {
@@ -67,12 +71,8 @@ void StochasticDiffusionAmountCalculator::update_bin(const Handle& h)
 }
 
 StochasticDiffusionAmountCalculator::StochasticDiffusionAmountCalculator
-                                     (AtomSpace * as) :
-    _as(as), _ab(&attentionbank(as))
-{
-}
-
-StochasticDiffusionAmountCalculator::~StochasticDiffusionAmountCalculator()
+                                     (ImportanceIndex* imp) :
+    _imidx(imp)
 {
 }
 
@@ -120,7 +120,7 @@ float StochasticDiffusionAmountCalculator::elapsed_time(const Handle& h)
         average_elapsed_time = (*it).size / (*it).update_rate;
 
     update_bin(h); // Update DiffusionRecordBin.
-    
+
     return average_elapsed_time;
 }
 
@@ -135,5 +135,5 @@ float StochasticDiffusionAmountCalculator::diffused_value(const Handle& h,
                                                           float decay_rate)
 {
     float average_elapsed_time = elapsed_time(h);
-    return _ab->get_sti(h) * pow((1 - decay_rate), average_elapsed_time);
+    return get_sti(h) * pow((1 - decay_rate), average_elapsed_time);
 }

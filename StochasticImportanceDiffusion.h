@@ -33,8 +33,7 @@ using namespace std::chrono;
 namespace opencog
 {
     class Handle;
-    class AtomSpace;
-    class AttentionBank;
+    class ImportantIndex;
     namespace ecan
     {
         struct DiffusionRecordBin {
@@ -58,21 +57,19 @@ namespace opencog
          * bin and a count of how many atoms have been updated so far in that
          * particular bin. Then the average elapsed time since last diffusion event
          * for an atom will be claculated as total in the bin divided by update rate
-         * ( count of diffused atoms divided by duration of time).
+         * (count of diffused atoms divided by duration of time).
          */
         class StochasticDiffusionAmountCalculator
         {
-            AtomSpace* _as;
-            AttentionBank* _ab;
+            ImportanceIndex* _imidx;
             std::vector<DiffusionRecordBin> _bins; 
 
-            unsigned int bin_index(const Handle& h);
+            size_t bin_index(const Handle&);
             size_t bin_size(unsigned int index);
-            void update_bin(const Handle& h);
+            void update_bin(const Handle&);
 
-            public:
-            StochasticDiffusionAmountCalculator(AtomSpace*);
-            ~StochasticDiffusionAmountCalculator();
+        public:
+            StochasticDiffusionAmountCalculator(ImportanceIndex*);
 
             std::vector<DiffusionRecordBin> merge_bins(
                     const std::vector<DiffusionRecordBin>& past,
