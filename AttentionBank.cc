@@ -89,6 +89,12 @@ void AttentionBank::change_vlti(const Handle& h, int unit)
     AVChanged(h, old_av, new_av);
 }
 
+void AttentionBank::change_av(const Handle& h, const AttentionValuePtr& new_av)
+{
+    AttentionValuePtr old_av = get_av(h);
+    AVChanged(h, old_av, new_av);
+}
+
 void AttentionBank::AVChanged(const Handle& h,
                               const AttentionValuePtr& old_av,
                               const AttentionValuePtr& new_av)

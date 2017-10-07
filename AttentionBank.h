@@ -141,10 +141,12 @@ public:
     /**
      * Change the attention value of an atom.
      */
+    void change_av(const Handle&, const AttentionValuePtr& new_av);
     void set_sti(const Handle&, AttentionValue::sti_t);
     void set_lti(const Handle&, AttentionValue::lti_t);
     void inc_vlti(const Handle& h) { change_vlti(h, +1); }
     void dec_vlti(const Handle& h) { change_vlti(h, -1); }
+
 
     /**
      * Stimulate an atom.
