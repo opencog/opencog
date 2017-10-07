@@ -53,7 +53,7 @@ class AttentionUTest :  public CxxTest::TestSuite
            
             TS_ASSERT_EQUALS(_as.get_size(), 50);
             TS_ASSERT_EQUALS(hseq.size(), 10);
-            TS_ASSERT_EQUALS(_ab.get_sti(hseq[0]), 400);
+            TS_ASSERT_EQUALS(get_sti(hseq[0]), 400);
         }
         
         void testGetRandomAtoms() 
