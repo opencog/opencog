@@ -294,7 +294,7 @@ Object AtomSpacePublisherModule::atomToJSON(Handle h)
     std::string handle = std::to_string(h.value());
 
     // AttentionValue
-    AttentionValuePtr av = _attention_bank->get_av(h);
+    AttentionValuePtr av = get_av(h);
     Object jsonAV;
     jsonAV = avToJSON(av);
 

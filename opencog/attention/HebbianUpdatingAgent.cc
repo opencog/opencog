@@ -126,8 +126,8 @@ double HebbianUpdatingAgent::targetConjunction(HandleSeq handles)
                 "Size of outgoing set of a hebbian link must be 2.");
     }
 
-    auto normsti_i = _bank->getNormalisedZeroToOneSTI(_bank->get_av(handles[0]), true, true);
-    auto normsti_j = _bank->getNormalisedZeroToOneSTI(_bank->get_av(handles[1]), true, true);
+    auto normsti_i = _bank->getNormalisedZeroToOneSTI(get_av(handles[0]), true, true);
+    auto normsti_j = _bank->getNormalisedZeroToOneSTI(get_av(handles[1]), true, true);
     double conj = (normsti_i * normsti_j) + ((normsti_j - normsti_i) * std::abs(normsti_j -normsti_i));
 
     conj = (conj + 1.0) / 2.0;
