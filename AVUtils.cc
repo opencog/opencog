@@ -32,14 +32,14 @@ static const Handle& attn_key(void)
 	return ak;
 }
 
-AttentionValuePtr get_av(const Handle& h)
+AttentionValuePtr opencog::get_av(const Handle& h)
 {
     auto pr = h->getValue(attn_key());
     if (nullptr == pr) return AttentionValue::DEFAULT_AV();
     return AttentionValueCast(pr);
 }
 
-void set_av(const Handle& h, const AttentionValuePtr& av)
+void opencog::set_av(const Handle& h, const AttentionValuePtr& av)
 {
     h->setValue(attn_key(), ProtoAtomCast(av));
 }
