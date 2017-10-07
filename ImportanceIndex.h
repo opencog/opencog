@@ -46,7 +46,7 @@ using HandleSTIPair = std::pair<Handle, AttentionValue::sti_t>;
 class ImportanceIndex
 {
 private:
-    std::mutex _mtx;
+    mutable std::mutex _mtx;
 
     AtomBins _index;
 
@@ -98,8 +98,8 @@ public:
      * Updates the importance index for the given atom.
      */
     void updateImportance(const Handle&,
-                          AttentionValuePtr oldav,
-                          AttentionValuePtr newav);
+                          const AttentionValuePtr& oldav,
+                          const AttentionValuePtr& newav);
 
     /**
      * Returns the set of atoms within the given importance range.

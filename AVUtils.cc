@@ -39,7 +39,7 @@ AttentionValuePtr get_av(const Handle& h)
     return AttentionValueCast(pr);
 }
 
-void set_av(const Handle& h, const AttentionValue& av)
+void set_av(const Handle& h, const AttentionValuePtr& av)
 {
-    h->setValue(attn_key(), av);
+    h->setValue(attn_key(), ProtoAtomCast(av));
 }

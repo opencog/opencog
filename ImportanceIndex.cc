@@ -89,10 +89,9 @@ void ImportanceIndex::updateImportance(const Handle& h,
     int newbin = importanceBin(newav->getSTI());
     if (oldbin == newbin) return;
 
-    Atom* atom = h.operator->();
-    _index.remove(oldbin, atom);
-    _index.insert(newbin, atom);
-    updateTopStiValues(atom);
+    _index.remove(oldbin, h);
+    _index.insert(newbin, h);
+    updateTopStiValues(h);
 }
 
 // ==============================================================
@@ -105,7 +104,7 @@ void ImportanceIndex::removeAtom(const Handle& h)
     int bin = ImportanceIndex::importanceBin(oldav->getSTI());
 
     std::lock_guard<std::mutex> lock(_mtx);
-    _index.remove(bin, h.operator->());
+    _index.remove(bin, h);
 
     // Also remove from topKSTIValueHandles vector
     auto it = std::find_if(
@@ -181,7 +180,7 @@ void ImportanceIndex::update(void)
 
     std::lock_guard<std::mutex> lock(_mtx);
     _minSTI = minSTISeen;
-    _maxSTTI = maxSTISeen;
+    _maxSTI = maxSTISeen;
 }
 
 // ==============================================================
@@ -226,49 +225,39 @@ UnorderedHandleSet ImportanceIndex::getHandleSet(
     // because there may be atoms that have the same importanceIndex
     // and whose importance is lower than lowerBound or bigger than
     // upperBound.
-    std::function<bool(Atom *)> pred =
-        [&](Atom* atom)->bool {
-            AttentionValue::sti_t sti = get_sti(atom->getHandle());
+    std::function<bool(const Handle&)> pred =
+        [&](const Handle& atom)->bool {
+            AttentionValue::sti_t sti = get_sti(atom);
             return (lowerBound <= sti and sti <= upperBound);
         };
 
     std::lock_guard<std::mutex> lock(_mtx);
-    AtomSet set;
-    _index.getContentIf(lowerBin, inserter(set), pred);
+    _index.getContentIf(lowerBin, inserter(ret), pred);
 
     // If both lower and upper bounds are in the same bin,
     // Then we are done.
-    if (lowerBin == upperBin) {
-        std::transform(set.begin(), set.end(), inserter(ret),
-                       [](Atom* atom)->Handle { return atom->getHandle(); });
-        return ret;
-    }
+    if (lowerBin == upperBin) return ret;
 
     // For every index within lowerBound and upperBound,
     // add to the list.
     while (++lowerBin < upperBin)
-        _index.getContent(lowerBin, inserter(set));
+        _index.getContent(lowerBin, inserter(ret));
 
     // The two lists are concatenated.
-    _index.getContentIf(upperBin, inserter(set), pred);
+    _index.getContentIf(upperBin, inserter(ret), pred);
 
-    std::transform(set.begin(), set.end(), inserter(ret),
-                   [](Atom* atom)->Handle { return atom->getHandle(); });
     return ret;
 }
 
 UnorderedHandleSet ImportanceIndex::getMaxBinContents()
 {
-    AtomSet set;
     UnorderedHandleSet ret;
     std::lock_guard<std::mutex> lock(_mtx);
     for (int i = IMPORTANCE_INDEX_SIZE ; i >= 0 ; i--)
     {
         if (_index.size(i) > 0)
         {
-            _index.getContent(i, inserter(set));
-            std::transform(set.begin(), set.end(), inserter(ret),
-                   [](Atom* atom)->Handle { return atom->getHandle(); });
+            _index.getContent(i, inserter(ret));
             return ret;
         }
     }
@@ -277,16 +266,13 @@ UnorderedHandleSet ImportanceIndex::getMaxBinContents()
 
 UnorderedHandleSet ImportanceIndex::getMinBinContents()
 {
-    AtomSet set;
     UnorderedHandleSet ret;
     std::lock_guard<std::mutex> lock(_mtx);
-    for (int i = IMPORTANCE_INDEX_SIZE ; i >= 0 ; i--)
+    for (int i = 0; i < IMPORTANCE_INDEX_SIZE; i++)
     {
         if (_index.size(i) > 0)
         {
-            _index.getContent(i, inserter(set));
-            std::transform(set.begin(), set.end(), inserter(ret),
-                   [](Atom* atom)->Handle { return atom->getHandle(); });
+            _index.getContent(i, inserter(ret));
             return ret;
         }
     }
@@ -305,7 +291,7 @@ HandleSeq ImportanceIndex::getTopSTIValuedHandles()
 size_t ImportanceIndex::bin_size() const
 {
     std::lock_guard<std::mutex> lock(_mtx);
-    return _index.bin_size();
+    return _index.size();
 }
 
 size_t ImportanceIndex::size(int i) const
