@@ -262,6 +262,12 @@ public:
     // XXX TODO -- Is this really needed? Users can operate thier
     // own importance index, if they need one, right?
 
+    /// Return the index itself, giving direct access to it.
+    ImportanceIndex& getImportance()
+    {
+        return _importanceIndex;
+    }
+
     /// Return a random atom drawn from the importanceBin.
     Handle getRandomAtom(void) const
     {
