@@ -40,7 +40,8 @@
 using namespace opencog;
 
 WARentCollectionAgent::WARentCollectionAgent(CogServer& cs):
-                       RentCollectionBaseAgent(cs), _sdac(&cs.getAtomSpace())
+                       RentCollectionBaseAgent(cs),
+                       _sdac(&attentionbank(&cs.getAtomSpace()).getImportance())
 {
     // READ SLEEPING TIME HERE
     _sti_rent = STIAtomRent;

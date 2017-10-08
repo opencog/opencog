@@ -90,10 +90,10 @@ void ForgettingAgent::forget()
 
     for (unsigned int i = 0; i < atomsVector.size(); i++)
     {
-        if (_bank->get_lti(atomsVector[i]) <= forgetThreshold
+        if (get_lti(atomsVector[i]) <= forgetThreshold
                 and count < removalAmount)
         {
-            if (_bank->get_vlti(atomsVector[i]) == AttentionValue::DISPOSABLE )
+            if (get_vlti(atomsVector[i]) == AttentionValue::DISPOSABLE )
             {
                 std::string atomName = atomsVector[i]->toString();
                 _log->fine("Removing atom %s", atomName.c_str());
