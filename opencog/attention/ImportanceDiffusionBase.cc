@@ -206,8 +206,8 @@ void ImportanceDiffusionBase::diffuseAtom(Handle source)
 void ImportanceDiffusionBase::tradeSTI(DiffusionEventType event)
 {
     // Trade STI between the source and target atoms
-    _bank->set_sti(event.source, _bank->get_sti(event.source) - event.amount);
-    _bank->set_sti(event.target, _bank->get_sti(event.target) + event.amount);
+    _bank->set_sti(event.source, get_sti(event.source) - event.amount);
+    _bank->set_sti(event.target, get_sti(event.target) + event.amount);
 
 #ifdef DEBUG
     std::cout << "tradeSTI: " << event.amount << " from " << event.source

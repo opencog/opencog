@@ -73,8 +73,8 @@ void HebbianCreationAgent::run()
   
     HandleSeq topStiInAF;
     auto afSti = _bank->get_af_max_sti(); 
-    for(const auto& h : attentionalFocus){
-        if(_bank->get_sti(h) >= afSti)
+    for (const auto& h : attentionalFocus) {
+        if (get_sti(h) >= afSti)
             topStiInAF.push_back(h);
     }
     std::sort(topStiInAF.begin(), topStiInAF.end());

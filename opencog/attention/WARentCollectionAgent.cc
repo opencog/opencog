@@ -40,7 +40,8 @@
 using namespace opencog;
 
 WARentCollectionAgent::WARentCollectionAgent(CogServer& cs):
-                       RentCollectionBaseAgent(cs), _sdac(&cs.getAtomSpace())
+                       RentCollectionBaseAgent(cs),
+                       _sdac(&attentionbank(&cs.getAtomSpace()).getImportance())
 {
     // READ SLEEPING TIME HERE
     _sti_rent = STIAtomRent;
@@ -59,8 +60,8 @@ void WARentCollectionAgent::selectTargets(HandleSeq &targetSetOut)
 void WARentCollectionAgent::collectRent(HandleSeq& targetSet)
 {
     for (const Handle& h : targetSet) {
-        int sti = _bank->get_sti(h);
-        int lti = _bank->get_lti(h);
+        int sti = get_sti(h);
+        int lti = get_lti(h);
         
         float last_update_time = _sdac.elapsed_time(h);
         STIAtomRent = STIAtomRent * last_update_time;

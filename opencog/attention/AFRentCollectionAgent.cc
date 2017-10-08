@@ -70,8 +70,8 @@ void AFRentCollectionAgent::collectRent(HandleSeq& targetSet)
     int w = elapsed_time.count() / update_cycle;
 
     for (const Handle& h : targetSet) {
-        int sti = _bank->get_sti(h);
-        int lti = _bank->get_lti(h);
+        int sti = get_sti(h);
+        int lti = get_lti(h);
         int stiRent = calculate_STI_Rent();
         int ltiRent = calculate_LTI_Rent();
 

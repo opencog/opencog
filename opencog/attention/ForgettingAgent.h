@@ -108,8 +108,8 @@ struct ForgettingLTIThenTVAscendingSort
     {
         AttentionValue::lti_t lti1, lti2;
 
-        lti1 = _bank->get_lti(h1);
-        lti2 = _bank->get_lti(h2);
+        lti1 = get_lti(h1);
+        lti2 = get_lti(h2);
         if (lti1 != lti2) return lti1 < lti2;
         else {
             double tv1, tv2;
