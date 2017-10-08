@@ -13,6 +13,10 @@ idea is that the most important atoms should be exained first, and
 that importance can be spread around algorithmically to control the
 exploration of various branches.
 
+See the wiki page for more information.
+
+http://wiki.opencog.org/w/Attention_Allocation
+
 Design Issues
 =============
 Several design questions described below.
