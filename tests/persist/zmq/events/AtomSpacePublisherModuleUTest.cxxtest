@@ -190,7 +190,7 @@ public:
                         ("details.confidence", 0), 7.1, precision);
 
         // Modify the atom's AttentionValue
-        attentionbank(as).change_av(h, createAV(30, 50, 0));
+        attentionbank(as).change_av(h, AttentionValue::createAV(30, 50, 0));
 
         address = s_recv (subscriberAVChanged);
         contents = s_recv (subscriberAVChanged);
@@ -227,7 +227,7 @@ public:
         TS_ASSERT(ptAVNew.get<std::string>("vlti", "") == "false");
 
         // Add the atom to the AttentionalFocus
-        attentionbank(as).change_av(h, createAV(1100, 0, 0));
+        attentionbank(as).change_av(h, AttentionValue::createAV(1100, 0, 0));
         
         address = s_recv (subscriberAddAF);
         contents = s_recv (subscriberAddAF);
@@ -264,7 +264,7 @@ public:
 
         // Remove the atom(i.e ExampleNode) from the AttentionalFocus
         Handle h2 = as->add_node(CONCEPT_NODE, "AFTakeOverAtom");
-        attentionbank(as).change_av(h2, createAV(1200, 0, 0));
+        attentionbank(as).change_av(h2, AttentionValue::createAV(1200, 0, 0));
 
         address = s_recv (subscriberRemoveAF);
         contents = s_recv (subscriberRemoveAF);
