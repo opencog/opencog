@@ -134,15 +134,37 @@ void PatternMinerUTest::test_PatternMiner_SodaDrinker()
 void PatternMinerUTest::test_PatternMiner_InferenceControl()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
-	// Load inference_control_corpus.scm
-	// _scm.eval("(load-from-path \"inference_control_corpus.scm\")");
+	// Load inference-control-corpus.scm
+	_scm.eval("(load-from-path \"inference-control-corpus.scm\")");
 
-	// // Run the pattern miner
-	// PatternMiner pm(&_as);
-	// pm.runPatternMiner(false);
+	// Run the pattern miner
+	PatternMiner pm(&_as);
+	pm.runPatternMiner(false);
 
-	// Test the result: check the final top 3-gram pattern
 	// TODO
+	vector<HTreeNode*>&  top3gramPatterns = pm.getFinalPatternsForGram(3);
+
+	// The main pattern of interest should look like
+	//
+	// Execution
+	//   Schema "expand"
+	//   List
+	//     PatternMiningVariable "$k"
+	//     Inheritance
+	//       ConceptNode "A"
+	//       PatternMiningVariable "$x"
+	//     GroundedSchemaNode "scm: conditional-full-instantiation-scope-formula"
+	//   PatternMiningVariable "$r"
+	//
+	// Evaluation
+	//   Predicate "preproof
+	//   PatternMiningVariable "$k"
+	//
+	// Evaluation
+	//   Predicate "preproof
+	//   PatternMiningVariable "$r"
+
+	TS_WARN("TODO");
 
 	logger().info("End TEST: %s", __FUNCTION__);
 
