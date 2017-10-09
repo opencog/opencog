@@ -40,8 +40,7 @@
 
 ;; Randomly generate N targets
 (define (gen-random-targets N)
-  (list (Inheritance (Concept "B") (Concept "D"))
-        (Inheritance (Concept "C") (Concept "Z"))
+  (list (Inheritance (Concept "D") (Concept "Y"))
         (Inheritance (Concept "A") (Concept "Z"))
         (Inheritance (Concept "A") (Concept "G"))))
   ;; (if (= N 0)
