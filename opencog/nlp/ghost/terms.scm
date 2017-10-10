@@ -206,23 +206,35 @@
               (List (ghost-uvar UVAR) (Word VAL))))
 
 (define-public (ghost-execute-action . ACTIONS)
-  "Say the text and update the internal state."
-  (define (extract-txt actions)
-    (string-join (append-map
+  "Execute the actions and update the internal state."
+  (define txt "")
+  (define atoms '())
+  (define (extract actions)
+    (for-each
       (lambda (a)
-        (cond ((cog-link? a)
-               (list (extract-txt (cog-outgoing-set a))))
-              ((equal? 'WordNode (cog-type a))
-               (list (cog-name a)))
-              ((equal? 'ConceptNode (cog-type a))
-               (list (cog-name a)))
-              ; TODO: things other than text
-              (else '())))
-        actions)))
-  (define txt (string-trim (extract-txt ACTIONS)))
+        (cond ((or (equal? 'ListLink (cog-type a))
+                   (equal? 'SetLink (cog-type a)))
+               (extract (cog-outgoing-set a)))
+              ((or (equal? 'WordNode (cog-type a))
+                   ; This assumes that the name of a ConceptNode
+                   ; is something meaningful to say...
+                   (equal? 'ConceptNode (cog-type a)))
+               (set! txt (string-trim (string-append txt " " (cog-name a)))))
+              ; These can be ignored, may just be the return
+              ; of a GroundedSchemaNode
+              ((or (equal? 'TrueLink (cog-type a))
+                   (equal? 'FalseLink (cog-type a)))
+               '())
+              (else (set! atoms (append atoms (list a))))))
+      actions))
+  ; See what needs to be handled
+  (extract ACTIONS)
   ; Is there anything to say?
   (if (not (string-null? txt))
       (begin (cog-logger-info ghost-logger "Say: \"~a\"" txt)
              (cog-execute! (Put (DefinedPredicate "Say") (Node txt)))))
+  ; New atoms being created
+  (if (not (null? atoms))
+      (cog-logger-info ghost-logger "Atoms Created: ~a" atoms))
   ; Reset the state
   (State ghost-anchor (Concept "Default State")))

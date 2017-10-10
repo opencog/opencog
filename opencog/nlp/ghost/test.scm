@@ -28,8 +28,11 @@
 
 (define-public (ghost-currently-processing)
   "Get the sentence that is currently being processed."
-  (car (filter (lambda (e) (equal? ghost-word-seq (gar e)))
-               (cog-get-pred (ghost-get-curr-sent) 'PredicateNode))))
+  (let ((sent (ghost-get-curr-sent)))
+    (if (null? sent)
+        '()
+        (car (filter (lambda (e) (equal? ghost-word-seq (gar e)))
+                     (cog-get-pred (ghost-get-curr-sent) 'PredicateNode))))))
 
 (define-public (ghost-get-relex-outputs)
   "Get the RelEx outputs generated for the current sentence."
