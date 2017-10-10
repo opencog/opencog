@@ -3085,10 +3085,7 @@ void PatternMiner::calculateSurprisingness( HTreeNode* HNode, AtomSpace *_fromAt
         float diff = p - total_p;
         diff = diff / total_p;
 
-        float abs_diff = diff;
-
-        if (abs_diff < 0)
-            abs_diff = - abs_diff;
+        float abs_diff = std::abs(diff);
 
 //        cout << "diff  = p - total_p" << diff << " \n" ;
 
