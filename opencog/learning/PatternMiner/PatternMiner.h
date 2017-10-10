@@ -429,8 +429,8 @@ protected:
 
     bool isTypeInList(Type type, vector<Type> &typeList);
 
-    // if atomspace = 0, it will use the pattern mining Atomspace
-    std::string Link2keyString(Handle& link, string indent = "", const AtomSpace *atomspace = 0);
+    // if atomspace = nullptr, it will use the pattern mining Atomspace
+    std::string Link2keyString(Handle& link, string indent = "", const AtomSpace *atomspace = nullptr);
 
     void removeLinkAndItsAllSubLinks(AtomSpace *_atomspace, Handle link);
 
@@ -500,7 +500,7 @@ public:
 
     bool checkPatternExist(const string& patternKeyStr);
 
-    string unifiedPatternToKeyString(HandleSeq& inputPattern , const AtomSpace *atomspace = 0);
+    string unifiedPatternToKeyString(HandleSeq& inputPattern , const AtomSpace *atomspace = nullptr);
 
     void OutPutFrequentPatternsToFile(unsigned int n_gram, vector < vector<HTreeNode*> >& _patternsForGram, string _fileNamebasic = "");
 

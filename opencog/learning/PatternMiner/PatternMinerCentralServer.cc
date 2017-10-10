@@ -312,7 +312,7 @@ void DistributedPatternMiner::handleFindNewPatterns(http_request request)
 //    if (msgReceivedNum == 100)
 //    {
 //        timeval t1;
-//        gettimeofday(&t1, NULL);
+//        gettimeofday(&t1, nullptr);
 
 //        startTime = t1.tv_sec*1000 + t1.tv_usec/1000;
 //    }
@@ -320,7 +320,7 @@ void DistributedPatternMiner::handleFindNewPatterns(http_request request)
 //    if (msgReceivedNum == 2100)
 //    {
 //        timeval t2;
-//        gettimeofday(&t2, NULL);
+//        gettimeofday(&t2, nullptr);
 
 //        endTime = t2.tv_sec*1000 + t2.tv_usec/1000;
 //        long costSeconds = (endTime - startTime) / 1000;

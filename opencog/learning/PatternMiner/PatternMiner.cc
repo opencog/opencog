@@ -472,7 +472,7 @@ Handle PatternMiner::UnifyOneLinkForUnorderedLink(Handle& link,std::map<Handle,T
 
 string PatternMiner::unifiedPatternToKeyString(HandleSeq& inputPattern, const AtomSpace *atomspace)
 {
-    if (atomspace == 0)
+    if (atomspace == nullptr)
         atomspace = this->atomSpace;
 
     string keyStr = "";
@@ -3543,9 +3543,9 @@ void PatternMiner::initPatternMiner()
 
     cur_gram = 0;
 
-    htree = 0;
+    htree = nullptr;
 
-    observingAtomSpace = 0;
+    observingAtomSpace = nullptr;
 
 
 //    if (threads)
@@ -3676,7 +3676,7 @@ void PatternMiner::cleanUpPatternMiner()
     if (htree != nullptr)
     {
         delete htree;
-        htree = 0;
+        htree = nullptr;
     }
 
     if (atomSpace != nullptr)
@@ -3793,7 +3793,7 @@ void PatternMiner::runPatternMiner(bool exit_program_after_finish)
     std::cout <<"\nDebug: PatternMining start! Max gram = "
               << this->MAX_GRAM << ", mode = " << Pattern_mining_mode << std::endl;
 
-    int start_time = time(NULL);
+    int start_time = time(nullptr);
 
     allLinks.clear();
     originalAtomSpace->get_handles_by_type(back_inserter(allLinks), (Type) LINK, true );
@@ -3931,7 +3931,7 @@ void PatternMiner::runPatternMiner(bool exit_program_after_finish)
     }
 
 
-    int end_time = time(NULL);
+    int end_time = time(nullptr);
     printf("\nPattern Mining Finished! Total time: %d seconds. \n", end_time - start_time);
 
 
@@ -4759,7 +4759,7 @@ void PatternMiner::selectSubsetForDBpedia()
 
 std::string PatternMiner::Link2keyString(Handle& h, std::string indent, const AtomSpace *atomspace)
 {
-    if (atomspace == 0)
+    if (atomspace == nullptr)
         atomspace = this->atomSpace;
 
     std::stringstream answer;

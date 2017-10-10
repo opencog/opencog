@@ -307,7 +307,7 @@ void PatternMiner::growPatternsDepthFirstTask(unsigned int thread_index)
 void PatternMiner::runPatternMinerDepthFirst()
 {
     // observingAtomSpace is used to copy one link everytime from the originalAtomSpace
-    if (observingAtomSpace == 0)
+    if (observingAtomSpace == nullptr)
         observingAtomSpace = new AtomSpace();
 
     if (THREAD_NUM > 1)
@@ -368,7 +368,7 @@ HTreeNode* PatternMiner::extractAPatternFromGivenVarCombination(HandleSeq &input
                                                                 HandleSeq &shouldNotBeVars, HandleSeq &shouldBeVars,AtomSpace* _fromAtomSpace, unsigned int & extendedLinkIndex,
                                                                 set<string>& allNewMinedPatternsCurTask, bool& notOutPutPattern, bool &patternAlreadyExtractedInCurTask, bool startFromLinkContainWhiteKeyword)
 {
-    HTreeNode* returnHTreeNode = 0;
+    HTreeNode* returnHTreeNode = nullptr;
     bool skip = false;
     unsigned int gram = inputLinks.size();
 
@@ -497,7 +497,7 @@ HTreeNode* PatternMiner::extractAPatternFromGivenVarCombination(HandleSeq &input
 
 
 
-        HTreeNode* newHTreeNode = 0;
+        HTreeNode* newHTreeNode = nullptr;
 
         if (is_distributed)
         {
@@ -673,7 +673,7 @@ void PatternMiner::extendAPatternForOneMoreGramRecursively(const Handle &extende
 
     bool notOutPutPattern = false;
 
-    if (parentNode == 0) // this the first gram
+    if (parentNode == nullptr) // this the first gram
     {
         newValueToVarMap = valueToVarMap;
     }
@@ -1540,7 +1540,7 @@ void PatternMiner::extendAPatternForOneMoreGramRecursively(const Handle &extende
 //                string keyString = unifiedPatternToKeyString(unifiedPattern);
 
 //                // next, check if this pattern already exist (need lock)
-//                HTreeNode* newHTreeNode = 0;
+//                HTreeNode* newHTreeNode = nullptr;
 //                uniqueKeyLock.lock();
 
 //                map<string, HTreeNode*>::iterator htreeNodeIter = keyStrToHTreeNodeMap.find(keyString);

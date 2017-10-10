@@ -800,7 +800,7 @@ void* PatternMinerSCM::init_in_guile(void* self)
 {
     scm_c_define_module("opencog patternminer", init_in_module, self);
     scm_c_use_module("opencog patternminer");
-    return NULL;
+    return nullptr;
 }
 
 void PatternMinerSCM::init_in_module(void* data)

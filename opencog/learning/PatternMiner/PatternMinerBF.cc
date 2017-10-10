@@ -255,7 +255,7 @@ void PatternMiner::extractAllPossiblePatternsFromInputLinksBF(HandleSeq& inputLi
                     string keyString = unifiedPatternToKeyString(unifiedPattern);
 
                     // next, check if this pattern already exist (need lock)
-                    HTreeNode* newHTreeNode = 0;
+                    HTreeNode* newHTreeNode = nullptr;
                     uniqueKeyLock.lock();
 
                     map<string, HTreeNode*>::iterator htreeNodeIter = keyStrToHTreeNodeMap.find(keyString);
@@ -404,7 +404,7 @@ bool compareHTreeNodeBySurprisingness(HTreeNode* node1, HTreeNode* node2);
 
 void PatternMiner::ConstructTheFirstGramPatternsBF()
 {
-    int start_time = time(NULL);
+    int start_time = time(nullptr);
 
     std::cout<<"Debug: PatternMiner:  start (gram = 1) pattern mining..." << std::endl;
 
@@ -432,7 +432,7 @@ void PatternMiner::ConstructTheFirstGramPatternsBF()
     // sort the patterns by frequency
     std::sort((patternsForGram[0]).begin(), (patternsForGram[0]).end(),compareHTreeNodeByFrequency );
 
-    int end_time = time(NULL);
+    int end_time = time(nullptr);
     OutPutFrequentPatternsToFile(1, patternsForGram);
 
     std::cout<<"Debug: PatternMiner: done (gram = 1) pattern mining! " + toString((patternsForGram[0]).size()) + " patterns found! " << std::endl;

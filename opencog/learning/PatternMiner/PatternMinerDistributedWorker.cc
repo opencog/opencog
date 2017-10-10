@@ -191,7 +191,7 @@ void DistributedPatternMiner::startMiningWork()
         std::cout << "Start pattern mining work! Max gram = "
                   << this->MAX_GRAM << ", mode = Depth_First" << std::endl;
 
-        int start_time = time(NULL);
+        int start_time = time(nullptr);
 
         originalAtomSpace->get_handles_by_type(back_inserter(allLinks), (Type) LINK, true );
 
@@ -221,7 +221,7 @@ void DistributedPatternMiner::startMiningWork()
 
         runPatternMinerDepthFirst();
 
-        int end_time = time(NULL);
+        int end_time = time(nullptr);
         printf("Current pattern mining worker finished working! Total time: %d seconds. \n", end_time - start_time);
 
         notifyServerThisWorkerStop();
