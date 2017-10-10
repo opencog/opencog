@@ -1111,9 +1111,9 @@ void PatternMiner::extendAPatternForOneMoreGramRecursively(const Handle &extende
 //                        string curvarstr = extendNode->toShortString();
 //                        cout << "\n---------------start curvarstr = " << curvarstr << "---------------" <<std::endl;
 
-                        for (LinkPtr incomeingPtr : incomings)
+                        for (LinkPtr incomingPtr : incomings)
                         {
-                            Handle incomingHandle = incomeingPtr->getHandle();
+                            Handle incomingHandle = incomingPtr->getHandle();
                             Handle extendedHandle = incomingHandle;
 
                             if (use_linktype_black_list && isIgnoredType (incomingHandle->getType()) )

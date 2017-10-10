@@ -2783,9 +2783,9 @@ unsigned int PatternMiner::getAllEntityCountWithSamePredicatesForAPattern(Handle
             HandleSet allEntitiesForThisPredicate;
 
             IncomingSet allEvals = predicate->getIncomingSet(originalAtomSpace);
-            for (LinkPtr incomeingPtr : allEvals)
+            for (LinkPtr incomingPtr : allEvals)
             {
-                Handle evalLink = incomeingPtr->getHandle();
+                Handle evalLink = incomingPtr->getHandle();
                 Handle listLink = evalLink->getOutgoingAtom(1);
                 Handle entityNode = listLink->getOutgoingAtom(0);
                 allEntitiesForThisPredicate.insert(entityNode);
