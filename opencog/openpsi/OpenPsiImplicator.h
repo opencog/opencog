@@ -51,17 +51,18 @@ public:
   /**
    * Returns TRUE_TV if there is grounding else returns FALSE_TV. If the
    * cache has entry for the context then TRUE_TV is returned.
+   *
+   * @param rule An openpsi rule.
    */
-  TruthValuePtr check_satisfiability(const Handle& himplication);
+  TruthValuePtr check_satisfiability(const Handle& rule);
 
   /**
-   * Instantiate the implicand of the given ImplicationLink.
+   * Instantiate the action of the given openpsi rule.
    *
-   * @param himplication Handle to the ImplicationLink.
-   * @param vars Map from variables to their groundings.
+   * @param rule An openpsi rule.
    * @return The handle to the grounded atom.
    */
-  Handle imply(const Handle& himplication);
+  Handle imply(const Handle& rule);
 
 private:
   /**

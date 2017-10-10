@@ -22,6 +22,7 @@
 #ifndef _OPENCOG_OPENPSI_RULES_H
 #define _OPENCOG_OPENPSI_RULES_H
 
+#include <opencog/atoms/pattern/PatternLink.h>
 #include <opencog/atomspace/AtomSpace.h>
 
 namespace opencog
@@ -31,6 +32,14 @@ class OpenPsiRules
 {
 public:
   OpenPsiRules(AtomSpace* as);
+
+  inline Handle add_demand(const std::string& name) {
+    return add_tag(_psi_demand, name);
+  }
+
+  inline Handle add_goal(const std::string& name) {
+    return add_tag(_psi_goal, name);
+  }
 
   /**
    * Add a rule to the atomspace and the psi-rule index.
@@ -45,11 +54,50 @@ public:
   Handle add_rule(const HandleSeq& context, const Handle& action,
     const Handle& goal, const TruthValuePtr stv, const Handle& demand);
 
+  /**
+   * @param rule A psi-rule.
+   * @return Context of the given psi-rule.
+   */
+  static HandleSeq& get_context(const Handle rule);
+
+  /**
+   * @param rule A psi-rule.
+   * @return Action of the given psi-rule.
+   */
+  static Handle get_action(const Handle rule);
+
+  /**
+   * @param rule A psi-rule.
+   * @return Goal of the given psi-rule.
+   */
+  Handle get_goal(const Handle rule);
+
+  /**
+   * @param rule A psi-rule.
+   * @return Query atom used to check if the context of the given psi-rule is
+   *  satisfiable or not.
+   */
+  static PatternLinkPtr get_query(const Handle rule);
+
 private:
   /**
-   * The structure of the tuple is (context, action, goal).
+   * Declare a new_tag by adding the following structured atom into the
+   * atomspace
+   *      (InheritanceLink (ConceptNode "name") tag_type_node)
+   *
+   * @param tag_type_node The Node from which the new tag node inherites from.
+   * @param name The name of the ConceptNode that is going to be added
+   * @return ConceptNode created.
    */
-  typedef std::tuple<HandleSeq, Handle, Handle> PsiTuple;
+  Handle add_tag(const Handle tag_type_node, const std::string& name);
+
+  /**
+   * The structure of the tuple is (context, action, goal, query),
+   * where queryis a PatternLink that isn't added to the atomspace, and
+   * is used to check if the rule is satisfiable.
+   */
+  // TODO Should these entries be a member of Rules class?
+  typedef std::tuple<HandleSeq, Handle, Handle, PatternLinkPtr> PsiTuple;
 
   /**
    * This is a index with the keys being the psi-rules and the corresponding
@@ -73,7 +121,12 @@ private:
   /**
    * Node used to declare a goal.
    */
-  // static Handle _psi_goal;
+  static Handle _psi_goal;
+
+  /**
+   * Node used to declare a demand.
+   */
+  static Handle _psi_demand;
 
   AtomSpace* _as;
 };

@@ -1,0 +1,193 @@
+/*
+ * OpenPsiRulesUTest.cxxtest
+ *
+ * Copyright (C) 2017 MindCloud
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+#include <cxxtest/TestSuite.h>
+
+#include <opencog/atoms/base/Link.h>
+#include <opencog/atomspace/AtomSpace.h>
+#include <opencog/guile/SchemeEval.h>
+#include <opencog/truthvalue/SimpleTruthValue.h>
+
+#include <opencog/openpsi/OpenPsiRules.h>
+
+#define OPENPSI_TEST_PATH PROJECT_SOURCE_DIR "/tests/openpsi"
+#define CHKERR \
+    TSM_ASSERT("Caught scm error during eval", \
+        (false == _scm->eval_error()));
+
+using namespace opencog;
+
+class OpenPsiRulesUTest : public CxxTest::TestSuite
+{
+private:
+  AtomSpace* _as;
+  SchemeEval* _scm;
+  OpenPsiRules* _opr;
+
+public:
+  OpenPsiRulesUTest(): _as(nullptr), _scm(nullptr), _opr(nullptr)
+  {
+    logger().set_level(Logger::DEBUG);
+    logger().set_print_level_flag(true);
+    logger().set_print_to_stdout_flag(true);
+  }
+
+  ~OpenPsiRulesUTest()
+  {
+    // Clean Up
+    tearDown();
+
+    // Erase the log file if no assertions failed
+    if(!CxxTest::TestTracker::tracker().suiteFailed())
+        std::remove(logger().get_filename().c_str());
+  }
+
+  void setUp()
+  {
+    // The scheme environment is reset between each test.
+    _as = new AtomSpace();
+    _scm = new SchemeEval(_as);
+    _opr = new OpenPsiRules(_as);
+
+    // Configure scheme load-paths that are common for all tests.
+    _scm->eval("(add-to-load-path \"/usr/local/share/opencog/scm\")");
+    CHKERR
+
+    // Load require modules to be tested and populate the atomspace
+    _scm->eval("(use-modules (opencog))");
+    CHKERR
+    logger().info("##### Finished setting up to run a test #####");
+  }
+
+  void tearDown()
+  {
+    delete _as;
+    _as = nullptr;
+    delete _scm;
+    _scm = nullptr;
+
+    // Reset the cache between each test.
+    delete _opr;
+    _opr = nullptr;
+    // TODO: Clear the index.
+  }
+
+  // Check OpenPsiRules::add_rule is addng the openpsi rule properly.
+  void test_add_rule()
+  {
+    logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+    _scm->eval("(load \"" OPENPSI_TEST_PATH "/rules.scm\")");
+    CHKERR
+    HandleSeq context_1 = _scm->eval_h("(context-1-cpp)")->getOutgoingSet();
+    CHKERR
+    Handle action_1 = _scm->eval_h("action-1");
+    CHKERR
+    Handle goal_1 = _opr->add_goal("goal-1");
+    CHKERR
+    Handle demand_1 = _opr->add_demand("demand-1");
+
+    // Test 1:
+    // Check if the rule is added properly.
+    Handle rule_1 = _opr->add_rule(context_1, action_1, goal_1,
+      SimpleTruthValue::createTV(1.0, 1.0), demand_1);
+    Handle expected_rule_1 = _scm->eval_h("(rule-1-cpp)");
+    CHKERR
+    TSM_ASSERT_EQUALS("Expected to be equal", expected_rule_1, rule_1);
+
+    // TODO: Add test to check if the index is being updated when
+    // multiple rules are added.
+
+    logger().info("END TEST: %s", __FUNCTION__);
+  }
+
+  // Check OpenPsiRules::get_context is behaving as expected. If the rule
+  // is added into the atomspace using OpenPsiRules::add_rule then it
+  // should behave as tested here.
+  void test_get_context()
+  {
+    logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+    // Common Setup
+    _scm->eval("(use-modules (opencog openpsi))");
+    CHKERR
+    _scm->eval("(load \"" OPENPSI_TEST_PATH "/rules.scm\")");
+    CHKERR
+
+    // Test 1:
+    // If the rule isn't added using OpenPsiRules::add_rule then
+    // the index doesn't know about it.
+    Handle rule_2 = _scm->eval_h("(rule-2-cpp)");
+    CHKERR
+    HandleSeq& result_1 = OpenPsiRules::get_context(rule_2);
+    TSM_ASSERT_EQUALS("Expected to be empty", 0, result_1.size());
+
+    // Test 2:
+    // If the rule is added using OpenPsiRules::add_rule then
+    // the index is aware of it.
+    _scm->eval_h("(rule-2)");
+    CHKERR
+    HandleSeq expected_context_2 = \
+    _scm->eval_h("(context-2-cpp)")->getOutgoingSet();
+    CHKERR
+    HandleSeq& result_2 = OpenPsiRules::get_context(rule_2);
+    // A Link is created so as to use operator==.
+    TSM_ASSERT_EQUALS("Expected to be equal",
+      *(createLink(expected_context_2).get()), *(createLink(result_2).get()));
+
+    logger().info("END TEST: %s", __FUNCTION__);
+  }
+
+  // Check OpenPsiRules::get_query is behaving as expected. If the rule
+  // is added into the atomspace using OpenPsiRules::add_rule then it
+  // should behave as tested here.
+  void test_get_query()
+  {
+    logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+    // Common Setup
+    _scm->eval("(load \"" OPENPSI_TEST_PATH "/psi-implicator.scm\")");
+    CHKERR
+
+    // Test 1:
+    // If the rule isn't added using OpenPsiRules::add_rule then
+    // the query atom isn't created, and thus the index isn't aware
+    // of it.
+    Handle rule_1 = _scm->eval_h("(rule-1-cpp)");
+    CHKERR
+    PatternLinkPtr result_1 = OpenPsiRules::get_query(rule_1);
+    TS_ASSERT_EQUALS(nullptr, result_1);
+
+    // Test 2:
+    // If the rule is added using OpenPsiRules::add_rule then
+    // the query atom is created, and thus the index is aware
+    // of it.
+    _scm->eval_h("(rule-1)");
+    CHKERR
+    Handle expected_query_2 = _scm->eval_h("(pattern-link-1)");
+    CHKERR
+    PatternLinkPtr result_2 = OpenPsiRules::get_query(rule_1);
+    // Don't know why operator== doesn't work.
+    TS_ASSERT(opencog::content_eq(expected_query_2, result_2->getHandle()));
+
+    logger().info("END TEST: %s", __FUNCTION__);
+  }
+};

@@ -22,7 +22,7 @@
 (load "utilities.scm")
 
 ; --------------------------------------------------------------
-(define psi-demand-node (ConceptNode (string-append psi-prefix-str "Demand")))
+(define psi-demand-node (ConceptNode (string-append psi-prefix-str "demand")))
 
 ; --------------------------------------------------------------
 ; A cache of the demands, used to improve performance.
