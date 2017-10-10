@@ -3548,25 +3548,12 @@ void PatternMiner::initPatternMiner()
 
     observingAtomSpace = nullptr;
 
-
 //    if (threads)
 //        delete threads;
 
-
-    // vector<vector<HTreeNode*>> patternsForGram
-    for (unsigned int i = 0; i < MAX_GRAM; ++i)
-    {
-        vector<HTreeNode*> patternVector;
-        patternsForGram.push_back(patternVector);
-
-        vector<HTreeNode*> finalPatternVector;
-        finalPatternsForGram.push_back(finalPatternVector);
-
-        vector<HTreeNode*> tmpPatternVector;
-        tmpPatternsForGram.push_back(tmpPatternVector);
-
-    }
-
+    patternsForGram.resize(MAX_GRAM);
+    finalPatternsForGram.resize(MAX_GRAM);
+    tmpPatternsForGram.resize(MAX_GRAM);
 }
 
 void PatternMiner::reSetAllSettingsFromConfig()
