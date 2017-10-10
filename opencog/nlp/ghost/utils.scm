@@ -70,16 +70,7 @@
                 (word-inst-match-pos? w "punctuation")
                 (null? (cog-chase-link TYPE 'WordNode w)))
             '()
-            ; For proper names, e.g. Jessica Henwick,
-            ; RelEx converts them into a single WordNode, e.g.
-            ; (WordNode "Jessica_Henwick"). Codes below try to
-            ; split it into two WordNodes, "Jessica" and "Henwick",
-            ; so that the matcher will be able to find the rules
-            (let* ((wn (car (cog-chase-link TYPE 'WordNode w)))
-                   (name (cog-name wn)))
-              (if (integer? (string-index name #\_))
-                  (map Word (string-split name  #\_))
-                  (list wn)))))
+            (cog-chase-link TYPE 'WordNode w)))
       (car (sent-get-words-in-order SENT))))
   (let* ((wseq (get-seq 'ReferenceLink))
          (word-seq (List wseq))
