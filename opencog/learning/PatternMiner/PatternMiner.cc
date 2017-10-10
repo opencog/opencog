@@ -62,7 +62,7 @@ bool isInStringVector(string _item, vector<string> _vector)
     return false;
 }
 
-void PatternMiner::generateIndexesOfSharedVars(Handle& link, HandleSeq& orderedHandles, vector < vector< std::pair<int,std::size_t> > >& indexes)
+void PatternMiner::generateIndexesOfSharedVars(Handle& link, HandleSeq& orderedHandles, vector<vector<std::pair<int,std::size_t>>>& indexes)
 {
     HandleSeq outgoingLinks = link->getOutgoingSet();
     for (Handle h : outgoingLinks)
@@ -73,7 +73,7 @@ void PatternMiner::generateIndexesOfSharedVars(Handle& link, HandleSeq& orderedH
             {
                 string var_name = h->getName();
 
-                vector< std::pair<int,std::size_t> > indexesForCurVar; // vector <handleindex,varposintthehandle>
+                vector<std::pair<int,std::size_t>> indexesForCurVar; // vector<handleindex,varposintthehandle>
                 int index = 0;
 
                 for (Handle oh : orderedHandles)
@@ -1475,7 +1475,7 @@ void PatternMiner::OutPutAllEntityNumsToFile()
 
 
 
-void PatternMiner::OutPutFrequentPatternsToFile(unsigned int n_gram, vector < vector<HTreeNode*> >& _patternsForGram, string _fileNamebasic)
+void PatternMiner::OutPutFrequentPatternsToFile(unsigned int n_gram, vector<vector<HTreeNode*>>& _patternsForGram, string _fileNamebasic)
 {
 
     // out put the n_gram frequent patterns to a file, in the order of frequency
@@ -2012,7 +2012,7 @@ bool PatternMiner::filters(HandleSeq& inputLinks, HandleSeqSeq& oneOfEachSeqShou
 
     HandleSet all2ndOutgoingsOfInherlinks;
 
-    // map<predicate, set<value> >
+    // map<predicate, set<value>>
     map<Handle, HandleSet > predicateToValueOfEvalLinks;
 
     HandleSet  all1stOutgoingsOfEvalLinks;
@@ -3552,7 +3552,7 @@ void PatternMiner::initPatternMiner()
 //        delete threads;
 
 
-    // vector < vector<HTreeNode*> > patternsForGram
+    // vector<vector<HTreeNode*>> patternsForGram
     for (unsigned int i = 0; i < MAX_GRAM; ++i)
     {
         vector<HTreeNode*> patternVector;
@@ -4476,7 +4476,7 @@ void PatternMiner::applyWhiteListKeywordfilterAfterMining()
 
     string fileNameBasic = "WhiteKeyWord-" + logic + "-" + keywordlist;
 
-    vector < vector<HTreeNode*> > patternsForGramFiltered;
+    vector<vector<HTreeNode*>> patternsForGramFiltered;
 
     for(unsigned int gram = 1; gram <= MAX_GRAM; gram ++)
     {

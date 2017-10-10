@@ -71,8 +71,8 @@ protected:
     std::thread *parsePatternTaskThreads;
     std::mutex patternQueueLock, addRelationLock, updatePatternCountLock, modifyWorkerLock;
 
-    // map < uid, <is_still_working, processedFactsNum> >
-    map<string, std::pair<bool, unsigned int> > allWorkers;
+    // map<uid, <is_still_working, processedFactsNum>>
+    map<string, std::pair<bool, unsigned int>> allWorkers;
     bool allWorkersStop;
 
     list<json::value> waitForParsePatternQueue;

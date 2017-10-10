@@ -100,7 +100,7 @@ using namespace opencog;
 
 //        extractAllPossiblePatternsFromInputLinksDF(observedLinks, 0, observingAtomSpace, _allLastGramHTreeNodes,_allThisGramHTreeNodes,1);
 
-//        map<HandleSeq, vector<HTreeNode*> > allLastGramLinksToPatterns; // for this cur_link
+//        map<HandleSeq, vector<HTreeNode*>> allLastGramLinksToPatterns; // for this cur_link
 //        allLastGramLinksToPatterns.insert(std::pair<HandleSeq, vector<HTreeNode*>>(observedLinks, _allThisGramHTreeNodes));
 
 //        unsigned int gram;
@@ -108,8 +108,8 @@ using namespace opencog;
 
 //        for ( gram = 2; gram <= MAX_GRAM; ++ gram)
 //        {
-//            map<HandleSeq, vector<HTreeNode*> > ::iterator it = allLastGramLinksToPatterns.begin();
-//            map<HandleSeq, vector<HTreeNode*> > allThisGramLinksToPatterns;
+//            map<HandleSeq, vector<HTreeNode*>> ::iterator it = allLastGramLinksToPatterns.begin();
+//            map<HandleSeq, vector<HTreeNode*>> allThisGramLinksToPatterns;
 //            vector<HandleSet> newConnectedLinksFoundThisGram;
 
 //            for(; it != allLastGramLinksToPatterns.end(); ++ it)
@@ -1233,7 +1233,7 @@ void PatternMiner::extendAPatternForOneMoreGramRecursively(const Handle &extende
 // this function is old
 // allLastGramHTreeNodes is input, allFactLinksToPatterns is output - the links fact to all its pattern HTreeNodes
 //void PatternMiner::extendAllPossiblePatternsForOneMoreGramDF(HandleSeq &instance, AtomSpace* _fromAtomSpace, unsigned int gram,
-//     vector<HTreeNode*>& allLastGramHTreeNodes, map<HandleSeq, vector<HTreeNode*> >& allFactLinksToPatterns, vector<HandleSet>& newConnectedLinksFoundThisGram)
+//     vector<HTreeNode*>& allLastGramHTreeNodes, map<HandleSeq, vector<HTreeNode*>>& allFactLinksToPatterns, vector<HandleSet>& newConnectedLinksFoundThisGram)
 //{
 
 //    // First, extract all the variable nodes in the instance links

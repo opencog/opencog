@@ -63,7 +63,7 @@ namespace PatternMining
 struct _non_ordered_pattern
 {
     Handle link;
-    vector< vector <std::pair<int,std::size_t> > > indexesOfSharedVars;
+    vector<vector<std::pair<int,std::size_t>>> indexesOfSharedVars;
 
     bool operator <(const _non_ordered_pattern& other) const
     {
@@ -98,7 +98,7 @@ struct _non_ordered_pattern
 struct advanced_non_ordered_pattern // only when complex patterns like pln patterns, used when enable_unify_unordered_links = true
 {
     Handle link;
-    vector< vector <std::pair<int,std::size_t> > > indexesOfSharedVars; // the shared vars indexes appear in the already sorted links
+    vector<vector<std::pair<int,std::size_t>>> indexesOfSharedVars; // the shared vars indexes appear in the already sorted links
 
 
     bool operator <(const _non_ordered_pattern& other) const
@@ -170,11 +170,11 @@ protected:
     // Every pattern is reprented as a unique string as the key in this map, mapping to its cooresponding HTreeNode
     map<string, HTreeNode*> keyStrToHTreeNodeMap;
 
-    vector < vector<HTreeNode*> > patternsForGram;
-    vector < vector<HTreeNode*> > finalPatternsForGram;
+    vector<vector<HTreeNode*>> patternsForGram;
+    vector<vector<HTreeNode*>> finalPatternsForGram;
 
     // temp patterns generated only for calcuate the interestingness of its superpatterns, e.g. patterns with too many variables
-    vector < vector<HTreeNode*> > tmpPatternsForGram;
+    vector<vector<HTreeNode*>> tmpPatternsForGram;
 
     map<string, unsigned int> allEntityNumMap;
 
@@ -328,7 +328,7 @@ protected:
 
     HandleSeq ReplaceConstNodeWithVariableForAPattern(HandleSeq& pattern, Handle constNode, Handle newVariableNode);
 
-    void generateIndexesOfSharedVars(Handle& link, HandleSeq& orderedHandles, vector<vector<std::pair<int, size_t> > > &indexes);
+    void generateIndexesOfSharedVars(Handle& link, HandleSeq& orderedHandles, vector<vector<std::pair<int, size_t>>> &indexes);
 
     // generate the outgoings for a link in a pattern in the Pattern mining Atomspace, according to the given group of variables
     void generateALinkByChosenVariables(Handle &originalLink, HandleMap& valueToVarMap, HandleSeq &outputOutgoings, AtomSpace *_fromAtomSpace);
@@ -368,7 +368,7 @@ protected:
     void extractAllVariableNodesInAnInstanceLink(Handle& instanceLink, Handle& patternLink, map<Handle, unsigned int>& allVarNodes, unsigned index);
 
     void extendAllPossiblePatternsForOneMoreGramDF(HandleSeq &instance, AtomSpace* _fromAtomSpace, unsigned int gram,
-                                                   vector<HTreeNode*>& allLastGramHTreeNodes, map<HandleSeq, vector<HTreeNode*> >& allFactLinksToPatterns, vector<HandleSet>& newConnectedLinksFoundThisGram);
+                                                   vector<HTreeNode*>& allLastGramHTreeNodes, map<HandleSeq, vector<HTreeNode*>>& allFactLinksToPatterns, vector<HandleSet>& newConnectedLinksFoundThisGram);
 
     void extendAllPossiblePatternsForOneMoreGramBF(HandleSeq &instance, HTreeNode* curHTreeNode, unsigned int gram);
 
@@ -502,7 +502,7 @@ public:
 
     string unifiedPatternToKeyString(HandleSeq& inputPattern , const AtomSpace *atomspace = nullptr);
 
-    void OutPutFrequentPatternsToFile(unsigned int n_gram, vector < vector<HTreeNode*> >& _patternsForGram, string _fileNamebasic = "");
+    void OutPutFrequentPatternsToFile(unsigned int n_gram, vector<vector<HTreeNode*>>& _patternsForGram, string _fileNamebasic = "");
 
     void OutPutStaticsToCsvFile(unsigned int n_gram);
 
