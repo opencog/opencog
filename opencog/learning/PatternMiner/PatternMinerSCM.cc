@@ -586,7 +586,7 @@ public:
         keywordstr .erase(std::remove(keywordstr .begin(), keywordstr .end(), ' '), keywordstr .end());
         boost::split(keyword_list, keywordstr , boost::is_any_of(","));
 
-        if (keyword_list.size() == 0)
+        if (keyword_list.empty())
         {
             cout << "\nError: Keyword list is empty!" << std::endl;
             return;
@@ -622,7 +622,7 @@ public:
     void select_whitelist_subset_from_atomspace(int max_distance, bool if_contain_logic)
     {
         vector<string> keyword_list = patternMiner->get_keyword_white_list();
-        if (keyword_list.size() == 0)
+        if (keyword_list.empty())
         {
             cout << "\nError: white keyword list is empty!" << std::endl;
             return;

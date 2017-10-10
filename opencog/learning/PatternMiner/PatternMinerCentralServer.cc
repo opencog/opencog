@@ -180,7 +180,7 @@ void DistributedPatternMiner::centralServerStopListening()
 bool DistributedPatternMiner::checkIfAllWorkersStopWorking()
 {
 
-    if (allWorkers.size() == 0)
+    if (allWorkers.empty())
         return false; // has not start yet
 
     map<string,std::pair<bool, unsigned int>>::iterator workerIt;
@@ -437,7 +437,7 @@ void DistributedPatternMiner::parseAPatternTask(json::value jval)
             HandleSeq patternHandleSeq = loadPatternIntoAtomSpaceFromString(PatternStr, atomSpace);
 
 
-            if (patternHandleSeq.size() == 0)
+            if (patternHandleSeq.empty())
             {
 
                 // cout << "Warning: Invalid pattern string: " << PatternStr << std::endl;
@@ -493,7 +493,7 @@ void DistributedPatternMiner::parseAPatternTask(json::value jval)
                     // So we add this parent pattern here first, but set its count = 0
                     // add this new found pattern into the Atomspace
                     HandleSeq parentPatternHandleSeq = loadPatternIntoAtomSpaceFromString(ParentPatternStr, atomSpace);
-                    if (parentPatternHandleSeq.size() == 0)
+                    if (parentPatternHandleSeq.empty())
                     {
 
                         cout << "Warning: Invalid pattern string: " << ParentPatternStr << std::endl;

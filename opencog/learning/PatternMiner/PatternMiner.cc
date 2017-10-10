@@ -1306,7 +1306,7 @@ Handle PatternMiner::getFirstNonIgnoredIncomingLink(AtomSpace *atomspace, Handle
     while(true)
     {
         IncomingSet incomings = cur_h->getIncomingSet(atomspace);
-        if (incomings.size() == 0)
+        if (incomings.empty())
             return Handle::UNDEFINED;
 
         Handle incomingHandle = (incomings[0])->getHandle();
@@ -1366,7 +1366,7 @@ bool compareHTreeNodeBySurprisingness_I(HTreeNode* node1, HTreeNode* node2)
 bool compareHTreeNodeBySurprisingness_II(HTreeNode* node1, HTreeNode* node2)
 {
 
-    if ((node1->superPatternRelations.size() != 0) && (node2->superPatternRelations.size() != 0))
+    if (not node1->superPatternRelations.empty() && not node2->superPatternRelations.empty())
     {
         if ( node1->nII_Surprisingness - node2->nII_Surprisingness > FLOAT_MIN_DIFF)
             return true;
@@ -1413,7 +1413,7 @@ void PatternMiner::OutPutFinalPatternsToFile(unsigned int n_gram)
         if (htreeNode->count < thresholdFrequency)
             continue;
 
-//        if ((htreeNode->superPatternRelations.size() == 0))
+//        if (htreeNode->superPatternRelations.empty())
 //            continue;
 
         if (OUTPUT_SURPRISINGNESS_CALCULATION_TO_FILE)
@@ -1617,7 +1617,7 @@ void PatternMiner::OutPutSurpringnessBToFile(vector<HTreeNode*> &patternsForThis
 
         resultFile << ", Surprisingnes_II_b = " << toString(htreeNode->nII_Surprisingness_b);
 
-        if (htreeNode->SubRelation_b_map.size() != 0)
+        if (not htreeNode->SubRelation_b_map.empty())
         {
             unsigned int max_sub_num = 0;
 
@@ -1833,7 +1833,7 @@ void PatternMiner::OutPutHighSurprisingILowSurprisingnessIIPatternsToFile(vector
 
     for (HTreeNode* htreeNode : patternsForThisGram)
     {
-//        if (htreeNode->superPatternRelations.size() == 0)
+//        if (htreeNode->superPatternRelations.empty())
 //            continue;
 
         if (htreeNode->count < thresholdFrequency)
@@ -1992,7 +1992,7 @@ bool PatternMiner::containsLoopVariable(HandleSeq& inputPattern)
     for (it = varInLinksMap.begin(); it != varInLinksMap.end(); ++ it)
     {
          VariableInLinks& varLinks = it->second;
-         if (varLinks.containsConstLinks.size() == 0)
+         if (varLinks.containsConstLinks.empty())
              return true;
 
     }
@@ -3135,7 +3135,7 @@ void PatternMiner::calculateSurprisingness( HTreeNode* HNode, AtomSpace *_fromAt
 
     // II_Surprisingness is to evaluate how easily the frequency of this pattern can be infered from any of  its superpatterns
     // for all its super patterns
-    if (HNode->superPatternRelations.size() == 0)
+    if (HNode->superPatternRelations.empty())
     {
         HNode->nII_Surprisingness  = 999999999.9;
         // debug:
@@ -3245,7 +3245,7 @@ void PatternMiner::calculateSurprisingness( HTreeNode* HNode, AtomSpace *_fromAt
                 surpringnessIICalfile << "actualProcessedRelationNum = 0. Min Surprisingness_II  = -1.0";
         }
 
-        if ((HNode->superPatternRelations.size() > 0) && actualProcessedRelationNum)
+        if (not HNode->superPatternRelations.empty() && actualProcessedRelationNum)
         {
             HNode->nII_Surprisingness = minSurprisingness_II/p;
         }
@@ -3382,7 +3382,7 @@ void PatternMiner::calculateTypeBSurprisingness( HTreeNode* HNode, AtomSpace *_f
 
         }
 
-        if (HNode->superRelation_b_list.size() == 0)
+        if (HNode->superRelation_b_list.empty())
         {
             HNode->nII_Surprisingness_b = 9999999.9;
             return;
@@ -4985,7 +4985,7 @@ void PatternMiner::findAllLinksContainKeyWords(vector<string>& subsetKeywords, u
     allSubsetLinks.clear();
     HandleSet extractedNodes;
 
-    if (allLinks.size() == 0)
+    if (allLinks.empty())
     {
         originalAtomSpace->get_handles_by_type(back_inserter(allLinks), (Type) LINK, true );
     }
@@ -5582,7 +5582,7 @@ void PatternMiner::loadPatternsFromResultFile(string fileName)
             // add this new found pattern into the Atomspace
             HandleSeq patternHandleSeq = loadPatternIntoAtomSpaceFromFileString(patternStr, atomSpace);
 
-            if (patternHandleSeq.size() == 0)
+            if (patternHandleSeq.empty())
             {
 
                 cout << "Warning: Invalid pattern string: " << patternStr << std::endl;
