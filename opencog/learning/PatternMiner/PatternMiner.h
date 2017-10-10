@@ -345,11 +345,11 @@ protected:
 
     bool containVariableNodes(Handle link, AtomSpace* _atomSpace);
 
-    void extractAllPossiblePatternsFromInputLinksBF(HandleSeq& inputLinks,  HTreeNode* parentNode,HandleSet& sharedNodes, unsigned int gram);
+    void extractAllPossiblePatternsFromInputLinksBF(HandleSeq& inputLinks, HTreeNode* parentNode, HandleSet& sharedNodes, unsigned int gram);
 
 //    // vector<HTreeNode *> &allHTreeNodes is output all the HTreeNodes found
 //    void extractAllPossiblePatternsFromInputLinksDF(HandleSeq& inputLinks,unsigned int sharedLinkIndex, AtomSpace* _fromAtomSpace,
-//                                                    vector<HTreeNode*>& allLastGramHTreeNodes, vector<HTreeNode*>& allHTreeNodes, unsigned int gram = 1);
+//                                                    vector<HTreeNode*>& allLastGramHTreeNodes, vector<HTreeNode*>& allHTreeNodes, unsigned int gram=1);
 
     void swapOneLinkBetweenTwoAtomSpace(AtomSpace* fromAtomSpace, AtomSpace* toAtomSpace, Handle& fromLink, HandleSeq& outgoings, HandleSeq &outVariableNodes);
 
@@ -430,7 +430,7 @@ protected:
     bool isTypeInList(Type type, vector<Type> &typeList);
 
     // if atomspace = nullptr, it will use the pattern mining Atomspace
-    std::string Link2keyString(Handle& link, string indent = "", const AtomSpace *atomspace = nullptr);
+    std::string Link2keyString(Handle& link, string indent="", const AtomSpace *atomspace=nullptr);
 
     void removeLinkAndItsAllSubLinks(AtomSpace *_atomspace, Handle link);
 
@@ -439,7 +439,7 @@ protected:
     HandleSet _extendOneLinkForSubsetCorpus(HandleSet& allNewLinksLastGram, HandleSet& allSubsetLinks, HandleSet& extractedNodes);
 
     // will write the subset to a scm file
-    void _selectSubsetFromCorpus(vector<string>& subsetKeywords, unsigned int max_connection, bool logic_contain = true);
+    void _selectSubsetFromCorpus(vector<string>& subsetKeywords, unsigned int max_connection, bool logic_contain=true);
 
     void findAllLinksContainKeyWords(vector<string>& subsetKeywords, unsigned int max_connection, bool logic_contain, HandleSet& foundLinks);
 
@@ -488,8 +488,8 @@ protected:
 
     void cleanUpPatternMiner();
 
-    bool loadOutgoingsIntoAtomSpaceFromString(stringstream &outgoingStream, AtomSpace *_atomSpace, HandleSeq &outgoings, string parentIndent = "");
-    bool loadOutgoingsIntoAtomSpaceFromAtomString(stringstream& outgoingStream, AtomSpace *_atomSpace, HandleSeq &outgoings, string parentIndent = "");
+    bool loadOutgoingsIntoAtomSpaceFromString(stringstream &outgoingStream, AtomSpace *_atomSpace, HandleSeq &outgoings, string parentIndent="");
+    bool loadOutgoingsIntoAtomSpaceFromAtomString(stringstream& outgoingStream, AtomSpace *_atomSpace, HandleSeq &outgoings, string parentIndent="");
     HandleSeq loadPatternIntoAtomSpaceFromString(string patternStr, AtomSpace* _atomSpace);// input string is pattern keystring
     HandleSeq loadPatternIntoAtomSpaceFromFileString(string patternStr, AtomSpace *_atomSpace); // input string is normal atom string
 
@@ -500,9 +500,9 @@ public:
 
     bool checkPatternExist(const string& patternKeyStr);
 
-    string unifiedPatternToKeyString(HandleSeq& inputPattern , const AtomSpace *atomspace = nullptr);
+    string unifiedPatternToKeyString(HandleSeq& inputPattern , const AtomSpace *atomspace=nullptr);
 
-    void OutPutFrequentPatternsToFile(unsigned int n_gram, vector<vector<HTreeNode*>>& _patternsForGram, string _fileNamebasic = "");
+    void OutPutFrequentPatternsToFile(unsigned int n_gram, vector<vector<HTreeNode*>>& _patternsForGram, string _fileNamebasic="");
 
     void OutPutStaticsToCsvFile(unsigned int n_gram);
 
@@ -512,7 +512,7 @@ public:
 
     void OutPutHighSurprisingILowSurprisingnessIIPatternsToFile(vector<HTreeNode*> &patternsForThisGram, unsigned int n_gram, float min_surprisingness_I, float max_surprisingness_II);
 
-    void OutPutInterestingPatternsToFile(vector<HTreeNode*> &patternsForThisGram, unsigned int n_gram, int surprisingness, string _fileNamebasic = "");
+    void OutPutInterestingPatternsToFile(vector<HTreeNode*> &patternsForThisGram, unsigned int n_gram, int surprisingness, string _fileNamebasic="");
 
     void OutPutSurpringnessBToFile(vector<HTreeNode*> &patternsForThisGram, unsigned int n_gram);
 
@@ -535,7 +535,7 @@ public:
 
     AtomSpace* getResultAtomSpace() {return atomSpace;}
 
-    void runPatternMiner(bool exit_program_after_finish = true);
+    void runPatternMiner(bool exit_program_after_finish=true);
 
     void runPatternMinerBreadthFirst();
 
@@ -543,7 +543,7 @@ public:
 
     void runInterestingnessEvaluation();
 
-    void selectSubsetFromCorpus(vector<string> &topics, unsigned int gram, bool if_contian_logic = true);
+    void selectSubsetFromCorpus(vector<string> &topics, unsigned int gram, bool if_contian_logic=true);
 
     void selectSubsetAllEntityLinksContainsKeywords(vector<string>& subsetKeywords);
 
