@@ -22,6 +22,7 @@
 #ifndef _OPENCOG_OPENPSI_RULES_H
 #define _OPENCOG_OPENPSI_RULES_H
 
+#include <opencog/atoms/pattern/PatternLink.h>
 #include <opencog/atomspace/AtomSpace.h>
 
 namespace opencog
@@ -76,7 +77,7 @@ public:
    * @return Query atom used to check if the context of the given psi-rule is
    *  satisfiable or not.
    */
-  static Handle get_query(const Handle rule);
+  static PatternLinkPtr get_query(const Handle rule);
 
 private:
   /**
@@ -91,14 +92,12 @@ private:
   Handle add_tag(const Handle tag_type_node, const std::string& name);
 
   /**
-   * The structure of the tuple is (context, action, goal, query_body),
-   * where query_body is structured as (AndLink context), and is not added
-   * to the atomspace.
-   *
+   * The structure of the tuple is (context, action, goal, query),
+   * where queryis a PatternLink that isn't added to the atomspace, and
+   * is used to check if the rule is satisfiable.
    */
-  // TODO should query_body replace context ? Why shouldn't the context
-  // of a psi-rule be wrapped in an AndLink?
-  typedef std::tuple<HandleSeq, Handle, Handle, Handle> PsiTuple;
+  // TODO Should these entries be a member of Rules class?
+  typedef std::tuple<HandleSeq, Handle, Handle, PatternLinkPtr> PsiTuple;
 
   /**
    * This is a index with the keys being the psi-rules and the corresponding

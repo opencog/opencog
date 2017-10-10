@@ -94,7 +94,10 @@ public:
     // Common Setup
     _scm->eval("(load \"" OPENPSI_TEST_PATH "/psi-implicator.scm\")");
     CHKERR
-    auto rule_1 = _scm->eval_h("(rule-1)");
+    Handle rule_1 = _scm->eval_h("(rule-1)");
+    CHKERR
+    // A Ghost rule.
+    Handle rule_2 = _scm->eval_h("(rule-2)");
     CHKERR
     TruthValuePtr tv;
 
@@ -102,6 +105,11 @@ public:
     // Test when there is no grounding.
     tv = _opi->check_satisfiability(rule_1);
     TSM_ASSERT_EQUALS("Expected (stv 0 1)", TruthValue::FALSE_TV(), tv);
+    TS_ASSERT_EQUALS(0, _opi->_satisfiability_cache.size());
+
+    tv = _opi->check_satisfiability(rule_2);
+    TSM_ASSERT_EQUALS("Expected (stv 0 1)", TruthValue::FALSE_TV(), tv);
+    TS_ASSERT_EQUALS(0, _opi->_satisfiability_cache.size());
 
     // Test 2:
     // Test when there is an alpha-equivalent pattern.
@@ -109,6 +117,11 @@ public:
     CHKERR
     tv = _opi->check_satisfiability(rule_1);
     TSM_ASSERT_EQUALS("Expected (stv 0 1)", TruthValue::FALSE_TV(), tv);
+    TS_ASSERT_EQUALS(0, _opi->_satisfiability_cache.size());
+
+    tv = _opi->check_satisfiability(rule_2);
+    TSM_ASSERT_EQUALS("Expected (stv 0 1)", TruthValue::FALSE_TV(), tv);
+    TS_ASSERT_EQUALS(0, _opi->_satisfiability_cache.size());
 
     // Test 3:
     // Test when there is a grounding.
@@ -116,6 +129,11 @@ public:
     CHKERR
     tv = _opi->check_satisfiability(rule_1);
     TSM_ASSERT_EQUALS("Expected (stv 1 1)", TruthValue::TRUE_TV(), tv);
+    TS_ASSERT_EQUALS(1, _opi->_satisfiability_cache.size());
+
+    tv = _opi->check_satisfiability(rule_2);
+    TSM_ASSERT_EQUALS("Expected (stv 1 1)", TruthValue::TRUE_TV(), tv);
+    TS_ASSERT_EQUALS(2, _opi->_satisfiability_cache.size());
 
     logger().info("END TEST: %s", __FUNCTION__);
   }
@@ -127,22 +145,32 @@ public:
     // Common Setup
     _scm->eval("(load \"" OPENPSI_TEST_PATH "/psi-implicator.scm\")");
     CHKERR
-    auto rule_1 = _scm->eval_h("(groundable-content-1) (rule-1)");
+    Handle expected_result = _scm->eval_h("(test_imply_solution)");
+    CHKERR
+    Handle rule_1 = _scm->eval_h("(groundable-content-1) (rule-1)");
+    CHKERR
+    // A Ghost rule.
+    Handle rule_2 = _scm->eval_h("(rule-2)");
     CHKERR
 
     // Test 1:
     // Test when satisfiablity hasn't been checked.
-    Handle result_1 = _opi->imply(rule_1);
-    TSM_ASSERT_EQUALS("Expected null", nullptr, result_1);
+    Handle result_1_1 = _opi->imply(rule_1);
+    TSM_ASSERT_EQUALS("Expected null", nullptr, result_1_1);
+    Handle result_1_2 = _opi->imply(rule_1);
+    TSM_ASSERT_EQUALS("Expected null", nullptr, result_1_2);
 
     // Test 2:
     // Test when satisfiablity has been checked.
     _opi->check_satisfiability(rule_1);
-    Handle result_2 = _opi->imply(rule_1);
-    auto expected_result = _scm->eval_h("(test_imply_solution)");
-    CHKERR
+    Handle result_2_1 = _opi->imply(rule_1);
     TSM_ASSERT_EQUALS("Expected grounded InheritanceLink",
-      expected_result, result_2);
+      expected_result, result_2_1);
+
+    _opi->check_satisfiability(rule_2);
+    Handle result_2_2 = _opi->imply(rule_2);
+    TSM_ASSERT_EQUALS("Expected grounded InheritanceLink",
+      expected_result, result_2_2);
 
     logger().info("END TEST: %s", __FUNCTION__);
   }

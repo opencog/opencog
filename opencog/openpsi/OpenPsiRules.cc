@@ -19,8 +19,9 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <opencog/atoms/base/Node.h>
+#include <opencog/atoms/base/ClassServer.h>
 #include <opencog/atoms/base/Link.h>
+#include <opencog/atoms/base/Node.h>
 
 #include "OpenPsiRules.h"
 
@@ -54,11 +55,29 @@ Handle OpenPsiRules::add_rule(const HandleSeq& context, const Handle& action,
   rule->setTruthValue(stv);
   _as->add_link(MEMBER_LINK, rule, demand);
 
-  // Construct the query atom that is used to check satisfiablity
-  Handle query_body(createLink(context, AND_LINK)) ;
+  // Construct the query atom that is used to check satisfiablity. This is
+  // done here for performance. If context has only one atom and it is a
+  // SatisfactionLink(e.g. a ghost context) then it cast it because the
+  // cast will be valid; else construct a PatternLink wrapping the context
+  // in an AndLink.
+  if ((1 == context.size()) and
+    classserver().isA(SATISFACTION_LINK, context[0]->getType())) {
+      // This is for ghost.
 
-  // Add to the index of rules.
-  _psi_rules[rule] = std::make_tuple(context, action, goal, query_body);
+      // Add to the index of rules.
+      PatternLinkPtr query = PatternLinkCast(context[0]);
+      _psi_rules[rule] = std::make_tuple(context, action, goal, query);
+  } else {
+    // This is for backward compatability.
+    // TODO: Test thoroughly, or develop an alternative. See discussion
+    // @ https://github.com/opencog/opencog/pull/2899 for what the
+    // alternative might be.
+
+    // Add to the index of rules.
+    PatternLinkPtr query_body = \
+      createPatternLink(Handle(createLink(context, AND_LINK)));
+    _psi_rules[rule] = std::make_tuple(context, action, goal, query_body);
+  }
 
   return rule;
 }
@@ -100,11 +119,11 @@ Handle OpenPsiRules::get_goal(const Handle rule)
   }
 }
 
-Handle OpenPsiRules::get_query(const Handle rule)
+PatternLinkPtr OpenPsiRules::get_query(const Handle rule)
 {
   if(_psi_rules.count(rule)) {
     return std::get<3>(_psi_rules[rule]);
   } else {
-    return Handle::UNDEFINED;
+    return nullptr;
   }
 }

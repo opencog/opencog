@@ -155,4 +155,39 @@ public:
 
     logger().info("END TEST: %s", __FUNCTION__);
   }
+
+  // Check OpenPsiRules::get_query is behaving as expected. If the rule
+  // is added into the atomspace using OpenPsiRules::add_rule then it
+  // should behave as tested here.
+  void test_get_query()
+  {
+    logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+    // Common Setup
+    _scm->eval("(load \"" OPENPSI_TEST_PATH "/psi-implicator.scm\")");
+    CHKERR
+
+    // Test 1:
+    // If the rule isn't added using OpenPsiRules::add_rule then
+    // the query atom isn't created, and thus the index isn't aware
+    // of it.
+    Handle rule_1 = _scm->eval_h("(rule-1-cpp)");
+    CHKERR
+    PatternLinkPtr result_1 = OpenPsiRules::get_query(rule_1);
+    TS_ASSERT_EQUALS(nullptr, result_1);
+
+    // Test 2:
+    // If the rule is added using OpenPsiRules::add_rule then
+    // the query atom is created, and thus the index is aware
+    // of it.
+    _scm->eval_h("(rule-1)");
+    CHKERR
+    Handle expected_query_2 = _scm->eval_h("(pattern-link-1)");
+    CHKERR
+    PatternLinkPtr result_2 = OpenPsiRules::get_query(rule_1);
+    // Don't know why operator== doesn't work.
+    TS_ASSERT(opencog::content_eq(expected_query_2, result_2->getHandle()));
+
+    logger().info("END TEST: %s", __FUNCTION__);
+  }
 };

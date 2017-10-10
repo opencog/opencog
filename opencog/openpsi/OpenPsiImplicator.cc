@@ -19,9 +19,9 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <opencog/atoms/execution/Instantiator.h>
-#include <opencog/atoms/base/Link.h>
 #include <opencog/atoms/base/ClassServer.h>
+#include <opencog/atoms/base/Link.h>
+#include <opencog/atoms/execution/Instantiator.h>
 
 #include "OpenPsiImplicator.h"
 #include "OpenPsiRules.h"
@@ -83,19 +83,20 @@ TruthValuePtr OpenPsiImplicator::check_satisfiability(const Handle& rule)
 {
   // TODO: Replace this with the context, as psi-rule is
   // (context + action ->goal)
-  Handle query =  OpenPsiRules::get_query(rule);
+  PatternLinkPtr query =  OpenPsiRules::get_query(rule);
 
   // TODO:
   // 1. How to prevent stale cache?
   // 2. Also remove entry if the context isn't grounding?
   // 3. What happens if the atoms are removed for the atomspace for
-  // whatever reason? Is signal the only means?
+  // whatever reason? -> Use either signals or query the atomspace
+  // similar to SchemeSmob::ss_link/ss_node.
+  // 4. Solve for multithreaded access. See ThreadSafeHandleMap.
   if (_update_cache) {
-    PatternLinkPtr plp =  createPatternLink(query);
-    plp->satisfy(*this);
+    query->satisfy(*this);
   }
 
-  if (_satisfiability_cache.count(query)) {
+  if (_satisfiability_cache.count(query->get_pattern().body)) {
     return TruthValue::TRUE_TV();
   } else {
     return TruthValue::FALSE_TV();
@@ -106,12 +107,12 @@ Handle OpenPsiImplicator::imply(const Handle& rule)
 {
   // TODO: Replace this with the action, as psi-rule is
   // (context + action ->goal)
-  Handle query = OpenPsiRules::get_query(rule);
+  PatternLinkPtr query = OpenPsiRules::get_query(rule);
   Instantiator inst(_as);
 
-  if (_satisfiability_cache.count(query)) {
+  if (_satisfiability_cache.count(query->get_pattern().body)) {
     return inst.instantiate(OpenPsiRules::get_action(rule),
-              _satisfiability_cache.at(query), true);
+              _satisfiability_cache.at(query->get_pattern().body), true);
   } else {
     // NOTE: Trying to check for satisfiablity isn't done because it
     // is the responsibility of the action-selector for determining

@@ -39,6 +39,42 @@
 
 (define (rule-1) (psi-rule context-1 action-1 goal-1 (stv 1 1) (demand-1)))
 
+(define (rule-1-cpp)
+; Rule added to the atomspace not index.
+  (ImplicationLink (stv 1 1)
+    (SequentialAndLink
+      (InheritanceLink
+         (VariableNode "$H")
+         (ConceptNode "human")
+      )
+      (EvaluationLink
+         (PredicateNode "eat")
+         (ListLink
+            (VariableNode "$H")
+            (ConceptNode "Beso")
+         )
+      )
+      (InheritanceLink
+         (VariableNode "$H")
+         (ConceptNode "animal")
+      )
+    )
+    (ConceptNode "goal-1")
+  )
+)
+
+(define (pattern-link-1)
+  ; Structure of the PatternLink created for checking satisfiablity.
+  (PatternLink (And context-1))
+)
+
+; A Ghost rule
+(define (rule-2)
+  (psi-rule
+    (list (Satisfaction (And context-1 (True))))
+    action-1 goal-1 (stv 1 1) (demand-1))
+)
+
 (define (groundable-content-1)
 ; Some data to populate the atomspace for grounding (rule-1)
   (InheritanceLink
