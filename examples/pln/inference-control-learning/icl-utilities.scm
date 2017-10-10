@@ -40,10 +40,12 @@
 
 ;; Randomly generate N targets
 (define (gen-random-targets N)
-  ;; (list (Inheritance (Concept "B") (Concept "D"))))
-  (if (= N 0)
-      '()
-      (cons (gen-random-target) (gen-random-targets (- N 1)))))
+  (list (Inheritance (Concept "D") (Concept "Y"))
+        (Inheritance (Concept "A") (Concept "Z"))
+        (Inheritance (Concept "A") (Concept "G"))))
+  ;; (if (= N 0)
+  ;;     '()
+  ;;     (cons (gen-random-target) (gen-random-targets (- N 1)))))
 
 ;; Log the given atomspace at some level
 (define (icl-logger-info-atomspace as)

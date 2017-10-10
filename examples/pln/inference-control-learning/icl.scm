@@ -31,9 +31,9 @@
 ;; (cog-logger-set-sync! (cog-ure-logger) #t)
 
 ;; Set parameters
-(define pss 100)                    ; Problem set size
-(define niter 2)                    ; Number of iterations
-(define piter 30)                   ; Number of iterations used for each problem
+(define pss 3)                    ; Problem set size
+(define niter 1)                    ; Number of iterations
+(define piter 5)                   ; Number of iterations used for each problem
 
 ;; AtomSpace containing the targets in there to no forget them
 (define targets-as (cog-new-atomspace))
@@ -79,7 +79,11 @@
     (icl-logger-info "Move all problem histories to history-as")
     (union-as history-as histories)
 
+    (icl-logger-debug "History AtomSpace:")
+    (icl-logger-debug-atomspace history-as)
+
     ;; Build inference control rules for the next iteration
+    (icl-logger-info "Build inference control rules from the inference history")
     (mk-control-rules)
 
     ;; Return results for each problem
@@ -169,8 +173,6 @@
     (cog-set-atomspace! default-as)))
 
 (define (mk-control-rules)
-  (icl-logger-info "Build inference control rules from the inference history")
-
   ;; Reload the rule base for producing inference control rules
   (icr-reload)
 
