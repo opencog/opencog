@@ -36,6 +36,7 @@
 #include <functional>
 #include <sys/time.h>
 
+#include <boost/range/algorithm/sort.hpp>
 
 #include <opencog/atoms/base/ClassServer.h>
 #include <opencog/atoms/base/Handle.h>
@@ -549,7 +550,7 @@ void DistributedPatternMiner::centralServerEvaluateInterestingness()
     for(unsigned int gram = 1; gram <= MAX_GRAM; gram ++)
     {
         // sort by frequency
-        std::sort((patternsForGram[gram-1]).begin(), (patternsForGram[gram-1]).end(),compareHTreeNodeByFrequency );
+        boost::sort(patternsForGram[gram-1], compareHTreeNodeByFrequency );
 
         // Finished mining gram patterns; output to file
         std::cout<<"gram = " + toString(gram) + ": " + toString((patternsForGram[gram-1]).size()) + " patterns found! ";
@@ -596,14 +597,14 @@ void DistributedPatternMiner::centralServerEvaluateInterestingness()
             if (Enable_Interaction_Information)
             {
                 // sort by interaction information
-                std::sort((patternsForGram[cur_gram-1]).begin(), (patternsForGram[cur_gram-1]).end(),compareHTreeNodeByInteractionInformation);
+                boost::sort(patternsForGram[cur_gram-1], compareHTreeNodeByInteractionInformation);
                 OutPutInterestingPatternsToFile(patternsForGram[cur_gram-1], cur_gram, 0);
             }
 
             if (Enable_surprisingness)
             {
                 // sort by surprisingness_I first
-                std::sort((patternsForGram[cur_gram-1]).begin(), (patternsForGram[cur_gram-1]).end(),compareHTreeNodeBySurprisingness_I);
+                boost::sort(patternsForGram[cur_gram-1], compareHTreeNodeBySurprisingness_I);
                 OutPutInterestingPatternsToFile(patternsForGram[cur_gram-1], cur_gram,1);
 
                 if (cur_gram == MAX_GRAM)
@@ -612,7 +613,7 @@ void DistributedPatternMiner::centralServerEvaluateInterestingness()
                 vector<HTreeNode*> curGramPatterns = patternsForGram[cur_gram-1];
 
                 // and then sort by surprisingness_II
-                std::sort(curGramPatterns.begin(), curGramPatterns.end(),compareHTreeNodeBySurprisingness_II);
+                boost::sort(curGramPatterns, compareHTreeNodeBySurprisingness_II);
                 OutPutInterestingPatternsToFile(curGramPatterns,cur_gram,2);
 
                 // Get the min threshold of surprisingness_II
@@ -652,7 +653,7 @@ void DistributedPatternMiner::centralServerEvaluateInterestingness()
                 }
 
                 // sort by frequency
-                std::sort((finalPatternsForGram[cur_gram-1]).begin(), (finalPatternsForGram[cur_gram-1]).end(),compareHTreeNodeByFrequency );
+                boost::sort(finalPatternsForGram[cur_gram-1], compareHTreeNodeByFrequency );
 
                 OutPutFinalPatternsToFile(cur_gram);
 

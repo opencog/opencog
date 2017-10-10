@@ -33,6 +33,8 @@
 #include <sstream>
 #include <thread>
 
+#include <boost/range/algorithm/sort.hpp>
+
 #include <opencog/atoms/base/ClassServer.h>
 #include <opencog/atoms/base/Handle.h>
 #include <opencog/atoms/base/atom_types.h>
@@ -430,7 +432,7 @@ void PatternMiner::ConstructTheFirstGramPatternsBF()
     clear_by_swap(allLinks);
 
     // sort the patterns by frequency
-    std::sort((patternsForGram[0]).begin(), (patternsForGram[0]).end(),compareHTreeNodeByFrequency );
+    boost::sort(patternsForGram[0], compareHTreeNodeByFrequency );
 
     int end_time = time(nullptr);
     OutPutFrequentPatternsToFile(1, patternsForGram);
@@ -488,7 +490,7 @@ void PatternMiner::GrowAllPatternsBF()
 
 
         // sort by frequency
-        std::sort((patternsForGram[cur_gram-1]).begin(), (patternsForGram[cur_gram-1]).end(),compareHTreeNodeByFrequency );
+        boost::sort(patternsForGram[cur_gram-1], compareHTreeNodeByFrequency);
 
         // Finished mining cur_gram patterns; output to file
         std::cout<<"Debug: PatternMiner:  done (gram = " + toString(cur_gram) + ") frequent pattern mining!" + toString((patternsForGram[cur_gram-1]).size()) + " patterns found! " << std::endl;
@@ -512,7 +514,7 @@ void PatternMiner::GrowAllPatternsBF()
                }
 
                // sort by interaction information
-               std::sort((patternsForGram[cur_gram-1]).begin(), (patternsForGram[cur_gram-1]).end(),compareHTreeNodeByInteractionInformation);
+               boost::sort(patternsForGram[cur_gram-1], compareHTreeNodeByInteractionInformation);
             }
 
             if (Enable_surprisingness)
@@ -525,7 +527,7 @@ void PatternMiner::GrowAllPatternsBF()
                 }
 
                 // sort by surprisingness
-                std::sort((patternsForGram[cur_gram-1]).begin(), (patternsForGram[cur_gram-1]).end(),compareHTreeNodeBySurprisingness);
+                boost::sort(patternsForGram[cur_gram-1], compareHTreeNodeBySurprisingness);
             }
 
             // Finished mining cur_gram patterns; output to file
