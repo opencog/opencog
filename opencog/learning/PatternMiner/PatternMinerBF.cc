@@ -38,6 +38,7 @@
 #include <opencog/atoms/base/atom_types.h>
 #include <opencog/query/BindLinkAPI.h>
 #include <opencog/util/Config.h>
+#include <opencog/util/algorithm.h>
 #include <opencog/util/StringManipulator.h>
 #include <opencog/learning/PatternMiner/types/atom_types.h>
 
@@ -354,11 +355,7 @@ void PatternMiner::growPatternsTaskBF()
             extendAllPossiblePatternsForOneMoreGramBF(instance, cur_growing_pattern, cur_gram);
         }
 
-        cur_growing_pattern->instances.clear();
-        (vector<HandleSeq>()).swap(cur_growing_pattern->instances);
-
-
-
+        clear_by_swap(cur_growing_pattern->instances);
     }
 
 }
@@ -430,9 +427,7 @@ void PatternMiner::ConstructTheFirstGramPatternsBF()
 
     growTheFirstGramPatternsTaskBF();
 
-    // release allLinks
-    allLinks.clear();
-    (HandleSeq()).swap(allLinks);
+    clear_by_swap(allLinks);
 
     // sort the patterns by frequency
     std::sort((patternsForGram[0]).begin(), (patternsForGram[0]).end(),compareHTreeNodeByFrequency );

@@ -36,6 +36,7 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/algorithm/string/regex.hpp>
 
+#include <opencog/util/algorithm.h>
 #include <opencog/util/Config.h>
 
 #include <opencog/atoms/base/ClassServer.h>
@@ -2800,7 +2801,7 @@ unsigned int PatternMiner::getAllEntityCountWithSamePredicatesForAPattern(Handle
                               allEntitiesForEachPredicate[1].begin(), allEntitiesForEachPredicate[1].end(),
                               std::back_inserter(commonLinks));
 
-        if (commonLinks.size() == 0)
+        if (commonLinks.empty())
             return 0;
 
         for (unsigned int i = 2; i < pattern.size(); ++ i)
@@ -2811,7 +2812,7 @@ unsigned int PatternMiner::getAllEntityCountWithSamePredicatesForAPattern(Handle
                                   commonLinks.begin(), commonLinks.end(),
                                   std::back_inserter(newCommonLinks));
 
-            if (newCommonLinks.size() == 0)
+            if (newCommonLinks.empty())
                 return 0;
 
             commonLinks.swap(newCommonLinks);
@@ -3704,45 +3705,22 @@ void PatternMiner::cleanUpPatternMiner()
         delete ((HTreeNode*)(OnePattern.second));
     }
 
-    std::map <string, HTreeNode*> emptykeyStrToHTreeNodeMap;
-    keyStrToHTreeNodeMap.swap(emptykeyStrToHTreeNodeMap);
+    clear_by_swap(keyStrToHTreeNodeMap);
 
     // clear patternsForGram
-    unsigned int patternsForGramSize = patternsForGram.size();
-    for (unsigned int i = 0; i < patternsForGramSize; ++i)
-    {
-        std::vector<HTreeNode*> emptyVector;
-        (patternsForGram[i]).swap(emptyVector);
-    }
-
-    vector < vector<HTreeNode*> > emptypatternsForGram;
-    patternsForGram.swap(emptypatternsForGram);
-
+    for (auto& p : patternsForGram)
+	    clear_by_swap(p);
+    clear_by_swap(patternsForGram);
 
     // clear finalPatternsForGram
-    unsigned int finalPatternsForGramSize = finalPatternsForGram.size();
-    for (unsigned int i = 0; i < finalPatternsForGramSize; ++i)
-    {
-        std::vector<HTreeNode*> emptyVector;
-        (finalPatternsForGram[i]).swap(emptyVector);
-    }
-
-    vector < vector<HTreeNode*> > emptyFinalPatternsForGram;
-    finalPatternsForGram.swap(emptyFinalPatternsForGram);
-
+    for (auto& p : finalPatternsForGram)
+	    clear_by_swap(p);
+    clear_by_swap(finalPatternsForGram);
 
     // clear tmpPatternsForGram
-    unsigned int tmpPatternsForGramSize = tmpPatternsForGram.size();
-    for (unsigned int i = 0; i < tmpPatternsForGramSize; ++i)
-    {
-        std::vector<HTreeNode*> emptyVector;
-        (tmpPatternsForGram[i]).swap(emptyVector);
-    }
-
-    vector < vector<HTreeNode*> > emptytmpPatternsForGram;
-    tmpPatternsForGram.swap(emptytmpPatternsForGram);
-
-
+    for (auto& p : tmpPatternsForGram)
+	    clear_by_swap(p);
+    clear_by_swap(tmpPatternsForGram);
 }
 
 void PatternMiner::resetPatternMiner(bool resetAllSettingsFromConfig)

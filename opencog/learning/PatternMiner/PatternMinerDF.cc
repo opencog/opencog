@@ -37,6 +37,7 @@
 #include <opencog/atoms/base/Handle.h>
 #include <opencog/atoms/base/atom_types.h>
 #include <opencog/util/Config.h>
+#include <opencog/util/algorithm.h>
 
 #include "HTree.h"
 #include "PatternMiner.h"
@@ -338,9 +339,7 @@ void PatternMiner::runPatternMinerDepthFirst()
         threads[i].join();
     }
 
-    // release allLinks
-    allLinks.clear();
-    (HandleSeq()).swap(allLinks);
+    clear_by_swap(allLinks);
 
     if (THREAD_NUM > 1)
     {
