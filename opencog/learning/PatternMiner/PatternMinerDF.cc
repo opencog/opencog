@@ -794,11 +794,7 @@ void PatternMiner::extendAPatternForOneMoreGramRecursively(const Handle &extende
 
 
     // var_num is the number of variables
-    unsigned int var_num;
-    if (parentNode)
-        var_num = 0;
-    else
-        var_num = 1;
+    unsigned int var_num = parentNode ? 0 : 1;
 
     // todo: store the var combinations to HTreeNode map for finding super/sub_patternrelation_b
     // the string is one combination of indexes to string , e.g.: "0010"
