@@ -228,7 +228,7 @@ void DimEmbedModule::addPivot(Handle h, Type linkType, bool fanin)
     HandleSeq nodes;
     as->get_handles_by_type(std::back_inserter(nodes), NODE, true);
 
-    std::map<Handle,double> distMap;
+    std::map<Handle, double> distMap;
 
     typedef std::multimap<double,Handle> pQueue_t;
     pQueue_t pQueue;
@@ -800,7 +800,7 @@ ClusterSeq DimEmbedModule::kMeansCluster(Type l, int numClusters, int npass, boo
         clusters[i].second=centroid;
     }
 
-    //for (std::vector<HandleSeq>::const_iterator it=clusters.begin();
+    //for (HandleSeqSeq::const_iterator it=clusters.begin();
     //    it!=clusters.end(); ++it) {
     //    std::cout << "Homogeneity: " << homogeneity(*it,l) << std::endl;
     //    std::cout << "Separation: " << separation(*it,l) << std::endl;

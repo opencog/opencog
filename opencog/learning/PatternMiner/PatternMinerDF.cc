@@ -179,8 +179,8 @@ void PatternMiner::growPatternsDepthFirstTask(unsigned int thread_index)
 
         // Extract all the possible patterns from this originalLink, and extend till the max_gram links, not duplicating the already existing patterns
         HandleSeq lastGramLinks;
-        map<Handle,Handle> lastGramValueToVarMap;
-        map<Handle,Handle> patternVarMap;
+        HandleMap lastGramValueToVarMap;
+        HandleMap patternVarMap;
 
         set<string> allNewMinedPatternsCurTask;
         bool startFromLinkContainWhiteKeyword = false;
@@ -293,8 +293,8 @@ void PatternMiner::growPatternsDepthFirstTask(unsigned int thread_index)
 
 //        // Extract all the possible patterns from this originalLink, and extend till the max_gram links, not duplicating the already existing patterns
 //        HandleSeq lastGramLinks;
-//        map<Handle,Handle> lastGramValueToVarMap;
-//        map<Handle,Handle> patternVarMap;
+//        HandleMap lastGramValueToVarMap;
+//        HandleMap patternVarMap;
 //        set<string> cur_task_ExtractedLinks[MAX_GRAM];
 //        extendAPatternForOneMoreGramRecursively(newLink, observingAtomSpace, Handle::UNDEFINED, lastGramLinks, 0, lastGramValueToVarMap, patternVarMap, cur_task_ExtractedLinks, false);
 
@@ -364,7 +364,7 @@ void PatternMiner::runPatternMinerDepthFirst()
 // vector<HTreeNode*> &allHTreeNodesCurTask is only used in distributed version
 // notOutPutPattern is passed from extendAPatternForOneMoreGramRecursively, also may be modify in this function.
 // it indicates if one pattern is only generated for middle process - calculate interestingness for its superpatterns, but not put in output results
-HTreeNode* PatternMiner::extractAPatternFromGivenVarCombination(HandleSeq &inputLinks, map<Handle,Handle> &patternVarMap, map<Handle,Handle>& orderedVarNameMap,HandleSeqSeq &oneOfEachSeqShouldBeVars, HandleSeq &leaves,
+HTreeNode* PatternMiner::extractAPatternFromGivenVarCombination(HandleSeq &inputLinks, HandleMap &patternVarMap, HandleMap& orderedVarNameMap,HandleSeqSeq &oneOfEachSeqShouldBeVars, HandleSeq &leaves,
                                                                 HandleSeq &shouldNotBeVars, HandleSeq &shouldBeVars,AtomSpace* _fromAtomSpace, unsigned int & extendedLinkIndex,
                                                                 set<string>& allNewMinedPatternsCurTask, bool& notOutPutPattern, bool &patternAlreadyExtractedInCurTask, bool startFromLinkContainWhiteKeyword)
 {
@@ -658,18 +658,18 @@ bool PatternMiner::existInOneThreadExtractedLinks(unsigned int _gram, unsigned i
 // allNewMinedPatternsCurTask is to store all the pattern keystrings mined in current Link task, to avoid duplicate patterns being mined
 // allNewMinedPatternInfo is only used in distributed mode, to store all the new mined pattern info to send to server
 void PatternMiner::extendAPatternForOneMoreGramRecursively(const Handle &extendedLink, AtomSpace* _fromAtomSpace, const Handle &extendedNode, const HandleSeq &lastGramLinks,
-                 HTreeNode* parentNode, const map<Handle,Handle> &lastGramValueToVarMap, const map<Handle,Handle> &lastGramPatternVarMap, bool isExtendedFromVar,
+                 HTreeNode* parentNode, const HandleMap &lastGramValueToVarMap, const HandleMap &lastGramPatternVarMap, bool isExtendedFromVar,
                  set<string>& allNewMinedPatternsCurTask, vector<HTreeNode*> &allHTreeNodesCurTask, vector<MinedPatternInfo> &allNewMinedPatternInfo, unsigned int thread_index,
                  bool startFromLinkContainWhiteKeyword)
 {
 
     // the ground value node in the _fromAtomSpace to the variable handle in pattenmining Atomspace
-    map<Handle,Handle> valueToVarMap = lastGramValueToVarMap;
+    HandleMap valueToVarMap = lastGramValueToVarMap;
 
     // First, extract all the nodes in the input link
     extractAllNodesInLink(extendedLink, valueToVarMap, _fromAtomSpace);
 
-    map<Handle,Handle> newValueToVarMap; // the new elements added in this gram
+    HandleMap newValueToVarMap; // the new elements added in this gram
 
     bool notOutPutPattern = false;
 
@@ -679,11 +679,11 @@ void PatternMiner::extendAPatternForOneMoreGramRecursively(const Handle &extende
     }
     else
     {
-        map<Handle,Handle>::iterator valueToVarIt = valueToVarMap.begin();
+        HandleMap::iterator valueToVarIt = valueToVarMap.begin();
         for(; valueToVarIt != valueToVarMap.end(); valueToVarIt ++)
         {
             if (lastGramValueToVarMap.find(valueToVarIt->first) == lastGramValueToVarMap.end())
-                newValueToVarMap.insert( std::pair<Handle,Handle>(valueToVarIt->first,valueToVarIt->second));
+                newValueToVarMap.insert( HandlePair(valueToVarIt->first,valueToVarIt->second));
         }
     }
 
@@ -819,23 +819,23 @@ void PatternMiner::extendAPatternForOneMoreGramRecursively(const Handle &extende
         {
             // construct the pattern for this combination in the PatternMining Atomspace
             // generate the patternVarMap for this pattern of this combination
-            map<Handle,Handle>::iterator iter;
+            HandleMap::iterator iter;
 
             // the first part is the same with its parent node
-            map<Handle,Handle> patternVarMap;
+            HandleMap patternVarMap;
             if (parentNode)
             {
                 patternVarMap = lastGramPatternVarMap;
 
                 if (! isExtendedFromVar) // need to add the extendedNode into patternVarMap
                 {
-                    map<Handle,Handle>::const_iterator extendedIter = lastGramValueToVarMap.find(extendedNode);
+                    HandleMap::const_iterator extendedIter = lastGramValueToVarMap.find(extendedNode);
                     if (extendedIter == lastGramValueToVarMap.end())
                     {
                         cout <<"Exception: can't find extendedNode in lastGramValueToVarMap" << std::endl;
                     }
 
-                    patternVarMap.insert(std::pair<Handle,Handle>(extendedIter->first, extendedIter->second));
+                    patternVarMap.insert(HandlePair(extendedIter->first, extendedIter->second));
                 }
             }
 
@@ -846,7 +846,7 @@ void PatternMiner::extendAPatternForOneMoreGramRecursively(const Handle &extende
                 for (iter = newValueToVarMap.begin(); iter != newValueToVarMap.end(); ++ iter)
                 {
                     if (indexes[index]) // this is considered as a variable, add it into the variable to value map
-                        patternVarMap.insert(std::pair<Handle,Handle>(iter->first, iter->second));
+                        patternVarMap.insert(HandlePair(iter->first, iter->second));
 
                     index ++;
                 }
@@ -860,7 +860,7 @@ void PatternMiner::extendAPatternForOneMoreGramRecursively(const Handle &extende
 
             unsigned int extendedLinkIndex = 999;
             bool patternAlreadyExtractedInCurTask;
-            map<Handle,Handle> orderedVarNameMap;
+            HandleMap orderedVarNameMap;
 
             HTreeNode* thisGramHTreeNode = extractAPatternFromGivenVarCombination(inputLinks, patternVarMap, orderedVarNameMap,oneOfEachSeqShouldBeVars, leaves, shouldNotBeVars, shouldBeVars,
                                           _fromAtomSpace, extendedLinkIndex, allNewMinedPatternsCurTask, notOutPutPattern, patternAlreadyExtractedInCurTask, startFromLinkContainWhiteKeyword);
@@ -1054,16 +1054,16 @@ void PatternMiner::extendAPatternForOneMoreGramRecursively(const Handle &extende
                     // Extend one more gram from lastGramHTreeNode to get its superpatterns
                     // There are two different super patterns: extended from a variable, and extended from a const by turning it into a variable:
                     unsigned int nodeIndex = 0;
-                    map<Handle,Handle>::iterator niter;
+                    HandleMap::iterator niter;
 
 //                    cout << "valueToVarMap:\n";
-//                    for (map<Handle, Handle>::const_iterator titer = valueToVarMap.begin(); titer != valueToVarMap.end(); ++ titer)
+//                    for (HandleMap::const_iterator titer = valueToVarMap.begin(); titer != valueToVarMap.end(); ++ titer)
 //                    {
 //                        cout << " ( " <<((Handle)(titer->first))->getName() << " , " << ((Handle)(titer->second))->getName() << " ) ";
 //                    }
 
 //                    cout << "\n\npatternVarMap:\n";
-//                    for (map<Handle, Handle>::const_iterator titer = patternVarMap.begin(); titer != patternVarMap.end(); ++ titer)
+//                    for (HandleMap::const_iterator titer = patternVarMap.begin(); titer != patternVarMap.end(); ++ titer)
 //                    {
 //                        cout << " ( " <<((Handle)(titer->first))->getName() << " , " << ((Handle)(titer->second))->getName() << " ) ";
 //                    }
@@ -1374,7 +1374,7 @@ void PatternMiner::extendAPatternForOneMoreGramRecursively(const Handle &extende
 //void PatternMiner::extractAllPossiblePatternsFromInputLinksDF(HandleSeq& inputLinks,unsigned int sharedLinkIndex, AtomSpace* _fromAtomSpace,
 //                                                              vector<HTreeNode*>& allLastGramHTreeNodes, vector<HTreeNode*>& allHTreeNodes, unsigned int gram)
 //{
-//    map<Handle,Handle> valueToVarMap;  // the ground value node in the _fromAtomSpace to the variable handle in pattenmining Atomspace
+//    HandleMap valueToVarMap;  // the ground value node in the _fromAtomSpace to the variable handle in pattenmining Atomspace
 
 ////    // Debug
 ////    cout << "Extract patterns from these links: \n";
@@ -1433,9 +1433,9 @@ void PatternMiner::extendAPatternForOneMoreGramRecursively(const Handle &extende
 //        {
 //            // construct the pattern for this combination in the PatternMining Atomspace
 //            // generate the valueToVarMap for this pattern of this combination
-//            map<Handle,Handle>::iterator iter;
+//            HandleMap::iterator iter;
 
-//            map<Handle,Handle> patternVarMap;
+//            HandleMap patternVarMap;
 
 //            bool skip = false;
 
@@ -1443,7 +1443,7 @@ void PatternMiner::extendAPatternForOneMoreGramRecursively(const Handle &extende
 //            for (iter = valueToVarMap.begin(); iter != valueToVarMap.end(); ++ iter)
 //            {
 //                if (indexes[index]) // this is considered as a variable, add it into the variable to value map
-//                    patternVarMap.insert(std::pair<Handle,Handle>(iter->first, iter->second));
+//                    patternVarMap.insert(HandlePair(iter->first, iter->second));
 
 //                index ++;
 //            }

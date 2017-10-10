@@ -78,7 +78,7 @@ private:
     void chooseKeyNodes();
     //! get a map of destinations to links from src (when following links
     //! that inherit from linkType.
-    std::map<Handle,Handle> getDestinationsFrom(Handle src, Type linkType);
+    HandleMap getDestinationsFrom(Handle src, Type linkType);
 
 #ifdef HAVE_UBIGRAPH
     //! Ubigrapher for visualising
@@ -106,13 +106,13 @@ public:
     float density;
 
     //! Nodes in the Hopfield network can be referenced through HGrid.
-    std::vector<Handle> hGrid;
+    HandleSeq hGrid;
     //! Indication of whether observation nodes in grid are active or key
     //! nodes.
     std::vector<bool> hGridKey;
 
     //! Key nodes for glocal training
-    std::vector<Handle> keyNodes;
+    HandleSeq keyNodes;
 
     HopfieldServer();
     virtual ~HopfieldServer();

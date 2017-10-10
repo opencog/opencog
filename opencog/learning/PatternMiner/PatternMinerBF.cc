@@ -123,7 +123,7 @@ void PatternMiner::extendAllPossiblePatternsForOneMoreGramBF(HandleSeq &instance
 void PatternMiner::extractAllPossiblePatternsFromInputLinksBF(HandleSeq& inputLinks,  HTreeNode* parentNode,
                                                               HandleSet& sharedNodes, unsigned int gram)
 {
-    map<Handle,Handle> valueToVarMap;  // the ground value node in the orginal Atomspace to the variable handle in pattenmining Atomspace
+    HandleMap valueToVarMap;  // the ground value node in the orginal Atomspace to the variable handle in pattenmining Atomspace
 
 //    // Debug
 //    cout << "Extract patterns from these links: \n";
@@ -166,7 +166,7 @@ void PatternMiner::extractAllPossiblePatternsFromInputLinksBF(HandleSeq& inputLi
     for (Handle shardNode : sharedNodes)
     {
         sharedNodesIndexes[sharedCout] = -1;
-        map<Handle,Handle>::iterator varIt;
+        HandleMap::iterator varIt;
         int j = 0;
         for (varIt = valueToVarMap.begin(); varIt != valueToVarMap.end(); ++varIt, j++)
         {
@@ -199,9 +199,9 @@ void PatternMiner::extractAllPossiblePatternsFromInputLinksBF(HandleSeq& inputLi
         {
             // construct the pattern for this combination in the PatternMining Atomspace
             // generate the valueToVarMap for this pattern of this combination
-            map<Handle,Handle>::iterator iter;
+            HandleMap::iterator iter;
 
-            map<Handle,Handle> patternVarMap;
+            HandleMap patternVarMap;
 
             bool sharedAllVar = true;
 
@@ -222,7 +222,7 @@ void PatternMiner::extractAllPossiblePatternsFromInputLinksBF(HandleSeq& inputLi
                 for (iter = valueToVarMap.begin(); iter != valueToVarMap.end(); ++ iter)
                 {
                     if (indexes[index]) // this is considered as a variable, add it into the variable to value map
-                        patternVarMap.insert(std::pair<Handle,Handle>(iter->first, iter->second));
+                        patternVarMap.insert(HandlePair(iter->first, iter->second));
 
                     index ++;
                 }
@@ -249,7 +249,7 @@ void PatternMiner::extractAllPossiblePatternsFromInputLinksBF(HandleSeq& inputLi
 
                     // unify the pattern
                     unsigned int unifiedLastLinkIndex;
-                    map<Handle,Handle> orderedVarNameMap;
+                    HandleMap orderedVarNameMap;
                     unifiedPattern = UnifyPatternOrder(pattern, unifiedLastLinkIndex, orderedVarNameMap);
 
                     string keyString = unifiedPatternToKeyString(unifiedPattern);

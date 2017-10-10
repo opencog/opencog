@@ -53,7 +53,7 @@ void HebbianUpdatingAgent::run()
     HandleSeq atoms;
     size_t size;
 
-    std::back_insert_iterator< std::vector<Handle> > out_hi(atoms);
+    std::back_insert_iterator<HandleSeq> out_hi(atoms);
 
     _bank->get_handle_set_in_attentional_focus(out_hi);
 

@@ -309,7 +309,7 @@ protected:
     // Return unified ordered Handle vector
     HandleSeq _UnifyPatternOrder(HandleSeq& inputPattern, unsigned int& unifiedLastLinkIndex);
 
-    HandleSeq UnifyPatternOrder(HandleSeq& inputPattern, unsigned int &unifiedLastLinkIndex, map<Handle,Handle>& orderedVarNameMap);
+    HandleSeq UnifyPatternOrder(HandleSeq& inputPattern, unsigned int &unifiedLastLinkIndex, HandleMap& orderedVarNameMap);
 
     Handle UnifyOneLinkForUnorderedLink(Handle& link,std::map<Handle,Type> &orderedTmpLinkToType);
 
@@ -319,10 +319,10 @@ protected:
     void addAtomTypesFromString(string node_types_str, vector<Type> &typeListToAddTo);
 
     // this function is called by RebindVariableNames
-    void findAndRenameVariablesForOneLink(Handle link, map<Handle,Handle>& varNameMap, HandleSeq& renameOutgoingLinks, std::map<Handle,Type> &orderedTmpLinkToType);
+    void findAndRenameVariablesForOneLink(Handle link, HandleMap& varNameMap, HandleSeq& renameOutgoingLinks, std::map<Handle,Type> &orderedTmpLinkToType);
 
     // rename the variable names in a ordered pattern according to the orders of the variables appear in the orderedPattern
-    HandleSeq RebindVariableNames(HandleSeq& orderedPattern, map<Handle,Handle>& orderedVarNameMap,std::map<Handle,Type> &orderedTmpLinkToType);
+    HandleSeq RebindVariableNames(HandleSeq& orderedPattern, HandleMap& orderedVarNameMap,std::map<Handle,Type> &orderedTmpLinkToType);
 
     void ReplaceConstNodeWithVariableForOneLink(Handle link, Handle constNode, Handle newVariableNode, HandleSeq& renameOutgoingLinks);
 
@@ -331,10 +331,10 @@ protected:
     void generateIndexesOfSharedVars(Handle& link, HandleSeq& orderedHandles, vector<vector<std::pair<int, size_t> > > &indexes);
 
     // generate the outgoings for a link in a pattern in the Pattern mining Atomspace, according to the given group of variables
-    void generateALinkByChosenVariables(Handle &originalLink, map<Handle,Handle>& valueToVarMap, HandleSeq &outputOutgoings, AtomSpace *_fromAtomSpace);
+    void generateALinkByChosenVariables(Handle &originalLink, HandleMap& valueToVarMap, HandleSeq &outputOutgoings, AtomSpace *_fromAtomSpace);
 
     // valueToVarMap:  the ground value node in the orginal Atomspace to the variable handle in pattenmining Atomspace
-    void extractAllNodesInLink(Handle link, map<Handle,Handle>& valueToVarMap, AtomSpace* _fromAtomSpace);
+    void extractAllNodesInLink(Handle link, HandleMap& valueToVarMap, AtomSpace* _fromAtomSpace);
     void extractAllNodesInLink(Handle link, HandleSet& allNodes, AtomSpace* _fromAtomSpace);
     void extractAllNodesInLink(Handle link, map<Handle, unsigned int> &allNodes, AtomSpace* _fromAtomSpace, unsigned index); // just find all the nodes in the original atomspace for this link
     void extractAllVariableNodesInLink(Handle link, HandleSet& allNodes, AtomSpace* _atomSpace);
@@ -380,7 +380,7 @@ protected:
     bool existInOneThreadExtractedLinks(unsigned int _gram, unsigned int cur_thread_index, string _extractedLinkUIDs);
 
     void extendAPatternForOneMoreGramRecursively(const Handle &extendedLink, AtomSpace* _fromAtomSpace, const Handle &extendedNode, const HandleSeq &lastGramLinks,
-                                                 HTreeNode* parentNode, const map<Handle,Handle> &lastGramValueToVarMap, const map<Handle,Handle> &lastGramPatternVarMap,
+                                                 HTreeNode* parentNode, const HandleMap &lastGramValueToVarMap, const HandleMap &lastGramPatternVarMap,
                                                  bool isExtendedFromVar, set<string>& allNewMinedPatternsCurTask, vector<HTreeNode*> &allHTreeNodesCurTask,
                                                  vector<MinedPatternInfo> &allNewMinedPatternInfo, unsigned int thread_index, bool startFromLinkContainWhiteKeyword);
 
@@ -390,7 +390,7 @@ protected:
 
     void quoteAllThePatternSForGram(unsigned int gram);
 
-    HTreeNode* extractAPatternFromGivenVarCombination(HandleSeq &inputLinks, map<Handle,Handle> &patternVarMap, map<Handle,Handle>& orderedVarNameMap,HandleSeqSeq &oneOfEachSeqShouldBeVars, HandleSeq &leaves,HandleSeq &shouldNotBeVars, HandleSeq &shouldBeVars,
+    HTreeNode* extractAPatternFromGivenVarCombination(HandleSeq &inputLinks, HandleMap &patternVarMap, HandleMap& orderedVarNameMap,HandleSeqSeq &oneOfEachSeqShouldBeVars, HandleSeq &leaves,HandleSeq &shouldNotBeVars, HandleSeq &shouldBeVars,
                                                       AtomSpace *_fromAtomSpace, unsigned int &extendedLinkIndex, set<string>& allNewMinedPatternsCurTask, bool &notOutPutPattern, bool &patternAlreadyExtractedInCurTask,bool startFromLinkContainWhiteKeyword);
 
 

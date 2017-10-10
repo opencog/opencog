@@ -65,7 +65,7 @@ namespace opencog
          public:
             HandleSeq pattern;
             Handle quotedPatternLink; // only used when if_quote_output_pattern = true
-            vector<HandleSeq> instances; // the corresponding instances of this pattern in the original AtomSpace, only be used by breadth first mining
+            HandleSeqSeq instances; // the corresponding instances of this pattern in the original AtomSpace, only be used by breadth first mining
             set<HTreeNode*> parentLinks;
             set<HTreeNode*> childLinks;
 

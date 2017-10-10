@@ -498,12 +498,12 @@ void HopfieldServer::updateKeyNodeLinks(Handle keyHandle, float density)
     }
 }
 
-std::map<Handle,Handle> HopfieldServer::getDestinationsFrom(Handle src, Type linkType)
+HandleMap HopfieldServer::getDestinationsFrom(Handle src, Type linkType)
 {
     //! This only expects arity 2 links, so make generic before placing in
     //! AtomSpace, by having the dest map keys be of type HandleSeq.
     //! returns in destinations mapped to link that got there.
-    std::map<Handle,Handle> result;
+    HandleMap result;
     HandleSeq links;
     src->getIncomingSetByType(back_inserter(links), linkType);
     for (const Handle& lh : links)
@@ -758,7 +758,7 @@ Pattern HopfieldServer::retrievePattern(Pattern partialPattern, int numCycles,
 Pattern HopfieldServer::getGridSTIAsPattern(bool blankKeys)
 {
     Pattern out(width, height);
-    std::vector<Handle>::iterator i;
+    HandleSeq::iterator i;
 
     for (size_t i = 0; i < hGrid.size(); i++) {
         Handle h = hGrid[i];
@@ -775,7 +775,7 @@ Pattern HopfieldServer::getGridSTIAsPattern(bool blankKeys)
 std::vector<stim_t> HopfieldServer::getGridStimVector()
 {
     std::vector<stim_t> out;
-    std::vector<Handle>::iterator i;
+    HandleSeq::iterator i;
 
     for (i = hGrid.begin(); i != hGrid.end(); ++i) {
         Handle h = *i;

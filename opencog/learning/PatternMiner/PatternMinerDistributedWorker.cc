@@ -361,8 +361,8 @@ void DistributedPatternMiner::growPatternsDepthFirstTask(unsigned int thread_ind
 
         // Extract all the possible patterns from this originalLink, and extend till the max_gram links, not duplicating the already existing patterns
         HandleSeq lastGramLinks;
-        map<Handle,Handle> lastGramValueToVarMap;
-        map<Handle,Handle> patternVarMap;
+        HandleMap lastGramValueToVarMap;
+        HandleMap patternVarMap;
 
         set<string> allNewMinedPatternsCurTask;
 

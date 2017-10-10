@@ -96,7 +96,7 @@ void PatternMiner::generateIndexesOfSharedVars(Handle& link, HandleSeq& orderedH
     }
 }
 
-void PatternMiner::findAndRenameVariablesForOneLink(Handle link, map<Handle,Handle>& varNameMap, HandleSeq& renameOutgoingLinks, std::map<Handle,Type> &orderedTmpLinkToType)
+void PatternMiner::findAndRenameVariablesForOneLink(Handle link, HandleMap& varNameMap, HandleSeq& renameOutgoingLinks, std::map<Handle,Type> &orderedTmpLinkToType)
 {
 
     HandleSeq outgoingLinks = link->getOutgoingSet();
@@ -118,7 +118,7 @@ void PatternMiner::findAndRenameVariablesForOneLink(Handle link, map<Handle,Hand
                    string var_name = "$var_"  + toString(varNameMap.size() + 1);
                    Handle var_node = atomSpace->add_node(opencog::PATTERN_VARIABLENODE_TYPE, var_name);
 
-                   varNameMap.insert(std::pair<Handle,Handle>(h,var_node));
+                   varNameMap.insert(HandlePair(h,var_node));
                    renameOutgoingLinks.push_back(var_node);
                }
            }
@@ -155,7 +155,7 @@ void PatternMiner::findAndRenameVariablesForOneLink(Handle link, map<Handle,Hand
 
 }
 
-HandleSeq PatternMiner::RebindVariableNames(HandleSeq& orderedPattern, map<Handle,Handle>& orderedVarNameMap, std::map<Handle,Type> &orderedTmpLinkToType)
+HandleSeq PatternMiner::RebindVariableNames(HandleSeq& orderedPattern, HandleMap& orderedVarNameMap, std::map<Handle,Type> &orderedTmpLinkToType)
 {
 
     HandleSeq rebindedPattern;
@@ -243,7 +243,7 @@ HandleSeq PatternMiner::ReplaceConstNodeWithVariableForAPattern(HandleSeq& patte
 // because the last link in input pattern is the externed link from last gram pattern
 // in orderedVarNameMap, the first Handle is the variable node in the input unordered pattern,
 // the second Handle is the renamed ordered variable node in the output ordered pattern.
-HandleSeq PatternMiner::UnifyPatternOrder(HandleSeq& inputPattern, unsigned int& unifiedLastLinkIndex, map<Handle,Handle>& orderedVarNameMap)
+HandleSeq PatternMiner::UnifyPatternOrder(HandleSeq& inputPattern, unsigned int& unifiedLastLinkIndex, HandleMap& orderedVarNameMap)
 {
     HandleSeq orderedHandles;
 
@@ -551,7 +551,7 @@ unsigned int combinationCalculate(int r, int n)
 }
 
  // valueToVarMap:  the ground value node in the orginal Atomspace to the variable handle in pattenmining Atomspace
-void PatternMiner::generateALinkByChosenVariables(Handle& originalLink, map<Handle,Handle>& valueToVarMap,  HandleSeq& outputOutgoings,AtomSpace *_fromAtomSpace)
+void PatternMiner::generateALinkByChosenVariables(Handle& originalLink, HandleMap& valueToVarMap,  HandleSeq& outputOutgoings,AtomSpace *_fromAtomSpace)
 {
     HandleSeq outgoingLinks = originalLink->getOutgoingSet();
 
@@ -587,7 +587,7 @@ void PatternMiner::generateALinkByChosenVariables(Handle& originalLink, map<Hand
 
  // valueToVarMap:  the ground value node in the orginal Atomspace to the variable handle in pattenmining Atomspace
 // _fromAtomSpace: where the input link is from
-void PatternMiner::extractAllNodesInLink(Handle link, map<Handle,Handle>& valueToVarMap, AtomSpace* _fromAtomSpace)
+void PatternMiner::extractAllNodesInLink(Handle link, HandleMap& valueToVarMap, AtomSpace* _fromAtomSpace)
 {
     HandleSeq outgoingLinks = link->getOutgoingSet();
 
@@ -599,7 +599,7 @@ void PatternMiner::extractAllNodesInLink(Handle link, map<Handle,Handle>& valueT
             {
                 // add a variable node in Pattern miner Atomspace
                 Handle varHandle = atomSpace->add_node(opencog::PATTERN_VARIABLENODE_TYPE,"$var~" + toString(valueToVarMap.size()) );
-                valueToVarMap.insert(std::pair<Handle,Handle>(h,varHandle));
+                valueToVarMap.insert(HandlePair(h,varHandle));
             }
 
             if ((h->getType() == opencog::PATTERN_VARIABLENODE_TYPE))
@@ -2314,7 +2314,7 @@ void PatternMiner::calculateInteractionInformation(HTreeNode* HNode)
              }
 
              unsigned int unifiedLastLinkIndex;
-             map<Handle,Handle> orderedVarNameMap;
+             HandleMap orderedVarNameMap;
              HandleSeq unifiedSubPattern = UnifyPatternOrder(subPattern, unifiedLastLinkIndex,orderedVarNameMap);
              string subPatternKey = unifiedPatternToKeyString(unifiedSubPattern);
 
@@ -2332,7 +2332,7 @@ void PatternMiner::calculateInteractionInformation(HTreeNode* HNode)
                  {
                      // Unify it again
                      unsigned int _unifiedLastLinkIndex;
-                     map<Handle,Handle> suborderedVarNameMap;
+                     HandleMap suborderedVarNameMap;
                      HandleSeq unifiedConnectedSubPattern = UnifyPatternOrder(aConnectedSubPart, _unifiedLastLinkIndex,suborderedVarNameMap);
                      string connectedSubPatternKey = unifiedPatternToKeyString(unifiedConnectedSubPattern);
 //                     cout << "a splitted part: " << connectedSubPatternKey;
@@ -3001,7 +3001,7 @@ void PatternMiner::calculateSurprisingness( HTreeNode* HNode, AtomSpace *_fromAt
             }
 
             unsigned int unifiedLastLinkIndex;
-            map<Handle,Handle> orderedVarNameMap;
+            HandleMap orderedVarNameMap;
             HandleSeq unifiedSubPattern = UnifyPatternOrder(subPattern, unifiedLastLinkIndex, orderedVarNameMap);
             string subPatternKey = unifiedPatternToKeyString(unifiedSubPattern);
 
@@ -3190,7 +3190,7 @@ void PatternMiner::calculateSurprisingness( HTreeNode* HNode, AtomSpace *_fromAt
             patternE.push_back(curSuperRelation.newExtendedLink);
             // unify patternE
             unsigned int unifiedLastLinkIndex;
-            map<Handle,Handle> EorderedVarNameMap;
+            HandleMap EorderedVarNameMap;
             HandleSeq unifiedPatternE = UnifyPatternOrder(patternE, unifiedLastLinkIndex, EorderedVarNameMap);
 
             string patternEKey = unifiedPatternToKeyString(unifiedPatternE, atomSpace);
@@ -3330,7 +3330,7 @@ void PatternMiner::calculateTypeBSurprisingness( HTreeNode* HNode, AtomSpace *_f
         {
             // generate all the super patterns of same gram of this pattern for 2-gram or bigger patterns
             // By changing one const node into a variable node, if this pattern exist, then it is one super pattern of this pattern
-            set<Handle> allConstNodes;
+            HandleSet allConstNodes;
             for (Handle link : HNode->pattern)
                 extractAllConstNodesInALink(link, allConstNodes, atomSpace);
 
@@ -3345,7 +3345,7 @@ void PatternMiner::calculateTypeBSurprisingness( HTreeNode* HNode, AtomSpace *_f
                 // only try to find it from mined patterns, will not query it by pattern matcher
 
                 unsigned int unifiedLastLinkIndex;
-                map<Handle,Handle> suborderedVarNameMap;
+                HandleMap suborderedVarNameMap;
                 HandleSeq unifiedSuperPattern = UnifyPatternOrder(oneSuperPattern, unifiedLastLinkIndex, suborderedVarNameMap);
 
                 string superPatternKey = unifiedPatternToKeyString(unifiedSuperPattern);

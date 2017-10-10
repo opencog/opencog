@@ -67,9 +67,9 @@ public:
     int clause_match(const Handle &h1, const Handle &h2);
     void add_clause_match(const Handle &h1, const Handle &h2, bool value);
 
-    int grounding_match(const std::map<Handle, Handle> &m1, const std::map<Handle, Handle> &m2);
-    void add_grounding_match(const std::map<Handle, Handle> &m1, bool value);
-    void add_grounding_match(const std::map<Handle, Handle> &m1, const std::map<Handle, Handle> &m2, bool value);
+    int grounding_match(const HandleMap &m1, const HandleMap &m2);
+    void add_grounding_match(const HandleMap &m1, bool value);
+    void add_grounding_match(const HandleMap &m1, const HandleMap &m2, bool value);
 
     bool get_node_list(const Handle &h, HandleSeq &list);
     void add_node_list(const Handle &h, const HandleSeq &list);
@@ -91,7 +91,7 @@ private:
 
     int match(HandleCacheMap &map, const Handle &h1, const Handle &h2);
     void add_match(HandleCacheMap &map, const Handle &h1, const Handle &h2, bool value);
-    std::string build_map_hash_key(const std::map<Handle, Handle> &m);
+    std::string build_map_hash_key(const HandleMap &m);
     std::string handle_to_hash_key(const Handle &h);
 };
 
