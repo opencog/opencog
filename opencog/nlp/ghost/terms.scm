@@ -21,7 +21,11 @@
          (v (list (TypedVariable v1 (Type "WordNode"))
                   (TypedVariable v2 (Type "WordInstanceNode"))))
          (c (list (ReferenceLink v2 v1)
-                  (LemmaLink v2 l)
+                  ; It's ok not to generate the LemmaLink
+                  ; here as the "evaluation" is done when
+                  ; we pass the lemma-seq to a DualLink
+                  ; to find rules
+                  ; (LemmaLink v2 l)
                   (WordInstanceLink v2 (Variable "$P")))))
     (list v c (list v1) (list l))))
 

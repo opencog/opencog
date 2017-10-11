@@ -72,13 +72,18 @@
             '()
             (cog-chase-link TYPE 'WordNode w)))
       (car (sent-get-words-in-order SENT))))
-  (let* ((wseq (get-seq 'ReferenceLink))
-         (word-seq (List wseq))
-         (lseq (get-seq 'LemmaLink))
-         (lemma-seq (List lseq)))
-        ; These EvaluationLinks will be used in the matching process
-        (Evaluation ghost-word-seq (List SENT word-seq))
-        (Evaluation ghost-lemma-seq (List SENT lemma-seq))))
+  (let ((word-seq (List (get-seq 'ReferenceLink)))
+        ; In some rare situation, particularly if the input
+        ; sentence is not grammatical, RelEx may not lemmatize a
+        ; word because of the ambiguity.
+        ; As a result the lemma sequence may contain non-lemmatized
+        ; words, which will become a problem during rule-matching.
+        ; As a quick workaround, do "ghost-get-lemma" for each of
+        ; the words in the lemma sequence
+        (lemma-seq (apply ghost-get-lemma (get-seq 'LemmaLink))))
+       ; These EvaluationLinks will be used in the matching process
+       (Evaluation ghost-word-seq (List SENT word-seq))
+       (Evaluation ghost-lemma-seq (List SENT lemma-seq))))
 
 (define (get-lemma-from-relex WORD)
   "Get the lemma of WORD via the RelEx server."
