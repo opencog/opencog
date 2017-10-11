@@ -12,6 +12,12 @@
                   (ReferenceLink v2 v1))))
     (list v c (list v1) (list l))))
 
+(define-public (ghost-lemma? WORD LEMMA)
+  "Check if LEMMA is the stem of WORD."
+  (if (equal? (get-lemma (cog-name WORD)) (cog-name LEMMA))
+      (stv 1 1)
+      (stv 0 1)))
+
 (define (lemma STR)
   "Lemma occurrence, aka canonical form of a term.
    This is the default for word mentions in the rule pattern."
@@ -21,11 +27,14 @@
          (v (list (TypedVariable v1 (Type "WordNode"))
                   (TypedVariable v2 (Type "WordInstanceNode"))))
          (c (list (ReferenceLink v2 v1)
-                  ; It's ok not to generate the LemmaLink
-                  ; here as the "evaluation" is done when
-                  ; we pass the lemma-seq to a DualLink
-                  ; to find rules
-                  ; (LemmaLink v2 l)
+                  ; In some rare situation, particularly if the input
+                  ; sentence is not grammatical, RelEx may not lemmatize a
+                  ; word because of the ambiguity. So just to be sure
+                  ; "l" is the stem of "v1", a GroundedPredicateNode is
+                  ; used instead of putting "(LemmaLink v2 l)" in the
+                  ; context.
+                  (Evaluation (GroundedPredicate "scm: ghost-lemma?")
+                              (List v1 l))
                   (WordInstanceLink v2 (Variable "$P")))))
     (list v c (list v1) (list l))))
 
