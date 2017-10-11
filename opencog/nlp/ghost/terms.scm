@@ -12,9 +12,11 @@
                   (ReferenceLink v2 v1))))
     (list v c (list v1) (list l))))
 
-(define-public (ghost-lemma? WORD LEMMA)
-  "Check if LEMMA is the stem of WORD."
-  (if (equal? (get-lemma (cog-name WORD)) (cog-name LEMMA))
+(define-public (ghost-lemma? GRD LEMMA)
+  "Check if LEMMA is the stem of GRD."
+  (cog-logger-debug ghost-logger
+    "In ghost-lemma? LEMMA: ~aGRD: ~a" LEMMA GRD)
+  (if (equal? (get-lemma (cog-name GRD)) (cog-name LEMMA))
       (stv 1 1)
       (stv 0 1)))
 
