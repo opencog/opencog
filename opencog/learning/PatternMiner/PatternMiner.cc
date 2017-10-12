@@ -1325,70 +1325,73 @@ Handle PatternMiner::getFirstNonIgnoredIncomingLink(AtomSpace *atomspace, Handle
 
 bool compareHTreeNodeByFrequency(HTreeNode* node1, HTreeNode* node2)
 {
-    return (node1->count > node2->count);
+    return node1->count > node2->count;
 }
 
 bool compareHTreeNodeByInteractionInformation(HTreeNode* node1, HTreeNode* node2)
 {
-    return (node1->interactionInformation > node2->interactionInformation);
+    return node1->interactionInformation > node2->interactionInformation;
 }
 
 bool compareHTreeNodeBySurprisingness(HTreeNode* node1, HTreeNode* node2)
 {
-    if ( (node1->nI_Surprisingness +  node1->nII_Surprisingness) - (node2->nI_Surprisingness + node2->nII_Surprisingness) > FLOAT_MIN_DIFF)
+    float s1 = node1->nI_Surprisingness + node1->nII_Surprisingness,
+        s2 = node2->nI_Surprisingness + node2->nII_Surprisingness,
+        diff = s1 - s2;
+    if (FLOAT_MIN_DIFF < diff)
         return true;
-    else if ((node2->nI_Surprisingness + node2->nII_Surprisingness) - (node1->nI_Surprisingness +  node1->nII_Surprisingness) > FLOAT_MIN_DIFF)
+    else if (FLOAT_MIN_DIFF < -diff)
         return false;
 
-    return (node1->var_num < node2->var_num);
+    return node1->var_num < node2->var_num;
 }
 
 bool compareHTreeNodeBySurprisingness_I(HTreeNode* node1, HTreeNode* node2)
 {
+    float s1 = node1->nI_Surprisingness,
+        s2 = node2->nI_Surprisingness;
+
     if (USE_ABS_SURPRISINGNESS)
     {
-        if ( node1->nI_Surprisingness - node2->nI_Surprisingness  > FLOAT_MIN_DIFF)
-            return true;
-        else if (node2->nI_Surprisingness - node1->nI_Surprisingness > FLOAT_MIN_DIFF)
-            return false;
-    }
-    else
-    {
-        if ( std::abs(node1->nI_Surprisingness) - std::abs(node2->nI_Surprisingness)  > FLOAT_MIN_DIFF)
-            return true;
-        else if (std::abs(node2->nI_Surprisingness) - std::abs(node1->nI_Surprisingness) > FLOAT_MIN_DIFF)
-            return false;
+        s1 = std::abs(s1);
+        s2 = std::abs(s2);
     }
 
-    return (node1->var_num < node2->var_num);
+    float diff = s1 - s2;
+    if (FLOAT_MIN_DIFF < diff)
+        return true;
+    else if (FLOAT_MIN_DIFF < -diff)
+        return false;
+
+    return node1->var_num < node2->var_num;
 }
 
 bool compareHTreeNodeBySurprisingness_II(HTreeNode* node1, HTreeNode* node2)
 {
 
-    if (not node1->superPatternRelations.empty() && not node2->superPatternRelations.empty())
+    if (not node1->superPatternRelations.empty() and
+        not node2->superPatternRelations.empty())
     {
-        if ( node1->nII_Surprisingness - node2->nII_Surprisingness > FLOAT_MIN_DIFF)
+        float diff = node1->nII_Surprisingness - node2->nII_Surprisingness;
+        if (FLOAT_MIN_DIFF < diff)
             return true;
-        else if ( node2->nII_Surprisingness - node1->nII_Surprisingness > FLOAT_MIN_DIFF)
+        else if (FLOAT_MIN_DIFF < -diff)
             return false;
     }
 
-    return (node1->var_num < node2->var_num);
+    return node1->var_num < node2->var_num;
 }
 
 bool compareHTreeNodeBySurprisingness_b(HTreeNode* node1, HTreeNode* node2)
 {
-
-    if ( node1-> nII_Surprisingness_b- node2->nII_Surprisingness_b > FLOAT_MIN_DIFF)
+    float diff = node1->nII_Surprisingness_b - node2->nII_Surprisingness_b;
+    if (FLOAT_MIN_DIFF < diff)
         return true;
-    else if ( node2->nII_Surprisingness_b - node1->nII_Surprisingness_b > FLOAT_MIN_DIFF)
+    else if (FLOAT_MIN_DIFF < -diff)
         return false;
 
-    return (node1->var_num < node2->var_num);
+    return node1->var_num < node2->var_num;
 }
-
-
 
 // only used by Surprisingness evaluation mode
 void PatternMiner::OutPutFinalPatternsToFile(unsigned int n_gram)
