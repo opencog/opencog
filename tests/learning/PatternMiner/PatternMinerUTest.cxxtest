@@ -110,9 +110,9 @@ void PatternMinerUTest::test_PatternMiner_SodaDrinker()
 
 	// Test the result: check the final top 3-gram pattern
 
-	vector<HTreeNode*>&  top3gramPatterns = pm.getFinalPatternsForGram(3);
+	vector<HTreeNode*>& top3gramPatterns = pm.getFinalPatternsForGram(3);
 
-	string patternStr = pm.unifiedPatternToKeyString((top3gramPatterns[0])->pattern);
+	string patternStr = pm.unifiedPatternToKeyString(top3gramPatterns[0]->pattern);
 	logger().info("The result top 3-gram pattern: \n%s", patternStr.c_str());
 
 	if (patternStr != top3gramPatternStr)
@@ -141,8 +141,10 @@ void PatternMinerUTest::test_PatternMiner_InferenceControl()
 	PatternMiner pm(&_as);
 	pm.runPatternMiner(false);
 
-	// TODO
-	vector<HTreeNode*>&  top3gramPatterns = pm.getFinalPatternsForGram(3);
+	vector<HTreeNode*>& top3gramPatterns = pm.getFinalPatternsForGram(3);
+
+	string patternStr = pm.unifiedPatternToKeyString(top3gramPatterns[0]->pattern);
+	logger().info("The result top 3-gram pattern: \n%s", patternStr.c_str());
 
 	// The main pattern of interest should look like
 	//
