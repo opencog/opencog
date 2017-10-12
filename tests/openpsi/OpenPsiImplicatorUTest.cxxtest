@@ -24,6 +24,7 @@
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/guile/SchemeEval.h>
 #include <opencog/openpsi/OpenPsiImplicator.h>
+#include <opencog/openpsi/OpenPsiRules.h>
 
 #define OPENPSI_TEST_PATH PROJECT_SOURCE_DIR "/tests/openpsi"
 #define CHKERR \
@@ -92,24 +93,30 @@ public:
     logger().info("BEGIN TEST: %s", __FUNCTION__);
 
     // Common Setup
+    TruthValuePtr tv;
     _scm->eval("(load \"" OPENPSI_TEST_PATH "/psi-implicator.scm\")");
     CHKERR
     Handle rule_1 = _scm->eval_h("(rule-1)");
     CHKERR
+    PatternLinkPtr query_1 =  OpenPsiRules::get_query(rule_1);
+    Handle query_body_1 = query_1->get_pattern().body;
     // A Ghost rule.
     Handle rule_2 = _scm->eval_h("(rule-2)");
     CHKERR
-    TruthValuePtr tv;
+    PatternLinkPtr query_2 =  OpenPsiRules::get_query(rule_2);
+    Handle query_body_2 = query_2->get_pattern().body;
 
     // Test 1:
     // Test when there is no grounding.
     tv = _opi->check_satisfiability(rule_1);
     TSM_ASSERT_EQUALS("Expected (stv 0 1)", TruthValue::FALSE_TV(), tv);
-    TS_ASSERT_EQUALS(0, _opi->_satisfiability_cache.size());
+    TS_ASSERT_EQUALS(_opi->_EMPTY_HANDLE_MAP,
+      _opi->_satisfiability_cache.at(query_body_1));
 
     tv = _opi->check_satisfiability(rule_2);
     TSM_ASSERT_EQUALS("Expected (stv 0 1)", TruthValue::FALSE_TV(), tv);
-    TS_ASSERT_EQUALS(0, _opi->_satisfiability_cache.size());
+    TS_ASSERT_EQUALS(_opi->_EMPTY_HANDLE_MAP,
+      _opi->_satisfiability_cache.at(query_body_2));
 
     // Test 2:
     // Test when there is an alpha-equivalent pattern.
@@ -117,11 +124,13 @@ public:
     CHKERR
     tv = _opi->check_satisfiability(rule_1);
     TSM_ASSERT_EQUALS("Expected (stv 0 1)", TruthValue::FALSE_TV(), tv);
-    TS_ASSERT_EQUALS(0, _opi->_satisfiability_cache.size());
+    TS_ASSERT_EQUALS(_opi->_EMPTY_HANDLE_MAP,
+      _opi->_satisfiability_cache.at(query_body_1));
 
     tv = _opi->check_satisfiability(rule_2);
     TSM_ASSERT_EQUALS("Expected (stv 0 1)", TruthValue::FALSE_TV(), tv);
-    TS_ASSERT_EQUALS(0, _opi->_satisfiability_cache.size());
+    TS_ASSERT_EQUALS(_opi->_EMPTY_HANDLE_MAP,
+      _opi->_satisfiability_cache.at(query_body_2));
 
     // Test 3:
     // Test when there is a grounding.
@@ -129,11 +138,13 @@ public:
     CHKERR
     tv = _opi->check_satisfiability(rule_1);
     TSM_ASSERT_EQUALS("Expected (stv 1 1)", TruthValue::TRUE_TV(), tv);
-    TS_ASSERT_EQUALS(1, _opi->_satisfiability_cache.size());
+    TS_ASSERT_DIFFERS(_opi->_EMPTY_HANDLE_MAP,
+      _opi->_satisfiability_cache.at(query_body_1));
 
     tv = _opi->check_satisfiability(rule_2);
     TSM_ASSERT_EQUALS("Expected (stv 1 1)", TruthValue::TRUE_TV(), tv);
-    TS_ASSERT_EQUALS(2, _opi->_satisfiability_cache.size());
+    TS_ASSERT_DIFFERS(_opi->_EMPTY_HANDLE_MAP,
+      _opi->_satisfiability_cache.at(query_body_2));
 
     logger().info("END TEST: %s", __FUNCTION__);
   }
@@ -155,10 +166,8 @@ public:
 
     // Test 1:
     // Test when satisfiablity hasn't been checked.
-    Handle result_1_1 = _opi->imply(rule_1);
-    TSM_ASSERT_EQUALS("Expected null", nullptr, result_1_1);
-    Handle result_1_2 = _opi->imply(rule_1);
-    TSM_ASSERT_EQUALS("Expected null", nullptr, result_1_2);
+    TS_ASSERT_THROWS(_opi->imply(rule_1), RuntimeException);
+    TS_ASSERT_THROWS(_opi->imply(rule_2), RuntimeException);
 
     // Test 2:
     // Test when satisfiablity has been checked.

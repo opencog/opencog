@@ -29,6 +29,7 @@
 using namespace opencog;
 
 std::map<Handle, HandleMap> OpenPsiImplicator::_satisfiability_cache = {};
+const HandleMap OpenPsiImplicator::_EMPTY_HANDLE_MAP = {};
 
 OpenPsiImplicator::OpenPsiImplicator(AtomSpace* as) :
   InitiateSearchCB(as),
@@ -81,22 +82,20 @@ bool OpenPsiImplicator::grounding(const HandleMap &var_soln,
 
 TruthValuePtr OpenPsiImplicator::check_satisfiability(const Handle& rule)
 {
-  // TODO: Replace this with the context, as psi-rule is
-  // (context + action ->goal)
-  PatternLinkPtr query =  OpenPsiRules::get_query(rule);
-
   // TODO:
-  // 1. How to prevent stale cache?
-  // 2. Also remove entry if the context isn't grounding?
-  // 3. What happens if the atoms are removed for the atomspace for
-  // whatever reason? -> Use either signals or query the atomspace
-  // similar to SchemeSmob::ss_link/ss_node.
-  // 4. Solve for multithreaded access. See ThreadSafeHandleMap.
-  if (_update_cache) {
-    query->satisfy(*this);
-  }
+  // Solve for multithreaded access. Create a rule class and lock
+  // the rule when updating the cache.
 
-  if (_satisfiability_cache.count(query->get_pattern().body)) {
+  PatternLinkPtr query =  OpenPsiRules::get_query(rule);
+  Handle query_body = query->get_pattern().body;
+
+  // Always update cache.
+  _satisfiability_cache[query_body] = _EMPTY_HANDLE_MAP;
+  query->satisfy(*this);
+
+  // The boolean returned by query->satisfy isn't used because all
+  // type of contexts haven't been handled by this callback yet.
+  if (_EMPTY_HANDLE_MAP != _satisfiability_cache.at(query_body)) {
     return TruthValue::TRUE_TV();
   } else {
     return TruthValue::FALSE_TV();
@@ -105,14 +104,22 @@ TruthValuePtr OpenPsiImplicator::check_satisfiability(const Handle& rule)
 
 Handle OpenPsiImplicator::imply(const Handle& rule)
 {
-  // TODO: Replace this with the action, as psi-rule is
-  // (context + action ->goal)
   PatternLinkPtr query = OpenPsiRules::get_query(rule);
+  Handle query_body = query->get_pattern().body;
+  HandleMap query_grounding;
+
+  try {
+    query_grounding = _satisfiability_cache.at(query_body);
+  } catch (const std::out_of_range& e) {
+    throw RuntimeException(TRACE_INFO, "The openpsi rule should be checked "
+      "for satisfiablity first." );
+  }
+
   Instantiator inst(_as);
 
-  if (_satisfiability_cache.count(query->get_pattern().body)) {
+  if (_EMPTY_HANDLE_MAP != query_grounding) {
     return inst.instantiate(OpenPsiRules::get_action(rule),
-              _satisfiability_cache.at(query->get_pattern().body), true);
+              query_grounding, true);
   } else {
     // NOTE: Trying to check for satisfiablity isn't done because it
     // is the responsibility of the action-selector for determining
