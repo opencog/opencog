@@ -82,11 +82,11 @@ using namespace opencog;
 //            continue;
 //        }
 
-//        // Add this link into observingAtomSpace
+//        // Add this link into observing_as
 //        HandleSeq outgoingLinks,outVariableNodes;
 
-//        swapOneLinkBetweenTwoAtomSpace(originalAtomSpace, observingAtomSpace, cur_link, outgoingLinks, outVariableNodes);
-//        Handle newLink = observingAtomSpace->add_link(cur_link->getType(), outgoingLinks);
+//        swapOneLinkBetweenTwoAtomSpace(original_as, observing_as, cur_link, outgoingLinks, outVariableNodes);
+//        Handle newLink = observing_as->add_link(cur_link->getType(), outgoingLinks);
 //        newLink->setTruthValue(cur_link->getTruthValue());
 
 //        HandleSeq observedLinks;
@@ -98,7 +98,7 @@ using namespace opencog;
 
 //        vector<HTreeNode*> _allThisGramHTreeNodes;
 
-//        extractAllPossiblePatternsFromInputLinksDF(observedLinks, 0, observingAtomSpace, _allLastGramHTreeNodes,_allThisGramHTreeNodes,1);
+//        extractAllPossiblePatternsFromInputLinksDF(observedLinks, 0, observing_as, _allLastGramHTreeNodes,_allThisGramHTreeNodes,1);
 
 //        map<HandleSeq, vector<HTreeNode*>> allLastGramLinksToPatterns; // for this cur_link
 //        allLastGramLinksToPatterns.insert(std::pair<HandleSeq, vector<HTreeNode*>>(observedLinks, _allThisGramHTreeNodes));
@@ -115,7 +115,7 @@ using namespace opencog;
 //            for(; it != allLastGramLinksToPatterns.end(); ++ it)
 //            {
 //                // find all the 2~MAX_GRAM gram distance neighbour links of newLink
-//                extendAllPossiblePatternsForOneMoreGramDF((HandleSeq&)(it->first),observingAtomSpace,gram, (vector<HTreeNode*>&)(it->second), allThisGramLinksToPatterns, newConnectedLinksFoundThisGram);
+//                extendAllPossiblePatternsForOneMoreGramDF((HandleSeq&)(it->first),observing_as,gram, (vector<HTreeNode*>&)(it->second), allThisGramLinksToPatterns, newConnectedLinksFoundThisGram);
 //            }
 
 //            allLastGramLinksToPatterns = allThisGramLinksToPatterns;
@@ -216,21 +216,21 @@ void PatternMiner::growPatternsDepthFirstTask(unsigned int thread_index)
                     startFromLinkContainWhiteKeyword = true;
             }
 
-            // Add this link into observingAtomSpace
+            // Add this link into observing_as
             HandleSeq outgoingLinks, outVariableNodes;
 
-            swapOneLinkBetweenTwoAtomSpace(originalAtomSpace, observingAtomSpace, cur_link, outgoingLinks, outVariableNodes);
-            Handle newLink = observingAtomSpace->add_link(cur_link->getType(), outgoingLinks);
+            swapOneLinkBetweenTwoAtomSpace(original_as, observing_as, cur_link, outgoingLinks, outVariableNodes);
+            Handle newLink = observing_as->add_link(cur_link->getType(), outgoingLinks);
             newLink->setTruthValue(cur_link->getTruthValue());
 
-            extendAPatternForOneMoreGramRecursively(newLink, observingAtomSpace, Handle::UNDEFINED, lastGramLinks, 0, lastGramValueToVarMap,patternVarMap, false,
+            extendAPatternForOneMoreGramRecursively(newLink, observing_as, Handle::UNDEFINED, lastGramLinks, 0, lastGramValueToVarMap,patternVarMap, false,
                                                     allNewMinedPatternsCurTask, allHTreeNodesCurTask, allNewMinedPatternInfo, thread_index,startFromLinkContainWhiteKeyword);
 
 
         }
         else
         {
-            extendAPatternForOneMoreGramRecursively(cur_link, originalAtomSpace, Handle::UNDEFINED, lastGramLinks, 0, lastGramValueToVarMap,patternVarMap, false,
+            extendAPatternForOneMoreGramRecursively(cur_link, original_as, Handle::UNDEFINED, lastGramLinks, 0, lastGramValueToVarMap,patternVarMap, false,
                                                     allNewMinedPatternsCurTask, allHTreeNodesCurTask, allNewMinedPatternInfo, thread_index,startFromLinkContainWhiteKeyword);
 
         }
@@ -280,23 +280,23 @@ void PatternMiner::growPatternsDepthFirstTask(unsigned int thread_index)
 //        readNextLinkLock.unlock();
 
 //        // if this link is listlink, ignore it
-//        if (originalAtomSpace->getType(cur_link) == opencog::LIST_LINK)
+//        if (original_as->getType(cur_link) == opencog::LIST_LINK)
 //        {
 //            continue;
 //        }
 
-//        // Add this link into observingAtomSpace
+//        // Add this link into observing_as
 //        HandleSeq outgoingLinks,outVariableNodes;
 
-//        swapOneLinkBetweenTwoAtomSpace(originalAtomSpace, observingAtomSpace, cur_link, outgoingLinks, outVariableNodes);
-//        Handle newLink = observingAtomSpace->addLink(originalAtomSpace->getType(cur_link),outgoingLinks,originalAtomSpace->getTV(cur_link));
+//        swapOneLinkBetweenTwoAtomSpace(original_as, observing_as, cur_link, outgoingLinks, outVariableNodes);
+//        Handle newLink = observing_as->addLink(original_as->getType(cur_link),outgoingLinks,original_as->getTV(cur_link));
 
 //        // Extract all the possible patterns from this originalLink, and extend till the max_gram links, not duplicating the already existing patterns
 //        HandleSeq lastGramLinks;
 //        HandleMap lastGramValueToVarMap;
 //        HandleMap patternVarMap;
 //        set<string> cur_task_ExtractedLinks[MAX_GRAM];
-//        extendAPatternForOneMoreGramRecursively(newLink, observingAtomSpace, Handle::UNDEFINED, lastGramLinks, 0, lastGramValueToVarMap, patternVarMap, cur_task_ExtractedLinks, false);
+//        extendAPatternForOneMoreGramRecursively(newLink, observing_as, Handle::UNDEFINED, lastGramLinks, 0, lastGramValueToVarMap, patternVarMap, cur_task_ExtractedLinks, false);
 
 
 
@@ -306,9 +306,10 @@ void PatternMiner::growPatternsDepthFirstTask(unsigned int thread_index)
 
 void PatternMiner::runPatternMinerDepthFirst()
 {
-    // observingAtomSpace is used to copy one link everytime from the originalAtomSpace
-    if (observingAtomSpace == nullptr)
-        observingAtomSpace = new AtomSpace();
+    // observing_as is used to copy one link everytime from the
+    // original_as
+    if (not observing_as)
+        observing_as = new AtomSpace();
 
     if (THREAD_NUM > 1)
     {
@@ -463,7 +464,7 @@ HTreeNode* PatternMiner::extractAPatternFromGivenVarCombination(HandleSeq &input
         {
             HandleSeq outgoingLinks;
             generateALinkByChosenVariables(link, patternVarMap, outgoingLinks, _fromAtomSpace);
-            Handle rebindedLink = atomSpace->add_link(link->getType(), outgoingLinks);
+            Handle rebindedLink = as->add_link(link->getType(), outgoingLinks);
             rebindedLink->setTruthValue(TruthValue::TRUE_TV());
 
             pattern.push_back(rebindedLink);
@@ -766,7 +767,7 @@ void PatternMiner::extendAPatternForOneMoreGramRecursively(const Handle &extende
 
     //    OC_ASSERT( (valueToVarMap.size() > 1),
     //              "PatternMiner::extractAllPossiblePatternsFromInputLinks: this group of links only has one node: %s!\n",
-    //               atomSpace->atomAsString(inputLinks[0]).c_str() );
+    //               as->atomAsString(inputLinks[0]).c_str() );
 
     if( filters(inputLinks, oneOfEachSeqShouldBeVars, leaves, shouldNotBeVars, shouldBeVars,_fromAtomSpace) )
         return; //already been filter out in this phrase
@@ -1388,7 +1389,7 @@ void PatternMiner::extendAPatternForOneMoreGramRecursively(const Handle &extende
 
 ////    OC_ASSERT( (valueToVarMap.size() > 1),
 ////              "PatternMiner::extractAllPossiblePatternsFromInputLinks: this group of links only has one node: %s!\n",
-////               atomSpace->atomAsString(inputLinks[0]).c_str() );
+////               as->atomAsString(inputLinks[0]).c_str() );
 
 //    int n_max = valueToVarMap.size();
 //    int n_limit= valueToVarMap.size()/2.0f;
@@ -1523,7 +1524,7 @@ void PatternMiner::extendAPatternForOneMoreGramRecursively(const Handle &extende
 //                {
 //                    HandleSeq outgoingLinks;
 //                    generateALinkByChosenVariables(link, patternVarMap, outgoingLinks, _fromAtomSpace);
-//                    Handle rebindedLink = atomSpace->add_link(link->getType(), outgoingLinks);
+//                    Handle rebindedLink = as->add_link(link->getType(), outgoingLinks);
 //                    rebindedLink->setTruthValue(TruthValue::TRUE_TV());
 
 //                    pattern.push_back(rebindedLink);

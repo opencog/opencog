@@ -161,9 +161,9 @@ class PatternMiner
 protected:
 
     HTree* htree;
-    AtomSpace* atomSpace;
-    AtomSpace* originalAtomSpace;
-    AtomSpace* observingAtomSpace;
+    AtomSpace* as;
+    AtomSpace* original_as;
+    AtomSpace* observing_as;
 
     HandleSeq allLinks;// all links in the orginal atomspace
 
@@ -275,7 +275,7 @@ protected:
     HandleSet havenotProcessedWhiteKeywordLinks;
 
    // [gram], this to avoid different threads happen to work on the same links.
-   // each string is composed the handles of a group of fact links in the observingAtomSpace in the default hash order using std set
+   // each string is composed the handles of a group of fact links in the observing_as in the default hash order using std set
     // queue<string>[thread_num][max_gram]
    list<string>** thread_DF_ExtractedLinks;
    // set<string>[max_gram]
@@ -337,13 +337,13 @@ protected:
     void extractAllNodesInLink(Handle link, HandleMap& valueToVarMap, AtomSpace* _fromAtomSpace);
     void extractAllNodesInLink(Handle link, HandleSet& allNodes, AtomSpace* _fromAtomSpace);
     void extractAllNodesInLink(Handle link, map<Handle, unsigned int> &allNodes, AtomSpace* _fromAtomSpace, unsigned index); // just find all the nodes in the original atomspace for this link
-    void extractAllVariableNodesInLink(Handle link, HandleSet& allNodes, AtomSpace* _atomSpace);
-    void extractAllConstNodesInALink(Handle link, HandleSet& allConstNodes, AtomSpace* _atomSpace);
+    void extractAllVariableNodesInLink(Handle link, HandleSet& allNodes, AtomSpace* _as);
+    void extractAllConstNodesInALink(Handle link, HandleSet& allConstNodes, AtomSpace* _as);
 
     // if a link contains only variableNodes , no const nodes
-    bool onlyContainVariableNodes(Handle link, AtomSpace* _atomSpace);
+    bool onlyContainVariableNodes(Handle link, AtomSpace* _as);
 
-    bool containVariableNodes(Handle link, AtomSpace* _atomSpace);
+    bool containVariableNodes(Handle link, AtomSpace* _as);
 
     void extractAllPossiblePatternsFromInputLinksBF(HandleSeq& inputLinks, HTreeNode* parentNode, HandleSet& sharedNodes, unsigned int gram);
 
@@ -476,7 +476,7 @@ protected:
     void reNameNodesForALink(Handle& inputLink, Handle& nodeToBeRenamed, Handle& newNamedNode,HandleSeq& renameOutgoingLinks,
                              AtomSpace* _fromAtomSpace, AtomSpace* _toAtomSpace);
 
-    bool filters(HandleSeq& inputLinks, HandleSeqSeq& oneOfEachSeqShouldBeVars, HandleSeq& leaves, HandleSeq& shouldNotBeVars, HandleSeq& shouldBeVars,AtomSpace* _atomSpace);
+    bool filters(HandleSeq& inputLinks, HandleSeqSeq& oneOfEachSeqShouldBeVars, HandleSeq& leaves, HandleSeq& shouldNotBeVars, HandleSeq& shouldBeVars,AtomSpace* _as);
 
     bool containWhiteKeywords(const string& str, QUERY_LOGIC logic);
 
@@ -488,14 +488,14 @@ protected:
 
     void cleanUpPatternMiner();
 
-    bool loadOutgoingsIntoAtomSpaceFromString(stringstream &outgoingStream, AtomSpace *_atomSpace, HandleSeq &outgoings, string parentIndent="");
-    bool loadOutgoingsIntoAtomSpaceFromAtomString(stringstream& outgoingStream, AtomSpace *_atomSpace, HandleSeq &outgoings, string parentIndent="");
-    HandleSeq loadPatternIntoAtomSpaceFromString(string patternStr, AtomSpace* _atomSpace);// input string is pattern keystring
-    HandleSeq loadPatternIntoAtomSpaceFromFileString(string patternStr, AtomSpace *_atomSpace); // input string is normal atom string
+    bool loadOutgoingsIntoAtomSpaceFromString(stringstream &outgoingStream, AtomSpace *_as, HandleSeq &outgoings, string parentIndent="");
+    bool loadOutgoingsIntoAtomSpaceFromAtomString(stringstream& outgoingStream, AtomSpace *_as, HandleSeq &outgoings, string parentIndent="");
+    HandleSeq loadPatternIntoAtomSpaceFromString(string patternStr, AtomSpace* _as);// input string is pattern keystring
+    HandleSeq loadPatternIntoAtomSpaceFromFileString(string patternStr, AtomSpace *_as); // input string is normal atom string
 
 
 public:
-    PatternMiner(AtomSpace* _originalAtomSpace);
+    PatternMiner(AtomSpace* _original_as);
     ~PatternMiner();
 
     bool checkPatternExist(const string& patternKeyStr);
@@ -533,7 +533,7 @@ public:
     void queryPatternsWithFrequencyAndInteractionInformationRanges(unsigned int min_frequency, unsigned int max_frequency,
                                                                    float min_ii, float max_ii, int gram);
 
-    AtomSpace* getResultAtomSpace() {return atomSpace;}
+    AtomSpace* getResultAtomSpace() {return as;}
 
     void runPatternMiner(bool exit_program_after_finish=true);
 

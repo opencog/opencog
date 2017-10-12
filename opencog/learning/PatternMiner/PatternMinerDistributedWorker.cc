@@ -194,7 +194,7 @@ void DistributedPatternMiner::startMiningWork()
 
         int start_time = time(nullptr);
 
-        originalAtomSpace->get_handles_by_type(back_inserter(allLinks), (Type) LINK, true );
+        original_as->get_handles_by_type(back_inserter(allLinks), (Type) LINK, true );
 
         allLinkNumber = (int)(allLinks.size());
         atomspaceSizeFloat = (float)(allLinkNumber);
@@ -237,8 +237,8 @@ void DistributedPatternMiner::startMiningWork()
 
 void DistributedPatternMiner::runPatternMinerDepthFirst()
 {
-    // observingAtomSpace is used to copy one link everytime from the originalAtomSpace
-    observingAtomSpace = new AtomSpace();
+    // observing_as is used to copy one link everytime from the original_as
+    observing_as = new AtomSpace();
 
     if (THREAD_NUM > 1)
     {
@@ -352,11 +352,11 @@ void DistributedPatternMiner::growPatternsDepthFirstTask(unsigned int thread_ind
             }
         }
 
-        // Add this link into observingAtomSpace
+        // Add this link into observing_as
         HandleSeq outgoingLinks, outVariableNodes;
 
-        swapOneLinkBetweenTwoAtomSpace(originalAtomSpace, observingAtomSpace, cur_link, outgoingLinks, outVariableNodes);
-        Handle newLink = observingAtomSpace->add_link(cur_link->getType(), outgoingLinks);
+        swapOneLinkBetweenTwoAtomSpace(original_as, observing_as, cur_link, outgoingLinks, outVariableNodes);
+        Handle newLink = observing_as->add_link(cur_link->getType(), outgoingLinks);
         newLink->setTruthValue(cur_link->getTruthValue());
 
 
@@ -387,7 +387,7 @@ void DistributedPatternMiner::growPatternsDepthFirstTask(unsigned int thread_ind
                 startFromLinkContainWhiteKeyword = true;
         }
 
-        extendAPatternForOneMoreGramRecursively(newLink, observingAtomSpace, Handle::UNDEFINED, lastGramLinks, 0, lastGramValueToVarMap,
+        extendAPatternForOneMoreGramRecursively(newLink, observing_as, Handle::UNDEFINED, lastGramLinks, 0, lastGramValueToVarMap,
                                                 patternVarMap, false, allNewMinedPatternsCurTask, allHTreeNodesCurTask, allNewMinedPatternInfo, thread_index,startFromLinkContainWhiteKeyword);
 
 
@@ -398,7 +398,7 @@ void DistributedPatternMiner::growPatternsDepthFirstTask(unsigned int thread_ind
         // release all the HTreeNodes created in this task
         // clean up the pattern atomspace, do not need to keep patterns in atomspace when run as a distributed worker
         if (THREAD_NUM == 1)
-            atomSpace->clear(); // can only clear the atomspace when only 1 thread is used
+            as->clear(); // can only clear the atomspace when only 1 thread is used
 
         for(unsigned int hNodeNum = 0; hNodeNum < allHTreeNodesCurTask.size(); hNodeNum ++)
         {

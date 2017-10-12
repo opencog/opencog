@@ -121,7 +121,7 @@ protected:
 
 public:
 
-    DistributedPatternMiner(AtomSpace* _originalAtomSpace) : PatternMiner(_originalAtomSpace)
+    DistributedPatternMiner(AtomSpace* _original_as) : PatternMiner(_original_as)
     {
 
         is_distributed = true;

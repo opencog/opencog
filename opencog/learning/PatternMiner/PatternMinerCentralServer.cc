@@ -434,7 +434,7 @@ void DistributedPatternMiner::parseAPatternTask(json::value jval)
         else
         {
             // add this new found pattern into the Atomspace
-            HandleSeq patternHandleSeq = loadPatternIntoAtomSpaceFromString(PatternStr, atomSpace);
+            HandleSeq patternHandleSeq = loadPatternIntoAtomSpaceFromString(PatternStr, as);
 
 
             if (patternHandleSeq.empty())
@@ -492,7 +492,7 @@ void DistributedPatternMiner::parseAPatternTask(json::value jval)
                     // It's possibly sent by another thread, and added to the queue later than the current pattern.
                     // So we add this parent pattern here first, but set its count = 0
                     // add this new found pattern into the Atomspace
-                    HandleSeq parentPatternHandleSeq = loadPatternIntoAtomSpaceFromString(ParentPatternStr, atomSpace);
+                    HandleSeq parentPatternHandleSeq = loadPatternIntoAtomSpaceFromString(ParentPatternStr, as);
                     if (parentPatternHandleSeq.empty())
                     {
 
