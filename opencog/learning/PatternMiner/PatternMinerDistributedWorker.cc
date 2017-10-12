@@ -39,6 +39,7 @@
 #include <opencog/atoms/base/atom_types.h>
 #include <opencog/query/BindLinkAPI.h>
 #include <opencog/util/Config.h>
+#include <opencog/util/algorithm.h>
 
 #include <cpprest/http_client.h>
 #include <cpprest/filestream.h>
