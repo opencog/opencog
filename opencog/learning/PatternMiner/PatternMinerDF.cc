@@ -350,15 +350,12 @@ void PatternMiner::runPatternMinerDepthFirst()
         delete [] thread_DF_ExtractedLinks;
 
         delete [] all_thread_ExtractedLinks_pergram;
-
     }
 
     delete [] threads;
 
     cout << "\nFinished mining 1~" << MAX_GRAM << " gram patterns.\n";
     cout << "\ntotalLinkNum = " << processedLinkNum << ", actualProcessedLinkNum = " << actualProcessedLinkNum << std::endl;
-
-
 }
 
 // extendedLinkIndex is to return the index of extendedLink's patternlink in the unified pattern so as to identify where is the extended link in this pattern
