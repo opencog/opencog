@@ -66,16 +66,18 @@ public:
 
 private:
   /**
-   * Cache used to store context with the variable groundings.
+   * Cache used to store context with the variable groundings. Values
+   * are not used to associate the variable groundings(the HandleMap) with
+   * the query PatternLink, because doing so would require extra
+   * computation that doesn't add any value.
    */
   static std::map<Handle, HandleMap> _satisfiability_cache;
 
   /**
-   * Used to signal whether cache should be updated or not. By default the
-   * cache is updated. It isn't static because one might only want to
-   * use the cache for a subset of contexts.
+   * An empty map used for clearing cache entries, or to denote absence
+   * of groundings.
    */
-  bool _update_cache = true;
+  static const HandleMap _EMPTY_HANDLE_MAP;
 
   // Because two of the ancestor classes that this class inherites
   // from have _as variable.
