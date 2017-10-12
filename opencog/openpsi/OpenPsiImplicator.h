@@ -66,7 +66,10 @@ public:
 
 private:
   /**
-   * Cache used to store context with the variable groundings.
+   * Cache used to store context with the variable groundings. Values
+   * are not used to associate the variable groundings(the HandleMap) with
+   * the query PatternLink, because doing so would require extra
+   * computation that doesn't add any value.
    */
   static std::map<Handle, HandleMap> _satisfiability_cache;
 
