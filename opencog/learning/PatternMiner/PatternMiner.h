@@ -377,19 +377,19 @@ protected:
     HandleSeq copyLinks(AtomSpace& to_as, const HandleSeq& links,
                         HandleSeq &variables);
 
-    void swapOneLinkBetweenTwoAtomSpaceForBindLink(AtomSpace& from_as, AtomSpace& to_as, Handle& fromLink, HandleSeq& outgoings,
-                                          HandleSeq &outVariableNodes, HandleSeq& linksWillBeDel, bool& containVar );
+    void swapOneLinkBetweenTwoAtomSpaceForBindLink(AtomSpace& from_as, AtomSpace& to_as, const Handle& fromLink, HandleSeq& outgoings,
+                                          HandleSeq &outVariableNodes, HandleSeq& linksWillBeDel, bool& containVar);
 
-    HandleSeq swapLinksBetweenTwoAtomSpaceForBindLink(AtomSpace& from_as, AtomSpace& to_as, HandleSeq& fromLinks, HandleSeq& outVariableNodes, HandleSeq& linksWillBeDel);
+    HandleSeq swapLinksBetweenTwoAtomSpaceForBindLink(AtomSpace& from_as, AtomSpace& to_as, const HandleSeq& fromLinks, HandleSeq& outVariableNodes, HandleSeq& linksWillBeDel);
 
-    void extractAllVariableNodesInAnInstanceLink(Handle& instanceLink, Handle& patternLink, HandleSet& allVarNodes);
+    void extractAllVariableNodesInAnInstanceLink(const Handle& instanceLink, Handle& patternLink, HandleSet& allVarNodes);
 
-    void extractAllVariableNodesInAnInstanceLink(Handle& instanceLink, Handle& patternLink, map<Handle, unsigned int>& allVarNodes, unsigned index);
+    void extractAllVariableNodesInAnInstanceLink(const Handle& instanceLink, Handle& patternLink, map<Handle, unsigned int>& allVarNodes, unsigned index);
 
-    void extendAllPossiblePatternsForOneMoreGramDF(HandleSeq &instance, AtomSpace& from_as, unsigned int gram,
+    void extendAllPossiblePatternsForOneMoreGramDF(const HandleSeq& instance, AtomSpace& from_as, unsigned int gram,
                                                    vector<HTreeNode*>& allLastGramHTreeNodes, map<HandleSeq, vector<HTreeNode*>>& allFactLinksToPatterns, vector<HandleSet>& newConnectedLinksFoundThisGram);
 
-    void extendAllPossiblePatternsForOneMoreGramBF(HandleSeq &instance, HTreeNode* curHTreeNode, unsigned int gram);
+    void extendAllPossiblePatternsForOneMoreGramBF(const HandleSeq& instance, HTreeNode* curHTreeNode, unsigned int gram);
 
     //  void extendAllPossiblePatternsTillMaxGramDF(Handle &startLink, AtomSpace& from_as, unsigned int max_gram);
     void addThreadExtractedLinks(unsigned int _gram, unsigned int cur_thread_index, string _extractedLinkUIDs);
@@ -436,20 +436,20 @@ protected:
 
     bool isLastNElementsAllTrue(bool* array, int size, int n);
 
-    bool isInHandleSeq(Handle handle, HandleSeq &handles);
+    bool isInHandleSeq(const Handle& handle, const HandleSeq& handles);
 
-    bool isInHandleSeqSeq(Handle handle, HandleSeqSeq &handleSeqs);
+    bool isInHandleSeqSeq(const Handle& handle, const HandleSeqSeq& handleSeqs);
 
-    bool containsDuplicateHandle(HandleSeq &handles);
+    bool containsDuplicateHandle(HandleSeq& handles);
 
-    Handle getFirstNonIgnoredIncomingLink(AtomSpace& atomspace, Handle& handle);
+    Handle getFirstNonIgnoredIncomingLink(AtomSpace& atomspace, const Handle& handle);
 
     bool isIgnoredType(Type type);
 
     bool isTypeInList(Type type, vector<Type> &typeList);
 
     // if atomspace = nullptr, it will use the pattern mining Atomspace
-    std::string Link2keyString(Handle& link, string indent="", const AtomSpace* atomspace=nullptr);
+    std::string Link2keyString(const Handle& link, string indent="", const AtomSpace* atomspace=nullptr);
 
     void removeLinkAndItsAllSubLinks(AtomSpace& _atomspace, Handle link);
 
@@ -520,7 +520,7 @@ public:
 
     bool checkPatternExist(const string& patternKeyStr);
 
-    string unifiedPatternToKeyString(HandleSeq& inputPattern ,
+    string unifiedPatternToKeyString(const HandleSeq& inputPattern ,
                                      const AtomSpace* atomspace=nullptr);
 
     void OutPutFrequentPatternsToFile(unsigned int n_gram, vector<vector<HTreeNode*>>& _patternsForGram, string _fileNamebasic="");

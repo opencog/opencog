@@ -471,14 +471,14 @@ Handle PatternMiner::UnifyOneLinkForUnorderedLink(Handle& link,std::map<Handle,T
 
 
 
-string PatternMiner::unifiedPatternToKeyString(HandleSeq& inputPattern,
+string PatternMiner::unifiedPatternToKeyString(const HandleSeq& inputPattern,
                                                const AtomSpace* atomspace)
 {
     if (atomspace == nullptr)
         atomspace = this->as;
 
     string keyStr = "";
-    for (Handle h : inputPattern)
+    for (const Handle& h : inputPattern)
     {
         keyStr += Link2keyString(h,"", atomspace);
         keyStr += "\n";
@@ -620,7 +620,7 @@ void PatternMiner::extractAllNodesInLink(const Handle& link,
     }
 }
 
-void PatternMiner::extractAllVariableNodesInAnInstanceLink(Handle& instanceLink, Handle& patternLink, HandleSet& allVarNodes)
+void PatternMiner::extractAllVariableNodesInAnInstanceLink(const Handle& instanceLink, Handle& patternLink, HandleSet& allVarNodes)
 {
 
     HandleSeq ioutgoingLinks = instanceLink->getOutgoingSet();
@@ -645,13 +645,12 @@ void PatternMiner::extractAllVariableNodesInAnInstanceLink(Handle& instanceLink,
             extractAllVariableNodesInAnInstanceLink(h,(Handle&)(*pit),allVarNodes);
         }
 
-        pit ++;
+        pit++;
     }
-
 }
 
 
-void PatternMiner::extractAllVariableNodesInAnInstanceLink(Handle& instanceLink, Handle& patternLink, map<Handle, unsigned int>& allVarNodes, unsigned index)
+void PatternMiner::extractAllVariableNodesInAnInstanceLink(const Handle& instanceLink, Handle& patternLink, map<Handle, unsigned int>& allVarNodes, unsigned index)
 {
 
     HandleSeq ioutgoingLinks = instanceLink->getOutgoingSet();
@@ -1027,24 +1026,20 @@ bool PatternMiner::containsDuplicateHandle(HandleSeq &handles)
 }
 
 
-bool PatternMiner::isInHandleSeq(Handle handle, HandleSeq &handles)
+bool PatternMiner::isInHandleSeq(const Handle& handle, const HandleSeq& handles)
 {
-    for (Handle h : handles)
-    {
+    for (const Handle& h : handles)
         if (handle == h)
             return true;
-    }
 
     return false;
 }
 
-bool PatternMiner::isInHandleSeqSeq(Handle handle, HandleSeqSeq &handleSeqs)
+bool PatternMiner::isInHandleSeqSeq(const Handle& handle, const HandleSeqSeq& handleSeqs)
 {
-    for (HandleSeq handles : handleSeqs)
-    {
+    for (const HandleSeq& handles : handleSeqs)
         if (isInHandleSeq(handle,handles))
             return true;
-    }
 
     return false;
 }
@@ -1301,7 +1296,7 @@ bool PatternMiner::remove_keyword_from_white_list(string _keyword)
     return false;
 }
 
-Handle PatternMiner::getFirstNonIgnoredIncomingLink(AtomSpace& atomspace, Handle& handle)
+Handle PatternMiner::getFirstNonIgnoredIncomingLink(AtomSpace& atomspace, const Handle& handle)
 {
     Handle cur_h = handle;
     while(true)
@@ -4681,7 +4676,7 @@ void PatternMiner::selectSubsetForDBpedia()
 }
 
 
-std::string PatternMiner::Link2keyString(Handle& h, std::string indent, const AtomSpace* atomspace)
+std::string PatternMiner::Link2keyString(const Handle& h, std::string indent, const AtomSpace* atomspace)
 {
     if (atomspace == nullptr)
         atomspace = this->as;
@@ -4701,7 +4696,7 @@ std::string PatternMiner::Link2keyString(Handle& h, std::string indent, const At
     if (h->isLink())
     {
         HandleSeq outgoings = h->getOutgoingSet();
-        for (Handle outgoing : outgoings)
+        for (const Handle& outgoing : outgoings)
             answer << Link2keyString(outgoing, more_indent, atomspace);
     }
 
@@ -4883,13 +4878,13 @@ HandleSet PatternMiner::_extendOneLinkForSubsetCorpus(HandleSet& allNewLinksLast
 {
     HandleSet allNewConnectedLinksThisGram;
     // only extend the links in allNewLinksLastGram. allNewLinksLastGram is a part of allSubsetLinks
-    for (Handle link : allNewLinksLastGram)
+    for (const Handle& link : allNewLinksLastGram)
     {
         // find all nodes in this link
         HandleSet allNodes;
         extractAllNodesInLink(link, allNodes, original_as);
 
-        for (Handle neighborNode : allNodes)
+        for (const Handle& neighborNode : allNodes)
         {
             if (neighborNode->getType() == PREDICATE_NODE)
                 continue;
@@ -4928,7 +4923,7 @@ void PatternMiner::findAllLinksContainKeyWords(vector<string>& subsetKeywords, u
     if (logic_contain)
     {
 
-        for (Handle link : allLinks)
+        for (const Handle& link : allLinks)
         {
             Handle newh = link;
 
@@ -4983,7 +4978,7 @@ void PatternMiner::findAllLinksContainKeyWords(vector<string>& subsetKeywords, u
     }
     else
     {
-        for (string keyword : subsetKeywords)
+        for (const string& keyword : subsetKeywords)
         {
             // std::cout << keyword << std::endl;
             Handle keywordNode = original_as.get_node(opencog::CONCEPT_NODE,keyword);
@@ -5023,7 +5018,7 @@ void PatternMiner::selectSubsetAllEntityLinksContainsKeywords(vector<string>& su
     HandleSet allSubsetLinks;
     string topicsStr = "";
 
-    for (string keyword : subsetKeywords)
+    for (const string& keyword : subsetKeywords)
     {
         std::cout << keyword << std::endl;
         topicsStr += "-";
@@ -5033,7 +5028,7 @@ void PatternMiner::selectSubsetAllEntityLinksContainsKeywords(vector<string>& su
     findAllLinksContainKeyWords(subsetKeywords, 0, false, allSubsetLinks);
 
     HandleSet allEntityNodes;
-    for (Handle link : allSubsetLinks)
+    for (const Handle& link : allSubsetLinks)
     {  
         Handle firstOutgoing = link->getOutgoingAtom(1);
         Handle entityNode;
@@ -5051,7 +5046,7 @@ void PatternMiner::selectSubsetAllEntityLinksContainsKeywords(vector<string>& su
     std::cout << allEntityNum <<" entities has the predicate value found! Now find all the other Links contain these entities ..." << std::endl;
 
     int processEntityNum = 0;
-    for (Handle entityNode : allEntityNodes)
+    for (const Handle& entityNode : allEntityNodes)
     {
         HandleSet allLinks = _getAllNonIgnoredLinksForGivenNode(entityNode, allSubsetLinks);
 
@@ -5074,7 +5069,7 @@ void PatternMiner::selectSubsetAllEntityLinksContainsKeywords(vector<string>& su
     // write the first line to enable unicode
     subsetFile <<  "(setlocale LC_CTYPE \"\")" << std::endl ;
 
-    for (Handle h : allSubsetLinks)
+    for (const Handle& h : allSubsetLinks)
     {
         if (containIgnoredContent(h))
             continue;
@@ -5097,7 +5092,7 @@ void PatternMiner::_selectSubsetFromCorpus(vector<string>& subsetKeywords, unsig
     HandleSet allSubsetLinks;
     string topicsStr = "";
 
-    for (string keyword : subsetKeywords)
+    for (const string& keyword : subsetKeywords)
     {
         std::cout << keyword << std::endl;
         topicsStr += "-";
@@ -5117,7 +5112,7 @@ void PatternMiner::_selectSubsetFromCorpus(vector<string>& subsetKeywords, unsig
     // write the first line to enable unicode
     subsetFile <<  "(setlocale LC_CTYPE \"\")" << std::endl ;
 
-    for (Handle h : allSubsetLinks)
+    for (const Handle& h : allSubsetLinks)
     {
         if (containIgnoredContent(h))
             continue;
@@ -5238,7 +5233,7 @@ HandleSeq PatternMiner::loadPatternIntoAtomSpaceFromString(string patternStr, At
 //        i++;
 //    }
 
-    for (string linkStr : strs) // load each link
+    for (const string& linkStr : strs) // load each link
     {
         if (linkStr == "") continue;
 
@@ -5401,7 +5396,7 @@ HandleSeq PatternMiner::loadPatternIntoAtomSpaceFromFileString(string patternStr
 
     HandleSeq pattern;
 
-    for (string linkStr : strs) // load each link
+    for (const string& linkStr : strs) // load each link
     {
         if (linkStr == "") continue;
 
@@ -5498,7 +5493,7 @@ void PatternMiner::loadPatternsFromResultFile(string fileName)
     unsigned int loadedPatternNum = 0;
     bool patternStart = false;
 
-    for (std::string line; std::getline(resultFile, line); )
+    for (std::string line; std::getline(resultFile, line);)
     {
         //cout <<"\nline: " << line << std::endl;
         if (patternStart && (line == "") && (lastLine == "")) // one pattern end, load it

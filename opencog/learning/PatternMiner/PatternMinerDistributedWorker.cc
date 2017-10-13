@@ -205,7 +205,7 @@ void DistributedPatternMiner::startMiningWork()
 
             cout << "\nOnly mine patterns start from white list:" << std::endl;
 
-            for (string keyword : keyword_white_list)
+            for (const string& keyword : keyword_white_list)
             {
                 std::cout << keyword << std::endl;
             }

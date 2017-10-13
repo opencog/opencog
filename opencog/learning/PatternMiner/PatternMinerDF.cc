@@ -375,7 +375,7 @@ HTreeNode* PatternMiner::extractAPatternFromGivenVarCombination(HandleSeq &input
 
     if (not shouldNotBeVars.empty())
     {
-        for (Handle noTypeNode  : shouldNotBeVars)
+        for (const Handle& noTypeNode  : shouldNotBeVars)
         {
             if (patternVarMap.find(noTypeNode) != patternVarMap.end())
             {
@@ -387,7 +387,7 @@ HTreeNode* PatternMiner::extractAPatternFromGivenVarCombination(HandleSeq &input
 
     if (not skip && not shouldBeVars.empty())
     {
-        for (Handle shouldBeVarNode  : shouldBeVars)
+        for (const Handle& shouldBeVarNode  : shouldBeVars)
         {
             if (patternVarMap.find(shouldBeVarNode) == patternVarMap.end())
             {
@@ -402,10 +402,10 @@ HTreeNode* PatternMiner::extractAPatternFromGivenVarCombination(HandleSeq &input
 
         // check if in this combination, if at least one node in each Seq of oneOfEachSeqShouldBeVars is considered as variable
         bool allSeqContainsVar = true;
-        for (HandleSeq& oneSharedSeq : oneOfEachSeqShouldBeVars)
+        for (const HandleSeq& oneSharedSeq : oneOfEachSeqShouldBeVars)
         {
             bool thisSeqContainsVar = false;
-            for (Handle& toBeSharedNode : oneSharedSeq)
+            for (const Handle& toBeSharedNode : oneSharedSeq)
             {
                 if (patternVarMap.find(toBeSharedNode) != patternVarMap.end())
                 {
@@ -429,7 +429,7 @@ HTreeNode* PatternMiner::extractAPatternFromGivenVarCombination(HandleSeq &input
 
     if ( (! skip) && (enable_filter_leaves_should_not_be_vars) && (gram > 1)) // for gram > 1, any leaf should not considered as variable
     {
-        for (Handle leaf  : leaves)
+        for (const Handle& leaf : leaves)
         {
 
             if (patternVarMap.find(leaf) != patternVarMap.end())
@@ -454,7 +454,7 @@ HTreeNode* PatternMiner::extractAPatternFromGivenVarCombination(HandleSeq &input
 
         HandleSeq pattern, unifiedPattern;
 
-        for (Handle link : inputLinks)
+        for (const Handle& link : inputLinks)
         {
             HandleSeq outgoingLinks;
             generateALinkByChosenVariables(link, patternVarMap, outgoingLinks, from_as);
@@ -555,7 +555,7 @@ HTreeNode* PatternMiner::extractAPatternFromGivenVarCombination(HandleSeq &input
                     if (! startFromLinkContainWhiteKeyword) // if it already starts from Links that contain keywords , do not need to check
                     {
                         bool is_contain = false;
-                        for (Handle link : inputLinks)
+                        for (const Handle& link : inputLinks)
                         {
                             if (containKeywords(link->toShortString(), keyword_white_list, keyword_white_list_logic))
                             {
@@ -638,7 +638,7 @@ bool PatternMiner::existInAllThreadExtractedLinks(unsigned int _gram, string _ex
 
 bool PatternMiner::existInOneThreadExtractedLinks(unsigned int _gram, unsigned int cur_thread_index, string _extractedLinkUIDs)
 {
-    for (string uids : (thread_DF_ExtractedLinks[cur_thread_index][_gram - 1]))
+    for (const string& uids : (thread_DF_ExtractedLinks[cur_thread_index][_gram - 1]))
     {
         if (_extractedLinkUIDs == uids)
             return true;
@@ -780,11 +780,11 @@ void PatternMiner::extendAPatternForOneMoreGramRecursively(const Handle &extende
 //    }
 //    // debug
 //    string lastGramLinksStr = "";
-//    for (Handle h : lastGramLinks)
+//    for (const Handle& h : lastGramLinks)
 //        lastGramLinksStr += h->toShortString();
 
 //    string inputLinksStr = "";
-//    for (Handle h : inputLinks)
+//    for (const Handle& h : inputLinks)
 //        inputLinksStr += h->toShortString();
 
 
@@ -835,6 +835,7 @@ void PatternMiner::extendAPatternForOneMoreGramRecursively(const Handle &extende
             if (var_num > 0 )
             {
                 unsigned int index = 0;
+                // NTODO convert into range loop
                 for (iter = newValueToVarMap.begin(); iter != newValueToVarMap.end(); ++ iter)
                 {
                     if (indexes[index]) // this is considered as a variable, add it into the variable to value map
@@ -898,7 +899,7 @@ void PatternMiner::extendAPatternForOneMoreGramRecursively(const Handle &extende
                     if (parentNode)
                     {
                         bool superPatternRelationExist = false;
-                        for (ExtendRelation& existRelation : parentNode->superPatternRelations)
+                        for (const ExtendRelation& existRelation : parentNode->superPatternRelations)
                         {
                             if (existRelation.extendedHTreeNode == thisGramHTreeNode)
                             {
@@ -971,6 +972,7 @@ void PatternMiner::extendAPatternForOneMoreGramRecursively(const Handle &extende
 
                                     unsigned int const_index = 0;
                                     Handle oldVarHandle;
+                                    // NTODO convert into range loop
                                     for (iter = newValueToVarMap.begin(); iter != newValueToVarMap.end(); ++ iter)
                                     {
                                         if (const_index == index_i)
@@ -1060,6 +1062,7 @@ void PatternMiner::extendAPatternForOneMoreGramRecursively(const Handle &extende
 //                        cout << " ( " <<((Handle)(titer->first))->getName() << " , " << ((Handle)(titer->second))->getName() << " ) ";
 //                    }
 
+                    // NTODO convert into range loop
                     for (niter = valueToVarMap.begin(); niter != valueToVarMap.end(); ++ niter)
                     {
 //                        cout << "nodeIndex = " << nodeIndex << std::endl;
@@ -1165,7 +1168,7 @@ void PatternMiner::extendAPatternForOneMoreGramRecursively(const Handle &extende
                                 HandleSet originalLinksSet(inputLinks.begin(), inputLinks.end());
                                 originalLinksSet.insert(extendedHandle);
 
-                                for (Handle h  : originalLinksSet)
+                                for (const Handle& h  : originalLinksSet)
                                 {
                                     instancekeyString +=  toString(h.value());
                                     instancekeyString += "_";

@@ -244,7 +244,7 @@ public:
     {
         string result =  "keyword_black_list:";
         vector<string> black_list = patternMiner->get_keyword_black_list();
-        for (string word : black_list)
+        for (const string& word : black_list)
             result +=  " " + word;
 
         return result;
@@ -267,7 +267,7 @@ public:
         keywordstr .erase(std::remove(keywordstr .begin(), keywordstr .end(), ' '), keywordstr .end());
         boost::split(keyword_list, keywordstr , boost::is_any_of(","));
 
-        for (string keyword : keyword_list)
+        for (const string& keyword : keyword_list)
             add_keyword_to_black_list(keyword);
 
         return "Added!" + get_keyword_black_list();
@@ -288,7 +288,7 @@ public:
     {
         string result =  "keyword_white_list:";
         vector<string> white_list = patternMiner->get_keyword_white_list();
-        for (string word : white_list)
+        for (const string& word : white_list)
             result +=  " " + word;
 
         return result;
@@ -312,7 +312,7 @@ public:
         keywordstr .erase(std::remove(keywordstr .begin(), keywordstr .end(), ' '), keywordstr .end());
         boost::split(keyword_list, keywordstr , boost::is_any_of(","));
 
-        for (string keyword : keyword_list)
+        for (const string& keyword : keyword_list)
             add_keyword_to_white_list(keyword);
 
         return "Added!" + get_keyword_white_list();
