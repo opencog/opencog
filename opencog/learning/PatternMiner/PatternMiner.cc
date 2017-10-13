@@ -3543,10 +3543,13 @@ void PatternMiner::reSetAllSettingsFromConfig()
     unsigned int system_thread_num  = std::thread::hardware_concurrency();
     if (THREAD_NUM > system_thread_num - 1)
     {
-        cout << "\nThere is only " << system_thread_num << " cores in this machine, so the Max_thread_num = "
-             << THREAD_NUM << " will not be used. " << system_thread_num - 1 << " threads will be used instead." << std::endl;
+        THREAD_NUM = std::max(1U, system_thread_num - 1);
 
-        THREAD_NUM = system_thread_num - 1;
+        cout << "\nThere is only " << system_thread_num
+             << " cores in this machine, so the Max_thread_num = "
+             << config().get_int("Max_thread_num")
+             << " will not be used. " << THREAD_NUM
+             << " threads will be used instead." << std::endl;
     }
 
     thresholdFrequency = config().get_int("Frequency_threshold");
