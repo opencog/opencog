@@ -217,9 +217,9 @@ void PatternMiner::growPatternsDepthFirstTask(unsigned int thread_index)
             }
 
             // Add this link into observing_as
-            HandleSeq outgoingLinks, outVariableNodes;
+            HandleSeq outVariableNodes;
 
-            swapOneLinkBetweenTwoAtomSpace(original_as, observing_as, cur_link, outgoingLinks, outVariableNodes);
+            HandleSeq outgoingLinks = copyOutgoings(*observing_as, cur_link, outVariableNodes);
             Handle newLink = observing_as->add_link(cur_link->getType(), outgoingLinks);
             newLink->setTruthValue(cur_link->getTruthValue());
 

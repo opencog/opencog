@@ -351,12 +351,21 @@ protected:
 //    void extractAllPossiblePatternsFromInputLinksDF(HandleSeq& inputLinks,unsigned int sharedLinkIndex, AtomSpace* _fromAtomSpace,
 //                                                    vector<HTreeNode*>& allLastGramHTreeNodes, vector<HTreeNode*>& allHTreeNodes, unsigned int gram=1);
 
-    void swapOneLinkBetweenTwoAtomSpace(AtomSpace* fromAtomSpace, AtomSpace* toAtomSpace, Handle& fromLink, HandleSeq& outgoings, HandleSeq &outVariableNodes);
+	// Copy the outgoings of `link` to `as` and return them.
+	//
+	// Also, pattern variables are turned into regular variables while
+	// being copied, filling `variables`.
+    HandleSeq copyOutgoings(AtomSpace& as, const Handle& link,
+                            HandleSeq& variables);
 
-    // Generate the links in toAtomSpace the same as the fromLinks in the fromAtomSpace. Return the swapped links in the toAtomSpace.
-    // Output all the variable nodes in the toAtomSpace BTW
-    HandleSeq swapLinksBetweenTwoAtomSpace(AtomSpace* fromAtomSpace, AtomSpace* toAtomSpace, HandleSeq& fromLinks, HandleSeq &outVariableNodes);
-
+	// Copy `links` to `as` and return them.
+	//
+	// Also, pattern variables are turned into regular variables while
+	// being copied, filling `variables`.
+	//
+	// NTODO: what guaranties that they are links?
+    HandleSeq copyLinks(AtomSpace& as, const HandleSeq& links,
+                        HandleSeq &variables);
 
     void swapOneLinkBetweenTwoAtomSpaceForBindLink(AtomSpace* fromAtomSpace, AtomSpace* toAtomSpace, Handle& fromLink, HandleSeq& outgoings,
                                           HandleSeq &outVariableNodes, HandleSeq& linksWillBeDel, bool& containVar );

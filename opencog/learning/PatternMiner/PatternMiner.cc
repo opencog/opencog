@@ -805,12 +805,11 @@ bool PatternMiner::containVariableNodes(Handle link, AtomSpace* _as)
 }
 
 
-void PatternMiner::swapOneLinkBetweenTwoAtomSpace(AtomSpace* fromAtomSpace, AtomSpace* toAtomSpace, Handle& fromLink, HandleSeq& outgoings,
-                                                  HandleSeq &outVariableNodes )
+HandleSeq PatternMiner::copyOutgoings(AtomSpace& as, const Handle& link,
+                                      HandleSeq& variables)
 {
-    HandleSeq outgoingLinks = fromLink->getOutgoingSet();
-
-    for (Handle h : outgoingLinks)
+    HandleSeq outgoings;
+    for (Handle h : link->getOutgoingSet())
     {
         if (h->isNode())
         {
@@ -818,44 +817,37 @@ void PatternMiner::swapOneLinkBetweenTwoAtomSpace(AtomSpace* fromAtomSpace, Atom
 
             if (h->getType() == PATTERN_VARIABLENODE_TYPE)
             {
-                new_node = toAtomSpace->add_node(VARIABLE_NODE, h->getName());
-                if ( ! isInHandleSeq(new_node, outVariableNodes) ) // should not have duplicated variable nodes
-                 outVariableNodes.push_back(new_node);
+                new_node = as.add_node(VARIABLE_NODE, h->getName());
+                if (!isInHandleSeq(new_node, variables)) // avoid duplicated variable
+                 variables.push_back(new_node);
             }
             else
-                new_node = toAtomSpace->add_node(h->getType(), h->getName());
+                new_node = as.add_node(h->getType(), h->getName());
 
            outgoings.push_back(new_node);
-
         }
         else
         {
-             HandleSeq _OutgoingLinks;
-
-             swapOneLinkBetweenTwoAtomSpace(fromAtomSpace, toAtomSpace, h, _OutgoingLinks, outVariableNodes);
-             Handle _link = toAtomSpace->add_link(h->getType(), _OutgoingLinks);
-             _link->setTruthValue(h->getTruthValue());
-
-             outgoings.push_back(_link);
+             HandleSeq ch_outgoings = copyOutgoings(as, h, variables);
+             Handle ch_link = as.add_link(h->getType(), ch_outgoings);
+             ch_link->setTruthValue(h->getTruthValue());
+             outgoings.push_back(ch_link);
         }
     }
+    return outgoings;
 }
 
-HandleSeq PatternMiner::swapLinksBetweenTwoAtomSpace(AtomSpace* fromAtomSpace, AtomSpace* toAtomSpace, HandleSeq& fromLinks, HandleSeq& outVariableNodes)
+HandleSeq PatternMiner::copyLinks(AtomSpace& as, const HandleSeq& links,
+                                  HandleSeq& variables)
 {
     HandleSeq outPutLinks;
-
-    for (Handle link : fromLinks)
+    for (Handle link : links)
     {
-        HandleSeq outgoingLinks;
-
-        swapOneLinkBetweenTwoAtomSpace(fromAtomSpace, toAtomSpace, link, outgoingLinks, outVariableNodes);
-        Handle toLink = toAtomSpace->add_link(link->getType(), outgoingLinks);
+        HandleSeq outgoingLinks = copyOutgoings(as, link, variables);
+        Handle toLink = as.add_link(link->getType(), outgoingLinks);
         toLink->setTruthValue(link->getTruthValue());
-
         outPutLinks.push_back(toLink);
     }
-
     return outPutLinks;
 }
 
@@ -889,7 +881,7 @@ void PatternMiner::findAllInstancesForGivenPatternInNestedAtomSpace(HTreeNode* H
     HandleSeq  bindLinkOutgoings, variableNodes;
 
 //  HandleSeq patternToMatch = swapLinksBetweenTwoAtomSpaceForBindLink(as, _as, HNode->pattern, variableNodes, linksWillBeDel);
-    HandleSeq patternToMatch = swapLinksBetweenTwoAtomSpace(as, _as, HNode->pattern, variableNodes);
+    HandleSeq patternToMatch = copyLinks(*_as, HNode->pattern, variableNodes);
 
     Handle hAndLink = _as->add_link(AND_LINK, patternToMatch);
 
@@ -4979,9 +4971,9 @@ void PatternMiner::findAllLinksContainKeyWords(vector<string>& subsetKeywords, u
 //                    if (only_mine_patterns_start_from_white_list)
 //                    {
 //                        // add this Link into the observing_as
-//                        HandleSeq outgoingLinks, outVariableNodes;
+//                        HandleSeq outVariableNodes;
 
-//                        swapOneLinkBetweenTwoAtomSpace(original_as, observing_as, newh, outgoingLinks, outVariableNodes);
+//                        HandleSeq outgoingLinks = swapLinkBetweenAtomSpaces(original_as, observing_as, newh, outVariableNodes);
 //                        Handle newLink = observing_as->add_link(newh->getType(), outgoingLinks);
 //                        newLink->setTruthValue(newh->getTruthValue());
 //                        linkNumLoadedIntoObservingAtomSpace ++;
