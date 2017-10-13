@@ -345,26 +345,36 @@ protected:
 
     bool containVariableNodes(Handle link, AtomSpace* _as);
 
-    void extractAllPossiblePatternsFromInputLinksBF(HandleSeq& inputLinks, HTreeNode* parentNode, HandleSet& sharedNodes, unsigned int gram);
+    void extractAllPossiblePatternsFromInputLinksBF(const HandleSeq& inputLinks, HTreeNode* parentNode, HandleSet& sharedNodes, unsigned int gram);
 
 //    // vector<HTreeNode *> &allHTreeNodes is output all the HTreeNodes found
 //    void extractAllPossiblePatternsFromInputLinksDF(HandleSeq& inputLinks,unsigned int sharedLinkIndex, AtomSpace* _fromAtomSpace,
 //                                                    vector<HTreeNode*>& allLastGramHTreeNodes, vector<HTreeNode*>& allHTreeNodes, unsigned int gram=1);
 
-	// Copy the outgoings of `link` to `as` and return them.
+	// Copy the outgoings of `link` to `atomspace` and return the copies
 	//
-	// Also, pattern variables are turned into regular variables while
-	// being copied, filling `variables`.
-    HandleSeq copyOutgoings(AtomSpace& as, const Handle& link,
+	// Pattern variables are turned into regular variables while being
+	// copied, filling `variables`.
+    HandleSeq copyOutgoings(AtomSpace& atomspace,
+                            const Handle& link,
                             HandleSeq& variables);
 
-	// Copy `links` to `as` and return them.
+	// Copy `h` to `atomspace` and return the copy.
 	//
-	// Also, pattern variables are turned into regular variables while
-	// being copied, filling `variables`.
+	// Pattern variables are turned into regular variables while being
+	// copied, filling `variables`.
+	Handle copyAtom(AtomSpace& atomspace,
+	                const Handle& link,
+	                HandleSeq& variables);
+
+	// Copy `links` to `atomspace` and return the copies.
+	//
+	// Pattern variables are turned into regular variables while being
+	// copied, filling `variables`.
 	//
 	// NTODO: what guaranties that they are links?
-    HandleSeq copyLinks(AtomSpace& as, const HandleSeq& links,
+    HandleSeq copyLinks(AtomSpace& atomspace,
+                        const HandleSeq& links,
                         HandleSeq &variables);
 
     void swapOneLinkBetweenTwoAtomSpaceForBindLink(AtomSpace* fromAtomSpace, AtomSpace* toAtomSpace, Handle& fromLink, HandleSeq& outgoings,

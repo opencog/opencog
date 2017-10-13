@@ -805,50 +805,57 @@ bool PatternMiner::containVariableNodes(Handle link, AtomSpace* _as)
 }
 
 
-HandleSeq PatternMiner::copyOutgoings(AtomSpace& as, const Handle& link,
+HandleSeq PatternMiner::copyOutgoings(AtomSpace& atomspace,
+                                      const Handle& link,
                                       HandleSeq& variables)
 {
     HandleSeq outgoings;
     for (Handle h : link->getOutgoingSet())
-    {
-        if (h->isNode())
-        {
-            Handle new_node;
-
-            if (h->getType() == PATTERN_VARIABLENODE_TYPE)
-            {
-                new_node = as.add_node(VARIABLE_NODE, h->getName());
-                if (!isInHandleSeq(new_node, variables)) // avoid duplicated variable
-                 variables.push_back(new_node);
-            }
-            else
-                new_node = as.add_node(h->getType(), h->getName());
-
-           outgoings.push_back(new_node);
-        }
-        else
-        {
-             HandleSeq ch_outgoings = copyOutgoings(as, h, variables);
-             Handle ch_link = as.add_link(h->getType(), ch_outgoings);
-             ch_link->setTruthValue(h->getTruthValue());
-             outgoings.push_back(ch_link);
-        }
-    }
+        outgoings.push_back(copyAtom(atomspace, h, variables));
     return outgoings;
 }
 
-HandleSeq PatternMiner::copyLinks(AtomSpace& as, const HandleSeq& links,
+HandleSeq PatternMiner::copyLinks(AtomSpace& atomspace,
+                                  const HandleSeq& links,
                                   HandleSeq& variables)
 {
     HandleSeq outPutLinks;
     for (Handle link : links)
     {
-        HandleSeq outgoingLinks = copyOutgoings(as, link, variables);
-        Handle toLink = as.add_link(link->getType(), outgoingLinks);
+        HandleSeq outgoingLinks = copyOutgoings(atomspace, link, variables);
+        Handle toLink = atomspace.add_link(link->getType(), outgoingLinks);
         toLink->setTruthValue(link->getTruthValue());
         outPutLinks.push_back(toLink);
     }
     return outPutLinks;
+}
+
+Handle PatternMiner::copyAtom(AtomSpace& atomspace,
+                              const Handle& h,
+                              HandleSeq& variables)
+{
+	if (h->isNode())
+	{
+		Handle new_node;
+
+		if (h->getType() == PATTERN_VARIABLENODE_TYPE)
+		{
+			new_node = atomspace.add_node(VARIABLE_NODE, h->getName());
+			if (!isInHandleSeq(new_node, variables)) // avoid duplicated variable
+				variables.push_back(new_node);
+		}
+		else
+			new_node = atomspace.add_node(h->getType(), h->getName());
+
+		return new_node;
+	}
+	else
+	{
+		HandleSeq outgoings = copyOutgoings(atomspace, h, variables);
+		Handle link = atomspace.add_link(h->getType(), outgoings);
+		link->setTruthValue(h->getTruthValue());
+		return link;
+	}
 }
 
  // using PatternMatcher

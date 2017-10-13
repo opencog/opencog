@@ -218,10 +218,7 @@ void PatternMiner::growPatternsDepthFirstTask(unsigned int thread_index)
 
             // Add this link into observing_as
             HandleSeq outVariableNodes;
-
-            HandleSeq outgoingLinks = copyOutgoings(*observing_as, cur_link, outVariableNodes);
-            Handle newLink = observing_as->add_link(cur_link->getType(), outgoingLinks);
-            newLink->setTruthValue(cur_link->getTruthValue());
+            Handle newLink = copyAtom(*observing_as, cur_link, outVariableNodes);
 
             extendAPatternForOneMoreGramRecursively(newLink, observing_as, Handle::UNDEFINED, lastGramLinks, 0, lastGramValueToVarMap,patternVarMap, false,
                                                     allNewMinedPatternsCurTask, allHTreeNodesCurTask, allNewMinedPatternInfo, thread_index,startFromLinkContainWhiteKeyword);
