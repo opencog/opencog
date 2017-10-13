@@ -471,7 +471,8 @@ Handle PatternMiner::UnifyOneLinkForUnorderedLink(Handle& link,std::map<Handle,T
 
 
 
-string PatternMiner::unifiedPatternToKeyString(HandleSeq& inputPattern, const AtomSpace *atomspace)
+string PatternMiner::unifiedPatternToKeyString(HandleSeq& inputPattern,
+                                               const AtomSpace *atomspace)
 {
     if (atomspace == nullptr)
         atomspace = this->as;
@@ -3543,7 +3544,7 @@ void PatternMiner::reSetAllSettingsFromConfig()
     if (THREAD_NUM > system_thread_num - 1)
     {
         cout << "\nThere is only " << system_thread_num << " cores in this machine, so the Max_thread_num = "
-             << THREAD_NUM << " will not be used." << system_thread_num - 1 << " threads will be used instead." << std::endl;
+             << THREAD_NUM << " will not be used. " << system_thread_num - 1 << " threads will be used instead." << std::endl;
 
         THREAD_NUM = system_thread_num - 1;
     }
