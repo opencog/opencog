@@ -63,7 +63,7 @@ PatternMinerAgent::PatternMinerAgent(CogServer& cs) : Agent(cs, 100)
 //                        "pm_test_corpus.scm"
 //                      );
 
-    this->patternMiner = new PatternMiner(&(cs.getAtomSpace()));
+    this->patternMiner = new PatternMiner(cs.getAtomSpace());
 
     logger().info("[PatternMinerAgent] constructor");
 

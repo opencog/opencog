@@ -816,7 +816,7 @@ void PatternMinerSCM::init_in_module(void* data)
 void PatternMinerSCM::init()
 {
     AtomSpace* as = SchemeSmob::ss_get_env_as("patten miner");
-    patternMiner = new PatternMiner(as);
+    patternMiner = new PatternMiner(*as);
 
     //---------------Note-----------------
     //

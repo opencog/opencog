@@ -194,7 +194,7 @@ void DistributedPatternMiner::startMiningWork()
 
         int start_time = time(nullptr);
 
-        original_as->get_handles_by_type(back_inserter(allLinks), (Type) LINK, true );
+        original_as.get_handles_by_type(back_inserter(allLinks), (Type) LINK, true );
 
         allLinkNumber = (int)(allLinks.size());
         atomspaceSizeFloat = (float)(allLinkNumber);
@@ -355,7 +355,7 @@ void DistributedPatternMiner::growPatternsDepthFirstTask(unsigned int thread_ind
         // Add this link into observing_as
         HandleSeq outgoingLinks, outVariableNodes;
 
-        swapOneLinkBetweenTwoAtomSpace(original_as, observing_as, cur_link, outgoingLinks, outVariableNodes);
+        swapOneLinkBetweenTwoAtomSpace(original_as, *observing_as, cur_link, outgoingLinks, outVariableNodes);
         Handle newLink = observing_as->add_link(cur_link->getType(), outgoingLinks);
         newLink->setTruthValue(cur_link->getTruthValue());
 
@@ -387,7 +387,7 @@ void DistributedPatternMiner::growPatternsDepthFirstTask(unsigned int thread_ind
                 startFromLinkContainWhiteKeyword = true;
         }
 
-        extendAPatternForOneMoreGramRecursively(newLink, observing_as, Handle::UNDEFINED, lastGramLinks, 0, lastGramValueToVarMap,
+        extendAPatternForOneMoreGramRecursively(newLink, *observing_as, Handle::UNDEFINED, lastGramLinks, 0, lastGramValueToVarMap,
                                                 patternVarMap, false, allNewMinedPatternsCurTask, allHTreeNodesCurTask, allNewMinedPatternInfo, thread_index,startFromLinkContainWhiteKeyword);
 
 

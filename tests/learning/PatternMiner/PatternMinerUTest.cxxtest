@@ -143,7 +143,7 @@ void PatternMinerUTest::test_PatternMiner_InferenceControl()
 	std::cout << "rs = " << rs << std::endl;
 
 	// Run the pattern miner
-	PatternMiner pm(&_as);
+	PatternMiner pm(_as);
 	pm.runPatternMiner(false);
 
 	vector<HTreeNode*>& top3gramPatterns = pm.getFinalPatternsForGram(3);
