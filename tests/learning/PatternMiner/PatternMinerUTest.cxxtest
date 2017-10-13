@@ -85,6 +85,8 @@ void PatternMinerUTest::setUp()
 	// Configure scheme load-paths that are common for all tests.
 	_scm.eval("(add-to-load-path \"" PROJECT_SOURCE_DIR
 	          "/opencog/learning/PatternMiner\")");
+	_scm.eval("(add-to-load-path \"" PROJECT_SOURCE_DIR
+	          "/tests/learning/PatternMiner\")");
 
 	string link1 = "(InheritanceLink )\n  (VariableNode $var_1)\n  (ConceptNode man)\n\n";
 	string link2 = "(InheritanceLink )\n  (VariableNode $var_1)\n  (ConceptNode soda drinker)\n\n";
@@ -135,7 +137,10 @@ void PatternMinerUTest::test_PatternMiner_InferenceControl()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 	// Load inference-control-corpus.scm
-	_scm.eval("(load-from-path \"inference-control-corpus.scm\")");
+	std::string rs =
+		_scm.eval("(load-from-path \"inference-control-corpus.scm\")");
+
+	std::cout << "rs = " << rs << std::endl;
 
 	// Run the pattern miner
 	PatternMiner pm(&_as);
@@ -169,5 +174,4 @@ void PatternMinerUTest::test_PatternMiner_InferenceControl()
 	TS_WARN("TODO");
 
 	logger().info("End TEST: %s", __FUNCTION__);
-
 }
