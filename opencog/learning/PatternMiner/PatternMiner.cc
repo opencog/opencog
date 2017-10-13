@@ -137,7 +137,7 @@ void PatternMiner::findAndRenameVariablesForOneLink(Handle link, HandleMap& varN
 
              Handle reLink;
 
-//             if (enable_unify_unordered_links && orderedTmpLinkToType.size() > 0)
+//             if (enable_unify_unordered_links && not orderedTmpLinkToType.empty())
 //             {
 
 //                std::map<Handle,Type>::iterator typeIt = orderedTmpLinkToType.find(h);
@@ -168,7 +168,7 @@ HandleSeq PatternMiner::RebindVariableNames(HandleSeq& orderedPattern, HandleMap
 
         Handle reLink;
 
-//        if (enable_unify_unordered_links && orderedTmpLinkToType.size() > 0)
+//        if (enable_unify_unordered_links && not orderedTmpLinkToType.empty())
 //        {
 
 //           std::map<Handle,Type>::iterator typeIt = orderedTmpLinkToType.find(h);
@@ -1682,7 +1682,7 @@ void PatternMiner::OutPutStaticsToCsvFile(unsigned int n_gram)
         csvFile << htreeNode->count << "," << htreeNode->nI_Surprisingness << ","
 
                 << htreeNode->nII_Surprisingness << "," << htreeNode->nII_Surprisingness_b << "," << htreeNode->max_b_subpattern_num;
-//        if (htreeNode->superPatternRelations.size() > 0)
+//        if (not htreeNode->superPatternRelations.empty())
 //            csvFile << htreeNode->nII_Surprisingness;
 //        else
 //            csvFile << "unknown";
@@ -2089,7 +2089,7 @@ bool PatternMiner::filters(HandleSeq& inputLinks, HandleSeqSeq& oneOfEachSeqShou
         }
     }
 
-    if (all1stOutgoingsOfEvalLinks.size() > 0)
+    if (not all1stOutgoingsOfEvalLinks.empty())
     {
         // this filter: all the first outgoing nodes of all evaluation links should be variables
         if (enable_filter_first_outgoing_evallink_should_be_var)
@@ -2116,7 +2116,7 @@ bool PatternMiner::filters(HandleSeq& inputLinks, HandleSeqSeq& oneOfEachSeqShou
                                       allNodesInEachLink[j].begin(), allNodesInEachLink[j].end(),
                                       std::back_inserter(commonNodes));
 
-                if (commonNodes.size() > 0)
+                if (not commonNodes.empty())
                     oneOfEachSeqShouldBeVars.push_back(commonNodes);
 
             }
@@ -3743,7 +3743,7 @@ void PatternMiner::quoteAllThePatternSForGram(unsigned int gram)
 void PatternMiner::runPatternMiner(bool exit_program_after_finish)
 {
 
-    if (keyStrToHTreeNodeMap.size() > 0)
+    if (not keyStrToHTreeNodeMap.empty())
     {
         cleanUpPatternMiner();
         initPatternMiner();
@@ -3758,7 +3758,7 @@ void PatternMiner::runPatternMiner(bool exit_program_after_finish)
     int start_time = time(nullptr);
 
     allLinks.clear();
-    original_as->get_handles_by_type(back_inserter(allLinks), (Type) LINK, true );
+    original_as->get_handles_by_type(back_inserter(allLinks), (Type)LINK, true );
 
     allLinkNumber = (int)allLinks.size();
     atomspaceSizeFloat = (float)allLinkNumber;
@@ -3882,7 +3882,7 @@ void PatternMiner::runPatternMiner(bool exit_program_after_finish)
 
         OutPutFrequentPatternsToFile(gram, patternsForGram);
 
-        if (GENERATE_TMP_PATTERNS && (tmpPatternsForGram[gram-1].size() > 0))
+        if (GENERATE_TMP_PATTERNS && not tmpPatternsForGram[gram-1].empty())
         {
             boost::sort(tmpPatternsForGram[gram-1], compareHTreeNodeByFrequency);
 

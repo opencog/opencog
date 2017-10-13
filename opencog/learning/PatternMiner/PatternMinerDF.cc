@@ -376,7 +376,7 @@ HTreeNode* PatternMiner::extractAPatternFromGivenVarCombination(HandleSeq &input
 //        inputLinksStr += _fromAtomSpace->atomAsString(h);
 
 
-    if ( shouldNotBeVars.size() > 0)
+    if (not shouldNotBeVars.empty())
     {
         for (Handle noTypeNode  : shouldNotBeVars)
         {
@@ -388,7 +388,7 @@ HTreeNode* PatternMiner::extractAPatternFromGivenVarCombination(HandleSeq &input
         }
     }
 
-    if ((! skip) && (shouldBeVars.size() > 0))
+    if (not skip && not shouldBeVars.empty())
     {
         for (Handle shouldBeVarNode  : shouldBeVars)
         {
@@ -1127,12 +1127,12 @@ void PatternMiner::extendAPatternForOneMoreGramRecursively(const Handle &extende
                             {
                                 if (keyword_black_logic_is_contain)
                                 {
-                                    if ((keyword_black_list.size() > 0) && containIgnoredContent(extendedHandle))
+                                    if (not keyword_black_list.empty() && containIgnoredContent(extendedHandle))
                                         continue;
                                 }
                                 else
                                 {
-                                    if ((black_keyword_Handles.size() > 0) && doesLinkContainNodesInKeyWordNodes(extendedHandle, black_keyword_Handles))
+                                    if (not black_keyword_Handles.empty() && doesLinkContainNodesInKeyWordNodes(extendedHandle, black_keyword_Handles))
                                         continue;
                                 }
                             }
@@ -1485,7 +1485,7 @@ void PatternMiner::extendAPatternForOneMoreGramRecursively(const Handle &extende
 //                }
 //            }
 
-//            if ( (! skip) && ( shouldNotBeVars.size() > 0) )
+//            if (not skip && not shouldNotBeVars.empty())
 //            {
 //                for (Handle noTypeNode  : shouldNotBeVars)
 //                {
@@ -1498,7 +1498,7 @@ void PatternMiner::extendAPatternForOneMoreGramRecursively(const Handle &extende
 //            }
 
 
-//            if ((! skip) && (shouldBeVars.size() > 0))
+//            if (not skip && not shouldBeVars.empty())
 //            {
 //                for (Handle shouldBeVarNode  : shouldBeVars)
 //                {

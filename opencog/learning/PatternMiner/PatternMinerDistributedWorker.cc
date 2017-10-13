@@ -408,7 +408,7 @@ void DistributedPatternMiner::growPatternsDepthFirstTask(unsigned int thread_ind
 
     }
 
-    if (patternJsonArrays[thread_index].size() > 0)
+    if (not patternJsonArrays[thread_index].empty())
         sendPatternsToCentralServer(patternJsonArrays[thread_index]);
 
     cout<< "\r100% completed in Thread " + toString(thread_index) + ".";

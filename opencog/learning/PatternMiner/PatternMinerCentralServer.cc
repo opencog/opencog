@@ -368,7 +368,7 @@ void DistributedPatternMiner::runParsePatternTaskThread()
     {
 
         patternQueueLock.lock();
-        if (waitForParsePatternQueue.size() > 0)
+        if (not waitForParsePatternQueue.empty())
         {
             json::value jval = waitForParsePatternQueue.front();
             waitForParsePatternQueue.pop_front();
