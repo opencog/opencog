@@ -53,10 +53,9 @@ using namespace opencog::PatternMining;
 using namespace opencog;
 
 
-void PatternMiner::generateIndexesOfSharedVars(Handle& link, HandleSeq& orderedHandles, vector<vector<std::pair<int,std::size_t>>>& indexes)
+void PatternMiner::generateIndexesOfSharedVars(const Handle& link, const HandleSeq& orderedHandles, vector<vector<std::pair<int,std::size_t>>>& indexes)
 {
-    HandleSeq outgoingLinks = link->getOutgoingSet();
-    for (const Handle& h : outgoingLinks)
+    for (const Handle& h : link->getOutgoingSet())
     {
         if (h->isNode())
         {
@@ -83,7 +82,7 @@ void PatternMiner::generateIndexesOfSharedVars(Handle& link, HandleSeq& orderedH
             }
         }
         else
-            generateIndexesOfSharedVars(h,orderedHandles,indexes);
+            generateIndexesOfSharedVars(h, orderedHandles, indexes);
     }
 }
 
@@ -348,6 +347,7 @@ HandleSeq PatternMiner::_UnifyPatternOrder(HandleSeq& inputPattern, unsigned int
         // get all the corresponding handles for this key string
         multimap<string, Handle>::iterator kit;
         vector<_non_ordered_pattern> sharedSameKeyPatterns;
+        // NTODO range loop
         for (kit = nonVarStrToHandleMap.lower_bound(keyString); kit != nonVarStrToHandleMap.upper_bound(keyString);  ++ kit)
         {
             _non_ordered_pattern p;

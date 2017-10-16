@@ -338,7 +338,7 @@ protected:
 
     HandleSeq ReplaceConstNodeWithVariableForAPattern(HandleSeq& pattern, Handle constNode, Handle newVariableNode);
 
-    void generateIndexesOfSharedVars(Handle& link, HandleSeq& orderedHandles, vector<vector<std::pair<int, size_t>>> &indexes);
+    void generateIndexesOfSharedVars(const Handle& link, const HandleSeq& orderedHandles, vector<vector<std::pair<int, size_t>>> &indexes);
 
     // generate the outgoings for a link in a pattern in the Pattern mining Atomspace, according to the given group of variables
     void generateALinkByChosenVariables(const Handle &originalLink, HandleMap& valueToVarMap, HandleSeq &outputOutgoings, AtomSpace& from_as);
