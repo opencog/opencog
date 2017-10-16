@@ -1096,7 +1096,7 @@ bool PatternMiner::doesLinkContainNodesInKeyWordNodes(const Handle& link, const 
 }
 
 
-bool PatternMiner::containIgnoredContent(Handle link )
+bool PatternMiner::containIgnoredContent(Handle link)
 {
     string str = link->toShortString();
 
@@ -4328,49 +4328,21 @@ void PatternMiner::queryPatternsWithFrequencyAndInteractionInformationRanges(uns
 
 bool PatternMiner::containWhiteKeywords(const string& str, QUERY_LOGIC logic)
 {
-    if (logic == QUERY_LOGIC::OR)
-    {
-        for (string keyword : keyword_white_list)
-        {
-            if (str.find(keyword) != std::string::npos)
-                return true;
-        }
-
-        return false;
-    }
-    else // QUERY_LOGIC::AND
-    {
-        for (string keyword : keyword_white_list)
-        {
-            if (str.find(keyword) == std::string::npos)
-                return false;
-        }
-
-        return true;
-    }
+    return containKeywords(str, keyword_white_list, logic);
 }
 
-bool PatternMiner::containKeywords(const string& str, vector<string>& keywords, QUERY_LOGIC logic)
+bool PatternMiner::containKeywords(const string& str, const vector<string>& keywords, QUERY_LOGIC logic)
 {
+    auto is_in_str = [&](const string& keyword) {
+        return str.find(keyword) != std::string::npos; };
+
     if (logic == QUERY_LOGIC::OR)
     {
-        for (string keyword : keywords)
-        {
-            if (str.find(keyword) != std::string::npos)
-                return true;
-        }
-
-        return false;
+        return std::any_of(keywords.begin(), keywords.end(), is_in_str);
     }
     else // QUERY_LOGIC::AND
     {
-        for (string keyword : keywords)
-        {
-            if (str.find(keyword) == std::string::npos)
-                return false;
-        }
-
-        return true;
+        return std::all_of(keywords.begin(), keywords.end(), is_in_str);
     }
 }
 
