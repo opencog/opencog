@@ -112,7 +112,7 @@ using namespace opencog;
 //            map<HandleSeq, vector<HTreeNode*>> allThisGramLinksToPatterns;
 //            vector<HandleSet> newConnectedLinksFoundThisGram;
 
-//            for(; it != allLastGramLinksToPatterns.end(); ++ it)
+//            for (; it != allLastGramLinksToPatterns.end(); ++ it)
 //            {
 //                // find all the 2~MAX_GRAM gram distance neighbour links of newLink
 //                extendAllPossiblePatternsForOneMoreGramDF((HandleSeq&)(it->first),observing_as,gram, (vector<HTreeNode*>&)(it->second), allThisGramLinksToPatterns, newConnectedLinksFoundThisGram);
@@ -152,7 +152,7 @@ void PatternMiner::growPatternsDepthFirstTask(unsigned int thread_index)
 
     float allLinkNumberfloat = (float)(end_index - start_index);
 
-    for(unsigned int t_cur_index = start_index; t_cur_index < end_index; ++t_cur_index)
+    for (unsigned int t_cur_index = start_index; t_cur_index < end_index; ++t_cur_index)
     {
         if (THREAD_NUM > 1)
             readNextLinkLock.lock();
@@ -457,7 +457,7 @@ HTreeNode* PatternMiner::extractAPatternFromGivenVarCombination(HandleSeq &input
         for (const Handle& link : inputLinks)
         {
             HandleSeq outgoingLinks;
-            generateALinkByChosenVariables(link, patternVarMap, outgoingLinks, from_as);
+            generateALinkByChosenVariables(link, patternVarMap, outgoingLinks);
             Handle rebindedLink = as->add_link(link->getType(), outgoingLinks);
             rebindedLink->setTruthValue(TruthValue::TRUE_TV());
 
@@ -661,7 +661,7 @@ void PatternMiner::extendAPatternForOneMoreGramRecursively(const Handle &extende
     std::cout << "valueToVarMap = " << oc_to_string(valueToVarMap);
 
     // First, extract all the nodes in the input link
-    extractAllNodesInLink(extendedLink, valueToVarMap, from_as);
+    extractAllNodesInLink(extendedLink, valueToVarMap);
 
     HandleMap newValueToVarMap; // the new elements added in this gram
 
@@ -749,7 +749,7 @@ void PatternMiner::extendAPatternForOneMoreGramRecursively(const Handle &extende
     //              "PatternMiner::extractAllPossiblePatternsFromInputLinks: this group of links only has one node: %s!\n",
     //               from_as.atomAsString(inputLinks[0]).c_str() );
 
-    if(filters(inputLinks, oneOfEachSeqShouldBeVars, leaves, shouldNotBeVars, shouldBeVars, from_as))
+    if(filters(inputLinks, oneOfEachSeqShouldBeVars, leaves, shouldNotBeVars, shouldBeVars))
         return; //already been filter out in this phrase
 
     bool* indexes = new bool[n_max]; //  indexes[i]=true means this i is a variable, indexes[i]=false means this i is a const
@@ -758,7 +758,7 @@ void PatternMiner::extendAPatternForOneMoreGramRecursively(const Handle &extende
 //    {
 //        int x = 0;
 //        x ++;
-//        for(Handle h : inputLinks)
+//        for (Handle h : inputLinks)
 //            cout << h->toShortString();
 
 //        cout << std::endl;
@@ -1221,7 +1221,7 @@ void PatternMiner::extendAPatternForOneMoreGramRecursively(const Handle &extende
 
 //    map<Handle, unsigned int>::iterator varIt;
 
-//    for(varIt = allVarNodes.begin(); varIt != allVarNodes.end(); ++ varIt)
+//    for (varIt = allVarNodes.begin(); varIt != allVarNodes.end(); ++ varIt)
 //    {
 //        Handle extendNode = (Handle)(varIt->first);
 //        if (enable_filter_node_types_should_not_be_vars)
@@ -1287,7 +1287,7 @@ void PatternMiner::extendAPatternForOneMoreGramRecursively(const Handle &extende
 //            bool alreadyExtracted = false;
 
 //            // check if these links have been extracted
-//            for(newExtendIt = newConnectedLinksFoundThisGram.begin(); newExtendIt != newConnectedLinksFoundThisGram.end(); ++newExtendIt)
+//            for (newExtendIt = newConnectedLinksFoundThisGram.begin(); newExtendIt != newConnectedLinksFoundThisGram.end(); ++newExtendIt)
 //            {
 //                HandleSet& exitstingLinks = (HandleSet&)(*newExtendIt);
 //                if (exitstingLinks == originalLinksToSet)
@@ -1380,7 +1380,7 @@ void PatternMiner::extendAPatternForOneMoreGramRecursively(const Handle &extende
 //    HandleSeqSeq oneOfEachSeqShouldBeVars;
 //    HandleSeq leaves, shouldNotBeVars, shouldBeVars;
 
-//    if (filters(inputLinks, oneOfEachSeqShouldBeVars, leaves, shouldNotBeVars, shouldBeVars, from_as))
+//    if (filters(inputLinks, oneOfEachSeqShouldBeVars, leaves, shouldNotBeVars, shouldBeVars))
 //        return; // already been filter out in this phrase
 
 //    bool* indexes = new bool[n_max]; //  indexes[i]=true means this i is a variable, indexes[i]=false means this i is a const

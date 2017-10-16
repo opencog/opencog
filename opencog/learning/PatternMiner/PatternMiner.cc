@@ -35,6 +35,7 @@
 
 #include <boost/range/algorithm/sort.hpp>
 #include <boost/range/algorithm/find.hpp>
+#include <boost/range/algorithm/set_algorithm.hpp>
 #include <boost/algorithm/string.hpp>
 #include <boost/algorithm/string/regex.hpp>
 
@@ -174,10 +175,7 @@ HandleSeq PatternMiner::RebindVariableNames(HandleSeq& orderedPattern, HandleMap
 
 void PatternMiner::ReplaceConstNodeWithVariableForOneLink(Handle link, Handle constNode, Handle newVariableNode, HandleSeq& renameOutgoingLinks)
 {
-
-    HandleSeq outgoingLinks = link->getOutgoingSet();
-
-    for (Handle h : outgoingLinks)
+    for (const Handle& h : link->getOutgoingSet())
     {
 
         if (h->isNode())
@@ -206,12 +204,12 @@ void PatternMiner::ReplaceConstNodeWithVariableForOneLink(Handle link, Handle co
 
 }
 
-HandleSeq PatternMiner::ReplaceConstNodeWithVariableForAPattern(HandleSeq& pattern, Handle constNode, Handle newVariableNode)
+HandleSeq PatternMiner::ReplaceConstNodeWithVariableForAPattern(const HandleSeq& pattern, Handle constNode, Handle newVariableNode)
 {
 
     HandleSeq rebindedPattern;
 
-    for (Handle link : pattern)
+    for (const Handle& link : pattern)
     {
         HandleSeq renameOutgoingLinks;
         ReplaceConstNodeWithVariableForOneLink(link, constNode, newVariableNode, renameOutgoingLinks);
@@ -322,14 +320,14 @@ HandleSeq PatternMiner::_UnifyPatternOrder(HandleSeq& inputPattern, unsigned int
     HandleSeq orderedHandles;
     vector<string> duplicateStrs;
     multimap<string, Handle>::iterator it;
-    for(it = nonVarStrToHandleMap.begin(); it != nonVarStrToHandleMap.end();)
+    for (it = nonVarStrToHandleMap.begin(); it != nonVarStrToHandleMap.end();)
     {
         int count = nonVarStrToHandleMap.count(it->first);
         if (count == 1)
         {
             // if this key string has only one record, just put the corresponding handle to the end of orderedHandles
             orderedHandles.push_back(it->second);
-            it ++;
+            ++it;
         }
         else
         {
@@ -342,13 +340,12 @@ HandleSeq PatternMiner::_UnifyPatternOrder(HandleSeq& inputPattern, unsigned int
     }
 
     // Step 3: sort the order of the handls share the same string key with other handles
-    for (string keyString : duplicateStrs)
+    for (const string& keyString : duplicateStrs)
     {
         // get all the corresponding handles for this key string
         multimap<string, Handle>::iterator kit;
         vector<_non_ordered_pattern> sharedSameKeyPatterns;
-        // NTODO range loop
-        for (kit = nonVarStrToHandleMap.lower_bound(keyString); kit != nonVarStrToHandleMap.upper_bound(keyString);  ++ kit)
+        for (kit = nonVarStrToHandleMap.lower_bound(keyString); kit != nonVarStrToHandleMap.upper_bound(keyString); ++kit)
         {
             _non_ordered_pattern p;
             p.link = kit->second;
@@ -357,7 +354,7 @@ HandleSeq PatternMiner::_UnifyPatternOrder(HandleSeq& inputPattern, unsigned int
         }
 
         boost::sort(sharedSameKeyPatterns);
-        for (_non_ordered_pattern np : sharedSameKeyPatterns)
+        for (const _non_ordered_pattern& np : sharedSameKeyPatterns)
         {
             orderedHandles.push_back(np.link);
         }
@@ -367,7 +364,7 @@ HandleSeq PatternMiner::_UnifyPatternOrder(HandleSeq& inputPattern, unsigned int
     // find out where the last link in the input pattern is now in the ordered pattern
     Handle lastLink = inputPattern[inputPattern.size()-1];
     unsigned int lastLinkIndex = 0;
-    for (Handle h : orderedHandles)
+    for (const Handle& h : orderedHandles)
     {
         if (h == lastLink)
         {
@@ -375,12 +372,10 @@ HandleSeq PatternMiner::_UnifyPatternOrder(HandleSeq& inputPattern, unsigned int
             break;
         }
 
-        ++ lastLinkIndex;
-
+        ++lastLinkIndex;
     }
 
     return orderedHandles;
-
 }
 
 
@@ -428,7 +423,7 @@ Handle PatternMiner::UnifyOneLinkForUnorderedLink(const Handle& link,
             HandleSeq outgoingLinksTobeUnified;
             HandleSeq nodesInOutgoings;
             // if it also contain Nodes, then only sort the Links, leave all the Nodes in the top of the list
-            for (Handle h1 : outputOutgoingLinks)
+            for (const Handle& h1 : outputOutgoingLinks)
             {
                 if (h1->isLink())
                     outgoingLinksTobeUnified.push_back(h1);
@@ -457,16 +452,12 @@ Handle PatternMiner::UnifyOneLinkForUnorderedLink(const Handle& link,
 
 
 
-string PatternMiner::unifiedPatternToKeyString(const HandleSeq& inputPattern,
-                                               const AtomSpace* atomspace)
+string PatternMiner::unifiedPatternToKeyString(const HandleSeq& inputPattern)
 {
-    if (atomspace == nullptr)
-        atomspace = this->as;
-
     string keyStr = "";
     for (const Handle& h : inputPattern)
     {
-        keyStr += Link2keyString(h,"", atomspace);
+        keyStr += Link2keyString(h,"");
         keyStr += "\n";
     }
 
@@ -486,11 +477,11 @@ void PatternMiner::generateNextCombinationGroup(bool* &indexes, int n_max)
 {
     int trueCount = -1;
     int i = 0;
-    for (; i < n_max - 1; ++ i)
+    for (; i < n_max - 1; ++i)
     {
         if (indexes[i])
         {
-            ++ trueCount;
+            ++trueCount;
 
             if (! indexes[i+1])
                 break;
@@ -500,17 +491,17 @@ void PatternMiner::generateNextCombinationGroup(bool* &indexes, int n_max)
     indexes[i] = false;
     indexes[i+1] = true;
 
-    for (int j = 0; j < trueCount; ++ j)
+    for (int j = 0; j < trueCount; ++j)
         indexes[j] = true;
 
-    for (int j = trueCount; j < i; ++ j)
+    for (int j = trueCount; j < i; ++j)
         indexes[j] = false;
 
 }
 
 bool PatternMiner::isLastNElementsAllTrue(bool* array, int size, int n)
 {
-    for (int i = size - 1; i >= size - n; i --)
+    for (int i = size - 1; i >= size - n; i--)
     {
         if (! array[i])
             return false;
@@ -519,6 +510,7 @@ bool PatternMiner::isLastNElementsAllTrue(bool* array, int size, int n)
     return true;
 }
 
+// NTODO replace by stl or boost equivalent
 unsigned int combinationCalculate(int r, int n)
 {
     // = n!/(r!*(n-r)!)
@@ -538,12 +530,10 @@ unsigned int combinationCalculate(int r, int n)
 
 }
 
- // valueToVarMap:  the ground value node in the orginal Atomspace to the variable handle in pattenmining Atomspace
-void PatternMiner::generateALinkByChosenVariables(const Handle& originalLink, HandleMap& valueToVarMap, HandleSeq& outputOutgoings, AtomSpace& from_as)
+// valueToVarMap:  the ground value node in the orginal Atomspace to the variable handle in pattenmining Atomspace
+void PatternMiner::generateALinkByChosenVariables(const Handle& originalLink, HandleMap& valueToVarMap, HandleSeq& outputOutgoings)
 {
-    HandleSeq outgoingLinks = originalLink->getOutgoingSet();
-
-    for (Handle h : outgoingLinks)
+    for (const Handle& h : originalLink->getOutgoingSet())
     {
         if (h->isNode())
         {
@@ -564,7 +554,7 @@ void PatternMiner::generateALinkByChosenVariables(const Handle& originalLink, Ha
         else
         {
              HandleSeq _outputOutgoings;
-             generateALinkByChosenVariables(h, valueToVarMap, _outputOutgoings, from_as);
+             generateALinkByChosenVariables(h, valueToVarMap, _outputOutgoings);
              Handle reLink = as->add_link(h->getType(),_outputOutgoings);
              // XXX why do we need to set the TV ???
              reLink->setTruthValue(TruthValue::TRUE_TV());
@@ -578,21 +568,18 @@ void PatternMiner::generateALinkByChosenVariables(const Handle& originalLink, Ha
 //
 // atomspace: where the input link is from
 void PatternMiner::extractAllNodesInLink(const Handle& link,
-                                         HandleMap& valueToVarMap,
-                                         AtomSpace& from_as)
+                                         HandleMap& valueToVarMap)
 {
-    HandleSeq outgoingLinks = link->getOutgoingSet();
-
-    for (Handle h : outgoingLinks)
+    for (const Handle& h : link->getOutgoingSet())
     {
         if (h->isNode())
         {
             if (valueToVarMap.find(h) == valueToVarMap.end())
             {
                 // add a variable node in Pattern miner Atomspace
-                Handle varHandle = from_as.add_node(opencog::PATTERN_VARIABLENODE_TYPE,
-                                                    "$var~" + toString(valueToVarMap.size()));
-                valueToVarMap.insert(HandlePair(h, varHandle));
+                Handle varHandle = as->add_node(opencog::PATTERN_VARIABLENODE_TYPE,
+                                                "$var~" + toString(valueToVarMap.size()));
+                valueToVarMap.insert({h, varHandle});
             }
 
             if ((h->getType() == opencog::PATTERN_VARIABLENODE_TYPE))
@@ -601,20 +588,16 @@ void PatternMiner::extractAllNodesInLink(const Handle& link,
         }
         else
         {
-            extractAllNodesInLink(h, valueToVarMap, from_as);
+            extractAllNodesInLink(h, valueToVarMap);
         }
     }
 }
 
-void PatternMiner::extractAllVariableNodesInAnInstanceLink(const Handle& instanceLink, Handle& patternLink, HandleSet& allVarNodes)
+void PatternMiner::extractAllVariableNodesInAnInstanceLink(const Handle& instanceLink, const Handle& patternLink, HandleSet& allVarNodes)
 {
+    HandleSeq::const_iterator pit = patternLink->getOutgoingSet().begin();
 
-    HandleSeq ioutgoingLinks = instanceLink->getOutgoingSet();
-    HandleSeq poutgoingLinks = patternLink->getOutgoingSet();
-
-    HandleSeq::iterator pit = poutgoingLinks.begin();
-
-    for (Handle h : ioutgoingLinks)
+    for (const Handle& h : instanceLink->getOutgoingSet())
     {
         if (h->isNode())
         {
@@ -631,20 +614,16 @@ void PatternMiner::extractAllVariableNodesInAnInstanceLink(const Handle& instanc
             extractAllVariableNodesInAnInstanceLink(h,(Handle&)(*pit),allVarNodes);
         }
 
-        pit++;
+        ++pit;
     }
 }
 
 
-void PatternMiner::extractAllVariableNodesInAnInstanceLink(const Handle& instanceLink, Handle& patternLink, map<Handle, unsigned int>& allVarNodes, unsigned index)
+void PatternMiner::extractAllVariableNodesInAnInstanceLink(const Handle& instanceLink, const Handle& patternLink, map<Handle, unsigned int>& allVarNodes, unsigned index)
 {
+    HandleSeq::const_iterator pit = patternLink->getOutgoingSet().begin();
 
-    HandleSeq ioutgoingLinks = instanceLink->getOutgoingSet();
-    HandleSeq poutgoingLinks = patternLink->getOutgoingSet();
-
-    HandleSeq::iterator pit = poutgoingLinks.begin();
-
-    for (Handle h : ioutgoingLinks)
+    for (const Handle& h : instanceLink->getOutgoingSet())
     {
         if (h->isNode())
         {
@@ -658,20 +637,18 @@ void PatternMiner::extractAllVariableNodesInAnInstanceLink(const Handle& instanc
         }
         else
         {
-            extractAllVariableNodesInAnInstanceLink(h,(Handle&)(*pit),allVarNodes, index);
+            extractAllVariableNodesInAnInstanceLink(h, (Handle&)(*pit), allVarNodes, index);
         }
 
-        pit ++;
+        ++pit;
     }
 
 }
 
 // map<Handle, unsigned> allNodes  , unsigned is the index the first link this node belongs to
-void PatternMiner::extractAllNodesInLink(Handle link, map<Handle, unsigned int>& allNodes, AtomSpace& from_as, unsigned index)
+void PatternMiner::extractAllNodesInLink(Handle link, map<Handle, unsigned int>& allNodes, unsigned index)
 {
-    HandleSeq outgoingLinks = link->getOutgoingSet();
-
-    for (Handle h : outgoingLinks)
+    for (const Handle& h : link->getOutgoingSet())
     {
         if (h->isNode())
         {
@@ -682,16 +659,14 @@ void PatternMiner::extractAllNodesInLink(Handle link, map<Handle, unsigned int>&
         }
         else
         {
-            extractAllNodesInLink(h, allNodes, from_as, index);
+            extractAllNodesInLink(h, allNodes, index);
         }
     }
 }
 
-void PatternMiner::extractAllNodesInLink(Handle link, HandleSet& allNodes, AtomSpace& from_as)
+void PatternMiner::extractAllNodesInLink(Handle link, HandleSet& allNodes)
 {
-    HandleSeq outgoingLinks = link->getOutgoingSet();
-
-    for (Handle h : outgoingLinks)
+    for (const Handle& h : link->getOutgoingSet())
     {
         if (h->isNode())
         {
@@ -702,16 +677,14 @@ void PatternMiner::extractAllNodesInLink(Handle link, HandleSet& allNodes, AtomS
         }
         else
         {
-            extractAllNodesInLink(h, allNodes, from_as);
+            extractAllNodesInLink(h, allNodes);
         }
     }
 }
 
-void PatternMiner::extractAllConstNodesInALink(Handle link, HandleSet& allConstNodes, AtomSpace& _as)
+void PatternMiner::extractAllConstNodesInALink(Handle link, HandleSet& allConstNodes)
 {
-    HandleSeq outgoingLinks = link->getOutgoingSet();
-
-    for (Handle h : outgoingLinks)
+    for (const Handle& h : link->getOutgoingSet())
     {
         if (h->isNode())
         {
@@ -722,17 +695,15 @@ void PatternMiner::extractAllConstNodesInALink(Handle link, HandleSet& allConstN
         }
         else
         {
-            extractAllVariableNodesInLink(h,allConstNodes, _as);
+            extractAllVariableNodesInLink(h, allConstNodes);
         }
     }
 }
 
 
-void PatternMiner::extractAllVariableNodesInLink(Handle link, HandleSet& allNodes, AtomSpace& _as)
+void PatternMiner::extractAllVariableNodesInLink(Handle link, HandleSet& allNodes)
 {
-    HandleSeq outgoingLinks = link->getOutgoingSet();
-
-    for (Handle h : outgoingLinks)
+    for (const Handle& h : link->getOutgoingSet())
     {
         if (h->isNode())
         {
@@ -743,16 +714,14 @@ void PatternMiner::extractAllVariableNodesInLink(Handle link, HandleSet& allNode
         }
         else
         {
-            extractAllVariableNodesInLink(h,allNodes, _as);
+            extractAllVariableNodesInLink(h,allNodes);
         }
     }
 }
 
-bool PatternMiner::onlyContainVariableNodes(Handle link, AtomSpace& _as)
+bool PatternMiner::onlyContainVariableNodes(Handle link)
 {
-    HandleSeq outgoingLinks = link->getOutgoingSet();
-
-    for (Handle h : outgoingLinks)
+    for (const Handle& h : link->getOutgoingSet())
     {
         if (h->isNode())
         {
@@ -763,7 +732,7 @@ bool PatternMiner::onlyContainVariableNodes(Handle link, AtomSpace& _as)
         }
         else
         {
-            if (! onlyContainVariableNodes(h, _as))
+            if (!onlyContainVariableNodes(h))
                 return false;
         }
     }
@@ -771,11 +740,9 @@ bool PatternMiner::onlyContainVariableNodes(Handle link, AtomSpace& _as)
     return true;
 }
 
-bool PatternMiner::containVariableNodes(Handle link, AtomSpace& _as)
+bool PatternMiner::containVariableNodes(Handle link)
 {
-    HandleSeq outgoingLinks = link->getOutgoingSet();
-
-    for (Handle h : outgoingLinks)
+    for (const Handle& h : link->getOutgoingSet())
     {
         if (h->isNode())
         {
@@ -786,7 +753,7 @@ bool PatternMiner::containVariableNodes(Handle link, AtomSpace& _as)
         }
         else
         {
-            if (containVariableNodes(h, _as))
+            if (containVariableNodes(h))
                 return true;
         }
     }
@@ -799,7 +766,7 @@ HandleSeq PatternMiner::copyOutgoings(AtomSpace& to_as, const Handle& link,
                                       HandleSeq& variables)
 {
     HandleSeq outgoings;
-    for (Handle h : link->getOutgoingSet())
+    for (const Handle& h : link->getOutgoingSet())
         outgoings.push_back(copyAtom(to_as, h, variables));
     return outgoings;
 }
@@ -808,7 +775,7 @@ HandleSeq PatternMiner::copyLinks(AtomSpace& to_as, const HandleSeq& links,
                                   HandleSeq& variables)
 {
     HandleSeq outPutLinks;
-    for (Handle link : links)
+    for (const Handle& link : links)
     {
         HandleSeq outgoingLinks = copyOutgoings(to_as, link, variables);
         Handle toLink = to_as.add_link(link->getType(), outgoingLinks);
@@ -881,13 +848,13 @@ void PatternMiner::findAllInstancesForGivenPatternInNestedAtomSpace(HTreeNode* H
 
 //    // add variable atoms
 //    HandleSet allVariableNodesInPattern;
-//    for (unsigned int i = 0; i < patternToMatch.size(); ++i)
+//    for (const Handle& h : patternToMatch)
 //    {
-//        extractAllVariableNodesInLink(patternToMatch[i],allVariableNodesInPattern, _as);
+//        extractAllVariableNodesInLink(h, allVariableNodesInPattern, _as);
 //    }
 
 
-//    for (Handle varh : allVariableNodesInPattern)
+//    for (const Handle& varh : allVariableNodesInPattern)
 //    {
 //        Handle v = _as.add_node(VARIABLE_NODE, varh->getName());
 //        variableNodes.push_back(v);
@@ -921,7 +888,7 @@ void PatternMiner::findAllInstancesForGivenPatternInNestedAtomSpace(HTreeNode* H
     _as.remove_atom(hResultListLink);
 
 //    int count = 0;
-    for (Handle listH  : resultSet)
+    for (const Handle& listH  : resultSet)
     {
 
 //        if  (Pattern_mining_mode == "Breadth_First")
@@ -964,9 +931,9 @@ void PatternMiner::findAllInstancesForGivenPatternInNestedAtomSpace(HTreeNode* H
 //        _as.remove_atom(patternLink);
 //    }
 
-    for (Handle varh : variableNodes)
+    for (const Handle& varh : variableNodes)
     {
-        _as.remove_atom(varh,true);
+        _as.remove_atom(varh, true);
     }
 
 //    allAtomSpaceLinks.clear();
@@ -975,27 +942,6 @@ void PatternMiner::findAllInstancesForGivenPatternInNestedAtomSpace(HTreeNode* H
 //              << allAtomSpaceLinks.size() << std::endl;
 
 }
-
-
-void PatternMiner::removeLinkAndItsAllSubLinks(AtomSpace& _atomspace, Handle link)
-{
-
-//    //debug
-//    std::cout << "Remove atom: " << link->toShortString() << std::endl;
-
-    HandleSeq Outgoings = link->getOutgoingSet();
-    for (Handle h : Outgoings)
-    {
-        if (h->isLink())
-        {
-            removeLinkAndItsAllSubLinks(_atomspace,h);
-
-        }
-    }
-    _atomspace.remove_atom(link);
-}
-
-
 
 bool PatternMiner::containsDuplicateHandle(HandleSeq &handles)
 {
@@ -1014,11 +960,7 @@ bool PatternMiner::containsDuplicateHandle(HandleSeq &handles)
 
 bool PatternMiner::isInHandleSeq(const Handle& handle, const HandleSeq& handles)
 {
-    for (const Handle& h : handles)
-        if (handle == h)
-            return true;
-
-    return false;
+    return is_in(handle, handles);
 }
 
 bool PatternMiner::isInHandleSeqSeq(const Handle& handle, const HandleSeqSeq& handleSeqs)
@@ -1032,43 +974,22 @@ bool PatternMiner::isInHandleSeqSeq(const Handle& handle, const HandleSeqSeq& ha
 
 bool PatternMiner::isIgnoredType(Type type)
 {
-    for (Type t : linktype_black_list)
-    {
-        if (t == type)
-            return true;
-    }
-
-    return false;
+    return isTypeInList(type, linktype_black_list);
 }
 
-bool PatternMiner::isTypeInList(Type type, vector<Type> &typeList)
+bool PatternMiner::isTypeInList(Type type, const vector<Type> &typeList)
 {
-    for (Type t : typeList)
-    {
-        if (t == type)
-            return true;
-    }
-
-    return false;
+    return is_in(type, typeList);
 }
 
-
-bool PatternMiner::isIgnoredContent(string keyword)
+bool PatternMiner::isIgnoredContent(const string& keyword)
 {
-    for (string ignoreWord : keyword_black_list)
-    {
-        if (keyword == ignoreWord)
-            return true;
-    }
-
-    return false;
+    return is_in(keyword, keyword_black_list);
 }
 
 bool PatternMiner::doesLinkContainNodesInKeyWordNodes(const Handle& link, const HandleSet& keywordNodes)
 {
-    HandleSeq outgoingLinks = link->getOutgoingSet();
-
-    for (Handle h : outgoingLinks)
+    for (const Handle& h : link->getOutgoingSet())
     {
         if (h->isNode())
         {
@@ -1090,7 +1011,7 @@ bool PatternMiner::containIgnoredContent(Handle link)
 {
     string str = link->toShortString();
 
-    for (string ignoreWord : keyword_black_list)
+    for (const string& ignoreWord : keyword_black_list)
     {
         string ignoreStr = "\"" + ignoreWord + "\"";
         if (str.find(ignoreStr) != std::string::npos)
@@ -1387,7 +1308,7 @@ void PatternMiner::OutPutFinalPatternsToFile(unsigned int n_gram)
               << fileName << std::endl;
 
     resultFile.open(fileName.c_str());
-    vector<HTreeNode*> &patternsForThisGram = finalPatternsForGram[n_gram-1];
+    vector<HTreeNode*>& patternsForThisGram = finalPatternsForGram[n_gram-1];
 
 
     resultFile << ";Interesting Pattern Mining final results for " + toString(n_gram) + " gram patterns. Total pattern number: " + toString(patternsForThisGram.size()) << endl;
@@ -1421,7 +1342,7 @@ void PatternMiner::OutPutFinalPatternsToFile(unsigned int n_gram)
             resultFile << htreeNode->quotedPatternLink->toShortString();
         else
         {
-            for (Handle link : htreeNode->pattern)
+            for (const Handle& link : htreeNode->pattern)
             {
                 resultFile << link->toShortString();
             }
@@ -1450,10 +1371,9 @@ void PatternMiner::OutPutAllEntityNumsToFile()
 
     csvFile << "predicates,AllEntityNum" << std::endl;
 
-    map<string, unsigned int>::const_iterator numit;
-    for (numit = allEntityNumMap.begin(); numit != allEntityNumMap.end(); numit ++)
+    for (const auto& num : allEntityNumMap)
     {
-        csvFile << numit->first << "," << numit->second << std::endl;
+        csvFile << num.first << "," << num.second << std::endl;
     }
 
     csvFile.close();
@@ -1461,7 +1381,7 @@ void PatternMiner::OutPutAllEntityNumsToFile()
 
 
 
-void PatternMiner::OutPutFrequentPatternsToFile(unsigned int n_gram, vector<vector<HTreeNode*>>& _patternsForGram, string _fileNamebasic)
+void PatternMiner::OutPutFrequentPatternsToFile(unsigned int n_gram, const vector<vector<HTreeNode*>>& _patternsForGram, const string& _fileNamebasic)
 {
 
     // out put the n_gram frequent patterns to a file, in the order of frequency
@@ -1472,12 +1392,12 @@ void PatternMiner::OutPutFrequentPatternsToFile(unsigned int n_gram, vector<vect
     std::cout<<"\nDebug: PatternMiner: writing  (gram = " + toString(n_gram) + ") frequent patterns to file " + fileName << std::endl;
 
     resultFile.open(fileName.c_str());
-    vector<HTreeNode*> &patternsForThisGram = _patternsForGram[n_gram-1];
+    const vector<HTreeNode*>& patternsForThisGram = _patternsForGram[n_gram-1];
 
     resultFile << ";Frequent Pattern Mining results for " + toString(n_gram) + " gram patterns. Total pattern number: " + toString(patternsForThisGram.size()) << endl;
     num_of_patterns_with_1_frequency[n_gram-1] = 0;
 
-    for (HTreeNode* htreeNode : patternsForThisGram)
+    for (const HTreeNode* htreeNode : patternsForThisGram)
     {
 
         if (htreeNode->count == 1)
@@ -1497,7 +1417,7 @@ void PatternMiner::OutPutFrequentPatternsToFile(unsigned int n_gram, vector<vect
             resultFile << htreeNode->quotedPatternLink->toShortString();
         else
         {
-            for (Handle link : htreeNode->pattern)
+            for (const Handle& link : htreeNode->pattern)
             {
                 resultFile << link->toShortString();
             }
@@ -1508,11 +1428,9 @@ void PatternMiner::OutPutFrequentPatternsToFile(unsigned int n_gram, vector<vect
 
     resultFile << std::endl;
     resultFile.close();
-
-
 }
 
-void PatternMiner::OutPutInterestingPatternsToFile(vector<HTreeNode*> &patternsForThisGram, unsigned int n_gram, int surprisingness, string _fileNamebasic) // surprisingness 1 or 2, it is default 0 which means Interaction_Information
+void PatternMiner::OutPutInterestingPatternsToFile(const vector<HTreeNode*>& patternsForThisGram, unsigned int n_gram, int surprisingness, const string& _fileNamebasic) // surprisingness 1 or 2, it is default 0 which means Interaction_Information
 {
 
     // out put the n_gram patterns to a file
@@ -1533,7 +1451,7 @@ void PatternMiner::OutPutInterestingPatternsToFile(vector<HTreeNode*> &patternsF
 
     resultFile << ";Interesting Pattern Mining results for " + toString(n_gram) + " gram patterns. Total pattern number: " + toString(patternsForThisGram.size()) << endl;
 
-    for (HTreeNode* htreeNode : patternsForThisGram)
+    for (const HTreeNode* htreeNode : patternsForThisGram)
     {
         if (htreeNode->count < thresholdFrequency)
             continue;
@@ -1563,7 +1481,7 @@ void PatternMiner::OutPutInterestingPatternsToFile(vector<HTreeNode*> &patternsF
             resultFile << htreeNode->quotedPatternLink->toShortString();
         else
         {
-            for (Handle link : htreeNode->pattern)
+            for (const Handle& link : htreeNode->pattern)
             {
                 resultFile << link->toShortString();
             }
@@ -1574,12 +1492,9 @@ void PatternMiner::OutPutInterestingPatternsToFile(vector<HTreeNode*> &patternsF
 
     resultFile << std::endl;
     resultFile.close();
-
 }
 
-
-
-void PatternMiner::OutPutSurpringnessBToFile(vector<HTreeNode*> &patternsForThisGram, unsigned int n_gram)
+void PatternMiner::OutPutSurpringnessBToFile(const vector<HTreeNode*>& patternsForThisGram, unsigned int n_gram)
 {
 
     // out put the n_gram patterns to a file
@@ -1655,7 +1570,7 @@ void PatternMiner::OutPutStaticsToCsvFile(unsigned int n_gram)
 
     csvFile << "Frequency,Surprisingness_I,Surprisingness_II,II_Surprisingness_b, max_b_subpattern_num" << std::endl;
 
-    for (HTreeNode* htreeNode : patternsForThisGram)
+    for (const HTreeNode* htreeNode : patternsForThisGram)
     {
         if (htreeNode->count < thresholdFrequency)
             continue;
@@ -1675,7 +1590,7 @@ void PatternMiner::OutPutStaticsToCsvFile(unsigned int n_gram)
 }
 
 
-void PatternMiner::OutPutLowFrequencyHighSurprisingnessPatternsToFile(vector<HTreeNode*> &patternsForThisGram, unsigned int n_gram, unsigned int max_frequency_index)
+void PatternMiner::OutPutLowFrequencyHighSurprisingnessPatternsToFile(const vector<HTreeNode*>& patternsForThisGram, unsigned int n_gram, unsigned int max_frequency_index)
 {
 
     // out put the n_gram patterns to a file
@@ -1689,10 +1604,9 @@ void PatternMiner::OutPutLowFrequencyHighSurprisingnessPatternsToFile(vector<HTr
 
     vector<HTreeNode*> resultPatterns;
 
-    for (unsigned int i = patternsForThisGram.size() - 1; i > max_frequency_index; i --)
+    for (unsigned int i = patternsForThisGram.size() - 1; i > max_frequency_index; i--)
     {
         HTreeNode* htreeNode = patternsForThisGram[i];
-
         resultPatterns.push_back(htreeNode);
     }
 
@@ -1705,7 +1619,7 @@ void PatternMiner::OutPutLowFrequencyHighSurprisingnessPatternsToFile(vector<HTr
     resultFile << ";This file contains the pattern with Frequency < "<< (patternsForThisGram[max_frequency_index])->count <<", sort by Surprisingness_I"  << std::endl;
 
 
-    for (HTreeNode* htreeNode : resultPatterns)
+    for (const HTreeNode* htreeNode : resultPatterns)
     {
         if (OUTPUT_SURPRISINGNESS_CALCULATION_TO_FILE)
         {
@@ -1723,7 +1637,7 @@ void PatternMiner::OutPutLowFrequencyHighSurprisingnessPatternsToFile(vector<HTr
 
         // resultFile << unifiedPatternToKeyString(htreeNode->pattern)<< endl;
 
-        for (Handle link : htreeNode->pattern)
+        for (const Handle link : htreeNode->pattern)
         {
             resultFile << link->toShortString();
         }
@@ -1734,17 +1648,14 @@ void PatternMiner::OutPutLowFrequencyHighSurprisingnessPatternsToFile(vector<HTr
 
     resultFile << std::endl;
     resultFile.close();
-
-
 }
 
-void PatternMiner::OutPutHighFrequencyHighSurprisingnessPatternsToFile(vector<HTreeNode*> &patternsForThisGram, unsigned int n_gram, unsigned int min_frequency_index)
+void PatternMiner::OutPutHighFrequencyHighSurprisingnessPatternsToFile(const vector<HTreeNode*>& patternsForThisGram, unsigned int n_gram, unsigned int min_frequency_index)
 {
 
     // out put the n_gram patterns to a file
     ofstream resultFile;
     string fileName;
-
 
     fileName = "HighFrequencyHighSurprisingness_" + toString(n_gram) + "gram.scm";
 
@@ -1762,13 +1673,11 @@ void PatternMiner::OutPutHighFrequencyHighSurprisingnessPatternsToFile(vector<HT
 
     resultFile.open(fileName.c_str());
 
-
     resultFile << ";Interesting Pattern Mining results for " + toString(n_gram) + " gram patterns. Total pattern number: " + toString(resultPatterns.size()) << endl;
 
     resultFile << ";This file contains the pattern with Frequency > " << (patternsForThisGram[min_frequency_index])->count << ", sort by Surprisingness_I"  << std::endl;
 
-
-    for (HTreeNode* htreeNode : resultPatterns)
+    for (const HTreeNode* htreeNode : resultPatterns)
     {
         if (OUTPUT_SURPRISINGNESS_CALCULATION_TO_FILE)
         {
@@ -1779,44 +1688,38 @@ void PatternMiner::OutPutHighFrequencyHighSurprisingnessPatternsToFile(vector<HT
 
         resultFile << " SurprisingnessI = " << toString(htreeNode->nI_Surprisingness);
 
-
         resultFile << ", SurprisingnessII = " << toString(htreeNode->nII_Surprisingness);
 
         resultFile << endl;
 
         // resultFile << unifiedPatternToKeyString(htreeNode->pattern)<< endl;
 
-        for (Handle link : htreeNode->pattern)
+        for (const Handle& link : htreeNode->pattern)
         {
             resultFile << link->toShortString();
         }
 
         resultFile << std::endl;
-
-
     }
 
     resultFile << std::endl;
     resultFile.close();
-
-
 }
 
-void PatternMiner::OutPutHighSurprisingILowSurprisingnessIIPatternsToFile(vector<HTreeNode*> &patternsForThisGram,unsigned int n_gram, float min_surprisingness_I, float max_surprisingness_II)
+void PatternMiner::OutPutHighSurprisingILowSurprisingnessIIPatternsToFile(const vector<HTreeNode*>& patternsForThisGram,unsigned int n_gram, float min_surprisingness_I, float max_surprisingness_II)
 {
 
     // out put the n_gram patterns to a file
     ofstream resultFile;
     string fileName;
 
-
     fileName = "HighSurprisingILowSurprisingnessII" + toString(n_gram) + "gram.scm";
 
     std::cout<<"\nDebug: PatternMiner: writing (gram = " + toString(n_gram) + ") HighSurprisingILowSurprisingnessII patterns to file " + fileName << std::endl;
 
-    vector<HTreeNode*> resultPatterns;
+    vector<const HTreeNode*> resultPatterns;
 
-    for (HTreeNode* htreeNode : patternsForThisGram)
+    for (const HTreeNode* htreeNode : patternsForThisGram)
     {
 //        if (htreeNode->superPatternRelations.empty())
 //            continue;
@@ -1824,23 +1727,19 @@ void PatternMiner::OutPutHighSurprisingILowSurprisingnessIIPatternsToFile(vector
         if (htreeNode->count < thresholdFrequency)
             continue;
 
-
         if ( (htreeNode->nI_Surprisingness > min_surprisingness_I) && (htreeNode->nII_Surprisingness < max_surprisingness_II) )
             resultPatterns.push_back(htreeNode);
     }
 
-
     resultFile.open(fileName.c_str());
-
 
     resultFile << ";Interesting Pattern Mining results for " + toString(n_gram) + " gram patterns. Total pattern number: " + toString(resultPatterns.size()) << endl;
 
     resultFile << ";This file contains the pattern with Surprising_I > " << min_surprisingness_I << ", and Surprisingness_II < "  << max_surprisingness_II << std::endl;
 
-
     // boost::sort(resultPatterns, compareHTreeNodeBySurprisingness_I);
 
-    for (HTreeNode* htreeNode : resultPatterns)
+    for (const HTreeNode* htreeNode : resultPatterns)
     {
         if (OUTPUT_SURPRISINGNESS_CALCULATION_TO_FILE)
         {
@@ -1857,20 +1756,16 @@ void PatternMiner::OutPutHighSurprisingILowSurprisingnessIIPatternsToFile(vector
 
         // resultFile << unifiedPatternToKeyString(htreeNode->pattern)<< endl;
 
-        for (Handle link : htreeNode->pattern)
+        for (const Handle& link : htreeNode->pattern)
         {
             resultFile << link->toShortString();
         }
 
         resultFile << std::endl;
-
-
     }
 
     resultFile << std::endl;
     resultFile.close();
-
-
 }
 
 
@@ -1899,19 +1794,20 @@ struct VariableInLinks
     HandleSeq containsConstLinks;
 };
 
-bool PatternMiner::containsLoopVariable(HandleSeq& inputPattern)
+bool PatternMiner::containsLoopVariable(const HandleSeq& inputPattern)
 {
-    // Need no check when gram < 3, it will already be filtered by the leaves filter
+    // Need no check when gram < 3, it will already be filtered by the
+    // leaves filter
     if (inputPattern.size() < 3)
         return false;
 
-
-    // First find those links that only contains variables, without any const
+    // First find those links that only contains variables, without
+    // any const
     map<string, VariableInLinks> varInLinksMap;
 
     bool allLinksContainsConst = true;
 
-    for (Handle inputH : inputPattern)
+    for (const Handle& inputH : inputPattern)
     {
         string str = inputH->toShortString();
         std::stringstream stream(str);
@@ -1943,10 +1839,10 @@ bool PatternMiner::containsLoopVariable(HandleSeq& inputPattern)
             allLinksContainsConst = false;
         }
 
-        for(string varStr : allVarsInThis_link)
+        for (const string& varStr : allVarsInThis_link)
         {
             map<string, VariableInLinks>::iterator it = varInLinksMap.find(varStr);
-            if ( it == varInLinksMap.end() )
+            if (it == varInLinksMap.end())
             {
                 VariableInLinks varLinks;
                 if (containsOnlyVars)
@@ -1966,19 +1862,16 @@ bool PatternMiner::containsLoopVariable(HandleSeq& inputPattern)
             }
 
         }
-
     }
 
     if (allLinksContainsConst)
         return false;
 
-    map<string, VariableInLinks>::iterator it;
-    for (it = varInLinksMap.begin(); it != varInLinksMap.end(); ++ it)
+    for (const auto& el : varInLinksMap)
     {
-         VariableInLinks& varLinks = it->second;
+         const VariableInLinks& varLinks = el.second;
          if (varLinks.containsConstLinks.empty())
              return true;
-
     }
 
     return false;
@@ -1989,7 +1882,7 @@ bool PatternMiner::containsLoopVariable(HandleSeq& inputPattern)
 // at least one node in a HandleSeq should be variable, which means two connected links in inputLinks should be connected by at least a variable
 // leaves are those nodes that are not connected to any other links in inputLinks, they should be
 // some will be filter out in this phrase, return true to filter out
-bool PatternMiner::filters(HandleSeq& inputLinks, HandleSeqSeq& oneOfEachSeqShouldBeVars, HandleSeq& leaves, HandleSeq& shouldNotBeVars, HandleSeq& shouldBeVars, AtomSpace& _as)
+bool PatternMiner::filters(const HandleSeq& inputLinks, HandleSeqSeq& oneOfEachSeqShouldBeVars, HandleSeq& leaves, HandleSeq& shouldNotBeVars, HandleSeq& shouldBeVars)
 {
 
     HandleSet allNodesInEachLink[inputLinks.size()];
@@ -1999,12 +1892,12 @@ bool PatternMiner::filters(HandleSeq& inputLinks, HandleSeqSeq& oneOfEachSeqShou
     // map<predicate, set<value>>
     map<Handle, HandleSet > predicateToValueOfEvalLinks;
 
-    HandleSet  all1stOutgoingsOfEvalLinks;
+    HandleSet all1stOutgoingsOfEvalLinks;
 
 
     for (unsigned int i = 0; i < inputLinks.size(); ++i)
     {
-        extractAllNodesInLink(inputLinks[i],allNodesInEachLink[i], _as);
+        extractAllNodesInLink(inputLinks[i], allNodesInEachLink[i]);
 
         if (inputLinks.size() == 1)
             break;
@@ -2083,7 +1976,6 @@ bool PatternMiner::filters(HandleSeq& inputLinks, HandleSeqSeq& oneOfEachSeqShou
         }
     }
 
-
     if ((inputLinks.size() > 1) && enable_filter_links_should_connect_by_vars)
     {
         // find the common nodes which are shared among inputLinks
@@ -2093,25 +1985,21 @@ bool PatternMiner::filters(HandleSeq& inputLinks, HandleSeqSeq& oneOfEachSeqShou
             {
                 HandleSeq commonNodes;
                 // get the common nodes in allNodesInEachLink[i] and allNodesInEachLink[j]
-                std::set_intersection(allNodesInEachLink[i].begin(), allNodesInEachLink[i].end(),
-                                      allNodesInEachLink[j].begin(), allNodesInEachLink[j].end(),
-                                      std::back_inserter(commonNodes));
+                boost::set_intersection(allNodesInEachLink[i], allNodesInEachLink[j],
+                                        std::back_inserter(commonNodes));
 
                 if (not commonNodes.empty())
                     oneOfEachSeqShouldBeVars.push_back(commonNodes);
-
             }
-
         }
     }
-
 
     if (enable_filter_leaves_should_not_be_vars || enable_filter_node_types_should_not_be_vars || enable_filter_node_types_should_be_vars)
     {
 
         for (unsigned i = 0; i < inputLinks.size(); i ++)
         {
-            for (Handle node : allNodesInEachLink[i])
+            for (const Handle& node : allNodesInEachLink[i])
             {
 
                 // find leaves , do not check this for 1-gram
@@ -2177,7 +2065,7 @@ bool PatternMiner::filters(HandleSeq& inputLinks, HandleSeqSeq& oneOfEachSeqShou
 
 // return true if the inputLinks are disconnected
 // when the inputLinks are connected, the outputConnectedGroups has only one group, which is the same as inputLinks
-bool PatternMiner::splitDisconnectedLinksIntoConnectedGroups(HandleSeq& inputLinks, HandleSeqSeq& outputConnectedGroups)
+bool PatternMiner::splitDisconnectedLinksIntoConnectedGroups(const HandleSeq& inputLinks, HandleSeqSeq& outputConnectedGroups)
 {
     if(inputLinks.size() < 2)
         return false;
@@ -2185,11 +2073,11 @@ bool PatternMiner::splitDisconnectedLinksIntoConnectedGroups(HandleSeq& inputLin
     HandleSet allNodesInEachLink[inputLinks.size()];
     for (unsigned int i = 0; i < inputLinks.size(); ++i)
     {
-        extractAllVariableNodesInLink(inputLinks[i], allNodesInEachLink[i], *as);
+        extractAllVariableNodesInLink(inputLinks[i], allNodesInEachLink[i]);
     }
 
     int i = -1;
-    for (Handle link : inputLinks)
+    for (const Handle& link : inputLinks)
     {
         i++;
 
@@ -2272,78 +2160,77 @@ void PatternMiner::calculateInteractionInformation(HTreeNode* HNode)
 
     for (int gram = maxgram-1; gram > 0; gram --)
     {
-         sign *= -1;
+        sign *= -1;
 //         std::cout << "start subpatterns of gram = " << gram << std::endl;
 
-         bool* indexes = new bool[maxgram];
+        bool* indexes = new bool[maxgram];
 
-         // generate the first combination
-         for (int i = 0; i < gram; ++ i)
-             indexes[i] = true;
+        // generate the first combination
+        for (int i = 0; i < gram; ++ i)
+            indexes[i] = true;
 
-         for (int i = gram; i < maxgram; ++ i)
-             indexes[i] = false;
+        for (int i = gram; i < maxgram; ++ i)
+            indexes[i] = false;
 
-         while(true)
-         {
-             HandleSeq subPattern;
-             for (int index = 0; index < maxgram; index ++)
-             {
-                 if (indexes[index])
-                     subPattern.push_back(HNode->pattern[index]);
-             }
+        while(true)
+        {
+            HandleSeq subPattern;
+            for (int index = 0; index < maxgram; index ++)
+            {
+                if (indexes[index])
+                    subPattern.push_back(HNode->pattern[index]);
+            }
 
-             unsigned int unifiedLastLinkIndex;
-             HandleMap orderedVarNameMap;
-             HandleSeq unifiedSubPattern = UnifyPatternOrder(subPattern, unifiedLastLinkIndex, orderedVarNameMap);
-             string subPatternKey = unifiedPatternToKeyString(unifiedSubPattern);
+            unsigned int unifiedLastLinkIndex;
+            HandleMap orderedVarNameMap;
+            HandleSeq unifiedSubPattern = UnifyPatternOrder(subPattern, unifiedLastLinkIndex, orderedVarNameMap);
+            string subPatternKey = unifiedPatternToKeyString(unifiedSubPattern);
 
 //             std::cout<< "Subpattern: " << subPatternKey;
 
-             // First check if this subpattern is disconnected. If it is disconnected, it won't exist in the H-Tree anyway.
-             HandleSeqSeq splittedSubPattern;
-             if (splitDisconnectedLinksIntoConnectedGroups(unifiedSubPattern, splittedSubPattern))
-             {
+            // First check if this subpattern is disconnected. If it is disconnected, it won't exist in the H-Tree anyway.
+            HandleSeqSeq splittedSubPattern;
+            if (splitDisconnectedLinksIntoConnectedGroups(unifiedSubPattern, splittedSubPattern))
+            {
 //                 std::cout<< " is disconnected! splitted it into connected parts: \n" ;
-                 // The splitted parts are disconnected, so they are independent. So the entroy = the sum of each part.
-                 // e.g. if ABC is disconneted, and it's splitted into connected subgroups by splitDisconnectedLinksIntoConnectedGroups,
-                 // for example: AC, B  then H(ABC) = H(AC) + H(B)
-                 for (HandleSeq aConnectedSubPart : splittedSubPattern)
-                 {
-                     // Unify it again
-                     unsigned int _unifiedLastLinkIndex;
-                     HandleMap suborderedVarNameMap;
-                     HandleSeq unifiedConnectedSubPattern = UnifyPatternOrder(aConnectedSubPart, _unifiedLastLinkIndex,suborderedVarNameMap);
-                     string connectedSubPatternKey = unifiedPatternToKeyString(unifiedConnectedSubPattern);
+                // The splitted parts are disconnected, so they are independent. So the entroy = the sum of each part.
+                // e.g. if ABC is disconneted, and it's splitted into connected subgroups by splitDisconnectedLinksIntoConnectedGroups,
+                // for example: AC, B  then H(ABC) = H(AC) + H(B)
+                for (HandleSeq aConnectedSubPart : splittedSubPattern)
+                {
+                    // Unify it again
+                    unsigned int _unifiedLastLinkIndex;
+                    HandleMap suborderedVarNameMap;
+                    HandleSeq unifiedConnectedSubPattern = UnifyPatternOrder(aConnectedSubPart, _unifiedLastLinkIndex,suborderedVarNameMap);
+                    string connectedSubPatternKey = unifiedPatternToKeyString(unifiedConnectedSubPattern);
 //                     cout << "a splitted part: " << connectedSubPatternKey;
-                     double h = calculateEntropyOfASubConnectedPattern(connectedSubPatternKey, unifiedConnectedSubPattern);
-                     II += sign*h;
+                    double h = calculateEntropyOfASubConnectedPattern(connectedSubPatternKey, unifiedConnectedSubPattern);
+                    II += sign*h;
 
-                     if (h > biggestEntroy)
-                         biggestEntroy = h;
+                    if (h > biggestEntroy)
+                        biggestEntroy = h;
 //                     cout << "sign="<<sign << " h =" << h << std::endl << std::endl;
-                 }
-             }
-             else
-             {
+                }
+            }
+            else
+            {
 //                 std::cout<< " is connected! \n" ;
-                 double h =calculateEntropyOfASubConnectedPattern(subPatternKey, unifiedSubPattern);
-                 II += sign*h;
+                double h =calculateEntropyOfASubConnectedPattern(subPatternKey, unifiedSubPattern);
+                II += sign*h;
 
-                 if (h > biggestEntroy)
-                     biggestEntroy = h;
+                if (h > biggestEntroy)
+                    biggestEntroy = h;
 //                 cout << "sign="<<sign << " h =" << h << std::endl << std::endl;
-             }
+            }
 
-             if (isLastNElementsAllTrue(indexes, maxgram, gram))
-                 break;
+            if (isLastNElementsAllTrue(indexes, maxgram, gram))
+                break;
 
-             // generate the next combination
-             generateNextCombinationGroup(indexes, maxgram);
-         }
+            // generate the next combination
+            generateNextCombinationGroup(indexes, maxgram);
+        }
 
-         delete [] indexes;
-
+        delete [] indexes;
     }
 
     // Normalize the interaction information
@@ -2503,10 +2390,10 @@ void PatternMiner::calculateInteractionInformation(HTreeNode* HNode)
 
 //}
 
-unsigned int PatternMiner::getCountOfAConnectedPattern(string& connectedPatternKey, HandleSeq& connectedPattern)
+unsigned int PatternMiner::getCountOfAConnectedPattern(const string& connectedPatternKey, const HandleSeq& connectedPattern)
 {
     uniqueKeyLock.lock();
-    // try to find if it has a correponding HtreeNode
+    // try to find if it has a corresponding HtreeNode
     map<string, HTreeNode*>::iterator patternNodeIter = keyStrToHTreeNodeMap.find(connectedPatternKey);
 
     if (patternNodeIter != keyStrToHTreeNodeMap.end())
@@ -2519,7 +2406,6 @@ unsigned int PatternMiner::getCountOfAConnectedPattern(string& connectedPatternK
     }
     else
     {
-
         uniqueKeyLock.unlock();
         // return 0; // just skip it
         // can't find its HtreeNode, have to calculate its frequency again by calling pattern matcher
@@ -2533,7 +2419,6 @@ unsigned int PatternMiner::getCountOfAConnectedPattern(string& connectedPatternK
         }
         else
         {
-
             if (PATTERN_VARIABLENODE_TYPE == PATTERN_VARIABLE_NODE)
             {
                 uniqueKeyLock.unlock();
@@ -2556,25 +2441,25 @@ unsigned int PatternMiner::getCountOfAConnectedPattern(string& connectedPatternK
     }
 }
 
-bool PatternMiner::isALinkOneInstanceOfGivenPattern(Handle &instanceLink, Handle& patternLink, AtomSpace& instanceLinkAtomSpace)
+bool PatternMiner::isALinkOneInstanceOfGivenPattern(const Handle& instanceLink, const Handle& patternLink)
 {
     if (instanceLink->getType() != patternLink->getType())
         return false;
 
-    HandleSeq outComingsOfPattern = patternLink->getOutgoingSet();
-    HandleSeq outComingsOfInstance = instanceLink->getOutgoingSet();
+    const HandleSeq& outComingsOfPattern = patternLink->getOutgoingSet();
+    const HandleSeq& outComingsOfInstance = instanceLink->getOutgoingSet();
 
     if (outComingsOfPattern.size() != outComingsOfInstance.size())
         return false;
 
-    for(unsigned int i = 0; i < outComingsOfPattern.size(); i ++)
+    for (unsigned int i = 0; i < outComingsOfPattern.size(); i ++)
     {
         bool pis_link = (outComingsOfPattern[i])->isLink();
         bool iis_link = (outComingsOfInstance[i])->isLink();
 
         if (pis_link && iis_link)
         {
-            if (isALinkOneInstanceOfGivenPattern(outComingsOfInstance[i], outComingsOfPattern[i], instanceLinkAtomSpace))
+            if (isALinkOneInstanceOfGivenPattern(outComingsOfInstance[i], outComingsOfPattern[i]))
                 continue;
             else
                 return false;
@@ -2599,13 +2484,11 @@ bool PatternMiner::isALinkOneInstanceOfGivenPattern(Handle &instanceLink, Handle
     }
 
     return true;
-
-
-
 }
 
-void PatternMiner::reNameNodesForALink(Handle& inputLink, Handle& nodeToBeRenamed, Handle& newNamedNode,HandleSeq& renameOutgoingLinks,
-                                       AtomSpace& from_as, AtomSpace& to_as)
+void PatternMiner::reNameNodesForALink(const Handle& inputLink, const Handle& nodeToBeRenamed,
+                                       Handle& newNamedNode, HandleSeq& renameOutgoingLinks,
+                                       AtomSpace& to_as)
 {
     HandleSeq outgoingLinks = inputLink->getOutgoingSet();
 
@@ -2626,7 +2509,7 @@ void PatternMiner::reNameNodesForALink(Handle& inputLink, Handle& nodeToBeRename
         else
         {
              HandleSeq _renameOutgoingLinks;
-             reNameNodesForALink(h, nodeToBeRenamed, newNamedNode, _renameOutgoingLinks, from_as, to_as);
+             reNameNodesForALink(h, nodeToBeRenamed, newNamedNode, _renameOutgoingLinks, to_as);
              Handle reLink = to_as.add_link(h->getType(), _renameOutgoingLinks);
              reLink->setTruthValue(h->getTruthValue());
              renameOutgoingLinks.push_back(reLink);
@@ -2657,19 +2540,19 @@ void PatternMiner::getOneMoreGramExtendedLinksFromGivenLeaf(Handle& toBeExtended
             extendedHandle = incomingHandle;
 
         // skip this extendedHandle if it's one instance of toBeExtendedLink
-        if (isALinkOneInstanceOfGivenPattern(extendedHandle, toBeExtendedLink, from_as))
+        if (isALinkOneInstanceOfGivenPattern(extendedHandle, toBeExtendedLink))
             continue;
 
         // Rebind this extendedHandle into Pattern Mining Atomspace
         HandleSeq renameOutgoingLinks;
-        reNameNodesForALink(extendedHandle, leaf, varNode, renameOutgoingLinks, from_as, *as);
+        reNameNodesForALink(extendedHandle, leaf, varNode, renameOutgoingLinks, *as);
         Handle reLink = as->add_link(extendedHandle->getType(), renameOutgoingLinks);
         reLink->setTruthValue(extendedHandle->getTruthValue());
         outPutExtendedPatternLinks.push_back(reLink);
     }
 }
 
-unsigned int PatternMiner::getAllEntityCountWithSamePredicatesForAPattern(HandleSeq& pattern)
+unsigned int PatternMiner::getAllEntityCountWithSamePredicatesForAPattern(const HandleSeq& pattern)
 {
 
     if (pattern.size() == 1)
@@ -2713,7 +2596,7 @@ unsigned int PatternMiner::getAllEntityCountWithSamePredicatesForAPattern(Handle
         }
         HandleSeq allPredicateNodes;
 
-        for (Handle l : pattern)
+        for (const Handle& l : pattern)
         {
             if (l->getType() == EVALUATION_LINK)
             {
@@ -2730,7 +2613,7 @@ unsigned int PatternMiner::getAllEntityCountWithSamePredicatesForAPattern(Handle
 
         boost::sort(allPredicateNodes);
         string predicateWords = "";
-        for (Handle predicate : allPredicateNodes)
+        for (const Handle& predicate : allPredicateNodes)
         {
             predicateWords += predicate->getName();
             predicateWords += " ";
@@ -2747,7 +2630,7 @@ unsigned int PatternMiner::getAllEntityCountWithSamePredicatesForAPattern(Handle
 
         vector<HandleSet> allEntitiesForEachPredicate;
 
-        for (Handle predicate : allPredicateNodes)
+        for (const Handle& predicate : allPredicateNodes)
         {
             HandleSet allEntitiesForThisPredicate;
 
@@ -2766,9 +2649,9 @@ unsigned int PatternMiner::getAllEntityCountWithSamePredicatesForAPattern(Handle
 
         HandleSeq commonLinks;
         // get the common Links in allEntitiesForEachPredicate
-        std::set_intersection(allEntitiesForEachPredicate[0].begin(), allEntitiesForEachPredicate[0].end(),
-                              allEntitiesForEachPredicate[1].begin(), allEntitiesForEachPredicate[1].end(),
-                              std::back_inserter(commonLinks));
+        boost::set_intersection(allEntitiesForEachPredicate[0],
+                                allEntitiesForEachPredicate[1],
+                                std::back_inserter(commonLinks));
 
         if (commonLinks.empty())
             return 0;
@@ -2777,9 +2660,8 @@ unsigned int PatternMiner::getAllEntityCountWithSamePredicatesForAPattern(Handle
         {
             HandleSeq newCommonLinks;
             // get the common Links in allEntitiesForEachPredicate
-            std::set_intersection(allEntitiesForEachPredicate[i].begin(), allEntitiesForEachPredicate[i].end(),
-                                  commonLinks.begin(), commonLinks.end(),
-                                  std::back_inserter(newCommonLinks));
+            boost::set_intersection(allEntitiesForEachPredicate[i], commonLinks,
+                                    std::back_inserter(newCommonLinks));
 
             if (newCommonLinks.empty())
                 return 0;
@@ -2834,7 +2716,7 @@ unsigned int PatternMiner::getAllEntityCountWithSamePredicatesForAPattern(Handle
 
 // II_Surprisingness_b can be calculated for all input grams, including 1 gram and max_gram
 // only calculate 2~4 gram patterns for nSurprisingness_I and nSurprisingness_II
-void PatternMiner::calculateSurprisingness(HTreeNode* HNode, AtomSpace& from_as)
+void PatternMiner::calculateSurprisingness(HTreeNode* HNode)
 {
 
 //    // debug
@@ -2854,7 +2736,7 @@ void PatternMiner::calculateSurprisingness(HTreeNode* HNode, AtomSpace& from_as)
     }
 
     if (calculate_type_b_surprisingness)
-        calculateTypeBSurprisingness(HNode, from_as);
+        calculateTypeBSurprisingness(HNode);
 
 
     unsigned int gram = HNode->pattern.size();
@@ -2928,12 +2810,11 @@ void PatternMiner::calculateSurprisingness(HTreeNode* HNode, AtomSpace& from_as)
         HNode->surprisingnessInfo += ";p = " + toString(HNode->count) + "/" + toString(allNumFloat) + " = " + toString(p) + "\n";
     }
 
-
     float abs_min_diff = 999999999.9f;
     float min_diff = 999999999.9f;
     // cout << "For this pattern itself: p = " <<  HNode->count << " / " <<  allNum << " = " << p << std::endl;
 
-    for (vector<vector<unsigned int>>&  oneCombin : components_ngram[gram-2])
+    for (const vector<vector<unsigned int>>& oneCombin : components_ngram[gram-2])
     {
         int com_i = 0;
         // std::cout <<" -----Combination " << comcount++ << "-----" << std::endl;
@@ -2947,7 +2828,7 @@ void PatternMiner::calculateSurprisingness(HTreeNode* HNode, AtomSpace& from_as)
         bool containsComponentDisconnected = false;
         bool subComponentNotFound = false;
 
-        for (vector<unsigned int>& oneComponent : oneCombin)
+        for (const vector<unsigned int>& oneComponent : oneCombin)
         {
             if (OUTPUT_SURPRISINGNESS_CALCULATION_TO_FILE)
             {
@@ -3037,16 +2918,12 @@ void PatternMiner::calculateSurprisingness(HTreeNode* HNode, AtomSpace& from_as)
                 // cout << ", p = " << component_count  << " / " << allNum << " = " << p_i << std::endl;
                 total_p *= p_i;
 //                std::cout << std::endl;
-
             }
-
             com_i ++;
-
         }
 
         if (containsComponentDisconnected || subComponentNotFound)
             continue;
-
 
 //        cout << "\n ---- total_p = " << total_p << " ----\n" ;
 
@@ -3072,7 +2949,6 @@ void PatternMiner::calculateSurprisingness(HTreeNode* HNode, AtomSpace& from_as)
         }
 
     }
-
 
     if (USE_ABS_SURPRISINGNESS)
         HNode->nI_Surprisingness = abs_min_diff;
@@ -3111,12 +2987,9 @@ void PatternMiner::calculateSurprisingness(HTreeNode* HNode, AtomSpace& from_as)
 
         HNode->nII_Surprisingness  = 999999999.9f;
         float minSurprisingness_II = 999999999.9f;
-        vector<ExtendRelation>::iterator oneSuperRelationIt;
         unsigned int actualProcessedRelationNum = 0;
-        for(oneSuperRelationIt = HNode->superPatternRelations.begin();  oneSuperRelationIt != HNode->superPatternRelations.end(); ++ oneSuperRelationIt)
+        for (const ExtendRelation& curSuperRelation : HNode->superPatternRelations)
         {
-            ExtendRelation& curSuperRelation = *oneSuperRelationIt;
-
             // There are two types of super patterns: one is extended from a variable, one is extended from a const (turnt into a variable)
 
             // type one : extended from a variable,  the extended node itself is considered as a variable in the pattern A
@@ -3159,7 +3032,7 @@ void PatternMiner::calculateSurprisingness(HTreeNode* HNode, AtomSpace& from_as)
             HandleMap EorderedVarNameMap;
             HandleSeq unifiedPatternE = UnifyPatternOrder(patternE, unifiedLastLinkIndex, EorderedVarNameMap);
 
-            string patternEKey = unifiedPatternToKeyString(unifiedPatternE, as);
+            string patternEKey = unifiedPatternToKeyString(unifiedPatternE);
 
             unsigned int patternE_count = getCountOfAConnectedPattern(patternEKey, unifiedPatternE);
 
@@ -3228,7 +3101,7 @@ void PatternMiner::calculateSurprisingness(HTreeNode* HNode, AtomSpace& from_as)
 }
 
 
-void PatternMiner::calculateTypeBSurprisingness(HTreeNode* HNode, AtomSpace& from_as)
+void PatternMiner::calculateTypeBSurprisingness(HTreeNode* HNode)
 {
 
     // Currently II_Surprisingness_b only for 1-gram patterns
@@ -3294,12 +3167,12 @@ void PatternMiner::calculateTypeBSurprisingness(HTreeNode* HNode, AtomSpace& fro
         // By changing one const node into a variable node, if this pattern exist, then it is one super pattern of this pattern
         HandleSet allConstNodes;
         for (Handle link : HNode->pattern)
-            extractAllConstNodesInALink(link, allConstNodes, *as);
+            extractAllConstNodesInALink(link, allConstNodes);
 
         string var_name = "$var_"  + toString(HNode->var_num + 1);
         Handle var_node = as->add_node(opencog::PATTERN_VARIABLENODE_TYPE, var_name);
 
-        for (Handle constNode : allConstNodes)
+        for (const Handle& constNode : allConstNodes)
         {
             // replace this const node with a new variable node
             HandleSeq oneSuperPattern = ReplaceConstNodeWithVariableForAPattern(HNode->pattern, constNode, var_node);
@@ -3362,7 +3235,7 @@ void PatternMiner::calculateTypeBSurprisingness(HTreeNode* HNode, AtomSpace& fro
 
     double min_II_Surprisingness_b = 9999999.9;
 
-    for (SuperRelation_b& superb : HNode->superRelation_b_list)
+    for (const SuperRelation_b& superb : HNode->superRelation_b_list)
     {
         // calculate II_Surprisingness_b
         double II_Surprisingness_b = ((float)HNode->count) / ((float)superb.superHTreeNode->count);
@@ -3374,7 +3247,7 @@ void PatternMiner::calculateTypeBSurprisingness(HTreeNode* HNode, AtomSpace& fro
             surpringnessIICalfile << "\nCount(S) = " << superb.superHTreeNode->count << ", II_Surprisingness_b = "
                                   << HNode->count << " / " << superb.superHTreeNode->count << " = " << II_Surprisingness_b << std::endl;
 
-            for (Handle link : superb.superHTreeNode->pattern)
+            for (const Handle& link : superb.superHTreeNode->pattern)
             {
                 surpringnessIICalfile << link->toShortString();
             }
@@ -3411,7 +3284,7 @@ void PatternMiner::generateComponentCombinations(string componentsStr, vector<ve
         for (string oneComponentStr : allComponentStrs)
         {
             vector<unsigned int> oneComponent;
-            for(std::string::size_type i = 0; i < oneComponentStr.size(); ++i)
+            for (std::string::size_type i = 0; i < oneComponentStr.size(); ++i)
             {
                 oneComponent.push_back((unsigned int)(oneComponentStr[i] - '0'));
             }
@@ -3638,7 +3511,7 @@ void PatternMiner::cleanUpPatternMiner()
 
     linktype_black_list.clear();
 
-    for( std::pair<string, HTreeNode*> OnePattern : keyStrToHTreeNodeMap)
+    for (std::pair<string, HTreeNode*> OnePattern : keyStrToHTreeNodeMap)
     {
         delete ((HTreeNode*)(OnePattern.second));
     }
@@ -3742,7 +3615,7 @@ void PatternMiner::runPatternMiner(bool exit_program_after_finish)
     black_keyword_Handles.clear();
     if (use_keyword_black_list && (! keyword_black_logic_is_contain))
     {
-        for (string keyword : keyword_black_list)
+        for (const string& keyword : keyword_black_list)
         {
             // std::cout << keyword << std::endl;
             Handle keywordNode = original_as.get_node(opencog::CONCEPT_NODE, keyword);
@@ -3793,7 +3666,7 @@ void PatternMiner::runPatternMiner(bool exit_program_after_finish)
             else
                 cout << "equal to";
             cout << " any of the following black keywords:\n";
-            for (string bkeyword : keyword_black_list)
+            for (const string& bkeyword : keyword_black_list)
             {
                 std::cout << bkeyword << std::endl;
             }
@@ -3840,7 +3713,7 @@ void PatternMiner::runPatternMiner(bool exit_program_after_finish)
     {
         if (if_quote_output_pattern)
         {
-            for(unsigned int gram = 1; gram <= MAX_GRAM; gram ++)
+            for (unsigned int gram = 1; gram <= MAX_GRAM; gram ++)
                 quoteAllThePatternSForGram(gram);
         }
     }
@@ -3848,7 +3721,7 @@ void PatternMiner::runPatternMiner(bool exit_program_after_finish)
     // Out put all patterns with a frequency above the thresthold
     num_of_patterns_with_1_frequency = new unsigned int [MAX_GRAM];
 
-    for(unsigned int gram = 1; gram <= MAX_GRAM; gram ++)
+    for (unsigned int gram = 1; gram <= MAX_GRAM; gram ++)
     {
         // sort by frequency
         boost::sort(patternsForGram[gram-1], compareHTreeNodeByFrequency);
@@ -3890,7 +3763,7 @@ void PatternMiner::runInterestingnessEvaluation()
         HandleSeq allEvalLinks;
         original_as.get_handles_by_type(back_inserter(allEvalLinks), (Type) EVALUATION_LINK, false);
         HandleSet allEntityHandles;
-        for (Handle evalLink : allEvalLinks)
+        for (const Handle& evalLink : allEvalLinks)
         {
             Handle listLink = evalLink->getOutgoingAtom(1);
             Handle entityHandle = listLink->getOutgoingAtom(0);
@@ -3909,7 +3782,7 @@ void PatternMiner::runInterestingnessEvaluation()
         surpringnessIICalfile.open("surpringnessII_calcualtion_info.scm");
     }
 
-    for(cur_gram = 1; cur_gram <= MAX_GRAM; cur_gram ++)
+    for (cur_gram = 1; cur_gram <= MAX_GRAM; cur_gram ++)
     {
 
         cout << "\nCalculating";
@@ -4080,7 +3953,7 @@ void PatternMiner::queryPatternsWithFrequencySurprisingnessIRanges(unsigned int 
                << "Surprisingness_I range = [" << toString(min_surprisingness_I) << ", " << toString(max_surprisingness_I) << "]" << std::endl;
 
 
-    for (HTreeNode* htreeNode : resultPatterns)
+    for (const HTreeNode* htreeNode : resultPatterns)
     {
         if (OUTPUT_SURPRISINGNESS_CALCULATION_TO_FILE)
         {
@@ -4101,7 +3974,7 @@ void PatternMiner::queryPatternsWithFrequencySurprisingnessIRanges(unsigned int 
 
         // resultFile << unifiedPatternToKeyString(htreeNode->pattern)<< endl;
 
-        for (Handle link : htreeNode->pattern)
+        for (const Handle& link : htreeNode->pattern)
         {
             resultFile << link->toShortString();
         }
@@ -4152,7 +4025,7 @@ void PatternMiner::queryPatternsWithSurprisingnessIAndIIRanges(unsigned int min_
                << "Surprisingness_I range = [" << toString(min_surprisingness_I) << ", " << toString(max_surprisingness_I) << "]"
                << "Surprisingness_II range = [" << toString(min_surprisingness_II) << ", " << toString(max_surprisingness_II) << "]" << std::endl;
 
-    for (HTreeNode* htreeNode : resultPatterns)
+    for (const HTreeNode* htreeNode : resultPatterns)
     {
         if (OUTPUT_SURPRISINGNESS_CALCULATION_TO_FILE)
         {
@@ -4173,7 +4046,7 @@ void PatternMiner::queryPatternsWithSurprisingnessIAndIIRanges(unsigned int min_
 
         // resultFile << unifiedPatternToKeyString(htreeNode->pattern)<< endl;
 
-        for (Handle link : htreeNode->pattern)
+        for (const Handle& link : htreeNode->pattern)
         {
             resultFile << link->toShortString();
         }
@@ -4202,7 +4075,7 @@ void PatternMiner::queryPatternsWithFrequencySurprisingnessBRanges(unsigned int 
     std::cout<<"surprisingness_B range = [" << toString(min_surprisingness_B) << ", " << toString(max_surprisingness_B) << "]"  << std::endl;
     std::cout<<"b_subpattern_num range = [" << toString(min_subpattern_num) << ", " << toString(max_subpattern_num) << "]"  << std::endl;
 
-    vector<HTreeNode*> resultPatterns;
+    vector<HTreeNode*> resultPatterns; // NTODO make it const
 
     for (HTreeNode* htreeNode : patternsForGram[gram - 1])
     {
@@ -4224,7 +4097,7 @@ void PatternMiner::queryPatternsWithFrequencySurprisingnessBRanges(unsigned int 
                <<"b_subpattern_num range = [" << toString(min_subpattern_num) << ", " << toString(max_subpattern_num) << "]"  << std::endl;
 
 
-    for (HTreeNode* htreeNode : resultPatterns)
+    for (const HTreeNode* htreeNode : resultPatterns)
     {
 
         resultFile << endl << ";Pattern: Frequency = " << toString(htreeNode->count) << ", "
@@ -4232,17 +4105,14 @@ void PatternMiner::queryPatternsWithFrequencySurprisingnessBRanges(unsigned int 
         << " nII_Surprisingness_b = " << toString(htreeNode->nII_Surprisingness_b) << ", "
         << " max_b_subpattern_num = " << toString(htreeNode->max_b_subpattern_num) << endl;
 
-
-
         // resultFile << unifiedPatternToKeyString(htreeNode->pattern)<< endl;
 
-        for (Handle link : htreeNode->pattern)
+        for (const Handle& link : htreeNode->pattern)
         {
             resultFile << link->toShortString();
         }
 
         resultFile << std::endl;
-
     }
 
     resultFile << std::endl;
@@ -4254,7 +4124,7 @@ void PatternMiner::queryPatternsWithFrequencySurprisingnessBRanges(unsigned int 
 
 
 void PatternMiner::queryPatternsWithFrequencyAndInteractionInformationRanges(unsigned int min_frequency, unsigned int max_frequency,
-                                                               float min_ii, float max_ii, int gram)
+                                                                             float min_ii, float max_ii, int gram)
 {
     // out put the gram patterns to a file
     ofstream resultFile;
@@ -4285,7 +4155,7 @@ void PatternMiner::queryPatternsWithFrequencyAndInteractionInformationRanges(uns
     resultFile << ";This file contains the pattern with Frequency range = [" << min_frequency << ", " << max_frequency << "] ,"
                << "InteractionInformation range = [" << toString(min_ii) << ", " << toString(max_ii) << "]."  << std::endl;
 
-    for (HTreeNode* htreeNode : resultPatterns)
+    for (const HTreeNode* htreeNode : resultPatterns)
     {
 //        if (OUTPUT_SURPRISINGNESS_CALCULATION_TO_FILE)
 //        {
@@ -4300,13 +4170,12 @@ void PatternMiner::queryPatternsWithFrequencyAndInteractionInformationRanges(uns
 
         // resultFile << unifiedPatternToKeyString(htreeNode->pattern)<< endl;
 
-        for (Handle link : htreeNode->pattern)
+        for (const Handle& link : htreeNode->pattern)
         {
             resultFile << link->toShortString();
         }
 
         resultFile << std::endl;
-
     }
 
     resultFile << std::endl;
@@ -4340,13 +4209,13 @@ void PatternMiner::applyWhiteListKeywordfilterAfterMining()
 {
     if (patternsForGram[0].size() < 1)
     {
-        std::cout<<"\nPatternMiner:  this filter should be applied after mining! Please run pattern miner first!" << std::endl;
+        std::cout << "\nPatternMiner:  this filter should be applied after mining! Please run pattern miner first!" << std::endl;
         return;
     }
 
     if (keyword_white_list.size() < 1)
     {
-        std::cout<<"\nPatternMiner:  white key word list is empty! Please set it first!" << std::endl;
+        std::cout << "\nPatternMiner:  white key word list is empty! Please set it first!" << std::endl;
         return;
     }
 
@@ -4369,7 +4238,7 @@ void PatternMiner::applyWhiteListKeywordfilterAfterMining()
 
     vector<vector<HTreeNode*>> patternsForGramFiltered;
 
-    for(unsigned int gram = 1; gram <= MAX_GRAM; gram ++)
+    for (unsigned int gram = 1; gram <= MAX_GRAM; gram ++)
     {
         vector<HTreeNode*> patternVector;
         patternsForGramFiltered.push_back(patternVector);
@@ -4399,7 +4268,7 @@ void PatternMiner::applyWhiteListKeywordfilterAfterMining()
 
     if (enable_Interesting_Pattern && (MAX_GRAM >1))
     {
-        for(cur_gram = 2; cur_gram <= MAX_GRAM; cur_gram ++)
+        for (cur_gram = 2; cur_gram <= MAX_GRAM; cur_gram ++)
         {
 
             if (Enable_Interaction_Information)
@@ -4468,7 +4337,7 @@ void PatternMiner::evaluateInterestingnessTask()
 
         if (Enable_surprisingness)
         {
-            calculateSurprisingness(htreeNode, *observing_as);
+            calculateSurprisingness(htreeNode);
         }
 
 
@@ -4480,23 +4349,23 @@ void PatternMiner::evaluateInterestingnessTask()
 }
 
 // select a subset for topics from the corpus
-void PatternMiner::selectSubsetFromCorpus(vector<string>& topics, unsigned int gram, bool if_contian_logic)
+void PatternMiner::selectSubsetFromCorpus(const vector<string>& topics, unsigned int gram, bool if_contian_logic)
 {
     _selectSubsetFromCorpus(topics,gram, if_contian_logic);
 }
 
-bool checkIfObjectIsAPerson(Handle& obj, HandleSeq& listLinks)
+bool checkIfObjectIsAPerson(const Handle& obj, const HandleSeq& listLinks)
 {
-    for (Handle l : listLinks)
+    for (const Handle& l : listLinks)
     {
         // only check ListLinks with h as the first outgoing
-        if ( l->getOutgoingAtom(0) != obj)
+        if (l->getOutgoingAtom(0) != obj)
             continue;
 
         HandleSeq evals;
         l->getIncomingSet(back_inserter(evals));
 
-        for (Handle eval : evals)
+        for (const Handle& eval : evals)
         {
             Handle predicate = eval->getOutgoingAtom(0);
             string predicateStr = predicate->getName();
@@ -4533,7 +4402,7 @@ void PatternMiner::selectSubsetForDBpedia()
 
     cout << "\nselecting president related links from DBpedia ... " << std::endl;
     // int x = 0;
-    for (Handle h : allDBpediaKeyNodes)
+    for (const Handle& h : allDBpediaKeyNodes)
     {
 //        string objname = h->getName();
 //        if (objname == "Stanley_Crooks")
@@ -4548,7 +4417,7 @@ void PatternMiner::selectSubsetForDBpedia()
         HandleSeq listLinks;
         h->getIncomingSet(back_inserter(listLinks));
 
-        for (Handle l : listLinks)
+        for (const Handle& l : listLinks)
         {
             // only process ListLinks with h as the first outgoing
             if ( l->getOutgoingAtom(0) != h)
@@ -4557,7 +4426,7 @@ void PatternMiner::selectSubsetForDBpedia()
             HandleSeq evals;
             l->getIncomingSet(back_inserter(evals));
 
-            for (Handle eval : evals)
+            for (const Handle& eval : evals)
             {
 
 //                // if the valueNode only has one connection, do not keep it
@@ -4578,7 +4447,7 @@ void PatternMiner::selectSubsetForDBpedia()
                 }
 
                 bool skip = false;
-                for (string title : titles)
+                for (const string& title : titles)
                 {
                     if (predicateStr == title)
                     {
@@ -4623,7 +4492,7 @@ void PatternMiner::selectSubsetForDBpedia()
     // write the first line to enable unicode
     subsetFile <<  "(setlocale LC_CTYPE \"\")" << std::endl;
 
-    for (Handle h : subsetLinks)
+    for (const Handle& h : subsetLinks)
     {
         subsetFile << h->toShortString();
     }
@@ -4634,11 +4503,8 @@ void PatternMiner::selectSubsetForDBpedia()
 }
 
 
-std::string PatternMiner::Link2keyString(const Handle& h, std::string indent, const AtomSpace* atomspace)
+std::string PatternMiner::Link2keyString(const Handle& h, const std::string& indent)
 {
-    if (atomspace == nullptr)
-        atomspace = this->as;
-
     std::stringstream answer;
     std::string more_indent = indent + LINE_INDENTATION;
 
@@ -4653,9 +4519,8 @@ std::string PatternMiner::Link2keyString(const Handle& h, std::string indent, co
 
     if (h->isLink())
     {
-        HandleSeq outgoings = h->getOutgoingSet();
-        for (const Handle& outgoing : outgoings)
-            answer << Link2keyString(outgoing, more_indent, atomspace);
+        for (const Handle& outgoing : h->getOutgoingSet())
+            answer << Link2keyString(outgoing, more_indent);
     }
 
     return answer.str();
@@ -4786,7 +4651,7 @@ void PatternMiner::testPatternMatcher()
 }
 
 
-HandleSet PatternMiner::_getAllNonIgnoredLinksForGivenNode(Handle keywordNode, HandleSet& allSubsetLinks)
+HandleSet PatternMiner::_getAllNonIgnoredLinksForGivenNode(Handle keywordNode, const HandleSet& allSubsetLinks)
 {
     HandleSet newHandles;
     IncomingSet incomings = keywordNode->getIncomingSet(&original_as);
@@ -4832,7 +4697,7 @@ HandleSet PatternMiner::_getAllNonIgnoredLinksForGivenNode(Handle keywordNode, H
     return newHandles;
 }
 
-HandleSet PatternMiner::_extendOneLinkForSubsetCorpus(HandleSet& allNewLinksLastGram, HandleSet& allSubsetLinks, HandleSet& extractedNodes)
+HandleSet PatternMiner::_extendOneLinkForSubsetCorpus(const HandleSet& allNewLinksLastGram, HandleSet& allSubsetLinks, HandleSet& extractedNodes)
 {
     HandleSet allNewConnectedLinksThisGram;
     // only extend the links in allNewLinksLastGram. allNewLinksLastGram is a part of allSubsetLinks
@@ -4840,7 +4705,7 @@ HandleSet PatternMiner::_extendOneLinkForSubsetCorpus(HandleSet& allNewLinksLast
     {
         // find all nodes in this link
         HandleSet allNodes;
-        extractAllNodesInLink(link, allNodes, original_as);
+        extractAllNodesInLink(link, allNodes);
 
         for (const Handle& neighborNode : allNodes)
         {
@@ -4868,7 +4733,7 @@ HandleSet PatternMiner::_extendOneLinkForSubsetCorpus(HandleSet& allNewLinksLast
 }
 
 // allSubsetLinks is  output
-void PatternMiner::findAllLinksContainKeyWords(vector<string>& subsetKeywords, unsigned int max_connection, bool logic_contain, HandleSet& allSubsetLinks)
+void PatternMiner::findAllLinksContainKeyWords(const vector<string>& subsetKeywords, unsigned int max_connection, bool logic_contain, HandleSet& allSubsetLinks)
 {
     allSubsetLinks.clear();
     HandleSet extractedNodes;
@@ -5044,7 +4909,7 @@ void PatternMiner::selectSubsetAllEntityLinksContainsKeywords(vector<string>& su
 // logic_contain = true will find all the Nodes with a label contains any of the keywords,e.g.
 // keyword = Premier , Node "32nd Premier of New South Wales" will be found if logic_contain = true;
 // only Node "Premier" will be found if logic_contain = false
-void PatternMiner::_selectSubsetFromCorpus(vector<string>& subsetKeywords, unsigned int max_connection, bool logic_contain)
+void PatternMiner::_selectSubsetFromCorpus(const vector<string>& subsetKeywords, unsigned int max_connection, bool logic_contain)
 {
     std::cout << "\nSelecting a subset from loaded corpus in Atomspace for the following keywords within " << max_connection << " distance:" << std::endl ;
     HandleSet allSubsetLinks;
@@ -5239,7 +5104,7 @@ HandleSeq PatternMiner::loadPatternIntoAtomSpaceFromString(string patternStr, At
     // static int pattern_num = 0;
     // string patternToStr = "";
 
-    // for(Handle h : pattern)
+    // for (Handle h : pattern)
     // {
     //    patternToStr += h->toShortString();
     //    patternToStr += "\n";
@@ -5402,7 +5267,7 @@ HandleSeq PatternMiner::loadPatternIntoAtomSpaceFromFileString(string patternStr
 //     static int pattern_num = 0;
 //     string patternToStr = "";
 
-//     for(Handle h : pattern)
+//     for (Handle h : pattern)
 //     {
 //        patternToStr += h->toShortString();
 //        patternToStr += "\n";

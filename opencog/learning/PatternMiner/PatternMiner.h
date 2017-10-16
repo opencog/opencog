@@ -336,27 +336,25 @@ protected:
 
     void ReplaceConstNodeWithVariableForOneLink(Handle link, Handle constNode, Handle newVariableNode, HandleSeq& renameOutgoingLinks);
 
-    HandleSeq ReplaceConstNodeWithVariableForAPattern(HandleSeq& pattern, Handle constNode, Handle newVariableNode);
+    HandleSeq ReplaceConstNodeWithVariableForAPattern(const HandleSeq& pattern, Handle constNode, Handle newVariableNode);
 
     void generateIndexesOfSharedVars(const Handle& link, const HandleSeq& orderedHandles, vector<vector<std::pair<int, size_t>>> &indexes);
 
     // generate the outgoings for a link in a pattern in the Pattern mining Atomspace, according to the given group of variables
-    void generateALinkByChosenVariables(const Handle &originalLink, HandleMap& valueToVarMap, HandleSeq &outputOutgoings, AtomSpace& from_as);
+    void generateALinkByChosenVariables(const Handle &originalLink, HandleMap& valueToVarMap, HandleSeq &outputOutgoings);
 
     // valueToVarMap: the ground value node in the orginal Atomspace
     // to the variable handle in pattenmining Atomspace
-    void extractAllNodesInLink(const Handle& link,
-                               HandleMap& valueToVarMap,
-                               AtomSpace& from_as);
-    void extractAllNodesInLink(Handle link, HandleSet& allNodes, AtomSpace& from_as);
-    void extractAllNodesInLink(Handle link, map<Handle, unsigned int> &allNodes, AtomSpace& from_as, unsigned index); // just find all the nodes in the original atomspace for this link
-    void extractAllVariableNodesInLink(Handle link, HandleSet& allNodes, AtomSpace& _as);
-    void extractAllConstNodesInALink(Handle link, HandleSet& allConstNodes, AtomSpace& _as);
+    void extractAllNodesInLink(const Handle& link, HandleMap& valueToVarMap);
+    void extractAllNodesInLink(Handle link, HandleSet& allNodes);
+    void extractAllNodesInLink(Handle link, map<Handle, unsigned int> &allNodes, unsigned index); // just find all the nodes in the original atomspace for this link
+    void extractAllVariableNodesInLink(Handle link, HandleSet& allNodes);
+    void extractAllConstNodesInALink(Handle link, HandleSet& allConstNodes);
 
     // if a link contains only variableNodes , no const nodes
-    bool onlyContainVariableNodes(Handle link, AtomSpace& _as);
+    bool onlyContainVariableNodes(Handle link);
 
-    bool containVariableNodes(Handle link, AtomSpace& _as);
+    bool containVariableNodes(Handle link);
 
     void extractAllPossiblePatternsFromInputLinksBF(const HandleSeq& inputLinks, HTreeNode* parentNode, HandleSet& sharedNodes, unsigned int gram);
 
@@ -387,17 +385,18 @@ protected:
     HandleSeq copyLinks(AtomSpace& to_as, const HandleSeq& links,
                         HandleSeq &variables);
 
-    void swapOneLinkBetweenTwoAtomSpaceForBindLink(AtomSpace& from_as, AtomSpace& to_as, const Handle& fromLink, HandleSeq& outgoings,
+    void swapOneLinkBetweenTwoAtomSpaceForBindLink(AtomSpace& to_as, const Handle& fromLink, HandleSeq& outgoings,
                                           HandleSeq &outVariableNodes, HandleSeq& linksWillBeDel, bool& containVar);
 
-    HandleSeq swapLinksBetweenTwoAtomSpaceForBindLink(AtomSpace& from_as, AtomSpace& to_as, const HandleSeq& fromLinks, HandleSeq& outVariableNodes, HandleSeq& linksWillBeDel);
+    HandleSeq swapLinksBetweenTwoAtomSpaceForBindLink(AtomSpace& to_as, const HandleSeq& fromLinks, HandleSeq& outVariableNodes, HandleSeq& linksWillBeDel);
 
-    void extractAllVariableNodesInAnInstanceLink(const Handle& instanceLink, Handle& patternLink, HandleSet& allVarNodes);
+    void extractAllVariableNodesInAnInstanceLink(const Handle& instanceLink, const Handle& patternLink, HandleSet& allVarNodes);
 
-    void extractAllVariableNodesInAnInstanceLink(const Handle& instanceLink, Handle& patternLink, map<Handle, unsigned int>& allVarNodes, unsigned index);
+    void extractAllVariableNodesInAnInstanceLink(const Handle& instanceLink, const Handle& patternLink, map<Handle, unsigned int>& allVarNodes, unsigned index);
 
-    void extendAllPossiblePatternsForOneMoreGramDF(const HandleSeq& instance, AtomSpace& from_as, unsigned int gram,
-                                                   vector<HTreeNode*>& allLastGramHTreeNodes, map<HandleSeq, vector<HTreeNode*>>& allFactLinksToPatterns, vector<HandleSet>& newConnectedLinksFoundThisGram);
+    // Unused
+    // void extendAllPossiblePatternsForOneMoreGramDF(const HandleSeq& instance, AtomSpace& from_as, unsigned int gram,
+    //                                                vector<HTreeNode*>& allLastGramHTreeNodes, map<HandleSeq, vector<HTreeNode*>>& allFactLinksToPatterns, vector<HandleSet>& newConnectedLinksFoundThisGram);
 
     void extendAllPossiblePatternsForOneMoreGramBF(const HandleSeq& instance, HTreeNode* curHTreeNode, unsigned int gram);
 
@@ -413,7 +412,7 @@ protected:
                                                  bool isExtendedFromVar, set<string>& allNewMinedPatternsCurTask, vector<HTreeNode*>& allHTreeNodesCurTask,
                                                  vector<MinedPatternInfo>& allNewMinedPatternInfo, unsigned int thread_index, bool startFromLinkContainWhiteKeyword);
 
-    bool containsLoopVariable(HandleSeq& inputPattern);
+    bool containsLoopVariable(const HandleSeq& inputPattern);
 
     void quoteAPattern(HTreeNode* hTreeNode);
 
@@ -456,32 +455,30 @@ protected:
 
     bool isIgnoredType(Type type);
 
-    bool isTypeInList(Type type, vector<Type> &typeList);
+    bool isTypeInList(Type type, const vector<Type> &typeList);
 
     // if atomspace = nullptr, it will use the pattern mining Atomspace
-    std::string Link2keyString(const Handle& link, string indent="", const AtomSpace* atomspace=nullptr);
+    std::string Link2keyString(const Handle& link, const string& indent=string());
 
-    void removeLinkAndItsAllSubLinks(AtomSpace& _atomspace, Handle link);
+    HandleSet _getAllNonIgnoredLinksForGivenNode(Handle keywordNode, const HandleSet& allSubsetLinks);
 
-    HandleSet _getAllNonIgnoredLinksForGivenNode(Handle keywordNode, HandleSet& allSubsetLinks);
-
-    HandleSet _extendOneLinkForSubsetCorpus(HandleSet& allNewLinksLastGram, HandleSet& allSubsetLinks, HandleSet& extractedNodes);
+    HandleSet _extendOneLinkForSubsetCorpus(const HandleSet& allNewLinksLastGram, HandleSet& allSubsetLinks, HandleSet& extractedNodes);
 
     // will write the subset to a scm file
-    void _selectSubsetFromCorpus(vector<string>& subsetKeywords, unsigned int max_connection, bool logic_contain=true);
+    void _selectSubsetFromCorpus(const vector<string>& subsetKeywords, unsigned int max_connection, bool logic_contain=true);
 
-    void findAllLinksContainKeyWords(vector<string>& subsetKeywords, unsigned int max_connection, bool logic_contain, HandleSet& foundLinks);
+    void findAllLinksContainKeyWords(const vector<string>& subsetKeywords, unsigned int max_connection, bool logic_contain, HandleSet& foundLinks);
 
-    bool isIgnoredContent(string keyword);
+    bool isIgnoredContent(const string& keyword);
 
-    bool containIgnoredContent(Handle link );
+    bool containIgnoredContent(Handle link);
 
     bool doesLinkContainNodesInKeyWordNodes(const Handle& link, const HandleSet& keywordNodes);
 
     vector<string> keyword_black_list;
     vector<string> keyword_white_list;
 
-    bool splitDisconnectedLinksIntoConnectedGroups(HandleSeq& inputLinks, HandleSeqSeq& outputConnectedGroups);
+    bool splitDisconnectedLinksIntoConnectedGroups(const HandleSeq& inputLinks, HandleSeqSeq& outputConnectedGroups);
 
     double calculateEntropyOfASubConnectedPattern(string& connectedSubPatternKey, HandleSeq& connectedSubPattern);
 
@@ -489,24 +486,25 @@ protected:
 
     void generateComponentCombinations(string componentsStr, vector<vector<vector<unsigned int>>> &componentCombinations);
 
-    unsigned int getCountOfAConnectedPattern(string& connectedPatternKey, HandleSeq& connectedPattern);
+    unsigned int getCountOfAConnectedPattern(const string& connectedPatternKey, const HandleSeq& connectedPattern);
 
-    unsigned int getAllEntityCountWithSamePredicatesForAPattern(HandleSeq& pattern);
+    unsigned int getAllEntityCountWithSamePredicatesForAPattern(const HandleSeq& pattern);
 
-    void calculateSurprisingness(HTreeNode* HNode, AtomSpace& from_as);
+    void calculateSurprisingness(HTreeNode* HNode);
 
-    void calculateTypeBSurprisingness(HTreeNode* HNode, AtomSpace& from_as);
+    void calculateTypeBSurprisingness(HTreeNode* HNode);
 
 	// NTODO: not used
     void getOneMoreGramExtendedLinksFromGivenLeaf(Handle& toBeExtendedLink, Handle& leaf, Handle& varNode,
                                                   HandleSeq& outPutExtendedPatternLinks, AtomSpace& from_as);
 
-    bool isALinkOneInstanceOfGivenPattern(Handle &instanceLink, Handle& patternLink, AtomSpace& instanceLinkAtomSpace);
+    bool isALinkOneInstanceOfGivenPattern(const Handle &instanceLink, const Handle& patternLink);
 
-    void reNameNodesForALink(Handle& inputLink, Handle& nodeToBeRenamed, Handle& newNamedNode,HandleSeq& renameOutgoingLinks,
-                             AtomSpace& from_as, AtomSpace& to_as);
+    void reNameNodesForALink(const Handle& inputLink, const Handle& nodeToBeRenamed,
+                             Handle& newNamedNode, HandleSeq& renameOutgoingLinks,
+                             AtomSpace& to_as);
 
-    bool filters(HandleSeq& inputLinks, HandleSeqSeq& oneOfEachSeqShouldBeVars, HandleSeq& leaves, HandleSeq& shouldNotBeVars, HandleSeq& shouldBeVars,AtomSpace& _as);
+    bool filters(const HandleSeq& inputLinks, HandleSeqSeq& oneOfEachSeqShouldBeVars, HandleSeq& leaves, HandleSeq& shouldNotBeVars, HandleSeq& shouldBeVars);
 
     bool containWhiteKeywords(const string& str, QUERY_LOGIC logic);
 
@@ -530,22 +528,21 @@ public:
 
     bool checkPatternExist(const string& patternKeyStr);
 
-    string unifiedPatternToKeyString(const HandleSeq& inputPattern ,
-                                     const AtomSpace* atomspace=nullptr);
+    string unifiedPatternToKeyString(const HandleSeq& inputPattern);
 
-    void OutPutFrequentPatternsToFile(unsigned int n_gram, vector<vector<HTreeNode*>>& _patternsForGram, string _fileNamebasic="");
+    void OutPutFrequentPatternsToFile(unsigned int n_gram, const vector<vector<HTreeNode*>>& _patternsForGram, const string& _fileNamebasic=string());
 
     void OutPutStaticsToCsvFile(unsigned int n_gram);
 
-    void OutPutLowFrequencyHighSurprisingnessPatternsToFile(vector<HTreeNode*> &patternsForThisGram, unsigned int n_gram, unsigned int max_frequency_index);
+    void OutPutLowFrequencyHighSurprisingnessPatternsToFile(const vector<HTreeNode*>& patternsForThisGram, unsigned int n_gram, unsigned int max_frequency_index);
 
-    void OutPutHighFrequencyHighSurprisingnessPatternsToFile(vector<HTreeNode*> &patternsForThisGram, unsigned int n_gram, unsigned int min_frequency_index);
+    void OutPutHighFrequencyHighSurprisingnessPatternsToFile(const vector<HTreeNode*>& patternsForThisGram, unsigned int n_gram, unsigned int min_frequency_index);
 
-    void OutPutHighSurprisingILowSurprisingnessIIPatternsToFile(vector<HTreeNode*> &patternsForThisGram, unsigned int n_gram, float min_surprisingness_I, float max_surprisingness_II);
+    void OutPutHighSurprisingILowSurprisingnessIIPatternsToFile(const vector<HTreeNode*>& patternsForThisGram, unsigned int n_gram, float min_surprisingness_I, float max_surprisingness_II);
 
-    void OutPutInterestingPatternsToFile(vector<HTreeNode*> &patternsForThisGram, unsigned int n_gram, int surprisingness, string _fileNamebasic="");
+    void OutPutInterestingPatternsToFile(const vector<HTreeNode*>& patternsForThisGram, unsigned int n_gram, int surprisingness, const string& _fileNamebasic=string());
 
-    void OutPutSurpringnessBToFile(vector<HTreeNode*> &patternsForThisGram, unsigned int n_gram);
+    void OutPutSurpringnessBToFile(const vector<HTreeNode*> &patternsForThisGram, unsigned int n_gram);
 
     void OutPutFinalPatternsToFile(unsigned int n_gram);
 
@@ -574,7 +571,7 @@ public:
 
     void runInterestingnessEvaluation();
 
-    void selectSubsetFromCorpus(vector<string> &topics, unsigned int gram, bool if_contian_logic=true);
+    void selectSubsetFromCorpus(const vector<string> &topics, unsigned int gram, bool if_contian_logic=true);
 
     void selectSubsetAllEntityLinksContainsKeywords(vector<string>& subsetKeywords);
 
@@ -582,7 +579,7 @@ public:
 
     void selectSubsetForDBpedia();
 
-    vector<HTreeNode*>&  getFinalPatternsForGram(unsigned int gram){return finalPatternsForGram[gram - 1];}
+    vector<HTreeNode*>&  getFinalPatternsForGram(unsigned int gram){ return finalPatternsForGram[gram - 1];}
 
     void loadPatternsFromResultFile(string fileName);
 

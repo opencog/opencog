@@ -318,7 +318,7 @@ void DistributedPatternMiner::growPatternsDepthFirstTask(unsigned int thread_ind
     patternJsonArrays[thread_index] = json::value::array();
 
     float allLinkNumberfloat = ((float)(end_index - start_index));
-    for(unsigned int t_cur_index = start_index; t_cur_index < end_index; ++t_cur_index)
+    for (unsigned int t_cur_index = start_index; t_cur_index < end_index; ++t_cur_index)
     {
         readNextLinkLock.lock();
         cout<< "\r" << ((float)(t_cur_index - start_index))/allLinkNumberfloat*100.0f << "% completed in Thread " + toString(thread_index) + "."; // it's not liner
@@ -400,12 +400,8 @@ void DistributedPatternMiner::growPatternsDepthFirstTask(unsigned int thread_ind
         if (THREAD_NUM == 1)
             as->clear(); // can only clear the atomspace when only 1 thread is used
 
-        for(unsigned int hNodeNum = 0; hNodeNum < allHTreeNodesCurTask.size(); hNodeNum ++)
-        {
-            delete (allHTreeNodesCurTask[hNodeNum]);
-        }
-
-
+        for (HTreeNode* htn : allHTreeNodesCurTask)
+            delete htn;
     }
 
     if (not patternJsonArrays[thread_index].empty())
@@ -420,7 +416,6 @@ void DistributedPatternMiner::addPatternsToJsonArrayBuf(string curPatternKeyStr,
 
     try
     {
-
         json::value patternInfo = json::value::object();
         patternInfo[U("Pattern")] = json::value(U(curPatternKeyStr));
         patternInfo[U("ParentPattern")] = json::value(U(parentKeyString));
@@ -524,8 +519,5 @@ bool DistributedPatternMiner::sendRequest(http_request &request, http_response &
         cout << "exception:" << e.what() << std::endl;
         return false;
     }
-
-
-
 }
 

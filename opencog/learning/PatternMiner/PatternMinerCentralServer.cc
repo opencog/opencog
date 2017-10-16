@@ -119,12 +119,8 @@ void DistributedPatternMiner::launchCentralServer()
         {
             // calculate the corpus size by adding up all the processedFactsNum of every worker
             unsigned int totalProcessedFactsNum = 0;
-            map<string,std::pair<bool, unsigned int>>::iterator workerIt;
-
-            for( workerIt = allWorkers.begin(); workerIt != allWorkers.end(); ++ workerIt)
-            {
-                totalProcessedFactsNum += (workerIt->second).second ;
-            }
+            for (const auto& worker : allWorkers)
+                totalProcessedFactsNum += worker.second.second;
 
             atomspaceSizeFloat = (float) totalProcessedFactsNum;
 
@@ -181,15 +177,11 @@ bool DistributedPatternMiner::checkIfAllWorkersStopWorking()
 {
 
     if (allWorkers.empty())
-        return false; // has not start yet
+        return false; // has not started yet
 
-    map<string,std::pair<bool, unsigned int>>::iterator workerIt;
-    for( workerIt = allWorkers.begin(); workerIt != allWorkers.end(); ++ workerIt)
-    {
-        if ( (workerIt->second).first == true)
+    for (const auto& workerIt : allWorkers)
+        if (worker.second.first)
             return false;
-    }
-
 
     return true;
 }
@@ -546,7 +538,7 @@ void DistributedPatternMiner::centralServerEvaluateInterestingness()
 
     std::cout<<"Debug: PatternMiner:  done frequent pattern mining for 1 to "<< MAX_GRAM <<"gram patterns!\n";
 
-    for(unsigned int gram = 1; gram <= MAX_GRAM; gram ++)
+    for (unsigned int gram = 1; gram <= MAX_GRAM; gram++)
     {
         // sort by frequency
         boost::sort(patternsForGram[gram-1], compareHTreeNodeByFrequency );
@@ -563,7 +555,7 @@ void DistributedPatternMiner::centralServerEvaluateInterestingness()
 
     if (enable_Interesting_Pattern)
     {
-        for(cur_gram = 2; cur_gram <= MAX_GRAM; cur_gram ++)
+        for (cur_gram = 2; cur_gram <= MAX_GRAM; cur_gram++)
         {
             cout << "\nCalculating";
             if (Enable_Interaction_Information)
@@ -637,7 +629,6 @@ void DistributedPatternMiner::centralServerEvaluateInterestingness()
                         break;
                 }
 
-
                 cout<< "surprisingness_II_threshold for " << cur_gram << " gram = "<< surprisingness_II_threshold;
 
                 // go through the top N patterns of surprisingness_I, pick the patterns with surprisingness_II higher than threshold
@@ -655,9 +646,7 @@ void DistributedPatternMiner::centralServerEvaluateInterestingness()
                 boost::sort(finalPatternsForGram[cur_gram-1], compareHTreeNodeByFrequency );
 
                 OutPutFinalPatternsToFile(cur_gram);
-
             }
-
             std::cout<< std::endl;
         }
     }
