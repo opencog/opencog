@@ -34,6 +34,7 @@
 #include <thread>
 
 #include <boost/range/algorithm/sort.hpp>
+#include <boost/range/algorithm/find.hpp>
 #include <boost/algorithm/string.hpp>
 #include <boost/algorithm/string/regex.hpp>
 
@@ -52,21 +53,10 @@ using namespace opencog::PatternMining;
 using namespace opencog;
 
 
-bool isInStringVector(string _item, vector<string> _vector)
-{
-    for (string s : _vector)
-    {
-        if (s == _item)
-            return true;
-    }
-
-    return false;
-}
-
 void PatternMiner::generateIndexesOfSharedVars(Handle& link, HandleSeq& orderedHandles, vector<vector<std::pair<int,std::size_t>>>& indexes)
 {
     HandleSeq outgoingLinks = link->getOutgoingSet();
-    for (Handle h : outgoingLinks)
+    for (const Handle& h : outgoingLinks)
     {
         if (h->isNode())
         {
@@ -74,16 +64,16 @@ void PatternMiner::generateIndexesOfSharedVars(Handle& link, HandleSeq& orderedH
             {
                 string var_name = h->getName();
 
-                vector<std::pair<int,std::size_t>> indexesForCurVar; // vector<handleindex,varposintthehandle>
+                vector<std::pair<int, std::size_t>> indexesForCurVar; // vector<handleindex,varposintthehandle>
                 int index = 0;
 
-                for (Handle oh : orderedHandles)
+                for (const Handle& oh : orderedHandles)
                 {
                     string ohStr = oh->toShortString();
                     std::size_t pos = ohStr.find(var_name) ;
                     if (pos != std::string::npos)
                     {
-                        indexesForCurVar.push_back(std::pair<int,std::size_t>(index,pos));
+                        indexesForCurVar.emplace_back(index, pos);
                     }
 
                     index ++;
@@ -1270,7 +1260,7 @@ bool PatternMiner::remove_keyword_from_black_list(string _keyword)
 
 bool PatternMiner::add_keyword_to_white_list(string _keyword)
 {
-    if (isInStringVector(_keyword, keyword_white_list))
+    if (is_in(_keyword, keyword_white_list))
         return false; // already exist
 
     keyword_white_list.push_back(_keyword);

@@ -67,6 +67,7 @@ struct _non_ordered_pattern
 
     bool operator <(const _non_ordered_pattern& other) const
     {
+        // NTODO replace by range loop
         for (unsigned int i = 0; i < indexesOfSharedVars.size(); ++ i)
         {
             if (indexesOfSharedVars[i].size() < other.indexesOfSharedVars[i].size())
@@ -104,6 +105,7 @@ struct advanced_non_ordered_pattern // only when complex patterns like pln patte
     bool operator <(const _non_ordered_pattern& other) const
     {
         // first, use indexesOfSharedVars
+        // NTODO replace by range loop
         for (unsigned int i = 0; i < indexesOfSharedVars.size(); ++ i)
         {
             if (indexesOfSharedVars[i].size() < other.indexesOfSharedVars[i].size())
@@ -642,7 +644,7 @@ public:
     bool remove_link_type_from_same_link_types_not_share_second_outgoing(Type _type);
     void clear_same_link_types_not_share_second_outgoing(){same_link_types_not_share_second_outgoing.clear();}
 
-    void set_enable_filter_node_types_should_not_be_vars(bool _enable){enable_filter_node_types_should_not_be_vars = _enable;}
+    void set_enable_filter_node_types_should_not_be_vars(bool _enable){enable_filter_node_types_should_not_be_vars=_enable;}
     bool get_enable_filter_node_types_should_not_be_vars(){return enable_filter_node_types_should_not_be_vars;}
     vector<Type> get_node_types_should_not_be_vars(){return node_types_should_not_be_vars;}
     bool add_node_type_to_node_types_should_not_be_vars(Type _type);
