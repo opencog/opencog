@@ -360,18 +360,12 @@ void PatternMiner::runPatternMinerDepthFirst()
 // notOutPutPattern is passed from extendAPatternForOneMoreGramRecursively, also may be modify in this function.
 // it indicates if one pattern is only generated for middle process - calculate interestingness for its superpatterns, but not put in output results
 HTreeNode* PatternMiner::extractAPatternFromGivenVarCombination(HandleSeq &inputLinks, HandleMap &patternVarMap, HandleMap& orderedVarNameMap,HandleSeqSeq &oneOfEachSeqShouldBeVars, HandleSeq &leaves,
-                                                                HandleSeq &shouldNotBeVars, HandleSeq &shouldBeVars, AtomSpace& from_as, unsigned int & extendedLinkIndex,
+                                                                HandleSeq &shouldNotBeVars, HandleSeq &shouldBeVars, unsigned int & extendedLinkIndex,
                                                                 set<string>& allNewMinedPatternsCurTask, bool& notOutPutPattern, bool &patternAlreadyExtractedInCurTask, bool startFromLinkContainWhiteKeyword)
 {
     HTreeNode* returnHTreeNode = nullptr;
     bool skip = false;
     unsigned int gram = inputLinks.size();
-
-//    // debug
-//    string inputLinksStr = "";
-//    for (Handle h : inputLinks)
-//        inputLinksStr += from_as.atomAsString(h);
-
 
     if (not shouldNotBeVars.empty())
     {
@@ -833,7 +827,7 @@ void PatternMiner::extendAPatternForOneMoreGramRecursively(const Handle &extende
             HandleMap orderedVarNameMap;
 
             HTreeNode* thisGramHTreeNode = extractAPatternFromGivenVarCombination(inputLinks, patternVarMap, orderedVarNameMap,oneOfEachSeqShouldBeVars, leaves, shouldNotBeVars, shouldBeVars,
-                                          from_as, extendedLinkIndex, allNewMinedPatternsCurTask, notOutPutPattern, patternAlreadyExtractedInCurTask, startFromLinkContainWhiteKeyword);
+                                          extendedLinkIndex, allNewMinedPatternsCurTask, notOutPutPattern, patternAlreadyExtractedInCurTask, startFromLinkContainWhiteKeyword);
 
             if (thisGramHTreeNode)
             {

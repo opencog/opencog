@@ -873,7 +873,6 @@ void PatternMiner::findAllInstancesForGivenPatternInNestedAtomSpace(HTreeNode* H
     // Run pattern matcher
     Handle hResultListLink = opencog::bindlink(&_as, hBindLink);
 
-
     // Get result
     // Note: Don't forget to remove the hResultListLink and BindLink
     HandleSeq resultSet = hResultListLink->getOutgoingSet();
