@@ -579,7 +579,12 @@ public:
 
     void selectSubsetForDBpedia();
 
-    vector<HTreeNode*>&  getFinalPatternsForGram(unsigned int gram){ return finalPatternsForGram[gram - 1];}
+    vector<HTreeNode*>& getFinalPatternsForGram(unsigned int gram) {
+        return finalPatternsForGram[gram - 1];
+    }
+    const vector<HTreeNode*>& getFinalPatternsForGram(unsigned int gram) const {
+        return finalPatternsForGram[gram - 1];
+    }
 
     void loadPatternsFromResultFile(string fileName);
 

@@ -1307,13 +1307,13 @@ void PatternMiner::OutPutFinalPatternsToFile(unsigned int n_gram)
               << fileName << std::endl;
 
     resultFile.open(fileName.c_str());
-    vector<HTreeNode*>& patternsForThisGram = finalPatternsForGram[n_gram-1];
+    const vector<HTreeNode*>& patternsForThisGram = finalPatternsForGram[n_gram-1];
 
 
     resultFile << ";Interesting Pattern Mining final results for " + toString(n_gram) + " gram patterns. Total pattern number: " + toString(patternsForThisGram.size()) << endl;
 
 
-    for (HTreeNode* htreeNode : patternsForThisGram)
+    for (const HTreeNode* htreeNode : patternsForThisGram)
     {
         if (htreeNode->count < thresholdFrequency)
             continue;
@@ -1539,7 +1539,7 @@ void PatternMiner::OutPutSurpringnessBToFile(const vector<HTreeNode*>& patternsF
             resultFile << htreeNode->quotedPatternLink->toShortString();
         else
         {
-            for (Handle link : htreeNode->pattern)
+            for (const Handle& link : htreeNode->pattern)
             {
                 resultFile << link->toShortString();
             }
@@ -1561,7 +1561,7 @@ void PatternMiner::OutPutStaticsToCsvFile(unsigned int n_gram)
     ofstream csvFile;
     string csvfileName = "PatternStatics_" + toString(n_gram) + "gram.csv";
 
-    vector<HTreeNode*> &patternsForThisGram = patternsForGram[n_gram-1];
+    const vector<HTreeNode*>& patternsForThisGram = patternsForGram[n_gram-1];
 
     std::cout<<"\nDebug: PatternMiner: writing  (gram = " + toString(n_gram) + ") pattern statics to csv file " + csvfileName << std::endl;
 
@@ -2398,9 +2398,7 @@ unsigned int PatternMiner::getCountOfAConnectedPattern(const string& connectedPa
     if (patternNodeIter != keyStrToHTreeNodeMap.end())
     {
         uniqueKeyLock.unlock();
-
-        HTreeNode* patternNode = (HTreeNode*)patternNodeIter->second;
-
+        HTreeNode* patternNode = patternNodeIter->second;
         return patternNode->count;
     }
     else
@@ -3188,7 +3186,7 @@ void PatternMiner::calculateTypeBSurprisingness(HTreeNode* HNode)
             map<string, HTreeNode*>::iterator patternNodeIter = keyStrToHTreeNodeMap.find(superPatternKey);
             if (patternNodeIter != keyStrToHTreeNodeMap.end())
             {
-                HTreeNode* superPatternNode = (HTreeNode*)patternNodeIter->second;
+                HTreeNode* superPatternNode = patternNodeIter->second;
 
                 SuperRelation_b superb;
                 superb.superHTreeNode = superPatternNode;
@@ -3933,7 +3931,6 @@ void PatternMiner::queryPatternsWithFrequencySurprisingnessIRanges(unsigned int 
     std::cout<<"Frequency range = [" << min_frequency << ", " << max_frequency << "] "  << std::endl;
     std::cout<<"Surprisingness_I range = [" << toString(min_surprisingness_I) << ", " << toString(max_surprisingness_I) << "]"  << std::endl;
 
-
     vector<HTreeNode*> resultPatterns;
 
     for (HTreeNode* htreeNode : patternsForGram[gram - 1])
@@ -3950,7 +3947,6 @@ void PatternMiner::queryPatternsWithFrequencySurprisingnessIRanges(unsigned int 
 
     resultFile << ";This file contains the pattern with Frequency range = [" << min_frequency << ", " << max_frequency << "] ,"
                << "Surprisingness_I range = [" << toString(min_surprisingness_I) << ", " << toString(max_surprisingness_I) << "]" << std::endl;
-
 
     for (const HTreeNode* htreeNode : resultPatterns)
     {

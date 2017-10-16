@@ -68,10 +68,10 @@ void PatternMiner::extendAllPossiblePatternsForOneMoreGramBF(const HandleSeq& in
     // we only extend one more link on the nodes that are considered as varaibles for this pattern
     HandleSet allVarNodes;
 
-    HandleSeq::iterator patternLinkIt = curHTreeNode->pattern.begin();
+    HandleSeq::const_iterator patternLinkIt = curHTreeNode->pattern.begin();
     for (const Handle& link : instance)
     {
-        extractAllVariableNodesInAnInstanceLink(link, *(patternLinkIt), allVarNodes);
+        extractAllVariableNodesInAnInstanceLink(link, *patternLinkIt, allVarNodes);
         ++patternLinkIt;
     }
 
@@ -114,13 +114,12 @@ void PatternMiner::extendAllPossiblePatternsForOneMoreGramBF(const HandleSeq& in
             originalLinks.push_back(extendedHandle);
 
             // Extract all the possible patterns from this originalLinks, not duplicating the already existing patterns
-            extractAllPossiblePatternsFromInputLinksBF(originalLinks, curHTreeNode, allVarNodes , gram);
-
+            extractAllPossiblePatternsFromInputLinksBF(originalLinks, curHTreeNode, allVarNodes, gram);
         }
     }
 }
 
-void PatternMiner::extractAllPossiblePatternsFromInputLinksBF(const HandleSeq& inputLinks,  HTreeNode* parentNode,
+void PatternMiner::extractAllPossiblePatternsFromInputLinksBF(const HandleSeq& inputLinks, HTreeNode* parentNode,
                                                               HandleSet& sharedNodes, unsigned int gram)
 {
     HandleMap valueToVarMap;  // the ground value node in the orginal Atomspace to the variable handle in pattenmining Atomspace
