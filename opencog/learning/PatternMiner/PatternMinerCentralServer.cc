@@ -245,7 +245,7 @@ void DistributedPatternMiner::handleRegisterNewWorker(http_request request)
         modifyWorkerLock.lock();
         allWorkersStop = false;
         waitingForNewClients = false;
-        allWorkers.insert(std::pair<string,std::pair<bool, unsigned int>>(clientID, std::pair<bool, unsigned int>(true, 0))); // true means this worker is still working.
+        allWorkers.insert({clientID, std::pair<bool, unsigned int>(true, 0)}); // true means this worker is still working.
         modifyWorkerLock.unlock();
 
         json::value answer = json::value::object();
@@ -449,7 +449,7 @@ void DistributedPatternMiner::parseAPatternTask(json::value jval)
             newHTreeNode->pattern = patternHandleSeq;
             newHTreeNode->count = 1;
             uniqueKeyLock.lock();
-            keyStrToHTreeNodeMap.insert(std::pair<string, HTreeNode*>(PatternStr, newHTreeNode));
+            keyStrToHTreeNodeMap.insert({PatternStr, newHTreeNode});
             uniqueKeyLock.unlock();
 
         }
@@ -506,7 +506,7 @@ void DistributedPatternMiner::parseAPatternTask(json::value jval)
                     parentNode->count = 0;
 
                     uniqueKeyLock.lock();
-                    keyStrToHTreeNodeMap.insert(std::pair<string, HTreeNode*>(ParentPatternStr, parentNode));
+                    keyStrToHTreeNodeMap.insert({ParentPatternStr, parentNode});
                     uniqueKeyLock.unlock();
 
 //                    addNewPatternLock.lock();

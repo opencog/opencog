@@ -101,7 +101,7 @@ using namespace opencog;
 //        extractAllPossiblePatternsFromInputLinksDF(observedLinks, 0, observing_as, _allLastGramHTreeNodes,_allThisGramHTreeNodes,1);
 
 //        map<HandleSeq, vector<HTreeNode*>> allLastGramLinksToPatterns; // for this cur_link
-//        allLastGramLinksToPatterns.insert(std::pair<HandleSeq, vector<HTreeNode*>>(observedLinks, _allThisGramHTreeNodes));
+//        allLastGramLinksToPatterns.insert({observedLinks, _allThisGramHTreeNodes});
 
 //        unsigned int gram;
 
@@ -519,7 +519,7 @@ HTreeNode* PatternMiner::extractAPatternFromGivenVarCombination(HandleSeq &input
                 newHTreeNode->count = 1;
 
 
-                keyStrToHTreeNodeMap.insert(std::pair<string, HTreeNode*>(keyString, newHTreeNode));
+                keyStrToHTreeNodeMap.insert({keyString, newHTreeNode});
 
     //            cout << "A new pattern Found:\n"<< keyString << std::endl;
 
@@ -979,7 +979,7 @@ void PatternMiner::extendAPatternForOneMoreGramRecursively(const Handle &extende
                                     {
                                         vector<SubRelation_b> subRelations;
                                         subRelations.push_back(onesub_b);
-                                        thisGramHTreeNode->SubRelation_b_map.insert(std::pair<Handle, vector<SubRelation_b>>(orderedVarHandle, subRelations));
+                                        thisGramHTreeNode->SubRelation_b_map.insert({orderedVarHandle, subRelations});
 
                                     }
                                     else
@@ -1001,7 +1001,7 @@ void PatternMiner::extendAPatternForOneMoreGramRecursively(const Handle &extende
 
                         }
 
-                        varCombinToHTreeNode.insert(std::pair<string, HTreeNode*>(indexStr, thisGramHTreeNode));
+                        varCombinToHTreeNode.insert({indexStr, thisGramHTreeNode});
 
                     }
 
@@ -1306,7 +1306,7 @@ void PatternMiner::extendAPatternForOneMoreGramRecursively(const Handle &extende
 ////                sharedNodes.insert(extendNode);
 //                vector<HTreeNode*> allThisGramHTreeNodes;
 //                extractAllPossiblePatternsFromInputLinksDF(originalLinks, (unsigned int)(varIt->second), from_as, allLastGramHTreeNodes, allThisGramHTreeNodes, gram);
-//                allFactLinksToPatterns.insert(std::pair<HandleSeq, vector<HTreeNode*>>(originalLinks, allThisGramHTreeNodes));
+//                allFactLinksToPatterns.insert({originalLinks, allThisGramHTreeNodes});
 
 //            }
 
@@ -1516,7 +1516,7 @@ void PatternMiner::extendAPatternForOneMoreGramRecursively(const Handle &extende
 //                if (htreeNodeIter == keyStrToHTreeNodeMap.end())
 //                {
 //                    newHTreeNode = new HTreeNode();
-//                    keyStrToHTreeNodeMap.insert(std::pair<string, HTreeNode*>(keyString, newHTreeNode));
+//                    keyStrToHTreeNodeMap.insert({keyString, newHTreeNode});
 
 
 //                    cout << "A new pattern Found:\n"<< keyString << std::endl;

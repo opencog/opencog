@@ -662,7 +662,7 @@ void PatternMiner::extractAllVariableNodesInAnInstanceLink(const Handle& instanc
             {
                 if (allVarNodes.find(h) == allVarNodes.end())
                 {
-                    allVarNodes.insert(std::pair<Handle, unsigned>(h,index));
+                    allVarNodes.insert({h, index});
                 }
             }
         }
@@ -687,7 +687,7 @@ void PatternMiner::extractAllNodesInLink(Handle link, map<Handle, unsigned int>&
         {
             if (allNodes.find(h) == allNodes.end())
             {
-                allNodes.insert(std::pair<Handle, unsigned>(h,index) );
+                allNodes.insert({h, index});
             }
         }
         else
@@ -1964,7 +1964,7 @@ bool PatternMiner::containsLoopVariable(HandleSeq& inputPattern)
                 else
                     varLinks.containsConstLinks.push_back(inputH);
 
-                varInLinksMap.insert(std::pair<string, VariableInLinks>(varStr, varLinks));
+                varInLinksMap.insert({varStr, varLinks});
             }
             else
             {
@@ -2062,7 +2062,7 @@ bool PatternMiner::filters(HandleSeq& inputLinks, HandleSeqSeq& oneOfEachSeqShou
                     {
                         HandleSet newValues;
                         newValues.insert(valueNode);
-                        predicateToValueOfEvalLinks.insert(std::pair<Handle, HandleSet >(predicateNode,newValues));
+                        predicateToValueOfEvalLinks.insert({predicateNode, newValues});
                     }
                 }
 
@@ -2552,7 +2552,7 @@ unsigned int PatternMiner::getCountOfAConnectedPattern(string& connectedPatternK
             else
             {
                 HTreeNode* newHTreeNode = new HTreeNode();
-                keyStrToHTreeNodeMap.insert(std::pair<string, HTreeNode*>(connectedPatternKey, newHTreeNode));
+                keyStrToHTreeNodeMap.insert({connectedPatternKey, newHTreeNode});
                 uniqueKeyLock.unlock();
 
                 newHTreeNode->pattern = connectedPattern;
@@ -2701,7 +2701,7 @@ unsigned int PatternMiner::getAllEntityCountWithSamePredicatesForAPattern(Handle
             else
             {
                 IncomingSet allEvals = predicate->getIncomingSet(&original_as);
-                allEntityNumMap.insert(std::pair<string,int>(predicateName,allEvals.size()));
+                allEntityNumMap.insert({predicateName, allEvals.size()});
 //                cout << "Found: " << allEvals.size() << " entities." << std::endl;
                 return allEvals.size();
             }
@@ -2797,7 +2797,7 @@ unsigned int PatternMiner::getAllEntityCountWithSamePredicatesForAPattern(Handle
             commonLinks.swap(newCommonLinks);
         }
 
-        allEntityNumMap.insert(std::pair<string,int>(predicateWords,commonLinks.size()));
+        allEntityNumMap.insert({predicateWords, commonLinks.size()});
 //        cout << "Found: " << commonLinks.size() << " entities." << std::endl;
         return commonLinks.size();
     }
@@ -3345,12 +3345,10 @@ void PatternMiner::calculateTypeBSurprisingness(HTreeNode* HNode, AtomSpace& fro
                     sub_b.subHTreeNode = HNode;
 
                     sub_blist.push_back(sub_b);
-                    superPatternNode->SubRelation_b_map.insert(std::pair<Handle, vector<SubRelation_b>>(unified_var_node, sub_blist));
+                    superPatternNode->SubRelation_b_map.insert({unified_var_node, sub_blist});
                 }
             }
-
         }
-
     }
 
     if (HNode->superRelation_b_list.empty())
@@ -4898,8 +4896,8 @@ HandleSet PatternMiner::_extendOneLinkForSubsetCorpus(HandleSet& allNewLinksLast
 
             HandleSet newConnectedLinks;
             newConnectedLinks = _getAllNonIgnoredLinksForGivenNode(neighborNode, allSubsetLinks);
-            allNewConnectedLinksThisGram.insert(newConnectedLinks.begin(),newConnectedLinks.end());
-            allSubsetLinks.insert(newConnectedLinks.begin(),newConnectedLinks.end());
+            allNewConnectedLinksThisGram.insert(newConnectedLinks.begin(), newConnectedLinks.end());
+            allSubsetLinks.insert(newConnectedLinks.begin(), newConnectedLinks.end());
         }
 
     }
@@ -5522,7 +5520,7 @@ void PatternMiner::loadPatternsFromResultFile(string fileName)
             if (hasInteractionInformation)
                 newHTreeNode->interactionInformation = interactioninformation;
 
-            keyStrToHTreeNodeMap.insert(std::pair<string, HTreeNode*>(patternStr, newHTreeNode));
+            keyStrToHTreeNodeMap.insert({patternStr, newHTreeNode});
             (patternsForGram[patternHandleSeq.size()-1]).push_back(newHTreeNode);
             loadedPatternNum ++;
             patternStr = "";

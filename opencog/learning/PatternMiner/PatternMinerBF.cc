@@ -264,7 +264,7 @@ void PatternMiner::extractAllPossiblePatternsFromInputLinksBF(const HandleSeq& i
                     if (htreeNodeIter == keyStrToHTreeNodeMap.end())
                     {
                         newHTreeNode = new HTreeNode();
-                        keyStrToHTreeNodeMap.insert(std::pair<string, HTreeNode*>(keyString, newHTreeNode));
+                        keyStrToHTreeNodeMap.insert({keyString, newHTreeNode});
                     }
                     else
                     {
