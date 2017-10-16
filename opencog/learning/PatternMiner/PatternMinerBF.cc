@@ -170,7 +170,6 @@ void PatternMiner::extractAllPossiblePatternsFromInputLinksBF(const HandleSeq& i
         sharedNodesIndexes[sharedCout] = -1;
         HandleMap::iterator varIt;
         int j = 0;
-        // NTODO convert into range loop
         for (varIt = valueToVarMap.begin(); varIt != valueToVarMap.end(); ++varIt, j++)
         {
             if ((varIt->first) == shardNode)
@@ -202,7 +201,6 @@ void PatternMiner::extractAllPossiblePatternsFromInputLinksBF(const HandleSeq& i
         {
             // construct the pattern for this combination in the PatternMining Atomspace
             // generate the valueToVarMap for this pattern of this combination
-            HandleMap::iterator iter;
 
             HandleMap patternVarMap;
 
@@ -222,13 +220,12 @@ void PatternMiner::extractAllPossiblePatternsFromInputLinksBF(const HandleSeq& i
             if (sharedAllVar)
             {
                 unsigned int index = 0;
-                // NTODO convert into range loop
-                for (iter = valueToVarMap.begin(); iter != valueToVarMap.end(); ++ iter)
+                for (const auto& valvar : valueToVarMap)
                 {
                     if (indexes[index]) // this is considered as a variable, add it into the variable to value map
-                        patternVarMap.insert(HandlePair(iter->first, iter->second));
+                        patternVarMap.insert(valvar);
 
-                    index ++;
+                    index++;
                 }
 
                 HandleSeq pattern, unifiedPattern;

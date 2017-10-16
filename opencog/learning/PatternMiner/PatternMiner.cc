@@ -97,19 +97,17 @@ void PatternMiner::generateIndexesOfSharedVars(Handle& link, HandleSeq& orderedH
     }
 }
 
-void PatternMiner::findAndRenameVariablesForOneLink(Handle link, HandleMap& varNameMap, HandleSeq& renameOutgoingLinks, std::map<Handle,Type> &orderedTmpLinkToType)
+HandleSeq PatternMiner::findAndRenameVariables(const Handle& link, HandleMap& varNameMap,
+                                               std::map<Handle, Type>& orderedTmpLinkToType)
 {
-
-    HandleSeq outgoingLinks = link->getOutgoingSet();
-
-    for (Handle h : outgoingLinks)
+    HandleSeq renameOutgoingLinks;
+    for (const Handle& h : link->getOutgoingSet())
     {
-
         if (h->isNode())
         {
            if (h->getType() == opencog::PATTERN_VARIABLENODE_TYPE)
            {
-               // it's a variable node, rename it
+               // It's a variable node, rename it if not in varNameMap
                if (varNameMap.find(h) != varNameMap.end())
                {
                    renameOutgoingLinks.push_back(varNameMap[h]);
@@ -119,21 +117,20 @@ void PatternMiner::findAndRenameVariablesForOneLink(Handle link, HandleMap& varN
                    string var_name = "$var_"  + toString(varNameMap.size() + 1);
                    Handle var_node = as->add_node(opencog::PATTERN_VARIABLENODE_TYPE, var_name);
 
-                   varNameMap.insert(HandlePair(h,var_node));
+                   varNameMap.insert(HandlePair(h, var_node));
                    renameOutgoingLinks.push_back(var_node);
                }
            }
            else
            {
-               // it's a const node, just add it
+               // It's a const node, just add it
                renameOutgoingLinks.push_back(h);
-
            }
         }
         else
         {
-             HandleSeq _renameOutgoingLinks;
-             findAndRenameVariablesForOneLink(h, varNameMap, _renameOutgoingLinks, orderedTmpLinkToType);
+             HandleSeq _renameOutgoingLinks =
+	             findAndRenameVariables(h, varNameMap, orderedTmpLinkToType);
 
              Handle reLink;
 
@@ -147,24 +144,23 @@ void PatternMiner::findAndRenameVariablesForOneLink(Handle link, HandleMap& varN
 //                    reLink = as->add_link(h->getType(),_renameOutgoingLinks);
 //             }
 //             else
-                reLink = as->add_link(h->getType(),_renameOutgoingLinks);
+             reLink = as->add_link(h->getType(), _renameOutgoingLinks);
 
              renameOutgoingLinks.push_back(reLink);
         }
-
     }
-
+    return renameOutgoingLinks;
 }
 
-HandleSeq PatternMiner::RebindVariableNames(HandleSeq& orderedPattern, HandleMap& orderedVarNameMap, std::map<Handle,Type> &orderedTmpLinkToType)
+HandleSeq PatternMiner::RebindVariableNames(HandleSeq& orderedPattern, HandleMap& orderedVarNameMap, std::map<Handle,Type>& orderedTmpLinkToType)
 {
 
     HandleSeq rebindedPattern;
 
-    for (Handle h : orderedPattern)
+    for (const Handle& h : orderedPattern)
     {
-        HandleSeq renameOutgoingLinks;
-        findAndRenameVariablesForOneLink(h, orderedVarNameMap, renameOutgoingLinks, orderedTmpLinkToType);
+        HandleSeq renameOutgoingLinks =
+	        findAndRenameVariables(h, orderedVarNameMap, orderedTmpLinkToType);
 
         Handle reLink;
 
@@ -178,7 +174,7 @@ HandleSeq PatternMiner::RebindVariableNames(HandleSeq& orderedPattern, HandleMap
 //               reLink = as->add_link(h->getType(),renameOutgoingLinks);
 //        }
 //        else
-           reLink = as->add_link(h->getType(),renameOutgoingLinks);
+        reLink = as->add_link(h->getType(), renameOutgoingLinks);
 
         rebindedPattern.push_back(reLink);
     }
@@ -248,14 +244,14 @@ HandleSeq PatternMiner::UnifyPatternOrder(HandleSeq& inputPattern, unsigned int&
 {
     HandleSeq orderedHandles;
 
-    std::map<Handle,Type> orderedTmpLinkToType;
+    std::map<Handle, Type> orderedTmpLinkToType;
 
     if (enable_unify_unordered_links)
     {
         // check for unordered links and unify them first
 
         HandleSeq orderedOutgoings;
-        for (Handle link : inputPattern)
+        for (const Handle& link : inputPattern)
         {
             Handle reLink = UnifyOneLinkForUnorderedLink(link, orderedTmpLinkToType);
             orderedOutgoings.push_back(reLink);
@@ -306,7 +302,7 @@ HandleSeq PatternMiner::_UnifyPatternOrder(HandleSeq& inputPattern, unsigned int
 
     multimap<string, Handle> nonVarStrToHandleMap;
 
-    for (Handle inputH : inputPattern)
+    for (const Handle& inputH : inputPattern)
     {
         string str = inputH->toShortString();
         string nonVarNameString = "";
@@ -315,7 +311,7 @@ HandleSeq PatternMiner::_UnifyPatternOrder(HandleSeq& inputPattern, unsigned int
 
         while(std::getline(stream, oneLine,'\n'))
         {
-            if (oneLine.find("VariableNode")==std::string::npos)
+            if (oneLine.find("VariableNode") == std::string::npos)
             {
                 // this node is not a VariableNode, just keep this line
                 nonVarNameString += oneLine;
@@ -327,11 +323,11 @@ HandleSeq PatternMiner::_UnifyPatternOrder(HandleSeq& inputPattern, unsigned int
             }
         }
 
-        nonVarStrToHandleMap.insert(std::pair<string, Handle>(nonVarNameString,inputH));
+        nonVarStrToHandleMap.insert({nonVarNameString, inputH});
     }
 
     // Step 2: sort the order of all the handls do not share the same string key with other handls
-    // becasue the strings are put into a map , so they are already sorted.
+    // because the strings are put into a map, so they are already sorted.
     // now print the Handles that do not share the same key with other Handles into a vector, left the Handles share the same keys
 
     HandleSeq orderedHandles;
@@ -342,7 +338,7 @@ HandleSeq PatternMiner::_UnifyPatternOrder(HandleSeq& inputPattern, unsigned int
         int count = nonVarStrToHandleMap.count(it->first);
         if (count == 1)
         {
-            // if this key string has only one record , just put the corresponding handle to the end of orderedHandles
+            // if this key string has only one record, just put the corresponding handle to the end of orderedHandles
             orderedHandles.push_back(it->second);
             it ++;
         }
@@ -407,24 +403,24 @@ HandleSeq PatternMiner::_UnifyPatternOrder(HandleSeq& inputPattern, unsigned int
 //      ListLink
 //   AndLink
 //   ListLink
-Handle PatternMiner::UnifyOneLinkForUnorderedLink(Handle& link,std::map<Handle,Type> &orderedTmpLinkToType)
+Handle PatternMiner::UnifyOneLinkForUnorderedLink(const Handle& link,
+                                                  std::map<Handle, Type>& orderedTmpLinkToType)
 {
-    HandleSeq outgoingLinks = link->getOutgoingSet();
     HandleSeq outputOutgoingLinks;
     bool containNodes = false;
 
-    for (Handle h : outgoingLinks)
+    for (const Handle& h : link->getOutgoingSet())
     {
         if (h->isNode())
         {
-           // it's a  node, just add it
-           outputOutgoingLinks.push_back(h);
-           containNodes = true;
+            // it's a node, just add it
+            outputOutgoingLinks.push_back(h);
+            containNodes = true;
         }
-        else
-        {
-             Handle reLink = UnifyOneLinkForUnorderedLink(h, orderedTmpLinkToType);
-             outputOutgoingLinks.push_back(reLink);
+	    else
+	    {
+            Handle reLink = UnifyOneLinkForUnorderedLink(h, orderedTmpLinkToType);
+            outputOutgoingLinks.push_back(reLink);
         }
     }
 
@@ -450,16 +446,16 @@ Handle PatternMiner::UnifyOneLinkForUnorderedLink(Handle& link,std::map<Handle,T
                     nodesInOutgoings.push_back(h1);
             }
 
-            orderedOutgoings = _UnifyPatternOrder(outgoingLinksTobeUnified,unifiedLastLinkIndex);
+            orderedOutgoings = _UnifyPatternOrder(outgoingLinksTobeUnified, unifiedLastLinkIndex);
             orderedOutgoings.insert(orderedOutgoings.begin(), nodesInOutgoings.begin(), nodesInOutgoings.end());
         }
         else
-            orderedOutgoings = _UnifyPatternOrder(outputOutgoingLinks,unifiedLastLinkIndex);
+            orderedOutgoings = _UnifyPatternOrder(outputOutgoingLinks, unifiedLastLinkIndex);
 
         // change the original unordered type into a tmp ListLink
         returnLink = as->add_link(LIST_LINK, orderedOutgoings);
 
-        orderedTmpLinkToType.insert(std::pair<Handle,Type>(returnLink,originalType));
+        orderedTmpLinkToType.insert({returnLink, originalType});
     }
     else
         returnLink = as->add_link(originalType, outputOutgoingLinks);
@@ -2309,7 +2305,7 @@ void PatternMiner::calculateInteractionInformation(HTreeNode* HNode)
 
              unsigned int unifiedLastLinkIndex;
              HandleMap orderedVarNameMap;
-             HandleSeq unifiedSubPattern = UnifyPatternOrder(subPattern, unifiedLastLinkIndex,orderedVarNameMap);
+             HandleSeq unifiedSubPattern = UnifyPatternOrder(subPattern, unifiedLastLinkIndex, orderedVarNameMap);
              string subPatternKey = unifiedPatternToKeyString(unifiedSubPattern);
 
 //             std::cout<< "Subpattern: " << subPatternKey;
@@ -2848,7 +2844,7 @@ unsigned int PatternMiner::getAllEntityCountWithSamePredicatesForAPattern(Handle
 
 // II_Surprisingness_b can be calculated for all input grams, including 1 gram and max_gram
 // only calculate 2~4 gram patterns for nSurprisingness_I and nSurprisingness_II
-void PatternMiner::calculateSurprisingness( HTreeNode* HNode, AtomSpace& from_as)
+void PatternMiner::calculateSurprisingness(HTreeNode* HNode, AtomSpace& from_as)
 {
 
 //    // debug
@@ -3242,7 +3238,7 @@ void PatternMiner::calculateSurprisingness( HTreeNode* HNode, AtomSpace& from_as
 }
 
 
-void PatternMiner::calculateTypeBSurprisingness( HTreeNode* HNode, AtomSpace& from_as)
+void PatternMiner::calculateTypeBSurprisingness(HTreeNode* HNode, AtomSpace& from_as)
 {
 
     // Currently II_Surprisingness_b only for 1-gram patterns
@@ -3447,6 +3443,8 @@ PatternMiner::PatternMiner(AtomSpace& _original_as)
 
     initPatternMiner();
 
+    // NTODO replace hard coded combinations by generic generator
+
     // define (hard coding) all the possible subcomponent combinations for 2~4 gram patterns
     string gramNcomponents[3];
     // for 2 gram patterns [01], the only possible combination is [0][1]
@@ -3484,7 +3482,7 @@ void PatternMiner::addAtomTypesFromString(string node_types_str, vector<Type>& t
     vector<string> typeStrs;
     boost::split(typeStrs, node_types_str, boost::is_any_of(","));
 
-    for (string typestr : typeStrs)
+    for (const string& typestr : typeStrs)
     {
         Type atomType = classserver().getType(typestr);
         if (atomType == NOTYPE)

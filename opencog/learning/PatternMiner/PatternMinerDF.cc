@@ -490,8 +490,6 @@ HTreeNode* PatternMiner::extractAPatternFromGivenVarCombination(HandleSeq &input
             allNewMinedPatternsCurTask.insert(keyString);
         }
 
-
-
         HTreeNode* newHTreeNode = nullptr;
 
         if (is_distributed)
@@ -670,16 +668,15 @@ void PatternMiner::extendAPatternForOneMoreGramRecursively(const Handle &extende
     bool notOutPutPattern = false;
 
     if (parentNode == nullptr) // this the first gram
-    {
+    {// NTODO doesn't that mean lastGramValueToVarMap is empty?
         newValueToVarMap = valueToVarMap;
     }
     else
     {
-        HandleMap::iterator valueToVarIt = valueToVarMap.begin();
-        for(; valueToVarIt != valueToVarMap.end(); valueToVarIt ++)
+        for (const auto& p : valueToVarMap)
         {
-            if (lastGramValueToVarMap.find(valueToVarIt->first) == lastGramValueToVarMap.end())
-                newValueToVarMap.insert( HandlePair(valueToVarIt->first,valueToVarIt->second));
+            if (lastGramValueToVarMap.find(p.first) == lastGramValueToVarMap.end())
+                newValueToVarMap.insert(p);
         }
     }
 
@@ -699,7 +696,7 @@ void PatternMiner::extendAPatternForOneMoreGramRecursively(const Handle &extende
 
     unsigned int n_max = newValueToVarMap.size();
     unsigned int n_limit;
-    unsigned int n_limit_putin_result = n_max;
+    unsigned int n_limit_putin_result;
 
     // sometimes there is only one variable in a link, like:
     //    (DuringLink
@@ -719,7 +716,6 @@ void PatternMiner::extendAPatternForOneMoreGramRecursively(const Handle &extende
     else
     {
         n_limit = n_limit_putin_result;
-
     }
 
     // sometimes an extended Link do not have any new nodes compared to its parent
@@ -738,20 +734,9 @@ void PatternMiner::extendAPatternForOneMoreGramRecursively(const Handle &extende
 //            (ConceptNode "Ann_Druyan")
 //          )
 //        )
-    if (n_max == 0)
-    {
-        n_limit_putin_result = 1;
-        n_limit = 1;
-    }
-    else
-    {
-        if (n_limit_putin_result > n_max)
-            n_limit_putin_result = n_max;
 
-        if (n_limit > n_max)
-            n_limit = n_max;
-    }
-
+    n_limit_putin_result = clamp(n_limit_putin_result, 1U, n_max);
+    n_limit = clamp(n_limit, 1U, n_max);
 
     // Get all the shared nodes and leaves
     HandleSeqSeq oneOfEachSeqShouldBeVars;
@@ -787,8 +772,6 @@ void PatternMiner::extendAPatternForOneMoreGramRecursively(const Handle &extende
 //    for (const Handle& h : inputLinks)
 //        inputLinksStr += h->toShortString();
 
-
-
     // var_num is the number of variables
     unsigned int var_num = parentNode ? 0 : 1;
 
@@ -804,14 +787,13 @@ void PatternMiner::extendAPatternForOneMoreGramRecursively(const Handle &extende
         for (unsigned int i = 0; i < var_num; ++ i)
             indexes[i] = true;
 
-        for (unsigned int i = var_num; i <n_max; ++ i)
+        for (unsigned int i = var_num; i < n_max; ++ i)
             indexes[i] = false;
 
         while (true)
         {
             // construct the pattern for this combination in the PatternMining Atomspace
             // generate the patternVarMap for this pattern of this combination
-            HandleMap::iterator iter;
 
             // the first part is the same with its parent node
             HandleMap patternVarMap;
@@ -822,12 +804,9 @@ void PatternMiner::extendAPatternForOneMoreGramRecursively(const Handle &extende
                 if (! isExtendedFromVar) // need to add the extendedNode into patternVarMap
                 {
                     HandleMap::const_iterator extendedIter = lastGramValueToVarMap.find(extendedNode);
-                    if (extendedIter == lastGramValueToVarMap.end())
-                    {
-                        cout <<"Exception: can't find extendedNode in lastGramValueToVarMap" << std::endl;
-                    }
-
-                    patternVarMap.insert(HandlePair(extendedIter->first, extendedIter->second));
+                    OC_ASSERT(extendedIter != lastGramValueToVarMap.end(),
+                              "can't find extendedNode in lastGramValueToVarMap");
+                    patternVarMap.insert(*extendedIter);
                 }
             }
 
@@ -835,13 +814,11 @@ void PatternMiner::extendAPatternForOneMoreGramRecursively(const Handle &extende
             if (var_num > 0 )
             {
                 unsigned int index = 0;
-                // NTODO convert into range loop
-                for (iter = newValueToVarMap.begin(); iter != newValueToVarMap.end(); ++ iter)
+                for (const auto& p : newValueToVarMap)
                 {
                     if (indexes[index]) // this is considered as a variable, add it into the variable to value map
-                        patternVarMap.insert(HandlePair(iter->first, iter->second));
-
-                    index ++;
+	                    patternVarMap.insert(p);
+                    index++;
                 }
             }
 
@@ -851,7 +828,7 @@ void PatternMiner::extendAPatternForOneMoreGramRecursively(const Handle &extende
                     notOutPutPattern = true;
             }
 
-            unsigned int extendedLinkIndex = 999;
+            unsigned int extendedLinkIndex = 999;// NTODO max value?
             bool patternAlreadyExtractedInCurTask;
             HandleMap orderedVarNameMap;
 
@@ -972,13 +949,12 @@ void PatternMiner::extendAPatternForOneMoreGramRecursively(const Handle &extende
 
                                     unsigned int const_index = 0;
                                     Handle oldVarHandle;
-                                    // NTODO convert into range loop
-                                    for (iter = newValueToVarMap.begin(); iter != newValueToVarMap.end(); ++ iter)
+                                    for (const auto& p : newValueToVarMap)
                                     {
                                         if (const_index == index_i)
                                         {
-                                            superb.constNode = iter->first;
-                                            oldVarHandle = iter->second;
+                                            superb.constNode = p.first;
+                                            oldVarHandle = p.second;
 
                                             break;
                                         }
@@ -988,7 +964,6 @@ void PatternMiner::extendAPatternForOneMoreGramRecursively(const Handle &extende
 
                                     // add the super b relation into the sub_b_treednode
                                     sub_b_htreenode->superRelation_b_list.push_back(superb);
-
 
                                     //
                                     // find out what is variable name this const node became in current pattern:
@@ -1048,7 +1023,6 @@ void PatternMiner::extendAPatternForOneMoreGramRecursively(const Handle &extende
                     // Extend one more gram from lastGramHTreeNode to get its superpatterns
                     // There are two different super patterns: extended from a variable, and extended from a const by turning it into a variable:
                     unsigned int nodeIndex = 0;
-                    HandleMap::iterator niter;
 
 //                    cout << "valueToVarMap:\n";
 //                    for (HandleMap::const_iterator titer = valueToVarMap.begin(); titer != valueToVarMap.end(); ++ titer)
@@ -1062,11 +1036,10 @@ void PatternMiner::extendAPatternForOneMoreGramRecursively(const Handle &extende
 //                        cout << " ( " <<((Handle)(titer->first))->getName() << " , " << ((Handle)(titer->second))->getName() << " ) ";
 //                    }
 
-                    // NTODO convert into range loop
-                    for (niter = valueToVarMap.begin(); niter != valueToVarMap.end(); ++ niter)
+                    for (const auto& p : valueToVarMap)
                     {
 //                        cout << "nodeIndex = " << nodeIndex << std::endl;
-                        Handle extendNode = (Handle)(niter->first);
+                        Handle extendNode = p.first;
                         if (enable_filter_node_types_should_not_be_vars)
                         {
                             bool isIgnoredType = false;

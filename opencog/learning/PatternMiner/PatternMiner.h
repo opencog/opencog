@@ -285,20 +285,22 @@ protected:
 
    std::ofstream surpringnessIICalfile;
 
-    // this is to against graph isomorphism problem, make sure the patterns we found are not dupicacted
-    // the input links should be a Pattern in such format:
+    // This is against graph isomorphism problem, make sure the
+    // patterns we found are not duplicacted. The input links should
+    // be a Pattern in such format:
+    //
     //    (InheritanceLink
     //       (VariableNode "$1")
     //       (ConceptNode "Animal")
-
+    //
     //    (InheritanceLink
     //       (VariableNode "$2")
     //       (VariableNode "$1")
-
+    //
     //    (InheritanceLink
     //       (VariableNode "$3")
     //       (VariableNode "$2")
-
+    //
     //    (EvaluationLink (stv 1 1)
     //       (PredicateNode "like_food")
     //       (ListLink
@@ -306,23 +308,29 @@ protected:
     //          (ConceptNode "meat")
     //       )
     //    )
+    //
     // Return unified ordered Handle vector
     HandleSeq _UnifyPatternOrder(HandleSeq& inputPattern, unsigned int& unifiedLastLinkIndex);
+    HandleSeq UnifyPatternOrder(HandleSeq& inputPattern, unsigned int& unifiedLastLinkIndex, HandleMap& orderedVarNameMap);
 
-    HandleSeq UnifyPatternOrder(HandleSeq& inputPattern, unsigned int &unifiedLastLinkIndex, HandleMap& orderedVarNameMap);
-
-    Handle UnifyOneLinkForUnorderedLink(Handle& link,std::map<Handle,Type> &orderedTmpLinkToType);
+    Handle UnifyOneLinkForUnorderedLink(const Handle& link,std::map<Handle,Type>& orderedTmpLinkToType);
 
 
-    Handle rebindLinkTypeRecursively(Handle &inputLink, std::map<Handle,Type> &orderedTmpLinkToType);
+    Handle rebindLinkTypeRecursively(const Handle& inputLink, std::map<Handle,Type>& orderedTmpLinkToType);
 
-    void addAtomTypesFromString(string node_types_str, vector<Type> &typeListToAddTo);
+    void addAtomTypesFromString(string node_types_str, vector<Type>& typeListToAddTo);
 
-    // this function is called by RebindVariableNames
-    void findAndRenameVariablesForOneLink(Handle link, HandleMap& varNameMap, HandleSeq& renameOutgoingLinks, std::map<Handle,Type> &orderedTmpLinkToType);
+    // Traverses link, if encouter a pattern variable not in
+    // varNameMap, create a name for it and insert a pair {old
+    // variable, new variable} in varNameMap. Produce a new outgoing
+    // set of link with all new variables and return it.
+    //
+    // orderedTmpLinkToType isn't used at the moment.
+    HandleSeq findAndRenameVariables(const Handle& link, HandleMap& varNameMap,
+                                     std::map<Handle,Type>& orderedTmpLinkToType);
 
-    // rename the variable names in a ordered pattern according to the orders of the variables appear in the orderedPattern
-    HandleSeq RebindVariableNames(HandleSeq& orderedPattern, HandleMap& orderedVarNameMap,std::map<Handle,Type> &orderedTmpLinkToType);
+    // Rename the variable names in a ordered pattern according to the orders of the variables appear in the orderedPattern
+    HandleSeq RebindVariableNames(HandleSeq& orderedPattern, HandleMap& orderedVarNameMap, std::map<Handle,Type>& orderedTmpLinkToType);
 
     void ReplaceConstNodeWithVariableForOneLink(Handle link, Handle constNode, Handle newVariableNode, HandleSeq& renameOutgoingLinks);
 

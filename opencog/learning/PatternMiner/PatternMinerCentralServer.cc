@@ -338,10 +338,8 @@ void DistributedPatternMiner::handleFindNewPatterns(http_request request)
         // should get an array of patterns
         json::value jarray = request.extract_json().get();
 
-        // NTODO convert into range loop
-        for (json::array::iterator iter = jarray.as_array().begin(); iter != jarray.as_array().end(); ++iter)
+        for (const json::value& jval : jarray.as_array())
         {
-            json::value jval = (json::value)(*iter);
             waitForParsePatternQueue.push_back(jval);
             total_pattern_received ++;
 
