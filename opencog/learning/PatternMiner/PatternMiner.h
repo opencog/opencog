@@ -209,12 +209,12 @@ protected:
     bool enable_filter_not_all_first_outgoing_const;
     bool enable_filter_first_outgoing_evallink_should_be_var;
     bool enable_filter_node_types_should_not_be_vars;
-    vector<Type> node_types_should_not_be_vars;
+    set<Type> node_types_should_not_be_vars;
 
     bool enable_filter_node_types_should_be_vars;
-    vector<Type> node_types_should_be_vars;
+    set<Type> node_types_should_be_vars;
 
-    vector<Type> same_link_types_not_share_second_outgoing;
+    set<Type> same_link_types_not_share_second_outgoing;
 
     unsigned int num_of_patterns_without_superpattern_cur_gram;
     unsigned int *num_of_patterns_with_1_frequency;
@@ -236,8 +236,8 @@ protected:
     bool use_linktype_black_list;
     bool use_linktype_white_list;
 
-    vector<Type> linktype_black_list;
-    vector<Type> linktype_white_list;
+    set<Type> linktype_black_list;
+    set<Type> linktype_white_list;
 
 //    Handle FrequencyHandle;
 //    Handle InteractionInformationHandle;
@@ -320,7 +320,7 @@ protected:
 
     Handle rebindLinkTypeRecursively(const Handle& inputLink, std::map<Handle,Type>& orderedTmpLinkToType);
 
-    void addAtomTypesFromString(string node_types_str, vector<Type>& typeListToAddTo);
+    void addAtomTypesFromString(const string& node_types_str, set<Type>& types);
 
     // Traverses link, if encouter a pattern variable not in
     // varNameMap, create a name for it and insert a pair {old
@@ -465,9 +465,9 @@ protected:
     HandleSet _extendOneLinkForSubsetCorpus(const HandleSet& allNewLinksLastGram, HandleSet& allSubsetLinks, HandleSet& extractedNodes);
 
     // will write the subset to a scm file
-    void _selectSubsetFromCorpus(const vector<string>& subsetKeywords, unsigned int max_connection, bool logic_contain=true);
+    void _selectSubsetFromCorpus(const set<string>& subsetKeywords, unsigned int max_connection, bool logic_contain=true);
 
-    void findAllLinksContainKeyWords(const vector<string>& subsetKeywords, unsigned int max_connection, bool logic_contain, HandleSet& foundLinks);
+    void findAllLinksContainKeyWords(const set<string>& subsetKeywords, unsigned int max_connection, bool logic_contain, HandleSet& foundLinks);
 
     bool isIgnoredContent(const string& keyword);
 
@@ -475,8 +475,8 @@ protected:
 
     bool doesLinkContainNodesInKeyWordNodes(const Handle& link, const HandleSet& keywordNodes);
 
-    vector<string> keyword_black_list;
-    vector<string> keyword_white_list;
+    set<string> keyword_black_list;
+    set<string> keyword_white_list;
 
     bool splitDisconnectedLinksIntoConnectedGroups(const HandleSeq& inputLinks, HandleSeqSeq& outputConnectedGroups);
 
@@ -508,7 +508,7 @@ protected:
 
     bool containWhiteKeywords(const string& str, QUERY_LOGIC logic);
 
-    bool containKeywords(const string& str, const vector<string>& keywords, QUERY_LOGIC logic);
+    bool containKeywords(const string& str, const set<string>& keywords, QUERY_LOGIC logic);
 
     void reSetAllSettingsFromConfig();
 
@@ -520,7 +520,6 @@ protected:
     bool loadOutgoingsIntoAtomSpaceFromAtomString(stringstream& outgoingStream, AtomSpace& _as, HandleSeq &outgoings, string parentIndent="");
     HandleSeq loadPatternIntoAtomSpaceFromString(string patternStr, AtomSpace& _as);// input string is pattern keystring
     HandleSeq loadPatternIntoAtomSpaceFromFileString(string patternStr, AtomSpace& _as); // input string is normal atom string
-
 
 public:
     PatternMiner(AtomSpace& _original_as);
@@ -571,9 +570,9 @@ public:
 
     void runInterestingnessEvaluation();
 
-    void selectSubsetFromCorpus(const vector<string> &topics, unsigned int gram, bool if_contian_logic=true);
+    void selectSubsetFromCorpus(const set<string> &topics, unsigned int gram, bool if_contian_logic=true);
 
-    void selectSubsetAllEntityLinksContainsKeywords(vector<string>& subsetKeywords);
+    void selectSubsetAllEntityLinksContainsKeywords(set<string>& subsetKeywords);
 
     void loandAllDBpediaKeyNodes();
 
@@ -618,22 +617,22 @@ public:
     bool get_use_linktype_white_list(){return use_linktype_white_list;}
     void set_use_linktype_white_list(bool _use){use_linktype_white_list = _use;}
 
-    vector<Type> get_linktype_white_list(){return linktype_white_list;}
+    set<Type> get_linktype_white_list(){return linktype_white_list;}
     bool add_linktype_to_white_list(Type _type);
     bool remove_linktype_from_white_list(Type _type);
 
-    vector<Type> get_Ignore_Link_Types(){return linktype_black_list;}
-    bool add_Ignore_Link_Type(Type _type);
-    bool remove_Ignore_Link_Type(Type _type);
+    set<Type> get_ignore_link_types(){return linktype_black_list;}
+    bool add_ignore_link_type(Type _type);
+    bool remove_ignore_link_type(Type _type);
 
-    vector<string> get_keyword_black_list(){return keyword_black_list;}
-    bool add_keyword_to_black_list(string _keyword);
-    bool remove_keyword_from_black_list(string _keyword);
+    set<string> get_keyword_black_list(){return keyword_black_list;}
+    bool add_keyword_to_black_list(const string& _keyword);
+    bool remove_keyword_from_black_list(const string& _keyword);
     void clear_keyword_black_list(){keyword_black_list.clear();}
 
-    vector<string> get_keyword_white_list(){return keyword_white_list;}
-    bool add_keyword_to_white_list(string _keyword);
-    bool remove_keyword_from_white_list(string _keyword);
+    set<string> get_keyword_white_list(){return keyword_white_list;}
+    bool add_keyword_to_white_list(const string& _keyword);
+    bool remove_keyword_from_white_list(const string& _keyword);
     void clear_keyword_white_list(){keyword_white_list.clear();}
 
     QUERY_LOGIC get_keyword_white_list_logic(){return keyword_white_list_logic;}
@@ -641,21 +640,21 @@ public:
 
     void set_enable_filter_links_of_same_type_not_share_second_outgoing(bool _enable){enable_filter_links_of_same_type_not_share_second_outgoing = _enable;}
     bool get_enable_filter_links_of_same_type_not_share_second_outgoing(){return enable_filter_links_of_same_type_not_share_second_outgoing;}
-    vector<Type> get_same_link_types_not_share_second_outgoing(){return same_link_types_not_share_second_outgoing;}
+    set<Type> get_same_link_types_not_share_second_outgoing(){return same_link_types_not_share_second_outgoing;}
     bool add_link_type_to_same_link_types_not_share_second_outgoing(Type _type);
     bool remove_link_type_from_same_link_types_not_share_second_outgoing(Type _type);
     void clear_same_link_types_not_share_second_outgoing(){same_link_types_not_share_second_outgoing.clear();}
 
     void set_enable_filter_node_types_should_not_be_vars(bool _enable){enable_filter_node_types_should_not_be_vars=_enable;}
     bool get_enable_filter_node_types_should_not_be_vars(){return enable_filter_node_types_should_not_be_vars;}
-    vector<Type> get_node_types_should_not_be_vars(){return node_types_should_not_be_vars;}
+    set<Type> get_node_types_should_not_be_vars(){return node_types_should_not_be_vars;}
     bool add_node_type_to_node_types_should_not_be_vars(Type _type);
     bool remove_node_type_from_node_types_should_not_be_vars(Type _type);
     void clear_node_types_should_not_be_vars(){node_types_should_not_be_vars.clear();}
 
     void set_enable_filter_node_types_should_be_vars(bool _enable){enable_filter_node_types_should_be_vars = _enable;}
     bool get_enable_filter_node_types_should_be_vars(){return enable_filter_node_types_should_be_vars;}
-    vector<Type> get_node_types_should_be_vars(){return node_types_should_be_vars;}
+    set<Type> get_node_types_should_be_vars(){return node_types_should_be_vars;}
     bool add_node_type_to_node_types_should_be_vars(Type _type);
     bool remove_node_type_from_node_types_should_be_vars(Type _type);
     void clear_node_types_should_be_vars(){node_types_should_be_vars.clear();}
@@ -666,6 +665,10 @@ public:
 
     void resetPatternMiner(bool resetAllSettingsFromConfig);
 
+    // Turn a string like "qewr, wert, erty" into a vector of 3
+    // strings {"qwer", wert", erty"}
+    static vector<string> parse_comma_separated_list(string str);
+    static set<string> parse_comma_separated_set(string str);
 };
 
 }

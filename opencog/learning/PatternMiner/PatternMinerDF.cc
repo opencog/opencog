@@ -198,7 +198,7 @@ void PatternMiner::growPatternsDepthFirstTask(unsigned int thread_index)
             {
                 continue;
             }
-            else if (use_linktype_white_list && (! isTypeInList(cur_link->getType(), linktype_white_list)))
+            else if (use_linktype_white_list && (!is_in(cur_link->getType(), linktype_white_list)))
             {
                 continue;
             }
@@ -1086,7 +1086,7 @@ void PatternMiner::extendAPatternForOneMoreGramRecursively(const Handle &extende
                                 if ((extendedHandle == Handle::UNDEFINED))
                                     continue;
                             }
-                            else if (use_linktype_white_list && (! isTypeInList(incomingHandle->getType(), linktype_white_list)))
+                            else if (use_linktype_white_list && (!is_in(incomingHandle->getType(), linktype_white_list)))
                             {
                                 continue;
                             }

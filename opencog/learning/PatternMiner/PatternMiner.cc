@@ -35,9 +35,11 @@
 
 #include <boost/range/algorithm/sort.hpp>
 #include <boost/range/algorithm/find.hpp>
+#include <boost/range/algorithm/remove.hpp>
 #include <boost/range/algorithm/set_algorithm.hpp>
 #include <boost/algorithm/string.hpp>
 #include <boost/algorithm/string/regex.hpp>
+#include <boost/algorithm/string/case_conv.hpp>
 
 #include <opencog/util/algorithm.h>
 #include <opencog/util/Config.h>
@@ -973,7 +975,7 @@ bool PatternMiner::isInHandleSeqSeq(const Handle& handle, const HandleSeqSeq& ha
 
 bool PatternMiner::isIgnoredType(Type type)
 {
-    return isTypeInList(type, linktype_black_list);
+    return is_in(type, linktype_black_list);
 }
 
 bool PatternMiner::isTypeInList(Type type, const vector<Type> &typeList)
@@ -1023,183 +1025,74 @@ bool PatternMiner::containIgnoredContent(Handle link)
 
 bool PatternMiner::add_linktype_to_white_list(Type _type)
 {
-    if (isTypeInList(_type, linktype_white_list))
-        return false; // already in the ignore link list
-
-    linktype_white_list.push_back(_type);
-    return true;
+    return linktype_white_list.insert(_type).second;
 }
 
 bool PatternMiner::remove_linktype_from_white_list(Type _type)
 {
-    vector<Type>::iterator it;
-    for (it = linktype_white_list.begin(); it != linktype_white_list.end(); it ++)
-    {
-        if ((Type)(*it) == _type)
-        {
-           linktype_white_list.erase(it);
-           return true;
-        }
-    }
-
-    return false;
+    return linktype_white_list.erase(_type);
 }
 
-bool PatternMiner::add_Ignore_Link_Type(Type _type)
+bool PatternMiner::add_ignore_link_type(Type _type)
 {
-    if (isIgnoredType(_type))
-        return false; // already in the ignore link list
-
-    linktype_black_list.push_back(_type);
-    return true;
+    return linktype_black_list.insert(_type).second;
 }
 
-bool PatternMiner::remove_Ignore_Link_Type(Type _type)
+bool PatternMiner::remove_ignore_link_type(Type _type)
 {
-    vector<Type>::iterator it;
-    for (it = linktype_black_list.begin(); it != linktype_black_list.end(); it ++)
-    {
-        if ((Type)(*it) == _type)
-        {
-           linktype_black_list.erase(it);
-           return true;
-        }
-    }
-
-    return false;
+    return linktype_black_list.erase(_type);
 }
 
 bool PatternMiner::add_link_type_to_same_link_types_not_share_second_outgoing(Type _type)
 {
-    for (Type t : same_link_types_not_share_second_outgoing)
-    {
-        if (t == _type)
-            return false; //  exist
-    }
-
-    same_link_types_not_share_second_outgoing.push_back(_type);
-    return true;
+    return same_link_types_not_share_second_outgoing.insert(_type).second;
 }
 
 bool PatternMiner::remove_link_type_from_same_link_types_not_share_second_outgoing(Type _type)
 {
-    vector<Type>::iterator it;
-    for (it = same_link_types_not_share_second_outgoing.begin(); it != same_link_types_not_share_second_outgoing.end(); it ++)
-    {
-        if ((Type)(*it) == _type)
-        {
-           same_link_types_not_share_second_outgoing.erase(it);
-           return true;
-        }
-    }
-
-    return false; // not exist
-
+    return same_link_types_not_share_second_outgoing.erase(_type);
 }
 
 bool PatternMiner::add_node_type_to_node_types_should_not_be_vars(Type _type)
 {
-    for (Type t : node_types_should_not_be_vars)
-    {
-        if (t == _type)
-            return false; //  exist
-    }
-
-    node_types_should_not_be_vars.push_back(_type);
-    return true;
+    return node_types_should_not_be_vars.insert(_type).second;
 }
 
 bool PatternMiner::remove_node_type_from_node_types_should_not_be_vars(Type _type)
 {
-    vector<Type>::iterator it;
-    for (it = node_types_should_not_be_vars.begin(); it != node_types_should_not_be_vars.end(); it ++)
-    {
-        if ((Type)(*it) == _type)
-        {
-           node_types_should_not_be_vars.erase(it);
-           return true;
-        }
-    }
-
-    return false; // not exist
+    return node_types_should_not_be_vars.erase(_type);
 }
 
 bool PatternMiner::add_node_type_to_node_types_should_be_vars(Type _type)
 {
-    for (Type t : node_types_should_be_vars)
-    {
-        if (t == _type)
-            return false; //  exist
-    }
-
-    node_types_should_be_vars.push_back(_type);
-    return true;
+    return node_types_should_be_vars.insert(_type).second;
 }
 
 bool PatternMiner::remove_node_type_from_node_types_should_be_vars(Type _type)
 {
-    vector<Type>::iterator it;
-    for (it = node_types_should_be_vars.begin(); it != node_types_should_be_vars.end(); it ++)
-    {
-        if ((Type)(*it) == _type)
-        {
-           node_types_should_be_vars.erase(it);
-           return true;
-        }
-    }
-
-    return false; // not exist
+    return node_types_should_be_vars.erase(_type);
 }
 
-bool PatternMiner::add_keyword_to_black_list(string _keyword)
+bool PatternMiner::add_keyword_to_black_list(const string& _keyword)
 {
     if (_keyword == "")
-            return false;
-
-    if (isIgnoredContent(_keyword))
-        return false; // already in the ignore keyword list
-
-    keyword_black_list.push_back(_keyword);
-    return true;
+        return false;
+    return keyword_black_list.insert(_keyword).second;
 }
 
-bool PatternMiner::remove_keyword_from_black_list(string _keyword)
+bool PatternMiner::remove_keyword_from_black_list(const string& _keyword)
 {
-    vector<string>::iterator it;
-    for (it = keyword_black_list.begin(); it != keyword_black_list.end(); it ++)
-    {
-        if ((string)(*it) == _keyword)
-        {
-           keyword_black_list.erase(it);
-           return true;
-        }
-    }
-
-    return false;
+    return keyword_black_list.erase(_keyword);
 }
 
-bool PatternMiner::add_keyword_to_white_list(string _keyword)
+bool PatternMiner::add_keyword_to_white_list(const string& _keyword)
 {
-    if (is_in(_keyword, keyword_white_list))
-        return false; // already exist
-
-    keyword_white_list.push_back(_keyword);
-    return true;
+    return keyword_white_list.insert(_keyword).second;
 }
 
-bool PatternMiner::remove_keyword_from_white_list(string _keyword)
+bool PatternMiner::remove_keyword_from_white_list(const string& _keyword)
 {
-    vector<string>::iterator it;
-    for (it = keyword_white_list.begin(); it != keyword_white_list.end(); it ++)
-    {
-        if ((string)(*it) == _keyword)
-        {
-           keyword_white_list.erase(it);
-           return true;
-        }
-    }
-
-    return false;
+    return keyword_white_list.erase(_keyword);
 }
 
 Handle PatternMiner::getFirstNonIgnoredIncomingLink(AtomSpace& atomspace, const Handle& handle)
@@ -2000,7 +1893,6 @@ bool PatternMiner::filters(const HandleSeq& inputLinks, HandleSeqSeq& oneOfEachS
         {
             for (const Handle& node : allNodesInEachLink[i])
             {
-
                 // find leaves , do not check this for 1-gram
                 if ((inputLinks.size() > 1) && enable_filter_leaves_should_not_be_vars)
                 {
@@ -2012,7 +1904,7 @@ bool PatternMiner::filters(const HandleSeq& inputLinks, HandleSeqSeq& oneOfEachS
                         if (j == i)
                             continue;
 
-                        if (allNodesInEachLink[j].find(node) != allNodesInEachLink[j].end())
+                        if (is_in(node, allNodesInEachLink[j]))
                         {
                             is_leaf = false;
                             break;
@@ -2028,31 +1920,11 @@ bool PatternMiner::filters(const HandleSeq& inputLinks, HandleSeqSeq& oneOfEachS
                 {
                     Type t = node->getType();
 
-                    // check if this node type is in node_types_should_not_be_vars
-                    if (enable_filter_node_types_should_not_be_vars)
-                    {
+                    if (is_in(t, node_types_should_not_be_vars))
+                        shouldNotBeVars.push_back(node);
 
-                        for (Type noType : node_types_should_not_be_vars)
-                        {
-                            if (t == noType)
-                            {
-                                shouldNotBeVars.push_back(node);
-                                break;
-                            }
-                        }
-                    }
-
-                    if (enable_filter_node_types_should_be_vars)
-                    {
-                        for (Type shouldType : node_types_should_be_vars)
-                        {
-                            if (t == shouldType)
-                            {
-                                shouldBeVars.push_back(node);
-                                break;
-                            }
-                        }
-                    }
+                    if (is_in(t, node_types_should_be_vars))
+                        shouldBeVars.push_back(node);
                 }
             }
         }
@@ -2094,7 +1966,7 @@ bool PatternMiner::splitDisconnectedLinksIntoConnectedGroups(const HandleSeq& in
         {
             for (Handle node : allNodesInEachLink[i])
             {
-                if (allNodesInEachLink[j].find(node) != allNodesInEachLink[j].end())
+                if (is_in(node, allNodesInEachLink[j]))
                 {
                     // they share same node -> they are connected.
                     newGroup.push_back(inputLinks[j]);
@@ -2286,7 +2158,7 @@ void PatternMiner::calculateInteractionInformation(HTreeNode* HNode)
 //        {
 //            for (HTreeNode* pNode : curNode->parentLinks)
 //            {
-//                if (curlevelNodes.find(pNode) == curlevelNodes.end())
+//                if (is_in(pNode, curlevelNodes))
 //                {
 //                    std::cout << "H(subpattern): \n";
 //                    for (Handle link : pNode->pattern)
@@ -2329,7 +2201,7 @@ void PatternMiner::calculateInteractionInformation(HTreeNode* HNode)
 
 //                 std::cout<< "Subpattern: " << subPatternKey;
 
-//                 if (keystrings.find(subPatternKey)== keystrings.end())
+//                 if (keystrings.find(subPatternKey) == keystrings.end())
 //                 {
 //                     std::cout<< " not found above! \n" ;
 
@@ -3333,14 +3205,9 @@ PatternMiner::~PatternMiner()
     cleanUpPatternMiner();
 }
 
-void PatternMiner::addAtomTypesFromString(string node_types_str, vector<Type>& typeListToAddTo)
+void PatternMiner::addAtomTypesFromString(const string& node_types_str, set<Type>& types)
 {
-
-    node_types_str.erase(std::remove(node_types_str.begin(), node_types_str.end(), ' '), node_types_str.end());
-    vector<string> typeStrs;
-    boost::split(typeStrs, node_types_str, boost::is_any_of(","));
-
-    for (const string& typestr : typeStrs)
+    for (const string& typestr : parse_comma_separated_list(node_types_str))
     {
         Type atomType = classserver().getType(typestr);
         if (atomType == NOTYPE)
@@ -3348,7 +3215,7 @@ void PatternMiner::addAtomTypesFromString(string node_types_str, vector<Type>& t
             cout << "\nCannot find Node Type: " << typestr << " in config file.\n";
             continue;
         }
-        typeListToAddTo.push_back(atomType);
+        types.insert(atomType);
     }
 }
 
@@ -3426,21 +3293,15 @@ void PatternMiner::reSetAllSettingsFromConfig()
     keyword_black_logic_is_contain = config().get_bool("keyword_black_logic_is_contain");
 
     string keyword_black_list_str  = config().get("keyword_black_list");
-    keyword_black_list_str .erase(std::remove(keyword_black_list_str .begin(), keyword_black_list_str .end(), ' '), keyword_black_list_str .end());
-    boost::split(keyword_black_list, keyword_black_list_str , boost::is_any_of(","));
+    keyword_black_list = parse_comma_separated_set(keyword_black_list_str);
 
     string keyword_white_list_str  = config().get("keyword_white_list");
-    keyword_white_list_str .erase(std::remove(keyword_white_list_str .begin(), keyword_white_list_str .end(), ' '), keyword_white_list_str .end());
-    boost::split(keyword_white_list, keyword_white_list_str , boost::is_any_of(","));
-
+    keyword_white_list = parse_comma_separated_set(keyword_white_list_str);
 
     string keyword_white_list_logic_str = config().get("keyword_white_list_logic");
-
-    if ( (keyword_white_list_logic_str == "AND") or (keyword_white_list_logic_str == "and") or (keyword_white_list_logic_str == "And")  )
-        keyword_white_list_logic = QUERY_LOGIC::AND;
-    else
-        keyword_white_list_logic = QUERY_LOGIC::OR;
-
+    keyword_white_list_logic =
+        boost::algorithm::to_lower_copy(keyword_white_list_logic_str) == "and" ?
+        QUERY_LOGIC::AND : QUERY_LOGIC::OR;
 
     use_linktype_black_list = config().get_bool("use_linktype_black_list");
     use_linktype_white_list = config().get_bool("use_linktype_white_list");
@@ -3469,7 +3330,6 @@ void PatternMiner::reSetAllSettingsFromConfig()
     node_types_should_not_be_vars.clear();
     string node_types_str = config().get("node_types_should_not_be_vars");
     addAtomTypesFromString(node_types_str, node_types_should_not_be_vars);
-
 
     node_types_should_be_vars.clear();
     node_types_str = config().get("node_types_should_be_vars");
@@ -4185,7 +4045,7 @@ bool PatternMiner::containWhiteKeywords(const string& str, QUERY_LOGIC logic)
     return containKeywords(str, keyword_white_list, logic);
 }
 
-bool PatternMiner::containKeywords(const string& str, const vector<string>& keywords, QUERY_LOGIC logic)
+bool PatternMiner::containKeywords(const string& str, const set<string>& keywords, QUERY_LOGIC logic)
 {
     auto is_in_str = [&](const string& keyword) {
         return str.find(keyword) != std::string::npos; };
@@ -4344,7 +4204,7 @@ void PatternMiner::evaluateInterestingnessTask()
 }
 
 // select a subset for topics from the corpus
-void PatternMiner::selectSubsetFromCorpus(const vector<string>& topics, unsigned int gram, bool if_contian_logic)
+void PatternMiner::selectSubsetFromCorpus(const set<string>& topics, unsigned int gram, bool if_contian_logic)
 {
     _selectSubsetFromCorpus(topics,gram, if_contian_logic);
 }
@@ -4665,7 +4525,7 @@ HandleSet PatternMiner::_getAllNonIgnoredLinksForGivenNode(Handle keywordNode, c
             if ((newh == Handle::UNDEFINED))
                 continue;
         }
-        else if (use_linktype_white_list && (! isTypeInList(newh->getType(), linktype_white_list)))
+        else if (use_linktype_white_list && (!is_in(newh->getType(), linktype_white_list)))
         {
             continue;
         }
@@ -4728,7 +4588,7 @@ HandleSet PatternMiner::_extendOneLinkForSubsetCorpus(const HandleSet& allNewLin
 }
 
 // allSubsetLinks is  output
-void PatternMiner::findAllLinksContainKeyWords(const vector<string>& subsetKeywords, unsigned int max_connection, bool logic_contain, HandleSet& allSubsetLinks)
+void PatternMiner::findAllLinksContainKeyWords(const set<string>& subsetKeywords, unsigned int max_connection, bool logic_contain, HandleSet& allSubsetLinks)
 {
     allSubsetLinks.clear();
     HandleSet extractedNodes;
@@ -4753,7 +4613,7 @@ void PatternMiner::findAllLinksContainKeyWords(const vector<string>& subsetKeywo
                 if ((newh == Handle::UNDEFINED))
                     continue;
             }
-            else if (use_linktype_white_list && (! isTypeInList(link->getType(), linktype_white_list)))
+            else if (use_linktype_white_list && (!is_in(link->getType(), linktype_white_list)))
             {
                 continue;
             }
@@ -4830,7 +4690,7 @@ void PatternMiner::findAllLinksContainKeyWords(const vector<string>& subsetKeywo
 
 }
 
-void PatternMiner::selectSubsetAllEntityLinksContainsKeywords(vector<string>& subsetKeywords)
+void PatternMiner::selectSubsetAllEntityLinksContainsKeywords(set<string>& subsetKeywords)
 {
     std::cout << "\nSelecting a subset from loaded corpus in Atomspace for the Entities contain following value keywords." << std::endl ;
     HandleSet allSubsetLinks;
@@ -4904,7 +4764,7 @@ void PatternMiner::selectSubsetAllEntityLinksContainsKeywords(vector<string>& su
 // logic_contain = true will find all the Nodes with a label contains any of the keywords,e.g.
 // keyword = Premier , Node "32nd Premier of New South Wales" will be found if logic_contain = true;
 // only Node "Premier" will be found if logic_contain = false
-void PatternMiner::_selectSubsetFromCorpus(const vector<string>& subsetKeywords, unsigned int max_connection, bool logic_contain)
+void PatternMiner::_selectSubsetFromCorpus(const set<string>& subsetKeywords, unsigned int max_connection, bool logic_contain)
 {
     std::cout << "\nSelecting a subset from loaded corpus in Atomspace for the following keywords within " << max_connection << " distance:" << std::endl ;
     HandleSet allSubsetLinks;
@@ -5110,7 +4970,6 @@ HandleSeq PatternMiner::loadPatternIntoAtomSpaceFromString(string patternStr, At
 
     return pattern;
 }
-
 
 // recursively function , normal atom format
 //  (PredicateNode "country") ; [4408301568758128182][1]
@@ -5419,4 +5278,16 @@ void PatternMiner::loadPatternsFromResultFile(string fileName)
 
 }
 
+vector<string> PatternMiner::parse_comma_separated_list(string str)
+{
+    str.erase(boost::remove(str, ' '), str.end());
+    vector<string> strs;
+    boost::split(strs, str, boost::is_any_of(","));
+    return strs;
+}
 
+set<string> PatternMiner::parse_comma_separated_set(string str)
+{
+    vector<string> l = parse_comma_separated_list(str);
+    return set<string>(l.begin(), l.end());
+}
