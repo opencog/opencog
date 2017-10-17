@@ -347,7 +347,6 @@ protected:
     // to the variable handle in pattenmining Atomspace
     void extractAllNodesInLink(const Handle& link, HandleMap& valueToVarMap);
     void extractAllNodesInLink(Handle link, HandleSet& allNodes);
-    void extractAllNodesInLink(Handle link, map<Handle, unsigned int> &allNodes, unsigned index); // just find all the nodes in the original atomspace for this link
     void extractAllVariableNodesInLink(Handle link, HandleSet& allNodes);
     void extractAllConstNodesInALink(Handle link, HandleSet& allConstNodes);
 
@@ -357,10 +356,6 @@ protected:
     bool containVariableNodes(Handle link);
 
     void extractAllPossiblePatternsFromInputLinksBF(const HandleSeq& inputLinks, HTreeNode* parentNode, HandleSet& sharedNodes, unsigned int gram);
-
-//    // vector<HTreeNode *> &allHTreeNodes is output all the HTreeNodes found
-//    void extractAllPossiblePatternsFromInputLinksDF(HandleSeq& inputLinks,unsigned int sharedLinkIndex, AtomSpace& from_as,
-//                                                    vector<HTreeNode*>& allLastGramHTreeNodes, vector<HTreeNode*>& allHTreeNodes, unsigned int gram=1);
 
 	// Copy the outgoings of `link` to `to_as` and return the copies
 	//
@@ -392,15 +387,8 @@ protected:
 
     void extractAllVariableNodesInAnInstanceLink(const Handle& instanceLink, const Handle& patternLink, HandleSet& allVarNodes);
 
-    void extractAllVariableNodesInAnInstanceLink(const Handle& instanceLink, const Handle& patternLink, map<Handle, unsigned int>& allVarNodes, unsigned index);
-
-    // Unused
-    // void extendAllPossiblePatternsForOneMoreGramDF(const HandleSeq& instance, AtomSpace& from_as, unsigned int gram,
-    //                                                vector<HTreeNode*>& allLastGramHTreeNodes, map<HandleSeq, vector<HTreeNode*>>& allFactLinksToPatterns, vector<HandleSet>& newConnectedLinksFoundThisGram);
-
     void extendAllPossiblePatternsForOneMoreGramBF(const HandleSeq& instance, HTreeNode* curHTreeNode, unsigned int gram);
 
-    //  void extendAllPossiblePatternsTillMaxGramDF(Handle &startLink, AtomSpace& from_as, unsigned int max_gram);
     void addThreadExtractedLinks(unsigned int _gram, unsigned int cur_thread_index, string _extractedLinkUIDs);
 
     bool existInAllThreadExtractedLinks(unsigned int _gram, string _extractedLinkUIDs);
@@ -434,8 +422,6 @@ protected:
     void growPatternsTaskBF();
 
     void GrowAllPatternsBF();
-
-    // void growPatternsDepthFirstTask_old();
 
     void growPatternsDepthFirstTask(unsigned int thread_index);
 
