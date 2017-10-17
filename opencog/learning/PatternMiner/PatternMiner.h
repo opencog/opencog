@@ -63,11 +63,10 @@ namespace PatternMining
 struct _non_ordered_pattern
 {
     Handle link;
-    vector<vector<std::pair<int,std::size_t>>> indexesOfSharedVars;
+    vector<vector<std::pair<int, std::size_t>>> indexesOfSharedVars;
 
     bool operator<(const _non_ordered_pattern& other) const
     {
-        // NTODO replace by range loop
         for (unsigned int i = 0; i < indexesOfSharedVars.size(); ++ i)
         {
             if (indexesOfSharedVars[i].size() < other.indexesOfSharedVars[i].size())
@@ -90,22 +89,20 @@ struct _non_ordered_pattern
         }
 
         // if all above criteria cannot figure out the order of these two patterns, just return true and output a warning
-        cout << "\n warning: _non_ordered_pattern: Fail to figure out the order of  two patterns!\n";
+        cout << "\n warning: _non_ordered_pattern: Fail to figure out the order of two patterns!\n";
         return true;
     }
 };
 
-
+// NTODO this seems identical to _non_ordered_pattern
 struct advanced_non_ordered_pattern // only when complex patterns like pln patterns, used when enable_unify_unordered_links = true
 {
     Handle link;
-    vector<vector<std::pair<int,std::size_t>>> indexesOfSharedVars; // the shared vars indexes appear in the already sorted links
+    vector<vector<std::pair<int, std::size_t>>> indexesOfSharedVars; // the shared vars indexes appear in the already sorted links
 
-
-    bool operator <(const _non_ordered_pattern& other) const
+    bool operator<(const _non_ordered_pattern& other) const
     {
         // first, use indexesOfSharedVars
-        // NTODO replace by range loop
         for (unsigned int i = 0; i < indexesOfSharedVars.size(); ++ i)
         {
             if (indexesOfSharedVars[i].size() < other.indexesOfSharedVars[i].size())
@@ -115,7 +112,7 @@ struct advanced_non_ordered_pattern // only when complex patterns like pln patte
 
             for (unsigned int j = 0; j < indexesOfSharedVars[i].size(); ++ j)
             {
-                if ((indexesOfSharedVars[i][j]).first< (other.indexesOfSharedVars[i][j]).first)
+                if ((indexesOfSharedVars[i][j]).first < (other.indexesOfSharedVars[i][j]).first)
                     return true;
                 else if ((indexesOfSharedVars[i][j]).first > (other.indexesOfSharedVars[i][j]).first)
                     return false;
@@ -130,7 +127,7 @@ struct advanced_non_ordered_pattern // only when complex patterns like pln patte
         // if indexesOfSharedVars cannot decide the result, use
 
         // if all above criteria cannot figure out the order of these two patterns, just return true and output a warning
-        cout << "\n warning: _non_ordered_pattern: Fail to figure out the order of  two patterns!\n";
+        cout << "\n warning: _non_ordered_pattern: Fail to figure out the order of two patterns!\n";
         return true;
     }
 };
@@ -417,6 +414,9 @@ protected:
                                                  bool isExtendedFromVar, set<string>& allNewMinedPatternsCurTask, vector<HTreeNode*>& allHTreeNodesCurTask,
                                                  vector<MinedPatternInfo>& allNewMinedPatternInfo, unsigned int thread_index, bool startFromLinkContainWhiteKeyword);
 
+    /**
+     * NTODO: add comment
+     */
     bool containsLoopVariable(const HandleSeq& inputPattern);
 
     void quoteAPattern(HTreeNode* hTreeNode);

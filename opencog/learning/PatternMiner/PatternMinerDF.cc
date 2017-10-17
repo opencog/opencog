@@ -321,7 +321,7 @@ HTreeNode* PatternMiner::extractAPatternFromGivenVarCombination(HandleSeq &input
             pattern.push_back(rebindedLink);
         }
 
-        if ( gram > 2)
+        if (gram > 2)
         {
             if (containsLoopVariable(pattern))
             return 0;

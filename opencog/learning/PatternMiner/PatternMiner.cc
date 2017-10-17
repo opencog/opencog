@@ -628,7 +628,7 @@ void PatternMiner::extractAllConstNodesInALink(Handle link, HandleSet& allConstN
     {
         if (h->isNode())
         {
-            if ((h->getType() != opencog::PATTERN_VARIABLENODE_TYPE) && (allConstNodes.find(h) == allConstNodes.end()))
+            if (h->getType() != opencog::PATTERN_VARIABLENODE_TYPE)
             {
                 allConstNodes.insert(h);
             }
@@ -647,7 +647,7 @@ void PatternMiner::extractAllVariableNodesInLink(Handle link, HandleSet& allNode
     {
         if (h->isNode())
         {
-            if ((h->getType() == opencog::PATTERN_VARIABLENODE_TYPE) && (allNodes.find(h) == allNodes.end()))
+            if (h->getType() == opencog::PATTERN_VARIABLENODE_TYPE)
             {
                 allNodes.insert(h);
             }
@@ -1661,26 +1661,11 @@ bool PatternMiner::containsLoopVariable(const HandleSeq& inputPattern)
 
         for (const string& varStr : allVarsInThis_link)
         {
-            map<string, VariableInLinks>::iterator it = varInLinksMap.find(varStr);
-            if (it == varInLinksMap.end())
-            {
-                VariableInLinks varLinks;
-                if (containsOnlyVars)
-                    varLinks.onlyContainsVarLinks.push_back(inputH);
-                else
-                    varLinks.containsConstLinks.push_back(inputH);
-
-                varInLinksMap.insert({varStr, varLinks});
-            }
+            VariableInLinks& varLinks = varInLinksMap[varStr];
+            if (containsOnlyVars)
+                varLinks.onlyContainsVarLinks.push_back(inputH);
             else
-            {
-                VariableInLinks& varLinks = it->second;
-                if (containsOnlyVars)
-                    varLinks.onlyContainsVarLinks.push_back(inputH);
-                else
-                    varLinks.containsConstLinks.push_back(inputH);
-            }
-
+                varLinks.containsConstLinks.push_back(inputH);
         }
     }
 
@@ -1725,14 +1710,13 @@ bool PatternMiner::filters(const HandleSeq& inputLinks, HandleSeqSeq& oneOfEachS
         {
             for (Type t : same_link_types_not_share_second_outgoing)
             {
-                // filter: Any two Links of the same type in the  should not share their secondary outgoing nodes
+                // filter: Any two Links of the same type in the should not share their secondary outgoing nodes
                 if (((inputLinks[i])->getType() == t))
                 {
                     Handle secondOutgoing = inputLinks[i]->getOutgoingSet()[1];
-                    if (all2ndOutgoingsOfInherlinks.find(secondOutgoing) == all2ndOutgoingsOfInherlinks.end())
-                        all2ndOutgoingsOfInherlinks.insert(secondOutgoing);
-                    else
-                        return true;
+                    auto rs = all2ndOutgoingsOfInherlinks.insert(secondOutgoing);
+                    if (not rs.second)
+	                    return true;
                 }
             }
         }
@@ -1755,15 +1739,13 @@ bool PatternMiner::filters(const HandleSeq& inputLinks, HandleSeqSeq& oneOfEachS
                     if (it != predicateToValueOfEvalLinks.end())
                     {
                         HandleSet& values = (it->second);
-                        if (values.find(valueNode) != values.end())
+                        auto rs = values.insert(valueNode);
+                        if (not rs.second);
                             return true;
-                        else
-                            values.insert(valueNode);
                     }
                     else
                     {
-                        HandleSet newValues;
-                        newValues.insert(valueNode);
+                        HandleSet newValues{valueNode};
                         predicateToValueOfEvalLinks.insert({predicateNode, newValues});
                     }
                 }
@@ -1773,8 +1755,7 @@ bool PatternMiner::filters(const HandleSeq& inputLinks, HandleSeqSeq& oneOfEachS
                 {
                     if (outgoings2.size() > 1)
                     {
-                        if(all1stOutgoingsOfEvalLinks.find(outgoings2[0]) == all1stOutgoingsOfEvalLinks.end())
-                            all1stOutgoingsOfEvalLinks.insert(outgoings2[0]);
+                        all1stOutgoingsOfEvalLinks.insert(outgoings2[0]);
                     }
                 }
 
@@ -2209,7 +2190,7 @@ unsigned int PatternMiner::getAllEntityCountWithSamePredicatesForAPattern(const 
 
 //            cout << "/npredicate: " << predicateName << std::endl;
 
-            map<string,unsigned int>::iterator eit = allEntityNumMap.find(predicateName);
+            map<string, unsigned int>::iterator eit = allEntityNumMap.find(predicateName);
             if (eit != allEntityNumMap.end())
             {
 //                cout << "alredy exists: " << eit->second << std::endl;
@@ -2826,24 +2807,15 @@ void PatternMiner::calculateTypeBSurprisingness(HTreeNode* HNode)
             if (patternNodeIter != keyStrToHTreeNodeMap.end())
             {
                 HTreeNode* superPatternNode = patternNodeIter->second;
-
-                SuperRelation_b superb;
-                superb.superHTreeNode = superPatternNode;
-                superb.constNode = constNode;
-
+                SuperRelation_b superb{superPatternNode, constNode};
                 HNode->superRelation_b_list.push_back(superb);
 
                 Handle unified_var_node = suborderedVarNameMap[var_node];
 
                 if (superPatternNode->SubRelation_b_map.find(unified_var_node) == superPatternNode->SubRelation_b_map.end())
                 {
-                    vector<SubRelation_b> sub_blist;
-
-                    SubRelation_b sub_b;
-                    sub_b.constNode = constNode;
-                    sub_b.subHTreeNode = HNode;
-
-                    sub_blist.push_back(sub_b);
+                    SubRelation_b sub_b{HNode, constNode};
+                    vector<SubRelation_b> sub_blist{sub_b};
                     superPatternNode->SubRelation_b_map.insert({unified_var_node, sub_blist});
                 }
             }
@@ -3241,22 +3213,13 @@ void PatternMiner::runPatternMiner(bool exit_program_after_finish)
     {
         for (const string& keyword : keyword_black_list)
         {
-            // std::cout << keyword << std::endl;
             Handle keywordNode = original_as.get_node(opencog::CONCEPT_NODE, keyword);
-            if (keywordNode != Handle::UNDEFINED)
-            {
-                if (black_keyword_Handles.find(keywordNode) == black_keyword_Handles.end())
-                    black_keyword_Handles.insert(keywordNode);
-            }
+            if (keywordNode)
+	            black_keyword_Handles.insert(keywordNode);
 
             keywordNode = original_as.get_node(opencog::PREDICATE_NODE, keyword);
-
-            if (keywordNode != Handle::UNDEFINED)
-            {
-                if (black_keyword_Handles.find(keywordNode) == black_keyword_Handles.end())
-                    black_keyword_Handles.insert(keywordNode);
-            }
-
+            if (keywordNode)
+	            black_keyword_Handles.insert(keywordNode);
         }
     }
 
@@ -3391,10 +3354,7 @@ void PatternMiner::runInterestingnessEvaluation()
         {
             Handle listLink = evalLink->getOutgoingAtom(1);
             Handle entityHandle = listLink->getOutgoingAtom(0);
-            if (allEntityHandles.find(entityHandle) == allEntityHandles.end())
-            {
-                allEntityHandles.insert(entityHandle);
-            }
+            allEntityHandles.insert(entityHandle);
         }
 
         cout << "All entity number = " << allEntityHandles.size() << std::endl;
@@ -4095,8 +4055,8 @@ void PatternMiner::selectSubsetForDBpedia()
                     }
                 }
 
-                if ( (! skip) && (subsetLinks.find(eval) == subsetLinks.end()))
-                    subsetLinks.insert(eval);
+                if (! skip)
+	                subsetLinks.insert(eval);
             }
         }
     }
@@ -4345,7 +4305,6 @@ HandleSet PatternMiner::_extendOneLinkForSubsetCorpus(const HandleSet& allNewLin
             allNewConnectedLinksThisGram.insert(newConnectedLinks.begin(), newConnectedLinks.end());
             allSubsetLinks.insert(newConnectedLinks.begin(), newConnectedLinks.end());
         }
-
     }
 
     return allNewConnectedLinksThisGram;
@@ -4438,7 +4397,6 @@ void PatternMiner::findAllLinksContainKeyWords(const set<string>& subsetKeywords
             HandleSet newConnectedLinks = _getAllNonIgnoredLinksForGivenNode(keywordNode, allSubsetLinks);
 
             allSubsetLinks.insert(newConnectedLinks.begin(), newConnectedLinks.end());
-
         }
 
     }
@@ -4479,8 +4437,7 @@ void PatternMiner::selectSubsetAllEntityLinksContainsKeywords(set<string>& subse
         else
             entityNode = firstOutgoing;
 
-        if (allEntityNodes.find(entityNode) == allEntityNodes.end())
-            allEntityNodes.insert(entityNode);
+        allEntityNodes.insert(entityNode);
     }
 
 
@@ -4493,7 +4450,7 @@ void PatternMiner::selectSubsetAllEntityLinksContainsKeywords(set<string>& subse
         HandleSet allLinks = _getAllNonIgnoredLinksForGivenNode(entityNode, allSubsetLinks);
 
         allSubsetLinks.insert(allLinks.begin(), allLinks.end());
-        processEntityNum ++;
+        processEntityNum++;
 
         cout<< "\r" << ((float)(processEntityNum ))/((float)allEntityNum)*100.0f << "% completed."; // it's not liner
         std::cout.flush();
