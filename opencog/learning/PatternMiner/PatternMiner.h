@@ -65,7 +65,7 @@ struct _non_ordered_pattern
     Handle link;
     vector<vector<std::pair<int,std::size_t>>> indexesOfSharedVars;
 
-    bool operator <(const _non_ordered_pattern& other) const
+    bool operator<(const _non_ordered_pattern& other) const
     {
         // NTODO replace by range loop
         for (unsigned int i = 0; i < indexesOfSharedVars.size(); ++ i)
@@ -77,7 +77,7 @@ struct _non_ordered_pattern
 
             for (unsigned int j = 0; j < indexesOfSharedVars[i].size(); ++ j)
             {
-                if ((indexesOfSharedVars[i][j]).first< (other.indexesOfSharedVars[i][j]).first)
+                if ((indexesOfSharedVars[i][j]).first < (other.indexesOfSharedVars[i][j]).first)
                     return true;
                 else if ((indexesOfSharedVars[i][j]).first > (other.indexesOfSharedVars[i][j]).first)
                     return false;
@@ -322,12 +322,14 @@ protected:
 
     void addAtomTypesFromString(const string& node_types_str, set<Type>& types);
 
-    // Traverses link, if encouter a pattern variable not in
-    // varNameMap, create a name for it and insert a pair {old
-    // variable, new variable} in varNameMap. Produce a new outgoing
-    // set of link with all new variables and return it.
-    //
-    // orderedTmpLinkToType isn't used at the moment.
+    /**
+     * Traverses link, if encouter a pattern variable not in
+     * varNameMap, create a name for it and insert a pair {old
+     * variable, new variable} in varNameMap. Produce a new outgoing
+     * set of link with all new variables and return it.
+     *
+     * NTODO orderedTmpLinkToType isn't used at the moment.
+     */
     HandleSeq findAndRenameVariables(const Handle& link, HandleMap& varNameMap,
                                      std::map<Handle,Type>& orderedTmpLinkToType);
 
@@ -343,10 +345,19 @@ protected:
     // generate the outgoings for a link in a pattern in the Pattern mining Atomspace, according to the given group of variables
     void generateALinkByChosenVariables(const Handle &originalLink, HandleMap& valueToVarMap, HandleSeq &outputOutgoings);
 
-    // valueToVarMap: the ground value node in the orginal Atomspace
-    // to the variable handle in pattenmining Atomspace
-    void extractAllNodesInLink(const Handle& link, HandleMap& valueToVarMap);
-    void extractAllNodesInLink(Handle link, HandleSet& allNodes);
+    /**
+     * Retrieve all nodes from a given link and its descendents. For
+     * each node, associate a pattern variable with a generated name,
+     * and insert that association to nodeToVar.
+     */
+    void associateNodesToVars(const Handle& link, HandleMap& nodesToVars);
+
+    /**
+     * Retrieve all nodes from a given link and its descendents, and
+     * fill allNodes with them.
+     */
+    void extractNodes(Handle link, HandleSet& allNodes);
+
     void extractAllVariableNodesInLink(Handle link, HandleSet& allNodes);
     void extractAllConstNodesInALink(Handle link, HandleSet& allConstNodes);
 
@@ -357,26 +368,32 @@ protected:
 
     void extractAllPossiblePatternsFromInputLinksBF(const HandleSeq& inputLinks, HTreeNode* parentNode, HandleSet& sharedNodes, unsigned int gram);
 
-	// Copy the outgoings of `link` to `to_as` and return the copies
-	//
-	// Pattern variables are turned into regular variables while being
-	// copied, filling `variables`.
+	/**
+     * Copy the outgoings of `link` to `to_as` and return the copies
+     *
+     * Pattern variables are turned into regular variables while being
+     * copied, filling `variables`.
+     */
     HandleSeq copyOutgoings(AtomSpace& to_as, const Handle& link,
                             HandleSeq& variables);
 
-	// Copy `h` to `to_as` and return the copy.
-	//
-	// Pattern variables are turned into regular variables while being
-	// copied, filling `variables`.
-	Handle copyAtom(AtomSpace& to_as, const Handle& link,
-	                HandleSeq& variables);
+    /**
+     * Copy `h` to `to_as` and return the copy.
+     *
+     * Pattern variables are turned into regular variables while being
+     * copied, filling `variables`.
+     */
+    Handle copyAtom(AtomSpace& to_as, const Handle& link,
+                    HandleSeq& variables);
 
-	// Copy `links` to `to_as` and return the copies.
-	//
-	// Pattern variables are turned into regular variables while being
-	// copied, filling `variables`.
-	//
-	// NTODO: what guaranties that they are links?
+	/**
+     * Copy `links` to `to_as` and return the copies.
+     *
+     * Pattern variables are turned into regular variables while being
+     * copied, filling `variables`.
+     *
+     * NTODO: what guaranties that they are links?
+     */
     HandleSeq copyLinks(AtomSpace& to_as, const HandleSeq& links,
                         HandleSeq &variables);
 

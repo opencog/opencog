@@ -133,7 +133,7 @@ void PatternMiner::extractAllPossiblePatternsFromInputLinksBF(const HandleSeq& i
 
     // First, extract all the nodes in the input links
     for (const Handle& link : inputLinks)
-        extractAllNodesInLink(link, valueToVarMap);
+        associateNodesToVars(link, valueToVarMap);
 
     // Generate all the possible combinations of all the nodes: all patterns including the 1 ~ n_max variables
     // If there are too many variables in a pattern, it doesn't make much sense, so we litmit the max number of variables to half of the node number

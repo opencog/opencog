@@ -563,24 +563,19 @@ void PatternMiner::generateALinkByChosenVariables(const Handle& originalLink, Ha
     }
 }
 
-// valueToVarMap: the ground value node in the orginal Atomspace to
-// the variable handle in pattenmining Atomspace.
-//
-// atomspace: where the input link is from
-void PatternMiner::extractAllNodesInLink(const Handle& link,
-                                         HandleMap& valueToVarMap)
+void PatternMiner::associateNodesToVars(const Handle& link, HandleMap& nodesToVars)
 {
     for (const Handle& h : link->getOutgoingSet())
     {
         if (h->isNode())
         {
-            if (valueToVarMap.find(h) == valueToVarMap.end())
+            if (nodesToVars.find(h) == nodesToVars.end())
             {
 	            // NTODO move variable name creation in its own method
                 // add a variable node in Pattern miner Atomspace
                 Handle varHandle = as->add_node(opencog::PATTERN_VARIABLENODE_TYPE,
-                                                "$var~" + toString(valueToVarMap.size()));
-                valueToVarMap.insert({h, varHandle});
+                                                "$var~" + toString(nodesToVars.size()));
+                nodesToVars.insert({h, varHandle});
             }
 
             if ((h->getType() == opencog::PATTERN_VARIABLENODE_TYPE))
@@ -589,7 +584,7 @@ void PatternMiner::extractAllNodesInLink(const Handle& link,
         }
         else
         {
-            extractAllNodesInLink(h, valueToVarMap);
+            associateNodesToVars(h, nodesToVars);
         }
     }
 }
@@ -616,21 +611,14 @@ void PatternMiner::extractAllVariableNodesInAnInstanceLink(const Handle& instanc
     }
 }
 
-void PatternMiner::extractAllNodesInLink(Handle link, HandleSet& allNodes)
+void PatternMiner::extractNodes(Handle link, HandleSet& allNodes)
 {
     for (const Handle& h : link->getOutgoingSet())
     {
         if (h->isNode())
-        {
-            if (allNodes.find(h) == allNodes.end())
-            {
-                allNodes.insert(h);
-            }
-        }
+	        allNodes.insert(h);
         else
-        {
-            extractAllNodesInLink(h, allNodes);
-        }
+            extractNodes(h, allNodes);
     }
 }
 
@@ -1721,14 +1709,14 @@ bool PatternMiner::filters(const HandleSeq& inputLinks, HandleSeqSeq& oneOfEachS
     HandleSet all2ndOutgoingsOfInherlinks;
 
     // map<predicate, set<value>>
-    map<Handle, HandleSet > predicateToValueOfEvalLinks;
+    map<Handle, HandleSet> predicateToValueOfEvalLinks;
 
     HandleSet all1stOutgoingsOfEvalLinks;
 
 
     for (unsigned int i = 0; i < inputLinks.size(); ++i)
     {
-        extractAllNodesInLink(inputLinks[i], allNodesInEachLink[i]);
+        extractNodes(inputLinks[i], allNodesInEachLink[i]);
 
         if (inputLinks.size() == 1)
             break;
@@ -4336,7 +4324,7 @@ HandleSet PatternMiner::_extendOneLinkForSubsetCorpus(const HandleSet& allNewLin
     {
         // find all nodes in this link
         HandleSet allNodes;
-        extractAllNodesInLink(link, allNodes);
+        extractNodes(link, allNodes);
 
         for (const Handle& neighborNode : allNodes)
         {

@@ -518,7 +518,7 @@ void PatternMiner::extendAPatternForOneMoreGramRecursively(const Handle &extende
     std::cout << "valueToVarMap = " << oc_to_string(valueToVarMap);
 
     // First, extract all the nodes in the input link
-    extractAllNodesInLink(extendedLink, valueToVarMap);
+    associateNodesToVars(extendedLink, valueToVarMap);
 
     HandleMap newValueToVarMap; // the new elements added in this gram
 
