@@ -35,10 +35,13 @@
 #include <opencog/atoms/base/Node.h>
 #include <opencog/atomspace/AtomSpace.h>
 
+#include <opencog/learning/PatternMiner/types/atom_types.h>
+
 #include "HTree.h"
 
 using namespace std;
 
+class PatternMinerUTest;
 
 namespace opencog
 {
@@ -157,6 +160,8 @@ enum QUERY_LOGIC
 
 class PatternMiner
 {
+    friend class ::PatternMinerUTest;
+
 protected:
 
     HTree* htree;
@@ -350,13 +355,24 @@ protected:
     void associateNodesToVars(const Handle& link, HandleMap& nodesToVars);
 
     /**
-     * Retrieve all nodes from a given link and its descendents, and
-     * fill allNodes with them.
+     * Retrieve all nodes from the given link and its descendents,
+     * fill nodes with them.
      */
-    void extractNodes(Handle link, HandleSet& allNodes);
+    void extractNodes(const Handle& link, HandleSet& nodes);
 
-    void extractAllVariableNodesInLink(Handle link, HandleSet& allNodes);
-    void extractAllConstNodesInALink(Handle link, HandleSet& allConstNodes);
+    /**
+     * Retrieve all pattern variable nodes from the given link and its
+     * descendents, fill varNodes with them.
+     */
+    void extractVarNodes(const Handle& link, HandleSet& varNodes);
+
+    /**
+     * Retrieve all non pattern variable nodes from the given links
+     * and its descendents, fill constNodes with them. Note that
+     * regular variables are included as well, since they are
+     * different then pattern variables.
+     */
+    void extractConstNodes(const Handle& link, HandleSet& constNodes);
 
     // if a link contains only variableNodes , no const nodes
     bool onlyContainVariableNodes(Handle link);
@@ -481,7 +497,15 @@ protected:
     set<string> keyword_black_list;
     set<string> keyword_white_list;
 
-    bool splitDisconnectedLinksIntoConnectedGroups(const HandleSeq& inputLinks, HandleSeqSeq& outputConnectedGroups);
+    /**
+     * Partition links into strongly connected components, where each
+     * link is connected to the other w.r.t. whether they shares some
+     * pattern variables.
+     *
+     * Write the results into connectedGroups. Return true iff there
+     * more than 1 component.
+     */
+    bool partitionBySharedVariables(const HandleSeq& links, HandleSeqSeq& connectedGroups);
 
     double calculateEntropyOfASubConnectedPattern(string& connectedSubPatternKey, HandleSeq& connectedSubPattern);
 

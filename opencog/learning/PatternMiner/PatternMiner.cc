@@ -47,7 +47,6 @@
 #include <opencog/atoms/base/ClassServer.h>
 #include <opencog/atoms/base/Handle.h>
 #include <opencog/atoms/base/atom_types.h>
-#include <opencog/learning/PatternMiner/types/atom_types.h>
 #include <opencog/query/BindLinkAPI.h>
 
 #include "PatternMiner.h"
@@ -611,50 +610,45 @@ void PatternMiner::extractAllVariableNodesInAnInstanceLink(const Handle& instanc
     }
 }
 
-void PatternMiner::extractNodes(Handle link, HandleSet& allNodes)
+void PatternMiner::extractNodes(const Handle& link, HandleSet& nodes)
 {
     for (const Handle& h : link->getOutgoingSet())
     {
         if (h->isNode())
-	        allNodes.insert(h);
+	        nodes.insert(h);
         else
-            extractNodes(h, allNodes);
+            extractNodes(h, nodes);
     }
 }
 
-void PatternMiner::extractAllConstNodesInALink(Handle link, HandleSet& allConstNodes)
-{
-    for (const Handle& h : link->getOutgoingSet())
-    {
-        if (h->isNode())
-        {
-            if (h->getType() != opencog::PATTERN_VARIABLENODE_TYPE)
-            {
-                allConstNodes.insert(h);
-            }
-        }
-        else
-        {
-            extractAllVariableNodesInLink(h, allConstNodes);
-        }
-    }
-}
-
-
-void PatternMiner::extractAllVariableNodesInLink(Handle link, HandleSet& allNodes)
+void PatternMiner::extractVarNodes(const Handle& link, HandleSet& varNodes)
 {
     for (const Handle& h : link->getOutgoingSet())
     {
         if (h->isNode())
         {
             if (h->getType() == opencog::PATTERN_VARIABLENODE_TYPE)
-            {
-                allNodes.insert(h);
-            }
+                varNodes.insert(h);
         }
         else
         {
-            extractAllVariableNodesInLink(h,allNodes);
+            extractVarNodes(h, varNodes);
+        }
+    }
+}
+
+void PatternMiner::extractConstNodes(const Handle& link, HandleSet& constNodes)
+{
+    for (const Handle& h : link->getOutgoingSet())
+    {
+        if (h->isNode())
+        {
+            if (h->getType() != opencog::PATTERN_VARIABLENODE_TYPE)
+                constNodes.insert(h);
+        }
+        else
+        {
+            extractConstNodes(h, constNodes);
         }
     }
 }
@@ -790,7 +784,7 @@ void PatternMiner::findAllInstancesForGivenPatternInNestedAtomSpace(HTreeNode* H
 //    HandleSet allVariableNodesInPattern;
 //    for (const Handle& h : patternToMatch)
 //    {
-//        extractAllVariableNodesInLink(h, allVariableNodesInPattern, _as);
+//        extractVarNodes(h, allVariableNodesInPattern, _as);
 //    }
 
 
@@ -1843,23 +1837,24 @@ bool PatternMiner::filters(const HandleSeq& inputLinks, HandleSeqSeq& oneOfEachS
 
 // return true if the inputLinks are disconnected
 // when the inputLinks are connected, the outputConnectedGroups has only one group, which is the same as inputLinks
-bool PatternMiner::splitDisconnectedLinksIntoConnectedGroups(const HandleSeq& inputLinks, HandleSeqSeq& outputConnectedGroups)
+bool PatternMiner::partitionBySharedVariables(const HandleSeq& links,
+                                              HandleSeqSeq& connectedGroups)
 {
-    if(inputLinks.size() < 2)
+    if(links.size() < 2)
         return false;
 
-    HandleSet allNodesInEachLink[inputLinks.size()];
-    for (unsigned int i = 0; i < inputLinks.size(); ++i)
+    HandleSet variablesPerLink[links.size()];
+    for (unsigned int i = 0; i < links.size(); ++i)
     {
-        extractAllVariableNodesInLink(inputLinks[i], allNodesInEachLink[i]);
+        extractVarNodes(links[i], variablesPerLink[i]);
     }
 
     int i = -1;
-    for (const Handle& link : inputLinks)
+    for (const Handle& link : links)
     {
         i++;
 
-        if (isInHandleSeqSeq(link, outputConnectedGroups))
+        if (isInHandleSeqSeq(link, connectedGroups))
             continue;
 
         // This link is not in outputConnectedGroups, which means none
@@ -1867,25 +1862,20 @@ bool PatternMiner::splitDisconnectedLinksIntoConnectedGroups(const HandleSeq& in
         // group.
         HandleSeq newGroup;
         newGroup.push_back(link);
+        HandleSet variablesInGroup(variablesPerLink[i]);
 
         // Only need to scan the links after this link
-        for (unsigned int j = i+1; j < inputLinks.size(); j++)
-        {
-            for (Handle node : allNodesInEachLink[i])
-            {
-                if (is_in(node, allNodesInEachLink[j]))
-                {
-                    // they share same node -> they are connected.
-                    newGroup.push_back(inputLinks[j]);
-                    break;
-                }
+        for (unsigned int j = i+1; j < links.size(); j++) {
+            if (not is_disjoint(variablesInGroup, variablesPerLink[j])) {
+                newGroup.push_back(links[j]);
+                set_union_modify(variablesInGroup, variablesPerLink[j]);
             }
         }
 
-        outputConnectedGroups.push_back(newGroup);
+        connectedGroups.push_back(newGroup);
     }
 
-    return  (outputConnectedGroups.size() > 1);
+    return connectedGroups.size() > 1;
 }
 
 double PatternMiner::calculateEntropyOfASubConnectedPattern(string& connectedSubPatternKey, HandleSeq& connectedSubPattern)
@@ -1967,7 +1957,7 @@ void PatternMiner::calculateInteractionInformation(HTreeNode* HNode)
 
             // First check if this subpattern is disconnected. If it is disconnected, it won't exist in the H-Tree anyway.
             HandleSeqSeq splittedSubPattern;
-            if (splitDisconnectedLinksIntoConnectedGroups(unifiedSubPattern, splittedSubPattern))
+            if (partitionBySharedVariables(unifiedSubPattern, splittedSubPattern))
             {
 //                 std::cout<< " is disconnected! splitted it into connected parts: \n" ;
                 // The splitted parts are disconnected, so they are independent. So the entroy = the sum of each part.
@@ -2478,7 +2468,7 @@ void PatternMiner::calculateSurprisingness(HTreeNode* HNode)
 
             // First check if this subpattern is disconnected. If it is disconnected, it won't exist in the H-Tree anyway.
             HandleSeqSeq splittedSubPattern;
-            if (splitDisconnectedLinksIntoConnectedGroups(unifiedSubPattern, splittedSubPattern))
+            if (partitionBySharedVariables(unifiedSubPattern, splittedSubPattern))
             {
 //                std::cout<< " is disconnected! skip it \n" ;
                 containsComponentDisconnected = true;
@@ -2784,7 +2774,7 @@ void PatternMiner::calculateTypeBSurprisingness(HTreeNode* HNode)
         // By changing one const node into a variable node, if this pattern exist, then it is one super pattern of this pattern
         HandleSet allConstNodes;
         for (Handle link : HNode->pattern)
-            extractAllConstNodesInALink(link, allConstNodes);
+            extractConstNodes(link, allConstNodes);
 
         string var_name = "$var_"  + toString(HNode->var_num + 1);
         Handle var_node = as->add_node(opencog::PATTERN_VARIABLENODE_TYPE, var_name);

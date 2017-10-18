@@ -643,7 +643,7 @@ void PatternMiner::findAllInstancesForGivenPatternBF(HTreeNode* HNode)
 //   HandleSet allNodesInPattern;
 //   for (unsigned int i = 0; i < HNode->pattern.size(); ++i)
 //   {
-//       extractAllVariableNodesInLink(HNode->pattern[i],allNodesInPattern, as);
+//       extractVarNodes(HNode->pattern[i],allNodesInPattern, as);
 //   }
 
 //   HandleSeq variableNodes(allNodesInPattern.begin(), allNodesInPattern.end());
