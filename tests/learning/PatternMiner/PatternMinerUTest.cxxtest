@@ -53,6 +53,7 @@ public:
 	void setUp();
 	void tearDown();
 
+	void test__UnifyPatternOrder();
 	void test_partitionBySharedVariables();
 
 	void test_PatternMiner_SodaDrinker();
@@ -99,6 +100,33 @@ void PatternMinerUTest::setUp()
 
 void PatternMinerUTest::tearDown() 
 {
+	_as.clear();
+}
+
+void PatternMinerUTest::test__UnifyPatternOrder()
+{
+	Handle C1 = an(CONCEPT_NODE, "C1"),
+		C2 = an(CONCEPT_NODE, "C2"),
+		P = an(PREDICATE_NODE, "P"),
+		X1 = an(PATTERN_VARIABLE_NODE, "$X1"),
+		X2 = an(PATTERN_VARIABLE_NODE, "$X2"),
+		X3 = an(PATTERN_VARIABLE_NODE, "$X3"),
+		h1 = al(INHERITANCE_LINK, X1, C1),
+		h2 = al(INHERITANCE_LINK, X2, X1),
+		h3 = al(INHERITANCE_LINK, X3, X2),
+		h4 = al(EVALUATION_LINK, P, al(LIST_LINK, X3, C2));
+
+	PatternMiner pm(_as);
+
+	unsigned int unifiedIndex;
+	HandleSeq result = pm._UnifyPatternOrder({h1, h2, h3, h4}, unifiedIndex),
+		expected = {h4, h1, h2, h3};
+
+	std::cout << "result = " << oc_to_string(result);
+	std::cout << "expected = " << oc_to_string(expected);
+
+	TS_ASSERT_EQUALS(result, expected);
+	TS_ASSERT_EQUALS(unifiedIndex, 0);
 }
 
 void PatternMinerUTest::test_partitionBySharedVariables()

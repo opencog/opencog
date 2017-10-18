@@ -93,6 +93,7 @@ struct _non_ordered_pattern
 
         // if all above criteria cannot figure out the order of these two patterns, just return true and output a warning
         cout << "\n warning: _non_ordered_pattern: Fail to figure out the order of two patterns!\n";
+        // NTODO if there are equal, then it should be false.
         return true;
     }
 };
@@ -278,47 +279,88 @@ protected:
     HandleSeq allLinksContainWhiteKeywords;
     HandleSet havenotProcessedWhiteKeywordLinks;
 
-   // [gram], this to avoid different threads happen to work on the same links.
-   // each string is composed the handles of a group of fact links in the observing_as in the default hash order using std set
+    // [gram], this to avoid different threads happen to work on the same links.
+    // each string is composed the handles of a group of fact links in the observing_as in the default hash order using std set
     // queue<string>[thread_num][max_gram]
-   list<string>** thread_DF_ExtractedLinks;
-   // set<string>[max_gram]
-   set<string>* all_thread_ExtractedLinks_pergram;
+    list<string>** thread_DF_ExtractedLinks;
+    // set<string>[max_gram]
+    set<string>* all_thread_ExtractedLinks_pergram;
 
-   HandleSeq allDBpediaKeyNodes;
+    HandleSeq allDBpediaKeyNodes;
 
-   std::ofstream surpringnessIICalfile;
+    std::ofstream surpringnessIICalfile;
 
-    // This is against graph isomorphism problem, make sure the
-    // patterns we found are not duplicated. The input links should
-    // be a Pattern in such format:
-    //
-    //    (InheritanceLink
-    //       (VariableNode "$1")
-    //       (ConceptNode "Animal")
-    //
-    //    (InheritanceLink
-    //       (VariableNode "$2")
-    //       (VariableNode "$1")
-    //
-    //    (InheritanceLink
-    //       (VariableNode "$3")
-    //       (VariableNode "$2")
-    //
-    //    (EvaluationLink (stv 1 1)
-    //       (PredicateNode "like_food")
-    //       (ListLink
-    //          (VariableNode "$3")
-    //          (ConceptNode "meat")
-    //       )
-    //    )
-    //
-    // Return unified ordered Handle vector
-    //
-    // NTODO: why not use a set instead of seq in inputPattern
+    /**
+     * Re-order the inputPattern so that, after abstracting away the
+     * variable names, the unique sub-patterns come first (according
+     * to some fixed order defined by their content -- currently using
+     * their string representations). Then the sub-patterns grouped by
+     * structures (after abstracting away the variable names). Groups
+     * are ordered according to their structures (using again their
+     * string representations). And sub-patterns within groups are
+     * ordered according to how their mapping to their structures
+     * after abstracting names away.
+     *
+     * The value unifiedLastLinkIndex represents the index of the last
+     * sub-pattern in the new order.
+     *
+     * For instance, if inputPattern is
+     *
+     *    (InheritanceLink
+     *       (VariableNode "$1")
+     *       (ConceptNode "Animal")
+     *
+     *    (InheritanceLink
+     *       (VariableNode "$2")
+     *       (VariableNode "$1")
+     *
+     *    (InheritanceLink
+     *       (VariableNode "$3")
+     *       (VariableNode "$2")
+     *
+     *    (EvaluationLink (stv 1 1)
+     *       (PredicateNode "like_food")
+     *       (ListLink
+     *          (VariableNode "$3")
+     *          (ConceptNode "meat")
+     *       )
+     *    )
+     *
+     * The output may look like
+     *
+     *
+     *    (InheritanceLink
+     *       (VariableNode "$1")
+     *       (ConceptNode "Animal")
+     *
+     *    (EvaluationLink (stv 1 1)
+     *       (PredicateNode "like_food")
+     *       (ListLink
+     *          (VariableNode "$3")
+     *          (ConceptNode "meat")
+     *       )
+     *    )
+     *
+     *    (InheritanceLink
+     *       (VariableNode "$2")
+     *       (VariableNode "$1")
+     *
+     *    (InheritanceLink
+     *       (VariableNode "$3")
+     *       (VariableNode "$2")
+     *
+     * and unifiedLastLinkIndex = 1
+     */
     HandleSeq _UnifyPatternOrder(const HandleSeq& inputPattern, unsigned int& unifiedLastLinkIndex);
+
+    /**
+     * NTODO write comment
+     */
     HandleSeq UnifyPatternOrder(const HandleSeq& inputPattern, unsigned int& unifiedLastLinkIndex, HandleMap& orderedVarNameMap);
 
+    /**
+     * NTODO write comment
+     */
     Handle UnifyOneLinkForUnorderedLink(const Handle& link,std::map<Handle,Type>& orderedTmpLinkToType);
 
 
@@ -344,6 +386,14 @@ protected:
 
     HandleSeq ReplaceConstNodeWithVariableForAPattern(const HandleSeq& pattern, Handle constNode, Handle newVariableNode);
 
+    /**
+     * For each pattern variable of `link` (presumably duplicates as
+     * well), pushes onto `indexes` a vector of pairs such that the
+     * first element of each pair is an index within orderedHandles,
+     * and the second element is the location of the variable name
+     * within the string representation of the handle at that index,
+     * in case the variable appears in that handle at all.
+     */
     void generateIndexesOfSharedVars(const Handle& link, const HandleSeq& orderedHandles, vector<vector<std::pair<int, size_t>>> &indexes);
 
     // generate the outgoings for a link in a pattern in the Pattern mining Atomspace, according to the given group of variables

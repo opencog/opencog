@@ -77,7 +77,7 @@ void PatternMiner::generateIndexesOfSharedVars(const Handle& link, const HandleS
                         indexesForCurVar.emplace_back(index, pos);
                     }
 
-                    index ++;
+                    index++;
                 }
 
                 indexes.push_back(indexesForCurVar);
@@ -146,7 +146,6 @@ HandleSeq PatternMiner::findAndRenameVariables(const Handle& link, HandleMap& va
 
 HandleSeq PatternMiner::RebindVariableNames(HandleSeq& orderedPattern, HandleMap& orderedVarNameMap, std::map<Handle,Type>& orderedTmpLinkToType)
 {
-
     HandleSeq rebindedPattern;
 
     for (const Handle& h : orderedPattern)
@@ -173,7 +172,6 @@ HandleSeq PatternMiner::RebindVariableNames(HandleSeq& orderedPattern, HandleMap
 
     return rebindedPattern;
 }
-
 
 void PatternMiner::ReplaceConstNodeWithVariableForOneLink(Handle link, Handle constNode, Handle newVariableNode, HandleSeq& renameOutgoingLinks)
 {
@@ -250,11 +248,9 @@ HandleSeq PatternMiner::UnifyPatternOrder(const HandleSeq& inputPattern, unsigne
     else
         orderedHandles = _UnifyPatternOrder(inputPattern, unifiedLastLinkIndex);
 
-    HandleSeq rebindPattern = RebindVariableNames(orderedHandles, orderedVarNameMap,orderedTmpLinkToType);
-
+    HandleSeq rebindPattern = RebindVariableNames(orderedHandles, orderedVarNameMap, orderedTmpLinkToType);
 
     return rebindPattern;
-
 }
 
 
@@ -340,7 +336,7 @@ HandleSeq PatternMiner::_UnifyPatternOrder(const HandleSeq& inputPattern, unsign
 
     }
 
-    // Step 3: sort the order of the handls share the same string key with other handles
+    // Step 3: sort the order of the handles share the same string key with other handles
     for (const string& keyString : duplicateStrs)
     {
         // get all the corresponding handles for this key string
@@ -363,7 +359,7 @@ HandleSeq PatternMiner::_UnifyPatternOrder(const HandleSeq& inputPattern, unsign
 
 
     // find out where the last link in the input pattern is now in the ordered pattern
-    Handle lastLink = inputPattern[inputPattern.size()-1];
+    Handle lastLink = inputPattern.back();
     unsigned int lastLinkIndex = 0;
     for (const Handle& h : orderedHandles)
     {
@@ -415,7 +411,6 @@ Handle PatternMiner::UnifyOneLinkForUnorderedLink(const Handle& link,
     Type originalType = link->getType();
     if (classserver().isA(originalType, UNORDERED_LINK))
     {
-
         unsigned int unifiedLastLinkIndex;
         HandleSeq orderedOutgoings;
         // check if there are only Links in the outgoings
