@@ -254,14 +254,8 @@ HandleSeq PatternMiner::UnifyPatternOrder(const HandleSeq& inputPattern, unsigne
 }
 
 
-// the input links should be like: only specify the const node, all the variable node name should not be specified:
-// unifiedLastLinkIndex is to return where the last link in the input pattern is now in the ordered pattern
-// because the last link in input pattern is the externed link from last gram pattern
-// in orderedVarNameMap, the first Handle is the variable node in the input unordered pattern,
-// the second Handle is the renamed ordered variable node in the output ordered pattern.
 HandleSeq PatternMiner::_UnifyPatternOrder(const HandleSeq& inputPattern, unsigned int& unifiedLastLinkIndex)
 {
-
     // Step 1: take away all the variable names, make the pattern into such format string:
     //    (InheritanceLink
     //       (VariableNode )
@@ -356,7 +350,6 @@ HandleSeq PatternMiner::_UnifyPatternOrder(const HandleSeq& inputPattern, unsign
             orderedHandles.push_back(np.link);
         }
     }
-
 
     // find out where the last link in the input pattern is now in the ordered pattern
     Handle lastLink = inputPattern.back();
