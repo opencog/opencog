@@ -840,30 +840,20 @@ void PatternMiner::findAllInstancesForGivenPatternInNestedAtomSpace(HTreeNode* H
 bool PatternMiner::containDuplicates(const HandleSeq &handles)
 {
     for (unsigned int i = 0; i < handles.size(); i ++)
-    {
         for (unsigned int j = i+1; j < handles.size(); j ++)
-        {
             if (handles[j] == handles[i])
                 return true;
-        }
-    }
-
     return false;
 }
 
-
-bool PatternMiner::isInHandleSeq(const Handle& handle, const HandleSeq& handles)
+bool PatternMiner::isInHandleSeq(const Handle& h, const HandleSeq& hs)
 {
-    return is_in(handle, handles);
+    return is_in(h, hs);
 }
 
-bool PatternMiner::isInHandleSeqSeq(const Handle& handle, const HandleSeqSeq& handleSeqs)
+bool PatternMiner::isInHandleSeqSeq(const Handle& h, const HandleSeqSeq& hss)
 {
-    for (const HandleSeq& handles : handleSeqs)
-        if (isInHandleSeq(handle,handles))
-            return true;
-
-    return false;
+    return any_of(hss, [&](const HandleSeq& hs) { return is_in(h, hs); });
 }
 
 bool PatternMiner::isIgnoredType(Type type)
