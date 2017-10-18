@@ -75,8 +75,8 @@ class WordRelQuery :
 
 		/* Callbacks called from PatternMatch */
 		virtual bool node_match(Node *, Node *);
-		virtual bool solution(std::map<Handle, Handle> &pred_soln,
-		                      std::map<Handle, Handle> &var_soln);
+		virtual bool solution(HandleMap &pred_soln,
+		                      HandleMap &var_soln);
 };
 
 } // namespace opencog

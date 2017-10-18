@@ -30,6 +30,7 @@
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/learning/PatternMiner/PatternMiner.h>
 
+#include <boost/range/algorithm/remove.hpp>
 #include <boost/algorithm/string.hpp>
 
 using namespace std;
@@ -121,11 +122,10 @@ public:
         return get_use_keyword_white_list();
     }
 
-    string get_Ignore_Link_Types()
+    string get_ignore_link_types()
     {
         string result =  "Ignore_Link_Types:";
-        vector<Type> ignore_list = patternMiner->get_Ignore_Link_Types();
-        for (Type type : ignore_list)
+        for (Type type : patternMiner->get_ignore_link_types())
             result +=  " " + classserver().getTypeName(type);
 
         return result;
@@ -134,8 +134,7 @@ public:
     string get_linktype_white_list()
     {
         string result =  "linktype_white_list:";
-        vector<Type> white_list = patternMiner->get_linktype_white_list();
-        for (Type type : white_list)
+        for (Type type : patternMiner->get_linktype_white_list())
             result +=  " " + classserver().getTypeName(type);
 
         return result;
@@ -207,7 +206,7 @@ public:
 
     }
 
-    string add_Ignore_Link_Type(const string& _typeStr)
+    string add_ignore_link_type(const string& _typeStr)
     {
         Type atomType = classserver().getType(_typeStr);
         if (atomType == NOTYPE)
@@ -215,12 +214,12 @@ public:
 
         string result = "";
 
-        if (patternMiner->add_Ignore_Link_Type(atomType))
+        if (patternMiner->add_ignore_link_type(atomType))
             result += "Added!\n";
         else
             result += "Input type already exists in the ingnore Link list!\n";
 
-        return result + get_Ignore_Link_Types();
+        return result + get_ignore_link_types();
 
     }
 
@@ -231,20 +230,19 @@ public:
             return "Error: Input type doesn't exist!";
 
         string result = "";
-        if (patternMiner->remove_Ignore_Link_Type(atomType))
+        if (patternMiner->remove_ignore_link_type(atomType))
             result += "Removed!\n";
         else
             result += "Input type does not exist in the ingnore Link list!\n";
 
-        return result + get_Ignore_Link_Types();
+        return result + get_ignore_link_types();
 
     }
 
     string get_keyword_black_list()
     {
         string result =  "keyword_black_list:";
-        vector<string> black_list = patternMiner->get_keyword_black_list();
-        for (string word : black_list)
+        for (const string& word : patternMiner->get_keyword_black_list())
             result +=  " " + word;
 
         return result;
@@ -262,12 +260,9 @@ public:
 
     string add_keywords_to_black_list(const string& _keywordlist)
     {
-        vector<string> keyword_list;
-        string keywordstr = _keywordlist;
-        keywordstr .erase(std::remove(keywordstr .begin(), keywordstr .end(), ' '), keywordstr .end());
-        boost::split(keyword_list, keywordstr , boost::is_any_of(","));
+        vector<string> keyword_list = PatternMiner::parse_comma_separated_list(_keywordlist);
 
-        for (string keyword : keyword_list)
+        for (const string& keyword : keyword_list)
             add_keyword_to_black_list(keyword);
 
         return "Added!" + get_keyword_black_list();
@@ -287,8 +282,7 @@ public:
     string get_keyword_white_list()
     {
         string result =  "keyword_white_list:";
-        vector<string> white_list = patternMiner->get_keyword_white_list();
-        for (string word : white_list)
+        for (const string& word : patternMiner->get_keyword_white_list())
             result +=  " " + word;
 
         return result;
@@ -307,12 +301,9 @@ public:
 
     string add_keywords_to_white_list(const string& _keywordlist)
     {
-        vector<string> keyword_list;
-        string keywordstr = _keywordlist;
-        keywordstr .erase(std::remove(keywordstr .begin(), keywordstr .end(), ' '), keywordstr .end());
-        boost::split(keyword_list, keywordstr , boost::is_any_of(","));
+        vector<string> keyword_list = PatternMiner::parse_comma_separated_list(_keywordlist);
 
-        for (string keyword : keyword_list)
+        for (const string& keyword : keyword_list)
             add_keyword_to_white_list(keyword);
 
         return "Added!" + get_keyword_white_list();
@@ -380,11 +371,11 @@ public:
             return "enable_filter_node_types_should_not_be_vars: false";
     }
 
+	// NTODO this is fishy, you don't want to return a string
     string get_node_types_should_not_be_vars()
     {
         string result =  "node_types_should_not_be_vars:";
-        vector<Type> _list = patternMiner->get_node_types_should_not_be_vars();
-        for (Type type : _list)
+        for (Type type : patternMiner->get_node_types_should_not_be_vars())
             result +=  " " + classserver().getTypeName(type);
 
         return result;
@@ -445,8 +436,7 @@ public:
     string get_node_types_should_be_vars()
     {
         string result =  "node_types_should_be_vars:";
-        vector<Type> _list = patternMiner->get_node_types_should_be_vars();
-        for (Type type : _list)
+        for (Type type : patternMiner->get_node_types_should_be_vars())
             result +=  " " + classserver().getTypeName(type);
 
         return result;
@@ -466,7 +456,6 @@ public:
             result += "Input type already exists in the node_types_should_be_vars list!\n";
 
         return result + get_node_types_should_be_vars();
-
     }
 
     string remove_node_type_from_node_types_should_be_vars(const string& _typeStr)
@@ -507,8 +496,7 @@ public:
     string get_same_link_types_not_share_second_outgoing()
     {
         string result =  "same_link_types_not_share_second_outgoing Link_Types:";
-        vector<Type> _list = patternMiner->get_same_link_types_not_share_second_outgoing();
-        for (Type type : _list)
+        for (Type type : patternMiner->get_same_link_types_not_share_second_outgoing())
             result +=  " " + classserver().getTypeName(type);
 
         return result;
@@ -559,7 +547,7 @@ public:
         result += get_use_linktype_black_list() + "\n";
         result += get_use_linktype_white_list() + "\n";
         result += get_linktype_white_list() + "\n";
-        result += get_Ignore_Link_Types() + "\n";
+        result += get_ignore_link_types() + "\n";
         result += get_use_keyword_black_list() + "\n";
         result += get_use_keyword_white_list() + "\n";
         result += get_keyword_black_list() + "\n";
@@ -581,12 +569,9 @@ public:
     // e.g.: "dog,cat,bike,swimming pool,computer"
     void select_subset_from_atomspace(const string& _keywordlist, int max_distance, bool if_contain_logic)
     {
-        vector<string> keyword_list;
-        string keywordstr = _keywordlist;
-        keywordstr .erase(std::remove(keywordstr .begin(), keywordstr .end(), ' '), keywordstr .end());
-        boost::split(keyword_list, keywordstr , boost::is_any_of(","));
+        set<string> keyword_list = PatternMiner::parse_comma_separated_set(_keywordlist);
 
-        if (keyword_list.size() == 0)
+        if (keyword_list.empty())
         {
             cout << "\nError: Keyword list is empty!" << std::endl;
             return;
@@ -621,8 +606,8 @@ public:
 
     void select_whitelist_subset_from_atomspace(int max_distance, bool if_contain_logic)
     {
-        vector<string> keyword_list = patternMiner->get_keyword_white_list();
-        if (keyword_list.size() == 0)
+        set<string> keyword_list = patternMiner->get_keyword_white_list();
+        if (keyword_list.empty())
         {
             cout << "\nError: white keyword list is empty!" << std::endl;
             return;
@@ -654,7 +639,6 @@ public:
         select_whitelist_subset_from_atomspace(max_distance, false);
     }
 
-
     void apply_whitelist_keyword_filter_after_mining()
     {
         patternMiner->applyWhiteListKeywordfilterAfterMining();
@@ -662,10 +646,9 @@ public:
 
     void select_whitelist_entity_links_subset_equalto_keywords()
     {
-        vector<string> whiteKeywords = patternMiner->get_keyword_white_list();
+        set<string> whiteKeywords = patternMiner->get_keyword_white_list();
         patternMiner->selectSubsetAllEntityLinksContainsKeywords(whiteKeywords);
     }
-
 
     // Note: this will release all the previous pattern mining results
     void reset_patternminer(bool resetAllSettingsFromConfig)
@@ -685,10 +668,7 @@ public:
 
     void query_patterns_with_frequency_surprisingnessI_ranges(const string& ranges, int gram)
     {
-        vector<string> range_vector;
-        string rangesStr = ranges;
-        rangesStr.erase(std::remove(rangesStr.begin(), rangesStr.end(), ' '), rangesStr.end());
-        boost::split(range_vector, rangesStr , boost::is_any_of(","));
+        vector<string> range_vector = PatternMiner::parse_comma_separated_list(ranges);
         unsigned int min_frequency = std::stoi(range_vector[0]);
         unsigned int max_frequency = std::stoi(range_vector[1]);
         float min_surprisingness_I = std::stof(range_vector[2]);
@@ -698,10 +678,7 @@ public:
 
     void query_patterns_with_surprisingnessI_and_surprisingnessII_ranges(const string& ranges, int gram)
     {
-        vector<string> range_vector;
-        string rangesStr = ranges;
-        rangesStr.erase(std::remove(rangesStr.begin(), rangesStr.end(), ' '), rangesStr.end());
-        boost::split(range_vector, rangesStr , boost::is_any_of(","));
+        vector<string> range_vector = PatternMiner::parse_comma_separated_list(ranges);
         unsigned int min_frequency = std::stoi(range_vector[0]);
         unsigned int max_frequency = std::stoi(range_vector[1]);
         float min_surprisingness_I = std::stof(range_vector[2]);
@@ -714,10 +691,7 @@ public:
 
     void query_patterns_with_frequency_surprisingnessB_and_subpatternnum_ranges(const string& ranges, int gram)
     {
-        vector<string> range_vector;
-        string rangesStr = ranges;
-        rangesStr.erase(std::remove(rangesStr.begin(), rangesStr.end(), ' '), rangesStr.end());
-        boost::split(range_vector, rangesStr , boost::is_any_of(","));
+	    vector<string> range_vector = PatternMiner::parse_comma_separated_list(ranges);
         unsigned int min_frequency = std::stoi(range_vector[0]);
         unsigned int max_frequency = std::stoi(range_vector[1]);
         double min_surprisingness_B = std::stof(range_vector[2]);
@@ -731,10 +705,7 @@ public:
 
     void query_patterns_with_frequency_interactioninformation_ranges(const string& ranges, int gram)
     {
-        vector<string> range_vector;
-        string rangesStr = ranges;
-        rangesStr.erase(std::remove(rangesStr.begin(), rangesStr.end(), ' '), rangesStr.end());
-        boost::split(range_vector, rangesStr , boost::is_any_of(","));
+        vector<string> range_vector = PatternMiner::parse_comma_separated_list(ranges);
         unsigned int min_frequency = std::stoi(range_vector[0]);
         unsigned int max_frequency = std::stoi(range_vector[1]);
         float min_ii = std::stof(range_vector[2]);
@@ -800,7 +771,7 @@ void* PatternMinerSCM::init_in_guile(void* self)
 {
     scm_c_define_module("opencog patternminer", init_in_module, self);
     scm_c_use_module("opencog patternminer");
-    return NULL;
+    return nullptr;
 }
 
 void PatternMinerSCM::init_in_module(void* data)
@@ -816,7 +787,7 @@ void PatternMinerSCM::init_in_module(void* data)
 void PatternMinerSCM::init()
 {
     AtomSpace* as = SchemeSmob::ss_get_env_as("patten miner");
-    patternMiner = new PatternMiner(as);
+    patternMiner = new PatternMiner(*as);
 
     //---------------Note-----------------
     //
@@ -837,8 +808,8 @@ void PatternMinerSCM::init()
 
     define_scheme_primitive("pm-get-use-linktype-black-list", &PatternMinerSCM::get_use_linktype_black_list, this, "patternminer");
     define_scheme_primitive("pm-set-use-linktype-black-list", &PatternMinerSCM::get_use_linktype_black_list, this, "patternminer");
-    define_scheme_primitive("pm-get-ignore-link-types", &PatternMinerSCM::get_Ignore_Link_Types, this, "patternminer");
-    define_scheme_primitive("pm-add-ignore-link-type", &PatternMinerSCM::add_Ignore_Link_Type, this, "patternminer");
+    define_scheme_primitive("pm-get-ignore-link-types", &PatternMinerSCM::get_ignore_link_types, this, "patternminer");
+    define_scheme_primitive("pm-add-ignore-link-type", &PatternMinerSCM::add_ignore_link_type, this, "patternminer");
 
 
     define_scheme_primitive("pm-get-use-linktype-white-list", &PatternMinerSCM::get_use_linktype_white_list, this, "patternminer");

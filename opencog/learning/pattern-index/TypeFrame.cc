@@ -653,10 +653,10 @@ void TypeFrame::printForDebug(string prefix, string suffix, bool showNames) cons
     printf("%s", prefix.c_str());
     for (unsigned int i = 0; i < size(); i++) {
         if (showNames && (at(i).first < 1000)) {
-            printf("(%s %d) ", classserver().getTypeName(at(i).first).c_str(), at(i).second);
+            printf("(%s %lu) ", classserver().getTypeName(at(i).first).c_str(), at(i).second);
         } else {
             if (at(i).first != 1000) {
-                printf("(%d %d) ", at(i).first, at(i).second);
+                printf("(%u %lu) ", at(i).first, at(i).second);
             } else {
                 printf("(*) ");
             }
@@ -766,16 +766,16 @@ int TypeFrame::recursiveParse(const string &txt, unsigned int begin)
         if (DEBUG) printf("targetBegin = %d\n", targetBegin);
         int targetEnd = 0;
         Arity targetCount = countTargets(txt, targetBegin);
-        if (DEBUG) printf("targetCount = %d\n", targetCount);
+        if (DEBUG) printf("targetCount = %lu\n", targetCount);
         if (targetCount < 0){
             error("Could not compute targetCount");
             return -1;
         }
         push_back(TypePair(type, targetCount));
-        for (int i = 0; i < targetCount; i++) {
-            if (DEBUG) printf("Processing target #%d\n", i);
+        for (unsigned i = 0; i < targetCount; i++) {
+            if (DEBUG) printf("Processing target #%u\n", i);
             targetEnd = recursiveParse(txt, targetBegin);
-            if (DEBUG) printf("Done with target#%d\n", i);
+            if (DEBUG) printf("Done with target#%u\n", i);
             if (DEBUG) printf("targetEnd = %d\n", targetEnd);
             if (targetEnd < 0) return -1;
             if (i != (targetCount -1)) {

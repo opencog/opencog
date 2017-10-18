@@ -52,7 +52,7 @@ private:
     HandleSeqSeq do_cached_sureal_match(Handle);
     void reset_cache(void);
 
-    HandleSeqSeq sureal_get_mapping(Handle&, std::vector<std::map<Handle, Handle> >&);
+    HandleSeqSeq sureal_get_mapping(Handle&, std::vector<HandleMap >&);
 
 public:
     SuRealSCM();

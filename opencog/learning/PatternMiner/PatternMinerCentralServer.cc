@@ -36,6 +36,7 @@
 #include <functional>
 #include <sys/time.h>
 
+#include <boost/range/algorithm/sort.hpp>
 
 #include <opencog/atoms/base/ClassServer.h>
 #include <opencog/atoms/base/Handle.h>
@@ -118,12 +119,8 @@ void DistributedPatternMiner::launchCentralServer()
         {
             // calculate the corpus size by adding up all the processedFactsNum of every worker
             unsigned int totalProcessedFactsNum = 0;
-            map<string,std::pair<bool, unsigned int>>::iterator workerIt;
-
-            for( workerIt = allWorkers.begin(); workerIt != allWorkers.end(); ++ workerIt)
-            {
-                totalProcessedFactsNum += (workerIt->second).second ;
-            }
+            for (const auto& worker : allWorkers)
+                totalProcessedFactsNum += worker.second.second;
 
             atomspaceSizeFloat = (float) totalProcessedFactsNum;
 
@@ -179,16 +176,12 @@ void DistributedPatternMiner::centralServerStopListening()
 bool DistributedPatternMiner::checkIfAllWorkersStopWorking()
 {
 
-    if (allWorkers.size() == 0)
-        return false; // has not start yet
+    if (allWorkers.empty())
+        return false; // has not started yet
 
-    map<string,std::pair<bool, unsigned int>>::iterator workerIt;
-    for( workerIt = allWorkers.begin(); workerIt != allWorkers.end(); ++ workerIt)
-    {
-        if ( (workerIt->second).first == true)
+    for (const auto& workerIt : allWorkers)
+        if (worker.second.first)
             return false;
-    }
-
 
     return true;
 }
@@ -244,7 +237,7 @@ void DistributedPatternMiner::handleRegisterNewWorker(http_request request)
         modifyWorkerLock.lock();
         allWorkersStop = false;
         waitingForNewClients = false;
-        allWorkers.insert(std::pair<string,std::pair<bool, unsigned int>>(clientID, std::pair<bool, unsigned int>(true, 0))); // true means this worker is still working.
+        allWorkers.insert({clientID, std::pair<bool, unsigned int>(true, 0)}); // true means this worker is still working.
         modifyWorkerLock.unlock();
 
         json::value answer = json::value::object();
@@ -312,7 +305,7 @@ void DistributedPatternMiner::handleFindNewPatterns(http_request request)
 //    if (msgReceivedNum == 100)
 //    {
 //        timeval t1;
-//        gettimeofday(&t1, NULL);
+//        gettimeofday(&t1, nullptr);
 
 //        startTime = t1.tv_sec*1000 + t1.tv_usec/1000;
 //    }
@@ -320,7 +313,7 @@ void DistributedPatternMiner::handleFindNewPatterns(http_request request)
 //    if (msgReceivedNum == 2100)
 //    {
 //        timeval t2;
-//        gettimeofday(&t2, NULL);
+//        gettimeofday(&t2, nullptr);
 
 //        endTime = t2.tv_sec*1000 + t2.tv_usec/1000;
 //        long costSeconds = (endTime - startTime) / 1000;
@@ -337,9 +330,8 @@ void DistributedPatternMiner::handleFindNewPatterns(http_request request)
         // should get an array of patterns
         json::value jarray = request.extract_json().get();
 
-        for (json::array::iterator iter = jarray.as_array().begin(); iter != jarray.as_array().end(); ++iter)
+        for (const json::value& jval : jarray.as_array())
         {
-            json::value jval = (json::value)(*iter);
             waitForParsePatternQueue.push_back(jval);
             total_pattern_received ++;
 
@@ -367,7 +359,7 @@ void DistributedPatternMiner::runParsePatternTaskThread()
     {
 
         patternQueueLock.lock();
-        if (waitForParsePatternQueue.size() > 0)
+        if (not waitForParsePatternQueue.empty())
         {
             json::value jval = waitForParsePatternQueue.front();
             waitForParsePatternQueue.pop_front();
@@ -433,10 +425,10 @@ void DistributedPatternMiner::parseAPatternTask(json::value jval)
         else
         {
             // add this new found pattern into the Atomspace
-            HandleSeq patternHandleSeq = loadPatternIntoAtomSpaceFromString(PatternStr, atomSpace);
+            HandleSeq patternHandleSeq = loadPatternIntoAtomSpaceFromString(PatternStr, as);
 
 
-            if (patternHandleSeq.size() == 0)
+            if (patternHandleSeq.empty())
             {
 
                 // cout << "Warning: Invalid pattern string: " << PatternStr << std::endl;
@@ -449,7 +441,7 @@ void DistributedPatternMiner::parseAPatternTask(json::value jval)
             newHTreeNode->pattern = patternHandleSeq;
             newHTreeNode->count = 1;
             uniqueKeyLock.lock();
-            keyStrToHTreeNodeMap.insert(std::pair<string, HTreeNode*>(PatternStr, newHTreeNode));
+            keyStrToHTreeNodeMap.insert({PatternStr, newHTreeNode});
             uniqueKeyLock.unlock();
 
         }
@@ -491,8 +483,8 @@ void DistributedPatternMiner::parseAPatternTask(json::value jval)
                     // It's possibly sent by another thread, and added to the queue later than the current pattern.
                     // So we add this parent pattern here first, but set its count = 0
                     // add this new found pattern into the Atomspace
-                    HandleSeq parentPatternHandleSeq = loadPatternIntoAtomSpaceFromString(ParentPatternStr, atomSpace);
-                    if (parentPatternHandleSeq.size() == 0)
+                    HandleSeq parentPatternHandleSeq = loadPatternIntoAtomSpaceFromString(ParentPatternStr, as);
+                    if (parentPatternHandleSeq.empty())
                     {
 
                         cout << "Warning: Invalid pattern string: " << ParentPatternStr << std::endl;
@@ -506,7 +498,7 @@ void DistributedPatternMiner::parseAPatternTask(json::value jval)
                     parentNode->count = 0;
 
                     uniqueKeyLock.lock();
-                    keyStrToHTreeNodeMap.insert(std::pair<string, HTreeNode*>(ParentPatternStr, parentNode));
+                    keyStrToHTreeNodeMap.insert({ParentPatternStr, parentNode});
                     uniqueKeyLock.unlock();
 
 //                    addNewPatternLock.lock();
@@ -546,10 +538,10 @@ void DistributedPatternMiner::centralServerEvaluateInterestingness()
 
     std::cout<<"Debug: PatternMiner:  done frequent pattern mining for 1 to "<< MAX_GRAM <<"gram patterns!\n";
 
-    for(unsigned int gram = 1; gram <= MAX_GRAM; gram ++)
+    for (unsigned int gram = 1; gram <= MAX_GRAM; gram++)
     {
         // sort by frequency
-        std::sort((patternsForGram[gram-1]).begin(), (patternsForGram[gram-1]).end(),compareHTreeNodeByFrequency );
+        boost::sort(patternsForGram[gram-1], compareHTreeNodeByFrequency );
 
         // Finished mining gram patterns; output to file
         std::cout<<"gram = " + toString(gram) + ": " + toString((patternsForGram[gram-1]).size()) + " patterns found! ";
@@ -563,7 +555,7 @@ void DistributedPatternMiner::centralServerEvaluateInterestingness()
 
     if (enable_Interesting_Pattern)
     {
-        for(cur_gram = 2; cur_gram <= MAX_GRAM; cur_gram ++)
+        for (cur_gram = 2; cur_gram <= MAX_GRAM; cur_gram++)
         {
             cout << "\nCalculating";
             if (Enable_Interaction_Information)
@@ -596,14 +588,14 @@ void DistributedPatternMiner::centralServerEvaluateInterestingness()
             if (Enable_Interaction_Information)
             {
                 // sort by interaction information
-                std::sort((patternsForGram[cur_gram-1]).begin(), (patternsForGram[cur_gram-1]).end(),compareHTreeNodeByInteractionInformation);
+                boost::sort(patternsForGram[cur_gram-1], compareHTreeNodeByInteractionInformation);
                 OutPutInterestingPatternsToFile(patternsForGram[cur_gram-1], cur_gram, 0);
             }
 
             if (Enable_surprisingness)
             {
                 // sort by surprisingness_I first
-                std::sort((patternsForGram[cur_gram-1]).begin(), (patternsForGram[cur_gram-1]).end(),compareHTreeNodeBySurprisingness_I);
+                boost::sort(patternsForGram[cur_gram-1], compareHTreeNodeBySurprisingness_I);
                 OutPutInterestingPatternsToFile(patternsForGram[cur_gram-1], cur_gram,1);
 
                 if (cur_gram == MAX_GRAM)
@@ -612,7 +604,7 @@ void DistributedPatternMiner::centralServerEvaluateInterestingness()
                 vector<HTreeNode*> curGramPatterns = patternsForGram[cur_gram-1];
 
                 // and then sort by surprisingness_II
-                std::sort(curGramPatterns.begin(), curGramPatterns.end(),compareHTreeNodeBySurprisingness_II);
+                boost::sort(curGramPatterns, compareHTreeNodeBySurprisingness_II);
                 OutPutInterestingPatternsToFile(curGramPatterns,cur_gram,2);
 
                 // Get the min threshold of surprisingness_II
@@ -637,7 +629,6 @@ void DistributedPatternMiner::centralServerEvaluateInterestingness()
                         break;
                 }
 
-
                 cout<< "surprisingness_II_threshold for " << cur_gram << " gram = "<< surprisingness_II_threshold;
 
                 // go through the top N patterns of surprisingness_I, pick the patterns with surprisingness_II higher than threshold
@@ -652,12 +643,10 @@ void DistributedPatternMiner::centralServerEvaluateInterestingness()
                 }
 
                 // sort by frequency
-                std::sort((finalPatternsForGram[cur_gram-1]).begin(), (finalPatternsForGram[cur_gram-1]).end(),compareHTreeNodeByFrequency );
+                boost::sort(finalPatternsForGram[cur_gram-1], compareHTreeNodeByFrequency );
 
                 OutPutFinalPatternsToFile(cur_gram);
-
             }
-
             std::cout<< std::endl;
         }
     }

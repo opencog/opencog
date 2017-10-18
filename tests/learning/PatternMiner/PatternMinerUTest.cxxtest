@@ -35,6 +35,9 @@ using namespace opencog;
 using namespace opencog::PatternMining;
 using namespace std;
 
+#define al _as.add_link
+#define an _as.add_node
+
 class PatternMinerUTest : public CxxTest::TestSuite
 {
 private:
@@ -50,7 +53,8 @@ public:
 	void setUp();
 	void tearDown();
 
-	// Test extracted from opencog/learning/PatternMiner/TestPatternMinerAgent.cc
+	void test_partitionBySharedVariables();
+
 	void test_PatternMiner_SodaDrinker();
 	void test_PatternMiner_InferenceControl();
 };
@@ -81,21 +85,45 @@ void PatternMinerUTest::setUp()
 	config().set("Pattern_mining_mode", "Depth_First");
 	config().set("Max_thread_num", "4");
 
-
 	// Configure scheme load-paths that are common for all tests.
 	_scm.eval("(add-to-load-path \"" PROJECT_SOURCE_DIR
 	          "/opencog/learning/PatternMiner\")");
+	_scm.eval("(add-to-load-path \"" PROJECT_SOURCE_DIR
+	          "/tests/learning/PatternMiner\")");
 
 	string link1 = "(InheritanceLink )\n  (VariableNode $var_1)\n  (ConceptNode man)\n\n";
 	string link2 = "(InheritanceLink )\n  (VariableNode $var_1)\n  (ConceptNode soda drinker)\n\n";
 	string link3 = "(InheritanceLink )\n  (VariableNode $var_1)\n  (ConceptNode ugly)\n\n";
 	top3gramPatternStr = link1 + link2 + link3;
-
 }
 
 void PatternMinerUTest::tearDown() 
-{  
+{
+}
 
+void PatternMinerUTest::test_partitionBySharedVariables()
+{
+	Handle C = an(CONCEPT_NODE, "C"),
+		X1 = an(PATTERN_VARIABLE_NODE, "$X1"),
+		X2 = an(PATTERN_VARIABLE_NODE, "$X2"),
+		X3 = an(PATTERN_VARIABLE_NODE, "$X3"),
+		X4 = an(PATTERN_VARIABLE_NODE, "$X4"),
+		h1 = al(INHERITANCE_LINK, C, X1),
+		h2 = al(INHERITANCE_LINK, X1, X2),
+		h3 = al(INHERITANCE_LINK, X2, X3),
+		h4 = al(INHERITANCE_LINK, C, X4);
+
+	PatternMiner pm(_as);
+
+	HandleSeq links{h1, h2, h3, h4};
+	HandleSeqSeq result;
+	pm.partitionBySharedVariables(links, result);
+	HandleSeqSeq expected = HandleSeqSeq{HandleSeq{h1, h2, h3}, HandleSeq{h4}};
+
+	std::cout << "result = " << oc_to_string(result);
+	std::cout << "expected = " << oc_to_string(expected);
+
+	TS_ASSERT_EQUALS(result, expected);
 }
 
 void PatternMinerUTest::test_PatternMiner_SodaDrinker()
@@ -105,14 +133,14 @@ void PatternMinerUTest::test_PatternMiner_SodaDrinker()
 	_scm.eval("(load-from-path \"ugly_male_soda-drinker_corpus.scm\")");
 
 	// Run the pattern miner
-	PatternMiner pm(&_as);
+	PatternMiner pm(_as);
 	pm.runPatternMiner(false);
 
 	// Test the result: check the final top 3-gram pattern
 
-	vector<HTreeNode*>&  top3gramPatterns = pm.getFinalPatternsForGram(3);
+	vector<HTreeNode*>& top3gramPatterns = pm.getFinalPatternsForGram(3);
 
-	string patternStr = pm.unifiedPatternToKeyString((top3gramPatterns[0])->pattern);
+	string patternStr = pm.unifiedPatternToKeyString(top3gramPatterns[0]->pattern);
 	logger().info("The result top 3-gram pattern: \n%s", patternStr.c_str());
 
 	if (patternStr != top3gramPatternStr)
@@ -134,16 +162,46 @@ void PatternMinerUTest::test_PatternMiner_SodaDrinker()
 void PatternMinerUTest::test_PatternMiner_InferenceControl()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
-	// Load inference_control_corpus.scm
-	// _scm.eval("(load-from-path \"inference_control_corpus.scm\")");
+	// Load inference-control-corpus.scm
+	std::string rs =
+		_scm.eval("(load-from-path \"inference-control-corpus.scm\")");
 
-	// // Run the pattern miner
-	// PatternMiner pm(&_as);
-	// pm.runPatternMiner(false);
+	std::cout << "rs = " << rs << std::endl;
 
-	// Test the result: check the final top 3-gram pattern
-	// TODO
+	// Run the pattern miner
+	PatternMiner pm(_as);
+	pm.runPatternMiner(false);
+
+	vector<HTreeNode*>& top3gramPatterns = pm.getFinalPatternsForGram(3);
+
+	string patternStr = pm.unifiedPatternToKeyString(top3gramPatterns[0]->pattern);
+	logger().info("The result top 3-gram pattern: \n%s", patternStr.c_str());
+
+	// The main pattern of interest should look like
+	//
+	// Execution
+	//   Schema "expand"
+	//   List
+	//     PatternMiningVariable "$k"
+	//     Inheritance
+	//       ConceptNode "A"
+	//       PatternMiningVariable "$x"
+	//     GroundedSchemaNode "scm: conditional-full-instantiation-scope-formula"
+	//   PatternMiningVariable "$r"
+	//
+	// Evaluation
+	//   Predicate "preproof
+	//   PatternMiningVariable "$k"
+	//
+	// Evaluation
+	//   Predicate "preproof
+	//   PatternMiningVariable "$r"
+
+	TS_WARN("TODO");
 
 	logger().info("End TEST: %s", __FUNCTION__);
-
 }
+
+#undef al
+#undef an
+
