@@ -58,8 +58,8 @@ public:
     typedef std::unordered_map<Handle, HandleSeq> HandleSeqCache;
     typedef std::unordered_map<std::string, bool> StringMap;
     typedef std::unordered_map<std::string, StringMap> StringCacheMap;
-    typedef std::unordered_map<Handle, bool> HandleMap;
-    typedef std::unordered_map<Handle, HandleMap> HandleCacheMap;
+    typedef std::unordered_map<Handle, bool> HandleBoolMap;
+    typedef std::unordered_map<Handle, HandleBoolMap> HandleCacheMap;
 
     int variable_match(const Handle &h1, const Handle &h2);
     void add_variable_match(const Handle &h1, const Handle &h2, bool value);
