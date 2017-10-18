@@ -17,6 +17,7 @@ IF (HAVE_cpprest)
         patternminer-types
         ${cpprest_LIBRARY}
         ${Boost_SYSTEM_LIBRARY}
+        ${Boost_REGEX_LIBRARY}
     )
 ELSE (HAVE_cpprest)
     ADD_LIBRARY (PatternMiner SHARED
@@ -31,6 +32,7 @@ ELSE (HAVE_cpprest)
         ${ATOMSPACE_LIBRARIES}
         patternminer-types
         ${Boost_SYSTEM_LIBRARY}
+        ${Boost_REGEX_LIBRARY}
     )
 ENDIF (HAVE_cpprest)
 
@@ -98,7 +100,3 @@ IF (HAVE_GUILE)
 ENDIF (HAVE_GUILE)
 
 # ------------------------------------------------------------
-
-
-
-
