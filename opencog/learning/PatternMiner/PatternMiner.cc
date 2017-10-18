@@ -1698,7 +1698,7 @@ bool PatternMiner::filters(const HandleSeq& inputLinks, HandleSeqSeq& oneOfEachS
                     {
                         HandleSet& values = (it->second);
                         auto rs = values.insert(valueNode);
-                        if (not rs.second);
+                        if (not rs.second)
                             return true;
                     }
                     else
