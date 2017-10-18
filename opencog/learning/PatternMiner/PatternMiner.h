@@ -350,6 +350,9 @@ protected:
      *       (VariableNode "$2")
      *
      * and unifiedLastLinkIndex = 1
+     *
+     * NTODO can probably be simplified by generalizing to atoms
+     * instead of links.
      */
     HandleSeq _UnifyPatternOrder(const HandleSeq& inputPattern, unsigned int& unifiedLastLinkIndex);
 
@@ -359,10 +362,15 @@ protected:
     HandleSeq UnifyPatternOrder(const HandleSeq& inputPattern, unsigned int& unifiedLastLinkIndex, HandleMap& orderedVarNameMap);
 
     /**
-     * NTODO write comment
+     * Replace all unordered links within `link` by a ListLink, where
+     * all outgoings follow a determined ordered (defined by
+     * _UnifyPatternOrder). In addition, fill orderedTmpLinkToType
+     * with associating replacement links by their original link type.
+     *
+     * NTODO can probably be simplified by generalizing to atoms
+     * instead of links.
      */
     Handle UnifyOneLinkForUnorderedLink(const Handle& link,std::map<Handle,Type>& orderedTmpLinkToType);
-
 
     Handle rebindLinkTypeRecursively(const Handle& inputLink, std::map<Handle,Type>& orderedTmpLinkToType);
 
@@ -377,10 +385,10 @@ protected:
      * NTODO orderedTmpLinkToType isn't used at the moment.
      */
     HandleSeq findAndRenameVariables(const Handle& link, HandleMap& varNameMap,
-                                     std::map<Handle,Type>& orderedTmpLinkToType);
+                                     const std::map<Handle,Type>& orderedTmpLinkToType);
 
     // Rename the variable names in a ordered pattern according to the orders of the variables appear in the orderedPattern
-    HandleSeq RebindVariableNames(HandleSeq& orderedPattern, HandleMap& orderedVarNameMap, std::map<Handle,Type>& orderedTmpLinkToType);
+    HandleSeq RebindVariableNames(const HandleSeq& orderedPattern, HandleMap& orderedVarNameMap, const std::map<Handle,Type>& orderedTmpLinkToType);
 
     void ReplaceConstNodeWithVariableForOneLink(Handle link, Handle constNode, Handle newVariableNode, HandleSeq& renameOutgoingLinks);
 
