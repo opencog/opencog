@@ -515,7 +515,7 @@ void PatternMiner::extendAPatternForOneMoreGramRecursively(const Handle &extende
 
     // the ground value node in the from_as to the variable handle in pattenmining Atomspace
     HandleMap valueToVarMap = lastGramValueToVarMap;
-    std::cout << "valueToVarMap = " << oc_to_string(valueToVarMap);
+    // std::cout << "valueToVarMap = " << oc_to_string(valueToVarMap);
 
     // First, extract all the nodes in the input link
     associateNodesToVars(extendedLink, valueToVarMap);

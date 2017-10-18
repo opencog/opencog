@@ -77,7 +77,7 @@ void PatternMiner::generateIndexesOfSharedVars(const Handle& link, const HandleS
                         indexesForCurVar.emplace_back(index, pos);
                     }
 
-                    index ++;
+                    index++;
                 }
 
                 indexes.push_back(indexesForCurVar);
@@ -89,7 +89,7 @@ void PatternMiner::generateIndexesOfSharedVars(const Handle& link, const HandleS
 }
 
 HandleSeq PatternMiner::findAndRenameVariables(const Handle& link, HandleMap& varNameMap,
-                                               std::map<Handle, Type>& orderedTmpLinkToType)
+                                               const std::map<Handle, Type>& orderedTmpLinkToType)
 {
     HandleSeq renameOutgoingLinks;
     for (const Handle& h : link->getOutgoingSet())
@@ -105,7 +105,7 @@ HandleSeq PatternMiner::findAndRenameVariables(const Handle& link, HandleMap& va
                }
                else
                {
-	               // NTODO move variable name creation to a method
+                   // NTODO move variable name creation to a method
                    string var_name = "$var_"  + toString(varNameMap.size() + 1);
                    Handle var_node = as->add_node(opencog::PATTERN_VARIABLENODE_TYPE, var_name);
 
@@ -122,16 +122,18 @@ HandleSeq PatternMiner::findAndRenameVariables(const Handle& link, HandleMap& va
         else
         {
              HandleSeq _renameOutgoingLinks =
-	             findAndRenameVariables(h, varNameMap, orderedTmpLinkToType);
+                 findAndRenameVariables(h, varNameMap, orderedTmpLinkToType);
 
              Handle reLink;
+
+             // NTODO probably need to re-enable that
 
 //             if (enable_unify_unordered_links && not orderedTmpLinkToType.empty())
 //             {
 
-//                std::map<Handle,Type>::iterator typeIt = orderedTmpLinkToType.find(h);
+//                std::map<Handle, Type>::const_iterator typeIt = orderedTmpLinkToType.find(h);
 //                if (typeIt != orderedTmpLinkToType.end())
-//                    reLink = as->add_link((Type)(typeIt->second),_renameOutgoingLinks);
+//                    reLink = as->add_link(typeIt->second, _renameOutgoingLinks);
 //                else
 //                    reLink = as->add_link(h->getType(),_renameOutgoingLinks);
 //             }
@@ -144,9 +146,8 @@ HandleSeq PatternMiner::findAndRenameVariables(const Handle& link, HandleMap& va
     return renameOutgoingLinks;
 }
 
-HandleSeq PatternMiner::RebindVariableNames(HandleSeq& orderedPattern, HandleMap& orderedVarNameMap, std::map<Handle,Type>& orderedTmpLinkToType)
+HandleSeq PatternMiner::RebindVariableNames(const HandleSeq& orderedPattern, HandleMap& orderedVarNameMap, const std::map<Handle,Type>& orderedTmpLinkToType)
 {
-
     HandleSeq rebindedPattern;
 
     for (const Handle& h : orderedPattern)
@@ -155,6 +156,9 @@ HandleSeq PatternMiner::RebindVariableNames(HandleSeq& orderedPattern, HandleMap
 	        findAndRenameVariables(h, orderedVarNameMap, orderedTmpLinkToType);
 
         Handle reLink;
+
+        // NTODO probably need to re-enable that (either here or in
+        // findAndRenameVariables)
 
 //        if (enable_unify_unordered_links && not orderedTmpLinkToType.empty())
 //        {
@@ -173,7 +177,6 @@ HandleSeq PatternMiner::RebindVariableNames(HandleSeq& orderedPattern, HandleMap
 
     return rebindedPattern;
 }
-
 
 void PatternMiner::ReplaceConstNodeWithVariableForOneLink(Handle link, Handle constNode, Handle newVariableNode, HandleSeq& renameOutgoingLinks)
 {
@@ -222,11 +225,6 @@ HandleSeq PatternMiner::ReplaceConstNodeWithVariableForAPattern(const HandleSeq&
     return rebindedPattern;
 }
 
-// the input links should be like: only specify the const node, all the variable node name should not be specified:
-// unifiedLastLinkIndex is to return where the last link in the input pattern is now in the ordered pattern
-// because the last link in input pattern is the externed link from last gram pattern
-// in orderedVarNameMap, the first Handle is the variable node in the input unordered pattern,
-// the second Handle is the renamed ordered variable node in the output ordered pattern.
 HandleSeq PatternMiner::UnifyPatternOrder(const HandleSeq& inputPattern, unsigned int& unifiedLastLinkIndex, HandleMap& orderedVarNameMap)
 {
     HandleSeq orderedHandles;
@@ -245,27 +243,17 @@ HandleSeq PatternMiner::UnifyPatternOrder(const HandleSeq& inputPattern, unsigne
         }
 
         orderedHandles = _UnifyPatternOrder(orderedOutgoings, unifiedLastLinkIndex);
-
     }
     else
         orderedHandles = _UnifyPatternOrder(inputPattern, unifiedLastLinkIndex);
 
-    HandleSeq rebindPattern = RebindVariableNames(orderedHandles, orderedVarNameMap,orderedTmpLinkToType);
-
+    HandleSeq rebindPattern = RebindVariableNames(orderedHandles, orderedVarNameMap, orderedTmpLinkToType);
 
     return rebindPattern;
-
 }
 
-
-// the input links should be like: only specify the const node, all the variable node name should not be specified:
-// unifiedLastLinkIndex is to return where the last link in the input pattern is now in the ordered pattern
-// because the last link in input pattern is the externed link from last gram pattern
-// in orderedVarNameMap, the first Handle is the variable node in the input unordered pattern,
-// the second Handle is the renamed ordered variable node in the output ordered pattern.
 HandleSeq PatternMiner::_UnifyPatternOrder(const HandleSeq& inputPattern, unsigned int& unifiedLastLinkIndex)
 {
-
     // Step 1: take away all the variable names, make the pattern into such format string:
     //    (InheritanceLink
     //       (VariableNode )
@@ -340,7 +328,7 @@ HandleSeq PatternMiner::_UnifyPatternOrder(const HandleSeq& inputPattern, unsign
 
     }
 
-    // Step 3: sort the order of the handls share the same string key with other handles
+    // Step 3: sort the order of the handles share the same string key with other handles
     for (const string& keyString : duplicateStrs)
     {
         // get all the corresponding handles for this key string
@@ -361,9 +349,8 @@ HandleSeq PatternMiner::_UnifyPatternOrder(const HandleSeq& inputPattern, unsign
         }
     }
 
-
     // find out where the last link in the input pattern is now in the ordered pattern
-    Handle lastLink = inputPattern[inputPattern.size()-1];
+    Handle lastLink = inputPattern.back();
     unsigned int lastLinkIndex = 0;
     for (const Handle& h : orderedHandles)
     {
@@ -415,7 +402,6 @@ Handle PatternMiner::UnifyOneLinkForUnorderedLink(const Handle& link,
     Type originalType = link->getType();
     if (classserver().isA(originalType, UNORDERED_LINK))
     {
-
         unsigned int unifiedLastLinkIndex;
         HandleSeq orderedOutgoings;
         // check if there are only Links in the outgoings
@@ -1581,37 +1567,17 @@ void PatternMiner::OutPutHighSurprisingILowSurprisingnessIIPatternsToFile(const 
     resultFile.close();
 }
 
-
-// To exclude this kind of patterns:
-// $var_3 doesn't really can be a variable, all the links contains it doesn't contains any const nodes, so actually $var_3 is a leaf
-// we call variable nodes like $var_3 as "loop variable"
-//(InheritanceLink )
-//  (ConceptNode Broccoli)
-//  (VariableNode $var_1)
-
-//(InheritanceLink )
-//  (ConceptNode dragonfruit)
-//  (VariableNode $var_2)
-
-//(InheritanceLink )
-//  (VariableNode $var_2)
-//  (VariableNode $var_3)
-
-//(InheritanceLink )
-//  (VariableNode $var_1)
-//  (VariableNode $var_3)
-
 struct VariableInLinks
 {
     HandleSeq onlyContainsVarLinks;
     HandleSeq containsConstLinks;
 };
 
-bool PatternMiner::containsLoopVariable(const HandleSeq& inputPattern)
+bool PatternMiner::containsLoopVariable(const HandleSeq& pattern)
 {
     // Need no check when gram < 3, it will already be filtered by the
     // leaves filter
-    if (inputPattern.size() < 3)
+    if (pattern.size() < 3)
         return false;
 
     // First find those links that only contains variables, without
@@ -1620,10 +1586,9 @@ bool PatternMiner::containsLoopVariable(const HandleSeq& inputPattern)
 
     bool allLinksContainsConst = true;
 
-    for (const Handle& inputH : inputPattern)
+    for (const Handle& subpattern : pattern)
     {
-        string str = inputH->toShortString();
-        std::stringstream stream(str);
+        std::stringstream stream(subpattern->toShortString());
         string oneLine;
         bool containsOnlyVars = true;
         vector<string> allVarsInThis_link;
@@ -1656,9 +1621,9 @@ bool PatternMiner::containsLoopVariable(const HandleSeq& inputPattern)
         {
             VariableInLinks& varLinks = varInLinksMap[varStr];
             if (containsOnlyVars)
-                varLinks.onlyContainsVarLinks.push_back(inputH);
+                varLinks.onlyContainsVarLinks.push_back(subpattern);
             else
-                varLinks.containsConstLinks.push_back(inputH);
+                varLinks.containsConstLinks.push_back(subpattern);
         }
     }
 
@@ -2885,11 +2850,8 @@ void PatternMiner::generateComponentCombinations(string componentsStr, vector<ve
             {
                 oneComponent.push_back((unsigned int)(oneComponentStr[i] - '0'));
             }
-
             oneCombin.push_back(oneComponent);
-
         }
-
         componentCombinations.push_back(oneCombin);
     }
 }
@@ -4882,16 +4844,13 @@ void PatternMiner::loadPatternsFromResultFile(string fileName)
         //cout <<"\nline: " << line << std::endl;
         if (patternStart && (line == "") && (lastLine == "")) // one pattern end, load it
         {
-
             // add this new found pattern into the Atomspace
             HandleSeq patternHandleSeq = loadPatternIntoAtomSpaceFromFileString(patternStr, *as);
 
             if (patternHandleSeq.empty())
             {
-
                 cout << "Warning: Invalid pattern string: " << patternStr << std::endl;
                 return;
-
             }
 
             // create a new HTreeNode

@@ -53,7 +53,9 @@ public:
 	void setUp();
 	void tearDown();
 
+	void test__UnifyPatternOrder();
 	void test_partitionBySharedVariables();
+	void test_containsLoopVariable();
 
 	void test_PatternMiner_SodaDrinker();
 	void test_PatternMiner_InferenceControl();
@@ -99,6 +101,33 @@ void PatternMinerUTest::setUp()
 
 void PatternMinerUTest::tearDown() 
 {
+	_as.clear();
+}
+
+void PatternMinerUTest::test__UnifyPatternOrder()
+{
+	Handle C1 = an(CONCEPT_NODE, "C1"),
+		C2 = an(CONCEPT_NODE, "C2"),
+		P = an(PREDICATE_NODE, "P"),
+		X1 = an(PATTERN_VARIABLE_NODE, "$X1"),
+		X2 = an(PATTERN_VARIABLE_NODE, "$X2"),
+		X3 = an(PATTERN_VARIABLE_NODE, "$X3"),
+		h1 = al(INHERITANCE_LINK, X1, C1),
+		h2 = al(INHERITANCE_LINK, X2, X1),
+		h3 = al(INHERITANCE_LINK, X3, X2),
+		h4 = al(EVALUATION_LINK, P, al(LIST_LINK, X3, C2));
+
+	PatternMiner pm(_as);
+
+	unsigned int unifiedIndex;
+	HandleSeq result = pm._UnifyPatternOrder({h1, h2, h3, h4}, unifiedIndex),
+		expected = {h4, h1, h2, h3};
+
+	std::cout << "result = " << oc_to_string(result);
+	std::cout << "expected = " << oc_to_string(expected);
+
+	TS_ASSERT_EQUALS(result, expected);
+	TS_ASSERT_EQUALS(unifiedIndex, 0);
 }
 
 void PatternMinerUTest::test_partitionBySharedVariables()
@@ -124,6 +153,51 @@ void PatternMinerUTest::test_partitionBySharedVariables()
 	std::cout << "expected = " << oc_to_string(expected);
 
 	TS_ASSERT_EQUALS(result, expected);
+}
+
+void PatternMinerUTest::test_containsLoopVariable()
+{
+	Handle Broccoli = an(CONCEPT_NODE, "Broccoli"),
+		dragonfruit = an(CONCEPT_NODE, "dragonfruit"),
+		var_1 = an(PATTERN_VARIABLE_NODE, "$var_1"),
+		var_2 = an(PATTERN_VARIABLE_NODE, "$var_2"),
+		var_3 = an(PATTERN_VARIABLE_NODE, "$var_3"),
+		h1 = al(INHERITANCE_LINK, Broccoli, var_1),
+		h2 = al(INHERITANCE_LINK, dragonfruit, var_2),
+		h3 = al(INHERITANCE_LINK, var_2, var_3),
+		h4 = al(INHERITANCE_LINK, var_1, var_3);
+
+	PatternMiner pm(_as);
+
+	HandleSeq pattern1{h1, h2};
+	bool result1 = pm.containsLoopVariable(pattern1),
+		expected1 = false;
+	TS_ASSERT_EQUALS(result1, expected1);
+
+	HandleSeq pattern2{h1, h2, h3};
+	bool result2 = pm.containsLoopVariable(pattern2),
+		expected2 = true;
+	TS_ASSERT_EQUALS(result2, expected2);
+
+	HandleSeq pattern3{h1, h2, h3, h4};
+	bool result3 = pm.containsLoopVariable(pattern3),
+		expected3 = true;
+	TS_ASSERT_EQUALS(result3, expected3);
+
+	HandleSeq pattern4{h2, h3, h4};
+	bool result4 = pm.containsLoopVariable(pattern4),
+		expected4 = true;
+	TS_ASSERT_EQUALS(result4, expected4);
+
+	HandleSeq pattern5{h3, h4};
+	bool result5 = pm.containsLoopVariable(pattern5),
+		expected5 = false;
+	TS_ASSERT_EQUALS(result5, expected5);
+
+	HandleSeq pattern6{h4};
+	bool result6 = pm.containsLoopVariable(pattern6),
+		expected6 = false;
+	TS_ASSERT_EQUALS(result6, expected6);
 }
 
 void PatternMinerUTest::test_PatternMiner_SodaDrinker()
@@ -156,7 +230,6 @@ void PatternMinerUTest::test_PatternMiner_SodaDrinker()
 	}
 
 	logger().info("End TEST: %s", __FUNCTION__);
-
 }
 
 void PatternMinerUTest::test_PatternMiner_InferenceControl()

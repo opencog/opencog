@@ -93,6 +93,7 @@ struct _non_ordered_pattern
 
         // if all above criteria cannot figure out the order of these two patterns, just return true and output a warning
         cout << "\n warning: _non_ordered_pattern: Fail to figure out the order of two patterns!\n";
+        // NTODO if there are equal, then it should be false.
         return true;
     }
 };
@@ -278,49 +279,98 @@ protected:
     HandleSeq allLinksContainWhiteKeywords;
     HandleSet havenotProcessedWhiteKeywordLinks;
 
-   // [gram], this to avoid different threads happen to work on the same links.
-   // each string is composed the handles of a group of fact links in the observing_as in the default hash order using std set
+    // [gram], this to avoid different threads happen to work on the same links.
+    // each string is composed the handles of a group of fact links in the observing_as in the default hash order using std set
     // queue<string>[thread_num][max_gram]
-   list<string>** thread_DF_ExtractedLinks;
-   // set<string>[max_gram]
-   set<string>* all_thread_ExtractedLinks_pergram;
+    list<string>** thread_DF_ExtractedLinks;
+    // set<string>[max_gram]
+    set<string>* all_thread_ExtractedLinks_pergram;
 
-   HandleSeq allDBpediaKeyNodes;
+    HandleSeq allDBpediaKeyNodes;
 
-   std::ofstream surpringnessIICalfile;
+    std::ofstream surpringnessIICalfile;
 
-    // This is against graph isomorphism problem, make sure the
-    // patterns we found are not duplicated. The input links should
-    // be a Pattern in such format:
-    //
-    //    (InheritanceLink
-    //       (VariableNode "$1")
-    //       (ConceptNode "Animal")
-    //
-    //    (InheritanceLink
-    //       (VariableNode "$2")
-    //       (VariableNode "$1")
-    //
-    //    (InheritanceLink
-    //       (VariableNode "$3")
-    //       (VariableNode "$2")
-    //
-    //    (EvaluationLink (stv 1 1)
-    //       (PredicateNode "like_food")
-    //       (ListLink
-    //          (VariableNode "$3")
-    //          (ConceptNode "meat")
-    //       )
-    //    )
-    //
-    // Return unified ordered Handle vector
-    //
-    // NTODO: why not use a set instead of seq in inputPattern
+    /**
+     * Re-order the inputPattern so that, after abstracting away the
+     * variable names, the unique sub-patterns come first (according
+     * to some fixed order defined by their content -- currently using
+     * their string representations). Then the sub-patterns grouped by
+     * structures (after abstracting away the variable names). Groups
+     * are ordered according to their structures (using again their
+     * string representations). And sub-patterns within groups are
+     * ordered according to how their mapping to their structures
+     * after abstracting names away.
+     *
+     * The value unifiedLastLinkIndex represents the index of the last
+     * sub-pattern in the new order.
+     *
+     * For instance, if inputPattern is
+     *
+     *    (InheritanceLink
+     *       (VariableNode "$1")
+     *       (ConceptNode "Animal")
+     *
+     *    (InheritanceLink
+     *       (VariableNode "$2")
+     *       (VariableNode "$1")
+     *
+     *    (InheritanceLink
+     *       (VariableNode "$3")
+     *       (VariableNode "$2")
+     *
+     *    (EvaluationLink (stv 1 1)
+     *       (PredicateNode "like_food")
+     *       (ListLink
+     *          (VariableNode "$3")
+     *          (ConceptNode "meat")
+     *       )
+     *    )
+     *
+     * The output may look like
+     *
+     *
+     *    (InheritanceLink
+     *       (VariableNode "$1")
+     *       (ConceptNode "Animal")
+     *
+     *    (EvaluationLink (stv 1 1)
+     *       (PredicateNode "like_food")
+     *       (ListLink
+     *          (VariableNode "$3")
+     *          (ConceptNode "meat")
+     *       )
+     *    )
+     *
+     *    (InheritanceLink
+     *       (VariableNode "$2")
+     *       (VariableNode "$1")
+     *
+     *    (InheritanceLink
+     *       (VariableNode "$3")
+     *       (VariableNode "$2")
+     *
+     * and unifiedLastLinkIndex = 1
+     *
+     * NTODO can probably be simplified by generalizing to atoms
+     * instead of links.
+     */
     HandleSeq _UnifyPatternOrder(const HandleSeq& inputPattern, unsigned int& unifiedLastLinkIndex);
+
+    /**
+     * NTODO write comment
+     */
     HandleSeq UnifyPatternOrder(const HandleSeq& inputPattern, unsigned int& unifiedLastLinkIndex, HandleMap& orderedVarNameMap);
 
+    /**
+     * Replace all unordered links within `link` by a ListLink, where
+     * all outgoings follow a determined ordered (defined by
+     * _UnifyPatternOrder). In addition, fill orderedTmpLinkToType
+     * with associating replacement links by their original link type.
+     *
+     * NTODO can probably be simplified by generalizing to atoms
+     * instead of links.
+     */
     Handle UnifyOneLinkForUnorderedLink(const Handle& link,std::map<Handle,Type>& orderedTmpLinkToType);
-
 
     Handle rebindLinkTypeRecursively(const Handle& inputLink, std::map<Handle,Type>& orderedTmpLinkToType);
 
@@ -335,15 +385,23 @@ protected:
      * NTODO orderedTmpLinkToType isn't used at the moment.
      */
     HandleSeq findAndRenameVariables(const Handle& link, HandleMap& varNameMap,
-                                     std::map<Handle,Type>& orderedTmpLinkToType);
+                                     const std::map<Handle,Type>& orderedTmpLinkToType);
 
     // Rename the variable names in a ordered pattern according to the orders of the variables appear in the orderedPattern
-    HandleSeq RebindVariableNames(HandleSeq& orderedPattern, HandleMap& orderedVarNameMap, std::map<Handle,Type>& orderedTmpLinkToType);
+    HandleSeq RebindVariableNames(const HandleSeq& orderedPattern, HandleMap& orderedVarNameMap, const std::map<Handle,Type>& orderedTmpLinkToType);
 
     void ReplaceConstNodeWithVariableForOneLink(Handle link, Handle constNode, Handle newVariableNode, HandleSeq& renameOutgoingLinks);
 
     HandleSeq ReplaceConstNodeWithVariableForAPattern(const HandleSeq& pattern, Handle constNode, Handle newVariableNode);
 
+    /**
+     * For each pattern variable of `link` (presumably duplicates as
+     * well), pushes onto `indexes` a vector of pairs such that the
+     * first element of each pair is an index within orderedHandles,
+     * and the second element is the location of the variable name
+     * within the string representation of the handle at that index,
+     * in case the variable appears in that handle at all.
+     */
     void generateIndexesOfSharedVars(const Handle& link, const HandleSeq& orderedHandles, vector<vector<std::pair<int, size_t>>> &indexes);
 
     // generate the outgoings for a link in a pattern in the Pattern mining Atomspace, according to the given group of variables
@@ -433,9 +491,37 @@ protected:
                                                  vector<MinedPatternInfo>& allNewMinedPatternInfo, unsigned int thread_index, bool startFromLinkContainWhiteKeyword);
 
     /**
-     * NTODO: add comment
+     * Return iff the pattern contains "loop variables".
+     *
+     * For instance, in the following $var_3 isn't really a variable because...
+     *
+     * To exclude this kind of patterns:
+     * $var_3 doesn't really can be a variable, all the links contains it doesn't contains any const nodes, so actually $var_3 is a leaf
+     *
+     * we call variable nodes like $var_3 as "loop variable"
+     * (InheritanceLink
+     *  (ConceptNode Broccoli)
+     *  (VariableNode $var_1))
+     *
+     * (InheritanceLink
+     *  (ConceptNode dragonfruit)
+     *  (VariableNode $var_2))
+     *
+     * (InheritanceLink
+     *  (VariableNode $var_2)
+     *  (VariableNode $var_3))
+     *
+     * (InheritanceLink
+     *  (VariableNode $var_1)
+     *  (VariableNode $var_3))
+     *
+     * NTODO: it seems it returns true iff a sub-pattern has only
+     * variables.
+     *
+     * NTODO: what about representing a pattern a set of sub-patterns,
+     * as opposed to pattern sequence.
      */
-    bool containsLoopVariable(const HandleSeq& inputPattern);
+    bool containsLoopVariable(const HandleSeq& pattern);
 
     void quoteAPattern(HTreeNode* hTreeNode);
 
@@ -443,8 +529,6 @@ protected:
 
     HTreeNode* extractAPatternFromGivenVarCombination(HandleSeq &inputLinks, HandleMap &patternVarMap, HandleMap& orderedVarNameMap,HandleSeqSeq &oneOfEachSeqShouldBeVars, HandleSeq &leaves,HandleSeq &shouldNotBeVars, HandleSeq &shouldBeVars,
                                                       unsigned int &extendedLinkIndex, set<string>& allNewMinedPatternsCurTask, bool &notOutPutPattern, bool &patternAlreadyExtractedInCurTask,bool startFromLinkContainWhiteKeyword);
-
-
 
     void findAllInstancesForGivenPatternInNestedAtomSpace(HTreeNode* HNode);
 
