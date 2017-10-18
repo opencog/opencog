@@ -434,10 +434,16 @@ protected:
      */
     void extractConstNodes(const Handle& link, HandleSet& constNodes);
 
-    // if a link contains only variableNodes , no const nodes
-    bool onlyContainVariableNodes(Handle link);
+	/**
+	 * Return true iff an atom contains only pattern variable nodes,
+	 * no const nodes.
+	 */
+    bool containOnlyVariables(Handle h);
 
-    bool containVariableNodes(Handle link);
+	/**
+	 * Return true iff an atom contains some pattern variable nodes.
+	 */
+    bool containSomeVariables(Handle link);
 
     void extractAllPossiblePatternsFromInputLinksBF(const HandleSeq& inputLinks, HTreeNode* parentNode, HandleSet& sharedNodes, unsigned int gram);
 
@@ -491,7 +497,7 @@ protected:
                                                  vector<MinedPatternInfo>& allNewMinedPatternInfo, unsigned int thread_index, bool startFromLinkContainWhiteKeyword);
 
     /**
-     * Return iff the pattern contains "loop variables".
+     * Return iff some sub-pattern contains only variables.
      *
      * For instance, in the following $var_3 isn't really a variable because...
      *
@@ -515,13 +521,10 @@ protected:
      *  (VariableNode $var_1)
      *  (VariableNode $var_3))
      *
-     * NTODO: it seems it returns true iff a sub-pattern has only
-     * variables.
-     *
      * NTODO: what about representing a pattern a set of sub-patterns,
      * as opposed to pattern sequence.
      */
-    bool containsLoopVariable(const HandleSeq& pattern);
+    bool containLoopVariable(const HandleSeq& pattern);
 
     void quoteAPattern(HTreeNode* hTreeNode);
 
@@ -554,7 +557,7 @@ protected:
 
     bool isInHandleSeqSeq(const Handle& handle, const HandleSeqSeq& handleSeqs);
 
-    bool containsDuplicateHandle(HandleSeq& handles);
+    bool containDuplicates(const HandleSeq& handles);
 
     Handle getFirstNonIgnoredIncomingLink(AtomSpace& atomspace, const Handle& handle);
 

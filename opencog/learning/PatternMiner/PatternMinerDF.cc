@@ -323,7 +323,7 @@ HTreeNode* PatternMiner::extractAPatternFromGivenVarCombination(HandleSeq &input
 
         if (gram > 2)
         {
-            if (containsLoopVariable(pattern))
+            if (containLoopVariable(pattern))
             return 0;
         }
 

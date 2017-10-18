@@ -170,33 +170,33 @@ void PatternMinerUTest::test_containsLoopVariable()
 	PatternMiner pm(_as);
 
 	HandleSeq pattern1{h1, h2};
-	bool result1 = pm.containsLoopVariable(pattern1),
+	bool result1 = pm.containLoopVariable(pattern1),
 		expected1 = false;
 	TS_ASSERT_EQUALS(result1, expected1);
 
 	HandleSeq pattern2{h1, h2, h3};
-	bool result2 = pm.containsLoopVariable(pattern2),
+	bool result2 = pm.containLoopVariable(pattern2),
 		expected2 = true;
 	TS_ASSERT_EQUALS(result2, expected2);
 
 	HandleSeq pattern3{h1, h2, h3, h4};
-	bool result3 = pm.containsLoopVariable(pattern3),
+	bool result3 = pm.containLoopVariable(pattern3),
 		expected3 = true;
 	TS_ASSERT_EQUALS(result3, expected3);
 
 	HandleSeq pattern4{h2, h3, h4};
-	bool result4 = pm.containsLoopVariable(pattern4),
+	bool result4 = pm.containLoopVariable(pattern4),
 		expected4 = true;
 	TS_ASSERT_EQUALS(result4, expected4);
 
 	HandleSeq pattern5{h3, h4};
-	bool result5 = pm.containsLoopVariable(pattern5),
-		expected5 = false;
+	bool result5 = pm.containLoopVariable(pattern5),
+		expected5 = true;
 	TS_ASSERT_EQUALS(result5, expected5);
 
 	HandleSeq pattern6{h4};
-	bool result6 = pm.containsLoopVariable(pattern6),
-		expected6 = false;
+	bool result6 = pm.containLoopVariable(pattern6),
+		expected6 = true;
 	TS_ASSERT_EQUALS(result6, expected6);
 }
 

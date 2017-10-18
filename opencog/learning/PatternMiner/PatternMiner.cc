@@ -638,46 +638,22 @@ void PatternMiner::extractConstNodes(const Handle& link, HandleSet& constNodes)
     }
 }
 
-bool PatternMiner::onlyContainVariableNodes(Handle link)
+bool PatternMiner::containOnlyVariables(Handle h)
 {
-    for (const Handle& h : link->getOutgoingSet())
-    {
-        if (h->isNode())
-        {
-            if (h->getType() != opencog::PATTERN_VARIABLENODE_TYPE)
-            {
-                return false;
-            }
-        }
-        else
-        {
-            if (!onlyContainVariableNodes(h))
-                return false;
-        }
-    }
+    if (h->isNode())
+        return h->getType() == PATTERN_VARIABLENODE_TYPE;
 
-    return true;
+    return all_of(h->getOutgoingSet(), [&](const Handle& ch) {
+            return containOnlyVariables(ch); });
 }
 
-bool PatternMiner::containVariableNodes(Handle link)
+bool PatternMiner::containSomeVariables(Handle h)
 {
-    for (const Handle& h : link->getOutgoingSet())
-    {
-        if (h->isNode())
-        {
-            if (h->getType() == opencog::PATTERN_VARIABLENODE_TYPE)
-            {
-                return true;
-            }
-        }
-        else
-        {
-            if (containVariableNodes(h))
-                return true;
-        }
-    }
+    if (h->isNode())
+        return h->getType() == PATTERN_VARIABLENODE_TYPE;
 
-    return false;
+    return any_of(h->getOutgoingSet(), [&](const Handle& ch) {
+            return containSomeVariables(ch); });
 }
 
 
@@ -819,7 +795,7 @@ void PatternMiner::findAllInstancesForGivenPatternInNestedAtomSpace(HTreeNode* H
 //            else
 //            {
 //                // instance that contains duplicate links will not be added
-//                if (! containsDuplicateHandle(instanceLinks))
+//                if (! containDuplicates(instanceLinks))
 //                    HNode->instances.push_back(instanceLinks);
 //            }
 //        }
@@ -861,7 +837,7 @@ void PatternMiner::findAllInstancesForGivenPatternInNestedAtomSpace(HTreeNode* H
 
 }
 
-bool PatternMiner::containsDuplicateHandle(HandleSeq &handles)
+bool PatternMiner::containDuplicates(const HandleSeq &handles)
 {
     for (unsigned int i = 0; i < handles.size(); i ++)
     {
@@ -1567,79 +1543,11 @@ void PatternMiner::OutPutHighSurprisingILowSurprisingnessIIPatternsToFile(const 
     resultFile.close();
 }
 
-struct VariableInLinks
+bool PatternMiner::containLoopVariable(const HandleSeq& pattern)
 {
-    HandleSeq onlyContainsVarLinks;
-    HandleSeq containsConstLinks;
-};
-
-bool PatternMiner::containsLoopVariable(const HandleSeq& pattern)
-{
-    // Need no check when gram < 3, it will already be filtered by the
-    // leaves filter
-    if (pattern.size() < 3)
-        return false;
-
-    // First find those links that only contains variables, without
-    // any const
-    map<string, VariableInLinks> varInLinksMap;
-
-    bool allLinksContainsConst = true;
-
-    for (const Handle& subpattern : pattern)
-    {
-        std::stringstream stream(subpattern->toShortString());
-        string oneLine;
-        bool containsOnlyVars = true;
-        vector<string> allVarsInThis_link;
-
-        while(std::getline(stream, oneLine,'\n'))
-        {
-            if (oneLine.find("Node") == std::string::npos) // this line is a link, contains no nodes
-                continue;
-
-            std::size_t pos_var = oneLine.find("VariableNode");
-            if (pos_var == std::string::npos)
-            {
-                // this node is a const node
-                containsOnlyVars = false;
-            }
-            else
-            {
-                string keyVarStr = oneLine.substr(pos_var);
-                // this node is a VariableNode
-                allVarsInThis_link.push_back(keyVarStr);
-            }
-        }
-
-        if (containsOnlyVars)
-        {
-            allLinksContainsConst = false;
-        }
-
-        for (const string& varStr : allVarsInThis_link)
-        {
-            VariableInLinks& varLinks = varInLinksMap[varStr];
-            if (containsOnlyVars)
-                varLinks.onlyContainsVarLinks.push_back(subpattern);
-            else
-                varLinks.containsConstLinks.push_back(subpattern);
-        }
-    }
-
-    if (allLinksContainsConst)
-        return false;
-
-    for (const auto& el : varInLinksMap)
-    {
-         const VariableInLinks& varLinks = el.second;
-         if (varLinks.containsConstLinks.empty())
-             return true;
-    }
-
-    return false;
+    return any_of(pattern, [&](const Handle& h) {
+            return containOnlyVariables(h); });
 }
-
 
 // Each HandleSeq in HandleSeqSeq oneOfEachSeqShouldBeVars is a list of nodes that connect two links in inputLinks,
 // at least one node in a HandleSeq should be variable, which means two connected links in inputLinks should be connected by at least a variable
@@ -3730,11 +3638,11 @@ bool PatternMiner::containKeywords(const string& str, const set<string>& keyword
 
     if (logic == QUERY_LOGIC::OR)
     {
-        return std::any_of(keywords.begin(), keywords.end(), is_in_str);
+        return any_of(keywords, is_in_str);
     }
     else // QUERY_LOGIC::AND
     {
-        return std::all_of(keywords.begin(), keywords.end(), is_in_str);
+        return all_of(keywords, is_in_str);
     }
 }
 
@@ -4179,7 +4087,6 @@ void PatternMiner::testPatternMatcher()
     std::cout <<"After Pattern Matcher: PatternMiner total link number = "
               << allAtomSpaceLinks.size() << std::endl;
 }
-
 
 HandleSet PatternMiner::_getAllNonIgnoredLinksForGivenNode(Handle keywordNode, const HandleSet& allSubsetLinks)
 {

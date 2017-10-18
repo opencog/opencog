@@ -234,7 +234,7 @@ void PatternMiner::extractAllPossiblePatternsFromInputLinksBF(const HandleSeq& i
                     generateALinkByChosenVariables(link, patternVarMap, outgoingLinks);
                     Handle rebindedLink = as->add_link(link->getType(), outgoingLinks);
                     rebindedLink->setTruthValue(TruthValue::TRUE_TV());
-                    if (onlyContainVariableNodes(rebindedLink))
+                    if (containOnlyVariables(rebindedLink))
                     {
                         hasLinkContainsOnlyVars = true;
                     }
@@ -700,7 +700,7 @@ void PatternMiner::findAllInstancesForGivenPatternBF(HTreeNode* HNode)
        else
        {
            // instance that contains duplicate links will not be added
-           if (! containsDuplicateHandle(instanceLinks))
+           if (! containDuplicates(instanceLinks))
                HNode->instances.push_back(instanceLinks);
        }
 
