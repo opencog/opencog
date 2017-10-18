@@ -201,9 +201,7 @@ void PatternMiner::ReplaceConstNodeWithVariableForOneLink(Handle link, Handle co
 
              renameOutgoingLinks.push_back(reLink);
         }
-
     }
-
 }
 
 HandleSeq PatternMiner::ReplaceConstNodeWithVariableForAPattern(const HandleSeq& pattern, Handle constNode, Handle newVariableNode)
@@ -229,7 +227,7 @@ HandleSeq PatternMiner::ReplaceConstNodeWithVariableForAPattern(const HandleSeq&
 // because the last link in input pattern is the externed link from last gram pattern
 // in orderedVarNameMap, the first Handle is the variable node in the input unordered pattern,
 // the second Handle is the renamed ordered variable node in the output ordered pattern.
-HandleSeq PatternMiner::UnifyPatternOrder(HandleSeq& inputPattern, unsigned int& unifiedLastLinkIndex, HandleMap& orderedVarNameMap)
+HandleSeq PatternMiner::UnifyPatternOrder(const HandleSeq& inputPattern, unsigned int& unifiedLastLinkIndex, HandleMap& orderedVarNameMap)
 {
     HandleSeq orderedHandles;
 
@@ -265,7 +263,7 @@ HandleSeq PatternMiner::UnifyPatternOrder(HandleSeq& inputPattern, unsigned int&
 // because the last link in input pattern is the externed link from last gram pattern
 // in orderedVarNameMap, the first Handle is the variable node in the input unordered pattern,
 // the second Handle is the renamed ordered variable node in the output ordered pattern.
-HandleSeq PatternMiner::_UnifyPatternOrder(HandleSeq& inputPattern, unsigned int& unifiedLastLinkIndex)
+HandleSeq PatternMiner::_UnifyPatternOrder(const HandleSeq& inputPattern, unsigned int& unifiedLastLinkIndex)
 {
 
     // Step 1: take away all the variable names, make the pattern into such format string:
@@ -291,16 +289,17 @@ HandleSeq PatternMiner::_UnifyPatternOrder(HandleSeq& inputPattern, unsigned int
 
     multimap<string, Handle> nonVarStrToHandleMap;
 
+    // NTODO: Instead of converting into a string, why not create a
+    // new pattern where the VariableNode name are empty?
     for (const Handle& inputH : inputPattern)
     {
-        string str = inputH->toShortString();
-        string nonVarNameString = "";
-        std::stringstream stream(str);
+        stringstream stream(inputH->toShortString());
+        string nonVarNameString;
         string oneLine;
 
-        while(std::getline(stream, oneLine,'\n'))
+        while (getline(stream, oneLine,'\n'))
         {
-            if (oneLine.find("VariableNode") == std::string::npos)
+            if (oneLine.find("VariableNode") == string::npos)
             {
                 // this node is not a VariableNode, just keep this line
                 nonVarNameString += oneLine;
@@ -315,7 +314,7 @@ HandleSeq PatternMiner::_UnifyPatternOrder(HandleSeq& inputPattern, unsigned int
         nonVarStrToHandleMap.insert({nonVarNameString, inputH});
     }
 
-    // Step 2: sort the order of all the handls do not share the same string key with other handls
+    // Step 2: sort the order of all the handles do not share the same string key with other handles
     // because the strings are put into a map, so they are already sorted.
     // now print the Handles that do not share the same key with other Handles into a vector, left the Handles share the same keys
 
@@ -334,7 +333,7 @@ HandleSeq PatternMiner::_UnifyPatternOrder(HandleSeq& inputPattern, unsigned int
         else
         {
             // this key string has multiple handles to it, not put these handles into the orderedHandles,
-            // insteadly put this key string into duplicateStrs
+            // instead put this key string into duplicateStrs
             duplicateStrs.push_back(it->first);
             it = nonVarStrToHandleMap.upper_bound(it->first);
         }
@@ -1968,7 +1967,7 @@ void PatternMiner::calculateInteractionInformation(HTreeNode* HNode)
                     // Unify it again
                     unsigned int _unifiedLastLinkIndex;
                     HandleMap suborderedVarNameMap;
-                    HandleSeq unifiedConnectedSubPattern = UnifyPatternOrder(aConnectedSubPart, _unifiedLastLinkIndex,suborderedVarNameMap);
+                    HandleSeq unifiedConnectedSubPattern = UnifyPatternOrder(aConnectedSubPart, _unifiedLastLinkIndex, suborderedVarNameMap);
                     string connectedSubPatternKey = unifiedPatternToKeyString(unifiedConnectedSubPattern);
 //                     cout << "a splitted part: " << connectedSubPatternKey;
                     double h = calculateEntropyOfASubConnectedPattern(connectedSubPatternKey, unifiedConnectedSubPattern);

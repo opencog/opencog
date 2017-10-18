@@ -290,7 +290,7 @@ protected:
    std::ofstream surpringnessIICalfile;
 
     // This is against graph isomorphism problem, make sure the
-    // patterns we found are not duplicacted. The input links should
+    // patterns we found are not duplicated. The input links should
     // be a Pattern in such format:
     //
     //    (InheritanceLink
@@ -314,8 +314,10 @@ protected:
     //    )
     //
     // Return unified ordered Handle vector
-    HandleSeq _UnifyPatternOrder(HandleSeq& inputPattern, unsigned int& unifiedLastLinkIndex);
-    HandleSeq UnifyPatternOrder(HandleSeq& inputPattern, unsigned int& unifiedLastLinkIndex, HandleMap& orderedVarNameMap);
+    //
+    // NTODO: why not use a set instead of seq in inputPattern
+    HandleSeq _UnifyPatternOrder(const HandleSeq& inputPattern, unsigned int& unifiedLastLinkIndex);
+    HandleSeq UnifyPatternOrder(const HandleSeq& inputPattern, unsigned int& unifiedLastLinkIndex, HandleMap& orderedVarNameMap);
 
     Handle UnifyOneLinkForUnorderedLink(const Handle& link,std::map<Handle,Type>& orderedTmpLinkToType);
 
