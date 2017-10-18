@@ -353,12 +353,10 @@ void DistributedPatternMiner::growPatternsDepthFirstTask(unsigned int thread_ind
         }
 
         // Add this link into observing_as
-        HandleSeq outgoingLinks, outVariableNodes;
-
-        swapOneLinkBetweenTwoAtomSpace(original_as, *observing_as, cur_link, outgoingLinks, outVariableNodes);
+        HandleSeq outVariableNodes;
+        HandleSeq outgoingLinks = copyOutgoings(*observing_as, cur_link, outVariableNodes);
         Handle newLink = observing_as->add_link(cur_link->getType(), outgoingLinks);
         newLink->setTruthValue(cur_link->getTruthValue());
-
 
         // Extract all the possible patterns from this originalLink, and extend till the max_gram links, not duplicating the already existing patterns
         HandleSeq lastGramLinks;
@@ -404,7 +402,7 @@ void DistributedPatternMiner::growPatternsDepthFirstTask(unsigned int thread_ind
             delete htn;
     }
 
-    if (not patternJsonArrays[thread_index].empty())
+    if (patternJsonArrays[thread_index].size() > 0)
         sendPatternsToCentralServer(patternJsonArrays[thread_index]);
 
     cout<< "\r100% completed in Thread " + toString(thread_index) + ".";

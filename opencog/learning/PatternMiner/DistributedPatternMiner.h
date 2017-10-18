@@ -116,17 +116,12 @@ protected:
     void addPatternsToJsonArrayBuf(string curPatternKeyStr, string parentKeyString,  unsigned int extendedLinkIndex, bool notOutPutPattern, json::value &patternJsonArray);
     void sendPatternsToCentralServer(json::value &patternJsonArray);
 
-
-
-
 public:
 
-    DistributedPatternMiner(AtomSpace* _original_as) : PatternMiner(_original_as)
+    DistributedPatternMiner(AtomSpace& _original_as) : PatternMiner(_original_as)
     {
-
         is_distributed = true;
         patternJsonArrays = new web::json::value[THREAD_NUM];
-
     }
 
     void launchADistributedWorker();
@@ -137,8 +132,6 @@ public:
     bool sendRequest(http_request &request, http_response &response);
 
     void startCentralServer();
-
-
 };
 
 }

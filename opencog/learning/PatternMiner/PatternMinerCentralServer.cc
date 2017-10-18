@@ -179,7 +179,7 @@ bool DistributedPatternMiner::checkIfAllWorkersStopWorking()
     if (allWorkers.empty())
         return false; // has not started yet
 
-    for (const auto& workerIt : allWorkers)
+    for (const auto& worker : allWorkers)
         if (worker.second.first)
             return false;
 
@@ -219,14 +219,10 @@ void DistributedPatternMiner::handlePost(http_request request)
        cout << e.what() << endl;
        request.reply(status_codes::NotFound);
     }
-
-
 }
-
 
 void DistributedPatternMiner::handleRegisterNewWorker(http_request request)
 {
-
     try
     {
         auto paths = uri::split_path(uri::decode(request.relative_uri().query()));
@@ -425,8 +421,7 @@ void DistributedPatternMiner::parseAPatternTask(json::value jval)
         else
         {
             // add this new found pattern into the Atomspace
-            HandleSeq patternHandleSeq = loadPatternIntoAtomSpaceFromString(PatternStr, as);
-
+            HandleSeq patternHandleSeq = loadPatternIntoAtomSpaceFromString(PatternStr, *as);
 
             if (patternHandleSeq.empty())
             {
@@ -483,7 +478,7 @@ void DistributedPatternMiner::parseAPatternTask(json::value jval)
                     // It's possibly sent by another thread, and added to the queue later than the current pattern.
                     // So we add this parent pattern here first, but set its count = 0
                     // add this new found pattern into the Atomspace
-                    HandleSeq parentPatternHandleSeq = loadPatternIntoAtomSpaceFromString(ParentPatternStr, as);
+                    HandleSeq parentPatternHandleSeq = loadPatternIntoAtomSpaceFromString(ParentPatternStr, *as);
                     if (parentPatternHandleSeq.empty())
                     {
 
