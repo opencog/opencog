@@ -1567,37 +1567,17 @@ void PatternMiner::OutPutHighSurprisingILowSurprisingnessIIPatternsToFile(const 
     resultFile.close();
 }
 
-
-// To exclude this kind of patterns:
-// $var_3 doesn't really can be a variable, all the links contains it doesn't contains any const nodes, so actually $var_3 is a leaf
-// we call variable nodes like $var_3 as "loop variable"
-//(InheritanceLink )
-//  (ConceptNode Broccoli)
-//  (VariableNode $var_1)
-
-//(InheritanceLink )
-//  (ConceptNode dragonfruit)
-//  (VariableNode $var_2)
-
-//(InheritanceLink )
-//  (VariableNode $var_2)
-//  (VariableNode $var_3)
-
-//(InheritanceLink )
-//  (VariableNode $var_1)
-//  (VariableNode $var_3)
-
 struct VariableInLinks
 {
     HandleSeq onlyContainsVarLinks;
     HandleSeq containsConstLinks;
 };
 
-bool PatternMiner::containsLoopVariable(const HandleSeq& inputPattern)
+bool PatternMiner::containsLoopVariable(const HandleSeq& pattern)
 {
     // Need no check when gram < 3, it will already be filtered by the
     // leaves filter
-    if (inputPattern.size() < 3)
+    if (pattern.size() < 3)
         return false;
 
     // First find those links that only contains variables, without
@@ -1606,10 +1586,9 @@ bool PatternMiner::containsLoopVariable(const HandleSeq& inputPattern)
 
     bool allLinksContainsConst = true;
 
-    for (const Handle& inputH : inputPattern)
+    for (const Handle& subpattern : pattern)
     {
-        string str = inputH->toShortString();
-        std::stringstream stream(str);
+        std::stringstream stream(subpattern->toShortString());
         string oneLine;
         bool containsOnlyVars = true;
         vector<string> allVarsInThis_link;
@@ -1642,9 +1621,9 @@ bool PatternMiner::containsLoopVariable(const HandleSeq& inputPattern)
         {
             VariableInLinks& varLinks = varInLinksMap[varStr];
             if (containsOnlyVars)
-                varLinks.onlyContainsVarLinks.push_back(inputH);
+                varLinks.onlyContainsVarLinks.push_back(subpattern);
             else
-                varLinks.containsConstLinks.push_back(inputH);
+                varLinks.containsConstLinks.push_back(subpattern);
         }
     }
 

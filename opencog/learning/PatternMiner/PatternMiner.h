@@ -491,9 +491,37 @@ protected:
                                                  vector<MinedPatternInfo>& allNewMinedPatternInfo, unsigned int thread_index, bool startFromLinkContainWhiteKeyword);
 
     /**
-     * NTODO: add comment
+     * Return iff the pattern contains "loop variables".
+     *
+     * For instance, in the following $var_3 isn't really a variable because...
+     *
+     * To exclude this kind of patterns:
+     * $var_3 doesn't really can be a variable, all the links contains it doesn't contains any const nodes, so actually $var_3 is a leaf
+     *
+     * we call variable nodes like $var_3 as "loop variable"
+     * (InheritanceLink
+     *  (ConceptNode Broccoli)
+     *  (VariableNode $var_1))
+     *
+     * (InheritanceLink
+     *  (ConceptNode dragonfruit)
+     *  (VariableNode $var_2))
+     *
+     * (InheritanceLink
+     *  (VariableNode $var_2)
+     *  (VariableNode $var_3))
+     *
+     * (InheritanceLink
+     *  (VariableNode $var_1)
+     *  (VariableNode $var_3))
+     *
+     * NTODO: it seems it returns true iff a sub-pattern has only
+     * variables.
+     *
+     * NTODO: what about representing a pattern a set of sub-patterns,
+     * as opposed to pattern sequence.
      */
-    bool containsLoopVariable(const HandleSeq& inputPattern);
+    bool containsLoopVariable(const HandleSeq& pattern);
 
     void quoteAPattern(HTreeNode* hTreeNode);
 
@@ -501,8 +529,6 @@ protected:
 
     HTreeNode* extractAPatternFromGivenVarCombination(HandleSeq &inputLinks, HandleMap &patternVarMap, HandleMap& orderedVarNameMap,HandleSeqSeq &oneOfEachSeqShouldBeVars, HandleSeq &leaves,HandleSeq &shouldNotBeVars, HandleSeq &shouldBeVars,
                                                       unsigned int &extendedLinkIndex, set<string>& allNewMinedPatternsCurTask, bool &notOutPutPattern, bool &patternAlreadyExtractedInCurTask,bool startFromLinkContainWhiteKeyword);
-
-
 
     void findAllInstancesForGivenPatternInNestedAtomSpace(HTreeNode* HNode);
 
