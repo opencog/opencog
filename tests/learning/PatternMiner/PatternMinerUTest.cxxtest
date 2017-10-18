@@ -159,9 +159,9 @@ void PatternMinerUTest::test_containsLoopVariable()
 {
 	Handle Broccoli = an(CONCEPT_NODE, "Broccoli"),
 		dragonfruit = an(CONCEPT_NODE, "dragonfruit"),
-		var_1 = an(VARIABLE_NODE, "$var_1"),
-		var_2 = an(VARIABLE_NODE, "$var_2"),
-		var_3 = an(VARIABLE_NODE, "$var_3"),
+		var_1 = an(PATTERN_VARIABLE_NODE, "$var_1"),
+		var_2 = an(PATTERN_VARIABLE_NODE, "$var_2"),
+		var_3 = an(PATTERN_VARIABLE_NODE, "$var_3"),
 		h1 = al(INHERITANCE_LINK, Broccoli, var_1),
 		h2 = al(INHERITANCE_LINK, dragonfruit, var_2),
 		h3 = al(INHERITANCE_LINK, var_2, var_3),
@@ -183,6 +183,21 @@ void PatternMinerUTest::test_containsLoopVariable()
 	bool result3 = pm.containsLoopVariable(pattern3),
 		expected3 = true;
 	TS_ASSERT_EQUALS(result3, expected3);
+
+	HandleSeq pattern4{h2, h3, h4};
+	bool result4 = pm.containsLoopVariable(pattern4),
+		expected4 = true;
+	TS_ASSERT_EQUALS(result4, expected4);
+
+	HandleSeq pattern5{h3, h4};
+	bool result5 = pm.containsLoopVariable(pattern5),
+		expected5 = false;
+	TS_ASSERT_EQUALS(result5, expected5);
+
+	HandleSeq pattern6{h4};
+	bool result6 = pm.containsLoopVariable(pattern6),
+		expected6 = false;
+	TS_ASSERT_EQUALS(result6, expected6);
 }
 
 void PatternMinerUTest::test_PatternMiner_SodaDrinker()
