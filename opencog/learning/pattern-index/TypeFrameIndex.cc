@@ -6,6 +6,7 @@
 #include <boost/range/algorithm/set_algorithm.hpp>
 
 #include <opencog/util/Logger.h>
+#include <opencog/util/algorithm.h>
 
 #include "TypeFrameIndex.h"
 #include "TypeFrame.h"
