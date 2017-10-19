@@ -53,10 +53,13 @@ public:
 	void setUp();
 	void tearDown();
 
+	// Tests auxiliary methods
 	void test__UnifyPatternOrder();
 	void test_partitionBySharedVariables();
 	void test_containsLoopVariable();
 
+	// Tests pattern miner itself
+	void test_PatternMiner_ABC();
 	void test_PatternMiner_InferenceControl();
 	void test_PatternMiner_SodaDrinker();
 };
@@ -198,6 +201,28 @@ void PatternMinerUTest::test_containsLoopVariable()
 	bool result6 = pm.containLoopVariable(pattern6),
 		expected6 = true;
 	TS_ASSERT_EQUALS(result6, expected6);
+}
+
+void PatternMinerUTest::test_PatternMiner_ABC()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	Handle A = an(CONCEPT_NODE, "A"),
+		B = an(CONCEPT_NODE, "B"),
+		C = an(CONCEPT_NODE, "C"),
+		AB = al(INHERITANCE_LINK, A, B),
+		AC = al(INHERITANCE_LINK, A, C);
+
+	PatternMiner pm(_as);
+	pm.runPatternMiner(false);  // NTODO set count threshold >= 2
+
+	vector<HTreeNode*>& top1gramPatterns = pm.getFinalPatternsForGram(1); // NTODO why is it empty?
+
+	string patternStr = pm.unifiedPatternToKeyString(top1gramPatterns[0]->pattern);
+
+	logger().info("The result top 1-gram pattern: \n%s", patternStr.c_str());
+
+	TS_WARN("TODO");
 }
 
 void PatternMinerUTest::test_PatternMiner_InferenceControl()
