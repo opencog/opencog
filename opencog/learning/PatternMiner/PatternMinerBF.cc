@@ -230,14 +230,9 @@ void PatternMiner::extractAllPossiblePatternsFromInputLinksBF(const HandleSeq& i
 
                 for (const Handle& link : inputLinks)
                 {
-                    HandleSeq outgoingLinks;
-                    generateALinkByChosenVariables(link, patternVarMap, outgoingLinks);
-                    Handle rebindedLink = as->add_link(link->getType(), outgoingLinks);
-                    rebindedLink->setTruthValue(TruthValue::TRUE_TV());
+                    Handle rebindedLink = substitute(link, patternVarMap);
                     if (containOnlyVariables(rebindedLink))
-                    {
                         hasLinkContainsOnlyVars = true;
-                    }
                     pattern.push_back(rebindedLink);
                 }
 

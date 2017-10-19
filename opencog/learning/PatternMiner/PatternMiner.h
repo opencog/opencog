@@ -404,8 +404,12 @@ protected:
      */
     void generateIndexesOfSharedVars(const Handle& link, const HandleSeq& orderedHandles, vector<vector<std::pair<int, size_t>>> &indexes);
 
-    // generate the outgoings for a link in a pattern in the Pattern mining Atomspace, according to the given group of variables
-    void generateALinkByChosenVariables(const Handle &originalLink, HandleMap& valueToVarMap, HandleSeq &outputOutgoings);
+	/**
+	 * Given a mapping between handles, substitute all encountered
+	 * handle keys by their values in h. The produced handle is added
+	 * to the pattern miner atomspace and returned.
+	 */
+	Handle substitute(const Handle& h, const HandleMap& h2h);
 
     /**
      * Retrieve all nodes from a given link and its descendents. For

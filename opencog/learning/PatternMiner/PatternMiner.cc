@@ -511,40 +511,26 @@ unsigned int combinationCalculate(int r, int n)
     }
 
     return top/bottom;
-
 }
 
-// valueToVarMap:  the ground value node in the orginal Atomspace to the variable handle in pattenmining Atomspace
-void PatternMiner::generateALinkByChosenVariables(const Handle& originalLink, HandleMap& valueToVarMap, HandleSeq& outputOutgoings)
+Handle PatternMiner::substitute(const Handle& h, const HandleMap& h2h)
 {
-    for (const Handle& h : originalLink->getOutgoingSet())
-    {
-        if (h->isNode())
-        {
-           if (valueToVarMap.find(h) != valueToVarMap.end())
-           {
-               // this node is considered as a variable
-               outputOutgoings.push_back(valueToVarMap[h]);
-           }
-           else
-           {
-               // this node is considered not a variable, so add its bound value node into the Pattern mining Atomspace
-               Handle value_node = as->add_node(h->getType(), h->getName());
-               // XXX why do we need to set the TV ???
-               value_node->setTruthValue(TruthValue::TRUE_TV());
-               outputOutgoings.push_back(value_node);
-           }
-        }
-        else
-        {
-             HandleSeq _outputOutgoings;
-             generateALinkByChosenVariables(h, valueToVarMap, _outputOutgoings);
-             Handle reLink = as->add_link(h->getType(),_outputOutgoings);
-             // XXX why do we need to set the TV ???
-             reLink->setTruthValue(TruthValue::TRUE_TV());
-             outputOutgoings.push_back(reLink);
-        }
-    }
+    // If h in in h2h, its associated handle is returned
+    auto it = h2h.find(h);
+    if (it != h2h.end())
+        return as->add_atom(it->second);
+
+    // Otherwise if h is a node, h itself is returned
+    if (h->isNode())
+        return h;
+
+    // Recursively substitute its outgoings and reconstruct
+    HandleSeq nout;
+    for (const Handle& ch : h->getOutgoingSet())
+        nout.push_back(substitute(ch, h2h));
+    Handle nh = as->add_link(h->getType(), nout);
+    nh->copyValues(h);
+    return nh;
 }
 
 void PatternMiner::associateNodesToVars(const Handle& link, HandleMap& nodesToVars)

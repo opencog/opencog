@@ -311,14 +311,9 @@ HTreeNode* PatternMiner::extractAPatternFromGivenVarCombination(HandleSeq &input
 
         HandleSeq pattern, unifiedPattern;
 
-        for (const Handle& link : inputLinks)
-        {
-            HandleSeq outgoingLinks;
-            generateALinkByChosenVariables(link, patternVarMap, outgoingLinks);
-            Handle rebindedLink = as->add_link(link->getType(), outgoingLinks);
-            rebindedLink->setTruthValue(TruthValue::TRUE_TV());
-
-            pattern.push_back(rebindedLink);
+        for (const Handle& link : inputLinks) {
+            Handle nlink = substitute(link, patternVarMap);
+            pattern.push_back(nlink);
         }
 
         if (gram > 2)
