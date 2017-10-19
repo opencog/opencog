@@ -64,11 +64,9 @@ void PatternMiner::growPatternsDepthFirstTask(unsigned int thread_index)
     else
         end_index = linksPerThread * (thread_index + 1);
 
-
     cout << "\nStart thread " << thread_index
          << ": will process Link number from " << start_index
          << " to (excluded) " << end_index << std::endl;
-
 
     float allLinkNumberfloat = (float)(end_index - start_index);
 
@@ -328,7 +326,6 @@ HTreeNode* PatternMiner::extractAPatternFromGivenVarCombination(HandleSeq &input
 
         string keyString = unifiedPatternToKeyString(unifiedPattern);
 
-
         // check if this pattern has been found in current Link task
         if (allNewMinedPatternsCurTask.find(keyString) != allNewMinedPatternsCurTask.end())
         {
@@ -352,11 +349,9 @@ HTreeNode* PatternMiner::extractAPatternFromGivenVarCombination(HandleSeq &input
             newHTreeNode->pattern = unifiedPattern;
             newHTreeNode->var_num = patternVarMap.size();
             returnHTreeNode = newHTreeNode;
-
         }
         else
         {
-
             // next, check if this pattern already exist (need lock)
 
             if (THREAD_NUM > 1)
@@ -370,7 +365,6 @@ HTreeNode* PatternMiner::extractAPatternFromGivenVarCombination(HandleSeq &input
                 returnHTreeNode = newHTreeNode;
                 newHTreeNode->count = 1;
 
-
                 keyStrToHTreeNodeMap.insert({keyString, newHTreeNode});
 
     //            cout << "A new pattern Found:\n"<< keyString << std::endl;
@@ -378,17 +372,15 @@ HTreeNode* PatternMiner::extractAPatternFromGivenVarCombination(HandleSeq &input
             }
             else
             {
-                returnHTreeNode = ((HTreeNode*)(htreeNodeIter->second));
+                returnHTreeNode = htreeNodeIter->second;
 
                 returnHTreeNode->count ++;
 
     //            cout << "Unique Key already exists:" << keyString << std::endl;
-
             }
 
             if (THREAD_NUM > 1)
                 uniqueKeyLock.unlock();
-
 
             if (newHTreeNode)
             {
@@ -397,7 +389,6 @@ HTreeNode* PatternMiner::extractAPatternFromGivenVarCombination(HandleSeq &input
 
                 newHTreeNode->pattern = unifiedPattern;
                 newHTreeNode->var_num = patternVarMap.size();
-
 
                 if ( (! notOutPutPattern) && only_output_patterns_contains_white_keywords)
                 {
@@ -435,14 +426,10 @@ HTreeNode* PatternMiner::extractAPatternFromGivenVarCombination(HandleSeq &input
 
                 if (THREAD_NUM > 1)
                     addNewPatternLock.unlock();
-
             }
         }
-
     }
-
     return returnHTreeNode;
-
 }
 
 // call existInOneThreadExtractedLinks and existInAllThreadExtractedLinks before this call function
@@ -467,7 +454,6 @@ void PatternMiner::addThreadExtractedLinks(unsigned int _gram, unsigned int cur_
     }
 
     threadExtractedLinksLock.unlock();
-
 }
 
 bool PatternMiner::existInAllThreadExtractedLinks(unsigned int _gram, string _extractedLinkUIDs)
@@ -483,7 +469,6 @@ bool PatternMiner::existInAllThreadExtractedLinks(unsigned int _gram, string _ex
         threadExtractedLinksLock.unlock();
         return true;
     }
-
 }
 
 bool PatternMiner::existInOneThreadExtractedLinks(unsigned int _gram, unsigned int cur_thread_index, string _extractedLinkUIDs)
@@ -507,7 +492,6 @@ void PatternMiner::extendAPatternForOneMoreGramRecursively(const Handle &extende
                  set<string>& allNewMinedPatternsCurTask, vector<HTreeNode*> &allHTreeNodesCurTask, vector<MinedPatternInfo> &allNewMinedPatternInfo, unsigned int thread_index,
                  bool startFromLinkContainWhiteKeyword)
 {
-
     // the ground value node in the from_as to the variable handle in pattenmining Atomspace
     HandleMap valueToVarMap = lastGramValueToVarMap;
     // std::cout << "valueToVarMap = " << oc_to_string(valueToVarMap);
@@ -525,7 +509,7 @@ void PatternMiner::extendAPatternForOneMoreGramRecursively(const Handle &extende
     }
     else
     {
-        for (const auto& p : valueToVarMap)
+        for (const auto& p : valueToVarMap) // NTODO Replace this code by map difference
         {
             if (lastGramValueToVarMap.find(p.first) == lastGramValueToVarMap.end())
                 newValueToVarMap.insert(p);
@@ -685,7 +669,7 @@ void PatternMiner::extendAPatternForOneMoreGramRecursively(const Handle &extende
             HandleMap orderedVarNameMap;
 
             HTreeNode* thisGramHTreeNode = extractAPatternFromGivenVarCombination(inputLinks, patternVarMap, orderedVarNameMap,oneOfEachSeqShouldBeVars, leaves, shouldNotBeVars, shouldBeVars,
-                                          extendedLinkIndex, allNewMinedPatternsCurTask, notOutPutPattern, patternAlreadyExtractedInCurTask, startFromLinkContainWhiteKeyword);
+                                          extendedLinkIndex, allNewMinedPatternsCurTask, notOutPutPattern, patternAlreadyExtractedInCurTask, startFromLinkContainWhiteKeyword); // NTODO move all parameters in a PatterMinerParameter structure and pass the structure instead
 
             if (thisGramHTreeNode)
             {
@@ -838,14 +822,6 @@ void PatternMiner::extendAPatternForOneMoreGramRecursively(const Handle &extende
                                     {
                                         (sub_b_relation_it->second).push_back(onesub_b);
                                     }
-
-//                                    cout << "const node:" << superb.constNode->toShortString() << std::endl;
-//                                    cout << "variable node: " << orderedVarHandle->toShortString() << std::endl;
-//                                    cout << "Sub pattern: " << std::endl;
-//                                    for (Handle plink : sub_b_htreenode->pattern)
-//                                        cout << plink->toShortString();
-//                                    cout << std::endl;
-
                                 }
                             }
                             else // it is a const node
@@ -876,25 +852,12 @@ void PatternMiner::extendAPatternForOneMoreGramRecursively(const Handle &extende
                     // There are two different super patterns: extended from a variable, and extended from a const by turning it into a variable:
                     unsigned int nodeIndex = 0;
 
-//                    cout << "valueToVarMap:\n";
-//                    for (HandleMap::const_iterator titer = valueToVarMap.begin(); titer != valueToVarMap.end(); ++ titer)
-//                    {
-//                        cout << " ( " <<((Handle)(titer->first))->getName() << " , " << ((Handle)(titer->second))->getName() << " ) ";
-//                    }
-
-//                    cout << "\n\npatternVarMap:\n";
-//                    for (HandleMap::const_iterator titer = patternVarMap.begin(); titer != patternVarMap.end(); ++ titer)
-//                    {
-//                        cout << " ( " <<((Handle)(titer->first))->getName() << " , " << ((Handle)(titer->second))->getName() << " ) ";
-//                    }
-
                     for (const auto& p : valueToVarMap)
                     {
-//                        cout << "nodeIndex = " << nodeIndex << std::endl;
                         Handle extendNode = p.first;
                         if (enable_filter_node_types_should_not_be_vars)
                         {
-                            bool isIgnoredType = false;
+                            bool isIgnoredType = false; // NTODO move this to its own function
                             Type t = extendNode->getType();
                             for (Type noType : node_types_should_not_be_vars)
                             {
@@ -905,7 +868,7 @@ void PatternMiner::extendAPatternForOneMoreGramRecursively(const Handle &extende
                                 }
                             }
 
-                            if (isIgnoredType )
+                            if (isIgnoredType)
                                 continue;
                         }
 
@@ -915,13 +878,11 @@ void PatternMiner::extendAPatternForOneMoreGramRecursively(const Handle &extende
                         if (patternVarMap.find(extendNode) != patternVarMap.end()) // this is considered as a variable
                         {   // Type 1: extended from a variable
                             isNewExtendedFromVar = true;
-//                            cout << "\nExtended from var";
                         }
                         else
                         {
                             // Type 2: extended from a const by turning it into a variable
                             isNewExtendedFromVar = false;
-//                            cout << "\nExtended from const";
                         }
 
                         // find what are the other links in the original Atomspace contain this variable
@@ -936,7 +897,7 @@ void PatternMiner::extendAPatternForOneMoreGramRecursively(const Handle &extende
                             Handle incomingHandle = incomingPtr->getHandle();
                             Handle extendedHandle = incomingHandle;
 
-                            if (use_linktype_black_list && isIgnoredType (incomingHandle->getType()) )
+                            if (use_linktype_black_list && isIgnoredType(incomingHandle->getType()))
                             {
                                 // if this atom is of igonred type, get its first ancestor that is not in the igonred types
                                 extendedHandle = getFirstNonIgnoredIncomingLink(from_as, incomingHandle);
@@ -963,7 +924,7 @@ void PatternMiner::extendAPatternForOneMoreGramRecursively(const Handle &extende
                                 }
                             }
 
-                            if (isInHandleSeq(extendedHandle, inputLinks))
+                            if (is_in(extendedHandle, inputLinks))
                                 continue;
 
                             if (only_mine_patterns_start_from_white_list)

@@ -553,6 +553,9 @@ protected:
 
     void evaluateInterestingnessTask();
 
+	/**
+	 * NTODO Add comment + utest
+	 */
     void generateNextCombinationGroup(bool* &indexes, int n_max);
 
     bool isLastNElementsAllTrue(bool* array, int size, int n);

@@ -3038,7 +3038,7 @@ void PatternMiner::runPatternMiner(bool exit_program_after_finish)
     int start_time = time(nullptr);
 
     allLinks.clear();
-    original_as.get_handles_by_type(back_inserter(allLinks), (Type)LINK, true );
+    original_as.get_handles_by_type(back_inserter(allLinks), (Type)LINK, true);
 
     allLinkNumber = (int)allLinks.size();
     atomspaceSizeFloat = (float)allLinkNumber;
@@ -3282,9 +3282,12 @@ void PatternMiner::runInterestingnessEvaluation()
 
             vector<HTreeNode*> curGramPatterns = patternsForGram[cur_gram-1];
 
+            if (curGramPatterns.empty())
+                break;
+
             // and then sort by surprisingness_II
             boost::sort(curGramPatterns, compareHTreeNodeBySurprisingness_II);
-            OutPutInterestingPatternsToFile(curGramPatterns,cur_gram,2);
+            OutPutInterestingPatternsToFile(curGramPatterns, cur_gram, 2);
 
             // Get the min threshold of surprisingness_II
             int threshold_index_II;
@@ -3293,7 +3296,7 @@ void PatternMiner::runInterestingnessEvaluation()
             int looptimes = 0;
             while (true)
             {
-                surprisingness_II_threshold = (curGramPatterns[threshold_index_II])->nII_Surprisingness;
+                surprisingness_II_threshold = (curGramPatterns[threshold_index_II])->nII_Surprisingness; // NTODO understand how that comes to be
                 if (surprisingness_II_threshold <= 0.00000f)
                 {
                     if (++looptimes > 8)
@@ -3538,8 +3541,6 @@ void PatternMiner::queryPatternsWithFrequencySurprisingnessBRanges(unsigned int 
     cout <<"\nDone!" << std::endl;
 }
 
-
-
 void PatternMiner::queryPatternsWithFrequencyAndInteractionInformationRanges(unsigned int min_frequency, unsigned int max_frequency,
                                                                              float min_ii, float max_ii, int gram)
 {
@@ -3600,7 +3601,6 @@ void PatternMiner::queryPatternsWithFrequencyAndInteractionInformationRanges(uns
 
     cout <<"\nDone!" << std::endl;
 }
-
 
 bool PatternMiner::containWhiteKeywords(const string& str, QUERY_LOGIC logic)
 {
@@ -3723,7 +3723,7 @@ void PatternMiner::evaluateInterestingnessTask()
 
         cur_index ++;
 
-        if ((unsigned int)cur_index < (patternsForGram[cur_gram-1]).size())
+        if ((unsigned int)cur_index < (patternsForGram[cur_gram-1]).size()) // NTODO how that stuff gets defined?
         {
             cout<< "\r" << (float)(cur_index)/(float)((patternsForGram[cur_gram-1]).size())*100.0f << + "% completed." ;
             std::cout.flush();
@@ -3916,7 +3916,6 @@ void PatternMiner::selectSubsetForDBpedia()
 
     std::cout << "\nDone! The subset has been written to file:  " << fileName << std::endl;
 }
-
 
 std::string PatternMiner::Link2keyString(const Handle& h, const std::string& indent)
 {
@@ -4423,7 +4422,6 @@ bool PatternMiner::loadOutgoingsIntoAtomSpaceFromString(stringstream& outgoingSt
     return true;
 }
 
-
 // a patternStr is sent from a distributed worker via json, it's the keystring of a pattern
 // the server need to load the string into links into AtomSpace
 // e.g. a patternStr =
@@ -4621,7 +4619,6 @@ bool PatternMiner::loadOutgoingsIntoAtomSpaceFromAtomString(stringstream& outgoi
 //) ; [13092614614903350611][2]
 HandleSeq PatternMiner::loadPatternIntoAtomSpaceFromFileString(string patternStr, AtomSpace& _as)
 {
-
     std::vector<std::string> strs;
     boost::algorithm::split_regex( strs, patternStr, boost::regex( "\n\\)\n" ) ) ;
 

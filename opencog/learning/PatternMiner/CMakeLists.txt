@@ -92,9 +92,6 @@ IF (HAVE_GUILE)
 
         INSTALL (TARGETS guile-patternminer DESTINATION "lib${LIB_DIR_SUFFIX}/opencog")
 
-	
-
-       
 ENDIF (HAVE_GUILE)
 
 # ------------------------------------------------------------
