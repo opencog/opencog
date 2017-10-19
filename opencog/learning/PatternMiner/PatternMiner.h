@@ -166,7 +166,7 @@ class PatternMiner
 protected:
 
     HTree* htree;
-    AtomSpace* as;              // NTODO what is this used for?
+    AtomSpace* as;              // NTODO what is this used for? It seems to be where patterns lives
     AtomSpace& original_as;
     AtomSpace* observing_as;
 

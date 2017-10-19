@@ -1658,7 +1658,7 @@ bool PatternMiner::filters(const HandleSeq& inputLinks, HandleSeqSeq& oneOfEachS
             for (const Handle& node : allNodesInEachLink[i])
             {
                 // find leaves , do not check this for 1-gram
-                if ((inputLinks.size() > 1) && enable_filter_leaves_should_not_be_vars)
+                if (inputLinks.size() > 1 && enable_filter_leaves_should_not_be_vars)
                 {
                     bool is_leaf = true;
 
@@ -3046,7 +3046,7 @@ void PatternMiner::runPatternMiner(bool exit_program_after_finish)
     Pattern_mining_mode = config().get("Pattern_mining_mode"); // option: Breadth_First , Depth_First
     assert( (Pattern_mining_mode == "Breadth_First") || (Pattern_mining_mode == "Depth_First"));
 
-    std::cout <<"\nDebug: PatternMining start! Max gram = "
+    std::cout << "\nDebug: PatternMining start! Max gram = "
               << this->MAX_GRAM << ", mode = " << Pattern_mining_mode << std::endl;
 
     int start_time = time(nullptr);

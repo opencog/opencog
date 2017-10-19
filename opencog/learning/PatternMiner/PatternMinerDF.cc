@@ -169,7 +169,7 @@ void PatternMiner::runPatternMinerDepthFirst()
     // observing_as is used to copy one link everytime from the
     // original_as
     if (not observing_as)
-        observing_as = new AtomSpace();
+        observing_as = new AtomSpace(); // NTODO can you init this at ctor?
 
     if (THREAD_NUM > 1)
     {
@@ -525,7 +525,7 @@ void PatternMiner::extendAPatternForOneMoreGramRecursively(const Handle &extende
     bool notOutPutPattern = false;
 
     if (parentNode == nullptr) // this the first gram
-    {// NTODO doesn't that mean lastGramValueToVarMap is empty?
+    {
         newValueToVarMap = valueToVarMap;
     }
     else
@@ -538,7 +538,7 @@ void PatternMiner::extendAPatternForOneMoreGramRecursively(const Handle &extende
     }
 
     // Generate all the possible combinations of all the nodes: all patterns including the 1 ~ n_max variables
-    // If there are too many variables in a pattern, it doesn't make much sense, so we litmit the max number of variables to half of the node number
+    // If there are too many variables in a pattern, it doesn't make much sense, so we limit the max number of variables to half of the node number
 
     unsigned int cur_pattern_gram = 1;
 //    unsigned int lastGramTotalNodeNum = 0;
@@ -563,7 +563,7 @@ void PatternMiner::extendAPatternForOneMoreGramRecursively(const Handle &extende
     n_limit_putin_result = valueToVarMap.size() * max_var_num_percent - lastGramTotalVarNum;
     n_limit_putin_result ++;
 
-    if (n_limit_putin_result == 1)
+    if (n_limit_putin_result == 1) // NTODO why?
         n_limit_putin_result = 2;
 
     if (GENERATE_TMP_PATTERNS)
@@ -576,7 +576,7 @@ void PatternMiner::extendAPatternForOneMoreGramRecursively(const Handle &extende
     }
 
     // sometimes an extended Link do not have any new nodes compared to its parent
-    // so  that newValueToVarMap.size() can be , e.g.:
+    // so that newValueToVarMap.size() can be equal, e.g.:
 //        (EvaluationLink (stv 1.000000 1.000000)
 //          (PredicateNode "spouse")
 //          (ListLink (stv 1.000000 1.000000)
@@ -642,17 +642,17 @@ void PatternMiner::extendAPatternForOneMoreGramRecursively(const Handle &extende
 
         // generate the first combination
         for (unsigned int i = 0; i < var_num; ++ i)
-            indexes[i] = true;
+            indexes[i] = true;  // NTODO can probably be replace by calling structure
 
         for (unsigned int i = var_num; i < n_max; ++ i)
-            indexes[i] = false;
+            indexes[i] = false; // NTODO can probably be replace by calling structure
 
         while (true)
         {
             // construct the pattern for this combination in the PatternMining Atomspace
             // generate the patternVarMap for this pattern of this combination
 
-            // the first part is the same with its parent node
+            // the first part is the same as its parent node
             HandleMap patternVarMap;
             if (parentNode)
             {
@@ -668,7 +668,7 @@ void PatternMiner::extendAPatternForOneMoreGramRecursively(const Handle &extende
             }
 
             // And then add the second part:
-            if (var_num > 0 )
+            if (var_num > 0)
             {
                 unsigned int index = 0;
                 for (const auto& p : newValueToVarMap)
