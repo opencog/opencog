@@ -58,8 +58,12 @@ public:
 	void test_partitionBySharedVariables();
 	void test_containsLoopVariable();
 
-	// Tests pattern miner itself
-	void test_PatternMiner_ABC();
+	// Simple pattern miner tests
+	void test_PatternMiner_AB_AC();
+	void test_PatternMiner_AB_ABC();
+	void test_PatternMiner_ABCD();
+
+	// Complex pattern miner tests
 	void test_PatternMiner_InferenceControl();
 	void test_PatternMiner_SodaDrinker();
 };
@@ -203,7 +207,7 @@ void PatternMinerUTest::test_containsLoopVariable()
 	TS_ASSERT_EQUALS(result6, expected6);
 }
 
-void PatternMinerUTest::test_PatternMiner_ABC()
+void PatternMinerUTest::test_PatternMiner_AB_AC()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
@@ -216,7 +220,53 @@ void PatternMinerUTest::test_PatternMiner_ABC()
 	PatternMiner pm(_as);
 	pm.runPatternMiner(false);  // NTODO set count threshold >= 2
 
-	vector<HTreeNode*>& top1gramPatterns = pm.getFinalPatternsForGram(1); // NTODO why is it empty?
+	vector<HTreeNode*>& top1gramPatterns = pm.getFinalPatternsForGram(1);
+
+	string patternStr = pm.unifiedPatternToKeyString(top1gramPatterns[0]->pattern);
+
+	logger().info("The result top 1-gram pattern: \n%s", patternStr.c_str());
+
+	TS_WARN("TODO");
+}
+
+void PatternMinerUTest::test_PatternMiner_AB_ABC()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	Handle A = an(CONCEPT_NODE, "A"),
+		B = an(CONCEPT_NODE, "B"),
+		C = an(CONCEPT_NODE, "C"),
+		AB = al(INHERITANCE_LINK, A, B),
+		ABC = al(INHERITANCE_LINK, A, al(AND_LINK, B, C));
+
+	PatternMiner pm(_as);
+	pm.runPatternMiner(false);  // NTODO set count threshold >= 2
+
+	vector<HTreeNode*>& top1gramPatterns = pm.getFinalPatternsForGram(1);
+
+	string patternStr = pm.unifiedPatternToKeyString(top1gramPatterns[0]->pattern);
+
+	logger().info("The result top 1-gram pattern: \n%s", patternStr.c_str());
+
+	TS_WARN("TODO");
+}
+
+void PatternMinerUTest::test_PatternMiner_ABCD()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	Handle A = an(CONCEPT_NODE, "A"),
+		B = an(CONCEPT_NODE, "B"),
+		C = an(CONCEPT_NODE, "C"),
+		D = an(CONCEPT_NODE, "C"),
+		AB = al(INHERITANCE_LINK, A, B),
+		AC = al(INHERITANCE_LINK, A, C),
+		ABCD = al(INHERITANCE_LINK, A, al(SET_LINK, B, C, D));
+
+	PatternMiner pm(_as);
+	pm.runPatternMiner(false);  // NTODO set count threshold >= 2
+
+	vector<HTreeNode*>& top1gramPatterns = pm.getFinalPatternsForGram(1);
 
 	string patternStr = pm.unifiedPatternToKeyString(top1gramPatterns[0]->pattern);
 
