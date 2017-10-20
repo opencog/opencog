@@ -2844,7 +2844,7 @@ void PatternMiner::reSetAllSettingsFromConfig()
 
     thresholdFrequency = config().get_int("Frequency_threshold");
 
-    max_var_num_percent = config().get_double("max_var_num_percent");
+    param.max_var_num_percent = config().get_double("max_var_num_percent");
 
     if_quote_output_pattern = config().get_bool("if_quote_output_pattern");
     string quotedTypeStr = config().get("output_pattern_quoted_linktype");
@@ -2887,15 +2887,14 @@ void PatternMiner::reSetAllSettingsFromConfig()
     string linktype_white_list_str = config().get("linktype_white_list");
     addAtomTypesFromString(linktype_white_list_str, linktype_white_list);
 
-    enable_filter_leaves_should_not_be_vars = config().get_bool("enable_filter_leaves_should_not_be_vars");
-    enable_filter_links_should_connect_by_vars = config().get_bool("enable_filter_links_should_connect_by_vars");
-    enable_filter_node_types_should_not_be_vars =  config().get_bool("enable_filter_node_types_should_not_be_vars");
-    enable_filter_node_types_should_be_vars =  config().get_bool("enable_filter_node_types_should_be_vars");
-    enable_filter_links_of_same_type_not_share_second_outgoing = config().get_bool("enable_filter_links_of_same_type_not_share_second_outgoing");
-    enable_filter_not_all_first_outgoing_const = config().get_bool("enable_filter_not_all_first_outgoing_const");
-    enable_filter_not_same_var_from_same_predicate = config().get_bool("enable_filter_not_same_var_from_same_predicate");
-    enable_filter_first_outgoing_evallink_should_be_var = config().get_bool("enable_filter_first_outgoing_evallink_should_be_var");
-
+    param.enable_filter_leaves_should_not_be_vars = config().get_bool("enable_filter_leaves_should_not_be_vars");
+    param.enable_filter_links_should_connect_by_vars = config().get_bool("enable_filter_links_should_connect_by_vars");
+    param.enable_filter_node_types_should_not_be_vars =  config().get_bool("enable_filter_node_types_should_not_be_vars");
+    param.enable_filter_node_types_should_be_vars =  config().get_bool("enable_filter_node_types_should_be_vars");
+    param.enable_filter_links_of_same_type_not_share_second_outgoing = config().get_bool("enable_filter_links_of_same_type_not_share_second_outgoing");
+    param.enable_filter_not_all_first_outgoing_const = config().get_bool("enable_filter_not_all_first_outgoing_const");
+    param.enable_filter_not_same_var_from_same_predicate = config().get_bool("enable_filter_not_same_var_from_same_predicate");
+    param.enable_filter_first_outgoing_evallink_should_be_var = config().get_bool("enable_filter_first_outgoing_evallink_should_be_var");
 
     node_types_should_not_be_vars.clear();
     string node_types_str = config().get("node_types_should_not_be_vars");
@@ -3025,8 +3024,8 @@ void PatternMiner::runPatternMiner(bool exit_program_after_finish)
         initPatternMiner();
     }
 
-    Pattern_mining_mode = config().get("Pattern_mining_mode"); // option: Breadth_First , Depth_First
-    assert( (Pattern_mining_mode == "Breadth_First") || (Pattern_mining_mode == "Depth_First"));
+    param.pattern_mining_mode = config().get("Pattern_mining_mode"); // option: Breadth_First , Depth_First
+    OC_ASSERT(Pattern_mining_mode == "Breadth_First" || Pattern_mining_mode == "Depth_First");
 
     std::cout << "\nDebug: PatternMining start! Max gram = "
               << this->MAX_GRAM << ", mode = " << Pattern_mining_mode << std::endl;
