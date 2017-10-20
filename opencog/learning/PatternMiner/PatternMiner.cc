@@ -2186,7 +2186,6 @@ void PatternMiner::calculateSurprisingness(HTreeNode* HNode)
 
     if (HNode->count < thresholdFrequency)
     {
-
         HNode->nII_Surprisingness = 0.0f;
         HNode->nI_Surprisingness = 0.0f;
         HNode->nII_Surprisingness_b = 0.0f;
@@ -2816,9 +2815,6 @@ void PatternMiner::initPatternMiner()
 
     observing_as = nullptr;
 
-//    if (threads)
-//        delete threads;
-
     patternsForGram.resize(MAX_GRAM);
     finalPatternsForGram.resize(MAX_GRAM);
     tmpPatternsForGram.resize(MAX_GRAM);
@@ -3317,10 +3313,10 @@ void PatternMiner::runInterestingnessEvaluation()
             int threshold_index_I = SURPRISINGNESS_I_TOP_THRESHOLD * (float)(curGramPatterns.size());
             for (int p = 0; p <= threshold_index_I; p++)
             {
-                HTreeNode* pNode = (patternsForGram[cur_gram-1])[p];
+                HTreeNode* pNode = patternsForGram[cur_gram-1][p];
 
                 // for patterns that have no superpatterns, nII_Surprisingness == -1.0, which should be taken into account
-                if ( (pNode->nII_Surprisingness < 0 ) || (pNode->nII_Surprisingness > surprisingness_II_threshold ) )
+                if ( (pNode->nII_Surprisingness < 0) || (pNode->nII_Surprisingness >= surprisingness_II_threshold) )
                     finalPatternsForGram[cur_gram-1].push_back(pNode);
             }
 
