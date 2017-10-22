@@ -9,7 +9,7 @@ ADD_LIBRARY (attentionbank
 )
 
 TARGET_LINK_LIBRARIES(attentionbank
-	-Wl,--no-as-needed
+	${NO_AS_NEEDED}
 	atombase
 	truthvalue
 	${COGUTIL_LIBRARY}
