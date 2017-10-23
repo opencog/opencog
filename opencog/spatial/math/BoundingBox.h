@@ -126,7 +126,7 @@ namespace opencog
 
                 BoundingBox& operator=( const BoundingBox& bb );
 
-                const std::list<LineSegment*>& getEdges( const Vector3& corner ) const throw(opencog::NotFoundException);
+                const std::list<LineSegment*>& getEdges( const Vector3& corner ) const;
 
             private:
                 void buildCorners( void );

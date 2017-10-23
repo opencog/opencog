@@ -23,7 +23,6 @@
 
 
 #include <opencog/util/mt19937ar.h>
-#include <opencog/util/StringManipulator.h>
 
 #include <opencog/spatial/AStarController.h>
 #include <opencog/spatial/LocalSpaceMap2DUtil.h>
@@ -91,8 +90,8 @@ void addSolutionToMap(AStarController &asc, Map *map)
     vector<spatial::Point> solution_points = asc.getSolutionPoints();
     //add solution to map
     spatial::ObjectMetaData no_meta;
-//    map->addNonObstacle(toString(rng.randint()), solution_points.begin(), solution_points.end(), no_meta);
-    map->addObject(opencog::toString(randGen().randint()), no_meta, false );
+//    map->addNonObstacle(std::to_string(rng.randint()), solution_points.begin(), solution_points.end(), no_meta);
+    map->addObject(std::to_string(randGen().randint()), no_meta, false );
 }
 
 

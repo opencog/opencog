@@ -43,7 +43,7 @@ namespace opencog
                 Rectangle( const Rectangle& other );
 
                 Rectangle( const Vector3& leftTopCorner, const Vector3& rightTopCorner, 
-                    const Vector3& rightBottomCorner ) throw(opencog::InvalidParamException);
+                    const Vector3& rightBottomCorner );
 
                 inline virtual ~Rectangle( void ) 
                 { 

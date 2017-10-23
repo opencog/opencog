@@ -58,17 +58,17 @@ public:
 
     string get_Pattern_Max_Gram()
     {
-        return  "max_gram: " + std::to_string( (int)(patternMiner->get_Pattern_Max_Gram()));
+        return  "max_gram: " + std::to_string( (int)(patternMiner->param.get_pattern_max_gram()));
     }
     string set_Pattern_Max_Gram(int _max_gram)
     {
-        patternMiner->set_Pattern_Max_Gram(_max_gram);
+        patternMiner->param.set_pattern_max_gram(_max_gram);
         return get_Pattern_Max_Gram();
     }
 
     string get_Enable_Interesting_Pattern()
     {
-        bool enable = patternMiner->get_Enable_Interesting_Pattern();
+        bool enable = patternMiner->param.get_enable_interesting_pattern();
 
         if (enable)
             return "enable_Interesting_Pattern: true";
@@ -78,21 +78,21 @@ public:
 
     string set_Enable_Interesting_Pattern(bool _enable)
     {
-        patternMiner->set_Enable_Interesting_Pattern(_enable) ;
+        patternMiner->param.set_enable_interesting_pattern(_enable) ;
         return get_Enable_Interesting_Pattern();
     }
 
-    string get_Frequency_threshold() {return "Frequency_threshold: " + std::to_string(patternMiner->get_Frequency_threshold());}
+    string get_Frequency_threshold() {return "Frequency_threshold: " + std::to_string(patternMiner->param.get_frequency_threshold());}
     string set_Frequency_threshold(int _Frequency_threshold)
     {
-        patternMiner->set_Frequency_threshold(_Frequency_threshold);
+        patternMiner->param.set_frequency_threshold(_Frequency_threshold);
         return get_Frequency_threshold();
     }
 
 
     string get_use_keyword_black_list()
     {
-        bool enable = patternMiner->get_use_keyword_black_list();
+        bool enable = patternMiner->param.get_use_keyword_black_list();
 
         if (enable)
             return "use_keyword_black_list: true";
@@ -102,13 +102,13 @@ public:
 
     string set_use_keyword_black_list(bool _use)
     {
-        patternMiner->set_use_keyword_black_list(_use);
+        patternMiner->param.set_use_keyword_black_list(_use);
         return get_use_keyword_black_list();
     }
 
     string get_use_keyword_white_list()
     {
-        bool enable = patternMiner->get_use_keyword_white_list();
+        bool enable = patternMiner->param.get_use_keyword_white_list();
 
         if (enable)
             return "use_keyword_white_list: true";
@@ -118,14 +118,14 @@ public:
 
     string set_use_keyword_white_list(bool _use)
     {
-        patternMiner->set_use_keyword_white_list(_use);
+        patternMiner->param.set_use_keyword_white_list(_use);
         return get_use_keyword_white_list();
     }
 
     string get_ignore_link_types()
     {
         string result =  "Ignore_Link_Types:";
-        for (Type type : patternMiner->get_ignore_link_types())
+        for (Type type : patternMiner->param.get_ignore_link_types())
             result +=  " " + classserver().getTypeName(type);
 
         return result;
@@ -134,7 +134,7 @@ public:
     string get_linktype_white_list()
     {
         string result =  "linktype_white_list:";
-        for (Type type : patternMiner->get_linktype_white_list())
+        for (Type type : patternMiner->param.get_linktype_white_list())
             result +=  " " + classserver().getTypeName(type);
 
         return result;
@@ -143,7 +143,7 @@ public:
 
     string get_use_linktype_white_list()
     {
-        bool enable = patternMiner->get_use_linktype_white_list();
+        bool enable = patternMiner->param.get_use_linktype_white_list();
 
         if (enable)
             return "use_linktype_white_list: true";
@@ -153,13 +153,13 @@ public:
 
     string set_use_linktype_white_list(bool _use)
     {
-        patternMiner->set_use_linktype_white_list(_use);
+        patternMiner->param.set_use_linktype_white_list(_use);
         return get_use_linktype_white_list();
     }
 
     string get_use_linktype_black_list()
     {
-        bool enable = patternMiner->get_use_linktype_black_list();
+        bool enable = patternMiner->param.get_use_linktype_black_list();
 
         if (enable)
             return "use_linktype_black_list: true";
@@ -169,7 +169,7 @@ public:
 
     string set_use_linktype_black_list(bool _use)
     {
-        patternMiner->set_use_linktype_black_list(_use);
+        patternMiner->param.set_use_linktype_black_list(_use);
         return get_use_linktype_black_list();
     }
 
@@ -181,7 +181,7 @@ public:
 
         string result = "";
 
-        if (patternMiner->add_linktype_to_white_list(atomType))
+        if (patternMiner->param.add_linktype_to_white_list(atomType))
             result += "Added!\n";
         else
             result += "Input type already exists in the linktype white list!\n";
@@ -197,7 +197,7 @@ public:
             return "Error: Input type doesn't exist!";
 
         string result = "";
-        if (patternMiner->remove_linktype_from_white_list(atomType))
+        if (patternMiner->param.remove_linktype_from_white_list(atomType))
             result += "Removed!\n";
         else
             result += "Input type does not exist in the linktype white list!\n";
@@ -214,7 +214,7 @@ public:
 
         string result = "";
 
-        if (patternMiner->add_ignore_link_type(atomType))
+        if (patternMiner->param.add_ignore_link_type(atomType))
             result += "Added!\n";
         else
             result += "Input type already exists in the ingnore Link list!\n";
@@ -230,7 +230,7 @@ public:
             return "Error: Input type doesn't exist!";
 
         string result = "";
-        if (patternMiner->remove_ignore_link_type(atomType))
+        if (patternMiner->param.remove_ignore_link_type(atomType))
             result += "Removed!\n";
         else
             result += "Input type does not exist in the ingnore Link list!\n";
@@ -242,7 +242,7 @@ public:
     string get_keyword_black_list()
     {
         string result =  "keyword_black_list:";
-        for (const string& word : patternMiner->get_keyword_black_list())
+        for (const string& word : patternMiner->param.get_keyword_black_list())
             result +=  " " + word;
 
         return result;
@@ -251,7 +251,7 @@ public:
     string add_keyword_to_black_list(const string& _keyword)
     {
         string result = "";
-        if (patternMiner->add_keyword_to_black_list(_keyword))
+        if (patternMiner->param.add_keyword_to_black_list(_keyword))
             result += "Added!\n";
         else
             result +=  "Input keyword already exists in the black list!\n";
@@ -260,7 +260,7 @@ public:
 
     string add_keywords_to_black_list(const string& _keywordlist)
     {
-        vector<string> keyword_list = PatternMiner::parse_comma_separated_list(_keywordlist);
+        vector<string> keyword_list = Parameters::parse_comma_separated_list(_keywordlist);
 
         for (const string& keyword : keyword_list)
             add_keyword_to_black_list(keyword);
@@ -271,7 +271,7 @@ public:
     string remove_keyword_from_black_list(const string& _keyword)
     {
         string result = "";
-        if (patternMiner->remove_keyword_from_black_list(_keyword))
+        if (patternMiner->param.remove_keyword_from_black_list(_keyword))
             result += "Removed!\n";
         else
             result +=  "Input keyword does not exist in the black list!\n";
@@ -282,7 +282,7 @@ public:
     string get_keyword_white_list()
     {
         string result =  "keyword_white_list:";
-        for (const string& word : patternMiner->get_keyword_white_list())
+        for (const string& word : patternMiner->param.get_keyword_white_list())
             result +=  " " + word;
 
         return result;
@@ -292,7 +292,7 @@ public:
     string add_keyword_to_white_list(const string& _keyword)
     {
         string result = "";
-        if (patternMiner->add_keyword_to_white_list(_keyword))
+        if (patternMiner->param.add_keyword_to_white_list(_keyword))
             result += "Added!\n";
         else
             result +=  "Input keyword already exists in the white list!\n";
@@ -301,7 +301,7 @@ public:
 
     string add_keywords_to_white_list(const string& _keywordlist)
     {
-        vector<string> keyword_list = PatternMiner::parse_comma_separated_list(_keywordlist);
+        vector<string> keyword_list = Parameters::parse_comma_separated_list(_keywordlist);
 
         for (const string& keyword : keyword_list)
             add_keyword_to_white_list(keyword);
@@ -312,7 +312,7 @@ public:
     string remove_keyword_from_white_list(const string& _keyword)
     {
         string result = "";
-        if (patternMiner->remove_keyword_from_white_list(_keyword))
+        if (patternMiner->param.remove_keyword_from_white_list(_keyword))
             result += "Removed!\n";
         else
             result +=  "Input keyword does not exist in the white list!\n";
@@ -323,7 +323,7 @@ public:
     {
         string result = "keyword_white_list_logic:";
 
-        QUERY_LOGIC logic = patternMiner->get_keyword_white_list_logic();
+        QUERY_LOGIC logic = patternMiner->param.get_keyword_white_list_logic();
         if (logic == QUERY_LOGIC::AND)
             result += "AND";
         else if (logic == QUERY_LOGIC::OR)
@@ -339,12 +339,12 @@ public:
 
         if ((logic == "AND") || (logic == "And") || (logic == "and"))
         {
-            patternMiner->set_keyword_white_list_logic(QUERY_LOGIC::AND);
+            patternMiner->param.set_keyword_white_list_logic(QUERY_LOGIC::AND);
             return get_keyword_white_list_logic();
         }
         else if ((logic == "OR") || (logic == "Or") || (logic == "or"))
         {
-            patternMiner->set_keyword_white_list_logic(QUERY_LOGIC::OR);
+            patternMiner->param.set_keyword_white_list_logic(QUERY_LOGIC::OR);
             return get_keyword_white_list_logic();
         }
         else
@@ -352,18 +352,18 @@ public:
     }
 
 
-    void clear_keyword_black_list(){patternMiner->clear_keyword_white_list();}
-    void clear_keyword_white_list(){patternMiner->clear_keyword_white_list();}
+    void clear_keyword_black_list(){patternMiner->param.clear_keyword_white_list();}
+	void clear_keyword_white_list(){patternMiner->param.clear_keyword_white_list();}
 
     string set_enable_filter_node_types_should_not_be_vars(bool _enable)
     {
-        patternMiner->set_enable_filter_node_types_should_not_be_vars(_enable);
+        patternMiner->param.set_enable_filter_node_types_should_not_be_vars(_enable);
         return get_enable_filter_node_types_should_not_be_vars();
     }
 
     string get_enable_filter_node_types_should_not_be_vars()
     {
-        bool enable = patternMiner->get_enable_filter_node_types_should_not_be_vars();
+        bool enable = patternMiner->param.get_enable_filter_node_types_should_not_be_vars();
 
         if (enable)
             return "enable_filter_node_types_should_not_be_vars: true";
@@ -374,7 +374,7 @@ public:
     string get_node_types_should_not_be_vars()
     {
         string result =  "node_types_should_not_be_vars:";
-        for (Type type : patternMiner->get_node_types_should_not_be_vars())
+        for (Type type : patternMiner->param.get_node_types_should_not_be_vars())
             result +=  " " + classserver().getTypeName(type);
 
         return result;
@@ -388,7 +388,7 @@ public:
 
         string result = "";
 
-        if (patternMiner->add_node_type_to_node_types_should_not_be_vars(atomType))
+        if (patternMiner->param.add_node_type_to_node_types_should_not_be_vars(atomType))
             result += "Added!\n";
         else
             result += "Input type already exists in the node_types_should_not_be_vars list!\n";
@@ -404,7 +404,7 @@ public:
             return "Error: Input type doesn't exist!";
 
         string result = "";
-        if (patternMiner->remove_node_type_from_node_types_should_not_be_vars(atomType))
+        if (patternMiner->param.remove_node_type_from_node_types_should_not_be_vars(atomType))
             result += "Removed!\n";
         else
             result += "Input type does not exist in the node_types_should_not_be_vars list!\n";
@@ -413,18 +413,18 @@ public:
 
     }
 
-    void clear_node_types_should_not_be_vars(){patternMiner->clear_node_types_should_not_be_vars();}
+    void clear_node_types_should_not_be_vars(){patternMiner->param.clear_node_types_should_not_be_vars();}
 
 
     string set_enable_filter_node_types_should_be_vars(bool _enable)
     {
-        patternMiner->set_enable_filter_node_types_should_be_vars(_enable);
+        patternMiner->param.set_enable_filter_node_types_should_be_vars(_enable);
         return get_enable_filter_node_types_should_be_vars();
     }
 
     string get_enable_filter_node_types_should_be_vars()
     {
-        bool enable = patternMiner->get_enable_filter_node_types_should_be_vars();
+        bool enable = patternMiner->param.get_enable_filter_node_types_should_be_vars();
 
         if (enable)
             return "enable_filter_node_types_should_be_vars: true";
@@ -435,7 +435,7 @@ public:
     string get_node_types_should_be_vars()
     {
         string result =  "node_types_should_be_vars:";
-        for (Type type : patternMiner->get_node_types_should_be_vars())
+        for (Type type : patternMiner->param.get_node_types_should_be_vars())
             result +=  " " + classserver().getTypeName(type);
 
         return result;
@@ -449,7 +449,7 @@ public:
 
         string result = "";
 
-        if (patternMiner->add_node_type_to_node_types_should_be_vars(atomType))
+        if (patternMiner->param.add_node_type_to_node_types_should_be_vars(atomType))
             result += "Added!\n";
         else
             result += "Input type already exists in the node_types_should_be_vars list!\n";
@@ -464,7 +464,7 @@ public:
             return "Error: Input type doesn't exist!";
 
         string result = "";
-        if (patternMiner->remove_node_type_from_node_types_should_be_vars(atomType))
+        if (patternMiner->param.remove_node_type_from_node_types_should_be_vars(atomType))
             result += "Removed!\n";
         else
             result += "Input type does not exist in the node_types_should_be_vars list!\n";
@@ -473,18 +473,18 @@ public:
 
     }
 
-    void clear_node_types_should_be_vars(){patternMiner->clear_node_types_should_not_be_vars();}
+    void clear_node_types_should_be_vars(){patternMiner->param.clear_node_types_should_not_be_vars();}
 
 
     string set_enable_filter_links_of_same_type_not_share_second_outgoing(bool _enable)
     {
-        patternMiner->set_enable_filter_links_of_same_type_not_share_second_outgoing(_enable);
+        patternMiner->param.set_enable_filter_links_of_same_type_not_share_second_outgoing(_enable);
         return get_enable_filter_links_of_same_type_not_share_second_outgoing();
     }
 
     string get_enable_filter_links_of_same_type_not_share_second_outgoing()
     {
-        bool enable = patternMiner->get_enable_filter_links_of_same_type_not_share_second_outgoing();
+        bool enable = patternMiner->param.get_enable_filter_links_of_same_type_not_share_second_outgoing();
 
         if (enable)
             return "enable_filter_links_of_same_type_not_share_second_outgoing: true";
@@ -495,7 +495,7 @@ public:
     string get_same_link_types_not_share_second_outgoing()
     {
         string result =  "same_link_types_not_share_second_outgoing Link_Types:";
-        for (Type type : patternMiner->get_same_link_types_not_share_second_outgoing())
+        for (Type type : patternMiner->param.get_same_link_types_not_share_second_outgoing())
             result +=  " " + classserver().getTypeName(type);
 
         return result;
@@ -509,7 +509,7 @@ public:
 
         string result = "";
 
-        if (patternMiner->add_link_type_to_same_link_types_not_share_second_outgoing(atomType))
+        if (patternMiner->param.add_link_type_to_same_link_types_not_share_second_outgoing(atomType))
             result += "Added!\n";
         else
             result += "Input type already exists in the same_link_types_not_share_second_outgoing list!\n";
@@ -525,7 +525,7 @@ public:
             return "Error: Input type doesn't exist!";
 
         string result = "";
-        if (patternMiner->remove_link_type_from_same_link_types_not_share_second_outgoing(atomType))
+        if (patternMiner->param.remove_link_type_from_same_link_types_not_share_second_outgoing(atomType))
             result += "Removed!\n";
         else
             result += "Input type does not exist in the same_link_types_not_share_second_outgoing list!\n";
@@ -534,7 +534,7 @@ public:
 
     }
 
-    void clear_same_link_types_not_share_second_outgoing(){patternMiner->clear_same_link_types_not_share_second_outgoing();}
+	void clear_same_link_types_not_share_second_outgoing(){patternMiner->param.clear_same_link_types_not_share_second_outgoing();}
 
 
     string get_current_settings()
@@ -568,7 +568,7 @@ public:
     // e.g.: "dog,cat,bike,swimming pool,computer"
     void select_subset_from_atomspace(const string& _keywordlist, int max_distance, bool if_contain_logic)
     {
-        set<string> keyword_list = PatternMiner::parse_comma_separated_set(_keywordlist);
+        set<string> keyword_list = Parameters::parse_comma_separated_set(_keywordlist);
 
         if (keyword_list.empty())
         {
@@ -578,7 +578,7 @@ public:
 
         if (max_distance <= 0)
         {
-            max_distance = patternMiner->get_Pattern_Max_Gram();
+            max_distance = patternMiner->param.get_pattern_max_gram();
             cout <<"\n Becasue max_distance <= 0, Pattern_Max_Gram = " << max_distance << " will be used!" << std::endl;
         }
 
@@ -605,7 +605,7 @@ public:
 
     void select_whitelist_subset_from_atomspace(int max_distance, bool if_contain_logic)
     {
-        set<string> keyword_list = patternMiner->get_keyword_white_list();
+	    set<string> keyword_list = patternMiner->param.get_keyword_white_list();
         if (keyword_list.empty())
         {
             cout << "\nError: white keyword list is empty!" << std::endl;
@@ -614,7 +614,7 @@ public:
 
         if (max_distance <= 0)
         {
-            max_distance = patternMiner->get_Pattern_Max_Gram();
+            max_distance = patternMiner->param.get_pattern_max_gram();
             cout <<"\n Becasue max_distance <= 0, Pattern_Max_Gram = " << max_distance << " will be used!" << std::endl;
         }
 
@@ -645,7 +645,7 @@ public:
 
     void select_whitelist_entity_links_subset_equalto_keywords()
     {
-        set<string> whiteKeywords = patternMiner->get_keyword_white_list();
+        set<string> whiteKeywords = patternMiner->param.get_keyword_white_list();
         patternMiner->selectSubsetAllEntityLinksContainsKeywords(whiteKeywords);
     }
 
@@ -667,7 +667,7 @@ public:
 
     void query_patterns_with_frequency_surprisingnessI_ranges(const string& ranges, int gram)
     {
-        vector<string> range_vector = PatternMiner::parse_comma_separated_list(ranges);
+        vector<string> range_vector = Parameters::parse_comma_separated_list(ranges);
         unsigned int min_frequency = std::stoi(range_vector[0]);
         unsigned int max_frequency = std::stoi(range_vector[1]);
         float min_surprisingness_I = std::stof(range_vector[2]);
@@ -677,7 +677,7 @@ public:
 
     void query_patterns_with_surprisingnessI_and_surprisingnessII_ranges(const string& ranges, int gram)
     {
-        vector<string> range_vector = PatternMiner::parse_comma_separated_list(ranges);
+        vector<string> range_vector = Parameters::parse_comma_separated_list(ranges);
         unsigned int min_frequency = std::stoi(range_vector[0]);
         unsigned int max_frequency = std::stoi(range_vector[1]);
         float min_surprisingness_I = std::stof(range_vector[2]);
@@ -690,7 +690,7 @@ public:
 
     void query_patterns_with_frequency_surprisingnessB_and_subpatternnum_ranges(const string& ranges, int gram)
     {
-	    vector<string> range_vector = PatternMiner::parse_comma_separated_list(ranges);
+	    vector<string> range_vector = Parameters::parse_comma_separated_list(ranges);
         unsigned int min_frequency = std::stoi(range_vector[0]);
         unsigned int max_frequency = std::stoi(range_vector[1]);
         double min_surprisingness_B = std::stof(range_vector[2]);
@@ -704,7 +704,7 @@ public:
 
     void query_patterns_with_frequency_interactioninformation_ranges(const string& ranges, int gram)
     {
-        vector<string> range_vector = PatternMiner::parse_comma_separated_list(ranges);
+        vector<string> range_vector = Parameters::parse_comma_separated_list(ranges);
         unsigned int min_frequency = std::stoi(range_vector[0]);
         unsigned int max_frequency = std::stoi(range_vector[1]);
         float min_ii = std::stof(range_vector[2]);

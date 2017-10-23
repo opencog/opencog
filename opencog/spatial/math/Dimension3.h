@@ -42,7 +42,7 @@ namespace opencog
             {
             public:
 
-                inline Dimension3( float width = 1, float height = 1, float length = 1 ) throw (opencog::InvalidParamException):
+                inline Dimension3( float width = 1, float height = 1, float length = 1 ) :
                 Dimension2( width, height ), length( length ) 
                 {
                     if ( length < 0 ) {

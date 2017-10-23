@@ -117,7 +117,7 @@ namespace opencog
                  * @param plane3
                  * @return
                  */
-                Vector3 getIntersectionPoint( const Plane& plane2, const Plane& plane3 ) throw (opencog::NotFoundException);
+                Vector3 getIntersectionPoint( const Plane& plane2, const Plane& plane3 );
 
                 /*
                  *

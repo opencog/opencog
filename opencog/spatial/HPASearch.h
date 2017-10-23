@@ -140,7 +140,7 @@ namespace opencog
 
                 const Graph& getAbstractGraph( void );
 
-                bool processPath( const math::Vector2& startPoint, const math::Vector2& endPoint ) throw( opencog::RuntimeException );
+                bool processPath( const math::Vector2& startPoint, const math::Vector2& endPoint );
 
                 const std::vector<math::Vector2>& getProcessedPath( void ) const;
 
@@ -193,13 +193,13 @@ namespace opencog
             HPASearch( LocalSpaceMap2D* map, unsigned int numberOfLevels = 1, unsigned int maximumClusters = 16 );
 
             // process a path from informed start and end positions
-            bool processPath( const math::Vector2& startPoint, const math::Vector2& endPoint, unsigned int levelId = 1 ) throw( opencog::RuntimeException );
+            bool processPath( const math::Vector2& startPoint, const math::Vector2& endPoint, unsigned int levelId = 1 );
 
-            const std::vector<math::Vector2>& getProcessedPath( unsigned int levelId ) const throw( opencog::RuntimeException );
+            const std::vector<math::Vector2>& getProcessedPath( unsigned int levelId ) const;
 
             virtual ~HPASearch(void);
 
-            Level* getLevel( unsigned int levelId ) const throw( opencog::RuntimeException );
+            Level* getLevel( unsigned int levelId ) const;
 
             unsigned int getNumberOfLevels( void );
 

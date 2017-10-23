@@ -118,7 +118,7 @@ namespace opencog
              * Create a super entity. If the parameters are entities that did not intersect
              * each other an InvalidParamException will be raised to notify the error
              */
-            SuperEntity( const EntityPtr& entity1, const EntityPtr& entity2 ) throw (opencog::InvalidParamException);
+            SuperEntity( const EntityPtr& entity1, const EntityPtr& entity2 );
 
             virtual ~SuperEntity( void );
 
@@ -155,7 +155,7 @@ namespace opencog
              * Remove an entity from the superEntity. It will throw an InvalidParamException if these
              * operation results in an invalid superentity (just one entity or far entities)
              */
-            void removeEntity( long id ) throw (opencog::InvalidParamException);
+            void removeEntity( long id );
 
             /**
              * Create a copy of this super entity

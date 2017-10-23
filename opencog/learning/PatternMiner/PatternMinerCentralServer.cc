@@ -531,9 +531,9 @@ void DistributedPatternMiner::parseAPatternTask(json::value jval)
 void DistributedPatternMiner::centralServerEvaluateInterestingness()
 {
 
-    std::cout<<"Debug: PatternMiner:  done frequent pattern mining for 1 to "<< MAX_GRAM <<"gram patterns!\n";
+    std::cout<<"Debug: PatternMiner:  done frequent pattern mining for 1 to "<< param.MAX_GRAM <<"gram patterns!\n";
 
-    for (unsigned int gram = 1; gram <= MAX_GRAM; gram++)
+    for (unsigned int gram = 1; gram <= param.MAX_GRAM; gram++)
     {
         // sort by frequency
         boost::sort(patternsForGram[gram-1], compareHTreeNodeByFrequency );
@@ -548,29 +548,29 @@ void DistributedPatternMiner::centralServerEvaluateInterestingness()
 
 
 
-    if (enable_Interesting_Pattern)
+    if (param.enable_interesting_pattern)
     {
-        for (cur_gram = 2; cur_gram <= MAX_GRAM; cur_gram++)
+        for (cur_gram = 2; cur_gram <= param.MAX_GRAM; cur_gram++)
         {
             cout << "\nCalculating";
-            if (Enable_Interaction_Information)
+            if (param.enable_interaction_information)
                 cout << " Interaction_Information ";
 
-            if (Enable_surprisingness)
+            if (param.enable_surprisingness)
                 cout << " Surprisingness ";
 
             cout << "for " << cur_gram << " gram patterns." << std::endl;
 
             cur_index = -1;
-            threads = new thread[THREAD_NUM];
+            threads = new thread[param.THREAD_NUM];
             num_of_patterns_without_superpattern_cur_gram = 0;
 
-            for (unsigned int i = 0; i < THREAD_NUM; ++ i)
+            for (unsigned int i = 0; i < param.THREAD_NUM; ++ i)
             {
                 threads[i] = std::thread([this]{this->evaluateInterestingnessTask();}); // using C++11 lambda-expression
             }
 
-            for (unsigned int i = 0; i < THREAD_NUM; ++ i)
+            for (unsigned int i = 0; i < param.THREAD_NUM; ++ i)
             {
                 threads[i].join();
             }
@@ -580,20 +580,20 @@ void DistributedPatternMiner::centralServerEvaluateInterestingness()
             std::cout<<"Debug: PatternMiner:  done (gram = " + toString(cur_gram) + ") interestingness evaluation!" + toString((patternsForGram[cur_gram-1]).size()) + " patterns found! ";
             std::cout<<"Outputting to file ... ";
 
-            if (Enable_Interaction_Information)
+            if (param.enable_interaction_information)
             {
                 // sort by interaction information
                 boost::sort(patternsForGram[cur_gram-1], compareHTreeNodeByInteractionInformation);
                 OutPutInterestingPatternsToFile(patternsForGram[cur_gram-1], cur_gram, 0);
             }
 
-            if (Enable_surprisingness)
+            if (param.enable_surprisingness)
             {
                 // sort by surprisingness_I first
                 boost::sort(patternsForGram[cur_gram-1], compareHTreeNodeBySurprisingness_I);
                 OutPutInterestingPatternsToFile(patternsForGram[cur_gram-1], cur_gram,1);
 
-                if (cur_gram == MAX_GRAM)
+                if (cur_gram == param.MAX_GRAM)
                     break;
 
                 vector<HTreeNode*> curGramPatterns = patternsForGram[cur_gram-1];

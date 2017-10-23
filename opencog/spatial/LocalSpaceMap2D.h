@@ -214,8 +214,8 @@ namespace opencog
 
             // Get the nearest free (not occupied or out of bounds)
             // point from the given point
-            Point getNearestFreePoint(const Point& pt) const throw (opencog::RuntimeException, std::bad_exception);
-            Point3D getNearestFree3DPoint(const Point3D& pt, double delta) const throw (opencog::RuntimeException, std::bad_exception);
+            Point getNearestFreePoint(const Point& pt) const;
+            Point3D getNearestFree3DPoint(const Point3D& pt, double delta) const;
 
             // Get the proper altitude of a given grid point in order 
             // to reach a target 3D point with a limited delta upwards height.
@@ -248,7 +248,7 @@ namespace opencog
             bool isNonObstacle(const ObjectID& id) const;
 
             // Gets the grid points occupied by the object with the given id
-            const std::vector<GridPoint>& getObjectPoints(const ObjectID& id) const throw(opencog::NotFoundException);
+            const std::vector<GridPoint>& getObjectPoints(const ObjectID& id) const;
 
             /*
              * Threshold to consider an entity near another
@@ -483,7 +483,7 @@ namespace opencog
              * @param distance Maximum distance from the given position to search the free point
              * @param startDirection Vector that points to the direction of the first rayTrace
              */
-            Point getNearFreePointAtDistance( const Point& position, float distance, const Point& startDirection ) const throw (opencog::NotFoundException);
+            Point getNearFreePointAtDistance( const Point& position, float distance, const Point& startDirection ) const;
 
             /**
              * Get the nearest object point of a given a reference point
@@ -492,7 +492,7 @@ namespace opencog
              * @param objectID Object ID
              * @return The nearest object point
              */
-            Point getNearestObjectPoint( const Point& referencePoint, const ObjectID& objectID ) const throw(opencog::NotFoundException);
+            Point getNearestObjectPoint( const Point& referencePoint, const ObjectID& objectID ) const;
 
             /**
              * Find all points belonging to a given line segment
@@ -537,12 +537,12 @@ namespace opencog
 
             //const Object& getObject( const ObjectID& id ) const throw (opencog::NotFoundException);
 
-            const EntityPtr& getEntity( const std::string& id ) const throw (opencog::NotFoundException);
-            const EntityPtr& getEntity( long id ) const throw (opencog::NotFoundException);
+            const EntityPtr& getEntity( const std::string& id ) const;
+            const EntityPtr& getEntity( long id ) const;
 
             bool belongsToSuperEntity( const ObjectID& id ) const;
 
-            const SuperEntityPtr& getSuperEntityWhichContains( const ObjectID& id ) const throw(opencog::NotFoundException);
+            const SuperEntityPtr& getSuperEntityWhichContains( const ObjectID& id ) const;
 
             inline const std::list<SuperEntityPtr>& getSuperEntities( void ) const {
                 return this->superEntities;

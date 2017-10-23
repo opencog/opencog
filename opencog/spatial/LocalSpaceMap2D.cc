@@ -380,7 +380,7 @@ bool LocalSpaceMap2D::illegal(const spatial::Point& pt) const
     return gridIllegal(snap(pt));
 }
 
-spatial::Point LocalSpaceMap2D::getNearestFreePoint(const spatial::Point& pt) const throw (opencog::RuntimeException, std::bad_exception)
+spatial::Point LocalSpaceMap2D::getNearestFreePoint(const spatial::Point& pt) const
 {
     GridPoint gp = snap(pt);
     if (!gridIllegal(gp)) {
@@ -463,7 +463,7 @@ spatial::Point LocalSpaceMap2D::getNearestFreePoint(const spatial::Point& pt) co
     return nearestFreePoint;
 }
 
-spatial::Point3D LocalSpaceMap2D::getNearestFree3DPoint(const spatial::Point3D& pt, double delta) const throw (opencog::RuntimeException, std::bad_exception)
+spatial::Point3D LocalSpaceMap2D::getNearestFree3DPoint(const spatial::Point3D& pt, double delta) const
 {
     double destAltitude = pt.get<2>();
 
@@ -794,7 +794,7 @@ bool LocalSpaceMap2D::isNonObstacle(const spatial::ObjectID& id) const
     return !isObstacle( id );
 }
 
-const std::vector<spatial::GridPoint>& LocalSpaceMap2D::getObjectPoints(const spatial::ObjectID& id) const  throw(opencog::NotFoundException)
+const std::vector<spatial::GridPoint>& LocalSpaceMap2D::getObjectPoints(const spatial::ObjectID& id) const
 {
     long idHash = boost::hash<std::string>()( id );
     LongGridPointVectorHashMap::const_iterator it = this->gridPoints.find( idHash );
@@ -804,7 +804,7 @@ const std::vector<spatial::GridPoint>& LocalSpaceMap2D::getObjectPoints(const sp
     return it->second;
 }
 
-spatial::Point LocalSpaceMap2D::getNearestObjectPoint( const spatial::Point& referencePoint, const spatial::ObjectID& objectID ) const throw (opencog::NotFoundException)
+spatial::Point LocalSpaceMap2D::getNearestObjectPoint( const spatial::Point& referencePoint, const spatial::ObjectID& objectID ) const
 {
 
     if ( !containsObject( objectID ) ) {
@@ -1038,7 +1038,7 @@ spatial::Point LocalSpaceMap2D::unsnap(const spatial::GridPoint& g) const
                           (spatial::Distance(g.second) + 0.5) * yGridWidth() + _yMin);
 }
 
-spatial::Point LocalSpaceMap2D::getNearFreePointAtDistance( const spatial::Point& position, float distance, const spatial::Point& startDirection ) const throw (opencog::NotFoundException)
+spatial::Point LocalSpaceMap2D::getNearFreePointAtDistance( const spatial::Point& position, float distance, const spatial::Point& startDirection ) const
 {
     // do a raytrace to
     unsigned int step = 5;
@@ -1303,7 +1303,7 @@ void LocalSpaceMap2D::updateObject( const spatial::ObjectID& id, const spatial::
     } // catch
 }
 
-const EntityPtr& LocalSpaceMap2D::getEntity( const std::string& id ) const throw (opencog::NotFoundException)
+const EntityPtr& LocalSpaceMap2D::getEntity( const std::string& id ) const
 {
     long idHash = boost::hash<std::string>()( id );
     LongEntityPtrHashMap::const_iterator it = this->entities.find( idHash );
@@ -1313,7 +1313,7 @@ const EntityPtr& LocalSpaceMap2D::getEntity( const std::string& id ) const throw
     throw opencog::NotFoundException( TRACE_INFO, "LocalSpaceMap2D - There is no entity named %s inside map", id.c_str( ) );
 }
 
-const EntityPtr& LocalSpaceMap2D::getEntity( long id ) const throw (opencog::NotFoundException)
+const EntityPtr& LocalSpaceMap2D::getEntity( long id ) const
 {
     LongEntityPtrHashMap::const_iterator it = this->entities.find( id );
     if ( it != this->entities.end( ) ) {
@@ -1336,7 +1336,7 @@ bool LocalSpaceMap2D::belongsToSuperEntity( const spatial::ObjectID& id ) const
     return false;
 }
 
-const SuperEntityPtr& LocalSpaceMap2D::getSuperEntityWhichContains( const spatial::ObjectID& id ) const throw(opencog::NotFoundException)
+const SuperEntityPtr& LocalSpaceMap2D::getSuperEntityWhichContains( const spatial::ObjectID& id ) const
 {
     std::list<SuperEntityPtr>::const_iterator it;
     long idHash = boost::hash<std::string>()( id );
