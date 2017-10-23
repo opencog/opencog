@@ -90,7 +90,7 @@ void Plane::transformSelf( const Matrix4& transformation )
     set( Vector3( result.x, result.y, result.z ), result.w );
 }
 
-Vector3 Plane::getIntersectionPoint( const Plane& plane2, const Plane& plane3 ) throw (opencog::NotFoundException)
+Vector3 Plane::getIntersectionPoint( const Plane& plane2, const Plane& plane3 )
 {
     Matrix3 linearSystem (
         this->normal.x, this->normal.y, this->normal.z,

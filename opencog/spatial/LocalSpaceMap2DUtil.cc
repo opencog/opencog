@@ -25,7 +25,6 @@
 #include <opencog/util/functional.h>
 #include <opencog/util/Logger.h>
 #include <opencog/util/random.h>
-#include <opencog/util/StringManipulator.h>
 
 #include <opencog/spatial/LocalSpaceMap2DUtil.h>
 #include <opencog/spatial/LocalSpaceMap2D.h>
@@ -131,7 +130,7 @@ void opencog::spatial::populateRandom(spatial::LocalSpaceMap2D& lsm,
         metaData.length = radius_y;
         metaData.yaw = 0;
         metaData.entityClass = "";
-        lsm.addObject( opencog::toString(cnt), metaData, true );
+        lsm.addObject( std::to_string(cnt), metaData, true );
 
     } // for
 }

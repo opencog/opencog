@@ -29,7 +29,7 @@
 using namespace opencog;
 using namespace opencog::spatial;
 
-SuperEntity::SuperEntity( const EntityPtr& entity1, const EntityPtr& entity2 ) throw (opencog::InvalidParamException)
+SuperEntity::SuperEntity( const EntityPtr& entity1, const EntityPtr& entity2 )
 {
     boost::shared_ptr<SubEntity> subEntity1( createSubEntity(entity1) );
     boost::shared_ptr<SubEntity> subEntity2( createSubEntity(entity2) );
@@ -332,7 +332,7 @@ bool SuperEntity::containsEntity( long id ) const
     return ( this->subEntities.find( id ) != this->subEntities.end( ) );
 }
 
-void SuperEntity::removeEntity( long id ) throw (opencog::InvalidParamException)
+void SuperEntity::removeEntity( long id )
 {
     LongSubEntityPtrHashMap::iterator it = this->subEntities.find( id );
     if ( it != this->subEntities.end( ) ) {

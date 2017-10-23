@@ -34,7 +34,7 @@ Rectangle::Rectangle( const Rectangle& other ) : leftTopCorner( other.leftTopCor
 {
 }
 
-Rectangle::Rectangle( const Vector3& leftTopCorner, const Vector3& rightTopCorner, const Vector3& rightBottomCorner ) throw(opencog::InvalidParamException)
+Rectangle::Rectangle( const Vector3& leftTopCorner, const Vector3& rightTopCorner, const Vector3& rightBottomCorner )
 {
     Vector3 vec1 = rightTopCorner - leftTopCorner;
     vec1.normalise( );

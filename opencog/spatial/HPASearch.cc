@@ -367,7 +367,7 @@ GridPoint HPASearch::Level::getNearestVertex( unsigned int clusterId, const math
     return response;
 }
 
-bool HPASearch::Level::processPath( const math::Vector2& startPoint, const math::Vector2& endPoint ) throw( opencog::RuntimeException )
+bool HPASearch::Level::processPath( const math::Vector2& startPoint, const math::Vector2& endPoint )
 {
 
     this->processedPath.clear( );
@@ -576,7 +576,7 @@ HPASearch::~HPASearch(void)
         this->levels[ i ] = 0;
     } // for
 }
-HPASearch::Level* HPASearch::getLevel( unsigned int level ) const throw( opencog::RuntimeException )
+HPASearch::Level* HPASearch::getLevel( unsigned int level ) const
 {
     if ( level <= this->levels.size( ) ) {
         return this->levels[ level - 1 ];
@@ -589,14 +589,14 @@ unsigned int HPASearch::getNumberOfLevels( void )
     return this->numberOfLevels;
 }
 
-bool HPASearch::processPath( const math::Vector2& startPoint, const math::Vector2& endPoint, unsigned int levelId ) throw( opencog::RuntimeException )
+bool HPASearch::processPath( const math::Vector2& startPoint, const math::Vector2& endPoint, unsigned int levelId )
 {
     bool response = getLevel( levelId )->processPath( startPoint, endPoint );
     logger().info(( "HPASearch - from[" + startPoint.toString( ) + "] to[" + endPoint.toString( ) + "] Result (%d)" ).c_str( ), response ? 1 : 0 );
     return response;
 }
 
-const std::vector<math::Vector2>& HPASearch::getProcessedPath( unsigned int levelId ) const throw( opencog::RuntimeException )
+const std::vector<math::Vector2>& HPASearch::getProcessedPath( unsigned int levelId ) const
 {
     return getLevel( levelId )->getProcessedPath( );
 }
