@@ -51,3 +51,8 @@
           (equal? 'ReferenceLink type)
           (equal? 'LemmaLink type)))
     relex-outputs))
+
+(define-public (ghost-get-result)
+  "Return the most recent result generated."
+  ; Will be used by the bio project
+  ghost-result)
