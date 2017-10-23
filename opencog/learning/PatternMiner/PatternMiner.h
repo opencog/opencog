@@ -46,6 +46,9 @@ class PatternMinerUTest;
 
 namespace opencog
 {
+
+class PatternMinerSCM;
+
 namespace PatternMining
 {
 #define FLOAT_MIN_DIFF 0.00001
@@ -157,6 +160,7 @@ struct MinedPatternInfo
 class PatternMiner
 {
     friend class ::PatternMinerUTest;
+	friend class opencog::PatternMinerSCM;
 
 protected:
 

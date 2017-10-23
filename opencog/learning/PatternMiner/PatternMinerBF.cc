@@ -41,7 +41,6 @@
 #include <opencog/query/BindLinkAPI.h>
 #include <opencog/util/Config.h>
 #include <opencog/util/algorithm.h>
-#include <opencog/util/StringManipulator.h>
 #include <opencog/learning/PatternMiner/types/atom_types.h>
 
 #include "HTree.h"
@@ -49,8 +48,6 @@
 
 using namespace opencog::PatternMining;
 using namespace opencog;
-
-
 
 // This file is not maintained anymore. Please use depth first mining.
 
@@ -408,12 +405,12 @@ void PatternMiner::ConstructTheFirstGramPatternsBF()
 
     atomspaceSizeFloat = (float)(allLinks.size());
 
-//    for (unsigned int i = 0; i < THREAD_NUM; ++ i)
+//    for (unsigned int i = 0; i < param.THREAD_NUM; ++ i)
 //    {
 //        threads[i] = std::thread([this]{this->growTheFirstGramPatternsTaskBF();}); // using C++11 lambda-expression
 //    }
 
-//    for (unsigned int i = 0; i < THREAD_NUM; ++ i)
+//    for (unsigned int i = 0; i < param.THREAD_NUM; ++ i)
 //    {
 //        threads[i].join();
 //    }
