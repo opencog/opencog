@@ -4,6 +4,7 @@ ADD_SUBDIRECTORY (types)
 IF (HAVE_cpprest)
     ADD_LIBRARY (PatternMiner SHARED
             HTree
+            Parameters
             PatternMiner
             PatternMinerBF
             PatternMinerDF
@@ -21,6 +22,7 @@ IF (HAVE_cpprest)
 ELSE (HAVE_cpprest)
     ADD_LIBRARY (PatternMiner SHARED
             HTree
+            Parameters
             PatternMiner
             PatternMinerBF
             PatternMinerDF
@@ -47,6 +49,7 @@ TARGET_LINK_LIBRARIES (PatternMinerAgent
 
 INSTALL (FILES
 	HTree.h
+    Parameters.h
 	PatternMiner.h
 	DESTINATION "include/${PROJECT_NAME}/learning/PatternMiner"
 )

@@ -25,10 +25,24 @@
 #ifndef _OPENCOG_PATTERNMINER_Parameters_H
 #define _OPENCOG_PATTERNMINER_Parameters_H
 
+#include <set>
+#include <vector>
+#include <string>
+
+#include <opencog/learning/PatternMiner/types/atom_types.h>
+
 namespace opencog { namespace PatternMining {
+
+enum QUERY_LOGIC
+{
+    OR,
+    AND
+};
 
 struct Parameters {
 	unsigned int MAX_GRAM;
+
+	unsigned int THREAD_NUM;
 
 	std::string pattern_mining_mode;
 
@@ -45,20 +59,60 @@ struct Parameters {
 	std::set<Type> node_types_should_not_be_vars;
 
 	bool enable_filter_node_types_should_be_vars;
-    std::set<Type> node_types_should_be_vars;
+	std::set<Type> node_types_should_be_vars;
 
 	std::set<Type> same_link_types_not_share_second_outgoing;
 
+	unsigned int threshold_frequency;
+
+	bool use_keyword_white_list;
+	bool use_keyword_black_list;
+
+	std::set<std::string> keyword_black_list;
+	std::set<std::string> keyword_white_list;
+
+	// = true will filter out atoms with labels contain keyword, = fasle will only filter out atoms with labels equal to any keyword
+	bool keyword_black_logic_is_contain;
+
+	QUERY_LOGIC keyword_white_list_logic;
+
+	bool use_linktype_black_list;
+	bool use_linktype_white_list;
+
+	std::set<Type> linktype_black_list;
+	std::set<Type> linktype_white_list;
+
+	bool if_quote_output_pattern;
+
+	bool calculate_type_b_surprisingness;
+
+	bool enable_interesting_pattern;
+
+	// Only effective when Enable_Interesting_Pattern is true.
+	bool enable_interaction_information;
+	bool enable_surprisingness;
+
+	bool enable_unify_unordered_links; // if the corpus contains unordered Links like AND_LINK
+
+	Type output_pattern_quoted_linktype;
+
+	bool only_mine_patterns_start_from_white_list;
+	bool only_mine_patterns_start_from_white_list_contain;
+
+	bool only_output_patterns_contains_white_keywords;
+
+	void reSetAllSettingsFromConfig();
+
 	// -------------------------------basic settings----------------------
 
-	unsigned int get_Pattern_Max_Gram() {return MAX_GRAM;}
-	void set_Pattern_Max_Gram(unsigned int _max_gram) { MAX_GRAM = _max_gram;}
+	unsigned int get_pattern_max_gram() {return MAX_GRAM;}
+	void set_pattern_max_gram(unsigned int _max_gram) { MAX_GRAM = _max_gram;}
 
-	bool get_Enable_Interesting_Pattern() {return enable_Interesting_Pattern;}
-	void set_Enable_Interesting_Pattern(bool _enable) {enable_Interesting_Pattern = _enable;}
+	bool get_enable_interesting_pattern() {return enable_interesting_pattern;}
+	void set_enable_interesting_pattern(bool _enable) {enable_interesting_pattern = _enable;}
 
-	unsigned int get_Frequency_threshold() {return thresholdFrequency;}
-	void set_Frequency_threshold(unsigned int _Frequency_threshold) {thresholdFrequency = _Frequency_threshold;}
+	unsigned int get_frequency_threshold() {return threshold_frequency;}
+	void set_frequency_threshold(unsigned int _Frequency_threshold) {threshold_frequency = _Frequency_threshold;}
 
 	// -------------------------------end basic settings----------------------
 
@@ -118,6 +172,16 @@ struct Parameters {
 	void clear_node_types_should_be_vars() {node_types_should_be_vars.clear();}
 
 	// -------------------------------end filter settings----------------------
+
+	// ------------------------------------- Helpers --------------------------
+
+	void addAtomTypesFromString(const std::string& node_types_str,
+	                            std::set<Type>& types);
+
+	// Turn a string like "qewr, wert, erty" into a vector of 3
+	// strings {"qwer", wert", erty"}
+	static std::vector<std::string> parse_comma_separated_list(std::string str);
+	static std::set<std::string> parse_comma_separated_set(std::string str);
 };
 		
 }}

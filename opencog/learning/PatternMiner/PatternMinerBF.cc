@@ -340,7 +340,7 @@ void PatternMiner::growPatternsTaskBF()
 
         patternForLastGramLock.unlock();
 
-        if(cur_growing_pattern->count < thresholdFrequency)
+        if(cur_growing_pattern->count < param.threshold_frequency)
             continue;
 
         for (const HandleSeq& instance  : cur_growing_pattern->instances)
@@ -460,19 +460,19 @@ void PatternMiner::ConstructTheFirstGramPatternsBF()
 
 void PatternMiner::GrowAllPatternsBF()
 {
-    for (cur_gram = 2; cur_gram <= MAX_GRAM; ++ cur_gram)
+    for (cur_gram = 2; cur_gram <= param.MAX_GRAM; ++ cur_gram)
     {
         cur_index = -1;
         std::cout<<"Debug: PatternMiner:  start (gram = " + toString(cur_gram) + ") pattern mining..." << std::endl;
 
         last_gram_total_float = (float)((patternsForGram[cur_gram-2]).size());
 
-        for (unsigned int i = 0; i < THREAD_NUM; ++ i)
+        for (unsigned int i = 0; i < param.THREAD_NUM; ++ i)
         {
             threads[i] = std::thread([this]{this->growPatternsTaskBF();}); // using C++11 lambda-expression
         }
 
-        for (unsigned int i = 0; i < THREAD_NUM; ++ i)
+        for (unsigned int i = 0; i < param.THREAD_NUM; ++ i)
         {
             threads[i].join();
         }
@@ -490,12 +490,12 @@ void PatternMiner::GrowAllPatternsBF()
 
 
 
-        if (enable_Interesting_Pattern)
+        if (param.enable_interesting_pattern)
         {
             cout << "\nCalculating interestingness for " << cur_gram << "gram patterns";
             // evaluate the interestingness
             // Only effective when Enable_Interesting_Pattern is true. The options are "Interaction_Information", "surprisingness"
-            if (Enable_Interaction_Information)
+            if (param.enable_interaction_information)
             {
                 cout << "by evaluating Interaction_Information ...\n";
                // calculate interaction information
@@ -508,7 +508,7 @@ void PatternMiner::GrowAllPatternsBF()
                boost::sort(patternsForGram[cur_gram-1], compareHTreeNodeByInteractionInformation);
             }
 
-            if (Enable_surprisingness)
+            if (param.enable_surprisingness)
             {
                 cout << "by evaluating surprisingness ...\n";
                 // calculate surprisingness

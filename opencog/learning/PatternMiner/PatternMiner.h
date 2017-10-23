@@ -154,12 +154,6 @@ struct MinedPatternInfo
     bool notOutPutPattern;
 };
 
-enum QUERY_LOGIC
-{
-    OR,
-    AND
-};
-
 class PatternMiner
 {
     friend class ::PatternMinerUTest;
@@ -186,68 +180,35 @@ protected:
 
     std::thread *threads;
 
-    unsigned int THREAD_NUM;
-
 	Parameters param;
 
     bool is_distributed;
 
-    unsigned int cur_gram; // NTODO state
+    unsigned int cur_gram;
 
-    int cur_index; // NTODO state
+    int cur_index;
 
-    int allLinkNumber; // NTODO state
+    int allLinkNumber;
 
-    unsigned int linksPerThread; // NTODO state
+    unsigned int linksPerThread;
 
-    float last_gram_total_float; // NTODO state
+    float last_gram_total_float;
 
     unsigned int num_of_patterns_without_superpattern_cur_gram;
     unsigned int *num_of_patterns_with_1_frequency;
 
-    unsigned int thresholdFrequency;
+    std::mutex uniqueKeyLock, patternForLastGramLock, removeAtomLock,
+        patternMatcherLock, addNewPatternLock, calculateIILock,
+        readNextLinkLock,actualProcessedLinkLock, curDFExtractedLinksLock,
+        readNextPatternLock, threadExtractedLinksLock;
 
-    std::mutex uniqueKeyLock, patternForLastGramLock, removeAtomLock, patternMatcherLock, addNewPatternLock, calculateIILock,
-        readNextLinkLock,actualProcessedLinkLock, curDFExtractedLinksLock, readNextPatternLock, threadExtractedLinksLock;
-
-    bool use_keyword_white_list;
-    bool use_keyword_black_list;
-
-    // = true will filter out atoms with labels contain keyword, = fasle will only filter out atoms with labels equal to any keyword
-    bool keyword_black_logic_is_contain;
     HandleSet black_keyword_Handles; // only use when keyword_black_logic_is_contain = false
-
-    QUERY_LOGIC keyword_white_list_logic;
-
-    bool use_linktype_black_list;
-    bool use_linktype_white_list;
-
-    set<Type> linktype_black_list;
-    set<Type> linktype_white_list;
 
 //    Handle FrequencyHandle;
 //    Handle InteractionInformationHandle;
 //    Handle SurprisingnessIHandle;
 //    Handle SurprisingnessIIHandle;
     Handle PatternValuesHandle;
-
-    bool if_quote_output_pattern;
-    Type output_pattern_quoted_linktype;
-
-    bool calculate_type_b_surprisingness;
-
-    bool enable_Interesting_Pattern;
-
-    // Only effective when Enable_Interesting_Pattern is true.
-    bool Enable_Interaction_Information;
-    bool Enable_surprisingness;
-
-    bool enable_unify_unordered_links; // if the corpus contains unordered Links like AND_LINK
-
-    bool only_mine_patterns_start_from_white_list;
-    bool only_mine_patterns_start_from_white_list_contain;
-
-    bool only_output_patterns_contains_white_keywords;
 
     float atomspaceSizeFloat;
 
@@ -356,8 +317,6 @@ protected:
     Handle UnifyOneLinkForUnorderedLink(const Handle& link,std::map<Handle,Type>& orderedTmpLinkToType);
 
     Handle rebindLinkTypeRecursively(const Handle& inputLink, std::map<Handle,Type>& orderedTmpLinkToType);
-
-    void addAtomTypesFromString(const string& node_types_str, set<Type>& types);
 
     /**
      * Traverses link, if encouter a pattern variable not in
@@ -573,9 +532,6 @@ protected:
 
     bool doesLinkContainNodesInKeyWordNodes(const Handle& link, const HandleSet& keywordNodes);
 
-    set<string> keyword_black_list;
-    set<string> keyword_white_list;
-
     /**
      * Partition links into strongly connected components, where each
      * link is connected to the other w.r.t. whether they shares some
@@ -615,8 +571,6 @@ protected:
     bool containWhiteKeywords(const string& str, QUERY_LOGIC logic);
 
     bool containKeywords(const string& str, const set<string>& keywords, QUERY_LOGIC logic);
-
-    void reSetAllSettingsFromConfig();
 
     void initPatternMiner();
 
@@ -699,11 +653,6 @@ public:
     void applyWhiteListKeywordfilterAfterMining();
 
     void resetPatternMiner(bool resetAllSettingsFromConfig);
-
-    // Turn a string like "qewr, wert, erty" into a vector of 3
-    // strings {"qwer", wert", erty"}
-    static vector<string> parse_comma_separated_list(string str);
-    static set<string> parse_comma_separated_set(string str);
 };
 
 }
