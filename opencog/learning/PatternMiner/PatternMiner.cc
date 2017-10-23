@@ -102,7 +102,9 @@ HandleSeq PatternMiner::findAndRenameVariables(const Handle& link, HandleMap& va
                }
                else
                {
-                   // NTODO move variable name creation to a method
+                   // TODO move this in its own method. Why is it
+                   // different that the one in
+                   // PatternMiner::associateNodesToVars with $var~ ?
                    string var_name = "$var_"  + toString(varNameMap.size() + 1);
                    Handle var_node = as->add_node(opencog::PATTERN_VARIABLENODE_TYPE, var_name);
 
@@ -123,7 +125,7 @@ HandleSeq PatternMiner::findAndRenameVariables(const Handle& link, HandleMap& va
 
              Handle reLink;
 
-             // NTODO probably need to re-enable that
+             // TODO probably need to re-enable that
 
 //             if (enable_unify_unordered_links && not orderedTmpLinkToType.empty())
 //             {
@@ -154,7 +156,7 @@ HandleSeq PatternMiner::RebindVariableNames(const HandleSeq& orderedPattern, Han
 
         Handle reLink;
 
-        // NTODO probably need to re-enable that (either here or in
+        // TODO probably need to re-enable that (either here or in
         // findAndRenameVariables)
 
 //        if (enable_unify_unordered_links && not orderedTmpLinkToType.empty())
@@ -274,7 +276,7 @@ HandleSeq PatternMiner::_UnifyPatternOrder(const HandleSeq& inputPattern, unsign
 
     multimap<string, Handle> nonVarStrToHandleMap;
 
-    // NTODO: Instead of converting into a string, why not create a
+    // TODO: Instead of converting into a string, why not create a
     // new pattern where the VariableNode name are empty?
     for (const Handle& inputH : inputPattern)
     {
@@ -491,7 +493,7 @@ bool PatternMiner::isLastNElementsAllTrue(bool* array, int size, int n)
     return true;
 }
 
-// NTODO replace by stl or boost equivalent
+// TODO replace by stl or boost equivalent
 unsigned int combinationCalculate(int r, int n)
 {
     // = n!/(r!*(n-r)!)
@@ -538,7 +540,7 @@ void PatternMiner::associateNodesToVars(const Handle& link, HandleMap& nodesToVa
         {
             if (nodesToVars.find(h) == nodesToVars.end())
             {
-	            // NTODO move variable name creation in its own method
+                // TODO move variable name creation in its own method
                 // add a variable node in Pattern miner Atomspace
                 Handle varHandle = as->add_node(opencog::PATTERN_VARIABLENODE_TYPE,
                                                 "$var~" + toString(nodesToVars.size()));
@@ -2679,7 +2681,7 @@ PatternMiner::PatternMiner(AtomSpace& _original_as)
 
     initPatternMiner();
 
-    // NTODO replace hard coded combinations by generic generator
+    // TODO replace hard coded combinations by generic generator
 
     // define (hard coding) all the possible subcomponent combinations for 2~4 gram patterns
     string gramNcomponents[3];
@@ -2758,7 +2760,7 @@ void PatternMiner::cleanUpPatternMiner()
 //    if (threads)
 //        delete threads;
 
-    param.linktype_black_list.clear(); // NTODO move tha to Parameters
+    param.linktype_black_list.clear();
 
     for (std::pair<string, HTreeNode*> OnePattern : keyStrToHTreeNodeMap)
     {
@@ -3112,7 +3114,7 @@ void PatternMiner::runInterestingnessEvaluation()
             int looptimes = 0;
             while (true)
             {
-                surprisingness_II_threshold = (curGramPatterns[threshold_index_II])->nII_Surprisingness; // NTODO understand how that comes to be
+                surprisingness_II_threshold = (curGramPatterns[threshold_index_II])->nII_Surprisingness; // TODO how that comes to be?
                 if (surprisingness_II_threshold <= 0.00000f)
                 {
                     if (++looptimes > 8)
@@ -3311,7 +3313,7 @@ void PatternMiner::queryPatternsWithFrequencySurprisingnessBRanges(unsigned int 
     std::cout<<"surprisingness_B range = [" << toString(min_surprisingness_B) << ", " << toString(max_surprisingness_B) << "]"  << std::endl;
     std::cout<<"b_subpattern_num range = [" << toString(min_subpattern_num) << ", " << toString(max_subpattern_num) << "]"  << std::endl;
 
-    vector<HTreeNode*> resultPatterns; // NTODO make it const
+    vector<HTreeNode*> resultPatterns;
 
     for (HTreeNode* htreeNode : patternsForGram[gram - 1])
     {
@@ -3539,7 +3541,7 @@ void PatternMiner::evaluateInterestingnessTask()
 
         cur_index ++;
 
-        if ((unsigned int)cur_index < (patternsForGram[cur_gram-1]).size()) // NTODO how that stuff gets defined?
+        if ((unsigned int)cur_index < (patternsForGram[cur_gram-1]).size())
         {
             cout<< "\r" << (float)(cur_index)/(float)((patternsForGram[cur_gram-1]).size())*100.0f << + "% completed." ;
             std::cout.flush();

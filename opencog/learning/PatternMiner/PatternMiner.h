@@ -94,12 +94,12 @@ struct _non_ordered_pattern
 
         // if all above criteria cannot figure out the order of these two patterns, just return true and output a warning
         cout << "\n warning: _non_ordered_pattern: Fail to figure out the order of two patterns!\n";
-        // NTODO if there are equal, then it should be false.
+        // TODO if there are equal, then it should be false.
         return true;
     }
 };
 
-// NTODO this seems identical to _non_ordered_pattern
+// TODO this seems identical to _non_ordered_pattern
 struct advanced_non_ordered_pattern // only when complex patterns like pln patterns, used when enable_unify_unordered_links = true
 {
     Handle link;
@@ -161,7 +161,7 @@ class PatternMiner
 protected:
 
     HTree* htree;
-    AtomSpace* as;              // NTODO what is this used for? It seems to be where patterns lives
+    AtomSpace* as;              // AtomSpace holding the patterns
     AtomSpace& original_as;
     AtomSpace* observing_as;
 
@@ -295,13 +295,13 @@ protected:
      *
      * and unifiedLastLinkIndex = 1
      *
-     * NTODO can probably be simplified by generalizing to atoms
-     * instead of links.
+     * TODO can be simplified by generalizing to atoms instead of
+     * links.
      */
     HandleSeq _UnifyPatternOrder(const HandleSeq& inputPattern, unsigned int& unifiedLastLinkIndex);
 
     /**
-     * NTODO write comment
+     * TODO write comment
      */
     HandleSeq UnifyPatternOrder(const HandleSeq& inputPattern, unsigned int& unifiedLastLinkIndex, HandleMap& orderedVarNameMap);
 
@@ -311,8 +311,8 @@ protected:
      * _UnifyPatternOrder). In addition, fill orderedTmpLinkToType
      * with associating replacement links by their original link type.
      *
-     * NTODO can probably be simplified by generalizing to atoms
-     * instead of links.
+     * TODO can be simplified by generalizing to atoms instead of
+     * links.
      */
     Handle UnifyOneLinkForUnorderedLink(const Handle& link,std::map<Handle,Type>& orderedTmpLinkToType);
 
@@ -324,7 +324,7 @@ protected:
      * variable, new variable} in varNameMap. Produce a new outgoing
      * set of link with all new variables and return it.
      *
-     * NTODO orderedTmpLinkToType isn't used at the moment.
+     * TODO orderedTmpLinkToType isn't used at the moment.
      */
     HandleSeq findAndRenameVariables(const Handle& link, HandleMap& varNameMap,
                                      const std::map<Handle,Type>& orderedTmpLinkToType);
@@ -417,7 +417,8 @@ protected:
      * Pattern variables are turned into regular variables while being
      * copied, filling `variables`.
      *
-     * NTODO: what guaranties that they are links?
+     * TODO: can be simplified by generalizing to atoms rather than
+     * links.
      */
     HandleSeq copyLinks(AtomSpace& to_as, const HandleSeq& links,
                         HandleSeq &variables);
@@ -466,9 +467,6 @@ protected:
      * (InheritanceLink
      *  (VariableNode $var_1)
      *  (VariableNode $var_3))
-     *
-     * NTODO: what about representing a pattern a set of sub-patterns,
-     * as opposed to pattern sequence.
      */
     bool containLoopVariable(const HandleSeq& pattern);
 
@@ -496,7 +494,7 @@ protected:
     void evaluateInterestingnessTask();
 
 	/**
-	 * NTODO Add comment + utest
+	 * TODO Add comment + utest
 	 */
     void generateNextCombinationGroup(bool* &indexes, int n_max);
 
@@ -556,7 +554,7 @@ protected:
 
     void calculateTypeBSurprisingness(HTreeNode* HNode);
 
-	// NTODO: not used
+    // TODO: not used
     void getOneMoreGramExtendedLinksFromGivenLeaf(Handle& toBeExtendedLink, Handle& leaf, Handle& varNode,
                                                   HandleSeq& outPutExtendedPatternLinks, AtomSpace& from_as);
 

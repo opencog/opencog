@@ -62,7 +62,7 @@ public:
     HandleSeq pattern;
     Handle quotedPatternLink; // only used when if_quote_output_pattern = true
     HandleSeqSeq instances; // the corresponding instances of this pattern in the original AtomSpace, only be used by breadth first mining
-    std::set<HTreeNode*> parentLinks; // NTODO why not use a full object as opposed to pointer?
+    std::set<HTreeNode*> parentLinks;
     std::set<HTreeNode*> childLinks;
 
     // set<string> instancesUidStrings;// all uid in each instance HandleSeq in all instances, in the form of 5152_815_201584. to prevent the same instance being count multiple times

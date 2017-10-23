@@ -167,7 +167,7 @@ void PatternMiner::runPatternMinerDepthFirst()
     // observing_as is used to copy one link everytime from the
     // original_as
     if (not observing_as)
-        observing_as = new AtomSpace(); // NTODO can you init this at ctor?
+        observing_as = new AtomSpace(); // TODO can you init this at ctor?
 
     if (param.THREAD_NUM > 1)
     {
@@ -510,7 +510,7 @@ void PatternMiner::extendAPatternForOneMoreGramRecursively(const Handle &extende
     }
     else
     {
-        for (const auto& p : valueToVarMap) // NTODO Replace this code by map difference
+        for (const auto& p : valueToVarMap) // TODO Replace this code by map difference
         {
             if (lastGramValueToVarMap.find(p.first) == lastGramValueToVarMap.end())
                 newValueToVarMap.insert(p);
@@ -543,7 +543,7 @@ void PatternMiner::extendAPatternForOneMoreGramRecursively(const Handle &extende
     n_limit_putin_result = valueToVarMap.size() * param.max_var_num_percent - lastGramTotalVarNum;
     n_limit_putin_result ++;
 
-    if (n_limit_putin_result == 1) // NTODO why?
+    if (n_limit_putin_result == 1) // TODO why?
         n_limit_putin_result = 2;
 
     if (GENERATE_TMP_PATTERNS)
@@ -622,10 +622,10 @@ void PatternMiner::extendAPatternForOneMoreGramRecursively(const Handle &extende
 
         // generate the first combination
         for (unsigned int i = 0; i < var_num; ++ i)
-            indexes[i] = true;  // NTODO can probably be replace by calling structure
+            indexes[i] = true;
 
         for (unsigned int i = var_num; i < n_max; ++ i)
-            indexes[i] = false; // NTODO can probably be replace by calling structure
+            indexes[i] = false;
 
         while (true)
         {
@@ -665,12 +665,12 @@ void PatternMiner::extendAPatternForOneMoreGramRecursively(const Handle &extende
                     notOutPutPattern = true;
             }
 
-            unsigned int extendedLinkIndex = 999;// NTODO max value?
+            unsigned int extendedLinkIndex = 999;// TODO max value?
             bool patternAlreadyExtractedInCurTask;
             HandleMap orderedVarNameMap;
 
             HTreeNode* thisGramHTreeNode = extractAPatternFromGivenVarCombination(inputLinks, patternVarMap, orderedVarNameMap,oneOfEachSeqShouldBeVars, leaves, shouldNotBeVars, shouldBeVars,
-                                          extendedLinkIndex, allNewMinedPatternsCurTask, notOutPutPattern, patternAlreadyExtractedInCurTask, startFromLinkContainWhiteKeyword); // NTODO move all parameters in a PatterMinerParameter structure and pass the structure instead
+                                          extendedLinkIndex, allNewMinedPatternsCurTask, notOutPutPattern, patternAlreadyExtractedInCurTask, startFromLinkContainWhiteKeyword);
 
             if (thisGramHTreeNode)
             {
@@ -858,7 +858,7 @@ void PatternMiner::extendAPatternForOneMoreGramRecursively(const Handle &extende
                         Handle extendNode = p.first;
                         if (param.enable_filter_node_types_should_not_be_vars)
                         {
-                            bool isIgnoredType = false; // NTODO move this to its own function
+                            bool isIgnoredType = false; // TODO move this to its own function
                             Type t = extendNode->getType();
                             for (Type noType : param.node_types_should_not_be_vars)
                             {

@@ -527,8 +527,6 @@ void PatternMiner::GrowAllPatternsBF()
             OutPutInterestingPatternsToFile(patternsForGram[cur_gram-1],cur_gram, true);
         }
 
-
-
         HandleSeq allDumpNodes, allDumpLinks;
         as->get_handles_by_type(back_inserter(allDumpNodes), (Type) NODE, true );
 
