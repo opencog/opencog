@@ -48,14 +48,14 @@ private:
    *
    * @param himplication A psi-rule.
    */
-  Handle psi_imply(const Handle& himplication);
+  Handle imply(const Handle& himplication);
 
   /**
    * Add psi-rule.
    *
    * @return An implication link which is a psi-rule.
    */
-  Handle psi_rule(const HandleSeq& context, const Handle& action,
+  Handle add_rule(const HandleSeq& context, const Handle& action,
     const Handle& goal, const TruthValuePtr stv, const Handle& demand);
 
   /**

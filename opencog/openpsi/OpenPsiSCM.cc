@@ -41,10 +41,10 @@ void OpenPsiSCM::init()
   define_scheme_primitive("psi-satisfy", &OpenPsiSCM::satisfiable,
     this, "openpsi");
 
-  define_scheme_primitive("psi-imply", &OpenPsiSCM::psi_imply,
+  define_scheme_primitive("psi-imply", &OpenPsiSCM::imply,
     this, "openpsi");
 
-  define_scheme_primitive("psi-rule", &OpenPsiSCM::psi_rule,
+  define_scheme_primitive("psi-rule", &OpenPsiSCM::add_rule,
     this, "openpsi");
 }
 
@@ -56,14 +56,15 @@ TruthValuePtr OpenPsiSCM::satisfiable(const Handle& himplication)
   return implicator.check_satisfiability(himplication);
 }
 
-Handle OpenPsiSCM::psi_imply(const Handle& himplication)
+Handle OpenPsiSCM::imply(const Handle& himplication)
 {
+  // TODO: Rename to psi-satisfiable? once c++ cache is implemented.
   AtomSpace* as = SchemeSmob::ss_get_env_as("psi-imply");
   OpenPsiImplicator implicator(as);
   return implicator.imply(himplication);
 }
 
-Handle OpenPsiSCM::psi_rule(const HandleSeq& context, const Handle& action,
+Handle OpenPsiSCM::add_rule(const HandleSeq& context, const Handle& action,
   const Handle& goal, const TruthValuePtr stv, const Handle& demand)
 {
   AtomSpace* as = SchemeSmob::ss_get_env_as("psi-rule");
