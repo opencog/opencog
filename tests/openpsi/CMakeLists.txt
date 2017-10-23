@@ -7,5 +7,4 @@ LINK_LIBRARIES(
 # The tests are ordered in the order they are run during make test.
 ADD_CXXTEST(OpenPsiRulesUTest)
 ADD_CXXTEST(OpenPsiImplicatorUTest)
-ADD_CXXTEST(OpenPsiUTest)
-#ADD_CXXTEST(OpenPsiExampleTest)
+ADD_CXXTEST(OpenPsiSCMUTest)

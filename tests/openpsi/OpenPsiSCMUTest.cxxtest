@@ -34,21 +34,21 @@ using namespace opencog;
     TSM_ASSERT("Caught scm error during eval", \
         (false == _scm->eval_error()));
 
-class OpenPsiUTest : public CxxTest::TestSuite
+class OpenPsiSCMUTest : public CxxTest::TestSuite
 {
 private:
     AtomSpace* _as;
     SchemeEval* _scm;
 
 public:
-    OpenPsiUTest(): _as(nullptr), _scm(nullptr)
+    OpenPsiSCMUTest(): _as(nullptr), _scm(nullptr)
     {
         logger().set_level(Logger::DEBUG);
         logger().set_print_level_flag(true);
         logger().set_print_to_stdout_flag(true);
     }
 
-    ~OpenPsiUTest()
+    ~OpenPsiSCMUTest()
     {
         // Clean Up
         delete _as;
