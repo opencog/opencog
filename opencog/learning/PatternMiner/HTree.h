@@ -24,17 +24,16 @@
 
 #ifndef _OPENCOG_PATTERNMINER_HTREE_H
 #define _OPENCOG_PATTERNMINER_HTREE_H
+
 #include <map>
 #include <vector>
 
 #include <opencog/atoms/base/Node.h>
 #include <opencog/atomspace/AtomSpace.h>
 
-using namespace std;
-
 namespace opencog { namespace PatternMining {
 
-class  HTreeNode;
+class HTreeNode;
 
 struct ExtendRelation // to store a super pattern of a pattern
 {
@@ -63,28 +62,30 @@ public:
     HandleSeq pattern;
     Handle quotedPatternLink; // only used when if_quote_output_pattern = true
     HandleSeqSeq instances; // the corresponding instances of this pattern in the original AtomSpace, only be used by breadth first mining
-    set<HTreeNode*> parentLinks;
-    set<HTreeNode*> childLinks;
+    std::set<HTreeNode*> parentLinks;
+    std::set<HTreeNode*> childLinks;
 
     // set<string> instancesUidStrings;// all uid in each instance HandleSeq in all instances, in the form of 5152_815_201584. to prevent the same instance being count multiple times
 
-    vector<ExtendRelation> superPatternRelations; // store all the connections to its super patterns
+    std::vector<ExtendRelation> superPatternRelations; // store all the connections to its super patterns
 
-    vector<SuperRelation_b> superRelation_b_list; // store all the superRelation_b
+    std::vector<SuperRelation_b> superRelation_b_list; // store all the superRelation_b
 
-    map<Handle, vector<SubRelation_b>> SubRelation_b_map;// map<VariableNode, vector<SubRelation_b>>
+    std::map<Handle, std::vector<SubRelation_b>> SubRelation_b_map;// map<VariableNode, vector<SubRelation_b>>
 
-    unsigned int count; // instance number
-    unsigned int var_num; // the number of all the variables in this pattern
+    unsigned int count; // Number of instances grounding this pattern
+    unsigned int var_num; // Number of the variables in this pattern
     double interactionInformation;
     double nI_Surprisingness;
     double nII_Surprisingness;
     double nII_Surprisingness_b; // calculated from the other same gram patterns
     unsigned int max_b_subpattern_num;
 
-    string surprisingnessInfo; // the middle info record the surpringness calculating process for this pattern
+    std::string surprisingnessInfo; // the middle info record the surpringness calculating process for this pattern
 
     HandleSeq sharedVarNodeList; // all the shared nodes in these links in the original AtomSpace, each handle is a shared node
+
+    std::string to_string() const;
 
     HTreeNode()
         : count(0),
@@ -107,7 +108,54 @@ public:
     }
 };
 
+} // ~namespace PatterMining
 
-}}
+using namespace PatternMining;
+
+std::string oc_to_string(const std::map<Handle, std::vector<SubRelation_b>>& sm);
+std::string oc_to_string(const std::vector<SuperRelation_b>& srbs);
+std::string oc_to_string(const std::vector<SubRelation_b>& srbs);
+std::string oc_to_string(const SuperRelation_b& srb);
+std::string oc_to_string(const SubRelation_b& srb);
+std::string oc_to_string(const ExtendRelation& extrel);
+std::string oc_to_string(const std::vector<ExtendRelation>& extrel);
+std::string oc_to_string(const std::vector<std::vector<HTreeNode*>>& htrees);
+std::string oc_to_string(const std::vector<HTreeNode*>& htrees);
+std::string oc_to_string(const std::set<HTreeNode*>& htrees);
+std::string oc_to_string(const HTreeNode* htnptr);
+std::string oc_to_string(const HTreeNode& htn);
+std::string oc_to_string(const HTree& htree);
+
+/**
+ * Template to simplify opencog container string convertion. Name is
+ * the name of the container, it will output
+ *
+ * size = <size of the container>
+ * <elname>[0]:
+ * <content of first element>
+ * ...
+ * <elname>[size-1]:
+ * <content of last element>
+ *
+ * The content of each element is obtained using oc_to_string. It
+ * assumes that the content string of an element ends by endl.
+ *
+ * TODO: move this to cogutil
+ */
+template<typename C>
+std::string oc_to_string(const C& c, const std::string& elname)
+{
+    std::stringstream ss;
+	ss << "size = " << c.size() << std::endl;
+	int i = 0;
+	for (const auto& el : c) {
+		ss << elname << "[" << i << "]:" << std::endl
+		   << oc_to_string(el);
+		i++;
+	}
+	return ss.str();
+}
+
+} // ~namespace opencog
 
 #endif //_OPENCOG_PATTERNMINER_HTREE_H

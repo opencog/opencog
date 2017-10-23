@@ -371,7 +371,6 @@ public:
             return "enable_filter_node_types_should_not_be_vars: false";
     }
 
-	// NTODO this is fishy, you don't want to return a string
     string get_node_types_should_not_be_vars()
     {
         string result =  "node_types_should_not_be_vars:";

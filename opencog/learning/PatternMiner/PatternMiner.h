@@ -38,6 +38,7 @@
 #include <opencog/learning/PatternMiner/types/atom_types.h>
 
 #include "HTree.h"
+#include "Parameters.h"
 
 using namespace std;
 
@@ -93,12 +94,12 @@ struct _non_ordered_pattern
 
         // if all above criteria cannot figure out the order of these two patterns, just return true and output a warning
         cout << "\n warning: _non_ordered_pattern: Fail to figure out the order of two patterns!\n";
-        // NTODO if there are equal, then it should be false.
+        // TODO if there are equal, then it should be false.
         return true;
     }
 };
 
-// NTODO this seems identical to _non_ordered_pattern
+// TODO this seems identical to _non_ordered_pattern
 struct advanced_non_ordered_pattern // only when complex patterns like pln patterns, used when enable_unify_unordered_links = true
 {
     Handle link;
@@ -153,12 +154,6 @@ struct MinedPatternInfo
     bool notOutPutPattern;
 };
 
-enum QUERY_LOGIC
-{
-    OR,
-    AND
-};
-
 class PatternMiner
 {
     friend class ::PatternMinerUTest;
@@ -166,7 +161,7 @@ class PatternMiner
 protected:
 
     HTree* htree;
-    AtomSpace* as;              // NTODO what is this used for?
+    AtomSpace* as;              // AtomSpace holding the patterns
     AtomSpace& original_as;
     AtomSpace* observing_as;
 
@@ -185,17 +180,11 @@ protected:
 
     std::thread *threads;
 
-    unsigned int THREAD_NUM;
-
-    unsigned int MAX_GRAM;
-
-    string Pattern_mining_mode;
+	Parameters param;
 
     bool is_distributed;
 
     unsigned int cur_gram;
-
-    double max_var_num_percent;
 
     int cur_index;
 
@@ -205,66 +194,21 @@ protected:
 
     float last_gram_total_float;
 
-    bool enable_filter_leaves_should_not_be_vars;
-    bool enable_filter_links_should_connect_by_vars;
-    bool enable_filter_links_of_same_type_not_share_second_outgoing;
-    bool enable_filter_not_same_var_from_same_predicate;
-    bool enable_filter_not_all_first_outgoing_const;
-    bool enable_filter_first_outgoing_evallink_should_be_var;
-    bool enable_filter_node_types_should_not_be_vars;
-    set<Type> node_types_should_not_be_vars;
-
-    bool enable_filter_node_types_should_be_vars;
-    set<Type> node_types_should_be_vars;
-
-    set<Type> same_link_types_not_share_second_outgoing;
-
     unsigned int num_of_patterns_without_superpattern_cur_gram;
     unsigned int *num_of_patterns_with_1_frequency;
 
-    unsigned int thresholdFrequency;
+    std::mutex uniqueKeyLock, patternForLastGramLock, removeAtomLock,
+        patternMatcherLock, addNewPatternLock, calculateIILock,
+        readNextLinkLock,actualProcessedLinkLock, curDFExtractedLinksLock,
+        readNextPatternLock, threadExtractedLinksLock;
 
-    std::mutex uniqueKeyLock, patternForLastGramLock, removeAtomLock, patternMatcherLock, addNewPatternLock, calculateIILock,
-        readNextLinkLock,actualProcessedLinkLock, curDFExtractedLinksLock, readNextPatternLock, threadExtractedLinksLock;
-
-    bool use_keyword_white_list;
-    bool use_keyword_black_list;
-
-    // = true will filter out atoms with labels contain keyword, = fasle will only filter out atoms with labels equal to any keyword
-    bool keyword_black_logic_is_contain;
     HandleSet black_keyword_Handles; // only use when keyword_black_logic_is_contain = false
-
-    QUERY_LOGIC keyword_white_list_logic;
-
-    bool use_linktype_black_list;
-    bool use_linktype_white_list;
-
-    set<Type> linktype_black_list;
-    set<Type> linktype_white_list;
 
 //    Handle FrequencyHandle;
 //    Handle InteractionInformationHandle;
 //    Handle SurprisingnessIHandle;
 //    Handle SurprisingnessIIHandle;
     Handle PatternValuesHandle;
-
-    bool if_quote_output_pattern;
-    Type output_pattern_quoted_linktype;
-
-    bool calculate_type_b_surprisingness;
-
-    bool enable_Interesting_Pattern;
-
-    // Only effective when Enable_Interesting_Pattern is true.
-    bool Enable_Interaction_Information;
-    bool Enable_surprisingness;
-
-    bool enable_unify_unordered_links; // if the corpus contains unordered Links like AND_LINK
-
-    bool only_mine_patterns_start_from_white_list;
-    bool only_mine_patterns_start_from_white_list_contain;
-
-    bool only_output_patterns_contains_white_keywords;
 
     float atomspaceSizeFloat;
 
@@ -351,13 +295,13 @@ protected:
      *
      * and unifiedLastLinkIndex = 1
      *
-     * NTODO can probably be simplified by generalizing to atoms
-     * instead of links.
+     * TODO can be simplified by generalizing to atoms instead of
+     * links.
      */
     HandleSeq _UnifyPatternOrder(const HandleSeq& inputPattern, unsigned int& unifiedLastLinkIndex);
 
     /**
-     * NTODO write comment
+     * TODO write comment
      */
     HandleSeq UnifyPatternOrder(const HandleSeq& inputPattern, unsigned int& unifiedLastLinkIndex, HandleMap& orderedVarNameMap);
 
@@ -367,14 +311,12 @@ protected:
      * _UnifyPatternOrder). In addition, fill orderedTmpLinkToType
      * with associating replacement links by their original link type.
      *
-     * NTODO can probably be simplified by generalizing to atoms
-     * instead of links.
+     * TODO can be simplified by generalizing to atoms instead of
+     * links.
      */
     Handle UnifyOneLinkForUnorderedLink(const Handle& link,std::map<Handle,Type>& orderedTmpLinkToType);
 
     Handle rebindLinkTypeRecursively(const Handle& inputLink, std::map<Handle,Type>& orderedTmpLinkToType);
-
-    void addAtomTypesFromString(const string& node_types_str, set<Type>& types);
 
     /**
      * Traverses link, if encouter a pattern variable not in
@@ -382,7 +324,7 @@ protected:
      * variable, new variable} in varNameMap. Produce a new outgoing
      * set of link with all new variables and return it.
      *
-     * NTODO orderedTmpLinkToType isn't used at the moment.
+     * TODO orderedTmpLinkToType isn't used at the moment.
      */
     HandleSeq findAndRenameVariables(const Handle& link, HandleMap& varNameMap,
                                      const std::map<Handle,Type>& orderedTmpLinkToType);
@@ -404,8 +346,12 @@ protected:
      */
     void generateIndexesOfSharedVars(const Handle& link, const HandleSeq& orderedHandles, vector<vector<std::pair<int, size_t>>> &indexes);
 
-    // generate the outgoings for a link in a pattern in the Pattern mining Atomspace, according to the given group of variables
-    void generateALinkByChosenVariables(const Handle &originalLink, HandleMap& valueToVarMap, HandleSeq &outputOutgoings);
+	/**
+	 * Given a mapping between handles, substitute all encountered
+	 * handle keys by their values in h. The produced handle is added
+	 * to the pattern miner atomspace and returned.
+	 */
+	Handle substitute(const Handle& h, const HandleMap& h2h);
 
     /**
      * Retrieve all nodes from a given link and its descendents. For
@@ -434,10 +380,16 @@ protected:
      */
     void extractConstNodes(const Handle& link, HandleSet& constNodes);
 
-    // if a link contains only variableNodes , no const nodes
-    bool onlyContainVariableNodes(Handle link);
+	/**
+	 * Return true iff an atom contains only pattern variable nodes,
+	 * no const nodes.
+	 */
+    bool containOnlyVariables(Handle h);
 
-    bool containVariableNodes(Handle link);
+	/**
+	 * Return true iff an atom contains some pattern variable nodes.
+	 */
+    bool containSomeVariables(Handle link);
 
     void extractAllPossiblePatternsFromInputLinksBF(const HandleSeq& inputLinks, HTreeNode* parentNode, HandleSet& sharedNodes, unsigned int gram);
 
@@ -465,7 +417,8 @@ protected:
      * Pattern variables are turned into regular variables while being
      * copied, filling `variables`.
      *
-     * NTODO: what guaranties that they are links?
+     * TODO: can be simplified by generalizing to atoms rather than
+     * links.
      */
     HandleSeq copyLinks(AtomSpace& to_as, const HandleSeq& links,
                         HandleSeq &variables);
@@ -491,7 +444,7 @@ protected:
                                                  vector<MinedPatternInfo>& allNewMinedPatternInfo, unsigned int thread_index, bool startFromLinkContainWhiteKeyword);
 
     /**
-     * Return iff the pattern contains "loop variables".
+     * Return iff some sub-pattern contains only variables.
      *
      * For instance, in the following $var_3 isn't really a variable because...
      *
@@ -514,14 +467,8 @@ protected:
      * (InheritanceLink
      *  (VariableNode $var_1)
      *  (VariableNode $var_3))
-     *
-     * NTODO: it seems it returns true iff a sub-pattern has only
-     * variables.
-     *
-     * NTODO: what about representing a pattern a set of sub-patterns,
-     * as opposed to pattern sequence.
      */
-    bool containsLoopVariable(const HandleSeq& pattern);
+    bool containLoopVariable(const HandleSeq& pattern);
 
     void quoteAPattern(HTreeNode* hTreeNode);
 
@@ -546,6 +493,9 @@ protected:
 
     void evaluateInterestingnessTask();
 
+	/**
+	 * TODO Add comment + utest
+	 */
     void generateNextCombinationGroup(bool* &indexes, int n_max);
 
     bool isLastNElementsAllTrue(bool* array, int size, int n);
@@ -554,7 +504,7 @@ protected:
 
     bool isInHandleSeqSeq(const Handle& handle, const HandleSeqSeq& handleSeqs);
 
-    bool containsDuplicateHandle(HandleSeq& handles);
+    bool containDuplicates(const HandleSeq& handles);
 
     Handle getFirstNonIgnoredIncomingLink(AtomSpace& atomspace, const Handle& handle);
 
@@ -580,9 +530,6 @@ protected:
 
     bool doesLinkContainNodesInKeyWordNodes(const Handle& link, const HandleSet& keywordNodes);
 
-    set<string> keyword_black_list;
-    set<string> keyword_white_list;
-
     /**
      * Partition links into strongly connected components, where each
      * link is connected to the other w.r.t. whether they shares some
@@ -607,7 +554,7 @@ protected:
 
     void calculateTypeBSurprisingness(HTreeNode* HNode);
 
-	// NTODO: not used
+    // TODO: not used
     void getOneMoreGramExtendedLinksFromGivenLeaf(Handle& toBeExtendedLink, Handle& leaf, Handle& varNode,
                                                   HandleSeq& outPutExtendedPatternLinks, AtomSpace& from_as);
 
@@ -622,8 +569,6 @@ protected:
     bool containWhiteKeywords(const string& str, QUERY_LOGIC logic);
 
     bool containKeywords(const string& str, const set<string>& keywords, QUERY_LOGIC logic);
-
-    void reSetAllSettingsFromConfig();
 
     void initPatternMiner();
 
@@ -702,86 +647,10 @@ public:
 
     void testPatternMatcher();
 
-
 public:
-    // -------------------------------basic settings----------------------
-
-    unsigned int get_Pattern_Max_Gram(){return MAX_GRAM;}
-    void set_Pattern_Max_Gram(unsigned int _max_gram){ MAX_GRAM = _max_gram;}
-
-    bool get_Enable_Interesting_Pattern(){return enable_Interesting_Pattern;}
-    void set_Enable_Interesting_Pattern(bool _enable){enable_Interesting_Pattern = _enable;}
-
-    unsigned int get_Frequency_threshold() {return thresholdFrequency;}
-    void set_Frequency_threshold(unsigned int _Frequency_threshold) {thresholdFrequency = _Frequency_threshold;}
-
-    // -------------------------------end basic settings----------------------
-
-    // -------------------------------filter settings----------------------
-    bool get_use_keyword_black_list(){return use_keyword_black_list;}
-    void set_use_keyword_black_list(bool _use){use_keyword_black_list = _use;}
-
-    bool get_use_keyword_white_list(){return use_keyword_white_list;}
-    void set_use_keyword_white_list(bool _use){use_keyword_white_list = _use;}
-
-    bool get_use_linktype_black_list(){return use_linktype_black_list;}
-    void set_use_linktype_black_list(bool _use){use_linktype_black_list = _use;}
-
-    bool get_use_linktype_white_list(){return use_linktype_white_list;}
-    void set_use_linktype_white_list(bool _use){use_linktype_white_list = _use;}
-
-    set<Type> get_linktype_white_list(){return linktype_white_list;}
-    bool add_linktype_to_white_list(Type _type);
-    bool remove_linktype_from_white_list(Type _type);
-
-    set<Type> get_ignore_link_types(){return linktype_black_list;}
-    bool add_ignore_link_type(Type _type);
-    bool remove_ignore_link_type(Type _type);
-
-    set<string> get_keyword_black_list(){return keyword_black_list;}
-    bool add_keyword_to_black_list(const string& _keyword);
-    bool remove_keyword_from_black_list(const string& _keyword);
-    void clear_keyword_black_list(){keyword_black_list.clear();}
-
-    set<string> get_keyword_white_list(){return keyword_white_list;}
-    bool add_keyword_to_white_list(const string& _keyword);
-    bool remove_keyword_from_white_list(const string& _keyword);
-    void clear_keyword_white_list(){keyword_white_list.clear();}
-
-    QUERY_LOGIC get_keyword_white_list_logic(){return keyword_white_list_logic;}
-    void set_keyword_white_list_logic(QUERY_LOGIC logic){keyword_white_list_logic = logic;}
-
-    void set_enable_filter_links_of_same_type_not_share_second_outgoing(bool _enable){enable_filter_links_of_same_type_not_share_second_outgoing = _enable;}
-    bool get_enable_filter_links_of_same_type_not_share_second_outgoing(){return enable_filter_links_of_same_type_not_share_second_outgoing;}
-    set<Type> get_same_link_types_not_share_second_outgoing(){return same_link_types_not_share_second_outgoing;}
-    bool add_link_type_to_same_link_types_not_share_second_outgoing(Type _type);
-    bool remove_link_type_from_same_link_types_not_share_second_outgoing(Type _type);
-    void clear_same_link_types_not_share_second_outgoing(){same_link_types_not_share_second_outgoing.clear();}
-
-    void set_enable_filter_node_types_should_not_be_vars(bool _enable){enable_filter_node_types_should_not_be_vars=_enable;}
-    bool get_enable_filter_node_types_should_not_be_vars(){return enable_filter_node_types_should_not_be_vars;}
-    set<Type> get_node_types_should_not_be_vars(){return node_types_should_not_be_vars;}
-    bool add_node_type_to_node_types_should_not_be_vars(Type _type);
-    bool remove_node_type_from_node_types_should_not_be_vars(Type _type);
-    void clear_node_types_should_not_be_vars(){node_types_should_not_be_vars.clear();}
-
-    void set_enable_filter_node_types_should_be_vars(bool _enable){enable_filter_node_types_should_be_vars = _enable;}
-    bool get_enable_filter_node_types_should_be_vars(){return enable_filter_node_types_should_be_vars;}
-    set<Type> get_node_types_should_be_vars(){return node_types_should_be_vars;}
-    bool add_node_type_to_node_types_should_be_vars(Type _type);
-    bool remove_node_type_from_node_types_should_be_vars(Type _type);
-    void clear_node_types_should_be_vars(){node_types_should_be_vars.clear();}
-
-    // -------------------------------end filter settings----------------------
-
     void applyWhiteListKeywordfilterAfterMining();
 
     void resetPatternMiner(bool resetAllSettingsFromConfig);
-
-    // Turn a string like "qewr, wert, erty" into a vector of 3
-    // strings {"qwer", wert", erty"}
-    static vector<string> parse_comma_separated_list(string str);
-    static set<string> parse_comma_separated_set(string str);
 };
 
 }
