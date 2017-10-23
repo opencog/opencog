@@ -60,11 +60,11 @@ public:
 
 	// Simple pattern miner tests
 	void test_PatternMiner_AB_AC();
-	void test_PatternMiner_AB_ABC();
-	void test_PatternMiner_ABCD();
+	// void test_PatternMiner_AB_ABC(); // will probably not be supported
+	// void test_PatternMiner_ABCD(); // will probably not be supported
 
 	// Complex pattern miner tests
-	void test_PatternMiner_InferenceControl();
+	// void test_PatternMiner_InferenceControl(); // will probably not be supported
 	void test_PatternMiner_SodaDrinker();
 };
 
@@ -218,105 +218,109 @@ void PatternMinerUTest::test_PatternMiner_AB_AC()
 		AC = al(INHERITANCE_LINK, A, C);
 
 	PatternMiner pm(_as);
-	pm.runPatternMiner(false);  // NTODO set count threshold >= 2
-
-	vector<HTreeNode*>& top1gramPatterns = pm.getFinalPatternsForGram(1);
-
-	string patternStr = pm.unifiedPatternToKeyString(top1gramPatterns[0]->pattern);
-
-	logger().info("The result top 1-gram pattern: \n%s", patternStr.c_str());
-
-	TS_WARN("TODO");
-}
-
-void PatternMinerUTest::test_PatternMiner_AB_ABC()
-{
-	logger().info("BEGIN TEST: %s", __FUNCTION__);
-
-	Handle A = an(CONCEPT_NODE, "A"),
-		B = an(CONCEPT_NODE, "B"),
-		C = an(CONCEPT_NODE, "C"),
-		AB = al(INHERITANCE_LINK, A, B),
-		ABC = al(INHERITANCE_LINK, A, al(AND_LINK, B, C));
-
-	PatternMiner pm(_as);
-	pm.runPatternMiner(false);  // NTODO set count threshold >= 2
-
-	vector<HTreeNode*>& top1gramPatterns = pm.getFinalPatternsForGram(1);
-
-	string patternStr = pm.unifiedPatternToKeyString(top1gramPatterns[0]->pattern);
-
-	logger().info("The result top 1-gram pattern: \n%s", patternStr.c_str());
-
-	TS_WARN("TODO");
-}
-
-void PatternMinerUTest::test_PatternMiner_ABCD()
-{
-	logger().info("BEGIN TEST: %s", __FUNCTION__);
-
-	Handle A = an(CONCEPT_NODE, "A"),
-		B = an(CONCEPT_NODE, "B"),
-		C = an(CONCEPT_NODE, "C"),
-		D = an(CONCEPT_NODE, "C"),
-		AB = al(INHERITANCE_LINK, A, B),
-		AC = al(INHERITANCE_LINK, A, C),
-		ABCD = al(INHERITANCE_LINK, A, al(SET_LINK, B, C, D));
-
-	PatternMiner pm(_as);
-	pm.runPatternMiner(false);  // NTODO set count threshold >= 2
-
-	vector<HTreeNode*>& top1gramPatterns = pm.getFinalPatternsForGram(1);
-
-	string patternStr = pm.unifiedPatternToKeyString(top1gramPatterns[0]->pattern);
-
-	logger().info("The result top 1-gram pattern: \n%s", patternStr.c_str());
-
-	TS_WARN("TODO");
-}
-
-void PatternMinerUTest::test_PatternMiner_InferenceControl()
-{
-	logger().info("BEGIN TEST: %s", __FUNCTION__);
-	// Load inference-control-corpus.scm
-	std::string rs =
-		_scm.eval("(load-from-path \"inference-control-corpus.scm\")");
-
-	std::cout << "rs = " << rs << std::endl;
-
-	// Run the pattern miner
-	PatternMiner pm(_as);
 	pm.runPatternMiner(false);
 
-	vector<HTreeNode*>& top3gramPatterns = pm.getFinalPatternsForGram(3);
+	vector<HTreeNode*>& top1gramPatterns = pm.getFinalPatternsForGram(1);
 
-	string patternStr = pm.unifiedPatternToKeyString(top3gramPatterns[0]->pattern);
-	logger().info("The result top 3-gram pattern: \n%s", patternStr.c_str());
+	string patternStr = pm.unifiedPatternToKeyString(top1gramPatterns[0]->pattern),
+		expectedStr =
+		"(InheritanceLink )\n"
+		"  (ConceptNode A)\n"
+		"  (PatternVariableNode $var_1)\n\n";
 
-	// The main pattern of interest should look like
-	//
-	// Execution
-	//   Schema "expand"
-	//   List
-	//     PatternMiningVariable "$k"
-	//     Inheritance
-	//       ConceptNode "A"
-	//       PatternMiningVariable "$x"
-	//     GroundedSchemaNode "scm: conditional-full-instantiation-scope-formula"
-	//   PatternMiningVariable "$r"
-	//
-	// Evaluation
-	//   Predicate "preproof
-	//   PatternMiningVariable "$k"
-	//
-	// Evaluation
-	//   Predicate "preproof
-	//   PatternMiningVariable "$r"
+	logger().info("The result top 1-gram pattern: \n%s", patternStr.c_str());
 
-	TS_WARN("TODO");
-
-	logger().info("End TEST: %s", __FUNCTION__);
+	TS_ASSERT_EQUALS(patternStr, expectedStr);
 }
+
+// void PatternMinerUTest::test_PatternMiner_AB_ABC()
+// {
+// 	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+// 	Handle A = an(CONCEPT_NODE, "A"),
+// 		B = an(CONCEPT_NODE, "B"),
+// 		C = an(CONCEPT_NODE, "C"),
+// 		AB = al(INHERITANCE_LINK, A, B),
+// 		ABC = al(INHERITANCE_LINK, A, al(AND_LINK, B, C));
+
+// 	PatternMiner pm(_as);
+// 	pm.runPatternMiner(false);  // NTODO set count threshold >= 2
+
+// 	vector<HTreeNode*>& top1gramPatterns = pm.getFinalPatternsForGram(1);
+
+// 	string patternStr = pm.unifiedPatternToKeyString(top1gramPatterns[0]->pattern);
+
+// 	logger().info("The result top 1-gram pattern: \n%s", patternStr.c_str());
+
+// 	TS_WARN("TODO");
+// }
+
+// void PatternMinerUTest::test_PatternMiner_ABCD()
+// {
+// 	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+// 	Handle A = an(CONCEPT_NODE, "A"),
+// 		B = an(CONCEPT_NODE, "B"),
+// 		C = an(CONCEPT_NODE, "C"),
+// 		D = an(CONCEPT_NODE, "C"),
+// 		AB = al(INHERITANCE_LINK, A, B),
+// 		AC = al(INHERITANCE_LINK, A, C),
+// 		ABCD = al(INHERITANCE_LINK, A, al(SET_LINK, B, C, D));
+
+// 	PatternMiner pm(_as);
+// 	pm.runPatternMiner(false);  // NTODO set count threshold >= 2
+
+// 	vector<HTreeNode*>& top1gramPatterns = pm.getFinalPatternsForGram(1);
+
+// 	string patternStr = pm.unifiedPatternToKeyString(top1gramPatterns[0]->pattern);
+
+// 	logger().info("The result top 1-gram pattern: \n%s", patternStr.c_str());
+
+// 	TS_WARN("TODO");
+// }
+
+// void PatternMinerUTest::test_PatternMiner_InferenceControl()
+// {
+// 	logger().info("BEGIN TEST: %s", __FUNCTION__);
+// 	// Load inference-control-corpus.scm
+// 	std::string rs =
+// 		_scm.eval("(load-from-path \"inference-control-corpus.scm\")");
+
+// 	std::cout << "rs = " << rs << std::endl;
+
+// 	// Run the pattern miner
+// 	PatternMiner pm(_as);
+// 	pm.runPatternMiner(false);
+
+// 	vector<HTreeNode*>& top3gramPatterns = pm.getFinalPatternsForGram(3);
+
+// 	string patternStr = pm.unifiedPatternToKeyString(top3gramPatterns[0]->pattern);
+// 	logger().info("The result top 3-gram pattern: \n%s", patternStr.c_str());
+
+// 	// The main pattern of interest should look like
+// 	//
+// 	// Execution
+// 	//   Schema "expand"
+// 	//   List
+// 	//     PatternMiningVariable "$k"
+// 	//     Inheritance
+// 	//       ConceptNode "A"
+// 	//       PatternMiningVariable "$x"
+// 	//     GroundedSchemaNode "scm: conditional-full-instantiation-scope-formula"
+// 	//   PatternMiningVariable "$r"
+// 	//
+// 	// Evaluation
+// 	//   Predicate "preproof
+// 	//   PatternMiningVariable "$k"
+// 	//
+// 	// Evaluation
+// 	//   Predicate "preproof
+// 	//   PatternMiningVariable "$r"
+
+// 	TS_WARN("TODO");
+
+// 	logger().info("End TEST: %s", __FUNCTION__);
+// }
 
 void PatternMinerUTest::test_PatternMiner_SodaDrinker()
 {
