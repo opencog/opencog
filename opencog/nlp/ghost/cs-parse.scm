@@ -248,7 +248,7 @@
       (CONCEPT ID declaration-sequence) :
         (create-concept $2 (eval-string (string-append "(list " $3 ")")))
       (TOPIC ID declaration-sequence) :
-        (display-token (format #f "topic(~a = ~a)" $2 $3))
+        (create-topic $2 (eval-string (string-append "(list " $3 ")")))
     )
 
     (declaration-sequence
