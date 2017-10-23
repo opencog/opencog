@@ -307,32 +307,6 @@ actions are EvaluationLinks, not schemas or ExecutionOutputLinks.
 )
 
 ; --------------------------------------------------------------
-(define (psi-satisfiable? rule)
-"
-  psi-satisfiable? RULE - Return a TV indicating if the context of
-  the RULE is satisfiable.
-
-  Satisfaction is determined by evaluating the context part of the
-  rule. If the context requires grounding in the atomspace, then
-  this is performed. That is, if the context contains variables
-  that require grounding, then this is performed; if the context is
-  not groundable, then the rule is not satisfiable.
-
-  The current implementation returns TRUE_TV if the context is
-  satisfiable, else it returns FALSE_TV. A later design point
-  is to have a weighted, probabilistic value to be returned.
-"
-    (define result (cog-evaluate!
-        (SatisfactionLink (AndLink (psi-get-context rule)))))
-
-    ; NOTE: stv are choosen as the return values so as to make the function
-    ; usable in evaluatable-terms.
-    (set! psi-satisfiablity-alist
-        (assoc-set! psi-satisfiablity-alist rule result))
-
-    result
-)
-
 ; Utility wrapper for above; returns crisp #t or #f
 (define (is-satisfiable? RULE)
     (equal? (stv 1 1) (psi-satisfiable? RULE))

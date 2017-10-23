@@ -30,7 +30,7 @@
     ; From rule.scm
     psi-get-rules psi-get-all-rules psi-rule? psi-get-all-actions psi-action?
     psi-get-context psi-get-action psi-get-goal psi-rule-alias
-    psi-partition-rule-with-alias psi-related-goals psi-satisfiable?
+    psi-partition-rule-with-alias psi-related-goals
     psi-rule-satisfiability psi-get-satisfiable-rules
     psi-get-weighted-satisfiable-rules psi-get-all-satisfiable-rules
     psi-get-all-weighted-satisfiable-rules psi-context-weight psi-action-weight
@@ -45,7 +45,7 @@
     psi-get-members
 
     ; C++ bindings from libopenpsi
-    psi-satisfy psi-imply psi-rule
+    psi-imply psi-rule psi-satisfiable?
     )
 )
 
@@ -57,3 +57,22 @@
 (load-from-path "opencog/openpsi/rule.scm")
 (load-from-path "opencog/openpsi/main.scm")
 (load-from-path "opencog/openpsi/utilities.scm")
+
+; --------------------------------------------------------------
+; Documentations for C++ bindings from libopenpsi
+(set-procedure-property! psi-satisfiable? 'documentation
+"
+  psi-satisfiable? RULE - Return a TV indicating if the context of
+  the RULE is satisfiable.
+
+  Satisfaction is determined by evaluating the context part of the
+  rule. If the context requires grounding in the atomspace, then
+  this is performed. That is, if the context contains variables
+  that require grounding, then this is performed. If the context is
+  not groundable, then the rule is not satisfiable.
+
+  The current implementation returns TRUE_TV if the context is
+  satisfiable, else it returns FALSE_TV. A later design point
+  is to have a weighted, probabilistic value to be returned.
+"
+)
