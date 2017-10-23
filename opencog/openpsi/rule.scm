@@ -289,24 +289,6 @@ actions are EvaluationLinks, not schemas or ExecutionOutputLinks.
 )
 
 ; --------------------------------------------------------------
-; An alist used to cache the result of evaluating psi-satisfiable?. The keys
-; are psi-rules and value is TRUE_TV or FALSE_TV. This is a cache of results.
-(define psi-satisfiablity-alist '())
-
-; --------------------------------------------------------------
-(define (satisfiable? rule)
-"
-  Returns the satisfiablity result of the rule from cache. `psi-satisfiable?`
-  should have been run for the given rule somewhere in the control flow before
-  calling this function.
-
-  rule:
-  - A psi-rule to be checked if its context is satisfiable.
-"
-    (assoc-ref psi-satisfiablity-alist rule)
-)
-
-; --------------------------------------------------------------
 ; Utility wrapper for above; returns crisp #t or #f
 (define (is-satisfiable? RULE)
     (equal? (stv 1 1) (psi-satisfiable? RULE))

@@ -73,7 +73,7 @@ public:
 
         _scm->eval("(setenv \"LTDL_LIBRARY_PATH\" \"/usr/local/lib/opencog\")");
         // Load require modules to be tested and populate the atomspace
-        _scm->eval("(use-modules (opencog))");
+        _scm->eval("(use-modules (opencog) (opencog openpsi))");
         CHKERR
         // NOTE: Using  module (opencog openpsi) after running
         // ```
@@ -99,9 +99,9 @@ public:
         _scm = nullptr;
     }
 
-    // Check the scheme function `psi-satisfiable?`` and `satisfiable?`
+    // Check the scheme function `psi-satisfiable?`
     // NOTE: The name of the test function uses `__predicate` in place of `?`
-    void test_psi_satisfiable_and_satisfiable__predicate()
+    void test_psi_satisfiable__predicate()
     {
         logger().info("BEGIN TEST: %s", __FUNCTION__);
         // Load the file to get access to update-satisfiablity-alist procedure
@@ -115,12 +115,6 @@ public:
         CHKERR
         TSM_ASSERT_EQUALS("Expected (stv 0 1)", TruthValue::FALSE_TV(), result_1_1);
 
-        // Check result from cache is consistent with that of the actual
-        // execution.
-        auto result_1_2 = _scm->eval_tv("(satisfiable? (rule-1))");
-        CHKERR
-        TSM_ASSERT_EQUALS("Expected (stv 0 1)", TruthValue::FALSE_TV(), result_1_2);
-
         // Test 2:
         // Test satisfaiability
         _scm->eval("(groundable-content-1)");
@@ -128,12 +122,6 @@ public:
         auto result_2_1 = _scm->eval_tv("(psi-satisfiable? (rule-1))");
         CHKERR
         TSM_ASSERT_EQUALS("Expected (stv 1 1)", TruthValue::TRUE_TV(), result_2_1);
-
-        // Check result from cache is consistent with that of the actual
-        // execution.
-        auto result_2_2 = _scm->eval_tv("(satisfiable? (rule-1))");
-        CHKERR
-        TSM_ASSERT_EQUALS("Expected (stv 1 1)", TruthValue::TRUE_TV(), result_2_2);
 
         logger().info("END TEST: %s", __FUNCTION__);
     }
