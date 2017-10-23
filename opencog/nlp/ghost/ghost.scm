@@ -45,6 +45,10 @@
   ghost-logger
 )
 
+; The current topic, will be used when creating GHOST rules
+; When set, all the rules created will be under this topic
+(define ghost-topic '())
+
 ; A list of shared goals for all the rules under the same topic file
 (define shared-goals '())
 

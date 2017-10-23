@@ -304,12 +304,7 @@
    same topic."
   (set! shared-goals GOAL))
 
-; ----------
-; Topic
-; ----------
-(define default-topic '())
-
-(define-public (create-topic TOPIC-NAME)
+(define-public (create-topic TOPIC-NAME KEYWORDS)
 "
   create-topic TOPIC-NAME
 
@@ -328,8 +323,9 @@
   ; 2. Should the weight be accessable? Specially if the execution graph is
   ; separate from the content, thus allowing learing, why?
 
-  (set! default-topic (psi-demand TOPIC-NAME))
-  default-topic)
+  (set! ghost-topic (psi-demand (ghost-prefix TOPIC-NAME)))
+  (for-each (lambda (kw) (Member (Word kw) ghost-topic)) KEYWORDS)
+  ghost-topic)
 
 ; This is the default topic.
-(create-topic "Yakking")
+(create-topic "Default Topic" '())
