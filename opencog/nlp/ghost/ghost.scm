@@ -61,6 +61,9 @@
 ; or from the WordNet CLI (for unit test only)
 (define test-get-lemma #f)
 
+; Keep a record of the most recent outputs generated
+(define ghost-result '())
+
 ;; --------------------
 ;; The required files
 

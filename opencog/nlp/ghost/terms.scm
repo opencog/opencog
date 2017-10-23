@@ -222,8 +222,9 @@
 
 (define-public (ghost-execute-action . ACTIONS)
   "Execute the actions and update the internal state."
-  (define txt "")
-  (define atoms '())
+  (define txt-str "")
+  (define txt-atoms '())
+  (define atoms-created '())
   (define (extract actions)
     (for-each
       (lambda (a)
@@ -234,22 +235,25 @@
                    ; This assumes that the name of a ConceptNode
                    ; is something meaningful to say...
                    (equal? 'ConceptNode (cog-type a)))
-               (set! txt (string-trim (string-append txt " " (cog-name a)))))
+               (set! txt-atoms (append txt-atoms (list a)))
+               (set! txt-str (string-trim (string-append txt-str " " (cog-name a)))))
               ; These can be ignored, may just be the return
               ; of a GroundedSchemaNode
               ((or (equal? 'TrueLink (cog-type a))
                    (equal? 'FalseLink (cog-type a)))
                '())
-              (else (set! atoms (append atoms (list a))))))
+              (else (set! atoms-created (append atoms-created (list a))))))
       actions))
   ; See what needs to be handled
   (extract ACTIONS)
   ; Is there anything to say?
-  (if (not (string-null? txt))
-      (begin (cog-logger-info ghost-logger "Say: \"~a\"" txt)
-             (cog-execute! (Put (DefinedPredicate "Say") (Node txt)))))
+  (if (not (string-null? txt-str))
+      (begin (cog-logger-info ghost-logger "Say: \"~a\"" txt-str)
+             (cog-execute! (Put (DefinedPredicate "Say") (Node txt-str)))))
   ; New atoms being created
-  (if (not (null? atoms))
-      (cog-logger-info ghost-logger "Atoms Created: ~a" atoms))
+  (if (not (null? atoms-created))
+      (cog-logger-info ghost-logger "Atoms Created: ~a" atoms-created))
+  ; Record the result
+  (set! ghost-result (append txt-atoms atoms-created))
   ; Reset the state
   (State ghost-anchor (Concept "Default State")))
