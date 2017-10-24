@@ -285,7 +285,7 @@
                           action
                           (psi-goal (car goal))
                           (stv (cdr goal) .9)
-                          (if (null? TOPIC) default-topic TOPIC)))
+                          (if (null? TOPIC) ghost-topic TOPIC)))
                       goals))))
     (lambda (key . parameters)
       (if (not (equal? key 'FeatureNotSupported))
@@ -304,16 +304,11 @@
    same topic."
   (set! shared-goals GOAL))
 
-; ----------
-; Topic
-; ----------
-(define default-topic '())
-
-(define-public (create-topic TOPIC-NAME)
+(define-public (create-topic TOPIC-NAME KEYWORDS)
 "
   create-topic TOPIC-NAME
 
-  Creates a psi-demand named as TOPIC-NAME, sets the default-topic to be it
+  Creates a psi-demand named as TOPIC-NAME, sets the ghost-topic to be it
   and returns ConceptNode that represent the topic(aka demand).
 "
   ; NOTE:The intention is to follow chatscript like authoring approach. Once a
@@ -328,8 +323,9 @@
   ; 2. Should the weight be accessable? Specially if the execution graph is
   ; separate from the content, thus allowing learing, why?
 
-  (set! default-topic (psi-demand TOPIC-NAME))
-  default-topic)
+  (set! ghost-topic (psi-demand (ghost-prefix TOPIC-NAME)))
+  (for-each (lambda (kw) (Member kw ghost-topic)) (terms-to-atomese KEYWORDS))
+  ghost-topic)
 
 ; This is the default topic.
-(create-topic "Yakking")
+(create-topic "Default Topic" '())

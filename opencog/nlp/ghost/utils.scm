@@ -41,7 +41,7 @@
 
 (define (terms-to-atomese TERMS)
   "Helper function to convert a list of terms into atomese.
-   For use of choices and negation."
+   For use of choices, negation, and topic etc."
   (map (lambda (t)
     (cond ((equal? 'word (car t))
            (WordNode (cdr t)))
