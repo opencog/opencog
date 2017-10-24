@@ -60,6 +60,40 @@
 
 ; --------------------------------------------------------------
 ; Documentations for C++ bindings from libopenpsi
+(set-procedure-property! psi-rule 'documentation
+"
+  psi-rule CONTEXT ACTION GOAL TV DEMAND - create a psi-rule.
+
+  Associate an action with a context such that, if the action is
+  taken, then the goal will be satisfied. The structure of a rule
+  is in the form of an `ImplicationLink`:
+
+    (ImplicationLink TV
+        (SequentialAndLink
+            CONTEXT
+            ACTION)
+        GOAL)
+
+  where:
+  CONTEXT is a scheme list containing all of the terms that should
+    be met for the ACTION to be taken. These are atoms that, when
+    evaluated, should return a true or false TV.  The action is taken
+    only if the boolean-AND of the return values is true.
+
+  ACTION is an evaluatable atom, i.e. it should return a TV when
+    evaluated by `cog-evaluate!`.
+
+  GOAL is an atom that represents what goal is affected when an action
+    is made in the specified context. If multiple goals are affected by
+    the context and action then multiple psi-rules should be created.
+
+  TV is the TruthValue assigned to the ImplicationLink. It should
+    be a SimpleTruthValue.
+
+  DEMAND is a Node, representing the demand that this rule affects.
+"
+)
+
 (set-procedure-property! psi-satisfiable? 'documentation
 "
   psi-satisfiable? RULE - Return a TV indicating if the context of
