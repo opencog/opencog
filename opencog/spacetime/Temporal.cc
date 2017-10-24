@@ -56,7 +56,7 @@ std::ostream& operator<<(std::ostream& out, const Temporal& t)
 // USED TO SEEK MEMORY LEAK
 //int Temporal::numTemporals = 0;
 
-void Temporal::init(octime_t a, octime_t b, bool normal) throw (InvalidParamException)
+void Temporal::init(octime_t a, octime_t b, bool normal)
 {
 
     // USED TO SEEK MEMORY LEAK

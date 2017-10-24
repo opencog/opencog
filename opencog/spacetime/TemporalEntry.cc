@@ -122,7 +122,7 @@ bool TemporalEntry::contains(Temporal* t)
     return false;
 }
 
-TemporalEntry* TemporalEntry::intersection(TemporalEntry* set1, TemporalEntry* set2) throw (InconsistenceException)
+TemporalEntry* TemporalEntry::intersection(TemporalEntry* set1, TemporalEntry* set2)
 {
 
     TemporalEntry** sets = new TemporalEntry*[2];
@@ -222,7 +222,7 @@ TemporalEntry* TemporalEntry::add(TemporalEntry* sortedSet, Temporal* t)
     }
 }
 
-TemporalEntry* TemporalEntry::intersection(TemporalEntry** sets, int n) throw (InconsistenceException)
+TemporalEntry* TemporalEntry::intersection(TemporalEntry** sets, int n)
 {
 
     // leave this method if there are no lists
@@ -390,7 +390,7 @@ std::string TemporalEntry::toString()
     return answer;
 }
 
-Temporal** TemporalEntry::toTemporalVector(Temporal**& vector, int& n) throw (InconsistenceException)
+Temporal** TemporalEntry::toTemporalVector(Temporal**& vector, int& n)
 {
     n = getSize();
     vector = new Temporal*[n];

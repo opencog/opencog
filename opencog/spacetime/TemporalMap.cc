@@ -80,7 +80,7 @@ TemporalMap::TemporalMap(int size, bool useMutex)
     init(size, useMutex);
 }
 
-void TemporalMap::add(Temporal* key, void *element) throw (RuntimeException)
+void TemporalMap::add(Temporal* key, void *element)
 {
 
     lock();
@@ -217,7 +217,7 @@ bool TemporalMapIterator::hasNext()
     return current != map->hashMap->end();
 }
 
-Temporal* TemporalMapIterator::next() throw (IndexErrorException)
+Temporal* TemporalMapIterator::next()
 {
 
     if (!hasNext()) {

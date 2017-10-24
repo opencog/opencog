@@ -116,8 +116,7 @@ namespace opencog
          *        SpaceMap handle or if there is no SpaceMap for that node
          *         in SpaceServer
          */
-        const SpaceMap& getMap(Handle spaceMapHandle) const
-            throw (opencog::RuntimeException, std::bad_exception);
+        const SpaceMap& getMap(Handle spaceMapHandle) const;
 
         /**
          * Gets a const reference to a specific EntityRecorder for make queries
@@ -125,8 +124,7 @@ namespace opencog
          *        SpaceMap handle or if there is no EntityRecorder for that node
          *         in SpaceServer
          */
-        const EntityRecorder& getEntityRecorder(Handle spaceMapHandle) const
-            throw (opencog::RuntimeException, std::bad_exception);
+        const EntityRecorder& getEntityRecorder(Handle spaceMapHandle) const;
 
         /**
          * Checks if this SpaceServer contains a map with the given handle
@@ -137,8 +135,7 @@ namespace opencog
          * Gets a const reference to the latest (more recent) map in this
          * SpaceServer
          */
-        const SpaceMap& getLatestMap() const
-            throw (opencog::AssertionException, std::bad_exception);
+        const SpaceMap& getLatestMap() const;
 
         const SpaceServer::EntityRecorder& getLatestEntityRecorder() const;
 

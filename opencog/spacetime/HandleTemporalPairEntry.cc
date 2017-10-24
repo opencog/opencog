@@ -209,7 +209,7 @@ HandleTemporalPairEntry* HandleTemporalPairEntry::add(HandleTemporalPairEntry* s
     }
 }
 
-HandleTemporalPairEntry* HandleTemporalPairEntry::intersection(HandleTemporalPairEntry** sets, unsigned int n) throw (InconsistenceException)
+HandleTemporalPairEntry* HandleTemporalPairEntry::intersection(HandleTemporalPairEntry** sets, unsigned int n)
 {
 
     // leave this method if there are no lists
@@ -364,7 +364,7 @@ std::string HandleTemporalPairEntry::toString()
     return answer;
 }
 
-HandleTemporalPair* HandleTemporalPairEntry::toHandleTemporalPairVector(HandleTemporalPair*& vector, int& n) throw (InconsistenceException)
+HandleTemporalPair* HandleTemporalPairEntry::toHandleTemporalPairVector(HandleTemporalPair*& vector, int& n)
 {
     n = getSize();
     vector = new HandleTemporalPair[n];
