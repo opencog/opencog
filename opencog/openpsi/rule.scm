@@ -103,20 +103,6 @@ there are 100K rules!
 )
 
 ; --------------------------------------------------------------
-(define (psi-get-all-actions)
-"
-  Returns a list of all openpsi actions.
-
-XXX FIXME this is borken, and does not work.
-actions are EvaluationLinks, not schemas or ExecutionOutputLinks.
-"
-    ;(append
-    ;    (cog-chase-link 'MemberLink 'ExecutionOutputLink psi-action)
-    ;    (cog-chase-link 'MemberLink 'DefinedSchemaNode psi-action))
-    (list)
-)
-
-; --------------------------------------------------------------
 (define (psi-action? ATOM)
 "
   Check if ATOM is an action and return `#t`, if it is, and `#f`
