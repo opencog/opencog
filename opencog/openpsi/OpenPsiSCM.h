@@ -35,29 +35,56 @@ public:
 
 private:
   /**
-   * Returns TRUE_TV or FALSE_TV depending on whether the context of the
-   * given psi-rule is satisfiable or not.
+   * Add psi-rule.
    *
-   * @param himplication A psi-rule.
+   * @return An implication link which is a psi-rule.
    */
-  TruthValuePtr satisfiable(const Handle& himplication);
+  Handle add_rule(const HandleSeq& context, const Handle& action,
+    const Handle& goal, const TruthValuePtr stv, const Handle& demand);
+
+  /**
+   * Get the action of the given rule.
+   *
+   * @param rule A psi-rule.
+   * @return A handle of the action atom.
+   */
+  Handle get_action(const Handle& rule);
+
+  /**
+   * Get the context of the given rule.
+   *
+   * @param rule A psi-rule.
+   * @return A vector of atoms that form the context of the given rule.
+   */
+  HandleSeq& get_context(const Handle& rule);
+
+  /**
+   * Get the goal of the given rule.
+   *
+   * @param rule A psi-rule.
+   * @return A handle of the goal atom.
+   */
+  Handle get_goal(const Handle& rule);
 
   /**
    * Instantiates the action of the psi-rule if their is an entry in
    * the cache for the groundings of its context.
    *
-   * @param himplication A psi-rule.
+   * @param rule A psi-rule.
    */
-  Handle psi_imply(const Handle& himplication);
+  Handle imply(const Handle& rule);
 
   /**
-   * Add psi-rule.
+   * Returns TRUE_TV or FALSE_TV depending on whether the context of the
+   * given psi-rule is satisfiable or not.
    *
-   * @return An implication link which is a psi-rule.
+   * @param rule A psi-rule.
    */
-  Handle psi_rule(const HandleSeq& context, const Handle& action,
-    const Handle& goal, const TruthValuePtr stv, const Handle& demand);
+  TruthValuePtr is_satisfiable(const Handle& rule);
 
+  // ========================================================
+  // Boilerplate code.
+  // ========================================================
   /**
    * Init function for using with scm_with_guile. It creates the
    * openpsi scheme module and uses it by default.

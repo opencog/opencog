@@ -59,52 +59,6 @@
 )
 
 ; --------------------------------------------------------------
-(define* (psi-rule-old context action goal a-stv demand)
-"
-  psi-rule CONTEXT ACTION GOAL TV DEMAND - create a psi-rule.
-
-  Associate an action with a context such that, if the action is
-  taken, then the goal will be satisfied. The structure of a rule
-  is in the form of an `ImplicationLink`:
-
-    (ImplicationLink TV
-        (SequentialAndLink
-            CONTEXT
-            ACTION)
-        GOAL)
-
-  where:
-  CONTEXT is a scheme list containing all of the terms that should
-    be met for the ACTION to be taken. These are atoms that, when
-    evaluated, should return a true or false TV.  The action is taken
-    only if the boolean-AND of the return values is true.
-
-  ACTION is an evaluatable atom, i.e. it should return a TV when
-    evaluated by `cog-evaluate!`.
-
-  GOAL is an atom that represents what goal is affected when an action
-    is made in the specified context. If multiple goals are affected by
-    the context and action then multiple psi-rules should be created.
-
-  TV is the TruthValue assigned to the ImplicationLink. It should
-    be a SimpleTruthValue.
-
-  DEMAND is a Node, representing the demand that this rule affects.
-"
-    (let ((implication
-            (Implication a-stv (SequentialAndLink context action) goal)))
-
-        ; The membership below is used to simplify filtering and searching.
-        ; Other alternative designs are possible.
-        (MemberLink action psi-action)
-
-        (MemberLink implication demand)
-
-        implication
-    )
-)
-
-; --------------------------------------------------------------
 (define (psi-get-rules demand-node)
 "
   Returns a list of all psi-rules that affect the given demand.
@@ -149,20 +103,6 @@ there are 100K rules!
 )
 
 ; --------------------------------------------------------------
-(define (psi-get-all-actions)
-"
-  Returns a list of all openpsi actions.
-
-XXX FIXME this is borken, and does not work.
-actions are EvaluationLinks, not schemas or ExecutionOutputLinks.
-"
-    ;(append
-    ;    (cog-chase-link 'MemberLink 'ExecutionOutputLink psi-action)
-    ;    (cog-chase-link 'MemberLink 'DefinedSchemaNode psi-action))
-    (list)
-)
-
-; --------------------------------------------------------------
 (define (psi-action? ATOM)
 "
   Check if ATOM is an action and return `#t`, if it is, and `#f`
@@ -170,48 +110,6 @@ actions are EvaluationLinks, not schemas or ExecutionOutputLinks.
   represented by (ConceptNode \"OpenPsi: action\").
 "
     (not (null?  (cog-link 'MemberLink ATOM psi-action)))
-)
-
-; --------------------------------------------------------------
-(define (get-c&a impl-link)
-"
-  Get context and action list from ImplicationLink.
-"
-    (cog-outgoing-set (cog-outgoing-atom impl-link 0))
-)
-
-; --------------------------------------------------------------
-(define (psi-get-context rule)
-"
-  psi-get-context RULE - Get the context of the openpsi-rule RULE.
-
-  Returns a scheme list of all of the atoms that form the context.
-"
-    (drop-right (get-c&a rule) 1)
-)
-
-; --------------------------------------------------------------
-(define (psi-get-action rule)
-"
-  psi-get-action RULE
-
-  Get the action of the openpsi-rule RULE.  Returns the single
-  atom that is the action.
-"
-    ; Instead of doing this, it might be more efficient to get
-    ; the size of the outgoing set, and ask for the last element
-    ; directly, using (cog-outgoing-atom n-1).
-    (car (take-right (get-c&a rule) 1))
-)
-
-; --------------------------------------------------------------
-(define (psi-get-goal rule)
-"
-  psi-get-goal RULE
-
-  Get the goal of the openpsi-rule RULE.
-"
-    (cog-outgoing-atom rule 1)
 )
 
 ; --------------------------------------------------------------
@@ -289,50 +187,6 @@ actions are EvaluationLinks, not schemas or ExecutionOutputLinks.
 )
 
 ; --------------------------------------------------------------
-; An alist used to cache the result of evaluating psi-satisfiable?. The keys
-; are psi-rules and value is TRUE_TV or FALSE_TV. This is a cache of results.
-(define psi-satisfiablity-alist '())
-
-; --------------------------------------------------------------
-(define (satisfiable? rule)
-"
-  Returns the satisfiablity result of the rule from cache. `psi-satisfiable?`
-  should have been run for the given rule somewhere in the control flow before
-  calling this function.
-
-  rule:
-  - A psi-rule to be checked if its context is satisfiable.
-"
-    (assoc-ref psi-satisfiablity-alist rule)
-)
-
-; --------------------------------------------------------------
-(define (psi-satisfiable? rule)
-"
-  psi-satisfiable? RULE - Return a TV indicating if the context of
-  the RULE is satisfiable.
-
-  Satisfaction is determined by evaluating the context part of the
-  rule. If the context requires grounding in the atomspace, then
-  this is performed. That is, if the context contains variables
-  that require grounding, then this is performed; if the context is
-  not groundable, then the rule is not satisfiable.
-
-  The current implementation returns TRUE_TV if the context is
-  satisfiable, else it returns FALSE_TV. A later design point
-  is to have a weighted, probabilistic value to be returned.
-"
-    (define result (cog-evaluate!
-        (SatisfactionLink (AndLink (psi-get-context rule)))))
-
-    ; NOTE: stv are choosen as the return values so as to make the function
-    ; usable in evaluatable-terms.
-    (set! psi-satisfiablity-alist
-        (assoc-set! psi-satisfiablity-alist rule result))
-
-    result
-)
-
 ; Utility wrapper for above; returns crisp #t or #f
 (define (is-satisfiable? RULE)
     (equal? (stv 1 1) (psi-satisfiable? RULE))

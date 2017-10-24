@@ -36,7 +36,7 @@
          (rules-satisfied
            (append-map
              (lambda (r)
-               (if (equal? (stv 1 1) (psi-satisfy r))
+               (if (equal? (stv 1 1) (psi-satisfiable? r))
                    (list r)
                    '()))
              rules-matched)))

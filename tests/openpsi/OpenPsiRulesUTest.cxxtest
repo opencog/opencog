@@ -119,10 +119,11 @@ public:
     logger().info("END TEST: %s", __FUNCTION__);
   }
 
-  // Check OpenPsiRules::get_context is behaving as expected. If the rule
+  // Check OpenPsiRules::get_context, OpenPsiRules::get_action, and
+  // OpenPsiRules::get_goal are behaving as expected. If the rule
   // is added into the atomspace using OpenPsiRules::add_rule then it
   // should behave as tested here.
-  void test_get_context()
+  void test_rule_get_functions()
   {
     logger().info("BEGIN TEST: %s", __FUNCTION__);
 
@@ -137,21 +138,37 @@ public:
     // the index doesn't know about it.
     Handle rule_2 = _scm->eval_h("(rule-2-cpp)");
     CHKERR
-    HandleSeq& result_1 = OpenPsiRules::get_context(rule_2);
-    TSM_ASSERT_EQUALS("Expected to be empty", 0, result_1.size());
+    Handle result_1_1 = OpenPsiRules::get_action(rule_2);
+    TS_ASSERT_EQUALS(Handle::UNDEFINED, result_1_1);
+
+    HandleSeq& result_1_2 = OpenPsiRules::get_context(rule_2);
+    TS_ASSERT_EQUALS(0, result_1_2.size());
+
+    Handle result_1_3 = OpenPsiRules::get_goal(rule_2);
+    TS_ASSERT_EQUALS(Handle::UNDEFINED, result_1_3);
 
     // Test 2:
     // If the rule is added using OpenPsiRules::add_rule then
     // the index is aware of it.
     _scm->eval_h("(rule-2)");
     CHKERR
+    Handle expected_action_2 = _scm->eval_h("action-2");
+    CHKERR
+    Handle result_2_1 = OpenPsiRules::get_action(rule_2);
+    TS_ASSERT_EQUALS(expected_action_2, result_2_1);
+
     HandleSeq expected_context_2 = \
     _scm->eval_h("(context-2-cpp)")->getOutgoingSet();
     CHKERR
-    HandleSeq& result_2 = OpenPsiRules::get_context(rule_2);
+    HandleSeq& result_2_2 = OpenPsiRules::get_context(rule_2);
     // A Link is created so as to use operator==.
-    TSM_ASSERT_EQUALS("Expected to be equal",
-      *(createLink(expected_context_2).get()), *(createLink(result_2).get()));
+    TS_ASSERT_EQUALS(*(createLink(expected_context_2).get()),
+      *(createLink(result_2_2).get()));
+
+    Handle expected_goal_2 = _scm->eval_h("goal-2");
+    CHKERR
+    Handle result_2_3 = OpenPsiRules::get_goal(rule_2);
+    TS_ASSERT_EQUALS(expected_goal_2, result_2_3);
 
     logger().info("END TEST: %s", __FUNCTION__);
   }
