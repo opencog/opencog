@@ -30,7 +30,6 @@
 
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/cogserver/server/CogServer.h>
-#include <opencog/attentionbank/AttentionBank.h>
 
 #include <opencog/learning/dimensionalembedding/DimEmbedModule.h>
 
@@ -163,7 +162,6 @@ public:
     {
         CogServer& cs = cogserver();
         AtomSpace* atomSpace = &cs.getAtomSpace();
-        AttentionBank* bank = &attentionbank(atomSpace);
         atomSpace->clear();
         DimEmbedModule dimEmbed = DimEmbedModule(cs);
         

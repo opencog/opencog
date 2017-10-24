@@ -173,14 +173,14 @@ bool ReportRank::renorm_sense(const Handle& word_sense_h,
 
 #ifdef DEBUG
 	if (hi_score < score) {
-		hi_sense = NodeCast(word_sense_h)->getName().c_str();
+		hi_sense = word_sense_h->getName().c_str();
 		hi_score = score;
 	}
 	if (0.0 < score) {
 		choosen_sense_count += 1.0;
 	
 #if 0
-printf ("duu word sense=%s score=%f\n", NodePtr(word_sense_h)->getName().c_str(), score);
+printf ("duu word sense=%s score=%f\n", word_sense_h->getName().c_str(), score);
 fflush (stdout);
 #endif
 	}

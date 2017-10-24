@@ -143,8 +143,7 @@ void SenseRank::log_bad_sense(const Handle& word_sense_h, const std::string& msg
         bool is_error)
 {
     const char *s = "";
-    NodePtr n(NodeCast(word_sense_h));
-    if (n) s = n->getName().c_str();
+    if (word_sense_h->isNode()) s = word_sense_h->getName().c_str();
     if (is_error) logger().error("SenseRank: %s: %s", msg.c_str(), s);
     else logger().info("SenseRank: %s: %s", msg.c_str(), s);
 }
@@ -159,7 +158,7 @@ bool SenseRank::start_sense(const Handle& word_sense_h,
                             const Handle& sense_link_h)
 {
 #ifdef DEBUG
-	printf ("; SenseRank start at %s\n", NodeCast(word_sense_h)->getName().c_str());
+	printf ("; SenseRank start at %s\n", word_sense_h->getName().c_str());
 #endif
 
 	if (Handle::UNDEFINED == sense_link_h) {
@@ -237,9 +236,9 @@ void SenseRank::rank_sense(const Handle& sense_link_h)
 	double old_rank = sense_link_h->getTruthValue()->getCount();
 
 #ifdef DEBUG
-	HandleSeq oset = LinkCast(sense_link_h)->getOutgoingSet();
+	HandleSeq oset = sense_link_h->getOutgoingSet();
 	printf ("; SenseRank: sense %s was %g new %g delta=%g\n",
-	        NodePtr(oset[1])->getName().c_str(),
+	        oset[1]->getName().c_str(),
            old_rank, rank_sum, fabs(rank_sum - old_rank));
 #endif
 

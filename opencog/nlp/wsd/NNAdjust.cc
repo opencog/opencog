@@ -76,8 +76,8 @@ bool NNAdjust::adjust_relation(const std::string &relname,
 {
 	if (relname.compare("_nn")) return false;
 #ifdef DEBUG
-	const std::string &fn = NodeCast(first)->getName();
-	const std::string &sn = NodeCast(second)->getName();
+	const std::string &fn = first->getName();
+	const std::string &sn = second->getName();
 	printf("_nn(%s, %s)\n", fn.c_str(), sn.c_str());
 #endif
 
@@ -139,14 +139,14 @@ bool NNAdjust::sense_pair(const Handle& pair_link)
 	if (classserver().isA(t, COSENSE_LINK)) return false;
 
 	// If this link is not linking the first and second sense, skip it.
-	HandleSeq outset = LinkCast(pair_link)->getOutgoingSet();
+	const HandleSeq& outset = pair_link->getOutgoingSet();
 	if ((first_sense_link != outset[0]) && 
 	    (first_sense_link != outset[1])) return false;
 
 	// If we are here, we've got the link that we want. 
 	// Increase its strength.
 	TruthValuePtr tv = pair_link->getTruthValue();
-	float strength = tv->getMean() * (float) strength_adjust;
+	double strength = tv->getMean() * strength_adjust;
 	TruthValuePtr stv(SimpleTruthValue::createTV(strength, tv->getConfidence()));
 
 	pair_link->setTruthValue(stv);

@@ -132,8 +132,8 @@ SimpleTruthValuePtr SenseSimilarityLCH::similarity(const Handle& fs,
 
 #ifdef DEBUG
 	printf("(%s, %s) dist=%d sim=%g\n",
-	       NodeCast(first_sense)->getName().c_str(),
-	       NodeCast(second_sense)->getName().c_str(),
+	       first_sense->getName().c_str(),
+	       second_sense->getName().c_str(),
 	       min_cnt, sim);
 	// printf("----\n");
 #endif

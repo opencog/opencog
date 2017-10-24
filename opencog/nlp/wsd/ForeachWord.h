@@ -154,7 +154,7 @@ class PrivateUseOnlyPOSFilter
 			Handle h(fl.follow_binary_link(word_sense, PART_OF_SPEECH_LINK));
 
 			// The 'no-sense' special-case sense will not have a pos.
-			const std::string &sense_pos = NodeCast(h)->getName();
+			const std::string &sense_pos = h->getName();
 
 			// If there's no POS match, skip this sense.
 			if (desired_pos->compare(sense_pos)) return false;
@@ -204,9 +204,8 @@ inline const std::string get_part_of_speech(const Handle& word_instance)
 	// Find the part-of-speech for this word instance.
 	FollowLink fl;
 	Handle inst_pos(fl.follow_binary_link(word_instance, PART_OF_SPEECH_LINK));
-	NodePtr n(NodeCast(inst_pos));
-	if (NULL == n) return empty;
-	return n->getName();
+	if (not inst_pos->isLink()) return empty;
+	return inst_pos->getName();
 }
 
 /**
@@ -284,19 +283,19 @@ template <typename T>
 class PrivateUseOnlyRelexRelationFinder
 {
 	private:
-		LinkPtr listlink;
+		Handle listlink;
 		bool look_for_eval_link(const Handle& h)
 		{
 			Type t = h->getType();
 			if (t != EVALUATION_LINK) return false;
 
 			// If we are here, lets see if the first node is a ling rel.
-			Handle a(LinkCast(h)->getOutgoingAtom(0));
+			const Handle& a(h->getOutgoingAtom(0));
 			if (a->getType() != DEFINED_LINGUISTIC_RELATIONSHIP_NODE) return false;
 
 			// OK, we've found a relationship. Get the second member of
 			// the list link, and call the user callback with it.
-			const std::string &relname = NodeCast(a)->getName();
+			const std::string &relname = a->getName();
 
 			const HandleSeq outset = listlink->getOutgoingSet();
 
@@ -315,7 +314,7 @@ class PrivateUseOnlyRelexRelationFinder
 		bool look_for_list_link(const Handle& h)
 		{
 			if (h->getType() != LIST_LINK) return false;
-			listlink = LinkCast(h);
+			listlink = h;
 
 			// If we are here, lets see if the list link is in eval link.
 			h->foreach_incoming(&PrivateUseOnlyRelexRelationFinder::look_for_eval_link, this);
@@ -347,7 +346,7 @@ foreach_relex_relation(const Handle& h,
  */
 inline Handle get_word_instance_of_sense_link(const Handle& h)
 {
-	return LinkCast(h)->getOutgoingAtom(0);
+	return h->getOutgoingAtom(0);
 }
 
 /**
@@ -362,7 +361,7 @@ inline Handle get_word_instance_of_sense_link(const Handle& h)
  */
 inline Handle get_word_sense_of_sense_link(const Handle& h)
 {
-	return LinkCast(h)->getOutgoingAtom(1);
+	return h->getOutgoingAtom(1);
 }
 
 } // namespace opencog

@@ -49,20 +49,20 @@ namespace opencog
             Handle resultSetLink = satisfying_set(&atomSpace, getLink);
 
             if (numberOfPredicateValue == 1) {
-                HandleSeq resultNodeSet = (LinkCast(resultSetLink)->getOutgoingSet());
+                const HandleSeq& resultNodeSet = resultSetLink->getOutgoingSet();
                 if (resultNodeSet.empty()) {
                     return result;
                 }
-                result.push_back(NodeCast(resultNodeSet[0])->getName());
+                result.push_back(resultNodeSet[0]->getName());
             } else {
                 //more than one predicate value, ex.size
-                HandleSeq resultListLinkSet = (LinkCast(resultSetLink)->getOutgoingSet());
+                const HandleSeq& resultListLinkSet = resultSetLink->getOutgoingSet();
                 if (resultListLinkSet.empty()) {
                     return result;
                 }
-                HandleSeq resultListLinkOutgoings = LinkCast(resultListLinkSet[0])->getOutgoingSet();
+                const HandleSeq& resultListLinkOutgoings = resultListLinkSet[0]->getOutgoingSet();
                 for (auto predicateValueNode : resultListLinkOutgoings) {
-                    result.push_back(NodeCast(predicateValueNode)->getName());
+                    result.push_back(predicateValueNode->getName());
                 }
             }
             return result;
