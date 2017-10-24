@@ -54,7 +54,7 @@ private:
     /**
      * Initializes the attributes of this Temporal object. Used by constructors only.
      */
-    void init(octime_t, octime_t, bool) throw (InvalidParamException);
+    void init(octime_t, octime_t, bool);
 
     /**
      * Creates a unique instance for UNDEFINED_TEMPORAL object

@@ -121,7 +121,6 @@ void SpaceServer::setAgentHeight(unsigned int _height, Handle spaceMapHandle)
 }
 
 const SpaceServer::SpaceMap& SpaceServer::getMap(Handle spaceMapHandle) const
-    throw (opencog::RuntimeException, std::bad_exception)
 {
     logger().fine("SpaceServer::getMap() for mapHandle = %s",
             spaceMapHandle != Handle::UNDEFINED ?
@@ -140,7 +139,6 @@ const SpaceServer::SpaceMap& SpaceServer::getMap(Handle spaceMapHandle) const
 }
 
 const EntityRecorder& SpaceServer::getEntityRecorder(Handle spaceMapHandle) const
-    throw (opencog::RuntimeException, std::bad_exception)
 {
     logger().fine("SpaceServer::getEntityRecorder() for mapHandle = %s",
             spaceMapHandle != Handle::UNDEFINED ?
@@ -170,7 +168,6 @@ const bool SpaceServer::isLatestMapValid() const
 }
 
 const SpaceServer::SpaceMap& SpaceServer::getLatestMap() const
-    throw (opencog::AssertionException, std::bad_exception)
 {
     return getMap(curSpaceMapHandle);
 }

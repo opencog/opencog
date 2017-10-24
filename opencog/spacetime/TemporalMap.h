@@ -130,7 +130,7 @@ public:
      * @param Key.
      * @param Element.
      */
-    void add(Temporal*, void *) throw (RuntimeException);
+    void add(Temporal*, void *);
 
     /**
      * Returns the element for a given key.
@@ -244,7 +244,7 @@ public:
      *
      * @return Next key of the iterator and advances.
      */
-    Temporal* next() throw (IndexErrorException);
+    Temporal* next();
 };
 
 /** @}*/

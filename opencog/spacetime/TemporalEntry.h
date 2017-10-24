@@ -123,7 +123,7 @@ public:
      * @return Pointer passed by reference where the vector will be
      * allocated. Same as the first parameter.
      */
-    Temporal** toTemporalVector(Temporal**&, int&) throw (InconsistenceException);
+    Temporal** toTemporalVector(Temporal**&, int&);
 
     /**
      * Returns a HandlEntry containing all data in the array passed
@@ -160,7 +160,7 @@ public:
      * @param Second linked-list.
      * @return The intersection between two linked-lists.
      */
-    static TemporalEntry* intersection(TemporalEntry*, TemporalEntry*) throw (InconsistenceException);
+    static TemporalEntry* intersection(TemporalEntry*, TemporalEntry*);
 
     /**
      * Returns the intersection between several linked-lists. The n
@@ -170,7 +170,7 @@ public:
      * @param Length of the array of linked-lists.
      * @return Intersection between the given linked-lists.
      */
-    static TemporalEntry* intersection(TemporalEntry**, int) throw (InconsistenceException);
+    static TemporalEntry* intersection(TemporalEntry**, int);
 
     /**
      * This method is internal for the intersection calculation methods.

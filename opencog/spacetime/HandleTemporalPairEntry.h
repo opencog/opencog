@@ -144,7 +144,7 @@ public:
      * @return Pointer passed by reference where the vector will be
      * allocated. Same as the first parameter.
      */
-    HandleTemporalPair* toHandleTemporalPairVector(HandleTemporalPair*&, int&) throw (InconsistenceException);
+    HandleTemporalPair* toHandleTemporalPairVector(HandleTemporalPair*&, int&);
 
     /**
      * Returns a HandlEntry containing all data in the array passed
@@ -194,7 +194,7 @@ public:
      * @param Length of the array of linked-lists.
      * @return Intersection between the given linked-lists.
      */
-    static HandleTemporalPairEntry* intersection(HandleTemporalPairEntry**, unsigned int) throw (InconsistenceException);
+    static HandleTemporalPairEntry* intersection(HandleTemporalPairEntry**, unsigned int);
 
     /**
      * This method is internal for the intersection calculation methods.
