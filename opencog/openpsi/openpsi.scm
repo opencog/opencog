@@ -29,7 +29,7 @@
 
     ; From rule.scm
     psi-get-rules psi-get-all-rules psi-rule? psi-get-all-actions psi-action?
-    psi-get-goal psi-rule-alias
+    psi-rule-alias
     psi-partition-rule-with-alias psi-related-goals
     psi-rule-satisfiability psi-get-satisfiable-rules
     psi-get-weighted-satisfiable-rules psi-get-all-satisfiable-rules
@@ -45,7 +45,12 @@
     psi-get-members
 
     ; C++ bindings from libopenpsi
-     psi-get-action psi-get-context psi-imply psi-rule psi-satisfiable?
+    psi-get-action
+    psi-get-context
+    psi-get-goal
+    psi-imply
+    psi-rule
+    psi-satisfiable?
     )
 )
 
@@ -74,6 +79,14 @@
   psi-get-context RULE - Get the context of the openpsi-rule RULE.
 
   Returns a scheme list of all of the atoms that form the context.
+"
+)
+
+(set-procedure-property! psi-get-goal 'documentation
+"
+  psi-get-goal RULE
+
+  Get the goal of the openpsi-rule RULE.
 "
 )
 

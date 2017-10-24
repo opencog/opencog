@@ -320,3 +320,7 @@
 (define (test_psi_get_context_1)
   (equal? (Set context-1) (Set (psi-get-context (rule-1))))
 )
+
+(define (test_psi_get_goal_1)
+  (equal? goal-1 (psi-get-goal (rule-1)))
+)

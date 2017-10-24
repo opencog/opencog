@@ -113,16 +113,6 @@ there are 100K rules!
 )
 
 ; --------------------------------------------------------------
-(define (psi-get-goal rule)
-"
-  psi-get-goal RULE
-
-  Get the goal of the openpsi-rule RULE.
-"
-    (cog-outgoing-atom rule 1)
-)
-
-; --------------------------------------------------------------
 (define (psi-rule-set-alias psi-rule name)
 "
   psi-rule-set-alias PSI-RULE NAME

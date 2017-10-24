@@ -114,6 +114,20 @@ public:
         logger().info("END TEST: %s", __FUNCTION__);
     }
 
+    // Check the scheme function `psi-get-goal`
+    void test_psi_get_goal()
+    {
+        logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+        // Test 1:
+        // For single atomspace
+        auto result_1 = _scm->eval("(test_psi_get_goal_1)");
+        CHKERR
+        TSM_ASSERT_EQUALS("Expected `#t`", "#t\n" , result_1);
+
+        logger().info("END TEST: %s", __FUNCTION__);
+    }
+
     // Check the scheme function `psi-satisfiable?`
     // NOTE: The name of the test function uses `__predicate` in place of `?`
     void test_psi_satisfiable__predicate()

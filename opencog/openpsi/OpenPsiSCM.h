@@ -59,6 +59,14 @@ private:
   HandleSeq& get_context(const Handle& rule);
 
   /**
+   * Get the goal of the given rule.
+   *
+   * @param rule A psi-rule.
+   * @return A handle of the goal atom.
+   */
+  Handle get_goal(const Handle& rule);
+
+  /**
    * Instantiates the action of the psi-rule if their is an entry in
    * the cache for the groundings of its context.
    *
