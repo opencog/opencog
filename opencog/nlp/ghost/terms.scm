@@ -142,11 +142,13 @@
 (define (context-function NAME ARGS)
   "Occurrence of a function in the context of a rule.
    The Scheme function named NAME should have already been defined."
+  ; TODO: Check to make sure the function has been defined
   (Evaluation (GroundedPredicate (string-append "scm: " NAME)) (List ARGS)))
 
 (define (action-function NAME ARGS)
   "Occurrence of a function in the action of a rule.
    The Scheme function named NAME should have already been defined."
+  ; TODO: Check to make sure the function has been defined
   (ExecutionOutput (GroundedSchema (string-append "scm: " NAME)) (List ARGS)))
 
 (define-public (ghost-pick-action ACTIONS)
