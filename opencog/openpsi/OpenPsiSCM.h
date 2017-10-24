@@ -35,22 +35,6 @@ public:
 
 private:
   /**
-   * Returns TRUE_TV or FALSE_TV depending on whether the context of the
-   * given psi-rule is satisfiable or not.
-   *
-   * @param himplication A psi-rule.
-   */
-  TruthValuePtr satisfiable(const Handle& himplication);
-
-  /**
-   * Instantiates the action of the psi-rule if their is an entry in
-   * the cache for the groundings of its context.
-   *
-   * @param himplication A psi-rule.
-   */
-  Handle imply(const Handle& himplication);
-
-  /**
    * Add psi-rule.
    *
    * @return An implication link which is a psi-rule.
@@ -58,6 +42,25 @@ private:
   Handle add_rule(const HandleSeq& context, const Handle& action,
     const Handle& goal, const TruthValuePtr stv, const Handle& demand);
 
+  /**
+   * Instantiates the action of the psi-rule if their is an entry in
+   * the cache for the groundings of its context.
+   *
+   * @param rule A psi-rule.
+   */
+  Handle imply(const Handle& rule);
+
+  /**
+   * Returns TRUE_TV or FALSE_TV depending on whether the context of the
+   * given psi-rule is satisfiable or not.
+   *
+   * @param rule A psi-rule.
+   */
+  TruthValuePtr is_satisfiable(const Handle& rule);
+
+  // ========================================================
+  // Boilerplate code.
+  // ========================================================
   /**
    * Init function for using with scm_with_guile. It creates the
    * openpsi scheme module and uses it by default.
