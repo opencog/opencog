@@ -86,6 +86,20 @@ public:
         _scm = nullptr;
     }
 
+    // Check the scheme function `psi-get-action`
+    void test_psi_get_action()
+    {
+        logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+        // Test 1:
+        // For single atomspace
+        auto result_1 = _scm->eval("(test_psi_get_action_1)");
+        CHKERR
+        TSM_ASSERT_EQUALS("Expected `#t`", "#t\n" , result_1);
+
+        logger().info("END TEST: %s", __FUNCTION__);
+    }
+
     // Check the scheme function `psi-get-context`
     void test_psi_get_context()
     {

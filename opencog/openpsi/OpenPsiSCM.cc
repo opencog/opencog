@@ -38,6 +38,9 @@ OpenPsiSCM::OpenPsiSCM()
 
 void OpenPsiSCM::init()
 {
+  define_scheme_primitive("psi-get-action", &OpenPsiSCM::get_action,
+    this, "openpsi");
+
   define_scheme_primitive("psi-get-context", &OpenPsiSCM::get_context,
     this, "openpsi");
 
@@ -59,6 +62,11 @@ Handle OpenPsiSCM::add_rule(const HandleSeq& context, const Handle& action,
   // to be handled?
   OpenPsiRules rule_constructor(as);
   return rule_constructor.add_rule(context, action, goal, stv, demand);
+}
+
+Handle OpenPsiSCM::get_action(const Handle& rule)
+{
+  return OpenPsiRules::get_action(rule);
 }
 
 HandleSeq& OpenPsiSCM::get_context(const Handle& rule)

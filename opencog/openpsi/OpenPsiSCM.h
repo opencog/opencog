@@ -43,6 +43,14 @@ private:
     const Handle& goal, const TruthValuePtr stv, const Handle& demand);
 
   /**
+   * Get the action of the given rule.
+   *
+   * @param rule A psi-rule.
+   * @return A handle of the action atom.
+   */
+  Handle get_action(const Handle& rule);
+
+  /**
    * Get the context of the given rule.
    *
    * @param rule A psi-rule.

@@ -113,28 +113,6 @@ there are 100K rules!
 )
 
 ; --------------------------------------------------------------
-(define (get-c&a impl-link)
-"
-  Get context and action list from ImplicationLink.
-"
-    (cog-outgoing-set (cog-outgoing-atom impl-link 0))
-)
-
-; --------------------------------------------------------------
-(define (psi-get-action rule)
-"
-  psi-get-action RULE
-
-  Get the action of the openpsi-rule RULE.  Returns the single
-  atom that is the action.
-"
-    ; Instead of doing this, it might be more efficient to get
-    ; the size of the outgoing set, and ask for the last element
-    ; directly, using (cog-outgoing-atom n-1).
-    (car (take-right (get-c&a rule) 1))
-)
-
-; --------------------------------------------------------------
 (define (psi-get-goal rule)
 "
   psi-get-goal RULE
