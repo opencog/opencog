@@ -278,23 +278,23 @@
           (eval-string (string-append "(list " $4 ")"))
           (eval-string (string-append "(list " $5 ")"))
           (eval-string (string-append "(list " $1 ")"))
-          (list) $3)
+          $3)
       (rule-goal RESPONDERS context action) :
         (create-rule
           (eval-string (string-append "(list " $3 ")"))
           (eval-string (string-append "(list " $4 ")"))
           (eval-string (string-append "(list " $1 ")"))
-          (list) "")
+          "")
       (RESPONDERS name context action) :
         (create-rule
           (eval-string (string-append "(list " $3 ")"))
           (eval-string (string-append "(list " $4 ")"))
-          (list) (list) $2)
+          (list) $2)
       (RESPONDERS context action) :
         (create-rule
           (eval-string (string-append "(list " $2 ")"))
           (eval-string (string-append "(list " $3 ")"))
-          (list) (list) "")
+          (list) "")
       (REJOINDERS context action) :
         (format #f "\nrejoinder: ~a\n~a\n~a" $1 $2 $3)
       (GAMBIT context action) : (format #f "gambit: ~a ~a" $2 $3)

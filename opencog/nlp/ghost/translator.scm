@@ -261,7 +261,7 @@
         (remove (lambda (sg) (any (lambda (g) (equal? (car sg) (car g))) GOAL))
                 shared-goals))))
 
-(define (create-rule PATTERN ACTION GOAL TOPIC NAME)
+(define (create-rule PATTERN ACTION GOAL NAME)
   "Top level translation function. Pattern is a quoted list of terms,
    and action is a quoted list of actions or a single action."
   (cog-logger-debug "In create-rule\nPATTERN = ~a\nACTION = ~a" PATTERN ACTION)
@@ -285,7 +285,9 @@
                           action
                           (psi-goal (car goal))
                           (stv (cdr goal) .9)
-                          (if (null? TOPIC) ghost-topic TOPIC)))
+                          (if (null? ghost-topic)
+                              (create-topic "Default Topic" '())
+                              ghost-topic)))
                       goals))))
     (lambda (key . parameters)
       (if (not (equal? key 'FeatureNotSupported))
@@ -326,6 +328,3 @@
   (set! ghost-topic (psi-demand (ghost-prefix TOPIC-NAME)))
   (for-each (lambda (kw) (Member kw ghost-topic)) (terms-to-atomese KEYWORDS))
   ghost-topic)
-
-; This is the default topic.
-(create-topic "Default Topic" '())

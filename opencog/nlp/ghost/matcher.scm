@@ -63,4 +63,5 @@
 (psi-set-action-selector
   (Put (DefinedSchema "Find Chat Rules")
        (DefinedSchema "Get Current Input"))
-  ghost-topic)
+  ; Component label
+  (Concept "GHOST"))
