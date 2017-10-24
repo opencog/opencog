@@ -324,7 +324,7 @@
   ; separate from the content, thus allowing learing, why?
 
   (set! ghost-topic (psi-demand (ghost-prefix TOPIC-NAME)))
-  (for-each (lambda (kw) (Member (Word kw) ghost-topic)) KEYWORDS)
+  (for-each (lambda (kw) (Member kw ghost-topic)) (terms-to-atomese KEYWORDS))
   ghost-topic)
 
 ; This is the default topic.
