@@ -141,17 +141,13 @@
 
 (define (context-function NAME ARGS)
   "Occurrence of a function in the context of a rule.
-   The DefinedPredicateNode named NAME should have already been defined."
-  (if (equal? 1 (length ARGS))
-      (Put (DefinedPredicate NAME) ARGS)
-      (Put (DefinedPredicate NAME) (List ARGS))))
+   The Scheme function named NAME should have already been defined."
+  (Evaluation (GroundedPredicate (string-append "scm: " NAME)) (List ARGS)))
 
 (define (action-function NAME ARGS)
   "Occurrence of a function in the action of a rule.
-   The DefinedSchemaNode named NAME should have already been defined."
-  (if (equal? 1 (length ARGS))
-      (Put (DefinedSchema NAME) ARGS)
-      (Put (DefinedSchema NAME) (List ARGS))))
+   The Scheme function named NAME should have already been defined."
+  (ExecutionOutput (GroundedSchema (string-append "scm: " NAME)) (List ARGS)))
 
 (define-public (ghost-pick-action ACTIONS)
   "The actual Scheme function being called by the GroundedSchemaNode
