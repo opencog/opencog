@@ -180,9 +180,9 @@ where
 
 A preproof is a back-inference-tree prefix (or suffix if you start
 from the axioms) of a complete proof of T. In other words it is a
-subtree with root T (as in graph theory, not computer data structure)
-of an inference tree proving T. The reason we use preproof as measure
-of success, as opposed to say the likelihood of finding a proof within
+subtree with root T (induced subtree, not bottom-up subtree) of an
+inference tree proving T. The reason we use preproof as measure of
+success, as opposed to say the likelihood of finding a proof within
 the allocated effort, is because it is independent on the difficulty
 of the problem. If we can find a preproof it means we're on the right
 track no matter what. This may hopefully make it easier to transfer
@@ -373,15 +373,18 @@ ImplicationScope <TV>
 where `<pattern>` is a predicate body involving all or some of the
 variables T, A, L and R.
 
+The other option is to specialize the preproof and expansion clauses
+instead of having an explicit `<pattern>` clause, as we'll see below.
+
 Finally, it's important to realize that B never needs to be
 instantiated. In other words, we don't need to try to expand A and
 produce B to estimate whether the expansion is worthwhile.
 
 ### Example
 
-In this example we craft a rule saying that if the letter in the
-target (or leaf) is A, then conditional instantiation almost surely
-produce a preproof. Such rule may look like
+In this example we craft a rule saying that if the first letter in the
+target (or premise leaf) is A, then conditional instantiation almost
+surely produces a preproof. Such rule may look like
 
 ```
 ImplicationScope <TV>
@@ -420,8 +423,65 @@ ImplicationScope <TV>
 You may notice that the inference rule has already been instantiated,
 here referred as `<conditional-instantiation>` to keep the example
 short. Also the `Predicate "first-letter-is-A"` should be expressed in
-terms of patterns mined by the pattern miner. It's note clear to me
-yet how this is gonna be done.
+terms of patterns mined by the pattern miner.
+
+The other option is to specialize the preproof and expansion clauses
+to capture that pattern.
+
+```
+ImplicationScope <TV>
+  VariableList
+    Variable "$T"  ;; Theorem/target to prove
+    TypedVariable  ;; and-BIT to expand
+      Variable "$A"
+      Type "BindLink"
+    Variable "$X"  ;; Second letter involved in the leaf to expand
+    TypedVariable  ;; Resulting and-BIT from the expansion of L from A with rule R
+      Variable "$B"
+      Type "BindLink"
+  And
+    Execution
+      GroundedSchema "expand-and-BIT"
+      List
+        Variable "$A"
+        Inheritance
+          Concept "A"
+          Variable "$X"
+        <conditional-instantiation>
+      Variable "$B"
+    Evaluation
+      Predicate "preproof-of"
+      List
+        Variable "$A"
+        Variable "$T"
+  Evaluation
+    Predicate "preproof-of"
+    List
+      Variable "$B"
+      Variable "$T"
+```
+
+As you may see, in the expansion clause
+
+```
+Variable "$L"
+```
+
+has been replaced by
+
+```
+Inheritance
+  Concept "A"
+  Variable "$X"
+```
+
+as a substitute for the pattern clause
+
+```
+    Evaluation
+      Predicate "first-letter-is-A"
+      Variable "$L"
+```
 
 Learn Inference Control Rules
 -----------------------------
