@@ -43,6 +43,14 @@ private:
     const Handle& goal, const TruthValuePtr stv, const Handle& demand);
 
   /**
+   * Get the context of the given rule.
+   *
+   * @param rule A psi-rule.
+   * @return A vector of atoms that form the context of the given rule.
+   */
+  HandleSeq& get_context(const Handle& rule);
+
+  /**
    * Instantiates the action of the psi-rule if their is an entry in
    * the cache for the groundings of its context.
    *

@@ -313,3 +313,6 @@
 ;    )
 ;)
 ; --------------------------------------------------------------
+(define (test_psi_get_context_1)
+  (equal? (Set context-1) (Set (psi-get-context (rule-1))))
+)

@@ -60,6 +60,14 @@
 
 ; --------------------------------------------------------------
 ; Documentations for C++ bindings from libopenpsi
+(set-procedure-property! psi-get-context 'documentation
+"
+  psi-get-context RULE - Get the context of the openpsi-rule RULE.
+
+  Returns a scheme list of all of the atoms that form the context.
+"
+)
+
 (set-procedure-property! psi-rule 'documentation
 "
   psi-rule CONTEXT ACTION GOAL TV DEMAND - create a psi-rule.

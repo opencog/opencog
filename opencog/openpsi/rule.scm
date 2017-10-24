@@ -135,16 +135,6 @@ actions are EvaluationLinks, not schemas or ExecutionOutputLinks.
 )
 
 ; --------------------------------------------------------------
-(define (psi-get-context rule)
-"
-  psi-get-context RULE - Get the context of the openpsi-rule RULE.
-
-  Returns a scheme list of all of the atoms that form the context.
-"
-    (drop-right (get-c&a rule) 1)
-)
-
-; --------------------------------------------------------------
 (define (psi-get-action rule)
 "
   psi-get-action RULE
