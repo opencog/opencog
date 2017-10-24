@@ -70,7 +70,7 @@ public:
    * @param rule A psi-rule.
    * @return Goal of the given psi-rule.
    */
-  Handle get_goal(const Handle rule);
+  static Handle get_goal(const Handle rule);
 
   /**
    * @param rule A psi-rule.
