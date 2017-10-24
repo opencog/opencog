@@ -285,7 +285,7 @@
                           action
                           (psi-goal (car goal))
                           (stv (cdr goal) .9)
-                          (if (null? TOPIC) default-topic TOPIC)))
+                          (if (null? TOPIC) ghost-topic TOPIC)))
                       goals))))
     (lambda (key . parameters)
       (if (not (equal? key 'FeatureNotSupported))
@@ -308,7 +308,7 @@
 "
   create-topic TOPIC-NAME
 
-  Creates a psi-demand named as TOPIC-NAME, sets the default-topic to be it
+  Creates a psi-demand named as TOPIC-NAME, sets the ghost-topic to be it
   and returns ConceptNode that represent the topic(aka demand).
 "
   ; NOTE:The intention is to follow chatscript like authoring approach. Once a
