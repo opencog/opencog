@@ -162,8 +162,8 @@ public:
     CHKERR
     HandleSeq& result_2_2 = OpenPsiRules::get_context(rule_2);
     // A Link is created so as to use operator==.
-    TS_ASSERT_EQUALS(*(createLink(expected_context_2).get()),
-      *(createLink(result_2_2).get()));
+    TS_ASSERT_EQUALS(*LinkCast(createLink(expected_context_2)),
+      *LinkCast(createLink(result_2_2)));
 
     Handle expected_goal_2 = _scm->eval_h("goal-2");
     CHKERR
