@@ -136,7 +136,7 @@ bool ReportRank::renorm_word(const Handle& h)
 
 #ifdef HISCORE_DEBUG
 	Handle wh = get_dict_word_of_word_instance(h);
-	const char *wd = wh->getName().c_str();
+	const char *wd = wh->get_name().c_str();
 	printf("; hi score=%g word = %s sense=%s\n", hi_score, wd, hi_sense);
 	fflush (stdout);
 #endif
@@ -173,14 +173,14 @@ bool ReportRank::renorm_sense(const Handle& word_sense_h,
 
 #ifdef DEBUG
 	if (hi_score < score) {
-		hi_sense = word_sense_h->getName().c_str();
+		hi_sense = word_sense_h->get_name().c_str();
 		hi_score = score;
 	}
 	if (0.0 < score) {
 		choosen_sense_count += 1.0;
 	
 #if 0
-printf ("duu word sense=%s score=%f\n", word_sense_h->getName().c_str(), score);
+printf ("duu word sense=%s score=%f\n", word_sense_h->get_name().c_str(), score);
 fflush (stdout);
 #endif
 	}

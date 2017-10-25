@@ -65,8 +65,8 @@ bool lg_conn_type_match(const Handle& hConn1, const Handle& hConn2)
         return false;
 
     // Convert the types to string
-    std::string type1 = lg_conn_get_type(hConn1)->getName();
-    std::string type2 = lg_conn_get_type(hConn2)->getName();
+    std::string type1 = lg_conn_get_type(hConn1)->get_name();
+    std::string type2 = lg_conn_get_type(hConn2)->get_name();
     uint i1 = 0;
     uint i2 = 0;
 

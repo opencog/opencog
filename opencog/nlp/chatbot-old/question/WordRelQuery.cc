@@ -89,7 +89,7 @@ bool WordRelQuery::is_qVar(Handle word_prop)
 	if (DEFINED_LINGUISTIC_CONCEPT_NODE != atomspace->getType(word_prop))
         return false;
 
-	const std::string& name = atomspace->getName(word_prop);
+	const std::string& name = atomspace->get_name(word_prop);
 	const char * str = name.c_str();
 	if (0 == strcmp(str, "who"))
 		return true;
@@ -239,7 +239,7 @@ const char * WordRelQuery::get_word_instance(Atom *atom)
 	if (WORD_NODE != wrd->getType()) return NULL;
 
 	Node *n = static_cast<Node *>(wrd);
-	const std::string& name = n->getName();
+	const std::string& name = n->get_name();
 
 	return name.c_str();
 }
@@ -269,9 +269,9 @@ bool WordRelQuery::node_match(Node *npat, Node *nsoln)
 	if ((DEFINED_LINGUISTIC_RELATIONSHIP_NODE == soltype) ||
 	    (PREPOSITIONAL_RELATIONSHIP_NODE == soltype))
 	{
-		const char *spat = npat->getName().c_str();
+		const char *spat = npat->get_name().c_str();
 		if (strcmp("isa", spat) && strcmp("hypothetical_isa", spat)) return false;
-		const char *ssol = npat->getName().c_str();
+		const char *ssol = npat->get_name().c_str();
 		if (strcmp("isa", ssol) && strcmp("hypothetical_isa", ssol)) return false;
 
 		// If we got to here then we matched isa to isa or hypothetical_isa,
@@ -298,8 +298,8 @@ bool WordRelQuery::node_match(Node *npat, Node *nsoln)
 		 * be have more relaxed agreement for tense...
 		 * i.e. match #past to #past_infinitive, etc.
 		 */
-		const char * sa = npat->getName().c_str();
-		const char * sb = nsoln->getName().c_str();
+		const char * sa = npat->get_name().c_str();
+		const char * sb = nsoln->get_name().c_str();
 printf("duude compare %s to %s\n", sa, sb);
 		const char * ua = strchr(sa, '_');
 		if (ua)
@@ -370,7 +370,7 @@ bool WordRelQuery::solution(HandleMap &pred_grounding,
 		// at this point, and that's what we return as the
 		// answer.
 		if (!atom_space->isNode(atom_space->getType(ha))) return false;
-		printf("duude answer=%s\n", atom_space->getName(ha).c_str());
+		printf("duude answer=%s\n", atom_space->get_name(ha).c_str());
 
 		Handle hw = ha;
 		atom_space->addLink(LIST_LINK, hq, hw);

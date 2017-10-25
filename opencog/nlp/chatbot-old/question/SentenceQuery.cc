@@ -92,7 +92,7 @@ bool SentenceQuery::is_tq(Handle prop)
 	AtomSpace *atomspace = cogserver().getAtomSpace();
 	if (DEFINED_LINGUISTIC_CONCEPT_NODE != atomspace->getType(prop)) return false;
 
-	const std::string& name = atomspace->getName(prop);
+	const std::string& name = atomspace->get_name(prop);
 	const char * str = name.c_str();
 	if (0 == strcmp(str, "truth-query"))
 		return true;
@@ -187,7 +187,7 @@ bool SentenceQuery::discard_extra_markup(Atom *atom)
 	 * definite-FLAG matching. Everything else is ignored
 	 * in the match.
 	 */
-	const char *name = n->getName().c_str();
+	const char *name = n->get_name().c_str();
 	if (!strcmp("#masculine", name)) do_discard = false;
 	else if (!strcmp("#feminine", name)) do_discard = false;
 	else if (!strcmp("#person", name)) do_discard = false;

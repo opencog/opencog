@@ -68,7 +68,7 @@ bool FrameQuery::discard_question_markup(Atom *atom)
 	Type atype = atom->getType();
 	if (DEFINED_LINGUISTIC_CONCEPT_NODE == atype)
 	{
-		const char *name = n->getName().c_str();
+		const char *name = n->get_name().c_str();
 
 		/* Throw away #what, #which, etc. 
 		 * as that frame will never occur as a part of the answer.
@@ -117,7 +117,7 @@ bool FrameQuery::discard_eval_markup(Atom *atom)
 	/* By default, keep frame elt links */
 	do_discard = false;
 
-	const char *name = n->getName().c_str();
+	const char *name = n->get_name().c_str();
 
 	/* Throw away #Questioning,
 	 * as that frame will never occur as a part of the answer.
@@ -134,7 +134,7 @@ bool FrameQuery::discard_heir_markup(Atom *atom)
 	if(!n) return false;
 	Type atype = atom->getType();
 
-	const char *name = n->getName().c_str();
+	const char *name = n->get_name().c_str();
 	if (CONCEPT_NODE == atype)
 	{
 		/* frame links never have concept nodes in them. */

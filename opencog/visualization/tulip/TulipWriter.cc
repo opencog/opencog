@@ -144,7 +144,7 @@ void TulipWriter::writeNodeNames()
     myfile << "(property  0 string \"viewLabel\" " << endl;
     myfile << "  (default \"\" \"\" )" << endl;
     for (Handle h : nodeHandles) {
-        myfile << "  (node " << h << " \"" << h->getName() << "\")" << endl;
+        myfile << "  (node " << h << " \"" << h->get_name() << "\")" << endl;
     }
     // give not nodes the name NOT
     for (Handle h : linkHandles) {

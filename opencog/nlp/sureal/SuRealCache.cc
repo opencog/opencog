@@ -200,7 +200,7 @@ std::string SuRealCache::handle_to_hash_key(const Handle &h)
     if (classserver().isNode(type)) {
         answer += classserver().getTypeName(type);
         answer += ":";
-        answer += h->getName();
+        answer += h->get_name();
     } else {
         answer += classserver().getTypeName(type);
         answer += "(";

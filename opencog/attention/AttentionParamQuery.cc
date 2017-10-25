@@ -75,7 +75,7 @@ std::string AttentionParamQuery::get_param_value(const std::string& param)
     for(Handle h : hseq){
         if(h->getType() == STATE_LINK ){
             Handle hvalue = h->getOutgoingSet()[1];
-            std::string str = hvalue->getName();
+            std::string str = hvalue->get_name();
             str.erase (str.find_last_not_of('0') + 1,
                     std::string::npos);
 

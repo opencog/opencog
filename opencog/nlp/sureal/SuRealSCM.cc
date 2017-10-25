@@ -192,7 +192,7 @@ HandleSeqSeq SuRealSCM::do_sureal_match(Handle h, bool use_cache)
             n->getType() == DEFINED_LINGUISTIC_PREDICATE_NODE)
            continue;
 
-        std::string sName = n->getName();
+        std::string sName = n->get_name();
 
         // if it is an instance, check if it has the LG relationships
         if (sName.find("@") != std::string::npos)

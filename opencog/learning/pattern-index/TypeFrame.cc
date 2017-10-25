@@ -696,7 +696,7 @@ void TypeFrame::recursiveHandleTraverse(Handle handle)
             recursiveHandleTraverse(handle->getOutgoingAtom(i));
         }
     } else {
-        setNodeNameAt(size() - 1, handle->getName());
+        setNodeNameAt(size() - 1, handle->get_name());
     }
 }
 

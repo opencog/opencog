@@ -762,11 +762,11 @@ Entity::LimitRelation Entity::computeObjectsLimits( const Entity& entityB ) cons
 
 //    bool observerBetweenObjects = false;
 
-//    if ( observer.getName( ) == entityA.getName( ) ||
+//    if ( observer.get_name( ) == entityA.get_name( ) ||
 //         entityA.getBoundingBox( ).isInside( observerPosition ) ) {
 //        observerDirection = (observer.getDirection( ) * objectDirection.length( )+1.0);
 //    }
-//    else if ( observer.getName( ) == entityB.getName( ) ||
+//    else if ( observer.get_name( ) == entityB.get_name( ) ||
 //              entityB.getBoundingBox( ).isInside( observerPosition ) ) {
 //        observerDirection = -(observer.getDirection( ) * objectDirection.length( )+1.0);
 //    }

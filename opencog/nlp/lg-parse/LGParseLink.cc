@@ -159,10 +159,10 @@ Handle LGParseLink::execute(AtomSpace* as) const
 	if (nullptr == dict)
 		throw InvalidParamException(TRACE_INFO,
 			"LgParseLink requires valid dictionary! %s was given.",
-			ldn->getName().c_str());
+			ldn->get_name().c_str());
 
 	// Set up the sentence
-	const char* phrstr = _outgoing[0]->getName().c_str() ;
+	const char* phrstr = _outgoing[0]->get_name().c_str() ;
 	Sentence sent = sentence_create(phrstr, dict);
 	if (nullptr == sent) return Handle();
 

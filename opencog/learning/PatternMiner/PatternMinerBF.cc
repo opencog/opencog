@@ -559,7 +559,7 @@ void PatternMiner::swapOneLinkBetweenTwoAtomSpaceForBindLink(AtomSpace& to_as, c
     {
         if (h->isNode())
         {
-           Handle new_node = to_as.add_node(h->getType(), h->getName());
+           Handle new_node = to_as.add_node(h->getType(), h->get_name());
            new_node->setTruthValue(h->getTruthValue());
            outgoings.push_back(new_node);
            if (h->getType() == PATTERN_VARIABLENODE_TYPE)

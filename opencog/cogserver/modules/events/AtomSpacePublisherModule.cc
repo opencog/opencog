@@ -288,7 +288,7 @@ Object AtomSpacePublisherModule::atomToJSON(Handle h)
     std::string typeNameString = classserver().getTypeName(type);
 
     // Name
-    std::string nameString = h->getName();
+    std::string nameString = h->get_name();
 
     // Handle
     std::string handle = std::to_string(h.value());

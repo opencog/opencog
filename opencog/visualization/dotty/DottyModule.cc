@@ -72,7 +72,7 @@ public:
         ost << "label=\"[" << classserver().getTypeName(a->getType()) << "]";
         if (classserver().isNode(a->getType())) {
             NodePtr n(NodeCast(a));
-            ost << " " << n->getName();
+            ost << " " << n->get_name();
         } //else {
             // TODO: anything to output for links?
             //LinkPtr l = boost::dynamic_pointer_cast<Link>(a);

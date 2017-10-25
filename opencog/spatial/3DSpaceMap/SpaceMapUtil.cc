@@ -53,7 +53,7 @@ namespace opencog
                 if (resultNodeSet.empty()) {
                     return result;
                 }
-                result.push_back(resultNodeSet[0]->getName());
+                result.push_back(resultNodeSet[0]->get_name());
             } else {
                 //more than one predicate value, ex.size
                 const HandleSeq& resultListLinkSet = resultSetLink->getOutgoingSet();
@@ -62,7 +62,7 @@ namespace opencog
                 }
                 const HandleSeq& resultListLinkOutgoings = resultListLinkSet[0]->getOutgoingSet();
                 for (auto predicateValueNode : resultListLinkOutgoings) {
-                    result.push_back(predicateValueNode->getName());
+                    result.push_back(predicateValueNode->get_name());
                 }
             }
             return result;

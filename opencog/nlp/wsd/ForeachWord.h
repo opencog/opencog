@@ -154,7 +154,7 @@ class PrivateUseOnlyPOSFilter
 			Handle h(fl.follow_binary_link(word_sense, PART_OF_SPEECH_LINK));
 
 			// The 'no-sense' special-case sense will not have a pos.
-			const std::string &sense_pos = h->getName();
+			const std::string &sense_pos = h->get_name();
 
 			// If there's no POS match, skip this sense.
 			if (desired_pos->compare(sense_pos)) return false;
@@ -205,7 +205,7 @@ inline const std::string get_part_of_speech(const Handle& word_instance)
 	FollowLink fl;
 	Handle inst_pos(fl.follow_binary_link(word_instance, PART_OF_SPEECH_LINK));
 	if (not inst_pos->isLink()) return empty;
-	return inst_pos->getName();
+	return inst_pos->get_name();
 }
 
 /**
@@ -295,7 +295,7 @@ class PrivateUseOnlyRelexRelationFinder
 
 			// OK, we've found a relationship. Get the second member of
 			// the list link, and call the user callback with it.
-			const std::string &relname = a->getName();
+			const std::string &relname = a->get_name();
 
 			const HandleSeq outset = listlink->getOutgoingSet();
 

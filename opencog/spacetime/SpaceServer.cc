@@ -286,7 +286,7 @@ void SpaceServer::removeSpaceInfo(Handle objectNode, Handle spaceMapHandle, octi
         entityRecorder.removeNoneBlockEntity(objectNode);
     }
 
-    logger().debug("%s(%s)\n", __FUNCTION__, objectNode->getName().c_str());
+    logger().debug("%s(%s)\n", __FUNCTION__, objectNode->get_name().c_str());
 
 }
 
@@ -309,7 +309,7 @@ std::string SpaceServer::getMapIdString(Handle mapHandle) const
     // So, just get the name of the TimeNode as its string representation
     // return atomspace->get_name(mapHandle->getOutgoingSet()[0])->get_result();
 
-    return mapHandle->getName();
+    return mapHandle->get_name();
 }
 
 // TODO

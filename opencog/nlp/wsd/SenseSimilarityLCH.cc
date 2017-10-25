@@ -132,8 +132,8 @@ SimpleTruthValuePtr SenseSimilarityLCH::similarity(const Handle& fs,
 
 #ifdef DEBUG
 	printf("(%s, %s) dist=%d sim=%g\n",
-	       first_sense->getName().c_str(),
-	       second_sense->getName().c_str(),
+	       first_sense->get_name().c_str(),
+	       second_sense->get_name().c_str(),
 	       min_cnt, sim);
 	// printf("----\n");
 #endif
@@ -156,7 +156,7 @@ bool SenseSimilarityLCH::up_first(const Handle& up)
 	// Don't explore paths that are longer than the current shortest path.
 	if (first_cnt + 1 >= min_cnt) return false;
 
-	// printf ("first height=%d up=%s\n", first_cnt, n->getName().c_str());
+	// printf ("first height=%d up=%s\n", first_cnt, n->get_name().c_str());
 
 	// Look to see if the join candidate (candidate for the "least common
 	// subsumer") appears anywhere on the up chain of the second sense.
@@ -197,7 +197,7 @@ bool SenseSimilarityLCH::up_second(const Handle& up)
 	if (dist >= min_cnt) return false;
 
 	second_cnt ++;
-	// printf ("second height=%d up=%s\n", second_cnt, n->getName().c_str());
+	// printf ("second height=%d up=%s\n", second_cnt, n->get_name().c_str());
 
 	// If we found the match to the candidate, compute the distance,
 	// and save it. The distance is number of steps from each sense,

@@ -315,7 +315,7 @@ void TimeServer::atomAdded(const Handle& h)
     }
 
     // Add corresponding TimeServer entry
-    const string& timeNodeName = timeNode->getName();
+    const string& timeNodeName = timeNode->get_name();
     const Handle& timed_h = h->getOutgoingAtom(1);
     Temporal t = Temporal::getFromTimeNodeName(timeNodeName.c_str());
     TimeDomain timeDomain = DEFAULT_TIMEDOMAIN;
@@ -330,7 +330,7 @@ void TimeServer::atomAdded(const Handle& h)
                   classserver().getTypeName(timeDomainNode->getType()).c_str());
             return;
         }
-        timeDomain = timeDomainNode->getName();
+        timeDomain = timeDomainNode->get_name();
     }
     add(timed_h, t, timeDomain);
 }
@@ -358,7 +358,7 @@ void TimeServer::atomRemoved(const AtomPtr& atom)
         if (timeNode->getType() != TIME_DOMAIN_NODE) {
             return;
         }
-        timeDomain = timeDomainNode->getName();
+        timeDomain = timeDomainNode->get_name();
     }
 
 #if DOES_NOT_COMPILE_RIGHT_NOW
@@ -368,6 +368,6 @@ void TimeServer::atomRemoved(const AtomPtr& atom)
         spaceServer->removeMap(atom->getHandle());
 #endif
     remove(timedAtom,
-        Temporal::getFromTimeNodeName(timeNode->getName().c_str()), TemporalTable::EXACT, timeDomain);
+        Temporal::getFromTimeNodeName(timeNode->get_name().c_str()), TemporalTable::EXACT, timeDomain);
 
 }

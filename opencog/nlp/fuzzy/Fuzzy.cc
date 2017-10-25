@@ -88,7 +88,7 @@ static void examine(const Handle& h, HandleSeq& wi, HandleSeq& sl)
                 const Handle& w = lp->getOutgoingAtom(1);
 
                 if (w->getType() == WORD_INSTANCE_NODE and
-                    h->getName() == w->getName() and
+                    h->get_name() == w->get_name() and
                     std::find(wi.begin(), wi.end(), w) == wi.end())
                 {
                     wi.emplace_back(w);
@@ -250,7 +250,7 @@ void Fuzzy::get_ling_rel(const HandleSeq& hs)
         for (const Handle& el : evals)
         {
             // Extract the relation
-            std::string ling_rel = (el->getOutgoingSet()[0])->getName();
+            std::string ling_rel = (el->getOutgoingSet()[0])->get_name();
 
             // Assign weights accordingly, subject to change
             if (ling_rel.compare("_subj") == 0 or
@@ -297,7 +297,7 @@ bool Fuzzy::accept_starter(const Handle& hp)
     Type t = hp->getType();
 
     return (t == CONCEPT_NODE or t == PREDICATE_NODE) and
-           hp->getName().find("@") == std::string::npos;
+           hp->get_name().find("@") == std::string::npos;
 }
 
 /**

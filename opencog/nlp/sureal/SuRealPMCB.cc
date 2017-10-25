@@ -95,7 +95,7 @@ bool SuRealPMCB::variable_match(const Handle &hPat, const Handle &hSoln)
             hPat->getType() == INTERPRETATION_NODE) {
             answer = true;
         } else {
-            std::string sSoln = hSoln->getName();
+            std::string sSoln = hSoln->get_name();
             // get the corresponding WordInstanceNode for hSoln
             Handle hSolnWordInst = m_as->get_handle(WORD_INSTANCE_NODE, sSoln);
             // no WordInstanceNode? reject!
@@ -238,7 +238,7 @@ bool SuRealPMCB::clause_match(const Handle &pattrn_link_h, const Handle &grnd_li
         auto it = m_words.find(hPatNode);
         if (it == m_words.end())
         {
-            std::string sPat = hPatNode->getName();
+            std::string sPat = hPatNode->get_name();
             std::string sPatWord = sPat.substr(0, sPat.find_first_of('@'));
 
             // Get the WordNode associated with the word
@@ -250,7 +250,7 @@ bool SuRealPMCB::clause_match(const Handle &pattrn_link_h, const Handle &grnd_li
         else hPatWordNode = it->second;
 
         // get the corresponding WordInstanceNode of the solution node
-        std::string sSoln = hSolnNode->getName();
+        std::string sSoln = hSolnNode->get_name();
         Handle hSolnWordInst = m_as->get_handle(WORD_INSTANCE_NODE, sSoln);
 
         // if the node is a variable, it would have matched to a node with
@@ -371,10 +371,10 @@ bool SuRealPMCB::grounding(const HandleMap &var_soln, const HandleMap &pred_soln
             return false;
         }
 
-        std::string sName = kv.first->getName();
+        std::string sName = kv.first->get_name();
         std::string sWord = sName.substr(0, sName.find_first_of('@'));
         Handle hPatWord = m_as->get_handle(WORD_NODE, sWord);
-        Handle hSolnWordInst = m_as->get_handle(WORD_INSTANCE_NODE, kv.second->getName());
+        Handle hSolnWordInst = m_as->get_handle(WORD_INSTANCE_NODE, kv.second->get_name());
 
         // do a disjunct match for PredicateNodes as well
         if (kv.first->getType() == PREDICATE_NODE and kv.second->getType() == PREDICATE_NODE)
@@ -412,7 +412,7 @@ bool SuRealPMCB::grounding(const HandleMap &var_soln, const HandleMap &pred_soln
                     if (qOS[0]->getType() != WORD_INSTANCE_NODE)
                         continue;
 
-                    std::string sName = qOS[0]->getName();
+                    std::string sName = qOS[0]->get_name();
                     std::string sWord = sName.substr(0, sName.find_first_of('@'));
 
                     // Skip if we have seen it before
@@ -434,7 +434,7 @@ bool SuRealPMCB::grounding(const HandleMap &var_soln, const HandleMap &pred_soln
                         if (qInhOS[0] == kv.second and
                                 qInhOS[1]->getType() == DEFINED_LINGUISTIC_CONCEPT_NODE)
                         {
-                            sTense = qInhOS[1]->getName();
+                            sTense = qInhOS[1]->get_name();
                             break;
                         }
                     }
@@ -452,7 +452,7 @@ bool SuRealPMCB::grounding(const HandleMap &var_soln, const HandleMap &pred_soln
                             if (qInhOS[0] == hPatPredNode and
                                 qInhOS[1]->getType() == DEFINED_LINGUISTIC_CONCEPT_NODE) {
                                 has_tense = true;
-                                eq_tense = sTense == qInhOS[1]->getName();
+                                eq_tense = sTense == qInhOS[1]->get_name();
                                 break;
                             }
                         }
@@ -570,8 +570,8 @@ bool SuRealPMCB::grounding(const HandleMap &var_soln, const HandleMap &pred_soln
             {
                 auto matchWordInst = [&](Handle& w)
                 {
-                    std::string wordInstName = w->getName();
-                    std::string nodeName = n->getName();
+                    std::string wordInstName = w->get_name();
+                    std::string nodeName = n->get_name();
 
                     if (wordInstName.compare(nodeName) == 0)
                     {
@@ -682,7 +682,7 @@ bool SuRealPMCB::disjunct_match(const Handle& hPatWordNode, const Handle& hSolnW
         Handle hNumNode2 = get_target_neighbors(hWordInst2, WORD_SEQUENCE_LINK)[0];
 
         // compare their word sequences
-        return hNumNode1->getName() > hNumNode2->getName();
+        return hNumNode1->get_name() > hNumNode2->get_name();
     };
 
     // helper for sorting EvaluationLinks in word sequence order
@@ -701,7 +701,7 @@ bool SuRealPMCB::disjunct_match(const Handle& hPatWordNode, const Handle& hSolnW
         Handle hNumNode2 = get_target_neighbors(hWordInst2, WORD_SEQUENCE_LINK)[0];
 
         // compare their word sequences
-        return hNumNode1->getName() < hNumNode2->getName();
+        return hNumNode1->get_name() < hNumNode2->get_name();
     };
 
     // sort the qLGInstsLeft in reverse word sequence order

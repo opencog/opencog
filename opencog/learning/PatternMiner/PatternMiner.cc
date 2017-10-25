@@ -60,7 +60,7 @@ void PatternMiner::generateIndexesOfSharedVars(const Handle& link, const HandleS
         {
             if (h->getType() == opencog::PATTERN_VARIABLENODE_TYPE)
             {
-                string var_name = h->getName();
+                string var_name = h->get_name();
 
                 vector<std::pair<int, std::size_t>> indexesForCurVar; // vector<handleindex,varposintthehandle>
                 int index = 0;
@@ -674,12 +674,12 @@ Handle PatternMiner::copyAtom(AtomSpace& to_as, const Handle& h,
 
 		if (h->getType() == PATTERN_VARIABLENODE_TYPE)
 		{
-			new_node = to_as.add_node(VARIABLE_NODE, h->getName());
+			new_node = to_as.add_node(VARIABLE_NODE, h->get_name());
 			if (!isInHandleSeq(new_node, variables)) // avoid duplicated variable
 				variables.push_back(new_node);
 		}
 		else
-			new_node = to_as.add_node(h->getType(), h->getName());
+			new_node = to_as.add_node(h->getType(), h->get_name());
 
 		return new_node;
 	}
@@ -736,7 +736,7 @@ void PatternMiner::findAllInstancesForGivenPatternInNestedAtomSpace(HTreeNode* H
 
 //    for (const Handle& varh : allVariableNodesInPattern)
 //    {
-//        Handle v = _as.add_node(VARIABLE_NODE, varh->getName());
+//        Handle v = _as.add_node(VARIABLE_NODE, varh->get_name());
 //        variableNodes.push_back(v);
 //    }
 
@@ -1959,7 +1959,7 @@ unsigned int PatternMiner::getAllEntityCountWithSamePredicatesForAPattern(const 
         {
             Handle predicate = pattern[0]->getOutgoingAtom(0);
 
-            string predicateName = predicate->getName();
+            string predicateName = predicate->get_name();
 
 //            cout << "/npredicate: " << predicateName << std::endl;
 
@@ -2012,7 +2012,7 @@ unsigned int PatternMiner::getAllEntityCountWithSamePredicatesForAPattern(const 
         string predicateWords = "";
         for (const Handle& predicate : allPredicateNodes)
         {
-            predicateWords += predicate->getName();
+            predicateWords += predicate->get_name();
             predicateWords += " ";
         }
 
@@ -3601,7 +3601,7 @@ bool checkIfObjectIsAPerson(const Handle& obj, const HandleSeq& listLinks)
         for (const Handle& eval : evals)
         {
             Handle predicate = eval->getOutgoingAtom(0);
-            string predicateStr = predicate->getName();
+            string predicateStr = predicate->get_name();
             if ((predicateStr ==  "nationality") || (predicateStr == "predecessor") || (predicateStr == "successor") || (predicateStr == "religion") ||
                     (predicateStr == "occupation") || (predicateStr == "birthPlace") || (predicateStr == "party") || (predicateStr == "almaMater")  ||
                     (predicateStr == "relation") || (predicateStr == "child") || (predicateStr == "parent") )
@@ -3637,7 +3637,7 @@ void PatternMiner::selectSubsetForDBpedia()
     // int x = 0;
     for (const Handle& h : allDBpediaKeyNodes)
     {
-//        string objname = h->getName();
+//        string objname = h->get_name();
 //        if (objname == "Stanley_Crooks")
 //        {
 //            x ++;
@@ -3666,13 +3666,13 @@ void PatternMiner::selectSubsetForDBpedia()
 //                Handle valueNode = l->getOutgoingAtom(1);
 //                if (valueNode->getIncomingSetSize() < 2)
 //                {
-//                    cout << valueNode->getName() << " only has one connection, skip it!" << std::endl;
+//                    cout << valueNode->get_name() << " only has one connection, skip it!" << std::endl;
 //
 //                    continue;
 //                }
 
                 Handle predicate = eval->getOutgoingAtom(0);
-                string predicateStr = predicate->getName();
+                string predicateStr = predicate->get_name();
 
                 if (param.use_keyword_black_list && isIgnoredContent(predicateStr))
                 {
@@ -3697,7 +3697,7 @@ void PatternMiner::selectSubsetForDBpedia()
                             skip = true;
                         else
                         {
-                            cout << h->getName() << " is a not a person, keep it!\n";
+                            cout << h->get_name() << " is a not a person, keep it!\n";
                         }
 
                         break;
@@ -3744,7 +3744,7 @@ std::string PatternMiner::Link2keyString(const Handle& h, const std::string& ind
 
     if (h->isNode())
     {
-        answer << h->getName();
+        answer << h->get_name();
     }
 
     answer << ")" << "\n";
@@ -3942,7 +3942,7 @@ HandleSet PatternMiner::_extendOneLinkForSubsetCorpus(const HandleSet& allNewLin
             if (neighborNode->getType() == PREDICATE_NODE)
                 continue;
 
-            string content = neighborNode->getName();
+            string content = neighborNode->get_name();
             if (isIgnoredContent(content))
                 continue;
 

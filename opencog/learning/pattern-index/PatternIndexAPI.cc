@@ -340,7 +340,7 @@ Handle PatternIndexAPI::createIndex(const HandleSeq &handles)
 
 void PatternIndexAPI::deleteIndex(Handle key)
 {
-    IndexMap::iterator it = indexes.find(stoi(key->getName()));
+    IndexMap::iterator it = indexes.find(stoi(key->get_name()));
     if (it == indexes.end()) {
         throw runtime_error("Invalid index key: " + key->to_string());
     }
@@ -351,7 +351,7 @@ void PatternIndexAPI::deleteIndex(Handle key)
 
 void PatternIndexAPI::applyProperties(Handle key)
 {
-    IndexMap::iterator it = indexes.find(stoi(key->getName()));
+    IndexMap::iterator it = indexes.find(stoi(key->get_name()));
     if (it == indexes.end()) {
         throw runtime_error("Invalid index key: " + key->to_string());
     }
@@ -434,7 +434,7 @@ void PatternIndexAPI::setProperty(Handle key,
                                   const string &propertyName, 
                                   const string &propertyValue)
 {
-    IndexMap::iterator it1 = indexes.find(stoi(key->getName()));
+    IndexMap::iterator it1 = indexes.find(stoi(key->get_name()));
     if (it1 == indexes.end()) {
         throw runtime_error("Invalid index key: " + key->to_string());
     }
@@ -452,7 +452,7 @@ void PatternIndexAPI::query(vector<QueryResult> &answer,
 {
     applyProperties(key);
     vector<TypeFrameIndex::ResultPair> queryResults;
-    indexes.find(stoi(key->getName()))->second.first->query(queryResults, query);
+    indexes.find(stoi(key->get_name()))->second.first->query(queryResults, query);
     for (const TypeFrameIndex::ResultPair& result : queryResults) {
         HandleSeq atoms;
         VariableMapping mapping;
@@ -509,7 +509,7 @@ void PatternIndexAPI::minePatterns(vector<MiningResult> &answer,
     applyProperties(key);
 
     vector<pair<float,TypeFrame>> patterns;
-    indexes.find(stoi(key->getName()))->second.first->minePatterns(patterns);
+    indexes.find(stoi(key->get_name()))->second.first->minePatterns(patterns);
     for (const auto& pattern : patterns) {
         answer.emplace_back(pattern.first,
                             schemeEval->eval_h(pattern.second.toSCMString()));

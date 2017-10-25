@@ -224,9 +224,9 @@ Handle PointMemorySCM::create_map(Handle map_name, Handle resolution)
 	const HandleSeq& hs = resolution->getOutgoingSet();
 
 	// XXX FIXME -- verify that these are NumberNodes.
-	double space_res_mtr = atof(hs[0]->getName().c_str());
-	int time_res_milli_sec = atoi(hs[1]->getName().c_str());
-	int time_units = atoi(hs[2]->getName().c_str());
+	double space_res_mtr = atof(hs[0]->get_name().c_str());
+	int time_res_milli_sec = atoi(hs[1]->get_name().c_str());
+	int time_units = atoi(hs[2]->get_name().c_str());
 
 	// Reject if time units < 1
 	if (time_units < 1)
@@ -533,7 +533,7 @@ time_pt PointMemorySCM::get_map_time(const Handle& map_name,
                                      const Handle& helapse)
 {
 	have_map(map_name);
-	int elapse = atoi(helapse->getName().c_str());
+	int elapse = atoi(helapse->get_name().c_str());
 	return tsa[map_name]->get_current_time() - std::chrono::milliseconds(elapse);
 }
 

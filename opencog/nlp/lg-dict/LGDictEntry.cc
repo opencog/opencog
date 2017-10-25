@@ -107,9 +107,9 @@ Handle LGDictEntry::execute(AtomSpace* as) const
 	if (nullptr == dict)
 		throw InvalidParamException(TRACE_INFO,
 			"LgDictEntry requires valid dictionary! %s was given.",
-			ldn->getName().c_str());
+			ldn->get_name().c_str());
 
-	HandleSeq djs = getDictEntry(dict, _outgoing[0]->getName());
+	HandleSeq djs = getDictEntry(dict, _outgoing[0]->get_name());
 	for (const Handle& dj: djs) as->add_atom(dj);
 
 	return _outgoing[0];
