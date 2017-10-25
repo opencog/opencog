@@ -41,7 +41,7 @@
 //#define DPRINTF printf
 #define DPRINTF(...)
 // To simplify debug log output
-#define ATOM_AS_STRING(h) (h->toShortString().c_str())
+#define ATOM_AS_STRING(h) (h->to_short_string().c_str())
 
 using namespace opencog;
 using namespace opencog::spatial;

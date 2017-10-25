@@ -79,7 +79,7 @@ void PatternMiner::extendAllPossiblePatternsForOneMoreGramBF(const HandleSeq& in
         var->getIncomingSet(back_inserter(incomings));
 
         // debug
-        string curvarstr = var->toShortString();
+        string curvarstr = var->to_short_string();
 
         for (const Handle& incomingHandle : incomings)
         {
@@ -95,7 +95,7 @@ void PatternMiner::extendAllPossiblePatternsForOneMoreGramBF(const HandleSeq& in
                 extendedHandle = incomingHandle;
 
             // debug
-            string extendedHandleStr = extendedHandle->toShortString();
+            string extendedHandleStr = extendedHandle->to_short_string();
 
             if (isInHandleSeq(extendedHandle, instance))
                 continue;
@@ -441,14 +441,14 @@ void PatternMiner::ConstructTheFirstGramPatternsBF()
 
     for (const Handle& h : allDumpNodes)
     {
-        dumpFile << h->toShortString();
+        dumpFile << h->to_short_string();
     }
 
     as->get_handles_by_type(back_inserter(allDumpLinks), (Type) LINK, true );
 
     for (const Handle& h : allDumpLinks)
     {
-        dumpFile << h->toShortString();
+        dumpFile << h->to_short_string();
     }
 
     dumpFile.close();
@@ -535,14 +535,14 @@ void PatternMiner::GrowAllPatternsBF()
 
         for (const Handle& h : allDumpNodes)
         {
-            dumpFile << h->toShortString();
+            dumpFile << h->to_short_string();
         }
 
         as->get_handles_by_type(back_inserter(allDumpLinks), (Type) LINK, true );
 
         for (const Handle& h : allDumpLinks)
         {
-            dumpFile << h->toShortString();
+            dumpFile << h->to_short_string();
         }
 
         dumpFile.close();
@@ -666,7 +666,7 @@ void PatternMiner::findAllInstancesForGivenPatternBF(HTreeNode* HNode)
    hBindLink->setTruthValue(TruthValue::TRUE_TV());
 
 
-   string s = hBindLink->toShortString();
+   string s = hBindLink->to_short_string();
    // Run pattern matcher
    Handle hResultListLink = bindlink(&original_as, hBindLink);
 

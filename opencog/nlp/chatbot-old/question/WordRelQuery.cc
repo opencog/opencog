@@ -59,7 +59,7 @@ WordRelQuery::~WordRelQuery()
 #ifdef DEBUG
 static void prt(Atom *atom)
 {
-   std::string str = atom->toString();
+   std::string str = atom->to_string();
    printf ("%s\n", str.c_str());
 }
 #else
@@ -325,8 +325,8 @@ printf("duude compare %s to %s\n", sa, sb);
 	fprintf(stderr, "Error: unexpected ground node type %d %s\n", soltype,
 	        classserver().getTypeName(soltype).c_str());
 
-	std::string sa = npat->toString();
-	std::string sb = nsoln->toString();
+	std::string sa = npat->to_string();
+	std::string sb = nsoln->to_string();
 	fprintf (stderr, "unexpected comp %s\n"
 	                 "             to %s\n", sa.c_str(), sb.c_str());
 

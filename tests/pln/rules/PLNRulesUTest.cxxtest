@@ -149,7 +149,7 @@ void PLNRulesUTest::test_deduction()
 	// instances of men are also humans (Socrates, Einstein, and Peirce)
 	results = eval.eval_h("(cog-bind find-humans)");
 
-	logger().debug() << "results = " << results->toString();
+	logger().debug() << "results = " << results->to_string();
 
 	// 4 in total, man, Peirce, Einstein, Socrates
 	TS_ASSERT_EQUALS(4, getarity(results));
@@ -309,8 +309,8 @@ void PLNRulesUTest::test_forall_implication_to_higher_order()
 		 "            (PredicateNode \"P\")"
 		 "            (VariableNode \"$X\")))))");
 
-	logger().debug() << "results = " << results->toString();
-	logger().debug() << "expected = " << expected->toString();
+	logger().debug() << "results = " << results->to_string();
+	logger().debug() << "expected = " << expected->to_string();
 
 	TS_ASSERT_EQUALS(results, expected);
 }
@@ -340,8 +340,8 @@ void PLNRulesUTest::test_implication_full_instantiation()
 		 "      (PredicateNode \"Q\")"
 		 "      (ConceptNode \"A\")))");
 
-	logger().debug() << "results = " << results->toString();
-	logger().debug() << "expected = " << expected->toString();
+	logger().debug() << "results = " << results->to_string();
+	logger().debug() << "expected = " << expected->to_string();
 
 	TS_ASSERT_EQUALS(results, expected);
 }
@@ -368,8 +368,8 @@ void PLNRulesUTest::test_implication_full_instantiation_extra_variables()
 		 "         (ConceptNode \"A\")"
 		 "         (ConceptNode \"A\"))))");
 
-	logger().debug() << "results = " << results->toString();
-	logger().debug() << "expected = " << expected->toString();
+	logger().debug() << "results = " << results->to_string();
+	logger().debug() << "expected = " << expected->to_string();
 
 	TS_ASSERT_EQUALS(results, expected);
 }
@@ -424,9 +424,9 @@ void PLNRulesUTest::test_implication_partial_instantiation()
 		 "            (VariableNode \"$Y\")"
 		 "            (ConceptNode \"A\")))))");
 
-	logger().debug() << "results = " << results->toString();
-	logger().debug() << "possible_results_1 = " << possible_results_1->toString();
-	logger().debug() << "possible_results_2 = " << possible_results_2->toString();
+	logger().debug() << "results = " << results->to_string();
+	logger().debug() << "possible_results_1 = " << possible_results_1->to_string();
+	logger().debug() << "possible_results_2 = " << possible_results_2->to_string();
 
 	TS_ASSERT((results == possible_results_1)
 	          or (results == possible_results_2));
@@ -506,8 +506,8 @@ void PLNRulesUTest::test_implication_scope_to_implication()
 		 "            (PredicateNode \"Q\")"
 		 "            (VariableNode \"$X\")))))");
 
-	std::cout << "results = " << results->toString();
-	std::cout << "expected = " << expected->toString();
+	std::cout << "results = " << results->to_string();
+	std::cout << "expected = " << expected->to_string();
 
 	TS_ASSERT_EQUALS(results, expected);
 }
@@ -540,8 +540,8 @@ void PLNRulesUTest::test_and_lambda_distribution()
 		 "            (PredicateNode \"Q\")"
 		 "            (VariableNode \"$X\")))))");
 
-	std::cout << "results = " << results->toString();
-	std::cout << "expected = " << expected->toString();
+	std::cout << "results = " << results->to_string();
+	std::cout << "expected = " << expected->to_string();
 
 	TS_ASSERT_EQUALS(results, expected);
 }
@@ -568,8 +568,8 @@ void PLNRulesUTest::test_implication_implicant_distribution()
 		 "         (PredicateNode \"P\")"
 		 "         (PredicateNode \"Q\"))))");
 
-	std::cout << "results = " << results->toString();
-	std::cout << "expected = " << expected->toString();
+	std::cout << "results = " << results->to_string();
+	std::cout << "expected = " << expected->to_string();
 
 	TS_ASSERT_EQUALS(results, expected);
 }
@@ -597,8 +597,8 @@ void PLNRulesUTest::test_implication_introduction()
 		 "      (PredicateNode \"Q\")"
 		 "      (PredicateNode \"P\")))");
 
-	std::cout << "results = " << results->toString();
-	std::cout << "expected = " << expected->toString();
+	std::cout << "results = " << results->to_string();
+	std::cout << "expected = " << expected->to_string();
 
 	TS_ASSERT_EQUALS(results, expected);
 }
@@ -624,8 +624,8 @@ void PLNRulesUTest::test_closed_lambda_introduction()
 		 "      (PredicateNode \"P\")"
 		 "      (ConceptNode \"A\")))");
 
-	std::cout << "results = " << results->toString();
-	std::cout << "expected = " << expected->toString();
+	std::cout << "results = " << results->to_string();
+	std::cout << "expected = " << expected->to_string();
 
 	// Rather than enumerating all possible constructions we just make
 	// sure the one that matters is in there.
@@ -664,8 +664,8 @@ void PLNRulesUTest::test_equivalence_to_implication()
 		"  )"
 		")");
 
-	std::cout << "results = " << results->toString();
-	std::cout << "expected = " << expected->toString();
+	std::cout << "results = " << results->to_string();
+	std::cout << "expected = " << expected->to_string();
 
 	TS_ASSERT_EQUALS(results, expected);
 }
@@ -719,8 +719,8 @@ void PLNRulesUTest::test_implication_and_lambda_factorization()
 		 "  )"
 		 ")");
 
-	std::cout << "results = " << results->toString();
-	std::cout << "expected = " << expected->toString();
+	std::cout << "results = " << results->to_string();
+	std::cout << "expected = " << expected->to_string();
 
 	TS_ASSERT_EQUALS(results, expected);
 }
@@ -743,8 +743,8 @@ void PLNRulesUTest::test_implication_implicant_conjunction()
 		 "         (Predicate \"P2\"))"
 		 "      (Predicate \"Q\")))");
 
-	std::cout << "results = " << results->toString();
-	std::cout << "expected = " << expected->toString();
+	std::cout << "results = " << results->to_string();
+	std::cout << "expected = " << expected->to_string();
 
 	TS_ASSERT_EQUALS(results, expected);
 }
@@ -772,8 +772,8 @@ void PLNRulesUTest::test_implication_direct_evaluation()
 		 "      (PredicateNode \"Q\")"
 		 "      (PredicateNode \"P\")))");
 
-	std::cout << "results = " << results->toString();
-	std::cout << "expected = " << expected->toString();
+	std::cout << "results = " << results->to_string();
+	std::cout << "expected = " << expected->to_string();
 
 	TS_ASSERT_EQUALS(results, expected);
 }
@@ -842,8 +842,8 @@ void PLNRulesUTest::test_conditional_full_instantiation_meta_rule()
 		 "  )"
 		 ")");
 
-	std::cout << "results = " << results->toString();
-	std::cout << "expected = " << expected->toString();
+	std::cout << "results = " << results->to_string();
+	std::cout << "expected = " << expected->to_string();
 
 	TS_ASSERT_EQUALS(results, expected);
 }
@@ -864,8 +864,8 @@ void PLNRulesUTest::test_consequent_disjunction_elimination()
 		 "      (Predicate \"P\")"
 		 "      (Predicate \"Q1\")))");
 
-	std::cout << "results = " << results->toString();
-	std::cout << "expected = " << expected->toString();
+	std::cout << "results = " << results->to_string();
+	std::cout << "expected = " << expected->to_string();
 
 	TS_ASSERT_EQUALS(results, expected);
 }

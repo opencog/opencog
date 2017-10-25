@@ -637,7 +637,7 @@ void DimEmbedModule::logAtomEmbedding(Type linkType)
     oss << "PIVOTS:" << std::endl;
     for (HandleSeq::const_iterator it=pivots.begin(); it!=pivots.end(); ++it){
         if (as->is_valid_handle(*it)) {
-            oss << (*it)->toShortString() << std::endl;
+            oss << (*it)->to_short_string() << std::endl;
         } else {
             oss << "[PIVOT'S BEEN DELETED]" << std::endl;
         }
@@ -646,7 +646,7 @@ void DimEmbedModule::logAtomEmbedding(Type linkType)
     AtomEmbedding::const_iterator it;
     for (it=atomEmbedding.begin(); it!=atomEmbedding.end(); ++it){
         if (as->is_valid_handle(it->first)) {
-            oss << (it->first)->toShortString() << " : (";
+            oss << (it->first)->to_short_string() << " : (";
         } else {
             oss << "[NODE'S BEEN DELETED H=" << it->first << "] : (";
         }
@@ -673,7 +673,7 @@ void DimEmbedModule::printEmbedding()
         AtomEmbedding::const_iterator it;
         for (it=atomEmbedding.begin(); it!=atomEmbedding.end(); ++it){
             if (as->is_valid_handle(it->first)) {
-                oss << (it->first)->toShortString() << " : (";
+                oss << (it->first)->to_short_string() << " : (";
             } else {
                 oss << "[NODE'S BEEN DELETED. handle=";
                 oss << it->first.value() << "] : (";
@@ -993,7 +993,7 @@ Handle DimEmbedModule::blendNodes(Handle n1,
         double dist2 = p2.distance(cTree.k_nearest_neighbors(p2,1)[0]);
         if (dist1>dist2) newVec[i]=embedVec2[i];
     }
-    std::string prefix("blend_"+n1->toString()+"_"+n2->toString()+"_");
+    std::string prefix("blend_"+n1->to_string()+"_"+n2->to_string()+"_");
     Handle newNode = add_prefixed_node(*as, n1->getType(), prefix);
 
     for (unsigned int i=0; i<numDims; i++) {

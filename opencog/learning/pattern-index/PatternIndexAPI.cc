@@ -342,7 +342,7 @@ void PatternIndexAPI::deleteIndex(Handle key)
 {
     IndexMap::iterator it = indexes.find(stoi(key->getName()));
     if (it == indexes.end()) {
-        throw runtime_error("Invalid index key: " + key->toString());
+        throw runtime_error("Invalid index key: " + key->to_string());
     }
 
     delete it->second.first;
@@ -353,7 +353,7 @@ void PatternIndexAPI::applyProperties(Handle key)
 {
     IndexMap::iterator it = indexes.find(stoi(key->getName()));
     if (it == indexes.end()) {
-        throw runtime_error("Invalid index key: " + key->toString());
+        throw runtime_error("Invalid index key: " + key->to_string());
     }
 
     TypeFrameIndex *index = it->second.first;
@@ -436,7 +436,7 @@ void PatternIndexAPI::setProperty(Handle key,
 {
     IndexMap::iterator it1 = indexes.find(stoi(key->getName()));
     if (it1 == indexes.end()) {
-        throw runtime_error("Invalid index key: " + key->toString());
+        throw runtime_error("Invalid index key: " + key->to_string());
     }
     StringMap::iterator it2 = it1->second.second.find(propertyName);
     if (it2 == it1->second.second.end()) {

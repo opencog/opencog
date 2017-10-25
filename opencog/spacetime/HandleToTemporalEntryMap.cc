@@ -104,7 +104,7 @@ std::string HandleToTemporalEntryMap::toString()
         TemporalEntry* value = get(key);
         /* append key */
         AtomPtr atom(key);
-        answer += atom->toShortString();
+        answer += atom->to_short_string();
         answer += ":";
         /* append value */
         answer += value->toString();

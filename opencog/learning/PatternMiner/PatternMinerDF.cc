@@ -399,7 +399,7 @@ HTreeNode* PatternMiner::extractAPatternFromGivenVarCombination(HandleSeq &input
                         bool is_contain = false;
                         for (const Handle& link : inputLinks)
                         {
-                            if (containKeywords(link->toShortString(), param.keyword_white_list, param.keyword_white_list_logic))
+                            if (containKeywords(link->to_short_string(), param.keyword_white_list, param.keyword_white_list_logic))
                             {
                                 is_contain = true;
                                 break;
@@ -596,18 +596,18 @@ void PatternMiner::extendAPatternForOneMoreGramRecursively(const Handle &extende
 //        int x = 0;
 //        x ++;
 //        for (Handle h : inputLinks)
-//            cout << h->toShortString();
+//            cout << h->to_short_string();
 
 //        cout << std::endl;
 //    }
 //    // debug
 //    string lastGramLinksStr = "";
 //    for (const Handle& h : lastGramLinks)
-//        lastGramLinksStr += h->toShortString();
+//        lastGramLinksStr += h->to_short_string();
 
 //    string inputLinksStr = "";
 //    for (const Handle& h : inputLinks)
-//        inputLinksStr += h->toShortString();
+//        inputLinksStr += h->to_short_string();
 
     // var_num is the number of variables
     unsigned int var_num = parentNode ? 0 : 1;
@@ -745,7 +745,7 @@ void PatternMiner::extendAPatternForOneMoreGramRecursively(const Handle &extende
 
 //                        cout << "\n-------------------Found sub type b patterns for current pattern: -----------------\n";
 //                        for (Handle plink : thisGramHTreeNode->pattern)
-//                            cout << plink->toShortString();
+//                            cout << plink->to_short_string();
 //                        cout << std::endl;
                         string indexStr = "";
 
@@ -890,7 +890,7 @@ void PatternMiner::extendAPatternForOneMoreGramRecursively(const Handle &extende
                         IncomingSet incomings = extendNode->getIncomingSet(&from_as);
 
                         // debug
-//                        string curvarstr = extendNode->toShortString();
+//                        string curvarstr = extendNode->to_short_string();
 //                        cout << "\n---------------start curvarstr = " << curvarstr << "---------------" <<std::endl;
 
                         for (LinkPtr incomingPtr : incomings)
@@ -934,7 +934,7 @@ void PatternMiner::extendAPatternForOneMoreGramRecursively(const Handle &extende
                                     continue;
                             }
 
-//                             string extendedHandleStr = extendedHandle->toShortString();
+//                             string extendedHandleStr = extendedHandle->to_short_string();
 
                             // debug
 //                             cout << "Extended link :" << extendedHandleStr << std::endl;

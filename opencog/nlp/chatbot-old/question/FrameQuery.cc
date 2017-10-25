@@ -43,7 +43,7 @@ FrameQuery::~FrameQuery()
 #ifdef DEBUG
 static void prt(Atom *atom)
 {
-   std::string str = atom->toString();
+   std::string str = atom->to_string();
    printf ("%s\n", str.c_str());
 }
 #endif
@@ -245,8 +245,8 @@ bool FrameQuery::node_match(Node *aa, Node *ab)
 	fprintf(stderr, "Error: unexpected node type %d %s\n", ntype,
 	        classserver().getTypeName(ntype).c_str());
 
-	std::string sa = aa->toString();
-	std::string sb = ab->toString();
+	std::string sa = aa->to_string();
+	std::string sb = ab->to_string();
 	fprintf (stderr, "unexpected comp %s\n"
 	                 "             to %s\n", sa.c_str(), sb.c_str());
 

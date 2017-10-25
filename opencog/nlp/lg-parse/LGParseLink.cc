@@ -64,13 +64,13 @@ void LGParseLink::init()
 	if (PHRASE_NODE != pht and VARIABLE_NODE != pht and GLOB_NODE != pht)
 		throw InvalidParamException(TRACE_INFO,
 			"LGParseLink: Expecting PhraseNode, got %s",
-			oset[0]->toString().c_str());
+			oset[0]->to_string().c_str());
 
 	Type dit = oset[1]->getType();
 	if (LG_DICT_NODE != dit and VARIABLE_NODE != dit and GLOB_NODE != dit)
 		throw InvalidParamException(TRACE_INFO,
 			"LGParseLink: Expecting LgDictNode, got %s",
-			oset[1]->toString().c_str());
+			oset[1]->to_string().c_str());
 
 	if (3 == osz)
 	{
@@ -78,7 +78,7 @@ void LGParseLink::init()
 		if (NUMBER_NODE != nit and VARIABLE_NODE != nit and GLOB_NODE != nit)
 			throw InvalidParamException(TRACE_INFO,
 				"LGParseLink: Expecting NumberNode, got %s",
-				oset[2]->toString().c_str());
+				oset[2]->to_string().c_str());
 	}
 }
 

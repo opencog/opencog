@@ -111,7 +111,7 @@ int main(int argc, char *argv[]) {
         for (const auto& pattern : resultPatterns) {
             printf("%f: %s",
                    pattern.first,
-                   pattern.second->toString().c_str());
+                   pattern.second->to_string().c_str());
         }
         unsigned int delta1 = std::chrono::duration_cast<std::chrono::seconds>(t2 - t1).count();
         unsigned int delta2 = std::chrono::duration_cast<std::chrono::seconds>(t4 - t3).count();

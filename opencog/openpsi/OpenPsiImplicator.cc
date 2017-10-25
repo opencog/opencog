@@ -74,7 +74,7 @@ bool OpenPsiImplicator::grounding(const HandleMap &var_soln,
     // searching.
     logger().info("In %s: the following _pattern_body triggered "
       "InitiateSearchCB::no_search \n %s", __FUNCTION__ ,
-      _pattern_body->toString().c_str());
+      _pattern_body->to_string().c_str());
 
     return false;
   }

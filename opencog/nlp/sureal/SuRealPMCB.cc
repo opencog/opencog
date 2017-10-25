@@ -81,7 +81,7 @@ bool SuRealPMCB::variable_match(const Handle &hPat, const Handle &hSoln)
     }
 
     logger().debug("[SuReal] In variable_match, looking at %s",
-          hSoln->toShortString().c_str());
+          hSoln->to_short_string().c_str());
 
     bool answer;
 
@@ -176,7 +176,7 @@ bool SuRealPMCB::clause_match(const Handle &pattrn_link_h, const Handle &grnd_li
     }
 
     logger().debug("[SuReal] In clause_match, looking at %s",
-        grnd_link_h->toShortString().c_str());
+        grnd_link_h->to_short_string().c_str());
 
     HandleSeq qISet;
     grnd_link_h->getIncomingSetByType(back_inserter(qISet), SET_LINK);
@@ -622,7 +622,7 @@ bool SuRealPMCB::grounding(const HandleMap &var_soln, const HandleMap &pred_soln
             if (m_results.count(n) == 0)
                 m_results[n] = HandleMapSeq();
 
-            logger().debug("[SuReal] grounding Interpreation: %s", n->toShortString().c_str());
+            logger().debug("[SuReal] grounding Interpreation: %s", n->to_short_string().c_str());
             m_results[n].push_back(shrinked_soln);
         }
         if (m_use_cache) {
@@ -746,7 +746,7 @@ bool SuRealPMCB::disjunct_match(const Handle& hPatWordNode, const Handle& hSolnW
     }
     else qDisjuncts = iter->second;
 
-    logger().debug("[SuReal] Looking at %d disjuncts of %s", qDisjuncts.size(), hPatWordNode->toShortString().c_str());
+    logger().debug("[SuReal] Looking at %d disjuncts of %s", qDisjuncts.size(), hPatWordNode->to_short_string().c_str());
 
     // for each disjunct, get its outgoing set, and match 1-to-1 with qTargetConns
     auto matchHelper = [&](const Handle& hDisjunct)
@@ -811,7 +811,7 @@ bool SuRealPMCB::disjunct_match(const Handle& hPatWordNode, const Handle& hSolnW
         if (not sourceConns.empty() or not targetConns.empty())
             return false;
 
-        logger().debug("[SuReal] " + hDisjunct->toShortString() + " passed!");
+        logger().debug("[SuReal] " + hDisjunct->to_short_string() + " passed!");
 
         return true;
     };
@@ -860,7 +860,7 @@ bool SuRealPMCB::initiate_search(PatternMatchEngine* pPME)
     Handle bestClause = _pattern->mandatory[0];
 
     logger().debug("[SuReal] Start pred is: %s",
-                   bestClause->toShortString().c_str());
+                   bestClause->to_short_string().c_str());
 
     // keep only links of the same type as bestClause and have linkage to InterpretationNode
     HandleSeq qCandidate;
@@ -913,7 +913,7 @@ bool SuRealPMCB::initiate_search(PatternMatchEngine* pPME)
 
     for (auto& c : sCandidate)
     {
-        logger().debug("[SuReal] Loop candidate: %s", c.handle->toShortString().c_str());
+        logger().debug("[SuReal] Loop candidate: %s", c.handle->to_short_string().c_str());
 
         if (pPME->explore_neighborhood(bestClause, bestClause, c.handle))
             return true;

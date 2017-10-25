@@ -54,13 +54,13 @@ void LGDictEntry::init()
 	if (WORD_NODE != pht and VARIABLE_NODE != pht and GLOB_NODE != pht)
 		throw InvalidParamException(TRACE_INFO,
 			"LgDictEntry: Expecting WordNode, got %s",
-			oset[0]->toString().c_str());
+			oset[0]->to_string().c_str());
 
 	Type dit = oset[1]->getType();
 	if (LG_DICT_NODE != dit and VARIABLE_NODE != dit and GLOB_NODE != dit)
 		throw InvalidParamException(TRACE_INFO,
 			"LGDictEntry: Expecting LgDictNode, got %s",
-			oset[1]->toString().c_str());
+			oset[1]->to_string().c_str());
 }
 
 LGDictEntry::LGDictEntry(const HandleSeq& oset, Type t)

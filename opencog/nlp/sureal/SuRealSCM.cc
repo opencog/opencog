@@ -310,7 +310,7 @@ HandleSeqSeq SuRealSCM::do_sureal_match(Handle h, bool use_cache)
  */
 HandleSeqSeq SuRealSCM::sureal_get_mapping(Handle& h, std::vector<HandleMap >& mappings)
 {
-    logger().debug("[SuReal] %d mapping(s) for %s", mappings.size(), h->toShortString().c_str());
+    logger().debug("[SuReal] %d mapping(s) for %s", mappings.size(), h->to_short_string().c_str());
 
     HandleSeq qKeys, qVars;
 

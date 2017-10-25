@@ -117,7 +117,7 @@ void MOSESPLNSynergyUTest::test_moses_pln_synergy_pm()
 	                      gn(PREDICATE_NODE, "take-treatment-1"),
 	                      gn(PREDICATE_NODE, "eat-lots-fruits-vegetables")),
 	                   gn(PREDICATE_NODE, "recovery-speed-of-injury-alpha"));
-	std::cout << "target = " << target->toString() << std::endl;
+	std::cout << "target = " << target->to_string() << std::endl;
 
 	TS_ASSERT_DIFFERS(target, Handle::UNDEFINED);
 
@@ -165,7 +165,7 @@ void MOSESPLNSynergyUTest::test_moses_pln_synergy_fc()
 	//                       gn(PREDICATE_NODE, "take-treatment-1"),
 	//                       gn(PREDICATE_NODE, "eat-lots-fruits-vegetables")),
 	//                    gn(PREDICATE_NODE, "recovery-speed-of-injury-alpha"));
-	// std::cout << "target = " << target->toString() << std::endl;
+	// std::cout << "target = " << target->to_string() << std::endl;
 
 	// TS_ASSERT_DIFFERS(target, Handle::UNDEFINED);
 
@@ -202,7 +202,7 @@ void MOSESPLNSynergyUTest::test_moses_pln_synergy_bc()
 	// //    )
 	// //    (PredicateNode "recovery-speed-of-injury-alpha" (stv 0.30000001 0.80000001))
 	// // )
-	// std::cout << "target = " << target->toString() << std::endl;
+	// std::cout << "target = " << target->to_string() << std::endl;
 
 	// TS_ASSERT_DIFFERS(target, Handle::UNDEFINED);
 

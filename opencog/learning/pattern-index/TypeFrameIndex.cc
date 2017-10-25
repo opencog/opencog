@@ -833,7 +833,7 @@ bool TypeFrameIndex::add(Handle handle, int offset)
     if (frame.isValid()) {
         exitStatus = addFrame(frame, offset);
     } else {
-        printf("INVALID FRAME <%s>\n", handle->toString().c_str());
+        printf("INVALID FRAME <%s>\n", handle->to_string().c_str());
     }
     return exitStatus;
 
