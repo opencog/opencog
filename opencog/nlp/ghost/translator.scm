@@ -248,8 +248,10 @@
           (list (action-choices choices)))))
   (define action-atomese (to-atomese (cdar ACTION)))
   (True (if reuse action-atomese
-                  (ExecutionOutput (GroundedSchema "scm: ghost-execute-action")
-                                   (List action-atomese)))))
+                  (list (ExecutionOutput
+                          (GroundedSchema "scm: ghost-execute-action")
+                          (List action-atomese))
+                        (Put (State ghost-topic (Variable "$x")) rule-topic)))))
 
 (define (process-goal GOAL)
   "Go through each of the goals, including the shared ones."
@@ -267,6 +269,9 @@
   (cog-logger-debug "In create-rule\nPATTERN = ~a\nACTION = ~a" PATTERN ACTION)
   (catch #t
     (lambda ()
+      ; First of all, make sure the topic is set
+      (if (null? rule-topic)
+          (set! rule-topic (create-topic "Default Topic" '())))
       (let* ((ordered-terms (order-terms PATTERN))
              (proc-terms (process-pattern-terms ordered-terms))
              (vars (append atomese-variable-template (list-ref proc-terms 0)))
@@ -285,9 +290,7 @@
                           action
                           (psi-goal (car goal))
                           (stv (cdr goal) .9)
-                          (if (null? rule-topic)
-                              (create-topic "Default Topic" '())
-                              rule-topic)))
+                          rule-topic))
                       goals))))
     (lambda (key . parameters)
       (if (not (equal? key 'FeatureNotSupported))

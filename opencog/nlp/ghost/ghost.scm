@@ -34,6 +34,7 @@
 (define ghost-no-constant (Anchor (ghost-prefix "No constant terms")))
 (define ghost-word-seq (Predicate (ghost-prefix "Word Sequence")))
 (define ghost-lemma-seq (Predicate (ghost-prefix "Lemma Sequence")))
+(define ghost-topic (Anchor (ghost-prefix "Current Topic")))
 
 ; Define the logger for GHOST
 (define ghost-logger (cog-new-logger))
@@ -59,9 +60,6 @@
 
 ; Keep a record of the lemmas we have seen, and it serves as a cache as well
 (define lemma-alist '())
-
-; The current topic
-(define ghost-topic '())
 
 ; Keep a record of the most recent outputs generated
 (define ghost-result '())
