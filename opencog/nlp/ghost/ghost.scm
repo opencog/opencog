@@ -15,6 +15,7 @@
   #:use-module (ice-9 regex)
   #:use-module (ice-9 getopt-long)
   #:use-module (ice-9 eval-string)
+  #:use-module (ice-9 receive)
   #:use-module (system base lalr)
 )
 

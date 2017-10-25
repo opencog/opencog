@@ -6,11 +6,19 @@
 ;; OpenPsi should be able to know how and what kinds of rules it should be
 ;; looking for at a particular point in time.
 
+(define (eval-rules RULES)
+  "Evaluate each of the RULES, return those that are satisfied."
+  (append-map
+    (lambda (r)
+      (if (equal? (stv 1 1) (psi-satisfiable? r)) (list r) '()))
+    RULES))
+
 (define-public (ghost-find-rules SENT)
   "The action selector. It first searches for the rules using DualLink,
    and then does the filtering by evaluating the context of the rules.
    Eventually returns a list of weighted rules that can satisfy the demand."
-  (let* ((input-lseq (gddr (car (filter (lambda (e)
+  (let* ((curr-topic (ghost-get-curr-topic))
+         (input-lseq (gddr (car (filter (lambda (e)
            (equal? ghost-lemma-seq (gar e)))
              (cog-get-pred SENT 'PredicateNode)))))
          ; The ones that contains no variables/globs
@@ -34,12 +42,20 @@
                  (list) (append exact-match no-const dual-match)))
          ; Evaluate the matched rules one by one and see which of them satisfy
          (rules-satisfied
-           (append-map
-             (lambda (r)
-               (if (equal? (stv 1 1) (psi-satisfiable? r))
-                   (list r)
-                   '()))
-             rules-matched)))
+           (receive (topic-rules other-rules)
+             ; See which rules are on the current topic
+             (partition (lambda (r)
+               (equal? curr-topic (car (cog-chase-link 'MemberLink 'ConceptNode r))))
+               rules-matched)
+             ; Evaluate the ones that are on the current topic first, then the
+             ; other rules if no on topic rules are satisfied
+             (let ((satisfied-topic-rules (eval-rules topic-rules)))
+                  (if (null? satisfied-topic-rules)
+                      (begin
+                        (cog-logger-debug ghost-logger
+                          "Evaluating rules that are not on topic ~a" curr-topic)
+                        (eval-rules other-rules))
+                      satisfied-topic-rules)))))
         (cog-logger-debug ghost-logger "For input:\n~a" input-lseq)
         (cog-logger-debug ghost-logger "Rules with no constant:\n~a" no-const)
         (cog-logger-debug ghost-logger "Exact match:\n~a" exact-match)
