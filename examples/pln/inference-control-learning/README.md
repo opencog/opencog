@@ -22,12 +22,12 @@ letters.
 
 ```
 Inheritance (stv 1 1)
-  Concept "A" (stv 1/26 1)
-  Concept "B" (stv 2/26 1)
+  Concept "a" (stv 1/26 1)
+  Concept "b" (stv 2/26 1)
 ...
 Inheritance (stv 1 1)
-  Concept "Y" (stv 25/26 1)
-  Concept "Z" (stv 26/26 1)
+  Concept "y" (stv 25/26 1)
+  Concept "z" (stv 26/26 1)
 ```
 
 The concept strengths, 1/26 to 26/26, are defined to be consistent
@@ -40,14 +40,14 @@ letters.
 Evaluation (stv 1 1)
   Predicate "alphabetical-order"
   List
-    Concept "A"
-    Concept "B"
+    Concept "a"
+    Concept "b"
 ...
 Evaluation (stv 1 1)
   Predicate "alphabetical-order"
   List
-    Concept "A"
-    Concept "Z"
+    Concept "a"
+    Concept "z"
 ```
 
 Combined with a rule to infer that if letter X occurs before Y, then X
@@ -99,14 +99,14 @@ types of useful control rules.
 
 1. Deduction is often useful. That is because chaining an number of
    deductions is enough to prove that any 2 letters are ordered.
-2. If the target is of the form Inheritance A X, then conditional
+2. If the target is of the form Inheritance a X, then conditional
    instantiation is useful. That is because in that case we can use
    this rule over the fact that
    ```
    Evaluation
      alphabetical-order
      List
-       A
+       a
        X
    ```
    is true for all other letters, combined with the implication that
@@ -116,7 +116,7 @@ The first control rule can easily be learned by PLN alone, using
 direct evaluation. The second rule however requires something more
 sophisticated like the pattern miner to notice that using conditional
 instantiation is only fruitful when the first letter of the target is
-A.
+`a`.
 
 Usage
 -----
@@ -411,7 +411,7 @@ ImplicationScope <TV>
         Variable "$A"
         Variable "$T"
     Evaluation
-      Predicate "first-letter-is-A"
+      Predicate "first-letter-is-a"
       Variable "$L"
   Evaluation
     Predicate "preproof-of"
@@ -422,7 +422,7 @@ ImplicationScope <TV>
 
 You may notice that the inference rule has already been instantiated,
 here referred as `<conditional-instantiation>` to keep the example
-short. Also the `Predicate "first-letter-is-A"` should be expressed in
+short. Also the `Predicate "first-letter-is-a"` should be expressed in
 terms of patterns mined by the pattern miner.
 
 The other option is to specialize the preproof and expansion clauses
@@ -445,7 +445,7 @@ ImplicationScope <TV>
       List
         Variable "$A"
         Inheritance
-          Concept "A"
+          Concept "a"
           Variable "$X"
         <conditional-instantiation>
       Variable "$B"
@@ -471,7 +471,7 @@ has been replaced by
 
 ```
 Inheritance
-  Concept "A"
+  Concept "a"
   Variable "$X"
 ```
 
@@ -479,7 +479,7 @@ as a substitute for the pattern clause
 
 ```
     Evaluation
-      Predicate "first-letter-is-A"
+      Predicate "first-letter-is-a"
       Variable "$L"
 ```
 

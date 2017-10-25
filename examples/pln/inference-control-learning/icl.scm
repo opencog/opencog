@@ -15,7 +15,7 @@
 
 ;; Set loggers levels
 (cog-logger-set-level! "info")
-(cog-logger-set-level! icl-logger "debug")
+(cog-logger-set-level! icl-logger "info")
 (cog-logger-set-level! (cog-ure-logger) "info")
 
 ;; Set loggers stdout
@@ -29,7 +29,7 @@
 ;; (cog-logger-set-sync! (cog-ure-logger) #t)
 
 ;; Set parameters
-(define pss 3)                    ; Problem set size
+(define pss 100)                    ; Problem set size
 (define niter 2)                    ; Number of iterations
 (define piter 30)                   ; Number of iterations used for each problem
 

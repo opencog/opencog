@@ -18,7 +18,7 @@
 
 ;; Let of characters of the alphabet
 (define alphabet-list
-  (string->list "ABCDEFGHIJKLMNOPQRSTUVWXYZ"))
+  (string->list "abcdefghijklmnopqrstuvwxyz"))
 
 ;; Given a number between 0 and 25 return the corresponding letter as
 ;; a string.
@@ -40,12 +40,12 @@
 
 ;; Randomly generate N targets
 (define (gen-random-targets N)
-  (list (Inheritance (Concept "D") (Concept "Y"))
-        (Inheritance (Concept "A") (Concept "Z"))
-        (Inheritance (Concept "A") (Concept "G"))))
-  ;; (if (= N 0)
-  ;;     '()
-  ;;     (cons (gen-random-target) (gen-random-targets (- N 1)))))
+  ;; (list (Inheritance (Concept "d") (Concept "y"))
+  ;;       (Inheritance (Concept "a") (Concept "z"))
+  ;;       (Inheritance (Concept "a") (Concept "g"))))
+  (if (= N 0)
+      '()
+      (cons (gen-random-target) (gen-random-targets (- N 1)))))
 
 ;; Log the given atomspace at some level
 (define (icl-logger-info-atomspace as)
