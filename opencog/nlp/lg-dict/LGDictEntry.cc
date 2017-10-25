@@ -50,17 +50,17 @@ void LGDictEntry::init()
 		throw InvalidParamException(TRACE_INFO,
 			"LgDictEntry: Expecting two arguments, got %lu", osz);
 
-	Type pht = oset[0]->getType();
+	Type pht = oset[0]->get_type();
 	if (WORD_NODE != pht and VARIABLE_NODE != pht and GLOB_NODE != pht)
 		throw InvalidParamException(TRACE_INFO,
 			"LgDictEntry: Expecting WordNode, got %s",
-			oset[0]->toString().c_str());
+			oset[0]->to_string().c_str());
 
-	Type dit = oset[1]->getType();
+	Type dit = oset[1]->get_type();
 	if (LG_DICT_NODE != dit and VARIABLE_NODE != dit and GLOB_NODE != dit)
 		throw InvalidParamException(TRACE_INFO,
 			"LGDictEntry: Expecting LgDictNode, got %s",
-			oset[1]->toString().c_str());
+			oset[1]->to_string().c_str());
 }
 
 LGDictEntry::LGDictEntry(const HandleSeq& oset, Type t)
@@ -80,7 +80,7 @@ LGDictEntry::LGDictEntry(const Link& l)
 	: FunctionLink(l)
 {
 	// Type must be as expected
-	Type tparse = l.getType();
+	Type tparse = l.get_type();
 	if (not classserver().isA(tparse, LG_DICT_ENTRY))
 	{
 		const std::string& tname = classserver().getTypeName(tparse);
@@ -93,8 +93,8 @@ LGDictEntry::LGDictEntry(const Link& l)
 
 Handle LGDictEntry::execute(AtomSpace* as) const
 {
-	if (WORD_NODE != _outgoing[0]->getType()) return Handle();
-	if (LG_DICT_NODE != _outgoing[1]->getType()) return Handle();
+	if (WORD_NODE != _outgoing[0]->get_type()) return Handle();
+	if (LG_DICT_NODE != _outgoing[1]->get_type()) return Handle();
 
 	if (nullptr == as) as = getAtomSpace();
 	if (nullptr == as)
@@ -107,9 +107,9 @@ Handle LGDictEntry::execute(AtomSpace* as) const
 	if (nullptr == dict)
 		throw InvalidParamException(TRACE_INFO,
 			"LgDictEntry requires valid dictionary! %s was given.",
-			ldn->getName().c_str());
+			ldn->get_name().c_str());
 
-	HandleSeq djs = getDictEntry(dict, _outgoing[0]->getName());
+	HandleSeq djs = getDictEntry(dict, _outgoing[0]->get_name());
 	for (const Handle& dj: djs) as->add_atom(dj);
 
 	return _outgoing[0];

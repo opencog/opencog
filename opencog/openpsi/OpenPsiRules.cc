@@ -61,7 +61,7 @@ Handle OpenPsiRules::add_rule(const HandleSeq& context, const Handle& action,
   // cast will be valid; else construct a PatternLink wrapping the context
   // in an AndLink.
   if ((1 == context.size()) and
-    classserver().isA(SATISFACTION_LINK, context[0]->getType())) {
+    classserver().isA(SATISFACTION_LINK, context[0]->get_type())) {
       // This is for ghost.
 
       // Add to the index of rules.

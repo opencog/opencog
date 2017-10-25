@@ -688,15 +688,15 @@ bool TypeFrame::buildFrameRepresentation(const string &schemeTxt)
 
 void TypeFrame::recursiveHandleTraverse(Handle handle)
 {
-    bool isLink = handle->isLink();
-    unsigned int n = (isLink ? handle->getArity() : 0);
-    emplace_back(handle->getType(), n);
+    bool isLink = handle->is_link();
+    unsigned int n = (isLink ? handle->get_arity() : 0);
+    emplace_back(handle->get_type(), n);
     if (isLink) {
         for (unsigned int i = 0; i < n; i++) {
             recursiveHandleTraverse(handle->getOutgoingAtom(i));
         }
     } else {
-        setNodeNameAt(size() - 1, handle->getName());
+        setNodeNameAt(size() - 1, handle->get_name());
     }
 }
 

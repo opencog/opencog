@@ -41,7 +41,7 @@
 //#define DPRINTF printf
 #define DPRINTF(...)
 // To simplify debug log output
-#define ATOM_AS_STRING(h) (h->toShortString().c_str())
+#define ATOM_AS_STRING(h) (h->to_short_string().c_str())
 
 using namespace opencog;
 using namespace opencog::spatial;
@@ -85,12 +85,12 @@ void SpaceServer::atomAdded(const Handle& h)
 
 void SpaceServer::atomRemoved(const AtomPtr& atom)
 {
-    Type type = atom->getType();
+    Type type = atom->get_type();
     if (not classserver().isA(type, OBJECT_NODE)) return;
 
     std::vector<std::string> timeDomains = timeser->getTimeDomains();
     for (auto timeDomain: timeDomains) {
-        removeSpaceInfo(atom->getHandle(), curSpaceMapHandle, 0, timeDomain);
+        removeSpaceInfo(atom->get_handle(), curSpaceMapHandle, 0, timeDomain);
     }
 }
 
@@ -233,7 +233,7 @@ bool SpaceServer::addSpaceInfo(Handle objectNode, Handle spaceMapHandle, bool is
 
     opencog::spatial::BlockVector pos(objX, objY, objZ);
 
-    if (objectNode->getType() == STRUCTURE_NODE) {
+    if (objectNode->get_type() == STRUCTURE_NODE) {
         // it's a block
         SpaceMap& theSpaceMap = (scenePairItr->second).spaceMap;
         theSpaceMap.addSolidUnitBlock(objectNode, pos);
@@ -278,7 +278,7 @@ void SpaceServer::removeSpaceInfo(Handle objectNode, Handle spaceMapHandle, octi
         timeser->addTimeInfo(spaceMapHandle, timestamp, timeDomain);
     }
 
-    if (objectNode->getType() == STRUCTURE_NODE) {
+    if (objectNode->get_type() == STRUCTURE_NODE) {
         SpaceMap& theSpaceMap = (scenePairItr->second).spaceMap;
         theSpaceMap.removeSolidUnitBlock(objectNode);
     } else {
@@ -286,7 +286,7 @@ void SpaceServer::removeSpaceInfo(Handle objectNode, Handle spaceMapHandle, octi
         entityRecorder.removeNoneBlockEntity(objectNode);
     }
 
-    logger().debug("%s(%s)\n", __FUNCTION__, objectNode->getName().c_str());
+    logger().debug("%s(%s)\n", __FUNCTION__, objectNode->get_name().c_str());
 
 }
 
@@ -309,7 +309,7 @@ std::string SpaceServer::getMapIdString(Handle mapHandle) const
     // So, just get the name of the TimeNode as its string representation
     // return atomspace->get_name(mapHandle->getOutgoingSet()[0])->get_result();
 
-    return mapHandle->getName();
+    return mapHandle->get_name();
 }
 
 // TODO

@@ -232,7 +232,7 @@ void AtomSpacePublisherModule::atomAddSignal(Handle h)
 void AtomSpacePublisherModule::atomRemoveSignal(AtomPtr atom)
 {
     tbb_enqueue_lambda([=] {
-        sendMessage("remove", atomMessage(atomToJSON(atom->getHandle())));
+        sendMessage("remove", atomMessage(atomToJSON(atom->get_handle())));
     });
 }
 
@@ -284,11 +284,11 @@ void AtomSpacePublisherModule::removeAFSignal(const Handle& h,
 Object AtomSpacePublisherModule::atomToJSON(Handle h)
 {
     // Type
-    Type type = h->getType();
+    Type type = h->get_type();
     std::string typeNameString = classserver().getTypeName(type);
 
     // Name
-    std::string nameString = h->getName();
+    std::string nameString = h->get_name();
 
     // Handle
     std::string handle = std::to_string(h.value());
@@ -313,7 +313,7 @@ Object AtomSpacePublisherModule::atomToJSON(Handle h)
 
     // Outgoing set
     Array outgoing;
-    if (h->isLink()) {
+    if (h->is_link()) {
         HandleSeq outgoingHandles = h->getOutgoingSet();
         for (uint i = 0; i < outgoingHandles.size(); i++) {
             outgoing.push_back(std::to_string(outgoingHandles[i].value()));
@@ -347,27 +347,27 @@ Object AtomSpacePublisherModule::tvToJSON(TruthValuePtr tvp)
 {
     Object json;
     Object jsonDetails;
-    Type tvt = tvp->getType();
+    Type tvt = tvp->get_type();
 
 
     if (tvt == SIMPLE_TRUTH_VALUE) {
         json.push_back(Pair("type", "simple"));
-        jsonDetails.push_back(Pair("strength", tvp->getMean()));
-        jsonDetails.push_back(Pair("count", tvp->getCount()));
-        jsonDetails.push_back(Pair("confidence", tvp->getConfidence()));
+        jsonDetails.push_back(Pair("strength", tvp->get_mean()));
+        jsonDetails.push_back(Pair("count", tvp->get_count()));
+        jsonDetails.push_back(Pair("confidence", tvp->get_confidence()));
         json.push_back(Pair("details", jsonDetails));
     }
     else if (tvt == COUNT_TRUTH_VALUE) {
         json.push_back(Pair("type", "count"));
-        jsonDetails.push_back(Pair("strength", tvp->getMean()));
-        jsonDetails.push_back(Pair("count", tvp->getCount()));
-        jsonDetails.push_back(Pair("confidence", tvp->getConfidence()));
+        jsonDetails.push_back(Pair("strength", tvp->get_mean()));
+        jsonDetails.push_back(Pair("count", tvp->get_count()));
+        jsonDetails.push_back(Pair("confidence", tvp->get_confidence()));
         json.push_back(Pair("details", jsonDetails));
     }
     else if (tvt == INDEFINITE_TRUTH_VALUE) {
         IndefiniteTruthValuePtr itv = IndefiniteTVCast(tvp);
         json.push_back(Pair("type", "indefinite"));
-        jsonDetails.push_back(Pair("strength", itv->getMean()));
+        jsonDetails.push_back(Pair("strength", itv->get_mean()));
         jsonDetails.push_back(Pair("L", itv->getL()));
         jsonDetails.push_back(Pair("U", itv->getU()));
         jsonDetails.push_back(Pair("confidence", itv->getConfidenceLevel()));
@@ -377,16 +377,16 @@ Object AtomSpacePublisherModule::tvToJSON(TruthValuePtr tvp)
     }
     else if (tvt == PROBABILISTIC_TRUTH_VALUE) {
         json.push_back(Pair("type", "probabilistic"));
-        jsonDetails.push_back(Pair("strength", tvp->getMean()));
-        jsonDetails.push_back(Pair("count", tvp->getCount()));
-        jsonDetails.push_back(Pair("confidence", tvp->getConfidence()));
+        jsonDetails.push_back(Pair("strength", tvp->get_mean()));
+        jsonDetails.push_back(Pair("count", tvp->get_count()));
+        jsonDetails.push_back(Pair("confidence", tvp->get_confidence()));
         json.push_back(Pair("details", jsonDetails));
     }
     else if (tvt == FUZZY_TRUTH_VALUE) {
         json.push_back(Pair("type", "fuzzy"));
-        jsonDetails.push_back(Pair("strength", tvp->getMean()));
-        jsonDetails.push_back(Pair("count", tvp->getCount()));
-        jsonDetails.push_back(Pair("confidence", tvp->getConfidence()));
+        jsonDetails.push_back(Pair("strength", tvp->get_mean()));
+        jsonDetails.push_back(Pair("count", tvp->get_count()));
+        jsonDetails.push_back(Pair("confidence", tvp->get_confidence()));
         json.push_back(Pair("details", jsonDetails));
     }
     else {

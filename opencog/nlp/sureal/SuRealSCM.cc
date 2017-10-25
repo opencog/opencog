@@ -99,7 +99,7 @@ void SuRealSCM::init()
 static void get_all_unique_nodes(const Handle& h,
                                  UnorderedHandleSet& node_set)
 {
-   if (h->isNode())
+   if (h->is_node())
    {
       node_set.insert(h);
       return;
@@ -151,7 +151,7 @@ HandleSeqSeq SuRealSCM::do_sureal_match(Handle h, bool use_cache)
 {
 #ifdef HAVE_GUILE
     // only accept SetLink
-    if (h->getType() != SET_LINK)
+    if (h->get_type() != SET_LINK)
         return HandleSeqSeq();
 
     AtomSpace* pAS = SchemeSmob::ss_get_env_as("sureal-match");
@@ -179,7 +179,7 @@ HandleSeqSeq SuRealSCM::do_sureal_match(Handle h, bool use_cache)
         // them as variables;  this is because we have
         //    (InterpreationNode "MicroplanningNewSentence")
         // from the microplanner that should be matched to any InterpretationNode
-        if (n->getType() == INTERPRETATION_NODE || n->getType() == VARIABLE_NODE)
+        if (n->get_type() == INTERPRETATION_NODE || n->get_type() == VARIABLE_NODE)
         {
             sVars.insert(n);
             continue;
@@ -188,11 +188,11 @@ HandleSeqSeq SuRealSCM::do_sureal_match(Handle h, bool use_cache)
         // special treatment for DefinedLinguisticConceptNode and
         // DefinedLinguisticPredicateNode, do not treat them as variables
         // because they are not actual words of a sentence.
-        if (n->getType() == DEFINED_LINGUISTIC_CONCEPT_NODE or
-            n->getType() == DEFINED_LINGUISTIC_PREDICATE_NODE)
+        if (n->get_type() == DEFINED_LINGUISTIC_CONCEPT_NODE or
+            n->get_type() == DEFINED_LINGUISTIC_PREDICATE_NODE)
            continue;
 
-        std::string sName = n->getName();
+        std::string sName = n->get_name();
 
         // if it is an instance, check if it has the LG relationships
         if (sName.find("@") != std::string::npos)
@@ -258,8 +258,8 @@ HandleSeqSeq SuRealSCM::do_sureal_match(Handle h, bool use_cache)
         // get the corresponding SetLink
         HandleSeq qi = get_target_neighbors(hi, REFERENCE_LINK);
         HandleSeq qj = get_target_neighbors(hj, REFERENCE_LINK);
-        qi.erase(std::remove_if(qi.begin(), qi.end(), [](Handle& h) { return h->getType() != SET_LINK; }), qi.end());
-        qj.erase(std::remove_if(qj.begin(), qj.end(), [](Handle& h) { return h->getType() != SET_LINK; }), qj.end());
+        qi.erase(std::remove_if(qi.begin(), qi.end(), [](Handle& h) { return h->get_type() != SET_LINK; }), qi.end());
+        qj.erase(std::remove_if(qj.begin(), qj.end(), [](Handle& h) { return h->get_type() != SET_LINK; }), qj.end());
 
         // assuming each InterpretationNode is only linked to one SetLink
         // and compare using arity
@@ -310,7 +310,7 @@ HandleSeqSeq SuRealSCM::do_sureal_match(Handle h, bool use_cache)
  */
 HandleSeqSeq SuRealSCM::sureal_get_mapping(Handle& h, std::vector<HandleMap >& mappings)
 {
-    logger().debug("[SuReal] %d mapping(s) for %s", mappings.size(), h->toShortString().c_str());
+    logger().debug("[SuReal] %d mapping(s) for %s", mappings.size(), h->to_short_string().c_str());
 
     HandleSeq qKeys, qVars;
 

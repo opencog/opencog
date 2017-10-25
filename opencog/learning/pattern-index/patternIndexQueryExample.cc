@@ -86,7 +86,7 @@ int main(int argc, char *argv[]) {
         Handle queryHandle = schemeEval->eval_h(queryStr1);
         Handle resultHandle = patternindex().query(indexKey, queryHandle);
         printf("Query 1:\n");
-        printf("Result: %s", resultHandle->toString().c_str());
+        printf("Result: %s", resultHandle->to_string().c_str());
 
         //
         // optionally, query() may be called passing the SCM string
@@ -117,13 +117,13 @@ int main(int argc, char *argv[]) {
         for (unsigned int i = 0; i < queryResults.size(); i++) {
             printf("Result #%u:\n\n", i + 1);
             for (const Handle& result : queryResults.at(i).first) {
-                printf("%s\n", result->toString().c_str());
+                printf("%s\n", result->to_string().c_str());
             }
             printf("Mapping:\n\n");
             for (const auto& vargnd : queryResults.at(i).second) {
                 printf("%s%s\n", 
-                       vargnd.first->toString().c_str(),
-                       vargnd.second->toString().c_str());
+                       vargnd.first->to_string().c_str(),
+                       vargnd.second->to_string().c_str());
             }
         }
     }

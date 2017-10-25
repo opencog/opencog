@@ -69,8 +69,8 @@ public:
 
         TS_ASSERT(nullptr != testmaphandle);
         Handle expected = testatomspace.get_node(SPACE_MAP_NODE, "testmap");
-        printf("expected=%s\n got=%s\n", expected->toString().c_str(),
-              testmaphandle->toString().c_str());
+        printf("expected=%s\n got=%s\n", expected->to_string().c_str(),
+              testmaphandle->to_string().c_str());
         TS_ASSERT_EQUALS(expected, testmaphandle);
     }
 
@@ -85,8 +85,8 @@ public:
                                       9, 10, 11);
         const SpaceServer::SpaceMap& testmap = testspaceserver->getMap(testmaphandle);
         Handle expected = testmap.getBlock(BlockVector(9, 10, 11));
-        printf("expected=%s\n got=%s\n", expected->toString().c_str(),
-              testobjecthandle->toString().c_str());
+        printf("expected=%s\n got=%s\n", expected->to_string().c_str(),
+              testobjecthandle->to_string().c_str());
         TS_ASSERT_EQUALS(expected, testobjecthandle);
 
         testspaceserver->removeSpaceInfo(testobjecthandle,testmaphandle);

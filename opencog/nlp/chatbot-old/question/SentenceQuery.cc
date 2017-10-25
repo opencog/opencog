@@ -92,7 +92,7 @@ bool SentenceQuery::is_tq(Handle prop)
 	AtomSpace *atomspace = cogserver().getAtomSpace();
 	if (DEFINED_LINGUISTIC_CONCEPT_NODE != atomspace->getType(prop)) return false;
 
-	const std::string& name = atomspace->getName(prop);
+	const std::string& name = atomspace->get_name(prop);
 	const char * str = name.c_str();
 	if (0 == strcmp(str, "truth-query"))
 		return true;
@@ -170,7 +170,7 @@ bool SentenceQuery::is_query(Handle h)
  */
 bool SentenceQuery::discard_extra_markup(Atom *atom)
 {
-	if (DEFINED_LINGUISTIC_CONCEPT_NODE != atom->getType()) return false;
+	if (DEFINED_LINGUISTIC_CONCEPT_NODE != atom->get_type()) return false;
 
 	Node *n = dynamic_cast<Node *>(atom);
 	if(!n) return false;
@@ -187,7 +187,7 @@ bool SentenceQuery::discard_extra_markup(Atom *atom)
 	 * definite-FLAG matching. Everything else is ignored
 	 * in the match.
 	 */
-	const char *name = n->getName().c_str();
+	const char *name = n->get_name().c_str();
 	if (!strcmp("#masculine", name)) do_discard = false;
 	else if (!strcmp("#feminine", name)) do_discard = false;
 	else if (!strcmp("#person", name)) do_discard = false;
@@ -219,7 +219,7 @@ bool SentenceQuery::discard_extra_markup(Atom *atom)
 bool SentenceQuery::assemble_predicate(Atom *atom)
 {
 	Handle ah = atom->handle;
-	Type atype = atom->getType();
+	Type atype = atom->get_type();
 	if (EVALUATION_LINK == atype)
 	{
 		bool keep = foreach_outgoing_atom(ah, &WordRelQuery::is_ling_rel, this);
@@ -259,7 +259,7 @@ bool SentenceQuery::assemble_predicate(Atom *atom)
  */
 bool SentenceQuery::is_ling_rel(Atom *atom)
 {
-	Type t = atom->getType();
+	Type t = atom->get_type();
 	if (DEFINED_LINGUISTIC_RELATIONSHIP_NODE == t) return true;
 	if (PREPOSITIONAL_RELATIONSHIP_NODE == t) return true;
 	return false;

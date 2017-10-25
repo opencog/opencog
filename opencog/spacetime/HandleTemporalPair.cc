@@ -55,7 +55,7 @@ Temporal* HandleTemporalPair::getTemporal() const
 std::string HandleTemporalPair::toString() const
 {
     std::string  answer;
-    answer += "(" + Handle(handle)->toShortString() + "," + time->toString() + ")";
+    answer += "(" + Handle(handle)->to_short_string() + "," + time->toString() + ")";
     return answer;
 }
 

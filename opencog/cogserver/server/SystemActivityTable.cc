@@ -76,7 +76,7 @@ void SystemActivityTable::trimActivitySeq(ActivitySeq &seq, size_t max)
 
 void SystemActivityTable::atomRemoved(AtomPtr atom)
 {
-    Handle h = atom->getHandle();
+    Handle h = atom->get_handle();
     std::lock_guard<std::mutex> lock(_activityTableMutex);
     for (AgentActivityTable::iterator it  = _agentActivityTable.begin();
                                       it != _agentActivityTable.end(); ++it) {
