@@ -99,7 +99,7 @@ void SuRealSCM::init()
 static void get_all_unique_nodes(const Handle& h,
                                  UnorderedHandleSet& node_set)
 {
-   if (h->isNode())
+   if (h->is_node())
    {
       node_set.insert(h);
       return;

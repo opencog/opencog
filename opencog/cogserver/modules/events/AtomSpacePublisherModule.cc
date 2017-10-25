@@ -313,7 +313,7 @@ Object AtomSpacePublisherModule::atomToJSON(Handle h)
 
     // Outgoing set
     Array outgoing;
-    if (h->isLink()) {
+    if (h->is_link()) {
         HandleSeq outgoingHandles = h->getOutgoingSet();
         for (uint i = 0; i < outgoingHandles.size(); i++) {
             outgoing.push_back(std::to_string(outgoingHandles[i].value()));

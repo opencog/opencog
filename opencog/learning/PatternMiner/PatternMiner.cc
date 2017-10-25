@@ -56,7 +56,7 @@ void PatternMiner::generateIndexesOfSharedVars(const Handle& link, const HandleS
 {
     for (const Handle& h : link->getOutgoingSet())
     {
-        if (h->isNode())
+        if (h->is_node())
         {
             if (h->get_type() == opencog::PATTERN_VARIABLENODE_TYPE)
             {
@@ -91,7 +91,7 @@ HandleSeq PatternMiner::findAndRenameVariables(const Handle& link, HandleMap& va
     HandleSeq renameOutgoingLinks;
     for (const Handle& h : link->getOutgoingSet())
     {
-        if (h->isNode())
+        if (h->is_node())
         {
            if (h->get_type() == opencog::PATTERN_VARIABLENODE_TYPE)
            {
@@ -182,7 +182,7 @@ void PatternMiner::ReplaceConstNodeWithVariableForOneLink(Handle link, Handle co
     for (const Handle& h : link->getOutgoingSet())
     {
 
-        if (h->isNode())
+        if (h->is_node())
         {
            if (h == constNode)
            {
@@ -383,7 +383,7 @@ Handle PatternMiner::UnifyOneLinkForUnorderedLink(const Handle& link,
 
     for (const Handle& h : link->getOutgoingSet())
     {
-        if (h->isNode())
+        if (h->is_node())
         {
             // it's a node, just add it
             outputOutgoingLinks.push_back(h);
@@ -411,7 +411,7 @@ Handle PatternMiner::UnifyOneLinkForUnorderedLink(const Handle& link,
             // if it also contain Nodes, then only sort the Links, leave all the Nodes in the top of the list
             for (const Handle& h1 : outputOutgoingLinks)
             {
-                if (h1->isLink())
+                if (h1->is_link())
                     outgoingLinksTobeUnified.push_back(h1);
                 else
                     nodesInOutgoings.push_back(h1);
@@ -520,7 +520,7 @@ Handle PatternMiner::substitute(const Handle& h, const HandleMap& h2h)
         return as->add_atom(it->second);
 
     // Otherwise if h is a node, h itself is returned
-    if (h->isNode())
+    if (h->is_node())
         return h;
 
     // Recursively substitute its outgoings and reconstruct
@@ -536,7 +536,7 @@ void PatternMiner::associateNodesToVars(const Handle& link, HandleMap& nodesToVa
 {
     for (const Handle& h : link->getOutgoingSet())
     {
-        if (h->isNode())
+        if (h->is_node())
         {
             if (nodesToVars.find(h) == nodesToVars.end())
             {
@@ -564,7 +564,7 @@ void PatternMiner::extractAllVariableNodesInAnInstanceLink(const Handle& instanc
 
     for (const Handle& h : instanceLink->getOutgoingSet())
     {
-        if (h->isNode())
+        if (h->is_node())
         {
             if (((*pit)->get_type() == opencog::PATTERN_VARIABLENODE_TYPE))
             {
@@ -584,7 +584,7 @@ void PatternMiner::extractNodes(const Handle& link, HandleSet& nodes)
 {
     for (const Handle& h : link->getOutgoingSet())
     {
-        if (h->isNode())
+        if (h->is_node())
 	        nodes.insert(h);
         else
             extractNodes(h, nodes);
@@ -595,7 +595,7 @@ void PatternMiner::extractVarNodes(const Handle& link, HandleSet& varNodes)
 {
     for (const Handle& h : link->getOutgoingSet())
     {
-        if (h->isNode())
+        if (h->is_node())
         {
             if (h->get_type() == opencog::PATTERN_VARIABLENODE_TYPE)
                 varNodes.insert(h);
@@ -611,7 +611,7 @@ void PatternMiner::extractConstNodes(const Handle& link, HandleSet& constNodes)
 {
     for (const Handle& h : link->getOutgoingSet())
     {
-        if (h->isNode())
+        if (h->is_node())
         {
             if (h->get_type() != opencog::PATTERN_VARIABLENODE_TYPE)
                 constNodes.insert(h);
@@ -625,7 +625,7 @@ void PatternMiner::extractConstNodes(const Handle& link, HandleSet& constNodes)
 
 bool PatternMiner::containOnlyVariables(Handle h)
 {
-    if (h->isNode())
+    if (h->is_node())
         return h->get_type() == PATTERN_VARIABLENODE_TYPE;
 
     return all_of(h->getOutgoingSet(), [&](const Handle& ch) {
@@ -634,7 +634,7 @@ bool PatternMiner::containOnlyVariables(Handle h)
 
 bool PatternMiner::containSomeVariables(Handle h)
 {
-    if (h->isNode())
+    if (h->is_node())
         return h->get_type() == PATTERN_VARIABLENODE_TYPE;
 
     return any_of(h->getOutgoingSet(), [&](const Handle& ch) {
@@ -668,7 +668,7 @@ HandleSeq PatternMiner::copyLinks(AtomSpace& to_as, const HandleSeq& links,
 Handle PatternMiner::copyAtom(AtomSpace& to_as, const Handle& h,
                               HandleSeq& variables)
 {
-	if (h->isNode())
+	if (h->is_node())
 	{
 		Handle new_node;
 
@@ -860,7 +860,7 @@ bool PatternMiner::doesLinkContainNodesInKeyWordNodes(const Handle& link, const 
 {
     for (const Handle& h : link->getOutgoingSet())
     {
-        if (h->isNode())
+        if (h->is_node())
         {
             if (keywordNodes.find(h) != keywordNodes.end())
                 return true;
@@ -1853,8 +1853,8 @@ bool PatternMiner::isALinkOneInstanceOfGivenPattern(const Handle& instanceLink, 
 
     for (unsigned int i = 0; i < outComingsOfPattern.size(); i ++)
     {
-        bool pis_link = (outComingsOfPattern[i])->isLink();
-        bool iis_link = (outComingsOfInstance[i])->isLink();
+        bool pis_link = (outComingsOfPattern[i])->is_link();
+        bool iis_link = (outComingsOfInstance[i])->is_link();
 
         if (pis_link && iis_link)
         {
@@ -1893,7 +1893,7 @@ void PatternMiner::reNameNodesForALink(const Handle& inputLink, const Handle& no
 
     for (Handle h : outgoingLinks)
     {
-        if (h->isNode())
+        if (h->is_node())
         {
            if (h == nodeToBeRenamed)
            {
@@ -3742,14 +3742,14 @@ std::string PatternMiner::Link2keyString(const Handle& h, const std::string& ind
 
     answer << indent  << "(" << classserver().getTypeName(h->get_type()) << " ";
 
-    if (h->isNode())
+    if (h->is_node())
     {
         answer << h->get_name();
     }
 
     answer << ")" << "\n";
 
-    if (h->isLink())
+    if (h->is_link())
     {
         for (const Handle& outgoing : h->getOutgoingSet())
             answer << Link2keyString(outgoing, more_indent);
@@ -4083,7 +4083,7 @@ void PatternMiner::selectSubsetAllEntityLinksContainsKeywords(set<string>& subse
     {  
         Handle firstOutgoing = link->getOutgoingAtom(1);
         Handle entityNode;
-        if (firstOutgoing->isLink())
+        if (firstOutgoing->is_link())
             entityNode = firstOutgoing->getOutgoingAtom(0);
         else
             entityNode = firstOutgoing;

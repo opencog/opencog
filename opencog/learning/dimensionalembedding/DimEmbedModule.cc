@@ -287,7 +287,7 @@ void DimEmbedModule::addPivot(Handle h, Type linkType, bool fanin)
                 }
             }
             for (;it2!=newNodes.end(); ++it2) {
-                if (!(*it2)->isNode()) continue;
+                if (!(*it2)->is_node()) continue;
                 double alt =
                     distMap[u] * linkTV->get_mean() * linkTV->get_confidence();
                 double oldDist=distMap[*it2];
@@ -963,7 +963,7 @@ Handle DimEmbedModule::blendNodes(Handle n1,
         throw InvalidParamException(TRACE_INFO,
             "DimensionalEmbedding requires link type, not %s",
             classserver().getTypeName(l).c_str());
-    if (!n1->isNode() || !n2->isNode())
+    if (!n1->is_node() || !n2->is_node())
         throw InvalidParamException(TRACE_INFO,
                                     "blendNodes requires two nodes.");
     if (!isEmbedded(l)) {

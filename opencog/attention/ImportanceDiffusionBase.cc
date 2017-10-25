@@ -270,7 +270,7 @@ HandleSeq ImportanceDiffusionBase::incidentAtoms(Handle h)
     h->getIncomingSet(back_inserter(resultSet));
 
     // Calculate and append the outgoing set
-    if (h->isLink()) {
+    if (h->is_link()) {
         HandleSeq outgoing = h->getOutgoingSet();
         resultSet.insert(resultSet.end(), outgoing.begin(), outgoing.end());
     }

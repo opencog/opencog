@@ -70,7 +70,7 @@ static void examine(const Handle& h, HandleSeq& wi, HandleSeq& sl)
 {
     for (const LinkPtr& lp : h->getIncomingSet())
     {
-        if (h->isNode())
+        if (h->is_node())
         {
             // TODO: Extend to find similar links as well
             if (lp->get_type() == SIMILARITY_LINK)
@@ -97,7 +97,7 @@ static void examine(const Handle& h, HandleSeq& wi, HandleSeq& sl)
         }
     }
 
-    if (h->isLink())
+    if (h->is_link())
         for (const Handle& o : h->getOutgoingSet())
             examine(o, wi, sl);
 }
@@ -291,7 +291,7 @@ void Fuzzy::start_search(const Handle& trg)
  */
 bool Fuzzy::accept_starter(const Handle& hp)
 {
-    if (hp->isLink())
+    if (hp->is_link())
         return false;
 
     Type t = hp->get_type();

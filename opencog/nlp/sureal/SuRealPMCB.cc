@@ -122,7 +122,7 @@ bool SuRealPMCB::variable_match(const Handle &hPat, const Handle &hSoln)
  */
 static void get_nodes(const Handle& h, HandleSeq& node_list)
 {
-   if (h->isNode())
+   if (h->is_node())
    {
       node_list.emplace_back(h);
       return;

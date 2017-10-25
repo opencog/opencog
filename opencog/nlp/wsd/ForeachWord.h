@@ -204,7 +204,7 @@ inline const std::string get_part_of_speech(const Handle& word_instance)
 	// Find the part-of-speech for this word instance.
 	FollowLink fl;
 	Handle inst_pos(fl.follow_binary_link(word_instance, PART_OF_SPEECH_LINK));
-	if (not inst_pos->isLink()) return empty;
+	if (not inst_pos->is_link()) return empty;
 	return inst_pos->get_name();
 }
 
