@@ -6,7 +6,7 @@
 ;; OpenPsi should be able to know how and what kinds of rules it should be
 ;; looking for at a particular point in time.
 
-(define-public (chat-find-rules SENT)
+(define-public (ghost-find-rules SENT)
   "The action selector. It first searches for the rules using DualLink,
    and then does the filtering by evaluating the context of the rules.
    Eventually returns a list of weighted rules that can satisfy the demand."
@@ -49,19 +49,19 @@
         (List rules-satisfied)))
 
 (Define
-  (DefinedSchema "Get Current Input")
+  (DefinedSchema (ghost-prefix "Get Current Input"))
   (Get (State ghost-anchor (Variable "$x"))))
 
 (Define
-  (DefinedSchema "Find Chat Rules")
-  (Lambda (VariableList (TypedVariable (Variable "sentence")
+  (DefinedSchema (ghost-prefix "Find Rules"))
+  (Lambda (VariableList (TypedVariable (Variable "$sentence")
                                        (Type "SentenceNode")))
-          (ExecutionOutput (GroundedSchema "scm: chat-find-rules")
-                           (List (Variable "sentence")))))
+          (ExecutionOutput (GroundedSchema "scm: ghost-find-rules")
+                           (List (Variable "$sentence")))))
 
 ; The action selector for OpenPsi
 (psi-set-action-selector
-  (Put (DefinedSchema "Find Chat Rules")
-       (DefinedSchema "Get Current Input"))
+  (Put (DefinedSchema (ghost-prefix "Find Rules"))
+       (DefinedSchema (ghost-prefix "Get Current Input")))
   ; Component label
   (Concept "GHOST"))

@@ -8,8 +8,7 @@
   "Try to find (and execute) the matching rules given an input TXT."
   (ghost TXT)
   (map (lambda (r) (psi-imply r))
-       (cog-outgoing-set (chat-find-rules (ghost-get-curr-sent))))
-  ; TODO: Clear the variable-cache in OpenPsiImplicator
+       (cog-outgoing-set (ghost-find-rules (ghost-get-curr-sent))))
   *unspecified*)
 
 (define-public (ghost-show-lemmas)
