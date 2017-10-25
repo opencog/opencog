@@ -96,29 +96,11 @@
         WORD
         lemma)))
 
-(define (get-lemma-from-wn WORD)
-  "A hacky way to quickly find the lemma of a word using WordNet,
-   for unit test only."
-  (let* ((cmd-string
-           (string-append "wn " WORD " | grep \"Information available for .\\+\""))
-         (port (open-input-pipe cmd-string))
-         (lemma ""))
-    (do ((line (get-line port) (get-line port)))
-        ((eof-object? line))
-      (let ((l (car (last-pair (string-split line #\ )))))
-        (if (not (equal? (string-downcase WORD) l))
-          (set! lemma l))))
-    (close-pipe port)
-    (if (string-null? lemma) WORD lemma)))
-
 (define (get-lemma WORD)
   "Get the lemma of WORD."
   (define seen-lemma (assoc-ref lemma-alist WORD))
   (if (equal? #f seen-lemma)
-      (let ((lemma
-        (if test-get-lemma
-            (get-lemma-from-wn WORD)
-            (get-lemma-from-relex WORD))))
+      (let ((lemma (get-lemma-from-relex WORD)))
         (set! lemma-alist (assoc-set! lemma-alist WORD lemma))
         lemma)
       seen-lemma))

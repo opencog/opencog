@@ -60,10 +60,6 @@
 ; Keep a record of the lemmas we have seen, and it serves as a cache as well
 (define lemma-alist '())
 
-; Indicate whether to get the lemma of a word from the RelEx server (default),
-; or from the WordNet CLI (for unit test only)
-(define test-get-lemma #f)
-
 ; The current topic
 (define ghost-topic '())
 
