@@ -285,9 +285,9 @@
                           action
                           (psi-goal (car goal))
                           (stv (cdr goal) .9)
-                          (if (null? ghost-topic)
+                          (if (null? rule-topic)
                               (create-topic "Default Topic" '())
-                              ghost-topic)))
+                              rule-topic)))
                       goals))))
     (lambda (key . parameters)
       (if (not (equal? key 'FeatureNotSupported))
@@ -310,7 +310,7 @@
 "
   create-topic TOPIC-NAME
 
-  Creates a psi-demand named as TOPIC-NAME, sets the ghost-topic to be it
+  Creates a psi-demand named as TOPIC-NAME, sets the rule-topic to be it
   and returns ConceptNode that represent the topic(aka demand).
 "
   ; NOTE:The intention is to follow chatscript like authoring approach. Once a
@@ -326,12 +326,12 @@
   ; separate from the content, thus allowing learing, why?
 
   ; A topic will be defined when loading a (topic) file
-  (set! ghost-topic (psi-demand (ghost-prefix TOPIC-NAME)))
+  (set! rule-topic (psi-demand (ghost-prefix TOPIC-NAME)))
 
   ; Reset the topic-level goals
   (set! shared-goals '())
 
   ; The set of keywords associate with the topic
-  (for-each (lambda (kw) (Member kw ghost-topic)) (terms-to-atomese KEYWORDS))
+  (for-each (lambda (kw) (Member kw rule-topic)) (terms-to-atomese KEYWORDS))
 
-  ghost-topic)
+  rule-topic)

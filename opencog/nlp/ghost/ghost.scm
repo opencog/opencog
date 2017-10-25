@@ -45,9 +45,8 @@
   ghost-logger
 )
 
-; The current topic, will be used when creating GHOST rules
 ; When set, all the rules created will be under this topic
-(define ghost-topic '())
+(define rule-topic '())
 
 ; A list of shared goals for all the rules under the same topic file
 (define shared-goals '())
@@ -64,6 +63,9 @@
 ; Indicate whether to get the lemma of a word from the RelEx server (default),
 ; or from the WordNet CLI (for unit test only)
 (define test-get-lemma #f)
+
+; The current topic
+(define ghost-topic '())
 
 ; Keep a record of the most recent outputs generated
 (define ghost-result '())
