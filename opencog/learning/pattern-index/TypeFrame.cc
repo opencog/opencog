@@ -689,7 +689,7 @@ bool TypeFrame::buildFrameRepresentation(const string &schemeTxt)
 void TypeFrame::recursiveHandleTraverse(Handle handle)
 {
     bool isLink = handle->isLink();
-    unsigned int n = (isLink ? handle->getArity() : 0);
+    unsigned int n = (isLink ? handle->get_arity() : 0);
     emplace_back(handle->get_type(), n);
     if (isLink) {
         for (unsigned int i = 0; i < n; i++) {

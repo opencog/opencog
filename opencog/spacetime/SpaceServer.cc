@@ -90,7 +90,7 @@ void SpaceServer::atomRemoved(const AtomPtr& atom)
 
     std::vector<std::string> timeDomains = timeser->getTimeDomains();
     for (auto timeDomain: timeDomains) {
-        removeSpaceInfo(atom->getHandle(), curSpaceMapHandle, 0, timeDomain);
+        removeSpaceInfo(atom->get_handle(), curSpaceMapHandle, 0, timeDomain);
     }
 }
 

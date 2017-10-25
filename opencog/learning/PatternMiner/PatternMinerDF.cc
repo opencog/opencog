@@ -895,7 +895,7 @@ void PatternMiner::extendAPatternForOneMoreGramRecursively(const Handle &extende
 
                         for (LinkPtr incomingPtr : incomings)
                         {
-                            Handle incomingHandle = incomingPtr->getHandle();
+                            Handle incomingHandle = incomingPtr->get_handle();
                             Handle extendedHandle = incomingHandle;
 
                             if (param.use_linktype_black_list && isIgnoredType(incomingHandle->get_type()))

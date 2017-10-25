@@ -204,7 +204,7 @@ static bool is_source(const Handle& source, const Handle& link)
     // On ordered links, only the first position in the outgoing set
     // is a source of this link. So, if the handle given is equal to
     // the first position, true is returned.
-    Arity arity = lptr->getArity();
+    Arity arity = lptr->get_arity();
     if (classserver().isA(lptr->get_type(), ORDERED_LINK)) {
         return arity > 0 and lptr->getOutgoingAtom(0) == source;
     } else if (classserver().isA(lptr->get_type(), UNORDERED_LINK)) {
@@ -1071,7 +1071,7 @@ void DimEmbedModule::handleAddSignal(Handle h)
 
 void DimEmbedModule::atomRemoveSignal(AtomPtr atom)
 {
-    Handle h = atom->getHandle();
+    Handle h = atom->get_handle();
     if (NodeCast(atom)) {
         //for each link type embedding that exists, remove the node
         AtomEmbedMap::iterator it;

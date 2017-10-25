@@ -123,7 +123,7 @@ void PLNRulesUTest::load_scm_files(std::vector<std::string> files)
 	}
 }
 
-#define getarity(hand) hand->getArity()
+#define getarity(hand) hand->get_arity()
 
 /**
  * tests the deduction rule (deduction-rule) defined in:

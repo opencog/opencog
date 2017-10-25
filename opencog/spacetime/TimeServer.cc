@@ -209,7 +209,7 @@ bool TimeServer::removeTimeInfo(Handle h,
             OC_ASSERT(atomspace->is_valid_handle(timeNode)
                       and timeNode->get_type() == TIME_NODE,
                       "TimeServer::removeTimeInfo: Got no TimeNode node at the first position of the AtTimeLink\n");
-            int arityOfTimeLink = atTimeLink->getArity();
+            int arityOfTimeLink = atTimeLink->get_arity();
 
             if (timeDomain == DEFAULT_TIMEDOMAIN) {
                 //single time domain; should have 2 arities
@@ -296,7 +296,7 @@ void TimeServer::atomAdded(const Handle& h)
     Type type = h->get_type();
     if (type != AT_TIME_LINK) return;
 
-    int arityOfTimeLink = h->getArity();
+    int arityOfTimeLink = h->get_arity();
     if (arityOfTimeLink != 2 and arityOfTimeLink != 3)
     {
         logger().warn("TimeServer::atomAdded: Invalid arity for an "
@@ -340,7 +340,7 @@ void TimeServer::atomRemoved(const AtomPtr& atom)
     Type type = atom->get_type();
     if (type != AT_TIME_LINK) return;
 
-    int arityOfTimeLink = atom->getArity();
+    int arityOfTimeLink = atom->get_arity();
     OC_ASSERT(arityOfTimeLink != 3 || arityOfTimeLink != 2,
 	      "AtomSpace::atomRemoved: Got invalid arity for removed AtTimeLink = %d\n",
 	      arityOfTimeLink);

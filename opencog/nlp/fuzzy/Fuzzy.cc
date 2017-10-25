@@ -74,7 +74,7 @@ static void examine(const Handle& h, HandleSeq& wi, HandleSeq& sl)
         {
             // TODO: Extend to find similar links as well
             if (lp->get_type() == SIMILARITY_LINK)
-                sl.emplace_back(lp->getHandle());
+                sl.emplace_back(lp->get_handle());
 
             // Check if it's a link like this:
             //

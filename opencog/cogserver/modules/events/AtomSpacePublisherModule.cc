@@ -232,7 +232,7 @@ void AtomSpacePublisherModule::atomAddSignal(Handle h)
 void AtomSpacePublisherModule::atomRemoveSignal(AtomPtr atom)
 {
     tbb_enqueue_lambda([=] {
-        sendMessage("remove", atomMessage(atomToJSON(atom->getHandle())));
+        sendMessage("remove", atomMessage(atomToJSON(atom->get_handle())));
     });
 }
 

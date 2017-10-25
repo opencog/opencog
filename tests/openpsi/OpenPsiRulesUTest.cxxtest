@@ -203,7 +203,7 @@ public:
     CHKERR
     PatternLinkPtr result_2 = OpenPsiRules::get_query(rule_1);
     // Don't know why operator== doesn't work.
-    TS_ASSERT(opencog::content_eq(expected_query_2, result_2->getHandle()));
+    TS_ASSERT(opencog::content_eq(expected_query_2, result_2->get_handle()));
 
     logger().info("END TEST: %s", __FUNCTION__);
   }

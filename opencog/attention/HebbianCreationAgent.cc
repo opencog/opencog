@@ -159,7 +159,7 @@ void HebbianCreationAgent::run()
         std::uniform_int_distribution<int> distribution2(0,iset.size()-1);
         size_t s = iset.size();
         do {
-            _as->remove_atom(iset[distribution2(generator)]->getHandle(),true);
+            _as->remove_atom(iset[distribution2(generator)]->get_handle(), true);
             s--;
         } while (s >= maxLinkNum);
     }

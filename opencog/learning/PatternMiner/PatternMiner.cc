@@ -898,7 +898,7 @@ Handle PatternMiner::getFirstNonIgnoredIncomingLink(AtomSpace& atomspace, const 
         if (incomings.empty())
             return Handle::UNDEFINED;
 
-        Handle incomingHandle = (incomings[0])->getHandle();
+        Handle incomingHandle = (incomings[0])->get_handle();
         if (isIgnoredType (incomingHandle->get_type()))
         {
             cur_h = incomingHandle;
@@ -1926,7 +1926,7 @@ void PatternMiner::getOneMoreGramExtendedLinksFromGivenLeaf(Handle& toBeExtended
 
     for (LinkPtr incomingPtr : incomings)
     {
-        Handle incomingHandle  = incomingPtr->getHandle();
+        Handle incomingHandle  = incomingPtr->get_handle();
         Handle extendedHandle;
         // if this atom is a igonred type, get its first parent that is not in the igonred types
         if (isIgnoredType (incomingHandle->get_type()) )
@@ -2034,7 +2034,7 @@ unsigned int PatternMiner::getAllEntityCountWithSamePredicatesForAPattern(const 
             IncomingSet allEvals = predicate->getIncomingSet(&original_as);
             for (LinkPtr incomingPtr : allEvals)
             {
-                Handle evalLink = incomingPtr->getHandle();
+                Handle evalLink = incomingPtr->get_handle();
                 Handle listLink = evalLink->getOutgoingAtom(1);
                 Handle entityNode = listLink->getOutgoingAtom(0);
                 allEntitiesForThisPredicate.insert(entityNode);
@@ -3889,7 +3889,7 @@ HandleSet PatternMiner::_getAllNonIgnoredLinksForGivenNode(Handle keywordNode, c
     // cout << "\n " << incomings.size() << " incomings found for keyword: " << keywordNode->to_short_string() << std::endl;
     for (LinkPtr incomingPtr : incomings)
     {
-        Handle incomingHandle = incomingPtr->getHandle();
+        Handle incomingHandle = incomingPtr->get_handle();
         Handle newh = incomingHandle;
 
         // if this atom is a igonred type, get its first parent that is not in the igonred types
