@@ -6,7 +6,7 @@
 ;; Shared conditions for all terms
 (define atomese-condition-template
   (list (Parse (Variable "$P") (Variable "$S"))
-        (State ghost-anchor (Variable "$S"))))
+        (State ghost-curr-proc (Variable "$S"))))
 
 (define (order-terms TERMS)
   "Order the terms in the intended order, and insert wildcards into
@@ -251,7 +251,8 @@
                   (list (ExecutionOutput
                           (GroundedSchema "scm: ghost-execute-action")
                           (List action-atomese))
-                        (Put (State ghost-topic (Variable "$x")) rule-topic)))))
+                        (Put (State ghost-curr-topic (Variable "$x"))
+                             rule-topic)))))
 
 (define (process-goal GOAL)
   "Go through each of the goals, including the shared ones."
@@ -330,6 +331,7 @@
 
   ; A topic will be defined when loading a (topic) file
   (set! rule-topic (psi-demand (ghost-prefix TOPIC-NAME)))
+  (Inheritance rule-topic ghost-topic)
 
   ; Reset the topic-level goals
   (set! shared-goals '())

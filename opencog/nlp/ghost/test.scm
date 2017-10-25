@@ -22,12 +22,12 @@
 
 (define-public (ghost-get-curr-sent)
   "Get the SentenceNode that is being processed currently."
-  (define sent (cog-chase-link 'StateLink 'SentenceNode ghost-anchor))
+  (define sent (cog-chase-link 'StateLink 'SentenceNode ghost-curr-proc))
   (if (null? sent) '() (car sent)))
 
 (define-public (ghost-get-curr-topic)
   "Get the current topic."
-  (gar (cog-execute! (Get (State ghost-topic (Variable "$x"))))))
+  (gar (cog-execute! (Get (State ghost-curr-topic (Variable "$x"))))))
 
 (define-public (ghost-currently-processing)
   "Get the sentence that is currently being processed."

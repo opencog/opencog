@@ -31,11 +31,12 @@
     (string-append "variable-lemma-" (number->string NUM)))))
 (define (ghost-uvar STR)
   (Variable (ghost-prefix (string-append "user-variable-" STR))))
-(define ghost-anchor (Anchor (ghost-prefix "Currently Processing")))
+(define ghost-curr-proc (Anchor (ghost-prefix "Currently Processing")))
+(define ghost-curr-topic (Anchor (ghost-prefix "Current Topic")))
 (define ghost-no-constant (Anchor (ghost-prefix "No constant terms")))
 (define ghost-word-seq (Predicate (ghost-prefix "Word Sequence")))
 (define ghost-lemma-seq (Predicate (ghost-prefix "Lemma Sequence")))
-(define ghost-topic (Anchor (ghost-prefix "Current Topic")))
+(define ghost-topic (Concept (ghost-prefix "Topic")))
 
 ; Define the logger for GHOST
 (define ghost-logger (cog-new-logger))
@@ -92,4 +93,4 @@
    Should run this with the main OpenPsi loop."
   (define sent (car (nlp-parse TXT)))
   (generate-word-seqs sent)
-  (State ghost-anchor sent))
+  (State ghost-curr-proc sent))

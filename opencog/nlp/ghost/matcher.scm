@@ -43,18 +43,19 @@
          ; Evaluate the matched rules one by one and see which of them satisfy
          (rules-satisfied
            (receive (topic-rules other-rules)
-             ; See which rules are on the current topic
+             ; Partition the matched rules into two groups -- "on topic"
+             ; and "not on topic"
              (partition (lambda (r)
-               (equal? curr-topic (car (cog-chase-link 'MemberLink 'ConceptNode r))))
+               (equal? curr-topic (car
+                 (filter (lambda (x) (any (lambda (y) (equal? ghost-topic y))
+                   (cog-chase-link 'InheritanceLink 'ConceptNode x)))
+                     (cog-chase-link 'MemberLink 'ConceptNode r)))))
                rules-matched)
              ; Evaluate the ones that are on the current topic first, then the
              ; other rules if no on topic rules are satisfied
              (let ((satisfied-topic-rules (eval-rules topic-rules)))
                   (if (null? satisfied-topic-rules)
-                      (begin
-                        (cog-logger-debug ghost-logger
-                          "Evaluating rules that are not on topic ~a" curr-topic)
-                        (eval-rules other-rules))
+                      (eval-rules other-rules)
                       satisfied-topic-rules)))))
         (cog-logger-debug ghost-logger "For input:\n~a" input-lseq)
         (cog-logger-debug ghost-logger "Rules with no constant:\n~a" no-const)
@@ -66,7 +67,7 @@
 
 (Define
   (DefinedSchema (ghost-prefix "Get Current Input"))
-  (Get (State ghost-anchor (Variable "$x"))))
+  (Get (State ghost-curr-proc (Variable "$x"))))
 
 (Define
   (DefinedSchema (ghost-prefix "Find Rules"))
