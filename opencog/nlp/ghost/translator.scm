@@ -325,6 +325,13 @@
   ; 2. Should the weight be accessable? Specially if the execution graph is
   ; separate from the content, thus allowing learing, why?
 
+  ; A topic will be defined when loading a (topic) file
   (set! ghost-topic (psi-demand (ghost-prefix TOPIC-NAME)))
+
+  ; Reset the topic-level goals
+  (set! shared-goals '())
+
+  ; The set of keywords associate with the topic
   (for-each (lambda (kw) (Member kw ghost-topic)) (terms-to-atomese KEYWORDS))
+
   ghost-topic)
