@@ -249,6 +249,8 @@
         (create-concept $2 (eval-string (string-append "(list " $3 ")")))
       (TOPIC ID declaration-sequence) :
         (create-topic $2 (eval-string (string-append "(list " $3 ")")))
+      (TOPIC ID LPAREN RPAREN) : (create-topic $2 (list))
+      (TOPIC ID LSBRACKET RSBRACKET) : (create-topic $2 (list))
     )
 
     (declaration-sequence
