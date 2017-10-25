@@ -337,7 +337,7 @@ void DistributedPatternMiner::growPatternsDepthFirstTask(unsigned int thread_ind
         if (! param.only_mine_patterns_start_from_white_list)
         {
             // if this link is ingonre type, ignore it
-            if (isIgnoredType( cur_link->getType()))
+            if (isIgnoredType( cur_link->get_type()))
             {
                 continue;
             }
@@ -354,7 +354,7 @@ void DistributedPatternMiner::growPatternsDepthFirstTask(unsigned int thread_ind
         // Add this link into observing_as
         HandleSeq outVariableNodes;
         HandleSeq outgoingLinks = copyOutgoings(*observing_as, cur_link, outVariableNodes);
-        Handle newLink = observing_as->add_link(cur_link->getType(), outgoingLinks);
+        Handle newLink = observing_as->add_link(cur_link->get_type(), outgoingLinks);
         newLink->setTruthValue(cur_link->getTruthValue());
 
         // Extract all the possible patterns from this originalLink, and extend till the max_gram links, not duplicating the already existing patterns

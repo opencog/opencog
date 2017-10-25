@@ -85,7 +85,7 @@ void SpaceServer::atomAdded(const Handle& h)
 
 void SpaceServer::atomRemoved(const AtomPtr& atom)
 {
-    Type type = atom->getType();
+    Type type = atom->get_type();
     if (not classserver().isA(type, OBJECT_NODE)) return;
 
     std::vector<std::string> timeDomains = timeser->getTimeDomains();
@@ -233,7 +233,7 @@ bool SpaceServer::addSpaceInfo(Handle objectNode, Handle spaceMapHandle, bool is
 
     opencog::spatial::BlockVector pos(objX, objY, objZ);
 
-    if (objectNode->getType() == STRUCTURE_NODE) {
+    if (objectNode->get_type() == STRUCTURE_NODE) {
         // it's a block
         SpaceMap& theSpaceMap = (scenePairItr->second).spaceMap;
         theSpaceMap.addSolidUnitBlock(objectNode, pos);
@@ -278,7 +278,7 @@ void SpaceServer::removeSpaceInfo(Handle objectNode, Handle spaceMapHandle, octi
         timeser->addTimeInfo(spaceMapHandle, timestamp, timeDomain);
     }
 
-    if (objectNode->getType() == STRUCTURE_NODE) {
+    if (objectNode->get_type() == STRUCTURE_NODE) {
         SpaceMap& theSpaceMap = (scenePairItr->second).spaceMap;
         theSpaceMap.removeSolidUnitBlock(objectNode);
     } else {

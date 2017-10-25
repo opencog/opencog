@@ -124,13 +124,13 @@ bool WordRelQuery::is_word_a_query(Handle word_inst)
  */
 bool WordRelQuery::is_ling_cncpt(Atom *atom)
 {
-	if (DEFINED_LINGUISTIC_CONCEPT_NODE == atom->getType()) return true;
+	if (DEFINED_LINGUISTIC_CONCEPT_NODE == atom->get_type()) return true;
 	return false;
 }
 
 bool WordRelQuery::is_cncpt(Atom *atom)
 {
-	if (CONCEPT_NODE == atom->getType()) return true;
+	if (CONCEPT_NODE == atom->get_type()) return true;
 	return false;
 }
 
@@ -236,7 +236,7 @@ const char * WordRelQuery::get_word_instance(Atom *atom)
 	Atom *wrd = fl.follow_binary_link(atom, REFERENCE_LINK);
 	if (!wrd) return NULL;
 
-	if (WORD_NODE != wrd->getType()) return NULL;
+	if (WORD_NODE != wrd->get_type()) return NULL;
 
 	Node *n = static_cast<Node *>(wrd);
 	const std::string& name = n->get_name();
@@ -257,8 +257,8 @@ bool WordRelQuery::node_match(Node *npat, Node *nsoln)
 	// If we are here, then we are comparing nodes.
 	// The result of comparing nodes depends on the
 	// node types.
-	Type pattype = npat->getType();
-	Type soltype = nsoln->getType();
+	Type pattype = npat->get_type();
+	Type soltype = nsoln->get_type();
 	if ((pattype != soltype) && 
 	    (WORD_NODE != soltype) && 
 	    (SEME_NODE != soltype) && 

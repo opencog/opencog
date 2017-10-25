@@ -205,9 +205,9 @@ static bool is_source(const Handle& source, const Handle& link)
     // is a source of this link. So, if the handle given is equal to
     // the first position, true is returned.
     Arity arity = lptr->getArity();
-    if (classserver().isA(lptr->getType(), ORDERED_LINK)) {
+    if (classserver().isA(lptr->get_type(), ORDERED_LINK)) {
         return arity > 0 and lptr->getOutgoingAtom(0) == source;
-    } else if (classserver().isA(lptr->getType(), UNORDERED_LINK)) {
+    } else if (classserver().isA(lptr->get_type(), UNORDERED_LINK)) {
         // If the link is unordered, the outgoing set is scanned;
         // return true if any position is equal to the source.
         for (const Handle& h : lptr->getOutgoingSet())
@@ -269,7 +269,7 @@ void DimEmbedModule::addPivot(Handle h, Type linkType, bool fanin)
         u->getIncomingSet(back_inserter(newLinks));
         for (HandleSeq::iterator it=newLinks.begin(); it!=newLinks.end(); ++it){
             //ignore links that aren't a subtype of linkType
-            if (!classserver().isA((*it)->getType(), linkType)) continue;
+            if (!classserver().isA((*it)->get_type(), linkType)) continue;
             TruthValuePtr linkTV = (*it)->getTruthValue();
             HandleSeq newNodes = (*it)->getOutgoingSet();
             HandleSeq::iterator it2=newNodes.begin();
@@ -994,7 +994,7 @@ Handle DimEmbedModule::blendNodes(Handle n1,
         if (dist1>dist2) newVec[i]=embedVec2[i];
     }
     std::string prefix("blend_"+n1->to_string()+"_"+n2->to_string()+"_");
-    Handle newNode = add_prefixed_node(*as, n1->getType(), prefix);
+    Handle newNode = add_prefixed_node(*as, n1->get_type(), prefix);
 
     for (unsigned int i=0; i<numDims; i++) {
         double strength = sqrt(newVec[i]);
@@ -1059,11 +1059,11 @@ void DimEmbedModule::handleAddSignal(Handle h)
     else {//h is a link
         for (it = atomMaps.begin(); it != atomMaps.end(); ++it) {
             //if the new link is a subtype of an existing embedding, add it
-            if (classserver().isA(h->getType(), it->first))
+            if (classserver().isA(h->get_type(), it->first))
                 addLink(h, it->first);
         }
         for (it2 = asymAtomMaps.begin(); it2 !=asymAtomMaps.end(); ++it2) {
-            if (classserver().isA(h->getType(), it2->first))
+            if (classserver().isA(h->get_type(), it2->first))
                 addLink(h, it2->first);
         }
     }

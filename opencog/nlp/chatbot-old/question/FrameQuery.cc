@@ -56,7 +56,7 @@ static void prt(Atom *atom)
  */
 bool FrameQuery::is_frame_elt(Atom *atom)
 {
-	if (DEFINED_FRAME_ELEMENT_NODE == atom->getType()) return true;
+	if (DEFINED_FRAME_ELEMENT_NODE == atom->get_type()) return true;
 	return false;
 }
 
@@ -65,7 +65,7 @@ bool FrameQuery::discard_question_markup(Atom *atom)
 	Node *n = dynamic_cast<Node *>(atom);
 	if(!n) return false;
 
-	Type atype = atom->getType();
+	Type atype = atom->get_type();
 	if (DEFINED_LINGUISTIC_CONCEPT_NODE == atype)
 	{
 		const char *name = n->get_name().c_str();
@@ -94,7 +94,7 @@ bool FrameQuery::discard_question_markup(Atom *atom)
  */
 bool FrameQuery::discard_eval_markup(Atom *atom)
 {
-	Type atype = atom->getType();
+	Type atype = atom->get_type();
 
 	if (LIST_LINK == atype)
 	{
@@ -132,7 +132,7 @@ bool FrameQuery::discard_heir_markup(Atom *atom)
 
 	Node *n = dynamic_cast<Node *>(atom);
 	if(!n) return false;
-	Type atype = atom->getType();
+	Type atype = atom->get_type();
 
 	const char *name = n->get_name().c_str();
 	if (CONCEPT_NODE == atype)
@@ -180,7 +180,7 @@ bool FrameQuery::discard_heir_markup(Atom *atom)
 bool FrameQuery::assemble_predicate(Atom *atom)
 {
 	Handle ah = atom->handle;
-	Type atype = atom->getType();
+	Type atype = atom->get_type();
 	if (EVALUATION_LINK == atype)
 	{
 		bool keep = foreach_outgoing_atom(ah, &FrameQuery::is_frame_elt, this);
@@ -224,7 +224,7 @@ bool FrameQuery::node_match(Node *aa, Node *ab)
 	// If we are here, then we are comparing nodes.
 	// The result of comparing nodes depends on the
 	// node types.
-	Type ntype = aa->getType();
+	Type ntype = aa->get_type();
 
 	// DefinedLinguisticConcept nodes must match exactly;
 	// so if we are here, there's already a mismatch.

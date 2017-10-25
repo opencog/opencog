@@ -189,13 +189,13 @@ namespace opencog
         {
             BlockVector posA, posB;
 
-            Type typeA = objectA->getType();
+            Type typeA = objectA->get_type();
             if (typeA == ENTITY_NODE) {
                 posA = entityRecorder.getLastAppearedLocation(objectA);
             } else if (typeA==STRUCTURE_NODE) {
                 posA = spaceMap.getBlockLocation(objectA);
             }
-            Type typeB = objectB->getType();
+            Type typeB = objectB->get_type();
             if (typeB == ENTITY_NODE) {
                 posB = entityRecorder.getLastAppearedLocation(objectB);
             } else if (typeB == STRUCTURE_NODE) {
@@ -222,7 +222,7 @@ namespace opencog
                                const BlockVector& posB)
         {
             BlockVector posA;
-            Type typeA = objectA->getType();
+            Type typeA = objectA->get_type();
             if (typeA == STRUCTURE_NODE) {
                 posA = spaceMap.getBlockLocation(objectA);
             } else if (typeA==ENTITY_NODE) {

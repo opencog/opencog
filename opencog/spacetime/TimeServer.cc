@@ -207,7 +207,7 @@ bool TimeServer::removeTimeInfo(Handle h,
 	    Handle timeNode = atTimeLink->getOutgoingAtom(0);
             DPRINTF("Got timeNode = %lu\n", timeNode.value());
             OC_ASSERT(atomspace->is_valid_handle(timeNode)
-                      and timeNode->getType() == TIME_NODE,
+                      and timeNode->get_type() == TIME_NODE,
                       "TimeServer::removeTimeInfo: Got no TimeNode node at the first position of the AtTimeLink\n");
             int arityOfTimeLink = atTimeLink->getArity();
 
@@ -293,7 +293,7 @@ vector<TimeDomain> TimeServer::getTimeDomains() const
 
 void TimeServer::atomAdded(const Handle& h)
 {
-    Type type = h->getType();
+    Type type = h->get_type();
     if (type != AT_TIME_LINK) return;
 
     int arityOfTimeLink = h->getArity();
@@ -306,11 +306,11 @@ void TimeServer::atomAdded(const Handle& h)
     }
 
     const Handle& timeNode = h->getOutgoingAtom(0);
-    if (timeNode->getType() != TIME_NODE) {
+    if (timeNode->get_type() != TIME_NODE) {
         logger().warn("TimeServer::atomAdded: Invalid atom type "
              "at the first element in an AtTimeLink's outgoing: "
              "%s\n",
-             classserver().getTypeName(timeNode->getType()).c_str());
+             classserver().getTypeName(timeNode->get_type()).c_str());
         return;
     }
 
@@ -322,12 +322,12 @@ void TimeServer::atomAdded(const Handle& h)
     if (arityOfTimeLink == 3)
     {
         const Handle& timeDomainNode = h->getOutgoingAtom(2);
-        if (timeDomainNode->getType() != TIME_DOMAIN_NODE)
+        if (timeDomainNode->get_type() != TIME_DOMAIN_NODE)
         {
             logger().warn("TimeServer::atomAdded: Invalid atom type "
                   "at the third element in an AtTimeLink's outgoing: "
                   "%s\n",
-                  classserver().getTypeName(timeDomainNode->getType()).c_str());
+                  classserver().getTypeName(timeDomainNode->get_type()).c_str());
             return;
         }
         timeDomain = timeDomainNode->get_name();
@@ -337,7 +337,7 @@ void TimeServer::atomAdded(const Handle& h)
 
 void TimeServer::atomRemoved(const AtomPtr& atom)
 {
-    Type type = atom->getType();
+    Type type = atom->get_type();
     if (type != AT_TIME_LINK) return;
 
     int arityOfTimeLink = atom->getArity();
@@ -348,14 +348,14 @@ void TimeServer::atomRemoved(const AtomPtr& atom)
     const Handle& timeNode = atom->getOutgoingAtom(0);
     // If it's not a TimeNode, then it's a VariableNode which can stand
     // in for a TimeNode. So we can ignore it here.
-    if (timeNode->getType() != TIME_NODE) return;
+    if (timeNode->get_type() != TIME_NODE) return;
 
     const Handle& timedAtom = atom->getOutgoingAtom(1);
 
     TimeDomain timeDomain = DEFAULT_TIMEDOMAIN;
     if (arityOfTimeLink == 3) {
         const Handle& timeDomainNode = atom->getOutgoingAtom(2);
-        if (timeNode->getType() != TIME_DOMAIN_NODE) {
+        if (timeNode->get_type() != TIME_DOMAIN_NODE) {
             return;
         }
         timeDomain = timeDomainNode->get_name();

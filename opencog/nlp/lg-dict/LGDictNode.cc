@@ -54,7 +54,7 @@ LgDictNode::LgDictNode(const Node& n)
 	: Node(n), _dict(nullptr)
 {
 	// Type must be as expected
-	Type tdict = n.getType();
+	Type tdict = n.get_type();
 	if (not classserver().isA(tdict, LG_DICT_NODE))
 	{
 		const std::string& tname = classserver().getTypeName(tdict);

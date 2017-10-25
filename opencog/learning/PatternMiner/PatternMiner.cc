@@ -58,7 +58,7 @@ void PatternMiner::generateIndexesOfSharedVars(const Handle& link, const HandleS
     {
         if (h->isNode())
         {
-            if (h->getType() == opencog::PATTERN_VARIABLENODE_TYPE)
+            if (h->get_type() == opencog::PATTERN_VARIABLENODE_TYPE)
             {
                 string var_name = h->get_name();
 
@@ -93,7 +93,7 @@ HandleSeq PatternMiner::findAndRenameVariables(const Handle& link, HandleMap& va
     {
         if (h->isNode())
         {
-           if (h->getType() == opencog::PATTERN_VARIABLENODE_TYPE)
+           if (h->get_type() == opencog::PATTERN_VARIABLENODE_TYPE)
            {
                // It's a variable node, rename it if not in varNameMap
                if (varNameMap.find(h) != varNameMap.end())
@@ -134,10 +134,10 @@ HandleSeq PatternMiner::findAndRenameVariables(const Handle& link, HandleMap& va
 //                if (typeIt != orderedTmpLinkToType.end())
 //                    reLink = as->add_link(typeIt->second, _renameOutgoingLinks);
 //                else
-//                    reLink = as->add_link(h->getType(),_renameOutgoingLinks);
+//                    reLink = as->add_link(h->get_type(),_renameOutgoingLinks);
 //             }
 //             else
-             reLink = as->add_link(h->getType(), _renameOutgoingLinks);
+             reLink = as->add_link(h->get_type(), _renameOutgoingLinks);
 
              renameOutgoingLinks.push_back(reLink);
         }
@@ -166,10 +166,10 @@ HandleSeq PatternMiner::RebindVariableNames(const HandleSeq& orderedPattern, Han
 //           if (typeIt != orderedTmpLinkToType.end())
 //               reLink = as->add_link((Type)(typeIt->second),renameOutgoingLinks);
 //           else
-//               reLink = as->add_link(h->getType(),renameOutgoingLinks);
+//               reLink = as->add_link(h->get_type(),renameOutgoingLinks);
 //        }
 //        else
-        reLink = as->add_link(h->getType(), renameOutgoingLinks);
+        reLink = as->add_link(h->get_type(), renameOutgoingLinks);
 
         rebindedPattern.push_back(reLink);
     }
@@ -199,7 +199,7 @@ void PatternMiner::ReplaceConstNodeWithVariableForOneLink(Handle link, Handle co
         {
              HandleSeq _renameOutgoingLinks;
              ReplaceConstNodeWithVariableForOneLink(h, constNode, newVariableNode, _renameOutgoingLinks);
-             Handle reLink = as->add_link(h->getType(),_renameOutgoingLinks);
+             Handle reLink = as->add_link(h->get_type(),_renameOutgoingLinks);
 
              renameOutgoingLinks.push_back(reLink);
         }
@@ -216,7 +216,7 @@ HandleSeq PatternMiner::ReplaceConstNodeWithVariableForAPattern(const HandleSeq&
         HandleSeq renameOutgoingLinks;
         ReplaceConstNodeWithVariableForOneLink(link, constNode, newVariableNode, renameOutgoingLinks);
 
-        Handle rebindedLink = as->add_link(link->getType(),renameOutgoingLinks);
+        Handle rebindedLink = as->add_link(link->get_type(),renameOutgoingLinks);
 
         rebindedPattern.push_back(rebindedLink);
     }
@@ -398,7 +398,7 @@ Handle PatternMiner::UnifyOneLinkForUnorderedLink(const Handle& link,
 
     Handle returnLink;
 
-    Type originalType = link->getType();
+    Type originalType = link->get_type();
     if (classserver().isA(originalType, UNORDERED_LINK))
     {
         unsigned int unifiedLastLinkIndex;
@@ -527,7 +527,7 @@ Handle PatternMiner::substitute(const Handle& h, const HandleMap& h2h)
     HandleSeq nout;
     for (const Handle& ch : h->getOutgoingSet())
         nout.push_back(substitute(ch, h2h));
-    Handle nh = as->add_link(h->getType(), nout);
+    Handle nh = as->add_link(h->get_type(), nout);
     nh->copyValues(h);
     return nh;
 }
@@ -547,7 +547,7 @@ void PatternMiner::associateNodesToVars(const Handle& link, HandleMap& nodesToVa
                 nodesToVars.insert({h, varHandle});
             }
 
-            if ((h->getType() == opencog::PATTERN_VARIABLENODE_TYPE))
+            if ((h->get_type() == opencog::PATTERN_VARIABLENODE_TYPE))
                 cout << "Error: instance link contains variables: \n"
                      << h->to_short_string() <<std::endl;
         }
@@ -566,7 +566,7 @@ void PatternMiner::extractAllVariableNodesInAnInstanceLink(const Handle& instanc
     {
         if (h->isNode())
         {
-            if (((*pit)->getType() == opencog::PATTERN_VARIABLENODE_TYPE))
+            if (((*pit)->get_type() == opencog::PATTERN_VARIABLENODE_TYPE))
             {
 	            allVarNodes.insert(h);
             }
@@ -597,7 +597,7 @@ void PatternMiner::extractVarNodes(const Handle& link, HandleSet& varNodes)
     {
         if (h->isNode())
         {
-            if (h->getType() == opencog::PATTERN_VARIABLENODE_TYPE)
+            if (h->get_type() == opencog::PATTERN_VARIABLENODE_TYPE)
                 varNodes.insert(h);
         }
         else
@@ -613,7 +613,7 @@ void PatternMiner::extractConstNodes(const Handle& link, HandleSet& constNodes)
     {
         if (h->isNode())
         {
-            if (h->getType() != opencog::PATTERN_VARIABLENODE_TYPE)
+            if (h->get_type() != opencog::PATTERN_VARIABLENODE_TYPE)
                 constNodes.insert(h);
         }
         else
@@ -626,7 +626,7 @@ void PatternMiner::extractConstNodes(const Handle& link, HandleSet& constNodes)
 bool PatternMiner::containOnlyVariables(Handle h)
 {
     if (h->isNode())
-        return h->getType() == PATTERN_VARIABLENODE_TYPE;
+        return h->get_type() == PATTERN_VARIABLENODE_TYPE;
 
     return all_of(h->getOutgoingSet(), [&](const Handle& ch) {
             return containOnlyVariables(ch); });
@@ -635,7 +635,7 @@ bool PatternMiner::containOnlyVariables(Handle h)
 bool PatternMiner::containSomeVariables(Handle h)
 {
     if (h->isNode())
-        return h->getType() == PATTERN_VARIABLENODE_TYPE;
+        return h->get_type() == PATTERN_VARIABLENODE_TYPE;
 
     return any_of(h->getOutgoingSet(), [&](const Handle& ch) {
             return containSomeVariables(ch); });
@@ -658,7 +658,7 @@ HandleSeq PatternMiner::copyLinks(AtomSpace& to_as, const HandleSeq& links,
     for (const Handle& link : links)
     {
         HandleSeq outgoingLinks = copyOutgoings(to_as, link, variables);
-        Handle toLink = to_as.add_link(link->getType(), outgoingLinks);
+        Handle toLink = to_as.add_link(link->get_type(), outgoingLinks);
         toLink->setTruthValue(link->getTruthValue());
         outPutLinks.push_back(toLink);
     }
@@ -672,21 +672,21 @@ Handle PatternMiner::copyAtom(AtomSpace& to_as, const Handle& h,
 	{
 		Handle new_node;
 
-		if (h->getType() == PATTERN_VARIABLENODE_TYPE)
+		if (h->get_type() == PATTERN_VARIABLENODE_TYPE)
 		{
 			new_node = to_as.add_node(VARIABLE_NODE, h->get_name());
 			if (!isInHandleSeq(new_node, variables)) // avoid duplicated variable
 				variables.push_back(new_node);
 		}
 		else
-			new_node = to_as.add_node(h->getType(), h->get_name());
+			new_node = to_as.add_node(h->get_type(), h->get_name());
 
 		return new_node;
 	}
 	else
 	{
 		HandleSeq outgoings = copyOutgoings(to_as, h, variables);
-		Handle link = to_as.add_link(h->getType(), outgoings);
+		Handle link = to_as.add_link(h->get_type(), outgoings);
 		link->setTruthValue(h->getTruthValue());
 		return link;
 	}
@@ -899,7 +899,7 @@ Handle PatternMiner::getFirstNonIgnoredIncomingLink(AtomSpace& atomspace, const 
             return Handle::UNDEFINED;
 
         Handle incomingHandle = (incomings[0])->getHandle();
-        if (isIgnoredType (incomingHandle->getType()))
+        if (isIgnoredType (incomingHandle->get_type()))
         {
             cur_h = incomingHandle;
             continue;
@@ -1480,7 +1480,7 @@ bool PatternMiner::filters(const HandleSeq& inputLinks, HandleSeqSeq& oneOfEachS
             for (Type t : param.same_link_types_not_share_second_outgoing)
             {
                 // filter: Any two Links of the same type in the should not share their secondary outgoing nodes
-                if (((inputLinks[i])->getType() == t))
+                if (((inputLinks[i])->get_type() == t))
                 {
                     Handle secondOutgoing = inputLinks[i]->getOutgoingSet()[1];
                     auto rs = all2ndOutgoingsOfInherlinks.insert(secondOutgoing);
@@ -1495,7 +1495,7 @@ bool PatternMiner::filters(const HandleSeq& inputLinks, HandleSeqSeq& oneOfEachS
             param.enable_filter_first_outgoing_evallink_should_be_var)
         {
             // this filter: Any two EvaluationLinks with the same predicate should not share the same secondary outgoing nodes
-            if ((inputLinks[i])->getType() == EVALUATION_LINK)
+            if ((inputLinks[i])->get_type() == EVALUATION_LINK)
             {
                 HandleSeq outgoings = inputLinks[i]->getOutgoingSet();
                 Handle predicateNode = outgoings[0];
@@ -1603,7 +1603,7 @@ bool PatternMiner::filters(const HandleSeq& inputLinks, HandleSeqSeq& oneOfEachS
                 if (param.enable_filter_node_types_should_not_be_vars ||
                     param.enable_filter_node_types_should_be_vars)
                 {
-                    Type t = node->getType();
+                    Type t = node->get_type();
 
                     if (is_in(t, param.node_types_should_not_be_vars))
                         shouldNotBeVars.push_back(node);
@@ -1842,7 +1842,7 @@ unsigned int PatternMiner::getCountOfAConnectedPattern(const string& connectedPa
 
 bool PatternMiner::isALinkOneInstanceOfGivenPattern(const Handle& instanceLink, const Handle& patternLink)
 {
-    if (instanceLink->getType() != patternLink->getType())
+    if (instanceLink->get_type() != patternLink->get_type())
         return false;
 
     const HandleSeq& outComingsOfPattern = patternLink->getOutgoingSet();
@@ -1868,7 +1868,7 @@ bool PatternMiner::isALinkOneInstanceOfGivenPattern(const Handle& instanceLink, 
             // they are both nodes
 
             // If this node is a variable, skip it
-            if ((outComingsOfPattern[i])->getType() == PATTERN_VARIABLENODE_TYPE)
+            if ((outComingsOfPattern[i])->get_type() == PATTERN_VARIABLENODE_TYPE)
                 continue;
             else
             {
@@ -1909,7 +1909,7 @@ void PatternMiner::reNameNodesForALink(const Handle& inputLink, const Handle& no
         {
              HandleSeq _renameOutgoingLinks;
              reNameNodesForALink(h, nodeToBeRenamed, newNamedNode, _renameOutgoingLinks, to_as);
-             Handle reLink = to_as.add_link(h->getType(), _renameOutgoingLinks);
+             Handle reLink = to_as.add_link(h->get_type(), _renameOutgoingLinks);
              reLink->setTruthValue(h->getTruthValue());
              renameOutgoingLinks.push_back(reLink);
         }
@@ -1929,7 +1929,7 @@ void PatternMiner::getOneMoreGramExtendedLinksFromGivenLeaf(Handle& toBeExtended
         Handle incomingHandle  = incomingPtr->getHandle();
         Handle extendedHandle;
         // if this atom is a igonred type, get its first parent that is not in the igonred types
-        if (isIgnoredType (incomingHandle->getType()) )
+        if (isIgnoredType (incomingHandle->get_type()) )
         {
             extendedHandle = getFirstNonIgnoredIncomingLink(from_as, incomingHandle);
             if (extendedHandle == Handle::UNDEFINED)
@@ -1945,7 +1945,7 @@ void PatternMiner::getOneMoreGramExtendedLinksFromGivenLeaf(Handle& toBeExtended
         // Rebind this extendedHandle into Pattern Mining Atomspace
         HandleSeq renameOutgoingLinks;
         reNameNodesForALink(extendedHandle, leaf, varNode, renameOutgoingLinks, *as);
-        Handle reLink = as->add_link(extendedHandle->getType(), renameOutgoingLinks);
+        Handle reLink = as->add_link(extendedHandle->get_type(), renameOutgoingLinks);
         reLink->setTruthValue(extendedHandle->getTruthValue());
         outPutExtendedPatternLinks.push_back(reLink);
     }
@@ -1955,7 +1955,7 @@ unsigned int PatternMiner::getAllEntityCountWithSamePredicatesForAPattern(const 
 {
     if (pattern.size() == 1)
     {
-        if (pattern[0]->getType() == EVALUATION_LINK)
+        if (pattern[0]->get_type() == EVALUATION_LINK)
         {
             Handle predicate = pattern[0]->getOutgoingAtom(0);
 
@@ -1979,7 +1979,7 @@ unsigned int PatternMiner::getAllEntityCountWithSamePredicatesForAPattern(const 
         }
         else
         {
-            cout << "warning: this pattern contains " << classserver().getTypeName(pattern[0]->getType())
+            cout << "warning: this pattern contains " << classserver().getTypeName(pattern[0]->get_type())
                  << "\nUSE_QUERY_ENTITY_COUNT_FOR_EACH_PREDICATE is for the corpus that only contains EvalutionLinks." << std::endl;
             return 0;
         }
@@ -1995,14 +1995,14 @@ unsigned int PatternMiner::getAllEntityCountWithSamePredicatesForAPattern(const 
 
         for (const Handle& l : pattern)
         {
-            if (l->getType() == EVALUATION_LINK)
+            if (l->get_type() == EVALUATION_LINK)
             {
                 Handle predicate = l->getOutgoingAtom(0);
                 allPredicateNodes.push_back(predicate);
             }
             else
             {
-                cout << "warning: this pattern contains " << classserver().getTypeName(l->getType())
+                cout << "warning: this pattern contains " << classserver().getTypeName(l->get_type())
                      << "\nUSE_QUERY_ENTITY_COUNT_FOR_EACH_PREDICATE is for the corpus that only contains EvalutionLinks." << std::endl;
                 return 0;
             }
@@ -2079,7 +2079,7 @@ unsigned int PatternMiner::getAllEntityCountWithSamePredicatesForAPattern(const 
 //    {
 //        var_index_num ++;
 
-//        if (l->getType() == EVALUATION_LINK)
+//        if (l->get_type() == EVALUATION_LINK)
 //        {
 //            Handle conceptNode = l->getOutgoingAtom(0);
 
@@ -2092,7 +2092,7 @@ unsigned int PatternMiner::getAllEntityCountWithSamePredicatesForAPattern(const 
 //        }
 //        else
 //        {
-//            cout << "warning: this pattern contains " << classserver().getTypeName(l->getType())
+//            cout << "warning: this pattern contains " << classserver().getTypeName(l->get_type())
 //                 << "\USE_QUERY_ENTITY_COUNT_FOR_EACH_PREDICATE is for the corpus that only contains EvalutionLinks." << std::endl;
 //            return;
 //        }
@@ -3740,7 +3740,7 @@ std::string PatternMiner::Link2keyString(const Handle& h, const std::string& ind
     std::stringstream answer;
     std::string more_indent = indent + LINE_INDENTATION;
 
-    answer << indent  << "(" << classserver().getTypeName(h->getType()) << " ";
+    answer << indent  << "(" << classserver().getTypeName(h->get_type()) << " ";
 
     if (h->isNode())
     {
@@ -3893,14 +3893,14 @@ HandleSet PatternMiner::_getAllNonIgnoredLinksForGivenNode(Handle keywordNode, c
         Handle newh = incomingHandle;
 
         // if this atom is a igonred type, get its first parent that is not in the igonred types
-        if (param.use_linktype_black_list && isIgnoredType (newh->getType()) )
+        if (param.use_linktype_black_list && isIgnoredType (newh->get_type()) )
         {
             newh = getFirstNonIgnoredIncomingLink(original_as, newh);
 
             if ((newh == Handle::UNDEFINED))
                 continue;
         }
-        else if (param.use_linktype_white_list && (!is_in(newh->getType(), param.linktype_white_list)))
+        else if (param.use_linktype_white_list && (!is_in(newh->get_type(), param.linktype_white_list)))
         {
             continue;
         }
@@ -3939,7 +3939,7 @@ HandleSet PatternMiner::_extendOneLinkForSubsetCorpus(const HandleSet& allNewLin
 
         for (const Handle& neighborNode : allNodes)
         {
-            if (neighborNode->getType() == PREDICATE_NODE)
+            if (neighborNode->get_type() == PREDICATE_NODE)
                 continue;
 
             string content = neighborNode->get_name();
@@ -3980,14 +3980,14 @@ void PatternMiner::findAllLinksContainKeyWords(const set<string>& subsetKeywords
             Handle newh = link;
 
             // if this atom is a igonred type, get its first parent that is not in the igonred types
-            if (param.use_linktype_black_list && isIgnoredType (link->getType()) )
+            if (param.use_linktype_black_list && isIgnoredType (link->get_type()) )
             {
                 newh = getFirstNonIgnoredIncomingLink(original_as, link);
 
                 if ((newh == Handle::UNDEFINED))
                     continue;
             }
-            else if (param.use_linktype_white_list && (!is_in(link->getType(), param.linktype_white_list)))
+            else if (param.use_linktype_white_list && (!is_in(link->get_type(), param.linktype_white_list)))
             {
                 continue;
             }
@@ -4020,7 +4020,7 @@ void PatternMiner::findAllLinksContainKeyWords(const set<string>& subsetKeywords
 //                        HandleSeq outVariableNodes;
 
 //                        HandleSeq outgoingLinks = swapLinkBetweenAtomSpaces(original_as, observing_as, newh, outVariableNodes);
-//                        Handle newLink = observing_as->add_link(newh->getType(), outgoingLinks);
+//                        Handle newLink = observing_as->add_link(newh->get_type(), outgoingLinks);
 //                        newLink->setTruthValue(newh->getTruthValue());
 //                        linkNumLoadedIntoObservingAtomSpace ++;
 //                    }

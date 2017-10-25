@@ -49,7 +49,7 @@ bool OpenPsiImplicator::grounding(const HandleMap &var_soln,
   if (0 < var_soln.size()) {
     for( auto it = var_soln.begin(); it != var_soln.end(); ++it )
     {
-      if(classserver().isA(VARIABLE_NODE, (it->second)->getType())) {
+      if(classserver().isA(VARIABLE_NODE, (it->second)->get_type())) {
         return false;
       }
     }

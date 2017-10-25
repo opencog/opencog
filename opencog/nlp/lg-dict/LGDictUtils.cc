@@ -60,8 +60,8 @@ the same matchinng routines the link-grammar uses?
  */
 bool lg_conn_type_match(const Handle& hConn1, const Handle& hConn2)
 {
-    if (hConn1->getType() != LG_CONNECTOR or
-        hConn2->getType() != LG_CONNECTOR)
+    if (hConn1->get_type() != LG_CONNECTOR or
+        hConn2->get_type() != LG_CONNECTOR)
         return false;
 
     // Convert the types to string

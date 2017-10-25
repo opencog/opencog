@@ -284,7 +284,7 @@ void AtomSpacePublisherModule::removeAFSignal(const Handle& h,
 Object AtomSpacePublisherModule::atomToJSON(Handle h)
 {
     // Type
-    Type type = h->getType();
+    Type type = h->get_type();
     std::string typeNameString = classserver().getTypeName(type);
 
     // Name
@@ -347,7 +347,7 @@ Object AtomSpacePublisherModule::tvToJSON(TruthValuePtr tvp)
 {
     Object json;
     Object jsonDetails;
-    Type tvt = tvp->getType();
+    Type tvt = tvp->get_type();
 
 
     if (tvt == SIMPLE_TRUTH_VALUE) {

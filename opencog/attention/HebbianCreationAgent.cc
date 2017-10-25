@@ -63,7 +63,7 @@ void HebbianCreationAgent::run()
     // should not normally have STI values.The below check will avoid such
     // Scenarios from happening which could lead to HebbianLink creation
     // bn atoms containing HebbianLink.
-    if (classserver().isA(source->getType(), HEBBIAN_LINK))
+    if (classserver().isA(source->get_type(), HEBBIAN_LINK))
         return;
 
     // Retrieve the atoms in the AttentionalFocus

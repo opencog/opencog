@@ -143,7 +143,7 @@ SimpleTruthValuePtr SenseSimilarityLCH::similarity(const Handle& fs,
 
 bool SenseSimilarityLCH::up_first(const Handle& up)
 {
-	if (up->getType() != WORD_SENSE_NODE) return false;
+	if (up->get_type() != WORD_SENSE_NODE) return false;
 
 	first_cnt ++;
 	if (up == second_sense)
@@ -190,7 +190,7 @@ bool SenseSimilarityLCH::up_first(const Handle& up)
 
 bool SenseSimilarityLCH::up_second(const Handle& up)
 {
-	if (up->getType() != WORD_SENSE_NODE) return false;
+	if (up->get_type() != WORD_SENSE_NODE) return false;
 
 	// Don't explore paths that are longer than the current shortest path.
 	int dist = first_cnt + second_cnt + 1;

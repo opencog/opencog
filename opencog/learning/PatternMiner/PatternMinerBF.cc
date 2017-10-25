@@ -85,7 +85,7 @@ void PatternMiner::extendAllPossiblePatternsForOneMoreGramBF(const HandleSeq& in
         {
             Handle extendedHandle;
             // if this atom is a igonred type, get its first parent that is not in the igonred types
-            if (isIgnoredType (incomingHandle->getType()) )
+            if (isIgnoredType (incomingHandle->get_type()) )
             {
                 extendedHandle = getFirstNonIgnoredIncomingLink(original_as, incomingHandle);
                 if (extendedHandle == Handle::UNDEFINED)
@@ -372,7 +372,7 @@ void PatternMiner::growTheFirstGramPatternsTaskBF()
         Handle cur_link = allLinks[cur_index];
 
         // if this link is listlink, ignore it
-        if (cur_link->getType() == opencog::LIST_LINK)
+        if (cur_link->get_type() == opencog::LIST_LINK)
         {
             continue;
         }
@@ -559,10 +559,10 @@ void PatternMiner::swapOneLinkBetweenTwoAtomSpaceForBindLink(AtomSpace& to_as, c
     {
         if (h->isNode())
         {
-           Handle new_node = to_as.add_node(h->getType(), h->get_name());
+           Handle new_node = to_as.add_node(h->get_type(), h->get_name());
            new_node->setTruthValue(h->getTruthValue());
            outgoings.push_back(new_node);
-           if (h->getType() == PATTERN_VARIABLENODE_TYPE)
+           if (h->get_type() == PATTERN_VARIABLENODE_TYPE)
            {
                containVar = true;
                if (!isInHandleSeq(new_node, outVariableNodes)) // should not have duplicated variable nodes
@@ -574,7 +574,7 @@ void PatternMiner::swapOneLinkBetweenTwoAtomSpaceForBindLink(AtomSpace& to_as, c
              HandleSeq _OutgoingLinks;
              bool _containVar;
              swapOneLinkBetweenTwoAtomSpaceForBindLink(to_as, h, _OutgoingLinks, outVariableNodes, linksWillBeDel, _containVar);
-             Handle _link = to_as.add_link(h->getType(), _OutgoingLinks);
+             Handle _link = to_as.add_link(h->get_type(), _OutgoingLinks);
              _link->setTruthValue(h->getTruthValue());
              if (_containVar)
              {
@@ -596,7 +596,7 @@ HandleSeq PatternMiner::swapLinksBetweenTwoAtomSpaceForBindLink(AtomSpace& to_as
         HandleSeq outgoingLinks;
         bool containVar;
         swapOneLinkBetweenTwoAtomSpaceForBindLink(to_as, link, outgoingLinks, outVariableNodes, linksWillBeDel,containVar);
-        Handle toLink = to_as.add_link(link->getType(), outgoingLinks);
+        Handle toLink = to_as.add_link(link->get_type(), outgoingLinks);
         toLink->setTruthValue(link->getTruthValue());
         if (containVar)
             linksWillBeDel.push_back(toLink);

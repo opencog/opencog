@@ -115,9 +115,9 @@ void PatternIndexAPIUTest::test_createAndDelete()
     Handle key1 = PatternIndexAPI::getInstance().createIndex(fname);
     Handle key2 = PatternIndexAPI::getInstance().createIndex(fname);
     Handle key3 = PatternIndexAPI::getInstance().createIndex(fname);
-    TS_ASSERT_EQUALS(key1->getType(), ANCHOR_NODE);
-    TS_ASSERT_EQUALS(key2->getType(), ANCHOR_NODE);
-    TS_ASSERT_EQUALS(key3->getType(), ANCHOR_NODE);
+    TS_ASSERT_EQUALS(key1->get_type(), ANCHOR_NODE);
+    TS_ASSERT_EQUALS(key2->get_type(), ANCHOR_NODE);
+    TS_ASSERT_EQUALS(key3->get_type(), ANCHOR_NODE);
     PatternIndexAPI::getInstance().deleteIndex(key2);
     TS_ASSERT_THROWS_NOTHING(PatternIndexAPI::getInstance().setProperty(key1, "PatternCountCacheEnabled", "true"));
     TS_ASSERT_THROWS_ANYTHING(PatternIndexAPI::getInstance().setProperty(key2, "PatternCountCacheEnabled", "true"));
@@ -147,35 +147,35 @@ void PatternIndexAPIUTest::test_query()
     for (const PatternIndexAPI::QueryResult& result : queryResult) {
         TS_ASSERT_EQUALS(result.first.size(), 1);
         Handle link = result.first.at(0);
-        TS_ASSERT_EQUALS(link->getType(), SIMILARITY_LINK);
+        TS_ASSERT_EQUALS(link->get_type(), SIMILARITY_LINK);
         HandleSeq outgoing = link->getOutgoingSet();
         TS_ASSERT_EQUALS(outgoing.size(), 2);
-        TS_ASSERT_EQUALS(outgoing.at(0)->getType(), CONCEPT_NODE)
-        TS_ASSERT_EQUALS(outgoing.at(1)->getType(), CONCEPT_NODE)
-        if (outgoing.at(0)->getName().compare("earthworm") == 0) {
+        TS_ASSERT_EQUALS(outgoing.at(0)->get_type(), CONCEPT_NODE)
+        TS_ASSERT_EQUALS(outgoing.at(1)->get_type(), CONCEPT_NODE)
+        if (outgoing.at(0)->get_name().compare("earthworm") == 0) {
             flag1 = true;
-            TS_ASSERT(outgoing.at(1)->getName().compare("snake") == 0);
-        } else if (outgoing.at(0)->getName().compare("snake") == 0) {
+            TS_ASSERT(outgoing.at(1)->get_name().compare("snake") == 0);
+        } else if (outgoing.at(0)->get_name().compare("snake") == 0) {
             flag1 = true;
-            TS_ASSERT(outgoing.at(1)->getName().compare("earthworm") == 0);
-        } else if (outgoing.at(0)->getName().compare("triceratops") == 0) {
+            TS_ASSERT(outgoing.at(1)->get_name().compare("earthworm") == 0);
+        } else if (outgoing.at(0)->get_name().compare("triceratops") == 0) {
             flag2 = true;
-            TS_ASSERT(outgoing.at(1)->getName().compare("rhino") == 0);
-        } else if (outgoing.at(0)->getName().compare("rhino") == 0) {
+            TS_ASSERT(outgoing.at(1)->get_name().compare("rhino") == 0);
+        } else if (outgoing.at(0)->get_name().compare("rhino") == 0) {
             flag2 = true;
-            TS_ASSERT(outgoing.at(1)->getName().compare("triceratops") == 0);
-        } else if (outgoing.at(0)->getName().compare("vine") == 0) {
+            TS_ASSERT(outgoing.at(1)->get_name().compare("triceratops") == 0);
+        } else if (outgoing.at(0)->get_name().compare("vine") == 0) {
             flag3 = true;
-            TS_ASSERT(outgoing.at(1)->getName().compare("snake") == 0);
-        } else if (outgoing.at(0)->getName().compare("snake") == 0) {
+            TS_ASSERT(outgoing.at(1)->get_name().compare("snake") == 0);
+        } else if (outgoing.at(0)->get_name().compare("snake") == 0) {
             flag3 = true;
-            TS_ASSERT(outgoing.at(1)->getName().compare("vine") == 0);
-        } else if (outgoing.at(0)->getName().compare("human") == 0) {
+            TS_ASSERT(outgoing.at(1)->get_name().compare("vine") == 0);
+        } else if (outgoing.at(0)->get_name().compare("human") == 0) {
             flag4 = true;
-            TS_ASSERT(outgoing.at(1)->getName().compare("ent") == 0);
-        } else if (outgoing.at(0)->getName().compare("ent") == 0) {
+            TS_ASSERT(outgoing.at(1)->get_name().compare("ent") == 0);
+        } else if (outgoing.at(0)->get_name().compare("ent") == 0) {
             flag4 = true;
-            TS_ASSERT(outgoing.at(1)->getName().compare("human") == 0);
+            TS_ASSERT(outgoing.at(1)->get_name().compare("human") == 0);
         } else {
             TS_FAIL("Wrong query() answer");
         }

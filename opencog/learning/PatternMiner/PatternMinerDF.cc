@@ -112,11 +112,11 @@ void PatternMiner::growPatternsDepthFirstTask(unsigned int thread_index)
 
         if (! param.only_mine_patterns_start_from_white_list)
         {
-            if (param.use_linktype_black_list && isIgnoredType (cur_link->getType()) )
+            if (param.use_linktype_black_list && isIgnoredType (cur_link->get_type()) )
             {
                 continue;
             }
-            else if (param.use_linktype_white_list && (!is_in(cur_link->getType(), param.linktype_white_list)))
+            else if (param.use_linktype_white_list && (!is_in(cur_link->get_type(), param.linktype_white_list)))
             {
                 continue;
             }
@@ -859,7 +859,7 @@ void PatternMiner::extendAPatternForOneMoreGramRecursively(const Handle &extende
                         if (param.enable_filter_node_types_should_not_be_vars)
                         {
                             bool isIgnoredType = false; // TODO move this to its own function
-                            Type t = extendNode->getType();
+                            Type t = extendNode->get_type();
                             for (Type noType : param.node_types_should_not_be_vars)
                             {
                                 if (t == noType)
@@ -898,7 +898,7 @@ void PatternMiner::extendAPatternForOneMoreGramRecursively(const Handle &extende
                             Handle incomingHandle = incomingPtr->getHandle();
                             Handle extendedHandle = incomingHandle;
 
-                            if (param.use_linktype_black_list && isIgnoredType(incomingHandle->getType()))
+                            if (param.use_linktype_black_list && isIgnoredType(incomingHandle->get_type()))
                             {
                                 // if this atom is of igonred type, get its first ancestor that is not in the igonred types
                                 extendedHandle = getFirstNonIgnoredIncomingLink(from_as, incomingHandle);
@@ -906,7 +906,7 @@ void PatternMiner::extendAPatternForOneMoreGramRecursively(const Handle &extende
                                 if ((extendedHandle == Handle::UNDEFINED))
                                     continue;
                             }
-                            else if (param.use_linktype_white_list && (!is_in(incomingHandle->getType(), param.linktype_white_list)))
+                            else if (param.use_linktype_white_list && (!is_in(incomingHandle->get_type(), param.linktype_white_list)))
                             {
                                 continue;
                             }

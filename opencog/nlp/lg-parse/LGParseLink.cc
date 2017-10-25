@@ -60,13 +60,13 @@ void LGParseLink::init()
 		throw InvalidParamException(TRACE_INFO,
 			"LGParseLink: Expecting two or three arguments, got %lu", osz);
 
-	Type pht = oset[0]->getType();
+	Type pht = oset[0]->get_type();
 	if (PHRASE_NODE != pht and VARIABLE_NODE != pht and GLOB_NODE != pht)
 		throw InvalidParamException(TRACE_INFO,
 			"LGParseLink: Expecting PhraseNode, got %s",
 			oset[0]->to_string().c_str());
 
-	Type dit = oset[1]->getType();
+	Type dit = oset[1]->get_type();
 	if (LG_DICT_NODE != dit and VARIABLE_NODE != dit and GLOB_NODE != dit)
 		throw InvalidParamException(TRACE_INFO,
 			"LGParseLink: Expecting LgDictNode, got %s",
@@ -74,7 +74,7 @@ void LGParseLink::init()
 
 	if (3 == osz)
 	{
-		Type nit = oset[2]->getType();
+		Type nit = oset[2]->get_type();
 		if (NUMBER_NODE != nit and VARIABLE_NODE != nit and GLOB_NODE != nit)
 			throw InvalidParamException(TRACE_INFO,
 				"LGParseLink: Expecting NumberNode, got %s",
@@ -99,7 +99,7 @@ LGParseLink::LGParseLink(const Link& l)
 	: FunctionLink(l)
 {
 	// Type must be as expected
-	Type tparse = l.getType();
+	Type tparse = l.get_type();
 	if (not classserver().isA(tparse, LG_PARSE_LINK))
 	{
 		const std::string& tname = classserver().getTypeName(tparse);
@@ -125,7 +125,7 @@ LGParseMinimal::LGParseMinimal(const Link& l)
 	: LGParseLink(l)
 {
 	// Type must be as expected
-	Type tparse = l.getType();
+	Type tparse = l.get_type();
 	if (not classserver().isA(tparse, LG_PARSE_MINIMAL))
 	{
 		const std::string& tname = classserver().getTypeName(tparse);
@@ -138,10 +138,10 @@ LGParseMinimal::LGParseMinimal(const Link& l)
 
 Handle LGParseLink::execute(AtomSpace* as) const
 {
-	if (PHRASE_NODE != _outgoing[0]->getType()) return Handle();
-	if (LG_DICT_NODE != _outgoing[1]->getType()) return Handle();
+	if (PHRASE_NODE != _outgoing[0]->get_type()) return Handle();
+	if (LG_DICT_NODE != _outgoing[1]->get_type()) return Handle();
 	if (3 == _outgoing.size() and
-	   NUMBER_NODE != _outgoing[2]->getType()) return Handle();
+	   NUMBER_NODE != _outgoing[2]->get_type()) return Handle();
 
 	if (nullptr == as) as = getAtomSpace();
 	if (nullptr == as)
@@ -216,7 +216,7 @@ Handle LGParseLink::execute(AtomSpace* as) const
 
 	Handle snode(as->add_node(SENTENCE_NODE, sentstr));
 
-	bool minimal = (getType() == LG_PARSE_MINIMAL);
+	bool minimal = (get_type() == LG_PARSE_MINIMAL);
 	for (int i=0; i<num_linkages; i++)
 	{
 		Linkage lkg = linkage_create(i, sent, opts);

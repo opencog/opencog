@@ -170,7 +170,7 @@ bool SentenceQuery::is_query(Handle h)
  */
 bool SentenceQuery::discard_extra_markup(Atom *atom)
 {
-	if (DEFINED_LINGUISTIC_CONCEPT_NODE != atom->getType()) return false;
+	if (DEFINED_LINGUISTIC_CONCEPT_NODE != atom->get_type()) return false;
 
 	Node *n = dynamic_cast<Node *>(atom);
 	if(!n) return false;
@@ -219,7 +219,7 @@ bool SentenceQuery::discard_extra_markup(Atom *atom)
 bool SentenceQuery::assemble_predicate(Atom *atom)
 {
 	Handle ah = atom->handle;
-	Type atype = atom->getType();
+	Type atype = atom->get_type();
 	if (EVALUATION_LINK == atype)
 	{
 		bool keep = foreach_outgoing_atom(ah, &WordRelQuery::is_ling_rel, this);
@@ -259,7 +259,7 @@ bool SentenceQuery::assemble_predicate(Atom *atom)
  */
 bool SentenceQuery::is_ling_rel(Atom *atom)
 {
-	Type t = atom->getType();
+	Type t = atom->get_type();
 	if (DEFINED_LINGUISTIC_RELATIONSHIP_NODE == t) return true;
 	if (PREPOSITIONAL_RELATIONSHIP_NODE == t) return true;
 	return false;

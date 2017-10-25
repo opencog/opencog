@@ -102,7 +102,7 @@ void ForgettingAgent::forget()
                 recursive = true;
                 for (const LinkPtr& h : iset)
                 {
-                    if (h->getType() != ASYMMETRIC_HEBBIAN_LINK) {
+                    if (h->get_type() != ASYMMETRIC_HEBBIAN_LINK) {
                         recursive = false;
                         break;
                     }
