@@ -121,9 +121,9 @@ void MOSESPLNSynergyUTest::test_moses_pln_synergy_pm()
 
 	TS_ASSERT_DIFFERS(target, Handle::UNDEFINED);
 
-	strength_t target_strength = target->getTruthValue()->getMean(),
+	strength_t target_strength = target->getTruthValue()->get_mean(),
 		expected_strength = 0.603579;
-	confidence_t target_confidence = target->getTruthValue()->getConfidence(),
+	confidence_t target_confidence = target->getTruthValue()->get_confidence(),
 		expected_confidence = 0.65475;
 #define TEST_EPSILON 1e-6
 	TS_ASSERT_DELTA(target_strength, expected_strength, TEST_EPSILON);

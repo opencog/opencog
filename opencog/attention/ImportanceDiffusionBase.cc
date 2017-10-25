@@ -489,8 +489,8 @@ ImportanceDiffusionBase::combineIncidentAdjacentVectors(
 double ImportanceDiffusionBase::calculateHebbianDiffusionPercentage(
         Handle h)
 {
-    strength_t strength = h->getTruthValue()->getMean();
-    confidence_t confidence = h->getTruthValue()->getConfidence();
+    strength_t strength = h->getTruthValue()->get_mean();
+    confidence_t confidence = h->getTruthValue()->get_confidence();
 
     return strength * confidence;
 }

@@ -157,8 +157,8 @@ void EdgeThin::thin_parse(const Handle& h, int _keep)
  */
 static bool sense_compare(const Handle& ha, const Handle& hb)
 {
-	double sa = ha->getTruthValue()->getCount();
-	double sb = hb->getTruthValue()->getCount();
+	double sa = ha->getTruthValue()->get_count();
+	double sb = hb->getTruthValue()->get_count();
 	if (sa > sb) return true;
 	return false;
 }
@@ -240,7 +240,7 @@ bool EdgeThin::thin_word(const Handle& word_h)
 			deleted_links ++;
 		}
 #ifdef THIN_DEBUG
-		double sa = atom_space->getTV(sense_h).getCount();
+		double sa = atom_space->getTV(sense_h).get_count();
 		Handle hws = get_word_sense_of_sense_link(sense_h);
 		printf ("; delete %s with score %f (%d links)\n",
 			atom_space->get_name(hws).c_str(), sa, deleted_links);

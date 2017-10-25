@@ -352,22 +352,22 @@ Object AtomSpacePublisherModule::tvToJSON(TruthValuePtr tvp)
 
     if (tvt == SIMPLE_TRUTH_VALUE) {
         json.push_back(Pair("type", "simple"));
-        jsonDetails.push_back(Pair("strength", tvp->getMean()));
-        jsonDetails.push_back(Pair("count", tvp->getCount()));
-        jsonDetails.push_back(Pair("confidence", tvp->getConfidence()));
+        jsonDetails.push_back(Pair("strength", tvp->get_mean()));
+        jsonDetails.push_back(Pair("count", tvp->get_count()));
+        jsonDetails.push_back(Pair("confidence", tvp->get_confidence()));
         json.push_back(Pair("details", jsonDetails));
     }
     else if (tvt == COUNT_TRUTH_VALUE) {
         json.push_back(Pair("type", "count"));
-        jsonDetails.push_back(Pair("strength", tvp->getMean()));
-        jsonDetails.push_back(Pair("count", tvp->getCount()));
-        jsonDetails.push_back(Pair("confidence", tvp->getConfidence()));
+        jsonDetails.push_back(Pair("strength", tvp->get_mean()));
+        jsonDetails.push_back(Pair("count", tvp->get_count()));
+        jsonDetails.push_back(Pair("confidence", tvp->get_confidence()));
         json.push_back(Pair("details", jsonDetails));
     }
     else if (tvt == INDEFINITE_TRUTH_VALUE) {
         IndefiniteTruthValuePtr itv = IndefiniteTVCast(tvp);
         json.push_back(Pair("type", "indefinite"));
-        jsonDetails.push_back(Pair("strength", itv->getMean()));
+        jsonDetails.push_back(Pair("strength", itv->get_mean()));
         jsonDetails.push_back(Pair("L", itv->getL()));
         jsonDetails.push_back(Pair("U", itv->getU()));
         jsonDetails.push_back(Pair("confidence", itv->getConfidenceLevel()));
@@ -377,16 +377,16 @@ Object AtomSpacePublisherModule::tvToJSON(TruthValuePtr tvp)
     }
     else if (tvt == PROBABILISTIC_TRUTH_VALUE) {
         json.push_back(Pair("type", "probabilistic"));
-        jsonDetails.push_back(Pair("strength", tvp->getMean()));
-        jsonDetails.push_back(Pair("count", tvp->getCount()));
-        jsonDetails.push_back(Pair("confidence", tvp->getConfidence()));
+        jsonDetails.push_back(Pair("strength", tvp->get_mean()));
+        jsonDetails.push_back(Pair("count", tvp->get_count()));
+        jsonDetails.push_back(Pair("confidence", tvp->get_confidence()));
         json.push_back(Pair("details", jsonDetails));
     }
     else if (tvt == FUZZY_TRUTH_VALUE) {
         json.push_back(Pair("type", "fuzzy"));
-        jsonDetails.push_back(Pair("strength", tvp->getMean()));
-        jsonDetails.push_back(Pair("count", tvp->getCount()));
-        jsonDetails.push_back(Pair("confidence", tvp->getConfidence()));
+        jsonDetails.push_back(Pair("strength", tvp->get_mean()));
+        jsonDetails.push_back(Pair("count", tvp->get_count()));
+        jsonDetails.push_back(Pair("confidence", tvp->get_confidence()));
         json.push_back(Pair("details", jsonDetails));
     }
     else {

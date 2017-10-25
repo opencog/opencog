@@ -146,7 +146,7 @@ bool ReportRank::renorm_word(const Handle& h)
 bool ReportRank::count_sense(const Handle& word_sense_h,
                              const Handle& sense_link_h)
 {
-	normalization += sense_link_h->getTruthValue()->getCount();
+	normalization += sense_link_h->getTruthValue()->get_count();
 	sense_count += 1.0;
 	return false;
 }
@@ -154,7 +154,7 @@ bool ReportRank::count_sense(const Handle& word_sense_h,
 bool ReportRank::renorm_sense(const Handle& word_sense_h,
                               const Handle& sense_link_h)
 {
-	double score = sense_link_h->getTruthValue()->getCount();
+	double score = sense_link_h->getTruthValue()->get_count();
 
 	score *= normalization;
 	score -= 1.0;

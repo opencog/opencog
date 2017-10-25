@@ -289,7 +289,7 @@ void DimEmbedModule::addPivot(Handle h, Type linkType, bool fanin)
             for (;it2!=newNodes.end(); ++it2) {
                 if (!(*it2)->isNode()) continue;
                 double alt =
-                    distMap[u] * linkTV->getMean() * linkTV->getConfidence();
+                    distMap[u] * linkTV->get_mean() * linkTV->get_confidence();
                 double oldDist=distMap[*it2];
                 //If we've found a better (higher weight) path, update distMap
                 if (alt>oldDist) {
@@ -441,7 +441,7 @@ std::vector<double> DimEmbedModule::addNode(Handle h,
     for (HandleSeq::iterator it=links.begin(); it<links.end(); ++it) {
         HandleSeq nodes = a->getOutgoing(*it);
         const TruthValue& linkTV = a->getTV(*it);
-        double weight = linkTV.getConfidence()*linkTV.getMean();
+        double weight = linkTV.get_confidence()*linkTV.get_mean();
         for (HandleSeq::iterator it2=nodes.begin();it2<nodes.end(); ++it2) {
             if (*it2==h) continue;
             const std::vector<double>& embedding =
@@ -533,7 +533,7 @@ void DimEmbedModule::symAddLink(Handle h, Type linkType)
     int dim = dimensionMap[linkType];
     AtomEmbedding& aE = atomMaps[linkType];
     TruthValuePtr linkTV = h->getTruthValue();
-    double weight = linkTV->getConfidence() * linkTV->getMean();
+    double weight = linkTV->get_confidence() * linkTV->get_mean();
     HandleSeq nodes;
     if (LinkCast(h)) nodes = LinkCast(h)->getOutgoingSet();
     for (HandleSeq::iterator it=nodes.begin();it!=nodes.end();++it) {
@@ -565,7 +565,7 @@ void DimEmbedModule::asymAddLink(Handle h, Type linkType)
     AtomEmbedding& aEForw = asymAtomMaps[linkType].first;
     AtomEmbedding& aEBackw = asymAtomMaps[linkType].second;
     TruthValuePtr linkTV = h->getTruthValue();
-    double weight = linkTV->getConfidence() * linkTV->getMean();
+    double weight = linkTV->get_confidence() * linkTV->get_mean();
     HandleSeq nodes;
     if (LinkCast(h)) nodes = LinkCast(h)->getOutgoingSet();
     Handle source = nodes.front();

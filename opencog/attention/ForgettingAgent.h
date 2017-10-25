@@ -113,8 +113,8 @@ struct ForgettingLTIThenTVAscendingSort
         if (lti1 != lti2) return lti1 < lti2;
         else {
             double tv1, tv2;
-            tv1 = fabs(h1->getTruthValue()->getMean());
-            tv2 = fabs(h2->getTruthValue()->getMean());
+            tv1 = fabs(h1->getTruthValue()->get_mean());
+            tv2 = fabs(h2->getTruthValue()->get_mean());
             return tv1 < tv2;
         }
     }

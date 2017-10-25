@@ -82,7 +82,7 @@ void HebbianUpdatingAgent::run()
   //    auto magnitued = as->get_normalised_zero_to_one_STI(source,true,true);
   //    auto direction = as->get_normalised_STI(target,true,true);
 
-  //    old_tc = link->getTruthValue()->getMean();
+  //    old_tc = link->getTruthValue()->get_mean();
 
   //    new_tc = new_tc + magnitued * direction * learningRate;
   //    new_tc = std::min(std::max(new_tc,0.0),1.0);
@@ -108,7 +108,7 @@ void HebbianUpdatingAgent::updateHebbianLinks(Handle source)
 
         // old link strength decays
         TruthValuePtr oldtv  = h->getTruthValue();
-        old_tc = oldtv->getMean();
+        old_tc = oldtv->get_mean();
         tc = tcDecayRate * new_tc + (1.0 - tcDecayRate) * old_tc;
 
         //update truth value accordingly

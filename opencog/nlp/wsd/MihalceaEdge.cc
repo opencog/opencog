@@ -262,7 +262,7 @@ bool MihalceaEdge::sense_of_second_inst(const Handle& second_word_sense_h,
 #endif
 
 	// Skip making edges between utterly unrelated nodes.
-	if (stv->getMean() < 0.01) return false;
+	if (stv->get_mean() < 0.01) return false;
 
 	// Create a link connecting the first pair to the second pair.
 	HandleSeq out;

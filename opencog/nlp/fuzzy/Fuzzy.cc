@@ -173,7 +173,7 @@ double Fuzzy::fuzzy_compare(const Handle& h1, const Handle& h2)
         score += get_score(c);
 
     for (const Handle& s : common_simlks)
-        score += s->getTruthValue()->getMean() * NODE_WEIGHT;
+        score += s->getTruthValue()->get_mean() * NODE_WEIGHT;
 
     score /= std::max(target_word_insts.size(), soln_word_insts.size());
 
@@ -383,7 +383,7 @@ bool Fuzzy::try_match(const Handle& soln)
         score += get_score(c);
 
     for (const Handle& s : common_simlks)
-        score += s->getTruthValue()->getMean() * NODE_WEIGHT;
+        score += s->getTruthValue()->get_mean() * NODE_WEIGHT;
 
     score /= std::max(target_word_insts.size(), soln_word_insts.size());
 
