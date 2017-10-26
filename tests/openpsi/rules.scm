@@ -189,7 +189,7 @@
     (rule-2)
     (rule-3)
     ; Make one step
-    (psi-step)
+    (psi-step-per-demand)
 )
 
 (define (demand-value demand-node)
@@ -207,7 +207,7 @@
     ; Load groundable contents for satisfying rule-1 only
     (groundable-content-1)
     ; Make one step
-    (psi-step)
+    (psi-step-per-demand)
 )
 
 (define (test_psi_step_2_1) (cog-node? (cog-node 'ConceptNode "act-1")))
@@ -220,7 +220,7 @@
     ; Load groundable contents for satisfying rule-2 or rule 3
     (groundable-content-2)
     ; Make one step
-    (psi-step)
+    (psi-step-per-demand)
 )
 
 (define (test_psi_step_3_1) (cog-node? (cog-node 'ConceptNode "act-2")))
@@ -278,7 +278,7 @@
     ; Load rule
     (rule-6)
     ; Make one step
-    (psi-step)
+    (psi-step-per-demand)
 )
 
 (define (test_psi_step_4) (cog-node? (cog-node 'ConceptNode "act-6")))

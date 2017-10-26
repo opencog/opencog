@@ -77,7 +77,7 @@
 )
 
 ; ----------------------------------------------------------------------
-(define (psi-step)
+(define (psi-step-per-demand)
 "
   psi-step - Take one step of the OpenPsi rule engine.
 
@@ -174,7 +174,7 @@
 ; psi rules.  For now, this is OK, but at some point, this will become
 ; a bottleneck, as we will need to evaluate more rules more often.
 ;
-(define (psi-run)
+(define (psi-run-per-demand)
 "
   psi-run
 
@@ -215,7 +215,7 @@
   psi-halt
 
   Halts a previously-started psi loop thread. The thread is started
-  by calling `(psi-run)`.
+  by calling `(psi-run-per-demand)`.
 "
     (set! psi-do-run-loop #f)
 )

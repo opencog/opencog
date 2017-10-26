@@ -47,7 +47,7 @@
 
 ;; Call (run) to run the main loop, (halt) to pause the loop.
 ;; The main loop runs in its own thread.
-(define (run) (psi-run))
+(define (run) (psi-run-per-demand))
 (define (halt) (psi-halt))
 
 ; ---------------------------------------------------------

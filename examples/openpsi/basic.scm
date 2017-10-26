@@ -82,7 +82,7 @@
 ; reaches zero.
 (define (step-psi n)
 	(display "\n=================== Stepping psi one step\n")
-	(psi-step)
+	(psi-step-per-demand)
 	(sleep 3)
 	(if (< 0 n) (step-psi (- n 1))))
 
@@ -92,4 +92,4 @@
 ; Alternately, one can run the psi engine as fast as possible. This
 ; is not recommended for this demo, because it will clog the output
 ; with print statements.
-; (psi-run)
+; (psi-run-per-demand)
