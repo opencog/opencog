@@ -59,8 +59,7 @@
          ;; Load and-bit-prior rule base
          (dummy (load "and-bit-prior.scm"))
          ;; Define BC target and vardecl
-         (target (Evaluation
-                   (Predicate "URE:BC:preproof-of")
+         (target (preproof-of
                    (List
                      (Variable "$A")
                      (Variable "$T"))))

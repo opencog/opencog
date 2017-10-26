@@ -1,21 +1,21 @@
 ;; Contain the main inference control learning experiment loop
 
+;; Set parameters
+(define pss 20)                    ; Problem set size
+(define niter 2)                    ; Number of iterations
+(define piter 30)                   ; Number of iterations used for each problem
+
+;; Load utils
 (load "icl-utilities.scm")
 (load "mk-history.scm")
 (load "mk-control-rules.scm")
-
-;; Clear and reload the kb and rb
-(define (reload)
-  (clear)
-  (load "kb.scm")
-  (load "pln-rb.scm"))
 
 ;; Set the random seed of the experiment
 (cog-randgen-set-seed! 0)
 
 ;; Set loggers levels
 (cog-logger-set-level! "info")
-(cog-logger-set-level! icl-logger "info")
+(cog-logger-set-level! icl-logger "debug")
 (cog-logger-set-level! (cog-ure-logger) "info")
 
 ;; Set loggers stdout
@@ -28,10 +28,11 @@
 ;; (cog-logger-set-sync! icl-logger #t)
 ;; (cog-logger-set-sync! (cog-ure-logger) #t)
 
-;; Set parameters
-(define pss 100)                    ; Problem set size
-(define niter 2)                    ; Number of iterations
-(define piter 30)                   ; Number of iterations used for each problem
+;; Clear and reload the kb and rb
+(define (reload)
+  (clear)
+  (load "kb.scm")
+  (load "pln-rb.scm"))
 
 ;; AtomSpace containing the targets in there to no forget them
 (define targets-as (cog-new-atomspace))
@@ -70,6 +71,13 @@
     ;; Copy all atomspaces for histories to history-as
     (icl-logger-info "Move all problem histories to history-as")
     (union-as history-as histories)
+
+    ;; Remove dangling atoms from history-as. These are produced due
+    ;; to alpha-conversion. It creates inconsistencies, see
+    ;; https://github.com/opencog/atomspace/issues/1417. It's not too
+    ;; harmful for now but it will have to be remedy at some point.
+    (icl-logger-info "Remove dangling atoms from history-as")
+    (remove-dangling-atoms history-as)
 
     (icl-logger-debug "History AtomSpace:")
     (icl-logger-debug-atomspace history-as)

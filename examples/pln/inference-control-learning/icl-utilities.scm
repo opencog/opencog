@@ -152,7 +152,7 @@
 
 ;; Redefine cog-cp and cog-cp-all to return a list of copied atoms
 ;; (indeed these are not the same the ones in the source).
-(define-public (icl-cp AS LST)
+(define (icl-cp AS LST)
 "
   icl-cp AS LST - Copy the atoms in LST to the given atomspace AS and
   return the list of atoms now in AS.
@@ -176,9 +176,19 @@
     ;; Return the copied LST now in AS
     results))
 
-(define-public (icl-cp-all AS)
+(define (icl-cp-all AS)
 "
   icl-cp-all AS - Copy all atoms in the current atomspace to the given atomspace AS and returns the list of copied atoms.
 "
-  (icl-cp AS (apply append (map cog-get-atoms (cog-get-types))))
-)
+  (icl-cp AS (apply append (map cog-get-atoms (cog-get-types)))))
+
+(define (preproof-of arg)
+  (Evaluation
+    (Predicate "URE:BC:preproof-of")
+    arg))
+
+(define (expand input output)
+  (Execution
+    (Schema "URE:BC:expand-and-BIT")
+    input
+    output))
