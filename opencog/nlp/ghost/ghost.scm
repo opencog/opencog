@@ -15,6 +15,7 @@
   #:use-module (ice-9 regex)
   #:use-module (ice-9 getopt-long)
   #:use-module (ice-9 eval-string)
+  #:use-module (ice-9 receive)
   #:use-module (system base lalr)
 )
 
@@ -30,10 +31,12 @@
     (string-append "variable-lemma-" (number->string NUM)))))
 (define (ghost-uvar STR)
   (Variable (ghost-prefix (string-append "user-variable-" STR))))
-(define ghost-anchor (Anchor (ghost-prefix "Currently Processing")))
+(define ghost-curr-proc (Anchor (ghost-prefix "Currently Processing")))
+(define ghost-curr-topic (Anchor (ghost-prefix "Current Topic")))
 (define ghost-no-constant (Anchor (ghost-prefix "No constant terms")))
 (define ghost-word-seq (Predicate (ghost-prefix "Word Sequence")))
 (define ghost-lemma-seq (Predicate (ghost-prefix "Lemma Sequence")))
+(define ghost-topic (Concept (ghost-prefix "Topic")))
 
 ; Define the logger for GHOST
 (define ghost-logger (cog-new-logger))
@@ -45,9 +48,8 @@
   ghost-logger
 )
 
-; The current topic, will be used when creating GHOST rules
 ; When set, all the rules created will be under this topic
-(define ghost-topic '())
+(define rule-topic '())
 
 ; A list of shared goals for all the rules under the same topic file
 (define shared-goals '())
@@ -60,10 +62,6 @@
 
 ; Keep a record of the lemmas we have seen, and it serves as a cache as well
 (define lemma-alist '())
-
-; Indicate whether to get the lemma of a word from the RelEx server (default),
-; or from the WordNet CLI (for unit test only)
-(define test-get-lemma #f)
 
 ; Keep a record of the most recent outputs generated
 (define ghost-result '())
@@ -95,4 +93,4 @@
    Should run this with the main OpenPsi loop."
   (define sent (car (nlp-parse TXT)))
   (generate-word-seqs sent)
-  (State ghost-anchor sent))
+  (State ghost-curr-proc sent))

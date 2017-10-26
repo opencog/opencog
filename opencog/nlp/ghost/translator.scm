@@ -6,7 +6,7 @@
 ;; Shared conditions for all terms
 (define atomese-condition-template
   (list (Parse (Variable "$P") (Variable "$S"))
-        (State ghost-anchor (Variable "$S"))))
+        (State ghost-curr-proc (Variable "$S"))))
 
 (define (order-terms TERMS)
   "Order the terms in the intended order, and insert wildcards into
@@ -248,8 +248,11 @@
           (list (action-choices choices)))))
   (define action-atomese (to-atomese (cdar ACTION)))
   (True (if reuse action-atomese
-                  (ExecutionOutput (GroundedSchema "scm: ghost-execute-action")
-                                   (List action-atomese)))))
+                  (list (ExecutionOutput
+                          (GroundedSchema "scm: ghost-execute-action")
+                          (List action-atomese))
+                        (Put (State ghost-curr-topic (Variable "$x"))
+                             rule-topic)))))
 
 (define (process-goal GOAL)
   "Go through each of the goals, including the shared ones."
@@ -261,12 +264,15 @@
         (remove (lambda (sg) (any (lambda (g) (equal? (car sg) (car g))) GOAL))
                 shared-goals))))
 
-(define (create-rule PATTERN ACTION GOAL TOPIC NAME)
+(define (create-rule PATTERN ACTION GOAL NAME)
   "Top level translation function. Pattern is a quoted list of terms,
    and action is a quoted list of actions or a single action."
   (cog-logger-debug "In create-rule\nPATTERN = ~a\nACTION = ~a" PATTERN ACTION)
   (catch #t
     (lambda ()
+      ; First of all, make sure the topic is set
+      (if (null? rule-topic)
+          (set! rule-topic (create-topic "Default Topic" '())))
       (let* ((ordered-terms (order-terms PATTERN))
              (proc-terms (process-pattern-terms ordered-terms))
              (vars (append atomese-variable-template (list-ref proc-terms 0)))
@@ -285,7 +291,7 @@
                           action
                           (psi-goal (car goal))
                           (stv (cdr goal) .9)
-                          (if (null? TOPIC) ghost-topic TOPIC)))
+                          rule-topic))
                       goals))))
     (lambda (key . parameters)
       (if (not (equal? key 'FeatureNotSupported))
@@ -308,7 +314,7 @@
 "
   create-topic TOPIC-NAME
 
-  Creates a psi-demand named as TOPIC-NAME, sets the ghost-topic to be it
+  Creates a psi-demand named as TOPIC-NAME, sets the rule-topic to be it
   and returns ConceptNode that represent the topic(aka demand).
 "
   ; NOTE:The intention is to follow chatscript like authoring approach. Once a
@@ -323,9 +329,14 @@
   ; 2. Should the weight be accessable? Specially if the execution graph is
   ; separate from the content, thus allowing learing, why?
 
-  (set! ghost-topic (psi-demand (ghost-prefix TOPIC-NAME)))
-  (for-each (lambda (kw) (Member kw ghost-topic)) (terms-to-atomese KEYWORDS))
-  ghost-topic)
+  ; A topic will be defined when loading a (topic) file
+  (set! rule-topic (psi-demand (ghost-prefix TOPIC-NAME)))
+  (Inheritance rule-topic ghost-topic)
 
-; This is the default topic.
-(create-topic "Default Topic" '())
+  ; Reset the topic-level goals
+  (set! shared-goals '())
+
+  ; The set of keywords associate with the topic
+  (for-each (lambda (kw) (Member kw rule-topic)) (terms-to-atomese KEYWORDS))
+
+  rule-topic)

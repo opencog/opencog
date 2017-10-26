@@ -108,7 +108,7 @@
 (define-public (ghost-negation? . TERMS)
   "Check if the input sentence has none of the terms specified."
   (let* ; Get the raw text input
-        ((sent (car (cog-chase-link 'StateLink 'SentenceNode ghost-anchor)))
+        ((sent (car (cog-chase-link 'StateLink 'SentenceNode ghost-curr-proc)))
          (rtxt (cog-name (car (cog-chase-link 'ListLink 'Node sent))))
          (ltxt (string-join (map get-lemma (string-split rtxt #\sp)))))
         (if (any (lambda (t) (text-contains? rtxt ltxt t)) TERMS)
@@ -254,4 +254,4 @@
   ; Record the result
   (set! ghost-result (append txt-atoms atoms-created))
   ; Reset the state
-  (State ghost-anchor (Concept "Default State")))
+  (State ghost-curr-proc (Concept "Default State")))
