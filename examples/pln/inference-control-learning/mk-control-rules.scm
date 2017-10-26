@@ -27,6 +27,23 @@
   ;; Load PLN to have access to the PLN rules
   (load "pln-rb.scm")
 
+  ;; Ground rules
+  ;;
+  ;; (preproof-of $A $T)
+  ;; (expand ($A $L $R) $B)
+  ;; ->
+  ;; (preproof-of $B $T)
+  (ground-context-free-rules)
+
+  ;; Ground rules like
+  ;;
+  ;; (preproof-of $A $T)
+  ;; (expand ($A (Inheritance a $X) $R) $B)
+  ;; ->
+  ;; (preproof-of $B $T)
+  (ground-a-pattern-rules))
+
+(define (ground-context-free-rules)
   (let* ((vardecl (TypedVariable
                     (Variable "$Rule")
                     (Type "DefinedSchemaNode")))
@@ -48,6 +65,50 @@
                               (List
                                 (Variable "$A")
                                 (Variable "$L")
+                                (DontExec (Variable "$Rule")))
+                              (Variable "$B"))))
+         (impl-consequent (preproof-of
+                            (List
+                              (Variable "$B")
+                              (Variable "$T"))))
+         (target (ImplicationScope
+                   impl-vardecl
+                   impl-antecedent
+                   impl-consequent))
+
+         ;; Instantiate the targets as required by icr-bc
+         (rules-to-targets (Bind
+                             vardecl
+                             (Member
+                               (Variable "$Rule")
+                               pln-rbs)
+                             target)))
+    (cog-bind rules-to-targets)))
+
+(define (ground-a-pattern-rules)
+  (let* ((vardecl (TypedVariable
+                    (Variable "$Rule")
+                    (Type "DefinedSchemaNode")))
+         (impl-vardecl (VariableList
+                         (Variable "$T")
+                         (TypedVariable
+                           (Variable "$A")
+                           (Type "DontExecLink"))
+                         (TypedVariable
+                           (Variable "$X")
+                           (Type "ConceptNode"))
+                         (TypedVariable
+                           (Variable "$B")
+                           (Type "DontExecLink"))))
+         (impl-antecedent (And
+                            (preproof-of
+                              (List
+                                (Variable "$A")
+                                (Variable "$T")))
+                            (expand
+                              (List
+                                (Variable "$A")
+                                (Inheritance (Concept "a") (Variable "$X"))
                                 (DontExec (Variable "$Rule")))
                               (Variable "$B"))))
          (impl-consequent (preproof-of

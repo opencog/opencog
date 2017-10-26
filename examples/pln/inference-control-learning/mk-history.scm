@@ -20,9 +20,9 @@
     (icl-cp history-as (cog-get-atoms-as trace-as 'ExecutionLink))
     (remove-dangling-atoms history-as)
 
-    (icl-logger-debug "Per Problem History AtomSpace:")
-    (icl-logger-debug-atomspace history-as)
-    
+    ;; (icl-logger-debug "Per Problem History AtomSpace:")
+    ;; (icl-logger-debug-atomspace history-as)
+
     history-as))
 
 ;; Apply proof-is-preproof rule to trace-as and copy the results to

@@ -1,7 +1,7 @@
 ;; Contain the main inference control learning experiment loop
 
 ;; Set parameters
-(define pss 20)                    ; Problem set size
+(define pss 100)                    ; Problem set size
 (define niter 2)                    ; Number of iterations
 (define piter 30)                   ; Number of iterations used for each problem
 
@@ -79,8 +79,8 @@
     (icl-logger-info "Remove dangling atoms from history-as")
     (remove-dangling-atoms history-as)
 
-    (icl-logger-debug "History AtomSpace:")
-    (icl-logger-debug-atomspace history-as)
+    ;; (icl-logger-debug "History AtomSpace:")
+    ;; (icl-logger-debug-atomspace history-as)
 
     ;; Build inference control rules for the next iteration
     (icl-logger-info "Build inference control rules from the inference history")
