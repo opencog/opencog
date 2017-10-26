@@ -263,7 +263,7 @@ HandleSeqSeq SuRealSCM::do_sureal_match(Handle h, bool use_cache)
 
         // assuming each InterpretationNode is only linked to one SetLink
         // and compare using arity
-        return qi[0]->getArity() < qj[0]->getArity();
+        return qi[0]->get_arity() < qj[0]->get_arity();
     };
 
     std::sort(keys.begin(), keys.end(), itprComp);

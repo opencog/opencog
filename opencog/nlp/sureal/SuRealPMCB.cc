@@ -800,7 +800,7 @@ bool SuRealPMCB::disjunct_match(const Handle& hPatWordNode, const Handle& hSolnW
 
             // dumb hacky way of checking of the connector is
             // a multi-connector
-            if (sourceConns.front()->getArity() == 3)
+            if (sourceConns.front()->get_arity() == 3)
                 hMultiConn = sourceConns.front();
 
             sourceConns.pop_front();
@@ -895,7 +895,7 @@ bool SuRealPMCB::initiate_search(PatternMatchEngine* pPME)
             size_t maxSize = 0;
             for (Handle& q : qISet)
             {
-                size_t s = q->getArity();
+                size_t s = q->get_arity();
                 if (s > maxSize) maxSize = s;
             }
 
