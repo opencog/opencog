@@ -1,7 +1,7 @@
 ;; Contain the main inference control learning experiment loop
 
 ;; Set parameters
-(define pss 100)                    ; Problem set size
+(define pss 50)                    ; Problem set size
 (define niter 2)                    ; Number of iterations
 (define piter 30)                   ; Number of iterations used for each problem
 
@@ -16,7 +16,7 @@
 ;; Set loggers levels
 (cog-logger-set-level! "info")
 (cog-logger-set-level! icl-logger "debug")
-(cog-logger-set-level! (cog-ure-logger) "info")
+(cog-logger-set-level! (cog-ure-logger) "debug")
 
 ;; Set loggers stdout
 ;; (cog-logger-set-stdout! #t)

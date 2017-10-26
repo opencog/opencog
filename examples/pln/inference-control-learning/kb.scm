@@ -3,14 +3,14 @@
 ;; letters:
 ;;
 ;; Inheritance (stv 1 1)
-;;   Concept "A" (stv 1/26 1)
-;;   Concept "B" (stv 2/26 1)
+;;   Concept "a" (stv 1/26 1)
+;;   Concept "b" (stv 2/26 1)
 ;;
 ;; ...
 ;;
 ;; Inheritance (stv 1 1)
-;;   Concept "Y" (stv 25/26 1)
-;;   Concept "Z" (stv 26/26 1)
+;;   Concept "y" (stv 25/26 1)
+;;   Concept "z" (stv 26/26 1)
 ;;
 ;; The concept strengths, 1/26 to 26/26, are defined to be consistent
 ;; with PLN semantics, otherwise rules like Inversion by come by
@@ -19,24 +19,24 @@
 ;;
 ;; One can infer the order between any 2 letters by chaining as many
 ;; deductions as necessary. On top of that there are shortcuts to
-;; infer the order of any pair starting with the letter A, using
+;; infer the order of any pair starting with the letter a, using
 ;; conditional instantiation.
 ;;
-;; First we need to know that concepts "A" to "Z" are letters
+;; First we need to know that concepts "a" to "z" are letters
 ;;
 ;; Member (stv 1 1)
-;;   Concept "A"
+;;   Concept "a"
 ;;   Concept "latin-alphabet"
 ;;
 ;; ...
 ;;
 ;; Member (stv 1 1)
-;;   Concept "Z"
-;;   Concept "upcase-latin-alphabet"
+;;   Concept "z"
+;;   Concept "latin-alphabet"
 ;;
 ;; Then either
 ;;
-;; 1. the following rule allows to infer that "A" is less or equal
+;; 1. the following rule allows to infer that "a" is less or equal
 ;; than (inherits from) any other letter
 ;;
 ;; ImplicationScope (stv 1 1)
@@ -45,9 +45,9 @@
 ;;     Type "ConceptNode"
 ;;   Member
 ;;     Variable "$X"
-;;     Concept "upcase-latin-alphabet"
+;;     Concept "latin-alphabet"
 ;;   Inheritance
-;;     Concept "A"
+;;     Concept "a"
 ;;     Variable "$X"
 ;;
 ;; 2. the following rule
@@ -69,20 +69,20 @@
 ;;     Variable "$X"
 ;;     Variable "$Y"
 ;;
-;; combined with the knowledge that an other letter different than A
-;; is after A
+;; combined with the knowledge that an other letter different than a
+;; is after a
 ;;
 ;; Evaluation (stv 1 1)
 ;;   Predicate "alphabetical-order"
 ;;   List
-;;     Concept "A"
-;;     Concept "B"
+;;     Concept "a"
+;;     Concept "b"
 ;; ...
 ;; Evaluation (stv 1 1)
 ;;   Predicate "alphabetical-order"
 ;;   List
-;;     Concept "A"
-;;     Concept "Z"
+;;     Concept "a"
+;;     Concept "z"
 ;;
 ;; This is should make the pattern miner free version of icl not yield
 ;; very good results. The pattern miner version should however yield
@@ -93,13 +93,13 @@
 
 (define (gen-knowledge-base)
   (gen-inheritance-contiguous-letters)
-  (gen-A-before-all-letters-stupid))
+  (gen-a-before-all-letters-stupid))
 
-(define (gen-A-before-all-letters-smart)
-  (gen-A-inherits-all-letters-smart-rule))
+(define (gen-a-before-all-letters-smart)
+  (gen-a-inherits-all-letters-smart-rule))
 
-(define (gen-A-before-all-letters-stupid)
-  (gen-A-before-all-letters-stupid-facts)
+(define (gen-a-before-all-letters-stupid)
+  (gen-a-before-all-letters-stupid-facts)
   (gen-X-is-before-Y-then-X-inherits-Y-rule))
 
 (define (gen-inheritance-contiguous-letters)
@@ -107,20 +107,20 @@
     (map gen-alphabet-letter-member letters)
     (map gen-inheritance-letter-pair (drop-right letters 1) (cdr letters))))
 
-(define (gen-A-inherits-all-letters-smart-rule)
+(define (gen-a-inherits-all-letters-smart-rule)
   (let* ((X (Variable "$X"))
-         (A (Concept "A"))
+         (a (Concept "a"))
          (ConceptT (Type "ConceptNode")))
     (ImplicationScope (stv 1 1)
       (TypedVariable X ConceptT)
-      (Member X upcase-latin-alphabet)
-      (Inheritance A X))))
+      (Member X latin-alphabet)
+      (Inheritance a X))))
 
-(define (gen-A-before-all-letters-stupid-facts)
+(define (gen-a-before-all-letters-stupid-facts)
   (let* ((letters (gen-letters))
-         (A (Concept "A"))
-         (A-before-letters (lambda (X) (gen-alphabetical-order-letter-pair A X))))
-    (map A-before-letters (cdr letters))))
+         (a (Concept "a"))
+         (a-before-letters (lambda (X) (gen-alphabetical-order-letter-pair a X))))
+    (map a-before-letters (cdr letters))))
 
 (define (gen-X-is-before-Y-then-X-inherits-Y-rule)
   (let* ((X (Variable "$X"))
@@ -139,11 +139,11 @@
 (define (gen-letter X i)
   (Concept (list->string (list X)) (stv (/ (+ i 1) 26) 1)))
 
-(define upcase-latin-alphabet
-  (Concept "upcase-latin-alphabet"))
+(define latin-alphabet
+  (Concept "latin-alphabet"))
 
 (define (gen-alphabet-letter-member X)
-  (Member (stv 1 1) X upcase-latin-alphabet))
+  (Member (stv 1 1) X latin-alphabet))
 
 (define (gen-inheritance-letter-pair X Y)
   (Inheritance (stv 1 1) X Y))
