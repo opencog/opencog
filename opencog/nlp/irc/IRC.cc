@@ -149,7 +149,7 @@ int IRC::start(const char* server, int port, const char* nick,
 
 	/* Ping every .. I dunno -- 5 minutes? */
 	optval = 300;
-	rc=setsockopt(irc_socket, IPPROTO_TCP, TCP_KEEPIDLE, &optval, optlen);
+	rc=setsockopt(irc_socket, IPPROTO_TCP, TCP_KEEPINTVL, &optval, optlen);
 	if (0 > rc)
 	{
 		perror("setsockopt()");
