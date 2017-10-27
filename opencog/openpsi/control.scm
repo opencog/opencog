@@ -18,15 +18,33 @@
 (load "utilities.scm")
 
 ; --------------------------------------------------------------
+(define psi-component-node
+  (ConceptNode (string-append psi-prefix-str "component")))
+
+; --------------------------------------------------------------
+(define (psi-component NAME)
+"
+  psi-component NAME VALUE
+
+  Create and return a ConceptNode that represents an OpenPsi engine driven
+  component. The NAME should be a string.
+"
+  (let* ((component-node (ConceptNode NAME)))
+    (InheritanceLink component-node psi-component-node)
+    component-node
+  )
+)
+
+; --------------------------------------------------------------
 (define (psi-set-updater! updater component-node)
 "
-  psi-set-updater! UPDATER COMPONENT-NODE
+  psi-set-updater! UPDATER COMPONENT
 
   Returns the alias node that represents the updater UPDATER.  An
   updater is an evaluatable atom that, when evaluated, updates the
   values for a given component.
 
-  The TAG is a demand/modulator node that the updater is being added to.
+  The COMPONENT is a component node that the updater is being added to.
 "
     (psi-set-functionality updater #t component-node "updater")
 )
@@ -37,7 +55,7 @@
   psi-get-updater COMPONENT
 
   Returns a list containing the updater for the given component-node COMPONENT.
-  Null is returned if there is no updater for TAG.
+  Null is returned if there is no updater for COMPONENT.
 "
     (psi-get-functionality component-node "updater")
 )
