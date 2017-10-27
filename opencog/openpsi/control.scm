@@ -46,7 +46,7 @@
 
   The COMPONENT is a component node that the updater is being added to.
 "
-    (psi-set-functionality updater #t component-node "updater")
+    (psi-set-func! updater #t component-node "updater")
 )
 
 ; --------------------------------------------------------------
@@ -57,7 +57,7 @@
   Returns a list containing the updater for the given component-node COMPONENT.
   Null is returned if there is no updater for COMPONENT.
 "
-    (psi-get-functionality component-node "updater")
+    (psi-func component-node "updater")
 )
 
 ; --------------------------------------------------------------

@@ -144,7 +144,8 @@
     ; Do action-selection.
     (map
         (lambda (d)
-        ;
+         ;TODO: Replace the updater with a hook? Maybe using Join/Parallel
+         ; Links?
             (let ((updater (psi-get-updater d)))
                 ; Run the updater for the demand.
                 (if (not (null? updater))
