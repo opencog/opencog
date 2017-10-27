@@ -131,24 +131,24 @@
 ;; )
 ;;
 ; ----------------------------------------------------------------------
-(define (psi-set-action-selector exec-term demand-node)
+(define (psi-set-action-selector exec-term component-node)
 "
   psi-set-action-selector EXEC-TERM DEMAND-NODE - Sets EXEC-TERM as
-  the function used to select rules for the DEMAND-NODE.
+  the function used to select rules for the COMPONENT-NODE.
 
   EXEC-TERM should be an executable atom.
-  DEMAND-NODE should be any demand that has been defined.
+  COMPONENT-NODE should be any component that has been defined.
 "
-    (psi-set-functionality exec-term #f demand-node "action-selector")
+    (psi-set-functionality exec-term #f component-node "action-selector")
 )
 
 ; ----------------------------------------------------------------------
-(define (psi-get-action-selector demand-node)
+(define (psi-get-action-selector component-node)
 "
-  psi-get-action-selector DEMAND-NODE - Gets the action-selector of
-  DEMAND-NODE.
+  psi-get-action-selector COMPONENT-NODE - Gets the action-selector of
+  COMPONENT-NODE.
 "
-    (psi-get-functionality demand-node "action-selector")
+    (psi-get-functionality component-node "action-selector")
 )
 
 ; --------------------------------------------------------------

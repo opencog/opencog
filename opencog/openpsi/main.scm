@@ -136,11 +136,15 @@
     (cog-logger-debug opl "Taking one psi-step, loop-count = ~a" psi-loop-count)
 
     ; Run the controller that updates the weight.
+    ; TODO: Should this be a before selection hook? The real reason is that
+    ; the other components might want to specify other actions to be
+    ; undertaken.
     (psi-controller-update-weights)
 
     ; Do action-selection.
     (map
         (lambda (d)
+        ;
             (let ((updater (psi-get-updater d)))
                 ; Run the updater for the demand.
                 (if (not (null? updater))
@@ -154,6 +158,9 @@
     )
 
     ; Do garbage collection. This is a replacement to (run-behavior-tree-gc)
+    ; TODO: Each component must clean after itself or have a separate
+    ; component that does that. So, remove this. Should this be an after
+    ; selection hook?
     (when (equal? 0 (modulo psi-loop-count 1000))
         (cog-map-type (lambda (a) (cog-extract a) #f) 'SetLink)
         (cog-map-type (lambda (a) (cog-extract a) #f) 'ListLink)

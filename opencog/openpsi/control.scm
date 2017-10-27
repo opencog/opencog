@@ -18,28 +18,28 @@
 (load "utilities.scm")
 
 ; --------------------------------------------------------------
-(define (psi-set-updater! updater tag-node)
+(define (psi-set-updater! updater component-node)
 "
-  psi-set-updater! UPDATER TAG
+  psi-set-updater! UPDATER COMPONENT-NODE
 
   Returns the alias node that represents the updater UPDATER.  An
   updater is an evaluatable atom that, when evaluated, updates the
-  values for a given demand/modulator.
+  values for a given component.
 
   The TAG is a demand/modulator node that the updater is being added to.
 "
-    (psi-set-functionality updater #t tag-node "updater")
+    (psi-set-functionality updater #t component-node "updater")
 )
 
 ; --------------------------------------------------------------
-(define (psi-get-updater tag-node)
+(define (psi-get-updater component-node)
 "
-  psi-get-updater TAG
+  psi-get-updater COMPONENT
 
-  Returns a list containing the updater for the given tag-node TAG.
+  Returns a list containing the updater for the given component-node COMPONENT.
   Null is returned if there is no updater for TAG.
 "
-    (psi-get-functionality tag-node "updater")
+    (psi-get-functionality component-node "updater")
 )
 
 ; --------------------------------------------------------------

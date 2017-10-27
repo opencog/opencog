@@ -123,6 +123,7 @@ there are 100K rules!
     and there is no guarantee that the relationship between Types is
     static as a result of which the hash-value could change.
 "
+; TODO: Change to value
     (EvaluationLink
         psi-rule-name-predicate-node
         (ListLink
