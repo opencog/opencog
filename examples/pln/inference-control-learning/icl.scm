@@ -79,9 +79,6 @@
     (icl-logger-info "Remove dangling atoms from history-as")
     (remove-dangling-atoms history-as)
 
-    ;; (icl-logger-debug "History AtomSpace:")
-    ;; (icl-logger-debug-atomspace history-as)
-
     ;; Build inference control rules for the next iteration
     (icl-logger-info "Build inference control rules from the inference history")
     (mk-control-rules)

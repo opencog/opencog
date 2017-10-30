@@ -82,8 +82,13 @@
                              (Member
                                (Variable "$Rule")
                                pln-rbs)
-                             target)))
-    (cog-bind rules-to-targets)))
+                             target))
+         (results (cog-bind rules-to-targets)))
+
+    ;; Remove query to avoid then confounding it with a control rule
+    (extract-hypergraph rules-to-targets)
+
+    results))
 
 (define (ground-a-pattern-rules)
   (let* ((vardecl (TypedVariable
@@ -94,9 +99,7 @@
                          (TypedVariable
                            (Variable "$A")
                            (Type "DontExecLink"))
-                         (TypedVariable
-                           (Variable "$X")
-                           (Type "ConceptNode"))
+                         (Variable "$X")
                          (TypedVariable
                            (Variable "$B")
                            (Type "DontExecLink"))))
@@ -108,7 +111,9 @@
                             (expand
                               (List
                                 (Variable "$A")
-                                (Inheritance (Concept "a") (Variable "$X"))
+                                (Inheritance
+                                  (Concept "a")
+                                  (Variable "$X"))
                                 (DontExec (Variable "$Rule")))
                               (Variable "$B"))))
          (impl-consequent (preproof-of
@@ -126,8 +131,13 @@
                              (Member
                                (Variable "$Rule")
                                pln-rbs)
-                             target)))
-    (cog-bind rules-to-targets)))
+                             target))
+         (results (cog-bind rules-to-targets)))
+
+    ;; Remove query to avoid then confounding it with a control rule
+    (extract-hypergraph rules-to-targets)
+
+    results))
 
 (define (evaluate-antecedents)
   ;; Load rule base for producing evaluating antecedents
@@ -136,14 +146,14 @@
   (let* ((impl-antecedent (And
                             (preproof-of
                               (List
-                                (Variable "$A")
+                                (DontExec (Variable "$A"))
                                 (Variable "$T")))
                             (expand
                               (List
-                                (Variable "$A")
+                                (DontExec (Variable "$A"))
                                 (Variable "$L")
                                 (DontExec (Variable "$Rule")))
-                              (Variable "$B")))))
+                              (DontExec (Variable "$B"))))))
     ;; Evaluate all antecedents
     (pp-icr-bc impl-antecedent)))
 
@@ -153,25 +163,32 @@
   ;; Load rule base for evaluating the control rules via direct evaluation
   (load "icr-rb.scm")
 
-  (let* ((control-rules-target (Quote
+  (let* ((control-rules-vardecl (VariableList
+                                  (TypedVariable
+                                    (Variable "$impl-vardecl")
+                                    (Type "VariableList"))
+                                  (TypedVariable
+                                    (Variable "$preproof-A-args")
+                                    (Type "ListLink"))
+                                  (TypedVariable
+                                    (Variable "$expand-inputs")
+                                    (Type "ListLink"))
+                                  (Variable "$expand-output")
+                                  (TypedVariable
+                                    (Variable "$preproof-B-args")
+                                    (Type "ListLink"))))
+         (control-rules-target (Quote
                                  (ImplicationScope
                                    (Unquote
                                      (Variable "$impl-vardecl"))
                                    (And
                                      (preproof-of
-                                       (List
-                                         (Unquote (Variable "$A"))
-                                         (Unquote (Variable "$T"))))
+                                       (Unquote (Variable "$preproof-A-args")))
                                      (expand
-                                       (List
-                                         (Unquote (Variable "$A"))
-                                         (Unquote (Variable "$L"))
-                                         (Unquote (Variable "$R")))
-                                       (Unquote (Variable "$B"))))
+                                       (Unquote (Variable "$expand-inputs"))
+                                       (Unquote (Variable "$expand-output"))))
                                    (preproof-of
-                                     (List
-                                       (Unquote (Variable "$B"))
-                                       (Unquote (Variable "$T"))))))))
+                                     (Unquote (Variable "$preproof-B-args")))))))
 
     ;; Produce the inference control rules
-    (icr-bc control-rules-target)))
+    (icr-bc control-rules-target #:vardecl control-rules-vardecl)))
