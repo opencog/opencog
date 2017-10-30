@@ -112,6 +112,8 @@
     ((has-match? "^[ ]*\\^" str) (result:suffix '^ location #f))
     ((has-match? "^[ ]*\\[" str) (result:suffix 'LSBRACKET location #f))
     ((has-match? "^[ ]*]" str) (result:suffix 'RSBRACKET location #f))
+    ((has-match? "^[ ]*\\{" str) (result:suffix 'LBRACE location #f))
+    ((has-match? "^[ ]*}" str) (result:suffix 'RBRACE location #f))
     ((has-match? "^[ ]*<<" str) (result:suffix '<< location #f))
     ((has-match? "^[ ]*>>" str) (result:suffix '>> location #f))
     ; For restarting matching position -- "< *"
@@ -200,6 +202,7 @@
     ; NOTE
     ; LSBRACKET RSBRACKET = Square Brackets []
     ; LPAREN RPAREN = parentheses ()
+    ; LBRACE RBRACE = Braces {}
     ; DQUOTE = Double quote "
     ; ID = Identifier or Marking
     ; DICTKEY = Dictionary Keyword Sets
@@ -210,8 +213,8 @@
     (CONCEPT TOPIC RESPONDERS REJOINDERS GAMBIT GOAL RGOAL COMMENT SAMPLE_INPUT
      WHITESPACE
       (right: LPAREN LSBRACKET << ID VAR * ^ < LEMMA LITERAL NUM DICTKEY
-              STRING *~n *n UVAR MVAR MOVAR EQUAL NOT RESTART)
-      (left: RPAREN RSBRACKET >> > DQUOTE)
+              STRING *~n *n UVAR MVAR MOVAR EQUAL NOT RESTART LBRACE)
+      (left: RPAREN RSBRACKET RBRACE >> > DQUOTE)
       (right: ? CR NEWLINE)
     )
 
@@ -348,6 +351,7 @@
       (user-variable) : $1
       (function) : $1
       (choice) : $1
+      (optional) : $1
       (variable ? concept) :
         (format #f "(cons 'is_member (list ~a ~a))" $1 $3)
       (sequence) : $1
@@ -411,6 +415,11 @@
 
     (concept
       (ID) : (format #f "(cons 'concept \"~a\")" $1)
+    )
+
+    (optional
+      (LBRACE choice-terms RBRACE) :
+        (format #f "(cons 'optional (list ~a))" $2)
     )
 
     (choice
