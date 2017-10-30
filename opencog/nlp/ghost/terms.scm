@@ -143,13 +143,19 @@
   "Occurrence of a function in the context of a rule.
    The Scheme function named NAME should have already been defined."
   ; TODO: Check to make sure the function has been defined
-  (Evaluation (GroundedPredicate (string-append "scm: " NAME)) (List ARGS)))
+  (Evaluation (GroundedPredicate (string-append "scm: " NAME))
+              (List (map (lambda (a) (if (equal? 'GlobNode (cog-type a))
+                                         (List a) a))
+                         ARGS))))
 
 (define (action-function NAME ARGS)
   "Occurrence of a function in the action of a rule.
    The Scheme function named NAME should have already been defined."
   ; TODO: Check to make sure the function has been defined
-  (ExecutionOutput (GroundedSchema (string-append "scm: " NAME)) (List ARGS)))
+  (ExecutionOutput (GroundedSchema (string-append "scm: " NAME))
+                   (List (map (lambda (a) (if (equal? 'GlobNode (cog-type a))
+                                              (List a) a))
+                              ARGS))))
 
 (define-public (ghost-pick-action ACTIONS)
   "The actual Scheme function being called by the GroundedSchemaNode
