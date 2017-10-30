@@ -419,7 +419,7 @@
 
     (optional
       (LBRACE choice-terms RBRACE) :
-        (format #f "(cons 'optional (list ~a))" $2)
+        (format #f "(cons 'optionals (list ~a))" $2)
     )
 
     (choice

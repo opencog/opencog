@@ -87,7 +87,7 @@
                         (equal? 'wildcard (car (first prev))))
                    (cons term (cdr prev)))
                   ; Same as the above, but for optionals
-                  ((and (equal? 'optional (car term))
+                  ((and (equal? 'optionals (car term))
                         (equal? 'wildcard (car (first prev))))
                    (cons term (cdr prev)))
                   ; Similarly if there is a wildcard followed by a variable
@@ -100,7 +100,7 @@
                    prev)
                   ; Same as the above, but for optionals
                   ((and (equal? 'wildcard (car term))
-                        (equal? 'optional (car (first prev))))
+                        (equal? 'optionals (car (first prev))))
                    prev)
                   ; Otherwise accept and append it to the list
                   (else (cons term prev))))
@@ -135,8 +135,8 @@
              (update-lists (concept (cdr t))))
             ((equal? 'choices (car t))
              (update-lists (choices (cdr t))))
-            ((equal? 'optional (car t))
-             (update-lists (optional (cdr t))))
+            ((equal? 'optionals (car t))
+             (update-lists (optionals (cdr t))))
             ((equal? 'negation (car t))
              (update-lists (negation (cdr t))))
             ((equal? 'wildcard (car t))
