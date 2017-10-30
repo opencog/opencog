@@ -105,6 +105,35 @@
           (list g1)
           (list g2))))
 
+(define-public (ghost-optionals? OPTIONALS . GRD)
+  "Check if the value grounded for the GlobNode is either empty, or
+   a member of the list of optional words."
+  (cog-logger-debug ghost-logger
+    "In ghost-optionals? OPTIONALS: ~aGRD: ~a" OPTIONALS GRD)
+  (if (null? GRD)
+      (stv 1 1)
+      (let* ((opts (cog-outgoing-set OPTIONALS))
+             (cpts (append-map get-members (cog-filter 'ConceptNode opts))))
+            (if (is-member? GRD (append opts cpts))
+                (stv 1 1)
+                (stv 0 1)))))
+
+(define (optionals TERMS)
+  "Occurrence of a list of optional words."
+  (let ((g1 (Glob (gen-var "optionals" #t)))
+        (g2 (Glob (gen-var "optionals" #f)))
+        (tlength (term-length TERMS)))
+    (list (list (TypedVariable g1 (TypeSet (Type "WordNode")
+                                  (Interval (Number 0)
+                                            (Number tlength))))
+                (TypedVariable g2 (TypeSet (Type "WordNode")
+                                  (Interval (Number 0)
+                                            (Number tlength)))))
+          (list (Evaluation (GroundedPredicate "scm: ghost-optionals?")
+                            (List (List (terms-to-atomese TERMS)) g1)))
+          (list g1)
+          (list g2))))
+
 (define-public (ghost-negation? . TERMS)
   "Check if the input sentence has none of the terms specified."
   (let* ; Get the raw text input
