@@ -145,6 +145,12 @@
     ((has-match? "^[ ]*[0-9]+[0-9.]*" str)
       (result:suffix 'NUM location
         (string-trim (match:substring current-match))))
+    ((has-match? "^[ ]*[|]" str)
+     (result:suffix 'VLINE location
+        (string-trim (match:substring current-match))))
+    ((has-match? "^[ ]*," str)
+     (result:suffix 'COMMA location
+        (string-trim (match:substring current-match))))
     ; This should always be near the end, because it is broadest of all.
     ((has-match? "^[ \t]*[~'.,_!?0-9a-zA-Z-]+" str)
         (result:suffix 'STRING location
@@ -210,10 +216,11 @@
     ; MVAR = Match Variables
     ; MOVAR = Match Variables grounded in their original words
     ; ? = Comparison tests
+    ; VLINE = Vertical Line |
     (CONCEPT TOPIC RESPONDERS REJOINDERS GAMBIT GOAL RGOAL COMMENT SAMPLE_INPUT
      WHITESPACE
       (right: LPAREN LSBRACKET << ID VAR * ^ < LEMMA LITERAL NUM DICTKEY
-              STRING *~n *n UVAR MVAR MOVAR EQUAL NOT RESTART LBRACE)
+              STRING *~n *n UVAR MVAR MOVAR EQUAL NOT RESTART LBRACE VLINE COMMA)
       (left: RPAREN RSBRACKET RBRACE >> > DQUOTE)
       (right: ? CR NEWLINE)
     )
@@ -370,6 +377,7 @@
     (action-pattern
       (?) : "(cons 'str \"?\")"
       (NOT) : "(cons 'str \"!\")"
+      (COMMA) : "(cons 'str \",\")"
       (DQUOTE) : "(cons 'str \"\\\"\")"
       (LEMMA) : (format #f "(cons 'str \"~a\")" $1)
       (LITERAL) : (format #f "(cons 'str \"~a\")" $1)
@@ -385,6 +393,7 @@
       (UVAR EQUAL variable-grounding) :
         (format #f "(cons 'assign_uvar (list \"~a\" ~a))" $1 $3)
       (function) : $1
+      (tts-feature) : $1
       (LSBRACKET action-patterns RSBRACKET) :
         (format #f "(cons 'action-choices (list ~a))" $2)
     )
@@ -564,6 +573,23 @@
       (concept) : $1
       (choice) : $1
       (negation) : $1
+    )
+
+    ; For things like: |pause|, |vocal,27|, and |worry,$med,3.0| etc
+    (tts-feature
+      (VLINE tts-members VLINE) :
+        (format #f "(cons 'tts-feature (list ~a))" $2)
+    )
+
+    (tts-members
+      (tts-member) : $1
+      (tts-members tts-member) : (format #f "~a ~a" $1 $2)
+    )
+
+    (tts-member
+      (name) : $1
+      (NUM) : $1
+      (UVAR) : (format #f "(cons 'get_uvar \"~a\")" $1)
     )
   )
 )
