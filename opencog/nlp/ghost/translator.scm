@@ -127,6 +127,8 @@
              (update-lists (concept (cdr t))))
             ((equal? 'choices (car t))
              (update-lists (choices (cdr t))))
+            ((equal? 'optional (car t))
+             (update-lists (optional (cdr t))))
             ((equal? 'negation (car t))
              (update-lists (negation (cdr t))))
             ((equal? 'wildcard (car t))
