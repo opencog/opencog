@@ -578,34 +578,34 @@ Let's assume we have k active control rules for inference rule R (a
 control rule is active if its context is satisfied).
 
 ```
-ICR1 : C1 & R -> S <TV1>
+CR1 : C1 & R -> S <TV1>
 ...
-ICRk : Ck & R -> S <TVk>
+CRk : Ck & R -> S <TVk>
 ```
 
-where `->` compactly represent an `ImplicationScopeLink` as described
+where `->` compactly represents an `ImplicationScopeLink` as described
 above.
 
-`ICRi` expresses that in context `Ci` chosing `R` will produce a
+`CRi` expresses that in context `Ci` chosing `R` will produce a
 preproof of our final target with truth value `TVi`. `S` stands for
 Success. One way of doing that is to use a resource bound variation of
 Solomonoff's Universal Operator Induction which, reformulated to fit
 our problem, looks like
 
 ```
-P(S|R) = Sum_i=0^k P(ICRi) * ICRi(S|R) * Prod_j ICRi(Sj|Rj) / nt
+P(S|R) = Sum_i=0^k P(CRi) * CRi(S|R) * Prod_j CRi(Sj|Rj) / nt
 ```
 
-* `P(S|R)` is the probability that picking up `R` in this instance
-  will produce a preproof of our final target.
-* `P(ICRi)` is the prior of `ICRi`.
-* `ICRj(S|R)` is the probability of success upon choosing `R`
-  according to `ICRi`.
-* The last term `Prod_j ICRi(Sj|Rj)` is the probability that `ICRi`
-  explains our corpus of past inferences.
+* `P(S|R)` is the probability that picking up `R` will produce a
+  preproof of our final target.
+* `P(CRi)` is the prior of `CRi`.
+* `CRj(S|R)` is the probability of success upon choosing `R`
+  according to `CRi`.
+* The last term `Prod_j CRi(Sj|Rj)` is the probability that `CRi`
+  explains the corpus of past inferences.
 * `nt` is the normalizing term, defined as
 ```
-nt = Sum_i=0^n P(ICRi) * Prod_j ICRi(Sj|Rj)
+nt = Sum_i=0^n P(CRi) * Prod_j CRi(Sj|Rj)
 ```
 
 Since it is resource bound we cannot consider all computable rules.
@@ -621,42 +621,69 @@ Generally, one can do that by building a cumulative distribution
 function instead of a probability expectation.
 
 ```
-CDF_P(S|R)(x) = Sum_i_in_{ICRi(S|R)<=x} P(ICRi) * Prod_j ICRi(Sj|Rj) / nt
+CDF_P(S|R)(x) = Sum_i_in_{CRi(S|R)<=x} P(CRi) * Prod_j CRi(Sj|Rj) / nt
 ```
 
-However our models `ICRi` calculate TVs (thus pdfs), not
-probabilities, making `ICRi(S|R)<=x` ill-defined. To remedy that we
-can split `ICRi` into a continuous ensemble of models, each of which
-with a probability from 0 to 1, not a TV, associated to it. We can
-then use this ensemble as extra models and use the same formula above
-to calculate the cdf. Luckily it turns out that the TV corresponding
-to `ICRi` is equal to the cdf of `Prod_j ICRi(Sj|Rj)` up to a
-multiplicative constant, so in fact the cdf of `P(S|R)` is merely a
-weighted sum of the cdfs of `ICRi`
+However our models `CRi` calculate TVs (thus pdfs), not probabilities,
+thus `CRi(S|R)<=x` is meaningless. To remedy that we can split `CRi`
+into a continuous ensemble of models, each of which has a probability
+`p` varying from 0 to 1, indicating the probability of `S` conditioned
+by `R`. We can then use this ensemble as extra models and use the same
+formula above to calculate the cdf.
+
+TODO
 
 ```
-CDF_P(S|R) = Sum_i=0^n alpha_i * CDF_ICRi(S|R) * P(ICRi) / nt
+CDF_P(S|R)(x) = Sum_i Int_0^x P(CRi) * Prod_j CDF_CRi(Sj|Rj) * dp / nt
 ```
+
+`P(CRi)` is independent and can be taken out of the integral
+
+```
+CDF_P(S|R)(x) = Sum_i P(CRi) Int_0^x p * p^X*(1-p)^(N-X) * dp / nt
+```
+
+Luckily it turns out that the TV corresponding to `CRi` is equal to
+the cdf of `Prod_j CRi(Sj|Rj)` up to a multiplicative constant, so in
+fact the cdf of `P(S|R)` is merely a weighted sum of the cdfs of `CRi`
+
+```
+CDF_P(S|R)(x) = Sum_i P(CRi) Int_0^x p * p^X*(1-p)^(N-X) * dp / nt
+```
+
+
+```
+Int_0^x [ (PDF_CRi(S|R)(p) dp) * P(CRi) * Prod_j PDF_CRi(Sj|Rj)(p) * dp / nt
+CDF_P(S|R)(x) = Sum_i Int_0^x [ (PDF_CRi(S|R)(p) dp) * P(CRi) * Prod_j PDF_CRi(Sj|Rj)(p) * dp / nt
+CDF_P(S|R)(x) = Sum_i P(CRi) Int_0^x PDF_CRi(S|R)(p) * Prod_j PDF_CRi(Sj|Rj)(p) * dp / nt
+CDF_P(S|R)(x) = Sum_i P(CRi) Int_0^x PDF_CRi(S|R)(p) * Prod_j PDF_CRi(Sj|Rj)(p) * dp / nt
+```
+
+```
+CDF_P(S|R) = Sum_i=0^n alpha_i * CDF_CRi(S|R) * P(CRi) / nt
+```
+
+
 
 where
 
 ```
-alpha_i * CDF_ICRi(S|R)(x) = Int_0^x p^X*(1-p)^(N-X) dp
+alpha_i * CDF_CRi(S|R)(x) = Int_0^x p^X*(1-p)^(N-X) dp
 ```
 
 `N` is the number of observations and `X` the positive count. Which
 corresponds to, up to a multiplicative constant, the second order
 distribution representing a TV as defined in Section 4.5.1 of the PLN
-book. So up to a multiplicative constant `FCS_ICRi(S|R)` both
-corresponds to the TV of `ICRi(S|R)` and `Prod_j
-ICRi(Sj|Rj)`. According equation 2 in Section 4.5.1 of the PLN book
+book. So up to a multiplicative constant `FCS_CRi(S|R)` both
+corresponds to the TV of `CRi(S|R)` and `Prod_j
+CRi(Sj|Rj)`. According equation 2 in Section 4.5.1 of the PLN book
 this constant factor is
 
 ```
 (N+1)*(choose N X)
 ```
 
-so that `CDF_ICRi(S|R)(1) = 1`. To cancel this factor out we must
+so that `CDF_CRi(S|R)(1) = 1`. To cancel this factor out we must
 choose `alpha_i` such that
 
 ```
@@ -666,14 +693,14 @@ alpha_i = 1 / (N+1)*(choose N X)
 Which gives us a normalizing factor of
 
 ```
-nt = Sum_i=0^n P(ICRi) / ((Ni+1)*(choose Ni Xi))
+nt = Sum_i=0^n P(CRi) / ((Ni+1)*(choose Ni Xi))
 ```
 
 So the final equation is
 
 ```
-CDF_P(S|R) = Sum_i=0^n CDF_ICRi(S|R) * P(ICRi) / ((Ni+1)*(choose Ni Xi))
-           / Sum_i=0^n P(ICRi) / ((Ni+1)*(choose Ni Xi))
+CDF_P(S|R) = Sum_i=0^n CDF_CRi(S|R) * P(CRi) / ((Ni+1)*(choose Ni Xi))
+           / Sum_i=0^n P(CRi) / ((Ni+1)*(choose Ni Xi))
 ```
 
 This assumes that all observations are certain (based on perfect
@@ -686,7 +713,7 @@ the convolution products of their pdfs. However it is suspected that
 the convolution products of 2 beta-distributions is a
 beta-distribution, which should simplify things a lot.
 
-There is also the problem that `ICRi(Sj|Rj)` is undefined for some
+There is also the problem that `CRi(Sj|Rj)` is undefined for some
 observations. TODO: assume that the algorithmic complexity of the
 complete operator is
 
