@@ -587,8 +587,9 @@
     )
 
     (tts-member
-      (name) : $1
-      (NUM) : $1
+      (COMMA) : ""
+      (name) : (format #f "(cons 'str \"~a\")" $1)
+      (NUM) : (format #f "(cons 'str \"~a\")" $1)
       (UVAR) : (format #f "(cons 'get_uvar \"~a\")" $1)
     )
   )
