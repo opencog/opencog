@@ -72,6 +72,9 @@ ImplicationScope (stv 1 1)
     Variable "$Y"
 ```
 
+TODO add the z pattern, that when is Inheritance X z, then using
+conditional instantiation is worthless.
+
 Rule-base
 ---------
 
