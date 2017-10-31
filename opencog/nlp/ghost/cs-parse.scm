@@ -389,6 +389,9 @@
       ; e.g. $username=Bob
       (UVAR EQUAL name) :
         (format #f "(cons 'assign_uvar (list \"~a\" (cons 'str \"~a\")))" $1 $3)
+      ; e.g. $length=1
+      (UVAR EQUAL NUM) :
+        (format #f "(cons 'assign_uvar (list \"~a\" (cons 'str \"~a\")))" $1 $3)
       ; e.g. $username='_0
       (UVAR EQUAL variable-grounding) :
         (format #f "(cons 'assign_uvar (list \"~a\" ~a))" $1 $3)
@@ -471,6 +474,8 @@
     (user-variable
       (UVAR) : (format #f "(cons 'uvar_exist \"~a\")" $1)
       (UVAR EQUAL name) :
+        (format #f "(cons 'uvar_equal (list \"~a\" \"~a\"))" $1 $3)
+      (UVAR EQUAL NUM) :
         (format #f "(cons 'uvar_equal (list \"~a\" \"~a\"))" $1 $3)
     )
 
