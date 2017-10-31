@@ -168,6 +168,21 @@
         (list g1)
         (list g2))))
 
+(define-public (ghost-tts-feature . ARGS)
+  "Support features like |worry,$med,3.0| that exist in the current
+   rule base. The only reason of parsing and restructing the feature
+   instead of just sending it out as a string is because there may
+   be variables in it -- e.g. $med, and we will have to get the value
+   of it before sending the whole thing out.
+   The TTS server will handle the rest afterwards."
+  ; TODO: Should be handled in OpenCog internally?
+  (Word (string-append "|" (string-join (map cog-name ARGS) ",") "|")))
+
+(define (tts-feature ARGS)
+  "Occurrence of a TTS feature, like a pause or change of tone etc."
+  (ExecutionOutput (GroundedSchema "scm: ghost-tts-feature")
+                   (List ARGS)))
+
 (define (context-function NAME ARGS)
   "Occurrence of a function in the context of a rule.
    The Scheme function named NAME should have already been defined."

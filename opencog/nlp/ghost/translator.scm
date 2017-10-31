@@ -251,6 +251,9 @@
               ((equal? 'function (car n))
                (if (equal? "reuse" (cadr n)) (set! reuse #t))
                (action-function (cadr n) (to-atomese (cddr n))))
+              ; TTS feature
+              ((equal? 'tts-feature (car n))
+               (tts-feature (to-atomese (cdr n))))
               (else (Word (cdr n)))))
         actions)
       (if (null? choices)
