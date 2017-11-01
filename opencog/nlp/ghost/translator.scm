@@ -277,9 +277,12 @@
         (remove (lambda (sg) (any (lambda (g) (equal? (car sg) (car g))) GOAL))
                 shared-goals))))
 
-(define (create-rule PATTERN ACTION GOAL NAME)
-  "Top level translation function. Pattern is a quoted list of terms,
-   and action is a quoted list of actions or a single action."
+(define* (create-rule PATTERN ACTION GOAL NAME #:optional (TYPE 'Responder))
+  "Top level translation function. PATTERN, ACTION, and GOAL are the basic
+   components of a psi-rule, correspond to context, procedure, and goal
+   respectively. NAME is like a label of a rule, so that one can reference
+   this rule by using it. TYPE is a grouping idea from ChatScript, e.g.
+   responders, rejoinders, gambits etc."
   (cog-logger-debug "In create-rule\nPATTERN = ~a\nACTION = ~a" PATTERN ACTION)
   (catch #t
     (lambda ()

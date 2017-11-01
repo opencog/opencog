@@ -48,6 +48,9 @@
   ghost-logger
 )
 
+;; --------------------
+;; For rule parsing
+
 ; When set, all the rules created will be under this topic
 (define rule-topic '())
 
@@ -57,11 +60,14 @@
 ; Keep a record of the variables, if any, found in the pattern of a rule
 (define pat-vars '())
 
-; Keep a record of the value assigned to the user variables that authors defined
-(define uvars '())
+;; --------------------
+;; For rule matching
 
 ; Keep a record of the lemmas we have seen, and it serves as a cache as well
 (define lemma-alist '())
+
+; Keep a record of the value assigned to the user variables that authors defined
+(define uvars '())
 
 ; Keep a record of the most recent outputs generated
 (define ghost-result '())
