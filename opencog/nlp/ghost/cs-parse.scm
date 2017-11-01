@@ -290,25 +290,45 @@
           (eval-string (string-append "(list " $4 ")"))
           (eval-string (string-append "(list " $5 ")"))
           (eval-string (string-append "(list " $1 ")"))
-          $3)
+          $3 $2)
       (rule-goal RESPONDERS context action) :
         (create-rule
           (eval-string (string-append "(list " $3 ")"))
           (eval-string (string-append "(list " $4 ")"))
           (eval-string (string-append "(list " $1 ")"))
-          "")
+          "" $2)
       (RESPONDERS name context action) :
         (create-rule
           (eval-string (string-append "(list " $3 ")"))
           (eval-string (string-append "(list " $4 ")"))
-          (list) $2)
+          (list) $2 $1)
       (RESPONDERS context action) :
         (create-rule
           (eval-string (string-append "(list " $2 ")"))
           (eval-string (string-append "(list " $3 ")"))
-          (list) "")
+          (list) "" $1)
+      (rule-goal REJOINDERS name context action) :
+        (create-rule
+          (eval-string (string-append "(list " $4 ")"))
+          (eval-string (string-append "(list " $5 ")"))
+          (eval-string (string-append "(list " $1 ")"))
+          $3 $2)
+      (rule-goal REJOINDERS context action) :
+        (create-rule
+          (eval-string (string-append "(list " $3 ")"))
+          (eval-string (string-append "(list " $4 ")"))
+          (eval-string (string-append "(list " $1 ")"))
+          "" $2)
+      (REJOINDERS name context action) :
+        (create-rule
+          (eval-string (string-append "(list " $3 ")"))
+          (eval-string (string-append "(list " $4 ")"))
+          (list) $2 $1)
       (REJOINDERS context action) :
-        (format #f "\nrejoinder: ~a\n~a\n~a" $1 $2 $3)
+        (create-rule
+          (eval-string (string-append "(list " $2 ")"))
+          (eval-string (string-append "(list " $3 ")"))
+          (list) "" $1)
       (GAMBIT context action) : (format #f "gambit: ~a ~a" $2 $3)
       (GAMBIT action) : (format #f "gambit: ~a" $2)
     )
