@@ -324,12 +324,21 @@
                               (equal? #\? TYPE))
                           (cog-set-value! rule
                             ghost-rule-type (StringValue "responder"))
+                          (set! rule-rank (+ rule-rank 1))
+                          (cog-set-value! rule
+                            ghost-rank (FloatValue rule-rank))
                           (add-to-rule-lists 0 rule))
                          ; For gambits
-                         ((or (equal? #\r TYPE)
-                              (equal? #\t TYPE))
+                         ((equal? #\r TYPE)
+                          (cog-set-value! rule
+                            ghost-rule-type (StringValue "random gambit"))
+                          (add-to-rule-lists 0 rule))
+                         ((equal? #\t TYPE)
                           (cog-set-value! rule
                             ghost-rule-type (StringValue "gambit"))
+                          (set! rule-rank (+ rule-rank 1))
+                          (cog-set-value! rule
+                            ghost-rank (FloatValue rule-rank))
                           (add-to-rule-lists 0 rule))
                          ; For rejoinders
                          ; Rejoinders can be nested, a = level 1, b = level 2... etc
@@ -394,8 +403,9 @@
   (set! rule-topic (psi-demand (ghost-prefix TOPIC-NAME)))
   (Inheritance rule-topic ghost-topic)
 
-  ; Reset the topic-level goals
+  ; Reset the topic-level goals and the rank
   (set! shared-goals '())
+  (set! rule-rank 0)
 
   ; The set of keywords associate with the topic
   (for-each (lambda (kw) (Member kw rule-topic)) (terms-to-atomese KEYWORDS))
