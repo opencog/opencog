@@ -18,24 +18,6 @@
 (load "utilities.scm")
 
 ; --------------------------------------------------------------
-(define psi-component-node
-  (ConceptNode (string-append psi-prefix-str "component")))
-
-; --------------------------------------------------------------
-(define (psi-component NAME)
-"
-  psi-component NAME VALUE
-
-  Create and return a ConceptNode that represents an OpenPsi engine driven
-  component. The NAME should be a string.
-"
-  (let* ((component-node (ConceptNode NAME)))
-    (InheritanceLink component-node psi-component-node)
-    component-node
-  )
-)
-
-; --------------------------------------------------------------
 (define (psi-set-updater! component-node updater)
 "
   psi-set-updater! COMPONENT UPDATER
@@ -45,7 +27,7 @@
 
   The COMPONENT is a component node that the updater is being added to.
 "
-    (psi-set-func! updater #t component-node "updater")
+    (psi-set-func! updater "#t" component-node "updater")
 )
 
 ; --------------------------------------------------------------

@@ -139,7 +139,7 @@
   EXEC-TERM should be an executable atom.
   COMPONENT-NODE should be any component that has been defined.
 "
-  (psi-set-func! exec-term #f component-node "action-selector")
+  (psi-set-func! exec-term "#f" component-node "action-selector")
 )
 
 ; ----------------------------------------------------------------------

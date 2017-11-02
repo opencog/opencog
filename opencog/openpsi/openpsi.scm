@@ -37,8 +37,8 @@
     psi-goal psi-goal? psi-rule-set-alias
 
     ; From main.scm
-    psi-running? psi-get-loop-count psi-run-continue? psi-step psi-run psi-halt
-    psi-get-logger
+    psi-running? psi-loop-count psi-run-continue? psi-step psi-run psi-halt
+    psi-get-logger psi-component
 
     ; From utilities.scm
     psi-prefix-str psi-suffix-str psi-get-exact-match psi-get-dual-match
