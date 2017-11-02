@@ -36,13 +36,12 @@
 )
 
 ; --------------------------------------------------------------
-(define (psi-set-updater! updater component-node)
+(define (psi-set-updater! component-node updater)
 "
-  psi-set-updater! UPDATER COMPONENT
+  psi-set-updater! COMPONENT UPDATER
 
-  Returns the alias node that represents the updater UPDATER.  An
-  updater is an evaluatable atom that, when evaluated, updates the
-  values for a given component.
+  An UPDATER is an evaluatable atom that, when evaluated, updates the
+  values for a given COMPONENT.
 
   The COMPONENT is a component node that the updater is being added to.
 "
@@ -54,8 +53,9 @@
 "
   psi-get-updater COMPONENT
 
-  Returns a list containing the updater for the given component-node COMPONENT.
-  Null is returned if there is no updater for COMPONENT.
+  Returns the updater atom for the given COMPONENT, which when evaluated
+  will update the weight of psi-rules. Null is returned if there is no
+  updater for COMPONENT.
 "
     (psi-func component-node "updater")
 )

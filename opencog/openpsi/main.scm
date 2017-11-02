@@ -149,7 +149,7 @@
             (let ((updater (psi-get-updater d)))
                 ; Run the updater for the demand.
                 (if (not (null? updater))
-                    (cog-evaluate! (car updater))
+                    (cog-evaluate! updater)
                 )
                 ; The assumption is that the rules can be run concurrently.
                 (par-map act-and-evaluate (psi-select-rules-per-demand d))
