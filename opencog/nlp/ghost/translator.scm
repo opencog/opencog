@@ -283,23 +283,33 @@
    respectively. NAME is like a label of a rule, so that one can reference
    this rule by using it. TYPE is a grouping idea from ChatScript, e.g.
    responders, rejoinders, gambits etc."
+  (define (add-to-rule-lists POS RULE)
+    (if (<= (length rule-lists) POS)
+        (set! rule-lists (append rule-lists (list (list RULE))))
+        (list-set! rule-lists POS
+          (append (list-ref rule-lists POS) (list RULE)))))
+
   (catch #t
     (lambda ()
       ; First of all, make sure the topic is set
+      ; so that it can be used when we are processing the action
       (if (null? rule-topic)
           (set! rule-topic (create-topic "Default Topic" '())))
+
+      ; Reset the list of local variables
+      (set! pat-vars '())
+
+      ; Reset the rule-lists if we're looking at a new responder/gambit
+      (if (or (equal? #\u TYPE) (equal? #\s TYPE) (equal? #\? TYPE)
+              (equal? #\r TYPE) (equal? #\t TYPE))
+          (set! rule-lists '()))
+
       (let* ((ordered-terms (order-terms PATTERN))
              (proc-terms (process-pattern-terms ordered-terms))
              (vars (append atomese-variable-template (list-ref proc-terms 0)))
              (conds (append atomese-condition-template (list-ref proc-terms 1)))
              (action (process-action ACTION))
              (goals (process-goal GOAL)))
-            ; Reset the list of local variables
-            (set! pat-vars '())
-            ; Reset the rule-lists if we're looking at a new responder/gambit
-            (if (or (equal? #\u TYPE) (equal? #\s TYPE) (equal? #\? TYPE)
-                    (equal? #\r TYPE) (equal? #\t TYPE))
-                (set! rule-lists '()))
             (cog-logger-debug ghost-logger "Context: ~a" ordered-terms)
             (cog-logger-debug ghost-logger "Procedure: ~a" ACTION)
             (cog-logger-debug ghost-logger "Goal: ~a" goals)
@@ -312,17 +322,11 @@
                          ((or (equal? #\u TYPE)
                               (equal? #\s TYPE)
                               (equal? #\? TYPE))
-                          (if (null? rule-lists)
-                              (set! rule-lists (list (list rule)))
-                              (list-set! rule-lists 0
-                                (append (list-ref rule-lists 0) (list rule)))))
+                          (add-to-rule-lists 0 rule))
                          ; For gambits
                          ((or (equal? #\r TYPE)
                               (equal? #\t TYPE))
-                          (if (null? rule-lists)
-                              (set! rule-lists (list (list rule)))
-                              (list-set! rule-lists 0
-                                (append (list-ref rule-lists 0) (list rule)))))
+                          (add-to-rule-lists 0 rule))
                          ; For rejoinders
                          ; Rejoinders can be nested, a = level 1, b = level 2... etc
                          (else (let ((level (- (char->integer TYPE) 96)))
@@ -333,10 +337,7 @@
                                     (List parent-rule rule)))
                                 (list-ref rule-lists (- level 1)))
                            ; Update the rule-lists
-                           (if (<= (length rule-lists) level)
-                             (set! rule-lists (append rule-lists (list (list rule))))
-                             (list-set! rule-lists level
-                               (append (list-ref rule-lists level) (list rule)))))))
+                           (add-to-rule-lists level rule))))
                    ; Return
                    rule)
                  (map (lambda (goal)
