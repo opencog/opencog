@@ -83,11 +83,16 @@
     ; Chatscript rules
     ((has-match? "^[ ]*[s?u]:" str)
       (result:suffix 'RESPONDERS location
-        (substring (string-trim (match:substring current-match)) 0 1)))
+        (car (string->list (substring (string-trim
+          (match:substring current-match)) 0 1)))))
     ((has-match? "^[ \t]*[a-q]:" str)
       (result:suffix 'REJOINDERS location
-        (substring (string-trim (match:substring current-match)) 0 1)))
-    ((has-match? "^[ ]*[rt]:" str) (result:suffix 'GAMBIT location #f))
+        (car (string->list (substring (string-trim
+          (match:substring current-match)) 0 1)))))
+    ((has-match? "^[ ]*[rt]:" str)
+      (result:suffix 'GAMBIT location
+        (car (string->list (substring (string-trim
+          (match:substring current-match)) 0 1)))))
     ((has-match? "^[ ]*_[0-9]" str)
       (result:suffix 'MVAR location
         (substring (string-trim (match:substring current-match)) 1)))
@@ -329,8 +334,45 @@
           (eval-string (string-append "(list " $2 ")"))
           (eval-string (string-append "(list " $3 ")"))
           (list) "" $1)
-      (GAMBIT context action) : (format #f "gambit: ~a ~a" $2 $3)
-      (GAMBIT action) : (format #f "gambit: ~a" $2)
+      ; Note, do not support a gambit that has a "name"
+      ; but no context -- it's ambiguous to determine
+      ; whether it's really a "name" or just the first
+      ; word of the "action"
+      (rule-goal GAMBIT name context action) :
+        (create-rule
+          (eval-string (string-append "(list " $4 ")"))
+          (eval-string (string-append "(list " $5 ")"))
+          (eval-string (string-append "(list " $1 ")"))
+          $3 $2)
+      (rule-goal GAMBIT context action) :
+        (create-rule
+          (eval-string (string-append "(list " $3 ")"))
+          (eval-string (string-append "(list " $4 ")"))
+          (eval-string (string-append "(list " $1 ")"))
+          "" $2)
+      (rule-goal GAMBIT action) :
+        (create-rule
+          (list)
+          (eval-string (string-append "(list " $3 ")"))
+          (eval-string (string-append "(list " $1 ")"))
+          "" $2)
+      ; Same as the above, context is needed for a
+      ; named gambit
+      (GAMBIT name context action) :
+        (create-rule
+          (eval-string (string-append "(list " $3 ")"))
+          (eval-string (string-append "(list " $4 ")"))
+          (list) $2 $1)
+      (GAMBIT context action) :
+        (create-rule
+          (eval-string (string-append "(list " $2 ")"))
+          (eval-string (string-append "(list " $3 ")"))
+          (list) "" $1)
+      (GAMBIT action) :
+        (create-rule
+          (list)
+          (eval-string (string-append "(list " $2 ")"))
+          (list) "" $1)
     )
 
     (rule-goal
