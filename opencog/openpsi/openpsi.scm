@@ -90,6 +90,15 @@
 "
 )
 
+(set-procedure-property! psi-imply 'documentation
+"
+  psi-imply RULE
+
+  Execute the action of the RULE if its satisfiablity has been checked by
+  using psi-satisfiable?. If it hasn't been checked it throws an error.
+"
+)
+
 (set-procedure-property! psi-rule 'documentation
 "
   psi-rule CONTEXT ACTION GOAL TV DEMAND - create a psi-rule.
