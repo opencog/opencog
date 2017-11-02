@@ -324,6 +324,8 @@
           (eval-string (string-append "(list " $4 ")"))
           (eval-string (string-append "(list " $1 ")"))
           "" $2)
+      ; TODO: Make sure there is a parent rule before
+      ; accepting any rejoinders
       (REJOINDERS name context action) :
         (create-rule
           (eval-string (string-append "(list " $3 ")"))
