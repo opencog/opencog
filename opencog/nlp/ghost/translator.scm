@@ -322,10 +322,14 @@
                          ((or (equal? #\u TYPE)
                               (equal? #\s TYPE)
                               (equal? #\? TYPE))
+                          (cog-set-value! rule
+                            ghost-rule-type (StringValue "responder"))
                           (add-to-rule-lists 0 rule))
                          ; For gambits
                          ((or (equal? #\r TYPE)
                               (equal? #\t TYPE))
+                          (cog-set-value! rule
+                            ghost-rule-type (StringValue "gambit"))
                           (add-to-rule-lists 0 rule))
                          ; For rejoinders
                          ; Rejoinders can be nested, a = level 1, b = level 2... etc
@@ -336,7 +340,8 @@
                                   (Evaluation (Predicate (ghost-prefix "rejoinder"))
                                     (List parent-rule rule)))
                                 (list-ref rule-lists (- level 1)))
-                           ; Update the rule-lists
+                           (cog-set-value! rule
+                             ghost-rule-type (StringValue "rejoinder"))
                            (add-to-rule-lists level rule))))
                    ; Return
                    rule)

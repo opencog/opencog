@@ -270,6 +270,9 @@
 
 (define-public (ghost-execute-action . ACTIONS)
   "Execute the actions and update the internal state."
+; JJJ
+; What should be in atomese and what shouldn't (and just handle it internally here)
+; Reset the rank after execution
   (define txt-str "")
   (define txt-atoms '())
   (define atoms-created '())

@@ -22,7 +22,7 @@
 ;; --------------------
 ;; Shared things being used in the module
 
-(define-public (ghost-prefix STR) (string-append "GHOST: " STR))
+(define-public (ghost-prefix STR) (string-append "GHOST " STR))
 (define (ghost-var-word NUM)
   (Variable (ghost-prefix
     (string-append "variable-word-" (number->string NUM)))))
@@ -37,6 +37,7 @@
 (define ghost-word-seq (Predicate (ghost-prefix "Word Sequence")))
 (define ghost-lemma-seq (Predicate (ghost-prefix "Lemma Sequence")))
 (define ghost-topic (Concept (ghost-prefix "Topic")))
+(define ghost-rule-type (Predicate (ghost-prefix "Rule Type")))
 
 ; Define the logger for GHOST
 (define ghost-logger (cog-new-logger))
