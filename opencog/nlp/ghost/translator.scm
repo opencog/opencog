@@ -294,13 +294,53 @@
              (conds (append atomese-condition-template (list-ref proc-terms 1)))
              (action (process-action ACTION))
              (goals (process-goal GOAL)))
+            ; Reset the list of local variables
             (set! pat-vars '())
+            ; Reset the rule-lists if we're looking at a new responder/gambit
+            (if (or (equal? #\u TYPE) (equal? #\s TYPE) (equal? #\? TYPE)
+                    (equal? #\r TYPE) (equal? #\t TYPE))
+                (set! rule-lists '()))
             (cog-logger-debug ghost-logger "Context: ~a" ordered-terms)
             (cog-logger-debug ghost-logger "Procedure: ~a" ACTION)
             (cog-logger-debug ghost-logger "Goal: ~a" goals)
             (map (lambda (rule)
-                   (if (string-null? NAME) rule (psi-rule-set-alias rule NAME)))
+                   ; Label the rule(s), if needed
+                   (if (string-null? NAME) rule (psi-rule-set-alias rule NAME))
+                   ; Then check the rule type
+                   ; TODO: Give it a rank
+                   (cond ; For responders
+                         ((or (equal? #\u TYPE)
+                              (equal? #\s TYPE)
+                              (equal? #\? TYPE))
+                          (if (null? rule-lists)
+                              (set! rule-lists (list (list rule)))
+                              (list-set! rule-lists 0
+                                (append (list-ref rule-lists 0) (list rule)))))
+                         ; For gambits
+                         ((or (equal? #\r TYPE)
+                              (equal? #\t TYPE))
+                          (if (null? rule-lists)
+                              (set! rule-lists (list (list rule)))
+                              (list-set! rule-lists 0
+                                (append (list-ref rule-lists 0) (list rule)))))
+                         ; For rejoinders
+                         ; Rejoinders can be nested, a = level 1, b = level 2... etc
+                         (else (let ((level (- (char->integer TYPE) 96)))
+                           ; Store this rejoinder-relationship with each of its
+                           ; parents in the atomspace
+                           (map (lambda (parent-rule)
+                                  (Evaluation (Predicate (ghost-prefix "rejoinder"))
+                                    (List parent-rule rule)))
+                                (list-ref rule-lists (- level 1)))
+                           ; Update the rule-lists
+                           (if (<= (length rule-lists) level)
+                             (set! rule-lists (append rule-lists (list (list rule))))
+                             (list-set! rule-lists level
+                               (append (list-ref rule-lists level) (list rule)))))))
+                   ; Return
+                   rule)
                  (map (lambda (goal)
+                        ; Create the rule(s)
                         (psi-rule
                           (list (Satisfaction (VariableList vars) (And conds)))
                           action

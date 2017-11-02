@@ -60,6 +60,10 @@
 ; Keep a record of the variables, if any, found in the pattern of a rule
 (define pat-vars '())
 
+; A list to keep track of what rules have been created, will
+; be used when dealing with rejoinders
+(define rule-lists '())
+
 ;; --------------------
 ;; For rule matching
 
