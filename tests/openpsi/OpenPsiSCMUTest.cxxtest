@@ -191,7 +191,7 @@ public:
         logger().info("END TEST: %s", __FUNCTION__);
     }
 
-    // Check the scheme function `psi-select-rules-per-demand`
+    // Check the scheme function `psi-select-rules-per-component`
     void xtest_psi_select_rules_per_demand()
     {
         logger().info("BEGIN TEST: %s", __FUNCTION__);
@@ -203,11 +203,11 @@ public:
         CHKERR
 
         // Test 1:
-        auto result_1_1 = _scm->eval("(psi-select-rules-per-demand demand-1)");
+        auto result_1_1 = _scm->eval("(psi-select-rules-per-component demand-1)");
         CHKERR
         TSM_ASSERT_EQUALS("Expected ()", "()\n", result_1_1);
 
-        auto result_1_2 = _scm->eval("(psi-select-rules-per-demand demand-2)");
+        auto result_1_2 = _scm->eval("(psi-select-rules-per-component demand-2)");
         CHKERR
         TSM_ASSERT_EQUALS("Expected ()", "()\n", result_1_2);
 
@@ -215,11 +215,11 @@ public:
         _scm->eval("(groundable-content-1)");
         CHKERR
         auto result_2_1 = \
-            _scm->eval_h("(car (psi-select-rules-per-demand demand-1))");
+            _scm->eval_h("(car (psi-select-rules-per-component demand-1))");
         CHKERR
         TSM_ASSERT_EQUALS("Expected a single rule", rule_1 , result_2_1);
 
-        auto result_2_2 = _scm->eval("(psi-select-rules-per-demand demand-2)");
+        auto result_2_2 = _scm->eval("(psi-select-rules-per-component demand-2)");
         CHKERR
         TSM_ASSERT_EQUALS("Expected ()", "()\n", result_2_2);
         CHKERR
@@ -229,12 +229,12 @@ public:
         _scm->eval("(groundable-content-2)");
         CHKERR
         auto result_3_1 = \
-            _scm->eval_h("(car (psi-select-rules-per-demand demand-1))");
+            _scm->eval_h("(car (psi-select-rules-per-component demand-1))");
         CHKERR
         TSM_ASSERT_EQUALS("Expected a single rule", rule_1 , result_3_1);
 
         auto result_3_2 = \
-            _scm->eval_h("(car (psi-select-rules-per-demand demand-2))");
+            _scm->eval_h("(car (psi-select-rules-per-component demand-2))");
         CHKERR
         TSM_ASSERT_EQUALS("Expected a single rule", rule_2 , result_3_2);
 

@@ -139,7 +139,7 @@
   EXEC-TERM should be an executable atom.
   COMPONENT-NODE should be any component that has been defined.
 "
-    (psi-set-func! exec-term #f component-node "action-selector")
+  (psi-set-func! exec-term #f component-node "action-selector")
 )
 
 ; ----------------------------------------------------------------------
@@ -148,7 +148,7 @@
   psi-get-action-selector COMPONENT-NODE - Gets the action-selector of
   COMPONENT-NODE.
 "
-    (psi-func component-node "action-selector")
+  (psi-func component-node "action-selector")
 )
 
 ; --------------------------------------------------------------
@@ -243,46 +243,24 @@
 )
 
 ; --------------------------------------------------------------
-(define (psi-select-rules-per-demand d)
+(define (psi-select-rules-per-component component)
 "
-  psi-select-rules-per-demand DEMAND
+  psi-select-rules-per-component COMPONENT
 
-  Run the action selector associated with DEMAND, and return a list
-  of psi-rules.  If no custom action selector was specified, then
-  a list containing a single rule will be returned; that rule will
-  be highest-weight rule that is also satsisfiable.  If there is no
-  such rule, then the empty list is returned.
+  Run the action-selector associated with COMPONENT, and return a list
+  of psi-rules. If there aren't any rules returned on execution of the
+  action-selector null is returned.
 "
-    (let ((as (psi-action-selector d)))
-        (if (null? as)
-            ; If the user didn't specify a custom selector, then
-            ; run the default selector
-            (default-per-demand-action-selector d)
-
-            ; Else run the user's selector.
-            ; Assume the results are wrapped in
-            ; a ListLink under a SetLink. Can be
-            ; expanded in the future if needed
-            (let ((result (gar (cog-execute! (car as)))))
-                (if (null? result)
-                    '()
-                    (cog-outgoing-set result)
-                )
-            )
-        )
+  (let ((acs (psi-action-selector d)))
+    (if (null? acs)
+      (error
+        (format "Define an action-selector for component ~a" component))
+      (let ((result (gar (cog-execute! (car acs)))))
+          (if (null? result)
+            '()
+            (cog-outgoing-set result)
+          )
+      )
     )
-
-
-    ;(let ((demands (psi-get-all-demands)))
-    ;    ;NOTE:
-    ;    ; 1. If there is any hierarcy/graph, get the information from the
-    ;    ;    atomspace and do it here.
-    ;    ; 2. Any changes between steps are accounted for, i.e, there is no
-    ;    ;    caching of demands. This has a performance penality.
-    ;    ; FIXME:
-    ;    ; 1. Right now the demands are not separated between those that
-    ;    ;    are used for emotiong modeling vs those that are used for system
-    ;    ;    such as chat, behavior, ...
-    ;    (append-map select-rules demands)
-    ;)
+  )
 )

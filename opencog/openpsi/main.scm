@@ -152,7 +152,7 @@
                     (cog-evaluate! updater)
                 )
                 ; The assumption is that the rules can be run concurrently.
-                (par-map act-and-evaluate (psi-select-rules-per-demand d))
+                (par-map act-and-evaluate (psi-select-rules-per-component d))
             ))
 
         (psi-get-all-enabled-demands)
