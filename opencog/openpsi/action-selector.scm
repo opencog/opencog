@@ -37,7 +37,7 @@
 ;; )
 ;;
 ;; --------------------------------------------------------------
-;; (define (psi-get-action-selector-generic)
+;; (define (psi-action-selector-generic)
 ;; "
 ;;   Returns a list containing the user-defined action-selector.
 ;; "
@@ -63,7 +63,7 @@
 ;;   Return a list of psi-rules that are satisfiable by using the
 ;;   current action-selector.
 ;; "
-;;     (let ((dsn (psi-get-action-selector-generic)))
+;;     (let ((dsn (psi-action-selector-generic)))
 ;;         (if (null? dsn)
 ;;             (psi-default-action-selector)
 ;;             (let ((result (cog-execute! (car dsn))))
@@ -131,9 +131,9 @@
 ;; )
 ;;
 ; ----------------------------------------------------------------------
-(define (psi-set-action-selector exec-term component-node)
+(define (psi-set-action-selector! component-node exec-term)
 "
-  psi-set-action-selector EXEC-TERM DEMAND-NODE - Sets EXEC-TERM as
+  psi-set-action-selector COMPONENT-NODE EXEC-TERM - Sets EXEC-TERM as
   the function used to select rules for the COMPONENT-NODE.
 
   EXEC-TERM should be an executable atom.
@@ -143,7 +143,7 @@
 )
 
 ; ----------------------------------------------------------------------
-(define (psi-get-action-selector component-node)
+(define (psi-action-selector component-node)
 "
   psi-get-action-selector COMPONENT-NODE - Gets the action-selector of
   COMPONENT-NODE.
@@ -253,7 +253,7 @@
   be highest-weight rule that is also satsisfiable.  If there is no
   such rule, then the empty list is returned.
 "
-    (let ((as (psi-get-action-selector d)))
+    (let ((as (psi-action-selector d)))
         (if (null? as)
             ; If the user didn't specify a custom selector, then
             ; run the default selector
