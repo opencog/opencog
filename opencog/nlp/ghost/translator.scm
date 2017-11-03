@@ -296,7 +296,7 @@
             (list (TypedVariable var (Type "ImplicationLink")))
             (list ; TODO: Insert the "last executed" atomese from OpenPsi
                   (psi-rule-set-alias var
-                    (cog-name (car (list-ref rule-lists (- lv 1))))))
+                    (car (list-ref rule-lists (- lv 1)))))
             (StringValue "rejoinder"))))))
 
 (define (create-rule PATTERN ACTION GOAL NAME TYPE)
@@ -326,7 +326,10 @@
               (equal? #\r TYPE) (equal? #\t TYPE))
           (set! rule-lists '()))
 
-      (let* ((proc-type (process-type TYPE))
+      (let* (; Label the rule with NAME, if given, generate one otherwise
+             (rule-name (if (string-null? NAME)
+                            (gen-var "GHOST-rule" #f) NAME))
+             (proc-type (process-type TYPE))
              (ordered-terms (order-terms PATTERN))
              (proc-terms (process-pattern-terms ordered-terms))
              (vars (append atomese-variable-template
@@ -342,30 +345,30 @@
             (cog-logger-debug ghost-logger "Procedure: ~a" ACTION)
             (cog-logger-debug ghost-logger "Goal: ~a" goals)
             (map (lambda (rule)
-                   ; Label the rule(s) with NAME, if given, generate one otherwise
-                   (psi-rule-set-alias rule
-                     (if (string-null? NAME) NAME (gen-var "GHOST-rule" #f)))
+                   ; Label the rule
+                   (psi-rule-set-alias rule rule-name)
                    ; Then check the rule type
                    (cond ((equal? type (StringValue "responder"))
                           (cog-set-value! rule ghost-rule-type type)
                           (set! rule-rank (+ rule-rank 1))
                           (cog-set-value! rule
                             ghost-rank (FloatValue rule-rank))
-                          (add-to-rule-lists 0 rule))
+                          (add-to-rule-lists 0 rule-name))
                          ; For gambits
                          ((equal? type (StringValue "random gambit"))
                           (cog-set-value! rule ghost-rule-type type)
-                          (add-to-rule-lists 0 rule))
+                          (add-to-rule-lists 0 rule-name))
                          ((equal? type (StringValue "gambit"))
                           (cog-set-value! rule ghost-rule-type type)
                           (set! rule-rank (+ rule-rank 1))
                           (cog-set-value! rule
                             ghost-rank (FloatValue rule-rank))
-                          (add-to-rule-lists 0 rule))
+                          (add-to-rule-lists 0 rule-name))
                          ; For rejoinders
                          (else
                            (cog-set-value! rule ghost-rule-type type)
-                           (add-to-rule-lists (get-rejoinder-level TYPE) rule)))
+                           (add-to-rule-lists
+                             (get-rejoinder-level TYPE) rule-name)))
                    ; Return
                    rule)
                  (map (lambda (goal)
