@@ -328,7 +328,8 @@
 
       (let* (; Label the rule with NAME, if given, generate one otherwise
              (rule-name (if (string-null? NAME)
-                            (gen-var "GHOST-rule" #f) NAME))
+                            (string-append "GHOST-rule-" (random-string 36))
+                            NAME))
              (proc-type (process-type TYPE))
              (ordered-terms (order-terms PATTERN))
              (proc-terms (process-pattern-terms ordered-terms))
