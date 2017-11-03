@@ -272,7 +272,7 @@
   "Execute the actions and update the internal state."
 ; JJJ
 ; What should be in atomese and what shouldn't (and just handle it internally here)
-; Reset the rank after execution
+; Reset the rule-order after execution
   (define txt-str "")
   (define txt-atoms '())
   (define atoms-created '())

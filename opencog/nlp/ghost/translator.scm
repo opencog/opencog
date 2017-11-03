@@ -350,9 +350,9 @@
                    (psi-rule-set-alias rule rule-name)
                    ; Set the type
                    (cog-set-value! rule ghost-rule-type type)
-                   ; ... and the rank
-                   (set! rule-rank (+ rule-rank 1))
-                   (cog-set-value! rule ghost-rank (FloatValue rule-rank))
+                   ; ... and the rule-order
+                   (set! rule-order (+ rule-order 1))
+                   (cog-set-value! rule ghost-rule-order (FloatValue rule-order))
                    ; Then finally add to the rule-lists
                    (cond ((or (equal? type strval-responder)
                               (equal? type strval-random-gambit)
@@ -412,9 +412,10 @@
   (set! rule-topic (psi-demand (ghost-prefix TOPIC-NAME)))
   (Inheritance rule-topic ghost-topic)
 
-  ; Reset the topic-level goals and the rank
+  ; Reset the topic-level goals and the rule-order
   (set! shared-goals '())
-  (set! rule-rank 0)
+  (set! rule-order 0)
+
 
   ; The set of keywords associate with the topic
   (for-each (lambda (kw) (Member kw rule-topic)) (terms-to-atomese KEYWORDS))
