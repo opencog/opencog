@@ -342,8 +342,9 @@
             (cog-logger-debug ghost-logger "Procedure: ~a" ACTION)
             (cog-logger-debug ghost-logger "Goal: ~a" goals)
             (map (lambda (rule)
-                   ; Label the rule(s), if needed
-                   (if (string-null? NAME) rule (psi-rule-set-alias rule NAME))
+                   ; Label the rule(s) with NAME, if given, generate one otherwise
+                   (psi-rule-set-alias rule
+                     (if (string-null? NAME) NAME (gen-var "GHOST-rule" #f)))
                    ; Then check the rule type
                    (cond ((equal? type (StringValue "responder"))
                           (cog-set-value! rule ghost-rule-type type)
