@@ -277,6 +277,28 @@
         (remove (lambda (sg) (any (lambda (g) (equal? (car sg) (car g))) GOAL))
                 shared-goals))))
 
+(define (process-type TYPE)
+  "Figure out what the type of the rule is, generate the needed atomese, and
+   return the type as a StringValue."
+  (cond ((or (equal? #\u TYPE)
+             (equal? #\s TYPE)
+             (equal? #\? TYPE))
+         (list '() '() (StringValue "responder")))
+        ((equal? #\r TYPE)
+         (list '() '() (StringValue "random gambit")))
+        ((equal? #\t TYPE)
+         (list '() '() (StringValue "gambit")))
+        ; For rejoinders, put the condition (the last rule executed is
+        ; the parent of this rejoinder) in the pattern of the rule
+        (else (let ((var (Variable (gen-var "GHOST-rule" #f)))
+                    (lv (get-rejoinder-level TYPE)))
+          (list
+            (list (TypedVariable var (Type "ImplicationLink")))
+            (list ; TODO: Insert the "last executed" atomese from OpenPsi
+                  (psi-rule-set-alias var
+                    (cog-name (car (list-ref rule-lists (- lv 1))))))
+            (StringValue "rejoinder"))))))
+
 (define (create-rule PATTERN ACTION GOAL NAME TYPE)
   "Top level translation function. PATTERN, ACTION, and GOAL are the basic
    components of a psi-rule, correspond to context, procedure, and goal
@@ -304,10 +326,16 @@
               (equal? #\r TYPE) (equal? #\t TYPE))
           (set! rule-lists '()))
 
-      (let* ((ordered-terms (order-terms PATTERN))
+      (let* ((proc-type (process-type TYPE))
+             (ordered-terms (order-terms PATTERN))
              (proc-terms (process-pattern-terms ordered-terms))
-             (vars (append atomese-variable-template (list-ref proc-terms 0)))
-             (conds (append atomese-condition-template (list-ref proc-terms 1)))
+             (vars (append atomese-variable-template
+                           (list-ref proc-terms 0)
+                           (list-ref proc-type 0)))
+             (conds (append atomese-condition-template
+                            (list-ref proc-terms 1)
+                            (list-ref proc-type 1)))
+             (type (proc-type 2))
              (action (process-action ACTION))
              (goals (process-goal GOAL)))
             (cog-logger-debug ghost-logger "Context: ~a" ordered-terms)
@@ -317,41 +345,26 @@
                    ; Label the rule(s), if needed
                    (if (string-null? NAME) rule (psi-rule-set-alias rule NAME))
                    ; Then check the rule type
-                   ; TODO: Give it a rank
-                   (cond ; For responders
-                         ((or (equal? #\u TYPE)
-                              (equal? #\s TYPE)
-                              (equal? #\? TYPE))
-                          (cog-set-value! rule
-                            ghost-rule-type (StringValue "responder"))
+                   (cond ((equal? type (StringValue "responder"))
+                          (cog-set-value! rule ghost-rule-type type)
                           (set! rule-rank (+ rule-rank 1))
                           (cog-set-value! rule
                             ghost-rank (FloatValue rule-rank))
                           (add-to-rule-lists 0 rule))
                          ; For gambits
-                         ((equal? #\r TYPE)
-                          (cog-set-value! rule
-                            ghost-rule-type (StringValue "random gambit"))
+                         ((equal? type (StringValue "random gambit"))
+                          (cog-set-value! rule ghost-rule-type type)
                           (add-to-rule-lists 0 rule))
-                         ((equal? #\t TYPE)
-                          (cog-set-value! rule
-                            ghost-rule-type (StringValue "gambit"))
+                         ((equal? type (StringValue "gambit"))
+                          (cog-set-value! rule ghost-rule-type type)
                           (set! rule-rank (+ rule-rank 1))
                           (cog-set-value! rule
                             ghost-rank (FloatValue rule-rank))
                           (add-to-rule-lists 0 rule))
                          ; For rejoinders
-                         ; Rejoinders can be nested, a = level 1, b = level 2... etc
-                         (else (let ((level (- (char->integer TYPE) 96)))
-                           ; Store this rejoinder-relationship with each of its
-                           ; parents in the atomspace
-                           (map (lambda (parent-rule)
-                                  (Evaluation (Predicate (ghost-prefix "rejoinder"))
-                                    (List parent-rule rule)))
-                                (list-ref rule-lists (- level 1)))
-                           (cog-set-value! rule
-                             ghost-rule-type (StringValue "rejoinder"))
-                           (add-to-rule-lists level rule))))
+                         (else
+                           (cog-set-value! rule ghost-rule-type type)
+                           (add-to-rule-lists (get-rejoinder-level TYPE) rule)))
                    ; Return
                    rule)
                  (map (lambda (goal)
