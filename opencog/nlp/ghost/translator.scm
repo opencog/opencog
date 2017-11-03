@@ -283,11 +283,11 @@
   (cond ((or (equal? #\u TYPE)
              (equal? #\s TYPE)
              (equal? #\? TYPE))
-         (list '() '() (StringValue "responder")))
+         (list '() '() strval-responder))
         ((equal? #\r TYPE)
-         (list '() '() (StringValue "random gambit")))
+         (list '() '() strval-random-gambit))
         ((equal? #\t TYPE)
-         (list '() '() (StringValue "gambit")))
+         (list '() '() strval-gambit))
         ; For rejoinders, put the condition (the last rule executed is
         ; the parent of this rejoinder) in the pattern of the rule
         (else (let ((var (Variable (gen-var "GHOST-rule" #f)))
@@ -297,7 +297,7 @@
             (list ; TODO: Insert the "last executed" atomese from OpenPsi
                   (psi-rule-set-alias var
                     (car (list-ref rule-lists (- lv 1)))))
-            (StringValue "rejoinder"))))))
+            strval-rejoinder)))))
 
 (define (create-rule PATTERN ACTION GOAL NAME TYPE)
   "Top level translation function. PATTERN, ACTION, and GOAL are the basic
@@ -348,28 +348,19 @@
             (map (lambda (rule)
                    ; Label the rule
                    (psi-rule-set-alias rule rule-name)
-                   ; Then check the rule type
-                   (cond ((equal? type (StringValue "responder"))
-                          (cog-set-value! rule ghost-rule-type type)
-                          (set! rule-rank (+ rule-rank 1))
-                          (cog-set-value! rule
-                            ghost-rank (FloatValue rule-rank))
+                   ; Set the type
+                   (cog-set-value! rule ghost-rule-type type)
+                   ; ... and the rank
+                   (set! rule-rank (+ rule-rank 1))
+                   (cog-set-value! rule ghost-rank (FloatValue rule-rank))
+                   ; Then finally add to the rule-lists
+                   (cond ((or (equal? type strval-responder)
+                              (equal? type strval-random-gambit)
+                              (equal? type strval-gambit))
                           (add-to-rule-lists 0 rule-name))
-                         ; For gambits
-                         ((equal? type (StringValue "random gambit"))
-                          (cog-set-value! rule ghost-rule-type type)
-                          (add-to-rule-lists 0 rule-name))
-                         ((equal? type (StringValue "gambit"))
-                          (cog-set-value! rule ghost-rule-type type)
-                          (set! rule-rank (+ rule-rank 1))
-                          (cog-set-value! rule
-                            ghost-rank (FloatValue rule-rank))
-                          (add-to-rule-lists 0 rule-name))
-                         ; For rejoinders
-                         (else
-                           (cog-set-value! rule ghost-rule-type type)
-                           (add-to-rule-lists
-                             (get-rejoinder-level TYPE) rule-name)))
+                         ((equal? type strval-rejoinder)
+                          (add-to-rule-lists
+                            (get-rejoinder-level TYPE) rule-name)))
                    ; Return
                    rule)
                  (map (lambda (goal)

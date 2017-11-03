@@ -39,6 +39,10 @@
 (define ghost-topic (Concept (ghost-prefix "Topic")))
 (define ghost-rule-type (Predicate (ghost-prefix "Rule Type")))
 (define ghost-rank (Predicate (ghost-prefix "Rank")))
+(define strval-rejoinder (StringValue "rejoinder"))
+(define strval-responder (StringValue "responder"))
+(define strval-random-gambit (StringValue "random gambit"))
+(define strval-gambit (StringValue "gambit"))
 
 ; Define the logger for GHOST
 (define ghost-logger (cog-new-logger))
