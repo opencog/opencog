@@ -335,7 +335,7 @@
              (conds (append atomese-condition-template
                             (list-ref proc-terms 1)
                             (list-ref proc-type 1)))
-             (type (proc-type 2))
+             (type (list-ref proc-type 2))
              (action (process-action ACTION))
              (goals (process-goal GOAL)))
             (cog-logger-debug ghost-logger "Context: ~a" ordered-terms)
