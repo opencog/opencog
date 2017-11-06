@@ -216,7 +216,7 @@
 
   (list vars conds))
 
-(define (process-action ACTION)
+(define (process-action ACTION RULENAME)
   "Convert ACTION into atomese."
   (define reuse #f)
   (define (to-atomese actions)
@@ -260,12 +260,23 @@
           '()
           (list (action-choices choices)))))
   (define action-atomese (to-atomese (cdar ACTION)))
-  (True (if reuse action-atomese
-                  (list (ExecutionOutput
-                          (GroundedSchema "scm: ghost-execute-action")
-                          (List action-atomese))
-                        (Put (State ghost-curr-topic (Variable "$x"))
-                             rule-topic)))))
+  (True (if reuse
+            action-atomese
+            (list (ExecutionOutput
+                    (GroundedSchema "scm: ghost-execute-action")
+                    (List action-atomese))
+                  ; Update the ghost-order to zero so that
+                  ; the same rule won't be choosen again,
+                  ; by default
+                  (ExecutionOutput
+                    (GroundedSchema "scm: ghost-update-rule-order")
+                    (List (Concept (string-append "OpenPsi: " RULENAME))))
+                  ; Set the current topic
+                  (Put (State ghost-curr-topic (Variable "$x"))
+                       rule-topic)
+                  ; Reset the state
+                  (Put (State ghost-curr-proc (Variable "$x"))
+                       (Concept "Default State"))))))
 
 (define (process-goal GOAL)
   "Go through each of the goals, including the shared ones."
@@ -340,7 +351,7 @@
                             (list-ref proc-terms 1)
                             (list-ref proc-type 1)))
              (type (list-ref proc-type 2))
-             (action (process-action ACTION))
+             (action (process-action ACTION rule-name))
              (goals (process-goal GOAL)))
             (cog-logger-debug ghost-logger "Context: ~a" ordered-terms)
             (cog-logger-debug ghost-logger "Procedure: ~a" ACTION)
@@ -415,7 +426,6 @@
   ; Reset the topic-level goals and the rule-order
   (set! shared-goals '())
   (set! rule-order 0)
-
 
   ; The set of keywords associate with the topic
   (for-each (lambda (kw) (Member kw rule-topic)) (terms-to-atomese KEYWORDS))

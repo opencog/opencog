@@ -270,9 +270,6 @@
 
 (define-public (ghost-execute-action . ACTIONS)
   "Execute the actions and update the internal state."
-; JJJ
-; What should be in atomese and what shouldn't (and just handle it internally here)
-; Reset the rule-order after execution
   (define txt-str "")
   (define txt-atoms '())
   (define atoms-created '())
@@ -306,5 +303,10 @@
       (cog-logger-info ghost-logger "Atoms Created: ~a" atoms-created))
   ; Record the result
   (set! ghost-result (append txt-atoms atoms-created))
-  ; Reset the state
-  (State ghost-curr-proc (Concept "Default State")))
+  (Set txt-atoms atoms-created))
+
+(define-public (ghost-update-rule-order RULENAME)
+  "Update the ghost-rule-order of the rule with alias RULENAME."
+  (define rule (car (cog-chase-link 'ListLink 'ImplicationLink RULENAME)))
+  (cog-set-value! rule ghost-rule-order (FloatValue 0))
+  (True))
