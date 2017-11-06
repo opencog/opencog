@@ -91,7 +91,7 @@
   (if (and (cog-atom? atom) (null-incoming-set? atom) (null-confidence? atom))
       (let* ((outgoings (cog-outgoing-set atom)))
         (cog-delete atom)
-        (remove-dangling-atoms outgoings))))
+        (remove-dangling-atom-list outgoings))))
 
 (define (null-incoming-set? atom)
   (null? (cog-incoming-set atom)))
