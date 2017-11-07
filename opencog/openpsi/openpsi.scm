@@ -101,7 +101,7 @@
 
 (set-procedure-property! psi-rule 'documentation
 "
-  psi-rule CONTEXT ACTION GOAL TV DEMAND - create a psi-rule.
+  psi-rule CONTEXT ACTION GOAL TV CATEGORY - create a psi-rule.
 
   Associate an action with a context such that, if the action is
   taken, then the goal will be satisfied. The structure of a rule
@@ -129,7 +129,7 @@
   TV is the TruthValue assigned to the ImplicationLink. It should
     be a SimpleTruthValue.
 
-  DEMAND is a Node, representing the demand that this rule affects.
+  CATEGORY is a Node, representing the category that this rule is part of.
 "
 )
 

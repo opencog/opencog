@@ -39,7 +39,7 @@ OpenPsiRules::OpenPsiRules(AtomSpace* as): _as(as)
 {}
 
 Handle OpenPsiRules::add_rule(const HandleSeq& context, const Handle& action,
-  const Handle& goal, const TruthValuePtr stv, const Handle& demand)
+  const Handle& goal, const TruthValuePtr stv)
 {
   // Declare as an openpsi action if it hasn't already been declared.
   _as->add_link(MEMBER_LINK, action, _psi_action);
@@ -50,10 +50,9 @@ Handle OpenPsiRules::add_rule(const HandleSeq& context, const Handle& action,
   temp_c.push_back(action);
   Handle hca = _as->add_link(SEQUENTIAL_AND_LINK, temp_c);
 
-  // Add the psi-rule, set the truthvalue and add to a demand.
+  // Add the psi-rule, set the truthvalue.
   Handle rule = _as->add_link(IMPLICATION_LINK, hca, goal);
   rule->setTruthValue(stv);
-  _as->add_link(MEMBER_LINK, rule, demand);
 
   // Construct the query atom that is used to check satisfiablity. This is
   // done here for performance. If context has only one atom and it is a
@@ -82,12 +81,17 @@ Handle OpenPsiRules::add_rule(const HandleSeq& context, const Handle& action,
   return rule;
 }
 
-Handle OpenPsiRules::add_tag(const Handle tag_type_node,
+Handle OpenPsiRules::add_category(const Handle tag_type_node,
                              const std::string& name)
 {
   Handle tag = _as->add_node(CONCEPT_NODE, name);
   _as->add_link(INHERITANCE_LINK, tag , tag_type_node);
   return tag;
+}
+
+void OpenPsiRules::add_to_category(const Handle rule, const Handle category)
+{
+  _as->add_link(MEMBER_LINK, rule, category);
 }
 
 HandleSeq& OpenPsiRules::get_context(const Handle rule)

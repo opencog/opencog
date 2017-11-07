@@ -40,7 +40,7 @@ private:
    * @return An implication link which is a psi-rule.
    */
   Handle add_rule(const HandleSeq& context, const Handle& action,
-    const Handle& goal, const TruthValuePtr stv, const Handle& demand);
+    const Handle& goal, const TruthValuePtr stv, const Handle& category);
 
   /**
    * Get the action of the given rule.

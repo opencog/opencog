@@ -58,13 +58,16 @@ void OpenPsiSCM::init()
 }
 
 Handle OpenPsiSCM::add_rule(const HandleSeq& context, const Handle& action,
-  const Handle& goal, const TruthValuePtr stv, const Handle& demand)
+  const Handle& goal, const TruthValuePtr stv, const Handle& category)
 {
   AtomSpace* as = SchemeSmob::ss_get_env_as("psi-rule");
   // TODO: Should this be a singleton? What could be the issues that need
   // to be handled?
   OpenPsiRules rule_constructor(as);
-  return rule_constructor.add_rule(context, action, goal, stv, demand);
+  Handle rule = rule_constructor.add_rule(context, action, goal, stv);
+  // TODO: Add to multiple categories using scheme rest list.
+  rule_constructor.add_to_category(rule, category);
+  return rule;
 }
 
 Handle OpenPsiSCM::get_action(const Handle& rule)

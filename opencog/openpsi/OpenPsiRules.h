@@ -34,11 +34,11 @@ public:
   OpenPsiRules(AtomSpace* as);
 
   inline Handle add_demand(const std::string& name) {
-    return add_tag(_psi_demand, name);
+    return add_category(_psi_demand, name);
   }
 
   inline Handle add_goal(const std::string& name) {
-    return add_tag(_psi_goal, name);
+    return add_category(_psi_goal, name);
   }
 
   /**
@@ -52,7 +52,7 @@ public:
    *      goal)
    */
   Handle add_rule(const HandleSeq& context, const Handle& action,
-    const Handle& goal, const TruthValuePtr stv, const Handle& demand);
+    const Handle& goal, const TruthValuePtr stv);
 
   /**
    * @param rule A psi-rule.
@@ -79,18 +79,29 @@ public:
    */
   static PatternLinkPtr get_query(const Handle rule);
 
-private:
   /**
-   * Declare a new_tag by adding the following structured atom into the
+   * Declare a new category by adding the following structured atom into the
    * atomspace
-   *      (InheritanceLink (ConceptNode "name") tag_type_node)
+   *      (InheritanceLink (ConceptNode "name") category_type_node)
    *
    * @param tag_type_node The Node from which the new tag node inherites from.
    * @param name The name of the ConceptNode that is going to be added
-   * @return ConceptNode created.
+   * @return ConceptNode that represents the category.
    */
-  Handle add_tag(const Handle tag_type_node, const std::string& name);
+  Handle add_category(const Handle tag_type_node, const std::string& name);
 
+  /**
+   * Add a rule to a category. The representation is as follows
+   *    (MemberLink rule_node category_node)
+   * Having this enables the possiblity of easily redefining the
+   * representation.
+   *
+   * @param rule A psi-rule.
+   * @param rule An atom that reprsents the category.
+   */
+  void add_to_category(const Handle rule, const Handle category);
+
+private:
   /**
    * The structure of the tuple is (context, action, goal, query),
    * where queryis a PatternLink that isn't added to the atomspace, and

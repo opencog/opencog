@@ -103,12 +103,11 @@ public:
     CHKERR
     Handle goal_1 = _opr->add_goal("goal-1");
     CHKERR
-    Handle demand_1 = _opr->add_demand("demand-1");
 
     // Test 1:
     // Check if the rule is added properly.
     Handle rule_1 = _opr->add_rule(context_1, action_1, goal_1,
-      SimpleTruthValue::createTV(1.0, 1.0), demand_1);
+      SimpleTruthValue::createTV(1.0, 1.0));
     Handle expected_rule_1 = _scm->eval_h("(rule-1-cpp)");
     CHKERR
     TSM_ASSERT_EQUALS("Expected to be equal", expected_rule_1, rule_1);

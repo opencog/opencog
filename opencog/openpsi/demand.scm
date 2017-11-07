@@ -48,7 +48,7 @@
                     (MemberLink (VariableNode "demand") psi-label-skip)))
         ))
 
-    ; Compute the list of enabled deamnds, and cache it.
+    ; Compute the list of enabled demands, and cache it.
     (set! psi-demand-cache
         (lset-difference! equal? (psi-get-all-demands)
             (cog-outgoing-set skip-set))
