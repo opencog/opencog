@@ -303,7 +303,8 @@
       (cog-logger-info ghost-logger "Atoms Created: ~a" atoms-created))
   ; Record the result
   (set! ghost-result (append txt-atoms atoms-created))
-  (Set txt-atoms atoms-created))
+  ; Reset the state
+  (State ghost-curr-proc (Concept "Default State")))
 
 (define-public (ghost-update-rule-order RULENAME VALUE)
   "Update the ghost-rule-order of the rule with alias RULENAME."
