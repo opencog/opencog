@@ -305,8 +305,8 @@
   (set! ghost-result (append txt-atoms atoms-created))
   (Set txt-atoms atoms-created))
 
-(define-public (ghost-update-rule-order RULENAME)
+(define-public (ghost-update-rule-order RULENAME VALUE)
   "Update the ghost-rule-order of the rule with alias RULENAME."
   (define rule (car (cog-chase-link 'ListLink 'ImplicationLink RULENAME)))
-  (cog-set-value! rule ghost-rule-order (FloatValue 0))
-  (True))
+  (define val (string->number (cog-name VALUE)))
+  (cog-set-value! rule ghost-rule-order (FloatValue val)))

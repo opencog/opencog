@@ -270,7 +270,8 @@
                   ; by default
                   (ExecutionOutput
                     (GroundedSchema "scm: ghost-update-rule-order")
-                    (List (Concept (string-append "OpenPsi: " RULENAME))))
+                    (List (Concept (string-append "OpenPsi: " RULENAME))
+                          (Number 0)))
                   ; Set the current topic
                   (Put (State ghost-curr-topic (Variable "$x"))
                        rule-topic)

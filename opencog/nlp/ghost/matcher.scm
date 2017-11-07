@@ -32,7 +32,7 @@
              (random (length rules-evaluated) (random-state-from-platform))))
           ((equal? 'RANK F)
            (let ((highest-order 0)
-                 (selected-rule ""))
+                 (selected-rule '()))
              (for-each (lambda (r)
                (let ((order (car (cog-value->list (cog-value r ghost-rule-order)))))
                     (if (> order highest-order)
