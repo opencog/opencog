@@ -38,7 +38,7 @@
 (define ghost-lemma-seq (Predicate (ghost-prefix "Lemma Sequence")))
 (define ghost-topic (Concept (ghost-prefix "Topic")))
 (define ghost-rule-type (Predicate (ghost-prefix "Rule Type")))
-(define ghost-rule-order (Predicate (ghost-prefix "Rule Order")))
+(define ghost-rule-rank (Predicate (ghost-prefix "Rule Rank")))
 (define strval-rejoinder (StringValue "rejoinder"))
 (define strval-responder (StringValue "responder"))
 (define strval-random-gambit (StringValue "random gambit"))
@@ -72,7 +72,7 @@
 
 ; Basically the position of the rule being placed in a topic file
 ; This also serves as the "weight" during matching
-(define rule-order 0)
+(define rule-rank 0)
 
 ;; --------------------
 ;; For rule matching

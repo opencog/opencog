@@ -26,17 +26,17 @@
         R))
     rules-evaluated)
   (define (pick-rule F)
-    ; Either randomly pick one of the rules, or pick based on their "order"
+    ; Either randomly pick one of the rules, or pick based on their "rank"
     (cond ((equal? 'RANDOM F)
            (list-ref rules-evaluated
              (random (length rules-evaluated) (random-state-from-platform))))
           ((equal? 'RANK F)
-           (let ((highest-order 0)
+           (let ((highest-rank 0)
                  (selected-rule '()))
              (for-each (lambda (r)
-               (let ((order (car (cog-value->list (cog-value r ghost-rule-order)))))
-                    (if (> order highest-order)
-                        (begin (set! highest-order order)
+               (let ((rank (car (cog-value->list (cog-value r ghost-rule-rank)))))
+                    (if (> rank highest-rank)
+                        (begin (set! highest-rank rank)
                                (set! selected-rule r)))))
                rules-evaluated)
              selected-rule))))

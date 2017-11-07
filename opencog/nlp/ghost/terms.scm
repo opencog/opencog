@@ -306,8 +306,8 @@
   ; Reset the state
   (State ghost-curr-proc (Concept "Default State")))
 
-(define-public (ghost-update-rule-order RULENAME VALUE)
-  "Update the ghost-rule-order of the rule with alias RULENAME."
+(define-public (ghost-update-rule-rank RULENAME VALUE)
+  "Update the ghost-rule-rank of the rule with alias RULENAME."
   (define rule (car (cog-chase-link 'ListLink 'ImplicationLink RULENAME)))
   (define val (string->number (cog-name VALUE)))
-  (cog-set-value! rule ghost-rule-order (FloatValue val)))
+  (cog-set-value! rule ghost-rule-rank (FloatValue val)))
