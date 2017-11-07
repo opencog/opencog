@@ -305,3 +305,9 @@
   (set! ghost-result (append txt-atoms atoms-created))
   ; Reset the state
   (State ghost-curr-proc (Concept "Default State")))
+
+(define-public (ghost-update-rule-rank RULENAME VALUE)
+  "Update the ghost-rule-rank of the rule with alias RULENAME."
+  (define rule (car (cog-chase-link 'ListLink 'ImplicationLink RULENAME)))
+  (define val (string->number (cog-name VALUE)))
+  (cog-set-value! rule ghost-rule-rank (FloatValue val)))

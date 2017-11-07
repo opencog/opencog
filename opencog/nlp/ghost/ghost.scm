@@ -22,7 +22,7 @@
 ;; --------------------
 ;; Shared things being used in the module
 
-(define-public (ghost-prefix STR) (string-append "GHOST: " STR))
+(define-public (ghost-prefix STR) (string-append "GHOST " STR))
 (define (ghost-var-word NUM)
   (Variable (ghost-prefix
     (string-append "variable-word-" (number->string NUM)))))
@@ -37,6 +37,12 @@
 (define ghost-word-seq (Predicate (ghost-prefix "Word Sequence")))
 (define ghost-lemma-seq (Predicate (ghost-prefix "Lemma Sequence")))
 (define ghost-topic (Concept (ghost-prefix "Topic")))
+(define ghost-rule-type (Predicate (ghost-prefix "Rule Type")))
+(define ghost-rule-rank (Predicate (ghost-prefix "Rule Rank")))
+(define strval-rejoinder (StringValue "rejoinder"))
+(define strval-responder (StringValue "responder"))
+(define strval-random-gambit (StringValue "random gambit"))
+(define strval-gambit (StringValue "gambit"))
 
 ; Define the logger for GHOST
 (define ghost-logger (cog-new-logger))
@@ -48,6 +54,9 @@
   ghost-logger
 )
 
+;; --------------------
+;; For rule parsing
+
 ; When set, all the rules created will be under this topic
 (define rule-topic '())
 
@@ -57,11 +66,22 @@
 ; Keep a record of the variables, if any, found in the pattern of a rule
 (define pat-vars '())
 
-; Keep a record of the value assigned to the user variables that authors defined
-(define uvars '())
+; A list to keep track of what rules have been created, will
+; be used when dealing with rejoinders
+(define rule-lists '())
+
+; Basically the position of the rule being placed in a topic file
+; This also serves as the "weight" during matching
+(define rule-rank 0)
+
+;; --------------------
+;; For rule matching
 
 ; Keep a record of the lemmas we have seen, and it serves as a cache as well
 (define lemma-alist '())
+
+; Keep a record of the value assigned to the user variables that authors defined
+(define uvars '())
 
 ; Keep a record of the most recent outputs generated
 (define ghost-result '())
