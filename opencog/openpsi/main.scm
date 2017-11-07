@@ -141,7 +141,6 @@
 )
 
 ; --------------------------------------------------------------
-
 (define (psi-loop-count component)
 "
   psi-loop-count COMPONENT
@@ -175,7 +174,7 @@
       "In component ~a taking one psi-step, loop-count = ~a" component lc)
 
     ; Do action-selection and action-execution.
-    (par-map psi-act (psi-select-rules-per-component d))
+    (par-map psi-act (psi-select-rules-per-component component))
 
     (cog-logger-debug opl
       "In component ~a ending psi-step, loop-count = ~a" component lc)

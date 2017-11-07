@@ -74,26 +74,27 @@ public:
   /**
    * Declare a new category by adding the following structured atom into the
    * atomspace
-   *      (InheritanceLink (ConceptNode "name") category_type_node)
+   *      (Inheritance new_category (Concept "OpenPsi: category"))
    *
-   * @param tag_type_node The Node from which the new tag node inherites from.
-   * @param name The name of the ConceptNode that is going to be added
+   * Such categorization is helpful in defining custom behaviors per category.
+   *
+   * @param new_category The node reprsenting the new category.
    * @return ConceptNode that represents the category.
    */
-   // TODO: Should the categories be saved so as to check when using
-   // add_to_category?
-  Handle add_category(const Handle tag_type_node, const std::string& name);
+   // TODO:add predicate to check for membership of category.
+  Handle add_category(const Handle& new_category);
 
   /**
    * Add a node to a category. The representation is as follows
-   *    (MemberLink node category_node)
+   *    (MemberLink rule category)
    * Having this enables the possiblity of easily redefining the
    * representation.
    *
-   * @param node A node to be categorized.
-   * @param category An atom that reprsents the category.
+   * @param rule A rule to be categorized.
+   * @param category An atom that represents the category.
+   * @return The rule that was passed in.
    */
-  void add_to_category(const Handle node, const Handle category);
+  Handle add_to_category(const Handle& rule, const Handle& category);
 
 private:
   /**
@@ -117,6 +118,11 @@ private:
   // continue using such convention but should be replaces with graph that
   // represent the relationships. That way it would be possible to answer
   // questions about the system the nlp pipeline.
+
+  /**
+   * Node used to declare a category.
+   */
+  static Handle _psi_category;
 
   AtomSpace* _as;
 };

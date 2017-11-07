@@ -28,6 +28,8 @@
 using namespace opencog;
 
 std::map<Handle, OpenPsiRules::PsiTuple> OpenPsiRules::_psi_rules = {};
+Handle OpenPsiRules::_psi_category = \
+  Handle(createNode(CONCEPT_NODE, "OpenPsi: category"));
 
 OpenPsiRules::OpenPsiRules(AtomSpace* as): _as(as)
 {}
@@ -72,17 +74,16 @@ Handle OpenPsiRules::add_rule(const HandleSeq& context, const Handle& action,
   return rule;
 }
 
-Handle OpenPsiRules::add_category(const Handle tag_type_node,
-                             const std::string& name)
+Handle OpenPsiRules::add_category(const Handle& new_category)
 {
-  Handle tag = _as->add_node(CONCEPT_NODE, name);
-  _as->add_link(INHERITANCE_LINK, tag , tag_type_node);
-  return tag;
+  _as->add_link(INHERITANCE_LINK, new_category, _psi_category);
+  return new_category;
 }
 
-void OpenPsiRules::add_to_category(const Handle node, const Handle category)
+Handle OpenPsiRules::add_to_category(const Handle& rule, const Handle& category)
 {
-  _as->add_link(MEMBER_LINK, node, category);
+  _as->add_link(MEMBER_LINK, rule, category);
+  return rule;
 }
 
 HandleSeq& OpenPsiRules::get_context(const Handle rule)
