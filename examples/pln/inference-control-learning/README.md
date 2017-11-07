@@ -605,10 +605,11 @@ P(S|R) = Sum_i=0^k P(CRi) * CRi(S|R) * Prod_j CRi(Sj|Rj) / nt
 * `CRj(S|R)` is the probability of success upon choosing `R`
   according to `CRi`.
 * The last term `Prod_j CRi(Sj|Rj)` is the probability that `CRi`
-  explains the corpus of past inferences.
+  explains the corpus of past inferences, the likelihood of `CRi` also
+  noted `L(CRi)`.
 * `nt` is the normalizing term, defined as
 ```
-nt = Sum_i=0^n P(CRi) * Prod_j CRi(Sj|Rj)
+nt = Sum_i=0^k P(CRi) * Prod_j CRi(Sj|Rj)
 ```
 
 Since it is resource bound we cannot consider all computable rules.
@@ -617,8 +618,8 @@ such.
 
 On top of that, instead of returning a single probability we want to
 return a truth value, or more generally a pdf (probability density
-function). This is essential to balance exploitation vs exploration as
-explained in the next subsection.
+function) over probabilities. This is essential to balance
+exploitation vs exploration as explained in the next subsection.
 
 Generally, one can do that by building a cumulative distribution
 function instead of a probability expectation.
@@ -627,108 +628,148 @@ function instead of a probability expectation.
 CDF_P(S|R)(x) = Sum_i_in_{CRi(S|R)<=x} P(CRi) * Prod_j CRi(Sj|Rj) / nt
 ```
 
-However our models `CRi` calculate TVs (thus pdfs), not probabilities,
-thus `CRi(S|R)<=x` is meaningless. To remedy that we can split `CRi`
-into a continuous ensemble of models, each of which has a probability
-`p` varying from 0 to 1, indicating the probability of `S` conditioned
-by `R`. We can then use this ensemble as extra models and use the same
-formula above to calculate the cdf.
-
-TODO
+However our models `CRi` actually calculate TVs (pdfs), not
+probabilities, thus `CRi(S|R)<=x` is meaningless. To remedy that we
+can split `CRi` into a continuous ensemble of models, each of which
+has a probability `p` varying from 0 to 1, indicating the probability
+of `S` conditioned by `R`. We can then use this ensemble as extra
+models and use the same formula above to calculate the cdf.
 
 ```
-CDF_P(S|R)(x) = Sum_i Int_0^x P(CRi) * Prod_j CDF_CRi(Sj|Rj) * dp / nt
+CDF_P(S|R)(x) = Sum_i P(CRi) Int_0^x Prod_j CRi(Sj|Rj) dp / nt
 ```
 
-`P(CRi)` is independent and can be taken out of the integral
+So `P(CRi)` becomes the probability of the ith class of continous
+models. Given a infinitesimal model in that class is a mere
+probabilty, `CRi(Sj|Rj)`, the probability that `CRi` explains the jth
+observation, is in fact `p` if `Rj` yielded success `Sj=1`, `1-p` if
+it yielded failure `Sj=0`. Thus `Prod_j CRi(Sj|Rj)` is the binomial
+distribution, assuming for now a flat prior (other priors, such as
+Jeffrey's are easy consider, as we'll see further below)
 
 ```
-CDF_P(S|R)(x) = Sum_i P(CRi) Int_0^x p * p^X*(1-p)^(N-X) * dp / nt
+CDF_P(S|R)(x) = Sum_i P(CRi) Int_0^x p^X*(1-p)^(N-X) dp / nt
 ```
 
-Luckily it turns out that the TV corresponding to `CRi` is equal to
-the cdf of `Prod_j CRi(Sj|Rj)` up to a multiplicative constant, so in
-fact the cdf of `P(S|R)` is merely a weighted sum of the cdfs of `CRi`
+where `N` is the number of observations and `X` the positive count.
+
+Let define `L` the likelihood of an infinitesimal model with parameter
+probability `p`
 
 ```
-CDF_P(S|R)(x) = Sum_i P(CRi) Int_0^x p * p^X*(1-p)^(N-X) * dp / nt
+L(p) = p^X*(1-p)^(N-X)
 ```
 
+Let me recall that the pdf of a TV obtained purely by obversation is a
+beta distribution with 
 
 ```
-Int_0^x [ (PDF_CRi(S|R)(p) dp) * P(CRi) * Prod_j PDF_CRi(Sj|Rj)(p) * dp / nt
-CDF_P(S|R)(x) = Sum_i Int_0^x [ (PDF_CRi(S|R)(p) dp) * P(CRi) * Prod_j PDF_CRi(Sj|Rj)(p) * dp / nt
-CDF_P(S|R)(x) = Sum_i P(CRi) Int_0^x PDF_CRi(S|R)(p) * Prod_j PDF_CRi(Sj|Rj)(p) * dp / nt
-CDF_P(S|R)(x) = Sum_i P(CRi) Int_0^x PDF_CRi(S|R)(p) * Prod_j PDF_CRi(Sj|Rj)(p) * dp / nt
+alpha = X+1
+beta = N-X+1
 ```
 
-```
-CDF_P(S|R) = Sum_i=0^n alpha_i * CDF_CRi(S|R) * P(CRi) / nt
-```
+(Section 4.5.1 of the PLN book).
 
-
-
-where
+At that stage one can introduce a different prior, like Jeffrey's
 
 ```
-alpha_i * CDF_CRi(S|R)(x) = Int_0^x p^X*(1-p)^(N-X) dp
+alpha = X+1/2
+beta = N-X+1/2
 ```
 
-`N` is the number of observations and `X` the positive count. Which
-corresponds to, up to a multiplicative constant, the second order
-distribution representing a TV as defined in Section 4.5.1 of the PLN
-book. So up to a multiplicative constant `FCS_CRi(S|R)` both
-corresponds to the TV of `CRi(S|R)` and `Prod_j
-CRi(Sj|Rj)`. According equation 2 in Section 4.5.1 of the PLN book
-this constant factor is
+Once `alpha` and `beta` are defined, with whichever prior one chooses,
+the following holds
 
 ```
-(N+1)*(choose N X)
+L(p) = pdf_beta_distribution_alpha_beta(p) * Beta(alpha, beta)
+L(p) = pdf_CRi(p) * Beta(beta, alpha)
 ```
 
-so that `CDF_CRi(S|R)(1) = 1`. To cancel this factor out we must
-choose `alpha_i` such that
+* `pdf_beta_distribution_alpha_beta` is the pdf of the beta
+distribution with parameters `alpa` and `beta`.
+* `pdf_CRi` is the pdf of the TV of the ith model.
+* `Beta` is the beta function.
+
+We thus obtain the following, almost final, equation
 
 ```
-alpha_i = 1 / (N+1)*(choose N X)
+CDF_P(S|R)(x) = Sum_i P(CRi) Int_0^x pdf_CRi(p) * Beta(beta, alpha) dp / nt
 ```
 
-Which gives us a normalizing factor of
+Almost final because, unlike in Universal Operator Induction, our
+models are partial, they only compute the probability of the answer,
+`Si`, for a subset of questions, all those that satisfy context
+`Ci`. Thus the number of positive and total observations for model `i`
+are generally not `X` and `N`, but rather 
 
 ```
-nt = Sum_i=0^n P(CRi) / ((Ni+1)*(choose Ni Xi))
+X_i<=X
+N_i<=N
 ```
 
-So the final equation is
+Thus the `alpha` and `beta` parameters must be accordingly
+parameterized according to model `i`
 
 ```
-CDF_P(S|R) = Sum_i=0^n CDF_CRi(S|R) * P(CRi) / ((Ni+1)*(choose Ni Xi))
-           / Sum_i=0^n P(CRi) / ((Ni+1)*(choose Ni Xi))
+alpha_i = X_i+1/2
+beta_i = N_i-X_i+1/2
 ```
 
-This assumes that all observations are certain (based on perfect
-sensors). We actually do need to consider imperfect sensors because
-the negative observations of preproof have uncertainties, as explained
-in Subsection Record Inference Traces. It is expected that we'll have
-to resort to convolution products, because the pdf of a random
-variable equal to the sum of other random variables is determined by
-the convolution products of their pdfs. However it is suspected that
-the convolution products of 2 beta-distributions is a
-beta-distribution, which should simplify things a lot.
+assuming Jeffrey's prior.
 
-There is also the problem that `CRi(Sj|Rj)` is undefined for some
-observations. TODO: assume that the algorithmic complexity of the
-complete operator is
+There is no theory, to the best of my knowledge, of a variation of
+Universal Operator Induction considering partial operators. To address
+that we are going to artificially complete these operators. In
+principle, to do that well, one would need to consider all possible
+completions, but that is impractical. So instead will only consider
+the ones that perfectly explains the out-of-context data. This way the
+likelihood doesn't change as the contribution of each out-of-context
+datum has a factor of `1`.
 
 ```
-K(i)+a*sum_j_in_Ei (L(j)
+CDF_P(S|R)(x) = Sum_i P(CRi) Int_0^x pdf_CRi(p) * Beta(alpha_i, beta_i) dp / nt
 ```
 
-where `Ei` is the set of observations that are undefined by rule `i`
-and `L(j)` is the length, or entropy, of observation `j`.
+However this is assumption gives an unfair advantage to models with
+narrower contexts, and is expected to produce overfitting. So instead
+we move the extra complexity to the prior. If the fictive completed
+model of `CRi` is called `CRi+`, its prior `P(CRi+)<P(CRi)` has to
+account for that extra complexity. We unfortunately do not know it,
+but we can establish an upper bound. Indeed the extra complexity
+cannot be more than the length of the out-of-context data, because we
+can always complete `CRi` with a table mapping the out-of-context
+questions to their answers. For now we will use a simplistic heuristic
+and assume that the kolmogorov complexity of `CRi+` is
 
-Another option is to use distributional truth values to complete the
-operator.
+`K(CRi+) = K(CRi) + |D|^(1-c)`
+
+where `c` is a compressability parameter. If `c=0` then `D`, the
+out-of-context data, is incompressible, if `c=1` then `D` can be
+compressed to a single bit. It is a very crude heuristic of course,
+and it requires us to tune a parameter `c`, but it has the advantages
+of being simple and computationally lightweight.
+
+The prior of `CRi+` is then
+
+`P(CRi+) = exp(-cpx*K(CRi+))`
+
+where `cpx` is another parameter we'll have to tune. The final
+equation of our mixture model is therefore
+
+```
+CDF_P(S|R)(x) = Sum_i P(CRi+) Int_0^x pdf_CRi(p) * Beta(alpha_i, beta_i) dp / nt
+```
+
+Last remark. This does assume that all observations are certain (based
+on perfect sensors). In practice we actually need to consider
+imperfect sensors because the negative observations of preproof have
+uncertainties, as explained in Subsection Record Inference Traces. It
+is expected that we'll have to resort to convolution products, because
+the pdf of a random variable equal to the sum of other random
+variables is determined by the convolution products of their
+pdfs. However it is suspected that the convolution products of 2
+beta-distributions is a beta-distribution, which should simplify
+things a lot. This is highly speculative of course.
 
 Once we have that we can calculate the TVi of success of each active
 inference rule Ri, either by turning its cdf into a TV or a pdf as it
