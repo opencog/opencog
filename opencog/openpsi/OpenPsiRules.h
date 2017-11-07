@@ -33,14 +33,6 @@ class OpenPsiRules
 public:
   OpenPsiRules(AtomSpace* as);
 
-  inline Handle add_demand(const std::string& name) {
-    return add_category(_psi_demand, name);
-  }
-
-  inline Handle add_goal(const std::string& name) {
-    return add_category(_psi_goal, name);
-  }
-
   /**
    * Add a rule to the atomspace and the psi-rule index.
    * @return An ImplicationLink that forms a psi-rule. The structure
@@ -88,18 +80,20 @@ public:
    * @param name The name of the ConceptNode that is going to be added
    * @return ConceptNode that represents the category.
    */
+   // TODO: Should the categories be saved so as to check when using
+   // add_to_category?
   Handle add_category(const Handle tag_type_node, const std::string& name);
 
   /**
-   * Add a rule to a category. The representation is as follows
-   *    (MemberLink rule_node category_node)
+   * Add a node to a category. The representation is as follows
+   *    (MemberLink node category_node)
    * Having this enables the possiblity of easily redefining the
    * representation.
    *
-   * @param rule A psi-rule.
-   * @param rule An atom that reprsents the category.
+   * @param node A node to be categorized.
+   * @param category An atom that reprsents the category.
    */
-  void add_to_category(const Handle rule, const Handle category);
+  void add_to_category(const Handle node, const Handle category);
 
 private:
   /**
@@ -123,21 +117,6 @@ private:
   // continue using such convention but should be replaces with graph that
   // represent the relationships. That way it would be possible to answer
   // questions about the system the nlp pipeline.
-
-  /**
-   * Node used to declare an action.
-   */
-  static Handle _psi_action;
-
-  /**
-   * Node used to declare a goal.
-   */
-  static Handle _psi_goal;
-
-  /**
-   * Node used to declare a demand.
-   */
-  static Handle _psi_demand;
 
   AtomSpace* _as;
 };

@@ -28,12 +28,6 @@
 using namespace opencog;
 
 std::map<Handle, OpenPsiRules::PsiTuple> OpenPsiRules::_psi_rules = {};
-Handle OpenPsiRules::_psi_action = \
-  Handle(createNode(CONCEPT_NODE, "OpenPsi: action"));
-Handle OpenPsiRules::_psi_goal = \
-  Handle(createNode(CONCEPT_NODE, "OpenPsi: goal"));
-Handle OpenPsiRules::_psi_demand = \
-  Handle(createNode(CONCEPT_NODE, "OpenPsi: demand"));
 
 OpenPsiRules::OpenPsiRules(AtomSpace* as): _as(as)
 {}
@@ -41,9 +35,6 @@ OpenPsiRules::OpenPsiRules(AtomSpace* as): _as(as)
 Handle OpenPsiRules::add_rule(const HandleSeq& context, const Handle& action,
   const Handle& goal, const TruthValuePtr stv)
 {
-  // Declare as an openpsi action if it hasn't already been declared.
-  _as->add_link(MEMBER_LINK, action, _psi_action);
-
   // Add a SequentialAndLink of context and action which forms the
   // implicant of the psi-rule.
   HandleSeq temp_c =  context;
@@ -89,9 +80,9 @@ Handle OpenPsiRules::add_category(const Handle tag_type_node,
   return tag;
 }
 
-void OpenPsiRules::add_to_category(const Handle rule, const Handle category)
+void OpenPsiRules::add_to_category(const Handle node, const Handle category)
 {
-  _as->add_link(MEMBER_LINK, rule, category);
+  _as->add_link(MEMBER_LINK, node, category);
 }
 
 HandleSeq& OpenPsiRules::get_context(const Handle rule)

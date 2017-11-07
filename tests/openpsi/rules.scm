@@ -35,12 +35,14 @@
         (GroundedPredicate "scm: act-1")
         (ListLink (Variable "$abc"))))
 
+(define goal-1 (Concept "goal-1"))
+
 (define (act-1 groundings)
     (ConceptNode "act-1")
     (stv 1 1)
 )
 
-(define (demand-1) (psi-demand  "demand-1"))
+(define (demand-1) (psi-component  "demand-1"))
 
 (define goal-1 (Concept "goal-1"))
 
@@ -118,7 +120,7 @@
     (stv 1 1)
 )
 
-(define (demand-2) (psi-demand  "demand-2"))
+(define (demand-2) (psi-component  "demand-2"))
 
 (define goal-2 (Concept "goal-2"))
 
@@ -227,7 +229,7 @@
 
 ; --------------------------------------------------------------
 ; Helper functions for `OpenPsiUTest::test_psi_get_dual_rules`
-(define (demand-4) (psi-demand  "demand-4"))
+(define (demand-4) (psi-component  "demand-4"))
 
 (define action-4
     (EvaluationLink
@@ -284,7 +286,7 @@
 (define (test_psi_step_4) (cog-node? (cog-node 'ConceptNode "act-6")))
 
 ; --------------------------------------------------------------
-;(define (demand-5) (psi-demand  "demand-5"))
+;(define (demand-5) (psi-component  "demand-5"))
 
 ;(define (rule-5)
 ;    (psi-rule

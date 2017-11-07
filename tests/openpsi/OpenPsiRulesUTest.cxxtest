@@ -101,7 +101,7 @@ public:
     CHKERR
     Handle action_1 = _scm->eval_h("action-1");
     CHKERR
-    Handle goal_1 = _opr->add_goal("goal-1");
+    Handle goal_1 = _scm->eval_h("goal-1");
     CHKERR
 
     // Test 1:
