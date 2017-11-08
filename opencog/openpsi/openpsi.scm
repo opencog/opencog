@@ -45,6 +45,8 @@
     psi-get-members
 
     ; C++ bindings from libopenpsi
+    psi-add-category
+    psi-add-to-category
     psi-get-action
     psi-get-context
     psi-get-goal
