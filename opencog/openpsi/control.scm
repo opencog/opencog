@@ -128,7 +128,7 @@
 
     (psi-rule-set-atomese-weight psi-rule (tv-mean (cog-tv psi-rule)))
 
-    (psi-rule-set-alias psi-rule name)
+    (psi-rule-set-alias! psi-rule name)
 
     psi-rule
 )
@@ -215,6 +215,7 @@
   - a list with psi-rules.
 "
     (receive (filtered other)
+        ; TODO: Use categories instead of aliases for categorization
         (psi-partition-rule-with-alias rule-alias psi-rule-list)
         (map
             (lambda (psi-rule) (psi-rule-set-atomese-weight psi-rule 0.0))
@@ -235,6 +236,7 @@
   - a list with psi-rules.
 "
     (receive (filtered other)
+      ; TODO: Use categories instead of aliases for categorization
         (psi-partition-rule-with-alias rule-alias psi-rule-list)
         (map
             (lambda (psi-rule) (psi-rule-set-atomese-weight psi-rule 0.9))
