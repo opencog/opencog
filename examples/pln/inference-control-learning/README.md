@@ -700,7 +700,7 @@ Almost final because, unlike in Universal Operator Induction, our
 models are partial, they only compute the probability of the answer,
 `Si`, for a subset of questions, all those that satisfy context
 `Ci`. Thus the number of positive and total observations for model `i`
-are generally not `X` and `N`, but rather 
+are generally not `X` and `N`, but rather
 
 ```
 X_i<=X

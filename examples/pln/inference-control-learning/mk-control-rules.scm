@@ -41,7 +41,8 @@
   ;; (expand ($A (Inheritance a $X) $R) $B)
   ;; ->
   ;; (preproof-of $B $T)
-  (ground-a-pattern-rules))
+  (ground-a-pattern-rules)
+)
 
 (define (ground-context-free-rules)
   (let* ((vardecl (TypedVariable

@@ -16,7 +16,7 @@
 ;; Set loggers levels
 (cog-logger-set-level! "info")
 (cog-logger-set-level! icl-logger "debug")
-(cog-logger-set-level! (cog-ure-logger) "debug")
+(cog-logger-set-level! (cog-ure-logger) "fine")
 
 ;; Set loggers stdout
 ;; (cog-logger-set-stdout! #t)
