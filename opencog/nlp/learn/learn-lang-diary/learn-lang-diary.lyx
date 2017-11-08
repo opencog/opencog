@@ -2116,6 +2116,16 @@ Large-scale evidence of dependency length minimization in 37 languages
  (2015), doi: 10.1073/pnas.1502134112
 \end_layout
 
+\begin_layout Itemize
+The longest links, observed statistically, are of length 6 or less.
+ This is based on computing the mutual information of words at different
+ distances for the Brown corpus.
+ Xuedong Huang, Fileno Alleva, Hsiao-wuen Hon, Mei-Y uh Hwang, Kai-Fu Lee
+ and Ronald Rosenfeld.
+ The SPHINX-II Speech Recognition System: An Overview .
+ Computer , Speech and Language , volume 2, pages 137–148, 1993.
+\end_layout
+
 \begin_layout Standard
 So, rather than imposing no-crossing as a constraint on the parser, instead,
  let it find its own way into the grammar.
