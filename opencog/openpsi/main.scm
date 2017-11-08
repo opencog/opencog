@@ -36,8 +36,11 @@
 )
 
 ; --------------------------------------------------------------
-(define psi-component-node
-  (ConceptNode (string-append psi-prefix-str "component")))
+; Define the component category. Components are like mind-agents
+; but there activities are defined using openpsi-rules and action-selectors
+; associated with it.
+(define psi-component-node (ConceptNode "component"))
+(psi-add-category psi-component-node)
 
 ; --------------------------------------------------------------
 (define (psi-component name)
@@ -50,7 +53,7 @@
   ; NOTE: All the values associated with the component can easily moved into
   ; the atomspace.
   (let ((component (ConceptNode name))
-    (loop-node (DefinedPredicate (string-append name "-" "loop")))
+    (loop-node (DefinedPredicate (string-append name "-loop")))
     )
     (InheritanceLink component psi-component-node)
 
