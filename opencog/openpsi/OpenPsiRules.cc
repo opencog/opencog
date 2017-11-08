@@ -29,7 +29,7 @@ using namespace opencog;
 
 std::map<Handle, OpenPsiRules::PsiTuple> OpenPsiRules::_psi_rules = {};
 Handle OpenPsiRules::_psi_category = \
-  Handle(createNode(CONCEPT_NODE, "OpenPsi: category"));
+  Handle(createNode(CONCEPT_NODE, "category"));
 
 OpenPsiRules::OpenPsiRules(AtomSpace* as): _as(as)
 {}
