@@ -52,8 +52,7 @@
       (Evaluation
         (Predicate "URE:BC:target")
         (Variable "$T")))
-    (Evaluation
-      (Predicate "URE:BC:preproof-of")
+    (preproof-of
       (List
         (Variable "$A")
         (Variable "$T")))))

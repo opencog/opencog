@@ -18,7 +18,7 @@
 
 ;; Let of characters of the alphabet
 (define alphabet-list
-  (string->list "ABCDEFGHIJKLMNOPQRSTUVWXYZ"))
+  (string->list "abcdefghijklmnopqrstuvwxyz"))
 
 ;; Given a number between 0 and 25 return the corresponding letter as
 ;; a string.
@@ -40,12 +40,13 @@
 
 ;; Randomly generate N targets
 (define (gen-random-targets N)
-  (list (Inheritance (Concept "D") (Concept "Y"))
-        (Inheritance (Concept "A") (Concept "Z"))
-        (Inheritance (Concept "A") (Concept "G"))))
-  ;; (if (= N 0)
-  ;;     '()
-  ;;     (cons (gen-random-target) (gen-random-targets (- N 1)))))
+  ;; (list (Inheritance (Concept "d") (Concept "y"))
+  ;;       (Inheritance (Concept "h") (Concept "j"))
+  ;;       (Inheritance (Concept "a") (Concept "z"))
+  ;;       (Inheritance (Concept "a") (Concept "g"))))
+  (if (= N 0)
+      '()
+      (cons (gen-random-target) (gen-random-targets (- N 1)))))
 
 ;; Log the given atomspace at some level
 (define (icl-logger-info-atomspace as)
@@ -90,7 +91,7 @@
   (if (and (cog-atom? atom) (null-incoming-set? atom) (null-confidence? atom))
       (let* ((outgoings (cog-outgoing-set atom)))
         (cog-delete atom)
-        (remove-dangling-atoms outgoings))))
+        (remove-dangling-atom-list outgoings))))
 
 (define (null-incoming-set? atom)
   (null? (cog-incoming-set atom)))
@@ -152,7 +153,7 @@
 
 ;; Redefine cog-cp and cog-cp-all to return a list of copied atoms
 ;; (indeed these are not the same the ones in the source).
-(define-public (icl-cp AS LST)
+(define (icl-cp AS LST)
 "
   icl-cp AS LST - Copy the atoms in LST to the given atomspace AS and
   return the list of atoms now in AS.
@@ -176,9 +177,19 @@
     ;; Return the copied LST now in AS
     results))
 
-(define-public (icl-cp-all AS)
+(define (icl-cp-all AS)
 "
   icl-cp-all AS - Copy all atoms in the current atomspace to the given atomspace AS and returns the list of copied atoms.
 "
-  (icl-cp AS (apply append (map cog-get-atoms (cog-get-types))))
-)
+  (icl-cp AS (apply append (map cog-get-atoms (cog-get-types)))))
+
+(define (preproof-of arg)
+  (Evaluation
+    (Predicate "URE:BC:preproof-of")
+    arg))
+
+(define (expand input output)
+  (Execution
+    (Schema "URE:BC:expand-and-BIT")
+    input
+    output))
