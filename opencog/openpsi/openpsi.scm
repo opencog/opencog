@@ -9,9 +9,10 @@
 ; --------------------------------------------------------------
 (define-module (opencog openpsi)
   #:use-module (opencog)
+  #:use-module (opencog exec)
   #:export (
     ; From action-selector.scm
-    psi-set-action-selector psi-get-action-selector
+    psi-set-action-selector! psi-action-selector
     psi-select-rules-per-component
 
     ; From demand.scm
