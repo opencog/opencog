@@ -3,7 +3,7 @@
 ;; Set parameters
 (define pss 100)                    ; Problem set size
 (define niter 2)                    ; Number of iterations
-(define piter 30)                   ; Number of iterations used for each problem
+(define piter 5)                   ; Number of iterations used for each problem
 
 ;; Load utils
 (load "icl-utilities.scm")
@@ -14,7 +14,7 @@
 (cog-randgen-set-seed! 0)
 
 ;; Set loggers levels
-(cog-logger-set-level! "info")
+(cog-logger-set-level! "debug")
 (cog-logger-set-level! icl-logger "debug")
 (cog-logger-set-level! (cog-ure-logger) "fine")
 
