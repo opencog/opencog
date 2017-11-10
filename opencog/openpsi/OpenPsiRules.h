@@ -47,6 +47,13 @@ public:
     const Handle& goal, const TruthValuePtr stv);
 
   /**
+   * Returns all the categories that were added using add_to_category.
+   *
+   * @return A vector of Handles that represent the categories.
+   */
+  HandleSeq get_categories();
+
+  /**
    * @param rule A psi-rule.
    * @return Context of the given psi-rule.
    */
@@ -115,9 +122,17 @@ private:
   // TODO: Using names that are prefixed with "OpenPsi: " might be a bad idea,
   // because it might hinder interoperability with other components that
   // expect an explicit ontological representation. For historic reasons we
-  // continue using such convention but should be replaces with graph that
+  // continue using such convention but should be replaced with graph that
   // represent the relationships. That way it would be possible to answer
-  // questions about the system the nlp pipeline.
+  // questions about the system using the nlp pipeline.
+
+  /**
+   * Maps from category nodes to Set of rules in that category.
+   * It is static because the assumption is the recategorization of rules
+   * doesn't happen dynamically, for now, i.e., when there is no learning
+   * taking place.
+   */
+  static std::map<Handle, HandleSet> _category_index;
 
   /**
    * Node used to declare a category.

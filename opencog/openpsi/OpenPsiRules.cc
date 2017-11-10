@@ -28,6 +28,7 @@
 using namespace opencog;
 
 std::map<Handle, OpenPsiRules::PsiTuple> OpenPsiRules::_psi_rules = {};
+std::map<Handle, HandleSet> OpenPsiRules::_category_index = {};
 Handle OpenPsiRules::_psi_category = \
   Handle(createNode(CONCEPT_NODE, "category"));
 
@@ -77,13 +78,31 @@ Handle OpenPsiRules::add_rule(const HandleSeq& context, const Handle& action,
 Handle OpenPsiRules::add_category(const Handle& new_category)
 {
   _as->add_link(INHERITANCE_LINK, new_category, _psi_category);
+  if(not(_category_index.count(new_category))) {
+    _category_index[new_category] = {};
+  }
+
   return new_category;
 }
 
 Handle OpenPsiRules::add_to_category(const Handle& rule, const Handle& category)
 {
   _as->add_link(MEMBER_LINK, rule, category);
+  // Add the category just in case it hasn't been declared.
+  // TODO But why make the add_category public then?
+  add_category(category);
+  _category_index[category].insert(rule);
+
   return rule;
+}
+HandleSeq OpenPsiRules::get_categories()
+{
+  HandleSeq categories;
+  for(auto i : _category_index) {
+    categories.emplace_back(i.first);
+  }
+
+  return categories;
 }
 
 HandleSeq& OpenPsiRules::get_context(const Handle rule)
