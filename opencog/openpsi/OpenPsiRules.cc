@@ -95,14 +95,16 @@ Handle OpenPsiRules::add_to_category(const Handle& rule, const Handle& category)
 
   return rule;
 }
-HandleSeq OpenPsiRules::get_categories()
+
+HandleSeq& OpenPsiRules::get_categories()
 {
-  HandleSeq categories;
+  HandleSeq* categories = new HandleSeq();
   for(auto i : _category_index) {
-    categories.emplace_back(i.first);
+    categories->emplace_back(i.first);
   }
 
-  return categories;
+  // TODO: Should this be a shared ptr to avoid memory leak?
+  return *categories;
 }
 
 HandleSeq& OpenPsiRules::get_context(const Handle rule)

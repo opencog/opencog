@@ -51,7 +51,7 @@ public:
    *
    * @return A vector of Handles that represent the categories.
    */
-  HandleSeq get_categories();
+  static HandleSeq& get_categories();
 
   /**
    * @param rule A psi-rule.

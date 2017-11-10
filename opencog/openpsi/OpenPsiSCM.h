@@ -55,6 +55,13 @@ private:
   Handle get_action(const Handle& rule);
 
   /**
+   * A wrapper around OpenPsiRules::get_categories
+   *
+   * @return A vector of Handles that represent the categories.
+   */
+  HandleSeq& get_categories();
+
+  /**
    * Get the context of the given rule.
    *
    * @param rule A psi-rule.

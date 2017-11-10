@@ -44,6 +44,9 @@ void OpenPsiSCM::init()
   define_scheme_primitive("psi-add-to-category", &OpenPsiSCM::add_to_category,
     this, "openpsi");
 
+  define_scheme_primitive("psi-categories", &OpenPsiSCM::get_categories,
+    this, "openpsi");
+
   define_scheme_primitive("psi-get-action", &OpenPsiSCM::get_action,
     this, "openpsi");
 
@@ -94,6 +97,11 @@ Handle OpenPsiSCM::add_to_category(const Handle& rule, const Handle& category)
 Handle OpenPsiSCM::get_action(const Handle& rule)
 {
   return OpenPsiRules::get_action(rule);
+}
+
+HandleSeq& OpenPsiSCM::get_categories()
+{
+  return OpenPsiRules::get_categories();
 }
 
 HandleSeq& OpenPsiSCM::get_context(const Handle& rule)
