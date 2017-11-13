@@ -13,7 +13,7 @@
   #:export (
     ; From action-selector.scm
     psi-set-action-selector! psi-action-selector
-    psi-select-rules-per-component
+    psi-select-rules
 
     ; From demand.scm
     psi-get-all-demands psi-get-all-enabled-demands psi-get-all-valid-demands

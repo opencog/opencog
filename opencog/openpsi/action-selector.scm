@@ -120,9 +120,9 @@
 )
 
 ; --------------------------------------------------------------
-(define (psi-select-rules-per-component component)
+(define (psi-select-rules component)
 "
-  psi-select-rules-per-component COMPONENT
+  psi-select-rules COMPONENT
 
   Run the action-selector associated with COMPONENT, and return a list
   of psi-rules. If there aren't any rules returned on execution of the
@@ -132,7 +132,7 @@
     (if (null? acs)
       (error
         (format "Define an action-selector for component ~a" component))
-      (let ((result (gar (cog-execute! acs))))
+      (let ((result (cog-execute! acs)))
           (if (null? result)
             '()
             (cog-outgoing-set result)

@@ -46,16 +46,23 @@
 (define (psi-component name)
 "
   psi-component NAME
-
-  Create and return a ConceptNode that represents an OpenPsi engine driven
-  component. The NAME should be a string.
+    Create and return a ConceptNode that represents an OpenPsi engine driven
+    component called NAME. It associates an action-selector, and a psi-step
+    loop.
 "
-  ; NOTE: All the values associated with the component can easily moved into
-  ; the atomspace.
+  ; NOTE: All the values associated with the component can easily be
+  ; moved into the atomspace.
   (let ((component (ConceptNode name))
     (loop-node (DefinedPredicate (string-append name "-loop")))
     )
     (InheritanceLink component psi-component-node)
+
+    ; Assign a default action-selector
+    (psi-set-action-selector! component
+      (ExecutionOutput
+        (GroundedSchema "scm: psi-get-satisfiable-rules")
+        (List component))
+    )
 
     ; Add a value for controlling whether to keep on running the loop or not.
     (cog-set-value! component (Predicate "run-loop") (StringValue "#f"))
@@ -177,7 +184,7 @@
       "In component ~a taking one psi-step, loop-count = ~a" component lc)
 
     ; Do action-selection and action-execution.
-    (par-map psi-act (psi-select-rules-per-component component))
+    (par-map psi-act (psi-select-rules component))
 
     (cog-logger-debug opl
       "In component ~a ending psi-step, loop-count = ~a" component lc)
@@ -261,7 +268,7 @@
                     (cog-evaluate! updater)
                 )
                 ; The assumption is that the rules can be run concurrently.
-                (par-map act-and-evaluate (psi-select-rules-per-component d))
+                (par-map act-and-evaluate (psi-select-rules d))
             ))
 
         (psi-get-all-enabled-demands)

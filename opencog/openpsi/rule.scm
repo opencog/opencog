@@ -164,10 +164,10 @@
 (define (psi-get-satisfiable-rules category)
 "
   psi-get-satisfiable-rules CATEGORY
-    Returns a list of all of the psi-rules that are member of CATEGORY
+    Returns a SetLink of all of the psi-rules that are member of CATEGORY
     and are satisfiable.
 "
-  (filter is-satisfiable? (psi-get-rules category))
+  (Set (filter is-satisfiable? (psi-get-rules category)))
 )
 
 ; --------------------------------------------------------------
