@@ -159,7 +159,44 @@
     (pp-icr-bc impl-antecedent)))
 
 ;; Assumes that the control rules have already been grounded, and all
-;; antecedent and consequent groundings are evaluated.
+;; antecedent and consequent groundings are evaluated, merely run the
+;; backward chainer on the following query
+;;
+;; Quote
+;;   ImplicationScope
+;;     Unquote "$impl-vardecl"
+;;     And
+;;       Evaluation
+;;         Predicate "URE:BC:preproof-of"
+;;         Unquote Variable "preproof-A-args"
+;;       Execution
+;;         GroundedSchema "URE:BC:expand-and-BIT"
+;;         Unquote Variable "$expand-inputs"
+;;         Unquote Variable "$expand-output"
+;;     Evaluation
+;;       Predicate "URE:BC:preproof-of"
+;;       Unquote Variable "$preproof-B-args"
+;;
+;; with the following variable declaration for the query
+;;
+;; VariableList
+;;   TypedVariable
+;;     Variable "$impl-vardecl"
+;;     (Type "VariableList")
+;;   TypedVariable
+;;     Variable "$preproof-A-args"
+;;     Type "ListLink"
+;;   TypedVariable
+;;     Variable "$expand-inputs"
+;;     Type "ListLink"
+;;   Variable "$expand-output"
+;;   TypedVariable
+;;     Variable "$preproof-B-args"
+;;     Type "ListLink"
+;;
+;; TODO: Probably make the arguments as explicit as possible, to
+;; express the relationships between the different parts, as to make
+;; sure the variable declarations will reflect these.
 (define (produce-control-rules)
   ;; Load rule base for evaluating the control rules via direct evaluation
   (load "icr-rb.scm")
