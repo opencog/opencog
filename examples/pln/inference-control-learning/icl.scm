@@ -14,7 +14,7 @@
 (cog-randgen-set-seed! 0)
 
 ;; Set loggers levels
-(cog-logger-set-level! "info")
+(cog-logger-set-level! "debug")
 (cog-logger-set-level! icl-logger "debug")
 (cog-logger-set-level! (cog-ure-logger) "fine")
 
