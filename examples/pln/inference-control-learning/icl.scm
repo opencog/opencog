@@ -3,7 +3,7 @@
 ;; Set parameters
 (define pss 100)                    ; Problem set size
 (define niter 2)                    ; Number of iterations
-(define piter 5)                   ; Number of iterations used for each problem
+(define piter 30)                   ; Number of iterations used for each problem
 
 ;; Load utils
 (load "icl-utilities.scm")
