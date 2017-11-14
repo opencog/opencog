@@ -116,7 +116,6 @@ Handle OpenPsiSCM::get_goal(const Handle& rule)
 
 Handle OpenPsiSCM::imply(const Handle& rule)
 {
-  // TODO: Rename to psi-satisfiable? once c++ cache is implemented.
   AtomSpace* as = SchemeSmob::ss_get_env_as("psi-imply");
   OpenPsiImplicator implicator(as);
   return implicator.imply(rule);
