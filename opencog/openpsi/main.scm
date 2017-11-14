@@ -71,22 +71,24 @@
     ; been executed
     (cog-set-value! component (Predicate "loop-count") (FloatValue 0))
 
-    ; Add the loop that would be run. This is stored as value so as
-    ; to save on searching for it in the atomspace and make it accessable
+    ; Define the loop that would be run. This is stored as value so as
+    ; to save on searching for it in the atomspace and make it accessible
     ; through any programming language.
-    (cog-set-value! component (Predicate "loop")
-      (Define
-        loop-node
-        (Satisfaction
-          (SequentialAnd
-            (Evaluation
-              (GroundedPredicate "scm: psi-step")
-              (List component))
-            (Evaluation
-              (GroundedPredicate "scm: psi-run-continue?")
-              (List component))
-            ; tail-recursive call
-            loop-node))))
+    (Define
+      loop-node
+      (Satisfaction
+        (SequentialAnd
+          (Evaluation
+            (GroundedPredicate "scm: psi-step")
+            (List component))
+          (Evaluation
+            (GroundedPredicate "scm: psi-run-continue?")
+            (List component))
+          ; tail-recursive call
+          loop-node)))
+
+    (cog-set-value! component (Predicate "loop") loop-node)
+    component
   )
 )
 
@@ -105,7 +107,7 @@
   This thread can be halted by calling `(psi-halt COMPONENT)`, which will exit
   the loop, and kill the thread.
 "
-  (if (not (psi-running?))
+  (if (not (psi-running? component))
     (begin
       (cog-set-value! component (Predicate "run-loop") (StringValue "#t"))
       (call-with-new-thread

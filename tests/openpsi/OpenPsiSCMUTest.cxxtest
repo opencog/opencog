@@ -373,6 +373,37 @@ public:
         logger().info("END TEST: %s", __FUNCTION__);
     }
 
+    // Check the scheme functions `psi-run` and `psi-halt`
+    void test_psi_run_and_psi_halt()
+    {
+      logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+      // Common Setup
+      _scm->eval("(define d1 (demand-1))");
+      CHKERR
+      _scm->eval("(define d2 (demand-2))");
+      CHKERR
+
+      // Tests
+      auto result_1 = _scm->eval("(test-psi-run)");
+      CHKERR
+      TS_ASSERT_EQUALS("#t\n", result_1);
+
+      auto result_2 = _scm->eval("(test-psi-halt)");
+      CHKERR
+      TS_ASSERT_EQUALS("#t\n", result_2);
+      // Restart the loops
+      auto result_3 = _scm->eval("(test-psi-run)");
+      CHKERR
+      TS_ASSERT_EQUALS("#t\n", result_1);
+
+      auto result_4 = _scm->eval("(test-psi-halt)");
+      CHKERR
+      TS_ASSERT_EQUALS("#t\n", result_2);
+
+      logger().info("END TEST: %s", __FUNCTION__);
+    }
+
     // Check the scheme function `psi-get-dual-rules`
     // NOTE: The function `psi-get-dual-rules` has been removed but something
     // similar will be added. This test is not removed as the test may come in

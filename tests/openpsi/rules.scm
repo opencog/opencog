@@ -199,6 +199,48 @@
 )
 
 ; --------------------------------------------------------------
+(define (test-psi-run)
+"
+  If the loop-count is increasing then it means the loop is running
+"
+  (psi-run d1)
+  ; The delay is b/c it is more likely that different components will
+  ; not be started at the same time.
+  (sleep 1)
+  (psi-run d2)
+  (groundable-content-1)
+  (groundable-content-2)
+
+  (let ((l1 (psi-loop-count d1))
+    (l2 (psi-loop-count d2)))
+
+    ; Wait for a while to be sure
+    (sleep 1)
+    (and
+      (< 50 (- (psi-loop-count d1) l1))
+      (< 50 (- (psi-loop-count d2) l2)))
+  )
+)
+
+(define (test-psi-halt)
+"
+  If the loop-count is not changing then the loop has stopped.
+"
+  (psi-halt d1)
+  ; The delay is b/c it is more likely that different components will
+  ; not be stopped at the same time.
+  (sleep 1)
+  (psi-halt d2)
+  (let ((l1 (psi-loop-count d1))
+    (l2 (psi-loop-count d2)))
+    ; Wait for a while to be sure
+    (sleep 1)
+    (and
+      (equal? l1 (psi-loop-count d1))
+      (equal? l2 (psi-loop-count d2)))
+  )
+)
+; --------------------------------------------------------------
 ; Helper functions for `OpenPsiUTest::test_psi_get_dual_rules`
 (define (demand-4) (psi-component  "demand-4"))
 
