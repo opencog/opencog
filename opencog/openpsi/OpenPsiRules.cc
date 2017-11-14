@@ -28,32 +28,25 @@
 using namespace opencog;
 
 std::map<Handle, OpenPsiRules::PsiTuple> OpenPsiRules::_psi_rules = {};
-Handle OpenPsiRules::_psi_action = \
-  Handle(createNode(CONCEPT_NODE, "OpenPsi: action"));
-Handle OpenPsiRules::_psi_goal = \
-  Handle(createNode(CONCEPT_NODE, "OpenPsi: goal"));
-Handle OpenPsiRules::_psi_demand = \
-  Handle(createNode(CONCEPT_NODE, "OpenPsi: demand"));
+std::map<Handle, HandleSet> OpenPsiRules::_category_index = {};
+Handle OpenPsiRules::_psi_category = \
+  Handle(createNode(CONCEPT_NODE, "category"));
 
 OpenPsiRules::OpenPsiRules(AtomSpace* as): _as(as)
 {}
 
 Handle OpenPsiRules::add_rule(const HandleSeq& context, const Handle& action,
-  const Handle& goal, const TruthValuePtr stv, const Handle& demand)
+  const Handle& goal, const TruthValuePtr stv)
 {
-  // Declare as an openpsi action if it hasn't already been declared.
-  _as->add_link(MEMBER_LINK, action, _psi_action);
-
   // Add a SequentialAndLink of context and action which forms the
   // implicant of the psi-rule.
   HandleSeq temp_c =  context;
   temp_c.push_back(action);
   Handle hca = _as->add_link(SEQUENTIAL_AND_LINK, temp_c);
 
-  // Add the psi-rule, set the truthvalue and add to a demand.
+  // Add the psi-rule, set the truthvalue.
   Handle rule = _as->add_link(IMPLICATION_LINK, hca, goal);
   rule->setTruthValue(stv);
-  _as->add_link(MEMBER_LINK, rule, demand);
 
   // Construct the query atom that is used to check satisfiablity. This is
   // done here for performance. If context has only one atom and it is a
@@ -82,12 +75,36 @@ Handle OpenPsiRules::add_rule(const HandleSeq& context, const Handle& action,
   return rule;
 }
 
-Handle OpenPsiRules::add_tag(const Handle tag_type_node,
-                             const std::string& name)
+Handle OpenPsiRules::add_category(const Handle& new_category)
 {
-  Handle tag = _as->add_node(CONCEPT_NODE, name);
-  _as->add_link(INHERITANCE_LINK, tag , tag_type_node);
-  return tag;
+  _as->add_link(INHERITANCE_LINK, new_category, _psi_category);
+  if(not(_category_index.count(new_category))) {
+    _category_index[new_category] = {};
+  }
+
+  return new_category;
+}
+
+Handle OpenPsiRules::add_to_category(const Handle& rule, const Handle& category)
+{
+  _as->add_link(MEMBER_LINK, rule, category);
+  // Add the category just in case it hasn't been declared.
+  // TODO But why make the add_category public then?
+  add_category(category);
+  _category_index[category].insert(rule);
+
+  return rule;
+}
+
+HandleSeq& OpenPsiRules::get_categories()
+{
+  HandleSeq* categories = new HandleSeq();
+  for(auto i : _category_index) {
+    categories->emplace_back(i.first);
+  }
+
+  // TODO: Should this be a shared ptr to avoid memory leak?
+  return *categories;
 }
 
 HandleSeq& OpenPsiRules::get_context(const Handle rule)

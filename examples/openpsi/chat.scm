@@ -233,7 +233,7 @@
 ;---------------------------------------------------------------------
 ; Run OpenPsi (in a separate thread).
 
-(psi-run)
+(psi-run-per-demand)
 
 ; Now try talking to it...
 ; For example ...

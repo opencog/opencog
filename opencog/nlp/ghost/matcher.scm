@@ -138,8 +138,9 @@
                            (List (Variable "$sentence")))))
 
 ; The action selector for OpenPsi
-(psi-set-action-selector
+(psi-set-action-selector!
+  ; Component label
+  (Concept "GHOST")
   (Put (DefinedSchema (ghost-prefix "Find Rules"))
        (DefinedSchema (ghost-prefix "Get Current Input")))
-  ; Component label
-  (Concept "GHOST"))
+)

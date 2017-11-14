@@ -34,13 +34,17 @@ public:
   OpenPsiSCM();
 
 private:
+  Handle add_category(const Handle& new_category);
+
   /**
    * Add psi-rule.
    *
    * @return An implication link which is a psi-rule.
    */
   Handle add_rule(const HandleSeq& context, const Handle& action,
-    const Handle& goal, const TruthValuePtr stv, const Handle& demand);
+    const Handle& goal, const TruthValuePtr stv, const Handle& category);
+
+  Handle add_to_category(const Handle& rule, const Handle& category);
 
   /**
    * Get the action of the given rule.
@@ -49,6 +53,13 @@ private:
    * @return A handle of the action atom.
    */
   Handle get_action(const Handle& rule);
+
+  /**
+   * A wrapper around OpenPsiRules::get_categories
+   *
+   * @return A vector of Handles that represent the categories.
+   */
+  HandleSeq& get_categories();
 
   /**
    * Get the context of the given rule.

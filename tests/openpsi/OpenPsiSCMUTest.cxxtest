@@ -191,8 +191,8 @@ public:
         logger().info("END TEST: %s", __FUNCTION__);
     }
 
-    // Check the scheme function `psi-select-rules-per-demand`
-    void xtest_psi_select_rules_per_demand()
+    // Check the scheme function `psi-select-rules`
+    void test_psi_select_rules()
     {
         logger().info("BEGIN TEST: %s", __FUNCTION__);
 
@@ -203,11 +203,11 @@ public:
         CHKERR
 
         // Test 1:
-        auto result_1_1 = _scm->eval("(psi-select-rules-per-demand demand-1)");
+        auto result_1_1 = _scm->eval("(psi-select-rules (demand-1))");
         CHKERR
         TSM_ASSERT_EQUALS("Expected ()", "()\n", result_1_1);
 
-        auto result_1_2 = _scm->eval("(psi-select-rules-per-demand demand-2)");
+        auto result_1_2 = _scm->eval("(psi-select-rules (demand-2))");
         CHKERR
         TSM_ASSERT_EQUALS("Expected ()", "()\n", result_1_2);
 
@@ -215,11 +215,11 @@ public:
         _scm->eval("(groundable-content-1)");
         CHKERR
         auto result_2_1 = \
-            _scm->eval_h("(car (psi-select-rules-per-demand demand-1))");
+            _scm->eval_h("(car (psi-select-rules (demand-1)))");
         CHKERR
         TSM_ASSERT_EQUALS("Expected a single rule", rule_1 , result_2_1);
 
-        auto result_2_2 = _scm->eval("(psi-select-rules-per-demand demand-2)");
+        auto result_2_2 = _scm->eval("(psi-select-rules (demand-2))");
         CHKERR
         TSM_ASSERT_EQUALS("Expected ()", "()\n", result_2_2);
         CHKERR
@@ -229,12 +229,12 @@ public:
         _scm->eval("(groundable-content-2)");
         CHKERR
         auto result_3_1 = \
-            _scm->eval_h("(car (psi-select-rules-per-demand demand-1))");
+            _scm->eval_h("(car (psi-select-rules (demand-1)))");
         CHKERR
         TSM_ASSERT_EQUALS("Expected a single rule", rule_1 , result_3_1);
 
         auto result_3_2 = \
-            _scm->eval_h("(car (psi-select-rules-per-demand demand-2))");
+            _scm->eval_h("(car (psi-select-rules (demand-2)))");
         CHKERR
         TSM_ASSERT_EQUALS("Expected a single rule", rule_2 , result_3_2);
 
@@ -264,8 +264,7 @@ public:
     }
 
     // Check the scheme function `psi-get-satisfiable-rules`
-    // NOTE The function being tested isn't being used
-    void xtest_psi_get_satisfiable_rules()
+    void test_psi_get_satisfiable_rules()
     {
         logger().info("BEGIN TEST: %s", __FUNCTION__);
 
@@ -276,36 +275,36 @@ public:
         // Test 1:
         _scm->eval("(groundable-content-1)");
         CHKERR
-        auto result_1_1 = _scm->eval("(length \
-                            (psi-get-satisfiable-rules demand-1))");
+        auto result_1_1 = _scm->eval("(length (cog-outgoing-set \
+                            (psi-get-satisfiable-rules (demand-1))))");
         CHKERR
         TSM_ASSERT_EQUALS("Expected `1`", "1\n" , result_1_1);
-        auto result_1_2 =_scm->eval("(length \
-                            (psi-get-satisfiable-rules demand-2))");
+        auto result_1_2 =_scm->eval("(length (cog-outgoing-set \
+                            (psi-get-satisfiable-rules (demand-2))))");
         CHKERR
         TSM_ASSERT_EQUALS("Expected `0`", "0\n" , result_1_2);
 
         // Test 2:
         _scm->eval("(groundable-content-2)");
         CHKERR
-        auto result_2_1 = _scm->eval("(length \
-                            (psi-get-satisfiable-rules demand-1))");
+        auto result_2_1 = _scm->eval("(length (cog-outgoing-set \
+                            (psi-get-satisfiable-rules (demand-1))))");
         CHKERR
         TSM_ASSERT_EQUALS("Expected `2`", "2\n" , result_2_1);
-        auto result_2_2 =_scm->eval("(length \
-                            (psi-get-satisfiable-rules demand-2))");
+        auto result_2_2 =_scm->eval("(length (cog-outgoing-set \
+                            (psi-get-satisfiable-rules (demand-2))))");
         CHKERR
         TSM_ASSERT_EQUALS("Expected `1`", "1\n" , result_2_2);
 
         // Test 3:
         _scm->eval("(map cog-delete (groundable-content-1))");
         CHKERR
-        auto result_3_1 = _scm->eval("(length \
-                            (psi-get-satisfiable-rules demand-1))");
+        auto result_3_1 = _scm->eval("(length (cog-outgoing-set \
+                            (psi-get-satisfiable-rules (demand-1))))");
         CHKERR
         TSM_ASSERT_EQUALS("Expected `1`", "1\n" , result_3_1);
-        auto result_3_2 =_scm->eval("(length \
-                            (psi-get-satisfiable-rules demand-2))");
+        auto result_3_2 =_scm->eval("(length (cog-outgoing-set \
+                            (psi-get-satisfiable-rules (demand-2))))");
         CHKERR
         TSM_ASSERT_EQUALS("Expected `1`", "1\n" , result_3_2);
 
@@ -313,126 +312,96 @@ public:
     }
 
 
-    // Check the scheme function `psi-step`. There are multiple tests
-    // so as to use tearDown function to clean the atomspace.
-    // Test 1:
-    // Test that actions and goals are not evaluated.
-    void xtest_psi_step_1()
+    // Check the scheme function `psi-step`.
+    void test_psi_step_1()
     {
-        // NOTE: The demand-value checks are commented out because the
-        // psi-step default behavior of evaluating goals is being refactored
-        // out.
         logger().info("BEGIN TEST: %s", __FUNCTION__);
 
-        _scm->eval("(setup_test_psi_step_1)");
+        // Common Setup
+        _scm->eval("(rule-1) (rule-2)");
+        CHKERR
+
+        // Test 1:
+        // Test that actions are not evaluated when the contexts are not
+        // satisfied.
+        _scm->eval("(do_psi_step)");
+        CHKERR
+
+        auto result_1_1 = _scm->eval("(act-1-present?)");
+        CHKERR
+        TS_ASSERT_EQUALS("#f\n", result_1_1);
+
+        auto result_1_2 = _scm->eval("(act-2-present?)");
+        CHKERR
+        TS_ASSERT_EQUALS("#f\n", result_1_2);
+
+        // Test 2:
+        // Test that action-1 is executed and action-2 is not when its
+        // context is satisfied.
+        _scm->eval("(groundable-content-1)");
+        CHKERR
+        _scm->eval("(do_psi_step)");
         CHKERR
 
         // For rule-1
-        auto result_1_1 = _scm->eval("(cog-node 'ConceptNode \"act-1\")");
+        auto result_2_1 = _scm->eval("(act-1-present?)");
         CHKERR
-        TSM_ASSERT_EQUALS("Expected ()", "()\n", result_1_1);
-        // auto result_1_2 = _scm->eval("(demand-value demand-1)");
-        // CHKERR
-        // TSM_ASSERT_EQUALS("Expected `1.0`", "1.0\n", result_1_2);
+        TS_ASSERT_EQUALS("#t\n", result_2_1);
 
         // For rule-2
-        auto result_1_3 = _scm->eval("(cog-node 'ConceptNode \"act-2\")");
+        auto result_2_2 = _scm->eval("(act-2-present?)");
         CHKERR
-        TSM_ASSERT_EQUALS("Expected ()", "()\n", result_1_3);
-        // auto result_1_4 = _scm->eval("(demand-value demand-2)");
-        // CHKERR
-        // TSM_ASSERT_EQUALS("Expected `1.0`", "1.0\n", result_1_4);
+        TS_ASSERT_EQUALS("#f\n", result_2_2);
 
-        logger().info("END TEST: %s", __FUNCTION__);
-    }
-
-    // Continue checking the scheme function `psi-step`.
-    // Test 2:
-    // Test that action-1 and goal-1 are not evaluated.
-    void xtest_psi_step_2()
-    {
-        // NOTE: The demand-value checks are commented out because the
-        // psi-step default behavior of evaluating goals is being refactored
-        // out.
-        logger().info("BEGIN TEST: %s", __FUNCTION__);
-
-        _scm->eval("(setup_test_psi_step_2)");
+        // Test 3:
+        // Test that action-2, goal-1 and goal-2 are evaluated.
+        _scm->eval("(groundable-content-2)");
+        CHKERR
+        _scm->eval("(do_psi_step)");
         CHKERR
 
         // For rule-1
-        auto result_2_1 = _scm->eval("(test_psi_step_2_1)");
+        auto result_3_1 = _scm->eval("(act-1-present?)");
         CHKERR
-        TSM_ASSERT_EQUALS("Expected #t", "#t\n", result_2_1);
-        // auto result_2_2 = _scm->eval("(demand-value demand-1)");
-        // CHKERR
-        // TSM_ASSERT_EQUALS("Expected `0.5`", "0.5\n", result_2_2);
+        TS_ASSERT_EQUALS("#t\n", result_3_1);
 
         // For rule-2
-        auto result_2_3 = _scm->eval("(cog-node 'ConceptNode \"act-2\")");
+        auto result_3_2 = _scm->eval("(act-2-present?)");
         CHKERR
-        TSM_ASSERT_EQUALS("Expected ()", "()\n", result_2_3);
-        // auto result_2_4 = _scm->eval("(demand-value demand-2)");
-        // CHKERR
-        // TSM_ASSERT_EQUALS("Expected `1.0`", "1.0\n", result_2_4);
+        TS_ASSERT_EQUALS("#t\n", result_3_2);
 
         logger().info("END TEST: %s", __FUNCTION__);
     }
 
-    // Continue checking the scheme function `psi-step`.
-    // Test 3:
-    // Test that action-2, goal-1 and goal-2 are evaluated.
-    void xtest_psi_step_3()
+    // Check the scheme functions `psi-run` and `psi-halt`
+    void test_psi_run_and_psi_halt()
     {
-        // NOTE: The demand-value checks are commented out because the
-        // psi-step default behavior of evaluating goals is being refactored
-        // out.
-        logger().info("BEGIN TEST: %s", __FUNCTION__);
+      logger().info("BEGIN TEST: %s", __FUNCTION__);
 
-        _scm->eval("(setup_test_psi_step_3)");
-        CHKERR
+      // Common Setup
+      _scm->eval("(define d1 (demand-1))");
+      CHKERR
+      _scm->eval("(define d2 (demand-2))");
+      CHKERR
 
-        // For rule-2 or rule-3
-        auto result_3_1 = _scm->eval("(test_psi_step_3_1)");
-        CHKERR
-        TSM_ASSERT_EQUALS("Expected #t", "#t\n", result_3_1);
-        // auto result_3_2 = _scm->eval("(demand-value demand-2)");
-        // CHKERR
-        // TSM_ASSERT_EQUALS("Expected `0.5`", "0.5\n", result_3_2);
+      // Tests
+      auto result_1 = _scm->eval("(test-psi-run)");
+      CHKERR
+      TS_ASSERT_EQUALS("#t\n", result_1);
 
-        // For rule-1
-        auto result_3_3 = _scm->eval("(test_psi_step_2_1)");
-        CHKERR
-        TSM_ASSERT_EQUALS("Expected #f", "#f\n", result_3_3);
-        // auto result_3_4 = _scm->eval("(demand-value demand-1)");
-        // CHKERR
-        // TSM_ASSERT_EQUALS("Expected `0.5`", "0.5\n", result_3_4);
+      auto result_2 = _scm->eval("(test-psi-halt)");
+      CHKERR
+      TS_ASSERT_EQUALS("#t\n", result_2);
+      // Restart the loops
+      auto result_3 = _scm->eval("(test-psi-run)");
+      CHKERR
+      TS_ASSERT_EQUALS("#t\n", result_1);
 
-        logger().info("END TEST: %s", __FUNCTION__);
-    }
+      auto result_4 = _scm->eval("(test-psi-halt)");
+      CHKERR
+      TS_ASSERT_EQUALS("#t\n", result_2);
 
-    // Continue checking the scheme function `psi-step`.
-    // Test 4:
-    // Test that action-4 and goal-4 are evaluated. This tests that evaluatable
-    // contexts are handled properly.
-    void xtest_psi_step_4()
-    {
-        // NOTE: The demand-value checks are commented out because the
-        // psi-step default behavior of evaluating goals is being refactored
-        // out.
-        logger().info("BEGIN TEST: %s", __FUNCTION__);
-
-        _scm->eval("(setup_test_psi_step_4)");
-        CHKERR
-
-        // For rule-4 only
-        auto result_3_1 = _scm->eval("(test_psi_step_4)");
-        CHKERR
-        TSM_ASSERT_EQUALS("Expected #t", "#t\n", result_3_1);
-        // auto result_3_2 = _scm->eval("(demand-value demand-4)");
-        // CHKERR
-        // TSM_ASSERT_EQUALS("Expected `0.5`", "0.5\n", result_3_2);
-
-        logger().info("END TEST: %s", __FUNCTION__);
+      logger().info("END TEST: %s", __FUNCTION__);
     }
 
     // Check the scheme function `psi-get-dual-rules`
@@ -467,56 +436,6 @@ public:
         CHKERR
         TSM_ASSERT_EQUALS("Expected `#t`", "#t\n" , result_2_2);
 
-        logger().info("END TEST: %s", __FUNCTION__);
-    }
-
-    // Check the scheme function `psi-action?`
-    // NOTE: The name of the test function uses `__predicate` in place of `?`
-    void xtest_psi_action__predicate()
-    {
-        logger().info("BEGIN TEST: %s", __FUNCTION__);
-
-        auto result_1 = _scm->eval("(psi-action? action-1) ");
-        TSM_ASSERT_EQUALS("Expected `#f`", "#f\n" , result_1);
-
-        // Use the executable term `action-1` in defining a rule, that results
-        // in the term being converted to a psi recognizable action.
-        _scm->eval_h("(rule-1)");
-        CHKERR
-
-        auto result_2 = _scm->eval("(psi-action? action-1) ");
-        CHKERR
-        TSM_ASSERT_EQUALS("Expected `#t`", "#t\n" , result_2);
-
-        logger().info("END TEST: %s", __FUNCTION__);
-
-    }
-
-    // Check the scheme function `psi-demand-skip` and
-    // `psi-get-all-enabled-demands`.
-    void xtest_psi_demand_skip_and_psi_get_all_valid_demands()
-    {
-        logger().info("BEGIN TEST: %s", __FUNCTION__);
-
-        auto result_1_1 = _scm->eval("(length (psi-get-all-enabled-demands))");
-        CHKERR
-        TSM_ASSERT_EQUALS("Expected `3`", "3\n", result_1_1);
-
-        // Test 1:
-        // Skip a demand.
-        _scm->eval("(psi-demand-skip demand-1)");
-
-        // Test 2:
-        // The set of enabled demands should now have one less demand.
-        auto result_2_1 = _scm->eval("(length \
-            (psi-get-all-enabled-demands))");
-        CHKERR
-        TSM_ASSERT_EQUALS("Expected `2`", "2\n", result_2_1);
-
-        auto result_2_2 = _scm->eval("(member demand-1 \
-            (psi-get-all-enabled-demands))");
-        CHKERR
-        TSM_ASSERT_EQUALS("Expected `#f`", "#f\n", result_2_2);
         logger().info("END TEST: %s", __FUNCTION__);
     }
 };
