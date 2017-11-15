@@ -333,70 +333,65 @@
         (list-set! rule-lists POS
           (append (list-ref rule-lists POS) (list RULE)))))
 
-  (catch #t
-    (lambda ()
-      ; First of all, make sure the topic is set
-      ; so that it can be used when we are processing the action
-      (if (null? rule-topic)
-          (set! rule-topic (create-topic "Default Topic" '())))
+  ; First of all, make sure the topic is set
+  ; so that it can be used when we are processing the action
+  (if (null? rule-topic)
+      (set! rule-topic (create-topic "Default Topic" '())))
 
-      ; Reset the list of local variables
-      (set! pat-vars '())
+  ; Reset the list of local variables
+  (set! pat-vars '())
 
-      ; Reset the rule-lists if we're looking at a new responder/gambit
-      (if (or (equal? #\u TYPE) (equal? #\s TYPE) (equal? #\? TYPE)
-              (equal? #\r TYPE) (equal? #\t TYPE))
-          (set! rule-lists '()))
+  ; Reset the rule-lists if we're looking at a new responder/gambit
+  (if (or (equal? #\u TYPE) (equal? #\s TYPE) (equal? #\? TYPE)
+          (equal? #\r TYPE) (equal? #\t TYPE))
+      (set! rule-lists '()))
 
-      (let* (; Label the rule with NAME, if given, generate one otherwise
-             (rule-name (if (string-null? NAME)
-                            (string-append "GHOST-rule-" (random-string 36))
-                            NAME))
-             (proc-type (process-type TYPE))
-             (ordered-terms (order-terms PATTERN))
-             (proc-terms (process-pattern-terms ordered-terms))
-             (vars (append atomese-variable-template
-                           (list-ref proc-terms 0)
-                           (list-ref proc-type 0)))
-             (conds (append atomese-condition-template
-                            (list-ref proc-terms 1)
-                            (list-ref proc-type 1)))
-             (type (list-ref proc-type 2))
-             (action (process-action ACTION rule-name))
-             (goals (process-goal GOAL)))
-            (cog-logger-debug ghost-logger "Context: ~a" ordered-terms)
-            (cog-logger-debug ghost-logger "Procedure: ~a" ACTION)
-            (cog-logger-debug ghost-logger "Goal: ~a" goals)
-            (map (lambda (rule)
-                   ; Label the rule
-                   (psi-rule-set-alias! rule rule-name)
-                   ; Set the type
-                   (cog-set-value! rule ghost-rule-type type)
-                   ; ... and the rule-rank
-                   (set! rule-rank (+ rule-rank 1))
-                   (cog-set-value! rule ghost-rule-rank (FloatValue rule-rank))
-                   ; Then finally add to the rule-lists
-                   (cond ((or (equal? type strval-responder)
-                              (equal? type strval-random-gambit)
-                              (equal? type strval-gambit))
-                          (add-to-rule-lists 0 rule-name))
-                         ((equal? type strval-rejoinder)
-                          (add-to-rule-lists
-                            (get-rejoinder-level TYPE) rule-name)))
-                   ; Return
-                   rule)
-                 (map (lambda (goal)
-                        ; Create the rule(s)
-                        (psi-rule
-                          (list (Satisfaction (VariableList vars) (And conds)))
-                          action
-                          (psi-goal (car goal))
-                          (stv (cdr goal) .9)
-                          rule-topic))
-                      goals))))
-    (lambda (key . parameters)
-      (if (not (equal? key 'FeatureNotSupported))
-          (cog-logger-error ghost-logger "~a: ~a" key parameters)))))
+  (let* (; Label the rule with NAME, if given, generate one otherwise
+         (rule-name (if (string-null? NAME)
+                        (string-append "GHOST-rule-" (random-string 36))
+                        NAME))
+         (proc-type (process-type TYPE))
+         (ordered-terms (order-terms PATTERN))
+         (proc-terms (process-pattern-terms ordered-terms))
+         (vars (append atomese-variable-template
+                       (list-ref proc-terms 0)
+                       (list-ref proc-type 0)))
+         (conds (append atomese-condition-template
+                        (list-ref proc-terms 1)
+                        (list-ref proc-type 1)))
+         (type (list-ref proc-type 2))
+         (action (process-action ACTION rule-name))
+         (goals (process-goal GOAL)))
+        (cog-logger-debug ghost-logger "Context: ~a" ordered-terms)
+        (cog-logger-debug ghost-logger "Procedure: ~a" ACTION)
+        (cog-logger-debug ghost-logger "Goal: ~a" goals)
+        (map (lambda (rule)
+               ; Label the rule
+               (psi-rule-set-alias! rule rule-name)
+               ; Set the type
+               (cog-set-value! rule ghost-rule-type type)
+               ; ... and the rule-rank
+               (set! rule-rank (+ rule-rank 1))
+               (cog-set-value! rule ghost-rule-rank (FloatValue rule-rank))
+               ; Then finally add to the rule-lists
+               (cond ((or (equal? type strval-responder)
+                          (equal? type strval-random-gambit)
+                          (equal? type strval-gambit))
+                      (add-to-rule-lists 0 rule-name))
+                     ((equal? type strval-rejoinder)
+                      (add-to-rule-lists
+                        (get-rejoinder-level TYPE) rule-name)))
+               ; Return
+               rule)
+             (map (lambda (goal)
+                    ; Create the rule(s)
+                    (psi-rule
+                      (list (Satisfaction (VariableList vars) (And conds)))
+                      action
+                      (psi-goal (car goal))
+                      (stv (cdr goal) .9)
+                      rule-topic))
+                  goals))))
 
 (define (create-concept NAME MEMBERS)
   "Create named concepts with explicit membership lists.
