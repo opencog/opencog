@@ -29,7 +29,7 @@
     psi-controller-update-weights psi-rule-disable psi-rule-enable
 
     ; From rule.scm
-    psi-get-rules psi-get-all-rules psi-rule? psi-get-all-actions psi-action?
+    psi-get-rules psi-get-all-rules psi-get-all-actions psi-action?
     psi-rule-alias
     psi-partition-rule-with-alias psi-related-goals
     psi-rule-satisfiability psi-get-satisfiable-rules
@@ -54,6 +54,7 @@
     psi-get-goal
     psi-imply
     psi-rule
+    psi-rule?
     psi-satisfiable?
     )
 )
@@ -134,6 +135,18 @@
     be a SimpleTruthValue.
 
   CATEGORY is a Node, representing the category that this rule is part of.
+"
+)
+
+(set-procedure-property! psi-rule? 'documentation
+"
+  psi-rule? ATOM
+
+  Returns `#t` or `#f`, depending on whether the passed argument
+  is a valid openpsi-rule or not. A valid psi-rule is one that is created by
+  `psi-rule` function.
+
+  ATOM is the atom to check.
 "
 )
 

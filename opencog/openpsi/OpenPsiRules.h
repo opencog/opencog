@@ -51,7 +51,7 @@ public:
    * structured rule declared in the atomspace but not indexed will
    * not be considered as a rule.
    *
-   * @return Returns true if the rule is in the index, false other wise.
+   * @return true if the rule is in the index, false other wise.
    */
    // NOTE: An approach where in first the rules are declared then indexed
    // by searching the atomspace, similar to opencog::UREConfig, can
