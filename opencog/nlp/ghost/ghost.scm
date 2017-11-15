@@ -23,12 +23,6 @@
 ;; Shared things being used in the module
 
 (define-public (ghost-prefix STR) (string-append "GHOST " STR))
-(define (ghost-var-word NUM)
-  (Variable (ghost-prefix
-    (string-append "variable-word-" (number->string NUM)))))
-(define (ghost-var-lemma NUM)
-  (Variable (ghost-prefix
-    (string-append "variable-lemma-" (number->string NUM)))))
 (define (ghost-uvar STR)
   (Variable (ghost-prefix (string-append "user-variable-" STR))))
 (define ghost-curr-proc (Anchor (ghost-prefix "Currently Processing")))
