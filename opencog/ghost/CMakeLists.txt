@@ -7,5 +7,5 @@ ADD_GUILE_MODULE (FILES
 	utils.scm
 	functions.scm
 	test.scm
-	MODULE_DESTINATION "${DATADIR}/scm/opencog/nlp/ghost"
+	MODULE_DESTINATION "${DATADIR}/scm/opencog/ghost"
 )

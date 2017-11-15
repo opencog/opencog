@@ -1,4 +1,4 @@
-(define-module (opencog nlp ghost)
+(define-module (opencog ghost)
   #:use-module (opencog)
   #:use-module (opencog nlp)
   #:use-module (opencog nlp relex2logic)

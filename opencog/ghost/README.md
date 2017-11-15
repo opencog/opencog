@@ -84,7 +84,7 @@ Basic examples of how to use GHOST is available [HERE](https://github.com/openco
              (opencog nlp relex2logic)
              (opencog openpsi)
              (opencog eva-behavior)
-             (opencog nlp ghost))
+             (opencog ghost))
 ```
 4) Start authoring
 
