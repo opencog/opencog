@@ -373,7 +373,7 @@
   ; First of all, make sure the topic is set
   ; so that it can be used when we are processing the action
   (if (null? rule-topic)
-      (set! rule-topic (create-topic "Default Topic" '())))
+      (set! rule-topic (create-topic "Default Topic" '() '())))
 
   ; Reset the list of local variables
   (set! pat-vars '())
@@ -450,7 +450,7 @@
 "
   (set! shared-goals GOAL))
 
-(define-public (create-topic TOPIC-NAME KEYWORDS)
+(define-public (create-topic TOPIC-NAME FEATURES KEYWORDS)
 "
   Creates a psi-demand named as TOPIC-NAME, sets the rule-topic to be it
   and returns ConceptNode that represent the topic.
@@ -474,6 +474,11 @@
   ; Reset the topic-level goals and the rule-rank
   (set! shared-goals '())
   (set! rule-rank 0)
+
+  ; The set of features associate with the topic
+  ; The features will be stored as "values"
+  (cog-set-value! rule-topic ghost-topic-feature
+    (apply LinkValue (map (lambda (f) (StringValue f)) FEATURES)))
 
   ; The set of keywords associate with the topic
   (for-each (lambda (kw) (Member kw rule-topic)) (terms-to-atomese KEYWORDS))

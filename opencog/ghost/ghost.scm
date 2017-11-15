@@ -46,6 +46,7 @@
 (define ghost-topic (Concept (ghost-prefix "Topic")))
 (define ghost-rule-type (Predicate (ghost-prefix "Rule Type")))
 (define ghost-rule-rank (Predicate (ghost-prefix "Rule Rank")))
+(define ghost-topic-feature (Predicate (ghost-prefix "Topic Feature")))
 (define strval-rejoinder (StringValue "rejoinder"))
 (define strval-responder (StringValue "responder"))
 (define strval-random-gambit (StringValue "random gambit"))

@@ -263,9 +263,18 @@
       (CONCEPT ID declaration-sequence) :
         (create-concept $2 (eval-string (string-append "(list " $3 ")")))
       (TOPIC ID declaration-sequence) :
-        (create-topic $2 (eval-string (string-append "(list " $3 ")")))
-      (TOPIC ID LPAREN RPAREN) : (create-topic $2 (list))
-      (TOPIC ID LSBRACKET RSBRACKET) : (create-topic $2 (list))
+        (create-topic $2 (list) (eval-string (string-append "(list " $3 ")")))
+      (TOPIC ID LPAREN RPAREN) : (create-topic $2 (list) (list))
+      (TOPIC ID LSBRACKET RSBRACKET) : (create-topic $2 (list) (list))
+      ; Note, "names" here are the topic-level features/functions that will
+      ; be applied to every single rules under this topic
+      (TOPIC ID names declaration-sequence) :
+        (create-topic $2 (string-split $3 #\sp)
+          (eval-string (string-append "(list " $4 ")")))
+      (TOPIC ID names LPAREN RPAREN) :
+        (create-topic $2 (string-split $3 #\sp) (list))
+      (TOPIC ID names LSBRACKET RSBRACKET) :
+        (create-topic $2 (string-split $3 #\sp) (list))
     )
 
     (declaration-sequence
