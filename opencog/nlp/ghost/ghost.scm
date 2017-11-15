@@ -22,9 +22,20 @@
 ;; --------------------
 ;; Shared things being used in the module
 
-(define-public (ghost-prefix STR) (string-append "GHOST " STR))
+(define-public (ghost-prefix . STR)
+"
+  Append a GHOST prefix to STR, usually for naming a node
+  to make it clearer for a person to review/debug.
+"
+  (string-concatenate (append (list "GHOST ") STR)))
+
+; ----------
 (define (ghost-uvar STR)
-  (Variable (ghost-prefix (string-append "user-variable-" STR))))
+"
+  Define a VariableNode for a user variable.
+"
+  (Variable (ghost-prefix "user-variable-" STR)))
+
 (define ghost-curr-proc (Anchor (ghost-prefix "Currently Processing")))
 (define ghost-curr-topic (Anchor (ghost-prefix "Current Topic")))
 (define ghost-no-constant (Anchor (ghost-prefix "No constant terms")))
