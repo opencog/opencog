@@ -92,7 +92,7 @@
   (EvaluationLink
     psi-rule-name-predicate-node
     (ListLink
-      psi-rule
+      rule
       (ConceptNode (string-append psi-prefix-str name))))
 
   ; TODO Uncomment after testing with ghost
@@ -117,7 +117,7 @@
       (EvaluationLink
         psi-rule-name-predicate-node
         (ListLink
-          (QuoteLink psi-rule)  ;; ?? why is a Quote needed here?
+          (QuoteLink rule)  ;; ?? why is a Quote needed here?
           (VariableNode "rule-alias"))))))
 
   ; TODO Uncomment after testing with ghost
