@@ -453,9 +453,6 @@
       ; e.g. $username=Bob
       (UVAR EQUAL name) :
         (format #f "(cons 'assign_uvar (list \"~a\" (cons 'str \"~a\")))" $1 $3)
-      ; e.g. $length=1
-      (UVAR EQUAL NUM) :
-        (format #f "(cons 'assign_uvar (list \"~a\" (cons 'str \"~a\")))" $1 $3)
       ; e.g. $username='_0
       (UVAR EQUAL variable-grounding) :
         (format #f "(cons 'assign_uvar (list \"~a\" ~a))" $1 $3)
@@ -539,8 +536,6 @@
       (UVAR) : (format #f "(cons 'uvar_exist \"~a\")" $1)
       (UVAR EQUAL name) :
         (format #f "(cons 'uvar_equal (list \"~a\" \"~a\"))" $1 $3)
-      (UVAR EQUAL NUM) :
-        (format #f "(cons 'uvar_equal (list \"~a\" \"~a\"))" $1 $3)
     )
 
     (negation
@@ -579,6 +574,7 @@
       (LEMMA) : $1
       (LITERAL) : $1
       (STRING) : $1
+      (NUM) : $1
     )
 
     (args
@@ -658,7 +654,6 @@
     (tts-member
       (COMMA) : ""
       (name) : (format #f "(cons 'str \"~a\")" $1)
-      (NUM) : (format #f "(cons 'str \"~a\")" $1)
       (UVAR) : (format #f "(cons 'get_uvar \"~a\")" $1)
     )
   )
