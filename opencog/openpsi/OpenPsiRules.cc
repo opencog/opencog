@@ -75,6 +75,11 @@ Handle OpenPsiRules::add_rule(const HandleSeq& context, const Handle& action,
   return rule;
 }
 
+bool OpenPsiRules::is_rule(const Handle& rule)
+{
+  return _psi_rules.count(rule);
+}
+
 Handle OpenPsiRules::add_category(const Handle& new_category)
 {
   _as->add_link(INHERITANCE_LINK, new_category, _psi_category);
