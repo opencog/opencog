@@ -47,6 +47,20 @@ public:
     const Handle& goal, const TruthValuePtr stv);
 
   /**
+   * It checks if the rule passed is cached in the index. A valid
+   * structured rule declared in the atomspace but not indexed will
+   * not be considered as a rule.
+   *
+   * @return true if the rule is in the index, false other wise.
+   */
+   // NOTE: An approach where in first the rules are declared then indexed
+   // by searching the atomspace, similar to opencog::UREConfig, can
+   // be followed. But, this way the developer/agents/modules will have
+   // to make the choice of which declarations to process using this module,
+   // there by possibly helping in performance.
+  static bool is_rule(const Handle& rule);
+
+  /**
    * Returns all the categories that were added using add_to_category.
    *
    * @return A vector of Handles that represent the categories.

@@ -62,6 +62,9 @@ void OpenPsiSCM::init()
   define_scheme_primitive("psi-rule", &OpenPsiSCM::add_rule,
     this, "openpsi");
 
+  define_scheme_primitive("psi-rule?", &OpenPsiSCM::is_rule,
+    this, "openpsi");
+
   define_scheme_primitive("psi-satisfiable?", &OpenPsiSCM::is_satisfiable,
     this, "openpsi");
 }
@@ -119,6 +122,11 @@ Handle OpenPsiSCM::imply(const Handle& rule)
   AtomSpace* as = SchemeSmob::ss_get_env_as("psi-imply");
   OpenPsiImplicator implicator(as);
   return implicator.imply(rule);
+}
+
+bool OpenPsiSCM::is_rule(const Handle& rule)
+{
+  return OpenPsiRules::is_rule(rule);
 }
 
 TruthValuePtr OpenPsiSCM::is_satisfiable(const Handle& rule)

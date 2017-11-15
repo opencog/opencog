@@ -86,6 +86,13 @@ private:
   Handle imply(const Handle& rule);
 
   /**
+   * A wrapper around OpenPsiRules::is_rule.
+   *
+   * @return true if the rule is in the index, false other wise.
+   */
+  bool is_rule(const Handle& rule);
+
+  /**
    * Returns TRUE_TV or FALSE_TV depending on whether the context of the
    * given psi-rule is satisfiable or not.
    *

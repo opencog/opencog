@@ -90,11 +90,14 @@ public:
     // TODO: Clear the index.
   }
 
-  // Check OpenPsiRules::add_rule is addng the openpsi rule properly.
-  void test_add_rule()
+  // Check OpenPsiRules::add_rule is addng the openpsi rule properly,
+  // and that OpenPsiRules::is_rule differentiates between rules that
+  // are in index vs that are not.
+  void test_add_rule_and_is_rule()
   {
     logger().info("BEGIN TEST: %s", __FUNCTION__);
 
+    // Common Setup
     _scm->eval("(load \"" OPENPSI_TEST_PATH "/rules.scm\")");
     CHKERR
     HandleSeq context_1 = _scm->eval_h("(context-1-cpp)")->getOutgoingSet();
@@ -104,16 +107,22 @@ public:
     Handle goal_1 = _scm->eval_h("goal-1");
     CHKERR
 
-    // Test 1:
+    // Test 1 :
+    // Check that rules that are defined in the atomspace but are not
+    // added to the index are not considered as a valid rule.
+    Handle declared_rule_1 = _scm->eval_h("(rule-1-cpp)");
+    TS_ASSERT_EQUALS(false, OpenPsiRules::is_rule(declared_rule_1));
+
+    // Test 2:
     // Check if the rule is added properly.
     Handle rule_1 = _opr->add_rule(context_1, action_1, goal_1,
       SimpleTruthValue::createTV(1.0, 1.0));
-    Handle expected_rule_1 = _scm->eval_h("(rule-1-cpp)");
-    CHKERR
-    TSM_ASSERT_EQUALS("Expected to be equal", expected_rule_1, rule_1);
+    TS_ASSERT_EQUALS(declared_rule_1, rule_1);
 
-    // TODO: Add test to check if the index is being updated when
-    // multiple rules are added.
+    // Test 3:
+    // Check if rules that are defined using OpenPsiRules::add_rule are
+    // considered as a valid rule.
+    TS_ASSERT_EQUALS(true, OpenPsiRules::is_rule(declared_rule_1));
 
     logger().info("END TEST: %s", __FUNCTION__);
   }
