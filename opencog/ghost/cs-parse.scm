@@ -567,7 +567,7 @@
 
     (names
       (name) : $1
-      (names) : $1
+      (names name) : (format #f "~a ~a" $1 $2)
     )
 
     (name
