@@ -1,31 +1,38 @@
-;; Shared variables for all terms
+;; To convert things parsed by the parser into actual atomese.
+
+; ----------
+; Shared variables for all terms
 (define atomese-variable-template
   (list (TypedVariable (Variable "$S") (Type "SentenceNode"))
         (TypedVariable (Variable "$P") (Type "ParseNode"))))
 
-;; Shared conditions for all terms
+; Shared conditions for all terms
 (define atomese-condition-template
   (list (Parse (Variable "$P") (Variable "$S"))
         (State ghost-curr-proc (Variable "$S"))))
 
+; ----------
 (define (order-terms TERMS)
-  "Order the terms in the intended order, and insert wildcards into
-   appropriate positions of the sequence.
-   No operation is needed if the pattern is supposed to be matched in
-   any order.
-   Finally make sure there is no meaningless consecutive
-   wildcard/variable in the term list we are going to return, as that
-   may cause a glob to be grounded incorrectly."
+"
+  Order the terms in the intended order, and insert wildcards into
+  appropriate positions of the sequence.
+  No operation is needed if the pattern is supposed to be matched in
+  any order.
+  Finally make sure there is no meaningless consecutive
+  wildcard/variable in the term list we are going to return, as that
+  may cause a glob to be grounded in an unintentional way.
+"
   (define (merge-wildcard INT1 INT2)
     (cons (max (car INT1) (car INT2))
           (cond ((or (negative? (cdr INT1)) (negative? (cdr INT2))) -1)
                 (else (max (cdr INT1) (cdr INT2))))))
+
   (let* ((as (cons 'anchor-start "<"))
          (ae (cons 'anchor-end ">"))
          (wc (cons 'wildcard (cons 0 -1)))
          (unordered? (any (lambda (t) (equal? 'unordered-matching (car t))) TERMS))
          ; It's possible that the sequence does not having any word or concept etc,
-         ; e.g. a rule may just be about not having either one of these words
+         ; e.g. a rule may just be something like not-having-either-one-of-these-words
          (empty-seq? (every (lambda (t) (equal? 'negation (car t))) TERMS))
          (start-anchor? (any (lambda (t) (equal? as t)) TERMS))
          (end-anchor? (any (lambda (t) (equal? ae t)) TERMS))
@@ -33,6 +40,7 @@
          (end (if end-anchor?
                   (take-while (lambda (t) (not (equal? ae t))) TERMS)
                   (list wc)))
+         ; Start inserting the wildcards, including the implicit ones
          (term-lst (cond (unordered? TERMS)  ; Nothing needs to be done
                    ((and start-anchor? end-anchor?)
                     (if (equal? start-anchor? end-anchor?)
@@ -68,6 +76,7 @@
                    ; If there is no anchor, the main-seq should start and
                    ; end with a wildcard
                    (else (append (list wc) TERMS (list wc))))))
+        ; Remove, if any, wildcards that are not needed
         (fold-right
           (lambda (term prev)
             (cond ; If there are two consecutive wildcards, e.g.
@@ -107,10 +116,14 @@
           (list (last term-lst))
           (list-head term-lst (- (length term-lst) 1)))))
 
+; ----------
 (define (process-pattern-terms TERMS)
-  "Generate the atomese (i.e. the variable declaration and the pattern)
-   for each of the TERMS."
+"
+  Generate the atomese (i.e. the variable declaration and the pattern)
+  for each of the TERMS in the pattern.
+"
   (define is-unordered? #f)
+
   (define (process terms)
     (define v '())
     (define c '())
@@ -121,6 +134,7 @@
       (set! c (append c (list-ref t 1)))
       (set! ws (append ws (list-ref t 2)))
       (set! ls (append ls (list-ref t 3))))
+
     (for-each (lambda (t)
       (cond ((equal? 'unordered-matching (car t))
              (update-lists (process (cdr t)))
@@ -209,6 +223,9 @@
   ; DualLink couldn't match patterns with no constant terms in it
   ; Mark the rules with no constant terms so that they can be found
   ; easily during the matching process
+  ; TODO: Mark the ones with only functions in the context as well
+  ; XXX TODO: This can impede the performance if we have many of these
+  ;           in the rulebase
   (if (equal? (length lemma-seq)
               (length (filter (lambda (x) (equal? 'GlobNode (cog-type x)))
                               lemma-seq)))
@@ -216,10 +233,16 @@
 
   (list vars conds))
 
+; ----------
 (define (process-action ACTION RULENAME)
-  "Convert ACTION into atomese."
+"
+  Generate the atomese for each of the terms in ACTION.
+  RULENAME is the alias assigned to the rule.
+"
+  ; The system functions that are commonly used
   (define reuse #f)
   (define keep #f)
+
   (define (to-atomese actions)
     (define choices '())
     (append
@@ -237,15 +260,15 @@
                     (set! choices '())
                     ; Generate the atoms for the current one
                     (append (list ac) (to-atomese (list n)))))
-              ; The grounding of a variable in original words
+              ; The grounding of a variable in original words, e.g. '_0
               ((equal? 'get_wvar (car n))
                (list-ref pat-vars (cdr n)))
-              ; The grounding of a variable in lemmas
+              ; The grounding of a variable in lemmas, e.g. _0
               ((equal? 'get_lvar (car n))
                (get-var-lemmas (list-ref pat-vars (cdr n))))
-              ; Get the value of a user variable
+              ; Get the value of a user variable, e.g. $name
               ((equal? 'get_uvar (car n)) (get-user-variable (cdr n)))
-              ; Assign a value to a user variable
+              ; Assign a value to a user variable, e.g. $name=Bob
               ((equal? 'assign_uvar (car n))
                (set-user-variable (cadr n) (car (to-atomese (cddr n)))))
               ; A system function -- keep
@@ -289,19 +312,25 @@
                   (Put (State ghost-curr-topic (Variable "$x"))
                        rule-topic)))))
 
+; ----------
 (define (process-goal GOAL)
-  "Go through each of the goals, including the shared ones."
+"
+  Go through each of the goals, including the shared ones.
+"
   (if (null? GOAL)
       (list (cons (ghost-prefix "Default Goal") 0.9))
-      ; The shared goals will be overwritten if the same goal is specified
+      ; The shared goals will be overwritten if the same goal is given
       ; to this rule
       (append GOAL
         (remove (lambda (sg) (any (lambda (g) (equal? (car sg) (car g))) GOAL))
                 shared-goals))))
 
+; ----------
 (define (process-type TYPE)
-  "Figure out what the type of the rule is, generate the needed atomese, and
-   return the type as a StringValue."
+"
+  Figure out what the type of the rule is, generate the needed atomese, and
+  return the type as a StringValue.
+"
   (cond ((or (equal? #\u TYPE)
              (equal? #\s TYPE)
              (equal? #\? TYPE))
@@ -321,12 +350,20 @@
                     (car (list-ref rule-lists (- lv 1)))))
             strval-rejoinder)))))
 
+; ----------
 (define (create-rule PATTERN ACTION GOAL NAME TYPE)
-  "Top level translation function. PATTERN, ACTION, and GOAL are the basic
-   components of a psi-rule, correspond to context, procedure, and goal
-   respectively. NAME is like a label of a rule, so that one can reference
-   this rule by using it. TYPE is a grouping idea from ChatScript, e.g.
-   responders, rejoinders, gambits etc."
+"
+  Top level translation function.
+
+  PATTERN, ACTION, and GOAL are the basic components of a psi-rule,
+  correspond to context, procedure, and goal respectively.
+
+  NAME is like a label of a rule, so that one can reference this rule
+  by using it.
+
+  TYPE is a grouping idea from ChatScript, e.g. responders, rejoinders,
+  gambits etc.
+"
   (define (add-to-rule-lists POS RULE)
     (if (<= (length rule-lists) POS)
         (set! rule-lists (append rule-lists (list (list RULE))))
@@ -362,9 +399,11 @@
          (type (list-ref proc-type 2))
          (action (process-action ACTION rule-name))
          (goals (process-goal GOAL)))
+
         (cog-logger-debug ghost-logger "Context: ~a" ordered-terms)
         (cog-logger-debug ghost-logger "Procedure: ~a" ACTION)
         (cog-logger-debug ghost-logger "Goal: ~a" goals)
+
         (map (lambda (rule)
                ; Label the rule
                (psi-rule-set-alias! rule rule-name)
@@ -393,25 +432,28 @@
                       rule-topic))
                   goals))))
 
+; ----------
 (define (create-concept NAME MEMBERS)
-  "Create named concepts with explicit membership lists.
-   The first argument is the name of the concept, and the rest is the
-   list of words and/or concepts that will be considered as the members
-   of the concept."
+"
+  Create named concepts with explicit membership lists.
+
+  NAME is the name of the concept, and the rest is the list of words
+  and/or concepts that will be considered as the members of the concept.
+"
   (map (lambda (m) (Reference m (Concept NAME)))
        (terms-to-atomese MEMBERS)))
 
 (define (create-shared-goal GOAL)
-  "Create a topic level goal that will be shared among the rules under the
-   same topic."
+"
+  Create a topic level goal that will be shared among the rules under the
+  same topic.
+"
   (set! shared-goals GOAL))
 
 (define-public (create-topic TOPIC-NAME KEYWORDS)
 "
-  create-topic TOPIC-NAME
-
   Creates a psi-demand named as TOPIC-NAME, sets the rule-topic to be it
-  and returns ConceptNode that represent the topic(aka demand).
+  and returns ConceptNode that represent the topic.
 "
   ; NOTE:The intention is to follow chatscript like authoring approach. Once a
   ; topic is created, then the rules that are added after that will be under

@@ -1,14 +1,11 @@
-;; GHOST DSL for chat authoring rules
-;;
-;; This is the custom action selector that allows OpenPsi to find the authored
-;; rules.
-;; TODO: This is not needed in the long run as the default action selector in
-;; OpenPsi should be able to know how and what kinds of rules it should be
-;; looking for at a particular point in time.
+;; This is the GHOST action selector for finding and deciding
+;; which action should be executed at a particular point in time.
 
 (define (rank-and-eval RULES)
-  "Partition RULES into different categories based on their type,
-   and evaluate each of them. The satisfied one(s) will be returned."
+"
+  Partition RULES into different categories based on their type,
+  and evaluate each of them. The satisfied one(s) will be returned.
+"
   (define curr-topic (ghost-get-curr-topic))
   (define topic-rejoinders '())
   (define topic-responders '())
@@ -18,6 +15,8 @@
   (define random-gambits '())
   (define gambits '())
   (define rules-evaluated '())
+
+  ; To evaluate a list of rules using "psi-satisfiable?"
   (define (eval-rules R)
     (set! rules-evaluated
       (append-map
@@ -25,6 +24,8 @@
           (if (equal? (stv 1 1) (psi-satisfiable? r)) (list r) '()))
         R))
     rules-evaluated)
+
+  ; To pick one of the selected rules either randomly or based on their weights
   (define (pick-rule F)
     ; Either randomly pick one of the rules, or pick based on their "rank"
     (cond ((equal? 'RANDOM F)
@@ -89,10 +90,13 @@
         ; If we are here, there is no match
         (else (list))))
 
+; ----------
 (define-public (ghost-find-rules SENT)
-  "The action selector. It first searches for the rules using DualLink,
-   and then does the filtering by evaluating the context of the rules.
-   Eventually returns a list of weighted rules that can satisfy the demand."
+"
+  The action selector. It first searches for the rules using DualLink,
+  and then does the filtering by evaluating the context of the rules.
+  Eventually returns a list of weighted rules that can satisfy the demand.
+"
   (let* ((input-lseq (gddr (car (filter (lambda (e)
            (equal? ghost-lemma-seq (gar e)))
              (cog-get-pred SENT 'PredicateNode)))))
@@ -139,8 +143,6 @@
 
 ; The action selector for OpenPsi
 (psi-set-action-selector!
-  ; Component label
   (Concept "GHOST")
   (Put (DefinedSchema (ghost-prefix "Find Rules"))
-       (DefinedSchema (ghost-prefix "Get Current Input")))
-)
+       (DefinedSchema (ghost-prefix "Get Current Input"))))
