@@ -44,10 +44,8 @@
 
   ; Go through the rules and put them into different categories
   (for-each (lambda (r)
-    (if (equal? curr-topic (car (filter (lambda (x)
-          (any (lambda (y) (equal? ghost-topic y))
-            (cog-chase-link 'InheritanceLink 'ConceptNode x)))
-              (cog-chase-link 'MemberLink 'ConceptNode r))))
+    (define rule-topic (get-rule-topic r))
+    (if (any (lambda (t) (equal? curr-topic t)) rule-topic)
         (cond ((equal? strval-rejoinder (cog-value r ghost-rule-type))
                (set! topic-rejoinders (append topic-rejoinders (list r))))
               ((equal? strval-responder (cog-value r ghost-rule-type))
@@ -56,7 +54,10 @@
                (set! topic-random-gambits (append topic-random-gambits (list r))))
               ((equal? strval-gambit (cog-value r ghost-rule-type))
                (set! topic-gambits (append topic-gambits (list r)))))
-        (cond ((equal? strval-responder (cog-value r ghost-rule-type))
+        (cond ; Skip the rule if it's in a topic that should be explicitly triggered
+              ; A rule may (rarely) be in multiple topics, so check them all
+              ((every (lambda (t) (topic-has-feature? t "noaccess")) rule-topic))
+              ((equal? strval-responder (cog-value r ghost-rule-type))
                (set! responders (append responders (list r))))
               ((equal? strval-random-gambit (cog-value r ghost-rule-type))
                (set! random-gambits (append random-gambits (list r))))
