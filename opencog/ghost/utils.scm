@@ -218,11 +218,11 @@
 "
   Get which topic(s) the RULE is in.
 "
-  ; TODO: Should store the topic as a value as well?
-  (filter (lambda (x)
-    (any (lambda (y) (equal? ghost-topic y))
-      (cog-chase-link 'InheritanceLink 'ConceptNode x)))
-        (cog-chase-link 'MemberLink 'ConceptNode RULE)))
+  (filter
+    (lambda (x)
+      (any (lambda (y) (equal? ghost-topic y))
+           (cog-chase-link 'InheritanceLink 'ConceptNode x)))
+    (cog-chase-link 'InheritanceLink 'ConceptNode RULE)))
 
 ; ----------
 (define (topic-has-feature? TOPIC FEATURE)

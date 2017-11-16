@@ -410,6 +410,8 @@
                (psi-rule-set-alias! rule rule-name)
                ; Set the type
                (cog-set-value! rule ghost-rule-type type)
+               ; Associate it with its topic
+               (Inheritance rule rule-topic)
                ; Then finally add to the rule-lists
                (cond ((or (equal? type strval-responder)
                           (equal? type strval-random-gambit)
@@ -427,7 +429,7 @@
                       action
                       (psi-goal (car goal))
                       (stv (cdr goal) .9)
-                      rule-topic))
+                      ghost-component))
                   goals))))
 
 ; ----------
@@ -450,23 +452,17 @@
 
 (define-public (create-topic TOPIC-NAME FEATURES KEYWORDS)
 "
-  Creates a psi-demand named as TOPIC-NAME, sets the rule-topic to be it
-  and returns ConceptNode that represent the topic.
+  Create a GHOST topic named TOPIC-NAME.
+
+  FEATURES are the topic level features that will be applied to every
+  single rules under this topic.
+
+  KEYWORDS are kind of like the concepts related to this topic.
+  Currently it doesn't have any effect on the action selection, so may
+  be removed in the future.
 "
-  ; NOTE:The intention is to follow chatscript like authoring approach. Once a
-  ; topic is created, then the rules that are added after that will be under
-  ; that topic.
-
-  ; TODO:
-  ; 1. Should this be a skipped demand, so as to separate the dialogue loop
-  ; be independent of the psi-loop? Or, is it better to resturcture openpsi to
-  ; allow as many loops as possilbe as that might be required for the DMT
-  ; implementation?
-  ; 2. Should the weight be accessable? Specially if the execution graph is
-  ; separate from the content, thus allowing learing, why?
-
   ; A topic will be defined when loading a (topic) file
-  (set! rule-topic (psi-demand (ghost-prefix TOPIC-NAME)))
+  (set! rule-topic (Concept (ghost-prefix TOPIC-NAME)))
   (Inheritance rule-topic ghost-topic)
 
   ; Reset the topic-level goals

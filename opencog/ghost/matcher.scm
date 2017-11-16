@@ -65,6 +65,7 @@
                (set! gambits (append gambits (list r)))))))
     RULES)
 
+  (cog-logger-debug ghost-logger "Number of RULES = ~a\n" (length RULES))
   (cog-logger-debug ghost-logger "topic-rejoinders = ~a\n" (length topic-rejoinders))
   (cog-logger-debug ghost-logger "topic-responders = ~a\n" (length topic-responders))
   (cog-logger-debug ghost-logger "topic-random-gambits = ~a\n" (length topic-random-gambits))
@@ -110,7 +111,7 @@
          (dual-match (filter psi-rule? (append-map cog-get-trunk
            (cog-outgoing-set (cog-execute! (Dual input-lseq))))))
          ; Get the psi-rules associate with them with duplicates removed
-         (rules-matched
+         (rules-candidates
            (fold (lambda (rule prev)
                    ; Since a psi-rule can satisfy multiple goals and an
                    ; ImplicationLink will be generated for each of them,
@@ -122,12 +123,12 @@
                  (list) (append exact-match no-const dual-match)))
          ; Evaluate the matched rules one by one and see which of them satisfy
          ; the current context
-         (rules-satisfied (rank-and-eval rules-matched)))
+         (rules-satisfied (rank-and-eval rules-candidates)))
         (cog-logger-debug ghost-logger "For input:\n~a" input-lseq)
         (cog-logger-debug ghost-logger "Rules with no constant:\n~a" no-const)
         (cog-logger-debug ghost-logger "Exact match:\n~a" exact-match)
         (cog-logger-debug ghost-logger "Dual match:\n~a" dual-match)
-        (cog-logger-debug ghost-logger "Rules matched:\n~a" rules-matched)
+        (cog-logger-debug ghost-logger "Rule to-be-evaluated:\n~a" rules-candidates)
         (cog-logger-debug ghost-logger "Rules satisfied:\n~a" rules-satisfied)
         (List rules-satisfied)))
 
