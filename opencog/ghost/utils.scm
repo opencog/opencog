@@ -212,3 +212,12 @@
   Return the rejoinder level, e.g. a = level 1, b = level 2, and so on...
 "
   (- (char->integer TYPE) 96))
+
+; ----------
+(define (topic-has-feature? TOPIC FEATURE)
+"
+  Check if TOPIC has a certain feature named FEATURE.
+"
+  (not (equal? #f
+    (find (lambda (f) (equal? (StringValue FEATURE) f))
+          (cog-value->list (cog-value TOPIC ghost-topic-feature))))))

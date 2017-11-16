@@ -241,7 +241,7 @@
 "
   ; The system functions that are commonly used
   (define reuse #f)
-  (define keep #f)
+  (define keep (topic-has-feature? rule-topic "keep"))
 
   (define (to-atomese actions)
     (define choices '())
