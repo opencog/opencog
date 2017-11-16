@@ -300,13 +300,19 @@
   Assign a string value to a user variable.
 "
   (ExecutionOutput (GroundedSchema "scm: ghost-set-user-variable")
-                   (List (ghost-uvar UVAR) VAL)))
+                   (List (ghost-uvar UVAR) (List VAL))))
 
 (define-public (ghost-set-user-variable UVAR VAL)
 "
   Assign VAL to UVAR.
 "
-  (set! uvars (assoc-set! uvars UVAR VAL))
+  ; In some (rare) cases VAL may be null as the glob is grounded
+  ; to nothing legitimately, so check the rule pattern as there
+  ; are likely more than one ways of grounding it
+  (if (equal? 0 (cog-arity VAL))
+    (cog-logger-warn ghost-logger
+      "Trying to set user variable ~a but the value is NULL!" UVAR)
+    (set! uvars (assoc-set! uvars UVAR VAL)))
   (True))
 
 ; ----------
@@ -332,7 +338,7 @@
 "
   ; TODO: VAL can also be a concept etc?
   (Evaluation (GroundedPredicate "scm: ghost-user-variable-equal?")
-              (List (ghost-uvar UVAR) (Word VAL))))
+              (List (ghost-uvar UVAR) (List (Word VAL)))))
 
 (define-public (ghost-user-variable-equal? UVAR VAL)
 "
