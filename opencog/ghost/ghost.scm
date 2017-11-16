@@ -45,7 +45,6 @@
 (define ghost-lemma-seq (Predicate (ghost-prefix "Lemma Sequence")))
 (define ghost-topic (Concept (ghost-prefix "Topic")))
 (define ghost-rule-type (Predicate (ghost-prefix "Rule Type")))
-(define ghost-rule-rank (Predicate (ghost-prefix "Rule Rank")))
 (define ghost-topic-feature (Predicate (ghost-prefix "Topic Feature")))
 (define strval-rejoinder (StringValue "rejoinder"))
 (define strval-responder (StringValue "responder"))
@@ -83,10 +82,6 @@
 ; A list to keep track of what rules have been created
 ; Will be used when dealing with rejoinders
 (define rule-lists '())
-
-; Basically the position of the rule being placed in a topic file
-; This also serves as the "weight" during matching
-(define rule-rank 0)
 
 ;; --------------------
 ;; For rule matching

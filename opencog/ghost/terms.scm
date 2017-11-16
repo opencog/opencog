@@ -390,10 +390,24 @@
   (State ghost-curr-proc (Concept "Default State")))
 
 ; ----------
-(define-public (ghost-update-rule-rank RULENAME VALUE)
+(define-public (ghost-update-rule-strength RULENAME VALUE)
 "
-  Update the ghost-rule-rank of the rule with alias RULENAME.
+  Update the TruthValue strength of the rule with alias RULENAME to VALUE.
 "
-  (define rule (car (cog-chase-link 'ListLink 'ImplicationLink RULENAME)))
+  ; Get the action of the rule with alias RULENAME, and then
+  ; find all the rules that also contains this same action
+  ; TODO: Better if the label the action instead of the rule?
+  (define rules (get-related-psi-rules (psi-get-action
+    (car (cog-chase-link 'ListLink 'ImplicationLink RULENAME)))))
+
+  ; Get the value
   (define val (string->number (cog-name VALUE)))
-  (cog-set-value! rule ghost-rule-rank (FloatValue val)))
+
+  ; Update the TVs
+  (for-each
+    (lambda (rule)
+      (cog-set-tv! rule (cog-new-stv val (cog-stv-confidence rule))))
+    rules)
+
+  ; Return an atom
+  (True))

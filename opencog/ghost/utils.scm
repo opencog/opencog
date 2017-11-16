@@ -232,3 +232,10 @@
   (not (equal? #f
     (find (lambda (f) (equal? (StringValue FEATURE) f))
           (cog-value->list (cog-value TOPIC ghost-topic-feature))))))
+
+; ----------
+(define (get-related-psi-rules ATOM)
+"
+  Get all the psi-rules that contain ATOM
+"
+  (filter psi-rule? (cog-get-trunk ATOM)))

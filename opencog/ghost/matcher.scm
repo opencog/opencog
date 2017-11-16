@@ -27,17 +27,17 @@
 
   ; To pick one of the selected rules either randomly or based on their weights
   (define (pick-rule F)
-    ; Either randomly pick one of the rules, or pick based on their "rank"
+    ; Either randomly pick one of the rules, or pick based on their TV strength
     (cond ((equal? 'RANDOM F)
            (list-ref rules-evaluated
              (random (length rules-evaluated) (random-state-from-platform))))
           ((equal? 'RANK F)
-           (let ((highest-rank 0)
+           (let ((highest-strength 0)
                  (selected-rule '()))
              (for-each (lambda (r)
-               (let ((rank (car (cog-value->list (cog-value r ghost-rule-rank)))))
-                    (if (> rank highest-rank)
-                        (begin (set! highest-rank rank)
+               (let ((strength (cog-stv-strength r)))
+                    (if (> strength highest-strength)
+                        (begin (set! highest-strength strength)
                                (set! selected-rule r)))))
                rules-evaluated)
              selected-rule))))
