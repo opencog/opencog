@@ -144,6 +144,6 @@
 
 ; The action selector for OpenPsi
 (psi-set-action-selector!
-  (Concept "GHOST")
+  ghost-component
   (Put (DefinedSchema (ghost-prefix "Find Rules"))
        (DefinedSchema (ghost-prefix "Get Current Input"))))

@@ -36,6 +36,10 @@
   (Variable (ghost-prefix "user-variable-" STR)))
 
 ; ----------
+; A component in OpenPsi
+(define ghost-component (psi-component "GHOST"))
+
+; ----------
 ; Various anchors, predicates, values etc that will be used
 
 (define ghost-curr-proc (Anchor (ghost-prefix "Currently Processing")))
