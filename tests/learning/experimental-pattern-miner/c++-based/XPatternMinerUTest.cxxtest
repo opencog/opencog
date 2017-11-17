@@ -1,0 +1,207 @@
+/*
+ * opencog/tests/learning/PatternMiner/PatternMiner.cxxtest
+ *
+ * Copyright (C) 2016 by OpenCog Foundation
+ * All Rights Reserved
+ *
+ * Written by Nil Geisweiller
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+#include <cxxtest/TestSuite.h>
+
+#include <opencog/util/Config.h>
+#include <opencog/atomspace/AtomSpace.h>
+#include <opencog/learning/experimental-pattern-miner/c++-based/XPatternMiner.h>
+#include <opencog/guile/SchemeEval.h>
+
+#include <vector>
+
+using namespace opencog;
+using namespace std;
+
+#define al _as.add_link
+#define an _as.add_node
+
+class XPatternMinerUTest : public CxxTest::TestSuite
+{
+private:
+	AtomSpace _as;
+	SchemeEval _scm;
+
+public:
+	XPatternMinerUTest();
+	~XPatternMinerUTest();
+
+	void setUp();
+	void tearDown();
+
+	void test_PatternMiner_AB_AC();
+	// void test_PatternMiner_AB_ABC();
+	// void test_PatternMiner_ABCD();
+	// void test_PatternMiner_InferenceControl();
+};
+
+XPatternMinerUTest::XPatternMinerUTest() : _scm(&_as)
+{
+	logger().set_level(Logger::DEBUG);
+	logger().set_timestamp_flag(false);
+	logger().set_print_to_stdout_flag(true);
+}
+XPatternMinerUTest::~XPatternMinerUTest() {}
+
+void XPatternMinerUTest::setUp()
+{
+	// Configure scheme load-paths that are common for all tests.
+	_scm.eval("(add-to-load-path \"" PROJECT_SOURCE_DIR
+	          "/tests/learning/experimental-pattern-miner/C++-based/XPatternMiner\")");
+}
+
+void XPatternMinerUTest::tearDown()
+{
+	_as.clear();
+}
+
+void XPatternMinerUTest::test_PatternMiner_AB_AC()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	Handle A = an(CONCEPT_NODE, "A"),
+		B = an(CONCEPT_NODE, "B"),
+		C = an(CONCEPT_NODE, "C"),
+		AB = al(INHERITANCE_LINK, A, B),
+		AC = al(INHERITANCE_LINK, A, C);
+
+	XPatternMiner pm(_as);
+	HandleSet patterns = pm();
+
+	logger().info() << "patterns = " << oc_to_string(patterns);
+
+	TS_WARN("TODO");
+}
+
+// void XPatternMinerUTest::test_PatternMiner_AB_ABC()
+// {
+// 	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+// 	Handle A = an(CONCEPT_NODE, "A"),
+// 		B = an(CONCEPT_NODE, "B"),
+// 		C = an(CONCEPT_NODE, "C"),
+// 		AB = al(INHERITANCE_LINK, A, B),
+// 		ABC = al(INHERITANCE_LINK, A, al(AND_LINK, B, C));
+
+// 	XPatternMiner pm(_as);
+// 	HandleSet patterns = pm();
+
+// 	logger().info() << "patterns = " << oc_to_string(patterns);
+
+// 	TS_WARN("TODO");
+// }
+
+// void XPatternMinerUTest::test_PatternMiner_ABCD()
+// {
+// 	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+// 	Handle A = an(CONCEPT_NODE, "A"),
+// 		B = an(CONCEPT_NODE, "B"),
+// 		C = an(CONCEPT_NODE, "C"),
+// 		D = an(CONCEPT_NODE, "C"),
+// 		AB = al(INHERITANCE_LINK, A, B),
+// 		AC = al(INHERITANCE_LINK, A, C),
+// 		ABCD = al(INHERITANCE_LINK, A, al(SET_LINK, B, C, D));
+
+// 	XPatternMiner pm(_as);
+// 	HandleSet patterns = pm();
+
+// 	logger().info() << "patterns = " << oc_to_string(patterns);
+
+// 	TS_WARN("TODO");
+// }
+
+// void XPatternMinerUTest::test_PatternMiner_InferenceControl()
+// {
+// 	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+// 	// Load inference-control-corpus.scm
+// 	std::string rs =
+// 		_scm.eval("(load-from-path \"inference-control-corpus.scm\")");
+
+// 	std::cout << "rs = " << rs << std::endl;
+
+// 	// Run the pattern miner
+// 	XPatternMiner pm(_as);
+// 	HandleSet patterns = pm();
+
+// 	logger().info() << "patterns = " << oc_to_string(patterns);
+
+// 	// The main pattern of interest should look like
+// 	//
+// 	// Execution
+// 	//   Schema "expand"
+// 	//   List
+// 	//     PatternMiningVariable "$k"
+// 	//     Inheritance
+// 	//       ConceptNode "A"
+// 	//       PatternMiningVariable "$x"
+// 	//     GroundedSchemaNode "scm: conditional-full-instantiation-scope-formula"
+// 	//   PatternMiningVariable "$r"
+// 	//
+// 	// Evaluation
+// 	//   Predicate "preproof
+// 	//   PatternMiningVariable "$k"
+// 	//
+// 	// Evaluation
+// 	//   Predicate "preproof
+// 	//   PatternMiningVariable "$r"
+
+// 	TS_WARN("TODO");
+// }
+
+// void XPatternMinerUTest::test_PatternMiner_SodaDrinker()
+// {
+// 	logger().info("BEGIN TEST: %s", __FUNCTION__);
+// 	// Load ugly_male_soda-drinker_corpus.scm
+// 	_scm.eval("(load-from-path \"ugly_male_soda-drinker_corpus.scm\")");
+
+// 	// Run the pattern miner
+// 	PatternMiner pm(_as);
+// 	pm.runPatternMiner(false);
+
+// 	// Test the result: check the final top 3-gram pattern
+
+// 	vector<HTreeNode*>& top3gramPatterns = pm.getFinalPatternsForGram(3);
+
+// 	string patternStr = pm.unifiedPatternToKeyString(top3gramPatterns[0]->pattern);
+// 	logger().info("The result top 3-gram pattern: \n%s", patternStr.c_str());
+
+// 	if (patternStr != top3gramPatternStr)
+// 	{
+// 		logger().info("Failed: The result top 3-gram pattern is wrong! The right one should be:\n%s", top3gramPatternStr.c_str());
+// 		TS_FAIL("The result top 3-gram pattern is wrong!");
+// 	}
+
+// 	if (top3gramPatterns[0]->count != 5)
+// 	{
+// 		logger().info("Failed: The result top 3-gram pattern count is wrong!");
+// 		TS_FAIL("The result top 3-gram pattern count is wrong!");
+// 	}
+
+// 	logger().info("End TEST: %s", __FUNCTION__);
+// }
+
+#undef al
+#undef an

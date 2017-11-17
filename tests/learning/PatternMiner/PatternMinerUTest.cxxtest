@@ -356,4 +356,3 @@ void PatternMinerUTest::test_PatternMiner_SodaDrinker()
 
 #undef al
 #undef an
-
