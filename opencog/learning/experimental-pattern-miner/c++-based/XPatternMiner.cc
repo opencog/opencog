@@ -23,6 +23,7 @@
 
 #include "XPatternMiner.h"
 
+#include <opencog/util/algorithm.h>
 #include <opencog/util/dorepeat.h>
 #include <opencog/util/random.h>
 
@@ -59,8 +60,10 @@ XPatternMiner::XPatternMiner(AtomSpace& as, const XPMParameters& prm)
 
 HandleSet XPatternMiner::operator()()
 {
-	specialize(param.initpat);
-	return patterns;
+	HandleSet texts;
+	text_as.get_handles_by_type(std::inserter(texts, texts.end()),
+	                            opencog::ATOM, true);
+	return xspecialize(param.initpat, texts);
 }
 
 void XPatternMiner::specialize(const Handle& pattern, int distance)
@@ -85,21 +88,25 @@ void XPatternMiner::specialize(const Handle& pattern, int distance)
 HandleSet XPatternMiner::xspecialize(const Handle& pattern,
                                      const HandleSet& texts) const
 {
-	// Make sure the pattern to specialize has enough support
-	if (freq(pattern) < param.minsup)
-		return HandleSet();
+	// TODO wait a minute!
+	// // Make sure the pattern to specialize has enough support
+	// if (freq(pattern) < param.minsup)
+	// 	return HandleSet();
 
-	//////////////////
-    // Base case    //
-    //////////////////
-	if (get_body(pattern)->get_type() == VARIABLE_NODE)
-		return shallow_patterns(texts);
+	// If the pattern is a variable, then build shallow patterns and
+	// complete them.
+	if (get_body(pattern)->get_type() == VARIABLE_NODE) {
+		HandleMultimap pat2texts = shallow_patterns(texts);
+		HandleSet patterns;
+		for (const auto& el : pat2texts)
+			set_union_modify(patterns, xspecialize(el.first, el.second));
+		return patterns;
+	}
 
-	///////////////////////
-    // Recursive case    //
-    ///////////////////////
-
-	// Get mappings from variables to values
+	// Otherwise, if the pattern is structured, calculate the mappings
+	// from variables to values, get the patterns of these values now
+	// interpreted as texts, and use these patterns to expand the
+	// initial pattern.
 	HandleMapSet var2vals = gen_var2vals(pattern, texts);
 
 	// For each variable, create a trivial pattern, with its variable
@@ -117,7 +124,7 @@ HandleSet XPatternMiner::xspecialize(const Handle& pattern,
 	// Replacing each variable with its patterns in a cartesian
 	// product fashion (not forgetting updating their vardecl
 	// accordingly)
-	return substitution_product(pattern, var2patterns);
+	return product_substitute(pattern, var2patterns);
 }
 
 unsigned XPatternMiner::freq(const Handle& pattern) const
@@ -168,31 +175,25 @@ HandleSet XPatternMiner::next_specialize(const Handle& pattern) const
 	return HandleSet();
 }
 
-HandleSet XPatternMiner::shallow_patterns(const HandleSet& texts) const
+HandleMultimap XPatternMiner::shallow_patterns(const HandleSet& texts) const
 {
-	HandleSet patterns;
+	HandleMultimap pat2texts;
 	for (const Handle& text : texts) {
-		// Node, nothing to abstract
-		if (text->is_node()) {
-			patterns.insert(text);
+		// Node or empty link, nothing to abstract
+		if (text->is_node() or text->get_arity()) {
+			pat2texts[text].insert(text);
 			continue;
 		}
 
-		// Link, abstract its arguments away
+		// Non empty link, let's abstract away the arguments
 		HandleSeq rnd_vars = gen_rand_variables(text->get_arity());
-		Type tt = text->get_type();
-		if (rnd_vars.empty()) {
-			patterns.insert(createLink(tt));
-			continue;
-		}
-
 		Handle vardecl = rnd_vars.size() == 1 ? rnd_vars[0]
 			: createLink(rnd_vars, VARIABLE_LIST),
-			body = createLink(rnd_vars, tt),
+			body = createLink(rnd_vars, text->get_type()),
 			pattern = Handle(createLambdaLink(vardecl, body));
-		patterns.insert(pattern);
+		pat2texts[pattern].insert(text);
 	}
-	return patterns;
+	return pat2texts;
 }
 
 HandleMapSet XPatternMiner::gen_var2vals(const Handle& pattern,
@@ -252,11 +253,42 @@ HandleSet XPatternMiner::select_values(const HandleMapSet& var2vals,
 	return values;
 }
 
-HandleSet XPatternMiner::substitution_product(const Handle& pattern,
-                                              const HandleMultimap& var2pats) const
+HandleSet XPatternMiner::product_substitute(const Handle& pattern,
+                                            const HandleMultimap& var2pats) const
 {
-	// TODO
-	return HandleSet();
+	HandleSet patterns;
+	for (auto map_it = var2pats.begin(); map_it != var2pats.end(); map_it++) {
+		const Handle& variable = map_it->first;
+		const HandleSet& subpatterns = map_it->second;
+
+		// Reconstruct var2pats without that variable, and the ones
+		// preceeding, and recursively call product_substitute to
+		// obtain patterns without the subpatterns of that variables.
+		HandleMultimap re_var2pats(std::next(map_it), var2pats.end());
+		set_union_modify(patterns, product_substitute(pattern, re_var2pats));
+
+		// Combine the patterns of that variables with the patterns of
+		// the other variables.
+		for (auto subpat_it = subpatterns.begin();
+		     subpat_it != subpatterns.end(); ++subpat_it) {
+			// Perform a single substitution of variable by subpat
+			Handle npat = substitute(pattern, {{variable, *subpat_it}});
+
+			// Add the remaining subpatterns sub-patterns to var2pats,
+			// and recursively call product_substitute over it to
+			// generate substitutions combined with subpat
+			re_var2pats[variable].insert(std::next(subpat_it), subpatterns.end());
+			set_union_modify(patterns, product_substitute(npat, re_var2pats));
+		}
+	}
+	return patterns;
+}
+
+Handle XPatternMiner::substitute(const Handle& pattern,
+                                 const HandleMap& var2pat) const
+{
+	// TODO, see Unify::substitute. Probably generalize it.
+	return Handle::UNDEFINED;
 }
 
 } // namespace opencog

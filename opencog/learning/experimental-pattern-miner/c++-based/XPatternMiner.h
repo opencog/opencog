@@ -139,27 +139,28 @@ private:
 	HandleSet next_specialize(const Handle& pattern) const;
 
 	/**
-	 * Given a collection of text atoms, return all shallow
-	 * patterns. For instance
+	 * Given a collection of text atoms, return all shallow patterns,
+	 * associated to their matching texts. For instance
 	 *
 	 * texts = { (Concept "a"),
 	 *           (Concept "b"),
 	 *           (Inheritance (Concept "a") (Concept "b")) }
 	 *
 	 * shallow_patterns(texts) =
-	 *     { (Concept "a"),
-	 *       (Concept "b"),
-	 *       (Lambda
+	 *     { (Concept "a") -> { (Concept "a") },
+	 *       (Concept "b") -> { (Concept "b") },
+	 *       (Lambda       -> { (Inheritance (Concept "a") (Concept "b")) }
 	 *         (VariableList
 	 *           (Variable "$X")
 	 *           (Variable "$Y"))
 	 *         (Inheritance
 	 *           (Variable "$X")
-	 *           (Variable "$Y"))) }
+	 *           (Variable "$Y")))
+	 *     }
 	 *
 	 * TODO: we may want to support types in variable declaration.
 	 */
-	HandleSet shallow_patterns(const HandleSet& texts) const;
+	HandleMultimap shallow_patterns(const HandleSet& texts) const;
 
 	/**
 	 * Given a pattern, a collection of text atoms to match, build a
@@ -209,8 +210,16 @@ private:
 	 *
 	 * TODO: add this as unit test.
 	 */
-	HandleSet substitution_product(const Handle& pattern,
-	                               const HandleMultimap& var2patterns) const;
+	HandleSet product_substitute(const Handle& pattern,
+	                             const HandleMultimap& var2patterns) const;
+
+	/**
+	 * Given a pattern, and mapping from variables to sub-patterns,
+	 * replace all variables in the pattern by their associated
+	 * sub-patterns. Taking care of properly updating the variable
+	 * declaration of the obtained pattern.
+	 */
+	Handle substitute(const Handle& pattern, const HandleMap& var2pat) const;
 };
 
 } // namespace opencog
