@@ -31,6 +31,7 @@
 #include <opencog/atoms/base/Node.h>
 #include <opencog/atoms/core/LambdaLink.h>
 #include <opencog/atomutils/TypeUtils.h>
+#include <opencog/atomutils/Unify.h>
 #include <opencog/query/BindLinkAPI.h>
 
 namespace opencog
@@ -124,7 +125,7 @@ HandleSet XPatternMiner::xspecialize(const Handle& pattern,
 	// Replacing each variable with its patterns in a cartesian
 	// product fashion (not forgetting updating their vardecl
 	// accordingly)
-	return product_substitute(pattern, var2patterns);
+	return product_compose(pattern, var2patterns);
 }
 
 unsigned XPatternMiner::freq(const Handle& pattern) const
@@ -253,8 +254,8 @@ HandleSet XPatternMiner::select_values(const HandleMapSet& var2vals,
 	return values;
 }
 
-HandleSet XPatternMiner::product_substitute(const Handle& pattern,
-                                            const HandleMultimap& var2pats) const
+HandleSet XPatternMiner::product_compose(const Handle& pattern,
+                                         const HandleMultimap& var2pats) const
 {
 	HandleSet patterns;
 	for (auto map_it = var2pats.begin(); map_it != var2pats.end(); map_it++) {
@@ -262,33 +263,99 @@ HandleSet XPatternMiner::product_substitute(const Handle& pattern,
 		const HandleSet& subpatterns = map_it->second;
 
 		// Reconstruct var2pats without that variable, and the ones
-		// preceeding, and recursively call product_substitute to
-		// obtain patterns without the subpatterns of that variables.
+		// preceeding, and recursively call product_compose to obtain
+		// patterns without the subpatterns of that variables.
 		HandleMultimap re_var2pats(std::next(map_it), var2pats.end());
-		set_union_modify(patterns, product_substitute(pattern, re_var2pats));
+		set_union_modify(patterns, product_compose(pattern, re_var2pats));
 
 		// Combine the patterns of that variables with the patterns of
 		// the other variables.
 		for (auto subpat_it = subpatterns.begin();
 		     subpat_it != subpatterns.end(); ++subpat_it) {
 			// Perform a single substitution of variable by subpat
-			Handle npat = substitute(pattern, {{variable, *subpat_it}});
+			Handle npat = compose(pattern, {{variable, *subpat_it}});
 
 			// Add the remaining subpatterns sub-patterns to var2pats,
 			// and recursively call product_substitute over it to
 			// generate substitutions combined with subpat
 			re_var2pats[variable].insert(std::next(subpat_it), subpatterns.end());
-			set_union_modify(patterns, product_substitute(npat, re_var2pats));
+			set_union_modify(patterns, product_compose(npat, re_var2pats));
 		}
 	}
 	return patterns;
 }
 
-Handle XPatternMiner::substitute(const Handle& pattern,
-                                 const HandleMap& var2pat) const
+Handle XPatternMiner::compose(const Handle& pattern,
+                              const HandleMap& var2pat) const
 {
-	// TODO, see Unify::substitute. Probably generalize it.
-	return Handle::UNDEFINED;
+	// Split var2pat into 2 mappings, variable to sub-vardecl and
+	// variable to sub-body
+	HandleMap var2subdecl, var2subody;
+	for (const auto& el : var2pat) {
+		var2subdecl[el.first] = get_vardecl(el.second);
+		var2subody[el.first] = get_body(el.second);
+	}
+
+	// Get variable declaration of the composition
+	Handle vardecl = vardecl_compose(get_vardecl(pattern), var2subdecl);
+
+	// Turn the map into a vector of new bodies
+	const Variables variables = get_variables(pattern);
+	HandleSeq subodies = variables.make_values(var2subody);
+
+	// Perform composition of the pattern body with the sub-bodies)
+	Handle body = variables.substitute_nocheck(get_body(pattern), subodies);
+	body = Unify::consume_ill_quotations(vardecl, body);
+
+	// Create the substituted BindLink
+	return createLink(HandleSeq{vardecl, body}, pattern->get_type());
+}
+
+Handle XPatternMiner::vardecl_compose(const Handle& vardecl,
+                                      const HandleMap& var2subdecl)
+{
+	OC_ASSERT((bool)vardecl, "Not implemented");
+
+	Type t = vardecl->get_type();
+
+	// Base cases
+
+	if (t == VARIABLE_NODE) {
+		auto it = var2subdecl.find(vardecl);
+		// Compose if the variable maps to another variable
+		// declaration
+		if (it != var2subdecl.end())
+			return it->second;
+		return vardecl;
+	}
+
+	// Recursive cases
+
+	if (t == VARIABLE_LIST) {
+		HandleSeq oset;
+		for (const Handle& h : vardecl->getOutgoingSet()) {
+			Handle nh = vardecl_compose(h, var2subdecl);
+			if (nh) {
+				if (nh->get_type() == VARIABLE_LIST)
+					for (const Handle nhc : nh->getOutgoingSet())
+						oset.push_back(nhc);
+				else
+					oset.push_back(nh);
+			}
+		}
+
+		if (oset.empty())
+			return Handle::UNDEFINED;
+		else
+			return createLink(oset, t);
+	}
+	else if (t == TYPED_VARIABLE_LINK) {
+		return vardecl_compose(vardecl->getOutgoingAtom(0), var2subdecl);
+	}
+	else {
+		OC_ASSERT(false, "Not implemented");
+		return Handle::UNDEFINED;
+	}
 }
 
 } // namespace opencog

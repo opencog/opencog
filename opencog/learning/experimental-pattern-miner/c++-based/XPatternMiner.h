@@ -189,8 +189,8 @@ private:
 
 	/**
 	 * Given a pattern and a mapping from variables in that pattern to
-	 * sub-patterns, return as many patterns as variable substitutions
-	 * by the associated patterns. For instance
+	 * sub-patterns, return as many patterns as possible
+	 * compositions. For instance
 	 *
 	 * pattern = (Inheritance X Y)
 	 *
@@ -198,7 +198,7 @@ private:
 	 *   { X->(Concept "a"), Y->(Concept "b"),
 	 *     X->(And (Concept "a") (Concept "c")), Y->(Concept "d") }
 	 *
-	 * then substitution_product(pattern, var2patterns) =
+	 * then product_compose(pattern, var2patterns) =
 	 *   { (Inheritance X (Concept "b")),
 	 *     (Inheritance X (Concept "d")),
 	 *     (Inheritance (Concept "a") Y),
@@ -210,16 +210,44 @@ private:
 	 *
 	 * TODO: add this as unit test.
 	 */
-	HandleSet product_substitute(const Handle& pattern,
-	                             const HandleMultimap& var2patterns) const;
+	HandleSet product_compose(const Handle& pattern,
+	                          const HandleMultimap& var2patterns) const;
 
 	/**
 	 * Given a pattern, and mapping from variables to sub-patterns,
-	 * replace all variables in the pattern by their associated
-	 * sub-patterns. Taking care of properly updating the variable
-	 * declaration of the obtained pattern.
+	 * compose (as in function composition) the pattern with the
+	 * sub-patterns. That is replace variables in the pattern by their
+	 * associated sub-patterns, properly updating the variable
+	 * declaration.
+	 *
+	 * TODO: add unit test
+	 *
+	 * TODO: add examples
+	 *
+	 * TODO Move this to a ComposeLink factory.
 	 */
-	Handle substitute(const Handle& pattern, const HandleMap& var2pat) const;
+	Handle compose(const Handle& pattern, const HandleMap& var2pat) const;
+
+	/**
+	 * Given a variable declaration, and a mapping from variables to
+	 * variable declaration, produce a new variable declaration, as
+	 * obtained by compositing the pattern with the sub-patterns.
+	 *
+	 * If a variable in vardecl is missing in var2vardecl, then
+	 * vardecl is untouched. But if a variable maps to the undefined
+	 * Handle, then it is removed from the resulting variable
+	 * declaration. That happens in cases where the variable maps to a
+	 * constant pattern, i.e. a value. In such case composition
+	 * amounts to application.
+	 *
+	 * TODO: add unit test
+	 *
+	 * TODO: add examples
+	 *
+	 * TODO: can probably be made static
+	 */
+	static Handle vardecl_compose(const Handle& vardecl,
+	                              const HandleMap& var2subdecl);
 };
 
 } // namespace opencog
