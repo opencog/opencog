@@ -94,8 +94,8 @@ public:
 	Handle get_first_location(Handle, Handle ato, Handle elapse);
 	Handle get_last_location(Handle, Handle ato, Handle elapse);
 	//AtTimeLink
-	//  TimeNode "Date Time millisec"
 	//  Atom
+	//  TimeNode "Date Time millisec"
 	// Get time points of atom occuring at a location
 	Handle get_elapse_list_at_loc_ato(Handle, Handle ato,
 	                                  Handle loc);//listlink atTimeLink

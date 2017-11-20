@@ -59,15 +59,15 @@ namespace opencog
  * and we use a map<TimeDomain, TemporalTable> to save all corresponding tables
  * Also, we change the AtTimeLink structure to:
  * AtTimeLink
- * __TimeNode "12:00:00"
  * __ConceptNode "Lunch"
+ * __TimeNode "12:00:00"
  * __TimeDomainNode "GameWorld"
  * by adding a TimeDomainNode in the outgoings.
  * If we don't set our own TimeDomain when adding time info, TimeServer will set a default time domain.
  * And the AtTimeLink will be 
  * AtTimeLink
- * __TimeNode "12:00:00"
  * __ConceptNode "Lunch"
+ * __TimeNode "12:00:00"
  * skip the TimeDomainNode.
  */
 typedef std::string TimeDomain;
@@ -79,7 +79,7 @@ class TimeServerSavable;
  * atom handles.
  * All information added to this object should also be present in the
  * corresponding AtomSpace hypergraph in the following way:
- *     AtTimeLink ( TimeNode "<timestamp or timelag>", Handle )
+ *     AtTimeLink ( Handle, TimeNode "<timestamp or timelag>" )
  *
  * See also http://www.opencog.org/wiki/TimeServer
  */
@@ -183,7 +183,7 @@ public:
     void clear();
 
     /**
-     * Adds both the AtTime(TimeNode <timestamp>, atom) atom representation into the AtomTable
+     * Adds both the AtTime(atom, TimeNode <timestamp>) atom representation into the AtomTable
      * and the entry (atom, * timestamp) into the TimeServer of the given AtomSpace.
      *
      * @param atom       the Handle of the atom to be associated to the timestamp
@@ -194,12 +194,12 @@ public:
      * @return the Handle of the AtTimeLink added into AtomSpace.
      */
     Handle addTimeInfo(Handle atom,
-		       const octime_t& timestamp,
+                       const octime_t& timestamp,
                        const TimeDomain& timeDomain = DEFAULT_TIMEDOMAIN,
                        TruthValuePtr tv = TruthValue::TRUE_TV());
 
     /**
-     * Adds both the AtTime(TimeNode <t>, atom) atom representation
+     * Adds both the AtTime(atom, TimeNode <t>) atom representation
      * into the AtomTable and the entry (atom, t) into the TimeServer
      * of the given AtomSpace.
      *
@@ -210,12 +210,12 @@ public:
      * @return the Handle of the AtTimeLink added into AtomSpace.
      */
     Handle addTimeInfo(Handle atom, 
-		       const Temporal& t,
+                       const Temporal& t,
                        const TimeDomain& timeDomain = DEFAULT_TIMEDOMAIN,
                        TruthValuePtr tv = TruthValue::TRUE_TV());
 
     /**
-     * Adds both the AtTime(TimeNode <timeNodeName>, atom) atom representation into the AtomTable 
+     * Adds both the AtTime(atom, TimeNode <timeNodeName>) atom representation into the AtomTable 
      * and the corresponding entry (atom, t) into the TimeServer of the given AtomSpace.
      * @param atom the Handle of the atom to be associated to the timestamp
      * @param timeNodeName the name of the TimeNode to be associated to the atom via an AtTimeLink.
@@ -224,12 +224,12 @@ public:
      * @return the Handle of the AtTimeLink added into the AtomSpace.
      */
     Handle addTimeInfo(Handle h,
-		       const std::string& timeNodeName,
+                       const std::string& timeNodeName,
                        const TimeDomain& timeDomain = DEFAULT_TIMEDOMAIN, 
-		       TruthValuePtr tv = TruthValue::TRUE_TV());
+                       TruthValuePtr tv = TruthValue::TRUE_TV());
 
     /**
-     * Removes both the AtTime(TimeNode <timestamp>, atom) atom
+     * Removes both the AtTime(atom, TimeNode <timestamp>) atom
      * representation from the AtomTable and the entry (atom,
      * timestamp) from the TimeServer of the given AtomSpace.
      *
@@ -279,7 +279,7 @@ public:
                         bool recursive = true);
 
     /**
-     * Removes both the AtTime(TimeNode <t>, atom) atom representation
+     * Removes both the AtTime(atom, TimeNode <t>) atom representation
      * from the AtomTable and the entry (atom, t) from the TimeServer
      * of the given AtomSpace.
      *
@@ -323,7 +323,7 @@ public:
     bool removeTimeInfo(Handle h,
                         const Temporal& t = UNDEFINED_TEMPORAL,
                         TemporalTable::TemporalRelationship = TemporalTable::EXACT,
-			const TimeDomain& timeDomain = DEFAULT_TIMEDOMAIN,
+                        const TimeDomain& timeDomain = DEFAULT_TIMEDOMAIN,
                         bool removeDisconnectedTimeNodes = true,
                         bool recursive = true);
 

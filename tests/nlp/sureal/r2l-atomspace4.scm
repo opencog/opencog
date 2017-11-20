@@ -453,8 +453,8 @@
       )
    )
    (AtTimeLink
-      (TimeNode "1480053019")
       (SentenceNode "sentence@dcf4acc4-45e1-4787-9a67-5e0c326b0fa7")
+      (TimeNode "1480053019")
       (TimeDomainNode "Dialogue-System")
    )
    (EvaluationLink (stv 1 1)

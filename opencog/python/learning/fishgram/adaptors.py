@@ -559,7 +559,7 @@ if __name__ == "__main__":
 
     arity3 = a.add_link(t.AndLink, [bob, alice, obj1])
 
-    time = a.add_link(t.AtTimeLink, [a.add_node(t.TimeNode, "t-0"), a.add_node(t.ConceptNode, "blast-off")])
+    time = a.add_link(t.AtTimeLink, [a.add_node(t.ConceptNode, "blast-off"), a.add_node(t.TimeNode, "t-0")])
 
     eval_arity1 = a.add_link(t.EvaluationLink, [a.add_node(t.PredicateNode, "is_edible"),
                     a.add_link(t.ListLink, [a.add_node(t.ConceptNode, "bowl123")])])
