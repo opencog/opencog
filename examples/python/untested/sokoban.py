@@ -117,7 +117,7 @@ class Block:
         predicate = atomspace.add_node(types.PredicateNode, "AGISIM_position")
         
         evaluation = atomspace.add_link(types.EvaluationLink, [predicate, list])
-        at_time = atomspace.add_link(types.AtTimeLink, [time, evaluation], truth_value)
+        at_time = atomspace.add_link(types.AtTimeLink, [evaluation, time], truth_value)
         atomspace.add_link(types.LatestLink, [at_time])
         
         

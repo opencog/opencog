@@ -409,7 +409,7 @@ class GeneralAtTimeEvaluationToMemberRule(Rule):
         all_args = chainer.make_n_variables(arg_count)
         list_link = chainer.link(types.ListLink, all_args)
         eval_link = chainer.link(types.EvaluationLink, [pred, list_link])
-        at_time = chainer.link(types.AtTimeLink, [time, eval_link])
+        at_time = chainer.link(types.AtTimeLink, [eval_link, time])
 
         self.chainer = chainer
         Rule.__init__(self,

@@ -35,8 +35,8 @@ class TemporalRule(Rule):
         Rule.__init__(self,
                       formula=formula,
                       outputs=[chainer.link(link_type, [A, B])],
-                      inputs=[chainer.link(types.AtTimeLink, [ta, A]),
-                              chainer.link(types.AtTimeLink, [tb, B])])
+                      inputs=[chainer.link(types.AtTimeLink, [A, ta]),
+                              chainer.link(types.AtTimeLink, [B, tb])])
 
         self.name = get_type_name(link_type) + 'EvaluationRule'
 

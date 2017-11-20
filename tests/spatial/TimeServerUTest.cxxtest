@@ -1259,8 +1259,8 @@ public:
         Handle atTimeLink = timeServer().addTimeInfo(node1, 1000);
         TS_ASSERT(atTimeLink != Handle::UNDEFINED);
         Handle timeNode = atomSpace.get_handle(TIME_NODE, Temporal::getTimeNodeName(1000));
-        TS_ASSERT(atTimeLink->getOutgoingSet()[0] == timeNode);
-        TS_ASSERT(atTimeLink->getOutgoingSet()[1] == node1);
+        TS_ASSERT(atTimeLink->getOutgoingSet()[0] == node1);
+        TS_ASSERT(atTimeLink->getOutgoingSet()[1] == timeNode);
         vector<HandleTemporalPair> res;
         timeServer().getTimeInfo(back_inserter(res), node1);
         TS_ASSERT(res.size() == 1);
@@ -1272,8 +1272,8 @@ public:
         atTimeLink = timeServer().addTimeInfo(node1, t2);
         TS_ASSERT(atTimeLink != Handle::UNDEFINED);
         timeNode = atomSpace.get_handle(TIME_NODE, t2.getTimeNodeName());
-        TS_ASSERT(atTimeLink->getOutgoingSet()[0] == timeNode);
-        TS_ASSERT(atTimeLink->getOutgoingSet()[1] == node1);
+        TS_ASSERT(atTimeLink->getOutgoingSet()[0] == node1);
+        TS_ASSERT(atTimeLink->getOutgoingSet()[1] == timeNode);
         res.clear();
         timeServer().getTimeInfo(back_inserter(res), node1);
         TS_ASSERT(res.size() == 2);
@@ -1624,8 +1624,8 @@ public:
         TS_ASSERT((NULL != timeNode));
         // Check if the AtTimeLink was removed from AtomTable
         HandleSeq outgoing;
-        outgoing.push_back(timeNode);
         outgoing.push_back(node1);
+        outgoing.push_back(timeNode);
         TS_ASSERT(atomSpace.get_handle(AT_TIME_LINK, outgoing) == Handle::UNDEFINED);
         // Check if the pair(node1, T) was removed from TimeServer
         vector<HandleTemporalPair> res;
@@ -1662,8 +1662,8 @@ public:
         TS_ASSERT(timeNode != Handle::UNDEFINED);
         // Check if the AtTimeLink was removed from AtomTable
         outgoing.clear();
-        outgoing.push_back(timeNode);
         outgoing.push_back(node1);
+        outgoing.push_back(timeNode);
         TS_ASSERT(atomSpace.get_handle(AT_TIME_LINK, outgoing) == Handle::UNDEFINED);
         // Check if the pair(node1, T) was removed from TimeServer
         res.clear();

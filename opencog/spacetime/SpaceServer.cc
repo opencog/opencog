@@ -305,7 +305,8 @@ void SpaceServer::mapPersisted(Handle mapId)
 
 std::string SpaceServer::getMapIdString(Handle mapHandle) const
 {
-    // Currently the mapHandle is of AtTimeLink(TimeNode:"<timestamp>" , ConceptNode:"SpaceMap")
+    // Currently the mapHandle is of
+	// AtTimeLink(ConceptNode:"SpaceMap", TimeNode:"<timestamp>")
     // So, just get the name of the TimeNode as its string representation
     // return atomspace->get_name(mapHandle->getOutgoingSet()[0])->get_result();
 

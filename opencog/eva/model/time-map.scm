@@ -128,13 +128,13 @@
 	(cog-execute!
 	(PutLink
 		(AtTimeLink
-			(TimeNode (number->string (current-time)))
 			(EvaluationLink
 				(PredicateNode "say_face")
 					(ListLink
 						(VariableNode "$fid")
 						(SentenceNode sent)))
-				(Concept "sound-perception"))
+            (TimeNode (number->string (current-time)))
+            (Concept "sound-perception"))
 		(Get (State last-speaker (Variable "$fid")))
 	))
 )

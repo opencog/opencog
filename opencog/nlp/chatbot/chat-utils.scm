@@ -31,8 +31,8 @@
 		; FIXME: maybe opencog's internal time octime should
 		; be used. Will do for now, assuming a single instance
 		; deals with a single conversation.
-		(TimeNode (number->string (current-time)))
 		sent
+		(TimeNode (number->string (current-time)))
 		time-domain)
 )
 
@@ -50,8 +50,8 @@
                     (Variable "s")
                     (TypeNode "SentenceNode")))
             (AtTimeLink
-                (Variable "tn")
                 (Variable "s")
+                (Variable "tn")
                 time-domain)))
 
     (define last-time 0)
@@ -92,8 +92,8 @@
                     (Variable "s")
                     (TypeNode "SentenceNode")))
             (AtTimeLink
-                (Variable "tn")
                 (Variable "s")
+                (Variable "tn")
                 time-domain)))
 
     (define result '())
