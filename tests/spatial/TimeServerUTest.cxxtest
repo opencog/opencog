@@ -1624,8 +1624,8 @@ public:
         TS_ASSERT((NULL != timeNode));
         // Check if the AtTimeLink was removed from AtomTable
         HandleSeq outgoing;
-        outgoing.push_back(timeNode);
         outgoing.push_back(node1);
+        outgoing.push_back(timeNode);
         TS_ASSERT(atomSpace.get_handle(AT_TIME_LINK, outgoing) == Handle::UNDEFINED);
         // Check if the pair(node1, T) was removed from TimeServer
         vector<HandleTemporalPair> res;

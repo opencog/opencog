@@ -156,9 +156,9 @@ Handle TimeServer::addTimeInfo(Handle h, const std::string& timeNodeName, const 
     Handle timeNode = atomspace->add_node(TIME_NODE, timeNodeName);
 
     HandleSeq atTimeLinkOutgoing;
-    atTimeLinkOutgoing.push_back(timeNode);
     DPRINTF("TimeServer::addTimeInfo - timeNode was %lu\n", timeNode.value());
     atTimeLinkOutgoing.push_back(h);
+    atTimeLinkOutgoing.push_back(timeNode);
 
     // If it's default time domain, it means that we only have a single time domain.
     // So we'll not have TimeDomainNode;
@@ -204,7 +204,7 @@ bool TimeServer::removeTimeInfo(Handle h,
         Handle atTimeLink = getAtTimeLink(*itr, timeDomain);
         DPRINTF("Got atTimeLink = %lu\n", atTimeLink.value());
         if (atomspace->is_valid_handle(atTimeLink)) {
-	    Handle timeNode = atTimeLink->getOutgoingAtom(0);
+	    Handle timeNode = atTimeLink->getOutgoingAtom(1);
             DPRINTF("Got timeNode = %lu\n", timeNode.value());
             OC_ASSERT(atomspace->is_valid_handle(timeNode)
                       and timeNode->get_type() == TIME_NODE,
@@ -252,8 +252,8 @@ Handle TimeServer::getAtTimeLink(const HandleTemporalPair& htp, const TimeDomain
 
     Handle timeNode = atomspace->get_handle(TIME_NODE, t.getTimeNodeName());
     HandleSeq outgoing;
-    outgoing.push_back(timeNode);
     outgoing.push_back(h);
+    outgoing.push_back(timeNode);
     if (timeDomain != DEFAULT_TIMEDOMAIN) {
         //multiple time domain; should add TimeDomainNode in the last arity
         Handle timeDomainNode = atomspace->get_handle(TIME_DOMAIN_NODE, timeDomain);
@@ -305,7 +305,7 @@ void TimeServer::atomAdded(const Handle& h)
         return;
     }
 
-    const Handle& timeNode = h->getOutgoingAtom(0);
+    const Handle& timeNode = h->getOutgoingAtom(1);
     if (timeNode->get_type() != TIME_NODE) {
         logger().warn("TimeServer::atomAdded: Invalid atom type "
              "at the first element in an AtTimeLink's outgoing: "
@@ -316,7 +316,7 @@ void TimeServer::atomAdded(const Handle& h)
 
     // Add corresponding TimeServer entry
     const string& timeNodeName = timeNode->get_name();
-    const Handle& timed_h = h->getOutgoingAtom(1);
+    const Handle& timed_h = h->getOutgoingAtom(0);
     Temporal t = Temporal::getFromTimeNodeName(timeNodeName.c_str());
     TimeDomain timeDomain = DEFAULT_TIMEDOMAIN;
     if (arityOfTimeLink == 3)
@@ -345,12 +345,12 @@ void TimeServer::atomRemoved(const AtomPtr& atom)
 	      "AtomSpace::atomRemoved: Got invalid arity for removed AtTimeLink = %d\n",
 	      arityOfTimeLink);
 
-    const Handle& timeNode = atom->getOutgoingAtom(0);
+    const Handle& timeNode = atom->getOutgoingAtom(1);
     // If it's not a TimeNode, then it's a VariableNode which can stand
     // in for a TimeNode. So we can ignore it here.
     if (timeNode->get_type() != TIME_NODE) return;
 
-    const Handle& timedAtom = atom->getOutgoingAtom(1);
+    const Handle& timedAtom = atom->getOutgoingAtom(0);
 
     TimeDomain timeDomain = DEFAULT_TIMEDOMAIN;
     if (arityOfTimeLink == 3) {
