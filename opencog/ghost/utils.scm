@@ -225,6 +225,16 @@
     (cog-chase-link 'InheritanceLink 'ConceptNode RULE)))
 
 ; ----------
+(define (is-rule-in-topic? RULE TOPIC)
+"
+  Check if RULE is a member of TOPIC.
+
+  It is not impossible that the exact same rule exists in
+  multiple topics, so get and check all of them.
+"
+  (any (lambda (t) (equal? TOPIC t)) (get-rule-topic RULE)))
+
+; ----------
 (define (topic-has-feature? TOPIC FEATURE)
 "
   Check if TOPIC has a certain feature named FEATURE.

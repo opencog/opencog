@@ -47,8 +47,7 @@
 
   ; Go through the rules and put them into different categories
   (for-each (lambda (r)
-    (define rule-topic (get-rule-topic r))
-    (if (any (lambda (t) (equal? curr-topic t)) rule-topic)
+    (if (is-rule-in-topic? r curr-topic)
         (cond ((equal? strval-rejoinder (cog-value r ghost-rule-type))
                (set! topic-rejoinders (append topic-rejoinders (list r))))
               ((equal? strval-responder (cog-value r ghost-rule-type))
@@ -59,7 +58,7 @@
                (set! topic-gambits (append topic-gambits (list r)))))
         (cond ; Skip the rule if it's in a topic that should be explicitly triggered
               ; A rule may (rarely) be in multiple topics, so check them all
-              ((every (lambda (t) (topic-has-feature? t "noaccess")) rule-topic))
+              ((every (lambda (t) (topic-has-feature? t "noaccess")) (get-rule-topic r)))
               ((equal? strval-responder (cog-value r ghost-rule-type))
                (set! responders (append responders (list r))))
               ((equal? strval-random-gambit (cog-value r ghost-rule-type))
@@ -106,11 +105,12 @@
   Wa = 1/Na * sum(Wcagi)
 
   Na = number of satisfied rules [i] that have the action [a]
-  Wcagi = Scag * Sc * Ig
+  Wcagi = Scag * Sc * Ig * T
 
   Scag = Strength of the psi-rule (c ∧ a => g)
   Sc = Satisfiability of the context of the psi-rule
   Ig = Importance of the goal [g]
+  T = Whether the rule is in the current topic [1, 0.5]
 "
   ; Store the evaluation results for the contexts, so that the same context
   ; won't be evaluated again, in the same psi-step
@@ -128,6 +128,9 @@
   ; For random number generation
   (define total-weight 0)
 
+  ; Get to know what the current topic is
+  (define curr-topic (ghost-get-curr-topic))
+
   ; For quickly find out which rule an given
   ; action belongs to
   ; To-be removed once action selector actually
@@ -138,15 +141,17 @@
   (define (calculate-rweight R)
     ; XXX TODO: The default STI is zero, which means
     ; the weight for all the rules will be zero
-    ; To workaround this a non-zero STI will be assigned
+    ; To workaround this, a non-zero STI will be assigned
     ; to the goal for now until we have ECAN and GHOST
     ; running altogether in the near future
     (define sti (cog-av-sti (psi-get-goal R)))
-    (if (equal? 0 sti)
-        (set! sti 1))
+
+    ; Now calculate the weight
     (* (cog-stv-strength R)
        (assoc-ref context-alist (psi-get-context R))
-       sti))
+       (if (equal? 0 sti) 1 sti)
+       ; TODO: Use a more sophisticated way for the below
+       (if (is-rule-in-topic? R curr-topic) 1 0.5)))
 
   ; Calculate the weight of the action A
   (define (calculate-aweight A)
