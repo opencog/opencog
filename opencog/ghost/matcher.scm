@@ -170,9 +170,13 @@
           (if (equal? (assoc-ref sum-weight-alist ra) #f)
             (set! sum-weight-alist (assoc-set! sum-weight-alist ra w))
             (set! sum-weight-alist (assoc-set! sum-weight-alist ra
-              (+ (assoc-ref sum-weight-alist ra) w)))))))
+              (+ (assoc-ref sum-weight-alist ra) w))))
+          (cog-logger-debug ghost-logger
+            "Skipping action with zero weight: ~a" ra))))
     RULES)
 
+  ; Note: sum-weight-alist and action-weight-alist do not contain
+  ; actions that have a zero weight
   (for-each
     (lambda (a)
       (set! action-weight-alist
@@ -185,12 +189,13 @@
   (cog-logger-debug ghost-logger "action-cnt-alist: ~a" action-cnt-alist)
   (cog-logger-debug ghost-logger "sum-weight-alist: ~a" sum-weight-alist)
   (cog-logger-debug ghost-logger "action-weight-alist: ~a" action-weight-alist)
+  (cog-logger-debug ghost-logger "action-rule-alist: ~a" action-rule-alist)
 
   ; If there is only one action in the list, return that
   ; Otherwise, pick one based on their weights
   ; TODO: Return the actual action instead of a rule
   (if (equal? (length action-weight-alist) 1)
-    (cdar action-rule-alist)
+    (assoc-ref action-rule-alist (caar action-weight-alist))
     (let* ((accum-weight 0)
            (cutoff (* total-weight (random:uniform (random-state-from-platform))))
            (action-rtn
