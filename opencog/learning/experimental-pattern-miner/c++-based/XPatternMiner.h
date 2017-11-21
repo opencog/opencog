@@ -27,6 +27,8 @@
 #include <opencog/atoms/core/Variables.h>
 #include <opencog/atomspace/AtomSpace.h>
 
+class XPatternMinerUTest;
+
 namespace opencog
 {
 
@@ -72,6 +74,7 @@ struct XPMParameters {
  */
 class XPatternMiner
 {
+    friend class ::XPatternMinerUTest;
 public:
 
 	/**
@@ -122,7 +125,10 @@ public:
 	HandleSet patterns;
 private:
 	/**
-	 * Given a pattern, return its vardecl and body
+	 * Given a pattern, return its vardecl and body. If the pattern is
+	 * not a scope link (i.e. a constant/text), then get_variables and
+	 * get_vardecl return the empty Variables and vardecl
+	 * respectively, and get_body returns the pattern itself.
 	 */
 	const Variables& get_variables(const Handle& pattern) const;
 	const Handle& get_vardecl(const Handle& pattern) const;
@@ -195,8 +201,8 @@ private:
 	 * pattern = (Inheritance X Y)
 	 *
 	 * var2patterns =
-	 *   { X->(Concept "a"), Y->(Concept "b"),
-	 *     X->(And (Concept "a") (Concept "c")), Y->(Concept "d") }
+	 *   { X-> {(Concept "a"), (Set (Concept "a") (Concept "c"))},
+	 *     Y-> {(Concept "b"), (Concept "d")} }
 	 *
 	 * then product_compose(pattern, var2patterns) =
 	 *   { (Inheritance X (Concept "b")),
@@ -204,9 +210,9 @@ private:
 	 *     (Inheritance (Concept "a") Y),
 	 *     (Inheritance (Concept "a") (Concept "b")),
 	 *     (Inheritance (Concept "a") (Concept "d")),
-	 *     (Inheritance (And (Concept "a") (Concept "c")) Y),
-	 *     (Inheritance (And (Concept "a") (Concept "c")) (Concept "b")),
-	 *     (Inheritance (And (Concept "a") (Concept "c")) (Concept "d")) }
+	 *     (Inheritance (Set (Concept "a") (Concept "c")) Y),
+	 *     (Inheritance (Set (Concept "a") (Concept "c")) (Concept "b")),
+	 *     (Inheritance (Set (Concept "a") (Concept "c")) (Concept "d")) }
 	 *
 	 * TODO: add this as unit test.
 	 */

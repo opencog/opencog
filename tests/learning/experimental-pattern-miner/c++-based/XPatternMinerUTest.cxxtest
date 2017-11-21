@@ -41,6 +41,7 @@ class XPatternMinerUTest : public CxxTest::TestSuite
 {
 private:
 	AtomSpace _as;
+	AtomSpace _tmp_as;
 	SchemeEval _scm;
 
 public:
@@ -50,10 +51,12 @@ public:
 	void setUp();
 	void tearDown();
 
-	void test_PatternMiner_AB_AC();
-	// void test_PatternMiner_AB_ABC();
-	// void test_PatternMiner_ABCD();
-	// void test_PatternMiner_InferenceControl();
+	void test_product_compose();
+
+	void test_AB_AC();
+	// void test_AB_ABC();
+	// void test_ABCD();
+	// void test_InferenceControl();
 };
 
 XPatternMinerUTest::XPatternMinerUTest() : _scm(&_as)
@@ -74,9 +77,54 @@ void XPatternMinerUTest::setUp()
 void XPatternMinerUTest::tearDown()
 {
 	_as.clear();
+	_tmp_as.clear();
 }
 
-void XPatternMinerUTest::test_PatternMiner_AB_AC()
+void XPatternMinerUTest::test_product_compose()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	XPatternMiner pm(_as);
+
+	Handle X = _tmp_as.add_node(VARIABLE_NODE, "$X"),
+		Y = _tmp_as.add_node(VARIABLE_NODE, "$Y"),
+		a = _tmp_as.add_node(CONCEPT_NODE, "a"),
+		b = _tmp_as.add_node(CONCEPT_NODE, "b"),
+		c = _tmp_as.add_node(CONCEPT_NODE, "c"),
+		d = _tmp_as.add_node(CONCEPT_NODE, "d"),
+		Sac = _tmp_as.add_link(SET_LINK, a, c),
+		XY = _tmp_as.add_link(LAMBDA_LINK, _tmp_as.add_link(VARIABLE_LIST, X, Y),
+		                      _tmp_as.add_link(INHERITANCE_LINK, X, Y)),
+		Xb = _tmp_as.add_link(LAMBDA_LINK, X,
+		                      _tmp_as.add_link(INHERITANCE_LINK, X, b)),
+		Xd = _tmp_as.add_link(LAMBDA_LINK, X,
+		                      _tmp_as.add_link(INHERITANCE_LINK, X, d)),
+		aY = _tmp_as.add_link(LAMBDA_LINK, Y,
+		                      _tmp_as.add_link(INHERITANCE_LINK, a, Y)),
+		ab = _tmp_as.add_link(INHERITANCE_LINK, a, b),
+		ad = _tmp_as.add_link(INHERITANCE_LINK, a, d),
+		SacY = _tmp_as.add_link(LAMBDA_LINK, Y,
+		                        _tmp_as.add_link(INHERITANCE_LINK, Sac, Y)),
+		Sacb = _tmp_as.add_link(INHERITANCE_LINK, Sac, b),
+		Sacd = _tmp_as.add_link(INHERITANCE_LINK, Sac, d);
+
+	HandleMultimap var2pats = { {X, {a, Sac}}, {Y, {b, d}} };
+
+	HandleSet results = pm.product_compose(XY, var2pats),
+		expected = { Xb, Xd, aY, ab, ad, SacY, Sacb, Sacd };
+
+	std::cout << "results = " << oc_to_string(results);
+	std::cout << "expected = " << oc_to_string(expected);
+
+	// Because equality is by pointer and not by content, while
+	// less_than is by content, pfff
+	TS_ASSERT_EQUALS(results.size(), expected.size());
+	auto rit = results.begin(), eit = expected.begin();
+	for (; rit != results.end(); ++rit, ++eit)
+		TS_ASSERT(content_eq(*rit, *eit));
+}
+
+void XPatternMinerUTest::test_AB_AC()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
@@ -94,7 +142,7 @@ void XPatternMinerUTest::test_PatternMiner_AB_AC()
 	TS_WARN("TODO");
 }
 
-// void XPatternMinerUTest::test_PatternMiner_AB_ABC()
+// void XPatternMinerUTest::test_AB_ABC()
 // {
 // 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
@@ -112,7 +160,7 @@ void XPatternMinerUTest::test_PatternMiner_AB_AC()
 // 	TS_WARN("TODO");
 // }
 
-// void XPatternMinerUTest::test_PatternMiner_ABCD()
+// void XPatternMinerUTest::test_ABCD()
 // {
 // 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
@@ -132,7 +180,7 @@ void XPatternMinerUTest::test_PatternMiner_AB_AC()
 // 	TS_WARN("TODO");
 // }
 
-// void XPatternMinerUTest::test_PatternMiner_InferenceControl()
+// void XPatternMinerUTest::test_InferenceControl()
 // {
 // 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 

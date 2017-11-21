@@ -103,8 +103,10 @@ HandleSet XPatternMiner::xspecialize(const Handle& pattern,
 	if (get_body(pattern)->get_type() == VARIABLE_NODE) {
 		HandleMultimap pat2texts = shallow_patterns(texts);
 		HandleSet patterns;
-		for (const auto& el : pat2texts)
+		for (const auto& el : pat2texts) {
+			patterns.insert(el.first);
 			set_union_modify(patterns, xspecialize(el.first, el.second));
+		}
 		return patterns;
 	}
 
@@ -152,17 +154,27 @@ unsigned XPatternMiner::freq(const Handle& pattern) const
 
 const Variables& XPatternMiner::get_variables(const Handle& pattern) const
 {
-	return ScopeLinkCast(pattern)->get_variables();
+	ScopeLinkPtr sc = ScopeLinkCast(pattern);
+	if (sc)
+		return ScopeLinkCast(pattern)->get_variables();
+	static Variables empty_variables;
+	return empty_variables;
 }
 
 const Handle& XPatternMiner::get_vardecl(const Handle& pattern) const
 {
-	return ScopeLinkCast(pattern)->get_vardecl();
+	ScopeLinkPtr sc = ScopeLinkCast(pattern);
+	if (sc)
+		return ScopeLinkCast(pattern)->get_vardecl();
+	return Handle::UNDEFINED;
 }
 
 const Handle& XPatternMiner::get_body(const Handle& pattern) const
 {
-	return ScopeLinkCast(pattern)->get_body();
+	ScopeLinkPtr sc = ScopeLinkCast(pattern);
+	if (sc)
+		return ScopeLinkCast(pattern)->get_body();
+	return pattern;
 }
 
 void XPatternMiner::insert(const HandleSet& npats)
@@ -269,8 +281,8 @@ HandleSet XPatternMiner::product_compose(const Handle& pattern,
 		// Reconstruct var2pats without that variable, and the ones
 		// preceeding, and recursively call product_compose to obtain
 		// patterns without the subpatterns of that variables.
-		HandleMultimap re_var2pats(std::next(map_it), var2pats.end());
-		set_union_modify(patterns, product_compose(pattern, re_var2pats));
+		HandleMultimap revar2pats(std::next(map_it), var2pats.end());
+		set_union_modify(patterns, product_compose(pattern, revar2pats));
 
 		// Combine the patterns of that variables with the patterns of
 		// the other variables.
@@ -278,12 +290,17 @@ HandleSet XPatternMiner::product_compose(const Handle& pattern,
 		     subpat_it != subpatterns.end(); ++subpat_it) {
 			// Perform a single substitution of variable by subpat
 			Handle npat = compose(pattern, {{variable, *subpat_it}});
+			patterns.insert(npat);
+
+			// Recursively call product_compose on nap and the
+			// remaining variables
+			set_union_modify(patterns, product_compose(npat, revar2pats));
 
 			// Add the remaining subpatterns sub-patterns to var2pats,
-			// and recursively call product_substitute over it to
-			// generate substitutions combined with subpat
-			re_var2pats[variable].insert(std::next(subpat_it), subpatterns.end());
-			set_union_modify(patterns, product_compose(npat, re_var2pats));
+			// and recursively call product_compose over pattern
+			HandleMultimap revar2pats_revar(revar2pats);
+			revar2pats_revar[variable].insert(std::next(subpat_it), subpatterns.end());
+			set_union_modify(patterns, product_compose(pattern, revar2pats_revar));
 		}
 	}
 	return patterns;
@@ -311,8 +328,12 @@ Handle XPatternMiner::compose(const Handle& pattern,
 	Handle body = variables.substitute_nocheck(get_body(pattern), subodies);
 	body = Unify::consume_ill_quotations(vardecl, body);
 
-	// Create the substituted BindLink
-	return createLink(HandleSeq{vardecl, body}, pattern->get_type());
+	// Create the composed pattern
+	if (vardecl)
+		return createLink(HandleSeq{vardecl, body}, pattern->get_type());
+
+	// No variable, the pattern is the body itself
+	return body;
 }
 
 Handle XPatternMiner::vardecl_compose(const Handle& vardecl,
@@ -350,8 +371,9 @@ Handle XPatternMiner::vardecl_compose(const Handle& vardecl,
 
 		if (oset.empty())
 			return Handle::UNDEFINED;
-		else
-			return createLink(oset, t);
+		if (oset.size() == 1)
+			return oset[0];
+		return createLink(oset, t);
 	}
 	else if (t == TYPED_VARIABLE_LINK) {
 		return vardecl_compose(vardecl->getOutgoingAtom(0), var2subdecl);
