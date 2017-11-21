@@ -263,6 +263,11 @@
         (cog-logger-debug ghost-logger "To-be-evaluated:\n~a" rules-candidates)
         (cog-logger-debug ghost-logger "Selected:\n~a" selected)
 
+        ; Keep a record of which rule got executed, just for rejoinders
+        ; TODO: Move this part to OpenPsi?
+        ; TODO: This should be created after actually executing the action
+        (if (not (null? selected)) (State ghost-last-executed selected))
+
         (List selected)))
 
 (Define

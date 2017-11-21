@@ -349,9 +349,9 @@
                     (lv (get-rejoinder-level TYPE)))
           (list
             (list (TypedVariable var (Type "ImplicationLink")))
-            (list ; TODO: Insert the "last executed" atomese from OpenPsi
+            (list (State ghost-last-executed var)
                   (psi-rule-set-alias! var
-                    (car (list-ref rule-lists (- lv 1)))))
+                    (last (list-ref rule-lists (- lv 1)))))
             strval-rejoinder)))))
 
 ; ----------
