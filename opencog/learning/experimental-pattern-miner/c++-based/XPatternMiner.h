@@ -102,7 +102,7 @@ public:
 	 * For now all limits, expect minsup, are ignored, all patterns
 	 * are considered.
 	 */
-	HandleSet xspecialize(const Handle& pattern, const HandleSet& texts) const;
+	HandleSet xspecialize(const Handle& pattern, const HandleSet& texts);
 
 	/**
 	 * Calculate the frequency of a given pattern
@@ -113,7 +113,7 @@ public:
 	AtomSpace& text_as;
 
 	// Parameters
-	const XPMParameters& param;
+	XPMParameters param;
 
 	// Working atomspace containing the patterns, and other junk.
 	AtomSpace pattern_as;
@@ -160,7 +160,7 @@ private:
 	 *
 	 * TODO: we may want to support types in variable declaration.
 	 */
-	HandleMultimap shallow_patterns(const HandleSet& texts) const;
+	HandleMultimap shallow_patterns(const HandleSet& texts);
 
 	/**
 	 * Given a pattern, a collection of text atoms to match, build a

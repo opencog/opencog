@@ -87,12 +87,16 @@ void XPatternMiner::specialize(const Handle& pattern, int distance)
 }
 
 HandleSet XPatternMiner::xspecialize(const Handle& pattern,
-                                     const HandleSet& texts) const
+                                     const HandleSet& texts)
 {
 	// TODO wait a minute!
 	// // Make sure the pattern to specialize has enough support
 	// if (freq(pattern) < param.minsup)
 	// 	return HandleSet();
+
+	// If the pattern is constant, then no specialization is possible
+	if (pattern->get_type() != LAMBDA_LINK)
+		return HandleSet();
 
 	// If the pattern is a variable, then build shallow patterns and
 	// complete them.
@@ -113,19 +117,19 @@ HandleSet XPatternMiner::xspecialize(const Handle& pattern,
 	// For each variable, create a trivial pattern, with its variable
 	// as body and its type as vardecl, take the list of values, pass
 	// it as texts and call xspecialize.
-	HandleMultimap var2patterns;
+	HandleMultimap var2subpats;
 	for (const Handle& var : get_variables(pattern).varset) {
-		HandleSet var_texts = select_values(var2vals, var);
-		Handle var_vardecl = filter_vardecl(get_vardecl(pattern), var);
-		Handle var_pattern = Handle(createLambdaLink(var_vardecl, var));
-		HandleSet var_patterns = xspecialize(var_pattern, var_texts);
-		var2patterns[var] = var_patterns;
+		HandleSet subtexts = select_values(var2vals, var);
+		Handle subvardecl = filter_vardecl(get_vardecl(pattern), var);
+		Handle subpattern = Handle(createLambdaLink(subvardecl, var));
+		HandleSet subpatterns = xspecialize(subpattern, subtexts);
+		var2subpats[var] = subpatterns;
 	}
 
 	// Replacing each variable with its patterns in a cartesian
 	// product fashion (not forgetting updating their vardecl
 	// accordingly)
-	return product_compose(pattern, var2patterns);
+	return product_compose(pattern, var2subpats);
 }
 
 unsigned XPatternMiner::freq(const Handle& pattern) const
@@ -176,12 +180,12 @@ HandleSet XPatternMiner::next_specialize(const Handle& pattern) const
 	return HandleSet();
 }
 
-HandleMultimap XPatternMiner::shallow_patterns(const HandleSet& texts) const
+HandleMultimap XPatternMiner::shallow_patterns(const HandleSet& texts)
 {
 	HandleMultimap pat2texts;
 	for (const Handle& text : texts) {
 		// Node or empty link, nothing to abstract
-		if (text->is_node() or text->get_arity()) {
+		if (text->is_node() or text->get_arity() == 0) {
 			pat2texts[text].insert(text);
 			continue;
 		}
@@ -189,9 +193,9 @@ HandleMultimap XPatternMiner::shallow_patterns(const HandleSet& texts) const
 		// Non empty link, let's abstract away the arguments
 		HandleSeq rnd_vars = gen_rand_variables(text->get_arity());
 		Handle vardecl = rnd_vars.size() == 1 ? rnd_vars[0]
-			: createLink(rnd_vars, VARIABLE_LIST),
-			body = createLink(rnd_vars, text->get_type()),
-			pattern = Handle(createLambdaLink(vardecl, body));
+			: pattern_as.add_link(VARIABLE_LIST, rnd_vars),
+			body = pattern_as.add_link(text->get_type(), rnd_vars),
+			pattern = pattern_as.add_link(LAMBDA_LINK, vardecl, body);
 		pat2texts[pattern].insert(text);
 	}
 	return pat2texts;
@@ -242,7 +246,7 @@ HandleSeq XPatternMiner::gen_rand_variables(size_t n) const
 
 Handle XPatternMiner::gen_rand_variable() const
 {
-	return createNode(VARIABLE_NODE, randstr("PatternMiner-", 2));
+	return createNode(VARIABLE_NODE, randstr("$PM-", 2));
 }
 
 HandleSet XPatternMiner::select_values(const HandleMapSet& var2vals,
