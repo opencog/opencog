@@ -136,9 +136,17 @@
 
   ; Calculate the weight of the rule R
   (define (calculate-rweight R)
+    ; XXX TODO: The default STI is zero, which means
+    ; the weight for all the rules will be zero
+    ; To workaround this a non-zero STI will be assigned
+    ; to the goal for now until we have ECAN and GHOST
+    ; running altogether in the near future
+    (define sti (cog-av-sti (psi-get-goal R)))
+    (if (equal? 0 sti)
+        (set! sti 1))
     (* (cog-stv-strength R)
        (assoc-ref context-alist (psi-get-context R))
-       (cog-av-sti (psi-get-goal R))))
+       sti))
 
   ; Calculate the weight of the action A
   (define (calculate-aweight A)
