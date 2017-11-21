@@ -61,7 +61,7 @@ Here is a list of features that are fully supported in GHOST:
 - [Unordered Matching](https://github.com/bwilcox-1234/ChatScript/blob/master/WIKI/ChatScript-Basic-User-Manual.md#unordered-matching--)
 
 
-One or more goals can be specified for a rule in this way:
+The action selection in GHOST is goal-driven, so all of the GHOST rules should be linked to one or more goals:
 
 ```
 #goal: (novelty=0.8 please_user=0.4)
