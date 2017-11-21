@@ -263,9 +263,18 @@
       (CONCEPT ID declaration-sequence) :
         (create-concept $2 (eval-string (string-append "(list " $3 ")")))
       (TOPIC ID declaration-sequence) :
-        (create-topic $2 (eval-string (string-append "(list " $3 ")")))
-      (TOPIC ID LPAREN RPAREN) : (create-topic $2 (list))
-      (TOPIC ID LSBRACKET RSBRACKET) : (create-topic $2 (list))
+        (create-topic $2 (list) (eval-string (string-append "(list " $3 ")")))
+      (TOPIC ID LPAREN RPAREN) : (create-topic $2 (list) (list))
+      (TOPIC ID LSBRACKET RSBRACKET) : (create-topic $2 (list) (list))
+      ; Note, "names" here are the topic-level features/functions that will
+      ; be applied to every single rules under this topic
+      (TOPIC ID names declaration-sequence) :
+        (create-topic $2 (string-split $3 #\sp)
+          (eval-string (string-append "(list " $4 ")")))
+      (TOPIC ID names LPAREN RPAREN) :
+        (create-topic $2 (string-split $3 #\sp) (list))
+      (TOPIC ID names LSBRACKET RSBRACKET) :
+        (create-topic $2 (string-split $3 #\sp) (list))
     )
 
     (declaration-sequence
@@ -453,9 +462,6 @@
       ; e.g. $username=Bob
       (UVAR EQUAL name) :
         (format #f "(cons 'assign_uvar (list \"~a\" (cons 'str \"~a\")))" $1 $3)
-      ; e.g. $length=1
-      (UVAR EQUAL NUM) :
-        (format #f "(cons 'assign_uvar (list \"~a\" (cons 'str \"~a\")))" $1 $3)
       ; e.g. $username='_0
       (UVAR EQUAL variable-grounding) :
         (format #f "(cons 'assign_uvar (list \"~a\" ~a))" $1 $3)
@@ -539,8 +545,6 @@
       (UVAR) : (format #f "(cons 'uvar_exist \"~a\")" $1)
       (UVAR EQUAL name) :
         (format #f "(cons 'uvar_equal (list \"~a\" \"~a\"))" $1 $3)
-      (UVAR EQUAL NUM) :
-        (format #f "(cons 'uvar_equal (list \"~a\" \"~a\"))" $1 $3)
     )
 
     (negation
@@ -572,13 +576,14 @@
 
     (names
       (name) : $1
-      (names) : $1
+      (names name) : (format #f "~a ~a" $1 $2)
     )
 
     (name
       (LEMMA) : $1
       (LITERAL) : $1
       (STRING) : $1
+      (NUM) : $1
     )
 
     (args
@@ -658,7 +663,6 @@
     (tts-member
       (COMMA) : ""
       (name) : (format #f "(cons 'str \"~a\")" $1)
-      (NUM) : (format #f "(cons 'str \"~a\")" $1)
       (UVAR) : (format #f "(cons 'get_uvar \"~a\")" $1)
     )
   )

@@ -52,10 +52,16 @@ Here is a list of features that are fully supported in GHOST:
 - [Function](https://github.com/bwilcox-1234/ChatScript/blob/master/WIKI/ChatScript-Advanced-User-Manual.md#functions)
   - Currently only Scheme functions are accepted, can support other languages if needed
   - Should be in the public interface, e.g. use `define-public` when defining the function
+  - There are several build-in functions that are available
+    - `noaccess`, a topic feature that prevent any of the rules in it get triggered, unless being called explicitly. This should only be used when it's absolutely necessary.
+    - `reuse`, to reuse the action of another rule, e.g.
+      - `^reuse(some_label)` will reuse the action of another rule with a label named "some_label". It's recommended to use a unique label for each of the rules in the rulebase, `topic.label` is not supported.
+      - Note, currently reusing a rule with local variables in the action of the rule is not supported, but user variables are fine.
+    - `keep`, to keep the rule in the system so that it can be selected and executed more than once, this can be used at topic level too
 - [Unordered Matching](https://github.com/bwilcox-1234/ChatScript/blob/master/WIKI/ChatScript-Basic-User-Manual.md#unordered-matching--)
 
 
-One or more goals can be specified for a rule in this way:
+The action selection in GHOST is goal-driven, so all of the GHOST rules should be linked to one or more goals:
 
 ```
 #goal: (novelty=0.8 please_user=0.4)
@@ -84,7 +90,7 @@ Basic examples of how to use GHOST is available [HERE](https://github.com/openco
              (opencog nlp relex2logic)
              (opencog openpsi)
              (opencog eva-behavior)
-             (opencog nlp ghost))
+             (opencog ghost))
 ```
 4) Start authoring
 
@@ -141,12 +147,6 @@ u: means union of the both above
 
 - System variables
   - %input
-
-- Rule selection / topic management
-  - Gambits
-  - Rejoinders
-  - Weight the rules by the order of the rules in the topic file
-  - Block topic from accidental access, like doing "t: (!~) ^fail(topic)" in ChatScript
 
 - Action orchestrator
 
