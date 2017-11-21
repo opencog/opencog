@@ -318,8 +318,11 @@
 "
   Go through each of the goals, including the shared ones.
 "
-  (if (null? GOAL)
-      (list (cons (ghost-prefix "Default Goal") 0.9))
+  (if (and (null? GOAL) (null? shared-goals))
+      (begin
+        (cog-logger-warn ghost-logger
+          "Did you forget to link a goal to the rule?")
+        (list (cons (ghost-prefix "Default Goal") .9)))
       ; The shared goals will be overwritten if the same goal is given
       ; to this rule
       (append GOAL
