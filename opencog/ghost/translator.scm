@@ -377,7 +377,7 @@
   ; First of all, make sure the topic is set
   ; so that it can be used when we are processing the action
   (if (null? rule-topic)
-      (set! rule-topic (create-topic "Default Topic" '() '())))
+      (set! rule-topic (create-topic "Default Topic")))
 
   ; Reset the list of local variables
   (set! pat-vars '())
@@ -453,7 +453,8 @@
 "
   (set! shared-goals GOAL))
 
-(define-public (create-topic TOPIC-NAME FEATURES KEYWORDS)
+(define*-public (create-topic TOPIC-NAME
+                #:optional (FEATURES (list)) (KEYWORDS (list)))
 "
   Create a GHOST topic named TOPIC-NAME.
 
