@@ -111,7 +111,7 @@
     ((has-match? "^[ ]*\\*~[0-9]+" str)
       (result:suffix '*~n location
         (substring (string-trim (match:substring current-match)) 2)))
-    ((has-match? "^[ ]*~[a-zA-Z_]+" str)
+    ((has-match? "^[ ]*~[a-zA-Z0-9_]+" str)
       (result:suffix 'ID location
         (substring (string-trim (match:substring current-match)) 1)))
     ((has-match? "^[ ]*\\^" str) (result:suffix '^ location #f))
