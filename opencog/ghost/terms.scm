@@ -204,7 +204,9 @@
 
 ; ----------
 (define (tts-feature ARGS)
-  "Occurrence of a TTS feature, like a pause or change of tone etc."
+"
+  Occurrence of a TTS feature, like a pause or change of tone etc.
+"
   (ExecutionOutput (GroundedSchema "scm: ghost-tts-feature")
                    (List ARGS)))
 
@@ -219,7 +221,7 @@
   The TTS server will handle the rest afterwards.
 "
   ; TODO: Should be handled in OpenCog internally?
-  (Word (string-append "|" (string-join (map cog-name ARGS) ",") "|")))
+  (Word (string-append "|" (string-join (map cog-name (flatten-list ARGS)) ",") "|")))
 
 ; ----------
 (define (context-function NAME ARGS)

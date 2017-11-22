@@ -200,11 +200,12 @@
   into:
     (ListLink (Word \"hi\") (Word \"you\") (Word \"robot\"))
 "
-  (map (lambda (x)
-         (if (equal? 'ListLink (cog-type x))
-             (cog-outgoing-set x)
-             x))
-       LST))
+  (append-map
+    (lambda (x)
+      (if (equal? 'ListLink (cog-type x))
+        (cog-outgoing-set x)
+        (list x)))
+    LST))
 
 ; ----------
 (define (get-rejoinder-level TYPE)
