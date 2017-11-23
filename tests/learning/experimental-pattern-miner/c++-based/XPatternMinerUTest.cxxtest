@@ -1,7 +1,7 @@
 /*
- * opencog/tests/learning/PatternMiner/PatternMiner.cxxtest
+ * opencog/tests/learning/experimental-pattern-miner/c++-based/XPatternMiner.cxxtest
  *
- * Copyright (C) 2016 by OpenCog Foundation
+ * Copyright (C) 2017 by OpenCog Foundation
  * All Rights Reserved
  *
  * Written by Nil Geisweiller
@@ -56,8 +56,7 @@ public:
 	void test_A();
 	void test_AB_AC();
 	void test_AB_AC_BC();
-	// void test_AB_ABC();
-	// void test_ABCD();
+	void test_AB_ABC();
 	// void test_InferenceControl();
 };
 
@@ -196,43 +195,32 @@ void XPatternMinerUTest::test_AB_AC_BC()
 	TS_ASSERT(content_eq(results, expected));
 }
 
-// void XPatternMinerUTest::test_AB_ABC()
-// {
-// 	logger().info("BEGIN TEST: %s", __FUNCTION__);
+void XPatternMinerUTest::test_AB_ABC()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
-// 	Handle A = an(CONCEPT_NODE, "A"),
-// 		B = an(CONCEPT_NODE, "B"),
-// 		C = an(CONCEPT_NODE, "C"),
-// 		AB = al(INHERITANCE_LINK, A, B),
-// 		ABC = al(INHERITANCE_LINK, A, al(AND_LINK, B, C));
+	Handle A = an(CONCEPT_NODE, "A"),
+		B = an(CONCEPT_NODE, "B"),
+		C = an(CONCEPT_NODE, "C"),
+		AB = al(INHERITANCE_LINK, A, B),
+		ABC = al(INHERITANCE_LINK, A, al(AND_LINK, B, C));
 
-// 	XPatternMiner pm(_as);
-// 	HandleSet patterns = pm();
+	XPMParameters param(2);
+	XPatternMiner pm(_as, param);
+	HandleSet results = pm();
 
-// 	logger().info() << "patterns = " << oc_to_string(patterns);
+	Handle X = an(VARIABLE_NODE, "$X"),
+		Y = an(VARIABLE_NODE, "$Y"),
+		XY = al(INHERITANCE_LINK, X, Y),
+		AY = al(INHERITANCE_LINK, A, Y);
+	HandleSet expected = { al(LAMBDA_LINK, al(VARIABLE_LIST, X, Y), XY),
+	                       al(LAMBDA_LINK, Y, AY) };
 
-// 	TS_WARN("TODO");
-// }
+	logger().debug() << "results = " << oc_to_string(results);
+	logger().debug() << "expected = " << oc_to_string(expected);
 
-// void XPatternMinerUTest::test_ABCD()
-// {
-// 	logger().info("BEGIN TEST: %s", __FUNCTION__);
-
-// 	Handle A = an(CONCEPT_NODE, "A"),
-// 		B = an(CONCEPT_NODE, "B"),
-// 		C = an(CONCEPT_NODE, "C"),
-// 		D = an(CONCEPT_NODE, "C"),
-// 		AB = al(INHERITANCE_LINK, A, B),
-// 		AC = al(INHERITANCE_LINK, A, C),
-// 		ABCD = al(INHERITANCE_LINK, A, al(SET_LINK, B, C, D));
-
-// 	XPatternMiner pm(_as);
-// 	HandleSet patterns = pm();
-
-// 	logger().info() << "patterns = " << oc_to_string(patterns);
-
-// 	TS_WARN("TODO");
-// }
+	TS_ASSERT(content_eq(results, expected));
+}
 
 // void XPatternMinerUTest::test_InferenceControl()
 // {
