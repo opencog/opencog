@@ -64,35 +64,21 @@ HandleSet XPatternMiner::operator()()
 	HandleSet texts;
 	text_as.get_handles_by_type(std::inserter(texts, texts.end()),
 	                            opencog::ATOM, true);
-	return xspecialize(param.initpat, texts);
+	return specialize(param.initpat, texts);
 }
 
-void XPatternMiner::specialize(const Handle& pattern, int distance)
+HandleSet XPatternMiner::specialize(const Handle& pattern,
+                                    const HandleSet& texts)
 {
-	// No specialization at such distance
-	if (distance == 0)
-		return;
-
-	// According to the a priori property, if the pattern frequency is
-	// below the minimum, its specializations will be as well.
-	if (freq(pattern) < param.minsup)
-		return;
-
-	// Recursive case
-	HandleSet npats = next_specialize(pattern);
-	insert(npats);
-	if ((int)patterns.size() != param.maxpats)
-		for (const Handle& pat : npats)
-			specialize(pat, distance - 1);
+	return specialize(pattern, HandleUCounter(texts));
 }
 
-HandleSet XPatternMiner::xspecialize(const Handle& pattern,
-                                     const HandleSet& texts)
+HandleSet XPatternMiner::specialize(const Handle& pattern,
+                                    const HandleUCounter& texts)
 {
-	// TODO wait a minute!
-	// // Make sure the pattern to specialize has enough support
-	// if (freq(pattern) < param.minsup)
-	// 	return HandleSet();
+	// Make sure the pattern has enough support
+	if (not enough_support(pattern, texts))
+		return HandleSet();
 
 	// If the pattern is constant, then no specialization is possible
 	if (pattern->get_type() != LAMBDA_LINK)
@@ -101,11 +87,11 @@ HandleSet XPatternMiner::xspecialize(const Handle& pattern,
 	// If the pattern is a variable, then build shallow patterns and
 	// complete them.
 	if (get_body(pattern)->get_type() == VARIABLE_NODE) {
-		HandleMultimap pat2texts = shallow_patterns(texts);
+		HandleUCounterMap pat2texts = shallow_patterns(texts);
 		HandleSet patterns;
 		for (const auto& el : pat2texts) {
 			patterns.insert(el.first);
-			set_union_modify(patterns, xspecialize(el.first, el.second));
+			set_union_modify(patterns, specialize(el.first, el.second));
 		}
 		return patterns;
 	}
@@ -114,42 +100,40 @@ HandleSet XPatternMiner::xspecialize(const Handle& pattern,
 	// from variables to values, get the patterns of these values now
 	// interpreted as texts, and use these patterns to expand the
 	// initial pattern.
+	// TODO
 	HandleMapSet var2vals = gen_var2vals(pattern, texts);
 
 	// For each variable, create a trivial pattern, with its variable
 	// as body and its type as vardecl, take the list of values, pass
-	// it as texts and call xspecialize.
+	// it as texts and call specialize.
 	HandleMultimap var2subpats;
 	for (const Handle& var : get_variables(pattern).varset) {
 		HandleSet subtexts = select_values(var2vals, var);
 		Handle subvardecl = filter_vardecl(get_vardecl(pattern), var);
 		Handle subpattern = Handle(createLambdaLink(subvardecl, var));
-		HandleSet subpatterns = xspecialize(subpattern, subtexts);
+		HandleSet subpatterns = specialize(subpattern, subtexts);
 		var2subpats[var] = subpatterns;
 	}
 
-	// Replacing each variable with its patterns in a cartesian
-	// product fashion (not forgetting updating their vardecl
-	// accordingly)
+	// Replacing each variable by its patterns in a cartesian product
+	// fashion (not forgetting updating their vardecls accordingly)
 	return product_compose(pattern, var2subpats);
 }
 
-unsigned XPatternMiner::freq(const Handle& pattern) const
+bool enough_support(const Handle& pattern, const HandleUCounter& texts) const
 {
-	AtomSpace tmp_as(&text_as);
+	// First check if there are enough texts, to save computation
+	return param.minsup <= texts.total_count() and
+		param.minsup <= freq(pattern, texts);
+}
 
-	Handle
-		vardecl = get_vardecl(pattern),
-		body = get_body(pattern),
-		// the rewrite is the body wrapped in a DontExec. That is to
-		// count correctly. Indeed if we were to use a GetLink, extra
-		// permutations would be considered when the pattern contains
-		// unordered links.
-		rewrite = tmp_as.add_link(DONT_EXEC_LINK, body),
-		bl = tmp_as.add_link(BIND_LINK, vardecl, body, rewrite),
-		result = bindlink(&tmp_as, bl);
-
-	return result->get_arity();
+unsigned XPatternMiner::freq(const Handle& pattern,
+                             const HandleUCounter& texts) const
+{
+	unsigned total;
+	for (const auto& text : texts)
+		total += text.second * (unsigned)match(pattern, text.first);
+	return total;
 }
 
 const Variables& XPatternMiner::get_variables(const Handle& pattern) const
@@ -186,27 +170,44 @@ void XPatternMiner::insert(const HandleSet& npats)
 	}
 }
 
-HandleSet XPatternMiner::next_specialize(const Handle& pattern) const
+bool XPatternMiner::match(const Handle& pattern, const Handle& text) const
 {
-	// TODO, perhaps...
-	return HandleSet();
+	// If constant pattern, matching ammounts to equality
+	if (pattern->get_type() != LAMBDA_LINK)
+		return content_eq(pattern, text);
+
+	// Otherwise see if pattern matches text
+	AtomSpace tmp_as;
+	tmp_as.add_atom(text);
+	AtomSpace tmp_pattern_as(&tmp_as);
+	Handle tmp_pattern = tmp_pattern_as.add_atom(pattern),
+		vardecl = get_vardecl(tmp_pattern),
+		body = get_body(tmp_pattern),
+		// the rewrite is the body wrapped in a DontExec. That is to
+		// count correctly. Indeed if we were to use a GetLink, extra
+		// permutations would be considered when the pattern contains
+		// unordered links.
+		rewrite = tmp_as.add_link(DONT_EXEC_LINK, body),
+		bl = tmp_as.add_link(BIND_LINK, vardecl, body, rewrite),
+		result = bindlink(&tmp_as, bl);
+	return 0 < result->get_arity();
 }
 
-HandleMultimap XPatternMiner::shallow_patterns(const HandleSet& texts)
+HandleUCounterMap XPatternMiner::shallow_patterns(const HandleUCounter& texts)
 {
-	HandleMultimap pat2texts;
-	for (const Handle& text : texts) {
+	HandleUCounterMap pat2texts;
+	for (const auto& text : texts) {
 		// Node or empty link, nothing to abstract
-		if (text->is_node() or text->get_arity() == 0) {
-			pat2texts[text].insert(text);
+		if (text.first->is_node() or text.first->get_arity() == 0) {
+			pat2texts[text.first].insert(text);
 			continue;
 		}
 
 		// Non empty link, let's abstract away the arguments
-		HandleSeq rnd_vars = gen_rand_variables(text->get_arity());
+		HandleSeq rnd_vars = gen_rand_variables(text.first->get_arity());
 		Handle vardecl = rnd_vars.size() == 1 ? rnd_vars[0]
 			: pattern_as.add_link(VARIABLE_LIST, rnd_vars),
-			body = pattern_as.add_link(text->get_type(), rnd_vars),
+			body = pattern_as.add_link(text.first->get_type(), rnd_vars),
 			pattern = pattern_as.add_link(LAMBDA_LINK, vardecl, body);
 		pat2texts[pattern].insert(text);
 	}

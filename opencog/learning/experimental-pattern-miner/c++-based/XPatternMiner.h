@@ -32,6 +32,8 @@ class XPatternMinerUTest;
 namespace opencog
 {
 
+typedef std::map<Handle, HandleUCounter> HandleUCounterMap;
+
 /**
  * Parameters for XPatternMiner. The terminology is taken from
  * Frequent Subtree Mining -- An Overview, from Yun Chi et al, when
@@ -90,27 +92,30 @@ public:
 	HandleSet operator()();
 
 	/**
-	 * Generate all patterns specializing the given pattern from the
-	 * given distance, put the results in XPatternMiner::patterns. If
-	 * the distance is -1, then it will generate all patterns up to
-	 * maxpats above or equal to minsup.
-	 */
-	void specialize(const Handle& pattern, int dst=-1);
-
-	/**
-	 * Experimental specialization. Given a pattern and a collection
-	 * to text atoms, generate all specialized patterns of the given
-	 * pattern.
+	 * Specialization. Given a pattern and a collection to text atoms,
+	 * generate all specialized patterns of the given pattern.
 	 *
 	 * For now all limits, expect minsup, are ignored, all patterns
 	 * are considered.
 	 */
-	HandleSet xspecialize(const Handle& pattern, const HandleSet& texts);
+	HandleSet specialize(const Handle& pattern, const HandleSet& texts);
 
 	/**
-	 * Calculate the frequency of a given pattern
+	 * Like above but maps each text to a count. That is useful to
+	 * keep track of the frequence of sub-patterns.
 	 */
-	unsigned int freq(const Handle& pattern) const;
+	HandleSet specialize(const Handle& pattern, const HandleUCounter& texts);
+
+	/**
+	 * Calculate if pattern has enough support, that is whether its
+	 * frequency is greater than or equal to minsup.
+	 */
+	bool enough_support(const Handle& pattern, const HandleUCounter& texts) const;
+
+	/**
+	 * Calculate the frequency of a given pattern.
+	 */
+	unsigned freq(const Handle& pattern, const HandleUCounter& texts) const;
 
 	// AtomSpace containing the text trees to mine.
 	AtomSpace& text_as;
@@ -140,9 +145,11 @@ private:
 	void insert(const HandleSet& npats);
 
 	/**
-	 * Generate all specializations of the given pattern at distance 1.
+	 * Check whether a pattern matches a text.
+	 *
+	 * TODO: optimize
 	 */
-	HandleSet next_specialize(const Handle& pattern) const;
+	bool match(const Handle& pattern, const Handle& text) const;
 
 	/**
 	 * Given a collection of text atoms, return all shallow patterns,
@@ -166,7 +173,7 @@ private:
 	 *
 	 * TODO: we may want to support types in variable declaration.
 	 */
-	HandleMultimap shallow_patterns(const HandleSet& texts);
+	HandleUCounterMap shallow_patterns(const HandleUCounter& texts);
 
 	/**
 	 * Given a pattern, a collection of text atoms to match, build a

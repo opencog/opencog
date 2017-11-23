@@ -113,15 +113,10 @@ void XPatternMinerUTest::test_product_compose()
 	HandleSet results = pm.product_compose(XY, var2pats),
 		expected = { Xb, Xd, aY, ab, ad, SacY, Sacb, Sacd };
 
-	std::cout << "results = " << oc_to_string(results);
-	std::cout << "expected = " << oc_to_string(expected);
+	logger().debug() << "results = " << oc_to_string(results);
+	logger().debug() << "expected = " << oc_to_string(expected);
 
-	// Because equality is by pointer and not by content, while
-	// less_than is by content, pfff
-	TS_ASSERT_EQUALS(results.size(), expected.size());
-	auto rit = results.begin(), eit = expected.begin();
-	for (; rit != results.end(); ++rit, ++eit)
-		TS_ASSERT(content_eq(*rit, *eit));
+	TS_ASSERT(content_eq(results, expected));
 }
 
 void XPatternMinerUTest::test_AB_AC()
@@ -134,12 +129,15 @@ void XPatternMinerUTest::test_AB_AC()
 		AB = al(INHERITANCE_LINK, A, B),
 		AC = al(INHERITANCE_LINK, A, C);
 
+	XPMParameters param(2);
 	XPatternMiner pm(_as);
-	HandleSet patterns = pm();
+	HandleSet results = pm(),
+		expected;
 
-	logger().info() << "patterns = " << oc_to_string(patterns);
+	logger().debug() << "results = " << oc_to_string(results);
+	logger().debug() << "expected = " << oc_to_string(expected);
 
-	TS_WARN("TODO");
+	TS_ASSERT(content_eq(results, expected));
 }
 
 // void XPatternMinerUTest::test_AB_ABC()
