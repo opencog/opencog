@@ -25,6 +25,7 @@
 #include <cxxtest/TestSuite.h>
 
 #include <opencog/util/Config.h>
+#include <opencog/util/algorithm.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/learning/experimental-pattern-miner/c++-based/XPatternMiner.h>
 #include <opencog/guile/SchemeEval.h>
@@ -57,7 +58,8 @@ public:
 	void test_AB_AC();
 	void test_AB_AC_BC();
 	void test_AB_ABC();
-	// void test_InferenceControl();
+	void test_InferenceControl();
+	// void test_SodaDrinker();
 };
 
 XPatternMinerUTest::XPatternMinerUTest() : _scm(&_as)
@@ -72,7 +74,7 @@ void XPatternMinerUTest::setUp()
 {
 	// Configure scheme load-paths that are common for all tests.
 	_scm.eval("(add-to-load-path \"" PROJECT_SOURCE_DIR
-	          "/tests/learning/experimental-pattern-miner/C++-based/XPatternMiner\")");
+	          "/tests/learning/experimental-pattern-miner/c++-based\")");
 }
 
 void XPatternMinerUTest::tearDown()
@@ -222,44 +224,47 @@ void XPatternMinerUTest::test_AB_ABC()
 	TS_ASSERT(content_eq(results, expected));
 }
 
-// void XPatternMinerUTest::test_InferenceControl()
-// {
-// 	logger().info("BEGIN TEST: %s", __FUNCTION__);
+void XPatternMinerUTest::test_InferenceControl()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
-// 	// Load inference-control-corpus.scm
-// 	std::string rs =
-// 		_scm.eval("(load-from-path \"inference-control-corpus.scm\")");
+	// Load inference-control-corpus.scm
+	std::string rs =
+		_scm.eval("(load-from-path \"inference-control-corpus.scm\")");
 
-// 	std::cout << "rs = " << rs << std::endl;
+	std::cout << "rs = " << rs << std::endl;
 
-// 	// Run the pattern miner
-// 	XPatternMiner pm(_as);
-// 	HandleSet patterns = pm();
+	// Run the pattern miner
+	XPMParameters param(2);
+	XPatternMiner pm(_as, param);
+	HandleSet results = pm();
 
-// 	logger().info() << "patterns = " << oc_to_string(patterns);
+	Handle expected_pattern = al(AND_LINK); // TODO
+	// The main pattern of interest should look like
+	//
+	// Execution
+	//   Schema "expand"
+	//   List
+	//     PatternMiningVariable "$k"
+	//     Inheritance
+	//       ConceptNode "A"
+	//       PatternMiningVariable "$x"
+	//     GroundedSchemaNode "scm: conditional-full-instantiation-scope-formula"
+	//   PatternMiningVariable "$r"
+	//
+	// Evaluation
+	//   Predicate "preproof
+	//   PatternMiningVariable "$k"
+	//
+	// Evaluation
+	//   Predicate "preproof
+	//   PatternMiningVariable "$r"
 
-// 	// The main pattern of interest should look like
-// 	//
-// 	// Execution
-// 	//   Schema "expand"
-// 	//   List
-// 	//     PatternMiningVariable "$k"
-// 	//     Inheritance
-// 	//       ConceptNode "A"
-// 	//       PatternMiningVariable "$x"
-// 	//     GroundedSchemaNode "scm: conditional-full-instantiation-scope-formula"
-// 	//   PatternMiningVariable "$r"
-// 	//
-// 	// Evaluation
-// 	//   Predicate "preproof
-// 	//   PatternMiningVariable "$k"
-// 	//
-// 	// Evaluation
-// 	//   Predicate "preproof
-// 	//   PatternMiningVariable "$r"
+	logger().info() << "results = " << oc_to_string(results);
+	logger().info() << "expected_pattern = " << oc_to_string(expected_pattern);
 
-// 	TS_WARN("TODO");
-// }
+	TS_ASSERT(is_in(expected_pattern, results));
+}
 
 // void XPatternMinerUTest::test_PatternMiner_SodaDrinker()
 // {
