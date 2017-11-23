@@ -53,7 +53,9 @@ public:
 
 	void test_product_compose();
 
+	void test_A();
 	void test_AB_AC();
+	void test_AB_AC_BC();
 	// void test_AB_ABC();
 	// void test_ABCD();
 	// void test_InferenceControl();
@@ -110,8 +112,26 @@ void XPatternMinerUTest::test_product_compose()
 
 	HandleMultimap var2pats = { {X, {a, Sac}}, {Y, {b, d}} };
 
-	HandleSet results = pm.product_compose(XY, var2pats),
+	const HandleUCounter texts; // it can be empty since minsup is null
+	HandleSet results = pm.product_compose(XY, texts, var2pats),
 		expected = { Xb, Xd, aY, ab, ad, SacY, Sacb, Sacd };
+
+	logger().debug() << "results = " << oc_to_string(results);
+	logger().debug() << "expected = " << oc_to_string(expected);
+
+	TS_ASSERT(content_eq(results, expected));
+}
+
+void XPatternMinerUTest::test_A()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	Handle A = an(CONCEPT_NODE, "A");
+
+	XPMParameters param(2);
+	XPatternMiner pm(_as, param);
+	HandleSet results = pm(),
+		expected;
 
 	logger().debug() << "results = " << oc_to_string(results);
 	logger().debug() << "expected = " << oc_to_string(expected);
@@ -130,9 +150,45 @@ void XPatternMinerUTest::test_AB_AC()
 		AC = al(INHERITANCE_LINK, A, C);
 
 	XPMParameters param(2);
-	XPatternMiner pm(_as);
-	HandleSet results = pm(),
-		expected;
+	XPatternMiner pm(_as, param);
+	HandleSet results = pm();
+
+	Handle X = an(VARIABLE_NODE, "$X"),
+		Y = an(VARIABLE_NODE, "$Y"),
+		XY = al(INHERITANCE_LINK, X, Y),
+		AY = al(INHERITANCE_LINK, A, Y);
+	HandleSet expected = { al(LAMBDA_LINK, al(VARIABLE_LIST, X, Y), XY),
+	                       al(LAMBDA_LINK, Y, AY) };
+
+	logger().debug() << "results = " << oc_to_string(results);
+	logger().debug() << "expected = " << oc_to_string(expected);
+
+	TS_ASSERT(content_eq(results, expected));
+}
+
+void XPatternMinerUTest::test_AB_AC_BC()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	Handle A = an(CONCEPT_NODE, "A"),
+		B = an(CONCEPT_NODE, "B"),
+		C = an(CONCEPT_NODE, "C"),
+		AB = al(INHERITANCE_LINK, A, B),
+		AC = al(INHERITANCE_LINK, A, C),
+		BC = al(INHERITANCE_LINK, B, C);
+
+	XPMParameters param(2);
+	XPatternMiner pm(_as, param);
+	HandleSet results = pm();
+
+	Handle X = an(VARIABLE_NODE, "$X"),
+		Y = an(VARIABLE_NODE, "$Y"),
+		XY = al(INHERITANCE_LINK, X, Y),
+		AY = al(INHERITANCE_LINK, A, Y),
+		XC = al(INHERITANCE_LINK, X, C);
+	HandleSet expected = { al(LAMBDA_LINK, al(VARIABLE_LIST, X, Y), XY),
+	                       al(LAMBDA_LINK, Y, AY),
+	                       al(LAMBDA_LINK, X, XC) };
 
 	logger().debug() << "results = " << oc_to_string(results);
 	logger().debug() << "expected = " << oc_to_string(expected);

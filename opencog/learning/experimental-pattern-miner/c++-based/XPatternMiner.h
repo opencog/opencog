@@ -44,7 +44,7 @@ struct XPMParameters {
 	/**
 	 * CTor
 	 */
-	XPMParameters(int minsup=3,
+	XPMParameters(int minsup=0,
 	              const Handle& init_pattern=Handle::UNDEFINED,
 	              int maxpats=-1);
 
@@ -107,15 +107,11 @@ public:
 	HandleSet specialize(const Handle& pattern, const HandleUCounter& texts);
 
 	/**
-	 * Calculate if pattern has enough support, that is whether its
-	 * frequency is greater than or equal to minsup.
+	 * Like above on assume the pattern is trivial with a mere
+	 * variable. It assumes is has enough support.
 	 */
-	bool enough_support(const Handle& pattern, const HandleUCounter& texts) const;
-
-	/**
-	 * Calculate the frequency of a given pattern.
-	 */
-	unsigned freq(const Handle& pattern, const HandleUCounter& texts) const;
+	HandleSet specialize_varpat(const Handle& varpat,
+	                            const HandleUCounter& texts);
 
 	// AtomSpace containing the text trees to mine.
 	AtomSpace& text_as;
@@ -140,16 +136,56 @@ private:
 	const Handle& get_body(const Handle& pattern) const;
 
 	/**
-	 * Insert a set of new patterns to the set of discovered patterns
+	 * Given a pattern, a variable of that pattern, create another
+	 * pattern that is just that variable. For instance
+	 *
+	 * pattern = (Lambda
+	 *             (VariableList
+	 *               (TypedVariable
+	 *                 (Variable "$X")
+	 *                 (Type "ConceptNode"))
+	 *               (TypedVariable
+	 *                 (Variable "$Y")
+	 *                 (Type "AndLink"))
+	 *             (Inheritance
+	 *               (Variable "$X")
+	 *               (Variable "$Y")))
+	 *
+	 * var = (Variable "$X")
+	 *
+	 * mk_varpattern(pattern, var) = (Lambda
+	 *                                 (TypeVariable
+	 *                                   (Variable "$X")
+	 *                                   (Type "ConceptNode"))
+	 *                                 (Variable "$X"))
 	 */
-	void insert(const HandleSet& npats);
+	Handle mk_varpattern(const Handle& pattern, const Handle& var) const;
+
+	/**
+	 * Calculate if the satisfying texts has enough support, that is
+	 * whether its frequency is greater than or equal to minsup.
+	 */
+	bool enough_support(const HandleUCounter& texts) const;
+
+	/**
+	 * Filter in only texts matching the pattern
+	 */
+	HandleUCounter filter_texts(const Handle& pattern,
+	                            const HandleUCounter& texts) const;
 
 	/**
 	 * Check whether a pattern matches a text.
+	 */
+	bool match(const Handle& pattern, const Handle& text) const;
+
+	/**
+	 * Like above but returns the Set of Lists of values associated to
+	 * the variables of the pattern. Assumes that pattern is always a
+	 * LambdaLink, and not a constant.
 	 *
 	 * TODO: optimize
 	 */
-	bool match(const Handle& pattern, const Handle& text) const;
+	Handle matched_results(const Handle& pattern, const Handle& text) const;
 
 	/**
 	 * Given a collection of text atoms, return all shallow patterns,
@@ -178,13 +214,15 @@ private:
 	/**
 	 * Given a pattern, a collection of text atoms to match, build a
 	 * set of mappings from the variables in that pattern to their
-	 * values.
+	 * values (subtexts + counts).
 	 */
-	HandleMapSet gen_var2vals(const Handle& pattern, const HandleSet& texts) const;
+	HandleUCounterMap gen_var2subtexts(const Handle& pattern,
+	                                   const HandleUCounter& texts) const;
 
 	/**
-	 * Given a pattern and a list of values, map each variable in that
-	 * pattern to its value.
+	 * Given variables and a list of values, as (List v1 ... vn), map
+	 * each variable to its value. If there is only one variable, then
+	 * `values` contain a single value not wrapped in a List.
 	 */
 	HandleMap gen_var2val(const Variables& variables, const Handle& values) const;
 
@@ -195,10 +233,10 @@ private:
 	Handle gen_rand_variable() const;
 
 	/**
-	 * Given a collection of mappings from variable to values, and a
-	 * variable, return the set of associated values.
+	 * If the pattern is (Lambda (Variable "$X") (Variable "$X")) then
+	 * it is the most abstract pattern there is.
 	 */
-	HandleSet select_values(const HandleMapSet& var2vals, const Handle& var) const;
+	bool most_abstract(const Handle& pattern) const;
 
 	/**
 	 * Given a pattern and a mapping from variables in that pattern to
@@ -221,9 +259,11 @@ private:
 	 *     (Inheritance (Set (Concept "a") (Concept "c")) (Concept "b")),
 	 *     (Inheritance (Set (Concept "a") (Concept "c")) (Concept "d")) }
 	 *
-	 * TODO: add this as unit test.
+	 * TODO: I probably need to pass a HandleUCounterMap to keep the
+	 * texts associated to each subpattern associated to each variable.
 	 */
 	HandleSet product_compose(const Handle& pattern,
+	                          const HandleUCounter& texts,
 	                          const HandleMultimap& var2patterns) const;
 
 	/**

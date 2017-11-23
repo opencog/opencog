@@ -76,64 +76,69 @@ HandleSet XPatternMiner::specialize(const Handle& pattern,
 HandleSet XPatternMiner::specialize(const Handle& pattern,
                                     const HandleUCounter& texts)
 {
-	// Make sure the pattern has enough support
-	if (not enough_support(pattern, texts))
-		return HandleSet();
-
 	// If the pattern is constant, then no specialization is possible
 	if (pattern->get_type() != LAMBDA_LINK)
 		return HandleSet();
 
+	// Do not keep unnecessary unmatching texts
+	// TODO: we can probably assume that it is already filtered, and
+	// move the filtering to the specialize method above
+	HandleUCounter fltexts = filter_texts(pattern, texts);
+
+	// Make sure the pattern has enough support
+	if (not enough_support(fltexts))
+		return HandleSet();
+
 	// If the pattern is a variable, then build shallow patterns and
 	// complete them.
-	if (get_body(pattern)->get_type() == VARIABLE_NODE) {
-		HandleUCounterMap pat2texts = shallow_patterns(texts);
-		HandleSet patterns;
-		for (const auto& el : pat2texts) {
-			patterns.insert(el.first);
-			set_union_modify(patterns, specialize(el.first, el.second));
-		}
-		return patterns;
-	}
+	if (get_body(pattern)->get_type() == VARIABLE_NODE)
+		return specialize_varpat(pattern, fltexts);
 
 	// Otherwise, if the pattern is structured, calculate the mappings
 	// from variables to values, get the patterns of these values now
 	// interpreted as texts, and use these patterns to expand the
-	// initial pattern.
-	// TODO
-	HandleMapSet var2vals = gen_var2vals(pattern, texts);
+	// initial pattern by composition.
+	HandleUCounterMap var2subtexts = gen_var2subtexts(pattern, texts);
 
 	// For each variable, create a trivial pattern, with its variable
 	// as body and its type as vardecl, take the list of values, pass
-	// it as texts and call specialize.
+	// it as texts and call specialize to generate all sub-patterns.
 	HandleMultimap var2subpats;
-	for (const Handle& var : get_variables(pattern).varset) {
-		HandleSet subtexts = select_values(var2vals, var);
-		Handle subvardecl = filter_vardecl(get_vardecl(pattern), var);
-		Handle subpattern = Handle(createLambdaLink(subvardecl, var));
-		HandleSet subpatterns = specialize(subpattern, subtexts);
-		var2subpats[var] = subpatterns;
+	for (const auto& el : var2subtexts) {
+		const Handle& var = el.first;
+		const HandleUCounter& subtexts = el.second;
+		Handle varpattern = mk_varpattern(pattern, var);
+		// TODO: maybe we can use specialize_varpat, if no support
+		// checking is necessary.
+		var2subpats[var] = specialize(varpattern, subtexts);
 	}
 
 	// Replacing each variable by its patterns in a cartesian product
 	// fashion (not forgetting updating their vardecls accordingly)
-	return product_compose(pattern, var2subpats);
+	return product_compose(pattern, fltexts, var2subpats);
 }
 
-bool enough_support(const Handle& pattern, const HandleUCounter& texts) const
+HandleSet XPatternMiner::specialize_varpat(const Handle& varpat,
+                                           const HandleUCounter& texts)
 {
-	// First check if there are enough texts, to save computation
-	return param.minsup <= texts.total_count() and
-		param.minsup <= freq(pattern, texts);
-}
+	OC_ASSERT(get_body(varpat)->get_type() == VARIABLE_NODE);
 
-unsigned XPatternMiner::freq(const Handle& pattern,
-                             const HandleUCounter& texts) const
-{
-	unsigned total;
-	for (const auto& text : texts)
-		total += text.second * (unsigned)match(pattern, text.first);
-	return total;
+	HandleUCounterMap pat2texts = shallow_patterns(texts);
+	HandleSet patterns;
+	for (const auto& el : pat2texts) {
+		const Handle& shapat = el.first;
+		const HandleUCounter& shapat_texts = el.second;
+
+		// Make sure the shallow pattern has enough support before
+		// including it in the solution set and specializing it.
+		if (not enough_support(shapat_texts))
+			continue;
+
+		// Add shallow pattern to solution set, and specialize it
+		patterns.insert(shapat);
+		set_union_modify(patterns, specialize(shapat, shapat_texts));
+	}
+	return patterns;
 }
 
 const Variables& XPatternMiner::get_variables(const Handle& pattern) const
@@ -161,13 +166,26 @@ const Handle& XPatternMiner::get_body(const Handle& pattern) const
 	return pattern;
 }
 
-void XPatternMiner::insert(const HandleSet& npats)
+Handle XPatternMiner::mk_varpattern(const Handle& pattern,
+                                    const Handle& var) const
 {
-	for (auto it = npats.begin(); it != npats.end()
-		     // Make sure we don't add more patterns than maximum
-		     and (int)patterns.size() != param.maxpats; ++it) {
-		patterns.insert(*it);
-	}
+	Handle subvardecl = filter_vardecl(get_vardecl(pattern), var);
+	return Handle(createLambdaLink(subvardecl, var));
+}
+
+bool XPatternMiner::enough_support(const HandleUCounter& texts) const
+{
+	return param.minsup <= texts.total_count();
+}
+
+HandleUCounter XPatternMiner::filter_texts(const Handle& pattern,
+                                           const HandleUCounter& texts) const
+{
+	HandleUCounter filtrd;
+	for (const auto& text : texts)
+		if (match(pattern, text.first))
+			filtrd.insert(text);
+	return filtrd;
 }
 
 bool XPatternMiner::match(const Handle& pattern, const Handle& text) const
@@ -177,20 +195,25 @@ bool XPatternMiner::match(const Handle& pattern, const Handle& text) const
 		return content_eq(pattern, text);
 
 	// Otherwise see if pattern matches text
+	return 0 < matched_results(pattern, text)->get_arity();
+}
+
+Handle XPatternMiner::matched_results(const Handle& pattern,
+                                      const Handle& text) const
+{
+	// No need to run if most abstract
+	if (most_abstract(pattern))
+		return createLink(SET_LINK, text);
+
 	AtomSpace tmp_as;
 	tmp_as.add_atom(text);
 	AtomSpace tmp_pattern_as(&tmp_as);
 	Handle tmp_pattern = tmp_pattern_as.add_atom(pattern),
 		vardecl = get_vardecl(tmp_pattern),
 		body = get_body(tmp_pattern),
-		// the rewrite is the body wrapped in a DontExec. That is to
-		// count correctly. Indeed if we were to use a GetLink, extra
-		// permutations would be considered when the pattern contains
-		// unordered links.
-		rewrite = tmp_as.add_link(DONT_EXEC_LINK, body),
-		bl = tmp_as.add_link(BIND_LINK, vardecl, body, rewrite),
-		result = bindlink(&tmp_as, bl);
-	return 0 < result->get_arity();
+		gl = tmp_as.add_link(GET_LINK, vardecl, body),
+		result = satisfying_set(&tmp_as, gl);
+	return result;
 }
 
 HandleUCounterMap XPatternMiner::shallow_patterns(const HandleUCounter& texts)
@@ -214,20 +237,22 @@ HandleUCounterMap XPatternMiner::shallow_patterns(const HandleUCounter& texts)
 	return pat2texts;
 }
 
-HandleMapSet XPatternMiner::gen_var2vals(const Handle& pattern,
-                                         const HandleSet& texts) const
+HandleUCounterMap XPatternMiner::gen_var2subtexts(const Handle& pattern,
+                                                  const HandleUCounter& texts) const
 {
-	AtomSpace tmp_as;
-	Handle inputs = tmp_as.add_link(SET_LINK, HandleSeq(texts.begin(), texts.end())),
-		mpl = tmp_as.add_link(MAP_LINK, pattern, inputs);
-
-	Instantiator inst(&tmp_as);
-	Handle rh(inst.execute(mpl));
-
-	HandleMapSet results;
-	for (const Handle& values : rh->getOutgoingSet())
-		results.insert(gen_var2val(get_variables(pattern), values));
-	return results;
+	HandleUCounterMap var2subtexts;
+	const Variables& vars = get_variables(pattern);
+	for (const auto& text : texts) {
+		Handle results = matched_results(pattern, text.first);
+		for (const Handle& values : results->getOutgoingSet()) {
+			for (const auto& v : gen_var2val(vars, values)) {
+				const Handle& var = v.first;
+				const Handle& val = v.second;
+				var2subtexts[var][val] += 1;
+			}
+		}
+	}
+	return var2subtexts;
 }
 
 HandleMap XPatternMiner::gen_var2val(const Variables& vars,
@@ -262,16 +287,15 @@ Handle XPatternMiner::gen_rand_variable() const
 	return createNode(VARIABLE_NODE, randstr("$PM-", 2));
 }
 
-HandleSet XPatternMiner::select_values(const HandleMapSet& var2vals,
-                                       const Handle& var) const
+bool XPatternMiner::most_abstract(const Handle& pattern) const
 {
-	HandleSet values;
-	for (const HandleMap& var2val : var2vals)
-		values.insert(var2val.at(var));
-	return values;
+	return pattern->get_type() == LAMBDA_LINK and
+		get_vardecl(pattern)->get_type() == VARIABLE_NODE and
+		get_body(pattern)->get_type() == VARIABLE_NODE;
 }
 
 HandleSet XPatternMiner::product_compose(const Handle& pattern,
+                                         const HandleUCounter& texts,
                                          const HandleMultimap& var2pats) const
 {
 	HandleSet patterns;
@@ -283,7 +307,7 @@ HandleSet XPatternMiner::product_compose(const Handle& pattern,
 		// preceeding, and recursively call product_compose to obtain
 		// patterns without the subpatterns of that variables.
 		HandleMultimap revar2pats(std::next(map_it), var2pats.end());
-		set_union_modify(patterns, product_compose(pattern, revar2pats));
+		set_union_modify(patterns, product_compose(pattern, texts, revar2pats));
 
 		// Combine the patterns of that variables with the patterns of
 		// the other variables.
@@ -291,17 +315,22 @@ HandleSet XPatternMiner::product_compose(const Handle& pattern,
 		     subpat_it != subpatterns.end(); ++subpat_it) {
 			// Perform a single substitution of variable by subpat
 			Handle npat = compose(pattern, {{variable, *subpat_it}});
-			patterns.insert(npat);
+			HandleUCounter fltexts = filter_texts(npat, texts);
+			if (enough_support(fltexts)) {
+				patterns.insert(npat);
 
-			// Recursively call product_compose on nap and the
-			// remaining variables
-			set_union_modify(patterns, product_compose(npat, revar2pats));
+				// Recursively call product_compose on nap and the
+				// remaining variables
+				set_union_modify(patterns,
+				                 product_compose(npat, fltexts, revar2pats));
+			}
 
 			// Add the remaining subpatterns sub-patterns to var2pats,
 			// and recursively call product_compose over pattern
 			HandleMultimap revar2pats_revar(revar2pats);
 			revar2pats_revar[variable].insert(std::next(subpat_it), subpatterns.end());
-			set_union_modify(patterns, product_compose(pattern, revar2pats_revar));
+			set_union_modify(patterns,
+			                 product_compose(pattern, texts, revar2pats_revar));
 		}
 	}
 	return patterns;
