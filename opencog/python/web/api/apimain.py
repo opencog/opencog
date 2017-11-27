@@ -1,12 +1,13 @@
 __author__ = 'Cosmo Harrigan'
 
-from flask import Flask
-from flask.ext.restful import Api
-from flask.ext.cors import CORS
+from flask import Flask, request
+from flask_restful import Api
+from flask_cors import CORS
 from apiatomcollection import *
 from apitypes import *
 from apishell import *
 from apischeme import *
+from apighost import *
 from flask_restful_swagger import swagger
 
 
@@ -41,13 +42,16 @@ class RESTAPI(object):
 
         # Allow Cross Origin Resource Sharing (CORS) so that javascript apps
         # can use this API from other domains, ports and protocols. 
-        self.cors = CORS(self.app)
+        self.cors = CORS(self.app, resources={r"/api/*": {"origins": "*"}})
 
         # Create and add each resource
         atom_collection_api = AtomCollectionAPI.new(self.atomspace)
         atom_types_api = TypesAPI
         shell_api = ShellAPI
         scheme_api = SchemeAPI.new(self.atomspace)
+        ghost_api = GhostApi.new(self.atomspace)
+
+        self.api.decorators=[cors.crossdomain(origin='*', automatic_options=False)]
 
         self.api.add_resource(atom_collection_api,
                               '/api/v1.1/atoms',
@@ -61,6 +65,16 @@ class RESTAPI(object):
         self.api.add_resource(scheme_api,
                               '/api/v1.1/scheme',
                               endpoint='scheme')
+        self.api.add_resource(ghost_api, 
+                              '/api/v1.1/ghost', 
+                              endpoint='ghost')
+
+
+    def allow_cross_domain(self, response):
+        """Hook to set up response headers."""
+        response.headers['Access-Control-Allow-Origin'] = '*'
+        response.headers['Access-Control-Allow-Headers'] = 'Content-Type'
+        return response
 
     def run(self, host='127.0.0.1', port=5000):
         """
@@ -71,6 +85,8 @@ class RESTAPI(object):
                      ``'127.0.0.1'``.
         :param port: the port of the webserver. Defaults to ``5000``
         """
+        # self.app.before_request(self.option_autoreply)
+        self.app.after_request(self.allow_cross_domain)
         self.app.run(debug=False, host=host, port=port)
 
     def test(self):
