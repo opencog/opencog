@@ -8,6 +8,13 @@
   (cog-logger-set-stdout! ghost-logger #t))
 
 ; ----------
+(define-public (ghost-debug-mode-off)
+"
+  Change the logger level to \"info\".
+"
+  (cog-logger-set-level! ghost-logger "info"))
+
+; ----------
 (define-public (test-ghost TXT)
 "
   Try to find (and execute) the matching rules given an input TXT.
