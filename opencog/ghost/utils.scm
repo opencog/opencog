@@ -98,7 +98,17 @@
         ; words, which will become a problem during rule-matching.
         ; As a quick workaround, do "ghost-get-lemma" for each of
         ; the words in the lemma sequence
-        (lemma-seq (apply ghost-get-lemma (get-seq 'LemmaLink))))
+        (lemma-seq
+          (apply ghost-get-lemma
+            ; For idioms, they will be joined by a "_",
+            ; e.g. "allows_for"
+            ; Split it so that DualLink can find the rule
+            (append-map
+              (lambda (w)
+                (if (equal? #f (string-contains (cog-name w) "_"))
+                  (list w)
+                  (map Word (string-split (cog-name w) #\_))))
+              (get-seq 'LemmaLink)))))
 
        ; These EvaluationLinks will be used in the matching process
        (Evaluation ghost-word-seq (List SENT word-seq))
