@@ -70,12 +70,6 @@ class RESTAPI(object):
                               endpoint='ghost')
 
 
-    def allow_cross_domain(self, response):
-        """Hook to set up response headers."""
-        response.headers['Access-Control-Allow-Origin'] = '*'
-        response.headers['Access-Control-Allow-Headers'] = 'Content-Type'
-        return response
-
     def run(self, host='127.0.0.1', port=5000):
         """
         Runs the REST API
@@ -85,8 +79,6 @@ class RESTAPI(object):
                      ``'127.0.0.1'``.
         :param port: the port of the webserver. Defaults to ``5000``
         """
-        # self.app.before_request(self.option_autoreply)
-        self.app.after_request(self.allow_cross_domain)
         self.app.run(debug=False, host=host, port=port)
 
     def test(self):

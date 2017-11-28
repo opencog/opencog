@@ -1,4 +1,4 @@
-__author__ = 'Cosmo Harrigan'
+__author__ = 'xabush_semrie and aman'
 
 from flask.ext.restful import Resource, reqparse
 from opencog.scheme_wrapper import scheme_eval
