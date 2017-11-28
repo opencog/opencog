@@ -33,7 +33,10 @@
          (unordered? (any (lambda (t) (equal? 'unordered-matching (car t))) TERMS))
          ; It's possible that the sequence does not having any word or concept etc,
          ; e.g. a rule may just be something like not-having-either-one-of-these-words
-         (empty-seq? (every (lambda (t) (equal? 'negation (car t))) TERMS))
+         ; or just functions
+         (empty-seq? (every (lambda (t)
+           (or (equal? 'negation (car t))
+               (equal? 'function (car t)))) TERMS))
          (start-anchor? (any (lambda (t) (equal? as t)) TERMS))
          (end-anchor? (any (lambda (t) (equal? ae t)) TERMS))
          (start (if start-anchor? (cdr (member as TERMS)) (list wc)))

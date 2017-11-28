@@ -1,40 +1,18 @@
 # GHOST
 
-GHOST (General Holistic Organism Scripting Tool) is a DSL (Domain-Specific
-Language) designed to allow human authors to script behaviors for artificial
-characters. GHOST is inspired by ChatScript in its syntax, but it uses OpenPsi
-as the engine for topic selection and topic management, as well as various
-other OpenCog components for different purposes.
+GHOST (General Holistic Organism Scripting Tool) is a DSL (Domain-Specific Language) designed to allow human authors to script behaviors for artificial characters. GHOST is inspired by ChatScript in its syntax, but it uses OpenPsi as the engine for topic selection and topic management, i.e. action selection, as well as various other OpenCog cognitive algorithms for handling a wider range of situations in more flexible and intelligent ways.
 
 ## Design Overview
 
-When one tries to create a rule in GHOST, it will firstly be passed to the
-parser (`cs-parser.scm`) for syntax checking and preliminary interpretation.
-Any rules that is not syntactically correct will be rejected at this stage.
+When one tries to create a rule in GHOST, it will firstly be passed to the parser (`cs-parser.scm`) for syntax checking and preliminary interpretation. Any rules that is not syntactically correct will be rejected at this stage.
 
-The parser will then pass the interpretations to the translator (`translator.scm`)
-by calling `create-rule`, or other appropriate functions such as `create-concept`
-or the like if it is not a rule, and convert each of the interpreted terms into
-their corresponding atomese (defined in `terms.scm`). A psi-rule will be created
-if the input is a rule (i.e. responder, rejoinder, or gambit).
+The parser will then pass the intermediate interpretations (aka terms) to the translator (`translator.scm`) by calling either `create-rule` / `create-concept` / `create-topic` for creating a psi-rule / concept / topic respectively. Those terms will be converted into OpenCog atoms (defined in `terms.scm`) and stored in the AtomSpace.
 
-At this stage, GHOST rule authoring is mostly identical to ChatScript rule authoring.
-One has to create topic files and define concepts/rules etc in the appropriate
-topic files.
+An action selector is defined in `matcher.scm` for finding and selecting rules given a particular context. When a textual input is received, it will be converted into a list of WordNodes, wrapped in a `DualLink` and passed to the Recognizer for finding candidates (i.e. psi-rules) that may satisfy the current context. A full context evaluation will then be done for each of the candidates and a weight will be calculated for each of them, according to their satisfiability. Action selection will be done based on their weight and an action will be executed as a result.
 
-An action selector is defined in `matcher.scm` for rule matching and selection.
-When a textual input is received, it will be converted into a list of WordNodes,
-wrapped in a `DualLink` and passed to the recognizer in order to find candidates
-(i.e. psi-rules) that may satisfy the current context. A full context evaluation
-will be done for each of the candidates and the actions of those satisfying ones
-will be executed as a result.
+## Syntax
 
-## Current Status
-
-For verbal interaction authoring in particular, GHOST syntax is modeled heavily
-on [ChatScript](https://github.com/bwilcox-1234/ChatScript/blob/master/WIKI/ChatScript-Basic-User-Manual.md#rules).
-However, GHOST uses several ChatScript features for different purposes than
-they are normally used in ChatScript; and also contains some additional features.
+The syntax of GHOST rules is modeled heavily on [ChatScript](https://github.com/bwilcox-1234/ChatScript/blob/master/WIKI/ChatScript-Basic-User-Manual.md#rules). However, GHOST uses several ChatScript features for different purposes than they are normally used in ChatScript; and also contains some additional features.
 
 Here is a list of features that are fully supported in GHOST:
 - [Word/Lemma](https://github.com/bwilcox-1234/ChatScript/blob/master/WIKI/ChatScript-Basic-User-Manual.md#canonization)

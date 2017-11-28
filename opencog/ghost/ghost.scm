@@ -104,13 +104,13 @@
 ;; --------------------
 ;; Load the required files
 
+(load "ghost/test.scm")
 (load "ghost/utils.scm")
 (load "ghost/functions.scm")
-(load "ghost/translator.scm")
 (load "ghost/terms.scm")
+(load "ghost/translator.scm")
 (load "ghost/matcher.scm")
 (load "ghost/cs-parse.scm")
-(load "ghost/test.scm")
 
 ;; --------------------
 ;; To parse rules and interact with GHOST, the main interfaces
