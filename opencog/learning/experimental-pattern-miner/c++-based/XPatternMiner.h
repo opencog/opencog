@@ -42,15 +42,21 @@ typedef std::map<Handle, HandleUCounter> HandleUCounterMap;
 struct XPMParameters {
 
 	/**
-	 * CTor
+	 * CTor. Note that ngram will be overwritten by initpat, if
+	 * provided.
 	 */
-	XPMParameters(int minsup=0,
-	              const Handle& init_pattern=Handle::UNDEFINED,
+	XPMParameters(unsigned minsup=1,
+	              unsigned ngram=1,
+	              const Handle& initpat=Handle::UNDEFINED,
 	              int maxpats=-1);
 
 	// Minimum support. Mined patterns must have a frequency equal or
 	// above this value.
 	unsigned minsup;
+
+	// Initial gram. This value is overwritten by the actual gram
+	// value of initpat, if provided.
+	unsigned initgram;
 
 	// Initial pattern. All found patterns are specialization of
 	// it. If UNDEFINED, then the initial pattern is the most abstract
@@ -98,13 +104,15 @@ public:
 	 * For now all limits, expect minsup, are ignored, all patterns
 	 * are considered.
 	 */
-	HandleSet specialize(const Handle& pattern, const HandleSet& texts);
+	HandleSet specialize(const Handle& pattern, const HandleSet& texts,
+	                     unsigned mingram=0);
 
 	/**
 	 * Like above but maps each text to a count. That is useful to
 	 * keep track of the frequence of sub-patterns.
 	 */
-	HandleSet specialize(const Handle& pattern, const HandleUCounter& texts);
+	HandleSet specialize(const Handle& pattern, const HandleUCounter& texts,
+	                     unsigned mingram=0);
 
 	/**
 	 * Like above on assume the pattern is trivial with a mere
@@ -125,15 +133,8 @@ public:
 	// Set of pattern discovered so far
 	HandleSet patterns;
 private:
-	/**
-	 * Given a pattern, return its vardecl and body. If the pattern is
-	 * not a scope link (i.e. a constant/text), then get_variables and
-	 * get_vardecl return the empty Variables and vardecl
-	 * respectively, and get_body returns the pattern itself.
-	 */
-	const Variables& get_variables(const Handle& pattern) const;
-	const Handle& get_vardecl(const Handle& pattern) const;
-	const Handle& get_body(const Handle& pattern) const;
+
+	mutable AtomSpace tmp_as;
 
 	/**
 	 * Given a pattern, a variable of that pattern, create another
@@ -162,10 +163,33 @@ private:
 	Handle mk_varpattern(const Handle& pattern, const Handle& var) const;
 
 	/**
-	 * Calculate if the satisfying texts has enough support, that is
-	 * whether its frequency is greater than or equal to minsup.
+	 * Calculate if the pattern has enough support w.r.t. to the given
+	 * texts, that is whether its frequency is greater than or equal
+	 * to minsup.
+	 */
+	bool enough_support(const Handle& pattern,
+	                    const HandleUCounter& texts) const;
+
+	/**
+	 * Like above but only look at the text total count. This works
+	 * when the text has been filtered from a 1-gram pattern.
 	 */
 	bool enough_support(const HandleUCounter& texts) const;
+
+	// TODO move all static methods down
+
+	/**
+	 * Given a pattern and a text corpus, calculate the pattern
+	 * frequency, that is the number of matches. Note that is number
+	 * may be greater than the total count of the text corpus if the
+	 * pattern is an n-gram for any n > 1.
+	 */
+	unsigned freq(const Handle& pattern, const HandleUCounter& texts) const;
+
+	/**
+	 * Calculate the total count of texts.
+	 */
+	unsigned freq(const HandleUCounter& texts) const;
 
 	/**
 	 * Filter in only texts matching the pattern
@@ -186,6 +210,15 @@ private:
 	 * TODO: optimize
 	 */
 	Handle matched_results(const Handle& pattern, const Handle& text) const;
+
+	/**
+	 * Given a pattern and texts, return the satisfying set of the
+	 * pattern over the text. Please note that the texts count are
+	 * ignored. But this is still useful for n-gram patterns where the
+	 * counts are all in 1 anyway.
+	 */
+	Handle restrict_satisfying_set(const Handle& pattern,
+	                               const HandleUCounter& texts) const;
 
 	/**
 	 * Given a collection of text atoms, return all shallow patterns,
@@ -212,12 +245,26 @@ private:
 	HandleUCounterMap shallow_patterns(const HandleUCounter& texts);
 
 	/**
+	 * Wrap a LocalQuote link around h, if it is a link of type
+	 * AndLink. That is in order not to produce n-gram patterns when
+	 * in fact we want to match an AndLink text.
+	 */
+	Handle local_quote_if_and(const Handle& h);
+
+	/**
 	 * Given a pattern, a collection of text atoms to match, build a
 	 * set of mappings from the variables in that pattern to their
 	 * values (subtexts + counts).
 	 */
 	HandleUCounterMap gen_var2subtexts(const Handle& pattern,
 	                                   const HandleUCounter& texts) const;
+
+	/**
+	 * Given variables and a sequence of list of values, map each
+	 * variable to counted values (see gen_var2val).
+	 */
+	HandleUCounterMap gen_var2vals(const Variables& vars,
+	                               const HandleSeq& values_seq) const;
 
 	/**
 	 * Given variables and a list of values, as (List v1 ... vn), map
@@ -227,16 +274,154 @@ private:
 	HandleMap gen_var2val(const Variables& variables, const Handle& values) const;
 
 	/**
-	 * Generate a list of hopefully unique random variables
+	 * Return true iff the pattern is totally abstract like
+	 *
+	 * (Lambda
+	 *   (Variable "$X")
+	 *   (Variable "$X"))
+	 *
+	 * for a 1-gram. Or
+	 *
+	 * (Lambda
+	 *   (List
+	 *     (Variable "$X")
+	 *     (Variable "$Y"))
+	 *   (And
+	 *     (Variable "$X")
+	 *     (Variable "$Y"))
+	 *
+	 * for a 2-gram, etc.
 	 */
-	HandleSeq gen_rand_variables(size_t n) const;
-	Handle gen_rand_variable() const;
+	bool totally_abstract(const Handle& pattern) const;
 
 	/**
-	 * If the pattern is (Lambda (Variable "$X") (Variable "$X")) then
-	 * it is the most abstract pattern there is.
+	 * Given a pattern, a variable and a subpattern, build subpatterns
+	 * such that the variables in the subpatterns partially overlap,
+	 * in all possible ways, with the variables in the pattern
+	 * different than the given variable. For instance
+	 *
+	 * pattern = Lambda
+	 *             VariableList
+	 *               Variable "$X"
+	 *               Variable "$Y"
+	 *               Variable "$Z"
+	 *             And
+	 *               Variable "$X"
+	 *               Inheritance
+	 *                 Variable "$Y"
+	 *                 Variable "$Z"
+	 *
+	 * variable = Variable "$X"
+	 *
+	 * subpattern = Lambda
+	 *                VariableList
+	 *                  Variable "$U"
+	 *                  Variable "$V"
+	 *                Inheritance
+	 *                  Variable "$U"
+	 *                  Variable "$V"
+	 *
+	 * all possible variable overlaps are
+	 *
+	 * 1. no overlap   # TODO: compare with test (-> *compilation*)
+	 * 2. $V = $Y
+	 * 3. $V = $Z
+	 * 4. $U = $Y
+	 * 5. $U = $Y, $V = $Y
+	 * 6. $U = $Y, $V = $Z
+	 * 7. $U = $Z
+	 * 8. $U = $Z, $V = $Y
+	 * 9. $U = $Z, $V = $Z
+	 *
+	 * thus
+	 *
+	 * gen_var_overlap_subpatterns(pattern, variable, subpattern)
+	 * =
+	 * { Lambda [no overlap]
+	 *     VariableList
+	 *       Variable "$U"
+	 *       Variable "$V"
+	 *     Inheritance
+	 *       Variable "$U"
+	 *       Variable "$V"
+	 * , Lambda [$V = $Y]
+	 *     VariableList
+	 *       Variable "$U"
+	 *       Variable "$Y"
+	 *     Inheritance
+	 *       Variable "$U"
+	 *       Variable "$Y"
+	 * , Lambda [$V = $Z]
+	 *     VariableList
+	 *       Variable "$U"
+	 *       Variable "$Z"
+	 *     Inheritance
+	 *       Variable "$U"
+	 *       Variable "$Z"
+	 * , Lambda [$U = $Y]
+	 *     VariableList
+	 *       Variable "$Y"
+	 *       Variable "$V"
+	 *     Inheritance
+	 *       Variable "$Y"
+	 *       Variable "$V"
+	 * , Lambda [$U = $Y, $V = $Y]
+	 *     Variable "$Y"
+	 *     Inheritance
+	 *       Variable "$Y"
+	 *       Variable "$Y"
+	 * , Lambda [$U = $Y, $V = $Z]
+	 *     VariableList
+	 *       Variable "$Y"
+	 *       Variable "$Z"
+	 *     Inheritance
+	 *       Variable "$Y"
+	 *       Variable "$Z"
+	 * , Lambda [$U = $Z]
+	 *     VariableList
+	 *       Variable "$Z"
+	 *       Variable "$V"
+	 *     Inheritance
+	 *       Variable "$Z"
+	 *       Variable "$V"
+	 * , Lambda [$U = $Z, $V = $Y]
+	 *     VariableList
+	 *       Variable "$Z"
+	 *       Variable "$Y"
+	 *     Inheritance
+	 *       Variable "$Z"
+	 *       Variable "$Y"
+	 * , Lambda [$U = $Z, $V = $Z]
+	 *     Variable "$Z"
+	 *     Inheritance
+	 *       Variable "$Z"
+	 *       Variable "$Z" }
+	 *
+	 * The output container is a HandleSeq to be able to contain
+	 * alpha-equivalent subpatterns.
 	 */
-	bool most_abstract(const Handle& pattern) const;
+	HandleSeq gen_var_overlap_subpatterns(const Handle& pattern,
+	                                      const Handle& variable,
+	                                      const Handle& subpattern) const;
+
+	/**
+	 * Given 2 list of disjoint variables return all mappings between
+	 * the first list to the second. For instance
+	 *
+	 * vs1 = {$U, $V}, vs2 = {$X, $Y}
+	 *
+	 * gen_var_overlaps(vs1, vs2) = { {},
+	 *                                {$V->$X},
+	 *                                {$V->$Y},
+	 *                                {$U->$X},
+	 *                                {$U->$X, $V->$X},
+	 *                                {$U->$X, $V->$Y},
+	 *                                {$U->$Y},
+	 *                                {$U->$Y, $V->$X},
+	 *                                {$U->$Y, $V->$Y},
+	 */
+	HandleMapSet gen_var_overlaps(const HandleSet& vs1,
+	                              const HandleSet& vs2) const;
 
 	/**
 	 * Given a pattern and a mapping from variables in that pattern to
@@ -264,7 +449,8 @@ private:
 	 */
 	HandleSet product_compose(const Handle& pattern,
 	                          const HandleUCounter& texts,
-	                          const HandleMultimap& var2patterns) const;
+	                          const HandleMultimap& var2patterns,
+	                          unsigned mingram) const;
 
 	/**
 	 * Given a pattern, and mapping from variables to sub-patterns,
@@ -301,7 +487,47 @@ private:
 	 */
 	static Handle vardecl_compose(const Handle& vardecl,
 	                              const HandleMap& var2subdecl);
+
+	/**
+	 * If a body is an AndLink with one argument, remove it. For instance
+	 *
+	 * remove_uniry_and(And (Concept "A")) = (Concept "A")
+	 */
+	static Handle remove_unary_and(const Handle& h);
+
+	/**
+	 * Call alpha_conversion if pattern is a scope, return itself
+	 * otherwise.
+	 */
+	static Handle alpha_conversion(const Handle& pattern);
+
+public:
+	/**
+	 * Generate a list of hopefully unique random variables
+	 */
+	static HandleSeq gen_rand_variables(size_t n);
+	static Handle gen_rand_variable();
+
+	/**
+	 * Given a pattern, return its vardecl and body. If the pattern is
+	 * not a scope link (i.e. a constant/text), then get_variables and
+	 * get_vardecl return the empty Variables and vardecl
+	 * respectively, and get_body returns the pattern itself.
+	 */
+	static const Variables& get_variables(const Handle& pattern);
+	static const Handle& get_vardecl(const Handle& pattern);
+	static const Handle& get_body(const Handle& pattern);
+
+	/**
+	 * Return the number of grams in a pattern. That is, if the
+	 * pattern body is an AndLink, then returns its arity, otherwise
+	 * if the body is not an AndLink, then return 1, and if it's not a
+	 * pattern at all (i.e. not a LambdaLink), then return 0.
+	 */
+	static unsigned gram(const Handle& pattern);
 };
+
+std::string oc_to_string(const HandleUCounterMap& hucp);
 
 } // namespace opencog
 

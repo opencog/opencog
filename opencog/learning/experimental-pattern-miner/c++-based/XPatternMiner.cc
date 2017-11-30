@@ -23,6 +23,7 @@
 
 #include "XPatternMiner.h"
 
+#include <opencog/util/Logger.h>
 #include <opencog/util/algorithm.h>
 #include <opencog/util/dorepeat.h>
 #include <opencog/util/random.h>
@@ -37,13 +38,18 @@
 namespace opencog
 {
 
-XPMParameters::XPMParameters(int ms, const Handle& ipat, int maxp)
-	: minsup(ms), initpat(ipat), maxpats(maxp)
+XPMParameters::XPMParameters(unsigned ms, unsigned igram,
+                             const Handle& ipat, int maxp)
+	: minsup(ms), initgram(igram), initpat(ipat), maxpats(maxp)
 {
 	// Provide initial pattern if none
 	if (not initpat) {
-		Handle X = createNode(VARIABLE_NODE, "$X");
-		initpat = createLambdaLink(X, X);
+		HandleSeq vars = XPatternMiner::gen_rand_variables(initgram);
+		Handle vardecl = 1 < vars.size() ?
+		                     createLink(vars, VARIABLE_LIST) : vars[0];
+		Handle body = 1 < vars.size() ?
+		                  createLink(vars, AND_LINK) : vars[0];
+		initpat = createLambdaLink(vardecl, body);
 	}
 
 	// Provide a variable declaration if none
@@ -54,6 +60,9 @@ XPMParameters::XPMParameters(int ms, const Handle& ipat, int maxp)
 			body = sc->get_body();
 		initpat = createLink(initpat->get_type(), vardecl, body);
 	}
+
+	// Overwrite initgram if necessary
+	initgram = XPatternMiner::gram(initpat);
 }
 
 XPatternMiner::XPatternMiner(AtomSpace& as, const XPMParameters& prm)
@@ -64,35 +73,35 @@ HandleSet XPatternMiner::operator()()
 	HandleSet texts;
 	text_as.get_handles_by_type(std::inserter(texts, texts.end()),
 	                            opencog::ATOM, true);
-	return specialize(param.initpat, texts);
+	return specialize(param.initpat, texts, param.initgram);
 }
 
 HandleSet XPatternMiner::specialize(const Handle& pattern,
-                                    const HandleSet& texts)
+                                    const HandleSet& texts,
+                                    unsigned mingram)
 {
-	return specialize(pattern, HandleUCounter(texts));
+	// If the initial pattern is specialized, this initial filtering
+	// may save some computation
+	HandleUCounter fltexts = filter_texts(pattern, HandleUCounter(texts));
+	return specialize(pattern, fltexts, mingram);
 }
 
 HandleSet XPatternMiner::specialize(const Handle& pattern,
-                                    const HandleUCounter& texts)
+                                    const HandleUCounter& texts,
+                                    unsigned mingram)
 {
 	// If the pattern is constant, then no specialization is possible
 	if (pattern->get_type() != LAMBDA_LINK)
 		return HandleSet();
 
-	// Do not keep unnecessary unmatching texts
-	// TODO: we can probably assume that it is already filtered, and
-	// move the filtering to the specialize method above
-	HandleUCounter fltexts = filter_texts(pattern, texts);
-
 	// Make sure the pattern has enough support
-	if (not enough_support(fltexts))
+	if (not enough_support(pattern, texts))
 		return HandleSet();
 
-	// If the pattern is a variable, then build shallow patterns and
-	// complete them.
+	// If the pattern is a variable, then differ to single variable
+	// specialization
 	if (get_body(pattern)->get_type() == VARIABLE_NODE)
-		return specialize_varpat(pattern, fltexts);
+		return specialize_varpat(pattern, texts);
 
 	// Otherwise, if the pattern is structured, calculate the mappings
 	// from variables to values, get the patterns of these values now
@@ -108,14 +117,12 @@ HandleSet XPatternMiner::specialize(const Handle& pattern,
 		const Handle& var = el.first;
 		const HandleUCounter& subtexts = el.second;
 		Handle varpattern = mk_varpattern(pattern, var);
-		// TODO: maybe we can use specialize_varpat, if no support
-		// checking is necessary.
-		var2subpats[var] = specialize(varpattern, subtexts);
+		var2subpats[var] = specialize_varpat(varpattern, subtexts);
 	}
 
 	// Replacing each variable by its patterns in a cartesian product
 	// fashion (not forgetting updating their vardecls accordingly)
-	return product_compose(pattern, fltexts, var2subpats);
+	return product_compose(pattern, texts, var2subpats, mingram);
 }
 
 HandleSet XPatternMiner::specialize_varpat(const Handle& varpat,
@@ -131,6 +138,9 @@ HandleSet XPatternMiner::specialize_varpat(const Handle& varpat,
 
 		// Make sure the shallow pattern has enough support before
 		// including it in the solution set and specializing it.
+		// Because we know that shapat is 1-gram and its text has
+		// already been filtered by shallow_patterns, we only need to
+		// look at the texts.
 		if (not enough_support(shapat_texts))
 			continue;
 
@@ -141,31 +151,6 @@ HandleSet XPatternMiner::specialize_varpat(const Handle& varpat,
 	return patterns;
 }
 
-const Variables& XPatternMiner::get_variables(const Handle& pattern) const
-{
-	ScopeLinkPtr sc = ScopeLinkCast(pattern);
-	if (sc)
-		return ScopeLinkCast(pattern)->get_variables();
-	static Variables empty_variables;
-	return empty_variables;
-}
-
-const Handle& XPatternMiner::get_vardecl(const Handle& pattern) const
-{
-	ScopeLinkPtr sc = ScopeLinkCast(pattern);
-	if (sc)
-		return ScopeLinkCast(pattern)->get_vardecl();
-	return Handle::UNDEFINED;
-}
-
-const Handle& XPatternMiner::get_body(const Handle& pattern) const
-{
-	ScopeLinkPtr sc = ScopeLinkCast(pattern);
-	if (sc)
-		return ScopeLinkCast(pattern)->get_body();
-	return pattern;
-}
-
 Handle XPatternMiner::mk_varpattern(const Handle& pattern,
                                     const Handle& var) const
 {
@@ -173,14 +158,53 @@ Handle XPatternMiner::mk_varpattern(const Handle& pattern,
 	return Handle(createLambdaLink(subvardecl, var));
 }
 
+bool XPatternMiner::enough_support(const Handle& pattern,
+                                   const HandleUCounter& texts) const
+{
+	return param.minsup <= freq(pattern, texts);
+}
+
 bool XPatternMiner::enough_support(const HandleUCounter& texts) const
 {
 	return param.minsup <= texts.total_count();
 }
 
+unsigned XPatternMiner::freq(const Handle& pattern,
+                             const HandleUCounter& texts) const
+{
+	if (totally_abstract(pattern))
+		return gram(pattern) * freq(texts);
+
+	// If the pattern has more than one gram, then it is assumed that
+	// the count of each text in texts is 1, thus we just need to run
+	// the pattern over the whole texts without worrying about counts
+	if (1 < gram(pattern))
+		return restrict_satisfying_set(pattern, texts)->get_arity();
+
+	// Otherwise, assuming the texts has already been filtered, it is
+	// merely the texts total count. TODO: it would safer to put some
+	// assert to check if that assumption really hold
+	return freq(texts);
+}
+
+unsigned XPatternMiner::freq(const HandleUCounter& texts) const
+{
+	return texts.total_count();
+}
+
 HandleUCounter XPatternMiner::filter_texts(const Handle& pattern,
                                            const HandleUCounter& texts) const
 {
+	// No need to filter if most abstract
+	if (totally_abstract(pattern))
+		return texts;
+
+	// If it has more grams than 1, then TODO: it's probably the union
+	// of the texts of all its gram components.
+	if (1 < gram(pattern))
+		return texts;
+
+	// Otherwise it is a 1-gram pattern
 	HandleUCounter filtrd;
 	for (const auto& text : texts)
 		if (match(pattern, text.first))
@@ -201,11 +225,9 @@ bool XPatternMiner::match(const Handle& pattern, const Handle& text) const
 Handle XPatternMiner::matched_results(const Handle& pattern,
                                       const Handle& text) const
 {
-	// No need to run if most abstract
-	if (most_abstract(pattern))
-		return createLink(SET_LINK, text);
-
-	AtomSpace tmp_as;
+	// If I use a temporary atomspace on stack, then the atoms in it
+	// get deleted, grrrr, would need to use a smart pointer.
+	tmp_as.clear();
 	tmp_as.add_atom(text);
 	AtomSpace tmp_pattern_as(&tmp_as);
 	Handle tmp_pattern = tmp_pattern_as.add_atom(pattern),
@@ -214,6 +236,22 @@ Handle XPatternMiner::matched_results(const Handle& pattern,
 		gl = tmp_as.add_link(GET_LINK, vardecl, body),
 		result = satisfying_set(&tmp_as, gl);
 	return result;
+}
+
+Handle XPatternMiner::restrict_satisfying_set(const Handle& pattern,
+                                              const HandleUCounter& texts) const
+{
+	AtomSpace tmp_text_as;
+	for (const auto& text : texts)
+		tmp_text_as.add_atom(text.first);
+
+	AtomSpace tmp_query_as(&tmp_text_as);
+	Handle tmp_pattern = tmp_query_as.add_atom(pattern),
+		vardecl = get_vardecl(tmp_pattern),
+		body = get_body(tmp_pattern),
+		gl = tmp_query_as.add_link(GET_LINK, vardecl, body),
+		results = satisfying_set(&tmp_text_as, gl);
+	return results;
 }
 
 HandleUCounterMap XPatternMiner::shallow_patterns(const HandleUCounter& texts)
@@ -231,28 +269,57 @@ HandleUCounterMap XPatternMiner::shallow_patterns(const HandleUCounter& texts)
 		Handle vardecl = rnd_vars.size() == 1 ? rnd_vars[0]
 			: pattern_as.add_link(VARIABLE_LIST, rnd_vars),
 			body = pattern_as.add_link(text.first->get_type(), rnd_vars),
-			pattern = pattern_as.add_link(LAMBDA_LINK, vardecl, body);
+			pattern = pattern_as.add_link(LAMBDA_LINK,
+			                              vardecl,
+			                              local_quote_if_and(body));
 		pat2texts[pattern].insert(text);
 	}
 	return pat2texts;
 }
 
+Handle XPatternMiner::local_quote_if_and(const Handle& h)
+{
+	if (h->get_type() == AND_LINK)
+		return pattern_as.add_link(LOCAL_QUOTE_LINK, h);
+	return h;
+}
+
 HandleUCounterMap XPatternMiner::gen_var2subtexts(const Handle& pattern,
                                                   const HandleUCounter& texts) const
 {
-	HandleUCounterMap var2subtexts;
 	const Variables& vars = get_variables(pattern);
+
+	// If we have more than 1-gram patterns, then hopefully each text
+	// of texts has a count of one (TODO: make sure that's true). In
+	// the such case we just run the pattern matcher and collect the
+	// results without worrying about counts.
+	if (1 < gram(pattern)) {
+		Handle satset = restrict_satisfying_set(pattern, texts);
+		return gen_var2vals(vars, satset->getOutgoingSet());
+	}
+
+	// Otherwise take counts into account
+	HandleSeq values_seq;
 	for (const auto& text : texts) {
-		Handle results = matched_results(pattern, text.first);
-		for (const Handle& values : results->getOutgoingSet()) {
-			for (const auto& v : gen_var2val(vars, values)) {
-				const Handle& var = v.first;
-				const Handle& val = v.second;
-				var2subtexts[var][val] += 1;
-			}
+		const HandleSeq& res =
+			matched_results(pattern, text.first)->getOutgoingSet();
+		values_seq.insert(values_seq.end(), res.begin(), res.end());
+	}
+	return gen_var2vals(vars, values_seq);
+}
+
+HandleUCounterMap XPatternMiner::gen_var2vals(const Variables& vars,
+                                              const HandleSeq& values_seq) const
+{
+	HandleUCounterMap var2vals;
+	for (const Handle& values : values_seq) {
+		for (const auto& v : gen_var2val(vars, values)) {
+			const Handle& var = v.first;
+			const Handle& val = v.second;
+			var2vals[var][val] += 1;
 		}
 	}
-	return var2subtexts;
+	return var2vals;
 }
 
 HandleMap XPatternMiner::gen_var2val(const Variables& vars,
@@ -274,29 +341,83 @@ HandleMap XPatternMiner::gen_var2val(const Variables& vars,
 	return result;
 }
 
-HandleSeq XPatternMiner::gen_rand_variables(size_t n) const
+bool XPatternMiner::totally_abstract(const Handle& pattern) const
 {
-	HandleSeq variables;
-	dorepeat (n)
-		variables.push_back(gen_rand_variable());
-	return variables;
+	// Check whether it is an abstraction to begin with
+	if (pattern->get_type() != LAMBDA_LINK)
+		return false;
+
+	// If some variables are typed then the abstraction isn't total
+	const Variables& vars = get_variables(pattern);
+	if (not vars._simple_typemap.empty() or not vars._deep_typemap.empty())
+		return false;
+
+	// Make sure the body is either a variable, or a conjunction of
+	// variables
+	Handle body = get_body(pattern);
+	if (body->get_type() == VARIABLE_NODE)
+		return true;
+	if (body->get_type() != AND_LINK)
+		return false;
+	for (const Handle& ch : body->getOutgoingSet())
+		if (ch->get_type() != VARIABLE_NODE)
+			return false;
+	return true;
 }
 
-Handle XPatternMiner::gen_rand_variable() const
+HandleSeq XPatternMiner::gen_var_overlap_subpatterns(const Handle& pattern,
+                                                     const Handle& variable,
+                                                     const Handle& subpat) const
 {
-	return createNode(VARIABLE_NODE, randstr("$PM-", 2));
+	ScopeLinkPtr sc_subpat = ScopeLinkCast(subpat);
+	if (not sc_subpat)
+		return {subpat};
+
+	// Define vs1 and vs2 to generate all variable overlaps
+	const HandleSet& vs1 = get_variables(subpat).varset;
+	HandleSet vs2 = get_variables(pattern).varset;
+	vs2.erase(variable);
+
+	// Make sure vs1 and vs2 don't intersect
+	OC_ASSERT(is_disjoint(vs1, vs2));
+
+	// Generate all overlaps
+	HandleMapSet var_overlaps = gen_var_overlaps(vs1, vs2);
+
+	// For each mapping generate an associated subpattern
+	HandleSeq subpatterns;
+	for (const HandleMap& vm : var_overlaps)
+		subpatterns.push_back(sc_subpat->partial_substitute(vm));
+	return subpatterns;
 }
 
-bool XPatternMiner::most_abstract(const Handle& pattern) const
+HandleMapSet XPatternMiner::gen_var_overlaps(const HandleSet& vs1,
+                                             const HandleSet& vs2) const
 {
-	return pattern->get_type() == LAMBDA_LINK and
-		get_vardecl(pattern)->get_type() == VARIABLE_NODE and
-		get_body(pattern)->get_type() == VARIABLE_NODE;
+	// Base case
+	if (vs1.empty())
+		return {{}};
+
+	// Recursive case
+	Handle vs1_head = *vs1.begin();
+	HandleSet vs1_tail = vs1;
+	vs1_tail.erase(vs1_head);
+	HandleMapSet old_vms = gen_var_overlaps(vs1_tail, vs2);
+	HandleMapSet new_vms(old_vms);
+	for (const HandleMap& vm : old_vms) {
+		for (const Handle& v2 : vs2) {
+			HandleMap new_vm(vm);
+			new_vm[vs1_head] = v2;
+			new_vms.insert(new_vm);
+		}
+	}
+	return new_vms;
 }
 
 HandleSet XPatternMiner::product_compose(const Handle& pattern,
                                          const HandleUCounter& texts,
-                                         const HandleMultimap& var2pats) const
+                                         const HandleMultimap& var2pats,
+                                         unsigned mingram) const
 {
 	HandleSet patterns;
 	for (auto map_it = var2pats.begin(); map_it != var2pats.end(); map_it++) {
@@ -307,35 +428,55 @@ HandleSet XPatternMiner::product_compose(const Handle& pattern,
 		// preceeding, and recursively call product_compose to obtain
 		// patterns without the subpatterns of that variables.
 		HandleMultimap revar2pats(std::next(map_it), var2pats.end());
-		set_union_modify(patterns, product_compose(pattern, texts, revar2pats));
+		set_union_modify(patterns, product_compose(pattern, texts,
+		                                           revar2pats, mingram));
 
 		// Combine the patterns of that variables with the patterns of
-		// the other variables.
+		// the remaining variables.
 		for (auto subpat_it = subpatterns.begin();
 		     subpat_it != subpatterns.end(); ++subpat_it) {
+			// Alpha convert subpat_it to make sure it doesn't share
+			// variables with pattern
+			Handle subpat = alpha_conversion(*subpat_it);
+
 			// Perform a single substitution of variable by subpat
-			Handle npat = compose(pattern, {{variable, *subpat_it}});
-			HandleUCounter fltexts = filter_texts(npat, texts);
-			if (enough_support(fltexts)) {
-				patterns.insert(npat);
+			HandleSeq vosubpats =
+				gen_var_overlap_subpatterns(pattern, variable, subpat);
+			for (const Handle& vosubpat : vosubpats) {
+				Handle npat = compose(pattern, {{variable, vosubpat}});
+				// TODO: instead of filtering, it would probably be better
+				// if the satsifying text were pass along the pattern, in
+				// specialize and specialize_varpat, just as
+				// shallow_patterns does, that way we'll already have the
+				// filtered texts around.
+				HandleUCounter fltexts = filter_texts(npat, texts);
+				if (enough_support(npat, fltexts) and mingram <= gram(npat)) {
+					patterns.insert(npat);
 
-				// Recursively call product_compose on nap and the
-				// remaining variables
-				set_union_modify(patterns,
-				                 product_compose(npat, fltexts, revar2pats));
+					// Recursively call product_compose on nap and the
+					// remaining variables
+					HandleSet prod = product_compose(npat, fltexts,
+					                                 revar2pats, mingram);
+					patterns.insert(prod.begin(), prod.end());
+				}
 			}
-
-			// Add the remaining subpatterns sub-patterns to var2pats,
-			// and recursively call product_compose over pattern
-			HandleMultimap revar2pats_revar(revar2pats);
-			revar2pats_revar[variable].insert(std::next(subpat_it), subpatterns.end());
-			set_union_modify(patterns,
-			                 product_compose(pattern, texts, revar2pats_revar));
+			// TODO: many (but not all) of the following subpatterns
+			// are likely specializations of npat, so if npat fails,
+			// they will fail too, we can probably ignore them
+			// entirely. Maybe to help that we should use a tree of
+			// patterns instead of a set, such that if composing such
+			// a subpattern in that tree with a given pattern doesn't
+			// have enough support then we know composing its children
+			// with that same pattern won't have enough support
+			// either.
 		}
 	}
+
 	return patterns;
 }
 
+// TODO: take care of removing local quote in the composed
+// sub-patterns, if it doesn't already
 Handle XPatternMiner::compose(const Handle& pattern,
                               const HandleMap& var2pat) const
 {
@@ -355,8 +496,14 @@ Handle XPatternMiner::compose(const Handle& pattern,
 	HandleSeq subodies = variables.make_values(var2subody);
 
 	// Perform composition of the pattern body with the sub-bodies)
+	// TODO: perhaps use ScopeLink partial_substitute
 	Handle body = variables.substitute_nocheck(get_body(pattern), subodies);
 	body = Unify::consume_ill_quotations(vardecl, body);
+	// If root AndLink then simplify the pattern
+	if (body->get_type() == AND_LINK) {
+		body = Unify::remove_constant_clauses(vardecl, body);
+		body = remove_unary_and(body);
+	}
 
 	// Create the composed pattern
 	if (vardecl)
@@ -412,6 +559,84 @@ Handle XPatternMiner::vardecl_compose(const Handle& vardecl,
 		OC_ASSERT(false, "Not implemented");
 		return Handle::UNDEFINED;
 	}
+}
+
+Handle XPatternMiner::remove_unary_and(const Handle& h)
+{
+	if (h->get_type() == AND_LINK and h->get_arity() == 1)
+		return h->getOutgoingAtom(0);
+	return h;
+}
+
+Handle XPatternMiner::alpha_conversion(const Handle& pattern)
+{
+	ScopeLinkPtr sc = ScopeLinkCast(pattern);
+	if (sc)
+		return sc->alpha_conversion();
+	return pattern;
+}
+
+HandleSeq XPatternMiner::gen_rand_variables(size_t n)
+{
+	HandleSeq variables;
+	dorepeat (n)
+		variables.push_back(gen_rand_variable());
+	return variables;
+}
+
+Handle XPatternMiner::gen_rand_variable()
+{
+	return createNode(VARIABLE_NODE, randstr("$PM-"));
+}
+
+const Variables& XPatternMiner::get_variables(const Handle& pattern)
+{
+	ScopeLinkPtr sc = ScopeLinkCast(pattern);
+	if (sc)
+		return ScopeLinkCast(pattern)->get_variables();
+	static Variables empty_variables;
+	return empty_variables;
+}
+
+const Handle& XPatternMiner::get_vardecl(const Handle& pattern)
+{
+	ScopeLinkPtr sc = ScopeLinkCast(pattern);
+	if (sc)
+		return ScopeLinkCast(pattern)->get_vardecl();
+	return Handle::UNDEFINED;
+}
+
+const Handle& XPatternMiner::get_body(const Handle& pattern)
+{
+	ScopeLinkPtr sc = ScopeLinkCast(pattern);
+	if (sc)
+		return ScopeLinkCast(pattern)->get_body();
+	return pattern;
+}
+
+unsigned XPatternMiner::gram(const Handle& pattern)
+{
+	if (pattern->get_type() == LAMBDA_LINK) {
+		if (get_body(pattern)->get_type() == AND_LINK)
+			return get_body(pattern)->get_arity();
+		return 1;
+	}
+	return 0;
+}
+
+std::string oc_to_string(const HandleUCounterMap& hucp)
+{
+	std::stringstream ss;
+	ss << "size = " << hucp.size() << std::endl;
+	size_t i = 0;
+	for (const auto& el : hucp) {
+		ss << "atom[" << i << "]:" << std::endl
+		   << oc_to_string(el.first)
+		   << "HandleUCounter[" << i << "]:" << std::endl
+		   << oc_to_string(el.second);
+		i++;
+	}
+	return ss.str();
 }
 
 } // namespace opencog
