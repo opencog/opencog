@@ -505,6 +505,9 @@ Handle XPatternMiner::compose(const Handle& pattern,
 		body = remove_unary_and(body);
 	}
 
+	// Filter vardecl
+	vardecl = filter_vardecl(vardecl, body);
+
 	// Create the composed pattern
 	if (vardecl)
 		return createLink(HandleSeq{vardecl, body}, pattern->get_type());

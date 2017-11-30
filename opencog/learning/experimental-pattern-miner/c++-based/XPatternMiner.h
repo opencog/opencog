@@ -450,7 +450,7 @@ private:
 	HandleSet product_compose(const Handle& pattern,
 	                          const HandleUCounter& texts,
 	                          const HandleMultimap& var2patterns,
-	                          unsigned mingram) const;
+	                          unsigned mingram=0) const;
 
 	/**
 	 * Given a pattern, and mapping from variables to sub-patterns,
