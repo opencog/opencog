@@ -525,6 +525,14 @@ public:
 	 * pattern at all (i.e. not a LambdaLink), then return 0.
 	 */
 	static unsigned gram(const Handle& pattern);
+
+	/**
+	 * Remove useless clauses from a body pattern. Useless clauses are
+	 * constant clauses, as well as variables that already occur
+	 * within an existing clause.
+	 */
+	static Handle remove_useless_clauses(const Handle& vardecl,
+	                                     const Handle& body);
 };
 
 std::string oc_to_string(const HandleUCounterMap& hucp);

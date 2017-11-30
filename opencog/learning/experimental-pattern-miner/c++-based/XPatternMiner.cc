@@ -33,6 +33,7 @@
 #include <opencog/atoms/core/LambdaLink.h>
 #include <opencog/atomutils/TypeUtils.h>
 #include <opencog/atomutils/Unify.h>
+#include <opencog/atomutils/FindUtils.h>
 #include <opencog/query/BindLinkAPI.h>
 
 namespace opencog
@@ -501,7 +502,7 @@ Handle XPatternMiner::compose(const Handle& pattern,
 	body = Unify::consume_ill_quotations(vardecl, body);
 	// If root AndLink then simplify the pattern
 	if (body->get_type() == AND_LINK) {
-		body = Unify::remove_constant_clauses(vardecl, body);
+		body = remove_useless_clauses(vardecl, body);
 		body = remove_unary_and(body);
 	}
 
@@ -625,6 +626,26 @@ unsigned XPatternMiner::gram(const Handle& pattern)
 		return 1;
 	}
 	return 0;
+}
+
+Handle XPatternMiner::remove_useless_clauses(const Handle& vardecl,
+                                             const Handle& body)
+{
+	Handle res;
+	res = Unify::remove_constant_clauses(vardecl, body);
+
+	// Check that each clause isn't a subtree another another clause
+	const HandleSeq& outs = res->getOutgoingSet();
+	HandleSeq nouts;
+	for (auto it = outs.begin(); it != outs.end(); ++it) {
+		HandleSeq others(outs.begin(), it);
+		others.insert(others.end(), std::next(it), outs.end());
+		if (not is_unquoted_unscoped_in_any_tree(others, *it))
+			nouts.push_back(*it);
+	}
+	res = createLink(nouts, AND_LINK);
+
+	return res;
 }
 
 std::string oc_to_string(const HandleUCounterMap& hucp)
