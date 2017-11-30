@@ -64,7 +64,7 @@ public:
 	void test_AB_AC_BC();
 	void test_AB_ABC();
 	void test_2gram_1();
-	// void test_2gram_2();
+	void test_2gram_2();
 	// void test_InferenceControl();
 	// void test_SodaDrinker();
 };
@@ -329,7 +329,6 @@ void XPatternMinerUTest::test_2gram_1()
 		VXY = tmp_al(VARIABLE_LIST, X, Y),
 		VXYZ = tmp_al(VARIABLE_LIST, X, Y, Z);
 
-	Handle initpat = tmp_al(LAMBDA_LINK, VXY, tmp_al(AND_LINK, X, Y));
 	XPMParameters param(2, 2);
 	XPatternMiner pm(_as, param);
 	HandleSet results = pm();
@@ -345,43 +344,42 @@ void XPatternMinerUTest::test_2gram_1()
 	TS_ASSERT(results.find(expected_pattern) != results.end());
 }
 
-// void XPatternMinerUTest::test_2gram_2()
-// {
-// 	logger().info("BEGIN TEST: %s", __FUNCTION__);
+void XPatternMinerUTest::test_2gram_2()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
-// 	Handle
-// 		A1 = an(CONCEPT_NODE, "A1"),
-// 		A2 = an(CONCEPT_NODE, "A2"),
-// 		B = an(CONCEPT_NODE, "B"),
-// 		C1 = an(CONCEPT_NODE, "C1"),
-// 		C2 = an(CONCEPT_NODE, "C2"),
-// 		A1B = al(INHERITANCE_LINK, A1, B),
-// 		A2B = al(INHERITANCE_LINK, A2, B),
-// 		BC1 = al(INHERITANCE_LINK, B, C1),
-// 		BC2 = al(INHERITANCE_LINK, B, C2);
+	Handle
+		A1 = an(CONCEPT_NODE, "A1"),
+		A2 = an(CONCEPT_NODE, "A2"),
+		B = an(CONCEPT_NODE, "B"),
+		C1 = an(CONCEPT_NODE, "C1"),
+		C2 = an(CONCEPT_NODE, "C2"),
+		A1B = al(INHERITANCE_LINK, A1, B),
+		A2B = al(INHERITANCE_LINK, A2, B),
+		BC1 = al(INHERITANCE_LINK, B, C1),
+		BC2 = al(INHERITANCE_LINK, B, C2);
 
-// 	Handle
-// 		X = tmp_an(VARIABLE_NODE, "$X"),
-// 		Y = tmp_an(VARIABLE_NODE, "$Y"),
-// 		Z = tmp_an(VARIABLE_NODE, "$Z"),
-// 		VXY = tmp_al(VARIABLE_LIST, X, Y),
-// 		VXYZ = tmp_al(VARIABLE_LIST, X, Y, Z);
+	Handle
+		X = tmp_an(VARIABLE_NODE, "$X"),
+		Y = tmp_an(VARIABLE_NODE, "$Y"),
+		Z = tmp_an(VARIABLE_NODE, "$Z"),
+		VXY = tmp_al(VARIABLE_LIST, X, Y),
+		VXYZ = tmp_al(VARIABLE_LIST, X, Y, Z);
 
-// 	Handle initpat = tmp_al(LAMBDA_LINK, VXY, tmp_al(AND_LINK, X, Y));
-// 	XPMParameters param(4, initpat);
-// 	XPatternMiner pm(_as, param);
-// 	HandleSet results = pm();
-// 	Handle expected_pattern = tmp_al(LAMBDA_LINK,
-// 	                                 VXYZ,
-// 	                                 tmp_al(AND_LINK,
-// 	                                        tmp_al(INHERITANCE_LINK, X, Y),
-// 	                                        tmp_al(INHERITANCE_LINK, Y, Z)));
+	XPMParameters param(4, 2);
+	XPatternMiner pm(_as, param);
+	HandleSet results = pm();
+	Handle expected_pattern = tmp_al(LAMBDA_LINK,
+	                                 VXYZ,
+	                                 tmp_al(AND_LINK,
+	                                        tmp_al(INHERITANCE_LINK, X, Y),
+	                                        tmp_al(INHERITANCE_LINK, Y, Z)));
 
-// 	logger().info() << "results = " << oc_to_string(results);
-// 	logger().info() << "expected_pattern = " << oc_to_string(expected_pattern);
+	logger().info() << "results = " << oc_to_string(results);
+	logger().info() << "expected_pattern = " << oc_to_string(expected_pattern);
 
-// 	TS_ASSERT(is_in(expected_pattern, results));
-// }
+	TS_ASSERT(results.find(expected_pattern) != results.end());
+}
 
 // void XPatternMinerUTest::test_InferenceControl()
 // {
