@@ -53,9 +53,12 @@ XPMParameters::XPMParameters(unsigned ms, unsigned igram,
 		initpat = createLambdaLink(vardecl, body);
 	}
 
+	// Wrap a Lambda around if none
+	if (initpat->get_type() != LAMBDA_LINK)
+		initpat = createLink(LAMBDA_LINK, initpat);
+
 	// Provide a variable declaration if none
 	ScopeLinkPtr sc = ScopeLinkCast(initpat);
-	OC_ASSERT(sc != nullptr, "bug or user error, pattern must be a scope");
 	if (not sc->get_vardecl()) {
 		Handle vardecl = sc->get_variables().get_vardecl(),
 			body = sc->get_body();
@@ -258,31 +261,86 @@ Handle XPatternMiner::restrict_satisfying_set(const Handle& pattern,
 HandleUCounterMap XPatternMiner::shallow_patterns(const HandleUCounter& texts)
 {
 	HandleUCounterMap pat2texts;
-	for (const auto& text : texts) {
-		// Node or empty link, nothing to abstract
-		if (text.first->is_node() or text.first->get_arity() == 0) {
-			pat2texts[text.first].insert(text);
-			continue;
-		}
+	for (const auto& text : texts)
+		pat2texts[shallow_pattern(text.first)].insert(text);
 
-		// Non empty link, let's abstract away the arguments
-		HandleSeq rnd_vars = gen_rand_variables(text.first->get_arity());
-		Handle vardecl = rnd_vars.size() == 1 ? rnd_vars[0]
-			: pattern_as.add_link(VARIABLE_LIST, rnd_vars),
-			body = pattern_as.add_link(text.first->get_type(), rnd_vars),
-			pattern = pattern_as.add_link(LAMBDA_LINK,
-			                              vardecl,
-			                              local_quote_if_and(body));
-		pat2texts[pattern].insert(text);
-	}
 	return pat2texts;
 }
 
-Handle XPatternMiner::local_quote_if_and(const Handle& h)
+Handle XPatternMiner::shallow_pattern(const Handle& text)
 {
-	if (h->get_type() == AND_LINK)
-		return pattern_as.add_link(LOCAL_QUOTE_LINK, h);
-	return h;
+	// Node or empty link, nothing to abstract
+	if (text->is_node() or text->get_arity() == 0)
+		return text;
+
+	Type tt = text->get_type();
+
+	// // Special handling for links that do not accept variables for all
+	// // their outcomings
+	// if (tt == EXECUTION_OUTPUT_LINK) {
+	// 	Handle rndvar = gen_rand_variable(),
+	// 		schema = text->getOutgoingAtom(0),
+	// 		body = pattern_as.add_link(tt, {schema, rndvar}),
+	// 		pattern = lambda(rndvar, body);
+	// 	return pattern;
+	// }
+	// Links wrapped with LocalQuoteLink
+	if (tt == AND_LINK) {
+		HandleSeq rnd_vars = gen_rand_variables(text->get_arity());
+		Handle vardecl = variable_list(rnd_vars),
+			body = pattern_as.add_link(tt, rnd_vars),
+			pattern = lambda(vardecl, local_quote(body));
+		return pattern;
+	}
+	// Links wrapped with QuoteLink and UnquoteLinks
+	if (tt == BIND_LINK or
+	    tt == EVALUATION_LINK or
+	    tt == EXECUTION_OUTPUT_LINK)
+	{
+		HandleSeq rnd_vars = gen_rand_variables(text->get_arity());
+		// Wrap variables in UnquoteLink
+		HandleSeq uq_vars;
+		for (Handle& var : rnd_vars)
+			uq_vars.push_back(unquote(var));
+
+		Handle vardecl = variable_list(rnd_vars),
+			body = pattern_as.add_link(tt, uq_vars),
+			pattern = lambda(vardecl, quote(body));
+		return pattern;
+	}
+
+	// Generic non empty link, let's abstract away all the arguments
+	HandleSeq rnd_vars = gen_rand_variables(text->get_arity());
+	Handle vardecl = variable_list(rnd_vars),
+		body = pattern_as.add_link(tt, rnd_vars),
+		pattern = lambda(vardecl, body);
+	return pattern;
+}
+
+Handle XPatternMiner::variable_list(const HandleSeq& vars)
+{
+	return vars.size() == 1 ? vars[0]
+		: pattern_as.add_link(VARIABLE_LIST, vars);
+}
+
+Handle XPatternMiner::lambda(const Handle& vardecl, const Handle& body)
+{
+	return pattern_as.add_link(LAMBDA_LINK, vardecl, body);
+}
+
+Handle XPatternMiner::quote(const Handle& h)
+{
+	return pattern_as.add_link(QUOTE_LINK, h);
+}
+
+Handle XPatternMiner::unquote(const Handle& h)
+{
+	return pattern_as.add_link(UNQUOTE_LINK, h);
+}
+
+Handle XPatternMiner::local_quote(const Handle& h)
+{
+	return pattern_as.add_link(LOCAL_QUOTE_LINK, h);
 }
 
 HandleUCounterMap XPatternMiner::gen_var2subtexts(const Handle& pattern,
@@ -446,7 +504,7 @@ HandleSet XPatternMiner::product_compose(const Handle& pattern,
 			for (const Handle& vosubpat : vosubpats) {
 				Handle npat = compose(pattern, {{variable, vosubpat}});
 				// TODO: instead of filtering, it would probably be better
-				// if the satsifying text were pass along the pattern, in
+				// if the satisfying text were pass along the pattern, in
 				// specialize and specialize_varpat, just as
 				// shallow_patterns does, that way we'll already have the
 				// filtered texts around.
@@ -499,7 +557,7 @@ Handle XPatternMiner::compose(const Handle& pattern,
 	// Perform composition of the pattern body with the sub-bodies)
 	// TODO: perhaps use ScopeLink partial_substitute
 	Handle body = variables.substitute_nocheck(get_body(pattern), subodies);
-	body = Unify::consume_ill_quotations(vardecl, body);
+	body = ScopeLink::consume_ill_quotations(vardecl, body);
 	// If root AndLink then simplify the pattern
 	if (body->get_type() == AND_LINK) {
 		body = remove_useless_clauses(vardecl, body);

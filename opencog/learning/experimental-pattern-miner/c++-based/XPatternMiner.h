@@ -94,6 +94,8 @@ public:
 	 * Mine and return maxpats (or all if negative) patterns with
 	 * frequency equal to or above minsup, starting from the initial
 	 * pattern, excluded.
+	 *
+	 * TODO: return tree instead set
 	 */
 	HandleSet operator()();
 
@@ -103,6 +105,8 @@ public:
 	 *
 	 * For now all limits, expect minsup, are ignored, all patterns
 	 * are considered.
+	 *
+	 * TODO: return tree instead set
 	 */
 	HandleSet specialize(const Handle& pattern, const HandleSet& texts,
 	                     unsigned mingram=0);
@@ -110,6 +114,8 @@ public:
 	/**
 	 * Like above but maps each text to a count. That is useful to
 	 * keep track of the frequence of sub-patterns.
+	 *
+	 * TODO: return tree instead set
 	 */
 	HandleSet specialize(const Handle& pattern, const HandleUCounter& texts,
 	                     unsigned mingram=0);
@@ -243,13 +249,35 @@ private:
 	 * TODO: we may want to support types in variable declaration.
 	 */
 	HandleUCounterMap shallow_patterns(const HandleUCounter& texts);
+	Handle shallow_pattern(const Handle& text);
 
 	/**
-	 * Wrap a LocalQuote link around h, if it is a link of type
-	 * AndLink. That is in order not to produce n-gram patterns when
-	 * in fact we want to match an AndLink text.
+	 * Wrap a VariableList around a variable list, if more than one
+	 * variable, otherwise return that one variable.
 	 */
-	Handle local_quote_if_and(const Handle& h);
+	Handle variable_list(const HandleSeq& vars);
+
+	/**
+	 * Wrap a LambdaLink around a vardecl and body.
+	 */
+	Handle lambda(const Handle& vardecl, const Handle& body);
+
+	/**
+	 * Wrap a QuoteLink around h
+	 */
+	Handle quote(const Handle& h);
+
+	/**
+	 * Wrap a UnquoteLink around h
+	 */
+	Handle unquote(const Handle& h);
+
+	/**
+	 * Wrap a LocalQuote link around h (typically used if it is a link
+	 * of type AndLink. That is in order not to produce n-gram
+	 * patterns when in fact we want to match an AndLink text.)
+	 */
+	Handle local_quote(const Handle& h);
 
 	/**
 	 * Given a pattern, a collection of text atoms to match, build a
@@ -399,6 +427,8 @@ private:
 	 *
 	 * The output container is a HandleSeq to be able to contain
 	 * alpha-equivalent subpatterns.
+	 *
+	 * TODO: replace that by tree (keeping redundancy)
 	 */
 	HandleSeq gen_var_overlap_subpatterns(const Handle& pattern,
 	                                      const Handle& variable,
@@ -446,6 +476,11 @@ private:
 	 *
 	 * TODO: I probably need to pass a HandleUCounterMap to keep the
 	 * texts associated to each subpattern associated to each variable.
+	 *
+	 * TODO: replace var2patterns by var to tree, to skip making the
+	 * product of specializations with too low support.
+	 *
+	 * TODO: return tree instead set
 	 */
 	HandleSet product_compose(const Handle& pattern,
 	                          const HandleUCounter& texts,
@@ -482,8 +517,6 @@ private:
 	 * TODO: add unit test
 	 *
 	 * TODO: add examples
-	 *
-	 * TODO: can probably be made static
 	 */
 	static Handle vardecl_compose(const Handle& vardecl,
 	                              const HandleMap& var2subdecl);
@@ -537,6 +570,6 @@ public:
 
 std::string oc_to_string(const HandleUCounterMap& hucp);
 
-} // namespace opencog
+} // ~namespace opencog
 
 #endif /* OPENCOG_XPATTERNMINER_H_ */
