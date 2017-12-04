@@ -65,7 +65,7 @@ public:
 	void test_AB_ABC();
 	void test_2gram_1();
 	void test_2gram_2();
-	// void test_InferenceControl();
+	void test_InferenceControl();
 	// void test_SodaDrinker();
 };
 
@@ -381,47 +381,68 @@ void XPatternMinerUTest::test_2gram_2()
 	TS_ASSERT(results.find(expected_pattern) != results.end());
 }
 
-// void XPatternMinerUTest::test_InferenceControl()
-// {
-// 	logger().info("BEGIN TEST: %s", __FUNCTION__);
+void XPatternMinerUTest::test_InferenceControl()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
-// 	// Load inference-control-corpus.scm
-// 	std::string rs =
-// 		_scm.eval("(load-from-path \"inference-control-corpus.scm\")");
+	// Load inference-control-corpus.scm
+	std::string rs =
+		_scm.eval("(load-from-path \"inference-control-corpus.scm\")");
 
-// 	std::cout << "rs = " << rs << std::endl;
+	std::cout << "rs = " << rs << std::endl;
 
-// 	// Run the pattern miner
-// 	XPMParameters param(2);
-// 	XPatternMiner pm(_as, param);
-// 	HandleSet results = pm();
+	// Run the pattern miner
+	Handle expand = tmp_an(SCHEMA_NODE, "URE:BC:expand-and-BIT"),
+		preproof = tmp_an(PREDICATE_NODE, "URE:BC:preproof-of"),
+		T = tmp_an(VARIABLE_NODE, "$T"),
+		A = tmp_an(VARIABLE_NODE, "$A"),
+		L = tmp_an(VARIABLE_NODE, "$L"),
+		R = tmp_an(VARIABLE_NODE, "$R"),
+		B = tmp_an(VARIABLE_NODE, "$B"),
+		vardecl = tmp_al(VARIABLE_LIST, T, A, L, R, B),
+		clauses = tmp_al(AND_LINK,
+		                 tmp_al(EXECUTION_LINK,
+		                        expand,
+		                        tmp_al(LIST_LINK, A, L, R),
+		                        B),
+		                 tmp_al(EVALUATION_LINK,
+		                        preproof,
+		                        tmp_al(LIST_LINK, A, T)),
+		                 tmp_al(EVALUATION_LINK,
+		                        preproof,
+		                        tmp_al(LIST_LINK, B, T))),
+		initpat = tmp_al(LAMBDA_LINK, vardecl, clauses);
 
-// 	Handle expected_pattern = al(AND_LINK); // TODO
-// 	// The main pattern of interest should look like
-// 	//
-// 	// Execution
-// 	//   Schema "expand"
-// 	//   List
-// 	//     PatternMiningVariable "$k"
-// 	//     Inheritance
-// 	//       ConceptNode "A"
-// 	//       PatternMiningVariable "$x"
-// 	//     GroundedSchemaNode "scm: conditional-full-instantiation-scope-formula"
-// 	//   PatternMiningVariable "$r"
-// 	//
-// 	// Evaluation
-// 	//   Predicate "preproof
-// 	//   PatternMiningVariable "$k"
-// 	//
-// 	// Evaluation
-// 	//   Predicate "preproof
-// 	//   PatternMiningVariable "$r"
+	XPMParameters param(2, 3, initpat);
+	XPatternMiner pm(_as, param);
+	HandleSet results = pm();
 
-// 	logger().info() << "results = " << oc_to_string(results);
-// 	logger().info() << "expected_pattern = " << oc_to_string(expected_pattern);
+	Handle expected_pattern = al(AND_LINK); // TODO
+	// The main pattern of interest should look like
+	//
+	// Execution
+	//   Schema "expand"
+	//   List
+	//     PatternMiningVariable "$k"
+	//     Inheritance
+	//       ConceptNode "A"
+	//       PatternMiningVariable "$x"
+	//     GroundedSchemaNode "scm: conditional-full-instantiation-scope-formula"
+	//   PatternMiningVariable "$r"
+	//
+	// Evaluation
+	//   Predicate "preproof
+	//   PatternMiningVariable "$k"
+	//
+	// Evaluation
+	//   Predicate "preproof
+	//   PatternMiningVariable "$r"
 
-// 	TS_ASSERT(is_in(expected_pattern, results));
-// }
+	logger().info() << "results = " << oc_to_string(results);
+	logger().info() << "expected_pattern = " << oc_to_string(expected_pattern);
+
+	TS_ASSERT(is_in(expected_pattern, results));
+}
 
 // void XPatternMinerUTest::test_PatternMiner_SodaDrinker()
 // {
