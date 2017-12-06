@@ -27,6 +27,7 @@
 #include <opencog/util/Config.h>
 #include <opencog/util/algorithm.h>
 #include <opencog/atomspace/AtomSpace.h>
+#include <opencog/learning/experimental-pattern-miner/c++-based/HandleTree.h>
 #include <opencog/learning/experimental-pattern-miner/c++-based/XPatternMiner.h>
 #include <opencog/guile/SchemeEval.h>
 
@@ -54,10 +55,13 @@ public:
 	void setUp();
 	void tearDown();
 
+	// Auxiliary methods
 	void test_gen_var_overlap_subpatterns();
+	void test_product_compose_1();
+	void test_product_compose_2();
+	void test_product_compose_3();
 
-	void test_product_compose();
-
+	// Pattern miner
 	void test_A();
 	void test_AB();
 	void test_AB_AC();
@@ -72,7 +76,7 @@ public:
 XPatternMinerUTest::XPatternMinerUTest() : _scm(&_as)
 {
 	logger().set_level(Logger::DEBUG);
-	logger().set_timestamp_flag(false);
+	// logger().set_timestamp_flag(false);
 	logger().set_print_to_stdout_flag(true);
 }
 XPatternMinerUTest::~XPatternMinerUTest() {}
@@ -110,34 +114,35 @@ void XPatternMinerUTest::test_gen_var_overlap_subpatterns()
 		                tmp_al(INHERITANCE_LINK, U, V));
 
 	XPatternMiner pm(_as);
-	HandleSeq results = pm.gen_var_overlap_subpatterns(pattern, var, subpat),
-		expected = { tmp_al(LAMBDA_LINK,
-		                    tmp_al(VARIABLE_LIST, U, V),
-		                    tmp_al(INHERITANCE_LINK, U, V)),
-		             tmp_al(LAMBDA_LINK,
-		                    tmp_al(VARIABLE_LIST, Y, V),
-		                    tmp_al(INHERITANCE_LINK, Y, V)),
-		             tmp_al(LAMBDA_LINK,
-		                    Y,
-		                    tmp_al(INHERITANCE_LINK, Y, Y)),
-		             tmp_al(LAMBDA_LINK,
-		                    tmp_al(VARIABLE_LIST, Y, Z),
-		                    tmp_al(INHERITANCE_LINK, Y, Z)),
-		             tmp_al(LAMBDA_LINK,
-		                    tmp_al(VARIABLE_LIST, Z, V),
-		                    tmp_al(INHERITANCE_LINK, Z, V)),
-		             tmp_al(LAMBDA_LINK,
-		                    tmp_al(VARIABLE_LIST, Z, Y),
-		                    tmp_al(INHERITANCE_LINK, Z, Y)),
-		             tmp_al(LAMBDA_LINK,
-		                    Z,
-		                    tmp_al(INHERITANCE_LINK, Z, Z)),
-		             tmp_al(LAMBDA_LINK,
-		                    tmp_al(VARIABLE_LIST, U, Y),
-		                    tmp_al(INHERITANCE_LINK, U, Y)),
-		             tmp_al(LAMBDA_LINK,
-		                    tmp_al(VARIABLE_LIST, U, Z),
-		                    tmp_al(INHERITANCE_LINK, U, Z)) };
+	HandleTree results = pm.gen_var_overlap_subpatterns(pattern, var, subpat);
+	HandleTree expected
+		(tmp_al(LAMBDA_LINK,
+		        tmp_al(VARIABLE_LIST, U, V),
+		        tmp_al(INHERITANCE_LINK, U, V)),
+		 { HandleTree(tmp_al(LAMBDA_LINK,
+		                     tmp_al(VARIABLE_LIST, U, Y),
+		                     tmp_al(INHERITANCE_LINK, U, Y)),
+			          { tmp_al(LAMBDA_LINK,
+			                   Y,
+			                   tmp_al(INHERITANCE_LINK, Y, Y)),
+					    tmp_al(LAMBDA_LINK,
+					           tmp_al(VARIABLE_LIST, Z, Y),
+					           tmp_al(INHERITANCE_LINK, Z, Y)) }),
+		   HandleTree(tmp_al(LAMBDA_LINK,
+		                     tmp_al(VARIABLE_LIST, U, Z),
+		                     tmp_al(INHERITANCE_LINK, U, Z)),
+		              { tmp_al(LAMBDA_LINK,
+		                       tmp_al(VARIABLE_LIST, Y, Z),
+		                       tmp_al(INHERITANCE_LINK, Y, Z)),
+				        tmp_al(LAMBDA_LINK,
+				               Z,
+				               tmp_al(INHERITANCE_LINK, Z, Z)) }),
+		   tmp_al(LAMBDA_LINK,
+		          tmp_al(VARIABLE_LIST, Y, V),
+		          tmp_al(INHERITANCE_LINK, Y, V)),
+		   tmp_al(LAMBDA_LINK,
+		          tmp_al(VARIABLE_LIST, Z, V),
+		          tmp_al(INHERITANCE_LINK, Z, V)) });
 
 	logger().debug() << "results = " << oc_to_string(results);
 	logger().debug() << "expected = " << oc_to_string(expected);
@@ -145,7 +150,65 @@ void XPatternMinerUTest::test_gen_var_overlap_subpatterns()
 	TS_ASSERT(content_eq(results, expected));
 }
 
-void XPatternMinerUTest::test_product_compose()
+void XPatternMinerUTest::test_product_compose_1()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	XPMParameters param(0);
+	XPatternMiner pm(_as, param);
+
+	Handle X = _tmp_as.add_node(VARIABLE_NODE, "$X"),
+		Y = _tmp_as.add_node(VARIABLE_NODE, "$Y"),
+		a = _tmp_as.add_node(CONCEPT_NODE, "a"),
+		XY = _tmp_as.add_link(LAMBDA_LINK, _tmp_as.add_link(VARIABLE_LIST, X, Y),
+		                      _tmp_as.add_link(INHERITANCE_LINK, X, Y)),
+		aY = _tmp_as.add_link(LAMBDA_LINK, Y,
+		                      _tmp_as.add_link(INHERITANCE_LINK, a, Y));
+
+	HandleHandleTreeMap var2pats = { {X, HandleTree(a)} };
+
+	const HandleUCounter texts; // it can be empty since minsup is null
+	HandleTree results = pm.product_compose(XY, texts, var2pats),
+		expected(aY);
+
+	logger().debug() << "results = " << oc_to_string(results);
+	logger().debug() << "expected = " << oc_to_string(expected);
+
+	TS_ASSERT(content_eq(results, expected));
+}
+
+void XPatternMinerUTest::test_product_compose_2()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	XPMParameters param(0);
+	XPatternMiner pm(_as, param);
+
+	Handle X = _tmp_as.add_node(VARIABLE_NODE, "$X"),
+		Y = _tmp_as.add_node(VARIABLE_NODE, "$Y"),
+		a = _tmp_as.add_node(CONCEPT_NODE, "a"),
+		b = _tmp_as.add_node(CONCEPT_NODE, "b"),
+		XY = _tmp_as.add_link(LAMBDA_LINK, _tmp_as.add_link(VARIABLE_LIST, X, Y),
+		                      _tmp_as.add_link(INHERITANCE_LINK, X, Y)),
+		Xb = _tmp_as.add_link(LAMBDA_LINK, X,
+		                      _tmp_as.add_link(INHERITANCE_LINK, X, b)),
+		aY = _tmp_as.add_link(LAMBDA_LINK, Y,
+		                      _tmp_as.add_link(INHERITANCE_LINK, a, Y)),
+		ab = _tmp_as.add_link(INHERITANCE_LINK, a, b);
+
+	HandleHandleTreeMap var2pats = { {X, HandleTree(a)}, {Y, HandleTree(b)} };
+
+	const HandleUCounter texts; // it can be empty since minsup is null
+	HandleTree results = pm.product_compose(XY, texts, var2pats),
+		expected{Xb, HandleTree(aY, {ab})};
+
+	logger().debug() << "results = " << oc_to_string(results);
+	logger().debug() << "expected = " << oc_to_string(expected);
+
+	TS_ASSERT(content_eq(results, expected));
+}
+
+void XPatternMinerUTest::test_product_compose_3()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
@@ -174,11 +237,15 @@ void XPatternMinerUTest::test_product_compose()
 		Sacb = _tmp_as.add_link(INHERITANCE_LINK, Sac, b),
 		Sacd = _tmp_as.add_link(INHERITANCE_LINK, Sac, d);
 
-	HandleMultimap var2pats = { {X, {a, Sac}}, {Y, {b, d}} };
+	HandleHandleTreeMap var2pats = { {X, HandleTree{a, Sac}},
+	                                 {Y, HandleTree{b, d}} };
 
 	const HandleUCounter texts; // it can be empty since minsup is null
-	HandleSet results = pm.product_compose(XY, texts, var2pats),
-		expected = { Xb, Xd, aY, ab, ad, SacY, Sacb, Sacd };
+	HandleTree results = pm.product_compose(XY, texts, var2pats),
+		expected{ Xb,
+		          HandleTree(Xd, {ad, Sacd}),
+		          HandleTree(aY, {ab, Sacb}),
+		          SacY };
 
 	logger().debug() << "results = " << oc_to_string(results);
 	logger().debug() << "expected = " << oc_to_string(expected);
@@ -194,7 +261,7 @@ void XPatternMinerUTest::test_A()
 
 	XPMParameters param(2);
 	XPatternMiner pm(_as, param);
-	HandleSet results = pm(),
+	HandleTree results = pm(),
 		expected;
 
 	logger().debug() << "results = " << oc_to_string(results);
@@ -212,7 +279,7 @@ void XPatternMinerUTest::test_AB()
 
 	XPMParameters param(2);
 	XPatternMiner pm(_as, param);
-	HandleSet results = pm(),
+	HandleTree results = pm(),
 		expected;               // Still return nothing because the
                                 // resulting pattern is not a
                                 // specialization of the initial
@@ -237,14 +304,14 @@ void XPatternMinerUTest::test_AB_AC()
 
 	XPMParameters param(2);
 	XPatternMiner pm(_as, param);
-	HandleSet results = pm();
+	HandleTree results = pm();
 
 	Handle X = an(VARIABLE_NODE, "$X"),
 		Y = an(VARIABLE_NODE, "$Y"),
 		XY = al(INHERITANCE_LINK, X, Y),
 		AY = al(INHERITANCE_LINK, A, Y);
-	HandleSet expected = { al(LAMBDA_LINK, al(VARIABLE_LIST, X, Y), XY),
-	                       al(LAMBDA_LINK, Y, AY) };
+	HandleTree expected(al(LAMBDA_LINK, al(VARIABLE_LIST, X, Y), XY),
+	                    { al(LAMBDA_LINK, Y, AY) });
 
 	logger().debug() << "results = " << oc_to_string(results);
 	logger().debug() << "expected = " << oc_to_string(expected);
@@ -265,16 +332,15 @@ void XPatternMinerUTest::test_AB_AC_BC()
 
 	XPMParameters param(2);
 	XPatternMiner pm(_as, param);
-	HandleSet results = pm();
+	HandleTree results = pm();
 
 	Handle X = an(VARIABLE_NODE, "$X"),
 		Y = an(VARIABLE_NODE, "$Y"),
 		XY = al(INHERITANCE_LINK, X, Y),
 		AY = al(INHERITANCE_LINK, A, Y),
 		XC = al(INHERITANCE_LINK, X, C);
-	HandleSet expected = { al(LAMBDA_LINK, al(VARIABLE_LIST, X, Y), XY),
-	                       al(LAMBDA_LINK, Y, AY),
-	                       al(LAMBDA_LINK, X, XC) };
+	HandleTree expected(al(LAMBDA_LINK, al(VARIABLE_LIST, X, Y), XY),
+	                    { al(LAMBDA_LINK, Y, AY), al(LAMBDA_LINK, X, XC) });
 
 	logger().debug() << "results = " << oc_to_string(results);
 	logger().debug() << "expected = " << oc_to_string(expected);
@@ -294,14 +360,14 @@ void XPatternMinerUTest::test_AB_ABC()
 
 	XPMParameters param(2);
 	XPatternMiner pm(_as, param);
-	HandleSet results = pm();
+	HandleTree results = pm();
 
 	Handle X = an(VARIABLE_NODE, "$X"),
 		Y = an(VARIABLE_NODE, "$Y"),
 		XY = al(INHERITANCE_LINK, X, Y),
 		AY = al(INHERITANCE_LINK, A, Y);
-	HandleSet expected = { al(LAMBDA_LINK, al(VARIABLE_LIST, X, Y), XY),
-	                       al(LAMBDA_LINK, Y, AY) };
+	HandleTree expected(al(LAMBDA_LINK, al(VARIABLE_LIST, X, Y), XY),
+	                    { al(LAMBDA_LINK, Y, AY) });
 
 	logger().debug() << "results = " << oc_to_string(results);
 	logger().debug() << "expected = " << oc_to_string(expected);
@@ -331,7 +397,7 @@ void XPatternMinerUTest::test_2gram_1()
 
 	XPMParameters param(2, 2);
 	XPatternMiner pm(_as, param);
-	HandleSet results = pm();
+	HandleTree results = pm();
 	Handle expected_pattern = tmp_al(LAMBDA_LINK,
 	                                 VXYZ,
 	                                 tmp_al(AND_LINK,
@@ -341,7 +407,7 @@ void XPatternMinerUTest::test_2gram_1()
 	logger().info() << "results = " << oc_to_string(results);
 	logger().info() << "expected_pattern = " << oc_to_string(expected_pattern);
 
-	TS_ASSERT(results.find(expected_pattern) != results.end());
+	TS_ASSERT(content_is_in(expected_pattern, results));
 }
 
 void XPatternMinerUTest::test_2gram_2()
@@ -368,7 +434,7 @@ void XPatternMinerUTest::test_2gram_2()
 
 	XPMParameters param(4, 2);
 	XPatternMiner pm(_as, param);
-	HandleSet results = pm();
+	HandleTree results = pm();
 	Handle expected_pattern = tmp_al(LAMBDA_LINK,
 	                                 VXYZ,
 	                                 tmp_al(AND_LINK,
@@ -378,7 +444,7 @@ void XPatternMinerUTest::test_2gram_2()
 	logger().info() << "results = " << oc_to_string(results);
 	logger().info() << "expected_pattern = " << oc_to_string(expected_pattern);
 
-	TS_ASSERT(results.find(expected_pattern) != results.end());
+	TS_ASSERT(content_is_in(expected_pattern, results));
 }
 
 void XPatternMinerUTest::test_InferenceControl()
@@ -394,16 +460,18 @@ void XPatternMinerUTest::test_InferenceControl()
 	// Run the pattern miner
 	Handle expand = tmp_an(SCHEMA_NODE, "URE:BC:expand-and-BIT"),
 		preproof = tmp_an(PREDICATE_NODE, "URE:BC:preproof-of"),
+		rule = tmp_an(DEFINED_SCHEMA_NODE,
+		              "conditional-full-instantiation-implication-scope-meta-rule"),
+		de_rule = tmp_al(DONT_EXEC_LINK, rule),
 		T = tmp_an(VARIABLE_NODE, "$T"),
 		A = tmp_an(VARIABLE_NODE, "$A"),
 		L = tmp_an(VARIABLE_NODE, "$L"),
-		R = tmp_an(VARIABLE_NODE, "$R"),
 		B = tmp_an(VARIABLE_NODE, "$B"),
-		vardecl = tmp_al(VARIABLE_LIST, T, A, L, R, B),
+		vardecl = tmp_al(VARIABLE_LIST, T, A, L, B),
 		clauses = tmp_al(AND_LINK,
 		                 tmp_al(EXECUTION_LINK,
 		                        expand,
-		                        tmp_al(LIST_LINK, A, L, R),
+		                        tmp_al(LIST_LINK, A, L, de_rule),
 		                        B),
 		                 tmp_al(EVALUATION_LINK,
 		                        preproof,
@@ -415,33 +483,52 @@ void XPatternMinerUTest::test_InferenceControl()
 
 	XPMParameters param(2, 3, initpat);
 	XPatternMiner pm(_as, param);
-	HandleSet results = pm();
+	HandleTree results = pm();
 
-	Handle expected_pattern = al(AND_LINK); // TODO
 	// The main pattern of interest should look like
 	//
 	// Execution
 	//   Schema "expand"
 	//   List
-	//     PatternMiningVariable "$k"
+	//     Variable "$A"
 	//     Inheritance
-	//       ConceptNode "A"
-	//       PatternMiningVariable "$x"
+	//       ConceptNode "a"
+	//       PatternMiningVariable "$X"
 	//     GroundedSchemaNode "scm: conditional-full-instantiation-scope-formula"
-	//   PatternMiningVariable "$r"
+	//   Variable "$B"
 	//
 	// Evaluation
 	//   Predicate "preproof
-	//   PatternMiningVariable "$k"
+	//   Variable "$A"
 	//
 	// Evaluation
 	//   Predicate "preproof
-	//   PatternMiningVariable "$r"
+	//   Variable "$B"
+	Handle a = tmp_an(CONCEPT_NODE, "a"),
+		X = tmp_an(VARIABLE_NODE, "$X"),
+		expected_vardecl = tmp_al(VARIABLE_LIST, T, A, X, B),
+		expected_clauses = tmp_al(AND_LINK,
+		                          tmp_al(EXECUTION_LINK,
+		                                 expand,
+		                                 tmp_al(LIST_LINK,
+		                                        A,
+		                                        tmp_al(INHERITANCE_LINK, a, X),
+		                                        de_rule),
+		                                 B),
+		                          tmp_al(EVALUATION_LINK,
+		                                 preproof,
+		                                 tmp_al(LIST_LINK, A, T)),
+		                          tmp_al(EVALUATION_LINK,
+		                                 preproof,
+		                                 tmp_al(LIST_LINK, B, T))),
+		expected_pattern = tmp_al(LAMBDA_LINK,
+		                          expected_vardecl,
+		                          expected_clauses);
 
 	logger().info() << "results = " << oc_to_string(results);
 	logger().info() << "expected_pattern = " << oc_to_string(expected_pattern);
 
-	TS_ASSERT(is_in(expected_pattern, results));
+	TS_ASSERT(content_is_in(expected_pattern, results));
 }
 
 // void XPatternMinerUTest::test_PatternMiner_SodaDrinker()

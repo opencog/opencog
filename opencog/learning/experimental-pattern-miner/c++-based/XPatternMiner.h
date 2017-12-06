@@ -25,7 +25,10 @@
 
 #include <opencog/atoms/base/Handle.h>
 #include <opencog/atoms/core/Variables.h>
+#include <opencog/atoms/core/ScopeLink.h>
 #include <opencog/atomspace/AtomSpace.h>
+
+#include "HandleTree.h"
 
 class XPatternMinerUTest;
 
@@ -94,10 +97,8 @@ public:
 	 * Mine and return maxpats (or all if negative) patterns with
 	 * frequency equal to or above minsup, starting from the initial
 	 * pattern, excluded.
-	 *
-	 * TODO: return tree instead set
 	 */
-	HandleSet operator()();
+	HandleTree operator()();
 
 	/**
 	 * Specialization. Given a pattern and a collection to text atoms,
@@ -105,27 +106,23 @@ public:
 	 *
 	 * For now all limits, expect minsup, are ignored, all patterns
 	 * are considered.
-	 *
-	 * TODO: return tree instead set
 	 */
-	HandleSet specialize(const Handle& pattern, const HandleSet& texts,
-	                     unsigned mingram=0);
+	HandleTree specialize(const Handle& pattern, const HandleSet& texts,
+	                      unsigned mingram=0);
 
 	/**
 	 * Like above but maps each text to a count. That is useful to
 	 * keep track of the frequence of sub-patterns.
-	 *
-	 * TODO: return tree instead set
 	 */
-	HandleSet specialize(const Handle& pattern, const HandleUCounter& texts,
-	                     unsigned mingram=0);
+	HandleTree specialize(const Handle& pattern, const HandleUCounter& texts,
+	                      unsigned mingram=0);
 
 	/**
 	 * Like above on assume the pattern is trivial with a mere
 	 * variable. It assumes is has enough support.
 	 */
-	HandleSet specialize_varpat(const Handle& varpat,
-	                            const HandleUCounter& texts);
+	HandleTree specialize_varpat(const Handle& varpat,
+	                             const HandleUCounter& texts);
 
 	// AtomSpace containing the text trees to mine.
 	AtomSpace& text_as;
@@ -136,8 +133,6 @@ public:
 	// Working atomspace containing the patterns, and other junk.
 	AtomSpace pattern_as;
 
-	// Set of pattern discovered so far
-	HandleSet patterns;
 private:
 
 	mutable AtomSpace tmp_as;
@@ -363,6 +358,8 @@ private:
 	 *
 	 * thus
 	 *
+	 * TODO: update example to get the tree representation
+	 *
 	 * gen_var_overlap_subpatterns(pattern, variable, subpattern)
 	 * =
 	 * { Lambda [no overlap]
@@ -427,31 +424,37 @@ private:
 	 *
 	 * The output container is a HandleSeq to be able to contain
 	 * alpha-equivalent subpatterns.
-	 *
-	 * TODO: replace that by tree (keeping redundancy)
 	 */
-	HandleSeq gen_var_overlap_subpatterns(const Handle& pattern,
-	                                      const Handle& variable,
-	                                      const Handle& subpattern) const;
+	HandleTree gen_var_overlap_subpatterns(const Handle& pattern,
+	                                       const Handle& variable,
+	                                       const Handle& subpattern) const;
+	HandleTree gen_var_overlap_subpatterns(ScopeLinkPtr sc_subpat,
+	                                       const HandleMapTree&
+	                                       var_overlaps) const;
+	HandleTree gen_var_overlap_subpatterns(ScopeLinkPtr sc_subpat,
+	                                       HandleMapTree::sibling_iterator
+	                                       var_overlaps_sib) const;
 
 	/**
-	 * Given 2 list of disjoint variables return all mappings between
-	 * the first list to the second. For instance
+	 * Given 2 list of disjoint variables return a tree of all
+	 * mappings between the first list to the second. For instance
 	 *
 	 * vs1 = {$U, $V}, vs2 = {$X, $Y}
 	 *
-	 * gen_var_overlaps(vs1, vs2) = { {},
-	 *                                {$V->$X},
-	 *                                {$V->$Y},
-	 *                                {$U->$X},
-	 *                                {$U->$X, $V->$X},
-	 *                                {$U->$X, $V->$Y},
-	 *                                {$U->$Y},
-	 *                                {$U->$Y, $V->$X},
-	 *                                {$U->$Y, $V->$Y},
+	 * gen_var_overlaps(vs1, vs2) =
+	 *            ---------- {} ---------
+	 *           /       /       \       \
+	 *      {$V->$X} {$V->$Y} {$U->$X} {$U->$Y}
+	 *         |\           \------------------
+	 *         | --------------                \-------------------
+	 *         |               \                \                  \
+	 * {$U->$X, $V->$X}, {$U->$Y, $V->$X}, {$U->$X, $V->$Y}, {$U->$Y, $V->$Y},
+	 *
+	 * {$U->$X} and {$U->$Y} do not have children to avoid redundant
+	 * mappings.
 	 */
-	HandleMapSet gen_var_overlaps(const HandleSet& vs1,
-	                              const HandleSet& vs2) const;
+	HandleMapTree gen_var_overlaps(const HandleSet& vs1,
+	                               const HandleSet& vs2) const;
 
 	/**
 	 * Given a pattern and a mapping from variables in that pattern to
@@ -476,16 +479,11 @@ private:
 	 *
 	 * TODO: I probably need to pass a HandleUCounterMap to keep the
 	 * texts associated to each subpattern associated to each variable.
-	 *
-	 * TODO: replace var2patterns by var to tree, to skip making the
-	 * product of specializations with too low support.
-	 *
-	 * TODO: return tree instead set
 	 */
-	HandleSet product_compose(const Handle& pattern,
-	                          const HandleUCounter& texts,
-	                          const HandleMultimap& var2patterns,
-	                          unsigned mingram=0) const;
+	HandleTree product_compose(const Handle& pattern,
+	                           const HandleUCounter& texts,
+	                           const HandleHandleTreeMap& var2subpats,
+	                           unsigned mingram=0) const;
 
 	/**
 	 * Given a pattern, and mapping from variables to sub-patterns,

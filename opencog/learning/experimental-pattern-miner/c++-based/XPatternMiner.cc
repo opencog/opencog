@@ -72,7 +72,7 @@ XPMParameters::XPMParameters(unsigned ms, unsigned igram,
 XPatternMiner::XPatternMiner(AtomSpace& as, const XPMParameters& prm)
 	: text_as(as), param(prm) {}
 
-HandleSet XPatternMiner::operator()()
+HandleTree XPatternMiner::operator()()
 {
 	HandleSet texts;
 	text_as.get_handles_by_type(std::inserter(texts, texts.end()),
@@ -80,9 +80,9 @@ HandleSet XPatternMiner::operator()()
 	return specialize(param.initpat, texts, param.initgram);
 }
 
-HandleSet XPatternMiner::specialize(const Handle& pattern,
-                                    const HandleSet& texts,
-                                    unsigned mingram)
+HandleTree XPatternMiner::specialize(const Handle& pattern,
+                                     const HandleSet& texts,
+                                     unsigned mingram)
 {
 	// If the initial pattern is specialized, this initial filtering
 	// may save some computation
@@ -90,17 +90,17 @@ HandleSet XPatternMiner::specialize(const Handle& pattern,
 	return specialize(pattern, fltexts, mingram);
 }
 
-HandleSet XPatternMiner::specialize(const Handle& pattern,
-                                    const HandleUCounter& texts,
-                                    unsigned mingram)
+HandleTree XPatternMiner::specialize(const Handle& pattern,
+                                     const HandleUCounter& texts,
+                                     unsigned mingram)
 {
 	// If the pattern is constant, then no specialization is possible
 	if (pattern->get_type() != LAMBDA_LINK)
-		return HandleSet();
+		return HandleTree();
 
 	// Make sure the pattern has enough support
 	if (not enough_support(pattern, texts))
-		return HandleSet();
+		return HandleTree();
 
 	// If the pattern is a variable, then differ to single variable
 	// specialization
@@ -116,7 +116,7 @@ HandleSet XPatternMiner::specialize(const Handle& pattern,
 	// For each variable, create a trivial pattern, with its variable
 	// as body and its type as vardecl, take the list of values, pass
 	// it as texts and call specialize to generate all sub-patterns.
-	HandleMultimap var2subpats;
+	HandleHandleTreeMap var2subpats;
 	for (const auto& el : var2subtexts) {
 		const Handle& var = el.first;
 		const HandleUCounter& subtexts = el.second;
@@ -129,13 +129,14 @@ HandleSet XPatternMiner::specialize(const Handle& pattern,
 	return product_compose(pattern, texts, var2subpats, mingram);
 }
 
-HandleSet XPatternMiner::specialize_varpat(const Handle& varpat,
-                                           const HandleUCounter& texts)
+HandleTree XPatternMiner::specialize_varpat(const Handle& varpat,
+                                            const HandleUCounter& texts)
 {
 	OC_ASSERT(get_body(varpat)->get_type() == VARIABLE_NODE);
 
 	HandleUCounterMap pat2texts = shallow_patterns(texts);
-	HandleSet patterns;
+	HandleTree patterns;
+	HandleTree::iterator pat_it = patterns.begin();
 	for (const auto& el : pat2texts) {
 		const Handle& shapat = el.first;
 		const HandleUCounter& shapat_texts = el.second;
@@ -149,8 +150,9 @@ HandleSet XPatternMiner::specialize_varpat(const Handle& varpat,
 			continue;
 
 		// Add shallow pattern to solution set, and specialize it
-		patterns.insert(shapat);
-		set_union_modify(patterns, specialize(shapat, shapat_texts));
+		pat_it = patterns.insert(pat_it, shapat);
+		HandleTree specs = specialize(shapat, shapat_texts);
+		patterns.append_children(pat_it, specs.begin(), specs.end());
 	}
 	return patterns;
 }
@@ -424,13 +426,13 @@ bool XPatternMiner::totally_abstract(const Handle& pattern) const
 	return true;
 }
 
-HandleSeq XPatternMiner::gen_var_overlap_subpatterns(const Handle& pattern,
-                                                     const Handle& variable,
-                                                     const Handle& subpat) const
+HandleTree XPatternMiner::gen_var_overlap_subpatterns(const Handle& pattern,
+                                                      const Handle& variable,
+                                                      const Handle& subpat) const
 {
 	ScopeLinkPtr sc_subpat = ScopeLinkCast(subpat);
 	if (not sc_subpat)
-		return {subpat};
+		return HandleTree(subpat);
 
 	// Define vs1 and vs2 to generate all variable overlaps
 	const HandleSet& vs1 = get_variables(subpat).varset;
@@ -441,54 +443,76 @@ HandleSeq XPatternMiner::gen_var_overlap_subpatterns(const Handle& pattern,
 	OC_ASSERT(is_disjoint(vs1, vs2));
 
 	// Generate all overlaps
-	HandleMapSet var_overlaps = gen_var_overlaps(vs1, vs2);
+	HandleMapTree var_overlaps = gen_var_overlaps(vs1, vs2);
 
 	// For each mapping generate an associated subpattern
-	HandleSeq subpatterns;
-	for (const HandleMap& vm : var_overlaps)
-		subpatterns.push_back(sc_subpat->partial_substitute(vm));
-	return subpatterns;
+	return gen_var_overlap_subpatterns(sc_subpat, var_overlaps);
 }
 
-HandleMapSet XPatternMiner::gen_var_overlaps(const HandleSet& vs1,
-                                             const HandleSet& vs2) const
+HandleTree XPatternMiner::gen_var_overlap_subpatterns(ScopeLinkPtr sc_subpat,
+                                                      const HandleMapTree&
+                                                      var_overlaps) const
+{
+	HandleMapTree::iterator head_it = var_overlaps.begin();
+	if (var_overlaps.is_valid(head_it))
+		return gen_var_overlap_subpatterns(sc_subpat, head_it);
+	return HandleTree();
+}
+
+HandleTree XPatternMiner::gen_var_overlap_subpatterns(ScopeLinkPtr sc_subpat,
+                                                      HandleMapTree::sibling_iterator
+                                                      sib) const
+{
+	HandleTree ht(sc_subpat->partial_substitute(*sib));
+	for (auto ch_sib = sib.begin(); ch_sib != sib.end(); ++ch_sib) {
+		HandleTree cht = gen_var_overlap_subpatterns(sc_subpat, ch_sib);
+		ht.append_child(ht.begin(), cht.begin());
+	}
+	return ht;
+}
+
+HandleMapTree XPatternMiner::gen_var_overlaps(const HandleSet& vs1,
+                                              const HandleSet& vs2) const
 {
 	// Base case
 	if (vs1.empty())
-		return {{}};
+		return HandleMapTree(HandleMap());
 
 	// Recursive case
 	Handle vs1_head = *vs1.begin();
 	HandleSet vs1_tail = vs1;
 	vs1_tail.erase(vs1_head);
-	HandleMapSet old_vms = gen_var_overlaps(vs1_tail, vs2);
-	HandleMapSet new_vms(old_vms);
-	for (const HandleMap& vm : old_vms) {
+	HandleMapTree old_vms = gen_var_overlaps(vs1_tail, vs2);
+	HandleMapTree new_vms(old_vms);
+	for (const HandleMap& vm : old_vms) { // TODO: can you do that?
 		for (const Handle& v2 : vs2) {
 			HandleMap new_vm(vm);
 			new_vm[vs1_head] = v2;
-			new_vms.insert(new_vm);
+			// TODO see if you can use boost
+			HandleMapTree::iterator it =
+				std::find(new_vms.begin(), new_vms.end(), vm);
+			new_vms.append_child(it, new_vm);
 		}
 	}
 	return new_vms;
 }
 
-HandleSet XPatternMiner::product_compose(const Handle& pattern,
-                                         const HandleUCounter& texts,
-                                         const HandleMultimap& var2pats,
-                                         unsigned mingram) const
+HandleTree XPatternMiner::product_compose(const Handle& pattern,
+                                          const HandleUCounter& texts,
+                                          const HandleHandleTreeMap& var2pats,
+                                          unsigned mingram) const
 {
-	HandleSet patterns;
-	for (auto map_it = var2pats.begin(); map_it != var2pats.end(); map_it++) {
+	HandleTree patterns;
+	auto map_it = var2pats.begin();
+	if (map_it != var2pats.end()) {
 		const Handle& variable = map_it->first;
-		const HandleSet& subpatterns = map_it->second;
+		const HandleTree& subpatterns = map_it->second;
 
-		// Reconstruct var2pats without that variable, and the ones
-		// preceeding, and recursively call product_compose to obtain
-		// patterns without the subpatterns of that variables.
-		HandleMultimap revar2pats(std::next(map_it), var2pats.end());
-		set_union_modify(patterns, product_compose(pattern, texts,
-		                                           revar2pats, mingram));
+		// Reconstruct var2pats without that variable, and recursively
+		// call product_compose to obtain patterns without the
+		// subpatterns of that variables.
+		HandleHandleTreeMap revar2pats(std::next(map_it), var2pats.end());
+		patterns = product_compose(pattern, texts, revar2pats, mingram);
 
 		// Combine the patterns of that variables with the patterns of
 		// the remaining variables.
@@ -499,35 +523,44 @@ HandleSet XPatternMiner::product_compose(const Handle& pattern,
 			Handle subpat = alpha_conversion(*subpat_it);
 
 			// Perform a single substitution of variable by subpat
-			HandleSeq vosubpats =
+			HandleTree vosubpats =
 				gen_var_overlap_subpatterns(pattern, variable, subpat);
-			for (const Handle& vosubpat : vosubpats) {
-				Handle npat = compose(pattern, {{variable, vosubpat}});
-				// TODO: instead of filtering, it would probably be better
-				// if the satisfying text were pass along the pattern, in
-				// specialize and specialize_varpat, just as
-				// shallow_patterns does, that way we'll already have the
-				// filtered texts around.
+			for (auto vosubpat_it = vosubpats.begin();
+			     vosubpat_it != vosubpats.end(); ++vosubpat_it) {
+				Handle npat = compose(pattern, {{variable, *vosubpat_it}});
+				// TODO: instead of filtering, it would probably be
+				// better if the satisfying text were passed along the
+				// pattern, in specialize and specialize_varpat, just
+				// as shallow_patterns does, that way we'll already
+				// have the filtered texts around.
 				HandleUCounter fltexts = filter_texts(npat, texts);
 				if (enough_support(npat, fltexts) and mingram <= gram(npat)) {
-					patterns.insert(npat);
+					// TODO: do not insert redundant patterns
+					auto npat_it = patterns.empty() ? patterns.set_head(npat) :
+						patterns.insert_after(patterns.begin(), npat);
 
-					// Recursively call product_compose on nap and the
-					// remaining variables
-					HandleSet prod = product_compose(npat, fltexts,
-					                                 revar2pats, mingram);
-					patterns.insert(prod.begin(), prod.end());
+					// Recursively call product_compose on npat and
+					// the remaining variables
+					HandleTree prod = product_compose(npat, fltexts,
+					                                  revar2pats, mingram);
+					// These new patterns are necessarily
+					// specializations of npat, which is why they are
+					// inserted as children.
+					patterns.append_children(npat_it, prod.begin(), prod.end());
+				} else {
+					// npat doesn't have enough support or gram, we
+					// can skip the children of vosubpat_it, as they
+					// too won't have enough support or gram.
+					vosubpat_it.skip_children();
+
+					// If vosubpat_it happens to be the root, then we
+					// can also skip all children of subpat_it, as
+					// they too won't generate overlapping
+					// substitutions that have enough support or gram.
+					if (vosubpats.depth(vosubpat_it) == 0)
+						subpat_it.skip_children();
 				}
 			}
-			// TODO: many (but not all) of the following subpatterns
-			// are likely specializations of npat, so if npat fails,
-			// they will fail too, we can probably ignore them
-			// entirely. Maybe to help that we should use a tree of
-			// patterns instead of a set, such that if composing such
-			// a subpattern in that tree with a given pattern doesn't
-			// have enough support then we know composing its children
-			// with that same pattern won't have enough support
-			// either.
 		}
 	}
 
