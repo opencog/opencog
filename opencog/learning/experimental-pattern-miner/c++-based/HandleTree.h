@@ -27,10 +27,19 @@
 #include <opencog/atoms/base/Handle.h>
 #include <opencog/util/tree.h>
 
-namespace opencog
-{
+namespace opencog {
 
 typedef tree<Handle> HandleTree;
+typedef tree<HandleMap> HandleMapTree;
+typedef std::map<Handle, HandleTree> HandleHandleTreeMap;
+
+bool content_eq(const HandleTree& htl, const HandleTree& htr);
+bool content_eq(HandleTree::iterator itl, HandleTree::iterator itr);
+bool content_is_in(const Handle& h, const HandleTree& ht);
+
+std::string oc_to_string(const HandleTree& ht);
+std::string oc_to_string(const HandleMapTree& hmt);
+std::string oc_to_string(const HandleHandleTreeMap& hhtm);
 
 } // ~namespace opencog
 
