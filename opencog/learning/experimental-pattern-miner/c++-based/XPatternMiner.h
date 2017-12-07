@@ -51,6 +51,7 @@ struct XPMParameters {
 	XPMParameters(unsigned minsup=1,
 	              unsigned ngram=1,
 	              const Handle& initpat=Handle::UNDEFINED,
+	              int maxdepth=-1,
 	              int maxpats=-1);
 
 	// Minimum support. Mined patterns must have a frequency equal or
@@ -71,6 +72,11 @@ struct XPMParameters {
 	//
 	// That is the pattern matching the entire atomspace.
 	Handle initpat;
+
+	// Maximum depth from pattern to output. If negative, then no
+	// depth limit. Depth is the number of specializations between the
+	// initial pattern and the produced patterns.
+	int maxdepth;
 
 	// Maximum number of patterns to output. If negative, then output
 	// them all.
@@ -108,21 +114,22 @@ public:
 	 * are considered.
 	 */
 	HandleTree specialize(const Handle& pattern, const HandleSet& texts,
-	                      unsigned mingram=0);
+	                      unsigned mingram=0, int maxdepth=-1);
 
 	/**
 	 * Like above but maps each text to a count. That is useful to
 	 * keep track of the frequence of sub-patterns.
 	 */
 	HandleTree specialize(const Handle& pattern, const HandleUCounter& texts,
-	                      unsigned mingram=0);
+	                      unsigned mingram=0, int maxdepth=-1);
 
 	/**
 	 * Like above on assume the pattern is trivial with a mere
 	 * variable. It assumes is has enough support.
 	 */
 	HandleTree specialize_varpat(const Handle& varpat,
-	                             const HandleUCounter& texts);
+	                             const HandleUCounter& texts,
+	                             int maxdepth);
 
 	// AtomSpace containing the text trees to mine.
 	AtomSpace& text_as;
@@ -427,7 +434,8 @@ private:
 	 */
 	HandleTree gen_var_overlap_subpatterns(const Handle& pattern,
 	                                       const Handle& variable,
-	                                       const Handle& subpattern) const;
+	                                       const Handle& subpattern,
+	                                       int maxdepth) const;
 	HandleTree gen_var_overlap_subpatterns(ScopeLinkPtr sc_subpat,
 	                                       const HandleMapTree&
 	                                       var_overlaps) const;
@@ -454,7 +462,8 @@ private:
 	 * mappings.
 	 */
 	HandleMapTree gen_var_overlaps(const HandleSet& vs1,
-	                               const HandleSet& vs2) const;
+	                               const HandleSet& vs2,
+	                               int maxdepth) const;
 
 	/**
 	 * Given a pattern and a mapping from variables in that pattern to
@@ -483,7 +492,8 @@ private:
 	HandleTree product_compose(const Handle& pattern,
 	                           const HandleUCounter& texts,
 	                           const HandleHandleTreeMap& var2subpats,
-	                           unsigned mingram=0) const;
+	                           unsigned mingram=0,
+	                           int maxdepth=-1) const;
 
 	/**
 	 * Given a pattern, and mapping from variables to sub-patterns,

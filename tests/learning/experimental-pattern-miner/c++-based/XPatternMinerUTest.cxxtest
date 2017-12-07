@@ -114,7 +114,7 @@ void XPatternMinerUTest::test_gen_var_overlap_subpatterns()
 		                tmp_al(INHERITANCE_LINK, U, V));
 
 	XPatternMiner pm(_as);
-	HandleTree results = pm.gen_var_overlap_subpatterns(pattern, var, subpat);
+	HandleTree results = pm.gen_var_overlap_subpatterns(pattern, var, subpat, -1);
 	HandleTree expected
 		(tmp_al(LAMBDA_LINK,
 		        tmp_al(VARIABLE_LIST, U, V),
@@ -481,7 +481,7 @@ void XPatternMinerUTest::test_InferenceControl()
 		                        tmp_al(LIST_LINK, B, T))),
 		initpat = tmp_al(LAMBDA_LINK, vardecl, clauses);
 
-	XPMParameters param(2, 3, initpat);
+	XPMParameters param(2, 3, initpat, 2);
 	XPatternMiner pm(_as, param);
 	HandleTree results = pm();
 

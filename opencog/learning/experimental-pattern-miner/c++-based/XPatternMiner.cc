@@ -40,8 +40,9 @@ namespace opencog
 {
 
 XPMParameters::XPMParameters(unsigned ms, unsigned igram,
-                             const Handle& ipat, int maxp)
-	: minsup(ms), initgram(igram), initpat(ipat), maxpats(maxp)
+                             const Handle& ipat, int maxd, int maxp)
+	: minsup(ms), initgram(igram), initpat(ipat),
+	  maxdepth(maxd), maxpats(maxp)
 {
 	// Provide initial pattern if none
 	if (not initpat) {
@@ -77,23 +78,29 @@ HandleTree XPatternMiner::operator()()
 	HandleSet texts;
 	text_as.get_handles_by_type(std::inserter(texts, texts.end()),
 	                            opencog::ATOM, true);
-	return specialize(param.initpat, texts, param.initgram);
+	return specialize(param.initpat, texts, param.initgram, param.maxdepth);
 }
 
 HandleTree XPatternMiner::specialize(const Handle& pattern,
                                      const HandleSet& texts,
-                                     unsigned mingram)
+                                     unsigned mingram,
+                                     int maxdepth)
 {
 	// If the initial pattern is specialized, this initial filtering
 	// may save some computation
 	HandleUCounter fltexts = filter_texts(pattern, HandleUCounter(texts));
-	return specialize(pattern, fltexts, mingram);
+	return specialize(pattern, fltexts, mingram, maxdepth);
 }
 
 HandleTree XPatternMiner::specialize(const Handle& pattern,
                                      const HandleUCounter& texts,
-                                     unsigned mingram)
+                                     unsigned mingram,
+                                     int maxdepth)
 {
+	// We have reached the maximum depth
+	if (maxdepth == 0)
+		return HandleTree();
+
 	// If the pattern is constant, then no specialization is possible
 	if (pattern->get_type() != LAMBDA_LINK)
 		return HandleTree();
@@ -105,7 +112,7 @@ HandleTree XPatternMiner::specialize(const Handle& pattern,
 	// If the pattern is a variable, then differ to single variable
 	// specialization
 	if (get_body(pattern)->get_type() == VARIABLE_NODE)
-		return specialize_varpat(pattern, texts);
+		return specialize_varpat(pattern, texts, maxdepth);
 
 	// Otherwise, if the pattern is structured, calculate the mappings
 	// from variables to values, get the patterns of these values now
@@ -121,17 +128,22 @@ HandleTree XPatternMiner::specialize(const Handle& pattern,
 		const Handle& var = el.first;
 		const HandleUCounter& subtexts = el.second;
 		Handle varpattern = mk_varpattern(pattern, var);
-		var2subpats[var] = specialize_varpat(varpattern, subtexts);
+		var2subpats[var] = specialize_varpat(varpattern, subtexts, maxdepth);
 	}
 
 	// Replacing each variable by its patterns in a cartesian product
 	// fashion (not forgetting updating their vardecls accordingly)
-	return product_compose(pattern, texts, var2subpats, mingram);
+	return product_compose(pattern, texts, var2subpats, mingram, maxdepth);
 }
 
 HandleTree XPatternMiner::specialize_varpat(const Handle& varpat,
-                                            const HandleUCounter& texts)
+                                            const HandleUCounter& texts,
+                                            int maxdepth)
 {
+	// We have reached the maximum depth
+	if (maxdepth == 0)
+		return HandleTree();
+
 	OC_ASSERT(get_body(varpat)->get_type() == VARIABLE_NODE);
 
 	HandleUCounterMap pat2texts = shallow_patterns(texts);
@@ -151,7 +163,7 @@ HandleTree XPatternMiner::specialize_varpat(const Handle& varpat,
 
 		// Add shallow pattern to solution set, and specialize it
 		pat_it = patterns.insert(pat_it, shapat);
-		HandleTree specs = specialize(shapat, shapat_texts);
+		HandleTree specs = specialize(shapat, shapat_texts, 0, maxdepth - 1);
 		patterns.append_children(pat_it, specs.begin(), specs.end());
 	}
 	return patterns;
@@ -277,15 +289,6 @@ Handle XPatternMiner::shallow_pattern(const Handle& text)
 
 	Type tt = text->get_type();
 
-	// // Special handling for links that do not accept variables for all
-	// // their outcomings
-	// if (tt == EXECUTION_OUTPUT_LINK) {
-	// 	Handle rndvar = gen_rand_variable(),
-	// 		schema = text->getOutgoingAtom(0),
-	// 		body = pattern_as.add_link(tt, {schema, rndvar}),
-	// 		pattern = lambda(rndvar, body);
-	// 	return pattern;
-	// }
 	// Links wrapped with LocalQuoteLink
 	if (tt == AND_LINK) {
 		HandleSeq rnd_vars = gen_rand_variables(text->get_arity());
@@ -428,7 +431,8 @@ bool XPatternMiner::totally_abstract(const Handle& pattern) const
 
 HandleTree XPatternMiner::gen_var_overlap_subpatterns(const Handle& pattern,
                                                       const Handle& variable,
-                                                      const Handle& subpat) const
+                                                      const Handle& subpat,
+                                                      int maxdepth) const
 {
 	ScopeLinkPtr sc_subpat = ScopeLinkCast(subpat);
 	if (not sc_subpat)
@@ -443,7 +447,7 @@ HandleTree XPatternMiner::gen_var_overlap_subpatterns(const Handle& pattern,
 	OC_ASSERT(is_disjoint(vs1, vs2));
 
 	// Generate all overlaps
-	HandleMapTree var_overlaps = gen_var_overlaps(vs1, vs2);
+	HandleMapTree var_overlaps = gen_var_overlaps(vs1, vs2, maxdepth);
 
 	// For each mapping generate an associated subpattern
 	return gen_var_overlap_subpatterns(sc_subpat, var_overlaps);
@@ -472,23 +476,23 @@ HandleTree XPatternMiner::gen_var_overlap_subpatterns(ScopeLinkPtr sc_subpat,
 }
 
 HandleMapTree XPatternMiner::gen_var_overlaps(const HandleSet& vs1,
-                                              const HandleSet& vs2) const
+                                              const HandleSet& vs2,
+                                              int maxdepth) const
 {
-	// Base case
-	if (vs1.empty())
+	// Base cases
+	if (maxdepth == 0 or vs1.empty())
 		return HandleMapTree(HandleMap());
 
 	// Recursive case
 	Handle vs1_head = *vs1.begin();
 	HandleSet vs1_tail = vs1;
 	vs1_tail.erase(vs1_head);
-	HandleMapTree old_vms = gen_var_overlaps(vs1_tail, vs2);
+	HandleMapTree old_vms = gen_var_overlaps(vs1_tail, vs2, maxdepth - 1);
 	HandleMapTree new_vms(old_vms);
-	for (const HandleMap& vm : old_vms) { // TODO: can you do that?
+	for (const HandleMap& vm : old_vms) {
 		for (const Handle& v2 : vs2) {
 			HandleMap new_vm(vm);
 			new_vm[vs1_head] = v2;
-			// TODO see if you can use boost
 			HandleMapTree::iterator it =
 				std::find(new_vms.begin(), new_vms.end(), vm);
 			new_vms.append_child(it, new_vm);
@@ -500,8 +504,12 @@ HandleMapTree XPatternMiner::gen_var_overlaps(const HandleSet& vs1,
 HandleTree XPatternMiner::product_compose(const Handle& pattern,
                                           const HandleUCounter& texts,
                                           const HandleHandleTreeMap& var2pats,
-                                          unsigned mingram) const
+                                          unsigned mingram,
+                                          int maxdepth) const
 {
+	if (maxdepth == 0)
+		return HandleTree();
+
 	HandleTree patterns;
 	auto map_it = var2pats.begin();
 	if (map_it != var2pats.end()) {
@@ -512,21 +520,48 @@ HandleTree XPatternMiner::product_compose(const Handle& pattern,
 		// call product_compose to obtain patterns without the
 		// subpatterns of that variables.
 		HandleHandleTreeMap revar2pats(std::next(map_it), var2pats.end());
-		patterns = product_compose(pattern, texts, revar2pats, mingram);
+		patterns = product_compose(pattern, texts, revar2pats, mingram, maxdepth);
 
 		// Combine the patterns of that variables with the patterns of
 		// the remaining variables.
 		for (auto subpat_it = subpatterns.begin();
 		     subpat_it != subpatterns.end(); ++subpat_it) {
+			// Calculate the depth of subpat, +1 because the root is
+			// one step deeper from pattern.
+			int subpatdepth = subpatterns.depth(subpat_it) + 1;
+
+			// Make sure subpatdepth is less than or equal to
+			// maxdepth.
+			if (0 <= maxdepth and maxdepth < subpatdepth) {
+				// For sure all children will have a greater depth so
+				// they can be skipped.
+				subpat_it.skip_children();
+				continue;
+			}
+
 			// Alpha convert subpat_it to make sure it doesn't share
 			// variables with pattern
 			Handle subpat = alpha_conversion(*subpat_it);
 
 			// Perform a single substitution of variable by subpat
 			HandleTree vosubpats =
-				gen_var_overlap_subpatterns(pattern, variable, subpat);
+				gen_var_overlap_subpatterns(pattern, variable, subpat,
+				                            maxdepth - subpatdepth);
 			for (auto vosubpat_it = vosubpats.begin();
 			     vosubpat_it != vosubpats.end(); ++vosubpat_it) {
+				// Calculate the depth of the produced subpattern with
+				// variable overlap
+				int vosubpatdepth = subpatdepth + vosubpats.depth(vosubpat_it);
+
+				// Make sure vosubpatdepth is less than or equal to
+				// maxdepth.
+				if (0 <= maxdepth and maxdepth < vosubpatdepth) {
+					// For sure all children will have a greater depth so
+					// they can be skipped.
+					vosubpat_it.skip_children();
+					continue;
+				}
+
 				Handle npat = compose(pattern, {{variable, *vosubpat_it}});
 				// TODO: instead of filtering, it would probably be
 				// better if the satisfying text were passed along the
@@ -536,13 +571,17 @@ HandleTree XPatternMiner::product_compose(const Handle& pattern,
 				HandleUCounter fltexts = filter_texts(npat, texts);
 				if (enough_support(npat, fltexts) and mingram <= gram(npat)) {
 					// TODO: do not insert redundant patterns
+					// TODO: maybe use patterns.insert()
+					// TODO: fix that taking into account subpatterns
+					// tree structure
 					auto npat_it = patterns.empty() ? patterns.set_head(npat) :
 						patterns.insert_after(patterns.begin(), npat);
 
 					// Recursively call product_compose on npat and
 					// the remaining variables
-					HandleTree prod = product_compose(npat, fltexts,
-					                                  revar2pats, mingram);
+					HandleTree prod =
+						product_compose(npat, fltexts, revar2pats,
+						                mingram, maxdepth - vosubpatdepth);
 					// These new patterns are necessarily
 					// specializations of npat, which is why they are
 					// inserted as children.
