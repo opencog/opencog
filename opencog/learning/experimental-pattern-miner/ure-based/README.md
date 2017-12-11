@@ -125,3 +125,166 @@ Lambda
 ```
 
 as opposed to a half-defined pattern like above it.
+
+### ComposeLink
+
+It seems that using ComposeLink can help. Let's consider the inference
+control example
+
+```
+  ImplicationScope <rule-TV>
+    VariableList
+      Variable "$T"
+      TypedVariable
+        Variable "$A"
+        Type "BindLink"
+      Variable "$L"
+      TypedVariable
+        Variable "$B"
+        Type "BindLink"
+    And
+      Execution
+        GroundedSchema "expand-and-BIT"
+        List
+          Variable "$A"
+          Variable "$L"
+          <rule>
+        Variable "$B"
+      Evaluation
+        Predicate "preproof-of"
+        List
+          Variable "$A"
+          Variable "$T"
+    Evaluation
+      Predicate "preproof-of"
+      List
+        Variable "$B"
+        Variable "$T"
+```
+
+We can then write the query
+
+```
+Compose
+  ImplicationScope <rule-TV>
+    VariableList
+      Variable "$T"
+      TypedVariable
+        Variable "$A"
+        Type "BindLink"
+      Variable "$L"
+      TypedVariable
+        Variable "$B"
+        Type "BindLink"
+    And
+      Execution
+        GroundedSchema "expand-and-BIT"
+        List
+          Variable "$A"
+          Variable "$L"
+          <rule>
+        Variable "$B"
+      Evaluation
+        Predicate "preproof-of"
+        List
+          Variable "$A"
+          Variable "$T"
+    Evaluation
+      Predicate "preproof-of"
+      List
+        Variable "$B"
+        Variable "$T"
+  List
+    Project 0
+    Project 1
+    Variable "$L-specialized"
+    Project 3
+```
+
+where `Variable "$L-specialized"` is the variable of the BC query, and
+`Project i` is a function projection constructor to let the (i+1)th
+variable unchanged. A possible answer would be
+
+```
+Compose
+  ImplicationScope <rule-TV>
+    VariableList
+      Variable "$T"
+      TypedVariable
+        Variable "$A"
+        Type "BindLink"
+      Variable "$L"
+      TypedVariable
+        Variable "$B"
+        Type "BindLink"
+    And
+      Execution
+        GroundedSchema "expand-and-BIT"
+        List
+          Variable "$A"
+          Variable "$L"
+          <rule>
+        Variable "$B"
+      Evaluation
+        Predicate "preproof-of"
+        List
+          Variable "$A"
+          Variable "$T"
+    Evaluation
+      Predicate "preproof-of"
+      List
+        Variable "$B"
+        Variable "$T"
+  List
+    Project 0
+    Project 1
+    Lambda
+      VariableList
+        Variable "$T"
+        TypedVariable
+          Variable "$A"
+          Type "BindLink"
+        Variable "$X"
+        TypedVariable
+          Variable "$B"
+          Type "BindLink"
+      Inheritance
+        Concept "a"
+        Variable "$X"
+    Project 3
+```
+
+Which would correspond to
+
+```
+ImplicationScope <rule-TV>
+  VariableList
+    Variable "$T"
+    TypedVariable
+      Variable "$A"
+      Type "BindLink"
+    Variable "$X"
+    TypedVariable
+      Variable "$B"
+      Type "BindLink"
+  And
+    Execution
+      GroundedSchema "expand-and-BIT"
+      List
+        Variable "$A"
+        Inheritance
+          Concept "a"
+          Variable "$X"
+        <rule>
+      Variable "$B"
+    Evaluation
+      Predicate "preproof-of"
+      List
+        Variable "$A"
+        Variable "$T"
+  Evaluation
+    Predicate "preproof-of"
+    List
+      Variable "$B"
+      Variable "$T"
+```
