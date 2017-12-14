@@ -762,8 +762,7 @@ unsigned XPatternMiner::gram(const Handle& pattern)
 Handle XPatternMiner::remove_useless_clauses(const Handle& vardecl,
                                              const Handle& body)
 {
-	Handle res;
-	res = Unify::remove_constant_clauses(vardecl, body);
+	Handle res = Unify::remove_constant_clauses(vardecl, body);
 
 	// Check that each clause isn't a subtree another another clause
 	const HandleSeq& outs = res->getOutgoingSet();
