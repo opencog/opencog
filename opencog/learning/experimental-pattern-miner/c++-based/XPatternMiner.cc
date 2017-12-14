@@ -179,6 +179,7 @@ Handle XPatternMiner::mk_varpattern(const Handle& pattern,
 bool XPatternMiner::enough_support(const Handle& pattern,
                                    const HandleUCounter& texts) const
 {
+	// TODO: use instead bounded version of bindlink
 	return param.minsup <= freq(pattern, texts);
 }
 
