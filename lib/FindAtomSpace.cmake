@@ -61,6 +61,9 @@ find_library(ATOMSPACE_ruleengine_LIBRARY ruleengine
 find_library(ATOMSPACE_smob_LIBRARY smob
    PATH ${ATOMSPACE_LIBPATH} PATH_SUFFIXES opencog)
 
+find_library(ATOMSPACE_unify_LIBRARY unify
+   PATH ${ATOMSPACE_LIBPATH} PATH_SUFFIXES opencog)
+
 find_library(ATOMSPACE_truthvalue_LIBRARY truthvalue
    PATH ${ATOMSPACE_LIBPATH} PATH_SUFFIXES opencog)
 
@@ -82,6 +85,7 @@ set(ATOMSPACE_LIBRARIES
 	${ATOMSPACE_execution_LIBRARY}
 	${ATOMSPACE_ruleengine_LIBRARY}
 	${ATOMSPACE_smob_LIBRARY}
+	${ATOMSPACE_unify_LIBRARY}
 )
 
 # persist-sql is optional
