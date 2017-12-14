@@ -43,7 +43,7 @@
 ;;
 ;; For that we build the backward chainer query
 ;;
-;; Compose
+;; Composition
 ;;   ImplicationScope <rule-TV>
 ;;     VariableList
 ;;       Variable "$X"
@@ -67,7 +67,7 @@
 ;;
 ;; The final answer we're after is
 ;;
-;; Compose
+;; Composition
 ;;   ImplicationScope <rule-TV>
 ;;     VariableList
 ;;       Variable "$X"
@@ -89,3 +89,9 @@
 ;;       Inheritance
 ;;         Concept "a"
 ;;         Variable "$Y"
+
+;; Common definitions
+(define R (Predicate "R"))
+(define Q (Predicate "Q"))
+(define abstract-pattern
+  (ImplicationScope
