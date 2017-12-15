@@ -33,7 +33,7 @@
 ;; Evaluation <tv2>
 ;;   Predicate "minsup"
 ;;   List
-;;     CompositionLink
+;;     ComposeLink
 ;;       Lambda
 ;;         VariableList
 ;;           <x1>
@@ -79,7 +79,7 @@
 ;; Evaluation <tv2>
 ;;   Predicate "minsup"
 ;;   List
-;;     CompositionLink
+;;     ComposeLink
 ;;       Lambda
 ;;         <x>
 ;;         <g>
@@ -119,7 +119,7 @@
                        (Evaluation
                          minsup
                          (List
-                           (Composition
+                           (Compose
                              g-lamb
                              f-lamb)
                            ms))

@@ -30,7 +30,7 @@
 ;;
 ;; For that we build the backward chainer query
 ;;
-;; Composition
+;; Compose
 ;;   Lambda
 ;;     Variable "$X"
 ;;     Evaluation
@@ -43,7 +43,7 @@
 ;;
 ;; The final answer we're after is
 ;;
-;; Composition
+;; Compose
 ;;   Lambda
 ;;     Variable "$X"
 ;;     Evaluation
@@ -88,4 +88,4 @@
 ;; Query
 (define X-special (Variable "$X-special"))
 (define query
-  (Evaluation minsup (List (Composition abstract X-special) (Number 3))))
+  (Evaluation minsup (List (Compose abstract X-special) (Number 3))))

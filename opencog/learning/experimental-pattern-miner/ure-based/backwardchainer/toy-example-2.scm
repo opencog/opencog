@@ -43,7 +43,7 @@
 ;;
 ;; For that we build the backward chainer query
 ;;
-;; Composition
+;; Compose
 ;;   ImplicationScope <rule-TV>
 ;;     VariableList
 ;;       Variable "$X"
@@ -67,7 +67,7 @@
 ;;
 ;; The final answer we're after is
 ;;
-;; Composition
+;; Compose
 ;;   ImplicationScope <rule-TV>
 ;;     VariableList
 ;;       Variable "$X"

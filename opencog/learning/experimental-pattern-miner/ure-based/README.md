@@ -31,7 +31,7 @@ specializations can be done
 The first way would be for instance
 
 ```
-Composition
+Compose
   Type "InheritanceLink"
   Concept "a"
   Lambda
@@ -49,7 +49,7 @@ Lambda
     X
 ```
 
-The fictive link `Composition`, probably badly named [likely constructs
+The fictive link `Compose`, probably badly named [likely constructs
 from category theory would provide the right terminology], would take
 a pattern, `(Lambda X X)`, and plug it into a bigger pattern starting
 with `InheritanceLink`.
@@ -66,7 +66,7 @@ Lambda
 ```
 
 The first way is easily ameable to the URE, but does require higher
-order constructs, like our badly named `Composition` link.
+order constructs, like our badly named `Compose` link.
 
 ## Backward Chainer Based
 
@@ -126,9 +126,9 @@ Lambda
 
 as opposed to a half-defined pattern like above it.
 
-### CompositionLink
+### ComposeLink
 
-It seems that using CompositionLink can help. Let's consider the inference
+It seems that using ComposeLink can help. Let's consider the inference
 control example
 
 ```
@@ -165,7 +165,7 @@ control example
 We can then write the query
 
 ```
-Composition
+Compose
   ImplicationScope <rule-TV>
     VariableList
       Variable "$T"
@@ -206,7 +206,7 @@ where `Variable "$L-specialized"` is the variable of the BC query, and
 variable unchanged. A possible answer would be
 
 ```
-Composition
+Compose
   ImplicationScope <rule-TV>
     VariableList
       Variable "$T"
