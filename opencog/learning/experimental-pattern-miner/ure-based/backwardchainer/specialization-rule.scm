@@ -62,8 +62,9 @@
 (use-modules (opencog query))
 (use-modules (opencog logger))
 
-(cog-logger-set-level! "debug")
+(cog-logger-set-level! "fine")
 (cog-logger-set-stdout! #t)
+(cog-logger-set-sync! #t)
 
 ;; For now we implement a simplified unary version of that rule
 ;;
@@ -89,18 +90,20 @@
   (let* (;; Variables
          (x (Variable "$x"))
          (g (Variable "$g"))
+         (ms (Variable "$ms"))
          (f-lamb (Variable "$f-lamb"))
          ;; Constants
-         (ms (Variable "$ms"))
          (minsup (Predicate "minsup"))
          ;; Types
          (VariableT (Type "VariableNode"))
+         (NumberT (Type "NumberNode"))
          (LambdaT (Type "LambdaLink"))
          ;; Vardecls
          (x-decl (TypedVariable x VariableT))
          (g-decl g)
+         (ms-decl (TypedVariable ms NumberT))
          (f-lamb-decl (TypedVariable f-lamb LambdaT))
-         (vardecl (VariableList x-decl g-decl f-lamb-decl))
+         (vardecl (VariableList x-decl g-decl ms-decl f-lamb-decl))
          ;; Patterns
          (g-lamb (Quote (Lambda (Unquote x) (Unquote g))))
          (pattern (Evaluation
@@ -119,9 +122,9 @@
                        (Evaluation
                          minsup
                          (List
-                           (Compose
-                             g-lamb
-                             f-lamb)
+                           (Quote (Compose
+                             (Unquote g-lamb)
+                             (Unquote f-lamb)))
                            ms))
                        pattern
                        f-lamb))))
@@ -137,25 +140,32 @@
   (cog-logger-debug "unary-specialization-formula conclusion = ~a, premises = ~a"
                     conclusion premises)
   (if (= (length premises) 2)
-      (let* ((minsup-pred (gar premises))
+      (let* ((minsup-pred (car premises))
+             (dummy-1 (cog-logger-debug "unary-specialization-formula minsup-pred = ~a" minsup-pred))
              (minsup-pred-tv (cog-tv minsup-pred))
-             (f-lamb (gdr premises))
+             (dummy-2 (cog-logger-debug "unary-specialization-formula minsup-pred-tv = ~a" minsup-pred-tv))
+             (f-lamb (cdr premises))
+             (dummy-3 (cog-logger-debug "unary-specialization-formula f-lamb = ~a" f-lamb))
              (gf (gadr conclusion))
+             (dummy-4 (cog-logger-debug "unary-specialization-formula gf = ~a" gf))
              (ms (atom->number (gddr conclusion))))
+        (cog-logger-debug "unary-specialization-formula ms = ~a" ms)
         (if (tv->bool minsup-pred-tv)
             ;; g has enough support, let see if g.f has enough support
-            (cog-tv! conclusion (bool->tv (support gf ms)))
+            (cog-set-tv! conclusion (bool->tv (support gf ms)))
 
             ;; g does not have enough support, therefore g.f doesn't
             ;; have enough support
-            (cog-tv! conclusion (stv 0 1))))))
+            (cog-set-tv! conclusion (stv 0 1))))))
 
 ;; TODO: move this to rule-engine utils
 (define (atom->number A)
+  (cog-logger-debug "atom->number A = ~a" A)
   (string->number (cog-name A)))
 
 ;; Return #t if L has a frequency equal to or greater than ms, #f otherwise
 (define (support L ms)
+  (cog-logger-debug "support L = ~a, ms" L ms)
   (let* ((L-exec (cog-execute! L)))  ; consume compositions
     (if (= (cog-arity L) 2)
       (let* ((vardecl (gar L-exec))
