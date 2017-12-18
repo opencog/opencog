@@ -149,15 +149,18 @@
              (dummy-3 (cog-logger-debug "unary-specialization-formula f-lamb = ~a" f-lamb))
              (gf (gadr conclusion))
              (dummy-4 (cog-logger-debug "unary-specialization-formula gf = ~a" gf))
-             (ms (atom->number (gddr conclusion))))
-        (cog-logger-debug "unary-specialization-formula ms = ~a" ms)
-        (if (tv->bool minsup-pred-tv)
-            ;; g has enough support, let see if g.f has enough support
-            (cog-set-tv! conclusion (bool->tv (support gf ms)))
-
-            ;; g does not have enough support, therefore g.f doesn't
-            ;; have enough support
-            (cog-set-tv! conclusion (stv 0 1))))))
+             (ms (atom->number (gddr conclusion)))
+             (dummy-5 (cog-logger-debug "unary-specialization-formula ms = ~a" ms))
+             (conclusion-tv (if (tv->bool minsup-pred-tv)
+                                ;; g has enough support, let see if
+                                ;; g.f has enough support
+                                (bool->tv (support gf ms))
+                                ;; g does not have enough support,
+                                ;; therefore g.f doesn't have enough
+                                ;; support
+                                (stv 0 1)))
+             (dummy-6 (cog-logger-debug "unary-specialization-formula conclusion-tv = ~a" conclusion-tv)))
+        (cog-set-tv! conclusion conclusion-tv))))
 
 ;; TODO: move this to rule-engine utils
 (define (atom->number A)
@@ -166,6 +169,7 @@
 
 ;; Return #t if L has a frequency equal to or greater than ms, #f otherwise
 (define (support L ms)
+  ;; TODO: clobber this with log messages
   (cog-logger-debug "support L = ~a, ms" L ms)
   (let* ((L-exec (cog-execute! L)))  ; consume compositions
     (if (= (cog-arity L) 2)
