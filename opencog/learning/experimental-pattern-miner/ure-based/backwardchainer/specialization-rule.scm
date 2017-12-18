@@ -59,8 +59,9 @@
 ;; assuming that tv1 equals to (stv 1 1), then calculate the frequency
 ;; of the composed pattern and set tv2 accordingly.
 
-(use-modules (opencog query))
 (use-modules (opencog logger))
+(use-modules (opencog query))
+(use-modules (opencog rule-engine))
 
 (cog-logger-set-level! "fine")
 (cog-logger-set-stdout! #t)
