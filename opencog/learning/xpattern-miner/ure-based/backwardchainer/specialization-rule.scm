@@ -138,19 +138,12 @@
   (bool->tv (tv->bool (cog-tv A))))
 
 (define (unary-specialization-formula conclusion . premises)
-  (cog-logger-debug "unary-specialization-formula conclusion = ~a, premises = ~a"
-                    conclusion premises)
   (if (= (length premises) 2)
       (let* ((minsup-pred (car premises))
-             (dummy-1 (cog-logger-debug "unary-specialization-formula minsup-pred = ~a" minsup-pred))
              (minsup-pred-tv (cog-tv minsup-pred))
-             (dummy-2 (cog-logger-debug "unary-specialization-formula minsup-pred-tv = ~a" minsup-pred-tv))
              (f-lamb (cdr premises))
-             (dummy-3 (cog-logger-debug "unary-specialization-formula f-lamb = ~a" f-lamb))
              (gf (gadr conclusion))
-             (dummy-4 (cog-logger-debug "unary-specialization-formula gf = ~a" gf))
-             (ms (atom->number (gddr conclusion)))
-             (dummy-5 (cog-logger-debug "unary-specialization-formula ms = ~a" ms))
+             (ms (inexact->exact (atom->number (gddr conclusion))))
              (conclusion-tv (if (tv->bool minsup-pred-tv)
                                 ;; g has enough support, let see if
                                 ;; g.f has enough support
@@ -158,21 +151,17 @@
                                 ;; g does not have enough support,
                                 ;; therefore g.f doesn't have enough
                                 ;; support
-                                (stv 0 1)))
-             (dummy-6 (cog-logger-debug "unary-specialization-formula conclusion-tv = ~a" conclusion-tv)))
+                                (stv 0 1))))
         (cog-set-tv! conclusion conclusion-tv))))
 
 ;; TODO: move this to rule-engine utils
 (define (atom->number A)
-  (cog-logger-debug "atom->number A = ~a" A)
   (string->number (cog-name A)))
 
 ;; Return #t if L has a frequency equal to or greater than ms, #f otherwise
 (define (support L ms)
-  ;; TODO: clobber this with log messages
-  (cog-logger-debug "support L = ~a, ms" L ms)
   (let* ((L-exec (cog-execute! L)))  ; consume compositions
-    (if (= (cog-arity L) 2)
+    (if (= (cog-arity L-exec) 2)
       (let* ((vardecl (gar L-exec))
              (body (gdr L-exec))
              (bl (Bind vardecl body body)) ; to deal with unordered links
