@@ -113,6 +113,8 @@ public:
     AttentionBank(AtomSpace*);
     ~AttentionBank();
 
+    std::map<Handle, AttentionValue::sti_t> stimulusRec;
+
     /**
      * Provide ability for others to find out about atoms that cross in or
      * out of the AttentionalFocus
