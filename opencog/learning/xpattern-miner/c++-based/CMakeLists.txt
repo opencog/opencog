@@ -13,5 +13,5 @@ INSTALL (TARGETS xpatternminer DESTINATION "lib${LIB_DIR_SUFFIX}/opencog")
 INSTALL (FILES
 	XPatternMiner.h
 	HandleTree.h
-	DESTINATION "include/opencog/learning/experimental-pattern-miner/c++-based"
+	DESTINATION "include/opencog/learning/xpattern-miner/c++-based"
 )

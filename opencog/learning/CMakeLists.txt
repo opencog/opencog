@@ -17,4 +17,4 @@ IF (HAVE_GUILE)
     ADD_SUBDIRECTORY (scm)
 ENDIF (HAVE_GUILE)
 
-ADD_SUBDIRECTORY (experimental-pattern-miner)
+ADD_SUBDIRECTORY (xpattern-miner)

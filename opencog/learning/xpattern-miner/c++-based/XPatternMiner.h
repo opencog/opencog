@@ -25,7 +25,7 @@
 
 #include <opencog/atoms/base/Handle.h>
 #include <opencog/atoms/core/Variables.h>
-#include <opencog/atoms/core/ScopeLink.h>
+#include <opencog/atoms/core/RewriteLink.h>
 #include <opencog/atomspace/AtomSpace.h>
 
 #include "HandleTree.h"
@@ -436,10 +436,10 @@ private:
 	                                       const Handle& variable,
 	                                       const Handle& subpattern,
 	                                       int maxdepth) const;
-	HandleTree gen_var_overlap_subpatterns(ScopeLinkPtr sc_subpat,
+	HandleTree gen_var_overlap_subpatterns(RewriteLinkPtr sc_subpat,
 	                                       const HandleMapTree&
 	                                       var_overlaps) const;
-	HandleTree gen_var_overlap_subpatterns(ScopeLinkPtr sc_subpat,
+	HandleTree gen_var_overlap_subpatterns(RewriteLinkPtr sc_subpat,
 	                                       HandleMapTree::sibling_iterator
 	                                       var_overlaps_sib) const;
 

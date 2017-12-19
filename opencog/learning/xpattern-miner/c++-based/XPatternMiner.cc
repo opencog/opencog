@@ -32,7 +32,7 @@
 #include <opencog/atoms/base/Node.h>
 #include <opencog/atoms/core/LambdaLink.h>
 #include <opencog/atomutils/TypeUtils.h>
-#include <opencog/atomutils/Unify.h>
+#include <opencog/unify/Unify.h>
 #include <opencog/atomutils/FindUtils.h>
 #include <opencog/query/BindLinkAPI.h>
 
@@ -59,7 +59,7 @@ XPMParameters::XPMParameters(unsigned ms, unsigned igram,
 		initpat = createLink(LAMBDA_LINK, initpat);
 
 	// Provide a variable declaration if none
-	ScopeLinkPtr sc = ScopeLinkCast(initpat);
+	RewriteLinkPtr sc = RewriteLinkCast(initpat);
 	if (not sc->get_vardecl()) {
 		Handle vardecl = sc->get_variables().get_vardecl(),
 			body = sc->get_body();
@@ -435,7 +435,7 @@ HandleTree XPatternMiner::gen_var_overlap_subpatterns(const Handle& pattern,
                                                       const Handle& subpat,
                                                       int maxdepth) const
 {
-	ScopeLinkPtr sc_subpat = ScopeLinkCast(subpat);
+	RewriteLinkPtr sc_subpat = RewriteLinkCast(subpat);
 	if (not sc_subpat)
 		return HandleTree(subpat);
 
@@ -454,7 +454,7 @@ HandleTree XPatternMiner::gen_var_overlap_subpatterns(const Handle& pattern,
 	return gen_var_overlap_subpatterns(sc_subpat, var_overlaps);
 }
 
-HandleTree XPatternMiner::gen_var_overlap_subpatterns(ScopeLinkPtr sc_subpat,
+HandleTree XPatternMiner::gen_var_overlap_subpatterns(RewriteLinkPtr sc_subpat,
                                                       const HandleMapTree&
                                                       var_overlaps) const
 {
@@ -464,11 +464,11 @@ HandleTree XPatternMiner::gen_var_overlap_subpatterns(ScopeLinkPtr sc_subpat,
 	return HandleTree();
 }
 
-HandleTree XPatternMiner::gen_var_overlap_subpatterns(ScopeLinkPtr sc_subpat,
+HandleTree XPatternMiner::gen_var_overlap_subpatterns(RewriteLinkPtr sc_subpat,
                                                       HandleMapTree::sibling_iterator
                                                       sib) const
 {
-	HandleTree ht(sc_subpat->partial_substitute(*sib));
+	HandleTree ht(sc_subpat->beta_reduce(*sib));
 	for (auto ch_sib = sib.begin(); ch_sib != sib.end(); ++ch_sib) {
 		HandleTree cht = gen_var_overlap_subpatterns(sc_subpat, ch_sib);
 		ht.append_child(ht.begin(), cht.begin());
@@ -625,12 +625,12 @@ Handle XPatternMiner::compose(const Handle& pattern,
 
 	// Turn the map into a vector of new bodies
 	const Variables variables = get_variables(pattern);
-	HandleSeq subodies = variables.make_values(var2subody);
+	HandleSeq subodies = variables.make_sequence(var2subody);
 
 	// Perform composition of the pattern body with the sub-bodies)
-	// TODO: perhaps use ScopeLink partial_substitute
+	// TODO: perhaps use RewriteLink partial_substitute
 	Handle body = variables.substitute_nocheck(get_body(pattern), subodies);
-	body = ScopeLink::consume_ill_quotations(vardecl, body);
+	body = RewriteLink::consume_ill_quotations(vardecl, body);
 	// If root AndLink then simplify the pattern
 	if (body->get_type() == AND_LINK) {
 		body = remove_useless_clauses(vardecl, body);
@@ -705,9 +705,9 @@ Handle XPatternMiner::remove_unary_and(const Handle& h)
 
 Handle XPatternMiner::alpha_conversion(const Handle& pattern)
 {
-	ScopeLinkPtr sc = ScopeLinkCast(pattern);
+	RewriteLinkPtr sc = RewriteLinkCast(pattern);
 	if (sc)
-		return sc->alpha_conversion();
+		return sc->alpha_convert();
 	return pattern;
 }
 
@@ -726,26 +726,26 @@ Handle XPatternMiner::gen_rand_variable()
 
 const Variables& XPatternMiner::get_variables(const Handle& pattern)
 {
-	ScopeLinkPtr sc = ScopeLinkCast(pattern);
+	RewriteLinkPtr sc = RewriteLinkCast(pattern);
 	if (sc)
-		return ScopeLinkCast(pattern)->get_variables();
+		return RewriteLinkCast(pattern)->get_variables();
 	static Variables empty_variables;
 	return empty_variables;
 }
 
 const Handle& XPatternMiner::get_vardecl(const Handle& pattern)
 {
-	ScopeLinkPtr sc = ScopeLinkCast(pattern);
+	RewriteLinkPtr sc = RewriteLinkCast(pattern);
 	if (sc)
-		return ScopeLinkCast(pattern)->get_vardecl();
+		return RewriteLinkCast(pattern)->get_vardecl();
 	return Handle::UNDEFINED;
 }
 
 const Handle& XPatternMiner::get_body(const Handle& pattern)
 {
-	ScopeLinkPtr sc = ScopeLinkCast(pattern);
+	RewriteLinkPtr sc = RewriteLinkCast(pattern);
 	if (sc)
-		return ScopeLinkCast(pattern)->get_body();
+		return RewriteLinkCast(pattern)->get_body();
 	return pattern;
 }
 

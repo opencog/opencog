@@ -27,8 +27,8 @@
 #include <opencog/util/Config.h>
 #include <opencog/util/algorithm.h>
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/learning/experimental-pattern-miner/c++-based/HandleTree.h>
-#include <opencog/learning/experimental-pattern-miner/c++-based/XPatternMiner.h>
+#include <opencog/learning/xpattern-miner/c++-based/HandleTree.h>
+#include <opencog/learning/xpattern-miner/c++-based/XPatternMiner.h>
 #include <opencog/guile/SchemeEval.h>
 
 #include <vector>
