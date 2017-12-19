@@ -85,7 +85,7 @@ void XPatternMinerUTest::setUp()
 {
 	// Configure scheme load-paths that are common for all tests.
 	_scm.eval("(add-to-load-path \"" PROJECT_SOURCE_DIR
-	          "/tests/learning/experimental-pattern-miner/c++-based\")");
+	          "/tests/learning/xpattern-miner/c++-based\")");
 }
 
 void XPatternMinerUTest::tearDown()
