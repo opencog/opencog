@@ -179,36 +179,50 @@ Handle XPatternMiner::mk_varpattern(const Handle& pattern,
 bool XPatternMiner::enough_support(const Handle& pattern,
                                    const HandleUCounter& texts) const
 {
-	// TODO: use instead bounded version of bindlink
-	return param.minsup <= freq(pattern, texts);
+	return param.minsup <= freq(pattern, texts, param.minsup);
 }
 
 bool XPatternMiner::enough_support(const HandleUCounter& texts) const
 {
-	return param.minsup <= texts.total_count();
+	return param.minsup <= freq(texts, param.minsup);
 }
 
 unsigned XPatternMiner::freq(const Handle& pattern,
-                             const HandleUCounter& texts) const
+                             const HandleUCounter& texts,
+                             int maxf) const
 {
 	if (totally_abstract(pattern))
-		return gram(pattern) * freq(texts);
+	{
+		unsigned ng = gram(pattern);
+		int nmf = maxf < 0 ? maxf : (int)std::ceil((double)maxf/(double)ng);
+		return ng * freq(texts, nmf);
+	}
 
 	// If the pattern has more than one gram, then it is assumed that
 	// the count of each text in texts is 1, thus we just need to run
 	// the pattern over the whole texts without worrying about counts
 	if (1 < gram(pattern))
-		return restrict_satisfying_set(pattern, texts)->get_arity();
+		return restrict_satisfying_set(pattern, texts, maxf)->get_arity();
 
 	// Otherwise, assuming the texts has already been filtered, it is
 	// merely the texts total count. TODO: it would safer to put some
 	// assert to check if that assumption really hold
-	return freq(texts);
+	return freq(texts, maxf);
 }
 
-unsigned XPatternMiner::freq(const HandleUCounter& texts) const
+unsigned XPatternMiner::freq(const HandleUCounter& texts, int maxf) const
 {
-	return texts.total_count();
+	if (maxf < 0)
+		return texts.total_count();
+
+	// Otherwise only count up to maxf
+	unsigned count = 0;
+	for (const auto& text : texts) {
+		count += text.second;
+		if (maxf <= (int)count)
+			return count;
+	}
+	return count;
 }
 
 HandleUCounter XPatternMiner::filter_texts(const Handle& pattern,
@@ -258,7 +272,8 @@ Handle XPatternMiner::matched_results(const Handle& pattern,
 }
 
 Handle XPatternMiner::restrict_satisfying_set(const Handle& pattern,
-                                              const HandleUCounter& texts) const
+                                              const HandleUCounter& texts,
+                                              int maxf) const
 {
 	AtomSpace tmp_text_as;
 	for (const auto& text : texts)
@@ -269,7 +284,8 @@ Handle XPatternMiner::restrict_satisfying_set(const Handle& pattern,
 		vardecl = get_vardecl(tmp_pattern),
 		body = get_body(tmp_pattern),
 		gl = tmp_query_as.add_link(GET_LINK, vardecl, body),
-		results = satisfying_set(&tmp_text_as, gl);
+		results = (maxf < 0 ? satisfying_set(&tmp_text_as, gl)
+		           : satisfying_set(&tmp_text_as, gl, maxf));
 	return results;
 }
 
