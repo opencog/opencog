@@ -1,7 +1,7 @@
 ;
 ; batch-word-pair.scm
 ;
-; Batch-compute the mutual information of pairs of nautral-language words.
+; Batch-compute the mutual information of pairs of natural-language words.
 ;
 ; Copyright (c) 2013, 2014, 2017 Linas Vepstas
 ;
@@ -79,7 +79,7 @@
 
   Left-side counts, frequencies, etc. such as N(*,y) P(*,y) or
   log_2 P(*,y) will be placed on the following, which is returned
-  by the 'left-wildcard methd:
+  by the 'left-wildcard method:
 
     EvaluationLink
        LinkGrammarRelationshipNode \"ANY\"
@@ -122,7 +122,7 @@
 			(EvaluationLink any-pair-pred PAIR))
 
 		; Return the raw observational count on PAIR. If the counter for
-		; PAIR does not exist (was not oberved), then return 0.
+		; PAIR does not exist (was not observed), then return 0.
 		(define (get-pair-count PAIR)
 			(define pr (get-pair PAIR))
 			(if (null? pr) 0 (get-count pr)))
@@ -224,7 +224,7 @@
 			(EvaluationLink pair-pred PAIR))
 
 		; Return the raw observational count on PAIR.
-		; If the PAIR does not exist (was not oberved) return 0.
+		; If the PAIR does not exist (was not observed) return 0.
 		(define (get-pair-count PAIR)
 			(define pr (get-pair PAIR))
 			(if (null? pr) 0 (get-count pr)))
@@ -341,7 +341,7 @@
 			(EvaluationLink pair-max PAIR))
 
 		; Return the raw observational count on PAIR.
-		; If the PAIR does not exist (was not oberved) return 0.
+		; If the PAIR does not exist (was not observed) return 0.
 		; Return a list of atoms that hold the count.
 		(define (get-pair-count PAIR)
 			(fold
@@ -412,7 +412,7 @@
 (define-public (verify-clique-pair-sums)
 "
   This checks consistency of the the clique-pair total count, with
-  the subcounts of each pair, accodring to the distance between
+  the subcounts of each pair, according to the distance between
   the words. The sum of the subtotals should equal the total.
   It should not throw.
 
