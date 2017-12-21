@@ -1,3 +1,5 @@
+;; TODO: update comment to use PutLink
+;;
 ;; Given n+1 patterns
 ;;
 ;; - an n-ary pattern, g with frequency equal to or above ms
@@ -81,7 +83,7 @@
 ;; Evaluation <tv2>
 ;;   Predicate "minsup"
 ;;   List
-;;     ComposeLink
+;;     PutLink
 ;;       Lambda
 ;;         <x>
 ;;         <g>
@@ -123,7 +125,7 @@
                        (Evaluation
                          minsup
                          (List
-                           (Quote (Compose
+                           (Quote (Put
                              (Unquote g-lamb)
                              (Unquote f-lamb)))
                            ms))
@@ -138,12 +140,15 @@
   (bool->tv (tv->bool (cog-tv A))))
 
 (define (unary-specialization-formula conclusion . premises)
+  (cog-logger-debug "unary-specialization-formula conclusion = ~a, premises = ~a"
+                    conclusion premises)
   (if (= (length premises) 2)
       (let* ((minsup-pred (car premises))
              (minsup-pred-tv (cog-tv minsup-pred))
              (f-lamb (cdr premises))
              (gf (gadr conclusion))
              (ms (inexact->exact (atom->number (gddr conclusion))))
+             (dummy (cog-logger-debug "unary-specialization-formula ms = ~a" ms))
              (conclusion-tv (if (tv->bool minsup-pred-tv)
                                 ;; g has enough support, let see if
                                 ;; g.f has enough support
@@ -152,6 +157,7 @@
                                 ;; therefore g.f doesn't have enough
                                 ;; support
                                 (stv 0 1))))
+        (cog-logger-debug "unary-specialization-formula conclusion = ~a, conclusion-tv = ~a" conclusion conclusion-tv)
         (cog-set-tv! conclusion conclusion-tv))))
 
 ;; TODO: move this to rule-engine utils
@@ -160,15 +166,19 @@
 
 ;; Return #t if L has a frequency equal to or greater than ms, #f otherwise
 (define (support L ms)
+  (cog-logger-debug "support L = ~a, ms = ~a" L ms)
   (let* ((L-exec (cog-execute! L)))  ; consume compositions
+    (cog-logger-debug "support L-exec = ~a" L-exec)
     (if (= (cog-arity L-exec) 2)
       (let* ((vardecl (gar L-exec))
              (body (gdr L-exec))
              (bl (Bind vardecl body body)) ; to deal with unordered links
              (results (cog-bind-first-n bl ms)))
+        (cog-logger-debug "support results = ~a" results)
         (= (cog-arity results) ms))
       ;; Supposedly no variable declaration
       (let* ((body (gar L-exec))
              (bl (Bind body body)) ; to deal with unordered links
              (results (cog-bind-first-n bl ms)))
+        (cog-logger-debug "support results = ~a" results)
         (= (cog-arity results) ms)))))

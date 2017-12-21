@@ -1,3 +1,5 @@
+;; TODO: update comment
+
 ;; Let be a binary predicate P. The pattern we want to discover is
 ;;
 ;; P(Inheritance(X, Y))
@@ -57,6 +59,8 @@
 ;;       Variable "$X"
 ;;       Variable "$Y"
 
+(load "specialization-rule.scm")
+
 ;; Common definitions
 (define P (Predicate "P"))
 (define X (Variable "$X"))
@@ -79,13 +83,14 @@
   (Lambda X (Evaluation P X)))
 
 ;; Specialization
-(define specialization
+(define special
   (Lambda (Inheritance X Y)))
 
 ;; Abstraction has enough support
 (Evaluation (stv 1 1) minsup (List abstract (Number 3)))
 
-;; Query
-(define X-special (Variable "$X-special"))
-(define query
-  (Evaluation minsup (List (Compose abstract X-special) (Number 3))))
+;; ;; Query
+;; (define X-special (Variable "$X-special"))
+;; (define query
+;;   (Evaluation minsup (List (Compose abstract X-special) (Number 3))))
+(cog-execute! unary-specialization-rule)
