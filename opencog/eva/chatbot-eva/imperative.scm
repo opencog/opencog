@@ -91,13 +91,13 @@
 	; Apply rules that analyze sentences -- if the current sentence
 	; is an imperative of some sort, it will pick it apart into a
 	; simplfied form, and glue the simplified form to an anchor.
-	(cog-bind look-rule-1)
-	(cog-bind look-rule-2)
-	(cog-bind single-word-express-rule)
-	(cog-bind single-word-gesture-rule)
-	(cog-bind show-rule-1)
-	(cog-bind show-rule-2)
-	(cog-bind demo-rule)
+	(cog-execute! look-rule-1)
+	(cog-execute! look-rule-2)
+	(cog-execute! single-word-express-rule)
+	(cog-execute! single-word-gesture-rule)
+	(cog-execute! show-rule-1)
+	(cog-execute! show-rule-2)
+	(cog-execute! demo-rule)
 
 	(if do-dbg-prt (begin
 		(display "The current-imperative is\n")
@@ -107,18 +107,18 @@
 	; Apply semantics-rule-1 -- if the current-imperative
 	; anchor is a word we understand in a physical grounded
 	; sense, then attach that sense to the current-action anchor.
-	(cog-bind obj-semantics-rule-1-ao)
+	(cog-execute! obj-semantics-rule-1-ao)
 
 	(if do-dbg-prt (begin
 		(display "The current-action is\n")
 		(display (cog-execute! (Get (List current-action (Variable "$x")))))
 	))
 
-	(cog-bind obj-semantic-model-rule-1)
-	(cog-bind obj-semantic-model-rule-2)
+	(cog-execute! obj-semantic-model-rule-1)
+	(cog-execute! obj-semantic-model-rule-2)
 
 	; Perform the action, and print a reply.
-	(let* ((act-do-do (cog-bind action-rule-ao))
+	(let* ((act-do-do (cog-execute! action-rule-ao))
 			(action-list (cog-outgoing-set act-do-do))
 		)
 		(if do-dbg-prt (begin
