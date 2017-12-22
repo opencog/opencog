@@ -42,7 +42,7 @@
 ; ---------
 (define (print-msg node) (display (cog-name node)) (newline) (stv 1 1))
 
-; XXX needs to be public, so that cog-bind can find this...
+; XXX needs to be public, so that cog-execute! can find this...
 (define-public (show-arg node) (display node) node)
 
 ; ---------------------------------------------------------------
