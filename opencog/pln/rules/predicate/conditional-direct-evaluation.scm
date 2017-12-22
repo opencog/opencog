@@ -40,7 +40,7 @@
 
          ;; Fetch all antecedent values
          (antecedent-get (Get vardecl antecedent))
-         (antecedent-result (cog-satisfying-set antecedent-get))
+         (antecedent-result (cog-execute! antecedent-get))
          (antecedent-values (cog-outgoing-set antecedent-result))
 
          ;; Generate the antecedent and consequent terms
