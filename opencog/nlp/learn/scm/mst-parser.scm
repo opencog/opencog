@@ -16,7 +16,7 @@
 ;
 ; Input to this should be a single unicode utf8-encoded text sentence.
 ; It is presumed, as background, that the atomspace is loaded with a
-; large number of word-pairs and thier associated mutual information.
+; large number of word-pairs and their associated mutual information.
 ; These word-pairs need to have been previously computed.
 ;
 ; The sentence is tokenized, assuming that white-space represents word
@@ -65,7 +65,7 @@
 ; suffixes. This list is not complete nor terribly organized; rather,
 ; it is built up from experience of parsing assorted texts and noting
 ; the kinds of stuff that actually gets used. Its slanted towards
-; European langauges, and may be inadequate for other langauges.
+; European languages, and may be inadequate for other languages.
 ;
 ; I did not want to get too fancy here; I want just enough to parse
 ; most "ordinary" text, for now.  A fancier treatment must await
@@ -246,6 +246,43 @@
 	(for-each
 		(lambda (dj) (if (not (is-oversize? dj)) (count-one-atom dj)))
 		(make-sections (mst-parse-text plain-text))
+	)
+)
+
+(define-public (observe-mst-extra plain-text)
+"
+; TODO
+"
+	(define word-strs (tokenize-text plain-text))
+	(define word-list (map WordNode word-strs))
+	(define word-insts (map (lambda (w) (WordInstanceNode
+		(random-node-name 'WordInstanceNode 36 (string-append w "@"))))
+			word-strs))
+
+	; TODO: Store in DB
+	(define parse-node
+		(ParseNode (random-node-name 'ParseNode 36 "mst_parse@")))
+	(define word-inst-lks
+		(map (lambda (wi) (WordInstanceLink wi parse-node)) word-insts))
+	(define reference-lks
+		(map (lambda (wi w) (ReferenceLink wi w)) word-insts word-list))
+
+	(define parsed-txt (mst-parse-text plain-text))
+	(define sections (make-sections parsed-txt))
+
+	(define parsed-txt-insts
+		(map (lambda (w)
+			(cons (cons (cons (caaar w) (list-ref word-insts (- (caaar w) 1)))
+								(cons (cadar w) (list-ref word-insts (- (cadar w) 1))))
+						(cdr w)))
+			parsed-txt))
+	(define section-insts (make-sections parsed-txt-insts))
+
+	; The count-one-atom function fetches from the SQL database,
+	; increments the count by one, and stores the result back
+	(for-each
+		(lambda (dj) (if (not (is-oversize? dj)) (count-one-atom dj)))
+		(append sections section-insts)
 	)
 )
 ; ---------------------------------------------------------------------
