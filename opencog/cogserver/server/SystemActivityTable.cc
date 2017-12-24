@@ -30,6 +30,7 @@
 #include <opencog/cogserver/server/CogServer.h>
 
 using namespace opencog;
+using namespace std::placeholders;
 
 SystemActivityTable::SystemActivityTable() : _maxAgentActivityTableSeqSize(100),
         _cogServer(nullptr)
@@ -40,7 +41,7 @@ SystemActivityTable::SystemActivityTable() : _maxAgentActivityTableSeqSize(100),
 SystemActivityTable::~SystemActivityTable()
 {
     logger().debug("[SystemActivityTable] enter destructor");
-    _conn.disconnect();
+    // _cogServer->getAtomSpace().atomRemovedSignal().disconnect(_conn);
     clearActivity();
     logger().debug("[SystemActivityTable] exit destructor");
 }
@@ -49,8 +50,8 @@ void SystemActivityTable::init(CogServer *cogServer)
 {
     logger().debug("[SystemActivityTable] init");
     _cogServer = cogServer;
-    _conn = cogServer->getAtomSpace().removeAtomSignal(
-            boost::bind(&SystemActivityTable::atomRemoved, this, _1));
+    _conn = cogServer->getAtomSpace().atomRemovedSignal().connect(
+            std::bind(&SystemActivityTable::atomRemoved, this, _1));
 }
 
 void SystemActivityTable::setMaxAgentActivityTableSeqSize(size_t n)

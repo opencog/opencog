@@ -20,11 +20,10 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
+#include <cstdlib>
+#include <functional>
 #include <string>
 #include <vector>
-#include <cstdlib>
-
-#include <boost/bind.hpp>
 
 #include <opencog/util/Logger.h>
 #include <opencog/util/oc_assert.h>
@@ -58,16 +57,16 @@ SpaceServer::SpaceServer(AtomSpace &_atomspace) :
     curEntityRecorder = NULL;
 
     // connect signals
-    removedAtomConnection = _atomspace.addAtomSignal(boost::bind(&SpaceServer::atomAdded, this, _1));
-    addedAtomConnection = _atomspace.removeAtomSignal(boost::bind(&SpaceServer::atomRemoved, this, _1));
+    removedAtomConnection = _atomspace.atomAddedSignal().connect(std::bind(&SpaceServer::atomAdded, this, std::placeholders::_1));
+    addedAtomConnection = _atomspace.atomRemovedSignal().connect(std::bind(&SpaceServer::atomRemoved, this, std::placeholders::_1));
 
 }
 
 SpaceServer::~SpaceServer()
 {
     // disconnect signals
-    addedAtomConnection.disconnect();
-    removedAtomConnection.disconnect();
+    atomspace->atomAddedSignal().disconnect(addedAtomConnection);
+    atomspace->atomRemovedSignal().disconnect(removedAtomConnection);
 
     clear();
 }

@@ -22,8 +22,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <boost/bind.hpp>
-
 #include <opencog/util/Logger.h>
 #include <opencog/util/oc_assert.h>
 #include <opencog/spacetime/atom_types.h>
@@ -54,8 +52,8 @@ TimeServer::TimeServer(AtomSpace& a): atomspace(&a), spaceServer(NULL)
 {
     init();
     // Connect signals
-    addedAtomConnection = a.addAtomSignal(boost::bind(&TimeServer::atomAdded, this, _1));
-    removedAtomConnection = a.removeAtomSignal(boost::bind(&TimeServer::atomRemoved, this, _1));
+    addedAtomConnection = a.atomAddedSignal().connect(std::bind(&TimeServer::atomAdded, this, std::placeholders::_1));
+    removedAtomConnection = a.atomRemovedSignal().connect(std::bind(&TimeServer::atomRemoved, this, std::placeholders::_1));
 }
 
 TimeServer::TimeServer(AtomSpace& a, SpaceServer *_ss)
@@ -65,15 +63,15 @@ TimeServer::TimeServer(AtomSpace& a, SpaceServer *_ss)
     spaceServer->setTimeServer(this);
 
     // Connect signals
-    addedAtomConnection = a.addAtomSignal(boost::bind(&TimeServer::atomAdded, this, _1));
-    removedAtomConnection = a.removeAtomSignal(boost::bind(&TimeServer::atomRemoved, this, _1));
+    addedAtomConnection = a.atomAddedSignal().connect(std::bind(&TimeServer::atomAdded, this, std::placeholders::_1));
+    removedAtomConnection = a.atomRemovedSignal().connect(std::bind(&TimeServer::atomRemoved, this, std::placeholders::_1));
 }
 
 TimeServer::~TimeServer()
 {
     // disconnect signals
-    addedAtomConnection.disconnect();
-    removedAtomConnection.disconnect();
+    atomspace->atomAddedSignal().disconnect(addedAtomConnection);
+    atomspace->atomRemovedSignal().disconnect(removedAtomConnection);
 }
 
 void TimeServer::add(Handle h, const Temporal& t, const TimeDomain& timeDomain)
