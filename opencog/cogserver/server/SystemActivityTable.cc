@@ -41,7 +41,7 @@ SystemActivityTable::SystemActivityTable() : _maxAgentActivityTableSeqSize(100),
 SystemActivityTable::~SystemActivityTable()
 {
     logger().debug("[SystemActivityTable] enter destructor");
-    _cogServer->getAtomSpace().atomRemovedSignal().disconnect(_conn);
+    // _cogServer->getAtomSpace().atomRemovedSignal().disconnect(_conn);
     clearActivity();
     logger().debug("[SystemActivityTable] exit destructor");
 }
