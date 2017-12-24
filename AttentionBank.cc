@@ -22,7 +22,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <boost/bind.hpp>
+#include <functional>
 #include <opencog/util/Config.h>
 
 #include <opencog/atoms/base/Handle.h>
@@ -44,14 +44,15 @@ AttentionBank::AttentionBank(AtomSpace* asp)
     LTIAtomWage = config().get_int("ECAN_STARTING_ATOM_LTI_WAGE", 10);
     minAFSize = config().get_int("ECAN_MIN_AF_SIZE", 100);
 
-    _removeAtomConnection =
-        asp->removeAtomSignal(
-            boost::bind(&AttentionBank::remove_atom_from_bank, this, _1));
+    _remove_signal = &asp->atomRemovedSignal();
+    _remove_connection = _remove_signal->connect(
+            std::bind(&AttentionBank::remove_atom_from_bank, this,
+                std::placeholders::_1));
 }
 
 AttentionBank::~AttentionBank()
 {
-    _removeAtomConnection.disconnect();
+    _remove_signal->disconnect(_remove_connection);
 }
 
 void AttentionBank::remove_atom_from_bank(const AtomPtr& atom)
@@ -117,7 +118,7 @@ void AttentionBank::AVChanged(const Handle& h,
                    fundsSTI.load(), oldSti, newSti);
 
     // Notify any interested parties that the AV changed.
-    _AVChangedSignal(h, old_av, new_av);
+    _AVChangedSignal.emit(h, old_av, new_av);
 
     // update AF
     updateAttentionalFocus(h, old_av, new_av);
@@ -283,7 +284,7 @@ void AttentionBank::updateAttentionalFocus(const Handle& h,
 
         attentionalFocus.erase(least);
         AFCHSigl& afch = RemoveAFSignal();
-        afch(hrm, hrm_old_av, hrm_new_av);
+        afch.emit(hrm, hrm_old_av, hrm_new_av);
         insertable = true;
     }
 
@@ -292,6 +293,6 @@ void AttentionBank::updateAttentionalFocus(const Handle& h,
     {
         attentionalFocus.insert(std::make_pair(h, new_av));
         AFCHSigl& afch = AddAFSignal();
-        afch(h, old_av, new_av);
+        afch.emit(h, old_av, new_av);
     }
 }

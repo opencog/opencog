@@ -30,10 +30,10 @@
 #include <mutex>
 #include <unordered_map>
 
-#include <boost/signals2.hpp>
-
+#include <opencog/util/sigslot.h>
 #include <opencog/truthvalue/AttentionValue.h>
 #include <opencog/attentionbank/ImportanceIndex.h>
+#include <opencog/atomspace/AtomSpace.h>
 
 namespace opencog
 {
@@ -42,14 +42,14 @@ namespace opencog
  */
 
 /* Attention Value changed */
-typedef boost::signals2::signal<void (const Handle&,
-                                      const AttentionValuePtr&,
-                                      const AttentionValuePtr&)> AVCHSigl;
+typedef SigSlot<const Handle&,
+                const AttentionValuePtr&,
+                const AttentionValuePtr&> AVCHSigl;
 
 /* Attentional Focus changed */
-typedef boost::signals2::signal<void (const Handle&,
-                                      const AttentionValuePtr&,
-                                      const AttentionValuePtr&)> AFCHSigl;
+typedef SigSlot<const Handle&,
+                const AttentionValuePtr&,
+                const AttentionValuePtr&> AFCHSigl;
 
 class AtomSpace;
 class AttentionBank
@@ -71,7 +71,8 @@ class AttentionBank
     /** AV changes */
     void AVChanged(const Handle&, const AttentionValuePtr&, const AttentionValuePtr&);
 
-    boost::signals2::connection _removeAtomConnection;
+    AtomPtrSignal* _remove_signal;
+    int _remove_connection;
 
     /**
      * Signal emitted when an atom crosses in or out of the
