@@ -52,7 +52,7 @@ AttentionBank::AttentionBank(AtomSpace* asp)
 
 AttentionBank::~AttentionBank()
 {
-    _remove_signal->disconnect(_remove_connection);
+    //_remove_signal->disconnect(_remove_connection);
 }
 
 void AttentionBank::remove_atom_from_bank(const AtomPtr& atom)
