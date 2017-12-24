@@ -23,6 +23,7 @@
  */
 #include <algorithm>
 #include <cmath>
+#include <functional>
 #include <limits>
 #include <numeric>
 #include <string>
@@ -44,6 +45,7 @@ extern "C" {
 #include "DimEmbedModule.h"
 
 using namespace opencog;
+using namespace std::placeholders;
 
 typedef std::vector<std::pair<HandleSeq,std::vector<double> > >
     ClusterSeq; //the vector of doubles is the centroid of the cluster
@@ -57,19 +59,19 @@ DimEmbedModule::DimEmbedModule(CogServer& cs) : Module(cs)
     _bank = &attentionbank(as);
 
     addedAtomConnection = as->
-        addAtomSignal(boost::bind(&DimEmbedModule::handleAddSignal, this, _1));
+        atomAddedSignal().connect(std::bind(&DimEmbedModule::handleAddSignal, this, _1));
     removedAtomConnection = as->
-        removeAtomSignal(boost::bind(&DimEmbedModule::atomRemoveSignal, this, _1));
+        atomRemovedSignal().connect(std::bind(&DimEmbedModule::atomRemoveSignal, this, _1));
     tvChangedConnection = as->
-        TVChangedSignal(boost::bind(&DimEmbedModule::TVChangedSignal, this, _1, _2, _3));
+        TVChangedSignal().connect(std::bind(&DimEmbedModule::TVChangedSignal, this, _1, _2, _3));
 }
 
 DimEmbedModule::~DimEmbedModule()
 {
     logger().info("[DimEmbedModule] destructor");
-    addedAtomConnection.disconnect();
-    removedAtomConnection.disconnect();
-    tvChangedConnection.disconnect();
+    as->atomAddedSignal().disconnect(addedAtomConnection);
+    as->atomRemovedSignal().disconnect(removedAtomConnection);
+    as->TVChangedSignal().disconnect(tvChangedConnection);
 }
 
 void DimEmbedModule::init()
@@ -77,11 +79,11 @@ void DimEmbedModule::init()
     logger().info("[DimEmbedModule] init");
     this->as = &_cogserver.getAtomSpace();
     addedAtomConnection = as->
-        addAtomSignal(boost::bind(&DimEmbedModule::handleAddSignal, this, _1));
+        atomAddedSignal().connect(std::bind(&DimEmbedModule::handleAddSignal, this, _1));
     removedAtomConnection = as->
-        removeAtomSignal(boost::bind(&DimEmbedModule::atomRemoveSignal, this, _1));
+        atomRemovedSignal().connect(std::bind(&DimEmbedModule::atomRemoveSignal, this, _1));
     tvChangedConnection = as->
-        TVChangedSignal(boost::bind(&DimEmbedModule::TVChangedSignal, this, _1, _2, _3));
+        TVChangedSignal().connect(std::bind(&DimEmbedModule::TVChangedSignal, this, _1, _2, _3));
 #ifdef HAVE_GUILE
     //Functions available to scheme shell
     define_scheme_primitive("embedSpace",

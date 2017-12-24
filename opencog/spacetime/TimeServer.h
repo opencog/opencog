@@ -29,7 +29,6 @@
 #include <set>
 #include <map>
 #include <string>
-#include <boost/signals2.hpp>
 
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/spacetime/SpaceServer.h>
@@ -418,8 +417,8 @@ private:
     /**
      * signal connections used to keep track of atom removal in the SpaceMap
      */
-    boost::signals2::connection removedAtomConnection;
-    boost::signals2::connection addedAtomConnection;
+    int removedAtomConnection;
+    int addedAtomConnection;
 
     void atomAdded(const Handle&);
     void atomRemoved(const AtomPtr&);
