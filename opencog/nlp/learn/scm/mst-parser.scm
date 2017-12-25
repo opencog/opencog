@@ -251,8 +251,18 @@
 
 (define-public (observe-mst-extra plain-text)
 "
-; TODO
+  observe-mst-extra -- update pseduo-disjunct counts by observing raw
+  text.
+
+  See also 'observe-mst'.
+
+  This is the second part of the learning algo: simply count how
+  often pseudo-disjuncts show up. In addition to what 'observe-mst'
+  does, extra atoms will be generated to preserve the MST parse
+  for each of the inputs.
 "
+	; Tokenize the text, create WordNodes as well as WordIntanceNodes
+	; for each of the words
 	(define word-strs (tokenize-text plain-text))
 	(define word-list (map WordNode word-strs))
 	(define word-insts (map (lambda (w) (WordInstanceNode
@@ -260,6 +270,10 @@
 			word-strs))
 
 	; TODO: Store in DB
+	; Create a ParseNode, link each of the WordInstanceNodes with it
+	; by using WordInstanceLinks
+	; ReferenceLinks will also be created to link the WordInstanceNodes
+	; with their corresponding WordNodes
 	(define parse-node
 		(ParseNode (random-node-name 'ParseNode 36 "mst_parse@")))
 	(define word-inst-lks
@@ -267,16 +281,19 @@
 	(define reference-lks
 		(map (lambda (wi w) (ReferenceLink wi w)) word-insts word-list))
 
-	(define parsed-txt (mst-parse-text plain-text))
-	(define sections (make-sections parsed-txt))
+	; Do the MST parse
+	(define mstparse (mst-parse-text plain-text))
+	(define sections (make-sections mstparse))
 
-	(define parsed-txt-insts
+	; Take the parse from above, replace the WordNodes with WordInstanceNodes
+	; and create sections for those instances also
+	(define mstparse-insts
 		(map (lambda (w)
 			(cons (cons (cons (caaar w) (list-ref word-insts (- (caaar w) 1)))
 								(cons (cadar w) (list-ref word-insts (- (cadar w) 1))))
 						(cdr w)))
-			parsed-txt))
-	(define section-insts (make-sections parsed-txt-insts))
+			mstparse))
+	(define section-insts (make-sections mstparse-insts))
 
 	; The count-one-atom function fetches from the SQL database,
 	; increments the count by one, and stores the result back
