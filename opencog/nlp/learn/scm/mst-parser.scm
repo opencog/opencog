@@ -269,7 +269,6 @@
 		(random-node-name 'WordInstanceNode 36 (string-append w "@"))))
 			word-strs))
 
-	; TODO: Store in DB
 	; Create a ParseNode, link each of the WordInstanceNodes with it
 	; by using WordInstanceLinks
 	; ReferenceLinks will also be created to link the WordInstanceNodes
@@ -299,7 +298,16 @@
 	; increments the count by one, and stores the result back
 	(for-each
 		(lambda (dj) (if (not (is-oversize? dj)) (count-one-atom dj)))
-		(append sections section-insts)
+		sections
+	)
+
+	; And store the whole parse
+	(for-each
+		(lambda (x)
+			(if (equal? (cog-type x) 'Section)
+				(if (not (is-oversize? x)) (store-atom x))
+				(store-atom x)))
+		(append section-insts word-inst-lks reference-lks)
 	)
 )
 ; ---------------------------------------------------------------------
