@@ -136,17 +136,14 @@ LGParseMinimal::LGParseMinimal(const Link& l)
 
 // =================================================================
 
-Handle LGParseLink::execute(AtomSpace* as) const
+Handle LGParseLink::execute() const
 {
 	if (PHRASE_NODE != _outgoing[0]->get_type()) return Handle();
 	if (LG_DICT_NODE != _outgoing[1]->get_type()) return Handle();
 	if (3 == _outgoing.size() and
 	   NUMBER_NODE != _outgoing[2]->get_type()) return Handle();
 
-	if (nullptr == as) as = getAtomSpace();
-	if (nullptr == as)
-		throw InvalidParamException(TRACE_INFO,
-			"LgParseLink requires an atomspace to parse");
+	AtomSpace* as = getAtomSpace();
 
 	// Link grammar, for some reason, has a different error handler
 	// per thread. Don't know why. So we have to set it every time,
