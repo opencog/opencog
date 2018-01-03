@@ -136,14 +136,23 @@ LGParseMinimal::LGParseMinimal(const Link& l)
 
 // =================================================================
 
-Handle LGParseLink::execute(AtomSpace* as) const
+Handle LGParseLink::execute() const
 {
 	if (PHRASE_NODE != _outgoing[0]->get_type()) return Handle();
 	if (LG_DICT_NODE != _outgoing[1]->get_type()) return Handle();
 	if (3 == _outgoing.size() and
 	   NUMBER_NODE != _outgoing[2]->get_type()) return Handle();
 
-	if (nullptr == as) as = getAtomSpace();
+	// Due to the way that parsing generates big piles of atoms, they
+	// have to be placed into some atomspace. First choice is the same
+	// atomspace as this atom; however, this atom might not be in any
+	// atomspace, if it is begin created by some complex execution
+	// chain. Second attempt is to put it where the phrase is. If
+	// that's not available, then surely the dictionary is available
+	// as a long-lived atom.
+	AtomSpace* as = getAtomSpace();
+	if (nullptr == as) as = _outgoing[0]->getAtomSpace();
+	if (nullptr == as) as = _outgoing[1]->getAtomSpace();
 	if (nullptr == as)
 		throw InvalidParamException(TRACE_INFO,
 			"LgParseLink requires an atomspace to parse");
