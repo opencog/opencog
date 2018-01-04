@@ -56,11 +56,10 @@ public:
 
 typedef std::shared_ptr<LgDictNode> LgDictNodePtr;
 static inline LgDictNodePtr LgDictNodeCast(const Handle& h)
-	{ AtomPtr a(h); return std::dynamic_pointer_cast<LgDictNode>(a); }
+	{ return std::dynamic_pointer_cast<LgDictNode>(h); }
 static inline LgDictNodePtr LgDictNodeCast(AtomPtr a)
 	{ return std::dynamic_pointer_cast<LgDictNode>(a); }
 
-// XXX temporary hack ...
 #define createLgDictNode std::make_shared<LgDictNode>
 
 /** @}*/

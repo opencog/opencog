@@ -167,7 +167,7 @@ Handle LGParseLink::execute() const
 	Dictionary dict = ldn->get_dictionary();
 	if (nullptr == dict)
 		throw InvalidParamException(TRACE_INFO,
-			"LgParseLink requires valid dictionary! %s was given.",
+			"LgParseLink requires valid dictionary! \"%s\" was given.",
 			ldn->get_name().c_str());
 
 	// Set up the sentence
