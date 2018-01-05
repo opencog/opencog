@@ -1,3 +1,5 @@
+;; TODO: update comment to use PutLink
+;;
 ;; Given n+1 patterns
 ;;
 ;; - an n-ary pattern, g with frequency equal to or above ms
@@ -63,9 +65,9 @@
 (use-modules (opencog query))
 (use-modules (opencog rule-engine))
 
-(cog-logger-set-level! "fine")
-(cog-logger-set-stdout! #t)
-(cog-logger-set-sync! #t)
+;; (cog-logger-set-level! "fine")
+;; (cog-logger-set-stdout! #t)
+;; (cog-logger-set-sync! #t)
 
 ;; For now we implement a simplified unary version of that rule
 ;;
@@ -81,7 +83,7 @@
 ;; Evaluation <tv2>
 ;;   Predicate "minsup"
 ;;   List
-;;     ComposeLink
+;;     PutLink
 ;;       Lambda
 ;;         <x>
 ;;         <g>
@@ -123,7 +125,7 @@
                        (Evaluation
                          minsup
                          (List
-                           (Quote (Compose
+                           (Quote (Put
                              (Unquote g-lamb)
                              (Unquote f-lamb)))
                            ms))
@@ -138,48 +140,43 @@
   (bool->tv (tv->bool (cog-tv A))))
 
 (define (unary-specialization-formula conclusion . premises)
-  (cog-logger-debug "unary-specialization-formula conclusion = ~a, premises = ~a"
-                    conclusion premises)
   (if (= (length premises) 2)
       (let* ((minsup-pred (car premises))
-             (dummy-1 (cog-logger-debug "unary-specialization-formula minsup-pred = ~a" minsup-pred))
              (minsup-pred-tv (cog-tv minsup-pred))
-             (dummy-2 (cog-logger-debug "unary-specialization-formula minsup-pred-tv = ~a" minsup-pred-tv))
              (f-lamb (cdr premises))
-             (dummy-3 (cog-logger-debug "unary-specialization-formula f-lamb = ~a" f-lamb))
              (gf (gadr conclusion))
-             (dummy-4 (cog-logger-debug "unary-specialization-formula gf = ~a" gf))
-             (ms (atom->number (gddr conclusion)))
-             (dummy-5 (cog-logger-debug "unary-specialization-formula ms = ~a" ms))
+             (ms (inexact->exact (atom->number (gddr conclusion))))
              (conclusion-tv (if (tv->bool minsup-pred-tv)
                                 ;; g has enough support, let see if
                                 ;; g.f has enough support
-                                (bool->tv (support gf ms))
+                                (let ((sup (support gf ms)))
+                                  (if sup
+                                      (bool->tv (= ms sup))
+                                      #f)) ; It is ill-formed
                                 ;; g does not have enough support,
                                 ;; therefore g.f doesn't have enough
                                 ;; support
-                                (stv 0 1)))
-             (dummy-6 (cog-logger-debug "unary-specialization-formula conclusion-tv = ~a" conclusion-tv)))
-        (cog-set-tv! conclusion conclusion-tv))))
+                                (stv 0 1))))
+        (if conclusion-tv
+            (cog-set-tv! conclusion conclusion-tv)))))
 
-;; TODO: move this to rule-engine utils
-(define (atom->number A)
-  (cog-logger-debug "atom->number A = ~a" A)
-  (string->number (cog-name A)))
-
-;; Return #t if L has a frequency equal to or greater than ms, #f otherwise
+;; Return the min between the frequency of L and ms, or #f if L is
+;; ill-formed.
 (define (support L ms)
-  ;; TODO: clobber this with log messages
-  (cog-logger-debug "support L = ~a, ms" L ms)
-  (let* ((L-exec (cog-execute! L)))  ; consume compositions
-    (if (= (cog-arity L) 2)
-      (let* ((vardecl (gar L-exec))
-             (body (gdr L-exec))
-             (bl (Bind vardecl body body)) ; to deal with unordered links
-             (results (cog-bind-first-n bl ms)))
-        (= (cog-arity results) ms))
-      ;; Supposedly no variable declaration
-      (let* ((body (gar L-exec))
-             (bl (Bind body body)) ; to deal with unordered links
-             (results (cog-bind-first-n bl ms)))
-        (= (cog-arity results) ms)))))
+  (let* ((L-prnx (cog-execute! L))  ; get L in prenex form
+         (ill-formed (null? L-prnx)))
+    (if ill-formed
+        #f
+        ;; Otherwise it is well-formed, calculate its frequency up to ms
+        (if (= (cog-arity L-prnx) 2)
+            ;; With variable declaration
+            (let* ((vardecl (gar L-prnx))
+                   (body (gdr L-prnx))
+                   (bl (Bind vardecl body body)) ; to deal with unordered links
+                   (results (cog-bind-first-n bl ms)))
+              (cog-arity results))
+            ;; Without variable declaration
+            (let* ((body (gar L-prnx))
+                   (bl (Bind body body)) ; to deal with unordered links
+                   (results (cog-bind-first-n bl ms)))
+              (cog-arity results))))))

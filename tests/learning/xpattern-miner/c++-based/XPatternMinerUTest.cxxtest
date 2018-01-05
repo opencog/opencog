@@ -481,7 +481,7 @@ void XPatternMinerUTest::test_InferenceControl()
 		                        tmp_al(LIST_LINK, B, T))),
 		initpat = tmp_al(LAMBDA_LINK, vardecl, clauses);
 
-	XPMParameters param(2, 3, initpat, 2);
+	XPMParameters param(2/*minsup*/, 3/*ngram*/, initpat, -1/*maxdepth*/);
 	XPatternMiner pm(_as, param);
 	HandleTree results = pm();
 
