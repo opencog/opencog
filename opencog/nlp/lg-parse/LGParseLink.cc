@@ -270,8 +270,9 @@ Handle LGParseLink::cvt_linkage(Linkage lkg, int i, const char* idstr,
 			wrd = linkage_get_word(lkg, w);
 		else
 		{
-			if (' ' == phrstr[eb]) eb--;
-			wrd = strndupa(phrstr + sb, eb-sb+1);
+			// eb points at the byte after the last char,
+			// its a great place to write a null byte.
+			wrd = strndupa(phrstr + sb, eb-sb);
 		}
 
 		char buff[801] = "";
