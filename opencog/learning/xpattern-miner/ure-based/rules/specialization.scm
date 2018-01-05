@@ -160,10 +160,6 @@
         (if conclusion-tv
             (cog-set-tv! conclusion conclusion-tv)))))
 
-;; TODO: move this to rule-engine utils
-(define (atom->number A)
-  (string->number (cog-name A)))
-
 ;; Return the min between the frequency of L and ms, or #f if L is
 ;; ill-formed.
 (define (support L ms)
