@@ -59,7 +59,8 @@
 ;;       Variable "$X"
 ;;       Variable "$Y"
 
-(load "specialization-rule.scm")
+(load "../rules/specialization.scm")
+(load "../rules/abstraction.scm")
 
 ;; Common definitions
 (define P (Predicate "P"))
@@ -81,10 +82,6 @@
 ;; Abstraction
 (define abstract
   (Lambda X (Evaluation P X)))
-
-;; Specialization
-(define special
-  (Lambda (Inheritance X Y)))
 
 ;; Abstraction has enough support
 (Evaluation (stv 1 1) minsup (List abstract (Number 3)))
