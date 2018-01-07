@@ -21,9 +21,9 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "opencog/spacetime/atom_types.definitions"
+#include "opencog/spacetime/atom-types/atom_types.definitions"
 
-#define INHERITANCE_FILE "opencog/spacetime/atom_types.inheritance"
+#define INHERITANCE_FILE "opencog/spacetime/atom-types/atom_types.inheritance"
 #define INITNAME spacetime_types_init
 
 #include <opencog/atoms/base/atom_types.cc>
