@@ -19,5 +19,3 @@ INSTALL (FILES
 	TimeOctomap.h
 	DESTINATION "include/${PROJECT_NAME}/spacetime/octomap"
 )
-
-ADD_SUBDIRECTORY (pointmemory)
