@@ -1,15 +1,15 @@
-ADD_LIBRARY (octomap SHARED
+ADD_LIBRARY (atom_octomap SHARED
 	AtomOcTree.cc
 	AtomOcTreeNode.cc
 	TimeOctomap.cc
 )
 
-TARGET_LINK_LIBRARIES(octomap
+TARGET_LINK_LIBRARIES(atom_octomap
 	${OCTOMAP_LIBRARY}
 	${OCTOMAP_OCTOMATH_LIBRARY}
 )
 
-INSTALL (TARGETS octomap
+INSTALL (TARGETS atom_octomap
 	DESTINATION "lib${LIB_DIR_SUFFIX}/opencog"
 )
 

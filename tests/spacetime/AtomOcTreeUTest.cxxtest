@@ -32,7 +32,7 @@
 //TestAtomOcTree.cpp
 #include <cxxtest/TestSuite.h>
 #include <opencog/atomspace/AtomSpace.h>
-#include "opencog/timeoctomap/AtomOcTree.h"
+#include "opencog/spacetime/octomap/AtomOcTree.h"
 
 using namespace std;
 using namespace opencog;
