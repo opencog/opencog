@@ -10,18 +10,13 @@ ADD_SUBDIRECTORY (learning)
 
 IF (HAVE_ATOMSPACE)
 	ADD_SUBDIRECTORY (nlp)
+	ADD_SUBDIRECTORY (spacetime)
 ENDIF (HAVE_ATOMSPACE)
 
 IF (HAVE_SERVER)
 	ADD_SUBDIRECTORY (cogserver)
 	# attention builds *after* cogserver.
 	ADD_SUBDIRECTORY (attention)
-
-	# Will always build types
-	ADD_SUBDIRECTORY (spacetime)
-	IF (HAVE_OCTOMAP)
-		ADD_SUBDIRECTORY (timeoctomap)
-	ENDIF (HAVE_OCTOMAP)
 ENDIF(HAVE_SERVER)
 
 IF (HAVE_ATOMSPACE AND HAVE_GUILE)

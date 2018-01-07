@@ -32,7 +32,7 @@
 #include <opencog/atoms/core/NumberNode.h>
 #include <opencog/guile/SchemePrimitive.h>
 #include <opencog/spacetime/atom_types.h>
-#include <opencog/timeoctomap/TimeOctomap.h>
+#include <opencog/spacetime/octomap/TimeOctomap.h>
 
 namespace opencog
 {
