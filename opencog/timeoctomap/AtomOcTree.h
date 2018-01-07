@@ -39,16 +39,13 @@ public:
     /// Default constructor, sets resolution of leafs
     AtomOcTree(double resolution = 0.1)
         : OccupancyOcTreeBase< AtomOcTreeNode<T> >(resolution)
-    {
-        atomOcTreeMemberInit.ensureLinking();
-    }
+    {}
 
 
     /// virtual constructor: creates a new object of same type
-    /// (Covariant return type requires an up-to-date compiler)
     AtomOcTree<T> *create() const
     {
-        return new AtomOcTree<T>(this->resolution);    //changed to this->resolution else templates cause problems
+        return new AtomOcTree<T>(this->resolution);
     }
 
     std::string getTreeType() const
@@ -59,9 +56,8 @@ public:
     // set node dat at given key or coordinate. Replaces previous dat.
     AtomOcTreeNode<T>* setNodeData(const OcTreeKey& key, const T& r){
         AtomOcTreeNode<T>* n = this->search(key);
-        //AtomOcTreeNode<T>* n = dynamic_cast<AtomOcTreeNode<T>*>(this->search(key));
         if (n != 0) {
-            n->setData(r);//setColor
+            n->setData(r);
         }
         return n;
     }
@@ -72,18 +68,6 @@ public:
         if (!this->coordToKeyChecked(xyz, key)) return nullptr;
         return setNodeData(key, r);
     }
-    // update inner nodes, sets dat to average child dat
-    void updateInnerOccupancy() {}
-
-    AtomOcTreeNode<T>* setNodeBlock(const double& x,
-            const double& y,
-            const double& z,
-            const T& block)
-    {
-        point3d pos(x, y, z);
-        return setNodeBlock(pos, block);
-    }
-
 
     inline std::string getMapName() const {return mMapName;}
 
@@ -93,10 +77,7 @@ protected:
 
     /**
      * Static member object which ensures that this OcTree's prototype
-     * ends up in the classIDMapping only once. You need this as a
-     * static member in any derived octree class in order to read .ot
-     * files through the AbstractOcTree factory. You should also call
-     * ensureLinking() once from the constructor.
+     * ends up in the classIDMapping only once.
      */
 
     struct StaticMemberInitializer
@@ -106,13 +87,6 @@ protected:
             AtomOcTree<T>* tree = new AtomOcTree<T>(0.1);
             AbstractOcTree::registerTreeType(tree);
         }
-
-        /**
-         * Dummy function to ensure that MSVC does not drop the
-         * StaticMemberInitializer, causing this tree failing to register.
-         * Needs to be called from the constructor of this octree.
-         */
-        void ensureLinking() {};
     };
     /// static member to ensure static initialization (only once)
     static StaticMemberInitializer atomOcTreeMemberInit;
