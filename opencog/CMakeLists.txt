@@ -20,7 +20,6 @@ IF (HAVE_SERVER)
 	# Will always build types
 	ADD_SUBDIRECTORY (spacetime)
 	IF (HAVE_OCTOMAP)
-		ADD_SUBDIRECTORY (spatial)
 		ADD_SUBDIRECTORY (timeoctomap)
 	ENDIF (HAVE_OCTOMAP)
 ENDIF(HAVE_SERVER)

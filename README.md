@@ -127,28 +127,13 @@ the build, will be more precise as to which parts will not be built.
 
 ###### OctoMap
 > 3D occupancy grid mapping library
+> Required for the robot perception subsystem.
 > `sudo apt-get install liboctomap-dev`
 
 Obsolete Prerequisites
 ----------------------
 The following packages are needed to build some of the old, obsolete
 packages.
-
-###### OpenGL
-> Open Graphics Library
-> Used by opencog/spatial/MapTool (which is now deprecated/obsolete !?)
-> http://www.opengl.org
-> Commonly provided with your video card driver
-
-###### SDL
-> Simple DirectMedia Layer
-> Used by opencog/spatial/MapTool (which is now deprecated/obsolete !?)
-> http://www.libsdl.org | libsdl1.2-dev
-
-###### SDL_gfx
-> Simple DirectMedia Layer extension
-> Used by opencog/spatial/MapTool (which is now deprecated/obsolete !?)
-> http://www.ferzkopp.net/joomla/content/view/19/14/ | libsdl-gfx1.2-dev
 
 ###### CppREST
 > C++ HTTP RESTful interfaces
@@ -161,12 +146,6 @@ packages.
 > Used to implement the optional REST API. (TODO: the REST API should
   be refactored to not use TBB)
 > https://www.threadingbuildingblocks.org/download | libtbb-dev
-
-###### ZeroMQ (version 3.2.4 or higher)
-> Asynchronous messaging library
-> Used by the event publisher library ... which is currently broken,
-  anyway, and not used anywhere ...
-> http://zeromq.org/intro:get-the-software | libzmq3-dev
 
 Building OpenCog
 ----------------

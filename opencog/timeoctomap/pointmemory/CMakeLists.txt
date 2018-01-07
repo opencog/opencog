@@ -5,8 +5,6 @@ ADD_LIBRARY(point_memory SHARED
 )
 
 TARGET_LINK_LIBRARIES(point_memory
-	time_octomap
-	spacetime
 	spacetime-types
 	${ATOMSPACE_LIBRARIES}
 )
