@@ -66,11 +66,10 @@ public:
 
 typedef std::shared_ptr<LGDictEntry> LGDictEntryPtr;
 static inline LGDictEntryPtr LGDictEntryCast(const Handle& h)
-	{ AtomPtr a(h); return std::dynamic_pointer_cast<LGDictEntry>(a); }
+	{ return std::dynamic_pointer_cast<LGDictEntry>(h); }
 static inline LGDictEntryPtr LGDictEntryCast(AtomPtr a)
 	{ return std::dynamic_pointer_cast<LGDictEntry>(a); }
 
-// XXX temporary hack ...
 #define createLGDictEntry std::make_shared<LGDictEntry>
 
 /** @}*/
