@@ -1,9 +1,14 @@
-TimeOctomap API:
-  Purpose: This API stores Atoms in a 4d space time coordinate map. One can query the past or current location of an atom. Spatial coordinates are stored in an octomap. A circular buffer of octomaps is iused to represent time.  
+=Atom Octomap API=
 
-Map representation is inherited from octomap library and stores atom at an x,y,z location.
+This subsystem stores Atoms in a 4d spacetime coordinate map. The
+current or past location of an atom can be queried, as well at the
+set of atoms at a given location or time.
 
-Note:
- A little problem due to map being accessed probabilistic-ally is that deletion acts probabilistic as well.
- currently put a hack to change node value for full delete in case all atom references for particular atom need to be forgotten.
- RemoveAtomAtTime removes probabilistic while RemoveAtom to forget all atoms removes by changing value to UndefinedHandle
+Scheme bindings are provided by the `(opencog pointmem)` module.
+
+==Pre-requistes==
+
+In order to compile this code, this needs the OctoMap libary:
+```
+sudo apt-get install liboctomap-dev
+```
