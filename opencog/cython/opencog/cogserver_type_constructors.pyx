@@ -15,7 +15,7 @@ def set_type_ctor_atomspace(new_atomspace):
     atomspace = new_atomspace
 
 include "opencog/nlp/types/nlp_types.pyx"
-include "opencog/spacetime/spacetime_types.pyx"
+include "opencog/spacetime/atom-types/spacetime_types.pyx"
 include "opencog/attention/attention_types.pyx"
 
 cdef extern :
