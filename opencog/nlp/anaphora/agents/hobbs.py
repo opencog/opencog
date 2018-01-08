@@ -3,7 +3,7 @@ from __future__ import print_function
 from pprint import pprint
 from opencog.cogserver import MindAgent
 from opencog.atomspace import types, AtomSpace, TruthValue
-from opencog.scheme_wrapper import load_scm,scheme_eval_h,scheme_eval, __init__
+from opencog.scheme_wrapper import load_scm, scheme_eval_h, scheme_eval, __init__
 from opencog import logger
 
 import Queue
@@ -66,6 +66,7 @@ class BindLinkExecution():
         self.command=command
         self.resultNode=resultNode
         self.atomType=atomType
+        scheme_eval(self.atomspace, "(use-modules (opencog) (opencog exec))")
 
     def execution(self):
 
@@ -397,7 +398,7 @@ class HobbsAgent(MindAgent):
         Finds word sequence number for each word
         '''
 
-        rv= self.bindLinkExe(None,None,'(cog-execute! getAllNumberNodes)',self.currentResult,types.WordSequenceLink)
+        rv= self.bindLinkExe(None, None, '(cog-execute! getAllNumberNodes)', self.currentResult, types.WordSequenceLink)
         for link in rv:
             out=link.out
             if out[0].type==types.WordInstanceNode:
