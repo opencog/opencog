@@ -1,5 +1,6 @@
 
 (use-modules (ice-9 receive))  ; for receive, below
+(use-modules (ice-9 optargs))  ; for define*-public
 (use-modules (srfi srfi-1)
              (opencog)
              (opencog nlp)  ; need the atom types
@@ -23,20 +24,26 @@
 ; =======================================================================
 
 ; -----------------------------------------------------------------------
-; See documentation below ...
-(define-public microplanning
-"
-  microplanning -- The main microplanning interface
-
-  A shortcut for calling microplanning without specifying all the
-  arguments.
-"
+; Because we use the case-lambda, here, instead of optargs,
+; we cannot use define*-public, like we would like to. So the
+; export is down below.  Oh well.
+(define microplanning
 	(case-lambda
 		((sl ut) (microplanning-main sl ut *default_chunks_option* #t))
 		((sl ut opt a) (microplanning-main sl ut opt a))
 	)
 )
 
+(export microplanning)
+
+
+(set-procedure-property! microplanning 'documentation
+"
+  microplanning -- The main microplanning interface
+
+  A shortcut for calling microplanning without specifying all the
+  arguments.
+")
 
 ; =======================================================================
 ; Some constants
