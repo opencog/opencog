@@ -109,7 +109,7 @@ HandleTree XPatternMiner::specialize(const Handle& pattern,
 	if (not enough_support(pattern, texts))
 		return HandleTree();
 
-	// If the pattern is a variable, then differ to single variable
+	// If the pattern is a variable, then defer to single variable
 	// specialization
 	if (get_body(pattern)->get_type() == VARIABLE_NODE)
 		return specialize_varpat(pattern, texts, maxdepth);
