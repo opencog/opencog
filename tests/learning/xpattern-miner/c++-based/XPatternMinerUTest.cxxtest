@@ -531,7 +531,7 @@ void XPatternMinerUTest::test_InferenceControl()
 	TS_ASSERT(content_is_in(expected_pattern, results));
 }
 
-// void XPatternMinerUTest::test_PatternMiner_SodaDrinker()
+// void XPatternMinerUTest::test_SodaDrinker()
 // {
 // 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 // 	// Load ugly_male_soda-drinker_corpus.scm
