@@ -55,6 +55,33 @@ public:
         // clearing it.) Something is majorly wrong with this, but
         // I can't figure it out...
         _as = new AtomSpace();
+
+        _evaluator = new SchemeEval(_as);
+
+        // need this for loading LG dictionary
+        _evaluator->eval("(setlocale LC_CTYPE \"\")");
+        _evaluator->clear_pending();
+
+        std::string rv = _evaluator->eval("(use-modules (opencog))");
+        printf("Setup opencog: %s\n", rv.c_str());
+        rv = _evaluator->eval("(use-modules (opencog nlp))");
+        printf("Setup nlp: %s\n", rv.c_str());
+        rv = _evaluator->eval("(use-modules (opencog nlp lg-dict))");
+        printf("Setup lg-dict: %s\n", rv.c_str());
+
+        // XXX FIXME. Without this, the unit test fails because
+        // spacetime-types.so is not found.  If we put this in a
+        // different place, it also fails because some atom types
+        // get loadeed twice!  How is this possible??  This is insane!
+        _evaluator->eval("(setenv \"LTDL_LIBRARY_PATH\" "
+                         "\"/usr/local/lib/opencog\""
+                         ")");
+
+        rv = _evaluator->eval("(use-modules (opencog nlp relex2logic))");
+        printf("Setup r2l: %s\n", rv.c_str());
+        rv = _evaluator->eval("(use-modules (opencog nlp sureal))");
+        printf("Setup sureal: %s\n", rv.c_str());
+        _evaluator->clear_pending();
     }
 
     ~SuRealUTest()
@@ -80,30 +107,12 @@ void SuRealUTest::setUp(void)
 {
     // XXX Do not create an atomspace here, see comments above.
     //_as = new AtomSpace();
-    _evaluator = new SchemeEval(_as);
-
-    // need this for loading LG dictionary
-    _evaluator->eval("(setlocale LC_CTYPE \"\")");
-    _evaluator->clear_pending();
-
-    std::string rv = _evaluator->eval("(use-modules (opencog))");
-    printf("Setup opencog: %s\n", rv.c_str());
-
-    rv = _evaluator->eval("(use-modules (opencog nlp))");
-    printf("Setup nlp: %s\n", rv.c_str());
-    rv = _evaluator->eval("(use-modules (opencog nlp lg-dict))");
-    printf("Setup lg-dict: %s\n", rv.c_str());
-    rv = _evaluator->eval("(use-modules (opencog nlp relex2logic))");
-    printf("Setup r2l: %s\n", rv.c_str());
-    rv = _evaluator->eval("(use-modules (opencog nlp sureal))");
-    printf("Setup sureal: %s\n", rv.c_str());
-    _evaluator->clear_pending();
 }
 
 void SuRealUTest::tearDown(void)
 {
-    delete _evaluator;
-    _evaluator = NULL;
+    // delete _evaluator;
+    // _evaluator = NULL;
 
     // SuReal keeps a cache of atoms!  Aiiieee This needs fixing!!!
     nlp::SuRealCache::instance().reset();
