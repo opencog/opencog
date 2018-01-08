@@ -1,5 +1,10 @@
 
 (use-modules (ice-9 receive))  ; for receive, below
+(use-modules (srfi srfi-1)
+             (opencog)
+             (opencog nlp)  ; need the atom types
+             (opencog nlp relex2logic) ; helpers.scm uses this
+             (opencog nlp sureal))
 
 ;
 ; loading additional dependency
@@ -19,22 +24,19 @@
 
 ; -----------------------------------------------------------------------
 ; See documentation below ...
-(define microplanning
+(define-public microplanning
+"
+  microplanning -- The main microplanning interface
+
+  A shortcut for calling microplanning without specifying all the
+  arguments.
+"
 	(case-lambda
 		((sl ut) (microplanning-main sl ut *default_chunks_option* #t))
 		((sl ut opt a) (microplanning-main sl ut opt a))
 	)
 )
 
-(export microplanning)
-
-(set-procedure-property! microplanning 'documentation
-"
-  microplanning -- The main microplanning interface
-
-  A shortcut for calling microplanning without specifying all the
-  arguments.
-")
 
 ; =======================================================================
 ; Some constants

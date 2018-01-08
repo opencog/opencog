@@ -50,6 +50,19 @@ public:
         }
         logger().set_timestamp_flag(false);
         _as = new AtomSpace();
+        _evaluator = new SchemeEval(_as);
+
+        // need this for loading LG dictionary
+        _evaluator->eval("(setlocale LC_CTYPE \"\")");
+        _evaluator->clear_pending();
+
+        _evaluator->eval("(use-modules (opencog))");
+        _evaluator->eval("(use-modules (opencog nlp))");
+        _evaluator->eval("(use-modules (opencog nlp lg-dict))");
+        _evaluator->eval("(use-modules (opencog spacetime))");
+        _evaluator->eval("(use-modules (opencog nlp relex2logic))");
+        _evaluator->eval("(use-modules (opencog nlp sureal))");
+        _evaluator->eval("(use-modules (opencog nlp microplanning))");
     }
 
     ~MicroplanningUTest()
@@ -68,24 +81,6 @@ public:
 
 void MicroplanningUTest::setUp(void)
 {
-    // XXX FIXME This unit test fails, if multiple atomspaces
-    // are used, instead of re-using the same atomspace (and
-    // clearing it.) Something is majorly wrong with this, but
-    // I can't figure it out...
-    // _as = new AtomSpace();
-    _evaluator = new SchemeEval(_as);
-
-    // need this for loading LG dictionary
-    _evaluator->eval("(setlocale LC_CTYPE \"\")");
-    _evaluator->clear_pending();
-
-    _evaluator->eval("(use-modules (opencog))");
-    _evaluator->eval("(use-modules (opencog nlp))");
-    _evaluator->eval("(use-modules (opencog nlp lg-dict))");
-    _evaluator->eval("(use-modules (opencog nlp microplanning))");
-    _evaluator->eval("(use-modules (opencog nlp relex2logic))");
-    _evaluator->eval("(use-modules (opencog nlp sureal))");
-
     _evaluator->eval("(load  \"" PROJECT_SOURCE_DIR
                  "/tests/nlp/microplanning/r2l-atomspace.scm\")");
     _evaluator->eval("(load  \"" PROJECT_SOURCE_DIR
@@ -96,10 +91,7 @@ void MicroplanningUTest::setUp(void)
 
 void MicroplanningUTest::tearDown(void)
 {
-    delete _evaluator;
-    _evaluator = NULL;
-    // XXX Deleting the _as causes weird malloc pool corruption!
-    // delete _as;
+    _as->clear();
 }
 
 void MicroplanningUTest::test_declarative(void)
