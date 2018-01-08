@@ -78,16 +78,23 @@ void SuRealUTest::setUp(void)
     _evaluator->eval("(setlocale LC_CTYPE \"\")");
     _evaluator->clear_pending();
 
-    _evaluator->eval("(use-modules (opencog))");
+    std::string rv = _evaluator->eval("(use-modules (opencog))");
+    printf("Setup opencog: %s\n", rv.c_str());
 
+/*
     _evaluator->eval("(setenv \"LTDL_LIBRARY_PATH\" "
 		"\"/usr/local/lib/opencog"
 		"\")");
+*/
 
-    _evaluator->eval("(use-modules (opencog nlp))");
-    _evaluator->eval("(use-modules (opencog nlp lg-dict))");
-    _evaluator->eval("(use-modules (opencog nlp relex2logic))");
-    _evaluator->eval("(use-modules (opencog nlp sureal))");
+    rv = _evaluator->eval("(use-modules (opencog nlp))");
+    printf("Setup nlp: %s\n", rv.c_str());
+    rv = _evaluator->eval("(use-modules (opencog nlp lg-dict))");
+    printf("Setup lg-dict: %s\n", rv.c_str());
+    rv = _evaluator->eval("(use-modules (opencog nlp relex2logic))");
+    printf("Setup r2l: %s\n", rv.c_str());
+    rv = _evaluator->eval("(use-modules (opencog nlp sureal))");
+    printf("Setup sureal: %s\n", rv.c_str());
     _evaluator->clear_pending();
 }
 
@@ -113,8 +120,9 @@ void SuRealUTest::test_basic(void)
     _evaluator->eval_h(R"( (WordNode "eats") )");
 
     // test sureal with short sentence
-    _evaluator->eval(R"( (define s-result (sureal (SetLink (EvaluationLink (PredicateNode "eats") (ListLink (ConceptNode "she")))))) )");
+    std::string rv = _evaluator->eval(R"( (define s-result (sureal (SetLink (EvaluationLink (PredicateNode "eats") (ListLink (ConceptNode "she")))))) )");
     bool eval_err = _evaluator->eval_error();
+    if (eval_err) printf("got %s\n", rv.c_str());
     _evaluator->clear_pending();
     TSM_ASSERT("Failed to run sureal!", !eval_err);
 
