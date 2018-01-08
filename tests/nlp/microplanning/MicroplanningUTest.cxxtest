@@ -75,14 +75,6 @@ void MicroplanningUTest::setUp(void)
     _evaluator->clear_pending();
 
     _evaluator->eval("(use-modules (opencog))");
-
-    _evaluator->eval("(add-to-load-path \"/usr/local/share\")");
-    _evaluator->eval("(setenv \"LTDL_LIBRARY_PATH\" "
-         "\"/usr/local/lib/opencog:"
-         PROJECT_BINARY_DIR "/opencog/nlp/sureal:"
-         PROJECT_BINARY_DIR "/opencog/nlp/lg-dict"
-         "\")");
-
     _evaluator->eval("(use-modules (opencog nlp))");
     _evaluator->eval("(use-modules (opencog nlp lg-dict))");
     _evaluator->eval("(use-modules (opencog nlp microplanning))");
