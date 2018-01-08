@@ -59,7 +59,7 @@ public:
 	LGDictEntry(const Link&);
 
 	// Return a pointer to the atom being specified.
-	virtual Handle execute(AtomSpace* = nullptr) const;
+	virtual Handle execute() const;
 
 	static Handle factory(const Handle&);
 };
