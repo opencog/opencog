@@ -56,13 +56,32 @@ public:
         _evaluator->eval("(setlocale LC_CTYPE \"\")");
         _evaluator->clear_pending();
 
-        _evaluator->eval("(use-modules (opencog))");
-        _evaluator->eval("(use-modules (opencog nlp))");
-        _evaluator->eval("(use-modules (opencog nlp lg-dict))");
-        _evaluator->eval("(use-modules (opencog spacetime))");
-        _evaluator->eval("(use-modules (opencog nlp relex2logic))");
-        _evaluator->eval("(use-modules (opencog nlp sureal))");
-        _evaluator->eval("(use-modules (opencog nlp microplanning))");
+
+        std::string rv;
+        rv = _evaluator->eval("(use-modules (opencog))");
+        printf("setup opencog=%s", rv.c_str());
+        rv = _evaluator->eval("(use-modules (opencog nlp))");
+        printf("setup nlp=%s", rv.c_str());
+
+        // XXX FIXME - work around some kind of module loading crazy
+        // Placing this above casues WordNode to be loaded twice (!)
+        // Porbably because its loaded once from the build dir, and
+        // a second time from /usr/local.
+        // It should not be needed at all...
+        _evaluator->eval("(setenv \"LTDL_LIBRARY_PATH\" "
+                         "\"/usr/local/lib/opencog\""
+                         ")");
+
+        rv = _evaluator->eval("(use-modules (opencog nlp lg-dict))");
+        printf("setup lg-dict=%s", rv.c_str());
+        rv = _evaluator->eval("(use-modules (opencog spacetime))");
+        printf("setup spacetime=%s", rv.c_str());
+        rv = _evaluator->eval("(use-modules (opencog nlp relex2logic))");
+        printf("setup r2l=%s", rv.c_str());
+        rv = _evaluator->eval("(use-modules (opencog nlp sureal))");
+        printf("setup sureal=%s", rv.c_str());
+        rv = _evaluator->eval("(use-modules (opencog nlp microplanning))");
+        printf("setup micropanning=%s", rv.c_str());
     }
 
     ~MicroplanningUTest()
