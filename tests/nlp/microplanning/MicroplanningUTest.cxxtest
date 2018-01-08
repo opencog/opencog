@@ -93,7 +93,8 @@ void MicroplanningUTest::tearDown(void)
 {
     delete _evaluator;
     _evaluator = NULL;
-    delete _as;
+    // XXX Deleting the _as causes weird malloc pool corruption!
+    // delete _as;
 }
 
 void MicroplanningUTest::test_declarative(void)

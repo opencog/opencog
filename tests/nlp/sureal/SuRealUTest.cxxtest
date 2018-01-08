@@ -102,7 +102,9 @@ void SuRealUTest::tearDown(void)
 {
     delete _evaluator;
     _evaluator = NULL;
-    delete _as;
+    _as->clear();
+    // XXX Deleting the _as causes weird malloc pool corruption!
+    // delete _as;
 }
 
 void SuRealUTest::test_basic(void)
