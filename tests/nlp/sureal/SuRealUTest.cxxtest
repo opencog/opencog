@@ -27,6 +27,7 @@
 #include <opencog/guile/SchemeEval.h>
 #include <opencog/guile/SchemeSmob.h>
 #include <opencog/atomspace/AtomSpace.h>
+#include <opencog/nlp/sureal/SuRealCache.h>
 
 using namespace opencog;
 
@@ -48,6 +49,12 @@ public:
         {
             std::cerr << e.get_message() << std::endl;
         }
+
+        // XXX FIXME This unit test fails, if multiple atomspaces
+        // are used, instead of re-using the same atomspace (and
+        // clearing it.) Something is majorly wrong with this, but
+        // I can't figure it out...
+        _as = new AtomSpace();
     }
 
     ~SuRealUTest()
@@ -71,7 +78,8 @@ public:
 
 void SuRealUTest::setUp(void)
 {
-    _as = new AtomSpace();
+    // XXX Do not create an atomspace here, see comments above.
+    //_as = new AtomSpace();
     _evaluator = new SchemeEval(_as);
 
     // need this for loading LG dictionary
@@ -80,12 +88,6 @@ void SuRealUTest::setUp(void)
 
     std::string rv = _evaluator->eval("(use-modules (opencog))");
     printf("Setup opencog: %s\n", rv.c_str());
-
-/*
-    _evaluator->eval("(setenv \"LTDL_LIBRARY_PATH\" "
-		"\"/usr/local/lib/opencog\""
-      ")");
-*/
 
     rv = _evaluator->eval("(use-modules (opencog nlp))");
     printf("Setup nlp: %s\n", rv.c_str());
@@ -102,6 +104,9 @@ void SuRealUTest::tearDown(void)
 {
     delete _evaluator;
     _evaluator = NULL;
+
+    // SuReal keeps a cache of atoms!  Aiiieee This needs fixing!!!
+    nlp::SuRealCache::instance().reset();
     _as->clear();
     // XXX Deleting the _as causes weird malloc pool corruption!
     // delete _as;

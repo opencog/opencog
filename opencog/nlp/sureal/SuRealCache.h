@@ -35,6 +35,13 @@ namespace nlp
 /**
  * A Cache between SuReal and PatternMatcher. This class is a Singleton.
  *
+ * XXX THIS IS A BROKEN DESIGN! -- FIXME! (The fix is easy) The cache
+ * needs to be kept in the atomspace; just put the atoms there, keep
+ * them there, put them in well-known locations!  The problem with this
+ * cache is that it does NOT work with multiple atomspaces; see for
+ * example SuRealUTest, which bombs when multiple atomspces are used!!
+ * FIXME by getting rid of this class!!!
+ *
  * This cache stores the results of calls to differents methods of PatternMatcherCallBack
  * in separate Caches. This makes sense because such calls in SuReal are
  * time expensive and in some scenarios (in particular when SuReal is being used
