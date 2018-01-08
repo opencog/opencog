@@ -44,7 +44,7 @@ public:
     Handle testHandle;
     void setUp()
     {
-        testHandle=testatomspace.add_node(NUMBER_NODE,"21");
+        testHandle = testatomspace.add_node(NUMBER_NODE, "21");
     }
 
     void tearDown()
@@ -54,10 +54,10 @@ public:
     void print_query_info(point3d query, opencog::Handle ato)
     {
         if (ato != Handle()) {
-            cout << "occupancy at " << query << ":\t " << ato<< endl;
+            cout << "occupancy at " << query << ": " << ato->to_string() << endl;
         }
         else
-            cout << "occupancy at " << query << ":\t is unknown" << endl;
+            cout << "occupancy at " << query << ": empty" << endl;
     }
 
     void test_TSA()
@@ -84,7 +84,7 @@ public:
             for (int y=-20; y<20; y++) {
               for (int z=-20; z<20; z++) {
                 point3d endpoint ((float) x*0.05f, (float) y*0.05f, (float) z*0.05f);
-                TS_ASSERT(tsa.RemoveAtomAtTime(t1,1,endpoint));
+                TS_ASSERT(tsa.RemoveAtomAtTime(t1, 1, endpoint));
               }
             }
           }
