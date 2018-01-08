@@ -26,13 +26,14 @@
 #include <opencog/util/Logger.h>
 #include <opencog/guile/SchemeEval.h>
 #include <opencog/guile/SchemeSmob.h>
-#include <opencog/cogserver/server/CogServer.h>
+#include <opencog/atomspace/AtomSpace.h>
 
 using namespace opencog;
 
 class SuRealUTest :  public CxxTest::TestSuite
 {
 private:
+    AtomSpace* _as;
     SchemeEval* _evaluator;
 
 public:
@@ -70,30 +71,30 @@ public:
 
 void SuRealUTest::setUp(void)
 {
-    server(CogServer::createInstance);
-    cogserver().getAtomSpace().clear();
-
-    _evaluator = new SchemeEval(&cogserver().getAtomSpace());
+    _as = new AtomSpace();
+    _evaluator = new SchemeEval(_as);
 
     // need this for loading LG dictionary
     _evaluator->eval("(setlocale LC_CTYPE \"\")");
     _evaluator->clear_pending();
 
-    _evaluator->eval("(use-modules (opencog))");
+    std::string rv = _evaluator->eval("(use-modules (opencog))");
+    printf("Setup opencog: %s\n", rv.c_str());
+
 /*
-These cause the unit test to fail. I don't think they are needed.
-    _evaluator->eval("(add-to-load-path \"" PROJECT_BINARY_DIR "/opencog/\")");
-    _evaluator->eval("(add-to-load-path \"" PROJECT_BINARY_DIR "/opencog/scm\")");
+    _evaluator->eval("(setenv \"LTDL_LIBRARY_PATH\" "
+		"\"/usr/local/lib/opencog\""
+      ")");
 */
 
-    _evaluator->eval("(setenv \"LTDL_LIBRARY_PATH\" "
-		"\"/usr/local/lib/opencog"
-		"\")");
-
-    _evaluator->eval("(use-modules (opencog nlp))");
-    _evaluator->eval("(use-modules (opencog nlp lg-dict))");
-    _evaluator->eval("(use-modules (opencog nlp relex2logic))");
-    _evaluator->eval("(use-modules (opencog nlp sureal))");
+    rv = _evaluator->eval("(use-modules (opencog nlp))");
+    printf("Setup nlp: %s\n", rv.c_str());
+    rv = _evaluator->eval("(use-modules (opencog nlp lg-dict))");
+    printf("Setup lg-dict: %s\n", rv.c_str());
+    rv = _evaluator->eval("(use-modules (opencog nlp relex2logic))");
+    printf("Setup r2l: %s\n", rv.c_str());
+    rv = _evaluator->eval("(use-modules (opencog nlp sureal))");
+    printf("Setup sureal: %s\n", rv.c_str());
     _evaluator->clear_pending();
 }
 
@@ -101,6 +102,9 @@ void SuRealUTest::tearDown(void)
 {
     delete _evaluator;
     _evaluator = NULL;
+    _as->clear();
+    // XXX Deleting the _as causes weird malloc pool corruption!
+    // delete _as;
 }
 
 void SuRealUTest::test_basic(void)
@@ -118,8 +122,9 @@ void SuRealUTest::test_basic(void)
     _evaluator->eval_h(R"( (WordNode "eats") )");
 
     // test sureal with short sentence
-    _evaluator->eval(R"( (define s-result (sureal (SetLink (EvaluationLink (PredicateNode "eats") (ListLink (ConceptNode "she")))))) )");
+    std::string rv = _evaluator->eval(R"( (define s-result (sureal (SetLink (EvaluationLink (PredicateNode "eats") (ListLink (ConceptNode "she")))))) )");
     bool eval_err = _evaluator->eval_error();
+    if (eval_err) printf("got %s\n", rv.c_str());
     _evaluator->clear_pending();
     TSM_ASSERT("Failed to run sureal!", !eval_err);
 
@@ -152,7 +157,10 @@ void SuRealUTest::test_complex(void)
                          (ListLink (ConceptNode "cat") (ConceptNode "dog")))
                         (InheritanceLink (ConceptNode "cat") (ConceptNode "green")))))
                      )");
+    std::string sent = _evaluator->eval(R"( s-result  )");
+    printf("got %s\n", sent.c_str());
     std::string result = _evaluator->eval(R"( (equal? s-result (list (list "the" "green" "cat" "loves" "the" "dog" "."))) )");
+    printf("equality?  %s\n", result.c_str());
     TSM_ASSERT("Failed to sureal complex sentence!", result == "#t\n");
 
     logger().debug("END TEST: %s", __FUNCTION__);

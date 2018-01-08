@@ -4,6 +4,10 @@
 ; Some generic rule utilities, not limited to r2l.
 ;
 ;--------------------------------------------------------------------
+; XXX why is this public?
+(define-public r2l-rules (ConceptNode "R2L-en-RuleBase"))
+
+;--------------------------------------------------------------------
 ;
 ; Short-hand for declaring a variable.
 (define-public (var-decl var type)

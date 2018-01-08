@@ -26,13 +26,14 @@
 #include <opencog/util/Logger.h>
 #include <opencog/guile/SchemeEval.h>
 #include <opencog/guile/SchemeSmob.h>
-#include <opencog/cogserver/server/CogServer.h>
+#include <opencog/atomspace/AtomSpace.h>
 
 using namespace opencog;
 
 class MicroplanningUTest :  public CxxTest::TestSuite
 {
 private:
+    AtomSpace* _as;
     SchemeEval* _evaluator;
 
 public:
@@ -66,27 +67,14 @@ public:
 
 void MicroplanningUTest::setUp(void)
 {
-    server(CogServer::createInstance);
-    _evaluator = new SchemeEval(&cogserver().getAtomSpace());
+    _as = new AtomSpace();
+    _evaluator = new SchemeEval(_as);
 
     // need this for loading LG dictionary
     _evaluator->eval("(setlocale LC_CTYPE \"\")");
     _evaluator->clear_pending();
 
     _evaluator->eval("(use-modules (opencog))");
-
-    _evaluator->eval("(add-to-load-path \"/usr/local/share\")");
-/*
- These extra paths cause the unit tests to fail ... I don't understand why.
-    _evaluator->eval("(add-to-load-path \"" PROJECT_BINARY_DIR "/opencog/\")");
-    _evaluator->eval("(add-to-load-path \"" PROJECT_BINARY_DIR "/opencog/scm/\")");
-*/
-    _evaluator->eval("(setenv \"LTDL_LIBRARY_PATH\" "
-         "\"/usr/local/lib/opencog:"
-         PROJECT_BINARY_DIR "/opencog/nlp/sureal:"
-         PROJECT_BINARY_DIR "/opencog/nlp/lg-dict"
-         "\")");
-
     _evaluator->eval("(use-modules (opencog nlp))");
     _evaluator->eval("(use-modules (opencog nlp lg-dict))");
     _evaluator->eval("(use-modules (opencog nlp microplanning))");
@@ -105,6 +93,8 @@ void MicroplanningUTest::tearDown(void)
 {
     delete _evaluator;
     _evaluator = NULL;
+    // XXX Deleting the _as causes weird malloc pool corruption!
+    // delete _as;
 }
 
 void MicroplanningUTest::test_declarative(void)

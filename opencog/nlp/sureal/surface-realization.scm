@@ -15,7 +15,7 @@
              (opencog nlp lg-dict)
              (opencog nlp relex2logic))
 
-(use-modules (opencog logger))
+; (use-modules (opencog logger))
 
 ; ---------------------------------------------------------------------
 ; Creates a single list  made of the elements of lists within it with
@@ -143,7 +143,7 @@
 
     ; add LG dictionary on each word if not already in the atomspace
     (par-map
-        lg-get-dict-entry
+        lg-dict-entry
         (filter-map
             (lambda (n)
                 (if (null? (r2l-get-word-inst n))
@@ -154,7 +154,7 @@
                                 (map
                                     (lambda (p)
                                         ; TODO: There could be too many... skip if seen before?
-                                        (lg-get-dict-entry (word-inst-get-word p))
+                                        (lg-dict-entry (word-inst-get-word p))
                                     )
                                     (cog-chase-link 'LemmaLink 'WordInstanceNode (r2l-get-word n))
                                 )
@@ -281,7 +281,7 @@
     (define result (cog-execute! (MapLink filter-in-pattern filter-from)))
 
     ; Delete the filter-from SetLink and its encompasing MapLink.
-    (cog-delete-recursive filter-from)
+    (cog-extract-recursive filter-from)
 
     result
 )
