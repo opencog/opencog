@@ -49,6 +49,7 @@ public:
             std::cerr << e.get_message() << std::endl;
         }
         logger().set_timestamp_flag(false);
+        _as = new AtomSpace();
     }
 
     ~MicroplanningUTest()
@@ -67,7 +68,11 @@ public:
 
 void MicroplanningUTest::setUp(void)
 {
-    _as = new AtomSpace();
+    // XXX FIXME This unit test fails, if multiple atomspaces
+    // are used, instead of re-using the same atomspace (and
+    // clearing it.) Something is majorly wrong with this, but
+    // I can't figure it out...
+    // _as = new AtomSpace();
     _evaluator = new SchemeEval(_as);
 
     // need this for loading LG dictionary
