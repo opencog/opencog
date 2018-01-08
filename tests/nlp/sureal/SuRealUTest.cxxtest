@@ -157,7 +157,10 @@ void SuRealUTest::test_complex(void)
                          (ListLink (ConceptNode "cat") (ConceptNode "dog")))
                         (InheritanceLink (ConceptNode "cat") (ConceptNode "green")))))
                      )");
+    std::string sent = _evaluator->eval(R"( s-result  )");
+    printf("got %s\n", sent.c_str());
     std::string result = _evaluator->eval(R"( (equal? s-result (list (list "the" "green" "cat" "loves" "the" "dog" "."))) )");
+    printf("equality?  %s\n", result.c_str());
     TSM_ASSERT("Failed to sureal complex sentence!", result == "#t\n");
 
     logger().debug("END TEST: %s", __FUNCTION__);
