@@ -83,8 +83,8 @@ void SuRealUTest::setUp(void)
 
 /*
     _evaluator->eval("(setenv \"LTDL_LIBRARY_PATH\" "
-		"\"/usr/local/lib/opencog"
-		"\")");
+		"\"/usr/local/lib/opencog\""
+      ")");
 */
 
     rv = _evaluator->eval("(use-modules (opencog nlp))");

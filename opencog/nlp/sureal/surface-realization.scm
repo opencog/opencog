@@ -15,7 +15,7 @@
              (opencog nlp lg-dict)
              (opencog nlp relex2logic))
 
-(use-modules (opencog logger))
+; (use-modules (opencog logger))
 
 ; ---------------------------------------------------------------------
 ; Creates a single list  made of the elements of lists within it with
