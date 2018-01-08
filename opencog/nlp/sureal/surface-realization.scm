@@ -143,7 +143,7 @@
 
     ; add LG dictionary on each word if not already in the atomspace
     (par-map
-        lg-get-dict-entry
+        lg-dict-entry
         (filter-map
             (lambda (n)
                 (if (null? (r2l-get-word-inst n))
@@ -154,7 +154,7 @@
                                 (map
                                     (lambda (p)
                                         ; TODO: There could be too many... skip if seen before?
-                                        (lg-get-dict-entry (word-inst-get-word p))
+                                        (lg-dict-entry (word-inst-get-word p))
                                     )
                                     (cog-chase-link 'LemmaLink 'WordInstanceNode (r2l-get-word n))
                                 )
