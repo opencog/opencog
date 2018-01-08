@@ -3,7 +3,7 @@
 
 ; (add-to-load-path "/usr/local/share/opencog/scm")
 
-(use-modules (opencog) (opencog atom-types) (opencog nlp))
+(use-modules (opencog) (opencog spacetime) (opencog nlp))
 
 (load "relex2logic/rule-utils.scm")
 (load "relex2logic/r2l-utilities.scm")
