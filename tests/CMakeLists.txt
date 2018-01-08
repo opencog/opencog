@@ -18,9 +18,9 @@ INCLUDE_DIRECTORIES(${CMAKE_BINARY_DIR})
 IF (CXXTEST_FOUND)
 
     IF (HAVE_ATOMSPACE)
-        # Persistence is for saving/restoring atomspace to disk.
         ADD_SUBDIRECTORY (attention)
 
+        # Persistence is for saving/restoring atomspace to disk.
         ADD_SUBDIRECTORY (persist)
 
         # The cogserver exposes the atomspace to outside users.
@@ -30,8 +30,6 @@ IF (CXXTEST_FOUND)
 
         IF (HAVE_OCTOMAP)
             ADD_SUBDIRECTORY (spacetime)
-            ADD_SUBDIRECTORY (spatial)
-            ADD_SUBDIRECTORY (timeoctomap)
         ENDIF (HAVE_OCTOMAP)
 
         ADD_SUBDIRECTORY (nlp)
@@ -48,10 +46,6 @@ IF (CXXTEST_FOUND)
         ADD_SUBDIRECTORY (cython)
         ADD_SUBDIRECTORY (python)
     ENDIF (HAVE_CYTHON AND PYTHONINTERP_FOUND)
-
-   #IF (HAVE_ATTENTION)
-   #    ADD_SUBDIRECTORY (attention)
-   #ENDIF (HAVE_ATTENTION)
 
     ADD_SUBDIRECTORY (learning)
 

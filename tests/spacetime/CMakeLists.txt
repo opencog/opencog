@@ -1,7 +1,6 @@
 LINK_LIBRARIES(
-	spacetime-types
-	spacetime
+	atom_octomap
+	${ATOMSPACE_LIBRARIES}
 )
-
-ADD_CXXTEST(SpaceServerUTest)
-
+ADD_CXXTEST(AtomOcTreeUTest)
+ADD_CXXTEST(TimeSpaceAtomUTest)
