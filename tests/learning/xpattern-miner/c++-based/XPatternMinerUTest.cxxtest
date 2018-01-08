@@ -70,12 +70,12 @@ public:
 	void test_2gram_1();
 	void test_2gram_2();
 	void test_InferenceControl();
-	// void test_SodaDrinker();
+	void test_SodaDrinker();
 };
 
 XPatternMinerUTest::XPatternMinerUTest() : _scm(&_as)
 {
-	logger().set_level(Logger::DEBUG);
+	logger().set_level(Logger::INFO);
 	// logger().set_timestamp_flag(false);
 	logger().set_print_to_stdout_flag(true);
 }
@@ -404,8 +404,8 @@ void XPatternMinerUTest::test_2gram_1()
 	                                        tmp_al(INHERITANCE_LINK, X, Y),
 	                                        tmp_al(INHERITANCE_LINK, Y, Z)));
 
-	logger().info() << "results = " << oc_to_string(results);
-	logger().info() << "expected_pattern = " << oc_to_string(expected_pattern);
+	logger().debug() << "results = " << oc_to_string(results);
+	logger().debug() << "expected_pattern = " << oc_to_string(expected_pattern);
 
 	TS_ASSERT(content_is_in(expected_pattern, results));
 }
@@ -441,8 +441,8 @@ void XPatternMinerUTest::test_2gram_2()
 	                                        tmp_al(INHERITANCE_LINK, X, Y),
 	                                        tmp_al(INHERITANCE_LINK, Y, Z)));
 
-	logger().info() << "results = " << oc_to_string(results);
-	logger().info() << "expected_pattern = " << oc_to_string(expected_pattern);
+	logger().debug() << "results = " << oc_to_string(results);
+	logger().debug() << "expected_pattern = " << oc_to_string(expected_pattern);
 
 	TS_ASSERT(content_is_in(expected_pattern, results));
 }
@@ -455,7 +455,7 @@ void XPatternMinerUTest::test_InferenceControl()
 	std::string rs =
 		_scm.eval("(load-from-path \"inference-control-corpus.scm\")");
 
-	std::cout << "rs = " << rs << std::endl;
+	logger().debug() << "rs = " << rs;
 
 	// Run the pattern miner
 	Handle expand = tmp_an(SCHEMA_NODE, "URE:BC:expand-and-BIT"),
@@ -481,29 +481,30 @@ void XPatternMinerUTest::test_InferenceControl()
 		                        tmp_al(LIST_LINK, B, T))),
 		initpat = tmp_al(LAMBDA_LINK, vardecl, clauses);
 
-	XPMParameters param(2/*minsup*/, 3/*ngram*/, initpat, -1/*maxdepth*/);
+	XPMParameters param(2/*minsup*/, 3/*ngram*/, initpat, 2/*maxdepth*/);
 	XPatternMiner pm(_as, param);
 	HandleTree results = pm();
 
-	// The main pattern of interest should look like
+	// The pattern of interest looks like
 	//
-	// Execution
-	//   Schema "expand"
-	//   List
-	//     Variable "$A"
-	//     Inheritance
-	//       ConceptNode "a"
-	//       PatternMiningVariable "$X"
-	//     GroundedSchemaNode "scm: conditional-full-instantiation-scope-formula"
-	//   Variable "$B"
-	//
-	// Evaluation
-	//   Predicate "preproof
-	//   Variable "$A"
-	//
-	// Evaluation
-	//   Predicate "preproof
-	//   Variable "$B"
+	// Lambda
+	//   T A X B
+	// And
+	//   Execution
+	//     Schema "expand"
+	//     List
+	//       A
+	//       Inheritance
+	//         ConceptNode "a"
+	//         X
+	//       GroundedSchemaNode "scm: conditional-full-instantiation-scope-formula"
+	//     B
+	//   Evaluation
+	//     Predicate "preproof"
+	//     A
+	//   Evaluation
+	//     Predicate "preproof"
+	//     B
 	Handle a = tmp_an(CONCEPT_NODE, "a"),
 		X = tmp_an(VARIABLE_NODE, "$X"),
 		expected_vardecl = tmp_al(VARIABLE_LIST, T, A, X, B),
@@ -525,43 +526,60 @@ void XPatternMinerUTest::test_InferenceControl()
 		                          expected_vardecl,
 		                          expected_clauses);
 
-	logger().info() << "results = " << oc_to_string(results);
-	logger().info() << "expected_pattern = " << oc_to_string(expected_pattern);
+	logger().debug() << "results = " << oc_to_string(results);
+	logger().debug() << "expected_pattern = " << oc_to_string(expected_pattern);
 
 	TS_ASSERT(content_is_in(expected_pattern, results));
 }
 
-// void XPatternMinerUTest::test_SodaDrinker()
-// {
-// 	logger().info("BEGIN TEST: %s", __FUNCTION__);
-// 	// Load ugly_male_soda-drinker_corpus.scm
-// 	_scm.eval("(load-from-path \"ugly_male_soda-drinker_corpus.scm\")");
+void XPatternMinerUTest::test_SodaDrinker()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
-// 	// Run the pattern miner
-// 	PatternMiner pm(_as);
-// 	pm.runPatternMiner(false);
+	// Load ugly-male-soda-drinker-corpus.scm
+	std::string rs =
+		_scm.eval("(load-from-path \"ugly-male-soda-drinker-corpus.scm\")");
 
-// 	// Test the result: check the final top 3-gram pattern
+	logger().debug() << "rs = " << rs;
 
-// 	vector<HTreeNode*>& top3gramPatterns = pm.getFinalPatternsForGram(3);
+	// Run the pattern miner
+	XPMParameters param(5/*minsup*/, 3/*ngram*/, Handle::UNDEFINED, 8/*maxdepth*/);
+	XPatternMiner pm(_as, param);
+	HandleTree results = pm();
 
-// 	string patternStr = pm.unifiedPatternToKeyString(top3gramPatterns[0]->pattern);
-// 	logger().info("The result top 3-gram pattern: \n%s", patternStr.c_str());
+	// The pattern of interest looks like
+	//
+	// Lambda
+	//   X
+	// And
+	//   Inheritance
+	//     X
+	//     Concept "man"
+	//   Inheritance
+	//     X
+	//     Concept "soda drinker"
+	//   Inheritance
+	//     X
+	//     Concept "ugly"
+	Handle man = tmp_an(CONCEPT_NODE, "man"),
+		soda_drinker = tmp_an(CONCEPT_NODE, "soda drinker"),
+		ugly = tmp_an(CONCEPT_NODE, "ugly"),
+		X = tmp_an(VARIABLE_NODE, "$X"),
+		is_man = tmp_al(INHERITANCE_LINK, X, man),
+		is_soda_drinker = tmp_al(INHERITANCE_LINK, X, soda_drinker),
+		is_ugly = tmp_al(INHERITANCE_LINK, X, ugly),
+		expected_pattern = tmp_al(LAMBDA_LINK,
+		                          X,
+		                          tmp_al(AND_LINK,
+		                                 is_man,
+		                                 is_soda_drinker,
+		                                 is_ugly));
 
-// 	if (patternStr != top3gramPatternStr)
-// 	{
-// 		logger().info("Failed: The result top 3-gram pattern is wrong! The right one should be:\n%s", top3gramPatternStr.c_str());
-// 		TS_FAIL("The result top 3-gram pattern is wrong!");
-// 	}
+	logger().debug() << "results = " << oc_to_string(results);
+	logger().debug() << "expected_pattern = " << oc_to_string(expected_pattern);
 
-// 	if (top3gramPatterns[0]->count != 5)
-// 	{
-// 		logger().info("Failed: The result top 3-gram pattern count is wrong!");
-// 		TS_FAIL("The result top 3-gram pattern count is wrong!");
-// 	}
-
-// 	logger().info("End TEST: %s", __FUNCTION__);
-// }
+	TS_ASSERT(content_is_in(expected_pattern, results));
+}
 
 #undef al
 #undef an
