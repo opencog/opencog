@@ -93,7 +93,8 @@
     (map interpret (sentence-get-parses SENT))
 )
 ; -----------------------------------------------------------------------
-; This loads all the rules into the cogserver shell.
+
+; This loads all the rules into the atomspace
 (define-public (load-r2l-rulebase)
 
 	; "." in case the cogserver is started from in-source build directory.
