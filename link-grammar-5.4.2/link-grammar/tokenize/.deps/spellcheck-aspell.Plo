@@ -1,0 +1,4 @@
+tokenize/spellcheck-aspell.lo: tokenize/spellcheck-aspell.c \
+ /usr/include/stdc-predef.h
+
+/usr/include/stdc-predef.h:

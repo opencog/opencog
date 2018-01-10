@@ -1,0 +1,38 @@
+
+% This file contains tests involving the m4 quotes characters.
+% In order to prevent dictionary malfunctions caused by unintended
+% openings of m4 quotes, to introduce a line containing a backtic (`)
+% protect it as follows:
+%changequote(\,/)dnl
+%Here a ` is used ...
+%changequote dnl
+
+Ithey have told of the soldiers' fear
+O
+O    +--------->WV-------->+     +----------Jp----------+
+O    +---Wd--+--Sp-+---PP--+-OFj-+  +--Dmc--+--YP-+D*u*c+
+O    |       |     |       |     |  |       |     |     |
+OLEFT-WALL they have.v told.v-d of the soldiers.n '  fear.n 
+O
+
+Ihe said `this is a backtick test`
+O
+O                 +------------------QUc-----------------+
+O                 +------>WV----->+--------Osm-------+   |
+O    +---->WV---->+----Wd---+     |  +-----Ds**x-----+   |
+O    +--Wd--+--Ss-+-QUd+    +-Ss*b+  |      +---AN---+   |
+O    |      |     |    |    |     |  |      |        |   |
+OLEFT-WALL he said.q-d ` this.p is.v a backtick.n test.n ` 
+O
+
+I“What are you doing?” she asked.
+O
+O    +---------------QUc--------------+                
+O    +--------------Xc--------------+ |                
+O    +----------->WV---------->+    | |                
+O    |         +------Bsw------+    | |                
+O    +----Wq---+    +---Pg*b---+    | +----CP---+      
+O    +-QUd-+   +-Rw-+SIpx+     |    | |  +--Ss--+--Xp-+
+O    |     |   |    |    |     |    | |  |      |     |
+OLEFT-WALL “ what are.v you doing.v ? ” she asked.q-d . 
+O 

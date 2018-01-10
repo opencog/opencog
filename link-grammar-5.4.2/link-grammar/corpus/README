@@ -1,0 +1,17 @@
+
+                Parse Ranking and Word Sense Statistics
+                ---------------------------------------
+
+This directory contains code that computes a parse ranking, as well
+as a word-sense probability (based on WordNet 3.0) by looking up
+frequency statistics from an SQL database. The SQLite database engine
+is used because it is "administration-free" for the user, and because
+its license is compatbile with the current link-grammar license.
+
+This directory also contains code for "broadening" word linkages.
+See data/sql/README for more info.
+
+This directory contains one administrative tool, "cluster-pop",
+which is not built by default because users do not need this tool. 
+See the Makefile.am for notes on how to build it.
+

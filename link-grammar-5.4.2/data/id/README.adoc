@@ -1,0 +1,11 @@
+= Dictionary bahasa Indonesia sederhana untuk Link Grammar
+
+Link Grammar Parser Dictionary for Indonesian language (bahasa Indonesia)
+ 
+== Penggunaan
+
+    link-parser /home/ceefour/git/link-grammar-id
+
+== See also:
+
+    https://github.com/lumenitb/link-grammar-id

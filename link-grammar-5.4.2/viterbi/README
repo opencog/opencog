@@ -1,0 +1,326 @@
+
+                           Viterbi Decoder
+                           ---------------
+                      Linas Vepstas March 2013
+
+This directory contains code for a prototype Viterbi decoder for Link
+Grammar. It barely functions and is currently very slow.
+
+
+Motivation
+==========
+The goal of providing this decoder is to present a flexible, powerful
+interface for implementing high-level semantic algorithms on top of
+the low-level link-grammar syntactic parser, and, in particular,
+for steering the parse based on high-level semantic knowledge.  This
+allows the parser to move beyond being merely a syntactic parser,
+and to become fully integrated with general semantic artificial
+intelligence.
+
+A less abstract list of expected benefits include:
+
+ * Incremental parsing: the ability to obtain partial results after
+   providing partial sentences, a word at a time.
+ * Less sensitivity to sentence boundaries, allowing longer,
+   run-on sentences to be parsed far more quickly.
+ * Mitigation of the combinatorial explosion of parses.
+ * Allow grammatically broken/incorrect chat dialog to be parsed;
+   in general, to do better with slang, hip-speak.
+ * Enable co-reference resolution and anaphora resolution across
+   sentences (resolve pronouns, etc.)
+ * Enable annotation of the parse graph with word-sense data, entity
+   markers.
+ * Allow richer state to be passed up to higher layers: specifically,
+   alternate parses for fractions of a sentence, alternative reference
+   resolutions.
+ * Allow a plug-in architecture, so that plug-ins, employing higher-
+   level semantic (AGI) algorithms can provide parse guidance and
+   parse disambiguation.
+ * Eliminate many of the hard-coded array sizes in the code.
+ * Fix the word-count problem during spell-guessing. So, for
+   example, if the mis-spelled word "dont" shows up in the input, it
+   could be issued as one word ("done") or two ("do n't"). The
+   current suffix-stripping/word-issuing algo cannot deal with this
+   correctly. This is also an issue for the Russian dictionary, where
+   the stem+suffix processing can generate variable word counts.
+
+
+The data structures used to implement this resemble those of the
+OpenCog AtomSpace.  All data classes inherit from a class called Atom
+(which is an atomic predicate, in the sense of mathematical logic).
+Atoms are typed; the two core types are Links and Nodes. Thus, all data
+is represented in the form of a "term algebra" (aka the "Free Theory",
+in the sense of model theory).  This structure allows all data to be
+represented as (hyper-)graphs, which in turn makes the implementation
+of graph algorithms easier to implement.  All these theoretical
+considerations provide a natural setting for storing Viterbi state
+information.  Put differently, this provide a generic, uniform way of
+holding the various partly-finished parses, and effecting state
+transformations on them.
+
+Making the internal state directly visible allows low-level syntactic
+algorithms, as well as high-level, semantic algorithms to control parsing.
+In other words, the intended use of the Viterbi decoder is to provide
+a framework for parsing that should make it possible to integrate
+tightly (and cleanly) with high-level semantic analysis algorithms.
+Thus, reference and anaphora resolution can be done using the same
+graph structure as used for parsing; it should also allow graphical
+transformations, such as those currently implemented in RelEx.
+
+Since all of the data is represented dynamically (at run-time) by
+these (hyper-)graphs composed of atoms, developing custom algorithms
+to manipulate the parse becomes easy: there are no strange compile-time
+structures to master.  All algorithms can access the data in a uniform,
+common way.
+
+One may argue that Viterbi is a more natural, biological way of working
+with sequences.  Some experimental, psychological support for this can
+be found here:
+http://www.sciencedaily.com/releases/2012/09/120925143555.htm
+per Morten Christiansen, Cornell professor of psychology.
+
+
+Why "Viterbi"?
+==============
+The parser implemented here is called a "Viterbi decoder" because it is
+inspired by (and vaguely resembles) the Viterbi algorithm famous from signal
+processing.  A characteristic feature of that algorithm is that it maintains
+a set of states in parallel. As each new bit is received, some of the states
+become inherently inconsistent (e.g. because some checksum is violated),
+while other new states become possible.  Once some certain number of bits
+have been received, the ones that can be consistently interpreted with the
+checksum constraints can be output. The process then repeats with each new bit
+streaming in.  Likewise, the code here keeps a set of states in parallel;
+each state is tied to some possible pending output that is consistent with
+that state.  As each new word comes in, some of the states become invalid
+and are discarded (because the word cannot link to that state). When all
+states agree on some linkage, that linkage can be confidently output.
+As words flow in, the process is repeated.  If there are ambiguities, then
+multiple parse alternatives can be output (this is rather unlike the
+original Viterbi algorithm, whose goal is to generate only one output,
+the single most likely output).  For language parsing, however, it is
+useful to convey parse alternatives to higher-order processes, which can
+make a final determination (analogous to having a higher-order checksum
+functioning within the Viterbi decoder).
+
+I like this analogy because it is vaguely biological as well: or perhaps
+I should say "neural net-ish".  The multiple, provisional states that
+are kept around are sort of like the activation states of a feed-forward
+artificial neural network.  But this is not very deep: the feed-forward
+neural net looks like a Hidden Markov Model (HMM), and the Viterbi
+algorithm is essentially an HMM algorithm.  No surprise!
+
+
+Status
+======
+Currently, the parser can correctly parse many short sentences.  It
+currently runs very slowly, as no pruning algorithms have yet been
+implemented.  No probabilities or weights have yet been implemented,
+groundwork for this is being laid now.
+
+
+Using the parser
+================
+To use this parser, you must first configure with the --enable-viterbi
+flag:
+
+   configure --enable-viterbi
+
+Then, in the client, switch to the viterbi parser with the ! command
+!viterbi  (If confused, try !help and !var for general help).
+
+The vitest.cc file contains unit tests. Currently, it consists of 95
+tests, and all but the last of them pass.  More tests will be added.
+
+
+Design
+======
+What follows is a writeup of the current design.  It is incomplete.
+Parts of it may also be stale & out-of-date.  This part is meant only for
+programmers wishing to update this code.  If you are just a user, you
+can skip reading this section.
+
+
+AtomSpace Design
+----------------
+The concept of Atoms, Nodes, Links used in the implementation here
+generally resembles the concepts with the matching names, in OpenCog.
+That is, Nodes and Links are two fundamental types of Atoms.  Nodes
+have names, whereas Links contain lists of Atoms.  These two types are
+used to form hypergraphs, where nodes are labelled, but links are not.
+In C++, these are implemented as derived classes.  Each, in turn, has
+further subtypes: for example, Word is a special type of Node, and Set
+is a subtype of Link.
+
+Each atom has associated with it a 'truth value'.  In OpenCog, truth
+values may be rather complicated; in the current implementation, here,
+each truth value is just a single floating point number.  It is meant to
+be interpreted as the 'log likelihood', or the 'cost' or the 'entropy',
+depending on the context.  The word 'cost' comes from link-grammar,
+and is used to indicate preference: a parse with the lowest total cost
+is the most likely parse.  Note that costs are additive.
+
+Roughly speaking, probability P can be defined as P = exp(-C) where
+C is the cost. Traditional OpenCog stores P in truth values; we store
+C instead.  It just seems easier to debug using C instead of P.  One
+can always convert the one into the other.
+
+It is the intent of the Viterbi parser design to not only use cost
+as a guide for selecting and prioritizing parses, but also to eventually
+collect statistical data on real-world corpora, and automatically,
+through machine learning, update the dictionary with costs and new
+disjuncts.  Thus, the hypergraphs will behave somewhat like Bayesian
+networks, or perhaps somewhat like Markov Logic Networks.  Detailed
+interpretation of costs and how they are distributed and propagated
+through the network, both during parsing, and during learning, have
+not yet been figured out.  Its kind of complicated :-)
+
+The traditional OpenCog AtomSpace design insists that there can only
+ever be one single instance of any given atom at any time.  This is
+not yet enforced in the code here, but might be 'real soon now'.  It
+is certainly shaping design decisions.
+
+
+Disjunct Design
+---------------
+The core underlying concept of link-grammar are 'disjuncts', which are
+sets of connectors, each of which must be connected in order for a
+disjunct to be satisfied. A given dictionary word may have many
+disjuncts; however, only one may be satisfied at a time.  A typical
+dictionary entry for a word consists of several connectors composed
+with '&' and 'or' operators.  Although it is very tempting to think of
+'&' and 'or' as being boolean operators, they are not. First of all,
+connectors must be kept in sequential order: they do not commute
+under '&' (However, 'or' does commute).  Next, one can distribute
+'or' over '&' but not vice versa.  Thus, if A+, B+ and C+ are
+connectors, then it is true that
+
+   A+ & (B+ or C+) == A+ & (C+ or B+)
+                   == (A+ & B+) or (A+ & C+)
+                   == (A+ & C+) or (A+ & B+)
+
+However, one cannot distribute the other way:
+
+   A+ or (B+ & C+) != (A+ or B+) & (A+ or C+)
+
+There are several ways to understand the above prohibition:
+ 1) Non-copying of connectors: connectors cannot be duplicated. The
+    RHS of the above has two copies of A+, but the LHS has just one.
+    (Non-copying is quantum-like. How weird is that?).
+
+ 2) One might say that 'or' does behave like boolean OR, but '&' does
+    not.
+
+ 3) One might say that 'or' behaves like 'tensor plus' while '&'
+    behaves like 'tensor times' in linear logic. Except that tensor
+    times is commutative, and & is not...
+
+ 4) Alternately, 'or' behaves sort-of like 'exclusive-or', in that
+    only one of the arguments to 'exclusive-or' is allowed to hold.
+    An N>2 argument XOR is more correctly called a 'choose-one-of-N'
+    function: a logic demultiplexer.
+
+The simplest interpretation seems to be a 'many-worlds' interpretation:
+That is, use 4) so that 'or' is 'choose-one-world-of-many', and enforce
+1) non-copying of connectors within a single world.  BTW, note that any
+connector prefixes with a '@' is explicitly copyable!
+
+In the C++ code, the '&' operator will be called 'Tensand' (tensor-and),
+while the 'or' operator will be called 'Plexor' (multiplexed-or).
+(TODO: change the names.)
+
+Link-grammar dictionary entries are written as expressions of connectors,
+'&' and 'or'.  In order to actually use them in parsing a sentence, it
+seems easiest to expand them into disjunctive normal form (DNF). This
+makes it easy to determine that one and only one disjunct is being used,
+and that all of the connectors in the disjunct are being satisfied.
+The various disjoin() methods on the various classes are used to place
+expressions into DNF.
+
+To be clear: (A+ & B+) is a disjunct (all of the connectors are
+disjoined).  By contrast, A+ & (B+ or C+) is NOT a disjunct; but it
+can be disjoined into two of them.
+
+Several complications arise when we want to consider truth values
+(probabilities, or 'costs') associated with disjuncts.  First of all,
+costs need to be correctly distributed when disjuncts are being formed.
+Thus, for example, using [[]] to denote cost (just as in the
+link-grammar dicts), we have:
+
+   [[A+]] & (B+ or C+) == ([[A+]] & B+) or ([[A+]] & C+)
+                       == [[A+ & B+]] or [[A+ & C+]]
+                       == [[A+ & (B+ or C+)]]
+                       == A+ & [[B+ or C+]]
+
+while
+
+   A+ & ([[B+]] or C+) == (A+ & [[B+]]) or (A+ & C+)
+                       == [[A+ & B+]] or (A+ & C+)
+
+In this last expression, the disjunct [[A+ & B+]] is costly, while
+(A+ & C+) is not.
+
+The next issue is that the same disjunct can have different costs when
+used with different words. Thus, [[A+ & B+]] may be costly when used
+with the verb 'to be' but not when used with the verb 'to go'.  Thus,
+the cost annotation must be associated with the word-disjunct pair,
+and not with the disjunct alone.  Putting all these different
+observations together results in the following representation for an
+entry in the dictionary (after it has been placed in DNF):
+
+Dictionary entry as it appear in link-grammar dicts:
+
+   jabberwoky: A+ & ([[B+]] or C+);
+
+Dictionary entry, as represented in the atomspace, after being disjoined:
+
+   Plexor
+       WordCset    (cost 2.0)      ; Notice non-zero cost
+          Word     "jabberwoky"
+          Tensand                  ; Notice cost of zero for tensand
+             Connector "A+"
+             Connector "B+"
+
+       WordCset                    ; Zero cost here
+          Word     "jabberwoky"
+          Tensand
+             Connector "A+"
+             Connector "C+"
+
+Note that the act of disjoining has to have the Plexor 'pass through'
+the word labels (but not the Tensand).  So, for example, just after
+the dictionary entry is read from the file, but before before it is
+placed into the atomspace, it is represented as:
+
+   WordCset
+      Word     "jabberwoky"
+      Tensand
+         Connector "A+"
+         Plexor
+             Connector "B+"  (cost 2.0)
+             Connector "C+"
+
+which is certainly more compact than above, except that:
+
+1) Its very hard to develop an algo that will correctly couple
+   connectors during a parse, when the entry is in this form.
+   Thus, we want DNF just to make the algos doable.
+
+2) The cost on B+ means that we have to be careful that this connector
+   is not in the atomspace.  This is because the atomspace rules allow
+   only one, singular, unique atom called "Connector B+", and thus,
+   changing its cost would affect all expressions that contain it!
+
+3) Updating costs on Tensands (disjuncts) also raises similar issues:
+   the atomspace allows one and only one disjunct of the form
+   (Tensand (Connector "A+") (Connector "B+")) in the atomspace, so
+   setting its cost would change the perceived cost for any other
+   expression that might contain this sub-expression.
+
+
+
+Historical dates
+================
+Idea conceived: April 2008
+Coding started: October 2012
+First successful long sentence parse: March 2013

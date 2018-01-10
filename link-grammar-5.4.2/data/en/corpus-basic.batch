@@ -1,0 +1,1049 @@
+
+!batch
+!verbosity=1
+!echo
+!limit=1000
+!short=20
+!constituents=1
+!spell=0
+
+%NOUNS
+
+The fact that he smiled at me gives me hope
+*The event that he smiled at me gives me hope
+But my efforts to win his heart have failed
+*But my presents to win his heart have failed
+Failure to comply may result in dismissal
+*Absence to comply may result in dismissal
+The question is who we should invite
+*The party is who we should invite
+The big question on everybody's mind is who killed OJ
+*The big mind on everybody's question is who killed OJ
+Do it the way you've always done it
+I really like the way you do your hair
+*I really like the fashion you do your hair
+He made a request that there be an investigation
+*He stated the fact that there be an investigation
+He is the kind of person who would do that
+*He is the character of person who would do that
+An income tax increase may be necessary
+*A tax on income increase may be necessary
+Last week I saw a great movie
+
+% currently finds a parse with roman numeral I
+% i.e. "Last Dog the First saw a great movie" 
+*Last dog I saw a great movie
+The party that night was a big success
+*The party that dog was a big success
+John Stuart Mill is an important author
+The Richard Milhous Nixon Library has been a big success
+The mystery of the Nixon tapes was never solved
+High income taxes are important
+Oil company stock prices rose in heavy trading today
+Metals futures prices rose in heavy trading today
+U.S. economic indicators fell sharply last month
+Columbia medical and administrative workers continued their strike today
+Janet, who is an expert on dogs, helped me choose one
+*Janet who is an expert on dogs helped me choose one
+The dog that we eventually bought was very expensive
+*The dog, that we eventually bought, was very expensive
+*The dog, we eventually bought, was very expensive
+Have you ever seen the Pacific
+The new David Letterman is a happy, relaxed David Letterman
+Actress Whoopi Goldberg and singer Michael Jackson attended the ceremony
+We are from the planet Gorpon
+This is my friend Bob
+John's family is renovating their kitchen
+*A man I know's family is renovating their kitchen
+The boys' bedrooms will be enlarged
+*The boys's bedrooms will be enlarged
+My uncle's mother's cousin is visiting us
+*Emily's my cousin is visiting us
+We ate at Joe's Diner last week
+The buy-out caused a free-for-all in the mid-afternoon
+Joan Smith is president of the company
+*Joan Smith is tourist
+Alfred Baird, formerly vice president of Beevil Corp., has been appointed as president
+*Alfred Baird, man I know, has been described as good gardener
+A bunch of dogs are in the yard
+*A picture of dogs are in the yard
+
+%DETERMINERS & PRONOUNS
+
+Many people were angered by the hearings
+*Many person were angered by the hearings
+Many were angered by the hearings
+My many female friends were angered by the hearings
+
+% "My" is in the dictionary as a female given name.  Thus, the below parses
+% just like "John, some female friends were angered..." with the missing
+% comma allowed, but at high cost (allowed because people get sloppy with
+% their punctuation, and we want to understand people even if they're
+% sloppy.
+*My some female friends were angered by the hearings
+Many who initially supported Thomas later changed their minds
+The stupidity of the senators annoyed all my friends
+*The stupidity of the senators annoyed many my friends
+
+% The below is hard to get right. So, although we have
+% "*I want a gift inexpensive" it is OK with a definite determiner:
+% "I want the gift [to be] inexpensive." The phantom [to be] makes
+% the attachment of adjectives difficult to deal with.
+% See 4.0.fixes.batch, "I want it green" for more examples.
+I need to buy a present, but I want something inexpensive
+*I need to buy a present, but I want a gift inexpensive
+
+Anyone who thinks this will work is crazy
+Their program is better than ours
+Those that want to come can come
+I read everything I could about the subject
+I read whatever I could about the subjetc
+*I read several books I could about the subject
+the best costumes got prizes
+*a best costume got prizes
+*some best costumes got prizes
+the best five costumes got prizes
+the five best costumes got prizes
+*the five best five costumes got prizes
+*the hundreds of best costumes got prizes
+*five best costumes got prizes
+*best costumes got prizes
+*best five costumes got prizes
+five other costumes got prizes
+the other five costumes got prizes
+*other five costumes got prizes
+the other candy was really disgusting
+*the five other candy was really disgusting
+other candy is really disgusting
+*other piece of candy was really bad
+other costumes were really bad
+some other costumes were really bad
+
+%NUMBERS
+
+2 million attended 
+2863764 attended
+2 million people attended
+*2 million person attended 
+a million attended 
+a million people attended 
+about 2 million people attended
+about 2 million attended
+*about people attended
+a million such people attended
+*a million such attended
+5 million of the people attended
+5 thousand invited by Bob attended
+The 5 thousand invited by Bob attended
+The thousands of people who attended enjoyed it
+The 5 thousand people invited by Bob attended
+The nearly 5 million people who attended enjoyed it
+a few attended
+a few million people attended
+a few people attended
+few attended
+*few million people attended
+millions attended
+*5 millions attended
+millions of people attended
+hundreds of millions of people attended
+5 million years ago, the earth was covered with ice
+millions of years ago, the earth was covered with ice
+*dogs of years ago, the earth was covered with ice
+*the five million years ago, the earth was covered with ice
+*the other five million years ago, the earth was covered with ice
+*5 million ago, the earth was covered with ice
+The city of New York contains over one hundred million billion brain cells
+Almost one third of the people in the country have no health insurance
+Of all the people in this country, almost one third have no health insurance
+Three quarters of a million people in this city have no health insurance
+The price of the stock rose three tenths of one point
+*The price of the stock rose three tenths of one dog
+The nearest drug store is about three quarters of a mile away 
+The nearest drug store is about 3/4 of a mile away 
+Every morning I walk 3 1/2 miles
+*Every morning I walk 1/2 3 miles
+Nearly 1/2 million people work here every day
+Nearly 1 1/4 million people work here every day
+*Nearly 1 million 1/4 people work here every day
+Between 500 and 1000 people pass through here every minute
+They are the Number 3 auto maker and a Fortune 500 company
+I live at 805 West Indiana Street
+
+%TIME EXPRESSIONS
+
+We're thinking about going to a movie this evening
+*We're thinking about going to a movie this theater
+I've been grading these stupid exams all day
+*I've been grading these stupid days all exam
+We're having a big party Tuesday
+*We're having a big party our house
+
+% January is in the dictionary as a female given name.  Thus, "important
+% meeting January" is a name with two adjectival modifiers, and thus can
+% be the object of "There is going to be..."
+*There is going to be an important meeting January
+There is going to be an important meeting in January
+There is going to be an important meeting next January
+The party last week was a big success
+John last week threw a great party
+Until recently, these fossils were believed to belong to different species
+*Until initially, these fossils were believed to belong to different species
+*Until for many years, these fossils were believed to belong to different species
+Until last week, these fossils were believed to belong to different species
+*Until last meeting, these fossils were believed to belong to different species
+I'm quite excited about next week
+I am quite excited about next week
+Monday sounds good for the meeting
+Tomorrow might be a good time for the meeting
+Last Tuesday was really fun
+*Three days ago was really fun
+Almost three years after our first date, I saw Ruth again
+Almost three years after I first met her, I saw Ruth again
+*Almost three years, I saw Ruth again
+Almost three years later, I saw Ruth again
+*Almost three years for our first date, I saw Ruth again
+I saw her again a year and a half later
+*I saw her again a year and a dog later
+He left here a quarter of an hour ago
+*He left here a quarter of a dog ago
+*He left here a picture of an hour ago
+I still remember the day I kissed him
+
+% I appears in the dictionary as roman numeral I, so this parses as "room
+% the first", and since "I remember the room kissed him" parses, the below
+% will also.
+*I still remember the room I kissed him
+I'm going to Europe the day I graduate
+Clinton is expected to return to Washington Thursday morning
+*Clinton is expected to return to Thursday Washington office
+Clinton is expected to return to Washington on Thursday morning
+Clinton is expected to return to Washington late Thursday morning
+Clinton is expected to return to Washington next Thursday morning
+She walked out of the room the minute I saw her
+*She walked out of the room two minutes I saw her
+I was crazy about him the first time I saw him
+*I was crazy about him the first party I saw him
+In January 1990, a historic new law was passed
+*In Washington 1990, a historic new law was passed
+On January 15, 1990, a historic new law was passed
+*On January 320, 1990, a historic new law was passed
+He was convicted under an obscure 1990 law 
+
+% '50 law' parses, because '57 Chevy' has to parse.
+*He was convicted under an obscure 50 law
+I wish I could see him 100 times a day
+*I wish I could see him 3 meals a day
+*I wish I could see him 100 times a dog
+*I wish I could see him 100 times 2 days
+It's good to eat three big meals a day
+Someone is mugged in New York every five minutes
+Her career lasted almost thirty years
+*Her career lasted almost thirty books
+Every morning at 5 a.m., Ken gets up and runs for five miles
+At 4:52 p.m., on Monday, December 26, 1997, nothing happened
+
+%QUESTIONS AND RELATIVE CLAUSES
+
+Which dog did you chase
+*Which dog you chased
+Which dog did you say you chased
+*Which dog you said you chased
+*Which dog did you say did you chase
+I wonder which dog he said you chased
+*I wonder which dog did he say you chased
+*I wonder which dog did he say did you chase
+What did John say he thought you should do
+*What did John say did he think you should do
+*What John said he thought you should do
+What Alice did really annoyed me
+*Who Alice did really annoyed me
+Whoever designed this program didn't know what they were doing
+*Who designed this program didn't know what they were doing
+Invite John and whoever else you want to invite
+The dog which Chris bought is really ugly
+*The dog what Chris bought is really ugly
+I wonder whether we should go
+*Whether should we go
+We can't decide whether to go to the party
+*We can't decide who to go the party
+*We can't decide whether to go the the party with
+I am wondering who to go to the party with
+I am wondering who to invite to the party
+*I am wondering whether to invite to the party
+*I am wondering the people to invite to the party
+*Whether to go to the party
+*Who to invite to the party
+Do you think we should go to the party
+*What do you think we should go to the party
+How do you operate this machine
+How fast is the program
+How certain are you that John is coming
+*How tired are you that John is coming
+How likely is it that he will come
+*How likely is John that he will come
+How certain does he seem to be that John is coming
+How efficient a program is it
+
+% The below parses, because "Efficient" is taken to be someone's name
+% That is, similar to "Hey Joe, Coke is it!"
+% *Efficient a program is it
+*efficient a program is it
+*How fast programs are they
+*How fast the program is it
+How fast a program does he think it is
+*How fast a program he thinks it is
+*How fast programs does he think they are
+*How big a dog chased you 
+I wonder how fast a program he thinks it is
+*I wonder how fast a program does he think it is
+How much money did you earn
+*How much money you earn
+I wonder how much money you earned
+*I wonder how much money have you earned
+How much oil spilled
+How much do you swim
+*How much you swim
+I wonder how much you swim
+*I wonder how much do you swim
+*I don't have how much money
+I don't have very much money
+I don't have much money
+How much did you read
+*How much of the book you read
+How much of the book did you read
+I wonder how much of the book you read
+How many people died
+How many people did you see
+*How many people you saw
+I wonder how many people you saw
+I wonder how many of the people you saw were students
+How did John do it
+I wonder how John did it
+How long will it last
+
+% Arghhhh its not enough to exlcude adjectives:
+*How big will it last
+How big will it grow?
+*How slickly did you say it was?
+How big did you say it was?
+
+How many years did it take to do it
+How big is the department
+*How big the department is
+*I wonder how big is the department
+I wonder how big the department is
+*I wonder how big departments they are
+*I wonder how a department it is
+I wonder how big a department it is
+How important is it to turn the computer off
+I wonder how important it is to turn off the computer
+*I wonder how important is it to turn off the computer
+How quickly did Joe run
+*How quickly Joe ran
+I know how quickly you ran
+*I know how quickly did you run
+*He ran I know how quickly
+*Quickly did Joe run
+*Very quickly did Joe run
+*I know very quickly did Joe run
+*I know quickly did John run
+How much more quickly did you run
+*How much more quickly you run
+*I wonder how much more quickly did he run
+I wonder how much more quickly he ran
+How much more quickly did he run than Joe
+How much more should we work on this
+How much further do you think we should drive tonight
+I don't know how much longer I can tolerate this
+How much bigger is the dog
+*How much bigger dogs are they
+*How much bigger dogs ran
+*How big dogs run
+How much further did you run
+How much more oil spilled
+How much more spilled
+How much more oil did they spill
+How much more did they spill
+*How much more they spilled
+I wonder how much oil spilled
+I wonder how much oil they spilled
+*How much more efficient programs are available
+How many dogs ran
+How many ran
+How many dogs did you see
+How many more people did you see
+How many more people do you think will come
+I wonder how many more people he thinks will come
+*I wonder how many more people does he think will come
+How many times did you do it
+*How many times you did it
+I wonder how many times you did it
+*How many more stupid times did you do it
+How many years ago did you do it
+*Many years ago did you do it
+*How many years did you do it
+I wonder how many years ago you did it
+*How many years ago you did it
+I'll show you the house where I met your mother
+*I'll show you the house which I met your mother
+This is the man whose dog I bought
+*This is the man which dog I bought
+I wonder where John is
+*I wonder where John hit
+The dogs, some of which were very large, ran after the man
+The dogs, some of which I had seen before, ran after the man
+*The dogs some of which were very large ran after the man
+The box contained many books, some of which were badly damaged
+*Some of which were badly damaged
+*The box contained many books, some were badly damaged
+*The box contained many books, some of the books were badly damaged
+The dogs, some of them very large, ran after the man
+*The dogs, some of the dogs very large, ran after the man
+*Some of them very large ran after the man
+The man was chased by dogs, some of them very large
+I believe it was John who stole the priceless documents
+*I believe Fred was John who stole the priceless documents
+It seems to have been Einstein who first came up with the idea
+*There seems to have been Einstein who first came up with the idea
+*It hopes to have been Einstein who first came up with the idea
+*The book discussed Einstein who first came up with the idea
+*Stravinsky was in Paris that Debussy first heard Balinese music
+It was in Paris that Debussy first heard Balinese music
+It must have been there that he realized his destiny
+*It tried to have been there that he realized his destiny
+*He composed some good music that he realized his destiny
+*It was quickly that he wrote his first symphony
+Wasn't it in 1955 that Sally first met Joe
+Whatever the outcome, I'm sure he'll still be popular
+*Whatever an outcome, I'm sure he'll still be popular
+Whatever the outcome is, I'm sure he'll still be popular
+*What the outcome is, I'm sure he'll still be popular
+
+%CONJUNCTIONS
+
+The man we saw when we went to Paris is here
+*The man we saw but we went to Paris is here
+You should see a play while in London
+*You should see a play after in London
+I left the party after seeing Ann there
+*I left the party because seeing Ann there
+*I left the party despite I saw Ann there
+Because I didn't see Ann, I left
+*Therefore I didn't see Ann, I left
+I left, therefore I didn't see Ann
+But I really wanted to see her
+*After I really wanted to see her
+As I suspected, he had already left
+*Because I suspected, he had already left
+*I suspected, he had already left
+*I suspected
+Some grammars are better than others, as we have proved
+As had been expected, the party was a big success
+*As had been green, the party was a big success
+*As had wanted to be expected, the party was a big success
+*As had expected the party to be a success, it was a success
+In the event that the case goes to trial, I'm sure Clinton will be acquitted
+*In the scandal that the case goes to trial, I'm sure Clinton will be acquitted
+He should be acquitted, on the grounds that there's no evidence
+The public seem to love him, no matter what he does
+*The public seem to love him, no matter the stupid things he does
+
+%VERBS 
+
+Abrams does like programming
+% Allow "does be", so that we can parse Irish English.
+% *Abrams does be a good programmer
+He is being hired by another company
+He is looking for another job
+Fred has had five years of experience as a programmer
+*Fred has had been a programmer for five years
+I gave my mother the present I bought for her
+I gave her the present I bought for her
+*I gave my mother it
+We picked out some beautiful flowers for her
+We picked some beautiful flowers out for her
+We picked them out for her
+*We picked out them for her
+Did you put the milk in the refrigerator
+*Did you put the milk
+Where did you put the milk
+I hope he comes to the party tomorrow
+I hope that he comes to the party tomorrow
+*I hope him to come to the party tomorrow
+I expect him to come to the party tomorrow
+I expect to go to the party tomorrow
+*I expect
+*I expected who would come to the party
+I knew who would come to the party
+*I expected he go to the party
+I suggested he go to the party
+*He knew me how to use the program
+He asked me how to use the program
+*He disputed our program was superior
+He disputed that our program was superior
+Anne told me I would almost certainly be hired
+*Anne expected me I would almost certainly be hired
+*We argued adding new features to the program
+We discussed adding new features to the program
+*I thought terrible after our discussion
+I felt terrible after our discussion
+I made him make some changes in the program
+*I encouraged him make some changes in the program
+I helped him make some changes in the program
+I helped make some changes in the program
+*I saw make some changes in the program
+*I made him telling her about the party
+I saw him telling her about the party
+Phil gave me a sweater which he bought in Paris
+*Phil chose me a sweater which he bought in Paris
+Alan bet me five dollars Clinton would lose the election
+*Alan offered me five dollars Clinton would lose the election
+She said she didn't approve of my behavior
+*She said she didn't like of my behavior
+The results are in, the game is up and the truth is out
+*The in results show the out truth about the up game
+*The results became in and the truth seemed out
+He sold for five dollars the ring his mother had given him
+Clinton announced on Tuesday a bold new proposal
+*Clinton announced on Tuesday it
+I gave my brother an expensive present
+I gave him an expensive present
+I gave an expensive present
+I gave it
+*I gave my brother it
+I gave him for his birthday a very expensive present 
+*I gave him for his birthday it
+I gave for his birthday an expensive present 
+*I gave for his birthday it
+The President announced on Monday that several more bases would be closed
+He had attempted for years to make a career as a concert pianist
+*He had attempted for years
+I asked him when I saw him at the party yesterday what he was working on
+*I talked to him when I saw him at the party yesterday what he was working on
+I wondered for a long time why everyone liked her so much
+*I thought for a long time why everyone liked her so much
+*I thought for a long time, why everyone liked her so much
+I told Margaret that I thought she would probably be hired
+*I told on Tuesday Margaret that I thought she would probably be hired
+I told Margaret on Tuesday that I thought she would probably be hired
+We discussed at the meeting hiring a new secretary
+*We discussed at the meeting
+We informed the new employees that no salary increase would be possible
+We informed at the meeting the new employees
+*We informed at the meeting the new employees that no salary increase would be possible
+They were asked that he be allowed to go
+If his calculations were correct, Copernicus reasoned, the earth must revolve around the sun
+The earth, Copernicus reasoned, must revolve around the sun
+The earth must revolve around the sun, Copernicus reasoned
+*The earth must revolve around the sun, Copernicus was happy
+*The earth must revolve around the sun, Copernicus destroyed
+*The earth, the pope cringed when Copernicus reasoned, revolves around the sun
+Abortion was legal until the third month, the court ruled
+If the pregnancy was within the first three months, the court ruled, abortion was legal
+Nobody, it seems, wants to be a liberal
+*Nobody, John seems, wants to be a liberal
+Business is booming, Joe Smith, a car dealer, says
+Business is booming, says Joe Smith, a car dealer
+You can do anything you want, I told her
+In the last few years, it seems, nobody wants to be a liberal
+Also invited to the meeting were several prominent scientists
+*Also invited to the meeting invited several prominent scientists
+Also awarded the prize was Jean Smith, a prominent computer scientist
+Chosen to lead the commission was Fred Schultz, a former Federal judge
+*Chosen to lead the commission seemed likely to be Fred Schultz, a former Federal judge
+*Chooses to lead the investigation Fred Schultz
+*Choose to lead the investigation did Fred Schultz
+Also recommended in the report was a new initiative to combat crime
+*Also chosen the leader for the commission was Fred Schultz
+Included in our paper is a summary of the features of our program
+Also performing in the concert were members of the Budapest Quartet
+*Were performing in the concert members of the Budapest Quartet
+Voting in favor of the bill were 36 Republicans and 4 moderate Democrats
+Glaring coldly at Sarah, he walked out of the room
+He walked out of the room, glaring coldly at Sarah
+*Glaring coldly at Sarah, walking out of the room
+Finding that it was impossible to get work as a waiter, he worked as a janitor
+He had hoped to get work as a waiter, but, finding this was impossible, he worked as a janitor
+*He said that, finding that it was impossible to get work as a waiter, he would work as a janitor
+Used by some of the finest pianists in the country, Baldwin pianos are technical marvels
+Using specially designed parts, Baldwin pianos are technical marvels
+*Used specially designed parts, Baldwin pianos are technical marvels
+Sending a message of discontent to Washington, voters overwhelmingly rejected the Clinton administration
+She's a really good player
+John's coming to the party tonight
+He's usually gone to Boston for Thanksgiving
+*Do you know where John's
+Who's afraid of the big bad wolf
+That's just the kind of person he is
+*That's just the kind of person he's
+There's no reason to get so upset about it
+I didn't think he would do it, but he did
+*I didn't think he would invite her, but he invited
+If you don't want to do it, you should find someone who will
+If you don't want to do it, you should find someone who does
+Find someone who does
+*Find someone who wants to do
+I don't like programming, and someone who does may be difficult to find
+The price of the stock more than doubled in two days
+*The price of the stock more than increased in two days
+I finally figured out why this program is so slow
+*I finally flipped out why this program is so slow
+It turns out that Clinton didn't actually kiss Monica
+If you go around doing that, you're going to end up making people mad
+The lawyer pointed out that Clinton didn't actually kiss Monica
+A party is taking place, so if you'd like to show up, you should do so
+
+%PREPOSITIONS
+
+I have doubts about inviting him
+*I have doubts during inviting him
+I prevented her from doing it by praising her for not doing it
+From your description, I don't think I would enjoy it
+We had an argument over whether it was a good movie
+*We had an argument at whether it was a good movie
+Because of the rain, we decided to stay home
+They're having a party in front of the building
+The man with whom I play tennis is here
+The man I play tennis with is here
+*The man whom I play tennis is here
+*The man with whom I play tennis with is here
+With whom did you play tennis 
+Who did you play tennis with 
+The data on file will be used for the project at hand, which is already under way
+*The data on project will be used for the file at program
+The project was finished on schedule, as usual
+*The project as usual and the report on schedule were finished 
+I told him by telephone that I was coming by car
+From in back of the shed, I heard a scream that seemed to come from on top of the garage
+The university spends $5 per student
+*The university spends $5 per the student
+They're building a gigantic mall five miles from here
+*They're building a gigantic mall five mistakes from here
+The 7-11 is half a mile up the road, but the supermarket is a long way away
+I'm sure things will get done with Janet running the company 
+*I'm sure things will get done by Janet running the company 
+*I'm sure things will get done the company
+*I'm sure things will get done because Janet running the company 
+With Janet in charge, I'm sure things will get done
+
+%ADJECTIVES
+
+You are lucky that there is no exam today
+*You are stupid that there is no exam today
+You are lucky I am here
+*You are right I am here
+This is something we should be happy about
+*This is something we should be happy 
+*The happy about it man kissed his wife
+Is he sure how to find the house
+*Is he correct how to find the house
+You should be proud of your achievement
+*You should be happy of your achievement
+He is the smartest man I know
+*They are some smartest men I know
+I've seen a lot of programs, but ours is the fastest
+Ours is the fastest of the programs we have seen
+I've seen a lot of programs, but ours runs the most quickly
+*This is our the fastest program
+Voters angry about the economy will probably vote for Clinton
+*Voters angry will probably vote for Clinton
+Many Democrats unhappy about the economy but doubtful that Clinton can be elected  probably won't vote at all
+*Many Democrats unhappy but doubtful probably won't vote at all
+*Many Democrats likely that Bush will be reelected probably won't vote
+Hundreds of young men, furious about the verdict in the Rodney King case, looted stores in Los Angeles today
+*Hundreds of young men, furious, looted stores in Los Angeles today
+We need a programmer knowledgeable about Lisp
+*We need a programmer knowledgeable
+Any program as good as ours should be useful
+*Any program good should be useful
+Let us know if you have a program capable of parsing this sentence
+*Let us know if you have a program capable
+It is believed that even the troops loyal to Hussein will soon be forced to surrender
+*It is believed that even the troops loyal will soon be forced to surrender
+Republican policies only benefit the rich and powerful
+Republican policies only benefit the rich and the powerful
+*Republican policies only benefit a rich and a powerful
+*Republican policies only benefit some rich and some powerful
+The meek will inherit the earth, and the best is the enemy of the good
+They're building a skyscraper over 1000 feet tall
+*They're building a skyscraper tall
+The river is half a mile wide here and 300 feet deep
+*The river is half a mile beautiful and 300 feet dangerous
+Mr. John Smith, 66 years old, will succeed him as president
+*Mr. John Smith, old, will succeed him as president
+A big black ugly dog chased me
+A big, black, ugly dog chased me
+The former astronaut was alone and afraid
+*The alone astronaut was former
+
+%ADVERBS
+
+He is apparently an expert on dogs
+*He knows apparently an expert on dogs
+Mary quickly walked out of the room
+Mary just walked out of the room
+Quickly, Mary walked out of the room
+Mary walked out of the room quickly
+*Mary walked out of the room just
+He told them about the accident immediately
+*He told them about the accident presumably
+He told them about the accident, presumably
+She is very careful about her work
+She works very carefully
+*She very works carefully
+Is the piece easy enough for you
+Is the piece too easy for you
+*Is the piece enough easy for you
+She is apparently an excellent pianist
+*She married apparently an excellent pianist
+Only after the movie did he realize his mistake
+*After the movie did he realize his mistake
+I may have taken cocaine a few times, but at no time did I inhale
+*A few times may I have taken cocaine, but I inhaled at no time
+Never have I seen such a grotesque display of incompetence
+*Often have I seen such a grotesque display of incompetence
+We like to eat at restaurants, particularly on weekends
+We like to eat at restaurants, usually on weekends
+*We like to eat at restaurants, fortunately on weekends
+Such flowers are found mainly in Europe
+*Such flowers are found apparently in Europe
+*Such flowers are found mainly particularly in Europe
+*Such flowers are found mainly
+Many people, particularly doctors, believe there is no health care crisis
+*Many people, strongly doctors, believe there is no health care crisis
+I found a house that even John thinks we should buy
+He told me that even his mother likes me
+*He told me that even, his mother likes me
+We put the pie straight in the oven
+*We put the pie quickly in the oven
+We put the pie straight in
+*We put the pie straight
+He lives high in the mountains
+He lives over by the lake
+*He lives over by
+The apparently angry man walked out of the room
+The often underpaid administrators resent the invariably rude students and the understandably impatient professors
+The delicately lyrical tone of the cello contrasted with the fiercely percussive piano chords
+The always delicately lyrical tone was really beautiful
+*The delicately always lyrical tone was really beautiful
+*The delicately very lyrical tone was really beautiful
+Biochemically, I think the experiment has a lot of problems
+I think the experiment has a lot of problems biochemically
+It is biochemically an interesting experiment
+I'm not sure the results are biochemically valid
+
+%IT-THERE-THIS
+
+There is a dog in the park
+*There is chasing dogs
+*There are a dog in the park
+Does there seem to be a dog in the park?
+*Does there want to be a dog in the park?
+There seems to appear to have been likely to be a problem
+*There seems to appear to have been likely to be problems
+*There seems to appear to have been likely to be stupid
+There was an attempt to kill Rod
+The man there was an attempt to kill died
+There was a problem, but we solved it
+It is likely that Rod died
+*Joe is likely that Rod died
+It is clear who killed Rod
+*Joe is clear who killed Rod
+It may not be possible to fix the problem
+Grace may not be possible to fix the problem
+It is important that women be ready when they make these choices
+*It is clear that women be ready when they make these choices
+*Joe is important that women be ready when they make these choices
+flowers are red to attract bees
+I made it clear that I was angry
+*I made Anne clear that I was angry
+Dick is easy to hit
+% Many adjectives in words.adj.1 can be used as "too X to Y wtih/to"
+% including "big": "Dick is too big to hit".  So the below is accepted.
+*Dick is big to hit
+It is important to fix the problem
+Dick is important to fix the problem
+The man it is likely that John hit died
+*The man Joe is likely that Dick hit died
+Does it seem likely that Ann will come
+Does Ann act glad that Joe came
+*Does it act likely that Joe came
+It doesn't matter what Ted does
+*Joe doesn't matter what Ted does
+I want it to be possible to use the program
+I want Joe to be possible to use the program
+I want it to be clear that it was my idea
+*I asked it to be clear that it was my idea
+I want it to be obvious how to use the program
+*I want Emily to be obvious how to use the program
+I want Joe to be easy to hit
+It is likely they will come
+*Joe is likely they will come
+This is because he is extremely famous
+The trial is because he is extremely famous
+The excitement over the trial is because he is extremely famous
+This seems to have been because he is extremely famous
+
+%COMPARATIVES
+
+Our program works more elegantly than yours
+Ours works more elegantly than yours does
+Ours works more elegantly than yours works
+*Ours works more elegant than yours
+*Ours is more elegant than yours works
+Our program works more elegantly than efficiently
+Our program is more elegant than efficient
+Our program works better than yours
+We do this more for pleasure than for money
+He is more likely to go than to stay
+*He is more likely than to stay
+*He is more black to go than to stay
+He is more likely to go than he is to stay
+He is more likely to go than John is
+It is more likely that Joe died than that Fred died
+It is more likely that Joe died than it is that Fred died
+*John is more likely that Joe died than it is that Fred died
+*It is more likely that Joe died than John is that Fred died
+It is easier to ignore the problem than to solve it
+It is easier to ignore the problem than it is to solve it
+*Greg is easier to ignore the problem than to solve it
+Our program is easier to use than to understand
+*Our program is easier to use it than to understand
+I am more happy now than I was in college
+*I am more happy now than I earned in college
+He is more a teacher than a scholar
+I make more money in a month than John makes in a year
+I make more money in a month than John dies in a year
+I hit more the dog than the cat
+I have more money than John has time
+I have more dogs than John has five cats
+I have more money than John has a dog
+She interviewed more programmers than were hired
+*She interviewed more programmers than was hired
+I am as intelligent as John
+I earn as much money as John does
+*I am as intelligent as John does
+I earn as much money in a month as John earns in a year
+*I earn as much money in a month than John earns in a year
+Our program was better than had been expected
+*Our program was better than had been argued
+*Our program was better than had been responded
+Our program was better than was expected
+*Our program was better than were expected
+More people came to the party than were expected
+More people came to the party than was expected
+Our program did not run as quickly as expected
+*Our program did not run as quickly as said
+How much faster is our program than theirs
+*How much faster our program is than theirs
+The more quickly we write the program, the more money we will earn
+*The more people like the program
+*The people like the program, the more money we will earn
+The better the program is, the more people will like it
+The better the program, the more people will like it
+*The better a program, the more people will like it
+The less likely it is that we can parse this, the easier it is to understand 
+
+% "SO THAT", "SUCH...THAT"
+
+The shuttle is so big that it has to be carried on the back of a jet 
+*The shuttle is big that it has to be carried on the back of a jet 
+So many people attended that they spilled over into several neighboring fields
+*Many people attended that they spilled over into several neighboring fields
+The program has so many problems that you should probably just rewrite it
+*The program has many problems that you should probably just rewrite it
+The program has enough problems that you should probably just rewrite it
+I love her so much that I can't let her go
+*I love her very much that I can't let her go
+He ran home so quickly that his mother could hardly believe he had called from school
+*He ran home quickly that his mother could hardly believe he had called from school
+She presented her case with such eloquence that we could only admire her
+*She presented her case with eloquence that we could only admire her
+
+%"AND", ETC.
+
+I went to the store and got a gallon of milk
+*I got and went a gallon of milk
+I got a gallon of milk and some eggs
+I went to the store, got a gallon of milk, and returned the eggs
+
+% Sentence belwo was marked bad, but this seems arguable to me .. !?
+% *I went to the store, got a gallon of milk, and some eggs
+Mary, Joe and Louise are coming to the party
+Neither Mary nor Louise are coming to the party
+I am ready and eager to go to the party
+She handled it skillfully and with compassion
+I told him that I hated him and that I never wanted to see him again
+He told me why he was here and what he was doing
+*He told me why he was here and that he hated me
+Although he likes me and he respects me, he says he needs some privacy
+Your house and garden are very attractive
+I am in New York and I would like to see you
+This is not the man we know and love
+*This is not the man we know and love him
+The coverage on TV and on the radio has been terrible
+*The coverage on TV and I have seen has been terrible
+The sky is blue, so it is likely that Joe will come
+*It is blue and likely that Joe will come
+It is well and likely that Joe will come
+That is the man for whom and with whom Joe works
+*That is the man for whom and with Janet Joe works
+*When did Joe and John did leave the party
+
+% Huh ??? what's the correct parse/meaning of this sentence?
+% "my dog's freind came" is one of the parses !!?? wtf .. 
+% My dog, cat, and cousin's friend came
+*My dog, cat, horse, mouse, and his cow left
+My dog, cat, horse, and mouse, and his cow left
+you should not only ask for your money back, but demand it
+I was both angry and sad at the same time
+
+%PLURALIZATION IN CONJUNCTIONS
+
+There is neither a dog nor a cat here
+*There are neither a dog nor a cat here
+There is a dog or a cat here
+*There are a dog or a cat here
+*There are a dog and a cat here
+There is a dog and a cat here
+He and I are friends
+neither I nor my friend knows what happened
+neither I nor my friend know what happened
+Either I or my friend knows what happened
+Either I or my friend know what happened
+The dog and cats know what happened
+*The dog and cats knows what happened
+Are a dog and a cat here
+*Is a dog and a cat here
+*Is John and I invited
+Are John and I invited
+Is John or I invited
+Are John or I invited
+Is neither John nor I invited
+Are neither John nor I invited
+
+%GERUNDS
+
+Playing the piano bothers John
+Releasing the program at this point would annoy our competitors
+The playing of the piano really bothers John
+*The playing the piano really bothers John
+Telling Joe about the party would create a real problem
+*The telling Joe about the party could create a real problem
+Your telling Joe about the party could create a real problem
+Telling Joe that Sue was coming to the party would create a real problem
+Telling would create a real problem
+I want her to know about it, but the telling won't be easy
+*The telling her won't be easy
+*Some children like to tease
+Teasing can be very cruel
+Your telling John to leave may have destroyed your relationship
+The graduating of Fred changes the situation
+The sleeping of students is becoming a big problem
+The sleeping of students can ruin a lecture
+Buying of shares was brisk on Wall Street today
+The sleeping in class is becoming a big problem
+*The telling John to leave was stupid
+*The inviting your mother was stupid
+*The showing how to use the program seemed to interest people
+*The attempting to go to the party angered Joe
+The showing of the program seemed to impress people
+The sleeping of students described by Fred is a big problem
+The sleeping of students I told you about is a big problem
+The frequent sleeping of students is a big problem
+His hitting of the dog didn't help matters
+Some hitting of dogs will solve the problem
+the drug running here has become a massive problem
+He made a mistake in inviting John
+He made a mistake in the inviting of John
+I should have talked to you before inviting John
+I should have talked to you before the inviting of John
+
+%SPECIAL SUBJECTS: INFINITIVES, CLAUSES, AND INDIRECT QUESTIONS
+
+To pretend that our program is usable in its current form would be silly
+*To pretend that our program is usable in its current form would be happy
+That our program will be immediately accepted is hardly likely
+*That our program will be immediately accepted wrote the program
+*Is that our program will be accepted likely
+*That our program will be accepted seems likely that our program will be accepted
+Whether we should go to the party is the important question
+*Whether we should go to the party annoys me
+
+%LONGER CONSTRUCTIONS, PUNCTUATION, AND CAPITALIZATION
+
+Using the conventional Minuet form, Beethoven produced a piece of great originality
+Written in 1820, the symphony shows a new level of maturity for the composer
+Abandoned by his friends, he left Vienna three years later
+In Vienna, Beethoven met someone who would later be greatly influenced by him: Franz Schubert
+*In Vienna, Beethoven met someone who would later be greatly influenced by him; Franz Schubert
+Today I did something very important: I bought a dog
+*The store where I did something very important: I bought a dog was closed today
+It has been said that Schubert ran out of the room when he met Beethoven; but we now know this is untrue
+An important question remains: did Beethoven know about Schubert's music
+She just wanted one thing: to be a professional skater
+She knew one thing: that she would be a professional skater
+I agree that, in some ways, your program is better
+I agree that in some ways, your program is better
+*I agree that, in some ways your program is better
+That is the man who, in Joe's opinion, we should hire
+*That is the man, in Joe's opinion, we should hire
+*That is the man who, in Joe's opinion we should hire
+I know you hate Bill, but why did you send him that nasty note
+*I know you hate Bill, because why did you send him that nasty note
+But why did you send him that nasty note
+If John was with Lisa last night, who went to the movie with Diane
+*Although John was with Lisa last night, who went to the movie with Diane
+We need a President who understands us
+We need a president who understands us
+*We need a Melvin who understand us
+The Zongle of Bongle Dongle resigned today
+% A Zongle with a bad haircut resigned today -- is valid.
+% A Zongle with a Mercedes Benz resigned today -- is valid.
+% *A Zongle with a Bongle Dongle resigned today
+The National Association of Linguists is meeting here
+
+% "An" appears in the dictionary as a female given name, thus allowing the
+% below to parse in a rather awkward manner.
+% *An Association that many Linguists belong to is meeting here
+An association that many linguists belong to is meeting here
+If you were a middle-class American without a job, who would you vote for
+Many Croats who had fled their homes are now returning to them
+*Many Croat who had fled their homes are now returning to them
+Chinese is a wonderful language, Chinese food is nice, and the Chinese are nice people
+*Armenian is a wonderful language, Armenian food is great, and the Armenian are nice people
+Armenian is a wonderful language, Armenian food is great, and the Armenians are nice people
+Danish is a wonderful language, Danish food is great, and the Danish are nice people
+The Danes are nice people
+Dr Jane Smith lives on Main St
+Dr. Jane Smith lives on Main St.
+*Dr. Jane. Smith. lives on Main. St.
+Dr. J.G.D. Smith lives on Main St.
+*A Dr. lives on this St
+Mr. Smith (a lawyer for Kodak) refused to comment
+Mr. Smith -- a lawyer for Kodak -- refused to comment
+We left (carrying the dog) and Fred followed
+I have $50, but I want a $50000 car
+10% of the employees here do 90% of the work
+Zangbert stock fell 30% to $2.50 yesterday, but jumped 10% today in heavy trading
+*Zangbert stock fell %, but jumped to $ today
+With a 5% raise, I can get a $50000 car
+"What are you doing?" she asked.
+"This is what I'm going to do," he replied.
+"This is what I'm going to do!" he replied.
+*"This is what I'm going to do." he replied.
+*"This is what I'm doing to do" he replied.
+"On second thought," he said, "this is what I'm going to do".
+"Quotation marks" are simply "ignored" by our "program"
+Sometimes, people do this: They follow the colon with a capital letter.
+*However, they never do this; They don't follow a semi-colon with a capital letter.
+John said: "This is another use of colons one sometimes sees".
+Formerly, he had worked for Brody, McGill & Demson
+*He was unhappy & underpaid 
+The rally, at 6:00 last night, was attended by 1.1 million people
+Whatever you want to do is fine
+Who do you think Bill will bring?
+That, I did not know.
+
+

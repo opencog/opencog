@@ -1,0 +1,24 @@
+DOMAIN_STARTER_LINKS: S*  W
+
+DOMAIN_CONTAINS_LINKS: 
+
+URFL_ONLY_DOMAIN_STARTER_LINKS: 
+
+LEFT_DOMAIN_STARTER_LINKS: 
+
+STARTING_LINK_TYPE_TABLE: 
+W  s
+O  n
+
+; ----------------------------------------------------------------------
+; These links are not put in the word/link graph. They also cannot be the 
+; starter links for a domain. 
+
+IGNORE_THESE_LINKS:
+
+
+; ----------------------------------------------------------------------
+; these links are not traced further if they point back before the root word 
+
+RESTRICTED_LINKS: 
+

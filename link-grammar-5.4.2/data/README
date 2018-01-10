@@ -1,0 +1,53 @@
+
+
+Language Directories
+--------------------
+
+ar -- Arabic.  To be used with morphology engine; see morphology/ar
+
+de -- German. Contains dictionaries for a few thousand words, that's
+      all. Incomplete.
+
+en -- English. Complete set.
+
+fa -- Farsi.  To be used with morphology engine; see morphology/fa
+
+he -- Hebrew. Experimental prototype. Contains a few dozen words.
+
+id -- Indonesian. Experimental prototype. Contains a few hundred words.
+
+kz -- Kazakh. Experimental prototype. Contains a few dozen words.
+
+lt -- Lithuanian. Experimental prototype. Contains a few hundred words,
+      and implements only a few parts of speech.
+
+ru -- Russian.  Complete set of dictionaries, should parse most text.
+      Support needs to be added for conjunctions (and, or, but...)
+      Could use work on supporting regular expressions for numbers,
+      Russian-ized Latin technical terms, etc.  See the English 4.0.regex
+      file for more.
+
+tr -- Turkish. Experimental prototype. Contains a few dozen words.
+
+vn -- Vietnamese. Experimental prototype. Contains a few hundred words.
+
+any -- Will parse "any" language, exploring all combinatoric possibilities.
+       This is useful for certain machine-learning tasks, when one might
+       want to iterate over all possible parse trees in every way.
+
+ady -- Will parse "any" language, exploring all possible morphological
+       decompositions of the words in a sentence, as well as using
+       random linkages between words and morphemes. The assumed
+       morphology splits a word into at most two parts: a stem,
+       having no syntactic structure, and a suffix, which carries
+       the inflection -- that is, the stem carries all the syntactic
+       structure.
+
+amy -- Will parse "any" language, exploring all possible morphological
+       decompositions of the words in a sentence, as well as using
+       random linkages between words and morphemes. Configured to
+       explore morphology of 3 or more parts: syntactically inactive
+       prefixes and stems, and a single syntactically active suffix.
+
+demo-sql -- An almost empty demonstration dictionary, showing what an
+       SQLite-backed dictionary might look like.

@@ -1,0 +1,36 @@
+% 
+% Affixes get stripped off the left and right side of words 
+% i.e. spaces are inserted between the affix and the word itself.
+%
+% Some of the funky UTF-8 parenthesis are used in Asian texts.
+% In order to allow single straight quote ' and double straight quote ''
+% to be stripped off from both the left and the right, they are
+% distinguished by the suffix .x and .y (as as Mr.x Mrs.x or Jr.y Sr.y)
+% 
+% 。is an end-of-sentence marker used in Japanese texts.
+
+% Punctuation appearing on the right-side of words.
+% Note: the ellipsis ....y must appear *before* the dot ".", else the
+% splitting won't work right.
+")" "}" "]" ">" "".y" » 〉 ） 〕 》 】 ］ 』 」 "’’" "’" “ ''.y '.y `.y
+"%" "," ....y "." 。.y ‧ ":" ";" "?" "!" ‽ ؟ ？ ！ ….y "”" ━.y –.y ー.y ‐.y 、.y
+～ ¢ ₵ ™ ℠ 
+  : RPUNC+; 
+
+% Punctuation appearing on the left-side of words.
+"(" "{" "[" "<" "".x" « 〈 （ 〔 《 【 ［ 『 「 、.x `.x `` „ ‘ ''.x '.x ….x ....x
+¿ ¡ "$" US$ USD C$ 
+£ ₤ € ¤ ₳ ฿ ₡ ₢ ₠ ₫ ৳ ƒ ₣ ₲ ₴ ₭ ₺  ℳ  ₥ ₦ ₧ ₱ ₰ ₹ ₨ ₪ ﷼ ₸ ₮ ₩ ¥ ៛ 호점
+† †† ‡ § ¶ © ® ℗ № "#"
+* • ⁂ ❧ ☞ ◊ ※  ○  。.x ゜ ✿ ☆ ＊ ◕ ● ∇ □ ◇ ＠ ◎ 
+–.x ━.x ー.x -- - ‧.x
+  : LPUNC+;
+
+
+% The below is a quoted list, used during tokenization. Do NOT put
+% spaces in between the various quotation marks!!
+""«»《》【】『』`„“": QUOTES+;
+
+% The below is a quoted list, used during tokenization. Do NOT put
+% spaces in between the various symbols!!
+"()¿¡†‡§¶©®℗№#*•⁂❧☞◊※○。゜✿☆＊◕●∇□◇＠◎–━ー---‧": BULLETS+;

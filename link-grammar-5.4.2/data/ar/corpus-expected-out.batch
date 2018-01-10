@@ -1,0 +1,1297 @@
+linkparser> max-length set to 300
+Found 4 linkages (4 had no P.P. violations)
+  Linkage 1, cost vector = (UNUSED=0 DIS=2 AND=0 LEN=10)
+
+          +--------------------------P-------------------------+              
+          +-----------------P----------------+                 |              
+          +-----Oa-----+                     |                 +------PO-----+
+   +-CCVr-+     +--Dal-+NSUFFFEMsg+          +---PO---+        |      +--Dal-+
+   |      |     |      |          |          |        |        |      |      |
+w.conj nql.PV Al.d vlAv.ADJ p.NSUFFFEMSG |lY.PREP mst$fY.N0 fy.PREP Al.d qds.Ndip 
+
+Found 15 linkages (15 had no P.P. violations)
+  Linkage 1, cost vector = (UNUSED=0 DIS=1 AND=0 LEN=3)
+
+                                  +------GEN-----+--------------A-------------+
+   +-CCVr-+----Sn----+--GEN--+-QO-+      +--Dal--+-NSUFFFEMsg-+        +--Dal-+
+   |      |          |       |    |      |       |            |        |      |
+w.conj sjl.PV jylyyjyfs[?].n 8 hdf.Ndu Al.d mbArA.Napdu p.NSUFFFEMSG Al.d wHyd.ADJ 
+
+Found 4 linkages (4 had no P.P. violations)
+  Linkage 1, cost vector = (UNUSED=0 DIS=2 AND=0 LEN=3)
+
+          +---------CCOBJ---------+                  +----QO---+        
+   +-CCVr-+----Sn---+        +CCOL+---CCOr--+---GEN--+   +-Dal-+NSUFFPL+
+   |      |         |        |    |         |        |   |     |       |
+w.conj sjl.PV <ymrtwn.Nprop 12 w.conj zdrylyt$[?].n 66 Al.d hdf.Ndu yn.NPL 
+
+linkparser> No complete linkages found.
+Found 10 linkages (10 had no P.P. violations) at null count 2
+  Linkage 1, cost vector = (UNUSED=2 DIS=2 AND=0 LEN=10)
+
+                +---------------------CCOBJ---------------------+    +----QO
+   +----CCVr----+---Sn--+-GEN+---QO---+--PO--+-NPOSS-+     +CCOL+CCOr+   +-D
+   |            |       |    |        |      |       |     |    |    |   |  
+w.conj [sjl] fAt.PVV A[?].n 47 [w] b.PREP wgdAn.N y.NSUFF 70 w.conj 90 Al.d 
+
+
+---+
+al-+
+   |
+>hdAf.N 
+
+Found 18 linkages (18 had no P.P. violations)
+  Linkage 1, cost vector = (UNUSED=0 DIS=1 AND=0 LEN=8)
+
+          +-------------------P------------------+                                
+          +-----Sn----+-------A-------+          |        +------------QO---------
+   +-CCVr-+     +-Dal-+      +---Dal--+          +---PO---+          +---Ddp---+-D
+   |      |     |     |      |        |          |        |          |         |  
+w.conj rd.PVC Al.d jy$.Ndu Al.d <srA}yly.ADJ ElY.PREP kl.quant h`*h.DEMPRONF Al.d 
+
+
+---+           
+al-+NSUFFFEMpl+
+   |          |
+hjm.NAt At.NSUFFFEMPL 
+
+linkparser> No complete linkages found.
+Found 1 linkage (1 had no P.P. violations) at null count 1
+  Unique linkage, cost vector = (UNUSED=1 DIS=0 AND=0 LEN=9)
+
+             +--------------------------------------ADV-----------------------
+             |                                           +-----------GEN------
+   +---CCVr--+-----Sn----+---GEN---+--GEN--+-----GEN-----+-NSUFFFEMpl-+       
+   |         |           |         |       |             |            |       
+w.conj kAn.AspPVintr dnkTA$.N0 >Eln[?].n rfD.N [h] <qtrAH.NduAt At.NSUFFFEMPL 
+
+
+--------------+        
+-----+        |        
+     |        +-AVSUFF+
+     |        |       |
+>nAn.Nprop >yD.ADV AF.suff 
+
+linkparser> No complete linkages found.
+Found 51 linkages (51 had no P.P. violations) at null count 3
+  Linkage 1, cost vector = (UNUSED=3 DIS=3 AND=0 LEN=9)
+
+          +------------------SUB------------------+        +--------Oa--------+
+   +-CCVr-+-----Sn-----+--GEN-+---NPOSS---+       +--Csub--+           +--Dal-+
+   |      |            |      |           |       |        |           |      |
+w.conj qAl.PVV [lA] nzAl.N TmwH.N [yn] k.NSUFF mA.comp knA[?].n [fy] Al.d sAbq.ADJ 
+
+linkparser> No complete linkages found.
+Found 3 linkages (3 had no P.P. violations) at null count 1
+  Linkage 1, cost vector = (UNUSED=1 DIS=2 AND=0 LEN=12)
+
+          +--------------------------------On--------------------------------+ 
+          +----------------CCSUBJ----------------+                           | 
+          |          +------------CCSL-----------+                           +-
+   +-CCVr-+          +------G-----+              +--CCSr--+-----G----+       | 
+   |      |          |            |              |        |          |       | 
+w.conj sjl.PV dytAr[?].Nprop nymyv.Nprop [18] w.conj bytr.Nprop nymyv.Nprop 72 
+
+
+---QO---+        
+  +-Dal-+NSUFFPL+
+  |     |       |
+Al.d hdf.Ndu yn.NPL 
+
+Found 4 linkages (4 had no P.P. violations)
+  Linkage 1, cost vector = (UNUSED=0 DIS=1 AND=0 LEN=12)
+
+                          +---------------------------P-----------------------
+   +---------CCVr---------+----------On----------+                            
+   |      +------NEGi-----+------Sn-----+        |                            
+   |      |      +--IVPRE-+      +--Dal-+        +---QO---+-NSUFFFEMpl+       
+   |      |      |        |      |      |        |        |           |       
+w.conj lm.neg y.IV3MS qdm.IVyu Al.d mSdr.Ndu >y.quant <yDAH.NAt At.NSUFFFEMPL 
+
+
+----+                                   
+    |                                   
+    |       +------GEN-----+            
+    +---PO--+      +--Dal--+-NSUFFFEMsg+
+    |       |      |       |           |
+Hwl.PREP >hdAf.N Al.d zyAr.NapAt p.NSUFFFEMSG 
+
+linkparser> No complete linkages found.
+Found 5 linkages (5 had no P.P. violations) at null count 1
+  Linkage 1, cost vector = (UNUSED=1 DIS=0 AND=0 LEN=9)
+
+   +--------------CCVr-------------+                                           
+   |              +-----AUXfut-----+------------P------------+-----PO-----+----
+   |              |        +-IVPRE-+---P--+----PO---+        |      +-Dal-+NSUF
+   |              |        |       |      |         |        |      |     |    
+w.conj [>DAf] s.IVtense y.IV3MS kwn.IV fy.PREP bngAlwr.N0 fy.PREP Al.d sAE.NAt 
+
+
+---------A-------------+           
+FFEMpl+         +--Dal-+NSUFFFEMsg+
+      |         |      |          |
+At.NSUFFFEMPL Al.d mqbl.ADJ p.NSUFFFEMSG 
+
+Found 9 linkages (9 had no P.P. violations)
+  Linkage 1, cost vector = (UNUSED=0 DIS=2 AND=0 LEN=22)
+
+          +---------------------------------------------------On------------
+          +----------------------------------P------------------------------
+          |                +------GEN-----+--------------A-------------+    
+   +-CCVr-+---Sn--+---GEN--+      +--Dal--+-NSUFFFEMsg-+        +--Dal-+    
+   |      |       |        |      |       |            |        |      |    
+w.conj sjl.PV gAtwsw.N0 hdf.Ndu Al.d mbArA.Napdu p.NSUFFFEMSG Al.d wHyd.ADJ 
+
+
+--------------------------------------+
+---+                                  |
+   +------PO------+                   |
+   |      +--Dal--+-NSUFFFEMsg+       |
+   |      |       |           |       |
+fy.PREP Al.d dqyq.Napdu p.NSUFFFEMSG 57 
+
+Found 56 linkages (56 had no P.P. violations)
+  Linkage 1, cost vector = (UNUSED=0 DIS=1 AND=0 LEN=7)
+
+          +------CCSUBJ-----+---------CCSr--------+                            
+          |      +---CCSL---+        +----CCSL----+                 +----QO---+
+   +-CCVr-+      +-GEN-+    |        +--GEN--+    +---CCSr--+--GEN--+   +-Dal-+
+   |      |      |     |    |        |       |    |         |       |   |     |
+w.conj sjl.PV fynAn.N 14 w.conj kylbAn[?].n 84 w.conj stwntwn[?].n 90 Al.d >hdAf.N 
+
+linkparser> No complete linkages found.
+Found 1 linkage (1 had no P.P. violations) at null count 1
+  Unique linkage, cost vector = (UNUSED=1 DIS=2 AND=0 LEN=7)
+
+                                                   +-----------------P-
+                                   +-------On------+-------A------+    
+   +-CCVr-+--SUB--+------Csub------+       +--Dal--+       +--Dal-+NSUF
+   |      |       |                |       |       |       |      |    
+w.conj >wDH.PV >n.comp [h`*h] hy.PRON3FS Al.d ntA}j.Ndip Al.d >wly.ADJ 
+
+
+----------------+                            
+                +------PO------+             
+FFEMsg+         |     +---Dal--+-NSUFFFEMsg-+
+      |         |     |        |            |
+p.NSUFFFEMSG l.PREP Al.d <ntfAD.NapAt p.NSUFFFEMSG 
+
+linkparser> No complete linkages found.
+Found 2 linkages (2 had no P.P. violations) at null count 3
+  Linkage 1, cost vector = (UNUSED=3 DIS=2 AND=0 LEN=17)
+
+                        +--------------------------------------------P-----------
+                        +-----------P-----------+------PO-----+--------------A---
+   +--------CCVr--------+----Oa----+            |      +--Dal-+-NSUFFFEMsg+      
+   |                    |          |            |      |      |           |      
+w.conj [jmyE] [Al] DHAyA[?].PV mwZf.ADJ [wn] fy.PREP Al.d $rk.Napdu p.NSUFFFEMSG 
+
+
+--------------------------------+                        
+----------+                     +-----PO-----+           
+  +--Dal--+-NSUFFFEMsg+         |     +--Dal-+NSUFFFEMsg+
+  |       |           |         |     |      |          |
+Al.d bArysy.ADJ p.NSUFFFEMSG l.PREP Al.d tdf}.Nap p.NSUFFFEMSG 
+
+linkparser> No complete linkages found.
+Found 39 linkages (39 had no P.P. violations) at null count 2
+  Linkage 1, cost vector = (UNUSED=2 DIS=2 AND=0 LEN=16)
+
+          +----------------------------------------P----------------------------
+          +--------------On-------------+------GEN-----+--------------A---------
+   +-CCVr-+--Sn-+-NPOSS+                |      +--Dal--+-NSUFFFEMsg-+        +--
+   |      |     |      |                |      |       |            |        |  
+w.conj sjl.PV rwk.N y.NSUFF [jwnywr] hdf.Ndu Al.d mbArA.Napdu p.NSUFFFEMSG Al.d 
+
+
+------------+                                    
+----+       +------PO------+                     
+Dal-+       |      +--Dal--+-NSUFFFEMsg+         
+    |       |      |       |           |         
+wHyd.ADJ fy.PREP Al.d dqyq.Napdu p.NSUFFFEMSG [90] 
+
+linkparser> No complete linkages found.
+Found 32 linkages (32 had no P.P. violations) at null count 4
+  Linkage 1, cost vector = (UNUSED=4 DIS=2 AND=0 LEN=5)
+
+                    +-----Csub----+                  +--------GEN--------+-----
+   +--IVPRE-+--SUB--+      +--Dal-+--On--+----GEN----+           +--Dal--+     
+   |        |       |      |      |      |           |           |       |     
+y.IV3MS *kr.IVyu >n.comp Al.d fryq.Ndu Emr.N [Al] b$yr.N0 [hw] Al.d mr$H.NduAt 
+
+
+--A------+              
+  +--Dal-+              
+  |      |              
+Al.d wHyd.ADJ [HtY] [Al|n] 
+
+linkparser> No complete linkages found.
+Found 39 linkages (39 had no P.P. violations) at null count 2
+  Linkage 1, cost vector = (UNUSED=2 DIS=2 AND=0 LEN=16)
+
+          +----------------------------------------P----------------------------
+          +--------------On-------------+------GEN-----+--------------A---------
+   +-CCVr-+--Sn-+-NPOSS+                |      +--Dal--+-NSUFFFEMsg-+        +--
+   |      |     |      |                |      |       |            |        |  
+w.conj sjl.PV rwk.N y.NSUFF [jwnywr] hdf.Ndu Al.d mbArA.Napdu p.NSUFFFEMSG Al.d 
+
+
+------------+                                    
+----+       +------PO------+                     
+Dal-+       |      +--Dal--+-NSUFFFEMsg+         
+    |       |      |       |           |         
+wHyd.ADJ fy.PREP Al.d dqyq.Napdu p.NSUFFFEMSG [90] 
+
+Found 244 linkages (244 had no P.P. violations)
+  Linkage 1, cost vector = (UNUSED=0 DIS=1 AND=0 LEN=4)
+
+                                                               +----------GEN-----
+   +-CCVr-+-----Sn----+-------GEN------+---GEN---+-QO-+---PO---+-NSUFFFEMsg+      
+   |      |           |                |         |    |        |           |      
+w.conj sjl.PV frAnkwfysky[?].n frAnkwfyskY[?].n 61 mn.PREP rkl.Napdu p.NSUFFFEMSG 
+
+
+----+              +------GEN-----+--------------A-------------+
+    +--GEN--+--GEN-+      +--Dal--+-NSUFFFEMsg-+        +--Dal-+
+    |       |      |      |       |            |        |      |
+jzA[?].n '[?].n hdf.Ndu Al.d mbArA.Napdu p.NSUFFFEMSG Al.d wHyd.ADJ 
+
+linkparser> No complete linkages found.
+Found 10 linkages (10 had no P.P. violations) at null count 3
+  Linkage 1, cost vector = (UNUSED=3 DIS=2 AND=0 LEN=8)
+
+                +------------------P-----------------+                           
+                +----------Oa---------+              |                       +---
+   +----CCVr----+PVSUFFSUB+           |              +---PO---+------GEN-----+   
+   |            |         |           |              |        |              |   
+w.conj [qAl] ls.PVC nA.PVSUFFSUBJ mwAfq.ADJ [yn] ElY.PREP qrAr.Ndu [hArys] wqf.N 
+
+
+-GEN---+------A-----+
+  +-Dal+     +--Dal-+
+  |    |     |      |
+Al.d frz.N Al.d ydwy.ADJ 
+
+linkparser> No complete linkages found.
+Found 2 linkages (2 had no P.P. violations) at null count 5
+  Linkage 1, cost vector = (UNUSED=5 DIS=2 AND=0 LEN=12)
+
+                                      +----------------------------On----------
+                                      +---------Sn---------+------A------+     
+   +---------------CCVr---------------+PVSUFFSUB+          |      +--Dal-+-NSUF
+   |                                  |         |          |      |      |     
+w.conj [fy] [mbArA] [p] [vAny] [p] sHq.PV t.PVSUFFSUBJ kwryA.N0 Al.d jnwby.ADJ 
+
+
+-----------------+                                                        
+                 |                                                        
+FFEMsg+          +----GEN---+---GEN---+GEN+-QO-+--GEN--+---GEN---+--GEN--+
+      |          |          |         |   |    |       |         |       |
+p.NSUFFFEMSG bAkstAn.N Cmment[?].n :[?].n 7 -[?].n NOT[?].n FOUND[?].n Sfr.N 
+
+linkparser> No complete linkages found.
+Found 54 linkages (54 had no P.P. violations) at null count 1
+  Linkage 1, cost vector = (UNUSED=1 DIS=1 AND=0 LEN=16)
+
+               +---------------------------------P-----------------------------
+               +------------------P-----------------+                          
+               +-------------Sn-------------+       |        +-----GEN-----+   
+   +----CCVr---+           +---Ddp---+--Dal-+       +---PO---+       +-Dal-+   
+   |           |           |         |      |       |        |       |     |   
+w.conj [qd] >blg.PV h`*A.DEMPRONMS Al.d qrAr.Ndu l.PREP zbA}n.Ndip Al.d ErAq.N 
+
+
+----+                                      
+    |                                      
+    +------PO-----+------A-----+           
+    |       +-Dal-+     +--Dal-+NSUFFFEMsg+
+    |       |     |     |      |          |
+xlAl.PREP Al.d >yAm.N Al.d mADy.ADJ p.NSUFFFEMSG 
+
+linkparser> No complete linkages found.
+Found 76 linkages (76 had no P.P. violations) at null count 2
+  Linkage 1, cost vector = (UNUSED=2 DIS=3 AND=0 LEN=6)
+
+                  +----Csub----+----------On----------+                   +------
+   +-CCVr-+--SUB--+      +-Dal-+NSUFFFEMpl+           +--------GEN--------+-NSUFF
+   |      |       |      |     |          |           |                   |      
+w.conj qAl.PVV >n.comp Al.d slT.NAt At.NSUFFFEMPL EAml.N/ap [t] [ny] mEAml.NapAt 
+
+
+----GEN----------+----------GEN---------+                        
+FEMsg-+          +-NSUFFFEMsg+          +----GEN----+---NPOSS---+
+      |          |           |          |           |           |
+p.NSUFFFEMSG Hsn.NapAt p.NSUFFFEMSG >vnA'.N0 <EtqAl[?].Nprop y.NSUFF 
+
+Found 20 linkages (20 had no P.P. violations)
+  Linkage 1, cost vector = (UNUSED=0 DIS=2 AND=0 LEN=15)
+
+          +------------------------------CCOBJ-----------------------------+   
+          +-------CCSUBJ-------+---------CCSr---------+                    |   
+          |        +----CCSL---+         +----CCSL----+                    |   
+   +-CCVr-+        +--GEN-+    |         +--GEN--+    +--CCSr--+      +CCOL+--C
+   |      |        |      |    |         |       |    |        |      |    |   
+w.conj sjl.PV mAtys[?].n 63 w.conj stywArt[?].n 73 w.conj jwnz.Nprop 77 w.conj 
+
+
+            +----QO---+
+COr--+--GEN-+   +-Dal-+
+     |      |   |     |
+rAzwf[?].n 90 Al.d >hdAf.N 
+
+Found 28 linkages (28 had no P.P. violations)
+  Linkage 1, cost vector = (UNUSED=0 DIS=2 AND=0 LEN=33)
+
+                  +------------------------------------------------------
+                  +----------------------------------------------------On
+                  |                  +-----------------------CCPOBJ------
+                  |                  |       +--------------------CCPOL--
+   +-----CCVr-----+-----Sn----+      |       +-----------A----------+    
+   |      +-IVPRE-+     +-Dal-+---P--+       +NSUFFFEMpl+           +NSUF
+   |      |       |     |     |      |       |          |           |    
+w.conj y.IV3MS xDE.IV Al.d ErAq.N l.PREP Eqwb.NAt At.NSUFFFEMPL dwly.ADJ 
+
+
+--P--------------------------------------------------------+        
+---------------------------------------------------+       |        
+-----------------+                                 |       |        
+-----------------+                                 |       |        
+                 |                                 |       |        
+FFEMsg+          +---CCPOr--+--NPOSS--+      +-Dal-+       +---PO--+
+      |          |          |         |      |     |       |       |
+p.NSUFFFEMSG mn*.conj <jtyAH.NduAt h.NSUFF Al.d kwyt.N0 fy.PREP 1990.yr 
+
+linkparser> No complete linkages found.
+Found 60 linkages (60 had no P.P. violations) at null count 1
+  Linkage 1, cost vector = (UNUSED=1 DIS=1 AND=0 LEN=24)
+
+               +-----------------------------------------------P------------
+               +--------------------------------------P---------------------
+               +------------------P------------------+                      
+               +------Sn------+                      |                      
+   +----CCVr---+       +--Dal-+-NSUFFFEMpl+          +---PO---+---GEN--+NSUF
+   |           |       |      |           |          |        |        |    
+w.conj [t] jry.PVAtn Al.d mHAdv.NAt At.NSUFFFEMPL fy.PREP mskn.Ndu Eryq.NAt 
+
+
+----------------------------------+                                             
+-----------------+                |                                             
+                 |                |                                             
+                 |                +------PO-----+-------------A------------+    
+FFEMpl+          +---PO---+       |      +--Dal-+NSUFFFEMsg+        +--Dal-+NSUF
+      |          |        |       |      |      |          |        |      |    
+At.NSUFFFEMPL fy.PREP >ryHA.N0 fy.PREP Al.d Df.Napdu p.NSUFFFEMSG Al.d grby.ADJ 
+
+
+FFEMsg+
+      |
+p.NSUFFFEMSG 
+
+linkparser> No complete linkages found.
+Found 64 linkages (64 had no P.P. violations) at null count 1
+  Linkage 1, cost vector = (UNUSED=1 DIS=1 AND=0 LEN=17)
+
+                   +-------------------------------------------------P----------
+                   +-------------------------On-------------------------+       
+   +------CCVr-----+        +------A------+                             |       
+   |      +--IVPRE-+---Sn---+      +--Dal-+-NSUFFFEMsg+                 +-----GE
+   |      |        |        |      |      |           |                 |       
+w.conj y.IV3MS $Ark.IVyu wzyr.N0 Al.d xArjy.ADJ p.NSUFFFEMSG [Al] <srA}yly.NOUN 
+
+
+--------------------------------------+               
+                                      |               
+                                      +------PO------+
+N----+-----G-----+-----G-----+        |      +--Dal--+
+     |           |           |        |      |       |
+$lwmw.Nprop bn.NOUNPROP EAmy.Nprop fy.PREP Al.d m&tmr.NduAt 
+
+Found 1 linkage (1 had no P.P. violations)
+  Unique linkage, cost vector = (UNUSED=0 DIS=2 AND=0 LEN=18)
+
+          +----------------------------CCVl----------------------------+   
+          +-------------------------On-------------------------+       |   
+          +-------CCSUBJ-------+                               |       |   
+          |        +----CCSL---+                               |       |   
+   +-CCVr-+        +--GEN-+    +CCSr+-QO-+-NPOSS-+      +--Dal-+       +--C
+   |      |        |      |    |    |    |       |      |      |       |   
+w.conj sjl.PV rwmydAl.N0 55 w.conj 65 hdf.Ndu y.NSUFF Al.d dnmArk.N w.conj 
+
+
+CVr--+--Sn--+-QO-+---GEN---+
+     |      |    |         |
+$wl.PVintr 82 hdf.Ndu >lmAnyA.N0 
+
+linkparser> No complete linkages found.
+Found 224 linkages (224 had no P.P. violations) at null count 2
+  Linkage 1, cost vector = (UNUSED=2 DIS=0 AND=0 LEN=15)
+
+             +---------------------------------SUB-----------------------------
+             +----------------------P----------------------+                   
+   +---CCVr--+-----Sn----+---GEN---+-----GEN----+          +--PO--+---A---+    
+   |         |           |         |            |          |      |       |    
+w.conj kAn.AspPVintr mSdr.Ndu >myrky.NOUN >Eln[?].Nprop fy.PREP wqt.N sAbq.ADJ 
+
+
+---+------------------Csub-----------------+            
+   |                      +-----AUXfut-----+-----Sn----+
+   |                      |        +-IVPRE-+     +-Dal-+
+   |                      |        |       |     |     |
+>n.comp [Al] [<jtmAE] s.IVtense y.IV3MS Eqd.IV Al.d xmys.N 
+
+linkparser> No complete linkages found.
+Found 20 linkages (20 had no P.P. violations) at null count 3
+  Linkage 1, cost vector = (UNUSED=3 DIS=2 AND=0 LEN=8)
+
+          +----------CCOBJ---------+--------CCOr-------+------CCOr------+   
+   +-CCVr-+----Sn----+        +CCOL+              +CCOL+           +CCOL+---
+   |      |          |        |    |              |    |           |    |   
+w.conj sjl.PV tryzygyh.Nprop 12 w.conj [wyltwrd] 22 w.conj [mykw] 44 w.conj 
+
+
+         +----QO---+
+-CCOr----+   +-Dal-+
+         |   |     |
+[rwbyr] 74 Al.d >hdAf.N 
+
+linkparser> No complete linkages found.
+Found 4 linkages (4 had no P.P. violations) at null count 1
+  Linkage 1, cost vector = (UNUSED=1 DIS=1 AND=0 LEN=24)
+
+                              +-------------------------------------------------On-
+                              +-----------CCSUBJ----------+                        
+   +-----------CCVr-----------+       +--------CCSL-------+                        
+   |       +------AUXfut------+       +----GEN----+       |             +-------GEN
+   |       |        +--IVPRE--+       |     +-Dal-+       +-----CCSr----+       +--
+   |       |        |         |       |     |     |       |             |       |  
+w.conj s.IVtense y.IV3MS ltqy[?].IV rws.N Al.d xmys.N >yD.conj [AF] r}ys.N/ap Al.d 
+
+
+------------------------------------------------+            
+                                                |            
+                                                |            
+------+--------------A--------------+           |            
+-Dal--+------G-----+       +---Dal--+           +-----G-----+
+      |            |       |        |           |           |
+wzrA[?].Nprop '[?].Nprop Al.d <srA}yly.ADJ <yhwd.Nprop bArAk.Nprop 
+
+linkparser> No complete linkages found.
+Found 102 linkages (102 had no P.P. violations) at null count 3
+  Linkage 1, cost vector = (UNUSED=3 DIS=1 AND=0 LEN=21)
+
+               +-----------------------------P-----------------------------+    
+               +------------------P-----------------+                      |    
+               +------------Sn------------+         +------PO-----+        |    
+   +----CCVr---+     +---------Dal--------+         |     +--Dal--+        +---P
+   |           |     |                    |         |     |       |        |    
+w.conj [Al] hdf.PV Al.d [rAbE] [hw] mstwdE.NduAt l.PREP Al.d *xA}r.Ndip fy.PREP 
+
+
+           +-----GEN----+-------------A------------+           
+O---+--GEN-+     +--Dal-+NSUFFFEMsg+        +--Dal-+NSUFFFEMsg+
+    |      |     |      |          |        |      |          |
+>ryHA.N0 $rq.N Al.d Df.Napdu p.NSUFFFEMSG Al.d grby.ADJ p.NSUFFFEMSG 
+
+Found 302 linkages (302 had no P.P. violations)
+  Linkage 1, cost vector = (UNUSED=0 DIS=1 AND=0 LEN=24)
+
+          +----------------------------------------------------P----------------
+          +------------------------------------P--------------------------------
+          |                                           +---------GEN--------+    
+   +-CCVr-+--Sn--+--GEN-+--GEN--+---GEN---+--GEN-+-QO-+NSUFFIN+      +-Dal-+    
+   |      |      |      |       |         |      |    |       |      |     |    
+w.conj qd.PVC fArq.N >Hmd.N0 sEyd.N0 $EbAn.Ndip 20 EAm.Ndu AF.suff Al.d HyAp.N0 
+
+
+-----------------------------------+            
+----+                              |            
+    |                              +-----PO----+
+    +-----PO----+---NPOSS--+       |      +-Dal+
+    |           |          |       |      |    |
+bEd.PREP <SAbt[?].Nprop h.NSUFF fy.PREP Al.d Sdr.N 
+
+linkparser> No complete linkages found.
+Found 8 linkages (8 had no P.P. violations) at null count 1
+  Linkage 1, cost vector = (UNUSED=1 DIS=2 AND=0 LEN=24)
+
+            +----------------------------------------------P-------------------
+            +--------------------------------CCOBJ-----------------------------
+            |                                +----------------CCOL-------------
+            |                                +-----GEN-----+                   
+   +--CCVr--+----Sn----+---NPOSS--+          |     +--Dal--+-NSUFFFEMsg-+      
+   |        |          |          |          |     |       |            |      
+w.conj >Eln[?].PV <n[?].Nprop nA.NSUFF [n] dEm.N Al.d mqAwm.NapAt p.NSUFFFEMSG 
+
+
+--------------------------+                                  
+---+                      |                                  
+---+                      |                                  
+   +-----CCOr----+        +-------PO------+--------A--------+
+   |     +--Dal--+        |      +---Dal--+        +---Dal--+
+   |     |       |        |      |        |        |        |
+w.conj Al.d nDAl.Nprop Dd.PREP Al.d <HtlAl.NduAt Al.d <srA}yly.ADJ 
+
+linkparser> No complete linkages found.
+Found 4 linkages (4 had no P.P. violations) at null count 1
+  Linkage 1, cost vector = (UNUSED=1 DIS=4 AND=0 LEN=17)
+
+                   +-------------------------------------------------------On
+   +------CCVr-----+-------Sn-------+                      +----------GEN----
+   |      +--IVPRE-+       +---Dal--+-------P------+---PO--+NSUFFFEMsg+      
+   |      |        |       |        |              |       |          |      
+w.conj y.IV3MS TAlb.IVyu Al.d flsTyny.NOUN [wn] b.PREP qw.Napdu p.NSUFFFEMSG 
+
+
+------------------------------------------------------+                            
+-----+-----------A----------+                         |                      +-----
+     +-NSUFFFEMsg+          +NSUFFFEMsg+        +-Dal-+----REL---+----Crel---+--NPO
+     |           |          |          |        |     |          |           |     
+HmAy.NapAt p.NSUFFFEMSG dwly.ADJ p.NSUFFFEMSG Al.d >mr.Ndu Al*y.RELPRON trfD.NduAt 
+
+
+----On--------+
+SS-+          |
+   |          |
+h.NSUFF <srA}yl.Ndip 
+
+linkparser> No complete linkages found.
+Found 13 linkages (13 had no P.P. violations) at null count 7
+  Linkage 1, cost vector = (UNUSED=7 DIS=0 AND=0 LEN=19)
+
+                                  +------------------------------------------------
+                                  |                   +----------QO----------+     
+   +-------------CCVr-------------+----Sn----+---QO---+NSUFFFEMsg+           +-----
+   |                              |          |        |          |           |     
+w.conj [mn] [Al] [mqrr] [>n] tErD.PVintr tsE.Numb E$r.Numb p.NSUFFFEMSG msrHy.NOUN 
+
+
+P------------------------------------------------+                 
+                                                 +-------PO-------+
+-GEN-----+--------A--------+NSUFFFEMsg+          |       +---Dal--+
+         |                 |          |          |       |        |
+[p] >rdny.NOUN [p] [w] Erby.ADJ p.NSUFFFEMSG xlAl.PREP Al.d mhrjAn.NduAt 
+
+linkparser> No complete linkages found.
+Found 2 linkages (2 had no P.P. violations) at null count 1
+  Linkage 1, cost vector = (UNUSED=1 DIS=2 AND=0 LEN=15)
+
+          +--------------------------------CCVl--------------------------------+   
+          +--------------CCOBJ-------------+                                   |   
+          |                    +----CCOL---+         +-------GEN-------+       |   
+   +-CCVr-+---Sn---+           +--GEN-+    +CCOr+-QO-+          +--Dal-+       +--C
+   |      |        |           |      |    |    |    |          |      |       |   
+w.conj sjl.PV dynys.Nprop rwmydAl.N0 55 w.conj 65 hdf.Ndu [y] Al.d dnmArk.N w.conj 
+
+
+CVr--+--Sn--+-QO-+---GEN---+
+     |      |    |         |
+$wl.PVintr 82 hdf.Ndu >lmAnyA.N0 
+
+linkparser> No complete linkages found.
+Found 10 linkages (10 had no P.P. violations) at null count 1
+  Linkage 1, cost vector = (UNUSED=1 DIS=2 AND=0 LEN=10)
+
+          +----------------------CCOBJ----------------------+           
+          |      +------GEN-----+      +--------CCOL--------+           
+   +-CCVr-+--Sn--+      +--Dal--+      +-QO-+--GEN--+       +-------CCOr
+   |      |      |      |       |      |    |       |       |           
+w.conj sjl.PV r$yd.N0 Al.d bwEzyzy.N0 67 hdf.Ndu twns.N0 w.conj [mAryw] 
+
+
+------+-----GEN----+--GEN--+-QO-+---GEN--+
+      |            |       |    |        |
+kAntwby[?].n kAntwbY[?].n 19 hdf.Ndu swysrA.N0 
+
+linkparser> No complete linkages found.
+Found 20 linkages (20 had no P.P. violations) at null count 8
+  Linkage 1, cost vector = (UNUSED=8 DIS=0 AND=0 LEN=16)
+
+             +----------------------------------P-----------------------------
+             +---------------P--------------+------PO-----+                   
+   +---CCVr--+-----Sn----+                  |      +--Dal-+-NSUFFFEMpl+       
+   |         |           |                  |      |      |           |       
+w.conj kAn.AspPVintr hAm$.Ndu [Al] [xT>] fy.PREP Al.d tqdyr.NAt At.NSUFFFEMPL 
+
+
+----+                                                                       
+    |                                       +-------GEN-------+             
+    +------------PO-----------+-----GEN-----+NSUFFIND+        |             
+    |                         |             |        |        |             
+HtY.PREP [Al|n] [y] [EAdl] qrn.Ndu [nA] wAHd.NOUN AF.suff ElY.Nprop [Al] [>ql] 
+
+linkparser> No complete linkages found.
+Found 159 linkages (159 had no P.P. violations) at null count 1
+  Linkage 1, cost vector = (UNUSED=1 DIS=2 AND=0 LEN=16)
+
+          +-----------------------------------------P-----------------------------
+          +---------------On--------------+------GEN-----+--------------A---------
+   +-CCVr-+----Sn---+------G-----+        |      +--Dal--+-NSUFFFEMsg-+        +--
+   |      |         |            |        |      |       |            |        |  
+w.conj sjl.PV <dwArdz.Nprop byrs.Nprop hdf.Ndu Al.d mbArA.Napdu p.NSUFFFEMSG Al.d 
+
+
+------------+                                                                   
+----+       |              +--------GEN--------+             +-----------GEN----
+Dal-+       +------PO------+-NSUFFFEMsg+       +-QO-+---PO---+-NSUFFFEMsg+      
+    |       |              |           |       |    |        |           |      
+wHyd.ADJ fy.PREP [Al] dqyq.Napdu p.NSUFFFEMSG 16 mn.PREP rkl.Napdu p.NSUFFFEMSG 
+
+
+------+            
+      +-----G-----+
+      |           |
+jzA[?].Nprop '[?].Nprop 
+
+linkparser> No complete linkages found.
+Found 16 linkages (16 had no P.P. violations) at null count 2
+  Linkage 1, cost vector = (UNUSED=2 DIS=2 AND=0 LEN=25)
+
+          +----------------------------------------SUB----------------------
+          +-------------------------------------On--------------------------
+          |                       +----------GEN---------+--------NPOSS-----
+   +-CCVr-+----Sn----+-----GEN----+NSUFFFEMpl+           +-NSUFFFEMsg+      
+   |      |          |            |          |           |           |      
+w.conj mDY.PV0 [y] qwl.N [>n] qrAr.NAt At.NSUFFFEMPL mhm.NapAt p.NSUFFFEMSG 
+
+
+------------------+                                                              
+-----------+      |                                                              
+---+       |      +-----Csub----+             +-----GEN-----+--------------A-----
+   |       |      |      +-IVPRE+---P--+--PO--+     +--Dal--+-NSUFFFEMpl-+       
+   |       |      |      |      |      |      |     |       |            |       
+y.NSUFF jb.Ndu >n.comp t.IVS tx*.IV fy.PREP $>n.N Al.d tHAlf.NduAt At.NSUFFFEMPL 
+
+
+---------+            
+  +--Dal-+-NSUFFFEMsg+
+  |      |           |
+Al.d Hkwmy.ADJ p.NSUFFFEMSG 
+
+linkparser> No complete linkages found.
+Found 10 linkages (10 had no P.P. violations) at null count 1
+  Linkage 1, cost vector = (UNUSED=1 DIS=2 AND=0 LEN=26)
+
+          +-----------------------------------------------------P-------
+          +--------------------------------------P----------------------
+          +----------------On----------------+----------A----------+    
+   +-CCVr-+---Sn---+------NPOSS-----+        +NSUFFFEMsg+          +NSUF
+   |      |        |                |        |          |          |    
+w.conj >wDH.PV zrhwny.N0 [lAHZ] nA.NSUFF <rAd.Nap p.NSUFFFEMSG wADH.ADJ 
+
+
+----------------------------------------------+                                  
+----------------+                             |                                  
+                |       +------A------+       |         +-------------GEN--------
+FFEMsg+         +---PO--+      +--Dal-+       +----PO---+-NSUFFFEMsg-+        +--
+      |         |       |      |      |       |         |            |        |  
+p.NSUFFFEMSG mn.PREP Trf.Ndu Al.d mgrb.ADJ fy.PREP mkAfH.NapAt p.NSUFFFEMSG Al.d 
+
+
+-----+
+Dal--+
+     |
+<rhAb.NduAt 
+
+linkparser> No complete linkages found.
+Found 483 linkages (483 had no P.P. violations) at null count 1
+  Linkage 1, cost vector = (UNUSED=1 DIS=1 AND=0 LEN=15)
+
+          +---------SUB---------+               +----------------------------------
+          +------Sn-----+       +------Csub-----+                                  
+   +-CCVr-+      +--Dal-+       |       +-IVPRE-+--Sn-+--GEN-+---GEN--+---QO--+--GE
+   |      |      |      |       |       |       |     |      |        |       |    
+w.conj nfY.PV0 Al.d mSdr.Ndu >n.comp y.IV3MS kwn.IV wqE.N AY[?].n >y.quant >TlAq.N 
+
+
+----P-------------------------------------+              
+          +--------A-------+              +------PO-----+
+N-+--GEN--+       +---Dal--+              |      +--Dal-+
+  |       |       |        |              |      |      |
+nAr.N ElY.Nprop Al.d <srA}yly.ADJ [yn] mn.PREP Al.d mwqE.Ndu 
+
+linkparser> No complete linkages found.
+Found 2 linkages (2 had no P.P. violations) at null count 2
+  Linkage 1, cost vector = (UNUSED=2 DIS=4 AND=0 LEN=24)
+
+                                  +------------------------------------
+                                  +-------------------------------P----
+                   +-----Csub-----+---------------A--------------+     
+   +--CCVr-+--SUB--+      +--Dal--+-NSUFFFEMpl-+         +--Dal--+-NSUF
+   |       |       |      |       |            |         |       |     
+w.conj >DAf.PVV >n.comp Al.d mqAtl.NapAt At.NSUFFFEMPL Al.d >myrky.ADJ 
+
+
+----------------------On----------------------------------------------------
+---------------------------+                                                
+                           |        +------QO------+                        
+FFEMsg+                    +---PO---+       +--Dal-+-NSUFFFEMpl+         +--
+      |                    |        |       |      |           |         |  
+p.NSUFFFEMSG [lAHq] [t] fy.PREP bED.quant Al.d HAl.NapAt At.NSUFFFEMPL Al.d 
+
+
+-----+                                        
+     |                                        
+     +--------------A-------------+           
+Dal--+-NSUFFFEMpl+         +--Dal-+NSUFFFEMsg+
+     |           |         |      |          |
+TA}r.NapAt At.NSUFFFEMPL Al.d rwsy.ADJ p.NSUFFFEMSG 
+
+linkparser> No complete linkages found.
+Found 176 linkages (176 had no P.P. violations) at null count 2
+  Linkage 1, cost vector = (UNUSED=2 DIS=2 AND=0 LEN=40)
+
+                +---------------------------------------------------------------On-
+                +---------------------------------------------------P--------------
+                +----------------------------------P-------------------------------
+                +----------------P---------------+------PO-----+                   
+   +----CCVr----+---Sn---+------GEN-----+        |      +--Dal-+-NSUFFFEMpl+       
+   |            |        |              |        |      |      |           |       
+w.conj [qd] <nDm.PVV qwmy.NOUN [wn] tAmyl.N0 |lY.PREP Al.d mfAwD.NAt At.NSUFFFEMPL 
+
+
+--------------------------------------------------------------+
+------------------------------------+                         |
+---+                                |                         |
+   |       +------GEN-----+         +------PO-----+           |
+   +---PO--+      +--Dal--+         |      +--Dal-+           |
+   |       |      |       |         |      |      |           |
+mn.PREP >jl.Ndu Al.d <frAj.NduAt En.PREP Al.d mmvl.Ndu rAjkwmAr.Nprop 
+
+linkparser> No complete linkages found.
+Found 13 linkages (13 had no P.P. violations) at null count 2
+  Linkage 1, cost vector = (UNUSED=2 DIS=2 AND=0 LEN=28)
+
+          +-------------------------------------------------------------------
+          +----------------P----------------+                                 
+          +--------Oa--------+              |           +-------GEN------+----
+   +-CCVr-+           +--Dal-+              +--PO-+--QO-+NSUFFIN+        |    
+   |      |           |      |              |     |     |       |        |    
+w.conj qd.PVC [HSl] Al.d mstql.ADJ [wn] ElY.PREP 67 mqEd.Ndu AF.suff >vnA'.N0 
+
+
+--P---------------------------------------------------------------------+         
+                                                                        |         
+--------GEN------------+-------------A-------------+                    +-------PO
+      +---Ddp---+--Dal-+-NSUFFFEMsg+        +--Dal-+NSUFFFEMsg+         |      +--
+      |         |      |           |        |      |          |         |      |  
+h`*h.DEMPRONF Al.d jwl.NapAt p.NSUFFFEMSG Al.d >xyr.ADJ p.NSUFFFEMSG mn.PREP Al.d 
+
+
+------+             
+-Dal--+-NSUFFFEMpl-+
+      |            |
+<ntxAb.NduAt At.NSUFFFEMPL 
+
+linkparser> No complete linkages found.
+Found 29 linkages (29 had no P.P. violations) at null count 1
+  Linkage 1, cost vector = (UNUSED=1 DIS=1 AND=0 LEN=47)
+
+           +------------------------------------------------------------
+           +---------------------------------------------------------P--
+           +--------------------------------------P---------------------
+           +-------------Sn------------+-------------A-------------+    
+   +--CCVr-+PVSUFFSUBJ+        +--Dal--+-NSUFFFEMsg+        +--Dal-+NSUF
+   |       |          |        |       |           |        |      |    
+w.conj >$Ad.PVV t.PVSUFFSUBJ Al.d Hkwm.Napdu p.NSUFFFEMSG Al.d trky.ADJ 
+
+
+---------------------------------P-------------------------------------------------
+------------------------------------------------------+                            
+----------------+                                     |                            
+                +-------------PO-------------+        +----------PO----------+-----
+FFEMsg+         |          +---Ddp---+--Dal--+        |               +--Dal-+-NSUF
+      |         |          |         |       |        |               |      |     
+p.NSUFFFEMSG b.PREP h`*A.DEMPRONMS Al.d brnAmj.Ndu b.PREP [<stvnA'] Al.d fqr.Napdu 
+
+
+--------------------------------------------+        
+                                            |        
+                                            |        
+--------A-------------+                     |        
+FFEMsg+        +--Dal-+-NSUFFFEMsg+         +---PO--+
+      |        |      |           |         |       |
+p.NSUFFFEMSG Al.d mtElq.ADJ p.NSUFFFEMSG b.PREP qbrS.Ndip 
+
+linkparser> No complete linkages found.
+Found 2 linkages (2 had no P.P. violations) at null count 3
+  Linkage 1, cost vector = (UNUSED=3 DIS=2 AND=0 LEN=19)
+
+          +------------------SUB-----------------+                                 
+          +----------On----------+               |                           +-----
+          +------Sn-----+        |               |                           +-----
+   +-CCVr-+      +--Dal-+        +-NPOSS-+       +------------Csub-----------+-PVSU
+   |      |      |      |        |       |       |                           |     
+w.conj >wDH.PV Al.d mSdr.Ndu *At.NOUN h.NSUFF >n.comp [Al] [mstql] [yn] HSl.PVintr 
+
+
+---------------------P-------------------------+                                 
+------P-----------+                            +------PO------+-------------A----
+FFSUBJ+           +--PO-+--QO-+NSUFFIN+        |       +--Dal-+-NSUFFFEMsg+      
+      |           |     |     |       |        |       |      |           |      
+wA.PVSUFFSUBJ ElY.PREP 67 mqEd.Ndu AF.suff xlAl.PREP Al.d jwl.NapAt p.NSUFFFEMSG 
+
+
+---------+           
+  +--Dal-+NSUFFFEMsg+
+  |      |          |
+Al.d >xyr.ADJ p.NSUFFFEMSG 
+
+linkparser> No complete linkages found.
+Found 169 linkages (169 had no P.P. violations) at null count 2
+  Linkage 1, cost vector = (UNUSED=2 DIS=2 AND=0 LEN=22)
+
+          +----------------------------------------CCOBJ----------------------
+          +--------------------P--------------------+                         
+          |       +----GEN----+------A-----+        +-----PO-----+       +----
+   +-CCVr-+---Sn--+      +-Dal+     +--Dal-+        |      +-Dal-+       +NSUF
+   |      |       |      |    |     |      |        |      |     |       |    
+w.conj frD.PV mjls.Ndu Al.d >mn.N Al.d dwly.ADJ ElY.PREP Al.d ErAq.N Eqwb.NAt 
+
+
+------------------+                                                   
+                  |                                                   
+-----CCOL---------+          +--------GEN-------+------A-----+        
+FFEMpl+           +---CCOr---+            +-Dal-+      +-Dal-+        
+      |           |          |            |     |      |     |        
+At.NSUFFFEMPL mn*.conj <jtyAH.NduAt [h] Al.d kwyt.N0 Al.d EAm.ADJ [1990] 
+
+linkparser> No complete linkages found.
+Found 18 linkages (18 had no P.P. violations) at null count 2
+  Linkage 1, cost vector = (UNUSED=2 DIS=2 AND=0 LEN=16)
+
+                        +-----------------CCPOBJ----------------+        
+                        |        +-------------CCPOL------------+        
+   +-CCVr-+------P------+        +---GEN--+NSUFFFEMpl+          +-----CCP
+   |      |             |        |        |          |          |        
+w.conj jrY.PV0 [Al] lqA'.PREP byn.Ndu Eryq.NAt At.NSUFFFEMPL w.conj [Al] 
+
+
+      +-------------------------------------A--------------------------------
+      |            +-----------P-----------+        +------A------+          
+Or----+-----GEN----+------G-----+          +---PO---+      +--Dal-+       +--
+      |            |            |          |        |      |      |       |  
+dblwmAsy.NOUN >rwn.Nprop myllr[?].Nprop fy.PREP mskn.Ndu Al.d ms&wl.ADJ Al.d 
+
+
+-----+
+     |
+Dal--+
+     |
+flsTyny.ADJ 
+
+Found 50 linkages (50 had no P.P. violations)
+  Linkage 1, cost vector = (UNUSED=0 DIS=2 AND=0 LEN=14)
+
+          +--------------------------------CCOBJ-----------------------------
+          +-------CCSUBJ------+                                              
+          |     +-----CCSL----+                                              
+   +-CCVr-+     +-GEN-+GE+    +---CCSr--+--GEN--+-QO-+-NPOSS-+         +--CCO
+   |      |     |     |  |    |         |       |    |       |         |     
+w.conj sjl.PV srb.N An.N 3 w.conj bArswAn[?].n 90 hdf.Ndu y.NSUFF rwmAnyA.N0 
+
+
+---+                                      
+   |                                      
+   |                                      
+L--+----CCOr---+---GEN---+-QO-+----GEN---+
+   |           |         |    |          |
+w.conj myhAylwfyt$[?].n 87 hdf.Ndu ywgwslAfyA.N0 
+
+linkparser> No complete linkages found.
+Found 35 linkages (35 had no P.P. violations) at null count 1
+  Linkage 1, cost vector = (UNUSED=1 DIS=2 AND=0 LEN=37)
+
+           +------------------------------------------------------P----------------
+           +------------------------------------------P----------------------------
+           +-------------------------P------------------------+                    
+           +------------On------------+                       |                    
+           +------Sn-----+            +-------A------+        |        +------GEN--
+   +--CCVr-+       +-Dal-+      +-Dal-+      +--Dal--+        +---PO---+        +--
+   |       |       |     |      |     |      |       |        |        |        |  
+w.conj <ktfY.PV0 Al.d TyrAn.N Al.d mdny.N0 Al.d >ngwly.ADJ b.PREP t>kyd.NduAt Al.d 
+
+
+-------------------------------------+               
+--------------+                      |               
+              |                      |               
+              |                      |               
+----+         |                      +------PO------+
+Dal-+         +-------PO------+      |      +--Dal--+
+    |         |               |      |      |       |
+HAdv.N/ap dwn.PREP [<ETA'] mzyd.N mn.PREP Al.d tfASyl.Ndip 
+
+linkparser> No complete linkages found.
+Found 236 linkages (236 had no P.P. violations) at null count 2
+  Linkage 1, cost vector = (UNUSED=2 DIS=0 AND=0 LEN=35)
+
+             +---------------------------------------------------------------------
+             +----------------------------------------P----------------------------
+             +--------------------------------P-------------------------------+    
+             |                +-------GEN------+-------A-------+              |    
+   +---CCVr--+-------Sn-------+       +---Dal--+        +--Dal-+              +---P
+   |         |                |       |        |        |      |              |    
+w.conj kAn.AspPVintr [Al] <tHAd.Ndu Al.d swfyAty.NOUN Al.d sAbq.ADJ [bd>] qbl.PREP 
+
+
+---P-----------------------------------------------------------------------+    
+-----------+                                                               |    
+           |                                                               |    
+           |                 +------------A-----------+                    |    
+O--+       +---PO--+---GEN---+-NSUFFFEMpl-+           +NSUFFFEMsg+         +----
+   |       |       |         |            |           |          |         |    
+1991.yr fy.PREP bnA'.N0 tjhyz.NduAt At.NSUFFFEMPL nwwy.ADJ p.NSUFFFEMSG fy.PREP 
+
+
+-PO----+
+       |
+lybyA[?].Nprop 
+
+linkparser> No complete linkages found.
+Found 4 linkages (4 had no P.P. violations) at null count 1
+  Linkage 1, cost vector = (UNUSED=1 DIS=2 AND=0 LEN=4)
+
+          +----------------CCOBJ---------------+                                
+   +-CCVr-+----Sn---+------G-----+        +CCOL+CCOr+--QO-+------GEN-----+-----G
+   |      |         |            |        |    |    |     |              |      
+w.conj sjl.PV kArlws.Nprop rwyz[?].Nprop 53 w.conj 889 hdf.Ndu [y] gwAtymAlA.N0 
+
+
+EN----+-----GEN-----+--GEN--+-QO-+----GEN---+
+      |             |       |    |          |
+wrwlAndw[?].n fwnsykA[?].n 70 hdf.Ndu kwstArykA.N0 
+
+linkparser> No complete linkages found.
+Found 96 linkages (96 had no P.P. violations) at null count 3
+  Linkage 1, cost vector = (UNUSED=3 DIS=2 AND=0 LEN=44)
+
+          +------------------------------------------------------------------------
+          +-----------------------------------------------------------------On-----
+          +-------------------------------------P----------------------------------
+          +------------Sn------------+-------------A-------------+                 
+   +-CCVr-+PVSUFFSUB+        +--Dal--+-NSUFFFEMsg+        +--Dal-+NSUFFFEMsg+      
+   |      |         |        |       |           |        |      |          |      
+w.conj $hd.PV t.PVSUFFSUBJ Al.d mrHl.Napdu p.NSUFFFEMSG Al.d >xyr.ADJ p.NSUFFFEMSG 
+
+
+--------------P----------------------------------------------------------------
+------------------------------------------------------------+                  
+---+                                                        |                  
+   |       +------GEN------+                                |                  
+   +---PO--+      +---Dal--+-NSUFFFEMpl-+         +---Dal---+------G-----+     
+   |       |      |        |            |         |         |            |     
+mn.PREP h*[?].n Al.d <ntxAb.NduAt At.NSUFFFEMPL Al.d vlAvA[?].Nprop '[?].Nprop 
+
+
+---------------------+                                      
+                     |                                      
+                     |                                      
+                     |               +----------QO---------+
+                     +---PO--+--GEN--+-NSUFFFEMsg+         |
+                     |       |       |           |         |
+[HwAdv] [>d] [t] |lY.PREP sqwT.N >rbE.Numb p.NSUFFFEMSG qtlY.N0 
+
+linkparser> No complete linkages found.
+Found 48 linkages (48 had no P.P. violations) at null count 3
+  Linkage 1, cost vector = (UNUSED=3 DIS=2 AND=0 LEN=51)
+
+          +--------------------------------------------------------------------
+          +-------------------------------------------------------On-----------
+          +--------------------------------------P-----------------------------
+          +---------Sn---------+--------GEN-------+-----------A----------+     
+   +-CCVr-+PVSUFFSUB+          |           +--Dal-+-NSUFFPL+     +--Dal--+     
+   |      |         |          |           |      |        |     |       |     
+w.conj Tlb.PV t.PVSUFFSUBJ jmEy.NOUN [p] Al.d TyAr.Nall yn.NPL Al.d >ngwly.ADJ 
+
+
+-----------P-----------------------------------------------------------------
+-------------------------------------------+                                 
+--------+                                  |                                 
+        +-----PO-----+                     |        +-------------GEN--------
+        |      +-Dal-+NSUFFFEMpl+          +---GEN--+-NSUFFFEMpl+         +--
+        |      |     |          |          |        |           |         |  
+[yn] mn.PREP Al.d slT.NAt At.NSUFFFEMPL tElyq.N rHl.NapAt At.NSUFFFEMPL Al.d 
+
+
+--------------+                                          
+              |                                          
+              |                                          
+-----+        |       +---------------GEN---------------+
+Dal--+        +---PO--+NSUFFFEMsg+                +-Dal-+
+     |        |       |          |                |     |
+>nTwnwf.N0 fy.PREP kAf.Nap p.NSUFFFEMSG [<rjA'] Al.d blAd.N 
+
+linkparser> No complete linkages found.
+Found 58 linkages (58 had no P.P. violations) at null count 4
+  Linkage 1, cost vector = (UNUSED=4 DIS=0 AND=0 LEN=29)
+
+                +------------------------------------------------------------
+                +-----------------------------------------------P------------
+                +------------------Sn------------------+                     
+   +----CCVr----+-VSUFFDO-+       +---------Dal--------+------G------+-------
+   |            |         |       |                    |             |       
+w.conj [Trd] >lH.PVV km.VSUFFDO Al.d [>wrwgwyAny] xwrxy.Nprop lArywndA.Nprop 
+
+
+------------P---------------------------------------------------------------------
+-----------------------------------+                                              
+                                   |         +-------GEN------+                   
+--------G---------------+          +----PO---+        +--Dal--+-NSUFFFEMsg-+      
+                        |          |         |        |       |            |      
+[mhAjm] [kwlwmbyA] bwnyA.Nprop qbl.PREP nhAypF[?].n Al.d mbArA.Napdu p.NSUFFFEMSG 
+
+
+---+             
+   |             
+   |             
+   +--PO--+-GEN-+
+   |      |     |
+b.PREP dqyq.N tyn.N 
+
+Found 2 linkages (2 had no P.P. violations)
+  Linkage 1, cost vector = (UNUSED=0 DIS=0 AND=0 LEN=1)
+
+   +-------Sn------+
+   +-NPOSS+        |
+   |      |        |
+l.POSS y.NSUFF ktAb.Ndu 
+
+Found 1 linkage (1 had no P.P. violations)
+  Unique linkage, cost vector = (UNUSED=0 DIS=1 AND=0 LEN=1)
+
+   +----------Sp---------+
+   +PVSUFFSUB+           |
+   |         |           |
+fkr.PV t.PVSUFFSUBJ >nA.PRON1S 
+
+Found 2 linkages (2 had no P.P. violations)
+  Linkage 1, cost vector = (UNUSED=0 DIS=2 AND=0 LEN=0)
+
+  +--On--+
+  |      |
+mEy.N ktAb.N 
+
+linkparser> No complete linkages found.
+Found 2 linkages (2 had no P.P. violations) at null count 3
+  Linkage 1, cost vector = (UNUSED=4 DIS=0 AND=0 LEN=0)
+
+[>$rb] [mA] [>] [ryd] 
+
+Found 2 linkages (2 had no P.P. violations)
+  Linkage 1, cost vector = (UNUSED=0 DIS=2 AND=0 LEN=1)
+
+   +---------On--------+
+   +----Sp---+         |
+   |         |         |
+>Hb.PVV >nA.PRON1S ktby.Ndu 
+
+Found 1 linkage (1 had no P.P. violations)
+  Unique linkage, cost vector = (UNUSED=0 DIS=2 AND=0 LEN=1)
+
+   +--------On-------+       
+   +----Sp---+       +-NPOSS+
+   |         |       |      |
+>Hb.PVV >nA.PRON1S ktb.N y.NSUFF 
+
+Found 1 linkage (1 had no P.P. violations)
+  Unique linkage, cost vector = (UNUSED=0 DIS=0 AND=0 LEN=1)
+
+   +--------Sn--------+           
+   +VSUFFDO+          +-----G----+
+   |       |          |          |
+Tbx.PV h.VSUFFDO mHmd.Nprop EysY.Nprop 
+
+Found 1 linkage (1 had no P.P. violations)
+  Unique linkage, cost vector = (UNUSED=0 DIS=1 AND=0 LEN=2)
+
+   +---------P--------+-----PO-----+
+   +---Sp---+         |      +-Dal-+
+   |        |         |      |     |
+*hb.PV hw.PRON3MS <lY.PREP Al.d byt.Ndu 
+
+linkparser> No complete linkages found.
+Found 1 linkage (1 had no P.P. violations) at null count 3
+  Unique linkage, cost vector = (UNUSED=3 DIS=1 AND=0 LEN=0)
+
+   +----Sp---+                 
+   |         |                 
+>$rb.PV >nA.PRON1S [mA] [>] [ryd] 
+
+Found 10 linkages (10 had no P.P. violations)
+  Linkage 1, cost vector = (UNUSED=0 DIS=1 AND=0 LEN=0)
+
+   +---P---+---PO---+---GEN---+-NSUFFFEMsg+
+   |       |        |         |           |
+>kl.PVV fy.PREP >yp[?].n mktb.NapAt p.NSUFFFEMSG 
+
+Found 4 linkages (4 had no P.P. violations)
+  Linkage 1, cost vector = (UNUSED=0 DIS=2 AND=0 LEN=3)
+
+   +---------------On---------------+         
+   +----------Sp----------+         |         
+   +PVSUFFSUBJ+           |         +----A---+
+   |          |           |         |        |
+>kl.PVV t.PVSUFFSUBJ >nA.PRON1S ktAb.Ndu >Sgr.ADJ 
+
+linkparser> No complete linkages found.
+Found 1 linkage (1 had no P.P. violations) at null count 4
+  Unique linkage, cost vector = (UNUSED=5 DIS=0 AND=0 LEN=0)
+
+[ktAby] [>kbr] [mn] [ktAb] [k] 
+
+Found 4 linkages (4 had no P.P. violations)
+  Linkage 1, cost vector = (UNUSED=0 DIS=2 AND=0 LEN=4)
+
+   +---------------On--------------+                           
+   +----------Sp---------+         +------GEN-----+            
+   +PVSUFFSUB+           |         |      +--Dal--+-NSUFFFEMsg+
+   |         |           |         |      |       |           |
+>kl.PV t.PVSUFFSUBJ >nA.PRON1S ktAb.Ndu Al.d mktb.NapAt p.NSUFFFEMSG 
+
+linkparser> No complete linkages found.
+Found 1 linkage (1 had no P.P. violations) at null count 8
+  Unique linkage, cost vector = (UNUSED=9 DIS=0 AND=0 LEN=0)
+
+[mn] [Al] [SEb] [>n] [>] [drs] [f] [Al] [byt] 
+
+Found 8 linkages (8 had no P.P. violations)
+  Linkage 1, cost vector = (UNUSED=0 DIS=2 AND=0 LEN=6)
+
+   +---------------On--------------+                                           
+   +----------Sp---------+         +------GEN-----+-------------A-------------+
+   +PVSUFFSUB+           |         |      +--Dal--+-NSUFFFEMsg+        +--Dal-+
+   |         |           |         |      |       |           |        |      |
+>kl.PV t.PVSUFFSUBJ >nA.PRON1S ktAb.Ndu Al.d mktb.NapAt p.NSUFFFEMSG Al.d kbyr.ADJ 
+
+linkparser> No complete linkages found.
+Found 18 linkages (18 had no P.P. violations) at null count 2
+  Linkage 1, cost vector = (UNUSED=2 DIS=0 AND=0 LEN=6)
+
+   +--------CCVr--------+------------P------------+------PO-----+            
+   |             +-IVPRE+---P--+--PO--+           |      +--Dal-+-NSUFFFEMsg+
+   |             |      |      |      |           |      |      |           |
+lw.conj [knt] >.IV1S mlk.IV l.PREP >kl.Ndu [t] mE.PREP Al.d mlk.NapAt p.NSUFFFEMSG 
+
+linkparser> No complete linkages found.
+Found 22 linkages (22 had no P.P. violations) at null count 3
+  Linkage 1, cost vector = (UNUSED=3 DIS=2 AND=0 LEN=5)
+
+   +-----------------On----------------+                                  
+   +----------Sp----------+            |                                  
+   +PVSUFFSUBJ+           |            +---GEN---+-----NPOSS-----+        
+   |          |           |            |         |               |        
+>kl.PVV t.PVSUFFSUBJ >nA.PRON1S [Al] xbz.N l*y[?].Nprop [Tbx] h.NSUFF [mHmd] 
+
+Found 8 linkages (8 had no P.P. violations)
+  Linkage 1, cost vector = (UNUSED=0 DIS=2 AND=0 LEN=6)
+
+   +---------------On--------------+                                               
+   +----------Sp---------+         +------GEN-----+-------------A-------------+    
+   +PVSUFFSUB+           |         |      +--Dal--+-NSUFFFEMsg+        +--Dal-+NSUF
+   |         |           |         |      |       |           |        |      |    
+>kl.PV t.PVSUFFSUBJ >nA.PRON1S ktAb.Ndu Al.d mktb.NapAt p.NSUFFFEMSG Al.d kbyr.ADJ 
+
+
+FFEMsg+
+      |
+p.NSUFFFEMSG 
+
+linkparser> No complete linkages found.
+Found 12 linkages (12 had no P.P. violations) at null count 1
+  Linkage 1, cost vector = (UNUSED=1 DIS=2 AND=0 LEN=4)
+
+  +-------------------On-------------------+                                    
+  +---GEN--+-----G----+----G----+          +---GEN--+----GEN----+----G----+-----
+  |        |          |         |          |        |           |         |     
+fEl.N SdAm.Nprop Hsyn.Nprop >bn.Nprop bTwTp[?].n bTwT.N [h] >bn.Nprop Ebd.Nprop 
+
+
+-G-----+
+       |
+All`h.NOUNPROP 
+
+Found 4 linkages (4 had no P.P. violations)
+  Linkage 1, cost vector = (UNUSED=0 DIS=4 AND=0 LEN=9)
+
+    +------------------On-----------------+                              
+    +------------GEN------------+         |          +---------CCPOBJ----
+    +-NSUFFFEMsg+        +--Dal-+         +-----P----+      +--Dal-+---CC
+    |           |        |      |         |          |      |      |     
+Ewd.Napdu p.NSUFFFEMSG Al.d jnrAl.N0 byrwn.Nprop |lY.PREP Al.d >rjntyn.N 
+
+
+-----+                   +-------P-------+-----PO-----+
+POL--+--CCPOr-+-GEN-+-QO-+NSUFFIN+       |      +-Dal-+
+     |        |     |    |       |       |      |     |
+bEdmA.conj >mDY.N0 17 EAm.Ndu AF.suff fy.PREP Al.d mnfY.N0 
+
+Found 28 linkages (28 had no P.P. violations)
+  Linkage 1, cost vector = (UNUSED=0 DIS=3 AND=0 LEN=19)
+
+                                                                           +----
+                          +------------------------P-----------------------+    
+    +----------On---------+------------A-----------+                       |    
+    +NSUFFFEMsg+          +NSUFFFEMpl+             +-NSUFFFEMsg-+          |    
+    |          |          |          |             |            |          |    
+<qAm.Nap p.NSUFFFEMSG ElAq.NAt At.NSUFFFEMPL dblwmAsy.ADJ p.NSUFFFEMSG byn.PREP 
+
+
+------------------------CCPOBJ----------------------------+                      
+         +----------------------CCPOL---------------------+                      
+         +-------------A-------------+                    +----CCPOr---+-------A-
+  +--Dal-+NSUFFFEMpl+         +--Dal-+NSUFFFEMsg+         |     +--Dal-+      +--
+  |      |          |         |      |          |         |     |      |      |  
+Al.d wlAy.NAt At.NSUFFFEMPL Al.d mtHd.ADJ p.NSUFFFEMSG w.conj Al.d <tHAd.N0 Al.d 
+
+
+-----+
+Dal--+
+     |
+swfyAty.ADJ 
+
+linkparser>   Linkage 2, cost vector = (UNUSED=0 DIS=3 AND=0 LEN=19)
+
+                                                                           +----
+                          +------------------------P-----------------------+    
+    +----------On---------+------------A-----------+                       |    
+    +NSUFFFEMsg+          +NSUFFFEMpl+             +-NSUFFFEMsg-+          |    
+    |          |          |          |             |            |          |    
+<qAm.Nap p.NSUFFFEMSG ElAq.NAt At.NSUFFFEMPL dblwmAsy.ADJ p.NSUFFFEMSG byn.PREP 
+
+
+-------------------------CCPOBJ-----------------------------+                      
+          +----------------------CCPOL----------------------+                      
+          +--------------A-------------+                    +----CCPOr---+-------A-
+  +--Dal--+-NSUFFFEMpl+         +--Dal-+NSUFFFEMsg+         |     +--Dal-+      +--
+  |       |           |         |      |          |         |     |      |      |  
+Al.d wlAy.NapAt At.NSUFFFEMPL Al.d mtHd.ADJ p.NSUFFFEMSG w.conj Al.d <tHAd.N0 Al.d 
+
+
+-----+
+Dal--+
+     |
+swfyAty.ADJ 
+
+linkparser>   Linkage 3, cost vector = (UNUSED=0 DIS=3 AND=0 LEN=19)
+
+                                                                           +----
+                          +------------------------P-----------------------+    
+    +----------On---------+------------A-----------+                       |    
+    +NSUFFFEMsg+          +NSUFFFEMpl+             +-NSUFFFEMsg-+          |    
+    |          |          |          |             |            |          |    
+<qAm.Nap p.NSUFFFEMSG ElAq.NAt At.NSUFFFEMPL dblwmAsy.ADJ p.NSUFFFEMSG byn.PREP 
+
+
+------------------------CCPOBJ----------------------------+                       
+         +----------------------CCPOL---------------------+                       
+         +-------------A-------------+                    +----CCPOr---+-------A--
+  +--Dal-+NSUFFFEMpl+         +--Dal-+NSUFFFEMsg+         |     +--Dal-+       +--
+  |      |          |         |      |          |         |     |      |       |  
+Al.d wlAy.NAt At.NSUFFFEMPL Al.d mtHd.ADJ p.NSUFFFEMSG w.conj Al.d <tHAd.Ndu Al.d 
+
+
+-----+
+Dal--+
+     |
+swfyAty.ADJ 
+
+linkparser> 

@@ -1,0 +1,5 @@
+lg_readline.o: lg_readline.c /usr/include/stdc-predef.h lg_readline.h
+
+/usr/include/stdc-predef.h:
+
+lg_readline.h:

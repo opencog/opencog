@@ -1,0 +1,21 @@
+
+% This file containes test sentences, and the expected parses, for the
+% current Lituanian dictionary.
+
+IAš skaitau knygą.
+O
+O    +------->T------>+--------Xp-------+
+O    |       +<-DV*vp<+---->DG--->+     |
+O    |       |        |           |     |
+OLEFT-WALL aš.i skaitau.tevp knygą.avg1 . 
+O
+
+ISkaitau knygą broliui.
+O
+O                +--------------Xp--------------+
+O                +---------->DN--------->+      |
+O    +---->T---->+---->DG--->+           |      |
+O    |           |           |           |      |
+OLEFT-WALL skaitau.tevp knygą.avg1 broliui.pvn1 . 
+O
+

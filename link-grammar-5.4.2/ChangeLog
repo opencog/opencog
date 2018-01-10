@@ -1,0 +1,957 @@
+Version 5.4.2 (19 October 2017)
+ * Fix man page build (broken in 5.4.1)
+
+Version 5.4.1 (18 October 2017)
+ * Fix man page installation (broken in 5.3.8).
+ * Add affix-class MPUNC for splitting at intra-word punctuation.
+ * Fix crash when there is no PP info.
+ * Fix a stack buffer overflow.
+ * Eliminate hard-wired linkage diagram size limitations.
+ * Fix an unintended clipping of the linkage-limit option to 250000.
+
+Version 5.4.0 (26 July 2017)
+ * Fix for missing locale info in Windows XP.
+ * Empty out the post-processing tables for the any, ady, amy languages
+ * Remove left_print_string() from the API.
+ * Recover pp_lexer.l from ancient version 2.2!
+ * Fix unusual crash in post-processing for the "any" language.
+ * Remove three deprecated post-processing functions from API.
+ * Major reorganization of code base into more modular directories.
+ * Revive the sqlite3 dictionary into operational form.
+ * Add double-quotes to splittable punctuation for the "any" language.
+ * Add API functions to get linkage word positions in the sentence.
+ * Fix printing of diagrams containing Chinese or other wide glyphs.
+ * Fix `make distclean` when ant not installed.
+
+Version 5.3.16 (15 April 2017)
+ * Fix python3 unit tests.
+ * Restore tty state after ctrl-C, ctrl-Z of the app.
+ * Check for <stdatomic.h> before use (in Java bindings).
+ * Fix handling of punctuation in the "any" language.
+
+Version 5.3.15 (12 Feb 2017)
+ * Fix Windows compilation; the new wcwidth files were omitted.
+ * Fix "amy" language for 3-way random morphology splits.
+ * Remove the "EMPTY_WORD" device; it is no longer needed.
+ * Enable morphology display in the java bindings, by default.
+ * Improve random sampling in the "ady" language.
+ * Improve performance by 10% to 15% for all languages.
+ * Fix broken multi-threading support in the Java bindings.
+ * Fix the `make uninstall` targets.
+
+Version 5.3.14 (19 Jan 2017)
+ * Fix printing widths for Unicode-9 CJK ideographs and emoji's.
+ * Fix broken randomization in the "any" language.
+ * Add UTF-8 support to the random morpheme splitter (amy).
+ * Create an "ady" language for two-part morphology splits.
+ * Improved error notification facility (experimental).
+
+Version 5.3.13 (19 Nov 2016)
+ * Fix fatal errors w/ zlib-dev and python dependencies.
+
+Version 5.3.12: (17 Nov 2016)
+ * Fix bug in 'any' language (opencog/relex/issues/248).
+ * Preliminary support for common typos in English.
+ * Enable both python2 & python3 bindings by default.
+ * Fix locale_t use for the newly introduced Cygwin 2.6.0.
+ * Include in the distribution the missing make-check.py (for Windows).
+ * Minisat configuration improvements + fix a problem on Gentoo.
+ * When using the bundled minisat, link it statically, don't install it.
+
+Version 5.3.11: (26 Sept 2016)
+ * Re-enable postscript header printing!
+ * Cleanup python API (in a non-backwards-compat fashion).
+ * Fix certain adverbial uses of "only".
+ * Fix some interjective openers to questions.
+ * Fix serious error with subject-verb inversion to past participle.
+ * Remove most calls to exit() from the library.
+ * Update the SAT solver code to use MiniSAT 2.2.
+ * Use the system minisat2 library if available, instead of the bundled one.
+
+Version 5.3.10: (14 Sept 2016)
+ * Implement `make installcheck`.
+ * Pull #371: Simplification of API when handling disconnected words.
+ * Fix SAT parser crashes.
+ * Expand default list of Java JDK search paths.
+ * Fix python bindings: after timeout, no further parsing is performed.
+ * Fix various adverbial, conjunctive uses of "as", "so".
+ * Extended list of exclamations.
+ * Remove CC link, add VC link, for clauses to coordinating conjunctions.
+ * Fixes for the verb "dare", "someone or other", etc.
+ * Fix OSX build break, concerning undefined locale_t.
+ * Pull #385: Fix ancient bug that made dictionary debugging difficult.
+
+Version 5.3.9: (27 August 2016)
+ * Pull req #354: Major changes to support Cygwin.
+ * Pull req #356: SAT parser bug fix.
+ * General python binding cleanup.
+ * Fatal error: Unable to open default dictionary.
+
+Version 5.3.8: (15 August 2016)
+ * Disambiguate "Bob" the given name from "bob" the verb.
+ * Pull req #300: Crash while parsing certain Russian sentences.
+ * Pull req #301: MSVC compiler error, and warnings.
+ * Pull req #304: Python failure when no parses are possible.
+ * Pull req #309: Add MSVC14 support, remove MSVC9, MSVC12.
+ * Pull req #317: Make Java build reproducible.
+ * Remove (obsolete) binreloc support.
+ * Enable both python2.7 and python3.4 bindings to be built.
+ * Improved Cygwin and MinGW support (as well as improved MSVC support).
+ * Dictionaries now specify the appropriate locale.
+
+Version 5.3.7: (7 May 2016)
+ * Fix another MacOS build break, regarding library exports.
+
+Version 5.3.6: (30 April 2016)
+ * Add missing `parses-quotes-en.txt` file that python tests need.
+ * Fix build break related to lg_fgetc when libeditline is missing.
+
+Version 5.3.5: (28 April 2016)
+ * Modified (hacked) Kazakh dictionary.
+ * MacOS bug fix: fgetc behaves oddly in OSX, see bug #293.
+
+Version 5.3.4: (16 March 2016)
+ * Fix broken handling of apostrophe (issue #281).
+ * Revamp the README file; describe transitivity.
+ * Revised Turkish dictionary from Tatiana Batura, et al.
+ * Prototype Kazakh dictionary from Tatiana Batura, et al.
+ * Parse priority tweaks for the OpenCog chatbot.
+ * Fix Windows printing problem affecting some utf8 codepoints (issue #285).
+
+Version 5.3.3: (23 December 2015)
+ * Improve support for quoted phrases.
+ * Fixes for assorted zero-infinitive speech acts.
+ * Add 37 paraphrasing verbs.
+ * Add Greek mythological names.
+ * A few dozen more common computing terms added to dictionary.
+ * Misc coordination and question fixes.
+ * Misc abbreviations.
+ * Vietnamese dictionaries!
+ * Major overhaul of subject-verb inversion.
+ * Performance improvements on long sentences. (pull #247)
+ * Change default setting of 'islands_ok' back to false (bug #140).
+ * Fix for build break on Mac OSX el_capitan w/clang (bug #255).
+ * Disable perl bindings by default; use Lingua::LinkParser
+
+Version 5.3.2: (4 December 2015)
+ * Performance improvements, esp. for long sentences.
+ * Use std=c11 (the 2011 C standard) by default.
+ * Partial Irish English support.
+ * A few dozen common computing terms added to dictionary.
+ * Fix for build break on Mac OSX.
+
+Version 5.3.1: (22 November 2015)
+ * Fix build break with SAT solver.
+
+Version 5.3.0: (22 November 2015)
+ * Major redesign of the python bindings.
+ * Major redesign of sentence tokenization (the "wordgraph" design)
+ * Verb 'steal' is optionally transitive.
+ * Fixes for misc MSVC warnings.
+ * Hebrew dictionary expansion.
+ * Enhanced diagram printing, giving more space for link names.
+ * Minor work on phonetic agreement for 'a' vs. 'an'.
+ * Add ability to histogram the costs of different parses.
+ * Improve support for splitting sentences.
+ * Change default setting of 'islands_ok' to true.
+ * Improve performance on long sentences.
+ * Fix rare crash due to memory corruption on long sentences.
+ * Random morphology generation can be enabled at runtime.
+ * Remove obsolete, unmaintained MacOSX build file.
+ * Extensive updates to man page.
+ * Fix crash on long sentences (issue #137).
+ * Fix a memory leak in language bindings (issue #138).
+ * Remove bogus post-processor API function.
+ * Fix broken domain letter printing.
+ * New regex-file feature - negative regex'es.
+ * Correct the handling of moprhology stems with non-LL links.
+ * Fix !!LEFT-WALL and !!RIGHT-WALL
+ * SAT solver now linked statically.
+ * Assorted SAT sovler cleanup and improvements.
+ * Performance improvement in fast matcher: 15% faster on fixes.batch.
+
+Version 5.2.5: (1 February 2015)
+ * Fix contracted "is" verb.
+ * Fix crash in batch mode (issue #63).
+ * Fix Python bindings so that setting PYTHONPATH is not required.
+ * Fix "... as I expected him to be."
+ * Fix incorrect printing for some Russian linkages. (pull #75)
+ * Fix warning from glibc version 2.20 (bug #77)
+
+Version 5.2.4: (12 January 2015)
+ * Fix usage of 'less'.
+ * Fix MS Windows random number portability API.
+ * Fix mis-handled dictionary subscript dot (issue #53).
+ * Fix crash on dots used as fill (issue #57).
+ * Fix memory leak (issue #54).
+
+Version 5.2.3 (4 January 2015)
+ * Fix broken check for editline UTF8 support.
+ * Work around broken perl binding definition for clang.
+
+Version 5.2.2 (3 January 2015)
+ * Fix OSX build break.
+ * MSVC12 project file fixes.
+ * Check for UTF8 support in libedit ("undefined reference to el_wgets")
+ * Enable the 'make check' target for the multi-threading unit test.
+ * Misc verb fixes.
+
+Version 5.2.1 (28 December 2014)
+ * Prototype Indonesian dictionary from Hendy Irawan.
+ * Fix crash on long sentences.
+
+Version 5.2.0 (27 December 2014)
+ * y'all, ain't, gonna, y'gotta: Beverly Hillbillies basilect.
+ * Permanent removal of the fat-link code.
+ * Remove deprecated constituent tree code.
+ * Windows: add terminal screen resizing support.
+ * Windows: a build fix.
+ * reign, rule, run, leave, come: can take predicative adjective.
+ * Rework costs for many verb-derived adjectives.
+ * Handle (predicative) adjectival modifiers for assorted perfect verbs.
+ * Fixes for various color names.
+ * Fixes for various affirmative answers.
+ * Add 100 missing verbs.
+ * Add preliminary lxc-docker (docker.io) support.
+ * Remove MSVC6 support.
+ * Fix memleak introduced in version 5.1.0
+ * Speedup of 1.7x to 4x (depending on text) from linkage processing redesign.
+ * Fix multi-threading safety bug.
+ * Fix link-and-domain printing alignment (to handle utf8 char widths).
+ * Windows: fixes for MSVC12 support.
+ * Fix memory consumption bug (EMPTY_WORD) introduced in version 4.7.10.
+ * Get rid of xrealloc, which clashes with libbfd symbol xrealloc.
+ * Add multi-threaded parsing unit test.
+
+Version 5.1.3 (7 October 2014)
+ * More fixes for build breaks on Apple OSX.
+ * Minor fixes involving "to do"
+
+Version 5.1.2 (4 October 2014)
+ * Fix greeting: "How do you do?"
+ * Fix indirect object in 'what' questions: 'To what do you owe your success?'
+ * Fix assorted questions with verb "to be".
+ * Compile fixes for Apple OSX version "Mavericks"
+
+Version 5.1.1 (23 September 2014)
+ * Minor post-processing cleanup.
+ * English dict: Fix questions with "it".
+ * swig: add missing API functions sentence_split, dictionary_get_lang
+ * Swap order of post-processing and bad morphology rejection.
+ * Fix handling of ellipsis when there's missing whitespace.
+ * Java: API bugfix/change: costs should have been doubles not ints.
+ * Fat-linkage code: fix it so it compiles again.
+ * Sat-solver: re-enable it so that it runs.
+
+Version 5.1.0 (29 August 2014)
+ * Updated Russian dictionaries from Sergei Protasov.
+ * Added morphology-based unknown-word handling for Russian, from Sergei.
+ * Fix up fat-linkage code, which was recently broken...
+ * API cleanup: many command-line options never belonged in the API.
+ * New emoticon support was clobbering certain dictionary words.
+ * Fix: "Go to spot X", "It happens at time T."
+ * Add a dozen missing verbs.
+ * Minor work on greetings.
+ * Add mechanism for denoting fractional costs in the file-backed dict.
+ * Fix: broken handling of gerunds (due to bad verb-wall connectors)
+ * Major redesign of morpheme splitting mechanism (from AmirP)
+ * Minor extensions to support numeric formulas, e.g. 1 + 1 = 2.
+ * Remove fat linkage support from the SAT solver.
+ * Enable build of SAT solver by default.
+ * Fix multiple bugs with unit stripping.
+ * Add bounds-checking to the C API.
+ * Fix the old disjunct-printing implementation.
+ * Add support for easy-to-use link direction indicator.
+ * Add random morphology generator tool.
+ * Partial support for phonetic use of "a" vs. "an" for English.
+ * Rework how coordination between conjunctions works: "either... or ...", etc.
+ * Major redesign of tokenization mechanism (from AmirP)
+
+Version 5.0.8 (30 April 2014)
+ * Fix handling of initial letters in ordered lists.
+ * Fix another serious error in constituent printing, introduced in 4.8.0.
+ * New emoticon support was clobbering certain number expressions.
+ * Misc English dict fixes, more verb-wall connectors.
+
+Version 5.0.7 (29 April 2014)
+ * Compile fixes in SAT solver.
+ * Add missing verb-wall connectors for is, hasn't, haven't, hadn't, etc.
+ * Remove verb-wall connector for imperative verbs.
+ * Fix serious error in constituent printing, introduced in 5.0.3
+ * Fix old bug in command-line handling of options.
+ * Fix parsing of various ordered lists, including some tables of contents.
+
+Version 5.0.6 (18 April 2014)
+ * Fix: JSON output format missing brace; from Matt Kruse.
+ * Fix: Serious error in Russian morphology printing.
+
+Version 5.0.5 (17 April 2014)
+ * Fix packaging bug with the English dictionary.
+
+Version 5.0.4 (16 April 2014)
+ * Expanded unit tests for capitalization.
+ * Fix who questions: "Who are they?", "Who are you?", etc.
+ * Provide verb-wall linkage for many questions.
+ * Add Biblical naming idioms: "Lud, son of Shem, ..."
+ * Fix MacOSX build break.
+ * Fix the 'make clean' target to not remove critical files.
+ * Fix broken emoticon support in English dict.
+ * Remove obsolete entity detection tokens from English dict.
+ * Fix broken equation parsing.
+
+Version 5.0.3 (13 April 2014)
+ * Minor memory usage optimization
+ * Fix unit test: suppress printing of empty word, and of morphology.
+ * Fix: Swig and python were meant to be optional, not required!
+
+Version 5.0.2 (10 April 2014)
+ * Expanded unit tests
+ * Fix another sqlite3-dev build break
+
+Version 5.0.1 (9 April 2014)
+ * Dictionary debugging print fixes from Amir P
+ * Print summary of parse statistics when in batch mode (from AmirP)
+ * Generalize the notion of prefix/suffix to arbitrary classes (Amir P)
+ * Fixes for German adjectives.
+ * Fix build break when sqlite3-dev not installed.
+ * Fix regression in Russian morphology handling.
+
+Version 5.0.0 (1 April 2014)
+ * License upgrade to LGPLv2.1
+ * Arabic dictionaries, from Jon Dehdari
+ * Persian dictionaries, from Jon Dehdari
+ * Support for Hebrew tokenization, from Amir P.
+ * Fix wild-card matching for user-supplied word lookup.
+ * Prototype Turkish dictionary from Can Bruce.
+ * Re-arrange programming language bindings directory.
+ * Adopt the orphaned/unsupported pylinkgrammar Python bindings.
+ * Deprecate the obsolete CNode interface.
+ * Provide low-level perl bindings.
+ * Adopt the orphaned/unsupported OCaML bindings.
+ * Support affirmative replies: "Who did it?" "John's evil twin."
+ * Expanded Lithuanian dictionary.
+ * Minor disjunct printing fixes.
+ * Fix: "Mary is too XXX to talk to."
+ * Prototype Hebrew dictionary from Amir P.
+ * Change !suffixes flag to !morphology.
+ * Introduce a bi-directional connector, for free-word-order languages.
+ * Introduce a symmetric-AND operator, for free-word-order languages.
+ * Add demo shell script for running the JSON parse server.
+ * Bugfix: Java server failing when input sentence has commas in it!
+ * New !test and !debug commands for selective debugging support.
+ * Print post-processing rejection message, when !bad is enabled.
+ * Remove some deprecated functions for C API.
+ * Remove all deprecated functions from Java API.
+ * Initial support for an SQL-backed dynamic dictionary.
+
+Version 4.8.6 (2 February 2014)
+ * Fix minor OSX compiler warnings.
+ * Check for presence of Java ant before assuming it is there.
+ * Fix crash on certain sentences containing equals sign.
+ * Fix parsing of lists (blah, blah and blah).
+ * Fix build break for uClibc systems (Gentoo).
+ * Allow ungrammatical usage of 'ages' instead of 'aged'.
+ * Fix crash on certain sentences containing words with periods.
+
+Version 4.8.5 (5 January 2014)
+ * Update memory usage accounting; fix accounting bugs.
+ * Fix Java garbage collection bug.
+ * Fix numerous compiler warnings in the SAT-solver code.
+ * Fix build-break involving multiple declaration of 'Boolean'.
+
+Version 4.8.4 (30 December 2013)
+ * Fix build break for Mac OSX.
+
+Version 4.8.3 (30 December 2013)
+ * Create new msvc12 build files, restore old msvc9 files.
+ * Revert location of the Windows mbrtowc declaration.
+ * Add verb-wall connector for present participles.
+ * Fix build-time include file directory paths.
+ * Provide the 'any' language to enumerate all possible linkages.
+ * Fix recognition of U+00A0, c2 a0, NO-BREAK SPACE as whitespace.
+ * Improve parse-time performance of exceptionally long sentences.
+ * Fix crash on certain sentences containing equals sign.
+
+Version 4.8.2 (25 November 2013)
+ * More MSWindows UTF-8/multi-byte fixes (for Russian).
+ * Add missing JSONUtils file.
+
+Version 4.8.1 (21 November 2013)
+ * Ongoing work on Viterbi.
+ * Updated MSVC9 project files from Jand Hashemi (Lucky--)
+ * Fix important bug in Java services: return top parses, not random ones.
+ * Java: for the link-diagram string, do not limit to 80 char term width.
+ * Windows: UTF-8 fixes so that Russian works in most MSWindows locales.
+
+Version 4.8.0 (24 October 2013)
+ * Fix "he answered yes"
+ * Support bulleted, numbered lists.
+ * New link types from Lian Ruiting, for identifying the head-verb.
+ * Java: fix bug when totaling WordNet word-sense score.
+ * Java: add info to README about using the JSON parse server.
+ * Java: remove many deprecated functions.
+ * C API: remove some deprecated functions.
+ * Java: fix silent failure when library is not found.
+ * Java: Add support for fetching the ASCII-art diagram string.
+ * Java: Fix insane language selection initialization.
+ * Fix: "The pig runs SLOWER than the cat."
+ * Fix: conjoined superlatives: "... the longest and the farthest."
+ * Fix: "inside" can be used with conjunction: "near or inside..."
+ * Fix: conjoined question modifiers: "exactly when and precisely where..."
+ * Fix: issue 59: crash/corruption when dictionary opened twice.
+ * Fix: assorted exclamations!
+
+Version 4.7.14 (20 June 2013)
+ * Fix build break on MacOSX
+
+Version 4.7.13 (17 June 2013)
+ * Remove trailing carriage return in MSVC6 filenames.
+ * Performance improvement: avoid excess system timer calls.
+ * Unicode fixes for Windows.
+ * Fix: "... a purseful of pesos"; other currency fixes.
+ * MinGW, unicode fixes from Per Larsson
+
+Version 4.7.12 (25 May 2013)
+ * Large fixes to the Russian dictionaries.
+ * Windows: Explicitly fail if cygwin version is too old.
+ * Tweak the lt dict to work again with the modern parser.
+ * Make the fat linkages code be compile-time configurable.
+ * Disable fat linkages by default; mark as deprecated.
+ * Fix SAT-solver build; recent changes had broken it.
+ * Export read-dict.h as a public API.
+ * Ongoing development of the Viterbi prototype.
+ * Windows: some UTF8/widechar refactoring.
+ * Java bindings: add method to set the language.
+ * CMake: add version checking to the CMakefile
+ * Fix: failed handling of capitalized first word for Russian.
+ * Fix: stemming failures in many cases (for Russian dictionaries)
+ * Add flag to suppress stem-suffix printing.
+ * Windows: Fixes to MSVC6 build files.
+ * Fix: hash-table bug affecting Russian dictionaries
+
+Version 4.7.11 (23 March 2013)
+ * Fix build bug introduced recently (build_disjuncts_for_dict_node)
+ * MSVC6 build environment fixes.
+ * Ongoing development of the Viterbi prototype.
+
+Version 4.7.10 (9 March 2013)
+ * New: Russian dictionaries from Sergey Protasov!
+ * Improve prefix, suffix handling and stemming (needed for Russian)
+ * Fix: add "gurgle.n" to dictionary.
+ * Improve memory utilization (remove pointless malloc/free).
+ * Fix: UTF8 multi-byte diagram printing.
+ * Add UTF8 multi-byte editline support, when available.
+ * Include Common Lisp bindings, from Peter Szolovits (circa 2009).
+ * Ongoing work on pre-alpha Viterbi decoder.
+ * Fix: Bug 55: aspell header file included even if disabled.
+ * Updated MSVC6, MSVC9 project files.
+ * New, improved search for java jni.h
+ * Faster counting of disjuncts for the !! command.
+ * The !! command now shows regex entries and stem+suffix splits.
+
+Version 4.7.9 (3 November 2012)
+ * Fix: Poor comma choices: "The man, that you saw..." (issue #36)
+ * Fix: Add more java jni.h search paths.
+ * Fix: Warning in java JSON interface.
+ * Fix: weren't constructions: "If it weren't for Sally, ..."
+ * Fix: Better support for ellipsis ...
+ * Fix: strangely: "He is behaving very strangely"
+ * Fix: assorted usages of yes, no, maybe
+ * Fix: "being" in subordinate clauses: "The blade being dull, he ..."
+ * Fix: Build failure for Mac OSX.
+ * Fix: "... this time for real".
+ * Fix: "... the impudence to laugh."
+ * Fix: "we two", "us two"
+ * Fix: very old parse bug, using "enough"
+ * Fix: assorted profanity as synonyms to "else"
+ * Fix: whoever, whomever
+ * Fix: decade possessives: "It's a 60's hit"
+ * Fix: "... chances that ... could be ..."
+ * Fix: "Do you have it ready?"
+ * Fix: "What John wants are those cats"
+ * Fix: greetings
+ * Fix: misc verbs: wave, ink, kiss, bake, corral, crown, decant, rope,
+        slice, ink, butter, proclaim, make, give, bid, bade, think
+ * Fix: titles can behave as indefinite nouns.
+ * Fix: somewhere, near, nearby, halfway, about
+ * Fix: police-interrogation style questions
+ * Ongoing work on pre-alpha Viterbi decoder.
+
+Version 4.7.8 (10 October 2012)
+ * Ongoing work on pre-alpha Viterbi decoder.
+ * Fix include file paths so that 'make install' doesn't cause recompile.
+ * Fix build break due to bad include file paths in Makefiles.
+
+Version 4.7.7 (6 October 2012)
+ * Fix configure to not bomb if c++ is not found. (weird regex.h missing)
+ * Fix configure to explicitly require c++ only if sat-solver enabled.
+ * Dictionary: parse comma in "Monsters, Inc."
+ * Update README about Viterbi algo.
+ * Remove malloc-dbg.c from the MSVC6 project file.
+ * Add missing source files to MSVC6 project file.
+ * Use enums for constituent display style.
+ * Move command-line parser to its own directory.
+ * Portability fixes for Windows, from Bill Hayes.
+ * Fix: "Show results from today"
+ * Fix: conjoined imperatives.
+ * Fix: qualified conditional clauses
+ * Fix: conjoined irregular verbs: seem, appear, do, be, prove, have
+ * Disable fat link code via conditional compile.
+ * Fix: "a lot of", "a gaggle of" now treated as quantifying determiners
+ * Fix: likewise: "gallons of", "grams of" volume measures as determiners
+ * Update German dictionary so that it actually loads.
+ * Fix: assorted "but not", "not very" constructions.
+ * Pre-alpha implementation of Viterbi decoder started.
+ * Fix: conjunctions of optionally ditransitive verbs.
+
+Version 4.7.6 (26 April 2012)
+ * fast-match.c: unroll recursive call into loop (thx Valery Kholodkov).
+ * Fix accidental inclusion of internal header file from public header file.
+
+Version 4.7.5 (16 April 2012)
+ * Remove several duplicate given names.
+ * Remove malloc-dbg.c from the MSVC9 project file.
+ * Remove several dozen duplicated idioms.
+ * New AM_SILENT_RULES for less noisy build!
+ * Clean up misc minor compiler warnings.
+ * Start using -O3 optimization for another 2% perf improvement.
+ * Fix configure.in --enable/--disable flags (bug #53)
+ * Some intransitive verbs are actually transitive in rare cases.
+ * Use enum not int for the cost-model type.
+ * Update the man page to reflect actual command usage.
+
+Version 4.7.4 (13 February 2011)
+ * Dramatic speed improvement for long sentences (hash table fix).
+ * Fix: crash on certain sentences, when fat-link parsing enabled.
+ * Fix: fatal error introduced in last version (combinatorial explosion).
+ * Fix: mem leak introduced in last version (combinatorial explosion).
+ * Assorted fixes to the Boolean SAT solver.
+
+Version 4.7.3 (7 February 2011)
+ * Fix: "level" as indefinite noun: "... at knee level".
+ * Enable max disjunct cost as a controllable parser parameter.
+ * Don't just give up on combinatorial explosion, show something!
+
+Version 4.7.2 (6 January 2011)
+ * Fix: crash on certain sentences, when fat-link parsing enabled.
+ * Fix: 3 corrupted nouns in words.n.1
+ * Fix: minimize cpu spin if constituent processing and-list overflows.
+
+Version 4.7.1 (11 December 2010):
+ * Fix: dictionary: Add "x" as synonym for "times".
+ * Fix: compilation failure due to lack of termios support on Windows.
+ * Fix: if not set, then force-set locale to UTF-8 in the java library.
+ * Fix: Explicitly include <stddef.h> for Windows builds.
+ * Fix: "John imagines himself lost".
+ * Fix: predicative adjectives w/misc verbs: "You are driving me crazy"
+ * Fix: "judge innocent", etc.
+ * Fix: many, many conjoined present tense verbs.
+ * Fix: conjoined verbs with negations.
+ * Fix: "to" as post-nominal modifier: "the inability to laugh"
+
+Version 4.7.0 (12 September 2010):
+ * Fix: hunspell configuration on Fedora (bugtracker issue 47)
+ * Fix: 'turn' with adjective: "She turned him green" from wingedtachikoma
+ * Fix: comma-conjoined modifiers: "It tastes bitter, not sweet."
+ * Fix: conjoined question words: "When and where is the party?"
+ * Fix: recognize short, capitalized words (Los, La, etc.).
+ * Treat colon as synonym for is: "The answer: yes."
+ * Fix: begin with prepositions: "It all began in Chicago."
+ * Fix: "What does it come to?" and related.
+ * Fix: null infinitive: "I'd like to, I want to."
+ * Fix: "Because I said so."
+ * Fix: "sure" as preverbal adverb: "It sure is."
+ * Fix: Gerunds with determiners: "a running of the bulls"
+ * SJ link for conjoined nouns/noun phrases.
+ * Sort linkages according to whether fat linkage was used.
+ * Add flag to enable use of fat linkage during parsing.
+   (Fat links now disabled by default).
+ * Add male/female gender tags to misc nouns.
+ * Fix: misc optionally transitive verbs: mix, paint, boot
+ * Fix: word order: "look about fearfully", "look fearfully about", around
+ * Fix: recognize simple fractions
+ * Fix: "is" with uncountable nouns: "there is blood on your hands"
+ * Fix: Roman numeral suffixes e.g. "Henry VIII"
+ * Fix: regression in dates followed by punctuation. "In the 1950s, ..."
+ * Fix: verbs drank, drunk are optionally transitive.
+ * Fix: regression: "all the X", X can be plural or mass.
+ * Fix: verbs paint, color may be ditranstive: "paint the car bright green"
+
+Version 4.6.7 (16 April 2010)
+ * Fix: configure handling of --enable-hunspell (bugtracker issue 46)
+ * Fix: conjoined modifier phrases: "the black and white cat sleeps."
+ * Fix: MSWindows+MingGW compilation issue.
+ * Update msvc9 Microsoft Visual C 2008 project, from Boris Iordanov.
+
+Version 4.6.6 (19 March 2010)
+ * Minor fixes to handling of units.
+ * Fix: MSWindows+Cygwin/MingGW compilation issues.
+ * Use pkgconfig for editline (from Vincent Untz)
+ * Fix: "I want it back."
+ * Additional titular prefixes, suffixes: Maj. Ph.D.
+ * Add code to detect dictionary version number.
+ * Fix: MS VC missing strdup() function.
+ * Add AutoIt3 bindings from JRowe
+
+Version 4.6.5 (3 November 2009)
+ * Fix: Superlatives without preceding determiners ("... likes you best")
+ * Fix: Take more care in distinguishing mass and count nouns.
+ * Fix: Old bug w/relative clauses: Rw+ is optional, not mandatory.
+ * Provide tags identifying relative, superlative adjectives.
+ * Remove BioLG NUMBER-AND-UNIT handling, its been superceded.
+ * Fix handling of parenthetical phrases/clauses.
+ * Fix: handling of capitalized first words ending in letter "s".
+ * Fix: support "filler-it" SF link for "It was reasoned that..."
+ * Fix: certain WH-word constructions: "I did not know why until recently"
+ * Fix: go: "there goes the greatest guy ever"
+ * Fix: opening coordinating conjunctions: "And you can also ..."
+ * Configurable Hunspell spell-checker dictionary location.
+ * Fix: Misc ordinal usage.
+ * Add support for aspell spell-checker.
+
+Version 4.6.4 (11 October 2009)
+ * Restore nouns starting w/letters x-z, elided in version 4.5.9 ff.
+ * Add support for single-word interjections/exclamations!
+ * Fix: sometimes command line client fails to show all valid linkages.
+ * Misc fixes: such_that, upon, acted.v
+ * Fix: impersonal "be" linking to passive participle.
+ * Fix: handling of capitalized first words.
+ * Fix: duplication of certain parses involving transitive verbs.
+
+Version 4.6.3 (4 October 2009)
+ * Fix compilation bug on FreeBSD.
+ * Fix: allow MX link to post-nominal ", to be ..., "
+ * Fix: add idiom "time and again"
+ * Fix: another BioLG regression in handling of possessives.
+ * Fix: handling of period at end of number at end of sentence.
+ * Fix: Capitalized words ending in s at start of sentence.
+ * Use corpus-statistics-based ranking by default, if available.
+ * Fix difficulties in build of corpus statistics module.
+
+Version 4.6.2 (21 September 2009)
+ * Fix: "come across as authoritative".
+ * Improve Java location guessing in FreeBSD
+ * Fix for assert triggered by long sentences.
+ * Fix: long sequence of periods treated as unknown word.
+ * Add informational print showing dictionary location on startup.
+ * Remove duplicated {@MV+} in tend.v
+ * Automatically resize the display size to fit the current window size.
+ * Fix handling of punctuation at the end of a capitalized word.
+ * Fix misc verbs acting as adjectival modifiers: e.g. "given", "allied"
+ * Fix bug in BioLG code regarding the handling of possessives.
+ * Fix a (rare) crash in sentences with many conjunctions.
+ * Fix a crash involving long sequences of UTF8 punctuation marks.
+
+Version 4.6.1 (31 August 2009)
+ * Stop printing annoying warning when !vars are used.
+ * Fix missing dict file units.2 problem
+ * Fix compilation bug on FreeBSD.
+
+Version 4.6.0 (29 August 2009)
+ * Avoid used of bzero, add missing include directives (MacOSX problem)
+ * Reclassify a number of "medical" prepositions as adverbs.
+ * Add approx 100 adverbs & 300 adjectives.
+ * Add approx 250 verbs.
+ * Add approx 300 nouns.
+ * Add misc units.
+ * Add misc European connector words/patronymics.
+ * Reclassify 100's of transitive verbs as optionally-transitive.
+ * Add distinct tokenization step ("sentence_split") to public API.
+   This last change forces the minor-version-number bump.
+
+Version 4.5.10 (25 August 2009)
+ * Be sure to link with -lm
+
+Version 4.5.9 (25 August 2009)
+ * Modify error messages to indicate that they are from link-grammar.
+ * Add missing Java files that were forgotten last time around.
+ * Add greeting to command-line client startup.
+ * Print disjunct cost also, when requesting disjunct printing.
+ * Add missing color names as mass nouns.
+ * Fix: Reclassify musical instruments: "He plays piano"
+ * Add experimental word-clustering system.
+ * Add CMake build file
+ * Fix: "It takes longer than that."
+ * Fix: "He has done very well."
+ * Fix: a dozen optionally transitive verbs (swim, kill, etc.)
+ * Fix: "He's out running."
+ * Fix: "suddenly" is a "manner adverb", not a clausal adverb.
+ * Fix: Use Pg links to gerunds: "He feared hitting the wall."
+ * Fix: assorted numerical-range bugs.
+ * Fix: prep modifiers with distances: "It is a few miles out"
+ * Fix: Spelled-out dates: "It started in nineteen twelve"
+ * Fix: Misc date, time expression parsing e.g "Zero hour is here."
+ * Fix: Misc words, "ordered list", "screened out"
+ * Fix: Post-fixed numbers can act as determiners.
+ * Fix: "We bought the last 50 ft. of cable."
+ * Fix: opening directives to imperatives: "Finally, move it back."
+ * Fix: Improved simple equation parsing support.
+ * Fix: Add misc fixes from BioLG that were previously overlooked.
+ * Fix: "favorite" can take determiner "a" ("a favorite place")
+ * Fix: assorted clausal complements: "The emperor ordered it done."
+ * Fix: ordinals: "First on our list is ..."
+ * Fix: verb modifier "some of the time", "most places"
+ * Fix: Sit, stand take modifiers: "he stood still"
+
+Version 4.5.8 (2 July 2009)
+ * Fix: 'than anticipated', 'than was anticipated', etc.
+ * Fix: 'saw the wood'
+ * Fix: sometimes commas are used as if they were semicolons.
+ * Fix: 'We have quite enough work already, thank you!'
+ * Fix: allow 'and' as conjunction in entity names.
+ * Fix: 'I stared him down', 'They shouted him down', 'booed off'
+ * Fix: 'sound him out', 'look him over'
+ * Fix: 'Somewhere in the distance'
+ * Stub out list of names given to both men and women, to avoid duplication.
+ * Fix: 'I think so, too'
+ * Fixes for compilation under Cygwin.
+ * From Boris Iordanov: fixes to JSON java code.
+ * From Boris Iordanov: new java remote client code.
+ * Fix: Biological texts commonly have adj-noun-adj-noun chains
+
+Version 4.5.7 (4 June 2009)
+ * Fix 'make install' for MSWindows (abi bug 12049)
+ * Fix multi-threaded bug when TRACK_SPACE_USAGE is defined.
+ * Add './configure --enable-mudflap' just for fun...
+ * Fix: "Walk tall", "Think quick"
+ * Fix: "... part no. 1234-56A"
+ * Fix regression from BioLG merge: "It cost $14 million."
+ * Fix come/came: "The dog came running..."
+ * Fix year abbreviations: "He drove a souped-up '57 Chevy"
+ * Fix sit, stand: "The dog stood still"
+ * Fix act up, act out: "He is acting out." "The motor is acting up."
+ * Fix notoriously, poorly: "The store was poorly stocked".
+ * Fix: "strong" can be adverb
+ * Add support for recognizing basic time zones during parsing.
+ * Fix: verbs acting as adjectival modifiers: "a very politicized deal."
+ * Fix: ".. nearly so well", "...almost so well".
+ * Fix financial ranges: "It will cost $10 million to $20 million to build."
+ * Expand handling of capitalized words that appear in entity names.
+ * Expand the list of characters that are recognized as quotes.
+ * Support usage of yes, no as sentence openers.
+ * Better support for directives, commands.
+ * Fix: "Ash Wednesday", "Fat Tuesday", etc.
+ * Fix: post-verbal adj: "she wiped the table dry"
+ * Fix: wish: "she wished me a happy birthday"
+
+Version 4.5.6 (24 May 2009)
+ * Bugfix: fix non-thread-safe usage.
+ * Changes to enable MinGW/Windows to compile.
+ * Update of MSVC6 build files
+ * Fix: pizza, fries, chopsticks.
+ * Export word-sense database to Java apps.
+ * Fix: "Was the man drunk or crazy or both?"
+
+Version 4.5.5 (10 May 2009) includes the following changes:
+ * Bugfix: crash for zero-length sentences.
+
+Version 4.5.4 (9 May 2009) includes the following changes:
+ * Fix: "sleep in":  "A bed is something you sleep in."
+ * Fix: "drinking": "Let's go drinking."
+ * Fix go+bare infinitive: "Let's go shop", "Let's go swim"
+ * Fix: "Let's go for a swim." "Let's go for a smoke".
+ * Fix: "Let's not" "Let's not go" "Let's not cry"
+ * Fix: ... is <bare-infinitive>:  "All he ever does is complain."
+ * Fix: "You will die young/happy/unhappy"
+ * Fix: "You should exercise to stay fit."
+ * Fix: "We danced 'til dawn."
+ * Fix: "tell <direct-object> off": "She had told him off."
+ * Bugfix: sometimes spell checker would run even if turned off.
+
+Version 4.5.3 (14 April 2009) includes the following changes:
+ * Haste makes waste! Revert a recent 'fix'.
+
+Version 4.5.2 (14 April 2009) includes the following changes:
+ * Use re-entrant version of mbtowc in all code.
+ * Fix run-time breakage on Mac OSX and FreeBSD.
+
+Version 4.5.1 (13 April 2009) includes the following changes:
+ * Fix Assertion failed: negative constituent length!
+ * Fix build break for Mac OSX.
+ * Force use of UTF-8 locale in the command-line tool.
+
+Version 4.5.0 (10 April 2009) includes the following changes:
+ * Hack around missing SQLite3 pkgconfig on MacOS
+ * Fix adverbs: 'The motor ran hot', 'the door swung wide open', etc.
+ * Fix: 'at risk of breakdown', 'under threat of fire'
+ * Add regular-expression-based word guessing, from BioLG project.
+   This provides support for many scientific/biomedical terms.
+ * Add spell-guessing for unknown words.
+ * Fix UTF8 support to be correctly thread-safe.
+ * BioLG: fix post-numbering: 'it started on day one'
+ * BioLG: add number ranges: 'it takes 2 to 3 times the effort'
+ * BioLG: assorted adverb fixes, typical of scientific prose.
+ * BioLG: initiate, attach, localize etc are optionally transitive.
+ * BioLG: allow fork, branch, splice, export, etc to take particles.
+ * BioLG: extended use of Greek letters in biomedical text.
+ * BioLG: support parsing of Roman numerals.
+ * BioLG: support Greek-letter-number combinations.
+ * Fix: 'she was singing', etc.
+ * Enable WordNet word-sense identification based on syntactical usage.
+
+Version 4.4.3 (11 March 2009) includes the following changes:
+ * Look at JAVA_HOME to guess location of jni.h
+ * Add dictionary maintenance utility script.
+ * Add prototype German dictionary.
+ * Fix sentences containing measurements, lengths, speeds. etc.
+ * Add 1400 new adjectives, many of scientific origin.
+ * Add 250 international currencies, including special utf8 symbols.
+ * Performance optimization in sentence tokenization.
+ * Add 1100 male, female given names (from Bruce Wilcox).
+ * Cleanup parsing of "in-" date expressions, e.g. "in the 1940's".
+ * Cleanup of assorted compiler warnings.
+ * Fix handling of special utf8 characters in dictionary.
+ * Fix hang when parsing certain utf8 input strings.
+ * Make sure that most strings in the API are declared const char *
+ * Add option to command-line client to print disjunct strings.
+
+Version 4.4.2 (15 January 2009) includes the following changes:
+ * Fix: 'The keys are gone', 'It is a gone desire'
+ * Fix: 'He poured me a glass', 'He wired me the money', etc.
+ * Initial rough-in of corpus statistics based parse ranking.
+ * Initial rough-in of corpus-guided word-sense identification.
+ * Fix for googlecode bugs 38, 39 (Java, Ruby failure to load)
+ * Add new API routine to return disjunct string.
+
+Version 4.4.1 (15 December 2008) includes the following changes:
+ * Balance the dictionary tree; this speeds word-lookup slightly.
+ * New MSVC6 build files from Evgenii Philippov.
+ * Fix java server classes to pass along the link-grammar version number.
+
+Version 4.4.0 (7 December 2008) includes the following changes:
+ * fix: recognize curly-single-quote ’ where straight quote can be used.
+ * recognize and explicitly ignore emoticon types.
+ * Include MSVC6 build files.
+ * Apply patch needed for Ruby bindings.
+ * fix: "Where did they come from?", per Viswanath IIIT
+ * fix: "Where did they go to?"
+ * fix: "It gives me peace of mind."
+ * fix: many, many incorrectly identified mass nouns.
+ * fix: ladle.v "molten hot" "piping hot"
+ * fix: "It's a shame that...", "The crux of the plan is that..."
+ * Performance improvements (about 11%) to prune.c from Bruce Wilcox
+ * fix: "He eats with me nightly."
+ * Add new public api function: linkgrammar_get_version()
+ * MSVC9 build files from Borislav Iordanov
+ * Java network-efficient client-server classes from Borislav Iordanov
+
+Version 4.3.9 (8 October 2008) includes the following changes:
+ * Issue 13: "John is altogether amazingly quick."
+ * Nonstandard spelling "unequivocably"
+ * Dictionary fixes for 'marginally', etc. "That one is marginally better"
+ * Issue 7: Dictionary fixes for 'done': "I am done working"
+ * dictionary entries for walk-up drivethru car-wash
+ * dictionary: "I am through being mad", "It was a through flight", etc.
+ * Issue 11: "You are doing well"
+ * Issue 3: "I asked Jim a question", "I told Jim a story"
+ * Passive subjects with objects: "I was told that crap, too" "...was asked..."
+ * Fixes for Apple Mac OSX (crash on non-executable stack)
+ * Early version of Filip Maric's boolean SAT solver
+ * fix: "He talked quietly of revolt."
+ * fix: "It consists mostly of sand.", "He talks, mostly of revolution."
+ * fix: "He talked mostly to Ann.", "He talks a lot."
+ * fix: than_usual: "He is taking longer than usual."
+ * fix: a batch of new verbs from Roman Khlupin
+ * fix: Fix crash on Apple Macintosh by correctly identifying the platform.
+ * fix: "San Gabriel" "Block Island" "Great Southern Bank" "de la Rente"
+ * fix: "I biked Johnson Creek."
+
+Version 4.3.8 (14 August 2008) includes the following changes:
+ * Build fixes for Windows (missing bzero and thread-safe rand)
+ * Fix several mem leaks, one in the Java jni code.
+ * Fix crash of java6 jvm, due to blown stack limits.
+
+Version 4.3.7 (8 August 2008) includes the following changes:
+ * Expanded list of given names to include those from 2005 US Census
+ * Export a new java jni function, to get the inflected word.
+ * Add a TO+ connector so that "I tend to agree" parses correctly.
+ * Makefile fixes for Mac OS/X Leopard.
+
+Version 4.3.6 (21 July 2008) includes the following changes:
+ * Fixes for Windows MS Visual-C builds.
+ * Fix parsing of "He walked the dog.", "He sailed the boat."
+ * Add support for right-apostrophe (’) which is a non-ASCII UTF8 char.
+ * Add support for other non-ASCII UTF8 punctuation.
+ * Fix crash on printing constituent tree of certain long sentences.
+ * Avoid recursive error reporting for UTF8 dictionary errors.
+ * Clarify error logging and error printing.
+ * Add java getVersion() to return link-grammar version string.
+ * Add more numbers to dict (e.g. twenty-seven, bazillion, half-dozen, etc.)
+ * Foodstuffs: bagels, lox, tacos, guacamole, roe, neufchatel, mayo, etc.
+ * Weights and measures: megabytes, °C, km² etc.
+ * Performance improvements in printing of link-tree.
+ * Convert assert into warning when no canonical linkages can be found.
+ * Convert assert into warning when constituent andlist overflows.
+ * Provide additional checks for constituent overflows.
+ * Convert most error printfs into a formal error reporting system.
+ * Remove all globals, library is now thread-safe.
+ * Fix crash when sentence has square bracket, and doing constituents.
+
+Version 4.3.5 (29 April 2008) includes the following changes:
+ * Added ant build file to create the link-grammar jar file.
+ * Fix regression in command-line client of multiple-parse display.
+ * Use MB_LEN_MAX, not MB_CUR_MAX for UTF8 support.
+ * Fix a WIN32 compiler regression (no inline support in Windows).
+ * Fix error in handling of UTF8 dictionaries.
+ * Fix strncat() misuse in error.c
+ * Fix capitalization errors in country names.
+ * Fix parsing of "he angled left, he dodged left, he turned left".
+ * Don't build the JNI library if Java isn't found. Fixes build on Windows.
+ * Fix install bug for NetBSD systems.
+ * Pre-detected entities cannot participate in G links.
+ * There is no UTF8 support in MSWindows, so stub it out.
+ * Fix crash in constituent output, bug #22 in googlecode bugtacker.
+ * Some small steps taken to eventually make library thread-safe.
+ * There are three constituent string styles, enable all three.
+ * Make the command-line flag errors less cryptic.
+ * Add readline (BSD editline) support.
+ * Rename "grammar-parse" to the more logical "link-parser".
+ * Small man page updates.
+ * Export and cost, link cost via public API.
+
+Version 4.3.4 (16 March 2008) includes the following changes:
+ * Fix regression of handling of capitalization at the start of sentences.
+ * Fix dictionary search path so that it respects command-line input.
+ * Fix rare but nasty crash when parsing long sentences in panic mode.
+ * Add a method to set the dictionary path.
+ * Fix all remaining compiler warnings.
+ * Make parser capable of handling UTF8 strings and dictionaries.
+ * Ongoing minor expansion of the Lithuanian (lt) dictionary.
+
+Version 4.3.3 (27 February 2008) includes the following changes:
+ * Missing java is a warning, not an error.
+ * man page for grammar-parse.
+ * Removed cruft from the dictionary open routines.
+ * configure tries to guess some non-standard jni.h locations.
+ * Split up java library exports, should help cygwin builds.
+ * Fix java library pre-linking bug.
+ * Minor English dictionary additions.
+ * Prototype Lithuanian (lt) dictionary.
+
+Version 4.3.2 (2 February 2008) includes the following changes:
+ * Compile fixes for WIN32
+ * Dictionary fixes for given names. (Fixes a serious problem with 4.3.1)
+
+Version 4.3.1 (31 Jaunary 2008) includes the following changes:
+ * A merger of significant parts of the "medical terms" dictionary
+   from Peter Szolovits.  This includes thousands of additional words.
+
+Version 4.3.0 (30 January 2008) includes the following changes:
+ * New link types (Ct, Cta, Rn, Rw) for comparatives, so as to link
+   relative clauses: "John is bigger than Dave is", "John wants more
+   cookies than Dave wants". The Rw link is used to link question words
+   to the relative clauses that follow them.
+ * Dictionary Fixes for "Expresso is a coffee drink", "Teach me fetch",
+   "I am pooped" as synonym for "I am tired", "Mother likes her",
+   "Mommy loves me" and related. Also, directives involving "go":
+   "Go play ball", "Go take a walk", "You and Rover go play with the
+   ball."
+ * Dictionary support for external entity markup. This includes the
+   recognizition of personID0..personID60, dateID0..dateID60,
+   organizationID0..organizationID60 and locationID0..locationID60
+   as appropriate words.
+ * Fixes of numerous compile-time warnings.
+ * Simple Java (JNI) bindings.
+
+Version 4.2.5 (11 November 2007) includes the following changes:
+ * Security fix for a buffer overflow. CVE-2007-5395

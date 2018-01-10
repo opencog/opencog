@@ -1,0 +1,67 @@
+
+In quasi-historical order:
+
+Original Authors:
+Davy Temperley: http://theory.esm.rochester.edu/temperley/
+Daniel Sleator: http://www.cs.cmu.edu/~sleator/
+John Lafferty: http://www.cs.cmu.edu/~lafferty/
+
+Much additional work has been done by many different developers.
+The current lead developer is
+Linas Vepstas: http://linas.org/
+
+Arabic dictionaries were provided by
+Warren Casbeer and Jon Dehdari
+
+Farsi dictionaries were provided by
+Jon Dehdari
+
+The SAT parser code was developed by
+Filip Maric <filipmaric_at_gmail.com>
+as a part of the 2008 Google Summer of Code (GSoC) project for OpenCog.
+
+Russian dictionaries were provided by
+Sergey Protasov <svp_at_tj.ru>
+
+Support for Hebrew, a complete overhaul of tokenization, and assorted
+general maintenance and performance work:
+Amir Plivatsky <amirpli_at_gmail.com>
+
+Turkish dictionaries by:
+Can John Bruce <can.bruce_at_yale.edu>
+Turkish sharply revised:
+Tatiana Batura, Maria Mitkovskaya, Natalya Semenova
+
+Indonesian dictionaries were provided by:
+Hendy Irawan (ceefour)
+
+Kazakh dictionaries from:
+Tatiana Batura, Aigerim Bakiyeva, Aigerim Yerimbetova
+
+------------------------------------------------------------------
+Some of the people who have contributed patches and fixes include:
+(In alphabetical order)
+
+Artem Gayardo-Matrosov
+Bill Hayes <bhayes84_at_gmail.com>
+Borislav Iordanov <borislav.iordanov_at_gmail.com>
+Valery Kholodkov <valery_at_grid.net.ru>
+Vikas N Kumar <walburn_at_gmail.com>
+Dom Lachowicz <domlachowicz_at_gmail.com>
+Per Larsson <tucker_at_algonet.se>
+Stephen Leibowitz <librestephen_at_gmail.com>
+Marc Maurer <uwog_at_uwog.net>
+Evgenii Philippov <efilippov_at_gmail.com>
+Sergey Protasov <svp_at_tj.ru>
+Sampo Pyysalo <smp_at_is.s.u-tokyo.ac.jp>
+René Rhéaume <rene.rheaume_at_gmail.com>
+Lian Ruiting <lianlian1022_at_gmail.com>
+Murilo Saraiva de Queiroz <muriloq_at_gmail.com>
+Fridrich Strba <fridrich.strba_at_bluewin.ch>
+Simon Stuart <kraven_at_greycascade.com>
+Peter Szolovits <psz_at_mit.edu>
+Dimitri Timofeev <dtim@kalami.org>
+Alexander Tkachuk <alexander.tkachuk_at_gmail.com>
+Vincent Untz <vuntz_at_opensuse.org>
+Max Vyaznikov http://myclerk.ru
+Bruce Wilcox <gowilcox_at_gmail.com>

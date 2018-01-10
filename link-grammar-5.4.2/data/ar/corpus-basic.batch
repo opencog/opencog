@@ -1,0 +1,91 @@
+
+!batch
+!verbosity=1
+!echo
+!limit=1000
+!short=20
+!constituents=1
+!spell=0
+
+% Misc arabaic test sentences. All of these should parse.
+% These have been pre-morpho-analyzed by aramorph, and should 
+% "just plain work".
+
+w nql AlvlAvp AlY mst$fY fy Alqds
+w sjl jylyyjyfs 8 hdf AlmbArAp AlwHyd
+w sjl Aymrtwn 12 w zdrylyt$ 66 Alhdfyn
+w sjl fAtA 47 w bwgdAny 70 w 90 AlAhdAf
+w rd Aljy$ AlAsrA}yly ElY kl h*h AlhjmAt
+w kAn dnkTA$ AEln rfD h AqtrAHAt AnAn AyDA
+w qAl " lA nzAl TmwHyn k mA knA fy AlsAbq "
+w sjl dytAr nymyv 18 w bytr nymyv 72 Alhdfyn
+w lm yqdm AlmSdr Ay AyDAHAt Hwl AhdAf AlzyArp
+w >DAf " sykwn fy bngAlwr fy AlsAEAt Almqblp "
+w sjl gAtwsw hdf AlmbArAp AlwHyd fy Aldqyqp 57
+w sjl fynAn 14 w kylbAn 84 w stwntwn 90 AlAhdAf
+w >wDH An " h*h hy AlntA}j AlAwlyp l Al{ntfADp "
+w jmyE AlDHAyA mwZfwn fy Al$rkp AlbArysyp l Altdf}p
+w sjl rwky jwnywr hdf AlmbArAp AlwHyd fy Aldqyqp 90
+y*kr An Alfryq Emr Alb$yr hw Almr$H AlwHyd HtY AlAn
+w sjl rwk y jwnywr hdf AlmbArAp AlwHyd fy Aldqyqp 90
+w sjl frAnkwfysky 61 mn rklp jzA' hdf AlmbArAp AlwHyd
+w qAl " lsnA mwAfqyn ElY qrAr hArys wqf Alfrz Alydwy "
+w fy mbArAp vAnyp , sHqt kwryA Aljnwbyp bAkstAn 7 - Sfr
+w qd Ablg h*A AlqrAr l zbA}n AlErAq xlAl AlAyAm AlmADyp
+w qAl An " AlslTAt EAmlt ny mEAmlp Hsnp AvnA' {EtqAl y "
+w sjl mAtys 63 w stywArt 73 w jwnz 77 w rAzwf 90 AlAhdAf
+w yxDE AlErAq l EqwbAt dwlyp mn* {jtyAH h Alkwyt fy 1990
+w tjry AlmHAdvAt fy mskn EryqAt fy AryHA fy AlDfp Algrbyp
+w y$Ark wzyr AlxArjyp AlAsrA}yly $lwmw bn EAmy fy Alm&tmr
+w sjl rwmydAl 55 w 65 hdfy AldnmArk , w $wl 82 hdf AlmAnyA
+w kAn mSdr Amyrky AEln fy wqt sAbq An AlAjtmAE syEqd Alxmys
+w sjl tryzygyh 12 w wyltwrd 22 w mykw 44 w rwbyr 74 AlAhdAf
+w syltqy rws Alxmys AyDA r}ys AlwzrA' AlAsrA}yly Ayhwd bArAk
+w Alhdf AlrAbE hw mstwdE l Al*xA}r fy AryHA $rq AlDfp Algrbyp
+w qd fArq AHmd sEyd $EbAn 20 EAmA AlHyAp bEd <SAbt h fy AlSdr
+w >Eln " <n nA ndEm AlmqAwmp w AlnDAl " Dd AlAHtlAl AlAsrA}yly
+w yTAlb AlflsTynywn b qwp HmAyp dwlyp AlAmr Al*y trfD h AsrA}yl
+w mn Almqrr An tErD tsE E$rp msrHyp Ardnyp w Erbyp xlAl AlmhrjAn
+w sjl dynys rwmydAl 55 w 65 hdfy AldnmArk , w $wl 82 hdf AlmAnyA
+w sjl r$yd AlbwEzyzy 67 hdf twns , w mAryw kAntwby 19 hdf swysrA
+w kAn hAm$ AlxT> fy AltqdyrAt HtY AlAn yEAdl qrnA wAHdA ElY AlAql
+w sjl AdwArdz byrs hdf AlmbArAp AlwHyd fy Aldqyqp 16 mn rklp jzA'
+w mDY yqwl An " qrArAt mhmp yjb An ttx* fy $>n AltHAlfAt AlHkwmyp "
+w >wDH zrhwny " lAHZnA ArAdp wADHp mn Trf Almgrb fy mkAfHp AlArhAb "
+w nfY AlmSdr An ykwn " wqE AY ATlAq nAr ElY AlAsrA}ylyyn mn AlmwqE "
+w >DAf An AlmqAtlAt AlAmyrkyp lAHqt fy bED AlHAlAt , AlTA}rAt Alrwsyp
+w qd AnDm qwmywn tAmyl AlY AlmfAwDAt mn Ajl AlAfrAj En Almmvl rAjkwmAr
+w qd HSl Almstqlwn ElY 67 mqEdA AvnA' h*h Aljwlp AlAxyrp mn AlAntxAbAt
+w >$Adt AlHkwmp Altrkyp b h*A AlbrnAmj b {stvnA' Alfqrp AlmtElqp b qbrS
+w >wDH AlmSdr *At h An Almstqlyn HSlwA ElY 67 mqEdA xlAl Aljwlp AlAxyrp
+w frD mjls AlAmn Aldwly ElY AlErAq EqwbAt mn* {jtyAH h Alkwyt AlEAm 1990
+w jrY AllqA' byn EryqAt w AldblwmAsy Arwn myllr fy mskn Alms&wl AlflsTyny
+w sjl srbAn 3 w bArswAn 90 hdfy rwmAnyA , w myhAylwfyt$ 87 hdf ywgwslAfyA
+w {ktfY AlTyrAn Almdny AlAngwly b t>kyd AlHAdv dwn AETA' mzyd mn AltfASyl
+w kAn AlAtHAd AlswfyAty AlsAbq bd> qbl 1991 fy bnA' tjhyzAt nwwyp fy lybyA
+w sjl kArlws rwyz 53 w 889 hdfy gwAtymAlA , wrwlAndw fwnsykA 70 hdf kwstArykA
+w $hdt AlmrHlp AlAxyrp mn h* AlAntxAbAt AlvlAvA' HwAdv Adt AlY sqwT ArbEp qtlY
+w Tlbt jmEyp AlTyAryn AlAngwlyyn mn AlslTAt tElyq rHlAt AlAnTwnwf fy kAfp ArjA' AlblAd
+w Trd AlHkm AlAwrwgwyAny xwrxy lArywndA mhAjm kwlwmbyA bwnyA qbl nhAyp AlmbArAp b dqyqtyn
+
+ly ktAb
+fkrt AnA
+mEy ktAb
+A$rb mA Aryd
+AHb AnA ktaby
+AHb AnA ktab y
+Tbxh mHmd EysY
+*hb hw <lY Albyt
+A$rb AnA mA Aryd
+Akl fy Ayp mktbp
+Aklt AnA ktAb ASgr
+ktAby Akbr min ktAbk
+Aklt AnA ktAb Almktbp
+mn AlSEb An Adrs fi Albyt
+Aklt AnA ktAb Almktbp Alkbyr
+lw knt ALmlk lAklt mE Almlkp
+Aklt AnA Alxbz al*y Tbxh mHmd
+Aklt AnA ktAb Almktbp Alkbyrp
+fEl SdAm Hsyn Abn bTwTp Abn Ebd Allh
+Ewdp AljnrAl byrwn AlY AlArjntyn bEdmA AmDY 17 EAmA fy AlmnfY
+AqAmp ElAqAt dblwmAsyp byn AlwlAyAt AlmtHdp w Al{tHAd AlswfyAty

@@ -1,0 +1,12 @@
+
+")" "%" "," "." ":" ";" "?" "!" "''" "'" "'s": RPUNC+;
+"(" "$" "``": LPUNC+;
+
+%e en er es em: SUF+;
+.=: STEMSUBSCR+;
+=: INFIXMARK+;
+
+""«»《》【】『』`„“": QUOTES+;
+
+"w|ts": SANEMORPHISM+;
+

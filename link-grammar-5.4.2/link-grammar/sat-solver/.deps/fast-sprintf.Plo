@@ -1,0 +1,6 @@
+fast-sprintf.lo: fast-sprintf.cpp /usr/include/stdc-predef.h \
+ fast-sprintf.hpp
+
+/usr/include/stdc-predef.h:
+
+fast-sprintf.hpp:

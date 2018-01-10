@@ -1,0 +1,41 @@
+#include /any/affix-punc
+
+% Mark the first morpheme by appending STEMSUBSCR.
+.=: STEMSUBSCR+;
+
+% Mark the rest of morphemes by prepending INFIXMARK
+=: INFIXMARK+;
+
+% Program and dictionary sanity check: Allow only these combinations.
+% (w: word, t:stem, s: suffix)
+
+% Split words into 1 or 2 parts (and no more than two parts)
+% According to the 4.0.dict, the first part will act as a stem,
+% and the second part as a suffix carrying syntactic inflection.
+2: REGPARTS+;
+
+% Allowed structure for REGPARTS == 2
+"w|ts": SANEMORPHISM+;
+
+% Anysplit parameters
+
+% Number of alternatives to issue for a word. Two values: minimum and maximum.
+% If the word has more possibilities to split than the minimum, but less
+% than the maximum, then issue them without sampling. Else use pseudo-random
+% sampling until the minimum number is reached or all possibilities exhausted.
+2 10: REGALTS+;
+
+% When all word parts match these regexes,
+% the word is issued as an alternative.
+% Multiple regexes per class are permitted.
+%
+% The word parts currently contain at least one character
+% (null morphemes are not supported).
+
+% Regex to match the prefix
+"": REGPRE+;
+
+% Regex to match the suffix
+"": REGSUF+;
+
+% End of Anysplit parameters

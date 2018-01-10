@@ -1,0 +1,38 @@
+; Post-processing knowledge file
+; 6/96
+
+; ----------------------------------------------------------------------------
+; This file contains the knowledge related to post-processing, in the 
+; form of lists and rules. This file is read by post-process.c at run-time. 
+; Syntax of file:
+;           line starting with ";" is a comment
+;           commas are field delimiters 
+;           any token beginning with the character @ is expanded to the set
+;               of symbols it defined. e.g. one could write
+; FOO: blah1 blah2 blah3
+; thus defining a set FOO containing three strings. Then one could later write
+; BAR: blah5 @FOO blah8
+; which defines a set BAR containing 5 strings. 
+; 
+; Capitalized tokens are *required*, though if you feel like providing an
+; empty list afterwards, that's your right.
+; ----------------------------------------------------------------------------
+
+
+; the following links start a domain. Each must be given a name in the
+; table below (STARTING_LINK_TYPE_TABLE)
+  
+DOMAIN_STARTER_LINKS: 
+ W   
+
+
+; ----------------------------------------------------------------------
+; ---------------------- LINK TYPE TABLE-------------------------------
+; ----------------------------------------------------------------------
+; the following table associates a domain type with each possible
+; starting link. It contains pairs: the first of each pair is a link
+; type, and the second is the domain to which that link type belongs.
+
+STARTING_LINK_TYPE_TABLE: 
+ W     m  
+

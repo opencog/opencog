@@ -1,0 +1,13 @@
+
+                 Morphology Tools
+                 ----------------
+
+
+Assorted morphology tools, needed by the various languages.
+
+ar -- Some minor tools for Arabic, which are to be used with
+      the aramorph-1.2.1 Arabic morphology analyzer.
+
+fa -- A simple Persian stemmer, needed for the Persian LG
+
+

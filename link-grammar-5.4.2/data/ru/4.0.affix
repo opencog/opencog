@@ -1,0 +1,13 @@
+")" "%" "," "." ":" ";" "?" "!" "''" "'": RPUNC+;
+"(" "$" "``": LPUNC+;
+
+""«»《》【】『』`„“": QUOTES+;
+
+=: INFIXMARK+;
+
+"w|ts": SANEMORPHISM+;
+
+% Stems are marked in the dict by ".=".  For more than one stem meaning, the
+% dict may include stems ending with ".=x", when x serves as a word subscript.
+% In which case, include them here.
+.=: STEMSUBSCR+;

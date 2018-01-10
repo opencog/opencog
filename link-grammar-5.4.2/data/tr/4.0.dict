@@ -1,0 +1,122 @@
+%
+% Turkish dictionary -- experimental -- 2016 -- Tatiana Batura, Maria Mitkovskaya, Natalya Semenova
+%
+% Dictionary version number is 5.3.15 (formatted as V5v3v15+)
+<dictionary-version-number>: V5v3v15+;
+<dictionary-locale>: TR4tr+;
+
+% adjectives
+kırmızı şişman hasta kızgın güzel genç yasli iyi kötü hos üzücü mutlu aç siyah beyaz mavi yeşil mor pembe sarı: {AO+};
+
+
+% nouns with null suffix
+adam.= kadın.= çocuk.= elma.= araba.= insan.= kitap.= yazar.= halı.= kız.= yıldız.= şarkı.=
+palto.= göz.= memur.= meyve.= kent.= gazete.= resim.= mühendis.= silah.= dil.=: {AO-} & {Nl+} & {Np+} & (({S3s+} & {N+}) or ({OV+} & {Na+}));
+
+% suffixes for nouns
+=da.=: {Nl-} & {Nv+};
+=ki.=: {Nv-} & {Np+};
+=lar.= =ler.=: {Np-} & {S3p+} & ({N+} or {Na+});
+=.n: {N-}; %Nominative and null suffix 
+%нулевой аффикс нужен для обозначения конца слова, когда нет расширения
+
+% Genitive .ng
+=ın.ng =in.ng =un.ng =ün.ng =nın.ng =nin.ng =nun.ng =nün.ng: {Ng-} & {OO3+};
+
+% Dative .nd
+=a.nd =e.nd =ya.nd =ye.nd: {Nd-};
+
+% Accusative .na
+=i.na =ı.na =u.na =ü.na =yi.na =yı.na =yu.na =yü.na: {Na-} & {OV+};
+
+% Instrumental .ni 
+% ? в русском это творительный падеж
+=yla.ni =ile.ni =yle.ni: {Ni-};
+
+% Locative .nl
+% ? в русском это предложный падеж
+=da.nl =de.nl =ta.nl =te.nl: {Nl-};
+
+% Ablative .nb
+=den.nb =ten.nb =dan.nb =tan.nb: {Nb-};
+
+% ? Abasive .ns
+%=sız.ns: {Ns-};
+
+
+%elma.=: {Np+} or (({S3s+} & {N+}) or ({OV+} & {Na+}));
+% то же самое   elma.=: {Np+} or (({N+} or {Na+}) & ({S3s+} or {OV+}));
+% Проблема в том, что аффикс окончания винительного падежа может быть не только i или ni, но еще и нулевой (это омонимия с именительным падежом). Поэтому нужна возможность иногда (по необходимости) дописывать расширения к аффиксам в середине слова.
+
+
+% pronouns: I, thou, he/she, we, you, they
+onlar.=: {Pg+} & {S3p+};
+=ın.pg: {Pg-} & {OO3+};
+% расписать отдельно
+senin: {OO2+};
+
+ben: {S1s+};
+sen: {S2s+};
+o: {S3s+};
+biz: {S1p+};
+siz: {S2p+};
+
+
+ne: {R+};
+
+
+
+% verbs
+bil.=: ({Vn+} or {Vr+}) & {OV-};
+iste.=: {Nv+} & {R-};
+% объединить с другими глаголами gel.= bitir.= ye.= yap.= ver.= al.= koy.= iç.= git.= bak.= dur.= getir.= konuş.= otur.= kalk.= sor.= anla.= aç.= kapat.= yıka.= olm.=
+
+% suffixes for _bilmiyorum_
+=um.v1s : {V1s-} & {S1s-};
+=yor.=: {V1s+} & {Vr-};  % can also be other links like {V2s+} or {V3s+} ??? etc
+=mi.=: {Vn-} & {Vr+};
+
+% suffixes for _istediğini_
+=ni.na: {Na-} & {OV+};
+=i.= =ı.=: {Na+} & {Np3-} & {OO3-}; 
+=in.=: {Na+} & {Np2-} & {OO2-};
+=diğ.= : {Nv-} & ({Np2+} or {Np3+});
+
+
+ye.= gel.=: ({Va3s+} or {Va3p+}) & {OV-};
+=di.va3s: {Va3s-} & {S3s-};
+=di.va3p: {Va3p-} & {S3p-};
+
+%=diler.va3p: {Va3p-} & {S3p-};
+
+=di.=: {Vp+} & {Va3p-} & {S3p-};
+=ler.va3p: {Vp-};
+
+gör.=: {OV-} & {Va+};
+%=düm.va1s: {Va1s-};
+=dü.=: {Va-} & {V1s+};
+=m.va1s: {V1s-};
+
+
+%punctuations
+",": (SJl- & SJr+ & SJl+ )
+   or (AJl- & AJr+ & AJl+)
+   or (VJl- & VJr+ & VJl+) ;
+%",": Xc- & Xd+;
+
+
+LEFT-WALL: W+ or Q+;
+
+HMS-TIME: XXX-;
+DECADE-TIME: XXX-;
+DAY-ORDINALS: XXX-;
+ORDINALS: XXX-;
+NUMBERS: XXX-;
+FRACTION: XXX-;
+ROMAN-NUMERAL-WORDS: XXX-;
+INITIALS: XXX-;
+GREEK-LETTER-AND-NUMBER: XXX-;
+PL-GREEK-LETTER-AND-NUMBER: XXX-;
+CAPITALIZED-WORDS: XXX-;
+HYPHENATED-WORDS: XXX-;
+UNKNOWN-WORD: XXX-;

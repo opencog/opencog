@@ -1,0 +1,65 @@
+!batch
+!verbosity=1
+!echo
+!limit=1000
+!short=20
+!constituents=1
+!spell=0
+
+% Example sentences showing BUG FIXES since link-grammar 4.1b
+% as well as demonstating bugs that remain to be fixed.
+%
+% Long sentences that struggle to parse correctly
+% --------------------------------------------------------------------
+Radically cheaper, quicker and less energy-intensive to produce than regular steel, Flash Bainite is stronger than titanium by weight, and ductile enough to be pressed into shape while cold without thinning or cracking.
+
+
+% The below either caused crashes, or take too long to parse.
+% --------------------------------------------------------------------
+% Crashes of various sorts.
+
+fprintf (stderr, \"%s:%s:%d: %s: \", program_name, file, line, mode);
+Населенные пункты Калининградской области и их прежние названия = Ortsnamenverzeichnis Gebiet Kaliningrad (nordliches Ostpreussen) / Сост.
+His convalescence was relatively brief and he was able to return and fight at The Wilderness, Spotsylvania and Cold Harbor.
+Hot runners usually make the mold more expensive to manufacture and run, but allow savings by reducing plastic waste and by reducing the cycle time.
+Dietrich A. Loeber, ‘“Socialist” Features of Soviet Copyright Law’, Columbia Journal of Transnational Law, vol. 23, pp 297--313, 1984.
+
+% Overly long sentences leading to overflow
+I think one of the chief differences between the main Filipino language, which is Tagalog, and English, when I hear Tagalog speakers speaking English, is that they tend to place the stress on the wrong syllable of a word or they stress the wrong word in the sentence or in the question.
+
+% long sentence leading to crash.
+Cortes in his various letters again and again claims the Emperor's patronage of his bold defiance of the Emperor's officers on the ground that the latter in their action were moved solely by considerations of their personal gain, whereas he, Cortes, was striving to endow his sovereign with a rich new empire and boundless treasure whilst carrying into the dark pagan land, at the sword's point, the gentle creed of the Christian God.
+
+% A no-canonical-parses error
+Well, say, Joe, you can be Friar Tuck or Much the miller's son, and lam me with a quarter-staff; or I'll be the Sheriff of Nottingham and you be Robin Hood a little while and kill me.
+
+% When constituent tree printing is enabled, this causes 
+% a cascade of and-list overflow errors:
+I have not seen the grysbok, or the suni, or the dibitag, or the lechwi, or the aoul, or the gerenuk, or the blaauwbok, or the chevrotain, or lots of others, but who in the world could guess what they were or what they looked like, judging only from the names?
+
+% Overflow + no complete linkages.
+In 1608 he wrote a treatise of the Errors, False Gods, and Other Superstitions of the Indians of the Provinces of Huarochiri, Mama, and Chaclla, of which unfortunately only the first six chapters are known to exist and have been translated into English.
+
+The strongest rain ever recorded in India shut down the financial hub of Mumbai, snapped communication lines, closed airports and forced thousands of people to sleep in their offices or walk home during the night, officials said today.
+
+% No complete linkages found.
+New York Post: The new Mel Brooks/Susan Stroman musical extravaganza ...  is nearly very good indeed - but it is not the The Producers ... this story ... does not lend itself to stage adaptation in the way of the earlier movie ... Now for the good news ... Brooks and Stroman pull out every stop.
+
+% Combinatorial explosion
+However, the few tracts, the poetry, and the novels that embodied the social vision of Young England were directed to a New Generation of educated, religious, and socially conscious conservatives, who, like Young Englanders, were appalled at the despiritualizing effects of industrialization and the perceived amorality of Benthamite philosophy, which they blamed equally for Victorian social injustices.
+
+In vivo studies of the activity of four of the kinases, KinA, KinC, KinD (ykvD) and KinE (ykrQ), using abrB transcription as an indicator of Spo0A~P level, revealed that KinC and KinD were responsible for Spo0A~P production during the exponential phase of growth in the absence of KinA and KinB.
+
+Just two days after President Obama extolled Chuck Grassley's bipartisan spirit on health care reform, Grassley effectively stuck a hot poker in the President's eye, saying that if it weren't for the Democratic Party's willingness to negotiate with him, health care reform would have already passed the Senate.
+
+% Another crash, after a timeout:
+When Sir William Petre first bought the manor, he repaired thither and found, in the middest part of the demesne lands, the situation of an old house scant meet for a farmer to dwell upon, having about it divers houses of office as well builded as the inner houses were, which, when he had well perused and found the commodity of the ground to be such as he could well like of, then forthwith he caused all those old houses to be pulled down and, in stead of them, hath at his own great costs and charges erected and builded other new houses, very fair, large and stately, made of brick and embattled, and hath besides enclosed all the demesne lands lying round about his house with a fair large pale, parklike.
+
+% Crashs due to bad realloc size (issue #137) - 2 sentences.
+% Both has combinatorial explosion.
+% 1/2; This sentence also has a very high graph due to its repeated nature
+% (cannot be displayed with the current limit of MAX_HEIGHT=30).
+In Buddhism there are 84 Mahasiddhas: Acinta, Ajogi, Anangapa, Aryadeva, Babhaha, Bhadrapa, Bhandepa, Bhiksanapa, Bhusuku, Camaripa, Campaka, Carbaripa, Catrapa, Caurangipa, Celukapa, Darikapa, Dengipa, Dhahulipa, Dharmapa, Dhilipa, Dhobipa, Dhokaripa Dombipa, Dukhandi, Ghantapa, Gharbari, Godhuripa, Goraksa, Indrabhuti, Jalandhara, Jayananda, Jogipa, Kalapa, Kamparipa, Kambala, Kanakhala, Kanhapa, Kankana, Kankaripa, Kantalipa, Kapalapa, Khadgapa, Kilakilapa, Kirapalapa, Kokilipa, Kotalipa, Kucipa, Kukkuripa, Kumbharipa, Laksminkara, Lilapa, Lucikapa, Luipa, Mahipa, Manibhadra, Medhini, Mekhala, Mekopa, Minapa, Nagabodhi, Nagarjuna, Nalinapa, Naropa, Nirgunapa, Pacaripa, Pankajapa, Putalipa, Rahula, Saraha, Sakara, Samudra, Santipa, Sarvabhaksa, Savaripa, Syalipa, Tantepa, Tantipa, Thaganapa, Tilopa, Udhilipa, Upanaha, Vinapa, Virupa, Vyalipa.
+
+% 2/2;
+And yet he should be always ready to have a perfectly terrible scene, whenever we want one, and to become miserable, absolutely miserable, at a moment’s notice, and to overwhelm us with just reproaches in less than twenty minutes, and to be positively violent at the end of half an hour, and to leave us for ever at a quarter to eight, when we have to go and dress for dinner when, after that, one has seen him for really the last time, and he has refused to take back the little things he has given one, and promised never to communicate with one again, or to write one any foolish letters, he should be perfectly broken-hearted, and telegraph to one all day long, and send one little notes every half-hour by a private hansom, and dine quite alone at the club, so that every one should know how unhappy he was.

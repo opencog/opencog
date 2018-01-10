@@ -1,0 +1,19 @@
+% This file is mostly empty!   Maybe it shouldn't be!
+
+% Other proper nouns.
+% We demand that these end with an alphanumeric, i.e. explicitly
+% reject punctuation. We don't want this regex to "swallow" any trailing
+% commas, colons, or periods/question-marks at the end of sentences.
+% In addition, this must not swallow words ending in 's 'll etc.
+% (... any affix, for that matter ...) and so no embedded apostrophe
+CAPITALIZED-WORDS:     /^[[:upper:]][^'’]*[^[:punct:]]$/
+
+% Sequence of punctuation marks. If some mark appears in the affix table
+% such as a period, comma, dash or underscore, and there's a sequence of
+% these, then treat it as a "fill-in-the-blank" placeholder.
+% This matters only for punc. appearing in the affix table, since the
+% tokenizer explicitly mangles based on these punctution marks.
+%
+% Look for at least four in a row.
+UNKNOWN-WORD: /^[.,-]{4}[.,-]*$/
+

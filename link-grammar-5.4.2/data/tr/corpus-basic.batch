@@ -1,0 +1,48 @@
+!batch
+!verbosity=1
+!echo
+!limit=1000
+!morphology=1
+!spell=0
+!islands-ok=1
+
+% man ate (how can I make the man-ate link be preferntially subject and not object)
+% one of the possible variants of parsing is correct, but the other variants are also grammatically (not semantically) correct
+adam yedi
+% man ate apple (parses ok)
+adam elma yedi
+adamlar yedi (colloquial)
+adamlar yediler
+% man came
+adam geldi
+% men came (colloquial)
+adamlar geldi
+% men came
+adamlar geldiler
+
+kırmızı arabadakileri gördüm
+Onların ne istediğini bilmiyorum
+Senin ne istediğini bilmiyorum
+
+% I came
+ben geldim
+% He/she came
+o geldi
+% They came
+onlar geldiler
+%They came (colloquial) (doesn't parse as it should)
+onlar geldi
+
+% man and woman came
+adam ve kadın geldi
+% man, kid and woman came
+adam, çocuk ve kadın geldi
+% fat, angry and sick man came
+şişman, kızgın ve hasta adam geldi
+% fat angry sick man came (doesn't parse as it should)
+şişman kızgın hasta adam geldi
+% very fat man came
+çok şişman adam geldi
+% man came and finished (doesn't parse as it should)
+adam geldi ve bitirdi
+

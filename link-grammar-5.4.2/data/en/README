@@ -1,0 +1,173 @@
+
+Dictionary Data
+---------------
+Research notes.
+
+There are currently 63 data files in the 'words' directory.
+Of these, 8 are not distinct (*biolg*, *medical*) and so there
+are effectively just 55 "clusters" here.
+
+There are 1754 semicolons in 4.0.dict and 1772 colons.  This implies
+that there are approx 1650 to 1700 word clusters in 4.0.dict
+since many of the semi-colons appear in lines that merely define 
+new classes.
+
+A better count of the contents of 4.0.dict yields 1430 distinct clusters.
+
+There seem to be 86863 word forms in the dicts
+
+Example cluster from Siva's dataset:
+
+cluster469
+   bets.n -- ../blah/words.n.2.s
+   doubts.n -- ../blah/blah-29
+   excuses.n -- ../blah/blah-34
+   foes.n -- ../blah/words.n.2.s
+   warnings.n -- ../blah/blah-29
+
+Actual disjunct usage:
+
+select inflected_word, disjunct, count, log_cond_probability from disjuncts where inflected_word='bets.n' order by log_cond_probability;
+
+ bets.n         | Jp- Dmc-                      |   5.38320328295231 |     2.68897695164809
+ bets.n         | Op-                           |   6.59906960930676 |     2.79728207561233
+ bets.n         | Op- Dmc-                      |   4.49985344521703 |     2.94756384236018
+ bets.n         | Jp- A- MXp+ MXp+              |   2.94644784927368 |      3.5584651263364
+ bets.n         | Jp- A-                        |    2.8032719194889 |     3.63033016407109
+ bets.n         | Op- Mv+                       |   2.38083738088607 |     3.86597277463304
+
+ doubts.n       | Op-                           |    14.7235374869777 |     2.53482148983126
+ doubts.n       | Op- Dmc-                      |    12.8798744678498 |     2.75360123030737
+ doubts.n       | Jp- A-                        |    3.70244218036532 |     4.39933529761974
+ doubts.n       | Op- A-                        |    4.28538444498555 |     4.52871084843059
+ doubts.n       | Opt-                          |    2.90120184421541 |     4.75116183218627
+ doubts.n       | Jp- Dmc-                      |    2.40070396848023 |     5.02435498790713
+
+
+ excuses.n      | Op- Dmc-                 |   5.50880998373031 |     2.32890577902052
+ excuses.n      | Op-                      |   5.03419046103953 |     2.45888667993668
+ excuses.n      | Jp- Dmc-                 |   4.23024629056454 |     2.70990481825512
+ excuses.n      | Op- TOn+                 |   1.90192013978957 |     3.86318980988967
+ excuses.n      | Op- AN- TOn+             |   1.79344245046377 |      3.9479150280805
+ excuses.n      | Opn-                     |   1.65557911992073 |     4.06331052106999
+
+ foes.n         | Op- Dmc-                    |    7.72758442535996 |     3.08401721340472
+ foes.n         | Jp-                         |    5.78156289178878 |     3.50257518460873
+ foes.n         | Jp- Dmc-                    |    8.53048111009413 |     3.55652688759394
+ foes.n         | Op-                         |    4.24155412614344 |     3.94944175213513
+
+ warnings.n     | Op-                                 |    13.1191083714365 |     2.73150374115749
+ warnings.n     | Op- Dmc-                            |    12.4493113420905 |     2.80710747394272
+ warnings.n     | Jp- Dmc-                            |    8.38247973471882 |     3.37772441764546
+
+
+Here's another curious one:
+cluster992
+   banker.n
+   fisherman.n
+   illustrator.n
+   lyricist.n
+   mechanic.n
+   periodical.n
+   psychiatrist.n
+   sculptor.n
+
+all from words.n.1 -- thus does not broaden coverage ... but are very
+nearly all a profession!
+ mechanic.n     | Js- Ds-                              |    13.7642659600825 |     2.88500665850946
+ mechanic.n     | Os- Ds- AN-                          |    7.06177791953084 |     3.84783097573959
+ mechanic.n     | AN+                                  |    6.95599334826693 |     3.86960587427955
+ mechanic.n     | Js- Ds- AN-                          |    6.24886311846786 |     4.02426868916609
+ mechanic.n     | Ost- Ds- R+ Bs+                      |    5.70536887645721 |     4.15554226141072
+
+ fisherman.n    | Ost- Ds-                           |    6.96868003904821 |     3.15873229404902
+ fisherman.n    | Js- Ds-                            |    6.63831343245697 |     3.22880096148911
+ fisherman.n    | Ost- Ds- A-                        |    5.21447241306305 |     3.57709641838825
+ fisherman.n    | AN+                                |    5.15915525704624 |     3.59248284744609
+
+ illustrator.n  | Js- Ds-                     |    23.8048364557326 |     2.60514384269322
+ illustrator.n  | Ost- Ds-                    |    16.1435659294952 |     3.55061043888198
+ illustrator.n  | Ost- Ds- A-                 |    12.5473636660028 |      3.5717400794719
+ illustrator.n  | Ost- Ds- R+ Bs+             |    6.37835476174951 |     4.43506613246927
+ illustrator.n  | Ost- Ds- AN-                |    6.57567423582078 |     4.43628494235792
+ illustrator.n  | AN+                         |    5.92789142578842 |     4.54073145072105
+
+ periodical.n   | AN+                            |    13.523933645105 |     2.25884735662492
+ periodical.n   | Ost- Ds- R+ Bs+                |   4.69391736388206 |     3.78549785079099
+ periodical.n   | Os- Ds-                        |   3.54950597882271 |     4.18867205040734
+ periodical.n   | Os- Ds- Mv+                    |    4.4908520579338 |     4.32151671611172
+ periodical.n   | Js- Ds-                        |   3.46312434598804 |     4.51594109897193
+
+
+Examined 1165 clusters, recorded 626
+Examined 13026 words, and 2218422 disjuncts
+Average 11.181116 words/cluster; average 3543.805112 dj's/recored-cluster
+
+real	3m42.396s
+user	3m35.157s
+
+recorded 628
+recorded 622
+
+Examined 1165 clusters, recorded 622
+Examined 12952 words, and 2239866 disjuncts
+Average 11.117597 words/cluster; average 3601.070740 dj's/recored-cluster
+Got 74 mismatch warnings
+
+fixes w/o: 226           w/: 225
+bilog w/o: 38  w/: 38
+
+
+
+To get the full-length list -- 
+
+Disjunct *d1 = build_disjuncts_for_dict_node(dn); -- but is obsolete ... 
+free_disjuncts(d1)
+
+instead, use build_sentence_disjuncts() which use build_disjuncts_for_X_node()
+
+
+make float pt:
+in build-disjuncts.c == done 
+todo -- build_disjuncts_for_X_node == done
+build_clause == done
+build_disjunct == done
+build_sentence_disjuncts -- preparation.c
+
+but preparation.c ... 
+
+prepare_to_parse from api.c
+sentence_parse
+and retry from link-parser with more null counts.
+
+======================
+Historical trends:
+
+enwiki/A: grep  -- version 4.3.5
+num_skipped_words= * | wc  773352
+num_skipped_words="0" 388819  or 50.3%
+num_skipped_words="1" 148214  or 19.2%
+num_skipped_words="2"  83234  or 10.8%
+num_skipped_words="3"  43957  or  5.7%
+num_skipped_words="4"  28998  or  3.8%
+num_skipped_words="5"  19677  or  2.5%
+
+enwiki/E: grep  --- version 4.3.5 or so
+num_skipped_words= * | wc 980218
+num_skipped_words="0" 479076 or 48.9%
+num_skipped_words="1" 190183 or 19.4%
+num_skipped_words="2" 107265 or 10.9%
+num_skipped_words="3"  56875 or  5.8%
+num_skipped_words="4"  39240 or  4.0%
+num_skipped_words="5"  27431 or  2.8%
+
+enwiki/J: grep  --- version -4.5.7 or so
+num_skipped_words= * | wc 1744284
+num_skipped_words="0" 914187 or 52.4%
+num_skipped_words="1" 332653 or 19.1%
+num_skipped_words="2" 176185 or 10.1%
+num_skipped_words="3"  87241 or  5.0%
+num_skipped_words="4"  57509 or  3.3%
+num_skipped_words="5"  38483 or  2.2%
+
+

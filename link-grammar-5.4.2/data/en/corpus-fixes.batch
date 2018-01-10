@@ -1,0 +1,5107 @@
+!batch
+!verbosity=1
+!echo
+!limit=1000
+!short=20
+!constituents=1
+!spell=0
+
+% Example sentences showing BUG FIXES since link-grammar 4.1b
+% as well as demonstating bugs that remain to be fixed.
+
+% But first ... some simple sentences that work fine with the old
+% link-grammar, but cause trouble for the new WV and CV links.
+I am having trouble with it.
+
+% extrapostions with crossing links:
+knowledge was gained of the activities
+It was announced that remains have been found of the ark of the covenant
+
+% Missing verb-wall links
+They were of a single mind.
+What's up?
+
+
+An eerie silence befell the room
+an eerie calm settled down on the room
+an eerie quiet preceded the explosion.
+he had an easy calmness about him
+
+% Missing or miscategorized verbs
+Don't overexcite him!
+Don't overextend yourself!
+This code deadlocks.
+It is deadlocking right here.
+It is deadlocking over there.
+He sunburns easily.
+We had the painter texture the ceiling for us.
+This particular ceramic finish crazes easily.
+Hi, can you please freind me?
+I coded up the program.
+I hard-coded the answer.
+I always hard-code.
+Do this instead of hardcoding it.
+Do this instead of hard-coding it.
+Do this instead of hard coding it.
+it is hard coded.
+I tokenized the sentence.
+I like to tokenize.
+It is a tokenizing parser.
+That is a very unenhancing blush.
+I will vacuum it up
+I will vacuum it right up
+I will deep-fry it up for you.
+I will frame it up for you.
+I squished it down to a splat.
+I slurped it up.
+The secretary whited it out.
+She was whiting it out when the call came.
+Yes, he tailgates often.
+Yes, they topple frequently.
+It will unfreeze by itself.
+They deice the planes regularly.
+They deice regularly.
+They oversell whenever they feel like it.
+They pillory whoever they want to.
+He will anguish over the loss
+He will bankroll the company.
+Let me nuke that sandwich for you
+He is going to lowball the offer
+I don't mean to disrespect you
+
+he has a habit of horning in on other people's conversations.
+I hope you don't mind if I horn in.
+I hope you don't mind my horning in.
+
+He really ragged on me to do it.
+He was ragging on me all day long.
+
+She volunteered as a nurse.
+She volunteers as a nurse.
+
+
+He put forth an argument against sexism
+He puts forward an argument against sexism
+The Vatican declaration put forward an argument against sexism
+
+It has a hardness of 0.34 Brinell units.
+It has a tensile toughness of 0.34 joules per cubic metre
+
+% Parses, but not correctly!
+% Any expression with an exclamatory "right" mis-parses.
+*It is sitting right over here.
+
+% Parses, but not correctly! "at once" should stick together.
+*They were at once shelled and fired on by the machine guns
+
+% ----------------------------------------------------------
+% Phonetics: distinguish a/an usage with vowels/consonants:
+*I ate a apple.
+I ate an apple.
+
+I ate a little apple.
+*I ate an little apple.
+
+I ate a banana.
+*I ate an banana.
+*He has quite a imagination.
+He has quite an imagination.
+*He has such a imagination.
+He has such an imagination.
+*That is more of an challenge.
+That is more of a challenge.
+
+He gave me an acrylic lens.
+*He gave me a acrylic lens.
+He gave me an Afghan rug
+*He gave me a Afghan rug
+
+% ----------------------------------------------------------
+% Misc stuff
+I know which book he read.
+I know what book he read.
+Mommy loves me.
+Mother likes her.
+I am pooped.
+John is bigger than Dave is.
+John wants more cookies than Dave wants.
+It was covered with bites.
+Alice took a bite out of it.
+
+% Leasing and subleasing.
+It's to let.
+It's to let; there's a notice on the door.
+She has a room to let in her house.
+The landlord is letting the office to a local company.
+Let's sublet that room!
+Yes, we will sublet that room!
+Preliminary contracts were let and tunneling work started.
+The rooms were let.
+
+% wikipedia sentences
+Hatem Mohamed Mersal (born 20 January 1975) is an Egyptian long jumper.
+His personal best jump is 8.31 metres, achieved in June 1999 in Oslo.
+
+% Know, even
+He knows nothing but sin.
+Even a child knows better.
+He should know better
+We will know sooner or later.
+We will know, sooner or later.
+Even his mother likes me
+
+% the below parses, but not correctly; it should parse similar to above ...
+*Even a child can do better.
+
+
+% phantom commas
+I have no idea, what that is.
+I have no idea what that is.
+
+% Phantom-and:
+% the comma implies an "and", which is not actually voiced:
+His shout had been involuntary, something anybody might have done.
+
+% gone
+The position we talked about is gone.
+The keys are gone.
+The popcorn is all gone.
+The good times are done and gone.
+It's now a gone desire.
+
+He slunk over to the water-fountain.
+
+% tend
+I tended to believe that shepherds tend sheep.
+I often tended, for years at a time, to believe that shepherds quietly tend sheep.
+
+% misc nouns, verbs
+The smelter weighs 30 tonnes.
+She's sharp-witted and funny.
+He resigned that post.
+Exxon discovers gas offshore.
+The line extends 10 miles offshore.
+
+Give it a shake.
+Take the two shakes over to table five.
+
+There was wind and rain.
+
+It adjusts for errors
+It corrects for errors
+
+% verb: come was missing B-
+Which way did you come?
+
+% Problems with "on"
+% Below, "on" should modify "wears", using MVp
+He wears a mustache on the sitcom.
+
+% "on" should modify "report" via Mp
+% XXX this is still broken, at the moment...
+I have a report on sitcoms.
+I saw a report on sitcoms.
+I read a report on sitcoms.
+
+% "with" should modify verb with MVp, not object with Mp
+I have a date with Ben.
+I read a report with Ben.
+
+% "saw" w/ particle
+He tried to saw the wood.
+He tried to saw up the wood.
+We were sawing wood when it happened.
+We were sawing up the wood when it happened.
+
+% Assorted adverbial modifiers
+It has been unbelievably poorly managed.
+It has been notoriously managed.
+It has been notoriously badly managed.
+The store was poorly stocked.
+The play was dreadfully written.
+
+I was able to buy the house very cheap
+
+% Adverbial modifiers with EBm-
+There is absolutely no reason to believe American companies cannot compete overseas.
+
+There are rumours of a tightening of credit
+There are rumours of a collapse of credit
+
+knowledge was gained of the activities
+knowledge was obtained of the illicit activities
+
+% suddenly is a "manner adverb", sometimes clausal
+He sat up suddenly.
+He suddenly found soup in his lap.
+
+% double-commas on of_course
+It was, of course, his fault.
+
+% adverbs modifying prepositional phrases: MVl- links
+we are going to arrive almost on time
+we are going to arrive nearly on time
+we are going to arrive very nearly on time
+we are going to arrive exactly on time
+we are going to arrive about on time
+we are going to arrive just about on time
+
+% words.v.4.1 -- some predicative-adjective stuff in here
+It reduced chances that profits could equal their earlier performance
+It reduced chances that profits could affect the outcome
+It reduced the chances that profits could affect the outcome
+What are the chances that profits could affect the outcome?
+What are the chances that Sherlock could catch the criminal?
+What are the chances that Sherlock could really catch the criminal?
+What are the chances that Sherlock could really solve a crime?
+What are the chances that Sherlock could be a genius?
+What are the chances that Sherlock could be high?
+It reduced chances that profits could be high
+... chances that ... could be ...
+
+What are the chances that Sherlock caught the criminal?
+What are the chances that Sherlock captured the criminal?
+What are the chances that Sherlock will track him down?
+what are the chances she will drive him up to the farm?
+
+The motor ran flat out
+She flat out said so
+It happened during the 1988 first half
+
+% so
+He did not perform nearly so well.
+The price didn't drop nearly so fast.
+The price didn't drop nearly as fast.
+It went almost so well that we thought we won!
+
+% ready
+Is it ready?
+Do you have it ready?
+Do you have a more complex example ready?
+
+% enough
+We have quite enough work already, thank you!
+That'll be quite enough.
+That is quite enough rough-housing.
+That is enough rough-housing.
+Enough rough-housing!
+Enough!
+He is good enough
+He is a good enough player
+*He was very lucky enough
+*He was very good enough
+
+He is such a little shit.
+He is such a little fuck.
+I don't give a flying fuck.
+
+What, were you expecting Santa?
+What!
+
+I'll tell you what, you can have it for five bucks!
+I'll tell you what, you can shut the fuck up!
+I'll tell you what!
+Say what?
+Shut the fuck up!
+what does it matter?
+come what may.
+She gave him what for.
+I don't know but what.
+I don't know but what I'll go.
+
+% curious synonyms for "else" ....
+what the fuck?
+what else?
+what the fuck happened?
+what else happened?
+what fucking happened?
+what in hell happened?
+what in the hell happened?
+what goddamn happened?
+What for Christ sake happened?
+What in Jesus happened?
+What in God's name happened?
+What in Lord's name is going on here?
+What the bejesus happened?
+what in the hell?
+what the shit?
+what the bleep?
+where the fuck is it?
+where else is it?
+what the fuck did I tell you?
+what else did I tell you?
+what in hell did I just say?
+what the shit were you thinking?
+who the fuck came to the party?
+who else came to the party?
+
+% A bit more polite:
+What exactly do you want?
+What, exactly, do you want?
+What precisely do you want?
+
+Then what?
+
+why the hell would you say that?
+how else would you say that?
+how else might you say that?
+how else might you express yourself?
+how the fuck do I know?
+
+whyever for?
+what for?
+How come?
+How many?
+How?
+
+How quickly?
+
+How big?
+How small?
+How high?
+How big did he talk?
+How big is it?
+How big did you say it was?
+*How slickly did you say it was?
+How high did you say it was?
+How tall did you say he was?
+
+% Arghhh this is a mess. Some of these want to use AF+,
+% others seem to be more comfortable with Qe+ and its not clear
+% how to be consistent.
+How common did you say it was?
+How common?
+How often?
+How often does it happen?
+How shocking?
+How shocking was it?
+How shocking did you say it was?
+
+
+Who?
+who else?
+who else not?
+
+When?
+
+Which way?
+
+
+% We should distinguish between "who" and "whom" but who fucking cares?
+Who fucking cares?
+Bring him and whomever else
+Bring him and whomever the fuck cares
+Bring him and whoever the fuck cares
+Bring him and whoever you wish
+Bring him and whomever you wish
+Bring whoever else you care to.
+Bring whomever else you care to.
+Bring whomever else cares
+Bring whoever else cares
+Bring whomever you wish
+Bring whoever you wish
+
+Use whatever the fuck pleases you.
+Do whatever the fuck pleases you.
+
+% intransitive verbs taking prepositions
+He grabbed at it
+
+% transitive verbs taking prepositions
+He dished it out at the unsuspecting onlookers.
+I ladled it carefully into a bowl.
+You should ladle it out.
+He ladles it with a large wooden spoon.
+He was ladling the molten steel when the crucible tipped.
+He ladled the molten hot metal into the mold.
+It was molten hot.
+It was piping hot.
+It was devilishly hot.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% ==========================================================
+% NOUNS misclassified and mangled
+%
+% Miscellaneous missing nouns.
+He picked up the game die.
+People use espresso to make other coffee drinks.
+Espresso is a coffee drink.
+Bill sold his children to the gypsies
+Computers suck ass
+Computers suck dick
+I found a subgraph isomorphism that is isometric to the epimorphism.
+I installed one splitter near the antenna and two more before the amplifier.
+I installed one splitter near the antenna and two more splitters before the amplifier.
+I did not understand one smidgin of that lecture. Not one whit.
+Not one tittle. Not one whit.
+I'm getting a bad vibe from this.
+% mass nouns that were incorrectly classified as count nouns.
+% Nouns that can be used in an indefinite manner.
+I will give you a piece of armament.
+I will give you a piece of bagel.
+I will give you a bit of courtesy.
+Give me a piece of almond.
+Give me a bit of anaesthetic.
+Give me a piece of apple.
+He broke off a piece of bagel and gave it to me.
+A piece of asteroid broke off.
+Add one spoonful of avocado.
+I ate a bit of biscuit.
+She exposed a bit of bikini to us.
+A piece of cactus went sailing through the air.
+There were three cacti in front of us.
+Add a cup of finely shredded carrot.
+A length of chain was wrapped around the tree.
+He left town early next morning.
+I gave her a check for deposit.
+
+% ----------------
+% nouns not in nouns.1
+*an majority agree
+a majority agree
+*an number agree
+a number agree
+
+it's a kind of test
+*it's an kind of test
+it's a silly kind of test
+*it's an silly kind of test
+it's an unusual kind of test
+*it's a unusual kind of test
+
+This is a crucial test.
+*This is an crucial test.
+
+*it's an sort of test
+it's a sort of test
+there's an argument brewing
+*there's a argument brewing
+he gave me an excuse
+*he gave me a excuse
+That is an issue
+*That is a issue
+*There is an way
+There is a way
+*There is an place
+There is a place
+
+% Pronoun fixes
+I'll hire whomever I can find.
+I'll hire whomever.
+I'll hire whoever.
+
+% Proper names (entities) in the form of noun modifiers
+% The problem is that some of these appear in entity names
+% and thus must be explicitly listed in the dictionary. 
+My name is Gilles de la Tourette.
+I live in New York City.
+I work for the First National Bank.
+I live near the San Gabriel River.
+I was born in the Armenian Soviet Socialist Republic.
+I was born in the Soviet Union.
+My insurance carrier is United Healthcare.
+We took the ferry to Block Island.
+The man from Federated Conglomerates is here.
+I work for the Great Southern and Western Railroad.
+Central Texas is hot.
+North Sea crude was up.
+Korea First Advertising Co. stock is up.
+Quantum shares were up in trading.
+The Orange Democratic Movement called for a new election.
+It lies in the western Pacific Ocean.
+It is in the Gulf Territory
+I live near the Orkney Islands
+He is the man from Syndicated Features
+He represents the Undersea Exploration Company
+He represents the Equatorial Antarctic Bank
+
+% Confusing given names
+Finn pushed at the door.
+
+% Some given names can be proper names
+The late Mr. Tom will be sorely missed.
+
+% Collistions between given names and oteh words
+% Should be OK now; given name 'Frank' collides with frank.a, frank.v
+Frank felt vindicated when his long time friend Bill revealed that he was the winner of the competition.
+
+% Sue (female given name) vs. "to sue" (verb).
+Sue answered the door.
+
+% Tom as a mass noun interferes with far-more-likely common-name "Tom".
+Could we add some tom-tom to that track?
+
+% Some plural capitalized words are singular entities. Treat them well.
+% e.g. last name Johns, or Hotchkiss are not actually plurals ...
+Johns gave it to me.
+Hotchkiss gave it to me.
+
+% Proper name modifiers
+It dates back to fifteenth century France.
+
+% Biological texts commonly have adj-noun-adj-noun chains
+We extracted human umbilical vein endothelial cells.
+We extracted smooth muscle myosin heavy chain protein.
+We extracted peripheral blood mononuclear cells.
+It is located on the nuclear envelope inner membrane.
+We extracted simian virus large T-antigen.
+We collected HTLV-I infected T-cells.
+We looked for 3-Amino-3-azabicyclo[3.3.0]octane hydrochloride
+We looked for 3-amino-3-azabicyclo[3,3,0]octane hydrochloride
+
+They are a three times defeated team.
+
+% ----------------
+% Verbs that didn't have corresponding nouns -- bop.v was clobbering bop.n
+I like the sound of bop.
+She was the co-star.
+Who did you give the slavers?
+
+% ----------------
+% words that can be both mass and count nouns
+They are like family to us.
+He is like family to us.
+
+it is at an equilibrium
+it is in equilibrium
+
+% ----------------
+% Buggy classification of mass nouns (words.n.3)
+% The -ity, -acy and -ance words are now in words.n.3.y
+There was an abundance of poverty.
+There was a continuity of action.
+There was a certain crudity to his actions.
+It showed a certain abundance.
+He had a certain panache.
+He sank into a delirium.
+It was a detriment to further action.
+He demonstrated a certain ignorance.
+We were unable to find a common ground.
+
+He took the effort to make amends
+He had the imprudence to laugh
+He has the impunity to do as he pleases
+He has the balls to do as he pleases
+He had the honesty to come clean
+He has the panache to pull it off
+The solution had the acidity to eat through walls
+
+% More nouns that can be indefinite .. magazine, crisis,
+% musical instruments.
+He wrote for Playboy magazine.
+I know how to play guitar.
+The violence has thrown the country into crisis.
+The violence has created a crisis.
+He took the effort to make amends
+
+
+% level as indefinite noun, adjective, etc.
+% Unfortunately, this leads to a combinatoric explostion when
+% 'level' is a modifier: "He keeps a level head in an emergency"
+The process uses abrB transcription as an indicator of Spo0A~P level
+The platform was at knee level.
+
+That bitch did it!
+
+% ===================================================================
+% quasi-numeric determiners aka quantifying determiners
+% There are a zillion of these, mostly due to the product of the
+% special-case quantifiers (some of, none of, all of, etc) with objects,
+% subjects, and determiners (of these, of those, of it, etc.)
+%
+I have much furniture.
+*I have many furniture.
+
+I have a lot of time
+I have some number of cookies
+I have a passel load of cookies
+I have a passel of senators in my pocket
+I have a flock of sheep
+I have a pride of lions
+I have a gaggle of geese
+I have a skein of wool
+I have a vast expanse of land
+I have a large flock of sheep
+I have a lot of pride
+I have a handful of money
+I have a quantity of money
+I have quantities of money
+I have bags of money
+I have a whole slew of it
+I have gobs of it
+I have jillions of dollars
+I have zillions of dollars
+I have tens of billions of dollars
+
+I have a couple of cookies.
+I have a couple of them.
+I ate a couple of the cookies.
+
+% XXX TODO: squonky determiners with "of"
+%
+% Note how many of these allow a determiner "the beer", "this beer",
+% "I drank a pint of beer", "I drank a pint of this beer", while
+% others insist on it!  "*I drank the rest of beer", "*I drank all of beer"
+% Yet others forbid it: "*I drank another of the beer", "*I drank a couple
+% of the beer", with the last two treating "beer" as a count noun (bottles)
+% as opposed to a mass noun.
+%
+I have a few of them.
+*I have a few of cookies.
+I ate a few of the cookies.
+I ate a few of these cookies.
+*I ate a few of this cookies.
+I ate a few too many.
+I ate a few.
+I ate very few of the cookies.
+I ate pretty few of the cookies.
+
+I ate some of the cookies.
+I ate some of these cookies.
+*I ate some of this cookies.
+I ate some of this cake.
+I ate some of them.
+*I ate some of cookies.
+*I drank some of beer
+I ate some.
+I ate just some of the cookies
+I ate just some
+I see him some of the time.
+*I see him some of time.
+
+I ate a little of the cookies.
+*I ate a little of cookies.
+
+% XXX "I ate little", and little should MV "ate", and not "fish"
+% whereas "I ate a little" and it should be Os on "ate", right?
+I ate little of the fish.
+
+% phantom "bit": "I drank a little (bit) of beer"
+I drank a little of beer.
+I drank a little bit of beer.
+I drank a bit of beer.
+
+I drank a great deal of beer.
+I drank a great deal.
+
+I have most of the cookies.
+*I have most of cookies.
+*I have the most of cookies.
+*I have the most of this cookies.
+I ate most of them
+I have the most of the cookies.
+% XXX the next one parses, but not correctly
+I have the most of all the cookies.
+I have the most of all of the cookies.
+I have the most of all of them
+
+I drank the most of the beer.
+I drank most of the beer.
+
+I drank part of the beer.
+*I drank part of beer.
+I drank a part of the beer.
+I drank a part of this beer.
+I drank a small part of the beer.
+I ate a part of the cake.
+
+% cookie, unlike cake or beer, is normally a count noun; however, it can be
+% sometimes partitioned.  (viz, its "optionally" a mass noun.)
+I ate a part of the cookie.
+
+I drank all of the beer.
+*I drank all of beer.
+I ate all of the cookies.
+I ate all of these cookies.
+I ate all these cookies.
+I ate all of this cake.
+I ate all this cake.
+
+I made all these corrections to the dictionary.
+
+I drank none of the beer.
+*I drank none of beer.
+*I drank none of these beer.
+I drank none of this beer.
+I ate none of the cookies.
+* I ate none of this cookies.
+I ate none of that.
+
+I drank the rest of the beer.
+*I drank rest of the beer.
+*I drank the rest of beer.
+
+I drank plenty of beer.
+I drank plenty of the beer.
+I made plenty of fixes to the dictionary.
+
+I drank another of the beers.
+*I drank another of the beer.
+I drank each of the beers.
+
+I drank more of the beer
+I drank much more of the beer
+*I drank much more of the beers
+I drank many more of the beers
+*I drank many more of the beer
+I drank a couple more of the beers
+*I drank a couple more of the beer
+I drank plenty more of the beer
+I drank some more of the beer
+
+% More mass vs count
+I drank many of the beers
+*I drank many of the beer
+I drank much of the beer
+*I drank much of the beers
+
+I ate not many of the cookies.
+I drank not many of the beers
+I drank not many
+
+not many of the cookies were edible
+not many of them could be saved
+many of them could be saved
+*them could be saved
+
+many of them were saved
+
+much of the beer could be saved
+not much of the beer could be saved
+much of it could be saved
+not much of it could be saved
+
+I drank not much of the beer
+I drank not much
+I drank not much of it
+
+not much of what he said was true
+
+not all of the beer could be saved
+not all of the beer was saved
+not all of the trees were saved
+not all of it was saved
+I ate not all of the cookies.
+
+not one of them could be saved
+not one of them were saved
+not one of them was saved
+I ate not one of the cookies.
+
+I drank enough of the beer.
+I drank enough of it.
+not enough of the detergent got in there.
+
+there was enough of the beer
+there was enough of the beer and sandwiches
+
+there was enough of it
+there was not enough of it
+
+not enough of this was used
+they have plenty of this
+they have pleny of that
+
+Drink a pint of this beer.
+
+I've had enough of this farce.
+
+I gave him a number of the cookies
+I gave him a number of cookies
+*I gave him number of cookies
+*I gave him number of the cookies
+
+I gave him a number of these
+I gave him a number of those
+a number of these were found 
+a number of those were found 
+a number of them were found 
+
+He has wads of cash
+He commands several companies of men
+He is prone to flights of fancy
+I have untold numbers of cookies
+I have an immeasurable number of cookies
+I have a majority of the voters
+I have a number of pennies and dimes
+I have a quart of milk
+I have two quarts of milk
+I've drunk several cups of coffee
+I put two kilograms of explosives in the box
+I put two kilograms of TNT in the box
+I put two kilograms of Fugnuts in the box
+I put two kilograms of tri-nitro toluene in the box
+I put two kilograms of gonzo in the box
+I put seventy two kilograms of Mr. Goody Two-Shoes in the grave
+I put an insane amount of effort into this project
+
+I have oodles of talent.
+I have a kind of talent.
+I have a type of talent.
+I have a sort of talent.
+I have a breed of goats.
+
+Copelatus stavropolitanus is a species of diving beetle.
+
+What degree of trust do you put in him?
+
+% And not just as objects, but subjects too.
+A number of people took part in the riot.
+A pride of lions lounged in the shade.
+A number of recommendations were made.
+A number of reasons were given.
+Several kinds of reasons were given.
+A number of questions were asked.
+A number of different ways were considered
+A number of ideas were considered
+A number of hypotheses were tested.
+
+A number of recommendations and suggestions were made.
+They made a number of recommendations and suggestions.
+There was a great degree of haste in the proceedings.
+
+plenty of others thought so too
+
+% ===================================================================
+% Subject verb inversion
+% Many examples from wikipedia
+
+What have I done?
+What will I do?
+
+From where did it come?
+From where had it risen?
+From whom did you run?
+From whence was it bidden?
+whither did it come?
+From whither did it come?
+From where did you get it?
+About where did you put it?
+About where did you find it?
+For who were you mistaken?
+
+% Archaic fairy-tale / children's book registers (inverted subject/object)
+far out in the sea lived a fish.
+A fish lived far out in the sea.
+
+% Locative subject-object iversion
+under the tree sat Jim
+*Under the tree sat he.
+under the tree sits Jim, looking lonely
+
+beside the river sat Jim
+beside the river ran Jim
+Along the riverbank lay some smooth stones.
+Along the riverbank grew some flowers.
+Along the riverbank grow some flowers.
+for along the riverbank grow some flowers.
+yet along the riverbank grow some flowers.
+Beside Sally ran Jim
+
+And so stays the situation.
+And so stayed the situation.
+
+Here lies the ball.
+There lay the ball.
+And so there lay the matter, until Jill decided to challenge him.
+Beneath, there lay in mobile contiguity the essential elements of living matter.
+No matter what the motive was, there the money lay
+There lay the reason for the groans.
+
+In the corner lay a lamp.
+*In the corner lay it.
+
+Under that tree sleeps only Larry.
+
+% Verb-object inversion
+% .. and verb-object inversion with null copula.
+What a shame that was
+What a fiasco that was
+What a shame!
+Oh, what a shame!
+What a fiasco!
+What a great day today!
+What a nice night, tonight
+What a great day was today!
+What a great day yesterday was!
+What a great day tomorrow will be!
+What a great day Monday will be!
+What a great day Monday morning will be!
+What a great month July will be!
+What a great month was July!
+What a great day is in store!
+
+% What expletives, profanities
+What a lousy example sentence!
+What a cad!
+What an idiot!
+What a jerk!
+
+% Directive subject-object inversion
+Into the room came two students
+Down the stairs came the dog
+*Down the stairs came it.
+
+At last the infantry were ready, and off went the cavalry to the right
+Onward went the cavalry, spurred to extraordinary exertion by the fact that provisions began to run short.
+
+A good gift is flowers
+*A good gift is they
+
+% Directive inversion
+Into the room came two students.
+*Into the room came they.
+Out of the tree fell the squirrel.
+*Out of the tree fell it.
+
+After the speeches came the toasts
+Before the storm came an eerie quiet
+Before the storm came an eerie calm
+
+% comparative inversion
+It was too difficult a question.
+It was too long a journey.
+
+Cheaper than dirt, slime is greener
+radically cheaper than regular steel, Flash Bainite is stronger than titanium
+radically cheaper to produce than regular steel, Flash Bainite is stronger than titanium
+
+
+
+% ===================================================================
+% assorted mis-classified verbs.
+He is allied with the Reds.
+
+% Sentence openers
+% Some of these need to take the Z- link, when
+% the "I" is optional.  But others take the Cs+ link.
+% Said, guessed do the right thing here...
+% The others are broken. XXX fix these.
+As guessed, he was lying.
+As I guessed, he was lying.
+As I reckon, it won't happen here.
+As I sensed, it was all a lie.
+As I said, it was all a lie.
+As I verified, the switch was off.
+As I trust, it's all over now?
+It's all over, I trust?
+Sure enough, there it was, as I had sensed.
+Sure enough, there it was, as I had guessed.
+There it was, just as I had said.
+
+% zero-subject/phantom-subject in sentence opener
+As mentioned before, we are creating a business service.
+
+
+
+% up as prep vs. up as verb
+He forced it up the stairs.
+He willed it up the stairs.
+He jammed it down his throat.
+He jammed it up into a corner.
+He upped the bid.
+We are planning to up the bid.
+Ante up!
+
+% Optionally transitive verbs taking particles that were mis-classified.
+Water and oil don't mix.
+The computer doesn't boot.
+The computer doesn't boot up.
+Canvas is for painting on.
+Use a piece of paper to write upon.
+A piece of paper can be used to write upon.
+Once he goes, we can clean up.
+He really cleaned up!
+I watched the bomb blow up.
+We pushed the button, then it blew up
+He shined up to the boss
+Start shining the night sky, you light up like a solar flare
+Alice is bugging out.
+Alice is bugging me.
+*Alice is bugging.
+
+% stay, bite is optionally transitive
+The judge stayed the prisoner's execution
+Michael stayed his anger
+I stayed the week with my parents
+We stayed the duration of the game.
+Mere rain will not stay the mailman.
+That dog will bite!
+
+He did as he pleased.
+He does as he pleases.
+He did as it pleased him.
+
+% resolve can be intranstive
+He resolved on a course of action
+He decided on a course of action
+
+% drink is optionally transitive
+we drank
+we drank up
+we drank up all the milk
+Drink up!
+
+% null-of -- "of" is sometimes elided; use the ALx link.
+he has drunk all of the ale.
+he has drunk all the ale.
+he has eaten all the chocolate.
+
+He OK'd the orders.
+He OK'ed the orders.
+
+It gelled up into a nice pudding.
+As we set sail, a full gell blew up.
+
+% Some of the verbs classified as "intranstive" see rare usage as
+% transtivies; these should just have a high cost, that's all.
+He ad-libbed the speech.
+I hydroplaned the car.
+I ambled the horse.
+it rained cats and dogs
+it is raining cats and dogs
+*it rains cats and dogs
+
+
+% Some ditransitive verbs of various complexity
+He poured me a glass of champagne.
+*He poured me.
+He sang me a song.
+*He sang me.
+He sung me a song.
+He had sung a song.
+*He had sang a song.
+He will sing you good night.
+She was singing me a song.
+She sang soprano for the Philharmonic.
+Oscar Peterson played piano and wrote music.
+He wrote for piano and flute.
+He plays marimba and a lot of cowbell on that track.
+
+% Optionally ditransitive verbs
+I teach
+I taught those kids
+I taught them
+I taught them to sing
+I taught them how to sing
+I teach them every day.
+
+% more ditransitive and etc.
+I stared him down.
+We shouted him down
+We shouted him down off the stage.
+He pushed him down.
+He shouted out.
+He shouted out in pain.
+He cried out.
+He cried out in pain.
+He was shouted off the stage.
+They yelled and booed him off.
+She stalked off.
+She stalked off in a huff.
+She stalked him all day.
+She stalked him day and night.
+
+*She stared him
+She looked him over.
+She carefully looked him over when he got back to London.
+She carefully looked him over in London.
+*She looked him.
+*She shouted him.
+*She cried him.
+She sounded him out.
+She sounded him out when he got back to London.
+
+He drew me a picture.
+She bore me a child.
+She bore me.
+I dare you.
+I dare you to!
+She dared me.
+She dared me to jump.
+She had written him off.
+She had told him off.
+He will draw you a check later today.
+He wired me the money yesterday.
+He telegraphed me the go-ahead.
+She waved me off.
+The policeman waved me on.
+We danced 'til dawn.
+We danced the samba 'til dawn.
+They danced the whole night through
+We danced the night away.
+They danced up a storm.
+She danced me a little dance.
+They danced away on a cloud.
+They danced off on a cloud.
+We danced it up.
+
+% verb "dare" fixes
+no one dared say a word
+try it if you want
+try it if you want to
+try it if you dare
+try it if you dare to
+John dared him to jump
+don't dare blame anyone else
+don't you dare blame anyone else
+So don't dare blame anyone else
+Don't you dare stop me, you common little man!
+Sue dared the anger of her family
+How dare you disobey orders
+I dare not to say the truth
+He dare not lie to me!
+
+% ditransitive greetings and various assorted verb issues
+She wished me good luck
+She wished me goodnight
+She wishes you well.
+She wished me a happy birthday.
+She shouted him goodnight.
+
+She waved me goodbye.
+She waved me good bye.
+She waved me over
+
+Who did you wave to?
+The girl I waved at was blonde
+The girl I waved over was the blonde
+
+She kissed him goodnight.
+what are the chances she will kiss him goodnight?
+what are the chances that she will kiss him goodnight?
+what are the chances that she will drive him crazy?
+what are the chances that she will really drive him crazy?
+
+He bid me hello
+He bid me goodnight
+He bid me farewell.
+He bid me welcome.
+He bid me adieu.
+He bade them depart.
+
+Today, I will bid goodbye to my friends.
+Yesterday, I bade goodbye to my friends.
+
+He bade the messenger kneel by his bed
+she bade him sit down
+
+% give
+She gave to the Democrats
+I already gave at the office.
+Thank you, no, I already gave.
+She gave in to him
+Don't give in to his rants and ravings
+What are the chances you'll give her a kiss?
+
+she baked him a pie
+she corralled him a horse
+she roped him a mare
+she decanted him a glass
+she sliced him some bread
+She gave him some sliced bread
+she buttered him some toast
+she buttered him up
+Would you like some buttered bread?
+
+he inked her a letter
+he wrote her that he loved her
+
+she dismissed him out of hand
+
+she crowned him king
+she proclaimed him king
+she proclaimed him a liar and a thief
+
+he was made king
+he was made knight by the crown
+he was made a crown by the dentist
+he was made a suit by the tailor
+
+We will have to sit it out
+The waitress sat us down at the table
+The coach sat me out for the inning.
+She is going to stand you up.
+
+% More verbs taking prepositions
+We will party until dawn.
+We will party hardy until dawn.
+We will party on 'til dawn.
+Let's party!
+We boozed the night away.
+We boozed it up.
+We will booze it up until dawn!
+We clowned the night away.
+We dozed 'til noon.
+
+% imagine is a lot like vc-see, vc-watch.
+John imagines himself lost in the woods.
+John imagines himself singing from a mountaintop
+I imagined myself dozing on a sunny beach
+John imagined Mary as innocent as a lamb.
+
+% ======================================================
+% Adjectives!
+%
+% Special-case superlative adjectives
+% "favorite" can take determiner "a"
+Arkansas  has become a favorite place for older people to retire.
+Global Trotter, a favorite, seems unlikely to place.
+
+% Superlatives without preceeding determiners.
+He likes you best.
+He bores you most.
+He bores you the most.
+He likes you least.
+He likes you plenty.
+Mr. Bingley may like you the best of the party.
+He may like you best of all.
+He may like you the best of all.
+He may like you least of all.
+He may like you the least of all.
+He may like you most of all.
+He may like you the most of all.
+
+% Interuptives with preps. These probably should take CO links.
+You, least of all, should know.
+You, most of all, should know.
+You, out of everyone, should know.
+You, at least, should know.
+we should at least feed the goats in the petting area
+This is the man who, in some ways, I would like to hire
+
+% Verbs acting as adjectival modifiers (A+ link):
+% Everything in v.2.3, v.4.3, v.6.3 and v.8.3, and special cases:
+This has become a very politicized deal.
+You need to provide an ordered list.
+The given reference is incorrect.
+The provided reference is incorrect.
+The allied army is on the move.
+The adjusted balance is incorrect.
+The poured concrete slowly hardened.
+The wired connection has gone bad.
+The telegraphed orders never arrived.
+Do you have any ruled paper?
+I gave him some ruled paper.
+
+% Pg+ links between verbs and gerunds 
+He imagined hitting the ball.
+She imagined photographing the couple.
+He feared hitting the wall.
+I emphasize hitting your targets in my lectures.
+He confirmed missing his targets
+He regretted firing the man.
+I regret really smashing it.
+He disputed punching the man.
+I recollect raising the bar for that team.
+I envision building a very tall building.
+He tried stopping the man.
+I enjoy running the show.
+
+% Here a Ce+ link is used to attach to the subject
+% i.e. the gerund, acting as a noun. e.g pushing, trusting  
+He conceded pushing the button was a mistake.
+We concluded trusting him was a mistake.
+We concluded that trusting him was a mistake.
+
+% come, came with gerunds
+The dog came running at the master's call.
+The dog comes running when he's called.
+The ball came flying at his head.
+
+% gerunds with determiners
+It's a polishing of prose.
+It is a thinning of the herd
+The event features a running of the bulls
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%% Predicative adjectives %%%%%%%%%%%%%%%%%%%
+%
+% sit, stand must take Pa+ link ... 
+The house now sits vacant
+The house now stands vacant
+The house now sits empty
+The dog sat very still
+The dog sat up.
+The dog stood still.
+The dog looked tired.
+
+Stay a little while.
+Stay a while.
+
+% More Pa+ links:
+He was presumed innocent 
+He was presumed innocent of the crime
+He was made aware of the crime
+He was declared dead 
+He was declared dead after a cursory examination.
+he was declared dead of suffocation.
+
+He was judged innocent
+we judged him as innocent as a lamb
+He was judged innocent of the crime
+
+it can be pressed into shape while cold
+
+I gave it an up vote.
+Give it a down vote.
+Give it a down-vote.
+
+% turn - ditransitive with adjective (predicative adjective) Pa**j link
+The thought was turning him green with envy.
+The cancer treatment was turning John bald.
+The cancer treatment was making John bald.
+The treatment turned him bald in an instant.
+Who did you turn envious today?
+The witch turned him green.
+
+% more Pa**j links:
+The doctor declared him dead on arrival.
+The doctor declared him insane.
+The doctor made him insane.
+After that failure, we feared him untrainable.
+We presumed him innocent, for now.
+We suspect him incompetent in such matters.
+
+The loud music drove him insane.
+You are driving me crazy.
+You are making me crazy.
+The thugs beat him senseless.
+The cold froze the mud solid.
+
+% Like the above, but can only be used with "dead"
+He was slain dead by the arrows.
+
+The dog went unchained
+The dog ran unfettered
+His heart beat unfettered
+The truck ran uncontrolled
+The motor runs uncontrolled
+The motor is running uncontrolled now
+The truck went uncontrolled
+The reactor went uncontrolled
+The statement went unchallenged.
+The champ rules victorious
+The champ reigns victorious
+The champ reigns undefeated
+The champ remains undefeated
+The bomb remained unexploded
+His spirit seems undefeated
+The team went undefeated
+The team still goes undefeated
+The team stays undefeated
+We shall go undefeated!
+We will go undefeated!
+The vase landed unbroken
+The vase landed, unbroken
+They continued undaunted
+They continued, undaunted
+
+He ad-libbed, uninterrupted.
+
+% A few more ...
+He came unarmed
+He came unprotected
+He came unprepared
+He came unhinged
+He became unhinged
+he went unarmed
+he left unarmed
+he left unnoticed
+he walked in unnoticed
+he walked in unchallenged
+he really walked in unnoticed
+he really walked in utterly unnoticed
+
+% More Pa links
+He was struck hard by the baseball
+He was struck dumb
+He was struck dumb by these words.
+He was driven crazy by the sound
+He was being driven crazy by the neighbors
+It was painted green
+
+It was rusted closed
+It was rusted tight
+It was rusted shut
+It was really rusted shut
+
+% Many common adjectives should take the B+ connector.
+Mary is too angry to talk to
+Mary is too abrasive to talk to
+Mary is too abrupt to talk to
+Mary is too abrasive and abrupt to talk to
+Mary is too abstruse to talk to
+Mary is too abstract to talk to
+Mary is too crazy to talk to
+Mary is too depressing to talk to
+Mary is too silly to talk to
+Mary is too scary to talk to
+Mary is too boring to talk to
+Mary is too boring and depressing to talk to
+He is too hard to talk to
+It is too far to walk to
+It is too far to hike to
+Arizona is too hot to move to
+The show is too expensive to go to.
+It was too far to come back from.
+He was too far gone to come back from such a loss
+
+the inflammation is too acute to suppress
+He is too adventuresome to allow on this project
+The material is too advanced to present in this talk
+
+Mary is too smart to con
+He is too easy to make fun of
+He is too pathetic to make fun of
+He is too pathetic to make fun of
+He is too obnoxious to complain to
+
+% paint, color, with color names; constructions like 
+% "pale yellow" mean that the color names are nouns (O*n) and
+% not predicative adjectives (Pa**j)
+Just paint it white
+Just paint it all white
+Just color it black
+Please paint it pale yellow
+Paint the car bright green.
+
+The house is painted all white
+The house was painted pale yellow
+The house was painted a fading yellow
+The house was painted a faded yellow
+The house was painted burnt umber
+The house was painted yellow lime
+The house is painted a sublime shade of yellow
+Blue is the new black.
+Her shoes were marine grey
+Her shoes were a marine grey
+It looked to be bluish in color
+
+% Color names can be nouns as well as adjectives:
+She prefers red.
+She prefers fire-engine red
+
+% bright.e in an adverbial role:
+some areas appear bright red.
+some areas look bright red.
+
+% Pa links with adjectives
+William is described as smooth, yet reserved
+William is described as smooth, yet thoughtful and reserved
+William is described as smooth and yet thoughtful
+
+William is described as smooth and obliging, yet reserved and resolved
+
+William Petre is described as smooth and obliging in manner, yet reserved and resolved, and not given to many words.
+
+% Pv links...
+He is flighty and given to fanciful thoughts.
+He is thoughtful and not given to many words.
+He is thoughtful, and not given to many words.
+
+% More Pv links
+He was caught up in his work
+He was caught up completely in his work
+He was struck by the bus
+He was struck by these words
+
+% ... or both -- drunk wants Pa link, both wants Opt link
+Was the man drunk or crazy or both?
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% More predicative-style constructions
+
+He emerged, spirit unbroken
+He was set free, spirit unbroken.
+He laughed, at last set free
+He cried, heart heavy
+He cried, his heart heavy with sadness
+He winced, pain shooting up his arm
+He reddened, angered by their words
+He reddened, embarrassed by their words
+He shuffled, sad in his heart
+He shuffled, aching limbs hanging heavy
+He sneezed, eyes red and itchy
+He nodded, eyelids drooping with sleep
+He coughed, clearing his throat
+He stumbled unseeing through the darkness
+He stumbled, eyes blinded by the sudden light
+He stumbled, blinded by the sudden light
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%% particles %%%%%%%%%%%%%%%%%%%%%%%%%%
+% act out, act up
+He is going to act out until he gets what he wants.
+Call me if it acts up.
+The motor was acting up.
+He is acting out.
+He is acting out his fantasies.
+
+% beckon
+She beckoned to him.
+She beckoned him over.
+She was beckoning in that dress.
+
+% More verbs taking prepositions
+He pulled himself upright.
+He uprighted the fallen vase.
+It flexed once or twice in her hand.
+
+The economy weakened as prices spiraled up.
+Shares slid $2.66 in Big Board trading.
+Issues tumbled 4.2% last week.
+
+% Begin, began
+It began in Germany.
+It begins here.
+It begins now.
+It has begun in Cincinatti; it won't be long now.
+It really began in Chicago in the spring.
+It really began in Chicago last spring.
+
+% =================================================
+% subject-verb number agreement
+*She are going shopping.
+
+% Assorted prepositional difficulties.
+A bucket of chum sat near the tackle box.
+It was a sad bit of commentary to read.
+His works disclose a mastery of composition.
+There's a lot of cowbell in that song.
+There is a bit of cowboy in him.
+There's a bit of creep in the mission statement.
+He had to eat a bit of crow.
+A length of cutlass gleamed in the sunlight.
+I had a bite of donut before going out.
+He had a bit of egg on his face.
+It was as frail as eggshell.
+The ice was green as emerald.
+He ruled by fiat.
+We saw a school of flounder in front of us.
+There was a bit of gaudiness to the show.
+He had a bit of gumshoe in his cleverness.
+There was a lot of gyration in the Senator's words.
+I asked for half-a-pound of hamburger.
+There was a tone of harlot in her voice.
+There was a pretense of hero in his swagger.
+He ladled out a bowl of homily in his sermon.
+We played a game of hoop.
+The truck carried 2 tons of nitrate.
+He nibbled on oatcake.
+Miles of ocean lay before him.
+It was painted in drab olive and oat.
+We ate omelet for lunch.
+He suddenly found pancake in his lap.
+A pinch of parsnip finished the recipe.
+We ate paté on crackers.
+It was made of pearl and oystershell.
+He spoke pidgin.
+The platter was swept with an ocean of prawn.
+A plate of quiche drifted by, followed by a tub of quince.
+Then we moved on to rabbit and rarebit and a salad drowning in ranch.
+We drank sake all night.
+A wall of shrubbery faced us.
+She fried breaded smelt for dinner.
+We went hunting squirrel.
+A bit of swimsuit glittered under her tank top.
+Thunderclap upon thunderclap rattled the windows.
+Waterfowl filled the sky.
+Some Jolly Rogers taste like watermelon.
+It smells like someone is smoking weed.
+It tastes of yam.
+He clutched a purseful of silver.
+He clutched a purseful of dollars.
+He clutched a purseful of coins.
+He clutched a purseful of pesos.
+He clutched a purseful of francs.
+He clutched a purseful of złoty.
+A chair is something you sit in.
+A bed is something you sleep in.
+He breaded the chicken in a mixture of flour and breadcrumbs.
+I had an off day.
+Kim eats pizza with chopsticks.
+
+With a gurgle of laughter, the boy found the apple was in his hand.
+With a shrill yelp, she nipped him in the hind leg.
+
+% Somewhere is broken ...
+Off in the distance, a dog barked.
+Far in the distance, a dog barked.
+Somewhere in the distance, a dog barked.
+Somewhere, far away, a dog barked.
+Somewhere else, a cat meowed.
+quite near, a mouse scratched.
+somewhere near, a mouse scratched.
+quite nearby, a mouse scratched.
+somewhere nearby, a mouse scratched.
+nearby, a mouse scratched.
+close by, a mouse scratched.
+She kept the child close by.
+
+The ticking came from somewhere near.
+The ticking came from somewhere nearby.
+The ticking came from somewhere close by.
+We are finally getting somewhere.
+
+You are just about halfway there.
+You are about halfway there.
+You are about halfway in.
+You are partway in.
+You are halfway in.
+You are halfway there.
+You are almost there.
+You are almost done.
+You are nearly there.
+You are virtually there.
+You are in.
+you are there.
+
+We stopped, about halfway home.
+We stopped, about halfway in.
+We stopped, about halfway up.
+The record skips about halfway in.
+The record skips somewhere about halfway in.
+The record skips somewhere about halfway through.
+The record skips somewhere, about halfway through.
+The record skips there, about halfway through.
+
+The record skips somewhere, about there.
+The record skips somewhere, right about there.
+
+The record skips somewhere else, too.
+I want to be somewhere else
+
+% Faulkner
+It was a big dog, a hound with a strain of mastiff from somewhere
+
+Them there beans ought to be picked
+No one is sitting at that there table
+
+The record skips just about there.
+The record skips right about there.
+The record skips almost about there.
+The record skips nearly about there.
+You are nearly about there.
+You are nearly almost there.
+
+% EW links
+where are you?
+about where are you?
+Just about where did you see this?
+Right about where did you see this?
+Just where did you see this?
+About where did you put it?
+Roughly where did you put it?
+where, exactly, did you put it?
+where the fuck did you put it?
+Exactly where the fuck did you put it?
+About where did it happen?
+Precisely where did it happen?
+About when did it happen?
+Just how did it happen?
+Just why did you say that?
+Just which one did you take?
+Just what are you talking about?
+About what are you talking?
+About whom are you talking?
+Just whom are you talking about?
+Just who did you see?
+Just whose book is this?
+Exactly whose book is this?
+
+% Jw for the indirect object
+% But perhaps these should look more like the above?
+To what do you owe your success?
+To whom do you owe your success?
+
+Of which person were you speaking?
+
+% The below use QI links to form indirect questions
+I wonder where you put it?
+I wonder why you said that?
+
+% Problems with questions:  modifiers in query.
+% The below parses, but incorrectly. "a dog" should modify
+% "big".  Fixing this will probably render the HA and the A links
+% obsolete, completely.
+% Pied-piping: How-big is a pied-piper, pulling the subordinate
+% "a dog" over to the right: "*It is a how big dog?".
+% Basically, in "How big [a dog] is it?" the phrase "a dog" is
+% optional.  Therefore, by definition, it is a 'modifier' to
+% "how big".  That generates the simplest, easiest parse rules!
+%
+% For an anaysis, and more related sentences, see
+% Paul Kay & Ivan A. Sag, "Cleaning up the Big Mess: Discontinuous
+% Dependencies and Complex Determiners" (2012) chapter 5 in 
+% "Sign-Based Construction Grammar."
+% http://lingo.stanford.edu/sag/papers/kay-sag-final.pdf
+
+% "How big a dog is it?" should parse .. and it does, but the
+% parse is incorrect, so we put a * in front, for now.
+*How big a dog is it?
+How big of a dog can you imagine?
+How big is it?
+It was too big a dog to fit
+It is too big a bank to fail.
+It was too big a dog to fit through the hole in the fence.
+It was that big a dog.
+It was so big a dog that it filled the cage
+How big a dog did he buy?
+*How big did he buy?
+% Actually, the above is allowed, e.g. while talking about 
+% house prices, the conclusion might be: "So, how big did he buy?"
+
+
+% The documentation for EAh discusses the below.
+% post-processing "Incorrect use of 'how'17" blocks some of these.
+% post-processing for how needs to be fixed ...
+it is how big?
+it is this big.
+he is how stupid?
+he is that stupid.
+
+Our neighbours have too big a dog to keep in the house
+Our neighbours have a dog too big to keep in the house
+Our neighbours have dogs too big to keep in the house
+
+% Prepositional questions with null verbs
+By what means?
+In what way?
+To what end?
+For what reason?
+% Elipsis doesn't work, because the Qd- link can't be used without
+% the SI link, due to post-processing. Arghhh. 
+By what means ...?
+In what way ...?
+To what end ...?
+For what reason ...?
+
+
+How much should I use?
+How much sugar should I use?
+With whom does he live?
+How long did you take?
+How long a walk did you take?
+How long a walk in the park did you take?
+How old a wine do you want?
+
+How much sugar for the cake is needed?
+How much sugar is needed?
+How much is needed?
+How big a dog is wanted?
+How much of a dog is wanted?
+
+How much of a man is he?
+How much of a lie was it?
+How big a lie was it?
+
+% These cannot take WV links anywhere:
+Are you insane?
+Are you the one?
+Are you in the bathroom?
+Are we on time?
+Are we off?
+Is it in place?
+Is that when the meeting is?
+
+
+% This is blocked by post-processing....
+How long before you got home?
+Approximately how long before you got home?
+Approximately how long was it before you got home?
+
+% Some awkward sentences ...
+Sophy wondered up to what number she should count
+Sophy wondered up to what number to count
+Sophy wondered up to what number to count to
+Sophy wondered up to whose favorite number she should count
+Sophy wondered up to whose favorite number to count
+Sophy wondered up to whose favorite number to count to
+
+Sophy wondered what number to count to
+Sophy wondered what number to count up to
+Sophy wondered whose favorite number to count up to
+
+
+You put it where?
+It happened when?
+you did what?
+It happened how?
+You slept with who?
+
+Ma'am, where did it happen?
+where did it happen, ma'am?
+John, why did you say that?
+why did you say that, John?
+
+my dear sir, that can't be right!
+my lady, that can't be right!
+
+% exemplary
+It was an action exemplary of his conduct
+It was an action typical of his conduct
+
+% strong.e adverb
+The Miami market is coming back strong
+His approaches were coming on strong.
+The party was going on strong
+The party is still going strong
+
+% strangely
+He is behaving very strangely
+He is behaving very oddly
+
+% post-verbal adjectives (really, adverbs ... )
+The crisis is bleeding the bank dry
+He slowly bled the helium tank
+He bled off some speed with a sharp banking maneuver
+She slowly wrung the towel dry
+She slowly wrung the towel out
+She wiped it clean
+She wiped the table dry enough.
+She ironed it flat
+He combed his hair straight back
+He nailed it flat to the wall
+He pushed him flat against the wall
+He hit it flat on the head
+He hit me hard on the head
+She knocked me blind off my feet
+He robbed me blind.
+I liked her well enough
+
+% tired, fresh, refreshed in a post-verbal use
+We will arrive sooner than they
+We will arrive more tired than they.
+We will arrive a lot more tired than they.
+We will arrive a great deal more tired than they.
+We will arrive a little more tired than they.
+We will arrive less refreshed than they.
+We will arrive less happy than they.
+We will arrive less fresh than they.
+We will arrive tired.
+We will arrive exhausted.
+
+% clean.e as a bona-fide adverb
+She clean forgot to take it back
+
+% drug culture vocabulary
+It smells like someone is smoking maryjane.
+It smells like someone is smoking pot.
+We brought back a kilo of boo from Mexico.
+He took a gram of snort to the party.
+
+% Problems with "that"
+% VP that CLAUSE:
+The response was that there are several barriers that have to come down.
+
+% "The thing that VP is that CLAUSE": thing.n needs to take Ss*t+; see THb
+The only thing that has prevented a collapse in the dollar so far is that it is the currency reserve of the world.
+The only thing that has prevented a collapse of the dollar so far is that it is the currency reserve of the world.
+The only thing that has prevented a collapse so far is that it is the currency reserve of the world.
+The thing that has prevented a collapse is that it is the currency reserve.
+The thing that is funny is that it is wrong.
+The thing is that John is coming.
+
+The only thing that has prevented a collapse of the building are the walls.
+The thing that has prevented collapse are the walls.
+The thing that prevented collapse were the walls.
+...that has prevented collapse is ...
+The only thing preventing a collapse of the building are the walls.
+The only thing preventing collapse of the building are the walls.
+the thing that does it are the sound effects
+the thing that I like are the sound effects
+What I like are the sound effects
+What I love are the sound effects
+What I love about this movie are the sound effects
+What John loves about this movie are the sound effects
+What he loves is immaterial
+What he wants is the cat
+*What he wants is the cats
+What he wants are the cats
+The cats are what John wants
+The issues are that some pages will not load completely or load at all 
+
+% shame commonly used as a count noun.
+He felt a deep shame.
+The shame of it is that it was a good idea.
+I say it's a damn shame that he left.
+It's a shame that the deal collapsed.
+The whole thing is a crying shame.
+The whole thing is a fucking shame.
+
+The shame of it is that it was a good idea.
+The shame of it is, is that it was a good idea.
+The shame of it is that the lynchpin failed.
+The crux of it is that the lynchpin doesn't do anything.
+The crux of the plan is to take the fort.
+The shame of the priest is on all our minds.
+The idea of it is to act first.
+The shame of it is that we must act first.
+The crux of it is that we must act first.
+The crux of the plan is that we must act first.
+The idea of it is that we must act first.
+
+my guess is the door on the left hides the prize.
+my guess is that the door on the left hides the prize.
+The only conclusion is that he is wrong
+
+% However, words.n.3 needs to be culled:
+*A shame is easy to understand.
+It demonstrated a certain aloofness.
+It demonstrated a certain adroitness.
+It demonstrated a certain aggressiveness.
+*It demonstrated a certain acetylene.
+*It demonstrated a certain aluminum.
+The acetylene exploded.
+*The adroitness exploded.
+
+% bug fixes for google-code bug tracker issue 13
+John is pretty insanely stupid.
+John is rather excrutiatingly dull.
+John is rather exceptionally dull.
+John is rather unbearably dull.
+John is rather far from smart.
+John is rather incredibly dull.
+John is altogether incredibly dull.
+John is altogether amazingly quick.
+John is altogether stunningly dull.
+John is altogether stunningly inept.
+John is very atrociously gluttonous.
+John is rather quite dull.
+John is notably rather dull.
+John is plainly rather dull.
+John is obviously quite dull.
+John is quite fashionably late.
+John is so infernally frustrating.
+John is very unacceptably insubordinate.
+John is rather very insubordinate.
+John is rather far from dumb.
+John is rather quite dumb.
+John is altogether a bit boring, wouldn't you say?
+
+John is incomparably smarter.
+John is unflinchingly direct.
+John is undisputably the king.
+John is undeniably the winner.
+John is unarguably the winner.
+The car is unimaginably faster.
+The car is ridiculously faster.
+The Wehrmacht is unacceptably more dangerous.
+Rockefeller is fabulously richer.
+This computer is relatively more expensive.
+
+It's an inherently better method.
+It's a marginally less productive well.
+That one is a marginally better choice.
+It's a moderately faster way of doing things.
+
+John is rather incomparably smarter.
+It's a rather inherently better method.
+John is quite certainly a better choice.
+
+% But sometimes we modify the comparative, instead:
+it is vastly cheaper
+it is dramatically cheaper
+
+% Similar buggy sentences:
+*John is nimbly strongly dull.
+*John is boundlessly charmingly polite.
+John is boundlessly, charmingly polite.
+John is stupidly, insanely dull.
+
+% done, finished, started
+I have started working.
+I will start working.
+I am done working.
+I am done being angry.
+I am done with being angry.
+I am finished being angry.
+I am through being angry.
+We took a through flight.
+It's a done deed.
+
+They soon repaired what damage had been done
+he fixed what damage there had been done
+he took what little there was
+
+% Some idiomatic expressions involving "doing"
+% Somewhat inconsistent, though.
+I am doing fine.
+I am doing poorly.
+He is doing ok.
+He is doing okay.
+He has done very well.
+I am doing much better, thank you.
+It is going terribly.
+It is going well.
+I'm feeling awful.
+
+% Expressions with direct and indirect objects
+I asked him a question.
+I told Jim a story.
+
+% There is a phantom "to be" in these: "I want it [to be] back"
+% The phantom becomes explicit in the past tense: "I wish it was back"
+% Giving instructions to a shopper:  "I want the gift [to be] inexpensive"
+% However, "*I want a gift inexpensive" is just wrong
+I want it back.
+I want the book back.
+I want it now.
+I want the book now.
+I want the book here, now.
+
+% More definite/indefineite determiner distinctions....
+I want the shed to be painted green
+I want the shed painted green
+I want the shed green
+I want it green.
+*I want a shed green
+I want a shed green in color
+
+I want my coffee fresh
+*I want coffee fresh
+
+I want it shiny.
+I wish it was shiny.
+I want it brilliant.
+I want the review to be brilliant.
+I want the review brilliant.
+I want it done.  
+I want the job done.
+I want it finished. 
+I want the job finished.
+I want it over with. 
+I want these troubles over with.
+I wish it was over with.
+I want it completed.
+I wish it was completed.
+I want it fixed.
+I want it fixed up.
+I want it cleaned up.
+I want it gone. 
+I wish it was gone.
+I want to be rid of it.
+
+% Passive subjects with objects.
+I was asked a number of questions.
+I was told that crap, too.
+I was told all about it.
+I was told the whole story by Maybeline.
+He enquired my whereabouts.
+He inquired at the door.
+
+% threat.n singular and mass.
+The old system is in threat of breakdown.
+The area remains under severe threat of fire.
+He poses a threat to security.
+
+% Good sentences ... 
+I heard a bark in the distance.
+
+% verb modifiers for talk, consist, etc.
+He talked quietly of revolt.
+He disapproved passionately of sex.
+He talks, mostly of revolution.
+It consists largely of sand.
+He talks mostly about the weather.
+He talked up a storm.
+he talked mostly to Ann.
+he talked a mean streak longer than I'd hoped
+He is talking up some chicks.
+He talks a lot.
+
+% Problems with "nightly"
+He eats with me nightly.
+He eats with me daily.
+He prays with me daily.
+He barks at me nightly.
+He sits near me nightly.
+He sits near me occasionally.
+My boyfriend dresses very simply.
+
+
+% Time-related verb modifier
+He does that sometimes.
+He does that some of the time.
+He does that all the time.
+He does that all of the time.
+He does that a lot of the time.
+He does it all of the time.
+He does it all of the day.    
+He does it a little of the time.
+He does it a little bit of the time.
+That happens none of the time.
+That's what happens plenty of the time.
+That's what happens the rest of the time.
+That happens the rest of the time.
+That's what goes on the rest of the time.
+Long hair hides his eyes all of the time.
+Sunglasses hide his eyes all the time.
+Sunglasses hide her eyes a lot of the time.
+Sunglasses hide her eyes a bit of the time.
+A hat covers his head some of the time.
+A crown of snow covers the mountain most of the year
+A crown of snow covers the mountain a part of the year
+The trains run on time part of the day
+He is a part of the problem.
+Part of the problem is his attitude.
+
+It happens every other time. 
+It happens every time. 
+It happens each time. 
+It happens each time I hit the brake. 
+It happens not every time I hit the brake.
+It happens every place I go.
+Let's do it some other time.   
+Let's do it some other way.        
+Let's do it some other place.      
+That's what happens most other times. 
+I see that happen most places I go.
+
+% Filler-it and the SF link:
+It is reasoned that the vast concentration of the business information market in EMEA resides within Europe. 
+It is whispered that the vast concentration of the business information market in EMEA resides within Europe.
+it is reasoned that this statement is true.
+it is hoped that this statement is true.
+It was hinted that our actions were inappropriate.
+
+% buggy coppula and copula contractions
+%
+% Consider "Here's the ball." We have two choices: SFst+ as a filler-it,
+% or the more questionable [Wq- & PF+].  Note that (Wd- & PF+) is barred
+% by the post-processing rules.  Maybe PF is reasonable.. but SFst seems
+% better at the moment.
+%
+Here is the ball.
+Here's the ball.
+There is the ball!
+Where's the ball?
+Here's Johnny!
+
+Nearby is another temple that honors his wife.
+Close by is another temple.
+Nearby are more ruins.
+
+There goes the neighborhood!
+There goes the cutest guy ever!
+There goes one of the strongest competitors this sport has seen.
+There goes the biggest loser ever.
+There went the cutest guy ever!
+Oh great, there went my ride.
+Here goes nothing.
+But for the grace of God, there go I.
+
+
+% copulas with verb target:
+All he ever does is bark.
+All he ever does is whine.
+All he ever does is complain.
+All he ever does is drink.
+All he ever does is schmooze.
+All he ever does is lounge.
+All he ever does is watch TV.
+All he ever does is listen to the radio.
+All he ever does is sit in front of the computer.
+All he will ever do is complain.
+All he will ever do is go drinking.
+One of the things you do when you sleep is dream.
+One of the things you do when you sleep is to dream.
+Something you might do while attending school is learn.
+*Something you might do while attending school is to learn.
+Something you need to do before you watch TV is turn on the TV.
+One of the things you do when you stop your bicycle is apply the brake
+
+% Copulas with noun target:
+All he wants is luck.
+All he wants is a big cigar.
+All he ever wants is to get lucky.
+All he ever touched turned to gold.
+
+% Contractions.
+He's out jogging.
+He is out jogging.
+He's out biking.
+He's out running.
+He's out for lunch.
+He's out on the town.
+
+% Problems with "as" ....
+It is no longer portrayed as having the power to protect against sin.
+You are portrayed as having the power to make decisions.
+You are portrayed as wanting the power to make decisions.
+You are portrayed as needing the power to make decisions.
+Information on the Internet may come across as authoritative.
+You are as authoritative as he is.
+You come across as authoritative.
+He was so foolish as to lie.
+Ridiculous as it seems, the tale is true.
+
+There it lay, inert matter, as it had always lain, since the beginning of time.
+There it lay, as it had always lain, since the beginning of time.
+
+She sang well, as hoped for.
+She sang well, as was hoped for.
+She danced as promised.
+She danced, as promised, before leaving.
+As promised, she left
+As expected, she left
+He left as agreed.
+He left, as was agreed.
+He painted the fence, as agreed.
+He finished it, as promised
+He left without a fuss, as hoped
+
+She will fail, as is hoped for.
+She will fail, as it is hoped for.
+
+She failed, as was hoped for.
+She failed, as it was hoped for.
+She failed, as that was hoped for.
+
+She did her job well, as can be proved by the records.
+The accused is innocent, as shall be proven
+The accused, as shall be proven, is innocent
+as shall be proven, the accused is innocent
+as it shall be proven, the accused is innocent
+as had been agreed, the work began on Monday
+as had been agreed in advance, the low blow came in the third round
+
+Do as I do.
+He said it in a voice so loud as to make everyone stare.
+
+As it was commanded, so it shall be done.
+
+the note, as attached, is wrong
+the offer, as extended, is still valid
+the movie, as filmed, is too long
+the concrete, as formed, extends too far out
+the plane, as fuelled, is ready to fly
+the money, as bet, was as good as lost
+the country, as governed, was ripe for revolution
+the cheese, as grated, was too coarse for the recipe
+any girl, as heckled as she was, would have fled
+the ground, as liquified as it was, suddenly surged downhill.
+
+% Also, lots and lots ot present-participles...
+the man, as acquiescing as he was, was ill-suited to guard the hen-house
+
+the cookie, as big as life itself, fixed his attention
+
+
+% idiom "as is"
+We bought the table as is.
+
+% idiom "as how"
+He allowed as how it was none of my business.
+I don't know as how I ought to interfere.
+
+
+% Problems with "go":
+Let's go shop.
+Let's go shopping.
+Let's not go shop.
+Let's not go shopping.
+Let's not go.
+Let's not.
+Let's go sailing!
+Let's go drinking!
+Let's go smoke up that joint!
+Let's go smoke that joint!
+Let's go drink up that bottle!
+Let's go drink that bottle!
+Let's go sail up that lake!
+Let's go swim.
+Let's go for a swim.
+Let's go for a drink.
+Let's go for a smoke.
+Let's go eat.
+Let's go talk to him now.
+Let us go, then, you and I.
+Why don't you go jump in a lake?
+Why don't you just go jump in a lake?
+Why don't you go fall in a lake?
+Oh, go jump in a lake!
+Let's go fall in the water!
+Let's go jump in the water!
+Let's go hike that trail.
+Let's go hike up that trail.
+Let's blow this pop-stand.
+Go bring me that ball.
+Just go bring me the paper.
+
+I'm going drinking.
+I'm going running.
+I do see it now.
+
+
+% Buggy parsing of "all but", "nothing but"
+Nothing but ocean lay before.
+We heard nothing but silence.
+Nothing but scorched earth remained.
+All was lost but one table.
+All was lost, save for one chair.
+All but one tree remained untouched.
+But for want of a nail, the shoe was lost.
+All but one tree was lost.
+Everything but one tree remained.
+We hoped for the best, but were disappointed.
+There was nothing but pain.
+
+% Prepositional difficulties
+It fell when the clock chimed.
+
+% Inverted subject-object
+The treasure lay below the ground.
+Below the ground lay the treasure.
+In Xanadu did Kubla Kahn a stately pleasure dome decree.
+
+% Confusion between K- and MVa- links -- 
+% "He turned left." uses the MVa- link.
+% "He turned around", "he jumped around", "he jumped up" use "K"
+% as a particle link.
+% "He dodged sideways." uses MVp
+He turned left.
+He angled left.
+He angled sharply left.
+He angled around.
+He dodged left.
+He jumped left.
+
+% about can be particle (K- link), except that "about quickly"
+% and "quickly about" are both allowed, and K- only allows the first,
+% and not the second.
+He looked about.
+He turned about.
+The sailboat swung about, coming to a new bearing.
+He jumped about.
+
+% double-prepostion type constructions
+% adverbs w/ reversed preposition locations
+% Using MVa- seems like the only solution...
+People glanced fearfully around at the impassive troops.
+He looked around, fearfully.
+He looked around fearfully.
+He looked fearfully around.
+*He looked fearfully, around.
+He looked about, fearfully.
+He looked about fearfully.
+He looked fearfully about.
+*He looked fearfully, about.
+
+% Set phrases involving "so" -- this is an exhaustive list !
+% There are no other verbs that take "so" -- should there be 
+% a special link for this ???
+I assume so
+I believe so
+I fear so
+I hope so
+I imagine so
+I presume so
+I say so.
+I suspect so.
+I think so
+
+% Third-persom -- idiomatic
+It  seems so.
+
+% Particles w/ various optionally transitive verbs
+% XXX Many of these are wrong, esp the "up to" "down to"
+% these should be properly marked as prepositional, since
+% up/down/in/out really are action-direction modifiers.
+% constructions
+He walked the dog.
+He walked up to the counter.
+He walked out of the house.
+He sailed the boat into the pier.
+He sailed up to the bar.
+He clicked the mouse.
+*He clicked up the mouse.
+He zeroed the counter.
+He zeroed out the counter.
+He marched his prisoners through town.
+Elvis was all shook up.
+Elvis was all shaken up.
+He will kill again.
+The flu can kill.
+Let's kill some time on Sunday.
+I will kill him.
+The show airs on Sunday.
+The show will air again on Sunday.
+We've chosen to adopt
+We will adopt
+We will adopt again.
+We will adopt a child from Uruguay.
+
+% feed taking particle
+Horeses feed on hay.
+People eat but animals feed.
+
+% tell taking prep
+Today, we will tell about ancient structures.
+Yesterday, we told about ancient structures.
+They have told of the soldiers' fear 
+They have talked of the soldiers' fear 
+
+% More particles
+Your grammar should be worked on.
+Your grammar should be worked upon.
+
+% Transitive sports activities
+I biked Johnson Creek.
+We walked Shoal Creek.
+We kayaked Town Lake.
+We skied Big Sur.
+We're kayaking Shoal Creek tomorrow.
+Biking feels good.
+He wants to go surfing.
+He has gone to Hawaii to go surfing.
+We will canoe the rapids today.
+I will swim the sea.
+He swam three laps.
+He has swum the English Channel.
+We have swum out to the island before.
+Let's swim.
+Today, we will snorkel the reef.
+Today, we will snorkel out to the reef.
+Today, we will go snorkelling.
+Today, we will go skin-diving.
+He dove down to the bottom of the sea.
+
+Roselyn et al. wrote about manga.
+He went on and on, etc.
+The v.v. is true.
+Whenever he comes, she goes, and v.v.
+
+It was he that did it.
+John likes joking around.
+He's right, isn't he?
+Who am I?
+I don't think so.
+I, uhh, don't think you're right.
+Gosh darn it!
+
+% Rnx+ on because, only.
+Because I want to talk.
+Because I said so.
+Only I say so.
+
+% "just" takes MVa- link (just like "only")
+They do just that.
+He did just what you asked.
+
+% "only" has to have MVa- and MVl- & MVp+ links
+I am only here for a few days
+I am here only for a few days
+I am here for a few days only
+
+My phone can make calls only to family in this area
+My phone can make only calls to family in this area
+My phone can make calls only to family in this area
+My phone can make calls to family only in this area
+
+% phantom prepositions -- phantom "for"
+I am only here a few days
+I am here only a few days
+I am here a few days only
+
+This sentence parses badly.
+The bad parse was due to the improper parsing of the sentence.
+
+I would not choose to.
+Not that I would choose to.
+
+It sure is.
+It sure is great.
+It sure the fuck is great to see you, man!
+It sure the hell is!
+The book sure is great.
+The sushi was best.
+How about the bubble tea?
+How 'bout them Cowboys?
+
+The results bear out the method
+The results bear looking at.
+It bears looking at.
+
+He talked longer than usual.
+He is taking longer than usual.
+He is working harder than usual.
+He hit harder.
+He hits hard.
+
+% verbs taking prepositions
+We're going to bike over.
+We'll jet on by.
+They sailed on by.
+Just scroll down.
+That just reeks.
+That is just the cat's meow.
+He stands accused of misconduct.
+
+% Awake and asleep as adverbs
+He was jarred awake.
+We shook him awake.
+He jerked awake at the sound.
+The sound left him awake.
+We left him asleep in the tent.
+We left him sleeping in the tent.
+
+% Similar to the above, but with preps
+We stood it upright.
+We stood it up.
+He picked up the fallen lamp and stood it up.
+
+It was obvious that he would do it.
+It was obvious that he'd do it.
+
+% "is" copula with mass/uncountable nouns
+There's barf on the seat.
+There is water on the table.
+there is a glass on the table.
+There is dirt on the floor.
+there is egg on your face
+there is a rumour going around.
+there is dirt going around.
+There is blood on his hands
+There will be blood on your hands
+There is a wart on his hands
+There are warts on his hands
+
+it is your fault that you're a failure
+it's your fault that you're a failure
+it's really your fault that you're a failure
+it's really your fault in the end that you're a failure
+it's really your fault, in the end, that you're a failure
+
+
+What the beep was that?
+We'll cab on over to the restaurant later.
+He waited in the check-out line.
+The wind gusted from the north.
+He must pee into the bottle.
+He'll stride up to the bar, pretending he didn't see a thing.
+We'll uplink tonight.
+That will reek tomorrow.
+That reeks of favoritism.
+Kids will frolic in the summer.
+He would labor over it for hours.
+That circuit will jitter intermittently.
+
+% "to be" auxiliary with date modifiers (not copula)
+I was by then dominated by my aunt
+I was until now dominated by my aunt
+I was until recently dominated by my aunt
+
+I am, since yesterday, quite recovered
+I've been, since January, quite hopeful
+I've been since January quite hopeful
+I was, before Friday, quite unhappy.
+
+
+% Idiomatic usage of "of"
+You must beware of the tiger.
+You must be wary of the tiger.
+You must be afraid of the tiger.
+You must be cautious of the tiger.
+You must be cautious around this apparatus.
+You must be careful with this apparatus.
+You must be curious about the process.
+
+% Biblical "of" idioms
+Lud, son of Shem, went to the village.
+Leta, daughter of Shem, went to the village.
+Japheth, brother of Shem, went to the village.
+Japheth, child of Shem, went to the village.
+Lud, born of Shem, went to the village.
+Lud, son of Shem and brother of Japheth, went to the village.
+Lud, son of Shem, grandson of Noah, went to the village.
+Let, son of Shem, grandson of Noah, went to the village.
+Lud, son of Shem, ...
+
+% Biblical thy, thou, shalt
+Thou shalt not lean on thy left elbow.
+Thou shalt not lean on thy left elbow, or else.
+
+% Misc prepositions
+You just scrolled past it.
+
+What have you gotten into?
+What have you gotten yourself into?
+
+% Questions that want "from", "to" as prep.
+Where did the car come from?
+Where do the words come from?
+Who have bought your flat from?
+Where was she from?
+Where is the figure taken from?
+But where will you get them from?
+Where has this letter come from? my father asked.
+If the student does not recover the animal from anaesthesia, where will the experience of post-operative care come from?
+Where can I possibly get them from?
+Can you tell us where those strange ideas came from?
+Where are you coming from?
+Where were you coming from?
+Where is she coming from?
+Where am I coming from?
+Where does she come from?
+
+% These need R+ & Bsw+ in "where" to parse
+Where did they go to?
+Where have they gone to?
+*They have gone to.
+So, where did they come to?
+Where does it go to?
+What does it come to?
+What does it go to?
+
+*I want to thought about this.
+So, what does it all come to?
+So, what does it all come to, now?
+So, what does it all come to, brother?
+*Does it all come to?
+*Does it come from?
+Does it come from France?
+
+Where did that book go to?
+Where did that book get to?
+
+% Zappa/Grand Wazoo
+Where did they come from?
+Where did they go to?
+What has become of them now?
+How much was the leakage from the drain in the night?
+Who are those dudes in the back seat of Calvin's car? 
+What did they do when they got off the car? 
+Did they go get a sandwich? 
+Did they eat in the dark?                       
+What did they do with the waxed-paper bundles?
+
+% Sentences ending in "to", null infinitive
+% i.e. "I want to infinitive" but the verb is missing/implied.
+% Fixed by forcing "to" to be at end of sentence
+I want to, also.
+I want to, too.
+Because I have to.
+Because I want to.
+But I want to.
+I wanted to, but I didn't.
+I want.
+Yes, I'd like to.
+Yes, I'd love to.
+No, I wouldn't.
+Thank you, I'd love to.
+I'd like to, I want to.
+*I like to pliers.
+*I like to purple.
+*I like to many.
+
+% Clausal complements, fairly idiomatic in form ...
+The emperor ordered it made
+The emperor suggested it sold
+The advisor urged compromise
+The advisor urged for compromise
+The advisor argued for compromise
+The advisor urged it done
+I assumed it done.
+
+% Hmm. Things following a comma, but in a different register ...
+% I think the clause needs to be its own domain ??
+% Missing/implied subject 
+He stepped forward, gun raised.
+He stepped forward, hand out.
+He stepped forward, his hand out.
+He looked up, heart racing.
+He glanced away, hands trembling.
+The monkey reached, stick extended, for the banana.
+He stepped forward, smile broadening.
+He stepped forward, his white teeth glittering.
+
+% Even when it does parse, the MV link looks wrong to me ...
+% the clause needs to be its own funky domain, I think.
+He glanced away, looking pale.
+He stepped forward, putting his hand out.
+
+% Post-nominal modifiers with TO+ link:
+The inability to laugh signifies trouble
+The inability to laugh signifies mental illness
+The disability of John means he is slow
+The inability for the rejected to laugh signifies their paranoia at being noticed.
+
+% Post-nominal modifiers, MX- link to "to be"
+The drill, to be provided, will be used to take soil samples.
+The drill, soon to be provided, will be used to take soil samples.
+The stock, to be purchased on the open market, will be added to assets.
+The parts, being obtained as we speak, will arrive this afternoon.
+
+% zero-copula (missing "to be") post-nominal MX broken-ness:
+The event, being historically insignificant, will soon be forgotten
+The event, historically insignificant, will soon be forgotten
+The event, historically important, will be long commemorated
+the argument, fundamentally flawed, was soon destroyed
+the argument, being fundamentally flawed, was soon destroyed
+The lady, unpleased by this rude behavior, spoke sharply
+
+% The following fall victim to post-processing "Bad use of adjective65"
+% However, they seem OK enough to me ... they do work, in context.
+The lady, unpleased, spoke sharply
+The lady, displeased, spoke sharply
+the dog, unsatisfied, barked loudly.
+
+% another zero-copula
+Shades of Cyc, where apples were fruit, but oranges weren't, Kennedy was a president, but Nixon a statesman.
+
+% A phantom subject.
+Shades of Cyc! 
+Where apples were fruit, but oranges weren't, Kennedy was a president, but Nixon a statesman.
+
+
+% Impersonal, passive "be" linking to passive participle.
+It is normal that such directives be worked upon.
+It is normal that such directives are worked upon.
+It is normal that such directives be acted upon.
+It is normal that such directives are acted upon.
+It is normal that such directives be acted upon quickly.
+It is normal that such directives be quickly acted upon.
+
+It is normal that such actions are taken.
+It is normal that this action is taken.
+It is normal that this action be taken.
+
+% problems with "once" (once as adjective, noun)
+Once will have to do.
+You can go just this once.
+You can go just this one time.
+It was the once capital of the nation.
+
+% Archaic, idiomatic "be"
+Peace be unto you.
+
+% Archaic use of "be" with passive participles:
+Where be those roses gone which sweetened so our eyes?
+They be shooting and fishing out at the Forestry Lakes.
+
+% old as noun
+The seven year old kicked me in the shins.
+He is a seven year old.
+The seven year olds ran rampant.
+The seven year olds ran wild.
+
+% Named days of week.
+The market fell 156.83, or 8%, a week after Black Monday.
+We'll party all night on Fat Tuesday.
+We'll come for dinner on Ash Wednesday.
+
+% Adverbs that typically follow a verb.
+The horses run free now.
+The horses run hard.
+He runs hot and cold.
+The engine is running very hot.
+The door is locked tight.
+The window is wedged open.
+The window is wedged wide open.
+He blew the case wide open.
+The door swung wide open.
+The door slammed shut behind me.
+The bolt is screwed in tight.
+The bolt is frozen hard in the engine block.
+He cranked up the volume loud.
+He cranked up the volume way loud.
+He hit the nail pretty hard.
+He wacked the ball pretty far.
+I wonder how hot the motor ran.
+I wonder how open he plans to be about the truth.
+He is very tight with his friends.
+Will he be free with his praise?
+How free will he be with his praise?
+How open will he be with the truth?
+How tight is that connection?
+How loose is that connection?
+
+% Abbreviations
+The asset was written off.
+The asset was w/o.
+Its is a complete write-off.
+Its is a complete w/o.
+We left without him.
+We left w/o him.
+It comes w/o batteries.
+It comes with batteries.
+It comes w/ batteries.
+It comes w/batteries.
+The value is within parameters.
+The value is w/i parameters.
+
+% "I need help with that."
+I need help w/that.
+I take coffee w/milk.
+
+I'm telling you b/c you need to know.
+I'm telling you 'cause you need to know.
+
+% heating, ventilation and air conditioning.
+It comes with a/c.
+The a/c stopped working.
+The A/C stopped working.
+Just go hire an HVAC guy.
+
+% radio control
+I want an r/c car for Christmas!
+He got himself an R/C plane!
+
+% input/output
+There's a bottleneck in the i/o subsystem.
+Let's re-examine the I/O system architecture.
+
+% care of
+It is addressed c/o the Smith family.
+
+% Measurement units
+There is a nineteen minute gap in the tapes.
+There is a 12 year gap in the records.
+There is a 10 millenium gap in the geological records.
+The explosion blew out a 12 inch hole in the side of the tank.
+It shoots 12 picosecond pulses.
+It shoots a 12 picosecond pulse.
+It is a 12 watt motor.
+
+It is 1cm away.
+It is 1mm away.
+
+She screwed in a 40 watt light bulb.
+She screwed in a forty watt light bulb.
+It is a 12 m² apartment.
+The rent is $150 per m² per month.
+The cost is $150 per meter.
+The cost is $150 per yard.
+The rate is 10nm per msec.
+The differential rate is 5 volts per MeV.
+He queued up another 45 rpm record.
+India is building a 450MW nuclear plant.
+The temperature rose by 12°C.
+It is 12°C outside.
+My El Camino gets about 12 MPG.
+My El Camino gets about 12 mpg.
+We bought a 12 pound pumpkin for Halloween.
+We bought a 12 dollar pumpkin for Halloween.
+He got himself a 50 dollar haircut.
+That car goes 90 MPH.
+Give him 5 cc's of morphine, stat.
+The crystal is growing at a rate of 2mm per millisecond.
+The slew rate is 12mV per microsecond.
+He raced off at 90 miles an hour.
+The aircraft was moving 90 miles per hour.
+It goes 90 miles an hour.
+It moves 90 miles an hour.
+It went 90 miles an hour.
+That will cost you very nearly 12 drachma.
+It goes for 12 to the drachma.
+We sell them for 12 per drachma.
+That will cost ¥2400.
+That will cost 2400 yen.
+We bought 200ft. of lumber.
+We bought the last 200ft. of lumber.
+We bought 200sq.ft. of plywood.
+Apply 12 ft.lbs. of torque.
+It is 12ft. long.
+The voltage fell almost 50mV.
+That will cost hundreds of lira.
+That will cost zillions of lira.
+The ferrite core is wrapped with 24gauge wire.
+The last 50 ft. are bad.
+The last 50ft. are bad.
+Some 50 ft. are bad.
+Nearly 50 ft. are bad.
+The last 50 ft. of the cable are bad.
+The leftmost 50 ft. of the cable are bad.
+The protein (50 kDa) is examined.
+The protein (20 to 50 kDa) is examined
+The protein (1 kDa) is examined
+A miner's inch is defined as 1/60 ft³/s.
+A miner's inch is defined as 1/60 ft³ / s.
+A miner's inch is defined as 1 / 60 ft³/s.
+A miner's inch is defined as 1 / 60 ft³ / s.
+The drip rate is 472 mL/s
+The drip rate is 4.72 mL/s
+The drip rate is 472mL/s.
+The drip rate is 472 mL/s.
+The drip rate is 472 mL / s
+The drip rate is 472 mL / s.
+The drip rate is 472 mL/s, but we have a comma here.
+The drip rate is 472mL/s, but we have a comma here.
+A miner's inch is defined as 472 mL/s.
+A miner's inch is defined as 472 mL / s.
+
+the weight was 7grams
+the weight was 7grams, but we wanted a comma after the unit.
+the weight was 7lbs., but we wanted a comma after the unit.
+I'd like 2 lbs. of coffee
+I'd like 2lbs. of coffee
+
+% Lack of space between numbers and letters causes problems
+It was 10:30AM in the morning.
+It was 10AM in the morning.
+*It was 10:555:88 in the morning.
+*It was 10:555:88AM in the morning.
+Bids must be received by 1 p.m. EDT
+Bids must be received by 1 PM, CST
+Bids must be received by 1PM, CST
+
+I can't decide between 7:30AM and 9:30AM.
+I can't decide between the 7:30AM and the 9:30AM appointment.
+
+% Poorly parsed date expressions.
+I saw him on January 21, 1990
+I saw him on January 21st, 1990
+It happened on October 17th, 1781.
+It happened on October seventeenth, seventeen eighty-one.
+It happened on October seventeenth, seventeen oh-one.
+It happened on October seventeenth, seventeen oh one.
+It was produced by 21st Century Fox
+It happened on 20 January 1975
+John, born on January 20th, 1975, is a gifted ball player.
+John, born January 20th, 1975, is a gifted ball player.
+John, born January 20th, is a gifted ball player.
+John, born 20 January 1975, is a gifted ball player.
+John (born 20 January 1975) is a gifted ball player.
+
+It is a two cent needle
+That's a one dollar cigar
+That's a 1 dollar cigar
+That's a $1 cigar
+
+The IMF estimated growth at five and two-tenths percent.
+
+% XXX FIXME:
+% Note that the handling of prepositions is incorrect with regard to
+% measurements: the linkage should be to lumber, not feet.  That is, 
+% "12 feet of" is a modifier. Similarly, "hundreds of" should be a 
+% modifier to "hours". But this can also be ambiguous: consider:
+% "The rate is 10 nm per one msec of time" -- here "of time" is 
+% indeed the modifier. Hmmm ... 
+%
+% Note also: parse confusion between "feet.n" and "feet.i"
+% and so "feet.n" should be removed/trimmed back from dict.
+We bought hours of time.
+We bought 12 feet of lumber.
+That will take hundreds of hours of effort.
+That will take hours of effort.
+That will take hundreds of yards of cement.
+It will take several inches of movement to clear the rigger.
+It will take several foot-pounds of strain before it cracks.
+That will require 10 square yards of paint.
+That engine generates hundreds of foot-pounds of torque.
+The rate is 10 nm per one msec of time.
+
+It cost US$ 14 million.
+It cost $14 million.
+
+% Prepositional modifiers with distances.
+It is 5 miles distant.
+It was 3 miles under.
+It was 3 miles east.
+It was about 3 miles out.
+It is a few miles over.
+
+% Numeric comparatives
+I ran 10 fewer miles than Ben.
+I ran 10 more miles than Ben.
+
+
+% XXX These parse, but there's an explosion of parses generated.
+% Basically, miles.n is fucking things up -- we need to trim it down.
+It is between 5 miles and 15 miles long.
+It is between 5 miles and 15 miles distant.
+
+% post-fixed number handling with NM link
+It started on day one.
+The experiments ended on day 22.
+I fear the number 13.
+The number 12 is a lucky number.
+
+I fear the dirty dozen.
+
+% Post-fixed numbers can act as (singular) determiners
+The exon is spliced  with the intron.
+Exon 30 is spliced with the intron.
+* Exon is spliced  with the intron.
+Exon 30 is spliced with intron 40.
+Oven two is not heating evenly.
+Assembly line 7 had a work stoppage this morning
+Flight 442 was delayed.
+Aleph one is the first uncountable infinity.
+John, age 40, is a douchebag.
+John, aged 40, is a douchebag.
+
+
+% Can have numerical modifier *and* a determiner simultaneously: 
+The sigma factor sigma 35 is homologous.
+
+% Nested modifiers too:
+The sequence is omega 1 beta 2 alpha.
+
+% Post-posed romman numeral modifiers, and letter modifiers:
+He takes vitamin D supplements.
+They say that Pope Pious XII takes vitamin D supplements.
+Vitamin D supplements are good for you.
+William Petre was Secretary of State to Henry VIII.
+
+% identifiers, variable, math.
+It runs from time T until the end.
+It runs from T until the end.
+She will be in the daycare center an hour before the beginning of T and stay until after the end of T
+It all happens at time T.
+Go to spot X on the map.
+Go to place X on the map.
+
+% Numerical ranges
+It takes 2 to 3 times the effort.
+It takes 2 - 3 times the effort.
+It takes 2 -- 3 times the effort.
+It takes 2 --- 3 times the effort.
+
+It has a 10 to 20 foot range.
+The account has a $1000 to $2000 limit.
+It will cost $10 million to $20 million to build.
+It will cost $10 million or $20 million to build.
+
+I have between 5 and 20 dogs.
+There are from 5 to 20 of them.
+It will cost between 5 and 10 million.
+It is between 5 feet and 20 feet long.
+A DNA segment of 15 kDa to 20 kDa was obtained.
+It is two to threefold more abundant.
+
+% from w/ dates, times
+Show me my notes from today.
+Show results from Monday.
+Show results from last week.
+Show results from last June.
+Show results from a long time ago.
+Make predictions for tomorrow.
+Show results since yesterday.
+
+% Year date, time and number expressions:
+% NA, DG links
+The war of eighteen twelve was notable.
+It was all over by nineteen nineteen.
+The first model came out in nineteen oh five.
+The first model came out in nineteen oh-five.
+The first model came out in nineteen oh one.
+The first model came out in nineteen oh-one.
+The first model came out in nineteen zero five.
+The house was remodelled in two thousand three.
+The house was remodelled in two thousand and three.
+It happened in the late seventeen seventies.
+
+The movie was over by nine eighteen.
+The movie was over by 9:18.
+The movie was over by 9:18 PM.
+The movie was over by 9:18 pm.
+The movie was over by 9:18PM.
+The movie was over by twelve o'clock.
+The movie was over by twelve o'clock in the afternoon.
+The movie was over by midnight.
+We are moving out at twelve hundred hours.
+We are moving out at twelve hundred thirty hours.
+We are moving out at zero hundred hours.
+Zero hour is approaching.
+It's a fifty five gallon drum.
+It's a fifty-five gallon drum.
+It's a fifty one gallon drum.
+It's a one gallon can.
+We just got a hundred of them.
+We bought two hundred three of them.
+We bought two hundred and three of them.
+We bought two hundred 'n three of them.
+Two hundred twelve now roam wild.
+It's a hundred and two in the shade.
+What's two 'n two?
+press the button when the dial reads zero.
+
+% date ranges are simple modifiers, not numerical mods
+It was the 1989-90 crop that failed.
+
+% However, dashes can appear in model numbers:
+The plane is a Boeing 747-400
+The plane is a 747-400
+The 747 jumbo jet came roaring overhead.
+You want part no. 1234-567.
+
+You want part no 1234-567A.
+You want part no. 1234-567A.
+You want part num. 1234-567A.
+
+% 123A, the "A" suffix is assumed to be a unit, leading to a bad parse.
+You want part number 123
+You want part no. 123
+You want part no. 123A
+You want part no. 123ABC
+
+% Years as adjectival modifiers:
+He drove a souped-up '57 Chevy.
+He drove a souped-up 1957 Chevy.
+The 47 Ford came screamin' down the track.
+
+% Hyphenated words must be kept hyphenated!
+This is a must-see movie.
+*This is a must see movie.
+*He drove a souped up '57 Chevy.
+
+% Decade possessives:
+It's an old 50's love song.
+He's an old 1920's crooner.
+These ideas date back to the 60's
+These ideas date back to the 1860's
+
+% Simple mathematical formula and equation parsing:
+Phosphorylation was observed (P = 0.06).
+Phosphorylation was observed (probability = 0.06).
+The sun is distant (L = 1 AU).
+Bacteria with low G + C DNA content contain genes.
+Everyone knows that 1 + 1 = 2.
+Everyone knows that 1 + 1 is 2.
+Everyone knows that 2 + 2 = 4.
+Everyone knows that 2 + 2 is 4.
+Everyone knows that 14 + 354 = 24.
+Everyone knows that 914 + 945 = 984.
+Everyone knows that 1914 + 1945 = 1984.
+Everyone knows that 3 * (1914 + 1945) = 1984.
+Everyone knows that  4 * (2 + 2) = 16.
+John is < 10.
+The strength was in the order of gerE > cotD > yfhP
+The strength was in the order of gerE > cotD > yfhP P2 > yfhP P1
+I think that X + Y > Z
+I think that X + Y = Z
+I think that X + Y is greater than Z
+I think that X + Y is equal to Z
+I say that X plus Y = Z
+I say that X plus Y equals Z
+1 + 1 = 2
+(1 + 1) = 2
+2 = (1 + 1)
+2 + 2 = 4
+539 + 22 = 561
+
+
+
+% Ordinals as clause openers
+first on our list is this item.
+second on our list is this item.
+third on our list is this item.
+next on our list is this item.
+last on our list is this item.
+17th on our list is this item.
+first is this item.
+second is this item.
+next is this item.
+last is this item.
+
+% Other misc ordinal usage, including dates. 
+Today is the third of December.
+Today is the 3rd of December.
+Today is the 31st of October.
+Today is the thirty-first of October.
+He is the third to speak up.
+Of them all, he ranked third.
+Of them all, he ranked 3rd.  
+He left on the 20th.
+He left on the twentieth.
+We are leaving on December 2nd.
+He is the 17th Duke of Earl.
+He belongs to the 43rd regiment.
+It's a late 19th century artifact.
+It's a late nineteenth century artifact.
+I gave him a third of the loot.
+He gets a twentieth part of the proceeds.
+He flew with the 101st airborne division.
+By the 1550s, he was very prosperous.
+By the 650’s, he was very prosperous.
+By the 1950's, he was very prosperous.
+*By the 01950's, he was very prosperous.
+
+% This fails due to a bug in tokenize.c where the leading
+% quote is stripped, but "50s," cannot be found in the dict.
+By the '50s, he was very prosperous.
+
+% More ordinals
+Mike finished in first place, and John in third.
+Mike finished in first place, and John in last.
+He finished the season in first.
+He finished the season in first place.
+He finished the season in 3rd place.
+He finished the season in third place.
+He finished the season in last.
+He finished the season last.
+He finished the season dead last.
+He finished the season dead fucking last.
+He finished the season DFL.
+
+% problem with "of" in entity names.
+The National Voter Registration Act of 1993 makes it easy
+
+% Informal numeric determiners
+the real question is how those two should work with one another.
+the real question is how we two should work with one another.
+the real question is how us two should work with one another.
+
+
+% Emoticons
+I told you so :)
+;-)
+Have a happy day 8->
+Ouch =D
+Hey ಠ-ಠ
+% The following intentionally starts with whitespace
+% (see PARSE_WITH_DISJUNCT_COST_GT_0 in link-parser.c).
+ :っ)
+◠‿◠
+^m^
+＠^^
+@^^
+
+% ===========================================================
+% Spell checker now does a good job of splitting words.
+Marywent shoppingat thestore.
+Mary wentshopping atthe store.
+
+% Fix/spell-check "its"
+Its broken.
+It's broken.
+
+% In repsonse to "So, did you do it?"
+I sure wish I ...
+I sure wish I had.
+I sure wish I did.
+I sure wish I could.
+I sure wish he would.
+I sure wish I hadn't.
+I sure wish I didn't.
+I sure hope I don't.
+I am sure I haven't.
+I am sure I won't.
+I know I wouldn't.
+I know I ought to.
+You know you should.
+You know you can.
+You know you must.
+
+I know he doesn't.
+I know he didn't.
+You know you needn't.
+
+Why, I ought to ....
+I ought to.
+I ought to do it.
+I ought to go there.
+I ought to tell her.
+I know I ought to.
+I know I ought to tell her.
+
+
+% punctuation: sometimes commas are used as if they were semicolons:
+Sweat stood on his brow, fury was bright in his one good eye.
+
+% Automatic sentence splitting.  A period or question mark, mid-text,
+% will split the sentence into two. Note capitalization is handled.
+who is Obama? where was he born?
+Who is Obama? Where was he born?
+
+% Some commas seem inappropriately placed, but are common none-the-less:
+% Note these are essentially garden-path sentences, which is why people
+% try to use commas to fix them up.
+The man, that you saw laugh, jumped off a cliff.
+The man, that you saw laugh jumped off a cliff.
+The man that you saw laugh, jumped off a cliff.
+The man that you saw laugh jumped off a cliff.
+
+% being
+The tilt being wrong, he grabbed for it
+The reply being wrong, he panicked.
+The cutting was difficult, the blade being dull.
+The movie was boring, being childish.
+
+% Sometimes colons are used as synonyms for "is":
+The capital of France: Paris.
+Einstein's birthplace: Germany.
+The answer to your question: yes.
+The answer to your question is yes.
+my answer is yes.
+my answer: maybe.
+
+% Colon as synonym for "that"
+He said: i = j + k
+He said: the sky is blue
+He said: "the sky is blue"
+
+% yes, no, maybe
+I voted yes.
+I will say yes
+I will say maybe.
+My vote is yes
+My vote is emphatically yes
+The answer is surely yes
+His answer was an emphatic yes
+The vote was a resounding yes
+The reply being yes, he cried.
+The answer being yes, he broke down and cried.
+He cried, the answer being yes.
+The answer has been yes
+The answer has been yes all along
+The answer has been yes all the time
+The answer had been yes the whole time
+The answer must surely be yes.
+
+Just say no!
+He answered no.
+
+He replied with a yes
+He replied with a resounding yes
+
+I think so, yes.
+That's what he said, yes.
+Why the hell not, yes.
+
+Maybe I want to know!
+Maybe, I'm not sure.
+I said yes, I'm going!
+
+Problem: How do you convince your customer that you are on the right path?
+Question: How do you convince your customer that you are on the right path?
+The question is how do you convince your customer that you are on the right path?
+Answer: Very carefully!
+Answer 2: Politely.
+Question 3: Did you double-check your math? 
+Step 3: Tell him off!
+Question 3: What about tomorrow?
+What about tomorrow?
+How about tomorrow?
+
+Proposal 3: Take the damn car if you must!
+Plan 2: Go ahead and do it.
+Plan B: Hire a plumber.
+Plan B: Go home.
+Hypothesis 3: The door on the left hides the prize.
+Conclusion 3: The door on the left hides the prize.
+Step 3: Pry off the lid.
+
+The big question: Did he do it?
+
+% Numbered, bulleted, ordered lists
+Step 1: Get hammer.
+Step 1: Get a hammer.
+1: Get a hammer.
+2: Get nail.
+3: Hit it hard.
+
+% Smaller numbers get special treatment in the dict. Try bigger numbers.
+1. Get a hammer.
+2. Get nail.
+3. Hit it hard.
+4. Hit it hard.
+5. Hit it hard.
+6. Hit it hard.
+
+Step 1. Get a hammer.
+Step 2. Get nail.
+Step 3. Hit it hard.
+Step 4. Hit it hard.
+Step 5. Hit it hard.
+Step 6. Hit it hard.
+
+% The below fails because a determiner is desired. But determiners
+% are optional for imperatives and commands.
+A: Open cover gently.
+B: Press button firmly.
+B: Press the button firmly.
+C: Cover ears immediately.
+
+Step A: Open cover gently.
+Step B: Press button firmly.
+Step C: Press the button firmly.
+Step D: Cover ears immediately.
+
+% The below fails because the INITIALS regex accepts A. which then
+% prevents the dot from being split off the end.  Numbered, dotted
+% lists do seem to work.
+Step A. Open cover gently.
+Step B. Press button firmly.
+Step C. Press the button firmly.
+Step D. Cover ears immediately.
+
+I. Ancient Greece
+II. Ancient Rome
+III. Ancient Persia
+IV. Mideast
+V. Asia
+VI. Ancient China
+VII. Egypt
+
+% Bulleted lists
+* This is an item
+• This is a bullet
+⁂ This is a bullet
+❧ This is a bullet
+☞ This is a bullet
+◊ This is a bullet
+※  This is a bullet
+✿ This is a bullet
+☆ This is a bullet
+＊ This is a bullet
+● This is a bullet
+□ This is a bullet
+◇ This is a bullet
+◎ This is a bullet
+
+% Quoted words and phrases:
+We should distinguish between "who" and "whom" but who fucking cares?
+He said "blah blah blah."
+
+He said, "This is it."
+He tells her, "this is it."
+Well, I told her, "This is it."
+"This is a test," she said.
+"Is this a test?" she asked.
+She asked, "Is this a test?"
+"Let's go!" she said.
+He said, "Let's go!"
+"Let go of me!" she screamed.
+"Let go of me!" she sobbed.
+"Are you mad at me?" he demanded.
+"What's up?" he asked.
+You asked, "How might this work?"
+You were asking, "How might this work?"
+You were asking "How might this work?"
+You were asked, "How might this work?"
+You asked, "How might this work?" so I answered.
+You asked, "How might this work?" so I gave an answer.
+You were asking, "How might this work?" so I answered.
+
+% Still broken:
+"On second thought," he said, "this is it".
+He tells her, "Well, this is it."
+
+Mr. Johnson, who was working in his field that morning, said, "The alien spaceship appeared right before my own two eyes."
+"I didn't see an actual alien being," Mr. Johnson said, "but I sure wish I had."
+Although Mr. Johnson has seen odd happenings on the farm, he stated that the spaceship "certainly takes the cake" when it comes to unexplainable activity.
+
+% quotations can be used for grouping modifiers into an almost-idiom
+We ate so-called 'brain food' for lunch.
+
+
+%
+% Institutionalized phrases:
+% We want the comma to act as a left-wall.
+By the way, did you have some?
+By the way, how was it?
+Since we are talking about it, how was it?
+Now that you mention it, what happened?
+While we're on the topic, was it good?
+Kenny sure is a bastard.
+
+% elided "that" (phantom that)
+Just thought you'd like to know.
+It was previously thought they were wrong.
+It's a good bet he did it.
+It's a good bet that he did it.
+It's a good thing he did it.
+It's a good thing that he did it.
+
+
+% elided "to be" (phantom to be) 
+% Handled by Pa**j, O*n  (predicative adjective, object)
+She will think it an act of kindness.
+She will think it to be an act of kindness.
+She will think it true.
+She will think it common.
+
+% Phantom verbs -- the second sentance has an implicit verb...
+an examination conducted when it happened revealed chicanery.
+an examination when it happened revealed chicanery
+
+% The fix for the above breaks the below :-(
+The year when I lived in England was wonderful
+*The school when I lived in England was wonderful
+
+
+% misc idioms
+Not everything looks grim.
+Not all is lost.
+% "there on"
+I'll introduce you to her, but you're on your own from there on.
+% "such that"
+They were assigned separate seats such that they had enough space.
+
+% Dick Hudson points out:
+% Verb must link to left wall, not the noun, else the links would cross.
+% i.e. the subject is "I", topic (object) is "that". There can be no Wd
+% to the LEFT-WALL for this sentence.
+That is something I did not know.
+That I did not know!
+This I did not know!
+This, I did not know!
+
+
+% Buggy opening clauses
+Some days, the trains run on time.
+Some of the time, I really  hate it.
+The rest of the time, we goof off.
+part of the year, we goof off.
+
+% Opening idioms
+% some of these have a phantom-that e.g. "I'm telling you that ..."
+Listen to me, she'll do it.
+Take my word, she'll do it.
+Trust me, she'll do it.
+If nothing else, she'll do it.
+I'm telling you, she'll do it.
+Didn't I tell you that she would do it?
+Like I said, she'll do it!
+It's like this, she'll do it.
+Dude, she'll do it.
+Mark my words, she'll do it.
+well, I'll say, she did it!
+Oh my God, she did it!
+Can you believe it?
+
+% Openers to questions
+However, am I right?
+Conversely, am I right?
+Well, am I right?
+So, am I right?
+Really, am I right?
+Anyhow, am I right?
+John, am I right?
+Now, am I right?
+Then, am I right?
+So then, am I right?
+Say, am I right?
+Seriously, am I right?
+Seriously, then, am I right?
+Just asking, am I right?
+Wondering, am I right?
+So I am wondering, am I right?
+So then I am wondering, am I right?
+So then, I am wondering, am I right?
+
+% Yes, no as openers
+No, it wasn't John.
+No, that isn't true.
+Surely, that can't be right.
+No, that can't be right.
+Yes, that is right.
+
+% openers, interjections, linking to infinitive, or post-verbal
+Yes, please do it again.
+Yes, please, do it again.
+Yes, please, I'll have one.
+Yeah, go fuck yourself!
+Yeah, dude!
+Yeah dude!
+No, please stop.
+Please, no, stop.
+No, stop.
+No, stop that.
+No, don't do that.
+Don't do that!
+No, do not do that.
+Okay, don't do that.
+Anyhow, don't.
+In total, don't.
+Yes, go.
+Please, yes.
+Thank you, no.
+Yes, sir!
+Go, dude, go!
+Umm, I think he did it.
+That's what I think, yes.
+On arrival, go to the check-in window.
+Even so, just do it.
+Exactly, do it exactly like that.
+Roughly, it is done like this.
+
+Can't, I'm too busy.
+
+No, please don't do that.
+Okay, stop that.
+Stop, please don't do that.
+Sir, please don't do that.
+
+Tsk tsk, you dog!
+Tsk, tsk, you dog!
+
+Tsk tsk, what a shame!
+Tsk, tsk, what a shame!
+My, what a shame!
+
+My my, that was quite an outburst!
+My, my, that was quite an outburst!
+My, my, my, that was quite an outburst!
+
+% Single-word exclamations!
+Yes!
+No!
+Amen!
+Sure.
+Whatever.
+OK.
+Okay.
+Can't.
+Don't!
+Don't touch that!
+Good.
+Fair enough.
+Good enough.
+
+Hush!
+Shh!
+Shhh!
+Oh wow!
+Jesus!
+Yikes!
+Ouch!
+Ouch, that hurt!
+Oh no!
+Oh, sure!
+Oh, okay!
+My, my!
+Dear Lord!
+Oh dear!
+Oh, my!
+
+Jesus!
+John!
+Tom!
+Dick!
+Harry!
+
+Praise the Lord, amen!
+Praise the Lord God, amen!
+
+% Given names can be openers to directives or questions.
+Ma'am, please don't do that.
+John, please don't do that.
+Mary, stop.
+Mary, can you do this for me?
+Mary, should I do this?
+Mary, would you do this for me?
+Mary, won't you do it?
+Mary, mightn't you be right?
+John, do you think so, too?
+John, do you think it, too?
+John, do you believe it, too?
+John, do you believe so, too?
+John, doesn't that strike you as odd?
+John, have you thought about it?
+John, is it true?
+On arrival, can you do it?
+For now, can you do it?
+On second thought, can you do it?
+
+Yes, be alert!
+Yes, go play ball.
+Yes, go play soccer.
+Yes, go play tennis.
+Yes, go play piano.
+John, go do it.
+John, please go do it.
+John, let's go.
+John, if that's true, then I don't know.
+John, I am going to give this to you.
+John, this is it!
+
+% Openers to directives
+First, unbutton the button.
+Next, pour wine on your shirt.
+Finally, button the button.
+
+% and, or opening coordinating conjunctions.
+% Currently these take Wc- to the left wall, since they "coordinate"
+% with previous sentences.  This is different than a plain-old CO
+% link, since they are not 'plain-old' clause openers ... 
+And you can do it this way.
+Or you can do it this way.
+Or, you can do it this way.
+But not everyone used it.
+And not everyone agrees.
+And they really loved me!
+Also on this list is the Colossus of Rhodes.
+
+% Broken interjections ...
+Enough already!
+Enough of that!
+Yeah, right.
+
+% Dear
+Be a dear, take my luggage.
+Be a good dear, take my luggage.
+Be a good dear and take my luggage.
+Be a darling, take my luggage.
+The poor dears were so confused!
+
+% Split infinitives
+you should, on second thought, go home
+you should instead go home
+It will, more often than not, go by train.
+
+% Paraphrasing verbs -- Eq link
+risks, as one could call them, are stupid.
+risks, as one might name them, are stupid.
+risks, as one might label them, are stupid.
+risks, as one might label them stupidly, are mad.
+risks, as one might say, are stupid.
+risks, as one might argue, are stupid.
+
+% Broken idiomatic clauses ... (phantom/zero subjects)
+Heard that before?
+Just a coincidence?
+
+% Multiple MV links
+% All the different comma arrangements are valid, and make subtle
+% alterations to the meaning.
+We are ready, for real this time, for sure.
+We are ready, for real, this time, for sure.
+We are ready, for real, this time for sure.
+We are ready, this time for sure.
+We are ready to move, for real this time, for sure.
+We are ready to move, for real, this time, for sure.
+We are ready to move, for real, this time for sure.
+
+% done with MV link
+I've done that plenty of times
+I've done her plenty of times
+I've done that climb plenty of times
+I've done those climbs plenty of times
+I've done that chore plenty of times
+He's pulled that stunt plenty of times.
+He's pulled that stunt many times.
+I've hit that plenty of times
+
+% "so" as object of verb, object of preposition.
+I don't think so
+I don't believe so.
+If you think so.
+If you say so.
+I told you so!
+But I don't agree.
+Do you think so, too?
+Because I said so!
+Cuz I said so!
+Do it like so.
+Do it like this.
+It must be done exactly like so.
+How could it be so?
+
+% "so" as conjunction.
+John left so I stayed.
+I stayed so I could see you.
+He failed to appear, so we went on without him.
+This is the easiest way to get there, so don't argue.
+
+% "So" as adverbial modifier
+That is so not going to happen.
+
+Hold the brush so.
+
+It seems so
+It seems not
+It appears so
+It appears not
+It appeared not.
+It appeared not to be so.
+Apparently so
+Apparently not
+Evidently so
+Evidently not
+
+% "so" as sentence opener (... mild hostility)
+So, don't do it!
+So don't argue
+So be unhappy
+So be unhappy, see if I care!
+So go home.
+So be that way.
+So stick it up yor ass.
+So arrange it nicely.
+
+So! You thought I would fail!
+So!
+
+% "so" as a conjunction.
+
+
+% Requests, directives, commands, imperatives.
+Do not be wise in your own estimation.
+Do be wise in your choices.
+
+Go play.
+Go play ball!
+You and Rover go play fetch.
+Fetch the ball.
+Rover, fetch the ball.
+Rover, give me the ball.
+Go fetch the ball.
+Play fetch with Elena.
+Teach me fetch.
+Teach me.
+Teach me how.
+Teach me how to do it.
+
+Walk tall.
+Think quick.
+Think quickly.
+Act fast.
+Act smart.
+Act dumb.
+Act now.
+Shout it out.
+Shout loud.
+Stand up straight.
+
+there shall be an answer.
+there shall come a time.
+there shall verily come a time when man will be cleansed of his sins.
+
+Make it bitter
+Make it sweet
+Make it good and sweet
+Make it stop
+Make it rain
+Let it rain
+Let it be
+Leave it alone
+Keep it real
+Keepin' it real
+Keeping it real
+Thank you for keeping it real
+Is this it?
+Is that it?
+
+Leave me alone
+Leave him alone
+Leave it alone
+Leave it!
+Do not touch!
+Hey, don't push!
+Don't finger that!
+Do not do that!
+Do not open!
+Do not fail!
+
+% "To be" constructions
+To be continued
+Soon to be continued
+Apparently, to be continued.
+To not be continued
+To not be continued, it seems.
+Not to be continued, it seems.
+That is not to be continued.
+To be decided
+to be determined
+to be done later
+to be avoided
+
+% Single-word "topic" responses, taking the Wt link.
+Apparently.
+Apparently so.
+Perhaps.
+Evidently.
+Usually.
+
+Hey, of course!
+Why, of course!
+Why, of course it will!
+Why not?
+Why the fuck not?
+
+Why not, let's do it!
+Why, let's do it!
+Why, aren't you a dear?
+
+Why, that dirty little bastard!
+Why, you dirty little bastard!
+Why, you dirty rotten fink!
+You bastard! she hissed.
+You!
+You bastard, you!
+That asshole!
+
+Over here!
+Come over here!
+John, over here!
+
+% Affirmative replies
+What did you see?
+A red car.
+Who was in it?
+John. 
+John's evil twin.
+The evil twin.
+John and his brother.
+John or his brother.
+Neither John nor his brother.
+When did this happen?
+June 10th.
+June 10th, 1972.
+What was in the trunk?
+Some heroin.
+A dead body.
+A lot of sand.
+Lots of sand.
+How well could you see it?
+Just barely.
+How do you feel?
+Exhausted.
+Which way?
+Which way did they go?
+Which way, left or right?
+Straight.
+Which one?
+This.
+This one.
+That one.
+Those.
+Them there.
+Both.
+Both of them.
+Either.
+Either of them.
+Neither.
+Neither of them.
+How many do you want?
+A lot.
+A few.
+A couple.
+Some.
+Not much.
+Did you get what you wanted?
+Not enough.
+
+% Children's gain-saying.
+Is too.
+Is not.
+Is so.
+Not.
+Uh huh.
+Unh unh.
+Liar.
+
+% short greetings
+Hello!
+Hello there!
+Hey there!
+Bye!
+Goodbye!
+OK, bye!
+OK, then, bye!
+How are you doing?
+How are you?
+How do you do?
+
+Hello, Sue!
+Hi, Sue!
+Hey, Sue!
+Hey there, Sue!
+Hey there, little doggie!
+Hey, little doggie!
+Go home, little doggie!
+
+I say, ahoy there!
+I said, hello!
+He greeted me with a loud hallo!
+Ship ahoy!
+Land ahoy!
+
+% slang greetings
+Yo dawg!
+Whazzup!
+Dude!
+Duude!
+
+% hostilities
+Yo mama!
+
+% Beverly Hillbillies basilect & misc pseudo-working-class expressions
+That ain't right!
+Ain't you gonna go?
+I'm gonna go now.
+I gonna go.
+I'm gonna do it
+I'm really gonna do it
+I really gonna do it
+I'm gonna hit you.
+It looks like it ain't gonna rain today.
+Y'gonna go?
+I gotta go.
+He said, "I gotta go now."
+I really gotta go.
+You got to do it this way
+You gotta do it this way
+Y'got to do it this way
+Y'gotta do it this way
+I'm tellin' yo, y'gotta do it this way
+Are y'gonna do it?
+Well, I've been tryin' to esplain it to ya
+Well, I been tryin' to esplain it to ya
+
+Well, it just keeps startin' and stoppin'
+He's gettin' ink done.
+
+Y'all come back now, y'hear?
+You leaving already?
+You leavin' already?
+Yo leavin' already?
+Y'all ain't gonna tell me yo leavin' already?
+Y'all ain't gonna leave me here, all alone?
+You aren't going to leave me here, all alone?
+Where you going?
+Where you goin'?
+He was all alone, now.
+He was all alone and hungry, now.
+
+Lordy, he sure does be handsome!
+
+% Irish English -- See https://en.wikipedia.org/wiki/Irish_English
+It's him I do be thinking of.
+He does be doing a lot of work at school.
+He does be working every day.
+They do be talking on their mobiles a lot.
+Even when I do be round there with friends, I do be scared.
+
+Did ye all go to see it?
+None of youse have a clue!
+Are ye not finished yet?
+Where are yous going?
+Get youse your homework done or you're no goin' out!
+
+% yisser: you are
+Yisser looking well, so yis are.
+Yessir mad, so ya are.
+
+% yisser: your (possessive)
+Face the north, east is at yisser right.
+I've got yisser bags.
+
+% African American
+% Habitual be -- https://en.wikipedia.org/wiki/Habitual_be
+Christmas Day, well, everybody be so choked up over gifts and everything, they don't be too hungry
+He does be singing.
+He does be always drinkin layarge bohhels down be de park boy
+
+
+% WH-words
+I do not know why
+I do not know how
+I do not know when
+I do not know where
+I do not know which
+I do not know who
+I do not know why they did that
+I do not know how they did that
+I do not know when they did that
+I do not know where they went.
+I really don't know why
+I did not know why until recently
+I did not know how until recently
+I did not know when until recently
+I did not know where until recently
+I did not know which until recently
+I did not know who until recently
+I did not ask why until recently
+I did not tell why until recently
+I did not say why until recently
+I did not assess why until recently
+I did not establish why until recently
+I did not figure out why until recently
+I did not find out why until recently
+
+% Questions, queries
+What are your questions?
+What are the aliases of Jim?
+
+Why didn't you fucking say so?
+Why didn't you just fucking say so?
+
+% Who with inverted subject query
+% Should parse just like "where am I?" etc.
+Who am I?
+Who are they?
+Who are you?
+Who are we?
+Who are we to be so callous in his treatment?
+Who was he?
+Who was she?
+Who was that man?
+Who was that, man?
+Who were they?
+
+% "to do" questions
+What is there to do?
+What are you going to do?
+Who wants to do it?
+Are you going to really do that?
+Are you going to really do it to them?
+*Are you going to do?
+He is going to do it.
+*He is going to do.
+He is going to not do it.
+*He is going to not do.
+That will do.
+
+% Registers -- Newspaper headline declarations
+% Missing definite articles (with definite articles, these would parse)
+% Perhaps a modal parse: if the ordinary parse failed, try another
+% with definite articles auto-inserted ?
+Thief invades boathouse.
+Burglars attack museum.
+Thief empties pockets of all they hold.
+
+% Registers -- Medical speech
+7 month old female presents with chest congestion.
+John, aged 80, is ill.
+
+% People aged 20-40 don't know how to use the word "aged".
+People ages 55 to 64 on average are out of work for more than 54 weeks, while those ages 25 to 34 are unemployed for about 36 weeks, according to figures from the Bureau of Labor Statistics.
+
+% Technical speech - missing definite articles.
+Physical Volumes (LUN) allocated from SAN pool zoned to VIOS.
+
+% Idiomatic phrases
+He's not the least bit interested.
+Let me tell you this: it stank.
+Halloween is a great time of year.
+Christmas is a great time of year.
+Summer is a great time of year.
+
+% die-idioms
+Stay pretty, die young.
+I don't want to die young.
+You will die young if you keep smoking.
+You will die unhappy if you marry her.
+Grant me this wish and I will die happy.
+You will live long and happy.
+They lived happily in that old house.
+
+He didn't say.
+She wouldn't tell anyone.
+Stopping your bicycle requires using your brakes.
+You should exercise to stay fit.
+He is as fit as a fiddle.
+
+Watch out that you don't hit your head on the low beam.
+
+% clauses embedded parenthetically
+All he gave was his first name.
+Pete (all he gave was his first name) was still waiting.
+
+% --------------------------------------------------------------------
+% Disjunction/conjunction problems
+% What follows is a large section of conjunction test cases: adjectives,
+% nouns, verbs and adverbs conjoined with "and", "or", "but", commas, etc.
+% This spills over to more complex constructions.
+%
+% should be disjunction of modifiers ... (disjoined modifiers)
+% should be (major Eurobond or foreign bond) offerings
+There were no major Eurobond or foreign bond offerings Friday.
+Messrs. Malson and Seelenfreund are directors.
+The effects were less severe and less prolonged
+
+% 'but' works as a fat link, leaving 'rather' out to dry ...
+He didn't do it, but rather went home.
+
+% The second sentence parses, but should not.
+% For example "*Bill may distort" is handled correctly.
+% See "Catena (linguistics)" in wikipedia for more.
+% See "gapping" or "stripping (ellipsis)" in wikipedia for more.
+Bill may hide the truth, or distort it.
+*Bill may hide the truth, or distort.
+John wants to pay for the beer, not steal it.
+*John wants to pay for the beer, not steal.
+
+
+% conjunctions treated with thin links:
+% CJ link in this case.
+All large burial places, or tombs, became known as mausoleums.
+
+% --------------------------------------------------------------------
+% conjoined adjectival/adverbial modifiers
+The music was soft and mellow.
+She ran hot and cold.
+The black and white cat sleeps.
+It was a long and narrow valley.
+I don't care if the outcome is good or bad.
+
+% conjoined adjectives with modifiers
+The river is wide       
+The river is wide here
+The river is a mile wide
+The river is a mile wide here
+The river is a mile wide and 300 feet deep
+The river is a mile wide here and 300 feet deep
+The river is helf a mile wide here and 300 feet deep
+The river is wide here, and deep, too.
+
+Most of the 16th and 17th century leases included husbandry clauses.
+
+% comma as a conjunction
+It tastes bitter, not sweet.
+It tastes bitter, yet sweet.
+It tastes bitter, and yet sweet.
+I saw John, not Mary.
+I saw John and not Mary.
+
+% long adverb constructions, with "but"
+It is sour, but not too much.
+Push harder, but not too much
+He is stern, but not too much
+It hurts, but not very
+It hurts, but not very much
+It sounds false, and yet it's true.
+
+% neither-nor constructions with adjectives
+This is neither hip nor groovy
+He is neither happy nor healthy
+He is neither very happy nor very healthy
+
+% Difficulties with determiners & adjectives
+According to our records, he is in either the 105th or the 106th battalion
+According to our records, he is either in the 105th or the 106th battalion
+According to our records, he is either in the 105th or in the 106th battalion
+According to our records, he is in neither the 105th nor the 106th battalion
+According to our records, he is neither in the 105th or the 106th battalion
+According to our records, he is neither in the 105th nor in the 106th battalion
+
+Mike was not first, nor was he last.
+Mike was not first nor was he last.
+
+% conjoined comparatives
+he is bigger and badder than the Pope.
+he is bigger, and badder, than the Pope.
+he is much bigger and badder than the Pope.
+That is the easier but longer way of doing it
+That is the easier, but longer, way of doing it
+It will be harder and costlier than last time.
+This car is lower and faster than theirs.
+He is smarter, yet snarkier, than the others
+This brandy is smoother and fuller than the rest
+He is different, and better, than the others.
+We will arrive sooner than you
+We will arrive sooner than they
+They will arrive sooner than we.
+It will be harder, and take much longer, than before
+
+he is big and badder than the Pope.
+he is smart and better than the rest.
+he is clever and funnier than Mike.
+This one is bigger, yet easier to carry
+This one is bigger and easier to carry
+
+We will arrive sooner, yet more tired, than they.
+We will arrive sooner, yet more tired, than John.
+We will arrive much later and more tired
+we will arrive refreshed and rejuvenated
+she wiped the table clean and dry
+
+we are going farther and farther down that path
+There will be fewer yet larger fish as a result.
+There will be a lot fewer yet much larger fish as a result.
+
+he ran the longest and the farthest
+he ran the longest and farthest
+he ran the slowest but the farthest
+
+It is less costly and lighter
+It is lighter and less costly
+It is good enough and lighter
+It is cheaper and good enough
+It is cheaper and less energy-intensive
+It is cheaper and less energy-intensive to produce
+
+That is fine and well enough!
+That is fine and well enough, young man!
+
+
+% some idiomatic comparative-like expressions
+That will more and more be the case
+That will less and less be the case
+That will more or less be the case
+*That will more and less be the case
+*That will less or more be the case
+
+That will be more and more the case
+That will be less and less the case
+That will be more or less the case
+*That will be more and less the case
+*That will be less or more the case
+
+% conjoined superlatives
+he is the biggest and baddest thug in town.
+they are the biggest and baddest three thugs in town
+he is the biggest and the baddest thug in town.
+they are the biggest and the baddest three thugs in town
+it is the third largest and the fifth richest county in the state
+it is the hardest and worst problem on the list
+
+% -------------------------------------------------------------------------
+% Conjoined question words (QJ link) some weh EW link.
+When and where is the party?
+Exactly when and precisely where is the party?
+How and why did you do that?
+Exactly how and precisely why did you do that?
+
+Economists are nearly universal in their belief that the dollar is going to collapse; the only debate centers around when and for how long.
+The only debate centers around when and for how long.
+
+% conjoined post-nominal modifiers: MJ*a (in place of Ma and MX*a)
+Many Democrats unhappy about the economy but doubtful that Clinton can be elected probably won't vote at all
+Many Democrats, unhappy about the economy but doubtful that Clinton can be elected, probably won't vote at all  
+Many people, unaware of the deception and unfamiliar with the details, won't care.
+Many people, unaware or unfamiliar with the details, won't care.
+Many people, unaware of or unfamiliar with the details, won't care.
+*Many people, unaware and unfamiliar, won't care.
+The director, responsible for development and accountable for engineering, resigned.
+The director, responsible and accountable for engineering, resigned.
+*The director, responsible and accountable, resigned.
+The car, prone to breakdown and expensive to maintain, was a white elephant.
+The toy, expensive and fragile, broke immediately
+
+% Note: although the first parse for the below is good, the other parses
+% are nonsense, -- this should be fixed ... XXX
+The river, ten meters wide and a meter deep, runs swiftly here.
+The river, ten meters wide and a meter deep here, runs swiftly.
+The river, dangerous to navigate but important for commerce, has many shoals.
+The dog, unlikely to bite but still threatening, scared the interloper away.
+The dog, unlikely to bite but hard to ignore, scared the interloper away.
+The platform, aflame and adrift on the ocean, soon sank.
+The platform, aflame and adrift, soon sank.
+
+% conjoined post-nominal prep-phrase modifiers: MJ*p (in place of Mp)
+The coverage on TV and on the radio has been terrible
+it is hidden somewhere in the yard or near the house.
+
+He is either here or there.
+He is neither here nor there.
+He is either here or he is there.
+
+% MJ*p with clause openers
+By listening and by looking, we can safely cross the street.
+By this means, and by the shortness of the leases, the Petres managed to keep an element of control
+
+% Closely conjoined prepositions (joiner must take prep object)
+The new building was started about 1540 on, or very near, the old site.
+The prize is hidden in or near the playground.
+The Easter eggs are hidden in and around the house.
+
+% conjoined adverbs: RJ*v link
+She handled it quickly and gracefully 
+She handled it skillfully and with compassion
+She handled it quickly, quietly and gracefully
+
+% conjoined that: RJ*t link
+I told him that I hated him and that I never wanted to see him again
+
+% conjoined dependent clauses: RJ*c link
+Although he likes me and he respects me, he says he needs some privacy
+
+% conjoined prep-object-relative clauses: RJ*j link (instead of Mj- & Cs+)
+That is the man for whom and with whom Joe works
+
+% conjoined nouns
+% count nouns
+The dog and cat ran.
+The dog and the cat ran.
+The big dog and fat cat ran.
+The dog, cat and mouse ran.
+We took my dog and cat to the vet
+We took my heifer and John's cow to the fair
+We took my heifer and goat and John's cow to the fair
+Where is the sickle and hammer now?
+where did the hammer and sickle go?
+
+% number agreement for conjoined nouns
+There is a dog and a cat here.
+*There are a dog and a cat here.
+There is a dog or a cat here.
+there are two dogs and a cat here.
+*there is two dogs and a cat here.
+% ??there (is/are) a dog and two cats here.
+
+the dog and cat run
+*the dog and cat runs
+*The either dog or cat ran
+
+% conjoined mass nouns
+Cost and reliability were questioned.
+The cost and reliability were questioned.
+The mounting cost and reliability were questioned.
+The mounting cost and faltering reliability were questioned.
+The cost and lack of reliability were questioned
+The lack of reliability and cost were questioned
+The mounting debt and dearth of solutions have fueled the continuing crisis
+He wrote for piano and flute.
+
+% conjoined gerunds
+He enjoyed many rewards, such as free board and lodging at court.
+
+
+% conjoined proper names
+John and Mike left the party.
+actress Whoopi Goldberg and singer Michael Jackson attended the ceremony.
+John and I are friends.
+*I and John are friends.
+He and I are friends.
+
+Sims visited Golfe Juan, France, and Gaeta, Italy.
+Sims visited Gaeta, Italy, and Golfe Juan, France.
+
+% differences in number agreement for and, or:
+Are a dog and a cat here?
+Is John or I invited?
+*Is John and I invited?
+Are John and I invited?
+*John and I is invited
+
+% conjoined nouns as objects
+I heard a car and a train.
+I heard a car or a train.
+I heard a car but not a train
+*I heard a car but a train
+I heard a car nor a train
+I heard neither car nor train
+I heard neither a car nor a train
+I don't like dogs nor cats.
+
+% conjoined pronouns, misc nouns, other oddities
+this one and the others got broken
+hers and ours were mashed.
+yours and mine were damaged.
+let me know about this one and any others
+these ones and those over there got mashed
+these and those over there got mashed
+these both and those over there got mashed
+% XXX "these both got mashed" parses, but not correctly.
+*these both got mashed
+both of those, and this one, got mashed
+You'll find it at the corner of Gee Ave. and First St.
+You'll find it at the corner of Gee Ave. and 1st St.
+Let me introduce John Miller, AIA and Micheal Boost, Esq.
+Please give me the swizzle-stick and the torque-wrench
+I've been to Delaware and Maryland
+Let me introduce you to my alter ego and nemesis
+I am a master of kung fu and sleight of hand
+The majority and a number of others agree
+It was my insistence and reassurance that changed his mind
+It was my insistence and my reassurance that changed his mind
+It was my insistence and my reassurances that changed his mind
+It was my request and recommendations that changed his mind
+This is the time and place for it
+This is the right time and place for it
+This is neither the time nor the place for it
+This is neither the time nor the place for it
+Neither she nor I will go
+It's either us or them
+It is hers and mine.
+you and it have to go
+We and they agree
+Neither we nor they will do it.
+Neither you nor I will ever agree
+Everything and everyone must leave
+neither yours nor mine got damaged
+this and the others were damaged
+this one and many others were damaged
+this one and all these were damaged
+this one and all of these were damaged
+this one and a few others were damaged
+There is little or none left
+There is very little or none left
+Some or all of it remains
+Some or most of it remains
+Part or all of it remains
+this one and the other were damaged
+this one and the rest were damaged
+this one and plenty of others were damaged
+this one and one other were damaged
+this one and another were damaged
+this one and another one were damaged
+this one and one more were damaged
+He talks of this and that
+
+someone or other would always complain
+
+% Contradictions, corrections, gain-saying
+I saw not Mary, but John.
+I saw not Mary but John.
+
+% conjunctions of date and time expressions. These normally take NI,
+% but can also take SJ when used as common nouns.
+January and February are the coldest months
+I am working day and night
+It will happen in the weeks and months ahead
+
+% conjoined guessed nouns
+we went asdfing and qrwerting
+The howzas and the ufdahs are broken again
+The Howzas and the Ufdahs are in revolt
+The halide and chloride ions do this
+the stator and rotor collided
+
+% relative clauses with conjoined nouns
+The dog and the cat I saw were black
+
+% conjoined nouns in clauses
+I think John and Dave ran.
+
+% conjoined post-nominal modifiers
+Sue, a teacher and scholar, is here.
+
+% conjoined negations
+Neither Mary nor Louise are coming to the party
+Neither Mary Kate nor Louise Anne are coming to the party
+*either Mary nor Louise are coming to the party
+Neither Mary, Joe nor Louise are coming to the party
+*either Mary, Joe nor Louise are coming to the party
+Either Mary or Louise will come.
+Neither I nor John will come.
+
+neither I nor my friend knows what happened
+neither I nor my friend know what happened
+Either Mary or my friend know what happened
+Either Mary or my friend knows what happened
+Either I or my friend knows what happened
+Either I or my friend know what happened
+
+% Neither-nor with mass nouns
+Neither snow nor rain stays these couriers
+Neither snow nor rain nor heat stays these couriers
+gloom of night and heat will not stop me
+heat and gloom of night will not stop me
+Neither snow nor rain nor heat nor gloom of night stays these couriers from the swift completion of their appointed rounds
+
+% neither-nor with count nouns (verify number agreement)
+There is neither a dog nor a cat here
+*There are neither a dog nor a cat here
+
+% conjoined numbers
+Give me six or seven of those.
+Just give me six or seven.
+I'm only going to have one or two beers.
+It starts one or two hours later.
+
+% But for joining adjectives
+He is tired but happy.
+
+% But for joining nouns
+Mary, but not Louise, is coming to the party
+Mary Kate, but not Louise Anne, is coming to the party
+The plan caused not prosperity but ruin
+Not John, but Mary led the way
+
+% But for joining verbs
+She organized her work but accomplished very little
+No one but she saw the prowler.
+He would have joined the band but he couldn't spare the time  
+The brothers would have resisted but that they lacked courage.
+It never rains but it pours.
+There is no doubt but right will prevail.
+There never is a tax law presented but someone will oppose it.
+Ten to one but the police have got them
+They had no sooner arrived but they turned around and left.
+
+% conjoined verbs
+He tried and failed.
+He tried but failed.
+He tried but failed to acheive his goal.
+
+Oscar Peterson played piano and wrote music.
+
+% Conjoind verb test cases -- artificial sentences illustrating various forms.
+Oscar banged drums and tinkled piano
+Oscar really banged drums and righteously tinkled piano
+They banged drums and tinkled piano
+Oscar bangs drums and tinkles piano
+Oscar bangs drums and tinkled piano
+They bang drums and tinkled piano
+
+% Some verb-x irregular verbs.
+He seems shallow and appears idiotic.
+He seemed shallow and appeared idiotic.
+
+I did it and feel good about it.
+He did do it and felt good about it.
+
+He takes cookies and eats them.
+He took cookies and ate them.
+He bothered and pestered her.
+He annoyed and bothered her.
+
+
+% conjoined transitive and intransitive verbs
+I idolized and idealized the man.
+*I idolized and grimaced the man.
+I grimaced and idolized the man.
+
+% correct parse is "I (saw and greeted) Sue"
+I saw and greeted Sue.
+
+% correct parse is "we (sang and danced) the night away"
+*we sang and danced the night away
+He shrank and withdrew from the crowd
+The boat lurched forward and sank
+She will blush and start blathering at the mention of his name
+She will blush and begin blathering at the mention of his name
+The water rises and falls with the tides
+Do not surprise or alarm him
+
+I went to the store and got a gallon of milk
+I am going to the store and will get a gallon of milk
+I went to the store and returned the eggs
+I went to the store, got a gallon of milk, and returned the eggs
+
+We ate popcorn and watched movies on TV for three days.
+She arrived and left on Tuesday.
+
+He broke off a piece of bagel and gave it to me.
+He broke off a piece and gave it to me.
+He breaks off a piece and gives it to me.
+He broke off a piece and has given it to me.
+He had broken off a piece and had given it to me.
+He is breaking off a piece and will give it to me
+He is breaking off a piece and should give it to me
+He is breaking off a piece and would give it to me if I asked.
+He is breaking off a piece and ought to give it to me if I asked.
+He ought to break off a piece and give it to me
+
+We hoped for the best, but were disappointed.
+We hoped for the best and were disappointed.
+
+He obtained the lease of the manor of Great Burstead Grange (near East Horndon) from the Abbey of Stratford Langthorne, and purchased the manor of Bayhouse in West Thurrock.
+
+He rose rapidly in the royal service and was knighted.
+He rose rapidly in the royal service and, in 1543, was knighted.
+
+He was sent abroad and resided on the continent, chiefly in France, for more than four years.
+
+John describes and analyzes literature.
+Chief describes and analyzes the character of the families in a village, remarking that they all act completely the same.
+
+% conjoined infinitives are still broken...
+They advised us to avoid sunlight and to limit the consumption of fish.
+I am expecting this sentence to parse correctly, and to yield a very wide diagram.
+
+% conjoined verbs with modifiers, negation
+He cannot change the beliefs of popular society as a whole.
+He can not change the beliefs of popular society as a whole.
+He can't change the beliefs of popular society as a whole.
+He can challenge John, but cannot change the outcome.
+He can challenge John, but can't change the outcome.
+He realizes that he and McMurphy can challenge Big Nurse, but cannot change the beliefs of popular society as a whole.
+
+% conjoined verbs in relative clauses
+This is not the man we know and love.
+*This is not the man we know and love him
+This is not the man we knew and loved.
+
+This is a problem Moscow created and avoided
+This is a problem Moscow created but avoided fixing
+This is a problem Moscow created and failed to solve.
+
+% the first and.j-v links to "who" with B- & RS-
+I need to find a Hong Kong engineer who knows Java and Python and worked at Oracle and went to Stanford and is a VP
+
+% Mixture of conjoined nouns and verbs
+He knows Powerpoint and Excel and attended George Washington University
+
+% Conjoined imperatives
+Show me my notes from today and send them to my friends.
+By the way, show me my notes from today and send them to my friends.
+Show me my notes and be nice about it.
+Show me my notes and have a great day!
+Fuck off and have a great day, dipshit!
+Fuck off and have a great day, asshole!
+Show me my notes and do not tell anyone.
+Show me my notes but do not tell anyone.
+By the way, show me my notes but do not tell anyone.
+Do not tell anyone or say anything.
+Show me my notes, if they are readable.
+Show me my notes only if they are readable.
+Show me my notes, but only if they are readable.
+Show me my notes, but not if they are unreadable.
+Show me my notes from today, but not from yesterday.
+Show me my notes from today but not from yesterday.
+
+% qualified conditional clauses
+Do it only if you are sure.
+Only if they are home, should you do it.
+You should do it only if they are home.
+
+Theorem A is true if and only if Nachbin's theorem is true.
+Theorem A is true iff theorem B is true.
+
+% conjoined ditransitive objects
+I gave Bob a doll and Mary a gun.
+I found Bob a doll and Mary a gun for Chirstmas
+I got Bob a doll and Mary a gun for Chirstmas
+I offered Bob a doll and Mary a gun as an apology
+I refused Bob a raise and Mary a vacation
+I owe Bob some money and Mary a favor
+I called Bob a jerk and Mary a dork
+I painted the living room red and the bedroom green
+I wrote her a love song and him a hate letter
+I taught these mice to freeze, and those mice to jump.
+I taught these mice to freeze, and those to jump.
+
+% conjoined past particples
+the water had risen and fallen with the tides
+he had lain, and soon forgotten his vow
+
+% neither-nor constructions with verbs:
+we          ate popcorn or  watched movies
+we either   ate popcorn or  watched movies
+we neither  ate popcorn nor watched movies 
+*we either  ate popcorn nor watched movies 
+*we both    ate popcorn nor watched movies 
+*we         ate popcorn nor watched movies
+we both     ate popcorn and watched movies
+we not only ate popcorn but watched movies
+
+We neither ate nor drank for three days
+we neither saw nor heard what happened
+
+% lots of conjunctions, commas, lists mashed up ... 
+The problem is, or rather one of the problems, for there are many, a sizeable proportion of which are continually clogging up the civil, commercial, and criminal courts in all areas of the Galaxy, and especially, where possible, the more corrupt ones, this.
+The problem is, or rather one of the problems, this.
+The problem, or rather one of the problems, is this.
+% idiomatic "or rather"
+The problem, or rather, one of the problems, is this.
+The problems are clogging up the courts, and, where possible, the corrupt ones
+The problems are clogging up the courts, and, wherever possible, the corrupt ones
+
+% lists:
+% List of gerunds:
+He has three jobs: counting, measuring and listing.
+
+% List of relative clauses: RJ*r link
+There are 10 kinds of people: those who understand binary, and those who don't.
+
+% Collocations with holes: XJ links
+you should not only ask for your money back, but demand it
+
+% broken lexical chunk recognition:
+% ... not only, ... but also ...
+The deal includes not only junk, but also crap.
+
+% Split "if .. only" idiomatic expressions
+If there was only more left!
+If there were only more!
+If there were only more like you!
+If only there was more left!
+If only there were more!
+If only there was more!
+
+wait, there is more!
+wait, there are more!
+
+% If... then ... directives broken.
+% Registers: Typical language used in instruction manuals, directives.
+If paid weekly, bring the last six pay stubs.
+If paid weekly, then bring six stubs.
+If it is broken, then remove it.
+If broken, then remove.
+Check the lid; if cracked, then replace.
+Check the valve, replace if cracked.
+
+% Then is optional:
+If it is raining, stay inside!
+If you bought after the crash, you won.
+If you sold before the peak, you got lucky
+If you telegraphed after Sunday, I'd already left.
+
+if that's true, then I don't know.
+Show me my notes, if they are readable.
+If they are readable, show me my notes.
+
+if it weren't for Joe, it would work.
+if it were not for Joe, it would work.
+If it weren't for the Democratic Party, health care reform would have passed.
+
+% Someone... who...
+Someone is outside who wants to see you.
+
+% ellipsis
+If it weren't for Joe, ...
+If it weren't for Joe, …
+He is more intelligent than ...
+until yesterday ...
+
+% Lawrence Durrell
+... a ballroom polished like a skull
+... polished like a skull
+... like a skull
+% Frank Swinnerton
+... gleamed like dogs' eyes in a car's headlights
+% Wallace Whatley
+... shine as a sack of apples
+% Wallace Stevens
+... shines, like a bracelet shaken in a dance
+... how those two should work together
+... the 60's.
+
+I need to find someone who ...
+I need to find someone who...
+He is such a ...
+I will ...
+I will...
+I'll ...
+I'll...
+Maybe it works now...
+
+% Conjunctions
+He said that ... and that ...
+Although he said ... and he did ..., ...
+either ... or ...
+neither ... nor ... one will do
+neither this nor that one will do
+
+
+% gapping ellipses
+% See wikipedia article on gapping
+Should I attempt to call you, or you me?
+
+% The below parses (as it should), but parses incorrectly.
+*Susan likes to work the late shift, and Sam the early shift.
+
+% Compound queries
+% Typically, the two sub-phrases parse correctly, but, 
+% put together, they do not.
+What is a motor, and how does it work?
+What is a motor; how does it work?
+Who invented sliced bread, and when did they do it?
+Who invented sliced bread; when did they do it?
+
+% Coordinating conjunctions
+These are the snippers and those are the cutters.
+Grant me this wish and I will die happy.
+Tell me what to do and I will show him
+The brothers would have resisted but that they lacked courage
+It never rains but it pours.
+They had no sooner arrived but they turned around and left.
+
+% XXX Misc conjunction constructions that are still broken in the current parser:
+He is flighty and given to fanciful thoughts
+He is thoughtful, and not given to many words
+William Petre is described as smooth and obliging in manner, yet reserved and resolved, and not given to many words.
+He rose rapidly in the royal service and, in 1543, was knighted
+He was twice summoned before the Privy Council, first for a violent assault on Sir John Conway, then, ten years later, for fraud.
+From his youth he must have been a capable, pushing, insinuating man.
+
+% conjunction breakage: dangling MVp links needed to Ju
+They feel a "normal" person conforms to, and becomes imperceptible in, society.
+
+Grant me this wish and I will die happy.
+What did you tell her and what did she say
+*I saw John but Fred
+He talked to Steve and, apparently, Fred
+*He talked to, apparently, Fred
+I cannot discern any reason, other than some sort of historical blindness, for why the "fat link" mechanism was created.
+John; my advisor, Steve; and several other people are coming
+No one but she saw the prowler.
+
+% conjunction used to provide a definition.
+Logorrhea, or excessive and often incoherent talkativeness or wordiness, is a social disease.
+
+% The two below are valid sentences, but they parse incorrectly just right now
+% so we will put a * in front of them, for now, till the parse is fixed.
+*Mike finished in first place, and John in third.
+*Mike finished in first place, and John in last
+
+% --------------------------------------------------------------------
+% non-planar graph: "saw" and "yesterday" should link, but don't.
+% "dog" and "which" do link (and that is correct).
+*John saw a dog yesterday which was a Yorkshire terrier.
+
+% incorrect parses -- INCORRECT PARSES -- bad disjunct usage
+% These sentences typically parse just fine, but generate 
+% incorrect linkages.
+
+% Sentence used to parse incorrectly -- "of" linked to "bill", instead
+% of 12th.
+Senator Johnson introduced a bill on the 12th of July.
+Senator Johnson introduced a bill of July.
+
+% "one to two" should modify hours.
+It starts one to two hours later.
+It starts one or two hours later.
+
+% None of the generated parses are correct; all are garbage.
+% Put a star in front of this -- the sentence is good, the parses are bad.
+% The issue is that right/straight fail to modify 'through'; if they did,
+% then all would be good.
+*Bill went over the river and right through the woods.
+*Bill went over the river and straight through the woods.
+
+% More crazy parses due to bad conjunction handling
+Whenever he comes, she goes, and v.v.
+The market fell 156.83, or 8%, a week after Black Monday.
+
+% Hmm conjunctions .. these are  tricky to get right ... 
+Mike finished in first place, and John in third.
+Mike finished in first place, and John in last.
+
+% Rules should select "shouting.g" gerund, not "shouting.v" (participle)
+% Now fixed.
+The teacher's shouting startled the student.
+
+% "and so" is linked with Wq, should not be.
+% i.e. this parses(as it should), but incorrectly
+*Rama ate the apple, and so did Mohan.
+
+% Automatic possesive guessing broken when entity is in the dictionary:
+% "to run" is a verb, this breaks identification of "Ran" as entity;
+% fix by adding Ran explicitly as name to dictionary.
+% "hooker" is a noun ... but now works.
+% These are all working now.
+Flumblqwerty's shoes are red.
+Run's shoes are red.
+Ran's shoes are red.
+Asdf's philosophy was to build and sell
+Hooker's philosophy was to build and sell
+John's remark was awkward.
+John's sudden outburst was awkward.
+Lady's dress was awkward.
+
+% Other capitalization issues:
+We are from the planet Gorpon.
+
+% Broken comparatives:
+He is nothing less than inspired!
+He is less than bright!
+That is a less than optimal plan
+He is more than capable!
+He is more than qualified!
+they report less earnings than before
+they report less robust earnings than before
+they report less robust earnings than previously
+they report less robust earnings than they did previously
+They report much less robust earnings than they did earlier.
+They report much less robust earnings than they did for the third quarter.
+
+It takes longer than that.
+It takes more than that.
+The crossing takes longer than Washington thought it would.
+This allows companies to realize revenues quicker.
+This allows companies to realize revenues faster.
+
+The pig runs slower than the cat.
+
+% This works, notice the TR link:
+The better the computer, the faster the program.
+The bigger they are, the harder they fall.
+Florida is the balmier of the two.
+
+% It's not uncommon to drop "the" from "the same"
+It's same as the other one.
+It's the same as the other one.
+Amen’s hair is same as Ben’s.
+Amen’s hair is the same as Ben’s.
+
+The coffee tastes as it did last year.
+
+% problems with anticipated/suggested/expected, etc.
+The defenses have proved more formidable than was anticipated.
+The defenses have proven more formidable than was expected.
+The defenses were designed more formidably than was suggested.
+The defenses were designed more formidably than was expected.
+The earnings were lowered more strongly than was suggested.
+The rates were lowered more than suggested.
+The bolt was tightened more than was recommended.
+The bolt was tightened more than recommended.
+
+% colloquial expressions
+we should not forget the innocent people that was put in jail.
+you all had better get to going.
+
+There's more where that came from.
+There's plenty more where that came from.
+% --------------------------------------------------------------------
+% typographical errors
+they took there ball back
+than we left
+until than, I wasn't sure.
+
+% "or" should be "nor" for this to be grammatically correct.
+neither this or that one will do
+
+% --------------------------------------------------------------------
+% sentences that parse, but not correctly:
+% We are going to put *'s in front of them, until they are fixed...
+% viz they should parse,
+*You are as sweet as sugar.
+*The situation is not so bad as you suggest.
+*He was so foolish as to lie.
+*Ridiculous as it seems, the tale is true.
+*the hotel is quite comfortable as such establishments go
+*I don't know as I can answer your question.
+*Fuck off and have a great day, twit!
+*Fuck off and have a great day, jerk!
+
+I slipped on the ice as I ran home.
+
+% --------------------------------------------------------------------
+% assorted unclassified breakages, waiting for a fix:
+Although society has excluded the patients in the ward for their unique qualities, they feel 'safer' trying to fit in because they receive approval from nurses and the representatives of society.
+
+92 Chapter 10.............................................................................................................................................
+
+% --------------------------------------------------------------------
+% Sentence containing UTF8 chars that can lead to i/o or 
+% word-boundary problems
+*Bitter gourdはにがうりだそうであってるのかはちょっと不安ですが翻訳ソフトでやくしてみました。
+*Синтезируется из глюкозы в тканях и органах, например в сердце, печени, почках.
+
+% The period occurring "midword" with no spaces around it was causing
+% the dictionary lookup to go crazy. dict_order_user() fixes this, by
+% avoiding special treatment of periods when user-input strings are
+% provided.
+*You need it most.Either way you cant lose.
+
+% These sentences caused crashes in the initial wordgraph version.
+% (spell=4 in order to be compatible with future code that will make up to N
+% corrections when spell=N.)
+!spell=4
+*lgdebug(+D_IWA, "(%s) Gword %zu:%s split (split_counter=%zu) into", label,
+*@s
+% The following is corrected to: Vicki[~].f 's[~].v here
+vibeix here
+!spell=0
+% --------------------------------------------------------------------
+
+% The initial "T" used to match EMOTICON before the introduction
+% of negative regex'es. Now !/^"/ blocks that.
+*"T" This is a test
+
+% Sentences that caused a mess in the wordgraph flattening code:
+
+% Issue #146: The mess depends on both "To" and "To matching EMOTICON.
+% There can be any >5 words after "To".
+*"To" It's to let; there's a notice on the door
+
+% In the following sentence, the wordgraph complexity is because both
+% <vc-do> and vc-do are considered valid words (<vc-do> is in the dict,
+% vc-do matchesa regex), there are two alternatives, the later one is
+% longer due to ( [ and <,and there is an additional alternative level
+% when vc-do> gets broken to vc-do and > .
+*([<vc-do>
+
+% Sentences with all-capital words caused assertion failure in the SAT
+% parser after commit "add_empty_word(): Invoke only when needed". Got fix
+% on commit "Fix "Assertion (word_xnode != NULL) failed" in SAT solver".
+This is a TEST
+
+% The example for defect 28 from issue #50.
+The remarks--made off the cuff--were wrong.
+
+% The very long sentences that take forever to  parse are now in the
+% file 4.0.fix-long.batch
+% --------------------------------------------------------------------
+% --------------------------- THE END --------------------------------

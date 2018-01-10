@@ -1,0 +1,413 @@
+!batch
+!verbosity=1
+!echo
+!limit=1000
+!short=20
+!constituents=1
+!spell=0
+
+% Test sentences taken from bio-medical, biochemistry journal articles.
+% These tests sentences are originally from the biolg project.
+
+% UNITS --------------------------------------------------------
+
+% Some basic cases
+The 50 kDa protein is examined
+The protein ( 50 kDa ) is examined
+The mass is 50 kDa
+A protein of 50 kDa is examined
+The rate is 10 nm per msec
+The rate is 10 nm per one msec of time
+The last 195 bp of the DNA are examined
+
+% These should work also if the tokens are "merges" of number and unit
+The 50-kDa protein is examined
+The 50kDa protein is examined
+The mass is 50kDa
+A protein of 50kDa is examined
+The rate is 10nm per msec
+The rate is 10nm per 1msec of time
+The last 195bp of the DNA are examined
+
+% Number derived units are also recognized
+The rate is 10 mg/sec
+The rate is 10 mol/day
+The rate is 10 micrograms/mouse/day
+
+% Units previously in the dictionary have not been modified, and are
+% not allowed all the necessary roles.
+The 10 foot distance is examined
+
+% The following dont work yet, and would require special ".p" definitions
+% of the units, similar to, for example, feet.p and seconds.p.
+% This would require an OD- connectors (see feet.p)
+It fell 10 nm
+% This would require an OT- connector (see seconds.p)
+It lasted 10 msec
+% This would require Yd+ (see feet.p)
+It happened 10 nm away
+% This would require Yt+ (see seconds.p)
+It happened 10 msec later
+% This would require EC+ to have the intended parse (compare feet.p)
+The 10 bp longer sequence is examined
+
+% This one doesn't work because of "leftmost"
+The leftmost 195 bp of the DNA are examined
+
+% NUMERIC RANGES ------------------------------------------------
+
+The 50 to 100 kDa protein is examined
+Exons 40 to 50 were examined
+It was submitted in the period 1990 to 1995
+The range is 0 to 1
+The range is nine to twenty
+% ambiguities are mainly due to the bracketed part
+The production is low in rich media ( 50 to 300 LrpC molecules per cell )
+The enzyme has a weight of 125,000 to 130,000
+The domain ( residues 73 to 90 ) was shown
+The analysis revealed a transcript after 6 to 7.5 h
+CSF reached 50 to 100 nM
+A shift from 37 to 20 degrees C resulted in an increase
+An operon showed at 310 to 320 kb
+The sequence shows 28.2 to 34.6 % identities
+In the past 4 to 5 years results have advanced 
+One is the region 1911 to 1917
+% unnecessary (?) ambiguity with the range linking to "are"
+The segment includes the pacL from which genes 1 to 7 are transcribed
+The gene 1 to 7 mRNA synthesis was reduced
+There are  deviations of 2 to 3 A 
+% the range should link to the verb with MVp (~ "north"): to much ambiguous ?
+These transcripts are located 5 to 3
+These transcripts are located 5' to 3'
+
+% Ranges with hyphens
+
+The 50 - 100 kDa protein is examined
+Exons 40 -- 50 were examined
+It was submitted in the period 1990 --- 1995
+
+% Cases with "from" (e.g. "from 10 to 20") (TODO):
+% shifts
+The number of repeats was increased from 7 to 11 .
+Experiments revealed an increase from 0 to 5 min postinduction
+The transfer of cells from 37 to 50 degrees C repressed synthesis .
+The concentration increased from 125 to 325 microgram per assay .
+% ranges
+We inserted sequences from 5 to 21 bp in length
+The start point ranged from 17 to 18 base pairs
+The promoter contained a sequence near the region ( from 60 to 73 % )
+A region extending from 183 to 118 base pairs was required
+
+% Cases with "between"
+Transcription sets in ( between 8 and 16 h of culture ) .
+The pH optimum is between 5 and 7
+concentrations were measured  between 0 and 3 h after the beginning
+it shows activity at a temperature between 60 and 70 degrees C
+The activity is stable between pH 6 and 12
+
+% Numeric ranges with "merged" units (or "fold") also occur
+An 80 to 100-fold increase was observed
+Antigens ranged 82 to 90%
+
+% FOLD-WORDS --------------------------------------------------------
+
+This included an up to threefold increase
+There were increases in proteins, including actin (twofold to threefold)
+The association rate constant is also increased about 2-fold
+The affinity is approximately 30-fold weaker
+Leaves display a 2-fold accumulation
+This was about 10-fold higher
+% correct parse ranked second
+sigmaF was some twofold higher than sigmaE
+% does not parse
+It was two to threefold more abundant
+I found an at least twofold reduction
+It showed a fivefold anaerobic induction
+loci increased more than twofold
+% correct parse ranked fourth
+It corresponds to one- , two- and threefold phosphorilated proteins
+The structure shows a fold consisting of a beta-sheet
+
+% EQUATIONS ETC. --------------------------------------------------
+
+non-denaturing gradient gel electrophoresis (r = 0.859) was used
+preparations of 5 x 10(8) cfu/ml are made
+phosphorylation was observed (P = 0.06)
+bacteria with low G + C DNA content contain genes
+the strength was in the order of gerE > cotD > yfhP P2 > yfhP P1
+delta binds RNAP with an affinity of 2.5 x 10(6) M-1
+
+% "x" between numbers denoting multiplication
+A single cell inside a pool of 5 x 10000 lymphocytes could be quantified
+A single cell inside a pool of 5 x 10(4) could be quantified
+
+% "Arrows"
+We consider the MPO --> PAG pathway
+Codon 311 (Cys --> Ser) polymorphism is associated with apolipoprotein E4
+
+% GREEK LETTERS ----------------------------------------------------------
+minicells revealed the expression of both lambda and SPP1 genes
+We cloned a new gene encoding an alternative sigma factor
+The sigma factor sigma 35 of B. thuringiensis is homologous
+Each polymerase had a subunit composition analogous to beta beta2 alpha sigma delta omega 1 omega 2
+
+% MISC ADVERB CASES ----------------------------------------------------
+% compare
+patients are treated, therefore, even if they are negative
+patients are treated, however, even if they are negative
+% related?
+the results indicated, therefore, that it is required
+
+they prefer studies that are, however, open
+more importantly , they are open
+
+% i.e., e.g. and related
+they were not side-by-side (i.e., stacked)
+antagonists (e.g. WEB-2086) were examined 
+receptors, e.g. GluR5 and GluR, have been examined
+there is genetic heterogeneity, i.e. there are several genes
+
+% UPSTREAM, DOWNSTREAM, 3', 5'
+The soil from the river banks is washed downstream.
+He was making his way upstream.
+The view is upstream and the discharge is about 5.0 m3/s.
+It will require more information from upstream.
+The inverted repeat is found upstream of the promoter.
+The promoter is located immediately upstream of ftsY.
+The cryIAb gene was located 3 kb upstream of its initiator codon.
+mphR is located downstream from mrx.
+These transcripts are oriented 5' to 3'
+
+% MISCELLANIA (commented out not to confuse)
+% the patient tested negative
+
+% "MADE OF" VARIANTS
+the protein films have a microstructure formed of woven sheaves
+The sheaves are composed of well-defined whisker crystallites
+Different conjugates, composed of a peptide carrier and a cytotoxic moiety, have been investigated
+A study was made of the stability
+a protein made of the luminal domain fused to the tail
+the intracellular pool of enzyme is formed of newly synthesized molecules
+
+% "DESIGNATED" ETC.
+Mice that express epitope tagged SF-1 are being used
+The method labelled FAXS is rapid
+
+% ATTACH TO
+Isolated eosinophils from healthy donors rapidly attach to ASMC
+Dystrophin can attach to the cytoskeleton
+
+% INVESTIGATED, EXAMINED WHETHER
+this study examined whether AQP1 is present in HPMC
+
+
+% from PASBio -------------------------------------------------------
+
+% abolish.01
+% MEDLINE No.1
+This mutation abolishes splicing
+% EMBO No.1 (passive)
+Transcription is completely abolished
+
+% alter.01
+% MEDLINE No.1
+Mutations alter splice sites
+% EMBO No.3
+Phosphorylation was not altered by treating the cells
+
+% begin.01 ("start existing")
+% EMBO No.1
+The density begins between amino acids 136 and 140
+
+% begin.02 ("start doing")
+% EMBO No.1
+The levels begin to return
+
+% block.01
+% MEDLINE No.1  ('the' was manually added to "step")
+Mutations block the step II
+% EMBO No.3 (passive)
+Labeling is blocked by pre-incubation
+
+% catalyse.01, ("catalyze") is unknown
+% EMBO No.2 
+enzymes catalyze the unwinding
+% MEDLINE No.1 (passive)
+The metabolism is most likely catalysed by P450
+
+% confer.01
+% MEDLINE No.2
+The variant does not confer a risk
+% EMBO No.1 (passive)
+The phenotype can be conferred by replacing the C-terminus with Stat5
+
+% decrease.01
+% MEDLINE No.1
+Treatment decreased synthesis
+% EMBO No.2 (passive)
+The protection is decreased
+
+% delete.01
+% MEDLINE No.1
+Transcripts delete exons
+% EMBO No.4 (passive)
+the binding was deleted
+
+% develop.01 
+% MEDLINE No.1 ('a' was manually added to "deficiency")
+The son developed a deficiency
+
+% disrupt.01
+% MEDLINE No.1
+A mutation disrupted a sequence
+
+% eliminate.01
+% MEDLINE No.1 
+Deletion would eliminate a residue within a domain
+% EMBO No.4 (passive)
+All three sites are eliminated
+
+% encode.01
+% MEDLINE No.1 
+Supt4h2 encodes a protein
+% EMBO No.1
+SBP2 may be encoded by three transcripts
+
+% express.01
+% MEDLINE No.1  (passive) ('the' was manually added to "brain")
+The enzyme was expressed exclusively in the brain
+% MEDLINE No.7
+Retroelements express Pol
+
+% generate.01
+% MEDLINE No.1
+Prnd generates transcripts
+% MEDLINE No.7
+Molecules are generated by an alternative splicing
+
+% inhibit.01 MEDLINE No.1
+This peptide inhibited binding
+% inhibit.01 MEDLINE No.2 (passive)
+Isoforms are inhibited by rolipram
+
+% initiate.01 MEDLINE No.1 (?)
+Tumours had altered mRNAs , initiated within intron 1
+% initiate.01 MEDLINE No.2
+Cells initiate transcription at multiple sites
+% initiate.01 MEDLINE No.3 (intransitive)
+Translation initiates from an internal codon
+
+% lead.01 MEDLINE No.1
+A mutation leads to ligation
+% lead.01 ? (passive)
+
+% lose.01 MEDLINE No.1
+A variant which lost a site has been characterized
+% lose.01 EMBO No.3 (passive)
+Anchoring ability was lost
+
+% modify.01 MEDLINE No.1 (passive)
+Genes were modified
+% modify.01 EMBO No.2
+Factors that can modify the binding may regulate binding
+
+% mutate.01 MEDLINE No.1 (adj?)
+% [there may be a problem here with "deficiency"]
+The mutated allele resulted in deficiency
+% mutate.01 MEDLINE No.2 (passive participle postmodifier)
+The gene mutated in mice encodes a protein
+% mutate.01 EMBO No.4
+The fragments were mutated by the sequence
+% mutate.01 ? (active)
+
+% proliferate.01 MEDLINE No.1
+Cells are characterized by an ability to proliferate
+% proliferate.01 MEDLINE No.2
+Cells proliferate
+% proliferate.01 ? (passive)
+
+% recognize.01 MEDLINE No.1 (passive participle postmodifier)
+The protein would lack epitopes recognized by the serum
+% recognize.01 MEDLINE No.3
+A number recognized by cells have been isolated
+% recognize.01 MEDLINE No.5
+Antibodies recognize specifically a polypeptide
+
+% result.01 MEDLINE No.1
+We report the existence of isoforms which result from splicing
+% result.01 MEDLINE No.2
+Both mutations result in high proportions of mRNAs
+% result.01 ? (passive)
+
+% skip.01 MEDLINE No.1
+sequencing revealed a mutation, which skipped exon 3
+% skip.01 MEDLINE No.2
+An exon can be skipped by splicing
+
+% splice.01 MEDLINE No.1
+exon 30 is spliced together with the intron
+% splice.01 PNAS No.4
+3I spliced 20% as efficiently as 3F
+% splice.01 PNAS No.4 (oversimplified?)
+3I spliced
+
+% splice.02 MEDLINE No.1
+CD1c has a form that is thought to be spliced out
+% splice.02 MEDLINE No.2
+One exon is spliced out of the transcript
+% splice.02 MEDLINE No.9
+Exon 16 can be spliced out
+
+% transcribe.01 MEDLINE No.1
+The gene is transcribed
+% transcribe.01 MEDLINE No.2
+KLK41 transcribes two alternative transcripts
+
+% transform.01 MEDLINE No.1
+FGF8b can transform the midbrain into a cerebellum fate
+% transform.01 MEDLINE No.3
+Phospholipase D is known to transform cells into tumorigenic forms
+
+% transform.02 MEDLINE No.1
+The DNA was used to transform E. coli
+
+% translate.01 MEDLINE No.1
+Splicing results in a transcript which would be translated into a protein
+% translate.01 EMBO No.1
+Stat1 was translated
+% translate.01 EMBO No.2 (oversimplified? slightly modified)
+Stat1 translated can become a dimer
+
+% translate.02 MEDLINE No.1
+This review examines technologies that can be used to translate information
+% translate.02 MEDLINE No.3
+Acj6 translates information into specificity
+
+% translate.03 MEDLINE No.1
+The functions translate into modulations
+
+% truncate.01 MEDLINE No.1
+Changes were predicted to truncate the protein
+% truncate.01 MEDLINE No.2
+The domains were truncated
+
+% verbs taking particles
+The recombinant plasmid was screened out
+The adenine bulge is looped out
+A monomer is built up of strands
+
+% "in gel"
+% should have been in-gel to be grammatical -- could a spell cheker guess this?
+They were measured by in gel kinase assays
+
+
+% IMPORTANT: CAPITALIZED-WORDS SHOULD ALLOW "that" ETC. (<noun-sub-s> missing)
+it encodes a GPCR that is homologous to the chemokine
+% compare
+it encodes a gPCR that is homologous to the chemokine
+
+% "ORDERED" as an adjective
+The complex plays a role in the construction of ordered multicellular structures
+
+% CONCENTRATED as an adjective
+the genes were most concentrated in the cell

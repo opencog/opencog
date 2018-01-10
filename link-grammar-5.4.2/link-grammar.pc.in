@@ -1,0 +1,10 @@
+prefix=@prefix@
+exec_prefix=@exec_prefix@
+libdir=@libdir@
+includedir=@includedir@
+
+Name: link-grammar
+Description: A natural language parser based on link grammar theory
+Version: @VERSION@
+Libs: -L${libdir} -llink-grammar
+Cflags: -I${includedir}

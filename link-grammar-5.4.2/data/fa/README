@@ -1,0 +1,45 @@
+
+                   Persian Link Grammar
+                   --------------------
+                       By Jon Dehdari
+       Brigham Young University Linguistics Department
+                         2003-2005
+
+
+This README is for 'persianlg', a Persian (Farsi) implementation of the
+Link Grammar (LG) syntactic parser.  The LG Parser is a new approach to
+parsing sentences, and was developed at Carnegie Melon University.  The
+parser works by simply linking words together.  Directionality and
+distance are the primary constraints given, and are found in the 4.0.dict
+file.
+
+The Persian PersianLG implementation is the first full non-English
+implementation, to my knowledge.  It works a little differently than
+the English version, due to the more complex word structure.
+Morphological pre-parsing is required, either by hand, using the
+included stemmer (stemmer.pl) [1], or using the Persian-pckimmo
+morphology engine.  The LG-Soar framework, developed in the BYU Soar
+research group, has tied both the LG parser and the PC-Kimmo engine
+together, to provide seamless integration of morphology and syntax.
+Thus manual morphology pre-parsing is not necessary, nor is cutting
+and pasting pckimmo output to the link-parser input.
+
+For example, an unvoweled text like 'mn midAnm kh tu rfti.' (I know
+that you went), should go into the LG parser as 'mn mi dAn m kh tu rf t i.'
+See the orthography.txt file for the romanization scheme used.
+
+This package is Free Software, licensed under Lesser General Public
+License v.2.1 (www.fsf.org).  See LICENSE for details.  Note: the
+original PersianLG was made available under GPLv2; but, as of 2014,
+Jon Dehdari has consented to changing the license to LGPLv2.1 so that
+it can be included with the main Link Grammar project.
+
+
+[1]  The stemmmer is located in the /morphology/fa directory.  An 
+example usage is:
+
+   ./persianparse.sh 'man midAnam keh tu rafti.'
+
+or, equivalently:
+
+   echo -e 'man midAnam keh tu rafti.\n' | ./stemmer.pl -u | link-parser fa

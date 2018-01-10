@@ -1,0 +1,57 @@
+
+")" "%" "," "." ":" ";" "?" "!" "''" "'": RPUNC+;
+"(" "$" "``": LPUNC+;
+
+""«»《》【】『』`„“": QUOTES+;
+
+.=: STEMSUBSCR+;
+=: INFIXMARK+;
+"w|ts": SANEMORPHISM+;
+
+
+% Nebereikia daugiau ... 
+%
+%% Pirmoji linksnioutė I kirčiuotė
+%as  o  ui ą  u   e 
+%is io iui į iu yje i
+%ai ų  ams  us  ais  uose 
+%iai ių iams ius iais iuose
+%
+%% Pirmoji linksnioutė II kirčiuotė
+%žio žiui žiu tis čio čiui tį čiu tyje ti
+%žiai žių žiams žius žiais žiuose
+%čiai čių čiams čius čiais čiuose 
+%
+%% Pirmoji linksnioutė III kirčiuotė
+%ias ią ys y 
+%% Pirmoji linksnioutė IV kirčiuotė
+%tys ty 
+%
+%% Antroji linksniuotė
+%a os oje ė ės ei ę ėje 
+%oms omis ose ėms ėse
+%čios čią čia čioje
+%čioms čias čiomis čiose
+%
+%% Pirmoji asmenuotė
+%gu gi ga gam game gate 
+%gau gai go goem gote
+%gdavau gdavai gdavo gdavome gdavom gdavote
+%gsiu gsi gs gsime gsite 
+%gčiau gtum gtų gtume gtute k kime kite
+%
+%% Trečioji asmenuotė
+%au om ome ote iau 
+%ydavau ydavai ydavo ydavome ydavom ydavote 
+%ysiu ysi ysime ysite 
+%yčiau ytum ytų yk ykime ykite
+%
+%% Trečioji asmenuotė -- skaityti 
+%tau tai to tome tom tote čiau tei tė 
+%tėme tėm tėte tėt
+%tydavau tydavai tydavo tydavome tydavom tydavote tydavot
+%tysiu tysi tysime tysim tysite tysit
+%tyčiau tytum tytumei tytų 
+%tytume tytumėm tytumėme tytute tytumėte tytumėt
+%tyk tyki tykime tykim tykite tykit
+%  : SUF+;

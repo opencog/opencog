@@ -1,0 +1,11 @@
+; Post-processing knowledge file
+
+; ----------------------------------------------------------------------
+; ---------------------- LINK TYPE TABLE-------------------------------
+; ----------------------------------------------------------------------
+; The following table associates a domain type with each possible
+; starting link. It contains pairs: the first of each pair is a link
+; type, and the second is the domain to which that link type belongs.
+
+STARTING_LINK_TYPE_TABLE: 
+ ANY    e  

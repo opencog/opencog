@@ -1,0 +1,131 @@
+DOMAIN_STARTER_LINKS: S##* S##i SF SX Ce* Cet RS O OX Js Jp J* MVp Mp R* Rn Pa TH Pg Pv I PP Cr 
+Cs MX#* Wc Wd Wi Wa
+TI BIt MVs TO Mv Mg* MVa OF ON IN QI Ma CP* CPi CPx MVt S##w MX#r Pp MVi MVg Mgp MVx SI MX#p Cc
+S##t S##h S##b S##q L MX#a MG JG MX#x U S##d JT MVh Mr B#w B#d MVb COq Mj OD CX S##g PF Zc MX#d Bc
+K NIax 
+
+DOMAIN_CONTAINS_LINKS: 
+
+URFL_ONLY_DOMAIN_STARTER_LINKS: 
+
+LEFT_DOMAIN_STARTER_LINKS: A EA E CO#s CO* COd* YS YP Yt Yd GN DTie CO#n COp D##n ND
+
+STARTING_LINK_TYPE_TABLE: 
+S##*  v
+S##i  v
+S##t  v
+S##h  v
+S##b  v
+S##q  v
+S##d  z
+S##g  v
+SF v
+SX v
+Wd  s
+Wc  s
+Wi  z
+Wa  z
+Ce*  s
+Cet  s
+TH  b
+RS z
+O  n
+OX  n
+Js  n
+Jp  n
+J*  n
+MVp p
+Mp  p
+R*  b
+Rn  s
+Pa  a
+A   u
+Pg  v
+Pv  v
+I   v
+PP  v
+Cr  s
+Cs  s
+MX#* n
+TI  n
+BIt n
+MVs b
+EA e
+E e
+TO t
+MVi t
+Mv v
+Mg* v
+CO#s f
+CO* g
+COd* g
+CO#n g
+MVa i
+MVb i
+OF  p
+YS  y
+YP  y
+IN  n
+ON  n
+QI  b
+Ma  a
+CP* s
+CPi s
+CPx q
+MVt p
+MX#r b
+S##w z
+Pp p
+MVg z
+Mgp z
+MVx p
+SI n
+MX#p v
+Cc s
+L  a
+MX#a a
+Yt  y
+Yd  y
+MG  p
+JG  n
+GN  y
+MX#x p
+U  n
+JT n
+MVh b
+Mr b
+MX#d b
+B#w s
+B#d s
+DTie e
+COq s
+Mj  b
+OD  n
+CX  s
+COp c
+PF  v
+Zc  s
+Bc  s
+K   k
+D##n d
+ND  d
+NIax h
+
+; ----------------------------------------------------------------------
+; These links are not put in the word/link graph. They also cannot be the 
+; starter links for a domain. 
+
+IGNORE_THESE_LINKS: Xca  HA
+
+
+
+; ----------------------------------------------------------------------
+; these links are not traced further if they point back before the root word 
+; The WV, CV and IV links point to root verbs, and cause trouble if traced
+; backwards.  For example: "Every farmer has a donkey."  The period at the
+; end of the sentence triggers the trace-back, and blows away the subject.
+
+RESTRICTED_LINKS: 
+   B#*  D##w   B#w   B#d   AFh  MVt   Xx   HL   SFsic  AFd   Bc   CX  EAh  
+   H   HA   PFc   B#j   Wd   PF   Z   BW   CV   IV   WV
+

@@ -1,0 +1,883 @@
+%*****************************************************************************
+%
+%            
+%               A Link Grammar Parser Dictionary for Persian
+%
+%                           (C) Jon Dehdari, 2004-2005
+%
+%  This file is distributed under the terms of the General Public License v.2
+%            
+%
+%*****************************************************************************
+
+% Dictionary version number is 5.0.1 (formatted as V5v0v1+)
+<dictionary-version-number>: V5v0v1+;
+<dictionary-locale>: FA4ir+;
+
+% PERSIAN SYNTAX NOTES:
+%	-Normal Order:	(S) (PP) (O) V
+% 	-If Object if Definite:	(S) (O & rA) (PP) V
+%	-Marked categories in a phrase typically move to
+%	 the front, allowing pretty free word order
+%	 afterwards.  Just make sure the grammatical
+%	 markers (rA, be, dar, az, ...) are present in
+%	 this situation.
+
+% COMPOUND VERB NOTES:
+%	  jAru:			broom.n
+%	  zadan:		hit.v
+%	  jAru zadan:		sweep.v
+%	  jAru xub mi zad:	"he/she used to sweep well"
+%	  jAru rA zad:		"he/she hit the broom"
+%	  (see link 'K' for similar concept) 
+%
+
+% EZAFE NOTES:  -nouns can take ez. link afterwards and beforehand
+% 		-many preps (Geir, qAbel, sar, zir) must take ez. link afterwards,
+% 		-arabic preps (Geir, qAbel) can take ez. link beforehand,
+%		-persian preps cannot take ez. link beforehand,
+% 		-pronouns cannot take ez. link afterwards, 
+% 		-adj. and pronouns after nouns and prep. must form an ez. link
+%		-adj. must take ez. link beforehand.
+
+% LGPARSER NOTE: The more to the left something is (ceteris
+% paribus) the closer it will link.  This is important
+% for the SOV nature of Persian. Thus links from a verb:
+%   {O-} & {S-};	% This makes it SOV
+%   {S-} & {O-};	% And this makes it OSV
+
+% TODO: 
+% 	q's (non y/n), 
+% 	past participle verbs to form adj's
+% 	verbless things like 'fqirm' and ?'bzrg |m'? 
+% 	complementizers for NP's 'the book that is green'
+% 	(situation: 'kh |gr dr |irAn hst m, verb', and other "if" situations at both the beginning and end of a sentence
+%	more time and number situations
+
+
+
+% 0.	Definitions
+% I.	Nouns
+% II.	Pronouns
+% III.	Determiners
+% IV.	Verbs
+%		A. Normal Verbs
+%		B. Intransitive Verbs
+%		C. Compound Verbs
+%		D. Auxiliary Verbs
+%		E. Subordinating Verbs
+%		F. Passive Verbs
+%		G. Future Verbs
+%		H. Verb Prefixes
+%		I. Verb Suffixes
+% V.	Prepositions and Case Particles
+% VI.	Adjectives
+% VII.	Adverbs
+% VIII.	Other Grammatical Words
+
+
+
+% 0.	Definitions
+% AV 	Adverb [CO|E|MV]
+% AJM	Adjective Morphological Suffix (comparative|superlative) [?|L]
+% C 	Complementizer (aka Subordinate Clauses) [C]
+% CC 	Conjunction [CC]
+% CCcc	Conjunction for conjunctions
+% CCAM	Conjunction for attributive adjectives
+% CCAJM	Conjunction for attributive adjectives, top level
+% CCAMr	Conjunction for attributive adjectives on the Right side
+% CCAML	Conjunction for attributive adjectives on the Left side
+% CCAP	Conjunction for predicate adjectives
+% CCAJP	Conjunction for predicate adjectives, top level
+% CCAPR	Conjunction for predicate adjectives on the Right side
+% CCAPl	Conjunction for predicate adjectives on the Left side
+% CCF 	Conjunction for CP's on the Left side
+% CCO	Conjunction for Object (Accusative) phrases (both nouns and pronouns)
+% CCOR	Conjunction for Acc. words on the Right side
+% CCOl	Conjunction for Acc. words on the left side
+% CCOB	Conjunction for Acc. phrases, top level
+% CCN 	Conjunction for Noun phrases, nominative
+% CCNR	Conjunction for Nouns on the Right side
+% CCNl	Conjunction for Nouns on the Left side
+% CCP 	Conjunction for Prepositional phrases
+% CCPP	Conjunction for Prep phrases, top level
+% CCPr	Conj. for objects in a PP on the Right side
+% CCPL	Conj. for objects in a PP on the Left side
+% CCS 	Conjunction for Subject (nom), top level
+% COMMA	Connects a final comma with the following conjunction (eg. Bob, Sue, and Bill)
+% D 	Determiner (eg. yek-ketAb) [D]
+% EZ 	Ezafe (links Noun and M (noun|adj|pronoun))
+% I	Verb Future [I]
+% IK 	Light Verbs separated by linearity violations from non-verbal element (in future tense - eg. man dast xuAham zad) 
+% K 	Kompound verbs [K|ID?]
+% M 	Ezafe Construct or Genitive Pronominal Clitic (noun|adj|pronoun) [M|A]? (eg. ketAb e mA or ketAb-emAn)
+% NMS 	Noun Morphological Suffix - plural or indefinite (eg. ketAb-hA)
+% O 	Object (acc) [O]
+% On 	Object noun
+% Opn 	Object pronouns
+% ORDM	Ordinal number suffix morpheme
+% P	Predicate of stative verbs, for predicate adjectives, nouns [M] (eg. in ketAb ast; in bozorg ast)
+% PA 	Postposition Accusative (rA)
+% PO 	Preposition Object [J]
+% PP 	Preposition [MVp]
+% REL 	Relative clause [R] (eg. the book that I wrote is here) (note. using 'R' messes up stuff)
+% S 	Subject (nom) [S]
+% Sn 	Subject noun
+% Spn 	Subject pronouns (1st person,2nd... Plural, Singular)
+% SUB 	Subordinating word (eg. keh(that), AyA(y/n)) [TH]
+% SUBP	Subordinating Phrase, followed by 'keh' (eg. vaqti keh(when), barAye in keh(so that))
+% VM 	Verb Morpheme (prefixes: mi(DUR),be(IMPER or SUBJ),na(NEG)) [Pg| ]
+% VMO 	Verb Morpheme Object suffix (eg. didam-eC) [O]
+% VMP 	Verb Morpheme Person suffix (eg. did-am)
+% VMPK 	Verb Morpheme Person suffix for split complex predicates 
+% VMPP	Verb Morpheme Past Participle (eg. kard-eh)
+% VMT 	Verb Morpheme Tense suffix (d|t)
+% VPAS	Verb Passive (Become + Past Participle) (eg. kardeh Codan) [Pv]
+% VPPP	Verb Past Participle Person (eg. kardeh-am)
+% Wcc	left Wall for sentences with coordinating conjunction
+% Wd	left Wall for Declarative sentences with explicit subject
+% Wi	left Wall for Imperative sentences, or any other sentence without explicit subject
+% Xp	Sentence
+
+
+
+
+
+
+% I.	Nouns
+
+<noun-nom>:		Sns+;
+<noun-nom-plural>:	Sn3p+;
+<noun-acc>:		[On+];
+<noun-pred-stat>:	[Pn+];
+<noun-morph-plural>:	NMSp+;
+<noun-morph-indef>:	NMSi+;
+<noun-morph-suffix>:	( NMSp+ or NMSi+ );
+<postposition-acc>:	PA+;
+<preposition-obj>:	PO-;
+<relativizer>:		REL+;
+<determiner>:		D-;
+<determiner-indefinite>:	DI+;
+<ezafe-head>:		(EZ+ or M+);
+<ezafe-comp>:		M-;
+<conjunction-noun-nom>:	(CCNR- or CCNl+);
+<conjunction-acc>:	(CCOR- or CCOl+);
+<conjunction-prep>:	(CCPr- or CCPL+);
+<conjunction-ezafe-head>:	CCAJM+;
+<left-wall-declarative>:	{Wd-};
+
+
+/fa/words/words.n /fa/words/words.proper UNKNOWN-WORD.n :	% Nouns, normal
+  (	% Nouns in prepositional phrases
+    {<noun-morph-suffix>}
+    & {<ezafe-comp>}
+    & {( <ezafe-head> or <conjunction-ezafe-head> )}
+    & {<determiner>}
+    & {<relativizer>}
+    & ( <conjunction-prep> or <preposition-obj> )
+  )
+or
+  (	% Nouns in complement position of an ezAfe construct
+    {<noun-morph-suffix>}
+    & [<ezafe-comp>]	% Square Brackets are ugly! Please get rid of me.
+    & {( <ezafe-head> or <conjunction-ezafe-head> )}
+  )
+or
+  (	% Plural Nouns in nominal case
+    <noun-morph-plural>
+    & {( <ezafe-head> or <conjunction-ezafe-head> )}
+    & {<determiner>}
+    & {<relativizer>}
+    & ( 
+        <conjunction-noun-nom>
+      or 
+        ( <left-wall-declarative>
+	& <noun-nom-plural>
+	)
+      )
+  )
+or
+  (	% Singular Nouns in nominal case
+    {<noun-morph-indef>}
+    & {( <ezafe-head> or <conjunction-ezafe-head> )}
+    & {<determiner>}
+    & {<relativizer>}
+    & ( 
+        <conjunction-noun-nom>
+      or 
+        ( <left-wall-declarative>
+	& <noun-nom>
+	)
+      )
+  )
+or
+  (	% Nouns in accusative case
+    {<noun-morph-suffix>}
+    & {( <ezafe-head> or <conjunction-ezafe-head> )}
+    & {<determiner>}
+    & ((
+        {<postposition-acc>}
+	& {<relativizer>}
+        & ( <noun-acc> or <conjunction-acc> )
+      )
+     or
+      ( <noun-pred-stat> )
+     )
+  )
+;
+%({NMS+} & S+) or ({NMS+} & O+); % Similar to above stuff
+
+"hA.nms" "An.nms" "gAn.nms" "At.nms":	% Noun morphemes, plural suffix
+NMSp-;
+%NMSp- & {NMSi+} & Spn3p+; % experimental
+
+"i.nms" "|i.nms":	% Noun morphemes, indefinite suffix
+NMSi-;
+
+/fa/words/words.n.compound /fa/words/words.adj.compound UNKNOWN-WORD.nk:	% Noun component of compound verbs
+%?  (	% Rule out non-compounding possiblities, like 'yek jAru zad' or 'jAru rA zad'
+%    <postposition-acc>
+%    & <noun-acc>
+%  )
+%or
+  (	% Real compounds
+    K+
+  )
+;
+
+
+
+% II.	Pronouns
+
+<pronoun-nom-1>:	( {Wd-} & Spn1+ );
+<pronoun-nom-2>:	( {Wd-} & Spn2+ );
+<pronoun-nom-3s>:	( {Wd-} & Spn3s+ );
+<pronoun-nom-3p>:	( {Wd-} & Spn3p+ );
+<pronoun-acc>:		Opn+;
+<pronoun-ezafe>:	M-;
+<pronoun-enclitic>:	[M-];
+<pronoun-common>:
+(
+  <pronoun-ezafe>
+or
+  <conjunction-prep>
+or
+  <preposition-obj>
+or
+  (
+    (
+      <postposition-acc>
+      &
+      <pronoun-acc>
+    )
+    or
+    (<conjunction-acc>)
+  )
+or
+  <conjunction-noun-nom>
+);
+
+
+marA.pnacc mrA.pnacc torA.pnacc trA.pnacc:	% Acc. pronouns 'me' & 'thee'
+<pronoun-acc>;
+
+"man.pn" "mn.pn" "mA.pn" :	% 1st person pronouns
+<pronoun-common>
+or
+<pronoun-nom-1>
+;
+
+"tu.pn" "ComA.pn" "CmA.pn" :	% 2nd person pronouns
+<pronoun-common>
+or
+<pronoun-nom-2>
+
+;
+
+"|u.pn3s" "ce.wh" "ceh.wh" "ch.wh" :	% 3rd person singular pronoun
+<pronoun-common>
+or
+<pronoun-nom-3s>
+;
+
+"]nhA.pn" "]nAn.pn" "|iCAn.pn" :	% 3rd person plural pronoun
+<pronoun-common>
+or
+<pronoun-nom-3p>
+;
+
+"CAn.pme" "tAn.pme" "mAn.pme" "C.pme" "t.pme" "m.pme" :	% Nominal enclitics  eg. ketAbam 'my book'
+<pronoun-enclitic>;
+
+
+% III.	Determiners
+
+"ik.d" "iek.d" "yek.d" "kmi.d" "hic.d" "kmtr.d" "bEDi.d" "hmh.d" "hm.d" "hmdigr.d" "]n.d" "|in.d" "cndin.d" :
+  D+
+or
+  [<pronoun-common>]
+or
+  [<pronoun-nom-3p>]
+or
+  [[<pronoun-nom-3s>]]
+;
+
+/fa/words/words.numbers:
+{ORDM+}
+& (
+  D+
+or
+  [<pronoun-common>]
+or
+  [<pronoun-nom-3p>]
+or
+  [[<pronoun-nom-3s>]]
+  )
+;
+
+m.ordm om.ordm:	% Ordinal suffix morpheme
+ORDM-;
+
+% IV.	Verbs
+
+% MACROS
+<verb-prefix>:
+(
+  (
+    {VMdur-}
+  &
+    {VMneg-}
+  )
+  or
+    {VMbe-}
+);
+
+
+<verb-right-side>:
+(
+      VMP+	% for normal verbs with personal morpheme suffixes
+    or
+      CCF+	% for verbs with no personal ending, followed by conjunction
+    or
+      VMPP+	% for past participle verbs; in perfect tense
+    or
+      [()]	% for verbs with no personal ending (eg. 3rd person singular past)
+    or [RW+]	% for verbs with no personal ending (eg. 3rd person singular past)
+);
+
+<verb-right-side-comp>:
+(
+      VMP+	% for normal verbs with personal morpheme suffixes
+    or
+      CCF+	% for verbs with no personal ending, followed by conjunction
+    or
+      (SUB+ or C+)
+    or
+      VMPP+	% for past participle verbs; in perfect tense
+    or
+      [()]	% for verbs with no personal ending (eg. 3rd person singular past)
+     or [RW+]	% for verbs with no personal ending (eg. 3rd person singular past)
+);
+
+<verb-left-side>:
+{@AV-}
+& {( O- or CCOB-)}	% for one Object, or multiple ones
+& {@AV-}
+& {PP-}
+& {@AV-}
+& {[Wi- or [[C-]]]}
+;
+
+<verb-left-side-intrans>:
+{( P- or CCAJP-)}	% for one Predicate noun/adj., or multiple ones
+& {@AV-}
+& {PP-}
+& {@AV-}
+& {[ Spn3s- or Sns- ]}
+& {[(Wi- or C- or CC-)]}
+;
+
+/fa/words/words.v UNKNOWN-WORD.v:
+(	% For Non-Future tense (Normal)
+<verb-prefix>
+& {@AV-}	% Adverbs can occur almost anywhere, at a phrasal level
+& <verb-left-side>
+& {VMT+}
+& <verb-right-side>
+)
+or
+(	% For Future tense
+  I-
+  & {@AV-}
+  & <verb-left-side>
+  & VMT+
+  & {(   CCF+	% verbs with no personal ending, followed by conjunction
+    or
+      VMPP+	% past participle verbs; in perfect tense
+    or
+      RW+	% verbs with no personal ending (eg. 3rd person singular past)
+  )}
+)
+; 
+
+
+% IV.	Verbs	B. Intransitive Verbs
+/fa/words/words.v.intransitive:
+(	% for non-future tense
+  <verb-prefix>
+  & {@AV-}
+  & <verb-left-side-intrans>
+  & {VMT+}
+  & (
+      <verb-right-side>
+    or
+      <verb-right-side-comp>
+    )
+)
+or
+(	% For future tense
+  I-
+  & {@AV-}
+  & <verb-left-side-intrans>
+  & VMT+
+  & {(   CCF+	% verbs with no personal ending, followed by conjunction
+    or
+      VMPP+	% past participle verbs; in perfect tense
+    or
+      RW+	% verbs with no personal ending (eg. 3rd person singular past)
+  )}
+)	% For Future tense
+;
+
+% IV.	Verbs	C. Compound Verbs
+
+/fa/words/words.v.compound:
+(( <verb-prefix>
+   & {( [[PP-]] or VMO- )}  % For prep. phrases or acc. enclitics  between noun.k and light verb
+   & K-	%  "K"ompound verbs.  This gives false positives (eg. German "*Du sprichst auf")
+   & <verb-left-side>
+ )
+or
+ IK-
+)
+& {VMT+}
+& <verb-right-side>
+; 
+
+
+% IV.	Verbs	D. Auxiliary Verbs
+%	See subordinating verbs
+
+% IV.	Verbs	E. Subordinating Verbs
+
+/fa/words/words.v.sub "bAid.auxpr" "bAis.auxpa" "tuAn.auxpr" "tuAns.auxpa" "xuAs.auxpa" "AyA.q" "AiA.q" "]iA.q" :	% Simple subordinating verbs and Y/N
+<verb-prefix>
+& {@AV-}
+& <verb-left-side>
+& {VMT+}
+& <verb-right-side-comp>
+;
+
+/fa/words/words.v.compound.sub:	% Compound subordinating verbs
+<verb-prefix>
+& {@AV-}
+& K-
+& <verb-left-side>
+& {VMT+}
+& <verb-right-side-comp>
+;
+
+% IV.	Verbs	F. Passive Verb
+
+Cu.vpas C.vpas:
+<verb-prefix>
+& {I-}
+& VPAS-
+& {@AV-}
+& <verb-left-side>
+& {VMT+}
+& <verb-right-side-comp>
+; 
+
+% IV.	Verbs	F. Past Perfect Verb
+
+bu.vpperf:
+<verb-prefix>
+& {I-}
+& VPPP-
+& {@AV-}
+& <verb-left-side>
+& {VMT+}
+& <verb-right-side-comp>
+; 
+
+% IV.	Verbs	G. Future Verbs
+
+xuAh.fut:	% Verb that marks future tense
+( VMP+ or VMPK+ )
+& {I+}
+
+% ( K-		% future compound verbs
+%   & {VMO-}	% optional accusative enclitic
+%   & VMP+	
+%   & IK+
+% )
+%or
+% ( VMP+ & I+ )
+;
+
+
+% IV.	Verbs	H. Verb Prefixes
+
+na.vmn n.vmn:	% Negative verbal prefix
+VMneg+;
+
+mi.vmd:	% Durative verbal prefix
+VMdur+;
+
+be.vms b.vms:	% Subjunctive or imperative verbal prefix
+VMbe+;
+
+% IV.	Verbs	I. Verb Suffixes
+
+"d.vmt" "t.vmt" :	% Verb morpheme, tense
+VMT-;
+
+"emAn.vmo" "mAn.vmo" "etAn.vmo" "tAn.vmo" "eCAn.vmo" "CAn.vmo" "am.vmo" "m.vmo" "at.vmo" "et.vmo" "t.vmo" "aC.vmo" "eC.vmo" "C.vmo" :	% Verb morpheme, object
+( [VMO-] or [VMO+] );
+
+<verb-person-common>:
+({C-} or {Wi-})
+& (
+      ( {CC-}
+      & {VMO+}
+      )
+    or
+      ( {CC-}
+        & {VMO+}
+        & {
+	    CCF+
+	  or
+            ( SUB+ or [C+] )
+	  or
+	    RW+
+	  }
+	    
+      )
+  )
+;
+
+<verb-person-1>:	% Optional subject can only be 1st person pronoun
+{Spn1- or CCS-}
+& <verb-person-common>
+;
+
+<verb-person-2>:	% Optional subject can only be 2nd person pronoun
+{Spn2- or CCS-}
+& <verb-person-common>
+;
+
+<verb-person-3s>:	% Optional pronoun can only be 3s; liberal linkage to singular nouns
+{Spn3s- or Sns-}
+& {[<verb-person-common>]}
+;
+
+<verb-person-3p>:	% Optional subject must be a plural link -- either pronoun or noun or conjunction
+{Spn3p- or CCS- or Sn3p-}
+& <verb-person-common>
+;
+
+<verb-split-compound>:	% Workaround for complex predicates separated by future verb
+VMP-			% Normal situation - no split complex predicate
+or
+(			% Situation with complex predicates separated by future verb
+  VMPK-
+%  & IK-
+  & {( [[PP-]] or VMO- )}
+  & K-
+  & IK+
+)
+;
+
+
+"im.vmp" "m.vmp" :	% Verb morpheme,  1st person
+<verb-split-compound>
+& <verb-person-1>
+;
+
+"id.vmp" "i.vmp" :	% Verb morpheme,  2nd person
+<verb-split-compound>
+& <verb-person-2>
+;
+
+"d.vmp" "O.vmp" :	% Verb morpheme, 3rd person singular
+<verb-split-compound>
+& <verb-person-3s>
+;
+
+"nd.vmp" :	% Verb morpheme, 3rd person plural
+<verb-split-compound>
+& <verb-person-3p>
+;
+
+
+h.per eh.per:	% Verb Past Particple Morpheme Suffix 
+%dh.perf th.perf deh.perf teh.perf:	% Verb Past Particple Morpheme Suffix 
+VMPP-
+& {(
+      VPPP+
+    or
+      VPAS+	% For 'to become', 'kardeh Chodan'
+  )}
+;
+
+
+"|im.perf" "|m.perf" :	% Verb Past Participle Person Particle :-)  1st person
+VPPP-
+& <verb-person-1>
+;
+
+"|id.perf" "|i.perf" :	% Verb Past Participle Person Particle :-)  2nd person
+VPPP-
+& <verb-person-2>
+;
+
+"|st.perf" :	% Verb Past Participle Person Particle :-)  3rd person singular
+VPPP-
+& <verb-person-3s>
+;
+
+"|nd.perf" :	% Verb Past Participle Person Particle :-)  3rd person plural
+VPPP-
+& <verb-person-3p>
+;
+
+
+
+% V.	Prepositions and Case Particles
+
+/fa/words/words.pp:	% Preposition, normal
+( 
+    {EZ+}
+    & (
+          PO+	% eg. 'barA ye1 man2'
+	or
+	  CCPP+	% eg. 'barA ye1 man va2 to'
+      )
+)
+& PP+;
+
+
+rA.acc:	% Postposition, accusative
+PA-;
+
+
+% VI.	Adjectives
+<conjunction-ezafe-comp>:	(CCAMr- or CCAML+);
+<conjunction-adj-pred>:		(CCAPR- or CCAPl+);
+
+
+%/fa/words/words.adj UNKNOWN-WORD.adj:	% Adjectives, normal
+/fa/words/words.adj:	% Adjectives, normal
+( 
+  { AJM+ }
+  &(
+      Pa+	% Predicate adjectives
+    or
+      <conjunction-adj-pred>
+  )
+)
+or
+(
+  (
+      M-	% Attributive adjectives
+    or
+      <conjunction-ezafe-comp>
+  )
+  & (
+      {<ezafe-head>}
+    or
+      { AJM+ }
+    )
+)
+;
+
+"tarin.ajm" "trin.ajm" "tar.ajm" "tr.ajm" :	% Adjectival suffixes - comparative & superlative
+AJM-;
+
+
+
+
+% VII.	Adverbs
+
+/fa/words/words.adv "kojA.wh" "kjA.wh":	% Adverbs, normal
+AV+;	% A.K.A. in English as MVa, CO, Em (Quickly I go, I quickly go, I go quickly)
+
+
+
+
+% VIII.	Other Grammatical Words
+
+"ke.sub" "keh.sub" "kh.sub" ":" :		% Complementizer/relativizer (the ":" is temporary)
+{SUBP-}
+& ( SUB- or REL- )
+& C+;
+
+"agar.sub" "|gr.sub" "magar.sub" "mgr.sub" :	% Complementizer "if" NOTE: it's kinda in between complementizer and coordinating conjuntion (moreso complementizer).  hmmmm
+C+
+& ({ SUB- or SUB+ })
+;
+
+"e.ez" "ie.ez" "ye.ez":		% ezAfe -- for Gen., Adj.
+EZ-	% Warning: This is not like the EZ link for English
+& M+;
+
+"brAi.subp" "brA.subp" "vaqti.subp" "uaqti.subp" "uqti.subp":	% Complementizer Phrase
+%  question:  I know that you know. I know when you know. I know what you know. I know and you know.
+SUBP+
+;
+
+"va.cc" "ua.cc" "u.cc" "yA.cc" "iA.cc" "fqT.cc" "faqaT.cc" "vali.cc" "uali.cc" "uli.cc" : % coordinating conjunctions 'and, or, but'
+(
+  ( % for Prep Phrases
+    {COMMA-}
+    & CCPL-
+    & (CCP- or CCPP-)
+    & (CCPr+)
+  ) % for Prep Phrases
+  or
+  ( % for Noun Phrases
+    ( % for noun-nom
+      {COMMA-}
+      & CCNl-
+      & CCNR+
+      & (CCN+ or CCS+)
+      & {Wd-}
+    ) % for noun-nom
+    or
+    ( % for noun-acc
+      {COMMA-}
+      & CCOl-
+      & CCOR+
+      & {<postposition-acc>}
+      & (CCO+ or CCOB+)
+    ) % for noun-acc
+  ) % for Noun Phrases
+  or
+  (	% Adjectives
+    ( % Pred Adj
+%     {COMMA-}
+       CCAPl-
+      & CCAPR+
+      & (CCAP+ or CCAJP+)
+    ) % Pred Adj
+    or
+    ( % Attr Adj
+       CCAMr+
+      & CCAML-
+      & (CCAM- or CCAJM-)
+    ) % Attr Adj
+  )	% Adjectives
+)
+or
+  ( %	for CP's
+    {COMMA-}
+    & {CCcc-} %	CCcc is for multiple CC's
+    & CC+
+    & {CCcc+}
+  ) %	for CP's
+or
+  ( %	for CP's in 1st position
+    {COMMA-}
+    & CCF-
+    & {Wcc-}
+    & CC+
+    & {CCcc+} % CCcc is for multiple CC's
+  ) %	for CP's in 1st position
+;
+
+
+"," :
+(
+  (
+    ( % for Prep Phrases
+      CCPL-
+      & (CCP- or CCPP-)
+      & (CCPr+)
+    ) % for Prep Phrases
+  or
+    ( % for Noun Phrases
+      ( % noun-nom
+        CCNl-
+        & CCNR+
+	& (CCN+ or CCS+)
+      ) % noun-nom
+    or
+      (
+        
+      ) % noun-acc
+    ) % for Noun Phrases
+  )
+or
+  (
+    {CCcc-} %	CCcc is for multiple CC's
+    & CC+
+    & {CCcc+}
+  ) %	for CP's
+or
+  (
+    CCF-
+    & CC+
+    & {CCcc+} % CCcc is for multiple CC's
+  ) %	for CP's in the first position
+or
+  COMMA+
+) % needs to look for another CC to the right of it, also
+
+;
+
+
+
+%":" ";" :	% Colon and Semicolon
+%;
+
+%NUMBERS:   ;
+LEFT-WALL: ( Wcc+ or [Wi+] or [[Wd+]] ) & {Xp+}; % Connects to the Subject in declarative sentence, or Verb in subjectless or imperative sentence
+RIGHT-WALL: RW- ;
+
+"." "?" "!" :	% Period, Question Mark, and Exclamation
+Xp-
+& RW+
+;
+
+
+% The Junkyard
+%	& ( 
+%	    CCPr+
+%	  or
+%	    CCcc+
+%	  )
+%      ) % for the first CC in a PP
+  %  or
+  %    (
+  %      CCcc- 
+%	& CCPr-
+%	& (
+%	    CCPr+
+%	  or
+%	    CCcc+
+%	  )
+%      ) % for multiple CC's in a PP, not the first CC
+
+%% For verbs
+%& {S-}
+%& {@AV-}
+%& {C-}
+
+
+%%% Formerly external files that have been incorporated into this file:
+% words.v.m.person.1  words.v.m.person.2  words.v.m.person.3s  words.v.m.person.3p
+% words.pronoun.1  words.pronoun.2  words.pronoun.3s  words.pronoun.3p
+% words.v.perfect.person.1  words.v.perfect.person.2  words.v.perfect.person.3s  words.v.perfect.person.3p
+% words.v.m.object  words.pronoun.m.enclitic  words.v.m.tense  words.adj.m.suffix  words.q.aya  words.comp.if  words.n.m.suffix
+% words.v.aux  words.det

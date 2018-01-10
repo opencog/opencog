@@ -1,0 +1,17 @@
+% This file contains test cases for the SAT solver,
+% to validate that it works.
+% Since the SAT solver doesn't order (for now) its solutions
+% according to cost, this is just the solution it omits first
+% for the given sentence.
+
+Ithis is a test
+O
+O         +---Osm--+
+O   +-Ss*b+  +Ds**c+
+O   |     |  |     |
+Othis.p is.v a  test.n 
+O
+C(S (NP this.p)
+C   (VP is.v
+C       (NP a test.n)))
+C

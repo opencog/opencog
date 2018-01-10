@@ -1,0 +1,11 @@
+")" "%" "," "." ":" ";" "?" "!" "''" "'" "'s": RPUNC+;
+"(" "$" "``": LPUNC+;
+
+dakileri ki ler leri kileri düm m di lar diler um yor mi ni diğ diğini ini yorum miyorum ın in un ün nın nin nun nün a e ya ye i ı u ü yi yı yu yü yla ile yle da de ta te den ten dan tan sız: SUF+;
+
+""«»《》【】『』`„“": QUOTES+;
+
+=: INFIXMARK+;
+.=: STEMSUBSCR+;
+
+

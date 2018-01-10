@@ -1,0 +1,20 @@
+ %***************************************************************************%
+ %                                                                           %
+ %  Copyright (C) 2013 Linas Vepstas                                         %
+ %  See file "LICENSE" for information about commercial use of this system   %
+ %                                                                           %
+ %***************************************************************************%
+
+% Want to match apostrophes, for abbreviations (I'm I've, etc.) since
+% these cannot be auto-split with the current splitter.
+% Hyphenated words, and words with underbars in them, get split.
+ANY-WORD:  /^[[:alnum:]']+$/
+ANY-PUNCT:  /^[[:punct:]]+$/
+
+% Match anything that doesn't match the above.
+% Match anything that isn't white-space.
+% Well ... actually, reject anything that contains
+% punctuation. We do this, so that the tokenizer can split off the
+% the affixes (trailing commas, etc) correctly.
+JUNK: !/[[:punct:]]/
+JUNK: /^/

@@ -1,0 +1,19 @@
+ %***************************************************************************%
+ %                                                                           %
+ %  Copyright (C) 2013 Linas Vepstas                                         %
+ %  See file "LICENSE" for information about commercial use of this system   %
+ %                                                                           %
+ %***************************************************************************%
+
+% Want to match apostrophes, for abreviations (I'm I've, etc.) since these
+% cannot be auto-split with the current splitter.  Also want to accept
+% hyphenated words, and word with underbars in them.
+%#ANY-WORD:  /^[[:alnum:]_'-]+$/
+%#ANY-PUNCT:  /^[[:punct:]]+$/
+
+% Match anything that doesn't match the above.
+% Match anything that isn't white-space.
+% Well ... actually, reject anything that begins or ends with
+% punctuation. We do this, so that tokenize can split off the
+% the affixes (trailing commas, etc) correctly.
+%#JUNK: /^[^[:punct:]][^[:space:]]+[^[:punct:]]$/

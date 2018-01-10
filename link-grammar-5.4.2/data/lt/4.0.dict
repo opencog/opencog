@@ -1,0 +1,1047 @@
+% 
+%  ========== Lietuvių kalbos žodynas ir gramatika ==============
+%  =========== Lithuanian link-grammar dictionary ===============
+%
+% Experimental and incomplete ... 
+% It can parse 4.0.batch more or less correctly.
+%
+% Copyright (c) 2008, 2014 Linas Vepstas (Vepštas) linas@linas.org
+%
+% This file uses utf-8 characater encoding.
+% If editing with "vi", be sure to "set encoding=utf-8"
+% and also be sure to configure the terminal to use utf-8 encoding.
+%
+% Dictionary version number is 5.1.0 (formatted as V5v1v0+)
+<dictionary-version-number>: V5v1v0+;
+<dictionary-locale>: LT4lt+;
+
+% Ženklai:
+% Ą Č Ę Ė Į Š Ų Ū Ž
+% ą č ė ę į š ū ų ž
+%
+% Kaip išmušti ženklus:
+% ą == ,a  irgi ę į ų
+% č == <c irgi š ž
+% ė == .e   Ė
+% ū == -u   Ū
+% 
+% Pagal J. Ambraška ir J. Žiugžda
+% "Lietuvių Kalbos Gramatika (I dalis) Fonetika ir Morpfologia" (1937)
+% JAV LB Kultūros Fondas
+% Perspausdinta iš pirmos 1937 M. Sakalo b-vės laidos
+% VI laida Morkūno Spaustuvė, Čikago IL 1966 Jaunimo metai.
+%
+% Veiksnys (subject)  kas?
+% Papildinys (object) ko? ką? kam? kuo?
+%
+% Tarinys (predicate)
+% Grynasis tarinys      
+% Suvestinis tarinys
+% Sudurtinis tarinys
+% Mišrusis tarinys
+% 
+% 
+% D  == Daiktavardis
+% DV == Vardininkas Kas?
+%   DVv == vyriška, DVm == moteriška giminė
+%   DV*v == vienaskaita  DV*d == daugiskaita
+%   DV**p == pirmoji DV**a == antroji DV**t == trečioji  asmenuotė
+%
+% DK == Kilmininkas Ko?
+% DN == Naudininkas Kam?
+% DG == Galininkas Ką?
+% DI == Įnagininkas Kuo?
+% DU == Vietininkas Kur?
+% DS == Šauksmininkas O!
+%
+%
+% Reikia čia viska visai perašyti, išmesti ...   
+% V  == Veiksmažodis
+% VA == Aš
+% VT == Tu
+% VJv == Jis  (v == vyriška giminė)
+% VJm == Ji   (m == moteriška giminė)
+% VM == Mes
+% VU == Jus
+% VOv == Jie
+% VOm == Jos
+%
+% A == Būdvardis
+% B == Predikatinis Būdvardis
+%
+% P == Prieveiksmis
+% PB == būdo
+% PL == laiko
+% PP == priežasties
+% PV == vietos
+% PD == Prieveiksminės dalelytės.
+%
+% L == Prielinksnis
+% LK == su kilminiku
+% LG == su galininku
+% LI == su įnagininku
+%
+%
+% Xp == taškas gale sakinio (panašiai į anglų žodyna)
+
+Saulius: VJv+ & {Wd-};
+Audra Gintarė: VJm+ & {Wd-};
+
+% "Aš esu studentas.", "Aš esu studentė"
+esu: VA- & DV+;
+
+% giminė turi sueiti: negalima sakyti "jis yra studentė"
+yra: (VJv- & (DVv+ or Bv+)) or (VJm- & (DVm+ or Bm+));
+buvo: (VJv- & (DVv+ or Bv+)) or (VJm- & (DVm+ or Bm+));
+
+% prieveiksmi iš dešinės: "Mes einame namo"
+% arba prielinksni: "eina į mokyklą"
+einame einam gyvename gyvenam: VM- or ({VM-} & (LI+ or PV+) & {Wd- or Wi-});
+eina: {VJ-} & (LI+ or PV+);
+
+% -------------------------------
+% Daiktavardžai ... XXX
+šachmatais: VI-;
+
+mokytojas studentas: DVv- & {Xp+} & {Wd-};
+mokytoja studentė: DVm- & {Xp+} & {Wd-};
+
+% reikalauja veiksmažodi ant kairės.
+laivelį mokyklą sodžių: {DK-} & DG- & {LI-};
+
+% -------------------------------
+% Linksniai -- bendri
+% ko, kieno: dDK maža d tai reiškia 'dependent' ant kito daiktavardžio
+% ka: hDK maža h tai reiškia 'head' (galva), leidžia daiktavardi.
+<k-ko>: dDK+ or [dDK-];
+<n-kam>: dDN$ ^ {hDK$};
+<g-ka>: dDG$ ^ {hDK$};
+
+% Linksniai -- vyriški vienaskaita
+<vv-v-kas>: dDVvv$;
+<vv-k-ko>:  <k-ko>;
+<vv-n-kam>: <n-kam>;
+<vv-g-ka>:  <g-ka>;
+<vv-i-kuo>: VM+ & {Wd-};
+<vv-v-kur>: VM+ & {Wd-};
+<vv-s-o>: Wa-;
+
+% vyriški daugiskaita
+<vd-v-kas>: dDVvd$;
+<vd-k-ko>:  <k-ko>;
+<vd-n-kam>: <n-kam>;
+<vd-g-ka>:  <g-ka>;
+<vd-i-kuo>: VM+ & {Wd-};
+<vd-v-kur>: VM+ & {Wd-};
+<vd-s-o>: Wa-;
+
+% Linksniai -- moteriški vienaskaita
+<mv-v-kas>: dDVmv$;
+<mv-k-ko>:  <k-ko>;
+<mv-n-kam>: <n-kam>;
+<mv-g-ka>:  <g-ka>;
+<mv-i-kuo>: VM+ & {Wd-};
+<mv-v-kur>: VM+ & {Wd-};
+<mv-s-o>: Wa-;
+
+% moteriški daugiskaita
+<md-v-kas>: dDVmd$;
+<md-k-ko>:  <k-ko>;
+<md-n-kam>: <n-kam>;
+<md-g-ka>:  <g-ka>;
+<md-i-kuo>: VM+ & {Wd-};
+<md-v-kur>: VM+ & {Wd-};
+<md-s-o>: Wa-;
+
+% -------------------------------
+% Pirmoji linksniuotė
+% I kirčiuotė (Ambrška+Žiugžda)
+kaim.= nam.= tilt.= auks.= burt.= būst.= dūm.= elni.= grob.=
+inkst.= kalt.= kaul.= kauš.= kelt.= krūm.= kūn.= kurt.= moksl.=
+pien.= piūkl.= prūs.= poud.= rūm.= siūl.= sost.= sviest.= šaukšt.=
+šon.= tarp.= vyr.= žaisl.= žent.= :
+  LLPIRMIas+;
+
+% (Ambrška+Žiugžda)
+brol.= kurm.= ber.= joud.= kail.= kerš.= marg.= mol.= palš.= pant.=
+samt.= šuol.= uos.= uošv.= žirn.= žvirbl.= :
+  LLPIRMIis+;
+
+tvart.= : LLPIRMIas+ or  LLPIRMIis+;
+
+% tiktai daugistkaita (miltai ir t.t.)
+milt.= žąsl.= : LLPIRMIas+;
+
+% II kirčiuotė ---------------------
+% Kirčiai skirtingi nuo I-os kirčiuotės (Ambrška+Žiugžda)
+piršt.= rakt.= aūt.= būgn.= but.= dirž.= dvar.= gandr.= ginč.=
+ginkl.= gražt.= grumst.= gryb.= karkl.= mat.= men.= 
+niekš.= pad.= parš.= prot.= rąst.= rašt.= skund.= turt.= :
+  LLPIRMIas+;
+
+% Vardai .. Jonas it t.t.
+Jon.= Lin.= Tom.= : LLPIRMIas+;
+
+% ??? Ambraška-Žiugžda sako, kad II-o kirčio, bet nematau...
+% Man, lyg tai I kirč -is ...
+dalg.= kel.= kirv.= kišk.= kump.= latv.= niek.= plik.= syk.=
+smūg.= širm.= šok.= virž.= žal.= žingsn.= :
+  LLPIRMIis+;
+
+med.= rud.= vamzd.= žod.= :
+  LLPIRMIIis+;
+
+žard.= : LLPIRMIas+ or LLPIRMIIis+;
+
+% (Ambrška+Žiugžda)
+šal.= dang.= karš.= kir.= paukš.= rė.= sar.= :
+  LLPIRMIItis+;
+
+% tiktai daugistkaita
+ikr.= vart.= : LLPIRMIas+;
+grik.= : LLPIRMIis+;
+
+% III kirčiuotė -------------------------
+% Kirčiai skirtingi nuo I-os kirčioutės (pagal Ambrška+Žiugžda)
+kaln.= bern.= daikt.= driež.= irkl.= kelm.= kov.= laišk.= or.=
+plauk.= rand.= ryt.= sarg.= spirg.= stieb.= stog.= šern.= šiaud.=
+tėv.= uod.= veid.= verg.= vor.= žand.= žirg.= :
+  LLPIRMIas+;
+
+% (pagal Ambrška+Žiugžda)
+veln.=: LLPIRMIIIias+;
+vež.= ož.= žalt.= : LLPIRMIIIys+;
+
+% (pagal wiktionary)
+tev.= :
+  LLPIRMIas+;
+
+arkl.= : LLPIRMIas+ or LLPIRMIIIys+;
+
+% IV kirčiuotė ----------------------
+% Kirčiai skirtingi nuo I-os formos. (pagal Ambrška+Žiugžda)
+lauk.= kakl.= aul.= baln.= bals.= darž.= Diev.= dumbl.= gal.= gand.=
+gars.= jausm.= kamp.= kap.= krant.= krašt.= krauj.= laik.= laiv.=
+lizd.= mišk.= nag.= purv.= rag.= sparn.= tak.= tarn.= vaik.=
+vard.= varg.= varn.= verksm.= vilk.= :
+  LLPIRMIas+;
+
+% kelias ???
+
+% (Ambrška+Žiugžda)
+gaid.= garn.= gen.= koud.= lyd.= piršl.= smėl.= šaul.= šikšn.= :
+  LLPIRMIVys+;
+
+sve.= : LLPIRMIVtys+;
+
+% tik daugistkaita
+sak.= : LLPIRMIas+;
+
+% ---------------------------------------
+% Pirmoji linksniuotė vienaskaita I kirčiuotė
+=as.pvv:  LLPIRMIas- & <vv-v-kas>;
+=o.pvk:   LLPIRMIas- & <vv-k-ko>;
+=ui.pvn:  LLPIRMIas- & <vv-n-kam>;
+=ą.pvg:   LLPIRMIas- & <vv-g-ka>;
+=u.pvi:   LLPIRMIas- & <vv-i-kuo>;
+=e.pvu:   LLPIRMIas- & <vv-v-kur>;
+=e.pvs1:  LLPIRMIas- & <vv-s-o>;
+
+=is.pvv1:  LLPIRMIis- & <vv-v-kas>;
+=io.pvk:   LLPIRMIis- & <vv-k-ko>;
+=iui.pvn1: LLPIRMIis- & <vv-n-kam>;
+=į.pvg1:   LLPIRMIis- & <vv-g-ka>;
+=iu.pvi1:  LLPIRMIis- & <vv-i-kuo>;
+=yje.pvu1: LLPIRMIis- & <vv-v-kur>;
+=i.pvs1:   LLPIRMIis- & <vv-s-o>;
+
+% Pirmoji linksniuotė daugiskaita I kirčiuotė
+=ai.pdv:    LLPIRMIas- & <vd-v-kas>;
+=ų.pdk:     LLPIRMIas- & <vd-k-ko>;
+=ams.pdn:   LLPIRMIas- & <vd-n-kam>;
+=us.pdg:    LLPIRMIas- & <vd-g-ka>;
+=ais.pdi:   LLPIRMIas- & <vd-i-kuo>;
+=uose.pdu:  LLPIRMIas- & <vd-v-kur>;
+=ai.pds:    LLPIRMIas- & <vd-s-o>;
+
+=iai.pdv:    LLPIRMIis- & <vd-v-kas>;
+=ių.pdk:     LLPIRMIis- & <vd-k-ko>;
+=iams.pdn1:  LLPIRMIis- & <vd-n-kam>;
+=ius.pdg1:   LLPIRMIis- & <vd-g-ka>;
+=iais.pdi1:  LLPIRMIis- & <vd-i-kuo>;
+=iuose.pdu1: LLPIRMIis- & <vd-v-kur>;
+=iai.pds1:   LLPIRMIis- & <vd-s-o>;
+
+% Pirmoji linksniuotė vienaskaita II kirčiuotė
+=is.pvv2:   LLPIRMIIis- & <vv-v-kas>;
+=žio.pvk2:  LLPIRMIIis- & <vv-k-ko>;
+=žiui.pvn2: LLPIRMIIis- & <vv-n-kam>;
+=į.pvg2:    LLPIRMIIis- & <vv-g-ka>;
+=žiu.pvi2:  LLPIRMIIis- & <vv-i-kuo>;
+=yje.pvu2:  LLPIRMIIis- & <vv-v-kur>;
+=i.pvs2:    LLPIRMIIis- & <vv-s-o>;
+
+=tis.pvv2:  LLPIRMIItis- & <vv-v-kas>;
+=čio.pvk2:  LLPIRMIItis- & <vv-k-ko>;
+=čiui.pvn2: LLPIRMIItis- & <vv-n-kam>;
+=tį.pvg2:   LLPIRMIItis- & <vv-g-ka>;
+=čiu.pvi2:  LLPIRMIItis- & <vv-i-kuo>;
+=tyje.pvu2: LLPIRMIItis- & <vv-v-kur>;
+=ti.pvs2:   LLPIRMIItis- & <vv-s-o>;
+
+% Pirmoji linksniuotė daugiskaita II kirčiuotė
+=žiai.pdv2:    LLPIRMIIis- & <vd-v-kas>;
+=žių.pdk2:     LLPIRMIIis- & <vd-k-ko>;
+=žiams.pdn2:   LLPIRMIIis- & <vd-n-kam>;
+=žius.pdg2:    LLPIRMIIis- & <vd-g-ka>;
+=žiais.pdi2:   LLPIRMIIis- & <vd-i-kuo>;
+=žiuose.pdu2:  LLPIRMIIis- & <vd-v-kur>;
+=žiai.pds2:    LLPIRMIIis- & <vd-s-o>;
+
+=čiai.pdv2:   LLPIRMIItis- & <vd-v-kas>;
+=čių.pdk2:    LLPIRMIItis- & <vd-k-ko>;
+=čiams.pdn2:  LLPIRMIItis- & <vd-n-kam>;
+=čius.pdg2:   LLPIRMIItis- & <vd-g-ka>;
+=čiais.pdi2:  LLPIRMIItis- & <vd-i-kuo>;
+=čiuose.pdu2: LLPIRMIItis- & <vd-v-kur>;
+=čiai.pds2:   LLPIRMIItis- & <vd-s-o>;
+
+% Pirmoji linksniuotė vienaskaita III kirčiuotė
+=ias.pvv:  LLPIRMIIIias- & <vv-v-kas>;
+=io.pvk3:  LLPIRMIIIias- & <vv-k-ko>;
+=iui.pvn3: LLPIRMIIIias- & <vv-n-kam>;
+=ią.pvg:   LLPIRMIIIias- & <vv-g-ka>;
+=iu.pvi3:  LLPIRMIIIias- & <vv-i-kuo>;
+=yje.pvu3: LLPIRMIIIias- & <vv-v-kur>;
+=e.pvs3:   LLPIRMIIIias- & <vv-s-o>;
+
+=ys.pvv3y:  LLPIRMIIIys- & <vv-v-kas>;
+=io.pvk3y:  LLPIRMIIIys- & <vv-k-ko>;
+=iui.pvn3y: LLPIRMIIIys- & <vv-n-kam>;
+=į.pvg3y:   LLPIRMIIIys- & <vv-g-ka>;
+=iu.pvi3y:  LLPIRMIIIys- & <vv-i-kuo>;
+=yje.pvu3y: LLPIRMIIIys- & <vv-v-kur>;
+=y.pvs3y:   LLPIRMIIIys- & <vv-s-o>;
+
+% Pirmoji linksniuotė daugiskaita III kirčiuotė
+=iai.pdv3:   LLPIRMIIIias- & <vd-v-kas>;
+=ių.pdk3:    LLPIRMIIIias- & <vd-k-ko>;
+=iams.pdn3:  LLPIRMIIIias- & <vd-n-kam>;
+=ius.pdg3:   LLPIRMIIIias- & <vd-g-ka>;
+=iais.pdi3:  LLPIRMIIIias- & <vd-i-kuo>;
+=iuose.pdu3: LLPIRMIIIias- & <vd-v-kur>;
+=iai.pds3:   LLPIRMIIIias- & <vd-s-o>;
+
+=iai.pdv3y:   LLPIRMIIIys- & <vd-v-kas>;
+=ių.pdk3y:    LLPIRMIIIys- & <vd-k-ko>;
+=iams.pdn3y:  LLPIRMIIIys- & <vd-n-kam>;
+=ius.pdg3y:   LLPIRMIIIys- & <vd-g-ka>;
+=iais.pdi3y:  LLPIRMIIIys- & <vd-i-kuo>;
+=iuose.pdu3y: LLPIRMIIIys- & <vd-v-kur>;
+=iai.pds3y:   LLPIRMIIIys- & <vd-s-o>;
+
+% Pirmoji linksniuotė vienaskaita IV kirčiuotė
+=ys.pvv4:   LLPIRMIVys- & <vv-v-kas>;
+=žio.pvk4:  LLPIRMIVys- & <vv-k-ko>;
+=žiui.pvn4: LLPIRMIVys- & <vv-n-kam>;
+=į.pvg44:   LLPIRMIVys- & <vv-g-ka>;
+=žiu.pvi4:  LLPIRMIVys- & <vv-i-kuo>;
+=yje.pvu4:  LLPIRMIVys- & <vv-v-kur>;
+=y.pvs4:    LLPIRMIVys- & <vv-s-o>;
+
+=tys.pvv =čias.pvv4:  LLPIRMIVtys- & <vv-v-kas>;
+=čio.pvk4:  LLPIRMIVtys- & <vv-k-ko>;
+=čiui.pvn4: LLPIRMIVtys- & <vv-n-kam>;
+=tį.pvg4 =čią.pvg4:   LLPIRMIVtys- & <vv-g-ka>;
+=čiu.pvi4:  LLPIRMIVtys- & <vv-i-kuo>;
+=tyje.pvu4: LLPIRMIVtys- & <vv-v-kur>;
+=ty.pvs4:   LLPIRMIVtys- & <vv-s-o>;
+
+% Pirmoji linksniuotė daugiskaita IV kirčiuotė
+=žiai.pdv4:   LLPIRMIVys- & <vd-v-kas>;
+=žių.pdk4:    LLPIRMIVys- & <vd-k-ko>;
+=žiams.pdn4:  LLPIRMIVys- & <vd-n-kam>;
+=žius.pdg4:   LLPIRMIVys- & <vd-g-ka>;
+=žiais.pdi4:  LLPIRMIVys- & <vd-i-kuo>;
+=žiuose.pdu4: LLPIRMIVys- & <vd-v-kur>;
+=žiai.pds4:   LLPIRMIVys- & <vd-s-o>;
+
+=čiai.pdv4:   LLPIRMIVtys- & <vd-v-kas>;
+=čių.pdk4:    LLPIRMIVtys- & <vd-k-ko>;
+=čiams.pdn4:  LLPIRMIVtys- & <vd-n-kam>;
+=čius.pdg4:   LLPIRMIVtys- & <vd-g-ka>;
+=čiais.pdi4:  LLPIRMIVtys- & <vd-i-kuo>;
+=čiuose.pdu4: LLPIRMIVtys- & <vd-v-kur>;
+=čiai.pds4:   LLPIRMIVtys- & <vd-s-o>;
+
+% -------------------------------
+% Antroji linksniuotė
+% I kirčiuotė
+šark.= jur.= prog.= bob.= duon.= geld.= gėd.= ien.= yl.= jauj.= 
+juost.= karp.= kilp.= kink.= kuop.= kuos.= liep.= lov.= lūp.= malk.=
+maršk.= nuom.= piev.= plunksn.= sauj.= sien.= smilg.= start.=
+stirn.= šluot.= tuop.= ūdr.= vant.= varž.= vėtr.= vinkšn.= 
+  : LLANTRIa+;
+
+% tiktai daugiskaita:
+ėdži.= girn.= lėš.= strėn.= 
+  : LLANTRIa+;
+
+drob.= aib.= aukl.= baim.= buož.= dirs.= dulk.= gemb.= karv.=
+kaug.= kerp.= kiaun.= kiel.= kriauš.= kurp.= laim.= laisv.= lendr.=
+ling.= lys.= meil.= menk.= pelk.= pemp.= rykšt.= rop.= 
+saul.= seil.= smarv.= šiaur.= teis.= zyl.= žiurk.= žvyn.=
+  : LLANTRIe+;
+
+% Tiktai daugiskaita:
+dumpl.= riauš.= žirkl.= žnypl.=
+  : LLANTRIe+;
+
+% --------
+% II kirčiuotė rašoma taip pat kaip pirma ...
+rank.= dirv.= knyg.= bal.= drusk.= plyt.= plut.= pup.= put.= rūt.=
+viet.=
+  : LLANTRIa+;
+dvasi.= gaili.= giri.= vali.=
+  : LLANTRIa+;
+
+% II kirčiuotė rašoma taip pat kaip pirma ...
+up.= bit.= blak.= deiv.= dygl.= draug.= egl= gil.= kiaul.= laum.= liž.=
+pus.= silk.= švent.= veisl.= virv.= žagr.= žem.=
+  : LLANTRIe+;
+Tilž.=
+  : LLANTRIe+;
+
+% Tiktai daugiskaita:
+lub.= šlaj.= šuk.= vadži.=
+  : LLANTRIa+;
+drign.= repl.= rog.= stakl.=
+  : LLANTRIe+;
+
+% --------
+% III kirčiuotė rašosi taip pat kaip pirma ...
+galv.= trob.= burn.= naud.= ožk.= pėd.= skiedr.= žmon.= :  LLANTRIa+;
+giesm.= gerkl.= aikšt.= varšk.= versm.= : LLANTRIe+;
+
+% --------
+% IV kirčiuotė
+mar.= : LLANTRIVti+;
+
+% Dauguma IV-os kirčiuotes rašosi taip pat kaip pirma ...
+dain.= valdž.= ang.= ąs.= aušr.= band.= bang.= barzd.= daub.= dien.=
+giedr.= iev.= kalb.= karn.= kart.= kruv.=  lazd.= lent.=
+mald.= merg.= rib.= sal.= sausr.= skol.= spalv.= sul.= tams.=
+taut.= ties.= tvor.= uol.= valk.= žaizd.= žiem.=
+  : LLANTRIa+;
+
+dali.= gauj.= gij.= vej.= žini.=
+  : LLANTRIa+;
+
+eil.= derm.= drausm.= duob.= garb.= gelm.= gėl.= kat.= kert.= kregžd.=
+lėl.= mįsl.= pel.= prasm.= pūsl.= raupl.= riek.= siul.= skyl.= srov.=
+sterbl.= šlov.= tarm.= taur.= varl.= vert.= vėž.= žiev.= žym.=
+žol.= žūkl.= žvaigžd.=
+  : LLANTRIe+;
+
+% Tiktai daugiskaita:
+miel.=
+  : LLANTRIe+;
+
+% ---------------------------------------
+% lapas, lapė
+% lenkas, lenkė
+lap.= lenk.=:  LLPIRMIas+ or LLANTRIe+;
+
+% varpas, varpa ; lankas lanka
+lank.= varp.= : LLPIRMIas+ or LLANTRIa+;
+
+% sieliai, siela
+siel.= : LLPIRMIis+ or LLANTRIa+;
+
+% kamštis, kamša
+kamš.= : LLPIRMIItis+ or LLANTRIa+;
+
+% žynys, žynė
+žyn.= : LLPIRMIVys+ or LLANTRIe+;
+
+% šaka, šakės
+šak.=: LLANTRIa+ or LLANTRIe+;
+
+% kartis - pirmoji linksniuotė: matas grūdams seikėti, kaušas, seikas
+% kartis - trečioji linksniuotė:  gyvulio kartis (?) bet irgi karčių tvora
+kar.=: LLPIRMIItis+ or LLTRETItis+;
+
+% ---------------------------------------
+% Antroji linksniuotė vienaskaita I kirčiuotė
+=a.avv1:   LLANTRIa- & <mv-v-kas>;
+=os.avk1:  LLANTRIa- & <mv-k-ko>;
+=ai.avn1:  LLANTRIa- & <mv-n-kam>;
+=ą.avg1:   LLANTRIa- & <mv-g-ka>;
+=a.avi1:   LLANTRIa- & <mv-i-kuo>;
+=oje.avu1: LLANTRIa- & <mv-v-kur>;
+=a.avs1:   LLANTRIa- & <mv-s-o>;
+
+=ė.avv1:   LLANTRIe- & <mv-v-kas>;
+=ės.avk1:  LLANTRIe- & <mv-k-ko>;
+=ei.avn1:  LLANTRIe- & <mv-n-kam>;
+=ę.avg1:   LLANTRIe- & <mv-g-ka>;
+=e.avi1:   LLANTRIe- & <mv-i-kuo>;
+=ėje.avu1: LLANTRIe- & <mv-v-kur>;
+=e.avs1:   LLANTRIe- & <mv-s-o>;
+
+% Antroji linksniuotė daugiskaita I kirčiuotė
+=os.adv1:   LLANTRIa- & <md-v-kas>;
+=ų.adk1:    LLANTRIa- & <md-k-ko>;
+=oms.adn1:  LLANTRIa- & <md-n-kam>;
+=as.adg1:   LLANTRIa- & <md-g-ka>;
+=omis.adi1: LLANTRIa- & <md-i-kuo>;
+=ose.adu1:  LLANTRIa- & <md-v-kur>;
+=os.ads1:   LLANTRIa- & <md-s-o>;
+
+=ės.adv1:   LLANTRIe- & <md-v-kas>;
+=ių.adk1:   LLANTRIe- & <md-k-ko>;
+=ėms.adn1:  LLANTRIe- & <md-n-kam>;
+=es.adg1:   LLANTRIe- & <md-g-ka>;
+=ėmis.adi1: LLANTRIe- & <md-i-kuo>;
+=ėse.adu1:  LLANTRIe- & <md-v-kur>;
+=ės.ads1:   LLANTRIe- & <md-s-o>;
+
+% Antroji linksniuotė II ir III kirčiuotė rašosi taip pat kaip pirma ...
+
+% Antroji linksniuotė vienaskaita IV kirčiuotė
+=ti.avv1:    LLANTRIVti- & <mv-v-kas>;
+=čios.avk1:  LLANTRIVti- & <mv-k-ko>;
+=čiai.avn1:  LLANTRIVti- & <mv-n-kam>;
+=čią.avg1:   LLANTRIVti- & <mv-g-ka>;
+=čia.avi1:   LLANTRIVti- & <mv-i-kuo>;
+=čioje.avu1: LLANTRIVti- & <mv-v-kur>;
+=čia.avs1:   LLANTRIVti- & <mv-s-o>;
+
+% Antroji linksniuotė daugiskaita IV kirčiuotė
+=čios.adv1:   LLANTRIVti- & <md-v-kas>;
+=čių.adk1:    LLANTRIVti- & <md-k-ko>;
+=čioms.adn1:  LLANTRIVti- & <md-n-kam>;
+=čias.adg1:   LLANTRIVti- & <md-g-ka>;
+=čiomis.adi1: LLANTRIVti- & <md-i-kuo>;
+=čiose.adu1:  LLANTRIVti- & <md-v-kur>;
+=čios.ads1:   LLANTRIVti- & <md-s-o>;
+
+% -------------------------------
+% Trečioji linksniuotė
+
+% (Ambrška+Žiugžda)
+an.= skil.= pal.= pin.= svir.= val.=
+  : LLTRETItis+;
+
+toš.= rūš.= krosn.= 
+  : LLTRETIis+;
+
+% Tiktai daugiskaita:
+pirš.= 
+  : LLTRETIis+;
+
+% II kirčiuotė, tiktai daugiskaita, taip pat kaip IV kirčiuotė:
+dur.= 
+  : LLTRETIVis+;
+
+% III kirčiuotė kaip pirmoji:
+vilt.= : LLTRETItis+;
+žver.= : LLTRETIis+;
+
+šird.= šerd.= 
+  : LLTRETIIIis+;
+
+% IV kirčiuotė kaip pirmoji (minkšta -ių duag. kilm.)
+% ang.=   XXXXX
+vin.= ak.= angl.= aš.= av.= blužn.= dal.= krūt.= pusn.= puš.=
+ugn.= usn.= 
+  : LLTRETIis+;
+
+% IV kirčiuotė kieta daug. kilmininko ų
+% [[LLTRETIis+]] leistu tyrinėti klaidas, pvz: "žuvių" vietoj "žuvų"
+aus.= šakn.= tulž.= viln.= žąs.= žuv.=
+  : LLTRETIVis+;
+%  : LLTRETIVis+ or [[LLTRETIis+]];
+
+dan.= ly.= min.= mir.= nak.= pir.= rakš.= sag.=
+  : LLTRETIVtis+;
+
+vag.=
+  : LLTRETIViui+;
+
+% Tiktai daugiskaita:
+makš.=
+  : LLTRETIVtis+;
+
+
+% Trečioji linksniuotė vienaskaita I kirčiuotė
+
+=tis.tvv1:   LLTRETItis- & <mv-v-kas>;
+=ties.tvk1:  LLTRETItis- & <mv-k-ko>;
+=čiai.tvn1:  LLTRETItis- & <mv-n-kam>;
+=tį.tvg1:    LLTRETItis- & <mv-g-ka>;
+=timi.tvi1:  LLTRETItis- & <mv-i-kuo>;
+=tyje.tvu1:  LLTRETItis- & <mv-v-kur>;
+=tie.tvs1:   LLTRETItis- & <mv-s-o>;
+
+=is.tvv1:   LLTRETIis- & <mv-v-kas>;
+=ies.tvk1:  LLTRETIis- & <mv-k-ko>;
+=iai.tvn1:  LLTRETIis- & <mv-n-kam>;
+=į.tvg1:    LLTRETIis- & <mv-g-ka>;
+=imi.tvi1:  LLTRETIis- & <mv-i-kuo>;
+=yje.tvu1:  LLTRETIis- & <mv-v-kur>;
+=ie.tvs1:   LLTRETIis- & <mv-s-o>;
+
+% Trečioji linksniuotė daugiskaita I kirčiuotė
+=tys.tdv1:   LLTRETItis- & <md-v-kas>;
+=čių.tdk1:   LLTRETItis- & <md-k-ko>;
+=tims.tdn1:  LLTRETItis- & <md-n-kam>;
+=tis.tdg1:   LLTRETItis- & <md-g-ka>;
+=timis.tdi1: LLTRETItis- & <md-i-kuo>;
+=tyse.tdu1:  LLTRETItis- & <md-v-kur>;
+=tys.tds1:   LLTRETItis- & <md-s-o>;
+
+=ys.tdv1:   LLTRETIis- & <md-v-kas>;
+=ių.tdk1:   LLTRETIis- & <md-k-ko>;
+=ims.tdn1:  LLTRETIis- & <md-n-kam>;
+=is.tdg1:   LLTRETIis- & <md-g-ka>;
+=imis.tdi1: LLTRETIis- & <md-i-kuo>;
+=yse.tdu1:  LLTRETIis- & <md-v-kur>;
+=ys.tds1:   LLTRETIis- & <md-s-o>;
+
+% Trečioji linksniuotė vienaskaita III kirčiuotė
+
+=is.tvv3:   LLTRETIIIis- & <mv-v-kas>;
+=ies.tvk3:  LLTRETIIIis- & <mv-k-ko>;
+=žiai.tvn3: LLTRETIIIis- & <mv-n-kam>;
+=į.tvg3:    LLTRETIIIis- & <mv-g-ka>;
+=imi.tvi3:  LLTRETIIIis- & <mv-i-kuo>;
+=yje.tvu3:  LLTRETIIIis- & <mv-v-kur>;
+=ie.tvs3:   LLTRETIIIis- & <mv-s-o>;
+
+% Trečioji linksniuotė daugiskaita III kirčiuotė
+
+=ys.tdv3:   LLTRETIIIis- & <md-v-kas>;
+=žių.tdk3:  LLTRETIIIis- & <md-k-ko>;
+=ims.tdn3:  LLTRETIIIis- & <md-n-kam>;
+=is.tdg3:   LLTRETIIIis- & <md-g-ka>;
+=imis.tdi3: LLTRETIIIis- & <md-i-kuo>;
+=yse.tdu3:  LLTRETIIIis- & <md-v-kur>;
+=ys.tds3:   LLTRETIIIis- & <md-s-o>;
+
+% Trečioji linksniuotė vienaskaita IV kirčiuotė
+
+=is.tvv4:   LLTRETIVis- & <mv-v-kas>;
+=ies.tvk4:  LLTRETIVis- & <mv-k-ko>;
+=iai.tvn4:  LLTRETIVis- & <mv-n-kam>;
+=į.tvg4:    LLTRETIVis- & <mv-g-ka>;
+=imi.tvi4:  LLTRETIVis- & <mv-i-kuo>;
+=yje.tvu4:  LLTRETIVis- & <mv-v-kur>;
+=ie.tvs4:   LLTRETIVis- & <mv-s-o>;
+
+=tis.tvv4:   LLTRETIVtis- & <mv-v-kas>;
+=ties.tvk4:  LLTRETIVtis- & <mv-k-ko>;
+=čiui.tvn4:  LLTRETIVtis- & <mv-n-kam>;
+=tį.tvg4:    LLTRETIVtis- & <mv-g-ka>;
+=timi.tvi4:  LLTRETIVtis- & <mv-i-kuo>;
+=tyje.tvu4:  LLTRETIVtis- & <mv-v-kur>;
+=tie.tvs4:   LLTRETIVtis- & <mv-s-o>;
+
+=is.tvv4u:   LLTRETIViui- & <mv-v-kas>;
+=ies.tvk4u:  LLTRETIViui- & <mv-k-ko>;
+=iui.tvn4u:  LLTRETIViui- & <mv-n-kam>;
+=į.tvg4u:    LLTRETIViui- & <mv-g-ka>;
+=imi.tvi4u:  LLTRETIViui- & <mv-i-kuo>;
+=yje.tvu4u:  LLTRETIViui- & <mv-v-kur>;
+=ie.tvs4u:   LLTRETIViui- & <mv-s-o>;
+
+% Trečioji linksniuotė daugiskaita IV kirčiuotė
+% kieta kilmininko ų
+
+=ys.tdv4:   LLTRETIVis- & <md-v-kas>;
+=ų.tdk4:    LLTRETIVis- & <md-k-ko>;
+=ims.tdn4:  LLTRETIVis- & <md-n-kam>;
+=is.tdg4:   LLTRETIVis- & <md-g-ka>;
+=imis.tdi4: LLTRETIVis- & <md-i-kuo>;
+=yse.tdu4:  LLTRETIVis- & <md-v-kur>;
+=ys.tds4:   LLTRETIVis- & <md-s-o>;
+
+=tys.tdv4:   LLTRETIVtis- & <md-v-kas>;
+=tų.tdk4:    LLTRETIVtis- & <md-k-ko>;
+=tims.tdn4:  LLTRETIVtis- & <md-n-kam>;
+=tis.tdg4:   LLTRETIVtis- & <md-g-ka>;
+=timis.tdi4: LLTRETIVtis- & <md-i-kuo>;
+=tyse.tdu4:  LLTRETIVtis- & <md-v-kur>;
+=tys.tds4:   LLTRETIVtis- & <md-s-o>;
+
+% minkšta kilmininko ų
+=ys.tdv4u:   LLTRETIViui- & <md-v-kas>;
+=ių.tdk4u:   LLTRETIViui- & <md-k-ko>;
+=ims.tdn4u:  LLTRETIViui- & <md-n-kam>;
+=is.tdg4u:   LLTRETIViui- & <md-g-ka>;
+=imis.tdi4u: LLTRETIViui- & <md-i-kuo>;
+=yse.tdu4u:  LLTRETIViui- & <md-v-kur>;
+=ys.tds4u:   LLTRETIViui- & <md-s-o>;
+
+% -------------------------------
+% Ketvirtoji linksniuotė
+
+% -------------------------------
+% Penktoji linksniuotė
+
+%
+% =================================================================
+% Būdvardžiai
+
+didelis geras gražus medinis baltas: (Bv- & {Xp+}) or DVv+;
+didelė gera graži medine balta: (Bm- & {Xp+}) or DVm+;
+
+% =================================================================
+% Veiksmažodžiai
+
+skauda: VJv- & T-;
+
+išvažiavo: {PV-} & VO- & {Xp+};
+
+atvažiavom: {VM-} & (LI+ or PV+) & {Wd-};
+
+% gali turėti galininka iš dešines.
+irkluoja: VJ- & {DG+}; 
+
+sumušiau: VG- & {Wd-} & {VI+};
+
+% Grynasis Tarinys
+% DG+: skaitau knygą
+% DG-: knygą skaitau
+% DV-: aš skaitau
+% T- & DG+ & {DV*vt+}: "skaito knygą Jonas"
+% T- & DV*vt+ & DG+: "skaito Jonas knygą"
+<gryn-tarinys>: (dT- ^ ({hDG$} ^ {hDV$})) & {Xp+};
+
+% <veiks-nlsa>: nousaka -- laikas -- skaičius -- asmuo
+% -------
+% <veiks-tevp> Veiksmažodis - tev t=tiesioginė e=esamasis v=vienaskaita p=pirmasis
+<veiks-tevp>: (dT- ^ ({hDN$} ^ {hDG$} ^ {hDV*vp$})) & {Xp+};
+
+% <veiks-teva> Veiksmažodis - tev t=tiesioginė e=esamasis v=vienaskaita a=antrasis
+<veiks-teva>: (dT- ^ ({hDN$} ^ {hDG$} ^ {hDV*va$})) & {Xp+};
+
+% <veiks-tevt> Veiksmažodis - tev t=tiesioginė e=esamasis v=vienaskaita t=trečiasis
+<veiks-tevt>: (dT- ^ ({hDN$} ^ {hDG$} ^ {hDV*vt$})) & {Xp+};
+
+% <veiks-tedp> Veiksmažodis - ted t=tiesioginė e=esamasis d=daugiskaita p=pirmasis
+<veiks-tedp>: (dT- ^ ({hDN$} ^ {hDG$} ^ {hDV*dp$})) & {Xp+};
+
+% <veiks-teda> Veiksmažodis - ted t=tiesioginė e=esamasis d=daugiskaita a=antrasis
+<veiks-teda>: (dT- ^ ({hDN$} ^ {hDG$} ^ {hDV*da$})) & {Xp+};
+
+% <veiks-tedt> Veiksmažodis - ted t=tiesioginė e=esamasis d=daugiskaita t=trečiasis
+<veiks-tedt>: (dT- ^ ({hDN$} ^ {hDG$} ^ {hDV*dt$})) & {Xp+};
+
+% -------
+% <veiks-tkvp> Veiksmažodis - tkv t=tiesioginė k=būtasis kartinis v=vienaskaita p=pirmasis
+<veiks-tkvp>: (dT- ^ ({hDN$} ^ {hDG$} ^ {hDV*vp$})) & {Xp+};
+
+% <veiks-tkva> Veiksmažodis - tkv t=tiesioginė k=būtasis kartinis v=vienaskaita a=antrasis
+<veiks-tkva>: (dT- ^ ({hDN$} ^ {hDG$} ^ {hDV*va$})) & {Xp+};
+
+% <veiks-tkvt> Veiksmažodis - tkv t=tiesioginė k=būtasis kartinis v=vienaskaita t=trečiasis
+<veiks-tkvt>: (dT- ^ ({hDN$} ^ {hDG$} ^ {hDV*vt$})) & {Xp+};
+
+% <veiks-tkdp> Veiksmažodis - tkd t=tiesioginė k=būtasis kartinis d=daugiskaita p=pirmasis
+<veiks-tkdp>: (dT- ^ ({hDN$} ^ {hDG$} ^ {hDV*dp$})) & {Xp+};
+
+% <veiks-tkda> Veiksmažodis - tkd t=tiesioginė k=būtasis kartinis d=daugiskaita a=antrasis
+<veiks-tkda>: (dT- ^ ({hDN$} ^ {hDG$} ^ {hDV*da$})) & {Xp+};
+
+% <veiks-tkdt> Veiksmažodis - tkd t=tiesioginė k=būtasis kartinis d=daugiskaita t=trečiasis
+<veiks-tkdt>: (dT- ^ ({hDN$} ^ {hDG$} ^ {hDV*dt$})) & {Xp+};
+
+% -------
+% <veiks-tzvp> Veiksmažodis - tzv t=tiesioginė z=būtasis dažninis v=vienaskaita p=pirmasis
+<veiks-tzvp>: (dT- ^ ({hDN$} ^ {hDG$} ^ {hDV*vp$})) & {Xp+};
+
+% <veiks-tzva> Veiksmažodis - tzv t=tiesioginė z=būtasis dažninis v=vienaskaita a=antrasis
+<veiks-tzva>: (dT- ^ ({hDN$} ^ {hDG$} ^ {hDV*va$})) & {Xp+};
+
+% <veiks-tzvt> Veiksmažodis - tzv t=tiesioginė z=būtasis dažninis v=vienaskaita t=trečiasis
+<veiks-tzvt>: (dT- ^ ({hDN$} ^ {hDG$} ^ {hDV*vt$})) & {Xp+};
+
+% <veiks-tzdp> Veiksmažodis - tzd t=tiesioginė z=būtasis dažninis d=daugiskaita p=pirmasis
+<veiks-tzdp>: (dT- ^ ({hDN$} ^ {hDG$} ^ {hDV*dp$})) & {Xp+};
+
+% <veiks-tzda> Veiksmažodis - tzd t=tiesioginė z=būtasis dažninis d=daugiskaita a=antrasis
+<veiks-tzda>: (dT- ^ ({hDN$} ^ {hDG$} ^ {hDV*da$})) & {Xp+};
+
+% <veiks-tzdt> Veiksmažodis - tzd t=tiesioginė z=būtasis dažninis d=daugiskaita t=trečiasis
+<veiks-tzdt>: (dT- ^ ({hDN$} ^ {hDG$} ^ {hDV*dt$})) & {Xp+};
+
+% -------
+% <veiks-tuvp> Veiksmažodis - tuv t=tiesioginė u=būsimasis v=vienaskaita p=pirmasis
+<veiks-tuvp>: (dT- ^ ({hDN$} ^ {hDG$} ^ {hDV*vp$})) & {Xp+};
+
+% <veiks-tuva> Veiksmažodis - tuv t=tiesioginė u=būsimasis v=vienaskaita a=antrasis
+<veiks-tuva>: (dT- ^ ({hDN$} ^ {hDG$} ^ {hDV*va$})) & {Xp+};
+
+% <veiks-tuvt> Veiksmažodis - tuv t=tiesioginė u=būsimasis v=vienaskaita t=trečiasis
+<veiks-tuvt>: (dT- ^ ({hDN$} ^ {hDG$} ^ {hDV*vt$})) & {Xp+};
+
+% <veiks-tudp> Veiksmažodis - tud t=tiesioginė u=būsimasis d=daugiskaita p=pirmasis
+<veiks-tudp>: (dT- ^ ({hDN$} ^ {hDG$} ^ {hDV*dp$})) & {Xp+};
+
+% <veiks-tuda> Veiksmažodis - tud t=tiesioginė u=būsimasis d=daugiskaita a=antrasis
+<veiks-tuda>: (dT- ^ ({hDN$} ^ {hDG$} ^ {hDV*da$})) & {Xp+};
+
+% <veiks-tudt> Veiksmažodis - tud t=tiesioginė u=būsimasis d=daugiskaita t=trečiasis
+<veiks-tudt>: (dT- ^ ({hDN$} ^ {hDG$} ^ {hDV*dt$})) & {Xp+};
+
+% -------
+% <veiks-rvp> Veiksmažodis - rv r=tariamoji v=vienaskaita p=pirmasis
+<veiks-rvp>: (dT- ^ ({hDN$} ^ {hDG$} ^ {hDV*vp$})) & {Xp+};
+
+% <veiks-rva> Veiksmažodis - rv r=tariamoji v=vienaskaita a=antrasis
+<veiks-rva>: (dT- ^ ({hDN$} ^ {hDG$} ^ {hDV*va$})) & {Xp+};
+
+% <veiks-rvt> Veiksmažodis - rv r=tariamoji v=vienaskaita t=trečiasis
+<veiks-rvt>: (dT- ^ ({hDN$} ^ {hDG$} ^ {hDV*vt$})) & {Xp+};
+
+% <veiks-rdp> Veiksmažodis - rd r=tariamoji d=daugiskaita p=pirmasis
+<veiks-rdp>: (dT- ^ ({hDN$} ^ {hDG$} ^ {hDV*dp$})) & {Xp+};
+
+% <veiks-rda> Veiksmažodis - rd r=tariamoji d=daugiskaita a=antrasis
+<veiks-rda>: (dT- ^ ({hDN$} ^ {hDG$} ^ {hDV*da$})) & {Xp+};
+
+% <veiks-rdt> Veiksmažodis - rd r=tariamoji d=daugiskaita t=trečiasis
+<veiks-rdt>: (dT- ^ ({hDN$} ^ {hDG$} ^ {hDV*dt$})) & {Xp+};
+
+% -------
+% <veiks-lva> Veiksmažodis - lv l=liepiamoji v=vienaskaita a=antrasis
+<veiks-lva>: (dT- ^ ({hDN$} ^ {hDG$} ^ {hDV*va$})) & {Xp+};
+
+% <veiks-ldp> Veiksmažodis - ld l=liepiamoji d=daugiskaita p=pirmasis
+<veiks-ldp>: (dT- ^ ({hDN$} ^ {hDG$} ^ {hDV*dp$})) & {Xp+};
+
+% <veiks-lda> Veiksmažodis - ld l=liepiamoji d=daugiskaita a=antrasis
+<veiks-lda>: (dT- ^ ({hDN$} ^ {hDG$} ^ {hDV*da$})) & {Xp+};
+
+% =================================================================
+%
+% Pirmoji asmenuotė
+% augti
+au.= : LLAPIRMgti+;
+
+% ----- Tiesioginė nuosaka  Esamasis laikas
+=gu.tevp : LLAPIRMgti- & <veiks-tevp>;
+=gi.teva : LLAPIRMgti- & <veiks-teva>;
+=ga.tevt : LLAPIRMgti- & <veiks-tevt>;
+
+=game.tedp =gam.tedp : LLAPIRMgti- & <veiks-tedp>;
+=gate.teda : LLAPIRMgti- & <veiks-teda>;
+=ga.tedt   : LLAPIRMgti- & <veiks-tedt>;
+
+% ----- Tiesioginė nuosaka  Būtasis kartinis laikas
+=gau.tkvp : LLAPIRMgti- & <veiks-tkvp>;
+=gai.tkva : LLAPIRMgti- & <veiks-tkva>;
+=go.tkvt  : LLAPIRMgti- & <veiks-tkvt>;
+
+=gome.tkdp : LLAPIRMgti- & <veiks-tkdp>;
+=gote.tkda : LLAPIRMgti- & <veiks-tkda>;
+=go.tkdt   : LLAPIRMgti- & <veiks-tkdt>;
+
+% ----- Tiesioginė nuosaka  Būtasis dažninis laikas
+=gdavau.tzvp : LLAPIRMgti- & <veiks-tzvp>;
+=gdavai.tzva : LLAPIRMgti- & <veiks-tzva>;
+=gdavo.tzvt  : LLAPIRMgti- & <veiks-tzvt>;
+
+=gdavome.tzdp =gdavom.tzdp : LLAPIRMgti- & <veiks-tzdp>;
+=gdavote.tzda : LLAPIRMgti- & <veiks-tzda>;
+=gdavo.tzdt   : LLAPIRMgti- & <veiks-tzdt>;
+
+% ----- Tiesioginė nuosaka  Būsimasis laikas
+=gsiu.tuvp : LLAPIRMgti- & <veiks-tuvp>;
+=gsi.tuva  : LLAPIRMgti- & <veiks-tuva>;
+=gs.tuvt   : LLAPIRMgti- & <veiks-tuvt>;
+
+=gsime.tudp : LLAPIRMgti- & <veiks-tudp>;
+=gsite.tuda : LLAPIRMgti- & <veiks-tuda>;
+=gs.tudt    : LLAPIRMgti- & <veiks-tudt>;
+
+% ----- Tariamoji nuosaka
+=gčiau.rvp : LLAPIRMgti- & <veiks-rvp>;
+=gtum.rva  : LLAPIRMgti- & <veiks-rva>;
+=gtų.rvt   : LLAPIRMgti- & <veiks-rvt>;
+
+=gtume.rdp : LLAPIRMgti- & <veiks-rdp>;
+=gtute.rda : LLAPIRMgti- & <veiks-rda>;
+=gtų.rdt   : LLAPIRMgti- & <veiks-rdt>;
+
+% ----- Liepiamoji nuosaka
+=k.lva    : LLAPIRMgti- & <veiks-lva>;
+=kime.ldp : LLAPIRMgti- & <veiks-ldp>;
+=kite.lda : LLAPIRMgti- & <veiks-lda>;
+
+% ----- Geidžiamoji nuosaka
+% teaugie  ....
+
+% ---------------------------------------------------------
+%
+% Trečioji asmenuotė
+% mokyti 
+mok.= : LLATREyti+;
+
+% ----- Tiesioginė nuosaka  Esamasis laikas
+=au.tevp : LLATREyti- & <veiks-tevp>;
+=ai.teva : LLATREyti- & <veiks-teva>;
+=o.tevt  : LLATREyti- & <veiks-tevt>;
+
+=ome.tedp =om.tedp : LLATREyti- & <veiks-tedp>;
+=ote.teda : LLATREyti- & <veiks-teda>;
+=o.tedt   : LLATREyti- & <veiks-tedt>;
+
+% ----- Tiesioginė nuosaka  Būtasis kartinis laikas
+=iau.tkvp : LLATREyti- & <veiks-tkvp>;
+=ei.tkva  : LLATREyti- & <veiks-tkva>;
+=ė.tkvt   : LLATREyti- & <veiks-tkvt>;
+
+=ėme.tkdp : LLATREyti- & <veiks-tkdp>;
+=ėte.tkda : LLATREyti- & <veiks-tkda>;
+=ė.tkdt   : LLATREyti- & <veiks-tkdt>;
+
+% ----- Tiesioginė nuosaka  Būtasis dažninis laikas
+=ydavau.tzvp : LLATREyti- & <veiks-tzvp>;
+=ydavai.tzva : LLATREyti- & <veiks-tzva>;
+=ydavo.tzvt  : LLATREyti- & <veiks-tzvt>;
+
+=ydavome.tzdp =ydavom.tzdp : LLATREyti- & <veiks-tzdp>;
+=ydavote.tzda : LLATREyti- & <veiks-tzda>;
+=ydavo.tzdt   : LLATREyti- & <veiks-tzdt>;
+
+% ----- Tiesioginė nuosaka  Būsimasis laikas
+=ysiu.tuvp : LLATREyti- & <veiks-tuvp>;
+=ysi.tuva  : LLATREyti- & <veiks-tuva>;
+=ys.tuvt   : LLATREyti- & <veiks-tuvt>;
+
+=ysime.tudp : LLATREyti- & <veiks-tudp>;
+=ysite.tuda : LLATREyti- & <veiks-tuda>;
+=ys.tudt    : LLATREyti- & <veiks-tudt>;
+
+% ----- Tariamoji nuosaka
+=yčiau.rvp : LLATREyti- & <veiks-rvp>;
+=ytum.rva  : LLATREyti- & <veiks-rva>;
+=ytų.rvt   : LLATREyti- & <veiks-rvt>;
+
+=ytume.rdp : LLATREyti- & <veiks-rdp>;
+=ytute.rda : LLATREyti- & <veiks-rda>;
+=ytų.rdt   : LLATREyti- & <veiks-rdt>;
+
+% ----- Liepiamoji nuosaka
+=yk.lva    : LLATREyti- & <veiks-lva>;
+=ykime.ldp : LLATREyti- & <veiks-ldp>;
+=ykite.lda : LLATREyti- & <veiks-lda>;
+
+% ----- Geidžiamoji nuosaka
+% temokai  ....
+
+% ---------------------------------------------------------
+%
+% Trečioji asmenuotė
+% skatyti
+skai.= : LLATREtyti+;
+
+% ----- Tiesioginė nuosaka  Esamasis laikas
+=tau.tevp : LLATREtyti- & <veiks-tevp>;
+=tai.teva : LLATREtyti- & <veiks-teva>;
+=to.tevt  : LLATREtyti- & <veiks-tevt>;
+
+=tome.tedp =tom.tedp : LLATREtyti- & <veiks-tedp>;
+=tote.teda : LLATREtyti- & <veiks-teda>;
+=to.tedt   : LLATREtyti- & <veiks-tedt>;
+
+% ----- Tiesioginė nuosaka  Būtasis kartinis laikas
+=čiau.tkvp : LLATREtyti- & <veiks-tkvp>;
+=tei.tkva  : LLATREtyti- & <veiks-tkva>;
+=tė.tkvt   : LLATREtyti- & <veiks-tkvt>;
+
+=tėme.tkdp =tėm.tkdp : LLATREtyti- & <veiks-tkdp>;
+=tėte.tkda =tėt.tkda : LLATREtyti- & <veiks-tkda>;
+=tė.tkdt   : LLATREtyti- & <veiks-tkdt>;
+
+% ----- Tiesioginė nuosaka  Būtasis dažninis laikas
+=tydavau.tzvp : LLATREtyti- & <veiks-tzvp>;
+=tydavai.tzva : LLATREtyti- & <veiks-tzva>;
+=tydavo.tzvt  : LLATREtyti- & <veiks-tzvt>;
+
+=tydavome.tzdp =tydavom.tzdp : LLATREtyti- & <veiks-tzdp>;
+=tydavote.tzda =tydavot.tzda : LLATREtyti- & <veiks-tzda>;
+=tydavo.tzdt   : LLATREtyti- & <veiks-tzdt>;
+
+% ----- Tiesioginė nuosaka  Būsimasis laikas
+=tysiu.tuvp : LLATREtyti- & <veiks-tuvp>;
+=tysi.tuva  : LLATREtyti- & <veiks-tuva>;
+=tys.tuvt   : LLATREtyti- & <veiks-tuvt>;
+
+=tysime.tudp =tysim.tudp : LLATREtyti- & <veiks-tudp>;
+=tysite.tuda =tysit.tuda : LLATREtyti- & <veiks-tuda>;
+=tys.tudt    : LLATREtyti- & <veiks-tudt>;
+
+% ----- Tariamoji nuosaka
+=tyčiau.rvp : LLATREtyti- & <veiks-rvp>;
+=tytum.rva =tytumei.rva : LLATREtyti- & <veiks-rva>;
+=tytų.rvt   : LLATREtyti- & <veiks-rvt>;
+
+=tytume.rdp =tytumėm.rdp =tytumėme.rdp : LLATREtyti- & <veiks-rdp>;
+=tytute.rda =tytumėte.rda =tytumėt.rda : LLATREtyti- & <veiks-rda>;
+=tytų.rdt   : LLATREtyti- & <veiks-rdt>;
+
+% ----- Liepiamoji nuosaka
+=tyk.lva =tyki.lva   : LLATREtyti- & <veiks-lva>;
+=tykime.ldp =tykim.ldp : LLATREtyti- & <veiks-ldp>;
+=tykite.lda =tykit.lda : LLATREtyti- & <veiks-lda>;
+
+% ----- Geidžiamoji nuosaka
+% teskaito teskaitai ....
+
+% -------------------------------
+% Įvardžiai
+% Asmeniniai įvardžiai
+aš.i:  dDV*vp$;
+tu:  dDV*va$;
+jis: dDVvvt$;
+ji:  dDVmvt$;
+
+mes: dDV*dp$;
+jūs: dDV*da$;
+jie: dDVvdt$;
+jos: dDVmdt$;
+
+% Savybiniai įvardžiai
+mano tavo savo: dDV+;
+
+% -------------------------------
+% Prieveiksmiai ... 
+% XXX viskas čia blogai
+laukan miškan oran kairėn dešinėn: PV-;
+% "Einame namo", "Svečiai namo išvažiavo"
+namo: PV+ or (PV- & {Xp+});
+
+% Prielinksnai su galininku: Daiktavardi ant dešines:
+į: DG+;
+
+% -------------------------------
+% Sakinio pradžia ir galūnė
+%
+% taškas
+".": Xp-;
+
+% kablęlis
+% Xx- & Wi+:  "Broli, ename namo."
+",": Xx- & Wi+;
+
+% Žodžiai, kurie gali pradėti sakini.
+CAPITALIZED-WORDS: Wd-;
+LEFT-WALL: ((Wd+ or Wa+ or Wi+) & {Xx+}) or (hT+ & {Xx+});
+
+% With the following line in the dictionary, the parser will simply 
+% skip over (null-link) unknown words. If you remove it, the parser 
+% will output an error for any unknown words.
+UNKNOWN-WORD:  XXX+;

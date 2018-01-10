@@ -1,0 +1,336 @@
+; Post-processing knowledge file
+; 6/96
+
+; ----------------------------------------------------------------------------
+; This file contains the knowledge related to post-processing, in the
+; form of lists and rules. This file is read by post-process.c at run-time.
+; Syntax of file:
+;           line starting with ";" is a comment
+;           commas are field delimiters
+;           any token beginning with the character @ is expanded to the set
+;               of symbols it defined. e.g. one could write
+; FOO: blah1 blah2 blah3
+; thus defining a set FOO containing three strings. Then one could later write
+; BAR: blah5 @FOO blah8
+; which defines a set BAR containing 5 strings.
+;
+; Capitalized tokens are *required*, though if you feel like providing an
+; empty list afterwards, that's your right.
+; ----------------------------------------------------------------------------
+
+
+; The following links start a domain. Each must be given a name in the
+; table below (STARTING_LINK_TYPE_TABLE)
+;
+; Removed Rn as a starter link, since it doesn't seem to be needed,
+; and also because it interferes with a verb-wall link for sentences
+; like: "only you would say that" and "that I did not know". When Rn is
+; allowed to start an r domain, the above sentences then hit the
+; "unbounded r domain" rule below, on the WV link.
+
+DOMAIN_STARTER_LINKS:
+;W   Ce   Cs   Ca   Cc   Ci   R*   Rn   Re   RSe  Mr   QI#d   Mv*   Jr  Mj   Qd
+ W   Ce   Cs   Ca   Cc   Ci   R*   Re   RSe  Mr   QI#d   Mv*   Jr  Mj   Qd
+ TOn   TOi   Mg*   MVi  Ss#d   Bsd   ER   Z  Ma#*   SIs#g  BIqx   MX#p   MX#a
+ MX#r   MX#j   MV#o   MV#p  Eq   COq   VCq  AFd   PFc
+
+
+
+; ----------------------------------------------------------------------
+; The following links start a urfl domain.  They are also included in the
+; domain, as opposed to regular starter links (above), which are not. A
+; urfl domain includes links accessible from the root word, tracing to
+; the right (as well as everything accessible from the left end of the
+; starter link).
+
+URFL_DOMAIN_STARTER_LINKS:  TOo   I#j  Pa##j   CP
+
+
+
+; ----------------------------------------------------------------------
+; The following start a urfl_only domain. These include _only_ links :
+; reachable from the root word, tracing to the right. They aren't
+; included in the domain
+
+URFL_ONLY_DOMAIN_STARTER_LINKS:  SFsx   Ss#g   COp
+
+
+
+; ----------------------------------------------------------------------
+; Links which start a domain and are also part of the domain. This must be
+; a sublist of the domain_starter_list
+
+DOMAIN_CONTAINS_LINKS:
+ Mg*   Mx   Bsd   MX#a   Ma#*   Mv*   MX#r   Ss#d   Ws   Wq  Qd   Mj   Wj
+ Wi  MX#j   AFd   PFc   Jr   Wd   Wp   Mr
+
+
+
+; ----------------------------------------------------------------------
+; These links are not put in the word/link graph. They also cannot be the
+; starter links for a domain. (These links may also only be used in cycles.)
+
+IGNORE_THESE_LINKS: Xca
+
+
+
+; ----------------------------------------------------------------------
+; These links may only be used in cycles.
+; ---
+; Jd and OFd are used with determiner D: "I have a lot of cookies"
+; ---
+; WV must form a cycle with W links: WV links to the root verb to the wall,
+; and W links the leading noun to the wall. Both verb and noun must be in
+; the same phrase, forming a cycle, as otherwise, nonsense happens, such as
+; *He stated the fact that there be an investigation
+; with W linking to "he" and WV linking to "be" (instead of "stated")
+; ---
+; CV: similar to WV above, must form a loop along with Ce (typically).
+; Ce links noun of subordinate clause to the dominating phrase, while
+; CV links the verb of the subordinate clause to the dominating phrase.
+; Both the linked noun and verb must be in the same subordinate clause.
+; Example: "I wish I could see him 100 times a day"
+
+MUST_FORM_A_CYCLE_LINKS:  R#*  TOt  EXx  HA  SFsic  Jd  Jr  JQ  OFd Xca  WV CV IV
+
+
+
+; ----------------------------------------------------------------------
+; These links are not traced further if they point back before the root word.
+;
+; The creation of Rw necessitated making B#m a restricted link, to
+; prevent the (e) domain, started by Ce, from extending around through
+; the Rw link.
+; Reverted the B#m thing ...
+; This breaks parsing of
+;    How fast a program does he think it is
+;    I wonder how fast a program he thinks it is
+;    I wonder how much money you earned
+;    I wonder how many people you saw
+;    I wonder how big a department it is
+;    I wonder how much oil they spilled
+;    This is the man whose dog I bought
+;    I wonder which dog he said you chased
+;    How efficient a program is it
+; Meanwhile, I can't find the Ce problem mentioned ... this needs more
+; documentation!
+
+RESTRICTED_LINKS:
+   B#*  D##w   B#w   B#d   AFh  MVt   Xx   HL   SFsic  AFd   Bc   CX  EAh
+   H   HA   PFc   B#j   Wd   PF   Z
+
+;   H   HA   PFc   B#j   Wd   PF   Z  B#m
+
+
+; ----------------------------------------------------------------------
+; ---------------------- LINK TYPE TABLE-------------------------------
+; ----------------------------------------------------------------------
+; The following table associates a domain type with each possible
+; starting link. It contains pairs: the first of each pair is a link
+; type, and the second is the domain to which that link type belongs.
+;
+; Rn commented out, as per above.
+
+STARTING_LINK_TYPE_TABLE:
+ Ce    e
+ R*    r
+; Rn    r
+ Re    r
+ W     m
+ RSe   e
+ Cs    s
+ Ca    s
+ Jr    e
+ Mr    r
+ Cc    s
+ Mv*   e
+ QI#d  s
+ BIqx  s
+ TOn   e
+ TOi   e
+ MVi   e
+ MV#o  s
+ MV#p  s
+ AFd   s
+ PFc   s
+ Mg*   e
+ Mj    j
+ Qd    m
+ MX#j  j
+ TOo   x
+ I#j   x
+ Pa##j x
+ CP    x
+ COp   d
+ SFsx  d
+ Ss#g  d
+ SIs#g s
+ Ss#d  s
+ Bsd   s
+ ER    s
+ Z     s
+ Ma#*  e
+ MX#p  e
+ Ci    e
+ MX#a  e
+ Eq    e
+ COq   e
+ VCq   s
+ MX#r  r
+
+
+; ----------------------------------------------------------------------
+; ----------------------- LINK SETS ------------------------------------
+; ----------------------------------------------------------------------
+; (Not in use at present; see comment at beginning of file)
+
+; ----------------------------------------------------------------------
+; ----------------- RULES ----------------------------------------------
+; ----------------------------------------------------------------------
+; Explanation of syntax: as usual, each stanza begins with a label
+; terminated by a colon. The interpretation of the rule depends on
+; the label, as specified in each stanza.
+
+; The following rule asserts that the linkage must *still* be connected
+; when the specified set(s) of links are removed from the linkage.
+
+FORM_A_CYCLE_RULES:
+        @MUST_FORM_A_CYCLE_LINKS  ,  "'must form a cycle' violation0"
+
+
+; For the following rules, if a domain contains a link matching the 1st
+; column, it must also contain a linkage matching one of the members of the
+; set in the 2nd column. The individual rules are demarcated by semicolons and
+; the fields within a rule are demarcated by commas.
+
+; XXX fixme -- Qd should be replaced by Qw in first four.
+CONTAINS_ONE_RULES:
+ SI#*  ,  Wq    Qd    Qw    CQ    PFc  Wp   , "Bad use of s-v inversion1" ,
+ SI#x  ,  Wq    Qd    CQ    PFc   Wp        , "Bad use of s-v inversion2" ,
+ SFI##* , Wq    Qd    CQ    PFc             , "Bad use of s-v inversion3" ,
+ SXI   ,  Wq    Qd    CQ    PFc             , "Bad use of s-v inversion4" ,
+ Ws    ,  D##w  S##w   H                    , "S-V inversion required5" ,
+ I#a   ,  B#m   B#w                         , "incorrect use of 'to'6"  ,
+ Wq    ,  SI    SFI   SXI                   , "S-V inversion required7" ,
+ Qd    ,  SI    SFI   SXI                   , "S-V inversion required8" ,
+ PFc   ,  SI    SFI   SXI                   , "S-V inversion required9" ,
+ Mj    ,  Jw    JQ                          , "Incorrect relative10" ,
+ MX#j  ,  Jw    JQ                          , "Incorrect relative11" ,
+ Wj    ,  Jw    JQ                          , "Misuse of preposition12" ,
+ JQ    ,  Mj    Wj    MX#j                  , "Misuse of preposition13" ,
+ Jw    ,  Mj    Wj    MX#j                  , "Misuse of preposition14" ,
+ B#j   ,  Jr                                , "Incorrect relative15"    ,
+ Jr    ,  B#j                               , "Incorrect relative16"    ,
+; The two below prevent "How big?" and "How quickly?"
+; EAh   ,  AF    Bsm    B*m  Qe  Ca  AFm    , "Incorrect use of 'how'17"   ,
+; EEh   ,  AF    Bsm    B*m  Qe  Ca  AFm    , "Incorrect use of 'how'18"   ,
+ Qe    ,  EEh  EAh                          , "Incorrect use of adverb19"  ,
+ THi   ,  SFsi   SFIsi   OXi                , "Complement requires 'it'20" ,
+ TSi   ,  SFsi   SFIsi   OXi                , "Complement requires 'it'21" ,
+ QIi   ,  SFsi   SFIsi   OXi                , "Complement requires 'it'22" ,
+ TOi   ,  SFsi   SFIsi   OXi                , "Complement requires 'it'23" ,
+ Ci    ,  SFsi   SFIsi   OXi                , "Complement requires 'it'24" ,
+ COqi  ,  SFsi   SFIsi   OXi                , "Complement requires 'it'25" ,
+ CPi   ,  SFsi   SFIsi   OXi                , "Complement requires 'it'26" ,
+ Eqi   ,  SFsi   SFIsi   OXi                , "Complement requires 'it'27" ,
+ LEi   ,  SFsi   SFIsi   OXi                , "Complement requires 'it'28" ,
+ MVti  ,  SFsi   SFIsi   OXi                , "Complement requires 'it'29"     ,
+ AFdi  ,  SFsi   SFIsi   OXi                , "Complement requires 'it'30"     ,
+ O#i   ,  SFsi   SFIsi   OXi                , "Complement requires 'it'31"     ,
+; SFs, SFp SFu: force subject-object agreement for
+; singular/plural/uncountable noun objects
+ SFst  ,  O*t   Ost   Omt   Omm   Bs#t    B*#t    Bc#t    , "Bad use of 'there'32s"           ,
+ SFp   ,  O*t   Opt   Omt   Omm   Bp#t    B*#t    Bc#t    , "Bad use of 'there'32p"           ,
+ SFu   ,  O*t   Out   Omt   Omm   Bp#t    B*#t    Bc#t    , "Bad use of 'there'32u"           ,
+;
+ SFIst ,  O*t   Ost   Omt    Bs#t    B*#t    Bc#t    , "Bad use of 'there'34"           ,
+ SFIp  ,  O*t   Opt   Omt    Bp#t    B*#t    Bc#t    , "Bad use of 'there'35"           ,
+ OXt   ,  O#t   B##t                     ,   "Bad use of 'there'36"           ,
+ SFsi* ,  TOi    THi   QIi    TSi    O#i    Ci    THb   CPi
+          COqi    CPi    Eqi    AFdi    BIh , "Bad use of 'it'37"           ,
+ SFIsi ,  TOi    THi   QIi    TSi    O#i    Ci    THb   CPi
+          COqi    CPi    Eqi    AFdi    BIh , "Bad use of 'it'38"           ,
+ OXi   ,  TOi    THi   QIi    TSi    O#i    Ci    THb   CPi
+          COqi    CPi    Eqi    AFdi    BIh , "Bad use of 'it'39"           ,
+ THb   ,  S##t    SI##t  SFsi  SFIsi        , "Bad use of predicate40"      ,
+ BIh   ,  Ss#b    SIs#b  SFsi  SFIsi        , "Bad use of predicate41"      ,
+ BIq   ,  S##q    SI##q  SFsi  Ss#b    SFIsi SIs#b
+                                            , "Bad use of predicate42"      ,
+ MVt   ,  Dm#m   EAm   EEm   MVm  Pam   Pafm   AFm   EB#m   MVb AJrc
+          Om   Mam  Am  Jm  Ds*m   MX#m     , "Bad comparative43"    ,
+ MVz   ,  D##y    EAy    EEy    MVy    EB#y , "Bad comparative44"    ,
+ MV#a  ,  Pam    Pafm    EAm   Ds*m   EAy   AFm   Mam   Am
+					    , "Bad comparative45"    ,
+ MV#i  ,  Pam    Pafm    EAm   Ds*m   EAy   AFm   Mam   Am
+					    , "Bad comparative46"    ,
+ MV#o  ,  D##m    D##y    Om    Oy    Jm    Jy   Am   MX#m
+					    , "Bad comparative47"    ,
+ MV#p  ,  EEm   MVb   Dm#m   EEy   D##y  MVm   Om   Oy
+                            Jm   Jy   Am   MX#m
+					    , "Bad comparative48"    ,
+ Pafc  ,  EB#m    EB#y                      , "Bad comparative49"    ,
+ Pafc  ,  Pa*    Paf*                       , "Bad comparative50"    ,
+ MVat  ,  MVm                               , "Bad comparative51"    ,
+ MVpt  ,  MVm                               , "Bad comparative52"    ,
+ MVat  ,  MVa   MVp                         , "Bad comparative53"    ,
+ MVpt  ,  MVa   MVp                         , "Bad comparative54"    ,
+ U#t   ,  D##m    D##y    Om    Oy    Jm    Jy   Am   MX#m
+				            , "Bad comparative55"    ,
+ Cc    ,  EEm    EEy    MVm    MVb    MVy
+	                                    , "Bad comparative56"    ,
+ Sp#c  ,  Dmcm    Dmcy    Om    Oy    Jm    Jy  MX#m
+	 				    , "Bad comparative57"    ,
+ Ss#c  ,  Dmum    Dmuy    Om    Oy    Jm    Jy    Ds*y  MX#m
+					    , "Bad comparative58"    ,
+ S##c  ,  Dm#m    D##y    Om    Oy    Jm    Jy   MX#m
+					    , "Bad comparative59"    ,
+ THc   ,  TH                                , "Bad comparative60"    ,
+ TOc   ,  TO**   TOf*   TOi*                , "Bad comparative61"    ,
+ TOtc  ,  TOt  ,                              "Bad comparative62"    ,
+ Ma**  ,  TO   TOf   TH   MVp   TOt   QI   OF  MVt   MVz   MVh   Ytm   Ya
+					    , "Bad use of adjective63"    ,
+ Mam   ,  TO   TOf   TH   MVp   TOt   QI   OF  MVt   MVz   MVh   Ytm   Ya
+					    , "Bad use of adjective64"    ,
+;
+; The rule below sounds nice, in principle, in preventing some
+; nasty constructions ... however, it also prevents some good
+; ones, too. e.g. "The dog, unsatisfied, barked loudly"
+;
+MX#a  ,  TO  TOf  TH  MVp  TOt  QI  OF  MVt  MVz  MVh  Ytm Ya  MJ E EA
+			                    , "Bad use of adjective65"    ,
+
+; There's no JUNK connector, which means that Oxn is
+; prohibited from ever occuring. 4.0.batch covers this.
+ Oxn   ,  JUNK                              , "Bad use of pronoun66" ,
+ MVh   ,  EExk   EAxk   D##k                , "Incorrect use of that67" ,
+
+; The Rw link necessitated commenting out 68, because we had to make B#m
+; a restricted link(see above) xxx reverted .. this is needed ...
+;
+B#m  ,   D##w   H   HA                     , "Bad use of gerund68"
+
+CONTAINS_NONE_RULES:
+ S     ,  Spxi                             , "Bad n-v agreement69" ,
+ SI     , SIpxi                            , "Bad n-v agreement70" ,
+ Ws    ,  B#m   Ca   BT                    , "Question inversion violated71" ,
+ SF    ,  I*   PP*   TO*   Pa*   Pam  Pg*   Pv*   LE*   AFd*  MVta
+                                           , "Bad use of 'filler' subject72" ,
+ SFI   ,  I*   PP*   TO*   Pa*   Pam  Pg*   Pv*   LE*   AFd*  MVta
+                                           , "Bad use of 'filler' subject73" ,
+ OX    ,  I*   PP*   TO*   Pa*   Pam  Pg*   Pv*   LE*   AFd*  MVta
+                                           , "Bad use of 'filler' subject74" ,
+ MXsr  ,  Sp#w                             , "Bad n-v agreement75" ,
+ MXpr  ,  Ss#w   S#iw                      , "Bad n-v agreement76" ,
+ Mr    ,  B#*                              , "Bad use of 'whose'77"
+
+
+; ----------------------------------------------------------------------
+; The following rules assert that all specified domains must have the
+; property that all of the words that touch a link in the domain are
+; not to the left of the root word of the domain. These rules are
+; different from the above in that the first field is a *domain name*,
+; rather than a set of links.
+
+BOUNDED_RULES:
+ s                               , "Unbounded s domain78" ,
+ r                               , "Unbounded r domain79"

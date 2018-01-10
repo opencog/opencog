@@ -1,0 +1,1095 @@
+%%
+%% Link Grammar for Russian
+%%
+%% Copyright (c) 2004, 2012 Sergey Protasov 
+%% http://sz.ru/parser/
+%% svp dot zuzino.net.ru, svp dot tj.ru
+%%
+%% This file uses the utf8 encoding
+
+%% Dictionary version number is 5.3.15 (formatted as V5v3v15+)
+<dictionary-version-number>: V5v3v15+;
+<dictionary-locale>: RU4ru+;
+
+<costly-null>: [[[[]]]];
+
+<наречие-куда>: ({Xc-} & Ed-) or ({XIc+} & EId+) or ({Xt- & S-});
+<наречие-откуда>: ({Xc-} & Es-) or ({XIc+} & EIs+) or Mp- or ({Xt-} & S-);
+<наречие-где>: ({Xc-} & Ew-) or ({XIc+} & EIw+) or ({Xt-} & S-);
+<наречие-когда>: ({Xc-} & Et-) or ({Xc+} & EIt+);
+<наречие-как>: ({Xc-} & Ek-) or ({XIc+} & EIk+);
+<наречие-почему>: ({Xc-} & Ep-) or ({XIc+} & EIp+);
+
+<дополнение-о-чем>: Mp- or MVap- or MVIap+;
+<дополнение-без>: Mp- or <наречие-как>;
+<кроме>: ((Xc- & Mp-) or <наречие-как>) & {XIc+};
+
+%предлоги
+а-ля.ji : Ji+ & <наречие-как>;
+минус.ji плюс.ji: (Ji+ & Mp-) or CO+;
+
+близ.jg кругом.jg меж.jg между.jg напротив.jg насупротив.jg около.jg 
+окрест.jg подле.jg посереди.jg посередине.jg посередь.jg посреди.jg 
+посредине.jg поверх.jg позади.jg позадь.jg промеж.jg промежду.jg 
+середь.jg снизу.jg спереди.jg среди.jg средь.jg сверху.jg сзади.jg
+у.jg вблизи.jg вкруг.jg вне.jg внизу.jg внутри.jg вокруг.jg 
+возле.jg впереди.jg выше.jg : Jg+ & <наречие-где>;
+для.jg от.jg ото.jg ввиду.jg вследствие.jg ради.jg : Jg+ & <наречие-почему>;
+до.jg со.jg внутрь.jg вовнутрь.jg мимо.jg обок.jg вперед.jg против.jg супротив.jg : Jg+ & <наречие-куда>;
+по_обе_стороны по_другую_сторону : {Jg+} & <наречие-где>;
+% пришлось сидеть снаружи храма
+снаружи.jg : Jg+ & <наречие-где>;
+
+из-под.jg из-подо.jg из-за.jg из.jg изо.jg изнутри.jg с.jg : Jgp+ & <наречие-откуда>;
+из_под из_подо из_за : Jgp+ & <наречие-откуда>;
+
+наподобие.jg ниже.jg относительно.jg поперек.jg 
+посредством.jg превыше.jg наместо.jg противно.jg путем.jg
+сверх.jg свыше.jg вдоль.jg вкось.jg вместо.jg
+вроде.jg взамен.jg : Jg+ & <наречие-как>;
+касаемо.jg касательно.jg насчет.jg : Jg+ & <дополнение-о-чем>;
+без.jg безо.jg опричь.jg : Jg+ & <дополнение-без>;
+кроме.jg помимо.jg : Jg+ & <кроме>;
+накануне.jg после.jg прежде.jg : Jg+ & <наречие-когда>;
+
+благодаря.jd наперекор.jd подобно.jd согласно.jd сообразно.jd соответственно.jd 
+соразмерно.jd вопреки.jd : Jd+ & <наречие-как>;
+к.jd ко.jd вослед.jd вслед.jd : Jd+ & <наречие-куда>;
+наперерез.jd навстречу.jd вдогонку.jd  : Jd+ & <наречие-куда>;
+
+исключая.jv включая.jv выключая.jv : Jv+ & <кроме>;
+на.jv сквозь.jv через.jv чрез.jv : Jv+ & <наречие-куда>;
+про.jv : Jv+ & <дополнение-о-чем>;
+спустя.jv под.jv : Jv+ & <наречие-когда>;
+в.jv во.jv : Jv+ & <наречие-где>;
+за.jv : Jv+ & <наречие-почему>;
+% стрела ударилась о камни неподалеку
+о.jv : Jv+ & <наречие-почему>;
+
+% стук железа о камень
+о.j : Mv- & Jv+; 
+об.j : Mv- & Jv+;
+% бежал по коридору
+% по.jd : Jd+ & ( MVad- or MVIad+ );
+% двинулся по коридору
+по.jd : Jd+ & <наречие-где>;
+
+над.jt надо.jt перед.jt передо.jt по-над.jt по-за.jt под.jt пред.jt предо.jt 
+с.jt со.jt за.jt между.jt: Jt+ & <наречие-где>;
+
+на.jp при.jp в.jp во.jp : Jp+ & <наречие-где>;
+по.jp : Jp+ & <наречие-почему>;
+% сказать об этом случае
+о.jp об.jp обо.jp : Jp+ & ( <дополнение-о-чем> or <наречие-где>);
+
+без_сил : Mp-;
+изо_всех_сил из_последних_сил : <наречие-как>;
+
+% знаки пунктуации и спецсимволы
+и.i : Xi+;
+когда.i где.i : {XIb+} & ([Xia+] or (W+ & XIc+ & EI+) or (W+ & Xc- & E-));
+если.i но_если а_если и_если :  ([Xia+] or (W+ & XIc+ & EI+) or (W+ & Xc- & E-)) or ( { W+ } & IFTH+ ) ;
+то.ii:  ( {XIc+} & Xia+ ) or ({ Xc- } & IFTH- &  W+ & { W- }) ; 
+либо.ii: ({XIc+} & Xia+) or ({ Xc- } & OROR- &  W+ & { W- }) or ( { W+ } & OROR+ ) ; 
+во-первых.i во_первых : ( { W+ } & FISE+ ) ;
+во-вторых.i во_вторых : ({ Xc- } & FISE- &  W+ & { W- } & {FISE2+} ) ;
+в-третьих.i в_третьих : ({ Xc- } & FISE2- &  W+ & { W- }) ;
+
+почему.i : ( W- & W+ & Xq+ ) or ( W- & Xq+ );
+
+% See 4.0.affix for lists of punctuation.
+% -- - : Xt+;
+<точка> : {@XIc-} &  Xp- & ((W+ & Xp+) or RW+);
+"!" : {@XIc-} &  Xp- & RW+ ;
+"?" : ( {@XIc-} &  Xp- & RW+) or (Xq-) ;
+"," : Xc+ or @XIc- or [[<точка>]];
+"." : <точка> or Xp-;
+":" : Xp- & W+ & (Xp+ or RW+);
+";" : Xp- & W+ & (Xp+ or RW+);
+"(" : Wd+ & BR+;
+")" : BR- & (XIc+ or EI+);
+"╚" : ( Wd+ & BRq+ ) or ( Mg- & Mg+ & BRt+) or ( G- & G+ & BRt+);
+"╩" : ( BRq- & (XIc+ or EI+) ) or ( BRt- );
+
+не.p : Xn+;
+бы.p : XIb-;
+обе.amia: Ami+;
+все.aaia: A*i+;
+
+LEFT-WALL: W+ & (Xp+ or RW+);
+RIGHT-WALL: {Xc-} & RW-;
+
+<name-перечисление-сущ>: J- or ((Sp3+ or SIp3-) & Wd-) or ({Xt-} & S-) or Mg-;
+<name-макро-перечисление>: NX+
+        or (Xc- & NX- & (NX+ or [<name-перечисление-сущ>]))
+        or (Xi- & NX- & <name-перечисление-сущ>);
+
+% See 4.0.regex for CAPITALIZED-WORDS
+CAPITALIZED-WORDS: ({Xia-} & {@EI-} & {Xp+} & {G+} & (
+	((S*3+ or SI*3-) & Wd-)
+	or ({Xt-} & S-)
+	or <name-макро-перечисление>
+	or Ji-
+)) or (G- & {Xp+} & {G+}) or (MVv-);
+
+%% НАРЕЧИЯ СТЕПЕНИ
+%% последующие две недели прошли чересчур спокойно 
+очень.ep слишком.ep чересчур.ep сравнительно.ep довольно.ep весьма.ep относительно.ep крайне.ep чрезвычайно.ep необычайно.ep предельно.ep необыкновенно.ep : [EE-] or EEI+;
+очень.ea слишком.ea чересчур.ea сравнительно.ea довольно.ea весьма.ea относительно.ea крайне.ea чрезвычайно.ea необычайно.ea предельно.ea необыкновенно.ea : EA+;
+% целых полчаса 
+буквально.et максимум.et приблизительно.et примерно.et ровно.et аж.et по_меньшей_мере этак.et эдак.et самое_большее : ET+;
+целых.et добрых.et : ETp+;
+целую.et добрую.et : ETf+;
+целый.et добрый.et : ETm+;
+
+%%  наверняка мы прошли даже больше четырех миль
+даже.eas : EAS+;
+
+%% СУЩЕСТВИТЕЛЬНЫЕ
+<сущ-i>: Ji- or (Sp+ or SIp- or [[Wd-]]) or ((Xt- or [[]]) & S-) or Nip-;
+<макро-сущ-i> : NXi+ 
+	or (Xc- & NXi- & (NXi+ or [[[[{Api-} & {AIpi+} & {Ppi+} & {PIpi-} & <сущ-i>]]]]))
+	or (Xi- & NXi- & {Api-} & {AIpi+} & {Ppi+} & {PIpi-} & <сущ-i>);
+<сущ-g>: Jg- or [Mg-] or [[MVag- or MVIag+]] or Ngp-;
+<макро-сущ-g> : NXg+
+	or (Xc- & NXg- & (NXg+ or [[[[{Apg-} & {AIpg+} & {Ppg+} & {PIpg-} & <сущ-g>]]]]))
+	or (Xi- & NXg- & {Apg-} & {AIpg+} & {Ppg+} & {PIpg-} & <сущ-g>);
+<сущ-d>: Jd- or [[MVad-]] or [[MVIad+]] or Ndp-;
+<макро-сущ-d> : NXd+
+	or (Xc- & NXd- & (NXd+ or [[[[{Apd-} & {AIpd+} & {Ppd+} & {PIpd-} & <сущ-d>]]]]))
+	or (Xi- & NXd- & {Apd-} & {AIpd+} & {Ppd+} & {PIpd-} & <сущ-d>);
+<сущ-v>: Jv- or [MVv-] or [MVIv+] or Nvp-;
+<макро-сущ-v> : NXv+
+	or (Xc- & NXv- & (NXv+ or [[[[{Apv-} & {AIpv+} & {Ppv+} & {PIpv-} & <сущ-v>]]]]))
+	or (Xi- & NXv- & {Apv-} & {AIpv+} & {Ppv+} & {PIpv-} & <сущ-v>);
+<сущ-t>: Jt- or AP- or [[MVat- or MVIat+]] or Ntp-;
+<макро-сущ-t> : NXt+
+	or (Xc- & NXt- & (NXt+ or [[[[{Apt-} & {AIpt+} & {Ppt+} & {PIpt-} & <сущ-t>]]]]))
+	or (Xi- & NXt- & {Apt-} & {AIpt+} & {Ppt+} & {PIpt-} & <сущ-t>);
+<сущ-p>: Jp- or Npp-;
+<макро-сущ-p> : NXp+
+	or (Xc- & NXp- & (NXp+ or [[[[{App-} & {AIpp+} & {Ppp+} & {PIpp-} & <сущ-p>]]]]))
+	or (Xi- & NXp- & {App-} & {AIpp+} & {Ppp+} & {PIpp-} & <сущ-p>);
+<существительное-mi>: ((({M+} & {[[Ami-]]}) or ({Ami-} & {[[AImi+]]}) or ({M+} & {[[AImi+]]}) or {G+}) & {@Pmi+ or @PImi-} & {Xn-} & {Xia-} & {@EI-} & {I+} & (Ji- or (Sm3+ or MVAim- or SIm3- or [[Wd-]]) or ((Xt- or [[]]) & S-) or Nim- or <макро-сущ-i>)) or (Ami- & Ami- & {Xia-} & Sm3+ );
+<существительное-ni>: (({M+} & {[[Ani-]]}) or {[[AIni+]]} or {G+}) & {@Pni+ or @PIni-} & {Xn-} & {Xia-} & {@EI-} & (Ji- or (Sn3+ or MVAin- or SIn3- or [[Wd-]]) or ((Xt- or [[]]) & S-) or Nin- or <макро-сущ-i>);
+<существительное-fi>: (({M+} & {[[Afi-]]}) or {[[AIfi+]]} or {G+}) & {@Pfi+ or @PIfi-} & {Xn-} & {Xia-} & {@EI-} & (Ji- or (Sf3+ or MVAif- or SIf3- or [[Wd-]]) or ((Xt- or [[]]) & S-) or Nif- or <макро-сущ-i>);
+% первые минуты обычно самые страшные
+<существительное-pi>: ((({M+} & {[[Api-]]}) or {[[AIpi+]]} or {G+}) & {@Ppi+ or @PIpi-} & {Xn-} & {Xia-} & {@EI-} & (Ji- or (Sp+ or MVAip- or SIp- or [[Wd-]]) or ((Xt- or [[]]) & S-) or Nip- or <макро-сущ-i>)) or (Api- & Api- & {Xia-} & Sp+) or (Api- & Wd- &  AIpi+) ;
+<существительное-mg>: (({M+} & {[[Amg-]]}) or {[[AImg+]]} or {G+}) & {@Pmg+ or @PImg-} & {Xn-} & {Xia-} & {@EI-} & (Jg- or [Mg-] or [[MVag- or MVIag+]] or Ngm- or <макро-сущ-g>);
+<существительное-ng>: (({M+} & {[[Ang-]]}) or {[[AIng+]]} or {G+}) & {@Png+ or @PIng-} & {Xn-} & {Xia-} & {@EI-} & (Jg- or [Mg-] or [[MVag- or MVIag+]] or Ngn- or <макро-сущ-g>);
+<существительное-fg>: (({M+} & {[[Afg-]]}) or {[[AIfg+]]} or {G+}) & {@Pfg+ or @PIfg-} & {Xn-} & {Xia-} & {@EI-} & (Jg- or [Mg-] or [[MVag- or MVIag+]] or Ngf- or <макро-сущ-g>);
+<существительное-pg>: (({M+} & {[[Apg-]]}) or {[[AIpg+]]} or {G+}) & {@Ppg+ or @PIpg-} & {Xn-} & {Xia-} & {@EI-} & (Jg- or [Mg-] or [[MVag- or MVIag+]] or Ngp- or <макро-сущ-g>);
+<существительное-md>: (({M+} & {[[Amd-]]}) or {[[AImd+]]} or {G+}) & {@Pmd+ or @PImd-} & {Xn-} & {Xia-} & {@EI-} & (Jd- or [[MVad-]] or [[MVIad+]] or Ndm- or <макро-сущ-d>);
+<существительное-nd>: (({M+} & {[[And-]]}) or {[[AInd+]]} or {G+}) & {@Pnd+ or @PInd-} & {Xn-} & {Xia-} & {@EI-} & (Jd- or [[MVad-]] or [[MVIad+]] or Ndn- or <макро-сущ-d>);
+<существительное-fd>: (({M+} & {[[Afd-]]}) or {[[AIfd+]]} or {G+}) & {@Pfd+ or @PIfd-} & {Xn-} & {Xia-} & {@EI-} & (Jd- or [[MVad-]] or [[MVIad+]] or Ndf- or <макро-сущ-d>);
+<существительное-pd>: (({M+} & {[[Apd-]]}) or {[[AIpd+]]} or {G+}) & {@Ppd+ or @PIpd-} & {Xn-} & {Xia-} & {@EI-} & (Jd- or [[MVad-]] or [[MVIad+]] or Ndp- or <макро-сущ-d>);
+<существительное-mt>: (({M+} & {[[Amt-]]}) or {[[AImt+]]} or {G+}) & {@Pmt+ or @PImt-} & {Xn-} & {Xia-} & {@EI-} & (Jt- or AP- or [[MVat- or MVIat+]] or Ntm- or <макро-сущ-t>);
+<существительное-nt>: (({M+} & {[[Ant-]]}) or {[[AInt+]]} or {G+}) & {@Pnt+ or @PInt-} & {Xn-} & {Xia-} & {@EI-} & (Jt- or AP- or [[MVat- or MVIat+]] or Ntn- or <макро-сущ-t>);
+<существительное-ft>: (({M+} & {[[Aft-]]}) or {[[AIft+]]} or {G+}) & {@Pft+ or @PIft-} & {Xn-} & {Xia-} & {@EI-} & (Jt- or AP- or [[MVat- or MVIat+]] or Ntf- or <макро-сущ-t>);
+<существительное-pt>: (({M+} & {[[Apt-]]}) or {[[AIpt+]]} or {G+}) & {@Ppt+ or @PIpt-} & {Xn-} & {Xia-} & {@EI-} & (Jt- or AP- or [[MVat- or MVIat+]] or Ntp- or <макро-сущ-t>);
+<существительное-mp>: (({M+} & {[[Amp-]]}) or {[[AImp+]]} or {G+}) & {@Pmp+ or @PImp-} & {Xn-} & {Xia-} & {@EI-} & (Jp- or Npm- or <макро-сущ-p>);
+<существительное-np>: (({M+} & {[[Anp-]]}) or {[[AInp+]]} or {G+}) & {@Pnp+ or @PInp-} & {Xn-} & {Xia-} & {@EI-} & (Jp- or Npn- or <макро-сущ-p>);
+<существительное-fp>: (({M+} & {[[Afp-]]}) or {[[AIfp+]]} or {G+}) & {@Pfp+ or @PIfp-} & {Xn-} & {Xia-} & {@EI-} & (Jp- or Npf- or <макро-сущ-p>);
+<существительное-pp>: (({M+} & {[[App-]]}) or {[[AIpp+]]} or {G+}) & {@Ppp+ or @PIpp-} & {Xn-} & {Xia-} & {@EI-} & (Jp- or Npp- or <макро-сущ-p>);
+<существительное-fv>: (({M+} & {[[Afv-]]}) or {[[AIfv+]]} or {G+}) & {@Pfv+ or @PIfv-} & {Xn-} & {Xia-} & {@EI-} & (Jv- or [MVv-] or [MVIv+] or Nvf- or <макро-сущ-v>);
+<существительное-nv>: (({M+} & {[[Anv-]]}) or {[[AInv+]]} or {G+}) & {@Pnv+ or @PInv-} & {Xn-} & {Xia-} & {@EI-} & (Jv- or [MVv-] or [MVIv+] or Nvn- or <макро-сущ-v>);
+<существительное-mv>: (({M+} & {[[Amv-]]}) or {[[AImv+]]} or {G+}) & {@Pmv+ or @PImv-} & {Xn-} & {Xia-} & {@EI-} & (Jv- or [MVv-] or [MVIv+] or Nvm- or <макро-сущ-v>);
+
+%% МЕСТОИМЕНИЯ
+%% <мест-sub>: [{[AI+]} & {[A-]} & {Xn-} & {Xia-} & {@EI-} & {[M+]} & {P+} & {PI-}];
+<мест-sub>: [{[AI*i+]} & {[A-]} & {Xn-} & {Xia-} & {@EI-} & {[M+]} & {P+} & {PI-}];
+
+%% ПРИЛАГАТЕЛЬНЫЕ
+<прил-mi>: ( {EA-} & Ami+ ) or Asi+ or ( { EA- or ( EA- & EB- ) or ( EB- & EA- ) } & AImi- ) or AIsi- or Sm-;
+<макро-прил-mi> : AXmi+ or AXPmi+
+	or (Xc- & AXmi- & (AXmi+ or [<прил-mi>]))
+	or (Xi- & AXmi- & ([AXPmi+] or <прил-mi>))
+	or (AXPmi- & (AXPmi+ or <прил-mi>));
+<прил-mg>: ( {EA-} & Amg+ ) or Asg+ or AImg- or AIsg- or Sm-;
+<макро-прил-mg> : AXmg+ or AXPmg+
+	or (Xc- & AXmg- & (AXmg+ or [<прил-mg>]))
+	or (Xi- & AXmg- & ([AXPmg+] or <прил-mg>))
+	or (AXPmg- & (AXPmg+ or <прил-mg>));
+<прил-md>: ( {EA-} & Amd+ ) or Asd+ or AImd- or AIsd- or Sm-;
+<макро-прил-md> : AXmd+ or AXPmd+
+	or (Xc- & AXmd- & (AXmd+ or [<прил-md>]))
+	or (Xi- & AXmd- & ([AXPmd+] or <прил-md>))
+	or (AXPmd- & (AXPmd+ or <прил-md>));
+<прил-mv>: ( {EA-} & Amv+ ) or Asv+ or AImv- or AIsv- or Sm-;
+<макро-прил-mv> : AXmv+ or AXPmv+
+	or (Xc- & AXmv- & (AXmv+ or [<прил-mv>]))
+	or (Xi- & AXmv- & ([AXPmv+] or <прил-mv>))
+	or (AXPmv- & (AXPmv+ or <прил-mv>));
+<прил-mt>: ( {EA-} & Amt+ ) or Ast+ or ( {EA- or ( EA- & EB- ) or ( EB- & EA- ) } & AImt- ) or AIst- or Sm-;
+<макро-прил-mt> : AXmt+ or AXPmt+
+	or (Xc- & AXmt- & (AXmt+ or [<прил-mt>]))
+	or (Xi- & AXmt- & ([AXPmt+] or <прил-mt>))
+	or (AXPmt- & (AXPmt+ or <прил-mt>));
+<прил-mp>: ( {EA-} & Amp+ ) or Asp+ or AImp- or AIsp- or Sm-;
+<макро-прил-mp> : AXmp+ or AXPmp+
+	or (Xc- & AXmp- & (AXmp+ or [<прил-mp>]))
+	or (Xi- & AXmp- & ([AXPmp+] or <прил-mp>))
+	or (AXPmp- & (AXPmp+ or <прил-mp>));
+% это усилие было для него <b>слишком</b> <b>велико</b>
+<прил-ni>: ( {EA-} & Ani+ ) or Asi+ or ( {EA- or ( EA- & EB- ) or ( EB- & EA- ) } & AIni- ) or AIsi- or Sn-;
+<макро-прил-ni> : AXni+ or AXPni+
+	or (Xc- & AXni- & (AXni+ or [<прил-ni>]))
+	or (Xi- & AXni- & ([AXPni+] or <прил-ni>))
+	or (AXPni- & (AXPni+ or <прил-ni>));
+<прил-ng>: ( {EA-} & Ang+ ) or Asg+ or AIng- or AIsg- or Sn-;
+<макро-прил-ng> : AXng+ or AXPng+
+	or (Xc- & AXng- & (AXng+ or [<прил-ng>]))
+	or (Xi- & AXng- & ([AXPng+] or <прил-ng>))
+	or (AXPng- & (AXPng+ or <прил-ng>));
+<прил-nd>: ( {EA-} & And+ ) or Asd+ or AInd- or AIsd- or Sn-;
+<макро-прил-nd> : AXnd+ or AXPnd+
+	or (Xc- & AXnd- & (AXnd+ or [<прил-nd>]))
+	or (Xi- & AXnd- & ([AXPnd+] or <прил-nd>))
+	or (AXPnd- & (AXPnd+ or <прил-nd>));
+<прил-nv>: ( {EA-} & Anv+ ) or Asv+ or AInv- or AIsv- or Sn-;
+<макро-прил-nv> : AXnv+ or AXPnv+
+	or (Xc- & AXnv- & (AXnv+ or [<прил-nv>]))
+	or (Xi- & AXnv- & ([AXPnv+] or <прил-nv>))
+	or (AXPnv- & (AXPnv+ or <прил-nv>));
+% небо над головой было практически чистым
+<прил-nt>: ( {EA-} & Ant+ ) or Ast+ or ( {EA- or ( EA- & EB- ) or ( EB- & EA- ) } & AInt-) or AIst- or Sn-;
+<макро-прил-nt> : AXnt+ or AXPnt+
+	or (Xc- & AXnt- & (AXnt+ or [<прил-nt>]))
+	or (Xi- & AXnt- & ([AXPnt+] or <прил-nt>))
+	or (AXPnt- & (AXPnt+ or <прил-nt>));
+<прил-np>: ( {EA-} & Anp+ ) or Asp+ or AInp- or AIsp- or Sn-;
+<макро-прил-np> : AXnp+ or AXPnp+
+	or (Xc- & AXnp- & (AXnp+ or [<прил-np>]))
+	or (Xi- & AXnp- & ([AXPnp+] or <прил-np>))
+	or (AXPnp- & (AXPnp+ or <прил-np>));
+<прил-fi>: ( {EA-} & Afi+ ) or Asi+ or ( {EA- or ( EA- & EB- ) or ( EB- & EA- ) } & AIfi- ) or AIsi- or Sf-;
+<макро-прил-fi> : AXfi+ or AXPfi+
+	or (Xc- & AXfi- & (AXfi+ or [<прил-fi>]))
+	or (Xi- & AXfi- & ([AXPfi+] or <прил-fi>))
+	or (AXPfi- & (AXPfi+ or <прил-fi>));
+<прил-fg>: ( {EA-} & Afg+ ) or Asg+ or AIfg- or AIsg- or Sf-;
+<макро-прил-fg> : AXfg+ or AXPfg+
+	or (Xc- & AXfg- & (AXfg+ or [<прил-fg>]))
+	or (Xi- & AXfg- & ([AXPfg+] or <прил-fg>))
+	or (AXPfg- & (AXPfg+ or <прил-fg>));
+<прил-fd>: ( {EA-} & Afd+ ) or Asd+ or AIfd- or AIsd- or Sf-;
+<макро-прил-fd> : AXfd+ or AXPfd+
+	or (Xc- & AXfd- & (AXfd+ or [<прил-fd>]))
+	or (Xi- & AXfd- & ([AXPfd+] or <прил-fd>))
+	or (AXPfd- & (AXPfd+ or <прил-fd>));
+<прил-fv>: ( {EA-} & Afv+ ) or Asv+ or AIfv- or AIsv- or Sf-;
+<макро-прил-fv> : AXfv+ or AXPfv+
+	or (Xc- & AXfv- & (AXfv+ or [<прил-fv>]))
+	or (Xi- & AXfv- & ([AXPfv+] or <прил-fv>))
+	or (AXPfv- & (AXPfv+ or <прил-fv>));
+<прил-ft>: ( {EA-} & Aft+ ) or Ast+ or ({EA- or ( EA- & EB- ) or ( EB- & EA- ) } &  AIft-) or AIst- or Sf-;
+<макро-прил-ft> : AXft+ or AXPft+
+	or (Xc- & AXft- & (AXft+ or [<прил-ft>]))
+	or (Xi- & AXft- & ([AXPft+] or <прил-ft>))
+	or (AXPft- & (AXPft+ or <прил-ft>));
+<прил-fp>: ( {EA-} & Afp+ ) or Asp+ or AIfp- or AIsp- or Sf-;
+<макро-прил-fp> : AXfp+ or AXPfp+
+	or (Xc- & AXfp- & (AXfp+ or [<прил-fp>]))
+	or (Xi- & AXfp- & ([AXPfp+] or <прил-fp>))
+	or (AXPfp- & (AXPfp+ or <прил-fp>));
+<прил-pi>: ( {EA-} & Api+ ) or ( {EA- or ( EA- & EB- ) or ( EB- & EA- ) } & AIpi- ) or Sp-;
+%<прил-pi>: ( {EA-} & Api+ ) or AIpi- or Sp-;
+<макро-прил-pi> : AXpi+ or AXPpi+
+	or (Xc- & AXpi- & (AXpi+ or [<прил-pi>]))
+	or (Xi- & AXpi- & ([AXPpi+] or <прил-pi>))
+	or (AXPpi- & (AXPpi+ or <прил-pi>));
+<прил-pg>: ( {EA-} & Apg+ ) or AIpg- or Sp-;
+<макро-прил-pg> : AXpg+ or AXPpg+
+	or (Xc- & AXpg- & (AXpg+ or [<прил-pg>]))
+	or (Xi- & AXpg- & ([AXPpg+] or <прил-pg>))
+	or (AXPpg- & (AXPpg+ or <прил-pg>));
+<прил-pd>: ( {EA-} & Apd+ ) or AIpd- or Sp-;
+<макро-прил-pd> : AXpd+ or AXPpd+
+	or (Xc- & AXpd- & (AXpd+ or [<прил-pd>]))
+	or (Xi- & AXpd- & ([AXPpd+] or <прил-pd>))
+	or (AXPpd- & (AXPpd+ or <прил-pd>));
+<прил-pv>: ( {EA-} & Apv+ ) or AIpv- or Sp-;
+<макро-прил-pv> : AXpv+ or AXPpv+
+	or (Xc- & AXpv- & (AXpv+ or [<прил-pv>]))
+	or (Xi- & AXpv- & ([AXPpv+] or <прил-pv>))
+	or (AXPpv- & (AXPpv+ or <прил-pv>));
+<прил-pt>: ( {EA-} & Apt+ ) or AIpt- or Sp-;
+<макро-прил-pt> : AXpt+ or AXPpt+
+	or (Xc- & AXpt- & (AXpt+ or [<прил-pt>]))
+	or (Xi- & AXpt- & ([AXPpt+] or <прил-pt>))
+	or (AXPpt- & (AXPpt+ or <прил-pt>));
+<прил-pp>: ( {EA-} & App+ ) or AIpp- or Sp-;
+<макро-прил-pp> : AXpp+ or AXPpp+
+	or (Xc- & AXpp- & (AXpp+ or [<прил-pp>]))
+	or (Xi- & AXpp- & ([AXPpp+] or <прил-pp>))
+	or (AXPpp- & (AXPpp+ or <прил-pp>));
+<прил->: A+ or AI- or S-;
+<макро-прил-> : AX+ or AXP+
+	or (Xc- & AX- & (AX+ or [<прил->]))
+	or (Xi- & AX- & ([AXP+] or <прил->))
+	or (AXP- & (AXP+ or <прил->));
+%% ГЛАГОЛЫ
+
+% глаголы, 3л, нст и буд
+<глагол-нп-sub>: {Xn-} & {Xia-} & {EI-} & (({E+} & {MVv+ or MVat+}) or I+ or  II-);
+<глагол-нп-sub2>:  {EI-} & {MVIa-} & ({DI- or D+}) & (({E+} & {MVv+ or (MVad+ & MVag+)}) or I+ or  II-);
+
+<глагол-пе-sub>: {Xn-} & {Xia-} & {EI-} & (({E+} & {MVv+ or ( IMI- & MVat+ ) or MVat+ or MVap+ or (MVad+ & MVag+)} ) or I+ or II-);
+<глагол-пе-sub2>: {EI-} & {@MVI-}  & ({DI- or D+}) & (({E+} & {MVv+ or [[@MV+]] or ( IMI- & MVat+ ) or MVat+ or MVap+ or (MVad+ & MVag+)} & {E+} & {[[@MV+]] or (MVad+ & MVag+)}) or I+ or II-);
+
+<глагол-нп-sub-dat>: {Xn-} & {Xia-} & {EI-} & (({E+} & {MVv+ or MVad+ or (MVad+ & MVag+)}) or I+ or  II-);
+<глагол-нп-sub2-dat>:  {EI-} & {MVIad-} & ({DI- or D+}) & (({E+} & {MVv+ or MVad+ or (MVad+ & MVag+)}) or I+ or  II-);
+
+<глагол-нп-sub-gen>: {Xn-} & {Xia-} & {EI-} & (({E+} & {MVv+ or MVag+ or (MVad+ & MVag+)}) or I+ or  II-);
+<глагол-нп-sub2-gen>:  {EI-} & {MVIag-} & ({DI- or D+}) & (({E+} & {MVv+ or MVag+ or (MVad+ & MVag+)}) or I+ or  II-);
+
+<глагол-нп-sub-tv>: {Xn-} & {Xia-} & {EI-} & (({E+} & {MVv+ or MVat+ }) or I+ or  II-);
+<глагол-нп-sub2-tv>: {EI-} & {MVIat-} & ({DI- or D+}) & (({E+} & {MVv+ or MVat+ }) or I+ or  II-);
+
+<глагол-3s>: Sn3- or Sm3- or Sf3- or SIm3+ or SIn3+ or SIf3+;
+<глагол-3p>: Sp3- or SIp3+;
+<макро-глагол-3s> : VX3s+
+	or [[]];
+<макро-глагол-3p> : VX3p+
+	or [[]];
+
+
+<глагол-1s>: Ss1- or SIs1+;
+<макро-глагол-1s> : VX1s+
+	or [[]];
+
+<глагол-1p>: Sp1- or SIp1+;
+<макро-глагол-1p> : VX1p+
+	or [[]];
+
+<глагол-2s>: Ss2- or SIs2+;
+<макро-глагол-2s> : VX2s+
+	or [[]];
+
+<глагол-2p>: Sp2- or SIp2+;
+<макро-глагол-2p> : VX2p+
+	or [[]];
+
+% глаголы, прш
+
+%% <глагол-нп-пр-sub>: {Xn-} & {Xia-} & {XIb+} & {EI-} & {@MVIa-} & {DI- or D+} & (({E+} & {[[@MVa+]] or MVv+ or (MVad+ & MVag+)}) or I+ or II-);
+%% <глагол-нп-пр-sub>: {Xn-} & {Xia-} & {XIb+} & {EI-} & { MVIa- } & {DI- or D+} & ( ( {E+} & { [[@MVa+]] or MVv+ or (MVad+ & MVag+) } ) or I+ or II- );
+
+<глагол-нп-пр-sub>: ({Xn-} & {Xia-} & {XIb+} & {EI-} & ( ( {E+} & {  MVv+ or (MVad+ & MVag+) } ) )) or (I+ or II-) ;
+<глагол-нп-пр-sub2>: ( {EI-} & { MVIa- } & ( ( {E+} & { MVv+ or (MVad+ & MVag+) } ) )) or (DI- or D+) or (I+ or II-);
+
+<глагол-нп-пр-sub-gen>: ({Xn-} & {Xia-} & {XIb+} & {EI-} & ( ( {E+} & {  (MVag+ & MVad+) or (MVag+ & MVat+) or MVag+ } ) )) or (I+ or II-) ;
+<глагол-нп-пр-sub2-gen>: ( {EI-} & { MVIa- } & ( ( {E+} & { MVv+ or (MVag+ & MVad+) or MVag+  } ) )) or (DI- or D+) or (I+ or II-);
+
+<глагол-нп-пр-sub-dat>: {Xn-} & {Xia-} & {XIb+} & {EI-} & ( ( {E+} & { MVv+ or (MVad+ & MVag+) or MVad+ } ) or I+ or II- );
+<глагол-нп-пр-sub2-dat>: {EI-} & { MVIa- } & {DI- or D+} & ( ( {E+} & { MVv+ or (MVad+ & MVag+) or MVad+  } ) or I+ or II- );
+
+<глагол-нп-пр-sub-tv>: {Xn-} & {Xia-} & {XIb+} & {EI-} & ( ( {E+} & { MVv+ or (MVat+ & MVad+) or MVat+ } ) or I+ or II- );
+<глагол-нп-пр-sub2-tv>: {EI-} & { MVIa- } & {DI- or D+} & ( ( {E+} & { MVv+ or (MVat+ & MVad+) or MVat+  } ) or I+ or II- );
+
+<глагол-нп-пр-sub-pr>: ( {Xn-} & {Xia-} & {XIb+} & {EI-} & ( ( {E+} & { MVv+ or (MVap+ & MVad+) or MVap+ } ) ) ) or (I+ or II-);
+<глагол-нп-пр-sub2-pr>: ( {EI-} & { MVIa- } & ( ( {E+} & { MVv+ or (MVap+ & MVad+) or MVap+  } ) ) ) or (DI- or D+) or (I+ or II-);
+
+<глагол-пе-пр-sub>: { IM+  or Xn-} & {Xia-} & {XIb+} & {EI-} & ( ( { MVv+ } & {E+} ));
+<глагол-пе-пр-sub2>:  ( {EI-} & { MVI- } & ( ( {E+} & { MVv+ or (MVv+ and AInt+) or (MVad+ & MVag+) } & {E+} ) or I+ or ( { IMI- } & II-))) or ( DI- or D+ );
+
+% хочется устроить неприятности людям
+<глагол-пе-пр-sub-dat>: { IM+  or Xn-} & {Xia-} & {XIb+} & {EI-} & ( ( { MVv+ } & {E+} ));
+<глагол-пе-пр-sub2-dat>:  ( {EI-} & { MVI- } & ( ( {E+} & { MVv+ or MVad+ or (MVd+ & AInt+) } & {E+} ) or I+ or ( { IMI- } & II-))) or ( DI- or D+ );
+
+
+<глагол-пе-пр-sub-tv>: { IM+  or Xn-} & {Xia-} & {XIb+} & {EI-} & ( ( { MVv+ } & {E+} ));
+<глагол-пе-пр-sub2-tv>:  {EI-} & { MVI- } & ( ( {E+} & { MVv+ or (MVv+ and AInt+) or (MVat+ & MVag+) or MVat+ } & {E+} ) or I+ or ( { IMI- } & II-));
+
+
+<глагол-pm>: Sm- or Ss- or SIm+ or SIs+;
+<макро-глагол-pm> : VXpm+
+	or [[]];
+<глагол-pn>: Sn- or Ss- or SIn+ or SIs+;
+<макро-глагол-pn> : VXpn+
+	or [[]];
+<глагол-pf>: Sf- or Ss- or SIf+ or SIs+;
+<макро-глагол-pf> : VXpf+
+	or [[]];
+<глагол-pp>: Sp- or SIp+;
+<макро-глагол-pp> : VXpp+
+	or [[]];
+есть.vps становится.vpe оказывается.vpe выглядит.vpe остается.vpe считается.vpe обнаруживается.vpe звучит.vpe делается.vpe представляется.vpe покажется.vpe обходится.vpe послужит.vpe : ( <глагол-нп-sub> & {AIst+ or Ast- or AIsi+ or Asi-} & (<глагол-3s> or <макро-глагол-3s>) & <глагол-нп-sub2> & {Wd-}) or (S*3- & ( A*t- or MVIat-) & Wd- & E+ & {E+} );
+есть.vpp становятся.vpe оказываются.vpe выглядят.vpe остаются.vpe считаются.vpe обнаруживаются.vpe звучат.vpe делаются.vpe предоставляются.vpe покажутся.vpe обходятся.vpe послужат.vpe : <глагол-нп-sub> & {AIpt+ or Apt- or AIpi+ or Api-} & (<глагол-3p> or <макро-глагол-3p>) & <глагол-нп-sub2> & {Wd-};
+был.vp стал.vp оказался.vp казался.vp остался.vp оставался.vp показался.vp появился.vp выглядел.vp сделался.vp считался.vp становился.vp : (<глагол-нп-пр-sub> & ( { MVIat- or MVat+ or AImt+ or Amt- or AImi+ or Ami- } ) & (<глагол-pm> or <макро-глагол-pm>) & <глагол-нп-пр-sub2> & {Wd-}) or ( {EI-} & Sm3- & Wd- & MVad+ & AImt+) or (Sm- & {Xia-} & Wd- & MVAim+) ;
+
+была.vp стала.vp оказалась.vp казалась.vp осталась.vp оставалась.vp показалась.vp появилась.vp выглядела.vp сделалась.vp считалась.vp становилась.vp являлась.vp явилась.vp служила.vp : (<глагол-нп-пр-sub> & ( { AIft+ or Aft- or AIfi+ or Afi- } ) & (<глагол-pf> or <макро-глагол-pf> ) & <глагол-нп-пр-sub2> & {Wd-}) or ( {EI-} & Sf3- & {EI-} & Wd- & {MVad+} & (MVat+ or AIft+ or AIfi+ ) ) or ( {EI-} & {EI-} & Wd- & I+ & SIf3+ ) or (MVIat- & Sf3- & Wd- & E+) or (Sf- & {Xia-} & Wd- & MVAif+) ;
+
+было.vp стало.vp оказалось.vp казалось.vp осталось.vp оставалось.vp показалось.vp появилось.vp выглядело.vp считалось.vp делалось.vp обнаружилось.vp прозвучало.vp выходило.vp звучало.vp становилось.vp являлось.vp явилось.vp : (<глагол-нп-пр-sub> & ( { MVIad- or MVat+ or AInt+ or Ant- or AIni+ or Ani-} ) & (<глагол-pn> or <макро-глагол-pn>) & <глагол-нп-пр-sub2> & {Wd-}) or (Sn3- & Wd- & MVad+ & AInt+ );
+
+были.vp стали.vp оказались.vp казались.vp остались.vp оставались.vp показались.vp появились.vp выглядели.vp становились.vp : (<глагол-нп-пр-sub> & ( { MVat+  or AIpt+ or Apt- or AIpi+ or Api- } ) & (<глагол-pp> or <макро-глагол-pp>) & <глагол-нп-пр-sub2> & {Wd-}) or (EI- & Xia- & Wd- & SIp+) or (Sp- & {Xia-} & Wd- & MVAip+);
+<глагол-i>: I- or II+ or [Wd-];
+будут.vp станут.vp становятся.vp окажутся.vp: <глагол-нп-sub> & ( { MVat+ or AIpt+ or Apt- or AIpi+ or Api- } ) & (<глагол-3p> or <макро-глагол-3p>) & <глагол-нп-sub> & {Wd-};
+будет.vp станет.vp становится.vp окажется.vp оказывается.vp : {[<глагол-нп-sub>]} & (MVat+  or AIst+ or Ast- or AIsi+ or Asi-) & (<глагол-3s> or <макро-глагол-3s>) & {[<глагол-нп-sub>]} & {Wd-};
+буду.vp становлюсь.vp стану.vp окажусь.vp оказываюсь.vp : <глагол-нп-sub> & (MVat+ or AIst+ or Ast- or AIsi+ or Asi-) & (<глагол-1s> or <макро-глагол-1s>) & <глагол-нп-sub> & {Wd-};
+будем.vp станем.vp становимся.vp окажемся.vp оказываемся.vp : <глагол-нп-sub> & (MVat+ or E+ or AIpt+ or Apt- or AIpi+ or Api-) & (<глагол-1p> or <макро-глагол-1p>) & <глагол-нп-sub> & {Wd-};
+будешь.vp станешь.vp становишься.vp окажешься.vp оказываешься.vp : (<глагол-нп-sub> & (MVat+ or E+ or AIst+ or Ast- or AIsi+ or Asi-) & (<глагол-2s> or <макро-глагол-2s>) & <глагол-нп-sub> & {Wd-}) or ( EI- & MVIad- & Ss2- & Wd- & AIsi+ & E+ );
+будете.vp станете.vp становитесь.vp окажетесь.vp оказываетесь.vp : <глагол-нп-sub> & (MVat+ or E+ or AIpt+ or Apt- or AIpi+ or Api-) & (<глагол-2p> or <макро-глагол-2p>) & <глагол-нп-sub> & {Wd-};
+должен.am готов.am обязан.am вынужден.am : <глагол-пе-пр-sub> & (I- or II+ or <глагол-pm> or <макро-глагол-pm>) & <глагол-пе-пр-sub2> & {Wd-};
+должен.an готов.an обязан.an вынужден.an : <глагол-пе-пр-sub> & (I- or II+ or <глагол-pn> or <макро-глагол-pn>) & <глагол-пе-пр-sub2> & {Wd-};
+должна.af готова.af: <глагол-пе-пр-sub> & (I- or II+ or <глагол-pf> or <макро-глагол-pf>) & <глагол-пе-пр-sub2> & {Wd-};
+должны.ap готовы.ap бесполезны.ap бессильны.ap близки.ap целы.ap добры.ap довольны.ap хороши.ap мертвы.ap молоды.ap одинаковы.ap правы.ap прекрасны.ap рады.ap равны.ap свободны.ap счастливы.ap уничтожены.ap устали.ap устроены.ap уверены.ap живы.ap верны.ap: (<глагол-пе-пр-sub> & (I- or II+ or <глагол-pp> or <макро-глагол-pp>) & <глагол-пе-пр-sub> & {Wd-}) or ( {Xia-} & Sp- & Wd- & I+ );
+глупы.ap красивы.ap опасны.ap плохи.ap сильны.ap важны.ap велики.ap: <глагол-пе-пр-sub> & (I- or II+ or <глагол-pp> or <макро-глагол-pp>) & <глагол-пе-пр-sub2> & {Wd-};
+
+будут.vpdf3p станут.vpdf3p : {[<глагол-пе-sub>]} & (<глагол-3p> or <макро-глагол-3p>) & {[<глагол-пе-sub2>]} & {Wd-}; % Г,св,пе,дст,буд,3л,мн
+будет.vpdf3s станет.vpdf3s : {[<глагол-пе-sub>]} & (<глагол-3s> or <макро-глагол-3s>) & {[<глагол-пе-sub2>]} & {Wd-}; % Г,пе,дст,буд,3л,ед
+будете.vpdf2p станете.vpdf2p : {[<глагол-пе-sub>]} & (<глагол-2p> or <макро-глагол-2p>) & {[<глагол-пе-sub2>]} & {Wd-}; % Г,св,пе,дст,буд,2л,мн
+будешь.vpdf2s станешь.vpdf2s : {[<глагол-пе-sub>]} & (<глагол-2s> or <макро-глагол-2s>) & {[<глагол-пе-sub2>]} & {Wd-}; % Г,св,пе,дст,буд,2л,ед
+будем.vpdf1p станем.vpdf1p : {[<глагол-пе-sub>]} & (<глагол-1p> or <макро-глагол-1p>) & {[<глагол-пе-sub2>]} & {Wd-}; % Г,св,пе,дст,буд,2л,ед
+буду.vpdf1s стану.vpdf1s : {[<глагол-пе-sub>]} & (<глагол-1s> or <макро-глагол-1s>) & {[<глагол-пе-sub2>]} & {Wd-}; % Г,св,пе,дст,буд,2л,ед
+
+
+%% можно было, надо будет - связь с предикативами, терять контакт было никак нельзя
+будет.vt : IM- or IMI+;
+были.vt : IMp- or IMIp+;
+было.vt : IMn- or IMIn+;
+%% он был немало удивлен
+был.vt : IMm- or ({ Sm3- } & IMIm+);
+была.vt : IMf- or ({ Sf3- } & IMIf+);
+
+%% я нужен своей сестре
+интересен.vs известен.vs необходим.vs нужен.vs полезен.vs: <глагол-нп-пр-sub> & (<глагол-pm> or <макро-глагол-pm>) & <глагол-нп-пр-sub2> & {Wd-}; % Г,св,нп,дст,прш,мр,ед
+
+%% он был доктор, они были призраки
+был.vmp : Sm3- & Wd- & ( MVAi+ or MVat+ );
+была.vfp : Sf3- & Wd- & ( MVAi+ or MVat+ );
+будет.vpp : S*3- & Wd- & ( MVAi+ or MVat+ );
+
+%% это был голос живого существа, это голос
+это.msi : (Wd- & MVAi+) or S+;
+
+-.i --.i есть.v -_это : ( {S*3-} & ( ( { Ew- } & MVAi+ ) or I+ or MVv+ or ( { EI- } & E+ ) or ( { EI- } & EI+ ) ) & {Wd-}) or Xt+;
+
+%% были как призраки
+как.ji : Ew- & MVAi+;
+
+<макро-глагол-i> : VXi+
+	or (Xc- & VXi- & (VXi+ or [<глагол-i>]))
+	or (Xi- & VXi- & <глагол-i>)
+	or [[]];
+<глагол-pmi>: ( (Xc- or <costly-null>) & (XIc+ or <costly-null>) & Pmid- ) or PImid+;
+<глагол-smi>: ( (Xc- or <costly-null>) & (XIc+ or <costly-null>) & Pmis- ) or PImis+;
+<макро-глагол-pmi> : VXpmi+
+	or (Xc- & VXpmi- & (VXpmi+ or [<глагол-pmi>]))
+	or (Xi- & VXpmi- & <глагол-pmi>)
+	or [[]];
+<макро-глагол-smi> : VXsmi+
+	or (Xc- & VXsmi- & (VXsmi+ or [<глагол-smi>]))
+	or (Xi- & VXsmi- & <глагол-smi>)
+	or [[]];
+<глагол-pmg>: ( (Xc- or <costly-null>) & (XIc+ or <costly-null>) & Pmgd- ) or PImgd+;
+<глагол-smg>: ( (Xc- or <costly-null>) & (XIc+ or <costly-null>) & Pmgs- ) or PImgs+;
+<макро-глагол-pmg> : VXpmg+
+	or (Xc- & VXpmg- & (VXpmg+ or [<глагол-pmg>]))
+	or (Xi- & VXpmg- & <глагол-pmg>)
+	or [[]];
+<макро-глагол-smg> : VXsmg+
+	or (Xc- & VXsmg- & (VXsmg+ or [<глагол-smg>]))
+	or (Xi- & VXsmg- & <глагол-smg>)
+	or [[]];
+<глагол-pmd>: ( (Xc- or <costly-null>) & (XIc+ or <costly-null>) & Pmdd- ) or PImdd+;
+<глагол-smd>: ( (Xc- or <costly-null>) & (XIc+ or <costly-null>) & Pmds- ) or PImds+;
+<макро-глагол-pmd> : VXpmd+
+	or (Xc- & VXpmd- & (VXpmd+ or [<глагол-pmd>]))
+	or (Xi- & VXpmd- & <глагол-pmd>)
+	or [[]];
+<макро-глагол-smd> : VXsmd+
+	or (Xc- & VXsmd- & (VXsmd+ or [<глагол-smd>]))
+	or (Xi- & VXsmd- & <глагол-smd>)
+	or [[]];
+<глагол-pmv>: ( (Xc- or <costly-null>) & (XIc+ or <costly-null>) & Pmvd- ) or PImvd+;
+<глагол-smv>: ( (Xc- or <costly-null>) & (XIc+ or <costly-null>) & Pmvs- ) or PImvs+;
+<макро-глагол-pmv> : VXpmv+
+	or (Xc- & VXpmv- & (VXpmv+ or [<глагол-pmv>]))
+	or (Xi- & VXpmv- & <глагол-pmv>)
+	or [[]];
+<макро-глагол-smv> : VXsmv+
+	or (Xc- & VXsmv- & (VXsmv+ or [<глагол-smv>]))
+	or (Xi- & VXsmv- & <глагол-smv>)
+	or [[]];
+<глагол-pmt>: ( (Xc- or <costly-null>) & (XIc+ or <costly-null>) & Pmtd- ) or PImtd+;
+<глагол-smt>: ( (Xc- or <costly-null>) & (XIc+ or <costly-null>) & Pmts- ) or PImts+;
+<макро-глагол-pmt> : VXpmt+
+	or (Xc- & VXpmt- & (VXpmt+ or [<глагол-pmt>]))
+	or (Xi- & VXpmt- & <глагол-pmt>)
+	or [[]];
+<макро-глагол-smt> : VXsmt+
+	or (Xc- & VXsmt- & (VXsmt+ or [<глагол-smt>]))
+	or (Xi- & VXsmt- & <глагол-smt>)
+	or [[]];
+<глагол-pmp>: ( (Xc- or <costly-null>) & (XIc+ or <costly-null>) & Pmpd- ) or PImpd+;
+<глагол-smp>: ( (Xc- or <costly-null>) & (XIc+ or <costly-null>) & Pmps- ) or PImps+;
+<макро-глагол-pmp> : VXpmp+
+	or (Xc- & VXpmp- & (VXpmp+ or [<глагол-pmp>]))
+	or (Xi- & VXpmp- & <глагол-pmp>)
+	or [[]];
+<макро-глагол-smp> : VXsmp+
+	or (Xc- & VXsmp- & (VXsmp+ or [<глагол-smp>]))
+	or (Xi- & VXsmp- & <глагол-smp>)
+	or [[]];
+<глагол-pni>: ( (Xc- or <costly-null>) & (XIc+ or <costly-null>) & Pnid- ) or PInid+;
+<глагол-sni>: ( (Xc- or <costly-null>) & (XIc+ or <costly-null>) & Pnis- ) or PInis+;
+<макро-глагол-pni> : VXpni+
+	or (Xc- & VXpni- & (VXpni+ or [<глагол-pni>]))
+	or (Xi- & VXpni- & <глагол-pni>)
+	or [[]];
+<макро-глагол-sni> : VXsni+
+	or (Xc- & VXsni- & (VXsni+ or [<глагол-sni>]))
+	or (Xi- & VXsni- & <глагол-sni>)
+	or [[]];
+<глагол-png>: ( (Xc- or <costly-null>) & (XIc+ or <costly-null>) & Pngd- ) or PIngd+;
+<глагол-sng>: ( (Xc- or <costly-null>) & (XIc+ or <costly-null>) & Pngs- ) or PIngs+;
+<макро-глагол-png> : VXpng+
+	or (Xc- & VXpng- & (VXpng+ or [<глагол-png>]))
+	or (Xi- & VXpng- & <глагол-png>)
+	or [[]];
+<макро-глагол-sng> : VXsng+
+	or (Xc- & VXsng- & (VXsng+ or [<глагол-sng>]))
+	or (Xi- & VXsng- & <глагол-sng>)
+	or [[]];
+<глагол-pnd>: ( (Xc- or <costly-null>) & (XIc+ or <costly-null>) & Pndd- ) or PIndd+;
+<глагол-snd>: ( (Xc- or <costly-null>) & (XIc+ or <costly-null>) & Pnds- ) or PInds+;
+<макро-глагол-pnd> : VXpnd+
+	or (Xc- & VXpnd- & (VXpnd+ or [<глагол-pnd>]))
+	or (Xi- & VXpnd- & <глагол-pnd>)
+	or [[]];
+<макро-глагол-snd> : VXsnd+
+	or (Xc- & VXsnd- & (VXsnd+ or [<глагол-snd>]))
+	or (Xi- & VXsnd- & <глагол-snd>)
+	or [[]];
+<глагол-pnv>: ( (Xc- or <costly-null>) & (XIc+ or <costly-null>) & Pnvd- ) or PInvd+;
+<глагол-snv>: ( (Xc- or <costly-null>) & (XIc+ or <costly-null>) & Pnvs- ) or PInvs+;
+<макро-глагол-pnv> : VXpnv+
+	or (Xc- & VXpnv- & (VXpnv+ or [<глагол-pnv>]))
+	or (Xi- & VXpnv- & <глагол-pnv>)
+	or [[]];
+<макро-глагол-snv> : VXsnv+
+	or (Xc- & VXsnv- & (VXsnv+ or [<глагол-snv>]))
+	or (Xi- & VXsnv- & <глагол-snv>)
+	or [[]];
+<глагол-pnt>: ( (Xc- or <costly-null>) & (XIc+ or <costly-null>) & Pntd- ) or PIntd+;
+<глагол-snt>: ( (Xc- or <costly-null>) & (XIc+ or <costly-null>) & Pnts- ) or PInts+;
+<макро-глагол-pnt> : VXpnt+
+	or (Xc- & VXpnt- & (VXpnt+ or [<глагол-pnt>]))
+	or (Xi- & VXpnt- & <глагол-pnt>)
+	or [[]];
+<макро-глагол-snt> : VXsnt+
+	or (Xc- & VXsnt- & (VXsnt+ or [<глагол-snt>]))
+	or (Xi- & VXsnt- & <глагол-snt>)
+	or [[]];
+<глагол-pnp>: ( (Xc- or <costly-null>) & (XIc+ or <costly-null>) & Pnpd- ) or PInpd+;
+<глагол-snp>: ( (Xc- or <costly-null>) & (XIc+ or <costly-null>) & Pnps- ) or PInps+;
+<макро-глагол-pnp> : VXpnp+
+	or (Xc- & VXpnp- & (VXpnp+ or [<глагол-pnp>]))
+	or (Xi- & VXpnp- & <глагол-pnp>)
+	or [[]];
+<макро-глагол-snp> : VXsnp+
+	or (Xc- & VXsnp- & (VXsnp+ or [<глагол-snp>]))
+	or (Xi- & VXsnp- & <глагол-snp>)
+	or [[]];
+<глагол-pfi>: ( (Xc- or <costly-null>) & (XIc+ or <costly-null>) & Pfid- ) or PIfid+;
+<глагол-sfi>: ( (Xc- or <costly-null>) & (XIc+ or <costly-null>) & Pfis- ) or PIfis+;
+<макро-глагол-pfi> : VXpfi+
+	or (Xc- & VXpfi- & (VXpfi+ or [<глагол-pfi>]))
+	or (Xi- & VXpfi- & <глагол-pfi>)
+	or [[]];
+<макро-глагол-sfi> : VXsfi+
+	or (Xc- & VXsfi- & (VXsfi+ or [<глагол-sfi>]))
+	or (Xi- & VXsfi- & <глагол-sfi>)
+	or [[]];
+<глагол-pfg>: ( (Xc- or <costly-null>) & (XIc+ or <costly-null>) & Pfgd- ) or PIfgd+;
+<глагол-sfg>: ( (Xc- or <costly-null>) & (XIc+ or <costly-null>) & Pfgs- ) or PIfgs+;
+<макро-глагол-pfg> : VXpfg+
+	or (Xc- & VXpfg- & (VXpfg+ or [<глагол-pfg>]))
+	or (Xi- & VXpfg- & <глагол-pfg>)
+	or [[]];
+<макро-глагол-sfg> : VXsfg+
+	or (Xc- & VXsfg- & (VXsfg+ or [<глагол-sfg>]))
+	or (Xi- & VXsfg- & <глагол-sfg>)
+	or [[]];
+<глагол-pfd>: ( (Xc- or <costly-null>) & (XIc+ or <costly-null>) & Pfdd- ) or PIfdd+;
+<глагол-sfd>: ( (Xc- or <costly-null>) & (XIc+ or <costly-null>) & Pfds- ) or PIfds+;
+<макро-глагол-pfd> : VXpfd+
+	or (Xc- & VXpfd- & (VXpfd+ or [<глагол-pfd>]))
+	or (Xi- & VXpfd- & <глагол-pfd>)
+	or [[]];
+<макро-глагол-sfd> : VXsfd+
+	or (Xc- & VXsfd- & (VXsfd+ or [<глагол-sfd>]))
+	or (Xi- & VXsfd- & <глагол-sfd>)
+	or [[]];
+<глагол-pfv>: ( (Xc- or <costly-null>) & (XIc+ or <costly-null>) & Pfvd- ) or PIfvd+;
+<глагол-sfv>: ( (Xc- or <costly-null>) & (XIc+ or <costly-null>) & Pfvs- ) or PIfvs+;
+<макро-глагол-pfv> : VXpfv+
+	or (Xc- & VXpfv- & (VXpfv+ or [<глагол-pfv>]))
+	or (Xi- & VXpfv- & <глагол-pfv>)
+	or [[]];
+<макро-глагол-sfv> : VXsfv+
+	or (Xc- & VXsfv- & (VXsfv+ or [<глагол-sfv>]))
+	or (Xi- & VXsfv- & <глагол-sfv>)
+	or [[]];
+<глагол-pft>: ( (Xc- or <costly-null>) & (XIc+ or <costly-null>) & Pftd- ) or PIftd+;
+<глагол-sft>: ( (Xc- or <costly-null>) & (XIc+ or <costly-null>) & Pfts- ) or PIfts+;
+<макро-глагол-pft> : VXpft+
+	or (Xc- & VXpft- & (VXpft+ or [<глагол-pft>]))
+	or (Xi- & VXpft- & <глагол-pft>)
+	or [[]];
+<макро-глагол-sft> : VXsft+
+	or (Xc- & VXsft- & (VXsft+ or [<глагол-sft>]))
+	or (Xi- & VXsft- & <глагол-sft>)
+	or [[]];
+<глагол-pfp>: ( (Xc- or <costly-null>) & (XIc+ or <costly-null>) & Pfpd- ) or PIfpd+;
+<глагол-sfp>: ( (Xc- or <costly-null>) & (XIc+ or <costly-null>) & Pfps- ) or PIfps+;
+<макро-глагол-pfp> : VXpfp+
+	or (Xc- & VXpfp- & (VXpfp+ or [<глагол-pfp>]))
+	or (Xi- & VXpfp- & <глагол-pfp>)
+	or [[]];
+<макро-глагол-sfp> : VXsfp+
+	or (Xc- & VXsfp- & (VXsfp+ or [<глагол-sfp>]))
+	or (Xi- & VXsfp- & <глагол-sfp>)
+	or [[]];
+<глагол-ppi>: ( (Xc- or <costly-null>) & (XIc+ or <costly-null>) & Ppid- ) or PIpid+;
+<глагол-spi>: ( (Xc- or <costly-null>) & (XIc+ or <costly-null>) & Ppis- ) or PIpis+;
+<макро-глагол-ppi> : VXppi+
+	or (Xc- & VXppi- & (VXppi+ or [<глагол-ppi>]))
+	or (Xi- & VXppi- & <глагол-ppi>)
+	or [[]];
+<макро-глагол-spi> : VXspi+
+	or (Xc- & VXspi- & (VXspi+ or [<глагол-spi>]))
+	or (Xi- & VXspi- & <глагол-spi>)
+	or [[]];
+<глагол-ppg>: ( (Xc- or <costly-null>) & (XIc+ or <costly-null>) & Ppgd- ) or PIpgd+;
+<глагол-spg>: ( (Xc- or <costly-null>) & (XIc+ or <costly-null>) & Ppgs- ) or PIpgs+;
+<макро-глагол-ppg> : VXppg+
+	or (Xc- & VXppg- & (VXppg+ or [<глагол-ppg>]))
+	or (Xi- & VXppg- & <глагол-ppg>)
+	or [[]];
+<макро-глагол-spg> : VXspg+
+	or (Xc- & VXspg- & (VXspg+ or [<глагол-spg>]))
+	or (Xi- & VXspg- & <глагол-spg>)
+	or [[]];
+<глагол-ppd>: ( (Xc- or <costly-null>) & (XIc+ or <costly-null>) & Ppdd- ) or PIpdd+;
+<глагол-spd>: ( (Xc- or <costly-null>) & (XIc+ or <costly-null>) & Ppds- ) or PIpds+;
+<макро-глагол-ppd> : VXppd+
+	or (Xc- & VXppd- & (VXppd+ or [<глагол-ppd>]))
+	or (Xi- & VXppd- & <глагол-ppd>)
+	or [[]];
+<макро-глагол-spd> : VXspd+
+	or (Xc- & VXspd- & (VXspd+ or [<глагол-spd>]))
+	or (Xi- & VXspd- & <глагол-spd>)
+	or [[]];
+<глагол-ppv>: ( (Xc- or <costly-null>) & (XIc+ or <costly-null>) & Ppvd- ) or PIpvd+;
+<глагол-spv>: ( (Xc- or <costly-null>) & (XIc+ or <costly-null>) & Ppvs- ) or PIpvs+;
+<макро-глагол-ppv> : VXppv+
+	or (Xc- & VXppv- & (VXppv+ or [<глагол-ppv>]))
+	or (Xi- & VXppv- & <глагол-ppv>)
+	or [[]];
+<макро-глагол-spv> : VXspv+
+	or (Xc- & VXspv- & (VXspv+ or [<глагол-spv>]))
+	or (Xi- & VXspv- & <глагол-spv>)
+	or [[]];
+<глагол-ppt>: ( (Xc- or <costly-null>) & (XIc+ or <costly-null>) & Pptd- ) or PIptd+;
+<глагол-spt>: ( (Xc- or <costly-null>) & (XIc+ or <costly-null>) & Ppts- ) or PIpts+;
+<макро-глагол-ppt> : VXppt+
+	or (Xc- & VXppt- & (VXppt+ or [<глагол-ppt>]))
+	or (Xi- & VXppt- & <глагол-ppt>)
+	or [[]];
+<макро-глагол-spt> : VXspt+
+	or (Xc- & VXspt- & (VXspt+ or [<глагол-spt>]))
+	or (Xi- & VXspt- & <глагол-spt>)
+	or [[]];
+<глагол-ppp>: ( (Xc- or <costly-null>) & (XIc+ or <costly-null>) & Pppd- ) or PIppd+;
+<глагол-spp>: ( (Xc- or <costly-null>) & (XIc+ or <costly-null>) & Ppps- ) or PIpps+;
+<макро-глагол-ppp> : VXppp+
+	or (Xc- & VXppp- & (VXppp+ or [<глагол-ppp>]))
+	or (Xi- & VXppp- & <глагол-ppp>)
+	or [[]];
+<макро-глагол-spp> : VXspp+
+	or (Xc- & VXspp- & (VXspp+ or [<глагол-spp>]))
+	or (Xi- & VXspp- & <глагол-spp>)
+	or [[]];
+<глагол-d>: {Xc-} & {XIc+} & (D- or DI+);
+<макро-глагол-d> : VXd+
+	or (Xc- & VXd- & (VXd+ or [<глагол-d>]))
+	or (Xi- & VXd- & <глагол-d>)
+	or [[]];
+
+
+<глагол-pr>: Wd-;
+<макро-глагол-pr> : VXpr+
+	or (Xc- & VXpr- & (VXpr+ or [<глагол-pr>]))
+	or (Xi- & VXpr- & <глагол-pr>)
+	or [[]];
+
+%% ПРИЛАГАТЕЛЬНЫЕ
+<нар>:[({Xc-} & E- ) or ({[[XIc+]]} & EI+) or {Xt- & S-}];
+%% <макро-нар> : EX+ or EXP+ or (Xc- & EX- & (EX+ or [<нар>]))
+<макро-нар> : EX+ or (Xc- & EX- & (EX+ or [<нар>]))
+	or (Xi- & EX- & ([EXP+] or <нар>))
+	or (EXP- & (EXP+ or <нар>));
+
+менее.as более.as: {Xn-} & {Mg+ or AI*g+} &  {Ee-} & (E- or EI+); % П,сравн
+
+дана.afs одета.afs освещена.afs открыта.afs привязана.afs распахнута.afs расположена.afs сделана.afs создана.afs видна.afs закончена.afs закрыта.afs занята.afs заперта.afs: {[[AP+]]} & (<прил-fi> or <макро-прил-fi>); % П,жр,ед,кр
+
+погружен.ams создан.ams виден.ams сделан.ams расположен.ams предназначен.ams представлен.ams найден.ams поставлен.ams назначен.ams построен.ams направлен.ams заключен.ams дан.ams арестован.ams посвящен.ams настроен.ams включен.ams написан.ams разработан.ams подготовлен.ams выполнен.ams взят.ams определен.ams уничтожен.ams подписан.ams получен.ams приведен.ams обнаружен.ams вызван.ams введен.ams опубликован.ams доставлен.ams задержан.ams освобожден.ams отправлен.ams объявлен.ams составлен.ams проведен.ams зарегистрирован.ams назван.ams изображен.ams использован.ams рассмотрен.ams показан.ams оснащен.ams взят_в_плен : (<прил-mi> or <макро-прил-mi>); % П,мр,ед,кр
+
+%% ЧИСЛИТЕЛЬНЫЕ
+три.ci четыре.ci: {Api- or ET-} & ( Ngm+ or Nip+ ) & (Ji- or (Sp3+ or SIp3- or [[Wd-]]) or ((Xt- or [[]]) & S-) or Nip- or <макро-сущ-i> or N-);
+три.cv четыре.cv: {Api- or ET-} & ( Ngm+ or Nip+ or NIgm- ) & (Jv- or [MVv-] or [MVIv+] or Nvp- or <макро-сущ-v> or N-); % ЧИСЛ,вн
+
+два.cmi: {Api- or ET-} & ( Ngm+ ) & (Ji- or (Sp3+ or SIp3- or [[Wd-]]) or ((Xt- or [[]]) & S-) or Nip- or <макро-сущ-i> or N-);
+два.cmv: {Api- or ET-} & ( Ngm+ or NIgm- ) & (Jv- or [MVv-] or [MVIv+] or Nvp- or <макро-сущ-v> or N-); % ЧИСЛ,вн
+
+два.cni: {Api- or ET-} & ( Ngn+ ) & (Ji- or (Sp3+ or SIp3- or [[Wd-]]) or ((Xt- or [[]]) & S-) or Nip- or <макро-сущ-i> or N-);
+два.cnv: {Api- or ET-} & ( Ngn+ ) & (Jv- or [MVv-] or [MVIv+] or Nvp- or <макро-сущ-v> or N-); % ЧИСЛ,вн
+
+две.cfi: {Api- or ET-} & ( Nip+ ) & (Ji- or (Sp3+ or SIp3- or [[Wd-]]) or ((Xt- or [[]]) & S-) or Nip- or <макро-сущ-i> or N-);
+две.cfv: {Api- or ET-} & ( Nip+ ) & (Jv- or [MVv-] or [MVIv+] or Nvp- or <макро-сущ-v> or N-); % ЧИСЛ,вн
+
+оба.cmi: {Api-} & {Ngm+}  & (Ji- or (Sp3+ or SIp3- or [[Wd-]]) or ((Xt- or [[]]) & S-) or Nip- or <макро-сущ-i> or N-);
+оба.cmv: {Api-} & {Ngm+}  & (Jv- or [MVv-] or [MVIv+] or Nvp- or <макро-сущ-v> or N-); % ЧИСЛ,вн
+
+обе.cfi: {Api-} & {Nip+}  & (Ji- or (Sp3+ or SIp3- or [[Wd-]]) or ((Xt- or [[]]) & S-) or Nip- or <макро-сущ-i> or N-);
+обе.cfv: {Api-} & {Nip+}  & (Jv- or [MVv-] or [MVIv+] or Nvp- or <макро-сущ-v> or N-); % ЧИСЛ,вн
+
+%% ЧИСЛИТЕЛЬНЫЕ не обязательно требующие N+
+%% Аднумератив, аднумеративный падеж, счетный падеж, двойственное число.
+двое.nci трое.nci четверо.nci пятеро.nci шестеро.nci семеро.nci :  {Api- or ET-} & { Ngp+ } & (Ji- or (Sp3+ or Sn3+ or SIp3- or [[Wd-]]) or ((Xt- or [[]]) & S-) or Nip- or <макро-сущ-i> or N-); % ЧИСЛ,им
+двоих.ncv троих.ncv : {Api-} & { Ngp+ } & (Jv- or [MVv-] or [MVIv+] or Nvp- or <макро-сущ-v> or N-); % ЧИСЛ,вн
+двоих.ncg троих.ncg : { Ng+ } & ( Jg- or [Mg-] or [ ( { Xia- } & MVag- ) or MVIag+] or Ngp- or <макро-сущ-g> or N-); % ЧИСЛ,рд
+
+большинство.nci количество.nci число.nci часть.nci множество.nci : {Api-} & { Ngp+ } & (Ji- or (Sp3+ or Sn3+ or SIp3- or [[Wd-]]) or ((Xt- or [[]]) & S-) or Nip- or <макро-сущ-i> or N-); 
+
+%% ЧИСЛИТЕЛЬНЫЕ НАРЕЧИЯ
+много.cie мало.cie маловато.cie: ({EI-} & SIp3- & Ngp+);
+много.cve мало.cve маловато.cve: ({EI-} & MVv- & Ng+);
+
+
+%% НАРЕЧИЯ
+
+гораздо.ee намного.ee существенно.ee вдвое.ee значительно.ee заметно.ee ощутимо.ee: Ee+; % гораздо ярче, заметно реже
+абсолютно.ea более-менее.ea принципиально.ea совершенно.ea: EA+ or EEI+; % абсолютно темный, более-менее ярко
+почти.ea совсем.ea практически.ea : EA+ or EEI+; % почти весь, почти темный, почти ярко
+хорошо.ea плохо.ea прекрасно.ea едва.ea еле.ea чуть.ea : EA+; % хорошо знакомый
+бесконечно.ea безнадежно.ea безумно.ea безупречно.ea донельзя.ea идеально.ea излишне.ea мучительно.ea неестественно.ea немыслимо.ea необычно.ea неправдоподобно.ea непривычно.ea нестерпимо.ea неуловимо.ea невероятно.ea невообразимо.ea невыносимо.ea поразительно.ea смертельно.ea удивительно.ea ужасно.ea вдвойне.ea чудовищно.ea : EA+ or EI+; % бесконечно длинная 
+единственно.ea максимально.ea настолько.ea непомерно.ea поистине.ea столь.ea сугубо.ea чрезмерно.ea : EA+; % столь тонкий
+вполне.ea: EA+; % вполне способна
+еще.ea: EA+ or EEI+; % еще способна, еще ярко
+еще.ee: Ee+; % еще ярче, еще реже
+еще.e: <наречие-как>;
+как.e: <наречие-как>;
+безостановочно.ea круто.ea медленно.ea мерно.ea неспешно.ea неторопливо.ea неуклонно.ea неумолимо.ea плавно.ea ритмично.ea стремительно.ea вихрем.ea резко.ea : EEI+; % круто вверх
+
+все_равно вряд_ли едва_ли : <наречие-как>;
+
+%% самостоятельно
+сам.e сама.e один.e одна.e : <наречие-как>;
+
+лишь.e всего_лишь чаще_всего_лишь своего_рода : {EE+ or EEI-} & {@X-} & (<нар> or <макро-нар>); % Н,0
+
+еще.eb : EB+; 
+только.ec : EC+;
+
+большую_часть_времени большую_часть_дня два_дня_спустя два_года_спустя немного_спустя некоторое_время_спустя несколько_минут_спустя несколько_дней_спустя мгновение_спустя минуту_спустя много_лет_спустя половину_обеда первую_половину_обеда во_время_обеда секунду_спустя спустя_секунду час_спустя каждый_день полчаса_тому_назад полчаса_назад каждое_утро первый_раз первый_день первый_год до_рассвета год_назад или_поздно_вечером к_обеду к_тому_моменту к_вечеру к_этому_моменту на_следующее_утро на_следующий_день накануне_вечером немного_погодя нет_никаких_следов незадолго_до_рассвета около_полудня около_полуночи перед_отъездом по_ночам по_утрам по_вечерам после_обеда после_полудня после_ужина после_завтрака поздней_осенью поздно_вечером ранней_весной ранним_утром рано_утром сегодня_вечером в_скором_будущем в_случае_крайней_необходимости во_вторник во_второй_половине_дня вслед_за_ними завтра_утром через_минуту через_неделю через_несколько_дней через_несколько_минут через_несколько_секунд через_полчаса через_час чуть_позже: EI+ or E-;
+
+все_время несколько_раз всю_жизнь каждый_день один_раз некоторое_время в_первый_раз два_раза первый_раз всю_ночь в_последний_раз весь_день долгое_время много_раз целый_день последний_раз какое-то_время пару_раз хоть_раз второй_раз каждый_вечер каждый_год всю_дорогу весь_вечер столько_лет на_некоторое_время одно_время всю_свою_жизнь в_третий_раз столько_раз каждую_ночь целый_год тысячу_раз столько_времени раза_два целый_час только_один_раз почти_все_время еще_некоторое_время длительное_время десять_раз каждый_час жизнь_свою до_конца_жизни день_за_днем всю_неделю хотя_бы_раз на_короткое_время третий_раз первый_раз_в_жизни 2_раза по_нескольку_раз все_эти_дни вот_так_же почти_каждый_день в_сотый_раз: EI+ or E-;
+
+с_самого_начала о_чем-то с_детства с_первого_взгляда своими_глазами о_многом без_слов всей_душой всем_сердцем более_подробно в_общих_чертах собственными_глазами о_чем-нибудь в_совершенстве на_досуге кое_о_чем по_опыту задним_числом на_собственном_опыте по_голосу от_всего_сердца в_двух_словах с_точностью на_своем_веку по_достоинству до_последней_минуты на_сто_процентов всем_своим_существом до_безумия до_последнего_момента своими_словами раз_навсегда нутром.e за_версту не_понаслышке на_собственной_шкуре еще_в_детстве с_самого_детства : EI+ or E-;
+
+к_нему ко_мне к_ним к_ней к_нам к_вам к_тебе за_мной по_нему за_тобой туда_же на_ум так_рано на_первое_место мимо_него мне_в_голову по_этой_дороге ему_в_голову из_лесу мимо_нас : EI+ or E-;
+
+минуту.e мгновение.e секунду.e минутку.e мгновенье.e какое-то_мгновение долю_секунды пару_секунд какую-то_долю_секунды: EI+;
+
+при_этом в_конце_концов в_этом_случае со_временем таким_образом
+рано_или_поздно тем_самым в_таком_случае на_сей_раз в_итоге
+через_некоторое_время отныне.e через_несколько_минут всякий_раз
+при_желании благодаря_этому мало-помалу.x во_всем_остальном каким-то_чудом при_этом_случае : EI+ or E-;
+
+целый_день целый_год каждую_ночь каждый_день со_своей_стороны со_вчерашнего_дня усе.e весь_день всю_ночь всю_жизнь щас.e: EI+ or E-;
+
+целый_час десять_лет десять_минут долгое_время два_дня два_года два_часа двадцать_минут двадцать_четыре_года двадцать_четыре_часа какое-то_время короткое_время некоторое_время несколько_минут пару_минут полтора_года полтора_часа пятнадцать_минут три_дня три_года три_часа всю_свою_жизнь четверть_часа четыре_года : EI+ or E-;
+
+%% НАРЕЧИЯ 
+
+больше_чего_бы_то_ни_было может_быть : {EE+ or EEI-} & {@X-} & (<нар> or <макро-нар>); % Н,0
+одного_из_них одного_из_нас : Mg-;
+то_же_самое из_мухи_слона нечто_иное нечто_подобное нечто_ужасное : MVv-;
+бок_о_бок : EI+ or E-;
+
+%% НАРЕЧИЯ, ОТСУТСВУЮЩИЕ В ОСНОВНОМ СЛОВАРЕ
+машинально.e почтительно.e безошибочно.e беспомощно.e брезгливо.e многозначительно.e недоуменно.e презрительно.e укоризненно.e выразительно.e неумолимо.e нетерпеливо.e невозмутимо.e неуверенно.e бесцеремонно.e нерешительно.e неопределенно.e : { EEI- } & <наречие-как>;
+безжалостно.e оглушительно.e зловеще.e неслышно.e пулей.e вихрем.e безостановочно.e неторопливо.e рывком.e : { EEI- } & <наречие-как>;
+поудобнее.e за_столом во_дворе за_рулем от_неожиданности всем_телом во_тьме в_седле с_таким_видом во_мраке из-за_угла в_своем_кабинете перед_зеркалом под_солнцем среднего_роста со_спины в_белом_халате над_морем откуда-то_издалека среднего_возраста в_полном_недоумении откуда-то_сверху ниже_пояса до_мозга_костей на_белом_коне в_сером_костюме в_замке_зажигания в_полном_вооружении в_зеленом_плаще во_втором_этаже : <наречие-как>;
+
+%% НАРЕЧИЯ
+
+далеко_вверху далеко_внизу далеко_позади неожиданно_резко до_рассвета естественной_смертью из-под_земли к_обеду ко_всему_миру крепким_сном крупным_планом на_открытом_воздухе на_экране_монитора накануне_вечером незадолго_до_рассвета ни_единым_словом ночами.e около_двух_часов около_полуночи около_трех_часов отовсюду.e перед_сном перед_судом по_любому_поводу по_ночам по_состоянию_здоровья по_телевизору по_утрам по_вечерам по_всему_городу по_всему_свету по_всему_телу под_открытым_небом под_водой при_дворе при_исполнении_служебных_обязанностей прошлым_летом пуще_прежнего ранним_утром с_голоду с_невероятной_быстротой с_официальным_визитом с_открытыми_глазами с_закрытыми_глазами сегодня_вечером сквозь_пальцы сквозь_слезы со_смеху со_смертью со_стариком со_страху со_страшной_силой со_своей_женой со_своими_друзьями со_своими_мыслями со_своими_проблемами со_своими_чувствами со_всех_сторон со_злом собственными_глазами сравнительно_недавно свежим_воздухом своими_глазами своими_собственными_глазами в_XVIII_веке в_автомобильной_катастрофе в_любую_погоду в_ночную_смену в_открытом_космосе в_открытом_море в_полной_безопасности в_полной_темноте в_разных_местах в_случае_крайней_необходимости в_своем_воображении в_этом_районе вместе_со_всеми во_дворце во_сне во_время_беременности во_всех_направлениях во_вселенной во_Франции во_Владивостоке за_границей задом_наперед : {EE+ or EEI-} & {@X-} & (<нар> or <макро-нар>); % Н,0
+
+%% НАРЕЧИЯ КАК СОСТАВНЫЕ
+каждый_вечер каждое_утро каждую_минуту целыми_днями каждую_неделю веками.e во_всех_случаях круглые_сутки каждую_секунду матом.e подобным_образом в_равной_мере большими_буквами в_скором_будущем единым_фронтом общими_усилиями : <наречие-как>;
+
+%% НАРЕЧИЯ КАК СОСТАВНЫЕ 
+без_оглядки бодрым_шагом большими_шагами быстрым_шагом короткими_очередями короткими_перебежками кратчайшим_путем кружным_путем легким_галопом легкой_походкой мелкими_группами мелкими_шажками на_автопилоте на_бреющем_полете на_цыпочках на_карачках на_костылях на_лыжах на_полной_скорости на_полном_ходу на_полном_скаку на_веслах на_всех_парах на_четвереньках небольшими_группами непрерывным_потоком ночным_поездом огромными_прыжками окольными_путями очертя_голову по_инерции по_широкой_дуге под_конвоем под_парусом подземным_ходом полным_ходом после_долгого_путешествия против_ветра размашистым_шагом размеренным_шагом разными_путями ровным_шагом с_бешеной_скоростью с_непокрытой_головой с_невероятной_скоростью с_обнаженным_мечом с_обнаженными_мечами с_огромной_скоростью с_парашютом с_поднятыми_руками с_поразительной_быстротой с_той_же_скоростью с_удвоенной_скоростью с_высоко_поднятой_головой с_зажженными_фарами скорым_шагом сломя_голову со_скоростью_света со_страшной_скоростью со_свежими_силами со_свечой со_свитой со_своей_ношей со_своей_свитой со_своим_отрядом со_своими_людьми со_своими_помощниками со_всей_семьей со_шприцем собственной_персоной строевым_шагом стройными_рядами своим_ходом тяжелой_поступью утренним_поездом уверенным_шагом в_одних_носках в_полном_вооружении во_весь_дух во_весь_опор во_всю_прыть задним_ходом задом_наперед широким_фронтом широким_шагом черным_ходом : <наречие-как>;
+
+%% НАРЕЧИЯ СКОЛЬКО СОСТАВНЫЕ
+целую_неделю целую_вечность целые_сутки целый_месяц десять_дней десять_тысяч_фунтов девять_месяцев долгие_годы долгие_месяцы два_месяца две-три_недели две_минуты две_недели двое_суток минут_десять минут_пятнадцать многие_годы несколько_дней несколько_месяцев несколько_мгновений несколько_недель несколько_секунд несколько_шагов несколько_часов около_двух_недель около_получаса пару_дней пару_месяцев пару_недель пару_часов полтора_месяца полчаса.e третьи_сутки три_месяца три_минуты три_недели тридцать_секунд трое_суток весь_вечер всю_дорогу вторые_сутки шесть_месяцев шесть_недель часа_полтора четверть_мили четыре_месяца : {EE+ or EEI-} & {@X-} & (<нар> or <макро-нар>); % Н,0
+
+% замуж, незамеченным
+безо_всякого_выражения голыми_руками к_черту ко_всем_чертям на_круги_своя на_произвол_судьбы на_свет_божий на_всеобщее_обозрение наедине_со_своими_мыслями незамеченным.e почти_незамеченным практически_незамеченным под_стражей под_стражу снизу_вверх в_плен в_покое: {EE+ or EEI-} & {@X-} & (<нар> or <макро-нар>); % Н,0
+
+друг_подле_друга : <наречие-где>;
+лицом_вниз лицом_к_лицу лицом_к_стене лицом_вверх лицом_друг_к_другу : <наречие-как>;
+сверху_вниз снизу_вверх ладонями_вверх ладонями_кверху ладонями_вниз : <наречие-как>;
+лицом.e спиной.e носом.e плечом.e боком.e ухом.e лбом.e задом.e отношением.e щекой.e спинами.e животом.e лагерем.e этажом.e затылком.e острием.e спиною.e милей.e клубком.e рангом.e ликом.e вполоборота.e отходом.e бедром.e станом.e : <наречие-как>;
+что_угодно сколько_угодно кого_угодно где_угодно как_угодно сколь_угодно куда_угодно сколь_угодно_долго : {E- or EI+} ;
+им_вслед : <наречие-куда>;
+
+пораньше.as: {Xn-} & {Mg+ or AI*g+} &  {Ee-} & (E- or EI+); % П,сравн
+
+%% мои брови сами полезли наверх
+оба.e сами.e обе.e : {E- or EI+} ;
+
+%% СУЩЕСТВИТЕЛЬНЫЕ-НАРЕЧИЯ
+% эту работу тебе придется проделать самому
+одной.nt одному.nt самой.nt самому.nt : MVat- or Eo-; % пройти одной  много километров
+последним.nt одним_из_первых одним_из_последних одним_из_лучших одним_из_них : <существительное-nt>; % С,ср,но,ед,тв
+одной_из_них одного_из_них : <существительное-ng>;
+такие_же : MVIv+ or MVv-; 
+
+
+все_остальное самое_главное самое_интересное самое_лучшее самое_страшное самое_важное самое_худшее самое_трудное самое_удивительное самое_большое самое_дорогое самое_необходимое самое_ужасное самое_подходящее самое_ценное : MVv-;
+
+полдня.nt полгода.nt полчаса.nt : ETp- & (({M+} ) or {G+}) & {Xn-} & {Xia-} & (Jv- or [MVv-] or [MVIv+] or Nvm- or <макро-сущ-v>); % С,мр,но,ед,вн
+милю.nt неделю.nt : ETf- & (({M+} ) or {G+}) & {Xn-} & {Xia-} & (Jv- or [MVv-] or [MVIv+] or Nvm- or <макро-сущ-v>); % С,мр,но,ед,вн
+год.nt километр.nt квартал.nt месяц.nt метр.nt час.nt : ETm- & (({M+} ) or {G+}) & {Xn-} & {Xia-} & (Jv- or [MVv-] or [MVIv+] or Nvm- or <макро-сущ-v>); % С,мр,но,ед,вн
+
+
+юной.nfst бессильной.nfst бессмысленной.nfst безумной.nfst близкой.nfst богатой.nfst быстрой.nfst далекой.nfst долгой.nfst глупой.nfst горькой.nfst хорошей.nfst хрупкой.nfst короткой.nfst красивой.nfst кровавой.nfst крупной.nfst легкой.nfst мелкой.nfst мощной.nfst мрачной.nfst мучительной.nfst нелепой.nfst необычной.nfst неприятной.nfst нестерпимой.nfst несчастной.nfst невыносимой.nfst обыкновенной.nfst одинокой.nfst опасной.nfst острой.nfst отвратительной.nfst отчаянной.nfst подходящей.nfst полезной.nfst прекрасной.nfst приятной.nfst привлекательной.nfst привычной.nfst яркой.nfst яростной.nfst ясной.nfst явной.nfst разумной.nfst реальной.nfst серьезной.nfst сильной.nfst слабой.nfst сладкой.nfst сложной.nfst смертельной.nfst смертной.nfst совершенной.nfst спокойной.nfst странной.nfst страшной.nfst суровой.nfst счастливой.nfst тяжелой.nfst трудной.nfst ужасной.nfst жалкой.nfst жестокой.nfst важной.nfst великолепной.nfst верной.nfst веселой.nfst зловещей.nfst: <существительное-ft>; % С,жр,од,ед,тв
+
+оставшихся.npg патрульных.npg погибших.npg прибывших.npg присутствующих.npg собравшихся.npg спящих.npg уцелевших.npg живущих.npg  : <существительное-pg>; % С,мр,од,мн,рд
+
+дурного.nmsg хорошего.nmsg интересного.nmsg необычного.nmsg непонятного.nmsg общего.nmsg опасного.nmsg особенного.nmsg плохого.nmsg подобного.nmsg подозрительного.nmsg похожего.nmsg приятного.nmsg серьезного.nmsg смешного.nmsg страшного.nmsg удивительного.nmsg важного.nmsg: <существительное-mg>; % С,мр,но,ед,рд
+% ты бы мог достичь большего
+достойного.nmsg лишнего.nmsg лучшего.nmsg нового.nmsg нужного.nmsg подходящего.nmsg реального.nmsg большего.nmsg данного.nmsg такого.nmsg: <существительное-mg>; % С,мр,но,ед,рд
+
+%% МЕСТОИМЕНИЯ
+
+одно.wns : MVv-;
+
+них_обоих нас_обоих вас_обоих : <мест-sub> & (Jg- or [Mg-] or [[MVag- or MVIag+]] or Ng- or <макро-сущ-g>); % МС,3л,мн,рд
+такой_же : (<прил-mi> or <макро-прил-mi> or [[<существительное-mi>]]); % МС-П,мр,ед,им
+тоже_самое то_же_самое то_самое это_самое : MVv- or MVIv+;
+ей_самой ему_самому : MVad-;
+
+%% СУЩЕСТВИТЕЛЬНЫЕ, ТРЕБУЮЩИЕ ИНФИНИТИВЫ
+
+% я понимаю ваше желание уйти от ответственности
+готовность.ni манера.ni необходимость.ni попытка.ni потребность.ni способность.ni возможность.ni желание.ni право.ni стремление.ni умение.ni намерение.ni основание.ni мужество.ni нежелание.ni смелость.ni склонность.ni невозможность.ni тенденция.ni свобода.ni : ( (Sn3- or SIn3+) & I+ ) or (Anv- & MVv- & I+);
+% слишком мало шансов таким способом добиться успеха
+мозгов.ng надежды.ng ответов.ng патронов.ng пользы.ng припасов.ng проку.ng разницы.ng секретов.ng толку.ng желающих.ng шансов.ng чудес.ng : ( MVag- or MVIag+ or Xia- ) & I+;
+
+% существует по меньшей мере два способа предупредить своих об опасности 
+вида.ng источника.ng способа.ng метода.ng предмета.ng пункта.ng подхода.ng варианта.ng факта.ng элемента.ng этапа.ng принципа.ng субъекта.ng знака.ng фактора.ng параметра.ng символа.ng носителя.ng экземпляра.ng компонента.ng показателя.ng аспекта.ng аргумента.ng феномена.ng признака.ng критерия.ng рецепта.ng: Ngm- & I+;
+
+готовность.nv манеру.nv необходимость.nv попытку.nv потребность.nv способность.nv возможность.nv желание.nv право.nv стремление.nv умение.nv намерение.nv основание.nv мужество.nv нежелание.nv смелость.nv склонность.nv невозможность.nv тенденцию.nv свободу.nv : (Jv- or MVv- or MVIv+) & I+;
+
+%она дала ему знак соблюдать тишину
+акт.nv инстинкт.nv отпор.nv плод.nv пример.nv признак.nv пункт.nv сигнал.nv символ.nv жест.nv знак.nv элемент.nv член.nv : (Jv- or MVv- or MVIv+) & I+;
+
+%% РЕДКИЕ СУЩЕСТВИТЕЛЬНЫЕ
+
+кофе.ndmsg виски.ndmsg бренди.ndmsg: <существительное-mg>; % С,мр,но,ед,рд
+шоссе.ndfsd: <существительное-fd>; % С,жр,но,ед,дт
+тем_самым : <существительное-pg>; % С,жр,но,мн,рд
+друг_друга : ( (<существительное-mg>) or (<существительное-mv>) ); % С,жр,од,ед,вн
+друг_другу: <существительное-md>; % С,мр,од,ед,дт
+
+госпожа.ni леди.ni малышка.ni светлость.ni мадам.ni мисс.ni миссис.ni фрау.ni: <существительное-fi>; % С,жр,од,ед,им
+
+случившемся.np произошедшем.np : <существительное-mp>; % С,мр,но,ед,пр
+происходящим.nt : <существительное-mt>; % С,мр,но,ед,тв
+первыми.npt вторыми.npt третьими.npt четвертыми.npt : <существительное-pt>; % С,мн,мн,тв
+
+других.ng неизвестных.ng невинных.ng посторонних.ng бывших.ng : (( {[[Apg-]]}) or {[[AIpg+]]} or {G+}) & {@Ppg+ or @PIpg-} & {Xn-} & {Xia-} & {@EI-} & (Jg- or [Mg-] or [[MVag- or MVIag+]] or Ngp- or <макро-сущ-g>); % С,мр,од,мн,рд
+
+%% СЧЕТНЫЕ СУЩЕСТВИТЕЛЬНЫЕ 
+
+дней.ng глотков.ng кругов.ng месяцев.ng недель.ng ночей.ng поколений.ng прыжков.ng столетий.ng тысячелетий.ng веков.ng шагов.ng этажей.ng часов.ng лет.ng штук.ng минут.ng секунд.ng домов.ng ходов.ng комнат.ng рядов.ng столбов.ng строений.ng улиц.ng зданий.ng дюймов.ng долларов.ng фунтов.ng футов.ng градусов.ng килограммов.ng километров.ng локтей.ng метров.ng миль.ng процентов.ng ярдов.ng рублей.ng сантиметров.ng тонн.ng верст.ng : NIgp+ ;
+дюйма.nmg фута.nmg года.nmg километра.nmg месяца.nmg метра.nmg раза.nmg варианта.nmg часа.nmg : NIgm+ ;
+
+%% стук железа о камень
+грохот.nmsi гул.nmsi хлопанье.nmsi хор.nmsi хруст.nmsi лязг.nmsi плеск.nmsi раскат.nmsi рокот.nmsi скрежет.nmsi скрип.nmsi стук.nmsi топот.nmsi треск.nmsi журчание.nmsi всплеск.nmsi звон.nmsi шелест.nmsi шорох.nmsi шум.nmsi: <существительное-mi> & { Mv+ };
+
+грохот.nmsv гул.nmsv хлопанье.nmsv хор.nmsv хруст.nmsv лязг.nmsv плеск.nmsv раскат.nmsv рокот.nmsv скрежет.nmsv скрип.nmsv стук.nmsv топот.nmsv треск.nmsv журчание.nmsv всплеск.nmsv звон.nmsv шелест.nmsv шорох.nmsv шум.nmsv: (({M+} & {[[Ami-]]}) or {[[AImi+]]} or {G+}) & {@Pmi+ or @PImi-} & {Xn-} & {Xia-} & {@EI-} & (Jv- or [MVv-] or [MVIv+] or Nvm- or <макро-сущ-v>) & { Mv+ }; % С,мр,но,ед,вн
+
+российской_федерации Российской_Федерации КНР.ng Ленинградской_области Московской_области Москвы МИД_РФ Республики_Беларусь России.ng РФ.ng Соединенных_Штатов Свердловской_области СССР.ng США.ng Удмуртии.ng: <существительное-fg>; % С,жр,но,ед,рд
+
+Юра.nmsin Юрий.nmsin Айз.nmsin Алекс.nmsin Александр.nmsin Александр_Иванович Александр_Васильевич Алексей.nmsin Алик.nmsin Альберт.nmsin Анатолий.nmsin Андрей.nmsin Антон.nmsin Антон_Павлович Аркадий.nmsin Артур.nmsin Август.nmsin Билл.nmsin Борис.nmsin Борис_Николаевич Цезарь.nmsin Давид.nmsin Денис.nmsin Дима.nmsin Дмитрий.nmsin Дональд.nmsin Джон.nmsin Егор.nmsin Евгений.nmsin Федор.nmsin Феликс.nmsin Филипп.nmsin Фрэнк.nmsin Геннадий.nmsin Генрих.nmsin Георгий.nmsin Герман.nmsin Григорий.nmsin Гриша.nmsin Игорь.nmsin Илья.nmsin Иоанн.nmsin Иван.nmsin Иван_Иванович Иван_Иваныч Иван_Николаевич Иван_Петрович Иван_Васильевич Карл.nmsin Кирилл.nmsin Коля.nmsin Константин.nmsin Константин_Иванович Леонид.nmsin Лев.nmsin Леша.nmsin Максим.nmsin Михаил.nmsin Михаил_Иванович Миша.nmsin Никита.nmsin Николай.nmsin Николай_Иванович Николай_Николаевич Олег.nmsin Оскар.nmsin Павел.nmsin Паша.nmsin Петя.nmsin Петр.nmsin Петька.nmsin Яков.nmsin Радж.nmsin Роберт.nmsin Робин.nmsin Роман.nmsin Руслан.nmsin Саня.nmsin Санчо.nmsin Саша.nmsin Семен.nmsin Серега.nmsin Сережа.nmsin Сергей.nmsin Станислав.nmsin Стас.nmsin Степан.nmsin Толя.nmsin Уильям.nmsin Жак.nmsin Вадим.nmsin Валентин.nmsin Валерий.nmsin Ваня.nmsin Василий.nmsin Василий_Федорович Василий_Иванович Василий_Иваныч Василий_Николаевич Василий_Васильевич Вася.nmsin Виктор.nmsin Виталий.nmsin Витя.nmsin Влад.nmsin Владимир.nmsin Володя.nmsin Вячеслав.nmsin Эдуард.nmsin Эраст.nmsin Чарльз.nmsin: <существительное-mi>; % С,мр,од,имя,ед,им
+
+Анна.nfsin Мария.nfsin Алиса.nfsin Вера.nfsin Наташа.nfsin Елена.nfsin Таня.nfsin Ольга.nfsin Николь.nfsin Лена.nfsin Марина.nfsin Кора.nfsin Катя.nfsin Ирина.nfsin Юля.nfsin Маша.nfsin Валентина.nfsin Лиза.nfsin Татьяна.nfsin Королева.nfsin Труф.nfsin Нина.nfsin Роза.nfsin Делла.nfsin Марта.nfsin Лея.nfsin Сара.nfsin Орб.nfsin Джулия.nfsin Наталья.nfsin Надежда.nfsin Аня.nfsin Луиза.nfsin Валя.nfsin Людмила.nfsin Жанна.nfsin Диана.nfsin Дженнифер.nfsin Госпожа.nfsin Надя.nfsin Соня.nfsin Тамара.nfsin Екатерина.nfsin Ева.nfsin Настя.nfsin Светлана.nfsin Ира.nfsin Маргарита.nfsin Кристина.nfsin Оля.nfsin Лариса.nfsin Ниоба.nfsin Баба.nfsin Рита.nfsin Аймбри.nfsin Елизавета.nfsin Юлия.nfsin Принцесса.nfsin Джоли.nfsin Алла.nfsin Галина.nfsin Клара.nfsin Марья.nfsin Мара.nfsin Софья.nfsin Корделия.nfsin Джоанна.nfsin Сюзанна.nfsin Вероника.nfsin Лидочка.nfsin Изабелла.nfsin Лидия.nfsin Тереза.nfsin Варвара.nfsin Дари.nfsin Алена.nfsin Катерина.nfsin Ленка.nfsin Галя.nfsin Марис.nfsin Линда.nfsin Марика.nfsin Полина.nfsin Бекка.nfsin Анастасия.nfsin Нита.nfsin Ребекка.nfsin Лизавета.nfsin Лина.nfsin Варя.nfsin Лида.nfsin Виктория.nfsin Инга.nfsin Софи.nfsin Элена.nfsin Эмма.nfsin Зоя.nfsin София.nfsin Лора.nfsin Джеки.nfsin Люда.nfsin Лиля.nfsin Майя.nfsin Леночка.nfsin Сильвия.nfsin Клавдия.nfsin Шарлотта.nfsin Доротея.nfsin Дора.nfsin Муся.nfsin Аолла.nfsin Флора.nfsin Шура.nfsin Патриция.nfsin Люся.nfsin Глэдис.nfsin герцогиня.nfsin Даша.nfsin Каролина.nfsin Кира.nfsin Люба.nfsin Зина.nfsin Барбара.nfsin Эмилия.nfsin Алина.nfsin Гианэя.nfsin Светка.nfsin Лия.nfsin Моника.nfsin Оксана.nfsin Коломбина.nfsin Табита.nfsin Оливия.nfsin Би.nfsin Гертруда.nfsin Лолита.nfsin Габрия.nfsin Мила.nfsin Лада.nfsin Жюстина.nfsin Фрида.nfsin Тоня.nfsin Инна.nfsin Матильда.nfsin Вирджиния.nfsin Эльза.nfsin Мадлен.nfsin Леля.nfsin Жером.nfsin Мышь.nfsin Нора.nfsin баронесса.nfsin Зинаида.nfsin Раиса.nfsin Элиза.nfsin Ливия.nfsin Сабина.nfsin Гея.nfsin Анита.nfsin Горда.nfsin Дико.nfsin Дарья.nfsin Ванда.nfsin Тина.nfsin Синтия.nfsin Марфа.nfsin Селия.nfsin Юлька.nfsin Мона.nfsin Анжела.nfsin Лейша.nfsin Миранда.nfsin Стелла.nfsin Клеопатра.nfsin Катарина.nfsin Нейса.nfsin Дианора.nfsin Маруся.nfsin Землячка.nfsin Муза.nfsin Шина.nfsin Илона.nfsin Розочка.nfsin Ида.nfsin Марианна.nfsin Лейя.nfsin Аглая.nfsin Герцогиня.nfsin Териза.nfsin Сандра.nfsin Верочка.nfsin Элеонора.nfsin Тася.nfsin Делле.nfsin Крыса.nfsin Нюра.nfsin Амалия.nfsin Клава.nfsin Инка.nfsin Шейла.nfsin Магда.nfsin Тай.nfsin Донна.nfsin Бел.nfsin Ислам.nfsin Тараза.nfsin Ксения.nfsin Аська.nfsin Лантхильда.nfsin Ариадна.nfsin Антонина.nfsin Глория.nfsin Джайна.nfsin ОНА.nfsin Аманда.nfsin Камилла.nfsin Нинка.nfsin Маня.nfsin Дуня.nfsin Наташка.nfsin Рахиль.nfsin Вита.nfsin Лиса.nfsin Алия.nfsin Алма.nfsin Гера.nfsin Адель.nfsin Жозефина.nfsin Фидель.nfsin Вилена.nfsin Анджела.nfsin Душелов.nfsin Минерва.nfsin Озма.nfsin Ловец.nfsin Серафима.nfsin Кларисса.nfsin Авиенда.nfsin Камила.nfsin Тара.nfsin Мина.nfsin Ревекка.nfsin Евдокия.nfsin Лаура.nfsin Ангелина.nfsin Элла.nfsin Малышка.nfsin Сусанна.nfsin Индиана.nfsin Хлоя.nfsin Машенька.nfsin Рубенс.nfsin Джессика.nfsin Императрица.nfsin Ахматова.nfsin Дрема.nfsin Люська.nfsin Анжелика.nfsin Пьеретта.nfsin Фэйт.nfsin Марлена.nfsin Франческа.nfsin Аксинья.nfsin Белка.nfsin Танюша.nfsin Ламия.nfsin Аврора.nfsin Яночка.nfsin Афра.nfsin Пенелопа.nfsin Ванесса.nfsin Тесса.nfsin Маркиза.nfsin Амелия.nfsin Ядвига.nfsin Льюс.nfsin Пиф.nfsin Селина.nfsin Веяна.nfsin Лера.nfsin Флоринда.nfsin Лила.nfsin Ведьма.nfsin Лусилла.nfsin Ирка.nfsin Лара.nfsin Машка.nfsin Каталина.nfsin Хильда.nfsin Обезьяна.nfsin Афина.nfsin Матрена.nfsin Фея.nfsin Василиса.nfsin Ниночка.nfsin Алеся.nfsin Лейла.nfsin Розамонда.nfsin Делия.nfsin Елпидифор.nfsin Аленка.nfsin Памела.nfsin Юджиния.nfsin Абрайра.nfsin Ася.nfsin Ева-Лотта.nfsin Оттилия.nfsin Медея.nfsin Пелагия.nfsin Руфь.nfsin Агата.nfsin Ирия.nfsin Летиция.nfsin Наденька.nfsin Гонора.nfsin Эпонина.nfsin Рав.nfsin Танька.nfsin Агнесса.nfsin Золушка.nfsin Эвелина.nfsin Астрид.nfsin Сова.nfsin Генриетта.nfsin Геула.nfsin Марьяна.nfsin Эля.nfsin Герда.nfsin Глаша.nfsin Марлин.nfsin Беатриса.nfsin Аля.nfsin Тила.nfsin Нейда.nfsin Бренда.nfsin Робинзон.nfsin Сонечка.nfsin Карма.nfsin Лита.nfsin Эльвира.nfsin Танечка.nfsin Голда.nfsin Сашенька.nfsin Регана.nfsin Рената.nfsin Нарайан.nfsin Анника.nfsin Катриана.nfsin Фиона.nfsin Анджелина.nfsin Душечка.nfsin Акула.nfsin Селена.nfsin Настенька.nfsin Настасья.nfsin Саида.nfsin Дуся.nfsin Клементина.nfsin Колдунья.nfsin Мальвина.nfsin Зойка.nfsin Лючия.nfsin Фрона.nfsin Шо.nfsin Эдна.nfsin Анюта.nfsin Элоиза.nfsin Серафимова.nfsin Афродита.nfsin Арлен.nfsin Гермиона.nfsin Мушка.nfsin Крессида.nfsin Олеся.nfsin Фрейя.nfsin Альбина.nfsin Ирочка.nfsin Черепаха.nfsin Шиэна.nfsin Алисия.nfsin Урсула.nfsin Катька.nfsin Фелиция.nfsin Тонечка.nfsin Катюша.nfsin Эра.nfsin Брота.nfsin Лилия.nfsin Анелька.nfsin Леонора.nfsin Ирма.nfsin Наталия.nfsin Женечка.nfsin Корд.nfsin Умберто.nfsin Констанция.nfsin Гита.nfsin Виолета.nfsin Дебора.nfsin Ксюша.nfsin Ивонна.nfsin Земфира.nfsin Мелиса.nfsin Эстелла.nfsin Лелька.nfsin Арина.nfsin Сельма.nfsin Оленька.nfsin Евпраксия.nfsin Гота.nfsin Кассандра.nfsin Ирена.nfsin Галка.nfsin Аннушка.nfsin Альда.nfsin Инесса.nfsin Дубравка.nfsin Странница.nfsin Фонтейна.nfsin Гала.nfsin Елисавета.nfsin Арабелла.nfsin Лаврова.nfsin Пег.nfsin Нонна.nfsin Бланка.nfsin Дарла.nfsin Филомела.nfsin Анка.nfsin Сонька.nfsin Лотта.nfsin Уника.nfsin Леора.nfsin Галочка.nfsin Ронда.nfsin Мойра.nfsin Прасковья.nfsin Каэтана.nfsin Белинда.nfsin Цира.nfsin Жильберта.nfsin Ласточка.nfsin Эйлиан.nfsin Изольда.nfsin Снегурочка.nfsin Карлотта.nfsin Ляля.nfsin Ульяна.nfsin Калья.nfsin Горгона.nfsin Карабелла.nfsin Наина.nfsin Селин.nfsin Иезавель.nfsin Маринка.nfsin Щука.nfsin Зази.nfsin Янковская.nfsin Аланна.nfsin Карлина.nfsin Хельга.nfsin Олимпия.nfsin Роксана.nfsin Канна.nfsin Мелисса.nfsin Ганима.nfsin Лекси.nfsin Снежина.nfsin Нюрка.nfsin Октавия.nfsin Аурора.nfsin Ютта.nfsin Снежинка.nfsin Фатима.nfsin Матрона.nfsin Верка.nfsin Зофи.nfsin Янина.nfsin Римма.nfsin Кама.nfsin Паула.nfsin Неля.nfsin Нева.nfsin Сарра.nfsin Мада.nfsin Лола.nfsin Сита.nfsin Дуняша.nfsin Анечка.nfsin Аделаида.nfsin Муна.nfsin Альма.nfsin Елка.nfsin Лайма.nfsin Элана.nfsin Густа.nfsin Цецилия.nfsin Лайза.nfsin Джекки.nfsin Рина.nfsin Липа.nfsin Омаата.nfsin Фаина.nfsin Алевтина.nfsin Артемида.nfsin Нова.nfsin Дайна.nfsin Феня.nfsin Оса.nfsin Чима.nfsin Пелагея.nfsin Храбрый.nfsin Миропа.nfsin Смешинка.nfsin Дженифер.nfsin Зайка.nfsin Карина.nfsin Фауна.nfsin Фекла.nfsin Леся.nfsin Электра.nfsin Зинка.nfsin Аленушка.nfsin Дуняшка.nfsin Дельфина.nfsin Сефрения.nfsin Милена.nfsin ЖЕНЩИНА.nfsin Русалка.nfsin Сарасвати.nfsin Кукушка.nfsin : <существительное-fi>; % С,жр,од,имя,ед,им
+
+%% ПРИЛАГАТЕЛЬНЫЕ
+
+другой.afst иной.afst :  (<прил-ft> or <макро-прил-ft>); % П,жр,ед,тв
+
+%% ЕЩЕ ГЛАГОЛЫ
+
+может.v3s : ( MVIv- & Wd- & I+ & SI*3+ ) ;
+мог.v3s : ( MVIv- & Wd- & I+ & SIm3+ ) ;
+могла.v3s : ( MVIv- & Wd- & I+ & SIf3+ ) ;
+
+должен_быть : (Sm3- & Wd- & (MVat+ or AImt+)) or ( {EI-} & EI- & Wd- & SIm3+ ) ;
+должна_быть : (Sf3- & Wd- & (MVat+ or AIft+)) or ( {EI-} & EI- & Wd- & SI*3+ ) or (MVIat- & Wd- & SIf3+);
+должно_быть : (Sn3- & Wd- & (MVat+ or AInt+)) or ( {EI-} & EI- & Wd- & SIn3+ );
+
+представляли_собой представляли_себе представляли_собою представляли_из_себя : (Sp- & Wd- & MVv+ ) or (Sp- & Wd- & {MVad+} & I+ ) or (MVIad- & Sp- & Wd- & I+); % Г,нс,пе,дст,прш,мн
+представлял_собой представлял_себе представлял_собою представлял_из_себя : (S- & Wd- & MVv+ ) or (Sp- & Wd- & {MVad+} & I+ ) or (MVIad- & Sp- & Wd- & I+); % Г,нс,пе,дст,прш,мн
+
+попробуем.v попробуй.v попробуйте.v постарайся.v постарайтесь.v старайся.v: {[<глагол-пе-sub>]} & (<глагол-1p> or <макро-глагол-1p>) & {[<глагол-пе-sub2>]} & {Wd-}; % Г,св,пе,дст,буд,1л,мн
+
+должен.ams готов.ams обязан.ams обречен.ams склонен.ams способен.ams вынужден.ams: {EA-} & Sm3- & {I+};
+должна.afs готова.afs обязана.afs обречена.afs склонна.afs способна.afs вынуждена.afs: {EA-} & Sf3- & {I+};
+должны.aps готовы.aps обязаны.aps обречены.aps склонны.aps способны.aps вынуждены.aps: {EA-} & Sp- & {I+};
+
+%% ГЛАГОЛЫ, ТРЕБУЮЩИЕ РОДИТЕЛЬНЫЙ ПАДЕЖ
+% наелся яблок
+достиг.vpms достигал.vpms касался.vpms коснулся.vpms наелся.vpms поел.vpms подождал.vpms : <глагол-нп-пр-sub-gen> & (<глагол-pm> or <макро-глагол-pm>) & <глагол-нп-пр-sub2-gen> & {Wd-}; % Г,св,нп,дст,прш,мр,ед
+
+искали.vpp нашли.vpp обнаружили.vpp отыскали.vpp перебили.vpp победили.vpp почувствовали.vpp пропускали.vpp пускали.vpp уничтожили.vpp увидели.vpp видели.vpp встретили.vpp встречали.vpp захватили.vpp заметили.vpp чувствовали.vpp : ( <глагол-нп-пр-sub-gen> & (<глагол-pp> or <макро-глагол-pp>) & <глагол-нп-пр-sub2-gen> & {Wd-}) or ( Sp- & Wd- & MVag+ ) or ({EI-} & EI- & Sp- & Wd- & MVag+ & {E+} ); % Г,св,нп,дст,прш,мн
+
+достигали.vpp достигли.vpp касались.vpp коснулись.vpp : <глагол-нп-пр-sub-gen> & (<глагол-pp> or <макро-глагол-pp>) & <глагол-нп-пр-sub2-gen> & {Wd-}; % Г,св,нп,дст,прш,мн
+
+боялись.vpp боятся.vpp добились.vpp испугались.vpp любили.vpp любим.vpp любят.vpp ненавидели.vpp окружают.vpp ожидают.vpp ожидали.vpp слушали.vpp требовали.vpp требуют.vpp уважают.vpp учат.vpp учили.vpp ждали.vpp ждут.vpp : <глагол-нп-пр-sub-gen> & (<глагол-pp> or <макро-глагол-pp>) & <глагол-нп-пр-sub2-gen> & {Wd-}; % Г,св,нп,дст,прш,мн
+
+%вряд ли тебе удастся одолеть этих ребят
+догнать.vi коснуться.vi обмануть.vi обнять.vi одолеть.vi остановить.vi освободить.vi отвлечь.vi оживить.vi перехватить.vi поцеловать.vi поддержать.vi подхватить.vi поглотить.vi погубить.vi поймать.vi поразить.vi потрогать.vi прогнать.vi разбудить.vi раздавить.vi схватить.vi сокрушить.vi спасти.vi убедить.vi уберечь.vi удержать.vi уговорить.vi укусить.vi уничтожить.vi успокоить.vi утешить.vi задержать.vi задеть.vi заполучить.vi заставить.vi защитить.vi : <глагол-нп-пр-sub-gen> & (<глагол-i> or <макро-глагол-i>) & <глагол-нп-пр-sub2-gen> & {Wd-}; % Г,св,нп,дст,инф
+
+% слишком мало шансов добиться успеха
+добиться.vi достигнуть.vi достичь.vi дождаться.vi избежать.vi придерживаться.vi требовать.vi желать.vi : (<глагол-нп-пр-sub-gen> & (<глагол-i> or <макро-глагол-i>) & <глагол-нп-пр-sub2-gen> & {Wd-}) or ( {MVIat-} & I- & Wd- & MVag+ ); % Г,св,нп,дст,инф
+
+%% ГЛАГОЛЫ, ТРЕБУЮЩИЕ ДАТЕЛЬНЫЙ ПАДЕЖ
+
+%% нужны = требуются, мне действительно нужны эти пятьдесят человек; эти люди нужны нам
+нужны.vnndn3p необходимы.vnndn3p известны.vnndn3p страшны.vnndn3p интересны.vnndn3p полезны.vnndn3p важны.vnndn3p : {[<глагол-нп-sub-dat>]} & (<глагол-3p> or <макро-глагол-3p>) & {[<глагол-нп-sub2-dat>]} & {Wd-}; % Г,нс,нп,дст,нст,3л,мн
+
+дает.v дала.v дало.v даст.v давал.v давала.v давало.v доставит.v доставляет.v доставляло.v мешал.v мешала.v мешало.v напоминает.v отдает.v подарила.v подчиняется.v помешал.v помешало.v помогала.v помогла.v послужит.v позволила.v позволило.v позволит.v позволяет.v позволял.v позволяла.v позволяло.v предлагает.v придал.v придавал.v придавали.v придавало.v приказала.v принадлежал.v принадлежала.v принадлежало.v принадлежит.v принесет.v принесло.v приносит.v причинил.v служила.v служило.v соответствует.v велит.v: {[<глагол-нп-sub-dat>]} & (<глагол-3s> or <макро-глагол-3s>) & {[<глагол-нп-sub2-dat>]} & {Wd-}; % 
+
+доводилось.vpns исполнилось.vpns пришлось.vpns довелось.vpns приходилось.vpns приходится.vpns : <глагол-нп-пр-sub-dat> & (<глагол-pn> or <макро-глагол-pn>) & <глагол-нп-пр-sub2-dat> & {Wd-}; % Г,св,нп,дст,прш,ср,ед
+
+даст.v3s доверяет.v3s грозил.v3s мешает.v3s мешал.v3s мешала.v3s помешает.v3s помогает.v3s поможет.v3s повредит.v3s позволит.v3s позволяет.v3s позволял.v3s позволяла.v3s простит.v3s велит.v3s: {[<глагол-нп-sub-dat>]} & (<глагол-3s> or <макро-глагол-3s>) & {[<глагол-нп-sub2-dat>]} & {Wd-}; % Г,св,нп,дст,буд,3л,ед
+
+% устроить неприятности людям
+% бросить вызов судьбе 
+создать.vi провести.vi установить.vi сохранить.vi обеспечить.vi собрать.vi указать.vi занять.vi ввести.vi устроить.vi построить.vi организовать.vi произвести.vi включить.vi сыграть.vi записать.vi подготовить.vi сменить.vi сохранять.vi заполнить.vi облегчить.vi запустить.vi завоевать.vi оплатить.vi разработать.vi назначить.vi оформить.vi наладить.vi выработать.vi сэкономить.vi обеспечивать.vi усилить.vi продлить.vi укрепить.vi сформировать.vi закрепить.vi украсить.vi: (<глагол-пе-пр-sub-dat> & (<глагол-i> or <макро-глагол-i>) & <глагол-пе-пр-sub2-dat> & {Wd-}) or ( ( MVIad- or MVad+ ) & I- & MVv+) or (I- & MVad+) or (I- & MVad+ & MVv+) or (I- & MVad+ & MVag+) or (I- & MVv+ & MVad+) or (I- & MVad+ & E+) or (Xia- & I- & MVad+) or (I- & Mvv+ & MVad+) ; % Г,св,пе,дст,инф
+
+давать.vi ломать.vi оказывать.vi определять.vi отдавать.vi подавать.vi показывать.vi портить.vi повторять.vi позволять.vi приносить.vi задавать.vi : (<глагол-пе-пр-sub-dat> & (<глагол-i> or <макро-глагол-i>) & <глагол-пе-пр-sub2-dat> & {Wd-}) or ( ( MVIad- or MVad+ ) & I- & MVv+) or (I- & MVad+) or (I- & MVad+ & MVv+) or (I- & MVad+ & MVag+) or (I- & MVv+ & MVad+) or (I- & MVad+ & E+) or (Xia- & I- & MVad+) ;
+
+%% ГЛАГОЛЫ, ТРЕБУЮЩИЕ РОДИТЕЛЬНЫЙ ПАДЕЖ 
+
+лишилась.v лишился.v потребовал.v потребует.v стоил.v требовал.v требовала.v требовало.v требует.v жаждал.v жаждет.v заслуживает.v: {[<глагол-нп-sub-gen>]} & (<глагол-3s> or <макро-глагол-3s>) & {[<глагол-нп-sub2-gen>]} & {Wd-}; %
+
+хочет.v пожелает.v желает.v захочет.v: {[<глагол-нп-sub-gen>]} & (<глагол-3s> or <макро-глагол-3s>) & {[<глагол-нп-sub2-gen>]} & {Wd-}; %
+
+%% ГЛАГОЛЫ, ТРЕБУЮЩИЕ ТВОРИТЕЛЬНЫЙ ПАДЕЖ
+
+наполнился.vpms покрылся.vpms разразился.vpms сменился.vpms: <глагол-нп-sub-tv> & (<глагол-pm> or <макро-глагол-pm>) & <глагол-нп-sub2-tv> & {Wd-}; % Г,св,нп,дст,прш,мр,ед
+
+наполнилось.vpns покрылось.vpns разразилось.vpns сменилось.vpns: <глагол-нп-sub-tv> & (<глагол-pn> or <макро-глагол-pn>) & <глагол-нп-sub2-tv> & {Wd-}; % Г,св,нп,дст,прш,ср,ед
+
+наполнились.vpp покрылись.vpp разразились.vpp сменились.vpp: <глагол-нп-sub-tv> & (<глагол-pp> or <макро-глагол-pp>) & <глагол-нп-sub2-tv> & {Wd-}; % Г,св,нп,дст,прш,мн
+
+обладали.vpp пользовались.vpp представляли.vpp владели.vpp воспользовались.vpp занялись.vpp занимались.vpp являлись.vpp обменялись.vpp считались.vpp : <глагол-нп-sub-tv> & (<глагол-pp> or <макро-глагол-pp>) & <глагол-нп-sub2-tv> & {Wd-}; % Г,св,нп,дст,прш,мн
+
+блестели.vpp блистали.vpp горели.vpp мерцали.vpp отливали.vpp поблескивали.vpp полыхали.vpp пылали.vpp сияли.vpp сверкали.vpp сверкнули.vpp светили.vpp светились.vpp вспыхнули.vpp вздулись.vpp заблестели.vpp загорелись.vpp засверкали.vpp засветились.vpp зажглись.vpp: <глагол-нп-sub-tv> & (<глагол-pp> or <макро-глагол-pp>) & <глагол-нп-sub2-tv> & {Wd-}; % Г,св,нп,дст,прш,мн
+
+блеснула.vpfs блестела.vpfs горела.vpfs колыхалась.vpfs мерцала.vpfs ощущалась.vpfs прозвучала.vpfs сияла.vpfs скрывалась.vpfs слышалась.vpfs сверкала.vpfs сверкнула.vpfs светила.vpfs светилась.vpfs вспыхнула.vpfs взошла.vpfs загорелась.vpfs звенела.vpfs звучала.vpfs чувствовалась.vpfs : <глагол-нп-пр-sub-tv> & (<глагол-pf> or <макро-глагол-pf>) & <глагол-нп-пр-sub2-tv> & {Wd-}; % Г,св,нп,дст,прш,жр,ед
+
+известен.v необходим.v нужен.v предназначен.v полезен.v страшен.v интересен.v важен.v доволен.vpp недоволен.vpp поражен.vpp потрясен.vpp проклят.vpp удивлен.vpp: (<глагол-нп-пр-sub-tv> & (<глагол-pm> or <макро-глагол-pm>) & <глагол-нп-пр-sub2-tv> & {Wd-}) or ({IMI-} &  Sm3- & Wd- & {MVad+} & {MVat+}); % Г,св,нп,дст,прш,жр,ед
+
+известна.v необходима.v нужна.v предназначена.v полезна.v страшна.v интересна.v важна.v : (<глагол-нп-пр-sub> & (<глагол-pf> or <макро-глагол-pf>) & <глагол-нп-пр-sub2> & {Wd-}) or ( {IMI-} &  Sf3- & Wd- & {MVad+} & {MVat+} ); % Г,св,нп,дст,прш,жр,ед
+
+известно.v необходимо.v нужно.v предназначено.v полезно.v интересно.v важно.v : (<глагол-нп-пр-sub> & (<глагол-pn> or <макро-глагол-pn>) & <глагол-нп-пр-sub2> & {Wd-}) or ( {IMI-} &  Sn3- & Wd- & {MVad+} & {MVat+} ); % 
+
+доверял.v нуждаюсь.v нуждался.v ошиблась.v поверю.v поверил.v поверила.v верю.v верил.v верила.v веря.v верь.v: {[<глагол-нп-sub-dat>]} & (<глагол-1s> or <макро-глагол-1s>) & {[<глагол-нп-sub2-dat>]} & {Wd-}; % Г,нс,нп,дст,нст,1л,ед
+
+% горел огнем
+бушевал.vpms горел.vpms исходил.vpms отражался.vpms отразился.vpms полыхал.vpms пылал.vpms трещал.vpms : <глагол-нп-пр-sub-tv> & (<глагол-pm> or <макро-глагол-pm>) & <глагол-нп-пр-sub2-tv> & {Wd-}; % Г,нс,нп,дст,прш,мр,ед
+
+% нанес удар мечом
+хватал.vpms ломал.vpms ловил.vpms нанес.vpms описал.vpms отбил.vpms отрезал.vpms парировал.vpms перерезал.vpms прикрывал.vpms пробил.vpms рассек.vpms разбил.vpms разрезал.vpms резал.vpms сломал.vpms жег.vpms вдыхал.vpms втянул.vpms задел.vpms закрывал.vpms убил.vpms прикончил.vpms связал.vpms уничтожил.vpms : ( <глагол-пе-пр-sub-tv> & (<глагол-pm> or <макро-глагол-pm>) & <глагол-пе-пр-sub2-tv> & {Wd-} ) or (Sm3- & Wd- & MVad+ & MVv+ & MVat+ ) or ( {EI-} & Wd- & MVat+ & MVad+ & MVv+ ); % Г,св,пе,дст,прш,мр,ед
+
+% оглядел друзей горящими глазами
+изучал.vpms изучил.vpms оглядел.vpms осматривал.vpms осмотрел.vpms просмотрел.vpms рассматривал.vpms разглядывал.vpms выслушал.vpms : ( <глагол-пе-пр-sub-tv> & (<глагол-pm> or <макро-глагол-pm>) & <глагол-пе-пр-sub2-tv> & {Wd-} ) or (Sm3- & Wd- & MVad+ & MVv+ & MVat+ ) or ( {EI-} & Wd- & MVat+ & MVad+ & MVv+ ) ; % Г,св,пе,дст,прш,мр,ед
+
+% рука кончиками пальцев коснулась сердца
+% рука коснулась верхнего края
+достигла.vpfs касалась.vpfs коснулась.vpfs: ( <глагол-нп-пр-sub-tv> & (<глагол-pf> or <макро-глагол-pf>) & <глагол-нп-пр-sub2-tv> & {Wd-}) or ( {EI-} & {MVIat-} & Sf3- & Wd- & (MVv+ or MVag+)) ; % Г,св,нп,дст,прш,жр,ед
+
+% вряд ли моя деятельность являлась причиной этого
+% явилась.vsndpfs: (<глагол-нп-пр-sub> & (<глагол-pf> or <макро-глагол-pf>) & <глагол-нп-пр-sub2> & {Wd-}) or ({EI-} & { EI-} & EI- &  Wd- & SIf3+ ); % Г,св,нп,дст,прш,жр,ед
+
+быть.vi стать.vi становиться.vi оказаться.vi казаться.vi остаться.vi оставаться.vi показаться.vi появиться.vi выглядеть.vi: <глагол-нп-пр-sub-tv> & (<глагол-i> or <макро-глагол-i>) & <глагол-нп-пр-sub2-tv> & {Wd-};
+
+двигать.vi насладиться.vi обладать.vi овладеть.vi пользоваться.vi править.vi распоряжаться.vi управлять.vi владеть.vi воспользоваться.vi завладеть.vi : <глагол-нп-пр-sub-tv> & (<глагол-i> or <макро-глагол-i>) & <глагол-нп-пр-sub2-tv> & {Wd-};
+
+делиться.vi гордиться.vi командовать.vi любоваться.vi наслаждаться.vi обзавестись.vi питаться.vi поделиться.vi похвастаться.vi пожертвовать.vi рисковать.vi руководить.vi займемся.vi заниматься.vi заняться.vi : <глагол-нп-пр-sub-tv> & (<глагол-i> or <макро-глагол-i>) & <глагол-нп-пр-sub2-tv> & {Wd-};
+
+% обнял меня руками
+накрыл.vpms обхватил.vpms обнял.vpms оттолкнул.vpms поцеловал.vpms подхватил.vpms погладил.vpms похлопал.vpms потрепал.vpms сгреб.vpms схватил.vpms ухватил.vpms уложил.vpms : (<глагол-пе-пр-sub-tv> & (<глагол-pm> or <макро-глагол-pm>) & <глагол-пе-пр-sub2-tv> & {Wd-}) or ( {EI-} & ( MVIat- or MVat+ ) & { Sm3- } & Wd- & { MVad+ } & MVv+ ); % Г,св,пе,дст,прш,мр,ед
+
+% сказать словами
+добавить.vi обещать.vi сказать.vi утверждать.vi возразить.vi выразиться.vi : ( (<глагол-пе-пр-sub-tv> & (<глагол-pm> or <макро-глагол-pm>) & <глагол-пе-пр-sub2-tv> & {Wd-}) or ( {EI-} & ( MVIat- or MVat+ ) & { Sm3- } & Wd- & { MVad+ } & MVv+ )) or (I- & E+ & MVat+ ); % Г,св,пе,дст,прш,мр,ед
+
+%% ГЛАГОЛЫ, ТРЕБУЮЩИЕ ПРЕДЛОЖНЫЙ ПАДЕЖ
+
+писал.vpms слушал.vpms спросил.vpms считал.vpms узнал.vpms вспоминал.vpms вспомнил.vpms запомнил.vpms читал.vpms говорил.vpms думал.vpms доказал.vpms доложил.vpms объяснил.vpms объяснял.vpms объявил.vpms поведал.vpms признался.vpms рассказал.vpms рассказывал.vpms сказал.vpms сообщил.vpms заявил.vpms звонил.vpms : (<глагол-пе-пр-sub> & (<глагол-pm> or <макро-глагол-pm>) & <глагол-пе-пр-sub2> & {Wd-}) or ( {EI-} & ( MVIat- or MVat+ ) & { Sm3- } & Wd- & { MVad+ } & MVv+ ) or ( {EI-} & { Sm3- } & Wd- & { MVad+ } & MVap+ & { E+ } ); % Г,св,пе,дст,прш,мр,ед
+
+объявить.vi поведать.vi рассказывать.vi вспомнить.vi слышать.vi думать.vi позаботиться.vi сожалеть.vi заботиться.vi забывать.vi задумываться.vi писать.vi вспоминать.vi узнать.vi читать.vi говорить.vi объявлять.vi рассказать.vi доложить.vi заявить.vi сообщить.vi напомнить.vi побеседовать.vi поболтать.vi поговорить.vi : (<глагол-нп-пр-sub-pr> & (<глагол-i> or <макро-глагол-i>) & <глагол-нп-пр-sub2-pr> & {Wd-} ) or ( I- & MVad+ & MVap+ ); % Г,св,нп,дст,инф
+
+%% ПОВЕЛИТЕЛЬНОЕ НАКЛОНЕНИЕ, ед число
+бери.vspd2s брось.vspd2s делай.vspd2s говори.vspd2s ищи.vspd2s молчи.vspd2s найди.vspd2s оставайся.vspd2s оставь.vspd2s подожди.vspd2s подумай.vspd2s погоди.vspd2s пойми.vspd2s помни.vspd2s послушай.vspd2s рассказывай.vspd2s сделай.vspd2s сиди.vspd2s слушай.vspd2s спи.vspd2s спроси.vspd2s стой.vspd2s убей.vspd2s учтите.vspd2s жди.vspd2s живи.vspd2s вспомни.vspd2s запомни.vspd2s знай.vspd2s: {[<глагол-пе-sub>]} & (<глагол-2p> or <макро-глагол-2p>) & {[<глагол-пе-sub2>]} & {Wd-}; % Г,св,пе,дст,2л,ед
+
+%% МЕСТОИМЕНИЯ
+нам_обоим нам_обеим :<мест-sub> & (Jd- or [[MVad-]] or [[MVIad+]] or Nd- or <макро-сущ-d>); % МС,1л,мн,дт
+
+%% ПРЕДИКАТИВЫ
+%% "а" похоже на вот.xn неужели.xn неужто.xn
+нет_никаких а.xn: ( <глагол-пе-пр-sub> or <глагол-пе-пр-sub2>)& (<глагол-pr> or <макро-глагол-pr> or Xia+) ; % ПРЕДК,нст
+ведь.xn : E+ & {XIa+}; 
+как.x : I+ ; % как им видеть его, зачем им видеть его
+похоже.xn: ( <глагол-пе-пр-sub> or <глагол-пе-пр-sub2> ) & (<глагол-pr> or <макро-глагол-pr> or Xia+) ; % ПРЕДК,нст
+
+кроме_того таким_образом по_крайней_мере в_общем к_сожалению мне_кажется во_всяком_случае как_правило с_другой_стороны скорее_всего в_частности быть_может более_того к_счастью в_свою_очередь между_прочим к_примеру на_мой_взгляд с_одной_стороны слава_богу судя_по_всему по_его_словам стало_быть честно_говоря видите_ли не_исключено черт_возьми по_сути в_общем-то как_ни_странно одним_словом вместо_того честное_слово без_сомнения боже_мой черт_побери мало_того иными_словами вполне_возможно другое_дело независимо_от_того собственно_говоря по_всей_видимости по_правде_говоря друг_мой знаете_ли другими_словами к_несчастью видишь_ли короче_говоря со_своей_стороны ваше_величество уверяю_вас ради_бога не_задумываясь такое_впечатление по_всей_вероятности надо_полагать следует_отметить если_учесть тяжело_дыша судя_по_тому можно_предположить мой_мальчик иначе_говоря на_наш_взгляд сын_мой по_большому_счету несмотря_ни_на_что будем_надеяться совершенно_очевидно откровенно_говоря друзья_мои закрыв_глаза по_моему_мнению мягко_говоря по_сути_дела в_зависимости_от_того затаив_дыхание дорогой_мой до_свидания не_говоря_ни_слова вполне_вероятно вероятнее_всего поверь_мне опустив_голову ясное_дело вообще_говоря по_слухам скорей_всего само_собой_разумеется надо_отметить по_предварительным_данным стоит_отметить о_чем_идет_речь по_обыкновению ваше_высочество по_правде_сказать сдается_мне :  Xia+ ; ПРЕДК,нст
+
+
+%% теперь ей очень хотелось общества других людей
+%% мне хотелось бы иметь глаза
+хотелось.vxn хочется.vxn захотелось.vxn захочется.vxn : (( <глагол-пе-пр-sub> or <глагол-пе-пр-sub2> ) &  (<глагол-pr> or <макро-глагол-pr>)) or ( { EI- } & MVIad- & W- & MVv+ ) or (MVIad- & Wd- & XIb+ & I+ ); 
+
+%% ВОПРОСЫ
+%% какие.i какая.i какое.i : {XIb+} & ([Xia+] or (W+ & XIc+ & EI+) or (W+ & Xc- & E-));
+
+%% Слова с большой буквы
+Вам.m2sd: <мест-sub> & (Jd- or [[MVad-]] or [[MVIad+]] or Nd- or <макро-сущ-d>); % МС,2л,ед,дт
+
+% morphology linkages
+#include "/ru/morph.dict";
+
+% stems (roots)
+#include "/ru/stem.dict";
+
+% suffixes
+#include "/ru/suffix.dict";
+
+% unknown-word morphology endings
+#include "/ru/morph-ends.dict";
+
+% With the following line in the dictionary, the parser will simply
+% skip over (null-link) unknown words. If you remove it, the parser
+% will output an error for any unknown words.
+UNKNOWN-WORD: XXX+;

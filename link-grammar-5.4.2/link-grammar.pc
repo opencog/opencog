@@ -1,0 +1,10 @@
+prefix=/usr/local
+exec_prefix=${prefix}
+libdir=${exec_prefix}/lib
+includedir=${prefix}/include
+
+Name: link-grammar
+Description: A natural language parser based on link grammar theory
+Version: 5.4.2
+Libs: -L${libdir} -llink-grammar
+Cflags: -I${includedir}

@@ -1,0 +1,263 @@
+ %***************************************************************************%
+ %                                                                           %
+ %  Copyright (C) 2005, 2006 Sampo Pyysalo, Sophie Aubin                     %
+ %  Copyright (C) 2009, 2012 Linas Vepstas                                   %
+ %  See file "LICENSE" for information about commercial use of this system   %
+ %                                                                           %
+ %***************************************************************************%
+
+% This file contains regular expressions that are used to match
+% tokens not found in the dictionary. Each regex is given a name which
+% determines the disjuncts assigned when the regex matches; this name
+% must be defined in the dictionary along with the appropriate disjuncts.
+% Note that the order of the regular expressions matters: matches will
+% be attempted in the order in which the regexs appear in this file,
+% and only the first match will be used.
+
+% Numbers.
+% XXX, we need to add utf8 U+00A0 "no-break space"
+% 
+% Allows at most two colons in hour-muinute-second HH:MM:SS expressions
+% Allows at most two digits between colons
+HMS-TIME: /^[0-9][0-9]?(:[0-9][0-9]?(:[0-9][0-9]?)?)?(AM|PM|am|pm)?$/
+
+% e.g. 1950's leading number can be higher, for science fiction.
+% Must be four digits, or possible three. Must end in s, 's ’s
+DECADE-DATE: /^([1-4][0-9][0-9]|[1-9][0-9])0(s|'s|’s)$/
+
+% Similar to above, but does not end in s. Only allows four digits.
+% We process this before NUMBERS below, so that this is matched first.
+YEAR-DATE: /^([1-4][0-9]{3}|[1-9][0-9]{0,2})$/
+
+% Day-of-month names; this regex will match before the one below.
+DAY-ORDINALS: /^(1st|2nd|3rd|[4-9]th|1[0-9]th|2(0th|1st|2nd|3rd|[4-9]th)|30th|31st)$/
+
+% Ordinal numbers; everything except 1st through 13th
+% is handled by regex.
+ORDINALS: /^[1-9][0-9]*(0th|1st|2nd|3rd|[4-9]th)$/
+
+% Allows any number of commas or periods
+% Be careful not match the period at the end of a sentence; 
+% for example: "It happened in 1942."
+NUMBERS: /^[0-9,.]*[0-9]$/
+% This parses signed numbers and ranges, e.g. "-5" and "5-10" and "9+/-6.5"
+NUMBERS: /^[0-9.,-]*[0-9](\+\/-[0-9.,-]*[0-9])?$/
+% Parses simple fractions e.g. "1/60" with no decimal points or anything fancy
+FRACTION: /^[0-9]+\/[0-9]+$/
+% "10(3)" exponent (used in PubMed)
+NUMBERS: /^[0-9.,-]*[0-9][0-9.,-]*\([0-9:.,-]*[0-9][0-9.,-]*\)$/
+
+% Roman numerals
+% The first expr has the problem that it matches an empty string.  The
+% cure for this is to use look-ahead, but neither the Gnu nor the BSD
+% regex libs support look-ahead. I cant' think of a bettter solution.
+ROMAN-NUMERAL-WORDS: /^M*(CM|D?C{0,3}|CD)(XC|L?X{0,3}|XL)(IX|V?I{0,3}|IV)$/
+% ROMAN-NUMERAL-WORDS: /^(?=(M|C|D|L|X|V|I)+)M*(CM|D?C{0,3}|CD)(XC|L?X{0,3}|XL)(IX|V?I{0,3}|IV)$/
+% ROMAN-NUMERAL-WORDS: /^(?=.+)M*(CM|D?C{0,3}|CD)(XC|L?X{0,3}|XL)(IX|V?I{0,3}|IV)$/
+
+% Strings of initials. e.g "Dr. J.G.D. Smith lives on Main St."
+% Make it at least two letters long, as otherwise it clobbers
+% single-letter handling in the dict, which is different.
+INITIALS: /^[A-Z]\.([A-Z]\.)+$/
+
+% Greek letters with numbers
+GREEK-LETTER-AND-NUMBER: /^(alpha|beta|gamma|delta|epsilon|zeta|eta|theta|iota|kappa|lambda|mu|nu|xi|omicron|pi|rho|sigma|tau|upsilon|phi|chi|psi|omega)\-?[0-9]+$/
+PL-GREEK-LETTER-AND-NUMBER: /^(alpha|beta|gamma|delta|epsilon|zeta|eta|theta|iota|kappa|lambda|mu|nu|xi|omicron|pi|rho|sigma|tau|upsilon|phi|chi|psi|omega)s\-?[0-9]+$/
+
+% Some "safe" derived units. Simple units are in dictionary.
+% The idea here is for the regex to match something that is almost
+% certainly part of a derived unit, and allow the rest to be
+% anything; this way we can capture difficult derived units such
+% as "mg/kg/day" and even oddities such as "micrograms/mouse/day"
+% without listing them explicitly.
+% TODO: add more. 
+% Some (real) misses from these: 
+% micrograms.kg-1.h-1 microM-1 J/cm2 %/day mN/m cm/yr
+% m/s days/week ml/s degrees/sec cm/sec cm/s mm/s N/mm (is that a unit?)
+% cuts/minute clicks/s beats/minute x/week W/kg/W %/patient-year
+% microIU/ml degrees/s counts/mm2 cells/mm3 tumors/mouse
+% mm/sec ml/hr mJ/cm(2) m2/g amol/mm2 animals/group
+% h-1 min-1 day-1 cm-1 mg-1 kg-1 mg.m-2.min-1 ms.cm-1 g-1
+% sec-1 ms-1 ml.min.-1kg-1 ml.hr-1
+% also, both kilometer and kilometers seem to be absent(!)
+% remember "mm"!
+
+% grams/anything
+UNITS: /^([npmk]|milli|micro|nano|pico|femto|atto|kilo|mega|tera)?(g|grams?)\//
+
+% mol/anything
+UNITS: /^([fnmp]|milli|micro|nano|pico|femto|atto|mu)?mol(es)?\//
+
+% common endings
+UNITS: /^[a-zA-Z\/.]+\/((m|micro)?[lLg]|mg|kg|mol|min|day|h|hr)$/
+
+% common endings, except in the style "mg.kg-1" instead of "mg/kg".
+UNITS: /^[a-zA-Z\/.1-]+\.((m|micro)?[lLg]|mg|kg|mol|min|day|h|hr)(-1|\(-1\))$/
+
+% combinations of numbers and units, e.g. "50-kDa", "1-2h"
+% TODO: Clean up and check that these are up-to-date wrt the 
+% dictionary-recognized units; this is quite a mess currently.
+% TODO: Extend the "number" part of the regex to allow anything
+% that the NUMBER regex matches.
+% One problem here is a failure to split up the expression ... 
+% e.g. "2hr" becomes 2 - ND - hr with the ND link. But 2-hr is treated
+% as a single word ('I is a 2-hr wait')
+% NUMBER-AND-UNIT: /^[0-9.,-]+(msec|s|min|hour|h|hr|day|week|wk|month|year|yr|kDa|kilodalton|base|kilobase|base-pair|kD|kd|kDa|bp|nt|kb|mm|mg|cm|nm|g|Hz|ms|kg|ml|mL|km|microm|\%)$/
+% Comment out above, it screws up handling of unit suffixes, for
+% example: "Zangbert stock fell 30% to $2.50 yesterday."
+
+% fold-words. Matches NUMBER-fold, where NUMBER can be either numeric
+% or a spelled-out number, and the hyphen is optional. Note that for
+% spelled-out numbers, anything is allowed between the "initial" number
+% and "fold" to catch e.g. "two-to-three fold" ("fourteen" etc. are absent
+% as the prefix "four" is sufficient to match).
+FOLD-WORDS: /^[0-9.,:-]*[0-9]([0-9.,:-]|\([0-9.,:-]*[0-9][0-9.,:-]*\)|\+\/-)*-?fold$/
+FOLD-WORDS: /^(one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|thirteen|fifteen|twenty|thirty|fifty|hundred|thousand|million).*fold$/
+
+% Plural proper nouns.
+% Make sure that apostrophe-s is split out correctly.
+PL-CAPITALIZED-WORDS:  /^[[:upper:]].*[^iuoys'’]s$/
+
+% Other proper nouns.
+% We demand that these end with an alphanumeric, i.e. explicitly
+% reject punctuation. We don't want this regex to "swallow" any trailing
+% commas, colons, or periods/question-marks at the end of sentences.
+% In addition, this must not swallow words ending in 's 'll etc.
+% (... any affix, for that matter ...) and so no embedded apostrophe
+CAPITALIZED-WORDS:     /^[[:upper:]][^'’]*[^[:punct:]]$/
+
+% SUFFIX GUESSING
+% For all suffix-guessing patterns, we insist that the pattern start
+% with an alphanumeric. This is needed to guarentee that the
+% prefix-stripping code works correctly, as otherwise, the regex will
+% gobble the prefix. So for example: "We left (carrying the dog) and
+% Fred followed."  Since "(carrying" is not in the dict, we need to be
+% sure to not match the leading paren so that it will get tripped.
+%
+ING-WORDS:        /^\w.+ing$/
+
+% Plurals or verb-s. Make sure that apostrophe-s is split out correctly.
+% e.g. "The subject's name is John Doe."  should be
+%     +--Ds--+---YS--+--Ds-+
+%     |      |       |     |
+%    the subject.n 's.p name.n 
+S-WORDS:          /^\w.+[^iuoys'’]s$/
+
+% Verbs ending -ed.
+ED-WORDS:         /^\w.+ed$/
+
+% Advebs ending -ly.
+LY-WORDS:         /^\w.+ly$/
+
+% Nouns ending in -ism, -asm (chiliasm .. ) Usualy mass nouns
+% Stubbed out for now; I'm not convinced this improves accuracy.
+% ISM-WORDS:        /^\w.+asm$/
+% ISM-WORDS:        /^\w.+ism$/
+
+% Corresponding count noun version of above (chiliast...)
+% AST-WORDS:        /^\w.+ast$/
+% AST-WORDS:        /^\w.+ist$/
+
+% Corresponding adjectival form of above
+ADJ-WORDS: /^\w.+astic$/
+ADJ-WORDS: /^\w.+istic$/
+
+% Nouns ending -ation  stubbed out in BioLG, stub out here ... 
+%ATION-WORDS:      /^\w.+ation$/
+
+% Extension by LIPN 11/10/2005
+% nouns -- typically seen in (bio-)chemistry texts
+% synthetase, kinase
+% 5-(hydroxymethyl)-2’-deoxyuridine
+% hydroxyethyl, hydroxymethyl
+% septation, reguion
+% isomaltotetraose, isomaltotriose
+% glycosylphosphatidylinositol
+% iodide, oligodeoxynucleotide
+% chronicity, hypochromicity
+MC-NOUN-WORDS: /^\w.+ase$/
+MC-NOUN-WORDS: /^\w.+ene$/
+MC-NOUN-WORDS: /^\w.+ine?$/
+MC-NOUN-WORDS: /^\w.+yl$/
+MC-NOUN-WORDS: /^\w.+ion$/
+MC-NOUN-WORDS: /^\w.+ose$/
+MC-NOUN-WORDS: /^\w.+ol$/
+MC-NOUN-WORDS: /^\w.+ide$/
+MC-NOUN-WORDS: /^\w.+ity$/
+
+% Can take TOn+.  Must appear after above, to avoid clash with +ity
+NOUN-TO-WORDS: /^\w.+ty$/
+NOUN-TO-WORDS: /^\w.+cy$/
+NOUN-TO-WORDS: /^\w.+nce$/
+
+% replicon, intron
+C-NOUN-WORDS: /^\w.+o[rn]$/
+
+% adjectives
+% exogenous, heterologous
+% intermolecular, intramolecular
+% glycolytic, ribonucleic, uronic
+% ribosomal, ribsosomal
+% nonpermissive, thermosensitive
+% inducible, metastable
+ADJ-WORDS: /^\w.+ous$/
+ADJ-WORDS: /^\w.+ar$/
+ADJ-WORDS: /^\w.+ic$/
+ADJ-WORDS: /^\w.+al$/
+ADJ-WORDS: /^\w.+ive$/
+ADJ-WORDS: /^\w.+ble$/
+
+% latin (postposed) adjectives
+% influenzae, tarentolae
+% pentosaceus, luteus, carnosus
+LATIN-ADJ-WORDS: /^\w.+ae$/
+LATIN-ADJ-WORDS: /^\w.+us$/ % must appear after -ous in this file
+
+% latin (postposed) adjectives  or latin plural noun
+% brevis, israelensis
+% japonicum, tabacum, xylinum
+LATIN-ADJ-P-NOUN-WORDS: /^\w.+is?$/
+LATIN-ADJ-S-NOUN-WORDS: /^\w.+um$/
+
+
+% Hyphenated words. In the original LG morpho-guessing system that
+% predated the regex-based system, hyphenated words were detected
+% before ING-WORDS, S-WORDS etc., causing e.g. "cross-linked" to be
+% treated as a HYPHENATED-WORD (a generic adjective/noun), and
+% never a verb. To return to this ordering, move this regex just
+% after the CAPITALIZED-WORDS regex.
+% We also match on commas, dots, brackets: n-amino-3-azabicyclo[3.3.0]octane
+% []] means "match right-bracket"
+% Explicitly call out (5'|3') so that we don't all a generic match to 'll
+% But something is funky about this 5'-3' business since 2' also matches ???
+%  /^[[:alnum:]][][:alnum:],:.\[-]*-[][:alnum:],:.\[-]*[[:alnum:]]$/
+HYPHENATED-WORDS:
+  /^[[:alnum:](5'|3')][][:alnum:](5'|3'),:.\(\)\[-]*-[][:alnum:],:.\(\)\[-]*[[:alnum:]]$/
+
+% Emoticon checks must come *after* the above, so that the above take precedence.
+%
+% Emoticons must be entirely made of punctuation, length 2 or longer ;) 
+% XXX [:punct:] is strangely broken, I have to add ;-< explicitly
+% XXX: Don't use [:punct:].  Do NOT include period!!
+% XXX: The problem with below is that 5. 7. 8. get recognized as emoticons,
+% which then prevents splitting for list numbers.  (e.g "step 5. Do this.")
+%
+% Arghh. Other valid number expressions are clobbered by the emoticons.
+% For example: $5 $7 8%  The quick fix is to remove the numbers.
+% Other breakages: The below clobbers "Bob, who ..." becuase it
+% matches Bob, as an emoticon.
+%
+% EMOTICON: /^[[:punct:];BDOpTX0578Ｃ☆ಠ●＠◎～][[:punct:]<bcdDLmoOpPSTvX0358ಠっ○ 。゜✿☆＊レツ◕●≧∇≦□◇＠◎∩ω旦ヨ彡ミ‿◠￣ー～━-]+$/
+% EMOTICON: /^[!"#$%&'()*+,\-/:;<=>?@[\\\]^_`{|}~;BDOpTX0578Ｃ☆ಠ●＠◎～][!"#$%&'()*+,\-/:;<=>?@[\\\]^_`{|}~<bcdDLmoOpPSTvX0358ಠっ○ 。゜✿☆＊レツ◕●≧∇≦□◇＠◎∩ω旦ヨ彡ミ‿◠￣ー～━-]+$/
+EMOTICON: /^[[:punct:];BＣ☆ಠ●＠◎～][-!"#$%&'()+,:;<=>?@[\\^_`{|}~<cdDLmoOpPSTvXಠっ○ 。゜✿☆＊レツ◕●≧∇≦□◇＠◎∩ω旦ヨ彡ミ‿◠￣ー～━-]+$/
+
+
+
+% Sequence of punctuation marks. If some mark appears in the affix table
+% such as a period, comma, dash or underscore, and there's a sequence of
+% these, then treat it as a "fill-in-the-blank" placeholder.
+% This matters only for punc. appearing in the affix table, since the
+% tokenizer explicitly mangles based on these punctution marks.
+% 
+% Look for at least four in a row.
+UNKNOWN-WORD: /^[.,-]{4}[.,-]*$/

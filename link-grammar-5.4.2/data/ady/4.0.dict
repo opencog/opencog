@@ -1,0 +1,25 @@
+
+ %***************************************************************************%
+ %                                                                           %
+ %       Copyright (C) 2013, 2014, 2017 Linas Vepstas                        %
+ %                                                                           %
+ %  See file "README" for information about commercial use of this system    %
+ %                                                                           %
+ %***************************************************************************%
+
+% Dictionary version number is 5.3.15 (formatted as V5v3v15+)
+<dictionary-version-number>: V5v3v15+;
+
+LEFT-WALL: ANY+;
+ANY-WORD: {@ANY-} & {@ANY+};
+UNKNOWN-WORD: {@ANY-} & {@ANY+};
+ANY-PUNCT: {@ANY-} & {@ANY+};
+
+JUNK: {@ANY-} & {@ANY+};
+
+
+% A simple two-part morphology:  Some stem, which carries only
+% semantics but no syntax, and a single suffix, which carries
+% all of the syntactic information.
+SIMPLE-STEM: LL+;
+SIMPLE-SUFF: LL- & {@ANY-} & {@ANY+};

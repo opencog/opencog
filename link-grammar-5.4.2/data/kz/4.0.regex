@@ -1,0 +1,9 @@
+ %***************************************************************************%
+ %                                                                           %
+ %  Copyright (C) 2013 Linas Vepstas                                         %
+ %  See file "LICENSE" for information about commercial use of this system   %
+ %                                                                           %
+ %***************************************************************************%
+
+
+CAPITALIZED-WORDS:     /^[[:upper:]][^'’]*[^[:punct:]]$/

@@ -1,0 +1,30 @@
+
+                 Java Bindings for Link Grammar
+                 ------------------------------
+
+These files implement Java language bindings for Link Grammar. They do
+not extend the parsing algorithms already present in Link-Grammar in
+any way. The allow users to call the standard link-grammar API from
+Java.
+
+These bindings do provide an additional feature, though: they can be used
+in a client-server mode, so that, instead of calling the link-grammar
+library directly, the parse request can be sent to a link-grammar
+server, which then returns the result in JSON format, which the bindings
+here are able to parse, and present the same API, as if the library
+was called locally.
+
+The shell script link-grammar-server.sh demonstrates how to run the
+parser server.  Once the server is started, parses can be obtained
+by using ordinary TCPIP sockets; so, for example:
+
+   echo "text:this is a test" | nc localhost 9000
+
+will return a JSON-encoded parse of the sentence "this is a test".
+The diagram string can be obtained with:
+
+   echo "storeDiagramString:true, text:this is a test" | nc localhost 9000
+
+The port number 9000 is configurable; the language, dictionary path
+and number of threads to use can also be specified.  See the shell
+script for details.

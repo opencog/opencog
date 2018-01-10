@@ -1,0 +1,47 @@
+
+% This file contains test sentences, and the expected parses and
+% constituents output, for the current English dictionary.
+
+Ithis is a test
+O
+O    +----->WV----->+---Osm--+
+O    +---Wd---+-Ss*b+  +Ds**c+
+O    |        |     |  |     |
+OLEFT-WALL this.p is.v a  test.n 
+O
+C(S (NP this.p)
+C   (VP is.v
+C       (NP a test.n)))
+C
+N
+O
+O    +----->WV----->+---Ost--+
+O    +---Wd---+-Ss*b+  +Ds**c+
+O    |        |     |  |     |
+OLEFT-WALL this.p is.v a  test.n 
+O
+Ithe quick brown fox jumped over the lazy dog
+O
+O    +---------------->WV---------------->+                        
+O    +-------------Wd------------+        |                        
+O    |      +--------Ds**x-------+        |       +-------Js------+
+O    |      |     +-------A------+        |       |   +---Ds**x---+
+O    |      |     |       +---A--+---Ss---+--MVp--+   |     +--A--+
+O    |      |     |       |      |        |       |   |     |     |
+OLEFT-WALL the quick.a brown.a fox.n jumped.v-d over the lazy.a dog.n 
+O
+C(S (NP the quick.a brown.a fox.n)
+C   (VP jumped.v-d
+C       (PP over
+C           (NP the lazy.a dog.n))))
+C
+
+% Prefixes
+
+IY'gotta do it this way
+O
+O    +---->WV---->+       +------MVa-----+
+O    +--Wd--+-Sp*i+--I*t--+Osm+    +-Dsu-+
+O    |      |     |       |   |    |     |
+OLEFT-WALL y' gotta.v-d do.v it this.d way.n 
+O

@@ -1,0 +1,166 @@
+!batch
+%
+% * reiškia kad tai blogas sakinys, ir turetu buti atmestas.
+%
+
+!verbosity=1
+!echo
+!limit=1000
+!short=20
+!constituents=1
+
+Skaitau.
+Aš skaitau.
+Skaitau knygą.
+Aš skaitau knygą.
+Aš skaitau brolio knygą.
+
+Knygą skaitau.
+Knygą skaitytumėme.
+Knygą skaitytumėm.
+Knygą skaitytume.
+
+Skaitai.
+Skaito.
+Skaitome.
+Skaito.
+
+Aš skaitau.
+Tu skaitai.
+Jis skaito.
+Ji skaito.
+Mes skaitome.
+Mes skaitom.
+Jūs skaitote.
+Jie skaito.
+Jos skaito.
+
+% Subject-verb agreement
+*Aš skaitai.
+*Tu skaito.
+*Jis skaitom.
+*Ji skaitote.
+*Mes skaito.
+*Mes skaitot.
+*Jūs skaitai.
+*Jie skaitau.
+*Jos skaitom.
+
+Aš skaičiau knygą
+Tu skaitai knygą.
+Jonas skaitė knygą.
+Ji skaitė knygą
+
+Knygą skaitė Jonas.
+Skaitė knygą Jonas.
+
+% Future tense
+Mes skaitysime knygą.
+Mes skaitysim knygą.
+Jūs skaitysite knygą.
+Jūs skaitysit knygą.
+Jie skaitys knygą.
+Jos skaitys knygą.
+
+% Free word order.
+Skaito Jonas knygą.
+Skaito knygą Jonas.
+Knygą skaito Jonas.
+Knygą Jonas skaito.
+
+% Simple possessive
+Aš skaitydavau brolio knygas.
+Mes skaitydavom brolio knygas.
+Skaitau brolio knygą.
+Skaitau knygą brolio.
+
+Brolio knygą skaitau.
+Brolio knygą skaitydavau.
+
+% Naudiningkas kam?
+Broliui skaitau knygą.
+Skaitau knygą broliui.
+Knygą skaitau broliui.
+Broliui knygą skaitau.
+
+% 4 words means there are 4-factorial = 24 word order choices.
+% Of these, 18 are grammatical, č are questinoable, ė are bad.
+% So its almost free word order, and it appears that the disallowed
+% orders are exactly those constrained by the no-link-cross rule!
+% Cool -- projectivity works well for Lithuanian!
+%
+% Note that the possesive migrates from "father's book" to 
+% "father's brother", depending on the link-length.
+Tėvo knygą broliui skaitau.
+Tėvo knygą skaitau broliui.
+% Atsargiai! Kam !
+Tėvo broliui knygą skaitau.
+Tėvo broliui skaitau knygą.
+*Tėvo skaitau knygą broliui.
+*Tėvo skaitau broliui knygą.
+
+Broliui skaitau tėvo knygą.
+Broliui skaitau knygą tėvo.
+Broliui tėvo knygą skaitau.
+% Aieee! Next two sentences requires link crossing: this can never parse!
+% link broliui-skaitau would cross over knygą-tėvo.
+% Fortunately, this is more or less linguistically insane. ... phew.
+% Bet irgi galį būti broliui<->tevo
+?Broliui tėvo skaitau knygą.
+*Broliui knygą skaitau tėvo.
+Broliui knygą tėvo skaitau.
+
+% Atsargiai! Kam !
+Knygą skaitau tėvo broliui.
+Knygą skaitau broliui tėvo.
+*Knygą broliui skaitau tėvo.
+?Knygą broliui tėvo skaitau.
+Knygą tėvo skaitau broliui.
+Knygą tėvo broliui skaitau.
+
+Skaitau knygą tėvo broliui.
+Skaitau knygą broliui tėvo.
+Skaitau broliui tėvo knygą.
+Skaitau broliui knygą tėvo.
+Skaitau tėvo broliui knygą.
+Skaitau tėvo knygą broliui.
+
+
+% ---- įkį čia
+
+Aš esu studentas.
+Ji yra studentė.
+Audra yra studentė.
+*Ji yra studentas.
+*Jis yra studentė.
+Mes einame namo.
+Einame namo.
+Ji eina į mokyklą.
+Atvažiavom į sodžių.
+Svečiai namo išvažiavo.
+
+% Pirmoji linksniuotė vienaskaita -as
+% tiltas tilto tiltui tiltą tiltu tilte tilte
+Tiltas yra gražus.
+
+% Pirmoji linksniuotė vienaskaita -is
+% brolis brolio broliui brolį broliu brolyje broli
+Brolis eina į mokyklą.
+Brolį sumušiau.
+Brolį sumušiau šachmatais.
+Tiltu einam.
+Kaime gyvenam.
+broli, einam namo.
+Broli, einam namo.
+
+% Budvardžiai - vyriški
+Medinis irklas buvo baltas.
+Balti miltai buvo rupi.
+
+% Budvardžiai - moteriški
+
+% Neaišku ar čia klaida are ne ... "Žiurėkit! Mano namas!"
+*Mano namas.
+Mano namas yra gražus.
+*Mano namas yra graži
+

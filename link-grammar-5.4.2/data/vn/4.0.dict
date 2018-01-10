@@ -1,0 +1,303 @@
+﻿% Vietnamese Dictionary
+
+% Dictionary version number is 5.3.3 (formatted as V5v3v3+)
+<dictionary-version-number>: V5v3v3+;
+<dictionary-locale>: VI4vn+;
+
+% See https://bitbucket.org/ngocminh/lienkate for the master
+% project; this includes a version of the link-grammar perser
+% written in Java.
+
+% Guide to links:
+% ĐT = động từ = verb
+% DT = danh từ = noun
+% TĐT=trước động từ=preceding verb
+
+% Danh từ
+bàn ghế giường áo quần sách quyển_sách báo nhà cửa
+người hổ voi chó mèo cá cá_vàng cá_chép rắn
+thằn_lằn đất đá gỗ sắt thép núi sông biển trăng
+sao trời cỏ cây hoa lá nước bố mẹ con anh chị
+em ông bà cô chú bác giờ lít thước tấc mét
+héc_ta tỉnh huyện xã phường phòng ban xe_đạp xe_máy
+tôi tao tớ hắn ta chúng_ta chúng_tôi mình chúng_mình
+mày mi chúng_mày cậu nó chúng_nó họ sinh_viên
+học_sinh giáo_viên lò_xo âm_mưu quân_sự vụ quan_hệ
+ngoại_giao độc_lập vùng lực_lượng mật_vụ đơn_vị tăng
+chuyện thông_tin áp_lực cuộc_chiến chữ ti_vi thủ_quân
+con_đường vô_địch trận_đấu cơ_hội danh_hiệu đội mùa
+bóng cầu_thủ thành_tích chuyên_môn tuổi trận câu_lạc_bộ
+đội_tuyển quốc_gia mùa_giải thử_thách phản_ứng tối_hậu_thư
+điều quy_định vấn_đề lương thuế công_nhân hội_đồng
+tuyên_bố hành_động điểm chương_trình báo_cáo tháng bánh
+kẹo cổ_động_viên việc bản tương_lai bạn HLV mục_tiêu
+ông_chủ cách thời_gian lời.n quá_trình loài_người con_người
+khả_năng nhiễm_sắc_thể gene tên chức_năng người_ta cá_thể
+đực loài chuột nháy_mắt bọ_ngựa lao tóm hồi chim_ruồi
+xác_chết máy_ảnh kiểu chim tự_nhiên côn_trùng chúng
+nhóm nguồn_gốc mật_hoa động_vật hoạt_động thực_vật
+sứa cơ_thể mô ánh_sáng phôi_thai khỉ ống_nghiệm phôi
+tử_cung khỉ_cái đứa_con nghiên_cứu bệnh_truyền_nhiễm
+rối_loạn miễn_dịch thần_kinh bệnh y_học con_khỉ
+giới khoa_học lũ con_cháu vật thí_nghiệm :
+% [n]
+  (SDT1- & {SDT1+})
+  or ({TDT3-} & {TDT2- or ST_DT-} & {TDT1-} & {SDT1+}
+     & {SDT2+} & {SDT3+} & {SDT4+} & {SDT6+}
+     & {{{MA+} & SDT5+} & (SS_DT- or DT_LA+)}
+     & {{{MA+} & SDT5+}
+     & (GT_DT- or ĐT_DT- or DT_ĐT+ or DT_TT+ or DT_THI+ or DT_LA+ or LA_DT-)});
+
+% Danh từ tổng hợp
+đất_đá núi_non sông_biển trăng_sao :
+% [n]
+  (SDT1- & {SDT1+})
+  or ({TDT1-} & {SDT1+} & {@SDT2+} & {SDT3+}
+     & {SDT4+} & {{MA+} & SDT5+} & {SDT6+}
+     & {SS_DT- or DT_LA+}
+     & {GT_DT- or ĐT_DT- or DT_ĐT+ or DT_TT+ or DT_THI+});
+
+% Tên riêng
+NAME Tbilisi Nga Saakashvili Gruzia Arsenal MU Nou_Camp
+Fabregas Seoul Bình_Nhưỡng Bảo_an Liên_Hợp_Quốc Kaka
+Carlo_Ancelotti Chelsea David_Beckham Paolo_Maldini
+Ancelotti Roman_Abramovich San_Siro Man City Man_City
+Milan Y SRY Trochilidae châu_Mỹ protein virus
+Hideyuki_Okano Okano :
+  (SDT1- & {SDT1+})
+  or ({SDT1+} & {@SDT2+} & {SDT4+}
+     & {{{MA+} & SDT5+} & (SS_DT- or DT_LA+)}
+     & {{{MA+} & SDT5+}
+     & (GT_DT- or ĐT_DT- or DT_ĐT+ or @DT_TT+ or DT_THI+)});
+
+% Trước danh từ 3
+cái chiếc tấm bộ con : TDT3+;
+
+% Trước danh từ 2
+những các mỗi mọi : TDT2+;
+% từng : TDT2+ or TĐT2_1+ or TTT2_1+ or TST2_1+;
+
+% Trước danh từ 1
+toàn_thể tất_thảy tất_cả toàn_bộ bất_kỳ : TDT1+;
+
+% Số từ
+một hai ba 22 200 40 3 vài phần_lớn 9 5 :
+  (({TST2_1- or TST2_2-} & {{TST4-} & TST3-}
+      & {TST4-}) & {TST-}) & {DT_ĐT-} & ST_DT+;
+
+khoảng chừng : TST+;
+
+% Sau danh từ 3
+bằng về : (SDT3- or ĐT_GT- or TT_GT-) & GT_DT+;
+
+% Sau danh từ 4
+của : SDT4- & GT_DT+;
+
+dưới trước sau ngoài với tại trên như cho đối_với trong :
+  GT_DT+ & (TT_GT- or ĐT_GT- or SDT4- or ({PH+} & CL+));
+
+từ bởi cùng khỏi : GT_DT+ & (TT_GT- or ĐT_GT- or ({PH+} & CL+));
+
+ra vào theo sang :
+  (GT_DT+ & (TT_GT- or ĐT_GT- or ({PH+} & CL+)))
+  or (((({TĐT1-} & {TĐT2_1-} & {{TĐT4-} & TĐT3-} & {TĐT4-})
+      or {TT_ĐT-} or ({TT_ĐT-} & TĐT5-))
+    & {DT_ĐT- or ĐT_ĐT- or THI_ĐT- or LT_ĐT-}
+    & {ĐT_XONG+} & {ĐT_DT+} & {ĐT_TT+}
+    & {ĐT_GT+} & {ĐT_LT+} & {THT- or THS+}
+    & ({EV+} & {SDT5- or CL-} & {CO-})) or ({DT_ĐT-} & BI-));
+
+để : LT_ĐT+ & (TT_GT- or ĐT_GT- or SDT4- or ({PH+} & CL+));
+
+% Sau danh từ 6
+đó đấy kia ấy đây : GT_DT- or SDT6- or DT_LA+;
+thế : GT_DT- or SDT6- or DT_LA+ or ĐT_DT-;
+này : GT_DT- or SDT6-;
+
+% Từ "là"
+là :
+  (({TĐT1-} & {TĐT2_1-} & {TĐT3-} & {TĐT4-})
+    or TĐT5- or TT_ĐT-)
+  & {DT_LA- or THI_ĐT-} & {LA_DT+ or ĐT_TT+};
+
+% Động từ
+đi đứng chạy ngồi bơi nhảy khóc cười rơi rụng
+mơ.w đi_làm ngủ đi_ngủ ăn_nói đồng_ý trò_chuyện
+nấu_ăn gắng đứng_dậy hành_xử giao_kèo ở_lại tiến_hóa
+sinh_sản vật_lộn tắt_thở rơi_xuống thụ_phấn phát_quang :
+% [v]
+  ((({TĐT1-} & {TĐT2_1-} & {{TĐT4-} & TĐT3-} & {TĐT4-})
+      or TT_ĐT- or ({TT_ĐT-} & TĐT5-))
+    & {DT_ĐT- or ĐT_ĐT- or THI_ĐT- or LT_ĐT-}
+    & {ĐT_XONG+} & {ĐT_TT+} & {ĐT_GT+} & {ĐT_LT+}
+    & {THT- or THS+} & {EV+} & {SDT5- or CL-} & {CO-})
+  or ({DT_ĐT-} & BI-);
+
+tới học làm ăn đọc viết nghe xem gặp thấy đánh
+đuổi đợi phát_hiện đảo_chính tấn_công cắt công_nhận
+có chịu nuôi đánh_bật chứng_tỏ giành chấp_nhận
+ở đạt đợi_chờ chơi tập_trung gọi vạch chỉ_trích
+đến hoàn_thành trở_thành chọn xảy_ra mất mang
+nhìn_thấy chống_cự lấy chụp xếp thuộc săn_đuổi
+giúp sản_xuất phát_ra sử_dụng đưa sinh_hạ tìm_ra
+điều_trị đối_phó truyền tạo hy_vọng :
+% [v]
+  ((({TĐT1-} & {TĐT2_1-} & {TĐT3-} & {TĐT4-})
+      or TT_ĐT-
+      or ({TT_ĐT-} & TĐT5-))
+   & {DT_ĐT- or ĐT_ĐT- or THI_ĐT- or LT_ĐT- or BI-}
+   & {ĐT_XONG+} & {ĐT_DT+} & {ĐT_TT+} & {ĐT_GT+}
+   & {ĐT_LT+} & {THT- or THS+}
+   & ({EV+} & {SDT5- or CL-} & {CO-})) or ({DT_ĐT-} & BI-);
+
+nói biết hỏi.v xác_nhận bác_bỏ bảo cho_rằng khẳng_định
+cho_biết trả lời.v :
+% [v]
+  ((({TĐT1-} & {TĐT2_1-} & {{TĐT4-} & TĐT3-} & {TĐT4-})
+      or TT_ĐT-
+      or ({TT_ĐT-} & TĐT5-)) & {DT_ĐT- or ĐT_ĐT- or THI_ĐT- or LT_ĐT-}
+  & {ĐT_XONG+} & {ĐT_TT+} & {ĐT_GT+}
+  & {ĐT_DT+ or R+ or CL+} & {ĐT_LT+}
+  & {THT- or THS+}
+  & ({EV+} & {SDT5- or CL-} & {CO-})) or ({DT_ĐT-} & BI-);
+
+% Động từ yêu cầu, sai khiến
+ra_lệnh bắt bắt_buộc ép nài_ép hỏi.w đòi_hỏi cấm cho_phép
+yêu_cầu đề_nghị kêu_gọi quyết_định cân_nhắc cảm_thấy :
+% [v]
+  ((({TĐT1-} & {TĐT2_1-} & {{TĐT4-} & TĐT3-} & {TĐT4-})
+     or TT_ĐT-
+     or ({TT_ĐT-} & TĐT5-)) & {DT_ĐT- or THI_ĐT- or LT_ĐT-}
+   & {ĐT_XONG+} & {CL+} & {ĐT_LT+ or ĐT_SS+}
+   & {THT- or THS+} & {EV+} & {SDT5- or CL-} & {CO-}) or ({DT_ĐT-} & BI-);
+
+% Động từ tình thái
+phải dám nỡ nên.v có_thể không_thể định :
+% [v]
+  (({TĐT1-} & {TĐT2_1- or TĐT2_2-} & {{TĐT4-} & TĐT3-} & {TĐT4-})
+      or TT_ĐT-
+      or ({TT_ĐT-} & TĐT5-)) & {DT_ĐT- or THI_ĐT- or LT_ĐT-}
+    & ĐT_ĐT+ & {ĐT_LT+ or ĐT_SS+} & {THT- or THS+}
+    & ({EV+} & {SDT5- or CL-} & {CO-});
+
+muốn cần thích sợ mong mong_chờ tiếc hối_tiếc
+lo_lắng nhớ mơ.v ước quên kiên_nhẫn giận :
+% [v]
+  ((({TĐT1-} & {TĐT2_1- or TĐT2_2-} & {{TĐT4-} & TĐT3-} & {TĐT4-})
+      or TT_ĐT-
+      or ({TT_ĐT-} & TĐT5-)) & {DT_ĐT- or THI_ĐT- or LT_ĐT-}
+    & {ĐT_DT+ or ĐT_ĐT+ or ĐT_TT+} & {SĐT+} & {THT- or THS+}
+    & ({EV+} & {SDT5- or CL-} & {CO-})) or ({DT_ĐT-} & BI-);
+
+% Động từ chỉ sự bắt đầu, tiếp diễn
+bắt_đầu tiếp_tục thôi dừng kết_thúc :
+% [v]
+  ((({TĐT1-} & {TĐT2_1-} & {{TĐT4-} & TĐT3-} & {TĐT4-})
+      or TT_ĐT-
+      or ({TT_ĐT-} & TĐT5-)) & {DT_ĐT- or ĐT_ĐT- or THI_ĐT- or LT_ĐT-}
+  & {ĐT_XONG+} & {ĐT_DT+ or @ĐT_ĐT+} & {ĐT_TT+}
+  & {ĐT_GT+} & {ĐT_LT+ or ĐT_SS+} & {THT- or THS+}
+  & ({EV+} & {SDT5- or CL-} & {CO-})) or ({DT_ĐT-} & BI-);
+
+% Trước động từ 1 và tính từ 1
+thường hay luôn : TĐT1+ or TTT1+ or TST1+;
+
+% Trước động từ 2.1 và tính từ 2.1
+không chẳng chưa chưa_từng : TĐT2_1+ or TTT2_1+ or TST2_1+;
+
+% Trước động từ 2.2 và tính từ 2.2
+rất hơi khá chỉ : TĐT2_2+ or TTT2_2+ or TST2_2+;
+
+% Trước động từ 3 và tính từ 3
+đã đang sẽ vừa mới sắp sắp_sửa : TĐT3+ or TTT3+ or TST3+;
+
+% Trước động từ 4 và tính từ 4
+cũng vẫn còn cứ : TĐT4+ or TTT4+ or TST4+;
+
+% Trước động từ 5
+đừng chớ : TĐT5+ or TTT5+;
+
+% Từ "bị", "được"
+bị : (({TĐT1-} & {TĐT2_1- or TĐT2_2-} & {TĐT3-} & {TĐT4-}) or TĐT5-) & {DT_ĐT- or SDT5- or THI_ĐT- or LT_ĐT- or ĐT_ĐT-} & BI+ & {ĐT_LT+} & ({THT-} or {THS+} or ({EV+} & {CL-} & {CO-}));
+
+được : ((({TĐT1-} & {TĐT2_1- or TĐT2_2-} & {TĐT3-} & {TĐT4-}) or TĐT5-) & {DT_ĐT- or SDT5- or THI_ĐT- or LT_ĐT- or ĐT_ĐT-} & BI+ & {ĐT_LT+} & ({THT-} or {THS+} or ({EV+} & {CL-} & {CO-}))) or ĐT_XONG-;
+
+% Tính từ
+tốt đẹp xấu sạch bẩn đỏ xanh vàng đen trắng
+thiếu đủ nhanh chậm hỏng nóng lạnh mát hấp_dẫn
+chính_xác nặng_nề ly_khai vui_vẻ thật khó sẵn_sàng
+tất_nhiên đáng thất_vọng hài_lòng hiện_tại ở_đây
+hạnh_phúc gần cuối_cùng chuyên_nghiệp lập_tức gay_gắt
+riêng muộn đắt chăm thấp tuyệt_vời rõ_ràng chính_thức
+hoàn_toàn có_thật chung đơn_tính quan_trọng có_ích
+hiện_đại hiệu_quả lùn :
+(({TTT1-} & {TTT2_1- or TTT2_2-} & {{TTT4-} & TTT3-} & {TTT4-}) or TTT5- or TT_TT-) & {TT_TT+} & {DT_TT- or SDT2- or TT- or ĐT_TT- or THI_TT- or BI-} & {TT_ĐT+ or TT_GT+ or TT_LT+} & {STT+ or TT_SS+} & {THT- or THS+} & {EV+} & {CL-} & {CO-};
+
+nhiều ít tân :
+(({TTT1-} & {TTT2_1- or TTT2_2-} & {{TTT4-} & TTT3-} & {TTT4-}) or TTT5- or TT_TT-) & (({TT_TT+} & {DT_TT- or SDT2- or ĐT_TT- or THI_TT- or BI-} & {TT_ĐT+ or TT_GT+} & {STT+ or TT_SS+} & {THT- or THS+} & ({EV+} & {CL-} & {CO-})) or ST_DT-);
+
+% Sau tính từ
+lắm quá : STT- or SĐT-;
+
+% Từ "thì"
+thì : DT_THI- & (THI_TT+ or THI_ĐT+);
+
+% Các từ liên kết vị ng
+rồi liền bèn lại đành : ĐT_LT- & LT_ĐT+;
+
+mà : (ĐT_LT- & LT_ĐT+) or MA-;
+
+% Các từ so sánh
+hơn kém : {TT_SS-} & SS_DT+;
+nhất : TT_SS-;
+
+% Từ "xong"
+xong: ĐT_XONG-;
+
+% Từ "rằng"
+rằng : R- & CL+;
+chuyện : (R- or GT_DT-) & (CL+ or DT_DT+);
+
+% Các từ hỏi
+tại_sao vì_sao : THT+ & {R-};
+ở_đâu thế_nào như_thế_nào phải_không: THS- & {R-};
+khi_nào bao_giờ: (THT+ or THS-) & {R-};
+
+ai :
+  {ĐT_DT- or SS_DT- or GT_DT- or DT_LA+ or DT_ĐT+ or DT_TT+ or DT_THI+} & {R-};
+
+% Các từ nối trong câu ghép
+tuy_nhiên nhưng nên.w cho_nên nhờ_đó : CL+ & (EV- or QHT-);
+bởi_vì vì : (GT_DT+ or CL+) & {PH+} & (EV- or (CO+ or QHT+));
+dù : CL+ & {PH+} & (EV- or (CO+ or QHT+));
+sau_khi khi : CL+ & {PH+} & (EV- or CO+);
+
+% Dấu phẩy
+, : PH-;
+
+%Từ "và"
+và : ();
+
+% các từ đặc biệt
+lẽ_ra có_lẽ : CL+ or (DT_GT- & (GT_ĐT+ or GT_TT+));
+một_cách : ĐT_TT- & TT+;
+sau_đó ngày_nay vì_thế : CL+ & {ĐT_GT- or EV-};
+
+% Regex not supported.
+HMS-TIME: XXX-;
+DECADE-TIME: XXX-;
+DECADE-DATE: XXX-;
+YEAR-DATE: XXX-;
+DAY-ORDINALS: XXX-;
+ORDINALS: XXX-;
+NUMBERS: XXX-;
+FRACTION: XXX-;
+ROMAN-NUMERAL-WORDS: XXX-;
+INITIALS: XXX-;
+GREEK-LETTER-AND-NUMBER: XXX-;
+PL-GREEK-LETTER-AND-NUMBER: XXX-;
+EMOTICON: XXX-;
+PART-NUMBER: XXX-;
+CAPITALIZED-WORDS: XXX-;
+HYPHENATED-WORDS: XXX-;
+UNKNOWN-WORD: XXX-;

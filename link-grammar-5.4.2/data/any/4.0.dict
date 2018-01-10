@@ -1,0 +1,20 @@
+
+ %***************************************************************************%
+ %                                                                           %
+ %       Copyright (C) 2013 Linas Vepstas                                    %
+ %                                                                           %
+ %  See file "README" for information about commercial use of this system    %
+ %                                                                           %
+ %***************************************************************************%
+
+% Dictionary version number is 5.4.0 (formatted as V5v4v0+)
+<dictionary-version-number>: V5v4v0+;
+
+% Left-wall @ANY allows multiple head-words, e.g. head-nouns and also
+% head-verbs. See the README.md file for more.
+LEFT-WALL: @ANY+;
+ANY-WORD: {@ANY-} & {@ANY+};
+ANY-PUNCT: {@ANY-} & {@ANY+};
+UNKNOWN-WORD: {@ANY-} & {@ANY+};
+
+JUNK: {@ANY-} & {@ANY+};

@@ -1,0 +1,565 @@
+ %***************************************************************************%
+ %                                                                           %
+ % Experimental prototype Hebrew dictionary                                  %
+ %       Copyright (C) 2014  Amir Plivatsky                                  %
+ %                                                                           %
+ % Based on en/tiny.dict,                                                    %
+ %       Copyright (C) 1991-1998  Daniel Sleator and Davy Temperley          %
+ %
+ % and on en/4.0.dict.m4,
+ %       Copyright (C) 1991-1998  Daniel Sleator and Davy Temperley          %
+ %       Copyright (c) 2003  Peter Szolovits and MIT.                        %
+ %       Copyright (c) 2008-2014  Linas Vepstas                              %
+ %       Copyright (c) 2013  Lian Ruiting                                    %
+ %                                                                           %
+ %  See file "LICENSE" for information about commercial use of this system   %
+ %                                                                           %
+ %***************************************************************************%
+
+% Demo Hebrew dictionary, for initial checks. [ap]
+%
+% Its origin is the English tiny.dict, in which I translated some words
+% and added a few more, for the purpose of checking:
+% - tokenizing, including multi-prefix split
+% - the resolver behavior with multi-prefix linkages
+% - result printing
+% The old English definitions are commented out by %#.
+%
+% Some of the definitions have been replaced by the corresponding ones from
+% the full English dictionary (en/4.0.dict.m4). They were partially
+% converted to handle Hebrew.
+%
+% Much of the grammar here is still the English one,
+% so it is incorrect for Hebrew.
+%
+% By now several changes have been done to handle Hebrew more correctly.
+% Subject/verb/adjective, gender, and single/plural etc. agreements are only
+% partially done.  Most of the Hebrew grammatical constructs are not supported
+% here.
+%
+% Among numerous other things, changes to handle count/uncountable changes
+% have not been done yet. The created infrastructure for that may still need changes.
+
+% Dictionary version number is 5.3.15 (formatted as V5v3v15+)
+<dictionary-version-number>: V5v3v15+;
+<dictionary-locale>: HE4il+;
+
+% For now.
+LEFT-WALL: {Wa+} or {Wd+} or ();
+
+% The costly-null is introduced here for now, so expressions can be copied from
+% the English dictionary as they are.
+<costly-null>: [[[[()]]]];
+
+% NOUNS
+% Initially copied from the English dictionary, most probably along with unneeded
+% and inappropriate links for Hebrew (to be changed later).
+
+% Hebrew S links:
+% S1234
+% 1: s, p - for singular, plural
+% 2: c, u - for count, uncountable
+% 3: m, f - gender: male, female
+% 4: 1, 2, 3 - for 1st, 2nd, 3rd person
+
+% The RJ links connect to "and"; the l,r prevent cross-linking
+<clause-conjoin>: RJrc- or RJlc+;
+
+% {@COd-} : "That is the man who, in Joe's opinion, we should hire"
+<CLAUSE>: {({@COd-} & (C- or <clause-conjoin>)) or ({@CO-} & (Wd- & {CC+})) or [Rn-]};
+<S-CLAUSE>: {({@COd-} & (C- or <clause-conjoin>)) or ({@CO-} & (Wd- & {CC+}))};
+<CLAUSE-E>: {({@COd-} & (C- or <clause-conjoin>)) or ({@CO-} & (Wd- or {CC+})) or Re-};
+
+% Post-nominal qualifiers, complete with commas, etc.
+<post-nominal-x>:
+  ({[B*j+]} & Xd- & (Xc+ or <costly-null>) & MX-);
+
+<post-nominal-s>:
+  ({[Bsj+]} & Xd- & (Xc+ or <costly-null>) & MX-);
+
+<post-nominal-p>:
+  ({[Bpj+]} & Xd- & (Xc+ or <costly-null>) & MX-);
+
+<post-nominal-u>:
+  ({[Buj+]} & Xd- & (Xc+ or <costly-null>) & MX-);
+
+
+
+<noun-main-s,c,m,3>: 
+  (((Sscm3+ or P+) & <CLAUSE>) or SIs- or Js- or Os*m-
+  or <post-nominal-s>
+  or <costly-null>);
+<noun-main-s,u,m,3>: 
+  (((Ssum3+ or P+) & <CLAUSE>) or SIs- or Js- or Os*m-
+  or <post-nominal-s>
+  or <costly-null>);
+<noun-main-s,c,f,3>: 
+  (((Sscf3+ or P+) & <CLAUSE>) or SIs- or Js- or Os*f-
+  or <post-nominal-s>
+  or <costly-null>);
+<noun-main-s,u,f,3>: 
+  (((Ssuf3+ or P+) & <CLAUSE>) or SIs- or Js- or Os*f-
+  or <post-nominal-s>
+  or <costly-null>);
+<noun-main-p,c,m,3>: 
+  (((Spcm3+ or P+) & <CLAUSE>) or SIs- or Js- or Op*m-
+  or <post-nominal-s>
+  or <costly-null>);
+<noun-main-p,u,m,3>: 
+  (((Spum3+ or P+) & <CLAUSE>) or SIs- or Js- or Op*m-
+  or <post-nominal-s>
+  or <costly-null>);
+<noun-main-p,c,f,3>: 
+  (((Spcf3+ or P+) & <CLAUSE>) or SIs- or Js- or Op*f-
+  or <post-nominal-s>
+  or <costly-null>);
+<noun-main-p,u,f,3>: 
+  (((Spuf3+ or P+) & <CLAUSE>) or SIs- or Js- or Op*f-
+  or <post-nominal-s>
+  or <costly-null>);
+
+% NOUN_MAIN_H() arguments:
+% 1: s, p - for singular, plural
+% 2: m, f - gender: male, female
+
+% Dmu -> D*u ??? for now
+
+
+<noun-sub-x>: {@M+} & {((R+ & B+) or (Ds- & Rb+)) & {[[@M+]]}} & {@MX+};
+<noun-sub-s>: {@M+} & {((R+ & Bs+) or (Ds- & Rb+)) & {[[@M+]]}} & {@MXs+};
+<noun-sub-p>: {@M+} & {((R+ & Bp+) or (Ds- & Rb+)) & {[[@M+]]}} & {@MXp+};
+
+% Ds- here disallows *הכלב שחור רץ
+<noun-modifiers>:
+  ((@A+ or Ds-) & {[[@AN-]]})
+  or [@AN-]0.1
+  or ([[@AN-].1 & @A+] & {[[@AN-]]})
+  or ();
+
+<rel-clause-x>: {Rw+} & B*m+;
+<rel-clause-s>: {Rw+} & Bsm+;
+<rel-clause-p>: {Rw+} & Bpm+;
+
+<noun-and-s>: ({@M+} & SJls+) or ({[@M+]} & SJrs-);
+<noun-and-p>: ({[@M+]} & SJlp+) or ({[[@M+]]} & SJrp-);
+<noun-and-u>: ({[@M+]} & SJlu+) or ({[[@M+]]} & SJru-);
+<noun-and-x>: ({[@M+]} & SJl+) or ({[[@M+]]} & SJr-);
+
+
+
+%#dog cat woman man park yard bone neighbor store street bird hammer nose
+%#party friend house movie brother sister diner student exam:
+%# {@A-} & Ds- & {@M+ or (R+ & Bs+)} &
+%# (J- or Os- or (Ss+ & (({@CO-} & {C-}) or R-)) or SIs-);
+כלב חתול איש פארק שכן רחוב פטיש אף
+חבר בית סרט אח סטודנט מבחן ניסוי לב ורד שולחן:
+%% ({@A+} or {Ds-}) & {@M+ or (R+ & Bs+) or (Ds- & Rb+)} &
+%% (J- or Os- or ((Ss+ or P+) & (({@CO-} & {C-}) or R-)) or SIs-);
+(<noun-modifiers> &
+    (({NMa+} & AN+)
+    or ((NM+ or ({[NM+]1.5}    )) % & Ds- moved to noun-modifiers
+      & ((<noun-sub-s> & (
+  (((Sscm3+ or P+) & <CLAUSE>) or SIs- or Js- or Os*m-
+  or <post-nominal-s>
+  or <costly-null>) or <rel-clause-s>))
+        or <noun-and-s>))
+    or SJrs-
+    or (YS+ & Ds-)
+    or (GN+ & (DD- or [()]))
+    or Us-
+    or ({Ds-} & Wa-)));
+
+כלבה חתולה אישה חצר עצם שכנה חנות ציפור
+מסיבה חברה אחות ארוחה סטודנטית:
+(<noun-modifiers> &
+    (({NMa+} & AN+)
+    or ((NM+ or ({[NM+]1.5}    )) % & Ds- moved to noun-modifiers
+      & ((<noun-sub-s> & (
+  (((Sscf3+ or P+) & <CLAUSE>) or SIs- or Js- or Os*f-
+  or <post-nominal-s>
+  or <costly-null>) or <rel-clause-s>))
+        or <noun-and-s>))
+    or SJrs-
+    or (YS+ & Ds-)
+    or (GN+ & (DD- or [()]))
+    or Us-
+    or ({Ds-} & Wa-)));
+
+%#dogs cats women men
+%#parks yards bones neighbors stores streets birds hammers noses
+%#parties friends houses movies brothers sisters diners students exams
+%#wars winters actions laws successes:
+%#{@A+} & {Dmc-} & {@M+ or (R+ & Bp+)} &
+%# (J- or Op- or (Sp+ & (({@CO-} & {C-}) or R-)) or SIp-);
+כלבים חתולים גברים פארקים שכנים רחובות פטישים אפים
+חברים בתים סרטים אחים סטודנטים מבחנים שולחנות:
+%%{@A+} & {Dmc-} & {@M+ or (R+ & Bp+)} &
+%% (J- or Op- or (Sp+ & (({@CO-} & Wd- & {C-}) or R-)) or SIp-);
+(<noun-modifiers> &
+    (({NMa+} & AN+)
+    or ((NM+ or ({[NM+]1.5}    )) % & Ds- moved to noun-modifiers
+      & ((<noun-sub-p> & (
+  (((Spcm3+ or P+) & <CLAUSE>) or SIs- or Js- or Op*m-
+  or <post-nominal-s>
+  or <costly-null>) or <rel-clause-p>))
+        or <noun-and-p>))
+    or SJrs-
+    or (YS+ & Ds-)
+    or (GN+ & (DD- or [()]))
+    or Us-
+    or ({Ds-} & Wa-)));
+
+כלבות חתולות נשים חצרות עצמות שכנות חנויות ציפורים
+מסיבות חברות אחיות ארוחות סטודנטיות:
+(<noun-modifiers> &
+    (({NMa+} & AN+)
+    or ((NM+ or ({[NM+]1.5}    )) % & Ds- moved to noun-modifiers
+      & ((<noun-sub-p> & (
+  (((Spcf3+ or P+) & <CLAUSE>) or SIs- or Js- or Op*f-
+  or <post-nominal-s>
+  or <costly-null>) or <rel-clause-p>))
+        or <noun-and-p>))
+    or SJrs-
+    or (YS+ & Ds-)
+    or (GN+ & (DD- or [()]))
+    or Us-
+    or ({Ds-} & Wa-)));
+
+%#water anger money politics trouble:
+%#{@A+} & {Dmu-} & {@M+ or (R+ & Bs+)} &
+%#(J- or Os- or (Ss+ & (({@CO-} & {C-}) or R-)) or SIs-);
+מים כעס כסף פוליטיקה:
+{@A+} & {Dmu-} & {@M+ or (R+ & Bs+)} &
+(J- or Os- or (Ss+ & (({@CO-} & {C-}) or R-)) or SIs-);
+
+%#law winter action war success:
+%#{@A+} & {D*u-} & {@M+ or (R+ & Bs+)} &
+%#(J- or Os- or (Ss+ & (({@CO-} & {C-}) or R-)) or SIs-);
+חוק חורף פעולה מלחמה הצלחה:
+{@A+} & {D*u-} & {@M+ or (R+ & Bs+)} &
+(J- or Os- or (Ss+ & (({@CO-} & {C-}) or R-)) or SIs-);
+
+%PRONOUNS
+
+% 1: s, p - for singular, plural
+% 2: m, f - gender: male, female
+% 3: 1, 2, 3 - for 1st, 2nd, 3rd person
+
+%#she he: (Ss+ & (({@CO-} & {C-}) or R-)) or SIs-;
+%#me him them us: J- or O-;
+אותי אותו אותה אותם אותנו: J- or O-;
+%#her: D+ or J- or O-;
+%#its my your their our: D+;
+%#his: D+;
+שלה שלו שלי שלך שלהם שלנו: Mp-;
+
+
+% May need a J- variant in order to invalidate "של הוא", etc.
+%#you they we I: J- or O- or (Sp+ & (({@CO-} & {C-}) or R-)) or SIp-;
+%% אתם אתן הם הן אנחנו אני: J- or O- or (Sp+ & (({@CO-} & Wd- & {C-}) or R-)) or SIp-;
+%% היא הוא: {J- or O- or ({Ss+} & (({@CO-} & {Wd-} & {C-}) or R-)) or SIs-}
+%%% היא הוא:  {{[[R+ & Bs+]]} & (({Ss+} & <CLAUSE>) or SIs- or SJls+)}
+% From "is" - need to update them from the English dict.
+%%% & {(({Ss-} or (RS- & Bs-) or ({Q-} & SIs+))
+%%%  & (((O+ or B-) & {@MV+}) or P+ or AF-))};
+
+אני: ({{[[R+ & Bs**1+]]} &
+  (J- or Os**1- or ({Ss**1+} & <CLAUSE>) or SIs**1- or SJls**1+)}
+% Need to update
+ & {(({Ss**1-} or (RS- & Bs**1-) or ({Q-} & SIs**1+))
+ & (((Os**1+ or B-) & {@MV+}) or P+ or AF-))})
+;
+אתה: ({{[[R+ & Bs*m2+]]} &
+  (J- or Os*m2- or ({Ss*m2+} & <CLAUSE>) or SIs*m2- or SJls*m2+)}
+% Need to update
+ & {(({Ss*m2-} or (RS- & Bs*m2-) or ({Q-} & SIs*m2+))
+ & (((Os*m2+ or B-) & {@MV+}) or P+ or AF-))})
+;
+את: ({{[[R+ & Bs*f2+]]} &
+  (J- or Os*f2- or ({Ss*f2+} & <CLAUSE>) or SIs*f2- or SJls*f2+)}
+% Need to update
+ & {(({Ss*f2-} or (RS- & Bs*f2-) or ({Q-} & SIs*f2+))
+ & (((Os*f2+ or B-) & {@MV+}) or P+ or AF-))})
+;
+הוא: ({{[[R+ & Bs*m3+]]} &
+  (J- or Os*m3- or ({Ss*m3+} & <CLAUSE>) or SIs*m3- or SJls*m3+)}
+% Need to update
+ & {(({Ss*m3-} or (RS- & Bs*m3-) or ({Q-} & SIs*m3+))
+ & (((Os*m3+ or B-) & {@MV+}) or P+ or AF-))})
+;
+היא: ({{[[R+ & Bs*f3+]]} &
+  (J- or Os*f3- or ({Ss*f3+} & <CLAUSE>) or SIs*f3- or SJls*f3+)}
+% Need to update
+ & {(({Ss*f3-} or (RS- & Bs*f3-) or ({Q-} & SIs*f3+))
+ & (((Os*f3+ or B-) & {@MV+}) or P+ or AF-))})
+;
+אנחנו אנו: ({{[[R+ & Bp**3+]]} &
+  (J- or Op**3- or ({Sp**3+} & <CLAUSE>) or SIp**3- or SJlp**3+)}
+% Need to update
+ & {(({Sp**3-} or (RS- & Bp**3-) or ({Q-} & SIp**3+))
+ & (((Op**3+ or B-) & {@MV+}) or P+ or AF-))})
+;
+אתם: ({{[[R+ & Bp*m2+]]} &
+  (J- or Op*m2- or ({Sp*m2+} & <CLAUSE>) or SIp*m2- or SJlp*m2+)}
+% Need to update
+ & {(({Sp*m2-} or (RS- & Bp*m2-) or ({Q-} & SIp*m2+))
+ & (((Op*m2+ or B-) & {@MV+}) or P+ or AF-))})
+;
+אתן: ({{[[R+ & Bp*f2+]]} &
+  (J- or Op*f2- or ({Sp*f2+} & <CLAUSE>) or SIp*f2- or SJlp*f2+)}
+% Need to update
+ & {(({Sp*f2-} or (RS- & Bp*f2-) or ({Q-} & SIp*f2+))
+ & (((Op*f2+ or B-) & {@MV+}) or P+ or AF-))})
+;
+הם: ({{[[R+ & Bp*m3+]]} &
+  (J- or Op*m3- or ({Sp*m3+} & <CLAUSE>) or SIp*m3- or SJlp*m3+)}
+% Need to update
+ & {(({Sp*m3-} or (RS- & Bp*m3-) or ({Q-} & SIp*m3+))
+ & (((Op*m3+ or B-) & {@MV+}) or P+ or AF-))})
+;
+הן: ({{[[R+ & Bp*f3+]]} &
+  (J- or Op*f3- or ({Sp*f3+} & <CLAUSE>) or SIp*f3- or SJlp*f3+)}
+% Need to update
+ & {(({Sp*f3-} or (RS- & Bp*f3-) or ({Q-} & SIp*f3+))
+ & (((Op*f3+ or B-) & {@MV+}) or P+ or AF-))})
+;
+
+%#this: (J- or O- or (Ss+ & (({@CO-} & {C-}) or R-)) or SIs-) or D*u+;
+%%זה: (J- or O- or ((Ss+ or Os+) & (({@CO-} & Wd- & {C-}) or R-)) or SIs-) or D*u+;
+זה:
+  ((Jd- & D*u- & Os-)
+  or (Jd- & D*u- & {Wd-} & Ss*m*b+)
+  or ((Ss*m*b+ or Os*m+) & <CLAUSE>) or SIs*m*b- or [[Js*m-]] or [Os*m-]
+  or <post-nominal-x>
+  or <costly-null>)
+  or EA-
+  or <noun-and-s>;
+
+זו:
+  ((Jd- & D*u- & Os-)
+  or (Jd- & D*u- & {Wd-} & Ss*f*b+)
+  or ((Ss*f*b+ or Os*f+) & <CLAUSE>) or SIs*f*b- or [[Js*f-]] or [Os*f-]
+  or <post-nominal-x>
+  or <costly-null>)
+  or EA-
+  or <noun-and-s>;
+
+%#these: (J- or O- or (Sp+ & (({@CO-} & {C-}) or R-)) or SIp-) or Dmc+;
+%#those: (Dmc+) or (({P+} or {{C+} & Bp+}) &
+%#(J- or O- or (Sp+ & (({@CO-} & {C-}) or R-)) or SIp- or Xb-));
+%%אלו: (J- or O- or (Sp+ & (({@CO-} & Wd- & {C-}) or R-)) or SIp-) or Dmc+;
+אלו אלה:
+  ((Jd- & D*u- & Op-)
+  or (Jd- & D*u- & {Wd-} & Sp***b+)
+  or ((Sp***b+ or Op**+) & <CLAUSE>) or SIp***b- or [[Jp**-]] or [Op**-]
+  or <post-nominal-x>
+  or <costly-null>)
+  or EA-
+  or <noun-and-p>;
+
+% Demonstrative determiner only - needs a total fix
+%%הללו: (Dmc+) or (({P+} or {{C+} & Bp+}) &
+%%(J- or O- or (Sp+ & (({@CO-} & {C-}) or R-)) or SIp- or Xb-));
+
+%---
+
+%#the: D+;
+% Need both R and B to nouns (to allow the second ה=: הכלב השחור רץ)
+% hence invented here Rb
+ה=: D+ or (Rb- & P+);
+%#a: Ds+;
+
+%#did: ({Q-} & SI+ & I+) or ({@E-} & (S- or
+%#(RS- & B-)) & (((B- or O+) & {@MV+}) or I+));
+%#do: (SIp+ & I+) or ({@E-} & (Sp- or
+%#(RS- & Bp-) or I-) &
+%#(((B- or O+) & {@MV+}) or I+));
+%#does: ({Q-} & SIs+ & I+) or ({@E-} & (Ss- or (RS- & Bs-)) &
+%#(((B- or O+) & {@MV+}) or I+));
+%#done: {@E-} & (Pv- or M- or (PP- & (B- or O+) & {@MV+}));
+%#doing: {@E-} & (Pg- or Mg-) & (O+ or B-) & {@MV+};
+
+%#has: ({Q-} & SIs+ & PP+) or ({@E-} & (Ss- or (RS- & B-)) &
+%#(TO+ or ((B- or O+) & {@MV+}) or PP+));
+%#have: ({Q-} & SIp+ & PP+) or ({@E-} & (Sp- or
+%#(RS- & Bp-) or I-) &
+%#(TO+ or ((B- or O+) & {@MV+})));
+%#had: ({Q-} & SI+ & PP+) or ({@E-} & (S- or (RS- & B-) or PP-) &
+%#(TO+ or ((B- or O+) & {@MV+}) or PP+));
+%#having: {@E-} & (M- or Pg-) & (TO+ or ((B- or O+) & {@MV+}) or PP+);
+
+%#is was: ((Ss- or (RS- & Bs-) or ({Q-} & SIs+))
+%# & (((O+ or B-) & {@MV+}) or P+ or AF-));
+הנו היה: ((Ss- or (RS- & Bs-) or ({Q-} & SIs+))
+ & (((O+ or B-) & {@MV+}) or P+ or AF-));
+%#are were am: ((Sp- or (RS- & Bp-) or ({Q-} &
+%#SIp+)) & (((O+ or B-) & {@MV+}) or P+ or AF-));
+הנם היו הנני: ((Sp- or (RS- & Bp-) or ({Q-} &
+SIp+)) & (((O+ or B-) & {@MV+}) or P+ or AF-));
+%#be: I- & (((O+ or B-) & {@MV+}) or P+ or AF-);
+%#been: PP- & (((O+ or B-) & {@MV+}) or P+ or AF-);
+%#being: {@E-} & (M- or Pg-) & (((O+ or B-) & {@MV+}) or P+ or AF-);
+
+%#will can.v may must could should would might: (({Q-} &
+%#SI+) or S- or (RS- & B-)) & I+;
+
+%VERBS
+
+<MX-PHRASE>: Xd- & (Xc+ or <costly-null>) & (MX*p- or MVg-);
+<OPENER>: {Xd-} & Xc+ & COp+;
+
+% These are the verb-form expressions for ordinary verbs.
+
+% <verb-wall>: these connect to the head verb:
+% WV connects the wall to the head-verb,
+% CV connects the dominating clause to the head verb of the dependent clause.
+% IV connects infinitives to the head-verb
+%<verb-wall>: dWV- or dCV- or dIV- or [[()]];
+<verb-wall>: (); % Not implemented for now for Hebrew
+
+% VERB() arguments:
+% 1: s, p - for singular, plural
+% 2: m, f - gender: male, female
+% 3: 1, 2, 3 - for 1st, 2nd, 3rd person
+
+
+
+%#run come: {@E-} & (Sp- or (RS- & Bp-) or I- or W- or PP-) & {@MV+};
+%%רצים באים הולכים: {@E-} & (Sp- or (RS- & Bp-) or I- or W- or PP-) & {@MV+};
+רצים באים הולכים זזים: ({@E-} & (((Sp*m3- & <verb-wall>) or (RS- & Bp*m3-)) & {@MV+}));
+רצות באות הולכות זזות: ({@E-} & (((Sp*f3- & <verb-wall>) or (RS- & Bp*f3-)) & {@MV+}));
+%#runs comes goes: {@E-} & (Ss- or (RS- & Bs-)) & {@MV+};
+%%רץ רצה בא באה הולך: {@E-} & (Ss- or (RS- & Bs-)) & {@MV+};
+רץ בא הולך זז: ({@E-} & (((Ss*m3- & <verb-wall>) or (RS- & Bs*m3-)) & {@MV+}));
+רצה באה הולכת זזה: ({@E-} & (((Ss*f3- & <verb-wall>) or (RS- & Bs*f3-)) & {@MV+}));
+%%זז: {@E-} & (Ss*m3- or (RS- & Bs*m3-)) & {@MV+};
+%#ran came went: {@E-} & (S- or (RS- & B-)) & {@MV+};
+%#go: {@E-} & (Sp- or (RS- & Bp-) or I-) & {@MV+};
+%#gone: {@E-} & PP- & {@MV+};
+%#going: {@E-} & (Pg- or M-) & {TO+} & {@MV+};
+%#running coming: {@E-} & (Pg- or M-) & {@MV+};
+
+%#talk arrive die:
+%#   {@E-} & (Sp- or (RS- & Bp-) or I-) & {@MV+};
+מדבר מגיע מת:
+   {@E-} & (Sp- or (RS- & Bp-) or I-) & {@MV+};
+%#talks.v arrives dies:
+%#   {@E-} & (Ss- or (RS- & Bs-)) & {@MV+};
+%#talked arrived died:
+%#   {@E-} & (S- or (RS- & B-) or PP-) & {@MV+};
+%#talking arriving dying:
+%#   {@E-} & (Pg- or M-) & {@MV+};
+
+%#see meet chase invite arrest:
+%#   {@E-} & (Sp- or (RS- & Bp-) or I-) & (O+ or B-) & {@MV+};
+%#sees meets chases invites arrests:
+%#   {@E-} & (Ss- or (RS- & Bs-)) & (O+ or B-) & {@MV+};
+%#met chased invited arrested:
+%#{@E-} & (M- or Pv- or ((S- or (RS- & B-) or PP-) & (B- or O+))) & {@MV+};
+פגש רדף הזמין אסר:
+{@E-} & (M- or Pv- or ((S- or (RS- & B-) or PP-) & (B- or O+))) & {@MV+};
+%#saw: {@E-} & (S- or (RS- & B-)) & (B- or O+) & {@MV+};
+%#seen: {@E-} & (Pv- or M- or (PP- & (B- or O+))) & {@MV+};
+%#seeing meeting chasing inviting arresting:
+%#{@E-} & (Pg- or M-) & (O+ or B-) & {@MV+};
+
+%#tell: {@E-} & (Sp- or (RS- & Bp-) or I-) & ((O+ or B-) &
+%#{TH+ or C+ or QI+ or @MV+});
+מספרים: {@E-} & (Sp- or (RS- & Bp-) or I-) & ((O+ or B-) &
+{TH+ or C+ or QI+ or @MV+});
+%#tells: {@E-} & (Ss- or (RS- & Bs-)) & ((O+ or B-) & {TH+ or C+
+%#or QI+ or @MV+});
+מספר: {@E-} & (Ss- or (RS- & Bs-)) & ((O+ or B-) & {TH+ or C+
+or QI+ or @MV+});
+%#told: {@E-} & (M- or Pv- or ((S- or (RS- & B-) or PP-) & (O+ or B-))) &
+%#{TH+ or C+ or QI+ or @MV+};
+%#telling: {@E-} & (Pg- or M-) & ((O+ or B-) & {TH+ or C+ or QI+ or
+%#@MV+});
+
+% END OF VERBS
+
+%#recently sometimes soon gradually specifically generally initially
+%#ultimately already now sadly broadly:
+%#E+ or MV-;
+לאחרונה לפעמים בקרוב בהדרגה במיוחד באופן_כללי בתחילה
+לבסוף כבר עכשיו בעצבות בהרחבה:
+E+ or MV-;
+
+%#from with at against behind between below above
+%#without under for in across through
+%#by out up down along like.p on over into about:
+%#J+ & (Mp- or MV- or Pp-);
+% This doesn't consider the difference between "ב=" with or without a
+% definite article included in it. Trying to do so leads to extremely
+% complex expression (the same for ל= elsewhere here).
+מ= עם ב= מול מאחור בין מלמטה מעל
+בלי מתחת בשביל בתוך עבור מעבר דרך ליד חוץ למעלה למטה לאורך כ= כמו על לתוך בערך:
+J+ & (Mp- or MV- or Pp-);
+
+%#of: J+ & Mp-;
+של: J+ & Mp-;
+
+%#here there: MV- or Mp- or Pp-;
+כאן שם: J- or (MV- or Mp- or Pp-);
+
+%#that: (C+ & TH-)
+%#or Ds+ or (R- & (C+ or RS+)) or SIs- or (Ss+ &
+%#{{@CO-} & {C-}}) or J- or O-;
+ש=: (C+ & TH-)
+or Ds+ or (R- & (C+ or RS+)) or SIs- or (Ss+ &
+{{@CO-} & {C-}}) or J- or O-;
+
+%#to: (I+ & TO-) or ((MV- or Mp- or Pp-) & J+);
+ל=: (I+ & TO-) or ((MV- or Mp- or Pp-) & J+);
+
+%#who: (R- & (C+ or RS+)) or S+ or B+;
+מי: (R- & (C+ or RS+)) or S+ or B+;
+%#what: S+ or B+;
+מה: S+ or B+;
+%#which: (R- & (C+ or RS+)) or S+ or B-;
+איזה: (R- & (C+ or RS+)) or S+ or B-;
+
+%#because unless though although: (C+ & (({Xc+} & CO+) or MV-));
+מפני בגלל מפאת
+אילולי למרות_ש= למרות: (C+ & (({Xc+} & CO+) or MV-));
+%#after before since until: (C+ or J+) & (({Xc+} & CO+) or MV- or Mp-);
+אחרי לפני מאז עד: (C+ or J+) & (({Xc+} & CO+) or MV- or Mp-);
+%#if: C+ & (({Xc+} & CO+) or MV-);
+אם: C+ & (({Xc+} & CO+) or MV-);
+
+%#when: (QI- & C+) or Q+ or (C+ & (({Xc+} & CO+) or MV-));
+כאשר כש=: (QI- & C+) or Q+ or (C+ & (({Xc+} & CO+) or MV-));
+%#where:(QI- & C+) or Q+;
+איפה:(QI- & C+) or Q+;
+%#how:  (QI- & (C+ or EA+)) or Q+ or EA+;
+איך:  (QI- & (C+ or EA+)) or Q+ or EA+;
+
+%#fast slow short long black white big small beautiful ugly tired angry:
+%#  {EA-} & (A- or ((Pa- or AF+) & {@MV+}));
+מהיר אטי קצר ארוך שחור לבן גדול קטן יפה מכוער עייף כועס:
+   {EA-} & (A- or ((Pa- or AF+) & {@MV+}));
+
+%#glad afraid scared.a fortunate unfortunate lucky unlucky certain sure:
+%#{EA-} & (A- or ((Pa- or AF+) & {@MV+} & {C+ or TO+ or TH+}));
+שמח שמחה מפחד מפחדת מפוחד מפוחדת בר_מזל בת_מזל ביש_מזל בטוח בטוחה:
+ {EA-} & (A- or ((Pa- or AF+) & {@MV+} & {C+ or TO+ or TH+}));
+
+%#very: EA+;
+מאד: EA+;
+
+%#but and: MV- & C+;
+אבל ו=: MV- & C+;
+
+",": Xc-;
+
+% No actual definition yet - defined here because they appear as possible
+% prefixes in 4.0.affix.
+לכש= ככ= מב= מל= מש=: ();
+
+% prefix stripping tests
+שכבה כבה בה: ();
+
+% With the following line in the dictionary, the parser will simply
+% skip over (null-link) unknown words. If you remove it, the parser
+% will output an error for any unknown words.
+UNKNOWN-WORD: XXX+;

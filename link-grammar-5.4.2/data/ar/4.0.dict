@@ -1,0 +1,278 @@
+%                     Arabic Link Grammar Parser
+%
+% Copyright (c) 2006 Warren Casbeer and Jon Dehdari
+%
+% Dictionary version number is 5.0.1 (formatted as V5v0v1+)
+<dictionary-version-number>: V5v0v1+;
+<dictionary-locale>: C+; % Only the English alphabet is in use here
+
+
+% Link Types:  [Forms in brackets roughly equate with English Link Grammar]
+% A         Adj's [A]
+% AUX       Aspectual/Tense verb [To/Pg]
+% C         Complementizer [TH]
+% CC        Coordinating Conjunction
+% CCO       Coordinating Object
+% CCS       Coordinating Subject
+% CCV       Coordinating Verbs
+% COMPARE   Comparative constructions [MV*]
+% D         Determiner [D]
+% G         Proper nouns [G]
+% IV_PRE    Imperf. Verb prefix
+% IV_SUFF   Imperf. Verb suffix
+% NEG       Negation [N]
+% NUMB      Number [Dn]
+% NPOSS     Possesive Morpheme (for now)
+% O         Object [O]
+% P         Preposition [MVp]
+% p         pronouns [p]
+% PO        Object of Prep [J]
+% QO        Object of Quantifier [J]
+% REL       Relative clauses [R]
+% S         Subject [S]
+% n         nouns [n]
+
+
+% Nouns
+
+<noun-idafa>:
+{NSUFFINDEF+} & GEN+ & {@A+}	% Head of Idafa construct (1st position)
+;
+
+<noun-local>:
+( {Dal- or NPOSS+ or NSUFFINDEF+}
+%  & {NUMB-} % this rule is on probation
+  & {A+}
+);
+
+<noun-modify>:
+{REL+ or [P+]}
+;
+
+<noun-common>:
+(
+    GEN-	% 2nd term of Idafa construct
+    or Sn-	% Subject
+    or CCSr-	% Conjunction Subject
+    or CCSL+	% Conjunction Subject
+    or On-	% Object
+    or CCOr-	% Conjunction Object
+    or CCOL+	% Conjunction Object
+    or PO-	% Object of preposition
+    or CCPOr-	% Conjunction Object of Prep
+    or CCPOL+	% Conjunction Object of Prep
+    or QO-	% Object of Quantifier
+    or CCQOr-	% Conjunction Object of Quantifier
+    or CCQOL+	% Conjunction Object of Quantifier
+    or (
+    {C-}
+    & [[O+]] 	% Copula Subject
+    )
+);
+
+
+/ar/words/words.n /ar/words/words.noun /ar/words/words.Ndip /ar/words/words.N0 /ar/words/words.years UNKNOWN-WORD.n : (<noun-local> or <noun-idafa>) & <noun-modify> & <noun-common>;
+/ar/words/words.Ndu        : {NSUFFPLd+}   & (<noun-local> or <noun-idafa>) & <noun-modify> & <noun-common>;
+/ar/words/words.Nap        : NSUFFFEMsg+   & (<noun-local> or <noun-idafa>) & <noun-modify> & <noun-common>;
+/ar/words/words.NAt        : NSUFFFEMpl+   & (<noun-local> or <noun-idafa>) & <noun-modify> & <noun-common>;
+/ar/words/words.NapAt      : NSUFFFEM+     & (<noun-local> or <noun-idafa>) & <noun-modify> & <noun-common>;
+/ar/words/words.Napdu      : (NSUFFFEMsg+ or NSUFFPL+)    & (<noun-local> or <noun-idafa>) & <noun-modify> & <noun-common>;
+/ar/words/words.NduAt      : {NSUFFPLd+   or NSUFFFEMpl+} & (<noun-local> or <noun-idafa>) & <noun-modify> & <noun-common>;
+/ar/words/words.Nall       : (NSUFFFEM+ or NSUFFPL+) & (<noun-local> or <noun-idafa>) & <noun-modify> & <noun-common>;
+/ar/words/words.N_slash_ap : {NSUFFPLd+ or NSUFFFEMsg+ or NSUFFFEMpl+} & (<noun-local> or <noun-idafa>) & <noun-modify> & <noun-common>;
+
+/ar/words/words.Nprop /ar/words/words.noun_prop UNKNOWN-WORD.Nprop:
+(({G+} & <noun-local> & <noun-modify> & <noun-common>) or (G- & {G+}));	% Proper nouns
+
+% Quantifiers
+"kl.quant" "kul~.quant" "bED.quant" "baEoD.quant" ">y.quant" :
+(<noun-modify> or QO+) & <noun-common>;
+
+% Numbers
+/ar/words/words.numbers :
+{NSUFFFEMsg+} & (<noun-modify> or {QO+}) & <noun-common>;
+
+
+%% Nominal Plural Suffixes
+"iyn.NPL" "yn.NPL" : NSUFFPL-;
+"ayn.NPL":           NSUFFPLd-;
+
+%% Nominal Feminine Suffixes
+"ap.NSUFFFEMSG" "p.NSUFFFEMSG": NSUFFFEMsg-;
+"At.NSUFFFEMPL": NSUFFFEMpl-;
+
+
+% Pronouns
+%% Personal Pronouns
+"hw.PRON3MS" "huwa.PRON3MS" "hy.PRON3FS" "hiya.PRON3FS" ">nt.PRON2S" "Ant.PRON2S" ">anota.PRON2MS" ">anoti.PRON2FS" ">nA.PRON1S" "AnA.PRON1S" ">anA.PRON1S" "hm.PRON3MP" "hum.PRON3MP" "hn.PRON3FP" "hun~a.PRON3FP" ">ntm.PRON2MP" "Antm.PRON2MP" ">anotum.PRON2MP" ">ntn.PRON2FP" "Antn.PRON2FP" ">anotun~a.PRON2FP" "nHn.PRON1P" "naHonu.PRON1P" "hmA.PRON3D" "humA.PRON3D" ">ntmA.PRON2D" "AntmA.PRON2D" ">anotumA.PRON2D" :
+(
+(Sp- or CCSr- or CCSL+)
+or [PO- or CCPOr- or CCPOL+]  % Object of a Preposition
+or [QO- or CCQOr- or CCQOL+]  % Object of a Quantifier
+or (
+    {C-}
+    & O+	% Copula Subject
+   )
+);
+
+%% Demonstrative Pronouns
+"h*A.DEMPRONMS" "h`*A.DEMPRONMS" "h*h.DEMPRONF" "h`*h.DEMPRONF" "h`*ihi.DEMPRONF" "h*y.DEMPRONF" "h`*iy.DEMPRONF" "hAth.DEMPRONF" "hAtihi.DEMPRONF" "h*An.DEMPRONMD" "h`*Ani.DEMPRONMD" "h*yn.DEMPRONMD" "h`*ayoni.DEMPRONMD" "hAtAn.DEMPRONFD" "hAtAni.DEMPRONFD" "hAtyn.DEMPRONFD" "hAtayoni.DEMPRONFD" "h&lA'.DEMPRONMP" "h`&ulA'i.DEMPRONMP" "hwlA'.DEMPRONMP" :
+Ddp+;
+
+
+%% Nominal Possesive morphemes
+"h.NSUFF" "hu.NSUFF" "hmA.NSUFF" "humA.NSUFF" "hm.NSUFF" "hum.NSUFF" "hA.NSUFF" "hn.NSUFF" "hn~a.NSUFF" "k.NSUFF" "ka.NSUFF" "ki.NSUFF" "kmA.NSUFF" "kumA.NSUFF" "km.NSUFF" "kum.NSUFF" "kn.NSUFF" "kun~a.NSUFF" "y.NSUFF" "iy.NSUFF" "nA.NSUFF": 
+NPOSS-;
+
+
+
+
+% Dets
+"Al.d": {Ddp-} & Dal+;
+
+
+
+% Adjs
+/ar/words/words.adj :
+{NSUFFFEMsg+}
+& {Dal-}
+& (
+    A-	% Attributive adjectives
+    or
+    ({COMPARE+} & Oa-)	% Predicate adjectives, linking with Copula subject
+   )
+;
+
+
+% Comparatives
+"mn.compare" "min.compare":
+COMPARE- & (PO+ or CCPOBJ+ or [C+]);
+
+% Preps
+/ar/words/words.prep : (P- or [P+] or QO-) & (PO+ or CCPOBJ+);
+
+
+
+% Verbs
+<adjunct>:
+(
+  ( {@P+} & {@ADV+} )
+or
+  ( {@ADV+} & {@P+} )
+)
+;
+
+%% Perfect Verbs
+/ar/words/words.PV /ar/words/words.PV_V /ar/words/words.PV_C /ar/words/words.PV_Atn /ar/words/words.PV_0 UNKNOWN-WORD.PV :
+{PVSUFFSUBJ+} & {NEGp-} & {C- or CCVr-} & ((VSUFFDO+ & {S+ or CCSUBJ+}) or ({S+ or CCSUBJ+} & [<adjunct>] & {[O+ or CCOBJ+]})) & <adjunct> & {SUB+ or CCVl+}; 
+
+%% Intransitive Perfect Verbs
+/ar/words/words.PV_intr :
+{PVSUFFSUBJ+} & {NEGp-} & {C- or CCVr-} & {S+ or CCSUBJ+} & <adjunct> & {SUB+ or CCVl+}; 
+
+%% Aspectual Intransitive Perfect Verbs
+"kAn.AspPVintr" "bd>.AspPVintr" :
+{PVSUFFSUBJ+} & {NEGp-} & {C- or CCVr-} & {AUXasp+ or S+ or CCSUBJ+} & <adjunct> & {SUB+ or CCVl+};
+
+%% Tense markers
+"qd.PVtense":
+AUXpast+;
+"s.IVtense":
+AUXfut+;
+
+%%% Perfect Verb Suffixes
+"t.PVSUFFSUBJ" "at.PVSUFFSUBJ" "tu.PVSUFFSUBJ" "ta.PVSUFFSUBJ" "ti.PVSUFFSUBJ" "tmA.PVSUFFSUBJ" "tumA.PVSUFFSUBJ" "tm.PVSUFFSUBJ" "tum.PVSUFFSUBJ" "tn.PVSUFFSUBJ" "tun~a.PVSUFFSUBJ" "n.PVSUFFSUBJ" "na.PVSUFFSUBJ" "nA.PVSUFFSUBJ" "wA.PVSUFFSUBJ" "uwA.PVSUFFSUBJ" :
+PVSUFFSUBJ-;
+
+%% Imperfect Verbs
+/ar/words/words.IV /ar/words/words.IV_yu /ar/words/words.IV_0 UNKNOWN-WORD.IV :
+IVPRE- & {NEGi- or AUX-} & {C- or CCVr-} & {IVSUFFSUBJ+} & (({VSUFFDO+} & {S+ or CCSUBJ+}) or ({S+ or CCSUBJ+} & [<adjunct>] )) & {[O+ or CCOBJ+]} & <adjunct> & {SUB+ or CCVl+} ;
+
+%% Intransitive Imperfect Verbs
+/ar/words/words.IV_intr :
+IVPRE- & {NEGi- or AUX-} & {C- or CCVr-} & {IVSUFFSUBJ+} & {S+ or CCSUBJ+} & <adjunct> & {SUB+ or CCVl+} ;
+
+%% Possessive Construct
+"l.POSS" "li.POSS" "mE.POSS" "maE.POSS" :
+{NEGi- or AUX-} & {C- or CCVr-} & {NPOSS+} & {S+ or CCSUBJ+} & <adjunct>;
+
+%%% Imperfect Verb Prefixes
+"y.IV3MS" "ya.IV3MS" "yu.IV3MS" "t.IVS" "ta.IV3FS" "tu.IV2MS" ">.IV1S" ">a.IV1S" "n.IV1P" "na.IV1P":
+IVPRE+;
+%%% Imperfect Verb Suffixes
+"yn.IVSUFFSUBJ" "iyna.IVSUFFSUBJ" "wn.IVSUFFSUBJ" "uwna.IVSUFFSUBJ" "n.IVSUFFSUBJ" "na.IVSUFFSUBJ" :
+IVSUFFSUBJ-;
+
+%% Verb Direct Object Enclitics
+"h.VSUFFDO" "hu.VSUFFDO" "hmA.VSUFFDO" "humA.VSUFFDO" "hm.VSUFFDO"
+"hum.VSUFFDO" "hA.VSUFFDO" "hn.VSUFFDO" "hun~a.VSUFFDO" "k.VSUFFDO"
+"ka.VSUFFDO" "ki.VSUFFDO" "kmA.VSUFFDO" "kumA.VSUFFDO" "km.VSUFFDO"
+"kum.VSUFFDO" "kn.VSUFFDO" "kun~a.VSUFFDO" "ny.VSUFFDO" "niy.VSUFFDO"
+"nA.VSUFFDO":
+  VSUFFDO- or PO- or QO-;
+
+
+% Etc. grammatical words
+
+%% Adverbs
+/ar/words/words.adv:
+AVSUFF+ & ([ADV+] or ADV-);
+
+"AF.suff":
+AVSUFF- or NSUFFINDEF-;
+
+%% Negation
+"lA.neg" "lan.neg" "ln.neg" "lam.neg" "lm.neg": NEGi+;
+"mA.neg": NEGp+;
+
+%% Relativizers - mA??
+"Al*y.RELPRON" "Al~a*iy.RELPRON" "Alty.RELPRON" "Al~atiy.RELPRON" "All*An.RELPRON" "All~a*Ani.RELPRON" "All*yn.RELPRON" "All~a*ayoni.RELPRON" "AlltAn.RELPRON" "All~atAni.RELPRON" "Alltyn.RELPRON" "All~atayoni.RELPRON" "Al*yn.RELPRON" "Al~a*iyna.RELPRON" "AllAty.RELPRON" "All~Atiy.RELPRON" "AllwAty.RELPRON" "All~awAtiy.RELPRON" "AlltyA.RELPRON" "All~utay~A.RELPRON" ">yn.RELPRON" "Ayn.RELPRON" :
+REL- & Crel+;
+
+%% Complementizers
+"An.comp" ">n.comp" ">an.comp" ">an~.comp" ">an~a.comp" "lAn.com" "l>n.comp" "mA.comp":
+{PO-} & SUB- & Csub+;
+
+%% Coordination
+"w.conj" "wa.conj" ">w.conj" "Aw.conj" ">aw.conj" "lkn.conj"
+"l`kin.conj" "l`kin~a.conj" "f.conj" "fa.conj" "bl.conj" 
+"bal.conj" "bEdmA.conj" "baEodamA.conj" "byd.conj" "bayoda.conj"
+"bynmA.conj" "bayonamA.conj" "HsbmA.conj" "HasobamA.conj" "HAlmA.conj"
+"HAlamA.conj" "Hyv.conj" "Hayovu.conj" "HyvmA.conj" "HayovumA.conj"
+"HynmA.conj" "HiynamA.conj" "ryvmA.conj" "rayovamA.conj" "TAlmA.conj"
+"TAlamA.conj" "EndmA.conj" "EinodamA.conj" "fymA.conj" "fiymA.conj"
+"qblmA.conj" "qabolamA.conj" "klmA.conj" "kul~amA.conj" "kmA.conj"
+"kamA.conj" "lky.conj" "likay.conj" "kymA.conj" "kayomA.conj"
+"mAlm.conj" "mAlam.conj" "lw.conj" "law.conj" "mn*.conj" "muno*u.conj"
+"<*A.conj" "A*A.conj" "<i*A.conj" ">yD.conj" :
+%{COMMA-} &
+%Wdc+ or  % for sentence-initial conjunctions
+( % Multiple Verbs
+ CCVr+
+ & {CCVl-}
+)
+or
+( % Multiple Subjects
+ CCSr+
+ & CCSL-
+ & (CCS- or CCSUBJ-)
+)
+or 
+( % Multiple Objects
+ CCOr+
+ & CCOL-
+ & (CCO- or CCOBJ-)
+)
+or 
+( % Multiple Objects of a Preposition
+ CCPOr+
+ & CCPOL-
+ & (CCPO- or CCPOBJ-)
+)
+or 
+( % Multiple Objects of a Quantifier
+ CCQOr+
+ & CCQOL-
+ & (CCQO- or CCQOBJ-)
+)
+;

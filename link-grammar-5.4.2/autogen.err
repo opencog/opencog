@@ -1,0 +1,11 @@
+configure.ac:41: installing './compile'
+configure.ac:28: installing './missing'
+bindings/java-jni/Makefile.am: installing './depcomp'
+link-grammar/corpus/Makefile.am:42: warning: variable 'cluster_pop_SOURCES' is defined but no program or
+link-grammar/corpus/Makefile.am:42: library has 'cluster_pop' as canonical name (possible typo)
+link-grammar/corpus/Makefile.am:46: warning: variable 'sniff_SOURCES' is defined but no program or
+link-grammar/corpus/Makefile.am:46: library has 'sniff' as canonical name (possible typo)
+link-grammar/corpus/Makefile.am:43: warning: variable 'cluster_pop_LDADD' is defined but no program or
+link-grammar/corpus/Makefile.am:43: library has 'cluster_pop' as canonical name (possible typo)
+link-grammar/corpus/Makefile.am:47: warning: variable 'sniff_LDADD' is defined but no program or
+link-grammar/corpus/Makefile.am:47: library has 'sniff' as canonical name (possible typo)

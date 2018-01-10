@@ -1,0 +1,167 @@
+ %***************************************************************************%
+ %                                                                           %
+ %       Copyright (C) 2014  Hendy Irawan                                    %
+ %                                                                           %
+ %       http://www.abisource.com/projects/link-grammar/                     %
+ %       https://github.com/ceefour/link-grammar-id                          %
+ %                                                                           %
+ %***************************************************************************%
+
+% Dictionary version number is 5.2.1 (formatted as V5v2v1+)
+<dictionary-version-number>: V5v2v1+;
+<dictionary-locale>: ID4id+;
+
+anjing kucing wanita cewek pria cowok lelaki laki-laki taman lapangan tulang
+tetangga toko jalan burung palu hidung pesta teman rumah film sinetron kakak adik
+saudara saudari warung murid tes ujian:
+ {@A-} & Ds- & {@M+ or (R+ & Bs+)} & 
+ (J- or Os- or (Ss+ & (({@CO-} & {C-}) or R-)) or SIs-);
+
+anjing-anjing kucing-kucing cewek-cewek wanita-wanita pria-pria cowok-cowok
+taman-taman lapangan-lapangan tulang-tulang tulang-belulang tetangga-tetangga
+toko-toko jalan-jalan burung-burung palu-palu hidung-hidung pesta-pesta
+teman-teman rumah-rumah film-film sinetron-sinetron kakak-kakak adik-adik
+saudara-saudara saudari-saudari saudara-saudari warung-warung murid-murid
+tes-tes ujian-ujian perang-perang "musim-dingin-musim-dingin" aksi-aksi
+hukum-hukum kesuksesan-kesuksesan:
+{@A-} & {Dmc-} & {@M+ or (R+ & Bp+)} & 
+ (J- or Op- or (Sp+ & (({@CO-} & {C-}) or R-)) or SIp-);
+
+air kemarahan uang politik masalah:
+{@A-} & {Dmu-} & {@M+ or (R+ & Bs+)} & 
+(J- or Os- or (Ss+ & (({@CO-} & {C-}) or R-)) or SIs-);
+
+hukum "musim-dingin" aksi perang sukses:
+{@A-} & {D*u-} & {@M+ or (R+ & Bs+)} & 
+(J- or Os- or (Ss+ & (({@CO-} & {C-}) or R-)) or SIs-);
+
+CAPITALIZED-WORDS: J- or O- or (S+ & (({@CO-} & {C-}) or R-)) or SI-;
+
+dia ia: (Ss+ & (({@CO-} & {C-}) or R-)) or SIs-;
+aku saya dia mereka kami kita: J- or O-;
+dia ia: D+ or J- or O-;
+saya aku kamu mereka kami kita: D+;
+dia ia: D+;
+
+kamu mereka kami kita saya aku: J- or O- or (Sp+ & (({@CO-} & {C-}) or R-)) or SIp-;
+dia ia: J- or O- or (Ss+ & (({@CO-} & {C-}) or R-)) or SIs-;
+
+ini: (J- or O- or (Ss+ & (({@CO-} & {C-}) or R-)) or SIs-) or D*u+;
+ini: (J- or O- or (Sp+ & (({@CO-} & {C-}) or R-)) or SIp-) or Dmc+;
+itu: (Dmc+) or (({P+} or {{C+} & Bp+}) &
+(J- or O- or (Sp+ & (({@CO-} & {C-}) or R-)) or SIp- or Xb-));
+sebuah si sang: D+;
+sebuah: Ds+;
+
+melakukan berbuat: ({Q-} & SI+ & I+) or ({@E-} & (S- or 
+(RS- & B-)) & (((B- or O+) & {@MV+}) or I+));
+melakukan berbuat: (SIp+ & I+) or ({@E-} & (Sp- or 
+(RS- & Bp-) or I-) &
+(((B- or O+) & {@MV+}) or I+));
+melakukan berbuat: ({Q-} & SIs+ & I+) or ({@E-} & (Ss- or (RS- & Bs-)) &
+(((B- or O+) & {@MV+}) or I+));
+"telah-melakukan": {@E-} & (Pv- or M- or (PP- & (B- or O+) & {@MV+}));
+"sedang-melakukan": {@E-} & (Pg- or Mg-) & (O+ or B-) & {@MV+};
+
+telah sudah: ({Q-} & SIs+ & PP+) or ({@E-} & (Ss- or (RS- & B-)) &
+(TO+ or ((B- or O+) & {@MV+}) or PP+));
+telah sudah: ({Q-} & SIp+ & PP+) or ({@E-} & (Sp- or
+(RS- & Bp-) or I-) &
+(TO+ or ((B- or O+) & {@MV+})));
+telah sudah: ({Q-} & SI+ & PP+) or ({@E-} & (S- or (RS- & B-) or PP-) &
+(TO+ or ((B- or O+) & {@MV+}) or PP+));
+telah sudah: {@E-} & (M- or Pg-) & (TO+ or ((B- or O+) & {@MV+}) or PP+);
+
+adalah ialah yaitu: ((Ss- or (RS- & Bs-) or ({Q-} & SIs+))
+ & (((O+ or B-) & {@MV+}) or P+ or AF-));
+adalah ialah yaitu: ((Sp- or (RS- & Bp-) or ({Q-} &
+SIp+)) & (((O+ or B-) & {@MV+}) or P+ or AF-));
+adalah ialah yaitu: I- & (((O+ or B-) & {@MV+}) or P+ or AF-);
+adalah ialah yaitu: PP- & (((O+ or B-) & {@MV+}) or P+ or AF-);
+adalah ialah yaitu: {@E-} & (M- or Pg-) & (((O+ or B-) & {@MV+}) or P+ or AF-);
+
+akan dapat.v bisa.v harus seharusnya sebaiknya mungkin: (({Q-} & 
+SI+) or S- or (RS- & B-)) & I+;
+
+lari datang: {@E-} & (Sp- or (RS- & Bp-) or I- or W- or PP-) & {@MV+};
+lari datang pergi: {@E-} & (Ss- or (RS- & Bs-)) & {@MV+};
+lari datang pergi: {@E-} & (S- or (RS- & B-)) & {@MV+};
+pergi: {@E-} & (Sp- or (RS- & Bp-) or I-) & {@MV+};
+pergi: {@E-} & PP- & {@MV+};
+pergi: {@E-} & (Pg- or M-) & {TO+} & {@MV+};
+lari datang: {@E-} & (Pg- or M-) & {@MV+};
+
+bicara.v berbicara.v ngomong.v datang mati meninggal "meninggal-dunia" wafat tewas:
+   {@E-} & (Sp- or (RS- & Bp-) or I-) & {@MV+};
+bicara.v berbicara.v ngomong.v datang mati meninggal "meninggal-dunia" wafat tewas:
+   {@E-} & (Ss- or (RS- & Bs-)) & {@MV+};
+bicara.v berbicara.v ngomong.v datang mati meninggal "meninggal-dunia" wafat tewas:
+   {@E-} & (S- or (RS- & B-) or PP-) & {@MV+};
+bicara.v berbicara.v ngomong.v datang berdatangan mati meninggal "meninggal-dunia" wafat tewas:
+   {@E-} & (Pg- or M-) & {@MV+};
+
+lihat melihat ketemu bertemu menemui kejar mengejar undang mengundang menangkap:
+   {@E-} & (Sp- or (RS- & Bp-) or I-) & (O+ or B-) & {@MV+};
+lihat melihat ketemu bertemu menemui kejar mengejar undang mengundang menangkap:
+   {@E-} & (Ss- or (RS- & Bs-)) & (O+ or B-) & {@MV+};
+lihat melihat ketemu bertemu menemui kejar mengejar undang mengundang menangkap:
+{@E-} & (M- or Pv- or ((S- or (RS- & B-) or PP-) & (B- or O+))) & {@MV+};
+lihat melihat: {@E-} & (S- or (RS- & B-)) & (B- or O+) & {@MV+};
+lihat melihat: {@E-} & (Pv- or M- or (PP- & (B- or O+))) & {@MV+};
+lihat melihat ketemu bertemu menemui kejar mengejar undang mengundang menangkap:
+{@E-} & (Pg- or M-) & (O+ or B-) & {@MV+};
+
+bilang memberitahu menyampaikan: {@E-} & (Sp- or (RS- & Bp-) or I-) & ((O+ or B-) &
+{TH+ or C+ or QI+ or @MV+});
+bilang memberitahu menyampaikan: {@E-} & (Ss- or (RS- & Bs-)) & ((O+ or B-) & {TH+ or C+ 
+or QI+ or @MV+});
+bilang memberitahu menyampaikan: {@E-} & (M- or Pv- or ((S- or (RS- & B-) or PP-) & (O+ or B-))) &
+{TH+ or C+ or QI+ or @MV+};
+bilang memberitahu menyampaikan: {@E-} & (Pg- or M-) & ((O+ or B-) & {TH+ or C+ or QI+ or
+@MV+});
+
+"akhir-akhir-ini" "barusan" "baru-saja" kadang-kadang "sebentar-lagi" "sesaat-lagi"
+bertahap "secara-spesifik" "secara-umum" "awalnya" "nantinya" "akhirnya" "sudah"
+sekarang "sedihnya" umumnya:
+E+ or MV-;
+
+dari sambil di ke "di-belakang" antara "di-antara" "di-bawah" "di-atas"
+tanpa untuk "di-seberang" "ke-atas" "ke-bawah" sembari sekitar
+"ke-dalam" "di-dalam" sekira oleh:
+J+ & (Mp- or MV- or Pp-);
+
+oleh: J+ & Mp-;
+
+"di-sini" "di-sana": MV- or Mp- or Pp-;
+
+yang: (C+ & TH-) or Ds+ or (R- & (C+ or RS+)) or SIs- or (Ss+ & {{@CO-} & {C-}}) or J- or O-;
+
+ke: (I+ & TO-) or ((MV- or Mp- or Pp-) & J+);
+
+siapa: (R- & (C+ or RS+)) or S+ or B+;
+apa: S+ or B+;
+yang "di-mana": (R- & (C+ or RS+)) or S+ or B-;
+
+karena kecuali meski tapi tetapi namun meskipun "meski-pun" walau walaupun "walau-pun":
+  (C+ & (({Xc+} & CO+) or MV-));
+setelah sebelum sesudah sejak sampai: (C+ or J+) & (({Xc+} & CO+) or MV- or Mp-);
+jika bila andai: C+ & (({Xc+} & CO+) or MV-);
+
+kapan: (QI- & C+) or Q+ or (C+ & (({Xc+} & CO+) or MV-));
+"di-mana":(QI- & C+) or Q+;
+bagaimana gimana:  (QI- & (C+ or EA+)) or Q+ or EA+;
+
+cepat lambat tangkas pendek panjang hitam putih besar kecil cantik tampan rupawan
+jelek capek payah lelah marah:
+   {EA-} & (A+ or ((Pa- or AF+) & {@MV+}));
+
+lega takut ketakutan.a beruntung untung mujur sial yakin:
+{EA-} & (A+ or ((Pa- or AF+) & {@MV+} & {C+ or TO+ or TH+}));
+
+sangat amat: EA+;
+sekali banget bingit: EA-;
+
+tapi tetapi namun meski meskipun "meski-pun" walau walaupun "walau-pun" dan: MV- & C+;
+
+",": Xc-;
+

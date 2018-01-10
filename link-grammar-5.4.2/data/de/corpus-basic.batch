@@ -1,0 +1,31 @@
+
+% Miscellaneous test sentences that actually work...
+% The German dict is very small, so most German sentences fail completely.
+
+Dies ist den Traum
+Dies ist einen Traum
+Dies ist deinen Traum
+
+Der Hund jagte ihn durch den Park
+Der grosse Hund jagte ihn durch den Park
+*Der gross Hund jagte ihn durch den Park
+*Der grossen Hund jagte ihn durch den Park
+*Der grosser Hund jagte ihn durch den Park
+*Der grosses Hund jagte ihn durch den Park
+*Der grossem Hund jagte ihn durch den Park
+Eine grosse Katze jagte ihn durch den Park
+
+
+Die Schuhe sind alt
+Die Schuhe sind teuer
+
+Das ist einen großen Hund
+Dies ist ein großes Auto
+% großer großem
+
+Sah er einen großen schwarzen Hund. 
+Der Hund war sehr gross.
+Johan hatte Angst.
+Der Hund und die Katze ging.
+
+

@@ -1,0 +1,525 @@
+
+ %***************************************************************************%
+ %                                                                           %
+ %       Copyright (C) 1991-1998  Daniel Sleator and Davy Temperley          %
+ %                                                                           %
+ %  See file "README" for information about commercial use of this system    %
+ %                                                                           %
+ %***************************************************************************%
+
+% Dictionary version number is 5.0.2 (formatted as V5v0v2+)
+<dictionary-version-number>: V5v0v2+;
+<dictionary-locale>: DE4de+;
+
+% NOUNS, PRONOUNS
+
+% Masculine singular
+Hund.n Mann.n Brief.n Stein.n Freund.n Koenig.n Punkt.n Schuh.n Mond.n Ball.n Markt.n Frosch.n
+Hof.n Rock.n Sohn.n Baum.n Traum.n Arzt.n Satz.n Monat.n Bericht.n Erfolg.n Versuch.n
+Professor.n Doktor.n Staat.n Junge.n Bauer.n Nachbar.n Name.n Lehrer.s Vater.n Bruder.n
+Schlussel.s Vogel.n Apfel.n Garten.n Tag.n Park.n: 
+  {GE+} & {Rm+ or @M+} & {@MX+} & (
+    ((({@Ae-} & Dnmd-) or ({@Ar-} & Dnmi-)) & (Ss+ or SIs- or (Xd- & Xc+ & MX-) or SJr- or SJl+))
+    or ({@An-} & Dam- & (O- or J*a- or B+))
+    or ({@An-} & Ddm- & (J*d- or JB+)));
+
+% Feminine singular
+Katze.n Frau.n Hand.n Bank.n Nacht.n Stadt.n Wand.n Wurst.n Form.n
+Bahn.n Uhr.n Zahl.n Zeit.n Ansicht.n Gestalt.n Krankheit.n Bibliothek.n 
+Blume.n Ecke.n Farbe.n Geige.n Karte.n Kueche.n Nase.n Reise.n Sache.n Strasse.n Woche.n
+Regel.n Schwester.n Tochter.n Mutter.n Tuer.n Geschichte.n: 
+  {GE+} & {Rf+ or @M+} & {@MX+} & (
+    ({@Ae-} & Dnf- & (Ss+ or SIs- or O- or B+ or J*a- or (Xd- & Xc+ & MX-) or SJr- or SJl+))
+    or ({@An-} & Ddf- & (J*d- or JB+))
+    or ({@An-} & Dgf- & GE-));
+
+% Neuter singular
+Maedchen.s Haus.n Jahr.n Bein.n Stueck.n Teil.n Geschenk.n Geschaeft.n Papier.n 
+Glas.n Land.n Wort.n Buch.n Bild.n Kind.n Bett.n Auge.n Ende.n Buero.n Auto.n Kino.n
+Fenster.s Messer.s Verbrechen.s Halsband.n: 
+  {GE+} & {Rn+ or @M+} & {@MX+} & (
+    ((({@Ae-} & Dnnd-) or ({@As-} & Dnni-)) 
+       & (Ss+ or SIs- or O- or J*a- or B+ or (Xd- & Xc+ & MX-) or SJr- or SJl+))
+    or ({@An-} & Ddn- & (J*d- or JB+)));
+
+% Masculine genitive
+Hundes.n Mannes.n Briefes.n Steines.n Freundes.n Koeniges.n Punktes.n Schuhes.n Mondes.n
+Balles.n Marktes.n Frosches.n Hofes.n Rockes.n Sohnes.n Baumes.n Traumes.n Arztes.n 
+Satzes.n Monates.n Berichtes.n Erfolges.n Versuches.n
+Professores.n Doktors.n Staates.n Junges.n Bauern.s Nachbares.n Names.n Lehrers.s
+Vaters.n Bruders.n Schlusseles.s Vogeles.n Apfeles.n Gartenes.n Tages.n Parkes.n:
+  {GE+} & {Rn+ or @M+} & {@MX+} & {@An-} & Dgm- & GE-;
+
+% Neuter genitive
+Maedchenes.s Hauses.n Jahres.n Beines.n Stueckes.n Teiles.n Geschenkes.n
+Geschaeftes.n Papieres.n
+Glases.n Landes.n Wortes.n Buches.n Bildes.n Kindes.n Bettes.n Auges.n Endes.n
+Bueros.s Autos.s Kinos.s
+Fensters.n Messers.n Verbrechenes.n: 
+  {GE+} & {Rn+ or @M+} & {@MX+} & {@An-} & Dgn- & GE-;
+
+% Plural
+Maenner.n Hunde.n Katzen.n Frauen.n Hauser.n Maedchenen.n Briefe.n Steine.n Freunde.n Koenige.n
+Punkte.n Schuhe.n Monde.n Baelle.n Maerkte.n Froesche.n Hoefe.n Roecke.n Soehne.n Baeume.n
+Traeume.n Aerzte.n Saetze.n Monate.n Berichte.n Erfolge.n Versuche.n Professoren.n
+Doktoren.n Staaten.n Jungen.n Bauern.p Nachbarn.n Namen.n Lehrer.p Vaeter.n Brueder.n
+Schlussel.p Voegel.n Aepfel.n Gaerten.n
+Haende.n Baenke.n Naechte.n Staedte.n Waende.n Wuerste.n Kuenste.n 
+Banken.n Formen.n Bahnen.n Uhren.n Zahlen.n Zeiten.n Ansichten.n
+Gestalten.n Krankheiten.n Bibliotheken.n
+Blumen.n Ecken.n Farben.n Geigen.n Karten.n Kuechen.n Nasen.n Reisen.n Sachen.n Strassen.n
+Wochen.n Regeln.n Schwestern.n Toechter.n Muetter.n
+Jahre.n Beine.n Stuecke.n Teile.n Geschenke.n Geschaefte.n Papiere.n
+Glaeser.n Laender.n Woerter.n Buecher.n Bilder.n Gelder.n Kinder.n Betten.n Augen.n Enden.n
+Bueros.p Autos.p Kinos.p Fenster.p Messer.p Verbrechen.p Maedchen.p
+Tagen.n Parke.n Tueren.n Halsbaender.n Geschichten.n: 
+  {GE+} & {Rp+ or @M+} & {@MX+} & {@An-} & (
+    (Dnp- & (Sp+ or SIp- or O- or J*a- or B+ or (Xd- & Xc+ & MX-) or SJr- or SJl+))
+    or (Ddp- & (J*d- or JB+))
+    or (Dgp- & GE-));
+
+%Masculine mass
+Kaese.n:
+  {GE+} & {Rm+ or @M+} & {@MX+} & (
+    (((({@Ae-} & Dnmd-) or ({@Ar-} & {Dnmi- or Dm-}))) & (Ss+ or SIs- or (Xd- & Xc+ & MX-)))
+    or (({@An-} & {Dam- or Dm-}) & (O- or J*a- or B+))
+    or ((({@An-} & Ddm-) or ({@Am-} & {Dm-})) & (J*d- or JB+)));
+
+%Feminine mass
+Arbeit.n Luft.n Milch.n:
+  {GE+} & {Rf+ or @M+} & {@MX+} & (
+    (({@Ae-} & {Dnf- or Dm-}) & (Ss+ or SIs- or O- or B+ or J*a- or (Xd- & Xc+ & MX-)))
+    or ((({@An-} & Ddf-) or ({@Ar-} & {Dm-})) & (J*d- or JB+))
+    or ((({@An-} & Dgf-) or ({@Ar-} & {Dm-})) & GE-));
+
+%Neuter mass
+Geld.n Wasser.n Bier.n Brot.n:
+  {GE+} & {Rn+ or @M+} & {@MX+} & (
+    ((({@Ae-} & Dnnd-) or ({@As-} & {Dnni- or Dm-}))
+      & (Ss+ or SIs- or O- or J*a- or B+ or (Xd- & Xc+ & MX-)))
+    or ((({@An-} & Ddn-) or ({@Am-} & {Dm-})) & (J*d- or JB+)));
+
+%Masculine mass genitive
+Kaeses.n:
+  {GE+} & {Rn+ or @M+} & {@MX+} & (({@An-} & Dgm-) or ({@As-} & {Dm-})) & GE-;
+
+%Neuter mass genitive
+Geldes.n Wassers.n Bieres.n Brotes.n:
+  {GE+} & {Rn+ or @M+} & {@MX+} & (({@An-} & Dgn-) or ({@As-} & {Dm-})) & GE-;
+
+%PRONOUNS AND DETERMINERS
+
+ich: Si+ or SIi-;
+du: Sd+ or SId-;
+es.p: Ss+ or SIs- or O- or J*a- or B+;
+er.p: Ss+ or SIs-;
+wir: Sp+ or SIp-;
+ihr.p: Sr+ or SIr- or J*d- or JB+;
+sie.s: Ss+ or SIs- or O- or J*a- or B+;
+sie.p: Sp+ or SIp- or O- or J*a- or B+;
+
+das.p dies: Ss+ or SIp- or O- or B+ or JB+;
+
+mich dich ihn: O- or J*a- or B+;
+mir dir ihm: J*d- or JB+;
+uns: O- or J*a- or J*d- or B+ or JB+;
+ihnen: J*d- or JB+;
+
+der.d dieser jener: Dnmd+ or Ddf+ or Dgf+ or Dgp+; 
+die.d diese jene: Dnf+ or Dnp+; 
+das.d: Dnnd+; 
+den.d diesen jenen: Dam+ or Ddp+;
+dem.d diesem jenem: Ddm+ or Ddn+;
+des.d: Dgm+ or Dgn+;
+dieses jenes: Dnnd+ or Dgm+;
+
+der.r: (RSs+ & {Xd- & Xc+} & Rm-);
+die.r: ((RSs+ or RO+) & {Xd- & Xc+} & Rf-) or (RSp+ & {Xd- & Xc+} & Rp-);
+das.r: ((RSs+ or RO+) & {Xd- & Xc+} & Rn-);
+den.r: (RO+ & {Xd- & Xc+} & Rm-);
+
+ein: Dnmi+ or Dnni+;
+eine: Dnf+;
+einen: Dam+;
+einer: Ddf+ or Dgf+;
+einem: Ddm+ or Ddn+;
+eines: Dgm+ or Dgn+;
+
+mein dein sein.d unser ihr.d euer: Dnmi+ or Dnni+;
+meine deine seine unsere ihre eure: Dnf+ or Dnp+;
+meinen deinen seinen unseren ihren euren: Dam+ or Ddp+ or Dgf+;
+meiner deiner seiner unserer ihrer eurer: Ddf+ or Dgf+ or Dgp+;
+meinem deinem seinem unserem ihrem eurem: Ddm+ or Ddn+;
+meines deines seines unseres ihres eures: Dgm+ or Dgn+;
+
+einige: Dnp+ or Sp+ or SIp- or O- or J*a- or B+;
+einigen: Ddp+ or J*d- or JB+;
+einiger: Dgp+ or GE-;
+
+etwas.d: Dm+;
+
+zwei drei vier fuenf sechs sieben acht neun zehn: D*p+;
+
+s: YS- & D+;
+
+% VERBS
+
+bin.v war.i: (((Si- or ({CO-} & SIi+)) & (O+ or P+) & W-) 
+or ((B- or PI-) & (Si- & C-))) & {SC+};
+bist.v warst.v: (((Sd- or ({CO-} & SId+)) & (O+ or P+) & W-)
+ or ((B- or PI-) & (Sd- & C-))) & {SC+};
+
+ist.v war.s: 
+  (((Ss- or ({CO-} & SIs+)) & (O+ or P+) & W-) 
+    or ((B- or PI-) & ((Ss- & C-) or RSs-)))
+  & {SC+};
+
+sind.v waren.v: (((Sp- or ({CO-} & SIp+)) & (O+ or P+) & W-) or
+((B- or PI-) & ((Sp- & C-) or RSp-))) & {SC+};
+seid.v wart.v: (((Sr- or ({CO-} & SIr+)) & (O+ or P+) & W-) 
+or ((B- or PI-) & (Sr- & C-))) & {SC+};
+sein.v: (B- or PI-) & (I- or II+);
+gewesen.v: (B- or PI-) & (Pb- or PIb+);
+
+habe.v hatte.i: (((Si- or ({CO-} & SIi+)) & (O+ or PP+) & {@MV+} & W-) 
+or ({@MVI-} & (((B- or PPI-) & (Si- & (C- or RO-))) or (Sit- & RO-)))) & {SC+}; 
+hast.v hattest.v: (((Sd- or ({CO-} & SId+)) & (O+ or PP+) & {@MV+} & W-) 
+or ({@MVI-} & (((B- or PPI-) & (Sd- & (C- or RO-))) or (Sdt- & RO-)))) & {SC+}; 
+hat.v hatte.s: (((Ss- or ({CO-} & SIs+)) & (O+ or PP+) & {@MV+} & W-) 
+or ({@MVI-} & (((B- or PPI-) & ((Ss- & (C- or RO-)) or RSs-)) or (Sst- & RO-))))
+& {SC+}; 
+habt.v hattet.v: (((Sr- or ({CO-} & SIr+)) & (O+ or PP+) & {@MV+} & W-) 
+or ({@MVI-} & (((B- or PPI-) & (Sr- & (C- or RO-))) or (Srt- & RO-)))) & {SC+};
+hatten.v: (((Sp- or ({CO-} & SIp+)) & (O+ or PP+) & {@MV+} & W-) 
+or ({@MVI-} & (((B- or PPI-) & ((Sp- & (C- or RO-)) or RSp-)) or (Spt- & RO-))))
+& {SC+};
+haben.v: (((Sp- or ({CO-} & SIp+)) & (O+ or PP+) & {@MV+} & W-) 
+or ({@MVI-} & (((B- or PPI-) & ((Sp- & (C- or RO-)) or RSp-)) or 
+(Spt- & RO-)))) & {SC+};
+haben.i: {ZU-} & {@MVI-} & (B- or PPI-) & ((Xd- & Xc+ & SCz-) or I- or IIt+);
+gehabt.v: {@MVI-} & ((B- & PP-) or ({B-} & PPIt+));
+
+muss.v soll.v will.v kann.v
+musste.v sollte.v wollte.v kannte.m: (((Si- or Ss- or ({CO-} & (SIi+ or SIs+))) & I+
+& W-) or (II- & (((Si- or Ss-) & (C- or RO-)) or RS-))) & {SC+};
+werde.v: (((Si- or ({CO-} & SIi+)) & (I+ or PV+) & W-) or 
+((II- or PVI-) & Si- & (C- or RO-))) & {SC+};
+wird.v: (((Ss- or ({CO-} & SIs+)) & (I+ or PV+) & W-) or ((II- or PVI-) & ((Ss- &
+(C- or RO-)) or RSs-))) & {SC+};
+wurde.v: (((Si- or Ss- or ({CO-} & (SIi+ or SIs+))) & (I+ or PV+)
+& W-) or ((II- or PVI-) & (((Si- or Ss-) & (C- or RO-)) or RS-))) & {SC+};
+musst.v sollst.v willst.v kannst.v musstest.v solltest.v wolltest.v kanntest.m: 
+(((Sd- or ({CO-} & SId+)) & I+ & W-) or (II- & Sd- & (C- or RO-))) & {SC+};
+wirst.v wurdest.v: (((Sd- or ({CO-} & SId+)) & (I+ or PV+) & W-) or 
+((II- or PVI-) & Sd- & (C- or RO-))) & {SC+};
+muesst.v sollt.v wollt.v koennt.v: 
+(((Sr- or ({CO-} & SIr+)) & I+ & W-) or
+(II- & Sr- & (C- or RO-))) & {SC+};
+werdet.v wurdet.v: (((Sr- or ({CO-} & SIr+)) & (I+ or PV+) & W-) or
+((II- or PVI-) & Sr- & (C- or RO-))) & {SC+};
+muessen.v sollen.v wollen.v koennen.v muessten.v sollten.v wollten.v kannten.m: 
+(((Sp- or ({CO-} & SIp+)) & I+ & W-) or 
+(II- & (I- or II+ or ((Sp- & (C- or RO-)) or RSp-)))) & {SC+};
+werden.v wurden.v:
+(((Sp- or ({CO-} & SIp+)) & (I+ or PV+) & W-) or 
+((II- or PVI-) & (I- or II+ or ((Sp- & (C- or RO-)) or RSp-)))) & {SC+};
+worden.i: PVI- & (Pb- or PIb+);
+muessen.i sollen.i wollen.i koennen.i werden.i:
+(II- & (I- or II+));
+
+gehe.v spreche.v bleibe.v fahre.v komme.v laufe.v sterbe.v an+komme.v
+ging.i sprach.i blieb.i fuhr.i kam.i lief.i starb.i an+kam.i:
+(((Si- or ({CO-} & SIi+)) & {@MV+} & {K+} & W-) or ({KI-} & {@MVI-} & Si- &
+C-)) & {SC+};
+gehst.v sprichst.v bleibst.v faehrst.v kommst.v laeufst.v stirbst.a an+kommst.v
+gingst.v sprachst.v bliebst.v fuhrst.v kamst.v liefst.v starbst.v an+kamst.v:
+(((Sd- or ({CO-} & SId+)) & {@MV+} & {K+} & W-) or ({KI-} & {@MVI-} & Sd- & C-))
+& {SC+};
+geht.v spricht.v bleibt.v faehrt.v kommt.v laeuft.v stirbt.v an+kommt.v
+ging.s sprach.s blieb.s fuhr.s kam.s lief.s starb.s an+kam.s: 
+(((Ss- or Sr- or ({CO-} & (SIs+ or SIr+))) & {@MV+} & {K+} & W-) or 
+({KI-} & {@MVI-} & (((Ss- or Sr-) & C-) or RSs-))) & {SC+}; % Sr-
+gingt.v spracht.v bliebt.v fuhrt.v kamt.v lieft.v starbt.v an+kamt.v:
+(((Sr- or ({CO-} & SIr+)) & {@MV+} & {K+} & W-) or ({KI-} & {@MVI-} & Sr- & C-)) & {SC+};
+gehen.v sprechen.v bleiben.v fahren.v kommen.v laufen.v sterben.v an+kommen.v:
+(((Sp- or ({CO-} & SIp+)) & {@MV+} & {K+} & W-) or 
+({KI-} & {@MVI-} & (((Sp- & C-) or RSp-)))) & {SC+};
+gehen.i sprechen.i bleiben.i fahren.i kommen.i laufen.i sterben.i an+kommen.i:
+{ZU-} & {KI-} & {@MVI-} & ((Xd- & Xc+ & SCz-) or I- or IIi+);  % SCz- needs an optional SC+
+gingen.v sprachen.v blieben.v fuhren.v kamen.v liefen.v starben.v an+kamen.v:
+(((Sp- or ({CO-} & SIp+)) & {@MV+} & {K+} & W-) or 
+({KI-} & {@MVI-} & ((Sp- & C-) or RSp-))) & {SC+};
+gesprochen.v:
+{KI-} & {@MVI-} & (PP- or PPIi+);
+gegangen.v geblieben.v gekommen.v gestorben.v gelaufen.v an+gekommen.v:
+{KI-} & {@MVI-} & (Pb- or PIb+);
+gefahren.v:
+{KI-} & {@MVI-} & (Pb- or PIb+ or PP- or PPIi+);
+
+spiele.v koche.v esse.v trinke.v schreibe.v lese.v
+spielte.i kochte.i ass.i trank.i schrieb.i las.i:
+(((Si- or ({CO-} & SIi+)) & {O+} & {@MV+} & W-) or 
+({@MVI-} & {B-} & Sio- & (C- or RO-))) & {SC+};
+spielst.v kochst.v isst.d trinkst.v schreibst.v liest.d
+spieltest.v kochtest.v assest.i trankst.v schriebst.i lasst.v:
+(((Sd- or ({CO-} & SId+)) & {O+} & {@MV+} & W-) or 
+({@MVI-} & {B-} & Sdo- & (C- or RO-))) & {SC+};
+spielt.v kocht.v isst.s trinkt.v schreibt.v liest.s
+spielte.s kochte.s asst.s trank.s schrieb.s las.s: 
+(((Ss- or Sr- or ({CO-} & (SIs+ or SIr+))) & {O+} & {@MV+} &
+W-) or ({@MVI-} & {B-} & (((Sso- or Sro-) & (C- or RO-)) or RSs-))) & {SC+};
+spieltet.v kochtet.v asset.v tranket.v schriebet.v last.v:
+(((Sr- or ({CO-} & SIr+)) & {O+} & {@MV+} &
+W-) or ({@MVI-} & {B-} & Sro- & (C- or RO-))) & {SC+};
+spielen.v kochen.v essen.v schreiben.v lesen.v:
+(((Sp- or ({CO-} & SIp+)) & {O+} & {@MV+} & W-) or 
+({@MVI-} & {B-} & (((Spo- & (C- or RO-)) or RSp-))))
+& {SC+};
+spielen.i kochen.i essen.i schreiben.i lesen.i:
+{ZU-} & {@MVI-} & {B-} & ((Xd- & Xc+ & SCz-) or I- or IIo+);
+spielten.v kochten.v assen.i tranken.v schrieben.v lasen.v:
+(((Sp- or ({CO-} & SIp+)) & {O+} & {@MV+} & W-) or 
+({@MVI-} & {B-} & ((Spo- & (C- or RO-)) or RSp-))) & {SC+};
+gespielt.v gekocht.v gegessen.v geschrieben.v gelesen.v:
+{@MVI-} & (PV- or PVI+ or ({B-} & (PP- or PPIo+)));
+
+sehe.v schlage.v mache.v hoere.v kenne.v brauche.v nehme.v trage.v finde.v jage.v 
+sah.i schlug.i machte.i hoerte.i kannte.i brauchte.i nahm.i
+trug.i fand.i jagte.i: 
+(((Si- or ({CO-} & SIi+)) & O+ & {@MV+} & W-) or 
+({@MVI-} & {B-} & Sit- & (C- or RO-))) & {SC+};
+siehst.v schlaegst.v machst.v hoerst.v kennst.v brauchst.v nimmst.v traegst.v findest.v
+jagst.v 
+sahst.v schlugst.v machtest.v hoertest.v kanntest.v brauchtest.v nahmst.v
+trugst.v fandest.i jagtest.v: 
+(((Sd- or ({CO-} & SId+)) & O+ & {@MV+} & W-) or 
+({@MVI-} & {B-} & Sdt- & (C- or RO-))) & {SC+};
+sieht.v schlaegt.v macht.v hoert.v kennt.v braucht.v nimmt.v traegt.v findet.v jagt.v
+sah.s schlug.s machte.s hoerte.s kannte.s brauchte.s nahm.s trug.s fand.s jagte.s: 
+(((Ss- or Sr- or ({CO-} & (SIs+ or SIr+)))
+& O+ & {@MV+} & W-) or ({@MVI-} & {B-} & (((Sst- or Srt-) & 
+(C- or RO-)) or RSst-))) & {SC+};
+saht.v schlugt.v machtet.v hoertet.v kanntet.v brauchtet.v nahmet.v trugt.v fandet
+jagtet.v:
+(((Sr- or ({CO-} & SIr+)) 
+& O+ & {@MV+} & W-) or ({@MVI-} & {B-} & Srt- & (C- or RO-))) & {SC+};
+sehen.v schlagen.v machen.v hoeren.v kennen.v brauchen.v nehmen.v tragen.v jagen.v:
+(((Sp- or ({CO-} & SIp+)) & O+ & {@MV+} & W-) or 
+({@MVI-} & {B-} & ((Spt- & (C- or RO-)) or RSpt-))) & {SC+};
+sehen.i schlagen.i machen.i hoeren.i kennen.i brauchen.i nehmen.i tragen.i jagen.i:
+{ZU-} & {@MVI-} & {B-} & ((Xd- & Xc+ & SCz-) or I- or IIt+);
+sahten.v schlugten.v machten.v hoerten.v kannten.v brauchten.v nahmen.v
+trugten.v fanden.v jagten.v:
+(((Sp- or ({CO-} & SIp+)) & O+ & {@MV+} & {SC+} & W-) or 
+({@MVI-} & {B-} & ((Spt- & (C- or RO-)) or RSpt-))) & {SC+};
+gesehen.v geschlagt.v gemacht.v gehoert.v gekannt.v gebraucht.v genommen.v
+getragen.v gefunden.v gejagt.v erschreckt.v: 
+{@MVI-} & (PV- or PVI+ or (B- & PP-) or ({B-} & PPIt+));
+
+gebe.v bringe.v kaufe.v
+gab.i brachte.i kaufte.i:
+(((Si- or ({CO-} & SIi+)) & {J*d+} & O+ & {@MV+} & W-) or 
+({@MVI-} & {B-} & {JB-} & Sit- & (C- or RO-))) & {SC+};
+% To handle dative relative clauses:
+% ...& ({@MVI-} & {B-} & {JB-} & Sit- & (C- or RO- or RJ-))) & {SC+};
+% make RJ incompat with JB. When RJ is used, B will be obligatory, as it should be!
+gibst.v bringst.v kaufst.v
+gabst.v brachtest.v kauftest.v:
+(((Sd- or ({CO-} & SId+)) & {J*d+} & O+ & {@MV+} & W-) or 
+({@MVI-} & {B-} & {JB-} & Sdt- & (C- or RO-))) & {SC+};
+gibt.v bringt.v kauft.v
+gab.s brachte.s kaufte.s:
+(((Ss- or Sr- or ({CO-} & (SIs+ or SIr+)))
+& {J*d+} & O+ & {@MV+} & W-) or ({@MVI-} & {B-} & {JB-} & (((Sst- or Srt-) & 
+(C- or RO-)) or RSst-))) & {SC+};
+gabt.v brachtet.v kauftet.v:
+(((Sr- or ({CO-} & SIr+)) 
+& {J*d+} & O+ & {@MV+} & W-) or ({@MVI-} & {B-} & {JB-} & Srt- & (C- or RO-))) & {SC+};
+geben.v bringen.v kaufen.v:
+(((Sp- or ({CO-} & SIp+)) & {J*d+} & O+ & {@MV+} & W-) or 
+({@MVI-} & {B-} & {JB-} & ((Spt- & (C- or RO-)) or RSpt-))) & {SC+};
+geben.i bringen.i kaufen.i:
+{ZU-} & {@MVI-} & {B-} & {JB-} & ((Xd- & Xc+ & SCz-) or I- or IIt+);
+gaben.v brachten.v kauften.v:
+(((Sp- or ({CO-} & SIp+)) & {J*d+} & O+ & {@MV+} & {SC+} & W-) or 
+({@MVI-} & {B-} & {JB-} & ((Spt- & (C- or RO-)) or RSpt-))) & {SC+};
+gegeben.v gebracht.v gekauft.v: {@MVI-} & (PV- or PVI+ or (B- & {JB-} & PP-) or 
+({B-} & {JB-} & PPIt+));
+
+glaube.v sage.v glaubte.i sagte.i:
+(((Sic- or ({CO-} & SIic+)) & {O+} & {@MV+} & W-) or 
+({@MVI-} & B- & Sic- & (C- or RO-))) & {SC+};
+glaubst.v sagst.v glaubtest.v sagtest.v:
+(((Sdc- or ({CO-} & SIdc+)) & {O+} & {@MV+} & W-) or 
+({@MVI-} & {B-} & Sdc- & (C- or RO-))) & {SC+};
+glaubt.v sagt.v glaubte.s sagte.v:
+(((Ssc- or Src- or ({CO-} & (SIsc+ or SIrc+))) & {O+} & {@MV+} &
+W-) or ({@MVI-} & {B-} & (((Ssc- or Src-) & (C- or RO-)) or RSs-))) & {SC+};
+glaubtet.v sagtet.v:
+(((Src- or ({CO-} & SIrc-)) & {O+} & {@MV+} &
+W-) or ({@MVI-} & {B-} & Src- & (C- or RO-))) & {SC+};
+glauben.v sagen.v:
+(((Spc- or ({CO-} & SIpc+)) & {O+} & {@MV+} & W-) or 
+({@MVI-} & {B-} & ((Spc- & (C- or RO-)) or RSp-))) & {SC+};
+glauben.i sagen.i:
+{ZU-} & {@MVI-} & {B-} & (Ic- or IIc+);
+glaubten.v sagten.v:
+(((Spc- or ({CO-} & SIpc+)) & {O+} & {@MV+} & W-) or 
+({@MVI-} & {B-} & ((Spc- & (C- or RO-)) or RSp-))) & {SC+};
+geglaubt.v gesagt.v:
+{@MVI-} & {B-} & (PPc- or PPIc+);
+
+versuche.v versuchte.i:
+(((Siz- or ({CO-} & SIiz+)) & {O+} & {@MV+} & W-) or 
+({@MVI-} & {B-} & Siz- & (C- or RO-))) & {SC+};
+versuchst.v versuchtest.v:
+(((Sdz- or ({CO-} & SIdz+)) & {O+} & {@MV+} & W-) or 
+({@MVI-} & {B-} & Sdz- & (C- or RO-))) & {SC+};
+versucht.v versuchte.s:
+(((Ssz- or Srz- or ({CO-} & (SIsz+ or SIrz+))) & {O+} & {@MV+} & W-) 
+or ({@MVI-} & {B-} & (((Ssz- or Srz-) & (C- or RO-)) or RSs-)))
+& {SC+};
+versuchtet.v:
+(((Srz- or ({CO-} & SIrz-)) & {O+} & {@MV+} & W-) 
+or ({@MVI-} & {B-} & Srz- & (C- or RO-))) & {SC+};
+versuchen.i:
+((Spz- or ({CO-} & SIpz+)) & {O+} & {@MV+} & {SC+} & W-) or 
+({@MVI-} & {B-} & (I- or II+ or ((Spz- & (C- or RO-)) or RSp-)));
+versuchten.v:
+(((Spz- or ({CO-} & SIpz+)) & {O+} & {@MV+} & W-) or 
+({@MVI-} & {B-} & ((Spz- & (C- or RO-)) or RSp-))) & {SC+};
+versuchen.p:
+{@MVI-} & {B-} & (PPz- or PPIz+);
+
+helfe.v half.i:
+((Si- or ({CO-} & SIi+)) & J+ & {@MV+} & {SC+} & W-) or 
+({@MVI-} & B- & Si- & (C- or RO-));
+hilfst.v halfst.v:
+((Sd- or ({CO-} & SId+)) & J+ & {@MV+} & {SC+} & W-) or 
+({@MVI-} & B- & Sd- & (C- or RO-));
+hilft.v half.s:
+((Ss- or Sr- or ({CO-} & (SIs+ or SIr+))) 
+& J+ & {@MV+} & {SC+} & W-) or ({@MVI-} & B- & (((Ss- or Sr-) & 
+(C- or RO-)) or RSs-));
+halft.v:
+((Sr- or ({CO-} & SIr+)) 
+& J+ & {@MV+} & {SC+} & W-) or ({@MVI-} & B- & Sr- & (C- or RO-));
+helfen.v:
+((Sp- or ({CO-} & SIp+)) & J+ & {@MV+} & {SC+} & W-) or 
+({@MVI-} & B- & (I- or IIt+ or ((Sp- & (C- or RO-)) or RSp-)));
+halfen.v:
+((Sp- or ({CO-} & SIp+)) & J+ & {@MV+} & {SC+} & W-) or 
+({@MVI-} & B- & ((Sp- & (C- or RO-)) or RSp-));
+geholfen.v:
+{@MVI-} & B- & (PP- or PPI+);
+
+% CONJUNCTIONS, ADVERBS, PREPOSITIONS
+
+jetzt.e heute.e morgen.e gestern.e: MV- or MVI+ or CO+;
+
+bis durch fuer gegen ohne: J*a+ & (M- or MV- or MVI+ or Pp- or PIp+ or 
+({Xc+} & CO+));
+aus bei mit nach: J*d+ & (M- or MV- or MVI+ or Pp- or PIp+ or ({Xc+} &
+CO+));
+in ueber unter: J*d+ & (M- or MV- or MVI+ or Pp- or PIp+ or ({Xc+} &
+CO+));
+an auf: (J*d+ & (M- or MV- or MVI+ or Pp- or PIp+ or ({Xc+} &
+CO+))) or K- or KI+;
+als wenn weil: C+ & ((Xc+ & CO+) or ({Xd- & Xc+} & SC-));
+
+zu: (J*d+ & (M- or MV- or MVI+ or Pp- or PIp+ or ({Xc+} &
+CO+))) or ZU+;
+
+dass: C+ & Xd- & SCc- & Xc+;
+
+wann: Wq- & W+;       % Post-processing needed here to enforce s-v inversion 
+
+aber denn: {Xd-} & SC- & W+; % und?
+
+% ADJECTIVES
+
+groß.a gross.a klein.a alt.a jung.a rot.a blau.a gelb.a gruen.a schwarz.a weiss.a billig.a teuer.a
+kurz.a lang.a gut.a schlecht.a gescheit.a dumm.a froh.a erstaunt.a besorgt.a schoen.a: 
+  {FP-} & {EA-} & ( Pa- or PIa+);
+
+groß.= gross.= klein.= alt.= jung.= rot.= blau.= gelb.= gruen.= schwarz.= weiss.= billig.= teuer.=
+kurz.= lang.= gut.= schlecht.= gescheit.= dumm.= froh.= erstaunt.= besorgt.= schoen.=: 
+  LLFSe+ or LLFSn+ or LLFSr+ or LLFSs+ or LLFSm+;
+
+% Suffixes, appearing in 4.0.affix
+=e: {FP-} & {EA-} & (LLFSe- & Ae+);
+=en: {FP-} & {EA-} & (LLFSn- & An+);
+=er.f: {FP-} & {EA-} & (LLFSr- & Ar+);
+=es.f: {FP-} & {EA-} & (LLFSs- & As+);
+=em: {FP-} & {EA-} & (LLFSm- & Am+);
+
+%grosse.a kleine.a alte.a junge.a rote.a blaue.a gelbe.a gruene.a schwarze.a weisse.a
+%billige.a teuere.a lange.a kurze.a gute.a schlechte.a gescheite.a dumme.a frohe.a 
+%erstaunte.a besorgte.a schoene.a: {EA-} & Ae+;
+
+%grossen.a kleinen.a alten.a jungen.a roten.a blauen.a gelben.a gruenen.a schwarzen.a
+%weissen.a billigen.a teuren.a kurzen.a langen.a guten.a schlechten.a gescheiten.a
+%dummen.a frohen.a erstaunten.a besorgten.a boesen.a schoenen.a: {EA-} & An+;
+
+boese.a: {EA-} & (Pa- or PIa+ or Ae+);
+
+ex: FP+;
+
+%grosser.a kleiner.a alter.a junger.a roter.a blauer.a gelber.a gruener.a schwarzer.a
+%weisser.a billiger.a teurer.a kurzer.a langer.a guter.a schlechter.a gescheiter.a dummer.a
+%froher.a erstaunter.a besorgter.a boeser.a schoener.a: {EA-} & Ar+;
+
+%grosses.a kleines.a altes.a junges.a rotes.a blaues.a gelbes.a gruenes.a schwarzes.a
+%weisses.a billiges.a teures.a kurzes.a langes.a gutes.a schlechtes.a gescheites.a dummes.a
+%frohes.a erstauntes.a besorgtes.a boeses.a schoenes.a: {EA-} & As+;
+
+%grossem.a kleinem.a altem.a jungem.a rotem.a blauem.a gelbem.a gruenem.a schwarzem.a
+%weissem.a billigem.a teurem.a kurzem.a langem.a gutem.a schlechtem.a gescheitem.a dummem.a
+%frohem.a erstauntem.a besorgtem.a boesem.a schoenem.a: {EA-} & Am+;
+
+sehr.e ziemlich.e: EA+ or EE+;
+
+schnell.e: {EE-} & (MV- or MVI+);
+
+% SJl, SJr, connects nouns only; use AJ for adjectives, VJ for verbs ... etc.
+und: 
+  {@SJl-} & SJr+ & (
+    ({GE+} & {D-} & (S+ or SI- or O- or B+ or J- or GE- or (Xd- & Xc+ & MX-)))
+    or ({EA-} & (A+ or ({@MV-} & (P- or PI+))))
+    or ({@MVI-} & (I- or II+))
+    or (J+ & (MV- or MVI+))
+    or W-
+    or ((((S- or ({CO-} & SI+)) & {@MV+} & W-) or ({@MVI-} & S- & C-)) & {SC+}));
+
+",": Xc- or Xd+;
+
+".": {Xc-} & Xp- & RW+;
+"!": {Xc-} & Xp- & RW+;
+"?": {Xc-} & Xp- & RW+;
+
+CAPITALIZED-WORDS NAME: {G-} & (({@MX+} & 
+(Ss+ or SIs- or O- or B+ or J- or G+ or (Xd- & Xc+ & MX-))) or YS+);
+
+LEFT-WALL: W+ & {Xp+ or RW+};
+RIGHT-WALL: RW- or (Xc- & {@Xc-});
+POSTPROCESS: BOGUS+;
+
+% These need to be implemented. See english for example.
+HMS-TIME:     BZZT+;
+DECADE-TIME:  BZZT+;
+DAY-ORDINALS: BZZT+;
+ORDINALS:     BZZT+;
+NUMBERS:      BZZT+;
+FRACTION:     BZZT+;
+ROMAN-NUMERAL-WORDS:    BZZT+;
+INITIALS:     BZZT+;
+GREEK-LETTER-AND-NUMBER:    BZZT+;
+PL-GREEK-LETTER-AND-NUMBER:    BZZT+;
+UNITS:        BZZT+;
+PL-CAPITALIZED-WORDS:    BZZT+;
+
+% With the following line in the dictionary, the parser will simply
+% skip over (null-link) unknown words. If you remove it, the parser
+% will output an error for any unknown words.
+UNKNOWN-WORD: NO+;
+
