@@ -111,7 +111,7 @@ void XPatternMinerUTest::test_match()
 		                        tmp_al(AND_LINK, X, Y))),
 		text = tmp_al(INHERITANCE_LINK, A, tmp_al(AND_LINK, B, C));
 
-	XPatternMiner pm(_as);	
+	XPatternMiner pm(_as);
 
 	TS_ASSERT(not pm.match(pattern, text));
 }
