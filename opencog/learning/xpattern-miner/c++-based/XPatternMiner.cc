@@ -43,6 +43,9 @@ namespace opencog
 // 1. test if removing duplicates while merging is really necessary
 // 2. test if associating valuations to shabs is really necessary
 // 3. test if cash is really necessary
+// 4. test if using counter over valuations can speed up
+// 5. have valuations reflect disconnected components, and split them
+//    into strongly connected components when querying the pattern matcher.
 
 XPMParameters::XPMParameters(unsigned ms, unsigned iconjuncts,
                              const Handle& ipat, int maxd, int maxp)
@@ -403,6 +406,7 @@ Handle XPatternMiner::restrict_satisfying_set(const Handle& pattern,
 		tmp_texts.push_back(tmp_text_as->add_atom(text.first));
 
 	// Avoid pattern matcher warning
+	// TODO: support 1 < conjuncts
 	if (totally_abstract(pattern) and conjuncts(pattern) == 1)
 		return tmp_text_as->add_link(SET_LINK, tmp_texts);
 
