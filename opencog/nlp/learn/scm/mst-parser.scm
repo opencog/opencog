@@ -280,6 +280,15 @@
 	(define reference-lks
 		(map (lambda (wi w) (ReferenceLink wi w)) word-insts word-list))
 
+	; Create WordSequenceLink to record the word order
+	(define num-nodes '())
+	(define word-seq-lks (map
+		(lambda (wi)
+			(define n (NumberNode (length num-nodes)))
+			(set! num-nodes (append num-nodes (list n)))
+			(WordSequenceLink wi n))
+		word-insts))
+
 	; Do the MST parse
 	(define mstparse (mst-parse-text plain-text))
 	(define sections (make-sections mstparse))
@@ -315,8 +324,15 @@
 			(if (equal? (cog-type x) 'Section)
 				(if (not (is-oversize? x)) (store-atom x))
 				(store-atom x)))
-		(append section-insts word-inst-lks reference-lks)
+		(append section-insts word-seq-lks word-inst-lks reference-lks)
 	)
+
+	; Remove the instances and the links containing them
+	(for-each cog-extract-recursive word-insts)
+
+	; Also remove those newly generated nodes
+	(for-each cog-extract num-nodes)
+	(cog-extract parse-node)
 )
 ; ---------------------------------------------------------------------
 ; ---------------------------------------------------------------------
