@@ -129,12 +129,6 @@ void AttentionBank::stimulate(const Handle& h, double stimulus)
     // XXX This is not protected or made atomic in any way ...
     // If two different threads stimulate the same atom at the same
     // time, then the calculations will be bad. Does it matter?
-    if(stimulusRec.find(h) != stimulusRec.end()){
-        stimulusRec[h] += stimulus;
-    } else{
-        stimulusRec[h] = stimulus;
-    }
-
     AttentionValuePtr oldav(get_av(h));
     AttentionValue::sti_t sti   = oldav->getSTI();
     AttentionValue::lti_t lti   = oldav->getLTI();
@@ -146,6 +140,12 @@ void AttentionBank::stimulate(const Handle& h, double stimulus)
            sti + stiWage, lti + ltiWage, vlti);
     _importanceIndex.updateImportance(h, oldav, newav);
     AVChanged(h, oldav, newav);
+
+    if(stimulusRec.find(h) != stimulusRec.end()){
+        stimulusRec[h] += stimulus;
+    } else{
+        stimulusRec[h] = stimulus;
+    }
 }
 
 AttentionValue::sti_t AttentionBank::calculateSTIWage()
