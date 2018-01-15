@@ -327,12 +327,77 @@
 		(append section-insts word-seq-lks word-inst-lks reference-lks)
 	)
 
+	; Export the parse to a file
+	(export-mst-parses "mst-parses.txt")
+
 	; Remove the instances and the links containing them
 	(for-each cog-extract-recursive word-insts)
 
 	; Also remove those newly generated nodes
 	(for-each cog-extract num-nodes)
 	(cog-extract parse-node)
+)
+
+(define-public (export-mst-parses filename)
+"
+  Export all the MST-parses that can be found in the
+  atomspace to a text file named \"filename\", so that
+  it would be easier for people to examine the parses.
+
+  The format is:
+  [sentence]
+  [word1#] [word1] [word2#] [word2]
+"
+	(define file-port (open-file filename "a"))
+
+	; Given a WordInstanceNode, return its word sequence number
+	(define (get-index w)
+		(inexact->exact (string->number
+			(cog-name (word-inst-get-number w)))))
+
+	; Given a WordInstanceNode, return its corresponding word
+	(define (get-word w)
+		(cog-name (word-inst-get-word w)))
+
+	; Export a single parse
+	(define (export-parse word-insts)
+		; Print the sentence first
+		(if (not (null? word-insts))
+			(display
+				(format #f "~a\n"
+					(string-join (map get-word (cdr word-insts)) " "))
+				file-port))
+
+		(for-each
+			(lambda (w) ; WordInstanceNodes
+				(for-each
+					(lambda (cs) ; ConnectorSeq
+						(for-each
+							(lambda (c) ; Connector
+								(if (equal? (cog-name (gdr c)) "+")
+									(display
+										(format #f "~a ~a ~a ~a\n"
+											(get-index w)
+											(get-word w)
+											(get-index (gar c))
+											(get-word (gar c)))
+										file-port)))
+							(cog-outgoing-set cs)))
+					(cog-chase-link 'Section 'ConnectorSeq w)))
+			word-insts
+		)
+
+		; Add a new line at the end
+		(display "\n" file-port)
+	)
+
+	; Export the MST-parses
+	(for-each
+		(lambda (p)
+			(export-parse (parse-get-words-in-order p)))
+		(cog-get-atoms 'ParseNode))
+
+	(close-port file-port)
 )
 ; ---------------------------------------------------------------------
 ; ---------------------------------------------------------------------
