@@ -288,10 +288,18 @@
 	; and create sections for those instances also
 	(define mstparse-insts
 		(map (lambda (w)
-			(cons (cons (cons (caaar w) (list-ref word-insts (- (caaar w) 1)))
-								(cons (cadar w) (list-ref word-insts (- (cadar w) 1))))
-						(cdr w)))
+			(define l-idx (overt-get-index (wedge-get-left-overt w)))
+			(define r-idx (overt-get-index (wedge-get-right-overt w)))
+			(cons ; Pair this connection with the score
+				(cons ; Pair the left and right word instances with their indexes
+					(cons l-idx (list-ref word-insts (- l-idx 1)))
+					(cons r-idx (list-ref word-insts (- r-idx 1)))
+				)
+				(wedge-get-score w)
+			))
 			mstparse))
+
+	; Make sections using the instances
 	(define section-insts (make-sections mstparse-insts))
 
 	; The count-one-atom function fetches from the SQL database,
