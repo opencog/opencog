@@ -113,7 +113,9 @@ public:
     AttentionBank(AtomSpace*);
     ~AttentionBank();
 
+#ifdef ECAN_EXPERIMENT
     std::map<Handle, AttentionValue::sti_t> stimulusRec;
+#endif
 
     /**
      * Provide ability for others to find out about atoms that cross in or
