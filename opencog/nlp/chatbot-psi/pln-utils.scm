@@ -36,7 +36,7 @@
                  (And (State input-utterance-sentence (Variable "$sentence"))
                       (Parse (Variable "$parse") (Variable "$sentence")))
                  (Variable "$sentence")))
-         (results (cog-outgoing-set (cog-bind query))))
+         (results (cog-outgoing-set (cog-execute! query))))
     (if (null? results) '() (first results))))
 
 (define (get-last-rec-id)

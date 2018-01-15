@@ -3,7 +3,7 @@ from __future__ import print_function
 from pprint import pprint
 from opencog.cogserver import MindAgent
 from opencog.atomspace import types, AtomSpace, TruthValue
-from opencog.scheme_wrapper import load_scm,scheme_eval_h,scheme_eval, __init__
+from opencog.scheme_wrapper import load_scm, scheme_eval_h, scheme_eval, __init__
 from opencog import logger
 
 import Queue
@@ -51,7 +51,7 @@ TV_FOR_FILTERED_OUT_ANTECEDENTS=TruthValue(0.02, 0.9)
 class BindLinkExecution():
 
     '''
-    Executes a (cog-bind xxx) command and return the results of it
+    Executes a (cog-execute! xxx) command and return the results of it
     '''
 
     def __init__(self,atomspace,anchorNode, target, command,resultNode,atomType):
@@ -66,6 +66,7 @@ class BindLinkExecution():
         self.command=command
         self.resultNode=resultNode
         self.atomType=atomType
+        scheme_eval(self.atomspace, "(use-modules (opencog) (opencog exec))")
 
     def execution(self):
 
@@ -175,7 +176,7 @@ class HobbsAgent(MindAgent):
         Given a ParseNode, returns a SentenceNumber of a SentenceNode associated with it.
         '''
 
-        rv=self.bindLinkExe(self.currentTarget,node,'(cog-bind getNumberNode_ParseNode)',self.currentResult,types.NumberNode)
+        rv=self.bindLinkExe(self.currentTarget,node,'(cog-execute! getNumberNode_ParseNode)',self.currentResult,types.NumberNode)
         return int(rv[0].name)
 
     def sortNodes(self,list,keyFunc):
@@ -191,7 +192,7 @@ class HobbsAgent(MindAgent):
         Returns a sorted list of children nodes of current node.
         '''
 
-        rv=self.bindLinkExe(self.currentTarget,node,'(cog-bind getChildren)',self.currentResult,types.WordInstanceNode)
+        rv=self.bindLinkExe(self.currentTarget,node,'(cog-execute! getChildren)',self.currentResult,types.WordInstanceNode)
         return self.sortNodes(rv,self.getWordNumber)
 
     def generateReferenceLink(self,anaphora,antecedent,tv):
@@ -210,7 +211,7 @@ class HobbsAgent(MindAgent):
         Returning the other part of a conjunction if conjunction exists and anaphor is "Plural"
         '''
 
-        return self.bindLinkExe(self.currentProposal,node,'(cog-bind getConjunction)',self.currentResult,types.WordInstanceNode)
+        return self.bindLinkExe(self.currentProposal,node,'(cog-execute! getConjunction)',self.currentResult,types.WordInstanceNode)
 
     def checkConjunctions(self,node):
 
@@ -257,7 +258,7 @@ class HobbsAgent(MindAgent):
             end=filter+1
 
         for index in range(start,end):
-            command='(cog-bind filter-#'+str(index)+')'
+            command='(cog-execute! filter-#'+str(index)+')'
             rv=self.bindLinkExe(self.currentProposal,node,command,self.currentResult,types.AnchorNode)
             if len(rv)>0:
                 '''
@@ -328,7 +329,7 @@ class HobbsAgent(MindAgent):
         Returns a list of words in the atomspace
         '''
 
-        rv=self.bindLinkExe(None,None,'(cog-bind getWords)',self.currentResult,types.WordInstanceNode)
+        rv=self.bindLinkExe(None,None,'(cog-execute! getWords)',self.currentResult,types.WordInstanceNode)
         return self.sortNodes(rv,self.getWordNumber)
 
     def getTargets(self,words):
@@ -341,7 +342,7 @@ class HobbsAgent(MindAgent):
         for word in words:
             matched=False
             for index in range(1,self.numOfPrePatterns+1):
-                command='(cog-bind pre-process-#'+str(index)+')'
+                command='(cog-execute! pre-process-#'+str(index)+')'
                 rv=self.bindLinkExe(self.currentTarget,word,command,self.currentResult,types.AnchorNode)
                 if len(rv)>0:
                     matched=True
@@ -351,7 +352,7 @@ class HobbsAgent(MindAgent):
         return targets
 
     def getPronouns(self):
-        rv=self.bindLinkExe(None,None,'(cog-bind getPronouns)',self.unresolvedReferences,types.WordInstanceNode)
+        rv=self.bindLinkExe(None,None,'(cog-execute! getPronouns)',self.unresolvedReferences,types.WordInstanceNode)
         return self.sortNodes(rv,self.getWordNumber)
 
     def getRoots(self):
@@ -360,8 +361,8 @@ class HobbsAgent(MindAgent):
         Return a list of roots(incoming degree of 0)
         '''
 
-        self.bindLinkExe(None,None,'(cog-bind connectRootsToParseNodes)',None,None)
-        rv= self.bindLinkExe(None,None,'(cog-bind getAllParseNodes)',self.currentResult,types.ParseNode)
+        self.bindLinkExe(None,None,'(cog-execute! connectRootsToParseNodes)',None,None)
+        rv= self.bindLinkExe(None,None,'(cog-execute! getAllParseNodes)',self.currentResult,types.ParseNode)
         return self.sortNodes(rv,self.getSentenceNumber)
 
     def getRootOfNode(self,target):
@@ -369,7 +370,7 @@ class HobbsAgent(MindAgent):
         Returns a ParseNode associated with the "target"
         '''
 
-        rv=self.bindLinkExe(self.currentTarget,target,'(cog-bind getParseNode)',self.currentResult,types.ParseNode)
+        rv=self.bindLinkExe(self.currentTarget,target,'(cog-execute! getParseNode)',self.currentResult,types.ParseNode)
         return rv[0]
 
     def  previousRootExist(self,root):
@@ -397,7 +398,7 @@ class HobbsAgent(MindAgent):
         Finds word sequence number for each word
         '''
 
-        rv= self.bindLinkExe(None,None,'(cog-bind getAllNumberNodes)',self.currentResult,types.WordSequenceLink)
+        rv= self.bindLinkExe(None, None, '(cog-execute! getAllNumberNodes)', self.currentResult, types.WordSequenceLink)
         for link in rv:
             out=link.out
             if out[0].type==types.WordInstanceNode:
@@ -486,10 +487,10 @@ class HobbsAgent(MindAgent):
         Check if the node is the word "it".
         '''
         matched=False
-        rv=self.bindLinkExe(self.currentTarget,node,'(cog-bind isIt)',self.currentResult,types.AnchorNode)
+        rv=self.bindLinkExe(self.currentTarget,node,'(cog-execute! isIt)',self.currentResult,types.AnchorNode)
         if len(rv)>0:
             for index in range(1,self.numOfPleonasticItPatterns+1):
-                command='(cog-bind pleonastic-it-#'+str(index)+')'
+                command='(cog-execute! pleonastic-it-#'+str(index)+')'
                 rv=self.bindLinkExe(self.currentTarget,node,command,self.currentResult,types.AnchorNode)
                 if len(rv)>0:
                     matched=True

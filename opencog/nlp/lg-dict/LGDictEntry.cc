@@ -91,12 +91,16 @@ LGDictEntry::LGDictEntry(const Link& l)
 
 // =================================================================
 
-Handle LGDictEntry::execute(AtomSpace* as) const
+Handle LGDictEntry::execute() const
 {
 	if (WORD_NODE != _outgoing[0]->get_type()) return Handle();
 	if (LG_DICT_NODE != _outgoing[1]->get_type()) return Handle();
 
-	if (nullptr == as) as = getAtomSpace();
+	AtomSpace* as = this->getAtomSpace();
+	if (nullptr == as)
+		as = _outgoing[0]->getAtomSpace();
+	if (nullptr == as)
+		as = _outgoing[1]->getAtomSpace();
 	if (nullptr == as)
 		throw InvalidParamException(TRACE_INFO,
 			"LgDictEntry requires an atomspace to work");

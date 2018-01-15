@@ -18,8 +18,7 @@ attention       -- ECAN Attention allocation.
 
 cogserver       -- Multi-user network server.
 
-timeoctomap     -- Space and time storage matrix for avatars.
-spatial, spacetime -- Like above, but quasi-obsolete.
+spacetime       -- Tag atoms with 3D spatial and time coordinates.
 
 eva             -- Code to control the Hanson Robotics Sophia robot.
                    Includes perception (vision, sound), chat and

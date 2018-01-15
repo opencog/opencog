@@ -75,7 +75,7 @@ private:
     AgentPtr _waRentAgentPtr;
     AgentPtr _afRentAgentPtr;
 
-    boost::signals2::connection addAFConnection;
+    int addAFConnection;
 
     void addAFSignal(const Handle& h, const AttentionValuePtr& av_old,
                      const AttentionValuePtr& av_new);

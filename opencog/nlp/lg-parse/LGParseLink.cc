@@ -136,14 +136,23 @@ LGParseMinimal::LGParseMinimal(const Link& l)
 
 // =================================================================
 
-Handle LGParseLink::execute(AtomSpace* as) const
+Handle LGParseLink::execute() const
 {
 	if (PHRASE_NODE != _outgoing[0]->get_type()) return Handle();
 	if (LG_DICT_NODE != _outgoing[1]->get_type()) return Handle();
 	if (3 == _outgoing.size() and
 	   NUMBER_NODE != _outgoing[2]->get_type()) return Handle();
 
-	if (nullptr == as) as = getAtomSpace();
+	// Due to the way that parsing generates big piles of atoms, they
+	// have to be placed into some atomspace. First choice is the same
+	// atomspace as this atom; however, this atom might not be in any
+	// atomspace, if it is begin created by some complex execution
+	// chain. Second attempt is to put it where the phrase is. If
+	// that's not available, then surely the dictionary is available
+	// as a long-lived atom.
+	AtomSpace* as = getAtomSpace();
+	if (nullptr == as) as = _outgoing[0]->getAtomSpace();
+	if (nullptr == as) as = _outgoing[1]->getAtomSpace();
 	if (nullptr == as)
 		throw InvalidParamException(TRACE_INFO,
 			"LgParseLink requires an atomspace to parse");
@@ -158,7 +167,7 @@ Handle LGParseLink::execute(AtomSpace* as) const
 	Dictionary dict = ldn->get_dictionary();
 	if (nullptr == dict)
 		throw InvalidParamException(TRACE_INFO,
-			"LgParseLink requires valid dictionary! %s was given.",
+			"LgParseLink requires valid dictionary! \"%s\" was given.",
 			ldn->get_name().c_str());
 
 	// Set up the sentence
@@ -261,8 +270,9 @@ Handle LGParseLink::cvt_linkage(Linkage lkg, int i, const char* idstr,
 			wrd = linkage_get_word(lkg, w);
 		else
 		{
-			if (' ' == phrstr[eb]) eb--;
-			wrd = strndupa(phrstr + sb, eb-sb+1);
+			// eb points at the byte after the last char,
+			// its a great place to write a null byte.
+			wrd = strndupa(phrstr + sb, eb-sb);
 		}
 
 		char buff[801] = "";

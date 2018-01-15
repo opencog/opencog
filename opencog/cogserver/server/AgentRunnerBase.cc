@@ -85,7 +85,7 @@ void AgentRunnerBase::remove_all_agents(const std::string& id)
     // place agents with classinfo().id == id at the end of the container
     AgentSeq::iterator last =
         std::partition(agents.begin(), agents.end(),
-                       boost::bind(equal_to_id(), _1, id));
+                       std::bind(equal_to_id(), std::placeholders::_1, id));
 
     std::for_each(last, agents.end(), [] (AgentPtr &a) {
         cogserver().systemActivityTable().clearActivity(a);

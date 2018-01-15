@@ -72,13 +72,13 @@ Print all visible faces in the AtomSpace:
 ```
 rlwrap telnet localhost 17020
 (cog-incoming-set (PredicateNode "visible face"))
-(cog-bind chk-room-empty)
-(cog-bind chk-room-non-empty)
+(cog-execute! chk-room-empty)
+(cog-execute! chk-room-non-empty)
 (show-room-state)
 ```
 
 Note that if the room state changes, `(show-room-state)` will show the
-wrong state until after both cog-binds are performed!
+wrong state until after both cog-execute's are performed!
 
 
 Enhancement TODO List

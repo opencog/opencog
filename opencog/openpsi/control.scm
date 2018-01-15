@@ -156,7 +156,7 @@
   psi-rule:
   - An ImplicationLink whose weight is going to be modified.
 "
-    (cog-outgoing-set (cog-bind
+    (cog-outgoing-set (cog-execute!
         (BindLink
             (VariableList
                 (TypedVariableLink

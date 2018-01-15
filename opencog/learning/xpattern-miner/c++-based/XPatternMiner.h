@@ -49,7 +49,7 @@ struct XPMParameters {
 	 * provided.
 	 */
 	XPMParameters(unsigned minsup=1,
-	              unsigned ngram=1,
+	              unsigned ngram=1, // Rename by nconjucts
 	              const Handle& initpat=Handle::UNDEFINED,
 	              int maxdepth=-1,
 	              int maxpats=-1);
@@ -191,13 +191,21 @@ private:
 	 * frequency, that is the number of matches. Note that is number
 	 * may be greater than the total count of the text corpus if the
 	 * pattern is an n-gram for any n > 1.
+	 *
+	 * maxf is used to halt the frequency calculation if it reaches a
+	 * certain maximum. Purely for saving resources when possible.
 	 */
-	unsigned freq(const Handle& pattern, const HandleUCounter& texts) const;
+	unsigned freq(const Handle& pattern,
+	              const HandleUCounter& texts,
+	              int maxf=-1) const;
 
 	/**
 	 * Calculate the total count of texts.
+	 *
+	 * maxf is used to halt the frequency calculation if it reaches a
+	 * certain maximum. Purely for saving resources when possible.
 	 */
-	unsigned freq(const HandleUCounter& texts) const;
+	unsigned freq(const HandleUCounter& texts, int maxf=-1) const;
 
 	/**
 	 * Filter in only texts matching the pattern
@@ -223,10 +231,13 @@ private:
 	 * Given a pattern and texts, return the satisfying set of the
 	 * pattern over the text. Please note that the texts count are
 	 * ignored. But this is still useful for n-gram patterns where the
-	 * counts are all in 1 anyway.
+	 * counts are all 1 anyway.
+	 *
+	 * TODO: ignore permutations for unordered links.
 	 */
 	Handle restrict_satisfying_set(const Handle& pattern,
-	                               const HandleUCounter& texts) const;
+	                               const HandleUCounter& texts,
+	                               int maxf=-1) const;
 
 	/**
 	 * Given a collection of text atoms, return all shallow patterns,

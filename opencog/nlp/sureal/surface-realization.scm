@@ -7,7 +7,7 @@
 ;  (use-modules (ice-9 rdelim))
 
 (use-modules (srfi srfi-1)   ; needed for delete-duplicates
-             (ice-9 threads) ; needed for par-map
+             ; (ice-9 threads) ; needed for par-map
              (ice-9 rdelim) (ice-9 regex) (ice-9 receive))
 (use-modules (opencog))
 (use-modules (opencog exec))
@@ -15,7 +15,7 @@
              (opencog nlp lg-dict)
              (opencog nlp relex2logic))
 
-(use-modules (opencog logger))
+; (use-modules (opencog logger))
 
 ; ---------------------------------------------------------------------
 ; Creates a single list  made of the elements of lists within it with
@@ -141,9 +141,15 @@
     ;; (cog-logger-info "create-sentence a-set-link = ~a, use-cache = ~a"
     ;;                  a-set-link use-cache)
 
-    ; add LG dictionary on each word if not already in the atomspace
-    (par-map
-        lg-get-dict-entry
+    ; Perform LG dictionary lookup on each word, if it's not already
+    ; in the atomspace.
+    ;
+    ; Doing this in parallel with par-map seems like a good idea at
+    ; first, but the guile implementation of par-map is so terrible
+    ; that it actually makes things slower, by getting stuck in some
+    ; live-lock.  So don't use par-map, use plain map.
+    (map
+        lg-dict-entry
         (filter-map
             (lambda (n)
                 (if (null? (r2l-get-word-inst n))
@@ -154,7 +160,7 @@
                                 (map
                                     (lambda (p)
                                         ; TODO: There could be too many... skip if seen before?
-                                        (lg-get-dict-entry (word-inst-get-word p))
+                                        (lg-dict-entry (word-inst-get-word p))
                                     )
                                     (cog-chase-link 'LemmaLink 'WordInstanceNode (r2l-get-word n))
                                 )
@@ -281,7 +287,7 @@
     (define result (cog-execute! (MapLink filter-in-pattern filter-from)))
 
     ; Delete the filter-from SetLink and its encompasing MapLink.
-    (cog-delete-recursive filter-from)
+    (cog-extract-recursive filter-from)
 
     result
 )
