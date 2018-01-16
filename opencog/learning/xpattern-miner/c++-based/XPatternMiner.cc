@@ -636,25 +636,25 @@ Handle XPatternMiner::restricted_satisfying_set(const Handle& pattern,
                                                 const HandleUCounter& texts,
                                                 int maxf)
 {
-	// TODO: leaking!!!
-	AtomSpace* tmp_text_as = new AtomSpace();
+	static AtomSpace tmp_text_as;
+	tmp_text_as.clear();
 	HandleSeq tmp_texts;
 	for (const auto& text : texts)
-		tmp_texts.push_back(tmp_text_as->add_atom(text.first));
+		tmp_texts.push_back(tmp_text_as.add_atom(text.first));
 
 	// Avoid pattern matcher warning
 	// TODO: support 1 < conjuncts
 	if (totally_abstract(pattern) and conjuncts(pattern) == 1)
-		return tmp_text_as->add_link(SET_LINK, tmp_texts);
+		return tmp_text_as.add_link(SET_LINK, tmp_texts);
 
 	// Run the pattern matcher
-	AtomSpace tmp_query_as(tmp_text_as);
+	AtomSpace tmp_query_as(&tmp_text_as);
 	Handle tmp_pattern = tmp_query_as.add_atom(pattern),
 		vardecl = get_vardecl(tmp_pattern),
 		body = get_body(tmp_pattern),
 		gl = tmp_query_as.add_link(GET_LINK, vardecl, body),
-		results = (maxf < 0 ? satisfying_set(tmp_text_as, gl)
-		           : satisfying_set(tmp_text_as, gl, maxf));
+		results = (maxf < 0 ? satisfying_set(&tmp_text_as, gl)
+		           : satisfying_set(&tmp_text_as, gl, maxf));
 	return results;
 }
 
