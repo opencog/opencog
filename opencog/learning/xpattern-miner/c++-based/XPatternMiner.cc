@@ -103,7 +103,7 @@ HandleTree XPatternMiner::specialize(const Handle& pattern,
                                      const HandleUCounter& texts,
                                      int maxdepth)
 {
-	return specialize(pattern, texts, mk_valuations(pattern, texts), maxdepth);
+	return specialize(pattern, texts, Valuations(pattern, texts), maxdepth);
 }
 
 HandleTree XPatternMiner::specialize(const Handle& pattern,
@@ -210,10 +210,9 @@ HandleTree XPatternMiner::specialize_vared(const Handle& pattern,
 	if (vs2vals.empty())
 		return HandleTree();
 
-	// For each variable set, create a specialization where all
-	// variables in that set are substituted by the front variable,
-	// and the resulting pattern recursively specialized with the
-	// remaining valuations.
+	// For each variable, create a specialization where that variable
+	// is substituted by the front variable, and the resulting pattern
+	// recursively specialized.
 	HandleTree patterns;
 	Handle var = valuations.front_variable();
 	for (const auto v2v : vs2vals) {
@@ -261,17 +260,48 @@ HandleValuationsMap XPatternMiner::variable_reduce(const Valuations& valuations)
 	// Variable to specialize
 	Handle var = valuations.front_variable();
 
-	// For each valuation pick up variables with values equal to the
-	// front value
+	// Variables not added to potential reduction yet
+	HandleSet remvars(std::next(valuations.variables.varseq.begin()),
+	                  valuations.variables.varseq.end());
+
+	// Let's not bother and consider all remaining variables as
+	// potential reducible
 	HandleValuationsMap vs2vals;
-	for (const HandleSeq& valuation : valuations.values) {
-		for (unsigned i = 1; i < valuation.size(); ++i) {
-			if (content_eq(valuation[0], valuation[i]))
-				// TODO: for now we don't care about updating the
-				// valuations
-				vs2vals.insert({valuations.variable(i), valuations});
-		}
-	}
+	for (const Handle remvar : remvars)
+		vs2vals.insert({remvar, Valuations()});
+
+	// TODO: the follow code reads the valuations and only consider
+	// variables that can be reduced according to the values. This
+	// might speed up specialization by ignoring fails reductions,
+	// though it's not clear it is more efficient.
+
+	// // For each valuation pick up variables with values equal to the
+	// // front value
+	// HandleValuationsMap vs2vals;
+	// const SCValuations& var_scv(valuations.get_scvaluations(var));
+	// for (const HandleSeq& valuation : var_scv.values) {
+	// 	// All variables are reducible, no need to read values
+	// 	// anymore.
+	// 	if (remvars.empty())
+	// 		break;
+
+	// 	// Otherwise see what variable we can add for reduction
+	// 	for (const Handle& remvar : remvars) {
+	// 		const SCValuations& rem_scv(valuations.get_scvaluations(remvar));
+	// 		// remvar belongs to the same strongly connected
+	// 		// component, thus is dependent on
+	// 		if (&rem_scv == &var_scv) {
+
+	// 		}
+	// 		// remvar belongs to another component,
+	// 	}
+	// 	for (unsigned i = 1; i < valuation.size(); ++i) {
+	// 		if (content_eq(valuation[0], valuation[i]))
+	// 			// TODO: for now we don't care about updating the
+	// 			// valuations
+	// 			vs2vals.insert({valuations.variable(i), Valuations()});
+	// 	}
+	// }
 	return vs2vals;
 }
 
@@ -293,14 +323,6 @@ bool XPatternMiner::terminate(const Handle& pattern,
 		not enough_support(pattern, texts);
 }
 
-Valuations XPatternMiner::mk_valuations(const Handle& pattern,
-                                        // TODO: replace by HandleSet
-                                        const HandleUCounter& texts)
-{
-	Handle satset = restrict_satisfying_set(pattern, texts);
-	return Valuations(get_variables(pattern), satset);
-}
-
 bool XPatternMiner::enough_support(const Handle& pattern,
                                    const HandleUCounter& texts) const
 {
@@ -316,6 +338,8 @@ unsigned XPatternMiner::freq(const Handle& pattern,
                              const HandleUCounter& texts,
                              int maxf) const
 {
+	// TODO: split into strongly connected components so that totally
+	// abstract parts do not trigger the pattern matcher warnings
 	if (totally_abstract(pattern))
 	{
 		unsigned ng = conjuncts(pattern);
@@ -327,7 +351,7 @@ unsigned XPatternMiner::freq(const Handle& pattern,
 	// the count of each text in texts is 1, thus we just need to run
 	// the pattern over the whole texts without worrying about counts
 	if (1 < conjuncts(pattern))
-		return restrict_satisfying_set(pattern, texts, maxf)->get_arity();
+		return restricted_satisfying_set(pattern, texts, maxf)->get_arity();
 
 	// Otherwise, assuming the texts has already been filtered, it is
 	// merely the texts total count. TODO: it would safer to put some
@@ -395,32 +419,6 @@ Handle XPatternMiner::matched_results(const Handle& pattern,
 	return inst.execute(ml);
 }
 
-Handle XPatternMiner::restrict_satisfying_set(const Handle& pattern,
-                                              const HandleUCounter& texts,
-                                              int maxf) const
-{	
-	// TODO: leaking!!!
-	AtomSpace* tmp_text_as = new AtomSpace();
-	HandleSeq tmp_texts;
-	for (const auto& text : texts)
-		tmp_texts.push_back(tmp_text_as->add_atom(text.first));
-
-	// Avoid pattern matcher warning
-	// TODO: support 1 < conjuncts
-	if (totally_abstract(pattern) and conjuncts(pattern) == 1)
-		return tmp_text_as->add_link(SET_LINK, tmp_texts);
-
-	// Run the pattern matcher
-	AtomSpace tmp_query_as(tmp_text_as);
-	Handle tmp_pattern = tmp_query_as.add_atom(pattern),
-		vardecl = get_vardecl(tmp_pattern),
-		body = get_body(tmp_pattern),
-		gl = tmp_query_as.add_link(GET_LINK, vardecl, body),
-		results = (maxf < 0 ? satisfying_set(tmp_text_as, gl)
-		           : satisfying_set(tmp_text_as, gl, maxf));
-	return results;
-}
-
 // TODO: maybe we want to associate the corresponding filter text as well
 HandleValuationsMap XPatternMiner::shallow_abstract(const Valuations& valuations)
 {
@@ -431,11 +429,15 @@ HandleValuationsMap XPatternMiner::shallow_abstract(const Valuations& valuations
 	// Variable to specialize
 	Handle var = valuations.front_variable();
 
+	// Strongly connected valuations associated to that variable
+	const SCValuations& var_scv(valuations.get_scvaluations(var));
+
 	// For each valuation create an abstraction (shallow pattern) of
 	// the value associated to variable, and associate the remaining
 	// valuations to it.
 	HandleValuationsMap sha2vals;
-	for (const HandleSeq& valuation : valuations.values) {
+	// TODO: support multi-component valuations
+	for (const HandleSeq& valuation : var_scv.values) {
 		auto val_it = valuation.begin();
 		Handle shapat = shallow_abstract(*val_it);
 		auto s2v_it = sha2vals.find(shapat);
@@ -443,15 +445,17 @@ HandleValuationsMap XPatternMiner::shallow_abstract(const Valuations& valuations
 			// Construct the remaining valuations
 			Variables rembles(valuations.variables);
 			rembles.erase(var);
-			s2v_it = sha2vals.insert({shapat, Valuations(rembles)}).first;
+			// TODO: probably don't care about the valuations
+			s2v_it = sha2vals.insert({shapat, Valuations()}).first;
+			// s2v_it = sha2vals.insert({shapat, Valuations(rembles)}).first;
 		}
-		// Append the remaining values to existing valuations
-		// TODO: Instead of copying the entire remaining values,
-		// one could use boost::range, or simply C arrays. On the
-		// other hand this might be negligeable.
-		HandleSeq remval(++val_it, valuation.end());
-		if (not s2v_it->second.novar())
-			s2v_it->second.values.push_back(remval); // TODO use emplace_back
+		// // Append the remaining values to existing valuations
+		// // TODO: Instead of copying the entire remaining values,
+		// // one could use boost::range, or simply C arrays. On the
+		// // other hand this might be negligeable.
+		// HandleSeq remval(++val_it, valuation.end());
+		// if (not s2v_it->second.novar())
+		// 	s2v_it->second.values.push_back(remval); // TODO use emplace_back
 	}
 	return sha2vals;
 }
@@ -523,35 +527,11 @@ Handle XPatternMiner::local_quote(const Handle& h)
 	return pattern_as.add_link(LOCAL_QUOTE_LINK, h);
 }
 
-bool XPatternMiner::totally_abstract(const Handle& pattern) const
-{
-	// Check whether it is an abstraction to begin with
-	if (pattern->get_type() != LAMBDA_LINK)
-		return false;
-
-	// If some variables are typed then the abstraction isn't total
-	const Variables& vars = get_variables(pattern);
-	if (not vars._simple_typemap.empty() or not vars._deep_typemap.empty())
-		return false;
-
-	// Make sure the body is either a variable, or a conjunction of
-	// variables
-	Handle body = get_body(pattern);
-	if (body->get_type() == VARIABLE_NODE)
-		return true;
-	if (body->get_type() != AND_LINK)
-		return false;
-	for (const Handle& ch : body->getOutgoingSet())
-		if (ch->get_type() != VARIABLE_NODE)
-			return false;
-	return true;
-}
-
 // TODO: take care of removing local quote in the composed
 // sub-patterns, if it doesn't already
 // TODO: replace by PutLink, if possible
 Handle XPatternMiner::compose(const Handle& pattern,
-                              const HandleMap& var2pat) const
+                              const HandleMap& var2pat)
 {
 	// Split var2pat into 2 mappings, variable to sub-vardecl and
 	// variable to sub-body
@@ -652,6 +632,56 @@ Handle XPatternMiner::alpha_conversion(const Handle& pattern)
 	return pattern;
 }
 
+Handle XPatternMiner::restricted_satisfying_set(const Handle& pattern,
+                                                const HandleUCounter& texts,
+                                                int maxf)
+{
+	// TODO: leaking!!!
+	AtomSpace* tmp_text_as = new AtomSpace();
+	HandleSeq tmp_texts;
+	for (const auto& text : texts)
+		tmp_texts.push_back(tmp_text_as->add_atom(text.first));
+
+	// Avoid pattern matcher warning
+	// TODO: support 1 < conjuncts
+	if (totally_abstract(pattern) and conjuncts(pattern) == 1)
+		return tmp_text_as->add_link(SET_LINK, tmp_texts);
+
+	// Run the pattern matcher
+	AtomSpace tmp_query_as(tmp_text_as);
+	Handle tmp_pattern = tmp_query_as.add_atom(pattern),
+		vardecl = get_vardecl(tmp_pattern),
+		body = get_body(tmp_pattern),
+		gl = tmp_query_as.add_link(GET_LINK, vardecl, body),
+		results = (maxf < 0 ? satisfying_set(tmp_text_as, gl)
+		           : satisfying_set(tmp_text_as, gl, maxf));
+	return results;
+}
+
+bool XPatternMiner::totally_abstract(const Handle& pattern)
+{
+	// Check whether it is an abstraction to begin with
+	if (pattern->get_type() != LAMBDA_LINK)
+		return false;
+
+	// If some variables are typed then the abstraction isn't total
+	const Variables& vars = get_variables(pattern);
+	if (not vars._simple_typemap.empty() or not vars._deep_typemap.empty())
+		return false;
+
+	// Make sure the body is either a variable, or a conjunction of
+	// variables
+	Handle body = get_body(pattern);
+	if (body->get_type() == VARIABLE_NODE)
+		return true;
+	if (body->get_type() != AND_LINK)
+		return false;
+	for (const Handle& ch : body->getOutgoingSet())
+		if (ch->get_type() != VARIABLE_NODE)
+			return false;
+	return true;
+}
+
 HandleSeq XPatternMiner::gen_rand_variables(size_t n)
 {
 	HandleSeq variables;
@@ -703,7 +733,7 @@ unsigned XPatternMiner::conjuncts(const Handle& pattern)
 Handle XPatternMiner::remove_useless_clauses(const Handle& vardecl,
                                              const Handle& body)
 {
-	Handle res = Unify::remove_constant_clauses(vardecl, body);
+	Handle res = remove_constant_clauses(vardecl, body);
 
 	// Check that each clause isn't a subtree of another clause
 	const HandleSeq& outs = res->getOutgoingSet();
@@ -717,6 +747,27 @@ Handle XPatternMiner::remove_useless_clauses(const Handle& vardecl,
 	res = createLink(nouts, AND_LINK);
 
 	return res;
+}
+
+Handle XPatternMiner::remove_constant_clauses(const Handle& vardecl,
+                                              const Handle& clauses)
+{
+	VariableListPtr vl = createVariableList(vardecl);
+	HandleSet vars = vl->get_variables().varset;
+
+	// Remove constant clauses
+	Type t = clauses->get_type();
+	HandleSeq hs;
+	if (t == AND_LINK) {
+		for (const Handle& clause : clauses->getOutgoingSet()) {
+			if (any_unquoted_unscoped_in_tree(clause, vars)) {
+				hs.push_back(clause);
+			}
+		}
+	} else if (any_unquoted_unscoped_in_tree(clauses, vars)) {
+		return clauses;
+	}
+	return createLink(hs, AND_LINK);
 }
 
 std::string oc_to_string(const HandleUCounterMap& hucp)

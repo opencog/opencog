@@ -29,14 +29,35 @@
 namespace opencog
 {
 
+class ValuationsBase
+{
+public:
+	ValuationsBase(const Variables& variables);
+	ValuationsBase();               // TODO: just till be use dummy valuations
+
+	/**
+	 * Return true iff the valuation contains no variable (thus is
+	 * empty).
+	 */
+	bool novar() const;
+
+	/**
+	 * Return the front variable.
+	 */
+	Handle front_variable() const;
+
+	/**
+	 * Return the variable at index i.
+	 */
+	Handle variable(unsigned i) const;
+
+	Variables variables;
+};
+
 /**
- * Class representing valuations, that is mappings from variables to
- * values.
- *
- * TODO: maybe this could be moved to Unify.h and being used in
- * Unify.cc.
+ * Valuations for a single strongly connected component.
  */
-class Valuations
+class SCValuations : public ValuationsBase
 {
 public:
 	/**
@@ -47,23 +68,51 @@ public:
 	 *
 	 * construct the corresponding Valuations.
 	 */
-	Valuations(const Variables& variables, const Handle& satset=Handle::UNDEFINED);
+	SCValuations(const Variables& variables, const Handle& satset=Handle::UNDEFINED);
 
 	/**
-	 * Return true iff the valuation contains no variable (thus is
-	 * empty).
+	 * Erase the front variable with all its corresponding values on a
+	 * copy of this valuations.
 	 */
-	bool novar() const;
+	SCValuations erase_front() const;
 
 	/**
-	 * Return the front variable, the first one is the list.
+	 * Erase the given variable, if exists, with all its corresponding
+	 * values on a copy of this valuations.
 	 */
-	Handle front_variable() const;
+	SCValuations erase(const Handle& var) const;
 
 	/**
-	 * Return the variable at index i.
+	 * Less than relationship according to Variables, because it's
+	 * cheap and no 2 SCValuations with same variables will be in the
+	 * same set at once.
 	 */
-	Handle variable(unsigned i) const;
+	bool operator<(const SCValuations& other) const;
+
+	HandleSeqSeq values;
+};
+
+typedef std::set<SCValuations> SCValuationsSet;
+
+/**
+ * Class representing valuations of a pattern against a text, that is
+ * mappings from variables to values. Valuations is composed of
+ * strongly connected valuations, as to not perform their expensive
+ * Cartesian products.
+ */
+class Valuations : public ValuationsBase
+{
+public:
+	/**
+	 * Given a pattern and texts (ground terms), calculate its
+	 * valuations.
+	 *
+	 * Probably can replace HandleUCounter by HandleSet.
+	 */
+	Valuations(const Handle& pattern, const HandleUCounter& texts);
+	Valuations(const Variables& variables, const SCValuationsSet& scvs);
+	Valuations(const Variables& variables);
+	Valuations();               // TODO: just till be use dummy valuations
 	
 	/**
 	 * Erase the front variable with all its corresponding associated
@@ -71,13 +120,24 @@ public:
 	 */
 	Valuations erase_front() const;
 
-	Variables variables;
-	HandleSeqSeq values;
+	/**
+	 * Get the SCValuations containing the given variable.
+	 */
+	const SCValuations& get_scvaluations(const Handle& var) const;
+
+	/**
+	 * Given a pattern, split it into smaller patterns of strongly
+	 * connected components.
+	 */
+	static HandleSeq get_component_patterns(const Handle& pattern);
+
+	SCValuationsSet scvs;
 };
 
 typedef std::map<Handle, Valuations> HandleValuationsMap;
-// typedef std::map<HandleSet, Valuations> HandleSetValuationsMap;
 
+std::string oc_to_string(const SCValuations& scvaluations);
+std::string oc_to_string(const SCValuationsSet& scvs);
 std::string oc_to_string(const Valuations& valuations);
 std::string oc_to_string(const HandleValuationsMap& h2vals);
 

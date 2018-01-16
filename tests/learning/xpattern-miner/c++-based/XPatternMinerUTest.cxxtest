@@ -57,6 +57,7 @@ public:
 
 	// Auxiliary methods
 	void test_match();
+	void test_compose();
 
 	// Pattern miner
 	void test_A();
@@ -70,6 +71,7 @@ public:
 	void test_2conjuncts_1();
 	void test_2conjuncts_2();
 	void test_2conjuncts_3();
+	void test_2conjuncts_4();
 	void test_InferenceControl();
 	void test_SodaDrinker();
 };
@@ -77,7 +79,7 @@ public:
 XPatternMinerUTest::XPatternMinerUTest() : _scm(&_as)
 {
 	logger().set_level(Logger::DEBUG);
-	// logger().set_timestamp_flag(false);
+	logger().set_timestamp_flag(false);
 	logger().set_print_to_stdout_flag(true);
 }
 
@@ -114,6 +116,28 @@ void XPatternMinerUTest::test_match()
 	XPatternMiner pm(_as);
 
 	TS_ASSERT(not pm.match(pattern, text));
+}
+
+void XPatternMinerUTest::test_compose()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	Handle X = tmp_an(VARIABLE_NODE, "$X"),
+		Y = tmp_an(VARIABLE_NODE, "$Y"),
+		A = tmp_an(CONCEPT_NODE, "A"),
+		B = tmp_an(CONCEPT_NODE, "B"),
+		pattern = tmp_al(LAMBDA_LINK,
+		                 tmp_al(VARIABLE_LIST, X, Y),
+		                 tmp_al(AND_LINK, X, tmp_al(INHERITANCE_LINK, Y, B))),
+		subpat = A;
+
+	Handle npat = XPatternMiner::compose(pattern, {{Y, subpat}}),
+		expected = tmp_al(LAMBDA_LINK, X, X);
+
+	logger().debug() << "npat = " << oc_to_string(npat);
+	logger().debug() << "expected = " << oc_to_string(expected);
+
+	TS_ASSERT(content_eq(npat, expected));
 }
 
 void XPatternMinerUTest::test_A()
@@ -274,7 +298,11 @@ void XPatternMinerUTest::test_ABCD()
 	                                       tmp_al(IMPLICATION_LINK, Z, XY)),
 	                                { tmp_al(LAMBDA_LINK,
 	                                         tmp_al(IMPLICATION_LINK, ZW, XY)) }),
-			             tmp_al(LAMBDA_LINK, tmp_al(IMPLICATION_LINK, XY, Z)) };
+			             HandleTree(tmp_al(LAMBDA_LINK,
+			                               tmp_al(IMPLICATION_LINK, XY, Z)),
+	                                { tmp_al(LAMBDA_LINK,
+	                                         tmp_al(IMPLICATION_LINK, ZW, XY)) })
+			            };
 
 	logger().debug() << "results = " << oc_to_string(results);
 	logger().debug() << "expected = " << oc_to_string(expected);
@@ -357,14 +385,13 @@ void XPatternMinerUTest::test_2conjuncts_1()
 	Handle
 		X = tmp_an(VARIABLE_NODE, "$X"),
 		Y = tmp_an(VARIABLE_NODE, "$Y"),
-		Z = tmp_an(VARIABLE_NODE, "$Z"),
-		XYZ = tmp_al(VARIABLE_LIST, X, Y, Z);
+		XY = tmp_al(VARIABLE_LIST, X, Y);
 
 	Handle initpat = tmp_al(LAMBDA_LINK,
-	                        X,
+	                        XY,
 	                        tmp_al(AND_LINK,
-	                               tmp_al(INHERITANCE_LINK, A, B),
-	                               tmp_al(INHERITANCE_LINK, A, X)));
+	                               tmp_al(INHERITANCE_LINK, X, A),
+	                               tmp_al(INHERITANCE_LINK, A, Y)));
 
 	XPMParameters param(2, 2, initpat);
 	XPatternMiner pm(_as, param);
@@ -375,8 +402,48 @@ void XPatternMinerUTest::test_2conjuncts_1()
 	TS_ASSERT(results.empty());
 }
 
-// TODO: improve HandleTree management to remove duplicates
 void XPatternMinerUTest::test_2conjuncts_2()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	Handle
+		A = an(CONCEPT_NODE, "A"),
+		B = an(CONCEPT_NODE, "B"),
+		C1 = an(CONCEPT_NODE, "C1"),
+		C2 = an(CONCEPT_NODE, "C2"),
+		AB = al(INHERITANCE_LINK, A, B),
+		BC1 = al(INHERITANCE_LINK, B, C1),
+		BC2 = al(INHERITANCE_LINK, B, C2);
+
+	Handle
+		X = tmp_an(VARIABLE_NODE, "$X"),
+		Y = tmp_an(VARIABLE_NODE, "$Y"),
+		Z = tmp_an(VARIABLE_NODE, "$Z"),
+		W = tmp_an(VARIABLE_NODE, "$W"),
+		XYZ = tmp_al(VARIABLE_LIST, X, Y, Z),
+		XYZW = tmp_al(VARIABLE_LIST, X, Y, Z, W);
+
+	Handle initpat = tmp_al(LAMBDA_LINK,
+	                        XYZW,
+	                        tmp_al(AND_LINK,
+	                               tmp_al(INHERITANCE_LINK, X, Y),
+	                               tmp_al(INHERITANCE_LINK, Z, W)));
+	XPMParameters param(2, 2, initpat);
+	XPatternMiner pm(_as, param);
+	HandleTree results = pm();
+	Handle expected_pattern = tmp_al(LAMBDA_LINK,
+	                                 XYZ,
+	                                 tmp_al(AND_LINK,
+	                                        tmp_al(INHERITANCE_LINK, X, Y),
+	                                        tmp_al(INHERITANCE_LINK, Y, Z)));
+
+	logger().debug() << "results = " << oc_to_string(results);
+	logger().debug() << "expected_pattern = " << oc_to_string(expected_pattern);
+
+	TS_ASSERT(content_is_in(expected_pattern, results));
+}
+
+void XPatternMinerUTest::test_2conjuncts_3()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
@@ -410,7 +477,7 @@ void XPatternMinerUTest::test_2conjuncts_2()
 	TS_ASSERT(content_is_in(expected_pattern, results));
 }
 
-void XPatternMinerUTest::test_2conjuncts_3()
+void XPatternMinerUTest::test_2conjuncts_4()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 

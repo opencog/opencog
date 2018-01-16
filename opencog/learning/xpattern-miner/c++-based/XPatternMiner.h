@@ -159,15 +159,6 @@ private:
 	               const HandleUCounter& texts,
 	               const Valuations& valuations,
 	               int maxdepth) const;
-
-	/**
-	 * Given a pattern and texts, generate a valuation where all
-	 * variables of the pattern are associated to matching values.
-	 *
-	 * TODO: move this in Valuations constructor.
-	 */
-	Valuations mk_valuations(const Handle& pattern,
-	                         const HandleUCounter& texts);
 	
 	/**
 	 * Given a pattern, a variable of that pattern, create another
@@ -274,18 +265,6 @@ private:
 	Handle matched_results(const Handle& pattern, const Handle& text) const;
 
 	/**
-	 * Given a pattern and texts, return the satisfying set of the
-	 * pattern over the text. Please note that the texts count are
-	 * ignored. But this is still useful for multi-conjuncts patterns
-	 * where the counts are all 1 anyway.
-	 *
-	 * TODO: ignore permutations for unordered links.
-	 */
-	Handle restrict_satisfying_set(const Handle& pattern,
-	                               const HandleUCounter& texts,
-	                               int maxf=-1) const;
-
-	/**
 	 * TODO: add comment
 	 */
 	HandleValuationsMap variable_reduce(const Valuations& valuations) const;
@@ -353,27 +332,6 @@ private:
 	Handle local_quote(const Handle& h);
 
 	/**
-	 * Return true iff the pattern is totally abstract like
-	 *
-	 * (Lambda
-	 *   (Variable "$X")
-	 *   (Variable "$X"))
-	 *
-	 * for a single conjunct. Or
-	 *
-	 * (Lambda
-	 *   (List
-	 *     (Variable "$X")
-	 *     (Variable "$Y"))
-	 *   (And
-	 *     (Variable "$X")
-	 *     (Variable "$Y"))
-	 *
-	 * for 2 conjuncts, etc.
-	 */
-	bool totally_abstract(const Handle& pattern) const;
-
-	/**
 	 * Given a pattern, and mapping from variables to sub-patterns,
 	 * compose (as in function composition) the pattern with the
 	 * sub-patterns. That is replace variables in the pattern by their
@@ -386,7 +344,7 @@ private:
 	 *
 	 * TODO Move this to a ComposeLink factory.
 	 */
-	Handle compose(const Handle& pattern, const HandleMap& var2pat) const;
+	static Handle compose(const Handle& pattern, const HandleMap& var2pat);
 
 	/**
 	 * Given a variable declaration, and a mapping from variables to
@@ -422,6 +380,39 @@ private:
 
 public:
 	/**
+	 * Given a pattern and texts, return the satisfying set of the
+	 * pattern over the text. Please note that the texts count are
+	 * ignored. But this is still useful for multi-conjuncts patterns
+	 * where the counts are all 1 anyway.
+	 *
+	 * TODO: ignore permutations for unordered links.
+	 */
+	static Handle restricted_satisfying_set(const Handle& pattern,
+	                                        const HandleUCounter& texts,
+	                                        int maxf=-1);
+
+	/**
+	 * Return true iff the pattern is totally abstract like
+	 *
+	 * (Lambda
+	 *   (Variable "$X")
+	 *   (Variable "$X"))
+	 *
+	 * for a single conjunct. Or
+	 *
+	 * (Lambda
+	 *   (List
+	 *     (Variable "$X")
+	 *     (Variable "$Y"))
+	 *   (And
+	 *     (Variable "$X")
+	 *     (Variable "$Y"))
+	 *
+	 * for 2 conjuncts, etc.
+	 */
+	static bool totally_abstract(const Handle& pattern);
+
+	/**
 	 * Generate a list of hopefully unique random variables
 	 */
 	static HandleSeq gen_rand_variables(size_t n);
@@ -452,6 +443,13 @@ public:
 	 */
 	static Handle remove_useless_clauses(const Handle& vardecl,
 	                                     const Handle& body);
+
+	/**
+	 * Remove any closes clause (regardless of whether they are
+	 * evaluatable or not).
+	 */
+	static Handle remove_constant_clauses(const Handle& vardecl,
+	                                      const Handle& body);
 };
 
 std::string oc_to_string(const HandleUCounterMap& hucp);

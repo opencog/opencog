@@ -65,6 +65,11 @@ HandleTree merge_patterns(const std::initializer_list<HandleTree>& forests)
 	// Build forest of forests
 	HandleTree forest(forests);
 
+	// TODO: actually the assumption below is not right!!!!! So in
+	// order to remove redundants, then must be attached to the other
+	// one. I don't like that, because then you loose the trace of how
+	// things are being produced.
+
 	// // Remove duplicates
 	// HandleSet cash;
 	// for (auto it = forest.begin(); it != forest.end();)
