@@ -151,13 +151,13 @@ HandleSeq Valuations::get_component_patterns(const Handle& pattern)
 	PatternLink pl(XPatternMiner::get_vardecl(pattern),
 	               XPatternMiner::get_body(pattern));
 	HandleSeq compats;
-	for (unsigned i = 0; i < pl._num_comps; ++i)
+	const HandleSeqSeq comps(pl.get_components());
+	for (unsigned i = 0; i < comps.size(); ++i)
 	{
-		unsigned ncomp = pl._components[i].size();
+		unsigned ncomp = comps[i].size();
 		Handle vardecl = filter_vardecl(XPatternMiner::get_vardecl(pattern),
-		                                pl._components[i]);
-		Handle body = 1 < ncomp ? createLink(pl._components[i], AND_LINK)
-		                  : pl._components[i][0];
+		                                comps[i]);
+		Handle body = 1 < ncomp ? createLink(comps[i], AND_LINK) : comps[i][0];
 		if (vardecl != nullptr and body != nullptr)
 			compats.push_back(Handle(createLambdaLink(vardecl, body)));
 	}
