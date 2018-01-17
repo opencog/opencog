@@ -233,7 +233,7 @@ class HobbsAgent(MindAgent):
             if self.DEBUG and filter!=-1:
                 print("accepted \n"+str(conjunction_list))
             log.fine("accepted \n"+str(conjunction_list))
-            self.generateReferenceLink(self.currentPronoun,self.atomspace.add_link(types.AndLink, conjunction_list, TruthValue(1.0, TruthValue().confidence_to_count(1.0))),TruthValue(STRENGTH_FOR_ACCEPTED_ANTECEDENTS, TruthValue().confidence_to_count(self.confidence)))
+            self.generateReferenceLink(self.currentPronoun,self.atomspace.add_link(types.AndLink, conjunction_list, TruthValue(1.0, 1.0)),TruthValue(STRENGTH_FOR_ACCEPTED_ANTECEDENTS, self.confidence))
             self.confidence=self.confidence*CONFIDENCE_DECREASING_RATE
             return True
         return False
@@ -530,7 +530,7 @@ class HobbsAgent(MindAgent):
             '''
 
             if self.pleonastic_it(pronoun):
-                self.generateReferenceLink(pronoun,self.PleonasticItNode,TruthValue(STRENGTH_FOR_ACCEPTED_ANTECEDENTS, TruthValue().confidence_to_count(self.confidence)))
+                self.generateReferenceLink(pronoun,self.PleonasticItNode,TruthValue(STRENGTH_FOR_ACCEPTED_ANTECEDENTS, self.confidence))
                 self.confidence=self.confidence*CONFIDENCE_DECREASING_RATE
                 if self.DEBUG:
                     print("accepted "+self.PleonasticItNode.name)
