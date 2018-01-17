@@ -141,7 +141,7 @@
   ;; this method is used a lot, we should search for the goals directly
   ;; See https://github.com/opencog/opencog/pull/2899.
   (let* (
-    (and-links (cog-incoming-by-type action 'SequentialAndLink))
+    (and-links (cog-incoming-by-type action 'AndLink))
     (rules (filter psi-rule?  (append-map
       (lambda (sand) (cog-incoming-by-type sand 'ImplicationLink))
           and-links))))
@@ -188,13 +188,13 @@
       (fold min 1 (map (lambda (x) (tv-conf x)) stv-list)))
   )
 
-  ; map-in-order is used to simulate SequentialAndLink assuming
+  ; map-in-order is used to simulate AndLink assuming
   ; psi-get-context maintains, which is unlikely. What other options
   ; are there?
   ; XXX FIXME How about actually using a SequentialAndLink?
-  ; then teh code will be faster, and tehre won't be this problem.
+  ; then the code will be faster, and there won't be this problem.
   ; TODO: This calculation can be done in OpenPsiImplicator::grounding or
   ; when the rule is being added. Since it unlikely to change except
-  ; during learning it can be saved in the SequentialAndLink.
+  ; during learning it can be saved in the AndLink.
   (context-stv (map-in-order cog-evaluate! (psi-get-context rule)))
 )

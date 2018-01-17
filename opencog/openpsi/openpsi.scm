@@ -113,7 +113,7 @@
   is in the form of an `ImplicationLink`:
 
     (ImplicationLink TV
-        (SequentialAndLink
+        (AndLink
             CONTEXT
             ACTION)
         GOAL)

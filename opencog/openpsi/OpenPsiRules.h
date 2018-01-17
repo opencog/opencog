@@ -38,7 +38,7 @@ public:
    * @return An ImplicationLink that forms a psi-rule. The structure
    *  of the rule is
    *    (ImplicationLink TV
-   *      (SequentialAndLink
+   *      (AndLink
    *        context
    *        action)
    *      goal)
