@@ -342,7 +342,7 @@ void GenericShell::line_discipline(const std::string &expr)
 			c = expr[i+1];
 			if (IP == c or AO == c or SUSP == c)
 			{
-				logger().debug("[GenericShell] got user-interrupt %d", c);
+				logger().debug("[GenericShell] got telnet IAC user-interrupt %d", c);
 				user_interrupt();
 				return;
 			}
@@ -421,6 +421,7 @@ void GenericShell::line_discipline(const std::string &expr)
 	unsigned char c = expr[len-1];
 	if ((SYN == c) || (CAN == c) || (ESC == c))
 	{
+		logger().debug("[GenericShell] got user-interrupt %d", c);
 		// Discard all pending, unevaluated junk in the queue.
 		while (not evalque.is_empty()) evalque.pop();
 
