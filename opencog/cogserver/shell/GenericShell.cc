@@ -405,9 +405,17 @@ void GenericShell::line_discipline(const std::string &expr)
 
 			if (WILL == c)
 			{
-				// Just ignore these.  Typically, will be IAC WILL LINEMODE
-				// sent by the telnet client.
+				// Refuse to perform sub-negotation when
+				// IAC WILL LINEMODE is sent by the telnet client.
 				c = expr[i+2];
+				if (LINEMODE == c)
+				{
+					unsigned char ok[] = {IAC, DONT, LINEMODE, '\n', 0};
+					put_output((const char *) ok);
+					return;
+				}
+
+				// Ignore anything else.
 				logger().debug("[GenericShell] ignoring telnet IAC WILL %d", c);
 				return;
 			}
