@@ -422,15 +422,22 @@ void GenericShell::line_discipline(const std::string &expr)
 	if ((SYN == c) || (CAN == c) || (ESC == c))
 	{
 		logger().debug("[GenericShell] got user-interrupt %d", c);
+
 		// Discard all pending, unevaluated junk in the queue.
 		while (not evalque.is_empty()) evalque.pop();
+
+		// Work around timing window, where queue was just now emptyied,
+		// but the scheme evaluator has not yet started... and so the
+		// command that is to be interrupted hasn't even to begun to
+		// execute, when we go to interrupt it.
+		usleep(10000);
 
 		_evaluator->interrupt();
 		_evaluator->clear_pending();
 
 		put_output("\n");
 		finish_eval();
-		put_output(normal_prompt);
+		put_output(abort_prompt);
 		return;
 	}
 
