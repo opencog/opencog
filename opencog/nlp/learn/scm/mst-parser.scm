@@ -170,7 +170,7 @@
 
 	; The left-wall indicates the start of the sentence, and
 	; is used to link to the head-verb, head-noun of the sentence.
-	(define left-wall "###LEFT-WALL###")
+	(define left-wall "LEFT-WALL")
 
 	(let* ((pad-text (pad-dash plain-text infix-list))
 			(word-list (string-split pad-text #\ ))
