@@ -296,10 +296,12 @@ void GenericShell::user_interrupt()
 	// the shell user.
 	while (not evalque.is_empty()) evalque.pop();
 
-	// Must send TIMING-MARK first, as otherwise telnet silently
-	// ignores any bytes that come before it.
-	unsigned char ok[] = {IAC, WILL, TIMING_MARK, '\n', 0};
-	put_output((const char *) ok);
+	// Work around timing window, where queue was just now emptyied,
+	// but the scheme evaluator has not yet started... and so the
+	// command that is to be interrupted hasn't even to begun to
+	// execute, when we go to interrupt it.
+	usleep(10000);
+
 	_evaluator->interrupt();
 	_evaluator->clear_pending();
 	put_output(abort_prompt);
@@ -328,7 +330,7 @@ void GenericShell::line_discipline(const std::string &expr)
 	// characters, starting at the end of the input string. If they
 	// are there, then don't process input, and clear out the evaluator.
 	// Also, be sure to send telnet IAC WILL TIMING-MARK so that telnet
-	// doesn't sit there flushing output forever.
+	// doesn't sit there discarding output forever.
 	//
 	// Search for IAC to at most 20 chars from the end of the string.
 	int i = len-2;
@@ -343,6 +345,10 @@ void GenericShell::line_discipline(const std::string &expr)
 			if (IP == c or AO == c or SUSP == c)
 			{
 				logger().debug("[GenericShell] got telnet IAC user-interrupt %d", c);
+				// Must send TIMING-MARK first, as otherwise telnet silently
+				// ignores any bytes that come before it.
+				unsigned char ok[] = {IAC, WILL, TIMING_MARK, '\n', 0};
+				put_output((const char *) ok);
 				user_interrupt();
 				return;
 			}
@@ -378,6 +384,10 @@ void GenericShell::line_discipline(const std::string &expr)
 				if (TIMING_MARK == c)
 				{
 					logger().debug("[GenericShell] timing mark (user-interrupt?)");
+					// Must send TIMING-MARK first, as otherwise telnet silently
+					// ignores any bytes that come before it.
+					unsigned char ok[] = {IAC, WILL, TIMING_MARK, '\n', 0};
+					put_output((const char *) ok);
 					user_interrupt();
 					return;
 				}
@@ -430,22 +440,7 @@ void GenericShell::line_discipline(const std::string &expr)
 	if ((SYN == c) || (CAN == c) || (ESC == c))
 	{
 		logger().debug("[GenericShell] got user-interrupt %d", c);
-
-		// Discard all pending, unevaluated junk in the queue.
-		while (not evalque.is_empty()) evalque.pop();
-
-		// Work around timing window, where queue was just now emptyied,
-		// but the scheme evaluator has not yet started... and so the
-		// command that is to be interrupted hasn't even to begun to
-		// execute, when we go to interrupt it.
-		usleep(10000);
-
-		_evaluator->interrupt();
-		_evaluator->clear_pending();
-
-		put_output("\n");
-		finish_eval();
-		put_output(abort_prompt);
+		user_interrupt();
 		return;
 	}
 
