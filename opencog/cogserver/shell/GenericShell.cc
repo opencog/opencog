@@ -66,12 +66,8 @@ GenericShell::GenericShell(void)
 	show_output = true;
 	show_prompt = true;
 	normal_prompt = "> ";
+	abort_prompt = normal_prompt;
 	pending_prompt = "... ";
-	abort_prompt = "asdf"; // simply reserve 4 chars
-	abort_prompt[0] = IAC;
-	abort_prompt[1] = WILL;
-	abort_prompt[2] = TIMING_MARK;
-	abort_prompt[3] = '\n';
 
 	socket = nullptr;
 	evalthr = nullptr;
@@ -300,12 +296,13 @@ void GenericShell::user_interrupt()
 	// the shell user.
 	while (not evalque.is_empty()) evalque.pop();
 
-	// Must write the abort prompt, first, because
-	// telnet will silently ignore any bytes that
-	// come before it.
-	put_output(abort_prompt);
+	// Must send TIMING-MARK first, as otherwise telnet silently
+	// ignores any bytes that come before it.
+	unsigned char ok[] = {IAC, WILL, TIMING_MARK, '\n', 0};
+	put_output((const char *) ok);
 	_evaluator->interrupt();
 	_evaluator->clear_pending();
+	put_output(abort_prompt);
 	finish_eval();
 }
 
@@ -374,10 +371,9 @@ void GenericShell::line_discipline(const std::string &expr)
 			{
 				c = expr[i+2];
 				// Some telnets, including on Debian Stable, send us
-				// IAC DO TIMING_MARK after a ctrl-C from the user.
-				// If we don't ack this, telnet will stall, discarding
-				// everything we send it (It thinks it is doing us a
-				// favor by discarding buffered up junk).
+				// IAC DO TIMING-MARK instead of a IAC IP or IAC AO
+				// when the user hits ctrl-C.  This seems broken to me,
+				// but whatever. Pretend its a normal interrupt.
 				if (TIMING_MARK == c)
 				{
 					logger().debug("[GenericShell] timing mark (user-interrupt?)");
@@ -386,7 +382,8 @@ void GenericShell::line_discipline(const std::string &expr)
 				}
 
 				// If telnet ever tries to go into character mode,
-				// it will send us SUPPRESS-GO-AHEAD and ECHO
+				// it will send us SUPPRESS-GO-AHEAD and ECHO. Try to
+				// stop that, we don't want to effing fiddle with that.
 				if (SUPPRESS_GO_AHEAD == c)
 				{
 					unsigned char ok[] = {IAC, WILL, SUPPRESS_GO_AHEAD, 0};
