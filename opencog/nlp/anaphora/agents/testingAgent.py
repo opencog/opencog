@@ -18,33 +18,7 @@ atomspace = AtomSpace()
 scheme_eval(atomspace,  "(use-modules (opencog) (opencog exec))")
 scheme_eval(atomspace,  "(use-modules (opencog nlp))")
 
-
-
-data=["opencog/scm/config.scm",
-      "opencog/scm/core_types.scm",
-      "spacetime/spacetime_types.scm",
-      "opencog/nlp/types/nlp_types.scm",
-      "opencog/attention/attention_types.scm",
-      "opencog/embodiment/embodiment_types.scm",
-      "opencog/scm/apply.scm",
-      "opencog/scm/file-utils.scm",
-      "opencog/scm/persistence.scm",
-      #"opencog/scm/repl-shell.scm",
-      "opencog/scm/utilities.scm",
-      "opencog/scm/av-tv.scm",
-      "opencog/nlp/scm/type-definitions.scm",
-      "opencog/nlp/scm/config.scm",
-      "opencog/nlp/scm/file-utils.scm",
-      "opencog/nlp/scm/nlp-utils.scm",
-      "opencog/nlp/scm/disjunct-list.scm",
-      "opencog/nlp/scm/processing-utils.scm",
-
-      "opencog/nlp/anaphora/tests/atomspace.log"
-    ]
 #status2 = load_scm(atomspace, "opencog/nlp/anaphora/tests/atomspace.scm")
-
-# for item in data:
-#    load_scm(atomspace, item)
 
 #init=initAgent()
 #init.run(atomspace)
