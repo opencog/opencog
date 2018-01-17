@@ -1,11 +1,11 @@
 
 from __future__ import print_function
 from pprint import pprint
-from pln.examples.deduction import deduction_agent
+# from pln.examples.deduction import deduction_agent
 from opencog.atomspace import types, AtomSpace, TruthValue
-from hobbs import HobbsAgent
-from dumpAgent import dumpAgent
-from opencog.scheme_wrapper import load_scm,scheme_eval_h, __init__
+from agents.hobbs import HobbsAgent
+from agents.dumpAgent import dumpAgent
+from opencog.scheme_wrapper import load_scm,scheme_eval_h, scheme_eval, __init__
 
 __author__ = 'Hujie Wang'
 
@@ -14,7 +14,10 @@ This agent is purely for testing purposes, which can be used to test hobbsAgent 
 '''
 
 atomspace = AtomSpace()
-__init__(atomspace)
+# __init__(atomspace)
+scheme_eval(atomspace,  "(use-modules (opencog) (opencog exec))")
+scheme_eval(atomspace,  "(use-modules (opencog nlp))")
+
 
 
 data=["opencog/scm/config.scm",
@@ -40,8 +43,8 @@ data=["opencog/scm/config.scm",
     ]
 #status2 = load_scm(atomspace, "opencog/nlp/anaphora/tests/atomspace.scm")
 
-for item in data:
-    load_scm(atomspace, item)
+# for item in data:
+#    load_scm(atomspace, item)
 
 #init=initAgent()
 #init.run(atomspace)

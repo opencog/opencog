@@ -67,6 +67,7 @@ class BindLinkExecution():
         self.resultNode=resultNode
         self.atomType=atomType
         scheme_eval(self.atomspace, "(use-modules (opencog) (opencog exec))")
+        scheme_eval(self.atomspace, "(use-modules (opencog nlp))")
 
     def execution(self):
 
