@@ -352,6 +352,7 @@ void GenericShell::line_discipline(const std::string &expr)
 			if (EL == c or EC == c or BRK == c or ABRT == c or
 			    AYT == c or GA == c or NOP == c)
 			{
+				logger().debug("[GenericShell] ignoring telnet IAC %d", c);
 				put_output(get_prompt());
 				return;
 			}
@@ -407,7 +408,7 @@ void GenericShell::line_discipline(const std::string &expr)
 				// Just ignore these.  Typically, will be IAC WILL LINEMODE
 				// sent by the telnet client.
 				c = expr[i+2];
-				logger().debug("[GenericShell] ignoring IAC WILL %d", c);
+				logger().debug("[GenericShell] ignoring telnet IAC WILL %d", c);
 				return;
 			}
 		}
