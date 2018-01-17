@@ -39,6 +39,12 @@
 ; A component in OpenPsi
 (define ghost-component (psi-component "GHOST"))
 
+(define-public (ghost-get-component)
+"
+  Return the GHOST component.
+"
+  ghost-component)
+
 ; ----------
 ; Various anchors, predicates, values etc that will be used
 
