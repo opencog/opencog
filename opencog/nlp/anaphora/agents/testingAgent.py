@@ -3,6 +3,7 @@ from __future__ import print_function
 from pprint import pprint
 # from pln.examples.deduction import deduction_agent
 from opencog.atomspace import types, AtomSpace, TruthValue
+from opencog.cogserver_type_constructors import *
 from agents.hobbs import HobbsAgent
 from agents.dumpAgent import dumpAgent
 from opencog.scheme_wrapper import load_scm,scheme_eval_h, scheme_eval, __init__
@@ -26,3 +27,4 @@ dump=dumpAgent()
 dump.run(atomspace)
 hobbsAgent = HobbsAgent()
 hobbsAgent.run(atomspace)
+scheme_eval(atomspace, 'getWords')
