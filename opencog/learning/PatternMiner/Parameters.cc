@@ -40,11 +40,18 @@ using namespace std;
 
 void Parameters::reSetAllSettingsFromConfig()
 {
+	pattern_mining_mode = config().get("Pattern_mining_mode");
+
+	if (nullptr == pattern_mining_mode)
+	{
+		config().load("opencog_patternminer.conf", true);
+		pattern_mining_mode = config().get("Pattern_mining_mode");
+	}
+
+	OC_ASSERT(pattern_mining_mode == "Breadth_First" || pattern_mining_mode == "Depth_First");
+
 	int max_gram = config().get_int("Pattern_Max_Gram");
 	MAX_GRAM = (unsigned int)max_gram;
-
-	pattern_mining_mode = config().get("Pattern_mining_mode"); // option: Breadth_First , Depth_First
-    OC_ASSERT(pattern_mining_mode == "Breadth_First" || pattern_mining_mode == "Depth_First");
 
 	enable_interesting_pattern = config().get_bool("Enable_Interesting_Pattern");
 	enable_interaction_information = config().get_bool("Enable_Interaction_Information");
