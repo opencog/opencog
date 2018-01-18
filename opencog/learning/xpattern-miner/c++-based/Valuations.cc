@@ -105,7 +105,7 @@ bool SCValuations::operator<(const SCValuations& other) const
 	return variables < other.variables;
 }
 
-Valuations::Valuations(const Handle& pattern, const HandleUCounter& texts)
+Valuations::Valuations(const Handle& pattern, const HandleSet& texts)
 	: ValuationsBase(XPatternMiner::get_variables(pattern))
 {
 	for (const Handle& cp : XPatternMiner::get_component_patterns(pattern))
@@ -120,8 +120,6 @@ Valuations::Valuations(const Variables& vars, const SCValuationsSet& sc)
 
 Valuations::Valuations(const Variables& vars)
 	: ValuationsBase(vars) {}
-
-Valuations::Valuations() {}
 
 Valuations Valuations::erase_front() const
 {

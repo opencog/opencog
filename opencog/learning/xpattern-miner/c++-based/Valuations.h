@@ -106,13 +106,10 @@ public:
 	/**
 	 * Given a pattern and texts (ground terms), calculate its
 	 * valuations.
-	 *
-	 * Probably can replace HandleUCounter by HandleSet.
 	 */
-	Valuations(const Handle& pattern, const HandleUCounter& texts);
+	Valuations(const Handle& pattern, const HandleSet& texts);
 	Valuations(const Variables& variables, const SCValuationsSet& scvs);
 	Valuations(const Variables& variables);
-	Valuations();               // TODO: just till be use dummy valuations
 	
 	/**
 	 * Erase the front variable with all its corresponding associated

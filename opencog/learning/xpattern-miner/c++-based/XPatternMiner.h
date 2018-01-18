@@ -36,8 +36,6 @@ class XPatternMinerUTest;
 namespace opencog
 {
 
-typedef std::map<Handle, HandleUCounter> HandleUCounterMap;
-
 /**
  * Parameters for XPatternMiner. The terminology is taken from
  * Frequent Subtree Mining -- An Overview, from Yun Chi et al, when
@@ -129,28 +127,17 @@ public:
 	/**
 	 * Specialization. Given a pattern and a collection to text atoms,
 	 * generate all specialized patterns of the given pattern.
-	 *
-	 * For now all limits, expect minsup, are ignored, all patterns
-	 * are considered.
 	 */
 	HandleTree specialize(const Handle& pattern, const HandleSet& texts,
 	                      int maxdepth=-1);
 
 	/**
-	 * Alternate implementation using valuations
+	 * Like above, where all valid texts have been converted into
+	 * valuations.
 	 */
 	HandleTree specialize(const Handle& pattern,
-	                      // TODO: can probably replace
-	                      // HandleUCounter by HandleSet
-	                      const HandleUCounter& texts,
+	                      const HandleSet& texts,
 	                      const Valuations& valuations,
-	                      int maxdepth);
-
-	/**
-	 * Helper, automatically turns texts into valuations
-	 */
-	HandleTree specialize(const Handle& pattern,
-	                      const HandleUCounter& texts,
 	                      int maxdepth);
 
 	// AtomSpace containing the text trees to mine.
@@ -172,10 +159,10 @@ private:
 	 * whether the valuation has any variable left to specialize from.
 	 */
 	bool terminate(const Handle& pattern,
-	               const HandleUCounter& texts,
+	               const HandleSet& texts,
 	               int maxdepth) const;
 	bool terminate(const Handle& pattern,
-	               const HandleUCounter& texts,
+	               const HandleSet& texts,
 	               const Valuations& valuations,
 	               int maxdepth) const;
 	
@@ -211,7 +198,7 @@ private:
 	 * TODO: improve comment.
 	 */
 	HandleTree specialize_shabs(const Handle& pattern,
-	                            const HandleUCounter& texts,
+	                            const HandleSet& texts,
 	                            const Valuations& valuations,
 	                            int maxdepth);
 
@@ -222,7 +209,7 @@ private:
 	 * TODO: improve comment.
 	 */
 	HandleTree specialize_vared(const Handle& pattern,
-	                            const HandleUCounter& texts,
+	                            const HandleSet& texts,
 	                            const Valuations& valuations,
 	                            int maxdepth);
 
@@ -232,13 +219,13 @@ private:
 	 * to minsup.
 	 */
 	bool enough_support(const Handle& pattern,
-	                    const HandleUCounter& texts) const;
+	                    const HandleSet& texts) const;
 
 	/**
 	 * Like above but only look at the text total count. This works
 	 * when the text has been filtered from a single conjunct pattern.
 	 */
-	bool enough_support(const HandleUCounter& texts) const;
+	bool enough_support(const HandleSet& texts) const;
 
 	// TODO move all static methods down
 
@@ -256,7 +243,7 @@ private:
 	 * certain maximum, for saving resources.
 	 */
 	unsigned freq(const Handle& pattern,
-	              const HandleUCounter& texts,
+	              const HandleSet& texts,
 	              int maxf=-1) const;
 
 	/**
@@ -265,28 +252,28 @@ private:
 	 * connected components.
 	 */
 	unsigned freq_component(const Handle& component,
-	                        const HandleUCounter& texts,
+	                        const HandleSet& texts,
 	                        int maxf=-1) const;
-	
+
 	/**
 	 * Calculate the total count of texts.
 	 *
 	 * maxf is used to halt the frequency calculation if it reaches a
 	 * certain maximum. Purely for saving resources when possible.
 	 */
-	unsigned freq(const HandleUCounter& texts, int maxf=-1) const;
+	unsigned freq(const HandleSet& texts, int maxf=-1) const;
 
 	/**
 	 * Calculate the frequency of the whole pattern, given the
 	 * frequency of it's components.
 	 */
 	unsigned freq(const std::vector<unsigned>& freqs) const;
-	
+
 	/**
 	 * Filter in only texts matching the pattern
 	 */
-	HandleUCounter filter_texts(const Handle& pattern,
-	                            const HandleUCounter& texts) const;
+	HandleSet filter_texts(const Handle& pattern,
+	                       const HandleSet& texts) const;
 
 	/**
 	 * Check whether a pattern matches a text.
@@ -305,7 +292,7 @@ private:
 	/**
 	 * TODO: add comment
 	 */
-	HandleValuationsMap variable_reduce(const Valuations& valuations) const;
+	HandleSet variable_reduce(const Valuations& valuations) const;
 	
 	/**
 	 * TODO: fix comment
@@ -338,7 +325,7 @@ private:
 	 * produce shallow patterns based on the first variable, and
 	 * associate the remaining valuations to each pattern.
 	 */
-	HandleValuationsMap shallow_abstract(const Valuations& valuations);
+	HandleSet shallow_abstract(const Valuations& valuations);
 	
 	/**
 	 * Wrap a VariableList around a variable list, if more than one
@@ -433,7 +420,7 @@ public:
 	 * Given a pattern, split it into its disjuncts.
 	 */
 	static HandleSeq get_conjuncts(const Handle& pattern);
-	
+
 	/**
 	 * Given a pattern and texts, return the satisfying set of the
 	 * pattern over the text. Please note that the texts count are
@@ -443,7 +430,7 @@ public:
 	 * TODO: ignore permutations for unordered links.
 	 */
 	static Handle restricted_satisfying_set(const Handle& pattern,
-	                                        const HandleUCounter& texts,
+	                                        const HandleSet& texts,
 	                                        int maxf=-1);
 
 	/**
@@ -506,8 +493,6 @@ public:
 	static Handle remove_constant_clauses(const Handle& vardecl,
 	                                      const Handle& body);
 };
-
-std::string oc_to_string(const HandleUCounterMap& hucp);
 
 } // ~namespace opencog
 
