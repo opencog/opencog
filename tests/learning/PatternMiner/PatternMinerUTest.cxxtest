@@ -65,7 +65,7 @@ public:
 
 	// Complex pattern miner tests
 	// void test_PatternMiner_InferenceControl(); // will probably not be supported
-	void test_PatternMiner_SodaDrinker();
+	// void test_PatternMiner_SodaDrinker();
 };
 
 PatternMinerUTest::PatternMinerUTest() : _scm(&_as)
@@ -322,37 +322,37 @@ void PatternMinerUTest::test_PatternMiner_AB_AC()
 // 	logger().info("End TEST: %s", __FUNCTION__);
 // }
 
-void PatternMinerUTest::test_PatternMiner_SodaDrinker()
-{
-	logger().info("BEGIN TEST: %s", __FUNCTION__);
-	// Load ugly_male_soda-drinker_corpus.scm
-	_scm.eval("(load-from-path \"ugly_male_soda-drinker_corpus.scm\")");
+// void PatternMinerUTest::test_PatternMiner_SodaDrinker()
+// {
+// 	logger().info("BEGIN TEST: %s", __FUNCTION__);
+// 	// Load ugly_male_soda-drinker_corpus.scm
+// 	_scm.eval("(load-from-path \"ugly_male_soda-drinker_corpus.scm\")");
 
-	// Run the pattern miner
-	PatternMiner pm(_as);
-	pm.runPatternMiner(false);
+// 	// Run the pattern miner
+// 	PatternMiner pm(_as);
+// 	pm.runPatternMiner(false);
 
-	// Test the result: check the final top 3-gram pattern
+// 	// Test the result: check the final top 3-gram pattern
 
-	vector<HTreeNode*>& top3gramPatterns = pm.getFinalPatternsForGram(3);
+// 	vector<HTreeNode*>& top3gramPatterns = pm.getFinalPatternsForGram(3);
 
-	string patternStr = pm.unifiedPatternToKeyString(top3gramPatterns[0]->pattern);
-	logger().info("The result top 3-gram pattern: \n%s", patternStr.c_str());
+// 	string patternStr = pm.unifiedPatternToKeyString(top3gramPatterns[0]->pattern);
+// 	logger().info("The result top 3-gram pattern: \n%s", patternStr.c_str());
 
-	if (patternStr != top3gramPatternStr)
-	{
-		logger().info("Failed: The result top 3-gram pattern is wrong! The right one should be:\n%s", top3gramPatternStr.c_str());
-		TS_FAIL("The result top 3-gram pattern is wrong!");
-	}
+// 	if (patternStr != top3gramPatternStr)
+// 	{
+// 		logger().info("Failed: The result top 3-gram pattern is wrong! The right one should be:\n%s", top3gramPatternStr.c_str());
+// 		TS_FAIL("The result top 3-gram pattern is wrong!");
+// 	}
 
-	if (top3gramPatterns[0]->count != 5)
-	{
-		logger().info("Failed: The result top 3-gram pattern count is wrong!");
-		TS_FAIL("The result top 3-gram pattern count is wrong!");
-	}
+// 	if (top3gramPatterns[0]->count != 5)
+// 	{
+// 		logger().info("Failed: The result top 3-gram pattern count is wrong!");
+// 		TS_FAIL("The result top 3-gram pattern count is wrong!");
+// 	}
 
-	logger().info("End TEST: %s", __FUNCTION__);
-}
+// 	logger().info("End TEST: %s", __FUNCTION__);
+// }
 
 #undef al
 #undef an

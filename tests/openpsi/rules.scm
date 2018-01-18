@@ -54,7 +54,7 @@
 (define (rule-1) (psi-rule context-1 action-1 goal-1 (stv 1 1) (demand-1)))
 (define (rule-1-cpp)
   (ImplicationLink (stv 1 1)
-     (SequentialAndLink
+     (AndLink
         (ListLink
            (VariableNode "x1")
            (VariableNode "y1")
@@ -126,7 +126,7 @@
 
 (define (rule-2-cpp)
   (ImplicationLink (stv 1 1)
-     (SequentialAndLink
+     (AndLink
         (ListLink
            (VariableNode "x2")
            (ConceptNode "Required constant for DualLink-2")

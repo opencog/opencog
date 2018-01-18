@@ -33,13 +33,27 @@
 using namespace opencog;
 
 // Some random RFC 854 characters
-#define IAC 0xff  // Telnet Interpret As Command
-#define IP 0xf4   // Telnet IP Interrupt Process
-#define AO 0xf5   // Telnet AO Abort Output
-#define EL 0xf8   // Telnet EL Erase Line
+#define IAC  0xff // Telnet Interpret As Command
+#define TEOF 0xec // Telnet EOF
+#define SUSP 0xed // Telnet suspend
+#define ABRT 0xee // Telnet abort
+#define NOP  0xf1 // Telnet NOP no-op
+#define BRK  0xf3 // Telnet break
+#define IP   0xf4 // Telnet IP Interrupt Process
+#define AO   0xf5 // Telnet AO Abort Output
+#define AYT  0xf6 // Telnet AYT Are You There
+#define EC   0xf7 // Telnet EC Erase Character
+#define EL   0xf8 // Telnet EL Erase Line
+#define GA   0xf9 // Telnet GA Go ahead
 #define WILL 0xfb // Telnet WILL
-#define DO 0xfd   // Telnet DO
-#define TIMING_MARK 0x6 // Telnet RFC 860 timing mark
+#define WONT 0xfc // Telnet WONT
+#define DO   0xfd // Telnet DO
+#define DONT 0xfe // Telnet DONT
+
+#define RFC_ECHO          1  // Telnet RFC 857 ECHO option
+#define SUPPRESS_GO_AHEAD 3  // Telnet RFC 858 supporess go ahead
+#define TIMING_MARK       6  // Telnet RFC 860 timing mark
+#define LINEMODE          34 // Telnet RFC 1116 linemode
 
 // Some random ASCII control characters (unix semantics)
 #define EOT 0x4   // end    or ^D at keyboard.
@@ -52,12 +66,8 @@ GenericShell::GenericShell(void)
 	show_output = true;
 	show_prompt = true;
 	normal_prompt = "> ";
+	abort_prompt = normal_prompt;
 	pending_prompt = "... ";
-	abort_prompt = "asdf"; // simply reserve 4 chars
-	abort_prompt[0] = IAC;
-	abort_prompt[1] = WILL;
-	abort_prompt[2] = TIMING_MARK;
-	abort_prompt[3] = '\n';
 
 	socket = nullptr;
 	evalthr = nullptr;
@@ -276,6 +286,28 @@ void GenericShell::eval(const std::string &expr)
 	}
 }
 
+/**
+ * Handle user-generated interrupt (ctrl-C, etc)
+ */
+void GenericShell::user_interrupt()
+{
+	// Discard all pending, unevaluated junk in the queue.
+	// Failure to do so will typically result in confusing
+	// the shell user.
+	while (not evalque.is_empty()) evalque.pop();
+
+	// Work around timing window, where queue was just now emptyied,
+	// but the scheme evaluator has not yet started... and so the
+	// command that is to be interrupted hasn't even to begun to
+	// execute, when we go to interrupt it.
+	usleep(10000);
+
+	_evaluator->interrupt();
+	_evaluator->clear_pending();
+	put_output(abort_prompt);
+	finish_eval();
+}
+
 /* ============================================================== */
 /**
  * Handle special characters, evaluate the expression
@@ -298,7 +330,7 @@ void GenericShell::line_discipline(const std::string &expr)
 	// characters, starting at the end of the input string. If they
 	// are there, then don't process input, and clear out the evaluator.
 	// Also, be sure to send telnet IAC WILL TIMING-MARK so that telnet
-	// doesn't sit there flushing output forever.
+	// doesn't sit there discarding output forever.
 	//
 	// Search for IAC to at most 20 chars from the end of the string.
 	int i = len-2;
@@ -310,28 +342,91 @@ void GenericShell::line_discipline(const std::string &expr)
 		if (IAC == c)
 		{
 			c = expr[i+1];
-			if ((IP == c) || (AO == c))
+			if (IP == c or AO == c or SUSP == c)
 			{
-				logger().debug("[GenericShell] got user-interrupt");
-				// Discard all pending, unevaluated junk in the queue.
-				// Failure to do so will typically result in confusing
-				// the shell user.
-				while (not evalque.is_empty()) evalque.pop();
-
-				// Must write the abort prompt, first, because
-				// telnet will silently ignore any bytes that
-				// come before it.
-				put_output(abort_prompt);
-				_evaluator->interrupt();
-				_evaluator->clear_pending();
-				finish_eval();
+				logger().debug("[GenericShell] got telnet IAC user-interrupt %d", c);
+				// Must send TIMING-MARK first, as otherwise telnet silently
+				// ignores any bytes that come before it.
+				unsigned char ok[] = {IAC, WILL, TIMING_MARK, '\n', 0};
+				put_output((const char *) ok);
+				user_interrupt();
 				return;
 			}
 
 			// Erase line -- just ignore this line.
-			if (EL == c)
+			// Also other things we want to ignore, like break and abort.
+			if (EL == c or EC == c or BRK == c or ABRT == c or
+			    AYT == c or GA == c or NOP == c)
 			{
+				logger().debug("[GenericShell] ignoring telnet IAC %d", c);
 				put_output(get_prompt());
+				return;
+			}
+
+			// End-of-file just like ctrl-D
+			if (TEOF == c)
+			{
+				logger().debug("[GenericShell] got end-of-file; exiting shell");
+				self_destruct = true;
+				evalque.cancel();
+				if (show_prompt)
+					put_output("Exiting the shell\n");
+				return;
+			}
+
+			if (DO == c)
+			{
+				c = expr[i+2];
+				// Some telnets, including on Debian Stable, send us
+				// IAC DO TIMING-MARK instead of a IAC IP or IAC AO
+				// when the user hits ctrl-C.  This seems broken to me,
+				// but whatever. Pretend its a normal interrupt.
+				if (TIMING_MARK == c)
+				{
+					logger().debug("[GenericShell] timing mark (user-interrupt?)");
+					// Must send TIMING-MARK first, as otherwise telnet silently
+					// ignores any bytes that come before it.
+					unsigned char ok[] = {IAC, WILL, TIMING_MARK, '\n', 0};
+					put_output((const char *) ok);
+					user_interrupt();
+					return;
+				}
+
+				// If telnet ever tries to go into character mode,
+				// it will send us SUPPRESS-GO-AHEAD and ECHO. Try to
+				// stop that, we don't want to effing fiddle with that.
+				if (SUPPRESS_GO_AHEAD == c)
+				{
+					unsigned char ok[] = {IAC, WILL, SUPPRESS_GO_AHEAD, 0};
+					put_output((const char *) ok);
+					return;
+				}
+				if (RFC_ECHO == c)
+				{
+					unsigned char ok[] = {IAC, WONT, RFC_ECHO, '\n', 0};
+					put_output((const char *) ok);
+					return;
+				}
+				logger().debug("[GenericShell] IAC WONT %d", c);
+				unsigned char ok[] = {IAC, WONT, c, '\n', 0};
+				put_output((const char *) ok);
+				return;
+			}
+
+			if (WILL == c)
+			{
+				// Refuse to perform sub-negotation when
+				// IAC WILL LINEMODE is sent by the telnet client.
+				c = expr[i+2];
+				if (LINEMODE == c)
+				{
+					unsigned char ok[] = {IAC, DONT, LINEMODE, '\n', 0};
+					put_output((const char *) ok);
+					return;
+				}
+
+				// Ignore anything else.
+				logger().debug("[GenericShell] ignoring telnet IAC WILL %d", c);
 				return;
 			}
 		}
@@ -344,15 +439,8 @@ void GenericShell::line_discipline(const std::string &expr)
 	unsigned char c = expr[len-1];
 	if ((SYN == c) || (CAN == c) || (ESC == c))
 	{
-		// Discard all pending, unevaluated junk in the queue.
-		while (not evalque.is_empty()) evalque.pop();
-
-		_evaluator->interrupt();
-		_evaluator->clear_pending();
-
-		put_output("\n");
-		finish_eval();
-		put_output(normal_prompt);
+		logger().debug("[GenericShell] got user-interrupt %d", c);
+		user_interrupt();
 		return;
 	}
 

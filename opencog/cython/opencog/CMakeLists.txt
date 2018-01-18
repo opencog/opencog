@@ -55,11 +55,13 @@ IF (HAVE_ATOMSPACE)
 	ADD_DEPENDENCIES(cogserver_type_constructors nlp_atom_types)
 	ADD_DEPENDENCIES(cogserver_type_constructors attention_atom_types)
 	ADD_DEPENDENCIES(cogserver_type_constructors spacetime_atom_types)
+	ADD_DEPENDENCIES(cogserver_type_constructors patternminer_types)
 
 	TARGET_LINK_LIBRARIES(cogserver_type_constructors
 		attention-types
 		nlp-types
 		spacetime-types
+		patternminer-types
 		${ATOMSPACE_LIBRARIES}
 		${PYTHON_LIBRARIES}
 	)
