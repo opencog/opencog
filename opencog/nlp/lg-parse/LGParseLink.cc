@@ -275,6 +275,12 @@ Handle LGParseLink::cvt_linkage(Linkage lkg, int i, const char* idstr,
 			wrd = strndupa(phrstr + sb, eb-sb);
 		}
 
+		// LEFT-WALL is not an ordinary word. Its special. Make it
+		// extra-special by adding "illegal" punctuation to it.
+		// FYI, this is compatible with Relex, relex2logic.
+		if (0 == w and 0 == strcmp(wrd, "LEFT-WALL")) wrd = "###LEFT-WALL###";
+		if (nwords-1 == w and 0 == strcmp(wrd, "RIGHT-WALL")) wrd = "###RIGHT-WALL###";
+
 		char buff[801] = "";
 		strncat(buff, wrd, 800);
 		strncat(buff, "@", 800);
