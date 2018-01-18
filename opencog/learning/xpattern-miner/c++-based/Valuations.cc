@@ -108,7 +108,7 @@ bool SCValuations::operator<(const SCValuations& other) const
 Valuations::Valuations(const Handle& pattern, const HandleUCounter& texts)
 	: ValuationsBase(XPatternMiner::get_variables(pattern))
 {
-	for (const Handle& cp : get_component_patterns(pattern))
+	for (const Handle& cp : XPatternMiner::get_component_patterns(pattern))
 	{
 		Handle satset = XPatternMiner::restricted_satisfying_set(cp, texts);
 		scvs.insert(SCValuations(XPatternMiner::get_variables(cp), satset));
@@ -144,24 +144,6 @@ const SCValuations& Valuations::get_scvaluations(const Handle& var) const
 		if (scv.variables.is_in_varset(var))
 			return scv;
 	throw RuntimeException(TRACE_INFO, "There's likely a bug");
-}
-	
-HandleSeq Valuations::get_component_patterns(const Handle& pattern)
-{
-	PatternLink pl(XPatternMiner::get_vardecl(pattern),
-	               XPatternMiner::get_body(pattern));
-	HandleSeq compats;
-	const HandleSeqSeq comps(pl.get_components());
-	for (unsigned i = 0; i < comps.size(); ++i)
-	{
-		unsigned ncomp = comps[i].size();
-		Handle vardecl = filter_vardecl(XPatternMiner::get_vardecl(pattern),
-		                                comps[i]);
-		Handle body = 1 < ncomp ? createLink(comps[i], AND_LINK) : comps[i][0];
-		if (vardecl != nullptr and body != nullptr)
-			compats.push_back(Handle(createLambdaLink(vardecl, body)));
-	}
-	return compats;
 }
 
 std::string oc_to_string(const SCValuations& scv)

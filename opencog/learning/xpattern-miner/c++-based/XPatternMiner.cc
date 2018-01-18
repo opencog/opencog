@@ -36,21 +36,23 @@
 #include <opencog/atomutils/FindUtils.h>
 #include <opencog/query/BindLinkAPI.h>
 
+#include <boost/range/algorithm/min_element.hpp>
+#include <boost/range/numeric.hpp>
+#include <boost/range/algorithm/transform.hpp>
+
+#include <functional>
+
 namespace opencog
 {
 
 // TODO:
-// 1. test if removing duplicates while merging is really necessary
-// 2. test if associating valuations to shabs is really necessary
-// 3. test if cash is really necessary
-// 4. test if using counter over valuations can speed up
-// 5. have valuations reflect disconnected components, and split them
-//    into strongly connected components when querying the pattern matcher.
+// 6. maybe replace HandleUCounter for text by an AtomSpace
+// 7. make sure that filtering is still meaningfull
 
 XPMParameters::XPMParameters(unsigned ms, unsigned iconjuncts,
-                             const Handle& ipat, int maxd, int maxp)
+                             const Handle& ipat, int maxd, double io)
 	: minsup(ms), initconjuncts(iconjuncts), initpat(ipat),
-	  maxdepth(maxd), maxpats(maxp)
+	  maxdepth(maxd), info(io)
 {
 	// Provide initial pattern if none
 	if (not initpat) {
@@ -338,25 +340,28 @@ unsigned XPatternMiner::freq(const Handle& pattern,
                              const HandleUCounter& texts,
                              int maxf) const
 {
-	// TODO: split into strongly connected components so that totally
-	// abstract parts do not trigger the pattern matcher warnings
-	if (totally_abstract(pattern))
-	{
-		unsigned ng = conjuncts(pattern);
-		int nmf = maxf < 0 ? maxf : (int)std::ceil((double)maxf/(double)ng);
-		return ng * freq(texts, nmf);
-	}
+	HandleSeq cps(get_component_patterns(pattern));
+	// HandleSeq cps(get_conjuncts(pattern));
 
-	// If the pattern has more than one conjunct, then it is assumed that
-	// the count of each text in texts is 1, thus we just need to run
-	// the pattern over the whole texts without worrying about counts
-	if (1 < conjuncts(pattern))
-		return restricted_satisfying_set(pattern, texts, maxf)->get_arity();
+	// Likely a constant pattern
+	if (cps.empty())
+	    return 1;
 
-	// Otherwise, assuming the texts has already been filtered, it is
-	// merely the texts total count. TODO: it would safer to put some
-	// assert to check if that assumption really hold
-	return freq(texts, maxf);
+	// Otherwise aggregate the frequencies in a heuristic fashion
+	std::vector<unsigned> freqs;
+	boost::transform(cps, std::back_inserter(freqs),
+	                 [&](const Handle& cp)
+	                 { return freq_component(cp, texts, maxf); });
+	return freq(freqs);
+}
+
+unsigned XPatternMiner::freq_component(const Handle& component,
+                                       const HandleUCounter& texts,
+                                       int maxf) const
+{
+	if (totally_abstract(component))
+		freq(texts, maxf);
+	return restricted_satisfying_set(component, texts, maxf)->get_arity();
 }
 
 unsigned XPatternMiner::freq(const HandleUCounter& texts, int maxf) const
@@ -372,6 +377,14 @@ unsigned XPatternMiner::freq(const HandleUCounter& texts, int maxf) const
 			return count;
 	}
 	return count;
+}
+
+unsigned XPatternMiner::freq(const std::vector<unsigned>& freqs) const
+{
+	double minf = *boost::min_element(freqs),
+		timesf = boost::accumulate(freqs, 1, std::multiplies<unsigned>()),
+		f = param.info * minf + (1 - param.info) * timesf;
+	return std::floor(f);
 }
 
 HandleUCounter XPatternMiner::filter_texts(const Handle& pattern,
@@ -442,9 +455,9 @@ HandleValuationsMap XPatternMiner::shallow_abstract(const Valuations& valuations
 		Handle shapat = shallow_abstract(*val_it);
 		auto s2v_it = sha2vals.find(shapat);
 		if (s2v_it == sha2vals.end()) {
-			// Construct the remaining valuations
-			Variables rembles(valuations.variables);
-			rembles.erase(var);
+			// // Construct the remaining valuations
+			// Variables rembles(valuations.variables);
+			// rembles.erase(var);
 			// TODO: probably don't care about the valuations
 			s2v_it = sha2vals.insert({shapat, Valuations()}).first;
 			// s2v_it = sha2vals.insert({shapat, Valuations(rembles)}).first;
@@ -630,6 +643,49 @@ Handle XPatternMiner::alpha_conversion(const Handle& pattern)
 	if (sc)
 		return sc->alpha_convert();
 	return pattern;
+}
+
+Handle XPatternMiner::mk_pattern(const Handle& vardecl, const HandleSeq& clauses)
+{
+	Handle fvd = filter_vardecl(vardecl, clauses);
+	Handle body = 1 < clauses.size() ? createLink(clauses, AND_LINK) : clauses[0];
+	if (fvd != nullptr and body != nullptr)
+		return Handle(createLambdaLink(fvd, body));
+	return Handle::UNDEFINED;
+}
+
+HandleSeq XPatternMiner::get_component_patterns(const Handle& pattern)
+{
+	PatternLink pl(XPatternMiner::get_vardecl(pattern),
+	               XPatternMiner::get_body(pattern));
+	HandleSeq compats;
+	const HandleSeqSeq comps(pl.get_components());
+	for (unsigned i = 0; i < comps.size(); ++i)
+	{
+		Handle comp = mk_pattern(XPatternMiner::get_vardecl(pattern), comps[i]);
+		if (comp)
+			compats.push_back(comp);
+	}
+	return compats;
+}
+
+HandleSeq XPatternMiner::get_conjuncts(const Handle& pattern)
+{
+	if (pattern->get_type() == LAMBDA_LINK) {
+		Handle body = get_body(pattern);
+		if (body->get_type() == AND_LINK) {
+			Handle vardecl = get_vardecl(pattern);
+			HandleSeq conjs;
+			for (const Handle& clause : body->getOutgoingSet()) {
+				Handle conj = mk_pattern(vardecl, {clause});
+				if (conj)
+					conjs.push_back(conj);
+			}
+			return conjs;
+		}
+		return {pattern};
+	}
+	return {};
 }
 
 Handle XPatternMiner::restricted_satisfying_set(const Handle& pattern,

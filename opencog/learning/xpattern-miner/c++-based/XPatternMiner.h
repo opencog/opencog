@@ -53,7 +53,7 @@ struct XPMParameters {
 	              unsigned conjuncts=1,
 	              const Handle& initpat=Handle::UNDEFINED,
 	              int maxdepth=-1,
-	              int maxpats=-1);
+	              double info=1.0);
 
 	// Minimum support. Mined patterns must have a frequency equal or
 	// above this value.
@@ -79,11 +79,29 @@ struct XPMParameters {
 	// initial pattern and the produced patterns.
 	int maxdepth;
 
-	// Maximum number of patterns to output. If negative, then output
-	// them all.
-	int maxpats;
+	// Modify how the frequency of strongly connected components is
+	// calculated from the frequencies of its components. Specifically
+	// it will go from f1*...*fn to min(f1,...,fn), where f1 to fn are
+	// the frequencies of each component. This allows to dismiss
+	// abstractions that are likely not to lead to specializations
+	// with enough support.
+	//
+	// If the parameter equals to 0 the frequency of the whole pattern
+	// is calculated as the product of f1 to fn, if it equals to 1 the
+	// frequency of the whole pattern is calculated as the min of f1
+	// to fn. And if the value is between, it is calculated as a
+	// linear combination of both.
+	//
+	// It is called info for mutual information or its n-ary
+	// generalizations (like interaction information). What it means
+	// is that when info is low subsequent specializations are likely
+	// independant, while when info is high subsequent specializations
+	// are likely dependant and thus we can afford to estimate the
+	// frequency of the specializations by the lowest frequency of its
+	// component.
+	double info;
 };
-	
+
 /**
  * Experimental pattern miner. Mined patterns should be compatible
  * with the pattern matcher, that is if feed to the pattern matcher,
@@ -101,7 +119,8 @@ public:
 	XPatternMiner(AtomSpace& as, const XPMParameters& param=XPMParameters());
 
 	/**
-	 * Mine and return maxpats (or all if negative) patterns with
+	 * Mine and return a tree of patterns linked by specialization
+	 * relationship (children are specializations of parent) with
 	 * frequency equal to or above minsup, starting from the initial
 	 * pattern, excluded.
 	 */
@@ -225,9 +244,13 @@ private:
 
 	/**
 	 * Given a pattern and a text corpus, calculate the pattern
-	 * frequency, that is the number of matches. Note that this number
-	 * may be greater than the total count of the text corpus if the
-	 * pattern has more than one conjunct.
+	 * frequency, that is the number of matches if pattern is strongly
+	 * connected.
+	 *
+	 * If pattern is not strongly connected AND some heuristic is in
+	 * place TODO, then the definition of frequency deviates from the
+	 * usual one and corresponds to the minimum frequency over all
+	 * strongly connected components of that pattern.
 	 *
 	 * maxf is used to halt the frequency calculation if it reaches a
 	 * certain maximum, for saving resources.
@@ -237,6 +260,15 @@ private:
 	              int maxf=-1) const;
 
 	/**
+	 * Like above but assumes the pattern is a single strongly
+	 * connected component, as opposed to a conjuction of strongly
+	 * connected components.
+	 */
+	unsigned freq_component(const Handle& component,
+	                        const HandleUCounter& texts,
+	                        int maxf=-1) const;
+	
+	/**
 	 * Calculate the total count of texts.
 	 *
 	 * maxf is used to halt the frequency calculation if it reaches a
@@ -244,6 +276,12 @@ private:
 	 */
 	unsigned freq(const HandleUCounter& texts, int maxf=-1) const;
 
+	/**
+	 * Calculate the frequency of the whole pattern, given the
+	 * frequency of it's components.
+	 */
+	unsigned freq(const std::vector<unsigned>& freqs) const;
+	
 	/**
 	 * Filter in only texts matching the pattern
 	 */
@@ -379,6 +417,23 @@ private:
 	static Handle alpha_conversion(const Handle& pattern);
 
 public:
+	/**
+	 * Given a vardecl and a body, filter the vardecl to contain only
+	 * variable of the body, and create a Lambda with them.
+	 */
+	static Handle mk_pattern(const Handle& vardecl, const HandleSeq& clauses);
+
+	/**
+	 * Given a pattern, split it into smaller patterns of strongly
+	 * connected components.
+	 */
+	static HandleSeq get_component_patterns(const Handle& pattern);
+
+	/**
+	 * Given a pattern, split it into its disjuncts.
+	 */
+	static HandleSeq get_conjuncts(const Handle& pattern);
+	
 	/**
 	 * Given a pattern and texts, return the satisfying set of the
 	 * pattern over the text. Please note that the texts count are

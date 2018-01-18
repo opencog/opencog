@@ -72,24 +72,26 @@ public:
 	void test_2conjuncts_2();
 	void test_2conjuncts_3();
 	void test_2conjuncts_4();
+	void test_2conjuncts_5();
 	void test_InferenceControl();
 	void test_SodaDrinker();
 };
 
 XPatternMinerUTest::XPatternMinerUTest() : _scm(&_as)
 {
-	logger().set_level(Logger::DEBUG);
+	logger().set_level(Logger::INFO);
 	logger().set_timestamp_flag(false);
 	logger().set_print_to_stdout_flag(true);
+
+	// Configure scheme load-paths that are common for all tests.
+	_scm.eval("(add-to-load-path \"" PROJECT_SOURCE_DIR
+	          "/tests/learning/xpattern-miner/c++-based\")");
 }
 
 XPatternMinerUTest::~XPatternMinerUTest() {}
 
 void XPatternMinerUTest::setUp()
 {
-	// Configure scheme load-paths that are common for all tests.
-	_scm.eval("(add-to-load-path \"" PROJECT_SOURCE_DIR
-	          "/tests/learning/xpattern-miner/c++-based\")");
 }
 
 void XPatternMinerUTest::tearDown()
@@ -251,10 +253,13 @@ void XPatternMinerUTest::test_AB_ABC()
 
 	Handle X = an(VARIABLE_NODE, "$X"),
 		Y = an(VARIABLE_NODE, "$Y"),
-		XY = al(INHERITANCE_LINK, X, Y),
-		AY = al(INHERITANCE_LINK, A, Y);
-	HandleTree expected(al(LAMBDA_LINK, al(VARIABLE_LIST, X, Y), XY),
-	                    { al(LAMBDA_LINK, Y, AY) });
+		VarXY = al(VARIABLE_LIST, X, Y),
+		AndXY = al(AND_LINK, X, Y),
+		InhXY = al(INHERITANCE_LINK, X, Y),
+		InhAY = al(INHERITANCE_LINK, A, Y);
+	HandleTree expected({ al(LAMBDA_LINK, VarXY, al(LOCAL_QUOTE_LINK, AndXY)),
+				          HandleTree(al(LAMBDA_LINK, VarXY, InhXY),
+				                     { al(LAMBDA_LINK, Y, InhAY) }) });
 
 	logger().debug() << "results = " << oc_to_string(results);
 	logger().debug() << "expected = " << oc_to_string(expected);
@@ -514,6 +519,59 @@ void XPatternMinerUTest::test_2conjuncts_4()
 	TS_ASSERT(content_is_in(expected_pattern, results));
 }
 
+void XPatternMinerUTest::test_2conjuncts_5()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	Handle
+		A1 = an(CONCEPT_NODE, "A1"),
+		A2 = an(CONCEPT_NODE, "A2"),
+		A3 = an(CONCEPT_NODE, "A3"),
+		B = an(CONCEPT_NODE, "B"),
+		C1 = an(CONCEPT_NODE, "C1"),
+		C2 = an(CONCEPT_NODE, "C2"),
+		C3 = an(CONCEPT_NODE, "C3"),
+		A1B = al(INHERITANCE_LINK, A1, B),
+		A2B = al(INHERITANCE_LINK, A2, B),
+		A3B = al(INHERITANCE_LINK, A3, B),
+		BC1 = al(INHERITANCE_LINK, B, C1),
+		BC2 = al(INHERITANCE_LINK, B, C2),
+		BC3 = al(INHERITANCE_LINK, B, C3);
+
+	Handle
+		X = tmp_an(VARIABLE_NODE, "$X"),
+		Y = tmp_an(VARIABLE_NODE, "$Y"),
+		Z = tmp_an(VARIABLE_NODE, "$Z"),
+		W = tmp_an(VARIABLE_NODE, "$W"),
+		XYZ = tmp_al(VARIABLE_LIST, X, Y, Z),
+		XYZW = tmp_al(VARIABLE_LIST, X, Y, Z, W);
+
+	Handle initpat = tmp_al(LAMBDA_LINK,
+	                        XYZW,
+	                        tmp_al(AND_LINK,
+	                               tmp_al(INHERITANCE_LINK, X, Y),
+	                               tmp_al(INHERITANCE_LINK, Z, W)));
+
+	// Like test_2conjuncts_2 but setting the info heuristic to 1,
+	// meaning that the frequency of a conjunction of strongly
+	// connected components will be equal to the minimum frequency of
+	// each component. For that reason it should be able to discover
+	// the desired pattern.
+	XPMParameters param(9/*minsup*/, 2/*nconjucts*/, initpat, -1/*maxdepth*/, 1/*info*/);
+	XPatternMiner pm(_as, param);
+	HandleTree results = pm();
+	Handle non_expected_pattern = tmp_al(LAMBDA_LINK,
+	                                     XYZ,
+	                                     tmp_al(AND_LINK,
+	                                            tmp_al(INHERITANCE_LINK, X, Y),
+	                                            tmp_al(INHERITANCE_LINK, Y, Z)));
+
+	logger().debug() << "results = " << oc_to_string(results);
+	logger().debug() << "non_expected_pattern = " << oc_to_string(non_expected_pattern);
+
+	TS_ASSERT(not content_is_in(non_expected_pattern, results));
+}
+
 void XPatternMinerUTest::test_InferenceControl()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
@@ -548,7 +606,7 @@ void XPatternMinerUTest::test_InferenceControl()
 		                        tmp_al(LIST_LINK, B, T))),
 		initpat = tmp_al(LAMBDA_LINK, vardecl, clauses);
 
-	XPMParameters param(2/*minsup*/, 3/*ngram*/, initpat, 2/*maxdepth*/);
+	XPMParameters param(2/*minsup*/, 3/*ngram*/, initpat, 2/*maxdepth*/, 1/*info*/);
 	XPatternMiner pm(_as, param);
 	HandleTree results = pm();
 
@@ -609,8 +667,20 @@ void XPatternMinerUTest::test_SodaDrinker()
 
 	logger().debug() << "rs = " << rs;
 
+	// Define initial pattern (to speed up mining)
+	Handle X = tmp_an(VARIABLE_NODE, "$X"),
+		Y = tmp_an(VARIABLE_NODE, "$Y"),
+		Z = tmp_an(VARIABLE_NODE, "$Z"),
+		W = tmp_an(VARIABLE_NODE, "$W"),
+		XYZW = tmp_al(VARIABLE_LIST, X, Y, Z, W),
+		clauses = tmp_al(AND_LINK,
+		                 tmp_al(INHERITANCE_LINK, X, Y),
+		                 tmp_al(INHERITANCE_LINK, X, Z),
+		                 tmp_al(INHERITANCE_LINK, X, W)),
+		initpat = tmp_al(LAMBDA_LINK, XYZW, clauses);
+
 	// Run the pattern miner
-	XPMParameters param(5/*minsup*/, 3/*ngram*/, Handle::UNDEFINED, 8/*maxdepth*/);
+	XPMParameters param(5/*minsup*/, 3/*nconjuncts*/, initpat, 3/*maxdepth*/, 1/*info*/);
 	XPatternMiner pm(_as, param);
 	HandleTree results = pm();
 
@@ -631,7 +701,6 @@ void XPatternMinerUTest::test_SodaDrinker()
 	Handle man = tmp_an(CONCEPT_NODE, "man"),
 		soda_drinker = tmp_an(CONCEPT_NODE, "soda drinker"),
 		ugly = tmp_an(CONCEPT_NODE, "ugly"),
-		X = tmp_an(VARIABLE_NODE, "$X"),
 		is_man = tmp_al(INHERITANCE_LINK, X, man),
 		is_soda_drinker = tmp_al(INHERITANCE_LINK, X, soda_drinker),
 		is_ugly = tmp_al(INHERITANCE_LINK, X, ugly),

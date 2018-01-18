@@ -125,12 +125,6 @@ public:
 	 */
 	const SCValuations& get_scvaluations(const Handle& var) const;
 
-	/**
-	 * Given a pattern, split it into smaller patterns of strongly
-	 * connected components.
-	 */
-	static HandleSeq get_component_patterns(const Handle& pattern);
-
 	SCValuationsSet scvs;
 };
 
