@@ -42,7 +42,7 @@ void Parameters::reSetAllSettingsFromConfig()
 {
 	pattern_mining_mode = config().get("Pattern_mining_mode");
 
-	if (nullptr == pattern_mining_mode)
+	if (0 == pattern_mining_mode.size())
 	{
 		config().load("opencog_patternminer.conf", true);
 		pattern_mining_mode = config().get("Pattern_mining_mode");
