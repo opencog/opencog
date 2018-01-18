@@ -37,6 +37,17 @@ bool content_eq(const HandleTree& htl, const HandleTree& htr);
 bool content_eq(HandleTree::iterator itl, HandleTree::iterator itr);
 bool content_is_in(const Handle& h, const HandleTree& ht);
 
+/**
+ * Given a list of forests of patterns, merge them into a forest such
+ * that duplicates are discarded.
+ */
+HandleTree merge_patterns(const std::initializer_list<HandleTree>&);
+
+/**
+ * Check that it and all its children are in cash.
+ */
+bool all_nodes_in(const HandleSet& cash, HandleTree::iterator it);
+
 std::string oc_to_string(const HandleTree& ht);
 std::string oc_to_string(const HandleMapTree& hmt);
 std::string oc_to_string(const HandleHandleTreeMap& hhtm);

@@ -23,6 +23,8 @@
 
 #include "HandleTree.h"
 
+#include <opencog/util/Logger.h>
+
 #include <sstream>
 
 namespace opencog {
@@ -51,10 +53,63 @@ bool content_eq(HandleTree::iterator itl, HandleTree::iterator itr)
 
 bool content_is_in(const Handle& h, const HandleTree& ht)
 {
+	// TODO: optimize
 	for (const Handle& oh : ht)
 		if (content_eq(h, oh))
 			return true;
 	return false;
+}
+
+HandleTree merge_patterns(const std::initializer_list<HandleTree>& forests)
+{
+	// Build forest of forests
+	HandleTree forest(forests);
+
+	// TODO: actually the assumption below is not right!!!!! So in
+	// order to remove redundants, then must be attached to the other
+	// one. I don't like that, because then you loose the trace of how
+	// things are being produced.
+
+	// // Remove duplicates
+	// HandleSet cash;
+	// for (auto it = forest.begin(); it != forest.end();)
+	// {
+	// 	// Not in the cash? Don't remove it and add it to the cash
+	// 	if (cash.find(*it) == cash.end())
+	// 	{
+	// 		cash.insert(*it);
+	// 		++it;
+	// 		continue;
+	// 	}
+
+	// 	// // In the cash, remove it (and all its children, supposedly in
+	// 	// // the cash as well)
+
+	// 	// // TODO: remove the following check when we know we can make
+	// 	// // the assumption that all children are in the cash as well
+	// 	// // (thus in the forest explored thus far).
+	// 	// logger().debug() << "OC_ASSERT all_nodes_in it = " << oc_to_string(HandleTree(it));
+	// 	// OC_ASSERT(all_nodes_in(cash, it), "Noooooooooooo!");
+
+	// 	it = forest.erase(it);
+	// }
+
+	return forest;
+}
+
+bool all_nodes_in(const HandleSet& cash, HandleTree::iterator it)
+{
+	if (cash.find(*it) == cash.end()) {
+		logger().debug() << "all_nodes_in cash = " << oc_to_string(cash)
+		                 << ", *it = " << oc_to_string(*it);
+		return false;
+	}
+
+	for (auto cit = it.begin(); cit != it.end(); ++cit)
+		if (not all_nodes_in(cash, cit))
+			return false;
+
+	return true;
 }
 
 std::string oc_to_string(const HandleTree& ht)
