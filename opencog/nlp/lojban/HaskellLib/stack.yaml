@@ -6,13 +6,13 @@ resolver: lts-8.24
 # Local packages, usually specified by relative directory name
 packages:
 - '.'
-- location: /home/roman/Programming/LojbanValidator/
-  #git: https://github.com/rTreutlein/LojbanValidator
-  #commit: 93a06e1166ef5ca041fd3c62124b0b5e25bb1e6b
+- location:
+   git: https://github.com/rTreutlein/LojbanValidator
+   commit: 244a28e12402e9f74a5b6e60958ffefc21afc84f
   extra-dep: true
-- location: /home/roman/OpenCog/Iso/
-  #git: https://github.com/rTreutlein/IsoSyntax
-  #commit: 0dc1f0c8c4a7c217558a5011716c2559075b5ba4
+- location:
+   git: https://github.com/rTreutlein/IsoSyntax
+   commit: ebf2739edfac4568943edad389760386fe6535b5
   extra-dep: true
 
 # Packages to be pulled from upstream that are not in the resolver (e.g., acme-missiles-0.3)
