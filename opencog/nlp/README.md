@@ -208,18 +208,18 @@ microseconds.
 A Side-note About Syntactic Sugar
 =================================
 This has been said before, but it bears repeating. Consider the node
-type WordInstanceNode, for example:
-
+type `WordInstanceNode`, for example:
+```
     (WordInstanceNode "cabin@99d22336-6cda-4365-8555-64260ed8bd15")
-
+```
 This custom-defined node type should be thought of as syntactic sugar
 for the more "primitive" graph:
-
-   (InheritenceLink
+```
+    (InheritenceLink
         (ConceptNode "cabin@99d22336-6cda-4365-8555-64260ed8bd15")
         (ConceptNode "WordInstance")
     )
-
+```
 The above InheritenceLink essentially assigns a "type" to the word
 instance. This type can be used in the same way that types are
 ordinarily used in other programming languages. When managing
@@ -244,9 +244,9 @@ which stands for the more "primitive" construct:
         )
     )
 
-Notationally, these forms should be considered to be "equivalent"
+Abstractly, these forms should be considered to be "equivalent",
 although there is a bunch of actual code that depends on the one or
-the other, and cannot freely intermingle these cases.
+the other, and there is no automated conversion between these forms.
 
 References:
 ===========
