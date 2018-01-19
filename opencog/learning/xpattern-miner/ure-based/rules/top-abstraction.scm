@@ -83,4 +83,7 @@
         (if conclusion-tv
             (cog-set-tv! conclusion conclusion-tv)))))
 
-
+(define top-abstraction-rule-name
+  (DefinedSchemaNode "top-abstraction-rule"))
+(DefineLink top-abstraction-rule-name
+  top-abstraction-rule)

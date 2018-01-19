@@ -1,6 +1,5 @@
-;
-; URE Configuration file for the pattern miner, must be loaded first
-; before any pattern mining can take place.
+;; URE Configuration file for the pattern miner, must be loaded first
+;; before any pattern mining can take place.
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Load required modules and utils ;;
@@ -23,15 +22,14 @@
 (define (pm-fc source) (cog-fc pm-rbs source))
 (define (pm-bc target) (cog-bc pm-rbs target))
 
-;; ;;;;;;;;;;;;;;;;
-;; ;; Load rules ;;
-;; ;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;
+;; Load rules ;;
+;;;;;;;;;;;;;;;;
 
 ;; Load the rules (use load for relative path w.r.t. to that file)
 (add-to-load-path ".")
 (define rule-files (list "rules/top-abstraction.scm"
-                         ;; "rules/specialization.scm"
-                         ))
+                         "rules/specialization.scm"))
 (for-each load-from-path rule-files)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -39,9 +37,8 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ; List the rules and their weights.
-(define rules (list (list top-abstraction-rule-name 1)
-                    (list unary-specialization-rule-name 1))
-)
+(define rules (list top-abstraction-rule-name
+                    unary-specialization-rule-name))
 
 ; Associate rules to PLN
 (ure-add-rules pm-rbs rules)

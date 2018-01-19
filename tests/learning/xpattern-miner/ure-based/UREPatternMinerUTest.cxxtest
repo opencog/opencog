@@ -49,6 +49,12 @@ private:
 	AtomSpace _tmp_as;
 	SchemeEval _scm;
 
+	// Variables
+	Handle X, Y, Z, W;
+
+	// Constants
+	Handle A, B, C, D;
+
 	// Pattern miner rule base
 	Handle pm_rb;
 
@@ -58,13 +64,24 @@ private:
 	// minsup predicate
 	Handle minsup_prd;
 
+	// Top abstraction (Lambda X X)
+	Handle top;
+
+	/**
+	 * Make
+	 *
+	 * (Evaluation
+	 *   (Predicate "minsup")
+	 *   (List pattern (Concept "texts") minsup))
+	 */
+	Handle mk_minsup_eval(int minsup, const Handle& pattern);
+
 	/**
 	 * Make a URE query to mine patterns over texts with a given
 	 * minsup and a maximum of URE iterations.
 	 */
 	Handle mk_query(const HandleSeq& texts, int minsup,
 	                const Handle& initpat=Handle::UNDEFINED);
-
 public:
 	UREPatternMinerUTest();
 	~UREPatternMinerUTest();
@@ -74,7 +91,7 @@ public:
 
 	// Pattern miner
 	void test_A();
-	// void test_AB();
+	void test_AB();
 	// void test_AB_AC();
 	// void test_AB_AC_BC();
 	// void test_AB_ABC();
@@ -90,8 +107,17 @@ public:
 	// void test_SodaDrinker();
 };
 
-Handle UREPatternMinerUTest::mk_query(const HandleSeq& texts,
-                                      int minsup,
+Handle UREPatternMinerUTest::mk_minsup_eval(int minsup, const Handle& pattern)
+{
+	return al(EVALUATION_LINK,
+	          minsup_prd,
+	          al(LIST_LINK,
+	             pattern,
+	             texts_cpt,
+	             an(NUMBER_NODE, to_string(minsup))));
+}
+
+Handle UREPatternMinerUTest::mk_query(const HandleSeq& texts, int minsup,
                                       const Handle& initpat)
 {
 	// Make (Member text (Concept "texts)) links
@@ -99,11 +125,8 @@ Handle UREPatternMinerUTest::mk_query(const HandleSeq& texts,
 		al(MEMBER_LINK, text, texts_cpt);
 
 	// Make URE query
-	Handle ms = an(NUMBER_NODE, to_string(minsup)),
-		X = an(VARIABLE_NODE, "$X"),
-		spe_initpat = (bool)initpat ? al(PUT_LINK, initpat, X) : X,
-		query = al(EVALUATION_LINK, minsup_prd,
-		           al(LIST_LINK, spe_initpat, texts_cpt, ms));
+	Handle spe_initpat = (bool)initpat ? al(PUT_LINK, initpat, X) : X,
+		query = mk_minsup_eval(minsup, spe_initpat);
 	return query;
 }
 
@@ -118,12 +141,6 @@ UREPatternMinerUTest::UREPatternMinerUTest() : _scm(&_as)
 	          "/tests/learning/xpattern-miner/scm\")");
 	_scm.eval("(add-to-load-path \"" PROJECT_SOURCE_DIR
 	          "/opencog/learning/xpattern-miner/ure-based\")");
-
-	// Load modules (they are in the rules already but for some reason
-	// load-from-path doesn't load them)
-	_scm.eval("(use-modules (opencog logger))");
-	_scm.eval("(use-modules (opencog query))");
-	_scm.eval("(use-modules (opencog rule-engine))");
 }
 
 UREPatternMinerUTest::~UREPatternMinerUTest() {}
@@ -133,9 +150,18 @@ void UREPatternMinerUTest::setUp()
 	// Load URE-based pattern miner
 	std::string rs = _scm.eval("(load-from-path \"pm-config.scm\")");
 	logger().debug() << "rs = " << rs;
+	X = an(VARIABLE_NODE, "$X");
+	Y = an(VARIABLE_NODE, "$Y");
+	Z = an(VARIABLE_NODE, "$Z");
+	W = an(VARIABLE_NODE, "$W");
+	A = an(CONCEPT_NODE, "A");
+	B = an(CONCEPT_NODE, "B");
+	C = an(CONCEPT_NODE, "C");
+	D = an(CONCEPT_NODE, "D");
 	pm_rb = _scm.eval_h("pm-rbs");
 	texts_cpt = an(CONCEPT_NODE, "texts");
 	minsup_prd = an(PREDICATE_NODE, "minsup");
+	top = al(LAMBDA_LINK, X, X);
 }
 
 void UREPatternMinerUTest::tearDown()
@@ -148,7 +174,6 @@ void UREPatternMinerUTest::test_A()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
-	Handle A = an(CONCEPT_NODE, "A");
 	Handle query = mk_query({A}, 2);
 	BackwardChainer bc(_as, pm_rb, query);
 	bc.do_chain();
@@ -162,27 +187,22 @@ void UREPatternMinerUTest::test_A()
 	TS_ASSERT(content_eq(results, expected));
 }
 
-// void UREPatternMinerUTest::test_AB()
-// {
-// 	logger().info("BEGIN TEST: %s", __FUNCTION__);
+void UREPatternMinerUTest::test_AB()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
-// 	Handle A = an(CONCEPT_NODE, "A"),
-// 		B = an(CONCEPT_NODE, "B");
+	Handle query = mk_query({A, B}, 2);
+	BackwardChainer bc(_as, pm_rb, query);
+	bc.do_chain();
 
-// 	XPMParameters param(2);
-// 	XPatternMiner pm(_as, param);
-// 	HandleTree results = pm(),
-// 		expected;               // Still return nothing because the
-//                                 // resulting pattern is not a
-//                                 // specialization of the initial
-//                                 // one. This will change once types
-//                                 // are supported
+	Handle results = bc.get_results(),
+		expected = al(SET_LINK, mk_minsup_eval(2, top));
 
-// 	logger().debug() << "results = " << oc_to_string(results);
-// 	logger().debug() << "expected = " << oc_to_string(expected);
+	logger().debug() << "results = " << oc_to_string(results);
+	logger().debug() << "expected = " << oc_to_string(expected);
 
-// 	TS_ASSERT(content_eq(results, expected));
-// }
+	TS_ASSERT(content_eq(results, expected));
+}
 
 // void UREPatternMinerUTest::test_AB_AC()
 // {

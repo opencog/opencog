@@ -168,3 +168,8 @@
                                 (stv 0 1))))
         (if conclusion-tv
             (cog-set-tv! conclusion conclusion-tv)))))
+
+(define unary-specialization-rule-name
+  (DefinedSchemaNode "unary-specialization-rule"))
+(DefineLink unary-specialization-rule-name
+  unary-specialization-rule)
