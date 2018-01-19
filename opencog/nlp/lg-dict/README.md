@@ -45,8 +45,7 @@ The output should resemble the below:
    )
   ```
 
-The disjuncts are in Disjuntive Normal Form (DNF)
-as described http://en.wikipedia.org/wiki/Disjunctive_normal_form
+The disjuncts are in [Disjuntive Normal Form](http://en.wikipedia.org/wiki/Disjunctive_normal_form) (DNF)
 where `LgOr` and `LgAnd` correspond to the `or` and `&` notation of LG.
 Note that `LgOr` is actually a menu choice, and NOT a boolean OR.
 
@@ -54,9 +53,9 @@ Each LG connector is fully described within the `LgConnector` link,
 with the connector name in `LgConnectorNode`, direction in
 `LgConnDirNode`, and the multi-connect property in `LgConnMultiNode`.
 
-The connector ordering are kept intact, as described on
-http://www.abisource.com/projects/link-grammar/dict/introduction.html
-section 1.2.1
+The connector ordering is kept intact. Connectors and thier meaning and
+usage are described in the [Link Grammar documentation](http://www.abisource.com/projects/link-grammar/dict/introduction.html),
+section 1.2.1.
 
 For more information on the Node & Link, see `nlp/types/atom_types.script`
 
