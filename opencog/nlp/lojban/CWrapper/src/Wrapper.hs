@@ -45,7 +45,8 @@ c_parse asRef swl ctext = do
     print text
     case lojbanToAtomese wl seed text of
         Left m  -> pure nullPtr
-        Right r -> do
+        Right Nothing -> pure nullPtr
+        Right (Just r) -> do
             print r
             mres <- as <: insertAndGetHandle r
             case mres of
