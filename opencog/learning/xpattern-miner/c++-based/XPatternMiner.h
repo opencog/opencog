@@ -221,12 +221,6 @@ private:
 	bool enough_support(const Handle& pattern,
 	                    const HandleSet& texts) const;
 
-	/**
-	 * Like above but only look at the text total count. This works
-	 * when the text has been filtered from a single conjunct pattern.
-	 */
-	bool enough_support(const HandleSet& texts) const;
-
 	// TODO move all static methods down
 
 	/**
@@ -254,14 +248,6 @@ private:
 	unsigned freq_component(const Handle& component,
 	                        const HandleSet& texts,
 	                        int maxf=-1) const;
-
-	/**
-	 * Calculate the total count of texts.
-	 *
-	 * maxf is used to halt the frequency calculation if it reaches a
-	 * certain maximum. Purely for saving resources when possible.
-	 */
-	unsigned freq(const HandleSet& texts, int maxf=-1) const;
 
 	/**
 	 * Calculate the frequency of the whole pattern, given the
