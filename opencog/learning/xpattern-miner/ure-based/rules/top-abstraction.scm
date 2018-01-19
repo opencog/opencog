@@ -1,4 +1,4 @@
-;; Axiom rule about the top pattern (Lambda X X)
+;; Axiom rule about the top abstraction (Lambda X X)
 ;;
 ;; <texts>
 ;; <ms>
@@ -33,10 +33,10 @@
 
 (load "pattern-miner-utils.scm")
 
-;; Note that due to the texts-gt-ms precondition, it will not be able
+;; Note that due to the texts-ge-ms precondition, it will not be able
 ;; to proof its contrary, i.e. <tv> will never be assigned (stv 0 1).
 ;; To remedy that we may move texts-gt-ms in the formula.
-(define top-rule
+(define top-abstraction-rule
   (let* (;; Variables
          (texts (Variable "$texts"))
          (ms (Variable "$ms"))
@@ -60,7 +60,7 @@
                     texts-ge-ms))
          ;; Rewrite
          (rewrite (ExecutionOutput
-                    (GroundedSchema "scm: top-formula")
+                    (GroundedSchema "scm: top-abstraction-formula")
                     (List
                       (Evaluation
                         minsup
@@ -75,7 +75,7 @@
       clauses
       rewrite)))
 
-(define (top-formula conclusion . premises)
+(define (top-abstraction-formula conclusion . premises)
   (if (= (length premises) 2)
       (let* ((texts (car premises))
              (ms (cadr premises))
@@ -83,6 +83,4 @@
         (if conclusion-tv
             (cog-set-tv! conclusion conclusion-tv)))))
 
-;; Temporary testing data
-(Member (Concept "A") (Concept "texts"))
-(Number 1)
+
