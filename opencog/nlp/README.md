@@ -1,6 +1,6 @@
 
-                    Natural Language Processing
-                    ---------------------------
+Natural Language Processing
+===========================
 
 This directory contains an assortment of natural language processing
 subsystems, primarily focused on the English language. This includes
@@ -10,7 +10,7 @@ language output (generation of syntactically valid sentences),
 a chatbot interface, and some AIML interfaces.
 
 How-To
-======
+------
 The current code "doesn't do anything yet"; rather, it is a platform for
 running experiments. Thus, what is contained here should be thought of
 as a "bag of parts".  It is up to you to figure out what these parts
@@ -24,7 +24,7 @@ word-sense-disambiguation (WSD) process.  See the "learn" directory for
 more about language learning. See the wsd directory for more about wsd.
 
 A general sketch
-================
+----------------
 A detailed sketch of the desired dialog system can be found in the PDF
 file in the "dialog_system" directory.
 
@@ -141,7 +141,7 @@ Implements the `LgDictNode` and the `LgDictLookup` atoms.
 lg-parse
 --------
 Parse sentences and place parse results into the AtomSpace. Implements
-the 'LgParse` atom.
+the `LgParse` atom.
 
 lojban
 ------
@@ -205,8 +205,6 @@ take cpu-month to cpu-years; the table-lookup can be done in milli or
 microseconds.
 
 
-======================================================================
-
 A Side-note About Syntactic Sugar
 =================================
 This has been said before, but it bears repeating. Consider the node
@@ -250,10 +248,9 @@ Notationally, these forms should be considered to be "equivalent"
 although there is a bunch of actual code that depends on the one or
 the other, and cannot freely intermingle these cases.
 
-======================================================================
 References:
------------
-"To verbize one's nouns" -- the concept of "Lexical Implication Rules":
+===========
+* "To verbize one's nouns" -- the concept of "Lexical Implication Rules":
 N. Ostler, B.T.S.Atkins, "Predictable Meaning Shift: Some Linguistic
 Properties of Lexical Implication Rules", (1991) Proceedings of the
 First SIGLEX Workshop on Lexical Semantics and Knowledge Representation
