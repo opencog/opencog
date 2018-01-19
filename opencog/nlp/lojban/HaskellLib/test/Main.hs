@@ -16,9 +16,12 @@ main :: IO ()
 main = do
     putStrLn "Starting Test"
     (parser,printer) <- initParserPrinter "cmavo.csv" "gismu.csv"
+    putStrLn "Loading Data"
     sentences <- loadData
+    putStrLn "Testing: "
     let parsed = parMap rpar (ptest parser) sentences
     testRes <- sequence parsed
+ -- testRes <- mapM (ptest parser) sentences
     let testResF  = filter id testRes
     putStrLn $
         "Of " ++ show (length sentences) ++ " sentences " ++
@@ -27,17 +30,18 @@ main = do
         then exitSuccess
         else exitFailure
 
-ptest :: (String -> Either String Atom) -> String -> IO Bool
+ptest :: (String -> Either String (Maybe Atom)) -> String -> IO Bool
 ptest parser text = do
     case parser text of
         Left e  -> print text >> putStrLn e >> return False
         Right _ -> return True
 
-pptest :: (String -> Either String Atom) -> (Atom -> Either String String) -> String -> IO Bool
+pptest :: (String -> Either String (Maybe Atom)) -> (Atom -> Either String String) -> String -> IO Bool
 pptest parser printer text =
     case parser text of
         Left e    -> print False >> return False
-        Right res ->
+        Right Nothing -> putStrLn "Empty parse no Error" >> return True
+        Right (Just res) ->
             case printer res of
                 Left e      -> print False >> return False
                 Right ptext ->

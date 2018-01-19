@@ -29,14 +29,16 @@ import Control.Monad.Trans.Class
 import Iso hiding (Syntax,SynIso)
 
 initParserPrinter :: String -> String
-                  -> IO (String -> Either String Atom, Atom -> Either String String)
+                  -> IO ( String -> Either String (Maybe Atom)
+                        ,Atom -> Either String String)
+
 initParserPrinter cmavoSrc gismuSrc = do
     wordlist <- loadWordLists cmavoSrc gismuSrc
     seed <- randomIO
     return (lojbanToAtomese wordlist seed,atomeseToLojban wordlist seed)
 
-lojbanToAtomese :: (WordList State) -> Int -> String -> Either String Atom
-lojbanToAtomese rstate seed text = wrapAtom . fst <$> evalRWST (apply lojban ()) rstate state
+lojbanToAtomese :: (WordList State) -> Int -> String -> Either String (Maybe Atom)
+lojbanToAtomese rstate seed text = (fmap wrapAtom) . fst <$> evalRWST (apply lojban ()) rstate state
     where state = State {sFlags = M.empty
                         ,sAtoms = []
                         ,sText = text++" "
@@ -52,7 +54,7 @@ wrapAtom atom@(Link "PutLink" _ _)          = cLL [cAN "QuestionAnchor" , atom]
 wrapAtom atom                               = cLL [cAN "StatementAnchor", atom]
 
 atomeseToLojban :: (WordList State) -> Int -> Atom -> Either String String
-atomeseToLojban rstate seed a@(LL [_an,s]) = sText . fst <$> execRWST (unapply lojban s) rstate state
+atomeseToLojban rstate seed a@(LL [_an,s]) = sText . fst <$> execRWST (unapply lojban (Just s)) rstate state
     where state = State {sFlags = M.empty
                         ,sAtoms = []
                         ,sText = ""
