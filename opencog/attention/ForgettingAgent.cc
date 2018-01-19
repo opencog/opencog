@@ -95,14 +95,14 @@ void ForgettingAgent::forget()
         {
             if (get_vlti(atomsVector[i]) == AttentionValue::DISPOSABLE )
             {
-                std::string atomName = atomsVector[i]->toString();
+                std::string atomName = atomsVector[i]->to_string();
                 _log->fine("Removing atom %s", atomName.c_str());
                 // TODO: do recursive remove if neighbours are not very important
                 IncomingSet iset = atomsVector[i]->getIncomingSet(_as);
                 recursive = true;
                 for (const LinkPtr& h : iset)
                 {
-                    if (h->getType() != ASYMMETRIC_HEBBIAN_LINK) {
+                    if (h->get_type() != ASYMMETRIC_HEBBIAN_LINK) {
                         recursive = false;
                         break;
                     }

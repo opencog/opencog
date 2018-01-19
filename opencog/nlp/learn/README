@@ -18,12 +18,12 @@ enables this can be found in the paper "Language Learning", B. Goertzel
 and L. Vepstas (2014) on [ArXiv abs/1401.3372](https://arxiv.org/abs/1401.3372)
 A shorter sketch is given below.  Most of this README concerns the
 practical details of configuring and operating the system, and some
-diary-like notes about system configurtion and operation. A diary of
+diary-like notes about system configuration and operation. A diary of
 scientific notes and results is in the `learn-lang-diary` directory.
 
 The basic algorithmic steps, as implemented so far, are as follows:
 A) Ingest a lot of raw text, such as novels and narrative literature,
-   and count the occurance of nearby word-pairs.
+   and count the occurrence of nearby word-pairs.
 B) Compute the mutual information (mutual entropy) between the word-pairs.
 C) Use a Minimum-Spanning-Tree algorithm to obtain provisional parses
    of sentences.  This requires ingesting a lot of raw text, again.
@@ -38,21 +38,21 @@ a topic of current research; its not entirely clear what the best
 merging algorithm might be, or how it will work.
 
 Steps A-C are "well-known" in the academic literature, with results
-reported by many resaeachers over the last two decades. The results
+reported by many researchers over the last two decades. The results
 from Steps D & E are new, and have never been published before.
 (Results from Step D can be found in the file, in this directory
 `learn-lang-diary/drafts/connector-sets.lyx`, the PDF of which
 was posted to the mailing lists)
 
 All of the statistics gathering is done within the OpenCog AtomSpace,
-where counts and other statisical quantites are associated with various
+where counts and other statistical quantities are associated with various
 different hypergraphs.  The contents of the atomspace are saved to an
 SQL (Postgres) server for storage.  The system is fed with raw text
 using assorted ad-hoc scripts, which include both link-grammar and
 RelEx as central components of the processing pipeline. Most of the
 data analysis is performed with an assortment of scheme scripts.
 
-Thus, operating the sytem requires three basic steps:
+Thus, operating the system requires three basic steps:
 * Setting up the atomspace with the SQL backing store,
 * Setting up the misc scripts to feed in raw text, and
 * Processing the data after it has been collected.
@@ -219,9 +219,9 @@ So, set up the text-ingestion pipeline:
                 You almost surely do not need this.  This is for my
                 own personal curiosity.
 
-9c) Optionally tune the forced garbage collection paramters. Currently
+9c) Optionally tune the forced garbage collection parameters. Currently
   garbage collection is forced whenever the guile heap exceeds 750
-  MBytes; this helps keep RAM usage down on small-RAM achines.  However,
+  MBytes; this helps keep RAM usage down on small-RAM machines.  However,
   it does cost CPU time.  Adjust the `max-size` parameter in
   `observe-text` in the `link-pipeline.scm` file to suit your whims in
   RAM usage and time spent in GC.
@@ -236,7 +236,7 @@ So, set up the text-ingestion pipeline:
   and few action-verbs (hit, jump, push, take, sing, love) because
   its mostly describing objects and events (is, has, was). It also
   contains large numbers of product names, model numbers, geographical
-  place names, and foreign langauge words, which do little or nothing
+  place names, and foreign language words, which do little or nothing
   for learning grammar. Finally, it has large numbers of tables and
   lists of dates, awards, ceremonies, locations, sports-league names,
   battles, etc. that get mistaken for sentences, and leads to unusual
@@ -298,7 +298,7 @@ alpha-pages after all that work)
   by default, unless you want to do something unusual.
 
   -- `run-all-servers.sh` runs (almost) all of the needed servers, for
-     one langauge, all at once, in a multi-paneled `byobu` window. What
+     one language, all at once, in a multi-paneled `byobu` window. What
      it doesn't do is start the final batch script `./wiki-ss-<lang>.sh`,
      which needs to be started by hand (for the <lang> that you want to
      process). Use F4 to move to the 4th tab and start it there.
@@ -322,7 +322,7 @@ alpha-pages after all that work)
   is that older postgres don't automatically VACUUM (see "performance"
   below) The other is the list membership functions are needed.
 * Be sure to perform the postgres tuning recommendations found in
-  various online postgres peformance wikis, or in the
+  various online postgres performance wikis, or in the
   `opencog/persist/sql/README.md` file.  See also 'Performance' section
   below.
 
@@ -347,7 +347,7 @@ where type 7 is `CountTruthValue`.
 Mutual Information of Word Pairs
 --------------------------------
 After accumulating a few million word pairs, we're ready to compute
-the mutual entropy between them.  This is done manually, by runnning
+the mutual entropy between them.  This is done manually, by running
 functions defined in `(opencog nlp learn)`.
 
 ```
@@ -422,7 +422,7 @@ works well.
 
 To perform MST parsing in bulk:
 * Copy `run/mst-count-en.scm`, `run/mst-one.sh` and `run/wiki-mst-en.sh`
-  to yor working directory.
+  to your working directory.
 
 * (Optional but suggested) Make a copy of your word-pair database, "just
   in case".  You can copy databases by saying:
@@ -472,7 +472,7 @@ you can start exploring.
   at the same time, the issueing of UUID's will get confused, and
   one or both the servers will crash, and possible database corruption
   may occur.  It is possible to have multiple writers (and I've done
-  this before, any years ago), but this takes additonal configuration,
+  this before, any years ago), but this takes additional configuration,
   and a miscellany of coding changes and a couple of enhancements, to
   keep things in sync.
 
@@ -561,7 +561,7 @@ NAME           STATE   AUTOSTART GROUPS IPV4      IPV6
 simil-en       STOPPED 0         -      -         -
 ```
 
-* Start the contianer by saying `lxc-start -n simil-en`. Give it
+* Start the container by saying `lxc-start -n simil-en`. Give it
   5 or 10 or 30 seconds to boot up. Then `lxc-ls -f` again. You
   should see the below. It ay take a minute for the IPV4 address to
   show up. You will proably get a different IP than the one shown.

@@ -52,7 +52,7 @@ void PatternIndexSCM::init()
 
 Handle PatternIndexSCM::create_index(Handle scmPath)
 {
-    return PatternIndexAPI::getInstance().createIndex(scmPath->getName());
+    return PatternIndexAPI::getInstance().createIndex(scmPath->get_name());
 }
 
 Handle PatternIndexSCM::query(Handle indexKey, Handle queryLink)

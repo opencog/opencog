@@ -61,15 +61,13 @@ are used).
   * A rule is an ImplicationLink structured as
     ```scheme
             (ImplicationLink  <TV>
-                (SequentialAndLink
+                (AndLink
                     (context)
                     (action))
                 (goal))
     ```
     An ImplicationLink was choosen because it allows PLN to be employed
-    to perform reasoning in the face of uncertain contexts.  A
-    SequentialAndLink is used, so that the goal is always placed
-    unambiguously last in the sequence.
+    to perform reasoning in the face of uncertain contexts.
   * The function `psi-rule` that is defined [here](main.scm). Is to be used
     in adding new rules.
 

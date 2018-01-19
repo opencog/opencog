@@ -49,7 +49,7 @@ bool OpenPsiImplicator::grounding(const HandleMap &var_soln,
   if (0 < var_soln.size()) {
     for( auto it = var_soln.begin(); it != var_soln.end(); ++it )
     {
-      if(classserver().isA(VARIABLE_NODE, (it->second)->getType())) {
+      if(classserver().isA(VARIABLE_NODE, (it->second)->get_type())) {
         return false;
       }
     }
@@ -74,7 +74,7 @@ bool OpenPsiImplicator::grounding(const HandleMap &var_soln,
     // searching.
     logger().info("In %s: the following _pattern_body triggered "
       "InitiateSearchCB::no_search \n %s", __FUNCTION__ ,
-      _pattern_body->toString().c_str());
+      _pattern_body->to_string().c_str());
 
     return false;
   }

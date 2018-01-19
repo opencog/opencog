@@ -1,5 +1,11 @@
 
 (use-modules (ice-9 receive))  ; for receive, below
+(use-modules (ice-9 optargs))  ; for define*-public
+(use-modules (srfi srfi-1)
+             (opencog)
+             (opencog nlp)  ; need the atom types
+             (opencog nlp relex2logic) ; helpers.scm uses this
+             (opencog nlp sureal))
 
 ;
 ; loading additional dependency
@@ -18,7 +24,9 @@
 ; =======================================================================
 
 ; -----------------------------------------------------------------------
-; See documentation below ...
+; Because we use the case-lambda, here, instead of optargs,
+; we cannot use define*-public, like we would like to. So the
+; export is down below.  Oh well.
 (define microplanning
 	(case-lambda
 		((sl ut) (microplanning-main sl ut *default_chunks_option* #t))
@@ -27,6 +35,7 @@
 )
 
 (export microplanning)
+
 
 (set-procedure-property! microplanning 'documentation
 "

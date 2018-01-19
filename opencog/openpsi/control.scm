@@ -18,28 +18,28 @@
 (load "utilities.scm")
 
 ; --------------------------------------------------------------
-(define (psi-set-updater! updater tag-node)
+(define (psi-set-updater! component-node updater)
 "
-  psi-set-updater! UPDATER TAG
+  psi-set-updater! COMPONENT UPDATER
 
-  Returns the alias node that represents the updater UPDATER.  An
-  updater is an evaluatable atom that, when evaluated, updates the
-  values for a given demand/modulator.
+  An UPDATER is an evaluatable atom that, when evaluated, updates the
+  values for a given COMPONENT.
 
-  The TAG is a demand/modulator node that the updater is being added to.
+  The COMPONENT is a component node that the updater is being added to.
 "
-    (psi-set-functionality updater #t tag-node "updater")
+    (psi-set-func! updater "#t" component-node "updater")
 )
 
 ; --------------------------------------------------------------
-(define (psi-get-updater tag-node)
+(define (psi-get-updater component-node)
 "
-  psi-get-updater TAG
+  psi-get-updater COMPONENT
 
-  Returns a list containing the updater for the given tag-node TAG.
-  Null is returned if there is no updater for TAG.
+  Returns the updater atom for the given COMPONENT, which when evaluated
+  will update the weight of psi-rules. Null is returned if there is no
+  updater for COMPONENT.
 "
-    (psi-get-functionality tag-node "updater")
+    (psi-func component-node "updater")
 )
 
 ; --------------------------------------------------------------
@@ -128,7 +128,7 @@
 
     (psi-rule-set-atomese-weight psi-rule (tv-mean (cog-tv psi-rule)))
 
-    (psi-rule-set-alias psi-rule name)
+    (psi-rule-set-alias! psi-rule name)
 
     psi-rule
 )
@@ -156,7 +156,7 @@
   psi-rule:
   - An ImplicationLink whose weight is going to be modified.
 "
-    (cog-outgoing-set (cog-bind
+    (cog-outgoing-set (cog-execute!
         (BindLink
             (VariableList
                 (TypedVariableLink
@@ -215,6 +215,7 @@
   - a list with psi-rules.
 "
     (receive (filtered other)
+        ; TODO: Use categories instead of aliases for categorization
         (psi-partition-rule-with-alias rule-alias psi-rule-list)
         (map
             (lambda (psi-rule) (psi-rule-set-atomese-weight psi-rule 0.0))
@@ -235,6 +236,7 @@
   - a list with psi-rules.
 "
     (receive (filtered other)
+      ; TODO: Use categories instead of aliases for categorization
         (psi-partition-rule-with-alias rule-alias psi-rule-list)
         (map
             (lambda (psi-rule) (psi-rule-set-atomese-weight psi-rule 0.9))

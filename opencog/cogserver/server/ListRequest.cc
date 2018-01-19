@@ -132,7 +132,7 @@ void ListRequest::sendOutput()
 {
     std::ostringstream oss;
     for (const Handle& h : _handles) {
-        oss << h->toString() << std::endl;
+        oss << h->to_string() << std::endl;
     }
     send(oss.str());
 }

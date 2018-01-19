@@ -23,6 +23,7 @@
  */
 #include <algorithm>
 #include <cmath>
+#include <functional>
 #include <limits>
 #include <numeric>
 #include <string>
@@ -44,6 +45,7 @@ extern "C" {
 #include "DimEmbedModule.h"
 
 using namespace opencog;
+using namespace std::placeholders;
 
 typedef std::vector<std::pair<HandleSeq,std::vector<double> > >
     ClusterSeq; //the vector of doubles is the centroid of the cluster
@@ -57,19 +59,19 @@ DimEmbedModule::DimEmbedModule(CogServer& cs) : Module(cs)
     _bank = &attentionbank(as);
 
     addedAtomConnection = as->
-        addAtomSignal(boost::bind(&DimEmbedModule::handleAddSignal, this, _1));
+        atomAddedSignal().connect(std::bind(&DimEmbedModule::handleAddSignal, this, _1));
     removedAtomConnection = as->
-        removeAtomSignal(boost::bind(&DimEmbedModule::atomRemoveSignal, this, _1));
+        atomRemovedSignal().connect(std::bind(&DimEmbedModule::atomRemoveSignal, this, _1));
     tvChangedConnection = as->
-        TVChangedSignal(boost::bind(&DimEmbedModule::TVChangedSignal, this, _1, _2, _3));
+        TVChangedSignal().connect(std::bind(&DimEmbedModule::TVChangedSignal, this, _1, _2, _3));
 }
 
 DimEmbedModule::~DimEmbedModule()
 {
     logger().info("[DimEmbedModule] destructor");
-    addedAtomConnection.disconnect();
-    removedAtomConnection.disconnect();
-    tvChangedConnection.disconnect();
+    as->atomAddedSignal().disconnect(addedAtomConnection);
+    as->atomRemovedSignal().disconnect(removedAtomConnection);
+    as->TVChangedSignal().disconnect(tvChangedConnection);
 }
 
 void DimEmbedModule::init()
@@ -77,11 +79,11 @@ void DimEmbedModule::init()
     logger().info("[DimEmbedModule] init");
     this->as = &_cogserver.getAtomSpace();
     addedAtomConnection = as->
-        addAtomSignal(boost::bind(&DimEmbedModule::handleAddSignal, this, _1));
+        atomAddedSignal().connect(std::bind(&DimEmbedModule::handleAddSignal, this, _1));
     removedAtomConnection = as->
-        removeAtomSignal(boost::bind(&DimEmbedModule::atomRemoveSignal, this, _1));
+        atomRemovedSignal().connect(std::bind(&DimEmbedModule::atomRemoveSignal, this, _1));
     tvChangedConnection = as->
-        TVChangedSignal(boost::bind(&DimEmbedModule::TVChangedSignal, this, _1, _2, _3));
+        TVChangedSignal().connect(std::bind(&DimEmbedModule::TVChangedSignal, this, _1, _2, _3));
 #ifdef HAVE_GUILE
     //Functions available to scheme shell
     define_scheme_primitive("embedSpace",
@@ -204,10 +206,10 @@ static bool is_source(const Handle& source, const Handle& link)
     // On ordered links, only the first position in the outgoing set
     // is a source of this link. So, if the handle given is equal to
     // the first position, true is returned.
-    Arity arity = lptr->getArity();
-    if (classserver().isA(lptr->getType(), ORDERED_LINK)) {
+    Arity arity = lptr->get_arity();
+    if (classserver().isA(lptr->get_type(), ORDERED_LINK)) {
         return arity > 0 and lptr->getOutgoingAtom(0) == source;
-    } else if (classserver().isA(lptr->getType(), UNORDERED_LINK)) {
+    } else if (classserver().isA(lptr->get_type(), UNORDERED_LINK)) {
         // If the link is unordered, the outgoing set is scanned;
         // return true if any position is equal to the source.
         for (const Handle& h : lptr->getOutgoingSet())
@@ -269,7 +271,7 @@ void DimEmbedModule::addPivot(Handle h, Type linkType, bool fanin)
         u->getIncomingSet(back_inserter(newLinks));
         for (HandleSeq::iterator it=newLinks.begin(); it!=newLinks.end(); ++it){
             //ignore links that aren't a subtype of linkType
-            if (!classserver().isA((*it)->getType(), linkType)) continue;
+            if (!classserver().isA((*it)->get_type(), linkType)) continue;
             TruthValuePtr linkTV = (*it)->getTruthValue();
             HandleSeq newNodes = (*it)->getOutgoingSet();
             HandleSeq::iterator it2=newNodes.begin();
@@ -287,9 +289,9 @@ void DimEmbedModule::addPivot(Handle h, Type linkType, bool fanin)
                 }
             }
             for (;it2!=newNodes.end(); ++it2) {
-                if (!(*it2)->isNode()) continue;
+                if (!(*it2)->is_node()) continue;
                 double alt =
-                    distMap[u] * linkTV->getMean() * linkTV->getConfidence();
+                    distMap[u] * linkTV->get_mean() * linkTV->get_confidence();
                 double oldDist=distMap[*it2];
                 //If we've found a better (higher weight) path, update distMap
                 if (alt>oldDist) {
@@ -441,7 +443,7 @@ std::vector<double> DimEmbedModule::addNode(Handle h,
     for (HandleSeq::iterator it=links.begin(); it<links.end(); ++it) {
         HandleSeq nodes = a->getOutgoing(*it);
         const TruthValue& linkTV = a->getTV(*it);
-        double weight = linkTV.getConfidence()*linkTV.getMean();
+        double weight = linkTV.get_confidence()*linkTV.get_mean();
         for (HandleSeq::iterator it2=nodes.begin();it2<nodes.end(); ++it2) {
             if (*it2==h) continue;
             const std::vector<double>& embedding =
@@ -533,7 +535,7 @@ void DimEmbedModule::symAddLink(Handle h, Type linkType)
     int dim = dimensionMap[linkType];
     AtomEmbedding& aE = atomMaps[linkType];
     TruthValuePtr linkTV = h->getTruthValue();
-    double weight = linkTV->getConfidence() * linkTV->getMean();
+    double weight = linkTV->get_confidence() * linkTV->get_mean();
     HandleSeq nodes;
     if (LinkCast(h)) nodes = LinkCast(h)->getOutgoingSet();
     for (HandleSeq::iterator it=nodes.begin();it!=nodes.end();++it) {
@@ -565,7 +567,7 @@ void DimEmbedModule::asymAddLink(Handle h, Type linkType)
     AtomEmbedding& aEForw = asymAtomMaps[linkType].first;
     AtomEmbedding& aEBackw = asymAtomMaps[linkType].second;
     TruthValuePtr linkTV = h->getTruthValue();
-    double weight = linkTV->getConfidence() * linkTV->getMean();
+    double weight = linkTV->get_confidence() * linkTV->get_mean();
     HandleSeq nodes;
     if (LinkCast(h)) nodes = LinkCast(h)->getOutgoingSet();
     Handle source = nodes.front();
@@ -637,7 +639,7 @@ void DimEmbedModule::logAtomEmbedding(Type linkType)
     oss << "PIVOTS:" << std::endl;
     for (HandleSeq::const_iterator it=pivots.begin(); it!=pivots.end(); ++it){
         if (as->is_valid_handle(*it)) {
-            oss << (*it)->toShortString() << std::endl;
+            oss << (*it)->to_short_string() << std::endl;
         } else {
             oss << "[PIVOT'S BEEN DELETED]" << std::endl;
         }
@@ -646,7 +648,7 @@ void DimEmbedModule::logAtomEmbedding(Type linkType)
     AtomEmbedding::const_iterator it;
     for (it=atomEmbedding.begin(); it!=atomEmbedding.end(); ++it){
         if (as->is_valid_handle(it->first)) {
-            oss << (it->first)->toShortString() << " : (";
+            oss << (it->first)->to_short_string() << " : (";
         } else {
             oss << "[NODE'S BEEN DELETED H=" << it->first << "] : (";
         }
@@ -673,7 +675,7 @@ void DimEmbedModule::printEmbedding()
         AtomEmbedding::const_iterator it;
         for (it=atomEmbedding.begin(); it!=atomEmbedding.end(); ++it){
             if (as->is_valid_handle(it->first)) {
-                oss << (it->first)->toShortString() << " : (";
+                oss << (it->first)->to_short_string() << " : (";
             } else {
                 oss << "[NODE'S BEEN DELETED. handle=";
                 oss << it->first.value() << "] : (";
@@ -963,7 +965,7 @@ Handle DimEmbedModule::blendNodes(Handle n1,
         throw InvalidParamException(TRACE_INFO,
             "DimensionalEmbedding requires link type, not %s",
             classserver().getTypeName(l).c_str());
-    if (!n1->isNode() || !n2->isNode())
+    if (!n1->is_node() || !n2->is_node())
         throw InvalidParamException(TRACE_INFO,
                                     "blendNodes requires two nodes.");
     if (!isEmbedded(l)) {
@@ -993,8 +995,8 @@ Handle DimEmbedModule::blendNodes(Handle n1,
         double dist2 = p2.distance(cTree.k_nearest_neighbors(p2,1)[0]);
         if (dist1>dist2) newVec[i]=embedVec2[i];
     }
-    std::string prefix("blend_"+n1->toString()+"_"+n2->toString()+"_");
-    Handle newNode = add_prefixed_node(*as, n1->getType(), prefix);
+    std::string prefix("blend_"+n1->to_string()+"_"+n2->to_string()+"_");
+    Handle newNode = add_prefixed_node(*as, n1->get_type(), prefix);
 
     for (unsigned int i=0; i<numDims; i++) {
         double strength = sqrt(newVec[i]);
@@ -1059,11 +1061,11 @@ void DimEmbedModule::handleAddSignal(Handle h)
     else {//h is a link
         for (it = atomMaps.begin(); it != atomMaps.end(); ++it) {
             //if the new link is a subtype of an existing embedding, add it
-            if (classserver().isA(h->getType(), it->first))
+            if (classserver().isA(h->get_type(), it->first))
                 addLink(h, it->first);
         }
         for (it2 = asymAtomMaps.begin(); it2 !=asymAtomMaps.end(); ++it2) {
-            if (classserver().isA(h->getType(), it2->first))
+            if (classserver().isA(h->get_type(), it2->first))
                 addLink(h, it2->first);
         }
     }
@@ -1071,7 +1073,7 @@ void DimEmbedModule::handleAddSignal(Handle h)
 
 void DimEmbedModule::atomRemoveSignal(AtomPtr atom)
 {
-    Handle h = atom->getHandle();
+    Handle h = atom->get_handle();
     if (NodeCast(atom)) {
         //for each link type embedding that exists, remove the node
         AtomEmbedMap::iterator it;

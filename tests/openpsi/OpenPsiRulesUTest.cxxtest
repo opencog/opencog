@@ -90,39 +90,48 @@ public:
     // TODO: Clear the index.
   }
 
-  // Check OpenPsiRules::add_rule is addng the openpsi rule properly.
-  void test_add_rule()
+  // Check OpenPsiRules::add_rule is addng the openpsi rule properly,
+  // and that OpenPsiRules::is_rule differentiates between rules that
+  // are in index vs that are not.
+  void test_add_rule_and_is_rule()
   {
     logger().info("BEGIN TEST: %s", __FUNCTION__);
 
+    // Common Setup
     _scm->eval("(load \"" OPENPSI_TEST_PATH "/rules.scm\")");
     CHKERR
     HandleSeq context_1 = _scm->eval_h("(context-1-cpp)")->getOutgoingSet();
     CHKERR
     Handle action_1 = _scm->eval_h("action-1");
     CHKERR
-    Handle goal_1 = _opr->add_goal("goal-1");
+    Handle goal_1 = _scm->eval_h("goal-1");
     CHKERR
-    Handle demand_1 = _opr->add_demand("demand-1");
 
-    // Test 1:
+    // Test 1 :
+    // Check that rules that are defined in the atomspace but are not
+    // added to the index are not considered as a valid rule.
+    Handle declared_rule_1 = _scm->eval_h("(rule-1-cpp)");
+    TS_ASSERT_EQUALS(false, OpenPsiRules::is_rule(declared_rule_1));
+
+    // Test 2:
     // Check if the rule is added properly.
     Handle rule_1 = _opr->add_rule(context_1, action_1, goal_1,
-      SimpleTruthValue::createTV(1.0, 1.0), demand_1);
-    Handle expected_rule_1 = _scm->eval_h("(rule-1-cpp)");
-    CHKERR
-    TSM_ASSERT_EQUALS("Expected to be equal", expected_rule_1, rule_1);
+      SimpleTruthValue::createTV(1.0, 1.0));
+    TS_ASSERT_EQUALS(declared_rule_1, rule_1);
 
-    // TODO: Add test to check if the index is being updated when
-    // multiple rules are added.
+    // Test 3:
+    // Check if rules that are defined using OpenPsiRules::add_rule are
+    // considered as a valid rule.
+    TS_ASSERT_EQUALS(true, OpenPsiRules::is_rule(declared_rule_1));
 
     logger().info("END TEST: %s", __FUNCTION__);
   }
 
-  // Check OpenPsiRules::get_context is behaving as expected. If the rule
+  // Check OpenPsiRules::get_context, OpenPsiRules::get_action, and
+  // OpenPsiRules::get_goal are behaving as expected. If the rule
   // is added into the atomspace using OpenPsiRules::add_rule then it
   // should behave as tested here.
-  void test_get_context()
+  void test_rule_get_functions()
   {
     logger().info("BEGIN TEST: %s", __FUNCTION__);
 
@@ -137,21 +146,37 @@ public:
     // the index doesn't know about it.
     Handle rule_2 = _scm->eval_h("(rule-2-cpp)");
     CHKERR
-    HandleSeq& result_1 = OpenPsiRules::get_context(rule_2);
-    TSM_ASSERT_EQUALS("Expected to be empty", 0, result_1.size());
+    Handle result_1_1 = OpenPsiRules::get_action(rule_2);
+    TS_ASSERT_EQUALS(Handle::UNDEFINED, result_1_1);
+
+    HandleSeq& result_1_2 = OpenPsiRules::get_context(rule_2);
+    TS_ASSERT_EQUALS(0, result_1_2.size());
+
+    Handle result_1_3 = OpenPsiRules::get_goal(rule_2);
+    TS_ASSERT_EQUALS(Handle::UNDEFINED, result_1_3);
 
     // Test 2:
     // If the rule is added using OpenPsiRules::add_rule then
     // the index is aware of it.
     _scm->eval_h("(rule-2)");
     CHKERR
+    Handle expected_action_2 = _scm->eval_h("action-2");
+    CHKERR
+    Handle result_2_1 = OpenPsiRules::get_action(rule_2);
+    TS_ASSERT_EQUALS(expected_action_2, result_2_1);
+
     HandleSeq expected_context_2 = \
     _scm->eval_h("(context-2-cpp)")->getOutgoingSet();
     CHKERR
-    HandleSeq& result_2 = OpenPsiRules::get_context(rule_2);
+    HandleSeq& result_2_2 = OpenPsiRules::get_context(rule_2);
     // A Link is created so as to use operator==.
-    TSM_ASSERT_EQUALS("Expected to be equal",
-      *(createLink(expected_context_2).get()), *(createLink(result_2).get()));
+    TS_ASSERT_EQUALS(*LinkCast(createLink(expected_context_2)),
+      *LinkCast(createLink(result_2_2)));
+
+    Handle expected_goal_2 = _scm->eval_h("goal-2");
+    CHKERR
+    Handle result_2_3 = OpenPsiRules::get_goal(rule_2);
+    TS_ASSERT_EQUALS(expected_goal_2, result_2_3);
 
     logger().info("END TEST: %s", __FUNCTION__);
   }
@@ -186,7 +211,7 @@ public:
     CHKERR
     PatternLinkPtr result_2 = OpenPsiRules::get_query(rule_1);
     // Don't know why operator== doesn't work.
-    TS_ASSERT(opencog::content_eq(expected_query_2, result_2->getHandle()));
+    TS_ASSERT(opencog::content_eq(expected_query_2, result_2->get_handle()));
 
     logger().info("END TEST: %s", __FUNCTION__);
   }

@@ -54,7 +54,7 @@ LgDictNode::LgDictNode(const Node& n)
 	: Node(n), _dict(nullptr)
 {
 	// Type must be as expected
-	Type tdict = n.getType();
+	Type tdict = n.get_type();
 	if (not classserver().isA(tdict, LG_DICT_NODE))
 	{
 		const std::string& tname = classserver().getTypeName(tdict);
@@ -80,7 +80,7 @@ Dictionary LgDictNode::get_dictionary()
 	if (_dict) return _dict;
 
 	lg_error_set_handler(error_handler, nullptr);
-	const char * lang = getName().c_str();
+	const char * lang = get_name().c_str();
 
 	// Link grammar dictionary creation is NOT thread-safe.
 	static std::mutex _global_mtx;
@@ -99,7 +99,7 @@ Dictionary LgDictNode::get_dictionary()
 Handle LgDictNode::factory(const Handle& base)
 {
 	if (LgDictNodeCast(base)) return base;
-	Handle h(createLgDictNode(base->getName()));
+	Handle h(createLgDictNode(base->get_name()));
 	return h;
 }
 

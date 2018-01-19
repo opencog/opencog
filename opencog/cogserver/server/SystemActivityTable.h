@@ -80,13 +80,13 @@ protected:
     AgentActivityTable _agentActivityTable;
     size_t _maxAgentActivityTableSeqSize;
     CogServer* _cogServer;
-    boost::signals2::connection _conn;
+    int _conn;
 
     /** Protects _agentActivityTable from concurrent access. It is possible to
      * implement fine grained locking per agent. */
     std::mutex _activityTableMutex;
 
-    /** called by AtomSpace via a boost::signals2::signal when an atom is removed. */
+    /** called by AtomSpace via a signal when an atom is removed. */
     void atomRemoved(AtomPtr);
 
     /** trim Activity sequence to a maximum size */

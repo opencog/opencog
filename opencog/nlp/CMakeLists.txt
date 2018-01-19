@@ -20,7 +20,6 @@ IF (HAVE_NLP)
 	ADD_SUBDIRECTORY (chatbot-psi)
 	# fuzzy depends on sureal
 	ADD_SUBDIRECTORY (fuzzy)
-	ADD_SUBDIRECTORY (ghost)
 	ADD_SUBDIRECTORY (lg-dict)
 	ADD_SUBDIRECTORY (lg-parse)
 	ADD_SUBDIRECTORY (microplanning)

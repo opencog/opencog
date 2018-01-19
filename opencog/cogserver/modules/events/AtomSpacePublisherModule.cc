@@ -46,6 +46,7 @@
 #include "AtomSpacePublisherModule.h"
 
 using namespace std;
+using namespace std::placeholders;
 using namespace json_spirit;
 using namespace opencog;
 
@@ -57,6 +58,12 @@ AtomSpacePublisherModule::AtomSpacePublisherModule(CogServer& cs) : Module(cs)
     this->as = &cs.getAtomSpace();
     _attention_bank = &attentionbank(as);
 
+    _remove_atom_connection = 0;
+    _add_atom_connection = 0;
+    _tvchange_connection = 0;
+    _avchange_connection = 0;
+    _add_af_connection = 0;
+    _remove_af_connection = 0;
     enableSignals();
 
     do_publisherEnableSignals_register();
@@ -92,66 +99,81 @@ AtomSpacePublisherModule::~AtomSpacePublisherModule()
 
 void AtomSpacePublisherModule::enableSignals()
 {
-    if (!addAtomConnection.connected())
+    if (0 == _add_atom_connection)
     {
-        addAtomConnection = as->addAtomSignal(boost::bind(
+        _add_atom_signal = &as->atomAddedSignal();
+        _add_atom_connection = _add_atom_signal->connect(
+            std::bind(
             &AtomSpacePublisherModule::atomAddSignal, this, _1));
     }
-    if (!removeAtomConnection.connected())
+    if (0 == _remove_atom_connection)
     {
-        removeAtomConnection = as->removeAtomSignal(boost::bind(
+        _remove_atom_signal = &as->atomRemovedSignal();
+        _remove_atom_connection = _remove_atom_signal->connect(
+            std::bind(
             &AtomSpacePublisherModule::atomRemoveSignal, this, _1));
     }
-    if (!TVChangedConnection.connected())
+    if (0 == _tvchange_connection)
     {
-        TVChangedConnection = as->TVChangedSignal(boost::bind(
+        _tvchange_signal = &as->TVChangedSignal();
+        _tvchange_connection = _tvchange_signal->connect(
+            std::bind(
             &AtomSpacePublisherModule::TVChangedSignal, this, _1, _2, _3));
     }
-    if (!AVChangedConnection.connected())
+    if (0 == _avchange_connection)
     {
-        AVChangedConnection = _attention_bank->getAVChangedSignal().connect(
-            boost::bind(&AtomSpacePublisherModule::AVChangedSignal,
+        _avchange_signal = &_attention_bank->getAVChangedSignal();
+        _avchange_connection = _avchange_signal->connect(
+            std::bind(&AtomSpacePublisherModule::AVChangedSignal,
                         this, _1, _2, _3));
     }
-    if (!AddAFConnection.connected())
+    if (0 == _add_af_connection)
     {
-        AddAFConnection = _attention_bank->AddAFSignal().connect(
-            boost::bind(&AtomSpacePublisherModule::addAFSignal,
+        _add_af_signal = &_attention_bank->AddAFSignal();
+        _add_af_connection = _add_af_signal->connect(
+            std::bind(&AtomSpacePublisherModule::addAFSignal,
                         this, _1, _2, _3));
     }
-    if (!RemoveAFConnection.connected())
+    if (0 == _remove_af_connection)
     {
-        RemoveAFConnection = _attention_bank->RemoveAFSignal().connect(
-            boost::bind(&AtomSpacePublisherModule::removeAFSignal,
+        _remove_af_signal = &_attention_bank->RemoveAFSignal();
+        _remove_af_connection = _remove_af_signal->connect(
+            std::bind(&AtomSpacePublisherModule::removeAFSignal,
                         this, _1, _2, _3));
     }
 }
 
 void AtomSpacePublisherModule::disableSignals()
 {
-    if (addAtomConnection.connected())
+    if (_add_atom_connection)
     {
-        addAtomConnection.disconnect();
+        _add_atom_signal->disconnect(_add_atom_connection);
+        _add_atom_connection = 0;
     }
-    if (removeAtomConnection.connected())
+    if (_remove_atom_connection)
     {
-        removeAtomConnection.disconnect();
+        _remove_atom_signal->disconnect(_remove_atom_connection);
+        _remove_atom_connection = 0;
     }
-    if (TVChangedConnection.connected())
+    if (_tvchange_connection)
     {
-        TVChangedConnection.disconnect();
+        _tvchange_signal->disconnect(_tvchange_connection);
+        _tvchange_connection = 0;
     }
-    if (AVChangedConnection.connected())
+    if (_avchange_connection)
     {
-        AVChangedConnection.disconnect();
+        _avchange_signal->disconnect(_avchange_connection);
+        _avchange_connection = 0;
     }
-    if (AddAFConnection.connected())
+    if (_add_af_connection)
     {
-        AddAFConnection.disconnect();
+        _add_af_signal->disconnect(_add_af_connection);
+        _add_af_connection = 0;
     }
-    if (RemoveAFConnection.connected())
+    if (_remove_af_connection)
     {
-        RemoveAFConnection.disconnect();
+        _remove_af_signal->disconnect(_remove_af_connection);
+        _remove_af_connection = 0;
     }
 }
 
@@ -232,7 +254,7 @@ void AtomSpacePublisherModule::atomAddSignal(Handle h)
 void AtomSpacePublisherModule::atomRemoveSignal(AtomPtr atom)
 {
     tbb_enqueue_lambda([=] {
-        sendMessage("remove", atomMessage(atomToJSON(atom->getHandle())));
+        sendMessage("remove", atomMessage(atomToJSON(atom->get_handle())));
     });
 }
 
@@ -284,11 +306,11 @@ void AtomSpacePublisherModule::removeAFSignal(const Handle& h,
 Object AtomSpacePublisherModule::atomToJSON(Handle h)
 {
     // Type
-    Type type = h->getType();
+    Type type = h->get_type();
     std::string typeNameString = classserver().getTypeName(type);
 
     // Name
-    std::string nameString = h->getName();
+    std::string nameString = h->get_name();
 
     // Handle
     std::string handle = std::to_string(h.value());
@@ -313,7 +335,7 @@ Object AtomSpacePublisherModule::atomToJSON(Handle h)
 
     // Outgoing set
     Array outgoing;
-    if (h->isLink()) {
+    if (h->is_link()) {
         HandleSeq outgoingHandles = h->getOutgoingSet();
         for (uint i = 0; i < outgoingHandles.size(); i++) {
             outgoing.push_back(std::to_string(outgoingHandles[i].value()));
@@ -347,27 +369,27 @@ Object AtomSpacePublisherModule::tvToJSON(TruthValuePtr tvp)
 {
     Object json;
     Object jsonDetails;
-    Type tvt = tvp->getType();
+    Type tvt = tvp->get_type();
 
 
     if (tvt == SIMPLE_TRUTH_VALUE) {
         json.push_back(Pair("type", "simple"));
-        jsonDetails.push_back(Pair("strength", tvp->getMean()));
-        jsonDetails.push_back(Pair("count", tvp->getCount()));
-        jsonDetails.push_back(Pair("confidence", tvp->getConfidence()));
+        jsonDetails.push_back(Pair("strength", tvp->get_mean()));
+        jsonDetails.push_back(Pair("count", tvp->get_count()));
+        jsonDetails.push_back(Pair("confidence", tvp->get_confidence()));
         json.push_back(Pair("details", jsonDetails));
     }
     else if (tvt == COUNT_TRUTH_VALUE) {
         json.push_back(Pair("type", "count"));
-        jsonDetails.push_back(Pair("strength", tvp->getMean()));
-        jsonDetails.push_back(Pair("count", tvp->getCount()));
-        jsonDetails.push_back(Pair("confidence", tvp->getConfidence()));
+        jsonDetails.push_back(Pair("strength", tvp->get_mean()));
+        jsonDetails.push_back(Pair("count", tvp->get_count()));
+        jsonDetails.push_back(Pair("confidence", tvp->get_confidence()));
         json.push_back(Pair("details", jsonDetails));
     }
     else if (tvt == INDEFINITE_TRUTH_VALUE) {
         IndefiniteTruthValuePtr itv = IndefiniteTVCast(tvp);
         json.push_back(Pair("type", "indefinite"));
-        jsonDetails.push_back(Pair("strength", itv->getMean()));
+        jsonDetails.push_back(Pair("strength", itv->get_mean()));
         jsonDetails.push_back(Pair("L", itv->getL()));
         jsonDetails.push_back(Pair("U", itv->getU()));
         jsonDetails.push_back(Pair("confidence", itv->getConfidenceLevel()));
@@ -377,16 +399,16 @@ Object AtomSpacePublisherModule::tvToJSON(TruthValuePtr tvp)
     }
     else if (tvt == PROBABILISTIC_TRUTH_VALUE) {
         json.push_back(Pair("type", "probabilistic"));
-        jsonDetails.push_back(Pair("strength", tvp->getMean()));
-        jsonDetails.push_back(Pair("count", tvp->getCount()));
-        jsonDetails.push_back(Pair("confidence", tvp->getConfidence()));
+        jsonDetails.push_back(Pair("strength", tvp->get_mean()));
+        jsonDetails.push_back(Pair("count", tvp->get_count()));
+        jsonDetails.push_back(Pair("confidence", tvp->get_confidence()));
         json.push_back(Pair("details", jsonDetails));
     }
     else if (tvt == FUZZY_TRUTH_VALUE) {
         json.push_back(Pair("type", "fuzzy"));
-        jsonDetails.push_back(Pair("strength", tvp->getMean()));
-        jsonDetails.push_back(Pair("count", tvp->getCount()));
-        jsonDetails.push_back(Pair("confidence", tvp->getConfidence()));
+        jsonDetails.push_back(Pair("strength", tvp->get_mean()));
+        jsonDetails.push_back(Pair("count", tvp->get_count()));
+        jsonDetails.push_back(Pair("confidence", tvp->get_confidence()));
         json.push_back(Pair("details", jsonDetails));
     }
     else {

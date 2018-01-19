@@ -53,12 +53,19 @@ public:
 	void setUp();
 	void tearDown();
 
+	// Tests auxiliary methods
 	void test__UnifyPatternOrder();
 	void test_partitionBySharedVariables();
 	void test_containsLoopVariable();
 
-	void test_PatternMiner_SodaDrinker();
-	void test_PatternMiner_InferenceControl();
+	// Simple pattern miner tests
+	void test_PatternMiner_AB_AC();
+	// void test_PatternMiner_AB_ABC(); // will probably not be supported
+	// void test_PatternMiner_ABCD(); // will probably not be supported
+
+	// Complex pattern miner tests
+	// void test_PatternMiner_InferenceControl(); // will probably not be supported
+	// void test_PatternMiner_SodaDrinker();
 };
 
 PatternMinerUTest::PatternMinerUTest() : _scm(&_as)
@@ -170,111 +177,182 @@ void PatternMinerUTest::test_containsLoopVariable()
 	PatternMiner pm(_as);
 
 	HandleSeq pattern1{h1, h2};
-	bool result1 = pm.containsLoopVariable(pattern1),
+	bool result1 = pm.containLoopVariable(pattern1),
 		expected1 = false;
 	TS_ASSERT_EQUALS(result1, expected1);
 
 	HandleSeq pattern2{h1, h2, h3};
-	bool result2 = pm.containsLoopVariable(pattern2),
+	bool result2 = pm.containLoopVariable(pattern2),
 		expected2 = true;
 	TS_ASSERT_EQUALS(result2, expected2);
 
 	HandleSeq pattern3{h1, h2, h3, h4};
-	bool result3 = pm.containsLoopVariable(pattern3),
+	bool result3 = pm.containLoopVariable(pattern3),
 		expected3 = true;
 	TS_ASSERT_EQUALS(result3, expected3);
 
 	HandleSeq pattern4{h2, h3, h4};
-	bool result4 = pm.containsLoopVariable(pattern4),
+	bool result4 = pm.containLoopVariable(pattern4),
 		expected4 = true;
 	TS_ASSERT_EQUALS(result4, expected4);
 
 	HandleSeq pattern5{h3, h4};
-	bool result5 = pm.containsLoopVariable(pattern5),
-		expected5 = false;
+	bool result5 = pm.containLoopVariable(pattern5),
+		expected5 = true;
 	TS_ASSERT_EQUALS(result5, expected5);
 
 	HandleSeq pattern6{h4};
-	bool result6 = pm.containsLoopVariable(pattern6),
-		expected6 = false;
+	bool result6 = pm.containLoopVariable(pattern6),
+		expected6 = true;
 	TS_ASSERT_EQUALS(result6, expected6);
 }
 
-void PatternMinerUTest::test_PatternMiner_SodaDrinker()
+void PatternMinerUTest::test_PatternMiner_AB_AC()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
-	// Load ugly_male_soda-drinker_corpus.scm
-	_scm.eval("(load-from-path \"ugly_male_soda-drinker_corpus.scm\")");
 
-	// Run the pattern miner
+	Handle A = an(CONCEPT_NODE, "A"),
+		B = an(CONCEPT_NODE, "B"),
+		C = an(CONCEPT_NODE, "C"),
+		AB = al(INHERITANCE_LINK, A, B),
+		AC = al(INHERITANCE_LINK, A, C);
+
 	PatternMiner pm(_as);
 	pm.runPatternMiner(false);
 
-	// Test the result: check the final top 3-gram pattern
+	vector<HTreeNode*>& top1gramPatterns = pm.getFinalPatternsForGram(1);
 
-	vector<HTreeNode*>& top3gramPatterns = pm.getFinalPatternsForGram(3);
+	string patternStr = pm.unifiedPatternToKeyString(top1gramPatterns[0]->pattern),
+		expectedStr =
+		"(InheritanceLink )\n"
+		"  (ConceptNode A)\n"
+		"  (PatternVariableNode $var_1)\n\n";
 
-	string patternStr = pm.unifiedPatternToKeyString(top3gramPatterns[0]->pattern);
-	logger().info("The result top 3-gram pattern: \n%s", patternStr.c_str());
+	logger().info("The result top 1-gram pattern: \n%s", patternStr.c_str());
 
-	if (patternStr != top3gramPatternStr)
-	{
-		logger().info("Failed: The result top 3-gram pattern is wrong! The right one should be:\n%s", top3gramPatternStr.c_str());
-		TS_FAIL("The result top 3-gram pattern is wrong!");
-	}
-
-	if (top3gramPatterns[0]->count != 5)
-	{
-		logger().info("Failed: The result top 3-gram pattern count is wrong!");
-		TS_FAIL("The result top 3-gram pattern count is wrong!");
-	}
-
-	logger().info("End TEST: %s", __FUNCTION__);
+	TS_ASSERT_EQUALS(patternStr, expectedStr);
 }
 
-void PatternMinerUTest::test_PatternMiner_InferenceControl()
-{
-	logger().info("BEGIN TEST: %s", __FUNCTION__);
-	// Load inference-control-corpus.scm
-	std::string rs =
-		_scm.eval("(load-from-path \"inference-control-corpus.scm\")");
+// void PatternMinerUTest::test_PatternMiner_AB_ABC()
+// {
+// 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
-	std::cout << "rs = " << rs << std::endl;
+// 	Handle A = an(CONCEPT_NODE, "A"),
+// 		B = an(CONCEPT_NODE, "B"),
+// 		C = an(CONCEPT_NODE, "C"),
+// 		AB = al(INHERITANCE_LINK, A, B),
+// 		ABC = al(INHERITANCE_LINK, A, al(AND_LINK, B, C));
 
-	// Run the pattern miner
-	PatternMiner pm(_as);
-	pm.runPatternMiner(false);
+// 	PatternMiner pm(_as);
+// 	pm.runPatternMiner(false);  // NTODO set count threshold >= 2
 
-	vector<HTreeNode*>& top3gramPatterns = pm.getFinalPatternsForGram(3);
+// 	vector<HTreeNode*>& top1gramPatterns = pm.getFinalPatternsForGram(1);
 
-	string patternStr = pm.unifiedPatternToKeyString(top3gramPatterns[0]->pattern);
-	logger().info("The result top 3-gram pattern: \n%s", patternStr.c_str());
+// 	string patternStr = pm.unifiedPatternToKeyString(top1gramPatterns[0]->pattern);
 
-	// The main pattern of interest should look like
-	//
-	// Execution
-	//   Schema "expand"
-	//   List
-	//     PatternMiningVariable "$k"
-	//     Inheritance
-	//       ConceptNode "A"
-	//       PatternMiningVariable "$x"
-	//     GroundedSchemaNode "scm: conditional-full-instantiation-scope-formula"
-	//   PatternMiningVariable "$r"
-	//
-	// Evaluation
-	//   Predicate "preproof
-	//   PatternMiningVariable "$k"
-	//
-	// Evaluation
-	//   Predicate "preproof
-	//   PatternMiningVariable "$r"
+// 	logger().info("The result top 1-gram pattern: \n%s", patternStr.c_str());
 
-	TS_WARN("TODO");
+// 	TS_WARN("TODO");
+// }
 
-	logger().info("End TEST: %s", __FUNCTION__);
-}
+// void PatternMinerUTest::test_PatternMiner_ABCD()
+// {
+// 	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+// 	Handle A = an(CONCEPT_NODE, "A"),
+// 		B = an(CONCEPT_NODE, "B"),
+// 		C = an(CONCEPT_NODE, "C"),
+// 		D = an(CONCEPT_NODE, "C"),
+// 		AB = al(INHERITANCE_LINK, A, B),
+// 		AC = al(INHERITANCE_LINK, A, C),
+// 		ABCD = al(INHERITANCE_LINK, A, al(SET_LINK, B, C, D));
+
+// 	PatternMiner pm(_as);
+// 	pm.runPatternMiner(false);  // NTODO set count threshold >= 2
+
+// 	vector<HTreeNode*>& top1gramPatterns = pm.getFinalPatternsForGram(1);
+
+// 	string patternStr = pm.unifiedPatternToKeyString(top1gramPatterns[0]->pattern);
+
+// 	logger().info("The result top 1-gram pattern: \n%s", patternStr.c_str());
+
+// 	TS_WARN("TODO");
+// }
+
+// void PatternMinerUTest::test_PatternMiner_InferenceControl()
+// {
+// 	logger().info("BEGIN TEST: %s", __FUNCTION__);
+// 	// Load inference-control-corpus.scm
+// 	std::string rs =
+// 		_scm.eval("(load-from-path \"inference-control-corpus.scm\")");
+
+// 	std::cout << "rs = " << rs << std::endl;
+
+// 	// Run the pattern miner
+// 	PatternMiner pm(_as);
+// 	pm.runPatternMiner(false);
+
+// 	vector<HTreeNode*>& top3gramPatterns = pm.getFinalPatternsForGram(3);
+
+// 	string patternStr = pm.unifiedPatternToKeyString(top3gramPatterns[0]->pattern);
+// 	logger().info("The result top 3-gram pattern: \n%s", patternStr.c_str());
+
+// 	// The main pattern of interest should look like
+// 	//
+// 	// Execution
+// 	//   Schema "expand"
+// 	//   List
+// 	//     PatternMiningVariable "$k"
+// 	//     Inheritance
+// 	//       ConceptNode "A"
+// 	//       PatternMiningVariable "$x"
+// 	//     GroundedSchemaNode "scm: conditional-full-instantiation-scope-formula"
+// 	//   PatternMiningVariable "$r"
+// 	//
+// 	// Evaluation
+// 	//   Predicate "preproof
+// 	//   PatternMiningVariable "$k"
+// 	//
+// 	// Evaluation
+// 	//   Predicate "preproof
+// 	//   PatternMiningVariable "$r"
+
+// 	TS_WARN("TODO");
+
+// 	logger().info("End TEST: %s", __FUNCTION__);
+// }
+
+// void PatternMinerUTest::test_PatternMiner_SodaDrinker()
+// {
+// 	logger().info("BEGIN TEST: %s", __FUNCTION__);
+// 	// Load ugly_male_soda-drinker_corpus.scm
+// 	_scm.eval("(load-from-path \"ugly_male_soda-drinker_corpus.scm\")");
+
+// 	// Run the pattern miner
+// 	PatternMiner pm(_as);
+// 	pm.runPatternMiner(false);
+
+// 	// Test the result: check the final top 3-gram pattern
+
+// 	vector<HTreeNode*>& top3gramPatterns = pm.getFinalPatternsForGram(3);
+
+// 	string patternStr = pm.unifiedPatternToKeyString(top3gramPatterns[0]->pattern);
+// 	logger().info("The result top 3-gram pattern: \n%s", patternStr.c_str());
+
+// 	if (patternStr != top3gramPatternStr)
+// 	{
+// 		logger().info("Failed: The result top 3-gram pattern is wrong! The right one should be:\n%s", top3gramPatternStr.c_str());
+// 		TS_FAIL("The result top 3-gram pattern is wrong!");
+// 	}
+
+// 	if (top3gramPatterns[0]->count != 5)
+// 	{
+// 		logger().info("Failed: The result top 3-gram pattern count is wrong!");
+// 		TS_FAIL("The result top 3-gram pattern count is wrong!");
+// 	}
+
+// 	logger().info("End TEST: %s", __FUNCTION__);
+// }
 
 #undef al
 #undef an
-

@@ -8,12 +8,12 @@
 ; Copyright (c) 2013, 2017 Linas Vepstas <linasvepstas@gmail.com>
 ;
 ; This code is part of the language-learning effort.  The project
-; requires that a lot of text be observed, withe the goal of deducing
+; requires that a lot of text be observed, with the goal of deducing
 ; a grammar from it, using entropy and other basic probability methods.
 ;
 ; Main entry point: `(observe-text plain-text)`
 ;
-; Call this entry point with exactly one sentance as a plain text
+; Call this entry point with exactly one sentence as a plain text
 ; string. It will be parsed, and the resulting link-grammar link usage
 ; counts will be updated in the atomspace. The counts are flushed to
 ; the SQL database so that they're not forgotten.
@@ -51,8 +51,8 @@
 ; word-pair.  In addition, a count is maintained of the length of that
 ; link.
 ;
-; For the initial stages of the langauge-learning project, the parses
-; are produced by the "any" langauge parser, which produces random planar
+; For the initial stages of the language-learning project, the parses
+; are produced by the "any" language parser, which produces random planar
 ; trees.  This creates a sampling of word-pairs that is different than
 ; merely having them show up in the same sentence.  That is, a covering
 ; of a sentence by random trees does not produce the same edge statistics
@@ -145,7 +145,7 @@
 )
 
 ; ---------------------------------------------------------------------
-; update-clique-pair-counts -- count occurances of random word-pairs.
+; update-clique-pair-counts -- count occurrences of random word-pairs.
 ;
 ; This generates what are termed "clique pairs" throughout: these are
 ; all possible word-pair combinations, given a sequence of words.
@@ -157,7 +157,7 @@
 ;    than they would in a random planar tree parse.  In particular,
 ;    it generates more pairs between distant words than the planar tree
 ;    would. This could be ameliorated by simply not generating pairs
-;    for words that are more than 6 lengths apart. Or, altnernately,
+;    for words that are more than 6 lengths apart. Or, alternately,
 ;    only the statistics for closer pairs closer together than 6 could
 ;    be used.  Anyway, this is probably not a big deal, by itself.
 ;
@@ -165,7 +165,7 @@
 ;    (See below for the format).  This is might be interesting to
 ;    look at for academic reasons, but it currently puts a huge
 ;    impact on the size of the atomspace, and the size of the
-;    database, impacting performance in a sharply neggative way.
+;    database, impacting performance in a sharply negative way.
 ;    That's because, for every possible word-pair, chances are that
 ;    it will appear, sooner or later, with with every possible distance
 ;    from 1 to about 30. Each distance requires it's own atom to keep
@@ -180,7 +180,7 @@
 ;    hit is still huge.
 ;
 ; 3) On a per-sentence basis, when clique-counting is turned on, the
-;    number of databse updates increases by 3x-4x atom value updates.
+;    number of database updates increases by 3x-4x atom value updates.
 ;    If your database is on spinning disks, not SSD, this means that
 ;    database updates will be limited by the disk I/O subsystem, and
 ;    this additional traffic can slow down statistics gathering by...
@@ -206,10 +206,10 @@
 ;             WordNode "righty"
 ;         NumberNode 3
 ;
-; Here, the NumberNode encdes the distance between the words. It is always
+; Here, the NumberNode encodes the distance between the words. It is always
 ; at least one -- i.e. it is the difference between their ordinals.
 ;
-; Paramters:
+; Parameters:
 ; MAX-LEN -- integer: don't count a pair, if the words are farther apart
 ;            than this.
 ; RECORD-LEN -- boolean #t of #f: enable or disable recording of lengths.
@@ -414,7 +414,7 @@
  observe-text -- update word and word-pair counts by observing raw text.
 
  This is the first part of the learning algo: simply count the words
- and word-pairs oberved in incoming text. This takes in raw text, gets
+ and word-pairs observed in incoming text. This takes in raw text, gets
  it parsed, and then updates the counts for the observed words and word
  pairs.
 "

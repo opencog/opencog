@@ -33,6 +33,7 @@
 #include <tbb/concurrent_queue.h>
 
 #include <opencog/attentionbank/AttentionBank.h>
+#include <opencog/util/sigslot.h>
 #include <opencog/util/tbb.h>
 
 #include <opencog/cogserver/server/Agent.h>
@@ -92,12 +93,25 @@ class AtomSpacePublisherModule : public Module
     private:
         AtomSpace* as;
         AttentionBank* _attention_bank;
-        boost::signals2::connection removeAtomConnection;
-        boost::signals2::connection addAtomConnection;
-        boost::signals2::connection TVChangedConnection;
-        boost::signals2::connection AVChangedConnection;
-        boost::signals2::connection AddAFConnection;
-        boost::signals2::connection RemoveAFConnection;
+
+        AtomPtrSignal* _remove_atom_signal;
+        int _remove_atom_connection;
+
+        AtomSignal* _add_atom_signal;
+        int _add_atom_connection;
+
+        TVCHSigl* _tvchange_signal;
+        int _tvchange_connection;
+
+        AVCHSigl* _avchange_signal;
+        int _avchange_connection;
+
+        AVCHSigl* _add_af_signal;
+        int _add_af_connection;
+
+        AVCHSigl* _remove_af_signal;
+        int _remove_af_connection;
+
         void enableSignals();
         void disableSignals();
 

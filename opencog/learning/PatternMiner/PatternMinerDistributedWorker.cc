@@ -185,54 +185,53 @@ void DistributedPatternMiner::startMiningWork()
     // Note: Breadth_First mining is not maintained anymore. Only Depth_First is used in distributed mining.
     //    Pattern_mining_mode = config().get("Pattern_mining_mode"); // option: Breadth_First , Depth_First
     //    assert( (Pattern_mining_mode == "Breadth_First") || (Pattern_mining_mode == "Depth_First"));
-        Pattern_mining_mode = "Depth_First";
+    param.pattern_mining_mode = "Depth_First";
 
-        cur_worker_mined_pattern_num = 0;
+    cur_worker_mined_pattern_num = 0;
 
-        std::cout << "Start pattern mining work! Max gram = "
-                  << this->MAX_GRAM << ", mode = Depth_First" << std::endl;
+    std::cout << "Start pattern mining work! Max gram = "
+              << this->param.MAX_GRAM << ", mode = Depth_First" << std::endl;
 
-        int start_time = time(nullptr);
+    int start_time = time(nullptr);
 
-        original_as.get_handles_by_type(back_inserter(allLinks), (Type) LINK, true );
+    original_as.get_handles_by_type(back_inserter(allLinks), (Type) LINK, true );
 
-        allLinkNumber = (int)(allLinks.size());
-        atomspaceSizeFloat = (float)(allLinkNumber);
+    allLinkNumber = (int)(allLinks.size());
+    atomspaceSizeFloat = (float)(allLinkNumber);
 
-        if (only_mine_patterns_start_from_white_list)
+    if (param.only_mine_patterns_start_from_white_list)
+    {
+        allLinksContainWhiteKeywords.clear();
+
+        cout << "\nOnly mine patterns start from white list:" << std::endl;
+
+        for (const string& keyword : param.keyword_white_list)
         {
-            allLinksContainWhiteKeywords.clear();
-
-            cout << "\nOnly mine patterns start from white list:" << std::endl;
-
-            for (const string& keyword : keyword_white_list)
-            {
-                std::cout << keyword << std::endl;
-            }
-
-            cout << "Finding all Links contains these keywords...\n";
-
-            HandleSet allLinksContainWhiteKeywordsSet;
-            findAllLinksContainKeyWords(keyword_white_list, 0, true, allLinksContainWhiteKeywordsSet);
-
-            std::copy(allLinksContainWhiteKeywordsSet.begin(), allLinksContainWhiteKeywordsSet.end(), std::back_inserter(allLinksContainWhiteKeywords));
-            cout << "Found " << allLinksContainWhiteKeywords.size() << " Links contians the keywords!\n";
-
+            std::cout << keyword << std::endl;
         }
 
-        runPatternMinerDepthFirst();
+        cout << "Finding all Links contains these keywords...\n";
 
-        int end_time = time(nullptr);
-        printf("Current pattern mining worker finished working! Total time: %d seconds. \n", end_time - start_time);
+        HandleSet allLinksContainWhiteKeywordsSet;
+        findAllLinksContainKeyWords(param.keyword_white_list, 0, true, allLinksContainWhiteKeywordsSet);
 
-        notifyServerThisWorkerStop();
+        std::copy(allLinksContainWhiteKeywordsSet.begin(), allLinksContainWhiteKeywordsSet.end(), std::back_inserter(allLinksContainWhiteKeywords));
+        cout << "Found " << allLinksContainWhiteKeywords.size() << " Links contians the keywords!\n";
 
-        std::cout << THREAD_NUM << " threads used. "
-                  <<"Corpus size: "<< allLinkNumber << " links in total. \n"
-                  << cur_worker_mined_pattern_num << " patterns mined in total." << std::endl;
+    }
 
-        // std::exit(EXIT_SUCCESS);
+    runPatternMinerDepthFirst();
 
+    int end_time = time(nullptr);
+    printf("Current pattern mining worker finished working! Total time: %d seconds. \n", end_time - start_time);
+
+    notifyServerThisWorkerStop();
+
+    std::cout << param.THREAD_NUM << " threads used. "
+              <<"Corpus size: "<< allLinkNumber << " links in total. \n"
+              << cur_worker_mined_pattern_num << " patterns mined in total." << std::endl;
+
+    // std::exit(EXIT_SUCCESS);
 }
 
 void DistributedPatternMiner::runPatternMinerDepthFirst()
@@ -240,41 +239,41 @@ void DistributedPatternMiner::runPatternMinerDepthFirst()
     // observing_as is used to copy one link everytime from the original_as
     observing_as = new AtomSpace();
 
-    if (THREAD_NUM > 1)
+    if (param.THREAD_NUM > 1)
     {
-        thread_DF_ExtractedLinks = new list<string>* [THREAD_NUM];
-        for (unsigned int ti = 0; ti < THREAD_NUM; ti ++)
-            thread_DF_ExtractedLinks[ti] = new list<string>[MAX_GRAM];
+        thread_DF_ExtractedLinks = new list<string>* [param.THREAD_NUM];
+        for (unsigned int ti = 0; ti < param.THREAD_NUM; ti ++)
+            thread_DF_ExtractedLinks[ti] = new list<string>[param.MAX_GRAM];
 
-        all_thread_ExtractedLinks_pergram = new set<string>[MAX_GRAM];
+        all_thread_ExtractedLinks_pergram = new set<string>[param.MAX_GRAM];
     }
 
 
-    if (only_mine_patterns_start_from_white_list)
-        linksPerThread = allLinksContainWhiteKeywords.size() / THREAD_NUM;
+    if (param.only_mine_patterns_start_from_white_list)
+        linksPerThread = allLinksContainWhiteKeywords.size() / param.THREAD_NUM;
     else
-        linksPerThread = allLinkNumber / THREAD_NUM;
+        linksPerThread = allLinkNumber / param.THREAD_NUM;
 
     processedLinkNum = 0;
     actualProcessedLinkNum = 0;
 
-    for (unsigned int i = 0; i < THREAD_NUM; ++ i)
+    for (unsigned int i = 0; i < param.THREAD_NUM; ++ i)
     {
 
         threads[i] = std::thread(&DistributedPatternMiner::growPatternsDepthFirstTask,this,i);
         // threads[i] = std::thread([this]{this->growPatternsDepthFirstTask(i);}); // using C++11 lambda-expression
     }
 
-    for (unsigned int i = 0; i < THREAD_NUM; ++ i)
+    for (unsigned int i = 0; i < param.THREAD_NUM; ++ i)
     {
         threads[i].join();
     }
 
     clear_by_swap(allLinks);
 
-    if (THREAD_NUM > 1)
+    if (param.THREAD_NUM > 1)
     {
-        for (unsigned int ti = 0; ti < THREAD_NUM; ti ++)
+        for (unsigned int ti = 0; ti < param.THREAD_NUM; ti ++)
             delete [] (thread_DF_ExtractedLinks[ti]);
 
         delete [] thread_DF_ExtractedLinks;
@@ -285,7 +284,7 @@ void DistributedPatternMiner::runPatternMinerDepthFirst()
 
     delete [] threads;
 
-    cout << "\nFinished mining 1~" << MAX_GRAM << " gram patterns.\n";
+    cout << "\nFinished mining 1~" << param.MAX_GRAM << " gram patterns.\n";
     cout << "\nprocessedLinkNum = " << processedLinkNum << std::endl;
 
     delete [] patternJsonArrays;
@@ -299,12 +298,12 @@ void DistributedPatternMiner::growPatternsDepthFirstTask(unsigned int thread_ind
     unsigned int start_index = linksPerThread * thread_index;
     unsigned int end_index; // the last index for current thread (excluded)
 
-    if (thread_index == THREAD_NUM - 1)
+    if (thread_index == param.THREAD_NUM - 1)
     {
         // if this the last thread, it
         // needs to finish all the
         // rest of the links
-        if (only_mine_patterns_start_from_white_list)
+        if (param.only_mine_patterns_start_from_white_list)
             end_index = allLinksContainWhiteKeywords.size();
         else
             end_index = allLinkNumber;
@@ -328,23 +327,23 @@ void DistributedPatternMiner::growPatternsDepthFirstTask(unsigned int thread_ind
 
         Handle cur_link;
 
-        if (only_mine_patterns_start_from_white_list)
+        if (param.only_mine_patterns_start_from_white_list)
             cur_link = allLinksContainWhiteKeywords[t_cur_index];
         else
             cur_link = allLinks[t_cur_index];
 
         readNextLinkLock.unlock();
 
-        if (! only_mine_patterns_start_from_white_list)
+        if (! param.only_mine_patterns_start_from_white_list)
         {
             // if this link is ingonre type, ignore it
-            if (isIgnoredType( cur_link->getType()))
+            if (isIgnoredType( cur_link->get_type()))
             {
                 continue;
             }
 
 
-            if (use_keyword_black_list)
+            if (param.use_keyword_black_list)
             {
                 // if the content in this link contains content in the black list,ignore it
                 if (containIgnoredContent(cur_link))
@@ -355,7 +354,7 @@ void DistributedPatternMiner::growPatternsDepthFirstTask(unsigned int thread_ind
         // Add this link into observing_as
         HandleSeq outVariableNodes;
         HandleSeq outgoingLinks = copyOutgoings(*observing_as, cur_link, outVariableNodes);
-        Handle newLink = observing_as->add_link(cur_link->getType(), outgoingLinks);
+        Handle newLink = observing_as->add_link(cur_link->get_type(), outgoingLinks);
         newLink->setTruthValue(cur_link->getTruthValue());
 
         // Extract all the possible patterns from this originalLink, and extend till the max_gram links, not duplicating the already existing patterns
@@ -379,7 +378,7 @@ void DistributedPatternMiner::growPatternsDepthFirstTask(unsigned int thread_ind
         actualProcessedLinkNum ++;
         actualProcessedLinkLock.unlock();
 
-        if (only_output_patterns_contains_white_keywords)
+        if (param.only_output_patterns_contains_white_keywords)
         {
             if (havenotProcessedWhiteKeywordLinks.find(cur_link) != havenotProcessedWhiteKeywordLinks.end())
                 startFromLinkContainWhiteKeyword = true;
@@ -395,7 +394,7 @@ void DistributedPatternMiner::growPatternsDepthFirstTask(unsigned int thread_ind
 
         // release all the HTreeNodes created in this task
         // clean up the pattern atomspace, do not need to keep patterns in atomspace when run as a distributed worker
-        if (THREAD_NUM == 1)
+        if (param.THREAD_NUM == 1)
             as->clear(); // can only clear the atomspace when only 1 thread is used
 
         for (HTreeNode* htn : allHTreeNodesCurTask)

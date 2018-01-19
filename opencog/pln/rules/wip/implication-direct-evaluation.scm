@@ -103,7 +103,7 @@
          (fetch-true-enough-terms
           (lambda (p)
             (let* ((query (Get vardecl (term->instance p X)))
-                   (terms (cog-outgoing-set (cog-satisfying-set query))))
+                   (terms (cog-outgoing-set (cog-execute! query))))
               (filter (lambda (x) (true-enough-term? p x)) terms))))
          (P-true-enough-terms (fetch-true-enough-terms P))
          (Q-true-enough-terms (fetch-true-enough-terms Q))

@@ -381,7 +381,7 @@ cog-atom? says #t for deleted handle...
          (GroundedSchema "scm: show-arg")
          (ListLink (Variable "$direction")))))
 
-(cog-bind look-rule-1)
+(cog-execute! look-rule-1)
 
 (grounded-talk 'luser "look up")
 (grounded-talk 'luser "look right")
@@ -713,7 +713,7 @@ Implication
             (EqualLink (Time 3000) (Variable "$x"))
             (Variable "$x")))
 
-(cog-bind getter2)
+(cog-execute! getter2)
 
 
 (define getter3 (BindLink
@@ -722,7 +722,7 @@ Implication
            (Variable "$x")))
 
 (TimeNode 2000) ;set atom for getter3 to find
-(cog-bind getter3)
+(cog-execute! getter3)
 
 
 (use-modules (opencog logger))
@@ -1221,7 +1221,7 @@ LEFT-WALL look.v to.r the right.n-u
 (StateLink current-sentence imp)
 (load "imperative-rules.scm")
 
-   (cog-bind show-rule-1)
+   (cog-execute! show-rule-1)
 clobbers it
 
 (load "imperative-rules.scm")
@@ -1576,7 +1576,7 @@ obj-semantic-model-rule-1
 obj-semantic-model-rule-2
 
 (load "semantics.scm")
-(cog-bind obj-semantics-rule-1-ao)
+(cog-execute! obj-semantics-rule-1-ao)
 
 (Define (DefinedPredicate "Look-at-thing cmd")
  (DefinedPredicate "look at person"))
@@ -1605,7 +1605,7 @@ XXX correct version of "looking" requires using the space server.
 py:gaze_at_point
 prints "(Eva looks to the left)"
 
- (cog-bind show-rule-1)
+ (cog-execute! show-rule-1)
 (define current-action (AnchorNode "*-action-*"))
 (StateLink current-action (WordNode "foobar"))
 

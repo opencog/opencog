@@ -554,7 +554,8 @@ IF (CXXTEST_FOUND)
 			# and cmake has no way to add non-test dependencies to tests
 			DEPENDS tests cogserver
 			WORKING_DIRECTORY tests
-			COMMAND ${CMAKE_CTEST_COMMAND} --force-new-ctest-process $(ARGS)
+			COMMAND ${CMAKE_CTEST_COMMAND} --force-new-ctest-process --output-on-failure $(ARGS)
+
 			# This script combines the coverage analysis of each test,
 			# then creates html in tests/lcov
 			# Note: this should now be run separately...
@@ -566,7 +567,7 @@ IF (CXXTEST_FOUND)
 		ADD_CUSTOM_TARGET(test
 			DEPENDS tests
 			WORKING_DIRECTORY tests
-			COMMAND ${CMAKE_CTEST_COMMAND} --force-new-ctest-process $(ARGS)
+			COMMAND ${CMAKE_CTEST_COMMAND} --force-new-ctest-process --output-on-failure $(ARGS)
 			COMMENT "Running tests..."
 		)
 	ENDIF (CMAKE_BUILD_TYPE STREQUAL "Coverage")

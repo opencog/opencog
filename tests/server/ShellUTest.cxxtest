@@ -273,17 +273,17 @@ public:
 
 		end = time(0);
 		TS_ASSERT_LESS_THAN (end - start, 2);
-		printf("Elapsed: %ld\n", end-start);
+		printf("First elapsed: %ld\n", end-start);
 
 		start = time(0);
 		// The hexadecimal \x1b is ctrl-[ aka "escape"
 		rc = system("echo '(sleep 42)\n\x1b' | nc -q 0 localhost 17333");
-		if (rc != 0) printf("Error: first call failed\n");
+		if (rc != 0) printf("Error: second call failed\n");
 		TS_ASSERT_EQUALS(rc, 0);
 
 		end = time(0);
 		TS_ASSERT_LESS_THAN (end - start, 2);
-		printf("Elapsed: %ld\n", end-start);
+		printf("Second elapsed: %ld\n", end-start);
 
 		logger().debug("END TEST: %s", __FUNCTION__);
 	}

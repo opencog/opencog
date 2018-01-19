@@ -163,7 +163,7 @@
          (say-pattern (Evaluation (Predicate "say") (List P V)))
          (query-pattern (And say-pattern (InheritanceLink V S)))
          (query (Get vardecl query-pattern))
-         (results (cog-satisfying-set query)))
+         (results (cog-execute! query)))
     (length (cog-outgoing-set results))))
 
 (define (sentiment-sentence-to-person-l2s-formula Person Name)

@@ -34,30 +34,75 @@ public:
   OpenPsiSCM();
 
 private:
-  /**
-   * Returns TRUE_TV or FALSE_TV depending on whether the context of the
-   * given psi-rule is satisfiable or not.
-   *
-   * @param himplication A psi-rule.
-   */
-  TruthValuePtr satisfiable(const Handle& himplication);
-
-  /**
-   * Instantiates the action of the psi-rule if their is an entry in
-   * the cache for the groundings of its context.
-   *
-   * @param himplication A psi-rule.
-   */
-  Handle psi_imply(const Handle& himplication);
+  Handle add_category(const Handle& new_category);
 
   /**
    * Add psi-rule.
    *
    * @return An implication link which is a psi-rule.
    */
-  Handle psi_rule(const HandleSeq& context, const Handle& action,
-    const Handle& goal, const TruthValuePtr stv, const Handle& demand);
+  Handle add_rule(const HandleSeq& context, const Handle& action,
+    const Handle& goal, const TruthValuePtr stv, const Handle& category);
 
+  Handle add_to_category(const Handle& rule, const Handle& category);
+
+  /**
+   * Get the action of the given rule.
+   *
+   * @param rule A psi-rule.
+   * @return A handle of the action atom.
+   */
+  Handle get_action(const Handle& rule);
+
+  /**
+   * A wrapper around OpenPsiRules::get_categories
+   *
+   * @return A vector of Handles that represent the categories.
+   */
+  HandleSeq& get_categories();
+
+  /**
+   * Get the context of the given rule.
+   *
+   * @param rule A psi-rule.
+   * @return A vector of atoms that form the context of the given rule.
+   */
+  HandleSeq& get_context(const Handle& rule);
+
+  /**
+   * Get the goal of the given rule.
+   *
+   * @param rule A psi-rule.
+   * @return A handle of the goal atom.
+   */
+  Handle get_goal(const Handle& rule);
+
+  /**
+   * Instantiates the action of the psi-rule if their is an entry in
+   * the cache for the groundings of its context.
+   *
+   * @param rule A psi-rule.
+   */
+  Handle imply(const Handle& rule);
+
+  /**
+   * A wrapper around OpenPsiRules::is_rule.
+   *
+   * @return true if the rule is in the index, false other wise.
+   */
+  bool is_rule(const Handle& rule);
+
+  /**
+   * Returns TRUE_TV or FALSE_TV depending on whether the context of the
+   * given psi-rule is satisfiable or not.
+   *
+   * @param rule A psi-rule.
+   */
+  TruthValuePtr is_satisfiable(const Handle& rule);
+
+  // ========================================================
+  // Boilerplate code.
+  // ========================================================
   /**
    * Init function for using with scm_with_guile. It creates the
    * openpsi scheme module and uses it by default.

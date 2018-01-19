@@ -84,4 +84,10 @@
 (ure-set-num-parameter pln-rbs "URE:maximum-iterations" piter)
 
 ;; Complexity penalty
-(ure-set-num-parameter pln-rbs "URE:BC:complexity-penalty" 1)
+(ure-set-num-parameter pln-rbs "URE:BC:complexity-penalty" 0.1)
+
+;; Mixture Model compressiveness
+(ure-set-num-parameter pln-rbs "URE:BC:MM:compressiveness" 0.5)
+
+;; Mixture Model complexity penalty
+(ure-set-num-parameter pln-rbs "URE:BC:MM:complexity-penalty" 0.5)

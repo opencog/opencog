@@ -31,6 +31,7 @@
 #include "opencog/attention/atom_types.definitions"
 
 using namespace opencog;
+using namespace std::placeholders;
 
 concurrent_queue<Handle> opencog::newAtomsInAV;
 
@@ -62,7 +63,7 @@ AttentionModule::~AttentionModule()
     do_list_ecan_param_unregister();
     do_set_ecan_param_unregister();
 
-    addAFConnection.disconnect();
+    _cogserver.getAttentionBank().AddAFSignal().disconnect(addAFConnection);
 
     logger().debug("[AttentionModule] exit destructor");
 }
@@ -97,7 +98,7 @@ void AttentionModule::init()
 
 
     addAFConnection = _cogserver.getAttentionBank().AddAFSignal().connect(
-            boost::bind(&AttentionModule::addAFSignalHandler,
+            std::bind(&AttentionModule::addAFSignalHandler,
                 this, _1, _2, _3));
 }
 
@@ -146,7 +147,7 @@ std::string AttentionModule::do_list_ecan_param(Request *req, std::list<std::str
     AttentionParamQuery _atq(&_cogserver.getAtomSpace());
     HandleSeq hseq = _atq.get_params();
     for(const Handle& h : hseq){
-        std::string param = h->getName();
+        std::string param = h->get_name();
         response += param + "= " + _atq.get_param_value(param) + "\n"; 
     }
     return response;

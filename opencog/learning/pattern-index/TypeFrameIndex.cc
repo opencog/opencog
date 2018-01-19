@@ -6,6 +6,7 @@
 #include <boost/range/algorithm/set_algorithm.hpp>
 
 #include <opencog/util/Logger.h>
+#include <opencog/util/algorithm.h>
 
 #include "TypeFrameIndex.h"
 #include "TypeFrame.h"
@@ -832,7 +833,7 @@ bool TypeFrameIndex::add(Handle handle, int offset)
     if (frame.isValid()) {
         exitStatus = addFrame(frame, offset);
     } else {
-        printf("INVALID FRAME <%s>\n", handle->toString().c_str());
+        printf("INVALID FRAME <%s>\n", handle->to_string().c_str());
     }
     return exitStatus;
 
@@ -1482,11 +1483,11 @@ void TypeFrameIndex::query(vector<ResultPair> &answer,
     if (noPermutations) {
         for (const ResultPair& ufa : unfilteredAnswer) {
             bool none_eq =
-                std::none_of(answer.begin(), answer.end(),
-                             [&](const ResultPair& asw) {
-                                 return equivalentVarMappings(ufa.second,
-                                                              asw.second,
-                                                              distinct); });
+                opencog::none_of(answer,
+                                 [&](const ResultPair& asw) {
+                                     return equivalentVarMappings(ufa.second,
+                                                                  asw.second,
+                                                                  distinct); });
             if (none_eq) {
                 answer.push_back(ufa);
             }

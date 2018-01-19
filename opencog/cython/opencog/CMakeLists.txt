@@ -55,11 +55,13 @@ IF (HAVE_ATOMSPACE)
 	ADD_DEPENDENCIES(cogserver_type_constructors nlp_atom_types)
 	ADD_DEPENDENCIES(cogserver_type_constructors attention_atom_types)
 	ADD_DEPENDENCIES(cogserver_type_constructors spacetime_atom_types)
+	ADD_DEPENDENCIES(cogserver_type_constructors patternminer_types)
 
 	TARGET_LINK_LIBRARIES(cogserver_type_constructors
 		attention-types
 		nlp-types
 		spacetime-types
+		patternminer-types
 		${ATOMSPACE_LIBRARIES}
 		${PYTHON_LIBRARIES}
 	)
@@ -71,62 +73,6 @@ IF (HAVE_ATOMSPACE)
 	INSTALL (TARGETS cogserver_type_constructors
 		DESTINATION "lib${LIB_DIR_SUFFIX}/python2.7/dist-packages/opencog")
 
-	IF (HAVE_OCTOMAP)
-
-		############################ spacetime #########################
-		CYTHON_ADD_MODULE_PYX(spacetime
-			"${ATOMSPACE_INCLUDE_DIR}/opencog/cython/opencog/atomspace.pxd"
-		)
-		list(APPEND ADDITIONAL_MAKE_CLEAN_FILES "spacetime.cpp")
-		ADD_LIBRARY(spacetime_cython SHARED
-			spacetime.cpp
-		)
-
-		TARGET_LINK_LIBRARIES(spacetime_cython
-			${CMAKE_INSTALL_PREFIX}/lib${LIB_DIR_SUFFIX}/python2.7/dist-packages/opencog/atomspace.so
-			SpaceMap
-			spacetime
-			${ATOMSPACE_LIBRARIES}
-			${COGUTIL_LIBRARY}
-			${PYTHON_LIBRARIES}
-		)
-
-		SET_TARGET_PROPERTIES(spacetime_cython PROPERTIES
-			PREFIX ""
-			OUTPUT_NAME spacetime)
-
-		INSTALL (TARGETS spacetime_cython
-			DESTINATION "lib${LIB_DIR_SUFFIX}/python2.7/dist-packages/opencog")
-
-IF(FALSE) #TO COMMENT OUT THE BELOW CODE
-		############################ spatial #########################
-		CYTHON_ADD_MODULE_PYX(spatial
-			"${ATOMSPACE_INCLUDE_DIR}/opencog/cython/opencog/atomspace.pxd"
-			"../../spacetime/SpaceServer.h" "../../spacetime/TimeServer.h"
-		)
-		list(APPEND ADDITIONAL_MAKE_CLEAN_FILES "spatial.cpp")
-		ADD_LIBRARY(spatial_cython SHARED
-			spatial.cpp
-		)
-
-		TARGET_LINK_LIBRARIES(spatial_cython
-			${CMAKE_INSTALL_PREFIX}/lib${LIB_DIR_SUFFIX}/python2.7/dist-packages/opencog/atomspace.so
-			SpaceMap
-			SpaceMapUtil
-			spacetime
-			${ATOMSPACE_LIBRARIES}
-			${COGUTIL_LIBRARY}
-			${PYTHON_LIBRARIES}
-		)
-
-		SET_TARGET_PROPERTIES(spatial_cython PROPERTIES
-			PREFIX ""
-			OUTPUT_NAME spatial)
-
-		INSTALL (TARGETS spatial_cython
-			DESTINATION "lib${LIB_DIR_SUFFIX}/python2.7/dist-packages/opencog")
-ENDIF(FALSE)
-	ENDIF (HAVE_OCTOMAP)
 ENDIF (HAVE_ATOMSPACE)
 
 
@@ -136,7 +82,6 @@ IF (HAVE_SERVER)
 		"${ATOMSPACE_INCLUDE_DIR}/opencog/cython/opencog/atomspace.pxd"
 		"request.pyx" "agent.pyx" "agent_finder_types.h"
 		"../../cogserver/server/Agent.h" "../../cogserver/server/Request.h"
-		"../../spacetime/SpaceServer.h" "../../spacetime/TimeServer.h"
 	)
 
 	list(APPEND ADDITIONAL_MAKE_CLEAN_FILES "cogserver.cpp")
@@ -165,7 +110,6 @@ IF (HAVE_SERVER)
 		"${ATOMSPACE_INCLUDE_DIR}/opencog/cython/opencog/atomspace.pxd"
 		"cogserver.pxd"
 		"../../cogserver/server/Agent.h" "../../cogserver/server/Request.h"
-		"../../spacetime/SpaceServer.h" "../../spacetime/TimeServer.h"
 	)
 
 	list(APPEND ADDITIONAL_MAKE_CLEAN_FILES

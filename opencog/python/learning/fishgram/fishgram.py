@@ -623,7 +623,7 @@ class Fishgram:
 #                        print link
 #                else:
                 # Create concept nodes for each single variable.
-                # So if you have (AtTime $T (eats $1 $2))
+                # So if you have (AtTime (eats $1 $2) $T)
                 # you get "times when eating happens",
                 # "things that eat something sometimes" and
                 # "things that get eaten sometimes.
@@ -638,7 +638,7 @@ class Fishgram:
                     # Output the members of this concept.
                     members = set()
                     for s in embs:
-                        # If the embedding (binding) is (AtTime $0=42 (eats $1=cat23 $2=mouse17)), and var is
+                        # If the embedding (binding) is (AtTime (eats $1=cat23 $2=mouse17) $0=42), and var is
                         # $1, then the member is cat23
                         member = s[var]
                         members.add(member)
@@ -802,13 +802,13 @@ def notice_changes(atomspace):
         times_with_update = []
         for time in times:
 #            # Need to use unify because not sure what the arguments will be. But they must be the same...
-#            template = Tree('AtTimeLink', time, target)
+#            template = Tree('AtTimeLink', target, time)
 #            matches = find_conj( (template,) )
 #            
 #            # If this DemandGoal is in use there will be one value at each timestamp (otherwise none)
 #            assert len(matches) < 2
 #            matches[0].
-            template = T('AtTimeLink', [time, target])
+            template = T('AtTimeLink', [target, time])
             a = atom_from_tree(template, atomspace)
             
             # Was the value updated at that timestamp? The PsiDemandUpdaterAgent is not run every cycle so many
@@ -841,13 +841,13 @@ def notice_changes(atomspace):
 
             tv = TruthValue(1, 1.0e35)
             res = T('AtTimeLink',
-                     time2,
                      T('EvaluationLink',
                                 atomspace.add(t.PredicateNode, name=pred),
                                 T('ListLink',
                                     target
                                 )
-                        )
+                        ),
+                     time2
                     )
             a = atom_from_tree(res, atomspace)
             a.tv = tv

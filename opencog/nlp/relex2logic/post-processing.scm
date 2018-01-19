@@ -329,8 +329,7 @@
 		results-list
 	)
 
-	(if (null? marker)
-		'()
+	(if (cog-atom? marker)
 		(call-helper)
 	)
 )

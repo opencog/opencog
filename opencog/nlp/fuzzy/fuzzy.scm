@@ -1,16 +1,10 @@
-(setenv "LTDL_LIBRARY_PATH"
-    (if (getenv "LTDL_LIBRARY_PATH")
-        (string-append (getenv "LTDL_LIBRARY_PATH")
-            ":/usr/local/lib/opencog")
-        "/usr/local/lib/opencog"))
-
 (define-module (opencog nlp fuzzy))
 
+(use-modules (opencog))
 (load-extension "libnlpfz" "opencog_nlp_fuzzy_init")
 
 (use-modules (srfi srfi-1)
              (ice-9 optargs)      ; for doing define*-public
-             (opencog)
              (opencog query)      ; for fuzzy-match
              (opencog nlp)
              (opencog nlp sureal)

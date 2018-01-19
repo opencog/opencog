@@ -42,7 +42,7 @@
 (define (rule-1-cpp)
 ; Rule added to the atomspace not index.
   (ImplicationLink (stv 1 1)
-    (SequentialAndLink
+    (AndLink
       (InheritanceLink
          (VariableNode "$H")
          (ConceptNode "human")

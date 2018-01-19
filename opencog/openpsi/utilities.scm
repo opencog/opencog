@@ -11,7 +11,7 @@
 (use-modules (opencog) (opencog exec))
 
 ; --------------------------------------------------------------
-; XXX TODO: does this really need to be public?
+; XXX TODO: does this really need to be public? change into atom.
 (define psi-prefix-str "OpenPsi: ")
 
 ; --------------------------------------------------------------
@@ -30,29 +30,6 @@
         )
     )
 )
-
-; --------------------------------------------------------------
-
-; Define a local (internal-use-only, thus not define-public) variant
-; of the psi-rule? predicate, because the main one is too slow.  This
-; checks to see if MEMB is ...
-; -- a MemberLink
-; -- has arity 2
-; -- first elt is an ImplicationLink
-; -- Second elt is a node starting with string "OpenPsi: "
-;
-; Internal-use only, thus, not define-public.
-(define (psi-member? MEMB)
-    (and
-        (equal? 'MemberLink (cog-type MEMB))
-        (equal? 2 (cog-arity MEMB))
-        (let ((mem (cog-outgoing-set MEMB)))
-            (and
-                (equal? 'ImplicationLink (cog-type (car mem)))
-                (cog-node-type? (cog-type (cadr mem)))
-                (string-prefix? psi-prefix-str (cog-name (cadr mem)))
-        ))
-    ))
 
 ; --------------------------------------------------------------
 
@@ -117,78 +94,71 @@
 )
 
 ; --------------------------------------------------------------
-(define
-    (psi-set-functionality functionlity is-eval tag-node functionality-name)
+(define (psi-set-func! function is-eval component-node function-name)
 "
-  psi-set-functionality FUNC IS-EVAL TAG FUNC-NAME
+  psi-set-func! FUNC IS-EVAL COMPONENT FUNC-NAME
 
-  Associate a function with a particular demand or modulator.
+  Associate a function with a particular component.
 
   FUNC is an atom that can be executed or evaluated. It will perform
-    the functionality for the particular demand/modulator.
+    the function for the particular component.
 
-  Set IS-EVAL to #t if the functionality is evaluatable and #f if
+  IS-EVAL is a the string '#t' if the function is evaluatable and '#f' if
     it is executable.
 
-  TAG should be a demand or modulator node that the functionality will
+  COMPONENT should be a component node that the function will
     be assocaited with.
 
-  FUNC-NAME is the type of functionality.
+  FUNC-NAME is the type of function.
 "
-    ;; XXX FIXME -- there is no need to force the use of DPN's or DSN's
-    ;; here. Any excutable or evaluatable atom should be allowed.
-    (define (check-alias a-name)
-        (if is-eval
-            (cog-node 'DefinedPredicateNode a-name)
-            (cog-node 'DefinedSchemaNode a-name)))
+  ; Record whether the function is evaluatable or executable.
+  (cog-set-value!
+    function
+    (Predicate "is_evaluatable?")
+    (StringValue is-eval))
 
-    (let* ( (name (string-append
-                        psi-prefix-str functionality-name "-"
-                        (cog-name tag-node)))
-            (alias (check-alias name)))
-
-        (if (null? alias)
-            (begin
-                (set! alias
-                     (if is-eval
-                         (DefinedPredicateNode name)
-                         (DefinedSchemaNode name)))
-
-                ;; XXX FIXME why do we need a DefineLink here???
-                ;; why is an alias needed? what is the point of this?
-                (DefineLink alias functionlity)
-                (StateLink
-                    (ListLink
-                        (Node (string-append psi-prefix-str functionality-name))
-                         tag-node)
-                     alias)
-                alias
-            )
-        )
-        alias
-    )
+  ; Record the function with the component-node used to represent it.
+  (cog-set-value!
+    component-node
+    (Predicate function-name)
+    function)
 )
 
 ; --------------------------------------------------------------
-(define (psi-get-functionality tag-node functionality-name)
+(define (psi-func component-node function-name)
 "
-  psi-get-functionality TAG FUNC-NAME
+  psi-func COMPONENT FUNC-NAME
 
-  Return a list with the node that represents the functionality for the given
-  demand/modulator or nil if it doesn't exist.
+  Return the node that represents the function for the given component
+  or nil if it doesn't exist.
 
-  TAG should be a demand/modulator node that the functionality is
-  being added to.
+  COMPONENT should be a component node that the function is set for.
 
-  FUNC-NAME should be the type of functionality.
+  FUNC-NAME should be the type of function.
 "
-    (define state
-       (ListLink
-           (Node (string-append psi-prefix-str functionality-name))
-           tag-node))
+  (cog-value component-node (Predicate function-name))
+)
 
-    (cog-outgoing-set (cog-execute!
-        (GetLink (StateLink state (Variable "$x")))))
+; --------------------------------------------------------------
+(define (psi-func-evaluatable? component-node function-name)
+"
+  psi-func-evaluatable? COMPONENT FUNC-NAME
+
+  Return '#t' if the function is evaluatable and '#f' if
+    it is executable.
+
+  COMPONENT should be a component node that the function is set for.
+
+  FUNC-NAME should be the type of function.
+"
+  (let ((func (psi-func component-node function-name)))
+    (if (null? func)
+      (error (format "A function called \"~a\" hasn't been set for ~a\n"
+          function-name component-node))
+      (equal? "#t"
+        (cog-value-ref (cog-value func (Predicate "is_evaluatable?")) 0))
+    )
+  )
 )
 
 ; --------------------------------------------------------------

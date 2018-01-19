@@ -59,20 +59,17 @@
       (Variable "$L")
       (Variable "$T"))
     (And
-      (Execution
-        (Schema "URE:BC:expand-and-BIT")
+      (expand
         (List
           (Variable "$A")
           (Variable "$L")
           (Variable "$R"))
         (Variable "$B"))
-      (Evaluation
-        (Predicate "URE:BC:preproof-of")
+      (preproof-of
         (List
           (Variable "$B")
           (Variable "$T"))))
-    (Evaluation
-      (Predicate "URE:BC:preproof-of")
+    (preproof-of
       (List
         (Variable "$A")
         (Variable "$T")))))
@@ -189,15 +186,13 @@
     (VariableNode "$L-359df4eb")
   )
   (AndLink
-    (EvaluationLink
-      (PredicateNode "URE:BC:preproof-of")
+    (preproof-of
       (ListLink
         (VariableNode "$B-cc00185")
         (VariableNode "$T")
       )
     )
-    (ExecutionLink
-      (SchemaNode "URE:BC:expand-and-BIT")
+    (expand
       (ListLink
         (VariableNode "$A")
         (VariableNode "$L-359df4eb")
@@ -209,8 +204,7 @@
   (ExecutionOutputLink
     (GroundedSchemaNode "scm: conditional-full-instantiation-scope-formula")
     (ListLink
-      (EvaluationLink
-        (PredicateNode "URE:BC:preproof-of")
+      (preproof-of
         (ListLink
           (VariableNode "$A")
           (VariableNode "$T")
@@ -220,15 +214,13 @@
         (GroundedSchemaNode "scm: fuzzy-conjunction-introduction-formula")
         (ListLink
           (AndLink
-            (EvaluationLink
-              (PredicateNode "URE:BC:preproof-of")
+            (preproof-of
               (ListLink
                 (VariableNode "$B-cc00185")
                 (VariableNode "$T")
               )
             )
-            (ExecutionLink
-              (SchemaNode "URE:BC:expand-and-BIT")
+            (expand
               (ListLink
                 (VariableNode "$A")
                 (VariableNode "$L-359df4eb")
@@ -238,15 +230,13 @@
             )
           )
           (SetLink
-            (EvaluationLink
-              (PredicateNode "URE:BC:preproof-of")
+            (preproof-of
               (ListLink
                 (VariableNode "$B-cc00185")
                 (VariableNode "$T")
               )
             )
-            (ExecutionLink
-              (SchemaNode "URE:BC:expand-and-BIT")
+            (expand
               (ListLink
                 (VariableNode "$A")
                 (VariableNode "$L-359df4eb")
@@ -275,8 +265,7 @@
           (VariableNode "$T")
         )
         (AndLink
-          (ExecutionLink
-            (SchemaNode "URE:BC:expand-and-BIT")
+          (expand
             (ListLink
               (VariableNode "$A")
               (VariableNode "$L")
@@ -284,16 +273,14 @@
             )
             (VariableNode "$B")
           )
-          (EvaluationLink
-            (PredicateNode "URE:BC:preproof-of")
+          (preproof-of
             (ListLink
               (VariableNode "$B")
               (VariableNode "$T")
             )
           )
         )
-        (EvaluationLink
-          (PredicateNode "URE:BC:preproof-of")
+        (preproof-of
           (ListLink
             (VariableNode "$A")
             (VariableNode "$T")

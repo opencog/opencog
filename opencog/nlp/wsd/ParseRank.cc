@@ -50,7 +50,7 @@ Handle ParseRank::get_top_ranked_parse(const Handle& h)
  */
 bool ParseRank::lookat_parse(const Handle& h)
 {
-	double rank = h->getTruthValue()->getConfidence();
+	double rank = h->getTruthValue()->get_confidence();
 #ifdef DEBUG
 	printf("; ParseRank::lookat_parse parse=%lx rank=%f\n", (unsigned long) h, rank);
 #endif
