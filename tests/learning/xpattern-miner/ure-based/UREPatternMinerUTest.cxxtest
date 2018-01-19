@@ -75,6 +75,7 @@ private:
 	 *   (List pattern (Concept "texts") minsup))
 	 */
 	Handle mk_minsup_eval(int minsup, const Handle& pattern);
+	Handle mk_minsup_evals(int minsup, const HandleSeq& patterns);
 
 	/**
 	 * Make a URE query to mine patterns over texts with a given
@@ -82,6 +83,7 @@ private:
 	 */
 	Handle mk_query(const HandleSeq& texts, int minsup,
 	                const Handle& initpat=Handle::UNDEFINED);
+
 public:
 	UREPatternMinerUTest();
 	~UREPatternMinerUTest();
@@ -92,7 +94,7 @@ public:
 	// Pattern miner
 	void test_A();
 	void test_AB();
-	// void test_AB_AC();
+	void test_AB_AC();
 	// void test_AB_AC_BC();
 	// void test_AB_ABC();
 	// void test_ABCD();
@@ -115,6 +117,15 @@ Handle UREPatternMinerUTest::mk_minsup_eval(int minsup, const Handle& pattern)
 	             pattern,
 	             texts_cpt,
 	             an(NUMBER_NODE, to_string(minsup))));
+}
+
+Handle UREPatternMinerUTest::mk_minsup_evals(int minsup,
+                                             const HandleSeq& patterns)
+{
+	HandleSeq minsup_evals;
+	for (const Handle& pat : patterns)
+		minsup_evals.push_back(mk_minsup_eval(2, pat));
+	return al(SET_LINK, minsup_evals);
 }
 
 Handle UREPatternMinerUTest::mk_query(const HandleSeq& texts, int minsup,
@@ -196,7 +207,7 @@ void UREPatternMinerUTest::test_AB()
 	bc.do_chain();
 
 	Handle results = bc.get_results(),
-		expected = al(SET_LINK, mk_minsup_eval(2, top));
+		expected = mk_minsup_evals(2, {top});
 
 	logger().debug() << "results = " << oc_to_string(results);
 	logger().debug() << "expected = " << oc_to_string(expected);
@@ -204,32 +215,30 @@ void UREPatternMinerUTest::test_AB()
 	TS_ASSERT(content_eq(results, expected));
 }
 
-// void UREPatternMinerUTest::test_AB_AC()
-// {
-// 	logger().info("BEGIN TEST: %s", __FUNCTION__);
+void UREPatternMinerUTest::test_AB_AC()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
-// 	Handle A = an(CONCEPT_NODE, "A"),
-// 		B = an(CONCEPT_NODE, "B"),
-// 		C = an(CONCEPT_NODE, "C"),
-// 		AB = al(INHERITANCE_LINK, A, B),
-// 		AC = al(INHERITANCE_LINK, A, C);
+	Handle AB = al(INHERITANCE_LINK, A, B),
+		AC = al(INHERITANCE_LINK, A, C),
+		query = mk_query({A, B}, 2);
+	BackwardChainer bc(_as, pm_rb, query);
+	bc.do_chain();
 
-// 	XPMParameters param(2);
-// 	XPatternMiner pm(_as, param);
-// 	HandleTree results = pm();
+	Handle results = bc.get_results(),
+		VarXY = al(VARIABLE_LIST, X, Y),
+		InhXY = al(INHERITANCE_LINK, X, Y),
+		InhAY = al(INHERITANCE_LINK, A, Y),
+		expected = mk_minsup_evals(2,
+		                           { top,
+					                 al(LAMBDA_LINK, VarXY, InhXY),
+			                         al(LAMBDA_LINK, Y, InhAY) });
 
-// 	Handle X = an(VARIABLE_NODE, "$X"),
-// 		Y = an(VARIABLE_NODE, "$Y"),
-// 		XY = al(INHERITANCE_LINK, X, Y),
-// 		AY = al(INHERITANCE_LINK, A, Y);
-// 	HandleTree expected(al(LAMBDA_LINK, al(VARIABLE_LIST, X, Y), XY),
-// 	                    { al(LAMBDA_LINK, Y, AY) });
+	logger().debug() << "results = " << oc_to_string(results);
+	logger().debug() << "expected = " << oc_to_string(expected);
 
-// 	logger().debug() << "results = " << oc_to_string(results);
-// 	logger().debug() << "expected = " << oc_to_string(expected);
-
-// 	TS_ASSERT(content_eq(results, expected));
-// }
+	TS_ASSERT(content_eq(results, expected));
+}
 
 // void UREPatternMinerUTest::test_AB_AC_BC()
 // {
