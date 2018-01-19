@@ -27,6 +27,7 @@
 #include <opencog/util/Config.h>
 #include <opencog/util/algorithm.h>
 #include <opencog/atomspace/AtomSpace.h>
+#include <opencog/rule-engine/backwardchainer/BackwardChainer.h>
 #include <opencog/learning/xpattern-miner/c++-based/HandleTree.h>
 #include <opencog/learning/xpattern-miner/c++-based/XPatternMiner.h>
 #include <opencog/guile/SchemeEval.h>
@@ -47,6 +48,22 @@ private:
 	AtomSpace _as;
 	AtomSpace _tmp_as;
 	SchemeEval _scm;
+
+	// Pattern miner rule base
+	Handle pm_rb;
+
+	// Concept holding the texts
+	Handle texts_cpt;
+
+	// minsup predicate
+	Handle minsup_prd;
+
+	/**
+	 * Make a URE query to mine patterns over texts with a given
+	 * minsup and a maximum of URE iterations.
+	 */
+	Handle mk_query(const HandleSeq& texts, int minsup,
+	                const Handle& initpat=Handle::UNDEFINED);
 
 public:
 	UREPatternMinerUTest();
@@ -73,21 +90,52 @@ public:
 	// void test_SodaDrinker();
 };
 
+Handle UREPatternMinerUTest::mk_query(const HandleSeq& texts,
+                                      int minsup,
+                                      const Handle& initpat)
+{
+	// Make (Member text (Concept "texts)) links
+	for (const Handle& text : texts)
+		al(MEMBER_LINK, text, texts_cpt);
+
+	// Make URE query
+	Handle ms = an(NUMBER_NODE, to_string(minsup)),
+		X = an(VARIABLE_NODE, "$X"),
+		spe_initpat = (bool)initpat ? al(PUT_LINK, initpat, X) : X,
+		query = al(EVALUATION_LINK, minsup_prd,
+		           al(LIST_LINK, spe_initpat, texts_cpt, ms));
+	return query;
+}
+
 UREPatternMinerUTest::UREPatternMinerUTest() : _scm(&_as)
 {
-	logger().set_level(Logger::INFO);
+	logger().set_level(Logger::DEBUG);
 	logger().set_timestamp_flag(false);
 	logger().set_print_to_stdout_flag(true);
 
 	// Configure scheme load-paths that are common for all tests.
 	_scm.eval("(add-to-load-path \"" PROJECT_SOURCE_DIR
 	          "/tests/learning/xpattern-miner/scm\")");
+	_scm.eval("(add-to-load-path \"" PROJECT_SOURCE_DIR
+	          "/opencog/learning/xpattern-miner/ure-based\")");
+
+	// Load modules (they are in the rules already but for some reason
+	// load-from-path doesn't load them)
+	_scm.eval("(use-modules (opencog logger))");
+	_scm.eval("(use-modules (opencog query))");
+	_scm.eval("(use-modules (opencog rule-engine))");
 }
 
 UREPatternMinerUTest::~UREPatternMinerUTest() {}
 
 void UREPatternMinerUTest::setUp()
 {
+	// Load URE-based pattern miner
+	std::string rs = _scm.eval("(load-from-path \"pm-config.scm\")");
+	logger().debug() << "rs = " << rs;
+	pm_rb = _scm.eval_h("pm-rbs");
+	texts_cpt = an(CONCEPT_NODE, "texts");
+	minsup_prd = an(PREDICATE_NODE, "minsup");
 }
 
 void UREPatternMinerUTest::tearDown()
@@ -101,11 +149,12 @@ void UREPatternMinerUTest::test_A()
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
 	Handle A = an(CONCEPT_NODE, "A");
+	Handle query = mk_query({A}, 2);
+	BackwardChainer bc(_as, pm_rb, query);
+	bc.do_chain();
 
-	XPMParameters param(2);
-	XPatternMiner pm(_as, param);
-	HandleTree results = pm(),
-		expected;
+	Handle results = bc.get_results(),
+		expected = al(SET_LINK);
 
 	logger().debug() << "results = " << oc_to_string(results);
 	logger().debug() << "expected = " << oc_to_string(expected);
