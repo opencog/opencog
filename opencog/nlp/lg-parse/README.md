@@ -1,12 +1,13 @@
 
 Link Grammar parsing
---------------------
+====================
 
 Perform a Link Grammar parse of a sentence, and insert the results into
 the AtomSpace.  This is compatible with the LG subset of the RelEx
 parse.
 
-==LgParseLink
+LgParseLink
+-----------
 Parsing is performed by calling the `execute()` method on the C++ class
 LgParseLink, or equivalently, calling the scheme function `cog-execute!`
 on it.  The LgParseLink is a kind of FunctionLink, and can thus be used
@@ -27,13 +28,25 @@ optional NumberNode is present, then that will be the number of
 parses that are captured. If the NumberNode is not present, it
 defaults to four.
 
-==Notes
+Example
+-------
+Here's a working example:
+```
+(use-modules (opencog) (opencog nlp) (opencog nlp lg-parse) (opencog exec))
+(cog-execute! (LgParseLink  (PhraseNode "this is a test.")
+    (LgDictNode "en") (NumberNode 1)))
+(cog-prt-atomspace)
+```
+
+Notes
+-----
 This is a minimalist API to the Link Grammar parser, attempting to
 live off the default options that Link Grammar provides.  At this time,
 it is not envisioned that there will ever be any need to expand beyond
 this minimalist API.
 
-==Pros and Cons
+Pros and Cons
+-------------
 Since this provides a format compatible with the RelEx parse server,
 this means that there are two ways of getting parsed text into the
 atomspace: using this link, or using the RelEx server.  There are
@@ -44,7 +57,8 @@ competing pros and cons of doing it each way:
 
 * The RelEx server generates scheme strings, which must be parsed by
   the scheme interpreter in OpenCog. This adds a lot of overhead, and
-  can be slow.
+  can be slow. Guile memory management gets unhappy, when fed too many
+  long strings.
 
 * The RelEx server supports a much larger set of LG options, and can
-  thus be made to do unusual things, whatever that might be.
+  thus be made to do unusual things, should you need unusual things.

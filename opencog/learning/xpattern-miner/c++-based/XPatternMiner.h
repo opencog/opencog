@@ -29,13 +29,12 @@
 #include <opencog/atomspace/AtomSpace.h>
 
 #include "HandleTree.h"
+#include "Valuations.h"
 
 class XPatternMinerUTest;
 
 namespace opencog
 {
-
-typedef std::map<Handle, HandleUCounter> HandleUCounterMap;
 
 /**
  * Parameters for XPatternMiner. The terminology is taken from
@@ -45,22 +44,22 @@ typedef std::map<Handle, HandleUCounter> HandleUCounterMap;
 struct XPMParameters {
 
 	/**
-	 * CTor. Note that ngram will be overwritten by initpat, if
+	 * CTor. Note that conjuncts will be overwritten by initpat, if
 	 * provided.
 	 */
 	XPMParameters(unsigned minsup=1,
-	              unsigned ngram=1, // Rename by nconjucts
+	              unsigned conjuncts=1,
 	              const Handle& initpat=Handle::UNDEFINED,
 	              int maxdepth=-1,
-	              int maxpats=-1);
+	              double info=1.0);
 
 	// Minimum support. Mined patterns must have a frequency equal or
 	// above this value.
 	unsigned minsup;
 
-	// Initial gram. This value is overwritten by the actual gram
-	// value of initpat, if provided.
-	unsigned initgram;
+	// Initial number of conjuncts. This value is overwritten by the
+	// actual number of conjuncts of initpat, if provided.
+	unsigned initconjuncts;
 
 	// Initial pattern. All found patterns are specialization of
 	// it. If UNDEFINED, then the initial pattern is the most abstract
@@ -78,9 +77,27 @@ struct XPMParameters {
 	// initial pattern and the produced patterns.
 	int maxdepth;
 
-	// Maximum number of patterns to output. If negative, then output
-	// them all.
-	int maxpats;
+	// Modify how the frequency of strongly connected components is
+	// calculated from the frequencies of its components. Specifically
+	// it will go from f1*...*fn to min(f1,...,fn), where f1 to fn are
+	// the frequencies of each component. This allows to dismiss
+	// abstractions that are likely not to lead to specializations
+	// with enough support.
+	//
+	// If the parameter equals to 0 the frequency of the whole pattern
+	// is calculated as the product of f1 to fn, if it equals to 1 the
+	// frequency of the whole pattern is calculated as the min of f1
+	// to fn. And if the value is between, it is calculated as a
+	// linear combination of both.
+	//
+	// It is called info for mutual information or its n-ary
+	// generalizations (like interaction information). What it means
+	// is that when info is low subsequent specializations are likely
+	// independant, while when info is high subsequent specializations
+	// are likely dependant and thus we can afford to estimate the
+	// frequency of the specializations by the lowest frequency of its
+	// component.
+	double info;
 };
 
 /**
@@ -100,7 +117,8 @@ public:
 	XPatternMiner(AtomSpace& as, const XPMParameters& param=XPMParameters());
 
 	/**
-	 * Mine and return maxpats (or all if negative) patterns with
+	 * Mine and return a tree of patterns linked by specialization
+	 * relationship (children are specializations of parent) with
 	 * frequency equal to or above minsup, starting from the initial
 	 * pattern, excluded.
 	 */
@@ -109,27 +127,18 @@ public:
 	/**
 	 * Specialization. Given a pattern and a collection to text atoms,
 	 * generate all specialized patterns of the given pattern.
-	 *
-	 * For now all limits, expect minsup, are ignored, all patterns
-	 * are considered.
 	 */
 	HandleTree specialize(const Handle& pattern, const HandleSet& texts,
-	                      unsigned mingram=0, int maxdepth=-1);
+	                      int maxdepth=-1);
 
 	/**
-	 * Like above but maps each text to a count. That is useful to
-	 * keep track of the frequence of sub-patterns.
+	 * Like above, where all valid texts have been converted into
+	 * valuations.
 	 */
-	HandleTree specialize(const Handle& pattern, const HandleUCounter& texts,
-	                      unsigned mingram=0, int maxdepth=-1);
-
-	/**
-	 * Like above on assume the pattern is trivial with a mere
-	 * variable. It assumes is has enough support.
-	 */
-	HandleTree specialize_varpat(const Handle& varpat,
-	                             const HandleUCounter& texts,
-	                             int maxdepth);
+	HandleTree specialize(const Handle& pattern,
+	                      const HandleSet& texts,
+	                      const Valuations& valuations,
+	                      int maxdepth);
 
 	// AtomSpace containing the text trees to mine.
 	AtomSpace& text_as;
@@ -144,6 +153,19 @@ private:
 
 	mutable AtomSpace tmp_as;
 
+	/**
+	 * Return true iff maxdepth is null or pattern is not a lambda or
+	 * doesn't have enough support. Additionally the second one check
+	 * whether the valuation has any variable left to specialize from.
+	 */
+	bool terminate(const Handle& pattern,
+	               const HandleSet& texts,
+	               int maxdepth) const;
+	bool terminate(const Handle& pattern,
+	               const HandleSet& texts,
+	               const Valuations& valuations,
+	               int maxdepth) const;
+	
 	/**
 	 * Given a pattern, a variable of that pattern, create another
 	 * pattern that is just that variable. For instance
@@ -171,33 +193,67 @@ private:
 	Handle mk_varpattern(const Handle& pattern, const Handle& var) const;
 
 	/**
+	 * Specialize according to shallow abstractions.
+	 * 
+	 * TODO: improve comment.
+	 */
+	HandleTree specialize_shabs(const Handle& pattern,
+	                            const HandleSet& texts,
+	                            const Valuations& valuations,
+	                            int maxdepth);
+
+	/**
+	 * Specialize by reducing variables, that is mapping non-front
+	 * variables to the front one, when possible
+	 *
+	 * TODO: improve comment.
+	 */
+	HandleTree specialize_vared(const Handle& pattern,
+	                            const HandleSet& texts,
+	                            const Valuations& valuations,
+	                            int maxdepth);
+
+	/**
 	 * Calculate if the pattern has enough support w.r.t. to the given
 	 * texts, that is whether its frequency is greater than or equal
 	 * to minsup.
 	 */
 	bool enough_support(const Handle& pattern,
-	                    const HandleUCounter& texts) const;
+	                    const HandleSet& texts) const;
 
 	/**
 	 * Like above but only look at the text total count. This works
-	 * when the text has been filtered from a 1-gram pattern.
+	 * when the text has been filtered from a single conjunct pattern.
 	 */
-	bool enough_support(const HandleUCounter& texts) const;
+	bool enough_support(const HandleSet& texts) const;
 
 	// TODO move all static methods down
 
 	/**
 	 * Given a pattern and a text corpus, calculate the pattern
-	 * frequency, that is the number of matches. Note that is number
-	 * may be greater than the total count of the text corpus if the
-	 * pattern is an n-gram for any n > 1.
+	 * frequency, that is the number of matches if pattern is strongly
+	 * connected.
+	 *
+	 * If pattern is not strongly connected AND some heuristic is in
+	 * place TODO, then the definition of frequency deviates from the
+	 * usual one and corresponds to the minimum frequency over all
+	 * strongly connected components of that pattern.
 	 *
 	 * maxf is used to halt the frequency calculation if it reaches a
-	 * certain maximum. Purely for saving resources when possible.
+	 * certain maximum, for saving resources.
 	 */
 	unsigned freq(const Handle& pattern,
-	              const HandleUCounter& texts,
+	              const HandleSet& texts,
 	              int maxf=-1) const;
+
+	/**
+	 * Like above but assumes the pattern is a single strongly
+	 * connected component, as opposed to a conjuction of strongly
+	 * connected components.
+	 */
+	unsigned freq_component(const Handle& component,
+	                        const HandleSet& texts,
+	                        int maxf=-1) const;
 
 	/**
 	 * Calculate the total count of texts.
@@ -205,13 +261,19 @@ private:
 	 * maxf is used to halt the frequency calculation if it reaches a
 	 * certain maximum. Purely for saving resources when possible.
 	 */
-	unsigned freq(const HandleUCounter& texts, int maxf=-1) const;
+	unsigned freq(const HandleSet& texts, int maxf=-1) const;
+
+	/**
+	 * Calculate the frequency of the whole pattern, given the
+	 * frequency of it's components.
+	 */
+	unsigned freq(const std::vector<unsigned>& freqs) const;
 
 	/**
 	 * Filter in only texts matching the pattern
 	 */
-	HandleUCounter filter_texts(const Handle& pattern,
-	                            const HandleUCounter& texts) const;
+	HandleSet filter_texts(const Handle& pattern,
+	                       const HandleSet& texts) const;
 
 	/**
 	 * Check whether a pattern matches a text.
@@ -228,19 +290,14 @@ private:
 	Handle matched_results(const Handle& pattern, const Handle& text) const;
 
 	/**
-	 * Given a pattern and texts, return the satisfying set of the
-	 * pattern over the text. Please note that the texts count are
-	 * ignored. But this is still useful for n-gram patterns where the
-	 * counts are all 1 anyway.
-	 *
-	 * TODO: ignore permutations for unordered links.
+	 * TODO: add comment
 	 */
-	Handle restrict_satisfying_set(const Handle& pattern,
-	                               const HandleUCounter& texts,
-	                               int maxf=-1) const;
-
+	HandleSet variable_reduce(const Valuations& valuations) const;
+	
 	/**
-	 * Given a collection of text atoms, return all shallow patterns,
+	 * TODO: fix comment
+	 *
+	 * Given a collection of text atoms, return all shallow abstractions,
 	 * associated to their matching texts. For instance
 	 *
 	 * texts = { (Concept "a"),
@@ -261,9 +318,15 @@ private:
 	 *
 	 * TODO: we may want to support types in variable declaration.
 	 */
-	HandleUCounterMap shallow_patterns(const HandleUCounter& texts);
-	Handle shallow_pattern(const Handle& text);
+	Handle shallow_abstract(const Handle& text);
 
+	/**
+	 * Like above but take valuations instead of texts,
+	 * produce shallow patterns based on the first variable, and
+	 * associate the remaining valuations to each pattern.
+	 */
+	HandleSet shallow_abstract(const Valuations& valuations);
+	
 	/**
 	 * Wrap a VariableList around a variable list, if more than one
 	 * variable, otherwise return that one variable.
@@ -287,224 +350,11 @@ private:
 
 	/**
 	 * Wrap a LocalQuote link around h (typically used if it is a link
-	 * of type AndLink. That is in order not to produce n-gram
-	 * patterns when in fact we want to match an AndLink text.)
+	 * of type AndLink. That is in order not to produce
+	 * multi-conjuncts patterns when in fact we want to match an
+	 * AndLink text.)
 	 */
 	Handle local_quote(const Handle& h);
-
-	/**
-	 * Given a pattern, a collection of text atoms to match, build a
-	 * set of mappings from the variables in that pattern to their
-	 * values (subtexts + counts).
-	 */
-	HandleUCounterMap gen_var2subtexts(const Handle& pattern,
-	                                   const HandleUCounter& texts) const;
-
-	/**
-	 * Given variables and a sequence of list of values, map each
-	 * variable to counted values (see gen_var2val).
-	 */
-	HandleUCounterMap gen_var2vals(const Variables& vars,
-	                               const HandleSeq& values_seq) const;
-
-	/**
-	 * Given variables and a list of values, as (List v1 ... vn), map
-	 * each variable to its value. If there is only one variable, then
-	 * `values` contain a single value not wrapped in a List.
-	 */
-	HandleMap gen_var2val(const Variables& variables, const Handle& values) const;
-
-	/**
-	 * Return true iff the pattern is totally abstract like
-	 *
-	 * (Lambda
-	 *   (Variable "$X")
-	 *   (Variable "$X"))
-	 *
-	 * for a 1-gram. Or
-	 *
-	 * (Lambda
-	 *   (List
-	 *     (Variable "$X")
-	 *     (Variable "$Y"))
-	 *   (And
-	 *     (Variable "$X")
-	 *     (Variable "$Y"))
-	 *
-	 * for a 2-gram, etc.
-	 */
-	bool totally_abstract(const Handle& pattern) const;
-
-	/**
-	 * Given a pattern, a variable and a subpattern, build subpatterns
-	 * such that the variables in the subpatterns partially overlap,
-	 * in all possible ways, with the variables in the pattern
-	 * different than the given variable. For instance
-	 *
-	 * pattern = Lambda
-	 *             VariableList
-	 *               Variable "$X"
-	 *               Variable "$Y"
-	 *               Variable "$Z"
-	 *             And
-	 *               Variable "$X"
-	 *               Inheritance
-	 *                 Variable "$Y"
-	 *                 Variable "$Z"
-	 *
-	 * variable = Variable "$X"
-	 *
-	 * subpattern = Lambda
-	 *                VariableList
-	 *                  Variable "$U"
-	 *                  Variable "$V"
-	 *                Inheritance
-	 *                  Variable "$U"
-	 *                  Variable "$V"
-	 *
-	 * all possible variable overlaps are
-	 *
-	 * 1. no overlap   # TODO: compare with test (-> *compilation*)
-	 * 2. $V = $Y
-	 * 3. $V = $Z
-	 * 4. $U = $Y
-	 * 5. $U = $Y, $V = $Y
-	 * 6. $U = $Y, $V = $Z
-	 * 7. $U = $Z
-	 * 8. $U = $Z, $V = $Y
-	 * 9. $U = $Z, $V = $Z
-	 *
-	 * thus
-	 *
-	 * TODO: update example to get the tree representation
-	 *
-	 * gen_var_overlap_subpatterns(pattern, variable, subpattern)
-	 * =
-	 * { Lambda [no overlap]
-	 *     VariableList
-	 *       Variable "$U"
-	 *       Variable "$V"
-	 *     Inheritance
-	 *       Variable "$U"
-	 *       Variable "$V"
-	 * , Lambda [$V = $Y]
-	 *     VariableList
-	 *       Variable "$U"
-	 *       Variable "$Y"
-	 *     Inheritance
-	 *       Variable "$U"
-	 *       Variable "$Y"
-	 * , Lambda [$V = $Z]
-	 *     VariableList
-	 *       Variable "$U"
-	 *       Variable "$Z"
-	 *     Inheritance
-	 *       Variable "$U"
-	 *       Variable "$Z"
-	 * , Lambda [$U = $Y]
-	 *     VariableList
-	 *       Variable "$Y"
-	 *       Variable "$V"
-	 *     Inheritance
-	 *       Variable "$Y"
-	 *       Variable "$V"
-	 * , Lambda [$U = $Y, $V = $Y]
-	 *     Variable "$Y"
-	 *     Inheritance
-	 *       Variable "$Y"
-	 *       Variable "$Y"
-	 * , Lambda [$U = $Y, $V = $Z]
-	 *     VariableList
-	 *       Variable "$Y"
-	 *       Variable "$Z"
-	 *     Inheritance
-	 *       Variable "$Y"
-	 *       Variable "$Z"
-	 * , Lambda [$U = $Z]
-	 *     VariableList
-	 *       Variable "$Z"
-	 *       Variable "$V"
-	 *     Inheritance
-	 *       Variable "$Z"
-	 *       Variable "$V"
-	 * , Lambda [$U = $Z, $V = $Y]
-	 *     VariableList
-	 *       Variable "$Z"
-	 *       Variable "$Y"
-	 *     Inheritance
-	 *       Variable "$Z"
-	 *       Variable "$Y"
-	 * , Lambda [$U = $Z, $V = $Z]
-	 *     Variable "$Z"
-	 *     Inheritance
-	 *       Variable "$Z"
-	 *       Variable "$Z" }
-	 *
-	 * The output container is a HandleSeq to be able to contain
-	 * alpha-equivalent subpatterns.
-	 */
-	HandleTree gen_var_overlap_subpatterns(const Handle& pattern,
-	                                       const Handle& variable,
-	                                       const Handle& subpattern,
-	                                       int maxdepth) const;
-	HandleTree gen_var_overlap_subpatterns(RewriteLinkPtr sc_subpat,
-	                                       const HandleMapTree&
-	                                       var_overlaps) const;
-	HandleTree gen_var_overlap_subpatterns(RewriteLinkPtr sc_subpat,
-	                                       HandleMapTree::sibling_iterator
-	                                       var_overlaps_sib) const;
-
-	/**
-	 * Given 2 list of disjoint variables return a tree of all
-	 * mappings between the first list to the second. For instance
-	 *
-	 * vs1 = {$U, $V}, vs2 = {$X, $Y}
-	 *
-	 * gen_var_overlaps(vs1, vs2) =
-	 *            ---------- {} ---------
-	 *           /       /       \       \
-	 *      {$V->$X} {$V->$Y} {$U->$X} {$U->$Y}
-	 *         |\           \------------------
-	 *         | --------------                \-------------------
-	 *         |               \                \                  \
-	 * {$U->$X, $V->$X}, {$U->$Y, $V->$X}, {$U->$X, $V->$Y}, {$U->$Y, $V->$Y},
-	 *
-	 * {$U->$X} and {$U->$Y} do not have children to avoid redundant
-	 * mappings.
-	 */
-	HandleMapTree gen_var_overlaps(const HandleSet& vs1,
-	                               const HandleSet& vs2,
-	                               int maxdepth) const;
-
-	/**
-	 * Given a pattern and a mapping from variables in that pattern to
-	 * sub-patterns, return as many patterns as possible
-	 * compositions. For instance
-	 *
-	 * pattern = (Inheritance X Y)
-	 *
-	 * var2patterns =
-	 *   { X-> {(Concept "a"), (Set (Concept "a") (Concept "c"))},
-	 *     Y-> {(Concept "b"), (Concept "d")} }
-	 *
-	 * then product_compose(pattern, var2patterns) =
-	 *   { (Inheritance X (Concept "b")),
-	 *     (Inheritance X (Concept "d")),
-	 *     (Inheritance (Concept "a") Y),
-	 *     (Inheritance (Concept "a") (Concept "b")),
-	 *     (Inheritance (Concept "a") (Concept "d")),
-	 *     (Inheritance (Set (Concept "a") (Concept "c")) Y),
-	 *     (Inheritance (Set (Concept "a") (Concept "c")) (Concept "b")),
-	 *     (Inheritance (Set (Concept "a") (Concept "c")) (Concept "d")) }
-	 *
-	 * TODO: I probably need to pass a HandleUCounterMap to keep the
-	 * texts associated to each subpattern associated to each variable.
-	 */
-	HandleTree product_compose(const Handle& pattern,
-	                           const HandleUCounter& texts,
-	                           const HandleHandleTreeMap& var2subpats,
-	                           unsigned mingram=0,
-	                           int maxdepth=-1) const;
 
 	/**
 	 * Given a pattern, and mapping from variables to sub-patterns,
@@ -519,7 +369,7 @@ private:
 	 *
 	 * TODO Move this to a ComposeLink factory.
 	 */
-	Handle compose(const Handle& pattern, const HandleMap& var2pat) const;
+	static Handle compose(const Handle& pattern, const HandleMap& var2pat);
 
 	/**
 	 * Given a variable declaration, and a mapping from variables to
@@ -555,6 +405,56 @@ private:
 
 public:
 	/**
+	 * Given a vardecl and a body, filter the vardecl to contain only
+	 * variable of the body, and create a Lambda with them.
+	 */
+	static Handle mk_pattern(const Handle& vardecl, const HandleSeq& clauses);
+
+	/**
+	 * Given a pattern, split it into smaller patterns of strongly
+	 * connected components.
+	 */
+	static HandleSeq get_component_patterns(const Handle& pattern);
+
+	/**
+	 * Given a pattern, split it into its disjuncts.
+	 */
+	static HandleSeq get_conjuncts(const Handle& pattern);
+
+	/**
+	 * Given a pattern and texts, return the satisfying set of the
+	 * pattern over the text. Please note that the texts count are
+	 * ignored. But this is still useful for multi-conjuncts patterns
+	 * where the counts are all 1 anyway.
+	 *
+	 * TODO: ignore permutations for unordered links.
+	 */
+	static Handle restricted_satisfying_set(const Handle& pattern,
+	                                        const HandleSet& texts,
+	                                        int maxf=-1);
+
+	/**
+	 * Return true iff the pattern is totally abstract like
+	 *
+	 * (Lambda
+	 *   (Variable "$X")
+	 *   (Variable "$X"))
+	 *
+	 * for a single conjunct. Or
+	 *
+	 * (Lambda
+	 *   (List
+	 *     (Variable "$X")
+	 *     (Variable "$Y"))
+	 *   (And
+	 *     (Variable "$X")
+	 *     (Variable "$Y"))
+	 *
+	 * for 2 conjuncts, etc.
+	 */
+	static bool totally_abstract(const Handle& pattern);
+
+	/**
 	 * Generate a list of hopefully unique random variables
 	 */
 	static HandleSeq gen_rand_variables(size_t n);
@@ -571,12 +471,12 @@ public:
 	static const Handle& get_body(const Handle& pattern);
 
 	/**
-	 * Return the number of grams in a pattern. That is, if the
+	 * Return the number of conjuncts in a pattern. That is, if the
 	 * pattern body is an AndLink, then returns its arity, otherwise
 	 * if the body is not an AndLink, then return 1, and if it's not a
 	 * pattern at all (i.e. not a LambdaLink), then return 0.
 	 */
-	static unsigned gram(const Handle& pattern);
+	static unsigned conjuncts(const Handle& pattern);
 
 	/**
 	 * Remove useless clauses from a body pattern. Useless clauses are
@@ -585,9 +485,14 @@ public:
 	 */
 	static Handle remove_useless_clauses(const Handle& vardecl,
 	                                     const Handle& body);
-};
 
-std::string oc_to_string(const HandleUCounterMap& hucp);
+	/**
+	 * Remove any closes clause (regardless of whether they are
+	 * evaluatable or not).
+	 */
+	static Handle remove_constant_clauses(const Handle& vardecl,
+	                                      const Handle& body);
+};
 
 } // ~namespace opencog
 

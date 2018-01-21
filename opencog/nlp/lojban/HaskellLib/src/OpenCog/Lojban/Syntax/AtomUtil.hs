@@ -257,7 +257,7 @@ varnode :: SynIso String Atom
 varnode = nodeIso "VariableNode" noTv
 
 numberNode :: SynIso String Atom
-numberNode = nodeIso "VariableNode" noTv
+numberNode = nodeIso "NumberNode" noTv
 
 
 _frames :: SynIso (Selbri,[(Atom,Tag)]) Atom

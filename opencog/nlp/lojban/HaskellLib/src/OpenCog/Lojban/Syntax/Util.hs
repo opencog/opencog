@@ -39,7 +39,7 @@ mapIso iso = Iso f g where
     f = traverse (apply iso)
     g = traverse (unapply iso)
 
-choice :: [SynIso (c,a) b] -> SynIso (c,a) b
+choice :: [SynIso a b] -> SynIso a b
 choice lst = Iso f g where
     f i = foldl1 mplus $ map (`apply` i) lst
     g i = foldl1 mplus $ map (`unapply` i) lst
@@ -255,7 +255,7 @@ getFlagValue f = do
     flags <- gets sFlags
     case M.lookup f flags of
         Just a -> pure a
-        Nothing -> lift $ Left "Flag Value doesn't exist."
+        Nothing -> lift $ Left $ "Flag: " ++ f ++ " doesn't exist."
 
 getFlagValueIso :: Flag -> SynIso () String
 getFlagValueIso flag = Iso f g where
@@ -289,6 +289,14 @@ ifFlag flag = Iso f f where
         if flag `M.member` flags
            then pure a
            else lift $ Left $ "Flag: " ++ flag ++ " is not set."
+
+ifFlagVlaue :: Flag -> String -> SynIso a a
+ifFlagVlaue flag val  = Iso f f where
+    f a = do
+        value <- getFlagValue flag
+        if value == val
+           then pure a
+           else lift $ Left $ "Flag: " ++ flag ++ " doesn't have value" ++ val
 
 ifNotFlag :: Flag -> SynIso a a
 ifNotFlag flag = Iso f f where
