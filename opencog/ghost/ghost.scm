@@ -143,3 +143,17 @@
   (define sent (car (nlp-parse TXT)))
   (generate-word-seqs sent)
   (State ghost-curr-proc sent))
+
+; ----------
+(define-public (ghost-run)
+"
+  Start the psi-loop for GHOST.
+"
+  (psi-run ghost-component))
+
+; ----------
+(define-public (ghost-halt)
+"
+  Halt the psi-loop for GHOST.
+"
+  (psi-halt ghost-component))
