@@ -100,32 +100,4 @@ One can quickly test if a rule can be triggered by using `test-ghost`:
 
 The output `[INFO] [Ghost] Say: "Hello human"` will be printed.
 
-*Note*: `test-ghost` is mainly for testing and debugging. The
-proper way of running it is to start the OpenPsi loop and should use
-`ghost` instead of `test-ghost` to send the input.
-
-## To Do
-
-Here is a list of features that are partially working/need to be implemented:
-
-- Speech Acts
-
-A rule starts with:
-
-```
-s: is equivalent to declarative or imperative in OpenCog
-?: is equivalent to truth query or interrogative in OpenCog
-u: means union of the both above
-```
-
-- Nested pattern e.g. "you < * [(live * long) long-lived]"
-
-- System functions
-  - ^gambit()
-
-- System variables
-  - %input
-
-- Action orchestrator
-
-- Port all the DefinedPredicateNodes available in chatbot-psi and eva modules
+*Note*: `test-ghost` is mainly for testing and debugging. The proper way of running it is to start the OpenPsi loop and use `ghost` instead of `test-ghost` to send the input. To do so, follow steps 1 to 4, and then do `(ghost-run)` to start the psi-loop for GHOST, and then trigger it by using `ghost`, e.g. `(ghost "how are you doing")`.
