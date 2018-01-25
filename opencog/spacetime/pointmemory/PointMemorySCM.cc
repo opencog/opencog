@@ -21,6 +21,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <math.h>
 
 #include <iomanip>
 #include <map>
@@ -219,14 +220,27 @@ void PointMemorySCM::init()
 #endif
 }
 
+double get_float(const Handle& h, const char * msg)
+{
+	NumberNodePtr nn = NumberNodeCast(h);
+	if (nullptr == nn)
+		throw InvalidParamException(TRACE_INFO,
+			 "Expecting a number for %s, got %s", msg, h->to_string().c_str());
+	return nn->get_value();
+}
+
+int get_int(const Handle& h, const char * msg)
+{
+	return (int) round(get_float(h, msg));
+}
+
 Handle PointMemorySCM::create_map(Handle map_name, Handle resolution)
 {
 	const HandleSeq& hs = resolution->getOutgoingSet();
 
-	// XXX FIXME -- verify that these are NumberNodes.
-	double space_res_mtr = atof(hs[0]->get_name().c_str());
-	int time_res_milli_sec = atoi(hs[1]->get_name().c_str());
-	int time_units = atoi(hs[2]->get_name().c_str());
+	double space_res_mtr = get_float(hs[0], "space resolution");
+	int time_res_milli_sec = get_int(hs[1], "time resolution (millisecs)");
+	int time_units = get_int(hs[2], "time units");
 
 	// Reject if time units < 1
 	if (time_units < 1)
