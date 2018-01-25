@@ -133,7 +133,9 @@
              (or (equal? 'SeLink (cog-type (car rule-list)))
                  (equal? 'ListLink (cog-type (car rule-list)))))
         (rule-list-flatten (cog-outgoing-set (car rule-list)))
-        rule-list))
+        rule-list
+    )
+  )
 
   (let ((acs (psi-action-selector component)))
     (if (null? acs)
