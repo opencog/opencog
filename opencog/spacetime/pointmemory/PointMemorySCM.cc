@@ -547,7 +547,7 @@ time_pt PointMemorySCM::get_map_time(const Handle& map_name,
                                      const Handle& helapse)
 {
 	have_map(map_name);
-	int elapse = atoi(helapse->get_name().c_str());
+	int elapse = get_int(helapse, "elapsed time (millisecs));
 	return tsa[map_name]->get_current_time() - std::chrono::milliseconds(elapse);
 }
 
