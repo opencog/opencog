@@ -21,6 +21,9 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#ifdef __APPLE__
+  #include <cmath>
+#endif
 #include <algorithm>
 #include <boost/range/adaptor/reversed.hpp>
 
