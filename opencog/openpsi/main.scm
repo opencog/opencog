@@ -300,6 +300,9 @@
 ; psi rules.  For now, this is OK, but at some point, this will become
 ; a bottleneck, as we will need to evaluate more rules more often.
 ;
+(define psi-run-per-demand-loop-is-going #f) ;;; XXX this should be a
+;;;continuation instead. of a global.
+
 (define (psi-run-per-demand)
 "
   psi-run
@@ -328,8 +331,8 @@
             (null? (cog-chase-link 'DefineLink 'SatisfactionLink loop-node)))
         (define-psi-loop))
 
-    (if (not (psi-running?))
+    (if (not psi-run-per-demand-loop-is-going)
         (begin
-            (set! psi-do-run-loop #t)
-            (call-with-new-thread (lambda () (cog-evaluate! loop-node)))))
+            (set! psi-run-per-demand-loop-is-going #t)
+            (call-with-new-thread (lambda () (cog-evaluate!  loop-node)))))
 )
