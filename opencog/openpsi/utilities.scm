@@ -32,67 +32,70 @@
 )
 
 ; --------------------------------------------------------------
-
-(define (psi-get-exact-match ATOM)
-"
-  psi-get-exact-match ATOM - Return list of all of the MemberLinks
-  holding rules whose context or action apply exactly (without
-  any variables) to the ATOM. In other words, the ATOM appears
-  directly in the context of the rule.
-
-  All psi rules are members of some ruleset; this searches for and
-  finds such MemberLinks.
-"
-    ;; Get all exact matches
-    (define inset (cog-get-trunk ATOM))
-
-    ;; Keep only those links that are of type MemberLink...
-    ;; and, more precisely, a MemberLink that is of a valid
-    ;; psi-fule form.
-    (filter psi-member?
-        (delete-duplicates (cog-filter 'MemberLink inset)))
-)
-
-(define (psi-get-dual-match ATOM)
-"
-  psi-get-dual-match ATOM - Return list of the MemberLinks
-  holding rules whose context or action might apply to ATOM,
-  as a generalized case (i.e. containining variables).
-
-  All psi rules are members of some ruleset; this searches for and
-  finds such MemberLinks.
-"
-    (define set-of-duals (cog-execute! (DualLink ATOM)))
-
-    ;; Get all patterned rules
-    (define duset
-        (concatenate
-            (map cog-get-trunk (cog-outgoing-set set-of-duals))))
-
-    ; Avoid garbaging up the atomspace.
-    (cog-delete set-of-duals)
-
-    ;; Keep only those links that are of type MemberLink...
-    ;; and, more precisely, a MemberLink that is of a valid
-    ;; psi-fule form.
-    (filter psi-member?
-        (delete-duplicates (cog-filter 'MemberLink duset)))
-)
-
-(define (psi-get-members ATOM)
-"
-  psi-get-members ATOM - Return list of all of the MemberLinks
-  holding rules whose context or action might apply to ATOM.
-
-  All psi rules are members of some ruleset; this searches for and
-  finds such MemberLinks.
-"
-    (delete-duplicates (concatenate! (list
-        (psi-get-exact-match ATOM)
-        (psi-get-dual-match ATOM)
-    )))
-)
-
+; It appears that the predicate psi-member? is not defined anywhere
+; and so thecode below seems to be dead...
+; 
+;; DEAD CODE ;;
+;; DEAD CODE ;;(define (psi-get-exact-match ATOM)
+;; DEAD CODE ;;"
+;; DEAD CODE ;;  psi-get-exact-match ATOM - Return list of all of the MemberLinks
+;; DEAD CODE ;;  holding rules whose context or action apply exactly (without
+;; DEAD CODE ;;  any variables) to the ATOM. In other words, the ATOM appears
+;; DEAD CODE ;;  directly in the context of the rule.
+;; DEAD CODE ;;
+;; DEAD CODE ;;  All psi rules are members of some ruleset; this searches for and
+;; DEAD CODE ;;  finds such MemberLinks.
+;; DEAD CODE ;;"
+;; DEAD CODE ;;    ;; Get all exact matches
+;; DEAD CODE ;;    (define inset (cog-get-trunk ATOM))
+;; DEAD CODE ;;
+;; DEAD CODE ;;    ;; Keep only those links that are of type MemberLink...
+;; DEAD CODE ;;    ;; and, more precisely, a MemberLink that is of a valid
+;; DEAD CODE ;;    ;; psi-fule form.
+;; DEAD CODE ;;    (filter psi-member?
+;; DEAD CODE ;;        (delete-duplicates (cog-filter 'MemberLink inset)))
+;; DEAD CODE ;;)
+;; DEAD CODE ;;
+;; DEAD CODE ;;(define (psi-get-dual-match ATOM)
+;; DEAD CODE ;;"
+;; DEAD CODE ;;  psi-get-dual-match ATOM - Return list of the MemberLinks
+;; DEAD CODE ;;  holding rules whose context or action might apply to ATOM,
+;; DEAD CODE ;;  as a generalized case (i.e. containining variables).
+;; DEAD CODE ;;
+;; DEAD CODE ;;  All psi rules are members of some ruleset; this searches for and
+;; DEAD CODE ;;  finds such MemberLinks.
+;; DEAD CODE ;;"
+;; DEAD CODE ;;    (define set-of-duals (cog-execute! (DualLink ATOM)))
+;; DEAD CODE ;;
+;; DEAD CODE ;;    ;; Get all patterned rules
+;; DEAD CODE ;;    (define duset
+;; DEAD CODE ;;        (concatenate
+;; DEAD CODE ;;            (map cog-get-trunk (cog-outgoing-set set-of-duals))))
+;; DEAD CODE ;;
+;; DEAD CODE ;;    ; Avoid garbaging up the atomspace.
+;; DEAD CODE ;;    (cog-delete set-of-duals)
+;; DEAD CODE ;;
+;; DEAD CODE ;;    ;; Keep only those links that are of type MemberLink...
+;; DEAD CODE ;;    ;; and, more precisely, a MemberLink that is of a valid
+;; DEAD CODE ;;    ;; psi-fule form.
+;; DEAD CODE ;;    (filter psi-member?
+;; DEAD CODE ;;        (delete-duplicates (cog-filter 'MemberLink duset)))
+;; DEAD CODE ;;)
+;; DEAD CODE ;;
+;; DEAD CODE ;;(define (psi-get-members ATOM)
+;; DEAD CODE ;;"
+;; DEAD CODE ;;  psi-get-members ATOM - Return list of all of the MemberLinks
+;; DEAD CODE ;;  holding rules whose context or action might apply to ATOM.
+;; DEAD CODE ;;
+;; DEAD CODE ;;  All psi rules are members of some ruleset; this searches for and
+;; DEAD CODE ;;  finds such MemberLinks.
+;; DEAD CODE ;;"
+;; DEAD CODE ;;    (delete-duplicates (concatenate! (list
+;; DEAD CODE ;;        (psi-get-exact-match ATOM)
+;; DEAD CODE ;;        (psi-get-dual-match ATOM)
+;; DEAD CODE ;;    )))
+;; DEAD CODE ;;)
+;; DEAD CODE ;;
 ; --------------------------------------------------------------
 (define (psi-set-func! function is-eval component-node function-name)
 "

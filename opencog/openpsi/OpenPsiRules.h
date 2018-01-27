@@ -131,6 +131,9 @@ private:
    * value being a tuple of its three components. The intention is to minimize
    * the computing required for getting the different component of a rule.
    */
+// XXX FIXME storing handles as globals will cause a crash in
+// cxa_finalize when the shared library is unloaded. See bug #2991 for
+// details of why this happens.
   static std::map<Handle, PsiTuple> _psi_rules;
 
   // TODO: Using names that are prefixed with "OpenPsi: " might be a bad idea,
