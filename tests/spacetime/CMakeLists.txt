@@ -1,6 +1,7 @@
 LINK_LIBRARIES(
 	atom_octomap
 	${ATOMSPACE_LIBRARIES}
+	${COGUTIL_LIBRARY}
 )
 ADD_CXXTEST(AtomOcTreeUTest)
 ADD_CXXTEST(TimeSpaceAtomUTest)

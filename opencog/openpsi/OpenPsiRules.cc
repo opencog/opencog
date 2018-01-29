@@ -146,6 +146,6 @@ PatternLinkPtr OpenPsiRules::get_query(const Handle rule)
   if(_psi_rules.count(rule)) {
     return std::get<3>(_psi_rules[rule]);
   } else {
-    return nullptr;
+    return PatternLinkCast(Handle::UNDEFINED);
   }
 }
