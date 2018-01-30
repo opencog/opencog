@@ -67,13 +67,6 @@ public:
         _as = new AtomSpace();
         _scm = new SchemeEval(_as);
 
-        // Hack around mis-designed scheme bindings for logger.
-        // (The logger cannot find liblogger because opencog is already
-        // loaded by this point, and so the library path is not set up.)
-        // XXX fix the logger, then remove this.
-        _scm->eval("(setenv \"LTDL_LIBRARY_PATH\" \"" PROJECT_BINARY_DIR
-                   "/opencog/persist/gearman:/usr/local/lib/opencog\")");
-
         // Configure scheme load-paths that are common for all tests.
         _scm->eval("(add-to-load-path \"/usr/local/share/opencog/scm\")");
         CHKERR
