@@ -15,7 +15,7 @@ LINK_DIRECTORIES(
 LINK_LIBRARIES(
 	${ATOMSPACE_LIBRARY}
 	sureal
-	server
+	cogutil
 )
 
 ADD_CXXTEST(SuRealUTest)
