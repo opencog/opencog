@@ -69,18 +69,6 @@ public:
         // else the libspacetime-types.so won't be found.
         // _evaluator->eval("(use-modules (opencog spacetime))");
 
-        // XXX FIXME - there is some sort of race condition in sureal.
-        // This unit test sometimes passes, and sometimes fails,
-        // randomly.  Loading spacetime-types too early causes it to
-        // fail more often. Randomly. Something is screwed up, its
-        // fairly deep; there's some threading or race somehwere,
-        // and it shows up when the line above is uncommented- the
-        // (use-modules (opencog spacetime)) line, and the line below
-        // is commented away.
-        _evaluator->eval("(setenv \"LTDL_LIBRARY_PATH\" "
-                         "\"/usr/local/lib/opencog\""
-                         ")");
-
         _evaluator->eval("(use-modules (opencog nlp relex2logic))");
         _evaluator->eval("(use-modules (opencog nlp sureal))");
         _evaluator->clear_pending();

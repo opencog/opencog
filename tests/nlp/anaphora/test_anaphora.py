@@ -32,7 +32,6 @@ class AnaphoraUnitTester(TestCase):
 
         scheme_eval(self.atomspace, "(add-to-load-path \"/usr/local/share/opencog/scm\")")
         scheme_eval(self.atomspace, "(use-modules (opencog))")
-        scheme_eval(self.atomspace, "(use-modules (opencog atom-types))")
         scheme_eval(self.atomspace, "(use-modules (opencog query))")
         scheme_eval(self.atomspace, "(use-modules (opencog nlp))")
 

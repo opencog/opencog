@@ -3,6 +3,8 @@
 ;;anaphor is "their"
 ;;antecedent is "waitresses"
 
+(use-modules (opencog) (opencog nlp))
+
 
 ;; Expected result:
 ;; True (Conjunction resolution is applied. i.e. "their" refers to "waitresses and the cook")
