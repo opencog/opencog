@@ -326,6 +326,9 @@ public:
         subscriberAVChanged.close();
         subscriberAddAF.close();
         subscriberRemoveAF.close();
-        context.close();
+
+	// BUGFIX: context destructor doing same as close method
+	//         This causes rc to be -1 instead of 0
+        //context.close();
     }
 };
