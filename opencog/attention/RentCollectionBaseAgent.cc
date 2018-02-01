@@ -79,16 +79,14 @@ double RentCollectionBaseAgent::calculate_STI_Rent()
 {
     int funds = _bank->getSTIFunds();
     double diff  = targetSTI - funds;
+
+    if(diff <= 0)
+        return 0;
+
     double ndiff = diff / stiFundsBuffer;
     ndiff = std::min(ndiff, 1.0);
     ndiff = std::max(ndiff, -0.99);
-    //printf("ndiff: %f   ",ndiff);
-    //
     double res = STIAtomRent + (STIAtomRent * ndiff);
-
-    if (res < 1)
-        if ((rand() % 100) > (100 * res))
-            res = 1;
 
     return res;
 }
