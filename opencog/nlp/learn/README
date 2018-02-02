@@ -105,7 +105,7 @@ statistics.  Most of this revolves around setting up postgres.
    (in guile-2.2, it doesn't hang, but still behaves very badly)
 
 1) Set up and configure postgres, as described in
-   `opencog/persist/sql/README.md`
+   `atomspace/opencog/persist/sql/README.md`
 
 2) Create and initialize the database. Pick any name you want;
    here it is `learn-pairs`.
