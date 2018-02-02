@@ -28,8 +28,6 @@
 
 ;; Load the rules (use load for relative path w.r.t. to that file)
 (add-to-load-path ".")
-;; TODO fix the hardcoded path below
-(add-to-load-path "/home/nilg/OpenCog/opencog/opencog/learning/xpattern-miner/ure-based")
 (define rule-files (list "rules/top-abstraction.scm"
                          "rules/abstraction.scm"
                          "rules/specialization.scm"))
