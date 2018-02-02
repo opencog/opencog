@@ -267,11 +267,6 @@ bool XPatternMiner::enough_support(const Handle& pattern,
 	return param.minsup <= freq(pattern, texts, param.minsup);
 }
 
-bool XPatternMiner::enough_support(const HandleSet& texts) const
-{
-	return param.minsup <= freq(texts, param.minsup);
-}
-
 unsigned XPatternMiner::freq(const Handle& pattern,
                              const HandleSet& texts,
                              int maxf) const
@@ -296,23 +291,8 @@ unsigned XPatternMiner::freq_component(const Handle& component,
                                        int maxf) const
 {
 	if (totally_abstract(component))
-		freq(texts, maxf);
-	return restricted_satisfying_set(component, texts, maxf)->get_arity();
-}
-
-unsigned XPatternMiner::freq(const HandleSet& texts, int maxf) const
-{
-	if (maxf < 0)
 		return texts.size();
-
-	// Otherwise only count up to maxf
-	unsigned count = 0;
-	for (const auto& text : texts) {
-		++count;
-		if (maxf <= (int)count)
-			return count;
-	}
-	return count;
+	return restricted_satisfying_set(component, texts, maxf)->get_arity();
 }
 
 unsigned XPatternMiner::freq(const std::vector<unsigned>& freqs) const
