@@ -28,7 +28,10 @@
 
 ;; Load the rules (use load for relative path w.r.t. to that file)
 (add-to-load-path ".")
+;; TODO fix the hardcoded path below
+(add-to-load-path "/home/nilg/OpenCog/opencog/opencog/learning/xpattern-miner/ure-based")
 (define rule-files (list "rules/top-abstraction.scm"
+                         "rules/abstraction.scm"
                          "rules/specialization.scm"))
 (for-each load-from-path rule-files)
 
@@ -38,7 +41,9 @@
 
 ; List the rules and their weights.
 (define rules (list top-abstraction-rule-name
-                    unary-specialization-rule-name))
+                    unary-specialization-rule-name
+                    binary-first-arg-specialization-rule-name
+                    binary-second-arg-specialization-rule-name))
 
 ; Associate rules to PLN
 (ure-add-rules pm-rbs rules)
@@ -48,4 +53,7 @@
 ;;;;;;;;;;;;;;;;;;;;;
 
 ; Termination criteria parameters
-(ure-set-num-parameter pm-rbs "URE:maximum-iterations" 100)
+(ure-set-num-parameter pm-rbs "URE:maximum-iterations" 10)
+
+;; Complexity penalty
+(ure-set-num-parameter pm-rbs "URE:BC:complexity-penalty" 1)

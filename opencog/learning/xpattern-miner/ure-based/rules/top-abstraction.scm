@@ -24,13 +24,6 @@
 ;; Basically <tv> will be (stv 1 1) if the number of members of
 ;; <texts> is greater than or equal to <ms>, (stv 0 1) otherwise.
 
-(use-modules (opencog logger))
-(use-modules (opencog query))
-(use-modules (opencog rule-engine))
-
-(cog-logger-set-level! "debug")
-(cog-logger-set-stdout! #t)
-
 (load "pattern-miner-utils.scm")
 
 ;; Note that due to the texts-ge-ms precondition, it will not be able
@@ -76,6 +69,8 @@
       rewrite)))
 
 (define (top-abstraction-formula conclusion . premises)
+  ;; (cog-logger-debug "top-abstraction-formula conclusion = ~a, premises = ~a"
+  ;;                   conclusion premises)
   (if (= (length premises) 2)
       (let* ((texts (car premises))
              (ms (cadr premises))

@@ -28,6 +28,7 @@
 #include <opencog/util/algorithm.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/rule-engine/backwardchainer/BackwardChainer.h>
+#include <opencog/rule-engine/URELogger.h>
 #include <opencog/learning/xpattern-miner/c++-based/HandleTree.h>
 #include <opencog/learning/xpattern-miner/c++-based/XPatternMiner.h>
 #include <opencog/guile/SchemeEval.h>
@@ -143,9 +144,17 @@ Handle UREPatternMinerUTest::mk_query(const HandleSeq& texts, int minsup,
 
 UREPatternMinerUTest::UREPatternMinerUTest() : _scm(&_as)
 {
+	// Main logger
 	logger().set_level(Logger::DEBUG);
 	logger().set_timestamp_flag(false);
+	logger().set_sync_flag(true);
 	logger().set_print_to_stdout_flag(true);
+
+	// URE logger
+	ure_logger().set_level(Logger::DEBUG);
+	ure_logger().set_timestamp_flag(false);
+	ure_logger().set_sync_flag(true);
+	ure_logger().set_print_to_stdout_flag(true);
 
 	// Configure scheme load-paths that are common for all tests.
 	_scm.eval("(add-to-load-path \"" PROJECT_SOURCE_DIR
@@ -221,8 +230,9 @@ void UREPatternMinerUTest::test_AB_AC()
 
 	Handle AB = al(INHERITANCE_LINK, A, B),
 		AC = al(INHERITANCE_LINK, A, C),
-		query = mk_query({A, B}, 2);
+		query = mk_query({AB, AC}, 2);
 	BackwardChainer bc(_as, pm_rb, query);
+	bc.get_config().set_maximum_iterations(100);
 	bc.do_chain();
 
 	Handle results = bc.get_results(),
