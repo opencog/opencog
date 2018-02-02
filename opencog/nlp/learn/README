@@ -156,15 +156,13 @@ So, set up the text-ingestion pipeline:
    the same time.  It also contains the database credentials -- that's
    probably the only thing you need to change.
 
-8) Start the various servers. Eventually, you can use the
+8) Start the REPL server. Eventually, you can use the
    `run-all-servers.sh` file in the `run` directory to do this;
    it creates a `byobu` session with different servers in different
    terminals, where you can keep an eye on them. However, the
    first time through, it is better to do all this by hand. So:
 
-8a) Start `run/relex-server-any.sh` in a terminal.
-
-8b) Start the REPL server, in another terminal, as follows:
+8a) Start the REPL server, in another terminal, as follows:
 ```
    guile -l pair-count-??.scm
 ```
@@ -183,9 +181,9 @@ So, set up the text-ingestion pipeline:
    echo -e "(observe-text \"Lietuvos žydų kilmės žurnalistas\")" |nc localhost 17005
 ```
 
-   This should result in activity on the RelEx server, on the cogserver,
-   and on the database: the "observe text" scheme code sends the text to
-   RelEx for parsing, counts the returned word-pairs, and stores them in
+   This should result in activity on the cogserver 
+   and on the database: the "observe text" scheme code sends the text
+   for parsing, counts the returned word-pairs, and stores them in
    the database.
 
 9a) Verify that the above resulted in data sent to the SQL database.
