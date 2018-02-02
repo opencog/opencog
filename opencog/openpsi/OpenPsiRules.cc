@@ -27,11 +27,6 @@
 
 using namespace opencog;
 
-std::map<Handle, OpenPsiRules::PsiTuple> OpenPsiRules::_psi_rules = {};
-std::map<Handle, HandleSet> OpenPsiRules::_category_index = {};
-Handle OpenPsiRules::_psi_category = \
-  Handle(createNode(CONCEPT_NODE, "category"));
-
 OpenPsiRules::OpenPsiRules(AtomSpace* as): _as(as)
 {}
 
@@ -148,4 +143,12 @@ PatternLinkPtr OpenPsiRules::get_query(const Handle rule)
   } else {
     return PatternLinkCast(Handle::UNDEFINED);
   }
+}
+
+OpenPsiRules& opencog::openpsi_cache(AtomSpace* as)
+{
+  // To handle multiple atomspaces maybe a static vector of OpenPsiRules
+  //  maybe used.
+  static OpenPsiRules cache(as);
+  return cache;
 }

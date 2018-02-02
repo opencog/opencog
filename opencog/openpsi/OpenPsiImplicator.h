@@ -71,18 +71,21 @@ private:
    * the query PatternLink, because doing so would require extra
    * computation that doesn't add any value.
    */
-  static std::map<Handle, HandleMap> _satisfiability_cache;
+  std::map<Handle, HandleMap> _satisfiability_cache;
 
   /**
    * An empty map used for clearing cache entries, or to denote absence
    * of groundings.
    */
-  static const HandleMap _EMPTY_HANDLE_MAP;
+  const HandleMap _EMPTY_HANDLE_MAP;
 
   // Because two of the ancestor classes that this class inherites
   // from have _as variable.
   using DefaultPatternMatchCB::_as;
 };
+
+// This function is used to create a single static instance
+OpenPsiImplicator& openpsi_implicator(AtomSpace* as);
 
 }; // namespace opencog
 
