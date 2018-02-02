@@ -224,7 +224,8 @@ So, set up the text-ingestion pipeline:
   `observe-text` in the `link-pipeline.scm` file to suit your whims in
   RAM usage and time spent in GC.
 
-10) Get ready to feed it text. It would be best to get text that
+10) Get ready to feed it text (see Bulk Text Parsing section below). 
+  It would be best to get text that
   consists of narrative literature, adventure and young-adult novels,
   newspaper stories. These contain a good mix of common nouns and verbs,
   which is needed for conversational natural language.
