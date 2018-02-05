@@ -12,6 +12,8 @@
         (ConceptNode "Beso"))))
 )
 
+(define (context-1-cpp) (List context-1))
+
 ; Used for testing the case when the context is grounded by
 ; its alpha-equivalent pattern.
 (define (context-1-alpha-equivalent)
