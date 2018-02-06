@@ -42,7 +42,7 @@ AttentionBank::AttentionBank(AtomSpace* asp)
     targetSTI = config().get_int("TARGET_STI_FUNDS", 10000);
     STIAtomWage = config().get_int("ECAN_STARTING_ATOM_STI_WAGE", 10);
     LTIAtomWage = config().get_int("ECAN_STARTING_ATOM_LTI_WAGE", 10);
-    minAFSize = config().get_int("ECAN_MIN_AF_SIZE", 100);
+    maxAFSize = config().get_int("ECAN_MAX_AF_SIZE", 100);
 
     _remove_signal = &asp->atomRemovedSignal();
     _remove_connection = _remove_signal->connect(
@@ -276,7 +276,7 @@ void AttentionBank::updateAttentionalFocus(const Handle& h,
     }
 
     // Simply insert the new Atom if AF is not full yet.
-    else if (attentionalFocus.size() < minAFSize)
+    else if (attentionalFocus.size() < maxAFSize)
     {
         insertable = true;
     }

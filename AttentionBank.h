@@ -55,7 +55,7 @@ class AtomSpace;
 class AttentionBank
 {
     std::mutex AFMutex;
-    unsigned int minAFSize;
+    unsigned int maxAFSize;
     struct compare_sti_less {
         bool operator()(const std::pair<Handle, AttentionValuePtr>& h1,
                         const std::pair<Handle, AttentionValuePtr>& h2)
@@ -136,11 +136,11 @@ public:
     }
 
     void set_af_size(int size) {
-        minAFSize = size;
+        maxAFSize = size;
     }
 
     int get_af_size(void) {
-        return minAFSize;
+        return maxAFSize;
     }
 
     /**
