@@ -274,7 +274,9 @@ public:
     }
 
     /// Return a random atom drawn from the importanceBin.
-    Handle getRandomAtomNotInAF(void) const;
+    Handle getRandomAtomNotInAF(void) const {
+        return _importanceIndex.getRandomAtomNotInAF();
+    }
 
     AttentionValue::sti_t getMinSTI(bool average=true) const
     {
