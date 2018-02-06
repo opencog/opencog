@@ -121,7 +121,7 @@ Handle OpenPsiSCM::get_goal(const Handle& rule)
 Handle OpenPsiSCM::imply(const Handle& rule)
 {
   AtomSpace* as = SchemeSmob::ss_get_env_as("psi-imply");
-  return openpsi_implicator(as).imply(rule);
+  return openpsi_implicator(as).imply(rule, openpsi_cache(as));
 }
 
 bool OpenPsiSCM::is_rule(const Handle& rule)
@@ -133,7 +133,7 @@ bool OpenPsiSCM::is_rule(const Handle& rule)
 TruthValuePtr OpenPsiSCM::is_satisfiable(const Handle& rule)
 {
   AtomSpace *as = SchemeSmob::ss_get_env_as("psi-satisfiable?");
-  return openpsi_implicator(as).check_satisfiability(rule);
+  return openpsi_implicator(as).check_satisfiability(rule, openpsi_cache(as));
 }
 
 // ========================================================

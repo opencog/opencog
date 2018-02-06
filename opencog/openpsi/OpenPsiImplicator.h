@@ -25,6 +25,7 @@
 
 #include <opencog/atoms/pattern/PatternLink.h>
 #include <opencog/atomspace/AtomSpace.h>
+#include <opencog/openpsi/OpenPsiRules.h>
 
 #include <opencog/query/Satisfier.h>
 
@@ -54,7 +55,7 @@ public:
    *
    * @param rule An openpsi rule.
    */
-  TruthValuePtr check_satisfiability(const Handle& rule);
+  TruthValuePtr check_satisfiability(const Handle& rule, OpenPsiRules& opr);
 
   /**
    * Instantiate the action of the given openpsi rule.
@@ -62,7 +63,7 @@ public:
    * @param rule An openpsi rule.
    * @return The handle to the grounded atom.
    */
-  Handle imply(const Handle& rule);
+  Handle imply(const Handle& rule, OpenPsiRules& opr);
 
 private:
   /**

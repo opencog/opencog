@@ -70,12 +70,12 @@
   (PatternLink (And context-1))
 )
 
+(define context-2 (list (Satisfaction (And context-1 (True)))))
+
 ; A Ghost rule
-(define (rule-2)
-  (psi-rule
-    (list (Satisfaction (And context-1 (True))))
-    action-1 goal-1 (stv 1 1) (demand-1))
-)
+(define (rule-2) (psi-rule context-2 action-1 goal-1 (stv 1 1) (demand-1)))
+
+(define (context-2-cpp) (List context-2))
 
 (define (groundable-content-1)
 ; Some data to populate the atomspace for grounding (rule-1)
