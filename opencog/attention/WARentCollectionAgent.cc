@@ -51,7 +51,7 @@ WARentCollectionAgent::WARentCollectionAgent(CogServer& cs):
 
 void WARentCollectionAgent::selectTargets(HandleSeq &targetSetOut)
 {
-    Handle h = _bank->getRandomAtom();
+    Handle h = _bank->getRandomAtomNotInAF();
     if(h == Handle::UNDEFINED)
         return;
     targetSetOut.push_back(h);
