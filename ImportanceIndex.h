@@ -124,10 +124,10 @@ public:
         return _index.getContent(i,out);
     }
 
-    Handle getRandomAtom(void) const
-    {
-        return _index.getRandomAtom();
-    }
+    /**
+     * Select a random atom outside the AF
+     */
+    Handle getRandomAtomNotInAF(void) const;
 
     /**
      * Get the highest bin which contains Atoms

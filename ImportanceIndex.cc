@@ -256,6 +256,17 @@ UnorderedHandleSet ImportanceIndex::getHandleSet(
     return ret;
 }
 
+Handle ImportanceIndex::getRandomAtomNotInAF(void) const{
+    Handle h = _index.getRandomAtom();
+    while(std::find_if(topKSTIValuedHandles.begin(), topKSTIValuedHandles.end(),
+           [h](HandleSTIPair hsp) { return hsp.first == h; })
+            != topKSTIValuedHandles.end()){
+        h = _index.getRandomAtom();
+    }
+
+    return h;
+}
+
 UnorderedHandleSet ImportanceIndex::getMaxBinContents()
 {
     UnorderedHandleSet ret;
