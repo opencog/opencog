@@ -82,7 +82,7 @@ void WAImportanceDiffusionAgent::spreadImportance()
  */
 HandleSeq WAImportanceDiffusionAgent::diffusionSourceVector(void)
 {
-    Handle h = _bank->getRandomAtom();
+    Handle h = _bank->getRandomAtomNotInAF();
     
     if(h == Handle::UNDEFINED){
         return HandleSeq{};
