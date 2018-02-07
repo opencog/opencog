@@ -56,7 +56,7 @@ namespace opencog {
     class AFRentCollectionAgent : public RentCollectionBaseAgent {
         private:
             time_point<high_resolution_clock> last_update;
-            float update_cycle;
+            float update_freq;
 
         public:
 

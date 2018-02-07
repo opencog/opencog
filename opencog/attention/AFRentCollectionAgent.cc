@@ -59,15 +59,15 @@ void AFRentCollectionAgent::selectTargets(HandleSeq &targetSetOut)
 
 void AFRentCollectionAgent::collectRent(HandleSeq& targetSet)
 {
-    update_cycle = std::stod(_atq.get_param_value(AttentionParamQuery::af_rent_update_freq));
+    update_freq = std::stod(_atq.get_param_value(AttentionParamQuery::af_rent_update_freq));
 
     // calculate elapsed time Et
     seconds elapsed_time = duration_cast<seconds>
                            (high_resolution_clock::now() - last_update);
-    if (elapsed_time.count() <  update_cycle )
+    if (elapsed_time.count() <  update_freq )
         return;
 
-    int w = elapsed_time.count() / update_cycle;
+    double w = elapsed_time.count() * update_freq;
 
     for (const Handle& h : targetSet) {
         int sti = get_sti(h);
