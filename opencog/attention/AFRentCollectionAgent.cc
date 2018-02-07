@@ -70,16 +70,18 @@ void AFRentCollectionAgent::collectRent(HandleSeq& targetSet)
     double w = elapsed_time.count() * update_freq;
 
     for (const Handle& h : targetSet) {
-        int sti = get_sti(h);
-        int lti = get_lti(h);
-        int stiRent = calculate_STI_Rent();
-        int ltiRent = calculate_LTI_Rent();
+        AttentionValue::sti_t sti = get_sti(h);
+        AttentionValue::lti_t lti = get_lti(h);
+        AttentionValue::sti_t stiRent =  calculate_STI_Rent();
+        stiRent *= w;
+        AttentionValue::lti_t ltiRent =  calculate_LTI_Rent();
+        ltiRent *= w;
 
         if (stiRent > sti) stiRent = sti;
         if (ltiRent > lti) ltiRent = lti;
 
-        _bank->set_sti(h, sti - w * stiRent);
-        _bank->set_lti(h, lti - w * ltiRent);
+        _bank->set_sti(h, sti - stiRent);
+        _bank->set_lti(h, lti - ltiRent);
 
 #ifdef LOG_AV_STAT
         atom_avstat[h].rent = (w * stiRent);
