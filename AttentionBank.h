@@ -88,8 +88,8 @@ class AttentionBank
     std::atomic_long fundsSTI;
     std::atomic_long fundsLTI;
 
-    AttentionValue::sti_t startingFundsSTI;
-    AttentionValue::lti_t startingFundsLTI;
+    long startingFundsSTI;
+    long startingFundsLTI;
 
     AttentionValue::sti_t stiFundsBuffer;
     AttentionValue::lti_t ltiFundsBuffer;
@@ -168,8 +168,8 @@ public:
      *
      * @return total STI in the AttentionBank
      */
-    AttentionValue::sti_t getTotalSTI() const {
-        return startingFundsSTI - (AttentionValue::sti_t)fundsSTI;
+    long getTotalSTI() const {
+        return startingFundsSTI - fundsSTI;
     }
 
     /**
@@ -178,8 +178,8 @@ public:
      *
      * @return total LTI in the AttentionBank
      */
-    AttentionValue::lti_t getTotalLTI() const {
-        return startingFundsLTI - (AttentionValue::lti_t)fundsLTI;
+    long getTotalLTI() const {
+        return startingFundsLTI - fundsLTI;
     }
 
     /**
