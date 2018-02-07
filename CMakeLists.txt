@@ -385,18 +385,13 @@ IF (HAVE_PY_INTERP)
 		# differ on each operating system.
 		ADD_DEFINITIONS(-DHAVE_CYTHON)
 		SET(HAVE_CYTHON 1)
-		EXECUTE_PROCESS(
-			COMMAND ${PYTHON_EXECUTABLE} -c "from distutils.sysconfig import *;print(get_python_lib())"
-			OUTPUT_VARIABLE PYTHON_DEST
-		)
 
-		# Replace new line at end.
-		STRING(REPLACE "\n" "" PYTHON_DEST "${PYTHON_DEST}")
-		IF ("${PYTHON_DEST}" STREQUAL "")
-			MESSAGE(FATAL_ERROR "Python destination dir not found")
-		ELSE ("${PYTHON_DEST}" STREQUAL "")
-			MESSAGE(STATUS "Python destination dir found: ${PYTHON_DEST}" )
-		ENDIF ("${PYTHON_DEST}" STREQUAL "")
+		# Hack together some reasonable install location.
+		SET(PYTHON_DEST
+			"lib${LIB_DIR_SUFFIX}/${PYTHON_VER}/dist-packages/opencog")
+		MESSAGE(STATUS
+			"Python install dir: ${CMAKE_INSTALL_PREFIX}/${PYTHON_DEST}" )
+
 	ELSE (CYTHON_FOUND AND HAVE_PY_LIBS)
 		IF(NOT CYTHON_FOUND)
 			MESSAGE(STATUS "Cython executable not found.")
@@ -404,9 +399,14 @@ IF (HAVE_PY_INTERP)
 	ENDIF (CYTHON_FOUND AND HAVE_PY_LIBS)
 
 	# Nosetests will find and automatically run python tests.
-	FIND_PROGRAM(NOSETESTS_EXECUTABLE nosetests)
+	IF (PYTHON3INTERP_FOUND)
+		FIND_PROGRAM(NOSETESTS_EXECUTABLE nosetests3)
+	ELSE ()
+		FIND_PROGRAM(NOSETESTS_EXECUTABLE nosetests)
+	ENDIF ()
 	IF (NOSETESTS_EXECUTABLE AND CYTHON_FOUND AND HAVE_PY_LIBS)
 		SET(HAVE_NOSETESTS 1)
+		MESSAGE(STATUS "Using nosetests executable " ${NOSETESTS_EXECUTABLE})
 	ENDIF (NOSETESTS_EXECUTABLE AND CYTHON_FOUND AND HAVE_PY_LIBS)
 ENDIF (HAVE_PY_INTERP)
 
