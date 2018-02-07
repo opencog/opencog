@@ -185,12 +185,12 @@ public:
     }
 
     // Check the scheme function `psi-step`.
-    void x_test_psi_step_1()
+    void test_psi_step_1()
     {
         logger().info("BEGIN TEST: %s", __FUNCTION__);
 
-        // Common Setup
-        _scm->eval("(rule-1) (rule-2)");
+        // Initial Setup
+        _scm->eval("(rule-3) (rule-4)");
         CHKERR
 
         // Test 1:
@@ -199,46 +199,47 @@ public:
         _scm->eval("(do_psi_step)");
         CHKERR
 
-        auto result_1_1 = _scm->eval("(act-1-present?)");
+        auto result_1_1 = _scm->eval("(act-3-present?)");
         CHKERR
         TS_ASSERT_EQUALS("#f\n", result_1_1);
 
-        auto result_1_2 = _scm->eval("(act-2-present?)");
+        auto result_1_2 = _scm->eval("(act-4-present?)");
         CHKERR
         TS_ASSERT_EQUALS("#f\n", result_1_2);
 
         // Test 2:
         // Test that action-1 is executed and action-2 is not when its
         // context is satisfied.
-        _scm->eval("(groundable-content-1)");
+        _scm->eval("(groundable-content-3)");
         CHKERR
         _scm->eval("(do_psi_step)");
         CHKERR
 
         // For rule-1
-        auto result_2_1 = _scm->eval("(act-1-present?)");
+        auto result_2_1 = _scm->eval("(act-3-present?)");
         CHKERR
         TS_ASSERT_EQUALS("#t\n", result_2_1);
 
         // For rule-2
-        auto result_2_2 = _scm->eval("(act-2-present?)");
+        auto result_2_2 = _scm->eval("(act-4-present?)");
         CHKERR
         TS_ASSERT_EQUALS("#f\n", result_2_2);
 
         // Test 3:
-        // Test that action-2, goal-1 and goal-2 are evaluated.
-        _scm->eval("(groundable-content-2)");
+        // Test that action-2 is executed.
+        _scm->eval("(groundable-content-4)");
         CHKERR
         _scm->eval("(do_psi_step)");
         CHKERR
 
         // For rule-1
-        auto result_3_1 = _scm->eval("(act-1-present?)");
+	// Nothing changes
+        auto result_3_1 = _scm->eval("(act-3-present?)");
         CHKERR
         TS_ASSERT_EQUALS("#t\n", result_3_1);
 
         // For rule-2
-        auto result_3_2 = _scm->eval("(act-2-present?)");
+        auto result_3_2 = _scm->eval("(act-4-present?)");
         CHKERR
         TS_ASSERT_EQUALS("#t\n", result_3_2);
 
