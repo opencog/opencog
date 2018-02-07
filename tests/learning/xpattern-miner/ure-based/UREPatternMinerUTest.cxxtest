@@ -96,7 +96,7 @@ public:
 	void test_A();
 	void test_AB();
 	void test_AB_AC();
-	// void test_AB_AC_BC();
+	void test_AB_AC_BC();
 	// void test_AB_ABC();
 	// void test_ABCD();
 	// void test_ABAB();
@@ -250,34 +250,38 @@ void UREPatternMinerUTest::test_AB_AC()
 	TS_ASSERT(content_eq(results, expected));
 }
 
-// void UREPatternMinerUTest::test_AB_AC_BC()
-// {
-// 	logger().info("BEGIN TEST: %s", __FUNCTION__);
+void UREPatternMinerUTest::test_AB_AC_BC()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
-// 	Handle A = an(CONCEPT_NODE, "A"),
-// 		B = an(CONCEPT_NODE, "B"),
-// 		C = an(CONCEPT_NODE, "C"),
-// 		AB = al(INHERITANCE_LINK, A, B),
-// 		AC = al(INHERITANCE_LINK, A, C),
-// 		BC = al(INHERITANCE_LINK, B, C);
+	Handle A = an(CONCEPT_NODE, "A"),
+		B = an(CONCEPT_NODE, "B"),
+		C = an(CONCEPT_NODE, "C"),
+		InhAB = al(INHERITANCE_LINK, A, B),
+		InhAC = al(INHERITANCE_LINK, A, C),
+		InhBC = al(INHERITANCE_LINK, B, C),
+		query = mk_query({A, B, C, InhAB, InhAC, InhBC}, 2);
 
-// 	XPMParameters param(2);
-// 	XPatternMiner pm(_as, param);
-// 	HandleTree results = pm();
+	BackwardChainer bc(_as, pm_rb, query);
+	bc.get_config().set_maximum_iterations(100);
+	bc.do_chain();
 
-// 	Handle X = an(VARIABLE_NODE, "$X"),
-// 		Y = an(VARIABLE_NODE, "$Y"),
-// 		XY = al(INHERITANCE_LINK, X, Y),
-// 		AY = al(INHERITANCE_LINK, A, Y),
-// 		XC = al(INHERITANCE_LINK, X, C);
-// 	HandleTree expected(al(LAMBDA_LINK, al(VARIABLE_LIST, X, Y), XY),
-// 	                    { al(LAMBDA_LINK, Y, AY), al(LAMBDA_LINK, X, XC) });
+	Handle results = bc.get_results(),
+		varXY = al(VARIABLE_LIST, X, Y),
+		InhXY = al(INHERITANCE_LINK, X, Y),
+		InhAY = al(INHERITANCE_LINK, A, Y),
+		InhXC = al(INHERITANCE_LINK, X, C),
+		expected = mk_minsup_evals(2,
+		                           { top,
+				                     al(LAMBDA_LINK, varXY, InhXY),
+				                     al(LAMBDA_LINK, Y, InhAY),
+				                     al(LAMBDA_LINK, X, InhXC) });
 
-// 	logger().debug() << "results = " << oc_to_string(results);
-// 	logger().debug() << "expected = " << oc_to_string(expected);
+	logger().debug() << "results = " << oc_to_string(results);
+	logger().debug() << "expected = " << oc_to_string(expected);
 
-// 	TS_ASSERT(content_eq(results, expected));
-// }
+	TS_ASSERT(content_eq(results, expected));
+}
 
 // void UREPatternMinerUTest::test_AB_ABC()
 // {
