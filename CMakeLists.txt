@@ -346,20 +346,30 @@ MESSAGE(STATUS "${PROTOBUF_DIR_MESSAGE}")
 # -----------------------------------------------------------------------------
 # Python and Cython
 #
-# NOTE: Python interpreter is needed for runing python unit tests, and for
-# running the FindCython and FindCxxtest cmake modules.
+# NOTE: Python interpreter is needed for runing python unit tests,
+# and for running the FindCython module.
 
-FIND_PACKAGE(PythonInterp 2.7)
-IF (2.7.0 VERSION_LESS ${PYTHON_VERSION_STRING} AND
-	3.0.0 VERSION_GREATER ${PYTHON_VERSION_STRING})
+FIND_PACKAGE(Python3Interp)
+IF (3.4.0 VERSION_LESS ${PYTHON3_VERSION_STRING})
 	SET (HAVE_PY_INTERP 1)
-	MESSAGE(STATUS "Python ${PYTHON_VERSION_STRING} interpreter found.")
+	SET (PYTHON_VER python3.5)
+	MESSAGE(STATUS "Python ${PYTHON3_VERSION_STRING} interpreter found.")
 ENDIF()
 
-FIND_PACKAGE(PythonLibs 2.7)
+IF (NOT HAVE_PY_INTERP)
+	FIND_PACKAGE(PythonInterp)
+	IF (2.7.0 VERSION_LESS ${PYTHON_VERSION_STRING})
+		SET (HAVE_PY_INTERP 1)
+		SET (PYTHON_VER python2.7)
+		MESSAGE(STATUS "Python ${PYTHON_VERSION_STRING} interpreter found.")
+	ENDIF()
+ENDIF()
+
+FIND_PACKAGE(PythonLibs)
 IF (PYTHONLIBS_FOUND AND
-	2.7.0 VERSION_LESS ${PYTHONLIBS_VERSION_STRING} AND
-	3.0.0 VERSION_GREATER ${PYTHONLIBS_VERSION_STRING})
+     ((PYTHON3INTERP_FOUND AND 3.4.0 VERSION_LESS ${PYTHONLIBS_VERSION_STRING})
+     OR
+     (2.7.0 VERSION_LESS ${PYTHONLIBS_VERSION_STRING})))
 	SET (HAVE_PY_LIBS 1)
 	MESSAGE(STATUS "Python ${PYTHONLIBS_VERSION_STRING} libraries found.")
 ELSE()
@@ -367,7 +377,7 @@ ELSE()
 ENDIF()
 
 # Cython is used to generate python bindings.
-IF(HAVE_PY_INTERP)
+IF (HAVE_PY_INTERP)
 	FIND_PACKAGE(Cython 0.19.0)
 
 	IF (CYTHON_FOUND AND HAVE_PY_LIBS)
@@ -398,7 +408,7 @@ IF(HAVE_PY_INTERP)
 	IF (NOSETESTS_EXECUTABLE AND CYTHON_FOUND AND HAVE_PY_LIBS)
 		SET(HAVE_NOSETESTS 1)
 	ENDIF (NOSETESTS_EXECUTABLE AND CYTHON_FOUND AND HAVE_PY_LIBS)
-ENDIF(HAVE_PY_INTERP)
+ENDIF (HAVE_PY_INTERP)
 
 # -----------------------------------------------------------------------------
 

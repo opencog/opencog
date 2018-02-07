@@ -87,3 +87,6 @@ IF(NOT CXXTEST_FOUND)
 		ENDIF(Cxxtest_FIND_REQUIRED)
 	ENDIF(NOT Cxxtest_FIND_QUIETLY)
 ENDIF(NOT CXXTEST_FOUND)
+
+# Leaving this set interfers with the Python3 search.
+UNSET(PYTHONINTERP_FOUND)
