@@ -134,7 +134,7 @@
 )
 (StateLink 
   AF_RENT_FREQUENCY 
-  (NumberNode "0.05")
+  (NumberNode "5")
 )
 (StateLink 
   FORGET_THRESHOLD
