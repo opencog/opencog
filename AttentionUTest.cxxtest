@@ -37,7 +37,7 @@ class AttentionUTest :  public CxxTest::TestSuite
     public:
         AttentionUTest()
         {
-            config().set("ECAN_MIN_AF_SIZE", "10");
+            config().set("ECAN_MAX_AF_SIZE", "10");
         }
 
         void testTopSTIValues()
