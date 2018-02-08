@@ -28,9 +28,6 @@
 
 using namespace opencog;
 
-std::map<Handle, HandleMap> OpenPsiImplicator::_satisfiability_cache = {};
-const HandleMap OpenPsiImplicator::_EMPTY_HANDLE_MAP = {};
-
 OpenPsiImplicator::OpenPsiImplicator(AtomSpace* as) :
   InitiateSearchCB(as),
   DefaultPatternMatchCB(as),
@@ -80,16 +77,18 @@ bool OpenPsiImplicator::grounding(const HandleMap &var_soln,
   }
 }
 
-TruthValuePtr OpenPsiImplicator::check_satisfiability(const Handle& rule)
+TruthValuePtr OpenPsiImplicator::check_satisfiability(const Handle& rule,
+    OpenPsiRules& opr)
 {
   // TODO:
   // Solve for multithreaded access. Create a rule class and lock
   // the rule when updating the cache.
 
-  PatternLinkPtr query =  OpenPsiRules::get_query(rule);
+  PatternLinkPtr query =  opr.get_query(rule);
   Handle query_body = query->get_pattern().body;
 
   // Always update cache.
+  // TODO: Add cache per atomspace.
   _satisfiability_cache[query_body] = _EMPTY_HANDLE_MAP;
   query->satisfy(*this);
 
@@ -102,9 +101,9 @@ TruthValuePtr OpenPsiImplicator::check_satisfiability(const Handle& rule)
   }
 }
 
-Handle OpenPsiImplicator::imply(const Handle& rule)
+Handle OpenPsiImplicator::imply(const Handle& rule, OpenPsiRules& opr)
 {
-  PatternLinkPtr query = OpenPsiRules::get_query(rule);
+  PatternLinkPtr query = opr.get_query(rule);
   Handle query_body = query->get_pattern().body;
   HandleMap query_grounding;
 
@@ -118,7 +117,7 @@ Handle OpenPsiImplicator::imply(const Handle& rule)
   Instantiator inst(_as);
 
   if (_EMPTY_HANDLE_MAP != query_grounding) {
-    return inst.instantiate(OpenPsiRules::get_action(rule),
+    return inst.instantiate(opr.get_action(rule),
               query_grounding, true);
   } else {
     // NOTE: Trying to check for satisfiablity isn't done because it
@@ -126,4 +125,10 @@ Handle OpenPsiImplicator::imply(const Handle& rule)
     // what action is to be taken.
     return Handle::UNDEFINED;
   }
+}
+
+OpenPsiImplicator& opencog::openpsi_implicator(AtomSpace* as)
+{
+  static OpenPsiImplicator implicator(as);
+  return implicator;
 }
