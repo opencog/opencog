@@ -115,7 +115,7 @@ void AttentionBank::AVChanged(const Handle& h,
     _importanceIndex.update();
 
     logger().fine("AVChanged: fundsSTI = %d, old_av: %d, new_av: %d",
-                   fundsSTI.load(), oldSti, newSti);
+                   fundsSTI, oldSti, newSti);
 
     // Notify any interested parties that the AV changed.
     _AVChangedSignal.emit(h, old_av, new_av);
@@ -152,9 +152,9 @@ void AttentionBank::stimulate(const Handle& h, double stimulus)
 
 AttentionValue::sti_t AttentionBank::calculateSTIWage()
 {
-    long funds = getSTIFunds();
-    double diff  = funds - targetSTI;
-    double ndiff = diff / stiFundsBuffer;
+    AttentionValue::sti_t funds = getSTIFunds();
+    AttentionValue::sti_t diff  = funds - targetSTI;
+    AttentionValue::sti_t ndiff = diff / stiFundsBuffer;
     ndiff = std::min(ndiff, 1.0);
     ndiff = std::max(ndiff, -1.0);
 
@@ -163,9 +163,9 @@ AttentionValue::sti_t AttentionBank::calculateSTIWage()
 
 AttentionValue::lti_t AttentionBank::calculateLTIWage()
 {
-    long funds = getLTIFunds();
-    double diff  = funds - targetLTI;
-    double ndiff = diff / ltiFundsBuffer;
+    AttentionValue::lti_t funds = getLTIFunds();
+    AttentionValue::lti_t diff  = funds - targetLTI;
+    AttentionValue::lti_t ndiff = diff / ltiFundsBuffer;
     ndiff = std::min(ndiff, 1.0);
     ndiff = std::max(ndiff, -1.0);
 
@@ -186,6 +186,7 @@ double AttentionBank::getNormalisedSTI(AttentionValuePtr av,
         int normaliser = -((int) getMinSTI(average) + get_af_max_sti());
         if (normaliser == 0) return 0.0;
         val = (s + get_af_max_sti()) / (double) normaliser;
+
     }
 
     if (clip) return std::max(-1.0, std::min(val, 1.0));

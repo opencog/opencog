@@ -85,8 +85,8 @@ class AttentionBank
      * The amount importance funds available in the AttentionBank.
      * Atomic, so that updates don't need a lock.
      */
-    std::atomic_long fundsSTI;
-    std::atomic_long fundsLTI;
+    AttentionValue::sti_t fundsSTI;
+    AttentionValue::lti_t fundsLTI;
 
     AttentionValue::sti_t startingFundsSTI;
     AttentionValue::lti_t startingFundsLTI;
@@ -99,6 +99,14 @@ class AttentionBank
 
     AttentionValue::sti_t STIAtomWage;
     AttentionValue::lti_t LTIAtomWage;
+
+    inline AttentionValue::sti_t updateSTIFunds(AttentionValue::sti_t diff) {
+        return fundsSTI += diff;
+    }
+
+    inline AttentionValue::sti_t updateLTIFunds(AttentionValue::lti_t diff) {
+        return fundsLTI += diff;
+    }
 
     /** The importance index */
     ImportanceIndex _importanceIndex;
@@ -187,22 +195,14 @@ public:
      *
      * @return STI funds available
      */
-    long getSTIFunds() const { return fundsSTI; }
+    AttentionValue::sti_t getSTIFunds() const { return fundsSTI; }
 
     /**
      * Get the LTI funds available in the AttentionBank pool.
      *
      * @return LTI funds available
      */
-    long getLTIFunds() const { return fundsLTI; }
-
-    long updateSTIFunds(AttentionValue::sti_t diff) {
-        return fundsSTI += diff;
-    }
-
-    long updateLTIFunds(AttentionValue::lti_t diff) {
-        return fundsLTI += diff;
-    }
+    AttentionValue::lti_t getLTIFunds() const { return fundsLTI; }
 
     AttentionValue::sti_t calculateSTIWage(void);
 
