@@ -147,7 +147,7 @@ HandleTree XPatternMiner::specialize_shabs(const Handle& pattern,
 
 	// For each shallow abstraction, create a specialization from
 	// pattern by composing it, and recursively specialize the result
-	// with the remaining valuations.
+	// with the new resulting valuations.
 	HandleTree patterns;
 	Handle var = valuations.front_variable();
 	for (const auto& shapat : shapats)
@@ -239,7 +239,7 @@ HandleSet XPatternMiner::variable_reduce(const Valuations& valuations) const
 	                  valuations.variables.varseq.end());
 
 	// Let's not bother and consider all remaining variables as
-	// potential reducible
+	// potentially reducible
 	return remvars;
 }
 
@@ -369,17 +369,17 @@ HandleSet XPatternMiner::shallow_abstract(const Valuations& valuations)
 	return shapats;
 }
 
-Handle XPatternMiner::shallow_abstract(const Handle& text)
+Handle XPatternMiner::shallow_abstract(const Handle& value)
 {
 	// Node or empty link, nothing to abstract
-	if (text->is_node() or text->get_arity() == 0)
-		return text;
+	if (value->is_node() or value->get_arity() == 0)
+		return value;
 
-	Type tt = text->get_type();
+	Type tt = value->get_type();
 
 	// Links wrapped with LocalQuoteLink
 	if (tt == AND_LINK) {
-		HandleSeq rnd_vars = gen_rand_variables(text->get_arity());
+		HandleSeq rnd_vars = gen_rand_variables(value->get_arity());
 		Handle vardecl = variable_list(rnd_vars),
 			body = pattern_as.add_link(tt, rnd_vars),
 			pattern = lambda(vardecl, local_quote(body));
@@ -390,7 +390,7 @@ Handle XPatternMiner::shallow_abstract(const Handle& text)
 	    tt == EVALUATION_LINK or
 	    tt == EXECUTION_OUTPUT_LINK)
 	{
-		HandleSeq rnd_vars = gen_rand_variables(text->get_arity());
+		HandleSeq rnd_vars = gen_rand_variables(value->get_arity());
 		// Wrap variables in UnquoteLink
 		HandleSeq uq_vars;
 		for (Handle& var : rnd_vars)
@@ -403,7 +403,7 @@ Handle XPatternMiner::shallow_abstract(const Handle& text)
 	}
 
 	// Generic non empty link, let's abstract away all the arguments
-	HandleSeq rnd_vars = gen_rand_variables(text->get_arity());
+	HandleSeq rnd_vars = gen_rand_variables(value->get_arity());
 	Handle vardecl = variable_list(rnd_vars),
 		body = pattern_as.add_link(tt, rnd_vars),
 		pattern = lambda(vardecl, body);
