@@ -26,7 +26,6 @@
 #ifndef _OPENCOG_ATTENTION_BANK_H
 #define _OPENCOG_ATTENTION_BANK_H
 
-#include <atomic>
 #include <mutex>
 #include <unordered_map>
 
@@ -83,10 +82,6 @@ class AttentionBank
     AFCHSigl _AddAFSignal;
     AFCHSigl _RemoveAFSignal;
 
-    /**
-     * The amount importance funds available in the AttentionBank.
-     * Atomic, so that updates don't need a lock.
-     */
     AttentionValue::sti_t fundsSTI;
     AttentionValue::lti_t fundsLTI;
 
@@ -101,14 +96,6 @@ class AttentionBank
 
     AttentionValue::sti_t STIAtomWage;
     AttentionValue::lti_t LTIAtomWage;
-
-    inline AttentionValue::sti_t updateSTIFunds(AttentionValue::sti_t diff) {
-        return fundsSTI += diff;
-    }
-
-    inline AttentionValue::sti_t updateLTIFunds(AttentionValue::lti_t diff) {
-        return fundsLTI += diff;
-    }
 
     /** The importance index */
     ImportanceIndex _importanceIndex;

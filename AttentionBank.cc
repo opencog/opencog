@@ -110,8 +110,8 @@ void AttentionBank::AVChanged(const Handle& h,
 
     // Add the old attention values to the AttentionBank funds and
     // subtract the new attention values from the AttentionBank funds
-    updateSTIFunds(oldSti - newSti);
-    updateLTIFunds(old_av->getLTI() - new_av->getLTI());
+    fundsSTI += (oldSti - newSti);
+    fundsLTI += (old_av->getLTI() - new_av->getLTI());
 
     _importanceIndex.update();
 
