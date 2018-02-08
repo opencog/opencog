@@ -193,9 +193,10 @@ private:
 	Handle mk_varpattern(const Handle& pattern, const Handle& var) const;
 
 	/**
-	 * Specialize according to shallow abstractions.
-	 * 
-	 * TODO: improve comment.
+	 * Specialize the given pattern according to shallow abstractions
+	 * obtained by looking at the valuations of the front variable of
+	 * valuations, then recursively call XPatternMiner::specialize on
+	 * these obtained specializations.
 	 */
 	HandleTree specialize_shabs(const Handle& pattern,
 	                            const HandleSet& texts,
@@ -203,10 +204,10 @@ private:
 	                            int maxdepth);
 
 	/**
-	 * Specialize by reducing variables, that is mapping non-front
-	 * variables to the front one, when possible
-	 *
-	 * TODO: improve comment.
+	 * Specialize by reducing variables, that is mapping some
+	 * non-front variable to the front one, when compatible with the
+	 * given valuations. Then recursively call
+	 * XPatternMiner::specialize on these obtained specializations.
 	 */
 	HandleTree specialize_vared(const Handle& pattern,
 	                            const HandleSet& texts,
@@ -276,40 +277,68 @@ private:
 	Handle matched_results(const Handle& pattern, const Handle& text) const;
 
 	/**
-	 * TODO: add comment
+	 * Return all variables, except the front one, that could be
+	 * unified with the front one according to the given valuations.
+	 *
+	 * So for instance if valuations is
+	 *
+	 * { { X->Concept "A", Y->Concept "B", Z->Concept "C" },
+	 *   { X->Concept "B", Y->Concept "B", Z->Concept "C" },
+	 *   { X->Concept "C", Y->Concept "A", Z->Concept "B" } }
+	 *
+	 * then return {Y}. Indeed only Y is at least once equal to X.
+	 *
+	 * TODO: for now we return everything, and specializations that do
+	 * not have enough support are subsequently discarded. But it
+	 * could be faster to consider the minimum support in that
+	 * function and right away filter variables we know won't have
+	 * enough support based on valuations.
 	 */
 	HandleSet variable_reduce(const Valuations& valuations) const;
-	
+
 	/**
-	 * TODO: fix comment
+	 * Given an atom, return its corresponding shallow
+	 * abstraction. A shallow abstraction of an atom is
 	 *
-	 * Given a collection of text atoms, return all shallow abstractions,
-	 * associated to their matching texts. For instance
+	 * 1. itself if it is a node
 	 *
-	 * texts = { (Concept "a"),
-	 *           (Concept "b"),
-	 *           (Inheritance (Concept "a") (Concept "b")) }
+	 * 2. (Lambda (VariableList X1 ... Xn) (L X1 ... Xn) if it is a
+	 *    link of arity n.
 	 *
-	 * shallow_patterns(texts) =
-	 *     { (Concept "a") -> { (Concept "a") },
-	 *       (Concept "b") -> { (Concept "b") },
-	 *       (Lambda       -> { (Inheritance (Concept "a") (Concept "b")) }
-	 *         (VariableList
-	 *           (Variable "$X")
-	 *           (Variable "$Y"))
-	 *         (Inheritance
-	 *           (Variable "$X")
-	 *           (Variable "$Y")))
-	 *     }
+	 * For instance, with
+	 *
+	 * text = (Inheritance (Concept "a") (Concept "b"))
+	 *
+	 * shallow_patterns(text) = (Lambda
+	 *                            (VariableList
+	 *                              (Variable "$X1")
+	 *                              (Variable "$X2"))
+	 *                            (Inheritance
+	 *                              (Variable "$X1")
+	 *                              (Variable "$X2")))
 	 *
 	 * TODO: we may want to support types in variable declaration.
 	 */
-	Handle shallow_abstract(const Handle& text);
+	Handle shallow_abstract(const Handle& value);
 
 	/**
-	 * Like above but take valuations instead of texts,
-	 * produce shallow patterns based on the first variable, and
-	 * associate the remaining valuations to each pattern.
+	 * Given valuations, produce all shallow abstractions based on the
+	 * values associated to the front variable first variable.
+	 *
+	 * For instance
+	 *
+	 * valuations = { { X->(Inheritance (Concept "A") (Concept "B")), Y->(Concept "C") },
+	 *                { X->(Inheritance (Concept "B") (Concept "C")), Y->(Concept "D") },
+	 *                { X->(Concept "E"), Y->(Concept "D") } }
+	 *
+	 * shallow_abstrac(valuations) = { (Lambda
+	 *                                   (VariableList
+	 *                                     (Variable "$X1")
+	 *                                     (Variable "$X2"))
+	 *                                   (Inheritance
+	 *                                     (Variable "$X1")
+	 *                                     (Variable "$X2")),
+	 *                                 (Concept "E") }
 	 */
 	HandleSet shallow_abstract(const Valuations& valuations);
 	
@@ -343,21 +372,19 @@ private:
 	Handle local_quote(const Handle& h);
 
 	/**
+	 * TODO replace by RewriteLink::beta_reduce
+	 *
 	 * Given a pattern, and mapping from variables to sub-patterns,
 	 * compose (as in function composition) the pattern with the
 	 * sub-patterns. That is replace variables in the pattern by their
 	 * associated sub-patterns, properly updating the variable
 	 * declaration.
-	 *
-	 * TODO: add unit test
-	 *
-	 * TODO: add examples
-	 *
-	 * TODO Move this to a ComposeLink factory.
 	 */
 	static Handle compose(const Handle& pattern, const HandleMap& var2pat);
 
 	/**
+	 * TODO replace by RewriteLink::beta_reduce
+	 *
 	 * Given a variable declaration, and a mapping from variables to
 	 * variable declaration, produce a new variable declaration, as
 	 * obtained by compositing the pattern with the sub-patterns.
@@ -368,10 +395,6 @@ private:
 	 * declaration. That happens in cases where the variable maps to a
 	 * constant pattern, i.e. a value. In such case composition
 	 * amounts to application.
-	 *
-	 * TODO: add unit test
-	 *
-	 * TODO: add examples
 	 */
 	static Handle vardecl_compose(const Handle& vardecl,
 	                              const HandleMap& var2subdecl);

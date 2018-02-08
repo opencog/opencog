@@ -7,7 +7,7 @@ from opencog.scheme_wrapper import load_scm, scheme_eval_h, scheme_eval, __init_
 from opencog.cogserver_type_constructors import *
 from opencog import logger
 
-import Queue
+import queue
 import time
 
 __author__ = 'Hujie Wang'
@@ -312,7 +312,7 @@ class HobbsAgent(MindAgent):
         if node==None:
             #print("found you bfs")
             return
-        q=Queue.Queue()
+        q=queue.Queue()
         q.put(node)
         while not q.empty():
             front=q.get()

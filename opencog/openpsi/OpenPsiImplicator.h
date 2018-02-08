@@ -25,6 +25,7 @@
 
 #include <opencog/atoms/pattern/PatternLink.h>
 #include <opencog/atomspace/AtomSpace.h>
+#include <opencog/openpsi/OpenPsiRules.h>
 
 #include <opencog/query/Satisfier.h>
 
@@ -54,7 +55,7 @@ public:
    *
    * @param rule An openpsi rule.
    */
-  TruthValuePtr check_satisfiability(const Handle& rule);
+  TruthValuePtr check_satisfiability(const Handle& rule, OpenPsiRules& opr);
 
   /**
    * Instantiate the action of the given openpsi rule.
@@ -62,7 +63,7 @@ public:
    * @param rule An openpsi rule.
    * @return The handle to the grounded atom.
    */
-  Handle imply(const Handle& rule);
+  Handle imply(const Handle& rule, OpenPsiRules& opr);
 
 private:
   /**
@@ -71,18 +72,21 @@ private:
    * the query PatternLink, because doing so would require extra
    * computation that doesn't add any value.
    */
-  static std::map<Handle, HandleMap> _satisfiability_cache;
+  std::map<Handle, HandleMap> _satisfiability_cache;
 
   /**
    * An empty map used for clearing cache entries, or to denote absence
    * of groundings.
    */
-  static const HandleMap _EMPTY_HANDLE_MAP;
+  const HandleMap _EMPTY_HANDLE_MAP;
 
   // Because two of the ancestor classes that this class inherites
   // from have _as variable.
   using DefaultPatternMatchCB::_as;
 };
+
+// This function is used to create a single static instance
+OpenPsiImplicator& openpsi_implicator(AtomSpace* as);
 
 }; // namespace opencog
 

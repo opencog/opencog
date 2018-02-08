@@ -42,8 +42,7 @@
     psi-get-logger psi-component
 
     ; From utilities.scm
-    psi-prefix-str psi-suffix-str psi-get-exact-match psi-get-dual-match
-    psi-get-members
+    psi-prefix-str psi-suffix-str
 
     ; C++ bindings from libopenpsi
     psi-add-category
