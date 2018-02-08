@@ -101,6 +101,7 @@ void AttentionBank::AVChanged(const Handle& h,
                               const AttentionValuePtr& old_av,
                               const AttentionValuePtr& new_av)
 {
+    _mtx.lock();
     // First, update the atom's actual AV.
     set_av(h, new_av);
 
@@ -113,6 +114,8 @@ void AttentionBank::AVChanged(const Handle& h,
     updateLTIFunds(old_av->getLTI() - new_av->getLTI());
 
     _importanceIndex.update();
+
+    _mtx.unlock();
 
     logger().fine("AVChanged: fundsSTI = %d, old_av: %d, new_av: %d",
                    fundsSTI, oldSti, newSti);
@@ -136,6 +139,7 @@ void AttentionBank::stimulate(const Handle& h, double stimulus)
 
     AttentionValue::sti_t stiWage = calculateSTIWage() * stimulus;
     AttentionValue::lti_t ltiWage = calculateLTIWage() * stimulus;
+    std::cout << "[stimulus ="<< stimulus << " calculated_stiwage: " << stiWage/stimulus << " calculated_lti_wage: "<< ltiWage/stimulus <<"]\n";
     AttentionValuePtr newav = AttentionValue::createAV(
            sti + stiWage, lti + ltiWage, vlti);
     _importanceIndex.updateImportance(h, oldav, newav);

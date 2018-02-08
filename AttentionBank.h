@@ -54,7 +54,9 @@ typedef SigSlot<const Handle&,
 class AtomSpace;
 class AttentionBank
 {
-    std::mutex AFMutex;
+    std::mutex _mtx; // For synchronizing STI & LTI funds update
+    std::mutex AFMutex; // For AF fetching and update
+
     unsigned int maxAFSize;
     struct compare_sti_less {
         bool operator()(const std::pair<Handle, AttentionValuePtr>& h1,
@@ -65,7 +67,7 @@ class AttentionBank
     };
     std::multiset<std::pair<Handle, AttentionValuePtr>, compare_sti_less> attentionalFocus;
 
-    void updateAttentionalFocus(const Handle&, const AttentionValuePtr&, 
+    void updateAttentionalFocus(const Handle&, const AttentionValuePtr&,
                                 const AttentionValuePtr&);
     
     /** AV changes */
