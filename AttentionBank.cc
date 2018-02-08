@@ -139,7 +139,6 @@ void AttentionBank::stimulate(const Handle& h, double stimulus)
 
     AttentionValue::sti_t stiWage = calculateSTIWage() * stimulus;
     AttentionValue::lti_t ltiWage = calculateLTIWage() * stimulus;
-    std::cout << "[stimulus ="<< stimulus << " calculated_stiwage: " << stiWage/stimulus << " calculated_lti_wage: "<< ltiWage/stimulus <<"]\n";
     AttentionValuePtr newav = AttentionValue::createAV(
            sti + stiWage, lti + ltiWage, vlti);
     _importanceIndex.updateImportance(h, oldav, newav);
