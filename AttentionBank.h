@@ -263,7 +263,7 @@ public:
     }
 
     /// Return a random atom drawn from outside the AF.
-    Handle getRandomAtomNotInAF(void) const;
+    Handle getRandomAtomNotInAF(void);
 
     AttentionValue::sti_t getMinSTI(bool average=true) const
     {
