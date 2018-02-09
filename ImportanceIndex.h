@@ -69,7 +69,6 @@ private:
      */
     static size_t importanceBin(AttentionValue::sti_t);
 
-    std::vector<HandleSTIPair> topKSTIValuedHandles; // TOP K STI values
 public:
     ImportanceIndex();
     void removeAtom(const Handle&);
@@ -121,10 +120,7 @@ public:
         return _index.getContent(i,out);
     }
 
-    /**
-     * Select a random atom outside the AF
-     */
-    Handle getRandomAtomNotInAF(void) const;
+    Handle getRandomAtom(void) const;
 
     /**
      * Get the highest bin which contains Atoms

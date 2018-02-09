@@ -285,8 +285,8 @@ void AttentionBank::updateAttentionalFocus(const Handle& h,
         insertable = true;
     }
 
-    // Remove the least sti valued atom in the AF and repace
-    // it with the new atom holding higher STI value.
+    // Remove the least sti valued atom in the AF and replace
+    // it with the new atom holding a higher STI value.
     else if (sti > (least->second)->getSTI())
     {
         Handle hrm = least->first;
@@ -307,4 +307,16 @@ void AttentionBank::updateAttentionalFocus(const Handle& h,
         AFCHSigl& afch = AddAFSignal();
         afch.emit(h, old_av, new_av);
     }
+}
+
+Handle AttentionBank::getRandomAtomNotInAF(void) const
+{
+    Handle h = _importanceIndex.getRandomAtom();
+    while(std::find_if(attentionalFocus.begin(), attentionalFocus.end(),
+           [h](std::pair<Handle, AttentionValuePtr> hsp) { return hsp.first == h; })
+            != attentionalFocus.end()){
+        h = _importanceIndex.getRandomAtom();
+    }
+
+    return h;
 }

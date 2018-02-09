@@ -54,7 +54,6 @@ using namespace opencog;
 ImportanceIndex::ImportanceIndex()
     : _index(IMPORTANCE_INDEX_SIZE+1)
 {
-    minAFSize = config().get_int("ECAN_MIN_AF_SIZE", 100);
 }
 
 size_t ImportanceIndex::importanceBin(AttentionValue::sti_t impo)
@@ -208,16 +207,9 @@ UnorderedHandleSet ImportanceIndex::getHandleSet(
     return ret;
 }
 
-Handle ImportanceIndex::getRandomAtomNotInAF(void) const
+Handle ImportanceIndex::getRandomAtom(void) const
 {
-    Handle h = _index.getRandomAtom();
-    while(std::find_if(topKSTIValuedHandles.begin(), topKSTIValuedHandles.end(),
-           [h](HandleSTIPair hsp) { return hsp.first == h; })
-            != topKSTIValuedHandles.end()){
-        h = _index.getRandomAtom();
-    }
-
-    return h;
+   return  _index.getRandomAtom();
 }
 
 UnorderedHandleSet ImportanceIndex::getMaxBinContents()
