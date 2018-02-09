@@ -98,7 +98,6 @@ void ImportanceIndex::updateImportance(const Handle& h,
 
     _index.remove(oldbin, h);
     _index.insert(newbin, h);
-    updateTopStiValues(h);
 }
 
 // ==============================================================
@@ -112,53 +111,6 @@ void ImportanceIndex::removeAtom(const Handle& h)
 
     std::lock_guard<std::mutex> lock(_mtx);
     _index.remove(bin, h);
-
-    // Also remove from topKSTIValueHandles vector
-    auto it = std::find_if(
-            topKSTIValuedHandles.begin(),
-            topKSTIValuedHandles.end(),
-            [&h](const HandleSTIPair& p) {return p.first == h; });
-    if (it != topKSTIValuedHandles.end()) topKSTIValuedHandles.erase(it);
-    //TODO Find the next highest STI valued atom to replace the removed one.
-}
-
-// ==============================================================
-
-void ImportanceIndex::updateTopStiValues(const Handle& h)
-{
-    std::lock_guard<std::mutex> lock(_mtx);
-
-    auto insertHandle = [this](Handle h)
-    {
-        // delete if this handle is already in the vector. TODO find efficient
-        // way of doing this.
-        auto it = std::find_if(topKSTIValuedHandles.begin(),
-                               topKSTIValuedHandles.end(),
-                               [&h](HandleSTIPair p)
-                                    { return p.first == h; });
-
-        if (it != topKSTIValuedHandles.end()) topKSTIValuedHandles.erase(it);
-
-        HandleSTIPair p(h, get_sti(h));
-        it = std::lower_bound(topKSTIValuedHandles.begin(),
-                              topKSTIValuedHandles.end(), p,
-                [=](const HandleSTIPair& hsti1, const HandleSTIPair& hsti2)
-                {
-                      return hsti1.second < hsti2.second;
-                });
-        topKSTIValuedHandles.insert(it, HandleSTIPair(h, get_sti(h)));
-    };
-
-    AttentionValue::sti_t sti = get_sti(h);
-    if (static_cast<int>(topKSTIValuedHandles.size()) < minAFSize)
-    {
-        insertHandle(h);
-    }
-    else if (topKSTIValuedHandles.begin()->second < sti)
-    {
-        topKSTIValuedHandles.erase(topKSTIValuedHandles.begin());
-        insertHandle(h);
-    }
 }
 
 // ==============================================================
@@ -296,15 +248,6 @@ UnorderedHandleSet ImportanceIndex::getMinBinContents()
         }
     }
     return ret;
-}
-
-HandleSeq ImportanceIndex::getTopSTIValuedHandles()
-{
-    std::lock_guard<std::mutex> lock(_mtx);
-    HandleSeq hseq;
-    for (const HandleSTIPair& p : topKSTIValuedHandles)
-        hseq.push_back(p.first);
-    return  hseq;
 }
 
 size_t ImportanceIndex::bin_size() const
