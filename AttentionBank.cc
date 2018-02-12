@@ -312,13 +312,20 @@ void AttentionBank::updateAttentionalFocus(const Handle& h,
 Handle AttentionBank::getRandomAtomNotInAF(void)
 {
     std::lock_guard<std::mutex> lock(AFMutex);
+    auto find_in_af = [this](const Handle& h){
+       auto it = std::find_if(attentionalFocus.begin(), attentionalFocus.end(),
+                [h](std::pair<Handle, AttentionValuePtr> hsp) { return hsp.first == h; });
+       return it;
+    };
+
     int count = 50; // We might get stuck in the while loop if there are no atoms outside the AF
     Handle h = Handle::UNDEFINED;
-    while(std::find_if(attentionalFocus.begin(), attentionalFocus.end(),
-           [h](std::pair<Handle, AttentionValuePtr> hsp) { return hsp.first == h; })
-            != attentionalFocus.end() and --count > 0){
+    while(find_in_af(h) != attentionalFocus.end() and --count > 0){
         h = _importanceIndex.getRandomAtom();
     }
+    // Make sure the last selection did not select from the AF.
+    if(find_in_af(h) != attentionalFocus.end())
+        return Handle::UNDEFINED;
 
     return h;
 }
