@@ -269,7 +269,7 @@ void AttentionBank::updateAttentionalFocus(const Handle& h,
     bool insertable = false;
     auto it = std::find_if(attentionalFocus.begin(), attentionalFocus.end(),
             [h](std::pair<Handle, AttentionValuePtr> p)
-            { if (p.first == h) return true; return false;});
+            { return p.first == h;});
 
     // Update the STI value if atoms was already in AF
     if (it != attentionalFocus.end())
