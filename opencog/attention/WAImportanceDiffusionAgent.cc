@@ -38,7 +38,6 @@ using namespace opencog;
 WAImportanceDiffusionAgent::WAImportanceDiffusionAgent(CogServer& cs) :
     ImportanceDiffusionBase(cs)
 {
-    set_sleep_time(300);
 }
 
 WAImportanceDiffusionAgent::~WAImportanceDiffusionAgent()
@@ -83,7 +82,7 @@ void WAImportanceDiffusionAgent::spreadImportance()
 HandleSeq WAImportanceDiffusionAgent::diffusionSourceVector(void)
 {
     Handle h = _bank->getRandomAtomNotInAF();
-    
+
     if(h == Handle::UNDEFINED){
         return HandleSeq{};
     }
