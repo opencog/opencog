@@ -292,8 +292,8 @@ alpha-pages after all that work)
     cp -pr alpha-pages beta-pages
 ```
 * Review the file `opencog/nlp/learn/run/README`, and then copy the
-  scripts into your working dir.
-* Modify as needed for chosen language. None of these need modification,
+  scripts into your working dir. 
+* Modify as needed for chosen language. Most of them don't need modification,
   by default, unless you want to do something unusual.
 
   -- `run-all-servers.sh` runs (almost) all of the needed servers, for
@@ -302,9 +302,6 @@ alpha-pages after all that work)
      which needs to be started by hand (for the <lang> that you want to
      process). Use F4 to move to the 4th tab and start it there.
 
-  -- `relex-server-any.sh` performs random-syntax parsing for languages
-     that do not need morphological analysis.
-
   -- `wiki-ss-en.sh` performs batch processing of input text files.
      This calls `ss-one.sh` to process one text file.
 
@@ -312,9 +309,16 @@ alpha-pages after all that work)
      sentences, and then calls `submit-one.pl` to send the sentences
      to relex for parsing. None of these should need any modification.
 
-* Copy `pair-count-lang.scm` to your working directory.  Start the REPL
-  server: `guile -l pair-count-<lang>.scm `
-* Go back to the input text dir (the dir that contains `beta-pages`), and
+  -- `pair-count-lang.scm` starts the cogserver and opens the 
+      database. You need to modify 
+      ```
+          (sql-open "postgres:///en_pairs?user=ubuntu&password=asdf")
+      ```
+      to contain your database name, username and password (if needed)
+
+* Run `run-all-servers.sh` in your working directory.
+* In the byobu terminal, navigate to the 4th tab (with F4),
+  go back to the input text dir (the dir that contains `beta-pages`), and
   run `./wiki-ss-<lang>.sh`
 * Wait a few days.
 * This requires postgres 8.4 or newer, for multiple reasons. One reason
@@ -322,7 +326,7 @@ alpha-pages after all that work)
   below) The other is the list membership functions are needed.
 * Be sure to perform the postgres tuning recommendations found in
   various online postgres performance wikis, or in the
-  `opencog/persist/sql/README.md` file.  See also 'Performance' section
+  `atomspace/opencog/persist/sql/README.md` file.  See also 'Performance' section
   below.
 
 Some handy SQL commands:
