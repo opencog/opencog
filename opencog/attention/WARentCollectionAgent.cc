@@ -59,15 +59,15 @@ void WARentCollectionAgent::selectTargets(HandleSeq &targetSetOut)
 void WARentCollectionAgent::collectRent(HandleSeq& targetSet)
 {
     for (const Handle& h : targetSet) {
-        int sti = get_sti(h);
-        int lti = get_lti(h);
+        AttentionValue::sti_t sti = get_sti(h);
+        AttentionValue::lti_t lti = get_lti(h);
         
         float last_update_time = _sdac.elapsed_time(h);
         STIAtomRent = STIAtomRent * last_update_time;
         LTIAtomRent = LTIAtomRent * last_update_time;
         
-        int stiRent = calculate_STI_Rent();
-        int ltiRent = calculate_LTI_Rent();  
+        double stiRent = calculate_STI_Rent();
+        double ltiRent = calculate_LTI_Rent();
         if (stiRent > sti)
             stiRent = sti;
 
