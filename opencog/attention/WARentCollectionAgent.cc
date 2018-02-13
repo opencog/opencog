@@ -46,7 +46,6 @@ WARentCollectionAgent::WARentCollectionAgent(CogServer& cs):
     // READ SLEEPING TIME HERE
     _sti_rent = STIAtomRent;
     _lti_rent = LTIAtomRent;
-    set_sleep_time(2000);
 }
 
 void WARentCollectionAgent::selectTargets(HandleSeq &targetSetOut)
