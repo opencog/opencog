@@ -59,8 +59,6 @@ void RentCollectionBaseAgent::run()
     if (targetSet.size() == 0) return;
 
     collectRent(targetSet);
-   
-    std::this_thread::sleep_for(std::chrono::milliseconds(get_sleep_time()));
 }
 
 void RentCollectionBaseAgent::load_params(void)
