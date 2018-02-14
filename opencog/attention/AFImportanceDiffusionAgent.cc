@@ -35,10 +35,6 @@
 
 using namespace opencog;
 
-#ifdef DEBUG
-#undef DEBUG
-#endif
-
 AFImportanceDiffusionAgent::AFImportanceDiffusionAgent(CogServer& cs) :
     ImportanceDiffusionBase(cs)
 {
