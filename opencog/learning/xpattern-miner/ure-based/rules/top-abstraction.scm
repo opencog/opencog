@@ -26,6 +26,10 @@
 
 (load "pattern-miner-utils.scm")
 
+(define top
+  (let ((top-arg (Variable "$top-arg")))
+    (Lambda top-arg top-arg)))
+
 ;; Note that due to the texts-ge-ms precondition, it will not be able
 ;; to proof its contrary, i.e. <tv> will never be assigned (stv 0 1).
 ;; To remedy that we may move texts-gt-ms in the formula.
@@ -33,9 +37,7 @@
   (let* (;; Variables
          (texts (Variable "$texts"))
          (ms (Variable "$ms"))
-         (X (Variable "$X"))
          ;; Constants
-         (top (Lambda X X))
          (minsup (Predicate "minsup"))
          ;; Types
          (NumberT (Type "NumberNode"))
