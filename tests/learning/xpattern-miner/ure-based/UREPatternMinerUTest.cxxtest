@@ -97,7 +97,7 @@ public:
 	void test_AB();
 	void test_AB_AC();
 	void test_AB_AC_BC();
-	// void test_AB_ABC();
+	void test_AB_ABC();
 	// void test_ABCD();
 	// void test_ABAB();
 	// void test_AAAA();
@@ -267,13 +267,13 @@ void UREPatternMinerUTest::test_AB_AC_BC()
 	bc.do_chain();
 
 	Handle results = bc.get_results(),
-		varXY = al(VARIABLE_LIST, X, Y),
+		VarXY = al(VARIABLE_LIST, X, Y),
 		InhXY = al(INHERITANCE_LINK, X, Y),
 		InhAY = al(INHERITANCE_LINK, A, Y),
 		InhXC = al(INHERITANCE_LINK, X, C),
 		expected = mk_minsup_evals(2,
 		                           { top,
-				                     al(LAMBDA_LINK, varXY, InhXY),
+				                     al(LAMBDA_LINK, VarXY, InhXY),
 				                     al(LAMBDA_LINK, Y, InhAY),
 				                     al(LAMBDA_LINK, X, InhXC) });
 
@@ -283,35 +283,37 @@ void UREPatternMinerUTest::test_AB_AC_BC()
 	TS_ASSERT(content_eq(results, expected));
 }
 
-// void UREPatternMinerUTest::test_AB_ABC()
-// {
-// 	logger().info("BEGIN TEST: %s", __FUNCTION__);
+void UREPatternMinerUTest::test_AB_ABC()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
-// 	Handle A = an(CONCEPT_NODE, "A"),
-// 		B = an(CONCEPT_NODE, "B"),
-// 		C = an(CONCEPT_NODE, "C"),
-// 		AB = al(INHERITANCE_LINK, A, B),
-// 		ABC = al(INHERITANCE_LINK, A, al(AND_LINK, B, C));
+	Handle A = an(CONCEPT_NODE, "A"),
+		B = an(CONCEPT_NODE, "B"),
+		C = an(CONCEPT_NODE, "C"),
+		InhAB = al(INHERITANCE_LINK, A, B),
+		InhABC = al(INHERITANCE_LINK, A, al(AND_LINK, B, C)),
+		query = mk_query({A, B, C, InhAB, InhABC}, 2);
 
-// 	XPMParameters param(2);
-// 	XPatternMiner pm(_as, param);
-// 	HandleTree results = pm();
+	BackwardChainer bc(_as, pm_rb, query);
+	bc.get_config().set_maximum_iterations(100);
+	bc.do_chain();
 
-// 	Handle X = an(VARIABLE_NODE, "$X"),
-// 		Y = an(VARIABLE_NODE, "$Y"),
-// 		VarXY = al(VARIABLE_LIST, X, Y),
-// 		AndXY = al(AND_LINK, X, Y),
-// 		InhXY = al(INHERITANCE_LINK, X, Y),
-// 		InhAY = al(INHERITANCE_LINK, A, Y);
-// 	HandleTree expected({ al(LAMBDA_LINK, VarXY, al(LOCAL_QUOTE_LINK, AndXY)),
-// 				          HandleTree(al(LAMBDA_LINK, VarXY, InhXY),
-// 				                     { al(LAMBDA_LINK, Y, InhAY) }) });
+	Handle results = bc.get_results(),
+		VarXY = al(VARIABLE_LIST, X, Y),
+		AndXY = al(AND_LINK, X, Y),
+		InhXY = al(INHERITANCE_LINK, X, Y),
+		InhAY = al(INHERITANCE_LINK, A, Y),
+		expected = mk_minsup_evals(2,
+		                           { top,
+				                     al(LAMBDA_LINK, VarXY, al(LOCAL_QUOTE_LINK, AndXY)),
+				                     al(LAMBDA_LINK, VarXY, InhXY),
+				                     al(LAMBDA_LINK, Y, InhAY) });
 
-// 	logger().debug() << "results = " << oc_to_string(results);
-// 	logger().debug() << "expected = " << oc_to_string(expected);
+	logger().debug() << "results = " << oc_to_string(results);
+	logger().debug() << "expected = " << oc_to_string(expected);
 
-// 	TS_ASSERT(content_eq(results, expected));
-// }
+	TS_ASSERT(content_eq(results, expected));
+}
 
 // void UREPatternMinerUTest::test_ABCD()
 // {
