@@ -460,7 +460,7 @@ Handle XPatternMiner::compose(const Handle& pattern,
 	// Perform composition of the pattern body with the sub-bodies)
 	// TODO: perhaps use RewriteLink partial_substitute
 	Handle body = variables.substitute_nocheck(get_body(pattern), subodies);
-	body = RewriteLink::consume_ill_quotations(vardecl, body);
+	body = RewriteLink::consume_quotations(vardecl, body, true);
 	// If root AndLink then simplify the pattern
 	if (body->get_type() == AND_LINK) {
 		body = remove_useless_clauses(vardecl, body);
