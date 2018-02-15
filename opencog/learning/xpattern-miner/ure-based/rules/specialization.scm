@@ -83,7 +83,7 @@
 ;;     <ms>
 (define (gen-specialization-rule arity index)
   (let* (;; Variables
-         (xs (gen-variables "$x" arity))
+         (xs (gen-variables "$spe-arg" arity))
          (g (Variable "$g"))
          (texts (Variable "$texts"))
          (ms (Variable "$ms"))
