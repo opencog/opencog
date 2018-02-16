@@ -33,7 +33,7 @@
 ;; (Evaluation (stv 0.94999999 0.89999098)
 ;;   (Predicate "is-honest")
 ;;   (Concept "Bob"))
-(cog-bind implication-full-instantiation-rule)
+(cog-execute! implication-full-instantiation-rule)
 
 ;; (2) Distribute the scope of the implication that friends tend to be
 ;; honest in the kb, applying implication-scope-to-implication-rule.
@@ -69,7 +69,7 @@
 ;;          (Evaluation
 ;;             (Predicate "is-honest")
 ;;             (Variable "$Y")))))
-(cog-bind implication-scope-to-implication-rule)
+(cog-execute! implication-scope-to-implication-rule)
 
 ;; (3) Infer the TV of the implicant of (2) using
 ;; predicate-lambda-introduction-rule
@@ -89,7 +89,7 @@
 ;;       (List
 ;;          (Variable "$X")
 ;;          (Variable "$Y"))))
-(cog-bind predicate-lambda-introduction-rule)
+(cog-execute! predicate-lambda-introduction-rule)
 
 ;; (4) Infer the TV of the implicand of (2) using
 ;; predicate-lambda-introduction-rule
@@ -147,7 +147,7 @@
 ;;          (List
 ;;             (Variable "$X")
 ;;             (Variable "$Y")))))
-(cog-bind inversion-implication-rule)
+(cog-execute! inversion-implication-rule)
 
 ;; (6) Distribute the scope of the implication that human
 ;; acquaintances tend to become friends in the kb, applying
@@ -191,7 +191,7 @@
 ;;             (Variable "$Y")))))
 ;;
 ;; Actually, no need as it was inferred in (2)
-;; (cog-bind implication-scope-to-implication-rule)
+;; (cog-execute! implication-scope-to-implication-rule)
 
 ;; (7) Infer that honest human acquaintances tend to become friends
 ;; (more so than just human acquaintances). Apply rule
@@ -273,7 +273,7 @@
 ;;       )
 ;;    )
 ;; )
-(cog-bind implication-implicant-conjunction-rule)
+(cog-execute! implication-implicant-conjunction-rule)
 
 ;; (8) Factorize lambda in implicant of (7). Apply rule
 ;; and-lambda-factorization-double-implication-rule to the implicant
@@ -373,7 +373,7 @@
 ;;       )
 ;;    )
 ;; )
-(cog-bind and-lambda-factorization-double-implication-rule)
+(cog-execute! and-lambda-factorization-double-implication-rule)
 
 ;; (9) Deduce with all lambda factorized that honest human
 ;; acquaintance tend to become friend. Apply
@@ -439,7 +439,7 @@
 ;;       )
 ;;    )
 ;; )
-(cog-bind deduction-implication-rule)
+(cog-execute! deduction-implication-rule)
 
 ;; (10) Factorize the variables scopes in (9) so that implication
 ;; instantiation can work. This shouldn't be necessary in principle,
@@ -493,7 +493,7 @@
 ;;       )
 ;;    )
 ;; )
-(cog-bind implication-scope-factorization-rule)
+(cog-execute! implication-scope-factorization-rule)
 
 ;; (11) Infer that Bob may become a friend. Apply the
 ;; implication-full-instantiation-rule on (10).
@@ -510,7 +510,7 @@
 ;;
 ;; Due to some indeterminism we repeat 10 times to be almost surely
 ;; inferred.
-(for-each (lambda (i) (cog-bind implication-full-instantiation-rule)) (iota 10))
+(for-each (lambda (i) (cog-execute! implication-full-instantiation-rule)) (iota 10))
 
 ;; (12) Infer that Bob is funny. Apply the
 ;; implication-full-instantiation-rule on the implication stating that
@@ -523,7 +523,7 @@
 ;;   (Concept "Bob"))
 ;;
 ;; Actually, no need as it was inferred in (1)
-;; (cog-bind implication-full-instantiation-rule)
+;; (cog-execute! implication-full-instantiation-rule)
 
 ;; (13) Distribute the scope of the amusing funny equivalence from the
 ;; kb. Apply equivalence-scope-distribution-rule.
@@ -545,7 +545,7 @@
 ;;       (Evaluation
 ;;          (Predicate "is-amusing")
 ;;          (Variable "$X"))))
-(cog-bind equivalence-scope-distribution-rule)
+(cog-execute! equivalence-scope-distribution-rule)
 
 ;; (14) Infer that if X is funny, then X is amusing. Apply the
 ;; equivalence-to-implication-rule on (13).
@@ -567,7 +567,7 @@
 ;;       (Evaluation
 ;;          (Predicate "is-amusing")
 ;;          (Variable "$X"))))
-(cog-bind equivalence-to-double-implication-forward-rule)
+(cog-execute! equivalence-to-double-implication-forward-rule)
 
 ;; (15) Factorize the variables scopes in (14) so that implication
 ;; instantiation can work. This shouldn't be necessary in principle
@@ -591,7 +591,7 @@
 ;;       (VariableNode "$X")
 ;;    )
 ;; )
-(cog-bind implication-scope-factorization-rule)
+(cog-execute! implication-scope-factorization-rule)
 
 ;; (16) Infer that Bob is amusing. Apply implication-full-instantiation
 ;; on the result of (15).
@@ -601,7 +601,7 @@
 ;; (Evaluation (stv 0.65882355 0.80999994)
 ;;   (Predicate "is-amusing")
 ;;   (Concept "Bob"))
-(cog-bind implication-full-instantiation-rule)
+(cog-execute! implication-full-instantiation-rule)
 
 ;; (17) Infer that Bob will be an amusing and honest friend. Apply the
 ;; and-introduction-rule over the results of (11), (12) and (16)
@@ -620,4 +620,4 @@
 ;;    (Evaluation
 ;;       (Predicate "is-honest")
 ;;       (Concept "Bob")))
-(cog-bind and-introduction-grounded-evaluation-rule)
+(cog-execute! and-introduction-grounded-evaluation-rule)

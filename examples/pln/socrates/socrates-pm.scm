@@ -94,7 +94,7 @@
 ;; (InheritanceLink
 ;;    (ConceptNode "man@bde8e1a7-d23a-43a8-bb79-bdc8980e4ffe")
 ;;    (ConceptNode "men@6f7d2525-a8b7-409c-889f-a51de8fd7c80"))
-(cog-bind abduction-inheritance-rule)
+(cog-execute! abduction-inheritance-rule)
 
 ;; Step 2 - Deduction between the output of the previous step and
 ;;
@@ -110,7 +110,7 @@
 ;;
 ;; Actually it somehow has been produced by the previous step
 ;;
-(cog-bind deduction-inheritance-rule)
+(cog-execute! deduction-inheritance-rule)
 
 ;; Step 3 - Apply sog-hack-decomposition-rule so that the substitutive
 ;; terms matches
@@ -134,4 +134,4 @@
 ;;    (ListLink
 ;;       (ConceptNode "John@23d1ea16-fe1c-453b-96b6-992a4b390227")
 ;;       (ConceptNode "air@768d4dee-8054-453f-8528-8b3c17bc4416")))
-(cog-bind sog-hack-decomposition-rule)
+(cog-execute! sog-hack-decomposition-rule)

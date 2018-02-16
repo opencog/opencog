@@ -5,6 +5,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;
 
 ;; Load modules
+(use-modules (opencog exec))
 (use-modules (opencog query))
 (use-modules (opencog logger))
 
@@ -340,13 +341,13 @@
 ;;;;;;;;;;
 
 ;; Apply l2s rules
-(cog-bind unary-predicate-speech-act-l2s-rule)
+(cog-execute! unary-predicate-speech-act-l2s-rule)
 
 ;; Apply Implication direct evaluation
-(cog-bind implication-direct-evaluation-rule)
+(cog-execute! implication-direct-evaluation-rule)
 
 ;; Apply s2l rules
-(cog-bind inheritance-to-evaluation-s2l-rule)
+(cog-execute! inheritance-to-evaluation-s2l-rule)
 
 ;; Give model to sureal to produce the forthcoming sentence
 (chat "small cats are cute")

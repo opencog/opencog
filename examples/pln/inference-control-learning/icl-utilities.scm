@@ -4,6 +4,7 @@
 (use-modules (ice-9 threads))
 (use-modules (opencog logger))
 (use-modules (opencog randgen))
+(use-modules (opencog exec))
 (use-modules (opencog query))
 (use-modules (opencog rule-engine))
 
@@ -125,7 +126,7 @@
     (icl-cp tmp-as (cons rule atoms))
     ;; Switch to the temporary atomspace and apply the rule
     (let* ((init-as (cog-set-atomspace! tmp-as))
-           (results (cog-outgoing-set (cog-bind rule)))
+           (results (cog-outgoing-set (cog-execute! rule)))
            (init-results (icl-cp init-as results)))
 
       ;; Switch back to it and return the results
@@ -135,7 +136,7 @@
 ;; Apply rule n times and gather the results in a list of unique elements
 (define (repeat-apply-rule rule n)
   (if (< 0 n)
-      (let* ((results-n (cog-outgoing-set (cog-bind rule)))
+      (let* ((results-n (cog-outgoing-set (cog-execute! rule)))
              (results-rec (repeat-apply-rule rule (- n 1))))
         (lset-union equal? results-n results-rec))
       '()))
