@@ -30,7 +30,7 @@
 (define (apply-proof-is-preproof trace-as history-as)
   (let* ((default-as (cog-set-atomspace! trace-as))
          (dummy (load "proof-is-preproof.scm"))
-         (results (cog-bind proof-is-preproof-rule)))
+         (results (cog-execute! proof-is-preproof-rule)))
     (icl-cp history-as (cog-outgoing-set results))
     (remove-dangling-atoms trace-as)
     (extract-hypergraph proof-is-preproof)
