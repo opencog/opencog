@@ -45,7 +45,6 @@ using namespace opencog;
 
 AFRentCollectionAgent::AFRentCollectionAgent(CogServer& cs) : RentCollectionBaseAgent(cs)
 {
-    last_update      = high_resolution_clock::now();
 }
 
 AFRentCollectionAgent::~AFRentCollectionAgent() {
@@ -59,12 +58,21 @@ void AFRentCollectionAgent::selectTargets(HandleSeq &targetSetOut)
 
 void AFRentCollectionAgent::collectRent(HandleSeq& targetSet)
 {
+    static bool first_time = true;
+    if(first_time){
+        last_update = high_resolution_clock::now();
+        first_time = false;
+    }
+
     update_freq = std::stod(_atq.get_param_value(AttentionParamQuery::af_rent_update_freq));
 
     // calculate elapsed time Et
     seconds elapsed_time = duration_cast<seconds>
                            (high_resolution_clock::now() - last_update);
-    if (elapsed_time.count() <  update_freq )
+
+   // Without this w might always be zero. Which will make rent to be zero all
+   // the time.
+    if (elapsed_time.count() <  1/update_freq )
         return;
 
     double w = elapsed_time.count() * update_freq;

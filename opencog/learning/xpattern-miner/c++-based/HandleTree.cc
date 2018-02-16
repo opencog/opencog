@@ -24,6 +24,7 @@
 #include "HandleTree.h"
 
 #include <opencog/util/Logger.h>
+#include <opencog/util/dorepeat.h>
 
 #include <sstream>
 
@@ -112,14 +113,38 @@ bool all_nodes_in(const HandleSet& cash, HandleTree::iterator it)
 	return true;
 }
 
-std::string oc_to_string(const HandleTree& ht)
+std::string oc_to_string(const HandleTree& ht, const std::string& indent)
 {
 	std::stringstream ss;
-	ss << "size = " << ht.size() << std::endl;
+	ss << indent << "size = " << ht.size() << std::endl;
 	unsigned i = 0;
-	for (HandleTree::iterator it = ht.begin(); it != ht.end(); ++it) {
-		ss << "atom[" << i << ",depth=" << ht.depth(it) << "]:"
-		   << std::endl << oc_to_string(*it);
+	for (HandleTree::iterator it = ht.begin(); it != ht.end(); ++it)
+	{
+		int depth = ht.depth(it);
+		std::string node_indent = indent;
+		dorepeat(depth)
+			node_indent += OC_TO_STRING_INDENT;
+		ss << node_indent << "atom[" << i << ",depth=" << ht.depth(it) << "]:"
+		   << std::endl << oc_to_string(*it, node_indent + OC_TO_STRING_INDENT);
+		++i;
+	}
+	return ss.str();
+}
+
+std::string oc_to_string(const HandleTree& ht)
+{
+	return oc_to_string(ht, "");
+}
+
+std::string oc_to_string(const HandleMapTree& hmt, const std::string& indent)
+{
+	// TODO: show the hierarchy
+	std::stringstream ss;
+	ss << indent << "size = " << hmt.size() << std::endl;
+	unsigned i = 0;
+	for (HandleMapTree::iterator it = hmt.begin(); it != hmt.end(); ++it) {
+		ss << indent << "handle map[" << i << ",depth=" << hmt.depth(it) << "]:"
+		   << std::endl << oc_to_string(*it, indent + OC_TO_STRING_INDENT);
 		++i;
 	}
 	return ss.str();
@@ -127,13 +152,19 @@ std::string oc_to_string(const HandleTree& ht)
 
 std::string oc_to_string(const HandleMapTree& hmt)
 {
-	// TODO: show the hierarchy
+	return oc_to_string(hmt, "");
+}
+
+std::string oc_to_string(const HandleHandleTreeMap& hhtm, const std::string& indent)
+{
 	std::stringstream ss;
-	ss << "size = " << hmt.size() << std::endl;
+	ss << indent << "size = " << hhtm.size() << std::endl;
 	unsigned i = 0;
-	for (HandleMapTree::iterator it = hmt.begin(); it != hmt.end(); ++it) {
-		ss << "handle map[" << i << ",depth=" << hmt.depth(it) << "]:"
-		   << std::endl << oc_to_string(*it);
+	for (const auto& hht : hhtm) {
+		ss << indent << "atom[" << i << "]:" << std::endl
+		   << oc_to_string(hht.first, indent + OC_TO_STRING_INDENT);
+		ss << indent << "handle tree[" << i << "]:" << std::endl
+		   << oc_to_string(hht.second, indent + OC_TO_STRING_INDENT);
 		++i;
 	}
 	return ss.str();
@@ -141,16 +172,7 @@ std::string oc_to_string(const HandleMapTree& hmt)
 
 std::string oc_to_string(const HandleHandleTreeMap& hhtm)
 {
-	std::stringstream ss;
-	ss << "size = " << hhtm.size() << std::endl;
-	unsigned i = 0;
-	for (const auto& hht : hhtm) {
-		ss << "atom[" << i << "]:" << std::endl << oc_to_string(hht.first);
-		ss << "handle tree[" << i << "]:"
-		   << std::endl << oc_to_string(hht.second);
-		++i;
-	}
-	return ss.str();
+	return oc_to_string(hhtm, "");
 }
 
 } // ~namespace opencog
