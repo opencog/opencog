@@ -48,8 +48,11 @@ HandleTree merge_patterns(const std::initializer_list<HandleTree>&);
  */
 bool all_nodes_in(const HandleSet& cash, HandleTree::iterator it);
 
+std::string oc_to_string(const HandleTree& ht, const std::string& indent);
 std::string oc_to_string(const HandleTree& ht);
+std::string oc_to_string(const HandleMapTree& hmt, const std::string& indent);
 std::string oc_to_string(const HandleMapTree& hmt);
+std::string oc_to_string(const HandleHandleTreeMap& hhtm, const std::string& indent);
 std::string oc_to_string(const HandleHandleTreeMap& hhtm);
 
 } // ~namespace opencog
