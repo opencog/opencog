@@ -70,8 +70,6 @@ void AFRentCollectionAgent::collectRent(HandleSeq& targetSet)
     microseconds elapsed_time = duration_cast<microseconds>
                                 (high_resolution_clock::now() - last_update);
 
-    // Without this w might always be zero. Which will make rent to be zero all
-    // the time.
     if (elapsed_time.count() < 1000000/update_freq)
         return;
 
