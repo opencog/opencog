@@ -351,10 +351,11 @@
         (else (let ((var (Variable (gen-var "GHOST-rule" #f)))
                     (lv (get-rejoinder-level TYPE)))
           (list
-            (list (TypedVariable var (Type "ImplicationLink")))
+            (list (TypedVariable var (Type "ConceptNode")))
             (list (State ghost-last-executed var)
-                  (psi-rule-set-alias! var
-                    (last (list-ref rule-lists (- lv 1)))))
+                  (Equal var
+                    (Concept (string-append psi-prefix-str
+                      (last (list-ref rule-lists (- lv 1)))))))
             strval-rejoinder)))))
 
 ; ----------
