@@ -193,6 +193,10 @@ public:
      */
     AttentionValue::lti_t getLTIFunds() const { return fundsLTI; }
 
+    AttentionValue::sti_t getSTIFundsBuffer(){ return stiFundsBuffer;}
+
+    AttentionValue::lti_t getLTIFundsBuffer(){ return ltiFundsBuffer;}
+
     AttentionValue::sti_t calculateSTIWage(void);
 
     AttentionValue::lti_t calculateLTIWage(void);
