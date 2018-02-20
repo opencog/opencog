@@ -24,6 +24,7 @@
                    (prev-as (cog-set-atomspace! query-as))
                    (bl (pattern->bindlink pat-prnx))
                    (results (cog-bind-first-n bl ms)))
+              (cog-set-atomspace! prev-as)
               (cog-arity results))
             1))))
 
