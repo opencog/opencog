@@ -305,7 +305,6 @@ void UREPatternMinerUTest::test_AB_ABC()
 		InhAY = al(INHERITANCE_LINK, A, Y),
 		expected = mk_minsup_evals(2,
 		                           { top,
-				                     al(LAMBDA_LINK, VarXY, al(LOCAL_QUOTE_LINK, AndXY)),
 				                     al(LAMBDA_LINK, VarXY, InhXY),
 				                     al(LAMBDA_LINK, Y, InhAY) });
 
