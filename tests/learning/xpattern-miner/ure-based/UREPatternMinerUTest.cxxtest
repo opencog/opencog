@@ -98,7 +98,7 @@ public:
 	void test_AB_AC();
 	void test_AB_AC_BC();
 	void test_AB_ABC();
-	// void test_ABCD();
+	void test_ABCD();
 	// void test_ABAB();
 	// void test_AAAA();
 	// void test_2conjuncts_1();
@@ -314,53 +314,51 @@ void UREPatternMinerUTest::test_AB_ABC()
 	TS_ASSERT(content_eq(results, expected));
 }
 
-// void UREPatternMinerUTest::test_ABCD()
-// {
-// 	logger().info("BEGIN TEST: %s", __FUNCTION__);
+void UREPatternMinerUTest::test_ABCD()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
-// 	Handle A = an(CONCEPT_NODE, "A"),
-// 		B = an(CONCEPT_NODE, "B"),
-// 		C = an(CONCEPT_NODE, "C"),
-// 		D = an(CONCEPT_NODE, "D"),
-// 		E = an(CONCEPT_NODE, "E"),
-// 		F = an(CONCEPT_NODE, "F"),
-// 		G = an(CONCEPT_NODE, "G"),
-// 		H = an(CONCEPT_NODE, "H"),
-// 		AB = al(INHERITANCE_LINK, A, B),
-// 		CD = al(INHERITANCE_LINK, C, D),
-// 		EF = al(INHERITANCE_LINK, E, F),
-// 		GH = al(INHERITANCE_LINK, G, H),
-// 		ABCD = al(IMPLICATION_LINK, AB, AB),
-// 		EFGH = al(IMPLICATION_LINK, EF, GH);
+	Handle A = an(CONCEPT_NODE, "A"),
+		B = an(CONCEPT_NODE, "B"),
+		C = an(CONCEPT_NODE, "C"),
+		D = an(CONCEPT_NODE, "D"),
+		E = an(CONCEPT_NODE, "E"),
+		F = an(CONCEPT_NODE, "F"),
+		G = an(CONCEPT_NODE, "G"),
+		H = an(CONCEPT_NODE, "H"),
+		InhAB = al(INHERITANCE_LINK, A, B),
+		InhCD = al(INHERITANCE_LINK, C, D),
+		InhEF = al(INHERITANCE_LINK, E, F),
+		InhGH = al(INHERITANCE_LINK, G, H),
+		ImpABCD = al(IMPLICATION_LINK, InhAB, InhAB),
+		ImpEFGH = al(IMPLICATION_LINK, InhEF, InhGH),
+		X = an(VARIABLE_NODE, "$X"),
+		Y = an(VARIABLE_NODE, "$Y"),
+		Z = an(VARIABLE_NODE, "$Z"),
+		W = an(VARIABLE_NODE, "$W"),
+		InhXY = al(INHERITANCE_LINK, X, Y),
+		InhZW = al(INHERITANCE_LINK, Z, W),
+		ImpXY = al(IMPLICATION_LINK, X, Y),
+		initpat = al(LAMBDA_LINK, ImpXY),
+		query = mk_query({InhAB, InhCD, InhEF, InhGH, ImpABCD, ImpEFGH}, 2, initpat);
 
-// 	Handle X = tmp_an(VARIABLE_NODE, "$X"),
-// 		Y = tmp_an(VARIABLE_NODE, "$Y"),
-// 		initpat = tmp_al(LAMBDA_LINK,
-// 		                 tmp_al(IMPLICATION_LINK, X, Y));
+	BackwardChainer bc(_as, pm_rb, query);
+	bc.get_config().set_maximum_iterations(50);
+	bc.do_chain();
 
-// 	XPMParameters param(2, 1, initpat);
-// 	XPatternMiner pm(_as, param);
-// 	HandleTree results = pm();
+	Handle results = bc.get_results(),
+		expected = mk_minsup_evals(2,
+		                           { top,
+				                     al(LAMBDA_LINK, al(IMPLICATION_LINK, Z, InhXY)),
+				                     al(LAMBDA_LINK, al(IMPLICATION_LINK, InhZW, InhXY)),
+				                     al(LAMBDA_LINK, al(IMPLICATION_LINK, InhXY, Z)),
+				                     al(LAMBDA_LINK, al(IMPLICATION_LINK, InhZW, InhXY)) });
 
-// 	Handle Z = tmp_an(VARIABLE_NODE, "$Z"),
-// 		W = tmp_an(VARIABLE_NODE, "$W"),
-// 		XY = tmp_al(INHERITANCE_LINK, X, Y),
-// 		ZW = tmp_al(INHERITANCE_LINK, Z, W);
-// 	HandleTree expected{ HandleTree(tmp_al(LAMBDA_LINK,
-// 	                                       tmp_al(IMPLICATION_LINK, Z, XY)),
-// 	                                { tmp_al(LAMBDA_LINK,
-// 	                                         tmp_al(IMPLICATION_LINK, ZW, XY)) }),
-// 			             HandleTree(tmp_al(LAMBDA_LINK,
-// 			                               tmp_al(IMPLICATION_LINK, XY, Z)),
-// 	                                { tmp_al(LAMBDA_LINK,
-// 	                                         tmp_al(IMPLICATION_LINK, ZW, XY)) })
-// 			            };
+	logger().debug() << "results = " << oc_to_string(results);
+	logger().debug() << "expected = " << oc_to_string(expected);
 
-// 	logger().debug() << "results = " << oc_to_string(results);
-// 	logger().debug() << "expected = " << oc_to_string(expected);
-
-// 	TS_ASSERT(content_eq(expected, results));
-// }
+	TS_ASSERT(content_eq(expected, results));
+}
 
 // void UREPatternMinerUTest::test_ABAB()
 // {
