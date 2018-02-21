@@ -33,6 +33,30 @@
   (newline))
 
 ; ----------
+(define-public (ghost-check-lemma WORD)
+"
+  Show the lemma of the word.
+"
+  (assoc-ref lemma-alist WORD)
+)
+
+; ----------
+(define-public (ghost-add-lemma WORD LEMMA)
+"
+  Add an entry to the lemma list.
+"
+  (set! lemma-alist (assoc-set! lemma-alist WORD LEMMA))
+)
+
+; ----------
+(define-public (ghost-remove-lemma WORD)
+"
+  Remove an entry from the lemma list.
+"
+  (set! lemma-alist (assoc-remove! lemma-alist WORD))
+)
+
+; ----------
 (define-public (ghost-show-vars)
 "
   Show the groundings of the user variables that has been assigned to

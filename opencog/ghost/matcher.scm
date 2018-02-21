@@ -266,7 +266,8 @@
         ; Keep a record of which rule got executed, just for rejoinders
         ; TODO: Move this part to OpenPsi?
         ; TODO: This should be created after actually executing the action
-        (if (not (null? selected)) (State ghost-last-executed selected))
+        (if (not (null? selected))
+          (State ghost-last-executed (psi-rule-alias selected)))
 
         (List selected)))
 
