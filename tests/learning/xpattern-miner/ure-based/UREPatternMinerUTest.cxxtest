@@ -145,15 +145,15 @@ Handle UREPatternMinerUTest::mk_query(const HandleSeq& texts, int minsup,
 UREPatternMinerUTest::UREPatternMinerUTest() : _scm(&_as)
 {
 	// Main logger
-	logger().set_level(Logger::DEBUG);
+	logger().set_level(Logger::INFO);
 	logger().set_timestamp_flag(false);
-	logger().set_sync_flag(true);
+	// logger().set_sync_flag(true);
 	logger().set_print_to_stdout_flag(true);
 
 	// URE logger
-	ure_logger().set_level(Logger::DEBUG);
+	ure_logger().set_level(Logger::INFO);
 	ure_logger().set_timestamp_flag(false);
-	ure_logger().set_sync_flag(true);
+	// ure_logger().set_sync_flag(true);
 	ure_logger().set_print_to_stdout_flag(true);
 
 	// Configure scheme load-paths that are common for all tests.
@@ -232,7 +232,7 @@ void UREPatternMinerUTest::test_AB_AC()
 		AC = al(INHERITANCE_LINK, A, C),
 		query = mk_query({AB, AC}, 2);
 	BackwardChainer bc(_as, pm_rb, query);
-	bc.get_config().set_maximum_iterations(100);
+	bc.get_config().set_maximum_iterations(50);
 	bc.do_chain();
 
 	Handle results = bc.get_results(),
@@ -263,7 +263,7 @@ void UREPatternMinerUTest::test_AB_AC_BC()
 		query = mk_query({A, B, C, InhAB, InhAC, InhBC}, 2);
 
 	BackwardChainer bc(_as, pm_rb, query);
-	bc.get_config().set_maximum_iterations(100);
+	bc.get_config().set_maximum_iterations(50);
 	bc.do_chain();
 
 	Handle results = bc.get_results(),
@@ -295,7 +295,7 @@ void UREPatternMinerUTest::test_AB_ABC()
 		query = mk_query({A, B, C, InhAB, InhABC}, 2);
 
 	BackwardChainer bc(_as, pm_rb, query);
-	bc.get_config().set_maximum_iterations(100);
+	bc.get_config().set_maximum_iterations(50);
 	bc.do_chain();
 
 	Handle results = bc.get_results(),
@@ -305,7 +305,6 @@ void UREPatternMinerUTest::test_AB_ABC()
 		InhAY = al(INHERITANCE_LINK, A, Y),
 		expected = mk_minsup_evals(2,
 		                           { top,
-				                     al(LAMBDA_LINK, VarXY, al(LOCAL_QUOTE_LINK, AndXY)),
 				                     al(LAMBDA_LINK, VarXY, InhXY),
 				                     al(LAMBDA_LINK, Y, InhAY) });
 

@@ -4,9 +4,9 @@
 (use-modules (opencog rule-engine))
 (use-modules (srfi srfi-1))
 
-(cog-logger-set-level! "debug")
-(cog-logger-set-stdout! #t)
-(cog-logger-set-sync! #t)
+;; (cog-logger-set-level! "debug")
+;; (cog-logger-set-stdout! #t)
+;; (cog-logger-set-sync! #t)
 
 (define (support pat texts ms)
 "
@@ -24,6 +24,7 @@
                    (prev-as (cog-set-atomspace! query-as))
                    (bl (pattern->bindlink pat-prnx))
                    (results (cog-bind-first-n bl ms)))
+              (cog-set-atomspace! prev-as)
               (cog-arity results))
             1))))
 
