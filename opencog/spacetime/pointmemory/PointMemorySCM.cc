@@ -284,8 +284,8 @@ Handle PointMemorySCM::get_time_res(Handle map_name)
 Handle PointMemorySCM::get_space_res(Handle map_name)
 {
 	have_map(map_name);
-	return Handle(createNumberNode(
-		tsa[map_name]->get_space_resolution()));
+	return map_name->getAtomSpace()->add_atom(Handle(createNumberNode(
+		tsa[map_name]->get_space_resolution())));
 }
 
 Handle PointMemorySCM::get_time_units(Handle map_name)
