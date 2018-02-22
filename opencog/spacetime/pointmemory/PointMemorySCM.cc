@@ -291,8 +291,8 @@ Handle PointMemorySCM::get_space_res(Handle map_name)
 Handle PointMemorySCM::get_time_units(Handle map_name)
 {
 	have_map(map_name);
-	return Handle(createNumberNode(
-		tsa[map_name]->get_time_units()));
+	return map_name->getAtomSpace()->add_atom(Handle(createNumberNode(
+		tsa[map_name]->get_time_units())));
 }
 
 void PointMemorySCM::step_time_unit(Handle map_name)
