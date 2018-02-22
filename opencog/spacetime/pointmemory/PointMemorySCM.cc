@@ -277,8 +277,8 @@ Handle PointMemorySCM::get_time_res(Handle map_name)
 {
 	have_map(map_name);
 	duration_c dr = tsa[map_name]->get_time_resolution();
-	return Handle(createNumberNode(
-		chrono::duration_cast<chrono::milliseconds>(dr).count()));
+	return map_name->getAtomSpace()->add_atom(Handle(createNumberNode(
+		chrono::duration_cast<chrono::milliseconds>(dr).count())));
 }
 
 Handle PointMemorySCM::get_space_res(Handle map_name)
