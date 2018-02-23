@@ -114,7 +114,7 @@ struct TimeSlice
     /// get_locations -- get zero, one or more locations (3D coordinates)
     /// of an atom in this time-slice.  A time-slice does allow a single
     /// atom to be present at multiple locations, and this will return all
-    /// of them.  This returns an empty list if teh atom does not appear
+    /// of them.  This returns an empty list if the atom does not appear
     /// in the timeslice.
     // Get the locations of an atom.
     point3d_list get_locations(const T& ato) {
