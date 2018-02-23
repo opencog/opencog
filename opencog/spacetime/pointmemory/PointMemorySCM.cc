@@ -362,7 +362,7 @@ Handle PointMemorySCM::get_first_time(Handle map_name,
 	if (not r) return Handle(); // XXX should this throw instead?
 
 	// Make and return atTimeLink
-	return timestamp_tag_atom(tp, ato);
+	return map_name->getAtomSpace()->add_atom(timestamp_tag_atom(tp, ato));
 }
 
 Handle PointMemorySCM::get_last_time(Handle map_name,
