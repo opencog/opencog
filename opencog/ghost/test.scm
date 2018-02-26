@@ -15,15 +15,24 @@
   (cog-logger-set-level! ghost-logger "info"))
 
 ; ----------
+; TODO:  Remove once experimentation is over
+(define expt-var '())
 (define-public (test-ghost TXT)
 "
   Try to find (and execute) the matching rules given an input TXT.
 "
   (ghost TXT)
-  (map (lambda (r) (psi-imply r))
-       (cog-outgoing-set (ghost-find-rules (ghost-get-curr-sent))))
+  (let ((rule (cog-outgoing-set (ghost-find-rules (ghost-get-curr-sent)))))
+    (map (lambda (r) (psi-imply r)) rule)
+   ; not using ghost-last-executed, because getting back to the rule
+   ; from the alias atom is a hassle.
+    (set! expt-var rule)
+  )
   *unspecified*)
 
+(define-public (ghost-action-executed?)
+  (if (null? expt-var) (stv 0 1) (psi-action-executed? (car expt-var)))
+)
 ; ----------
 (define-public (ghost-show-lemmas)
 "
