@@ -94,7 +94,7 @@ private:
   // from have _as variable.
   using DefaultPatternMatchCB::_as;
 
-  // Predicate used to set a value on  whether an action was executed or not
+  // Predicate used to set a value on whether an action was executed or not
   Handle _action_executed;
 
 };

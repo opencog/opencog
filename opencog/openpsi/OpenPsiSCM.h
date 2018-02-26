@@ -86,6 +86,14 @@ private:
   Handle imply(const Handle& rule);
 
   /**
+   * Check if the instation of the acation worked on the last run of
+   * imply(rule).
+   *
+   * @param rule A psi-rule
+   */
+   TruthValuePtr was_action_executed(const Handle& rule);
+
+  /**
    * A wrapper around OpenPsiRules::is_rule.
    *
    * @return true if the rule is in the index, false other wise.
