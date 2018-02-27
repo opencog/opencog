@@ -448,7 +448,7 @@ Handle PointMemorySCM::get_locs_ato(Handle map_name, Handle ato)
 {
 	have_map(map_name);
 	point3d_list pl = tsa[map_name]->get_locations_of_atom(ato);
-	return tag_atom_with_locs(map_name, ato, pl);
+	return map_name->getAtomSpace()->add_atom(tag_atom_with_locs(map_name, ato, pl));
 }
 
 Handle PointMemorySCM::get_past_locs_ato(Handle map_name,
