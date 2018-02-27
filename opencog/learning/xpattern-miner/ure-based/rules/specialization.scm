@@ -148,7 +148,7 @@
                                 ;; g has enough support, let see if
                                 ;; g.f has enough support
                                 (let ((sup (support gf texts ms)))
-                                  (if (equal? ms sup)
+                                  (if (<= ms sup)
                                       (stv 1 1)
                                       #f)) ; It is ill-formed
                                 ;; g does not have enough support,
