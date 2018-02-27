@@ -38,10 +38,13 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ; List the rules and their weights.
-(define rules (list top-abstraction-rule-name
+(define rules (list ;; top-abstraction-rule-name
                     unary-specialization-rule-name
                     binary-first-arg-specialization-rule-name
-                    binary-second-arg-specialization-rule-name))
+                    binary-second-arg-specialization-rule-name
+                    ternary-first-arg-specialization-rule-name
+                    ternary-second-arg-specialization-rule-name
+                    ternary-third-arg-specialization-rule-name))
 
 ; Associate rules to PLN
 (ure-add-rules pm-rbs rules)

@@ -183,3 +183,25 @@
   (DefinedSchemaNode "binary-second-arg-specialization-rule"))
 (DefineLink binary-second-arg-specialization-rule-name
   binary-second-arg-specialization-rule)
+
+;; Define ternary specialization
+(define ternary-first-arg-specialization-rule
+  (gen-specialization-rule 3 0))
+(define ternary-first-arg-specialization-rule-name
+  (DefinedSchemaNode "ternary-first-arg-specialization-rule"))
+(DefineLink ternary-first-arg-specialization-rule-name
+  ternary-first-arg-specialization-rule)
+
+(define ternary-second-arg-specialization-rule
+  (gen-specialization-rule 3 1))
+(define ternary-second-arg-specialization-rule-name
+  (DefinedSchemaNode "ternary-second-arg-specialization-rule"))
+(DefineLink ternary-second-arg-specialization-rule-name
+  ternary-second-arg-specialization-rule)
+
+(define ternary-third-arg-specialization-rule
+  (gen-specialization-rule 3 1))
+(define ternary-third-arg-specialization-rule-name
+  (DefinedSchemaNode "ternary-third-arg-specialization-rule"))
+(DefineLink ternary-third-arg-specialization-rule-name
+  ternary-third-arg-specialization-rule)
