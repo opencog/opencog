@@ -75,6 +75,7 @@ public:
 	void test_2conjuncts_5();
 	void test_InferenceControl();
 	void test_SodaDrinker();
+	void test_lojban();
 };
 
 XPatternMinerUTest::XPatternMinerUTest() : _scm(&_as)
@@ -715,6 +716,66 @@ void XPatternMinerUTest::test_SodaDrinker()
 	logger().debug() << "expected_pattern = " << oc_to_string(expected_pattern);
 
 	TS_ASSERT(content_is_in(expected_pattern, results));
+}
+ void XPatternMinerUTest::test_lojban()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	// Load lojban-test.scm
+	std::string rs =
+		_scm.eval("(load-from-path \"lojban-for-testing.scm\")");
+
+	logger().info() << "rs = " << rs;
+
+	// Define initial pattern (to speed up mining)
+	Handle P1 = tmp_an(VARIABLE_NODE, "$P1"),
+		P3 = tmp_an(VARIABLE_NODE, "$P3"),
+		X1 = tmp_an(VARIABLE_NODE, "$X1"),
+		Z1 = tmp_an(VARIABLE_NODE, "$Z1"),
+		X2 = tmp_an(VARIABLE_NODE, "$X2"),
+		Z2 = tmp_an(VARIABLE_NODE, "$Z2"),
+		VARS = tmp_al(VARIABLE_LIST, X1, Z1, X2, Z2, P1, P3),
+		clauses = tmp_al(AND_LINK,
+		                 tmp_al(EVALUATION_LINK, P1, tmp_al(LIST_LINK, X1, X2)),
+		                 tmp_al(EVALUATION_LINK, P3, tmp_al(LIST_LINK, Z1, Z2))),
+		initpat = tmp_al(LAMBDA_LINK, VARS, clauses);
+
+	// Run the pattern miner
+	XPMParameters param(5/*minsup*/, 3/*nconjuncts*/, initpat, 3/*maxdepth*/, 1/*info*/);
+	XPatternMiner pm(_as, param);
+	HandleTree results = pm();
+
+	// The pattern of interest looks like
+	//
+	// Lambda
+	//   X
+	// And
+	//   Inheritance
+	//     X
+	//     Concept "man"
+	//   Inheritance
+	//     X
+	//     Concept "soda drinker"
+	//   Inheritance
+	//     X
+	//     Concept "ugly"
+	/*Handle man = tmp_an(CONCEPT_NODE, "man"),
+		soda_drinker = tmp_an(CONCEPT_NODE, "soda drinker"),
+		ugly = tmp_an(CONCEPT_NODE, "ugly"),
+		is_man = tmp_al(INHERITANCE_LINK, X, man),
+		is_soda_drinker = tmp_al(INHERITANCE_LINK, X, soda_drinker),
+		is_ugly = tmp_al(INHERITANCE_LINK, X, ugly),
+		expected_pattern = tmp_al(LAMBDA_LINK,
+		                          X,
+		                          tmp_al(AND_LINK,
+		                                 is_man,
+		                                 is_soda_drinker,
+		                                 is_ugly));*/
+
+	logger().info() << "results = " << oc_to_string(results);
+	//logger().debug() << "expected_pattern = " << oc_to_string(expected_pattern);
+
+	TS_ASSERT_EQUALS(1, 1);
 }
 
 #undef al
