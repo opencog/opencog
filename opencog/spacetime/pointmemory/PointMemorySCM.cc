@@ -441,7 +441,7 @@ Handle PointMemorySCM::get_last_location(Handle map_name,
 {
 	time_pt tpt = get_map_time(map_name, elapse);
 	point3d_list pl = tsa[map_name]->get_newest_locations(ato, tpt);
-	return tag_atom_with_locs(map_name, ato, pl);
+	return map_name->getAtomSpace()->add_atom(tag_atom_with_locs(map_name, ato, pl));
 }
 
 Handle PointMemorySCM::get_locs_ato(Handle map_name, Handle ato)
