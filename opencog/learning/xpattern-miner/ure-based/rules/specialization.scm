@@ -62,7 +62,7 @@
 ;;       VariableList
 ;;         <x0>
 ;;         <x1>
-;;       <g>
+;;       <g-body>
 ;;     <texts>
 ;;     <ms>
 ;; <f>
@@ -101,7 +101,7 @@
          ;; TODO: for now hardwire the type of f, then later only
          ;; accept shallow abstractions according to the
          ;; "shallow-abstraction-of" predicate
-         (f-decl (TypedVariable f (TypeChoice LambdaT ConceptT)))
+         (f-decl (TypedVariable f (TypeChoice LambdaT PutT ConceptT)))
          (vardecl (VariableList g-decl texts-decl ms-decl f-decl))
          ;; Patterns
          (minsup-g (minsup g texts ms))
