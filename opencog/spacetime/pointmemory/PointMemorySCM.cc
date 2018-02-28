@@ -476,7 +476,7 @@ Handle PointMemorySCM::get_elapse_list_at_loc_ato(Handle map_name,
 	for (const time_pt& tp: tl)
 		LL.push_back(timestamp_tag_atom(tp, ato));
 
-	return opencog::Handle(createLink(LL, SET_LINK));
+	return map_name->getAtomSpace()->add_atom(opencog::Handle(createLink(LL, SET_LINK)));
 }
 
 // Get the timeline of the atom.  That is, get a sequence of
