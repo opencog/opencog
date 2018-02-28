@@ -456,7 +456,7 @@ Handle PointMemorySCM::get_past_locs_ato(Handle map_name,
 {
 	time_pt tpt = get_map_time(map_name, elapse);
 	point3d_list pl = tsa[map_name]->get_locations_of_atom_at_time(tpt, ato);
-	return tag_atom_with_locs(map_name, ato, pl);
+	return map_name->getAtomSpace()->add_atom(tag_atom_with_locs(map_name, ato, pl));
 }
 
 Handle PointMemorySCM::get_elapse_list_at_loc_ato(Handle map_name,
