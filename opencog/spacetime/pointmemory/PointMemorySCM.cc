@@ -573,9 +573,9 @@ PointMemorySCM::get_angular_nearness(Handle map_name,
 {
 	const HandleSeq& hs = list->getOutgoingSet();
 	time_pt tpt = get_map_time(map_name, elapse);
-	return Handle(createNumberNode(
+	return map_name->getAtomSpace()->add_atom(Handle(createNumberNode(
 		tsa[map_name]->get_angular_nearness(tpt,
-			hs[0], hs[1], hs[2])));
+			hs[0], hs[1], hs[2]))));
 }
 
 // XXX FIXME this should just return xyz, and the left-right
