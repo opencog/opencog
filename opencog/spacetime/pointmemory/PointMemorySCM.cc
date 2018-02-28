@@ -617,7 +617,7 @@ PointMemorySCM::get_target_is_front_back(Handle map_name,
 	const HandleSeq& hs = list->getOutgoingSet();
 	point3d res = tsa[map_name]->get_spatial_relations(tpt,
 		hs[0], hs[1], hs[2]);
-	return Handle(createNumberNode(res.x()));
+	return map_name->getAtomSpace()->add_atom(Handle(createNumberNode(res.x())));
 }
 
 void opencog_ato_pointmem_init(void)
