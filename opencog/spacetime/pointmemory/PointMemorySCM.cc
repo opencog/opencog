@@ -561,8 +561,8 @@ PointMemorySCM::get_distance_between(Handle map_name,
 {
 	const HandleSeq& hs = list->getOutgoingSet();
 	time_pt tpt = get_map_time(map_name, elapse);
-	return Handle(createNumberNode(
-		tsa[map_name]->get_distance_between(tpt, hs[0], hs[1])));
+	return map_name->getAtomSpace()->add_atom(Handle(createNumberNode(
+		tsa[map_name]->get_distance_between(tpt, hs[0], hs[1]))));
 }
 
 // 2 = far, 1 = near, 0 = touching
