@@ -488,7 +488,7 @@ Handle PointMemorySCM::get_timeline(Handle map_name, Handle ato)
 	HandleSeq LL;
 	for (const time_pt& tp: tl)
 		LL.push_back(timestamp_tag_atom(tp, ato));
-	return opencog::Handle(createLink(LL, SET_LINK));
+	return map_name->getAtomSpace()->add_atom(opencog::Handle(createLink(LL, SET_LINK)));
 }
 
 Handle PointMemorySCM::remove_location_ato(Handle map_name,
