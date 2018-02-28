@@ -603,7 +603,7 @@ PointMemorySCM::get_target_is_above_below(Handle map_name,
 	const HandleSeq& hs = list->getOutgoingSet();
 	point3d res = tsa[map_name]->get_spatial_relations(tpt,
 		hs[0], hs[1], hs[2]);
-	return Handle(createNumberNode(res.z()));
+	return map_name->getAtomSpace()->add_atom(Handle(createNumberNode(res.z())));
 }
 
 // XXX FIXME this should just return xyz, and the front-back
