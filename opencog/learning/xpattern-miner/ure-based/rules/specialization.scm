@@ -143,7 +143,6 @@
       (let* ((pre-minsup-pred (car premises))
              (con-minsup-args (gdr conclusion))
              (pre-minsup-pred-tv (cog-tv pre-minsup-pred))
-             (f-lamb (car (cdr premises)))
              (gf (cog-outgoing-atom con-minsup-args 0))
              (texts (cog-outgoing-atom con-minsup-args 1))
              (ms-atom (cog-outgoing-atom con-minsup-args 2))
@@ -204,7 +203,7 @@
   ternary-second-arg-specialization-rule)
 
 (define ternary-third-arg-specialization-rule
-  (gen-specialization-rule 3 1))
+  (gen-specialization-rule 3 2))
 (define ternary-third-arg-specialization-rule-name
   (DefinedSchemaNode "ternary-third-arg-specialization-rule"))
 (DefineLink ternary-third-arg-specialization-rule-name
