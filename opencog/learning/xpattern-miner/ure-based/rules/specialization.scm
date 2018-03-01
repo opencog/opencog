@@ -1,8 +1,9 @@
-;; Rule to specialize a pattern and relate its specialization to its
-;; minimum support.
+;; Rule to specialize a pattern by composing it with a shallow
+;; abstraction, a constant, or a variable, and checks that it has
+;; enough support.
 ;;
-;; Given 2 patterns, g with arity n and with support ms, and f,
-;; specialize g by composing it with f over one of its variables, xi.
+;; Given g with arity n and with support ms, and f, specialize g by
+;; composing it with f over one of its variables, xi.
 ;;
 ;; Evaluation <tv1>
 ;;   Predicate "minsup"
@@ -22,23 +23,26 @@
 ;;     Put
 ;;       Lambda
 ;;         VariableList
-;;           <x0>
+;;           <x1>
 ;;           ...
-;;           <xn-1>
+;;           <xn>
 ;;         <g-body>
 ;;       List
-;;         <x0>
+;;         <x1>
 ;;         ...
 ;;         <xi-1>
 ;;         <f>
 ;;         <xi+1>
 ;;         ...
-;;         <xm>
+;;         <xn>
 ;;     <ms>
 ;;
 ;; assuming that tv1 equals to (stv 1 1), then calculate the frequency
-;; of the composed pattern and set tv2 accordingly, (stv 1 1) is g
+;; of the composed pattern and set tv2 accordingly, (stv 1 1) if g
 ;; composed with f has support ms, (stv 0 1) otherwise.
+;;
+;; <f> may either a shallow pattern (a function), a constant or a
+;; variable amongst <x1> to <xn> different than <xi>.
 ;;
 ;; TODO: we might want to split such rule into 2,
 ;;
@@ -50,8 +54,8 @@
 
 (load "pattern-miner-utils.scm")
 
-;; Generate specialization rule for a given arity and argument index
-;; ranging from 0 to arity-1.
+;; Generate composition specialization rule for a given arity and
+;; argument index ranging from 0 to arity-1.
 ;;
 ;; For instance (gen-specialization-rule 2 1) generates the following rule
 ;;
@@ -89,19 +93,19 @@
          (ms (Variable "$ms"))
          (f (Variable "$f"))
          ;; Types
-         (VariableT (Type "VariableNode"))
          (NumberT (Type "NumberNode"))
          (LambdaT (Type "LambdaLink"))
          (ConceptT (Type "ConceptNode"))
+         (VariableT (Type "VariableNode"))
          (PutT (Type "PutLink"))
          ;; Vardecls
          (g-decl (TypedVariable g (TypeChoice LambdaT PutT)))
          (texts-decl (TypedVariable texts ConceptT))
          (ms-decl (TypedVariable ms NumberT))
-         ;; TODO: for now hardwire the type of f, then later only
-         ;; accept shallow abstractions according to the
-         ;; "shallow-abstraction-of" predicate
-         (f-decl (TypedVariable f (TypeChoice LambdaT PutT ConceptT)))
+         ;; TODO: for now hardwire the types of f, then later only
+         ;; accept shallow abstractions, constants from valuations, or
+         ;; variables from the variables of g.
+         (f-decl (TypedVariable f (TypeChoice LambdaT ConceptT VariableT)))
          (vardecl (VariableList g-decl texts-decl ms-decl f-decl))
          ;; Patterns
          (minsup-g (minsup g texts ms))
