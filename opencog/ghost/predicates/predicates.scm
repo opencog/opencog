@@ -1,6 +1,8 @@
 (define-module (opencog ghost predicates)
+  #:use-module (ice-9 optargs)
   #:use-module (opencog)
   #:use-module (opencog attention)
+  #:use-module (opencog exec)
   #:use-module (opencog pointmem)
   #:use-module (opencog spacetime)
   #:export (
@@ -18,6 +20,9 @@
     ; Actions
     animation
     expression
+
+    ; Utilities
+    is-model-true?
     )
 )
 
@@ -26,20 +31,47 @@
 
 ; --------------------------------------------------------------
 ; There is a spacemap in eva-model module called faces. Thus the rename.
-(define facemap (SpaceMapNode "perceived-faces"))
+;(define facemap (SpaceMapNode "perceived-faces"))
+
+; --------------------------------------------------------------
+; Apis used to create the atoms used to represent the world, aka
+; world-model. These are not exported.
+; --------------------------------------------------------------
+(define (see-face face-id)
+"
+  Define the atom used to represent that the face represented by FACE-ID
+  is being seen.
+"
+  (Evaluation
+    (Predicate "see")
+    (List
+      (Concept "I")
+      (Concept face-id)))
+)
+
+(define (face-emotion face-id emotion-type)
+"
+  Define the atom used to represent EMOTION-TYPE of the face with
+  id FACE-ID.
+"
+  (Evaluation
+    (Predicate emotion-type)
+    (List face-id))
+)
 
 ; --------------------------------------------------------------
 ; Apis for inputing sensory information.
 ; --------------------------------------------------------------
-(define (perceived-face face-id x y z)
-  (cog-pointmem-map-atom facemap (Concept face-id)
-    (List (Number x) (Number y) (Number z)))
+;(define (perceived-face face-id x y z)
+;  (cog-pointmem-map-atom facemap (Concept face-id)
+;    (List (Number x) (Number y) (Number z)))
+
+(define (perceived-face face-id strength)
+  (cog-set-tv! (see-face face-id) (stv strength 1))
 )
 
 (define (perceived-emotion face-id emotion-type strength)
-  (Evaluation (stv strength 1)
-    (Predicate emotion-type)
-    (List face))
+  (cog-set-tv! (face-emotion face-id emotion-type) (stv strength 1))
 )
 
 (define (perceive-word word)
@@ -50,16 +82,55 @@
 ; Apis for forming GroundedPredicates that are used for 
 ; checking if the world is in a particular state or not.
 ; --------------------------------------------------------------
-(define (person_appears face-id)
-  (cog-pointmem-get-locs-of-atom facemap (Concept face-id))
+;(define (person_appears face-id)
+;  (cog-pointmem-get-locs-of-atom facemap (Concept face-id))
+;)
+
+(define* (person_appears #:optional face-id)
+  (if face-id
+    (is-model-true? (see-face face-id))
+    (any-face-seen?)
+  )
 )
 
-(define (person_smiles)
-  *uspecified* 
+(define (any-face-seen?)
+  (define get-models
+    (Get
+      (TypedVariable (Variable "seen-faces")
+      (Signature
+        (Evaluation
+          (Predicate "see")
+          (List
+            (Concept "I")
+            (Type "ConceptNode")))))
+      (And
+        (Evaluation
+          (GroundedPredicate "scm: is-model-true?")
+          (List
+            (Variable "seen-faces")))
+        (Variable "seen-faces"))))
+
+  (let ((models (cog-outgoing-set (cog-execute! get-models))))
+    (if (null? models)
+      (stv 0 1)
+      (stv 1 1)
+    )
+  )
+)
+
+(define* (person_smiles #:optional face-id)
+  (if face-id
+    (is-model-true? (face-emotion face-id "smile"))
+    (any-person-smiles?)
+  )
+)
+
+(define (any-person-smiles?)
+  *uspecified*
 )
 
 (define (person_angry)
-  *uspecified* 
+  *uspecified*
 )
 
 (define (word_perceived)
@@ -76,4 +147,15 @@
 
 (define (expression)
   *uspecified* 
+)
+
+; --------------------------------------------------------------
+; Utilities
+; --------------------------------------------------------------
+(define (is-model-true? model)
+  (let ((strength (tv-mean (cog-tv model))))
+    (cond
+      ((> 0.5 strength) (stv 0 1))
+      ((<= 0.5 strength) (stv 1 1)))
+  )
 )
