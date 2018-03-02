@@ -75,7 +75,7 @@
 )
 
 (define (perceive-word word)
-  *uspecified* 
+  *unspecified*
 )
 
 ; --------------------------------------------------------------
@@ -126,15 +126,15 @@
 )
 
 (define (any-person-smiles?)
-  *uspecified*
+  *unspecified*
 )
 
 (define (person_angry)
-  *uspecified*
+  *unspecified*
 )
 
 (define (word_perceived)
-  *uspecified* 
+  *unspecified*
 )
 
 ; --------------------------------------------------------------
@@ -142,11 +142,11 @@
 ; actions.
 ; --------------------------------------------------------------
 (define (animation)
-  *uspecified* 
+  *unspecified*
 )
 
 (define (expression)
-  *uspecified* 
+  *unspecified*
 )
 
 ; --------------------------------------------------------------
