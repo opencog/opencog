@@ -147,7 +147,7 @@ HandleTree XPatternMiner::specialize_shabs(const Handle& pattern,
 
 	// For each shallow abstraction, create a specialization from
 	// pattern by composing it, and recursively specialize the result
-	// with the remaining valuations.
+	// with the new resulting valuations.
 	HandleTree patterns;
 	Handle var = valuations.front_variable();
 	for (const auto& shapat : shapats)
@@ -239,7 +239,7 @@ HandleSet XPatternMiner::variable_reduce(const Valuations& valuations) const
 	                  valuations.variables.varseq.end());
 
 	// Let's not bother and consider all remaining variables as
-	// potential reducible
+	// potentially reducible
 	return remvars;
 }
 
@@ -267,11 +267,6 @@ bool XPatternMiner::enough_support(const Handle& pattern,
 	return param.minsup <= freq(pattern, texts, param.minsup);
 }
 
-bool XPatternMiner::enough_support(const HandleSet& texts) const
-{
-	return param.minsup <= freq(texts, param.minsup);
-}
-
 unsigned XPatternMiner::freq(const Handle& pattern,
                              const HandleSet& texts,
                              int maxf) const
@@ -296,23 +291,8 @@ unsigned XPatternMiner::freq_component(const Handle& component,
                                        int maxf) const
 {
 	if (totally_abstract(component))
-		freq(texts, maxf);
-	return restricted_satisfying_set(component, texts, maxf)->get_arity();
-}
-
-unsigned XPatternMiner::freq(const HandleSet& texts, int maxf) const
-{
-	if (maxf < 0)
 		return texts.size();
-
-	// Otherwise only count up to maxf
-	unsigned count = 0;
-	for (const auto& text : texts) {
-		++count;
-		if (maxf <= (int)count)
-			return count;
-	}
-	return count;
+	return restricted_satisfying_set(component, texts, maxf)->get_arity();
 }
 
 unsigned XPatternMiner::freq(const std::vector<unsigned>& freqs) const
@@ -389,17 +369,17 @@ HandleSet XPatternMiner::shallow_abstract(const Valuations& valuations)
 	return shapats;
 }
 
-Handle XPatternMiner::shallow_abstract(const Handle& text)
+Handle XPatternMiner::shallow_abstract(const Handle& value)
 {
 	// Node or empty link, nothing to abstract
-	if (text->is_node() or text->get_arity() == 0)
-		return text;
+	if (value->is_node() or value->get_arity() == 0)
+		return value;
 
-	Type tt = text->get_type();
+	Type tt = value->get_type();
 
 	// Links wrapped with LocalQuoteLink
 	if (tt == AND_LINK) {
-		HandleSeq rnd_vars = gen_rand_variables(text->get_arity());
+		HandleSeq rnd_vars = gen_rand_variables(value->get_arity());
 		Handle vardecl = variable_list(rnd_vars),
 			body = pattern_as.add_link(tt, rnd_vars),
 			pattern = lambda(vardecl, local_quote(body));
@@ -410,7 +390,7 @@ Handle XPatternMiner::shallow_abstract(const Handle& text)
 	    tt == EVALUATION_LINK or
 	    tt == EXECUTION_OUTPUT_LINK)
 	{
-		HandleSeq rnd_vars = gen_rand_variables(text->get_arity());
+		HandleSeq rnd_vars = gen_rand_variables(value->get_arity());
 		// Wrap variables in UnquoteLink
 		HandleSeq uq_vars;
 		for (Handle& var : rnd_vars)
@@ -423,7 +403,7 @@ Handle XPatternMiner::shallow_abstract(const Handle& text)
 	}
 
 	// Generic non empty link, let's abstract away all the arguments
-	HandleSeq rnd_vars = gen_rand_variables(text->get_arity());
+	HandleSeq rnd_vars = gen_rand_variables(value->get_arity());
 	Handle vardecl = variable_list(rnd_vars),
 		body = pattern_as.add_link(tt, rnd_vars),
 		pattern = lambda(vardecl, body);
@@ -480,7 +460,7 @@ Handle XPatternMiner::compose(const Handle& pattern,
 	// Perform composition of the pattern body with the sub-bodies)
 	// TODO: perhaps use RewriteLink partial_substitute
 	Handle body = variables.substitute_nocheck(get_body(pattern), subodies);
-	body = RewriteLink::consume_ill_quotations(vardecl, body);
+	body = RewriteLink::consume_quotations(vardecl, body, true);
 	// If root AndLink then simplify the pattern
 	if (body->get_type() == AND_LINK) {
 		body = remove_useless_clauses(vardecl, body);

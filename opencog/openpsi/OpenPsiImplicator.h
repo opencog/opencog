@@ -25,6 +25,7 @@
 
 #include <opencog/atoms/pattern/PatternLink.h>
 #include <opencog/atomspace/AtomSpace.h>
+#include <opencog/openpsi/OpenPsiRules.h>
 
 #include <opencog/query/Satisfier.h>
 
@@ -54,7 +55,7 @@ public:
    *
    * @param rule An openpsi rule.
    */
-  TruthValuePtr check_satisfiability(const Handle& rule);
+  TruthValuePtr check_satisfiability(const Handle& rule, OpenPsiRules& opr);
 
   /**
    * Instantiate the action of the given openpsi rule.
@@ -62,7 +63,17 @@ public:
    * @param rule An openpsi rule.
    * @return The handle to the grounded atom.
    */
-  Handle imply(const Handle& rule);
+  Handle imply(const Handle& rule, OpenPsiRules& opr);
+
+  /**
+   * Returns TRUE_TV if the last time an instantiation was tried on the
+   * given rule a grounding was possible and the instantation completed.
+   * FALSE_TV is returned if the rule is unsatisfiable and thus the
+   * action was not instantiated.
+   *
+   * @param rule An openpsi rule.
+   */
+  TruthValuePtr was_action_executed(const Handle rule);
 
 private:
   /**
@@ -71,18 +82,25 @@ private:
    * the query PatternLink, because doing so would require extra
    * computation that doesn't add any value.
    */
-  static std::map<Handle, HandleMap> _satisfiability_cache;
+  std::map<Handle, HandleMap> _satisfiability_cache;
 
   /**
    * An empty map used for clearing cache entries, or to denote absence
    * of groundings.
    */
-  static const HandleMap _EMPTY_HANDLE_MAP;
+  const HandleMap _EMPTY_HANDLE_MAP;
 
   // Because two of the ancestor classes that this class inherites
   // from have _as variable.
   using DefaultPatternMatchCB::_as;
+
+  // Predicate used to set a value on whether an action was executed or not
+  Handle _action_executed;
+
 };
+
+// This function is used to create a single static instance
+OpenPsiImplicator& openpsi_implicator(AtomSpace* as);
 
 }; // namespace opencog
 

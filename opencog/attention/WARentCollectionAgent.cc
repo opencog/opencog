@@ -46,12 +46,11 @@ WARentCollectionAgent::WARentCollectionAgent(CogServer& cs):
     // READ SLEEPING TIME HERE
     _sti_rent = STIAtomRent;
     _lti_rent = LTIAtomRent;
-    set_sleep_time(2000);
 }
 
 void WARentCollectionAgent::selectTargets(HandleSeq &targetSetOut)
 {
-    Handle h = _bank->getRandomAtom();
+    Handle h = _bank->getRandomAtomNotInAF();
     if(h == Handle::UNDEFINED)
         return;
     targetSetOut.push_back(h);
@@ -60,15 +59,15 @@ void WARentCollectionAgent::selectTargets(HandleSeq &targetSetOut)
 void WARentCollectionAgent::collectRent(HandleSeq& targetSet)
 {
     for (const Handle& h : targetSet) {
-        int sti = get_sti(h);
-        int lti = get_lti(h);
+        AttentionValue::sti_t sti = get_sti(h);
+        AttentionValue::lti_t lti = get_lti(h);
         
         float last_update_time = _sdac.elapsed_time(h);
         STIAtomRent = STIAtomRent * last_update_time;
         LTIAtomRent = LTIAtomRent * last_update_time;
         
-        int stiRent = calculate_STI_Rent();
-        int ltiRent = calculate_LTI_Rent();  
+        double stiRent = calculate_STI_Rent();
+        double ltiRent = calculate_LTI_Rent();
         if (stiRent > sti)
             stiRent = sti;
 

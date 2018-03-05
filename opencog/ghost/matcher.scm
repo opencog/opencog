@@ -149,7 +149,7 @@
     ; Now calculate the weight
     (* (cog-stv-strength R)
        (assoc-ref context-alist (psi-get-context R))
-       (if (equal? 0 sti) 1 sti)
+       (if (= 0 sti) 1 sti)
        ; TODO: Use a more sophisticated way for the below
        (if (is-rule-in-topic? R curr-topic) 1 0.5)))
 
@@ -266,7 +266,8 @@
         ; Keep a record of which rule got executed, just for rejoinders
         ; TODO: Move this part to OpenPsi?
         ; TODO: This should be created after actually executing the action
-        (if (not (null? selected)) (State ghost-last-executed selected))
+        (if (not (null? selected))
+          (State ghost-last-executed (psi-rule-alias selected)))
 
         (List selected)))
 

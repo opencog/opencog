@@ -216,17 +216,6 @@ void ImportanceDiffusionBase::tradeSTI(DiffusionEventType event)
 
     // TODO: How to make this a transaction? This could go wrong if there
     // were simultaneous updates in other threads.
-
-    // TODO: Using integers for STI values can cause strange consequences.
-    // Rounding to an integer is required so that only whole STI amounts
-    // are exchanged; due to flooring after multiplying the probability
-    // vector by the total diffusion amount, the amount diffused by this
-    // routine may not exactly match the totalDiffusionAmount, which could
-    // be a problem. Floor is used instead of round, so that an atom cannot
-    // diffuse more STI than it has. This also can cause an atom to not
-    // diffuse any STI when the amount to be diffused is less than 1.
-    //   * See: https://github.com/opencog/opencog/issues/676
-
 }
 
 /*

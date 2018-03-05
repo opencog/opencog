@@ -55,7 +55,7 @@ IF (HAVE_ATOMSPACE)
 	ADD_DEPENDENCIES(cogserver_type_constructors nlp_atom_types)
 	ADD_DEPENDENCIES(cogserver_type_constructors attention_atom_types)
 	ADD_DEPENDENCIES(cogserver_type_constructors spacetime_atom_types)
-	ADD_DEPENDENCIES(cogserver_type_constructors patternminer_types)
+	ADD_DEPENDENCIES(cogserver_type_constructors patternminer_atom_types)
 
 	TARGET_LINK_LIBRARIES(cogserver_type_constructors
 		attention-types
@@ -71,7 +71,7 @@ IF (HAVE_ATOMSPACE)
 		OUTPUT_NAME cogserver_type_constructors)
 
 	INSTALL (TARGETS cogserver_type_constructors
-		DESTINATION "lib${LIB_DIR_SUFFIX}/python2.7/dist-packages/opencog")
+		DESTINATION "${PYTHON_DEST}")
 
 ENDIF (HAVE_ATOMSPACE)
 
@@ -103,7 +103,7 @@ IF (HAVE_SERVER)
 		OUTPUT_NAME cogserver)
 
 	INSTALL (TARGETS cogserver_cython
-		DESTINATION "lib${LIB_DIR_SUFFIX}/python2.7/dist-packages/opencog")
+		DESTINATION "${PYTHON_DEST}")
 
 	####################### agent finder ########################
 	CYTHON_ADD_MODULE_PYX(agent_finder
@@ -132,7 +132,7 @@ IF (HAVE_SERVER)
 		OUTPUT_NAME agent_finder)
 
 	INSTALL (TARGETS agent_finder
-		DESTINATION "lib${LIB_DIR_SUFFIX}/python2.7/dist-packages/opencog")
+		DESTINATION "${PYTHON_DEST}")
 ENDIF(HAVE_SERVER)
 
 IF (HAVE_STATISTICS)
@@ -160,9 +160,9 @@ IF (HAVE_STATISTICS)
 		OUTPUT_NAME statistics)
 
 	INSTALL (TARGETS statistics_cython
-		DESTINATION "lib${LIB_DIR_SUFFIX}/python2.7/dist-packages/opencog")
+		DESTINATION "${PYTHON_DEST}")
 ENDIF (HAVE_STATISTICS)
 
 INSTALL (FILES
 	__init__.py
-	DESTINATION "lib${LIB_DIR_SUFFIX}/python2.7/dist-packages/opencog")
+	DESTINATION "${PYTHON_DEST}")

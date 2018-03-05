@@ -59,8 +59,6 @@ void RentCollectionBaseAgent::run()
     if (targetSet.size() == 0) return;
 
     collectRent(targetSet);
-   
-    std::this_thread::sleep_for(std::chrono::milliseconds(get_sleep_time()));
 }
 
 void RentCollectionBaseAgent::load_params(void)
@@ -70,14 +68,14 @@ void RentCollectionBaseAgent::load_params(void)
     STIAtomRent = std::stod(_atq.get_param_value(AttentionParamQuery::rent_starting_sti_rent));
     LTIAtomRent = std::stod(_atq.get_param_value(AttentionParamQuery::rent_starting_lti_rent));
     targetSTI = std::stod(_atq.get_param_value(AttentionParamQuery::rent_target_sti_funds));
-    stiFundsBuffer = std::stoi(_atq.get_param_value(AttentionParamQuery::rent_sti_funds_buffer));
+    stiFundsBuffer = std::stod(_atq.get_param_value(AttentionParamQuery::rent_sti_funds_buffer));
     targetLTI = std::stod(_atq.get_param_value(AttentionParamQuery::rent_target_lti_funds));
-    ltiFundsBuffer = std::stoi(_atq.get_param_value(AttentionParamQuery::rent_lti_funds_buffer));
+    ltiFundsBuffer = std::stod(_atq.get_param_value(AttentionParamQuery::rent_lti_funds_buffer));
 }
 
-double RentCollectionBaseAgent::calculate_STI_Rent()
+AttentionValue::sti_t RentCollectionBaseAgent::calculate_STI_Rent()
 {
-    int funds = _bank->getSTIFunds();
+    double funds = _bank->getSTIFunds();
     double diff  = targetSTI - funds;
 
     if(diff <= 0)
@@ -86,14 +84,14 @@ double RentCollectionBaseAgent::calculate_STI_Rent()
     double ndiff = diff / stiFundsBuffer;
     ndiff = std::min(ndiff, 1.0);
     ndiff = std::max(ndiff, -0.99);
-    double res = STIAtomRent + (STIAtomRent * ndiff);
+    AttentionValue::sti_t res = STIAtomRent + (STIAtomRent * ndiff);
 
     return res;
 }
 
-double RentCollectionBaseAgent::calculate_LTI_Rent()
+AttentionValue::sti_t RentCollectionBaseAgent::calculate_LTI_Rent()
 {
-    int funds = _bank->getLTIFunds();
+    double funds = _bank->getLTIFunds();
     double diff  = targetLTI - funds;
     double ndiff = diff / ltiFundsBuffer;
     ndiff = std::min(ndiff, 1.0);

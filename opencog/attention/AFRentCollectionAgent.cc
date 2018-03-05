@@ -45,7 +45,6 @@ using namespace opencog;
 
 AFRentCollectionAgent::AFRentCollectionAgent(CogServer& cs) : RentCollectionBaseAgent(cs)
 {
-    last_update      = high_resolution_clock::now();
 }
 
 AFRentCollectionAgent::~AFRentCollectionAgent() {
@@ -59,27 +58,36 @@ void AFRentCollectionAgent::selectTargets(HandleSeq &targetSetOut)
 
 void AFRentCollectionAgent::collectRent(HandleSeq& targetSet)
 {
-    update_cycle = std::stod(_atq.get_param_value(AttentionParamQuery::af_rent_update_freq));
+    static bool first_time = true;
+    if (first_time) {
+        last_update = high_resolution_clock::now();
+        first_time = false;
+    }
+
+    update_freq = std::stod(_atq.get_param_value(AttentionParamQuery::af_rent_update_freq));
 
     // calculate elapsed time Et
-    seconds elapsed_time = duration_cast<seconds>
-                           (high_resolution_clock::now() - last_update);
-    if (elapsed_time.count() <  update_cycle )
+    microseconds elapsed_time = duration_cast<microseconds>
+                                (high_resolution_clock::now() - last_update);
+
+    if (elapsed_time.count() < 1000000/update_freq)
         return;
 
-    int w = elapsed_time.count() / update_cycle;
+    double w = elapsed_time.count() * update_freq / 1000000;
 
     for (const Handle& h : targetSet) {
-        int sti = get_sti(h);
-        int lti = get_lti(h);
-        int stiRent = calculate_STI_Rent();
-        int ltiRent = calculate_LTI_Rent();
+        AttentionValue::sti_t sti = get_sti(h);
+        AttentionValue::lti_t lti = get_lti(h);
+        AttentionValue::sti_t stiRent =  calculate_STI_Rent();
+        stiRent *= w;
+        AttentionValue::lti_t ltiRent =  calculate_LTI_Rent();
+        ltiRent *= w;
 
         if (stiRent > sti) stiRent = sti;
         if (ltiRent > lti) ltiRent = lti;
 
-        _bank->set_sti(h, sti - w * stiRent);
-        _bank->set_lti(h, lti - w * ltiRent);
+        _bank->set_sti(h, sti - stiRent);
+        _bank->set_lti(h, lti - ltiRent);
 
 #ifdef LOG_AV_STAT
         atom_avstat[h].rent = (w * stiRent);

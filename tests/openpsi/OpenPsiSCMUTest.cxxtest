@@ -1,5 +1,5 @@
 /*
- * @file tests/planning/OpenPsiUTest.cxxtest
+ * @file tests/planning/OpenPsiSCMUTest.cxxtest
  *
  * Copyright (C) 2016 OpenCog Foundation
  * All Rights Reserved
@@ -41,8 +41,22 @@ private:
     SchemeEval* _scm;
 
 public:
-    OpenPsiSCMUTest(): _as(nullptr), _scm(nullptr)
+    OpenPsiSCMUTest()
     {
+        _as = new AtomSpace();
+        _scm = new SchemeEval(_as);
+
+        // The scheme environment is reset between each test.
+        // Configure scheme load-paths that are common for all tests.
+        _scm->eval("(add-to-load-path \"/usr/local/share/opencog/scm\")");
+        CHKERR
+
+        // Load required modules for testing and populate the atomspace
+        _scm->eval("(use-modules (opencog) (opencog openpsi))");
+        CHKERR
+        _scm->eval("(load \"" OPENPSI_TEST_PATH "/rules.scm\")");
+        CHKERR
+
         logger().set_level(Logger::DEBUG);
         logger().set_print_level_flag(true);
         logger().set_print_to_stdout_flag(true);
@@ -61,30 +75,9 @@ public:
             std::remove(logger().get_filename().c_str());
     }
 
-    void setUp()
-    {
-        // The scheme environment is reset between each test.
-        _as = new AtomSpace();
-        _scm = new SchemeEval(_as);
-
-        // Configure scheme load-paths that are common for all tests.
-        _scm->eval("(add-to-load-path \"/usr/local/share/opencog/scm\")");
-        CHKERR
-
-        // Load required modules for testing and populate the atomspace
-        _scm->eval("(use-modules (opencog) (opencog openpsi))");
-        CHKERR
-        _scm->eval("(load \"" OPENPSI_TEST_PATH "/rules.scm\")");
-        CHKERR
-    }
-
-    void tearDown()
-    {
-        delete _as;
-        _as = nullptr;
-        delete _scm;
-        _scm = nullptr;
-    }
+    // Each test continuese from the state created by the previous one.
+    void setUp() {}
+    void tearDown() {}
 
     // Check the scheme function `psi-get-action`
     void test_psi_get_action()
@@ -152,46 +145,6 @@ public:
     }
 
     // Check the scheme function `psi-select-rules`
-    void xtest_psi_select_rules()
-    {
-        logger().info("BEGIN TEST: %s", __FUNCTION__);
-
-        // Add the rules
-        auto rule_1 = _scm->eval_h("(rule-1)");
-        CHKERR
-        auto rule_2 = _scm->eval_h("(rule-2)");
-        CHKERR
-
-        // Test 1:
-        auto result_1 = _scm->eval("(psi-select-rules)");
-        CHKERR
-        TSM_ASSERT_EQUALS("Expected ()", "()\n", result_1);
-
-        // Test 2:
-        _scm->eval("(groundable-content-1)");
-        CHKERR
-        auto result_2_1 = _scm->eval("(length (psi-select-rules))");
-        CHKERR
-        TSM_ASSERT_EQUALS("Expected a single rule", "1\n" , result_2_1);
-
-        auto result_2_2 = _scm->eval_h("(car (psi-select-rules))");
-        CHKERR
-        TSM_ASSERT_EQUALS("Expected the same psi-rule", rule_1, result_2_2);
-        CHKERR
-
-        // Test 3:
-        // Test that only one rule is selected when running in default mode,
-        // eventhough multiple rules are satisfiable.
-        _scm->eval("(groundable-content-2)");
-        CHKERR
-        auto result_3 = _scm->eval("(length (psi-select-rules))");
-        CHKERR
-        TSM_ASSERT_EQUALS("Expected a single rule", "1\n" , result_3);
-
-        logger().info("END TEST: %s", __FUNCTION__);
-    }
-
-    // Check the scheme function `psi-select-rules`
     void test_psi_select_rules()
     {
         logger().info("BEGIN TEST: %s", __FUNCTION__);
@@ -203,17 +156,7 @@ public:
         CHKERR
 
         // Test 1:
-        auto result_1_1 = _scm->eval("(psi-select-rules (demand-1))");
-        CHKERR
-        TSM_ASSERT_EQUALS("Expected ()", "()\n", result_1_1);
-
-        auto result_1_2 = _scm->eval("(psi-select-rules (demand-2))");
-        CHKERR
-        TSM_ASSERT_EQUALS("Expected ()", "()\n", result_1_2);
-
-        // Test 2:
-        _scm->eval("(groundable-content-1)");
-        CHKERR
+        // Continuese from the state created by the previous test.
         auto result_2_1 = \
             _scm->eval_h("(car (psi-select-rules (demand-1)))");
         CHKERR
@@ -224,7 +167,7 @@ public:
         TSM_ASSERT_EQUALS("Expected ()", "()\n", result_2_2);
         CHKERR
 
-        // Test 3:
+        // Test 2:
         // Double checking
         _scm->eval("(groundable-content-2)");
         CHKERR
@@ -241,84 +184,13 @@ public:
         logger().info("END TEST: %s", __FUNCTION__);
     }
 
-    // Check the scheme function `psi-related-goals`
-    void xtest_psi_related_goals()
-    {
-        logger().info("BEGIN TEST: %s", __FUNCTION__);
-
-        // Add the rules
-        _scm->eval_h("(rule-1) (rule-2) (rule-3)");
-        CHKERR
-
-        // Test 1:
-        auto result_1 = _scm->eval("(test_psi_related_goals_1)");
-        CHKERR
-        TSM_ASSERT_EQUALS("Expected `#t`", "#t\n" , result_1);
-
-        // Test 2:
-        auto result_2 = _scm->eval("(test_psi_related_goals_2)");
-        CHKERR
-        TSM_ASSERT_EQUALS("Expected `#t`", "#t\n" , result_2);
-
-        logger().info("END TEST: %s", __FUNCTION__);
-    }
-
-    // Check the scheme function `psi-get-satisfiable-rules`
-    void test_psi_get_satisfiable_rules()
-    {
-        logger().info("BEGIN TEST: %s", __FUNCTION__);
-
-        // Add the rules and contents
-        _scm->eval_h("(rule-1) (rule-2) (rule-3)");
-        CHKERR
-
-        // Test 1:
-        _scm->eval("(groundable-content-1)");
-        CHKERR
-        auto result_1_1 = _scm->eval("(length (cog-outgoing-set \
-                            (psi-get-satisfiable-rules (demand-1))))");
-        CHKERR
-        TSM_ASSERT_EQUALS("Expected `1`", "1\n" , result_1_1);
-        auto result_1_2 =_scm->eval("(length (cog-outgoing-set \
-                            (psi-get-satisfiable-rules (demand-2))))");
-        CHKERR
-        TSM_ASSERT_EQUALS("Expected `0`", "0\n" , result_1_2);
-
-        // Test 2:
-        _scm->eval("(groundable-content-2)");
-        CHKERR
-        auto result_2_1 = _scm->eval("(length (cog-outgoing-set \
-                            (psi-get-satisfiable-rules (demand-1))))");
-        CHKERR
-        TSM_ASSERT_EQUALS("Expected `2`", "2\n" , result_2_1);
-        auto result_2_2 =_scm->eval("(length (cog-outgoing-set \
-                            (psi-get-satisfiable-rules (demand-2))))");
-        CHKERR
-        TSM_ASSERT_EQUALS("Expected `1`", "1\n" , result_2_2);
-
-        // Test 3:
-        _scm->eval("(map cog-delete (groundable-content-1))");
-        CHKERR
-        auto result_3_1 = _scm->eval("(length (cog-outgoing-set \
-                            (psi-get-satisfiable-rules (demand-1))))");
-        CHKERR
-        TSM_ASSERT_EQUALS("Expected `1`", "1\n" , result_3_1);
-        auto result_3_2 =_scm->eval("(length (cog-outgoing-set \
-                            (psi-get-satisfiable-rules (demand-2))))");
-        CHKERR
-        TSM_ASSERT_EQUALS("Expected `1`", "1\n" , result_3_2);
-
-        logger().info("END TEST: %s", __FUNCTION__);
-    }
-
-
     // Check the scheme function `psi-step`.
     void test_psi_step_1()
     {
         logger().info("BEGIN TEST: %s", __FUNCTION__);
 
-        // Common Setup
-        _scm->eval("(rule-1) (rule-2)");
+        // Initial Setup
+        _scm->eval("(rule-3) (rule-4)");
         CHKERR
 
         // Test 1:
@@ -327,46 +199,47 @@ public:
         _scm->eval("(do_psi_step)");
         CHKERR
 
-        auto result_1_1 = _scm->eval("(act-1-present?)");
+        auto result_1_1 = _scm->eval("(act-3-present?)");
         CHKERR
         TS_ASSERT_EQUALS("#f\n", result_1_1);
 
-        auto result_1_2 = _scm->eval("(act-2-present?)");
+        auto result_1_2 = _scm->eval("(act-4-present?)");
         CHKERR
         TS_ASSERT_EQUALS("#f\n", result_1_2);
 
         // Test 2:
         // Test that action-1 is executed and action-2 is not when its
         // context is satisfied.
-        _scm->eval("(groundable-content-1)");
+        _scm->eval("(groundable-content-3)");
         CHKERR
         _scm->eval("(do_psi_step)");
         CHKERR
 
         // For rule-1
-        auto result_2_1 = _scm->eval("(act-1-present?)");
+        auto result_2_1 = _scm->eval("(act-3-present?)");
         CHKERR
         TS_ASSERT_EQUALS("#t\n", result_2_1);
 
         // For rule-2
-        auto result_2_2 = _scm->eval("(act-2-present?)");
+        auto result_2_2 = _scm->eval("(act-4-present?)");
         CHKERR
         TS_ASSERT_EQUALS("#f\n", result_2_2);
 
         // Test 3:
-        // Test that action-2, goal-1 and goal-2 are evaluated.
-        _scm->eval("(groundable-content-2)");
+        // Test that action-2 is executed.
+        _scm->eval("(groundable-content-4)");
         CHKERR
         _scm->eval("(do_psi_step)");
         CHKERR
 
         // For rule-1
-        auto result_3_1 = _scm->eval("(act-1-present?)");
+	// Nothing changes
+        auto result_3_1 = _scm->eval("(act-3-present?)");
         CHKERR
         TS_ASSERT_EQUALS("#t\n", result_3_1);
 
         // For rule-2
-        auto result_3_2 = _scm->eval("(act-2-present?)");
+        auto result_3_2 = _scm->eval("(act-4-present?)");
         CHKERR
         TS_ASSERT_EQUALS("#t\n", result_3_2);
 
@@ -374,7 +247,7 @@ public:
     }
 
     // Check the scheme functions `psi-run` and `psi-halt`
-    void test_psi_run_and_psi_halt()
+    void x_test_psi_run_and_psi_halt()
     {
       logger().info("BEGIN TEST: %s", __FUNCTION__);
 
@@ -404,38 +277,4 @@ public:
       logger().info("END TEST: %s", __FUNCTION__);
     }
 
-    // Check the scheme function `psi-get-dual-rules`
-    // NOTE: The function `psi-get-dual-rules` has been removed but something
-    // similar will be added. This test is not removed as the test may come in
-    // handy.
-    void psi_get_dual_rules()
-    {
-        logger().info("BEGIN TEST: %s", __FUNCTION__);
-
-        // Test 1:
-        // Test for finding psi-rules with context without variable in them,
-        // aka canned rules.
-        _scm->eval_h("(rule-1)(rule-2)(rule-3)(rule-4)");
-        CHKERR
-        auto result_1_1 = _scm->eval("(test_psi_get_dual_rules_1_1)");
-        CHKERR
-        TSM_ASSERT_EQUALS("Expected `#t`", "#t\n" , result_1_1);
-        auto result_1_2 = _scm->eval("(test_psi_get_dual_rules_1_2)");
-        CHKERR
-        TSM_ASSERT_EQUALS("Expected `#t`", "#t\n" , result_1_2);
-
-        // Test 2:
-        // Test for finding psi-rules using DualLink for contexts that have
-        // variables in them.
-        _scm->eval_h("(rule-5)");
-        CHKERR
-        auto result_2_1 = _scm->eval("(test_psi_get_dual_rules_2_1)");
-        CHKERR
-        TSM_ASSERT_EQUALS("Expected `2`", "2\n" , result_2_1);
-        auto result_2_2 = _scm->eval("(test_psi_get_dual_rules_2_2)");
-        CHKERR
-        TSM_ASSERT_EQUALS("Expected `#t`", "#t\n" , result_2_2);
-
-        logger().info("END TEST: %s", __FUNCTION__);
-    }
 };
