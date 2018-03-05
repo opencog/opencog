@@ -18,7 +18,8 @@ filename="$2"
 coghost="$3"
 cogport=$4
 
-splitter=/home/ubuntu/src/relex/src/split-sentences/split-sentences.pl
+# Not using relex any longer
+#splitter=/home/ubuntu/src/relex/src/split-sentences/split-sentences.pl
 splitter=/usr/local/bin/split-sentences.pl
 splitter=./split-sentences.pl
 
