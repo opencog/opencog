@@ -104,18 +104,16 @@ statistics.  Most of this revolves around setting up postgres.
    https://debbugs.gnu.org/cgi/bugreport.cgi?bug=26616
    (in guile-2.2, it doesn't hang, but still behaves very badly)
 
-1) Set up and configure postgres, as described in
+1) Install `link-grammar-5.3.15` or newer, either from here:
+
+    https://www.abisource.com/projects/link-grammar/
+
+  or (for the latest, developer version) from here:
+
+    https://github.com/opencog/link-grammar
+
+2) Set up and configure postgres, as described in
    `atomspace/opencog/persist/sql/README.md`
-
-2) Create and initialize the database. Pick any name you want;
-   here it is `learn-pairs`.
-```
-   createdb learn-pairs
-   cat atom.sql | psql learn-pairs
-```
-
-3) Start the cogserver, verify that connections to the database work.
-   (see steps 5,6,7,8 below, for more on how to do this.)
 
 Obtaining word-pair counts requires digesting a lot of text, and
 counting the word-pairs that occur in the text.  The easiest way of
@@ -130,9 +128,13 @@ so we may as well start using it right away.
 
 So, set up the text-ingestion pipeline:
 
-4) Install `link-grammar-5.3.15` or newer.
-
-5) Create/edit the `~/.guile` file and add the following content:
+3) Create and initialize a database. Pick any name you want;
+   here it is `learn-pairs`.
+```
+   createdb learn-pairs
+   cat atom.sql | psql learn-pairs
+```
+4) Create/edit the `~/.guile` file and add the following content:
 ```
    (use-modules (ice-9 readline))
    (activate-readline)
@@ -141,21 +143,25 @@ So, set up the text-ingestion pipeline:
    (add-to-load-path "/usr/local/share/opencog/scm")
    (add-to-load-path ".")
 ```
-7) Copy the `observe-launch.scm` file from the `run` directory to your working
-   directory. Review and edit the language configuration if necessary (only 
-   need to change the appropriate 'opencog-??.conf' filename, if not using 
-   English).
+5) Copy the `observe-launch.scm` and `utilities.scm` files from the `run` 
+   directory to your working directory. 
+   Review and edit the language configuration if necessary (you can 
+   change the appropriate 'opencog-??.conf' filename, if not using English).
    This file starts the cogserver and sets a default prompt: set up by default
    to avoid conflicts and confusion, and to allow multiple languages to be 
    processed at the same time. You need to pass as arguments the database
-   credentials. See below for more details.
+   credentials. See next step.
 
-7a) Start the REPL server in a terminal, as follows:
+6) If you set up a password, start the REPL server in a 
+   new terminal, as follows:
 ```
-   guile -l pair-count-??.scm
+   guile -l observe-launch.scm  -- --db learn-pairs --user your_user --password asdf
 ```
+   The --user option is needed only if the database owner is different from the
+   current user.
+   --password is also optional, not needed if no password was setup for the database
 
-8) Verify that the language processing pipeline works. In a second
+7) Verify that the language processing pipeline works. In a second
    terminal, try this:
 ```
    rlwrap telnet localhost 17005  # or wherever your REPL server is configured.
@@ -174,7 +180,7 @@ So, set up the text-ingestion pipeline:
    for parsing, counts the returned word-pairs, and stores them in
    the database.
 
-8a) Verify that the above resulted in data sent to the SQL database.
+7a) Verify that the above resulted in data sent to the SQL database.
    Log into the database, and check:
 ```
    psql learn-pairs
@@ -186,7 +192,7 @@ So, set up the text-ingestion pipeline:
    pair-wise linkages for the above sentences. If the above are empty,
    something is wrong. Go to step zero.
 
-8b) Optionally reduce the amount of data that is collected. Currently,
+7b) Optionally reduce the amount of data that is collected. Currently,
   the `observe-text` function in 'link-pipeline.scm` collects counts
   on four different kinds of structures:
 
@@ -205,14 +211,14 @@ So, set up the text-ingestion pipeline:
                 You almost surely do not need this.  This is for my
                 own personal curiosity.
 
-8c) Optionally tune the forced garbage collection parameters. Currently
+7c) Optionally tune the forced garbage collection parameters. Currently
   garbage collection is forced whenever the guile heap exceeds 750
   MBytes; this helps keep RAM usage down on small-RAM machines.  However,
   it does cost CPU time.  Adjust the `max-size` parameter in
   `observe-text` in the `link-pipeline.scm` file to suit your whims in
   RAM usage and time spent in GC.
 
-9) Get ready to feed it text (see Bulk Text Parsing section below). 
+8) Get ready to feed it text (see Bulk Text Parsing section below). 
   It would be best to get text that
   consists of narrative literature, adventure and young-adult novels,
   newspaper stories. These contain a good mix of common nouns and verbs,
@@ -234,7 +240,7 @@ So, set up the text-ingestion pipeline:
   and pre-processing texts from Project Gutenberg, Wikipedia, and the
   "Archive of Our Own" fan-fiction website.
 
-9a) The current pipeline for Chinese text requires word segmentation
+8a) The current pipeline for Chinese text requires word segmentation
   to be performed outside of OpenCog. This can be done using jieba
   https://github.com/fxsjy/jieba So: first, install it:
   `pip install jieba` and then segment text:
@@ -247,7 +253,7 @@ So, set up the text-ingestion pipeline:
   you will want to use `zh-pre` or `yue-pre` for the language; this
   disables the addition of spaces between hanzi characters.
 
-10) After doing at least several days worth of parsing  (i.e. at least
+9) After doing at least several days worth of parsing  (i.e. at least
    hundreds of articles, tens of thousands of sentences) the word-pair
    mutual information can be extracted. Do the stuff in section "Mutual
    Information" section below.
@@ -255,13 +261,13 @@ So, set up the text-ingestion pipeline:
    If the parsing is interrupted, you can restart the various scripts;
    they will automatically pick up where they left off.
 
-11) Using the extracted mutual information for word-pairs, the MST
+10) Using the extracted mutual information for word-pairs, the MST
    parsing step can be started. See below. Run this for several days.
    At the end of this, you will have a bunch of statistics on
    "pseudo-connector sets": pairs which associate a word to a
    disjunct of pseudo-connectors.
 
-12) Perform clustering research.  You're on your own, now.
+11) Perform clustering research.  You're on your own, now.
 
 That's all for now, folks!
 
@@ -271,7 +277,7 @@ Bulk Text Parsing
 Set up distinct databases, one for each language:
 ```
     createdb fr_pairs lt_pairs pl_pairs simple_pairs
-    cat opencog/persist/sql/multi-driver/atom.sql | psql foobar_pairs
+    cat opencog/persist/sql/multi-driver/atom.sql | psql ??_pairs
 ```
 
 Now, build some working directories (so that we don't mess up
@@ -284,12 +290,6 @@ alpha-pages after all that work)
 * Modify as needed for chosen language. Most of them don't need modification,
   by default, unless you want to do something unusual.
 
-  -- `run-all-servers.sh` runs the cogserver for
-     one language, in a multi-paneled `byobu` window.
-     It doesn't start the final batch script `./wiki-ss-<lang>.sh`,
-     which needs to be started by hand (for the <lang> that you want to
-     process). Use F4 to move to the 'parse' tab and start it there.
-
   -- `wiki-ss-en.sh` performs batch processing of input text files.
      This calls `ss-one.sh` to process one text file.
 
@@ -297,18 +297,20 @@ alpha-pages after all that work)
      sentences, and then calls `submit-one.pl` to send the sentences
      for parsing. None of these should need any modification.
 
-  -- `pair-count-lang.scm` starts the cogserver and opens the 
-      database. You need to modify 
-      ```
-          (sql-open "postgres:///en_pairs?user=ubuntu&password=asdf")
-      ```
-      to contain your database name, username and password (if needed)
+  -- `observe-launch.scm` starts the cogserver and opens the 
+      database. You need modify the opencog-??.conf it reads 
+      (if not English), and pass the database details.
 
-* Run `run-all-servers.sh` in your working directory.
-* In the byobu terminal, navigate to the 'parse' tab (with F4),
-  go back to the input text dir (the dir that contains `beta-pages`), and
+* Run `observe-launch.scm` in your working directory.
+      ```
+        guile -l observe-launch.scm  -- --db learn-pairs --user your_user --password asdf
+      ```
+      (--user and --password are optional, as explained above).
+
+* In a separate terminal (same working directory),
   run `./wiki-ss-<lang>.sh`
 * Wait a few days.
+* When finished, stop the cogserver
 * This requires postgres 8.4 or newer, for multiple reasons. One reason
   is that older postgres don't automatically VACUUM (see "performance"
   below) The other is the list membership functions are needed.
@@ -338,19 +340,15 @@ where type 7 is `CountTruthValue`.
 Mutual Information of Word Pairs
 --------------------------------
 After accumulating a few million word pairs, we're ready to compute
-the mutual entropy between them.  This is done manually, by running
-functions defined in `(opencog nlp learn)`.
+the mutual entropy between them.  This is done by running
+```
+guile -l compute-mi-launch.scm  -- --db  --user opencog_user --password cheese
+```
+(again, --user and --password are optional)
 
-```
-	(use-modules (opencog) (opencog persist) (opencog persist-sql))
-	(use-modules (opencog matrix))
-	(use-modules (opencog nlp) (opencog nlp learn))
-	(sql-open "postgres:///en_pairs?user=ubuntu&password=asdf")
-	(define ala (make-any-link-api))
-	(define asa (add-pair-stars ala))
-	(batch-pairs asa)
-	(print-matrix-summary-report asa)
-```
+The code for computing word-pair MI is in `batch-word-pair.scm`, and called
+by compute-mi-launch.scm. 
+It uses the `(opencog matrix)` subsystem to perform the core work.
 
 Batch-counting might take hours or longer, depending on your dataset
 size. The batching routine will print to stdout, giving a hint of
@@ -395,9 +393,6 @@ SELECT count(uuid) FROM Atoms;  gives  10324863 (10.3M atoms)
 select count(uuid) from atoms where type = 77; gives  226030 (226K words)
 select count(uuid) from atoms where type = 8;  gives 5050835 (5M pairs ListLink)
 select count(uuid) from atoms where type = 27; gives 5050847 (5M pairs EvaluationLink)
-
-The code for computing word-pair MI is in `batch-word-pair.scm`. It uses
-the `(opencog matrix)` subsystem to perform the core work.
 
 
 Minimum Spanning Tree parsing

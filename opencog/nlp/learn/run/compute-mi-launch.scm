@@ -4,12 +4,9 @@
 ; loads the database (which can take an hour or more!)
 ;
 (use-modules (opencog) (opencog persist) (opencog persist-sql))
+(use-modules (opencog matrix))
 (use-modules (opencog cogserver))
 (use-modules (opencog nlp) (opencog nlp learn))
-(use-modules (system repl common))
-(use-modules (system repl server))
-
-(repl-default-option-set! 'prompt "scheme@(en-pairs)> ")
 
 (add-to-load-path ".")
 (load "utilities.scm")
@@ -24,25 +21,13 @@
 
 ; Open the database.
 (sql-open database-uri)
-(display "Opened database: ")
-(display database-uri)
-(display "\n")
-(display "Checking for empty database\n")
-(fetch-all-words)
 
-(define (cnt-all)
-    (define cnt 0)
-    (define (ink a) (set! cnt (+ cnt 1)) #f)
-    (define (cnt-type x) (cog-map-type ink x))
-    (map cnt-type (cog-get-types))
-    cnt
-)
+(define ala (make-any-link-api))
+(define asa (add-pair-stars ala))
+(batch-pairs asa)
+(print-matrix-summary-report asa)
 
-(define atom-count (cnt-all))
-(if (> atom-count 9)
-    (begin
-        (display "CAUTION: Database has ")
-        (display atom-count)
-        (display " atoms\n"))
-    (begin
-        (display "Database is EMPTY and ready to observe.\n")))
+; FIXME Is an sql-store needed?
+(sql-close)
+
+(display "Done\n")
