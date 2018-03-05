@@ -115,7 +115,7 @@ statistics.  Most of this revolves around setting up postgres.
 ```
 
 3) Start the cogserver, verify that connections to the database work.
-   (see steps 6,7,8 below, for more on how to do this.)
+   (see steps 5,6,7,8 below, for more on how to do this.)
 
 Obtaining word-pair counts requires digesting a lot of text, and
 counting the word-pairs that occur in the text.  The easiest way of
@@ -148,19 +148,14 @@ So, set up the text-ingestion pipeline:
    (add-to-load-path ".")
 ```
 
-7) Select a language, and copy one of the `pair-count-??.scm` files
-   from the `run` directory to your working directory. Review and edit
-   the configuration as necessary. It contains the REPL port number,
-   and a default prompt: These are set up by default to avoid conflicts
-   and confusion, and to allow multiple languages to be processed at
-   the same time.  It also contains the database credentials -- that's
-   probably the only thing you need to change.
-
-8) Start the REPL server. Eventually, you can use the
-   `run-all-servers.sh` file in the `run` directory to do this;
-   it creates a `byobu` session with different servers in different
-   terminals, where you can keep an eye on them. However, the
-   first time through, it is better to do all this by hand. So:
+7) Copy the `observe-launch.scm` file from the `run` directory to your working
+   directory. Review and edit the language configuration if necessary (only 
+   need to change the appropriate 'opencog-??.conf' filename, if not using 
+   English).
+   This file starts the cogserver and sets a default prompt: set up by default
+   to avoid conflicts and confusion, and to allow multiple languages to be 
+   processed at the same time. You need to pass as arguments the database
+   credentials. See below for more details.
 
 8a) Start the REPL server, in another terminal, as follows:
 ```
