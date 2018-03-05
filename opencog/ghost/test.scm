@@ -15,15 +15,24 @@
   (cog-logger-set-level! ghost-logger "info"))
 
 ; ----------
+; TODO:  Remove once experimentation is over
+(define expt-var '())
 (define-public (test-ghost TXT)
 "
   Try to find (and execute) the matching rules given an input TXT.
 "
   (ghost TXT)
-  (map (lambda (r) (psi-imply r))
-       (cog-outgoing-set (ghost-find-rules (ghost-get-curr-sent))))
+  (let ((rule (cog-outgoing-set (ghost-find-rules (ghost-get-curr-sent)))))
+    (map (lambda (r) (psi-imply r)) rule)
+   ; not using ghost-last-executed, because getting back to the rule
+   ; from the alias atom is a hassle.
+    (set! expt-var rule)
+  )
   *unspecified*)
 
+(define-public (ghost-action-executed?)
+  (if (null? expt-var) (stv 0 1) (psi-action-executed? (car expt-var)))
+)
 ; ----------
 (define-public (ghost-show-lemmas)
 "
@@ -31,6 +40,30 @@
 "
   (display lemma-alist)
   (newline))
+
+; ----------
+(define-public (ghost-check-lemma WORD)
+"
+  Show the lemma of the word.
+"
+  (assoc-ref lemma-alist WORD)
+)
+
+; ----------
+(define-public (ghost-add-lemma WORD LEMMA)
+"
+  Add an entry to the lemma list.
+"
+  (set! lemma-alist (assoc-set! lemma-alist WORD LEMMA))
+)
+
+; ----------
+(define-public (ghost-remove-lemma WORD)
+"
+  Remove an entry from the lemma list.
+"
+  (set! lemma-alist (assoc-remove! lemma-alist WORD))
+)
 
 ; ----------
 (define-public (ghost-show-vars)

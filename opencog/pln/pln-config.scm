@@ -19,10 +19,6 @@
 (use-modules (opencog))
 (use-modules (opencog rule-engine))
 
-(load-from-path "utilities.scm")
-(load-from-path "av-tv.scm")
-(load-from-path "rule-engine-utils.scm")
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Define PLN rule-based system ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -53,9 +49,8 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ; List the rules and their weights.
-(define rules (list (list deduction-inheritance-rule-name 1)
-                    (list modus-ponens-implication-rule-name 1))
-)
+(define rules (list deduction-inheritance-rule-name
+                    modus-ponens-implication-rule-name))
 
 ; Associate rules to PLN
 (ure-add-rules pln-rbs rules)

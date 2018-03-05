@@ -84,7 +84,7 @@
                                (Variable "$Rule")
                                pln-rbs)
                              target))
-         (results (cog-bind rules-to-targets)))
+         (results (cog-execute! rules-to-targets)))
 
     ;; Remove query to avoid then confounding it with a control rule
     (extract-hypergraph rules-to-targets)
@@ -133,7 +133,7 @@
                                (Variable "$Rule")
                                pln-rbs)
                              target))
-         (results (cog-bind rules-to-targets)))
+         (results (cog-execute! rules-to-targets)))
 
     ;; Remove query to avoid then confounding it with a control rule
     (extract-hypergraph rules-to-targets)

@@ -145,7 +145,7 @@ Semi-formally
 ```
 
 ```scheme
-scheme@(guile-user)> (for-each (lambda (i) (cog-bind implication-partial-instantiation-rule)) (iota 2))
+scheme@(guile-user)> (for-each (lambda (i) (cog-execute! implication-partial-instantiation-rule)) (iota 2))
 scheme@(guile-user)> (cog-prt-atomspace)
 And search for the following
 ...
@@ -190,7 +190,7 @@ Semi-formally
 ```
 
 ```scheme
-scheme@(guile-user)> (cog-bind implication-scope-to-implication-rule)
+scheme@(guile-user)> (cog-execute! implication-scope-to-implication-rule)
 ...
    (ImplicationLink (stv 1 1)
       (LambdaLink
@@ -240,7 +240,7 @@ Semi-formally
 ```
 
 ```scheme
-scheme@(guile-user)> (cog-bind and-lambda-distribution-rule)
+scheme@(guile-user)> (cog-execute! and-lambda-distribution-rule)
 ...
    (AndLink
       (LambdaLink
@@ -281,7 +281,7 @@ Semi-formally
 ```
 
 ```scheme
-scheme@(guile-user)> (cog-bind closed-lambda-introduction-rule)
+scheme@(guile-user)> (cog-execute! closed-lambda-evaluation-rule)
 $5 = (SetLink
    (LambdaLink (stv 1 1)
       (TypedVariableLink
@@ -307,7 +307,7 @@ Semi-formally
 ```
 
 ```scheme
-scheme@(guile-user)> (cog-bind implication-introduction-rule)
+scheme@(guile-user)> (cog-execute! implication-introduction-rule)
 ...
    (ImplicationLink (stv 1 1)
       (LambdaLink
@@ -349,7 +349,7 @@ Semi-formally
 ```
 
 ```scheme
-scheme@(guile-user)> (cog-bind implication-implicant-distribution-rule)
+scheme@(guile-user)> (cog-execute! implication-implicant-distribution-rule)
 ...
    (ImplicationLink (stv 1 1)
       (LambdaLink
@@ -406,7 +406,7 @@ Semi-formally
 ```
 
 ```scheme
-scheme@(guile-user)> (cog-bind implication-and-lambda-factorization-rule)
+scheme@(guile-user)> (cog-execute! implication-and-lambda-factorization-rule)
 ...
    (ImplicationLink (stv 1 1)
       (AndLink
@@ -472,7 +472,7 @@ Semi-formally
 ```
 
 ```scheme
-scheme@(guile-user)> (cog-bind deduction-implication-rule)
+scheme@(guile-user)> (cog-execute! deduction-implication-rule)
 ...
    (ImplicationLink (stv 1 1)
       (LambdaLink
@@ -524,7 +524,7 @@ Semi-formally
 ```
 
 ```scheme
-scheme@(guile-user)> (cog-bind deduction-implication-rule)
+scheme@(guile-user)> (cog-execute! deduction-implication-rule)
 ...
    (ImplicationLink (stv 1 1)
       (LambdaLink
@@ -560,7 +560,7 @@ scheme@(guile-user)> (cog-bind deduction-implication-rule)
 ##### (10) - Fully instantiate that if a predicate is in the injury-recovery-speed-predicates class, then is-well-hydrated implies it
 
 ```scheme
-scheme@(guile-user)> (cog-bind implication-full-instantiation-rule)
+scheme@(guile-user)> (cog-execute! implication-full-instantiation-rule)
 ...
    (ImplicationLink (stv 0.69999999 0.52499998)
       (PredicateNode "is-well-hydrated")
@@ -572,7 +572,7 @@ scheme@(guile-user)> (cog-bind implication-full-instantiation-rule)
 ##### (11) - Turn equivalences such as between `\x take(x, treatment-1)` and `take-treatment-1` into implications
 
 ```scheme
-scheme@(guile-user)> (cog-bind equivalence-to-implication-rule)
+scheme@(guile-user)> (cog-execute! equivalence-to-implication-rule)
 ...
       (ImplicationLink (stv 1 1)
          (LambdaLink
@@ -618,7 +618,7 @@ take-treatment-1 -> \x take(x, compound-A)
 ```
 
 ```scheme
-scheme@(guile-user)> (cog-bind deduction-implication-rule)
+scheme@(guile-user)> (cog-execute! deduction-implication-rule)
 ...
    (ImplicationLink (stv 1 1)
       (PredicateNode "take-treatment-1" (stv 0.1 0.80000001))
@@ -642,7 +642,7 @@ scheme@(guile-user)> (cog-bind deduction-implication-rule)
 ##### (13) - Use (12) and (11) to deduce `take-treatment-1 -> take-compound-A`
 
 ```scheme
-scheme@(guile-user)> (cog-bind deduction-implication-rule)
+scheme@(guile-user)> (cog-execute! deduction-implication-rule)
 ...
    (ImplicationLink (stv 1 1)
       (PredicateNode "take-treatment-1" (stv 0.1 0.80000001))
@@ -659,7 +659,7 @@ take-treatment-1 -> recovery-speed-of-injury-alpha
 ```
 
 ```scheme
-scheme@(guile-user)> (cog-bind deduction-implication-rule)
+scheme@(guile-user)> (cog-execute! deduction-implication-rule)
 ...
    (ImplicationLink (stv 0.55000001 0.81)
       (PredicateNode "take-treatment-1" (stv 0.1 0.80000001))
@@ -676,7 +676,7 @@ eat-lost-fruits-vegetables -> recovery-speed-of-injury-alpha
 ```
 
 ```scheme
-scheme@(guile-user)> (cog-bind deduction-implication-rule)
+scheme@(guile-user)> (cog-execute! deduction-implication-rule)
 ...
    (ImplicationLink (stv 0.62 0.64124995)
       (PredicateNode "eat-lots-fruits-vegetables" (stv 0.07 0.80000001))
@@ -688,7 +688,7 @@ scheme@(guile-user)> (cog-bind deduction-implication-rule)
 ##### (16) - Using (15) and (14) with the implication-implicant-disjunction rule we can infer a new TV for the MOSES model
 
 ```
-scheme@(guile-user)> (cog-bind implication-implicant-disjunction-rule)
+scheme@(guile-user)> (cog-execute! implication-implicant-disjunction-rule)
 $10 = (SetLink
    (ImplicationLink (stv 0.60357851 0.64124995)
       (OrLink

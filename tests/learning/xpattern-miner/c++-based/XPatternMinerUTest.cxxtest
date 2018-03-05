@@ -1,5 +1,5 @@
 /*
- * opencog/tests/learning/experimental-pattern-miner/c++-based/XPatternMiner.cxxtest
+ * opencog/tests/learning/xpattern-miner/c++-based/XPatternMiner.cxxtest
  *
  * Copyright (C) 2017 by OpenCog Foundation
  * All Rights Reserved
@@ -85,7 +85,7 @@ XPatternMinerUTest::XPatternMinerUTest() : _scm(&_as)
 
 	// Configure scheme load-paths that are common for all tests.
 	_scm.eval("(add-to-load-path \"" PROJECT_SOURCE_DIR
-	          "/tests/learning/xpattern-miner/c++-based\")");
+	          "/tests/learning/xpattern-miner/scm\")");
 }
 
 XPatternMinerUTest::~XPatternMinerUTest() {}

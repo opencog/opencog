@@ -52,9 +52,6 @@ namespace opencog
  */
 class RentCollectionBaseAgent : public Agent
 {
-private:
-    int sleep_time_ms;
-
 protected:
     AttentionBank* _bank;
     AttentionParamQuery _atq;
@@ -80,9 +77,6 @@ public:
     virtual void collectRent(HandleSeq& targetSet) = 0;
 
     void run();
-
-    int get_sleep_time() { return sleep_time_ms; };
-    void set_sleep_time(int ms) { sleep_time_ms = ms; };
 }; // class
 
 /** @}*/
