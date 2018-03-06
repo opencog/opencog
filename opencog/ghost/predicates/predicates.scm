@@ -56,7 +56,8 @@
 "
   (Evaluation
     (Predicate emotion-type)
-    (List face-id))
+    (List
+      (Concept face-id)))
 )
 
 ; --------------------------------------------------------------
@@ -79,7 +80,7 @@
 )
 
 ; --------------------------------------------------------------
-; Apis for forming GroundedPredicates that are used for 
+; Apis for forming GroundedPredicates that are used for
 ; checking if the world is in a particular state or not.
 ; --------------------------------------------------------------
 ;(define (person_appears face-id)
@@ -96,13 +97,14 @@
 (define (any-face-seen?)
   (define get-models
     (Get
-      (TypedVariable (Variable "seen-faces")
-      (Signature
-        (Evaluation
-          (Predicate "see")
-          (List
-            (Concept "I")
-            (Type "ConceptNode")))))
+      (TypedVariable
+        (Variable "seen-faces")
+        (Signature
+          (Evaluation
+            (Predicate "see")
+            (List
+              (Concept "I")
+              (Type "ConceptNode")))))
       (And
         (Evaluation
           (GroundedPredicate "scm: is-model-true?")
@@ -118,19 +120,43 @@
   )
 )
 
-(define* (person_smiles #:optional face-id)
-  (if face-id
-    (is-model-true? (face-emotion face-id "smile"))
-    (any-person-smiles?)
+(define (any-person-emotion? emotion-type)
+  (define get-models
+    (Get
+      (TypedVariable
+        (Variable "face-emotion")
+        (Signature
+          (Evaluation
+            (Predicate emotion-type)
+            (List
+              (Type "ConceptNode")))))
+      (And
+        (Evaluation
+          (GroundedPredicate "scm: is-model-true?")
+          (List
+            (Variable "face-emotion")))
+        (Variable "face-emotion"))))
+
+  (let ((models (cog-outgoing-set (cog-execute! get-models))))
+    (if (null? models)
+      (stv 0 1)
+      (stv 1 1)
+    )
   )
 )
 
-(define (any-person-smiles?)
-  *unspecified*
+(define* (person_smiles #:optional face-id)
+  (if face-id
+    (is-model-true? (face-emotion face-id "smile"))
+    (any-person-emotion? "smile")
+  )
 )
 
-(define (person_angry)
-  *unspecified*
+(define* (person_angry #:optional face-id)
+  (if face-id
+    (is-model-true? (face-emotion face-id "angry"))
+    (any-person-emotion? "angry")
+  )
 )
 
 (define (word_perceived)
