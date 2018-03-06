@@ -1,4 +1,6 @@
 ;
+; observe-launch.scm
+;
 ; Run the cogserver, needed for the language-learning disjunct
 ; counting pipeline. Starts the cogserver, opens the database,
 ; loads the database (which can take an hour or more!)

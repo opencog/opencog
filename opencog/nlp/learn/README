@@ -143,10 +143,10 @@ So, set up the text-ingestion pipeline:
    (add-to-load-path "/usr/local/share/opencog/scm")
    (add-to-load-path ".")
 ```
-5) Copy the `observe-launch.scm` and `utilities.scm` files from the `run` 
-   directory to your working directory. 
-   Review and edit the language configuration if necessary (you can 
-   change the appropriate 'opencog-??.conf' filename, if not using English).
+5) Copy all files from the `/opencog/nlp/learn/run` directory to your working
+   directory. Review and edit the language configuration inside 
+   `observe-launch.scm` if necessary (you can choose the appropriate 
+   'opencog-??.conf' file, if not using English).
    This file starts the cogserver and sets a default prompt: set up by default
    to avoid conflicts and confusion, and to allow multiple languages to be 
    processed at the same time. You need to pass as arguments the database
@@ -286,7 +286,7 @@ alpha-pages after all that work)
     cp -pr alpha-pages beta-pages
 ```
 * Review the file `opencog/nlp/learn/run/README`, and then copy the
-  scripts into your working dir. 
+  scripts into your working dir, if you didn't do it before.
 * Modify as needed for chosen language. Most of them don't need modification,
   by default, unless you want to do something unusual.
 
@@ -342,7 +342,7 @@ Mutual Information of Word Pairs
 After accumulating a few million word pairs, we're ready to compute
 the mutual entropy between them.  This is done by running
 ```
-guile -l compute-mi-launch.scm  -- --db  --user opencog_user --password cheese
+guile -l compute-mi-launch.scm  -- --db learn-pairs --user your_user --password asdf
 ```
 (again, --user and --password are optional)
 
@@ -407,8 +407,8 @@ Minimum spanning tree code is in `mst-parser.scm`. The current version
 works well.
 
 To perform MST parsing in bulk:
-* Copy `run/mst-count-en.scm`, `run/mst-one.sh` and `run/wiki-mst-en.sh`
-  to your working directory.
+* Review the file `opencog/nlp/learn/run/README`, and then copy the
+  scripts into your working dir, if you didn't do it before.
 
 * (Optional but suggested) Make a copy of your word-pair database, "just
   in case".  You can copy databases by saying:
@@ -416,18 +416,17 @@ To perform MST parsing in bulk:
   createdb -T existing_dbname  new_dbname
 ```
 
-* Edit `mst-count-en.scm` and set the correct database login
-  credentials. (Maybe to the new_dbname you crate above.)
-
 * Edit `wiki-mst-en.sh` and change the directory `gamma-pages` to
   whatever directory holds your source text (or copy your text to
   the `gamma-pages` directory). Be aware that, during processing,
   text files are removed from this directory.
 
-* Start the REPL server by running ./run-all-servers.sh or
+* Start the REPL server by running 
 ```
-  guile -l mst-count-en.scm
+  guile -l parse-launch.scm -- --db new_dbname --user your_user --password asdf
 ```
+  (again, --user and --password are optional)
+
   Wait 10 to 60+ minutes for the guile prompt to appear.  This script
   opens a connection to the database, and then loads all word-pairs
   into the atomspace.  This can take a long time, depending on the

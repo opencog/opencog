@@ -20,7 +20,7 @@ cogport=$4
 
 # Not using relex any longer
 #splitter=/home/ubuntu/src/relex/src/split-sentences/split-sentences.pl
-splitter=/usr/local/bin/split-sentences.pl
+#splitter=/usr/local/bin/split-sentences.pl
 splitter=./split-sentences.pl
 
 splitdir=split-articles

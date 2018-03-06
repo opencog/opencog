@@ -5,10 +5,15 @@
 ; counting pipeline. Starts the cogserver, opens the database,
 ; loads the database (which can take an hour or more!)
 ;
-(use-modules (opencog) (opencog cogserver))
+(use-modules (system repl common))
+(use-modules (system repl server))
+(use-modules (opencog) (opencog logger))
 (use-modules (opencog persist) (opencog persist-sql))
 (use-modules (opencog nlp) (opencog nlp learn))
+(use-modules (opencog matrix))
+(use-modules (opencog cogserver))
 
+(add-to-load-path ".")
 (load "utilities.scm")
 
 ; Get the database connection details
@@ -18,7 +23,7 @@
 ; Edit the below, setting it to the desired langauge.
 ; This has almost no effect, other than to set the cogserver
 ; port-number and the prompt-style.
-(start-cogserver "opencog-en.conf")
+(start-cogserver "opencog-mst-en.conf")
 
 ; Open the database.
 (sql-open database-uri)
@@ -37,7 +42,7 @@
 ; The object which will be providing pair-counts for us.
 ; We can also do MST parsing with other kinds of pair-count objects,
 ; for example, the clique-pairs, or the distance-pairs.
-(define pair-obj (make-clique-pair-api))
+(define pair-obj (make-any-link-api))
 (define star-obj (add-pair-stars pair-obj))
 (pair-obj 'fetch-pairs)
 
