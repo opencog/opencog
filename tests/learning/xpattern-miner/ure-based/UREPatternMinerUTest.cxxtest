@@ -197,13 +197,13 @@ bool UREPatternMinerUTest::enough_support(const Handle& pat, int minsup)
 UREPatternMinerUTest::UREPatternMinerUTest() : _scm(&_as)
 {
 	// Main logger
-	logger().set_level(Logger::DEBUG);
+	logger().set_level(Logger::INFO);
 	logger().set_timestamp_flag(false);
 	logger().set_sync_flag(true);
 	logger().set_print_to_stdout_flag(true);
 
 	// URE logger
-	ure_logger().set_level(Logger::DEBUG);
+	ure_logger().set_level(Logger::INFO);
 	ure_logger().set_timestamp_flag(false);
 	ure_logger().set_sync_flag(true);
 	ure_logger().set_print_to_stdout_flag(true);
@@ -253,6 +253,7 @@ void UREPatternMinerUTest::test_A()
 
 	Handle query = mk_query({A}, 2, 1);
 	BackwardChainer bc(_as, pm_rb, query);
+	bc.get_config().set_maximum_iterations(100);
 	bc.do_chain();
 
 	Handle results = bc.get_results(),
@@ -458,19 +459,24 @@ void UREPatternMinerUTest::test_ABAB()
 // 	Handle X = tmp_an(VARIABLE_NODE, "$X"),
 // 		Y = tmp_an(VARIABLE_NODE, "$Y"),
 // 		initpat = tmp_al(LAMBDA_LINK,
-// 		                 tmp_al(IMPLICATION_LINK, X, Y));
+// 		                 tmp_al(IMPLICATION_LINK, X, Y)),
+// 		query = mk_query({AAAA, BBBB}, 2, 4, initpat);
 
-// 	XPMParameters param(2, 1, initpat);
-// 	XPatternMiner pm(_as, param);
-// 	HandleTree results = pm();
+// 	BackwardChainer bc(_as, pm_rb, query);
+// 	bc.get_config().set_maximum_iterations(1000);
+// 	bc.do_chain();
 
-// 	Handle XX = tmp_al(INHERITANCE_LINK, X, X),
-// 		expected = tmp_al(LAMBDA_LINK, tmp_al(IMPLICATION_LINK, XX, XX));
+// 	Handle results = bc.get_results(),
+// 		InhXX = tmp_al(INHERITANCE_LINK, X, X),
+// 		expected = tmp_al(LAMBDA_LINK,
+// 		                  tmp_al(IMPLICATION_LINK,
+// 		                         InhXX,
+// 		                         InhXX));
 
 // 	logger().debug() << "results = " << oc_to_string(results);
 // 	logger().debug() << "expected = " << oc_to_string(expected);
 
-// 	TS_ASSERT(content_is_in(expected, results));
+// 	TS_ASSERT(is_in(expected, results->getOutgoingSet()));
 // }
 
 // void UREPatternMinerUTest::test_2conjuncts_1()
