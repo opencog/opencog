@@ -67,12 +67,12 @@
 ;  (cog-pointmem-map-atom facemap (Concept face-id)
 ;    (List (Number x) (Number y) (Number z)))
 
-(define (perceived-face face-id strength)
-  (cog-set-tv! (see-face face-id) (stv strength 1))
+(define (perceived-face face-id confidence)
+  (cog-set-tv! (see-face face-id) (stv 1 confidence))
 )
 
-(define (perceived-emotion face-id emotion-type strength)
-  (cog-set-tv! (face-emotion face-id emotion-type) (stv strength 1))
+(define (perceived-emotion face-id emotion-type confidence)
+  (cog-set-tv! (face-emotion face-id emotion-type) (stv 1 confidence))
 )
 
 (define (perceive-word word)
@@ -179,9 +179,12 @@
 ; Utilities
 ; --------------------------------------------------------------
 (define (is-model-true? model)
-  (let ((strength (tv-mean (cog-tv model))))
+; It is better to find the product of the strength and confidence but for now
+; confidence is used as the default stv for new atoms is (stv 1 0), so
+; need to waste cpu cycles.
+  (let ((confidence (tv-conf (cog-tv model))))
     (cond
-      ((> 0.5 strength) (stv 0 1))
-      ((<= 0.5 strength) (stv 1 1)))
+      ((> 0.5 confidence) (stv 0 1))
+      ((<= 0.5 confidence) (stv 1 1)))
   )
 )
