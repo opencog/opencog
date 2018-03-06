@@ -132,7 +132,7 @@ So, set up the text-ingestion pipeline:
    here it is `learn-pairs`.
 ```
    createdb learn-pairs
-   cat atom.sql | psql learn-pairs
+   cat atomspace/opencog/persist/sql/multi-driver/atom.sql | psql learn_pairs
 ```
 4) Create/edit the `~/.guile` file and add the following content:
 ```
@@ -277,7 +277,7 @@ Bulk Text Parsing
 Set up distinct databases, one for each language:
 ```
     createdb fr_pairs lt_pairs pl_pairs simple_pairs
-    cat opencog/persist/sql/multi-driver/atom.sql | psql ??_pairs
+    cat atomspace/opencog/persist/sql/multi-driver/atom.sql | psql ??_pairs
 ```
 
 Now, build some working directories (so that we don't mess up
@@ -303,7 +303,7 @@ alpha-pages after all that work)
 
 * Run `observe-launch.scm` in your working directory.
       ```
-        guile -l observe-launch.scm  -- --db learn-pairs --user your_user --password asdf
+        guile -l observe-launch.scm  -- --db ??-pairs --user your_user --password asdf
       ```
       (--user and --password are optional, as explained above).
 
@@ -342,7 +342,7 @@ Mutual Information of Word Pairs
 After accumulating a few million word pairs, we're ready to compute
 the mutual entropy between them.  This is done by running
 ```
-guile -l compute-mi-launch.scm  -- --db learn-pairs --user your_user --password asdf
+guile -l compute-mi-launch.scm  -- --db ??-pairs --user your_user --password asdf
 ```
 (again, --user and --password are optional)
 
@@ -413,7 +413,7 @@ To perform MST parsing in bulk:
 * (Optional but suggested) Make a copy of your word-pair database, "just
   in case".  You can copy databases by saying:
 ````
-  createdb -T existing_dbname  new_dbname
+  createdb -T existing_dbname new_dbname
 ```
 
 * Edit `wiki-mst-en.sh` and change the directory `gamma-pages` to
