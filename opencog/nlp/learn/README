@@ -423,6 +423,10 @@ To perform MST parsing in bulk:
   the `gamma-pages` directory). Be aware that, during processing,
   text files are removed from this directory.
 
+* If you are interested in the actual sentence parses, open
+  `mst-one.sh` and change the observe variable from `observe-mst` to
+  `observe-mst-extra`. Parses will be written in `mst-parses.txt`.
+
 * Start the REPL server by running 
 ```
   guile -l parse-launch.scm -- --db new_dbname --user your_user --password asdf
@@ -436,12 +440,12 @@ To perform MST parsing in bulk:
   needed to perform the MST parse.
 
 * Once the above has finished loading, the parse script can be
-  started. Run the `wiki-mst-en.sh` in a terminal, and wait a few days
-  for data to accumulate. 
-  
+  started. Run the `wiki-mst-en.sh` in a terminal, and wait a few
+  days for data to accumulate. 
+
 * When finished, stop the cogserver. Once this is done, you can move to 
   the next step, which is exploring the resulting connector-set (disjunct)
-  database.
+  database. You can also review the sentence parses in `mst-parses.txt`.
 
 * If parsing is stopped for any reason, you can just re-run these
   scripts; they will pick up where they left off.
