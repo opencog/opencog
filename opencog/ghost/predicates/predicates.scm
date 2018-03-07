@@ -89,7 +89,7 @@
 
 (define* (person_appears #:optional face-id)
   (if face-id
-    (is-model-true? (see-face face-id))
+    (is-model-true? (see-face (cog-name face-id)))
     (any-face-seen?)
   )
 )
@@ -147,14 +147,14 @@
 
 (define* (person_smiles #:optional face-id)
   (if face-id
-    (is-model-true? (face-emotion face-id "smile"))
+    (is-model-true? (face-emotion (cog-name face-id) "smile"))
     (any-person-emotion? "smile")
   )
 )
 
 (define* (person_angry #:optional face-id)
   (if face-id
-    (is-model-true? (face-emotion face-id "angry"))
+    (is-model-true? (face-emotion (cog-name face-id) "angry"))
     (any-person-emotion? "angry")
   )
 )
