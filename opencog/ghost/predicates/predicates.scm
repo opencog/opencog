@@ -166,9 +166,29 @@
 ; --------------------------------------------------------------
 ; Apis for forming GroundedSchemas that are use for exectuing
 ; actions.
+; NOTE: For testing use (opencog eva-behavior) module. For
+; running use (opencog movement) module. This is because the
+; apis are atomese DefinedPredicates.
+; TODO: List out the DefinedPredicates that are used as api, so as to
+; use delete-definition. Also adapt the scheme function naming convention
+; to make remembering easier.
 ; --------------------------------------------------------------
-(define (animation)
-  *unspecified*
+(define fini (Node "finished-action"))
+
+(define (animation emotion gesture)
+  ;TODO: Remove this hack.
+  (let* ((e (cog-name emotion))
+    (g (cog-name gesture))
+    (temp-gesture (if (equal? "nod" g) "nod-1" g)))
+  (cog-evaluate!
+    (Put
+      (DefinedPredicate "Show class gesture")
+      (List
+        (Concept e)
+        (Concept temp-gesture))))
+
+     fini
+   )
 )
 
 (define (expression)
