@@ -191,8 +191,15 @@
    )
 )
 
-(define (expression)
-  *unspecified*
+(define (expression expression-type)
+  (let ((e (cog-name expression-type)))
+    (cog-evaluate!
+      (Put
+        (DefinedPredicate "Show class expression")
+        (List
+          (Concept "neutral-keep-alive")
+          (Concept e))))
+  )
 )
 
 ; --------------------------------------------------------------
