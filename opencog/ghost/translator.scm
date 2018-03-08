@@ -175,7 +175,7 @@
                           (get-var-lemmas (list-ref pat-vars (cdr a))))
                          ((equal? 'get_uvar (car a))
                           (get-user-variable (cdr a)))
-                         (else (WordNode (cdr a)))))
+                         (else (ConceptNode (cdr a)))))
                    (cddr t)))))))
             ((equal? 'sequence (car t))
              (let ((pt (process (cdr t))))
