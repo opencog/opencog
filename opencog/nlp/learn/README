@@ -104,15 +104,16 @@ statistics.  Most of this revolves around setting up postgres.
    https://debbugs.gnu.org/cgi/bugreport.cgi?bug=26616
    (in guile-2.2, it doesn't hang, but still behaves very badly)
 
-1) Install `link-grammar-5.3.15` or newer, either from here:
-
+0.3) Opencog should be built with `link-grammar-5.4.3` or newer.
+   You can check it by running `link-parser --version`
+  If not, this version is available at:
     https://www.abisource.com/projects/link-grammar/
 
-  or (for the latest, developer version) from here:
+  or (for the latest, developer version) here:
 
     https://github.com/opencog/link-grammar
 
-2) Set up and configure postgres, as described in
+1) Set up and configure postgres, as described in
    `atomspace/opencog/persist/sql/README.md`
 
 Obtaining word-pair counts requires digesting a lot of text, and
@@ -128,13 +129,13 @@ so we may as well start using it right away.
 
 So, set up the text-ingestion pipeline:
 
-3) Create and initialize a database. Pick any name you want;
+2) Create and initialize a database. Pick any name you want;
    here it is `learn-pairs`.
 ```
    createdb learn-pairs
    cat atomspace/opencog/persist/sql/multi-driver/atom.sql | psql learn_pairs
 ```
-4) Create/edit the `~/.guile` file and add the following content:
+3) Create/edit the `~/.guile` file and add the following content:
 ```
    (use-modules (ice-9 readline))
    (activate-readline)
@@ -143,8 +144,10 @@ So, set up the text-ingestion pipeline:
    (add-to-load-path "/usr/local/share/opencog/scm")
    (add-to-load-path ".")
 ```
-5) Copy all files from the `/opencog/nlp/learn/run` directory to your working
-   directory. Review and edit the language configuration inside 
+4) Copy all files from the `/opencog/nlp/learn/run` directory to your working
+   directory. 
+
+   Review and edit the language configuration inside 
    `observe-launch.scm` if necessary (you can choose the appropriate 
    'opencog-??.conf' file, if not using English).
    This file starts the cogserver and sets a default prompt: set up by default

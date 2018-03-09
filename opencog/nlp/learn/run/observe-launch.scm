@@ -11,40 +11,27 @@
 (use-modules (system repl common))
 (use-modules (system repl server))
 
-(repl-default-option-set! 'prompt "scheme@(en-pairs)> ")
-
 (add-to-load-path ".")
 (load "utilities.scm")
 
 ; Get the database connection details
 (define database-uri (get-connection-uri))
+(define language (get-lang))
 
-; Start the cogserver.
-; Edit the below, setting it to the desired langauge.
-; This sets the cogserver port-number and the prompt-style.
-(start-cogserver "opencog-en.conf")
+; set the prompt for the given language
+(repl-default-option-set! 'prompt (string-append "scheme@(" 
+    language "-pairs)> "))
+
+; Get the database connection details
+(define database-uri (get-connection-uri))
+(define language (get-lang))
+
+; Start the cogserver with configs for the given language
+(start-cogserver (string-append "opencog-" language ".conf"))
 
 ; Open the database.
 (sql-open database-uri)
 (display "Opened database: ")
 (display database-uri)
 (display "\n")
-(display "Checking for empty database\n")
 (fetch-all-words)
-
-(define (cnt-all)
-    (define cnt 0)
-    (define (ink a) (set! cnt (+ cnt 1)) #f)
-    (define (cnt-type x) (cog-map-type ink x))
-    (map cnt-type (cog-get-types))
-    cnt
-)
-
-(define atom-count (cnt-all))
-(if (> atom-count 9)
-    (begin
-        (display "CAUTION: Database has ")
-        (display atom-count)
-        (display " atoms\n"))
-    (begin
-        (display "Database is EMPTY and ready to observe.\n")))
