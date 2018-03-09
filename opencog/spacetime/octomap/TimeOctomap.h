@@ -59,7 +59,7 @@ struct TimeSlice
     TimeSlice(time_pt tp, duration_c d): t(tp), duration(d) {}
 
     /// Return true if time-point is within this interval.
-    /// The end-point is NOT considfrered to be a part of the interval,
+    /// The end-point is NOT considered to be a part of the interval,
     /// and this is important: otherwise, a time-point could be in two
     /// adjacent intervals, and this will mess up search queries.
     bool operator==(time_pt tp)
@@ -99,7 +99,7 @@ struct TimeSlice
         for (auto& p : pl)
             map_tree.deleteNode(p);
     }
-    
+
     void remove_atoms_at_location(const point3d& location){
         map_tree.updateNode(location, false);
     }
@@ -511,7 +511,8 @@ public:
                 map_res(map_res_meters),
                 time_res(time_resolution),
                 time_circle(num_time_units),
-                auto_step(false) {
+                auto_step(false)
+    {
         curr_time = std::chrono::system_clock::now();
         TimeSlice<T> tu(curr_time, time_res);
         tu.map_tree.setResolution(map_res);
