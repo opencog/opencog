@@ -144,13 +144,10 @@ So, set up the text-ingestion pipeline:
    (add-to-load-path "/usr/local/share/opencog/scm")
    (add-to-load-path ".")
 ```
-4) Copy all files from the `/opencog/nlp/learn/run` directory to your working
-   directory. 
+4) Copy the following files from the `opencog/opencog/nlp/learn/run` directory
+   to your working directory:
 
-   Review and edit the language configuration inside 
-   `observe-launch.scm` if necessary (you can choose the appropriate 
-   'opencog-??.conf' file, if not using English).
-   This file starts the cogserver and sets a default prompt: set up by default
+   - This file starts the cogserver and sets a default prompt: set up by default
    to avoid conflicts and confusion, and to allow multiple languages to be 
    processed at the same time. You need to pass as arguments the database
    credentials. See next step.
