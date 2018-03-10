@@ -1,8 +1,8 @@
 #! /bin/bash
 #
-# run-all-servers.sh
+# run-server.sh
 #
-# All-in-one script to start all servers on the local machine
+# Start cogserver on the local machine
 # This runs tmux with byobu to multiplex multiple terminals;
 # use F3 and F4 to swtich to the other terminals.
 #
@@ -22,20 +22,18 @@ then
   exit 0
 fi
 
+args=("$@")
 # Use byobu so that the scroll bars actually work
 byobu new-session -d -n 'cntl' '$SHELL'
-if [ $# -eq 2]
+if [ $# -eq 2 ]
 then
-	byobu new-window -n 'cogsrv' 'nice guile -l observe-launch.scm -- --lang
-	$1 --db $2 ; $SHELL'
-elif [$# -eq 3]
+	byobu new-window -n 'cogsrv' "nice guile -l observe-launch.scm -- --lang $1 --db $2 ; $SHELL"
+elif [ $# -eq 3 ]
 then
-	byobu new-window -n 'cogsrv' 'nice guile -l observe-launch.scm -- --lang
-	$1 --db $2 --user $3; $SHELL'
-elif [$# -eq 4]
+	byobu new-window -n 'cogsrv' "nice guile -l observe-launch.scm -- --lang $1 --db $2 --user $3; $SHELL"
+elif [ $# -eq 4 ]
 then
-	byobu new-window -n 'cogsrv' 'nice guile -l observe-launch.scm -- --lang
-	$1 --db $2 --user $3 --password $4; $SHELL'
+	byobu new-window -n 'cogsrv' "nice guile -l observe-launch.scm -- --lang $1 --db $2 --user $3 --password $4; $SHELL"
 fi
 sleep 2;
 
@@ -44,28 +42,28 @@ sleep 2;
 # tmux new-window -n 'relex' './relex-server-any.sh; $SHELL'
 
 # Assign port value according to language
-if [$1 -eq 'en']
+if [ "$1" = "en" ]
 then
   PORT=17005
-elif [$1 -eq 'fr']
+elif [ "$1" = "fr" ]
 then
   PORT=17003
-elif [$1 -eq 'lt']
+elif [ "$1" = "lt" ]
 then
   PORT=17002
-elif [$1 -eq 'pl']
+elif [ "$1" = "pl" ]
 then
   PORT=17004
-elif [$1 -eq 'yue']
+elif [ "$1" = "yue" ]
 then
   PORT=17006
-elif [$1 -eq 'zh']
+elif [ "$1" = "zh" ]
 then
   PORT=17007
 fi
 
 # Telnet window
-tmux new-window -n 'telnt' 'rlwrap telnet localhost $PORT; $SHELL'
+tmux new-window -n 'telnet' "rlwrap telnet localhost $PORT; $SHELL"
 
 # Parse
 # ./wiki-ss-en.sh
