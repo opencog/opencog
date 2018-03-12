@@ -12,18 +12,18 @@
   Wa = 1/Na * sum(Wcagi)
 
   Na = number of satisfied rules [i] that have the action [a]
-  Wcagi = Scag * Sc * Ig * T
+  Wcagi = Scag * Sc * Icag
 
   Scag = Strength of the psi-rule (c ∧ a => g)
   Sc = Satisfiability of the context of the psi-rule
-  Ig = Importance of the goal [g]
-  T = Whether the rule is in the current topic [1, 0.5]
+  Icag = Importance (STI) of the rule
 "
+  ; ----------
   ; Store the evaluation results for the contexts, so that the same context
   ; won't be evaluated again, in the same psi-step
   (define context-alist '())
 
-  ; Store the action counts [Na]
+  ; Store the no. of rules that contain this action [Na]
   (define action-cnt-alist '())
 
   ; Store the sum of action-weights [sum(Wcagi)]
@@ -35,56 +35,53 @@
   ; For random number generation
   (define total-weight 0)
 
-  ; Get to know what the current topic is
-  (define curr-topic (ghost-get-curr-topic))
-
   ; For quickly find out which rule an given
   ; action belongs to
-  ; To-be removed once action selector actually
+  ; TODO: Remove it once action selector actually
   ; returns an action instead of a rule (?)
   (define action-rule-alist '())
 
-  ; Calculate the weight of the rule R
+  ; ----------
+  ; Calculate the weight of the rule R [Wcagi]
   (define (calculate-rweight R)
-    ; XXX TODO: The default STI is zero, which means
-    ; the weight for all the rules will be zero
-    ; To workaround this, a non-zero STI will be assigned
-    ; to the goal for now until we have ECAN and GHOST
-    ; running altogether in the near future
-    (define sti (cog-av-sti (psi-get-goal R)))
-
-    ; Now calculate the weight
     (* (cog-stv-strength R)
        (assoc-ref context-alist (psi-get-context R))
-       (if (= 0 sti) 1 sti)
-       ; TODO: Use a more sophisticated way for the below
-       (if (is-rule-in-topic? R curr-topic) 1 0.5)))
+       (cog-av-sti R)))
 
-  ; Calculate the weight of the action A
+  ; Calculate the weight of the action A [Wa]
   (define (calculate-aweight A)
     (* (/ 1 (assoc-ref action-cnt-alist A))
        (assoc-ref sum-weight-alist A)))
 
+  ; ----------
   (for-each
     (lambda (r)
       (define rc (psi-get-context r))
       (define ra (psi-get-action r))
 
-      ; Though an action may be in multiple psi-rule, but
-      ; it doesn't really matter here, just record one
-      ; of them
+      ; Though an action may be in multiple psi-rule, but it doesn't
+      ; really matter here, just record one of them
+      ; TODO: Remove it once action selector actually returns an
+      ; action instead of a rule (?)
       (set! action-rule-alist (assoc-set! action-rule-alist ra r))
 
+      ; Evaluate the context, and save the result in context-alist
       (if (equal? (assoc-ref context-alist rc) #f)
-        (set! context-alist (assoc-set! context-alist rc
-          (cdadr (cog-tv->alist (psi-satisfiable? r))))))
+        (set! context-alist
+          (assoc-set! context-alist rc
+            (cdadr (cog-tv->alist (psi-satisfiable? r))))))
 
+      ; Count the no. of rules that contain this action, and
+      ; save it in action-cnt-alist
       (if (equal? (assoc-ref action-cnt-alist ra) #f)
         (set! action-cnt-alist (assoc-set! action-cnt-alist ra 1))
         (set! action-cnt-alist (assoc-set! action-cnt-alist ra
           (+ (assoc-ref action-cnt-alist ra) 1))))
 
-      ; Ignore the action if its weight is zero
+      ; Calculate the weight of this rule
+      ; Save and accumulate the weight of an action in sum-weight-alist
+      ; Skip the action if its weight is zero, so that sum-weight-alist
+      ; and action-weight-alist do not contain actions that have a zero weight
       (let ((w (calculate-rweight r)))
         (if (> w 0)
           (if (equal? (assoc-ref sum-weight-alist ra) #f)
@@ -95,8 +92,7 @@
             "Skipping action with zero weight: ~a" ra))))
     RULES)
 
-  ; Note: sum-weight-alist and action-weight-alist do not contain
-  ; actions that have a zero weight
+  ; Finally calculate the weight of an action
   (for-each
     (lambda (a)
       (set! action-weight-alist
