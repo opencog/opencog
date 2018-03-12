@@ -1,7 +1,7 @@
 ;; This is the GHOST action selector for finding and deciding
 ;; which action should be executed at a particular point in time.
 
-(define (eval-and-select RULES)
+(define* (eval-and-select RULES #:optional (SKIP-STI #f))
 "
   This is the goal-driven action selection.
 
@@ -17,6 +17,12 @@
   Scag = Strength of the psi-rule (c ∧ a => g)
   Sc = Satisfiability of the context of the psi-rule
   Icag = Importance (STI) of the rule
+
+  SKIP-STI is for backward compatibility, used to decide whether to
+  include STI of a rule (Icag) in action selection or not. It's needed
+  as the default STI is zero. So if one runs GHOST without running
+  ECAN (as the earlier version of GHOST permits) then no action will
+  ever be triggered.
 "
   ; ----------
   ; Store the evaluation results for the contexts, so that the same context
@@ -46,7 +52,7 @@
   (define (calculate-rweight R)
     (* (cog-stv-strength R)
        (assoc-ref context-alist (psi-get-context R))
-       (cog-av-sti R)))
+       (if SKIP-STI 1 (cog-av-sti R))))
 
   ; Calculate the weight of the action A [Wa]
   (define (calculate-aweight A)
@@ -156,8 +162,8 @@
          ; Evaluate the matched rules one by one and see which of them satisfy
          ; the current context
          ; One of them, if any, will be selected and executed
-         (selected (eval-and-select
-           (delete-duplicates (append exact-match no-const dual-match)))))
+         (selected (eval-and-select (delete-duplicates
+           (append exact-match no-const dual-match)) #t)))
 
         (cog-logger-debug ghost-logger "For input:\n~a" input-lseq)
         (cog-logger-debug ghost-logger "Rules with no constant:\n~a" no-const)
