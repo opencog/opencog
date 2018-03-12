@@ -34,7 +34,7 @@ observe="observe-mst"
 # 	exit 1
 # fi
 # Alternate cogserver test: use netcat to ping it.
-haveping=`echo foo | nc $coghost $cogport`
+haveping=`echo foo | nc -N $coghost $cogport`
 if [[ $? -ne 0 ]] ; then
 	exit 1
 fi
@@ -62,7 +62,7 @@ cat "$splitdir/$rest" | ./submit-one.pl $coghost $cogport $observe
 # if [[ -z "$haveserver" ]] ; then
 # 	exit 1
 # fi
-haveping=`echo foo | nc $coghost $cogport`
+haveping=`echo foo | nc -N $coghost $cogport`
 if [[ $? -ne 0 ]] ; then
 	exit 1
 fi

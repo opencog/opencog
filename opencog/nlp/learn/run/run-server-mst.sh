@@ -1,6 +1,6 @@
 #! /bin/bash
 #
-# run-server.sh
+# run-server-mst.sh
 #
 # Start cogserver on the local machine
 # This runs tmux with byobu to multiplex multiple terminals;
@@ -18,7 +18,7 @@ export LD_LIBRARY_PATH=/usr/local/lib/opencog/modules
 
 if [ $# -lt 2 ]
 then 
-  echo "Usage: ./run-server.sh <language> <db_name> [<username>] [<password>]"
+  echo "Usage: ./run-server-mst.sh <language> <db_name> [<username>] [<password>]"
   exit 0
 fi
 
@@ -27,39 +27,35 @@ args=("$@")
 byobu new-session -d -n 'cntl' '$SHELL'
 if [ $# -eq 2 ]
 then
-	byobu new-window -n 'cogsrv' "nice guile -l observe-launch.scm -- --lang $1 --db $2 ; $SHELL"
+	byobu new-window -n 'cogsrv' "nice guile -l mst-launch.scm -- --lang $1 --db $2 ; $SHELL"
 elif [ $# -eq 3 ]
 then
-	byobu new-window -n 'cogsrv' "nice guile -l observe-launch.scm -- --lang $1 --db $2 --user $3; $SHELL"
+	byobu new-window -n 'cogsrv' "nice guile -l mst-launch.scm -- --lang $1 --db $2 --user $3; $SHELL"
 elif [ $# -eq 4 ]
 then
-	byobu new-window -n 'cogsrv' "nice guile -l observe-launch.scm -- --lang $1 --db $2 --user $3 --password $4; $SHELL"
+	byobu new-window -n 'cogsrv' "nice guile -l mst-launch.scm -- --lang $1 --db $2 --user $3 --password $4; $SHELL"
 fi
 sleep 2;
-
-# Relex "any" language
-# Not using relex any longer.
-# tmux new-window -n 'relex' './relex-server-any.sh; $SHELL'
 
 # Assign port value according to language
 if [ "$1" = "en" ]
 then
-  PORT=17005
+  PORT=19005
 elif [ "$1" = "fr" ]
 then
-  PORT=17003
+  PORT=19003
 elif [ "$1" = "lt" ]
 then
-  PORT=17002
+  PORT=19002
 elif [ "$1" = "pl" ]
 then
-  PORT=17004
+  PORT=19004
 elif [ "$1" = "yue" ]
 then
-  PORT=17006
+  PORT=19006
 elif [ "$1" = "zh" ]
 then
-  PORT=17007
+  PORT=19007
 fi
 
 # Telnet window

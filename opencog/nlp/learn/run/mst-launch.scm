@@ -5,25 +5,27 @@
 ; counting pipeline. Starts the cogserver, opens the database,
 ; loads the database (which can take an hour or more!)
 ;
+(use-modules (opencog) (opencog persist) (opencog persist-sql))
+(use-modules (opencog cogserver))
+(use-modules (opencog nlp) (opencog nlp learn))
 (use-modules (system repl common))
 (use-modules (system repl server))
-(use-modules (opencog) (opencog logger))
-(use-modules (opencog persist) (opencog persist-sql))
-(use-modules (opencog nlp) (opencog nlp learn))
+(use-modules (opencog logger))
 (use-modules (opencog matrix))
-(use-modules (opencog cogserver))
 
 (add-to-load-path ".")
 (load "utilities.scm")
 
-; Get the database connection details
+; Get the database connection and language details
 (define database-uri (get-connection-uri))
+(define language (get-lang))
 
-; Start the cogserver.
-; Edit the below, setting it to the desired langauge.
-; This has almost no effect, other than to set the cogserver
-; port-number and the prompt-style.
-(start-cogserver "opencog-mst-en.conf")
+; set the prompt for the given language
+(repl-default-option-set! 'prompt (string-append "scheme@(" 
+    language "-mst)> "))
+
+; Start the cogserver with configs for the given language
+(start-cogserver (string-append "opencog-mst-" language ".conf"))
 
 ; Open the database.
 (sql-open database-uri)

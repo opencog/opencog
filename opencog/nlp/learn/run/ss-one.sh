@@ -28,7 +28,7 @@ subdir=submitted-articles
 observe="observe-text"
 
 # Punt if the cogserver has crashed.  Use netcat to ping it.
-haveping=`echo foo | nc $coghost $cogport`
+haveping=`echo foo | nc -N $coghost $cogport`
 if [[ $? -ne 0 ]] ; then
 	exit 1
 fi
@@ -59,7 +59,7 @@ cat "$splitdir/$rest" | ./submit-one.pl $coghost $cogport $observe
 
 # Punt if the cogserver has crashed (second test,
 # before doing the mv and rm below)
-haveping=`echo foo | nc $coghost $cogport`
+haveping=`echo foo | nc -N $coghost $cogport`
 if [[ $? -ne 0 ]] ; then
 	exit 1
 fi
