@@ -131,6 +131,8 @@
         (assoc-ref action-rule-alist (car action-rtn))))))
 
 ; ----------
+; Obsolete, to be replaced by 'ghost-get-rules-from-af'
+
 (define-public (ghost-find-rules SENT)
 "
   The action selector. It first searches for the rules using DualLink,
@@ -151,14 +153,14 @@
          ; Get the psi-rules associate with them with duplicates removed
          (rules-candidates
            (fold (lambda (rule prev)
-                   ; Since a psi-rule can satisfy multiple goals and an
-                   ; ImplicationLink will be generated for each of them,
-                   ; we are comparing the implicant of the rules instead
-                   ; of the rules themselves, and create a list of rules
-                   ; with unique implicants
-                   (if (any (lambda (r) (equal? (gar r) (gar rule))) prev)
-                       prev (append prev (list rule))))
-                 (list) (append exact-match no-const dual-match)))
+             ; Since a psi-rule can satisfy multiple goals and an
+             ; ImplicationLink will be generated for each of them,
+             ; we are comparing the implicant of the rules instead
+             ; of the rules themselves, and create a list of rules
+             ; with unique implicants
+             (if (any (lambda (r) (equal? (gar r) (gar rule))) prev)
+                 prev (append prev (list rule))))
+           (list) (append exact-match no-const dual-match)))
          ; Evaluate the matched rules one by one and see which of them satisfy
          ; the current context
          ; One of them, if any, will be selected and executed
@@ -193,6 +195,8 @@
   (cog-logger-debug ghost-logger "Selected:\n~a" rules-selected)
 
   ; Keep a record of which rule got executed, just for rejoinders
+  ; TODO: Move this part to OpenPsi?
+  ; TODO: This should be created after actually executing the action
   (if (not (null? rules-selected))
     (State ghost-last-executed (psi-rule-alias selected)))
 
@@ -207,7 +211,7 @@
   (DefinedSchema (ghost-prefix "Find Rules"))
   (Lambda (VariableList (TypedVariable (Variable "$sentence")
                                        (Type "SentenceNode")))
-          (ExecutionOutput (GroundedSchema "scm: ghost-find-rules")
+          (ExecutionOutput (GroundedSchema "scm: ghost-get-rules-from-af")
                            (List (Variable "$sentence")))))
 
 ; The action selector for OpenPsi

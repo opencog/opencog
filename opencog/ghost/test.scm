@@ -15,8 +15,10 @@
   (cog-logger-set-level! ghost-logger "info"))
 
 ; ----------
-; TODO:  Remove once experimentation is over
+; TODO: Remove once experimentation is over
 (define expt-var '())
+; TODO: Should be removed as this is using 'ghost-find-rules',
+; which will be obsolete soon
 (define-public (test-ghost TXT)
 "
   Try to find (and execute) the matching rules given an input TXT.
@@ -24,8 +26,8 @@
   (ghost TXT)
   (let ((rule (cog-outgoing-set (ghost-find-rules (ghost-get-curr-sent)))))
     (map (lambda (r) (psi-imply r)) rule)
-   ; not using ghost-last-executed, because getting back to the rule
-   ; from the alias atom is a hassle.
+    ; not using ghost-last-executed, because getting back to the rule
+    ; from the alias atom is a hassle.
     (set! expt-var rule)
   )
   *unspecified*)
