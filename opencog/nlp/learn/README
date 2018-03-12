@@ -455,7 +455,7 @@ To perform MST parsing in bulk:
   languages to be processed at the same time. 
   You need to pass the language and database credentials as arguments; 
   see next stepsu
-  `wiki-mst-en.scm` starts the process of observing the text files contained
+  `wiki-mst-??.scm` starts the process of observing the text files contained
   in the gamma-pages folder, by calling `mst-one.sh`, which sends a sentence
   to the cogserver with `submit-one.pl`, giving the correct opencog command.
 
@@ -465,7 +465,7 @@ To perform MST parsing in bulk:
   createdb -T existing_dbname new_dbname
 ```
 
-* Edit `wiki-mst-en.sh` and change the directory `gamma-pages` to
+* Edit `wiki-mst-??.sh` and change the directory `gamma-pages` to
   whatever directory holds your source text (or copy your text to
   the `gamma-pages` directory). Be aware that, during processing,
   text files are removed from this directory.
@@ -487,7 +487,7 @@ To perform MST parsing in bulk:
   needed to perform the MST parse.
 
 * Once the above has finished loading, the parse script can be
-  started. Run `wiki-mst-en.sh` in one of the unused byob windos,
+  started. Run `wiki-mst-??.sh` in one of the unused byob windos,
   (navigate with F3, F4) and wait a few days for data to accumulate. 
    If the above command shows the error
    ```
