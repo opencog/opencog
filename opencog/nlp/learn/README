@@ -286,7 +286,7 @@ So, set up the text-ingestion pipeline:
    "pseudo-connector sets": pairs which associate a word to a
    disjunct of pseudo-connectors.
 
-11) Perform clustering research.  You're on your own, now.
+12) Perform clustering research.  You're on your own, now.
 
 That's all for now, folks!
 
@@ -376,12 +376,13 @@ Mutual Information of Word Pairs
 After accumulating a few million word pairs, we're ready to compute
 the mutual entropy between them.  This is done by running
 ```
-guile -l compute-mi.scm  -- --db ??-pairs --user your_user --password asdf
+guile -l compute-mi.scm  -- --lang ?? --db ??-pairs --user your_user --password asdf
 ```
 (again, --user and --password are optional, as explained in step 5 above).
 It uses the `(opencog matrix)` subsystem to perform the core work.
-If you find some error while executing this code, run each command separately
-to trace the error.
+The system might not be robust enough at this stage yet, so if you find an
+error while executing this code, run each command separately
+to trace it.
 
 Batch-counting might take hours or longer, depending on your dataset
 size. The batching routine will print to stdout, giving a hint of
