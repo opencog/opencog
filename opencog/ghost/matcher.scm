@@ -180,6 +180,25 @@
 
         (List selected)))
 
+; ----------
+(define-public (ghost-get-rules-from-af)
+"
+  The action selector that works with ECAN.
+  It evaluates and selects psi-rules from the attentional focus.
+"
+  (define rules-in-af (filter psi-rule? (cog-af)))
+  (define rules-selected (eval-and-select rules-in-af))
+
+  (cog-logger-debug ghost-logger "Rules in AF:\n~a" rules-in-af)
+  (cog-logger-debug ghost-logger "Selected:\n~a" rules-selected)
+
+  ; Keep a record of which rule got executed, just for rejoinders
+  (if (not (null? rules-selected))
+    (State ghost-last-executed (psi-rule-alias selected)))
+
+  (List rules-selected))
+
+; ----------
 (Define
   (DefinedSchema (ghost-prefix "Get Current Input"))
   (Get (State ghost-curr-proc (Variable "$x"))))
