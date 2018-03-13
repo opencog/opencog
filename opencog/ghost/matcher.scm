@@ -52,7 +52,10 @@
   (define (calculate-rweight R)
     (* (cog-stv-strength R)
        (assoc-ref context-alist (psi-get-context R))
-       (if SKIP-STI 1 (cog-av-sti R))))
+       (if SKIP-STI
+         ; Weight higher if the rule is in the current topic
+         (if (is-rule-in-topic? R (ghost-get-curr-topic)) 1 0.5)
+         (cog-av-sti R))))
 
   ; Calculate the weight of the action A [Wa]
   (define (calculate-aweight A)
