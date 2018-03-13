@@ -131,7 +131,6 @@
         (assoc-ref action-rule-alist (car action-rtn))))))
 
 ; ----------
-; Obsolete, to be replaced by 'ghost-get-rules-from-af'
 
 (define-public (ghost-find-rules SENT)
 "
