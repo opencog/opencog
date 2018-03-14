@@ -110,12 +110,6 @@
         (assoc-ref action-weight-alist (car a)))))
     sum-weight-alist)
 
-  (cog-logger-debug ghost-logger "context-alist: ~a" context-alist)
-  (cog-logger-debug ghost-logger "action-cnt-alist: ~a" action-cnt-alist)
-  (cog-logger-debug ghost-logger "sum-weight-alist: ~a" sum-weight-alist)
-  (cog-logger-debug ghost-logger "action-weight-alist: ~a" action-weight-alist)
-  (cog-logger-debug ghost-logger "action-rule-alist: ~a" action-rule-alist)
-
   ; If there is only one action in the list, return that
   ; Otherwise, pick one based on their weights
   ; TODO: Return the actual action instead of a rule
@@ -134,7 +128,6 @@
         (assoc-ref action-rule-alist (car action-rtn))))))
 
 ; ----------
-
 (define-public (ghost-find-rules SENT)
 "
   The action selector. It first searches for the rules using DualLink,
@@ -190,10 +183,14 @@
   The action selector that works with ECAN.
   It evaluates and selects psi-rules from the attentional focus.
 "
-  (define rules-in-af (filter psi-rule? (cog-af)))
-  (define rule-selected (eval-and-select rules-in-af))
+  (define candidate-rules
+    (filter psi-rule?
+      (if ghost-af-only?
+        (cog-af)
+        (cog-get-atoms 'ImplicationLink))))
+  (define rule-selected (eval-and-select candidate-rules))
 
-  (cog-logger-debug ghost-logger "Rules in AF:\n~a" rules-in-af)
+  (cog-logger-debug ghost-logger "Candidate Rules:\n~a" candidate-rules)
   (cog-logger-debug ghost-logger "Selected:\n~a" rule-selected)
 
   ; Keep a record of which rule got executed, just for rejoinders
