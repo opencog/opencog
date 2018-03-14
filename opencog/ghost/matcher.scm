@@ -191,33 +191,21 @@
   It evaluates and selects psi-rules from the attentional focus.
 "
   (define rules-in-af (filter psi-rule? (cog-af)))
-  (define rules-selected (eval-and-select rules-in-af))
+  (define rule-selected (eval-and-select rules-in-af))
 
   (cog-logger-debug ghost-logger "Rules in AF:\n~a" rules-in-af)
-  (cog-logger-debug ghost-logger "Selected:\n~a" rules-selected)
+  (cog-logger-debug ghost-logger "Selected:\n~a" rule-selected)
 
   ; Keep a record of which rule got executed, just for rejoinders
   ; TODO: Move this part to OpenPsi?
   ; TODO: This should be created after actually executing the action
-  (if (not (null? rules-selected))
-    (State ghost-last-executed (psi-rule-alias selected)))
+  (if (not (null? rule-selected))
+    (State ghost-last-executed (psi-rule-alias rule-selected)))
 
-  (List rules-selected))
+  (List rule-selected))
 
 ; ----------
-(Define
-  (DefinedSchema (ghost-prefix "Get Current Input"))
-  (Get (State ghost-curr-proc (Variable "$x"))))
-
-(Define
-  (DefinedSchema (ghost-prefix "Find Rules"))
-  (Lambda (VariableList (TypedVariable (Variable "$sentence")
-                                       (Type "SentenceNode")))
-          (ExecutionOutput (GroundedSchema "scm: ghost-get-rules-from-af")
-                           (List (Variable "$sentence")))))
-
 ; The action selector for OpenPsi
 (psi-set-action-selector!
   ghost-component
-  (Put (DefinedSchema (ghost-prefix "Find Rules"))
-       (DefinedSchema (ghost-prefix "Get Current Input"))))
+  (ExecutionOutput (GroundedSchema "scm: ghost-get-rules-from-af") (List)))
