@@ -24,7 +24,8 @@
          ; It's possible that the sequence does not having any word or concept etc,
          ; e.g. a rule may just be something like not-having-either-one-of-these-words
          (empty-seq? (every (lambda (t) (equal? 'negation (car t))) TERMS))
-         (func-only? (every (lambda (t) (equal? 'function (car t))) TERMS))
+         (func-only? (and (> (length TERMS) 0)
+           (every (lambda (t) (equal? 'function (car t))) TERMS)))
          (start-anchor? (any (lambda (t) (equal? as t)) TERMS))
          (end-anchor? (any (lambda (t) (equal? ae t)) TERMS))
          (start (if start-anchor? (cdr (member as TERMS)) (list wc)))
@@ -233,16 +234,18 @@
         ; Otherwise it's an ordered match
         (set! conds (append conds (list
           (generate-eval ghost-word-seq word-seq)
-          (generate-eval ghost-lemma-seq lemma-seq)))))))
+          (generate-eval ghost-lemma-seq lemma-seq))))))
+    ; TODO: Remove once we start using ECAN to find rules by default
+    ; See below
+    (MemberLink (car conds) ghost-no-constant))
 
   ; DualLink couldn't match patterns with no constant terms in it
   ; Mark the rules with no constant terms so that they can be found
   ; easily during the matching process
-  ; XXX TODO: This can impede the performance if we have many of these
-  ;           in the rulebase
+  ; TODO: Remove once we start using ECAN to find rules by default
   (if (equal? (length lemma-seq)
-              (length (filter (lambda (x) (equal? 'GlobNode (cog-type x)))
-                              lemma-seq)))
+        (length (filter (lambda (x) (equal? 'GlobNode (cog-type x)))
+                        lemma-seq)))
       (MemberLink (List lemma-seq) ghost-no-constant))
 
   (list vars conds))

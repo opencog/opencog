@@ -23,7 +23,7 @@
 
     ; Utilities
     is-model-true?
-    )
+  )
 )
 
 ; Perception and action apis and predicates
@@ -199,7 +199,7 @@
         (List
           (Concept "neutral-keep-alive")
           (Concept e))))
-  fini
+    fini
   )
 )
 
