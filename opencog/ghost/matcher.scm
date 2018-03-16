@@ -1,100 +1,7 @@
 ;; This is the GHOST action selector for finding and deciding
 ;; which action should be executed at a particular point in time.
 
-; Note: This is not being used at the moment
-(define (cs-eval RULES)
-"
-  A ChatScript-like way for selecting actions.
-
-  Partition RULES into different categories based on their type,
-  and evaluate each of them. A satisfied one will be returned.
-"
-  (define curr-topic (ghost-get-curr-topic))
-  (define topic-rejoinders '())
-  (define topic-responders '())
-  (define topic-random-gambits '())
-  (define topic-gambits '())
-  (define responders '())
-  (define random-gambits '())
-  (define gambits '())
-  (define rules-evaluated '())
-
-  ; To evaluate a list of rules using "psi-satisfiable?"
-  (define (eval-rules R)
-    (set! rules-evaluated
-      (append-map
-        (lambda (r)
-          (if (equal? (stv 1 1) (psi-satisfiable? r)) (list r) '()))
-        R))
-    rules-evaluated)
-
-  ; To pick one of the selected rules either randomly or based on their weights
-  (define (pick-rule F)
-    ; Either randomly pick one of the rules, or pick based on their TV strength
-    (cond ((equal? 'RANDOM F)
-           (list-ref rules-evaluated
-             (random (length rules-evaluated) (random-state-from-platform))))
-          ((equal? 'RANK F)
-           (let ((highest-strength 0)
-                 (selected-rule '()))
-             (for-each (lambda (r)
-               (let ((strength (cog-stv-strength r)))
-                    (if (> strength highest-strength)
-                        (begin (set! highest-strength strength)
-                               (set! selected-rule r)))))
-               rules-evaluated)
-             selected-rule))))
-
-  ; Go through the rules and put them into different categories
-  (for-each (lambda (r)
-    (if (is-rule-in-topic? r curr-topic)
-        (cond ((equal? strval-rejoinder (cog-value r ghost-rule-type))
-               (set! topic-rejoinders (append topic-rejoinders (list r))))
-              ((equal? strval-responder (cog-value r ghost-rule-type))
-               (set! topic-responders (append topic-responders (list r))))
-              ((equal? strval-random-gambit (cog-value r ghost-rule-type))
-               (set! topic-random-gambits (append topic-random-gambits (list r))))
-              ((equal? strval-gambit (cog-value r ghost-rule-type))
-               (set! topic-gambits (append topic-gambits (list r)))))
-        (cond ; Skip the rule if it's in a topic that should be explicitly triggered
-              ; A rule may (rarely) be in multiple topics, so check them all
-              ((every (lambda (t) (topic-has-feature? t "noaccess")) (get-rule-topic r)))
-              ((equal? strval-responder (cog-value r ghost-rule-type))
-               (set! responders (append responders (list r))))
-              ((equal? strval-random-gambit (cog-value r ghost-rule-type))
-               (set! random-gambits (append random-gambits (list r))))
-              ((equal? strval-gambit (cog-value r ghost-rule-type))
-               (set! gambits (append gambits (list r)))))))
-    RULES)
-
-  (cog-logger-debug ghost-logger "Number of RULES = ~a\n" (length RULES))
-  (cog-logger-debug ghost-logger "topic-rejoinders = ~a\n" (length topic-rejoinders))
-  (cog-logger-debug ghost-logger "topic-responders = ~a\n" (length topic-responders))
-  (cog-logger-debug ghost-logger "topic-random-gambits = ~a\n" (length topic-random-gambits))
-  (cog-logger-debug ghost-logger "topic-gambits = ~a\n" (length topic-gambits))
-  (cog-logger-debug ghost-logger "responders = ~a\n" (length responders))
-  (cog-logger-debug ghost-logger "random-gambits = ~a\n" (length random-gambits))
-  (cog-logger-debug ghost-logger "gambits = ~a\n" (length gambits))
-
-  ; And finally, evaluate the rules in this order:
-  ; 1) topic-rejoinders
-  ; 2) topic-responders
-  ; 3) topic-random-gambits
-  ; 4) topic-gambits
-  ; 5) responders
-  ; 6) random-gambits
-  ; 7) gambits
-  (cond ((not (null? (eval-rules topic-rejoinders))) (pick-rule 'RANK))
-        ((not (null? (eval-rules topic-responders))) (pick-rule 'RANK))
-        ((not (null? (eval-rules topic-random-gambits))) (pick-rule 'RANDOM))
-        ((not (null? (eval-rules topic-gambits))) (pick-rule 'RANK))
-        ((not (null? (eval-rules responders))) (pick-rule 'RANK))
-        ((not (null? (eval-rules random-gambits))) (pick-rule 'RANDOM))
-        ((not (null? (eval-rules gambits))) (pick-rule 'RANK))
-        ; If we are here, there is no match
-        (else (list))))
-
-(define (eval-and-select RULES)
+(define* (eval-and-select RULES #:optional (SKIP-STI #f))
 "
   This is the goal-driven action selection.
 
@@ -105,18 +12,24 @@
   Wa = 1/Na * sum(Wcagi)
 
   Na = number of satisfied rules [i] that have the action [a]
-  Wcagi = Scag * Sc * Ig * T
+  Wcagi = Scag * Sc * Icag
 
   Scag = Strength of the psi-rule (c ∧ a => g)
   Sc = Satisfiability of the context of the psi-rule
-  Ig = Importance of the goal [g]
-  T = Whether the rule is in the current topic [1, 0.5]
+  Icag = Importance (STI) of the rule
+
+  SKIP-STI is for backward compatibility, used to decide whether to
+  include STI of a rule (Icag) in action selection or not. It's needed
+  as the default STI is zero. So if one runs GHOST without running
+  ECAN (as the earlier version of GHOST permits) then no action will
+  ever be triggered.
 "
+  ; ----------
   ; Store the evaluation results for the contexts, so that the same context
   ; won't be evaluated again, in the same psi-step
   (define context-alist '())
 
-  ; Store the action counts [Na]
+  ; Store the no. of rules that contain this action [Na]
   (define action-cnt-alist '())
 
   ; Store the sum of action-weights [sum(Wcagi)]
@@ -128,56 +41,56 @@
   ; For random number generation
   (define total-weight 0)
 
-  ; Get to know what the current topic is
-  (define curr-topic (ghost-get-curr-topic))
-
   ; For quickly find out which rule an given
   ; action belongs to
-  ; To-be removed once action selector actually
+  ; TODO: Remove it once action selector actually
   ; returns an action instead of a rule (?)
   (define action-rule-alist '())
 
-  ; Calculate the weight of the rule R
+  ; ----------
+  ; Calculate the weight of the rule R [Wcagi]
   (define (calculate-rweight R)
-    ; XXX TODO: The default STI is zero, which means
-    ; the weight for all the rules will be zero
-    ; To workaround this, a non-zero STI will be assigned
-    ; to the goal for now until we have ECAN and GHOST
-    ; running altogether in the near future
-    (define sti (cog-av-sti (psi-get-goal R)))
-
-    ; Now calculate the weight
     (* (cog-stv-strength R)
        (assoc-ref context-alist (psi-get-context R))
-       (if (= 0 sti) 1 sti)
-       ; TODO: Use a more sophisticated way for the below
-       (if (is-rule-in-topic? R curr-topic) 1 0.5)))
+       (if SKIP-STI
+         ; Weight higher if the rule is in the current topic
+         (if (is-rule-in-topic? R (ghost-get-curr-topic)) 1 0.5)
+         (cog-av-sti R))))
 
-  ; Calculate the weight of the action A
+  ; Calculate the weight of the action A [Wa]
   (define (calculate-aweight A)
     (* (/ 1 (assoc-ref action-cnt-alist A))
        (assoc-ref sum-weight-alist A)))
 
+  ; ----------
   (for-each
     (lambda (r)
       (define rc (psi-get-context r))
       (define ra (psi-get-action r))
 
-      ; Though an action may be in multiple psi-rule, but
-      ; it doesn't really matter here, just record one
-      ; of them
+      ; Though an action may be in multiple psi-rule, but it doesn't
+      ; really matter here, just record one of them
+      ; TODO: Remove it once action selector actually returns an
+      ; action instead of a rule (?)
       (set! action-rule-alist (assoc-set! action-rule-alist ra r))
 
+      ; Evaluate the context, and save the result in context-alist
       (if (equal? (assoc-ref context-alist rc) #f)
-        (set! context-alist (assoc-set! context-alist rc
-          (cdadr (cog-tv->alist (psi-satisfiable? r))))))
+        (set! context-alist
+          (assoc-set! context-alist rc
+            (cdadr (cog-tv->alist (psi-satisfiable? r))))))
 
+      ; Count the no. of rules that contain this action, and
+      ; save it in action-cnt-alist
       (if (equal? (assoc-ref action-cnt-alist ra) #f)
         (set! action-cnt-alist (assoc-set! action-cnt-alist ra 1))
         (set! action-cnt-alist (assoc-set! action-cnt-alist ra
           (+ (assoc-ref action-cnt-alist ra) 1))))
 
-      ; Ignore the action if its weight is zero
+      ; Calculate the weight of this rule
+      ; Save and accumulate the weight of an action in sum-weight-alist
+      ; Skip the action if its weight is zero, so that sum-weight-alist
+      ; and action-weight-alist do not contain actions that have a zero weight
       (let ((w (calculate-rweight r)))
         (if (> w 0)
           (if (equal? (assoc-ref sum-weight-alist ra) #f)
@@ -188,8 +101,7 @@
             "Skipping action with zero weight: ~a" ra))))
     RULES)
 
-  ; Note: sum-weight-alist and action-weight-alist do not contain
-  ; actions that have a zero weight
+  ; Finally calculate the weight of an action
   (for-each
     (lambda (a)
       (set! action-weight-alist
@@ -197,12 +109,6 @@
       (set! total-weight (+ total-weight
         (assoc-ref action-weight-alist (car a)))))
     sum-weight-alist)
-
-  (cog-logger-debug ghost-logger "context-alist: ~a" context-alist)
-  (cog-logger-debug ghost-logger "action-cnt-alist: ~a" action-cnt-alist)
-  (cog-logger-debug ghost-logger "sum-weight-alist: ~a" sum-weight-alist)
-  (cog-logger-debug ghost-logger "action-weight-alist: ~a" action-weight-alist)
-  (cog-logger-debug ghost-logger "action-rule-alist: ~a" action-rule-alist)
 
   ; If there is only one action in the list, return that
   ; Otherwise, pick one based on their weights
@@ -235,26 +141,26 @@
          (exact-match (filter psi-rule? (cog-get-trunk input-lseq)))
          ; The ones that contains no constant terms
          (no-const (filter psi-rule? (append-map cog-get-trunk
-           (cog-chase-link 'MemberLink 'ListLink ghost-no-constant))))
+           (map gar (cog-incoming-by-type ghost-no-constant 'MemberLink)))))
          ; The ones found by the recognizer
          (dual-match (filter psi-rule? (append-map cog-get-trunk
            (cog-outgoing-set (cog-execute! (Dual input-lseq))))))
          ; Get the psi-rules associate with them with duplicates removed
          (rules-candidates
            (fold (lambda (rule prev)
-                   ; Since a psi-rule can satisfy multiple goals and an
-                   ; ImplicationLink will be generated for each of them,
-                   ; we are comparing the implicant of the rules instead
-                   ; of the rules themselves, and create a list of rules
-                   ; with unique implicants
-                   (if (any (lambda (r) (equal? (gar r) (gar rule))) prev)
-                       prev (append prev (list rule))))
-                 (list) (append exact-match no-const dual-match)))
+             ; Since a psi-rule can satisfy multiple goals and an
+             ; ImplicationLink will be generated for each of them,
+             ; we are comparing the implicant of the rules instead
+             ; of the rules themselves, and create a list of rules
+             ; with unique implicants
+             (if (any (lambda (r) (equal? (gar r) (gar rule))) prev)
+                 prev (append prev (list rule))))
+           (list) (append exact-match no-const dual-match)))
          ; Evaluate the matched rules one by one and see which of them satisfy
          ; the current context
          ; One of them, if any, will be selected and executed
-         (selected (eval-and-select
-           (delete-duplicates (append exact-match no-const dual-match)))))
+         (selected (eval-and-select (delete-duplicates
+           (append exact-match no-const dual-match)) #t)))
 
         (cog-logger-debug ghost-logger "For input:\n~a" input-lseq)
         (cog-logger-debug ghost-logger "Rules with no constant:\n~a" no-const)
@@ -267,23 +173,46 @@
         ; TODO: Move this part to OpenPsi?
         ; TODO: This should be created after actually executing the action
         (if (not (null? selected))
-          (State ghost-last-executed (psi-rule-alias selected)))
+          ; There are psi-rules with no alias, e.g. rules that are not
+          ; defined in GHOST, ignore them, as they are not using 'rejoinders'
+          ; which applies to GHOST rules only
+          (let ((alias (psi-rule-alias selected)))
+            (if (not (null? alias))
+              (State ghost-last-executed alias))))
 
         (List selected)))
 
-(Define
-  (DefinedSchema (ghost-prefix "Get Current Input"))
-  (Get (State ghost-curr-proc (Variable "$x"))))
+; ----------
+(define-public (ghost-get-rules-from-af)
+"
+  The action selector that works with ECAN.
+  It evaluates and selects psi-rules from the attentional focus.
+"
+  (define candidate-rules
+    (filter psi-rule?
+      (if ghost-af-only?
+        (cog-af)
+        (cog-get-atoms 'ImplicationLink))))
+  (define rule-selected (eval-and-select candidate-rules))
 
-(Define
-  (DefinedSchema (ghost-prefix "Find Rules"))
-  (Lambda (VariableList (TypedVariable (Variable "$sentence")
-                                       (Type "SentenceNode")))
-          (ExecutionOutput (GroundedSchema "scm: ghost-find-rules")
-                           (List (Variable "$sentence")))))
+  (cog-logger-debug ghost-logger "Candidate Rules:\n~a" candidate-rules)
+  (cog-logger-debug ghost-logger "Selected:\n~a" rule-selected)
 
+  ; Keep a record of which rule got executed, just for rejoinders
+  ; TODO: Move this part to OpenPsi?
+  ; TODO: This should be created after actually executing the action
+  (if (not (null? rule-selected))
+    ; There are psi-rules with no alias, e.g. rules that are not
+    ; defined in GHOST, ignore them, as they are not using 'rejoinders'
+    ; which applies to GHOST rules only
+    (let ((alias (psi-rule-alias rule-selected)))
+      (if (not (null? alias))
+        (State ghost-last-executed alias))))
+
+  (List rule-selected))
+
+; ----------
 ; The action selector for OpenPsi
 (psi-set-action-selector!
   ghost-component
-  (Put (DefinedSchema (ghost-prefix "Find Rules"))
-       (DefinedSchema (ghost-prefix "Get Current Input"))))
+  (ExecutionOutput (GroundedSchema "scm: ghost-get-rules-from-af") (List)))
