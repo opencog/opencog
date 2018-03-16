@@ -48,8 +48,8 @@ All of the statistics gathering is done within the OpenCog AtomSpace,
 where counts and other statistical quantities are associated with various
 different hypergraphs.  The contents of the atomspace are saved to an
 SQL (Postgres) server for storage.  The system is fed with raw text
-using assorted ad-hoc scripts, which include both link-grammar and
-RelEx as central components of the processing pipeline. Most of the
+using assorted ad-hoc scripts, which include link-grammar as a 
+central components of the processing pipeline. Most of the
 data analysis is performed with an assortment of scheme scripts.
 
 Thus, operating the system requires three basic steps:
@@ -105,7 +105,7 @@ statistics.  Most of this revolves around setting up postgres.
    (in guile-2.2, it doesn't hang, but still behaves very badly)
 
 1) Set up and configure postgres, as described in
-   `opencog/persist/sql/README.md`
+   `atomspace/opencog/persist/sql/README.md`
 
 2) Create and initialize the database. Pick any name you want;
    here it is `learn-pairs`.
@@ -119,26 +119,20 @@ statistics.  Most of this revolves around setting up postgres.
 
 Obtaining word-pair counts requires digesting a lot of text, and
 counting the word-pairs that occur in the text.  The easiest way of
-doing this, at the moment, is to parse the text with link-grammar and
-RelEx, using the "any" language.  This pseudo-language will link any
+doing this, at the moment, is to parse the text with link-grammar
+using the "any" language.  This pseudo-language will link any
 word to any other, and is simply a convenient way of extracting word
 pairs from text.  Although this might seem to be a very convoluted way
 of extracting word pairs, it actually "makes sense", for two reasons:
 a) it already works; little or no new code required. b) later processing
 steps will require passing text through the link-grammar parser anyway,
-so we may as well start using it right away. (RelEx is used only to
-convert link-grammar output to "atomese"; a stripped-down version of
-RelEx could be created that does only this, or maybe a native
-link-grammar server could be written.)
+so we may as well start using it right away. 
 
 So, set up the text-ingestion pipeline:
 
 4) Install `link-grammar-5.3.15` or newer.
 
-5) Install the current version of RelEx. The current version has
-   assorted bugfixes that are required to get a working system.
-
-6) Create/edit the `~/.guile` file and add the following content:
+5) Create/edit the `~/.guile` file and add the following content:
 ```
    (use-modules (ice-9 readline))
    (activate-readline)
@@ -148,7 +142,7 @@ So, set up the text-ingestion pipeline:
    (add-to-load-path ".")
 ```
 
-7) Select a language, and copy one of the `pair-count-??.scm` files
+6) Select a language, and copy one of the `pair-count-??.scm` files
    from the `run` directory to your working directory. Review and edit
    the configuration as necessary. It contains the REPL port number,
    and a default prompt: These are set up by default to avoid conflicts
@@ -156,24 +150,22 @@ So, set up the text-ingestion pipeline:
    the same time.  It also contains the database credentials -- that's
    probably the only thing you need to change.
 
-8) Start the various servers. Eventually, you can use the
+7) Start the REPL server. Eventually, you can use the
    `run-all-servers.sh` file in the `run` directory to do this;
    it creates a `byobu` session with different servers in different
    terminals, where you can keep an eye on them. However, the
    first time through, it is better to do all this by hand. So:
 
-8a) Start `run/relex-server-any.sh` in a terminal.
-
-8b) Start the REPL server, in another terminal, as follows:
+7a) Start the REPL server in a terminal, as follows:
 ```
    guile -l pair-count-??.scm
 ```
 
-9) Verify that the language processing pipeline works. In a third
+8) Verify that the language processing pipeline works. In a second
    terminal, try this:
 ```
    rlwrap telnet localhost 17005  # or wherever your REPL server is configured.
-   scheme@(en-pairs)> (observe-text "this is a test")
+   opencog-en> (observe-text "this is a test")
 ```
 
    Better yet:
@@ -183,12 +175,12 @@ So, set up the text-ingestion pipeline:
    echo -e "(observe-text \"Lietuvos žydų kilmės žurnalistas\")" |nc localhost 17005
 ```
 
-   This should result in activity on the RelEx server, on the cogserver,
-   and on the database: the "observe text" scheme code sends the text to
-   RelEx for parsing, counts the returned word-pairs, and stores them in
+   This should result in activity on the cogserver 
+   and on the database: the "observe text" scheme code sends the text
+   for parsing, counts the returned word-pairs, and stores them in
    the database.
 
-9a) Verify that the above resulted in data sent to the SQL database.
+8a) Verify that the above resulted in data sent to the SQL database.
    Log into the database, and check:
 ```
    psql learn-pairs
@@ -200,7 +192,7 @@ So, set up the text-ingestion pipeline:
    pair-wise linkages for the above sentences. If the above are empty,
    something is wrong. Go to step zero.
 
-9b) Optionally reduce the amount of data that is collected. Currently,
+8b) Optionally reduce the amount of data that is collected. Currently,
   the `observe-text` function in 'link-pipeline.scm` collects counts
   on four different kinds of structures:
 
@@ -219,14 +211,15 @@ So, set up the text-ingestion pipeline:
                 You almost surely do not need this.  This is for my
                 own personal curiosity.
 
-9c) Optionally tune the forced garbage collection parameters. Currently
+8c) Optionally tune the forced garbage collection parameters. Currently
   garbage collection is forced whenever the guile heap exceeds 750
   MBytes; this helps keep RAM usage down on small-RAM machines.  However,
   it does cost CPU time.  Adjust the `max-size` parameter in
   `observe-text` in the `link-pipeline.scm` file to suit your whims in
   RAM usage and time spent in GC.
 
-10) Get ready to feed it text. It would be best to get text that
+9) Get ready to feed it text (see Bulk Text Parsing section below). 
+  It would be best to get text that
   consists of narrative literature, adventure and young-adult novels,
   newspaper stories. These contain a good mix of common nouns and verbs,
   which is needed for conversational natural language.
@@ -247,7 +240,7 @@ So, set up the text-ingestion pipeline:
   and pre-processing texts from Project Gutenberg, Wikipedia, and the
   "Archive of Our Own" fan-fiction website.
 
-10a) The current pipeline for Chinese text requires word segmentation
+9a) The current pipeline for Chinese text requires word segmentation
   to be performed outside of OpenCog. This can be done using jieba
   https://github.com/fxsjy/jieba So: first, install it:
   `pip install jieba` and then segment text:
@@ -260,7 +253,7 @@ So, set up the text-ingestion pipeline:
   you will want to use `zh-pre` or `yue-pre` for the language; this
   disables the addition of spaces between hanzi characters.
 
-11) After doing at least several days worth of parsing  (i.e. at least
+10) After doing at least several days worth of parsing  (i.e. at least
    hundreds of articles, tens of thousands of sentences) the word-pair
    mutual information can be extracted. Do the stuff in section "Mutual
    Information" section below.
@@ -268,13 +261,13 @@ So, set up the text-ingestion pipeline:
    If the parsing is interrupted, you can restart the various scripts;
    they will automatically pick up where they left off.
 
-12) Using the extracted mutual information for word-pairs, the MST
+11) Using the extracted mutual information for word-pairs, the MST
    parsing step can be started. See below. Run this for several days.
    At the end of this, you will have a bunch of statistics on
    "pseudo-connector sets": pairs which associate a word to a
    disjunct of pseudo-connectors.
 
-13) Perform clustering research.  You're on your own, now.
+12) Perform clustering research.  You're on your own, now.
 
 That's all for now, folks!
 
@@ -293,29 +286,33 @@ alpha-pages after all that work)
     cp -pr alpha-pages beta-pages
 ```
 * Review the file `opencog/nlp/learn/run/README`, and then copy the
-  scripts into your working dir.
-* Modify as needed for chosen language. None of these need modification,
+  scripts into your working dir. 
+* Modify as needed for chosen language. Most of them don't need modification,
   by default, unless you want to do something unusual.
 
-  -- `run-all-servers.sh` runs (almost) all of the needed servers, for
-     one language, all at once, in a multi-paneled `byobu` window. What
-     it doesn't do is start the final batch script `./wiki-ss-<lang>.sh`,
+  -- `run-all-servers.sh` runs the cogserver for
+     one language, in a multi-paneled `byobu` window.
+     It doesn't start the final batch script `./wiki-ss-<lang>.sh`,
      which needs to be started by hand (for the <lang> that you want to
-     process). Use F4 to move to the 4th tab and start it there.
-
-  -- `relex-server-any.sh` performs random-syntax parsing for languages
-     that do not need morphological analysis.
+     process). Use F4 to move to the 'parse' tab and start it there.
 
   -- `wiki-ss-en.sh` performs batch processing of input text files.
      This calls `ss-one.sh` to process one text file.
 
   -- `ss-one.sh` calls `split-sentences.pl` to split the text file into
      sentences, and then calls `submit-one.pl` to send the sentences
-     to relex for parsing. None of these should need any modification.
+     for parsing. None of these should need any modification.
 
-* Copy `pair-count-lang.scm` to your working directory.  Start the REPL
-  server: `guile -l pair-count-<lang>.scm `
-* Go back to the input text dir (the dir that contains `beta-pages`), and
+  -- `pair-count-lang.scm` starts the cogserver and opens the 
+      database. You need to modify 
+      ```
+          (sql-open "postgres:///en_pairs?user=ubuntu&password=asdf")
+      ```
+      to contain your database name, username and password (if needed)
+
+* Run `run-all-servers.sh` in your working directory.
+* In the byobu terminal, navigate to the 'parse' tab (with F4),
+  go back to the input text dir (the dir that contains `beta-pages`), and
   run `./wiki-ss-<lang>.sh`
 * Wait a few days.
 * This requires postgres 8.4 or newer, for multiple reasons. One reason
@@ -323,7 +320,7 @@ alpha-pages after all that work)
   below) The other is the list membership functions are needed.
 * Be sure to perform the postgres tuning recommendations found in
   various online postgres performance wikis, or in the
-  `opencog/persist/sql/README.md` file.  See also 'Performance' section
+  `atomspace/opencog/persist/sql/README.md` file.  See also 'Performance' section
   below.
 
 Some handy SQL commands:
@@ -397,7 +394,7 @@ Next: batch-logli takes 540 seconds for 225K words
 
 Finally, an MI compute stage.
 Current rate is 60 words/sec = 3.6K per minute.
-This rate is per-word, not per word-pair.
+This rate is per-word, not per word-pair .
 
 Update Feb 2014: fr_pairs now contains 10.3M atoms
 SELECT count(uuid) FROM Atoms;  gives  10324863 (10.3M atoms)
@@ -438,7 +435,7 @@ To perform MST parsing in bulk:
   the `gamma-pages` directory). Be aware that, during processing,
   text files are removed from this directory.
 
-* Start the REPL server by saying
+* Start the REPL server by running ./run-all-servers.sh or
 ```
   guile -l mst-count-en.scm
 ```
@@ -616,7 +613,7 @@ DONE
   flags in version 4.8.3.
 * Need a mutli-language sentence splitter; the maxent splitter only
   works for English sentences.  Probably something simple will do ...
-  Done: copied one from moses-smt and put it into a relex subdirectory
+  Done: copied one from moses-smt and put it in the run subdirectory
 * Raw psql seems not to be utf8.  Were the tables created wrong,
   or is this a client bug?
   Fixed: turned out to be a guile-related bug.

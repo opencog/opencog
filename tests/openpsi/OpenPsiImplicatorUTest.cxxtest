@@ -159,6 +159,7 @@ public:
     logger().info("END TEST: %s", __FUNCTION__);
   }
 
+  // Test OpenPsiImplicator::imply and OpenpsiImplicator::was_action_executed.
   void test_imply()
   {
     logger().info("BEGIN TEST: %s", __FUNCTION__);
@@ -174,14 +175,17 @@ public:
     CHKERR
     HandleSeq context_2 = _scm->eval_h("(context-2-cpp)")->getOutgoingSet();
     CHKERR
+    HandleSeq context_3 = _scm->eval_h("(context-3-cpp)")->getOutgoingSet();
+    CHKERR
     Handle action_1 = _scm->eval_h("action-1");
     CHKERR
     Handle goal_1 = _scm->eval_h("goal-1");
     CHKERR
     Handle rule_1 = _opr->add_rule(context_1, action_1, goal_1,
       SimpleTruthValue::createTV(1.0, 1.0));
-    // A Ghost rule.
     Handle rule_2 = _opr->add_rule(context_2, action_1, goal_1,
+      SimpleTruthValue::createTV(1.0, 1.0));
+    Handle rule_3 = _opr->add_rule(context_3, action_1, goal_1,
       SimpleTruthValue::createTV(1.0, 1.0));
 
     // Test 1:
@@ -195,11 +199,18 @@ public:
     Handle result_2_1 = _opi->imply(rule_1, *_opr);
     TSM_ASSERT_EQUALS("Expected grounded InheritanceLink",
       expected_result, result_2_1);
+    TS_ASSERT_EQUALS(_opi->was_action_executed(rule_1), TruthValue::TRUE_TV());
 
     _opi->check_satisfiability(rule_2, *_opr);
     Handle result_2_2 = _opi->imply(rule_2, *_opr);
     TSM_ASSERT_EQUALS("Expected grounded InheritanceLink",
       expected_result, result_2_2);
+    TS_ASSERT_EQUALS(_opi->was_action_executed(rule_2), TruthValue::TRUE_TV());
+
+    _opi->check_satisfiability(rule_3, *_opr);
+    Handle result_2_3 = _opi->imply(rule_3, *_opr);
+    TS_ASSERT_EQUALS(Handle::UNDEFINED, result_2_3);
+    TS_ASSERT_EQUALS(_opi->was_action_executed(rule_3), TruthValue::FALSE_TV());
 
     logger().info("END TEST: %s", __FUNCTION__);
   }

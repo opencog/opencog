@@ -32,7 +32,9 @@ OpenPsiImplicator::OpenPsiImplicator(AtomSpace* as) :
   InitiateSearchCB(as),
   DefaultPatternMatchCB(as),
   Satisfier(as)
-{}
+{
+  _action_executed = _as->add_node(PREDICATE_NODE, "action-executed");
+}
 
 bool OpenPsiImplicator::grounding(const HandleMap &var_soln,
                                   const HandleMap &term_soln)
@@ -117,14 +119,23 @@ Handle OpenPsiImplicator::imply(const Handle& rule, OpenPsiRules& opr)
   Instantiator inst(_as);
 
   if (_EMPTY_HANDLE_MAP != query_grounding) {
-    return inst.instantiate(opr.get_action(rule),
-              query_grounding, true);
+    Handle result = \
+      inst.instantiate(opr.get_action(rule), query_grounding, true);
+    rule->setValue(_action_executed, ProtoAtomCast(TruthValue::TRUE_TV()));
+
+    return result;
   } else {
     // NOTE: Trying to check for satisfiablity isn't done because it
     // is the responsibility of the action-selector for determining
     // what action is to be taken.
+    rule->setValue(_action_executed, ProtoAtomCast(TruthValue::FALSE_TV()));
     return Handle::UNDEFINED;
   }
+}
+
+TruthValuePtr OpenPsiImplicator::was_action_executed(const Handle rule)
+{
+  return TruthValueCast(rule->getValue(_action_executed));
 }
 
 OpenPsiImplicator& opencog::openpsi_implicator(AtomSpace* as)

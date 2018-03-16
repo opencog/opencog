@@ -102,3 +102,10 @@
     (ConceptNode "Abeba")
     (ConceptNode "animal"))
 )
+
+; Rule-3 is ungroundable
+(define context-3
+  (append context-1 (list
+    (Link (Variable "a") (Variable "b")))))
+
+(define (context-3-cpp) (List context-3))

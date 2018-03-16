@@ -1,15 +1,5 @@
 ;; To convert things parsed by the parser into actual atomese.
 
-; ----------
-; Shared variables for all terms
-(define atomese-variable-template
-  (list (TypedVariable (Variable "$S") (Type "SentenceNode"))
-        (TypedVariable (Variable "$P") (Type "ParseNode"))))
-
-; Shared conditions for all terms
-(define atomese-condition-template
-  (list (Parse (Variable "$P") (Variable "$S"))
-        (State ghost-curr-proc (Variable "$S"))))
 
 ; ----------
 (define (order-terms TERMS)
@@ -33,10 +23,9 @@
          (unordered? (any (lambda (t) (equal? 'unordered-matching (car t))) TERMS))
          ; It's possible that the sequence does not having any word or concept etc,
          ; e.g. a rule may just be something like not-having-either-one-of-these-words
-         ; or just functions
-         (empty-seq? (every (lambda (t)
-           (or (equal? 'negation (car t))
-               (equal? 'function (car t)))) TERMS))
+         (empty-seq? (every (lambda (t) (equal? 'negation (car t))) TERMS))
+         (func-only? (and (> (length TERMS) 0)
+           (every (lambda (t) (equal? 'function (car t))) TERMS)))
          (start-anchor? (any (lambda (t) (equal? as t)) TERMS))
          (end-anchor? (any (lambda (t) (equal? ae t)) TERMS))
          (start (if start-anchor? (cdr (member as TERMS)) (list wc)))
@@ -44,41 +33,44 @@
                   (take-while (lambda (t) (not (equal? ae t))) TERMS)
                   (list wc)))
          ; Start inserting the wildcards, including the implicit ones
-         (term-lst (cond (unordered? TERMS)  ; Nothing needs to be done
-                   ((and start-anchor? end-anchor?)
-                    (if (equal? start-anchor? end-anchor?)
-                        ; If they are equal, we are not expecting
-                        ; anything else, either one of them is
-                        ; the whole sequence
-                        (drop-right start 1)
-                        ; If they are not equal, put a wildcard
-                        ; in between them
-                        (append start (list wc) end)))
-                    ; If there is only a start-anchor, append it and
-                    ; a wildcard with the main-seq
-                   (start-anchor?
-                    (let ((before-anchor-start
-                            (take-while (lambda (t) (not (equal? as t))) TERMS)))
-                         (if (null? before-anchor-start)
-                             (append start end)
-                             ; In case there are terms before anchor-start,
-                             ; get it and add an extra wildcard
-                             (append start (list wc) before-anchor-start end))))
-                   ; If there is only an end-anchor, the main-seq should start
-                   ; with a wildcard, follow by another wildcard and finally
-                   ; the end-seq
-                   (end-anchor?
-                    (let ((after-anchor-end (cdr (member ae TERMS))))
-                         (if (null? after-anchor-end)
-                             (append start end)
-                             ; In case there are still terms after anchor-end,
-                             ; get it and add an extra wildcard
-                             (append start after-anchor-end (list wc) end))))
-                   ; Just having one wildcard is enough for an empty sequence
-                   (empty-seq? (append TERMS (list wc)))
-                   ; If there is no anchor, the main-seq should start and
-                   ; end with a wildcard
-                   (else (append (list wc) TERMS (list wc))))))
+         (term-lst
+           (cond
+             (unordered? TERMS)  ; Nothing needs to be done
+             (func-only? TERMS)  ; Nothing needs to be done
+             ((and start-anchor? end-anchor?)
+              (if (equal? start-anchor? end-anchor?)
+                  ; If they are equal, we are not expecting
+                  ; anything else, either one of them is
+                  ; the whole sequence
+                  (drop-right start 1)
+                  ; If they are not equal, put a wildcard
+                  ; in between them
+                  (append start (list wc) end)))
+             ; If there is only a start-anchor, append it and
+             ; a wildcard with the main-seq
+             (start-anchor?
+               (let ((before-anchor-start
+                       (take-while (lambda (t) (not (equal? as t))) TERMS)))
+                    (if (null? before-anchor-start)
+                        (append start end)
+                        ; In case there are terms before anchor-start,
+                        ; get it and add an extra wildcard
+                        (append start (list wc) before-anchor-start end))))
+             ; If there is only an end-anchor, the main-seq should start
+             ; with a wildcard, follow by another wildcard and finally
+             ; the end-seq
+             (end-anchor?
+               (let ((after-anchor-end (cdr (member ae TERMS))))
+                 (if (null? after-anchor-end)
+                     (append start end)
+                     ; In case there are still terms after anchor-end,
+                     ; get it and add an extra wildcard
+                     (append start after-anchor-end (list wc) end))))
+             ; Just having one wildcard is enough for an empty sequence
+             (empty-seq? (append TERMS (list wc)))
+             ; If there is no anchor, the main-seq should start and
+             ; end with a wildcard
+             (else (append (list wc) TERMS (list wc))))))
         ; Remove, if any, wildcards that are not needed
         (fold-right
           (lambda (term prev)
@@ -126,6 +118,7 @@
   for each of the TERMS in the pattern.
 "
   (define is-unordered? #f)
+  (define has-words? #f)
 
   (define (process terms)
     (define v '())
@@ -143,28 +136,38 @@
              (update-lists (process (cdr t)))
              (set! is-unordered? #t))
             ((equal? 'word (car t))
-             (update-lists (word (cdr t))))
+             (update-lists (word (cdr t)))
+             (set! has-words? #t))
             ((equal? 'lemma (car t))
-             (update-lists (lemma (cdr t))))
+             (update-lists (lemma (cdr t)))
+             (set! has-words? #t))
             ((equal? 'phrase (car t))
-             (update-lists (phrase (cdr t))))
+             (update-lists (phrase (cdr t)))
+             (set! has-words? #t))
             ((equal? 'concept (car t))
-             (update-lists (concept (cdr t))))
+             (update-lists (concept (cdr t)))
+             (set! has-words? #t))
             ((equal? 'choices (car t))
-             (update-lists (choices (cdr t))))
+             (update-lists (choices (cdr t)))
+             (set! has-words? #t))
             ((equal? 'optionals (car t))
-             (update-lists (optionals (cdr t))))
+             (update-lists (optionals (cdr t)))
+             (set! has-words? #t))
             ((equal? 'negation (car t))
-             (update-lists (negation (cdr t))))
+             (update-lists (negation (cdr t)))
+             (set! has-words? #t))
             ((equal? 'wildcard (car t))
-             (update-lists (wildcard (cadr t) (cddr t))))
+             (update-lists (wildcard (cadr t) (cddr t)))
+             (set! has-words? #t))
             ((equal? 'variable (car t))
              (update-lists (process (cdr t)))
              (set! pat-vars (append pat-vars (last-pair ws))))
             ((equal? 'uvar_exist (car t))
-             (set! c (append c (list (uvar-exist? (cdr t))))))
+             (set! c (append c (list (uvar-exist? (cdr t)))))
+             (set! has-words? #t))
             ((equal? 'uvar_equal (car t))
-             (set! c (append c (list (uvar-equal? (cadr t) (caddr t))))))
+             (set! c (append c (list (uvar-equal? (cadr t) (caddr t)))))
+             (set! has-words? #t))
             ((equal? 'function (car t))
              (set! c (append c
                (list (context-function (cadr t)
@@ -175,7 +178,7 @@
                           (get-var-lemmas (list-ref pat-vars (cdr a))))
                          ((equal? 'get_uvar (car a))
                           (get-user-variable (cdr a)))
-                         (else (WordNode (cdr a)))))
+                         (else (ConceptNode (cdr a)))))
                    (cddr t)))))))
             ((equal? 'sequence (car t))
              (let ((pt (process (cdr t))))
@@ -200,38 +203,49 @@
   (define word-seq (list-ref terms 2))
   (define lemma-seq (list-ref terms 3))
 
-  (if is-unordered?
-      ; Generate an EvaluationLink for each of the term in the seq
-      ; if it's an unordered match
-      (begin
-        (for-each
-          (lambda (t)
-            (let ((wc (wildcard 0 -1)))
-              (set! vars (append vars (list-ref wc 0)))
-              (set! conds (append conds (list (generate-eval ghost-word-seq
-                (list (car (list-ref wc 2)) t (car (list-ref wc 3)))))))))
-          word-seq)
-        (for-each
-          (lambda (t)
-            (let ((wc (wildcard 0 -1)))
-              (set! vars (append vars (list-ref wc 0)))
-              (set! conds (append conds (list (generate-eval ghost-lemma-seq
-                (list (car (list-ref wc 2)) t (car (list-ref wc 3)))))))))
-          lemma-seq))
-      ; Otherwise it's an ordered match
+  ; If there is no word in the pattern, then don't put the seqs
+  ; and the other sentence related stuffs in the context
+  (if has-words?
+    (begin
+      (set! vars (append vars (list
+        (TypedVariable (Variable "$S") (Type "SentenceNode"))
+        (TypedVariable (Variable "$P") (Type "ParseNode")))))
       (set! conds (append conds (list
-        (generate-eval ghost-word-seq word-seq)
-        (generate-eval ghost-lemma-seq lemma-seq)))))
+        (Parse (Variable "$P") (Variable "$S"))
+        (State ghost-curr-proc (Variable "$S")))))
+      (if is-unordered?
+        ; Generate an EvaluationLink for each of the term in the seq
+        ; if it's an unordered match
+        (begin
+          (for-each
+            (lambda (t)
+              (let ((wc (wildcard 0 -1)))
+                (set! vars (append vars (list-ref wc 0)))
+                (set! conds (append conds (list (generate-eval ghost-word-seq
+                  (list (car (list-ref wc 2)) t (car (list-ref wc 3)))))))))
+            word-seq)
+          (for-each
+            (lambda (t)
+              (let ((wc (wildcard 0 -1)))
+                (set! vars (append vars (list-ref wc 0)))
+                (set! conds (append conds (list (generate-eval ghost-lemma-seq
+                  (list (car (list-ref wc 2)) t (car (list-ref wc 3)))))))))
+            lemma-seq))
+        ; Otherwise it's an ordered match
+        (set! conds (append conds (list
+          (generate-eval ghost-word-seq word-seq)
+          (generate-eval ghost-lemma-seq lemma-seq))))))
+    ; TODO: Remove once we start using ECAN to find rules by default
+    ; See below
+    (MemberLink (car conds) ghost-no-constant))
 
   ; DualLink couldn't match patterns with no constant terms in it
   ; Mark the rules with no constant terms so that they can be found
   ; easily during the matching process
-  ; TODO: Mark the ones with only functions in the context as well
-  ; XXX TODO: This can impede the performance if we have many of these
-  ;           in the rulebase
+  ; TODO: Remove once we start using ECAN to find rules by default
   (if (equal? (length lemma-seq)
-              (length (filter (lambda (x) (equal? 'GlobNode (cog-type x)))
-                              lemma-seq)))
+        (length (filter (lambda (x) (equal? 'GlobNode (cog-type x)))
+                        lemma-seq)))
       (MemberLink (List lemma-seq) ghost-no-constant))
 
   (list vars conds))
@@ -295,26 +309,27 @@
       (if (null? choices)
           '()
           (list (action-choices choices)))))
-  (define action-atomese (to-atomese (cdar ACTION)))
-  (True (if reuse
-            action-atomese
-            (list (ExecutionOutput
-                    (GroundedSchema "scm: ghost-execute-action")
-                    (List action-atomese))
-                  (if (not keep)
-                      ; The default behavior is to not executed the
-                      ; same action more than once -- update the
-                      ; TV strength to zero so that the action
-                      ; selector won't select it again
-                      (ExecutionOutput
-                        (GroundedSchema "scm: ghost-update-rule-strength")
-                        ; Note: This is generated by psi-rule-set-alias!
-                        (List (Concept (string-append "OpenPsi: " RULENAME))
-                              (Number 0)))
-                      (list))
-                  ; Set the current topic
-                  (Put (State ghost-curr-topic (Variable "$x"))
-                       rule-topic)))))
+
+  (True
+    (if reuse
+      (to-atomese (cdar ACTION))
+      (list (ExecutionOutput
+              (GroundedSchema "scm: ghost-execute-action")
+              (List (to-atomese (cdar ACTION))))
+            (if (not keep)
+                ; The default behavior is to not executed the
+                ; same action more than once -- update the
+                ; TV strength to zero so that the action
+                ; selector won't select it again
+                (ExecutionOutput
+                  (GroundedSchema "scm: ghost-update-rule-strength")
+                  ; Note: This is generated by psi-rule-set-alias!
+                  (List (Concept (string-append psi-prefix-str RULENAME))
+                        (Number 0)))
+                (list))
+            ; Set the current topic
+            (Put (State ghost-curr-topic (Variable "$x"))
+                 rule-topic)))))
 
 ; ----------
 (define (process-goal GOAL)
@@ -351,10 +366,11 @@
         (else (let ((var (Variable (gen-var "GHOST-rule" #f)))
                     (lv (get-rejoinder-level TYPE)))
           (list
-            (list (TypedVariable var (Type "ImplicationLink")))
+            (list (TypedVariable var (Type "ConceptNode")))
             (list (State ghost-last-executed var)
-                  (psi-rule-set-alias! var
-                    (last (list-ref rule-lists (- lv 1)))))
+                  (Equal var
+                    (Concept (string-append psi-prefix-str
+                      (last (list-ref rule-lists (- lv 1)))))))
             strval-rejoinder)))))
 
 ; ----------
@@ -371,11 +387,11 @@
   TYPE is a grouping idea from ChatScript, e.g. responders, rejoinders,
   gambits etc.
 "
-  (define (add-to-rule-lists POS RULE)
-    (if (<= (length rule-lists) POS)
+  (define (add-to-rule-lists LV RULE)
+    (if (<= (length rule-lists) LV)
         (set! rule-lists (append rule-lists (list (list RULE))))
-        (list-set! rule-lists POS
-          (append (list-ref rule-lists POS) (list RULE)))))
+        (list-set! rule-lists LV
+          (append (list-ref rule-lists LV) (list RULE)))))
 
   ; First of all, make sure the topic is set
   ; so that it can be used when we are processing the action
@@ -397,11 +413,9 @@
          (proc-type (process-type TYPE))
          (ordered-terms (order-terms PATTERN))
          (proc-terms (process-pattern-terms ordered-terms))
-         (vars (append atomese-variable-template
-                       (list-ref proc-terms 0)
+         (vars (append (list-ref proc-terms 0)
                        (list-ref proc-type 0)))
-         (conds (append atomese-condition-template
-                        (list-ref proc-terms 1)
+         (conds (append (list-ref proc-terms 1)
                         (list-ref proc-type 1)))
          (type (list-ref proc-type 2))
          (action (process-action ACTION rule-name))

@@ -45,6 +45,7 @@
     psi-prefix-str psi-suffix-str
 
     ; C++ bindings from libopenpsi
+    psi-action-executed?
     psi-add-category
     psi-add-to-category
     psi-categories
@@ -69,6 +70,15 @@
 
 ; --------------------------------------------------------------
 ; Documentations for C++ bindings from libopenpsi
+(set-procedure-property! psi-action-executed? 'documentation
+"
+  psi-action-executed? RULE
+
+  Returns (stv 1 1) if the action was executed last time `psi-imply`
+  was run, else it returns (stv 0 1).
+"
+)
+
 (set-procedure-property! psi-get-action 'documentation
 "
   psi-get-action RULE

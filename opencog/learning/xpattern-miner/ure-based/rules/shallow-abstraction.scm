@@ -39,5 +39,5 @@
 (define inheritance-shallow-abstraction
   (gen-shallow-abstraction InheritanceLink 2))
 
-;; (define and-shallow-abstraction
-;;   (gen-shallow-abstraction AndLink 2))
+(define and-shallow-abstraction
+  (gen-shallow-abstraction AndLink 2))

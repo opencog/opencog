@@ -38,7 +38,10 @@ OpenPsiSCM::OpenPsiSCM()
 
 void OpenPsiSCM::init()
 {
-  define_scheme_primitive("psi-add-category", &OpenPsiSCM::add_category,
+ define_scheme_primitive("psi-action-executed?", &OpenPsiSCM::was_action_executed,
+    this, "openpsi");
+
+ define_scheme_primitive("psi-add-category", &OpenPsiSCM::add_category,
     this, "openpsi");
 
   define_scheme_primitive("psi-add-to-category", &OpenPsiSCM::add_to_category,
@@ -67,6 +70,12 @@ void OpenPsiSCM::init()
 
   define_scheme_primitive("psi-satisfiable?", &OpenPsiSCM::is_satisfiable,
     this, "openpsi");
+}
+
+TruthValuePtr OpenPsiSCM::was_action_executed(const Handle& rule)
+{
+  AtomSpace* as = SchemeSmob::ss_get_env_as("psi-action-executed");
+  return openpsi_implicator(as).was_action_executed(rule);
 }
 
 Handle OpenPsiSCM::add_category(const Handle& new_category)

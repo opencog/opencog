@@ -1,3 +1,5 @@
+ADD_SUBDIRECTORY(predicates)
+
 ADD_GUILE_MODULE (FILES
 	ghost.scm
 	cs-parse.scm
