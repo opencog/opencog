@@ -50,7 +50,11 @@ LGDictExpContainer::LGDictExpContainer(Exp_type t, Exp* exp)
         return;
     }
 
+#if (LINK_MAJOR_VERSION == 5) && (LINK_MINOR_VERSION == 4) && (LINK_MICRO_VERSION < 4)
     m_string = exp->u.string;
+#else
+    m_string = exp->u.condesc->string;
+#endif
     m_direction = exp->dir;
     m_multi = exp->multi;
 }
