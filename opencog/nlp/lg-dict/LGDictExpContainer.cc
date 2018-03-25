@@ -52,11 +52,11 @@ LGDictExpContainer::LGDictExpContainer(Exp_type t, Exp* exp)
 
 #if (LINK_MAJOR_VERSION == 5) && (LINK_MINOR_VERSION == 4) && (LINK_MICRO_VERSION < 4)
     m_string = exp->u.string;
-#else
-    m_string = exp->u.condesc->string;
-#endif
     m_direction = exp->dir;
     m_multi = exp->multi;
+#else
+    // m_string = exp->u.condesc->string;
+#endif
 }
 
 /**
@@ -87,8 +87,8 @@ LGDictExpContainer::LGDictExpContainer(Exp_type t,
 /**
  * Flatten the container.
  *
- * Remove nested and recursive structures (eg. AND(A, AND(B, C)) becomes
- * AND(A, B, C)), assuming the sub-levels are already flatten.
+ * Remove nested and-recursive trees. Thus, AND(A, AND(B, C)) becomes
+ * AND(A, B, C), assuming the sub-levels are already flattened.
  */
 void LGDictExpContainer::basic_flatten()
 {
@@ -133,8 +133,8 @@ void LGDictExpContainer::basic_flatten()
 /**
  * Construct disjunctive normal form.
  *
- * Convert the expression into DNF form (ie. a disjuction of conjunctions of
- * connctors).
+ * Convert the expression into DNF form (ie. a disjuction of
+ * conjunctions of connectors).
  *
  * Connectors are OR-distributive but not AND-distributive. Thus, while
  * (A & (B or C)) = ((A & B) or (A & C)), it is NOT the case that
@@ -149,7 +149,9 @@ void LGDictExpContainer::basic_dnf()
         return;
 
     // find the first OR to distribute
-    auto or_exp_it = std::find_if(new_subexps.begin(), new_subexps.end(), [](LGDictExpContainer& exp) { return exp.m_type == OR_type; });
+    auto or_exp_it = std::find_if(new_subexps.begin(),
+                                  new_subexps.end(),
+           [](LGDictExpContainer& exp) { return exp.m_type == OR_type; });
 
     // no OR, the end
     if (or_exp_it == new_subexps.end())
@@ -159,7 +161,8 @@ void LGDictExpContainer::basic_dnf()
     LGDictExpContainer or_exp = *or_exp_it;
     new_subexps.erase(or_exp_it);
 
-    // change the type of this container to OR, and distribute the stuff in or_exp
+    // Change the type of this container to OR, and distribute
+    // the stuff in or_exp
     m_type = OR_type;
     m_subexps.clear();
 
@@ -181,8 +184,8 @@ void LGDictExpContainer::basic_dnf()
 /**
  * Convert to normal order.
  *
- * Putting connectors with - direction before those with + direction. Assume
- * everything already in DNF.
+ * Putting connectors with - direction before those with + direction.
+ * Assume everything already in DNF.
  */
 void LGDictExpContainer::basic_normal_order()
 {
@@ -202,7 +205,9 @@ void LGDictExpContainer::basic_normal_order()
     }
 
     m_subexps = new_leftexps;
-    m_subexps.insert(m_subexps.end(), new_rightexps.begin(), new_rightexps.end());
+    m_subexps.insert(m_subexps.end(),
+                     new_rightexps.begin(),
+                     new_rightexps.end());
 }
 
 /**
@@ -249,8 +254,9 @@ HandleSeq LGDictExpContainer::to_handle(const Handle& hWordNode)
     {
         // XXX FIXME ... using an std::map would be more efficient.
         std::sort(outgoing.begin(), outgoing.end());
-        outgoing.erase(std::unique(outgoing.begin(), outgoing.end()), outgoing.end());
-
+        outgoing.erase(std::unique(outgoing.begin(),
+                                   outgoing.end()),
+                                   outgoing.end());
         HandleSeq qDisjuncts;
         for (const Handle& h : outgoing)
             qDisjuncts.push_back(Handle(createLink(LG_DISJUNCT, hWordNode, h)));
@@ -258,6 +264,6 @@ HandleSeq LGDictExpContainer::to_handle(const Handle& hWordNode)
         return qDisjuncts;
     }
 
-    // should never get here
+    // Should never get here
     return HandleSeq();
 }
