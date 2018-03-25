@@ -265,5 +265,6 @@ HandleSeq LGDictExpContainer::to_handle(const Handle& hWordNode)
     }
 
     // Should never get here
+    OC_ASSERT(false, "Unknown Link Grammar Expression type %d", m_type);
     return HandleSeq();
 }
