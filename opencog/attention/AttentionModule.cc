@@ -25,6 +25,7 @@
 #include "AttentionModule.h"
 #include "AttentionParamQuery.h"
 
+#include <opencog/attentionbank/AttentionBank.h>
 #include <opencog/cogserver/server/CogServer.h>
 #include <opencog/util/Config.h>
 
@@ -72,6 +73,11 @@ void AttentionModule::init()
 {
     AttentionParamQuery _atq(&_cogserver.getAtomSpace());
     _atq.load_default_values(); // Load default ECAN param values into AS
+
+    // Set params
+    int af_size = std::stoi(_atq.get_param_value(AttentionParamQuery::af_max_size));
+    attentionbank(&_cogserver.getAtomSpace()).set_af_size(af_size);
+    
     // New Thread based ECAN agents.
     _cogserver.registerAgent(AFImportanceDiffusionAgent::info().id, &afImportanceFactory);
     _cogserver.registerAgent(WAImportanceDiffusionAgent::info().id, &waImportanceFactory);
