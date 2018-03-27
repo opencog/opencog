@@ -35,10 +35,6 @@
 
 using namespace opencog;
 
-#ifdef DEBUG
-#undef DEBUG
-#endif
-
 AFImportanceDiffusionAgent::AFImportanceDiffusionAgent(CogServer& cs) :
     ImportanceDiffusionBase(cs)
 {
@@ -83,10 +79,5 @@ AttentionValue::sti_t AFImportanceDiffusionAgent::calculateDiffusionAmount(Handl
 {
     updateMaxSpreadPercentage();
 
-    return (AttentionValue::sti_t) round(get_sti(h) * maxSpreadPercentage);
-
-    // TODO: Using integers for STI values can cause strange consequences.
-    // For example, if the amount to diffuse is 0.4, it will become 0, causing
-    // no diffusion to occur.
-    //   * See: https://github.com/opencog/opencog/issues/676
+    return (get_sti(h) * maxSpreadPercentage);
 }
