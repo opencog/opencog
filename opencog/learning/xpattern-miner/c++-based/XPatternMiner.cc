@@ -176,8 +176,7 @@ bool XPatternMiner::terminate(const Handle& pattern,
                               const HandleSet& texts,
                               const Valuations& valuations,
                               int maxdepth) const
-{
-	
+{	
 	return
 		// We have reached the maximum depth
 		maxdepth == 0 or

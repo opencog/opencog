@@ -299,7 +299,7 @@ private:
 	 *
 	 * TODO: we may want to support types in variable declaration.
 	 */
-	Handle shallow_abstract(const Handle& value);
+	static Handle shallow_abstract(const Handle& value);
 
 	/**
 	 * Given valuations produce all shallow abstractions based on the
@@ -330,28 +330,28 @@ private:
 	 *                                 (Concept "E")
 	 *                                 Y }
 	 */
-	HandleSet shallow_abstract(const Valuations& valuations);
-	
+	static HandleSet shallow_abstract(const Valuations& valuations);
+
 	/**
 	 * Wrap a VariableList around a variable list, if more than one
 	 * variable, otherwise return that one variable.
 	 */
-	Handle variable_list(const HandleSeq& vars);
+	static Handle variable_list(const HandleSeq& vars);
 
 	/**
 	 * Wrap a LambdaLink around a vardecl and body.
 	 */
-	Handle lambda(const Handle& vardecl, const Handle& body);
+	static Handle lambda(const Handle& vardecl, const Handle& body);
 
 	/**
 	 * Wrap a QuoteLink around h
 	 */
-	Handle quote(const Handle& h);
+	static Handle quote(const Handle& h);
 
 	/**
 	 * Wrap a UnquoteLink around h
 	 */
-	Handle unquote(const Handle& h);
+	static Handle unquote(const Handle& h);
 
 	/**
 	 * Wrap a LocalQuote link around h (typically used if it is a link
@@ -359,7 +359,7 @@ private:
 	 * multi-conjuncts patterns when in fact we want to match an
 	 * AndLink text.)
 	 */
-	Handle local_quote(const Handle& h);
+	static Handle local_quote(const Handle& h);
 
 	/**
 	 * TODO replace by RewriteLink::beta_reduce
