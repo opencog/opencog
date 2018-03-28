@@ -43,7 +43,7 @@ class AtomBins
 {
     private:
         mutable std::mutex _mtx;
-        std::vector<HandleSet> _idx;
+        HandleSetSeq _idx;
 
     public:
         AtomBins(size_t sz)
