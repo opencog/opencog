@@ -120,13 +120,8 @@ HandleTree XPatternMiner::specialize(const Handle& pattern,
 	HandleTree shabs_pats = specialize_shabs(pattern, texts, valuations,
 	                                         maxdepth);
 
-	// Produce specializations from mapping non-front variables to the
-	// front one, and so recursively.
-	HandleTree vared_pats = specialize_vared(pattern, texts, valuations,
-	                                         maxdepth);
-
 	// Merge specializations to patterns while discarding duplicates
-	patterns = merge_patterns({patterns, shabs_pats, vared_pats});
+	patterns = merge_patterns({patterns, shabs_pats});
 
 	return patterns;
 }
@@ -140,6 +135,12 @@ HandleTree XPatternMiner::specialize_shabs(const Handle& pattern,
 	// valuations and associate the remaining valuations (excluding
 	// that variable) to them.
 	HandleSet shapats = shallow_abstract(valuations);
+
+	// Generate variables for variable factorization (aka reduction)
+	HandleSet vs = variable_reduce(valuations);
+
+	// Include the variable factorization in the shallow patterns
+	shapats.insert(vs.begin(), vs.end());
 
 	// No shallow abstraction to use for specialization
 	if (shapats.empty())
@@ -159,50 +160,6 @@ HandleTree XPatternMiner::specialize_shabs(const Handle& pattern,
 		if (conjuncts(npat) < param.initconjuncts)
 			continue;
 		
-		// Generate the corresponding text
-		HandleSet fltexts = filter_texts(npat, texts);
-
-		// That specialization doesn't have enough support, skip it
-		// and its specializations.
-		if (not enough_support(npat, fltexts))
-			continue;
-
-		// Specialize npat from all variables (with new valuations)
-		HandleTree nvapats = specialize(npat, fltexts, maxdepth - 1);
-
-		// Insert specializations
-		HandleTree npats(npat, {nvapats});
-		patterns = merge_patterns({patterns, npats});
-	}
-	return patterns;
-}
-
-HandleTree XPatternMiner::specialize_vared(const Handle& pattern,
-                                           const HandleSet& texts,
-                                           const Valuations& valuations,
-                                           int maxdepth)
-{
-	// Generate all variable sets compatible with co-occurrence of
-	// values (equal to the front value of each valuation).
-	HandleSet vs = variable_reduce(valuations);
-
-	// No variable reduction to use for specialization
-	if (vs.empty())
-		return HandleTree();
-
-	// For each variable, create a specialization where that variable
-	// is substituted by the front variable, and the resulting pattern
-	// recursively specialized.
-	HandleTree patterns;
-	Handle var = valuations.front_variable();
-	for (const auto v : vs) {
-		// Perform the composition (that is specialize)
-		Handle npat = compose(pattern, {{v, var}});
-
-		// If the specialization has too few conjuncts, dismiss it.
-		if (conjuncts(npat) < param.initconjuncts)
-			continue;
-
 		// Generate the corresponding text
 		HandleSet fltexts = filter_texts(npat, texts);
 
