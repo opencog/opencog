@@ -136,12 +136,6 @@ HandleTree XPatternMiner::specialize_shabs(const Handle& pattern,
 	// that variable) to them.
 	HandleSet shapats = shallow_abstract(valuations);
 
-	// Generate variables for variable factorization (aka reduction)
-	HandleSet vs = variable_reduce(valuations);
-
-	// Include the variable factorization in the shallow patterns
-	shapats.insert(vs.begin(), vs.end());
-
 	// No shallow abstraction to use for specialization
 	if (shapats.empty())
 		return HandleTree();
@@ -176,24 +170,6 @@ HandleTree XPatternMiner::specialize_shabs(const Handle& pattern,
 		patterns = merge_patterns({patterns, npats});
 	}
 	return patterns;
-}
-
-HandleSet XPatternMiner::variable_reduce(const Valuations& valuations) const
-{
-	// No more variable to specialize from
-	if (valuations.novar())
-		return HandleSet();
-
-	// Variable to specialize
-	Handle var = valuations.front_variable();
-
-	// Variables not added to potential reduction yet
-	HandleSet remvars(std::next(valuations.variables.varseq.begin()),
-	                  valuations.variables.varseq.end());
-
-	// Let's not bother and consider all remaining variables as
-	// potentially reducible
-	return remvars;
 }
 
 bool XPatternMiner::terminate(const Handle& pattern,
@@ -319,6 +295,11 @@ HandleSet XPatternMiner::shallow_abstract(const Valuations& valuations)
 	HandleSet shapats;
 	for (const HandleSeq& valuation : var_scv.values)
 		shapats.insert(shallow_abstract(valuation[0]));
+
+	// Add all subsequent factorizable variables
+	shapats.insert(std::next(valuations.variables.varseq.begin()),
+	               valuations.variables.varseq.end());
+
 	return shapats;
 }
 

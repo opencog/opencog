@@ -277,26 +277,6 @@ private:
 	Handle matched_results(const Handle& pattern, const Handle& text) const;
 
 	/**
-	 * Return all variables, except the front one, that could be
-	 * unified with the front one according to the given valuations.
-	 *
-	 * So for instance if valuations is
-	 *
-	 * { { X->Concept "A", Y->Concept "B", Z->Concept "C" },
-	 *   { X->Concept "B", Y->Concept "B", Z->Concept "C" },
-	 *   { X->Concept "C", Y->Concept "A", Z->Concept "B" } }
-	 *
-	 * then return {Y}. Indeed only Y is at least once equal to X.
-	 *
-	 * TODO: for now we return everything, and specializations that do
-	 * not have enough support are subsequently discarded. But it
-	 * could be faster to consider the minimum support in that
-	 * function and right away filter variables we know won't have
-	 * enough support based on valuations.
-	 */
-	HandleSet variable_reduce(const Valuations& valuations) const;
-
-	/**
 	 * Given an atom, return its corresponding shallow
 	 * abstraction. A shallow abstraction of an atom is
 	 *
@@ -322,14 +302,23 @@ private:
 	Handle shallow_abstract(const Handle& value);
 
 	/**
-	 * Given valuations, produce all shallow abstractions based on the
-	 * values associated to the front variable first variable.
+	 * Given valuations produce all shallow abstractions based on the
+	 * values associated to the front variable first variable. This
+	 * shallow abstractions include
+	 *
+	 * 1. Single operator patterns, like (Lambda X Y (Inheritance X Y))
+	 * 2. Constant nodes, like (Concept "A")
+	 * 3. Remain variable after the front one, x2, ..., xn
+	 *
+	 * Composing these 3 sorts of abstractions are enough to generate
+	 * all possible patterns.
 	 *
 	 * For instance
 	 *
-	 * valuations = { { X->(Inheritance (Concept "A") (Concept "B")), Y->(Concept "C") },
-	 *                { X->(Inheritance (Concept "B") (Concept "C")), Y->(Concept "D") },
-	 *                { X->(Concept "E"), Y->(Concept "D") } }
+	 * valuations =
+	 *   { { X->(Inheritance (Concept "A") (Concept "B")), Y->(Concept "C") },
+	 *     { X->(Inheritance (Concept "B") (Concept "C")), Y->(Concept "D") },
+	 *     { X->(Concept "E"), Y->(Concept "D") } }
 	 *
 	 * shallow_abstrac(valuations) = { (Lambda
 	 *                                   (VariableList
@@ -337,8 +326,9 @@ private:
 	 *                                     (Variable "$X2"))
 	 *                                   (Inheritance
 	 *                                     (Variable "$X1")
-	 *                                     (Variable "$X2")),
-	 *                                 (Concept "E") }
+	 *                                     (Variable "$X2"))),
+	 *                                 (Concept "E")
+	 *                                 Y }
 	 */
 	HandleSet shallow_abstract(const Valuations& valuations);
 	
