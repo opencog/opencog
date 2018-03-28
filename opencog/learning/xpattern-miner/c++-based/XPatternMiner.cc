@@ -98,32 +98,8 @@ HandleTree XPatternMiner::specialize(const Handle& pattern,
                                      const HandleSet& texts,
                                      int maxdepth)
 {
+	// return specialize_alt(pattern, texts, Valuations(pattern, texts), maxdepth);
 	return specialize(pattern, texts, Valuations(pattern, texts), maxdepth);
-}
-
-HandleTree XPatternMiner::specialize_alt(const Handle& pattern,
-                                         const HandleSet& texts,
-                                         int maxdepth)
-{
-	HandleTree patterns;
-	Variables vars = get_variables(pattern);
-
-	// Calculate all shallow abstractions of pattern
-	HandleSetSeq shabs = shallow_abstract(pattern, texts);
-
-	// Generate all associated specializations
-	for (unsigned i = 0; i < shabs.size(); i++) {
-		for (const Handle& shapat : shabs[i]) {
-			// Compose pattern with shapat to obtain a specialization,
-			// and recursively specialize the result
-			HandleTree npats =
-				specialize_shapat(pattern, texts, vars.varseq[i], shapat, maxdepth);
-
-			// Insert specializations
-			patterns = merge_patterns({patterns, npats});
-		}
-	}
-	return patterns;
 }
 
 HandleTree XPatternMiner::specialize(const Handle& pattern,
@@ -151,6 +127,37 @@ HandleTree XPatternMiner::specialize(const Handle& pattern,
 	return patterns;
 }
 
+HandleTree XPatternMiner::specialize_alt(const Handle& pattern,
+                                         const HandleSet& texts,
+                                         const Valuations& valuations,
+                                         int maxdepth)
+{
+	// One of the termination criteria has been reached
+	if (terminate(pattern, texts, valuations, maxdepth))
+		return HandleTree();
+
+	HandleTree patterns;
+	Variables vars = get_variables(pattern);
+
+	// Calculate all shallow abstractions of pattern
+	HandleSetSeq shabs = shallow_abstract(valuations);
+
+	// Generate all associated specializations
+	for (unsigned i = 0; i < shabs.size(); i++) {
+		for (const Handle& shapat : shabs[i]) {
+			// Compose pattern with shapat to obtain a specialization,
+			// and recursively specialize the result
+			HandleTree npats = specialize_shapat(pattern, texts,
+			                                     vars.varseq[i], shapat,
+			                                     maxdepth);
+
+			// Insert specializations
+			patterns = merge_patterns({patterns, npats});
+		}
+	}
+	return patterns;
+}
+
 HandleTree XPatternMiner::specialize_shabs(const Handle& pattern,
                                            const HandleSet& texts,
                                            const Valuations& valuations,
@@ -174,7 +181,8 @@ HandleTree XPatternMiner::specialize_shabs(const Handle& pattern,
 	{
 		// Specialize pattern by composing it with shapat, and
 		// specialize the result recursively
-		HandleTree npats = specialize_shapat(pattern, texts, var, shapat, maxdepth);
+		HandleTree npats
+			= specialize_shapat(pattern, texts, var, shapat, maxdepth);
 
 		// Insert specializations
 		patterns = merge_patterns({patterns, npats});
@@ -182,8 +190,10 @@ HandleTree XPatternMiner::specialize_shabs(const Handle& pattern,
 	return patterns;
 }
 
-HandleTree XPatternMiner::specialize_shapat(const Handle& pattern, const HandleSet texts,
-                                            const Handle& var, const Handle& shapat,
+HandleTree XPatternMiner::specialize_shapat(const Handle& pattern,
+                                            const HandleSet texts,
+                                            const Handle& var,
+                                            const Handle& shapat,
                                             int maxdepth)
 {
 	// Perform the composition (that is specialize)
@@ -218,7 +228,7 @@ bool XPatternMiner::terminate(const Handle& pattern,
 		maxdepth == 0 or
 		// The pattern is constant, no specialization is possible
 		pattern->get_type() != LAMBDA_LINK or
-		// There is no move variable to specialize from
+		// There is no more variable to specialize from
 		valuations.novar() or
 		// The pattern doesn't have enough support
 		// TODO: it seems the text is always filtered prior anyway
@@ -319,6 +329,11 @@ HandleSetSeq XPatternMiner::shallow_abstract(const Handle& pattern, const Handle
 
 HandleSetSeq XPatternMiner::shallow_abstract(const Valuations& valuations)
 {
+	// Base case
+	if (valuations.novar())
+		return HandleSetSeq();
+
+	// Recursive case
 	HandleSetSeq shabs_per_var{front_shallow_abstract(valuations)};
 	HandleSetSeq remaining = shallow_abstract(valuations.erase_front());
 	shabs_per_var.insert(shabs_per_var.end(), remaining.begin(), remaining.end());
