@@ -556,8 +556,8 @@ void XPatternMinerUTest::test_2conjuncts_5()
 	// Like test_2conjuncts_2 but setting the info heuristic to 1,
 	// meaning that the frequency of a conjunction of strongly
 	// connected components will be equal to the minimum frequency of
-	// each component. For that reason it should be able to discover
-	// the desired pattern.
+	// each component. For that reason it should not be able to
+	// discover the desired pattern.
 	XPMParameters param(9/*minsup*/, 2/*nconjucts*/, initpat, -1/*maxdepth*/, 1/*info*/);
 	XPatternMiner pm(_as, param);
 	HandleTree results = pm();
