@@ -81,6 +81,7 @@ XPatternMinerUTest::XPatternMinerUTest() : _scm(&_as)
 {
 	logger().set_level(Logger::INFO);
 	logger().set_timestamp_flag(false);
+	// logger().set_sync_flag(true);
 	logger().set_print_to_stdout_flag(true);
 
 	// Configure scheme load-paths that are common for all tests.
