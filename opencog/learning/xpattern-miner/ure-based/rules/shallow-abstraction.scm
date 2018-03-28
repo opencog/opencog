@@ -1,31 +1,51 @@
-;; Given a ground atom, abstract it
-;;
-;; L
-;;   A1
-;;   ...
-;;   An
-;; |-
-;; Lambda
-;;   V1
-;;   ...
-;;   Vn
-;;   L
-;;     V1
-;;     ...
-;;     Vn
-;;
-;; V1 to Vn are random generated variables.
-
-;; TODO: these are in fact, facts!
-
-;; TODO: rather build a rule to create some thing like
+;; Rule to generate shallow abstractions of a given pattern,
+;; specifically
 ;;
 ;; Evaluation
-;;   Predicate "shallow-abstraction-of"
+;;   Predicate "minsup"
 ;;   List
-;;     <shallow-pattern>
-;;     <valuations>
+;;     Lambda
+;;       VariableList
+;;         <x1>
+;;         ...
+;;         <xn>
+;;       <g-body>
+;;     <ms>
+;; |-
+;; Set
+;;   Evaluation (stv 1 1)
+;;     Predicate "shabs"
+;;     List
+;;       List
+;;         <f1>
+;;         <x2>
+;;         ...
+;;         <xn>
+;;     Evaluation
+;;       Predicate "minsup"
+;;       List
+;;         Lambda
+;;           VariableList
+;;             <x1>
+;;             ...
+;;             <xn>
+;;           <g-body>
+;;         <ms>
+;; ...
+;;
+;; where f1 to fn are a shallow abstractions (shabs stands for shallow
+;; abstraction) either functions, constant nodes, or a variable nodes
+;; amongst x1 to xn.
+;;
+;; Note, it's weird that the second argument of shabs is the minsup
+;; evaluation, because it might be equivalent to it's TV, it's not
+;; clear though so we'll go with that for now.
 
+
+
+;; TODO
+
+;; Function to generate shallow abstractions
 (define (gen-shallow-abstraction link-type arity)
   (let* ((variables (gen-variables "$sha-arg" arity))
          (vardecl (VariableList variables))
@@ -36,8 +56,8 @@
             (LocalQuote body)
             body))))
 
-(define inheritance-shallow-abstraction
-  (gen-shallow-abstraction InheritanceLink 2))
+;; (define inheritance-shallow-abstraction
+;;   (gen-shallow-abstraction InheritanceLink 2))
 
-(define and-shallow-abstraction
-  (gen-shallow-abstraction AndLink 2))
+;; (define and-shallow-abstraction
+;;   (gen-shallow-abstraction AndLink 2))
