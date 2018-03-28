@@ -101,6 +101,31 @@ HandleTree XPatternMiner::specialize(const Handle& pattern,
 	return specialize(pattern, texts, Valuations(pattern, texts), maxdepth);
 }
 
+HandleTree XPatternMiner::specialize_alt(const Handle& pattern,
+                                         const HandleSet& texts,
+                                         int maxdepth)
+{
+	HandleTree patterns;
+	Variables vars = get_variables(pattern);
+
+	// Calculate all shallow abstractions of pattern
+	HandleSetSeq shabs = shallow_abstract(pattern, texts);
+
+	// Generate all associated specializations
+	for (unsigned i = 0; i < shabs.size(); i++) {
+		for (const Handle& shapat : shabs[i]) {
+			// Compose pattern with shapat to obtain a specialization,
+			// and recursively specialize the result
+			HandleTree npats =
+				specialize_shapat(pattern, texts, vars.varseq[i], shapat, maxdepth);
+
+			// Insert specializations
+			patterns = merge_patterns({patterns, npats});
+		}
+	}
+	return patterns;
+}
+
 HandleTree XPatternMiner::specialize(const Handle& pattern,
                                      const HandleSet& texts,
                                      const Valuations& valuations,

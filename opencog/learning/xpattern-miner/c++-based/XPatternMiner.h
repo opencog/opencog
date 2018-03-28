@@ -130,6 +130,8 @@ public:
 	 */
 	HandleTree specialize(const Handle& pattern, const HandleSet& texts,
 	                      int maxdepth=-1);
+	HandleTree specialize_alt(const Handle& pattern, const HandleSet& texts,
+	                          int maxdepth=-1);
 
 	/**
 	 * Like above, where all valid texts have been converted into
