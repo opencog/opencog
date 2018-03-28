@@ -152,12 +152,8 @@ HandleTree XPatternMiner::specialize_shabs(const Handle& pattern,
 	Handle var = valuations.front_variable();
 	for (const auto& shapat : shapats)
 	{
-		// Alpha convert to make sure it doesn't share variables with
-		// pattern
-		Handle subpat = alpha_conversion(shapat);
-
 		// Perform the composition (that is specialize)
-		Handle npat = compose(pattern, {{var, subpat}});
+		Handle npat = compose(pattern, {{var, shapat}});
 
 		// If the specialization has too few conjuncts, dismiss it.
 		if (conjuncts(npat) < param.initconjuncts)
@@ -413,27 +409,27 @@ Handle XPatternMiner::shallow_abstract(const Handle& value)
 Handle XPatternMiner::variable_list(const HandleSeq& vars)
 {
 	return vars.size() == 1 ? vars[0]
-		: pattern_as.add_link(VARIABLE_LIST, vars);
+		: createLink(vars, VARIABLE_LIST);
 }
 
 Handle XPatternMiner::lambda(const Handle& vardecl, const Handle& body)
 {
-	return pattern_as.add_link(LAMBDA_LINK, vardecl, body);
+	return createLink(LAMBDA_LINK, vardecl, body);
 }
 
 Handle XPatternMiner::quote(const Handle& h)
 {
-	return pattern_as.add_link(QUOTE_LINK, h);
+	return createLink(QUOTE_LINK, h);
 }
 
 Handle XPatternMiner::unquote(const Handle& h)
 {
-	return pattern_as.add_link(UNQUOTE_LINK, h);
+	return createLink(UNQUOTE_LINK, h);
 }
 
 Handle XPatternMiner::local_quote(const Handle& h)
 {
-	return pattern_as.add_link(LOCAL_QUOTE_LINK, h);
+	return createLink(LOCAL_QUOTE_LINK, h);
 }
 
 // TODO: take care of removing local quote in the composed
