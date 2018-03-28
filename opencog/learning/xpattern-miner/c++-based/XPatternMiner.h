@@ -204,15 +204,13 @@ private:
 	                            int maxdepth);
 
 	/**
-	 * Specialize by reducing variables, that is mapping some
-	 * non-front variable to the front one, when compatible with the
-	 * given valuations. Then recursively call
-	 * XPatternMiner::specialize on these obtained specializations.
+	 * Specialize the given pattern with the given shallow abstraction
+	 * at the given variable, then call XPatternMiner::specialize on
+	 * the obtained specialization.
 	 */
-	HandleTree specialize_vared(const Handle& pattern,
-	                            const HandleSet& texts,
-	                            const Valuations& valuations,
-	                            int maxdepth);
+	HandleTree specialize_shapat(const Handle& pattern, const HandleSet texts,
+	                             const Handle& var, const Handle& shapat,
+	                             int maxdepth);
 
 	/**
 	 * Calculate if the pattern has enough support w.r.t. to the given
@@ -277,7 +275,82 @@ private:
 	Handle matched_results(const Handle& pattern, const Handle& text) const;
 
 	/**
-	 * Given an atom, return its corresponding shallow
+	 * Like shallow_abstract(const Valuations&) but takes a pattern
+	 * and a texts instead, and generate the valuations of the pattern
+	 * prior to calling shallow_abstract on its valuations.
+	 *
+	 * See comment below for more details.
+	 */
+	static HandleSetSeq shallow_abstract(const Handle& pattern, const HandleSet& texts);
+
+	/**
+	 * Given valuations produce all shallow abstractions over all
+	 * variables. It basically applies front_shallow_abstract
+	 * recursively. See the specification of front_shallow_abstract
+	 * for more information.
+	 *
+	 * For instance, given
+	 *
+	 * valuations =
+	 *   { { X->(Inheritance (Concept "A") (Concept "B")), Y->(Concept "C") },
+	 *     { X->(Inheritance (Concept "B") (Concept "C")), Y->(Concept "D") },
+	 *     { X->(Concept "E"), Y->(Concept "D") } }
+	 *
+	 * shallow_abstract(valuations) =
+	 *  {
+	 *    ;; Shallow abstractions of X
+	 *    { (Lambda
+	 *        (VariableList
+	 *          (Variable "$X1")
+	 *          (Variable "$X2"))
+	 *        (Inheritance
+	 *          (Variable "$X1")
+	 *          (Variable "$X2"))),
+	 *      (Concept "E"),
+	 *      Y },
+	 *    ;; Shallow abstractions of Y
+	 *    { (Concept "C"),
+	 *      (Concept "D") }
+	 *  }
+	 *
+	 * TODO: maybe we should count and dismiss shallow abstractions
+	 * that would not reach the minimum support.
+	 */
+	static HandleSetSeq shallow_abstract(const Valuations& valuations);
+
+	/**
+	 * Given valuations produce all shallow abstractions based on the
+	 * values associated to the front variable first variable. This
+	 * shallow abstractions include
+	 *
+	 * 1. Single operator patterns, like (Lambda X Y (Inheritance X Y))
+	 * 2. Constant nodes, like (Concept "A")
+	 * 3. Remain variable after the front one, x2, ..., xn
+	 *
+	 * Composing these 3 sorts of abstractions are enough to generate
+	 * all possible patterns.
+	 *
+	 * For instance, given
+	 *
+	 * valuations =
+	 *   { { X->(Inheritance (Concept "A") (Concept "B")), Y->(Concept "C") },
+	 *     { X->(Inheritance (Concept "B") (Concept "C")), Y->(Concept "D") },
+	 *     { X->(Concept "E"), Y->(Concept "D") } }
+	 *
+	 * front_shallow_abstract(valuations) = { (Lambda
+	 *                                          (VariableList
+	 *                                            (Variable "$X1")
+	 *                                            (Variable "$X2"))
+	 *                                          (Inheritance
+	 *                                            (Variable "$X1")
+	 *                                            (Variable "$X2"))),
+	 *                                        (Concept "E"),
+	 *                                        Y }
+	 */
+	static HandleSet front_shallow_abstract(const Valuations& valuations);
+
+	/**
+	 * Given an atom, a value, return its corresponding shallow
 	 * abstraction. A shallow abstraction of an atom is
 	 *
 	 * 1. itself if it is a node
@@ -299,38 +372,7 @@ private:
 	 *
 	 * TODO: we may want to support types in variable declaration.
 	 */
-	static Handle shallow_abstract(const Handle& value);
-
-	/**
-	 * Given valuations produce all shallow abstractions based on the
-	 * values associated to the front variable first variable. This
-	 * shallow abstractions include
-	 *
-	 * 1. Single operator patterns, like (Lambda X Y (Inheritance X Y))
-	 * 2. Constant nodes, like (Concept "A")
-	 * 3. Remain variable after the front one, x2, ..., xn
-	 *
-	 * Composing these 3 sorts of abstractions are enough to generate
-	 * all possible patterns.
-	 *
-	 * For instance
-	 *
-	 * valuations =
-	 *   { { X->(Inheritance (Concept "A") (Concept "B")), Y->(Concept "C") },
-	 *     { X->(Inheritance (Concept "B") (Concept "C")), Y->(Concept "D") },
-	 *     { X->(Concept "E"), Y->(Concept "D") } }
-	 *
-	 * shallow_abstrac(valuations) = { (Lambda
-	 *                                   (VariableList
-	 *                                     (Variable "$X1")
-	 *                                     (Variable "$X2"))
-	 *                                   (Inheritance
-	 *                                     (Variable "$X1")
-	 *                                     (Variable "$X2"))),
-	 *                                 (Concept "E")
-	 *                                 Y }
-	 */
-	static HandleSet shallow_abstract(const Valuations& valuations);
+	static Handle val_shallow_abstract(const Handle& value);
 
 	/**
 	 * Wrap a VariableList around a variable list, if more than one

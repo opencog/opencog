@@ -134,7 +134,7 @@ HandleTree XPatternMiner::specialize_shabs(const Handle& pattern,
 	// Generate shallow patterns of the first variable of the
 	// valuations and associate the remaining valuations (excluding
 	// that variable) to them.
-	HandleSet shapats = shallow_abstract(valuations);
+	HandleSet shapats = front_shallow_abstract(valuations);
 
 	// No shallow abstraction to use for specialization
 	if (shapats.empty())
@@ -147,29 +147,40 @@ HandleTree XPatternMiner::specialize_shabs(const Handle& pattern,
 	Handle var = valuations.front_variable();
 	for (const auto& shapat : shapats)
 	{
-		// Perform the composition (that is specialize)
-		Handle npat = compose(pattern, {{var, shapat}});
-
-		// If the specialization has too few conjuncts, dismiss it.
-		if (conjuncts(npat) < param.initconjuncts)
-			continue;
-		
-		// Generate the corresponding text
-		HandleSet fltexts = filter_texts(npat, texts);
-
-		// That specialization doesn't have enough support, skip it
-		// and its specializations.
-		if (not enough_support(npat, fltexts))
-			continue;
-
-		// Specialize npat from all variables (with new valuations)
-		HandleTree nvapats = specialize(npat, fltexts, maxdepth - 1);
+		// Specialize pattern by composing it with shapat, and
+		// specialize the result recursively
+		HandleTree npats = specialize_shapat(pattern, texts, var, shapat, maxdepth);
 
 		// Insert specializations
-		HandleTree npats(npat, {nvapats});
 		patterns = merge_patterns({patterns, npats});
 	}
 	return patterns;
+}
+
+HandleTree XPatternMiner::specialize_shapat(const Handle& pattern, const HandleSet texts,
+                                            const Handle& var, const Handle& shapat,
+                                            int maxdepth)
+{
+	// Perform the composition (that is specialize)
+	Handle npat = compose(pattern, {{var, shapat}});
+
+	// If the specialization has too few conjuncts, dismiss it.
+	if (conjuncts(npat) < param.initconjuncts)
+		return HandleTree();
+
+	// Generate the corresponding text
+	HandleSet fltexts = filter_texts(npat, texts);
+
+	// That specialization doesn't have enough support, skip it
+	// and its specializations.
+	if (not enough_support(npat, fltexts))
+		return HandleTree();
+
+	// Specialize npat from all variables (with new valuations)
+	HandleTree nvapats = specialize(npat, fltexts, maxdepth - 1);
+
+	// Return npat and its children
+	return HandleTree(npat, {nvapats});
 }
 
 bool XPatternMiner::terminate(const Handle& pattern,
@@ -276,7 +287,20 @@ Handle XPatternMiner::matched_results(const Handle& pattern,
 	return inst.execute(ml);
 }
 
-HandleSet XPatternMiner::shallow_abstract(const Valuations& valuations)
+HandleSetSeq XPatternMiner::shallow_abstract(const Handle& pattern, const HandleSet& texts)
+{
+	return shallow_abstract(Valuations(pattern, texts));
+}
+
+HandleSetSeq XPatternMiner::shallow_abstract(const Valuations& valuations)
+{
+	HandleSetSeq shabs_per_var{front_shallow_abstract(valuations)};
+	HandleSetSeq remaining = shallow_abstract(valuations.erase_front());
+	shabs_per_var.insert(shabs_per_var.end(), remaining.begin(), remaining.end());
+	return shabs_per_var;
+}
+
+HandleSet XPatternMiner::front_shallow_abstract(const Valuations& valuations)
 {
 	// No more variable to specialize from
 	if (valuations.novar())
@@ -293,7 +317,7 @@ HandleSet XPatternMiner::shallow_abstract(const Valuations& valuations)
 	// valuations to it.
 	HandleSet shapats;
 	for (const HandleSeq& valuation : var_scv.values)
-		shapats.insert(shallow_abstract(valuation[0]));
+		shapats.insert(val_shallow_abstract(valuation[0]));
 
 	// Add all subsequent factorizable variables
 	shapats.insert(std::next(valuations.variables.varseq.begin()),
@@ -302,7 +326,7 @@ HandleSet XPatternMiner::shallow_abstract(const Valuations& valuations)
 	return shapats;
 }
 
-Handle XPatternMiner::shallow_abstract(const Handle& value)
+Handle XPatternMiner::val_shallow_abstract(const Handle& value)
 {
 	// Node or empty link, nothing to abstract
 	if (value->is_node() or value->get_arity() == 0)
