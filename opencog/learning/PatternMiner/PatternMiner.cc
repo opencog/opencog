@@ -2025,7 +2025,7 @@ unsigned int PatternMiner::getAllEntityCountWithSamePredicatesForAPattern(const 
             return eit->second;
         }
 
-        vector<HandleSet> allEntitiesForEachPredicate;
+        HandleSetSeq allEntitiesForEachPredicate;
 
         for (const Handle& predicate : allPredicateNodes)
         {
