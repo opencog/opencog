@@ -372,10 +372,10 @@ Handle XPatternMiner::shallow_abstract(const Handle& value)
 		return value;
 
 	Type tt = value->get_type();
+	HandleSeq rnd_vars = gen_rand_variables(value->get_arity());
 
 	// Links wrapped with LocalQuoteLink
 	if (tt == AND_LINK) {
-		HandleSeq rnd_vars = gen_rand_variables(value->get_arity());
 		Handle vardecl = variable_list(rnd_vars),
 			body = pattern_as.add_link(tt, rnd_vars),
 			pattern = lambda(vardecl, local_quote(body));
@@ -386,7 +386,6 @@ Handle XPatternMiner::shallow_abstract(const Handle& value)
 	    tt == EVALUATION_LINK or
 	    tt == EXECUTION_OUTPUT_LINK)
 	{
-		HandleSeq rnd_vars = gen_rand_variables(value->get_arity());
 		// Wrap variables in UnquoteLink
 		HandleSeq uq_vars;
 		for (Handle& var : rnd_vars)
@@ -399,7 +398,6 @@ Handle XPatternMiner::shallow_abstract(const Handle& value)
 	}
 
 	// Generic non empty link, let's abstract away all the arguments
-	HandleSeq rnd_vars = gen_rand_variables(value->get_arity());
 	Handle vardecl = variable_list(rnd_vars),
 		body = pattern_as.add_link(tt, rnd_vars),
 		pattern = lambda(vardecl, body);
