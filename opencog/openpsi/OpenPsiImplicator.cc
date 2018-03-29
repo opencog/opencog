@@ -115,7 +115,6 @@ Handle OpenPsiImplicator::imply(const Handle& rule, OpenPsiRules& opr)
 {
   PatternLinkPtr query = opr.get_query(rule);
   Handle query_body = query->get_pattern().body;
-  HandleMap query_grounding;
 
   if (_pattern_seen.find(query_body) == _pattern_seen.end())
   {
@@ -123,12 +122,13 @@ Handle OpenPsiImplicator::imply(const Handle& rule, OpenPsiRules& opr)
       "for satisfiablity first." );
   }
 
-  if (_satisfiability_cache.find(query_body) != _satisfiability_cache.end())
+  auto it = _satisfiability_cache.find(query_body);
+  if (it != _satisfiability_cache.end())
   {
     Instantiator inst(_as);
 
     Handle result = \
-      inst.instantiate(opr.get_action(rule), query_grounding, true);
+      inst.instantiate(opr.get_action(rule), it->second, true);
     rule->setValue(_action_executed, ProtoAtomCast(TruthValue::TRUE_TV()));
 
     return result;
