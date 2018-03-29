@@ -331,9 +331,11 @@
                   (List (Concept (string-append psi-prefix-str RULENAME))
                         (Number 0)))
                 (list))
-            ; Set the current topic
-            (Put (State ghost-curr-topic (Variable "$x"))
-                 rule-topic)))))
+            ; Set the current topic, for backward compatibility
+            (if ghost-with-ecan
+              (list)
+              (Put (State ghost-curr-topic (Variable "$x"))
+                   rule-topic))))))
 
 ; ----------
 (define (process-goal GOAL)
