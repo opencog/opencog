@@ -109,3 +109,15 @@
     (Link (Variable "a") (Variable "b")))))
 
 (define (context-3-cpp) (List context-3))
+
+(define test-pred-rtn #f)
+(define-public (test-pred)
+  (if test-pred-rtn (stv 1 1) (stv 0 1)))
+
+(define context-4
+  (list (Satisfaction
+    (And (Evaluation (GroundedPredicate "scm: test-pred") (List))))))
+
+(define (context-4-cpp) (List context-4))
+
+(define action-2 (True))
