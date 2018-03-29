@@ -84,6 +84,9 @@ private:
    */
   std::map<Handle, HandleMap> _satisfiability_cache;
 
+  // To store what pattern we've seen so far
+  std::set<Handle> _pattern_seen;
+
   /**
    * An empty map used for clearing cache entries, or to denote absence
    * of groundings.

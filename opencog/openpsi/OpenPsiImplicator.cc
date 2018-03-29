@@ -66,6 +66,12 @@ bool OpenPsiImplicator::grounding(const HandleMap &var_soln,
     // the declard relationship between the implicant and the implicand, aka
     // user-error.
     return true;
+  } else if (not _have_variables) {
+    // This happens when InitiateSearchCB::no_search has groundings -- when
+    // there is only constant (probably evaluatable) but no variable in the
+    // pattern
+    _satisfiability_cache[_pattern_body] = var_soln;
+    return true;
   } else {
     // TODO: This happens when InitiateSearchCB::no_search has groundings.
     // Cases for when this happens hasn't been tested yet. Explore the
@@ -86,17 +92,19 @@ TruthValuePtr OpenPsiImplicator::check_satisfiability(const Handle& rule,
   // Solve for multithreaded access. Create a rule class and lock
   // the rule when updating the cache.
 
-  PatternLinkPtr query =  opr.get_query(rule);
+  PatternLinkPtr query = opr.get_query(rule);
   Handle query_body = query->get_pattern().body;
 
-  // Always update cache.
+  // Always update cache to clear any previous result.
   // TODO: Add cache per atomspace.
-  _satisfiability_cache[query_body] = _EMPTY_HANDLE_MAP;
+  _satisfiability_cache.erase(query_body);
+  _pattern_seen.insert(query_body);
+
   query->satisfy(*this);
 
   // The boolean returned by query->satisfy isn't used because all
   // type of contexts haven't been handled by this callback yet.
-  if (_EMPTY_HANDLE_MAP != _satisfiability_cache.at(query_body)) {
+  if (_satisfiability_cache.find(query_body) != _satisfiability_cache.end()) {
     return TruthValue::TRUE_TV();
   } else {
     return TruthValue::FALSE_TV();
@@ -107,20 +115,20 @@ Handle OpenPsiImplicator::imply(const Handle& rule, OpenPsiRules& opr)
 {
   PatternLinkPtr query = opr.get_query(rule);
   Handle query_body = query->get_pattern().body;
-  HandleMap query_grounding;
 
-  try {
-    query_grounding = _satisfiability_cache.at(query_body);
-  } catch (const std::out_of_range& e) {
+  if (_pattern_seen.find(query_body) == _pattern_seen.end())
+  {
     throw RuntimeException(TRACE_INFO, "The openpsi rule should be checked "
       "for satisfiablity first." );
   }
 
-  Instantiator inst(_as);
+  auto it = _satisfiability_cache.find(query_body);
+  if (it != _satisfiability_cache.end())
+  {
+    Instantiator inst(_as);
 
-  if (_EMPTY_HANDLE_MAP != query_grounding) {
     Handle result = \
-      inst.instantiate(opr.get_action(rule), query_grounding, true);
+      inst.instantiate(opr.get_action(rule), it->second, true);
     rule->setValue(_action_executed, ProtoAtomCast(TruthValue::TRUE_TV()));
 
     return result;
