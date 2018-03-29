@@ -120,13 +120,13 @@ public:
     // Test when there is no grounding.
     tv = _opi->check_satisfiability(rule_1, *_opr);
     TSM_ASSERT_EQUALS("Expected (stv 0 1)", TruthValue::FALSE_TV(), tv);
-    TS_ASSERT_EQUALS(_opi->_EMPTY_HANDLE_MAP,
-      _opi->_satisfiability_cache.at(query_body_1));
+    TS_ASSERT_EQUALS(_opi->_satisfiability_cache.end(),
+      _opi->_satisfiability_cache.find(query_body_1));
 
     tv = _opi->check_satisfiability(rule_2, *_opr);
     TSM_ASSERT_EQUALS("Expected (stv 0 1)", TruthValue::FALSE_TV(), tv);
-    TS_ASSERT_EQUALS(_opi->_EMPTY_HANDLE_MAP,
-      _opi->_satisfiability_cache.at(query_body_2));
+    TS_ASSERT_EQUALS(_opi->_satisfiability_cache.end(),
+      _opi->_satisfiability_cache.find(query_body_2));
 
     // Test 2:
     // Test when there is an alpha-equivalent pattern.
@@ -134,13 +134,13 @@ public:
     CHKERR
     tv = _opi->check_satisfiability(rule_1, *_opr);
     TSM_ASSERT_EQUALS("Expected (stv 0 1)", TruthValue::FALSE_TV(), tv);
-    TS_ASSERT_EQUALS(_opi->_EMPTY_HANDLE_MAP,
-      _opi->_satisfiability_cache.at(query_body_1));
+    TS_ASSERT_EQUALS(_opi->_satisfiability_cache.end(),
+      _opi->_satisfiability_cache.find(query_body_1));
 
     tv = _opi->check_satisfiability(rule_2, *_opr);
     TSM_ASSERT_EQUALS("Expected (stv 0 1)", TruthValue::FALSE_TV(), tv);
-    TS_ASSERT_EQUALS(_opi->_EMPTY_HANDLE_MAP,
-      _opi->_satisfiability_cache.at(query_body_2));
+    TS_ASSERT_EQUALS(_opi->_satisfiability_cache.end(),
+      _opi->_satisfiability_cache.find(query_body_2));
 
     // Test 3:
     // Test when there is a grounding.
@@ -198,7 +198,7 @@ public:
     _opi->check_satisfiability(rule_1, *_opr);
     Handle result_2_1 = _opi->imply(rule_1, *_opr);
     TSM_ASSERT_EQUALS("Expected grounded InheritanceLink",
-      expected_result, result_2_1);
+      expected_result->to_string(), result_2_1->to_string());
     TS_ASSERT_EQUALS(_opi->was_action_executed(rule_1), TruthValue::TRUE_TV());
 
     _opi->check_satisfiability(rule_2, *_opr);
