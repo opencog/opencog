@@ -189,10 +189,9 @@
   It evaluates and selects psi-rules from the attentional focus.
 "
   (define candidate-rules
-    (filter psi-rule?
-      (if ghost-af-only?
-        (cog-af)
-        (cog-get-atoms 'ImplicationLink))))
+    (if ghost-af-only?
+      (filter psi-rule? (cog-af))
+      (psi-get-rules ghost-component)))
   (define rule-selected (eval-and-select candidate-rules))
 
   (cog-logger-debug ghost-logger "Candidate Rules:\n~a" candidate-rules)
