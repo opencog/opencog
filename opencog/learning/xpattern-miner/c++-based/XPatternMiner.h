@@ -279,15 +279,6 @@ private:
 	Handle matched_results(const Handle& pattern, const Handle& text) const;
 
 	/**
-	 * Like shallow_abstract(const Valuations&) but takes a pattern
-	 * and a texts instead, and generate the valuations of the pattern
-	 * prior to calling shallow_abstract on its valuations.
-	 *
-	 * See comment below for more details.
-	 */
-	static HandleSetSeq shallow_abstract(const Handle& pattern, const HandleSet& texts);
-
-	/**
 	 * Given valuations produce all shallow abstractions over all
 	 * variables. It basically applies front_shallow_abstract
 	 * recursively. See the specification of front_shallow_abstract
@@ -449,6 +440,16 @@ private:
 	static Handle alpha_conversion(const Handle& pattern);
 
 public:
+	/**
+	 * Like shallow_abstract(const Valuations&) but takes a pattern
+	 * and a texts instead, and generate the valuations of the pattern
+	 * prior to calling shallow_abstract on its valuations.
+	 *
+	 * See comment below for more details.
+	 */
+	static HandleSetSeq shallow_abstract(const Handle& pattern,
+	                                     const HandleSet& texts);
+
 	/**
 	 * Given a vardecl and a body, filter the vardecl to contain only
 	 * variable of the body, and create a Lambda with them.
