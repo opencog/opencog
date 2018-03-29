@@ -15,6 +15,17 @@
   (cog-logger-set-level! ghost-logger "info"))
 
 ; ----------
+(define ghost-with-ecan #f)
+
+(define-public (create-ghost-rules-for-ecan flag)
+"
+  For experimental purpose
+  To create GHOST rules that are slimmer.
+"
+  (set! ghost-with-ecan flag)
+)
+
+; ----------
 ; TODO: Remove once experimentation is over
 (define expt-var '())
 ; TODO: Should be removed as this is using 'ghost-find-rules',
