@@ -28,7 +28,8 @@
 
 ;; Load the rules (use load for relative path w.r.t. to that file)
 (add-to-load-path ".")
-(define rule-files (list "rules/shallow-abstraction.scm"
+(define rule-files (list "rules/top-abstraction.scm"
+                         "rules/shallow-abstraction.scm"
                          "rules/specialization.scm"))
 (for-each load-from-path rule-files)
 
@@ -37,12 +38,8 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ; List the rules and their weights.
-(define rules (list unary-specialization-rule-name
-                    binary-first-arg-specialization-rule-name
-                    binary-second-arg-specialization-rule-name
-                    ternary-first-arg-specialization-rule-name
-                    ternary-second-arg-specialization-rule-name
-                    ternary-third-arg-specialization-rule-name))
+(define rules (list shallow-abstraction-rule-name
+                    specialization-rule-name))
 
 ; Associate rules to PLN
 (ure-add-rules pm-rbs rules)
