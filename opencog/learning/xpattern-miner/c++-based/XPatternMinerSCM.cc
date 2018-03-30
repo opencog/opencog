@@ -105,7 +105,10 @@ Handle XPatternMinerSCM::do_shallow_abstract(Handle pattern, Handle texts)
 		for (const Handle& sa : shabs) {
 			HandleSeq sa_list = vars.varseq;
 			sa_list[vari] = sa;
-			sa_lists.insert(as->add_link(LIST_LINK, sa_list));
+			sa_lists.insert(sa_list.size() == 1 ? sa_list[0]
+			                // Only Wrap in a list if arity is greater
+			                // than one
+			                : as->add_link(LIST_LINK, sa_list));
 		}
 		vari++;
 	}
