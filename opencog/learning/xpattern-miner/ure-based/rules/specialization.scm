@@ -105,10 +105,8 @@
                           (Unquote xs-f)))
                         texts
                         ms)
-                      minsup-g))))      ; We ignore the f premise
-                                        ; since we're unable at this
-                                        ; moment to infer the shallow
-                                        ; abstraction backward.
+                      minsup-g
+                      shabs-eval))))
     (Bind
       vardecl
       (And shabs-eval precond-1 precond-2)
@@ -117,7 +115,7 @@
 (define (specialization-formula conclusion . premises)
   ;; (cog-logger-debug "specialization-formula conclusion = ~a, premises = ~a"
   ;;                   conclusion premises)
-  (if (= (length premises) 1)
+  (if (= (length premises) 2)
       (let* ((con-minsup-args (gdr conclusion))
              (pre-minsup-pred (car premises))
              (pre-minsup-pred-tv (cog-tv pre-minsup-pred))
