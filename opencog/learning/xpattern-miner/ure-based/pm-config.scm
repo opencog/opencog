@@ -28,8 +28,7 @@
 
 ;; Load the rules (use load for relative path w.r.t. to that file)
 (add-to-load-path ".")
-(define rule-files (list "rules/top-abstraction.scm"
-                         "rules/shallow-abstraction.scm"
+(define rule-files (list "rules/shallow-abstraction.scm"
                          "rules/specialization.scm"))
 (for-each load-from-path rule-files)
 
