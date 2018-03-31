@@ -100,6 +100,10 @@
         texts
         ms)))
 
+;; Like minsup-eval and add (stv 1 1) on the EvaluationLink
+(define (minsup-eval-true pattern texts ms)
+  (cog-set-tv! (minsup-eval pattern texts ms) (stv 1 1)))
+
 ;; Given an atom created with minsup-eval, get the pattern, texts and
 ;; ms
 (define (get-pattern minsup-g)
