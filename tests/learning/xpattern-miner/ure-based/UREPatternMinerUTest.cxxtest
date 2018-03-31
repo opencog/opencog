@@ -28,6 +28,8 @@
 #include <opencog/util/algorithm.h>
 #include <opencog/truthvalue/SimpleTruthValue.h>
 #include <opencog/atomspace/AtomSpace.h>
+#include <opencog/query/BindLinkAPI.h>
+#include <opencog/rule-engine/forwardchainer/ForwardChainer.h>
 #include <opencog/rule-engine/backwardchainer/BackwardChainer.h>
 #include <opencog/rule-engine/URELogger.h>
 #include <opencog/guile/SchemeEval.h>
@@ -82,6 +84,15 @@ private:
 	                       TruthValuePtr tv=TruthValue::DEFAULT_TV());
 
 	/**
+	 * Make
+	 *
+	 * (Evaluation
+	 *   (GroundedPredicate "scm: absolutely-true")
+	 *   h)
+	 */
+	Handle mk_abs_true_eval(const Handle& h);
+
+	/**
 	 * Make a URE query to mine patterns over texts with a given
 	 * minsup and a maximum of URE iterations.
 	 */
@@ -101,6 +112,13 @@ private:
 	 */
 	bool enough_support(const Handle& pat, int ms);
 
+	/**
+	 * Generate a query, run the URE forward to generate patterns,
+	 * then backward to gather the results, and output them.
+	 */
+	Handle run_pm(const HandleSeq& texts, int minsup,
+	              int max_iter, Handle initpat=Handle::UNDEFINED);
+
 public:
 	UREPatternMinerUTest();
 	~UREPatternMinerUTest();
@@ -115,7 +133,7 @@ public:
 	void test_AB_AC_BC();
 	void test_AB_ABC();
 	void test_ABCD();
-	void test_ABAB();
+	// void test_ABAB();
 	// void test_AAAA();
 	// void test_2conjuncts_1();
 	// void test_2conjuncts_2();
@@ -136,6 +154,7 @@ Handle UREPatternMinerUTest::mk_minsup_eval(int minsup,
 	                             pattern,
 	                             texts_cpt,
 	                             an(NUMBER_NODE, to_string(minsup))));
+	// Warning: if minsup_eval_h existed, this may erase its TV
 	minsup_eval_h->setTruthValue(tv);
 	return minsup_eval_h;
 }
@@ -148,6 +167,13 @@ Handle UREPatternMinerUTest::mk_minsup_evals(int minsup,
 	for (const Handle& pat : patterns)
 		minsup_evals.push_back(mk_minsup_eval(2, pat, tv));
 	return al(SET_LINK, minsup_evals);
+}
+
+Handle UREPatternMinerUTest::mk_abs_true_eval(const Handle& h)
+{
+	return al(EVALUATION_LINK,
+	          an(GROUNDED_PREDICATE_NODE, "scm: absolutely-true"),
+	          h);
 }
 
 Handle UREPatternMinerUTest::mk_query(const HandleSeq& texts, int minsup,
@@ -194,16 +220,54 @@ bool UREPatternMinerUTest::enough_support(const Handle& pat, int minsup)
 	return minsup <= freq;
 }
 
+Handle UREPatternMinerUTest::run_pm(const HandleSeq& texts, int minsup,
+                                    int maxiter, Handle initpat)
+{
+	// Make (Member text (Concept "texts)) links
+	for (const Handle& text : texts)
+		al(MEMBER_LINK, text, texts_cpt);
+
+	// If init is not defined then use top
+	if (not initpat)
+		initpat = top;
+
+	// Add the axiom that initpat has enough support, and use it as
+	// source for the forward chainer
+	bool es = enough_support(initpat, minsup);
+	// If it doesn't have enough support return the empy solution
+	if (not es)
+		return al(SET_LINK);
+	TruthValuePtr tv = SimpleTruthValue::createTV(es ? 1.0 : 0.0, 1.0);
+	Handle source = mk_minsup_eval(minsup, initpat, tv);
+
+	// Run the foward chainer from the initial pattern
+	ForwardChainer fc(_as, pm_rb, source);
+	fc.get_config().set_maximum_iterations(maxiter);
+	fc.do_chain();
+
+	// Run the pattern matcher query to gather the knowledge of
+	// interest, i.e. patterns reaching the minimum support, and
+	// return the results.
+	Handle patvar = an(VARIABLE_NODE, "$patvar"),
+		target = mk_minsup_eval(minsup, patvar),
+		vardecl = al(TYPED_VARIABLE_LINK, patvar, an(TYPE_NODE, "LambdaLink")),
+		abs_true = mk_abs_true_eval(target),
+		bl = al(BIND_LINK, vardecl, al(AND_LINK, target, abs_true), target),
+		results = bindlink(&_as, bl);
+
+	return results;
+}
+
 UREPatternMinerUTest::UREPatternMinerUTest() : _scm(&_as)
 {
 	// Main logger
-	logger().set_level(Logger::INFO);
+	logger().set_level(Logger::DEBUG);
 	logger().set_timestamp_flag(false);
 	logger().set_sync_flag(true);
 	logger().set_print_to_stdout_flag(true);
 
 	// URE logger
-	ure_logger().set_level(Logger::INFO);
+	ure_logger().set_level(Logger::DEBUG);
 	ure_logger().set_timestamp_flag(false);
 	ure_logger().set_sync_flag(true);
 	ure_logger().set_print_to_stdout_flag(true);
@@ -251,12 +315,7 @@ void UREPatternMinerUTest::test_A()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
-	Handle query = mk_query({A}, 2, 1);
-	BackwardChainer bc(_as, pm_rb, query);
-	bc.get_config().set_maximum_iterations(100);
-	bc.do_chain();
-
-	Handle results = bc.get_results(),
+	Handle results = run_pm({A}, 2, 10),
 		expected = al(SET_LINK);
 
 	logger().debug() << "results = " << oc_to_string(results);
@@ -269,11 +328,7 @@ void UREPatternMinerUTest::test_AB()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
-	Handle query = mk_query({A, B}, 2, 1);
-	BackwardChainer bc(_as, pm_rb, query);
-	bc.do_chain();
-
-	Handle results = bc.get_results(),
+	Handle results = run_pm({A, B}, 2, 10),
 		expected = mk_minsup_evals(2, {top});
 
 	logger().debug() << "results = " << oc_to_string(results);
@@ -286,14 +341,13 @@ void UREPatternMinerUTest::test_AB_AC()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
+	// Define texts
 	Handle AB = al(INHERITANCE_LINK, A, B),
-		AC = al(INHERITANCE_LINK, A, C),
-		query = mk_query({AB, AC}, 2, 2);
-	BackwardChainer bc(_as, pm_rb, query);
-	bc.get_config().set_maximum_iterations(100);
-	bc.do_chain();
+		AC = al(INHERITANCE_LINK, A, C);
+	HandleSeq texts{AB, AC};
 
-	Handle results = bc.get_results(),
+	// Run pattern miner
+	Handle results = run_pm(texts, 2, 10),
 		VarXY = al(VARIABLE_LIST, X, Y),
 		InhXY = al(INHERITANCE_LINK, X, Y),
 		InhAY = al(INHERITANCE_LINK, A, Y),
@@ -312,19 +366,17 @@ void UREPatternMinerUTest::test_AB_AC_BC()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
+	// Define texts
 	Handle A = an(CONCEPT_NODE, "A"),
 		B = an(CONCEPT_NODE, "B"),
 		C = an(CONCEPT_NODE, "C"),
 		InhAB = al(INHERITANCE_LINK, A, B),
 		InhAC = al(INHERITANCE_LINK, A, C),
-		InhBC = al(INHERITANCE_LINK, B, C),
-		query = mk_query({A, B, C, InhAB, InhAC, InhBC}, 2, 2);
+		InhBC = al(INHERITANCE_LINK, B, C);
+	HandleSeq texts{A, B, C, InhAB, InhAC, InhBC};
 
-	BackwardChainer bc(_as, pm_rb, query);
-	bc.get_config().set_maximum_iterations(100);
-	bc.do_chain();
-
-	Handle results = bc.get_results(),
+	// Run pattern miner
+	Handle results = run_pm(texts, 2, 100),
 		VarXY = al(VARIABLE_LIST, X, Y),
 		InhXY = al(INHERITANCE_LINK, X, Y),
 		InhAY = al(INHERITANCE_LINK, A, Y),
@@ -345,18 +397,16 @@ void UREPatternMinerUTest::test_AB_ABC()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
+	// Define texts
 	Handle A = an(CONCEPT_NODE, "A"),
 		B = an(CONCEPT_NODE, "B"),
 		C = an(CONCEPT_NODE, "C"),
 		InhAB = al(INHERITANCE_LINK, A, B),
-		InhABC = al(INHERITANCE_LINK, A, al(AND_LINK, B, C)),
-		query = mk_query({A, B, C, InhAB, InhABC}, 2, 2);
+		InhABC = al(INHERITANCE_LINK, A, al(AND_LINK, B, C));
+	HandleSeq texts{A, B, C, InhAB, InhABC};
 
-	BackwardChainer bc(_as, pm_rb, query);
-	bc.get_config().set_maximum_iterations(100);
-	bc.do_chain();
-
-	Handle results = bc.get_results(),
+	// Run pattern miner
+	Handle results = run_pm(texts, 2, 100),
 		VarXY = al(VARIABLE_LIST, X, Y),
 		AndXY = al(AND_LINK, X, Y),
 		InhXY = al(INHERITANCE_LINK, X, Y),
@@ -376,6 +426,7 @@ void UREPatternMinerUTest::test_ABCD()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
+	// Define texts
 	Handle InhAB = al(INHERITANCE_LINK, A, B),
 		InhCD = al(INHERITANCE_LINK, C, D),
 		InhEF = al(INHERITANCE_LINK, E, F),
@@ -384,16 +435,14 @@ void UREPatternMinerUTest::test_ABCD()
 		ImpEFGH = al(IMPLICATION_LINK, InhEF, InhGH),
 		InhXY = al(INHERITANCE_LINK, X, Y),
 		InhZW = al(INHERITANCE_LINK, Z, W),
-		ImpXY = al(IMPLICATION_LINK, X, Y),
-		initpat = al(LAMBDA_LINK, ImpXY),
-		query = mk_query({InhAB, InhCD, InhEF, InhGH, ImpABCD, ImpEFGH},
-		                 2, 2, initpat);
+		ImpXY = al(IMPLICATION_LINK, X, Y);
+	HandleSeq texts{InhAB, InhCD, InhEF, InhGH, ImpABCD, ImpEFGH};
 
-	BackwardChainer bc(_as, pm_rb, query);
-	bc.get_config().set_maximum_iterations(100);
-	bc.do_chain();
+	// Define initpat
+	Handle initpat = al(LAMBDA_LINK, ImpXY);
 
-	Handle results = bc.get_results(),
+	// Run pattern miner
+	Handle results = run_pm(texts, 2, 100, initpat),
 		expected = mk_minsup_evals(2,
 		                           { al(LAMBDA_LINK, ImpXY),
 				                     al(LAMBDA_LINK,
@@ -409,41 +458,41 @@ void UREPatternMinerUTest::test_ABCD()
 	TS_ASSERT(content_eq(expected, results));
 }
 
-void UREPatternMinerUTest::test_ABAB()
-{
-	logger().info("BEGIN TEST: %s", __FUNCTION__);
+// void UREPatternMinerUTest::test_ABAB()
+// {
+// 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
-	Handle A = an(CONCEPT_NODE, "A"),
-		B = an(CONCEPT_NODE, "B"),
-		C = an(CONCEPT_NODE, "C"),
-		AB = al(INHERITANCE_LINK, A, B),
-		BC = al(INHERITANCE_LINK, B, C),
-		ABAB = al(IMPLICATION_LINK, AB, AB),
-		BCBC = al(IMPLICATION_LINK, BC, BC);
+// 	Handle A = an(CONCEPT_NODE, "A"),
+// 		B = an(CONCEPT_NODE, "B"),
+// 		C = an(CONCEPT_NODE, "C"),
+// 		AB = al(INHERITANCE_LINK, A, B),
+// 		BC = al(INHERITANCE_LINK, B, C),
+// 		ABAB = al(IMPLICATION_LINK, AB, AB),
+// 		BCBC = al(IMPLICATION_LINK, BC, BC);
 	
-	Handle X = tmp_an(VARIABLE_NODE, "$X"),
-		Y = tmp_an(VARIABLE_NODE, "$Y"),
-		initpat = tmp_al(LAMBDA_LINK,
-		                 tmp_al(IMPLICATION_LINK, X, Y)),
-		query = mk_query({ABAB, BCBC}, 2, 2, initpat);
+// 	Handle X = tmp_an(VARIABLE_NODE, "$X"),
+// 		Y = tmp_an(VARIABLE_NODE, "$Y"),
+// 		initpat = tmp_al(LAMBDA_LINK,
+// 		                 tmp_al(IMPLICATION_LINK, X, Y)),
+// 		query = mk_query({ABAB, BCBC}, 2, 2, initpat);
 
-	BackwardChainer bc(_as, pm_rb, query);
-	bc.get_config().set_maximum_iterations(100);
-	bc.do_chain();
+// 	BackwardChainer bc(_as, pm_rb, query);
+// 	bc.get_config().set_maximum_iterations(100);
+// 	bc.do_chain();
 
-	Handle results = bc.get_results(),
-		VarXY = tmp_al(VARIABLE_LIST, X, Y),
-		InhXY = tmp_al(INHERITANCE_LINK, X, Y),
-		expected = mk_minsup_eval(2,
-		                          tmp_al(LAMBDA_LINK,
-		                                 VarXY,
-		                                 tmp_al(IMPLICATION_LINK, InhXY, InhXY)));
+// 	Handle results = bc.get_results(),
+// 		VarXY = tmp_al(VARIABLE_LIST, X, Y),
+// 		InhXY = tmp_al(INHERITANCE_LINK, X, Y),
+// 		expected = mk_minsup_eval(2,
+// 		                          tmp_al(LAMBDA_LINK,
+// 		                                 VarXY,
+// 		                                 tmp_al(IMPLICATION_LINK, InhXY, InhXY)));
 
-	logger().debug() << "results = " << oc_to_string(results);
-	logger().debug() << "expected = " << oc_to_string(expected);
+// 	logger().debug() << "results = " << oc_to_string(results);
+// 	logger().debug() << "expected = " << oc_to_string(expected);
 
-	TS_ASSERT(is_in(expected, results->getOutgoingSet()));
-}
+// 	TS_ASSERT(is_in(expected, results->getOutgoingSet()));
+// }
 
 // void UREPatternMinerUTest::test_AAAA()
 // {
