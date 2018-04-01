@@ -50,6 +50,7 @@ private:
 	AtomSpace _as;
 	AtomSpace _tmp_as;
 	SchemeEval _scm;
+	SchemeEval _tmp_scm;
 
 	// Variables
 	Handle X, Y, Z, W;
@@ -93,6 +94,15 @@ private:
 	Handle mk_abs_true_eval(const Handle& h);
 
 	/**
+	 * Make
+	 *
+	 * (Lambda
+	 *   (VariableList X1 ... Xn)
+	 *   (And X1 ... Xn))
+	 */
+	Handle mk_nconjunct(unsigned n);
+	
+	/**
 	 * Make a URE query to mine patterns over texts with a given
 	 * minsup and a maximum of URE iterations.
 	 */
@@ -100,12 +110,14 @@ private:
 	                int depth, Handle initpat=Handle::UNDEFINED);
 
 	/**
-	 * Gen shallow pattern variables for the query, for instance if i
-	 * = 2, return
-	 *
-	 * (Variable "$shapat-2")
+	 * Generate a variable (VariableNode <prefix-i>)
 	 */
-	Handle gen_shapat_var(int i);
+	Handle gen_variable(const std::string& prefix, int i);
+
+	/**
+	 * Generate variables (VariableNode <prefix-0>) ... (VariableNode <prefix-n-1>)
+	 */
+	HandleSeq gen_variables(const std::string& prefix, int n);
 
 	/**
 	 * Return whether if a pattern has enough support.
@@ -133,15 +145,16 @@ public:
 	void test_AB_AC_BC();
 	void test_AB_ABC();
 	void test_ABCD();
-	// void test_ABAB();
-	// void test_AAAA();
-	// void test_2conjuncts_1();
-	// void test_2conjuncts_2();
-	// void test_2conjuncts_3();
-	// void test_2conjuncts_4();
+	void test_ABAB();
+	void test_AAAA();
+	void test_2conjuncts_1();
+	void test_2conjuncts_2();
+	void test_2conjuncts_3();
+	void test_2conjuncts_4();
+	// Disable for now as we do not have the corresponding heuristic
 	// void test_2conjuncts_5();
-	// void test_InferenceControl();
-	// void test_SodaDrinker();
+	void test_InferenceControl();
+	void test_SodaDrinker();
 };
 
 Handle UREPatternMinerUTest::mk_minsup_eval(int minsup,
@@ -176,37 +189,22 @@ Handle UREPatternMinerUTest::mk_abs_true_eval(const Handle& h)
 	          h);
 }
 
-Handle UREPatternMinerUTest::mk_query(const HandleSeq& texts, int minsup,
-                                      int depth, Handle initpat)
+Handle UREPatternMinerUTest::mk_nconjunct(unsigned n)
 {
-	// Make (Member text (Concept "texts)) links
-	for (const Handle& text : texts)
-		al(MEMBER_LINK, text, texts_cpt);
-
-	// If init is not defined then use top
-	if (not initpat)
-		initpat = top;
-
-	// Add the axiom that initpat has enough support
-	bool es = enough_support(initpat, minsup);
-	TruthValuePtr tv = SimpleTruthValue::createTV(es ? 1.0 : 0.0, 1.0);
-	mk_minsup_eval(minsup, initpat, tv);
-
-	// Make URE query
-	Handle folded_pattern = initpat;
-	for (int i = 0; i < depth; i++)
-		folded_pattern = al(PUT_LINK,
-		                    folded_pattern,
-		                    al(UNQUOTE_LINK,
-		                       gen_shapat_var(i)));
-	Handle query = mk_minsup_eval(minsup, al(QUOTE_LINK, folded_pattern));
-	return query;
+	return al(LAMBDA_LINK, al(AND_LINK, gen_variables("$X-", n)));
 }
 
-Handle UREPatternMinerUTest::gen_shapat_var(int i)
+Handle UREPatternMinerUTest::gen_variable(const std::string& prefix, int i)
 {
-	std::string shapat("$shapat-");
-	return an(VARIABLE_NODE, shapat + std::to_string(i));
+	return an(VARIABLE_NODE, prefix + std::to_string(i));
+}
+
+HandleSeq UREPatternMinerUTest::gen_variables(const std::string& prefix, int n)
+{
+	HandleSeq vars;
+	for (int i = 0; i < n; i++)
+		vars.push_back(gen_variable(prefix, i));
+	return vars;
 }
 
 bool UREPatternMinerUTest::enough_support(const Handle& pat, int minsup)
@@ -258,18 +256,18 @@ Handle UREPatternMinerUTest::run_pm(const HandleSeq& texts, int minsup,
 	return results;
 }
 
-UREPatternMinerUTest::UREPatternMinerUTest() : _scm(&_as)
+UREPatternMinerUTest::UREPatternMinerUTest() : _scm(&_as), _tmp_scm(&_tmp_as)
 {
 	// Main logger
-	logger().set_level(Logger::DEBUG);
+	logger().set_level(Logger::INFO);
 	logger().set_timestamp_flag(false);
-	logger().set_sync_flag(true);
+	// logger().set_sync_flag(true);
 	logger().set_print_to_stdout_flag(true);
 
 	// URE logger
-	ure_logger().set_level(Logger::DEBUG);
+	ure_logger().set_level(Logger::INFO);
 	ure_logger().set_timestamp_flag(false);
-	ure_logger().set_sync_flag(true);
+	// ure_logger().set_sync_flag(true);
 	ure_logger().set_print_to_stdout_flag(true);
 
 	// Configure scheme load-paths that are common for all tests.
@@ -367,10 +365,7 @@ void UREPatternMinerUTest::test_AB_AC_BC()
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
 	// Define texts
-	Handle A = an(CONCEPT_NODE, "A"),
-		B = an(CONCEPT_NODE, "B"),
-		C = an(CONCEPT_NODE, "C"),
-		InhAB = al(INHERITANCE_LINK, A, B),
+	Handle InhAB = al(INHERITANCE_LINK, A, B),
 		InhAC = al(INHERITANCE_LINK, A, C),
 		InhBC = al(INHERITANCE_LINK, B, C);
 	HandleSeq texts{A, B, C, InhAB, InhAC, InhBC};
@@ -398,10 +393,7 @@ void UREPatternMinerUTest::test_AB_ABC()
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
 	// Define texts
-	Handle A = an(CONCEPT_NODE, "A"),
-		B = an(CONCEPT_NODE, "B"),
-		C = an(CONCEPT_NODE, "C"),
-		InhAB = al(INHERITANCE_LINK, A, B),
+	Handle InhAB = al(INHERITANCE_LINK, A, B),
 		InhABC = al(INHERITANCE_LINK, A, al(AND_LINK, B, C));
 	HandleSeq texts{A, B, C, InhAB, InhABC};
 
@@ -458,220 +450,189 @@ void UREPatternMinerUTest::test_ABCD()
 	TS_ASSERT(content_eq(expected, results));
 }
 
-// void UREPatternMinerUTest::test_ABAB()
-// {
-// 	logger().info("BEGIN TEST: %s", __FUNCTION__);
+void UREPatternMinerUTest::test_ABAB()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
-// 	Handle A = an(CONCEPT_NODE, "A"),
-// 		B = an(CONCEPT_NODE, "B"),
-// 		C = an(CONCEPT_NODE, "C"),
-// 		AB = al(INHERITANCE_LINK, A, B),
-// 		BC = al(INHERITANCE_LINK, B, C),
-// 		ABAB = al(IMPLICATION_LINK, AB, AB),
-// 		BCBC = al(IMPLICATION_LINK, BC, BC);
-	
-// 	Handle X = tmp_an(VARIABLE_NODE, "$X"),
-// 		Y = tmp_an(VARIABLE_NODE, "$Y"),
-// 		initpat = tmp_al(LAMBDA_LINK,
-// 		                 tmp_al(IMPLICATION_LINK, X, Y)),
-// 		query = mk_query({ABAB, BCBC}, 2, 2, initpat);
+	// Define texts
+	Handle AB = al(INHERITANCE_LINK, A, B),
+		BC = al(INHERITANCE_LINK, B, C),
+		ABAB = al(IMPLICATION_LINK, AB, AB),
+		BCBC = al(IMPLICATION_LINK, BC, BC);
+	HandleSeq texts{ABAB, BCBC};
 
-// 	BackwardChainer bc(_as, pm_rb, query);
-// 	bc.get_config().set_maximum_iterations(100);
-// 	bc.do_chain();
+	// Define initpat
+	Handle initpat = al(LAMBDA_LINK,
+	                    al(IMPLICATION_LINK, X, Y));
 
-// 	Handle results = bc.get_results(),
-// 		VarXY = tmp_al(VARIABLE_LIST, X, Y),
-// 		InhXY = tmp_al(INHERITANCE_LINK, X, Y),
-// 		expected = mk_minsup_eval(2,
-// 		                          tmp_al(LAMBDA_LINK,
-// 		                                 VarXY,
-// 		                                 tmp_al(IMPLICATION_LINK, InhXY, InhXY)));
+	// Run pattern miner
+	Handle results = run_pm(texts, 2, 100, initpat),
+		VarXY = al(VARIABLE_LIST, X, Y),
+		InhXY = al(INHERITANCE_LINK, X, Y),
+		expected = mk_minsup_eval(2,
+		                          al(LAMBDA_LINK,
+		                             VarXY,
+		                             al(IMPLICATION_LINK, InhXY, InhXY)));
 
-// 	logger().debug() << "results = " << oc_to_string(results);
-// 	logger().debug() << "expected = " << oc_to_string(expected);
+	logger().debug() << "results = " << oc_to_string(results);
+	logger().debug() << "expected = " << oc_to_string(expected);
 
-// 	TS_ASSERT(is_in(expected, results->getOutgoingSet()));
-// }
+	TS_ASSERT(is_in(expected, results->getOutgoingSet()));
+}
 
-// void UREPatternMinerUTest::test_AAAA()
-// {
-// 	logger().info("BEGIN TEST: %s", __FUNCTION__);
+void UREPatternMinerUTest::test_AAAA()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
-// 	Handle A = an(CONCEPT_NODE, "A"),
-// 		B = an(CONCEPT_NODE, "B"),
-// 		AA = al(INHERITANCE_LINK, A, A),
-// 		BB = al(INHERITANCE_LINK, B, B),
-// 		AAAA = al(IMPLICATION_LINK, AA, AA),
-// 		BBBB = al(IMPLICATION_LINK, BB, BB);
-	
-// 	Handle X = tmp_an(VARIABLE_NODE, "$X"),
-// 		Y = tmp_an(VARIABLE_NODE, "$Y"),
-// 		initpat = tmp_al(LAMBDA_LINK,
-// 		                 tmp_al(IMPLICATION_LINK, X, Y)),
-// 		query = mk_query({AAAA, BBBB}, 2, 4, initpat);
+	// Define texts
+	Handle AA = al(INHERITANCE_LINK, A, A),
+		BB = al(INHERITANCE_LINK, B, B),
+		AAAA = al(IMPLICATION_LINK, AA, AA),
+		BBBB = al(IMPLICATION_LINK, BB, BB);
+	HandleSeq texts{AAAA, BBBB};
 
-// 	BackwardChainer bc(_as, pm_rb, query);
-// 	bc.get_config().set_maximum_iterations(1000);
-// 	bc.do_chain();
+	// Define initpat
+	Handle initpat = al(LAMBDA_LINK,
+	                    al(IMPLICATION_LINK, X, Y));
 
-// 	Handle results = bc.get_results(),
-// 		InhXX = tmp_al(INHERITANCE_LINK, X, X),
-// 		expected = tmp_al(LAMBDA_LINK,
-// 		                  tmp_al(IMPLICATION_LINK,
-// 		                         InhXX,
-// 		                         InhXX));
+	// Run pattern miner
+	Handle results = run_pm(texts, 2, 100, initpat),
+		InhXX = al(INHERITANCE_LINK, X, X),
+		expected = mk_minsup_eval(2,
+		                          al(LAMBDA_LINK,
+		                             al(IMPLICATION_LINK,
+		                                InhXX,
+		                                InhXX)));
 
-// 	logger().debug() << "results = " << oc_to_string(results);
-// 	logger().debug() << "expected = " << oc_to_string(expected);
+	logger().debug() << "results = " << oc_to_string(results);
+	logger().debug() << "expected = " << oc_to_string(expected);
 
-// 	TS_ASSERT(is_in(expected, results->getOutgoingSet()));
-// }
+	TS_ASSERT(is_in(expected, results->getOutgoingSet()));
+}
 
-// void UREPatternMinerUTest::test_2conjuncts_1()
-// {
-// 	logger().info("BEGIN TEST: %s", __FUNCTION__);
+void UREPatternMinerUTest::test_2conjuncts_1()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
-// 	Handle
-// 		A = an(CONCEPT_NODE, "A"),
-// 		B = an(CONCEPT_NODE, "B"),
-// 		C1 = an(CONCEPT_NODE, "C1"),
-// 		C2 = an(CONCEPT_NODE, "C2"),
-// 		AB = al(INHERITANCE_LINK, A, B),
-// 		BC1 = al(INHERITANCE_LINK, B, C1),
-// 		BC2 = al(INHERITANCE_LINK, B, C2);
+	// Define texts
+	Handle C1 = an(CONCEPT_NODE, "C1"),
+		C2 = an(CONCEPT_NODE, "C2"),
+		AB = al(INHERITANCE_LINK, A, B),
+		BC1 = al(INHERITANCE_LINK, B, C1),
+		BC2 = al(INHERITANCE_LINK, B, C2);
+	HandleSeq texts{AB, BC1, BC2};
 
-// 	Handle
-// 		X = tmp_an(VARIABLE_NODE, "$X"),
-// 		Y = tmp_an(VARIABLE_NODE, "$Y"),
-// 		XY = tmp_al(VARIABLE_LIST, X, Y);
+	// Define initpat
+	Handle XY = al(VARIABLE_LIST, X, Y),
+		initpat = al(LAMBDA_LINK,
+		             XY,
+		             al(AND_LINK,
+		                al(INHERITANCE_LINK, X, A),
+		                al(INHERITANCE_LINK, A, Y)));
 
-// 	Handle initpat = tmp_al(LAMBDA_LINK,
-// 	                        XY,
-// 	                        tmp_al(AND_LINK,
-// 	                               tmp_al(INHERITANCE_LINK, X, A),
-// 	                               tmp_al(INHERITANCE_LINK, A, Y)));
+	// Run pattern miner
+	Handle results = run_pm(texts, 2, 10, initpat);
 
-// 	XPMParameters param(2, 2, initpat);
-// 	XPatternMiner pm(_as, param);
-// 	HandleTree results = pm();
+	logger().debug() << "results = " << oc_to_string(results);
 
-// 	logger().debug() << "results = " << oc_to_string(results);
+	TS_ASSERT(results->getOutgoingSet().empty());
+}
 
-// 	TS_ASSERT(results.empty());
-// }
+void UREPatternMinerUTest::test_2conjuncts_2()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
-// void UREPatternMinerUTest::test_2conjuncts_2()
-// {
-// 	logger().info("BEGIN TEST: %s", __FUNCTION__);
+	// Define texts
+	Handle C1 = an(CONCEPT_NODE, "C1"),
+		C2 = an(CONCEPT_NODE, "C2"),
+		AB = al(INHERITANCE_LINK, A, B),
+		BC1 = al(INHERITANCE_LINK, B, C1),
+		BC2 = al(INHERITANCE_LINK, B, C2);
+	HandleSeq texts{AB, BC1, BC2};
 
-// 	Handle
-// 		A = an(CONCEPT_NODE, "A"),
-// 		B = an(CONCEPT_NODE, "B"),
-// 		C1 = an(CONCEPT_NODE, "C1"),
-// 		C2 = an(CONCEPT_NODE, "C2"),
-// 		AB = al(INHERITANCE_LINK, A, B),
-// 		BC1 = al(INHERITANCE_LINK, B, C1),
-// 		BC2 = al(INHERITANCE_LINK, B, C2);
+	// Define initpat
+	Handle XYZ = al(VARIABLE_LIST, X, Y, Z),
+		XYZW = al(VARIABLE_LIST, X, Y, Z, W),
+		initpat = al(LAMBDA_LINK,
+		             XYZW,
+		             al(AND_LINK,
+		                al(INHERITANCE_LINK, X, Y),
+		                al(INHERITANCE_LINK, Z, W)));
 
-// 	Handle
-// 		X = tmp_an(VARIABLE_NODE, "$X"),
-// 		Y = tmp_an(VARIABLE_NODE, "$Y"),
-// 		Z = tmp_an(VARIABLE_NODE, "$Z"),
-// 		W = tmp_an(VARIABLE_NODE, "$W"),
-// 		XYZ = tmp_al(VARIABLE_LIST, X, Y, Z),
-// 		XYZW = tmp_al(VARIABLE_LIST, X, Y, Z, W);
+	// Run pattern miner
+	Handle results = run_pm(texts, 2, 100, initpat);
+	Handle expected_pattern = mk_minsup_eval(2,
+	                                         al(LAMBDA_LINK,
+	                                            XYZ,
+	                                            al(AND_LINK,
+	                                               al(INHERITANCE_LINK, X, Y),
+	                                               al(INHERITANCE_LINK, Y, Z))));
 
-// 	Handle initpat = tmp_al(LAMBDA_LINK,
-// 	                        XYZW,
-// 	                        tmp_al(AND_LINK,
-// 	                               tmp_al(INHERITANCE_LINK, X, Y),
-// 	                               tmp_al(INHERITANCE_LINK, Z, W)));
-// 	XPMParameters param(2, 2, initpat);
-// 	XPatternMiner pm(_as, param);
-// 	HandleTree results = pm();
-// 	Handle expected_pattern = tmp_al(LAMBDA_LINK,
-// 	                                 XYZ,
-// 	                                 tmp_al(AND_LINK,
-// 	                                        tmp_al(INHERITANCE_LINK, X, Y),
-// 	                                        tmp_al(INHERITANCE_LINK, Y, Z)));
+	logger().debug() << "results = " << oc_to_string(results);
+	logger().debug() << "expected_pattern = " << oc_to_string(expected_pattern);
 
-// 	logger().debug() << "results = " << oc_to_string(results);
-// 	logger().debug() << "expected_pattern = " << oc_to_string(expected_pattern);
+	TS_ASSERT(is_in(expected_pattern, results->getOutgoingSet()));
+}
 
-// 	TS_ASSERT(content_is_in(expected_pattern, results));
-// }
+void UREPatternMinerUTest::test_2conjuncts_3()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
-// void UREPatternMinerUTest::test_2conjuncts_3()
-// {
-// 	logger().info("BEGIN TEST: %s", __FUNCTION__);
+	// Define texts
+	Handle C1 = an(CONCEPT_NODE, "C1"),
+		C2 = an(CONCEPT_NODE, "C2"),
+		AB = al(INHERITANCE_LINK, A, B),
+		BC1 = al(INHERITANCE_LINK, B, C1),
+		BC2 = al(INHERITANCE_LINK, B, C2);
+	HandleSeq texts{AB, BC1, BC2};
 
-// 	Handle
-// 		A = an(CONCEPT_NODE, "A"),
-// 		B = an(CONCEPT_NODE, "B"),
-// 		C1 = an(CONCEPT_NODE, "C1"),
-// 		C2 = an(CONCEPT_NODE, "C2"),
-// 		AB = al(INHERITANCE_LINK, A, B),
-// 		BC1 = al(INHERITANCE_LINK, B, C1),
-// 		BC2 = al(INHERITANCE_LINK, B, C2);
+	// Run pattern miner
+	Handle results = run_pm(texts, 2, 500, mk_nconjunct(2)),
+		XYZ = al(VARIABLE_LIST, X, Y, Z),
+		expected_pattern = mk_minsup_eval(2,
+		                                  al(LAMBDA_LINK,
+		                                     XYZ,
+		                                     al(AND_LINK,
+		                                        al(INHERITANCE_LINK, X, Y),
+		                                        al(INHERITANCE_LINK, Y, Z))));
 
-// 	Handle
-// 		X = tmp_an(VARIABLE_NODE, "$X"),
-// 		Y = tmp_an(VARIABLE_NODE, "$Y"),
-// 		Z = tmp_an(VARIABLE_NODE, "$Z"),
-// 		XYZ = tmp_al(VARIABLE_LIST, X, Y, Z);
+	logger().debug() << "results = " << oc_to_string(results);
+	logger().debug() << "expected_pattern = " << oc_to_string(expected_pattern);
 
-// 	XPMParameters param(2, 2);
-// 	XPatternMiner pm(_as, param);
-// 	HandleTree results = pm();
-// 	Handle expected_pattern = tmp_al(LAMBDA_LINK,
-// 	                                 XYZ,
-// 	                                 tmp_al(AND_LINK,
-// 	                                        tmp_al(INHERITANCE_LINK, X, Y),
-// 	                                        tmp_al(INHERITANCE_LINK, Y, Z)));
+	TS_ASSERT(is_in(expected_pattern, results->getOutgoingSet()));
+}
 
-// 	logger().debug() << "results = " << oc_to_string(results);
-// 	logger().debug() << "expected_pattern = " << oc_to_string(expected_pattern);
+void UREPatternMinerUTest::test_2conjuncts_4()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
-// 	TS_ASSERT(content_is_in(expected_pattern, results));
-// }
+	// Define texts
+	Handle A1 = an(CONCEPT_NODE, "A1"),
+		A2 = an(CONCEPT_NODE, "A2"),
+		B = an(CONCEPT_NODE, "B"),
+		C1 = an(CONCEPT_NODE, "C1"),
+		C2 = an(CONCEPT_NODE, "C2"),
+		A1B = al(INHERITANCE_LINK, A1, B),
+		A2B = al(INHERITANCE_LINK, A2, B),
+		BC1 = al(INHERITANCE_LINK, B, C1),
+		BC2 = al(INHERITANCE_LINK, B, C2);
+	HandleSeq texts{A1B, A2B, BC1, BC2};
 
-// void UREPatternMinerUTest::test_2conjuncts_4()
-// {
-// 	logger().info("BEGIN TEST: %s", __FUNCTION__);
+	// Run pattern miner
+	Handle results = run_pm(texts, 4, 100, mk_nconjunct(2)),
+		VarXYZ = al(VARIABLE_LIST, X, Y, Z),
+		expected_pattern = mk_minsup_eval(4,
+		                                  al(LAMBDA_LINK,
+		                                     VarXYZ,
+		                                     al(AND_LINK,
+		                                        al(INHERITANCE_LINK, X, Y),
+		                                        al(INHERITANCE_LINK, Y, Z))));
 
-// 	Handle
-// 		A1 = an(CONCEPT_NODE, "A1"),
-// 		A2 = an(CONCEPT_NODE, "A2"),
-// 		B = an(CONCEPT_NODE, "B"),
-// 		C1 = an(CONCEPT_NODE, "C1"),
-// 		C2 = an(CONCEPT_NODE, "C2"),
-// 		A1B = al(INHERITANCE_LINK, A1, B),
-// 		A2B = al(INHERITANCE_LINK, A2, B),
-// 		BC1 = al(INHERITANCE_LINK, B, C1),
-// 		BC2 = al(INHERITANCE_LINK, B, C2);
+	logger().debug() << "results = " << oc_to_string(results);
+	logger().debug() << "expected_pattern = " << oc_to_string(expected_pattern);
 
-// 	Handle
-// 		X = tmp_an(VARIABLE_NODE, "$X"),
-// 		Y = tmp_an(VARIABLE_NODE, "$Y"),
-// 		Z = tmp_an(VARIABLE_NODE, "$Z"),
-// 		VXY = tmp_al(VARIABLE_LIST, X, Y),
-// 		VXYZ = tmp_al(VARIABLE_LIST, X, Y, Z);
-
-// 	XPMParameters param(4, 2);
-// 	XPatternMiner pm(_as, param);
-// 	HandleTree results = pm();
-// 	Handle expected_pattern = tmp_al(LAMBDA_LINK,
-// 	                                 VXYZ,
-// 	                                 tmp_al(AND_LINK,
-// 	                                        tmp_al(INHERITANCE_LINK, X, Y),
-// 	                                        tmp_al(INHERITANCE_LINK, Y, Z)));
-
-// 	logger().debug() << "results = " << oc_to_string(results);
-// 	logger().debug() << "expected_pattern = " << oc_to_string(expected_pattern);
-
-// 	TS_ASSERT(content_is_in(expected_pattern, results));
-// }
+	TS_ASSERT(is_in(expected_pattern, results->getOutgoingSet()));
+}
 
 // void UREPatternMinerUTest::test_2conjuncts_5()
 // {
@@ -726,150 +687,152 @@ void UREPatternMinerUTest::test_ABCD()
 // 	TS_ASSERT(not content_is_in(non_expected_pattern, results));
 // }
 
-// void UREPatternMinerUTest::test_InferenceControl()
-// {
-// 	logger().info("BEGIN TEST: %s", __FUNCTION__);
+void UREPatternMinerUTest::test_InferenceControl()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
-// 	// Load inference-control-corpus.scm
-// 	std::string rs =
-// 		_scm.eval("(load-from-path \"inference-control-corpus.scm\")");
+	// Define texts
+	// Load inference-control-corpus.scm to _tmp_as
+	std::string rs =
+		_tmp_scm.eval("(load-from-path \"inference-control-corpus.scm\")");
+	logger().debug() << "rs = " << rs;
+	HandleSeq texts;
+	_tmp_as.get_all_atoms(texts);
 
-// 	logger().debug() << "rs = " << rs;
+	// Define initpat
+	Handle expand = an(SCHEMA_NODE, "URE:BC:expand-and-BIT"),
+		preproof = an(PREDICATE_NODE, "URE:BC:preproof-of"),
+		rule = an(DEFINED_SCHEMA_NODE,
+		          "conditional-full-instantiation-implication-scope-meta-rule"),
+		de_rule = al(DONT_EXEC_LINK, rule),
+		VarT = an(VARIABLE_NODE, "$T"),
+		VarA = an(VARIABLE_NODE, "$A"),
+		VarL = an(VARIABLE_NODE, "$L"),
+		VarB = an(VARIABLE_NODE, "$B"),
+		vardecl = al(VARIABLE_LIST, VarT, VarA, VarL, VarB),
+		clauses = al(AND_LINK,
+		             al(EXECUTION_LINK,
+		                expand,
+		                al(LIST_LINK, VarA, VarL, de_rule),
+		                VarB),
+		             al(EVALUATION_LINK,
+		                preproof,
+		                al(LIST_LINK, VarA, VarT)),
+		             al(EVALUATION_LINK,
+		                preproof,
+		                al(LIST_LINK, VarB, VarT))),
+		initpat = al(LAMBDA_LINK, vardecl, clauses);
 
-// 	// Run the pattern miner
-// 	Handle expand = tmp_an(SCHEMA_NODE, "URE:BC:expand-and-BIT"),
-// 		preproof = tmp_an(PREDICATE_NODE, "URE:BC:preproof-of"),
-// 		rule = tmp_an(DEFINED_SCHEMA_NODE,
-// 		              "conditional-full-instantiation-implication-scope-meta-rule"),
-// 		de_rule = tmp_al(DONT_EXEC_LINK, rule),
-// 		T = tmp_an(VARIABLE_NODE, "$T"),
-// 		A = tmp_an(VARIABLE_NODE, "$A"),
-// 		L = tmp_an(VARIABLE_NODE, "$L"),
-// 		B = tmp_an(VARIABLE_NODE, "$B"),
-// 		vardecl = tmp_al(VARIABLE_LIST, T, A, L, B),
-// 		clauses = tmp_al(AND_LINK,
-// 		                 tmp_al(EXECUTION_LINK,
-// 		                        expand,
-// 		                        tmp_al(LIST_LINK, A, L, de_rule),
-// 		                        B),
-// 		                 tmp_al(EVALUATION_LINK,
-// 		                        preproof,
-// 		                        tmp_al(LIST_LINK, A, T)),
-// 		                 tmp_al(EVALUATION_LINK,
-// 		                        preproof,
-// 		                        tmp_al(LIST_LINK, B, T))),
-// 		initpat = tmp_al(LAMBDA_LINK, vardecl, clauses);
+	// Run pattern miner
+	Handle results = run_pm(texts, 2, 1000, initpat);
 
-// 	XPMParameters param(2/*minsup*/, 3/*ngram*/, initpat, 2/*maxdepth*/, 1/*info*/);
-// 	XPatternMiner pm(_as, param);
-// 	HandleTree results = pm();
+	// The pattern of interest looks like
+	//
+	// Lambda
+	//   T A X B
+	// And
+	//   Execution
+	//     Schema "expand"
+	//     List
+	//       A
+	//       Inheritance
+	//         ConceptNode "a"
+	//         X
+	//       GroundedSchemaNode "scm: conditional-full-instantiation-scope-formula"
+	//     B
+	//   Evaluation
+	//     Predicate "preproof-of"
+	//     List
+	//       A
+	//       T
+	//   Evaluation
+	//     Predicate "preproof-of"
+	//     List
+	//       B
+	//       T
+	Handle a = an(CONCEPT_NODE, "a"),
+		expected_vardecl = al(VARIABLE_LIST, VarT, VarA, X, VarB),
+		expected_clauses = al(AND_LINK,
+		                      al(EXECUTION_LINK,
+		                         expand,
+		                         al(LIST_LINK,
+		                            VarA,
+		                            al(INHERITANCE_LINK, a, X),
+		                            de_rule),
+		                         VarB),
+		                      al(EVALUATION_LINK,
+		                         preproof,
+		                         al(LIST_LINK, VarA, VarT)),
+		                      al(EVALUATION_LINK,
+		                         preproof,
+		                         al(LIST_LINK, VarB, VarT))),
+		expected_pattern = mk_minsup_eval(2,
+		                                  al(LAMBDA_LINK,
+		                                     expected_vardecl,
+		                                     expected_clauses));
 
-// 	// The pattern of interest looks like
-// 	//
-// 	// Lambda
-// 	//   T A X B
-// 	// And
-// 	//   Execution
-// 	//     Schema "expand"
-// 	//     List
-// 	//       A
-// 	//       Inheritance
-// 	//         ConceptNode "a"
-// 	//         X
-// 	//       GroundedSchemaNode "scm: conditional-full-instantiation-scope-formula"
-// 	//     B
-// 	//   Evaluation
-// 	//     Predicate "preproof"
-// 	//     A
-// 	//   Evaluation
-// 	//     Predicate "preproof"
-// 	//     B
-// 	Handle a = tmp_an(CONCEPT_NODE, "a"),
-// 		X = tmp_an(VARIABLE_NODE, "$X"),
-// 		expected_vardecl = tmp_al(VARIABLE_LIST, T, A, X, B),
-// 		expected_clauses = tmp_al(AND_LINK,
-// 		                          tmp_al(EXECUTION_LINK,
-// 		                                 expand,
-// 		                                 tmp_al(LIST_LINK,
-// 		                                        A,
-// 		                                        tmp_al(INHERITANCE_LINK, a, X),
-// 		                                        de_rule),
-// 		                                 B),
-// 		                          tmp_al(EVALUATION_LINK,
-// 		                                 preproof,
-// 		                                 tmp_al(LIST_LINK, A, T)),
-// 		                          tmp_al(EVALUATION_LINK,
-// 		                                 preproof,
-// 		                                 tmp_al(LIST_LINK, B, T))),
-// 		expected_pattern = tmp_al(LAMBDA_LINK,
-// 		                          expected_vardecl,
-// 		                          expected_clauses);
+	logger().debug() << "results = " << oc_to_string(results);
+	logger().debug() << "expected_pattern = " << oc_to_string(expected_pattern);
 
-// 	logger().debug() << "results = " << oc_to_string(results);
-// 	logger().debug() << "expected_pattern = " << oc_to_string(expected_pattern);
+	TS_ASSERT(is_in(expected_pattern, results->getOutgoingSet()));
+}
 
-// 	TS_ASSERT(content_is_in(expected_pattern, results));
-// }
+void UREPatternMinerUTest::test_SodaDrinker()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
-// void UREPatternMinerUTest::test_SodaDrinker()
-// {
-// 	logger().info("BEGIN TEST: %s", __FUNCTION__);
+	// Define texts
+	// Load ugly-male-soda-drinker-corpus.scm
+	std::string rs =
+		_tmp_scm.eval("(load-from-path \"ugly-male-soda-drinker-corpus.scm\")");
+	logger().debug() << "rs = " << rs;
+	HandleSeq texts;
+	_tmp_as.get_all_atoms(texts);
 
-// 	// Load ugly-male-soda-drinker-corpus.scm
-// 	std::string rs =
-// 		_scm.eval("(load-from-path \"ugly-male-soda-drinker-corpus.scm\")");
+	// Define initial pattern (to speed up mining)
+	Handle XYZW = al(VARIABLE_LIST, X, Y, Z, W),
+		clauses = al(AND_LINK,
+		             al(INHERITANCE_LINK, X, Y),
+		             al(INHERITANCE_LINK, X, Z),
+		             al(INHERITANCE_LINK, X, W)),
+		initpat = al(LAMBDA_LINK, XYZW, clauses);
 
-// 	logger().debug() << "rs = " << rs;
+	// Run the pattern miner
+	Handle results = run_pm(texts, 5, 1000, initpat);
 
-// 	// Define initial pattern (to speed up mining)
-// 	Handle X = tmp_an(VARIABLE_NODE, "$X"),
-// 		Y = tmp_an(VARIABLE_NODE, "$Y"),
-// 		Z = tmp_an(VARIABLE_NODE, "$Z"),
-// 		W = tmp_an(VARIABLE_NODE, "$W"),
-// 		XYZW = tmp_al(VARIABLE_LIST, X, Y, Z, W),
-// 		clauses = tmp_al(AND_LINK,
-// 		                 tmp_al(INHERITANCE_LINK, X, Y),
-// 		                 tmp_al(INHERITANCE_LINK, X, Z),
-// 		                 tmp_al(INHERITANCE_LINK, X, W)),
-// 		initpat = tmp_al(LAMBDA_LINK, XYZW, clauses);
+	// The pattern of interest looks like
+	//
+	// Lambda
+	//   X
+	// And
+	//   Inheritance
+	//     X
+	//     Concept "man"
+	//   Inheritance
+	//     X
+	//     Concept "soda drinker"
+	//   Inheritance
+	//     X
+	//     Concept "ugly"
+	Handle man = an(CONCEPT_NODE, "man"),
+		soda_drinker = an(CONCEPT_NODE, "soda drinker"),
+		ugly = an(CONCEPT_NODE, "ugly"),
+		is_man = al(INHERITANCE_LINK, X, man),
+		is_soda_drinker = al(INHERITANCE_LINK, X, soda_drinker),
+		is_ugly = al(INHERITANCE_LINK, X, ugly),
+		expected_pattern = mk_minsup_eval(5,
+		                                  al(LAMBDA_LINK,
+		                                     X,
+		                                     al(AND_LINK,
+		                                        is_man,
+		                                        is_soda_drinker,
+		                                        is_ugly)));
 
-// 	// Run the pattern miner
-// 	XPMParameters param(5/*minsup*/, 3/*nconjuncts*/, initpat, 3/*maxdepth*/, 1/*info*/);
-// 	XPatternMiner pm(_as, param);
-// 	HandleTree results = pm();
+	logger().debug() << "results = " << oc_to_string(results);
+	logger().debug() << "expected_pattern = " << oc_to_string(expected_pattern);
 
-// 	// The pattern of interest looks like
-// 	//
-// 	// Lambda
-// 	//   X
-// 	// And
-// 	//   Inheritance
-// 	//     X
-// 	//     Concept "man"
-// 	//   Inheritance
-// 	//     X
-// 	//     Concept "soda drinker"
-// 	//   Inheritance
-// 	//     X
-// 	//     Concept "ugly"
-// 	Handle man = tmp_an(CONCEPT_NODE, "man"),
-// 		soda_drinker = tmp_an(CONCEPT_NODE, "soda drinker"),
-// 		ugly = tmp_an(CONCEPT_NODE, "ugly"),
-// 		is_man = tmp_al(INHERITANCE_LINK, X, man),
-// 		is_soda_drinker = tmp_al(INHERITANCE_LINK, X, soda_drinker),
-// 		is_ugly = tmp_al(INHERITANCE_LINK, X, ugly),
-// 		expected_pattern = tmp_al(LAMBDA_LINK,
-// 		                          X,
-// 		                          tmp_al(AND_LINK,
-// 		                                 is_man,
-// 		                                 is_soda_drinker,
-// 		                                 is_ugly));
-
-// 	logger().debug() << "results = " << oc_to_string(results);
-// 	logger().debug() << "expected_pattern = " << oc_to_string(expected_pattern);
-
-// 	TS_ASSERT(content_is_in(expected_pattern, results));
-// }
+	TS_ASSERT(is_in(expected_pattern, results->getOutgoingSet()));
+}
 
 #undef al
 #undef an
