@@ -37,6 +37,10 @@
 namespace opencog
 {
 
+////////////////////
+// ValuationsBase //
+////////////////////
+
 ValuationsBase::ValuationsBase(const Variables& vars) : variables(vars) {}
 
 ValuationsBase::ValuationsBase() {}
@@ -55,6 +59,15 @@ Handle ValuationsBase::variable(unsigned i) const
 {
 	return variables.varseq[i];
 }
+
+unsigned ValuationsBase::size() const
+{
+	return 0;
+}
+
+//////////////////
+// SCValuations //
+//////////////////
 
 SCValuations::SCValuations(const Variables& vars, const Handle& satset)
 	: ValuationsBase(vars)
@@ -100,10 +113,24 @@ SCValuations SCValuations::erase(const Handle& var) const
 	return nvals;
 }
 
+bool SCValuations::operator==(const SCValuations& other) const
+{
+	return variables == other.variables;
+}
+
 bool SCValuations::operator<(const SCValuations& other) const
 {
 	return variables < other.variables;
 }
+
+unsigned SCValuations::size() const
+{
+	return values.size();
+}
+
+////////////////
+// Valuations //
+////////////////
 
 Valuations::Valuations(const Handle& pattern, const HandleSet& texts)
 	: ValuationsBase(XPatternMiner::get_variables(pattern))
@@ -113,26 +140,38 @@ Valuations::Valuations(const Handle& pattern, const HandleSet& texts)
 		Handle satset = XPatternMiner::restricted_satisfying_set(cp, texts);
 		scvs.insert(SCValuations(XPatternMiner::get_variables(cp), satset));
 	}
+	setup_size();
 }
 
 Valuations::Valuations(const Variables& vars, const SCValuationsSet& sc)
-	: ValuationsBase(vars), scvs(sc) {}
+	: ValuationsBase(vars), scvs(sc)
+{
+	setup_size();
+}
 
 Valuations::Valuations(const Variables& vars)
-	: ValuationsBase(vars) {}
+	: ValuationsBase(vars), _size(0) {}
 
 Valuations Valuations::erase_front() const
 {
-	Handle var = front_variable();
+	// Take remaining variables
 	Variables nvars(variables);
+	Handle var = front_variable();
 	nvars.erase(var);
 	Valuations nvals(nvars);
+
+	// Move values from remaining variables to new Valuations
 	for (const SCValuations& scv : scvs)
 	{
 		SCValuations nscvals(scv.erase(var));
 		if (not nscvals.novar())
 			nvals.scvs.insert(nscvals);
 	}
+
+	// Keep the previous size as we still need to consider those combinations
+	nvals._size = _size;
+
+	// Return new Valuations
 	return nvals;
 }
 
@@ -142,6 +181,18 @@ const SCValuations& Valuations::get_scvaluations(const Handle& var) const
 		if (scv.variables.is_in_varset(var))
 			return scv;
 	throw RuntimeException(TRACE_INFO, "There's likely a bug");
+}
+
+unsigned Valuations::size() const
+{
+	return _size;
+}
+
+void Valuations::setup_size()
+{
+	_size = scvs.empty() ? 0 : 1;
+	for (const SCValuations& scv : scvs)
+		_size *= scv.size();
 }
 
 std::string oc_to_string(const SCValuations& scv, const std::string& indent)

@@ -23,7 +23,10 @@
 
 #ifdef HAVE_GUILE
 
+#include <cmath>
+
 #include <opencog/guile/SchemeModule.h>
+#include <opencog/atoms/core/NumberNode.h>
 
 namespace opencog {
 
@@ -33,28 +36,26 @@ protected:
 	virtual void init();
 
 	/**
-	 * Given a pattern and a texts concept, return all shallow
-	 * abstractions, pre-wrapped in Lists ready to be applied to the
-	 * pattern.
+	 * Given a pattern, a texts concept and a minimum support, return
+	 * all shallow abstractions reaching the minimum support,
+	 * pre-wrapped in Lists ready to be applied to the pattern.
 	 *
 	 * For instance, given
 	 *
 	 * pattern = (Lambda X Y (Inheritance X Y))
-	 * texts  = { (Inheritance A B), (Inheritance A C) }
+	 * texts  = { (Inheritance A B),
+	 *            (Inheritance A C),
+	 *            (Inheritance D D),
+	 *            (Inheritance E E) }
+	 * ms = 2
 	 *
 	 * returns
 	 *
 	 * Set
 	 *   List A Y
 	 *   List Y Y
-	 *   List X B
-	 *   List X C
-	 *
-	 * TODO: we really only want to return shallow abtractions that
-	 * would reach minimum support.
 	 */
-	Handle do_shallow_abstract(Handle pattern,
-	                           Handle texts);
+	Handle do_shallow_abstract(Handle pattern, Handle texts, Handle ms);
 
 public:
 	XPatternMinerSCM();
@@ -79,7 +80,9 @@ void XPatternMinerSCM::init(void)
 		&XPatternMinerSCM::do_shallow_abstract, this, "xpattern-miner");
 }
 
-Handle XPatternMinerSCM::do_shallow_abstract(Handle pattern, Handle texts)
+Handle XPatternMinerSCM::do_shallow_abstract(Handle pattern,
+                                             Handle texts,
+                                             Handle ms)
 {
 	AtomSpace *as = SchemeSmob::ss_get_env_as("cog-shallow-abstract");
 
@@ -92,9 +95,13 @@ Handle XPatternMinerSCM::do_shallow_abstract(Handle pattern, Handle texts)
 			texts_set.insert(member);
 	}
 
+	// Fetch the minimum support
+	NumberNodePtr nn = NumberNodeCast(ms);
+	unsigned ms_uint = (unsigned)std::round(nn->get_value());
+
 	// Generate all shallow abstractions
 	HandleSetSeq shabs_per_var =
-		XPatternMiner::shallow_abstract(pattern, texts_set);
+		XPatternMiner::shallow_abstract(pattern, texts_set, ms_uint);
 
 	// Turn that sequence of handle sets into a set of ready to be
 	// applied shallow abstractions

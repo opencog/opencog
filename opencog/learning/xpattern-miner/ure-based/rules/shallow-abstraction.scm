@@ -89,7 +89,7 @@
              (g (get-pattern minsup-g))
              (texts (get-texts minsup-g))
              (ms (get-ms minsup-g))
-             (shabs-lists (cog-shallow-abstract g texts))
+             (shabs-lists (cog-shallow-abstract g texts ms))
              (list->eval (lambda (x) (cog-set-tv!
                                       (shallow-abstraction-eval x minsup-g)
                                       (stv 1 1))))

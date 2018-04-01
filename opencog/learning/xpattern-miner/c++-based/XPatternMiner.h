@@ -139,6 +139,10 @@ public:
 	                      const HandleSet& texts,
 	                      const Valuations& valuations,
 	                      int maxdepth);
+
+	/**
+	 * Alternate specialization that reflects how the URE would work.
+	 */
 	HandleTree specialize_alt(const Handle& pattern,
 	                          const HandleSet& texts,
 	                          const Valuations& valuations,
@@ -279,10 +283,10 @@ private:
 	Handle matched_results(const Handle& pattern, const Handle& text) const;
 
 	/**
-	 * Given valuations produce all shallow abstractions over all
-	 * variables. It basically applies front_shallow_abstract
-	 * recursively. See the specification of front_shallow_abstract
-	 * for more information.
+	 * Given valuations produce all shallow abstractions reachind
+	 * minimum support, over all variables. It basically applies
+	 * front_shallow_abstract recursively. See the specification of
+	 * front_shallow_abstract for more information.
 	 *
 	 * For instance, given
 	 *
@@ -290,6 +294,7 @@ private:
 	 *   { { X->(Inheritance (Concept "A") (Concept "B")), Y->(Concept "C") },
 	 *     { X->(Inheritance (Concept "B") (Concept "C")), Y->(Concept "D") },
 	 *     { X->(Concept "E"), Y->(Concept "D") } }
+	 * ms = 2
 	 *
 	 * shallow_abstract(valuations) =
 	 *  {
@@ -300,23 +305,17 @@ private:
 	 *          (Variable "$X2"))
 	 *        (Inheritance
 	 *          (Variable "$X1")
-	 *          (Variable "$X2"))),
-	 *      (Concept "E"),
-	 *      Y },
+	 *          (Variable "$X2"))) },
 	 *    ;; Shallow abstractions of Y
-	 *    { (Concept "C"),
-	 *      (Concept "D") }
+	 *    { (Concept "D") }
 	 *  }
-	 *
-	 * TODO: maybe we should count and dismiss shallow abstractions
-	 * that would not reach the minimum support.
 	 */
-	static HandleSetSeq shallow_abstract(const Valuations& valuations);
+	static HandleSetSeq shallow_abstract(const Valuations& valuations, unsigned ms);
 
 	/**
-	 * Given valuations produce all shallow abstractions based on the
-	 * values associated to the front variable first variable. This
-	 * shallow abstractions include
+	 * Given valuations produce all shallow abstractions reaching
+	 * minimum support based on the values associated to the front
+	 * variable first variable. This shallow abstractions include
 	 *
 	 * 1. Single operator patterns, like (Lambda X Y (Inheritance X Y))
 	 * 2. Constant nodes, like (Concept "A")
@@ -331,6 +330,7 @@ private:
 	 *   { { X->(Inheritance (Concept "A") (Concept "B")), Y->(Concept "C") },
 	 *     { X->(Inheritance (Concept "B") (Concept "C")), Y->(Concept "D") },
 	 *     { X->(Concept "E"), Y->(Concept "D") } }
+	 * ms = 2
 	 *
 	 * front_shallow_abstract(valuations) = { (Lambda
 	 *                                          (VariableList
@@ -338,11 +338,9 @@ private:
 	 *                                            (Variable "$X2"))
 	 *                                          (Inheritance
 	 *                                            (Variable "$X1")
-	 *                                            (Variable "$X2"))),
-	 *                                        (Concept "E"),
-	 *                                        Y }
+	 *                                            (Variable "$X2"))) }
 	 */
-	static HandleSet front_shallow_abstract(const Valuations& valuations);
+	static HandleSet front_shallow_abstract(const Valuations& valuations, unsigned ms);
 
 	/**
 	 * Given an atom, a value, return its corresponding shallow
@@ -441,14 +439,16 @@ private:
 
 public:
 	/**
-	 * Like shallow_abstract(const Valuations&) but takes a pattern
+	 * Like shallow_abstract(const Valuations&, unsigned) but takes a pattern
 	 * and a texts instead, and generate the valuations of the pattern
 	 * prior to calling shallow_abstract on its valuations.
 	 *
-	 * See comment below for more details.
+	 * See comment on shallow_abstract(const Valuations&, unsigned) for more
+	 * details.
 	 */
 	static HandleSetSeq shallow_abstract(const Handle& pattern,
-	                                     const HandleSet& texts);
+	                                     const HandleSet& texts,
+	                                     unsigned ms);
 
 	/**
 	 * Given a vardecl and a body, filter the vardecl to contain only

@@ -140,7 +140,7 @@ HandleTree XPatternMiner::specialize_alt(const Handle& pattern,
 	Variables vars = get_variables(pattern);
 
 	// Calculate all shallow abstractions of pattern
-	HandleSetSeq shabs = shallow_abstract(valuations);
+	HandleSetSeq shabs = shallow_abstract(valuations, param.minsup);
 
 	// Generate all associated specializations
 	for (unsigned i = 0; i < shabs.size(); i++) {
@@ -166,7 +166,7 @@ HandleTree XPatternMiner::specialize_shabs(const Handle& pattern,
 	// Generate shallow patterns of the first variable of the
 	// valuations and associate the remaining valuations (excluding
 	// that variable) to them.
-	HandleSet shapats = front_shallow_abstract(valuations);
+	HandleSet shapats = front_shallow_abstract(valuations, param.minsup);
 
 	// No shallow abstraction to use for specialization
 	if (shapats.empty())
@@ -322,26 +322,31 @@ Handle XPatternMiner::matched_results(const Handle& pattern,
 	return inst.execute(ml);
 }
 
-HandleSetSeq XPatternMiner::shallow_abstract(const Handle& pattern, const HandleSet& texts)
+HandleSetSeq XPatternMiner::shallow_abstract(const Handle& pattern,
+                                             const HandleSet& texts,
+                                             unsigned ms)
 {
-	return shallow_abstract(Valuations(pattern, texts));
+	return shallow_abstract(Valuations(pattern, texts), ms);
 }
 
-HandleSetSeq XPatternMiner::shallow_abstract(const Valuations& valuations)
+HandleSetSeq XPatternMiner::shallow_abstract(const Valuations& valuations,
+                                             unsigned ms)
 {
 	// Base case
 	if (valuations.novar())
 		return HandleSetSeq();
 
 	// Recursive case
-	HandleSetSeq shabs_per_var{front_shallow_abstract(valuations)};
-	HandleSetSeq remaining = shallow_abstract(valuations.erase_front());
+	HandleSetSeq shabs_per_var{front_shallow_abstract(valuations, ms)};
+	HandleSetSeq remaining = shallow_abstract(valuations.erase_front(), ms);
 	shabs_per_var.insert(shabs_per_var.end(), remaining.begin(), remaining.end());
 	return shabs_per_var;
 }
 
-HandleSet XPatternMiner::front_shallow_abstract(const Valuations& valuations)
+HandleSet XPatternMiner::front_shallow_abstract(const Valuations& valuations, unsigned ms)
 {
+	HandleSet shabs;
+
 	// No more variable to specialize from
 	if (valuations.novar())
 		return HandleSet();
@@ -352,18 +357,58 @@ HandleSet XPatternMiner::front_shallow_abstract(const Valuations& valuations)
 	// Strongly connected valuations associated to that variable
 	const SCValuations& var_scv(valuations.get_scvaluations(var));
 
+	////////////////////////////
+    // Shallow abtractions    //
+    ////////////////////////////
+
 	// For each valuation create an abstraction (shallow pattern) of
 	// the value associated to variable, and associate the remaining
 	// valuations to it.
-	HandleSet shapats;
+	HandleUCounter shapats;
+	// Calculate how many valuations will be encompassed by these
+	// shallow abstractions
+	unsigned val_count = valuations.size() / var_scv.size();
 	for (const HandleSeq& valuation : var_scv.values)
-		shapats.insert(val_shallow_abstract(valuation[0]));
+		shapats[val_shallow_abstract(valuation[0])] += val_count;
+
+	// Only consider the shallow abstractions that reach the minimum
+	// support
+	for (const auto& shapat : shapats)
+		if (ms <= shapat.second)
+			shabs.insert(shapat.first);
+
+	////////////////////////////////
+    // Variable factorizations    //
+    ////////////////////////////////
 
 	// Add all subsequent factorizable variables
-	shapats.insert(std::next(valuations.variables.varseq.begin()),
-	               valuations.variables.varseq.end());
+	HandleSeq remvars(std::next(valuations.variables.varseq.begin()),
+	                  valuations.variables.varseq.end());
+	HandleUCounter facvars;
+	for (const Handle& rv : remvars) {
+		// Strongly connected valuations associated to that variable
+		const SCValuations& rv_scv(valuations.get_scvaluations(rv));
+		bool same_scv = rv_scv == var_scv;
 
-	return shapats;
+		// Calculate how many valuations will be encompassed by this
+		// variable factorization
+		unsigned val_fac_count = val_count;
+		if (not same_scv)
+			val_fac_count /= rv_scv.size();
+
+		for (const HandleSeq& valuation : var_scv.values) {
+			// TODO
+			facvars[rv] += val_fac_count;
+		}
+	}
+
+	// Only consider variable factorizations reaching the minimum
+	// support
+	for (const auto& fvar : facvars)
+		if (ms <= fvar.second)
+			shabs.insert(fvar.first);
+
+	return shabs;
 }
 
 Handle XPatternMiner::val_shallow_abstract(const Handle& value)

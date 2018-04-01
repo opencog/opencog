@@ -51,6 +51,11 @@ public:
 	 */
 	Handle variable(unsigned i) const;
 
+	/**
+	 * Return the number of valuations
+	 */
+	unsigned size() const;
+
 	Variables variables;
 };
 
@@ -73,6 +78,9 @@ public:
 	/**
 	 * Erase the front variable with all its corresponding values on a
 	 * copy of this valuations.
+	 *
+	 * TODO: instead of erasing the front it would be better to move
+	 * some pointer to the next variable.
 	 */
 	SCValuations erase_front() const;
 
@@ -83,11 +91,24 @@ public:
 	SCValuations erase(const Handle& var) const;
 
 	/**
+	 * Compare if 2 SCValuations are equal, in fact only looking at
+	 * their variables, as it is enough it the context in which they
+	 * will be used.
+	 */
+	bool operator==(const SCValuations& other) const;
+
+	/**
 	 * Less than relationship according to Variables, because it's
 	 * cheap and no 2 SCValuations with same variables will be in the
 	 * same set at once.
 	 */
 	bool operator<(const SCValuations& other) const;
+
+	/**
+	 * Return the size of the SCValuations, that is its number of
+	 * values.
+	 */
+	unsigned size() const;
 
 	HandleSeqSeq values;
 };
@@ -122,7 +143,22 @@ public:
 	 */
 	const SCValuations& get_scvaluations(const Handle& var) const;
 
+	/**
+	 * Return the size of the Valuations, that is its totally number
+	 * of values accounting for the potential combinations of values
+	 * between the strongly connected valuations.
+	 */
+	unsigned size() const;
+
 	SCValuationsSet scvs;
+
+private:
+	/**
+	 * Calculate and set _size
+	 */
+	void setup_size();
+
+	unsigned _size;
 };
 
 typedef std::map<Handle, Valuations> HandleValuationsMap;
