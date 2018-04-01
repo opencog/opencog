@@ -513,7 +513,7 @@ public:
 	 * respectively, and get_body returns the pattern itself.
 	 */
 	static const Variables& get_variables(const Handle& pattern);
-	static const Handle& get_vardecl(const Handle& pattern);
+	static Handle get_vardecl(const Handle& pattern);
 	static const Handle& get_body(const Handle& pattern);
 
 	/**

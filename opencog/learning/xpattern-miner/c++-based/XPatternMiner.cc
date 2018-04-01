@@ -644,11 +644,15 @@ const Variables& XPatternMiner::get_variables(const Handle& pattern)
 	return empty_variables;
 }
 
-const Handle& XPatternMiner::get_vardecl(const Handle& pattern)
+Handle XPatternMiner::get_vardecl(const Handle& pattern)
 {
 	RewriteLinkPtr sc = RewriteLinkCast(pattern);
-	if (sc)
-		return RewriteLinkCast(pattern)->get_vardecl();
+	if (sc) {
+		Handle vardecl = sc->get_vardecl();
+		if (not vardecl)
+			vardecl = sc->get_variables().get_vardecl();
+		return vardecl;
+	}
 	return Handle::UNDEFINED;
 }
 
