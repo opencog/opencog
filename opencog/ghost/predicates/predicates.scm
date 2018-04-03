@@ -3,6 +3,7 @@
   #:use-module (opencog)
   #:use-module (opencog attention)
   #:use-module (opencog exec)
+  #:use-module (opencog nlp)
   #:use-module (opencog pointmem)
   #:use-module (opencog spacetime)
   #:export (
@@ -80,7 +81,7 @@
 )
 
 (define (perceive-word word)
-  *unspecified*
+  (set-time-perceived! (Word word))
 )
 
 ; --------------------------------------------------------------
@@ -163,8 +164,12 @@
   )
 )
 
-(define (word_perceived)
-  *unspecified*
+(define* (word_perceived word #:optional time-interval)
+  (if time-interval
+    (was-perceived? word (current-time-us)
+      (string->number (cog-name time-interval)))
+    (was-perceived? word (current-time-us) 0.01)
+  )
 )
 
 ; --------------------------------------------------------------
