@@ -150,6 +150,11 @@
   )
 )
 
+; TODO: If the stream of sensory inputs are interupted, for whatever reason,
+; then the variations in the confidence value are not updated and thus the
+; state of the world wouldn't be correct. To fix this add a time window
+; similar to word_perceived. If the time-window is passed then it returns
+; false.
 (define* (person_smiles #:optional face-id)
   (if face-id
     (is-model-true? (face-emotion (cog-name face-id) "smile"))
