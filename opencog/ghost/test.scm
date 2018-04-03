@@ -17,7 +17,7 @@
 ; ----------
 (define ghost-with-ecan #f)
 
-(define-public (create-ghost-rules-for-ecan flag)
+(define-public (ecan-based-ghost-rules flag)
 "
   For experimental purpose
   To create GHOST rules that are slimmer.
