@@ -24,8 +24,9 @@
     ; Utilities
     is-model-true?
     any-model-true?
-    set-time-perceived!
-    time-perceived
+    set-time-perceived! ; temporarily exported
+    time-perceived ; temporarily exported
+    was-perceived?
   )
 )
 
@@ -236,7 +237,8 @@
 (define (current-time-us)
 "
   Returns the current-time including microseconds by converting the pair
-  returned by (gettimeofday) into a floating number.
+  returned by (gettimeofday) into a floating number representing seconds
+  with microsecond accuracy.
 "
   (let ((time (gettimeofday)))
     (+ (car time) (/ (cdr time) 1000000))
@@ -256,7 +258,44 @@
 "
   time-perceived ATOM
 
-  Return the time of perception of the ATOM, or nil.
+  Return the time of perception of the ATOM, or nil. Nil is used to denote
+  that there is no perception time associated with ATOM.
 "
-  (cog-value-ref (cog-value atom time-key) 0)
+  ; If a perception time was not set then it is assumed to have not been
+  ; perceived and nil is returned.
+  (let ((time (cog-value atom time-key)))
+    (if (null? time)
+      time
+      (cog-value-ref time 0)
+    )
+  )
+)
+
+(define (time-within-interval? time start-time time-interval)
+"
+  time-within-interval? TIME START-TIME TIME-INTERVAL
+
+  Returns #t if (START-TIME - TIME-INTERVAL) <= TIME <= START-TIME, else it
+  returns #f. All times passed as argument should be in seconds.
+"
+  (and
+    (<= (- start-time time-interval) time)
+    (<= time start-time))
+)
+
+(define (was-perceived? atom start-time time-interval)
+"
+  was-perceived? ATOM START-TIME TIME-INTERVAL
+
+  Returns (stv 1 1) if
+    (START-TIME - TIME-INTERVAL) <= time-perceived <= START-TIME, else it
+  returns (stv 0 1). All times passed as argument should be in seconds.
+"
+  (let ((time (time-perceived atom)))
+    (if (and (not (null? time))
+          (time-within-interval? time start-time time-interval))
+      (stv 1 1)
+      (stv 0 1)
+    )
+  )
 )
