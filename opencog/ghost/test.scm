@@ -60,7 +60,7 @@
 ; or get all psi-rules from the atomspace in case none of them reach
 ; the attentional focus
 ; Either way the rules will be selected based on their weights
-(define ghost-af-only? #t)
+(define ghost-af-only? #f)
 (define-public (ghost-af-only AF-ONLY)
 "
   To decide whether or not to get rules only from the attentional focus
