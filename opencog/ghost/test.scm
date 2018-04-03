@@ -15,6 +15,17 @@
   (cog-logger-set-level! ghost-logger "info"))
 
 ; ----------
+(define ghost-with-ecan #f)
+
+(define-public (ecan-based-ghost-rules flag)
+"
+  For experimental purpose
+  To create GHOST rules that are slimmer.
+"
+  (set! ghost-with-ecan flag)
+)
+
+; ----------
 ; TODO: Remove once experimentation is over
 (define expt-var '())
 ; TODO: Should be removed as this is using 'ghost-find-rules',
@@ -49,7 +60,7 @@
 ; or get all psi-rules from the atomspace in case none of them reach
 ; the attentional focus
 ; Either way the rules will be selected based on their weights
-(define ghost-af-only? #t)
+(define ghost-af-only? #f)
 (define-public (ghost-af-only AF-ONLY)
 "
   To decide whether or not to get rules only from the attentional focus

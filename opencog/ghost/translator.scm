@@ -224,28 +224,32 @@
                 (set! conds (append conds (list (generate-eval ghost-word-seq
                   (list (car (list-ref wc 2)) t (car (list-ref wc 3)))))))))
             word-seq)
-          (for-each
-            (lambda (t)
-              (let ((wc (wildcard 0 -1)))
-                (set! vars (append vars (list-ref wc 0)))
-                (set! conds (append conds (list (generate-eval ghost-lemma-seq
-                  (list (car (list-ref wc 2)) t (car (list-ref wc 3)))))))))
-            lemma-seq))
+          (if (not ghost-with-ecan)
+            (for-each
+              (lambda (t)
+                (let ((wc (wildcard 0 -1)))
+                  (set! vars (append vars (list-ref wc 0)))
+                  (set! conds (append conds (list (generate-eval ghost-lemma-seq
+                    (list (car (list-ref wc 2)) t (car (list-ref wc 3)))))))))
+              lemma-seq)))
         ; Otherwise it's an ordered match
-        (set! conds (append conds (list
-          (generate-eval ghost-word-seq word-seq)
-          (generate-eval ghost-lemma-seq lemma-seq))))))
-    ; TODO: Remove once we start using ECAN to find rules by default
+        (begin
+          (set! conds (append conds (list
+            (generate-eval ghost-word-seq word-seq))))
+          (if (not ghost-with-ecan)
+            (set! conds (append conds (list
+              (generate-eval ghost-lemma-seq lemma-seq))))))))
     ; See below
-    (MemberLink (car conds) ghost-no-constant))
+    (if (not ghost-with-ecan)
+      (MemberLink (car conds) ghost-no-constant)))
 
   ; DualLink couldn't match patterns with no constant terms in it
   ; Mark the rules with no constant terms so that they can be found
   ; easily during the matching process
-  ; TODO: Remove once we start using ECAN to find rules by default
-  (if (equal? (length lemma-seq)
-        (length (filter (lambda (x) (equal? 'GlobNode (cog-type x)))
-                        lemma-seq)))
+  (if (and (not ghost-with-ecan)
+        (equal? (length lemma-seq)
+          (length (filter (lambda (x) (equal? 'GlobNode (cog-type x)))
+                          lemma-seq))))
       (MemberLink (List lemma-seq) ghost-no-constant))
 
   (list vars conds))
@@ -327,9 +331,11 @@
                   (List (Concept (string-append psi-prefix-str RULENAME))
                         (Number 0)))
                 (list))
-            ; Set the current topic
-            (Put (State ghost-curr-topic (Variable "$x"))
-                 rule-topic)))))
+            ; Set the current topic, for backward compatibility
+            (if ghost-with-ecan
+              (list)
+              (Put (State ghost-curr-topic (Variable "$x"))
+                   rule-topic))))))
 
 ; ----------
 (define (process-goal GOAL)
