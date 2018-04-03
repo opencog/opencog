@@ -23,6 +23,9 @@
 
     ; Utilities
     is-model-true?
+    any-model-true?
+    set-time-perceived!
+    time-perceived
   )
 )
 
@@ -224,4 +227,36 @@
       (stv 1 1)
     )
   )
+)
+
+; --------------------------------------------------------------
+; These allow adding time based predicates.
+(define time-key (Predicate "time-perceived"))
+
+(define (current-time-us)
+"
+  Returns the current-time including microseconds by converting the pair
+  returned by (gettimeofday) into a floating number.
+"
+  (let ((time (gettimeofday)))
+    (+ (car time) (/ (cdr time) 1000000))
+  )
+)
+
+(define (set-time-perceived! atom)
+"
+  set-time-perceived! ATOM
+
+  Record the current time as the time of perception of ATOM, and return ATOM.
+"
+  (cog-set-value! atom time-key (FloatValue (current-time-us)))
+)
+
+(define (time-perceived atom)
+"
+  time-perceived ATOM
+
+  Return the time of perception of the ATOM, or nil.
+"
+  (cog-value-ref (cog-value atom time-key) 0)
 )
