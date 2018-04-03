@@ -1,9 +1,9 @@
 (define-module (opencog ghost predicates)
   #:use-module (ice-9 optargs)
   #:use-module (opencog)
+  #:use-module (opencog atom-types)
   #:use-module (opencog attention)
   #:use-module (opencog exec)
-  #:use-module (opencog nlp)
   #:use-module (opencog pointmem)
   #:use-module (opencog spacetime)
   #:export (
