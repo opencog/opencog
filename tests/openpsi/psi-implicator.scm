@@ -34,12 +34,12 @@
     (ConceptNode "animal"))
 )
 
-(define (demand-1) (psi-demand  "demand-1"))
+(define (component-1) (psi-component "component-1"))
 
 ; TODO Replace with psi-goal.
 (define goal-1 (Concept "goal-1"))
 
-(define (rule-1) (psi-rule context-1 action-1 goal-1 (stv 1 1) (demand-1)))
+(define (rule-1) (psi-rule context-1 action-1 goal-1 (stv 1 1) (component-1)))
 
 (define (rule-1-cpp)
 ; Rule added to the atomspace not index.
@@ -73,7 +73,7 @@
 (define context-2 (list (Satisfaction (And context-1 (True)))))
 
 ; A Ghost rule
-(define (rule-2) (psi-rule context-2 action-1 goal-1 (stv 1 1) (demand-1)))
+(define (rule-2) (psi-rule context-2 action-1 goal-1 (stv 1 1) (component-1)))
 
 (define (context-2-cpp) (List context-2))
 
