@@ -700,5 +700,7 @@
   Parse a topic file in a Guile shell, for debugging mainly.
 "
   (define parser (cs-parser))
-  (parser (cs-lexer (open-file-input-port file)) error)
+  (define fp (open-file-input-port file))
+  (set-port-encoding! fp "UTF-8")
+  (parser (cs-lexer fp) error)
 )
