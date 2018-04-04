@@ -6,7 +6,6 @@
 ; Copyright (C) 2016 OpenCog Foundation
 ; Copyright (C) 2017 MindCloud
 
-(load "demand.scm")
 (load "rule.scm")
 (load "utilities.scm")
 
