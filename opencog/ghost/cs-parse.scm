@@ -588,7 +588,7 @@
 
     (args
       (arg) : $1
-      (args arg) : (format #f "~a ~a" $1 $2)
+      (arg COMMA args) : (format #f "~a ~a" $1 $3)
     )
 
     (arg
