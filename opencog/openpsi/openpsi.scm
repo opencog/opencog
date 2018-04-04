@@ -15,13 +15,6 @@
     psi-set-action-selector! psi-action-selector
     psi-select-rules
 
-    ; From control.scm
-    psi-set-updater! psi-get-updater psi-controller psi-controller-idle
-    psi-controller-busy psi-controller-occupy psi-controller-release
-    psi-rule-set-atomese-weight psi-set-controlled-rule
-    psi-get-controlled-rules psi-rule-atomese-weight
-    psi-controller-update-weights psi-rule-disable psi-rule-enable
-
     ; From rule.scm
     psi-get-rules psi-get-all-rules psi-get-all-actions psi-action?
     psi-rule-alias
@@ -56,7 +49,6 @@
 (load-extension "libopenpsi" "opencog_openpsi_init")
 
 (load-from-path "opencog/openpsi/action-selector.scm")
-(load-from-path "opencog/openpsi/control.scm")
 (load-from-path "opencog/openpsi/rule.scm")
 (load-from-path "opencog/openpsi/main.scm")
 (load-from-path "opencog/openpsi/utilities.scm")
