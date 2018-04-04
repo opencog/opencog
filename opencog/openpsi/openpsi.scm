@@ -15,12 +15,6 @@
     psi-set-action-selector! psi-action-selector
     psi-select-rules
 
-    ; From demand.scm
-    psi-get-all-demands psi-get-all-enabled-demands psi-get-all-valid-demands
-    psi-demand psi-demand? psi-set-demand-value
-    psi-demand-value-increase psi-demand-value-decrease
-    psi-demand-skip psi-demand-skip?
-
     ; From control.scm
     psi-set-updater! psi-get-updater psi-controller psi-controller-idle
     psi-controller-busy psi-controller-occupy psi-controller-release
@@ -62,7 +56,6 @@
 (load-extension "libopenpsi" "opencog_openpsi_init")
 
 (load-from-path "opencog/openpsi/action-selector.scm")
-(load-from-path "opencog/openpsi/demand.scm")
 (load-from-path "opencog/openpsi/control.scm")
 (load-from-path "opencog/openpsi/rule.scm")
 (load-from-path "opencog/openpsi/main.scm")
