@@ -20,7 +20,6 @@
 (use-modules (srfi srfi-1)) ; For `drop-right`, `append-map`, etc.
 (use-modules (opencog) (opencog query))
 
-(load "demand.scm")
 (load "utilities.scm")
 
 ; --------------------------------------------------------------
