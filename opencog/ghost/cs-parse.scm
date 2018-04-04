@@ -157,7 +157,7 @@
      (result:suffix 'COMMA location
         (string-trim (match:substring current-match))))
     ; This should always be near the end, because it is broadest of all.
-    ((has-match? "^[ \t]*[~'.,_!?0-9a-zA-Z-]+" str)
+    ((has-match? "^[ \t]*[~'._!?0-9a-zA-Z-]+" str)
         (result:suffix 'STRING location
           (string-trim (match:substring current-match))))
     ; NotDefined token is used for errors only and there shouldn't be any rules.
