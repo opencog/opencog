@@ -14,10 +14,11 @@ import System.Exit (exitFailure,exitSuccess)
 
 main :: IO ()
 main = do
+    input <- getLine
     putStrLn "Starting Test"
-    (parser,printer) <- initParserPrinter "cmavo.csv" "gismu.csv"
+    (parser,printer) <- initParserPrinter
     putStrLn "Loading Data"
-    sentences <- loadData
+    sentences <- loadData input
     putStrLn "Testing: "
     let parsed = parMap rpar (ptest parser) sentences
     testRes <- sequence parsed
@@ -49,9 +50,9 @@ pptest parser printer text =
                         then return True
                         else print text >> print ptext >> return False
 
-loadData :: IO [String]
-loadData = do
-    file <- readFile "data.txt"
+loadData :: String -> IO [String]
+loadData num = do
+    file <- readFile $ "data" ++ num ++ ".txt"
     return (lines file)
 
 isRight :: Either a b -> Bool

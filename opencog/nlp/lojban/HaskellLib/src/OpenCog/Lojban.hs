@@ -28,12 +28,11 @@ import Control.Monad.Trans.Class
 
 import Iso hiding (Syntax,SynIso)
 
-initParserPrinter :: String -> String
-                  -> IO ( String -> Either String (Maybe Atom)
+initParserPrinter :: IO ( String -> Either String (Maybe Atom)
                         ,Atom -> Either String String)
 
-initParserPrinter cmavoSrc gismuSrc = do
-    wordlist <- loadWordLists cmavoSrc gismuSrc
+initParserPrinter = do
+    wordlist <- loadWordLists
     seed <- randomIO
     return (lojbanToAtomese wordlist seed,atomeseToLojban wordlist seed)
 
