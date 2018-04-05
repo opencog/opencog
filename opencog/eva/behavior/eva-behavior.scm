@@ -19,7 +19,6 @@
 (load "eva-behavior/movement-api.scm")
 (load "eva-behavior/behavior.scm")
 (load "eva-behavior/face-priority.scm")
-(load "eva-behavior/psi-behavior.scm")
 (load "eva-behavior/orchestrate.scm")
 
 (define-public (load-eva-config)

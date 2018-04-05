@@ -158,11 +158,11 @@ public:
         // Test 1:
         // Continuese from the state created by the previous test.
         auto result_2_1 = \
-            _scm->eval_h("(car (psi-select-rules (demand-1)))");
+            _scm->eval_h("(car (psi-select-rules (component-1)))");
         CHKERR
         TSM_ASSERT_EQUALS("Expected a single rule", rule_1 , result_2_1);
 
-        auto result_2_2 = _scm->eval("(psi-select-rules (demand-2))");
+        auto result_2_2 = _scm->eval("(psi-select-rules (component-2))");
         CHKERR
         TSM_ASSERT_EQUALS("Expected ()", "()\n", result_2_2);
         CHKERR
@@ -172,12 +172,12 @@ public:
         _scm->eval("(groundable-content-2)");
         CHKERR
         auto result_3_1 = \
-            _scm->eval_h("(car (psi-select-rules (demand-1)))");
+            _scm->eval_h("(car (psi-select-rules (component-1)))");
         CHKERR
         TSM_ASSERT_EQUALS("Expected a single rule", rule_1 , result_3_1);
 
         auto result_3_2 = \
-            _scm->eval_h("(car (psi-select-rules (demand-2)))");
+            _scm->eval_h("(car (psi-select-rules (component-2)))");
         CHKERR
         TSM_ASSERT_EQUALS("Expected a single rule", rule_2 , result_3_2);
 
@@ -252,9 +252,9 @@ public:
       logger().info("BEGIN TEST: %s", __FUNCTION__);
 
       // Common Setup
-      _scm->eval("(define d1 (demand-1))");
+      _scm->eval("(define d1 (component-1))");
       CHKERR
-      _scm->eval("(define d2 (demand-2))");
+      _scm->eval("(define d2 (component-2))");
       CHKERR
 
       // Tests

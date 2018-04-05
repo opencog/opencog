@@ -73,6 +73,7 @@ Basic examples of how to use GHOST is available [HERE](https://github.com/openco
 1) Start the [RelEx server](https://github.com/opencog/relex#opencog-serversh)
 2) Start Guile
 3) Load the needed modules
+
 ```
 (use-modules (opencog)
              (opencog nlp relex2logic)
@@ -80,6 +81,7 @@ Basic examples of how to use GHOST is available [HERE](https://github.com/openco
              (opencog eva-behavior)
              (opencog ghost))
 ```
+
 4) Start authoring
 
 A rule can be created by using `ghost-parse`:
@@ -109,3 +111,76 @@ One can quickly test if a rule can be triggered by using `test-ghost`:
 ```
 
 The output `[INFO] [Ghost] Say: "Hello human"` will be printed.
+
+## To Run With ECAN (experimental)
+1) Start the [RelEx server](https://github.com/opencog/relex#opencog-serversh)
+2) Start the CogServer, e.g.
+
+```
+opencog/build/opencog/cogserver/server/cogserver
+```
+
+3) Connect to the CogServer in a new terminal, e.g.
+
+```
+telnet localhost 17001
+```
+
+4) Load the ECAN module
+
+```
+loadmodule opencog/build/opencog/attention/libattention.so
+```
+
+5) Start ECAN
+
+```
+start-ecan
+```
+
+6) Load the needed modules
+
+```
+(use-modules (opencog)
+             (opencog nlp relex2logic)
+             (opencog openpsi)
+             (opencog attention)
+             (opencog eva-behavior)
+             (opencog ghost))
+```
+
+7) Before creating any rules, run
+
+```
+(ecan-based-ghost-rules #t)
+```
+
+Note, rules being created after running this will be slimmer (preferred) and can only work with this ECAN approach. They are NOT backward-compatible with the `test-ghost`.
+
+8) Start authoring, e.g.
+
+```
+(ghost-parse "#goal: (novelty=0.24) u: (eat apple) I want an apple")
+```
+
+9) Start GHOST
+
+```
+(ghost-run)
+```
+
+10) Play with it, e.g.
+
+```
+(ghost "I eat apples")
+```
+
+11) Stimulate the atoms correspond to the input. NOTE, this is normally done automatically when the words are perceived. Since we don't have the perception pipeline running for this example, let's stimulate the atoms manually, e.g.
+
+```
+(cog-stimulate (Word "I") 100)
+(cog-stimulate (Word "eat") 100)
+(cog-stimulate (Word "apples") 100)
+```
+
+The output `[INFO] [GHOST] Say: "I want an apple"` will then be printed on the CogServer.

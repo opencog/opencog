@@ -14,8 +14,6 @@
 (use-modules (opencog logger))
 
 (load "action-selector.scm")
-(load "demand.scm")
-(load "control.scm")
 (load "rule.scm")
 (load "utilities.scm")
 
