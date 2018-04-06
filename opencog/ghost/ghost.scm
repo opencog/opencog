@@ -83,16 +83,17 @@
 ; When set, all the rules created will be under this topic
 (define rule-topic '())
 
-; A list of shared goals for all the rules under the same topic file
-(define shared-goals '())
+; A list of top level goals that will be shared with all the rules
+; defined under it
+(define top-lv-goals '())
 
 ; A list of local variables exist in the pattern of a rule,
 ; during rule parsing & creation
 (define pat-vars '())
 
-; A list to keep track of what rules have been created
+; A list to keep track of what rules hierarchy
 ; Will be used when dealing with rejoinders
-(define rule-lists '())
+(define rule-hierarchy '())
 
 ;; --------------------
 ;; For rule matching
