@@ -281,29 +281,29 @@
   )
 )
 
-(define (time-within-interval? time start-time time-interval)
+(define (time-within-interval? time end-time time-interval)
 "
-  time-within-interval? TIME START-TIME TIME-INTERVAL
+  time-within-interval? TIME END-TIME TIME-INTERVAL
 
-  Returns #t if (START-TIME - TIME-INTERVAL) <= TIME <= START-TIME, else it
+  Returns #t if (END-TIME - TIME-INTERVAL) <= TIME <= END-TIME, else it
   returns #f. All times passed as argument should be in seconds.
 "
   (and
-    (<= (- start-time time-interval) time)
-    (<= time start-time))
+    (<= (- end-time time-interval) time)
+    (<= time end-time))
 )
 
-(define (was-perceived? atom start-time time-interval)
+(define (was-perceived? atom end-time time-interval)
 "
-  was-perceived? ATOM START-TIME TIME-INTERVAL
+  was-perceived? ATOM END-TIME TIME-INTERVAL
 
   Returns (stv 1 1) if
-    (START-TIME - TIME-INTERVAL) <= time-perceived <= START-TIME, else it
+    (END-TIME - TIME-INTERVAL) <= time-perceived <= END-TIME, else it
   returns (stv 0 1). All times passed as argument should be in seconds.
 "
   (let ((time (time-perceived atom)))
     (if (and (not (null? time))
-          (time-within-interval? time start-time time-interval))
+          (time-within-interval? time end-time time-interval))
       (stv 1 1)
       (stv 0 1)
     )
