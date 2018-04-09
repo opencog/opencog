@@ -31,12 +31,14 @@
 (define psi-goal-node (Concept "goal"))
 
 ; --------------------------------------------------------------
-(define (psi-goal NAME)
+(define* (psi-goal NAME #:optional threshold)
 "
-  psi-goal NAME
+  psi-goal NAME [THRESHOLD]
 
-  Create and return a ConceptNode that represents an OpenPsi goal.
-  The NAME should be a string.
+  Create and return (ConceptNode NAME) that represents the OpenPsi goal
+  goal called NAME. If a number THRESHOLD is passed then it is used as
+  the ideal value for the goal on a scale of [0, 1]; if it isn't set
+  then 0 is assumed to be the default value.
 "
   ; NOTE: Why not make this part of psi-rule function? Because, developers
   ; might want to specify the behavior they prefer, when it comes to how
@@ -44,6 +46,14 @@
   ; value should change.
   (let* ((goal-node (ConceptNode NAME)))
     (InheritanceLink goal-node psi-goal-node)
+    ; A value is used instead of an EvalutionLink b/c it is simpler and faster
+    ; to change. Of course a StateLink can be used. At present there isn't
+    ; any process that uses that explicit(aka queryable) information thus
+    ; nothing is lost.
+    (cog-set-value! goal-node (Predicate "threshold")
+      (if threshold
+        (FloatValue threshold)
+        (FloatValue 0)))
     goal-node
   )
 )
