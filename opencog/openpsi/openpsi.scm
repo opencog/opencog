@@ -26,7 +26,7 @@
 
     ; From main.scm
     psi-running? psi-loop-count psi-run-continue? psi-step psi-run psi-halt
-    psi-get-logger psi-component
+    psi-get-logger psi-component psi-set-threshold! psi-threshold
 
     ; From utilities.scm
     psi-prefix-str psi-suffix-str

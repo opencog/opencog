@@ -31,6 +31,16 @@
 (define psi-goal-node (Concept "goal"))
 
 ; --------------------------------------------------------------
+(define (psi-set-threshold! goal num)
+"
+  psi-set-threshold! GOAL NUM
+
+  Returns GOAL after setting its threshold to NUM.
+"
+  (cog-set-value! goal (Predicate "threshold") (FloatValue num))
+)
+
+; --------------------------------------------------------------
 (define* (psi-goal NAME #:optional threshold)
 "
   psi-goal NAME [THRESHOLD]
@@ -44,18 +54,28 @@
   ; might want to specify the behavior they prefer, when it comes to how
   ; to measure the level of achivement of goal, and how the goal's measurement
   ; value should change.
-  (let* ((goal-node (ConceptNode NAME)))
-    (InheritanceLink goal-node psi-goal-node)
+  (let* ((goal (ConceptNode NAME)))
+    (InheritanceLink goal psi-goal-node)
     ; A value is used instead of an EvalutionLink b/c it is simpler and faster
     ; to change. Of course a StateLink can be used. At present there isn't
     ; any process that uses that explicit(aka queryable) information thus
     ; nothing is lost.
-    (cog-set-value! goal-node (Predicate "threshold")
       (if threshold
-        (FloatValue threshold)
-        (FloatValue 0)))
-    goal-node
+        (psi-set-threshold! goal threshold)
+        (psi-set-threshold! goal 0))
+    goal
   )
+)
+
+; --------------------------------------------------------------
+(define (psi-threshold goal)
+"
+  psi-threshold GOAL
+
+  Returns the present threshold value for GOAL. GOAL is a node representin
+  the goal concerned.
+"
+  (cog-value-ref (cog-value goal (Predicate "threshold")) 0)
 )
 
 ; --------------------------------------------------------------
