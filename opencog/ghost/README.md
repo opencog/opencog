@@ -55,15 +55,19 @@ There are two ways of creating goals,
 1) Top level goal(s)
 
 ```
-goal: (please_user=0.5)
+goal: (please_user=0.8)
 ```
 
 In this case, all the rules created after it will be having the same goal, until seeing another top level goal or the end of file is reached.
 
+For the convenience of the authors, an experimental feature has been added -- the rules being created under a top level goal will have a different weight associated, based on the order of creation. The relationship between the order and the weight forms a geometric sequence with a factor of 0.5.
+
+For example, if there are five rules under the above `please_user=0.8` goal, the first rule will have a weight of 0.4, the second one will have 0.2, the third one will have 0.1, and so on. The sum of the weights will get closer to the weight of the top level goal (0.8) if more rules are created under it.
+
 2) Rule level goal(s)
 
 ```
-#goal: (novelty=0.8 please_user=0.4)
+#goal: (novelty=0.67 please_user=0.4)
 u: (what be you name) I forgot; what's YOUR name, sweet wonderful human
 ```
 
