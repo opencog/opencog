@@ -18,6 +18,9 @@
     person_angry
     word_perceived
 
+    ; Time related predicates
+    after_min
+
     ; Actions
     animation
     expression
@@ -314,11 +317,25 @@
 ; This is an action, that can be wrapped in a GroundedSchemaNode
 (define* (start_timer #:optional (timer-id (Concept "Default-Timer")))
 "
-  start-timer TIMER-ID (optional)
+  start_timer TIMER-ID (optional)
 
   Record the current time for TIMER-ID.
   If TIMER-ID is not given, a default timer will be used.
 "
   (Member timer-id (Concept "Timer"))
   (set-time-perceived! timer-id)
+)
+
+(define* (after_min minutes #:optional (timer-id (Concept "Default-Timer")))
+"
+  after_min MINUTES TIMER-ID (optional)
+
+  Returns (stv 1 1) if current time >= the timer's start time (if given) + MINUTES.
+  Otherwise, returns (stv 0 1)
+"
+  (if (>= (current-time-us)
+          (+ (time-perceived timer-id)
+             (* (string->number (cog-name minutes)) 60)))
+      (stv 1 1)
+      (stv 0 1))
 )
