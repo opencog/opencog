@@ -31,6 +31,26 @@
 (define psi-goal-node (Concept "goal"))
 
 ; --------------------------------------------------------------
+(define (psi-set-gv! goal gv)
+"
+  psi-set-gv! GOAL GV
+
+  Set the goal-value of GOAL to GV. GV is a number.
+"
+  (cog-set-value! goal (Predicate "value") (FloatValue gv))
+)
+
+; --------------------------------------------------------------
+(define (psi-goal-value goal)
+"
+  psi-goal-value GOAL
+
+  Return the present value of GOAL.
+"
+  (cog-value-ref (cog-value goal (Predicate "value")) 0)
+)
+
+; --------------------------------------------------------------
 (define (psi-set-threshold! goal num)
 "
   psi-set-threshold! GOAL NUM
@@ -38,33 +58,6 @@
   Returns GOAL after setting its threshold to NUM.
 "
   (cog-set-value! goal (Predicate "threshold") (FloatValue num))
-)
-
-; --------------------------------------------------------------
-(define* (psi-goal NAME #:optional threshold)
-"
-  psi-goal NAME [THRESHOLD]
-
-  Create and return (ConceptNode NAME) that represents the OpenPsi goal
-  goal called NAME. If a number THRESHOLD is passed then it is used as
-  the ideal value for the goal on a scale of [0, 1]; if it isn't set
-  then 0 is assumed to be the default value.
-"
-  ; NOTE: Why not make this part of psi-rule function? Because, developers
-  ; might want to specify the behavior they prefer, when it comes to how
-  ; to measure the level of achivement of goal, and how the goal's measurement
-  ; value should change.
-  (let* ((goal (ConceptNode NAME)))
-    (InheritanceLink goal psi-goal-node)
-    ; A value is used instead of an EvalutionLink b/c it is simpler and faster
-    ; to change. Of course a StateLink can be used. At present there isn't
-    ; any process that uses that explicit(aka queryable) information thus
-    ; nothing is lost.
-      (if threshold
-        (psi-set-threshold! goal threshold)
-        (psi-set-threshold! goal 0))
-    goal
-  )
 )
 
 ; --------------------------------------------------------------
@@ -79,6 +72,34 @@
 )
 
 ; --------------------------------------------------------------
+(define* (psi-goal name value #:optional threshold)
+"
+  psi-goal NAME VALUE [THRESHOLD]
+
+  Create and return (ConceptNode NAME) that represents the OpenPsi goal
+  called NAME. Also sets the goal-value to VALUE.  If THRESHOLD is passed
+  then it is used as the ideal value for the goal otherwise, 0 is assumed
+  to be the default threshold value.
+"
+  ; NOTE: Why not make this part of psi-rule function? Because, developers
+  ; might want to specify the behavior they prefer, when it comes to how
+  ; to measure the level of achivement of goal, and how the goal's measurement
+  ; value should change.
+  (let* ((goal (ConceptNode name)))
+    (InheritanceLink goal psi-goal-node)
+    (psi-set-gv! goal value)
+    ; A value is used instead of an EvalutionLink b/c it is simpler and faster
+    ; to change. Of course a StateLink can be used. At present there isn't
+    ; any process that uses that explicit(aka queryable) information thus
+    ; nothing is lost.
+    (if threshold
+      (psi-set-threshold! goal threshold)
+      (psi-set-threshold! goal 0))
+    goal
+  )
+)
+
+; --------------------------------------------------------------
 (define (psi-goal? ATOM)
 "
   Check if ATOM is a goal and return `#t`, if it is, and `#f`
@@ -86,6 +107,22 @@
   represented by (ConceptNode \"goal\").
 "
   (not (null?  (cog-link 'InheritanceLink ATOM psi-goal-node)))
+)
+
+; --------------------------------------------------------------
+(define (psi-urge goal maxgv)
+"
+  psi-urge GOAL MAXGV
+
+  Returns the urge value of GOAL. Urge is calculated as
+  (GOAL_VALUE - THRESHOLD)/(MAXGV - THRESHOLD), where GOAL_VALUE
+  is the present value of the goal, MAXGV is the maximum value
+  that the goal can have, and THRESHOLD is the ideal value that the goal
+  should have.
+"
+; TODO Add a mechanism for developers to define there own urge formula
+  (/ (- (psi-goal-value goal) (psi-threshold goal))
+     (- maxgv (psi-threshold goal)))
 )
 
 ; --------------------------------------------------------------
