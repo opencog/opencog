@@ -21,6 +21,7 @@
     ; Actions
     animation
     expression
+    start_timer
 
     ; Utilities
     is-model-true?
@@ -85,7 +86,7 @@
 )
 
 ; --------------------------------------------------------------
-; Apis for forming GroundedPredicates that are used for
+; APIs for forming GroundedPredicates that are used for
 ; checking if the world is in a particular state or not.
 ; --------------------------------------------------------------
 ;(define (person_appears face-id)
@@ -308,4 +309,16 @@
       (stv 0 1)
     )
   )
+)
+
+; This is an action, that can be wrapped in a GroundedSchemaNode
+(define* (start_timer #:optional (timer-id (Concept "Default-Timer")))
+"
+  start-timer TIMER-ID (optional)
+
+  Record the current time for TIMER-ID.
+  If TIMER-ID is not given, a default timer will be used.
+"
+  (Member timer-id (Concept "Timer"))
+  (set-time-perceived! timer-id)
 )
