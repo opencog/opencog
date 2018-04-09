@@ -333,9 +333,13 @@
   Returns (stv 1 1) if current time >= the timer's start time (if given) + MINUTES.
   Otherwise, returns (stv 0 1)
 "
-  (if (>= (current-time-us)
-          (+ (time-perceived timer-id)
-             (* (string->number (cog-name minutes)) 60)))
-      (stv 1 1)
-      (stv 0 1))
+  (define t (time-perceived timer-id))
+
+  ; If it's null, the timer probably has not started yet
+  (if (null? t)
+    (stv 0 1)
+    (if (>= (current-time-us)
+            (+ t (* (string->number (cog-name minutes)) 60)))
+        (stv 1 1)
+        (stv 0 1)))
 )
