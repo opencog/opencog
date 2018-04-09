@@ -87,6 +87,9 @@
 ; defined under it
 (define top-lv-goals '())
 
+; How many rules we've seen under a particular top level goal
+(define goal-rule-cnt 0)
+
 ; A list of local variables exist in the pattern of a rule,
 ; during rule parsing & creation
 (define pat-vars '())

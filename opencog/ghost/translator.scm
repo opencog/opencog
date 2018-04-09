@@ -404,6 +404,10 @@
   (if (null? rule-topic)
       (set! rule-topic (create-topic "Default Topic")))
 
+  ; Update the count -- how many rules we've seen under this top level goal
+  (if (not (null? top-lv-goals))
+    (set! goal-rule-cnt (+ goal-rule-cnt 1)))
+
   ; Reset the list of local variables
   (set! pat-vars '())
 
@@ -454,7 +458,10 @@
                       (list (Satisfaction (VariableList vars) (And conds)))
                       action
                       (psi-goal (car goal))
-                      (stv (cdr goal) .9)
+                      ; Check if the goal is defined at the rule level
+                      (if (member goal GOAL)
+                        (stv (cdr goal) .9)
+                        (stv (/ (cdr goal) (expt 2 goal-rule-cnt)) .9))
                       ghost-component))
                   goals))))
 
@@ -474,7 +481,10 @@
   Create a topic level goal that will be shared among the rules under the
   same topic.
 "
-  (set! top-lv-goals GOAL))
+  (set! top-lv-goals GOAL)
+
+  ; Reset the count when we see a new top level goal
+  (set! goal-rule-cnt 0))
 
 (define*-public (create-topic TOPIC-NAME
                 #:optional (FEATURES (list)) (KEYWORDS (list)))
@@ -491,9 +501,6 @@
   ; A topic will be defined when loading a (topic) file
   (set! rule-topic (Concept (ghost-prefix TOPIC-NAME)))
   (Inheritance rule-topic ghost-topic)
-
-  ; Reset the topic-level goals
-  (set! top-lv-goals '())
 
   ; The set of features associate with the topic
   ; The features will be stored as "values"
