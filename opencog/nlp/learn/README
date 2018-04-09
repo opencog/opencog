@@ -144,17 +144,8 @@ So, set up the text-ingestion pipeline:
    (add-to-load-path "/usr/local/share/opencog/scm")
    (add-to-load-path ".")
 ```
-4) Copy the following files from the `opencog/opencog/nlp/learn/run` directory
-   to your working directory:
-
-   - run-server-parse.sh
-   - observe-launch.scm
-   - opencog-en.conf
-   - utilities.scm
-   - wiki-ss-en.sh
-   - ss-one.sh
-   - submit-one.pl
-   - nonbreaking_prefixes (the complete folder)
+4) Copy all files from the `opencog/opencog/nlp/learn/run` directory
+   to your working directory.
 
    `run-server-parse.sh` starts the cogserver and sets a default prompt: set 
    up by default to avoid conflicts and confusion, and to allow multiple 
@@ -163,7 +154,7 @@ So, set up the text-ingestion pipeline:
    see next step.
    `wiki-ss-en.scm` starts the process of observing the text files contained
    in the beta-pages folder, more on that later (see Bulk Text Parsing).
-   The rest of the files are explained later.
+   The rest of the relevant files are explained later.
 
 5) Start the REPL server. Eventually, you can use the
    `run-server-parse.sh` file in the `run` directory to do this;
@@ -444,7 +435,7 @@ information between word-pairs (so we are maximizing MI). Thus, MST
 parsing cannot be started before the above steps to compute word-pair
 MI have been accomplished.
 
-Minimum spanningutree code is in `mst-parser.scm`. The current version
+Minimum spanning tree code is in `mst-parser.scm`. The current version
 works well.
 
 To perform MST parsing in bulk:
@@ -454,7 +445,7 @@ To perform MST parsing in bulk:
   up by default to avoid conflicts and confusion, and to allow multiple 
   languages to be processed at the same time. 
   You need to pass the language and database credentials as arguments; 
-  see next stepsu
+  see next steps
   `wiki-mst-??.scm` starts the process of observing the text files contained
   in the gamma-pages folder, by calling `mst-one.sh`, which sends a sentence
   to the cogserver with `submit-one.pl`, giving the correct opencog command.
