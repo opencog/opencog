@@ -232,7 +232,7 @@ Handle UREPatternMinerUTest::run_pm(const HandleSeq& texts, int minsup,
 	// Add the axiom that initpat has enough support, and use it as
 	// source for the forward chainer
 	bool es = enough_support(initpat, minsup);
-	// If it doesn't have enough support return the empy solution
+	// If it doesn't have enough support return the empty solution
 	if (not es)
 		return al(SET_LINK);
 	TruthValuePtr tv = SimpleTruthValue::createTV(es ? 1.0 : 0.0, 1.0);
@@ -241,6 +241,7 @@ Handle UREPatternMinerUTest::run_pm(const HandleSeq& texts, int minsup,
 	// Run the foward chainer from the initial pattern
 	ForwardChainer fc(_as, pm_rb, source);
 	fc.get_config().set_maximum_iterations(maxiter);
+	fc.get_config().set_retry_sources(false);
 	fc.do_chain();
 
 	// Run the pattern matcher query to gather the knowledge of
@@ -619,7 +620,7 @@ void UREPatternMinerUTest::test_2conjuncts_4()
 	HandleSeq texts{A1B, A2B, BC1, BC2};
 
 	// Run pattern miner
-	Handle results = run_pm(texts, 4, 100, mk_nconjunct(2)),
+	Handle results = run_pm(texts, 4, 500, mk_nconjunct(2)),
 		VarXYZ = al(VARIABLE_LIST, X, Y, Z),
 		expected_pattern = mk_minsup_eval(4,
 		                                  al(LAMBDA_LINK,
