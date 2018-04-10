@@ -60,6 +60,11 @@ Handle ValuationsBase::variable(unsigned i) const
 	return variables.varseq[i];
 }
 
+unsigned ValuationsBase::index(const Handle& var) const
+{
+	return variables.index.at(var);
+}
+
 unsigned ValuationsBase::size() const
 {
 	return 0;
@@ -78,9 +83,9 @@ SCValuations::SCValuations(const Variables& vars, const Handle& satset)
 		for (const Handle& vals : satset->getOutgoingSet())
 		{
 			if (vars.size() == 1)
-				values.push_back({vals});
+				valuations.push_back({vals});
 			else
-				values.push_back(vals->getOutgoingSet());
+				valuations.push_back(vals->getOutgoingSet());
 		}
 	}
 }
@@ -104,13 +109,26 @@ SCValuations SCValuations::erase(const Handle& var) const
 	SCValuations nvals(nvars);
 	if (not nvals.novar())
 	{
-		for (HandleSeq vals : values)
+		for (HandleSeq vals : valuations)
 		{
 			vals.erase(std::next(vals.begin(), dst));
-			nvals.values.push_back(vals);
+			nvals.valuations.push_back(vals);
 		}
 	}
 	return nvals;
+}
+
+HandleUCounter SCValuations::values(const Handle& var) const
+{
+	return values(index(var));
+}
+
+HandleUCounter SCValuations::values(unsigned var_idx) const
+{
+	HandleUCounter vals;
+	for (const HandleSeq& valuation : valuations)
+		vals[valuation[var_idx]]++;
+	return vals;
 }
 
 bool SCValuations::operator==(const SCValuations& other) const
@@ -125,7 +143,7 @@ bool SCValuations::operator<(const SCValuations& other) const
 
 unsigned SCValuations::size() const
 {
-	return values.size();
+	return valuations.size();
 }
 
 ////////////////
@@ -168,7 +186,8 @@ Valuations Valuations::erase_front() const
 			nvals.scvs.insert(nscvals);
 	}
 
-	// Keep the previous size as we still need to consider those combinations
+	// Keep the previous size as we still need to consider those
+	// combinations
 	nvals._size = _size;
 
 	// Return new Valuations
@@ -200,8 +219,8 @@ std::string oc_to_string(const SCValuations& scv, const std::string& indent)
 	std::stringstream ss;
 	ss << indent << "variables:" << std::endl
 	   << oc_to_string(scv.variables, indent + OC_TO_STRING_INDENT);
-	ss << indent << "values:" << std::endl
-	   << oc_to_string(scv.values, indent + OC_TO_STRING_INDENT);
+	ss << indent << "valuations:" << std::endl
+	   << oc_to_string(scv.valuations, indent + OC_TO_STRING_INDENT);
 	return ss.str();
 }
 
@@ -232,6 +251,7 @@ std::string oc_to_string(const SCValuationsSet& scvs)
 std::string oc_to_string(const Valuations& valuations, const std::string& indent)
 {
 	std::stringstream ss;
+	ss << indent << "size = " << valuations.size() << std::endl;
 	ss << indent << "variables:" << std::endl
 	   << oc_to_string(valuations.variables, indent + OC_TO_STRING_INDENT);
 	ss << indent << "scvaluations set:" << std::endl

@@ -52,6 +52,11 @@ public:
 	Handle variable(unsigned i) const;
 
 	/**
+	 * Return the index corresponding to var
+	 */
+	unsigned index(const Handle& var) const;
+
+	/**
 	 * Return the number of valuations
 	 */
 	unsigned size() const;
@@ -91,6 +96,12 @@ public:
 	SCValuations erase(const Handle& var) const;
 
 	/**
+	 * Return all counted values corresponding to var.
+	 */
+	HandleUCounter values(const Handle& var) const;
+	HandleUCounter values(unsigned var_idx) const;
+
+	/**
 	 * Compare if 2 SCValuations are equal, in fact only looking at
 	 * their variables, as it is enough it the context in which they
 	 * will be used.
@@ -110,7 +121,9 @@ public:
 	 */
 	unsigned size() const;
 
-	HandleSeqSeq values;
+	// Actual valuations, sequence of tuples of values associated to
+	// each variable.
+	HandleSeqSeq valuations;
 };
 
 typedef std::set<SCValuations> SCValuationsSet;

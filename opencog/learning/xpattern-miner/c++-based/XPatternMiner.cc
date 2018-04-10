@@ -46,7 +46,6 @@ namespace opencog
 {
 
 // TODO:
-// 6. maybe replace HandleSet for text by an AtomSpace
 // 7. make sure that filtering is still meaningfull
 
 XPMParameters::XPMParameters(unsigned ms, unsigned iconjuncts,
@@ -368,7 +367,7 @@ HandleSet XPatternMiner::front_shallow_abstract(const Valuations& valuations, un
 	// Calculate how many valuations will be encompassed by these
 	// shallow abstractions
 	unsigned val_count = valuations.size() / var_scv.size();
-	for (const HandleSeq& valuation : var_scv.values)
+	for (const HandleSeq& valuation : var_scv.valuations)
 		shapats[val_shallow_abstract(valuation[0])] += val_count;
 
 	// Only consider the shallow abstractions that reach the minimum
@@ -388,7 +387,23 @@ HandleSet XPatternMiner::front_shallow_abstract(const Valuations& valuations, un
 	for (const Handle& rv : remvars) {
 		// Strongly connected valuations associated to that variable
 		const SCValuations& rv_scv(valuations.get_scvaluations(rv));
+
+		// Index of rv in rv_scv
+		unsigned rv_idx = rv_scv.index(rv);
+
+		// Whether var and rv are in the same strongly connected
+		// valuations
 		bool same_scv = rv_scv == var_scv;
+
+		// Ref to keep track of the number of text instances where the
+		// value of var is equal to the value to rv
+		unsigned& rv_count = facvars[rv];
+
+		// If they are in different stronly connected valuations, then
+		// put all values of rv in a set, to quickly check if any
+		// value is in.
+		HandleUCounter rv_vals = same_scv ?
+			HandleUCounter() : rv_scv.values(rv_idx);
 
 		// Calculate how many valuations will be encompassed by this
 		// variable factorization
@@ -396,9 +411,28 @@ HandleSet XPatternMiner::front_shallow_abstract(const Valuations& valuations, un
 		if (not same_scv)
 			val_fac_count /= rv_scv.size();
 
-		for (const HandleSeq& valuation : var_scv.values) {
-			// TODO
-			facvars[rv] += val_fac_count;
+		for (const HandleSeq& valuation : var_scv.valuations) {
+			// Value associated to var
+			const Handle& val = valuation[0];
+
+			// If the value of var is equal to that of rv, then
+			// increase rv factorization count
+			if (same_scv) {
+				if (content_eq(val, valuation[rv_idx])) {
+					rv_count += val_fac_count;
+				}
+			}
+			else {
+				auto it = rv_vals.find(val);
+				if (it != rv_vals.end()) {
+					rv_count += val_fac_count * it->second;
+				}
+			}
+
+			// IF the minimum support has been reached, no need to
+			// keep counting
+			if (ms <= rv_count)
+				break;
 		}
 	}
 
