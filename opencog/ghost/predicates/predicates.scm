@@ -18,9 +18,13 @@
     person_angry
     word_perceived
 
+    ; Time related predicates
+    after_min
+
     ; Actions
     animation
     expression
+    start_timer
 
     ; Utilities
     is-model-true?
@@ -85,7 +89,7 @@
 )
 
 ; --------------------------------------------------------------
-; Apis for forming GroundedPredicates that are used for
+; APIs for forming GroundedPredicates that are used for
 ; checking if the world is in a particular state or not.
 ; --------------------------------------------------------------
 ;(define (person_appears face-id)
@@ -309,3 +313,38 @@
     )
   )
 )
+
+; This is an action, that can be wrapped in a GroundedSchemaNode
+(define* (start_timer #:optional (timer-id (Concept "Default-Timer")))
+"
+  start_timer TIMER-ID (optional)
+
+  Record the current time for TIMER-ID.
+  If TIMER-ID is not given, a default timer will be used.
+"
+  (set-time-perceived! timer-id)
+  fini
+)
+
+(define* (after_min minutes #:optional (timer-id (Concept "Default-Timer")))
+"
+  after_min MINUTES TIMER-ID (optional)
+
+  Returns (stv 1 1) if current time >= the timer's start time (if given) + MINUTES.
+  Otherwise, returns (stv 0 1)
+"
+  (define t (time-perceived timer-id))
+
+  ; If it's null, the timer probably has not started yet
+  (if (null? t)
+    (stv 0 1)
+    (if (>= (current-time-us)
+            (+ t (* (string->number (cog-name minutes)) 60)))
+        (stv 1 1)
+        (stv 0 1)))
+)
+
+; Create the GroundedPredicateNode, and link it to a generic "timer-predicate"
+; so that we can stimulate the generic one and the STI will diffuse to
+; the specific predicates connecting to it
+(Member (GroundedPredicate "scm: after_min") (Concept "timer-predicate"))
