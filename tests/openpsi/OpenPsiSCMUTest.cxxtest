@@ -291,13 +291,13 @@ public:
       CHKERR
       TS_ASSERT_EQUALS("1.0\n", gv_1_1);
 
-      auto gv_1_2 = _scm->eval_h("(psi-set-gv! goal-1 1.1)");
+      auto gv_1_2 = _scm->eval_h("(psi-set-gv! goal-1 1.5)");
       CHKERR
       TS_ASSERT_EQUALS(goal_1, gv_1_2);
 
       auto gv_1_3 = _scm->eval("(psi-goal-value goal-1)");
       CHKERR
-      TS_ASSERT_EQUALS("1.1\n", gv_1_3);
+      TS_ASSERT_EQUALS("1.5\n", gv_1_3);
 
       auto gv_2 = _scm->eval("(psi-goal-value goal-2)");
       CHKERR
@@ -318,7 +318,17 @@ public:
 
       auto t_2 = _scm->eval("(psi-threshold goal-2)");
       CHKERR
-      TS_ASSERT_EQUALS("2.5\n", t_2);
+      TS_ASSERT_EQUALS("1.5\n", t_2);
+
+      // Check calcuation of psi-urge that can have both negative
+      // and positive values.
+      auto u_1 = _scm->eval("(psi-urge goal-1 2.5)");
+      CHKERR
+      TS_ASSERT_EQUALS("-1.0\n", u_1);
+
+      auto u_2 = _scm->eval("(psi-urge goal-2 2.5)");
+      CHKERR
+      TS_ASSERT_EQUALS("0.5\n", u_2);
 
       logger().info("END TEST: %s", __FUNCTION__);
     }

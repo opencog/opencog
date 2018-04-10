@@ -126,7 +126,7 @@
 
 (define (component-2) (psi-component  "component-2"))
 
-(define goal-2 (psi-goal "goal-2" 2 2.5))
+(define goal-2 (psi-goal "goal-2" 2 1.5))
 
 (define (rule-2) (psi-rule context-2 action-2 goal-2 (stv 1 1) (component-2)))
 
