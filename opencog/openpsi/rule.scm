@@ -127,6 +127,23 @@
 )
 
 ; --------------------------------------------------------------
+(define (psi-decrease-urge goal value)
+"
+  psi-decrease-urge GOAL VALUE
+
+  Return GOAL after decreasing the urge by given value. Decreasing means
+  minimizing the difference between the GOAL's threshold and present
+  goal-value, thus VALUE should be a positive number.
+"
+  (let ((u (psi-urge goal))
+    (t (psi-threshold goal)))
+      (if (equal? 0.0 u)
+        goal
+        (psi-set-gv! goal (+ t (* (- 1 t) (- u (* value (/ u (abs u))))))))
+  )
+)
+
+; --------------------------------------------------------------
 (define (psi-get-rules category)
 "
   psi-get-rules CATEGORY
