@@ -258,8 +258,7 @@ void XPatternMinerUTest::test_AB_ABC()
 		AndXY = al(AND_LINK, X, Y),
 		InhXY = al(INHERITANCE_LINK, X, Y),
 		InhAY = al(INHERITANCE_LINK, A, Y);
-	HandleTree expected({ al(LAMBDA_LINK, VarXY, al(LOCAL_QUOTE_LINK, AndXY)),
-				          HandleTree(al(LAMBDA_LINK, VarXY, InhXY),
+	HandleTree expected({ HandleTree(al(LAMBDA_LINK, VarXY, InhXY),
 				                     { al(LAMBDA_LINK, Y, InhAY) }) });
 
 	logger().debug() << "results = " << oc_to_string(results);
