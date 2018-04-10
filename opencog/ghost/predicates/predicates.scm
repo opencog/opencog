@@ -322,8 +322,8 @@
   Record the current time for TIMER-ID.
   If TIMER-ID is not given, a default timer will be used.
 "
-  (Member timer-id (Concept "Timer"))
   (set-time-perceived! timer-id)
+  fini
 )
 
 (define* (after_min minutes #:optional (timer-id (Concept "Default-Timer")))
@@ -343,3 +343,8 @@
         (stv 1 1)
         (stv 0 1)))
 )
+
+; Create the GroundedPredicateNode, and link it to a generic "timer-predicate"
+; so that we can stimulate the generic one and the STI will diffuse to
+; the specific predicates connecting to it
+(Member (GroundedPredicate "scm: after_min") (Concept "timer-predicate"))
