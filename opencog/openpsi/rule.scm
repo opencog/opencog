@@ -80,6 +80,8 @@
   called NAME. Also sets the goal-value to VALUE.  If THRESHOLD is passed
   then it is used as the ideal value for the goal otherwise, 0 is assumed
   to be the default threshold value.
+
+  Goal-value should be in the range [0, 1].
 "
   ; NOTE: Why not make this part of psi-rule function? Because, developers
   ; might want to specify the behavior they prefer, when it comes to how
@@ -110,19 +112,18 @@
 )
 
 ; --------------------------------------------------------------
-(define (psi-urge goal maxgv)
+(define (psi-urge goal)
 "
-  psi-urge GOAL MAXGV
+  psi-urge GOAL
 
   Returns the urge value of GOAL. Urge is calculated as
-  (GOAL_VALUE - THRESHOLD)/(MAXGV - THRESHOLD), where GOAL_VALUE
-  is the present value of the goal, MAXGV is the maximum value
-  that the goal can have, and THRESHOLD is the ideal value that the goal
-  should have.
+  (GOAL_VALUE - THRESHOLD)/(1 - THRESHOLD), where GOAL_VALUE
+  is the present value of the goal, and THRESHOLD is the ideal value
+  that the goal should have.
 "
 ; TODO Add a mechanism for developers to define there own urge formula
   (/ (- (psi-goal-value goal) (psi-threshold goal))
-     (- maxgv (psi-threshold goal)))
+     (- 1 (psi-threshold goal)))
 )
 
 ; --------------------------------------------------------------

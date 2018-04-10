@@ -47,7 +47,7 @@
 
 (define (component-1) (psi-component  "component-1"))
 
-(define goal-1 (psi-goal "goal-1" 1))
+(define goal-1 (psi-goal "goal-1" .1))
 
 (define (test-update-tv node strength)
     (cog-set-tv! node
@@ -126,7 +126,7 @@
 
 (define (component-2) (psi-component  "component-2"))
 
-(define goal-2 (psi-goal "goal-2" 2 1.5))
+(define goal-2 (psi-goal "goal-2" .2 .5))
 
 (define (rule-2) (psi-rule context-2 action-2 goal-2 (stv 1 1) (component-2)))
 
@@ -195,7 +195,7 @@
 
 (define (component-3) (psi-component  "component-3"))
 
-(define goal-3 (psi-goal "goal-3" 3))
+(define goal-3 (psi-goal "goal-3" .3))
 
 (define (groundable-content-3)
     (list ; They are in a list so as to simplify removal.
@@ -232,7 +232,7 @@
 
 (define (component-4) (psi-component  "component-4"))
 
-(define goal-4 (psi-goal "goal-4" 4))
+(define goal-4 (psi-goal "goal-4" .4))
 
 (define (groundable-content-4)
     (list ; They are in a list so as to simplify removal.

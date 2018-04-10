@@ -233,7 +233,7 @@ public:
         CHKERR
 
         // For rule-1
-	// Nothing changes
+        // Nothing changes
         auto result_3_1 = _scm->eval("(act-3-present?)");
         CHKERR
         TS_ASSERT_EQUALS("#t\n", result_3_1);
@@ -289,46 +289,46 @@ public:
       // Check goal-value setting and getting.
       auto gv_1_1 = _scm->eval("(psi-goal-value goal-1)");
       CHKERR
-      TS_ASSERT_EQUALS("1.0\n", gv_1_1);
+      TS_ASSERT_EQUALS("0.1\n", gv_1_1);
 
-      auto gv_1_2 = _scm->eval_h("(psi-set-gv! goal-1 1.5)");
+      auto gv_1_2 = _scm->eval_h("(psi-set-gv! goal-1 1)");
       CHKERR
       TS_ASSERT_EQUALS(goal_1, gv_1_2);
 
       auto gv_1_3 = _scm->eval("(psi-goal-value goal-1)");
       CHKERR
-      TS_ASSERT_EQUALS("1.5\n", gv_1_3);
+      TS_ASSERT_EQUALS("1.0\n", gv_1_3);
 
       auto gv_2 = _scm->eval("(psi-goal-value goal-2)");
       CHKERR
-      TS_ASSERT_EQUALS("2.0\n", gv_2);
+      TS_ASSERT_EQUALS("0.2\n", gv_2);
 
       // Check goal-threshold setting and getting.
       auto t_1_1 = _scm->eval("(psi-threshold goal-1)");
       CHKERR
       TS_ASSERT_EQUALS("0.0\n", t_1_1);
 
-      auto t_1_2 = _scm->eval_h("(psi-set-threshold! goal-1 2)");
+      auto t_1_2 = _scm->eval_h("(psi-set-threshold! goal-1 0.2)");
       CHKERR
       TS_ASSERT_EQUALS(goal_1, t_1_2);
 
       auto t_1_3 = _scm->eval("(psi-threshold goal-1)");
       CHKERR
-      TS_ASSERT_EQUALS("2.0\n", t_1_3);
+      TS_ASSERT_EQUALS("0.2\n", t_1_3);
 
       auto t_2 = _scm->eval("(psi-threshold goal-2)");
       CHKERR
-      TS_ASSERT_EQUALS("1.5\n", t_2);
+      TS_ASSERT_EQUALS("0.5\n", t_2);
 
       // Check calcuation of psi-urge that can have both negative
       // and positive values.
-      auto u_1 = _scm->eval("(psi-urge goal-1 2.5)");
+      auto u_1 = _scm->eval("(psi-urge goal-1)");
       CHKERR
-      TS_ASSERT_EQUALS("-1.0\n", u_1);
+      TS_ASSERT_EQUALS("1.0\n", u_1);
 
-      auto u_2 = _scm->eval("(psi-urge goal-2 2.5)");
+      auto u_2 = _scm->eval("(psi-urge goal-2)");
       CHKERR
-      TS_ASSERT_EQUALS("0.5\n", u_2);
+      TS_ASSERT_EQUALS("-0.6\n", u_2);
 
       logger().info("END TEST: %s", __FUNCTION__);
     }
