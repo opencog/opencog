@@ -72,13 +72,13 @@
 )
 
 ; --------------------------------------------------------------
-(define* (psi-goal name value #:optional threshold)
+(define* (psi-goal name value #:optional (threshold 1))
 "
   psi-goal NAME VALUE [THRESHOLD]
 
   Create and return (ConceptNode NAME) that represents the OpenPsi goal
   called NAME. Also sets the goal-value to VALUE.  If THRESHOLD is passed
-  then it is used as the ideal value for the goal otherwise, 0 is assumed
+  then it is used as the ideal value for the goal otherwise, 1 is assumed
   to be the default threshold value.
 
   Goal-value should be in the range [0, 1].
@@ -87,17 +87,14 @@
   ; might want to specify the behavior they prefer, when it comes to how
   ; to measure the level of achivement of goal, and how the goal's measurement
   ; value should change.
-  (let* ((goal (ConceptNode name)))
+  (let* ((goal (Concept name)))
     (InheritanceLink goal psi-goal-node)
     (psi-set-gv! goal value)
     ; A value is used instead of an EvalutionLink b/c it is simpler and faster
     ; to change. Of course a StateLink can be used. At present there isn't
     ; any process that uses that explicit(aka queryable) information thus
     ; nothing is lost.
-    (if threshold
-      (psi-set-threshold! goal threshold)
-      (psi-set-threshold! goal 0))
-    goal
+    (psi-set-threshold! goal threshold)
   )
 )
 
