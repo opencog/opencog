@@ -557,7 +557,7 @@ void XPatternMinerUTest::test_2conjuncts_5()
 	// connected components will be equal to the minimum frequency of
 	// each component. For that reason it should not be able to
 	// discover the desired pattern.
-	XPMParameters param(9/*minsup*/, 2/*nconjucts*/, initpat, -1/*maxdepth*/, 1/*info*/);
+	XPMParameters param(9/*minsup*/, 2/*nconjuncts*/, initpat, -1/*maxdepth*/, 1/*info*/);
 	XPatternMiner pm(_as, param);
 	HandleTree results = pm();
 	Handle non_expected_pattern = tmp_al(LAMBDA_LINK,
@@ -606,7 +606,7 @@ void XPatternMinerUTest::test_InferenceControl()
 		                        tmp_al(LIST_LINK, B, T))),
 		initpat = tmp_al(LAMBDA_LINK, vardecl, clauses);
 
-	XPMParameters param(2/*minsup*/, 3/*ngram*/, initpat, 2/*maxdepth*/, 1/*info*/);
+	XPMParameters param(2/*minsup*/, 3/*nconjuncts*/, initpat, 2/*maxdepth*/, 1/*info*/);
 	XPatternMiner pm(_as, param);
 	HandleTree results = pm();
 
