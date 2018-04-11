@@ -1,4 +1,4 @@
-ADD_SUBDIRECTORY(predicates)
+ADD_SUBDIRECTORY(procedures)
 
 ADD_GUILE_MODULE (FILES
 	ghost.scm
@@ -7,7 +7,6 @@ ADD_GUILE_MODULE (FILES
 	translator.scm
 	matcher.scm
 	utils.scm
-	functions.scm
 	test.scm
 	MODULE_DESTINATION "${DATADIR}/scm/opencog/ghost"
 )
