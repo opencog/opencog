@@ -87,7 +87,8 @@ Basic examples of how to use GHOST is available [HERE](https://github.com/openco
              (opencog nlp relex2logic)
              (opencog openpsi)
              (opencog eva-behavior)
-             (opencog ghost))
+             (opencog ghost)
+             (opencog ghost procedures))
 ```
 
 4) Start authoring
@@ -154,7 +155,8 @@ start-ecan
              (opencog openpsi)
              (opencog attention)
              (opencog eva-behavior)
-             (opencog ghost))
+             (opencog ghost)
+             (opencog ghost procedures))
 ```
 
 7) Before creating any rules, run
