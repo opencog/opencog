@@ -116,7 +116,6 @@
 
 (load "ghost/test.scm")
 (load "ghost/utils.scm")
-(load "ghost/functions.scm")
 (load "ghost/terms.scm")
 (load "ghost/translator.scm")
 (load "ghost/matcher.scm")
