@@ -7,17 +7,6 @@
 ; Copyright (C) 2015-2016 OpenCog Foundation
 ; Copyright (C) 2017 MindCloud
 
-(use-modules (srfi srfi-1)) ; For `append-map`
-(use-modules (ice-9 threads)) ; For par-map
-(use-modules (ice-9 optargs)) ; For define*
-
-(use-modules (opencog) (opencog exec) (opencog query) (opencog rule-engine))
-(use-modules (opencog logger))
-
-(load "action-selector.scm")
-(load "rule.scm")
-(load "utilities.scm")
-
 ; --------------------------------------------------------------
 ; Configure openpsi logger
 (define opl (cog-new-logger))

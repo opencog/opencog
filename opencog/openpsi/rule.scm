@@ -14,14 +14,6 @@
 ; have a unique name; however, the current chatbot uses the same name
 ; for all chat rules.
 
-
-(use-modules (ice-9 threads)) ; For `par-map`
-(use-modules (ice-9 optargs)) ; For `define*`
-(use-modules (srfi srfi-1)) ; For `drop-right`, `append-map`, etc.
-(use-modules (opencog) (opencog query))
-
-(load "utilities.scm")
-
 ; --------------------------------------------------------------
 ; Used as a key for naming rules
 (define psi-rule-name-predicate-node (Predicate "alias"))
@@ -174,17 +166,6 @@
     Returns a list of all psi-rules that are member of CATEGORY.
 "
   (cog-chase-link 'MemberLink 'ImplicationLink category)
-)
-
-; --------------------------------------------------------------
-(define (psi-action? ATOM)
-"
-  psi-action? ATOM
-    Check if ATOM is an action and return `#t`, if it is, and `#f`
-    otherwise. An atom is an action if it a member of the set
-    represented by (ConceptNode \"action\").
-"
-  (not (null?  (cog-link 'MemberLink ATOM psi-action)))
 )
 
 ; --------------------------------------------------------------

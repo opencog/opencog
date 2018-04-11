@@ -6,9 +6,6 @@
 ; Copyright (C) 2016 OpenCog Foundation
 ; Copyright (C) 2017 MindCloud
 
-(load "rule.scm")
-(load "utilities.scm")
-
 ; ----------------------------------------------------------------------
 (define (psi-set-action-selector! component exec-term)
 "

@@ -8,15 +8,20 @@
 
 ; --------------------------------------------------------------
 (define-module (opencog openpsi)
+  #:use-module (ice-9 optargs) ; For `define*`
+  #:use-module (ice-9 threads) ; For `par-map`
+  #:use-module (srfi srfi-1) ; For `drop-right`, `append-map`, etc.
   #:use-module (opencog)
   #:use-module (opencog exec)
+  #:use-module (opencog logger)
+
   #:export (
     ; From action-selector.scm
     psi-set-action-selector! psi-action-selector
     psi-select-rules
 
     ; From rule.scm
-    psi-get-rules psi-get-all-rules psi-get-all-actions psi-action?
+    psi-get-rules psi-get-all-rules psi-get-all-actions
     psi-rule-alias
     psi-partition-rule-with-alias psi-related-goals
     psi-rule-satisfiability psi-get-satisfiable-rules
@@ -51,8 +56,8 @@
 
 ; NOTE: The order of loading helps avoid warnings
 (load-from-path "opencog/openpsi/utilities.scm")
-(load-from-path "opencog/openpsi/action-selector.scm")
 (load-from-path "opencog/openpsi/rule.scm")
+(load-from-path "opencog/openpsi/action-selector.scm")
 (load-from-path "opencog/openpsi/main.scm")
 
 ; --------------------------------------------------------------
