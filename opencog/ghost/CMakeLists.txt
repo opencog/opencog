@@ -1,4 +1,5 @@
 ADD_SUBDIRECTORY(predicates)
+ADD_SUBDIRECTORY(schemas)
 
 ADD_GUILE_MODULE (FILES
 	ghost.scm

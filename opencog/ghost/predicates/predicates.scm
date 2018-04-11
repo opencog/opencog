@@ -21,11 +21,6 @@
     ; Time related predicates
     after_min
 
-    ; Actions
-    animation
-    expression
-    start_timer
-
     ; Utilities
     is-model-true?
     any-model-true?
@@ -35,15 +30,14 @@
   )
 )
 
-; Perception and action apis and predicates
-; NOTE: This is not organized  as it is still in development.
+; Perception APIs and predicates
 
 ; --------------------------------------------------------------
 ; There is a spacemap in eva-model module called faces. Thus the rename.
 ;(define facemap (SpaceMapNode "perceived-faces"))
 
 ; --------------------------------------------------------------
-; Apis used to create the atoms used to represent the world, aka
+; APIs used to create the atoms used to represent the world, aka
 ; world-model. These are not exported.
 ; --------------------------------------------------------------
 (define (see-face face-id)
@@ -70,7 +64,7 @@
 )
 
 ; --------------------------------------------------------------
-; Apis for inputing sensory information.
+; APIs for inputing sensory information.
 ; --------------------------------------------------------------
 ;(define (perceived-face face-id x y z)
 ;  (cog-pointmem-map-atom facemap (Concept face-id)
@@ -181,45 +175,28 @@
   )
 )
 
-; --------------------------------------------------------------
-; Apis for forming GroundedSchemas that are use for exectuing
-; actions.
-; NOTE: For testing use (opencog eva-behavior) module. For
-; running use (opencog movement) module. This is because the
-; apis are atomese DefinedPredicates.
-; TODO: List out the DefinedPredicates that are used as api, so as to
-; use delete-definition. Also adapt the scheme function naming convention
-; to make remembering easier.
-; --------------------------------------------------------------
-(define fini (Node "finished-action"))
+(define* (after_min minutes #:optional (timer-id (Concept "Default-Timer")))
+"
+  after_min MINUTES TIMER-ID (optional)
 
-(define (animation emotion gesture)
-  ;TODO: Remove this hack.
-  (let* ((e (cog-name emotion))
-    (g (cog-name gesture))
-    (temp-gesture (if (equal? "nod" g) "nod-1" g)))
-  (cog-evaluate!
-    (Put
-      (DefinedPredicate "Show class gesture")
-      (List
-        (Concept e)
-        (Concept temp-gesture))))
+  Returns (stv 1 1) if current time >= the timer's start time (if given) + MINUTES.
+  Otherwise, returns (stv 0 1)
+"
+  (define t (time-perceived timer-id))
 
-     fini
-   )
+  ; If it's null, the timer probably has not started yet
+  (if (null? t)
+    (stv 0 1)
+    (if (>= (current-time-us)
+            (+ t (* (string->number (cog-name minutes)) 60)))
+        (stv 1 1)
+        (stv 0 1)))
 )
 
-(define (expression expression-type)
-  (let ((e (cog-name expression-type)))
-    (cog-evaluate!
-      (Put
-        (DefinedPredicate "Show class expression")
-        (List
-          (Concept "neutral-keep-alive")
-          (Concept e))))
-    fini
-  )
-)
+; Create the GroundedPredicateNode, and link it to a generic "timer-predicate"
+; so that we can stimulate the generic one and the STI will diffuse to
+; the specific predicates connecting to it
+(Member (GroundedPredicate "scm: after_min") (Concept "timer-predicate"))
 
 ; --------------------------------------------------------------
 ; Utilities
@@ -313,38 +290,3 @@
     )
   )
 )
-
-; This is an action, that can be wrapped in a GroundedSchemaNode
-(define* (start_timer #:optional (timer-id (Concept "Default-Timer")))
-"
-  start_timer TIMER-ID (optional)
-
-  Record the current time for TIMER-ID.
-  If TIMER-ID is not given, a default timer will be used.
-"
-  (set-time-perceived! timer-id)
-  fini
-)
-
-(define* (after_min minutes #:optional (timer-id (Concept "Default-Timer")))
-"
-  after_min MINUTES TIMER-ID (optional)
-
-  Returns (stv 1 1) if current time >= the timer's start time (if given) + MINUTES.
-  Otherwise, returns (stv 0 1)
-"
-  (define t (time-perceived timer-id))
-
-  ; If it's null, the timer probably has not started yet
-  (if (null? t)
-    (stv 0 1)
-    (if (>= (current-time-us)
-            (+ t (* (string->number (cog-name minutes)) 60)))
-        (stv 1 1)
-        (stv 0 1)))
-)
-
-; Create the GroundedPredicateNode, and link it to a generic "timer-predicate"
-; so that we can stimulate the generic one and the STI will diffuse to
-; the specific predicates connecting to it
-(Member (GroundedPredicate "scm: after_min") (Concept "timer-predicate"))
