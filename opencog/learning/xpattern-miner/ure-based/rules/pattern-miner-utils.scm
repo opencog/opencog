@@ -2,6 +2,7 @@
 (use-modules (opencog query))
 (use-modules (opencog logger))
 (use-modules (opencog rule-engine))
+(use-modules (opencog xpattern-miner))
 (use-modules (srfi srfi-1))
 
 ;; (cog-logger-set-level! "debug")
@@ -91,13 +92,45 @@
          (post-i (drop l (+ i 1))))
     (append pre-i (list v) post-i)))
 
-(define (minsup pattern texts ms)
+(define (minsup-eval pattern texts ms)
   (Evaluation
      (Predicate "minsup")
      (List
         pattern
         texts
         ms)))
+
+;; Like minsup-eval and add (stv 1 1) on the EvaluationLink
+(define (minsup-eval-true pattern texts ms)
+  (cog-set-tv! (minsup-eval pattern texts ms) (stv 1 1)))
+
+;; Given an atom created with minsup-eval, get the pattern, texts and
+;; ms
+(define (get-pattern minsup-g)
+  (cog-outgoing-atom (gdr minsup-g) 0))
+(define (get-texts minsup-g)
+  (cog-outgoing-atom (gdr minsup-g) 1))
+(define (get-ms minsup-g)
+  (cog-outgoing-atom (gdr minsup-g) 2))
+
+(define (shallow-abstraction-eval shabs-list minsup-g)
+  (Evaluation
+    (Predicate "shallow-abstraction")
+    (List
+      shabs-list
+      minsup-g)))
+
+(define (absolutely-true-eval A)
+  (Evaluation
+    (GroundedPredicate "scm: absolutely-true")
+    A))
+
+(define (has-arity-eval g arity)
+  (Evaluation
+    (GroundedPredicate "scm: has-arity")
+    (List
+      g
+      (Number arity))))
 
 (define (pattern-arity pattern)
 "
