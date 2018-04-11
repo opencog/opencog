@@ -152,9 +152,14 @@
   Return GOAL after increasing the magnitude of the urge by VALUE. VALUE
   should be a positive number.
 "
+  (define (new-gv u t) ; u = urge & t = threshold
+    (if (equal? 0.0 u)
+      (+ t (* (- 1 t) (+ u value)))
+      (+ t (* (- 1 t) (+ u (* value (/ u (abs u))))))))
+
   (let* ((u (psi-urge goal))
     (t (psi-threshold goal))
-    (gv (+ t (* (- 1 t) (+ u (* value (/ u (abs u))))))))
+    (gv (new-gv u t)))
 
     (cond
       ((<= 1 gv) (psi-set-gv! goal 1))
