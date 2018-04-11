@@ -137,9 +137,29 @@
 "
   (let ((u (psi-urge goal))
     (t (psi-threshold goal)))
-      (if (equal? 0.0 u)
-        goal
-        (psi-set-gv! goal (+ t (* (- 1 t) (- u (* value (/ u (abs u))))))))
+
+    (if (equal? 0.0 u)
+      goal
+      (psi-set-gv! goal (+ t (* (- 1 t) (- u (* value (/ u (abs u))))))))
+  )
+)
+
+; --------------------------------------------------------------
+(define (psi-increase-urge goal value)
+"
+  psi-increase-urge GOAL VALUE
+
+  Return GOAL after increasing the magnitude of the urge by VALUE. VALUE
+  should be a positive number.
+"
+  (let* ((u (psi-urge goal))
+    (t (psi-threshold goal))
+    (gv (+ t (* (- 1 t) (+ u (* value (/ u (abs u))))))))
+
+    (cond
+      ((<= 1 gv) (psi-set-gv! goal 1))
+      ((>= 0 gv) (psi-set-gv! goal 0))
+      (else (psi-set-gv! goal gv)))
   )
 )
 

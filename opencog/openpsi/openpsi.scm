@@ -27,7 +27,7 @@
     ; From main.scm
     psi-running? psi-loop-count psi-run-continue? psi-step psi-run psi-halt
     psi-get-logger psi-component psi-set-threshold! psi-threshold
-    psi-goal-value psi-set-gv! psi-urge psi-decrease-urge
+    psi-goal-value psi-set-gv! psi-urge psi-decrease-urge psi-increase-urge
 
     ; From utilities.scm
     psi-prefix-str psi-suffix-str
