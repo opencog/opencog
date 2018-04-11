@@ -122,8 +122,7 @@
   that the goal should have.
 "
 ; TODO Add a mechanism for developers to define there own urge formula
-  (/ (- (psi-goal-value goal) (psi-threshold goal))
-     (- 1 (psi-threshold goal)))
+  (- (psi-goal-value goal) (psi-threshold goal))
 )
 
 ; --------------------------------------------------------------
@@ -138,9 +137,10 @@
   (let ((u (psi-urge goal))
     (t (psi-threshold goal)))
 
-    (if (equal? 0.0 u)
-      goal
-      (psi-set-gv! goal (+ t (* (- 1 t) (- u (* value (/ u (abs u))))))))
+    (cond
+      ((equal? 0.0 u) goal)
+      ((>= 0.0001 (abs u)) (psi-set-gv! goal t))
+      (else (psi-set-gv! goal (+ t (- u (* value (/ u (abs u))))))))
   )
 )
 
@@ -154,8 +154,8 @@
 "
   (define (new-gv u t) ; u = urge & t = threshold
     (if (equal? 0.0 u)
-      (+ t (* (- 1 t) (+ u value)))
-      (+ t (* (- 1 t) (+ u (* value (/ u (abs u))))))))
+      (+ t u value)
+      (+ t u (* value (/ u (abs u))))))
 
   (let* ((u (psi-urge goal))
     (t (psi-threshold goal))
