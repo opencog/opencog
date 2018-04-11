@@ -278,7 +278,7 @@ public:
     }
 
     // Check psi-goal, psi-threshold, psi-set-threshold!, psi-goal-value
-    // psi-set-gv! and psi-urge.
+    // psi-set-gv!, psi-urge, psi-increase-urge and psi-decrease-urge.
     void test_psi_goal_functions()
     {
       logger().info("BEGIN TEST: %s", __FUNCTION__);
@@ -329,6 +329,16 @@ public:
       auto u_2 = _scm->eval("(psi-urge goal-2)");
       CHKERR
       TS_ASSERT_EQUALS("-0.3\n", u_2);
+
+      // Check that psi-decrease-urge and psi-increase-urge are
+      // working as expected
+      auto increase_result = _scm->eval("(test_psi_goal_functions_1)");
+      CHKERR
+      TS_ASSERT_EQUALS("#t\n", increase_result);
+
+      auto decrease_result = _scm->eval("(test_psi_goal_functions_1)");
+      CHKERR
+      TS_ASSERT_EQUALS("#t\n", decrease_result);
 
       logger().info("END TEST: %s", __FUNCTION__);
     }

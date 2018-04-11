@@ -360,3 +360,38 @@
 (define (test_psi_get_goal_1)
   (equal? goal-1 (psi-get-goal (rule-1)))
 )
+
+; --------------------------------------------------------------
+(define (test_psi_goal_functions_1)
+"
+  Test psi-increase-urge function. The urge should increase in magnitude.
+
+  Run before test_psi_goal_functions_2 to ensure that it increases the
+  magnitude regardless of the sign of the urge.
+"
+  (let ((loop 2))
+    (while (not (equal? 0 loop))
+      (psi-increase-urge goal-1 0.1)
+      (psi-increase-urge goal-2 0.1)
+      (set! loop (- loop 1)))
+  )
+
+  (and (equal? 0.5 (psi-urge goal-1)) (equal? -0.5 (psi-urge goal-2)))
+)
+
+(define (test_psi_goal_functions_2)
+"
+  Test psi-decrease-urge function. The urge should decrease to 0
+  reagardless of whether urge is positive or negative.
+"
+  (let ((loop 6))
+    (while (not (equal? 0 loop))
+      (psi-decrease-urge goal-1 0.1)
+      (psi-decrease-urge goal-2 0.1)
+      (set! loop (- loop 1)))
+  )
+
+  (and (equal? 0.0 (psi-urge goal-1)) (equal? 0.0 (psi-urge goal-2)))
+)
+
+; --------------------------------------------------------------
