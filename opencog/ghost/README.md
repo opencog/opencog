@@ -78,7 +78,7 @@ Basic examples of how to use GHOST is available [HERE](https://github.com/openco
 
 ## How To Run
 
-1) Start the [RelEx server](https://github.com/opencog/relex#opencog-serversh)
+1) Start the [RelEx server](https://github.com/opencog/relex#opencog-serversh). You may need to do `(set-relex-server-host)` if you are running it via Docker.
 2) Start Guile
 3) Load the needed modules
 
@@ -104,10 +104,10 @@ Similarly for creating concepts:
 (ghost-parse "concept: ~young (child kid youngster)")
 ```
 
-One can also load a topic file by using `ghost-parse-file`:
+One can also parse a rule file by using `ghost-parse-file`:
 
 ```
-(ghost-parse-file "path/to/the/topic/file")
+(ghost-parse-file "path/to/the/rule/file")
 ```
 
 5) Play with it
@@ -121,7 +121,7 @@ One can quickly test if a rule can be triggered by using `test-ghost`:
 The output `[INFO] [Ghost] Say: "Hello human"` will be printed.
 
 ## To Run With ECAN (experimental)
-1) Start the [RelEx server](https://github.com/opencog/relex#opencog-serversh)
+1) Start the [RelEx server](https://github.com/opencog/relex#opencog-serversh). You may need to do `(set-relex-server-host)` if you are running it via Docker.
 2) Start the CogServer, e.g.
 
 ```
