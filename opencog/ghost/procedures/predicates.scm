@@ -1,35 +1,3 @@
-(define-module (opencog ghost predicates)
-  #:use-module (ice-9 optargs)
-  #:use-module (opencog)
-  #:use-module (opencog atom-types)
-  #:use-module (opencog attention)
-  #:use-module (opencog exec)
-  #:use-module (opencog pointmem)
-  #:use-module (opencog spacetime)
-  #:export (
-    ; Sensory input
-    perceived-face
-    perceived-emotion
-    perceive-word
-
-    ; Perceptual predicates
-    person_appears
-    person_smiles
-    person_angry
-    word_perceived
-
-    ; Time related predicates
-    after_min
-
-    ; Utilities
-    is-model-true?
-    any-model-true?
-    set-time-perceived! ; temporarily exported
-    time-perceived ; temporarily exported
-    was-perceived?
-  )
-)
-
 ; Perception APIs and predicates
 
 ; --------------------------------------------------------------

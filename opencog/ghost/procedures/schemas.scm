@@ -1,14 +1,3 @@
-(define-module (opencog ghost schemas)
-  #:use-module (ice-9 optargs)
-  #:use-module (opencog)
-  #:use-module (opencog exec)
-  #:export (
-    animation
-    expression
-    start_timer
-  )
-)
-
 ; Action APIs and schemas
 
 ; --------------------------------------------------------------
@@ -58,6 +47,6 @@
   Record the current time for TIMER-ID.
   If TIMER-ID is not given, a default timer will be used.
 "
-;  (set-time-perceived! timer-id)
+  (set-time-perceived! timer-id)
   fini
 )
