@@ -139,7 +139,7 @@
   (let ((acs (psi-action-selector component)))
     (if (null? acs)
       (error
-        (format "Define an action-selector for component ~a" component))
+        (format #f "Define an action-selector for component ~a" component))
       (let ((result (cog-execute! acs)))
           (if (null? result)
             '()

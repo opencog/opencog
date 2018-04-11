@@ -277,7 +277,7 @@ public:
       logger().info("END TEST: %s", __FUNCTION__);
     }
 
-    // Check psi-goal, psi-threshold, psi-set-threshold!, psi-goal-value
+    // Check psi-goal, psi-dgv, psi-set-dgv!, psi-goal-value
     // psi-set-gv!, psi-urge, psi-increase-urge and psi-decrease-urge.
     void test_psi_goal_functions()
     {
@@ -303,20 +303,20 @@ public:
       CHKERR
       TS_ASSERT_EQUALS("0.2\n", gv_2);
 
-      // Check goal-threshold setting and getting.
-      auto t_1_1 = _scm->eval("(psi-threshold goal-1)");
+      // Check desired-goal-value setting and getting.
+      auto t_1_1 = _scm->eval("(psi-dgv goal-1)");
       CHKERR
       TS_ASSERT_EQUALS("1.0\n", t_1_1);
 
-      auto t_1_2 = _scm->eval_h("(psi-set-threshold! goal-1 0.5)");
+      auto t_1_2 = _scm->eval_h("(psi-set-dgv! goal-1 0.5)");
       CHKERR
       TS_ASSERT_EQUALS(goal_1, t_1_2);
 
-      auto t_1_3 = _scm->eval("(psi-threshold goal-1)");
+      auto t_1_3 = _scm->eval("(psi-dgv goal-1)");
       CHKERR
       TS_ASSERT_EQUALS("0.5\n", t_1_3);
 
-      auto t_2 = _scm->eval("(psi-threshold goal-2)");
+      auto t_2 = _scm->eval("(psi-dgv goal-2)");
       CHKERR
       TS_ASSERT_EQUALS("0.5\n", t_2);
 

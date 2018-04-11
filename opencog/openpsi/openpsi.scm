@@ -26,7 +26,7 @@
 
     ; From main.scm
     psi-running? psi-loop-count psi-run-continue? psi-step psi-run psi-halt
-    psi-get-logger psi-component psi-set-threshold! psi-threshold
+    psi-get-logger psi-component psi-set-dgv! psi-dgv
     psi-goal-value psi-set-gv! psi-urge psi-decrease-urge psi-increase-urge
 
     ; From utilities.scm
@@ -49,10 +49,11 @@
 
 (load-extension "libopenpsi" "opencog_openpsi_init")
 
+; NOTE: The order of loading helps avoid warnings
+(load-from-path "opencog/openpsi/utilities.scm")
 (load-from-path "opencog/openpsi/action-selector.scm")
 (load-from-path "opencog/openpsi/rule.scm")
 (load-from-path "opencog/openpsi/main.scm")
-(load-from-path "opencog/openpsi/utilities.scm")
 
 ; --------------------------------------------------------------
 ; Documentations for C++ bindings from libopenpsi

@@ -51,35 +51,38 @@
 )
 
 ; --------------------------------------------------------------
-(define (psi-set-threshold! goal num)
-"
-  psi-set-threshold! GOAL NUM
+(define dgv-key (Predicate "desired-goal-value"))
 
-  Returns GOAL after setting its threshold to NUM.
+; --------------------------------------------------------------
+(define (psi-set-dgv! goal num)
 "
-  (cog-set-value! goal (Predicate "threshold") (FloatValue num))
+  psi-set-dgv! GOAL NUM
+
+  Returns GOAL after setting its desired-goal-value to NUM.
+"
+  (cog-set-value! goal dgv-key (FloatValue num))
 )
 
 ; --------------------------------------------------------------
-(define (psi-threshold goal)
+(define (psi-dgv goal)
 "
-  psi-threshold GOAL
+  psi-dgv GOAL
 
-  Returns the present threshold value for GOAL. GOAL is a node representin
-  the goal concerned.
+  Returns the present desired-goal-value for GOAL. GOAL is a node
+  representin the goal concerned.
 "
-  (cog-value-ref (cog-value goal (Predicate "threshold")) 0)
+  (cog-value-ref (cog-value goal dgv-key) 0)
 )
 
 ; --------------------------------------------------------------
-(define* (psi-goal name value #:optional (threshold 1))
+(define* (psi-goal name value #:optional (dgv 1))
 "
-  psi-goal NAME VALUE [THRESHOLD]
+  psi-goal NAME VALUE [DGV]
 
   Create and return (ConceptNode NAME) that represents the OpenPsi goal
-  called NAME. Also sets the goal-value to VALUE.  If THRESHOLD is passed
-  then it is used as the ideal value for the goal otherwise, 1 is assumed
-  to be the default threshold value.
+  called NAME. Also sets the goal-value to VALUE.  If DGV is passed
+  then it is used as the desired-goal-value for the goal otherwise,
+  1 is assumed to be the default threshold value.
 
   Goal-value should be in the range [0, 1].
 "
@@ -92,9 +95,9 @@
     (psi-set-gv! goal value)
     ; A value is used instead of an EvalutionLink b/c it is simpler and faster
     ; to change. Of course a StateLink can be used. At present there isn't
-    ; any process that uses that explicit(aka queryable) information thus
+    ; any process that uses that explicit(aka queryable) information, thus
     ; nothing is lost.
-    (psi-set-threshold! goal threshold)
+    (psi-set-dgv! goal dgv)
   )
 )
 
@@ -113,13 +116,12 @@
 "
   psi-urge GOAL
 
-  Returns the urge value of GOAL. Urge is calculated as
-  (GOAL_VALUE - THRESHOLD)/(1 - THRESHOLD), where GOAL_VALUE
-  is the present value of the goal, and THRESHOLD is the ideal value
-  that the goal should have.
+  Returns the urge value of GOAL. Urge is calculated as (GOAL_VALUE - DGV),
+  where GOAL_VALUE is the present value of the goal, and DGV is the
+  desired-goal-value for the GOAL.
 "
 ; TODO Add a mechanism for developers to define there own urge formula
-  (- (psi-goal-value goal) (psi-threshold goal))
+  (- (psi-goal-value goal) (psi-dgv goal))
 )
 
 ; --------------------------------------------------------------
@@ -128,11 +130,11 @@
   psi-decrease-urge GOAL VALUE
 
   Return GOAL after decreasing the urge by given value. Decreasing means
-  minimizing the difference between the GOAL's threshold and present
+  minimizing the difference between the desired-goal-value and present
   goal-value, thus VALUE should be a positive number.
 "
   (let ((u (psi-urge goal))
-    (t (psi-threshold goal)))
+    (t (psi-dgv goal)))
 
     (cond
       ((equal? 0.0 u) goal)
@@ -149,13 +151,13 @@
   Return GOAL after increasing the magnitude of the urge by VALUE. VALUE
   should be a positive number.
 "
-  (define (new-gv u t) ; u = urge & t = threshold
+  (define (new-gv u dgv) ; u = urge & dgv = desired-goal-value
     (if (equal? 0.0 u)
-      (+ t u value)
-      (+ t u (* value (/ u (abs u))))))
+      (+ dgv u value)
+      (+ dgv u (* value (/ u (abs u))))))
 
   (let* ((u (psi-urge goal))
-    (t (psi-threshold goal))
+    (t (psi-dgv goal))
     (gv (new-gv u t)))
 
     (cond
