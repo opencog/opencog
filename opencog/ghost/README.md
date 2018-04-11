@@ -87,6 +87,7 @@ Basic examples of how to use GHOST is available [HERE](https://github.com/openco
 
 ```
 (use-modules (opencog)
+             (opencog nlp)
              (opencog nlp relex2logic)
              (opencog openpsi)
              (opencog eva-behavior)
@@ -157,6 +158,7 @@ start-ecan
 
 ```
 (use-modules (opencog)
+             (opencog nlp)
              (opencog nlp relex2logic)
              (opencog openpsi)
              (opencog attention)
