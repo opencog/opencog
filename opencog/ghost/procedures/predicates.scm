@@ -164,4 +164,4 @@
 ; Create the GroundedPredicateNode, and link it to a generic "timer-predicate"
 ; so that we can stimulate the generic one and the STI will diffuse to
 ; the specific predicates connecting to it
-(Member (GroundedPredicate "scm: after_min") (Concept "timer-predicate"))
+(Inheritance (GroundedPredicate "scm: after_min") (Concept "timer-predicate"))

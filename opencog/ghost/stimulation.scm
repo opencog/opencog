@@ -17,7 +17,24 @@
 
 (define-public (ghost-stimulate-words . WORDS)
 "
-  Stimulate the given list of words with the default stimulus.
+  Stimulate the given list of words (as strings) with the default stimulus.
 "
   (map (lambda (w) (cog-stimulate (Word w) default-stimulus)) WORDS)
+)
+
+; ----------
+(define stimulate-timer-elapsed-time 0)
+(define (ghost-stimulate-timer)
+"
+  Stimulate the timer predicate, so that the rules having time-related
+  predicates will likely have some non-zero STI.
+
+  Currently the stimulus will be proportional to the elapsed time (sec)
+  since last time it's called.
+"
+  (if (> stimulate-timer-elapsed-time 0)
+    (cog-stimulate (Concept "timer-predicate")
+      (* 10 (- (current-time) stimulate-timer-elapsed-time))))
+
+  (set! stimulate-timer-elapsed-time (current-time))
 )
