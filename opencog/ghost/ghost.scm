@@ -46,6 +46,21 @@
   ghost-component)
 
 ; ----------
+; Define the logger for GHOST
+(define ghost-logger (cog-new-logger))
+
+; Default configuration for the GHOST logger
+(cog-logger-set-component! ghost-logger "GHOST")
+(cog-logger-set-level! ghost-logger "info")
+(cog-logger-set-stdout! ghost-logger #t)
+
+(define-public (ghost-get-logger)
+"
+  Return the logger for GHOST.
+"
+  ghost-logger)
+
+; ----------
 ; Various anchors, predicates, values etc that will be used
 
 (define ghost-curr-proc (Anchor (ghost-prefix "Currently Processing")))
@@ -61,21 +76,6 @@
 (define strval-responder (StringValue "responder"))
 (define strval-random-gambit (StringValue "random gambit"))
 (define strval-gambit (StringValue "gambit"))
-
-; ----------
-; Define the logger for GHOST
-(define ghost-logger (cog-new-logger))
-
-; Default configuration for the GHOST logger
-(cog-logger-set-component! ghost-logger "GHOST")
-(cog-logger-set-level! ghost-logger "info")
-(cog-logger-set-stdout! ghost-logger #t)
-
-(define-public (ghost-get-logger)
-"
-  Return the logger for GHOST.
-"
-  ghost-logger)
 
 ;; --------------------
 ;; For rule parsing
@@ -120,6 +120,7 @@
 (load "ghost/translator.scm")
 (load "ghost/matcher.scm")
 (load "ghost/cs-parse.scm")
+(load "ghost/stimulation.scm")
 
 ;; --------------------
 ;; To parse rules and interact with GHOST, the main interfaces

@@ -194,6 +194,9 @@
       (psi-get-rules ghost-component)))
   (define rule-selected (eval-and-select candidate-rules))
 
+  ; Stimulate the timer predicate
+  (ghost-stimulate-timer)
+
   (cog-logger-debug ghost-logger "Candidate Rules:\n~a" candidate-rules)
   (cog-logger-debug ghost-logger "Selected:\n~a" rule-selected)
 
