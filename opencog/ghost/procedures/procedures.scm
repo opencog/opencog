@@ -5,6 +5,7 @@
   #:use-module (opencog attention)
   #:use-module (opencog exec)
   #:use-module (opencog pointmem)
+  #:use-module (opencog openpsi)
   #:use-module (opencog spacetime)
   #:export (
     ; Sensory input
@@ -25,6 +26,8 @@
     animation
     expression
     start_timer
+    decrease_urge
+    increase_urge
 
     ; Utilities
     is-model-true?

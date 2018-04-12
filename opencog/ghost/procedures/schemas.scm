@@ -50,3 +50,23 @@
   (set-time-perceived! timer-id)
   fini
 )
+
+(define (decrease_urge goal value)
+"
+  decrease_urge GOAL VALUE
+
+  Decrease the urge of GOAL by VALUE.
+"
+  (psi-decrease-urge (Concept (cog-name goal))
+    (string->number (cog-name value)))
+)
+
+(define (increase_urge goal value)
+"
+  increase_urge GOAL VALUE
+
+  increase the urge of GOAL by VALUE.
+"
+  (psi-increase-urge (Concept (cog-name goal))
+    (string->number (cog-name value)))
+)
