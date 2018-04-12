@@ -36,7 +36,9 @@
 
 (define (component-1) (psi-component "component-1"))
 
-; TODO Replace with psi-goal.
+; FIXME: Using psi-goal results in the failure of OpenPsiRulesUTest
+; and OpenPsiImplicatorUTest
+;(define goal-1 (psi-goal "goal-1" 1))
 (define goal-1 (Concept "goal-1"))
 
 (define (rule-1) (psi-rule context-1 action-1 goal-1 (stv 1 1) (component-1)))

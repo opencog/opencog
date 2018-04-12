@@ -457,7 +457,7 @@
                     (psi-rule
                       (list (Satisfaction (VariableList vars) (And conds)))
                       action
-                      (psi-goal (car goal))
+                      (psi-goal (car goal) 0)
                       ; Check if the goal is defined at the rule level
                       (if (member goal GOAL)
                         (stv (cdr goal) .9)
