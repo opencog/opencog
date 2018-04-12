@@ -6,6 +6,7 @@ ADD_GUILE_MODULE (FILES
 	terms.scm
 	translator.scm
 	matcher.scm
+	stimulation.scm
 	utils.scm
 	test.scm
 	MODULE_DESTINATION "${DATADIR}/scm/opencog/ghost"
