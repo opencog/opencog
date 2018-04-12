@@ -65,40 +65,41 @@
   ; ----------
   (for-each
     (lambda (r)
-      (define rc (psi-get-context r))
-      (define ra (psi-get-action r))
+      ; Skip the rule if its STI or strength is zero
+      (if (and (> (cog-av-sti r) 0) (> (cog-stv-strength r) 0))
+        (let ((rc (psi-get-context r))
+              (ra (psi-get-action r)))
+          ; Though an action may be in multiple psi-rule, but it doesn't
+          ; really matter here, just record one of them
+          ; TODO: Remove it once action selector actually returns an
+          ; action instead of a rule (?)
+          (set! action-rule-alist (assoc-set! action-rule-alist ra r))
 
-      ; Though an action may be in multiple psi-rule, but it doesn't
-      ; really matter here, just record one of them
-      ; TODO: Remove it once action selector actually returns an
-      ; action instead of a rule (?)
-      (set! action-rule-alist (assoc-set! action-rule-alist ra r))
+          ; Evaluate the context, and save the result in context-alist
+          (if (equal? (assoc-ref context-alist rc) #f)
+            (set! context-alist
+              (assoc-set! context-alist rc
+                (cdadr (cog-tv->alist (psi-satisfiable? r))))))
 
-      ; Evaluate the context, and save the result in context-alist
-      (if (equal? (assoc-ref context-alist rc) #f)
-        (set! context-alist
-          (assoc-set! context-alist rc
-            (cdadr (cog-tv->alist (psi-satisfiable? r))))))
+          ; Count the no. of rules that contain this action, and
+          ; save it in action-cnt-alist
+          (if (equal? (assoc-ref action-cnt-alist ra) #f)
+            (set! action-cnt-alist (assoc-set! action-cnt-alist ra 1))
+            (set! action-cnt-alist (assoc-set! action-cnt-alist ra
+              (+ (assoc-ref action-cnt-alist ra) 1))))
 
-      ; Count the no. of rules that contain this action, and
-      ; save it in action-cnt-alist
-      (if (equal? (assoc-ref action-cnt-alist ra) #f)
-        (set! action-cnt-alist (assoc-set! action-cnt-alist ra 1))
-        (set! action-cnt-alist (assoc-set! action-cnt-alist ra
-          (+ (assoc-ref action-cnt-alist ra) 1))))
-
-      ; Calculate the weight of this rule
-      ; Save and accumulate the weight of an action in sum-weight-alist
-      ; Skip the action if its weight is zero, so that sum-weight-alist
-      ; and action-weight-alist do not contain actions that have a zero weight
-      (let ((w (calculate-rweight r)))
-        (if (> w 0)
-          (if (equal? (assoc-ref sum-weight-alist ra) #f)
-            (set! sum-weight-alist (assoc-set! sum-weight-alist ra w))
-            (set! sum-weight-alist (assoc-set! sum-weight-alist ra
-              (+ (assoc-ref sum-weight-alist ra) w))))
-          (cog-logger-debug ghost-logger
-            "Skipping action with zero weight: ~a" ra))))
+          ; Calculate the weight of this rule
+          ; Save and accumulate the weight of an action in sum-weight-alist
+          ; Skip the action if its weight is zero, so that sum-weight-alist
+          ; and action-weight-alist do not contain actions that have a zero weight
+          (let ((w (calculate-rweight r)))
+            (if (> w 0)
+              (if (equal? (assoc-ref sum-weight-alist ra) #f)
+                (set! sum-weight-alist (assoc-set! sum-weight-alist ra w))
+                (set! sum-weight-alist (assoc-set! sum-weight-alist ra
+                  (+ (assoc-ref sum-weight-alist ra) w))))
+              (cog-logger-debug ghost-logger
+                "Skipping action with zero weight: ~a" ra))))))
     RULES)
 
   ; Finally calculate the weight of an action
