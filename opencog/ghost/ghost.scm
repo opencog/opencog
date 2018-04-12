@@ -61,9 +61,13 @@
   ghost-logger)
 
 ; ----------
-; Update some of the ECAN Parameters
+; ECAN related configuration
+
+; Update some of the parameters
 (State (Concept "AF_RENT_FREQUENCY") (Number 0.5))
 (State (Concept "MAX_SPREAD_PERCENTAGE") (Number 0.8))
+
+(define default-stimulus 150)
 
 ; ----------
 ; Various anchors, predicates, values etc that will be used
