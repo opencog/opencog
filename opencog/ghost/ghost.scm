@@ -46,6 +46,26 @@
   ghost-component)
 
 ; ----------
+; Define the logger for GHOST
+(define ghost-logger (cog-new-logger))
+
+; Default configuration for the GHOST logger
+(cog-logger-set-component! ghost-logger "GHOST")
+(cog-logger-set-level! ghost-logger "info")
+(cog-logger-set-stdout! ghost-logger #t)
+
+(define-public (ghost-get-logger)
+"
+  Return the logger for GHOST.
+"
+  ghost-logger)
+
+; ----------
+; Update some of the ECAN Parameters
+(State (Concept "AF_RENT_FREQUENCY") (Number 0.5))
+(State (Concept "MAX_SPREAD_PERCENTAGE") (Number 0.8))
+
+; ----------
 ; Various anchors, predicates, values etc that will be used
 
 (define ghost-curr-proc (Anchor (ghost-prefix "Currently Processing")))
@@ -61,21 +81,6 @@
 (define strval-responder (StringValue "responder"))
 (define strval-random-gambit (StringValue "random gambit"))
 (define strval-gambit (StringValue "gambit"))
-
-; ----------
-; Define the logger for GHOST
-(define ghost-logger (cog-new-logger))
-
-; Default configuration for the GHOST logger
-(cog-logger-set-component! ghost-logger "GHOST")
-(cog-logger-set-level! ghost-logger "info")
-(cog-logger-set-stdout! ghost-logger #t)
-
-(define-public (ghost-get-logger)
-"
-  Return the logger for GHOST.
-"
-  ghost-logger)
 
 ;; --------------------
 ;; For rule parsing
