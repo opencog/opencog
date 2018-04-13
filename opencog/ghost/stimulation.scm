@@ -8,6 +8,15 @@
 (define default-stimulus 150)
 
 ; ----------
+(define-public (ghost-set-default-stimulus STIMULUS)
+"
+  Change the default stimulus to the given value.
+"
+  (if (number? STIMULUS)
+    (set! default-stimulus STIMULUS)
+    (cog-logger-warn ghost-logger "Stimulus should be a number!"))
+)
+
 (define-public (ghost-stimulate . ATOMS)
 "
   Stimulate the given list of atoms with the default stimulus.
