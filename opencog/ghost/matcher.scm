@@ -12,11 +12,12 @@
   Wa = 1/Na * sum(Wcagi)
 
   Na = number of satisfied rules [i] that have the action [a]
-  Wcagi = Scag * Sc * Icag
+  Wcagi = Scag * Sc * Icag * |Ug|
 
   Scag = Strength of the psi-rule (c ∧ a => g)
   Sc = Satisfiability of the context of the psi-rule
   Icag = Importance (STI) of the rule
+  |Ug| = Absolute value of the urge of the goal
 
   SKIP-STI is for backward compatibility, used to decide whether to
   include STI of a rule (Icag) in action selection or not. It's needed
@@ -55,7 +56,8 @@
        (if SKIP-STI
          ; Weight higher if the rule is in the current topic
          (if (is-rule-in-topic? R (ghost-get-curr-topic)) 1 0.5)
-         (cog-av-sti R))))
+         (cog-av-sti R))
+       (abs (psi-urge (psi-get-goal R)))))
 
   ; Calculate the weight of the action A [Wa]
   (define (calculate-aweight A)
