@@ -99,7 +99,9 @@
                 (set! sum-weight-alist (assoc-set! sum-weight-alist ra
                   (+ (assoc-ref sum-weight-alist ra) w))))
               (cog-logger-debug ghost-logger
-                "Skipping action with zero weight: ~a" ra))))))
+                "Skipping action with zero weight: ~a" ra))))
+      (cog-logger-debug ghost-logger
+        "Skipping rule with zero STI/strength: ~a" r)))
     RULES)
 
   ; Finally calculate the weight of an action
