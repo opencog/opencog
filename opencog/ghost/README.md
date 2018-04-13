@@ -181,19 +181,21 @@ Note, rules being created after running this will be slimmer (preferred) and can
 (ghost-parse "#goal: (novelty=0.24) u: (eat apple) I want an apple")
 ```
 
+Or use `ghost-parse-file` to parse a rule file.
+
 9) Start GHOST
 
 ```
 (ghost-run)
 ```
 
-10) Play with it, e.g.
+10) Send some input, e.g.
 
 ```
 (ghost "I eat apples")
 ```
 
-11) Stimulate the atoms correspond to the input. NOTE, this is normally done automatically when the words are perceived. Since we don't have the perception pipeline running for this example, let's stimulate the atoms manually, e.g.
+11) Stimulate the atoms correspond to the input. NOTE, this is normally done automatically when the words are perceived. Since we don't have the perception pipeline running for this example, let's stimulate the input atoms manually, e.g.
 
 ```
 (ghost-stimulate-words "I" "eat" "apples")
