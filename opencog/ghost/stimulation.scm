@@ -8,6 +8,15 @@
 (define default-stimulus 150)
 
 ; ----------
+(define-public (ghost-set-default-stimulus STIMULUS)
+"
+  Change the default stimulus to the given value.
+"
+  (if (number? STIMULUS)
+    (set! default-stimulus STIMULUS)
+    (cog-logger-warn ghost-logger "Stimulus should be a number!"))
+)
+
 (define-public (ghost-stimulate . ATOMS)
 "
   Stimulate the given list of atoms with the default stimulus.
@@ -29,7 +38,7 @@
 )
 
 ; ----------
-(define stimulate-timer-elapsed-time 0)
+(define timer-last-stimulated 0)
 (define (ghost-stimulate-timer)
 "
   Stimulate the timer predicate, so that the rules having time-related
@@ -38,9 +47,9 @@
   Currently the stimulus will be proportional to the elapsed time (sec)
   since last time it's called.
 "
-  (if (> stimulate-timer-elapsed-time 0)
+  (if (> timer-last-stimulated 0)
     (cog-stimulate (Concept "timer-predicate")
-      (* 10 (- (current-time) stimulate-timer-elapsed-time))))
+      (* 10 (- (current-time) timer-last-stimulated))))
 
-  (set! stimulate-timer-elapsed-time (current-time))
+  (set! timer-last-stimulated (current-time))
 )
