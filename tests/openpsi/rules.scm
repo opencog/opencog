@@ -376,7 +376,7 @@
       (set! loop (- loop 1)))
   )
 
-  (and (equal? 0.5 (psi-urge goal-1)) (equal? -0.5 (psi-urge goal-2)))
+  (and (equal? -0.5 (psi-urge goal-1)) (equal? 0.5 (psi-urge goal-2)))
 )
 
 (define (test_psi_goal_functions_2)
