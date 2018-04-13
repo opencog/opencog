@@ -21,6 +21,8 @@
 (define psi-action-node (Concept "action"))
 ; Used to declare the set of goals.
 (define psi-goal-node (Concept "goal"))
+; Key used to declare the desired-goal-value
+(define dgv-key (Predicate "desired-goal-value"))
 
 ; --------------------------------------------------------------
 (define (psi-set-gv! goal gv)
@@ -41,9 +43,6 @@
 "
   (cog-value-ref (cog-value goal (Predicate "value")) 0)
 )
-
-; --------------------------------------------------------------
-(define dgv-key (Predicate "desired-goal-value"))
 
 ; --------------------------------------------------------------
 (define (psi-set-dgv! goal num)
@@ -112,8 +111,7 @@
   where GOAL_VALUE is the present value of the goal, and DGV is the
   desired-goal-value for the GOAL.
 "
-; TODO Add a mechanism for developers to define there own urge formula
-  (- (psi-goal-value goal) (psi-dgv goal))
+  (- (psi-dgv goal) (psi-goal-value goal))
 )
 
 ; --------------------------------------------------------------

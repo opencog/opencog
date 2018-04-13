@@ -324,11 +324,11 @@ public:
       // and positive values.
       auto u_1 = _scm->eval("(psi-urge goal-1)");
       CHKERR
-      TS_ASSERT_EQUALS("0.30000000000000004\n", u_1);
+      TS_ASSERT_EQUALS("-0.30000000000000004\n", u_1);
 
       auto u_2 = _scm->eval("(psi-urge goal-2)");
       CHKERR
-      TS_ASSERT_EQUALS("-0.3\n", u_2);
+      TS_ASSERT_EQUALS("0.3\n", u_2);
 
       // Check that psi-decrease-urge and psi-increase-urge are
       // working as expected
