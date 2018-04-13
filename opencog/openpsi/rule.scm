@@ -21,6 +21,8 @@
 (define psi-action-node (Concept "action"))
 ; Used to declare the set of goals.
 (define psi-goal-node (Concept "goal"))
+; Key used to declare the desired-goal-value
+(define dgv-key (Predicate "desired-goal-value"))
 
 ; --------------------------------------------------------------
 (define (psi-set-gv! goal gv)
@@ -41,9 +43,6 @@
 "
   (cog-value-ref (cog-value goal (Predicate "value")) 0)
 )
-
-; --------------------------------------------------------------
-(define dgv-key (Predicate "desired-goal-value"))
 
 ; --------------------------------------------------------------
 (define (psi-set-dgv! goal num)
@@ -74,7 +73,7 @@
   Create and return (ConceptNode NAME) that represents the OpenPsi goal
   called NAME. Also sets the goal-value to VALUE.  If DGV is passed
   then it is used as the desired-goal-value for the goal otherwise,
-  1 is assumed to be the default threshold value.
+  1 is assumed to be the desired-goal-value.
 
   Goal-value should be in the range [0, 1].
 "
@@ -112,8 +111,7 @@
   where GOAL_VALUE is the present value of the goal, and DGV is the
   desired-goal-value for the GOAL.
 "
-; TODO Add a mechanism for developers to define there own urge formula
-  (- (psi-goal-value goal) (psi-dgv goal))
+  (- (psi-dgv goal) (psi-goal-value goal))
 )
 
 ; --------------------------------------------------------------
@@ -126,12 +124,12 @@
   goal-value, thus VALUE should be a positive number.
 "
   (let ((u (psi-urge goal))
-    (t (psi-dgv goal)))
+    (dgv (psi-dgv goal)))
 
     (cond
       ((equal? 0.0 u) goal)
-      ((>= 0.0001 (abs u)) (psi-set-gv! goal t))
-      (else (psi-set-gv! goal (+ t (- u (* value (/ u (abs u))))))))
+      ((>= 0.0001 (abs u)) (psi-set-gv! goal dgv))
+      (else (psi-set-gv! goal (- dgv (- u (* value (/ u (abs u))))))))
   )
 )
 
@@ -145,12 +143,12 @@
 "
   (define (new-gv u dgv) ; u = urge & dgv = desired-goal-value
     (if (equal? 0.0 u)
-      (+ dgv u value)
-      (+ dgv u (* value (/ u (abs u))))))
+      (+ dgv value)
+      (- dgv (+ u (* value (/ u (abs u)))))))
 
   (let* ((u (psi-urge goal))
-    (t (psi-dgv goal))
-    (gv (new-gv u t)))
+    (dgv (psi-dgv goal))
+    (gv (new-gv u dgv)))
 
     (cond
       ((<= 1 gv) (psi-set-gv! goal 1))
