@@ -6,10 +6,6 @@
 ; Copyright (C) 2016 OpenCog Foundation
 ; Copyright (C) 2017 MindCloud
 
-(load "demand.scm")
-(load "rule.scm")
-(load "utilities.scm")
-
 ; ----------------------------------------------------------------------
 (define (psi-set-action-selector! component exec-term)
 "
@@ -140,7 +136,7 @@
   (let ((acs (psi-action-selector component)))
     (if (null? acs)
       (error
-        (format "Define an action-selector for component ~a" component))
+        (format #f "Define an action-selector for component ~a" component))
       (let ((result (cog-execute! acs)))
           (if (null? result)
             '()

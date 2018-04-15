@@ -1,40 +1,11 @@
-(define-module (opencog ghost predicates)
-  #:use-module (ice-9 optargs)
-  #:use-module (opencog)
-  #:use-module (opencog attention)
-  #:use-module (opencog exec)
-  #:use-module (opencog pointmem)
-  #:use-module (opencog spacetime)
-  #:export (
-    ; Sensory input
-    perceived-face
-    perceived-emotion
-    perceive-word
-
-    ; Perceptual predicates
-    person_appears
-    person_smiles
-    person_angry
-    word_perceived
-
-    ; Actions
-    animation
-    expression
-
-    ; Utilities
-    is-model-true?
-  )
-)
-
-; Perception and action apis and predicates
-; NOTE: This is not organized  as it is still in development.
+; Perception APIs and predicates
 
 ; --------------------------------------------------------------
 ; There is a spacemap in eva-model module called faces. Thus the rename.
 ;(define facemap (SpaceMapNode "perceived-faces"))
 
 ; --------------------------------------------------------------
-; Apis used to create the atoms used to represent the world, aka
+; APIs used to create the atoms used to represent the world, aka
 ; world-model. These are not exported.
 ; --------------------------------------------------------------
 (define (see-face face-id)
@@ -61,7 +32,7 @@
 )
 
 ; --------------------------------------------------------------
-; Apis for inputing sensory information.
+; APIs for inputing sensory information.
 ; --------------------------------------------------------------
 ;(define (perceived-face face-id x y z)
 ;  (cog-pointmem-map-atom facemap (Concept face-id)
@@ -76,11 +47,11 @@
 )
 
 (define (perceive-word word)
-  *unspecified*
+  (set-time-perceived! (Word word))
 )
 
 ; --------------------------------------------------------------
-; Apis for forming GroundedPredicates that are used for
+; APIs for forming GroundedPredicates that are used for
 ; checking if the world is in a particular state or not.
 ; --------------------------------------------------------------
 ;(define (person_appears face-id)
@@ -145,6 +116,11 @@
   )
 )
 
+; TODO: If the stream of sensory inputs are interupted, for whatever reason,
+; then the variations in the confidence value are not updated and thus the
+; state of the world wouldn't be correct. To fix this add a time window
+; similar to word_perceived. If the time-window is passed then it returns
+; false.
 (define* (person_smiles #:optional face-id)
   (if face-id
     (is-model-true? (face-emotion (cog-name face-id) "smile"))
@@ -159,69 +135,33 @@
   )
 )
 
-(define (word_perceived)
-  *unspecified*
-)
-
-; --------------------------------------------------------------
-; Apis for forming GroundedSchemas that are use for exectuing
-; actions.
-; NOTE: For testing use (opencog eva-behavior) module. For
-; running use (opencog movement) module. This is because the
-; apis are atomese DefinedPredicates.
-; TODO: List out the DefinedPredicates that are used as api, so as to
-; use delete-definition. Also adapt the scheme function naming convention
-; to make remembering easier.
-; --------------------------------------------------------------
-(define fini (Node "finished-action"))
-
-(define (animation emotion gesture)
-  ;TODO: Remove this hack.
-  (let* ((e (cog-name emotion))
-    (g (cog-name gesture))
-    (temp-gesture (if (equal? "nod" g) "nod-1" g)))
-  (cog-evaluate!
-    (Put
-      (DefinedPredicate "Show class gesture")
-      (List
-        (Concept e)
-        (Concept temp-gesture))))
-
-     fini
-   )
-)
-
-(define (expression expression-type)
-  (let ((e (cog-name expression-type)))
-    (cog-evaluate!
-      (Put
-        (DefinedPredicate "Show class expression")
-        (List
-          (Concept "neutral-keep-alive")
-          (Concept e))))
-    fini
+(define* (word_perceived word #:optional time-interval)
+  (if time-interval
+    (was-perceived? word (current-time-us)
+      (string->number (cog-name time-interval)))
+    (was-perceived? word (current-time-us) 0.01)
   )
 )
 
-; --------------------------------------------------------------
-; Utilities
-; --------------------------------------------------------------
-(define (is-model-true? model)
-; It is better to find the product of the strength and confidence but for now
-; confidence is used as the default stv for new atoms is (stv 1 0), so
-; need to waste cpu cycles.
-  (let ((confidence (tv-conf (cog-tv model))))
-    (cond
-      ((> 0.5 confidence) (stv 0 1))
-      ((<= 0.5 confidence) (stv 1 1)))
-  )
+(define* (after_min minutes #:optional (timer-id (Concept "Default-Timer")))
+"
+  after_min MINUTES TIMER-ID (optional)
+
+  Returns (stv 1 1) if current time >= the timer's start time (if given) + MINUTES.
+  Otherwise, returns (stv 0 1)
+"
+  (define t (time-perceived timer-id))
+
+  ; If it's null, the timer probably has not started yet
+  (if (null? t)
+    (stv 0 1)
+    (if (>= (current-time-us)
+            (+ t (* (string->number (cog-name minutes)) 60)))
+        (stv 1 1)
+        (stv 0 1)))
 )
 
-(define (any-model-true? model-list)
-  (let ((true-models (filter is-model-true? model-list)))
-    (if (null? true-models)
-      (stv 0 1)
-      (stv 1 1)
-    )
-  )
-)
+; Create the GroundedPredicateNode, and link it to a generic "timer-predicate"
+; so that we can stimulate the generic one and the STI will diffuse to
+; the specific predicates connecting to it
+(Inheritance (GroundedPredicate "scm: after_min") (Concept "timer-predicate"))

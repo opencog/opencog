@@ -91,7 +91,7 @@
 "
   (let ((func (psi-func component-node function-name)))
     (if (null? func)
-      (error (format "A function called \"~a\" hasn't been set for ~a\n"
+      (error (format #f "A function called \"~a\" hasn't been set for ~a\n"
           function-name component-node))
       (equal? "#t"
         (cog-value-ref (cog-value func (Predicate "is_evaluatable?")) 0))

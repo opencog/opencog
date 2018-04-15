@@ -12,11 +12,12 @@
   Wa = 1/Na * sum(Wcagi)
 
   Na = number of satisfied rules [i] that have the action [a]
-  Wcagi = Scag * Sc * Icag
+  Wcagi = Scag * Sc * Icag * Ug
 
   Scag = Strength of the psi-rule (c ∧ a => g)
   Sc = Satisfiability of the context of the psi-rule
   Icag = Importance (STI) of the rule
+  Ug = Urge of the goal
 
   SKIP-STI is for backward compatibility, used to decide whether to
   include STI of a rule (Icag) in action selection or not. It's needed
@@ -55,7 +56,8 @@
        (if SKIP-STI
          ; Weight higher if the rule is in the current topic
          (if (is-rule-in-topic? R (ghost-get-curr-topic)) 1 0.5)
-         (cog-av-sti R))))
+         (cog-av-sti R))
+       (psi-urge (psi-get-goal R))))
 
   ; Calculate the weight of the action A [Wa]
   (define (calculate-aweight A)
@@ -65,40 +67,43 @@
   ; ----------
   (for-each
     (lambda (r)
-      (define rc (psi-get-context r))
-      (define ra (psi-get-action r))
+      ; Skip the rule if its STI or strength is zero
+      (if (and (> (cog-av-sti r) 0) (> (cog-stv-strength r) 0))
+        (let ((rc (psi-get-context r))
+              (ra (psi-get-action r)))
+          ; Though an action may be in multiple psi-rule, but it doesn't
+          ; really matter here, just record one of them
+          ; TODO: Remove it once action selector actually returns an
+          ; action instead of a rule (?)
+          (set! action-rule-alist (assoc-set! action-rule-alist ra r))
 
-      ; Though an action may be in multiple psi-rule, but it doesn't
-      ; really matter here, just record one of them
-      ; TODO: Remove it once action selector actually returns an
-      ; action instead of a rule (?)
-      (set! action-rule-alist (assoc-set! action-rule-alist ra r))
+          ; Evaluate the context, and save the result in context-alist
+          (if (equal? (assoc-ref context-alist rc) #f)
+            (set! context-alist
+              (assoc-set! context-alist rc
+                (cdadr (cog-tv->alist (psi-satisfiable? r))))))
 
-      ; Evaluate the context, and save the result in context-alist
-      (if (equal? (assoc-ref context-alist rc) #f)
-        (set! context-alist
-          (assoc-set! context-alist rc
-            (cdadr (cog-tv->alist (psi-satisfiable? r))))))
+          ; Count the no. of rules that contain this action, and
+          ; save it in action-cnt-alist
+          (if (equal? (assoc-ref action-cnt-alist ra) #f)
+            (set! action-cnt-alist (assoc-set! action-cnt-alist ra 1))
+            (set! action-cnt-alist (assoc-set! action-cnt-alist ra
+              (+ (assoc-ref action-cnt-alist ra) 1))))
 
-      ; Count the no. of rules that contain this action, and
-      ; save it in action-cnt-alist
-      (if (equal? (assoc-ref action-cnt-alist ra) #f)
-        (set! action-cnt-alist (assoc-set! action-cnt-alist ra 1))
-        (set! action-cnt-alist (assoc-set! action-cnt-alist ra
-          (+ (assoc-ref action-cnt-alist ra) 1))))
-
-      ; Calculate the weight of this rule
-      ; Save and accumulate the weight of an action in sum-weight-alist
-      ; Skip the action if its weight is zero, so that sum-weight-alist
-      ; and action-weight-alist do not contain actions that have a zero weight
-      (let ((w (calculate-rweight r)))
-        (if (> w 0)
-          (if (equal? (assoc-ref sum-weight-alist ra) #f)
-            (set! sum-weight-alist (assoc-set! sum-weight-alist ra w))
-            (set! sum-weight-alist (assoc-set! sum-weight-alist ra
-              (+ (assoc-ref sum-weight-alist ra) w))))
-          (cog-logger-debug ghost-logger
-            "Skipping action with zero weight: ~a" ra))))
+          ; Calculate the weight of this rule
+          ; Save and accumulate the weight of an action in sum-weight-alist
+          ; Skip the action if its weight is zero, so that sum-weight-alist
+          ; and action-weight-alist do not contain actions that have a zero weight
+          (let ((w (calculate-rweight r)))
+            (if (> w 0)
+              (if (equal? (assoc-ref sum-weight-alist ra) #f)
+                (set! sum-weight-alist (assoc-set! sum-weight-alist ra w))
+                (set! sum-weight-alist (assoc-set! sum-weight-alist ra
+                  (+ (assoc-ref sum-weight-alist ra) w))))
+              (cog-logger-debug ghost-logger
+                "Skipping action with zero weight: ~a" ra))))
+      (cog-logger-debug ghost-logger
+        "Skipping rule with zero STI/strength: ~a" r)))
     RULES)
 
   ; Finally calculate the weight of an action
@@ -189,11 +194,13 @@
   It evaluates and selects psi-rules from the attentional focus.
 "
   (define candidate-rules
-    (filter psi-rule?
-      (if ghost-af-only?
-        (cog-af)
-        (cog-get-atoms 'ImplicationLink))))
+    (if ghost-af-only?
+      (filter psi-rule? (cog-af))
+      (psi-get-rules ghost-component)))
   (define rule-selected (eval-and-select candidate-rules))
+
+  ; Stimulate the timer predicate
+  (ghost-stimulate-timer)
 
   (cog-logger-debug ghost-logger "Candidate Rules:\n~a" candidate-rules)
   (cog-logger-debug ghost-logger "Selected:\n~a" rule-selected)

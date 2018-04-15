@@ -104,18 +104,17 @@ statistics.  Most of this revolves around setting up postgres.
    https://debbugs.gnu.org/cgi/bugreport.cgi?bug=26616
    (in guile-2.2, it doesn't hang, but still behaves very badly)
 
+0.3) Opencog should be built with `link-grammar-5.4.3` or newer.
+   You can check it by running `link-parser --version`
+  If not, this version is available at:
+    https://www.abisource.com/projects/link-grammar/
+
+  or (for the latest, developer version) here:
+
+    https://github.com/opencog/link-grammar
+
 1) Set up and configure postgres, as described in
    `atomspace/opencog/persist/sql/README.md`
-
-2) Create and initialize the database. Pick any name you want;
-   here it is `learn-pairs`.
-```
-   createdb learn-pairs
-   cat atom.sql | psql learn-pairs
-```
-
-3) Start the cogserver, verify that connections to the database work.
-   (see steps 6,7,8 below, for more on how to do this.)
 
 Obtaining word-pair counts requires digesting a lot of text, and
 counting the word-pairs that occur in the text.  The easiest way of
@@ -130,9 +129,13 @@ so we may as well start using it right away.
 
 So, set up the text-ingestion pipeline:
 
-4) Install `link-grammar-5.3.15` or newer.
-
-5) Create/edit the `~/.guile` file and add the following content:
+2) Create and initialize a database. Pick any name you want;
+   here it is `learn-pairs`.
+```
+   createdb learn-pairs
+   cat atomspace/opencog/persist/sql/multi-driver/atom.sql | psql learn_pairs
+```
+3) Create/edit the `~/.guile` file and add the following content:
 ```
    (use-modules (ice-9 readline))
    (activate-readline)
@@ -141,30 +144,35 @@ So, set up the text-ingestion pipeline:
    (add-to-load-path "/usr/local/share/opencog/scm")
    (add-to-load-path ".")
 ```
+4) Copy all files from the `opencog/opencog/nlp/learn/run` directory
+   to your working directory.
 
-6) Select a language, and copy one of the `pair-count-??.scm` files
-   from the `run` directory to your working directory. Review and edit
-   the configuration as necessary. It contains the REPL port number,
-   and a default prompt: These are set up by default to avoid conflicts
-   and confusion, and to allow multiple languages to be processed at
-   the same time.  It also contains the database credentials -- that's
-   probably the only thing you need to change.
+   `run-server-parse.sh` starts the cogserver and sets a default prompt: set 
+   up by default to avoid conflicts and confusion, and to allow multiple 
+   languages to be processed at the same time. 
+   You need to pass the language and database credentials as arguments; 
+   see next step.
+   `wiki-ss-en.scm` starts the process of observing the text files contained
+   in the beta-pages folder, more on that later (see Bulk Text Parsing).
+   The rest of the relevant files are explained later.
 
-7) Start the REPL server. Eventually, you can use the
-   `run-all-servers.sh` file in the `run` directory to do this;
+5) Start the REPL server. Eventually, you can use the
+   `run-server-parse.sh` file in the `run` directory to do this;
    it creates a `byobu` session with different servers in different
    terminals, where you can keep an eye on them. However, the
-   first time through, it is better to do all this by hand. So:
+   first time through, it is better to do all this by hand. 
+   So, for now, start the REPL server in a terminal, as follows:
+   ```
+     guile -l observe-launch.scm  -- --lang en --db learn-pairs --user your_user --password asdf
+   ```
+   The --user option is needed only if the database owner is different from the
+   current user.
+   --password is also optional, not needed if no password was setup for the database
 
-7a) Start the REPL server in a terminal, as follows:
-```
-   guile -l pair-count-??.scm
-```
-
-8) Verify that the language processing pipeline works. In a second
+6) Verify that the language processing pipeline works. In a second
    terminal, try this:
 ```
-   rlwrap telnet localhost 17005  # or wherever your REPL server is configured.
+   rlwrap telnet localhost 17005  # default port for the REPL server in English.
    opencog-en> (observe-text "this is a test")
 ```
 
@@ -180,7 +188,7 @@ So, set up the text-ingestion pipeline:
    for parsing, counts the returned word-pairs, and stores them in
    the database.
 
-8a) Verify that the above resulted in data sent to the SQL database.
+7) Verify that the above resulted in data sent to the SQL database.
    Log into the database, and check:
 ```
    psql learn-pairs
@@ -192,7 +200,7 @@ So, set up the text-ingestion pipeline:
    pair-wise linkages for the above sentences. If the above are empty,
    something is wrong. Go to step zero.
 
-8b) Optionally reduce the amount of data that is collected. Currently,
+8) Optionally reduce the amount of data that is collected. Currently,
   the `observe-text` function in 'link-pipeline.scm` collects counts
   on four different kinds of structures:
 
@@ -211,15 +219,15 @@ So, set up the text-ingestion pipeline:
                 You almost surely do not need this.  This is for my
                 own personal curiosity.
 
-8c) Optionally tune the forced garbage collection parameters. Currently
+9) Optionally tune the forced garbage collection parameters. Currently
   garbage collection is forced whenever the guile heap exceeds 750
   MBytes; this helps keep RAM usage down on small-RAM machines.  However,
   it does cost CPU time.  Adjust the `max-size` parameter in
   `observe-text` in the `link-pipeline.scm` file to suit your whims in
   RAM usage and time spent in GC.
 
-9) Get ready to feed it text (see Bulk Text Parsing section below). 
-  It would be best to get text that
+10) Get ready to feed text to the pipeline (see Bulk Text Parsing 
+  section below). It would be best to get text that
   consists of narrative literature, adventure and young-adult novels,
   newspaper stories. These contain a good mix of common nouns and verbs,
   which is needed for conversational natural language.
@@ -240,9 +248,10 @@ So, set up the text-ingestion pipeline:
   and pre-processing texts from Project Gutenberg, Wikipedia, and the
   "Archive of Our Own" fan-fiction website.
 
-9a) The current pipeline for Chinese text requires word segmentation
+11) The current pipeline for Chinese text requires word segmentation
   to be performed outside of OpenCog. This can be done using jieba
-  https://github.com/fxsjy/jieba So: first, install it:
+  https://github.com/fxsjy/jieba 
+  If you are working with Chinese texts, install:
   `pip install jieba` and then segment text:
   `run/jieba-segment.py PATH-IN PATH-OUT`. This python utility is in
   the `run` directory.  It might be best to create modified versions
@@ -253,7 +262,7 @@ So, set up the text-ingestion pipeline:
   you will want to use `zh-pre` or `yue-pre` for the language; this
   disables the addition of spaces between hanzi characters.
 
-10) After doing at least several days worth of parsing  (i.e. at least
+12) After doing at least several days worth of parsing  (i.e. at least
    hundreds of articles, tens of thousands of sentences) the word-pair
    mutual information can be extracted. Do the stuff in section "Mutual
    Information" section below.
@@ -261,61 +270,79 @@ So, set up the text-ingestion pipeline:
    If the parsing is interrupted, you can restart the various scripts;
    they will automatically pick up where they left off.
 
-11) Using the extracted mutual information for word-pairs, the MST
-   parsing step can be started. See below. Run this for several days.
+13) Using the extracted mutual information for word-pairs, the MST
+   parsing step can be started. See the section "Minimum Spanning Tree 
+   parsing" below. Run this for several days.
    At the end of this, you will have a bunch of statistics on
    "pseudo-connector sets": pairs which associate a word to a
    disjunct of pseudo-connectors.
 
-12) Perform clustering research.  You're on your own, now.
+14) Perform clustering research.  You're on your own, now.
 
 That's all for now, folks!
 
 
 Bulk Text Parsing
 -----------------
-Set up distinct databases, one for each language:
+Set up distinct databases, one for each language you will work with:
 ```
     createdb fr_pairs lt_pairs pl_pairs simple_pairs
-    cat opencog/persist/sql/multi-driver/atom.sql | psql foobar_pairs
+    cat atomspace/opencog/persist/sql/multi-driver/atom.sql | psql ??_pairs
 ```
 
+The pair-counting scripts expect your text files to be stored in a directory
+called `beta-pages` in your working directory. If you used the provided 
+download scripts, you should have your files in `alpha-pages`.
 Now, build some working directories (so that we don't mess up
 alpha-pages after all that work)
 ```
     cp -pr alpha-pages beta-pages
 ```
+If you got your texts in some other way, just copy the files you want to
+process into beta-pages (keep in mind they will be removed from there).
+
 * Review the file `opencog/nlp/learn/run/README`, and then copy the
-  scripts into your working dir. 
-* Modify as needed for chosen language. Most of them don't need modification,
-  by default, unless you want to do something unusual.
+  scripts into your working dir, if you didn't do it before.
+* Here's a brief description of the relevant files for Text Parsing.
+  They don't need modification by default, unless you want to do 
+  something unusual.
 
-  -- `run-all-servers.sh` runs the cogserver for
-     one language, in a multi-paneled `byobu` window.
-     It doesn't start the final batch script `./wiki-ss-<lang>.sh`,
-     which needs to be started by hand (for the <lang> that you want to
-     process). Use F4 to move to the 'parse' tab and start it there.
+  -- `run-server-parse.sh` creates a `byobu` session with different
+   terminals, where you can keep an eye on the processes. One terminal
+   calls `observe-launch.scm` to start the cogserver, and another one
+   telnets into it using a language-specific port.
+   You need to pass it the language of the text to process and the database
+   credentials (see next step).
 
-  -- `wiki-ss-en.sh` performs batch processing of input text files.
-     This calls `ss-one.sh` to process one text file.
+  -- `wiki-ss-??.sh` performs batch processing of input text files in
+     the specified language. This calls `ss-one.sh` to process one text file.
 
   -- `ss-one.sh` calls `split-sentences.pl` to split the text file into
-     sentences, and then calls `submit-one.pl` to send the sentences
-     for parsing. None of these should need any modification.
+     sentences, and then calls `submit-one.pl` to send the sentences to the
+     cogserver for parsing. None of these should need any modification.
 
-  -- `pair-count-lang.scm` starts the cogserver and opens the 
-      database. You need to modify 
-      ```
-          (sql-open "postgres:///en_pairs?user=ubuntu&password=asdf")
-      ```
-      to contain your database name, username and password (if needed)
+  -- `opencog-??.conf` contains configuration settings for the cogserver, 
+     including the language-specific port to use.
 
-* Run `run-all-servers.sh` in your working directory.
-* In the byobu terminal, navigate to the 'parse' tab (with F4),
-  go back to the input text dir (the dir that contains `beta-pages`), and
-  run `./wiki-ss-<lang>.sh`
+  -- `observe-launch.scm` starts the cogserver and opens the database. 
+
+* Run `run-server-parse.sh` in your working directory.
+      ```
+        ./run-server-parse.sh lang ??-pairs your_user your_password
+      ```
+      (user and password are optional, as explained in step 5 above).
+
+* In the parse tab of byobu (you can navigate with the F3 and F4 keys),
+  run `./wiki-ss-??.sh`
+   If the above command shows the error
+   ```
+    nc: invalid option -- 'N'
+   ```
+   open ss-one.sh and remove the -N option from the nc commands.
+
 * Wait a few days.
-* This requires postgres 8.4 or newer, for multiple reasons. One reason
+* When finished, stop the cogserver
+* This requires postgres 9.3 or newer, for multiple reasons. One reason
   is that older postgres don't automatically VACUUM (see "performance"
   below) The other is the list membership functions are needed.
 * Be sure to perform the postgres tuning recommendations found in
@@ -344,19 +371,16 @@ where type 7 is `CountTruthValue`.
 Mutual Information of Word Pairs
 --------------------------------
 After accumulating a few million word pairs, we're ready to compute
-the mutual entropy between them.  This is done manually, by running
-functions defined in `(opencog nlp learn)`.
-
+the mutual entropy between them.
+This is done by running
 ```
-	(use-modules (opencog) (opencog persist) (opencog persist-sql))
-	(use-modules (opencog matrix))
-	(use-modules (opencog nlp) (opencog nlp learn))
-	(sql-open "postgres:///en_pairs?user=ubuntu&password=asdf")
-	(define ala (make-any-link-api))
-	(define asa (add-pair-stars ala))
-	(batch-pairs asa)
-	(print-matrix-summary-report asa)
+guile -l compute-mi.scm  -- --lang ?? --db ??-pairs --user your_user --password asdf
 ```
+(again, --user and --password are optional, as explained in step 5 above).
+It uses the `(opencog matrix)` subsystem to perform the core work.
+The system might not be robust enough at this stage yet, so if you find an
+error while executing this code, run each command separately
+to trace it.
 
 Batch-counting might take hours or longer, depending on your dataset
 size. The batching routine will print to stdout, giving a hint of
@@ -402,9 +426,6 @@ select count(uuid) from atoms where type = 77; gives  226030 (226K words)
 select count(uuid) from atoms where type = 8;  gives 5050835 (5M pairs ListLink)
 select count(uuid) from atoms where type = 27; gives 5050847 (5M pairs EvaluationLink)
 
-The code for computing word-pair MI is in `batch-word-pair.scm`. It uses
-the `(opencog matrix)` subsystem to perform the core work.
-
 
 Minimum Spanning Tree parsing
 -------------------------------
@@ -418,27 +439,38 @@ Minimum spanning tree code is in `mst-parser.scm`. The current version
 works well.
 
 To perform MST parsing in bulk:
-* Copy `run/mst-count-en.scm`, `run/mst-one.sh` and `run/wiki-mst-en.sh`
-  to your working directory.
+* Review the file `opencog/nlp/learn/run/README`, and then copy the
+  scripts into your working dir, if you didn't do it before.
+  `run-server-mst.sh` starts the cogserver and sets a default prompt: set 
+  up by default to avoid conflicts and confusion, and to allow multiple 
+  languages to be processed at the same time. 
+  You need to pass the language and database credentials as arguments; 
+  see next steps
+  `wiki-mst-??.scm` starts the process of observing the text files contained
+  in the gamma-pages folder, by calling `mst-one.sh`, which sends a sentence
+  to the cogserver with `submit-one.pl`, giving the correct opencog command.
 
 * (Optional but suggested) Make a copy of your word-pair database, "just
   in case".  You can copy databases by saying:
 ````
-  createdb -T existing_dbname  new_dbname
+  createdb -T existing_dbname new_dbname
 ```
 
-* Edit `mst-count-en.scm` and set the correct database login
-  credentials. (Maybe to the new_dbname you crate above.)
-
-* Edit `wiki-mst-en.sh` and change the directory `gamma-pages` to
+* Edit `wiki-mst-??.sh` and change the directory `gamma-pages` to
   whatever directory holds your source text (or copy your text to
   the `gamma-pages` directory). Be aware that, during processing,
   text files are removed from this directory.
 
-* Start the REPL server by running ./run-all-servers.sh or
-```
-  guile -l mst-count-en.scm
-```
+* If you are interested in the actual sentence parses, open
+  `mst-one.sh` and change the observe variable from `observe-mst` to
+  `observe-mst-extra`. Parses will be written in `mst-parses.txt`.
+
+* Run `run-server-mst.sh` in your working directory.
+      ```
+        ./run-server-parse.sh lang new_dbname your_user your_password
+      ```
+      (user and password are optional, as explained before).
+
   Wait 10 to 60+ minutes for the guile prompt to appear.  This script
   opens a connection to the database, and then loads all word-pairs
   into the atomspace.  This can take a long time, depending on the
@@ -446,12 +478,19 @@ To perform MST parsing in bulk:
   needed to perform the MST parse.
 
 * Once the above has finished loading, the parse script can be
-  started. Run the `wiki-mst-en.sh` in a terminal, and wait a few days
-  for data to accumulate.  Once this is done, you can move to the next
-  step, which is exploring the resulting connector-set (disjunct)
-  database.
+  started. Run `wiki-mst-??.sh` in one of the unused byob windos,
+  (navigate with F3, F4) and wait a few days for data to accumulate. 
+   If the above command shows the error
+   ```
+    nc: invalid option -- 'N'
+   ```
+   open mst-one.sh and remove the -N option from the nc commands.
 
-* If parsing is stopped for any reason, you can just re-run these
+* When finished, stop the cogserver. Once this is done, you can move to 
+  the next step, which is exploring the resulting connector-set (disjunct)
+  database. You can also review the sentence parses in `mst-parses.txt`.
+
+* If the process is stopped for any reason, you can just re-run these
   scripts; they will pick up where they left off.
 
 

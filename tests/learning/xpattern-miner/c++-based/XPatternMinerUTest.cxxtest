@@ -81,6 +81,7 @@ XPatternMinerUTest::XPatternMinerUTest() : _scm(&_as)
 {
 	logger().set_level(Logger::INFO);
 	logger().set_timestamp_flag(false);
+	// logger().set_sync_flag(true);
 	logger().set_print_to_stdout_flag(true);
 
 	// Configure scheme load-paths that are common for all tests.
@@ -257,8 +258,7 @@ void XPatternMinerUTest::test_AB_ABC()
 		AndXY = al(AND_LINK, X, Y),
 		InhXY = al(INHERITANCE_LINK, X, Y),
 		InhAY = al(INHERITANCE_LINK, A, Y);
-	HandleTree expected({ al(LAMBDA_LINK, VarXY, al(LOCAL_QUOTE_LINK, AndXY)),
-				          HandleTree(al(LAMBDA_LINK, VarXY, InhXY),
+	HandleTree expected({ HandleTree(al(LAMBDA_LINK, VarXY, InhXY),
 				                     { al(LAMBDA_LINK, Y, InhAY) }) });
 
 	logger().debug() << "results = " << oc_to_string(results);
@@ -555,9 +555,9 @@ void XPatternMinerUTest::test_2conjuncts_5()
 	// Like test_2conjuncts_2 but setting the info heuristic to 1,
 	// meaning that the frequency of a conjunction of strongly
 	// connected components will be equal to the minimum frequency of
-	// each component. For that reason it should be able to discover
-	// the desired pattern.
-	XPMParameters param(9/*minsup*/, 2/*nconjucts*/, initpat, -1/*maxdepth*/, 1/*info*/);
+	// each component. For that reason it should not be able to
+	// discover the desired pattern.
+	XPMParameters param(9/*minsup*/, 2/*nconjuncts*/, initpat, -1/*maxdepth*/, 1/*info*/);
 	XPatternMiner pm(_as, param);
 	HandleTree results = pm();
 	Handle non_expected_pattern = tmp_al(LAMBDA_LINK,
@@ -606,7 +606,7 @@ void XPatternMinerUTest::test_InferenceControl()
 		                        tmp_al(LIST_LINK, B, T))),
 		initpat = tmp_al(LAMBDA_LINK, vardecl, clauses);
 
-	XPMParameters param(2/*minsup*/, 3/*ngram*/, initpat, 2/*maxdepth*/, 1/*info*/);
+	XPMParameters param(2/*minsup*/, 3/*nconjuncts*/, initpat, 2/*maxdepth*/, 1/*info*/);
 	XPatternMiner pm(_as, param);
 	HandleTree results = pm();
 

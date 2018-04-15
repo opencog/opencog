@@ -49,37 +49,52 @@ Here is a list of features that are fully supported in GHOST:
 - [Unordered Matching](https://github.com/bwilcox-1234/ChatScript/blob/master/WIKI/ChatScript-Basic-User-Manual.md#unordered-matching--)
 
 
-The action selection in GHOST is goal-driven, so all of the GHOST rules should be linked to one or more goals:
+The action selection in GHOST is goal-driven, so all of the GHOST rules should be linked to one or more goals. You can link more than one goal to a rule, just like defining concepts, use a space to separate them.
+
+There are two ways of creating goals,
+1) Top level goal(s)
 
 ```
-#goal: (novelty=0.8 please_user=0.4)
+goal: (please_user=0.8)
+```
+
+In this case, all the rules created after it will be having the same goal, until seeing another top level goal or the end of file is reached.
+
+For the convenience of the authors, an experimental feature has been added -- the rules being created under a top level goal will have a different weight associated, based on the order of creation. The relationship between the order and the weight forms a geometric sequence with a factor of 0.5.
+
+For example, if there are five rules under the above `please_user=0.8` goal, the first rule will have a weight of 0.4, the second one will have 0.2, the third one will have 0.1, and so on. The sum of the weights will get closer to the weight of the top level goal (0.8) if more rules are created under it.
+
+2) Rule level goal(s)
+
+```
+#goal: (novelty=0.67 please_user=0.4)
 u: (what be you name) I forgot; what's YOUR name, sweet wonderful human
 ```
 
-Topic level goals can also be specified:
-
-```
-goal: (please_user=0.5)
-```
-
-in which case the specified goals will be applied to every single rule under
-the same topic.
+In this case, the goals will only be linked to the rule created immediately after it. Top level goals will also be linked to the rule if there are any. A top level goal will be overwritten by a rule level goal if the same goal is defined.
 
 Basic examples of how to use GHOST is available [HERE](https://github.com/opencog/opencog/blob/master/examples/ghost/basic.scm)
 
 
 ## How To Run
 
-1) Start the [RelEx server](https://github.com/opencog/relex#opencog-serversh)
+1) Start the [RelEx server](https://github.com/opencog/relex#opencog-serversh).
+
+   Note: You will need to do `(set-relex-server-host)` if you are running it via Docker.
+
 2) Start Guile
 3) Load the needed modules
+
 ```
 (use-modules (opencog)
+             (opencog nlp)
              (opencog nlp relex2logic)
              (opencog openpsi)
              (opencog eva-behavior)
-             (opencog ghost))
+             (opencog ghost)
+             (opencog ghost procedures))
 ```
+
 4) Start authoring
 
 A rule can be created by using `ghost-parse`:
@@ -94,10 +109,10 @@ Similarly for creating concepts:
 (ghost-parse "concept: ~young (child kid youngster)")
 ```
 
-One can also load a topic file by using `ghost-parse-file`:
+One can also parse a rule file by using `ghost-parse-file`:
 
 ```
-(ghost-parse-file "path/to/the/topic/file")
+(ghost-parse-file "path/to/the/rule/file")
 ```
 
 5) Play with it
@@ -109,3 +124,81 @@ One can quickly test if a rule can be triggered by using `test-ghost`:
 ```
 
 The output `[INFO] [Ghost] Say: "Hello human"` will be printed.
+
+## To Run With ECAN (experimental)
+1) Start the [RelEx server](https://github.com/opencog/relex#opencog-serversh).
+
+   Note: You will need to do `(set-relex-server-host)` if you are running it via Docker.
+
+2) Start the CogServer, e.g.
+
+```
+opencog/build/opencog/cogserver/server/cogserver
+```
+
+3) Connect to the CogServer in a new terminal, e.g.
+
+```
+telnet localhost 17001
+```
+
+4) Load the ECAN module
+
+```
+loadmodule opencog/build/opencog/attention/libattention.so
+```
+
+5) Start ECAN
+
+```
+start-ecan
+```
+
+6) Load the needed modules
+
+```
+(use-modules (opencog)
+             (opencog nlp)
+             (opencog nlp relex2logic)
+             (opencog openpsi)
+             (opencog attention)
+             (opencog eva-behavior)
+             (opencog ghost)
+             (opencog ghost procedures))
+```
+
+7) Before creating any rules, run
+
+```
+(ecan-based-ghost-rules #t)
+```
+
+Note, rules being created after running this will be slimmer (preferred) and can only work with this ECAN approach. They are NOT backward-compatible with the `test-ghost`.
+
+8) Start authoring, e.g.
+
+```
+(ghost-parse "#goal: (novelty=0.24) u: (eat apple) I want an apple")
+```
+
+Or use `ghost-parse-file` to parse a rule file.
+
+9) Start GHOST
+
+```
+(ghost-run)
+```
+
+10) Send some input, e.g.
+
+```
+(ghost "I eat apples")
+```
+
+11) Stimulate the atoms correspond to the input. NOTE, this is normally done automatically when the words are perceived. Since we don't have the perception pipeline running for this example, let's stimulate the input atoms manually, e.g.
+
+```
+(ghost-stimulate-words "I" "eat" "apples")
+```
+
+The output `[INFO] [GHOST] Say: "I want an apple"` will then be printed on the CogServer.

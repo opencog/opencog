@@ -140,7 +140,7 @@
     ((has-match? "^[ ]*'[a-zA-Z]+\\b" str)
       (result:suffix 'LITERAL location
         (substring (string-trim (match:substring current-match)) 1)))
-    ((has-match? "^[ ]*[a-zA-Z'-]+\\b" str)
+    ((has-match? "^[ ]*[a-zA-Z’'-]+\\b" str)
       (if (is-lemma? (string-trim (match:substring current-match)))
         (result:suffix 'LEMMA location
           (string-trim (match:substring current-match)))
@@ -157,7 +157,7 @@
      (result:suffix 'COMMA location
         (string-trim (match:substring current-match))))
     ; This should always be near the end, because it is broadest of all.
-    ((has-match? "^[ \t]*[~'.,_!?0-9a-zA-Z-]+" str)
+    ((has-match? "^[ \t]*[~’'._!?0-9a-zA-Z-]+" str)
         (result:suffix 'STRING location
           (string-trim (match:substring current-match))))
     ; NotDefined token is used for errors only and there shouldn't be any rules.
@@ -240,7 +240,7 @@
 
     (input
       (declarations) : $1
-      (goal) : (begin (create-shared-goal
+      (goal) : (begin (create-top-lv-goal
         (eval-string (string-append "(list " $1 ")"))) $1)
       (rule) : $1
       (enter) : $1
@@ -588,12 +588,13 @@
 
     (args
       (arg) : $1
-      (args arg) : (format #f "~a ~a" $1 $2)
+      (arg COMMA args) : (format #f "~a ~a" $1 $3)
     )
 
     (arg
       (LEMMA) : (format #f "(cons 'arg \"~a\")" $1)
       (LITERAL) : (format #f "(cons 'arg \"~a\")" $1)
+      (NUM) : (format #f "(cons 'arg \"~a\")" $1)
       (STRING) : (format #f "(cons 'arg \"~a\")" $1)
       (variable-grounding) : $1
     )
@@ -699,5 +700,7 @@
   Parse a topic file in a Guile shell, for debugging mainly.
 "
   (define parser (cs-parser))
-  (parser (cs-lexer (open-file-input-port file)) error)
+  (define fp (open-file-input-port file))
+  (set-port-encoding! fp "UTF-8")
+  (parser (cs-lexer fp) error)
 )

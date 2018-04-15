@@ -281,10 +281,14 @@ Handle LGParseLink::cvt_linkage(Linkage lkg, int i, const char* idstr,
 		if (0 == w and 0 == strcmp(wrd, "LEFT-WALL")) wrd = "###LEFT-WALL###";
 		if (nwords-1 == w and 0 == strcmp(wrd, "RIGHT-WALL")) wrd = "###RIGHT-WALL###";
 
+		uuid_t uu2;
+		uuid_generate(uu2);
+		char idstr2[37];
+		uuid_unparse(uu2, idstr2);
 		char buff[801] = "";
 		strncat(buff, wrd, 800);
 		strncat(buff, "@", 800);
-		strncat(buff, parseid, 800);
+		strncat(buff, idstr2, 800);
 		Handle winst(as->add_node(WORD_INSTANCE_NODE, buff));
 		wrds.push_back(winst);
 

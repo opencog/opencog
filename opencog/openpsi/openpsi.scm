@@ -8,28 +8,20 @@
 
 ; --------------------------------------------------------------
 (define-module (opencog openpsi)
+  #:use-module (ice-9 optargs) ; For `define*`
+  #:use-module (ice-9 threads) ; For `par-map`
+  #:use-module (srfi srfi-1) ; For `drop-right`, `append-map`, etc.
   #:use-module (opencog)
   #:use-module (opencog exec)
+  #:use-module (opencog logger)
+
   #:export (
     ; From action-selector.scm
     psi-set-action-selector! psi-action-selector
     psi-select-rules
 
-    ; From demand.scm
-    psi-get-all-demands psi-get-all-enabled-demands psi-get-all-valid-demands
-    psi-demand psi-demand? psi-set-demand-value
-    psi-demand-value-increase psi-demand-value-decrease
-    psi-demand-skip psi-demand-skip?
-
-    ; From control.scm
-    psi-set-updater! psi-get-updater psi-controller psi-controller-idle
-    psi-controller-busy psi-controller-occupy psi-controller-release
-    psi-rule-set-atomese-weight psi-set-controlled-rule
-    psi-get-controlled-rules psi-rule-atomese-weight
-    psi-controller-update-weights psi-rule-disable psi-rule-enable
-
     ; From rule.scm
-    psi-get-rules psi-get-all-rules psi-get-all-actions psi-action?
+    psi-get-rules psi-get-all-rules psi-get-all-actions
     psi-rule-alias
     psi-partition-rule-with-alias psi-related-goals
     psi-rule-satisfiability psi-get-satisfiable-rules
@@ -39,7 +31,8 @@
 
     ; From main.scm
     psi-running? psi-loop-count psi-run-continue? psi-step psi-run psi-halt
-    psi-get-logger psi-component
+    psi-get-logger psi-component psi-set-dgv! psi-dgv
+    psi-goal-value psi-set-gv! psi-urge psi-decrease-urge psi-increase-urge
 
     ; From utilities.scm
     psi-prefix-str psi-suffix-str
@@ -61,12 +54,11 @@
 
 (load-extension "libopenpsi" "opencog_openpsi_init")
 
-(load-from-path "opencog/openpsi/action-selector.scm")
-(load-from-path "opencog/openpsi/demand.scm")
-(load-from-path "opencog/openpsi/control.scm")
-(load-from-path "opencog/openpsi/rule.scm")
-(load-from-path "opencog/openpsi/main.scm")
+; NOTE: The order of loading helps avoid warnings
 (load-from-path "opencog/openpsi/utilities.scm")
+(load-from-path "opencog/openpsi/rule.scm")
+(load-from-path "opencog/openpsi/action-selector.scm")
+(load-from-path "opencog/openpsi/main.scm")
 
 ; --------------------------------------------------------------
 ; Documentations for C++ bindings from libopenpsi

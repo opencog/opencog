@@ -46,6 +46,21 @@
   ghost-component)
 
 ; ----------
+; Define the logger for GHOST
+(define ghost-logger (cog-new-logger))
+
+; Default configuration for the GHOST logger
+(cog-logger-set-component! ghost-logger "GHOST")
+(cog-logger-set-level! ghost-logger "info")
+(cog-logger-set-stdout! ghost-logger #t)
+
+(define-public (ghost-get-logger)
+"
+  Return the logger for GHOST.
+"
+  ghost-logger)
+
+; ----------
 ; Various anchors, predicates, values etc that will be used
 
 (define ghost-curr-proc (Anchor (ghost-prefix "Currently Processing")))
@@ -62,37 +77,26 @@
 (define strval-random-gambit (StringValue "random gambit"))
 (define strval-gambit (StringValue "gambit"))
 
-; ----------
-; Define the logger for GHOST
-(define ghost-logger (cog-new-logger))
-
-; Default configuration for the GHOST logger
-(cog-logger-set-component! ghost-logger "GHOST")
-(cog-logger-set-level! ghost-logger "info")
-(cog-logger-set-stdout! ghost-logger #t)
-
-(define-public (ghost-get-logger)
-"
-  Return the logger for GHOST.
-"
-  ghost-logger)
-
 ;; --------------------
 ;; For rule parsing
 
 ; When set, all the rules created will be under this topic
 (define rule-topic '())
 
-; A list of shared goals for all the rules under the same topic file
-(define shared-goals '())
+; A list of top level goals that will be shared with all the rules
+; defined under it
+(define top-lv-goals '())
+
+; How many rules we've seen under a particular top level goal
+(define goal-rule-cnt 0)
 
 ; A list of local variables exist in the pattern of a rule,
 ; during rule parsing & creation
 (define pat-vars '())
 
-; A list to keep track of what rules have been created
+; A list to keep track of what rules hierarchy
 ; Will be used when dealing with rejoinders
-(define rule-lists '())
+(define rule-hierarchy '())
 
 ;; --------------------
 ;; For rule matching
@@ -112,11 +116,11 @@
 
 (load "ghost/test.scm")
 (load "ghost/utils.scm")
-(load "ghost/functions.scm")
 (load "ghost/terms.scm")
 (load "ghost/translator.scm")
 (load "ghost/matcher.scm")
 (load "ghost/cs-parse.scm")
+(load "ghost/stimulation.scm")
 
 ;; --------------------
 ;; To parse rules and interact with GHOST, the main interfaces
