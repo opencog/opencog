@@ -144,6 +144,11 @@
 (load "ghost/stimulation.scm")
 
 ;; --------------------
+;; Key used to create a singly linked-list to record the sequence of
+;; input sentences.
+(define next-sent-key (Predicate "next-sentence"))
+
+;; --------------------
 ;; To parse rules and interact with GHOST, the main interfaces
 
 (define-public (ghost-parse TXT)
@@ -167,6 +172,10 @@
 "
   (define sent (car (nlp-parse TXT)))
   (generate-word-seqs sent)
+  (let ((curr-sent (ghost-get-curr-sent)))
+    (if (not (null? curr-sent))
+      (cog-set-value! curr-sent next-sent-key sent))
+  )
   (State ghost-curr-proc sent))
 
 ; ----------
