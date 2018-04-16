@@ -511,3 +511,10 @@
   (for-each (lambda (kw) (Member kw rule-topic)) (terms-to-atomese KEYWORDS))
 
   rule-topic)
+
+(define (create-user-variable UVAR VAL)
+"
+  Define a new user variable.
+"
+  (ghost-set-user-variable (ghost-uvar UVAR) (List (Word VAL)))
+)
