@@ -275,6 +275,7 @@
         (create-topic $2 (string-split $3 #\sp) (list))
       (TOPIC ID names LSBRACKET RSBRACKET) :
         (create-topic $2 (string-split $3 #\sp) (list))
+      (UVAR EQUAL name) : (create-user-variable $1 $3)
     )
 
     (declaration-sequence
