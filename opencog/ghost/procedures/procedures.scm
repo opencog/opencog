@@ -28,6 +28,10 @@
     start_timer
     decrease_urge
     increase_urge
+    stimulate_words
+    stimulate_concepts
+    stimulate_rules
+    set_rule_sti
 
     ; Utilities
     is-model-true?
@@ -133,3 +137,15 @@
     )
   )
 )
+
+; --------------------------------------------------------------
+(define (get-rule-from-alias alias)
+"
+  get-rule-from-alias ALIAS
+
+  Get the psi-rule with ALIAS, assuming ALIAS is unique
+  among all the psi-rules.
+"
+  (car (filter psi-rule?
+    (cog-chase-link 'ListLink 'ImplicationLink
+      (Concept (string-append psi-prefix-str alias))))))
