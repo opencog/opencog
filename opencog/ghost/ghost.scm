@@ -83,6 +83,9 @@
 ; When set, all the rules created will be under this topic
 (define rule-topic '())
 
+; The initial urge of goals
+(define initial-urges '())
+
 ; A list of top level goals that will be shared with all the rules
 ; defined under it
 (define top-lv-goals '())
