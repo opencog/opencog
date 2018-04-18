@@ -241,10 +241,8 @@
 
     (input
       (declarations) : $1
-      (urge) : (begin (set-initial-urge
-        (eval-string (string-append "(list " $1 ")"))) $1)
-      (goal) : (begin (create-top-lv-goal
-        (eval-string (string-append "(list " $1 ")"))) $1)
+      (urge) : (set-initial-urge (eval-string (string-append "(list " $1 ")")))
+      (goal) : (create-top-lv-goal (eval-string (string-append "(list " $1 ")")))
       (rule) : $1
       (enter) : $1
       (COMMENT) : #f
