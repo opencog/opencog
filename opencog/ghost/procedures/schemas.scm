@@ -65,8 +65,55 @@
 "
   increase_urge GOAL VALUE
 
-  increase the urge of GOAL by VALUE.
+  Increase the urge of GOAL by VALUE.
 "
   (psi-increase-urge (Concept (cog-name goal))
     (string->number (cog-name value)))
+)
+
+(define (stimulate_words . words)
+"
+  stimulate_words WORDS
+
+  Stimulate the WordNodes corresponding to WORDS.
+"
+  (for-each
+    (lambda (w) (cog-stimulate (Word (cog-name w)) 200))
+    words)
+  fini
+)
+
+(define (stimulate_concepts . concepts)
+"
+  stimulate_concepts CONCEPTS
+
+  Stimulate the ConceptNodes corresponding to CONCEPTS.
+"
+  (for-each
+    (lambda (c) (cog-stimulate (Concept (cog-name c)) 200))
+    concepts)
+  fini
+)
+
+(define (stimulate_rules . rule-labels)
+"
+  stimulate_rules RULE-LABELS
+
+  Stimulate the rules with RULE-LABELS.
+"
+  (for-each
+    (lambda (r) (cog-stimulate (get-rule-from-alias (cog-name r)) 200))
+    rule-labels)
+  fini
+)
+
+(define (set_rule_sti rule-label val)
+"
+  set_rule_sti RULE-LABEL VAL
+
+  Set the STI of a rule with RULE-LABEL to VAL.
+"
+  (cog-set-sti!
+    (get-rule-from-alias (cog-name rule-label))
+    (string->number (cog-name val)))
 )

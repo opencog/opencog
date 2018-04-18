@@ -457,7 +457,10 @@
                     (psi-rule
                       (list (Satisfaction (VariableList vars) (And conds)))
                       action
-                      (psi-goal (car goal) 0)
+                      (psi-goal (car goal)
+                        ; Check if an initial urge has been assigned to it
+                        (let ((urge (assoc-ref initial-urges (car goal))))
+                          (if urge (- 1 urge) 0)))
                       ; Check if the goal is defined at the rule level
                       (if (member goal GOAL)
                         (stv (cdr goal) .9)
@@ -476,18 +479,28 @@
   (map (lambda (m) (Reference m (Concept NAME)))
        (terms-to-atomese MEMBERS)))
 
-(define (create-top-lv-goal GOAL)
+(define (set-initial-urge URGES)
+"
+  Record the initial urge of a goal, which will be used during goal creation.
+"
+  (for-each
+    (lambda (u)
+      (set! initial-urges (assoc-set! initial-urges (car u) (cdr u))))
+    URGES
+  )
+)
+
+(define (create-top-lv-goal GOALS)
 "
   Create a topic level goal that will be shared among the rules under the
   same topic.
 "
-  (set! top-lv-goals GOAL)
+  (set! top-lv-goals GOALS)
 
   ; Reset the count when we see a new top level goal
   (set! goal-rule-cnt 0))
 
-(define*-public (create-topic TOPIC-NAME
-                #:optional (FEATURES (list)) (KEYWORDS (list)))
+(define* (create-topic TOPIC-NAME #:optional (FEATURES (list)) (KEYWORDS (list)))
 "
   Create a GHOST topic named TOPIC-NAME.
 
