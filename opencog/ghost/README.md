@@ -49,7 +49,7 @@ Here is a list of features that are fully supported in GHOST:
 - [Unordered Matching](https://github.com/bwilcox-1234/ChatScript/blob/master/WIKI/ChatScript-Basic-User-Manual.md#unordered-matching--)
 
 
-The action selection in GHOST is goal-driven, so all of the GHOST rules should be linked to one or more goals. You can link more than one goal to a rule, just like defining concepts, use a space to separate them.
+The action selection in GHOST is goal-driven, so all of the GHOST rules should be linked to one or more goals. You can link more than one goal to a rule, just like defining concepts, use a space to separate them. The value assigned to a goal will affect the strength of the rules (`ImplicationLinks`) linked to that goal.
 
 There are two ways of creating goals,
 1) Top level goal(s)
@@ -72,6 +72,18 @@ u: (what be you name) I forgot; what's YOUR name, sweet wonderful human
 ```
 
 In this case, the goals will only be linked to the rule created immediately after it. Top level goals will also be linked to the rule if there are any. A top level goal will be overwritten by a rule level goal if the same goal is defined.
+
+There is also an urge associated with a goal. The urge of a goal is 1 (maximum) by default. The default urge can be changed, and it should be done before creating the goal, for example:
+
+```
+urge: (please_user=1 novelty=0.5)
+
+goal: (please_user=0.9)
+  ; ... rules under the please_user goal ...
+
+goal: (novelty=0.9)
+  ; ... rules under the novelty goal ...
+```
 
 Basic examples of how to use GHOST is available [HERE](https://github.com/opencog/opencog/blob/master/examples/ghost/basic.scm)
 

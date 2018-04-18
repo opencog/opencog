@@ -73,6 +73,7 @@
     ((has-match? "^[ ]*\r" str) (result:suffix 'CR location ""))
     ; FIXME: This is not really newline.
     ((string=? "" str) (cons (make-lexical-token 'NEWLINE location #f) ""))
+    ((has-match? "^[ \t]*urge:" str) (result:suffix 'URGE location #f))
     ((has-match? "^[ \t]*goal:" str) (result:suffix 'GOAL location #f))
     ((has-match? "^[ \t]*#goal:" str) (result:suffix 'RGOAL location #f))
     ((has-match? "^[ \t]*#!" str) ; This should be checked always before #
@@ -222,8 +223,8 @@
     ; MOVAR = Match Variables grounded in their original words
     ; ? = Comparison tests
     ; VLINE = Vertical Line |
-    (CONCEPT TOPIC RESPONDERS REJOINDERS GAMBIT GOAL RGOAL COMMENT SAMPLE_INPUT
-     WHITESPACE
+    (CONCEPT TOPIC RESPONDERS REJOINDERS GAMBIT URGE GOAL RGOAL COMMENT
+     SAMPLE_INPUT WHITESPACE
       (right: LPAREN LSBRACKET << ID VAR * ^ < LEMMA LITERAL NUM DICTKEY
               STRING *~n *n UVAR MVAR MOVAR EQUAL NOT RESTART LBRACE VLINE COMMA)
       (left: RPAREN RSBRACKET RBRACE >> > DQUOTE)
@@ -240,8 +241,8 @@
 
     (input
       (declarations) : $1
-      (goal) : (begin (create-top-lv-goal
-        (eval-string (string-append "(list " $1 ")"))) $1)
+      (urge) : (set-initial-urge (eval-string (string-append "(list " $1 ")")))
+      (goal) : (create-top-lv-goal (eval-string (string-append "(list " $1 ")")))
       (rule) : $1
       (enter) : $1
       (COMMENT) : #f
@@ -387,22 +388,27 @@
           (list) "" $1)
     )
 
+    (urge
+      (URGE LPAREN goal-members RPAREN) : $3
+    )
+
     (rule-goal
-        (RGOAL LPAREN goal-members RPAREN) : $3
+      (RGOAL LPAREN goal-members RPAREN) : $3
     )
 
     (goal
-        (GOAL LPAREN goal-members RPAREN) : $3
+      (GOAL LPAREN goal-members RPAREN) : $3
     )
 
     (goal-members
-        (goal-member) : $1
-        (goal-members goal-member) : (format #f "~a ~a" $1 $2)
+      (goal-member) : $1
+      (goal-members goal-member) : (format #f "~a ~a" $1 $2)
     )
 
     (goal-member
-        (LEMMA EQUAL NUM) : (format #f "(cons \"~a\" ~a)" $1 $3)
-        (STRING EQUAL NUM) : (format #f "(cons \"~a\" ~a)" $1 $3)
+      (LITERAL EQUAL NUM) : (format #f "(cons \"~a\" ~a)" $1 $3)
+      (LEMMA EQUAL NUM) : (format #f "(cons \"~a\" ~a)" $1 $3)
+      (STRING EQUAL NUM) : (format #f "(cons \"~a\" ~a)" $1 $3)
     )
 
     (context
