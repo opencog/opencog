@@ -72,9 +72,11 @@
     (list (list (TypedVariable g1 (TypeSet (Type "WordNode")
                                            (Interval (Number 1)
                                                      (Number clength))))
-                (TypedVariable g2 (TypeSet (Type "WordNode")
-                                           (Interval (Number 1)
-                                                     (Number clength)))))
+                (if ghost-with-ecan
+                  (list)
+                  (TypedVariable g2 (TypeSet (Type "WordNode")
+                                             (Interval (Number 1)
+                                                       (Number clength))))))
           (list (Evaluation (GroundedPredicate "scm: ghost-concept?")
                             (List (Concept STR) g1)))
           (list g1)
@@ -104,9 +106,11 @@
     (list (list (TypedVariable g1 (TypeSet (Type "WordNode")
                                            (Interval (Number 1)
                                                      (Number tlength))))
-                (TypedVariable g2 (TypeSet (Type "WordNode")
-                                           (Interval (Number 1)
-                                                     (Number tlength)))))
+                (if ghost-with-ecan
+                  (list)
+                  (TypedVariable g2 (TypeSet (Type "WordNode")
+                                             (Interval (Number 1)
+                                                       (Number tlength))))))
           (list (Evaluation (GroundedPredicate "scm: ghost-choices?")
                             (List (List (terms-to-atomese TERMS)) g1)))
           (list g1)
@@ -136,9 +140,11 @@
     (list (list (TypedVariable g1 (TypeSet (Type "WordNode")
                                   (Interval (Number 0)
                                             (Number tlength))))
-                (TypedVariable g2 (TypeSet (Type "WordNode")
-                                  (Interval (Number 0)
-                                            (Number tlength)))))
+                (if ghost-with-ecan
+                  (list)
+                  (TypedVariable g2 (TypeSet (Type "WordNode")
+                                    (Interval (Number 0)
+                                              (Number tlength))))))
           (list (Evaluation (GroundedPredicate "scm: ghost-optionals?")
                             (List (List (terms-to-atomese TERMS)) g1)))
           (list g1)
@@ -195,9 +201,11 @@
       (TypedVariable g1
         (TypeSet (Type "WordNode")
                  (Interval (Number LOWER) (Number UPPER))))
-      (TypedVariable g2
-        (TypeSet (Type "WordNode")
-                 (Interval (Number LOWER) (Number UPPER)))))
+      (if ghost-with-ecan
+        (list)
+        (TypedVariable g2
+          (TypeSet (Type "WordNode")
+                   (Interval (Number LOWER) (Number UPPER))))))
         '()
         (list g1)
         (list g2))))
@@ -413,3 +421,14 @@
 
   ; Return an atom
   (True))
+
+; ----------
+(define-public (reuse LABEL)
+"
+  The function for reusing the output of another rule labeled with LABEL.
+"
+  (define rule (cog-chase-link 'ListLink 'ImplicationLink
+                 (Concept (string-append psi-prefix-str (cog-name LABEL)))))
+  (if (null? rule)
+      (cog-logger-error ghost "Failed to find the GHOST rule \"~a\"" (cog-name LABEL))
+      (psi-get-action (car rule))))

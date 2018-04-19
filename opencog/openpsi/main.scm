@@ -7,18 +7,6 @@
 ; Copyright (C) 2015-2016 OpenCog Foundation
 ; Copyright (C) 2017 MindCloud
 
-(use-modules (srfi srfi-1)) ; For `append-map`
-(use-modules (ice-9 threads)) ; For par-map
-
-(use-modules (opencog) (opencog exec) (opencog query) (opencog rule-engine))
-(use-modules (opencog logger))
-
-(load "action-selector.scm")
-(load "demand.scm")
-(load "control.scm")
-(load "rule.scm")
-(load "utilities.scm")
-
 ; --------------------------------------------------------------
 ; Configure openpsi logger
 (define opl (cog-new-logger))
@@ -43,12 +31,14 @@
 (psi-add-category psi-component-node)
 
 ; --------------------------------------------------------------
-(define (psi-component name)
+(define* (psi-component name #:optional step)
 "
-  psi-component NAME
+  psi-component NAME STEP
     Create and return a ConceptNode that represents an OpenPsi engine driven
     component called NAME. It associates an action-selector, and a psi-step
-    loop.
+    loop. If evaluatable atom, STEP, that encodes what needs to be
+    done during each loop, is passed then the loop will evaluate STEP during
+    each cycle. If STEP is not passed then the loop will use psi-step.
 "
   ; NOTE: All the values associated with the component can easily be
   ; moved into the atomspace.
@@ -78,9 +68,11 @@
       loop-node
       (Satisfaction
         (SequentialAnd
-          (Evaluation
-            (GroundedPredicate "scm: psi-step")
-            (List component))
+          (if step
+            step
+            (Evaluation
+              (GroundedPredicate "scm: psi-step")
+              (List component)))
           (Evaluation
             (GroundedPredicate "scm: psi-run-continue?")
             (List component))

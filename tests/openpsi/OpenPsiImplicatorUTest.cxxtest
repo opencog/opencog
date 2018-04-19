@@ -100,7 +100,11 @@ public:
     CHKERR
     HandleSeq context_2 = _scm->eval_h("(context-2-cpp)")->getOutgoingSet();
     CHKERR
+    HandleSeq context_4 = _scm->eval_h("(context-4-cpp)")->getOutgoingSet();
+    CHKERR
     Handle action_1 = _scm->eval_h("action-1");
+    CHKERR
+    Handle action_2 = _scm->eval_h("action-2");
     CHKERR
     Handle goal_1 = _scm->eval_h("goal-1");
     CHKERR
@@ -116,17 +120,23 @@ public:
     PatternLinkPtr query_2 =  _opr->get_query(rule_2);
     Handle query_body_2 = query_2->get_pattern().body;
 
+    // A Ghost rule with no variable in the pattern
+    Handle rule_3 = _opr->add_rule(context_4, action_2, goal_1,
+      SimpleTruthValue::createTV(1.0, 1.0));
+    PatternLinkPtr query_3 = _opr->get_query(rule_3);
+    Handle query_body_3 = query_3->get_pattern().body;
+
     // Test 1:
     // Test when there is no grounding.
     tv = _opi->check_satisfiability(rule_1, *_opr);
     TSM_ASSERT_EQUALS("Expected (stv 0 1)", TruthValue::FALSE_TV(), tv);
-    TS_ASSERT_EQUALS(_opi->_EMPTY_HANDLE_MAP,
-      _opi->_satisfiability_cache.at(query_body_1));
+    TS_ASSERT_EQUALS(_opi->_satisfiability_cache.end(),
+      _opi->_satisfiability_cache.find(query_body_1));
 
     tv = _opi->check_satisfiability(rule_2, *_opr);
     TSM_ASSERT_EQUALS("Expected (stv 0 1)", TruthValue::FALSE_TV(), tv);
-    TS_ASSERT_EQUALS(_opi->_EMPTY_HANDLE_MAP,
-      _opi->_satisfiability_cache.at(query_body_2));
+    TS_ASSERT_EQUALS(_opi->_satisfiability_cache.end(),
+      _opi->_satisfiability_cache.find(query_body_2));
 
     // Test 2:
     // Test when there is an alpha-equivalent pattern.
@@ -134,13 +144,13 @@ public:
     CHKERR
     tv = _opi->check_satisfiability(rule_1, *_opr);
     TSM_ASSERT_EQUALS("Expected (stv 0 1)", TruthValue::FALSE_TV(), tv);
-    TS_ASSERT_EQUALS(_opi->_EMPTY_HANDLE_MAP,
-      _opi->_satisfiability_cache.at(query_body_1));
+    TS_ASSERT_EQUALS(_opi->_satisfiability_cache.end(),
+      _opi->_satisfiability_cache.find(query_body_1));
 
     tv = _opi->check_satisfiability(rule_2, *_opr);
     TSM_ASSERT_EQUALS("Expected (stv 0 1)", TruthValue::FALSE_TV(), tv);
-    TS_ASSERT_EQUALS(_opi->_EMPTY_HANDLE_MAP,
-      _opi->_satisfiability_cache.at(query_body_2));
+    TS_ASSERT_EQUALS(_opi->_satisfiability_cache.end(),
+      _opi->_satisfiability_cache.find(query_body_2));
 
     // Test 3:
     // Test when there is a grounding.
@@ -155,6 +165,18 @@ public:
     TSM_ASSERT_EQUALS("Expected (stv 1 1)", TruthValue::TRUE_TV(), tv);
     TS_ASSERT_DIFFERS(_opi->_EMPTY_HANDLE_MAP,
       _opi->_satisfiability_cache.at(query_body_2));
+
+    // Test 4:
+    // Test when there is no variable in the pattern.
+    tv = _opi->check_satisfiability(rule_3, *_opr);
+    TSM_ASSERT_EQUALS("Expected (stv 0 1)", TruthValue::FALSE_TV(), tv);
+
+    // Change the flag, it should return true this time.
+    _scm->eval("(set! test-pred-rtn #t)");
+    tv = _opi->check_satisfiability(rule_3, *_opr);
+    TSM_ASSERT_EQUALS("Expected (stv 1 1)", TruthValue::TRUE_TV(), tv);
+    TSM_ASSERT_EQUALS("Expected _EMPTY_HANDLE_MAP", _opi->_EMPTY_HANDLE_MAP,
+      _opi->_satisfiability_cache.at(query_body_3));
 
     logger().info("END TEST: %s", __FUNCTION__);
   }
@@ -177,7 +199,11 @@ public:
     CHKERR
     HandleSeq context_3 = _scm->eval_h("(context-3-cpp)")->getOutgoingSet();
     CHKERR
+    HandleSeq context_4 = _scm->eval_h("(context-4-cpp)")->getOutgoingSet();
+    CHKERR
     Handle action_1 = _scm->eval_h("action-1");
+    CHKERR
+    Handle action_2 = _scm->eval_h("action-2");
     CHKERR
     Handle goal_1 = _scm->eval_h("goal-1");
     CHKERR
@@ -187,11 +213,15 @@ public:
       SimpleTruthValue::createTV(1.0, 1.0));
     Handle rule_3 = _opr->add_rule(context_3, action_1, goal_1,
       SimpleTruthValue::createTV(1.0, 1.0));
+    Handle rule_4 = _opr->add_rule(context_4, action_2, goal_1,
+      SimpleTruthValue::createTV(1.0, 1.0));
 
     // Test 1:
     // Test when satisfiablity hasn't been checked.
     TS_ASSERT_THROWS(_opi->imply(rule_1, *_opr), RuntimeException);
     TS_ASSERT_THROWS(_opi->imply(rule_2, *_opr), RuntimeException);
+    TS_ASSERT_THROWS(_opi->imply(rule_3, *_opr), RuntimeException);
+    TS_ASSERT_THROWS(_opi->imply(rule_4, *_opr), RuntimeException);
 
     // Test 2:
     // Test when satisfiablity has been checked.
@@ -211,6 +241,12 @@ public:
     Handle result_2_3 = _opi->imply(rule_3, *_opr);
     TS_ASSERT_EQUALS(Handle::UNDEFINED, result_2_3);
     TS_ASSERT_EQUALS(_opi->was_action_executed(rule_3), TruthValue::FALSE_TV());
+
+    _scm->eval("(set! test-pred-rtn #t)");
+    _opi->check_satisfiability(rule_4, *_opr);
+    Handle result_2_4 = _opi->imply(rule_4, *_opr);
+    TS_ASSERT_EQUALS(action_2, result_2_4);
+    TS_ASSERT_EQUALS(_opi->was_action_executed(rule_4), TruthValue::TRUE_TV());
 
     logger().info("END TEST: %s", __FUNCTION__);
   }

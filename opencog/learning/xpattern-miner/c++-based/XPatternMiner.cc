@@ -46,7 +46,6 @@ namespace opencog
 {
 
 // TODO:
-// 6. maybe replace HandleSet for text by an AtomSpace
 // 7. make sure that filtering is still meaningfull
 
 XPMParameters::XPMParameters(unsigned ms, unsigned iconjuncts,
@@ -98,6 +97,7 @@ HandleTree XPatternMiner::specialize(const Handle& pattern,
                                      const HandleSet& texts,
                                      int maxdepth)
 {
+	// return specialize_alt(pattern, texts, Valuations(pattern, texts), maxdepth);
 	return specialize(pattern, texts, Valuations(pattern, texts), maxdepth);
 }
 
@@ -120,14 +120,40 @@ HandleTree XPatternMiner::specialize(const Handle& pattern,
 	HandleTree shabs_pats = specialize_shabs(pattern, texts, valuations,
 	                                         maxdepth);
 
-	// Produce specializations from mapping non-front variables to the
-	// front one, and so recursively.
-	HandleTree vared_pats = specialize_vared(pattern, texts, valuations,
-	                                         maxdepth);
-
 	// Merge specializations to patterns while discarding duplicates
-	patterns = merge_patterns({patterns, shabs_pats, vared_pats});
+	patterns = merge_patterns({patterns, shabs_pats});
 
+	return patterns;
+}
+
+HandleTree XPatternMiner::specialize_alt(const Handle& pattern,
+                                         const HandleSet& texts,
+                                         const Valuations& valuations,
+                                         int maxdepth)
+{
+	// One of the termination criteria has been reached
+	if (terminate(pattern, texts, valuations, maxdepth))
+		return HandleTree();
+
+	HandleTree patterns;
+	Variables vars = get_variables(pattern);
+
+	// Calculate all shallow abstractions of pattern
+	HandleSetSeq shabs = shallow_abstract(valuations, param.minsup);
+
+	// Generate all associated specializations
+	for (unsigned i = 0; i < shabs.size(); i++) {
+		for (const Handle& shapat : shabs[i]) {
+			// Compose pattern with shapat to obtain a specialization,
+			// and recursively specialize the result
+			HandleTree npats = specialize_shapat(pattern, texts,
+			                                     vars.varseq[i], shapat,
+			                                     maxdepth);
+
+			// Insert specializations
+			patterns = merge_patterns({patterns, npats});
+		}
+	}
 	return patterns;
 }
 
@@ -139,7 +165,7 @@ HandleTree XPatternMiner::specialize_shabs(const Handle& pattern,
 	// Generate shallow patterns of the first variable of the
 	// valuations and associate the remaining valuations (excluding
 	// that variable) to them.
-	HandleSet shapats = shallow_abstract(valuations);
+	HandleSet shapats = front_shallow_abstract(valuations, param.minsup);
 
 	// No shallow abstraction to use for specialization
 	if (shapats.empty())
@@ -152,109 +178,56 @@ HandleTree XPatternMiner::specialize_shabs(const Handle& pattern,
 	Handle var = valuations.front_variable();
 	for (const auto& shapat : shapats)
 	{
-		// Alpha convert to make sure it doesn't share variables with
-		// pattern
-		Handle subpat = alpha_conversion(shapat);
-
-		// Perform the composition (that is specialize)
-		Handle npat = compose(pattern, {{var, subpat}});
-
-		// If the specialization has too few conjuncts, dismiss it.
-		if (conjuncts(npat) < param.initconjuncts)
-			continue;
-		
-		// Generate the corresponding text
-		HandleSet fltexts = filter_texts(npat, texts);
-
-		// That specialization doesn't have enough support, skip it
-		// and its specializations.
-		if (not enough_support(npat, fltexts))
-			continue;
-
-		// Specialize npat from all variables (with new valuations)
-		HandleTree nvapats = specialize(npat, fltexts, maxdepth - 1);
+		// Specialize pattern by composing it with shapat, and
+		// specialize the result recursively
+		HandleTree npats
+			= specialize_shapat(pattern, texts, var, shapat, maxdepth);
 
 		// Insert specializations
-		HandleTree npats(npat, {nvapats});
 		patterns = merge_patterns({patterns, npats});
 	}
 	return patterns;
 }
 
-HandleTree XPatternMiner::specialize_vared(const Handle& pattern,
-                                           const HandleSet& texts,
-                                           const Valuations& valuations,
-                                           int maxdepth)
+HandleTree XPatternMiner::specialize_shapat(const Handle& pattern,
+                                            const HandleSet texts,
+                                            const Handle& var,
+                                            const Handle& shapat,
+                                            int maxdepth)
 {
-	// Generate all variable sets compatible with co-occurrence of
-	// values (equal to the front value of each valuation).
-	HandleSet vs = variable_reduce(valuations);
+	// Perform the composition (that is specialize)
+	Handle npat = compose(pattern, {{var, shapat}});
 
-	// No variable reduction to use for specialization
-	if (vs.empty())
+	// If the specialization has too few conjuncts, dismiss it.
+	if (conjuncts(npat) < param.initconjuncts)
 		return HandleTree();
 
-	// For each variable, create a specialization where that variable
-	// is substituted by the front variable, and the resulting pattern
-	// recursively specialized.
-	HandleTree patterns;
-	Handle var = valuations.front_variable();
-	for (const auto v : vs) {
-		// Perform the composition (that is specialize)
-		Handle npat = compose(pattern, {{v, var}});
+	// Generate the corresponding text
+	HandleSet fltexts = filter_texts(npat, texts);
 
-		// If the specialization has too few conjuncts, dismiss it.
-		if (conjuncts(npat) < param.initconjuncts)
-			continue;
+	// That specialization doesn't have enough support, skip it
+	// and its specializations.
+	if (not enough_support(npat, fltexts))
+		return HandleTree();
 
-		// Generate the corresponding text
-		HandleSet fltexts = filter_texts(npat, texts);
+	// Specialize npat from all variables (with new valuations)
+	HandleTree nvapats = specialize(npat, fltexts, maxdepth - 1);
 
-		// That specialization doesn't have enough support, skip it
-		// and its specializations.
-		if (not enough_support(npat, fltexts))
-			continue;
-
-		// Specialize npat from all variables (with new valuations)
-		HandleTree nvapats = specialize(npat, fltexts, maxdepth - 1);
-
-		// Insert specializations
-		HandleTree npats(npat, {nvapats});
-		patterns = merge_patterns({patterns, npats});
-	}
-	return patterns;
-}
-
-HandleSet XPatternMiner::variable_reduce(const Valuations& valuations) const
-{
-	// No more variable to specialize from
-	if (valuations.novar())
-		return HandleSet();
-
-	// Variable to specialize
-	Handle var = valuations.front_variable();
-
-	// Variables not added to potential reduction yet
-	HandleSet remvars(std::next(valuations.variables.varseq.begin()),
-	                  valuations.variables.varseq.end());
-
-	// Let's not bother and consider all remaining variables as
-	// potentially reducible
-	return remvars;
+	// Return npat and its children
+	return HandleTree(npat, {nvapats});
 }
 
 bool XPatternMiner::terminate(const Handle& pattern,
                               const HandleSet& texts,
                               const Valuations& valuations,
                               int maxdepth) const
-{
-	
+{	
 	return
 		// We have reached the maximum depth
 		maxdepth == 0 or
 		// The pattern is constant, no specialization is possible
 		pattern->get_type() != LAMBDA_LINK or
-		// There is no move variable to specialize from
+		// There is no more variable to specialize from
 		valuations.novar() or
 		// The pattern doesn't have enough support
 		// TODO: it seems the text is always filtered prior anyway
@@ -348,8 +321,31 @@ Handle XPatternMiner::matched_results(const Handle& pattern,
 	return inst.execute(ml);
 }
 
-HandleSet XPatternMiner::shallow_abstract(const Valuations& valuations)
+HandleSetSeq XPatternMiner::shallow_abstract(const Handle& pattern,
+                                             const HandleSet& texts,
+                                             unsigned ms)
 {
+	return shallow_abstract(Valuations(pattern, texts), ms);
+}
+
+HandleSetSeq XPatternMiner::shallow_abstract(const Valuations& valuations,
+                                             unsigned ms)
+{
+	// Base case
+	if (valuations.novar())
+		return HandleSetSeq();
+
+	// Recursive case
+	HandleSetSeq shabs_per_var{front_shallow_abstract(valuations, ms)};
+	HandleSetSeq remaining = shallow_abstract(valuations.erase_front(), ms);
+	shabs_per_var.insert(shabs_per_var.end(), remaining.begin(), remaining.end());
+	return shabs_per_var;
+}
+
+HandleSet XPatternMiner::front_shallow_abstract(const Valuations& valuations, unsigned ms)
+{
+	HandleSet shabs;
+
 	// No more variable to specialize from
 	if (valuations.novar())
 		return HandleSet();
@@ -360,80 +356,151 @@ HandleSet XPatternMiner::shallow_abstract(const Valuations& valuations)
 	// Strongly connected valuations associated to that variable
 	const SCValuations& var_scv(valuations.get_scvaluations(var));
 
+	////////////////////////////
+    // Shallow abtractions    //
+    ////////////////////////////
+
 	// For each valuation create an abstraction (shallow pattern) of
 	// the value associated to variable, and associate the remaining
 	// valuations to it.
-	HandleSet shapats;
-	for (const HandleSeq& valuation : var_scv.values)
-		shapats.insert(shallow_abstract(valuation[0]));
-	return shapats;
+	HandleUCounter shapats;
+	// Calculate how many valuations will be encompassed by these
+	// shallow abstractions
+	unsigned val_count = valuations.size() / var_scv.size();
+	for (const HandleSeq& valuation : var_scv.valuations)
+		shapats[val_shallow_abstract(valuation[0])] += val_count;
+
+	// Only consider the shallow abstractions that reach the minimum
+	// support
+	for (const auto& shapat : shapats)
+		if (ms <= shapat.second)
+			shabs.insert(shapat.first);
+
+	////////////////////////////////
+    // Variable factorizations    //
+    ////////////////////////////////
+
+	// Add all subsequent factorizable variables
+	HandleSeq remvars(std::next(valuations.variables.varseq.begin()),
+	                  valuations.variables.varseq.end());
+	HandleUCounter facvars;
+	for (const Handle& rv : remvars) {
+		// Strongly connected valuations associated to that variable
+		const SCValuations& rv_scv(valuations.get_scvaluations(rv));
+
+		// Index of rv in rv_scv
+		unsigned rv_idx = rv_scv.index(rv);
+
+		// Whether var and rv are in the same strongly connected
+		// valuations
+		bool same_scv = rv_scv == var_scv;
+
+		// Ref to keep track of the number of text instances where the
+		// value of var is equal to the value to rv
+		unsigned& rv_count = facvars[rv];
+
+		// If they are in different stronly connected valuations, then
+		// put all values of rv in a set, to quickly check if any
+		// value is in.
+		HandleUCounter rv_vals = same_scv ?
+			HandleUCounter() : rv_scv.values(rv_idx);
+
+		// Calculate how many valuations will be encompassed by this
+		// variable factorization
+		unsigned val_fac_count = val_count;
+		if (not same_scv)
+			val_fac_count /= rv_scv.size();
+
+		for (const HandleSeq& valuation : var_scv.valuations) {
+			// Value associated to var
+			const Handle& val = valuation[0];
+
+			// If the value of var is equal to that of rv, then
+			// increase rv factorization count
+			if (same_scv) {
+				if (content_eq(val, valuation[rv_idx])) {
+					rv_count += val_fac_count;
+				}
+			}
+			else {
+				auto it = rv_vals.find(val);
+				if (it != rv_vals.end()) {
+					rv_count += val_fac_count * it->second;
+				}
+			}
+
+			// IF the minimum support has been reached, no need to
+			// keep counting
+			if (ms <= rv_count)
+				break;
+		}
+	}
+
+	// Only consider variable factorizations reaching the minimum
+	// support
+	for (const auto& fvar : facvars)
+		if (ms <= fvar.second)
+			shabs.insert(fvar.first);
+
+	return shabs;
 }
 
-Handle XPatternMiner::shallow_abstract(const Handle& value)
+Handle XPatternMiner::val_shallow_abstract(const Handle& value)
 {
 	// Node or empty link, nothing to abstract
 	if (value->is_node() or value->get_arity() == 0)
 		return value;
 
 	Type tt = value->get_type();
+	HandleSeq rnd_vars = gen_rand_variables(value->get_arity());
+	Handle vardecl = variable_list(rnd_vars),
+		body = createLink(rnd_vars, tt);
 
 	// Links wrapped with LocalQuoteLink
 	if (tt == AND_LINK) {
-		HandleSeq rnd_vars = gen_rand_variables(value->get_arity());
-		Handle vardecl = variable_list(rnd_vars),
-			body = pattern_as.add_link(tt, rnd_vars),
-			pattern = lambda(vardecl, local_quote(body));
-		return pattern;
+		return lambda(vardecl, local_quote(body));
 	}
 	// Links wrapped with QuoteLink and UnquoteLinks
 	if (tt == BIND_LINK or
 	    tt == EVALUATION_LINK or
 	    tt == EXECUTION_OUTPUT_LINK)
 	{
-		HandleSeq rnd_vars = gen_rand_variables(value->get_arity());
 		// Wrap variables in UnquoteLink
 		HandleSeq uq_vars;
 		for (Handle& var : rnd_vars)
 			uq_vars.push_back(unquote(var));
 
-		Handle vardecl = variable_list(rnd_vars),
-			body = pattern_as.add_link(tt, uq_vars),
-			pattern = lambda(vardecl, quote(body));
-		return pattern;
+		return lambda(vardecl, quote(body));
 	}
 
 	// Generic non empty link, let's abstract away all the arguments
-	HandleSeq rnd_vars = gen_rand_variables(value->get_arity());
-	Handle vardecl = variable_list(rnd_vars),
-		body = pattern_as.add_link(tt, rnd_vars),
-		pattern = lambda(vardecl, body);
-	return pattern;
+	return lambda(vardecl, body);
 }
 
 Handle XPatternMiner::variable_list(const HandleSeq& vars)
 {
 	return vars.size() == 1 ? vars[0]
-		: pattern_as.add_link(VARIABLE_LIST, vars);
+		: createLink(vars, VARIABLE_LIST);
 }
 
 Handle XPatternMiner::lambda(const Handle& vardecl, const Handle& body)
 {
-	return pattern_as.add_link(LAMBDA_LINK, vardecl, body);
+	return createLink(LAMBDA_LINK, vardecl, body);
 }
 
 Handle XPatternMiner::quote(const Handle& h)
 {
-	return pattern_as.add_link(QUOTE_LINK, h);
+	return createLink(QUOTE_LINK, h);
 }
 
 Handle XPatternMiner::unquote(const Handle& h)
 {
-	return pattern_as.add_link(UNQUOTE_LINK, h);
+	return createLink(UNQUOTE_LINK, h);
 }
 
 Handle XPatternMiner::local_quote(const Handle& h)
 {
-	return pattern_as.add_link(LOCAL_QUOTE_LINK, h);
+	return createLink(LOCAL_QUOTE_LINK, h);
 }
 
 // TODO: take care of removing local quote in the composed
@@ -656,11 +723,15 @@ const Variables& XPatternMiner::get_variables(const Handle& pattern)
 	return empty_variables;
 }
 
-const Handle& XPatternMiner::get_vardecl(const Handle& pattern)
+Handle XPatternMiner::get_vardecl(const Handle& pattern)
 {
 	RewriteLinkPtr sc = RewriteLinkCast(pattern);
-	if (sc)
-		return RewriteLinkCast(pattern)->get_vardecl();
+	if (sc) {
+		Handle vardecl = sc->get_vardecl();
+		if (not vardecl)
+			vardecl = sc->get_variables().get_vardecl();
+		return vardecl;
+	}
 	return Handle::UNDEFINED;
 }
 

@@ -223,12 +223,11 @@
 
 	; Create and count a word-pair, and the distance.
 	(define (count-one-pair left-seq right-seq)
-		(define pare (ListLink (gar left-seq) (gar right-seq)))
 		(define dist (- (get-no right-seq) (get-no left-seq)))
 
 		; Only count if the distance is less than the cap.
 		(if (<= dist MAX-LEN)
-			(begin
+			(let ((pare (ListLink (gar left-seq) (gar right-seq))))
 				(count-one-atom (EvaluationLink pair-pred pare))
 				(if RECORD-LEN
 					(count-one-atom

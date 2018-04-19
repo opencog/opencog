@@ -277,22 +277,22 @@ Handle PointMemorySCM::get_time_res(Handle map_name)
 {
 	have_map(map_name);
 	duration_c dr = tsa[map_name]->get_time_resolution();
-	return Handle(createNumberNode(
-		chrono::duration_cast<chrono::milliseconds>(dr).count()));
+	return map_name->getAtomSpace()->add_atom(Handle(createNumberNode(
+		chrono::duration_cast<chrono::milliseconds>(dr).count())));
 }
 
 Handle PointMemorySCM::get_space_res(Handle map_name)
 {
 	have_map(map_name);
-	return Handle(createNumberNode(
-		tsa[map_name]->get_space_resolution()));
+	return map_name->getAtomSpace()->add_atom(Handle(createNumberNode(
+		tsa[map_name]->get_space_resolution())));
 }
 
 Handle PointMemorySCM::get_time_units(Handle map_name)
 {
 	have_map(map_name);
-	return Handle(createNumberNode(
-		tsa[map_name]->get_time_units()));
+	return map_name->getAtomSpace()->add_atom(Handle(createNumberNode(
+		tsa[map_name]->get_time_units())));
 }
 
 void PointMemorySCM::step_time_unit(Handle map_name)
@@ -362,7 +362,7 @@ Handle PointMemorySCM::get_first_time(Handle map_name,
 	if (not r) return Handle(); // XXX should this throw instead?
 
 	// Make and return atTimeLink
-	return timestamp_tag_atom(tp, ato);
+	return map_name->getAtomSpace()->add_atom(timestamp_tag_atom(tp, ato));
 }
 
 Handle PointMemorySCM::get_last_time(Handle map_name,
@@ -376,7 +376,7 @@ Handle PointMemorySCM::get_last_time(Handle map_name,
 		return Handle::UNDEFINED; // XXX should this throw instead?
 
 	// make and return atTimeLink
-	return timestamp_tag_atom(tp, ato);
+	return map_name->getAtomSpace()->add_atom(timestamp_tag_atom(tp, ato));
 }
 
 Handle PointMemorySCM::get_at_loc_ato(Handle map_name,
@@ -433,23 +433,22 @@ Handle PointMemorySCM::get_first_location(Handle map_name,
 {
 	time_pt tpt = get_map_time(map_name, elapse);
 	point3d_list pl = tsa[map_name]->get_oldest_locations(ato, tpt);
-	return tag_atom_with_locs(map_name, ato, pl);
+	return map_name->getAtomSpace()->add_atom(tag_atom_with_locs(map_name, ato, pl));
 }
-
 
 Handle PointMemorySCM::get_last_location(Handle map_name,
                                          Handle ato, Handle elapse)
 {
 	time_pt tpt = get_map_time(map_name, elapse);
 	point3d_list pl = tsa[map_name]->get_newest_locations(ato, tpt);
-	return tag_atom_with_locs(map_name, ato, pl);
+	return map_name->getAtomSpace()->add_atom(tag_atom_with_locs(map_name, ato, pl));
 }
 
 Handle PointMemorySCM::get_locs_ato(Handle map_name, Handle ato)
 {
 	have_map(map_name);
 	point3d_list pl = tsa[map_name]->get_locations_of_atom(ato);
-	return tag_atom_with_locs(map_name, ato, pl);
+	return map_name->getAtomSpace()->add_atom(tag_atom_with_locs(map_name, ato, pl));
 }
 
 Handle PointMemorySCM::get_past_locs_ato(Handle map_name,
@@ -457,7 +456,7 @@ Handle PointMemorySCM::get_past_locs_ato(Handle map_name,
 {
 	time_pt tpt = get_map_time(map_name, elapse);
 	point3d_list pl = tsa[map_name]->get_locations_of_atom_at_time(tpt, ato);
-	return tag_atom_with_locs(map_name, ato, pl);
+	return map_name->getAtomSpace()->add_atom(tag_atom_with_locs(map_name, ato, pl));
 }
 
 Handle PointMemorySCM::get_elapse_list_at_loc_ato(Handle map_name,
@@ -477,7 +476,7 @@ Handle PointMemorySCM::get_elapse_list_at_loc_ato(Handle map_name,
 	for (const time_pt& tp: tl)
 		LL.push_back(timestamp_tag_atom(tp, ato));
 
-	return opencog::Handle(createLink(LL, SET_LINK));
+	return map_name->getAtomSpace()->add_atom(opencog::Handle(createLink(LL, SET_LINK)));
 }
 
 // Get the timeline of the atom.  That is, get a sequence of
@@ -489,7 +488,7 @@ Handle PointMemorySCM::get_timeline(Handle map_name, Handle ato)
 	HandleSeq LL;
 	for (const time_pt& tp: tl)
 		LL.push_back(timestamp_tag_atom(tp, ato));
-	return opencog::Handle(createLink(LL, SET_LINK));
+	return map_name->getAtomSpace()->add_atom(opencog::Handle(createLink(LL, SET_LINK)));
 }
 
 Handle PointMemorySCM::remove_location_ato(Handle map_name,
@@ -562,8 +561,8 @@ PointMemorySCM::get_distance_between(Handle map_name,
 {
 	const HandleSeq& hs = list->getOutgoingSet();
 	time_pt tpt = get_map_time(map_name, elapse);
-	return Handle(createNumberNode(
-		tsa[map_name]->get_distance_between(tpt, hs[0], hs[1])));
+	return map_name->getAtomSpace()->add_atom(Handle(createNumberNode(
+		tsa[map_name]->get_distance_between(tpt, hs[0], hs[1]))));
 }
 
 // 2 = far, 1 = near, 0 = touching
@@ -574,9 +573,9 @@ PointMemorySCM::get_angular_nearness(Handle map_name,
 {
 	const HandleSeq& hs = list->getOutgoingSet();
 	time_pt tpt = get_map_time(map_name, elapse);
-	return Handle(createNumberNode(
+	return map_name->getAtomSpace()->add_atom(Handle(createNumberNode(
 		tsa[map_name]->get_angular_nearness(tpt,
-			hs[0], hs[1], hs[2])));
+			hs[0], hs[1], hs[2]))));
 }
 
 // XXX FIXME this should just return xyz, and the left-right
@@ -590,7 +589,7 @@ PointMemorySCM::get_target_is_right_left(Handle map_name,
 	const HandleSeq& hs = list->getOutgoingSet();
 	point3d res = tsa[map_name]->get_spatial_relations(tpt,
 		hs[0], hs[1], hs[2]);
-	return Handle(createNumberNode(res.y()));
+	return map_name->getAtomSpace()->add_atom(Handle(createNumberNode(res.y())));
 }
 
 // XXX FIXME this should just return xyz, and the above-below
@@ -604,7 +603,7 @@ PointMemorySCM::get_target_is_above_below(Handle map_name,
 	const HandleSeq& hs = list->getOutgoingSet();
 	point3d res = tsa[map_name]->get_spatial_relations(tpt,
 		hs[0], hs[1], hs[2]);
-	return Handle(createNumberNode(res.z()));
+	return map_name->getAtomSpace()->add_atom(Handle(createNumberNode(res.z())));
 }
 
 // XXX FIXME this should just return xyz, and the front-back
@@ -618,7 +617,7 @@ PointMemorySCM::get_target_is_front_back(Handle map_name,
 	const HandleSeq& hs = list->getOutgoingSet();
 	point3d res = tsa[map_name]->get_spatial_relations(tpt,
 		hs[0], hs[1], hs[2]);
-	return Handle(createNumberNode(res.x()));
+	return map_name->getAtomSpace()->add_atom(Handle(createNumberNode(res.x())));
 }
 
 void opencog_ato_pointmem_init(void)

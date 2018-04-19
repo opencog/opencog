@@ -45,9 +45,9 @@
     (ConceptNode "act-1")
 )
 
-(define (demand-1) (psi-component  "demand-1"))
+(define (component-1) (psi-component  "component-1"))
 
-(define goal-1 (Concept "goal-1"))
+(define goal-1 (psi-goal "goal-1" .1))
 
 (define (test-update-tv node strength)
     (cog-set-tv! node
@@ -55,7 +55,7 @@
     (stv 1 1)
 )
 
-(define (rule-1) (psi-rule context-1 action-1 goal-1 (stv 1 1) (demand-1)))
+(define (rule-1) (psi-rule context-1 action-1 goal-1 (stv 1 1) (component-1)))
 (define (rule-1-cpp)
   (ImplicationLink (stv 1 1)
      (AndLink
@@ -124,11 +124,11 @@
     (ConceptNode "act-2")
 )
 
-(define (demand-2) (psi-component  "demand-2"))
+(define (component-2) (psi-component  "component-2"))
 
-(define goal-2 (Concept "goal-2"))
+(define goal-2 (psi-goal "goal-2" .2 .5))
 
-(define (rule-2) (psi-rule context-2 action-2 goal-2 (stv 1 1) (demand-2)))
+(define (rule-2) (psi-rule context-2 action-2 goal-2 (stv 1 1) (component-2)))
 
 (define (rule-2-cpp)
   (ImplicationLink (stv 1 1)
@@ -193,9 +193,9 @@
     (Concept "act-3")
 )
 
-(define (demand-3) (psi-component  "demand-3"))
+(define (component-3) (psi-component  "component-3"))
 
-(define goal-3 (Concept "goal-3"))
+(define goal-3 (psi-goal "goal-3" .3))
 
 (define (groundable-content-3)
     (list ; They are in a list so as to simplify removal.
@@ -205,7 +205,7 @@
             (Number 2)))
 )
 
-(define (rule-3) (psi-rule context-3 action-3 goal-3 (stv 1 1) (demand-3)))
+(define (rule-3) (psi-rule context-3 action-3 goal-3 (stv 1 1) (component-3)))
 
 ; --------------------------------------------------------------
 ; Rule - 4
@@ -230,9 +230,9 @@
     (Concept "act-4")
 )
 
-(define (demand-4) (psi-component  "demand-4"))
+(define (component-4) (psi-component  "component-4"))
 
-(define goal-4 (Concept "goal-4"))
+(define goal-4 (psi-goal "goal-4" .4))
 
 (define (groundable-content-4)
     (list ; They are in a list so as to simplify removal.
@@ -242,7 +242,7 @@
             (Number 3)))
 )
 
-(define (rule-4) (psi-rule context-4 action-4 goal-4 (stv 1 1) (demand-4)))
+(define (rule-4) (psi-rule context-4 action-4 goal-4 (stv 1 1) (component-4)))
 
 ; --------------------------------------------------------------
 ; Helper functions for `OpenPsiUTest::test_psi_related_goals`
@@ -272,8 +272,8 @@
 )
 
 (define (do_psi_step)
-    (psi-step (demand-3))
-    (psi-step (demand-4))
+    (psi-step (component-3))
+    (psi-step (component-4))
 )
 
 ; --------------------------------------------------------------
@@ -320,12 +320,12 @@
 )
 
 ; --------------------------------------------------------------
-;(define (demand-5) (psi-component  "demand-5"))
+;(define (component-5) (psi-component  "component-5"))
 
 ;(define (rule-5)
 ;    (psi-rule
 ;        (list context-1 (groundable-content-4))
-;        action-1 goal-2 (stv 1 1) (demand-5))
+;        action-1 goal-2 (stv 1 1) (component-5))
 ;)
 
 ;(define (test_psi_get_dual_rules_1_1)
@@ -360,3 +360,38 @@
 (define (test_psi_get_goal_1)
   (equal? goal-1 (psi-get-goal (rule-1)))
 )
+
+; --------------------------------------------------------------
+(define (test_psi_goal_functions_1)
+"
+  Test psi-increase-urge function. The urge should increase in magnitude.
+
+  Run before test_psi_goal_functions_2 to ensure that it increases the
+  magnitude regardless of the sign of the urge.
+"
+  (let ((loop 2))
+    (while (not (equal? 0 loop))
+      (psi-increase-urge goal-1 0.1)
+      (psi-increase-urge goal-2 0.1)
+      (set! loop (- loop 1)))
+  )
+
+  (and (equal? -0.5 (psi-urge goal-1)) (equal? 0.5 (psi-urge goal-2)))
+)
+
+(define (test_psi_goal_functions_2)
+"
+  Test psi-decrease-urge function. The urge should decrease to 0
+  reagardless of whether urge is positive or negative.
+"
+  (let ((loop 6))
+    (while (not (equal? 0 loop))
+      (psi-decrease-urge goal-1 0.1)
+      (psi-decrease-urge goal-2 0.1)
+      (set! loop (- loop 1)))
+  )
+
+  (and (equal? 0.0 (psi-urge goal-1)) (equal? 0.0 (psi-urge goal-2)))
+)
+
+; --------------------------------------------------------------
