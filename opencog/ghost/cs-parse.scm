@@ -233,10 +233,8 @@
 
     ; Parsing rules (aka nonterminal symbols)
     (inputs
-      (input) :
-        (if $1 (begin (cog-logger-debug ghost-logger "\nParsed:\n~a\n" $1) #t))
-      (inputs input) :
-        (if $2 (begin (cog-logger-debug ghost-logger "\nParsed:\n~a\n" $2) #t))
+      (input) : #t
+      (inputs input) : #t
     )
 
     (input
