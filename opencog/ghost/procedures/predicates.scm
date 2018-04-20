@@ -47,7 +47,16 @@
 )
 
 (define (perceive-word word)
-  (set-time-perceived! (Word word))
+  (define wn (Word word))
+  (set-time-perceived! wn)
+
+  ; 'ghost-word-seq' is shared among the rules with word-related pattern
+  ; This is mainly to make sure the rules with only a wildcard in the pattern
+  ; will also get some non-zero STI.
+  ; TODO: Find some better representation for that
+  ; (ghost-stimulate ghost-word-seq)
+
+  (ghost-stimulate wn)
 )
 
 ; --------------------------------------------------------------

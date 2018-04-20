@@ -7,6 +7,7 @@
   #:use-module (opencog pointmem)
   #:use-module (opencog openpsi)
   #:use-module (opencog spacetime)
+  #:use-module (opencog ghost)
   #:export (
     ; Sensory input
     perceived-face
