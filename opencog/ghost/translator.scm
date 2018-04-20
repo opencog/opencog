@@ -441,7 +441,8 @@
                ; Set the type
                (cog-set-value! rule ghost-rule-type type)
                ; Associate it with its topic
-               (Inheritance rule rule-topic)
+               (if (not ghost-with-ecan)
+                 (Inheritance rule rule-topic))
                ; Then finally add to the rule-hierarchy
                (cond ((or (equal? type strval-responder)
                           (equal? type strval-random-gambit)
@@ -492,8 +493,7 @@
 
 (define (create-top-lv-goal GOALS)
 "
-  Create a topic level goal that will be shared among the rules under the
-  same topic.
+  Create a top level goal that will be shared among the rules under it.
 "
   (set! top-lv-goals GOALS)
 
