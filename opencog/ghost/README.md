@@ -207,10 +207,4 @@ Or use `ghost-parse-file` to parse a rule file.
 (ghost "I eat apples")
 ```
 
-11) Stimulate the atoms correspond to the input. NOTE, this is normally done automatically when the words are perceived. Since we don't have the perception pipeline running for this example, let's stimulate the input atoms manually, e.g.
-
-```
-(ghost-stimulate-words "I" "eat" "apples")
-```
-
 The output `[INFO] [GHOST] Say: "I want an apple"` will then be printed on the CogServer.
