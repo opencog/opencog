@@ -367,6 +367,12 @@
          (list '() '() strval-random-gambit))
         ((equal? #\t TYPE)
          (list '() '() strval-gambit))
+        ((null? rule-hierarchy)
+         ; If we are here, it has to be a rejoinder, so make sure
+         ; rule-hierarchy is not empty, i.e. a responder should
+         ; be defined in advance
+         (throw (ghost-prefix
+           "Please define a responder first before defining a rejoinder.")))
         ; For rejoinders, put the condition (the last rule executed is
         ; the parent of this rejoinder) in the pattern of the rule
         (else (let ((var (Variable (gen-var "GHOST-rule" #f)))
@@ -474,6 +480,8 @@
                      ((equal? type strval-rejoinder)
                       ; If it's a rejoinder, its parent rule should be the
                       ; last rule one level up in rule-hierarchy
+                      ; 'process-type' will make sure there is a responder
+                      ; defined beforehand so rule-hierarchy is not empty
                       (if (not (null? top-lv-goals))
                         (set-next-rule
                           (get-rule-from-label
