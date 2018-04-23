@@ -425,7 +425,8 @@
     (set! rule-topic (create-topic "Default Topic")))
 
   ; Update the count -- how many rules we've seen under this top level goal
-  (if (not (null? top-lv-goals))
+  ; Do it only if the rules are ordered
+  (if is-rule-seq
     (set! goal-rule-cnt (+ goal-rule-cnt 1)))
 
   ; Reset the list of local variables
@@ -466,7 +467,7 @@
                       ; If it's not a rejoinder, its parent rules should
                       ; be the rules at every level that are still in
                       ; the rule-hierarchy
-                      (if (not (or (null? top-lv-goals) (null? rule-hierarchy)))
+                      (if (and is-rule-seq (not (null? rule-hierarchy)))
                         (for-each
                           (lambda (lv)
                             (for-each
@@ -482,7 +483,7 @@
                       ; last rule one level up in rule-hierarchy
                       ; 'process-type' will make sure there is a responder
                       ; defined beforehand so rule-hierarchy is not empty
-                      (if (not (null? top-lv-goals))
+                      (if is-rule-seq
                         (set-next-rule
                           (get-rule-from-label
                             (last (list-ref rule-hierarchy
@@ -503,7 +504,9 @@
                         (let ((urge (assoc-ref initial-urges (car goal))))
                           (if urge (- 1 urge) 0)))
                       ; Check if the goal is defined at the rule level
-                      (if (member goal GOAL)
+                      ; If the rule is ordered, the weight should change
+                      ; accordingly as well
+                      (if (or (member goal GOAL) (not is-rule-seq))
                         (stv (cdr goal) .9)
                         (stv (/ (cdr goal) (expt 2 goal-rule-cnt)) .9))
                       ghost-component))
@@ -531,11 +534,12 @@
   )
 )
 
-(define (create-top-lv-goal GOALS)
+(define* (create-top-lv-goal GOALS #:optional (ORDERED #f))
 "
   Create a top level goal that will be shared among the rules under it.
 "
   (set! top-lv-goals GOALS)
+  (set! is-rule-seq ORDERED)
 
   ; Reset the count when we see a new top level goal
   (set! goal-rule-cnt 0))
