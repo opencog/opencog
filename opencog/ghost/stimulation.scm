@@ -7,6 +7,9 @@
 
 (define default-stimulus 150)
 
+; Stimulate words when doing 'nlp-parse'
+(nlp-start-stimulation default-stimulus)
+
 ; ----------
 (define-public (ghost-set-default-stimulus STIMULUS)
 "
@@ -22,19 +25,6 @@
   Stimulate the given list of atoms with the default stimulus.
 "
   (map (lambda (a) (cog-stimulate a default-stimulus)) ATOMS)
-)
-
-(define-public (ghost-stimulate-words . WORDS)
-"
-  Stimulate the given list of words (as strings) with the default stimulus.
-"
-  ; 'ghost-word-seq' is shared among the rules with word-related pattern
-  ; This is mainly to make sure the rules with only a wildcard in the pattern
-  ; will also get some non-zero STI.
-  ; TODO: Find some better representation for that
-  (ghost-stimulate ghost-word-seq)
-
-  (map (lambda (w) (cog-stimulate (Word w) default-stimulus)) WORDS)
 )
 
 ; ----------

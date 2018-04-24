@@ -54,8 +54,16 @@ LGDictExpContainer::LGDictExpContainer(Exp_type t, Exp* exp)
     m_string = exp->u.string;
     m_direction = exp->dir;
     m_multi = exp->multi;
-#else
-    // m_string = exp->u.condesc->string;
+#endif
+
+#if (LINK_MAJOR_VERSION == 5) && (LINK_MINOR_VERSION == 4) && (LINK_MICRO_VERSION == 4)
+    #error "This version of link-grammar has a broken API! Use an earlier or a later version!"
+#endif
+
+#if (LINK_MAJOR_VERSION == 5) && (LINK_MINOR_VERSION >= 5)
+    m_string = lg_exp_get_string(exp);
+    m_direction = lg_exp_get_dir(exp);
+    m_multi = lg_exp_get_multi(exp);
 #endif
 }
 

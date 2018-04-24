@@ -367,6 +367,12 @@
          (list '() '() strval-random-gambit))
         ((equal? #\t TYPE)
          (list '() '() strval-gambit))
+        ((null? rule-hierarchy)
+         ; If we are here, it has to be a rejoinder, so make sure
+         ; rule-hierarchy is not empty, i.e. a responder should
+         ; be defined in advance
+         (throw (ghost-prefix
+           "Please define a responder first before defining a rejoinder.")))
         ; For rejoinders, put the condition (the last rule executed is
         ; the parent of this rejoinder) in the pattern of the rule
         (else (let ((var (Variable (gen-var "GHOST-rule" #f)))
@@ -394,27 +400,37 @@
   gambits etc.
 "
   (define (add-to-rule-hierarchy LV RULE)
-    (if (<= (length rule-hierarchy) LV)
+    ; Reset the rule hierarchy if it's not a rejoinder
+    (if (= LV 0)
+      (set! rule-hierarchy (list (list RULE)))
+      (if (= (length rule-hierarchy) LV)
         (set! rule-hierarchy (append rule-hierarchy (list (list RULE))))
         (list-set! rule-hierarchy LV
-          (append (list-ref rule-hierarchy LV) (list RULE)))))
+          (append (list-ref rule-hierarchy LV) (list RULE))))))
+
+  (define (get-rule-from-label LABEL)
+    (car (filter psi-rule? (cog-chase-link 'ListLink 'ImplicationLink
+      (Concept (string-append psi-prefix-str LABEL))))))
+
+  (define (set-next-rule PRULE CRULE KEY)
+    (define val (cog-value PRULE KEY))
+    (cog-set-value! PRULE KEY
+      (if (null? val)
+        (LinkValue CRULE)
+        (apply LinkValue (append (cog-value->list val) (list CRULE))))))
 
   ; First of all, make sure the topic is set
   ; so that it can be used when we are processing the action
   (if (null? rule-topic)
-      (set! rule-topic (create-topic "Default Topic")))
+    (set! rule-topic (create-topic "Default Topic")))
 
   ; Update the count -- how many rules we've seen under this top level goal
-  (if (not (null? top-lv-goals))
+  ; Do it only if the rules are ordered
+  (if is-rule-seq
     (set! goal-rule-cnt (+ goal-rule-cnt 1)))
 
   ; Reset the list of local variables
   (set! pat-vars '())
-
-  ; Reset the rule-hierarchy if we're looking at a new responder/gambit
-  (if (or (equal? #\u TYPE) (equal? #\s TYPE) (equal? #\? TYPE)
-          (equal? #\r TYPE) (equal? #\t TYPE))
-      (set! rule-hierarchy '()))
 
   (let* (; Label the rule with NAME, if given, generate one otherwise
          (rule-name (if (string-null? NAME)
@@ -441,15 +457,41 @@
                ; Set the type
                (cog-set-value! rule ghost-rule-type type)
                ; Associate it with its topic
-               (Inheritance rule rule-topic)
-               ; Then finally add to the rule-hierarchy
+               (if (not ghost-with-ecan)
+                 (Inheritance rule rule-topic))
+               ; Keep track of the rule hierarchy, and link rules that
+               ; are defined in a sequence
                (cond ((or (equal? type strval-responder)
                           (equal? type strval-random-gambit)
                           (equal? type strval-gambit))
+                      ; If it's not a rejoinder, its parent rules should
+                      ; be the rules at every level that are still in
+                      ; the rule-hierarchy
+                      (if (and is-rule-seq (not (null? rule-hierarchy)))
+                        (for-each
+                          (lambda (lv)
+                            (for-each
+                              (lambda (r)
+                                (set-next-rule
+                                  (get-rule-from-label r)
+                                    rule ghost-next-responder))
+                              lv))
+                          rule-hierarchy))
                       (add-to-rule-hierarchy 0 rule-name))
                      ((equal? type strval-rejoinder)
+                      ; If it's a rejoinder, its parent rule should be the
+                      ; last rule one level up in rule-hierarchy
+                      ; 'process-type' will make sure there is a responder
+                      ; defined beforehand so rule-hierarchy is not empty
+                      (if is-rule-seq
+                        (set-next-rule
+                          (get-rule-from-label
+                            (last (list-ref rule-hierarchy
+                              (1- (get-rejoinder-level TYPE)))))
+                          rule ghost-next-rejoinder))
                       (add-to-rule-hierarchy
                         (get-rejoinder-level TYPE) rule-name)))
+               ; (cog-logger-debug ghost-logger "rule-hierarchy: ~a" rule-hierarchy)
                ; Return
                rule)
              (map (lambda (goal)
@@ -462,7 +504,9 @@
                         (let ((urge (assoc-ref initial-urges (car goal))))
                           (if urge (- 1 urge) 0)))
                       ; Check if the goal is defined at the rule level
-                      (if (member goal GOAL)
+                      ; If the rule is ordered, the weight should change
+                      ; accordingly as well
+                      (if (or (member goal GOAL) (not is-rule-seq))
                         (stv (cdr goal) .9)
                         (stv (/ (cdr goal) (expt 2 goal-rule-cnt)) .9))
                       ghost-component))
@@ -490,12 +534,12 @@
   )
 )
 
-(define (create-top-lv-goal GOALS)
+(define* (create-top-lv-goal GOALS #:optional (ORDERED #f))
 "
-  Create a topic level goal that will be shared among the rules under the
-  same topic.
+  Create a top level goal that will be shared among the rules under it.
 "
   (set! top-lv-goals GOALS)
+  (set! is-rule-seq ORDERED)
 
   ; Reset the count when we see a new top level goal
   (set! goal-rule-cnt 0))
