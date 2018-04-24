@@ -212,7 +212,8 @@
   (if (not (null? rule-selected))
     (let ((alias (psi-rule-alias rule-selected))
           (next-responder (cog-value rule-selected ghost-next-responder))
-          (next-rejoinder (cog-value rule-selected ghost-next-rejoinder)))
+          (next-rejoinder (cog-value rule-selected ghost-next-rejoinder))
+          (av-alist (cog-av->alist (cog-av rule-selected))))
       ; There are psi-rules with no alias, e.g. rules that are not
       ; defined in GHOST, ignore them, as they are not using 'rejoinders'
       ; which applies to GHOST rules only
@@ -228,7 +229,12 @@
       (if (not (null? next-rejoinder))
         (for-each
           (lambda (r) (cog-stimulate r default-stimulus))
-          (cog-value->list next-rejoinder)))))
+          (cog-value->list next-rejoinder)))
+      ; Lower the STI of the selected one
+      (cog-set-av!
+        rule-selected
+        (cog-new-av 0
+          (cdr (assoc 'lti av-alist)) (cdr (assoc 'vlti av-alist))))))
 
   (List rule-selected))
 
