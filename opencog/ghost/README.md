@@ -48,6 +48,7 @@ Here is a list of features that are fully supported in GHOST:
     - `keep`, to keep the rule in the system so that it can be selected and executed more than once, this can be used at topic level too
 - [Unordered Matching](https://github.com/bwilcox-1234/ChatScript/blob/master/WIKI/ChatScript-Basic-User-Manual.md#unordered-matching--)
 
+Note: Currently there is no special handling for various types of responders (`u` `s` `?`) and gambits (`r` `t`), they are treated the same way.
 
 The action selection in GHOST is goal-driven, so all of the GHOST rules should be linked to one or more goals. You can link more than one goal to a rule, just like defining concepts, use a space to separate them. The value assigned to a goal will affect the strength of the rules (`ImplicationLinks`) linked to that goal.
 
@@ -58,7 +59,7 @@ There are two ways of creating goals,
 goal: (please_user=0.8)
 ```
 
-In this case, all the rules created after it will be having the same goal and the same weight, until seeing another top level goal or the end of file is reached.
+In this case, all the rules created after it will be having the same goal and the same weight, until another top level goal or the end of file is reached.
 
 It's also possible to create a list of rules that are ordered:
 
@@ -66,9 +67,11 @@ It's also possible to create a list of rules that are ordered:
 ordered-goals: (please_user=0.8)
 ```
 
-The rules being created under a `ordered-goals` will have a different weight associated, based on the order of creation. The relationship between the order and the weight forms a geometric sequence with a factor of 0.5.
+The rules being created under a `ordered-goals` will have a different weight, based on the order of creation. The relationship between the order and the weight forms a geometric sequence with a factor of 0.5.
 
 For example, if there are five rules under the above `please_user=0.8` goal, the first rule will have a weight of 0.4, the second one will have 0.2, the third one will have 0.1, and so on. The sum of the weights will get closer to the weight of the top level goal (0.8) if more rules are created under it.
+
+Additionally, when a rule in a sequence is triggered, it will have a lower STI while the next rules in the same sequence will receive a boost in STI, so as to increase the chance of being selected in the next cycle.
 
 2) Rule level goal(s)
 
@@ -211,6 +214,12 @@ Or use `ghost-parse-file` to parse a rule file.
 
 ```
 (ghost "I eat apples")
+```
+
+11) Optionally, you can stimulate the atoms correspond to the input. NOTE, this is normally done automatically when the words are perceived. Since we don't have the perception pipeline running for this example, we can stimulate the input atoms manually, e.g.
+
+```
+(ghost-stimulate-words "I" "eat" "apples")
 ```
 
 The output `[INFO] [GHOST] Say: "I want an apple"` will then be printed on the CogServer.
