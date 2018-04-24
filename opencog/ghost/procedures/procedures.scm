@@ -7,6 +7,7 @@
   #:use-module (opencog pointmem)
   #:use-module (opencog openpsi)
   #:use-module (opencog spacetime)
+  #:use-module (opencog ghost)
   #:export (
     ; Sensory input
     perceived-face
@@ -44,6 +45,65 @@
 
 (load "procedures/predicates.scm")
 (load "procedures/schemas.scm")
+
+; --------------------------------------------------------------
+; There is a spacemap in eva-model module called faces. Thus the rename.
+; (define facemap (SpaceMapNode "perceived-faces"))
+
+; --------------------------------------------------------------
+; APIs used to create the atoms used to represent the world, aka
+; world-model. These are not exported.
+; --------------------------------------------------------------
+(define (see-face face-id)
+"
+  Define the atom used to represent that the face represented by FACE-ID
+  is being seen.
+"
+  (Evaluation
+    (Predicate "see")
+    (List
+      (Concept "I")
+      (Concept face-id)))
+)
+
+(define (face-emotion face-id emotion-type)
+"
+  Define the atom used to represent EMOTION-TYPE of the face with
+  id FACE-ID.
+"
+  (Evaluation
+    (Predicate emotion-type)
+    (List
+      (Concept face-id)))
+)
+
+; --------------------------------------------------------------
+; APIs for inputing sensory information.
+; --------------------------------------------------------------
+;(define (perceived-face face-id x y z)
+;  (cog-pointmem-map-atom facemap (Concept face-id)
+;    (List (Number x) (Number y) (Number z)))
+
+(define (perceived-face face-id confidence)
+  (cog-set-tv! (see-face face-id) (stv 1 confidence))
+)
+
+(define (perceived-emotion face-id emotion-type confidence)
+  (cog-set-tv! (face-emotion face-id emotion-type) (stv 1 confidence))
+)
+
+(define (perceive-word word)
+  (define wn (Word word))
+  (set-time-perceived! wn)
+
+  ; 'ghost-word-seq' is shared among the rules with word-related pattern
+  ; This is mainly to make sure the rules with only a wildcard in the pattern
+  ; will also get some non-zero STI.
+  ; TODO: Find some better representation for that
+  ; (ghost-stimulate ghost-word-seq)
+
+  (ghost-stimulate wn)
+)
 
 ; --------------------------------------------------------------
 ; Utilities for the predicates & schemas

@@ -1,56 +1,6 @@
 ; Perception APIs and predicates
 
 ; --------------------------------------------------------------
-; There is a spacemap in eva-model module called faces. Thus the rename.
-;(define facemap (SpaceMapNode "perceived-faces"))
-
-; --------------------------------------------------------------
-; APIs used to create the atoms used to represent the world, aka
-; world-model. These are not exported.
-; --------------------------------------------------------------
-(define (see-face face-id)
-"
-  Define the atom used to represent that the face represented by FACE-ID
-  is being seen.
-"
-  (Evaluation
-    (Predicate "see")
-    (List
-      (Concept "I")
-      (Concept face-id)))
-)
-
-(define (face-emotion face-id emotion-type)
-"
-  Define the atom used to represent EMOTION-TYPE of the face with
-  id FACE-ID.
-"
-  (Evaluation
-    (Predicate emotion-type)
-    (List
-      (Concept face-id)))
-)
-
-; --------------------------------------------------------------
-; APIs for inputing sensory information.
-; --------------------------------------------------------------
-;(define (perceived-face face-id x y z)
-;  (cog-pointmem-map-atom facemap (Concept face-id)
-;    (List (Number x) (Number y) (Number z)))
-
-(define (perceived-face face-id confidence)
-  (cog-set-tv! (see-face face-id) (stv 1 confidence))
-)
-
-(define (perceived-emotion face-id emotion-type confidence)
-  (cog-set-tv! (face-emotion face-id emotion-type) (stv 1 confidence))
-)
-
-(define (perceive-word word)
-  (set-time-perceived! (Word word))
-)
-
-; --------------------------------------------------------------
 ; APIs for forming GroundedPredicates that are used for
 ; checking if the world is in a particular state or not.
 ; --------------------------------------------------------------
