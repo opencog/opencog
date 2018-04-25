@@ -255,8 +255,17 @@ HandleSeq ImportanceDiffusionBase::incidentAtoms(Handle h)
 {
     HandleSeq resultSet;
 
-    // Add the incoming set
-    h->getIncomingSet(back_inserter(resultSet));
+    // Add the incoming set only found in the present atomspace, because
+    // if on another thread the incoming-set is being modified, for example
+    // a query that uses transient atomspaces is being processed, we don't
+    // want to diffuse to transient atoms created.
+    // TODO: How to handle cases when the other atomspaces are not transient
+    // but are a child or parent of the present atomspace?
+    IncomingSet hIncomingSet = h->getIncomingSet(_as);
+    for (const auto i : hIncomingSet)
+    {
+        resultSet.push_back(i->get_handle());
+    }
 
     // Calculate and append the outgoing set
     if (h->is_link()) {
