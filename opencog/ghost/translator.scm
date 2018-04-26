@@ -491,6 +491,19 @@
                           rule ghost-next-rejoinder))
                       (add-to-rule-hierarchy
                         (get-rejoinder-level TYPE) rule-name)))
+               ; Connect words, concepts and predicates from the context
+               ; directly to the rule via a HebbianLink
+               (for-each
+                 (lambda (node) (AsymmetricHebbianLink node rule (stv 1 1)))
+                 (append-map
+                   (lambda (pat)
+                     (filter-hypergraph
+                       (lambda (x)
+                         (or (equal? 'WordNode (cog-type x))
+                             (equal? 'ConceptNode (cog-type x))
+                             (equal? 'GroundedPredicateNode (cog-type x))))
+                       pat))
+                   conds))
                ; (cog-logger-debug ghost-logger "rule-hierarchy: ~a" rule-hierarchy)
                ; Return
                rule)
