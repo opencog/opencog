@@ -320,7 +320,7 @@ toState :: Int -> SynIso [Atom] ()
 toState i = Iso f g where
     f as =
         if length as == i
-           then modify (\s -> s {sAtoms = as ++ sAtoms s})
+           then pushAtoms as
            else lift $ Left "List has wrong lenght, is this intended?"
     g () = do
         allatoms <- gets sAtoms

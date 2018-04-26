@@ -13,6 +13,7 @@ import Iso
 import Syntax hiding (SynIso,Syntax)
 
 import qualified Data.Map as M
+import qualified Data.Map.Lazy as M
 import qualified Data.Foldable as F
 import Data.Maybe (fromJust,isJust)
 import Data.List (isSuffixOf,nub,isInfixOf)
@@ -319,7 +320,10 @@ handleTAG = post . isoFoldl tagOne . init
                     where next s = show (read s + 1)
                           t = findNext p
                           findNext s = let t = next s
-                                       in if u M.! t then t else findNext t
+                                       in case M.lookup t u of
+                                           Just True  -> t
+                                           Just False -> findNext t
+                                           Nothing -> t --FIXME could this casue issues???
               g ((a,s):r,(p,u))
                 | length s >  1 = ((r,(p     ,u)), (a,Just s ))
                 | s == p        = ((r,(prev p,u)), (a,Nothing))

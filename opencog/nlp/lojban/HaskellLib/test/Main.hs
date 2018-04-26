@@ -14,6 +14,7 @@ import System.Exit (exitFailure,exitSuccess)
 
 main :: IO ()
 main = do
+    putStrLn "Please specify which data file to use: "
     input <- getLine
     putStrLn "Starting Test"
     (parser,printer) <- initParserPrinter
@@ -33,8 +34,9 @@ main = do
 
 ptest :: (String -> Either String (Maybe Atom)) -> String -> IO Bool
 ptest parser text = do
+    print text
     case parser text of
-        Left e  -> print text >> putStrLn e >> return False
+        Left e  -> putStrLn e >> return False
         Right _ -> return True
 
 pptest :: (String -> Either String (Maybe Atom)) -> (Atom -> Either String String) -> String -> IO Bool

@@ -31,7 +31,7 @@ import Lojban hiding (brivla,cmevla)
 import qualified Lojban as Morph (brivla,cmevla)
 import Lojban.Syntax.Util hiding (brivla,cmevla)
 
-import OpenCog.AtomSpace (Atom(..),TruthVal(..),noTv,stv,atomFold,nodeName,atomElem,atomMap)
+import OpenCog.AtomSpace (Atom(..),TruthVal(..),noTv,stv,atomFold,nodeName,atomElem,atomMap,showAtom)
 import OpenCog.Lojban.Util
 
 import OpenCog.Lojban.Syntax.Types
@@ -293,7 +293,7 @@ handleNA :: SynIso (Maybe NA,Atom) Atom
 handleNA = (iso ||| id) . ifJustA
     where iso = Iso f g
           f ((n,[(CN "ge'e",tv)]),a) = apply _evalTv (tv,(cGPN n lowTv,[a]))
-          f _ = error $ "handleNA.iso.f can't handle non ge'e UIs"
+          f _ = lift $ Left "handleNA.iso.f can't handle non ge'e UIs"
           g (EvalL tv (GPN n) a) = pure ((n,[(cCN "ge'e" noTv,tv)]),a)
 
 handleSelbriSumtis :: SynIso (Selbri,[Sumti]) Atom
@@ -333,7 +333,14 @@ handleSelbriSumtis = merge
                       Just jai -> do
                           (na,Just t) <- apply modalSumti (jai,a)
                           pure (na,t)
-                      Nothing  -> lift $ Left "No JAI in state."
+                      Nothing  -> do
+                          name <- randName (showAtom a)
+                          pred <- apply implicationOf (cPN "ckini" noTv)
+                          e <- apply concept name
+                          f1 <- apply _frame ((noTv,pred),(a,"1"))
+                          f2 <- apply _frame ((noTv,pred),(e,"2"))
+                          pushAtoms [f1,f2]
+                          pure (e,"jai")
               f a = pure a
               g = pure --Loosing information
 
@@ -602,13 +609,12 @@ laheP = handleRelClause
             g (((lahe,s),f),mr) = ((lahe,[]),(mr,(s,Just f)))
           handle = Iso f g
           f ((lahe,idx1,idx2),sumti) = do
-              name <- randName (nodeName sumti)
+              name <- randName (showAtom sumti)
               let referent = cCN name noTv
               l <- apply _frames ((highTv,lahe),[(sumti,idx1),(referent,idx2)])
               pushAtom l
               pure referent
           g = error "Not implemente laheP.hangle.g"
-          --FIXME tu'a needs special handeling/expanding
           --FIXME find predicates for no'e/je'a
           ls = [insert (cPN "sinxa" highTv,"1","2") . ignore "la'e"
                ,insert (cPN "sinxa" highTv,"2","1") . ignore "lu'e"
@@ -618,6 +624,7 @@ laheP = handleRelClause
                ,insert (cPN "porsi" highTv,"1","3") . ignore "vu'i"
                ,insert (cPN "drata" highTv,"1","2") . ignore "na'e"
                ,insert (cPN "dukti" highTv,"1","2") . ignore "to'e"
+               ,insert (cPN "ckini" highTv,"1","2") . ignore "tu'a"
                ,insert (cPN "no'ebo" highTv,"1","2") . ignore "no'e"
                ,insert (cPN "je'abo" highTv,"1","2") . ignore "je'a"
                ]
@@ -1192,17 +1199,13 @@ tanruNAhE = handleNAhE <<< _NAhE &&& tanru_unit_2
 
 tanruJAI :: Syntax Selbri
 tanruJAI = sepMorph "JAI"
-                &&> setFlagIso "JAI" . jaiFlag . tag
-                &&> tanru_unit_2
-    where jaiFlag :: SynIso JJCTTS ()
+         &&> setFlagIso "JAI" . jaiFlag . optional tag
+         &&> tanru_unit_2
+    where jaiFlag :: SynIso (Maybe JJCTTS) ()
           jaiFlag = Iso f g where
-              f = setJai
-              g () = do
-                  mjai <- gets sJAI
-                  case mjai of
-                      Just jai -> rmJai >> pure jai
-                      Nothing  -> lift $ Left "No JAI in state."
-
+              f (Just a) = setJai a
+              f (Nothing) = pure ()
+              g () = gets sJAI
 
 _NAhE :: Syntax TruthVal
 _NAhE = naheToTV <<< morph "NAhE"
@@ -1240,6 +1243,8 @@ meP = (handleFREEs2 ||| id) . handle
 _MO :: Syntax Atom
 _MO = varnode . word "mo"
 
+--Could replace some words of class MOI
+--for exampel moi with momkai
 _MOI :: Syntax Atom
 _MOI = implicationOf . predicate . morph "MOI"
 
@@ -1637,7 +1642,9 @@ sei = handleBRIDI . commute
                         <&& optMorph "SEhU"
 
 indicatorsNA :: Syntax [UI]
-indicatorsNA = indicators <+> insert [(cCN "ge'e" lowTv,selbriDefaultTV)]
+--FIXME
+--indicatorsNA = indicators <+> insert [(cCN "ge'e" lowTv,selbriDefaultTV)]
+indicatorsNA = insert [(cCN "ge'e" lowTv,selbriDefaultTV)]
 
 indicators :: Syntax [UI]
 indicators = some indicator
