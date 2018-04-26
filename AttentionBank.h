@@ -68,7 +68,7 @@ class AttentionBank
 
     void updateAttentionalFocus(const Handle&, const AttentionValuePtr&,
                                 const AttentionValuePtr&);
-    
+
     /** AV changes */
     void AVChanged(const Handle&, const AttentionValuePtr&, const AttentionValuePtr&);
 
@@ -248,7 +248,7 @@ public:
     get_handle_set_in_attentional_focus(OutputIterator result)
     {
          std::lock_guard<std::mutex> lock(AFMutex);
-         for (const auto p : attentionalFocus) {
+         for (const auto& p : attentionalFocus) {
              *result++ = p.first;
          }
          return result;
