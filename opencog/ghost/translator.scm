@@ -491,17 +491,12 @@
                ; directly to the rule via a HebbianLink
                (for-each
                  (lambda (node) (AsymmetricHebbianLink node rule (stv 1 1)))
-                 (append-map
-                   (lambda (pat)
-; JJJ
-(display "pat = ") (display pat) (newline)
-                     (filter-hypergraph
-                       (lambda (x)
-                         (or (equal? 'WordNode (cog-type x))
-                             (equal? 'ConceptNode (cog-type x))
-                             (equal? 'GroundedPredicateNode (cog-type x))))
-                       pat))
-                   conds))
+                 (filter
+                   (lambda (x)
+                     (or (equal? 'WordNode (cog-type x))
+                         (equal? 'ConceptNode (cog-type x))
+                         (equal? 'GroundedPredicateNode (cog-type x))))
+                   (append-map cog-get-all-nodes conds)))
                ; (cog-logger-debug ghost-logger "rule-hierarchy: ~a" rule-hierarchy)
                ; Return
                rule)
