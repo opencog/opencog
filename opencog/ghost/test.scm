@@ -159,3 +159,27 @@
           (equal? 'ReferenceLink type)
           (equal? 'LemmaLink type)))
     relex-outputs))
+
+; ----------
+(define-public (ghost-rule-av LABEL)
+"
+  Given the label of a rule in string, return the AV of the rule with that label.
+"
+  (cog-av (get-rule-from-label LABEL)))
+
+; ----------
+(define-public (ghost-rule-tv LABEL)
+"
+  Given the label of a rule in string, return the TV of the rule with that label.
+"
+  (cog-tv (get-rule-from-label LABEL)))
+
+; ----------
+(define-public (ghost-show-rule-status LABEL)
+"
+  Given the label of a rule in string, return both the STI and TV of the rule
+  with that label.
+"
+  (define rule (get-rule-from-label LABEL))
+  (if (not (null? rule))
+    (display (format #f "AV = ~a\nTV = ~a\n" (cog-av rule) (cog-tv rule)))))

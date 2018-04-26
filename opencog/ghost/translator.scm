@@ -408,10 +408,6 @@
         (list-set! rule-hierarchy LV
           (append (list-ref rule-hierarchy LV) (list RULE))))))
 
-  (define (get-rule-from-label LABEL)
-    (car (filter psi-rule? (cog-chase-link 'ListLink 'ImplicationLink
-      (Concept (string-append psi-prefix-str LABEL))))))
-
   (define (set-next-rule PRULE CRULE KEY)
     (define val (cog-value PRULE KEY))
     (cog-set-value! PRULE KEY
@@ -497,6 +493,8 @@
                  (lambda (node) (AsymmetricHebbianLink node rule (stv 1 1)))
                  (append-map
                    (lambda (pat)
+; JJJ
+(display "pat = ") (display pat) (newline)
                      (filter-hypergraph
                        (lambda (x)
                          (or (equal? 'WordNode (cog-type x))
