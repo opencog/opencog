@@ -57,7 +57,16 @@ AttentionBank::~AttentionBank()
 
 void AttentionBank::remove_atom_from_bank(const AtomPtr& atom)
 {
-    _importanceIndex.removeAtom(Handle(atom));
+    AFMutex.lock();
+    auto it = std::find_if(attentionalFocus.begin(), attentionalFocus.end(),
+                [atom](std::pair<Handle, AttentionValuePtr> p)
+                { return p.first == Handle(atom);});
+
+    if (it != attentionalFocus.end())
+        attentionalFocus.erase(it);
+    AFMutex.unlock();
+
+   _importanceIndex.removeAtom(Handle(atom));
 }
 
 void AttentionBank::set_sti(const Handle& h, AttentionValue::sti_t stiValue)
