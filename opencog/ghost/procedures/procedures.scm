@@ -100,7 +100,7 @@
   ; This is mainly to make sure the rules with only a wildcard in the pattern
   ; will also get some non-zero STI.
   ; TODO: Find some better representation for that
-  ; (ghost-stimulate ghost-word-seq)
+  (cog-stimulate ghost-word-seq (/ default-stimulus 2))
 
   (ghost-stimulate wn)
 )

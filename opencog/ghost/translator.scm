@@ -493,7 +493,8 @@
                  (lambda (node) (AsymmetricHebbianLink node rule (stv 1 1)))
                  (filter
                    (lambda (x)
-                     (or (equal? 'WordNode (cog-type x))
+                     (or (equal? ghost-word-seq x)
+                         (equal? 'WordNode (cog-type x))
                          (equal? 'ConceptNode (cog-type x))
                          (equal? 'GroundedPredicateNode (cog-type x))))
                    (append-map cog-get-all-nodes conds)))
