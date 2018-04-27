@@ -48,6 +48,10 @@
   ; returns an action instead of a rule (?)
   (define action-rule-alist '())
 
+  ; For monitoring the status
+  (define rules-eval-cnt 0)
+  (define rules-sat-cnt 0)
+
   ; ----------
   ; Calculate the weight of the rule R [Wcagi]
   (define (calculate-rweight R)
@@ -96,16 +100,24 @@
           ; Skip the action if its weight is zero, so that sum-weight-alist
           ; and action-weight-alist do not contain actions that have a zero weight
           (let ((w (calculate-rweight r)))
+            (set! rules-eval-cnt (1+ rules-eval-cnt))
             (if (> w 0)
-              (if (equal? (assoc-ref sum-weight-alist ra) #f)
-                (set! sum-weight-alist (assoc-set! sum-weight-alist ra w))
-                (set! sum-weight-alist (assoc-set! sum-weight-alist ra
-                  (+ (assoc-ref sum-weight-alist ra) w))))
+              (begin
+                (set! rules-sat-cnt (1+ rules-sat-cnt))
+                (if (equal? (assoc-ref sum-weight-alist ra) #f)
+                  (set! sum-weight-alist (assoc-set! sum-weight-alist ra w))
+                  (set! sum-weight-alist (assoc-set! sum-weight-alist ra
+                    (+ (assoc-ref sum-weight-alist ra) w)))))
               (cog-logger-debug ghost-logger
                 "Skipping action with zero weight: ~a" ra))))
       (cog-logger-debug ghost-logger
         "Skipping rule with zero STI/strength: ~a" r)))
     RULES)
+
+  ; Update the status
+  (set! num-rules-found (length RULES))
+  (set! num-rules-evaluated rules-eval-cnt)
+  (set! num-rules-satisfied rules-sat-cnt)
 
   ; Finally calculate the weight of an action
   (for-each

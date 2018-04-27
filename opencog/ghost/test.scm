@@ -159,3 +159,53 @@
           (equal? 'ReferenceLink type)
           (equal? 'LemmaLink type)))
     relex-outputs))
+
+(define-public (ghost-rule LABEL)
+"
+  Return the rule with the given label.
+"
+  (get-rule-from-label LABEL))
+
+; ----------
+(define-public (ghost-rule-av LABEL)
+"
+  Given the label of a rule in string, return the AV of the rule with that label.
+"
+  (cog-av (get-rule-from-label LABEL)))
+
+; ----------
+(define-public (ghost-rule-tv LABEL)
+"
+  Given the label of a rule in string, return the TV of the rule with that label.
+"
+  (cog-tv (get-rule-from-label LABEL)))
+
+; ----------
+(define-public (ghost-show-rule-status LABEL)
+"
+  Given the label of a rule in string, return both the STI and TV of the rule
+  with that label.
+"
+  (define rule (get-rule-from-label LABEL))
+  (if (not (null? rule))
+    (display (format #f "AV = ~a\nTV = ~a\n" (cog-av rule) (cog-tv rule)))))
+
+; ----------
+(define-public (ghost-show-status)
+"
+  Show current status of GHOST.
+"
+  (define last-rule (cog-chase-link 'StateLink 'ConceptNode ghost-last-executed))
+  (display
+    (format #f
+      (string-append
+        "GHOST loop count: ~a\n"
+        "Rules Found: ~a\n"
+        "Rules Evaluated: ~a\n"
+        "Rules Satisfied: ~a\n"
+        "Last Triggered Rule: (~a)\n\n")
+      (psi-loop-count (ghost-get-component))
+      num-rules-found
+      num-rules-evaluated
+      num-rules-satisfied
+      (if (null? last-rule) "N.A." (cog-name (car last-rule))))))
