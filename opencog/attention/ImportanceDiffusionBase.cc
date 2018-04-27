@@ -264,6 +264,8 @@ HandleSeq ImportanceDiffusionBase::incidentAtoms(Handle h)
         resultSet.insert(resultSet.end(), outgoing.begin(), outgoing.end());
     }
 
+    removeHebbianLinks(resultSet);
+
     return resultSet;
 }
 
