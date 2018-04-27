@@ -262,7 +262,7 @@ HandleSeq ImportanceDiffusionBase::incidentAtoms(Handle h)
     // TODO: How to handle cases when the other atomspaces are not transient
     // but are a child or parent of the present atomspace?
     IncomingSet hIncomingSet = h->getIncomingSet(_as);
-    for (const auto i : hIncomingSet)
+    for (const auto& i : hIncomingSet)
     {
         resultSet.push_back(i->get_handle());
     }
