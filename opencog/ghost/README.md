@@ -169,10 +169,10 @@ telnet localhost 17001
 loadmodule opencog/build/opencog/attention/libattention.so
 ```
 
-5) Start ECAN
+5) Start ECAN agents
 
 ```
-start-ecan
+agents-start opencog::AFImportanceDiffusionAgent opencog::WAImportanceDiffusionAgent opencog::AFRentCollectionAgent opencog::WARentCollectionAgent
 ```
 
 6) Load the needed modules
