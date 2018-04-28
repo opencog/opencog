@@ -408,10 +408,6 @@
         (list-set! rule-hierarchy LV
           (append (list-ref rule-hierarchy LV) (list RULE))))))
 
-  (define (get-rule-from-label LABEL)
-    (car (filter psi-rule? (cog-chase-link 'ListLink 'ImplicationLink
-      (Concept (string-append psi-prefix-str LABEL))))))
-
   (define (set-next-rule PRULE CRULE KEY)
     (define val (cog-value PRULE KEY))
     (cog-set-value! PRULE KEY
@@ -491,6 +487,17 @@
                           rule ghost-next-rejoinder))
                       (add-to-rule-hierarchy
                         (get-rejoinder-level TYPE) rule-name)))
+               ; Connect words, concepts and predicates from the context
+               ; directly to the rule via a HebbianLink
+               (for-each
+                 (lambda (node) (AsymmetricHebbianLink node rule (stv 1 1)))
+                 (filter
+                   (lambda (x)
+                     (or (equal? ghost-word-seq x)
+                         (equal? 'WordNode (cog-type x))
+                         (equal? 'ConceptNode (cog-type x))
+                         (equal? 'GroundedPredicateNode (cog-type x))))
+                   (append-map cog-get-all-nodes conds)))
                ; (cog-logger-debug ghost-logger "rule-hierarchy: ~a" rule-hierarchy)
                ; Return
                rule)

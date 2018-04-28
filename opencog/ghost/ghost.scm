@@ -120,6 +120,12 @@
 (define uvars '())
 
 ;; --------------------
+;; For monitoring the status
+(define num-rules-found 0)
+(define num-rules-evaluated 0)
+(define num-rules-satisfied 0)
+
+;; --------------------
 ;; Load the required files
 
 (load "ghost/test.scm")

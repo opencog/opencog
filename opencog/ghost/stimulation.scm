@@ -4,6 +4,7 @@
 ; Update some of the parameters
 (State (Concept "AF_RENT_FREQUENCY") (Number 0.5))
 (State (Concept "MAX_SPREAD_PERCENTAGE") (Number 0.8))
+(State (Concept "HEBBIAN_MAX_ALLOCATION_PERCENTAGE") (Number 1))
 
 (define default-stimulus 150)
 
