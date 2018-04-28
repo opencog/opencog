@@ -40,6 +40,7 @@ lojbanToAtomese :: (WordList State) -> Int -> String -> Either String (Maybe Ato
 lojbanToAtomese rstate seed text = (fmap wrapAtom) . fst <$> evalRWST (apply lojban ()) rstate state
     where state = State {sFlags = M.empty
                         ,sAtoms = []
+                        ,sTVLs = []
                         ,sText = text++" "
                         ,sSeed = seed
                         ,sNow = now_here
@@ -56,6 +57,7 @@ atomeseToLojban :: (WordList State) -> Int -> Atom -> Either String String
 atomeseToLojban rstate seed a@(LL [_an,s]) = sText . fst <$> execRWST (unapply lojban (Just s)) rstate state
     where state = State {sFlags = M.empty
                         ,sAtoms = []
+                        ,sTVLs = []
                         ,sText = ""
                         ,sSeed = seed
                         ,sNow = now_here

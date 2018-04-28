@@ -178,7 +178,13 @@ statement = handleMa <<< statement'
                   if x
                      then do
                          interinst <- apply instanceOf inter
-                         pure $ cInhL noTv interinst (cSSScL noTv [a])
+                         tvls <- gets sTVLs
+                         setTVLs []
+                         case tvls of
+                             [] -> pure $ cInhL noTv interinst
+                                                     (cSSScL noTv [a])
+                             ls -> pure $ cInhL noTv interinst
+                                                     (cSSScL noTv [cLL ls,a])
                      else pure a
               g (InhL _ _ (SSScL [a])) = pure a
               g a                      = pure a
@@ -853,7 +859,7 @@ liP :: Syntax Atom
 liP = sepMorph "LI" &&> (xo <+> number) <&& optMorph "LOhO"
 
 xo :: Syntax Atom
-xo = varnode <<< word "xo"
+xo = randvarnode <<< word "xo"
 
 quantifier :: Syntax Atom
 quantifier = number <&& optMorph "BOI"
@@ -934,10 +940,13 @@ tense_modal :: Syntax (Tagged SelbriNA)
 tense_modal = simple_tense_modal
             <+> addsnd Nothing . (sepMorph "FIhO" &&> selbri <&& optMorph "FEhU")
 
+--FIXME: Not complete handeling for space_time CAha
+--missing NAhE and KI handeling
 simple_tense_modal :: Syntax (Tagged SelbriNA)
 simple_tense_modal = _bai
                   <+> _space_time
                   <+> _CAhA
+                  <+> _CUhE
 
 _bai :: Syntax (Tagged SelbriNA)
 _bai = addsnd Nothing . commute <<< ((_NAhE <+> insert (stv 0.75 0.9))
@@ -988,6 +997,11 @@ _space_time = addsnd (Just "space_time") . second (addfstAny noTv)
 _CAhA :: Syntax (Tagged SelbriNA)
 _CAhA = addsndAny Nothing . addfst Nothing . addfstAny noTv
       . implicationOf . predicate . morph "CAhA"
+
+_CUhE :: Syntax (Tagged SelbriNA)
+_CUhE = addsndAny Nothing . addfst Nothing . addfstAny noTv
+      . (randvarnode |||  implicationOf . predicate)
+      . switchOnValue "cu'e" . morph "CUhE"
 
 --Fails when the Syntax Succeds and the other way arround
 --Either the syn succeds then we fail with the zeroArrow
@@ -1241,7 +1255,7 @@ meP = (handleFREEs2 ||| id) . handle
           g (Right a)      = ([],(a,Just ("me'u",[])))
 
 _MO :: Syntax Atom
-_MO = varnode . word "mo"
+_MO = randvarnode . word "mo"
 
 --Could replace some words of class MOI
 --for exampel moi with momkai
