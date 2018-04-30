@@ -180,6 +180,13 @@ Handle LGParseLink::execute() const
 	Parse_Options opts = parse_options_create();
 	parse_options_set_verbosity(opts, 0);
 
+	// For the ANY language, this code is being used for sampling.
+	// In this case, we are not concerned about reproducibility,
+	// but want different, truly random results each time through.
+	// Viz, every time we have a four-word sentence, we want a
+	// different parse for it, each time. Bug #3065.
+	parse_options_set_repeatable_rand(opts, 0);
+
 	// Count the number of parses
 	int num_linkages = sentence_parse(sent, opts);
 	if (num_linkages < 0)
