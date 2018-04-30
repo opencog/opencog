@@ -147,7 +147,6 @@ void ListRequest::sendError()
 {
     _error << "Supported options:" << std::endl;
     _error << "-a          List all atoms" << std::endl;
-    _error << "-h handle   List given handle" << std::endl;
     _error << "-n name     List all atoms with name" << std::endl;
     _error << "-t type     List all atoms of type" << std::endl;
     _error << "-T type     List all atoms with type or subtype" << std::endl;
