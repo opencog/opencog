@@ -161,8 +161,10 @@ void CogServer::enableNetworkServer(int port)
 
 void CogServer::disableNetworkServer()
 {
-    delete _networkServer;
-    _networkServer = nullptr;
+    if (_networkServer) {
+        delete _networkServer;
+        _networkServer = nullptr;
+    }
 }
 
 SystemActivityTable& CogServer::systemActivityTable()
@@ -194,6 +196,16 @@ void CogServer::serverLoop()
             usleep((unsigned int) delta);
         timer_start = timer_end;
     }
+
+    // Perform a clean shutdown. Drain the request queue.
+    while (0 < getRequestQueueSize())
+    {
+        processRequests();
+    }
+
+    // No way to process requests. Stop accepting network connections.
+    disableNetworkServer();
+    _systemActivityTable.halt();
 }
 
 void CogServer::runLoopStep(void)
