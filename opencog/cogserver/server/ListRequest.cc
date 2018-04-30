@@ -105,14 +105,20 @@ bool ListRequest::execute()
     if (name != "" && type != NOTYPE) { // filter by name & type
         classserver().foreachRecursive(
             [&](Type t)->void {
-                 Handle h(as.get_handle(t, name));
-                 if (h) _handles.push_back(h); }, type);
+                 try {
+                     Handle h(as.get_handle(t, name));
+                     if (h) _handles.push_back(h);
+                 } catch (const std::exception& e) {}
+            }, type);
 
     } else if (name != "") {     // filter by name
         classserver().foreachRecursive(
             [&](Type t)->void {
-                 Handle h(as.get_handle(t, name));
-                 if (h) _handles.push_back(h); }, NODE);
+                 try {
+                     Handle h(as.get_handle(t, name));
+                     if (h) _handles.push_back(h);
+                 } catch (const std::exception& e) {}
+            }, NODE);
 
     } else if (type != NOTYPE) { // filter by type
         as.get_handles_by_type(std::back_inserter(_handles), type, subtypes);
