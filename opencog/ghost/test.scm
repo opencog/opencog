@@ -15,7 +15,7 @@
   (cog-logger-set-level! ghost-logger "info"))
 
 ; ----------
-(define ghost-with-ecan #f)
+(define ghost-with-ecan #t)
 
 (define-public (ecan-based-ghost-rules flag)
 "
@@ -201,11 +201,23 @@
     (format #f
       (string-append
         "GHOST loop count: ~a\n"
+        "AF only? ~a\n"
+        "-----\n"
+        "Strength weight: ~a\n"
+        "Context weight: ~a\n"
+        "STI weight: ~a\n"
+        "Urge weight: ~a\n"
+        "-----\n"
         "Rules Found: ~a\n"
         "Rules Evaluated: ~a\n"
         "Rules Satisfied: ~a\n"
         "Last Triggered Rule: (~a)\n\n")
       (psi-loop-count (ghost-get-component))
+      (if ghost-af-only? "T" "F")
+      strength-weight
+      context-weight
+      sti-weight
+      urge-weight
       num-rules-found
       num-rules-evaluated
       num-rules-satisfied

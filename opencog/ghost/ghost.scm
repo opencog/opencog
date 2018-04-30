@@ -120,6 +120,7 @@
 (define uvars '())
 
 ; The weights of various parameters used in the action selector
+; For experimental purpose
 (define strength-weight 1)
 (define context-weight 1)
 (define sti-weight 1)
