@@ -119,6 +119,12 @@
 ; Storing values assigned to the user variables for referencing later
 (define uvars '())
 
+; The weights of various parameters used in the action selector
+(define strength-weight 1)
+(define context-weight 1)
+(define sti-weight 1)
+(define urge-weight 1)
+
 ;; --------------------
 ;; For monitoring the status
 (define num-rules-found 0)
