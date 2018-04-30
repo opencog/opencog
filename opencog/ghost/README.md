@@ -217,3 +217,10 @@ Or use `ghost-parse-file` to parse a rule file.
 ```
 
 The output `[INFO] [GHOST] Say: "I want an apple"` will then be printed on the CogServer.
+
+For experimental purpose, you may change the weights (default = 1) of various parameters being used in action selector, by doing `ghost-set-strength-weight`, `ghost-set-context-weight`, `ghost-set-sti-weight`, and `ghost-set-urge-weight`, for example:
+
+```
+(ghost-set-sti-weight 0.5)
+(ghost-set-strength-weight 3)
+```
