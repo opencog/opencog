@@ -102,8 +102,8 @@ CogServer::~CogServer()
             // invoke the module's unload function
             (*mdata.unloadFunction)(mdata.module);
 
-            // erase the map entries (one with the filename as key, and one with the module)
-            // id as key
+            // erase the map entries (one with the filename as key, and
+            // one with the module id as key)
             modules.erase(filename);
             modules.erase(id);
         }
@@ -131,21 +131,16 @@ CogServer::~CogServer()
 }
 
 CogServer::CogServer(AtomSpace* as) :
+    BaseServer(as),
     cycleCount(1), running(false), _networkServer(nullptr)
 {
-    // We shouldn't get called with a non-NULL atomSpace static global as
-    // that's indicative of a missing call to CogServer::~CogServer.
-    if (atomSpace) {
-        throw (RuntimeException(TRACE_INFO,
-               "Found non-NULL atomSpace. CogServer::~CogServer not called!"));
-    }
-
-    if (nullptr == as)
+    if (nullptr == as) {
         atomSpace = new AtomSpace();
-    else
+        attentionbank(atomSpace);
+    }
+    else {
         atomSpace = as;
-
-    attentionbank(atomSpace);
+    }
 
 #ifdef HAVE_GUILE
     // Tell scheme which atomspace to use.
