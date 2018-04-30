@@ -102,6 +102,7 @@ public:
 
     /** initialize the SystemActivityTable */
     virtual void init(CogServer*);
+    virtual void halt();
 
     /** Returns the agent activity table
      *  Activities will be listed with the most recent first. */
