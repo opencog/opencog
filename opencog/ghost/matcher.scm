@@ -55,13 +55,25 @@
   ; ----------
   ; Calculate the weight of the rule R [Wcagi]
   (define (calculate-rweight R)
-    (* (cog-stv-strength R)
-       (assoc-ref context-alist (psi-get-context R))
-       (if SKIP-STI
-         ; Weight higher if the rule is in the current topic
-         (if (is-rule-in-topic? R (ghost-get-curr-topic)) 1 0.5)
-         (cog-av-sti R))
-       (psi-urge (psi-get-goal R))))
+    (define strength
+      (if (> strength-weight 0)
+        (* strength-weight (cog-stv-strength R)) 1))
+    (define context
+      (if (> context-weight 0)
+        (* context-weight
+          (assoc-ref context-alist (psi-get-context R))) 1))
+    (define sti (if SKIP-STI
+      ; Weight higher if the rule is in the current topic
+      (if (is-rule-in-topic? R (ghost-get-curr-topic)) 1 0.5)
+      (if (> sti-weight 0)
+        (* sti-weight (cog-av-sti R)) 1)))
+    (define urge
+      (if (> urge-weight 0)
+        (* urge-weight (psi-urge (psi-get-goal R))) 1))
+    (define weight (* strength context sti urge))
+    (cog-logger-debug ghost-logger "The weight of the rule ~a is ~a"
+      (psi-rule-alias R) weight)
+    weight)
 
   ; Calculate the weight of the action A [Wa]
   (define (calculate-aweight A)
