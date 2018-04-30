@@ -206,9 +206,20 @@
   The action selector that works with ECAN.
   It evaluates and selects psi-rules from the attentional focus.
 "
+  ; is-psi-rule? uses try-catch so as to avoid getting of
+  ; "#<Invalid handle>" error due to change in the value of StateLinks
+  ; by a different thread, after this thread got a copy of the atoms in
+  ; the attention-focus.
+  (define (is-psi-rule? x)
+    (catch #t
+      (lambda () (psi-rule? x))
+      (lambda (key . args)
+        (format #t "Catched Error at ~a\nError details =\"~a ~a\"\n"
+          (current-source-location) key args) #f)))
+
   (define candidate-rules
     (if ghost-af-only?
-      (filter psi-rule? (cog-af))
+      (filter is-psi-rule? (cog-af))
       (psi-get-rules ghost-component)))
   (define rule-selected (eval-and-select candidate-rules))
 
