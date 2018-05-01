@@ -48,12 +48,12 @@ BuiltinRequestsModule::BuiltinRequestsModule(CogServer& cs) : Module(cs)
 
 BuiltinRequestsModule::~BuiltinRequestsModule()
 {
+    unregisterAgentRequests();
     _cogserver.unregisterRequest(ListRequest::info().id);
     _cogserver.unregisterRequest(ShutdownRequest::info().id);
     _cogserver.unregisterRequest(LoadModuleRequest::info().id);
     _cogserver.unregisterRequest(UnloadModuleRequest::info().id);
     _cogserver.unregisterRequest(ListModulesRequest::info().id);
-    unregisterAgentRequests();
 }
 
 void BuiltinRequestsModule::registerAgentRequests()
