@@ -135,6 +135,7 @@ namespace opencog
  */
 class CogServer : public BaseServer, public Registry<Agent>, public Registry<Request>
 {
+    AtomSpace* _private_as;
 
 protected:
 

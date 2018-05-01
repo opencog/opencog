@@ -71,7 +71,8 @@ BaseServer::BaseServer(AtomSpace* as)
 BaseServer::~BaseServer()
 {
     // We are no longer the current server.
-    set_current_server(NULL);
+    set_current_server(nullptr);
+    atomSpace = nullptr;
 }
 
 AtomSpace& BaseServer::getAtomSpace()

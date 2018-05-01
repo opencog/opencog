@@ -109,15 +109,9 @@ CogServer::~CogServer()
         }
     }
 
-    // Shut down the system activity table... before the atomspace is
-    // killed.
+    // Shut down the system activity table.
     _systemActivityTable.halt();
-
-    // Delete the static atomSpace instance (defined in BaseServer.h)
-    if (atomSpace) {
-        delete atomSpace;
-        atomSpace = NULL;
-    }
+    if (_private_as) delete _private_as;
 
     logger().debug("[CogServer] exit destructor");
 }
@@ -129,6 +123,7 @@ CogServer::CogServer(AtomSpace* as) :
     if (nullptr == as) {
         atomSpace = new AtomSpace();
         attentionbank(atomSpace);
+        _private_as = atomSpace;
     }
     else {
         atomSpace = as;
