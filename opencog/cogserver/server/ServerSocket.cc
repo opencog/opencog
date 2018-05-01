@@ -143,6 +143,7 @@ match_eol_or_escape(bitter begin, bitter end)
 
 void ServerSocket::set_connection(boost::asio::ip::tcp::socket* sock)
 {
+    if (_socket) delete _socket;
     _socket = sock;
 }
 
