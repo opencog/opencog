@@ -123,17 +123,28 @@ free_frees = filterDummy . handleFREEs . addfst dummy . ifEmptyFail . frees
           f a = pure a
           g a = pure a
 
-
 text_1 :: Syntax Atom
-text_1 = (handle ||| id) . ifJustA
-        <<< optional (someNIho &&& frees)
+text_1 = ((handleCON ||| handleNIhO) . distribute ||| id) . ifJustA
+        <<< optional (left . checkEmpty . (manySep (sepMorph "I")
+                      &&> optional joik_jek
+                      &&& (optional (stag <&& sepMorph "BO")
+                          <+> nothing <<< optMorph "BO"))
+                      <+>
+                      right . (someNIhO &&& frees))
         &&& paragraphs
-    where handle = listl . tolist2
-                         . second (handleFREEs.commute)
-                         . inverse associate
-          someNIho = mkIso f g . countNulls . some (sepMorph "NIhO")
+    where handleNIhO = listl . tolist2
+                             . second (handleFREEs.commute)
+                             . inverse associate
+          handleCON = handleCon . second (addfst $ cCN "dummy" noTv) --FIXME no dummy
+          someNIhO = mkIso f g . countNulls . some (sepMorph "NIhO")
           f i = cAN ("paragraphLevel" ++ show i)
           g (AN name) = read $ drop 14 name
+
+checkEmpty :: SynIso Con Con
+checkEmpty = Iso f g where
+    f (Nothing,Nothing) = lift $ Left "No connectives"
+    f a = pure a
+    g a = pure a
 
 countNulls :: SynIso [()] Int
 countNulls = mkIso f g where
@@ -205,7 +216,8 @@ statement_1 = isoFoldl handleCon2
 statement_2 :: Syntax Atom
 statement_2 = (handleCon2 ||| id) . ifJustB
     <<< statement_3 &&& optional (sepMorph "I"
-                                  &&> (just.joik_jek &&& optional stag)
+                                  &&> (checkEmpty <<< optional joik_jek
+                                                  &&& optional stag)
                                   &&& sepMorph "BO"
                                   &&> statement_2 --FIXME officaly optional
                                  )
@@ -240,8 +252,9 @@ sentence :: Syntax Atom
 sentence = withCleanState sentence'
 
 sentence' :: Syntax Atom
-sentence' = handleCTX . handleBTCT
-    <<< ((terms <&& optMorph "CU") <+> insert []) &&& bridi_tail
+sentence' = handleCTX . handleFREEs2 . first handleBTCT
+          . associate . second commute
+    <<< termsM <&& optMorph "CU" &&& frees &&& bridi_tail
     where handleCTX = Iso f g where
               f a = do
                   atoms <- gets sAtoms
@@ -1242,7 +1255,14 @@ meP = (handleFREEs2 ||| id) . handle
                        <&& (ignoreAny Nothing ||| failIfFound)
                            . switchOnFlag "moi"
                            . optional (lookahead (morph "MOI"))
-    where me = implicationOf . predicate . showReadIso <<< sumti
+    where me = iunit
+             . second (toState 1 . tolist1 . _frame
+                                 . (addfst noTv   *** addsnd "MEPlace")
+               )
+             <<< reorder . first implicationOf . addfst (cPN "me" noTv) . sumti
+          reorder = mkIso f g where
+              f (s,a)     = (s,(s,a))
+              g (s,(_,a)) = (s,a)
           failIfFound = Iso f g where
               f (Nothing) = pure ()
               f (Just _ ) = lift $ Left "moi in me fail"
