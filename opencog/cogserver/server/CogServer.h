@@ -135,6 +135,7 @@ namespace opencog
  */
 class CogServer : public BaseServer, public Registry<Agent>, public Registry<Request>
 {
+    AtomSpace* _private_as;
 
 protected:
 
@@ -213,7 +214,7 @@ public:
     /** Returns the number of executed cycles so far */
     virtual long getCycleCount(void);
 
-    /** Interrupts the main loop. Note that the loop will only exit
+    /** Terminates the main loop. The loop will be exited
      *  after the current interaction is finished. */
     virtual void stop(void);
 

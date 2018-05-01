@@ -40,10 +40,7 @@ SystemActivityTable::SystemActivityTable() : _maxAgentActivityTableSeqSize(100),
 
 SystemActivityTable::~SystemActivityTable()
 {
-    logger().debug("[SystemActivityTable] enter destructor");
-    // _cogServer->getAtomSpace().atomRemovedSignal().disconnect(_conn);
-    clearActivity();
-    logger().debug("[SystemActivityTable] exit destructor");
+    logger().debug("[SystemActivityTable] destructor");
 }
 
 void SystemActivityTable::init(CogServer *cogServer)
@@ -52,6 +49,13 @@ void SystemActivityTable::init(CogServer *cogServer)
     _cogServer = cogServer;
     _conn = cogServer->getAtomSpace().atomRemovedSignal().connect(
             std::bind(&SystemActivityTable::atomRemoved, this, _1));
+}
+
+void SystemActivityTable::halt()
+{
+    logger().debug("[SystemActivityTable] halt");
+    clearActivity();
+    _cogServer->getAtomSpace().atomRemovedSignal().disconnect(_conn);
 }
 
 void SystemActivityTable::setMaxAgentActivityTableSeqSize(size_t n)
