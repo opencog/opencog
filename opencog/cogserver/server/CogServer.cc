@@ -127,6 +127,7 @@ CogServer::CogServer(AtomSpace* as) :
     }
     else {
         atomSpace = as;
+        _private_as = nullptr;
     }
 
 #ifdef HAVE_GUILE
