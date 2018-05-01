@@ -7,7 +7,6 @@ ADD_GUILE_MODULE (FILES
 	face-priority.scm
 	primitives.scm
 	orchestrate.scm
-	psi-behavior.scm
 	movement-api.scm
 	cfg-tools.scm
 	cfg-eva.scm

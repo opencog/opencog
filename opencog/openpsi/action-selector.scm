@@ -6,10 +6,6 @@
 ; Copyright (C) 2016 OpenCog Foundation
 ; Copyright (C) 2017 MindCloud
 
-(load "demand.scm")
-(load "rule.scm")
-(load "utilities.scm")
-
 ; ----------------------------------------------------------------------
 (define (psi-set-action-selector! component exec-term)
 "
@@ -128,14 +124,27 @@
   of psi-rules. If there aren't any rules returned on execution of the
   action-selector null is returned.
 "
+  (define (rule-list-flatten rule-list)
+    (if (and (equal? (length rule-list) 1)
+             (or (equal? 'SeLink (cog-type (car rule-list)))
+                 (equal? 'ListLink (cog-type (car rule-list)))))
+        (rule-list-flatten (cog-outgoing-set (car rule-list)))
+        rule-list
+    )
+  )
+
   (let ((acs (psi-action-selector component)))
     (if (null? acs)
       (error
-        (format "Define an action-selector for component ~a" component))
+        (format #f "Define an action-selector for component ~a" component))
       (let ((result (cog-execute! acs)))
           (if (null? result)
             '()
-            (cog-outgoing-set result)
+            ; Depending on how the action-selector is defined,
+            ; the list of psi-rules returned may be nested in
+            ; one or more ListLink/SetLink, so remove the
+            ; nested links until we reach the actual psi-rules.
+            (rule-list-flatten (cog-outgoing-set result))
           )
       )
     )

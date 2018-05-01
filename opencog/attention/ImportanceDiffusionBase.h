@@ -48,9 +48,6 @@ class AttentionBank;
  */
 class ImportanceDiffusionBase : public Agent
 {
-private:
-    int sleep_time_ms;
-
 protected:
     AttentionBank* _bank;
     double maxSpreadPercentage;
@@ -69,7 +66,7 @@ protected:
     void processDiffusionStack();
 
     HandleSeq diffusionSourceVector(void);
-    
+
     HandleSeq incidentAtoms(Handle);
     HandleSeq hebbianAdjacentAtoms(Handle);
     void      removeHebbianLinks(HandleSeq& hseq);
@@ -82,7 +79,7 @@ protected:
 
     double calculateHebbianDiffusionPercentage(Handle);
     double calculateIncidentDiffusionPercentage(Handle);
-    
+
     void tradeSTI(DiffusionEventType);
     void updateMaxSpreadPercentage();
 
@@ -93,10 +90,6 @@ protected:
 public:
     ImportanceDiffusionBase(CogServer&);
     virtual ~ImportanceDiffusionBase();
-
-    int get_sleep_time() { return sleep_time_ms; }
-
-    void set_sleep_time(int ms) { sleep_time_ms = ms; }
 
 }; // class
 

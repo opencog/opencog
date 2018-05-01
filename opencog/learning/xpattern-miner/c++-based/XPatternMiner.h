@@ -140,6 +140,14 @@ public:
 	                      const Valuations& valuations,
 	                      int maxdepth);
 
+	/**
+	 * Alternate specialization that reflects how the URE would work.
+	 */
+	HandleTree specialize_alt(const Handle& pattern,
+	                          const HandleSet& texts,
+	                          const Valuations& valuations,
+	                          int maxdepth);
+
 	// AtomSpace containing the text trees to mine.
 	AtomSpace& text_as;
 
@@ -193,9 +201,10 @@ private:
 	Handle mk_varpattern(const Handle& pattern, const Handle& var) const;
 
 	/**
-	 * Specialize according to shallow abstractions.
-	 * 
-	 * TODO: improve comment.
+	 * Specialize the given pattern according to shallow abstractions
+	 * obtained by looking at the valuations of the front variable of
+	 * valuations, then recursively call XPatternMiner::specialize on
+	 * these obtained specializations.
 	 */
 	HandleTree specialize_shabs(const Handle& pattern,
 	                            const HandleSet& texts,
@@ -203,15 +212,13 @@ private:
 	                            int maxdepth);
 
 	/**
-	 * Specialize by reducing variables, that is mapping non-front
-	 * variables to the front one, when possible
-	 *
-	 * TODO: improve comment.
+	 * Specialize the given pattern with the given shallow abstraction
+	 * at the given variable, then call XPatternMiner::specialize on
+	 * the obtained specialization.
 	 */
-	HandleTree specialize_vared(const Handle& pattern,
-	                            const HandleSet& texts,
-	                            const Valuations& valuations,
-	                            int maxdepth);
+	HandleTree specialize_shapat(const Handle& pattern, const HandleSet texts,
+	                             const Handle& var, const Handle& shapat,
+	                             int maxdepth);
 
 	/**
 	 * Calculate if the pattern has enough support w.r.t. to the given
@@ -220,12 +227,6 @@ private:
 	 */
 	bool enough_support(const Handle& pattern,
 	                    const HandleSet& texts) const;
-
-	/**
-	 * Like above but only look at the text total count. This works
-	 * when the text has been filtered from a single conjunct pattern.
-	 */
-	bool enough_support(const HandleSet& texts) const;
 
 	// TODO move all static methods down
 
@@ -256,14 +257,6 @@ private:
 	                        int maxf=-1) const;
 
 	/**
-	 * Calculate the total count of texts.
-	 *
-	 * maxf is used to halt the frequency calculation if it reaches a
-	 * certain maximum. Purely for saving resources when possible.
-	 */
-	unsigned freq(const HandleSet& texts, int maxf=-1) const;
-
-	/**
 	 * Calculate the frequency of the whole pattern, given the
 	 * frequency of it's components.
 	 */
@@ -290,63 +283,110 @@ private:
 	Handle matched_results(const Handle& pattern, const Handle& text) const;
 
 	/**
-	 * TODO: add comment
+	 * Given valuations produce all shallow abstractions reachind
+	 * minimum support, over all variables. It basically applies
+	 * front_shallow_abstract recursively. See the specification of
+	 * front_shallow_abstract for more information.
+	 *
+	 * For instance, given
+	 *
+	 * valuations =
+	 *   { { X->(Inheritance (Concept "A") (Concept "B")), Y->(Concept "C") },
+	 *     { X->(Inheritance (Concept "B") (Concept "C")), Y->(Concept "D") },
+	 *     { X->(Concept "E"), Y->(Concept "D") } }
+	 * ms = 2
+	 *
+	 * shallow_abstract(valuations) =
+	 *  {
+	 *    ;; Shallow abstractions of X
+	 *    { (Lambda
+	 *        (VariableList
+	 *          (Variable "$X1")
+	 *          (Variable "$X2"))
+	 *        (Inheritance
+	 *          (Variable "$X1")
+	 *          (Variable "$X2"))) },
+	 *    ;; Shallow abstractions of Y
+	 *    { (Concept "D") }
+	 *  }
 	 */
-	HandleSet variable_reduce(const Valuations& valuations) const;
-	
+	static HandleSetSeq shallow_abstract(const Valuations& valuations, unsigned ms);
+
 	/**
-	 * TODO: fix comment
+	 * Given valuations produce all shallow abstractions reaching
+	 * minimum support based on the values associated to the front
+	 * variable first variable. This shallow abstractions include
 	 *
-	 * Given a collection of text atoms, return all shallow abstractions,
-	 * associated to their matching texts. For instance
+	 * 1. Single operator patterns, like (Lambda X Y (Inheritance X Y))
+	 * 2. Constant nodes, like (Concept "A")
+	 * 3. Remain variable after the front one, x2, ..., xn
 	 *
-	 * texts = { (Concept "a"),
-	 *           (Concept "b"),
-	 *           (Inheritance (Concept "a") (Concept "b")) }
+	 * Composing these 3 sorts of abstractions are enough to generate
+	 * all possible patterns.
 	 *
-	 * shallow_patterns(texts) =
-	 *     { (Concept "a") -> { (Concept "a") },
-	 *       (Concept "b") -> { (Concept "b") },
-	 *       (Lambda       -> { (Inheritance (Concept "a") (Concept "b")) }
-	 *         (VariableList
-	 *           (Variable "$X")
-	 *           (Variable "$Y"))
-	 *         (Inheritance
-	 *           (Variable "$X")
-	 *           (Variable "$Y")))
-	 *     }
+	 * For instance, given
+	 *
+	 * valuations =
+	 *   { { X->(Inheritance (Concept "A") (Concept "B")), Y->(Concept "C") },
+	 *     { X->(Inheritance (Concept "B") (Concept "C")), Y->(Concept "D") },
+	 *     { X->(Concept "E"), Y->(Concept "D") } }
+	 * ms = 2
+	 *
+	 * front_shallow_abstract(valuations) = { (Lambda
+	 *                                          (VariableList
+	 *                                            (Variable "$X1")
+	 *                                            (Variable "$X2"))
+	 *                                          (Inheritance
+	 *                                            (Variable "$X1")
+	 *                                            (Variable "$X2"))) }
+	 */
+	static HandleSet front_shallow_abstract(const Valuations& valuations, unsigned ms);
+
+	/**
+	 * Given an atom, a value, return its corresponding shallow
+	 * abstraction. A shallow abstraction of an atom is
+	 *
+	 * 1. itself if it is a node
+	 *
+	 * 2. (Lambda (VariableList X1 ... Xn) (L X1 ... Xn) if it is a
+	 *    link of arity n.
+	 *
+	 * For instance, with
+	 *
+	 * text = (Inheritance (Concept "a") (Concept "b"))
+	 *
+	 * shallow_patterns(text) = (Lambda
+	 *                            (VariableList
+	 *                              (Variable "$X1")
+	 *                              (Variable "$X2"))
+	 *                            (Inheritance
+	 *                              (Variable "$X1")
+	 *                              (Variable "$X2")))
 	 *
 	 * TODO: we may want to support types in variable declaration.
 	 */
-	Handle shallow_abstract(const Handle& text);
+	static Handle val_shallow_abstract(const Handle& value);
 
-	/**
-	 * Like above but take valuations instead of texts,
-	 * produce shallow patterns based on the first variable, and
-	 * associate the remaining valuations to each pattern.
-	 */
-	HandleSet shallow_abstract(const Valuations& valuations);
-	
 	/**
 	 * Wrap a VariableList around a variable list, if more than one
 	 * variable, otherwise return that one variable.
 	 */
-	Handle variable_list(const HandleSeq& vars);
+	static Handle variable_list(const HandleSeq& vars);
 
 	/**
 	 * Wrap a LambdaLink around a vardecl and body.
 	 */
-	Handle lambda(const Handle& vardecl, const Handle& body);
+	static Handle lambda(const Handle& vardecl, const Handle& body);
 
 	/**
 	 * Wrap a QuoteLink around h
 	 */
-	Handle quote(const Handle& h);
+	static Handle quote(const Handle& h);
 
 	/**
 	 * Wrap a UnquoteLink around h
 	 */
-	Handle unquote(const Handle& h);
+	static Handle unquote(const Handle& h);
 
 	/**
 	 * Wrap a LocalQuote link around h (typically used if it is a link
@@ -354,24 +394,22 @@ private:
 	 * multi-conjuncts patterns when in fact we want to match an
 	 * AndLink text.)
 	 */
-	Handle local_quote(const Handle& h);
+	static Handle local_quote(const Handle& h);
 
 	/**
+	 * TODO replace by RewriteLink::beta_reduce
+	 *
 	 * Given a pattern, and mapping from variables to sub-patterns,
 	 * compose (as in function composition) the pattern with the
 	 * sub-patterns. That is replace variables in the pattern by their
 	 * associated sub-patterns, properly updating the variable
 	 * declaration.
-	 *
-	 * TODO: add unit test
-	 *
-	 * TODO: add examples
-	 *
-	 * TODO Move this to a ComposeLink factory.
 	 */
 	static Handle compose(const Handle& pattern, const HandleMap& var2pat);
 
 	/**
+	 * TODO replace by RewriteLink::beta_reduce
+	 *
 	 * Given a variable declaration, and a mapping from variables to
 	 * variable declaration, produce a new variable declaration, as
 	 * obtained by compositing the pattern with the sub-patterns.
@@ -382,10 +420,6 @@ private:
 	 * declaration. That happens in cases where the variable maps to a
 	 * constant pattern, i.e. a value. In such case composition
 	 * amounts to application.
-	 *
-	 * TODO: add unit test
-	 *
-	 * TODO: add examples
 	 */
 	static Handle vardecl_compose(const Handle& vardecl,
 	                              const HandleMap& var2subdecl);
@@ -404,6 +438,18 @@ private:
 	static Handle alpha_conversion(const Handle& pattern);
 
 public:
+	/**
+	 * Like shallow_abstract(const Valuations&, unsigned) but takes a pattern
+	 * and a texts instead, and generate the valuations of the pattern
+	 * prior to calling shallow_abstract on its valuations.
+	 *
+	 * See comment on shallow_abstract(const Valuations&, unsigned) for more
+	 * details.
+	 */
+	static HandleSetSeq shallow_abstract(const Handle& pattern,
+	                                     const HandleSet& texts,
+	                                     unsigned ms);
+
 	/**
 	 * Given a vardecl and a body, filter the vardecl to contain only
 	 * variable of the body, and create a Lambda with them.
@@ -467,7 +513,7 @@ public:
 	 * respectively, and get_body returns the pattern itself.
 	 */
 	static const Variables& get_variables(const Handle& pattern);
-	static const Handle& get_vardecl(const Handle& pattern);
+	static Handle get_vardecl(const Handle& pattern);
 	static const Handle& get_body(const Handle& pattern);
 
 	/**

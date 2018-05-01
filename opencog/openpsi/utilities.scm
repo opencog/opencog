@@ -32,68 +32,6 @@
 )
 
 ; --------------------------------------------------------------
-
-(define (psi-get-exact-match ATOM)
-"
-  psi-get-exact-match ATOM - Return list of all of the MemberLinks
-  holding rules whose context or action apply exactly (without
-  any variables) to the ATOM. In other words, the ATOM appears
-  directly in the context of the rule.
-
-  All psi rules are members of some ruleset; this searches for and
-  finds such MemberLinks.
-"
-    ;; Get all exact matches
-    (define inset (cog-get-trunk ATOM))
-
-    ;; Keep only those links that are of type MemberLink...
-    ;; and, more precisely, a MemberLink that is of a valid
-    ;; psi-fule form.
-    (filter psi-member?
-        (delete-duplicates (cog-filter 'MemberLink inset)))
-)
-
-(define (psi-get-dual-match ATOM)
-"
-  psi-get-dual-match ATOM - Return list of the MemberLinks
-  holding rules whose context or action might apply to ATOM,
-  as a generalized case (i.e. containining variables).
-
-  All psi rules are members of some ruleset; this searches for and
-  finds such MemberLinks.
-"
-    (define set-of-duals (cog-execute! (DualLink ATOM)))
-
-    ;; Get all patterned rules
-    (define duset
-        (concatenate
-            (map cog-get-trunk (cog-outgoing-set set-of-duals))))
-
-    ; Avoid garbaging up the atomspace.
-    (cog-delete set-of-duals)
-
-    ;; Keep only those links that are of type MemberLink...
-    ;; and, more precisely, a MemberLink that is of a valid
-    ;; psi-fule form.
-    (filter psi-member?
-        (delete-duplicates (cog-filter 'MemberLink duset)))
-)
-
-(define (psi-get-members ATOM)
-"
-  psi-get-members ATOM - Return list of all of the MemberLinks
-  holding rules whose context or action might apply to ATOM.
-
-  All psi rules are members of some ruleset; this searches for and
-  finds such MemberLinks.
-"
-    (delete-duplicates (concatenate! (list
-        (psi-get-exact-match ATOM)
-        (psi-get-dual-match ATOM)
-    )))
-)
-
-; --------------------------------------------------------------
 (define (psi-set-func! function is-eval component-node function-name)
 "
   psi-set-func! FUNC IS-EVAL COMPONENT FUNC-NAME
@@ -153,7 +91,7 @@
 "
   (let ((func (psi-func component-node function-name)))
     (if (null? func)
-      (error (format "A function called \"~a\" hasn't been set for ~a\n"
+      (error (format #f "A function called \"~a\" hasn't been set for ~a\n"
           function-name component-node))
       (equal? "#t"
         (cog-value-ref (cog-value func (Predicate "is_evaluatable?")) 0))

@@ -180,6 +180,13 @@ Handle LGParseLink::execute() const
 	Parse_Options opts = parse_options_create();
 	parse_options_set_verbosity(opts, 0);
 
+	// For the ANY language, this code is being used for sampling.
+	// In this case, we are not concerned about reproducibility,
+	// but want different, truly random results each time through.
+	// Viz, every time we have a four-word sentence, we want a
+	// different parse for it, each time. Bug #3065.
+	parse_options_set_repeatable_rand(opts, 0);
+
 	// Count the number of parses
 	int num_linkages = sentence_parse(sent, opts);
 	if (num_linkages < 0)
@@ -281,10 +288,14 @@ Handle LGParseLink::cvt_linkage(Linkage lkg, int i, const char* idstr,
 		if (0 == w and 0 == strcmp(wrd, "LEFT-WALL")) wrd = "###LEFT-WALL###";
 		if (nwords-1 == w and 0 == strcmp(wrd, "RIGHT-WALL")) wrd = "###RIGHT-WALL###";
 
+		uuid_t uu2;
+		uuid_generate(uu2);
+		char idstr2[37];
+		uuid_unparse(uu2, idstr2);
 		char buff[801] = "";
 		strncat(buff, wrd, 800);
 		strncat(buff, "@", 800);
-		strncat(buff, parseid, 800);
+		strncat(buff, idstr2, 800);
 		Handle winst(as->add_node(WORD_INSTANCE_NODE, buff));
 		wrds.push_back(winst);
 

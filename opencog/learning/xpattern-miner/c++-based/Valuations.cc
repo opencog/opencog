@@ -37,6 +37,10 @@
 namespace opencog
 {
 
+////////////////////
+// ValuationsBase //
+////////////////////
+
 ValuationsBase::ValuationsBase(const Variables& vars) : variables(vars) {}
 
 ValuationsBase::ValuationsBase() {}
@@ -56,6 +60,20 @@ Handle ValuationsBase::variable(unsigned i) const
 	return variables.varseq[i];
 }
 
+unsigned ValuationsBase::index(const Handle& var) const
+{
+	return variables.index.at(var);
+}
+
+unsigned ValuationsBase::size() const
+{
+	return 0;
+}
+
+//////////////////
+// SCValuations //
+//////////////////
+
 SCValuations::SCValuations(const Variables& vars, const Handle& satset)
 	: ValuationsBase(vars)
 {
@@ -65,9 +83,9 @@ SCValuations::SCValuations(const Variables& vars, const Handle& satset)
 		for (const Handle& vals : satset->getOutgoingSet())
 		{
 			if (vars.size() == 1)
-				values.push_back({vals});
+				valuations.push_back({vals});
 			else
-				values.push_back(vals->getOutgoingSet());
+				valuations.push_back(vals->getOutgoingSet());
 		}
 	}
 }
@@ -91,19 +109,46 @@ SCValuations SCValuations::erase(const Handle& var) const
 	SCValuations nvals(nvars);
 	if (not nvals.novar())
 	{
-		for (HandleSeq vals : values)
+		for (HandleSeq vals : valuations)
 		{
 			vals.erase(std::next(vals.begin(), dst));
-			nvals.values.push_back(vals);
+			nvals.valuations.push_back(vals);
 		}
 	}
 	return nvals;
+}
+
+HandleUCounter SCValuations::values(const Handle& var) const
+{
+	return values(index(var));
+}
+
+HandleUCounter SCValuations::values(unsigned var_idx) const
+{
+	HandleUCounter vals;
+	for (const HandleSeq& valuation : valuations)
+		vals[valuation[var_idx]]++;
+	return vals;
+}
+
+bool SCValuations::operator==(const SCValuations& other) const
+{
+	return variables == other.variables;
 }
 
 bool SCValuations::operator<(const SCValuations& other) const
 {
 	return variables < other.variables;
 }
+
+unsigned SCValuations::size() const
+{
+	return valuations.size();
+}
+
+////////////////
+// Valuations //
+////////////////
 
 Valuations::Valuations(const Handle& pattern, const HandleSet& texts)
 	: ValuationsBase(XPatternMiner::get_variables(pattern))
@@ -113,26 +158,39 @@ Valuations::Valuations(const Handle& pattern, const HandleSet& texts)
 		Handle satset = XPatternMiner::restricted_satisfying_set(cp, texts);
 		scvs.insert(SCValuations(XPatternMiner::get_variables(cp), satset));
 	}
+	setup_size();
 }
 
 Valuations::Valuations(const Variables& vars, const SCValuationsSet& sc)
-	: ValuationsBase(vars), scvs(sc) {}
+	: ValuationsBase(vars), scvs(sc)
+{
+	setup_size();
+}
 
 Valuations::Valuations(const Variables& vars)
-	: ValuationsBase(vars) {}
+	: ValuationsBase(vars), _size(0) {}
 
 Valuations Valuations::erase_front() const
 {
-	Handle var = front_variable();
+	// Take remaining variables
 	Variables nvars(variables);
+	Handle var = front_variable();
 	nvars.erase(var);
 	Valuations nvals(nvars);
+
+	// Move values from remaining variables to new Valuations
 	for (const SCValuations& scv : scvs)
 	{
 		SCValuations nscvals(scv.erase(var));
 		if (not nscvals.novar())
 			nvals.scvs.insert(nscvals);
 	}
+
+	// Keep the previous size as we still need to consider those
+	// combinations
+	nvals._size = _size;
+
+	// Return new Valuations
 	return nvals;
 }
 
@@ -144,47 +202,87 @@ const SCValuations& Valuations::get_scvaluations(const Handle& var) const
 	throw RuntimeException(TRACE_INFO, "There's likely a bug");
 }
 
-std::string oc_to_string(const SCValuations& scv)
+unsigned Valuations::size() const
+{
+	return _size;
+}
+
+void Valuations::setup_size()
+{
+	_size = scvs.empty() ? 0 : 1;
+	for (const SCValuations& scv : scvs)
+		_size *= scv.size();
+}
+
+std::string oc_to_string(const SCValuations& scv, const std::string& indent)
 {
 	std::stringstream ss;
-	ss << "variables:" << std::endl << oc_to_string(scv.variables);
-	ss << "values:" << std::endl << oc_to_string(scv.values);
+	ss << indent << "variables:" << std::endl
+	   << oc_to_string(scv.variables, indent + OC_TO_STRING_INDENT);
+	ss << indent << "valuations:" << std::endl
+	   << oc_to_string(scv.valuations, indent + OC_TO_STRING_INDENT);
+	return ss.str();
+}
+
+std::string oc_to_string(const SCValuations& scv)
+{
+	return oc_to_string(scv, "");
+}
+
+std::string oc_to_string(const SCValuationsSet& scvs, const std::string& indent)
+{
+	std::stringstream ss;
+	ss << indent << "size = " << scvs.size() << std::endl;
+	int i = 0;
+	for (const auto& scv : scvs)
+	{
+		ss << indent << "scvaluations [" << i << "]:" << std::endl
+		   << oc_to_string(scv, indent + OC_TO_STRING_INDENT);
+		++i;
+	}
 	return ss.str();
 }
 
 std::string oc_to_string(const SCValuationsSet& scvs)
 {
+	return oc_to_string(scvs, "");
+}
+
+std::string oc_to_string(const Valuations& valuations, const std::string& indent)
+{
 	std::stringstream ss;
-	ss << "size = " << scvs.size() << std::endl;
-	int i = 0;
-	for (const auto& scv : scvs)
-	{
-		ss << "scvaluations [" << i << "]:" << std::endl << oc_to_string(scv);
-		++i;
-	}
+	ss << indent << "size = " << valuations.size() << std::endl;
+	ss << indent << "variables:" << std::endl
+	   << oc_to_string(valuations.variables, indent + OC_TO_STRING_INDENT);
+	ss << indent << "scvaluations set:" << std::endl
+	   << oc_to_string(valuations.scvs, indent + OC_TO_STRING_INDENT);
 	return ss.str();
 }
 
 std::string oc_to_string(const Valuations& valuations)
 {
+	return oc_to_string(valuations, "");
+}
+
+std::string oc_to_string(const HandleValuationsMap& h2vals, const std::string& indent)
+{
 	std::stringstream ss;
-	ss << "variables:" << std::endl << oc_to_string(valuations.variables);
-	ss << "scvaluations set:" << std::endl << oc_to_string(valuations.scvs);
+	ss << indent << "size = " << h2vals.size() << std::endl;
+	int i = 0;
+	for (const auto& hv : h2vals)
+	{
+		ss << indent << "atom [" << i << "]:" << std::endl
+		   << oc_to_string(hv.first, indent + OC_TO_STRING_INDENT);
+		ss << indent << "valuations [" << i << "]:" << std::endl
+		   << oc_to_string(hv.second, indent + OC_TO_STRING_INDENT);
+		++i;
+	}
 	return ss.str();
 }
 
 std::string oc_to_string(const HandleValuationsMap& h2vals)
 {
-	std::stringstream ss;
-	ss << "size = " << h2vals.size() << std::endl;
-	int i = 0;
-	for (const auto& hv : h2vals)
-	{
-		ss << "atom [" << i << "]:" << std::endl << oc_to_string(hv.first);
-		ss << "valuations [" << i << "]:" << std::endl << oc_to_string(hv.second);
-		++i;
-	}
-	return ss.str();
+	return oc_to_string(h2vals, "");
 }
 
 } // namespace opencog

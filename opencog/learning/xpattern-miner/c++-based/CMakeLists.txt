@@ -1,4 +1,4 @@
-ADD_LIBRARY(xpatternminer
+ADD_LIBRARY(xpatternminer SHARED
   XPatternMiner
   HandleTree
   Valuations
@@ -17,3 +17,17 @@ INSTALL (FILES
     Valuations.h
 	DESTINATION "include/opencog/learning/xpattern-miner/c++-based"
 )
+
+IF (HAVE_GUILE)
+  ADD_LIBRARY(guile-xpatternminer SHARED
+    XPatternMinerSCM
+  )
+
+  TARGET_LINK_LIBRARIES(guile-xpatternminer
+    xpatternminer
+    ${GUILE_LIBRARIES}
+  )
+
+  INSTALL (TARGETS guile-xpatternminer DESTINATION "lib${LIB_DIR_SUFFIX}/opencog")
+
+ENDIF (HAVE_GUILE)

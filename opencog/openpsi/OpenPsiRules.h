@@ -58,39 +58,39 @@ public:
    // be followed. But, this way the developer/agents/modules will have
    // to make the choice of which declarations to process using this module,
    // there by possibly helping in performance.
-  static bool is_rule(const Handle& rule);
+  bool is_rule(const Handle& rule);
 
   /**
    * Returns all the categories that were added using add_to_category.
    *
    * @return A vector of Handles that represent the categories.
    */
-  static HandleSeq& get_categories();
+  HandleSeq& get_categories();
 
   /**
    * @param rule A psi-rule.
    * @return Context of the given psi-rule.
    */
-  static HandleSeq& get_context(const Handle rule);
+  HandleSeq& get_context(const Handle rule);
 
   /**
    * @param rule A psi-rule.
    * @return Action of the given psi-rule.
    */
-  static Handle get_action(const Handle rule);
+  Handle get_action(const Handle rule);
 
   /**
    * @param rule A psi-rule.
    * @return Goal of the given psi-rule.
    */
-  static Handle get_goal(const Handle rule);
+  Handle get_goal(const Handle rule);
 
   /**
    * @param rule A psi-rule.
    * @return Query atom used to check if the context of the given psi-rule is
    *  satisfiable or not.
    */
-  static PatternLinkPtr get_query(const Handle rule);
+  PatternLinkPtr get_query(const Handle rule);
 
   /**
    * Declare a new category by adding the following structured atom into the
@@ -131,7 +131,7 @@ private:
    * value being a tuple of its three components. The intention is to minimize
    * the computing required for getting the different component of a rule.
    */
-  static std::map<Handle, PsiTuple> _psi_rules;
+  std::map<Handle, PsiTuple> _psi_rules;
 
   // TODO: Using names that are prefixed with "OpenPsi: " might be a bad idea,
   // because it might hinder interoperability with other components that
@@ -146,15 +146,21 @@ private:
    * doesn't happen dynamically, for now, i.e., when there is no learning
    * taking place.
    */
-  static std::map<Handle, HandleSet> _category_index;
+  std::map<Handle, HandleSet> _category_index;
 
   /**
    * Node used to declare a category.
    */
-  static Handle _psi_category;
+  Handle _psi_category;
+
+  // Predicate used to set a value on whether an action was executed or not
+  Handle _action_executed;
 
   AtomSpace* _as;
 };
+
+// This function is used to create a single static instance
+OpenPsiRules& openpsi_cache(AtomSpace* as);
 
 } // namespace opencog
 

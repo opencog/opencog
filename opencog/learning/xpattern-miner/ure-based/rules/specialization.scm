@@ -1,12 +1,10 @@
-;; TODO: update comment to use PutLink
+;; Rule to specialize a pattern by composing it with a shallow
+;; abstraction, which can be pattern with just one link and all
+;; variables as outgoings, a constant, or a variable, and checks that
+;; it has enough support.
 ;;
-;; Given n+1 patterns
-;;
-;; - an n-ary pattern, g with frequency equal to or above ms
-;;
-;; - n m-ary patterns f1 to fn
-;;
-;; specialize g to produce a pattern g(f1(x1,...,xm),...,fn(x1,...,xm))
+;; Given g with arity n and with support ms, and f, specialize g by
+;; composing it with f over one of its variables, xi.
 ;;
 ;; Evaluation <tv1>
 ;;   Predicate "minsup"
@@ -16,167 +14,134 @@
 ;;         <x1>
 ;;         ...
 ;;         <xn>
-;;       <g>
+;;       <g-body>
+;;     <texts>
 ;;     <ms>
-;; Lambda
-;;   VariableList
-;;     <x1>
-;;     ...
-;;     <xm>
-;;   <f1>
-;; ...
-;; Lambda
-;;   VariableList
-;;     <x1>
-;;     ...
-;;     <xm>
-;;   <f1>
-;; |-
 ;; Evaluation <tv2>
+;;   Predicate "shallow-abstraction"
+;;   List
+;;     List
+;;       <x1>
+;;       ...
+;;       <xi-1>
+;;       <f>
+;;       <xi+1>
+;;       ...
+;;       <xn>
+;;     <minsup evaluation above>
+;; |-
+;; Evaluation <tv3>
 ;;   Predicate "minsup"
 ;;   List
-;;     ComposeLink
+;;     Put
 ;;       Lambda
 ;;         VariableList
 ;;           <x1>
 ;;           ...
 ;;           <xn>
-;;         <g>
+;;         <g-body>
 ;;       List
-;;         Lambda
-;;           VariableList
-;;             <x1>
-;;             ...
-;;             <xm>
-;;           <f1>
+;;         <x1>
 ;;         ...
-;;         Lambda
-;;           VariableList
-;;             <x1>
-;;             ...
-;;             <xm>
-;;           <f1>
+;;         <xi-1>
+;;         <f>
+;;         <xi+1>
+;;         ...
+;;         <xn>
+;;     <texts>
 ;;     <ms>
 ;;
-;; assuming that tv1 equals to (stv 1 1), then calculate the frequency
-;; of the composed pattern and set tv2 accordingly.
-
-(use-modules (opencog logger))
-(use-modules (opencog query))
-(use-modules (opencog rule-engine))
-
-;; (cog-logger-set-level! "fine")
-;; (cog-logger-set-stdout! #t)
-;; (cog-logger-set-sync! #t)
-
-;; For now we implement a simplified unary version of that rule
+;; assuming that tv1 and tv2 are equal to (stv 1 1), then calculate
+;; the frequency of the composed pattern and set tv3 accordingly, (stv
+;; 1 1) if g composed with f has support ms, (stv 0 1) otherwise.
 ;;
-;; Evaluation <tv1>
-;;   Predicate "minsup"
-;;   List
-;;     Lambda
-;;       <x>
-;;       <g>
-;;     <ms>
-;; <f-lamb>
-;; |-
-;; Evaluation <tv2>
-;;   Predicate "minsup"
-;;   List
-;;     PutLink
-;;       Lambda
-;;         <x>
-;;         <g>
-;;       <f-lamb>
-;;     <ms>
-(define unary-specialization-rule
+;; <f> may either a pattern with one link all variables as outgoings,
+;; a constant or a variable amongst <x1> to <xn> different than <xi>.
+;;
+;; We don't need to care about the structure of (List <x1> ...)
+;; because, as presented implemented, only correct structures will be
+;; formed by the shallow-abstraction rule.
+;;
+;; TODO: we might want to split such rule into 2,
+;;
+;; 1. Relating PutLink and specialization/abstraction
+;;
+;; 2. Relating specialization/abstraction and minsup
+;;
+;; instead of being mangled into one rule.
+
+(load "pattern-miner-utils.scm")
+
+(define specialization-rule
   (let* (;; Variables
-         (x (Variable "$x"))
          (g (Variable "$g"))
+         (texts (Variable "$texts"))
          (ms (Variable "$ms"))
-         (f-lamb (Variable "$f-lamb"))
-         ;; Constants
-         (minsup (Predicate "minsup"))
+         (xs-f (Variable "$xs-f"))
          ;; Types
-         (VariableT (Type "VariableNode"))
          (NumberT (Type "NumberNode"))
          (LambdaT (Type "LambdaLink"))
+         (PutT (Type "PutLink"))
+         (ConceptT (Type "ConceptNode"))
          ;; Vardecls
-         (x-decl (TypedVariable x VariableT))
-         (g-decl g)
+         (g-decl (TypedVariable g (TypeChoice LambdaT PutT)))
+         (texts-decl (TypedVariable texts ConceptT))
          (ms-decl (TypedVariable ms NumberT))
-         (f-lamb-decl (TypedVariable f-lamb LambdaT))
-         (vardecl (VariableList x-decl g-decl ms-decl f-lamb-decl))
-         ;; Patterns
-         (g-lamb (Quote (Lambda (Unquote x) (Unquote g))))
-         (pattern (Evaluation
-                    minsup
-                    (List
-                      g-lamb
-                      ms)))
+         (xs-f-decl xs-f)
+         (vardecl (VariableList g-decl texts-decl ms-decl xs-f-decl))
+         ;; Clauses
+         (minsup-g (minsup-eval g texts ms))
+         (shabs-eval (shallow-abstraction-eval xs-f minsup-g))
          ;; Make sure the pattern has the minimum support
-         (pre-condition (Evaluation
-                          (GroundedPredicate "scm: absolutely-true")
-                          pattern))
+         (precond-1 (absolutely-true-eval minsup-g))
+         (precond-2 (absolutely-true-eval shabs-eval))
          ;; Rewrite
          (rewrite (ExecutionOutput
-                     (GroundedSchema "scm: unary-specialization-formula")
-                     (List
-                       (Evaluation
-                         minsup
-                         (List
-                           (Quote (Put
-                             (Unquote g-lamb)
-                             (Unquote f-lamb)))
-                           ms))
-                       pattern
-                       f-lamb))))
+                    (GroundedSchema "scm: specialization-formula")
+                    (List
+                      (minsup-eval
+                        (Quote (Put
+                          (Unquote g)
+                          (Unquote xs-f)))
+                        texts
+                        ms)
+                      minsup-g
+                      shabs-eval))))
     (Bind
       vardecl
-      (And pattern f-lamb pre-condition)
+      (And shabs-eval precond-1 precond-2)
       rewrite)))
 
-(define (absolutely-true A)
-  (bool->tv (tv->bool (cog-tv A))))
-
-(define (unary-specialization-formula conclusion . premises)
+(define (specialization-formula conclusion . premises)
+  ;; (cog-logger-debug "specialization-formula conclusion = ~a, premises = ~a"
+  ;;                   conclusion premises)
   (if (= (length premises) 2)
-      (let* ((minsup-pred (car premises))
-             (minsup-pred-tv (cog-tv minsup-pred))
-             (f-lamb (cdr premises))
-             (gf (gadr conclusion))
-             (ms (inexact->exact (atom->number (gddr conclusion))))
-             (conclusion-tv (if (tv->bool minsup-pred-tv)
+      (let* ((con-minsup-args (gdr conclusion))
+             (pre-minsup-pred (car premises))
+             (pre-minsup-pred-tv (cog-tv pre-minsup-pred))
+             (gf (cog-outgoing-atom con-minsup-args 0))
+             (texts (cog-outgoing-atom con-minsup-args 1))
+             (ms-atom (cog-outgoing-atom con-minsup-args 2))
+             (ms (inexact->exact (atom->number ms-atom)))
+             (conclusion-tv (if (tv->bool pre-minsup-pred-tv)
                                 ;; g has enough support, let see if
                                 ;; g.f has enough support
-                                (let ((sup (support gf ms)))
-                                  (if sup
-                                      (bool->tv (= ms sup))
+                                (let ((sup (support gf texts ms)))
+                                  (if (<= ms sup)
+                                      (stv 1 1)
                                       #f)) ; It is ill-formed
                                 ;; g does not have enough support,
                                 ;; therefore g.f doesn't have enough
                                 ;; support
-                                (stv 0 1))))
+                                #f))
+             ;; Reduce the pattern to a normal form by collapsing all
+             ;; PutLinks, and output this norma form
+             (reduced-conclusion (cog-execute! conclusion)))
         (if conclusion-tv
-            (cog-set-tv! conclusion conclusion-tv)))))
+            (cog-set-tv! reduced-conclusion conclusion-tv)))))
 
-;; Return the min between the frequency of L and ms, or #f if L is
-;; ill-formed.
-(define (support L ms)
-  (let* ((L-prnx (cog-execute! L))  ; get L in prenex form
-         (ill-formed (null? L-prnx)))
-    (if ill-formed
-        #f
-        ;; Otherwise it is well-formed, calculate its frequency up to ms
-        (if (= (cog-arity L-prnx) 2)
-            ;; With variable declaration
-            (let* ((vardecl (gar L-prnx))
-                   (body (gdr L-prnx))
-                   (bl (Bind vardecl body body)) ; to deal with unordered links
-                   (results (cog-bind-first-n bl ms)))
-              (cog-arity results))
-            ;; Without variable declaration
-            (let* ((body (gar L-prnx))
-                   (bl (Bind body body)) ; to deal with unordered links
-                   (results (cog-bind-first-n bl ms)))
-              (cog-arity results))))))
+;; Define specialization
+(define specialization-rule-name
+  (DefinedSchemaNode "specialization-rule"))
+(DefineLink specialization-rule-name
+  specialization-rule)

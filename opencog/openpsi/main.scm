@@ -7,18 +7,6 @@
 ; Copyright (C) 2015-2016 OpenCog Foundation
 ; Copyright (C) 2017 MindCloud
 
-(use-modules (srfi srfi-1)) ; For `append-map`
-(use-modules (ice-9 threads)) ; For par-map
-
-(use-modules (opencog) (opencog exec) (opencog query) (opencog rule-engine))
-(use-modules (opencog logger))
-
-(load "action-selector.scm")
-(load "demand.scm")
-(load "control.scm")
-(load "rule.scm")
-(load "utilities.scm")
-
 ; --------------------------------------------------------------
 ; Configure openpsi logger
 (define opl (cog-new-logger))
@@ -43,12 +31,14 @@
 (psi-add-category psi-component-node)
 
 ; --------------------------------------------------------------
-(define (psi-component name)
+(define* (psi-component name #:optional step)
 "
-  psi-component NAME
+  psi-component NAME STEP
     Create and return a ConceptNode that represents an OpenPsi engine driven
     component called NAME. It associates an action-selector, and a psi-step
-    loop.
+    loop. If evaluatable atom, STEP, that encodes what needs to be
+    done during each loop, is passed then the loop will evaluate STEP during
+    each cycle. If STEP is not passed then the loop will use psi-step.
 "
   ; NOTE: All the values associated with the component can easily be
   ; moved into the atomspace.
@@ -78,9 +68,11 @@
       loop-node
       (Satisfaction
         (SequentialAnd
-          (Evaluation
-            (GroundedPredicate "scm: psi-step")
-            (List component))
+          (if step
+            step
+            (Evaluation
+              (GroundedPredicate "scm: psi-step")
+              (List component)))
           (Evaluation
             (GroundedPredicate "scm: psi-run-continue?")
             (List component))
@@ -192,144 +184,4 @@
       "In component ~a ending psi-step, loop-count = ~a" component lc)
     (stv 1 1) ; For continuing psi-run loop.
   )
-)
-
-; ----------------------------------------------------------------------
-(define (psi-step-per-demand)
-"
-  psi-step - Take one step of the OpenPsi rule engine.
-
-  Returns TRUE_TV, always.
-"
-; TODO: Add reinforcement signal in psi-step
-; 1. Record which rule was selected, per demand, on the previous run.
-; 2. Update the rule strength, depending on the reinforcement signal.
-; 3. Define the representation for the reinforcement signal.
-    (define (get-context-grounding-atoms rule)
-        #!
-        (let* ((pattern (GetLink (AndLink (psi-get-context rule))))
-                ;FIXME: Cache `results` during `psi-select-rules` stage
-               (results (cog-execute! pattern)))
-            (cog-extract pattern)
-            ; If it is only links then nothing to pass to an action.
-            (if (null? (cog-get-all-nodes results))
-                '()
-                results
-            )))!#
-            '())
-
-
-    (define (act-and-evaluate rule)
-        ;NOTE: This is the job of the action-orchestrator.
-        (let* ((action (psi-get-action rule))
-              ; (goals (psi-related-goals action))
-               (context-atoms (get-context-grounding-atoms rule)))
-
-            (cog-logger-debug opl "Starting evaluation of psi-rule ~a" rule)
-
-            ; The #t condition is for evaluatable-contexts. These are
-            ; contexts that only have evaluatable-terms that return TRUE_TV
-            ; or FALSE_TV.
-            ; The #f condition is for groundable-contexts. These are contexts,
-            ; that are similar to the implicant of a BindLink. The contexts are
-            ; grounded and the grounding atoms are put into the action (that is
-            ; equivalent to the implicand of the BindLink).
-            (if (null? context-atoms)
-                (cog-evaluate! action)
-                ; FIXME Since the PutLink is wrapped in a TrueLink any
-                ; information due to the evaluation of the action is lost.
-                (cog-evaluate! (True (PutLink action context-atoms)))
-            )
-            ; An evaluation of an action that is common in mulitple rules
-            ; results in the achievement of the goals, even if the context of
-            ; the other rules aren't not satisfied.
-            ; NOTE: The evalution of goals is disabled as it isn't being used
-            ; and is a candidate to be refactored out.
-            ;(map cog-evaluate! goals)
-            (cog-logger-debug opl "Finished evaluating of psi-rule ~a" rule)
-        ))
-
-    (set! psi-loop-count (+ psi-loop-count 1))
-
-    (cog-logger-debug opl "Taking one psi-step, loop-count = ~a" psi-loop-count)
-
-    ; Run the controller that updates the weight.
-    ; TODO: Should this be a before selection hook? The real reason is that
-    ; the other components might want to specify other actions to be
-    ; undertaken.
-    (psi-controller-update-weights)
-
-    ; Do action-selection.
-    (map
-        (lambda (d)
-         ;TODO: Replace the updater with a hook? Maybe using Join/Parallel
-         ; Links?
-            (let ((updater (psi-get-updater d)))
-                ; Run the updater for the demand.
-                (if (not (null? updater))
-                    (cog-evaluate! updater)
-                )
-                ; The assumption is that the rules can be run concurrently.
-                (par-map act-and-evaluate (psi-select-rules d))
-            ))
-
-        (psi-get-all-enabled-demands)
-    )
-
-    ; Do garbage collection. This is a replacement to (run-behavior-tree-gc)
-    ; TODO: Each component must clean after itself or have a separate
-    ; component that does that. So, remove this. Should this be an after
-    ; selection hook?
-    (when (equal? 0 (modulo psi-loop-count 1000))
-        (cog-map-type (lambda (a) (cog-extract a) #f) 'SetLink)
-        (cog-map-type (lambda (a) (cog-extract a) #f) 'ListLink)
-        (cog-map-type (lambda (a) (cog-extract a) #f) 'NumberNode)
-        (cog-map-type (lambda (a) (cog-extract a) #f) 'ConceptNode)
-        (cog-logger-debug opl
-            "Finished garbage collection, loop-count = ~a" psi-loop-count)
-    )
-
-    (cog-logger-debug opl "Ending psi-step, loop-count = ~a" psi-loop-count)
-    (stv 1 1) ; For continuing psi-run loop.
-)
-
-; --------------------------------------------------------------
-;
-; XXX FIXME -- right now, this assumes that a single thread, running
-; at no more than 100 steps per second, is sufficient to run all of the
-; psi rules.  For now, this is OK, but at some point, this will become
-; a bottleneck, as we will need to evaluate more rules more often.
-;
-(define (psi-run-per-demand)
-"
-  psi-run
-
-  Create a new thread, and repeatedly invoke `psi-step` in it.
-  This thread can be halted by calling `(psi-halt)`, which will exit
-  the loop (and kill the thread).
-"
-    (define loop-name (string-append psi-prefix-str "loop"))
-    (define loop-node (DefinedPredicateNode loop-name))
-    (define (define-psi-loop)
-        (DefineLink
-            loop-node
-            (SatisfactionLink
-                (SequentialAnd
-                    (Evaluation
-                        (GroundedPredicate "scm: psi-step")
-                        (ListLink))
-                    (Evaluation
-                        (GroundedPredicate "scm: psi-run-continue?")
-                        (ListLink))
-                    ; tail-recursive call
-                    loop-node))))
-
-    (if (or (null? (cog-node 'DefinedPredicateNode loop-name))
-            (null? (cog-chase-link 'DefineLink 'SatisfactionLink loop-node)))
-        (define-psi-loop))
-
-    (if (not (psi-running?))
-        (begin
-            (set! psi-do-run-loop #t)
-            (call-with-new-thread (lambda () (cog-evaluate! loop-node)))))
 )

@@ -73,6 +73,8 @@
     ((has-match? "^[ ]*\r" str) (result:suffix 'CR location ""))
     ; FIXME: This is not really newline.
     ((string=? "" str) (cons (make-lexical-token 'NEWLINE location #f) ""))
+    ((has-match? "^[ \t]*urge:" str) (result:suffix 'URGE location #f))
+    ((has-match? "^[ \t]*ordered-goal:" str) (result:suffix 'ORD-GOAL location #f))
     ((has-match? "^[ \t]*goal:" str) (result:suffix 'GOAL location #f))
     ((has-match? "^[ \t]*#goal:" str) (result:suffix 'RGOAL location #f))
     ((has-match? "^[ \t]*#!" str) ; This should be checked always before #
@@ -140,7 +142,7 @@
     ((has-match? "^[ ]*'[a-zA-Z]+\\b" str)
       (result:suffix 'LITERAL location
         (substring (string-trim (match:substring current-match)) 1)))
-    ((has-match? "^[ ]*[a-zA-Z'-]+\\b" str)
+    ((has-match? "^[ ]*[a-zA-Z’'-]+\\b" str)
       (if (is-lemma? (string-trim (match:substring current-match)))
         (result:suffix 'LEMMA location
           (string-trim (match:substring current-match)))
@@ -157,7 +159,7 @@
      (result:suffix 'COMMA location
         (string-trim (match:substring current-match))))
     ; This should always be near the end, because it is broadest of all.
-    ((has-match? "^[ \t]*[~'.,_!?0-9a-zA-Z-]+" str)
+    ((has-match? "^[ \t]*[~’'._!?0-9a-zA-Z-]+" str)
         (result:suffix 'STRING location
           (string-trim (match:substring current-match))))
     ; NotDefined token is used for errors only and there shouldn't be any rules.
@@ -222,8 +224,8 @@
     ; MOVAR = Match Variables grounded in their original words
     ; ? = Comparison tests
     ; VLINE = Vertical Line |
-    (CONCEPT TOPIC RESPONDERS REJOINDERS GAMBIT GOAL RGOAL COMMENT SAMPLE_INPUT
-     WHITESPACE
+    (CONCEPT TOPIC RESPONDERS REJOINDERS GAMBIT URGE ORD-GOAL GOAL RGOAL COMMENT
+     SAMPLE_INPUT WHITESPACE
       (right: LPAREN LSBRACKET << ID VAR * ^ < LEMMA LITERAL NUM DICTKEY
               STRING *~n *n UVAR MVAR MOVAR EQUAL NOT RESTART LBRACE VLINE COMMA)
       (left: RPAREN RSBRACKET RBRACE >> > DQUOTE)
@@ -232,16 +234,16 @@
 
     ; Parsing rules (aka nonterminal symbols)
     (inputs
-      (input) :
-        (if $1 (begin (cog-logger-debug ghost-logger "\nParsed:\n~a\n" $1) #t))
-      (inputs input) :
-        (if $2 (begin (cog-logger-debug ghost-logger "\nParsed:\n~a\n" $2) #t))
+      (input) : #t
+      (inputs input) : #t
     )
 
     (input
       (declarations) : $1
-      (goal) : (begin (create-shared-goal
-        (eval-string (string-append "(list " $1 ")"))) $1)
+      (urge) : (set-initial-urge (eval-string (string-append "(list " $1 ")")))
+      (goal) : (create-top-lv-goal (eval-string (string-append "(list " $1 ")")))
+      (ordered-goal) :
+        (create-top-lv-goal (eval-string (string-append "(list " $1 ")")) #t)
       (rule) : $1
       (enter) : $1
       (COMMENT) : #f
@@ -275,6 +277,7 @@
         (create-topic $2 (string-split $3 #\sp) (list))
       (TOPIC ID names LSBRACKET RSBRACKET) :
         (create-topic $2 (string-split $3 #\sp) (list))
+      (UVAR EQUAL name) : (create-user-variable $1 $3)
     )
 
     (declaration-sequence
@@ -386,22 +389,31 @@
           (list) "" $1)
     )
 
+    (urge
+      (URGE LPAREN goal-members RPAREN) : $3
+    )
+
+    (ordered-goal
+      (ORD-GOAL LPAREN goal-members RPAREN) : $3
+    )
+
     (rule-goal
-        (RGOAL LPAREN goal-members RPAREN) : $3
+      (RGOAL LPAREN goal-members RPAREN) : $3
     )
 
     (goal
-        (GOAL LPAREN goal-members RPAREN) : $3
+      (GOAL LPAREN goal-members RPAREN) : $3
     )
 
     (goal-members
-        (goal-member) : $1
-        (goal-members goal-member) : (format #f "~a ~a" $1 $2)
+      (goal-member) : $1
+      (goal-members goal-member) : (format #f "~a ~a" $1 $2)
     )
 
     (goal-member
-        (LEMMA EQUAL NUM) : (format #f "(cons \"~a\" ~a)" $1 $3)
-        (STRING EQUAL NUM) : (format #f "(cons \"~a\" ~a)" $1 $3)
+      (LITERAL EQUAL NUM) : (format #f "(cons \"~a\" ~a)" $1 $3)
+      (LEMMA EQUAL NUM) : (format #f "(cons \"~a\" ~a)" $1 $3)
+      (STRING EQUAL NUM) : (format #f "(cons \"~a\" ~a)" $1 $3)
     )
 
     (context
@@ -588,12 +600,13 @@
 
     (args
       (arg) : $1
-      (args arg) : (format #f "~a ~a" $1 $2)
+      (arg COMMA args) : (format #f "~a ~a" $1 $3)
     )
 
     (arg
       (LEMMA) : (format #f "(cons 'arg \"~a\")" $1)
       (LITERAL) : (format #f "(cons 'arg \"~a\")" $1)
+      (NUM) : (format #f "(cons 'arg \"~a\")" $1)
       (STRING) : (format #f "(cons 'arg \"~a\")" $1)
       (variable-grounding) : $1
     )
@@ -699,5 +712,7 @@
   Parse a topic file in a Guile shell, for debugging mainly.
 "
   (define parser (cs-parser))
-  (parser (cs-lexer (open-file-input-port file)) error)
+  (define fp (open-file-input-port file))
+  (set-port-encoding! fp "UTF-8")
+  (parser (cs-lexer fp) error)
 )

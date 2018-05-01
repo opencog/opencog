@@ -39,22 +39,11 @@
 ; A component in OpenPsi
 (define ghost-component (psi-component "GHOST"))
 
-; ----------
-; Various anchors, predicates, values etc that will be used
-
-(define ghost-curr-proc (Anchor (ghost-prefix "Currently Processing")))
-(define ghost-curr-topic (Anchor (ghost-prefix "Current Topic")))
-(define ghost-last-executed (Anchor (ghost-prefix "Last Executed")))
-(define ghost-no-constant (Anchor (ghost-prefix "No constant terms")))
-(define ghost-word-seq (Predicate (ghost-prefix "Word Sequence")))
-(define ghost-lemma-seq (Predicate (ghost-prefix "Lemma Sequence")))
-(define ghost-topic (Concept (ghost-prefix "Topic")))
-(define ghost-topic-feature (Predicate (ghost-prefix "Topic Feature")))
-(define ghost-rule-type (Predicate (ghost-prefix "Rule Type")))
-(define strval-rejoinder (StringValue "rejoinder"))
-(define strval-responder (StringValue "responder"))
-(define strval-random-gambit (StringValue "random gambit"))
-(define strval-gambit (StringValue "gambit"))
+(define-public (ghost-get-component)
+"
+  Return the GHOST component.
+"
+  ghost-component)
 
 ; ----------
 ; Define the logger for GHOST
@@ -71,22 +60,51 @@
 "
   ghost-logger)
 
+; ----------
+; Various anchors, predicates, values etc that will be used
+
+(define ghost-curr-proc (Anchor (ghost-prefix "Currently Processing")))
+(define ghost-curr-topic (Anchor (ghost-prefix "Current Topic")))
+(define ghost-last-executed (Anchor (ghost-prefix "Last Executed")))
+(define ghost-no-constant (Anchor (ghost-prefix "No constant terms")))
+(define ghost-word-seq (Predicate (ghost-prefix "Word Sequence")))
+(define ghost-lemma-seq (Predicate (ghost-prefix "Lemma Sequence")))
+(define ghost-topic (Concept (ghost-prefix "Topic")))
+(define ghost-topic-feature (Predicate (ghost-prefix "Topic Feature")))
+(define ghost-rule-type (Predicate (ghost-prefix "Rule Type")))
+(define ghost-next-responder (Predicate (ghost-prefix "Next Responder")))
+(define ghost-next-rejoinder (Predicate (ghost-prefix "Next Rejoinder")))
+(define strval-rejoinder (StringValue "rejoinder"))
+(define strval-responder (StringValue "responder"))
+(define strval-random-gambit (StringValue "random gambit"))
+(define strval-gambit (StringValue "gambit"))
+
 ;; --------------------
 ;; For rule parsing
 
 ; When set, all the rules created will be under this topic
 (define rule-topic '())
 
-; A list of shared goals for all the rules under the same topic file
-(define shared-goals '())
+; The initial urge of goals
+(define initial-urges '())
+
+; A list of top level goals that will be shared with all the rules
+; defined under it
+(define top-lv-goals '())
+
+; Whether the rules defined under a top level goal is ordered
+(define is-rule-seq #f)
+
+; How many rules we've seen under a particular top level goal
+(define goal-rule-cnt 0)
 
 ; A list of local variables exist in the pattern of a rule,
 ; during rule parsing & creation
 (define pat-vars '())
 
-; A list to keep track of what rules have been created
+; A list to keep track of what rules hierarchy
 ; Will be used when dealing with rejoinders
-(define rule-lists '())
+(define rule-hierarchy '())
 
 ;; --------------------
 ;; For rule matching
@@ -101,16 +119,29 @@
 ; Storing values assigned to the user variables for referencing later
 (define uvars '())
 
+; The weights of various parameters used in the action selector
+; For experimental purpose
+(define strength-weight 1)
+(define context-weight 1)
+(define sti-weight 1)
+(define urge-weight 1)
+
+;; --------------------
+;; For monitoring the status
+(define num-rules-found 0)
+(define num-rules-evaluated 0)
+(define num-rules-satisfied 0)
+
 ;; --------------------
 ;; Load the required files
 
 (load "ghost/test.scm")
 (load "ghost/utils.scm")
-(load "ghost/functions.scm")
 (load "ghost/terms.scm")
 (load "ghost/translator.scm")
 (load "ghost/matcher.scm")
 (load "ghost/cs-parse.scm")
+(load "ghost/stimulation.scm")
 
 ;; --------------------
 ;; To parse rules and interact with GHOST, the main interfaces
@@ -137,3 +168,17 @@
   (define sent (car (nlp-parse TXT)))
   (generate-word-seqs sent)
   (State ghost-curr-proc sent))
+
+; ----------
+(define-public (ghost-run)
+"
+  Start the psi-loop for GHOST.
+"
+  (psi-run ghost-component))
+
+; ----------
+(define-public (ghost-halt)
+"
+  Halt the psi-loop for GHOST.
+"
+  (psi-halt ghost-component))

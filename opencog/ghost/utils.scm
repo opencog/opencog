@@ -260,3 +260,16 @@
   Get all the psi-rules that contain ATOM
 "
   (filter psi-rule? (cog-get-trunk ATOM)))
+
+; ----------
+(define (get-rule-from-label LABEL)
+"
+  Given the label of a rule in string, return the rule with that lavel.
+"
+  (define rule
+    (cog-chase-link 'ListLink 'ImplicationLink
+      (Concept (string-append psi-prefix-str LABEL))))
+
+  (if (null? rule)
+      (cog-logger-warn ghost "Failed to find the GHOST rule \"~a\"" LABEL)
+      (car rule)))

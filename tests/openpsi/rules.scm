@@ -1,17 +1,21 @@
 ; Copyright (C) 2016 OpenCog Foundation
 
 ; --------------------------------------------------------------
-; If you want to run this in guile wihout installing,
+; If you want to run this in guile without installing,
 ; 1. run cmake in the build directory
 ; 2. run  (add-to-load-path "/absolute/path/to/build/opencog/scm")
-; 3. (use-modules (opencog) (opencog openpsi))
-
+;
 ; NOTE:
 ; 1. The context of the rules are created so as to test possible generic
 ;    atomese patterns during application development, thus the semantics might
 ;    not make sense.
 ; 2. The numbering of the demands, context, action, and goals are used for
 ;    differentiating and are not necessarily related with the number of tests.
+; --------------------------------------------------------------
+(use-modules (opencog) (opencog openpsi))
+
+; --------------------------------------------------------------
+; Rule - 1
 ; --------------------------------------------------------------
 (define context-1
     (list
@@ -41,9 +45,9 @@
     (ConceptNode "act-1")
 )
 
-(define (demand-1) (psi-component  "demand-1"))
+(define (component-1) (psi-component  "component-1"))
 
-(define goal-1 (Concept "goal-1"))
+(define goal-1 (psi-goal "goal-1" .1))
 
 (define (test-update-tv node strength)
     (cog-set-tv! node
@@ -51,7 +55,7 @@
     (stv 1 1)
 )
 
-(define (rule-1) (psi-rule context-1 action-1 goal-1 (stv 1 1) (demand-1)))
+(define (rule-1) (psi-rule context-1 action-1 goal-1 (stv 1 1) (component-1)))
 (define (rule-1-cpp)
   (ImplicationLink (stv 1 1)
      (AndLink
@@ -93,6 +97,8 @@
 )
 
 ; --------------------------------------------------------------
+; Rule - 2
+; --------------------------------------------------------------
 (define context-2
     (list ; They are in a list so as to simplify removal.
        (ListLink
@@ -118,11 +124,11 @@
     (ConceptNode "act-2")
 )
 
-(define (demand-2) (psi-component  "demand-2"))
+(define (component-2) (psi-component  "component-2"))
 
-(define goal-2 (Concept "goal-2"))
+(define goal-2 (psi-goal "goal-2" .2 .5))
 
-(define (rule-2) (psi-rule context-2 action-2 goal-2 (stv 1 1) (demand-2)))
+(define (rule-2) (psi-rule context-2 action-2 goal-2 (stv 1 1) (component-2)))
 
 (define (rule-2-cpp)
   (ImplicationLink (stv 1 1)
@@ -164,7 +170,79 @@
             (NumberNode 2)))
 )
 
-(define (rule-3) (psi-rule context-2 action-2 goal-1 (stv 1 1) (demand-1)))
+; --------------------------------------------------------------
+; Rule - 3
+; --------------------------------------------------------------
+(define context-3
+    (list ; They are in a list so as to simplify removal.
+       (List
+            (Concept "For PlusLink") ; Avoid error during pattern matching
+            (Variable "x")
+            (Variable "y"))
+        (Equal
+            (Plus (Variable "x") (Variable "y"))
+            (Number 5))
+        ))
+
+(define action-3
+    (ExecutionOutput
+        (GroundedSchema "scm: act-3")
+        (List (Variable "$abc"))))
+
+(define (act-3 groundings)
+    (Concept "act-3")
+)
+
+(define (component-3) (psi-component  "component-3"))
+
+(define goal-3 (psi-goal "goal-3" .3))
+
+(define (groundable-content-3)
+    (list ; They are in a list so as to simplify removal.
+        (List
+	    (Concept "For PlusLink")
+            (Number 3)
+            (Number 2)))
+)
+
+(define (rule-3) (psi-rule context-3 action-3 goal-3 (stv 1 1) (component-3)))
+
+; --------------------------------------------------------------
+; Rule - 4
+; --------------------------------------------------------------
+(define context-4
+    (list ; They are in a list so as to simplify removal.
+       (List
+            (Concept "For PlusLink") ; Avoid error during pattern matching
+            (Variable "x")
+            (Variable "y"))
+        (Equal
+            (Plus (Variable "x") (Variable "y"))
+            (Number 7))
+        ))
+
+(define action-4
+    (ExecutionOutput
+        (GroundedSchema "scm: act-4")
+        (List (Variable "$abc"))))
+
+(define (act-4 groundings)
+    (Concept "act-4")
+)
+
+(define (component-4) (psi-component  "component-4"))
+
+(define goal-4 (psi-goal "goal-4" .4))
+
+(define (groundable-content-4)
+    (list ; They are in a list so as to simplify removal.
+        (List
+	    (Concept "For PlusLink")
+            (Number 4)
+            (Number 3)))
+)
+
+(define (rule-4) (psi-rule context-4 action-4 goal-4 (stv 1 1) (component-4)))
 
 ; --------------------------------------------------------------
 ; Helper functions for `OpenPsiUTest::test_psi_related_goals`
@@ -183,8 +261,8 @@
 
 ; --------------------------------------------------------------
 ; Helper functions for `OpenPsiUTest::test_psi_step_*
-(define (act-1-present?) (cog-node? (cog-node 'ConceptNode "act-1")))
-(define (act-2-present?) (cog-node? (cog-node 'ConceptNode "act-2")))
+(define (act-3-present?) (cog-node? (cog-node 'ConceptNode "act-3")))
+(define (act-4-present?) (cog-node? (cog-node 'ConceptNode "act-4")))
 
 (define (demand-value demand-node)
 "
@@ -194,8 +272,8 @@
 )
 
 (define (do_psi_step)
-    (psi-step (demand-1))
-    (psi-step (demand-2))
+    (psi-step (component-3))
+    (psi-step (component-4))
 )
 
 ; --------------------------------------------------------------
@@ -240,45 +318,14 @@
       (equal? l2 (psi-loop-count d2)))
   )
 )
-; --------------------------------------------------------------
-; Helper functions for `OpenPsiUTest::test_psi_get_dual_rules`
-(define (demand-4) (psi-component  "demand-4"))
-
-(define action-4
-    (EvaluationLink
-        (GroundedPredicate "scm: act-4")
-        (ListLink (Variable "$abc"))))
-
-(define (act-4 groundings)
-    (ConceptNode "act-4")
-    (stv 1 1)
-)
-
-(define goal-4 (Concept "goal-4"))
-
-
-(define (groundable-content-4)
-    (list ; They are in a list so as to simplify removal.
-        (ListLink
-            (NumberNode 1)
-            (NumberNode 2))
-        (InheritanceLink
-            (NumberNode 1)
-            (NumberNode 2)))
-)
-
-; (rule-4) & (rule-5) are for usage with DualLink version of action-selection
-; i.e. psi-satisfiable? should use DualLink
-(define (rule-4)
-    (psi-rule (groundable-content-4) action-4 goal-4 (stv 1 1) (demand-4)))
 
 ; --------------------------------------------------------------
-;(define (demand-5) (psi-component  "demand-5"))
+;(define (component-5) (psi-component  "component-5"))
 
 ;(define (rule-5)
 ;    (psi-rule
 ;        (list context-1 (groundable-content-4))
-;        action-1 goal-2 (stv 1 1) (demand-5))
+;        action-1 goal-2 (stv 1 1) (component-5))
 ;)
 
 ;(define (test_psi_get_dual_rules_1_1)
@@ -313,3 +360,38 @@
 (define (test_psi_get_goal_1)
   (equal? goal-1 (psi-get-goal (rule-1)))
 )
+
+; --------------------------------------------------------------
+(define (test_psi_goal_functions_1)
+"
+  Test psi-increase-urge function. The urge should increase in magnitude.
+
+  Run before test_psi_goal_functions_2 to ensure that it increases the
+  magnitude regardless of the sign of the urge.
+"
+  (let ((loop 2))
+    (while (not (equal? 0 loop))
+      (psi-increase-urge goal-1 0.1)
+      (psi-increase-urge goal-2 0.1)
+      (set! loop (- loop 1)))
+  )
+
+  (and (equal? -0.5 (psi-urge goal-1)) (equal? 0.5 (psi-urge goal-2)))
+)
+
+(define (test_psi_goal_functions_2)
+"
+  Test psi-decrease-urge function. The urge should decrease to 0
+  reagardless of whether urge is positive or negative.
+"
+  (let ((loop 6))
+    (while (not (equal? 0 loop))
+      (psi-decrease-urge goal-1 0.1)
+      (psi-decrease-urge goal-2 0.1)
+      (set! loop (- loop 1)))
+  )
+
+  (and (equal? 0.0 (psi-urge goal-1)) (equal? 0.0 (psi-urge goal-2)))
+)
+
+; --------------------------------------------------------------
