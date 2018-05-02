@@ -59,9 +59,9 @@ to indicate end-of-messsage, and expects that the cog server will
 do the same. Only after the cog-server closes its socket does cogita
 reply on the IRC channel.
 
-  IRC.cc,.h:  C++ class for generic IRC communications.
-  go-irc.cc:  the main guts of the cogita server
-  whirr-sockets.cc,.h: tcp socket to send data to opencog, get reply.
+  * `IRC.cc,.h`:  C++ class for generic IRC communications.
+  * `go-irc.cc`:  the main guts of the cogita server
+  * `whirr-sockets.cc,.h`: tcp socket to send data to opencog, get reply.
 
 Note that if the cog-server is busy, then whirr can block for an
 indefinitely long time. The person who is chatting will start to
