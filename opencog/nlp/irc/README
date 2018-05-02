@@ -28,6 +28,20 @@ prefacing comments with cog:, cogita: or cogita-bot: or by opening a
 private dialog window to it, in which case, you don't need to address
 it directly.
 
+Running the cogserver
+---------------------
+The cogserver can be started from guile, like so:
+```
+$ guile
+scheme@(guile-user)> (use-modules (opencog)(opencog cogserver))
+scheme@(guile-user)> (use-modules (opencog nlp) (opencog nlp chatbot))
+scheme@(guile-user)> (start-cogserver "/path/to/opencog-git/lib/opencog-chatbot.conf")
+```
+This can be tested locally, without using IRC:
+```
+scheme@(guile-user)> (process-query "foo" "hello")
+```
+
 
 Architecture
 -------------
