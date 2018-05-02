@@ -15,7 +15,7 @@
   (cog-logger-set-level! ghost-logger "info"))
 
 ; ----------
-(define ghost-with-ecan #t)
+(define ghost-with-ecan #f)
 
 (define-public (ecan-based-ghost-rules flag)
 "
@@ -60,7 +60,7 @@
 ; or get all psi-rules from the atomspace in case none of them reach
 ; the attentional focus
 ; Either way the rules will be selected based on their weights
-(define ghost-af-only? #f)
+(define ghost-af-only? #t)
 (define-public (ghost-af-only AF-ONLY)
 "
   To decide whether or not to get rules only from the attentional focus
@@ -161,7 +161,7 @@
     relex-outputs))
 
 ; ----------
-(define-public (ghost-rule LABEL)
+(define-public (ghost-get-rule LABEL)
 "
   Return the rule with the given label.
 "
