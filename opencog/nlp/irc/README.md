@@ -1,8 +1,9 @@
 
-                       IRC Chatbot interfaces
-                       ----------------------
-                Linas Vepstas <linasvepstas@gmail.com>
-                          August 2009
+IRC Chatbot interfaces
+----------------------
+Linas Vepstas <linasvepstas@gmail.com>
+
+August 2009
 
 Simple code that allows the OpenCog chatbot to connect to IRC.
 
