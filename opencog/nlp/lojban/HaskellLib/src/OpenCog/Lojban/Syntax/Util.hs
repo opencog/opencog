@@ -198,6 +198,12 @@ appendAtoms i = Iso f g where
         setAtoms as
         pure a
 
+pushTVLs :: SynMonad t State => [Atom] -> (t ME) ()
+pushTVLs a = modify (\s -> s {sTVLs = a ++ sTVLs s})
+
+setTVLs :: SynMonad t State => [Atom] -> (t ME) ()
+setTVLs a = modify (\s -> s {sTVLs = a})
+
 --FIXME???
 withCleanState :: Syntax a -> Syntax a
 withCleanState syn = Iso f g where
@@ -213,6 +219,7 @@ withCleanState syn = Iso f g where
 cleanState :: State -> State
 cleanState s = State {sFlags = M.empty
                      ,sAtoms = []
+                     ,sTVLs = []
                      ,sText = sText s
                      ,sSeed = sSeed s
                      ,sNow = sNow s
@@ -223,6 +230,7 @@ cleanState s = State {sFlags = M.empty
 mergeState :: State -> State -> State
 mergeState s1 s2 = State {sFlags = sFlags s1
                          ,sAtoms = sAtoms s1
+                         ,sTVLs = sTVLs s2
                          ,sText = sText s2
                          ,sSeed = sSeed s2
                          ,sNow = sNow s1
@@ -316,11 +324,19 @@ switchOnFlag flag = Iso f g where
     g (Left a)  = setFlag flag >> pure a
     g (Right a) = pure a
 
+switchOnValue :: Eq a => a -> SynIso a (Either a a)
+switchOnValue val = mkIso f g where
+    f a = if a == val
+             then Left a
+             else Right a
+    g (Left a)  = a
+    g (Right a) = a
+
 toState :: Int -> SynIso [Atom] ()
 toState i = Iso f g where
     f as =
         if length as == i
-           then modify (\s -> s {sAtoms = as ++ sAtoms s})
+           then pushAtoms as
            else lift $ Left "List has wrong lenght, is this intended?"
     g () = do
         allatoms <- gets sAtoms
