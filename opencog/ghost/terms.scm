@@ -427,8 +427,11 @@
 "
   The function for reusing the output of another rule labeled with LABEL.
 "
-  (define rule (cog-chase-link 'ListLink 'ImplicationLink
-                 (Concept (string-append psi-prefix-str (cog-name LABEL)))))
+  (define alias (Concept (string-append psi-prefix-str (cog-name LABEL))))
+  (define rule (cog-chase-link 'ListLink 'ImplicationLink alias))
+
   (if (null? rule)
-      (cog-logger-warn ghost-logger "Failed to find the GHOST rule \"~a\"" (cog-name LABEL))
-      (psi-get-action (car rule))))
+    (cog-logger-warn ghost-logger "Failed to find the GHOST rule \"~a\"" (cog-name LABEL))
+    (begin
+      (State ghost-last-executed alias)
+      (psi-get-action (car rule)))))
