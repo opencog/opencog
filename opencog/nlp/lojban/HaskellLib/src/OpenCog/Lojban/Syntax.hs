@@ -224,7 +224,16 @@ statement_2 = (handleCon2 ||| id) . ifJustB
 
 statement_3 :: Syntax Atom
 statement_3 = sentence
- -- <+> optional tag &&& sepMorph "TUhE" &&> text_1 <&&& optMorph "TUhU"
+            <+> (handle <<< optional tag <&& sepMorph "TUhE" &&& frees
+                                         &&& text_1
+                                         &&& ((sepMorph "TUhU" &&> frees)
+                                              <+> insert [])
+                )
+    where handle = (handleJJCTTS .> tolist1 ||| id) . ifJustA
+                 . second handleFREEs2 . reorder
+          reorder = mkIso f g where
+              f (mt,(f1,(t,f2))) = (mt,(t,f1++f2))
+              g (mt,(t,f)) = (mt,(f,(t,[])))
 
 --FIXME
 fragment :: Syntax Atom
