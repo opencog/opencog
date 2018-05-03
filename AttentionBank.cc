@@ -323,9 +323,11 @@ Handle AttentionBank::getRandomAtomNotInAF(void)
 {
     UnorderedHandleSet atoms_not_in_af = _importanceIndex.getHandleSet(0);
 
-    std::lock_guard<std::mutex> lock(AFMutex);
-    for (const auto& hsp : attentionalFocus) {
-        atoms_not_in_af.erase(hsp.first);
+    {
+        std::lock_guard<std::mutex> lock(AFMutex);
+        for (const auto& hsp : attentionalFocus) {
+            atoms_not_in_af.erase(hsp.first);
+        }
     }
 
     if (atoms_not_in_af.empty())
