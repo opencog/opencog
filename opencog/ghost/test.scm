@@ -60,7 +60,7 @@
 ; or get all psi-rules from the atomspace in case none of them reach
 ; the attentional focus
 ; Either way the rules will be selected based on their weights
-(define ghost-af-only? #f)
+(define ghost-af-only? #t)
 (define-public (ghost-af-only AF-ONLY)
 "
   To decide whether or not to get rules only from the attentional focus
@@ -160,7 +160,8 @@
           (equal? 'LemmaLink type)))
     relex-outputs))
 
-(define-public (ghost-rule LABEL)
+; ----------
+(define-public (ghost-get-rule LABEL)
 "
   Return the rule with the given label.
 "
@@ -200,12 +201,68 @@
     (format #f
       (string-append
         "GHOST loop count: ~a\n"
+        "AF only? ~a\n"
+        "-----\n"
+        "Strength weight: ~a\n"
+        "Context weight: ~a\n"
+        "STI weight: ~a\n"
+        "Urge weight: ~a\n"
+        "-----\n"
         "Rules Found: ~a\n"
         "Rules Evaluated: ~a\n"
         "Rules Satisfied: ~a\n"
         "Last Triggered Rule: (~a)\n\n")
       (psi-loop-count (ghost-get-component))
+      (if ghost-af-only? "T" "F")
+      strength-weight
+      context-weight
+      sti-weight
+      urge-weight
       num-rules-found
       num-rules-evaluated
       num-rules-satisfied
       (if (null? last-rule) "N.A." (cog-name (car last-rule))))))
+
+; ----------
+(define-public (ghost-set-strength-weight VAL)
+"
+  Set the weight of the strength used duing action selection.
+"
+  (if (number? VAL)
+    (set! strength-weight VAL)
+    (cog-logger-warn ghost-logger
+      "The weight has to be a numeric value!" VAL))
+)
+
+; ----------
+(define-public (ghost-set-context-weight VAL)
+"
+  Set the weight of the context used duing action selection.
+"
+  (if (number? VAL)
+    (set! context-weight VAL)
+    (cog-logger-warn ghost-logger
+      "The weight has to be a numeric value!" VAL))
+)
+
+; ----------
+(define-public (ghost-set-sti-weight VAL)
+"
+  Set the weight of the STI used duing action selection.
+"
+  (if (number? VAL)
+    (set! sti-weight VAL)
+    (cog-logger-warn ghost-logger
+      "The weight has to be a numeric value!" VAL))
+)
+
+; ----------
+(define-public (ghost-set-urge-weight VAL)
+"
+  Set the weight of the urge used duing action selection.
+"
+  (if (number? VAL)
+    (set! urge-weight VAL)
+    (cog-logger-warn ghost-logger
+      "The weight has to be a numeric value!" VAL))
+)

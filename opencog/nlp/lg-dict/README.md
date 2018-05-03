@@ -19,7 +19,7 @@ into the atomspace.  For example:
 ```
 will look up the word "..." in the English langauge Link Grammar
 dictionary, and place the resulting disjuncts into the atomspace.
-The output should resemble the below:
+The `(cog-incoming-set (WordNode "..."))` should resemble the below:
 
   ```
    (LgDisjunct

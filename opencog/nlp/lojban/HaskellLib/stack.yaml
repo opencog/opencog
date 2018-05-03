@@ -6,18 +6,18 @@ resolver: lts-8.24
 # Local packages, usually specified by relative directory name
 packages:
 - '.'
-- location:
-   git: https://github.com/rTreutlein/LojbanValidator
-   commit: 244a28e12402e9f74a5b6e60958ffefc21afc84f
+- location: #/home/roman/Programming/LojbanValidator/
+    git: https://github.com/rTreutlein/LojbanValidator
+    commit: e0d289628df9389c7f5ca921f52c84efd13e17fa
   extra-dep: true
-- location:
-   git: https://github.com/rTreutlein/IsoSyntax
-   commit: ebf2739edfac4568943edad389760386fe6535b5
+- location: #/home/roman/OpenCog/Iso/
+    git: https://github.com/rTreutlein/IsoSyntax
+    commit: ebf2739edfac4568943edad389760386fe6535b5
   extra-dep: true
+  #- location: /home/roman/OpenCog/atomspace/opencog/haskell
 
 # Packages to be pulled from upstream that are not in the resolver (e.g., acme-missiles-0.3)
-extra-deps: [opencog-atomspace-0.1.0.8
-            ,list-tries-0.6.3]
+extra-deps: [list-tries-0.6.5,opencog-atomspace-0.1.0.8]
 
 # Override default flag values for local packages and extra-deps
 flags: {}
@@ -38,4 +38,7 @@ extra-package-dbs: []
 
 # Extra directories used by stack for building
 # extra-include-dirs: [/usr/local/lib/opencog]
-extra-lib-dirs: [/usr/local/lib/opencog]
+extra-lib-dirs: [/usr/local/lib/opencog/]
+
+ghc-options:
+    opencog-atomspace: -latomspace-cwrapper

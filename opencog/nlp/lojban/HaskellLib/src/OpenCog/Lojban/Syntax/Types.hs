@@ -55,6 +55,7 @@ type Bridi = ([Sumti],BTCT)
 type Flag = String
 data State = State { sFlags :: M.Map String String
                    , sAtoms :: [Atom]
+                   , sTVLs  :: [Atom]
                    , sText  :: String
                    , sSeed  :: Int
                    , sNow   :: Atom

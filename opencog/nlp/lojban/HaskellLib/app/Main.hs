@@ -18,7 +18,7 @@ import System.Process
 
 main :: IO ()
 main = do
-    (parser,printer) <- initParserPrinter "cmavo.csv" "gismu.csv"
+    (parser,printer) <- initParserPrinter
     mainloop parser printer
 
 mainloop parser printer = do

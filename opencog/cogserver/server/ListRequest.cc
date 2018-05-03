@@ -105,14 +105,20 @@ bool ListRequest::execute()
     if (name != "" && type != NOTYPE) { // filter by name & type
         classserver().foreachRecursive(
             [&](Type t)->void {
-                 Handle h(as.get_handle(t, name));
-                 if (h) _handles.push_back(h); }, type);
+                 try {
+                     Handle h(as.get_handle(t, name));
+                     if (h) _handles.push_back(h);
+                 } catch (const std::exception& e) {}
+            }, type);
 
     } else if (name != "") {     // filter by name
         classserver().foreachRecursive(
             [&](Type t)->void {
-                 Handle h(as.get_handle(t, name));
-                 if (h) _handles.push_back(h); }, NODE);
+                 try {
+                     Handle h(as.get_handle(t, name));
+                     if (h) _handles.push_back(h);
+                 } catch (const std::exception& e) {}
+            }, NODE);
 
     } else if (type != NOTYPE) { // filter by type
         as.get_handles_by_type(std::back_inserter(_handles), type, subtypes);
@@ -141,7 +147,6 @@ void ListRequest::sendError()
 {
     _error << "Supported options:" << std::endl;
     _error << "-a          List all atoms" << std::endl;
-    _error << "-h handle   List given handle" << std::endl;
     _error << "-n name     List all atoms with name" << std::endl;
     _error << "-t type     List all atoms of type" << std::endl;
     _error << "-T type     List all atoms with type or subtype" << std::endl;

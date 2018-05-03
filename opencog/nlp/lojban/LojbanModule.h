@@ -41,7 +41,7 @@ extern "C"
 
     char* lojban_print(opencog::AtomSpace *, HsStablePtr, opencog::Handle *);
 
-    HsStablePtr lojban_init(const char *,const char *);
+    HsStablePtr lojban_init();
 
     void lojban_exit(HsStablePtr);
 }

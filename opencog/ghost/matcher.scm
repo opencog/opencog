@@ -55,13 +55,25 @@
   ; ----------
   ; Calculate the weight of the rule R [Wcagi]
   (define (calculate-rweight R)
-    (* (cog-stv-strength R)
-       (assoc-ref context-alist (psi-get-context R))
-       (if SKIP-STI
-         ; Weight higher if the rule is in the current topic
-         (if (is-rule-in-topic? R (ghost-get-curr-topic)) 1 0.5)
-         (cog-av-sti R))
-       (psi-urge (psi-get-goal R))))
+    (define strength
+      (if (> strength-weight 0)
+        (* strength-weight (cog-stv-strength R)) 1))
+    (define context
+      (if (> context-weight 0)
+        (* context-weight
+          (assoc-ref context-alist (psi-get-context R))) 1))
+    (define sti (if SKIP-STI
+      ; Weight higher if the rule is in the current topic
+      (if (is-rule-in-topic? R (ghost-get-curr-topic)) 1 0.5)
+      (if (> sti-weight 0)
+        (* sti-weight (cog-av-sti R)) 1)))
+    (define urge
+      (if (> urge-weight 0)
+        (* urge-weight (psi-urge (psi-get-goal R))) 1))
+    (define weight (* strength context sti urge))
+    (cog-logger-debug ghost-logger "The weight of the rule ~a is ~a"
+      (psi-rule-alias R) weight)
+    weight)
 
   ; Calculate the weight of the action A [Wa]
   (define (calculate-aweight A)
@@ -206,9 +218,20 @@
   The action selector that works with ECAN.
   It evaluates and selects psi-rules from the attentional focus.
 "
+  ; is-psi-rule? uses try-catch so as to avoid getting of
+  ; "#<Invalid handle>" error due to change in the value of StateLinks
+  ; by a different thread, after this thread got a copy of the atoms in
+  ; the attention-focus.
+  (define (is-psi-rule? x)
+    (catch #t
+      (lambda () (psi-rule? x))
+      (lambda (key . args)
+        (format #t "Catched Error at ~a\nError details =\"~a ~a\"\n"
+          (current-source-location) key args) #f)))
+
   (define candidate-rules
     (if ghost-af-only?
-      (filter psi-rule? (cog-af))
+      (filter is-psi-rule? (cog-af))
       (psi-get-rules ghost-component)))
   (define rule-selected (eval-and-select candidate-rules))
 

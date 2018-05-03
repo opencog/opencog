@@ -13,6 +13,7 @@ import Iso
 import Syntax hiding (SynIso,Syntax)
 
 import qualified Data.Map as M
+import qualified Data.Map.Lazy as M
 import qualified Data.Foldable as F
 import Data.Maybe (fromJust,isJust)
 import Data.List (isSuffixOf,nub,isInfixOf)
@@ -143,24 +144,29 @@ iffl = definedSchemaLink "IfAndOnlyIf"
 uL :: SynIso [Atom] Atom
 uL = definedSchemaLink "WetherOrNot"
 
-anotbl :: SynIso [Atom] Atom
-anotbl = andl . tolist2 . second (notl . tolist1) . inverse tolist2
-
-onlyif :: SynIso [Atom] Atom
-onlyif = orl . tolist2 . (andl *** notl) . reorder
-    where reorder = mkIso f g
-          f [a,b] = ([a,b],[a])
-          g (a,_) = a
-
-xorl :: SynIso [Atom] Atom
-xorl = orl . tolist2
-     . (myand . first mynot *** myand . second mynot)
-     . reorder
-    where reorder = Iso (pure . f) (pure . g)
-          f [a,b] = ((a,b),(a,b))
-          g ((a,b),_) = [a,b]
-          myand = andl .tolist2
-          mynot = notl . tolist1
+jiL :: SynIso [Atom] Atom
+jiL = Iso f g where
+    f [a1,a2] = do
+        rndname1 <- randName $ show a1 ++ show a2
+        rndname2 <- randName $ show a1 ++ show a2
+        rndnamel <- randName $ show a1 ++ show a2
+        let v1 = cVN rndname1
+            v2 = cVN rndname2
+            v  = cVN rndnamel
+            tvl= [cTVL v1
+                  (cTCL [a1,cNL noTv a1])
+                 ,cTVL v2
+                  (cTCL [a2,cNL noTv a2])
+                 ,cTVL v
+                  (cTCL [cAL noTv [v1,v2]
+                        ,cOL noTv [v1,v2]
+                        ,cEXL noTv (cDSN "IfAndOnlyIf") (cLL [v1,v2])
+                        ,cEXL noTv (cDSN "WetherOrNot") (cLL [v1,v2])
+                        ])
+                 ]
+        pushTVLs tvl
+        pure v
+    g = error "AtomUtil.jiL.g not defined"
 
 handleEKMods :: SynIso (EK,(Atom,Atom)) (String,(Atom,Atom))
 handleEKMods = mkIso f g where
@@ -189,7 +195,7 @@ conLink = conLink' . second tolist2 . handleEKMods
                         ,orl    . rmfst "a"
                         ,iffl   . rmfst "o"
                         ,uL     . rmfst "u"
-                --FIXME:,varl   . rmfst "ji"
+                        ,jiL    . rmfst "ji"
                         ]
 
 _JAtoA :: SynIso String String
@@ -256,6 +262,13 @@ predicate = nodeIso "PredicateNode" noTv
 varnode :: SynIso String Atom
 varnode = nodeIso "VariableNode" noTv
 
+randvarnode :: SynIso String Atom
+randvarnode = varnode . Iso f g where
+    f s = do
+        n <- randName s
+        pure (n ++ s)
+    g s = pure $ drop 20 s
+
 numberNode :: SynIso String Atom
 numberNode = nodeIso "NumberNode" noTv
 
@@ -319,7 +332,10 @@ handleTAG = post . isoFoldl tagOne . init
                     where next s = show (read s + 1)
                           t = findNext p
                           findNext s = let t = next s
-                                       in if u M.! t then t else findNext t
+                                       in case M.lookup t u of
+                                           Just True  -> t
+                                           Just False -> findNext t
+                                           Nothing -> t --FIXME could this casue issues???
               g ((a,s):r,(p,u))
                 | length s >  1 = ((r,(p     ,u)), (a,Just s ))
                 | s == p        = ((r,(prev p,u)), (a,Nothing))

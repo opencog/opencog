@@ -94,11 +94,14 @@ cOL  tv a       = Link "OrLink"                               a     tv
 cNL  tv a       = Link "NotLink"                            [a]     tv
 cDL  tv a       = Link "DefineLink"                           a     tv
 cEXOL tv a      = Link "ExecutionOutputLink"                  a     tv
+cEXL tv a b     = Link "ExecutionOutputLink"              [a,b]     tv
 cCtxL tv a b    = Link "ContextLink"                      [a,b]     tv
 cLamdaL tv a b  = Link "LambdaLink"                       [a,b]     tv
 cMemL tv a b    = Link "MemberLink"                       [a,b]     tv
 cEquivL tv a b  = Link "EquivalenceLink"                  [a,b]     tv
 cSubL tv a b    = Link "SubsetLink"                       [a,b]     tv
+cTVL a b        = Link "TypedVariableLink"                [a,b]     noTv
+cTCL ls         = Link "TypedChoice"                         ls     noTv
 
 isInteger s = case reads s :: [(Integer, String)] of
   [(_, "")] -> True

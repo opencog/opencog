@@ -72,21 +72,6 @@ public:
     virtual const ClassInfo& info() const { return _Type::info(); }
 }; 
 
-/** Defines a single factory template to allow insert the same agent
- * multiple times in the Cogserver schedule */
-template< typename _Type, typename _BaseType >
-class SingletonFactory : public Factory<_Type, _BaseType>
-{
-public:
-    explicit SingletonFactory() : Factory<_Type, _BaseType>() {}
-    virtual ~SingletonFactory() {}
-    virtual _BaseType* create(CogServer& cs) const {
-        static _BaseType* inst =  new _Type(cs);
-        return inst;
-    }
-};
-
-
 /** @}*/
 } // namespace opencog
 
