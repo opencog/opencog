@@ -252,7 +252,7 @@
                           lemma-seq))))
       (MemberLink (List lemma-seq) ghost-no-constant))
 
-  (list vars conds))
+  (list vars conds has-words?))
 
 ; ----------
 (define (process-action ACTION RULENAME)
@@ -439,6 +439,34 @@
             strval-rejoinder)))))
 
 ; ----------
+; Key used to set the value of psi-rules as either (stv 1 1) or (stv 0 1).
+(define handles-sent-key (Predicate "handles-sentence-input"))
+
+; ----------
+(define (handles-sent! rule)
+"
+  set-handles-sent! RULE
+
+  Returns the RULE after setting the handles-sentence-input value to (stv 1 1).
+"
+  (cog-set-value! rule handles-sent-key (stv 1 1)))
+
+; ----------
+(define (handles-sent? rule)
+"
+  handles-sent? RULE
+
+  Returns (stv 1 1) if the RULE is tagged to handle sentences, else
+  it returns (stv 0 1).
+"
+  (let ((result (cog-value rule handles-sent-key)))
+    (if (null? result)
+      (stv 0 1)
+      result
+    )
+  ))
+
+; ----------
 (define (create-rule PATTERN ACTION GOAL NAME TYPE)
 "
   Top level translation function.
@@ -554,8 +582,10 @@
                ; (cog-logger-debug ghost-logger "rule-hierarchy: ~a" rule-hierarchy)
                ; Return
                rule)
-             (map (lambda (goal)
-                    ; Create the rule(s)
+             (map
+               (lambda (goal)
+                 ; Create the rule(s)
+                 (let ((a-rule
                     (psi-rule
                       (list (Satisfaction (VariableList vars) (And conds)))
                       action
@@ -569,7 +599,14 @@
                       (if (or (member goal GOAL) (not is-rule-seq))
                         (stv (cdr goal) .9)
                         (stv (/ (cdr goal) (expt 2 goal-rule-cnt)) .9))
-                      ghost-component))
+                      ghost-component)))
+                   ; If the rule can possibly be satisfied by input sentence
+                   ; tag it as such.
+                   (if (list-ref proc-terms 2)
+                     (handles-sent! a-rule)
+                     a-rule)
+                 )
+               )
                   goals))))
 
 ; ----------
