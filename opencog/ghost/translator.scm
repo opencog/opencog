@@ -262,6 +262,7 @@
 "
   ; The system functions that are commonly used
   (define reuse #f)
+  (define reused-rule-label "")
   (define keep (topic-has-feature? rule-topic "keep"))
 
   ; The GroundedSchemaNode that will be used
@@ -311,6 +312,7 @@
                      "Please make sure the rule with label \"~a\" is defined!" label)
                    (begin
                      (set! reuse #t)
+                     (set! reused-rule-label label)
                      (psi-get-action reused-rule)))))
               ; Other functions
               ((equal? 'function (car n))
@@ -360,6 +362,13 @@
           (if reuse
             (get-reused-action action-atomese)
             action-atomese)))
+      ; The expected behavior is that, when (the action of) a rule is reused,
+      ; the rule will be considered as fired, so mark the last executed rule
+      ; as the reused one instead of the one that calls the reuse function
+      (if reuse
+        (Put (State ghost-last-executed (Variable "$x"))
+             (Concept (string-append psi-prefix-str reused-rule-label)))
+        (list))
       (if (not keep)
           ; The default behavior is to not executed the
           ; same action more than once -- update the
