@@ -364,7 +364,11 @@
             action-atomese)))
       ; The expected behavior is that, when (the action of) a rule is reused,
       ; the rule will be considered as fired, so mark the last executed rule
-      ; as the reused one instead of the one that calls the reuse function
+      ; as the reused one instead of the one that calls the reuse function,
+      ; so that the rejoinders (if any) of the reused rule can be triggered
+      ; correctly
+      ; If there are more than one "reuse"s being used in a single action,
+      ; the last reused rule will be mark as the last executed rule
       (if reuse
         (Put (State ghost-last-executed (Variable "$x"))
              (Concept (string-append psi-prefix-str reused-rule-label)))
