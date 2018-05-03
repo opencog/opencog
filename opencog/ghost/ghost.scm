@@ -146,7 +146,46 @@
 ;; --------------------
 ;; Key used to create a singly linked-list to record the sequence of
 ;; input sentences.
+(define sent-input-seq (Anchor "Sentence Input Sequence"))
 (define next-sent-key (Predicate "next-sentence"))
+(define tail-sent-key (Predicate "last-inputed-sentence"))
+
+;; --------------------
+(define (tail-input-sent)
+"
+  Returns nil or the SentenceNode for the last inputed sentence.
+"
+  (cog-value sent-input-seq tail-sent-key))
+
+;; --------------------
+(define (append-to-sent-seq sent)
+"
+  append-to-sent-seq SENT
+
+  Returns the SentenceNode SENT after appending it to the sentence
+  input sequence.
+"
+  ; The assumption is that there is only one thread that is adding
+  ; to the sequence.
+  (let ((tail-sent (tail-input-sent)))
+    (if (null? tail-sent)
+      (begin
+        (cog-set-value! sent-input-seq tail-sent-key sent)
+        (cog-set-value! sent-input-seq next-sent-key sent))
+      (begin
+        (cog-set-value! sent-input-seq tail-sent-key sent)
+        (cog-set-value! tail-sent next-sent-key sent))
+    )
+  ))
+
+;; --------------------
+(define (next-input-sent sent)
+"
+  next-input-sent SENT
+
+  Returns nil or the input SentenceNode that followed SENT SentenceNode.
+"
+  (cog-value sent next-sent-key))
 
 ;; --------------------
 ;; To parse rules and interact with GHOST, the main interfaces
@@ -172,11 +211,9 @@
 "
   (define sent (car (nlp-parse TXT)))
   (generate-word-seqs sent)
-  (let ((curr-sent (ghost-get-curr-sent)))
-    (if (not (null? curr-sent))
-      (cog-set-value! curr-sent next-sent-key sent))
-  )
-  (State ghost-curr-proc sent))
+  (append-to-sent-seq sent)
+  (State ghost-curr-proc sent)
+  sent)
 
 ; ----------
 (define-public (ghost-run)
