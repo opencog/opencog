@@ -36,6 +36,16 @@
 		time-domain)
 )
 
+(define-public (sent-get-parse-time sent)
+"
+  sent-get-parse-time SENT
+
+  Returns the time, in seconds, at which the SentenceNode SENT was parsed.
+"
+  (string->number (cog-name (car
+    (cog-chase-link 'AtTimeLink 'TimeNode sent))))
+)
+
 (define-public (get-last-said-sent)
 "
   Returns the SentenceNode of the last said sentence or returns an empty list.
