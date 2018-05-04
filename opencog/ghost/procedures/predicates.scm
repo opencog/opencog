@@ -4,17 +4,6 @@
 ; APIs for forming GroundedPredicates that are used for
 ; checking if the world is in a particular state or not.
 ; --------------------------------------------------------------
-;(define (person_appears face-id)
-;  (cog-pointmem-get-locs-of-atom facemap (Concept face-id))
-;)
-
-(define* (person_appears #:optional face-id)
-  (if face-id
-    (is-model-true? (see-face (cog-name face-id)))
-    (any-face-seen?)
-  )
-)
-
 (define (any-face-seen?)
   (define get-models
     (Get
@@ -96,6 +85,18 @@
 ; state of the world wouldn't be correct. To fix this add a time window
 ; similar to word_perceived. If the time-window is passed then it returns
 ; false.
+
+;(define (person_appears face-id)
+;  (cog-pointmem-get-locs-of-atom facemap (Concept face-id))
+;)
+
+(define* (person_appears #:optional face-id)
+  (if face-id
+    (is-model-true? (see-face (cog-name face-id)))
+    (any-face-seen?)
+  )
+)
+
 (define* (person_smiles #:optional face-id)
   (if face-id
     (is-model-true? (face-emotion (cog-name face-id) "smile"))
@@ -112,7 +113,7 @@
 
 (define* (person_talking #:optional face-id)
   (if face-id
-    (is-model-true? (face-emotion (cog-name face-id) "angry"))
+    (is-model-true? (face-talking (cog-name face-id)))
     (any-person-talking?)
   )
 )
