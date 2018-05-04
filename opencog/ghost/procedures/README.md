@@ -5,6 +5,8 @@ Here is a list of procedures (predicates and schemas) that can be used in GHOST.
 - person_appears
 - person_smiles
 - person_angry
+- person_talking
+- person_not_talking
 - word_perceived
 - after_min
 
