@@ -13,6 +13,7 @@
     perceived-face
     perceived-emotion
     perceive-word
+    perceive-face-talking
 
     ; Perceptual predicates
     person_appears
@@ -77,6 +78,17 @@
       (Concept face-id)))
 )
 
+(define (face-talking face-id)
+"
+  Define the atom used to represent that the face represented by FACE-ID
+  is talking.
+"
+  (Evaluation
+    (Predicate "talking")
+    (List
+      (Concept face-id)))
+)
+
 ; --------------------------------------------------------------
 ; APIs for inputing sensory information.
 ; --------------------------------------------------------------
@@ -103,6 +115,10 @@
   (cog-stimulate ghost-word-seq (/ default-stimulus 2))
 
   (ghost-stimulate wn)
+)
+
+(define (perceive-face-talking face-id confidence)
+  (cog-set-tv! (face-talking face-id) (stv 1 confidence))
 )
 
 ; --------------------------------------------------------------
