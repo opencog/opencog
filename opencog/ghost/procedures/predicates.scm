@@ -118,6 +118,10 @@
   )
 )
 
+(define* (person_not_talking #:optional face-id)
+  (negate-stv! (person_talking face-id))
+)
+
 (define* (word_perceived word #:optional time-interval)
   (if time-interval
     (was-perceived? word (current-time-us)

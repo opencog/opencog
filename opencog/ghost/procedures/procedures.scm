@@ -20,6 +20,7 @@
     person_smiles
     person_angry
     person_talking
+    person_not_talking
     word_perceived
 
     ; Time related predicates
@@ -142,6 +143,19 @@
       (stv 0 1)
       (stv 1 1)
     )
+  )
+)
+
+(define (negate-stv! stv)
+"
+  negate-stv! STV
+
+  Returns (stv 1 1) if STV is (stv 0 1) and vice-versa.
+"
+  (cond
+    ((equal? (stv 1 1) stv) (stv 0 1))
+    ((equal? (stv 0 1) stv) (stv 1 1))
+    (else (error "negate-stv! expected (stv 1 1)/(stv 0 1) got=~a\n" stv))
   )
 )
 
