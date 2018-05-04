@@ -4,17 +4,6 @@
 ; APIs for forming GroundedPredicates that are used for
 ; checking if the world is in a particular state or not.
 ; --------------------------------------------------------------
-;(define (person_appears face-id)
-;  (cog-pointmem-get-locs-of-atom facemap (Concept face-id))
-;)
-
-(define* (person_appears #:optional face-id)
-  (if face-id
-    (is-model-true? (see-face (cog-name face-id)))
-    (any-face-seen?)
-  )
-)
-
 (define (any-face-seen?)
   (define get-models
     (Get
@@ -36,7 +25,7 @@
   (let ((models (cog-outgoing-set (cog-execute! get-models))))
     (if (null? models)
       (stv 0 1)
-      (any-model-true? models)
+      (stv 1 1)
     )
   )
 )
@@ -61,7 +50,32 @@
   (let ((models (cog-outgoing-set (cog-execute! get-models))))
     (if (null? models)
       (stv 0 1)
-      (any-model-true? models)
+      (stv 1 1)
+    )
+  )
+)
+
+(define (any-person-talking?)
+  (define get-models
+    (Get
+      (TypedVariable
+        (Variable "face-talking")
+        (Signature
+          (Evaluation
+            (Predicate "talking")
+            (List
+              (Type "ConceptNode")))))
+      (And
+        (Evaluation
+          (GroundedPredicate "scm: is-model-true?")
+          (List
+            (Variable "face-talking")))
+        (Variable "face-talking"))))
+
+  (let ((models (cog-outgoing-set (cog-execute! get-models))))
+    (if (null? models)
+      (stv 0 1)
+      (stv 1 1)
     )
   )
 )
@@ -71,6 +85,18 @@
 ; state of the world wouldn't be correct. To fix this add a time window
 ; similar to word_perceived. If the time-window is passed then it returns
 ; false.
+
+;(define (person_appears face-id)
+;  (cog-pointmem-get-locs-of-atom facemap (Concept face-id))
+;)
+
+(define* (person_appears #:optional face-id)
+  (if face-id
+    (is-model-true? (see-face (cog-name face-id)))
+    (any-face-seen?)
+  )
+)
+
 (define* (person_smiles #:optional face-id)
   (if face-id
     (is-model-true? (face-emotion (cog-name face-id) "smile"))
@@ -83,6 +109,17 @@
     (is-model-true? (face-emotion (cog-name face-id) "angry"))
     (any-person-emotion? "angry")
   )
+)
+
+(define* (person_talking #:optional face-id)
+  (if face-id
+    (is-model-true? (face-talking (cog-name face-id)))
+    (any-person-talking?)
+  )
+)
+
+(define* (person_not_talking #:optional face-id)
+  (negate-stv! (person_talking face-id))
 )
 
 (define* (word_perceived word #:optional time-interval)
