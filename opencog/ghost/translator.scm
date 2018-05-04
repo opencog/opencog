@@ -524,90 +524,95 @@
          (action (process-action ACTION rule-name))
          (goals (process-goal GOAL)))
 
-        (cog-logger-debug ghost-logger "Context: ~a" ordered-terms)
-        (cog-logger-debug ghost-logger "Procedure: ~a" ACTION)
-        (cog-logger-debug ghost-logger "Goal: ~a" goals)
+    (cog-logger-debug ghost-logger "Context: ~a" ordered-terms)
+    (cog-logger-debug ghost-logger "Procedure: ~a" ACTION)
+    (cog-logger-debug ghost-logger "Goal: ~a" goals)
 
-        (map (lambda (rule)
-               ; Label the rule
-               (psi-rule-set-alias! rule rule-name)
-               ; Set the type
-               (cog-set-value! rule ghost-rule-type type)
-               ; Associate it with its topic
-               (if (not ghost-with-ecan)
-                 (Inheritance rule rule-topic))
-               ; Keep track of the rule hierarchy, and link rules that
-               ; are defined in a sequence
-               (cond ((or (equal? type strval-responder)
-                          (equal? type strval-random-gambit)
-                          (equal? type strval-gambit))
-                      ; If it's not a rejoinder, its parent rules should
-                      ; be the rules at every level that are still in
-                      ; the rule-hierarchy
-                      (if (and is-rule-seq (not (null? rule-hierarchy)))
-                        (for-each
-                          (lambda (lv)
-                            (for-each
-                              (lambda (r)
-                                (set-next-rule
-                                  (get-rule-from-label r)
-                                    rule ghost-next-responder))
-                              lv))
-                          rule-hierarchy))
-                      (add-to-rule-hierarchy 0 rule-name))
-                     ((equal? type strval-rejoinder)
-                      ; If it's a rejoinder, its parent rule should be the
-                      ; last rule one level up in rule-hierarchy
-                      ; 'process-type' will make sure there is a responder
-                      ; defined beforehand so rule-hierarchy is not empty
-                      (if is-rule-seq
-                        (set-next-rule
-                          (get-rule-from-label
-                            (last (list-ref rule-hierarchy
-                              (1- (get-rejoinder-level TYPE)))))
-                          rule ghost-next-rejoinder))
-                      (add-to-rule-hierarchy
-                        (get-rejoinder-level TYPE) rule-name)))
-               ; Connect words, concepts and predicates from the context
-               ; directly to the rule via a HebbianLink
-               (for-each
-                 (lambda (node) (AsymmetricHebbianLink node rule (stv 1 1)))
-                 (filter
-                   (lambda (x)
-                     (or (equal? ghost-word-seq x)
-                         (equal? 'WordNode (cog-type x))
-                         (equal? 'ConceptNode (cog-type x))
-                         (equal? 'GroundedPredicateNode (cog-type x))))
-                   (append-map cog-get-all-nodes conds)))
-               ; (cog-logger-debug ghost-logger "rule-hierarchy: ~a" rule-hierarchy)
-               ; Return
-               rule)
-             (map
-               (lambda (goal)
-                 ; Create the rule(s)
-                 (let ((a-rule
-                    (psi-rule
-                      (list (Satisfaction (VariableList vars) (And conds)))
-                      action
-                      (psi-goal (car goal)
-                        ; Check if an initial urge has been assigned to it
-                        (let ((urge (assoc-ref initial-urges (car goal))))
-                          (if urge (- 1 urge) 0)))
-                      ; Check if the goal is defined at the rule level
-                      ; If the rule is ordered, the weight should change
-                      ; accordingly as well
-                      (if (or (member goal GOAL) (not is-rule-seq))
-                        (stv (cdr goal) .9)
-                        (stv (/ (cdr goal) (expt 2 goal-rule-cnt)) .9))
-                      ghost-component)))
-                   ; If the rule can possibly be satisfied by input sentence
-                   ; tag it as such.
-                   (if (list-ref proc-terms 2)
-                     (handles-sent! a-rule)
-                     a-rule)
-                 )
-               )
-                  goals))))
+    (map
+      (lambda (goal)
+        ; Create the rule
+        (define a-rule
+          (psi-rule
+            (list (Satisfaction (VariableList vars) (And conds)))
+            action
+            (psi-goal (car goal)
+              ; Check if an initial urge has been assigned to it
+              (let ((urge (assoc-ref initial-urges (car goal))))
+                (if urge (- 1 urge) 0)))
+            ; Check if the goal is defined at the rule level
+            ; If the rule is ordered, the weight should change
+            ; accordingly as well
+            (if (or (member goal GOAL) (not is-rule-seq))
+              (stv (cdr goal) .9)
+              (stv (/ (cdr goal) (expt 2 goal-rule-cnt)) .9))
+            ghost-component))
+
+        ; If the rule can possibly be satisfied by input sentence
+        ; tag it as such.
+        (if (list-ref proc-terms 2)
+          (handles-sent! a-rule)
+          a-rule)
+
+        ; Label the rule
+        (psi-rule-set-alias! a-rule rule-name)
+
+        ; Set the type
+        (cog-set-value! a-rule ghost-rule-type type)
+
+        ; Associate it with its topic
+        (if (not ghost-with-ecan)
+          (Inheritance a-rule rule-topic))
+
+        ; Keep track of the rule hierarchy, and link rules that
+        ; are defined in a sequence
+        (cond ((or (equal? type strval-responder)
+                   (equal? type strval-random-gambit)
+                   (equal? type strval-gambit))
+               ; If it's not a rejoinder, its parent rules should
+               ; be the rules at every level that are still in
+               ; the rule-hierarchy
+               (if (and is-rule-seq (not (null? rule-hierarchy)))
+                 (for-each
+                   (lambda (lv)
+                     (for-each
+                       (lambda (r)
+                         (set-next-rule
+                           (get-rule-from-label r)
+                             a-rule ghost-next-responder))
+                       lv))
+                   rule-hierarchy))
+               (add-to-rule-hierarchy 0 rule-name))
+              ((equal? type strval-rejoinder)
+               ; If it's a rejoinder, its parent rule should be the
+               ; last rule one level up in rule-hierarchy
+               ; 'process-type' will make sure there is a responder
+               ; defined beforehand so rule-hierarchy is not empty
+               (if is-rule-seq
+                 (set-next-rule
+                   (get-rule-from-label
+                     (last (list-ref rule-hierarchy
+                       (1- (get-rejoinder-level TYPE)))))
+                   a-rule ghost-next-rejoinder))
+               (add-to-rule-hierarchy
+                 (get-rejoinder-level TYPE) rule-name)))
+
+        ; Connect words, concepts and predicates from the context
+        ; directly to the rule via a HebbianLink
+        (for-each
+          (lambda (node) (AsymmetricHebbianLink node a-rule (stv 1 1)))
+          (filter
+            (lambda (x)
+              (or (equal? ghost-word-seq x)
+                  (equal? 'WordNode (cog-type x))
+                  (equal? 'ConceptNode (cog-type x))
+                  (equal? 'GroundedPredicateNode (cog-type x))))
+            (append-map cog-get-all-nodes conds)))
+
+        ; (cog-logger-debug ghost-logger "rule-hierarchy: ~a" rule-hierarchy)
+
+        ; Return
+        a-rule)
+      goals)))
 
 ; ----------
 (define (create-concept NAME MEMBERS)
