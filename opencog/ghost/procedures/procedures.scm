@@ -10,8 +10,8 @@
   #:use-module (opencog ghost)
   #:export (
     ; Sensory input
-    perceived-face
-    perceived-emotion
+    perceive-face
+    perceive-emotion
     perceive-word
     perceive-face-talking
 
@@ -97,11 +97,11 @@
 ;  (cog-pointmem-map-atom facemap (Concept face-id)
 ;    (List (Number x) (Number y) (Number z)))
 
-(define (perceived-face face-id confidence)
+(define (perceive-face face-id confidence)
   (cog-set-tv! (see-face face-id) (stv 1 confidence))
 )
 
-(define (perceived-emotion face-id emotion-type confidence)
+(define (perceive-emotion face-id emotion-type confidence)
   (cog-set-tv! (face-emotion face-id emotion-type) (stv 1 confidence))
 )
 
