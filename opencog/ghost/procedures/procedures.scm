@@ -19,6 +19,7 @@
     person_appears
     person_smiles
     person_angry
+    person_talking
     word_perceived
 
     ; Time related predicates

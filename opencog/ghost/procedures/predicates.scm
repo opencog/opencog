@@ -66,6 +66,31 @@
   )
 )
 
+(define (any-person-talking?)
+  (define get-models
+    (Get
+      (TypedVariable
+        (Variable "face-talking")
+        (Signature
+          (Evaluation
+            (Predicate "talking")
+            (List
+              (Type "ConceptNode")))))
+      (And
+        (Evaluation
+          (GroundedPredicate "scm: is-model-true?")
+          (List
+            (Variable "face-talking")))
+        (Variable "face-talking"))))
+
+  (let ((models (cog-outgoing-set (cog-execute! get-models))))
+    (if (null? models)
+      (stv 0 1)
+      (stv 1 1)
+    )
+  )
+)
+
 ; TODO: If the stream of sensory inputs are interupted, for whatever reason,
 ; then the variations in the confidence value are not updated and thus the
 ; state of the world wouldn't be correct. To fix this add a time window
@@ -82,6 +107,13 @@
   (if face-id
     (is-model-true? (face-emotion (cog-name face-id) "angry"))
     (any-person-emotion? "angry")
+  )
+)
+
+(define* (person_talking #:optional face-id)
+  (if face-id
+    (is-model-true? (face-emotion (cog-name face-id) "angry"))
+    (any-person-talking?)
   )
 )
 
