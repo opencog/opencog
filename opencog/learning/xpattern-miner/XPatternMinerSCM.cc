@@ -66,7 +66,7 @@ public:
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/guile/SchemePrimitive.h>
 
-#include <opencog/learning/xpattern-miner/c++-based/XPatternMiner.h>
+#include <opencog/learning/xpattern-miner/XPatternMiner.h>
 
 using namespace opencog;
 

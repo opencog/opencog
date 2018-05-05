@@ -1,5 +1,5 @@
 /*
- * opencog/tests/learning/xpattern-miner/c++-based/XPatternMiner.cxxtest
+ * opencog/tests/learning/xpattern-miner/XPatternMiner.cxxtest
  *
  * Copyright (C) 2017 by OpenCog Foundation
  * All Rights Reserved
@@ -27,8 +27,8 @@
 #include <opencog/util/Config.h>
 #include <opencog/util/algorithm.h>
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/learning/xpattern-miner/c++-based/HandleTree.h>
-#include <opencog/learning/xpattern-miner/c++-based/XPatternMiner.h>
+#include <opencog/learning/xpattern-miner/HandleTree.h>
+#include <opencog/learning/xpattern-miner/XPatternMiner.h>
 #include <opencog/guile/SchemeEval.h>
 
 #include <vector>

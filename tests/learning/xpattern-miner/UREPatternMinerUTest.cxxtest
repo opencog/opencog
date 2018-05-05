@@ -1,5 +1,5 @@
 /*
- * opencog/tests/learning/xpattern-miner/ure-based/UREPatternMiner.cxxtest
+ * opencog/tests/learning/xpattern-miner/UREPatternMiner.cxxtest
  *
  * Copyright (C) 2018 by OpenCog Foundation
  * All Rights Reserved
@@ -232,10 +232,11 @@ Handle UREPatternMinerUTest::run_pm(const HandleSeq& texts, int minsup,
 	// Add the axiom that initpat has enough support, and use it as
 	// source for the forward chainer
 	bool es = enough_support(initpat, minsup);
+	
 	// If it doesn't have enough support return the empty solution
 	if (not es)
 		return al(SET_LINK);
-	TruthValuePtr tv = SimpleTruthValue::createTV(es ? 1.0 : 0.0, 1.0);
+	TruthValuePtr tv = SimpleTruthValue::createTV(1.0, 1.0);
 	Handle source = mk_minsup_eval(minsup, initpat, tv);
 
 	// Run the foward chainer from the initial pattern
@@ -270,22 +271,23 @@ UREPatternMinerUTest::UREPatternMinerUTest() : _scm(&_as), _tmp_scm(&_tmp_as)
 	ure_logger().set_timestamp_flag(false);
 	// ure_logger().set_sync_flag(true);
 	ure_logger().set_print_to_stdout_flag(true);
-
+	
 	// Configure scheme load-paths that are common for all tests.
 	_scm.eval("(add-to-load-path \"" PROJECT_SOURCE_DIR
 	          "/tests/learning/xpattern-miner/scm\")");
 	_scm.eval("(add-to-load-path \"" PROJECT_SOURCE_DIR
-	          "/opencog/learning/xpattern-miner/ure-based\")");
+	          "/opencog/learning/xpattern-miner\")");
+
+	// Load modules
+	_scm.eval("(use-modules (opencog))");
+	std::string rs = _scm.eval("(use-modules (opencog xpattern-miner))");
+	logger().debug() << "UREPatternMinerUTest() rs = " << rs;
 }
 
 UREPatternMinerUTest::~UREPatternMinerUTest() {}
 
 void UREPatternMinerUTest::setUp()
 {
-	// Load URE-based pattern miner
-	std::string rs = _scm.eval("(load-from-path \"pm-config.scm\")");
-	logger().debug() << "rs = " << rs;
-
 	X = an(VARIABLE_NODE, "$X");
 	Y = an(VARIABLE_NODE, "$Y");
 	Z = an(VARIABLE_NODE, "$Z");
@@ -298,10 +300,14 @@ void UREPatternMinerUTest::setUp()
 	F = an(CONCEPT_NODE, "F");
 	G = an(CONCEPT_NODE, "G");
 	H = an(CONCEPT_NODE, "H");
-	pm_rb = _scm.eval_h("pm-rbs");
+	pm_rb = an(CONCEPT_NODE, "pm-rbs");
 	texts_cpt = an(CONCEPT_NODE, "texts");
 	minsup_prd = an(PREDICATE_NODE, "minsup");
 	top = al(LAMBDA_LINK, X, X);
+
+	// Load URE-based pattern miner
+	std::string rs = _scm.eval("(configure-rules (Concept \"pm-rbs\"))");
+	logger().debug() << "setUp() rs = " << rs;
 }
 
 void UREPatternMinerUTest::tearDown()
