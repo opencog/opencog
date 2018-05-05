@@ -2,21 +2,16 @@
 (use-modules (opencog query))
 (use-modules (opencog logger))
 (use-modules (opencog rule-engine))
-(use-modules (opencog xpattern-miner))
 (use-modules (srfi srfi-1))
 
-;; (cog-logger-set-level! "debug")
-;; (cog-logger-set-stdout! #t)
-;; (cog-logger-set-sync! #t)
+;; (define (mega-top)
+;; "
+;;   Insert the top abstraction in the current atomspace
 
-;; Return the top abstraction, that is
-;;
-;; Lambda
-;;   Variable "$top-arg"
-;;   Variable "$top-arg"
-(define top
-  (let ((top-arg (Variable "$top-arg")))
-    (Lambda top-arg top-arg)))
+;;   (Lambda (Variable \"$X\") (Variable \"$X\"))
+;; "
+;;   (let ((top-arg (Variable "$top-arg")))
+;;     (Lambda top-arg top-arg)))
 
 (define (support pat texts ms)
 "
@@ -25,7 +20,7 @@
   cardinality of concept texts.
 "
   ;; (cog-logger-debug "support pat = ~a, texts = ~a, ms = ~a" pat texts ms)
-  (if (equal? pat top)
+  (if (equal? pat (top))
       (get-cardinality texts)
       (let* ((pat-prnx (cog-execute! pat))  ; get pat in prenex form
              (ill-formed (null? pat-prnx)))
@@ -40,6 +35,14 @@
                   (cog-set-atomspace! prev-as)
                   (cog-arity results))
                 1)))))
+
+(define (enough-support? pat texts ms)
+"
+  Return #t if pat has enough support w.r.t. texts, that is if
+  the frequency of pat is greater than or equal to ms. Return #f
+  otherwise.
+"
+  (<= ms (support pat texts ms)))
 
 (define (get-members C)
 "
@@ -83,27 +86,6 @@
       (let* ((body (gar pattern)))
         (Bind body body)))) ; to deal with unordered links
 
-(define (replace-el l i v)
-"
-  Given a list, a zero-based index and a value, replace the element
-  at the index by the value on a new list.
-"
-  (let* ((pre-i (take l i))
-         (post-i (drop l (+ i 1))))
-    (append pre-i (list v) post-i)))
-
-(define (minsup-eval pattern texts ms)
-  (Evaluation
-     (Predicate "minsup")
-     (List
-        pattern
-        texts
-        ms)))
-
-;; Like minsup-eval and add (stv 1 1) on the EvaluationLink
-(define (minsup-eval-true pattern texts ms)
-  (cog-set-tv! (minsup-eval pattern texts ms) (stv 1 1)))
-
 ;; Given an atom created with minsup-eval, get the pattern, texts and
 ;; ms
 (define (get-pattern minsup-g)
@@ -119,41 +101,3 @@
     (List
       shabs-list
       minsup-g)))
-
-(define (absolutely-true-eval A)
-  (Evaluation
-    (GroundedPredicate "scm: absolutely-true")
-    A))
-
-(define (has-arity-eval g arity)
-  (Evaluation
-    (GroundedPredicate "scm: has-arity")
-    (List
-      g
-      (Number arity))))
-
-(define (pattern-arity pattern)
-"
-  Return the arity of the pattern, or #f if it is ill-formed.
-"
-  (let* ((pat-prnx (cog-execute! pattern))  ; get pattern in prenex form
-         (ill-formed (null? pat-prnx)))
-    (if ill-formed
-        #f
-        (if (eq? (cog-type pat-prnx) 'LambdaLink)
-            (length (cog-free-variables (cog-outgoing-atom pat-prnx 0)))
-            0))))
-
-(define (has-arity . args)
-"
-  Return (stv 1 1) if pattern (the first argument) has
-  the given arity (the second argument), (stv 0 1) otherwise
-
-  We do that because the type system doesn't allow to statically check
-  that yet.
-"
-  (if (= (length args) 2)
-      (let* ((pattern (list-ref args 0))
-             (arity (inexact->exact (atom->number (list-ref args 1)))))
-        (bool->tv (equal? (pattern-arity pattern) arity)))
-      (stv 0 1)))

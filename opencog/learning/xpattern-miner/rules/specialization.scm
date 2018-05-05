@@ -70,7 +70,7 @@
 ;;
 ;; instead of being mangled into one rule.
 
-(load "pattern-miner-utils.scm")
+(load "xpattern-miner-rule-utils.scm")
 
 (define specialization-rule
   (let* (;; Variables
@@ -123,16 +123,14 @@
              (texts (cog-outgoing-atom con-minsup-args 1))
              (ms-atom (cog-outgoing-atom con-minsup-args 2))
              (ms (inexact->exact (atom->number ms-atom)))
-             (conclusion-tv (if (tv->bool pre-minsup-pred-tv)
-                                ;; g has enough support, let see if
-                                ;; g.f has enough support
-                                (let ((sup (support gf texts ms)))
-                                  (if (<= ms sup)
-                                      (stv 1 1)
-                                      #f)) ; It is ill-formed
-                                ;; g does not have enough support,
-                                ;; therefore g.f doesn't have enough
-                                ;; support
+             (conclusion-tv (if (and (tv->bool pre-minsup-pred-tv)
+                                     ;; The lazyness of and allows to
+                                     ;; avoid testing g.f support if g
+                                     ;; doesn't have enough support
+                                     (enough-support? gf texts ms))
+                                ;; Both g and g,f have enough support
+                                (stv 1 1)
+                                ;; f.g doesn't have enough support
                                 #f))
              ;; Reduce the pattern to a normal form by collapsing all
              ;; PutLinks, and output this norma form
