@@ -10,14 +10,17 @@
   #:use-module (opencog ghost)
   #:export (
     ; Sensory input
-    perceived-face
-    perceived-emotion
+    perceive-face
+    perceive-emotion
     perceive-word
+    perceive-face-talking
 
     ; Perceptual predicates
     person_appears
     person_smiles
     person_angry
+    person_talking
+    person_not_talking
     word_perceived
 
     ; Time related predicates
@@ -77,6 +80,17 @@
       (Concept face-id)))
 )
 
+(define (face-talking face-id)
+"
+  Define the atom used to represent that the face represented by FACE-ID
+  is talking.
+"
+  (Evaluation
+    (Predicate "talking")
+    (List
+      (Concept face-id)))
+)
+
 ; --------------------------------------------------------------
 ; APIs for inputing sensory information.
 ; --------------------------------------------------------------
@@ -84,11 +98,11 @@
 ;  (cog-pointmem-map-atom facemap (Concept face-id)
 ;    (List (Number x) (Number y) (Number z)))
 
-(define (perceived-face face-id confidence)
+(define (perceive-face face-id confidence)
   (cog-set-tv! (see-face face-id) (stv 1 confidence))
 )
 
-(define (perceived-emotion face-id emotion-type confidence)
+(define (perceive-emotion face-id emotion-type confidence)
   (cog-set-tv! (face-emotion face-id emotion-type) (stv 1 confidence))
 )
 
@@ -103,6 +117,10 @@
   (cog-stimulate ghost-word-seq (/ default-stimulus 2))
 
   (ghost-stimulate wn)
+)
+
+(define (perceive-face-talking face-id confidence)
+  (cog-set-tv! (face-talking face-id) (stv 1 confidence))
 )
 
 ; --------------------------------------------------------------
@@ -125,6 +143,19 @@
       (stv 0 1)
       (stv 1 1)
     )
+  )
+)
+
+(define (negate-stv! stv)
+"
+  negate-stv! STV
+
+  Returns (stv 1 1) if STV is (stv 0 1) and vice-versa.
+"
+  (cond
+    ((equal? (stv 1 1) stv) (stv 0 1))
+    ((equal? (stv 0 1) stv) (stv 1 1))
+    (else (error "negate-stv! expected (stv 1 1)/(stv 0 1) got=~a\n" stv))
   )
 )
 

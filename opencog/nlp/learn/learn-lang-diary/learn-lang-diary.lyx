@@ -1,7 +1,9 @@
-#LyX 2.0 created this file. For more info see http://www.lyx.org/
-\lyxformat 413
+#LyX 2.2 created this file. For more info see http://www.lyx.org/
+\lyxformat 508
 \begin_document
 \begin_header
+\save_transient_properties true
+\origin unavailable
 \textclass article
 \begin_preamble
 \usepackage{url} 
@@ -12,16 +14,16 @@
 \language_package default
 \inputencoding utf8
 \fontencoding global
-\font_roman times
-\font_sans helvet
-\font_typewriter courier
+\font_roman "times" "default"
+\font_sans "helvet" "default"
+\font_typewriter "courier" "default"
+\font_math "auto" "auto"
 \font_default_family default
 \use_non_tex_fonts false
 \font_sc false
 \font_osf false
-\font_sf_scale 100
-\font_tt_scale 100
-
+\font_sf_scale 100 100
+\font_tt_scale 100 100
 \graphics default
 \default_output_format default
 \output_sync 0
@@ -41,15 +43,24 @@
 \pdf_pdfusetitle true
 \papersize default
 \use_geometry false
-\use_amsmath 2
-\use_esint 0
-\use_mhchem 0
-\use_mathdots 1
+\use_package amsmath 2
+\use_package amssymb 2
+\use_package cancel 1
+\use_package esint 0
+\use_package mathdots 1
+\use_package mathtools 1
+\use_package mhchem 0
+\use_package stackrel 1
+\use_package stmaryrd 1
+\use_package undertilde 1
 \cite_engine basic
+\cite_engine_type default
+\biblio_style plain
 \use_bibtopic false
 \use_indices false
 \paperorientation portrait
 \suppress_date false
+\justification true
 \use_refstyle 0
 \index Index
 \shortcut idx
@@ -2019,8 +2030,8 @@ Hubiness, length, crossings and their relationships in dependency trees
 \begin_inset Quotes erd
 \end_inset
 
-, ArXiv 1304.4086 --- also states: maximum number of crossings is bounded
- above by mean dependency length.
+, ArXiv 1304.4086 — also states: maximum number of crossings is bounded above
+ by mean dependency length.
  Also, mean dependency length is bounded below by variance of degrees of
  vertexes (i.e.
  variance in number of connectors a word can have).
@@ -2050,7 +2061,7 @@ al Linguistics - Human Language Technologies (NAACL-HLT) conference.
 \begin_layout Itemize
 Sentences with long dependencies are hard to understand: The original claim
  is from Yngve, 1960, having to do with phrase-structure depth.
- See -- Gibson, E.
+ See – Gibson, E.
  (2000).
  The dependency locality theory: A distance-based theory of linguistic complexit
 y.
@@ -2062,7 +2073,7 @@ y.
 
 \begin_layout Itemize
 (Cite this, its good) Mean dependency distance is a good measure of sentence
- complexity -- for 20 languages -- Haitao Liu gives overview starting from
+ complexity – for 20 languages – Haitao Liu gives overview starting from
  Yngve.
  
 \begin_inset CommandInset citation
@@ -2090,12 +2101,12 @@ Sentences with long dependencies are rarely spoken: Hawkins, J.
  (1994).
  A Performance Theory of Order and Constituency.
  Cambridge University Press, Cambridge, UK.
- ----Hawkins, J.
+ —-Hawkins, J.
  A.
  (2004).
  Efficiency and Complexity in Grammars.
  Oxford University Press, Oxford, UK.
- ----Wasow, T.
+ —-Wasow, T.
  (2002).
  Postverbal Behavior.
  CSLI Publications, Stanford, CA.
@@ -2477,7 +2488,7 @@ Some notes about the Boltzmann distribution.
 \begin_inset Formula $(w_{l},w_{r})$
 \end_inset
 
- -- for example, this might be (minus) the MI.
+ – for example, this might be (minus) the MI.
  By convention, one introduces a Lagrange multiplier 
 \begin_inset Formula $\beta$
 \end_inset
@@ -2644,7 +2655,7 @@ Now we do the funky chicken dance.
  Write
 \begin_inset Formula 
 \[
-Z(S)=\det\, L(S)
+Z(S)=\det\,L(S)
 \]
 
 \end_inset
@@ -3462,7 +3473,7 @@ Another curious and interesting language-constraint structure emerges with
  the word-order are directly governed by syntax alone, but instead seem
  to be frozen into a fixed form.
  So, one talks of the 'time of day', but never of 'pressure of air' or 'height
- of mountain' -- 
+ of mountain' – 
 \begin_inset Quotes eld
 \end_inset
 
@@ -3548,7 +3559,7 @@ er logic, but to marry maximum entropy to dependency grammars (or, equivalently,
  the wrong one will lead to disasterous machine learning performance (this,
  I think, is the lesson from neural networks).
  Picking something too easy doesn't get you far enough (the lesson of HMM's
- -- excellent for certain classes of problems, but lacking in scale).
+ – excellent for certain classes of problems, but lacking in scale).
  There are more choices than that: but the chices, and their inter-connectedness
 , and trade-offs, seem to be unarticulated.
  For any given monoidal category, there would seem to be some probabilistic
@@ -3929,7 +3940,7 @@ propose to trans- form tree-structured data into an approximate numerical
 \end_inset
 
 .
- Funny -- that's what Bob Coecke proposes for any kind of monoidal category:
+ Funny – that's what Bob Coecke proposes for any kind of monoidal category:
  vector spaces being a special monoidal cat.
  Hmmm.
  
@@ -4191,7 +4202,7 @@ sideways false
 status open
 
 \begin_layout Plain Layout
-\begin_inset Caption
+\begin_inset Caption Standard
 
 \begin_layout Plain Layout
 Word Split Table
@@ -4213,18 +4224,18 @@ name "tab:Word-Split-Table"
 \begin_inset Tabular
 <lyxtabular version="3" rows="20" columns="12">
 <features tabularvalignment="middle">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
 <row>
 <cell alignment="center" valignment="top" usebox="none">
 \begin_inset Text
@@ -6758,18 +6769,18 @@ Phew.
 \begin_inset Tabular
 <lyxtabular version="3" rows="7" columns="12">
 <features tabularvalignment="middle">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
 <row>
 <cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
 \begin_inset Text
@@ -7567,9 +7578,9 @@ The best results from the above table are summarized below
 \begin_inset Tabular
 <lyxtabular version="3" rows="7" columns="3">
 <features tabularvalignment="middle">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
 <row>
 <cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
 \begin_inset Text
@@ -7849,9 +7860,9 @@ In keeping with the previous, lets look at a super-simplified version of
 \begin_inset Tabular
 <lyxtabular version="3" rows="7" columns="3">
 <features tabularvalignment="middle">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
 <row>
 <cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
 \begin_inset Text
@@ -7886,7 +7897,7 @@ Initial Link Type
 \begin_inset Text
 
 \begin_layout Plain Layout
-gif--t
+gif–t
 \end_layout
 
 \end_inset
@@ -7915,7 +7926,7 @@ GA
 \begin_inset Text
 
 \begin_layout Plain Layout
-gif--ty
+gif–ty
 \end_layout
 
 \end_inset
@@ -7944,7 +7955,7 @@ GB
 \begin_inset Text
 
 \begin_layout Plain Layout
-gif--ter
+gif–ter
 \end_layout
 
 \end_inset
@@ -7973,7 +7984,7 @@ GC
 \begin_inset Text
 
 \begin_layout Plain Layout
-tes--t
+tes–t
 \end_layout
 
 \end_inset
@@ -8002,7 +8013,7 @@ TA
 \begin_inset Text
 
 \begin_layout Plain Layout
-tes--ty
+tes–ty
 \end_layout
 
 \end_inset
@@ -8031,7 +8042,7 @@ TB
 \begin_inset Text
 
 \begin_layout Plain Layout
-tes--ter
+tes–ter
 \end_layout
 
 \end_inset
@@ -8091,7 +8102,7 @@ sideways false
 status open
 
 \begin_layout Plain Layout
-\begin_inset Caption
+\begin_inset Caption Standard
 
 \begin_layout Plain Layout
 Morpheme grammar
@@ -8234,10 +8245,10 @@ tester
 \begin_inset Tabular
 <lyxtabular version="3" rows="5" columns="4">
 <features tabularvalignment="middle">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
 <row>
 <cell alignment="center" valignment="top" usebox="none">
 \begin_inset Text
@@ -9201,13 +9212,13 @@ reference "eq:counting complexity"
 \begin_inset Tabular
 <lyxtabular version="3" rows="10" columns="7">
 <features tabularvalignment="middle">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
 <row>
 <cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
 \begin_inset Text
@@ -10169,7 +10180,7 @@ sideways false
 status open
 
 \begin_layout Plain Layout
-\begin_inset Caption
+\begin_inset Caption Standard
 
 \begin_layout Plain Layout
 Example Link Frequency Table
@@ -10188,9 +10199,9 @@ name "tab:Example-Link-Frequency"
 \begin_inset Tabular
 <lyxtabular version="3" rows="9" columns="3">
 <features tabularvalignment="middle">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
 <row>
 <cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
 \begin_inset Text
@@ -10225,7 +10236,7 @@ Initial Link Type
 \begin_inset Text
 
 \begin_layout Plain Layout
-gif--t
+gif–t
 \end_layout
 
 \end_inset
@@ -10254,7 +10265,7 @@ GA
 \begin_inset Text
 
 \begin_layout Plain Layout
-gif--ty
+gif–ty
 \end_layout
 
 \end_inset
@@ -10283,7 +10294,7 @@ GB
 \begin_inset Text
 
 \begin_layout Plain Layout
-gif--ter
+gif–ter
 \end_layout
 
 \end_inset
@@ -10312,7 +10323,7 @@ GC
 \begin_inset Text
 
 \begin_layout Plain Layout
-tes--t
+tes–t
 \end_layout
 
 \end_inset
@@ -10341,7 +10352,7 @@ TA
 \begin_inset Text
 
 \begin_layout Plain Layout
-tes--ty
+tes–ty
 \end_layout
 
 \end_inset
@@ -10370,7 +10381,7 @@ TB
 \begin_inset Text
 
 \begin_layout Plain Layout
-tes--ter
+tes–ter
 \end_layout
 
 \end_inset
@@ -10399,7 +10410,7 @@ TC
 \begin_inset Text
 
 \begin_layout Plain Layout
-blo--ty
+blo–ty
 \end_layout
 
 \end_inset
@@ -10525,7 +10536,7 @@ status open
 \end_layout
 
 \begin_layout Plain Layout
-\begin_inset Caption
+\begin_inset Caption Standard
 
 \begin_layout Plain Layout
 Example morpheme grammar
@@ -11914,7 +11925,7 @@ status open
 \end_inset
 
 The above only annotates the +-going links; it seems like annotating the
- --going links would cause double-counting.
+ –going links would cause double-counting.
  This is somewhat confusing, since the probability has nothing to do with
  directionality.
  A better notation is not obvious.
@@ -12119,10 +12130,10 @@ and the first few values are shown below.
 \begin_inset Tabular
 <lyxtabular version="3" rows="8" columns="4">
 <features tabularvalignment="middle">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
 <row>
 <cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
 \begin_inset Text
@@ -12456,16 +12467,16 @@ The question is then: how would the above cases go if this was used as the
 \begin_inset Tabular
 <lyxtabular version="3" rows="11" columns="10">
 <features tabularvalignment="middle">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
 <row>
 <cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
 \begin_inset Text
@@ -13803,16 +13814,16 @@ The first is shown in column C1, the second in C2.
 \begin_inset Tabular
 <lyxtabular version="3" rows="5" columns="10">
 <features tabularvalignment="middle">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
 <row>
 <cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
 \begin_inset Text
@@ -14415,7 +14426,7 @@ Curious points and thoughts:
 \end_layout
 
 \begin_layout Itemize
-CEI -- 
+CEI – 
 \begin_inset Quotes eld
 \end_inset
 
@@ -14423,7 +14434,7 @@ Cause-effect information
 \begin_inset Quotes erd
 \end_inset
 
- -- Tononi -- sound like a time-ordered variant of mutual information.
+ – Tononi – sound like a time-ordered variant of mutual information.
  How should this be defined? Answer: my guess is that its just like the
  mutual information defined in eqn
 \begin_inset CommandInset ref
@@ -14726,7 +14737,7 @@ So first, we have the table:
 \begin_inset Tabular
 <lyxtabular version="3" rows="6" columns="5">
 <features tabularvalignment="middle">
-<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top">
 <column alignment="center" valignment="top" width="15col%">
 <column alignment="center" valignment="top" width="15col%">
 <column alignment="center" valignment="top" width="25col%">
@@ -15094,7 +15105,7 @@ The principle of least power dissipation is this: Given fixed voltages
  on the input/output terminals, the actual power dissipated is
 \begin_inset Formula 
 \[
-Q(\psi)=\min_{\phi\in\mathbb{R}^{N},\phi|_{\partial N}=\psi}\; P(\phi)
+Q(\psi)=\min_{\phi\in\mathbb{R}^{N},\phi|_{\partial N}=\psi}\;P(\phi)
 \]
 
 \end_inset
@@ -15183,7 +15194,7 @@ Baez primary result on impedence networks is that the black box is describable
 \end_layout
 
 \begin_layout Section*
-MI graphs -- 31 May 2015
+MI graphs – 31 May 2015
 \end_layout
 
 \begin_layout Standard
@@ -15258,7 +15269,7 @@ Summary: these are more or less exactly as expected.
 \end_layout
 
 \begin_layout Section*
-Mining Grammatical Categories -- 20 June 2015
+Mining Grammatical Categories – 20 June 2015
 \end_layout
 
 \begin_layout Standard
@@ -16195,11 +16206,11 @@ That's all for now.
 \end_layout
 
 \begin_layout Section*
-Not LSA -- 1 July 2015
+Not LSA – 1 July 2015
 \end_layout
 
 \begin_layout Standard
-NotLSA -- a way to do LSA-like things without actually using LSA (Latent
+NotLSA – a way to do LSA-like things without actually using LSA (Latent
  Semantic Analysis).
  Two very low-brow approaches, maybe well-known in the industry; I have
  no idea.
@@ -16224,7 +16235,7 @@ Text-keyword correlation
 \end_layout
 
 \begin_layout Standard
-Lets take a text, say -- 1000 pages of ..
+Lets take a text, say – 1000 pages of ..
  something.
  Some corpus.
  We want to compute the mutual information between the page itself, and
@@ -16336,7 +16347,7 @@ are the traditional-looking pair-MI values.
 \end_layout
 
 \begin_layout Standard
-TODO: -- this does not have the feature-reduction/word-combing aspects of
+TODO: – this does not have the feature-reduction/word-combing aspects of
  LSA...
 \end_layout
 
@@ -16444,6 +16455,10 @@ words
  are 'a', 'b', 'c' and 'd'.
  There are a total of six edges, with one edge between every possible word-pair.
  Each edge occurs only once.
+\begin_inset Separator latexpar
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -16462,6 +16477,10 @@ Pair counting in planar diagrams gives different results.
  The diagram below shows the twelve planar trees, containing no cycles,
  that can be formed by parsing a sentence of four words.
  
+\begin_inset Separator latexpar
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -16541,6 +16560,10 @@ ing planar trees, constrained by linear word-order.
 \begin_layout Standard
 There are 36 edges grand total, and these are unequally distributed.
  The counts are: 
+\begin_inset Separator latexpar
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -16548,8 +16571,8 @@ There are 36 edges grand total, and these are unequally distributed.
 \begin_inset Tabular
 <lyxtabular version="3" rows="7" columns="2">
 <features tabularvalignment="middle">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
 <row>
 <cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
 \begin_inset Text
@@ -16701,6 +16724,10 @@ count
 Note that the most frequent edges occur almost twice as often as the least-frequ
 ent edges.
  The distribution, by length, is:
+\begin_inset Separator latexpar
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -16708,8 +16735,8 @@ ent edges.
 \begin_inset Tabular
 <lyxtabular version="3" rows="4" columns="2">
 <features tabularvalignment="middle">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
 <row>
 <cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
 \begin_inset Text
@@ -16805,6 +16832,10 @@ Note that the progressively-longer edges get less frequent.
 If graphs with cycles are also allowed, (but no edge crossings) then, in
  addition to the above, there are eleven more diagrams.
  These are shown below.
+\begin_inset Separator latexpar
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -16822,6 +16853,10 @@ If graphs with cycles are also allowed, (but no edge crossings) then, in
 Again, we count the number of edges, as before.
  The 'tree' column shows he counts from before; the loop count count the
  edges from the additional eleven diagrams; the total is just that.
+\begin_inset Separator latexpar
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -16829,10 +16864,10 @@ Again, we count the number of edges, as before.
 \begin_inset Tabular
 <lyxtabular version="3" rows="7" columns="4">
 <features tabularvalignment="middle">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
 <row>
 <cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
 \begin_inset Text
@@ -17108,6 +17143,10 @@ total
 
 \begin_layout Standard
 Likewise, the number of arcs of the given length is now given below:
+\begin_inset Separator latexpar
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -17115,8 +17154,8 @@ Likewise, the number of arcs of the given length is now given below:
 \begin_inset Tabular
 <lyxtabular version="3" rows="4" columns="2">
 <features tabularvalignment="middle">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
 <row>
 <cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
 \begin_inset Text
@@ -17226,6 +17265,10 @@ Let's count the number of planar tree graphs; i.e.
  The diagram below shows one way to count.
  (I think what follows is correct, but I might be making a mistake.
  I am unaware of any literature that presents this information).
+\begin_inset Separator latexpar
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -17261,7 +17304,7 @@ Here, the star represents some planar tree connecting all of the words of
  Because of the over-arching arc, these can never result in double-counting.
  However, counting only pairs results in an under-counting: graphs of Type
  B never occur.
- Thus, one should count pairs, triples, and so on -- graphs of Type E.
+ Thus, one should count pairs, triples, and so on – graphs of Type E.
  Now we have a way of getting the formula.
  Define 
 \begin_inset Formula $D(n)$
@@ -17377,6 +17420,10 @@ C_{k}(n)=\Pi_{\sigma}\cdots
 \end_inset
 
 The table below summarizes the first few sums:
+\begin_inset Separator latexpar
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -17384,13 +17431,13 @@ The table below summarizes the first few sums:
 \begin_inset Tabular
 <lyxtabular version="3" rows="7" columns="7">
 <features tabularvalignment="middle">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
 <row>
 <cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
 \begin_inset Text
@@ -17887,6 +17934,10 @@ Counting planar loop graphs
 The above process can be repeated, except that this time, we consider the
  planar graphs containing loops.
  To get started, consider the diagram below.
+\begin_inset Separator latexpar
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -17985,6 +18036,10 @@ Let
 
 \begin_layout Standard
 A table of these is given below.
+\begin_inset Separator latexpar
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -17992,14 +18047,14 @@ A table of these is given below.
 \begin_inset Tabular
 <lyxtabular version="3" rows="7" columns="8">
 <features tabularvalignment="middle">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
 <row>
 <cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
 \begin_inset Text
@@ -18774,6 +18829,10 @@ Some typical values for English words are given in the table below.
  The word-pairs were generated by creating random parse trees of the sentences
  in the data-set, and then counting a pair, if two words are connected by
  a parse link.
+\begin_inset Separator latexpar
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -18781,8 +18840,8 @@ Some typical values for English words are given in the table below.
 \begin_inset Tabular
 <lyxtabular version="3" rows="13" columns="2">
 <features tabularvalignment="middle">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
 <row>
 <cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
 \begin_inset Text
@@ -19070,6 +19129,10 @@ nguage word pairs, where were observed for a total of 420 million times.
  geographical names, as well as an assortment of foreign-language words
  as might be encountered in a sampling of English wikipedia pages.
  (This is the dataset collected by Rohit, summer of 2015).
+\begin_inset Separator latexpar
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -19322,6 +19385,10 @@ ANY
 \end_inset
 
 
+\begin_inset Separator latexpar
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -19329,13 +19396,13 @@ ANY
 \begin_inset Tabular
 <lyxtabular version="3" rows="13" columns="7">
 <features tabularvalignment="middle">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
 <row>
 <cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
 \begin_inset Text
@@ -20492,15 +20559,15 @@ There's something else interesting going on, shown in the table below.
 \begin_inset Tabular
 <lyxtabular version="3" rows="10" columns="9">
 <features tabularvalignment="middle">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
 <row>
 <cell multicolumn="1" alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
 \begin_inset Text
@@ -21539,15 +21606,15 @@ Next, datasets that hold disjuncts.
 \begin_inset Tabular
 <lyxtabular version="3" rows="7" columns="9">
 <features tabularvalignment="middle">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
 <row>
 <cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
 \begin_inset Text
@@ -22441,6 +22508,10 @@ ons, and are shown for comparison.
 
 \begin_layout Standard
 XXXX the table below is still from the broken corpus!!!! discard it!!!
+\begin_inset Separator latexpar
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -22448,10 +22519,10 @@ XXXX the table below is still from the broken corpus!!!! discard it!!!
 \begin_inset Tabular
 <lyxtabular version="3" rows="16" columns="4">
 <features tabularvalignment="middle">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
 <row>
 <cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
 \begin_inset Text
@@ -23311,6 +23382,10 @@ Created with
 \end_inset
 
 
+\begin_inset Separator latexpar
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -23318,13 +23393,13 @@ Created with
 \begin_inset Tabular
 <lyxtabular version="3" rows="7" columns="7">
 <features tabularvalignment="middle">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
 <row>
 <cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
 \begin_inset Text
@@ -23790,6 +23865,10 @@ a
 \begin_layout Standard
 So what is this saying? There are plenty of pairs that have greater similarity;
  here's an arbitrary sampling: 
+\begin_inset Separator latexpar
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -23797,8 +23876,8 @@ So what is this saying? There are plenty of pairs that have greater similarity;
 \begin_inset Tabular
 <lyxtabular version="3" rows="9" columns="2">
 <features tabularvalignment="middle">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
 <row>
 <cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
 \begin_inset Text
@@ -24969,15 +25048,15 @@ en_pairs_ttwo_mst
 \begin_inset Tabular
 <lyxtabular version="3" rows="2" columns="9">
 <features tabularvalignment="middle">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
 <row>
 <cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
 \begin_inset Text
@@ -25208,6 +25287,10 @@ From the cnt-obs-rows function.
 \end_inset
 
 
+\begin_inset Separator latexpar
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -25276,13 +25359,13 @@ Stats can be gotten by creating the add-support-compute object on the filter
 \begin_inset Tabular
 <lyxtabular version="3" rows="11" columns="7">
 <features tabularvalignment="middle">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
 <row>
 <cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
 \begin_inset Text
@@ -26065,6 +26148,10 @@ Iteration appears to converge very rapidly.
 
  are plotted for the first five iterations, using this rank.
  After the third iteration, there is no discernible change in the weights.
+\begin_inset Separator latexpar
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -26126,6 +26213,10 @@ Computed as follows (simplified, various checks were done to verify correctness)
 \end_inset
 
 
+\begin_inset Separator latexpar
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -26133,8 +26224,8 @@ Computed as follows (simplified, various checks were done to verify correctness)
 \begin_inset Tabular
 <lyxtabular version="3" rows="6" columns="2">
 <features tabularvalignment="middle">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
 <row>
 <cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
 \begin_inset Text
@@ -27397,6 +27488,10 @@ en_pairs_rthree
 .
  It does not take very many observations to drive the uncertainty to a fairly
  small value.
+\begin_inset Separator latexpar
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -27499,13 +27594,13 @@ reference "sec:Dataset-report"
 \begin_inset Tabular
 <lyxtabular version="3" rows="2" columns="7">
 <features tabularvalignment="middle">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
 <row>
 <cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
 \begin_inset Text
@@ -27674,15 +27769,15 @@ reference "sec:Dataset-report"
 \begin_inset Tabular
 <lyxtabular version="3" rows="3" columns="9">
 <features tabularvalignment="middle">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
 <row>
 <cell multicolumn="1" alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
 \begin_inset Text
@@ -27955,6 +28050,10 @@ Distribution of Mutual Information
 The figure below shows the distribution of the mutual information of English
  word-pairs.
  
+\begin_inset Separator latexpar
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -28042,13 +28141,13 @@ reference "sec:Dataset-report"
 \begin_inset Tabular
 <lyxtabular version="3" rows="2" columns="7">
 <features tabularvalignment="middle">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
 <row>
 <cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
 \begin_inset Text
@@ -28214,15 +28313,15 @@ reference "sec:Dataset-report"
 \begin_inset Tabular
 <lyxtabular version="3" rows="3" columns="9">
 <features tabularvalignment="middle">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
 <row>
 <cell multicolumn="1" alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
 \begin_inset Text
@@ -28507,6 +28606,10 @@ Distribution of Mutual Information
 The figure below shows the distribution of the mutual information of the
  hanzi pairs.
  
+\begin_inset Separator latexpar
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -29066,6 +29169,23 @@ floats- drifts+
 \end_inset
 
 .
+\end_layout
+
+\begin_layout Standard
+Meaning bibliography: 
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Quotes eld
+\end_inset
+
+The Molecular Level of Lexical Semantics
+\begin_inset Quotes erd
+\end_inset
+
+, EA Nida, (1997) International Journal of Lexicography, 10(4): 265–274.
+ https://www.academia.edu/36534355/The_Molecular_Level_of_Lexical_Semantics_by_EA_
+Nida
 \end_layout
 
 \begin_layout Section*
