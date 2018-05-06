@@ -349,7 +349,7 @@
 					(Inheritance (Concept subj_instance) (Concept subj_concept))
 					(r2l-wordinst-concept subj_instance)
 					(EvaluationLink
-						(PredicateNode var_name)
+						(VariableNode var_name)
 						(ListLink (ConceptNode subj_instance)))
 				)
 		))
