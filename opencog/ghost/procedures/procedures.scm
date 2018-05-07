@@ -126,25 +126,28 @@
 ; --------------------------------------------------------------
 ; Utilities for the predicates & schemas
 ; --------------------------------------------------------------
-(define (true-model? model)
+(define (true-value? value)
 "
+  true-value? VALUE
+
   This is an abstraction to make it easier to keep consistent definition
-  of what a true model is, and is used internally.
+  of what a true value is, and is used internally. Here a value is a
+  measure of trueness as per the model defined in here.
 "
-  (let ((confidence (tv-conf (cog-tv model))))
-    (cond
-      ((> 0.5 confidence) #f)
-      ((<= 0.5 confidence) #t))
-  )
+  (cond
+    ((> event-threshold value) #f)
+    ((<= event-threshold value) #t))
 )
 
 (define (is-model-true? model)
 ; It is better to find the product of the strength and confidence but for now
 ; confidence is used as the default stv for new atoms is (stv 1 0), so
 ; need to waste cpu cycles.
-  (if (true-model? model)
-    (stv 1 1)
-    (stv 0 1)
+  (let ((conf (tv-conf (cog-tv model))))
+    (if (true-value? conf)
+      (stv 1 1)
+      (stv 0 1)
+    )
   )
 )
 
