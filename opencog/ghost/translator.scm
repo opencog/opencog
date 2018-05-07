@@ -320,12 +320,13 @@
                            "Found the rule \"~a\" in the rule-alist" label)
                          (set! reuse #t)
                          (set! reused-rule-label label)
-                         ; The 2nd item in the list is the action
-                         (to-atomese (cdar (list-ref reused-rule-from-alist 1))))))
+                         (process-action
+                           ; The 2nd item in the list is the action
+                           (list-ref reused-rule-from-alist 1) label))))
                    (begin
                      (set! reuse #t)
                      (set! reused-rule-label label)
-                     (get-reused-action (list (psi-get-action reused-rule)))))))
+                     (psi-get-action reused-rule)))))
               ; Other functions
               ((equal? 'function (car n))
                (action-function (cadr n) (to-atomese (cddr n))))
@@ -370,7 +371,10 @@
     (list
       (ExecutionOutput
         gsn-action
-        (List action-atomese))
+        (List
+          (if reuse
+            (get-reused-action action-atomese)
+            action-atomese)))
       ; The expected behavior is that, when (the action of) a rule is reused,
       ; the rule will be considered as fired, so mark the last executed rule
       ; as the reused one instead of the one that calls the reuse function,
