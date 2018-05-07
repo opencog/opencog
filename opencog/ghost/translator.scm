@@ -302,18 +302,30 @@
                (set! keep #t)
                (list))
               ; A system function -- reuse
-              ; Find the rule, and unwrap its action
+              ; First of all, try to see if the rule has been created in
+              ; the AtomSpace, and get its action directly if so
+              ; Otherwise, see if the rule is defined in the same file being
+              ; parsed but just hasn't yet created, check the rule-alist if so
               ((and (equal? 'function (car n))
                     (equal? "reuse" (cadr n)))
                (let* ((label (cdaddr n))
                       (reused-rule (get-rule-from-label label)))
                  (if (null? reused-rule)
-                   (cog-logger-error ghost-logger
-                     "Please make sure the rule with label \"~a\" is defined!" label)
+                   (let ((reused-rule-from-alist (assoc-ref rule-alist label)))
+                     (if (null? reused-rule-from-alist)
+                       (cog-logger-error ghost-logger
+                         "Please make sure the rule with label \"~a\" is defined!" label)
+                       (begin
+                         (cog-logger-debug ghost-logger
+                           "Found the rule \"~a\" in the rule-alist" label)
+                         (set! reuse #t)
+                         (set! reused-rule-label label)
+                         ; The 2nd item in the list is the action
+                         (to-atomese (cdar (list-ref reused-rule-from-alist 1))))))
                    (begin
                      (set! reuse #t)
                      (set! reused-rule-label label)
-                     (psi-get-action reused-rule)))))
+                     (get-reused-action (list (psi-get-action reused-rule)))))))
               ; Other functions
               ((equal? 'function (car n))
                (action-function (cadr n) (to-atomese (cddr n))))
@@ -358,10 +370,7 @@
     (list
       (ExecutionOutput
         gsn-action
-        (List
-          (if reuse
-            (get-reused-action action-atomese)
-            action-atomese)))
+        (List action-atomese))
       ; The expected behavior is that, when (the action of) a rule is reused,
       ; the rule will be considered as fired, so mark the last executed rule
       ; as the reused one instead of the one that calls the reuse function,
@@ -469,7 +478,7 @@
 ; ----------
 (define (process-rule-stack)
 "
-  Instantiate the rules in accumulated in rule-label-list.
+  Instantiate the rules accumulated in rule-label-list.
 "
   (for-each
     (lambda (l)
