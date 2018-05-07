@@ -467,6 +467,21 @@
   ))
 
 ; ----------
+(define (process-rule-stack)
+"
+  Instantiate the rules in accumulated in rule-label-list.
+"
+  (for-each
+    (lambda (l)
+      (apply instantiate-rule (assoc-ref rule-alist l)))
+    rule-label-list)
+
+  ; Clear the states
+  (set! rule-label-list '())
+  (set! rule-alist '())
+)
+
+; ----------
 (define (create-rule PATTERN ACTION GOAL NAME TYPE)
 "
   Top level translation function.
@@ -479,6 +494,23 @@
 
   TYPE is a grouping idea from ChatScript, e.g. responders, rejoinders,
   gambits etc.
+"
+  ; Label the rule with NAME, if given, generate one otherwise
+  (define rule-name
+    (if (string-null? NAME)
+      (string-append "GHOST-rule-" (random-string 36))
+      NAME))
+
+  (set! rule-label-list (append rule-label-list (list rule-name)))
+
+  (set! rule-alist
+    (assq-set! rule-alist rule-name (list PATTERN ACTION GOAL rule-name TYPE)))
+)
+
+; ----------
+(define (instantiate-rule PATTERN ACTION GOAL NAME TYPE)
+"
+  To process and create the rule in the AtomSpace.
 "
   (define (add-to-rule-hierarchy LV RULE)
     ; Reset the rule hierarchy if it's not a rejoinder
@@ -509,11 +541,7 @@
   ; Reset the list of local variables
   (set! pat-vars '())
 
-  (let* (; Label the rule with NAME, if given, generate one otherwise
-         (rule-name (if (string-null? NAME)
-                        (string-append "GHOST-rule-" (random-string 36))
-                        NAME))
-         (proc-type (process-type TYPE))
+  (let* ((proc-type (process-type TYPE))
          (ordered-terms (order-terms PATTERN))
          (proc-terms (process-pattern-terms ordered-terms))
          (vars (append (list-ref proc-terms 0)
@@ -521,7 +549,7 @@
          (conds (append (list-ref proc-terms 1)
                         (list-ref proc-type 1)))
          (type (list-ref proc-type 2))
-         (action (process-action ACTION rule-name))
+         (action (process-action ACTION NAME))
          (goals (process-goal GOAL)))
 
     (cog-logger-debug ghost-logger "Context: ~a" ordered-terms)
@@ -554,7 +582,7 @@
           a-rule)
 
         ; Label the rule
-        (psi-rule-set-alias! a-rule rule-name)
+        (psi-rule-set-alias! a-rule NAME)
 
         ; Set the type
         (cog-set-value! a-rule ghost-rule-type type)
@@ -581,7 +609,7 @@
                              a-rule ghost-next-responder))
                        lv))
                    rule-hierarchy))
-               (add-to-rule-hierarchy 0 rule-name))
+               (add-to-rule-hierarchy 0 NAME))
               ((equal? type strval-rejoinder)
                ; If it's a rejoinder, its parent rule should be the
                ; last rule one level up in rule-hierarchy
@@ -594,7 +622,7 @@
                        (1- (get-rejoinder-level TYPE)))))
                    a-rule ghost-next-rejoinder))
                (add-to-rule-hierarchy
-                 (get-rejoinder-level TYPE) rule-name)))
+                 (get-rejoinder-level TYPE) NAME)))
 
         ; Connect words, concepts and predicates from the context
         ; directly to the rule via a HebbianLink

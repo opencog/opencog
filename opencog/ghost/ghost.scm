@@ -102,6 +102,14 @@
 ; during rule parsing & creation
 (define pat-vars '())
 
+; A list of all the labels of the rules we have seen
+(define rule-label-list '())
+
+; An association list that contains all the atomese needed to create
+; the actual rules
+; The key of this list is the labels of the rules
+(define rule-alist '())
+
 ; A list to keep track of what rules hierarchy
 ; Will be used when dealing with rejoinders
 (define rule-hierarchy '())
@@ -194,14 +202,18 @@
 "
   Parse the TXT, convert them into atomese.
 "
-  (test-parse TXT))
+  (test-parse TXT)
+  (process-rule-stack)
+)
 
 ; ----------
 (define-public (ghost-parse-file FILE)
 "
   Parse everything in the topic FILE, and convert them into atomese.
 "
-  (test-parse-file FILE))
+  (test-parse-file FILE)
+  (process-rule-stack)
+)
 
 ; ----------
 (define-public (ghost TXT)
