@@ -165,7 +165,7 @@
   )
 )
 
-(define (set-event-times model old-value new-value)
+(define (set-event-times! model old-value new-value)
 "
   set-event-times! MODEL OLD-VALUE NEW-VALUE
 
@@ -176,6 +176,72 @@
       (cog-set-value! model event-start (FloatValue (current-time-us))))
     ((false-transiton-occurs? old-value new-value)
       (cog-set-value! model event-stop (FloatValue (current-time-us))))
+  )
+)
+
+(define (time-true-transition model)
+"
+  time-true-transition MODEL
+
+  Returns the time in microseconds of the last time the MODEL transitioned
+  into a true state. If no time had been recorded then nil is returned.
+"
+  (let ((time (cog-value model event-start)))
+    (if (null? time)
+      time
+      (cog-value-ref time 0)
+    )
+  )
+)
+
+(define (time-true-transition model)
+"
+  time-false-transition MODEL
+
+  Returns the time in microseconds of the last time the MODEL transitioned
+  into a false state. If no time had been recorded then nil is returned.
+"
+  (let ((time (cog-value model event-stop)))
+    (if (null? time)
+      time
+      (cog-value-ref time 0)
+    )
+  )
+)
+
+(define (since-true-transition-occurred? model secs)
+"
+  since-true-transition-occurred? MODEL SECS
+
+  Return #t if the time passed since the MODEL had a true transition is
+  greater than SECS, and there hasn't been a false transition. If not,
+  returns #f.
+"
+  (let ((true-t (time-true-transition model))
+    (false-t (time-false-transition model)))
+    (if (and (not (null? true-t)) (not (null? false-t))
+          (> true-t false-t) (>= (- (current-time-us) true-t) secs))
+      #t
+      #f
+    )
+  )
+)
+
+(define (since-false-transition-occurred? model secs)
+"
+  since-false-transition-occurred? MODEL SECS
+
+  Return #t if the time passed since the MODEL had a false transition is
+  greater than SECS, and there hasn't been a true transition. If not,
+  returns #f.
+"
+  (let ((true-t (time-true-transition model))
+    (false-t (time-false-transition model)))
+    (if (and (not (null? true-t)) (not (null? false-t))
+          (< true-t false-t) (>= (- (current-time-us) false-t) secs))
+      #t
+      #f
+    )
   )
 )
 
