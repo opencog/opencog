@@ -165,6 +165,20 @@
   )
 )
 
+(define (set-event-times model old-value new-value)
+"
+  set-event-times! MODEL OLD-VALUE NEW-VALUE
+
+  Record the time that MODEL transitions to true or false.
+"
+  (cond
+    ((true-transiton-occurs? old-value new-value)
+      (cog-set-value! model event-start (FloatValue (current-time-us))))
+    ((false-transiton-occurs? old-value new-value)
+      (cog-set-value! model event-stop (FloatValue (current-time-us))))
+  )
+)
+
 (define (true-value? value)
 "
   true-value? VALUE
