@@ -271,5 +271,8 @@
       (Concept (string-append psi-prefix-str LABEL))))
 
   (if (null? rule)
-      (cog-logger-warn ghost-logger "Failed to find the GHOST rule \"~a\"" LABEL)
+      (begin
+        (cog-logger-debug ghost-logger
+          "Failed to find the GHOST rule \"~a\"" LABEL)
+        (list))
       (car rule)))
