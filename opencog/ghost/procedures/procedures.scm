@@ -126,6 +126,45 @@
 ; --------------------------------------------------------------
 ; Utilities for the predicates & schemas
 ; --------------------------------------------------------------
+; NOTE: An event is defined to have occured when the model used to
+; represent it becomes true, and when the model stops being true then the
+; state that was transitioned into have stopped.
+
+; The confidence value that defines when an event occurs or stops occurring.
+(define event-threshold 0.5)
+; Key used to record the time an event occured at.
+(define event-start (Predicate "event-start-time"))
+; Key used to record the time an event stopped occuring at.
+(define event-stop (Predicate "event-stop-time"))
+
+(define (true-transition-occurs? old-value new-value)
+"
+  true-transition-occurs? OLD-VALUE NEW-VALUE
+
+  Returns #t if NEW-VALUE will cause the underlying model to become true,
+  else it returns #f. #f is returned even if OLD-VALUE is already in a
+  true state because an event occurs only once.
+"
+  (if (true-value? old-value)
+    #f
+    (true-value? new-value)
+  )
+)
+
+(define (false-transition-occurs? old-value new-value)
+"
+  false-transition-occurs? OLD-VALUE NEW-VALUE
+
+  Returns #t if NEW-VALUE will cause the underlying model to become false,
+  else it returns #f. #f is returned even if OLD-VALUE is already in a
+  false state because an event occurs only once.
+"
+  (if (true-value? old-value)
+    (not (true-value? new-value))
+    #f
+  )
+)
+
 (define (true-value? value)
 "
   true-value? VALUE
