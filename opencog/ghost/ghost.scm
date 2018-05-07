@@ -105,7 +105,7 @@
 ; A list of all the labels of the rules we have seen
 (define rule-label-list '())
 
-; An association list that contains all the atomese needed to create
+; An association list that contains all the terms needed to create
 ; the actual rules
 ; The key of this list is the labels of the rules
 (define rule-alist '())

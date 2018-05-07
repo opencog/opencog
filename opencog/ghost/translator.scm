@@ -304,8 +304,8 @@
               ; A system function -- reuse
               ; First of all, try to see if the rule has been created in
               ; the AtomSpace, and get its action directly if so
-              ; Otherwise, see if the rule is defined in the same file being
-              ; parsed but just hasn't yet created, check the rule-alist if so
+              ; Otherwise, check the rule-alist to see if the rule is
+              ; defined in the same file being parsed
               ((and (equal? 'function (car n))
                     (equal? "reuse" (cadr n)))
                (let* ((label (cdaddr n))
