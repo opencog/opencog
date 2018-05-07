@@ -119,8 +119,13 @@
   (ghost-stimulate wn)
 )
 
-(define (perceive-face-talking face-id confidence)
-  (cog-set-tv! (face-talking face-id) (stv 1 confidence))
+(define (perceive-face-talking face-id new-conf)
+  (let* ((model (face-talking face-id))
+    (old-conf (tv-conf (cog-tv model))))
+
+    (cog-set-tv! model (stv 1 new-conf))
+    (set-event-times! model old-conf new-conf)
+  )
 )
 
 ; --------------------------------------------------------------
