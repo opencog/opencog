@@ -209,12 +209,13 @@
   the patterns.
 "
   (cond
-    ((true-transiton-occurs? old-value new-value)
+    ((true-transition-occurs? old-value new-value)
       (cog-set-value! sign event-start (FloatValue (current-time-us)))
       (cog-set-value! model event-start (FloatValue (current-time-us))))
-    ((false-transiton-occurs? old-value new-value)
+    ((false-transition-occurs? old-value new-value)
       (cog-set-value! sign event-stop (FloatValue (current-time-us)))
       (cog-set-value! model event-stop (FloatValue (current-time-us))))
+    (else model)
   )
 )
 
