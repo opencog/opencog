@@ -1,3 +1,13 @@
+Reboot
+======
+
+There are 2 ways to invoke the URE pattern miner
+
+1. cog-miner, it will set up a rule-base, configure it, generate a
+   query for the URE, run it, return the results, and delete the
+   rule-base.
+2. Manually using the URE.
+
 Scretch
 =======
 

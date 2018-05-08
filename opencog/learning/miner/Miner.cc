@@ -1,5 +1,5 @@
 /*
- * XPatternMiner.cc
+ * Miner.cc
  *
  * Copyright (C) 2017 OpenCog Foundation
  *
@@ -21,7 +21,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "XPatternMiner.h"
+#include "Miner.h"
 
 #include <opencog/util/Logger.h>
 #include <opencog/util/algorithm.h>
@@ -55,7 +55,7 @@ XPMParameters::XPMParameters(unsigned ms, unsigned iconjuncts,
 {
 	// Provide initial pattern if none
 	if (not initpat) {
-		HandleSeq vars = XPatternMiner::gen_rand_variables(initconjuncts);
+		HandleSeq vars = Miner::gen_rand_variables(initconjuncts);
 		Handle vardecl = 1 < vars.size() ?
 		                     createLink(vars, VARIABLE_LIST) : vars[0];
 		Handle body = 1 < vars.size() ?
@@ -76,13 +76,13 @@ XPMParameters::XPMParameters(unsigned ms, unsigned iconjuncts,
 	}
 
 	// Overwrite initconjuncts if necessary
-	initconjuncts = XPatternMiner::conjuncts(initpat);
+	initconjuncts = Miner::conjuncts(initpat);
 }
 
-XPatternMiner::XPatternMiner(AtomSpace& as, const XPMParameters& prm)
+Miner::Miner(AtomSpace& as, const XPMParameters& prm)
 	: text_as(as), param(prm) {}
 
-HandleTree XPatternMiner::operator()()
+HandleTree Miner::operator()()
 {
 	HandleSet texts;
 	text_as.get_handles_by_type(std::inserter(texts, texts.end()),
@@ -93,18 +93,18 @@ HandleTree XPatternMiner::operator()()
 	return specialize(param.initpat, fltexts, param.maxdepth);
 }
 
-HandleTree XPatternMiner::specialize(const Handle& pattern,
-                                     const HandleSet& texts,
-                                     int maxdepth)
+HandleTree Miner::specialize(const Handle& pattern,
+                             const HandleSet& texts,
+                             int maxdepth)
 {
 	// return specialize_alt(pattern, texts, Valuations(pattern, texts), maxdepth);
 	return specialize(pattern, texts, Valuations(pattern, texts), maxdepth);
 }
 
-HandleTree XPatternMiner::specialize(const Handle& pattern,
-                                     const HandleSet& texts,
-                                     const Valuations& valuations,
-                                     int maxdepth)
+HandleTree Miner::specialize(const Handle& pattern,
+                             const HandleSet& texts,
+                             const Valuations& valuations,
+                             int maxdepth)
 {
 	// One of the termination criteria has been reached
 	if (terminate(pattern, texts, valuations, maxdepth))
@@ -126,10 +126,10 @@ HandleTree XPatternMiner::specialize(const Handle& pattern,
 	return patterns;
 }
 
-HandleTree XPatternMiner::specialize_alt(const Handle& pattern,
-                                         const HandleSet& texts,
-                                         const Valuations& valuations,
-                                         int maxdepth)
+HandleTree Miner::specialize_alt(const Handle& pattern,
+                                 const HandleSet& texts,
+                                 const Valuations& valuations,
+                                 int maxdepth)
 {
 	// One of the termination criteria has been reached
 	if (terminate(pattern, texts, valuations, maxdepth))
@@ -157,10 +157,10 @@ HandleTree XPatternMiner::specialize_alt(const Handle& pattern,
 	return patterns;
 }
 
-HandleTree XPatternMiner::specialize_shabs(const Handle& pattern,
-                                           const HandleSet& texts,
-                                           const Valuations& valuations,
-                                           int maxdepth)
+HandleTree Miner::specialize_shabs(const Handle& pattern,
+                                   const HandleSet& texts,
+                                   const Valuations& valuations,
+                                   int maxdepth)
 {
 	// Generate shallow patterns of the first variable of the
 	// valuations and associate the remaining valuations (excluding
@@ -189,11 +189,11 @@ HandleTree XPatternMiner::specialize_shabs(const Handle& pattern,
 	return patterns;
 }
 
-HandleTree XPatternMiner::specialize_shapat(const Handle& pattern,
-                                            const HandleSet texts,
-                                            const Handle& var,
-                                            const Handle& shapat,
-                                            int maxdepth)
+HandleTree Miner::specialize_shapat(const Handle& pattern,
+                                    const HandleSet texts,
+                                    const Handle& var,
+                                    const Handle& shapat,
+                                    int maxdepth)
 {
 	// Perform the composition (that is specialize)
 	Handle npat = compose(pattern, {{var, shapat}});
@@ -217,10 +217,10 @@ HandleTree XPatternMiner::specialize_shapat(const Handle& pattern,
 	return HandleTree(npat, {nvapats});
 }
 
-bool XPatternMiner::terminate(const Handle& pattern,
-                              const HandleSet& texts,
-                              const Valuations& valuations,
-                              int maxdepth) const
+bool Miner::terminate(const Handle& pattern,
+                      const HandleSet& texts,
+                      const Valuations& valuations,
+                      int maxdepth) const
 {	
 	return
 		// We have reached the maximum depth
@@ -234,15 +234,15 @@ bool XPatternMiner::terminate(const Handle& pattern,
 		not enough_support(pattern, texts);
 }
 
-bool XPatternMiner::enough_support(const Handle& pattern,
-                                   const HandleSet& texts) const
+bool Miner::enough_support(const Handle& pattern,
+                           const HandleSet& texts) const
 {
 	return param.minsup <= freq(pattern, texts, param.minsup);
 }
 
-unsigned XPatternMiner::freq(const Handle& pattern,
-                             const HandleSet& texts,
-                             int maxf) const
+unsigned Miner::freq(const Handle& pattern,
+                     const HandleSet& texts,
+                     int maxf) const
 {
 	HandleSeq cps(get_component_patterns(pattern));
 	// HandleSeq cps(get_conjuncts(pattern));
@@ -259,16 +259,16 @@ unsigned XPatternMiner::freq(const Handle& pattern,
 	return freq(freqs);
 }
 
-unsigned XPatternMiner::freq_component(const Handle& component,
-                                       const HandleSet& texts,
-                                       int maxf) const
+unsigned Miner::freq_component(const Handle& component,
+                               const HandleSet& texts,
+                               int maxf) const
 {
 	if (totally_abstract(component))
 		return texts.size();
 	return restricted_satisfying_set(component, texts, maxf)->get_arity();
 }
 
-unsigned XPatternMiner::freq(const std::vector<unsigned>& freqs) const
+unsigned Miner::freq(const std::vector<unsigned>& freqs) const
 {
 	double minf = *boost::min_element(freqs),
 		timesf = boost::accumulate(freqs, 1, std::multiplies<unsigned>()),
@@ -276,8 +276,8 @@ unsigned XPatternMiner::freq(const std::vector<unsigned>& freqs) const
 	return std::floor(f);
 }
 
-HandleSet XPatternMiner::filter_texts(const Handle& pattern,
-                                      const HandleSet& texts) const
+HandleSet Miner::filter_texts(const Handle& pattern,
+                              const HandleSet& texts) const
 {
 	// No need to filter if most abstract
 	if (totally_abstract(pattern))
@@ -296,7 +296,7 @@ HandleSet XPatternMiner::filter_texts(const Handle& pattern,
 	return filtrd;
 }
 
-bool XPatternMiner::match(const Handle& pattern, const Handle& text) const
+bool Miner::match(const Handle& pattern, const Handle& text) const
 {
 	// If constant pattern, matching ammounts to equality
 	if (pattern->get_type() != LAMBDA_LINK)
@@ -306,8 +306,7 @@ bool XPatternMiner::match(const Handle& pattern, const Handle& text) const
 	return (bool)matched_results(pattern, text);
 }
 
-Handle XPatternMiner::matched_results(const Handle& pattern,
-                                      const Handle& text) const
+Handle Miner::matched_results(const Handle& pattern, const Handle& text) const
 {
 	// If I use a temporary atomspace on stack, then the atoms in it
 	// get deleted, grrrr, would need to use a smart pointer.
@@ -321,15 +320,14 @@ Handle XPatternMiner::matched_results(const Handle& pattern,
 	return inst.execute(ml);
 }
 
-HandleSetSeq XPatternMiner::shallow_abstract(const Handle& pattern,
-                                             const HandleSet& texts,
-                                             unsigned ms)
+HandleSetSeq Miner::shallow_abstract(const Handle& pattern,
+                                     const HandleSet& texts,
+                                     unsigned ms)
 {
 	return shallow_abstract(Valuations(pattern, texts), ms);
 }
 
-HandleSetSeq XPatternMiner::shallow_abstract(const Valuations& valuations,
-                                             unsigned ms)
+HandleSetSeq Miner::shallow_abstract(const Valuations& valuations, unsigned ms)
 {
 	// Base case
 	if (valuations.novar())
@@ -342,7 +340,7 @@ HandleSetSeq XPatternMiner::shallow_abstract(const Valuations& valuations,
 	return shabs_per_var;
 }
 
-HandleSet XPatternMiner::front_shallow_abstract(const Valuations& valuations, unsigned ms)
+HandleSet Miner::front_shallow_abstract(const Valuations& valuations, unsigned ms)
 {
 	HandleSet shabs;
 
@@ -445,7 +443,7 @@ HandleSet XPatternMiner::front_shallow_abstract(const Valuations& valuations, un
 	return shabs;
 }
 
-Handle XPatternMiner::val_shallow_abstract(const Handle& value)
+Handle Miner::val_shallow_abstract(const Handle& value)
 {
 	// Node or empty link, nothing to abstract
 	if (value->is_node() or value->get_arity() == 0)
@@ -477,28 +475,28 @@ Handle XPatternMiner::val_shallow_abstract(const Handle& value)
 	return lambda(vardecl, body);
 }
 
-Handle XPatternMiner::variable_list(const HandleSeq& vars)
+Handle Miner::variable_list(const HandleSeq& vars)
 {
 	return vars.size() == 1 ? vars[0]
 		: createLink(vars, VARIABLE_LIST);
 }
 
-Handle XPatternMiner::lambda(const Handle& vardecl, const Handle& body)
+Handle Miner::lambda(const Handle& vardecl, const Handle& body)
 {
 	return createLink(LAMBDA_LINK, vardecl, body);
 }
 
-Handle XPatternMiner::quote(const Handle& h)
+Handle Miner::quote(const Handle& h)
 {
 	return createLink(QUOTE_LINK, h);
 }
 
-Handle XPatternMiner::unquote(const Handle& h)
+Handle Miner::unquote(const Handle& h)
 {
 	return createLink(UNQUOTE_LINK, h);
 }
 
-Handle XPatternMiner::local_quote(const Handle& h)
+Handle Miner::local_quote(const Handle& h)
 {
 	return createLink(LOCAL_QUOTE_LINK, h);
 }
@@ -506,8 +504,7 @@ Handle XPatternMiner::local_quote(const Handle& h)
 // TODO: take care of removing local quote in the composed
 // sub-patterns, if it doesn't already
 // TODO: replace by PutLink, if possible
-Handle XPatternMiner::compose(const Handle& pattern,
-                              const HandleMap& var2pat)
+Handle Miner::compose(const Handle& pattern, const HandleMap& var2pat)
 {
 	// Split var2pat into 2 mappings, variable to sub-vardecl and
 	// variable to sub-body
@@ -545,8 +542,7 @@ Handle XPatternMiner::compose(const Handle& pattern,
 	return body;
 }
 
-Handle XPatternMiner::vardecl_compose(const Handle& vardecl,
-                                      const HandleMap& var2subdecl)
+Handle Miner::vardecl_compose(const Handle& vardecl, const HandleMap& var2subdecl)
 {
 	OC_ASSERT((bool)vardecl, "Not implemented");
 
@@ -593,14 +589,14 @@ Handle XPatternMiner::vardecl_compose(const Handle& vardecl,
 	}
 }
 
-Handle XPatternMiner::remove_unary_and(const Handle& h)
+Handle Miner::remove_unary_and(const Handle& h)
 {
 	if (h->get_type() == AND_LINK and h->get_arity() == 1)
 		return h->getOutgoingAtom(0);
 	return h;
 }
 
-Handle XPatternMiner::alpha_conversion(const Handle& pattern)
+Handle Miner::alpha_conversion(const Handle& pattern)
 {
 	RewriteLinkPtr sc = RewriteLinkCast(pattern);
 	if (sc)
@@ -608,7 +604,7 @@ Handle XPatternMiner::alpha_conversion(const Handle& pattern)
 	return pattern;
 }
 
-Handle XPatternMiner::mk_pattern(const Handle& vardecl, const HandleSeq& clauses)
+Handle Miner::mk_pattern(const Handle& vardecl, const HandleSeq& clauses)
 {
 	Handle fvd = filter_vardecl(vardecl, clauses);
 	Handle body = 1 < clauses.size() ? createLink(clauses, AND_LINK) : clauses[0];
@@ -617,22 +613,22 @@ Handle XPatternMiner::mk_pattern(const Handle& vardecl, const HandleSeq& clauses
 	return Handle::UNDEFINED;
 }
 
-HandleSeq XPatternMiner::get_component_patterns(const Handle& pattern)
+HandleSeq Miner::get_component_patterns(const Handle& pattern)
 {
-	PatternLink pl(XPatternMiner::get_vardecl(pattern),
-	               XPatternMiner::get_body(pattern));
+	PatternLink pl(Miner::get_vardecl(pattern),
+	               Miner::get_body(pattern));
 	HandleSeq compats;
 	const HandleSeqSeq comps(pl.get_components());
 	for (unsigned i = 0; i < comps.size(); ++i)
 	{
-		Handle comp = mk_pattern(XPatternMiner::get_vardecl(pattern), comps[i]);
+		Handle comp = mk_pattern(Miner::get_vardecl(pattern), comps[i]);
 		if (comp)
 			compats.push_back(comp);
 	}
 	return compats;
 }
 
-HandleSeq XPatternMiner::get_conjuncts(const Handle& pattern)
+HandleSeq Miner::get_conjuncts(const Handle& pattern)
 {
 	if (pattern->get_type() == LAMBDA_LINK) {
 		Handle body = get_body(pattern);
@@ -651,9 +647,9 @@ HandleSeq XPatternMiner::get_conjuncts(const Handle& pattern)
 	return {};
 }
 
-Handle XPatternMiner::restricted_satisfying_set(const Handle& pattern,
-                                                const HandleSet& texts,
-                                                int maxf)
+Handle Miner::restricted_satisfying_set(const Handle& pattern,
+                                        const HandleSet& texts,
+                                        int maxf)
 {
 	static AtomSpace tmp_text_as;
 	tmp_text_as.clear();
@@ -677,7 +673,7 @@ Handle XPatternMiner::restricted_satisfying_set(const Handle& pattern,
 	return results;
 }
 
-bool XPatternMiner::totally_abstract(const Handle& pattern)
+bool Miner::totally_abstract(const Handle& pattern)
 {
 	// Check whether it is an abstraction to begin with
 	if (pattern->get_type() != LAMBDA_LINK)
@@ -701,7 +697,7 @@ bool XPatternMiner::totally_abstract(const Handle& pattern)
 	return true;
 }
 
-HandleSeq XPatternMiner::gen_rand_variables(size_t n)
+HandleSeq Miner::gen_rand_variables(size_t n)
 {
 	HandleSeq variables;
 	dorepeat (n)
@@ -709,12 +705,12 @@ HandleSeq XPatternMiner::gen_rand_variables(size_t n)
 	return variables;
 }
 
-Handle XPatternMiner::gen_rand_variable()
+Handle Miner::gen_rand_variable()
 {
 	return createNode(VARIABLE_NODE, randstr("$PM-"));
 }
 
-const Variables& XPatternMiner::get_variables(const Handle& pattern)
+const Variables& Miner::get_variables(const Handle& pattern)
 {
 	RewriteLinkPtr sc = RewriteLinkCast(pattern);
 	if (sc)
@@ -723,7 +719,7 @@ const Variables& XPatternMiner::get_variables(const Handle& pattern)
 	return empty_variables;
 }
 
-Handle XPatternMiner::get_vardecl(const Handle& pattern)
+Handle Miner::get_vardecl(const Handle& pattern)
 {
 	RewriteLinkPtr sc = RewriteLinkCast(pattern);
 	if (sc) {
@@ -735,7 +731,7 @@ Handle XPatternMiner::get_vardecl(const Handle& pattern)
 	return Handle::UNDEFINED;
 }
 
-const Handle& XPatternMiner::get_body(const Handle& pattern)
+const Handle& Miner::get_body(const Handle& pattern)
 {
 	RewriteLinkPtr sc = RewriteLinkCast(pattern);
 	if (sc)
@@ -743,7 +739,7 @@ const Handle& XPatternMiner::get_body(const Handle& pattern)
 	return pattern;
 }
 
-unsigned XPatternMiner::conjuncts(const Handle& pattern)
+unsigned Miner::conjuncts(const Handle& pattern)
 {
 	if (pattern->get_type() == LAMBDA_LINK) {
 		if (get_body(pattern)->get_type() == AND_LINK)
@@ -753,8 +749,8 @@ unsigned XPatternMiner::conjuncts(const Handle& pattern)
 	return 0;
 }
 
-Handle XPatternMiner::remove_useless_clauses(const Handle& vardecl,
-                                             const Handle& body)
+Handle Miner::remove_useless_clauses(const Handle& vardecl,
+                                     const Handle& body)
 {
 	Handle res = remove_constant_clauses(vardecl, body);
 
@@ -772,8 +768,8 @@ Handle XPatternMiner::remove_useless_clauses(const Handle& vardecl,
 	return res;
 }
 
-Handle XPatternMiner::remove_constant_clauses(const Handle& vardecl,
-                                              const Handle& clauses)
+Handle Miner::remove_constant_clauses(const Handle& vardecl,
+                                      const Handle& clauses)
 {
 	VariableListPtr vl = createVariableList(vardecl);
 	HandleSet vars = vl->get_variables().varset;

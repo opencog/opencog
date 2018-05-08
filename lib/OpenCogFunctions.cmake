@@ -50,7 +50,7 @@ ENDFUNCTION(PROCESS_MODULE_STRUCTURE)
 #
 # FILES: List of files to be installed/symlinked
 #
-# MODULE_DESTINATION: The absolute path  where the files associated
+# MODULE_DESTINATION: The absolute path where the files associated
 #   with the module are installed, with the exception of the
 #   MODULE_FILE(see definition at top of this file). The path for
 #   MODULE_FILE, is inferred from this argument, even if it is the only file to
