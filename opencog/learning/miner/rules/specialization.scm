@@ -70,7 +70,7 @@
 ;;
 ;; instead of being mangled into one rule.
 
-(load "xpattern-miner-rule-utils.scm")
+(load "miner-rule-utils.scm")
 
 (define specialization-rule
   (let* (;; Variables

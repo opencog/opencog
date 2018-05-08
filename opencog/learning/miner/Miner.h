@@ -1,5 +1,5 @@
 /*
- * XPatternMiner.h
+ * Miner.h
  *
  * Copyright (C) 2017 OpenCog Foundation
  *
@@ -31,13 +31,13 @@
 #include "HandleTree.h"
 #include "Valuations.h"
 
-class XPatternMinerUTest;
+class MinerUTest;
 
 namespace opencog
 {
 
 /**
- * Parameters for XPatternMiner. The terminology is taken from
+ * Parameters for Miner. The terminology is taken from
  * Frequent Subtree Mining -- An Overview, from Yun Chi et al, when
  * possible.
  */
@@ -106,15 +106,15 @@ struct XPMParameters {
  * the latter should return as many candidates as the pattern's
  * frequency.
  */
-class XPatternMiner
+class Miner
 {
-    friend class ::XPatternMinerUTest;
+    friend class ::MinerUTest;
 public:
 
 	/**
 	 * CTor
 	 */
-	XPatternMiner(AtomSpace& as, const XPMParameters& param=XPMParameters());
+	Miner(AtomSpace& as, const XPMParameters& param=XPMParameters());
 
 	/**
 	 * Mine and return a tree of patterns linked by specialization
@@ -203,8 +203,8 @@ private:
 	/**
 	 * Specialize the given pattern according to shallow abstractions
 	 * obtained by looking at the valuations of the front variable of
-	 * valuations, then recursively call XPatternMiner::specialize on
-	 * these obtained specializations.
+	 * valuations, then recursively call Miner::specialize on these
+	 * obtained specializations.
 	 */
 	HandleTree specialize_shabs(const Handle& pattern,
 	                            const HandleSet& texts,
@@ -213,8 +213,8 @@ private:
 
 	/**
 	 * Specialize the given pattern with the given shallow abstraction
-	 * at the given variable, then call XPatternMiner::specialize on
-	 * the obtained specialization.
+	 * at the given variable, then call Miner::specialize on the
+	 * obtained specialization.
 	 */
 	HandleTree specialize_shapat(const Handle& pattern, const HandleSet texts,
 	                             const Handle& var, const Handle& shapat,

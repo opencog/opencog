@@ -1,5 +1,5 @@
 ;;
-;; xpattern-miner-utils.scm
+;; miner-utils.scm
 ;;
 ;;;; Commentary:
 ;;
@@ -9,7 +9,7 @@
 ;; Utilities include:
 ;;
 ;; If you add more utilities don't forget to add them in the
-;; export-xpattern-miner-utils function.
+;; export-miner-utils function.
 ;;
 ;;;; Code:
 ;; Copyright (c) 2018, OpenCog Foundation
@@ -74,7 +74,7 @@
 
 (define (configure-rules pm-rbs)
   ;; Load and associate rules to pm-rbs
-  (let* ((rule-path "opencog/xpattern-miner/rules/")
+  (let* ((rule-path "opencog/miner/rules/")
          (base-rule-files (list "shallow-abstraction.scm"
                                 "specialization.scm"))
          (mk-full-path (lambda (rf) (string-append rule-path rf)))
@@ -328,7 +328,7 @@
             ;; possible
             (Set minsup-results-lst))))))
 
-(define (export-xpattern-miner-utils)
+(define (export-miner-utils)
   (export
     top
     random-texts-cpt

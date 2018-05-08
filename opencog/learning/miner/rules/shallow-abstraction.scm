@@ -44,7 +44,7 @@
 ;; clear though that it's much of a problem, so we'll go with that for
 ;; now.
 
-(load "xpattern-miner-rule-utils.scm")
+(load "miner-rule-utils.scm")
 
 (define shallow-abstraction-rule
   (let* (;; Variables
