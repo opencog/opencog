@@ -50,16 +50,24 @@
     text
     texts-cpt
 
-  texts can be a Scheme list or an Atomese List or Set.
+  texts can be
+  1. a Scheme list
+  2. an Atomese List or Set
+  3. an AtomSpace
 
   Once all memberships have been added to the current atomspace,
-  it returns texts-cpt.
+  texts-cpt is returned.
 "
-  (let* ((texts-lst (if (and (cog-atom? texts)
-                             (or (eq? (cog-type? texts) 'ListLink)
-                                 (eq? (cog-type? texts) 'SetLink)))
-                        (cog-outgoing-set texts)
-                        texts))
+  (define (is-List-Set a)
+    (and (cog-atom? texts)
+         (or (eq? (cog-type? texts) 'ListLink)
+             (eq? (cog-type? texts) 'SetLink))))
+  (let* ((texts-lst (cond ;; Scheme list
+                          ((list? texts) texts)
+                          ;; Atomese List or Set
+                          ((is-List-Set texts) (cog-outgoing-set texts))
+                          ;; AtomSpace
+                          ((cog-atomspace? texts) (cog-get-atoms 'Atom #t))))
          (mk-member (lambda (text) (Member text texts-cpt))))
     (for-each mk-member texts-lst))
   texts-cpt)
