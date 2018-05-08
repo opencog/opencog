@@ -155,7 +155,8 @@
   Returns (stv 1 1) if current time >= the time any user started talking plus
   SECS. Otherwise, returns (stv 0 1).
 "
-  (if (since-true-transition-occurred? face-talking-sign secs)
+  (if (since-true-transition-occurred? face-talking-sign
+    (string->number (cog-name secs)))
     (stv 1 1)
     (stv 0 1)
   )
@@ -168,7 +169,8 @@
   Returns (stv 1 1) if current time >= the time any user-stopped talking plus
   SECS. Otherwise, returns (stv 0 1).
 "
-  (if (since-false-transition-occurred? face-talking-sign secs)
+  (if (since-false-transition-occurred? face-talking-sign
+    (string->number (cog-name secs)))
     (stv 1 1)
     (stv 0 1)
   )
