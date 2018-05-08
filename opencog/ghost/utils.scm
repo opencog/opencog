@@ -268,7 +268,7 @@
 "
   (define rule
     (cog-chase-link 'ListLink 'ImplicationLink
-      (Concept (string-append psi-prefix-str LABEL))))
+      (Concept LABEL)))
 
   (if (null? rule)
       (begin

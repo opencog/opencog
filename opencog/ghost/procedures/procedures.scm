@@ -463,4 +463,4 @@
 "
   (car (filter psi-rule?
     (cog-chase-link 'ListLink 'ImplicationLink
-      (Concept (string-append psi-prefix-str alias))))))
+      (Concept alias)))))
