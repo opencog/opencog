@@ -333,11 +333,7 @@ Handle AttentionBank::getRandomAtomNotInAF(void)
     if (atoms_not_in_af.empty())
         return Handle::UNDEFINED;
 
-    auto seed = std::chrono::duration_cast<std::chrono::microseconds>(
-            std::chrono::system_clock::now().time_since_epoch());
-    MT19937RandGen rng(seed.count());
-
     auto it = atoms_not_in_af.cbegin();
-    std::advance(it, rng.randint(atoms_not_in_af.size()));
+    std::advance(it, randGen().randint(atoms_not_in_af.size()));
     return *it;
 }
