@@ -25,6 +25,8 @@
 
     ; Time related predicates
     after_min
+    after_user_started_talking
+    after_user_stopped_talking
 
     ; schemas
     animation
