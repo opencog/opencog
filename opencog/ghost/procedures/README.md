@@ -9,6 +9,8 @@ Here is a list of procedures (predicates and schemas) that can be used in GHOST.
 - person_not_talking
 - word_perceived
 - after_min
+- after_user_started_talking
+- after_user_stopped_talking
 
 ## Schemas
 - animation

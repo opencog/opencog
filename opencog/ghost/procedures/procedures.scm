@@ -197,6 +197,8 @@
   )
 )
 
+; TODO Move the time related helpers to the time-server. Some of this
+; utilities should have been provided by it.
 (define (set-event-times! sign model old-value new-value)
 "
   set-event-times! SIGN MODEL OLD-VALUE NEW-VALUE
