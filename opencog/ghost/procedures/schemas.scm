@@ -117,3 +117,78 @@
     (get-rule-from-alias (cog-name rule-label))
     (string->number (cog-name val)))
 )
+
+(define (max_sti_words . words)
+"
+  max_sti_words WORDS
+
+  Maximize the STI of the WordNodes correspondings to WORDS.
+"
+  (define max-sti (cog-av-sti (car (cog-af 1))))
+  (for-each
+    (lambda (w) (cog-set-sti! (Word (cog-name w)) max-sti))
+    words)
+  fini
+)
+
+(define (max_sti_concepts . concepts)
+"
+  max_sti_concepts . CONCEPTS
+
+  Maximize the STI of the ConceptNodes corresponding to CONCEPTS.
+"
+  (define max-sti (cog-av-sti (car (cog-af 1))))
+  (for-each
+    (lambda (c) (cog-set-sti! (Concept (cog-name c)) max-sti))
+    concepts)
+  fini
+)
+
+(define (max_sti_rules . rule-labels)
+"
+  max_sti_rules . RULE-LABELS
+
+  Maximize the STI of the rules with RULE-LABELS.
+"
+  (define max-sti (cog-av-sti (car (cog-af 1))))
+  (for-each
+    (lambda (r) (cog-set-sti! (get-rule-from-alias (cog-name r)) max-sti))
+    rule-labels)
+  fini
+)
+
+(define (min_sti_words . words)
+"
+  min_sti_words WORDS
+
+  Minimize the STI of the WordNodes correspondings to WORDS.
+"
+  (for-each
+    (lambda (w) (cog-set-sti! (Word (cog-name w)) 0))
+    words)
+  fini
+)
+
+(define (min_sti_concepts . concepts)
+"
+  min_sti_concepts . CONCEPTS
+
+  Minimize the STI of the ConceptNodes corresponding to CONCEPTS.
+"
+  (for-each
+    (lambda (c) (cog-set-sti! (Concept (cog-name c)) 0))
+    concepts)
+  fini
+)
+
+(define (min_sti_rules . rule-labels)
+"
+  min_sti_rules . RULE-LABELS
+
+  Minimize the STI of the rules with RULE-LABELS.
+"
+  (for-each
+    (lambda (r) (cog-set-sti! (get-rule-from-alias (cog-name r)) 0))
+    rule-labels)
+  fini
+)

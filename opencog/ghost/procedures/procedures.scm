@@ -36,6 +36,12 @@
     stimulate_concepts
     stimulate_rules
     set_rule_sti
+    max_sti_words
+    max_sti_concepts
+    max_sti_rules
+    min_sti_words
+    min_sti_concepts
+    min_sti_rules
 
     ; Utilities
     is-model-true?
