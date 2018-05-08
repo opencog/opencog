@@ -57,6 +57,7 @@ INSTALL (FILES
 )
 
 INSTALL (TARGETS PatternMiner DESTINATION "lib${LIB_DIR_SUFFIX}/opencog")
+INSTALL (TARGETS PatternMinerAgent DESTINATION "lib${LIB_DIR_SUFFIX}/opencog")
 
 IF (HAVE_cpprest)
 
