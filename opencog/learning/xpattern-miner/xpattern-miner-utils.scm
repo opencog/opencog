@@ -17,6 +17,7 @@
 
 (use-modules (opencog))
 (use-modules (opencog exec))
+(use-modules (opencog query))
 (use-modules (opencog rule-engine))
 (use-modules (srfi srfi-1))
 
@@ -39,7 +40,7 @@
 "
   Create a random Concept node for defining a pattern miner rule base
 "
-  (random-node 'Concept 16 "pattern-miner-rbs-"))
+  (random-node 'ConceptNode 16 "pattern-miner-rbs-"))
 
 (define (fill-texts-cpt texts-cpt texts)
 "
@@ -98,8 +99,8 @@
   (configure-rules pm-rbs)
 
   ;; Set parameters
-  (ure-set-maximum-iterations maxiter)
-  (ure-set-fc-retry-sources #f)
+  (ure-set-maximum-iterations pm-rbs maxiter)
+  (ure-set-fc-retry-sources pm-rbs #f)
 )
 
 (define (minsup-eval pattern texts ms)
@@ -118,13 +119,105 @@
      (List
         pattern
         texts
-        ms)))
+        (if (number? ms) (Number ms) ms))))
 
 (define (minsup-eval-true pattern texts ms)
 "
   Like minsup-eval and add (stv 1 1) on the EvaluationLink
 "
   (cog-set-tv! (minsup-eval pattern texts ms) (stv 1 1)))
+
+
+(define (get-members C)
+"
+  Given a concept node C, return all its members
+"
+  (let* ((member-links (cog-filter 'MemberLink (cog-incoming-set C)))
+         (member-of-C (lambda (x) (equal? C (gdr x))))
+         (members (map gar (filter member-of-C member-links))))
+    members))
+
+(define (get-cardinality C)
+"
+  Giveb a concept node C, return its number of members
+"
+  (length (get-members C)))
+
+(define (size-ge texts ms)
+  (let* ((result (>= (get-cardinality texts) (atom->number ms))))
+    (bool->tv result)))
+
+(define (texts->atomspace texts)
+"
+  Create an atomspace with all members of concept texts in it.
+"
+  (let* ((members (get-members texts))
+         (texts-as (cog-new-atomspace)))
+    (cog-cp members texts-as)
+    texts-as))
+
+(define (pattern->bindlink pattern)
+"
+  Turn a pattern into a BindLink for for subsequent pattern
+  matching texts.
+"
+  (if (= (cog-arity pattern) 2)
+      ;; With variable declaration
+      (let* ((vardecl (gar pattern))
+             (body (gdr pattern)))
+        (Bind vardecl body body)) ; to deal with unordered links
+      ;; Without variable declaration
+      (let* ((body (gar pattern)))
+        (Bind body body)))) ; to deal with unordered links
+
+(define (support pat texts ms)
+"
+  Return the min between the frequency of pat according to texts and
+  ms, or #f if pat is ill-formed. If the pattern is top then return the
+  cardinality of concept texts.
+"
+  ;; (cog-logger-debug "support pat = ~a, texts = ~a, ms = ~a" pat texts ms)
+  (if (equal? pat (top))
+      (get-cardinality texts)
+      (let* ((pat-prnx (cog-execute! pat))  ; get pat in prenex form
+             (ill-formed (null? pat-prnx)))
+        (if ill-formed
+            #f
+            (if (eq? (cog-type pat-prnx) 'LambdaLink)
+                (let* ((texts-as (texts->atomspace texts))
+                       (query-as (cog-new-atomspace texts-as))
+                       (prev-as (cog-set-atomspace! query-as))
+                       (bl (pattern->bindlink pat-prnx))
+                       (results (cog-bind-first-n bl ms)))
+                  (cog-set-atomspace! prev-as)
+                  (cog-arity results))
+                1)))))
+
+(define (enough-support? pat texts ms)
+"
+  Return #t if pat has enough support w.r.t. texts, that is if
+  the frequency of pat is greater than or equal to ms. Return #f
+  otherwise.
+"
+  (<= ms (support pat texts ms)))
+
+(define (fetch-minsup-eval texts ms)
+"
+  Fetch atoms of the form
+
+  Evaluation (stv 1 1)
+    Predicate \"minsup\"
+    List
+      <pattern>
+      texts
+      ms
+"
+  (let* ((patvar (Variable "$patvar"))
+         (target (minsup-eval patvar texts ms))
+         (vardecl (TypedVariable patvar (Type "LambdaLink")))
+         (precond (absolutely-true-eval target))
+         (bl (Bind vardecl (And target precond) target)))
+    (cog-execute! bl)))
 
 (define* (cog-mine texts ms #:key (maxiter -1) (initpat (top)))
 "
@@ -192,7 +285,7 @@
      tree is considered.
 "
   (let* (;; Create a temporary child atomspace for the URE         
-         (tmp-as (cog-new-atomspace (cog-get-atomspace)))
+         (tmp-as (cog-new-atomspace (cog-atomspace)))
          (parent-as (cog-set-atomspace! tmp-as))
          ;; Construct text concept if necessary
          (create-texts-cpt? (not (and (cog-atom? texts)
@@ -204,7 +297,7 @@
                         ;; Otherwise texts is already a concept
                         texts))
          ;; Check that the initial pattern has enough support
-         (es (enough-support? ip texts-cpt ms)))
+         (es (enough-support? initpat texts-cpt ms)))
     (if (not es)
         ;; The initial pattern doesn't have enough support, thus the
         ;; solution set is empty        
@@ -214,15 +307,18 @@
              (Set))
         ;; The initial pattern has enough support, let's configure the
         ;; rule engine and run the pattern mining query
-        (let* ((source (minsup-eval-true ip texts-cpt ms))
-               (miner-rbs (random-pm-rbs-cpt)))
+        (let* ((source (minsup-eval-true initpat texts-cpt ms))
+               (miner-rbs (random-miner-rbs-cpt)))
           (configure-miner miner-rbs #:maxiter maxiter)
-          (let* ((results (cog-fc pm-rbs source))
-                 (results-lst (cog-outgoing-set results)))
+          (let* (;; Run the pattern miner in a forward way
+                 (results (cog-fc miner-rbs source))
+                 ;; Fetch all relevant results
+                 (minsup-results (fetch-minsup-eval texts-cpt ms))
+                 (minsup-results-lst (cog-outgoing-set minsup-results)))
             (cog-set-atomspace! parent-as)
             ;; TODO: delete tmp-as but without deleting its atoms, if
             ;; possible
-            (Set results-lst))))))
+            (Set minsup-results-lst))))))
 
 (define (export-xpattern-miner-utils)
   (export
@@ -234,6 +330,14 @@
     configure-miner
     minsup-eval
     minsup-eval-true
+    get-members
+    get-cardinality
+    size-ge
+    texts->atomspace
+    pattern->bindlink
+    support
+    enough-support?
+    fetch-minsup-eval
     cog-mine
   )
 )
