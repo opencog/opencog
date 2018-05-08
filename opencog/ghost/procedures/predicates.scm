@@ -148,6 +148,32 @@
         (stv 0 1)))
 )
 
+(define (after_user_started_talking secs)
+"
+  after_user_started_talking SECS
+
+  Returns (stv 1 1) if current time >= the time any user started talking plus
+  SECS. Otherwise, returns (stv 0 1).
+"
+  (if (since-true-transition-occurred? face-talking-sign secs)
+    (stv 1 1)
+    (stv 0 1)
+  )
+)
+
+(define (after_user_stopped_talking secs)
+"
+  after_user_stopped_talking SECS
+
+  Returns (stv 1 1) if current time >= the time any user-stopped talking plus
+  SECS. Otherwise, returns (stv 0 1).
+"
+  (if (since-false-transition-occurred? face-talking-sign secs)
+    (stv 1 1)
+    (stv 0 1)
+  )
+)
+
 ; Create the GroundedPredicateNode, and link it to a generic "timer-predicate"
 ; so that we can stimulate the generic one and the STI will diffuse to
 ; the specific predicates connecting to it
