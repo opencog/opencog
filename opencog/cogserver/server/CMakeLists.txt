@@ -38,9 +38,11 @@ ADD_LIBRARY (server SHARED
 )
 
 TARGET_LINK_LIBRARIES(server
+	nlp-types
 	${ATOMSPACE_smob_LIBRARY}
 	${COGUTIL_LIBRARY}
 	${Boost_FILESYSTEM_LIBRARY}
+	${Boost_SYSTEM_LIBRARY}
 	dl
 )
 
