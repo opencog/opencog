@@ -426,9 +426,20 @@
   return the type as a StringValue.
 "
   (cond ((or (equal? #\u TYPE)
-             (equal? #\s TYPE)
-             (equal? #\? TYPE))
+             (equal? #\s TYPE))
          (list '() '() strval-responder))
+        ((equal? #\? TYPE)
+         (let ((var (Variable (gen-var "Interpretation" #f))))
+           (list
+             (list (TypedVariable var (Type "InterpretationNode")))
+             (list
+               (InterpretationLink var (Variable "$P"))
+               (ChoiceLink
+                 (InheritanceLink var
+                   (DefinedLinguisticConcept "InterrogativeSpeechAct"))
+                 (InheritanceLink var
+                   (DefinedLinguisticConcept "TruthQuerySpeechAct"))))
+             strval-responder)))
         ((equal? #\r TYPE)
          (list '() '() strval-random-gambit))
         ((equal? #\t TYPE)
