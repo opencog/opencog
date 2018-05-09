@@ -188,6 +188,24 @@ Handle addRealAtom(AtomSpace& as, AtomPtr atom,
 }
 
 /**
+ * Filter handles from a sequence according to the given criterion.
+ *
+ * @param begin iterator for the sequence
+ * @param end iterator for the sequence
+ * @param struct or function embodying the criterion
+ * @return The handles in the sequence that match the criterion.
+ * @deprecated do not use in new code!
+ */
+template<typename InputIterator>
+HandleSeq filter(InputIterator begin, InputIterator end, HandlePredicate& compare)
+{
+    HandleSeq result;
+    std::copy_if(begin, end, back_inserter(result),
+        [&](Handle h)->bool { return compare(h); } );
+    return result;
+}
+
+/**
  * Gets a set of handles that matches with the given type
  * (subclasses optionally) and a given criterion.
  *
@@ -211,7 +229,7 @@ template <typename OutputIterator> OutputIterator
 getHandleSetFiltered(AtomSpace* as, OutputIterator result,
              Type type,
              bool subclass,
-             AtomPredicate& compare)
+             HandlePredicate& compare)
 {
     HandleSeq hs;
     as->get_handles_by_type(back_inserter(hs), type, subclass);
@@ -300,16 +318,16 @@ public:
         delete atomSpace;
     }
 
-    struct mean : public AtomPredicate
+    struct mean : public HandlePredicate
     {
-        virtual bool test(const AtomPtr& h) const {
+        virtual bool test(const Handle& h) const {
             return h->getTruthValue()->get_mean() > 0.8;
         }
     };
 
-    struct everything : public AtomPredicate
+    struct everything : public HandlePredicate
     {
-        virtual bool test(const AtomPtr& h) const { return true; }
+        virtual bool test(const Handle& h) const { return true; }
     };
 
     void testMiscellaneous()
