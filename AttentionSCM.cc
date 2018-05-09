@@ -46,8 +46,8 @@ AttentionSCM::AttentionSCM(void)
 
 void* AttentionSCM::init_in_guile(void* self)
 {
-	scm_c_define_module("opencog attention", init_in_module, self);
-	scm_c_use_module("opencog attention");
+	scm_c_define_module("opencog attention-bank", init_in_module, self);
+	scm_c_use_module("opencog attention-bank");
 	return NULL;
 }
 
@@ -57,11 +57,11 @@ void AttentionSCM::init_in_module(void* data)
 	self->init();
 }
 
-/// This is called while (opencog attention) is the current module.
+/// This is called while (opencog attention-bank) is the current module.
 /// Thus, all the definitions below happen in that module.
 void AttentionSCM::init(void)
 {
-	define_scheme_primitive("bcog-av", &AttentionSCM::get_av, this, "attention");
+	define_scheme_primitive("bcog-av", &AttentionSCM::get_av, this, "attention-bank");
 }
 
 AttentionSCM::~AttentionSCM()
@@ -70,7 +70,7 @@ AttentionSCM::~AttentionSCM()
 
 AttentionValuePtr AttentionSCM::get_av(const Handle& h)
 {
-	return get_av(h);
+	return opencog::get_av(h);
 }
 
 
