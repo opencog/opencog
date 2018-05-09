@@ -28,10 +28,10 @@
 
 using namespace opencog;
 
-AtomSpace* BaseServer::atomSpace = NULL;
+AtomSpace* BaseServer::_atomSpace = nullptr;
+AttentionBank* BaseServer::_attentionBank = nullptr;
 
-
-static BaseServer* serverInstance = NULL;
+static BaseServer* serverInstance = nullptr;
 
 BaseServer* BaseServer::createInstance(AtomSpace* as)
 {
@@ -54,14 +54,14 @@ BaseServer::BaseServer(AtomSpace* as)
 {
     // We shouldn't get called with a non-NULL atomSpace static global;
     // that's indicative of a missing call to BaseServer::~BaseServer.
-    if (atomSpace) {
+    if (_atomSpace) {
         throw (RuntimeException(TRACE_INFO,
                "Found non-NULL atomSpace. BaseServer::~BaseServer not called!"));
     }
 
     if (as) {
-        atomSpace = as;
-        attentionbank(as);
+        _atomSpace = as;
+        _attentionBank = &attentionbank(as);
     }
 
     // Set this server as the current server.
@@ -72,17 +72,17 @@ BaseServer::~BaseServer()
 {
     // We are no longer the current server.
     set_current_server(nullptr);
-    atomSpace = nullptr;
+    _atomSpace = nullptr;
 }
 
 AtomSpace& BaseServer::getAtomSpace()
 {
-    return *atomSpace;
+    return *_atomSpace;
 }
 
 AttentionBank& BaseServer::getAttentionBank()
 {
-    return attentionbank(atomSpace);
+    return *_attentionBank;
 }
 
 BaseServer& opencog::server(BaseServer* (*factoryFunction)(AtomSpace*),

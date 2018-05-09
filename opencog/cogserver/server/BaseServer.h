@@ -52,7 +52,8 @@ class BaseServer
 
 protected:
 
-    static AtomSpace* atomSpace;
+    static AtomSpace* _atomSpace;
+    static AttentionBank* _attentionBank;
 
 public:
 
