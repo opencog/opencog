@@ -25,6 +25,10 @@ class AttentionSCM
 		~AttentionSCM();
 
 		AttentionValuePtr get_av(const Handle&);
+		Handle set_av(const Handle&, const AttentionValuePtr&);
+		Handle inc_vlti(const Handle&);
+		Handle dec_vlti(const Handle&);
+
 		Handle update_af(int);
 		int af_size(void);
 		int set_af_size(int);
@@ -68,6 +72,9 @@ void AttentionSCM::init_in_module(void* data)
 void AttentionSCM::init(void)
 {
 	define_scheme_primitive("cog-av", &AttentionSCM::get_av, this, "attention-bank");
+	define_scheme_primitive("cog-set-av!", &AttentionSCM::set_av, this, "attention-bank");
+	define_scheme_primitive("cog-inc-vlti!", &AttentionSCM::inc_vlti, this, "attention-bank");
+	define_scheme_primitive("cog-dec-vlti!", &AttentionSCM::dec_vlti, this, "attention-bank");
 
 	// Attentional-focus-related stuff
 	define_scheme_primitive("cog-update-af", &AttentionSCM::update_af, this, "attention-bank");
@@ -85,13 +92,34 @@ AttentionValuePtr AttentionSCM::get_av(const Handle& h)
 	return opencog::get_av(h);
 }
 
+Handle AttentionSCM::set_av(const Handle& h, const AttentionValuePtr& av)
+{
+	AtomSpace* atomspace = SchemeSmob::ss_get_env_as("cog-set-av!");
+	attentionbank(atomspace).change_av(h, av);
+	return h;
+}
+
+Handle AttentionSCM::inc_vlti(const Handle& h)
+{
+	AtomSpace* atomspace = SchemeSmob::ss_get_env_as("cog-inc-vlti!");
+	attentionbank(atomspace).inc_vlti(h);
+	return h;
+}
+
+Handle AttentionSCM::dec_vlti(const Handle& h)
+{
+	AtomSpace* atomspace = SchemeSmob::ss_get_env_as("cog-dec-vlti!");
+	attentionbank(atomspace).dec_vlti(h);
+	return h;
+}
+
 /**
  *   Return AttentionalFocus Size
  **/
 int AttentionSCM::af_size(void)
 {
-    AtomSpace* atomspace = SchemeSmob::ss_get_env_as("cog-af-size");
-    return attentionbank(atomspace).get_af_size();
+	AtomSpace* atomspace = SchemeSmob::ss_get_env_as("cog-af-size");
+	return attentionbank(atomspace).get_af_size();
 }
 
 /**
@@ -99,10 +127,10 @@ int AttentionSCM::af_size(void)
  */
 int AttentionSCM::set_af_size (int ssize)
 {
-    AtomSpace* atomspace = SchemeSmob::ss_get_env_as("cog-set-af-size!");
+	AtomSpace* atomspace = SchemeSmob::ss_get_env_as("cog-set-af-size!");
 
-    attentionbank(atomspace).set_af_size(ssize);
-    return attentionbank(atomspace).get_af_size();
+	attentionbank(atomspace).set_af_size(ssize);
+	return attentionbank(atomspace).get_af_size();
 }
 
 /**
@@ -115,7 +143,7 @@ Handle AttentionSCM::update_af(int n)
 	AtomSpace* atomspace = SchemeSmob::ss_get_env_as("cog-af");
 
 	Handle af_anchor = atomspace->add_node(ANCHOR_NODE,
-	                                "*-attentional-focus-boundary-*");
+	                               "*-attentional-focus-boundary-*");
 
 	// Get the atoms that were previously in attention focus
 	IncomingSet paf(af_anchor->getIncomingSetByType(MEMBER_LINK));
