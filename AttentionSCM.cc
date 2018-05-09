@@ -24,6 +24,7 @@ class AttentionSCM
 		~AttentionSCM();
 
 		int af_size(void);
+		int set_af_size(int);
 };
 
 }
@@ -62,41 +63,36 @@ void AttentionSCM::init_in_module(void* data)
 /// Thus, all the definitions below happen in that module.
 void AttentionSCM::init(void)
 {
-	define_scheme_primitive("bcog-av", &AttentionSCM::get_av, this, "attention-bank");
+	define_scheme_primitive("cog-af-size", &AttentionSCM::af_size, this, "attention-bank");
+	define_scheme_primitive("cog-set-af-size!", &AttentionSCM::set_af_size, this, "attention-bank");
 }
 
 AttentionSCM::~AttentionSCM()
 {
 }
 
-{
-
 /**
  *   Return AttentionalFocus Size
  **/
 int AttentionSCM::af_size(void)
 {
-    AtomSpace* atomspace = ss_get_env_as("cog-af-size");
+    AtomSpace* atomspace = SchemeSmob::ss_get_env_as("cog-af-size");
     return attentionbank(atomspace).get_af_size();
 }
 
-#fidef FOO
-xxxxxxxxxxxxxxxxxxxxxxx
 /**
  * Set AttentionalFocus Size
  */
-SCM SchemeSmob::ss_set_af_size (SCM ssize)
+int AttentionSCM::set_af_size (int ssize)
 {
-    AtomSpace* atomspace = ss_get_env_as("cog-set-af-size!");
-    if (scm_is_false(scm_integer_p(ssize)))
-        scm_wrong_type_arg_msg("cog-set-af-size", 1, ssize,
-                "integer opencog AttentionalFocus size");
+    AtomSpace* atomspace = SchemeSmob::ss_get_env_as("cog-set-af-size!");
 
-    int bdy = scm_to_int(ssize);
-    attentionbank(atomspace).set_af_size(bdy);
-    return scm_from_int(attentionbank(atomspace).get_af_size());
+    attentionbank(atomspace).set_af_size(ssize);
+    return attentionbank(atomspace).get_af_size();
 }
 
+#ifdef FOO
+xxxxxxxxxxxxxxxxxxxxxxx
 /**
  * Return the list of top n atoms in the AttentionalFocus or
  * return all atoms in the AF if n is unspecified or is larger
