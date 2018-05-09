@@ -25,6 +25,7 @@ class AttentionSCM
 
 		int af_size(void);
 		int set_af_size(int);
+		Handle stimulate (const Handle&, double);
 };
 
 }
@@ -65,6 +66,7 @@ void AttentionSCM::init(void)
 {
 	define_scheme_primitive("cog-af-size", &AttentionSCM::af_size, this, "attention-bank");
 	define_scheme_primitive("cog-set-af-size!", &AttentionSCM::set_af_size, this, "attention-bank");
+	define_scheme_primitive("cog-stimulate", &AttentionSCM::stimulate, this, "attention-bank");
 }
 
 AttentionSCM::~AttentionSCM()
@@ -118,20 +120,17 @@ SCM SchemeSmob::ss_af (SCM n)
 
 	return head;
 }
+#endif
 
 /**
  *  Stimulate an atom with given stimulus amount.
  */
-SCM SchemeSmob::ss_stimulate (SCM satom, SCM sstimulus)
+Handle AttentionSCM::stimulate (const Handle& h, double stimulus)
 {
-	Handle h(scm_to_handle(satom));
-	double stimulus = scm_to_double(sstimulus);
-	AtomSpace* atomspace = ss_get_env_as("cog-stimulate");
+	AtomSpace* atomspace = SchemeSmob::ss_get_env_as("cog-stimulate");
 	attentionbank(atomspace).stimulate(h, stimulus);
-	return satom;
+	return h;
 }
-#endif
-
 
 extern "C" {
 void opencog_attention_init(void);
