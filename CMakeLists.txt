@@ -1,8 +1,8 @@
 
-
 ADD_LIBRARY (attentionbank
 	AtomBins.cc
 	AttentionBank.cc
+	AttentionSCM.cc
 	AVUtils.cc
 	ImportanceIndex.cc
 	StochasticImportanceDiffusion.cc
