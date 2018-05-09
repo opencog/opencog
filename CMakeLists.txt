@@ -10,6 +10,7 @@ ADD_LIBRARY (attentionbank
 
 TARGET_LINK_LIBRARIES(attentionbank
 	${NO_AS_NEEDED}
+	smob
 	atombase
 	truthvalue
 	${COGUTIL_LIBRARY}
