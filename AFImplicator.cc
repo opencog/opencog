@@ -1,10 +1,6 @@
 /*
  * AFImplicator.cc
  *
- * Copyright (C) 2009, 2014 Linas Vepstas
- *
- * Author: Linas Vepstas <linasvepstas@gmail.com>  January 2009
- *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
  * published by the Free Software Foundation and including the exceptions
@@ -25,6 +21,12 @@
 #include <opencog/query/DefaultImplicator.h>
 
 using namespace opencog;
+
+// XXX FIXME -- do we need this function, at all?  Why isn't it
+// sufficient to just do a normal pattern search, and weed out
+// the atttention focus after the fact? I find it very hard to
+// beleive that this provides any significant performance kick
+// over a simpler, more modular design.
 
 namespace opencog
 {

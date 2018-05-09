@@ -47,3 +47,12 @@ Should a generic value-changed signal infrastructure be developed?
 There already is one for TruthValues; it is kept in the AtomTable
 but administered through the AtomSpace.  Maybe this is where attention
 values should be administered as well?
+
+AttentionFocus pattern matcher
+------------------------------
+This directory includes code for a pattern-matcher extension that looks
+at the attention focus boundary during the patttern-matching search.
+Is this really needed?  Why isn't it sufficient to just do a normal
+pattern search, and weed out the atttention focus after the fact?
+It is hard to beleive that this provides any significant performance
+kick over a simpler, more modular design.

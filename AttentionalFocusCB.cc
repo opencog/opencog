@@ -26,6 +26,12 @@
 
 using namespace opencog;
 
+// XXX FIXME -- do we need this function, at all?  Why isn't it
+// sufficient to just do a normal pattern search, and weed out
+// the atttention focus after the fact? I find it very hard to
+// beleive that this provides any significant performance kick
+// over a simpler, more modular design.
+
 AttentionalFocusCB::AttentionalFocusCB(AtomSpace* as) :
 	DefaultPatternMatchCB(as)
 {
