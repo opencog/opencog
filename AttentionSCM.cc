@@ -33,6 +33,8 @@ class AttentionSCM
 		int af_size(void);
 		int set_af_size(int);
 		Handle stimulate (const Handle&, double);
+
+		Handle af_bindlink(const Handle&);
 };
 
 }
@@ -40,6 +42,7 @@ class AttentionSCM
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/guile/SchemePrimitive.h>
 #include <opencog/guile/SchemeSmob.h>
+#include <opencog/attentionbank/AFImplicator.h>
 
 using namespace opencog;
 
@@ -81,6 +84,9 @@ void AttentionSCM::init(void)
 	define_scheme_primitive("cog-af-size", &AttentionSCM::af_size, this, "attention-bank");
 	define_scheme_primitive("cog-set-af-size!", &AttentionSCM::set_af_size, this, "attention-bank");
 	define_scheme_primitive("cog-stimulate", &AttentionSCM::stimulate, this, "attention-bank");
+
+	// Pattern matching with filtering.
+	define_scheme_primitive("cog-bind-af", &AttentionSCM::af_bindlink, this, "attention-bank");
 }
 
 AttentionSCM::~AttentionSCM()
@@ -201,6 +207,12 @@ Handle AttentionSCM::stimulate (const Handle& h, double stimulus)
 	AtomSpace* atomspace = SchemeSmob::ss_get_env_as("cog-stimulate");
 	attentionbank(atomspace).stimulate(h, stimulus);
 	return h;
+}
+
+Handle AttentionSCM::af_bindlink(const Handle& h)
+{
+	AtomSpace* atomspace = SchemeSmob::ss_get_env_as("cog-bind-af");
+	opencog::af_bindlink(atomspace, h);
 }
 
 extern "C" {

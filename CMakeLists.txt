@@ -1,6 +1,8 @@
 
 ADD_LIBRARY (attentionbank
+	AFImplicator.cc
 	AtomBins.cc
+	AttentionalFocusCB.cc
 	AttentionBank.cc
 	AttentionSCM.cc
 	AVUtils.cc
