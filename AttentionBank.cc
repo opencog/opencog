@@ -34,6 +34,9 @@ using namespace opencog;
 
 AttentionBank::AttentionBank(AtomSpace* asp)
 {
+    // XXX FIXME -- should not use config() to get these values;
+    // The user of this class should call config(), instead!
+
     startingFundsSTI = fundsSTI = config().get_double("STARTING_STI_FUNDS", 100000);
     startingFundsLTI = fundsLTI = config().get_double("STARTING_LTI_FUNDS", 100000);
     stiFundsBuffer = config().get_double("STI_FUNDS_BUFFER", 10000);
