@@ -1,5 +1,6 @@
 (define-module (opencog ghost)
   #:use-module (opencog)
+  #:use-module (opencog attention-bank)
   #:use-module (opencog nlp)
   #:use-module (opencog nlp relex2logic)
   #:use-module (opencog nlp chatbot)

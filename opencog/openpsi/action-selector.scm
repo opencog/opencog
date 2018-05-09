@@ -6,6 +6,8 @@
 ; Copyright (C) 2016 OpenCog Foundation
 ; Copyright (C) 2017 MindCloud
 
+(use-modules (opencog attention-bank))
+
 ; ----------------------------------------------------------------------
 (define (psi-set-action-selector! component exec-term)
 "

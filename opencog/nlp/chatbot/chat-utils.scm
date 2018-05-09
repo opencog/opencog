@@ -11,6 +11,7 @@
 (use-modules (ice-9 threads)  ; needed for par-map
              (srfi srfi-1)
              (opencog)
+             (opencog attention-bank)
              (opencog rule-engine)
              (opencog nlp)
              (opencog nlp fuzzy)
