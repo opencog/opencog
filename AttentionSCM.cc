@@ -2,13 +2,14 @@
  * AttentionSCM.cc
  *
  * Guile Scheme bindings for the attentionbank
+ * Copyright (C) 2014 Cosmo Harrigan
  * Copyright (c) 2008, 2014, 2015, 2018 Linas Vepstas <linasvepstas@gmail.com>
  */
 
 #ifdef HAVE_GUILE
 
+#include <opencog/attentionbank/AttentionBank.h>
 #include <opencog/guile/SchemePrimitive.h>
-#include "AttentionBank.h"
 
 namespace opencog {
 
@@ -22,7 +23,7 @@ class AttentionSCM
 		AttentionSCM(void);
 		~AttentionSCM();
 
-		AttentionValuePtr get_av(const Handle&);
+		int af_size(void);
 };
 
 }
@@ -68,10 +69,72 @@ AttentionSCM::~AttentionSCM()
 {
 }
 
-AttentionValuePtr AttentionSCM::get_av(const Handle& h)
 {
-	return opencog::get_av(h);
+
+/**
+ *   Return AttentionalFocus Size
+ **/
+int AttentionSCM::af_size(void)
+{
+    AtomSpace* atomspace = ss_get_env_as("cog-af-size");
+    return attentionbank(atomspace).get_af_size();
 }
+
+#fidef FOO
+xxxxxxxxxxxxxxxxxxxxxxx
+/**
+ * Set AttentionalFocus Size
+ */
+SCM SchemeSmob::ss_set_af_size (SCM ssize)
+{
+    AtomSpace* atomspace = ss_get_env_as("cog-set-af-size!");
+    if (scm_is_false(scm_integer_p(ssize)))
+        scm_wrong_type_arg_msg("cog-set-af-size", 1, ssize,
+                "integer opencog AttentionalFocus size");
+
+    int bdy = scm_to_int(ssize);
+    attentionbank(atomspace).set_af_size(bdy);
+    return scm_from_int(attentionbank(atomspace).get_af_size());
+}
+
+/**
+ * Return the list of top n atoms in the AttentionalFocus or
+ * return all atoms in the AF if n is unspecified or is larger
+ * than the AF size.
+ */
+SCM SchemeSmob::ss_af (SCM n)
+{
+	AtomSpace* atomspace = ss_get_env_as("cog-af");
+	HandleSeq attentionalFocus;
+	attentionbank(atomspace).get_handle_set_in_attentional_focus(back_inserter(attentionalFocus));
+	size_t isz = attentionalFocus.size();
+	if (0 == isz) return SCM_EOL;
+
+	SCM head = SCM_EOL;
+	size_t N = isz;
+	if( SCM_UNDEFINED != n) N = scm_to_uint(n);
+	if( N > isz)  N = isz;
+	for (size_t i = isz - N; i < isz; i++) {
+		Handle hi = attentionalFocus[i];
+		SCM smob = handle_to_scm(hi);
+		head = scm_cons(smob, head);
+	}
+
+	return head;
+}
+
+/**
+ *  Stimulate an atom with given stimulus amount.
+ */
+SCM SchemeSmob::ss_stimulate (SCM satom, SCM sstimulus)
+{
+	Handle h(scm_to_handle(satom));
+	double stimulus = scm_to_double(sstimulus);
+	AtomSpace* atomspace = ss_get_env_as("cog-stimulate");
+	attentionbank(atomspace).stimulate(h, stimulus);
+	return satom;
+}
+#endif
 
 
 extern "C" {
