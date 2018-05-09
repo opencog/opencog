@@ -24,6 +24,7 @@ class AttentionSCM
 		AttentionSCM(void);
 		~AttentionSCM();
 
+		AttentionValuePtr get_av(const Handle&);
 		Handle update_af(int);
 		int af_size(void);
 		int set_af_size(int);
@@ -66,6 +67,9 @@ void AttentionSCM::init_in_module(void* data)
 /// Thus, all the definitions below happen in that module.
 void AttentionSCM::init(void)
 {
+	define_scheme_primitive("cog-av", &AttentionSCM::get_av, this, "attention-bank");
+
+	// Attentional-focus-related stuff
 	define_scheme_primitive("cog-update-af", &AttentionSCM::update_af, this, "attention-bank");
 	define_scheme_primitive("cog-af-size", &AttentionSCM::af_size, this, "attention-bank");
 	define_scheme_primitive("cog-set-af-size!", &AttentionSCM::set_af_size, this, "attention-bank");
@@ -74,6 +78,11 @@ void AttentionSCM::init(void)
 
 AttentionSCM::~AttentionSCM()
 {
+}
+
+AttentionValuePtr AttentionSCM::get_av(const Handle& h)
+{
+	return opencog::get_av(h);
 }
 
 /**
