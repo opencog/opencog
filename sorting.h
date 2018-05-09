@@ -10,8 +10,7 @@ public:
     virtual bool test(const Handle&) const = 0;
 };
 
-class AtomPredicate {
-public:
+struct AtomPredicate {
     inline bool operator()(const AtomPtr& a) const { return this->test(a); }
     virtual bool test(const AtomPtr&) const = 0;
 };

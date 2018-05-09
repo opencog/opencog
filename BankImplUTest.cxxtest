@@ -187,6 +187,39 @@ Handle addRealAtom(AtomSpace& as, AtomPtr atom,
     return result;
 }
 
+/**
+ * Gets a set of handles that matches with the given type
+ * (subclasses optionally) and a given criterion.
+ *
+ * @param result An output iterator.
+ * @param type The desired type.
+ * @param subclass Whether type subclasses should be considered.
+ * @param compare A criterion for including atoms. It must be something
+ * that returns a bool when called.
+ *
+ * @return The set of atoms of a given type (subclasses optionally).
+ *
+ * @note The matched entries are appended to a container whose
+ * OutputIterator is passed as the first argument.  Example of call to this
+ * method, which would return all entries in AtomSpace beyond 500 LTI:
+ * @code
+ *         std::list<Handle> ret;
+ *         atomSpace.getHandleSet(back_inserter(ret), ATOM, true, LTIAboveThreshold(500));
+ * @endcode
+ */
+template <typename OutputIterator> OutputIterator
+getHandleSetFiltered(AtomSpace* as, OutputIterator result,
+             Type type,
+             bool subclass,
+             AtomPredicate& compare)
+{
+    HandleSeq hs;
+    as->get_handles_by_type(back_inserter(hs), type, subclass);
+
+    return std::copy_if(hs.begin(), hs.end(), result,
+        [&](Handle h)->bool { return compare(h); } );
+}
+
 // Wrapper for comparing atoms from a HandleSeq
 template <typename Compare>
 struct compareAtom
@@ -269,14 +302,14 @@ public:
 
     struct mean : public AtomPredicate
     {
-        virtual bool test(AtomPtr h) {
+        virtual bool test(const AtomPtr& h) const {
             return h->getTruthValue()->get_mean() > 0.8;
         }
     };
 
     struct everything : public AtomPredicate
     {
-        virtual bool test(AtomPtr h) { return true; }
+        virtual bool test(const AtomPtr& h) const { return true; }
     };
 
     void testMiscellaneous()
