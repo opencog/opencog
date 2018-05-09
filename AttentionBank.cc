@@ -24,6 +24,7 @@
 
 #include <functional>
 #include <opencog/util/Config.h>
+#include <opencog/util/mt19937ar.h>
 
 #include <opencog/atoms/base/Handle.h>
 #include <opencog/atomspace/AtomSpace.h>
@@ -320,21 +321,19 @@ void AttentionBank::updateAttentionalFocus(const Handle& h,
 
 Handle AttentionBank::getRandomAtomNotInAF(void)
 {
-    std::lock_guard<std::mutex> lock(AFMutex);
-    auto find_in_af = [this](const Handle& h){
-       auto it = std::find_if(attentionalFocus.begin(), attentionalFocus.end(),
-                [h](const std::pair<Handle, AttentionValuePtr>& hsp) { return hsp.first == h; });
-       return it;
-    };
+    UnorderedHandleSet atoms_not_in_af = _importanceIndex.getHandleSet(0);
 
-    int count = 50; // We might get stuck in the while loop if there are no atoms outside the AF
-    Handle h = Handle::UNDEFINED;
-    do {
-        h = _importanceIndex.getRandomAtom();
-    } while(find_in_af(h) != attentionalFocus.end() and --count > 0);
-    // Make sure the last selection did not select from the AF.
-    if(find_in_af(h) != attentionalFocus.end())
+    {
+        std::lock_guard<std::mutex> lock(AFMutex);
+        for (const auto& hsp : attentionalFocus) {
+            atoms_not_in_af.erase(hsp.first);
+        }
+    }
+
+    if (atoms_not_in_af.empty())
         return Handle::UNDEFINED;
 
-    return h;
+    auto it = atoms_not_in_af.cbegin();
+    std::advance(it, randGen().randint(atoms_not_in_af.size()));
+    return *it;
 }
