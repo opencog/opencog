@@ -1,5 +1,5 @@
 /*
- * tests/atomspace/AtomSpaceImplUTest.cxxtest
+ * tests/attentionbank/BankImplUTest.cxxtest
  *
  * Copyright (C) 2010 OpenCog Foundation
  * All Rights Reserved
@@ -244,7 +244,7 @@ InputIterator end)
     return filter(begin, end, sti_above);
 }
 
-class AtomSpaceImplUTest :  public CxxTest::TestSuite
+class BankImplUTest :  public CxxTest::TestSuite
 {
 private:
 
@@ -252,7 +252,7 @@ private:
     AttentionBank* bank;
 
 public:
-    AtomSpaceImplUTest() {
+    BankImplUTest() {
         logger().set_level(Logger::INFO);
         logger().set_print_to_stdout_flag(true);
     }
