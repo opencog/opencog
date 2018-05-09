@@ -70,4 +70,21 @@ class AttentionUTest :  public CxxTest::TestSuite
                 TS_ASSERT_DIFFERS(h, Handle::UNDEFINED);
             }
         }
+
+        void testGetRandomAtomsBigAF()
+        {
+            AttentionBank _ab(&_as);
+            _ab.set_af_size(999);
+
+            // Check Valid atoms are selected.
+            for(int i = 0; i < 1000; i++) {
+                Handle h = _as.add_node(CONCEPT_NODE, "cnode-"+ std::to_string(i));
+                _ab.set_sti(h, 1 + i*10);
+            }
+
+            for( int i = 0; i < 50; i++) {
+                Handle h = _ab.getRandomAtomNotInAF();
+                TS_ASSERT_DIFFERS(h, Handle::UNDEFINED);
+            }
+        }
 };
