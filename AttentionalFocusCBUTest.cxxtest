@@ -20,18 +20,20 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#include <opencog/guile/SchemeEval.h>
 #include <opencog/atomspace/AtomSpace.h>
+#include <opencog/attentionbank/AFImplicator.h>
 #include <opencog/attentionbank/AttentionBank.h>
-#include <opencog/query/BindLinkAPI.h>
+#include <opencog/guile/SchemeEval.h>
 #include <opencog/util/Logger.h>
 
 using namespace opencog;
 
-class AttentionalFocusCBUTest: public CxxTest::TestSuite {
+class AttentionalFocusCBUTest: public CxxTest::TestSuite
+{
 private:
 	AtomSpace * as;
 	SchemeEval * eval;
+
 public:
 	AttentionalFocusCBUTest(void)
 	{
@@ -70,7 +72,7 @@ void AttentionalFocusCBUTest::setUp(void)
 void AttentionalFocusCBUTest::test_af_bindlink(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
-	eval->eval("(load-from-path \"tests/query/af-filtering-test.scm\")");
+	eval->eval("(load-from-path \"tests/attentionbank/af-filtering-test.scm\")");
 
 	Handle findMan = eval->eval_h("find-man");
 	// Test PatternMatch::af_bindlink, which should only return the
