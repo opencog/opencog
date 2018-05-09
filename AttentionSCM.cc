@@ -212,7 +212,7 @@ Handle AttentionSCM::stimulate (const Handle& h, double stimulus)
 Handle AttentionSCM::af_bindlink(const Handle& h)
 {
 	AtomSpace* atomspace = SchemeSmob::ss_get_env_as("cog-bind-af");
-	opencog::af_bindlink(atomspace, h);
+	return opencog::af_bindlink(atomspace, h);
 }
 
 extern "C" {
