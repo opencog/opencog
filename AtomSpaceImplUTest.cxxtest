@@ -37,7 +37,7 @@
 #include <opencog/util/Logger.h>
 #include <opencog/util/platform.h>
 
-#include "makeVirtualAtom.h"
+#include "../atomspace/makeVirtualAtom.h"
 #include "sorting.h"
 
 using namespace opencog;
@@ -131,6 +131,30 @@ HandleSeq createSimpleGraph(AtomSpace* atomSpace, const char* baseName)
     return testAtoms;
 }
 
+struct STIAboveThreshold : public HandlePredicate
+{
+    STIAboveThreshold(const AttentionValue::sti_t t) :
+       threshold (t) {}
+
+    virtual bool test(const Handle& atom) const
+    {
+        return get_sti(atom) > threshold;
+    }
+    AttentionValue::sti_t threshold;
+};
+
+struct LTIAboveThreshold : public HandlePredicate
+{
+    LTIAboveThreshold(const AttentionValue::lti_t t) :
+       threshold (t) {}
+
+    virtual bool test(const Handle& atom) const
+    {
+        return get_lti(atom) > threshold;
+    }
+    AttentionValue::lti_t threshold;
+};
+
 Handle addRealAtom(AtomSpace& as, AtomPtr atom,
                    TruthValuePtr tvn = TruthValuePtr())
 {
@@ -210,6 +234,14 @@ getSortedHandleSet(AtomSpace* as,
     as->get_handles_by_type(back_inserter(hs), type, subclass);
     std::sort(hs.begin(), hs.end(), compareAtom<AtomComparator>(compare));
     return std::copy(hs.begin(), hs.end(), result);
+}
+
+template<typename InputIterator>
+HandleSeq filter_InAttentionalFocus(AtomSpace* as, InputIterator begin,
+InputIterator end)
+{
+    STIAboveThreshold sti_above(attentionbank(as).get_af_max_sti());
+    return filter(begin, end, sti_above);
 }
 
 class AtomSpaceImplUTest :  public CxxTest::TestSuite
@@ -317,6 +349,9 @@ public:
         }
         logger().debug("TVS checked\n");
 
+        TS_ASSERT(atomSpace->get_num_nodes() == NUM_NODES);
+        TS_ASSERT(atomSpace->get_num_links() == 8);
+
         HandleSeq hsn;
         atomSpace->get_handles_by_type(back_inserter(hsn), NODE, true);
         TS_ASSERT(hsn.size() == NUM_NODES);
@@ -329,6 +364,42 @@ public:
         // OutputIterator getHandleSet(OutputIterator, Type, const string& name, bool acceptSubTypes=true) const;
 
 #define NUM_VHS 4
+
+        // Test filters
+        for (int vhIdx = 0; vhIdx < NUM_VHS; vhIdx++) {
+
+            mean m;
+            HandleSeq high_mean;
+            getHandleSetFiltered(atomSpace, back_inserter(high_mean), ATOM, true, m);
+            logger().debug("Filter %d checked", vhIdx);
+
+            //std::cout << "high mean size " << high_mean.size() << std::endl;
+            //for (int jj = 0; jj < high_mean.size(); jj++) {
+            //    std::cout << atomSpace->atomAsString(high_mean[jj],false) << std::endl;
+            //}
+
+            HandleSeq nodes;
+            atomSpace->get_handles_by_type(back_inserter(nodes), NODE, true);
+            logger().debug("Get nodes by type %d checked", vhIdx);
+
+            HandleSeq links;
+            atomSpace->get_handles_by_type(back_inserter(links), LINK, true);
+            logger().debug("Get links by type %d checked", vhIdx);
+
+            HandleSeq all;
+            everything e;
+            getHandleSetFiltered(atomSpace, back_inserter(all), ATOM, true, e);
+
+            HandleSeq AF_nodes = filter_InAttentionalFocus(atomSpace, nodes.begin(), nodes.end());
+            HandleSeq AF_links = filter_InAttentionalFocus(atomSpace, links.begin(), links.end());
+
+            logger().debug("Focus %d checked", vhIdx);
+            TS_ASSERT(AF_nodes.size() == 0);
+            TS_ASSERT(AF_links.size() == 0);
+        }
+
+
+        logger().debug("Start subset test");
         for (int vhIdx = 0; vhIdx < NUM_VHS; vhIdx++) {
 
             TS_ASSERT(classserver().isA(SUBSET_LINK, INHERITANCE_LINK));
@@ -363,6 +434,7 @@ public:
             TS_ASSERT(partOfLinks.size() == 4);
         }
     }
+
 
     static inline Handle addAtomIter(AtomSpace& as, tree<Vertex>& a, tree<Vertex>::iterator it, TruthValuePtr tvn)
     {
@@ -711,6 +783,101 @@ public:
         TS_ASSERT(1.0 <= bank->getNormalisedZeroToOneSTI(get_av(h), average, clip));
         clip = true;
         TS_ASSERT_DELTA(bank->getNormalisedZeroToOneSTI(get_av(h), average, clip), 1.0, 0.001);
+    }
+
+    /**
+     * Method tested:
+     *
+     * Gets a set of handles that matches with the given type
+     * (subclasses optionally) and a given criterion.
+     *
+     * @param An output iterator.
+     * @param The desired type.
+     * @param Whether type subclasses should be considered.
+     * @param A criterion for including atoms. It must be something that returns a bool when called.
+     *
+     * @return The set of atoms of a given type (subclasses optionally).
+     *
+     * NOTE: The matched entries are appended to a container whose OutputIterator is passed as the first argument.
+     *          Example of call to this method, which would return all entries in TimeServer beyond 500 LTI:
+     *         std::list<Handle> ret;
+     *         atomSpace.getHandleSet(back_inserter(ret), ATOM, true, LTIAboveThreshold(500));
+     */
+    void testgetHandleSetFiltered()
+    {
+        HandleSeq atoms;
+        logger().debug("BEGIN TEST: getHandleSetFiltered");
+
+        atoms = createSimpleGraph(atomSpace, "hs_filt\0");
+
+        logger().debug("STIAboveThreshold");
+
+        HandleSeq highSTI;
+        STIAboveThreshold sti_above(1000);
+        getHandleSetFiltered(atomSpace, back_inserter(highSTI), NODE, true, sti_above);
+        for (unsigned int i = 0; i < highSTI.size(); i++) {
+            TS_ASSERT(STIAboveThreshold(1000) (highSTI[i]) );
+        }
+        TS_ASSERT(highSTI.size() == 1U);
+        TS_ASSERT(highSTI[0] == atoms[0]);
+
+        logger().debug("LTIAboveThreshold");
+
+        HandleSeq highLTI;
+        LTIAboveThreshold lti_above(800);
+        getHandleSetFiltered(atomSpace, back_inserter(highLTI), NODE, true, lti_above);
+        for (unsigned int i = 0; i < highLTI.size(); i++) {
+            TS_ASSERT(LTIAboveThreshold(800) (highLTI[i]) );
+        }
+        TS_ASSERT(highLTI.size() == 1U);
+        TS_ASSERT(highLTI[0] == atoms[1]);
+        logger().debug("END TEST: getHandleSetFiltered");
+    }
+
+    /**
+     * Method tested:
+     *
+     * Filter handles from a sequence according to the given criterion.
+     *
+     * @param begin iterator for the sequence
+     * @param end iterator for the sequence
+     * @param struct or function embodying the criterion
+     * @return The handles in the sequence that match the criterion.
+     */
+    void testfilter() {
+        HandleSeq atoms;
+        logger().debug("BEGIN TEST: filter");
+
+        //atomSpace->getAtomTable().log(logger(), NODE, true);
+        //atomSpace->getAtomTable().log(logger(), LINK, true);
+
+        atoms = createSimpleGraph(atomSpace, "filt\0");
+
+        //atomSpace->getAtomTable().log(logger(), NODE, true);
+        //atomSpace->getAtomTable().log(logger(), LINK, true);
+
+        logger().debug("STIAboveThreshold");
+
+        STIAboveThreshold sti_above(1000);
+        HandleSeq highSTI = filter(atoms.begin(), atoms.end(), sti_above);
+        for (unsigned int i = 0; i < highSTI.size(); i++) {
+            //std::cout << atomSpace->atomAsString(highSTI[i],false) << std::endl;
+            //std::cout << atomSpace->getSTI(highSTI[i]) << std::endl;
+            TS_ASSERT(STIAboveThreshold(1000) (highSTI[i]) );
+        }
+        TS_ASSERT(highSTI.size() == 1U);
+        TS_ASSERT(highSTI[0] == atoms[0]);
+
+        logger().debug("LTIAboveThreshold");
+
+        LTIAboveThreshold lti_above(800);
+        HandleSeq highLTI = filter(atoms.begin(), atoms.end(), lti_above);
+        for (unsigned int i = 0; i < highLTI.size(); i++) {
+            TS_ASSERT(LTIAboveThreshold(800) (highLTI[i]) );
+        }
+        TS_ASSERT(highLTI.size() == 1U);
+        TS_ASSERT(highLTI[0] == atoms[1]);
+        logger().debug("END TEST: filter");
     }
 
 };
