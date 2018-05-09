@@ -8,6 +8,7 @@
 
 #ifdef HAVE_GUILE
 
+#include <opencog/atoms/base/Link.h>
 #include <opencog/attentionbank/AttentionBank.h>
 #include <opencog/guile/SchemePrimitive.h>
 
@@ -23,6 +24,7 @@ class AttentionSCM
 		AttentionSCM(void);
 		~AttentionSCM();
 
+		Handle update_af(int);
 		int af_size(void);
 		int set_af_size(int);
 		Handle stimulate (const Handle&, double);
@@ -64,6 +66,7 @@ void AttentionSCM::init_in_module(void* data)
 /// Thus, all the definitions below happen in that module.
 void AttentionSCM::init(void)
 {
+	define_scheme_primitive("cog-update-af", &AttentionSCM::update_af, this, "attention-bank");
 	define_scheme_primitive("cog-af-size", &AttentionSCM::af_size, this, "attention-bank");
 	define_scheme_primitive("cog-set-af-size!", &AttentionSCM::set_af_size, this, "attention-bank");
 	define_scheme_primitive("cog-stimulate", &AttentionSCM::stimulate, this, "attention-bank");
@@ -93,34 +96,65 @@ int AttentionSCM::set_af_size (int ssize)
     return attentionbank(atomspace).get_af_size();
 }
 
-#ifdef FOO
-xxxxxxxxxxxxxxxxxxxxxxx
 /**
  * Return the list of top n atoms in the AttentionalFocus or
  * return all atoms in the AF if n is unspecified or is larger
  * than the AF size.
  */
-SCM SchemeSmob::ss_af (SCM n)
+Handle AttentionSCM::update_af(int n)
 {
-	AtomSpace* atomspace = ss_get_env_as("cog-af");
+	AtomSpace* atomspace = SchemeSmob::ss_get_env_as("cog-af");
+
+	Handle af_anchor = atomspace->add_node(ANCHOR_NODE,
+	                                "*-attentional-focus-boundary-*");
+
+	// Get the atoms that were previously in attention focus
+	IncomingSet paf(af_anchor->getIncomingSetByType(MEMBER_LINK));
+	HandleSet prev_af;
+	for (const LinkPtr& lp: paf)
+	{
+		Handle h(lp->getOutgoingAtom(0));
+		if (h != af_anchor)
+			prev_af.insert(h);
+	}
+
 	HandleSeq attentionalFocus;
 	attentionbank(atomspace).get_handle_set_in_attentional_focus(back_inserter(attentionalFocus));
 	size_t isz = attentionalFocus.size();
-	if (0 == isz) return SCM_EOL;
 
-	SCM head = SCM_EOL;
 	size_t N = isz;
-	if( SCM_UNDEFINED != n) N = scm_to_uint(n);
+	if (0 < n) N = n;
 	if( N > isz)  N = isz;
-	for (size_t i = isz - N; i < isz; i++) {
+
+	/* Add all the atoms in the current attentional focus that are not
+	 * already there. */
+	HandleSet curr_af;
+	for (size_t i = isz - N; i < isz; i++)
+	{
 		Handle hi = attentionalFocus[i];
-		SCM smob = handle_to_scm(hi);
-		head = scm_cons(smob, head);
+		auto gone = prev_af.find(hi);
+		if (prev_af.end() == gone)
+		{
+			atomspace->add_link(MEMBER_LINK, hi, af_anchor);
+		}
+		else
+		{
+			curr_af.insert(hi);
+		}
 	}
 
-	return head;
+	/* Remove the atoms no longer in attentional focus */
+	for (const Handle& h: prev_af)
+	{
+		auto gone = curr_af.find(h);
+		if (curr_af.end() == gone)
+		{
+			atomspace->extract_atom(h);
+		}
+	}
+
+	return af_anchor;
 }
-#endif
 
 /**
  *  Stimulate an atom with given stimulus amount.
