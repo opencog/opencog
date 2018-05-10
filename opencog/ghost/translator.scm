@@ -556,11 +556,6 @@
   (if (null? rule-topic)
     (set! rule-topic (create-topic "Default Topic")))
 
-  ; Update the count -- how many rules we've seen under this top level goal
-  ; Do it only if the rules are ordered
-  (if is-rule-seq
-    (set! goal-rule-cnt (+ goal-rule-cnt 1)))
-
   ; Reset the list of local variables
   (set! pat-vars '())
 
@@ -573,11 +568,18 @@
                         (list-ref proc-type 1)))
          (type (list-ref proc-type 2))
          (action (process-action ACTION NAME))
-         (goals (process-goal GOAL)))
+         (goals (process-goal GOAL))
+         (is-rejoinder? (equal? type strval-rejoinder))
+         (rule-lv (if is-rejoinder? (get-rejoinder-level TYPE) 0)))
 
     (cog-logger-debug ghost-logger "Context: ~a" ordered-terms)
     (cog-logger-debug ghost-logger "Procedure: ~a" ACTION)
     (cog-logger-debug ghost-logger "Goal: ~a" goals)
+
+    ; Update the count -- how many rules we've seen under this top level goal
+    ; Do it only if the rules are ordered
+    (if (and is-rule-seq (not is-rejoinder?))
+      (set! goal-rule-cnt (+ goal-rule-cnt 1)))
 
     (map
       (lambda (goal)
@@ -595,7 +597,7 @@
             ; accordingly as well
             (if (or (member goal GOAL) (not is-rule-seq))
               (stv (cdr goal) .9)
-              (stv (/ (cdr goal) (expt 2 goal-rule-cnt)) .9))
+              (stv (/ (cdr goal) (expt 2 (+ rule-lv goal-rule-cnt))) .9))
             ghost-component))
 
         ; If the rule can possibly be satisfied by input sentence
