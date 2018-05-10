@@ -577,7 +577,7 @@
     (cog-logger-debug ghost-logger "Goal: ~a" goals)
 
     ; Update the count -- how many rules we've seen under this top level goal
-    ; Do it only if the rules are ordered
+    ; Do it only if the rules are ordered and it's not a rejoinder
     (if (and is-rule-seq (not is-rejoinder?))
       (set! goal-rule-cnt (+ goal-rule-cnt 1)))
 
