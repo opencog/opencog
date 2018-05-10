@@ -618,36 +618,35 @@
 
         ; Keep track of the rule hierarchy, and link rules that
         ; are defined in a sequence
-        (cond ((or (equal? type strval-responder)
-                   (equal? type strval-random-gambit)
-                   (equal? type strval-gambit))
-               ; If it's not a rejoinder, its parent rules should
-               ; be the rules at every level that are still in
-               ; the rule-hierarchy
-               (if (and is-rule-seq (not (null? rule-hierarchy)))
-                 (for-each
-                   (lambda (lv)
-                     (for-each
-                       (lambda (r)
-                         (set-next-rule
-                           (get-rule-from-label r)
-                             a-rule ghost-next-responder))
-                       lv))
-                   rule-hierarchy))
-               (add-to-rule-hierarchy 0 NAME))
-              ((equal? type strval-rejoinder)
-               ; If it's a rejoinder, its parent rule should be the
-               ; last rule one level up in rule-hierarchy
-               ; 'process-type' will make sure there is a responder
-               ; defined beforehand so rule-hierarchy is not empty
-               (if is-rule-seq
-                 (set-next-rule
-                   (get-rule-from-label
-                     (last (list-ref rule-hierarchy
-                       (1- (get-rejoinder-level TYPE)))))
-                   a-rule ghost-next-rejoinder))
-               (add-to-rule-hierarchy
-                 (get-rejoinder-level TYPE) NAME)))
+        (if is-rejoinder?
+          ; If it's a rejoinder, its parent rule should be the
+          ; last rule one level up in rule-hierarchy
+          ; 'process-type' will make sure there is a responder
+          ; defined beforehand so rule-hierarchy is not empty
+          (begin
+            (if is-rule-seq
+              (set-next-rule
+                (get-rule-from-label
+                  (last (list-ref rule-hierarchy
+                    (1- (get-rejoinder-level TYPE)))))
+                a-rule ghost-next-rejoinder))
+            (add-to-rule-hierarchy
+              (get-rejoinder-level TYPE) NAME))
+          (begin
+            ; If it's not a rejoinder, its parent rules should
+            ; be the rules at every level that are still in
+            ; the rule-hierarchy
+            (if (and is-rule-seq (not (null? rule-hierarchy)))
+              (for-each
+                (lambda (lv)
+                  (for-each
+                    (lambda (r)
+                      (set-next-rule
+                        (get-rule-from-label r)
+                          a-rule ghost-next-responder))
+                    lv))
+                rule-hierarchy))
+            (add-to-rule-hierarchy 0 NAME)))
 
         ; Connect words, concepts and predicates from the context
         ; directly to the rule via a HebbianLink
