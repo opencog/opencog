@@ -411,12 +411,41 @@ Step 1: selecting the next pattern to specialize.
 
 #### Minimum Support Formalization
 
-TODO
+Knowledge such as `minsup(P, T, ms)` is simply being formalized as
+```
+Evaluation (stv 1 1)
+  Predicate "minsup"
+  List
+    P
+    T
+    ms
+```
+
+where `P` is the pattern, `T` is a concept node of the text set, so
+that each element of it is a text, and `ms` is a number node with the
+minimum support parameter.
+
+When the pattern miner is invoked the discovered patterns will be
+delivered according to that format.
 
 Usage
 -----
 
-TODO
+To invoke the pattern miner, within guile, you first need to import
+the `miner` module
+```
+(use-modules (opencog miner))
+```
+
+Then, simply call `cog-miner` with your text set and minimum
+support. The text set can be either
+
+1. a Scheme list of atoms
+2. an Atomese List or Set of atoms
+3. an atomspace (use (cog-atomspace) to get the current one)
+4. a concept node such that all its members are texts
+
+TODO: give example.
 
 References
 ----------
