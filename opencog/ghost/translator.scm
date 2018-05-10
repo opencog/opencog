@@ -556,11 +556,6 @@
   (if (null? rule-topic)
     (set! rule-topic (create-topic "Default Topic")))
 
-  ; Update the count -- how many rules we've seen under this top level goal
-  ; Do it only if the rules are ordered
-  (if is-rule-seq
-    (set! goal-rule-cnt (+ goal-rule-cnt 1)))
-
   ; Reset the list of local variables
   (set! pat-vars '())
 
@@ -573,11 +568,18 @@
                         (list-ref proc-type 1)))
          (type (list-ref proc-type 2))
          (action (process-action ACTION NAME))
-         (goals (process-goal GOAL)))
+         (goals (process-goal GOAL))
+         (is-rejoinder? (equal? type strval-rejoinder))
+         (rule-lv (if is-rejoinder? (get-rejoinder-level TYPE) 0)))
 
     (cog-logger-debug ghost-logger "Context: ~a" ordered-terms)
     (cog-logger-debug ghost-logger "Procedure: ~a" ACTION)
     (cog-logger-debug ghost-logger "Goal: ~a" goals)
+
+    ; Update the count -- how many rules we've seen under this top level goal
+    ; Do it only if the rules are ordered and it's not a rejoinder
+    (if (and is-rule-seq (not is-rejoinder?))
+      (set! goal-rule-cnt (+ goal-rule-cnt 1)))
 
     (map
       (lambda (goal)
@@ -595,7 +597,7 @@
             ; accordingly as well
             (if (or (member goal GOAL) (not is-rule-seq))
               (stv (cdr goal) .9)
-              (stv (/ (cdr goal) (expt 2 goal-rule-cnt)) .9))
+              (stv (/ (cdr goal) (expt 2 (+ rule-lv goal-rule-cnt))) .9))
             ghost-component))
 
         ; If the rule can possibly be satisfied by input sentence
@@ -616,36 +618,35 @@
 
         ; Keep track of the rule hierarchy, and link rules that
         ; are defined in a sequence
-        (cond ((or (equal? type strval-responder)
-                   (equal? type strval-random-gambit)
-                   (equal? type strval-gambit))
-               ; If it's not a rejoinder, its parent rules should
-               ; be the rules at every level that are still in
-               ; the rule-hierarchy
-               (if (and is-rule-seq (not (null? rule-hierarchy)))
-                 (for-each
-                   (lambda (lv)
-                     (for-each
-                       (lambda (r)
-                         (set-next-rule
-                           (get-rule-from-label r)
-                             a-rule ghost-next-responder))
-                       lv))
-                   rule-hierarchy))
-               (add-to-rule-hierarchy 0 NAME))
-              ((equal? type strval-rejoinder)
-               ; If it's a rejoinder, its parent rule should be the
-               ; last rule one level up in rule-hierarchy
-               ; 'process-type' will make sure there is a responder
-               ; defined beforehand so rule-hierarchy is not empty
-               (if is-rule-seq
-                 (set-next-rule
-                   (get-rule-from-label
-                     (last (list-ref rule-hierarchy
-                       (1- (get-rejoinder-level TYPE)))))
-                   a-rule ghost-next-rejoinder))
-               (add-to-rule-hierarchy
-                 (get-rejoinder-level TYPE) NAME)))
+        (if is-rejoinder?
+          ; If it's a rejoinder, its parent rule should be the
+          ; last rule one level up in rule-hierarchy
+          ; 'process-type' will make sure there is a responder
+          ; defined beforehand so rule-hierarchy is not empty
+          (begin
+            (if is-rule-seq
+              (set-next-rule
+                (get-rule-from-label
+                  (last (list-ref rule-hierarchy
+                    (1- (get-rejoinder-level TYPE)))))
+                a-rule ghost-next-rejoinder))
+            (add-to-rule-hierarchy
+              (get-rejoinder-level TYPE) NAME))
+          (begin
+            ; If it's not a rejoinder, its parent rules should
+            ; be the rules at every level that are still in
+            ; the rule-hierarchy
+            (if (and is-rule-seq (not (null? rule-hierarchy)))
+              (for-each
+                (lambda (lv)
+                  (for-each
+                    (lambda (r)
+                      (set-next-rule
+                        (get-rule-from-label r)
+                          a-rule ghost-next-responder))
+                    lv))
+                rule-hierarchy))
+            (add-to-rule-hierarchy 0 NAME)))
 
         ; Connect words, concepts and predicates from the context
         ; directly to the rule via a HebbianLink
