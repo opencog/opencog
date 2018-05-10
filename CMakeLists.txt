@@ -13,6 +13,7 @@ ADD_LIBRARY (attentionbank
 TARGET_LINK_LIBRARIES(attentionbank
 #	${NO_AS_NEEDED}
 	query
+	execution
 	smob
 	atombase
 	truthvalue
