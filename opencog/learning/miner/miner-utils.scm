@@ -16,6 +16,7 @@
 ;;
 
 (use-modules (opencog))
+(use-modules (opencog logger))
 (use-modules (opencog exec))
 (use-modules (opencog query))
 (use-modules (opencog rule-engine))
@@ -67,6 +68,7 @@
                           ;; Atomese List or Set
                           ((is-List-Set texts) (cog-outgoing-set texts))
                           ;; AtomSpace
+                          ;; TODO: bug!!! should use the given atomspace
                           ((cog-atomspace? texts) (cog-get-atoms 'Atom #t))))
          (mk-member (lambda (text) (Member text texts-cpt))))
     (for-each mk-member texts-lst))
@@ -228,6 +230,27 @@
          (gl (Get vardecl (And target precond))))
     (cog-execute! gl)))
 
+(define* (conjunct-pattern nconj)
+"
+  Create a pattern of nconj conjunctions.
+
+  For instance (conjunct-pattern 3), creates
+
+  (Lambda
+    (VariableList
+      (Variable \"$X-1\")
+      (Variable \"$X-2\")
+      (Variable \"$X-3\"))
+    (And
+      (Variable \"$X-1\")
+      (Variable \"$X-2\")
+      (Variable \"$X-3\")))
+"
+  (let* ((vars (gen-variables "$X" nconj))
+         (var-lst (VariableList vars))
+         (var-conj (And vars)))
+    (Lambda var-lst var-conj)))
+
 (define* (cog-miner . args)
   (display ("The command you are looking for is cog-mine.")))
 
@@ -349,6 +372,7 @@
     support
     enough-support?
     fetch-patterns
+    conjunct-pattern
     cog-miner
     cog-mine
   )
