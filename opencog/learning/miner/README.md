@@ -437,15 +437,34 @@ the `miner` module
 (use-modules (opencog miner))
 ```
 
-Then, simply call `cog-miner` with your text set and minimum
-support. The text set can be either
+Then, simply call `cog-mine` on your text set and with a given minimum
+support
 
+```
+(cog-mine texts ms)
+```
+where `texts` is either
 1. a Scheme list of atoms
 2. an Atomese List or Set of atoms
 3. an atomspace (use (cog-atomspace) to get the current one)
 4. a concept node such that all its members are texts
+and `ms` is a Scheme number (not an Atomese `NumberNode`).
 
-TODO: give example.
+`cog-mine` will configure the rule engine, call it, return its results
+and remove all configuration cruft temporarily created. It accepts
+some options, such as initial pattern and maximum number of
+iterations. You amy get more information with online help, as follows
+```
+(help cog-mine)
+```
+
+If you wish to configure the URE yourself, the `miner` module also
+provides some utilities, feel free to take look at
+[miner-utils.scm](opencog/learning/miner/miner-utils.scm) for the full
+list.
+
+Also, you may find examples of `cog-mine` in
+[examples/miner](examples/miner).
 
 References
 ----------
