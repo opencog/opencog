@@ -228,6 +228,9 @@
          (gl (Get vardecl (And target precond))))
     (cog-execute! gl)))
 
+(define* (cog-miner . args)
+  (display ("The command you are looking for is cog-mine.")))
+
 (define* (cog-mine texts ms #:key (maxiter -1) (initpat (top)))
 "
   Mine patterns in texts with minimum support ms, optionally
@@ -296,10 +299,9 @@
   (let* (;; Create a temporary child atomspace for the URE         
          (tmp-as (cog-new-atomspace (cog-atomspace)))
          (parent-as (cog-set-atomspace! tmp-as))
-         ;; Construct text concept if necessary
-         (create-texts-cpt? (not (and (cog-atom? texts)
-                                      (eq? texts-type 'ConceptNode))))
-         (texts-cpt (if create-texts-cpt?
+         (texts-concept? (and (cog-atom? texts)
+                              (eq? (cog-type texts 'ConceptNode))))
+         (texts-cpt (if (not texts-concept?)
                         ;; Construct a temporary concept containing
                         ;; the texts
                         (fill-texts-cpt (random-texts-cpt) texts)
@@ -327,7 +329,7 @@
             (cog-set-atomspace! parent-as)
             ;; TODO: delete tmp-as but without deleting its atoms, if
             ;; possible
-            (Set minsup-results-lst))))))
+            (Set patterns-lst))))))
 
 (define (export-miner-utils)
   (export
@@ -346,7 +348,8 @@
     pattern->bindlink
     support
     enough-support?
-    fetch-minsup-eval
+    fetch-patterns
+    cog-miner
     cog-mine
   )
 )
