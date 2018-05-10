@@ -10,7 +10,7 @@ Additional heuristics and filtering techniques will be implemented in
 as time goes.
 
 If you know what you are dealing with and want to use it, jump
-straight to the Usage Section.
+straight to the Usage Section (TODO: add link).
 
 Problem and Terminology
 -----------------------
@@ -409,25 +409,6 @@ reaching the minimum support. For that reason, there is only one
 decision that really matters in the pattern miner control, the one in
 Step 1: selecting the next pattern to specialize.
 
-#### Minimum Support Formalization
-
-Knowledge such as `minsup(P, T, ms)` is simply being formalized as
-```
-Evaluation (stv 1 1)
-  Predicate "minsup"
-  List
-    P
-    T
-    ms
-```
-
-where `P` is the pattern, `T` is a concept node of the text set, so
-that each element of it is a text, and `ms` is a number node with the
-minimum support parameter.
-
-When the pattern miner is invoked the discovered patterns will be
-delivered according to that format.
-
 Usage
 -----
 
@@ -437,34 +418,68 @@ the `miner` module
 (use-modules (opencog miner))
 ```
 
-Then, simply call `cog-mine` on your text set and with a given minimum
+Then, simply call `cog-mine` on your text set with a given minimum
 support
-
 ```
 (cog-mine texts ms)
 ```
 where `texts` is either
 1. a Scheme list of atoms
 2. an Atomese List or Set of atoms
-3. an atomspace (use (cog-atomspace) to get the current one)
+3. an atomspace (use `(cog-atomspace)` to get the current one)
 4. a concept node such that all its members are texts
 and `ms` is a Scheme number (not an Atomese `NumberNode`).
 
-`cog-mine` will configure the rule engine, call it, return its results
-and remove all configuration cruft temporarily created. It accepts
-some options, such as initial pattern and maximum number of
-iterations. You amy get more information with online help, as follows
+`cog-mine` automatically configures the rule engine, calls it, returns
+its results and removes the atoms that were temporarily created. The
+results have the following form
+```
+(Set
+  P1
+  ...
+  Pn)
+```
+where `P1` to `Pn` are the patterns discovered by the pattern miner.
+
+In addition you can optionally provide an initial pattern and maximum
+number of iterations. The providing an initial patterns can greatly
+speed up the search, in addition, if you wish your pattern to contain
+more conjuncts (although called grams in the previous pattern miner),
+you may specify it in the initial pattern. The function
+`conjunct-pattern` can help you to do that. For instance to produce
+an initial pattern with 3 conjuncts, call
+```
+(conjunct-pattern 3)
+```
+to get
+```
+(Lambda
+  (VariableList
+    (Variable "$X-1")
+    (Variable "$X-2")
+    (Variable "$X-3"))
+  (And
+    (Variable "$X-1")
+    (Variable "$X-2")
+    (Variable "$X-3")))
+```
+
+Futher Help
+-----------
+
+You any get more information with the online help of `cog-mine`
 ```
 (help cog-mine)
 ```
 
-If you wish to configure the URE yourself, the `miner` module also
-provides some utilities, feel free to take look at
-[miner-utils.scm](opencog/learning/miner/miner-utils.scm) for the full
-list.
-
-Also, you may find examples of `cog-mine` in
+Futher more, usage examples of `cog-mine` can be found in
 [examples/miner](examples/miner).
+
+Finally, if you wish to carry out manually the various steps
+automatically handled by `cog-mine`, configuring the URE and such, the
+`miner` module should provide all the utilities you may need. The list
+can be obtained by TODO, and each function has an online help like
+`cog-mine`.
 
 References
 ----------
