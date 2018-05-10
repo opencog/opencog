@@ -209,9 +209,10 @@
 "
   (<= ms (support pat texts ms)))
 
-(define (fetch-minsup-eval texts ms)
+(define (fetch-patterns texts ms)
 "
-  Fetch atoms of the form
+  Fetch all patterns with enough support, thus found in the following
+  hypergraphs
 
   Evaluation (stv 1 1)
     Predicate \"minsup\"
@@ -224,8 +225,8 @@
          (target (minsup-eval patvar texts ms))
          (vardecl (TypedVariable patvar (Type "LambdaLink")))
          (precond (absolutely-true-eval target))
-         (bl (Bind vardecl (And target precond) target)))
-    (cog-execute! bl)))
+         (gl (Get vardecl (And target precond))))
+    (cog-execute! gl)))
 
 (define* (cog-mine texts ms #:key (maxiter -1) (initpat (top)))
 "
@@ -321,8 +322,8 @@
           (let* (;; Run the pattern miner in a forward way
                  (results (cog-fc miner-rbs source))
                  ;; Fetch all relevant results
-                 (minsup-results (fetch-minsup-eval texts-cpt ms))
-                 (minsup-results-lst (cog-outgoing-set minsup-results)))
+                 (patterns (fetch-patterns texts-cpt ms))
+                 (patterns-lst (cog-outgoing-set patterns)))
             (cog-set-atomspace! parent-as)
             ;; TODO: delete tmp-as but without deleting its atoms, if
             ;; possible
