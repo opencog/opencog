@@ -1,4 +1,4 @@
-Ultra simple example, given
+Ultra simple example. Given the KB
 ```
 (Inheritance
   (Concept "A")

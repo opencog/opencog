@@ -1,4 +1,5 @@
-Simple 2-conjunction pattern miner example, given
+Simple pattern miner example starting with a pattern with 2
+conjunctions. Given the KB
 ```
 (Inheritance
   (Concept "A")
