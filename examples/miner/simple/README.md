@@ -7,7 +7,7 @@ Ultra simple example, given
   (Concept "A")
   (Concept "C"))
 ```
-find the pattern
+find pattern
 ```
 (Lambda
   (Variable "$X")
