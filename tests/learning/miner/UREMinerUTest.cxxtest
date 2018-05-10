@@ -1,5 +1,5 @@
 /*
- * opencog/tests/learning/xpattern-miner/ure-based/UREPatternMiner.cxxtest
+ * opencog/tests/learning/miner/UREMiner.cxxtest
  *
  * Copyright (C) 2018 by OpenCog Foundation
  * All Rights Reserved
@@ -44,7 +44,7 @@ using namespace std;
 #define tmp_al _tmp_as.add_link
 #define tmp_an _tmp_as.add_node
 
-class UREPatternMinerUTest : public CxxTest::TestSuite
+class UREMinerUTest : public CxxTest::TestSuite
 {
 private:
 	AtomSpace _as;
@@ -132,8 +132,8 @@ private:
 	              int max_iter, Handle initpat=Handle::UNDEFINED);
 
 public:
-	UREPatternMinerUTest();
-	~UREPatternMinerUTest();
+	UREMinerUTest();
+	~UREMinerUTest();
 
 	void setUp();
 	void tearDown();
@@ -157,9 +157,9 @@ public:
 	void test_SodaDrinker();
 };
 
-Handle UREPatternMinerUTest::mk_minsup_eval(int minsup,
-                                            const Handle& pattern,
-                                            TruthValuePtr tv)
+Handle UREMinerUTest::mk_minsup_eval(int minsup,
+                                     const Handle& pattern,
+                                     TruthValuePtr tv)
 {
 	Handle minsup_eval_h = al(EVALUATION_LINK,
 	                          minsup_prd,
@@ -172,9 +172,9 @@ Handle UREPatternMinerUTest::mk_minsup_eval(int minsup,
 	return minsup_eval_h;
 }
 
-Handle UREPatternMinerUTest::mk_minsup_evals(int minsup,
-                                             const HandleSeq& patterns,
-                                             TruthValuePtr tv)
+Handle UREMinerUTest::mk_minsup_evals(int minsup,
+                                      const HandleSeq& patterns,
+                                      TruthValuePtr tv)
 {
 	HandleSeq minsup_evals;
 	for (const Handle& pat : patterns)
@@ -182,24 +182,24 @@ Handle UREPatternMinerUTest::mk_minsup_evals(int minsup,
 	return al(SET_LINK, minsup_evals);
 }
 
-Handle UREPatternMinerUTest::mk_abs_true_eval(const Handle& h)
+Handle UREMinerUTest::mk_abs_true_eval(const Handle& h)
 {
 	return al(EVALUATION_LINK,
 	          an(GROUNDED_PREDICATE_NODE, "scm: absolutely-true"),
 	          h);
 }
 
-Handle UREPatternMinerUTest::mk_nconjunct(unsigned n)
+Handle UREMinerUTest::mk_nconjunct(unsigned n)
 {
 	return al(LAMBDA_LINK, al(AND_LINK, gen_variables("$X-", n)));
 }
 
-Handle UREPatternMinerUTest::gen_variable(const std::string& prefix, int i)
+Handle UREMinerUTest::gen_variable(const std::string& prefix, int i)
 {
 	return an(VARIABLE_NODE, prefix + std::to_string(i));
 }
 
-HandleSeq UREPatternMinerUTest::gen_variables(const std::string& prefix, int n)
+HandleSeq UREMinerUTest::gen_variables(const std::string& prefix, int n)
 {
 	HandleSeq vars;
 	for (int i = 0; i < n; i++)
@@ -207,7 +207,7 @@ HandleSeq UREPatternMinerUTest::gen_variables(const std::string& prefix, int n)
 	return vars;
 }
 
-bool UREPatternMinerUTest::enough_support(const Handle& pat, int minsup)
+bool UREMinerUTest::enough_support(const Handle& pat, int minsup)
 {
 	std::string support_query_str("(support\n");
 	support_query_str += pat->to_string();
@@ -218,8 +218,8 @@ bool UREPatternMinerUTest::enough_support(const Handle& pat, int minsup)
 	return minsup <= freq;
 }
 
-Handle UREPatternMinerUTest::run_pm(const HandleSeq& texts, int minsup,
-                                    int maxiter, Handle initpat)
+Handle UREMinerUTest::run_pm(const HandleSeq& texts, int minsup,
+                             int maxiter, Handle initpat)
 {
 	// Make (Member text (Concept "texts)) links
 	for (const Handle& text : texts)
@@ -232,10 +232,11 @@ Handle UREPatternMinerUTest::run_pm(const HandleSeq& texts, int minsup,
 	// Add the axiom that initpat has enough support, and use it as
 	// source for the forward chainer
 	bool es = enough_support(initpat, minsup);
+	
 	// If it doesn't have enough support return the empty solution
 	if (not es)
 		return al(SET_LINK);
-	TruthValuePtr tv = SimpleTruthValue::createTV(es ? 1.0 : 0.0, 1.0);
+	TruthValuePtr tv = SimpleTruthValue::createTV(1.0, 1.0);
 	Handle source = mk_minsup_eval(minsup, initpat, tv);
 
 	// Run the foward chainer from the initial pattern
@@ -257,7 +258,7 @@ Handle UREPatternMinerUTest::run_pm(const HandleSeq& texts, int minsup,
 	return results;
 }
 
-UREPatternMinerUTest::UREPatternMinerUTest() : _scm(&_as), _tmp_scm(&_tmp_as)
+UREMinerUTest::UREMinerUTest() : _scm(&_as), _tmp_scm(&_tmp_as)
 {
 	// Main logger
 	logger().set_level(Logger::INFO);
@@ -270,22 +271,23 @@ UREPatternMinerUTest::UREPatternMinerUTest() : _scm(&_as), _tmp_scm(&_tmp_as)
 	ure_logger().set_timestamp_flag(false);
 	// ure_logger().set_sync_flag(true);
 	ure_logger().set_print_to_stdout_flag(true);
-
+	
 	// Configure scheme load-paths that are common for all tests.
 	_scm.eval("(add-to-load-path \"" PROJECT_SOURCE_DIR
-	          "/tests/learning/xpattern-miner/scm\")");
+	          "/tests/learning/miner/scm\")");
 	_scm.eval("(add-to-load-path \"" PROJECT_SOURCE_DIR
-	          "/opencog/learning/xpattern-miner/ure-based\")");
+	          "/opencog/learning/miner\")");
+
+	// Load modules
+	_scm.eval("(use-modules (opencog))");
+	std::string rs = _scm.eval("(use-modules (opencog miner))");
+	logger().debug() << "UREMinerUTest() rs = " << rs;
 }
 
-UREPatternMinerUTest::~UREPatternMinerUTest() {}
+UREMinerUTest::~UREMinerUTest() {}
 
-void UREPatternMinerUTest::setUp()
+void UREMinerUTest::setUp()
 {
-	// Load URE-based pattern miner
-	std::string rs = _scm.eval("(load-from-path \"pm-config.scm\")");
-	logger().debug() << "rs = " << rs;
-
 	X = an(VARIABLE_NODE, "$X");
 	Y = an(VARIABLE_NODE, "$Y");
 	Z = an(VARIABLE_NODE, "$Z");
@@ -298,19 +300,23 @@ void UREPatternMinerUTest::setUp()
 	F = an(CONCEPT_NODE, "F");
 	G = an(CONCEPT_NODE, "G");
 	H = an(CONCEPT_NODE, "H");
-	pm_rb = _scm.eval_h("pm-rbs");
+	pm_rb = an(CONCEPT_NODE, "pm-rbs");
 	texts_cpt = an(CONCEPT_NODE, "texts");
 	minsup_prd = an(PREDICATE_NODE, "minsup");
 	top = al(LAMBDA_LINK, X, X);
+
+	// Load URE-based pattern miner
+	std::string rs = _scm.eval("(configure-rules (Concept \"pm-rbs\"))");
+	logger().debug() << "setUp() rs = " << rs;
 }
 
-void UREPatternMinerUTest::tearDown()
+void UREMinerUTest::tearDown()
 {
 	_as.clear();
 	_tmp_as.clear();
 }
 
-void UREPatternMinerUTest::test_A()
+void UREMinerUTest::test_A()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
@@ -323,7 +329,7 @@ void UREPatternMinerUTest::test_A()
 	TS_ASSERT(content_eq(results, expected));
 }
 
-void UREPatternMinerUTest::test_AB()
+void UREMinerUTest::test_AB()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
@@ -336,7 +342,7 @@ void UREPatternMinerUTest::test_AB()
 	TS_ASSERT(content_eq(results, expected));
 }
 
-void UREPatternMinerUTest::test_AB_AC()
+void UREMinerUTest::test_AB_AC()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
@@ -361,7 +367,7 @@ void UREPatternMinerUTest::test_AB_AC()
 	TS_ASSERT(content_eq(results, expected));
 }
 
-void UREPatternMinerUTest::test_AB_AC_BC()
+void UREMinerUTest::test_AB_AC_BC()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
@@ -389,7 +395,7 @@ void UREPatternMinerUTest::test_AB_AC_BC()
 	TS_ASSERT(content_eq(results, expected));
 }
 
-void UREPatternMinerUTest::test_AB_ABC()
+void UREMinerUTest::test_AB_ABC()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
@@ -415,7 +421,7 @@ void UREPatternMinerUTest::test_AB_ABC()
 	TS_ASSERT(content_eq(results, expected));
 }
 
-void UREPatternMinerUTest::test_ABCD()
+void UREMinerUTest::test_ABCD()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
@@ -451,7 +457,7 @@ void UREPatternMinerUTest::test_ABCD()
 	TS_ASSERT(content_eq(expected, results));
 }
 
-void UREPatternMinerUTest::test_ABAB()
+void UREMinerUTest::test_ABAB()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
@@ -481,7 +487,7 @@ void UREPatternMinerUTest::test_ABAB()
 	TS_ASSERT(is_in(expected, results->getOutgoingSet()));
 }
 
-void UREPatternMinerUTest::test_AAAA()
+void UREMinerUTest::test_AAAA()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
@@ -511,7 +517,7 @@ void UREPatternMinerUTest::test_AAAA()
 	TS_ASSERT(is_in(expected, results->getOutgoingSet()));
 }
 
-void UREPatternMinerUTest::test_2conjuncts_1()
+void UREMinerUTest::test_2conjuncts_1()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
@@ -539,7 +545,7 @@ void UREPatternMinerUTest::test_2conjuncts_1()
 	TS_ASSERT(results->getOutgoingSet().empty());
 }
 
-void UREPatternMinerUTest::test_2conjuncts_2()
+void UREMinerUTest::test_2conjuncts_2()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
@@ -575,7 +581,7 @@ void UREPatternMinerUTest::test_2conjuncts_2()
 	TS_ASSERT(is_in(expected_pattern, results->getOutgoingSet()));
 }
 
-void UREPatternMinerUTest::test_2conjuncts_3()
+void UREMinerUTest::test_2conjuncts_3()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
@@ -603,7 +609,7 @@ void UREPatternMinerUTest::test_2conjuncts_3()
 	TS_ASSERT(is_in(expected_pattern, results->getOutgoingSet()));
 }
 
-void UREPatternMinerUTest::test_2conjuncts_4()
+void UREMinerUTest::test_2conjuncts_4()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
@@ -635,7 +641,7 @@ void UREPatternMinerUTest::test_2conjuncts_4()
 	TS_ASSERT(is_in(expected_pattern, results->getOutgoingSet()));
 }
 
-// void UREPatternMinerUTest::test_2conjuncts_5()
+// void UREMinerUTest::test_2conjuncts_5()
 // {
 // 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
@@ -674,7 +680,7 @@ void UREPatternMinerUTest::test_2conjuncts_4()
 // 	// each component. For that reason it should be able to discover
 // 	// the desired pattern.
 // 	XPMParameters param(9/*minsup*/, 2/*nconjuncts*/, initpat, -1/*maxdepth*/, 1/*info*/);
-// 	XPatternMiner pm(_as, param);
+// 	Miner pm(_as, param);
 // 	HandleTree results = pm();
 // 	Handle non_expected_pattern = tmp_al(LAMBDA_LINK,
 // 	                                     XYZ,
@@ -688,7 +694,7 @@ void UREPatternMinerUTest::test_2conjuncts_4()
 // 	TS_ASSERT(not content_is_in(non_expected_pattern, results));
 // }
 
-void UREPatternMinerUTest::test_InferenceControl()
+void UREMinerUTest::test_InferenceControl()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
@@ -778,7 +784,7 @@ void UREPatternMinerUTest::test_InferenceControl()
 	TS_ASSERT(is_in(expected_pattern, results->getOutgoingSet()));
 }
 
-void UREPatternMinerUTest::test_SodaDrinker()
+void UREMinerUTest::test_SodaDrinker()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 

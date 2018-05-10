@@ -1,5 +1,5 @@
 /*
- * XPatternMinerSCM.cc
+ * MinerSCM.cc
  *
  * Copyright (C) 2018 OpenCog Foundation
  *
@@ -30,7 +30,7 @@
 
 namespace opencog {
 
-class XPatternMinerSCM : public ModuleWrap
+class MinerSCM : public ModuleWrap
 {
 protected:
 	virtual void init();
@@ -58,7 +58,7 @@ protected:
 	Handle do_shallow_abstract(Handle pattern, Handle texts, Handle ms);
 
 public:
-	XPatternMinerSCM();
+	MinerSCM();
 };
 
 } /*end of namespace opencog*/
@@ -66,21 +66,21 @@ public:
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/guile/SchemePrimitive.h>
 
-#include <opencog/learning/xpattern-miner/c++-based/XPatternMiner.h>
+#include <opencog/learning/miner/Miner.h>
 
 using namespace opencog;
 
-XPatternMinerSCM::XPatternMinerSCM() : ModuleWrap("opencog xpattern-miner") {}
+MinerSCM::MinerSCM() : ModuleWrap("opencog miner") {}
 
-/// This is called while (opencog xpattern-miner) is the current
+/// This is called while (opencog miner) is the current
 /// module.  Thus, all the definitions below happen in that module.
-void XPatternMinerSCM::init(void)
+void MinerSCM::init(void)
 {
 	define_scheme_primitive("cog-shallow-abstract",
-		&XPatternMinerSCM::do_shallow_abstract, this, "xpattern-miner");
+		&MinerSCM::do_shallow_abstract, this, "miner");
 }
 
-Handle XPatternMinerSCM::do_shallow_abstract(Handle pattern,
+Handle MinerSCM::do_shallow_abstract(Handle pattern,
                                              Handle texts,
                                              Handle ms)
 {
@@ -101,11 +101,11 @@ Handle XPatternMinerSCM::do_shallow_abstract(Handle pattern,
 
 	// Generate all shallow abstractions
 	HandleSetSeq shabs_per_var =
-		XPatternMiner::shallow_abstract(pattern, texts_set, ms_uint);
+		Miner::shallow_abstract(pattern, texts_set, ms_uint);
 
 	// Turn that sequence of handle sets into a set of ready to be
 	// applied shallow abstractions
-	const Variables& vars = XPatternMiner::get_variables(pattern);
+	const Variables& vars = Miner::get_variables(pattern);
 	HandleSet sa_lists;
 	unsigned vari = 0;         // Index of the variable
 	for (const HandleSet& shabs : shabs_per_var) {
@@ -124,13 +124,13 @@ Handle XPatternMinerSCM::do_shallow_abstract(Handle pattern,
 }
 
 extern "C" {
-void opencog_xpatternminer_init(void);
+void opencog_miner_init(void);
 };
 
-void opencog_xpatternminer_init(void)
+void opencog_miner_init(void)
 {
-    static XPatternMinerSCM xpattern_miner;
-    xpattern_miner.module_init();
+    static MinerSCM miner;
+    miner.module_init();
 }
 
 #endif // HAVE_GUILE

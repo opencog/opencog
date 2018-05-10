@@ -180,7 +180,7 @@
     psi-rule-name-predicate-node
     (ListLink
       rule
-      (ConceptNode (string-append psi-prefix-str name))))
+      (ConceptNode name)))
 
   ; TODO Uncomment after testing with ghost
   ;(cog-set-value!
@@ -188,6 +188,7 @@
   ;  psi-rule-name-predicate-node
   ;  (StringValue name))
 )
+
 ; --------------------------------------------------------------
 (define (psi-rule-alias rule)
 "

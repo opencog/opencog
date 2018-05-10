@@ -61,6 +61,7 @@ public:
 
 		eval.eval("(add-to-load-path \"/usr/local/share\")");
 		eval.eval("(use-modules (opencog))");
+		eval.eval("(use-modules (opencog attention-bank))");
 		eval.eval("(use-modules (opencog query))");
 		eval.eval("(use-modules (opencog logger))");
 		eval.eval("(use-modules (opencog rule-engine))");

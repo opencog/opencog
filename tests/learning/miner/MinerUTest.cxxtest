@@ -1,5 +1,5 @@
 /*
- * opencog/tests/learning/xpattern-miner/c++-based/XPatternMiner.cxxtest
+ * opencog/tests/learning/miner/Miner.cxxtest
  *
  * Copyright (C) 2017 by OpenCog Foundation
  * All Rights Reserved
@@ -27,8 +27,8 @@
 #include <opencog/util/Config.h>
 #include <opencog/util/algorithm.h>
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/learning/xpattern-miner/c++-based/HandleTree.h>
-#include <opencog/learning/xpattern-miner/c++-based/XPatternMiner.h>
+#include <opencog/learning/miner/HandleTree.h>
+#include <opencog/learning/miner/Miner.h>
 #include <opencog/guile/SchemeEval.h>
 
 #include <vector>
@@ -41,7 +41,7 @@ using namespace std;
 #define tmp_al _tmp_as.add_link
 #define tmp_an _tmp_as.add_node
 
-class XPatternMinerUTest : public CxxTest::TestSuite
+class MinerUTest : public CxxTest::TestSuite
 {
 private:
 	AtomSpace _as;
@@ -49,8 +49,8 @@ private:
 	SchemeEval _scm;
 
 public:
-	XPatternMinerUTest();
-	~XPatternMinerUTest();
+	MinerUTest();
+	~MinerUTest();
 
 	void setUp();
 	void tearDown();
@@ -77,7 +77,7 @@ public:
 	void test_SodaDrinker();
 };
 
-XPatternMinerUTest::XPatternMinerUTest() : _scm(&_as)
+MinerUTest::MinerUTest() : _scm(&_as)
 {
 	logger().set_level(Logger::INFO);
 	logger().set_timestamp_flag(false);
@@ -86,22 +86,22 @@ XPatternMinerUTest::XPatternMinerUTest() : _scm(&_as)
 
 	// Configure scheme load-paths that are common for all tests.
 	_scm.eval("(add-to-load-path \"" PROJECT_SOURCE_DIR
-	          "/tests/learning/xpattern-miner/scm\")");
+	          "/tests/learning/miner/scm\")");
 }
 
-XPatternMinerUTest::~XPatternMinerUTest() {}
+MinerUTest::~MinerUTest() {}
 
-void XPatternMinerUTest::setUp()
+void MinerUTest::setUp()
 {
 }
 
-void XPatternMinerUTest::tearDown()
+void MinerUTest::tearDown()
 {
 	_as.clear();
 	_tmp_as.clear();
 }
 
-void XPatternMinerUTest::test_match()
+void MinerUTest::test_match()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
@@ -116,12 +116,12 @@ void XPatternMinerUTest::test_match()
 		                        tmp_al(AND_LINK, X, Y))),
 		text = tmp_al(INHERITANCE_LINK, A, tmp_al(AND_LINK, B, C));
 
-	XPatternMiner pm(_as);
+	Miner pm(_as);
 
 	TS_ASSERT(not pm.match(pattern, text));
 }
 
-void XPatternMinerUTest::test_compose()
+void MinerUTest::test_compose()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
@@ -134,7 +134,7 @@ void XPatternMinerUTest::test_compose()
 		                 tmp_al(AND_LINK, X, tmp_al(INHERITANCE_LINK, Y, B))),
 		subpat = A;
 
-	Handle npat = XPatternMiner::compose(pattern, {{Y, subpat}}),
+	Handle npat = Miner::compose(pattern, {{Y, subpat}}),
 		expected = tmp_al(LAMBDA_LINK, X, X);
 
 	logger().debug() << "npat = " << oc_to_string(npat);
@@ -143,14 +143,14 @@ void XPatternMinerUTest::test_compose()
 	TS_ASSERT(content_eq(npat, expected));
 }
 
-void XPatternMinerUTest::test_A()
+void MinerUTest::test_A()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
 	Handle A = an(CONCEPT_NODE, "A");
 
 	XPMParameters param(2);
-	XPatternMiner pm(_as, param);
+	Miner pm(_as, param);
 	HandleTree results = pm(),
 		expected;
 
@@ -160,7 +160,7 @@ void XPatternMinerUTest::test_A()
 	TS_ASSERT(content_eq(results, expected));
 }
 
-void XPatternMinerUTest::test_AB()
+void MinerUTest::test_AB()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
@@ -168,7 +168,7 @@ void XPatternMinerUTest::test_AB()
 		B = an(CONCEPT_NODE, "B");
 
 	XPMParameters param(2);
-	XPatternMiner pm(_as, param);
+	Miner pm(_as, param);
 	HandleTree results = pm(),
 		expected;               // Still return nothing because the
                                 // resulting pattern is not a
@@ -182,7 +182,7 @@ void XPatternMinerUTest::test_AB()
 	TS_ASSERT(content_eq(results, expected));
 }
 
-void XPatternMinerUTest::test_AB_AC()
+void MinerUTest::test_AB_AC()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
@@ -193,7 +193,7 @@ void XPatternMinerUTest::test_AB_AC()
 		AC = al(INHERITANCE_LINK, A, C);
 
 	XPMParameters param(2);
-	XPatternMiner pm(_as, param);
+	Miner pm(_as, param);
 	HandleTree results = pm();
 
 	Handle X = an(VARIABLE_NODE, "$X"),
@@ -209,7 +209,7 @@ void XPatternMinerUTest::test_AB_AC()
 	TS_ASSERT(content_eq(results, expected));
 }
 
-void XPatternMinerUTest::test_AB_AC_BC()
+void MinerUTest::test_AB_AC_BC()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
@@ -221,7 +221,7 @@ void XPatternMinerUTest::test_AB_AC_BC()
 		BC = al(INHERITANCE_LINK, B, C);
 
 	XPMParameters param(2);
-	XPatternMiner pm(_as, param);
+	Miner pm(_as, param);
 	HandleTree results = pm();
 
 	Handle X = an(VARIABLE_NODE, "$X"),
@@ -238,7 +238,7 @@ void XPatternMinerUTest::test_AB_AC_BC()
 	TS_ASSERT(content_eq(results, expected));
 }
 
-void XPatternMinerUTest::test_AB_ABC()
+void MinerUTest::test_AB_ABC()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
@@ -249,7 +249,7 @@ void XPatternMinerUTest::test_AB_ABC()
 		ABC = al(INHERITANCE_LINK, A, al(AND_LINK, B, C));
 
 	XPMParameters param(2);
-	XPatternMiner pm(_as, param);
+	Miner pm(_as, param);
 	HandleTree results = pm();
 
 	Handle X = an(VARIABLE_NODE, "$X"),
@@ -267,7 +267,7 @@ void XPatternMinerUTest::test_AB_ABC()
 	TS_ASSERT(content_eq(results, expected));
 }
 
-void XPatternMinerUTest::test_ABCD()
+void MinerUTest::test_ABCD()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
@@ -292,7 +292,7 @@ void XPatternMinerUTest::test_ABCD()
 		                 tmp_al(IMPLICATION_LINK, X, Y));
 
 	XPMParameters param(2, 1, initpat);
-	XPatternMiner pm(_as, param);
+	Miner pm(_as, param);
 	HandleTree results = pm();
 
 	Handle Z = tmp_an(VARIABLE_NODE, "$Z"),
@@ -315,7 +315,7 @@ void XPatternMinerUTest::test_ABCD()
 	TS_ASSERT(content_eq(expected, results));
 }
 
-void XPatternMinerUTest::test_ABAB()
+void MinerUTest::test_ABAB()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
@@ -333,7 +333,7 @@ void XPatternMinerUTest::test_ABAB()
 		                 tmp_al(IMPLICATION_LINK, X, Y));
 
 	XPMParameters param(2, 1, initpat);
-	XPatternMiner pm(_as, param);
+	Miner pm(_as, param);
 	HandleTree results = pm();
 
 	Handle XY = tmp_al(INHERITANCE_LINK, X, Y),
@@ -345,7 +345,7 @@ void XPatternMinerUTest::test_ABAB()
 	TS_ASSERT(content_is_in(expected, results));
 }
 
-void XPatternMinerUTest::test_AAAA()
+void MinerUTest::test_AAAA()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
@@ -362,7 +362,7 @@ void XPatternMinerUTest::test_AAAA()
 		                 tmp_al(IMPLICATION_LINK, X, Y));
 
 	XPMParameters param(2, 1, initpat);
-	XPatternMiner pm(_as, param);
+	Miner pm(_as, param);
 	HandleTree results = pm();
 
 	Handle XX = tmp_al(INHERITANCE_LINK, X, X),
@@ -374,7 +374,7 @@ void XPatternMinerUTest::test_AAAA()
 	TS_ASSERT(content_is_in(expected, results));
 }
 
-void XPatternMinerUTest::test_2conjuncts_1()
+void MinerUTest::test_2conjuncts_1()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
@@ -399,7 +399,7 @@ void XPatternMinerUTest::test_2conjuncts_1()
 	                               tmp_al(INHERITANCE_LINK, A, Y)));
 
 	XPMParameters param(2, 2, initpat);
-	XPatternMiner pm(_as, param);
+	Miner pm(_as, param);
 	HandleTree results = pm();
 
 	logger().debug() << "results = " << oc_to_string(results);
@@ -407,7 +407,7 @@ void XPatternMinerUTest::test_2conjuncts_1()
 	TS_ASSERT(results.empty());
 }
 
-void XPatternMinerUTest::test_2conjuncts_2()
+void MinerUTest::test_2conjuncts_2()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
@@ -434,7 +434,7 @@ void XPatternMinerUTest::test_2conjuncts_2()
 	                               tmp_al(INHERITANCE_LINK, X, Y),
 	                               tmp_al(INHERITANCE_LINK, Z, W)));
 	XPMParameters param(2, 2, initpat);
-	XPatternMiner pm(_as, param);
+	Miner pm(_as, param);
 	HandleTree results = pm();
 	Handle expected_pattern = tmp_al(LAMBDA_LINK,
 	                                 XYZ,
@@ -448,7 +448,7 @@ void XPatternMinerUTest::test_2conjuncts_2()
 	TS_ASSERT(content_is_in(expected_pattern, results));
 }
 
-void XPatternMinerUTest::test_2conjuncts_3()
+void MinerUTest::test_2conjuncts_3()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
@@ -468,7 +468,7 @@ void XPatternMinerUTest::test_2conjuncts_3()
 		XYZ = tmp_al(VARIABLE_LIST, X, Y, Z);
 
 	XPMParameters param(2, 2);
-	XPatternMiner pm(_as, param);
+	Miner pm(_as, param);
 	HandleTree results = pm();
 	Handle expected_pattern = tmp_al(LAMBDA_LINK,
 	                                 XYZ,
@@ -482,7 +482,7 @@ void XPatternMinerUTest::test_2conjuncts_3()
 	TS_ASSERT(content_is_in(expected_pattern, results));
 }
 
-void XPatternMinerUTest::test_2conjuncts_4()
+void MinerUTest::test_2conjuncts_4()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
@@ -505,7 +505,7 @@ void XPatternMinerUTest::test_2conjuncts_4()
 		VXYZ = tmp_al(VARIABLE_LIST, X, Y, Z);
 
 	XPMParameters param(4, 2);
-	XPatternMiner pm(_as, param);
+	Miner pm(_as, param);
 	HandleTree results = pm();
 	Handle expected_pattern = tmp_al(LAMBDA_LINK,
 	                                 VXYZ,
@@ -519,7 +519,7 @@ void XPatternMinerUTest::test_2conjuncts_4()
 	TS_ASSERT(content_is_in(expected_pattern, results));
 }
 
-void XPatternMinerUTest::test_2conjuncts_5()
+void MinerUTest::test_2conjuncts_5()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
@@ -558,7 +558,7 @@ void XPatternMinerUTest::test_2conjuncts_5()
 	// each component. For that reason it should not be able to
 	// discover the desired pattern.
 	XPMParameters param(9/*minsup*/, 2/*nconjuncts*/, initpat, -1/*maxdepth*/, 1/*info*/);
-	XPatternMiner pm(_as, param);
+	Miner pm(_as, param);
 	HandleTree results = pm();
 	Handle non_expected_pattern = tmp_al(LAMBDA_LINK,
 	                                     XYZ,
@@ -572,7 +572,7 @@ void XPatternMinerUTest::test_2conjuncts_5()
 	TS_ASSERT(not content_is_in(non_expected_pattern, results));
 }
 
-void XPatternMinerUTest::test_InferenceControl()
+void MinerUTest::test_InferenceControl()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
@@ -607,7 +607,7 @@ void XPatternMinerUTest::test_InferenceControl()
 		initpat = tmp_al(LAMBDA_LINK, vardecl, clauses);
 
 	XPMParameters param(2/*minsup*/, 3/*nconjuncts*/, initpat, 2/*maxdepth*/, 1/*info*/);
-	XPatternMiner pm(_as, param);
+	Miner pm(_as, param);
 	HandleTree results = pm();
 
 	// The pattern of interest looks like
@@ -657,7 +657,7 @@ void XPatternMinerUTest::test_InferenceControl()
 	TS_ASSERT(content_is_in(expected_pattern, results));
 }
 
-void XPatternMinerUTest::test_SodaDrinker()
+void MinerUTest::test_SodaDrinker()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
@@ -681,7 +681,7 @@ void XPatternMinerUTest::test_SodaDrinker()
 
 	// Run the pattern miner
 	XPMParameters param(5/*minsup*/, 3/*nconjuncts*/, initpat, 3/*maxdepth*/, 1/*info*/);
-	XPatternMiner pm(_as, param);
+	Miner pm(_as, param);
 	HandleTree results = pm();
 
 	// The pattern of interest looks like

@@ -188,8 +188,18 @@
   with that label.
 "
   (define rule (get-rule-from-label LABEL))
+  (define next-responder (cog-value rule ghost-next-responder))
+  (define next-rejoinder (cog-value rule ghost-next-rejoinder))
   (if (not (null? rule))
-    (display (format #f "AV = ~a\nTV = ~a\n" (cog-av rule) (cog-tv rule)))))
+    (format #t "AV = ~a\nTV = ~a\nNext responder: ~a\nNext rejoinder: ~a\n"
+      (cog-av rule)
+      (cog-tv rule)
+      (if (null? next-responder)
+        (list)
+        (append-map psi-rule-alias (cog-value->list next-responder)))
+      (if (null? next-rejoinder)
+        (list)
+        (append-map psi-rule-alias (cog-value->list next-rejoinder))))))
 
 ; ----------
 (define-public (ghost-show-status)
