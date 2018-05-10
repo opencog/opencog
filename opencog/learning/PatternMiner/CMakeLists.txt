@@ -62,26 +62,28 @@ INSTALL (TARGETS PatternMinerAgent DESTINATION "lib${LIB_DIR_SUFFIX}/opencog")
 
 IF (HAVE_cpprest)
 
-    ADD_LIBRARY(DistributedPatternMinerClient SHARED
-            DistributedPatternMinerClient
-    )
+	ADD_LIBRARY(DistributedPatternMinerClient SHARED
+		DistributedPatternMinerClient
+	)
 
-    ADD_LIBRARY(DistributedPatternMinerServer SHARED
-            DistributedPatternMinerServer
-    )
+	ADD_LIBRARY(DistributedPatternMinerServer SHARED
+		DistributedPatternMinerServer
+	)
 
-    TARGET_LINK_LIBRARIES (DistributedPatternMinerClient
-            PatternMiner
-    )
+	TARGET_LINK_LIBRARIES (DistributedPatternMinerClient
+		PatternMiner
+		server
+	)
 
-    TARGET_LINK_LIBRARIES (DistributedPatternMinerServer
-            PatternMiner
-    )
+	TARGET_LINK_LIBRARIES (DistributedPatternMinerServer
+		PatternMiner
+		server
+	)
 
-    INSTALL (FILES
-            DistributedPatternMiner.h
-            DESTINATION "include/${PROJECT_NAME}/learning/PatternMiner"
-    )
+	INSTALL (FILES
+		DistributedPatternMiner.h
+		DESTINATION "include/${PROJECT_NAME}/learning/PatternMiner"
+	)
 
 ENDIF (HAVE_cpprest)
 
