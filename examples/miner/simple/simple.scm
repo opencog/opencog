@@ -11,9 +11,17 @@
   (Concept "A")
   (Concept "C")))
 
-;; Call the miner with a minimum support of 2
-(cog-mine (list AB AC) 2)
-
-;; Another way to call the miner on the entire atomspace instead of a
-;; determine text set
+;; Call the miner on the entire atomspace with minimum support of 2
+;;
+;; Expect to learn, amonst others, the following pattern
+;;
+;; (Lambda
+;;   (Variable "$X")
+;;   (Inheritance
+;;     (Concept "A")
+;;     (Variable "$X")))
 (cog-mine (cog-atomspace) 2)
+
+;; Call the miner on the text set of interest instead, should yield
+;; the same results.
+(cog-mine (list AB AC) 2)
