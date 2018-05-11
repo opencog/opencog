@@ -57,7 +57,7 @@
   For use of choices, negation, and topic etc.
 "
   (map (lambda (t)
-    (cond ((equal? 'word (car t))
+    (cond ((or (equal? 'word (car t)) (equal? 'word-apos (car t)))
            (WordNode (cdr t)))
           ((equal? 'lemma (car t))
            (LemmaNode (get-lemma (cdr t))))
