@@ -17,7 +17,7 @@ Problem and Terminology
 
 The pattern miner attempts to solve the problem of finding frequent
 patterns in the AtomSpace. The terminology used here is similar to the
-one defined in this overview [1](#[1]) and the algorithm mimics the
+one defined in this [overview](#chi2005) and the algorithm mimics the
 typical algorithms of the subtree mining litterature with the
 additional twist that patterns are Atomese programs.
 
@@ -488,5 +488,5 @@ and each function has an online help like `cog-mine`.
 References
 ----------
 
-## [1]
+##### Chi2005 
 Yun Chi et al. Frequent Subtree Mining -- An Overview. (2005)
