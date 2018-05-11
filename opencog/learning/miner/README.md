@@ -1,25 +1,25 @@
 Pattern Miner
 =============
 
-New pattern miner implementation which should ultimately replace
-Shujing Ke pattern miner (see `learning/README.md`). In its current
-state is it very comprehensive, that is it shouldn't miss any desired
-pattern. However, due to that, it can also be very slow, possibly
-slower than Shujing Key pattern miner depending on the usage.
-Additional heuristics and filtering techniques will be implemented as
-time goes.
+New pattern miner implementation which should eventually replace
+Shujing Ke pattern miner (see [learning/README.md](../README.md)). In
+its current state is it already funtional and very comprehensive, that
+is it shouldn't miss any pattern. However, due to that, it can also be
+very slow, possibly slower than Shujing Key pattern miner depending on
+the case. Additional heuristics and filtering techniques will be
+implemented as time goes.
 
-If you know what you are dealing with and want to use it, jump
-straight to the [Usage](#usage) Section.
+If you just want to use the pattern miner, jump straight ahead to the
+[Usage](#usage) Section, otherwise read on.
 
 Problem and Terminology
 -----------------------
 
 The pattern miner attempts to solve the problem of finding frequent
 patterns in the AtomSpace. The terminology used here is similar to the
-one defined in this overview [1] and the algorithm mimics the typical
-algorithms of the subtree mining litterature with the additional twist
-that patterns are Atomese programs.
+one defined in this overview [1](#[1]) and the algorithm mimics the
+typical algorithms of the subtree mining litterature with the
+additional twist that patterns are Atomese programs.
 
 Let us recall the important terms
 
@@ -474,7 +474,7 @@ You any get more information with the online help of `cog-mine`
 ```
 
 Futher more, usage examples of `cog-mine` can be found in
-[examples/miner](examples/miner).
+[examples/miner](../../../examples/miner).
 
 Finally, if you wish to carry out manually the various steps
 automatically handled by `cog-mine`, configuring the URE and such, the
@@ -488,4 +488,5 @@ and each function has an online help like `cog-mine`.
 References
 ----------
 
-[1] Yun Chi et al. Frequent Subtree Mining -- An Overview. (2005)
+## [1]
+Yun Chi et al. Frequent Subtree Mining -- An Overview. (2005)
