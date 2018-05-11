@@ -16,6 +16,7 @@
 ;;
 
 (use-modules (opencog))
+(use-modules (opencog logger))
 (use-modules (opencog exec))
 (use-modules (opencog query))
 (use-modules (opencog rule-engine))
@@ -67,6 +68,7 @@
                           ;; Atomese List or Set
                           ((is-List-Set texts) (cog-outgoing-set texts))
                           ;; AtomSpace
+                          ;; TODO: bug!!! should use the given atomspace
                           ((cog-atomspace? texts) (cog-get-atoms 'Atom #t))))
          (mk-member (lambda (text) (Member text texts-cpt))))
     (for-each mk-member texts-lst))
@@ -209,9 +211,10 @@
 "
   (<= ms (support pat texts ms)))
 
-(define (fetch-minsup-eval texts ms)
+(define (fetch-patterns texts ms)
 "
-  Fetch atoms of the form
+  Fetch all patterns with enough support, thus found in the following
+  hypergraphs
 
   Evaluation (stv 1 1)
     Predicate \"minsup\"
@@ -224,8 +227,32 @@
          (target (minsup-eval patvar texts ms))
          (vardecl (TypedVariable patvar (Type "LambdaLink")))
          (precond (absolutely-true-eval target))
-         (bl (Bind vardecl (And target precond) target)))
-    (cog-execute! bl)))
+         (gl (Get vardecl (And target precond))))
+    (cog-execute! gl)))
+
+(define* (conjunct-pattern nconj)
+"
+  Create a pattern of nconj conjunctions.
+
+  For instance (conjunct-pattern 3), creates
+
+  (Lambda
+    (VariableList
+      (Variable \"$X-1\")
+      (Variable \"$X-2\")
+      (Variable \"$X-3\"))
+    (And
+      (Variable \"$X-1\")
+      (Variable \"$X-2\")
+      (Variable \"$X-3\")))
+"
+  (let* ((vars (gen-variables "$X" nconj))
+         (var-lst (VariableList vars))
+         (var-conj (And vars)))
+    (Lambda var-lst var-conj)))
+
+(define* (cog-miner . args)
+  (display ("The command you are looking for is cog-mine.")))
 
 (define* (cog-mine texts ms #:key (maxiter -1) (initpat (top)))
 "
@@ -295,10 +322,9 @@
   (let* (;; Create a temporary child atomspace for the URE         
          (tmp-as (cog-new-atomspace (cog-atomspace)))
          (parent-as (cog-set-atomspace! tmp-as))
-         ;; Construct text concept if necessary
-         (create-texts-cpt? (not (and (cog-atom? texts)
-                                      (eq? texts-type 'ConceptNode))))
-         (texts-cpt (if create-texts-cpt?
+         (texts-concept? (and (cog-atom? texts)
+                              (eq? (cog-type texts 'ConceptNode))))
+         (texts-cpt (if (not texts-concept?)
                         ;; Construct a temporary concept containing
                         ;; the texts
                         (fill-texts-cpt (random-texts-cpt) texts)
@@ -321,12 +347,12 @@
           (let* (;; Run the pattern miner in a forward way
                  (results (cog-fc miner-rbs source))
                  ;; Fetch all relevant results
-                 (minsup-results (fetch-minsup-eval texts-cpt ms))
-                 (minsup-results-lst (cog-outgoing-set minsup-results)))
+                 (patterns (fetch-patterns texts-cpt ms))
+                 (patterns-lst (cog-outgoing-set patterns)))
             (cog-set-atomspace! parent-as)
             ;; TODO: delete tmp-as but without deleting its atoms, if
             ;; possible
-            (Set minsup-results-lst))))))
+            (Set patterns-lst))))))
 
 (define (export-miner-utils)
   (export
@@ -340,12 +366,11 @@
     minsup-eval-true
     get-members
     get-cardinality
-    size-ge
-    texts->atomspace
-    pattern->bindlink
     support
     enough-support?
-    fetch-minsup-eval
+    fetch-patterns
+    conjunct-pattern
+    cog-miner
     cog-mine
   )
 )
