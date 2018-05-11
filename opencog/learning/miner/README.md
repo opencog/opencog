@@ -6,11 +6,11 @@ Shujing Ke pattern miner (see `learning/README.md`). In its current
 state is it very comprehensive, that is it shouldn't miss any desired
 pattern. However, due to that, it can also be very slow, possibly
 slower than Shujing Key pattern miner depending on the usage.
-Additional heuristics and filtering techniques will be implemented in
-as time goes.
+Additional heuristics and filtering techniques will be implemented as
+time goes.
 
 If you know what you are dealing with and want to use it, jump
-straight to the Usage Section (TODO: add link).
+straight to the [Usage](#usage) Section.
 
 Problem and Terminology
 -----------------------
@@ -205,7 +205,8 @@ because it corresponds to a pattern matching its value.
 Given all shallow abstractions associated to a certain pattern `P`
 over all its variables, we can compose `P` with each of them to
 produce specializations. For instance reusing `P`, `T` and `V` as
-defined in the section detailing Step 2, the shallow abstractions over
+defined in the section detailing [Step
+2](#step-2:-extract-valuation-set), the shallow abstractions over
 variable `$(Variable "$X")` are `(Concept "A")`, `(Concept "D")` and
 `(Variable "$Y")`. Likewise the shallow abstractions over variable
 `$(Variable "$Y")` are `(Concept "B")`, `(Concept "C")` and `(Concept
@@ -310,8 +311,8 @@ One may notice that already in Step 4 we can avoid creating shallow
 abstractions that we know will not lead to specializations with enough
 support, just by counting the number of valuations matching a shallow
 abstraction. This is used in the forward URE implementation as
-explained in the subsection Enumerating Specializations with Forward
-Chaining.
+explained in Subsection [Enumerating Specializations with Forward
+Chaining](#enumerating-specializations-with-backward-chaining).
 
 ### Unified Rule Engine Implemenation
 
@@ -478,8 +479,11 @@ Futher more, usage examples of `cog-mine` can be found in
 Finally, if you wish to carry out manually the various steps
 automatically handled by `cog-mine`, configuring the URE and such, the
 `miner` module should provide all the utilities you may need. The list
-can be obtained by TODO, and each function has an online help like
-`cog-mine`.
+can be obtained by
+```
+,in (opencog miner) ,b
+```
+and each function has an online help like `cog-mine`.
 
 References
 ----------
