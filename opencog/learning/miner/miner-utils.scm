@@ -366,9 +366,6 @@
     minsup-eval-true
     get-members
     get-cardinality
-    size-ge
-    texts->atomspace
-    pattern->bindlink
     support
     enough-support?
     fetch-patterns
