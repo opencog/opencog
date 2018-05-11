@@ -8,7 +8,7 @@ This directory is going to contain some relatively simple, quick-n-dirty
 clustering algorithms for extracting the number of clusters, and their
 sizes, given only a collection of objects, and the pair-wise similarity
 between them.  Currently, the primary consumer of this code is planned
-to be MOSES; the clustering is neede to get a sensation of the diversity
+to be MOSES; the clustering is needed to get a sensation of the diversity
 of the demes being trained in MOSES.  That is, given a collection of
 combo trees, and some similarity value between them, the goal is to see
 how many of these are similar, and how many are different, and what the

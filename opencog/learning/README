@@ -1,8 +1,0 @@
-
-                    OpenCog Learning README
-                    -----------------------
-
-This directory currently contains three subdirectories:
-
--- dimensionalembedding -- implements a method of dimensional embedding
-   of the atomspace using the Harel-Koren algorithm

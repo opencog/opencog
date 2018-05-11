@@ -127,6 +127,7 @@
                                      ;; The lazyness of and allows to
                                      ;; avoid testing g.f support if g
                                      ;; doesn't have enough support
+                                     ;; TODO: do you really need this?
                                      (enough-support? gf texts ms))
                                 ;; Both g and g,f have enough support
                                 (stv 1 1)
