@@ -139,13 +139,13 @@ packages.
 > C++ HTTP RESTful interfaces
 > Used by the Pattern miner for distributed processing (this will be
   replaced by gearman in future releases).
-> sudo apt-get install libcpprest-dev
+> `sudo apt-get install libcpprest-dev`
 
 ###### Threading Building Blocks
 > C++ template library for parallel programming
 > Used to implement the optional REST API. (TODO: the REST API should
   be refactored to not use TBB)
-> sudo apt-get install libtbb-dev
+> `sudo apt-get install libtbb-dev`
 
 Building OpenCog
 ----------------
