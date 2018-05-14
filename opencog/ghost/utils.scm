@@ -102,16 +102,32 @@
   ; Merge them back to one, just for matching
   (do ((i 0 (1+ i)))
       ((>= i (length word-seq)))
-    (if (and (< (1+ i) (length word-seq))
-             (or (string-prefix? "'" (cog-name (list-ref word-seq (1+ i))))
-                 (string-prefix? "’" (cog-name (list-ref word-seq (1+ i))))))
-      (let ((merged-word (WordNode
-              (string-append (cog-name (list-ref word-seq i))
-                             (cog-name (list-ref word-seq (1+ i)))))))
-        (set! final-word-seq (append final-word-seq (list merged-word)))
-        (set! word-apos-alist (assoc-set! word-apos-alist i merged-word))
-        (set! i (1+ i)))
-      (set! final-word-seq (append final-word-seq (list (list-ref word-seq i))))))
+    (let* ((current-word-node (list-ref word-seq i))
+           (current-word-str (cog-name current-word-node))
+           (next-word-str
+             (if (< (1+ i) (length word-seq))
+               (cog-name (list-ref word-seq (1+ i))) ""))
+           (current-word-splitted
+             (string-split current-word-str (char-set #\' #\’)))
+           (next-word-splitted
+             (string-split next-word-str (char-set #\' #\’))))
+      (cond
+        ((> (length next-word-splitted) 1)
+         (let ((merged-word (WordNode
+                 (string-append
+                   current-word-str
+                   "'"  ; This will turn "’" into "'", for consistency
+                   (string-drop next-word-str 1)))))
+           (set! final-word-seq (append final-word-seq (list merged-word)))
+           (set! word-apos-alist (assoc-set! word-apos-alist i merged-word))
+           (set! i (1+ i))))
+        ; The current word may also have an apostrophe, make sure to turn
+        ; "’" into "'" as well for consistency
+        ((> (length current-word-splitted) 1)
+         (let ((new-word (WordNode (string-join current-word-splitted "'"))))
+           (set! final-word-seq (append final-word-seq (list new-word)))
+           (set! word-apos-alist (assoc-set! word-apos-alist i new-word))))
+        (else (set! final-word-seq (append final-word-seq (list current-word-node)))))))
 
   (Evaluation ghost-word-seq (List SENT (List final-word-seq)))
 
