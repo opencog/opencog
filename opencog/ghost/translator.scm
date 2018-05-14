@@ -627,12 +627,11 @@
           ; 'process-type' will make sure there is a responder
           ; defined beforehand so rule-hierarchy is not empty
           (begin
-            (if is-rule-seq
-              (set-next-rule
-                (get-rule-from-label
-                  (last (list-ref rule-hierarchy
-                    (1- (get-rejoinder-level TYPE)))))
-                a-rule ghost-next-rejoinder))
+            (set-next-rule
+              (get-rule-from-label
+                (last (list-ref rule-hierarchy
+                  (1- (get-rejoinder-level TYPE)))))
+              a-rule ghost-next-rejoinder)
             (add-to-rule-hierarchy
               (get-rejoinder-level TYPE) NAME))
           (begin
