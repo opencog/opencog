@@ -109,10 +109,11 @@
                (cog-name (list-ref word-seq (1+ i))) ""))
            (current-word-splitted
              (string-split current-word-str (char-set #\' #\’)))
-           (next-word-splitted
-             (string-split next-word-str (char-set #\' #\’))))
+           (next-word-prefix-with-apos?
+             (or (string-prefix? "'" next-word-str)
+                 (string-prefix? "’" next-word-str))))
       (cond
-        ((> (length next-word-splitted) 1)
+        (next-word-prefix-with-apos?
          (let ((merged-word (WordNode
                  (string-append
                    current-word-str
