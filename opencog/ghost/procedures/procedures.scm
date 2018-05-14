@@ -130,13 +130,20 @@
 ;(define (perceived-face face-id x y z)
 ;  (cog-pointmem-map-atom facemap (Concept face-id)
 ;    (List (Number x) (Number y) (Number z)))
+(define default-stimulus 150)
 
 (define (perceive-face face-id confidence)
-  (cog-set-tv! (see-face face-id) (stv 1 confidence))
+  (let ((model (see-face face-id)))
+    (cog-stimulate model default-stimulus)
+    (cog-set-tv! model (stv 1 confidence))
+  )
 )
 
 (define (perceive-emotion face-id emotion-type confidence)
-  (cog-set-tv! (face-emotion face-id emotion-type) (stv 1 confidence))
+  (let ((model (face-emotion face-id emotion-type)))
+    (cog-stimulate model default-stimulus)
+    (cog-set-tv! model (stv 1 confidence))
+  )
 )
 
 (define (perceive-word word)
@@ -147,7 +154,7 @@
   ; This is mainly to make sure the rules with only a wildcard in the pattern
   ; will also get some non-zero STI.
   ; TODO: Find some better representation for that
-  (cog-stimulate ghost-word-seq (/ default-stimulus 2))
+  (cog-stimulate (ghost-word-seq-pred) (/ default-stimulus 2))
 
   (ghost-stimulate wn)
 )
@@ -157,6 +164,7 @@
     (old-conf (tv-conf (cog-tv model))))
 
     (cog-set-tv! model (stv 1 new-conf))
+    (cog-stimulate model default-stimulus)
     (set-event-times! face-talking-sign model old-conf new-conf)
   )
 )
