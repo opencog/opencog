@@ -417,6 +417,7 @@
 
     (goal-member
       (LITERAL EQUAL NUM) : (format #f "(cons \"~a\" ~a)" $1 $3)
+      (LITERAL_APOS EQUAL NUM) : (format #f "(cons \"~a\" ~a)" $1 $3)
       (LEMMA EQUAL NUM) : (format #f "(cons \"~a\" ~a)" $1 $3)
       (STRING EQUAL NUM) : (format #f "(cons \"~a\" ~a)" $1 $3)
     )
@@ -515,6 +516,7 @@
     (phrase-term
       (LEMMA) : $1
       (LITERAL) : $1
+      (LITERAL_APOS) : $1
       (STRING) : $1
     )
 
@@ -619,6 +621,7 @@
     (arg
       (LEMMA) : (format #f "(cons 'arg \"~a\")" $1)
       (LITERAL) : (format #f "(cons 'arg \"~a\")" $1)
+      (LITERAL_APOS) : (format #f "(cons 'arg \"~a\")" $1)
       (NUM) : (format #f "(cons 'arg \"~a\")" $1)
       (STRING) : (format #f "(cons 'arg \"~a\")" $1)
       (variable-grounding) : $1
