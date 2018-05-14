@@ -180,3 +180,7 @@
 ; so that we can stimulate the generic one and the STI will diffuse to
 ; the specific predicates connecting to it
 (Inheritance (GroundedPredicate "scm: after_min") (Concept "timer-predicate"))
+(Inheritance (GroundedPredicate "scm: after_user_started_talking")
+  (Concept "timer-predicate"))
+(Inheritance (GroundedPredicate "scm: after_user_stopped_talking")
+  (Concept "timer-predicate"))

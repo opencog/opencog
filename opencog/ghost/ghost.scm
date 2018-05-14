@@ -85,6 +85,13 @@
 (define strval-gambit (StringValue "gambit"))
 
 ;; --------------------
+(define-public (ghost-word-seq-pred)
+"
+  Returns the Predicate that represent word sequences.
+"
+  ghost-word-seq)
+
+;; --------------------
 ;; For rule parsing
 
 ; When set, all the rules created will be under this topic
