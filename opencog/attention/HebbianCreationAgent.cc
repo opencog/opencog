@@ -112,7 +112,8 @@ void HebbianCreationAgent::run()
         //Pick a random target and create the link if it doesn't exist already
         for (int i = 0; i < farLinks; i++) {
             Handle target = _bank->getRandomAtomNotInAF();
-            if(Handle::UNDEFINED != target){
+            if(Handle::UNDEFINED != target and
+               (not classserver().isA(target->get_type(), HEBBIAN_LINK))){
                 Handle link = _as->get_handle(ASYMMETRIC_HEBBIAN_LINK, source, target);
                 if (link == Handle::UNDEFINED)
                     addHebbian(source,target);
