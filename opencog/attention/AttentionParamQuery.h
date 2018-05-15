@@ -60,6 +60,7 @@ namespace opencog
             static const std::string dif_spread_percentage;
             static const std::string dif_spread_hebonly;
             static const std::string dif_tournament_size;
+            static const std::string spreading_filter;
 
             // Rent Params
             static const std::string rent_starting_sti_rent;
