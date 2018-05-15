@@ -157,15 +157,17 @@
       (result:suffix 'NUM location
         (string-trim (match:substring current-match))))
     ((has-match? "^[ ]*[|]" str)
-     (result:suffix 'VLINE location
-        (string-trim (match:substring current-match))))
+      (result:suffix 'VLINE location
+         (string-trim (match:substring current-match))))
     ((has-match? "^[ ]*," str)
-     (result:suffix 'COMMA location
-        (string-trim (match:substring current-match))))
+      (result:suffix 'COMMA location
+         (string-trim (match:substring current-match))))
     ; This should always be near the end, because it is broadest of all.
     ((has-match? "^[ \t]*[~’'._!?0-9a-zA-Z-]+" str)
-        (result:suffix 'STRING location
-          (string-trim (match:substring current-match))))
+      (result:suffix 'STRING location
+        (string-trim (match:substring current-match))))
+    ; Trailing space
+    ((has-match? "^[ \t]+$" str) (result:suffix 'TRAILSPACE location #f))
     ; NotDefined token is used for errors only and there shouldn't be any rules.
     (else (cons (make-lexical-token 'NotDefined location str) ""))
   )
@@ -229,7 +231,7 @@
     ; ? = Comparison tests
     ; VLINE = Vertical Line |
     (CONCEPT TOPIC RESPONDERS REJOINDERS GAMBIT URGE ORD-GOAL GOAL RGOAL COMMENT
-     SAMPLE_INPUT WHITESPACE
+     SAMPLE_INPUT TRAILSPACE
       (right: LPAREN LSBRACKET << ID VAR * ^ < LEMMA LITERAL LITERAL_APOS NUM DICTKEY
               STRING *~n *n UVAR MVAR MOVAR EQUAL NOT RESTART LBRACE VLINE COMMA)
       (left: RPAREN RSBRACKET RBRACE >> > DQUOTE)
@@ -252,6 +254,7 @@
       (enter) : $1
       (COMMENT) : #f
       (SAMPLE_INPUT) : #f ; TODO replace with a tester function
+      (TRAILSPACE) : #f
     )
 
     (enter
