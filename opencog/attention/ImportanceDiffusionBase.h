@@ -54,6 +54,11 @@ protected:
     double hebbianMaxAllocationPercentage;
     bool spreadHebbianOnly;
     AttentionParamQuery _atq;
+    // Set of atoms types spreading should not happen to.
+    // These types of atoms will not have STI value but
+    // atoms linked via them will receive STI via
+    // spreading.
+    HandleSeq hsfilter_out;
 
     typedef struct DiffusionEventType
     {

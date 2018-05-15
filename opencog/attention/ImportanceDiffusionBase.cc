@@ -55,10 +55,14 @@ ImportanceDiffusionBase::ImportanceDiffusionBase(CogServer& cs) : Agent(cs)
                          ,_atq(&cs.getAtomSpace())
 {
     _bank = &attentionbank(_as);
+    // Filter out atoms listed in SPREADING_FILTER param so that no
+    // STI would be propagated to them.
+    Handle memberlink = _atq.get_param_hvalue(AttentionParamQuery::spreading_filter);
+    hsfilter_out = memberlink->getOutgoingSet();
 
     // Provide a logger
     setLogger(new opencog::Logger("ImportanceDiffusionBase.log",
-                                  Logger::FINE, true));
+                Logger::FINE, true));
 }
 
 /*
@@ -172,6 +176,28 @@ void ImportanceDiffusionBase::diffuseAtom(Handle source)
         return;
     }
 
+    // Filter out atom types that we don't want STI to be spread to.
+    AttentionValue::sti_t total_refund = 0.0;
+
+    for(auto it = probabilityVector.begin() ; it != probabilityVector.end();)
+    {
+        Handle target = it->first;
+        auto ij = std::find_if(hsfilter_out.begin(), hsfilter_out.end(),
+                [target](const Handle& h){
+                return (target->get_type() == h->get_type());
+                });
+        if( hsfilter_out.end() != ij){
+            total_refund += (totalDiffusionAmount * it->second);
+            probabilityVector.erase(it);
+        } else {
+            ++it;
+        }
+    }
+
+    // Equally spread back the amount that was supposed to be spread to the
+    // atoms types in hsfilter_out.
+    auto refund = total_refund / probabilityVector.size();
+
     // Perform diffusion from the source to each atom target
     for( const auto& p : probabilityVector)
     {
@@ -180,7 +206,7 @@ void ImportanceDiffusionBase::diffuseAtom(Handle source)
         // Calculate the diffusion amount using the entry in the probability
         // vector for this particular target (stored in iterator->second)
         diffusionEvent.amount = (AttentionValue::sti_t)
-                (totalDiffusionAmount * p.second);
+            ((totalDiffusionAmount * p.second) + refund);
 
         diffusionEvent.source = source;
         diffusionEvent.target = p.first;
