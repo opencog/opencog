@@ -138,11 +138,15 @@
     ((has-match? "^[ ]*!" str) (result:suffix 'NOT location #f))
     ((has-match? "^[ ]*[?]" str) (result:suffix '? location "?"))
     ((has-match? "^[ ]*=" str) (result:suffix 'EQUAL location #f))
+    ; Words with apostrophe, e.g. I'm, it's etc
+    ((has-match? "^[ ]*[a-zA-Z]+['’][a-zA-Z]+" str)
+      (result:suffix 'LITERAL_APOS location
+        (string-trim (match:substring current-match))))
     ; Literals -- words start with a '
     ((has-match? "^[ ]*'[a-zA-Z]+\\b" str)
       (result:suffix 'LITERAL location
         (substring (string-trim (match:substring current-match)) 1)))
-    ((has-match? "^[ ]*[a-zA-Z’'-]+\\b" str)
+    ((has-match? "^[ ]*[a-zA-Z-]+\\b" str)
       (if (is-lemma? (string-trim (match:substring current-match)))
         (result:suffix 'LEMMA location
           (string-trim (match:substring current-match)))
@@ -226,7 +230,7 @@
     ; VLINE = Vertical Line |
     (CONCEPT TOPIC RESPONDERS REJOINDERS GAMBIT URGE ORD-GOAL GOAL RGOAL COMMENT
      SAMPLE_INPUT WHITESPACE
-      (right: LPAREN LSBRACKET << ID VAR * ^ < LEMMA LITERAL NUM DICTKEY
+      (right: LPAREN LSBRACKET << ID VAR * ^ < LEMMA LITERAL LITERAL_APOS NUM DICTKEY
               STRING *~n *n UVAR MVAR MOVAR EQUAL NOT RESTART LBRACE VLINE COMMA)
       (left: RPAREN RSBRACKET RBRACE >> > DQUOTE)
       (right: ? CR NEWLINE)
@@ -293,6 +297,7 @@
     (declaration-member
       (lemma) : $1
       (literal) : $1
+      (literal-apos) : $1
       (phrase) : $1
       (concept) : $1
       (sequence) : $1
@@ -412,6 +417,7 @@
 
     (goal-member
       (LITERAL EQUAL NUM) : (format #f "(cons \"~a\" ~a)" $1 $3)
+      (LITERAL_APOS EQUAL NUM) : (format #f "(cons \"~a\" ~a)" $1 $3)
       (LEMMA EQUAL NUM) : (format #f "(cons \"~a\" ~a)" $1 $3)
       (STRING EQUAL NUM) : (format #f "(cons \"~a\" ~a)" $1 $3)
     )
@@ -437,6 +443,7 @@
       (wildcard) : $1
       (lemma) : $1
       (literal) : $1
+      (literal-apos) : $1
       (phrase) : $1
       (concept) : $1
       (variable) : $1
@@ -466,6 +473,7 @@
       (DQUOTE) : "(cons 'str \"\\\"\")"
       (LEMMA) : (format #f "(cons 'str \"~a\")" $1)
       (LITERAL) : (format #f "(cons 'str \"~a\")" $1)
+      (LITERAL_APOS) : (format #f "(cons 'str \"~a\")" $1)
       (NUM) : (format #f "(cons 'str \"~a\")" $1)
       (STRING) : (format #f "(cons 'str \"~a\")" $1)
       (variable) : $1
@@ -492,6 +500,10 @@
       (STRING) : (format #f "(cons 'word \"~a\")" $1)
     )
 
+    (literal-apos
+      (LITERAL_APOS) : (format #f "(cons 'word-apos \"~a\")" $1)
+    )
+
     (phrase
       (DQUOTE phrase-terms DQUOTE) : (format #f "(cons 'phrase \"~a\")" $2)
     )
@@ -504,6 +516,7 @@
     (phrase-term
       (LEMMA) : $1
       (LITERAL) : $1
+      (LITERAL_APOS) : $1
       (STRING) : $1
     )
 
@@ -529,6 +542,7 @@
     (choice-term
       (lemma) : $1
       (literal) : $1
+      (literal-apos) : $1
       (phrase) : $1
       (concept) : $1
       (sequence) : $1
@@ -573,6 +587,7 @@
     (negation-term
       (lemma) : $1
       (literal) : $1
+      (literal-apos) : $1
       (phrase) : $1
       (concept) : $1
     )
@@ -606,6 +621,7 @@
     (arg
       (LEMMA) : (format #f "(cons 'arg \"~a\")" $1)
       (LITERAL) : (format #f "(cons 'arg \"~a\")" $1)
+      (LITERAL_APOS) : (format #f "(cons 'arg \"~a\")" $1)
       (NUM) : (format #f "(cons 'arg \"~a\")" $1)
       (STRING) : (format #f "(cons 'arg \"~a\")" $1)
       (variable-grounding) : $1
@@ -625,6 +641,7 @@
       (wildcard) : $1
       (lemma) : $1
       (literal) : $1
+      (literal-apos) : $1
       (phrase) : $1
     )
 
@@ -656,6 +673,7 @@
     (unordered-term
       (lemma) : $1
       (literal) : $1
+      (literal-apos) : $1
       (phrase) : $1
       (concept) : $1
       (choice) : $1

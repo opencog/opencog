@@ -63,8 +63,16 @@
         (* context-weight
           (assoc-ref context-alist (psi-get-context R))) 1))
     (define sti (if SKIP-STI
-      ; Weight higher if the rule is in the current topic
-      (if (is-rule-in-topic? R (ghost-get-curr-topic)) 1 0.5)
+      ; Weight higher if the rule is in the current topic, and/or
+      ; it's a rejoinder
+      (let ((topic-weight
+              (if (is-rule-in-topic? R (ghost-get-curr-topic)) 1 0.5))
+            (rejoinder-weight
+             ; A crude way to see if R is a rejoinder
+             (if (any (lambda (x) (equal? x ghost-last-executed))
+                      (cog-get-all-nodes R))
+                 1 0.1)))
+        (* topic-weight rejoinder-weight))
       (if (> sti-weight 0)
         (* sti-weight (cog-av-sti R)) 1)))
     (define urge

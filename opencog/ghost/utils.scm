@@ -57,7 +57,7 @@
   For use of choices, negation, and topic etc.
 "
   (map (lambda (t)
-    (cond ((equal? 'word (car t))
+    (cond ((or (equal? 'word (car t)) (equal? 'word-apos (car t)))
            (WordNode (cdr t)))
           ((equal? 'lemma (car t))
            (LemmaNode (get-lemma (cdr t))))
@@ -79,6 +79,8 @@
   Get the words and their corresponding lemmas associate with SENT
   and put them into two lists -- word-seq and lemma-seq.
 "
+  (define input-word-seq (car (sent-get-words-in-order SENT)))
+
   (define (get-seq TYPE)
     (append-map
       (lambda (w)
@@ -88,31 +90,80 @@
                 (null? (cog-chase-link TYPE 'WordNode w)))
             '()
             (cog-chase-link TYPE 'WordNode w)))
-      (car (sent-get-words-in-order SENT))))
+      input-word-seq))
 
-  (let ((word-seq (List (get-seq 'ReferenceLink)))
-        ; In some rare situation, particularly if the input
-        ; sentence is not grammatical, RelEx may not lemmatize a
-        ; word because of the ambiguity.
-        ; As a result the lemma sequence may contain non-lemmatized
-        ; words, which will become a problem during rule-matching.
-        ; As a quick workaround, do "ghost-get-lemma" for each of
-        ; the words in the lemma sequence
-        (lemma-seq
-          (apply ghost-get-lemma
-            ; For idioms, they will be joined by a "_",
-            ; e.g. "allows_for"
-            ; Split it so that DualLink can find the rule
-            (append-map
-              (lambda (w)
-                (if (equal? #f (string-contains (cog-name w) "_"))
-                  (list w)
-                  (map Word (string-split (cog-name w) #\_))))
-              (get-seq 'LemmaLink)))))
+  (define word-seq (get-seq 'ReferenceLink))
 
-       ; These EvaluationLinks will be used in the matching process
-       (Evaluation ghost-word-seq (List SENT word-seq))
-       (Evaluation ghost-lemma-seq (List SENT lemma-seq))))
+  (define final-word-seq '())
+  (define word-apos-alist '())
+
+  ; Contraction may be splitted into two WordNodes, because of their linguistic role
+  ; e.g. "I'm" -> "I" and "'m"
+  ; Merge them back to one, just for matching
+  (do ((i 0 (1+ i)))
+      ((>= i (length word-seq)))
+    (let* ((current-word-node (list-ref word-seq i))
+           (current-word-str (cog-name current-word-node))
+           (next-word-str
+             (if (< (1+ i) (length word-seq))
+               (cog-name (list-ref word-seq (1+ i))) ""))
+           (current-word-splitted
+             (string-split current-word-str (char-set #\' #\’)))
+           (next-word-prefix-with-apos?
+             (or (string-prefix? "'" next-word-str)
+                 (string-prefix? "’" next-word-str))))
+      (cond
+        (next-word-prefix-with-apos?
+         (let ((merged-word (WordNode
+                 (string-append
+                   current-word-str
+                   "'"  ; This will turn "’" into "'", for consistency
+                   (string-drop next-word-str 1)))))
+           (set! final-word-seq (append final-word-seq (list merged-word)))
+           (set! word-apos-alist (assoc-set! word-apos-alist i merged-word))
+           (set! i (1+ i))))
+        ; The current word may also have an apostrophe, make sure to turn
+        ; "’" into "'" as well for consistency
+        ((> (length current-word-splitted) 1)
+         (let ((new-word (WordNode (string-join current-word-splitted "'"))))
+           (set! final-word-seq (append final-word-seq (list new-word)))
+           (set! word-apos-alist (assoc-set! word-apos-alist i new-word))))
+        (else (set! final-word-seq (append final-word-seq (list current-word-node)))))))
+
+  (Evaluation ghost-word-seq (List SENT (List final-word-seq)))
+
+  ; Generate this lemma-seq only for backward compatibility
+  (if (not ghost-with-ecan)
+    (let (; In some rare situation, particularly if the input
+          ; sentence is not grammatical, RelEx may not lemmatize a
+          ; word because of the ambiguity.
+          ; As a result the lemma sequence may contain non-lemmatized
+          ; words, which will become a problem during rule-matching.
+          ; As a quick workaround, do "ghost-get-lemma" for each of
+          ; the words in the lemma sequence
+          (lemma-seq (cog-outgoing-set
+            (apply ghost-get-lemma
+              ; For idioms, they will be joined by a "_",
+              ; e.g. "allows_for"
+              ; Split it so that DualLink can find the rule
+              (append-map
+                (lambda (w)
+                  (if (equal? #f (string-contains (cog-name w) "_"))
+                    (list w)
+                    (map Word (string-split (cog-name w) #\_))))
+                (get-seq 'LemmaLink)))))
+          (final-lemma-seq '()))
+      ; Get the contractions found above, if any, and put it in the lemma-seq
+      ; Use their original form in matching, instead of their lemmas
+      (do ((i 0 (1+ i)))
+          ((>= i (length lemma-seq)))
+        (set! final-lemma-seq (append final-lemma-seq (list
+          (if (assoc-ref word-apos-alist i)
+            (begin
+              (set! i (1+ i))
+              (assoc-ref word-apos-alist (1- i)))
+            (list-ref lemma-seq i))))))
+    (Evaluation ghost-lemma-seq (List SENT (List final-lemma-seq))))))
 
 ; ----------
 (define (get-lemma-from-relex WORD)

@@ -130,16 +130,42 @@
 ;(define (perceived-face face-id x y z)
 ;  (cog-pointmem-map-atom facemap (Concept face-id)
 ;    (List (Number x) (Number y) (Number z)))
+(define default-stimulus 150)
 
 (define (perceive-face face-id confidence)
-  (cog-set-tv! (see-face face-id) (stv 1 confidence))
+"
+  perceive-face FACE-ID CONFIDENCE
+
+  Returns the atom representing whether the face with id FACE-ID is being
+  seen, after setting its truth-value to (stv 1 CONFIDENCE) and increasing
+  its sti.
+"
+  (let ((model (see-face face-id)))
+    (cog-stimulate model default-stimulus)
+    (cog-set-tv! model (stv 1 confidence))
+  )
 )
 
 (define (perceive-emotion face-id emotion-type confidence)
-  (cog-set-tv! (face-emotion face-id emotion-type) (stv 1 confidence))
+"
+  perceive-emotion FACE-ID EMOTION-TYPE CONFIDENCE
+
+  Returns the atom representing whether the face with id FACE-ID is in an
+  emotional-state EMOTION-TYPE, after increasing its sti and setting its
+  truth-value to (stv 1 CONFIDENCE).
+"
+  (let ((model (face-emotion face-id emotion-type)))
+    (cog-stimulate model default-stimulus)
+    (cog-set-tv! model (stv 1 confidence))
+  )
 )
 
 (define (perceive-word word)
+"
+  perceive-word WORD
+
+  Returns WORD after increasing its sti.
+"
   (define wn (Word word))
   (set-time-perceived! wn)
 
@@ -147,16 +173,29 @@
   ; This is mainly to make sure the rules with only a wildcard in the pattern
   ; will also get some non-zero STI.
   ; TODO: Find some better representation for that
-  (cog-stimulate ghost-word-seq (/ default-stimulus 2))
+  (cog-stimulate (ghost-word-seq-pred) (/ default-stimulus 2))
 
   (ghost-stimulate wn)
 )
 
 (define (perceive-face-talking face-id new-conf)
+"
+  perceive-face-talking FACE-ID NEW-CONF
+
+  Returns the atom representing that the face with id FACE-ID is talking,
+  after increasing its sti, setting its truth-value to (stv 1 NEW-CONF),
+  and recording the start/stop time of the face starting/stoping talking.
+
+  When NEW-CONF increases past 0.5 then the time is recorded as
+  the start time for the event of the person starting talking, and when
+  NEW-CONF decreases past 0.5 the time is recorded as the stop time for
+  event of the person stopped talking.
+"
   (let* ((model (face-talking face-id))
     (old-conf (tv-conf (cog-tv model))))
 
     (cog-set-tv! model (stv 1 new-conf))
+    (cog-stimulate model default-stimulus)
     (set-event-times! face-talking-sign model old-conf new-conf)
   )
 )
