@@ -58,7 +58,7 @@ ImportanceDiffusionBase::ImportanceDiffusionBase(CogServer& cs) : Agent(cs)
     // Filter out atoms listed in SPREADING_FILTER param so that no
     // STI would be propagated to them.
     Handle memberlink = _atq.get_param_hvalue(AttentionParamQuery::spreading_filter);
-    hsfilter_out = memberlink->getOutgoingSet();
+    hsFilterOut = memberlink->getOutgoingSet();
 
     // Provide a logger
     setLogger(new opencog::Logger("ImportanceDiffusionBase.log",
@@ -177,17 +177,17 @@ void ImportanceDiffusionBase::diffuseAtom(Handle source)
     }
 
     // Filter out atom types that we don't want STI to be spread to.
-    AttentionValue::sti_t total_refund = 0.0;
+    AttentionValue::sti_t totalRefund = 0.0;
 
     for(auto it = probabilityVector.begin() ; it != probabilityVector.end();)
     {
         Handle target = it->first;
-        auto ij = std::find_if(hsfilter_out.begin(), hsfilter_out.end(),
+        auto ij = std::find_if(hsFilterOut.begin(), hsFilterOut.end(),
                 [target](const Handle& h){
                 return (target->get_type() == h->get_type());
                 });
-        if( hsfilter_out.end() != ij){
-            total_refund += (totalDiffusionAmount * it->second);
+        if( hsFilterOut.end() != ij){
+            totalRefund += (totalDiffusionAmount * it->second);
             probabilityVector.erase(it);
         } else {
             ++it;
@@ -195,8 +195,8 @@ void ImportanceDiffusionBase::diffuseAtom(Handle source)
     }
 
     // Equally spread back the amount that was supposed to be spread to the
-    // atoms types in hsfilter_out.
-    auto refund = total_refund / probabilityVector.size();
+    // atoms types in hsFilterOut.
+    auto refund = totalRefund / probabilityVector.size();
 
     // Perform diffusion from the source to each atom target
     for( const auto& p : probabilityVector)
