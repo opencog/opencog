@@ -582,7 +582,16 @@
     ; Update the count -- how many rules we've seen under this top level goal
     ; Do it only if the rules are ordered and it's not a rejoinder
     (if (and is-rule-seq (not is-rejoinder?))
-      (set! goal-rule-cnt (+ goal-rule-cnt 1)))
+      (begin
+        (set! goal-rule-cnt (+ goal-rule-cnt 1))
+        ; Force the rules defined in a sequence to be triggered
+        ; in an ordered fashion
+        ; TODO: Remove the geometric series?
+        (if (> (length rule-hierarchy) 0)
+          (set! conds (append conds (list
+            (Evaluation
+              (GroundedPredicate "scm: ghost-prev-rule-triggered?")
+              (List (Concept (caar rule-hierarchy))))))))))
 
     (map
       (lambda (goal)
