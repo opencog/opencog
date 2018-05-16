@@ -567,7 +567,8 @@ std::vector<std::pair<Handle, double>> ImportanceDiffusionBase::redistribute(con
         // the remaining value(sti) should in theory be collected back by rent collection
         // agent.
         // FIXME it could accumulate such small sti values over time and endup in the AF?
-        if(sti < MIN_SPREADING_VALUE){
+        auto min_spreading_value = _bank->get_af_min_sti();
+        if(sti < min_spreading_value){
             refund.push_back(std::make_pair(target, sti));
             return refund;
         }
