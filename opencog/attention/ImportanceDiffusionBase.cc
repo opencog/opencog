@@ -185,7 +185,7 @@ void ImportanceDiffusionBase::diffuseAtom(Handle source)
         Handle target = it->first;
         auto ij = std::find_if(hsFilterOut.begin(), hsFilterOut.end(),
                 [target](const Handle& h){
-                return (target->get_type() == h->get_type());
+                return (target->get_type() == classerver().getType(h->get_name()));
                 });
         if( hsFilterOut.end() != ij){
             totalRefund += (totalDiffusionAmount * it->second);
