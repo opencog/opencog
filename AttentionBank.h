@@ -132,6 +132,14 @@ public:
             return 0;
     }
 
+    AttentionValue::sti_t get_af_min_sti(void) const
+    {
+        if (attentionalFocus.rbegin() != attentionalFocus.rend())
+            return ((attentionalFocus.rend()-1)->second)->getSTI();
+        else
+            return 0;
+    }
+
     void set_af_size(int size) {
         maxAFSize = size;
     }
