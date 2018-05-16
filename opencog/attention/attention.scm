@@ -13,9 +13,9 @@
 (load "attention/default-param-values.scm")
 
 
-(define-public (ecan-set-filter . type-symbols)
+(define-public (ecan-set-spreading-filter . type-symbols)
 "
-  ecan-set-filter TYPE-SYMBOLS
+  ecan-set-spreading-filter TYPE-SYMBOLS
 
   Set ecan to filter atoms of TYPE-SYMOBLS.
 "
