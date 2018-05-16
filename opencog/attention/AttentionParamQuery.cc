@@ -29,7 +29,7 @@ const std::string AttentionParamQuery::heb_local_farlink_ratio = "LOCAL_FAR_LINK
 const std::string AttentionParamQuery::dif_spread_percentage = "MAX_SPREAD_PERCENTAGE";
 const std::string AttentionParamQuery::dif_spread_hebonly = "SPREAD_HEBBIAN_ONLY";
 const std::string AttentionParamQuery::dif_tournament_size = "DIFFUSION_TOURNAMENT_SIZE";
-const std::string spreading_filter = "SPREADING_FILTER";
+const std::string AttentionParamQuery::spreading_filter = "SPREADING_FILTER";
 
 // Rent Params
 const std::string AttentionParamQuery::rent_starting_sti_rent = "STARTING_ATOM_STI_RENT";
