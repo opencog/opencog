@@ -177,28 +177,24 @@ void ImportanceDiffusionBase::diffuseAtom(Handle source)
         return;
     }
 
-    // Filter out atom types that we don't want STI to be spread to.
-    AttentionValue::sti_t totalRefund = 0.0;
 
-    for(auto it = probabilityVector.begin() ; it != probabilityVector.end();)
-    {
-        Handle target = it->first;
-        auto ij = std::find_if(hsFilterOut.begin(), hsFilterOut.end(),
-                [target](const Handle& h){
-                return (target->get_type() == classerver().getType(h->get_name()));
-                });
-        if( hsFilterOut.end() != ij){
-            totalRefund += (totalDiffusionAmount * it->second);
-            probabilityVector.erase(it);
-        } else {
-            ++it;
+    std::map<Handle, double> refund;
+    // Redistribute sti values that should not go to certain types of atoms.
+    for(auto it = probabilityVector.begin() ; it !=probabilityVector.end() ; ++it){
+        std::vector<std::pair<Handle, double>> tempRefund;
+        redistribute(it->first, it->second, tempRefund);
+        // Now lets append the tempRefund map to refund map
+        for(const auto& p : tempRefund){
+           if(refund.find(p.first) == refund.end())
+               refund[p.first] = p.second;
+           else
+               refund[p.first] += (refund[p.first] + p.second);
         }
     }
 
-    // Equally spread back the amount that was supposed to be spread to the
-    // atoms types in hsFilterOut.
-    auto refund = totalRefund / probabilityVector.size();
-
+    // Finishe the redistribution by assigning new values to probabilityVector.
+    probabilityVector = refund;
+    
     // Perform diffusion from the source to each atom target
     for( const auto& p : probabilityVector)
     {
@@ -207,7 +203,7 @@ void ImportanceDiffusionBase::diffuseAtom(Handle source)
         // Calculate the diffusion amount using the entry in the probability
         // vector for this particular target (stored in iterator->second)
         diffusionEvent.amount = (AttentionValue::sti_t)
-            ((totalDiffusionAmount * p.second) + refund);
+            (totalDiffusionAmount * p.second);
 
         diffusionEvent.source = source;
         diffusionEvent.target = p.first;
@@ -226,6 +222,8 @@ void ImportanceDiffusionBase::diffuseAtom(Handle source)
 
     // TODO: Support inverse hebbian links
 }
+
+
 
 /*
  * Trades STI between a source atom and a target atom
@@ -533,3 +531,39 @@ void ImportanceDiffusionBase::processDiffusionStack()
 
 }
 
+std::vector<std::pair<Handle, double>> ImportanceDiffusionBase::redistribute(const Handle& target,
+                         const double& sti, std::vector<std::pair<Handle, double>>& refund){
+    auto ij = std::find_if(hsFilterOut.begin(), hsFilterOut.end(),
+            [target](const Handle& h){
+            return (target->get_type() == classserver().getType(h->get_name()));
+            });
+
+    if(ij != hsFilterOut.end()){
+        // This is to prevent indefinite recursion which could
+        // happen incase of a cyclic graph.
+        // Assuming MIN_SPREADING_VALUE will be very small
+        // compared to the minimum STI in the AF and no direct stimulation,
+        // this  atoms should never get the chance to enter into the AF.
+        // the remaining value(sti) should in theory be collected back by rent collection
+        // agent.
+        // FIXME it could accumulate such small sti values over time and endup in the AF?
+        if(sti < MIN_SPREADING_VALUE){
+            refund.push_back(std::make_pair(target, sti));
+            return refund;
+        }
+        HandleSeq seq;
+        if(target->is_node())
+            target->getIncomingSet(std::back_inserter(seq));
+        else
+            seq = target->getOutgoingSet();
+
+        auto r = sti/seq.size();
+        for(const Handle& h : seq)
+            redistribute(h, r, refund);
+    }
+    else{
+        refund.push_back(std::make_pair(target, sti));
+    }
+
+    return refund;
+}

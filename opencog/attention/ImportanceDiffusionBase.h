@@ -91,6 +91,11 @@ protected:
     virtual void spreadImportance() = 0;
     virtual AttentionValue::sti_t calculateDiffusionAmount(Handle) = 0;
 
+    const double MIN_SPREADING_VALUE = 0.01;
+    // Recursively try to redistribute STI which was supposed to be delivered to
+    // certain atom types which should not receive STI.
+    std::vector<std::pair<Handle, double>> redistribute(const Handle& target, const double& sti,
+                                          std::vector<std::pair<Handle, double>>& refund);
 public:
     ImportanceDiffusionBase(CogServer&);
     virtual ~ImportanceDiffusionBase();
