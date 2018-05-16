@@ -72,6 +72,9 @@ For example, if there are five rules under the above `please_user=0.8` goal, the
 
 Additionally, when a rule in a sequence is triggered, it will have a lower STI while the next rules in the same sequence will receive a boost in STI, so as to increase the chance of being selected in the next cycle.
 
+Updated May 2018:
+Looks like the above methods of biasing the rules to be triggered in the defined order are not enough to give the behavior that one would expect, so an extra condition has been added to the context of the rules to make sure the rule will be triggered only if the previous rules has been triggered.
+
 2) Rule level goal(s)
 
 ```
