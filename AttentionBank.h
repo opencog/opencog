@@ -135,7 +135,7 @@ public:
     AttentionValue::sti_t get_af_min_sti(void) const
     {
         if (attentionalFocus.rbegin() != attentionalFocus.rend())
-            return ((attentionalFocus.rend()-1)->second)->getSTI();
+            return (attentionalFocus.begin()->second)->getSTI();
         else
             return 0;
     }
