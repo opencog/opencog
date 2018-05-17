@@ -223,7 +223,7 @@
     (catch #t
       (lambda () (psi-rule? x))
       (lambda (key . args)
-        (format #t "Catched Error at ~a\nError details =\"~a ~a\"\n"
+        (format #f "Catched Error at ~a\nError details =\"~a ~a\"\n"
           (current-source-location) key args) #f)))
 
   (define candidate-rules
