@@ -628,6 +628,7 @@
       (NUM) : (format #f "(cons 'arg \"~a\")" $1)
       (STRING) : (format #f "(cons 'arg \"~a\")" $1)
       (variable-grounding) : $1
+      (UVAR) : (format #f "(cons 'get_uvar \"~a\")" $1)
     )
 
     (sequence
