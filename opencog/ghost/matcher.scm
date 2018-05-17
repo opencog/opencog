@@ -239,8 +239,6 @@
   (cog-logger-debug ghost-logger "Selected:\n~a" rule-selected)
 
   ; Keep a record of which rule got executed, just for rejoinders
-  ; TODO: Move this part to OpenPsi?
-  ; TODO: This should be created after actually executing the action
   (if (not (null? rule-selected))
     (let ((next-responder (cog-value rule-selected ghost-next-responder))
           (next-rejoinder (cog-value rule-selected ghost-next-rejoinder))
