@@ -342,6 +342,10 @@
           '()
           (list (action-choices choices)))))
 
+  ; Whether or not the rule that's being reused is also reusing
+  ; another rule
+  (define is-reusing-another-rule? #f)
+
   ; A typical action of a GHOST rule looks like this:
   ;
   ; (TrueLink
@@ -358,15 +362,40 @@
   ; the additional ones that are in the same TrueLink
   ; TODO: Handle variables as well
   (define (get-reused-action atomese)
-    (append-map
-      (lambda (x)
-        (cond ((equal? 'TrueLink (cog-type x))
-               (get-reused-action (cog-outgoing-set x)))
-              ((and (equal? 'ExecutionOutputLink (cog-type x))
-                    (equal? gsn-action (gar x)))
-               (get-reused-action (cog-outgoing-set (gdr x))))
-              (else (list x))))
-      atomese))
+    (define action-atomese
+      (append-map
+        (lambda (x)
+          (cond ((equal? 'TrueLink (cog-type x))
+                 (get-reused-action (cog-outgoing-set x)))
+                ((and (equal? 'ExecutionOutputLink (cog-type x))
+                      (equal? gsn-action (gar x)))
+                 (get-reused-action (cog-outgoing-set (gdr x))))
+                ; A crude way to find whether the rule is reusing
+                ; another rule
+                ((and (equal? 'PutLink (cog-type x))
+                      (equal? 'StateLink (cog-type (gar x)))
+                      (equal? ghost-last-executed (gaar x)))
+                 (set! is-reusing-another-rule? #t)
+                 (list x))
+                (else (list x))))
+        atomese))
+      ; Filter out duplicate PutLinks in the action -- the ones that
+      ; are updating the same pattern, e.g. if there are (Put A B)
+      ; and (Put (State A) C) in a list, then only (Put (State A) C)
+      ; is kept as it's the last one in the list
+      ; Filtering may be needed when "reuse" is called more than one time,
+      ; either in a single rule, or other rule in the chain
+      ; The fold-right and reverse are there to perserve the execution order
+      (reverse
+        (fold-right
+          (lambda (atom rtn)
+            (if (and (equal? 'PutLink (cog-type atom))
+                     (equal? 'StateLink (cog-type (gar atom)))
+                     (find (lambda (x) (equal? (gar atom) (gar x))) rtn))
+              rtn
+              (append rtn (list atom))))
+          (list)
+          action-atomese)))
 
   (define action-atomese (to-atomese (cdar ACTION)))
 
@@ -378,17 +407,31 @@
           (if reuse
             (get-reused-action action-atomese)
             action-atomese)))
+      ; Keep a record of which rule got executed, just for rejoinders
+      ; And when a "reuse" is used, it becomes slightly more complicated
       ; The expected behavior is that, when (the action of) a rule is reused,
       ; the rule will be considered as fired, so mark the last executed rule
       ; as the reused one instead of the one that calls the reuse function,
       ; so that the rejoinders (if any) of the reused rule can be triggered
       ; correctly
-      ; If there are more than one "reuse"s being used in a single action,
-      ; the last reused rule will be mark as the last executed rule
-      (if reuse
-        (Put (State ghost-last-executed (Variable "$x"))
-             (Concept reused-rule-label))
-        (list))
+      (cond ; If it's reusing a rule that reuses another rule,
+            ; no need to generate this as we only need to record the last
+            ; one down the line
+            ((and reuse is-reusing-another-rule?)
+             (list))
+            ; If it's reusing a rule that does not reuse any other rule,
+            ; generate this so that the reused rule will be marked as
+            ; the last executed once the action is executed
+            ; If there are more than one "reuse"s being used in a single action,
+            ; the last reused rule will be mark as the last executed rule
+            (reuse
+              (Put (State ghost-last-executed (Variable "$x"))
+                   (Concept reused-rule-label)))
+            ; If no reuse is called, just mark the current one as the last
+            ; executed rule
+            (else
+              (Put (State ghost-last-executed (Variable "$x"))
+                   (Concept RULENAME))))
       (if (not keep)
           ; The default behavior is to not executed the
           ; same action more than once -- update the

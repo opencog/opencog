@@ -75,6 +75,7 @@
 (define ghost-word-seq (Predicate (ghost-prefix "Word Sequence")))
 (define ghost-lemma-seq (Predicate (ghost-prefix "Lemma Sequence")))
 (define ghost-topic (Concept (ghost-prefix "Topic")))
+(define ghost-rule-executed (Concept (ghost-prefix "Rule Executed")))
 (define ghost-topic-feature (Predicate (ghost-prefix "Topic Feature")))
 (define ghost-rule-type (Predicate (ghost-prefix "Rule Type")))
 (define ghost-next-responder (Predicate (ghost-prefix "Next Responder")))

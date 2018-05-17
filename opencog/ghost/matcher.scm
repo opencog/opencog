@@ -207,17 +207,6 @@
         (cog-logger-debug ghost-logger "To-be-evaluated:\n~a" rules-candidates)
         (cog-logger-debug ghost-logger "Selected:\n~a" selected)
 
-        ; Keep a record of which rule got executed, just for rejoinders
-        ; TODO: Move this part to OpenPsi?
-        ; TODO: This should be created after actually executing the action
-        (if (not (null? selected))
-          ; There are psi-rules with no alias, e.g. rules that are not
-          ; defined in GHOST, ignore them, as they are not using 'rejoinders'
-          ; which applies to GHOST rules only
-          (let ((alias (psi-rule-alias selected)))
-            (if (not (null? alias))
-              (State ghost-last-executed alias))))
-
         (List selected)))
 
 ; ----------
@@ -253,15 +242,9 @@
   ; TODO: Move this part to OpenPsi?
   ; TODO: This should be created after actually executing the action
   (if (not (null? rule-selected))
-    (let ((alias (psi-rule-alias rule-selected))
-          (next-responder (cog-value rule-selected ghost-next-responder))
+    (let ((next-responder (cog-value rule-selected ghost-next-responder))
           (next-rejoinder (cog-value rule-selected ghost-next-rejoinder))
           (av-alist (cog-av->alist (cog-av rule-selected))))
-      ; There are psi-rules with no alias, e.g. rules that are not
-      ; defined in GHOST, ignore them, as they are not using 'rejoinders'
-      ; which applies to GHOST rules only
-      (if (not (null? alias))
-        (State ghost-last-executed alias))
       ; Stimulate the next rules in the sequence and lower the STI of
       ; the current one
       ; Rejoinders has a bigger boost than responder
