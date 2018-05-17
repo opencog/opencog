@@ -59,6 +59,7 @@
 "
   (psi-decrease-urge (Concept (cog-name goal))
     (string->number (cog-name value)))
+  fini
 )
 
 (define (increase_urge goal value)
@@ -69,6 +70,7 @@
 "
   (psi-increase-urge (Concept (cog-name goal))
     (string->number (cog-name value)))
+  fini
 )
 
 (define (stimulate_words . words)
