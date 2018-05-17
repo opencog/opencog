@@ -28,8 +28,7 @@
 #include <opencog/attentionbank/AttentionBank.h>
 #include <opencog/cogserver/server/CogServer.h>
 #include <opencog/util/Config.h>
-
-#include "opencog/attention/atom_types.definitions"
+#include <opencog/attention/atom_types.h>
 
 using namespace opencog;
 using namespace std::placeholders;
