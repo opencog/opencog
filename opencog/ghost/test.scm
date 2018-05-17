@@ -191,9 +191,17 @@
   (define next-responder (cog-value rule ghost-next-responder))
   (define next-rejoinder (cog-value rule ghost-next-rejoinder))
   (if (not (null? rule))
-    (format #t "AV = ~a\nTV = ~a\nNext responder: ~a\nNext rejoinder: ~a\n"
+    (format #t (string-append
+      "AV = ~a\n"
+      "TV = ~a\n"
+      "Satisfiability: ~a\n"
+      "Next responder: ~a\n"
+      "Next rejoinder: ~a\n")
       (cog-av rule)
       (cog-tv rule)
+      (every
+        (lambda (x) (> (cdr (assoc 'mean (cog-tv->alist (cog-evaluate! x)))) 0))
+        (psi-get-context rule))
       (if (null? next-responder)
         (list)
         (append-map psi-rule-alias (cog-value->list next-responder)))
