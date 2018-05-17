@@ -364,34 +364,31 @@
 ; --------------------------------------------------------------
 (define (test_psi_goal_functions_1)
 "
-  Test psi-increase-urge function. The urge should increase in magnitude.
+  Test psi-increase-urge function. The urge should increase in magnitude to
+  a maximum of 1.
 
-  Run before test_psi_goal_functions_2 to ensure that it increases the
-  magnitude regardless of the sign of the urge.
+  Run before test_psi_goal_functions_2, so as to explore the range of values.
 "
-  (let ((loop 2))
+  (let ((loop 8))
     (while (not (equal? 0 loop))
-      (psi-increase-urge goal-1 0.1)
-      (psi-increase-urge goal-2 0.1)
+      (psi-increase-urge goal-1 0.2)
       (set! loop (- loop 1)))
   )
 
-  (and (equal? -0.5 (psi-urge goal-1)) (equal? 0.5 (psi-urge goal-2)))
+  (= 1 (psi-urge goal-1))
 )
 
 (define (test_psi_goal_functions_2)
 "
-  Test psi-decrease-urge function. The urge should decrease to 0
-  reagardless of whether urge is positive or negative.
+  Test psi-decrease-urge function. The urge should decrease to a minimum of 0.
 "
-  (let ((loop 6))
+  (let ((loop 8))
     (while (not (equal? 0 loop))
-      (psi-decrease-urge goal-1 0.1)
-      (psi-decrease-urge goal-2 0.1)
+      (psi-decrease-urge goal-1 0.2)
       (set! loop (- loop 1)))
   )
 
-  (and (equal? 0.0 (psi-urge goal-1)) (equal? 0.0 (psi-urge goal-2)))
+  (= 0.0 (psi-urge goal-1))
 )
 
 ; --------------------------------------------------------------
