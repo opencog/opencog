@@ -57,7 +57,12 @@ void HebbianCreationAgent::run()
                                (AttentionParamQuery::heb_local_farlink_ratio));
 
     Handle source;
+    if(newAtomsInAV.is_empty()){
+      return;
+    }
     newAtomsInAV.pop(source);
+    if (source == Handle::UNDEFINED)
+        return;
 
     // HebbianLinks should not normally enter to the AF boundary since they
     // should not normally have STI values.The below check will avoid such
@@ -71,31 +76,8 @@ void HebbianCreationAgent::run()
     HandleSet attentionalFocus;
     _bank->get_handle_set_in_attentional_focus(std::inserter(attentionalFocus,attentionalFocus.begin()));
   
-    HandleSeq topStiInAF;
-    auto afSti = _bank->get_af_max_sti(); 
-    for (const auto& h : attentionalFocus) {
-        if (get_sti(h) >= afSti)
-            topStiInAF.push_back(h);
-    }
-    std::sort(topStiInAF.begin(), topStiInAF.end());
-
-    //  - Get handles with sti [ 0, MinSti(AF)]
-    HandleSeq includesAFAtoms;
-    _bank->get_handles_by_AV(back_inserter(includesAFAtoms), 0, afSti);
-    std::sort(includesAFAtoms.begin(), includesAFAtoms.end());
-
-    HandleSeq notAttentionalFocus;
-    // Atoms not in AF
-    std::set_difference(topStiInAF.begin(), topStiInAF.end(),
-                        includesAFAtoms.begin(), includesAFAtoms.end(),
-                        std::back_inserter(notAttentionalFocus));
-
-
     // Exclude the source atom
     attentionalFocus.erase(source);
-
-    if (source == Handle::UNDEFINED)
-        return;
 
     // Get the neighboring atoms, where the connecting edge
     // is an AsymmetricHebbianLink in either direction
@@ -127,22 +109,19 @@ void HebbianCreationAgent::run()
         count++;
     }
 
-    std::default_random_engine generator;
-    if(notAttentionalFocus.size() > 0 ){
-        std::uniform_int_distribution<int> distribution(0,(int)notAttentionalFocus.size()-1);
-
         //How many links outside the AF should be created
         int farLinks = round(count / localToFarLinks);
 
         //Pick a random target and create the link if it doesn't exist already
         for (int i = 0; i < farLinks; i++) {
-            Handle target = notAttentionalFocus[distribution(generator)];
-            Handle link = _as->get_handle(ASYMMETRIC_HEBBIAN_LINK, source, target);
-            if (link == Handle::UNDEFINED)
-                addHebbian(source,target);
+            Handle target = _bank->getRandomAtomNotInAF();
+            if(Handle::UNDEFINED != target and
+               (not classserver().isA(target->get_type(), HEBBIAN_LINK))){
+                Handle link = _as->get_handle(ASYMMETRIC_HEBBIAN_LINK, source, target);
+                if (link == Handle::UNDEFINED)
+                    addHebbian(source,target);
+            }
         }
-    }
-
     //Check the ammount of HebbianLinks the Atom has
     IncomingSet iset;
     classserver().foreachRecursive(
@@ -157,6 +136,7 @@ void HebbianCreationAgent::run()
     //      that will keep some of the weak links intact
     if (iset.size() >= maxLinkNum) {
         std::uniform_int_distribution<int> distribution2(0,iset.size()-1);
+        std::default_random_engine generator;
         size_t s = iset.size();
         do {
             _as->remove_atom(iset[distribution2(generator)]->get_handle(), true);

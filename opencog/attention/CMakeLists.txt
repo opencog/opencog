@@ -45,9 +45,7 @@ ADD_LIBRARY(attention SHARED
 	#scm/StimulationAgent
 )
 
-ADD_DEPENDENCIES(attention attention-types)
-
-TARGET_LINK_LIBRARIES(attention server ${ATOMSPACE_LIBRARIES})
+TARGET_LINK_LIBRARIES(attention attention-types server ${ATOMSPACE_LIBRARIES})
 
 
 INSTALL (TARGETS attention-types
