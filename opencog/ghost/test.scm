@@ -242,6 +242,22 @@
       (if (null? last-rule) "N.A." (cog-name (car last-rule))))))
 
 ; ----------
+(define-public (ghost-show-executed-rules)
+"
+  Show a list of rules that have been executed.
+"
+  (define rset (cog-execute! (Get
+    (Evaluation (Predicate "GHOST Rule Executed") (List (Variable "$x"))))))
+
+  (define rtn (cog-outgoing-set rset))
+
+  ; Remove the SetLink
+  (cog-extract rset)
+
+  rtn
+)
+
+; ----------
 (define-public (ghost-set-strength-weight VAL)
 "
   Set the weight of the strength used duing action selection.
