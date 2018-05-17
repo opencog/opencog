@@ -75,12 +75,17 @@
   then it is used as the desired-goal-value for the goal otherwise,
   1 is assumed to be the desired-goal-value.
 
-  Goal-value should be in the range [0, 1].
+  VALUE and DGV should be in the range [0, 1].
 "
   ; NOTE: Why not make this part of psi-rule function? Because, developers
   ; might want to specify the behavior they prefer, when it comes to how
   ; to measure the level of achivement of goal, and how the goal's measurement
   ; value should change.
+  (if (not (and (<= 0 dgv) (<= dgv 1)))
+    (error "Expected 0 <= dgv <= 1, got" dgv))
+  (if (not (and (<= 0 value) (<= value 1)))
+    (error "Expected 0 <= value <= 1, got" value))
+
   (let* ((goal (Concept name)))
     (InheritanceLink goal psi-goal-node)
     (psi-set-gv! goal value)
@@ -88,7 +93,10 @@
     ; to change. Of course a StateLink can be used. At present there isn't
     ; any process that uses that explicit(aka queryable) information, thus
     ; nothing is lost.
-    (psi-set-dgv! goal dgv)
+    (if (and (<= 0 dgv) (<= dgv 1))
+      (psi-set-dgv! goal dgv)
+      (error "Expected 0 <= dgv <= 1, got" dgv)
+    )
   )
 )
 
