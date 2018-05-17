@@ -453,7 +453,7 @@ public:
         logger().debug("Start subset test");
         for (int vhIdx = 0; vhIdx < NUM_VHS; vhIdx++) {
 
-            TS_ASSERT(classserver().isA(SUBSET_LINK, INHERITANCE_LINK));
+            TS_ASSERT(nameserver().isA(SUBSET_LINK, INHERITANCE_LINK));
 
             // Note: SUBSET_LINK is a subType of INHERITANCE_LINK
             HandleSeq links;
