@@ -434,12 +434,3 @@
 
   ; Return an atom
   (True))
-
-; ----------
-(define-public (ghost-prev-rule-triggered? RULENAME)
-"
-  If the rule is defined in a sequence (i.e. under an ordered-goal),
-  make sure the previous one in the same sequence has been triggered.
-"
-  (psi-action-executed? (get-rule-from-label (cog-name RULENAME)))
-)

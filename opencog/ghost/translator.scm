@@ -370,17 +370,10 @@
                 ((and (equal? 'ExecutionOutputLink (cog-type x))
                       (equal? gsn-action (gar x)))
                  (get-reused-action (cog-outgoing-set (gdr x))))
-                ; A crude way to find whether the rule is reusing
-                ; another rule
-                ((and (equal? 'PutLink (cog-type x))
-                      (equal? 'StateLink (cog-type (gar x)))
-                      (equal? ghost-last-executed (gaar x)))
-                 (set! is-reusing-another-rule? #t)
-                 (list x))
                 (else (list x))))
         atomese))
       ; Filter out duplicate PutLinks in the action -- the ones that
-      ; are updating the same pattern, e.g. if there are (Put A B)
+      ; are updating the same state, e.g. if there are (Put (State A) B)
       ; and (Put (State A) C) in a list, then only (Put (State A) C)
       ; is kept as it's the last one in the list
       ; Filtering may be needed when "reuse" is called more than one time,
@@ -392,7 +385,12 @@
             (if (and (equal? 'PutLink (cog-type atom))
                      (equal? 'StateLink (cog-type (gar atom)))
                      (find (lambda (x) (equal? (gar atom) (gar x))) rtn))
-              rtn
+              (begin
+                ; A crude way to find whether the rule is reusing
+                ; another rule
+                (if (equal? ghost-last-executed (gaar atom))
+                  (set! is-reusing-another-rule? #t))
+                rtn)
               (append rtn (list atom))))
           (list)
           action-atomese)))
@@ -417,8 +415,7 @@
       (cond ; If it's reusing a rule that reuses another rule,
             ; no need to generate this as we only need to record the last
             ; one down the line
-            ((and reuse is-reusing-another-rule?)
-             (list))
+            ((and reuse is-reusing-another-rule?) (list))
             ; If it's reusing a rule that does not reuse any other rule,
             ; generate this so that the reused rule will be marked as
             ; the last executed once the action is executed
@@ -443,6 +440,10 @@
             (List (Concept RULENAME)
                   (Number 0)))
           (list))
+      ; Keep a record of which rules have been executed
+      (Put
+        (Evaluation ghost-rule-executed (List (Variable "$x")))
+        (Concept RULENAME))
       ; Set the current topic, for backward compatibility
       (if ghost-with-ecan
         (list)
@@ -629,12 +630,23 @@
         (set! goal-rule-cnt (+ goal-rule-cnt 1))
         ; Force the rules defined in a sequence to be triggered
         ; in an ordered fashion
-        ; TODO: Remove the geometric series?
+        ; Note: psi-action-executed? is not used here, because
+        ; when (the action of) a rule is "reused", it will be
+        ; considered as "used". But "reuse" is just about executing
+        ; the action of another rule, it doesn't evaluate the
+        ; context of a rule, i.e. it doesn't go through the
+        ; PsiImplicator, so psi-action-executed? will return
+        ; false for the reused rule even if its action has been
+        ; executed already, which is not the behavior we want here
+        ; TODO: Remove the geometric series as it is no longer needed?
         (if (> (length rule-hierarchy) 0)
-          (set! conds (append conds (list
-            (Evaluation
-              (GroundedPredicate "scm: ghost-prev-rule-triggered?")
-              (List (Concept (caar rule-hierarchy))))))))))
+          (let ((var (Variable (gen-var "GHOST-executed-rule" #f))))
+            (set! vars (append vars (list
+              (TypedVariable var (Type "ConceptNode")))))
+            (set! conds (append conds (list
+              (Evaluation ghost-rule-executed (List var))
+              (Equal var (Concept (caar rule-hierarchy))))))))
+    ))
 
     (map
       (lambda (goal)
