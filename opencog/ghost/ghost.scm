@@ -72,6 +72,7 @@
 (define ghost-curr-topic (Anchor (ghost-prefix "Current Topic")))
 (define ghost-last-executed (Anchor (ghost-prefix "Last Executed")))
 (define ghost-no-constant (Anchor (ghost-prefix "No constant terms")))
+(define ghost-rule-executed (Predicate (ghost-prefix "Rule Executed")))
 (define ghost-word-seq (Predicate (ghost-prefix "Word Sequence")))
 (define ghost-lemma-seq (Predicate (ghost-prefix "Lemma Sequence")))
 (define ghost-topic (Concept (ghost-prefix "Topic")))
