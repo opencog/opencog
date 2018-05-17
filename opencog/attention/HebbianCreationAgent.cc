@@ -57,6 +57,9 @@ void HebbianCreationAgent::run()
                                (AttentionParamQuery::heb_local_farlink_ratio));
 
     Handle source;
+    if(newAtomsInAV.is_empty()){
+      return;
+    }
     newAtomsInAV.pop(source);
     if (source == Handle::UNDEFINED)
         return;
