@@ -56,10 +56,6 @@ ImportanceDiffusionBase::ImportanceDiffusionBase(CogServer& cs) : Agent(cs)
                          ,_atq(&cs.getAtomSpace())
 {
     _bank = &attentionbank(_as);
-    // Filter out atoms listed in SPREADING_FILTER param so that no
-    // STI would be propagated to them.
-    Handle memberlink = _atq.get_param_hvalue(AttentionParamQuery::spreading_filter);
-    hsFilterOut = memberlink->getOutgoingSet();
 
     // Provide a logger
     setLogger(new opencog::Logger("ImportanceDiffusionBase.log",
@@ -177,9 +173,17 @@ void ImportanceDiffusionBase::diffuseAtom(Handle source)
         return;
     }
 
+    static bool isFirstRun = true;
+    // Filter out atoms listed in SPREADING_FILTER param so that no
+    // STI would be propagated to them.
+    if(isFirstRun){
+        Handle memberlink = _atq.get_param_hvalue(AttentionParamQuery::spreading_filter);
+        hsFilterOut = memberlink->getOutgoingSet();
+        isFirstRun = false;
+    }
 
+    // Redistribute sti values that should not go to types in hsFilterOut.
     std::map<Handle, double> refund;
-    // Redistribute sti values that should not go to certain types of atoms.
     for(auto it = probabilityVector.begin() ; it !=probabilityVector.end() ; ++it){
         std::vector<std::pair<Handle, double>> tempRefund;
         redistribute(it->first, it->second, tempRefund);
