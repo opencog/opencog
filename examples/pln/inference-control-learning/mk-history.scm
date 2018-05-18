@@ -20,8 +20,8 @@
     (icl-cp local-history-as (cog-get-atoms-as trace-as 'ExecutionLink))
     (remove-dangling-atoms local-history-as)
 
-    ;; (icl-logger-debug "Per Problem History AtomSpace:")
-    ;; (icl-logger-debug-atomspace history-as)
+    (icl-logger-fine "Per Problem History AtomSpace:")
+    (icl-logger-fine-atomspace local-history-as)
 
     (icl-logger-debug "Size of local history: ~a" (icl-count-all local-history-as))
 

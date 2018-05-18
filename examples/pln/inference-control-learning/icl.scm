@@ -1,8 +1,8 @@
 ;; Contain the main inference control learning experiment loop
 
 ;; Set parameters
-(define pss 100)                    ; Problem set size
-(define niter 2)                    ; Number of iterations
+(define pss 40)                    ; Problem set size
+(define niter 1)                    ; Number of iterations
 (define piter 30)                   ; Number of iterations used for each problem
 
 ;; Load utils
@@ -15,18 +15,18 @@
 
 ;; Set loggers levels
 (cog-logger-set-level! "info")
-(cog-logger-set-level! icl-logger "debug")
-(cog-logger-set-level! (cog-ure-logger) "info")
+(icl-logger-set-level! "fine")
+(ure-logger-set-level! "info")
 
 ;; Set loggers stdout
 ;; (cog-logger-set-stdout! #t)
-(cog-logger-set-stdout! icl-logger #t)
-;; (cog-logger-set-stdout! (cog-ure-logger) #t)
+(icl-logger-set-stdout! #t)
+;; (ure-logger-set-stdout! #t)
 
 ;; ;; Set loggers sync (for debugging)
 ;; (cog-logger-set-sync! #t)
-;; (cog-logger-set-sync! icl-logger #t)
-;; (cog-logger-set-sync! (cog-ure-logger) #t)
+;; (icl-logger-set-sync! #t)
+;; (ure-logger-set-sync! #t)
 
 ;; Clear and reload the kb and rb
 (define (reload)
