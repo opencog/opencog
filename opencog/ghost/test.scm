@@ -265,7 +265,7 @@
   (if (number? VAL)
     (set! strength-weight VAL)
     (cog-logger-warn ghost-logger
-      "The weight has to be a numeric value!" VAL))
+      "The weight has to be a numeric value!"))
 )
 
 ; ----------
@@ -276,7 +276,7 @@
   (if (number? VAL)
     (set! context-weight VAL)
     (cog-logger-warn ghost-logger
-      "The weight has to be a numeric value!" VAL))
+      "The weight has to be a numeric value!"))
 )
 
 ; ----------
@@ -287,7 +287,7 @@
   (if (number? VAL)
     (set! sti-weight VAL)
     (cog-logger-warn ghost-logger
-      "The weight has to be a numeric value!" VAL))
+      "The weight has to be a numeric value!"))
 )
 
 ; ----------
@@ -298,5 +298,34 @@
   (if (number? VAL)
     (set! urge-weight VAL)
     (cog-logger-warn ghost-logger
-      "The weight has to be a numeric value!" VAL))
+      "The weight has to be a numeric value!"))
+)
+
+; ----------
+(define-public (ghost-set-rep-sti-boost VAL)
+"
+  ghost-set-rep-sti-boost VAL
+
+  Set how much of a default stimulus will be given to
+  the next responder after triggering the previous
+  one in the sequence.
+"
+  (if (number? VAL)
+    (set! responder-sti-boost VAL)
+    (cog-logger-warn ghost-logger
+      "The responder STI boost has to be a numberic value!"))
+)
+
+; ----------
+(define-public (ghost-set-rej-sti-boost VAL)
+"
+  ghost-set-rej-sti-boost VAL
+
+  Set how much of a default stimulus will be given to
+  the next rejoinder(s) after triggering the parent rule.
+"
+  (if (number? VAL)
+    (set! rejoinder-sti-boost VAL)
+    (cog-logger-warn ghost-logger
+      "The rejoinder STI boost has to be a numberic value!"))
 )
