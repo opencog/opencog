@@ -365,7 +365,10 @@
     (define action-atomese
       (append-map
         (lambda (x)
-          (cond ((equal? 'TrueLink (cog-type x))
+          (cond ; "x" could just be a list if ^keep() is used
+                ; in the same rule, skip it that's the case
+                ((and keep (list? x) (null? x)) (list))
+                ((equal? 'TrueLink (cog-type x))
                  (get-reused-action (cog-outgoing-set x)))
                 ((and (equal? 'ExecutionOutputLink (cog-type x))
                       (equal? gsn-action (gar x)))
