@@ -245,7 +245,7 @@
           (av-alist (cog-av->alist (cog-av rule-selected))))
       ; Stimulate the next rules in the sequence and lower the STI of
       ; the current one
-      ; Rejoinders has a bigger boost than responder
+      ; Rejoinders will have a bigger boost than responders by default
       (if (not (null? next-responder))
         (for-each
           (lambda (r) (cog-stimulate r (* default-stimulus responder-sti-boost)))
