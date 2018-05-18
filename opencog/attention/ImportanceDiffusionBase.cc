@@ -559,7 +559,7 @@ std::vector<std::pair<Handle, double>> ImportanceDiffusionBase::redistribute(con
         HandleSeq seq;
         if(target->is_node())
             target->getIncomingSet(std::back_inserter(seq));
-        else
+        else if(target->is_link())
             seq = target->getOutgoingSet();
 
         auto r = sti/seq.size();
