@@ -14,7 +14,7 @@
 #include <stdio.h>
 
 #include <opencog/util/platform.h>
-#include <opencog/atoms/base/ClassServer.h>
+#include <opencog/atoms/proto/NameServer.h>
 #include <opencog/truthvalue/SimpleTruthValue.h>
 #include <opencog/nlp/wsd/ForeachWord.h>
 
@@ -136,7 +136,7 @@ bool NNAdjust::sense_pair(const Handle& pair_link)
 {
 	// If this is not a cosense link, skip it.
 	Type t = pair_link->get_type();
-	if (classserver().isA(t, COSENSE_LINK)) return false;
+	if (nameserver().isA(t, COSENSE_LINK)) return false;
 
 	// If this link is not linking the first and second sense, skip it.
 	const HandleSeq& outset = pair_link->getOutgoingSet();

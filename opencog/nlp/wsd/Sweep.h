@@ -14,7 +14,7 @@
 #include <set>
 
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/atoms/base/types.h>
+#include <opencog/atoms/proto/types.h>
 
 namespace opencog {
 

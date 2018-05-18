@@ -2,7 +2,7 @@
 
 (define-module (opencog nlp))
 
-; Load the C library; this calls the classserver to load the types.
+; Load the C library; this calls the nameserver to load the types.
 (load-extension "libnlp-types" "nlp_types_init")
 
 ; User-modifiable config parameters.

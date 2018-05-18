@@ -27,7 +27,7 @@
 
 #include <sstream>
 #include <string>
-#include <opencog/atoms/base/atom_types.h>
+#include <opencog/atoms/proto/atom_types.h>
 #include <opencog/atomspace/AtomSpace.h>
 
 namespace opencog

@@ -1,4 +1,5 @@
 
+#include <opencog/atoms/proto/NameServer.h>
 #include <opencog/atomutils/Neighbors.h>
 #include <opencog/atoms/base/Link.h>
 #include <opencog/guile/SchemeEval.h>
@@ -78,7 +79,7 @@ std::string AttentionParamQuery::get_param_value(const std::string& param)
     }
 
     Handle  hvalue = hsvalue[0];
-    if (not classserver().isA(hvalue->get_type(), NODE)){
+    if (not nameserver().isA(hvalue->get_type(), NODE)){
         throw RuntimeException(TRACE_INFO, "Parameter's value is a link. Can't"
                 "convert to string.",
                 param.c_str());
