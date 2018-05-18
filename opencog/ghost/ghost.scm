@@ -147,6 +147,8 @@
 (define context-weight 1)
 (define sti-weight 1)
 (define urge-weight 1)
+(define responder-sti-boost 1)
+(define rejoinder-sti-boost 10)
 
 ;; --------------------
 ;; For monitoring the status
