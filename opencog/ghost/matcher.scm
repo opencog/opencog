@@ -248,11 +248,11 @@
       ; Rejoinders has a bigger boost than responder
       (if (not (null? next-responder))
         (for-each
-          (lambda (r) (cog-stimulate r (/ default-stimulus 2)))
+          (lambda (r) (cog-stimulate r (* default-stimulus responder-sti-boost)))
           (cog-value->list next-responder)))
       (if (not (null? next-rejoinder))
         (for-each
-          (lambda (r) (cog-stimulate r default-stimulus))
+          (lambda (r) (cog-stimulate r (* default-stimulus rejoinder-sti-boost)))
           (cog-value->list next-rejoinder)))
       ; Lower the STI of the selected one
       (cog-set-av!
