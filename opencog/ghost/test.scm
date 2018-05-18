@@ -265,7 +265,7 @@
   (if (number? VAL)
     (set! strength-weight VAL)
     (cog-logger-warn ghost-logger
-      "The weight has to be a numeric value!"))
+      "The weight of the strength has to be a numeric value!"))
 )
 
 ; ----------
@@ -276,7 +276,7 @@
   (if (number? VAL)
     (set! context-weight VAL)
     (cog-logger-warn ghost-logger
-      "The weight has to be a numeric value!"))
+      "The weight of the context has to be a numeric value!"))
 )
 
 ; ----------
@@ -287,7 +287,7 @@
   (if (number? VAL)
     (set! sti-weight VAL)
     (cog-logger-warn ghost-logger
-      "The weight has to be a numeric value!"))
+      "The weight of the STI has to be a numeric value!"))
 )
 
 ; ----------
@@ -298,7 +298,7 @@
   (if (number? VAL)
     (set! urge-weight VAL)
     (cog-logger-warn ghost-logger
-      "The weight has to be a numeric value!"))
+      "The weight of the urge has to be a numeric value!"))
 )
 
 ; ----------
