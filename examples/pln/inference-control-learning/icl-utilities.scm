@@ -184,6 +184,15 @@
 "
   (icl-cp AS (apply append (map cog-get-atoms (cog-get-types)))))
 
+(define (icl-count-all AS)
+"
+  Return the total number of atoms in atomspace AS
+"
+  (let ((old-as (cog-set-atomspace! AS))
+        (as-count (count-all)))
+    (cog-set-atomspace! old-as)
+    as-count))
+
 (define (preproof-of arg)
   (Evaluation
     (Predicate "URE:BC:preproof-of")
