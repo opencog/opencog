@@ -14,9 +14,9 @@
 (cog-randgen-set-seed! 0)
 
 ;; Set loggers levels
-(cog-logger-set-level! "debug")
+(cog-logger-set-level! "info")
 (cog-logger-set-level! icl-logger "debug")
-(cog-logger-set-level! (cog-ure-logger) "fine")
+(cog-logger-set-level! (cog-ure-logger) "info")
 
 ;; Set loggers stdout
 ;; (cog-logger-set-stdout! #t)
@@ -75,7 +75,7 @@
     ;; Remove dangling atoms from history-as. These are produced due
     ;; to alpha-conversion. It creates inconsistencies, see
     ;; https://github.com/opencog/atomspace/issues/1417. It's not too
-    ;; harmful for now but it will have to be remedy at some point.
+    ;; harmful for now but it will have to be remedied at some point.
     (icl-logger-info "Remove dangling atoms from history-as")
     (remove-dangling-atoms history-as)
 
