@@ -152,7 +152,9 @@ LG_LINK_INSTANCE_LINK <- LIST_LINK
 
 // ---------------------------------------------------------------
 // Types used in the Lojban Parser
-// What do thse types do? XXX FIXME - these names are excessively
-// generic, and quite mysterious.
+// XXX FIXME - these names are excessively generic, and are
+// undocumented. Based on conversations, both of these links appear to
+// be special cases of TypedAtomLink, see discussion at
+// https://github.com/opencog/opencog/pull/3115
 SET_TYPE_LINK <- ORDERED_LINK
 SET_SIZE_LINK <- ORDERED_LINK
