@@ -591,11 +591,13 @@ void ImportanceDiffusionBase::redistribute(const Handle& target, const double& s
             refund.push_back(std::make_pair(target, sti));
             return;
         }
+
+        // Redistribute to all neighbors.
         HandleSeq seq;
-        if(target->is_node())
-            target->getIncomingSet(std::back_inserter(seq));
-        else if(target->is_link())
+        if(target->is_link())
             seq = target->getOutgoingSet();
+
+        target->getIncomingSet(std::back_inserter(seq));
 
         auto r = sti/seq.size();
         for(const Handle& h : seq)
