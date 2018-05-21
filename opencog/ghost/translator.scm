@@ -705,7 +705,7 @@
             ; This is used during matching, basically rejoinders is treated
             ; as a sequence, and the one defined first will be matched first
             ; if it satisfies the context
-            (cog-set-value! a-rule ghost-is-rejoinder (FloatValue
+            (cog-set-value! a-rule ghost-rej-seq-num (FloatValue
               (length (list-ref rule-hierarchy (get-rejoinder-level TYPE))))))
           (begin
             ; If it's not a rejoinder, its parent rules should

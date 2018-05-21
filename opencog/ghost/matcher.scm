@@ -160,12 +160,12 @@
     (let ((rejoinder
             (fold
               (lambda (rej top-rej)
-                (if (and (not (null? (cog-value rej ghost-is-rejoinder)))
+                (if (and (not (null? (cog-value rej ghost-rej-seq-num)))
                          (or (null? top-rej)
                              (< (car (cog-value->list
-                                       (cog-value rej ghost-is-rejoinder)))
+                                       (cog-value rej ghost-rej-seq-num)))
                                 (car (cog-value->list
-                                       (cog-value top-rej ghost-is-rejoinder))))))
+                                       (cog-value top-rej ghost-rej-seq-num))))))
                   rej
                   top-rej))
               (list)
