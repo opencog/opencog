@@ -557,6 +557,21 @@ void ImportanceDiffusionBase::processDiffusionStack()
 
 std::vector<std::pair<Handle, double>> ImportanceDiffusionBase::redistribute(const Handle& target,
                          const double& sti, std::vector<std::pair<Handle, double>>& refund){
+/**
+ * Redistributed amount of sti that should have gone to target atom if
+ * the atom type is in the Fitler set. The sti will be equally distributed
+ * to the incoming or outgoing set of target atom.
+ *
+ * @param target the atom whose to type is to be checked against the filter set.
+ *
+ * @sti   the sti that should be redistribited if the target's type is in Filter
+ * set.
+ *
+ * @refund a list of pairs of atoms and redistributed sti.
+ *
+ * @return void.
+ *
+ */
     static unsigned int NRECURSION = 1; // Prevent stack-overflowing. XXX how to determing maxdepth?
     auto ij = std::find_if(hsFilterOut.begin(), hsFilterOut.end(),
             [target](const Handle& h){
