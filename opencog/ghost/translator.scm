@@ -769,6 +769,7 @@
 "
   (set! top-lv-goals GOALS)
   (set! is-rule-seq ORDERED)
+  (set! rule-hierarchy '())
 
   ; Reset the count when we see a new top level goal
   (set! goal-rule-cnt 0))
