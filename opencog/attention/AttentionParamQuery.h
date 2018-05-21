@@ -27,7 +27,7 @@
 
 #include <sstream>
 #include <string>
-#include <opencog/atoms/base/atom_types.h>
+#include <opencog/atoms/proto/atom_types.h>
 #include <opencog/atomspace/AtomSpace.h>
 
 namespace opencog
@@ -60,6 +60,7 @@ namespace opencog
             static const std::string dif_spread_percentage;
             static const std::string dif_spread_hebonly;
             static const std::string dif_tournament_size;
+            static const std::string spreading_filter;
 
             // Rent Params
             static const std::string rent_starting_sti_rent;
@@ -74,6 +75,7 @@ namespace opencog
 
             void load_default_values(void);
             std::string get_param_value(const std::string& param);
+            Handle get_param_hvalue(const std::string& param);
             HandleSeq get_params(void);
 
             template<class T>
@@ -90,6 +92,16 @@ namespace opencog
 
                     _as->add_link(STATE_LINK, HandleSeq{param, hvalue});
                 }
+
+            void set_param(const std::string& param_name,Handle hvalue)
+            {
+                Handle param = _as->add_node(CONCEPT_NODE, param_name);
+                Handle member_link = _as->add_link(MEMBER_LINK,
+                        HandleSeq{param, parent_param});
+
+                _as->add_link(STATE_LINK, HandleSeq{param, hvalue});
+            }
+
     }; // class
 
     /** @}*/

@@ -3179,7 +3179,7 @@ crap. Are teh datbases corrupt???
 
 also .. reload the typemap
 type_map_was_loaded = false
-classserver().getNumberOfClasses();
+nameserver().getNumberOfClasses();
 
 INSERT INTO Valuations
    (SELECT 1 AS key,  -- 1 here is the predicate node

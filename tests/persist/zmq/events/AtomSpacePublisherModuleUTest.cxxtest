@@ -34,7 +34,7 @@
 #include <opencog/util/Config.h>
 
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/atoms/base/types.h>
+#include <opencog/atoms/proto/types.h>
 #include <opencog/attention/atom_types.h>
 #include <opencog/truthvalue/TruthValue.h>
 #include <opencog/truthvalue/SimpleTruthValue.h>

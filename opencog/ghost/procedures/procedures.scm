@@ -190,8 +190,11 @@
   the start time for the event of the person starting talking, and when
   NEW-CONF decreases past 0.5 the time is recorded as the stop time for
   event of the person stopped talking.
+
+  If FACE-ID = \"\" then an unidentified source is talking.
 "
-  (let* ((model (face-talking face-id))
+  (let* ((model
+           (if (equal? "" face-id) face-talking-sign (face-talking face-id)))
     (old-conf (tv-conf (cog-tv model))))
 
     (cog-set-tv! model (stv 1 new-conf))

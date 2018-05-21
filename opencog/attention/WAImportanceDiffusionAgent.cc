@@ -30,6 +30,7 @@
 #include <opencog/attentionbank/AttentionBank.h>
 #include <opencog/attentionbank/StochasticImportanceDiffusion.h>
 
+#include "AttentionUtils.h"
 #include "WAImportanceDiffusionAgent.h"
 
 using namespace opencog;

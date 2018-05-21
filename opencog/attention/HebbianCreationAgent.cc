@@ -22,6 +22,7 @@
 #include <opencog/util/Config.h>
 #include <opencog/util/algorithm.h>
 
+#include <opencog/atoms/proto/NameServer.h>
 #include <opencog/atoms/base/Link.h>
 #include <opencog/truthvalue/IndefiniteTruthValue.h>
 #include <opencog/truthvalue/SimpleTruthValue.h>
@@ -32,6 +33,7 @@
 #include <opencog/attentionbank/AttentionBank.h>
 #include <opencog/cogserver/server/CogServer.h>
 
+#include "AttentionUtils.h"
 #include "HebbianCreationAgent.h"
 
 #ifdef DEBUG
@@ -57,45 +59,32 @@ void HebbianCreationAgent::run()
                                (AttentionParamQuery::heb_local_farlink_ratio));
 
     Handle source;
+    if(newAtomsInAV.is_empty()){
+      return;
+    }
     newAtomsInAV.pop(source);
+    if (source == Handle::UNDEFINED)
+        return;
 
     // HebbianLinks should not normally enter to the AF boundary since they
     // should not normally have STI values.The below check will avoid such
     // Scenarios from happening which could lead to HebbianLink creation
     // bn atoms containing HebbianLink.
-    if (classserver().isA(source->get_type(), HEBBIAN_LINK))
+    if (nameserver().isA(source->get_type(), HEBBIAN_LINK))
         return;
 
     // Retrieve the atoms in the AttentionalFocus
-    
     HandleSet attentionalFocus;
     _bank->get_handle_set_in_attentional_focus(std::inserter(attentionalFocus,attentionalFocus.begin()));
   
-    HandleSeq topStiInAF;
-    auto afSti = _bank->get_af_max_sti(); 
-    for (const auto& h : attentionalFocus) {
-        if (get_sti(h) >= afSti)
-            topStiInAF.push_back(h);
-    }
-    std::sort(topStiInAF.begin(), topStiInAF.end());
-
-    //  - Get handles with sti [ 0, MinSti(AF)]
-    HandleSeq includesAFAtoms;
-    _bank->get_handles_by_AV(back_inserter(includesAFAtoms), 0, afSti);
-    std::sort(includesAFAtoms.begin(), includesAFAtoms.end());
-
-    HandleSeq notAttentionalFocus;
-    // Atoms not in AF
-    std::set_difference(topStiInAF.begin(), topStiInAF.end(),
-                        includesAFAtoms.begin(), includesAFAtoms.end(),
-                        std::back_inserter(notAttentionalFocus));
-
+    // Remove HebbianLinks. if AF is not full HebbianLinks might be inserted
+    // into AF when set_sti function is called.
+    HandleSeq attentionalF(attentionalFocus.begin(), attentionalFocus.end());
+    removeHebbianLinks(attentionalF);
+    attentionalFocus = HandleSet(attentionalF.begin(),attentionalF.end());
 
     // Exclude the source atom
     attentionalFocus.erase(source);
-
-    if (source == Handle::UNDEFINED)
-        return;
 
     // Get the neighboring atoms, where the connecting edge
     // is an AsymmetricHebbianLink in either direction
@@ -127,25 +116,22 @@ void HebbianCreationAgent::run()
         count++;
     }
 
-    std::default_random_engine generator;
-    if(notAttentionalFocus.size() > 0 ){
-        std::uniform_int_distribution<int> distribution(0,(int)notAttentionalFocus.size()-1);
-
         //How many links outside the AF should be created
         int farLinks = round(count / localToFarLinks);
 
         //Pick a random target and create the link if it doesn't exist already
         for (int i = 0; i < farLinks; i++) {
-            Handle target = notAttentionalFocus[distribution(generator)];
-            Handle link = _as->get_handle(ASYMMETRIC_HEBBIAN_LINK, source, target);
-            if (link == Handle::UNDEFINED)
-                addHebbian(source,target);
+            Handle target = _bank->getRandomAtomNotInAF();
+            if(Handle::UNDEFINED != target and
+               (not nameserver().isA(target->get_type(), HEBBIAN_LINK))){
+                Handle link = _as->get_handle(ASYMMETRIC_HEBBIAN_LINK, source, target);
+                if (link == Handle::UNDEFINED)
+                    addHebbian(source,target);
+            }
         }
-    }
-
     //Check the ammount of HebbianLinks the Atom has
     IncomingSet iset;
-    classserver().foreachRecursive(
+    nameserver().foreachRecursive(
         [&] (Type type)->void {
             IncomingSet ts = source->getIncomingSetByType(type);
             iset.insert(iset.end(), ts.begin(), ts.end());
@@ -157,6 +143,7 @@ void HebbianCreationAgent::run()
     //      that will keep some of the weak links intact
     if (iset.size() >= maxLinkNum) {
         std::uniform_int_distribution<int> distribution2(0,iset.size()-1);
+        std::default_random_engine generator;
         size_t s = iset.size();
         do {
             _as->remove_atom(iset[distribution2(generator)]->get_handle(), true);

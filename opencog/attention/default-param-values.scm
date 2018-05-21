@@ -23,6 +23,7 @@
 (define LTI_FUNDS_BUFFER (ConceptNode "LTI_FUNDS_BUFFER"))
 (define TARGET_LTI_FUNDS_BUFFER (ConceptNode "TARGET_LTI_FUNDS_BUFFER"))
 (define RENT_TOURNAMENT_SIZE (ConceptNode "RENT_TOURNAMENT_SIZE"))
+(define SPREADING_FILTER (ConceptNode "SPREADING_FILTER"))
 
 (MemberLink 
   AF_SIZE
@@ -71,6 +72,10 @@
 (MemberLink 
   MAX_SPREAD_PERCENTAGE
   ECAN_PARAM  
+)
+(MemberLink
+  SPREADING_FILTER
+  ECAN_PARAM
 )
 (MemberLink 
   SPREAD_HEBBIAN_ONLY
@@ -155,6 +160,12 @@
 (StateLink 
   MAX_SPREAD_PERCENTAGE
   (NumberNode "0.4")
+)
+(StateLink
+  SPREADING_FILTER
+  (MemberLink
+    (TypeNode "MemberLink")
+  )
 )
 (StateLink 
   SPREAD_HEBBIAN_ONLY

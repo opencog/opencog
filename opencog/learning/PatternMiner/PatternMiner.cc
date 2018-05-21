@@ -43,7 +43,7 @@
 
 #include <opencog/atoms/base/ClassServer.h>
 #include <opencog/atoms/base/Handle.h>
-#include <opencog/atoms/base/atom_types.h>
+#include <opencog/atoms/proto/atom_types.h>
 #include <opencog/query/BindLinkAPI.h>
 
 #include "PatternMiner.h"
@@ -399,7 +399,7 @@ Handle PatternMiner::UnifyOneLinkForUnorderedLink(const Handle& link,
     Handle returnLink;
 
     Type originalType = link->get_type();
-    if (classserver().isA(originalType, UNORDERED_LINK))
+    if (nameserver().isA(originalType, UNORDERED_LINK))
     {
         unsigned int unifiedLastLinkIndex;
         HandleSeq orderedOutgoings;
@@ -1979,7 +1979,7 @@ unsigned int PatternMiner::getAllEntityCountWithSamePredicatesForAPattern(const 
         }
         else
         {
-            cout << "warning: this pattern contains " << classserver().getTypeName(pattern[0]->get_type())
+            cout << "warning: this pattern contains " << nameserver().getTypeName(pattern[0]->get_type())
                  << "\nUSE_QUERY_ENTITY_COUNT_FOR_EACH_PREDICATE is for the corpus that only contains EvalutionLinks." << std::endl;
             return 0;
         }
@@ -2002,7 +2002,7 @@ unsigned int PatternMiner::getAllEntityCountWithSamePredicatesForAPattern(const 
             }
             else
             {
-                cout << "warning: this pattern contains " << classserver().getTypeName(l->get_type())
+                cout << "warning: this pattern contains " << nameserver().getTypeName(l->get_type())
                      << "\nUSE_QUERY_ENTITY_COUNT_FOR_EACH_PREDICATE is for the corpus that only contains EvalutionLinks." << std::endl;
                 return 0;
             }
@@ -2092,7 +2092,7 @@ unsigned int PatternMiner::getAllEntityCountWithSamePredicatesForAPattern(const 
 //        }
 //        else
 //        {
-//            cout << "warning: this pattern contains " << classserver().getTypeName(l->get_type())
+//            cout << "warning: this pattern contains " << nameserver().getTypeName(l->get_type())
 //                 << "\USE_QUERY_ENTITY_COUNT_FOR_EACH_PREDICATE is for the corpus that only contains EvalutionLinks." << std::endl;
 //            return;
 //        }
@@ -2833,7 +2833,7 @@ void PatternMiner::quoteAPattern(HTreeNode* hTreeNode)
 
 void PatternMiner::quoteAllThePatternSForGram(unsigned int gram)
 {
-    cout << "\nQuoting all " << gram << "-gram patterns with " << classserver().getTypeName(param.output_pattern_quoted_linktype) << std::endl;
+    cout << "\nQuoting all " << gram << "-gram patterns with " << nameserver().getTypeName(param.output_pattern_quoted_linktype) << std::endl;
     for (HTreeNode* hTreeNode : patternsForGram[gram - 1])
     {
         quoteAPattern(hTreeNode);
@@ -2918,7 +2918,7 @@ void PatternMiner::runPatternMiner(bool exit_program_after_finish)
 
             for (Type linkTpe : param.linktype_black_list)
             {
-                std::cout << classserver().getTypeName(linkTpe) << std::endl;
+                std::cout << nameserver().getTypeName(linkTpe) << std::endl;
             }
         }
         else if (param.use_linktype_white_list)
@@ -2927,7 +2927,7 @@ void PatternMiner::runPatternMiner(bool exit_program_after_finish)
 
             for (Type linkTpe : param.linktype_white_list)
             {
-                std::cout << classserver().getTypeName(linkTpe) << std::endl;
+                std::cout << nameserver().getTypeName(linkTpe) << std::endl;
             }
         }
 
@@ -3740,7 +3740,7 @@ std::string PatternMiner::Link2keyString(const Handle& h, const std::string& ind
     std::stringstream answer;
     std::string more_indent = indent + LINE_INDENTATION;
 
-    answer << indent  << "(" << classserver().getTypeName(h->get_type()) << " ";
+    answer << indent  << "(" << nameserver().getTypeName(h->get_type()) << " ";
 
     if (h->is_node())
     {
@@ -4190,7 +4190,7 @@ bool PatternMiner::loadOutgoingsIntoAtomSpaceFromString(stringstream& outgoingSt
         std::size_t typeEndPos = nonIndentSubStr.find(" ");
         string atomTypeStr = nonIndentSubStr.substr(0, typeEndPos);
         string linkOrNodeStr = atomTypeStr.substr(atomTypeStr.size() - 4, 4);
-        Type atomType = classserver().getType(atomTypeStr);
+        Type atomType = nameserver().getType(atomTypeStr);
         if (NOTYPE == atomType)
         {
             cout << "Warning: loadOutgoingsIntoAtomSpaceFromString: Not a valid typename: " << atomTypeStr << std::endl;
@@ -4311,7 +4311,7 @@ HandleSeq PatternMiner::loadPatternIntoAtomSpaceFromString(string patternStr, At
 
         }
 
-        Type atomType = classserver().getType(atomTypeStr);
+        Type atomType = nameserver().getType(atomTypeStr);
         if (NOTYPE == atomType)
         {
 
@@ -4364,7 +4364,7 @@ bool PatternMiner::loadOutgoingsIntoAtomSpaceFromAtomString(stringstream& outgoi
         std::size_t typeEndPos = nonIndentSubStr.find(" ");
         string atomTypeStr = nonIndentSubStr.substr(0, typeEndPos);
         string linkOrNodeStr = atomTypeStr.substr(atomTypeStr.size() - 4, 4);
-        Type atomType = classserver().getType(atomTypeStr);
+        Type atomType = nameserver().getType(atomTypeStr);
         if (NOTYPE == atomType)
         {
             cout << "Warning: loadOutgoingsIntoAtomSpaceFromAtomString: Not a valid typename: " << atomTypeStr << std::endl;
@@ -4472,7 +4472,7 @@ HandleSeq PatternMiner::loadPatternIntoAtomSpaceFromFileString(string patternStr
 
         }
 
-        Type atomType = classserver().getType(atomTypeStr);
+        Type atomType = nameserver().getType(atomTypeStr);
         if (NOTYPE == atomType)
         {
 

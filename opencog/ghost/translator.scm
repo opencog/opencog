@@ -342,6 +342,10 @@
           '()
           (list (action-choices choices)))))
 
+  ; Whether or not the rule that's being reused is also reusing
+  ; another rule
+  (define is-reusing-another-rule? #f)
+
   ; A typical action of a GHOST rule looks like this:
   ;
   ; (TrueLink
@@ -358,15 +362,41 @@
   ; the additional ones that are in the same TrueLink
   ; TODO: Handle variables as well
   (define (get-reused-action atomese)
-    (append-map
-      (lambda (x)
-        (cond ((equal? 'TrueLink (cog-type x))
-               (get-reused-action (cog-outgoing-set x)))
-              ((and (equal? 'ExecutionOutputLink (cog-type x))
-                    (equal? gsn-action (gar x)))
-               (get-reused-action (cog-outgoing-set (gdr x))))
-              (else (list x))))
-      atomese))
+    (define action-atomese
+      (append-map
+        (lambda (x)
+          (cond ; "x" could just be a list if ^keep() is used
+                ; in the same rule, skip it that's the case
+                ((and keep (list? x) (null? x)) (list))
+                ((equal? 'TrueLink (cog-type x))
+                 (get-reused-action (cog-outgoing-set x)))
+                ((and (equal? 'ExecutionOutputLink (cog-type x))
+                      (equal? gsn-action (gar x)))
+                 (get-reused-action (cog-outgoing-set (gdr x))))
+                (else (list x))))
+        atomese))
+      ; Filter out duplicate PutLinks in the action -- the ones that
+      ; are updating the same state, e.g. if there are (Put (State A) B)
+      ; and (Put (State A) C) in a list, then only (Put (State A) C)
+      ; is kept as it's the last one in the list
+      ; Filtering may be needed when "reuse" is called more than one time,
+      ; either in a single rule, or other rule in the chain
+      ; The fold-right and reverse are there to perserve the execution order
+      (reverse
+        (fold-right
+          (lambda (atom rtn)
+            (if (and (equal? 'PutLink (cog-type atom))
+                     (equal? 'StateLink (cog-type (gar atom)))
+                     (find (lambda (x) (equal? (gar atom) (gar x))) rtn))
+              (begin
+                ; A crude way to find whether the rule is reusing
+                ; another rule
+                (if (equal? ghost-last-executed (gaar atom))
+                  (set! is-reusing-another-rule? #t))
+                rtn)
+              (append rtn (list atom))))
+          (list)
+          action-atomese)))
 
   (define action-atomese (to-atomese (cdar ACTION)))
 
@@ -378,17 +408,30 @@
           (if reuse
             (get-reused-action action-atomese)
             action-atomese)))
+      ; Keep a record of which rule got executed, just for rejoinders
+      ; And when a "reuse" is used, it becomes slightly more complicated
       ; The expected behavior is that, when (the action of) a rule is reused,
       ; the rule will be considered as fired, so mark the last executed rule
       ; as the reused one instead of the one that calls the reuse function,
       ; so that the rejoinders (if any) of the reused rule can be triggered
       ; correctly
-      ; If there are more than one "reuse"s being used in a single action,
-      ; the last reused rule will be mark as the last executed rule
-      (if reuse
-        (Put (State ghost-last-executed (Variable "$x"))
-             (Concept reused-rule-label))
-        (list))
+      (cond ; If it's reusing a rule that reuses another rule,
+            ; no need to generate this as we only need to record the last
+            ; one down the line
+            ((and reuse is-reusing-another-rule?) (list))
+            ; If it's reusing a rule that does not reuse any other rule,
+            ; generate this so that the reused rule will be marked as
+            ; the last executed once the action is executed
+            ; If there are more than one "reuse"s being used in a single action,
+            ; the last reused rule will be mark as the last executed rule
+            (reuse
+              (Put (State ghost-last-executed (Variable "$x"))
+                   (Concept reused-rule-label)))
+            ; If no reuse is called, just mark the current one as the last
+            ; executed rule
+            (else
+              (Put (State ghost-last-executed (Variable "$x"))
+                   (Concept RULENAME))))
       (if (not keep)
           ; The default behavior is to not executed the
           ; same action more than once -- update the
@@ -400,6 +443,10 @@
             (List (Concept RULENAME)
                   (Number 0)))
           (list))
+      ; Keep a record of which rules have been executed
+      (Put
+        (Evaluation ghost-rule-executed (List (Variable "$x")))
+        (Concept RULENAME))
       ; Set the current topic, for backward compatibility
       (if ghost-with-ecan
         (list)
@@ -582,7 +629,27 @@
     ; Update the count -- how many rules we've seen under this top level goal
     ; Do it only if the rules are ordered and it's not a rejoinder
     (if (and is-rule-seq (not is-rejoinder?))
-      (set! goal-rule-cnt (+ goal-rule-cnt 1)))
+      (begin
+        (set! goal-rule-cnt (+ goal-rule-cnt 1))
+        ; Force the rules defined in a sequence to be triggered
+        ; in an ordered fashion
+        ; Note: psi-action-executed? is not used here, because
+        ; when (the action of) a rule is "reused", it will be
+        ; considered as "used". But "reuse" is just about executing
+        ; the action of another rule, it doesn't evaluate the
+        ; context of a rule, i.e. it doesn't go through the
+        ; PsiImplicator, so psi-action-executed? will return
+        ; false for the reused rule even if its action has been
+        ; executed already, which is not the behavior we want here
+        ; TODO: Remove the geometric series as it is no longer needed?
+        (if (> (length rule-hierarchy) 0)
+          (let ((var (Variable (gen-var "GHOST-executed-rule" #f))))
+            (set! vars (append vars (list
+              (TypedVariable var (Type "ConceptNode")))))
+            (set! conds (append conds (list
+              (Evaluation ghost-rule-executed (List var))
+              (Equal var (Concept (caar rule-hierarchy))))))))
+    ))
 
     (map
       (lambda (goal)
@@ -633,7 +700,13 @@
                   (1- (get-rejoinder-level TYPE)))))
               a-rule ghost-next-rejoinder)
             (add-to-rule-hierarchy
-              (get-rejoinder-level TYPE) NAME))
+              (get-rejoinder-level TYPE) NAME)
+            ; Record the sequence number of the rejoinder
+            ; This is used during matching, basically rejoinders is treated
+            ; as a sequence, and the one defined first will be matched first
+            ; if it satisfies the context
+            (cog-set-value! a-rule ghost-rej-seq-num (FloatValue
+              (length (list-ref rule-hierarchy (get-rejoinder-level TYPE))))))
           (begin
             ; If it's not a rejoinder, its parent rules should
             ; be the rules at every level that are still in
@@ -696,6 +769,7 @@
 "
   (set! top-lv-goals GOALS)
   (set! is-rule-seq ORDERED)
+  (set! rule-hierarchy '())
 
   ; Reset the count when we see a new top level goal
   (set! goal-rule-cnt 0))

@@ -6,7 +6,7 @@
 
 (define-module (opencog attention))
 
-; Load the C library that calls the classserver to load the types.
+; Load the C library that calls the nameserver to load the types.
 (load-extension "libattention-types" "attention_types_init")
 
 (load "attention/attention_types.scm")

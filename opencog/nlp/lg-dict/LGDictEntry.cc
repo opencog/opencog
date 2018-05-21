@@ -21,6 +21,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <opencog/atoms/proto/NameServer.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include "LGDictNode.h"
 #include "LGDictEntry.h"
@@ -67,9 +68,9 @@ LGDictEntry::LGDictEntry(const HandleSeq& oset, Type t)
 	: FunctionLink(oset, t)
 {
 	// Type must be as expected
-	if (not classserver().isA(t, LG_DICT_ENTRY))
+	if (not nameserver().isA(t, LG_DICT_ENTRY))
 	{
-		const std::string& tname = classserver().getTypeName(t);
+		const std::string& tname = nameserver().getTypeName(t);
 		throw InvalidParamException(TRACE_INFO,
 			"Expecting an LgDictEntry, got %s", tname.c_str());
 	}
@@ -81,9 +82,9 @@ LGDictEntry::LGDictEntry(const Link& l)
 {
 	// Type must be as expected
 	Type tparse = l.get_type();
-	if (not classserver().isA(tparse, LG_DICT_ENTRY))
+	if (not nameserver().isA(tparse, LG_DICT_ENTRY))
 	{
-		const std::string& tname = classserver().getTypeName(tparse);
+		const std::string& tname = nameserver().getTypeName(tparse);
 		throw InvalidParamException(TRACE_INFO,
 			"Expecting an LgDictEntry, got %s", tname.c_str());
 	}

@@ -77,7 +77,7 @@ void Parameters::reSetAllSettingsFromConfig()
 	if_quote_output_pattern = config().get_bool("if_quote_output_pattern");
 	string quotedTypeStr = config().get("output_pattern_quoted_linktype");
 //    cout << "quotedTypeStr = " << quotedTypeStr << std::endl;
-	output_pattern_quoted_linktype = classserver().getType(quotedTypeStr);
+	output_pattern_quoted_linktype = nameserver().getType(quotedTypeStr);
 	if (output_pattern_quoted_linktype == NOTYPE)
 	{
 		cout << "\nError: output_pattern_quoted_linktype : "<< quotedTypeStr << " in config file doesn't exist!" << std::endl;
@@ -221,7 +221,7 @@ void Parameters::addAtomTypesFromString(const string& node_types_str,
 {
     for (const string& typestr : parse_comma_separated_list(node_types_str))
     {
-        Type atomType = classserver().getType(typestr);
+        Type atomType = nameserver().getType(typestr);
         if (atomType == NOTYPE)
         {
             cout << "\nCannot find Node Type: " << typestr << " in config file.\n";

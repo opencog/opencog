@@ -23,6 +23,7 @@
 
 #include "SuRealCache.h"
 
+#include <opencog/atoms/proto/NameServer.h>
 #include <opencog/atoms/base/Atom.h>
 
 using namespace opencog::nlp;
@@ -197,12 +198,12 @@ std::string SuRealCache::handle_to_hash_key(const Handle &h)
 
     std::string answer = "";
     Type type = h->get_type();
-    if (classserver().isNode(type)) {
-        answer += classserver().getTypeName(type);
+    if (nameserver().isNode(type)) {
+        answer += nameserver().getTypeName(type);
         answer += ":";
         answer += h->get_name();
     } else {
-        answer += classserver().getTypeName(type);
+        answer += nameserver().getTypeName(type);
         answer += "(";
         for (const Handle& target_handle: h->getOutgoingSet()) {
             answer += handle_to_hash_key(target_handle);

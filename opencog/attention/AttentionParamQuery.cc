@@ -1,4 +1,6 @@
 
+#include <opencog/atoms/proto/NameServer.h>
+#include <opencog/atomutils/Neighbors.h>
 #include <opencog/atoms/base/Link.h>
 #include <opencog/guile/SchemeEval.h>
 #include <opencog/query/BindLinkAPI.h>
@@ -28,6 +30,7 @@ const std::string AttentionParamQuery::heb_local_farlink_ratio = "LOCAL_FAR_LINK
 const std::string AttentionParamQuery::dif_spread_percentage = "MAX_SPREAD_PERCENTAGE";
 const std::string AttentionParamQuery::dif_spread_hebonly = "SPREAD_HEBBIAN_ONLY";
 const std::string AttentionParamQuery::dif_tournament_size = "DIFFUSION_TOURNAMENT_SIZE";
+const std::string AttentionParamQuery::spreading_filter = "SPREADING_FILTER";
 
 // Rent Params
 const std::string AttentionParamQuery::rent_starting_sti_rent = "STARTING_ATOM_STI_RENT";
@@ -68,31 +71,40 @@ std::string AttentionParamQuery::get_param_value(const std::string& param)
 {
     Handle hparam = _as->add_node(CONCEPT_NODE, param);
     std::string value = "";
-    HandleSeq hseq;
-    hparam->getIncomingSet(back_inserter(hseq));
-
-    bool has_value = false;
-    for(Handle h : hseq){
-        if(h->get_type() == STATE_LINK ){
-            Handle hvalue = h->getOutgoingSet()[1];
-            std::string str = hvalue->get_name();
-            str.erase (str.find_last_not_of('0') + 1,
-                    std::string::npos);
-
-            if(str.back() == '.')
-                str.pop_back();
-            value = str;
-            has_value = true;
-            break;
-        }
-    }
-
-    if(not has_value){
+    // This should always return one atom.
+    HandleSeq hsvalue = get_target_neighbors(hparam, STATE_LINK);
+    if(hsvalue.empty()){
         throw RuntimeException(TRACE_INFO, "Parameter %s has no associated value.",
                 param.c_str());
     }
 
-    return value;
+    Handle  hvalue = hsvalue[0];
+    if (not nameserver().isA(hvalue->get_type(), NODE)){
+        throw RuntimeException(TRACE_INFO, "Parameter's value is a link. Can't"
+                "convert to string.",
+                param.c_str());
+    }
+
+    std::string str = hvalue->get_name();
+    str.erase (str.find_last_not_of('0') + 1, std::string::npos);
+
+    if(str.back() == '.')
+        str.pop_back();
+
+    return str;
+}
+
+Handle AttentionParamQuery::get_param_hvalue(const std::string& param)
+{
+    Handle hparam = _as->add_node(CONCEPT_NODE, param);
+    // This should always return one atom.
+    HandleSeq hsvalue = get_target_neighbors(hparam, STATE_LINK);
+    if(hsvalue.empty()){
+        throw RuntimeException(TRACE_INFO, "Parameter %s has no associated value.",
+                param.c_str());
+    }
+
+    return  hsvalue[0];
 }
 
 HandleSeq AttentionParamQuery::get_params(void)

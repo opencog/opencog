@@ -23,6 +23,7 @@
 #include <mutex>
 
 #include <link-grammar/link-includes.h>
+#include <opencog/atoms/proto/NameServer.h>
 #include <opencog/util/Logger.h>
 #include <opencog/nlp/types/atom_types.h>
 
@@ -55,9 +56,9 @@ LgDictNode::LgDictNode(const Node& n)
 {
 	// Type must be as expected
 	Type tdict = n.get_type();
-	if (not classserver().isA(tdict, LG_DICT_NODE))
+	if (not nameserver().isA(tdict, LG_DICT_NODE))
 	{
-		const std::string& tname = classserver().getTypeName(tdict);
+		const std::string& tname = nameserver().getTypeName(tdict);
 		throw InvalidParamException(TRACE_INFO,
 			"Expecting an LgDictNode, got %s", tname.c_str());
 	}

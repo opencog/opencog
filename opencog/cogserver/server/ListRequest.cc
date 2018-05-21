@@ -25,8 +25,8 @@
 #include "ListRequest.h"
 
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/atoms/base/ClassServer.h>
-#include <opencog/atoms/base/types.h>
+#include <opencog/atoms/proto/NameServer.h>
+#include <opencog/atoms/proto/types.h>
 #include <opencog/cogserver/server/CogServer.h>
 
 using namespace opencog;
@@ -76,7 +76,7 @@ bool ListRequest::execute()
         } else if (*it == "-t") { // filter by type, excluding subtypes
             ++it;
             if (it == _parameters.end()) return syntaxError();
-            type = classserver().getType(it->c_str());
+            type = nameserver().getType(it->c_str());
             if (type == NOTYPE) {
                 _error << "Error: Invalid type" << std::endl;
                 sendError();
@@ -85,7 +85,7 @@ bool ListRequest::execute()
         } else if (*it == "-T") { // filter by type, including subtypes
             ++it;
             if (it == _parameters.end()) return syntaxError();
-            type = classserver().getType(it->c_str());
+            type = nameserver().getType(it->c_str());
             if (type == NOTYPE) {
                 _error << "invalid type" << std::endl;
                 sendError();
@@ -103,7 +103,7 @@ bool ListRequest::execute()
         }
     }
     if (name != "" && type != NOTYPE) { // filter by name & type
-        classserver().foreachRecursive(
+        nameserver().foreachRecursive(
             [&](Type t)->void {
                  try {
                      Handle h(as.get_handle(t, name));
@@ -112,7 +112,7 @@ bool ListRequest::execute()
             }, type);
 
     } else if (name != "") {     // filter by name
-        classserver().foreachRecursive(
+        nameserver().foreachRecursive(
             [&](Type t)->void {
                  try {
                      Handle h(as.get_handle(t, name));

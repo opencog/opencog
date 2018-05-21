@@ -21,7 +21,8 @@
 ; Temporarily used during transitioning. The aim is to make life easier for
 ; developers who work with atomspace before opencog/atomspace/pull/1664 while
 ; waiting for opencog/opencog/issues/3107 to resolve.
-(resolve-module '(opencog attention-bank) #:ensure #f)
+(if (resolve-module '(opencog attention-bank) #:ensure #f)
+  (use-modules (opencog attention-bank)))
 
 ;; --------------------
 ;; Shared things being used in the module
@@ -72,6 +73,7 @@
 (define ghost-curr-topic (Anchor (ghost-prefix "Current Topic")))
 (define ghost-last-executed (Anchor (ghost-prefix "Last Executed")))
 (define ghost-no-constant (Anchor (ghost-prefix "No constant terms")))
+(define ghost-rule-executed (Predicate (ghost-prefix "Rule Executed")))
 (define ghost-word-seq (Predicate (ghost-prefix "Word Sequence")))
 (define ghost-lemma-seq (Predicate (ghost-prefix "Lemma Sequence")))
 (define ghost-topic (Concept (ghost-prefix "Topic")))
@@ -79,6 +81,7 @@
 (define ghost-rule-type (Predicate (ghost-prefix "Rule Type")))
 (define ghost-next-responder (Predicate (ghost-prefix "Next Responder")))
 (define ghost-next-rejoinder (Predicate (ghost-prefix "Next Rejoinder")))
+(define ghost-rej-seq-num (Predicate (ghost-prefix "Rejoinder Sequence Number")))
 (define strval-rejoinder (StringValue "rejoinder"))
 (define strval-responder (StringValue "responder"))
 (define strval-random-gambit (StringValue "random gambit"))
@@ -145,6 +148,8 @@
 (define context-weight 1)
 (define sti-weight 1)
 (define urge-weight 1)
+(define responder-sti-boost 1)
+(define rejoinder-sti-boost 10)
 
 ;; --------------------
 ;; For monitoring the status

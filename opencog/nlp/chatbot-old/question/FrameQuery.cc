@@ -26,6 +26,7 @@
 
 #include <stdio.h>
 
+#include <opencog/atoms/proto/NameServer.h>
 #include <opencog/atomspace/Node.h>
 #include <opencog/util/platform.h>
 
@@ -243,7 +244,7 @@ bool FrameQuery::node_match(Node *aa, Node *ab)
 #endif
 
 	fprintf(stderr, "Error: unexpected node type %d %s\n", ntype,
-	        classserver().getTypeName(ntype).c_str());
+	        nameserver().getTypeName(ntype).c_str());
 
 	std::string sa = aa->to_string();
 	std::string sb = ab->to_string();

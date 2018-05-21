@@ -69,7 +69,6 @@ protected:
 
     HandleSeq incidentAtoms(Handle);
     HandleSeq hebbianAdjacentAtoms(Handle);
-    void      removeHebbianLinks(HandleSeq& hseq);
 
     std::map<Handle, double> probabilityVector(HandleSeq);
     std::map<Handle, double> probabilityVectorIncident(HandleSeq);
