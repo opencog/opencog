@@ -534,9 +534,6 @@ void ImportanceDiffusionBase::processDiffusionStack()
 #endif
 
 }
-
-std::vector<std::pair<Handle, double>> ImportanceDiffusionBase::redistribute(const Handle& target,
-                         const double& sti, std::vector<std::pair<Handle, double>>& refund){
 /**
  * Redistributed amount of sti that should have gone to target atom if
  * the atom type is in the Fitler set. The sti will be equally distributed
@@ -552,6 +549,8 @@ std::vector<std::pair<Handle, double>> ImportanceDiffusionBase::redistribute(con
  * @return void.
  *
  */
+void ImportanceDiffusionBase::redistribute(const Handle& target, const double& sti,
+                                           std::vector<std::pair<Handle, double>>& refund){
     static unsigned int NRECURSION = 1; // Prevent stack-overflowing. XXX how to determing maxdepth?
     auto ij = std::find_if(hsFilterOut.begin(), hsFilterOut.end(),
             [target](const Handle& h){
@@ -570,7 +569,7 @@ std::vector<std::pair<Handle, double>> ImportanceDiffusionBase::redistribute(con
         auto min_spreading_value = _bank->get_af_min_sti();
         if(sti < min_spreading_value or NRECURSION > 100){
             refund.push_back(std::make_pair(target, sti));
-            return refund;
+            return;
         }
         HandleSeq seq;
         if(target->is_node())
@@ -587,5 +586,5 @@ std::vector<std::pair<Handle, double>> ImportanceDiffusionBase::redistribute(con
     }
 
     ++NRECURSION;
-    return refund;
+    return;
 }
