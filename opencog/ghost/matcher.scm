@@ -151,19 +151,40 @@
   ; If there is only one action in the list, return that
   ; Otherwise, pick one based on their weights
   ; TODO: Return the actual action instead of a rule
-  (if (equal? (length action-weight-alist) 1)
+  (if (= (length action-weight-alist) 1)
     (assoc-ref action-rule-alist (caar action-weight-alist))
-    (let* ((accum-weight 0)
-           (cutoff (* total-weight (random:uniform (random-state-from-platform))))
-           (action-rtn
-             (find
-               (lambda (a)
-                 (set! accum-weight (+ accum-weight (cdr a)))
-                 (<= cutoff accum-weight))
-               action-weight-alist)))
-      (if (equal? #f action-rtn)
-        (list)
-        (assoc-ref action-rule-alist (car action-rtn))))))
+    ; Here there are special handling for rejoinders:
+    ; 1) If there is a rejoinder that satisfy the current context, always trigger it
+    ; 2) If there are more than one rejoinders that satisfy the current context,
+    ;    always choose the one that is defined first
+    (let ((rejoinder
+            (fold
+              (lambda (rej top-rej)
+                (if (and (not (null? (cog-value rej ghost-is-rejoinder)))
+                         (or (null? top-rej)
+                             (< (car (cog-value->list
+                                       (cog-value rej ghost-is-rejoinder)))
+                                (car (cog-value->list
+                                       (cog-value top-rej ghost-is-rejoinder))))))
+                  rej
+                  top-rej))
+              (list)
+              (map (lambda (a) (assoc-ref action-rule-alist (car a))) action-weight-alist))))
+      (if (null? rejoinder)
+        (begin
+          ; If there is no rejoinder that safisfy the current context, try the responders
+          (let* ((accum-weight 0)
+                 (cutoff (* total-weight (random:uniform (random-state-from-platform))))
+                 (action-rtn
+                   (find
+                     (lambda (a)
+                       (set! accum-weight (+ accum-weight (cdr a)))
+                       (<= cutoff accum-weight))
+                     action-weight-alist)))
+            (if (equal? #f action-rtn)
+              (list)
+              (assoc-ref action-rule-alist (car action-rtn)))))
+        rejoinder))))
 
 ; ----------
 (define-public (ghost-find-rules SENT)
