@@ -107,7 +107,7 @@ Handle LgDictNode::factory(const Handle& base)
 /* This runs when the shared lib is loaded. */
 static __attribute__ ((constructor)) void init(void)
 {
-   nameserver().addFactory(LG_DICT_NODE, &LgDictNode::factory);
+   classserver().addFactory(LG_DICT_NODE, &LgDictNode::factory);
 }
 
 // ------------------------------------------------------
