@@ -700,7 +700,13 @@
                   (1- (get-rejoinder-level TYPE)))))
               a-rule ghost-next-rejoinder)
             (add-to-rule-hierarchy
-              (get-rejoinder-level TYPE) NAME))
+              (get-rejoinder-level TYPE) NAME)
+            ; Record the sequence number of the rejoinder
+            ; This is used during matching, basically rejoinders is treated
+            ; as a sequence, and the one defined first will be matched first
+            ; if it satisfies the context
+            (cog-set-value! a-rule ghost-rej-seq-num (FloatValue
+              (length (list-ref rule-hierarchy (get-rejoinder-level TYPE))))))
           (begin
             ; If it's not a rejoinder, its parent rules should
             ; be the rules at every level that are still in

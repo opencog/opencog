@@ -81,6 +81,7 @@
 (define ghost-rule-type (Predicate (ghost-prefix "Rule Type")))
 (define ghost-next-responder (Predicate (ghost-prefix "Next Responder")))
 (define ghost-next-rejoinder (Predicate (ghost-prefix "Next Rejoinder")))
+(define ghost-rej-seq-num (Predicate (ghost-prefix "Rejoinder Sequence Number")))
 (define strval-rejoinder (StringValue "rejoinder"))
 (define strval-responder (StringValue "responder"))
 (define strval-random-gambit (StringValue "random gambit"))
