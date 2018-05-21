@@ -557,6 +557,7 @@ void ImportanceDiffusionBase::processDiffusionStack()
 
 std::vector<std::pair<Handle, double>> ImportanceDiffusionBase::redistribute(const Handle& target,
                          const double& sti, std::vector<std::pair<Handle, double>>& refund){
+    static unsigned int NRECURSION = 1; // Prevent stack-overflowing. XXX how to determing maxdepth?
     auto ij = std::find_if(hsFilterOut.begin(), hsFilterOut.end(),
             [target](const Handle& h){
             return (target->get_type() == classserver().getType(h->get_name()));
@@ -572,7 +573,7 @@ std::vector<std::pair<Handle, double>> ImportanceDiffusionBase::redistribute(con
         // agent.
         // FIXME it could accumulate such small sti values over time and endup in the AF?
         auto min_spreading_value = _bank->get_af_min_sti();
-        if(sti < min_spreading_value){
+        if(sti < min_spreading_value or NRECURSION > 100){
             refund.push_back(std::make_pair(target, sti));
             return refund;
         }
@@ -590,5 +591,6 @@ std::vector<std::pair<Handle, double>> ImportanceDiffusionBase::redistribute(con
         refund.push_back(std::make_pair(target, sti));
     }
 
+    ++NRECURSION;
     return refund;
 }
