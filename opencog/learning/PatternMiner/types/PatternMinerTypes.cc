@@ -10,4 +10,4 @@
 #define INHERITANCE_FILE "opencog/learning/PatternMiner/types/atom_types.inheritance"
 #define INITNAME patternminer_types_init
 
-#include <opencog/atoms/base/atom_types.cc>
+#include <opencog/atoms/proto/atom_types.cc>

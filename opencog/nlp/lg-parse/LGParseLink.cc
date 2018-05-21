@@ -25,6 +25,7 @@
 #include <uuid/uuid.h>
 #include <link-grammar/link-includes.h>
 
+#include <opencog/atoms/proto/NameServer.h>
 #include <opencog/atoms/base/Node.h>
 #include <opencog/atoms/core/NumberNode.h>
 #include <opencog/atomspace/AtomSpace.h>
@@ -86,9 +87,9 @@ LGParseLink::LGParseLink(const HandleSeq& oset, Type t)
 	: FunctionLink(oset, t)
 {
 	// Type must be as expected
-	if (not classserver().isA(t, LG_PARSE_LINK))
+	if (not nameserver().isA(t, LG_PARSE_LINK))
 	{
-		const std::string& tname = classserver().getTypeName(t);
+		const std::string& tname = nameserver().getTypeName(t);
 		throw InvalidParamException(TRACE_INFO,
 			"Expecting an LgParseLink, got %s", tname.c_str());
 	}
@@ -100,9 +101,9 @@ LGParseLink::LGParseLink(const Link& l)
 {
 	// Type must be as expected
 	Type tparse = l.get_type();
-	if (not classserver().isA(tparse, LG_PARSE_LINK))
+	if (not nameserver().isA(tparse, LG_PARSE_LINK))
 	{
-		const std::string& tname = classserver().getTypeName(tparse);
+		const std::string& tname = nameserver().getTypeName(tparse);
 		throw InvalidParamException(TRACE_INFO,
 			"Expecting an LgParseLink, got %s", tname.c_str());
 	}
@@ -112,9 +113,9 @@ LGParseMinimal::LGParseMinimal(const HandleSeq& oset, Type t)
 	: LGParseLink(oset, t)
 {
 	// Type must be as expected
-	if (not classserver().isA(t, LG_PARSE_MINIMAL))
+	if (not nameserver().isA(t, LG_PARSE_MINIMAL))
 	{
-		const std::string& tname = classserver().getTypeName(t);
+		const std::string& tname = nameserver().getTypeName(t);
 		throw InvalidParamException(TRACE_INFO,
 			"Expecting an LgParseMinimal, got %s", tname.c_str());
 	}
@@ -126,9 +127,9 @@ LGParseMinimal::LGParseMinimal(const Link& l)
 {
 	// Type must be as expected
 	Type tparse = l.get_type();
-	if (not classserver().isA(tparse, LG_PARSE_MINIMAL))
+	if (not nameserver().isA(tparse, LG_PARSE_MINIMAL))
 	{
-		const std::string& tname = classserver().getTypeName(tparse);
+		const std::string& tname = nameserver().getTypeName(tparse);
 		throw InvalidParamException(TRACE_INFO,
 			"Expecting an LgParseMinimal, got %s", tname.c_str());
 	}

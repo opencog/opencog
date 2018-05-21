@@ -22,6 +22,7 @@
 #include <opencog/util/Config.h>
 #include <opencog/util/algorithm.h>
 
+#include <opencog/atoms/proto/NameServer.h>
 #include <opencog/atoms/base/Link.h>
 #include <opencog/truthvalue/IndefiniteTruthValue.h>
 #include <opencog/truthvalue/SimpleTruthValue.h>
@@ -69,7 +70,7 @@ void HebbianCreationAgent::run()
     // should not normally have STI values.The below check will avoid such
     // Scenarios from happening which could lead to HebbianLink creation
     // bn atoms containing HebbianLink.
-    if (classserver().isA(source->get_type(), HEBBIAN_LINK))
+    if (nameserver().isA(source->get_type(), HEBBIAN_LINK))
         return;
 
     // Retrieve the atoms in the AttentionalFocus
@@ -122,7 +123,7 @@ void HebbianCreationAgent::run()
         for (int i = 0; i < farLinks; i++) {
             Handle target = _bank->getRandomAtomNotInAF();
             if(Handle::UNDEFINED != target and
-               (not classserver().isA(target->get_type(), HEBBIAN_LINK))){
+               (not nameserver().isA(target->get_type(), HEBBIAN_LINK))){
                 Handle link = _as->get_handle(ASYMMETRIC_HEBBIAN_LINK, source, target);
                 if (link == Handle::UNDEFINED)
                     addHebbian(source,target);
@@ -130,7 +131,7 @@ void HebbianCreationAgent::run()
         }
     //Check the ammount of HebbianLinks the Atom has
     IncomingSet iset;
-    classserver().foreachRecursive(
+    nameserver().foreachRecursive(
         [&] (Type type)->void {
             IncomingSet ts = source->getIncomingSetByType(type);
             iset.insert(iset.end(), ts.begin(), ts.end());

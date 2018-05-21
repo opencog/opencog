@@ -4,6 +4,7 @@
 #include <sstream>
 #include <iostream>
 
+#include <opencog/atoms/proto/NameServer.h>
 #include <opencog/guile/SchemePrimitive.h>
 #include <opencog/util/Config.h>
 #include "SCMLoader.h"
@@ -410,10 +411,10 @@ void PatternIndexAPI::applyProperties(Handle key)
     istringstream iss1(s);
     string stype;    
     while (getline(iss1, stype, ',')) {
-        if (classserver().isDefined(stype)) {
-            index->ALLOWED_TOP_LEVEL_TYPES.insert(classserver().getType(stype));
+        if (nameserver().isDefined(stype)) {
+            index->ALLOWED_TOP_LEVEL_TYPES.insert(nameserver().getType(stype));
         } else {
-            printf("type: %u\n", classserver().getType(stype));
+            printf("type: %u\n", nameserver().getType(stype));
             throw runtime_error("Invalid value for RootTypesUsedToBuildPatterns. Unknown type: " + stype);
         }
     }
@@ -421,10 +422,10 @@ void PatternIndexAPI::applyProperties(Handle key)
     s = getStringProperty(it->second.second, "TypesAllowedToBecomeVariables");
     istringstream iss2(s);
     while (getline(iss2, stype, ',')) {
-        if (classserver().isDefined(stype)) {
-            index->ALLOWED_VAR_SUBSTITUTION.insert(classserver().getType(stype));
+        if (nameserver().isDefined(stype)) {
+            index->ALLOWED_VAR_SUBSTITUTION.insert(nameserver().getType(stype));
         } else {
-            printf("type: %u\n", classserver().getType(stype));
+            printf("type: %u\n", nameserver().getType(stype));
             throw runtime_error("Invalid value for TypesAllowedToBecomeVariables. Unknown type: " + stype);
         }
     }

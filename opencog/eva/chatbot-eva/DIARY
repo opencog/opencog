@@ -963,7 +963,7 @@ _as->get_num_atoms_of_type
 _size_by_type
 oresize should take an arg
 
-classserver().getNumberOfClasses() in the resize() method
+nameserver().getNumberOfClasses() in the resize() method
 Also in the ctor too.
 
 Fix the stupid subtype miterator
@@ -977,7 +977,7 @@ is currtype even used ????
 
 isize++
 _size_by_type[atom->_type] ++
-size_t new_size = classserver().getNumberOfClasses();
+size_t new_size = nameserver().getNumberOfClasses();
 +    _size_by_type.resize(new_size);
 
 Also: do NOT use NodeIndex::size() anywhere

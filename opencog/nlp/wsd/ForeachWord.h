@@ -19,7 +19,7 @@
 #include <opencog/atomutils/FollowLink.h>
 #include <opencog/atoms/base/Link.h>
 #include <opencog/atoms/base/Node.h>
-#include <opencog/atoms/base/atom_types.h>
+#include <opencog/atoms/proto/atom_types.h>
 #include <opencog/nlp/types/atom_types.h>
 
 namespace opencog {

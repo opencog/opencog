@@ -38,6 +38,7 @@
 
 #include <stdio.h>
 
+#include <opencog/atoms/proto/NameServer.h>
 #include <opencog/atomspace/ForeachChaseLink.h>
 #include <opencog/atomspace/Node.h>
 
@@ -323,7 +324,7 @@ printf("duude compare %s to %s\n", sa, sb);
 	}
 
 	fprintf(stderr, "Error: unexpected ground node type %d %s\n", soltype,
-	        classserver().getTypeName(soltype).c_str());
+	        nameserver().getTypeName(soltype).c_str());
 
 	std::string sa = npat->to_string();
 	std::string sb = nsoln->to_string();

@@ -21,6 +21,7 @@
 #include <time.h>
 #include <sstream>
 
+#include <opencog/atoms/proto/NameServer.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/cogserver/server/CogServer.h>
 
@@ -148,7 +149,7 @@ void TulipWriter::writeNodeNames()
     }
     // give not nodes the name NOT
     for (Handle h : linkHandles) {
-        myfile << "(node " << h << " \"" << classserver().getTypeName(h->get_type()) 
+        myfile << "(node " << h << " \"" << nameserver().getTypeName(h->get_type()) 
             << "\" )" << endl;
     }
     myfile << ")" << endl;

@@ -11,4 +11,4 @@
 #define INHERITANCE_FILE "opencog/nlp/types/atom_types.inheritance"
 #define INITNAME nlp_types_init
 
-#include <opencog/atoms/base/atom_types.cc>
+#include <opencog/atoms/proto/atom_types.cc>

@@ -1,4 +1,5 @@
 #include "AttentionUtils.h"
+#include <opencog/atoms/proto/NameServer.h>
 #include <opencog/attention/atom_types.h>
 
 namespace opencog
@@ -10,7 +11,7 @@ namespace opencog
                     [=](const Handle& h)
                     {
                     Type type = h->get_type();
-                    return classserver().isA(type, HEBBIAN_LINK);
+                    return nameserver().isA(type, HEBBIAN_LINK);
                     });
 
         sources.erase(it_end, sources.end());
